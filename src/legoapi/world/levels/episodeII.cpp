@@ -5,6 +5,7 @@
 
 #include "decomp.h"
 #include "legoapi/world/level.h"
+#include "legoapi/render/core/terrain.h"
 #include "globals.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/gizmo/base/GizBlowupObjectInterface.h"
@@ -19,6 +20,7 @@
 #include "legoapi/characters/motion/gameanim.h"
 #include "legoapi/core/input/timer.h"
 #include "legoapi/menus/core/gamemessage.h"
+#include "legoapi/menus/core/panel.h"
 #include "legoapi/world/levels/levels.h"
 #include "legoapi/render/core/render.h"
 #include "nu2api/nu3d/nuspecial.h"
@@ -250,12 +252,15 @@ void BountyHunterPursuitA_Init(WORLDINFO_s *world) {
 }
 
 void BountyHunterPursuitB_Init(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void BountyHunterPursuitC_Init(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void BountyHunterPursuitD_Init(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void BountyHunterPursuitA_Reset(WORLDINFO_s *world) {
@@ -420,6 +425,7 @@ void BountyHunterPursuitC_Update(WORLDINFO_s *world) {
 }
 
 void BountyHunterPursuitD_Update(WORLDINFO_s *) {
+    STUBBED();
 }
 
 // ===========================================================================
@@ -467,7 +473,7 @@ void KaminoA_AlwaysUpdate(WORLDINFO_s *) {
 }
 
 #include "legoapi/gizmos/traps/gizturrets.h"
-#include "legoapi/gizmos/trigger/gizaimessage.h"
+#include "legoapi/gizmo/base/gizmessage.h"
 GIZTURRET_s *GizTurret_FindByName(GIZTURRETSYS_s *, char *);
 extern i32 obstacle_gizmotype_id;
 nuhspecial_s walllights[2], walllights_disco[2], striplights[2], discolights[2];
@@ -826,7 +832,6 @@ void KaminoD_Init(WORLDINFO_s *world) {
 }
 
 #include "legoapi/gizmos/object/gizpanel.h"
-extern "C" i32 FindPlatInst(i32);
 
 void KaminoE_Init(WORLDINFO_s *world) {
     kaminoe_netpacket = SetLevelHack(0x14);
@@ -1121,6 +1126,7 @@ void KaminoE_Draw(WORLDINFO_s *world) {
 }
 
 void KaminoE_CheckPlatHit(BOLT_s *) {
+    STUBBED();
 }
 
 void KaminoF_Init(WORLDINFO_s *world) {
@@ -1198,6 +1204,7 @@ void FactoryB_Reset(WORLDINFO_s *world) {
 }
 
 void FactoryB_Update(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void FactoryB_Draw(WORLDINFO_s *) {

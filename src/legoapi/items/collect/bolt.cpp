@@ -12,12 +12,6 @@ struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
-static f32 TerrWallDeflectYScale;
-
-extern "C" void TerrainSetWallDeflectYScale(f32 scale) {
-    TerrWallDeflectYScale = scale;
-}
-
 i32 LineIntersectSphere(NUVEC *, NUVEC *, NUVEC *, f32, f32 *);
 bool LineIntersectCircle(NUVEC *, NUVEC *, NUVEC *, f32);
 
@@ -53,27 +47,16 @@ BOLT_s *FindIncomingBolt(GameObject_s *object, i32 exclude_players, i32 mark_dir
     return nearest;
 }
 
-void FullDeflectSmallY(NUVEC *normal, NUVEC *movement, NUVEC *result) {
-    // Move just far enough out of the surface to retain a small separation.
-    const f32 normal_x = normal->x;
-    const f32 normal_y = normal->y;
-    const f32 normal_z = normal->z;
-    const f32 movement_x = movement->x;
-    const f32 movement_y = movement->y;
-    const f32 movement_z = movement->z;
-    const f32 deflection = -movement_y * normal_y - movement_x * normal_x - movement_z * normal_z + 0.0003f;
-    result->x = movement_x + normal_x * deflection;
-    result->y = movement_y + normal_y * deflection * TerrWallDeflectYScale;
-    result->z = movement_z + normal_z * deflection;
-}
-
 void GuidedMissile_Kill(PART_s *, i32) {
+    STUBBED();
 }
 
 void GuidedMissile_Move(PART_s *, float) {
+    STUBBED();
 }
 
 void GuidedMissile_Deflect(PART_s *) {
+    STUBBED();
 }
 
 extern "C" i16 id_SPEEDERBIKE;
@@ -92,33 +75,3 @@ i32 InitBolt_AddMomentumType_LSW(BOLT_s *bolt, GameObject_s *object, NUVEC *mome
         return 1;
     return 0;
 }
-
-extern "C" {
-
-    void FullDeflect(NUVEC *normal, NUVEC *movement, NUVEC *result) {
-        const f32 normal_x = normal->x;
-        const f32 normal_y = normal->y;
-        const f32 normal_z = normal->z;
-        const f32 movement_x = movement->x;
-        const f32 movement_y = movement->y;
-        const f32 movement_z = movement->z;
-        const f32 deflection = -movement_y * normal_y - movement_x * normal_x - movement_z * normal_z + 0.0003f;
-        result->x = movement_x + normal_x * deflection;
-        result->y = movement_y + normal_y * deflection;
-        result->z = movement_z + normal_z * deflection;
-    }
-
-    void FullReflect(NUVEC *normal, NUVEC *movement, NUVEC *result) {
-        const f32 normal_x = normal->x;
-        const f32 normal_y = normal->y;
-        const f32 normal_z = normal->z;
-        const f32 movement_x = movement->x;
-        const f32 movement_y = movement->y;
-        const f32 movement_z = movement->z;
-        const f32 reflection = -movement_y * normal_y - movement_x * normal_x - movement_z * normal_z;
-        result->x = movement_x + 2.0f * (normal_x * reflection);
-        result->y = movement_y + 2.0f * (normal_y * reflection);
-        result->z = movement_z + 2.0f * (normal_z * reflection);
-    }
-
-} // extern "C"

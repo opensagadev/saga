@@ -1,3 +1,4 @@
+#include "legoapi/ai/game/gameantinode.h"
 #include "legoapi/legoapi_types.h"
 #include "decomp.h"
 #include "globals.h"
@@ -92,6 +93,7 @@ void GameAntinode_Update(GAMEANTINODESYS_s *system) {
 }
 
 void GameAntinode_Debug_DrawGrid(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void GameAntinode_FindGridPosition(WORLDINFO_s *world, NUVEC *position, f32 radius_x, f32 radius_z, u8 *min_x,
@@ -239,52 +241,67 @@ GAMEANTINODE_s *GameAntinode_UpdateAntiNodeUsingData(GAMEANTINODESYS_s *system, 
 }
 
 static __used__ void *CreateAntinode(nuvec_s *) {
+    STUBBED();
     return {};
 }
 
 static __used__ void antinodeEditor_AntinodeMoved(EDANTINODE_s *) {
+    STUBBED();
 }
 
 static __used__ void *antinodeEditor_GetNearestAntinode(int) {
+    STUBBED();
     return {};
 }
 
 static __used__ void antinodeEditor_cbSetType(eduimenu_s *, eduiitem_s *, unsigned int) {
+    STUBBED();
 }
 
 static __used__ void antinodeEditor_cbSelectType(eduimenu_s *, eduiitem_s *, unsigned int) {
+    STUBBED();
 }
 
 static __used__ void antinodeEditor_cbAntiNodeFlagsToggle(eduimenu_s *, eduiitem_s *, unsigned int) {
+    STUBBED();
 }
 
 static __used__ void antinodeEditor_cbDeleteAntinode(eduimenu_s *, eduiitem_s *, unsigned int) {
+    STUBBED();
 }
 
 static __used__ void antinodeEditor_cbCancelDeleteAntinodeMenu(eduimenu_s *, eduimenu_s *) {
+    STUBBED();
 }
 
 static __used__ void antinodeEditor_cbCancelMenu(eduimenu_s *, eduimenu_s *) {
+    STUBBED();
 }
 
 extern "C" {
 
     void antinodeEditorDrawAntinodes(void) {
+        STUBBED();
     }
 
     void antinodeEditorSaveData(void) {
+        STUBBED();
     }
 
     void antinodeEditor_UpdateAntiNodesOnPlatforms(void) {
+        STUBBED();
     }
 
 } // extern "C"
 
 void AISysDrawAntinode_Circle(AIANTINODE_s *, u32) {
+    STUBBED();
 }
 
 void AISysDrawAntinode_Ellipse(AIANTINODE_s *, u32) {
+    STUBBED();
 }
 
 void AISysDrawAntinode_Rectangle(AIANTINODE_s *, u32) {
+    STUBBED();
 }

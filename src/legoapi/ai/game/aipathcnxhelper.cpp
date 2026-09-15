@@ -1,4 +1,5 @@
 #include "decomp.h"
+#include "legoapi/gizmos/object/gizbuildits.h"
 #include "gameapi/ai/aisys/aisys.h"
 #include "globals.h"
 #include "legoapi/ai/core/ai_sys_stubs.h"
@@ -23,7 +24,6 @@ struct SHOPINPUT;
 
 extern "C" void *AIPAthFindPathCnx(AISYS_s *, AIPATH_s *, char *, char *, i32 *);
 extern void *CutScene_FindInst(CUTSYS *, char *);
-extern GIZBUILDIT_s *GizBuildIt_Find(WORLDINFO_s *, char *);
 extern FLOWBOX_s *FlowBoxFindByName(GIZFLOW_s *, char *);
 
 void AIPathCalcExtents(AIPATH *path) {
@@ -78,6 +78,7 @@ i32 AIPathCheckExtents(AIPATH *path, NUVEC *position) {
 }
 
 void pathEditorDrawNode(nuvec_s *, float, float, float, u32, numtl_s *, i32, i32) {
+    STUBBED();
 }
 
 void (*AIPathCnxHelperSysInitFn)(WORLDINFO_s *) = NULL;
@@ -385,9 +386,6 @@ AIPATHCNXHELPER_s *AIPathCnxHelperSys_AddHelper(AIPATHCNXHELPERSYS_s *system, AI
     helper->direction = direction;
     helper->type = type;
     return helper;
-}
-
-void pathEditorDrawConnectionInfo(nuvec_s *, float, nuvec_s *, u32, i32) {
 }
 
 void AIPathCnxControllerSetOnRange(AIPATHCNXCONTROLLER_s *controller, i32 start_frame, i32 end_frame) {

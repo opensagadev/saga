@@ -26,6 +26,7 @@ enum PushBlockCompletionFlags {
 u32 (*CanPushBlocksFn)(GameObject_s *) = NULL;
 
 void KnockPushBlock(pushblock_s *, nuvec_s *) {
+    STUBBED();
 }
 
 i32 NewBlockAction(GameObject_s *object) {
@@ -116,12 +117,15 @@ i32 OtherBlockInRange(WORLDINFO_s *world, pushblock_s *block, nuvec_s *position,
 }
 
 void ResetSinglePushBlock(WORLDINFO_s *, pushblock_s *, i32) {
+    STUBBED();
 }
 
 void NearestFacingPushBlock(WORLDINFO_s *, GameObject_s *, float) {
+    STUBBED();
 }
 
 void GizmoPushBlockInitAndReset(WORLDINFO_s *, void *) {
+    STUBBED();
 }
 
 void ResetSinglePushBlockHeight(WORLDINFO_s *world, pushblock_s *block, i32 index) {
@@ -160,4 +164,5 @@ i32 GizPushBlock_EndFrameCompleted(pushblock_s *push_block, i32 output_index) {
 }
 
 void PushBlock(GameObject_s *) {
+    STUBBED();
 }

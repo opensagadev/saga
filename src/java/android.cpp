@@ -18,11 +18,30 @@
 #include "nu2api/nuplatform/nudevicespecs.hpp"
 #include "nu2api/nuplatform/nuplatform.h"
 
-JavaVM *g_javaVM;
-jclass g_activityClass;
-extern "C" char g_language[16];
+// These zero-initialized JNI/platform globals form the original Android state run.
+// Definition order is reversed here to reproduce their linked BSS order.
+ANativeWindow *g_appWindow;
 pthread_t g_appPthread;
 bool g_appPthreadStarted;
+JavaVM *g_javaVM;
+jclass g_activityClass;
+i32 g_obbMainVersion;
+i32 g_obbMainSize;
+i32 g_obbPatchVersion;
+i32 g_obbPatchSize;
+i32 g_forceETC1;
+char g_versionName[64];
+i32 g_flashAvailable;
+char g_internalDataPath[256];
+char g_externalDataPath[256];
+char g_deviceManufacturer[256];
+char g_deviceModel[256];
+extern "C" {
+    char g_language[64];
+}
+char g_androidOsVersion[64];
+char g_activityName[64];
+AAssetManager *g_assetManager;
 
 static bool g_isStopped = true;
 static bool g_isPaused = true;

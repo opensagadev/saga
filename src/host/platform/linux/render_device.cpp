@@ -5,13 +5,11 @@
 #include "decomp.h"
 #include "globals.h"
 #include "host/platform/graphics.hpp"
+#include "java/android.h"
 #include "nu2api/nu3d/nurndr.h"
 #include "nu2api/nucore/nucore.hpp"
 #include "nu2api/nucore/nuapi.h"
 #include "nu2api/nucore/nustring.h"
-
-extern thread_local i32 gt_glContextIndex;
-extern i32 g_nextGLContextIndex;
 
 namespace {
     SDL_Window *host_window;

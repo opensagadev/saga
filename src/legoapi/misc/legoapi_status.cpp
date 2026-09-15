@@ -10,15 +10,19 @@ struct SHOPINPUT;
 extern "C" {
 
     void DEVCDDVDROM_Interrogate(void) {
+        STUBBED();
     }
 
     void DEVMEMORYCARD_Interrogate(void) {
+        STUBBED();
     }
 
     void DebugLog(void) {
+        STUBBED();
     }
 
     void Debug_Print(void) {
+        STUBBED();
     }
 
 } // extern "C"

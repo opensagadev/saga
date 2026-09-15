@@ -1,7 +1,6 @@
 #pragma once
 
 #include "decomp.h"
-#include "decomp.h"
 #include "nu2api/numath/nuvec.h"
 
 class VuVec {

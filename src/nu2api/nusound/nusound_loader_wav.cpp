@@ -12,6 +12,7 @@
 #include <string.h>
 
 NuSoundLoaderWAV::NuSoundLoaderWAV() {
+    STUBBED();
 }
 
 NuSoundLoaderWAV::~NuSoundLoaderWAV() {
@@ -174,11 +175,13 @@ i32 NuSoundLoaderWAV::ReadHeader(NuSoundStreamDesc *desc) {
 }
 
 bool NuSoundLoaderWAV::SeekPCMSample(u64 index) {
+    STUBBED();
     (void)index;
     return false;
 }
 
 bool NuSoundLoaderWAV::SeekTime(f64 seconds) {
+    STUBBED();
     // The original leaves this unimplemented: WAV/MIB streams always start
     // from the raw data offset.
     (void)seconds;

@@ -8,18 +8,13 @@
 #include "nu2api/nu3d/android/nuvertexformat_android.h"
 #include "nu2api/nu3d/nurndr.h"
 #include "nu2api/nu3d/nushader.h"
+#include "nu2api/nu3d/nushader_plain.h"
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nucore/common.h"
 #include "nu2api/nucore/nulst.h"
 #include "nu2api/nufile/nufile.h"
 #include "nu2api/nufile/nu2api_nufile_types.h"
-
-// Shader manager API (transcribed in nushadermanager_plain.cpp).
-extern "C" void *NuShaderManagerRetrieveShader(NUSHADERMTLDESC *desc, void *mtl);
-extern "C" void *NuShaderManagerRetrieveShaderVariant(NUSHADERMTLDESC *desc, void *mtl, i32 variant);
-extern "C" NUSHADEROBJECT *NuShaderManagerGetShaderById(i32 id);
-extern "C" void NuShaderManagerReleaseShader(NUSHADEROBJECT *shader);
 
 extern "C" i32 NuSpecialForceToAlpha(nuhspecial_s *special) {
     if (special->scene == NULL) {
@@ -62,6 +57,16 @@ DECOMP_ASSERT(sizeof(MTL_OVERRIDE_RECORD) == 12, "Material override payload ABI"
 
 extern "C" void NuMtlInitOverride(i32 count, VARIPTR *buffer, VARIPTR *end) {
     g_overrideList = NuLstCreateBuff(count, sizeof(MTL_OVERRIDE_RECORD), buffer, *end, 16);
+}
+
+extern "C" void NuMtlRegisterForOverride(void) {
+    STUBBED();
+}
+extern "C" void NuMtlFindVariantMtl(void) {
+    STUBBED();
+}
+extern "C" void NuMtlFindVariantMtlFromDesc(void) {
+    STUBBED();
 }
 
 extern "C" void NuMtlDestroy(NUMTL *mtl) {
@@ -336,9 +341,7 @@ void NuMtlUpdate(NUMTL *mtl) {
 }
 
 void NuMtlAddEx(numtl_s *, i32) {
-}
-
-void NuMtlInsert(numtl_s *, i32) {
+    STUBBED();
 }
 
 // original 0x29bc50 — refresh the material's shader desc, (re)acquire its
@@ -406,4 +409,5 @@ void NuMtlSetUVOffsetPS(numtl_s *mtl, u32 layer, float u, float v) {
 }
 
 void NuMtlDisableCulling() {
+    STUBBED();
 }

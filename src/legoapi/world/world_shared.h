@@ -10,6 +10,7 @@
 #include "globals.h"
 #include "legoapi/world/level.h"
 #include "legoapi/characters/core/players.h"
+#include "legoapi/items/objects/grabber.h"
 #include "legoapi/world/world.h"
 #include "nu2api/nu3d/nugscn.h"
 #include "nu2api/nucore/nulist.h"
@@ -32,7 +33,7 @@ struct SCENEPROGRESS_s;
 extern LEVELDATA *PLATFORM_LDATA;
 
 // Terrain subsystem (defined in terrain.cpp, used by world.cpp)
-extern char *debris_name[147];
+extern char *debris_name[400];
 
 // Gizmo subsystem (defined in gizmo_sys.cpp, used by world.cpp)
 extern COLLECTION_s MiniKitCollection;
@@ -58,7 +59,6 @@ extern "C" {
     NUGSCN *NuGHGFixup(NUGSCN *scene, void *);
     void NuRndrInitWorld(void);
 }
-i32 NuGScnUploadGfxDataFromFilePS(VARIPTR *buf, VARIPTR *buf_end, i32 file);
 // The trailing flags argument is passed as 1 by every caller in the
 // original binary; the original implementation never reads it.
 i32 NuSpecialFind(NUGSCN *scene, nuhspecial_s *dest, char *name, i32 flags);
@@ -67,24 +67,7 @@ void SetCameraZoom(f32 zoom);
 // --- chris.cpp ---
 void ChrisAllocLevelStuff(WORLDINFO_s *world);
 
-// --- terrain.cpp — terrain / debris / grass / bridge / particles ---
-extern "C" {
-    void DebrisSetThinningLevel(f32 level);
-    void DebrisSetForcedThinning(i32 forced);
-    void DebrisSetDetailLevel(i32 level);
-    void noterraininit(void);
-    void TerrainSetCur(void *terrain);
-    void TerrSetPlatScanDist(f32 dist);
-    void TerrainPlatformOldUpdate(void);
-    void TerrainPlatformNewUpdate(void);
-    void TerrainSetWallDeflectYScale(f32 scale);
-    void NewTerrainScaleYMask(NUVEC *position, NUVEC *movement, u8 *hit_flags, i32 object_index, f32 radius,
-                              f32 collision_radius, f32 object_scale, i32 embedded_retry, i32 scan_flags,
-                              i32 terrain_mask);
-    void *TerrainInitEx(i32 param1, void *buf, void *buf_end, i32 param2, char *path, void *gscn, i32 param3,
-                        u32 param4, u32 param5, u32 param6);
-}
-
+// --- grass, bridge, particles ---
 // Results written by the original terrain query pipeline.
 extern i16 TerrImpact;
 extern i32 terrhitflags;
@@ -95,15 +78,12 @@ void *InitPartDebris(VARIPTR *buf, VARIPTR *buf_end, i32 param1, i32 param2, cha
 void LoadTerrainFile(WORLDINFO *world);
 void LoadGrassFile(WORLDINFO *world);
 void LoadBridgeFile(WORLDINFO *world);
-void LoadPartFile(WORLDINFO *world);
 void Particles_Load(WORLDINFO *world, char **debris_name, i32 count, i32 flags);
 
 // --- sfx.cpp — sound / SFX / quiet tables ---
 extern "C" void ResetSounds(void);
 void SetLevelSfxBits(WORLDINFO *world);
 void ResetLevSfx(WORLDINFO *world);
-i32 ActionFromQuiet(i32 idx);
-i32 AmbientFromQuiet(i32 idx);
 bool InitSpecialSfx(WORLDINFO *world);
 void LoadSpecialSfxFile(WORLDINFO *world);
 
@@ -111,7 +91,6 @@ void LoadSpecialSfxFile(WORLDINFO *world);
 GIZMOSYS_s *CreateGizmoSys(void *world, VARIPTR *buf, VARIPTR *buf_end);
 void LoadGizmoSys(GIZMOSYS_s *gizmo_sys, void *world, char *config_file);
 i32 LoadEditorSplines(char *path, VARIPTR *buf, VARIPTR *buf_end);
-void GizmoBlowupResetNameTable(void);
 void Hub_LoadAndFixUpMiniKits(WORLDINFO *world, VARIPTR *buf, VARIPTR *buf_end);
 void MiniKit_Load(MINIKIT *minikit, i32 id, VARIPTR *buf, VARIPTR *buf_end, void *param);
 void MiniKit_InitPieces(MINIKIT *minikit, i32 count, VARIPTR *buf, VARIPTR *buf_end);
@@ -134,7 +113,6 @@ void *CreateClimbObjectSys(VARIPTR *buf, VARIPTR *buf_end, i32 count);
 void ClearGameObjects(APIOBJECTSYS_s *api_object_sys);
 GameObject_s *AddGameObject(i32 id);
 i32 InitCreature(GameObject_s *obj, i32 id, i32 param);
-void InitGameObjectLights(void);
 
 // --- cutscene.cpp — cutscenes / character scenes ---
 i32 InStory(void);
@@ -157,14 +135,11 @@ void LevelObjects_InitForLevel(WORLDINFO *world);
 void BoltTypes_Init(WORLDINFO *world);
 void BoltTypes_Configure(WORLDINFO *world, char *config);
 void EquivalentObjects_Configure(WORLDINFO *world, char *config);
-void Teleports_Configure(WORLDINFO *world, char *config);
 void Doors_Configure(WORLDINFO *world, char *config);
 void Faders_Configure(WORLDINFO *world, char *config);
 void CharPlatforms_Configure(WORLDINFO *world, char *config);
-void Grabber_Configure(WORLDINFO *world, char *config);
 void Pulses_Configure(WORLDINFO *world, char *config);
 void TrafficAnimSys_Configure(WORLDINFO *world, char *config);
-void SpecialMiniKits_Configure(WORLDINFO *world, char *config);
 void GizForceSFX_Configure(WORLDINFO *world, char *config);
 void RippleEffects_Configure(WORLDINFO *world, char *config);
 void PortalDoors_Configure(WORLDINFO *world, char *config);
@@ -174,7 +149,6 @@ void *GameAntnode_CreateSys(WORLDINFO *world, VARIPTR *buf, VARIPTR *buf_end, i3
 extern "C" {
     void SockSys_Configure(void *sock_sys, char *config, i32 param, void *buf, void *buf_end, void *gscn);
     void rtlResetDynamic(void);
-    void SetPartRTLSet(usize rtl_set);
     i32 rtlFindByUserId(usize rtl_set, i32 user_id);
     void rtlGetDirection(usize rtl_set, i32 id, void **out);
     void NewMenu(i32 menu_id, i32 menu_y, i32 param3);

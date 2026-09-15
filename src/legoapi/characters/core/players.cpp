@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "legoapi/world/world.h"
 struct HINT_s;
 
@@ -10,12 +11,14 @@ struct HINT_s;
 #include "globals.h"
 #include "legoapi/world/area.h"
 #include "legoapi/characters/core/character.h"
+#include "legoapi/characters/core/charconfig.h"
 #include "legoapi/core/config/cheat.h"
 #include "legoapi/cutscenes/cutscenes.h"
 #include "legoapi/items/base/collection.h"
 #include "legoapi/world/levels/episode.h"
 #include "legoapi/world/level.h"
 #include "legoapi/characters/core/players.h"
+#include "legoapi/actions/movement/carrying.h"
 #include "legoapi/characters/motion/gameanim.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/props/doors/door.h"
@@ -24,11 +27,13 @@ struct HINT_s;
 #include "legoapi/characters/motion.h"
 #include "legoapi/props/system/socksys.h"
 #include "legoapi/render/fx.h"
+#include "legoapi/render/light/lighting.h"
 #include "legoapi/core/input/timer.h"
 #include "legogame/game.h"
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/nuandroid/ios_graphics.h"
 #include "nu2api/nucore/nustring.h"
+#include "nu2api/nucore/nuhgobj.h"
 #include "nu2api/nucore/nutime.h"
 #include "nu2api/nufile/nufile.h"
 #include "nu2api/nufile/nufpar.h"
@@ -49,7 +54,6 @@ extern void GetTopBot(GameObject_s *obj);
 extern void GameObjectDimensions(GameObject_s *obj);
 extern void GameObjectOrigin(GameObject_s *obj);
 extern void ResetRumble(RUMBLEPACKET *packet);
-extern void ResetLights(NUVEC *position, rtldata_s *data, void *set);
 extern void CurrentStart(GameObject_s *obj, i32 mode, i32 start);
 extern void InitSurfaceInfo(GameObject_s *obj);
 extern i32 SetObjOnSurface(GameObject_s *obj, i32 mode);
@@ -61,7 +65,6 @@ void ResetPlayerMoves(GameObject_s *obj);
 void SetProtocolDroidDeactivatedAction(GameObject_s *);
 void NewBuzz(nupad_s *, f32, i32);
 void GameAudio_PlaySfxById(i32 sfx_id, nuvec_s *position, i32 flags, i32 volume);
-extern "C" f32 AnimDuration(i32, i32, f32, f32, i32);
 extern "C" f32 chattersfxwait;
 
 void Players_Init(void) {
@@ -680,11 +683,8 @@ void ChatterSfx(GameObject_s *g, i32 a, float b) {
     }
 }
 
-void Move_VEHICLE(GameObject_s *g) {
-    (void)g;
-}
-
 void DrawOffsetCode(GameObject_s *obj, i32 param) {
+    STUBBED();
     (void)obj;
     (void)param;
 }
@@ -723,19 +723,16 @@ float GetHoverPosY(GameObject_s *obj) {
     return 0.0f;
 }
 
-i32 Player_HasPurpleForce(GameObject_s *obj) {
-    if (Cheat_IsOn(0x1c))
-        return 1;
-    return obj != NULL && obj->field_0xdec > 0.0f;
-}
-
 void PlayerTakeHit(GameObject_s *, GameObject_s *) {
+    STUBBED();
 }
 
 void PlayerItem_Set(PLAYERITEM_s *, PLAYERITEMTYPE_s *) {
+    STUBBED();
 }
 
 void Player_FindByID(i32) {
+    STUBBED();
 }
 
 NUVEC *Player_StartPos(GameObject_s *obj) {
@@ -791,11 +788,11 @@ i32 Players_BothActive() {
 }
 
 void PlayerItemType_Find(i32) {
+    STUBBED();
 }
 
 void (*Player_ClearContextFn)(GameObject_s *, i32);
 void Whip_Release(GameObject_s *);
-void SuperCarry_Release(GameObject_s *);
 void SpecialMove_ReleaseVictim(GameObject_s *);
 
 void Player_ClearContext(GameObject_s *object, i32 mode) {
@@ -812,6 +809,7 @@ i32 Player_HasFastBuild(GameObject_s *player) {
 }
 
 void PlayerItemTypes_Init(PLAYERITEMTYPE_s *) {
+    STUBBED();
 }
 
 void Player_ResetContexts(PLAYERPACKET_s *packet) {
@@ -1050,6 +1048,7 @@ i32 Player_HasDoubleBoltDamage(GameObject_s *object) {
 }
 
 void PlayerButton_OnHold_Callback(MechTouchUIElement &, TouchHolder &) {
+    STUBBED();
 }
 
 i32 Player_HasDoubleWeaponDamage(GameObject_s *object) {
@@ -1060,6 +1059,7 @@ i32 Player_HasDoubleWeaponDamage(GameObject_s *object) {
 }
 
 void PlayerButton_OnLeave_Callback(MechTouchUIElement &, TouchHolder &) {
+    STUBBED();
 }
 
 i32 Player_HasDoubleBoltDamage_FromBolt(BOLT_s *bolt) {
@@ -1074,18 +1074,22 @@ i32 Player_HasDoubleBoltDamage_FromBolt(BOLT_s *bolt) {
 }
 
 void PlayerButton_OnClick_Callback_NextButton(MechTouchUIElement &, TouchHolder &) {
+    STUBBED();
 }
 
 static __used__ i32 SelectOpponent(GameObject_s *, f32, f32, i32, i32) {
+    STUBBED();
     return 0;
 }
 
 static __used__ void Player_ClearContext_Game(GameObject_s *, i32) {
+    STUBBED();
 }
 
 u32 (*CanPushObstaclesFn)(GameObject_s *) = NULL;
 
 void KillPlayer(GameObject_s *, i32, i32, nuvec_s *) {
+    STUBBED();
 }
 
 namespace {
@@ -1237,6 +1241,11 @@ void ResetPlayer(GameObject_s *obj, i32 reset_moves, nuvec_s *position, i32 snap
 void StarWars_AutoSetAICapabilities(GameObject_s *object);
 i32 CanPullLevers(i32 id);
 extern f32 DEFAULT_MOVE_RANGE;
+
+void SetFlicker(GameObject_s *object, float duration) {
+    object->field_0x1024 = duration;
+    object->flicker_flags &= ~7;
+}
 
 void InitPlayerAI(GameObject_s *object) {
     StarWars_AutoSetAICapabilities(object);
@@ -1462,10 +1471,8 @@ i32 DeactivatePlayer(GameObject_s *object, f32 duration, GameObject_s *source) {
 }
 
 void ResetPlayerPacket(PLAYERPACKET_s *, CHARACTERDATA_s *);
-i32 GetDefaultIdle(GameObject_s *);
 void ResetCharacterIdle(GameObject_s *, i32, i32);
 void SetGameObjectCharacterData(GameObject_s *);
-void SetFlicker(GameObject_s *, f32);
 void ResetCoinPacket(COINPACKET_s *);
 
 void ResetPlayerMoves(GameObject_s *object) {
@@ -1546,6 +1553,7 @@ i32 AvailableToPlayer(u32 character_flags, i32 weapon_action, i32 context, i32 r
 }
 
 void GetNumLocalPlayers() {
+    STUBBED();
 }
 
 i32 UnderPlayerControl(GameObject_s *object) {
@@ -1581,6 +1589,151 @@ GameObject_s *GetOtherActivePlayer(GameObject_s *object) {
     return NULL;
 }
 
+struct SPECIAL_LAYER_s {
+    i16 *character_id;
+    char *name;
+    u32 mask;
+};
+
+DECOMP_ASSERT(sizeof(SPECIAL_LAYER_s) == 0xc, "SPECIAL_LAYER_s size");
+
+static SPECIAL_LAYER_s SpecialLayer[] = {
+    {&id_BATMAN, "bombbackpack", 0},       {&id_BATMAN, "sonargun", 0},          {&id_BATMAN, "infrared_goggles", 0},
+    {&id_BATMAN, "mask_black", 0},         {&id_BATMAN, "mask_blue", 0},         {&id_BATMAN, "mask_red", 0},
+    {&id_BATMAN, "cape_black", 0},         {&id_BATMAN, "cape_blue", 0},         {&id_BATMAN, "body_grey_nextgen", 0},
+    {&id_BATMAN, "body_grey_high", 0},     {&id_BATMAN, "body_grey_low", 0},     {&id_BATMAN, "body_black_nextgen", 0},
+    {&id_BATMAN, "body_black_high", 0},    {&id_BATMAN, "body_black_low", 0},    {&id_BATMAN, "body_blue_nextgen", 0},
+    {&id_BATMAN, "body_blue_high", 0},     {&id_BATMAN, "body_blue_low", 0},     {&id_BATMAN, "face_hands_black", 0},
+    {&id_BATMAN, "face_hands_blue", 0},    {&id_BATMAN, "face_hands_red", 0},    {&id_BATMAN, "hips_black_nextgen", 0},
+    {&id_BATMAN, "hips_black_high", 0},    {&id_BATMAN, "hips_blue_nextgen", 0}, {&id_BATMAN, "hips_blue_high", 0},
+    {&id_BATMAN, "hips_red_nextgen", 0},   {&id_BATMAN, "hips_red_high", 0},     {&id_ROBIN, "magnetic_boots", 0},
+    {&id_ROBIN, "scuba_gear", 0},          {&id_ROBIN, "hack_pack", 0},          {&id_ROBIN, "vacuum_gun", 0},
+    {&id_ROBIN, "nextgen_limbs_green", 0}, {&id_ROBIN, "hires_limbs_green", 0},  {&id_ROBIN, "lowres_limbs_green", 0},
+    {&id_ROBIN, "nextgen_limbs_white", 0}, {&id_ROBIN, "hires_limbs_white", 0},  {&id_ROBIN, "lowres_limbs_white", 0},
+    {&id_ROBIN, "nextgen_limbs_grey", 0},  {&id_ROBIN, "hires_limbs_grey", 0},   {&id_ROBIN, "lowres_limbs_grey", 0},
+    {&id_ROBIN, "nextgen_limbs_blue", 0},  {&id_ROBIN, "hires_limbs_blue", 0},   {&id_ROBIN, "lowres_limbs_blue", 0},
+};
+
+// Shares the original translation-unit-local layer table with FixUpLayers.
+u32 AdjustLayerBits(u32 mask, GameObject_s *object) {
+    GAMECHARACTERDATA *data = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
+    u32 cape = data->cape_layer == -1 ? 0 : 1u << (static_cast<u32>(data->cape_layer) & 31);
+    u32 hair = data->hair_layer == -1 ? 0 : 1u << (static_cast<u32>(data->hair_layer) & 31);
+    if (object->field_0x108e != 0)
+        mask &= ~hair;
+    SUIT_s *suit = static_cast<SUIT_s *>(object->suit);
+    if (suit != NULL && object->id == id_BATMAN) {
+        if ((suit->flags & 4) != 0) {
+            mask = (mask & ~cape) | SpecialLayer[0].mask;
+            mask = (mask & ~SpecialLayer[3].mask) | SpecialLayer[5].mask;
+            if ((mask & SpecialLayer[20].mask) != 0)
+                mask = (mask & ~SpecialLayer[20].mask) | SpecialLayer[24].mask;
+            else if ((mask & SpecialLayer[21].mask) != 0)
+                mask = (mask & ~SpecialLayer[21].mask) | SpecialLayer[25].mask;
+            mask = (mask & ~SpecialLayer[17].mask) | SpecialLayer[19].mask;
+        } else if ((suit->flags & 2) != 0) {
+            mask &= ~cape;
+        } else if ((suit->flags & 8) != 0) {
+            mask = (mask & ~cape) | SpecialLayer[1].mask | SpecialLayer[7].mask;
+            mask = (mask & ~SpecialLayer[3].mask) | SpecialLayer[4].mask;
+            if ((mask & SpecialLayer[20].mask) != 0)
+                mask = (mask & ~SpecialLayer[20].mask) | SpecialLayer[22].mask;
+            else if ((mask & SpecialLayer[21].mask) != 0)
+                mask = (mask & ~SpecialLayer[21].mask) | SpecialLayer[23].mask;
+            mask = (mask & ~SpecialLayer[17].mask) | SpecialLayer[18].mask;
+            if ((mask & SpecialLayer[8].mask) != 0)
+                mask = (mask & ~SpecialLayer[8].mask) | SpecialLayer[14].mask;
+            else if ((mask & SpecialLayer[9].mask) != 0)
+                mask = (mask & ~SpecialLayer[9].mask) | SpecialLayer[15].mask;
+            else if ((mask & SpecialLayer[10].mask) != 0)
+                mask = (mask & ~SpecialLayer[10].mask) | SpecialLayer[16].mask;
+        } else if ((suit->flags & 1) != 0) {
+            mask |= SpecialLayer[2].mask;
+            if ((mask & SpecialLayer[8].mask) != 0)
+                mask = (mask & ~SpecialLayer[8].mask) | SpecialLayer[11].mask;
+            else if ((mask & SpecialLayer[9].mask) != 0)
+                mask = (mask & ~SpecialLayer[9].mask) | SpecialLayer[12].mask;
+            else if ((mask & SpecialLayer[10].mask) != 0)
+                mask = (mask & ~SpecialLayer[10].mask) | SpecialLayer[13].mask;
+        }
+    } else if (suit != NULL && object->id == id_ROBIN) {
+        if ((suit->flags & 0x10) != 0) {
+            mask = (mask & ~(hair | cape)) | SpecialLayer[27].mask;
+            if ((mask & SpecialLayer[30].mask) != 0)
+                mask = (mask & ~SpecialLayer[30].mask) | SpecialLayer[39].mask;
+            else if ((mask & SpecialLayer[31].mask) != 0)
+                mask = (mask & ~SpecialLayer[31].mask) | SpecialLayer[40].mask;
+            else if ((mask & SpecialLayer[32].mask) != 0)
+                mask = (mask & ~SpecialLayer[32].mask) | SpecialLayer[41].mask;
+        } else if ((suit->flags & 0x40) != 0) {
+            mask = (mask & ~cape) | SpecialLayer[26].mask;
+            if ((mask & SpecialLayer[30].mask) != 0)
+                mask = (mask & ~SpecialLayer[30].mask) | SpecialLayer[36].mask;
+            else if ((mask & SpecialLayer[31].mask) != 0)
+                mask = (mask & ~SpecialLayer[31].mask) | SpecialLayer[37].mask;
+            else if ((mask & SpecialLayer[32].mask) != 0)
+                mask = (mask & ~SpecialLayer[32].mask) | SpecialLayer[38].mask;
+        } else if ((suit->flags & 0x20) != 0) {
+            mask = (mask & ~cape) | SpecialLayer[28].mask;
+            if ((mask & SpecialLayer[30].mask) != 0)
+                mask = (mask & ~SpecialLayer[30].mask) | SpecialLayer[33].mask;
+            else if ((mask & SpecialLayer[31].mask) != 0)
+                mask = (mask & ~SpecialLayer[31].mask) | SpecialLayer[34].mask;
+            else if ((mask & SpecialLayer[32].mask) != 0)
+                mask = (mask & ~SpecialLayer[32].mask) | SpecialLayer[35].mask;
+        } else if ((suit->flags & 0x80) != 0) {
+            mask = (mask & ~cape) | SpecialLayer[29].mask;
+        }
+    }
+    if (object->id == id_BODYGUARD) {
+        if (object->current_hp <= 1)
+            mask &= ~0x10u;
+    } else if (object->id == id_GEONOSIAN) {
+        mask |= (object->field_0xefd & 2) != 0 ? 0x20 : 0x40;
+    } else if (CharacterCustomiser != NULL && object->id == CharacterCustomiser->character_ids[0]) {
+        if ((CharacterCustomiser->pieces[static_cast<u16>(Game.customizer.pieces[5])].layer_flags & 0x40) == 0)
+            mask |= cape;
+    } else if (CharacterCustomiser != NULL && object->id == CharacterCustomiser->character_ids[1]) {
+        if ((CharacterCustomiser->pieces[static_cast<u16>(Game.customizer.secondary_pieces[5])].layer_flags & 0x40) ==
+            0)
+            mask |= cape;
+    } else if (object->id == id_CHEWBACCA) {
+        if (Cheat_IsOn(4) != 0)
+            mask |= 0xc0;
+        data = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
+    }
+    if (data->ride_layers_off != 0 && object->field_0xcc0 != NULL && object->field_0x7a5 == 0x3b)
+        mask &= ~data->ride_layers_off;
+    return mask;
+}
+
+void FixUpLayers() {
+    for (i32 model_index = 0; model_index < apicharsys->loaded_model_count; ++model_index) {
+        CHARACTERMODEL_s *model = &apicharsys->models[model_index];
+        GAMECHARACTERDATA_s *character = &GCDataList[model->model_id];
+
+        for (i32 layer_index = 0; layer_index < character->layer_count; ++layer_index) {
+            GAMECHARACTERLAYER_s *layer = &character->layers[layer_index];
+            layer->hierarchy_layer_index = NuHGobjGetLayerIndex(layer->name, model->hierarchy);
+        }
+    }
+
+    SPECIAL_LAYER_s *layer = SpecialLayer;
+    SPECIAL_LAYER_s *layer_end = SpecialLayer + sizeof(SpecialLayer) / sizeof(SpecialLayer[0]);
+    for (; layer != layer_end; ++layer) {
+        layer->mask = 0;
+        if (layer->character_id != NULL && *layer->character_id != -1) {
+            layer->mask = 1 << LayerFromName(&GCDataList[*layer->character_id], layer->name);
+        }
+    }
+}
+
+i32 Player_HasPurpleForce(GameObject_s *obj) {
+    if (Cheat_IsOn(0x1c))
+        return 1;
+    return obj != NULL && obj->field_0xdec > 0.0f;
+}
+
 bool FindNearestPlayerToVec(nuvec_s *position, GameObject_s **nearest_player, float &distance_squared,
                             bool require_character_flags, u32 character_flags) {
     *nearest_player = NULL;
@@ -1614,14 +1767,17 @@ bool FindNearestPlayerToVec(nuvec_s *position, GameObject_s **nearest_player, fl
 }
 
 void SetPlayerGroupPosition(float, float, float) {
+    STUBBED();
 }
 
 i32 (*LastSafePosExtraFn)(GameObject_s *) = NULL;
 
 void CheckForPlayersTurnedOff() {
+    STUBBED();
 }
 
 void FindFurthestPlayerFromVec(nuvec_s *, GameObject_s **, float &, bool, u32) {
+    STUBBED();
 }
 
 void AveragePlayerCurrentSpeedMul() {

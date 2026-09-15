@@ -1,6 +1,15 @@
+#include "decomp.h"
 #include "legoapi/world/world.h"
 #include "legoapi/world/level.h"
 #include "legoapi/world/world_shared.h"
+#include "legoapi/audio/sfx.h"
+#include "legoapi/render/core/terrain.h"
+#include "legoapi/render/fx/game_deb.h"
+#include "legoapi/gizmos/fx/gizmopickups.h"
+#include "legoapi/items/collect/minikits.h"
+#include "legoapi/gizmos/transport/teleport.h"
+#include "legoapi/render/fx/parts.h"
+#include "legoapi/render/light/lighting.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -9,8 +18,10 @@
 #include "gameapi/edtools/edstubs.h"
 #include "gameapi/gui/apimenu.h"
 #include "globals.h"
+#include "legoapi/gizmo/object/gizmoblowups.h"
 #include "legoapi/world/area.h"
 #include "legoapi/characters/core/character.h"
+#include "legoapi/characters/core/charconfig.h"
 #include "legoapi/world/level.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/items/base/collection.h"
@@ -26,6 +37,7 @@
 #include "nu2api/nucore/NuDeviceSpecs.h"
 #include "nu2api/nufile/nufile.h"
 #include "nu2api/nufile/nufpar.h"
+#include "nu2api/nusound/nusound.h"
 #include "MechInputTouch/MechInputTouch_types.h"
 #include "gameapi/edtools/edgra.h"
 
@@ -79,14 +91,11 @@ GizForceLOSState_s GizForceLOSInfo[2];
 i32 DEFAULT_PLAYERHITPOINTS = 8;
 u32 LEGOOBJ_DEFAULTLASTCOIN = -1;
 
-APICHARACTERSYS *apicharsys;
 void CutScenes_Destroy(CUTSYS *system);
 void CharScenes_LevelDump(WORLDINFO *world);
 void Customiser_DumpAll(CUSTOMISER *, WORLDINFO *);
-void CharacterMiniKits_Dump(WORLDINFO *);
 void DestroyRippleMtls(WORLDINFO *);
 extern "C" {
-    void ClearLinkedCutSceneMusic(void *);
     extern i32 edpp_page_on[8];
     extern i32 part_page_on[8];
 }
@@ -222,6 +231,7 @@ void SaveSceneObjectAnimTFactors(NUGSCN *gscn) {
     } while (count != 0);
 }
 void CalculateWorldSize(WORLDINFO *world) {
+    STUBBED();
     (void)world;
 }
 
@@ -980,7 +990,6 @@ void WorldInfo_ReArrangeBuffers(i32 area1, i32 area2) {
 }
 
 extern "C" {
-    i32 InModelList(APICHARACTERMODELLIST_s *, i32, i32 *);
     extern i16 id_DARTHVADER;
     extern i16 id_THEEMPEROR;
     extern i16 id_GRANDMOFFTARKIN;
@@ -989,7 +998,6 @@ extern "C" {
 }
 
 i32 InModelListDataFlags(APICHARACTERMODELLIST_s *, u32, u32, i32, i32);
-i32 RandomIDFromFlags(u32, u32, i32, APICHARACTERMODELLIST_s *, i32);
 void MakeFreePlayModelList(i32 model1, i32 model2, i32 area, i32 level, i32 param5) {
     i32 flags = 0;
     if (WORLD != NULL && WORLD->area != NULL && WORLD->area == HUB_ADATA && bonusmodearcade != 0)

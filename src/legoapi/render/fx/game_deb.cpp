@@ -1,8 +1,22 @@
 #include "decomp.h"
+#include "globals.h"
+#include "legoapi/gizmo/base/gizactions.h"
+#include "legoapi/audio/sfx.h"
+#include "legoapi/characters/motion.h"
 #include "legoapi/legoapi_types.h"
+#include "legoapi/world/levels/levels.h"
 #include "legoapi/render/fx.h"
+#include "legoapi/render/fx/game_deb.h"
+#include "gameapi/edtools/edstubs.h"
 #include "nu2api/nu3d/nutex.h"
+#include "nu2api/nu3d/nurndr.h"
+#include "nu2api/nu3d/nucamera.h"
+#include "nu2api/nu3d/nuportal.h"
+#include "nu2api/nu3d/glutils.h"
 #include "nu2api/nu3d/numtl.h"
+#include "nu2api/nu3d/android/nuptl_android.h"
+#include "nu2api/nu3d/android/nurain_android.h"
+#include "nu2api/nu3d/android/nutimebar_plain.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nucore/common.h"
 #include "nu2api/numath/nurand.h"
@@ -14,15 +28,22 @@
 #include <string.h>
 #include <stdlib.h>
 
+extern "C" {
+    i32 DebrisSuspendDrawObjectSwitch = -1;
+}
+f32 debris_thinning_level = 1.0f;
+i32 debris_detail_level = 4;
+i32 forced_debris_thinning;
+
 struct AIROW_s;
 struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
-NUMTL *CreateAlphaBlendTexture(VARIPTR *, VARIPTR, char *, i32, i32, i32, i32);
 NUMTL *CreateCopyMat(NUMTL *, i32, i32, i32, i32);
 
 uv1deb *GenDebDummy(debkeydatatype_s *, debinftype *, float) {
+    STUBBED();
     return NULL;
 }
 
@@ -32,9 +53,8 @@ extern "C" {
     void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
     void AddVariableShotDebrisEffectMtx3(i32, NUVEC *, NUVEC *, i32, NUMTX *, NUMTX *);
 
-    extern u32 debrisseed;
     extern f32 globaltime;
-    void GenericDebinfoDmaTypeUpdate(debinftype *);
+    static u32 debrisseed = 0x5c0999;
 }
 
 static dma_particle_s *DebrisParticleAt(debkeydatatype_s *key, i16 index, u8 particle_type) {
@@ -610,6 +630,47 @@ void GenDebMomAdjFromPosRevTree(debkeydatatype_s *, debinftype *effect, uv1deb *
     particle->inverse_lifetime = 64.0f / (static_cast<f32>(lrand48()) * lifetime / 1503238528.0f + lifetime);
 }
 
+void DebrisDrawCalculateClipBoxes(debinftype *effect, debkeydatatype_s *key) {
+    NUMTX matrix = key->effect_orientation;
+    NuMtxTranslate(&matrix, &key->position);
+    f32 emission_time = effect->emission_period_random + effect->emission_pause;
+    f32 lifetime = effect->particle_lifetime;
+    NUVEC extent = {
+        (fabsf(effect->emitter_velocity.x) * emission_time + effect->field_04c * lifetime) + effect->field_058,
+        (fabsf(effect->emitter_velocity.y) * emission_time +
+         (fabsf(effect->field_048) + effect->field_050) * lifetime) +
+            effect->field_05c,
+        (fabsf(effect->emitter_velocity.z) * emission_time + effect->field_054 * lifetime) + effect->field_060};
+    NuVecMtxRotate(&extent, &extent, &key->emitter_orientation);
+    if (extent.x < 0.0f)
+        extent.x = -extent.x;
+    if (extent.y < 0.0f)
+        extent.y = -extent.y;
+    if (extent.z < 0.0f)
+        extent.z = -extent.z;
+    f32 padding = 0.0001f * effect->field_14c;
+    extent.x = (extent.x + padding) + 0.2f;
+    extent.y = (extent.y + padding) + 0.2f;
+    extent.z = (extent.z + padding) + 0.2f;
+    NUVEC minimum = {-extent.x, -extent.y, -extent.z};
+    if (effect->field_0a0 > 0.0f)
+        extent.y += (effect->field_0a0 * lifetime) * lifetime;
+    else if (effect->field_0a0 < 0.0f)
+        minimum.y = (effect->field_0a0 * lifetime) * lifetime - extent.y;
+    f32 horizontal = extent.x > extent.z ? extent.x : extent.z;
+    f32 radius;
+    if (extent.y > -minimum.y)
+        radius = horizontal > extent.y ? horizontal : extent.y;
+    else if (horizontal > -minimum.y)
+        radius = horizontal;
+    else
+        radius = extent.y > -minimum.y ? extent.y : -minimum.y;
+    key->clip_max = extent;
+    key->clip_matrix = matrix;
+    key->clip_radius = radius;
+    key->clip_min = minimum;
+}
+
 extern "C" {
 
     // These are the original registry globals.  `effecttypes` is the
@@ -640,9 +701,11 @@ extern "C" {
     f32 renderglobaltime = 0.0f;
     f32 renderpanelglobaltime = 0.0f;
     f32 timeincrement = 0.0f;
+    void DebrisSetTimeIncrement(f32 increment) {
+        timeincrement = increment;
+    }
     i32 globalframes = 0;
     i32 update_debris_enabled = 1;
-    u32 debrisseed = 0x5c0999;
     i32 processdeb = 0;
     f32 glyntestha = 0.0f;
     DEBRISMOMENTUMADJUSTER gencodetab[7] = {
@@ -786,9 +849,6 @@ extern "C" {
     void DebrisProcessTimeSlip(void);
     extern i32 debris_suspended;
 
-    dma_particle_chunk_s *CreateDmaParticleSet(void *, i32 *);
-    dma_particle_chunk_s *CreateDmaParticleSetGlass(void *, i32 *);
-    PartHeader *CreateDmaPartEffectList(void *, i32 *);
     void DebrisTrashableSetup(VARIPTR *, VARIPTR *);
 
     void DebrisSetup2(VARIPTR *, VARIPTR, VARIPTR *, VARIPTR, char *, i32, i32, i32, i32);
@@ -945,14 +1005,15 @@ extern "C" {
     // LookupDebrisEffectPageIgnore @0x355d30. Search the requested page first,
     // then the two permanent pages, then every other active page.
     i32 LookupDebrisEffectPageIgnore(char *name, i32 page, i32 ignore) {
-        if (name == NULL || debtab == NULL) {
+        if (name == NULL) {
             return -1;
         }
 
-        if (static_cast<u32>(page) < 8 && edpp_page_used[page] != 0) {
+        const u8 requested_page = static_cast<u8>(page);
+        if (requested_page < 8 && edpp_page_used[requested_page] != 0) {
             for (i32 i = 1; i < EDPP_MAX_TYPES; ++i) {
                 debinftype *effect = debtab[i];
-                if (i != ignore && effect != NULL && effect->page == static_cast<u8>(page) &&
+                if (i != ignore && effect != NULL && effect->page == requested_page &&
                     NuStrICmp(effect->name, name) == 0) {
                     return i;
                 }
@@ -961,7 +1022,8 @@ extern "C" {
 
         for (i32 i = 1; i < EDPP_MAX_TYPES; ++i) {
             debinftype *effect = debtab[i];
-            if (i != ignore && effect != NULL && effect->page < 2 && edpp_page_used[effect->page] != 0 &&
+            if (i != ignore && effect != NULL &&
+                ((effect->page == 0 && edpp_page_used[0] != 0) || (effect->page == 1 && edpp_page_used[1] != 0)) &&
                 NuStrICmp(effect->name, name) == 0) {
                 return i;
             }
@@ -969,7 +1031,7 @@ extern "C" {
 
         for (i32 i = 1; i < EDPP_MAX_TYPES; ++i) {
             debinftype *effect = debtab[i];
-            if (i != ignore && effect != NULL && effect->page < 8 && edpp_page_used[effect->page] != 0 &&
+            if (i != ignore && effect != NULL && edpp_page_used[static_cast<i8>(effect->page)] != 0 &&
                 NuStrICmp(effect->name, name) == 0) {
                 return i;
             }
@@ -983,15 +1045,14 @@ extern "C" {
     }
 
     i32 LookupDebrisEffectPageOnly(char *name, char page) {
-        if (name == NULL || debtab == NULL) {
+        if (name == NULL) {
             return -1;
         }
 
-        const u8 requested_page = static_cast<u8>(page);
-        if (requested_page < 8 && edpp_page_used[requested_page] != 0) {
+        if (static_cast<u8>(page) < 8 && edpp_page_used[page] != 0) {
             for (i32 i = 1; i < EDPP_MAX_TYPES; ++i) {
                 debinftype *effect = debtab[i];
-                if (effect != NULL && effect->page == requested_page && NuStrICmp(effect->name, name) == 0) {
+                if (effect != NULL && effect->page == static_cast<u8>(page) && NuStrICmp(effect->name, name) == 0) {
                     return i;
                 }
             }
@@ -999,7 +1060,8 @@ extern "C" {
 
         for (i32 i = 1; i < EDPP_MAX_TYPES; ++i) {
             debinftype *effect = debtab[i];
-            if (effect != NULL && effect->page < 2 && edpp_page_used[effect->page] != 0 &&
+            if (effect != NULL &&
+                ((effect->page == 0 && edpp_page_used[0] != 0) || (effect->page == 1 && edpp_page_used[1] != 0)) &&
                 NuStrICmp(effect->name, name) == 0) {
                 return i;
             }
@@ -1016,3 +1078,444 @@ extern "C" {
     }
 
 } // extern "C"
+
+static inline void DebrisEmissionSound(debkeydatatype_s *key, debinftype *effect, i32 event, f32 volume) {
+    for (i32 i = 0; i < 4; ++i) {
+        if (effect->sound_data[i * 3] != -1 && effect->sound_data[i * 3 + 1] == event)
+            PlaySfxByIdEx(effect->sound_data[i * 3], &key->position, volume, 1.0f);
+    }
+}
+
+extern "C" void DebrisStartOffsetEx(debkeydatatype_s *key, f32 offset) {
+    if (key == NULL) {
+        return;
+    }
+    const i16 effect_index = key->effect_index;
+    debinftype *effect = debtab[effect_index];
+    f32 now = effect->time_group == 4 ? panelglobaltime : globaltime;
+    f32 start;
+    f32 period;
+    if (effect->emission_period_random == 0.0f && effect->emission_pause_random == 0.0f) {
+        const f32 interval = effect->emission_period + effect->emission_pause;
+        start = static_cast<f32>(static_cast<i32>(now / interval)) * interval;
+        if (effect->generator_type == 7 && effect->emission_pause == 0.0f) {
+            const f32 frames = offset * 60.0f;
+            key->emitter_rotation_x = static_cast<i16>(static_cast<i32>(effect->field_050 * frames));
+            key->emitter_rotation_y = static_cast<i16>(static_cast<i32>(effect->field_054 * frames));
+        } else {
+            start += offset;
+        }
+        start += interval;
+        key->emission_time = start;
+        while (now < start) {
+            start -= interval;
+        }
+    } else {
+        start = now;
+        key->emission_time = start;
+    }
+    period = effect->emission_period;
+    key->previous_emission_time = -10.0f;
+    key->field_1e4 = NuRandFloatSeeded(&debrisseed) * effect->emission_period_random + start + period;
+}
+
+void DebrisProcessGeneration() {
+    for (debkeydatatype_s *key = debris_keystack; key != NULL;) {
+        debkeydatatype_s *next = key->previous;
+        debinftype *effect = debtab[key->effect_index];
+        const f32 now = effect->time_group == 4 ? panelglobaltime : globaltime;
+        if (key->field_1d8 != 0) {
+            key = next;
+            continue;
+        }
+        key->cutoff_distance = CameraEmitterDistance(&key->position);
+        const f32 near_distance = *reinterpret_cast<f32 *>(&effect->fields_030[4]);
+        const i16 render_group = *reinterpret_cast<i16 *>(key->fields_2f0);
+        if (key->field_184 != 0) {
+            if (key->cutoff_distance < near_distance ||
+                (effect->clip_extent > 0.0f && key->cutoff_distance > effect->clip_extent)) {
+                if (effect->use_explicit_clip_box == 0 && effect->time_group != 4)
+                    key->field_184 = 0;
+            }
+            if (debris_render_group != 0 && render_group != 0 && debris_render_group != render_group)
+                key->field_184 = 0;
+            if ((static_cast<i8>(key->field_1da) & debris_detail_level) == 0)
+                key->field_184 = 0;
+        }
+        f32 sound_range = effect->sound_range_override;
+        if (sound_range == 0.0f)
+            sound_range = effect->sound_range;
+        if (sound_range == 0.0f)
+            sound_range = effect->clip_extent;
+        f32 volume = 1.0f;
+        if (sound_range > key->cutoff_distance) {
+            for (i32 i = 0; i < 4; ++i)
+                if (effect->sound_data[i * 3] != -1)
+                    SetSfxBit_On(effect->sound_data[i * 3]);
+            volume = (sound_range - key->cutoff_distance) / sound_range;
+        }
+        if (key->process_collision_sound != 0 && key->field_184 != 0 && sound_range > key->cutoff_distance)
+            DebrisEmissionSound(key, effect, 4, volume);
+        if (effect->status == 0)
+            key->field_184 = 0;
+        if (effect->status == 2)
+            key->field_184 = 1;
+        if (key->field_2f4 == 0)
+            key->field_184 = 0;
+        else {
+            if (key->field_2f4 == 2)
+                key->field_184 = 1;
+            if (key->field_184 != 0 && key->previous_allocated_chunk_count == 0) {
+                DebReAlloc(key, effect->max_particles);
+                const f32 thinning =
+                    forced_debris_thinning != 0
+                        ? debris_thinning_level
+                        : (effect->thinning < debris_thinning_level ? effect->thinning : debris_thinning_level);
+                DebReAlloc(key, static_cast<i32>(effect->max_particles / thinning));
+            }
+        }
+        const f32 elapsed = now - key->last_update_time;
+        key->emission_position.x = key->emitter_momentum.x * elapsed;
+        key->emission_position.y = key->emitter_momentum.y * elapsed;
+        key->emission_position.z = key->emitter_momentum.z * elapsed;
+        const f32 frequency = static_cast<f32>(effect->frequency);
+        const f32 thinning =
+            forced_debris_thinning != 0
+                ? debris_thinning_level
+                : (effect->thinning < debris_thinning_level ? effect->thinning : debris_thinning_level);
+        const f32 emission_interval = frequency > 0.0f ? 1.0f / (frequency / thinning) : 0.0f;
+        f32 emission_time = key->emission_epoch + emission_interval;
+        for (i32 emission = 1; emission != 100 && emission_time < now + timeincrement; ++emission) {
+            f32 pause = 0.0f;
+            i32 transitions = 100;
+            while (emission_time >= key->field_1e4 && emission_time >= key->emission_time && --transitions != 0) {
+                if (key->emission_time < key->field_1e4) {
+                    key->previous_emission_time = key->emission_time;
+                    pause =
+                        effect->emission_pause_random + NuRandFloatSeeded(&debrisseed) * effect->start_offset_random;
+                    key->emission_time = key->field_1e4 + pause;
+                    if (key->field_184 == 2)
+                        key->field_184 = 0;
+                    if (key->process_collision_sound != 0 && key->field_184 != 0 && sound_range > key->cutoff_distance)
+                        DebrisEmissionSound(key, effect, 2, volume);
+                } else {
+                    key->field_1e4 = key->emission_time + effect->emission_period_random +
+                                     NuRandFloatSeeded(&debrisseed) * effect->emission_pause;
+                    if (key->field_1d4 > 0) {
+                        if (--key->field_1d4 == 0) {
+                            DebFreeWithoutKey(key);
+                            emission_time += 99999.0f;
+                            key->process_collision_sound = 0;
+                        }
+                    }
+                    if (key->field_1d4 < 0 && ++key->field_1d4 == 0) {
+                        key->field_2f4 = 0;
+                        key->field_184 = 0;
+                    }
+                    if (key->process_collision_sound != 0 && key->field_184 != 0 && sound_range > key->cutoff_distance)
+                        DebrisEmissionSound(key, effect, 1, volume);
+                    pause = 0.0f;
+                }
+            }
+            if (pause > 0.0f) {
+                emission_time = key->emission_time - emission_interval;
+                key->emission_epoch = emission_time;
+            } else if (key->allocated_chunk_count > 0 && key->field_184 != 0) {
+                uv1deb *particle = key->generator(key, effect, emission_time);
+                if (effect->process_spheres != 0 && particle != NULL && emission == 1)
+                    DebrisProcessSpheres(particle, emission_time, effect, key, 0);
+                if (key->process_collision_sound != 0 && sound_range > key->cutoff_distance)
+                    DebrisEmissionSound(key, effect, 3, volume);
+            }
+            emission_time += emission_interval;
+        }
+        if (key->field_184 == 0) {
+            if (key->field_2f4 != 0 && key->trigger_second == -1 && key->cutoff_distance >= near_distance &&
+                (effect->clip_extent == 0.0f || key->cutoff_distance <= effect->clip_extent) &&
+                (debris_render_group == 0 || render_group == 0 || debris_render_group == render_group) &&
+                (static_cast<i8>(key->field_1da) & debris_detail_level) != 0)
+                key->field_184 = 1;
+            else if (key->previous_allocated_chunk_count != 0)
+                DebReAlloc(key, 0);
+        }
+        key = next;
+    }
+}
+
+void DebrisProcessTriggers() {
+    i32 switch_changes[32][2];
+    i32 last_switch_change = -1;
+    for (debkeydatatype_s *key = debris_keystack; key != NULL;) {
+        debinftype *effect = debtab[key->effect_index];
+        debkeydatatype_s *next = key->previous;
+        if (key->trigger_first == 1 && key->field_184 != 2 && key->trigger_second != -1) {
+            switch (object_switches[key->trigger_second]) {
+                case 0:
+                    key->field_184 = 0;
+                    break;
+                case 1:
+                    key->field_184 = 1;
+                    break;
+                case 3:
+                    last_switch_change = (last_switch_change + 1) & 31;
+                    switch_changes[last_switch_change][0] = key->trigger_second;
+                    switch_changes[last_switch_change][1] = 0;
+                    break;
+                case 2:
+                    last_switch_change = (last_switch_change + 1) & 31;
+                    key->field_184 = 2;
+                    switch_changes[last_switch_change][0] = key->trigger_second;
+                    switch_changes[last_switch_change][1] = 3;
+                    goto restart_emission;
+                case 4: {
+                    last_switch_change = (last_switch_change + 1) & 31;
+                    key->field_184 = 2;
+                    switch_changes[last_switch_change][0] = key->trigger_second;
+                    switch_changes[last_switch_change][1] = 0;
+                restart_emission:
+                    DebrisStartOffsetEx(key, 0.0f);
+                    f32 shift = key->emission_time - globaltime;
+                    key->field_1d8 = 0;
+                    key->emission_epoch = globaltime;
+                    key->emission_time -= shift;
+                    key->field_1e4 -= shift;
+                    if (key->process_collision_sound != 0) {
+                        key->cutoff_distance = CameraEmitterDistance(&key->position);
+                        f32 range = effect->sound_range_override;
+                        if (range == 0.0f)
+                            range = effect->sound_range;
+                        if (range == 0.0f)
+                            range = effect->clip_extent;
+                        f32 volume = 0.0f;
+                        if (range > key->cutoff_distance) {
+                            if (effect->sound_data[0] != -1)
+                                SetSfxBit_On(effect->sound_data[0]);
+                            if (effect->sound_data[3] != -1)
+                                SetSfxBit_On(effect->sound_data[3]);
+                            if (effect->sound_data[6] != -1)
+                                SetSfxBit_On(effect->sound_data[6]);
+                            if (effect->sound_data[9] != -1)
+                                SetSfxBit_On(effect->sound_data[9]);
+                            volume = (range - key->cutoff_distance) / range;
+                        }
+                        if (range > key->cutoff_distance) {
+                            if (effect->sound_data[0] != -1 && effect->sound_data[1] == 1)
+                                PlaySfxByIdEx(effect->sound_data[0], &key->position, volume, 1.0f);
+                            if (effect->sound_data[3] != -1 && effect->sound_data[4] == 1)
+                                PlaySfxByIdEx(effect->sound_data[3], &key->position, volume, 1.0f);
+                            if (effect->sound_data[6] != -1 && effect->sound_data[7] == 1)
+                                PlaySfxByIdEx(effect->sound_data[6], &key->position, volume, 1.0f);
+                            if (effect->sound_data[9] != -1 && effect->sound_data[10] == 1)
+                                PlaySfxByIdEx(effect->sound_data[9], &key->position, volume, 1.0f);
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+        key = next;
+    }
+    for (i32 i = 0; i <= last_switch_change; ++i)
+        object_switches[switch_changes[i][0]] = switch_changes[i][1];
+}
+
+extern "C" {
+    static i32 debris_rt;
+    static i32 debris_initialised;
+    static NUMTL *debris_copy_mtl;
+    static f32 debrisu1;
+    static f32 debrisv1;
+    static i32 DebrisCutSceneMode;
+    i32 g_renderingDebris;
+
+    void DebrisDraw(i32, i32 pass) {
+        if (debris_suspended != 0)
+            return;
+        _NuTimeBarSlotBegin(0, 12, "deb");
+        DebMat[7]->tex_id = static_cast<i16>(debris_rt);
+        i32 drawn = 0;
+        for (particlechunkrendertype_s *chunk = ParticleChunkRenderStack[pass]; chunk != NULL; chunk = chunk->next) {
+            if (chunk->particle_chunk == NULL)
+                continue;
+            debinftype *effect = chunk->effect;
+            debkeydatatype_s *key = chunk->key;
+            if (DebrisCutSceneMode != 0 && effect->cutscene_only != 0)
+                continue;
+            if (DebrisSuspendDrawObjectSwitch != -1 && key != NULL &&
+                key->trigger_second == DebrisSuspendDrawObjectSwitch)
+                continue;
+            if (effect->native_data == NULL) {
+                if (freeDmaDebType == EDPP_MAX_DMADEBTYPES)
+                    DebrisFreeOldestDmaDebTypeTable();
+                GenericDebinfoDmaTypeUpdate(effect);
+                if (effect->native_data == NULL)
+                    continue;
+            }
+            NUMTX matrix;
+            NUVEC position;
+            if (key != NULL) {
+                bool assigned = (effect->particle_keys[0] != -1 && &debkeydata[effect->particle_keys[0]] == key) ||
+                                (effect->particle_keys[1] != -1 && &debkeydata[effect->particle_keys[1]] == key) ||
+                                (effect->particle_keys[2] != -1 && &debkeydata[effect->particle_keys[2]] == key) ||
+                                (effect->particle_keys[3] != -1 && &debkeydata[effect->particle_keys[3]] == key) ||
+                                (effect->particle_keys[4] != -1 && &debkeydata[effect->particle_keys[4]] == key) ||
+                                (effect->particle_keys[5] != -1 && &debkeydata[effect->particle_keys[5]] == key) ||
+                                (effect->particle_keys[6] != -1 && &debkeydata[effect->particle_keys[6]] == key) ||
+                                (effect->particle_keys[7] != -1 && &debkeydata[effect->particle_keys[7]] == key);
+                bool visible = true;
+                if (!assigned && effect->sound_range > 0.0f && effect->use_explicit_clip_box == 0 &&
+                    key->cutoff_distance > effect->sound_range)
+                    visible = false;
+                if (key->field_2f7 == 0)
+                    continue;
+                if (visible && pass != 4 && effect->generator_type == 0 && effect->use_explicit_clip_box == 0 &&
+                    !assigned) {
+                    if (key->clip_radius == 0.0f || *edbits_editor_enabled != 0)
+                        DebrisDrawCalculateClipBoxes(effect, key);
+                    if (edbits_editmode == 0 && key->gscene != NULL && key->field_2f2 != -1)
+                        visible = NuPortalClipTest(key->gscene, &key->position, key->clip_radius, key->field_2f2) != 0;
+                    NUVEC minimum = key->clip_min;
+                    NUVEC maximum = key->clip_max;
+                    if (NuCameraClipTestExtents(&minimum, &maximum, &key->clip_matrix, 0.0f, 0) == 0)
+                        continue;
+                }
+                if (!visible)
+                    continue;
+                matrix = key->effect_orientation;
+                position = key->position;
+            } else {
+                if (effect->sound_range > 0.0f && effect->use_explicit_clip_box == 0 &&
+                    CameraEmitterDistance(&chunk->position) > effect->sound_range)
+                    continue;
+                matrix = chunk->effect_orientation;
+                position = chunk->position;
+            }
+            NuMtxTranslate(&matrix, &position);
+            f32 render_time;
+            if (pass == 4) {
+                NuMtxMulVU0(&matrix, &matrix, NuCameraGetMtx());
+                render_time = renderpanelglobaltime;
+                effect->last_render_time = panelglobaltime;
+            } else {
+                render_time = renderglobaltime;
+                effect->last_render_time = globaltime;
+            }
+            if (key != NULL && key->field_2fa != 0)
+                NuRndrSetParticleRotation(&key->particle_orientation);
+            else if (effect->camera_facing != 0)
+                NuRndrSetParticleRotation(&xzfacingmtx);
+            else
+                NuRndrSetParticleRotation(NULL);
+            NuMtxPreScaleX(&matrix, 1.0f);
+            i32 mode;
+            if (effect->particle_type == 7)
+                mode = 4;
+            else if (effect->use_explicit_clip_box != 0) {
+                NuRndrSetDebBox(reinterpret_cast<NUVEC *>(effect->fields_2f8));
+                mode = 6;
+            } else
+                mode = 0;
+            NuRndrParticleGroup(reinterpret_cast<uv1debdata *>(chunk->particle_chunk), chunk->effect->native_data,
+                                DebMat[static_cast<i8>(chunk->effect->particle_type)], render_time, &matrix, mode,
+                                effect->field_140, effect->field_144, effect->clip_extent, effect->field_044);
+            drawn = 1;
+        }
+        if (drawn != 0)
+            g_renderingDebris = g_renderingDebris == 0;
+        _NuTimeBarSlotEnd(0, 12);
+    }
+
+    i32 DebrisGlassParticlesActive(void) {
+        return freedebchkptrg > 0;
+    }
+
+    void DebrisGlassClose(void) {
+        if (debris_initialised != 0) {
+            if (debris_copy_mtl != NULL) {
+                NuMtlDestroy(debris_copy_mtl);
+                debris_copy_mtl = NULL;
+            }
+            if (debris_rt != 0) {
+                NuTexDestroy(debris_rt);
+                debris_rt = 0;
+            }
+            debris_initialised = 0;
+        }
+    }
+
+    void DebrisGlassInit(void) {
+        if (debris_initialised != 0)
+            return;
+        if (debris_rt == 0) {
+            NUTEX texture = {NUTEX_RTT24, PS2_REZ_W, PS2_REZ_H};
+            debris_rt = NuTexCreate(&texture);
+        }
+        i32 texture_width = NuPower2(PS2_REZ_W);
+        debrisu1 = (static_cast<f32>(PS2_REZ_W) - 1.0f) / static_cast<f32>(texture_width);
+        i32 texture_height = NuPower2(PS2_REZ_H);
+        debrisv1 = (static_cast<f32>(PS2_REZ_H) - 1.0f) / static_cast<f32>(texture_height);
+        if (debris_copy_mtl == NULL) {
+            NUMTL *material = NuMtlCreateEx(1, 14);
+            material->diffuse_color = {1.0f, 1.0f, 1.0f};
+            material->opacity = 0.999f;
+            debris_copy_mtl = material;
+            material->tex_id = -1;
+            material->attribs.unknown_1_1_2 = 1;
+            material->attribs.unknown_1_4_8 = 1;
+            material->attribs.cull_mode = 2;
+            material->attribs.z_mode = 3;
+            material->attribs.alpha_mode = 0;
+            material->attribs.filter_mode = 0;
+            material->attribs.unknown_2_1_2 = 2;
+            material->attribs.unknown_2_4 = 1;
+            NuMtlUpdate(material);
+        }
+        debris_initialised = 1;
+    }
+
+    void DebrisDrawGlassEx(i32 flicker) {
+        if (debris_initialised == 0)
+            return;
+        i32 reserved = NuTexReserve(NuTexGetReqSize(debris_rt, 0));
+        DebrisGlassParticlesActive();
+        if (flicker == 0)
+            NuRndrBeginSceneEx(-1, -2, 1);
+        else
+            NuRndrFlickerBeginScene();
+        if (DebrisGlassParticlesActive() != 0)
+            DebrisDraw(0, 2);
+        NuRainDraw(reserved);
+        if (flicker != 0)
+            NuRndrFlickerEnd();
+        NuRndrEndScene();
+        NuTexUnReserve();
+    }
+
+    void DebrisDrawGlass(void) {
+        DebrisDrawGlassEx(0);
+    }
+
+    void DebrisSetSeed(i32 seed) {
+        debrisseed = static_cast<u32>(seed);
+    }
+
+    void DebrisGetSeed(void) {
+        STUBBED();
+    }
+
+    void DebrisSetCutSceneMode(i32 enabled) {
+        DebrisCutSceneMode = enabled;
+    }
+
+    void DebrisSetThinningLevel(f32 level) {
+        debris_thinning_level = level < 1.0f ? 1.0f : level;
+    }
+
+    void DebrisSetDetailLevel(i32 level) {
+        debris_detail_level = level;
+    }
+
+    void DebrisSetForcedThinning(i32 forced) {
+        forced_debris_thinning = forced;
+    }
+}

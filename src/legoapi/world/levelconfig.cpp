@@ -1,12 +1,11 @@
 #include "decomp.h"
 #include "nu2api/nufile/nufpar.h"
 #include "legoapi/world/level.h"
+#include "legoapi/audio/audio.h"
 #include "nu2api/nuandroid/ios_graphics.h"
 #include "nu2api/numusic/sfx.h"
 #include "nu2api/numusic/numusic.h"
 #include "globals.h"
-
-extern i16 GetMusicIndex(char *, nusound_filename_info_s *, i32);
 
 static __used__ void LC_AL_backb(nufpar_s *fp) {
     u8 v = (u8)NuFParGetInt(fp);

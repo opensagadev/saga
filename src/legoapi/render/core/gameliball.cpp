@@ -1,4 +1,5 @@
 #include "decomp.h"
+#include "legoapi/render/core/gameliball.h"
 #include "legoapi/legoapi_types.h"
 #include "nu2api/nufile/nufile.h"
 #include "nu2api/nu3d/nutex.h"
@@ -10,7 +11,7 @@ struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
-u8 *crashdata;
+static u8 *crashdata;
 
 namespace {
 
@@ -141,7 +142,12 @@ i32 ReadTerrain(unsigned char *base_path, i32 first_group, i16 **buffer, TERRSET
     return group_count;
 }
 
+extern "C" void CrashDataPtr(void) {
+    STUBBED();
+}
+
 void ReadInstanceIDs(i32, nugscn_s *) {
+    STUBBED();
 }
 
 i32 ReadTerrainPickup(unsigned char *base_path, i16 **buffer, TERRPICKUPSET *terrain) {

@@ -149,6 +149,14 @@ static void __used__ _saga_log(enum log_level level, const char *file, i32 line,
         }                                                                                                              \
     } while (0)
 
+#define LOG_WARN_ONCE(...)                                                                                             \
+    do {                                                                                                               \
+        static i32 saga_logged_once = 0;                                                                               \
+        if (__atomic_exchange_n(&saga_logged_once, 1, __ATOMIC_RELAXED) == 0) {                                        \
+            LOG_WARN(__VA_ARGS__);                                                                                     \
+        }                                                                                                              \
+    } while (0)
+#define STUBBED() LOG_WARN_ONCE("STUBBED: %s", __func__)
 #define UNIMPLEMENTED(...) LOG_ERR("UNIMPLEMENTED: %s", #__VA_ARGS__)
 
 #else
@@ -171,5 +179,7 @@ static void __used__ _saga_log(enum log_level level, const char *file, i32 line,
 #define LOG_INFO(...)
 #define LOG_DEBUG(...)
 #define LOG_INFO_IF(condition, ...)
+#define LOG_WARN_ONCE(...)
+#define STUBBED()
 
 #endif

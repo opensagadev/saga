@@ -1,4 +1,5 @@
 
+#include "decomp.h"
 #include "nu2api/numath/nuvec.h"
 #include "nu2api/numath/numtx.h"
 #include "nu2api/numath/nuvec4.h"
@@ -468,50 +469,6 @@ extern "C" {
         return shift;
     }
 
-    void NuMtxInvVU0(NUMTX *out, NUMTX *in) {
-        f32 x = -in->m30;
-        f32 y = -in->m31;
-        f32 z = -in->m32;
-        f32 temp = in->m01;
-        out->m01 = in->m10;
-        out->m10 = temp;
-        temp = in->m02;
-        out->m02 = in->m20;
-        out->m20 = temp;
-        temp = in->m12;
-        out->m12 = in->m21;
-        out->m21 = temp;
-        out->m00 = in->m00;
-        out->m11 = in->m11;
-        out->m22 = in->m22;
-        out->m30 = out->m00 * x + out->m10 * y + out->m20 * z;
-        out->m31 = out->m01 * x + out->m11 * y + out->m21 * z;
-        out->m32 = out->m02 * x + out->m12 * y + out->m22 * z;
-        out->m03 = out->m13 = out->m23 = 0.0f;
-        out->m33 = 1.0f;
-    }
-
-    void NuMtxMulArrayVU0(NUMTX *out, NUMTX *left, NUMTX *right, i32 count) {
-        for (i32 i = 0; i < count; ++i)
-            NuMtxMulH(&out[i], &left[i], &right[i]);
-    }
-
-    void NuMtxMulnVU0(NUMTX *out, NUMTX *left, NUMTX **right) {
-        NuMtxMul(out, left, *right);
-    }
-
-    void NuMtxPreScaleUVU0(NUMTX *matrix, f32 scale) {
-        matrix->m00 *= scale;
-        matrix->m01 *= scale;
-        matrix->m02 *= scale;
-        matrix->m10 *= scale;
-        matrix->m11 *= scale;
-        matrix->m12 *= scale;
-        matrix->m20 *= scale;
-        matrix->m21 *= scale;
-        matrix->m22 *= scale;
-    }
-
     NUVEC NuBezierQuadraticTrianglePartialsUU(NUVEC *control) {
         NUVEC result;
         NuVecScale(&result, &control[3], 2.0f);
@@ -539,10 +496,6 @@ extern "C" {
     f32 NuCeil(f32 value) {
         f32 lower = NuFloor(value);
         return lower != value ? lower + 1.0f : value;
-    }
-
-    f32 NuFrsqrt(f32 value) {
-        return value <= 0.0f ? 0.0f : 1.0f / sqrtf(value);
     }
 
     i32 NuMiscNextPow2(i32 value) {
@@ -638,93 +591,14 @@ extern "C" {
         else
             out->w = b->w;
     }
-    void NuVec4MtxInvRotVU0(NUVEC4 *out, NUVEC4 *v, NUMTX *m) {
-        f32 y = v->x * m->m10 + v->y * m->m11 + v->z * m->m12;
-        f32 z = v->x * m->m20 + v->y * m->m21 + v->z * m->m22;
-        f32 w = v->x * m->m30 + v->y * m->m31 + v->z * m->m32;
-        out->x = v->x * m->m00 + v->y * m->m01 + v->z * m->m02;
-        out->y = y;
-        out->z = z;
-        out->w = w;
-    }
-    void NuVec4MtxInvTransformVU0(NUVEC4 *out, NUVEC *v, NUMTX *matrix) {
-        NUMTX inverse;
-        NuMtxInv(&inverse, matrix);
-        NuVec4MtxTransform(out, v, &inverse);
-    }
-    void NuVec4MtxRotateVU0(NUVEC4 *out, NUVEC4 *v, NUMTX *m) {
-        f32 x = v->x * m->m00 + v->y * m->m10 + v->z * m->m20;
-        f32 y = v->x * m->m01 + v->y * m->m11 + v->z * m->m21;
-        f32 z = v->x * m->m02 + v->y * m->m12 + v->z * m->m22;
-        out->x = x;
-        out->y = y;
-        out->z = z;
-        out->w = v->w;
-    }
-    void NuVec4MtxTransformHVU0(NUVEC4 *out, NUVEC4 *v, NUMTX *matrix) {
-        NuVec4MtxTransformH(out, v, matrix);
-    }
-    void NuVec4MtxTransformVU0(NUVEC4 *out, NUVEC4 *in, NUMTX *matrix) {
-        f32 x = in->x * matrix->m00 + in->y * matrix->m10 + in->z * matrix->m20 + in->w * matrix->m30;
-        f32 y = in->x * matrix->m01 + in->y * matrix->m11 + in->z * matrix->m21 + in->w * matrix->m31;
-        f32 z = in->x * matrix->m02 + in->y * matrix->m12 + in->z * matrix->m22 + in->w * matrix->m32;
-        f32 w = in->x * matrix->m03 + in->y * matrix->m13 + in->z * matrix->m23 + in->w * matrix->m33;
-        out->x = x;
-        out->y = y;
-        out->z = z;
-        out->w = w;
-    }
-    void NuVec4MtxTransformVU0x2(NUVEC4 *out, NUVEC4 *v, NUMTX *m) {
-        for (i32 i = 0; i < 2; ++i) {
-            f32 x = v->x * m->m00 + v->y * m->m10 + v->z * m->m20 + v->w * m->m30;
-            f32 y = v->x * m->m01 + v->y * m->m11 + v->z * m->m21 + v->w * m->m31;
-            f32 z = v->x * m->m02 + v->y * m->m12 + v->z * m->m22 + v->w * m->m32;
-            f32 w = v->x * m->m03 + v->y * m->m13 + v->z * m->m23 + v->w * m->m33;
-            out->x = x;
-            out->y = y;
-            out->z = z;
-            out->w = w;
-            ++out;
-            ++v;
-        }
-    }
-    void NuVec4MtxTransformVU0x3(NUVEC4 *out, NUVEC4 *v, NUMTX *m) {
-        for (i32 i = 0; i < 3; ++i) {
-            f32 x = v->x * m->m00 + v->y * m->m10 + v->z * m->m20 + v->w * m->m30;
-            f32 y = v->x * m->m01 + v->y * m->m11 + v->z * m->m21 + v->w * m->m31;
-            f32 z = v->x * m->m02 + v->y * m->m12 + v->z * m->m22 + v->w * m->m32;
-            f32 w = v->x * m->m03 + v->y * m->m13 + v->z * m->m23 + v->w * m->m33;
-            out->x = x;
-            out->y = y;
-            out->z = z;
-            out->w = w;
-            ++out;
-            ++v;
-        }
-    }
-    void NuVec4MtxTransformVU0x4(NUVEC4 *out, NUVEC4 *v, NUMTX *m) {
-        for (i32 i = 0; i < 4; ++i) {
-            f32 x = v->x * m->m00 + v->y * m->m10 + v->z * m->m20 + v->w * m->m30;
-            f32 y = v->x * m->m01 + v->y * m->m11 + v->z * m->m21 + v->w * m->m31;
-            f32 z = v->x * m->m02 + v->y * m->m12 + v->z * m->m22 + v->w * m->m32;
-            f32 w = v->x * m->m03 + v->y * m->m13 + v->z * m->m23 + v->w * m->m33;
-            out->x = x;
-            out->y = y;
-            out->z = z;
-            out->w = w;
-            ++out;
-            ++v;
-        }
-    }
+
     void NuVec4ScaleAccum(NUVEC4 *out, NUVEC4 *v, f32 scale) {
         out->x += v->x * scale;
         out->y += v->y * scale;
         out->z += v->z * scale;
         out->w += v->w * scale;
     }
-    void NuVec4ScaleXYZVU0(NUVEC4 *out, NUVEC4 *v, f32 scale) {
-        NuVec4Scale(out, v, scale);
-    }
+
     void NuVec4Sub(NUVEC4 *out, NUVEC4 *a, NUVEC4 *b) {
         out->x = a->x - b->x;
         out->y = a->y - b->y;
@@ -737,22 +611,7 @@ extern "C" {
         out->z = NuFloatToHalf(v->z);
         out->w = NuFloatToHalf(v->w);
     }
-    void NuVecConvertToIntVU0(void) {
-    }
-    f32 NuVecDiffSqrVU0(NUVEC *a, NUVEC *b) {
-        f32 x = a->x - b->x;
-        f32 y = a->y - b->y;
-        f32 z = a->z - b->z;
-        f32 squared = x * x + y * y + z * z;
-        return squared;
-    }
-    f32 NuVecDiffVU0(NUVEC *a, NUVEC *b) {
-        f32 x = a->x - b->x;
-        f32 y = a->y - b->y;
-        f32 z = a->z - b->z;
-        f32 squared = x * x + y * y + z * z;
-        return NuFsqrt(squared);
-    }
+
     // The reference ignores the scalar argument and rereads the destination
     // axis after each store. Preserve that sequential behavior.
     void NuVecInvMtxRotateValX(NUVEC *out, f32, NUMTX *matrix) {
@@ -775,23 +634,13 @@ extern "C" {
         out->y = v->y / matrix->m11;
         out->z = v->z / matrix->m22;
     }
-    void NuVecInvMtxTransformVU0(NUVEC *out, NUVEC *v, NUMTX *m) {
-        f32 x = v->x - m->m30;
-        f32 y = v->y - m->m31;
-        f32 z = v->z - m->m32;
-        out->x = m->m00 * x + m->m01 * y + m->m02 * z;
-        out->y = m->m10 * x + m->m11 * y + m->m12 * z;
-        out->z = m->m20 * x + m->m21 * y + m->m22 * z;
-    }
+
     void NuVecInvMtxTranslate(NUVEC *out, NUVEC *v, NUMTX *matrix) {
         out->x = v->x - matrix->m30;
         out->y = v->y - matrix->m31;
         out->z = v->z - matrix->m32;
     }
-    f32 NuVecMagVU0(NUVEC *v) {
-        f32 magnitude = NuFsqrt(v->x * v->x + v->y * v->y + v->z * v->z);
-        return magnitude;
-    }
+
     void NuVecMtxRotateH(NUVEC *out, NUVEC *v, NUMTX *m) {
         f32 reciprocal_w = 1.0f / (v->x * m->m03 + v->y * m->m13 + v->z * m->m23);
         f32 y = (v->x * m->m01 + v->y * m->m11 + v->z * m->m21) * reciprocal_w;
@@ -815,26 +664,6 @@ extern "C" {
         out->y = matrix->m21 * value;
         out->z = matrix->m22 * value;
     }
-    void NuVecMtxTransformVU0(NUVEC *out, NUVEC *input, NUMTX *matrix) {
-        NuVecMtxTransform(out, input, matrix);
-    }
-    f32 NuVecNormVU0(NUVEC *out, NUVEC *v) {
-        f32 magnitude = NuFsqrt(v->x * v->x + v->y * v->y + v->z * v->z);
-        NUVEC normalized;
-        if (magnitude != 0.0f) {
-            normalized.x = v->x / magnitude;
-            normalized.y = v->y / magnitude;
-            normalized.z = v->z / magnitude;
-        } else {
-            normalized.x = 0.0f;
-            normalized.y = 0.0f;
-            normalized.z = 0.0f;
-        }
-        out->x = normalized.x;
-        out->y = normalized.y;
-        out->z = normalized.z;
-        return magnitude;
-    }
     void NuVecRotateYValX(NUVEC *out, f32 value, NUANG angle) {
         f32 cosine = NuTrigTable[((angle + 0x4000) >> 1) & 0x7fff];
         f32 sine = NuTrigTable[(angle >> 1) & 0x7fff];
@@ -842,12 +671,4 @@ extern "C" {
         out->y = 0.0f;
         out->z = -value * sine;
     }
-}
-
-u32 NuVecToRGBA(NUVEC *v, f32 alpha) {
-    u32 red = (v->x + 1.0f) * 127.5f;
-    u32 green = (v->y + 1.0f) * 127.5f;
-    u32 blue = (v->z + 1.0f) * 127.5f;
-    u32 opacity = alpha * 255.0f;
-    return (opacity << 24) + (red << 16) + (green << 8) + blue;
 }

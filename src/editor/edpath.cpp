@@ -1,5 +1,6 @@
 #include "decomp.h"
 #include "editor/edpath.h"
+#include "editor/path_connections.h"
 #include <string.h>
 #include <stdio.h>
 
@@ -17,10 +18,6 @@ extern "C" {
     extern f32 default_path_heighttol;
     void creatureEditor_PathNodeMoved(EDAIPATHNODE_s *);
     void locatorEditor_PathNodeMoved(EDAIPATHNODE_s *);
-    eduiitem_s *eduiItemSelCreate(i32, const void *, i32, i32, void (*)(eduimenu_s *, eduiitem_s *, u32), char *);
-    eduiitem_s *eduiItemToggleCreate(i32, const void *, i32, i32, void (*)(eduimenu_s *, eduiitem_s *, u32), char *);
-    eduiitem_s *eduiItemTextPickCreate(i32, const void *, void (*)(eduimenu_s *, eduiitem_s *, u32), char *);
-    eduiitem_s *eduiItemCheckCreate(i32, const void *, i32, i32, void (*)(eduimenu_s *, eduiitem_s *, u32), char *);
     void aieditor_cbCancelMainMenu(eduimenu_s *, eduimenu_s *);
     void aieditor_cvSelectEditorMode(eduimenu_s *, eduiitem_s *, u32);
     void aieditor_cbSave(eduimenu_s *, eduiitem_s *, u32);
@@ -36,13 +33,47 @@ extern "C" {
     f32 default_path_node_radius = .25f;
     extern char *(*SpecialRouteCharacterNameFn)(u8);
 }
-struct AIPATHCNXTYPE {
+struct AIPATHCNXTYPE_s {
+    u32 connection_flag;
+    void *context;
+    char name[0x40];
     u32 flags;
-    u32 unknown_4;
-    char name[0x44];
 };
-static AIPATHCNXTYPE aipathcnxtypes[32];
+DECOMP_ASSERT(sizeof(AIPATHCNXTYPE_s) == 0x4c, "editor path connection type size");
+DECOMP_ASSERT(offsetof(AIPATHCNXTYPE_s, flags) == 0x48, "editor path connection options offset");
+static AIPATHCNXTYPE_s aipathcnxtypes[32];
 static i32 naipathcnxtypes;
+
+extern "C" void aieditor_ClearAllPathCnxTypes(void) {
+    naipathcnxtypes = 0;
+    memset(aipathcnxtypes, 0, sizeof(aipathcnxtypes));
+}
+
+extern "C" void aieditor_RegisterDefaultPathCnxTypes(void) {
+    aieditor_RegisterPathCnxType("Permanent Block", 0x40000000, nullptr, 0);
+    aieditor_RegisterPathCnxType("Temporary Block", 0x80000000, nullptr, 0);
+    aieditor_RegisterPathCnxType("Link Obstacle", 0x20000000, nullptr, 1);
+}
+
+extern "C" void aieditor_RegisterPathCnxType(const char *name, u32 connection_flag, void *context, u32 flags) {
+    if (name == nullptr) {
+        return;
+    }
+    usize length = strlen(name);
+    if (length > 63 || connection_flag == 0 || naipathcnxtypes >= 32) {
+        return;
+    }
+    AIPATHCNXTYPE_s &type = aipathcnxtypes[naipathcnxtypes++];
+    memcpy(type.name, name, length + 1);
+    type.connection_flag = connection_flag;
+    type.context = context;
+    type.flags = flags;
+}
+
+void pathEditorDrawConnectionInfo(nuvec_s *, float, nuvec_s *, u32, i32) {
+    STUBBED();
+}
+
 static u32 attr[4] = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
 static void DestroyAIPathNode(EDAIPATHNODE_s *, EDAIPATH_s *);
 extern "C" void aieditor_ClearMainMenu(void);
@@ -63,14 +94,12 @@ struct EdUiNameInputItem : eduiitem_s {
 DECOMP_ASSERT(offsetof(EdUiNameInputItem, name) == 0x4c, "editor name input offset");
 DECOMP_ASSERT(offsetof(EdUiNameInputItem, max_name_length) == 0x15a, "editor name input limit offset");
 
-
-static __used__ void ParseAIPathCnxFlag(char *) {
-}
-
 static __used__ void pathEditorDrawPath(EDAIPATH_s *, i32) {
+    STUBBED();
 }
 
 static __used__ void TestPointPathCheck(nuvec_s *, EDAIPATHNODE_s *, EDAIPATHNODE_s *, f32 *, f32 *, i32 *, f32) {
+    STUBBED();
 }
 
 static __used__ void pathEditor_cbCreatePath(eduimenu_s *, eduiitem_s *, u32) {
@@ -97,6 +126,7 @@ static __used__ void pathEditor_cbCreatePath(eduimenu_s *, eduiitem_s *, u32) {
 }
 
 static __used__ void pathEditor_cbDeletePath(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 
 static __used__ void pathEditor_cbRenameNode(eduimenu_s *, eduiitem_s *item, u32) {
@@ -140,6 +170,7 @@ static __used__ void pathEditor_cbCancelRenameNodeMenu(eduimenu_s *, eduimenu_s 
 static __used__ void pathEditor_cbCancelSelectMenu(eduimenu_s *, eduimenu_s *);
 static __used__ void pathEditor_cbSetCurrentPath(eduimenu_s *, eduiitem_s *, u32);
 static __used__ void pathEditor_cbSetShareNode(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 
 static __used__ void pathEditor_cbShareNodeMenu(eduimenu_s *parent, eduiitem_s *, u32) {
@@ -182,12 +213,15 @@ static __used__ void pathEditor_cbShareNodeMenu(eduimenu_s *parent, eduiitem_s *
 }
 
 static __used__ void pathEditorCalcRouteIterator(AIPATH_s *, f32 *, u8 *, i32, i32, f32, i32) {
+    STUBBED();
 }
 
 static __used__ void pathEditor_cbCnxFlagsToggle(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 
 static __used__ void pathEditor_cbDeletePathNode(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 
 static __used__ void pathEditor_cbRenameNodeMenu(eduimenu_s *parent, eduiitem_s *, u32) {
@@ -308,9 +342,11 @@ static __used__ void pathEditor_cbCancelSelectMenu(eduimenu_s *, eduimenu_s *men
 }
 
 static __used__ void pathEditor_cbDisconnectPathNode(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 
 static __used__ void pathEditorCalculateDistanceTable(AIPATH_s *, i32, variptr_u *, variptr_u *) {
+    STUBBED();
 }
 
 static __used__ void pathEditor_cbCancelDeleteAreaMenu(eduimenu_s *, eduimenu_s *) {
@@ -372,9 +408,11 @@ static __used__ void routeEditor_cbRouteUsers(eduimenu_s *parent, eduiitem_s *, 
 }
 
 static __used__ void routeEditor_cbCreateRoute(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 
 static __used__ void routeEditor_cbDeleteRoute(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 
 static __used__ void routeEditor_cbRenameRoute(eduimenu_s *, eduiitem_s *item, u32) {
@@ -444,6 +482,7 @@ static __used__ void routeEditor_cbCancelRenameRouteMenu(eduimenu_s *, eduimenu_
 extern "C" {
 
     void pathEditorCreateData(void) {
+        STUBBED();
     }
 
     void pathEditorDrawPaths(void) {
@@ -477,6 +516,7 @@ extern "C" {
     }
 
     void pathEditorSaveData(void) {
+        STUBBED();
     }
 
     void pathEditor_CalcNodeIXs(void) {
@@ -504,9 +544,11 @@ extern "C" {
     }
 
     void pathEditor_OnPathCheck(void) {
+        STUBBED();
     }
 
     void pathEditor_QuickOnPathCheck(void) {
+        STUBBED();
     }
 
     void pathEditor_UpdateNodesOnPlatforms(void) {
@@ -526,9 +568,11 @@ extern "C" {
 } // extern "C"
 
 void pathEditor_Enter(void) {
+    STUBBED();
 }
 
 void pathEditor_Render(i32, i32, float, float) {
+    STUBBED();
 }
 
 static EDAIPATHNODE_s *pathEditor_GetNearestNode(EDAIPATH_s *path, i32 require_radius) {
@@ -682,9 +726,9 @@ eduimenu_s *pathEditor_Process(nupad_s *pad) {
             if (connection && naipathcnxtypes != 0) {
                 eduiMenuAddItem(menu, eduiItemSelCreate(1, attr, 0, 0, NULL, "================="));
                 for (i32 i = 0; i < naipathcnxtypes; ++i) {
-                    eduiMenuAddItem(menu,
-                                    eduiItemToggleCreate(i, attr, (connection->flags & aipathcnxtypes[i].flags) != 0,
-                                                         i + 2, pathEditor_cbCnxFlagsToggle, aipathcnxtypes[i].name));
+                    eduiMenuAddItem(menu, eduiItemToggleCreate(
+                                              i, attr, (connection->flags & aipathcnxtypes[i].connection_flag) != 0,
+                                              i + 2, pathEditor_cbCnxFlagsToggle, aipathcnxtypes[i].name));
                     row = i + 3;
                 }
                 eduiMenuAddItem(menu, eduiItemSelCreate(1, attr, 0, 0, NULL, "================="));

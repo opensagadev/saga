@@ -38,6 +38,11 @@ struct AIPATHNODE_s;
 struct AISCRIPTPROCESS_s;
 struct APIOBJECT_s;
 
+extern "C" void (*APIObjResetShadowMapRenderingFn)(void);
+extern "C" void (*APIObjEnableShadowMapRenderingFn)(void);
+extern "C" void (*APIObjPlaySfxByIdFn)(i32, NUVEC *);
+extern "C" void SetAPIObjPlaySfxByIdFn(void (*play_sfx)(i32, NUVEC *));
+
 enum CHARACTER_CONTEXT : i8 {
     CHARACTER_CONTEXT_JUMP = 0,
     CHARACTER_CONTEXT_LAND_JUMP = 1,
@@ -651,6 +656,8 @@ extern "C" void APIObjectCollisions(i32 count, APIOBJECT **objects, NUVEC *minim
                                     i32 (*collide)(APIOBJECT *, APIOBJECT *));
 extern "C" i32 APIObjectCollision(APIOBJECT *first, APIOBJECT *second);
 extern "C" i32 APIObjectCollision2D(APIOBJECT *first, APIOBJECT *second);
+extern "C" i32 InModelList(APICHARACTERMODELLIST_s *list, i32 id, i32 *out_index);
+extern "C" void APIDumpCharacterModels(i32 mode);
 
 struct APIOBJECTSYS_s {
     u32 object_size;

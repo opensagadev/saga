@@ -4,12 +4,12 @@
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/gizmo/base/gizmo.h"
+#include "legoapi/gizmo/base/gizflow.h"
 #include "legoapi/core/config/cheat.h"
 #include "legoapi/legoapi_types.h"
 #include "nu2api/nucore/nuhgobj.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nu3d/nutex.h"
-#include "legoapi/gizmo/base/gizmo.h"
 #include "nu2api/nufile/nufpar.h"
 #include "legoapi/gizmos/trigger/giztimer.h"
 #include "legoapi/gizmos/trigger/gizrandom.h"
@@ -510,167 +510,6 @@ void *LoadGizFlow(void *, GIZMOSYS_s *system, char *path, VARIPTR *buffer, VARIP
     return flow;
 }
 
-struct AIROW_s;
-struct nuqthdr_s;
-struct nunativegscene_s;
-struct SHOPINPUT;
-
-extern "C" {
-    extern i16 id_BATMAN;
-    extern i16 id_ROBIN;
-    extern i16 id_BODYGUARD, id_GEONOSIAN, id_CHEWBACCA;
-}
-
-struct SPECIAL_LAYER_s {
-    i16 *character_id;
-    char *name;
-    u32 mask;
-};
-
-DECOMP_ASSERT(sizeof(SPECIAL_LAYER_s) == 0xc, "SPECIAL_LAYER_s size");
-
-static SPECIAL_LAYER_s SpecialLayer[] = {
-    {&id_BATMAN, "bombbackpack", 0},       {&id_BATMAN, "sonargun", 0},          {&id_BATMAN, "infrared_goggles", 0},
-    {&id_BATMAN, "mask_black", 0},         {&id_BATMAN, "mask_blue", 0},         {&id_BATMAN, "mask_red", 0},
-    {&id_BATMAN, "cape_black", 0},         {&id_BATMAN, "cape_blue", 0},         {&id_BATMAN, "body_grey_nextgen", 0},
-    {&id_BATMAN, "body_grey_high", 0},     {&id_BATMAN, "body_grey_low", 0},     {&id_BATMAN, "body_black_nextgen", 0},
-    {&id_BATMAN, "body_black_high", 0},    {&id_BATMAN, "body_black_low", 0},    {&id_BATMAN, "body_blue_nextgen", 0},
-    {&id_BATMAN, "body_blue_high", 0},     {&id_BATMAN, "body_blue_low", 0},     {&id_BATMAN, "face_hands_black", 0},
-    {&id_BATMAN, "face_hands_blue", 0},    {&id_BATMAN, "face_hands_red", 0},    {&id_BATMAN, "hips_black_nextgen", 0},
-    {&id_BATMAN, "hips_black_high", 0},    {&id_BATMAN, "hips_blue_nextgen", 0}, {&id_BATMAN, "hips_blue_high", 0},
-    {&id_BATMAN, "hips_red_nextgen", 0},   {&id_BATMAN, "hips_red_high", 0},     {&id_ROBIN, "magnetic_boots", 0},
-    {&id_ROBIN, "scuba_gear", 0},          {&id_ROBIN, "hack_pack", 0},          {&id_ROBIN, "vacuum_gun", 0},
-    {&id_ROBIN, "nextgen_limbs_green", 0}, {&id_ROBIN, "hires_limbs_green", 0},  {&id_ROBIN, "lowres_limbs_green", 0},
-    {&id_ROBIN, "nextgen_limbs_white", 0}, {&id_ROBIN, "hires_limbs_white", 0},  {&id_ROBIN, "lowres_limbs_white", 0},
-    {&id_ROBIN, "nextgen_limbs_grey", 0},  {&id_ROBIN, "hires_limbs_grey", 0},   {&id_ROBIN, "lowres_limbs_grey", 0},
-    {&id_ROBIN, "nextgen_limbs_blue", 0},  {&id_ROBIN, "hires_limbs_blue", 0},   {&id_ROBIN, "lowres_limbs_blue", 0},
-};
-
-// Shares the original translation-unit-local layer table with FixUpLayers.
-u32 AdjustLayerBits(u32 mask, GameObject_s *object) {
-    GAMECHARACTERDATA *data = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
-    u32 cape = data->cape_layer == -1 ? 0 : 1u << (static_cast<u32>(data->cape_layer) & 31);
-    u32 hair = data->hair_layer == -1 ? 0 : 1u << (static_cast<u32>(data->hair_layer) & 31);
-    if (object->field_0x108e != 0)
-        mask &= ~hair;
-    SUIT_s *suit = static_cast<SUIT_s *>(object->suit);
-    if (suit != NULL && object->id == id_BATMAN) {
-        if ((suit->flags & 4) != 0) {
-            mask = (mask & ~cape) | SpecialLayer[0].mask;
-            mask = (mask & ~SpecialLayer[3].mask) | SpecialLayer[5].mask;
-            if ((mask & SpecialLayer[20].mask) != 0)
-                mask = (mask & ~SpecialLayer[20].mask) | SpecialLayer[24].mask;
-            else if ((mask & SpecialLayer[21].mask) != 0)
-                mask = (mask & ~SpecialLayer[21].mask) | SpecialLayer[25].mask;
-            mask = (mask & ~SpecialLayer[17].mask) | SpecialLayer[19].mask;
-        } else if ((suit->flags & 2) != 0) {
-            mask &= ~cape;
-        } else if ((suit->flags & 8) != 0) {
-            mask = (mask & ~cape) | SpecialLayer[1].mask | SpecialLayer[7].mask;
-            mask = (mask & ~SpecialLayer[3].mask) | SpecialLayer[4].mask;
-            if ((mask & SpecialLayer[20].mask) != 0)
-                mask = (mask & ~SpecialLayer[20].mask) | SpecialLayer[22].mask;
-            else if ((mask & SpecialLayer[21].mask) != 0)
-                mask = (mask & ~SpecialLayer[21].mask) | SpecialLayer[23].mask;
-            mask = (mask & ~SpecialLayer[17].mask) | SpecialLayer[18].mask;
-            if ((mask & SpecialLayer[8].mask) != 0)
-                mask = (mask & ~SpecialLayer[8].mask) | SpecialLayer[14].mask;
-            else if ((mask & SpecialLayer[9].mask) != 0)
-                mask = (mask & ~SpecialLayer[9].mask) | SpecialLayer[15].mask;
-            else if ((mask & SpecialLayer[10].mask) != 0)
-                mask = (mask & ~SpecialLayer[10].mask) | SpecialLayer[16].mask;
-        } else if ((suit->flags & 1) != 0) {
-            mask |= SpecialLayer[2].mask;
-            if ((mask & SpecialLayer[8].mask) != 0)
-                mask = (mask & ~SpecialLayer[8].mask) | SpecialLayer[11].mask;
-            else if ((mask & SpecialLayer[9].mask) != 0)
-                mask = (mask & ~SpecialLayer[9].mask) | SpecialLayer[12].mask;
-            else if ((mask & SpecialLayer[10].mask) != 0)
-                mask = (mask & ~SpecialLayer[10].mask) | SpecialLayer[13].mask;
-        }
-    } else if (suit != NULL && object->id == id_ROBIN) {
-        if ((suit->flags & 0x10) != 0) {
-            mask = (mask & ~(hair | cape)) | SpecialLayer[27].mask;
-            if ((mask & SpecialLayer[30].mask) != 0)
-                mask = (mask & ~SpecialLayer[30].mask) | SpecialLayer[39].mask;
-            else if ((mask & SpecialLayer[31].mask) != 0)
-                mask = (mask & ~SpecialLayer[31].mask) | SpecialLayer[40].mask;
-            else if ((mask & SpecialLayer[32].mask) != 0)
-                mask = (mask & ~SpecialLayer[32].mask) | SpecialLayer[41].mask;
-        } else if ((suit->flags & 0x40) != 0) {
-            mask = (mask & ~cape) | SpecialLayer[26].mask;
-            if ((mask & SpecialLayer[30].mask) != 0)
-                mask = (mask & ~SpecialLayer[30].mask) | SpecialLayer[36].mask;
-            else if ((mask & SpecialLayer[31].mask) != 0)
-                mask = (mask & ~SpecialLayer[31].mask) | SpecialLayer[37].mask;
-            else if ((mask & SpecialLayer[32].mask) != 0)
-                mask = (mask & ~SpecialLayer[32].mask) | SpecialLayer[38].mask;
-        } else if ((suit->flags & 0x20) != 0) {
-            mask = (mask & ~cape) | SpecialLayer[28].mask;
-            if ((mask & SpecialLayer[30].mask) != 0)
-                mask = (mask & ~SpecialLayer[30].mask) | SpecialLayer[33].mask;
-            else if ((mask & SpecialLayer[31].mask) != 0)
-                mask = (mask & ~SpecialLayer[31].mask) | SpecialLayer[34].mask;
-            else if ((mask & SpecialLayer[32].mask) != 0)
-                mask = (mask & ~SpecialLayer[32].mask) | SpecialLayer[35].mask;
-        } else if ((suit->flags & 0x80) != 0) {
-            mask = (mask & ~cape) | SpecialLayer[29].mask;
-        }
-    }
-    if (object->id == id_BODYGUARD) {
-        if (object->current_hp <= 1)
-            mask &= ~0x10u;
-    } else if (object->id == id_GEONOSIAN) {
-        mask |= (object->field_0xefd & 2) != 0 ? 0x20 : 0x40;
-    } else if (CharacterCustomiser != NULL && object->id == CharacterCustomiser->character_ids[0]) {
-        if ((CharacterCustomiser->pieces[static_cast<u16>(Game.customizer.pieces[5])].layer_flags & 0x40) == 0)
-            mask |= cape;
-    } else if (CharacterCustomiser != NULL && object->id == CharacterCustomiser->character_ids[1]) {
-        if ((CharacterCustomiser->pieces[static_cast<u16>(Game.customizer.secondary_pieces[5])].layer_flags & 0x40) ==
-            0)
-            mask |= cape;
-    } else if (object->id == id_CHEWBACCA) {
-        if (Cheat_IsOn(4) != 0)
-            mask |= 0xc0;
-        data = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
-    }
-    if (data->ride_layers_off != 0 && object->field_0xcc0 != NULL && object->field_0x7a5 == 0x3b)
-        mask &= ~data->ride_layers_off;
-    return mask;
-}
-
-i32 LayerFromName(GAMECHARACTERDATA_s *character, char *name);
-
-void FixUpLayers() {
-    for (i32 model_index = 0; model_index < apicharsys->loaded_model_count; ++model_index) {
-        CHARACTERMODEL_s *model = &apicharsys->models[model_index];
-        GAMECHARACTERDATA_s *character = &GCDataList[model->model_id];
-
-        for (i32 layer_index = 0; layer_index < character->layer_count; ++layer_index) {
-            GAMECHARACTERLAYER_s *layer = &character->layers[layer_index];
-            layer->hierarchy_layer_index = NuHGobjGetLayerIndex(layer->name, model->hierarchy);
-        }
-    }
-
-    SPECIAL_LAYER_s *layer = SpecialLayer;
-    SPECIAL_LAYER_s *layer_end = SpecialLayer + sizeof(SpecialLayer) / sizeof(SpecialLayer[0]);
-    for (; layer != layer_end; ++layer) {
-        layer->mask = 0;
-        if (layer->character_id != NULL && *layer->character_id != -1) {
-            layer->mask = 1 << LayerFromName(&GCDataList[*layer->character_id], layer->name);
-        }
-    }
-}
-
-i32 LayerFromName(GAMECHARACTERDATA_s *character, char *name) {
-    for (i32 i = 0; i < character->layer_count; ++i) {
-        if (NuStrICmp(name, character->layers[i].name) == 0) {
-            return character->layers[i].mask_bit;
-        }
-    }
-    return -1;
-}
-
 FLOWBOX_s *FlowBoxFindByName(GIZFLOW_s *system, char *name) {
     if (name != NULL && system != NULL) {
         for (i32 i = 0; i < system->flowbox_count; ++i) {
@@ -780,4 +619,440 @@ void GizmoTypeStoreProgress(GIZMOSYS_s *system, void *world, i32 progress_index,
         type->fns.clear_progress_fn(world, progress);
     if (type->fns.store_progress_fn != NULL)
         type->fns.store_progress_fn(world, set->unknown, progress);
+}
+
+static void CheckIfParentsFinished(GIZFLOW_s *system, FLOWBOX_s *box) {
+    for (i32 i = 0; i < box->parent_count; ++i) {
+        FLOWBOX_s *parent = box->parents[i];
+        if ((parent->state_flags_low & 0x20) == 0)
+            continue;
+
+        i32 child_index;
+        for (child_index = 0; child_index < parent->child_count; ++child_index) {
+            FLOWBOX_s *child = parent->children[child_index];
+            if ((child->state_flags_low & 0xc0) != 0) {
+                if ((child->state_flags & 0x102) != 2)
+                    break;
+            } else if ((child->state_flags_low & 1) != 0 && child != box) {
+                break;
+            }
+        }
+        if (child_index != parent->child_count)
+            continue;
+
+        if ((parent->state_flags_low & 8) != 0) {
+            FLOWBOXGIZMODATA_s *data = parent->data;
+            for (i32 j = 0; j < data->gizmo_count; ++j)
+                GizmoSetVisibility(system->gizmo_sys, data->gizmos[j]->gizmo, 0, 1);
+        } else if ((parent->state_flags_low & 0x10) != 0) {
+            FLOWBOXGIZMODATA_s *data = parent->data;
+            for (i32 j = 0; j < data->gizmo_count; ++j)
+                GizmoActivate(system->gizmo_sys, data->gizmos[j]->gizmo, 0, 1);
+        }
+        if ((parent->state_flags_low & 0x40) != 0) {
+            parent->state_flags_high &= ~1;
+            CheckIfParentsFinished(system, parent);
+        }
+        parent->state_flags_low &= ~0x20;
+    }
+}
+
+static void ProcessFlowBox(GIZFLOW_s *, FLOWBOX_s *, u8);
+
+static void ResetForLoopEx(GIZFLOW_s *flow, FLOWBOX_s *root, FLOWBOX_s *box, i32 checksum) {
+    if (box != root && box->loop_checksum != checksum) {
+        box->loop_checksum = checksum;
+        if (box->type == 0 && (box->state_flags_high & 0x10) == 0 && box->data != NULL) {
+            FLOWBOXGIZMODATA_s *data = box->data;
+            for (i32 i = 0; i < data->gizmo_count; ++i) {
+                GizmoActivate(flow->gizmo_sys, data->gizmos[i]->gizmo, 0, 1);
+            }
+        }
+        for (i32 i = 0; i < box->child_count; ++i) {
+            ResetForLoopEx(flow, root, box->children[i], checksum);
+        }
+    }
+}
+
+static void ResetGizmoFlowBox(GIZFLOW_s *giz_flow, FLOWBOX_s *flow_box) {
+    FLOWBOXGIZMODATA_s &data = *flow_box->data;
+    if ((flow_box->state_flags & 0x1000) != 0 || data.gizmo_count <= 0) {
+        return;
+    }
+    for (i32 i = 0; i < data.gizmo_count; ++i) {
+        GizmoActivate(giz_flow->gizmo_sys, data.gizmos[i]->gizmo, 0, 1);
+    }
+}
+
+static i32 ProcessGizmoFlowBox(GIZFLOW_s *, FLOWBOX_s *, u8);
+static i32 ProcessActionFlowBox(GIZFLOW_s *, FLOWBOX_s *, u8);
+static i32 ProcessConditionFlowBox(GIZFLOW_s *, FLOWBOX_s *, u8);
+static i32 CheckOutputGizmoFlowBox(GIZFLOW_s *, FLOWBOX_s *, u8);
+static i32 CheckOutputActionFlowBox(GIZFLOW_s *, FLOWBOX_s *, u8);
+static i32 CheckOutputConditionFlowBox(GIZFLOW_s *, FLOWBOX_s *, u8);
+static u8 getNextLoopChecksum();
+struct FLOWBOXTYPE {
+    void (*reset)(GIZFLOW_s *, FLOWBOX_s *);
+    i32 (*process)(GIZFLOW_s *, FLOWBOX_s *, u8);
+    i32 (*check_output)(GIZFLOW_s *, FLOWBOX_s *, u8);
+};
+static FLOWBOXTYPE flowboxtypes[] = {
+    {ResetGizmoFlowBox, ProcessGizmoFlowBox, CheckOutputGizmoFlowBox},
+    {NULL, ProcessConditionFlowBox, CheckOutputConditionFlowBox},
+    {NULL, ProcessActionFlowBox, CheckOutputActionFlowBox},
+};
+DECOMP_ASSERT(sizeof(flowboxtypes) == 0x24, "Flow-box callback table ABI");
+
+static void ProcessFlowBox(GIZFLOW_s *system, FLOWBOX_s *box, u8 frame) {
+    if (box->state_flags_high & 1) {
+        i32 i;
+        for (i = 0; i < box->parent_count; ++i) {
+            FLOWBOX_s *parent = box->parents[i];
+            if (!flowboxtypes[parent->type].check_output(system, parent, box->output_indices[0]))
+                break;
+        }
+        FLOWBOXGIZMODATA_s *data = box->data;
+        if (i == box->parent_count) {
+            for (i32 j = 0; j < data->gizmo_count; ++j)
+                GizmoActivateReverse(system->gizmo_sys, data->gizmos[j]->gizmo, 0, box->state_flags_low >> 7, 1);
+        } else {
+            for (i32 j = 0; j < data->gizmo_count; ++j)
+                GizmoActivateReverse(system->gizmo_sys, data->gizmos[j]->gizmo, 1, box->state_flags_low >> 7, 1);
+        }
+    }
+    if ((box->state_flags_low & 1) == 0)
+        return;
+    if (!flowboxtypes[box->type].process(system, box, frame))
+        return;
+
+    if ((box->state_flags_high & 0xc) == 0xc)
+        box->state_flags_high &= ~4;
+    box->state_flags_high |= 8;
+    box->state_flags_low = (box->state_flags_low & ~1) | 2;
+    if (box->type == 0) {
+        if (box->state_flags_low & 0x18) {
+            if (box->child_count != 0) {
+                box->state_flags_low |= 0x20;
+            } else {
+                FLOWBOXGIZMODATA_s *data = box->data;
+                if (box->state_flags_low & 8) {
+                    for (i32 i = 0; i < data->gizmo_count; ++i)
+                        GizmoSetVisibility(system->gizmo_sys, data->gizmos[i]->gizmo, 0, 1);
+                } else if (box->state_flags_low & 0x10) {
+                    for (i32 i = 0; i < data->gizmo_count; ++i)
+                        GizmoActivate(system->gizmo_sys, data->gizmos[i]->gizmo, 0, 1);
+                }
+                box->state_flags_low &= ~0x20;
+            }
+        }
+        if (box->state_flags_low & 0xc0) {
+            box->state_flags_low |= 0x20;
+            box->state_flags_high |= 1;
+            FLOWBOX_s **parents = box->parents;
+            i32 count = box->parent_count;
+            for (i32 i = 0; i < count; ++i) {
+                if (parents[i]->type == 1)
+                    parents[i]->state_flags_high |= 2;
+                if (parents[i]->type == 0 && (parents[i]->state_flags_low & 0x40)) {
+                    parents[i]->state_flags_high |= 1;
+                    parents[i]->state_flags_low |= 0x20;
+                }
+            }
+        }
+    }
+    if (box->type != 0)
+        CheckIfParentsFinished(system, box);
+    for (i32 i = 0; i < box->child_count; ++i) {
+        FLOWBOX_s **child = &box->children[i];
+        (*child)->state_flags_low |= 1;
+        if ((*child)->last_process_frame != frame || box->type == 1) {
+            (*child)->last_process_frame = frame;
+            ProcessFlowBox(system, *child, frame);
+        }
+    }
+}
+
+void ProcessGizFlow(GIZFLOW_s *system, float) {
+    if (system == NULL)
+        return;
+    ++system->field_0x0c;
+    FLOWBOX_s *box = system->flowboxes;
+    for (i32 i = 0; i < system->flowbox_count; ++i, ++box) {
+        if (box->last_process_frame != system->field_0x0c && (box->state_flags & 0x101))
+            ProcessFlowBox(system, box, system->field_0x0c);
+        box->last_process_frame = system->field_0x0c;
+    }
+}
+
+static i32 ProcessGizmoFlowBox(GIZFLOW_s *system, FLOWBOX_s *box, u8) {
+    FLOWBOX_s **parents = box->parents;
+    u8 *outputs = box->output_indices;
+    for (i32 i = 0; i < box->parent_count; ++i) {
+        FLOWBOX_s *parent = parents[i];
+        if (!flowboxtypes[parent->type].check_output(system, parent, outputs[i]))
+            return 0;
+    }
+    CheckIfParentsFinished(system, box);
+    if ((box->state_flags_high & 0x10) != 0 || ((box->state_flags_high & 0x40) == 0 && FreePlay == 0) ||
+        ((box->state_flags_high & 0x20) == 0 && FreePlay != 0))
+        return 1;
+    FLOWBOXGIZMODATA_s *data = box->data;
+    for (i32 i = 0; i < data->gizmo_count; ++i)
+        GizmoActivate(system->gizmo_sys, data->gizmos[i]->gizmo, 1, 1);
+    return 1;
+}
+
+static i32 ProcessActionFlowBox(GIZFLOW_s *system, FLOWBOX_s *box, u8) {
+    FLOWBOX_s **parents = box->parents;
+    u8 *outputs = box->output_indices;
+    for (i32 i = 0; i < box->parent_count; ++i) {
+        FLOWBOX_s *parent = parents[i];
+        if (!flowboxtypes[parent->type].check_output(system, parent, outputs[i]))
+            return 0;
+    }
+    PerformActionFlowBox(system, box);
+    return 1;
+}
+
+static i32 ProcessConditionFlowBox(GIZFLOW_s *flow, FLOWBOX_s *box, u8) {
+    u8 *condition = reinterpret_cast<u8 *>(box->data);
+    if (condition == NULL) {
+        FLOWBOX_s **parents = box->parents;
+        u8 *outputs = box->output_indices;
+        for (i32 i = 0; i < box->parent_count; ++i) {
+            FLOWBOX_s *parent = parents[i];
+            if (flowboxtypes[parent->type].check_output(flow, parent, outputs[i]) == 0) {
+                return 0;
+            }
+        }
+        return 1;
+    }
+    switch (condition[0]) {
+        case 0: {
+            FLOWBOX_s **parents = box->parents;
+            u8 *outputs = box->output_indices;
+            for (i32 i = 0; i < box->parent_count; ++i) {
+                FLOWBOX_s *parent = parents[i];
+                if (flowboxtypes[parent->type].check_output(flow, parent, outputs[i]) == 0) {
+                    return 0;
+                }
+            }
+            break;
+        }
+        case 2: {
+            FLOWBOX_s **parents = box->parents;
+            u8 *outputs = box->output_indices;
+            for (i32 i = 0; i < box->parent_count; ++i) {
+                FLOWBOX_s *parent = parents[i];
+                if (flowboxtypes[parent->type].check_output(flow, parent, outputs[i]) != 0) {
+                    return 0;
+                }
+            }
+            break;
+        }
+        case 1:
+        case 3:
+        case 5: {
+            const i32 required = condition[0] == 1 ? 1 : condition[1];
+            FLOWBOX_s **parents = box->parents;
+            u8 *outputs = box->output_indices;
+            i32 count = 0;
+            for (i32 i = 0; i < box->parent_count; ++i) {
+                FLOWBOX_s *parent = parents[i];
+                count += flowboxtypes[parent->type].check_output(flow, parent, outputs[i]) != 0;
+            }
+            if (condition[0] == 5) {
+                return count == required;
+            }
+            if (count < required) {
+                return 0;
+            }
+            break;
+        }
+        case 4: {
+            i32 required = box->parent_count;
+            if ((box->state_flags_high & 4) != 0) {
+                required -= box->loop_parent_count;
+            }
+            if (box->parent_count != 0) {
+                FLOWBOX_s **parents = box->parents;
+                u8 *outputs = box->output_indices;
+                i32 count = 0;
+                for (i32 i = 0; i < box->parent_count; ++i) {
+                    FLOWBOX_s *parent = parents[i];
+                    count += flowboxtypes[parent->type].check_output(flow, parent, outputs[i]) != 0;
+                }
+                if (count < required) {
+                    return 0;
+                }
+            }
+            break;
+        }
+    }
+    if (condition[0] == 4) {
+        for (i32 i = 0; i < box->child_count; ++i) {
+            const u8 checksum = getNextLoopChecksum();
+            ResetForLoopEx(flow, box, box->children[i], checksum);
+        }
+    }
+    return 1;
+}
+
+static i32 CheckOutputGizmoFlowBox(GIZFLOW_s *system, FLOWBOX_s *box, u8 output) {
+    if (((box->state_flags_high & 0x40) == 0 && FreePlay == 0) ||
+        ((box->state_flags_high & 0x20) == 0 && FreePlay != 0))
+        return 1;
+    FLOWBOXGIZMODATA_s *data = box->data;
+    i32 result = 1;
+    for (i32 i = 0; i < data->gizmo_count; ++i) {
+        if (!GizmoGetOutput(system->gizmo_sys, data->gizmos[i]->gizmo, output, (box->state_flags_high >> 4) & 1))
+            result = 0;
+    }
+    return result;
+}
+
+static i32 CheckOutputActionFlowBox(GIZFLOW_s *, FLOWBOX_s *box, u8) {
+    return (box->state_flags_low >> 1) & 1;
+}
+
+static i32 CheckOutputConditionFlowBox(GIZFLOW_s *system, FLOWBOX_s *box, u8) {
+    if ((box->state_flags_high & 2) == 0)
+        return (box->state_flags_low >> 1) & 1;
+    u8 saved = box->state_flags_high & 4;
+    box->state_flags_high |= 4;
+    i32 result = flowboxtypes[box->type].process(system, box, 0) != 0;
+    box->state_flags_high = (box->state_flags_high & ~4) | saved;
+    return result;
+}
+
+static i32 Loop_CountLoopingInputsEx(FLOWBOX_s *loop, FLOWBOX_s *box, i32 count, u8 checksum) {
+    if (loop == box) {
+        --box->loop_checksum;
+        return count + 1;
+    }
+    for (i32 i = 0; i < box->child_count; ++i) {
+        if (box->children[i]->loop_checksum != checksum) {
+            box->children[i]->loop_checksum = checksum;
+            count = Loop_CountLoopingInputsEx(loop, box->children[i], count, checksum);
+        }
+    }
+    return count;
+}
+
+static u8 getNextLoopChecksum() {
+    static u8 loop_checksum;
+    return ++loop_checksum;
+}
+
+void DynamicAddGizmoToFlow(GIZFLOW_s *system, GIZMO_s *gizmo) {
+    if (gizmo == NULL || system == NULL || gizmotypes == NULL || gizmo->type_id >= gizmotypes->count ||
+        gizmotypes->types[gizmo->type_id].fns.get_gizmo_name_fn == NULL)
+        return;
+    FLOWBOX_s *box = system->flowboxes;
+    for (i32 i = 0; i < system->flowbox_count; ++i, ++box) {
+        FLOWBOXGIZMODATA_s *data = box->data;
+        if (data == NULL)
+            continue;
+        for (i32 j = 0; j < data->gizmo_count; ++j) {
+            if (data->gizmos[j]->gizmo != NULL)
+                continue;
+            char *name = gizmotypes->types[gizmo->type_id].fns.get_gizmo_name_fn(gizmo);
+            if (NuStrICmp(data->gizmos[j]->name, name) != 0)
+                continue;
+            data->gizmos[j]->gizmo = gizmo;
+            if ((box->state_flags_low & 1) == 0) {
+                if (flowboxtypes[box->type].reset != NULL)
+                    flowboxtypes[box->type].reset(system, box);
+                if ((box->state_flags_low & 5) == 4 && box->type == 0)
+                    GizmoSetVisibility(system->gizmo_sys, data->gizmos[j]->gizmo, 0, 1);
+            }
+        }
+    }
+}
+
+void ResetGizFlowPointers(GIZFLOW_s *system) {
+    if (system == NULL || system->flowbox_count == 0)
+        return;
+    FLOWBOX_s *box = system->flowboxes;
+    for (i32 i = 0; i < system->flowbox_count; ++i, ++box) {
+        if (box->type != 0)
+            continue;
+        FLOWBOXGIZMODATA_s *data = box->data;
+        for (i32 j = 0; j < data->gizmo_count; ++j) {
+            FLOWBOXGIZMOREF_s *ref = data->gizmos[j];
+            if (ref->gizmo != NULL) {
+                ref->gizmo = GizmoFindByName(system->gizmo_sys, ref->gizmo->type_id, ref->name);
+            } else {
+                ref->gizmo = GizmoFindByName(system->gizmo_sys, -1, ref->name);
+                if (data->gizmos[j]->gizmo != NULL && (box->state_flags_low & 1) == 0) {
+                    if (flowboxtypes[box->type].reset != NULL)
+                        flowboxtypes[box->type].reset(system, box);
+                    if ((box->state_flags_low & 5) == 4 && box->type == 0)
+                        GizmoSetVisibility(system->gizmo_sys, data->gizmos[j]->gizmo, 0, 1);
+                }
+            }
+        }
+    }
+}
+
+void ResetGizFlow(GIZFLOW_s *system, GIZFLOWPROGRESS_s *progress) {
+    if (system == NULL)
+        return;
+    system->field_0x0c = 0;
+    FLOWBOX_s *box = system->flowboxes;
+    ResetGizFlowPointers(system);
+    for (i32 i = 0; i < system->flowbox_count; ++i, ++box) {
+        box->last_process_frame = 0;
+        box->state_flags_low &= ~0x20;
+        if (progress != NULL && progress->valid != 0) {
+            i32 word = i >> 5;
+            u32 bit = 1u << (i & 31);
+            box->state_flags_low = (box->state_flags_low & ~1) | ((progress->active[word] & bit) != 0);
+            box->state_flags_low = (box->state_flags_low & ~2) | (((progress->completed[word] & bit) != 0) << 1);
+            box->state_flags_low |= ((progress->latched[word] & bit) != 0) << 5;
+            box->state_flags_high = (box->state_flags_high & ~4) | (((progress->output_state[word] & bit) != 0) << 2);
+            if (box->type == 1 && box->condition_data[0] == 4) {
+                u8 checksum = getNextLoopChecksum();
+                i32 count = 0;
+                for (i32 child = 0; child < box->child_count; ++child) {
+                    count = Loop_CountLoopingInputsEx(box, box->children[child], count, checksum);
+                }
+                box->loop_parent_count = count;
+            }
+            continue;
+        }
+        box->state_flags_low &= ~2;
+        box->state_flags_high &= ~1;
+        if (box->type == 1 && box->condition_data[0] == 4) {
+            u8 checksum = getNextLoopChecksum();
+            i32 count = 0;
+            for (i32 child = 0; child < box->child_count; ++child) {
+                count = Loop_CountLoopingInputsEx(box, box->children[child], count, checksum);
+            }
+            box->loop_parent_count = count;
+            box->state_flags_high |= 4;
+            if (box->parent_count == box->loop_parent_count) {
+                box->state_flags_high |= 8;
+                box->state_flags_low |= 1;
+            } else
+                box->state_flags_low &= ~1;
+        } else {
+            box->state_flags_low = (box->state_flags_low & ~1) | (box->parent_count == 0);
+        }
+
+        if (flowboxtypes[box->type].reset != NULL && (box->state_flags_high & 0x10) == 0)
+            flowboxtypes[box->type].reset(system, box);
+        if (box->type == 0) {
+            if (((box->state_flags_high & 0x40) == 0 && FreePlay == 0) ||
+                ((box->state_flags_high & 0x20) == 0 && FreePlay != 0)) {
+                FLOWBOXGIZMODATA_s *data = box->data;
+                for (i32 gizmo = 0; gizmo < data->gizmo_count; ++gizmo)
+                    GizmoSetVisibility(system->gizmo_sys, data->gizmos[gizmo]->gizmo, 0, 1);
+            } else if ((box->state_flags_low & 5) == 4) {
+                FLOWBOXGIZMODATA_s *data = box->data;
+                for (i32 gizmo = 0; gizmo < data->gizmo_count; ++gizmo)
+                    GizmoSetVisibility(system->gizmo_sys, data->gizmos[gizmo]->gizmo, 0, 1);
+            }
+        }
+    }
 }

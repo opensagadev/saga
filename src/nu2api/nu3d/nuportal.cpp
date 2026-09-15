@@ -1,4 +1,5 @@
 #include "nu2api/nu3d/nuportal.h"
+#include "nu2api/nu3d/android/nuportal_android.h"
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nu3d/nugscn.h"
 #include "nu2api/numath/nufloat.h"
@@ -19,8 +20,6 @@ static NUPLANE cam_plane;
 static NUFRUSTRUM **frustra;
 static i32 *nfrustra;
 static i32 draw_portals;
-
-extern "C" void clipRoomAgainstFrustrum(NUGSCN *scene, NUROOM *room, NUFRUSTRUM *frustum);
 
 static i16 rooms_visited[16];
 
@@ -281,10 +280,6 @@ void NuPortalMaxDepth(struct nugscn_s *scene, i32 depth) {
 static NUVEC *override_campos;
 extern i32 portals_enabled;
 static NUPLANE near_clip_plane;
-extern "C" void Initialise_PS(NUGSCN *scene);
-extern "C" void SetAllInstancesVisible(NUGSCN *scene);
-void SetAllInstancesHidden(NUGSCN *scene);
-
 extern "C" i32 NuPortalVisibility(NUGSCN *scene) {
     Initialise_PS(scene);
     NUVEC *camera_position = override_campos != NULL ? override_campos : &world_campos;

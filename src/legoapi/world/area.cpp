@@ -1,5 +1,6 @@
 #include "decomp.h"
 #include "legoapi/world/area.h"
+#include "legoapi/render/core/screen.h"
 
 #include <stdlib.h>
 
@@ -19,6 +20,7 @@ i32 Area_CharIDInCurrentList(i32 character_id) {
     return result;
 }
 #include "legoapi/characters/core/character.h"
+#include "legoapi/characters/core/customiser.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/core/config/cheat.h"
 #include "legoapi/core/input/gamepads.h"
@@ -117,7 +119,6 @@ extern AREADATA *LEGOCITY_ADATA;
 extern AREADATA *NEWTOWN_ADATA;
 extern AREADATA *JIMTEST_ADATA;
 extern i32 CHARPAK;
-extern i32 apiloadcharactermodels_nopakfile;
 extern i32 CharacterDataLoad;
 extern i32 loadareadata_loadlevel;
 extern i32 AreaDataLoaded;
@@ -147,10 +148,8 @@ extern OPTIONSSAVE *Game_OptionsSave;
 extern FadeSystem FadeSys;
 extern void *theGameThings;
 
-extern void IconScenes_Load(APICHARACTERMODELLIST_s *, i32, variptr_u *, variptr_u *);
 extern void MakeFreePlayModelList(i32, i32, i32, i32, i32);
 extern void Customiser_LoadAccessories(CUSTOMISER *, APICHARACTERMODELLIST_s *);
-extern void Customiser_ResetModelTextureIDs(CUSTOMISER *);
 extern void Customiser_SetAnimsToLoad(CUSTOMISER *, i32);
 extern void GameLoadCharacterModels(APICHARACTERMODELLIST_s *, i32, variptr_u *, variptr_u *, i32, i32);
 extern void CharScenes_AreaLoad(APICHARACTERMODELLIST_s *, variptr_u *, variptr_u);
@@ -163,10 +162,7 @@ extern void BackDrop_ResetColours(void);
 extern void BackDrop_Update(f32);
 extern void BackDrop_UpdateColours(i32);
 extern void BackDrop_Draw(f32, i32);
-extern void NeedScreenGrab(i32);
-extern void GrabStillScreen(void);
 extern i16 tTOUCHTOSTART;
-extern "C" void NuRndrGradClear(i32, i32, i32, f32);
 extern "C" i32 NuRndrBeginScene(i32);
 extern "C" void NuRndrEndScene(void);
 extern "C" f32 NuFrameEnd(void);
@@ -176,7 +172,6 @@ extern "C" i32 NuKeyboard_db(i32);
 extern "C" i32 NuSound3LoadingSfx(void);
 extern void Particles_LoadAreaPage(char *);
 extern "C" {
-    extern void APIResetCharacterRemap(void);
     extern void SoundKillAll(void);
 }
 
@@ -262,274 +257,8 @@ i32 Area = -1;
 i32 AREA_DEFAULTBONUSTIMETRIALTIME = 300;
 i32 AREA_DEFAULTCHALLENGETIME = 600;
 
-AREADATA *Area_FindByName(char *name, i32 *indexDest) {
-    for (i32 i = 0; i < AREACOUNT; i++) {
-        if (NuStrICmp(ADataList[i].file, name) == 0) {
-            if (indexDest != NULL) {
-                *indexDest = i;
-            }
-            return &ADataList[i];
-        }
-    }
-
-    if (indexDest != NULL) {
-        *indexDest = -1;
-    }
-
-    return NULL;
-}
-
-AREADATA *Areas_ConfigureList(char *file, VARIPTR *bufferStart, VARIPTR *bufferEnd, i32 count, i32 *countDest) {
-    nufpar_s *fp = NuFParCreate(file);
-    if (fp == NULL) {
-        if (countDest != NULL)
-            *countDest = 0;
-        return NULL;
-    }
-
-    i32 area_count = 0;
-    i32 in_area = 0;
-    AREADATA *area = (AREADATA *)ALIGN((usize)bufferStart->void_ptr, 4);
-    bufferStart->void_ptr = area;
-    AREADATA *area_base = area;
-
-    while (NuFParGetLine(fp)) {
-        NuFParGetWord(fp);
-        char *word = fp->word_buf;
-        if (*word == '\0')
-            continue;
-
-        if (in_area) {
-            if (NuStrICmp(word, "area_end") == 0) {
-                in_area = 0;
-                if (area->dir[0] != '\0' && area->file[0] != '\0' && area->level_count != 0 &&
-                    (area->flags & AREAFLAG_TEST_AREA) == 0) {
-                    area++;
-                    area_count++;
-                }
-            } else if (NuStrICmp(fp->word_buf, "dir") == 0) {
-                if (NuFParGetWord(fp) != 0 && NuStrLen(fp->word_buf) <= 0x3f)
-                    NuStrCpy(area->dir, fp->word_buf);
-                in_area = 1;
-            } else if (NuStrICmp(fp->word_buf, "file") == 0) {
-                if (NuFParGetWord(fp) != 0 && NuStrLen(fp->word_buf) <= 0x1f)
-                    NuStrCpy(area->file, fp->word_buf);
-                in_area = 1;
-            } else if (NuStrICmp(fp->word_buf, "level") == 0) {
-                if (area->level_count > 0xb || NuFParGetWord(fp) == 0) {
-                    in_area = 1;
-                } else {
-                    i32 li;
-                    Level_FindByName(fp->word_buf, &li);
-                    in_area = 1;
-                    if (li != -1) {
-                        in_area = area->level_count;
-                        if (in_area == 0) {
-                            area->levels[0] = (i16)li;
-                            area->level_count = 1;
-                        } else {
-                            i32 k;
-                            if (area->levels[0] != li) {
-                                for (k = 1; k < in_area; k++) {
-                                    if (area->levels[k] == li)
-                                        break;
-                                }
-                                if (k == in_area) {
-                                    area->levels[in_area] = (i16)li;
-                                    area->level_count = (u8)(in_area + 1);
-                                }
-                            }
-                        }
-                        in_area = 1;
-                    }
-                }
-            } else if (NuStrICmp(fp->word_buf, "single_buffer") == 0) {
-                in_area = 1;
-                area->flags |= AREAFLAG_SINGLE_BUFFER;
-            } else if (NuStrICmp(fp->word_buf, "minikit") == 0) {
-                in_area = 1;
-                area->flags |= AREAFLAG_MINIKIT;
-                if (NuFParGetWord(fp) != 0)
-                    area->minikit_id = CharIDFromName(fp->word_buf);
-            } else if (NuStrICmp(fp->word_buf, "true_jedi") == 0) {
-                in_area = 1;
-                area->flags |= AREAFLAG_TRUE_JEDI;
-            } else if (NuStrICmp(fp->word_buf, "test_area") == 0) {
-                in_area = 1;
-                area->flags |= AREAFLAG_TEST_AREA;
-            } else if (NuStrICmp(fp->word_buf, "hub_area") == 0) {
-                in_area = 1;
-                area->flags |= AREAFLAG_HUB_AREA;
-            } else if (NuStrICmp(fp->word_buf, "override_things_scene") == 0) {
-                in_area = 1;
-                area->flags |= AREAFLAG_OVERRIDE_THINGS_SCENE;
-            } else if (NuStrICmp(fp->word_buf, "vehicle_area") == 0) {
-                in_area = 1;
-                area->flags |= AREAFLAG_VEHICLE_AREA;
-            } else if (NuStrICmp(fp->word_buf, "ending_area") == 0) {
-                in_area = 1;
-                area->flags |= AREAFLAG_ENDING_AREA;
-            } else if (NuStrICmp(fp->word_buf, "bonus_area") == 0) {
-                in_area = 1;
-                area->flags |= AREAFLAG_BONUS_AREA;
-            } else if (NuStrICmp(fp->word_buf, "super_bonus_area") == 0) {
-                in_area = 1;
-                area->flags |= AREAFLAG_SUPER_BONUS_AREA;
-            } else if (NuStrICmp(fp->word_buf, "nocharactercollision") == 0 ||
-                       NuStrICmp(fp->word_buf, "nocharactercollisions") == 0 ||
-                       NuStrICmp(fp->word_buf, "no_character_collision") == 0 ||
-                       NuStrICmp(fp->word_buf, "no_character_collisions") == 0) {
-                in_area = 1;
-                area->flags |= AREAFLAG_NO_CHARACTER_COLLISION;
-            } else if (NuStrICmp(fp->word_buf, "nopickupgravity") == 0) {
-                in_area = 1;
-                area->flags |= AREAFLAG_NOPICKUPGRAVITY;
-            } else if (NuStrICmp(fp->word_buf, "no_gold_brick") == 0) {
-                in_area = 1;
-                area->flags |= AREAFLAG_NO_GOLDBRICK;
-            } else if (NuStrICmp(fp->word_buf, "no_completion_points") == 0) {
-                in_area = 1;
-                area->flags |= AREAFLAG_NO_COMPLETION_POINTS;
-            } else if (NuStrICmp(fp->word_buf, "no_freeplay") == 0) {
-                in_area = 1;
-                area->flags |= AREAFLAG_NO_FREEPLAY;
-            } else if (NuStrICmp(fp->word_buf, "name_id") == 0) {
-                in_area = 1;
-                area->name_id = NuFParGetInt(fp);
-            } else if (NuStrICmp(fp->word_buf, "text_id") == 0) {
-                area->text_id = NuFParGetInt(fp);
-                in_area = 1;
-                if (NuFParGetWord(fp) != 0)
-                    area->text_id_value = (byte)abs(NuAToI(fp->word_buf));
-            } else if (NuStrICmp(fp->word_buf, "timetrial_time") == 0) {
-                in_area = 1;
-                area->challenge_trial_time = NuFParGetInt(fp);
-            } else if (NuStrICmp(fp->word_buf, "redbrick_cheat") == 0 ||
-                       NuStrICmp(fp->word_buf, "redbrick_extra") == 0) {
-                if (NuFParGetWord(fp) == 0) {
-                    in_area = 1;
-                } else {
-                    area->cheat = Cheat_FindByName(fp->word_buf);
-                    in_area = 1;
-                }
-            }
-        } else {
-            if (NuStrICmp(word, "area_start") != 0 || count <= area_count)
-                continue;
-            in_area = 1;
-            area->dir[0] = '\0';
-            area->file[0] = '\0';
-            area->levels[0] = -1;
-            area->name_id = 0xffff;
-            area->flags = AREAFLAG_NONE;
-            area->index = (u8)area_count;
-            area->level_count = 0;
-            area->cheat = 0xff;
-            area->super_counter_count = 0;
-            area->super_counters = NULL;
-            area->challenge_trial_time = 0;
-            area->episode_index = 0xff;
-            area->area_index = 0xff;
-            area->area_music = -1;
-            area->minikit_id = 0xffff;
-            area->field37_0x8c = 0;
-            area->field38_0x90 = 0;
-            area->text_id = 0xffff;
-            area->text_id_value = 1;
-            area->hub_player_ids = NULL;
-        }
-    }
-
-    NuFParDestroy(fp);
-    if (area_count != 0) {
-        bufferStart->void_ptr = area;
-        if (countDest != NULL)
-            *countDest = area_count;
-        i32 j = 0;
-        if (0 < area_count) {
-            do {
-                while (true) {
-                    if (area_base[j].challenge_trial_time == 0) {
-                        if ((area_base[j].flags & AREAFLAG_SUPER_BONUS_AREA) == AREAFLAG_BONUS_AREA)
-                            area_base[j].challenge_trial_time = (i16)AREA_DEFAULTBONUSTIMETRIALTIME;
-                        else if ((area_base[j].flags & AREAFLAG_MINIKIT) != 0)
-                            area_base[j].challenge_trial_time = (i16)AREA_DEFAULTCHALLENGETIME;
-                    }
-                    if (area_base[j].cheat != 0xff)
-                        Cheat_SetArea((i32)(char)area_base[j].cheat, j);
-                    if (area_base[j].challenge_trial_time != 0 &&
-                        (area_base[j].flags & (AREAFLAG_SUPER_BONUS_AREA | AREAFLAG_MINIKIT)) == AREAFLAG_MINIKIT)
-                        break;
-                    j++;
-                    if (area_count <= j)
-                        return area_base;
-                }
-                area_base[j].challenge_trial_time = 1200;
-                j++;
-            } while (j < area_count);
-            return area_base;
-        }
-    }
-    return NULL;
-}
-
-void Areas_FixUp(AREAFIXUP *fixup) {
-    if (fixup != NULL) {
-        for (AREAFIXUP *f = fixup; f->name != NULL; f++) {
-            if (f->area != NULL) {
-                *f->area = Area_FindByName(f->name, NULL);
-            }
-        }
-    }
-}
-
 void FixUpAreas(void) {
     Areas_FixUp(AreaFixUp_LSW);
-}
-
-struct LEVELDATA_s *Area_FindStatusLevel(AREADATA *area, i32 *indexDest) {
-    if (indexDest != NULL) {
-        *indexDest = -1;
-    }
-
-    if (area == NULL || area->level_count == 0) {
-        return NULL;
-    }
-
-    for (i32 i = 0; i < area->level_count; i++) {
-        i32 levelIdx = area->levels[i];
-        LEVELDATA *level = &LDataList[levelIdx];
-        if (level->flags & LEVEL_STATUS) {
-            if (indexDest != NULL) {
-                *indexDest = levelIdx;
-            }
-            return level;
-        }
-    }
-
-    return NULL;
-}
-
-LEVELDATA *Area_FindNextPlayLevel(i32 levelIdx) {
-    LEVELDATA *level = &LDataList[levelIdx];
-    i32 areaIdx = level->area_index;
-    i32 areaLevelIdx = level->area_level_index;
-    LEVELDATA *result = level;
-
-    if (areaIdx != -1) {
-        if (areaLevelIdx < ADataList[areaIdx].level_count - 1) {
-            result = &LDataList[ADataList[areaIdx].levels[areaLevelIdx]];
-            if (result->flags & (LEVEL_INTRO | LEVEL_MIDTRO | LEVEL_OUTRO)) {
-                for (i32 i = areaLevelIdx; i != ADataList[areaIdx].level_count - 2; i++) {
-                    LEVELDATA *candidate = &LDataList[ADataList[areaIdx].levels[i + 1]];
-                    if (!(candidate->flags & (LEVEL_INTRO | LEVEL_MIDTRO | LEVEL_OUTRO)))
-                        return candidate;
-                }
-                return level;
-            }
-        }
-    }
-    return result;
 }
 
 i32 AreaFromMiniKitID(i32 minikitId) {

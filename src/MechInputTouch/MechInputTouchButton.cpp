@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include <stddef.h>
 
 #include "MechInputTouch_types.h"
@@ -92,9 +93,11 @@ MechInputTouchButton::MechInputTouchButton(i32 index, u32 id, float x, float y, 
 }
 
 __attribute__((weak)) void MechInputTouchButton::Render() {
+    STUBBED();
 }
 
 __attribute__((weak)) void MechInputTouchButton::Update(NuInputTouchData const *) {
+    STUBBED();
 }
 
 __attribute__((weak)) char const *MechInputTouchButton::GetName() {
@@ -141,12 +144,15 @@ void MechInputTouchButton::SetTouchLocked(u32 touch_id, bool allow_new) {
 }
 
 MechInputTouchButtonFaker::MechInputTouchButtonFaker(i32, u32, float, float, float, float) {
+    STUBBED();
 }
 
 void MechInputTouchButtonFaker::Render() {
+    STUBBED();
 }
 
 void MechInputTouchButtonFaker::Update(NuInputTouchData const *) {
+    STUBBED();
 }
 
 MechInputTouchMainDummyStick::MechInputTouchMainDummyStick(MechInputTouchMainController &main_controller,
@@ -158,6 +164,7 @@ MechInputTouchMainDummyButton::MechInputTouchMainDummyButton(MechInputTouchMainC
                                                              MechInputTouchMainController::eButtonTypes type)
     : NuTouchInputElement(TYPE_BUTTON, colourPurple, id, 0.0f, 0.0f, 0.0f, 0.0f), controller(&main_controller),
       button_type(static_cast<u32>(type)) {
+    STUBBED();
 }
 
 MechInputTouchButtonControlled::MechInputTouchButtonControlled(MechInputTouchMainController &, i32 index)
@@ -169,6 +176,7 @@ __attribute__((weak)) bool MechInputTouchButtonControlled::ControlledUpdate(NuIn
 }
 
 __attribute__((weak)) void MechInputTouchButtonControlled::ControlledRender() {
+    STUBBED();
 }
 
 __attribute__((weak)) void MechInputTouchButtonControlled::Reset() {

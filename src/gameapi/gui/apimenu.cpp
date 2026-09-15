@@ -1,4 +1,4 @@
-#include "gameapi/gui/apimenu.h"
+#include "gameapi/gui/apimenu_internal.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -7,6 +7,7 @@
 #include "globals.h"
 #include "MechInputTouch/MechInputTouch_types.h"
 #include "gameframework/saveload.h"
+#include "legoapi/cutscenes/cutscenes.h"
 #include "legoapi/core/input/timer.h"
 #include "legoapi/core/startup/game.h"
 #include "legoapi/core/startup/main.h"
@@ -32,9 +33,6 @@
 #include "nu2api/numusic/numusic.h"
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numath/nufloat.h"
-
-#define TOTAL_MENUS_COUNT 100
-#define RESERVED_MENUS_COUNT 25
 
 static void MenuDrawTitles(MENU *);
 static void MenuUpdateTitles(MENU *);
@@ -76,8 +74,6 @@ void Hint_LoadAllGameState(void);
 void NuIOS_RestoreInAppPurchases(void);
 void NewGame(void);
 void MenuDrawNewGame(MENU *menu);
-void MenuEnterNewGame(MENU *menu);
-void MenuExitNewGame(MENU *menu);
 void MenuUpdateNewGame(MENU *menu);
 void MenuDrawLoad(MENU *menu);
 void MenuDrawLoading(MENU *menu);
@@ -147,16 +143,11 @@ void DropOut(i32 player, i32 show_effect, i32 silent, i32 force);
 LEVELDATA_s *CanSaveAndExit(WORLDINFO_s *world);
 void NewLevelFromMenu(LEVELDATA_s *level, i32 menu_id, i32 menu_y, i32 remember_hub);
 struct CUTSCENEPLAYERCLIP;
-extern CUTSCENEPLAYERCLIP *CutScenePlayer_Active(void);
 extern i32 saveload_autosave;
 extern FadeSystem FadeSys;
 extern i32 level_already_loaded;
-extern "C" void instNuGCutSceneEnd(instNUGCUTSCENE_s *instance);
 extern "C" i32 NewMode;
-LEVELDATA_s *CanSaveAndExit(WORLDINFO_s *world);
-void NewLevelFromMenu(LEVELDATA_s *level, i32 menu_id, i32 menu_y, i32 flags);
 extern i32 from_save_and_exit;
-extern FadeSystem FadeSys;
 extern i16 tCANCEL;
 extern u8 MENULOSTR1, MENULOSTG1, MENULOSTB1, MENULOSTA1;
 extern u8 MENULOSTR2, MENULOSTG2, MENULOSTB2, MENULOSTA2;
@@ -207,7 +198,6 @@ void Arcade_UpdateEndMenu(MENU *menu);
 void Credits_UpdateMenu(MENU *menu);
 void CustomiserMenu_Draw(MENU *menu);
 void CustomiserMenu_Update(MENU *menu);
-void MenuDrawBonusMode(MENU *menu);
 void MenuDrawClips(MENU *menu);
 void MenuDrawDebugStore(MENU *menu);
 void MenuDrawEndChallenge(MENU *menu);
@@ -220,7 +210,6 @@ void MenuDrawMissions(MENU *menu);
 void MenuDrawOptions(MENU *menu);
 void MenuDrawRestoreNewGame(MENU *menu);
 void MenuDrawSelectControls(MENU *menu);
-void MenuDrawSelectMode(MENU *menu);
 void MenuDrawStore(MENU *menu);
 void MenuDrawStoreHolding(MENU *menu);
 void MenuDrawStorePurchase(MENU *menu);
@@ -231,17 +220,14 @@ void MenuExitStore(MENU *menu);
 void MenuExitStoreHolding(MENU *menu);
 void MenuExitStorePurchase(MENU *menu);
 void MenuExitStoreRestoring(MENU *menu);
-void MenuInitBonusMode(MENU *menu);
 void MenuInitClips(MENU *menu);
 void MenuInitEpisodes(MENU *menu);
 void MenuInitFreePlay(MENU *menu);
 void MenuInitMissions(MENU *menu);
-void MenuInitSelectMode(MENU *menu);
 void MenuInitStore(MENU *menu);
 void MenuInitStoreHolding(MENU *menu);
 void MenuInitStorePurchase(MENU *menu);
 void MenuInitStoreRestoring(MENU *menu);
-void MenuUpdateBonusMode(MENU *menu);
 void MenuUpdateClips(MENU *menu);
 void MenuUpdateDebugStore(MENU *menu);
 void MenuUpdateEndChallenge(MENU *menu);
@@ -254,7 +240,6 @@ void MenuUpdateMissions(MENU *menu);
 void MenuUpdateOptions(MENU *menu);
 void MenuUpdateRestoreNewGame(MENU *menu);
 void MenuUpdateSelectControls(MENU *menu);
-void MenuUpdateSelectMode(MENU *menu);
 void MenuUpdateStore(MENU *menu);
 void MenuUpdateStoreHolding(MENU *menu);
 void MenuUpdateStorePurchase(MENU *menu);
@@ -361,9 +346,6 @@ i32 MenusUsed = RESERVED_MENUS_COUNT;
 i32 MenuLanguages = 1;
 char MenuHeader[64];
 
-i32 header_r;
-i32 header_g;
-i32 header_b;
 i32 MenuDisableHeaders;
 
 u8 MENUHEADERR = 0;
@@ -455,85 +437,8 @@ void ReCalculateCompletionPoints();
 
 void DrawShopPrompts();
 
-void MenuReset(void) {
-    memset(GameMenu, 0, sizeof(GameMenu));
-    GameMenu[0].menu = -1;
-    MenuSFX = -1;
-    GameMenuLevel = 0;
-}
-
-void APIMenuDrawMemCardSlots(MENU *menu, f32 time) {
-    UNIMPLEMENTED();
-}
-
 void APIMenuDrawGameState(f32 x, f32 y, i32 highlight, i32 slot) {
     UNIMPLEMENTED();
-}
-
-void (*drawslotsfn)(MENU *, f32) = APIMenuDrawMemCardSlots;
-void (*drawslotinfofn)(f32, f32, i32, i32) = APIMenuDrawGameState;
-
-void MenuInitialiseEx(MENUFNINFO *menu_info, i32 menu_id_count, i32 language_count,
-                      void (*draw_save_slots_info_fn)(f32, f32, i32, i32), i32 is_fade_enabled, i32 is_shadow_enabled) {
-    char menus_used_str[64];
-
-    i32 menu_ids_used = TOTAL_MENUS_COUNT - RESERVED_MENUS_COUNT;
-    if (menu_id_count <= TOTAL_MENUS_COUNT - RESERVED_MENUS_COUNT) {
-        menu_ids_used = menu_id_count;
-    }
-
-    // menu_id_count describes the valid ID range, not the number of records.
-    // The game table is sparse (ID 0x1c is absent), sorted, and ends with the
-    // record for menu_id_count - 1.
-    for (i32 i = 0; i < menu_ids_used; i++) {
-        MenuInfo[RESERVED_MENUS_COUNT + i] = menu_info[i];
-        if (menu_info[i].id >= menu_ids_used - 1) {
-            break;
-        }
-    }
-
-    MenusUsed = menu_ids_used + RESERVED_MENUS_COUNT;
-    sprintf(menus_used_str, "Menus used: %d", MenusUsed);
-
-    MenuLanguages = language_count;
-    MenuHeader[0] = '\0';
-
-    header_r = MENUHEADERR;
-    header_g = MENUHEADERG;
-    header_b = MENUHEADERB;
-
-    if (draw_save_slots_info_fn != NULL) {
-        drawslotinfofn = draw_save_slots_info_fn;
-    }
-
-    MenuFadeEnabled = is_fade_enabled;
-    MenuDrawDropShadows = is_shadow_enabled;
-
-    NUMTL *menu_fade_mtl = NuMtlCreate(1);
-    MenuFadeMtl = menu_fade_mtl;
-
-    menu_fade_mtl->attribs.z_mode = 3;
-    menu_fade_mtl->attribs.alpha_mode = 1;
-
-    menu_fade_mtl->attribs.unknown_2_1_2 = 2;
-
-    menu_fade_mtl->attribs.unknown_1_1_2 = 1;
-    menu_fade_mtl->attribs.unknown_1_4_8 = 1;
-
-    menu_fade_mtl->attribs.unknown_2_4 = 1;
-
-    menu_fade_mtl->attribs.filter_mode = 1;
-
-    NuMtlUpdate(menu_fade_mtl);
-}
-
-void MenuInitialise(MENUFNINFO *menu_info, i32 menu_id_count, i32 language_count,
-                    void (*draw_save_slots_fn)(MENU *, f32), i32 is_fade_enabled, i32 is_shadow_enabled) {
-    MenuInitialiseEx(menu_info, menu_id_count, language_count, NULL, is_fade_enabled, is_shadow_enabled);
-
-    if (draw_save_slots_fn != NULL) {
-        drawslotsfn = draw_save_slots_fn;
-    }
 }
 
 void MenuLoadTechnicalStrings(char *filepath, char *language, VARIPTR *buf, VARIPTR buf_end) {
@@ -799,20 +704,6 @@ void MenuDrawNewGame(MENU *menu) {
     }
 }
 
-void MenuEnterNewGame(MENU *menu) {
-    (void)menu;
-    if (MenuLoadOccurred == 0 && startnewgame_initiated == 0 && startnewgame == 0) {
-        saveload_autosave = -1;
-    }
-    MenuLoadOccurred = MenuSaveOccurred = 0;
-}
-
-void MenuExitNewGame(MENU *) {
-    if (PlayerProgress[0].active == 0 && PlayerProgress[1].active == 0) {
-        PlayerProgress[0].active = 1;
-    }
-}
-
 void MenuUpdateNewGame(MENU *menu) {
     if (menu->close_requested != 0 || menu->cancel_pressed != 0) {
         BackupMenu();
@@ -933,12 +824,16 @@ void MenuUpdateNewGame(MENU *menu) {
     }
 }
 static __used__ void MenuDrawMiniKit(MENU *) {
+    STUBBED();
 }
 static __used__ void MenuEnterTitles(MENU *) {
+    STUBBED();
 }
 static __used__ void MenuUpdateMiniKit(MENU *) {
+    STUBBED();
 }
 static __used__ void MenuDrawBonusWin(MENU *) {
+    STUBBED();
 }
 static void MenuRefreshPauseCutTarget() {
     pausecut_skip_to_level = -1;
@@ -1080,8 +975,10 @@ static __used__ void MenuExitHowToPlay(MENU *) {
     TriggerExtraDataSave();
 }
 static __used__ void MenuInitHowToPlay(MENU *) {
+    STUBBED();
 }
 static __used__ void MenuUpdateBonusWin(MENU *) {
+    STUBBED();
 }
 static __used__ void MenuUpdatePauseCut(MENU *menu) {
     MenuRefreshPauseCutTarget();
@@ -1258,8 +1155,10 @@ static __used__ void MenuDrawPauseRestart(MENU *menu) {
     GameDrawMenuEntry(menu, TTab[tNO]);
 }
 static __used__ void MenuDrawBonusComplete(MENU *) {
+    STUBBED();
 }
 static __used__ void MenuDrawSelectLanguage(MENU *) {
+    STUBBED();
 }
 static __used__ void MenuUpdatePauseRestart(MENU *menu) {
     if (menu->confirm_pressed != 0 && menu->selected_item == 0) {
@@ -1275,6 +1174,8 @@ static __used__ void MenuUpdatePauseRestart(MENU *menu) {
     }
 }
 static __used__ void MenuUpdateBonusComplete(MENU *) {
+    STUBBED();
 }
 static __used__ void MenuUpdateSelectLanguage(MENU *) {
+    STUBBED();
 }

@@ -8,8 +8,6 @@
 
 typedef void (*SoundBitCallback)(i32 sound_id);
 
-i32 GroupBuffer_GetNumInGroup(i32 group_id);
-i32 GroupBuffer_GetSampleByIndex(i32 group_id, i32 sample_index);
 extern "C" void MusicPreSeek(i32 track);
 extern "C" void RestoreGameMusic(void);
 extern "C" edanim_param_s AnimParams[64];
@@ -110,6 +108,7 @@ extern "C" {
         params.sound_count = final_count;
     }
     void edbitsSoundPlay(NUVEC *, i32) {
+        STUBBED();
     }
     void gcutSetSoundVol(i32 sound_volume, i32 music_volume) {
         gcutSoundVol = sound_volume;

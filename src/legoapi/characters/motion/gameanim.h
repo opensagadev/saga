@@ -3,6 +3,16 @@
 #include "nu2api/nucore/common.h"
 #include "nu2api/numath/nuvec.h"
 
+extern u8 ForcePlayEndFrame;
+extern u8 ForceEulerToQuat;
+
+enum CHARACTER_ANIMATION_FLAGS : u32 {
+    CHARACTER_ANIMATION_FLAG_SYNCHRONISED = 0x02,
+    CHARACTER_ANIMATION_FLAG_ROOT_MOTION = 0x20,
+    CHARACTER_ANIMATION_FLAG_REVERSE_WITH_MOVEMENT = 0x80,
+    CHARACTER_ANIMATION_FLAG_VERTICAL_ROOT_MOTION = 0x200,
+};
+
 enum PLAYER_JUMP_ACTION : i16 {
     PLAYER_JUMP_ACTION_FALL = 5,
     PLAYER_JUMP_ACTION_JUMP = 6,
@@ -34,6 +44,10 @@ struct characterdata_s;
 struct nugscn_s;
 struct nuhspecial_s;
 struct numtx_s;
+void RootFnEx(numtx_s *, void *, NUVEC *, NUVEC *, NUVEC *, f32, i32);
+extern "C" void RootFn(numtx_s *, void *, NUVEC *, NUVEC *, NUVEC *, f32);
+extern "C" void RootFnY(numtx_s *, void *, NUVEC *, NUVEC *, NUVEC *, f32);
+extern "C" void BlendRootFn(numtx_s *, void *, NUVEC *, NUVEC *, NUVEC *, f32);
 f32 GameAnimSet_AutoSetReflectY(GAMEANIMSET_s *set, nuvec_s *position, numtx_s *matrix);
 enum GAMEANIMSET_VISIBILITY : i32;
 
@@ -49,6 +63,9 @@ i32 GameAnimSet_Reset(GAMEANIMSET_s *set);
 i32 GameAnimSet_JumpToStart(GAMEANIMSET_s *set);
 i32 GameAnimSet_JumpToEnd(GAMEANIMSET_s *set);
 i32 GameAnimSet_Playing(GAMEANIMSET_s *set);
+// Animation-set state and object membership helpers.
+i32 GameAnimSet_IsAnimationReset(GAMEANIMSET_s *set);
+void GameAnimSet_RemoveAllObjects(GAMEANIMSET_s *set);
 void GameAnimSet_EvalAnim(GAMEANIMSET_s *set);
 f32 GameAnimSet_GetAnimPos(GAMEANIMOBJ_s *object);
 void GameAnimSet_SetAnimPos(GAMEANIMOBJ_s *object, f32 position);
@@ -78,18 +95,48 @@ GAMEANIMOBJ_s *GameAnimSet_AddObjectByName(GAMEANIMSET_s *set, nugscn_s *scene, 
 i32 GizmoFileReadGameAnimSet(GAMEANIMSET_s *set, void *world, void (*read_object_data)(GAMEANIMOBJ_s *, unsigned char),
                              unsigned char version, char *prefix, char *suffix);
 void Animate_JEDI(GameObject_s *object);
+void Animate_PROTOCOL(GameObject_s *object);
+void Animate_ASTROMECH(GameObject_s *object);
+void Animate_CANNON(GameObject_s *object);
+void Animate_VEHICLE(GameObject_s *object);
+void Animate_BEAST(GameObject_s *object);
+void Animate_BATTLEDROID(GameObject_s *object);
+void Animate_HOVERDROID(GameObject_s *object);
+void Animate_WALKER(GameObject_s *object);
+void Animate_ATAT(GameObject_s *object);
+void Animate_CRITTER(GameObject_s *object);
+void Animate_POD(GameObject_s *object);
+void Animate_WEIRDO(GameObject_s *object);
+void Animate_DROIDEKA(GameObject_s *object);
+void Animate_SUPERBATTLEDROID(GameObject_s *object);
+void Animate_BARMAN(GameObject_s *object);
+void Animate_REPUBLICGUNSHIP(GameObject_s *object);
+void Animate_SPEEDERBIKE(GameObject_s *object);
+void Animate_DEFAULT(GameObject_s *object);
+void Animate_GEONOSIAN(GameObject_s *object);
 void AnimatePlayer(GameObject_s *object);
 #ifdef __cplusplus
 extern "C" {
 #endif
+    void SetAnimBlendMode(i32 mode);
+    i32 AnimMiscFlags(CHARACTERMODEL_s *model, i32 animation);
+    void AnimList_NoLoad(i32 character_id, ...);
+    void AnimList_RequestAnimGroups(i32 character_id, ...);
+    void AnimList_RequestAnimGroupForCreatures(i32 group_id, ...);
+    i32 GetAnimBlendMode(void);
     i32 CurrentAnim(ANIMPACKET_s *packet);
     f32 AnimSpeed(CHARACTERMODEL_s *model, i32 animation);
     void AnimPacket_MiniToFull(MINIANIMPACKET_s *mini_packet, ANIMPACKET_s *packet);
     void AnimPacket_FullToMini(ANIMPACKET_s *packet, MINIANIMPACKET_s *mini_packet);
     i32 FindAnimIX(characterdata_s *character, char *name);
+    f32 AnimDuration(i32 character_id, i32 animation, f32 start_frame, f32 end_frame, i32 subtract_frame_time);
     f32 GetAnimTimeRandom(CHARACTERMODEL_s *model, i32 animation);
     void SetAnimTimeRandom(CHARACTERMODEL_s *model, ANIMPACKET_s *packet);
     void ResetAnimPacket(ANIMPACKET_s *packet, i16 animation);
+    f32 BlendTimeBetweenAnims(CHARACTERMODEL_s *model, i32 source_animation, i32 target_animation);
+    i32 AnimsAvailableToBothCharacters(ANIMPACKET_s *packet, i32 first_character, i32 second_character);
+    void EvalModelAnim(CHARACTERMODEL_s *model, ANIMPACKET_s *packet, numtx_s *world_matrix, numtx_s *joint_matrices,
+                       void ***dwa_output, NUVEC *locator_positions, numtx_s *locator_matrices, u32 layer_mask);
     f32 AnimStopFrame(CHARACTERMODEL_s *model, i32 animation);
     void UpdateAnimPacket(CHARACTERMODEL_s *model, ANIMPACKET_s *packet, f32 frame_step, f32 movement_speed,
                           f32 blend_step, f32 backwards_multiplier);

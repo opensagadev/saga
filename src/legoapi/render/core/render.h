@@ -4,11 +4,23 @@
 #include "decomp.h"
 #include "legoapi/legoapi_types.h"
 
-// Core rendering helpers (module legoapi/render/core, render.cpp).
+// Core rendering helpers.
+
+extern void (*DisguiseAdjustFn)(i32 character_id, i32 hat, NUVEC *scale, NUVEC *offset);
 
 void DrawPaintLights(void);
-void DrawTimer(i32 mins, i32 secs, i32 unknown);
+void Draw3DObject(WORLDINFO_s *world, i32 object_index, NUVEC *position, u16 x_rotation, u16 y_rotation, u16 z_rotation,
+                  f32 scale_x, f32 scale_y, f32 scale_z, i32 rotate_order);
+void DrawGameMessage_Targets(GAMEMESSAGE_s *message, NUVEC *position, f32 scale);
+extern i32 dco_locatorposonly;
+void DrawObjectOnCharacter(WORLDINFO_s *world, GameObject_s *object, i32 object_id, nuhspecial_s *special, i32 locator,
+                           i32 second_locator, NUMTX *joints, i32 reflect, u32 layers, NUMTX *rotation,
+                           NUVEC *translation, f32 alpha, f32 scale);
+void BackDrop_ResetColours(void);
+extern f32 KITPOSY;
+extern f32 BOSSICONY;
 void DrawBossHitPoints(GameObject_s *obj);
+void DrawStatusIcons(STATUSPACKET_s *status, f32 y, f32 alpha);
 void DrawMiniSnowTroopers(WORLDINFO_s *world);
 void DrawForceBackEffect(nuhspecial_s *special);
 void DrawSaveSlots(MENU_s *menu, float y);

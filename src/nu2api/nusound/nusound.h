@@ -1,6 +1,5 @@
 #pragma once
 
-#include "globals.h"
 #include "nu2api/nucore/common.h"
 
 struct NuSoundStreamingSample;
@@ -72,6 +71,8 @@ DECOMP_ASSERT(sizeof(MusicPlayback) == 0x24, "MusicPlayback size");
 #ifdef __cplusplus
 
 NUSOUND_FILENAME_INFO *ConfigureMusic(char *file, VARIPTR *bufferStart, VARIPTR *bufferEnd);
+i32 ActionFromQuiet(i32 index);
+i32 AmbientFromQuiet(i32 index);
 
 extern "C" {
 #endif

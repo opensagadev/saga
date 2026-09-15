@@ -9,11 +9,13 @@
 #include <GLES2/gl2.h>
 #include <pthread.h>
 #include <string.h>
+#include <time.h>
 
 #include "decomp.h"
 #include "nu2api/nu3d/NuRenderDevice.h"
-#include "nu2api/nu3d/android/nuiosdl_gl.h"
+#include "nu2api/nu3d/android/nurndr_android.h"
 #include "nu2api/nu3d/android/nuposteffect_plain.h"
+#include "nu2api/nu3d/android/nupostfilter.h"
 #include "nu2api/nu3d/android/nutimebar_plain.h"
 #include "nu2api/nu3d/android/nutex_ios_ex.h"
 #include "nu2api/nu3d/nudlist.h"
@@ -24,7 +26,6 @@
 #include "nu2api/nucore/nuthread.h"
 
 static volatile i32 renderThreadCS;
-i64 getCurrentTime();
 static i32 renderThreadIsLocked;
 pthread_t g_renderThread;
 thread_local i32 gt_currentThreadId = -1;
@@ -34,7 +35,7 @@ extern "C" i32 NuRenderThreadIsCurrentThread(void) {
 }
 
 // Original file-static double buffers (bss 0x119db.. / 0x119fd..).
-static nudisplayscene_s sceneParameters_safe[16];
+static nurenderscene_s sceneParameters_safe[16];
 static i32 sceneParametersCount_safe;
 static void *dynamicLights_safe[64];
 static i32 dynamicLightsCount_safe;
@@ -47,26 +48,13 @@ extern "C" {
 
 // Game-thread scene-parameter queue (defined in nurndr_plain.cpp).
 extern "C" {
-    extern struct nudisplayscene_s sceneParameters[16];
+    extern struct nurenderscene_s sceneParameters[16];
     extern i32 sceneParametersCount;
 }
 static VARIPTR nuspecial_vertex_offsets_safe;
 static i32 nuspecial_vertex_noffsets_safe;
 
-// Render-context accumulators reset/read by the frame tail (bss 0x119bb..).
-extern "C" {
-    f32 g_renderContext_gpuTime;
-    f32 g_renderContext_postEffectTime;
-    f32 g_renderContext_3dTime;
-    f32 g_renderContext_kTint[4];
-}
 extern const f32 nuvec4_one[4] = {1.0f, 1.0f, 1.0f, 1.0f};
-f32 g_renderContext_viewProj[16];
-f32 g_renderContext_viewProjInverse[16];
-f32 g_renderContext_view[16];
-f32 g_renderContext_projection[16];
-f32 g_renderContext_world[16];
-f32 g_renderContext_position[4];
 
 extern "C" i32 NuDynamicLightIsEnabled(void *light) {
     return light != NULL;
@@ -163,6 +151,13 @@ extern "C" void NuRenderThreadPrepareRender(void) {
     sceneParametersCount = 0;
 }
 
+// Original 0x2a6020: C++ render-thread clock helper, distinct from the C platform entry point.
+i64 getCurrentTime() {
+    struct timespec ts;
+    clock_gettime(CLOCK_REALTIME, &ts);
+    return (i64)ts.tv_sec * 1000 + (i64)ts.tv_nsec;
+}
+
 // original 0x2a6080
 extern "C" void NuRenderThreadStartRender(void) {
     g_renderStartTime = getCurrentTime();
@@ -185,7 +180,7 @@ i32 renderThread_processRenderScenes(void) {
     _NuTimeBarSlotBegin(-1, 4, "CPU_QUEUE_DRAW");
 
     for (i32 i = 0; i < sceneParametersCount_safe; i++) {
-        nudisplayscene_s &scn = sceneParameters_safe[i];
+        nurenderscene_s &scn = sceneParameters_safe[i];
 
         if (scn.unknown_48 != 0 && !NuPostEffectIsInitialised(0x20))
             scn.unknown_48 = 0;
@@ -214,7 +209,7 @@ i32 renderThread_processRenderScenes(void) {
     glViewport(0, 0, g_backingWidth, g_backingHeight);
 
     for (i32 i = 0; i < sceneParametersCount_safe; i++) {
-        nudisplayscene_s &scn = sceneParameters_safe[i];
+        nurenderscene_s &scn = sceneParameters_safe[i];
 
         if (scn.clear_flags != 0) {
             NuFramebufferClear(scn.clear_flags, scn.bg_colour);

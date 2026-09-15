@@ -1,11 +1,13 @@
 #include "decomp.h"
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/legoapi_types.h"
+#include "legoapi/gizmo/object/gizmopickup.h"
 #include "nu2api/nu3d/nutex.h"
 #include "globals.h"
 #include "gamelib/util/gamelib_util_types.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/gizmos/fx/gizmopickups.h"
+#include "legoapi/menus/screens/arcade.h"
 #include "legoapi/world/world.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/mission.h"
@@ -17,42 +19,7 @@ struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
-u8 CoinTab[4] = {0, 1, 2, 3};
-
-void Pup_CollectCoin(WORLDINFO_s *, GIZMOPICKUP_s *, i32, GameObject_s *, i32);
-
-GIZMO_PICKUP_TYPE GizmoPickupType[10] = {
-    {"Silver Coin", NULL, NULL, 's', 4, GIZMOPICKUP_TYPE_FLAG_40, 0, 0x00b7, 10, 0.045f, 0.045f, 10.0f, 0.0f, NULL,
-     Pup_CollectCoin, -1, -1, 0.0f, 0.0f},
-    {"Gold Coin", NULL, NULL, 'g', 4, GIZMOPICKUP_TYPE_FLAG_40, 0, 0x00bf, 100, 0.045f, 0.045f, 10.0f, 0.0f, NULL,
-     Pup_CollectCoin, -1, -1, 0.0f, 0.0f},
-    {"Blue Coin", "PickupCoinB", NULL, 'b', 4, GIZMOPICKUP_TYPE_FLAG_40, 0, 0x00c7, 1000, 0.045f, 0.045f, 6.0f, 0.0f,
-     NULL, Pup_CollectCoin, 8, -1, 0.0f, 0.0f},
-    {"Purple Coin", "PickupCoinB", NULL, 'p', 4, GIZMOPICKUP_TYPE_FLAG_40, 0, 0x00d5, 10000, 0.045f, 0.045f, 6.0f, 0.0f,
-     NULL, Pup_CollectCoin, 8, -1, 0.0f, 0.0f},
-    {"Minikit", "MK-Appear", NULL, 'm', 0,
-     GIZMOPICKUP_TYPE_DRAW_TUMBLING | GIZMOPICKUP_TYPE_MINIKIT_DETECTOR | GIZMOPICKUP_TYPE_FLAG_40, 0, 0x00ce, 0,
-     0.125f, 0.15f, 2.0f, 0.05f, NULL, NULL, 20, -1, 0.0f, 0.0f},
-    {"Heart", NULL, NULL, 'h', 0, GIZMOPICKUP_TYPE_DRAW_Y_ROTATION, 0, 0x00cb, 0, 0.1f, 0.08f, 4.0f, 0.0f, NULL, NULL,
-     -1, -1, 0.0f, 0.0f},
-    {"Red Brick", "MK-Appear", NULL, 'r', 0,
-     GIZMOPICKUP_TYPE_DRAW_TUMBLING | GIZMOPICKUP_TYPE_RED_BRICK_DETECTOR | GIZMOPICKUP_TYPE_FLAG_40, 0, 0x00d2, 0,
-     0.12f, 0.06f, 2.0f, 0.1f, NULL, NULL, 99, -1, 0.0f, 0.0f},
-    {"Charkit", "MK-Appear", "MK-Pickup", 'c', 0,
-     GIZMOPICKUP_TYPE_DRAW_TUMBLING | GIZMOPICKUP_TYPE_CHALLENGE_MODE_FILTER, 0, 0x00cf, 0, 0.125f, 0.15f, 2.0f, 0.05f,
-     NULL, NULL, 20, -1, 0.0f, 0.0f},
-    {"Torpedo", NULL, NULL, 't', 0, GIZMOPICKUP_TYPE_DRAW_Y_ROTATION, 0, 0x0079, 0, 0.1f, 0.1f, 5.0f, 0.0f, NULL, NULL,
-     -1, -1, 0.0f, 0.0f},
-    {"Power Up", "MK-Appear", NULL, 'u', 0, GIZMOPICKUP_TYPE_DRAW_TUMBLING, 0, 0x00d0, 0, 0.125f, 0.125f, 2.0f, 0.05f,
-     NULL, NULL, -1, 0x00d1, 0.0f, 0.0f},
-};
-
-GIZMOPICKUPSYS_s GizmoPickupSys_Game = {
-    GizmoPickupType, CoinTab, 10, 4, 4, 2, 0, 0,
-};
-
 WORLDINFO_s *WorldInfo_CurrentlyActive();
-i32 Arcade_GetMode(u32 *);
 extern f32 COINMSGTIME;
 extern "C" void PlaySfx(char *, NUVEC *);
 void MakePartVector(NUVEC *, NUVEC *, f32);
@@ -217,6 +184,7 @@ i32 IsACoinType(i32 type) {
 }
 
 void AddMiscPickups(nuvec_s *, i32, i32, i32) {
+    STUBBED();
 }
 
 i32 GetRandomCoinType() {

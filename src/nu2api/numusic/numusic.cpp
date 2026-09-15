@@ -1142,6 +1142,7 @@ const char *NuMusic::ClassToName(u32) {
 }
 
 void NuMusic::Debug(i32, i32) {
+    STUBBED();
 }
 
 i32 NuMusic::GetAlbumHandle(char const *name) {
@@ -1543,9 +1544,11 @@ void NuMusic::xAttenuation(nufpar_s *fpar) {
 }
 
 void NuMusic::GlobalParseErrorFn(nufpar_s *param_1) {
+    STUBBED();
 }
 
 void NuMusic::TrackParseErrorFn(nufpar_s *param_1) {
+    STUBBED();
 }
 
 void RegisterMusic(NUSOUND_FILENAME_INFO *files) {

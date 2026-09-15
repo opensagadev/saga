@@ -2,14 +2,21 @@
 #include "legoapi/world/world.h"
 #include "legoapi/world/level.h"
 #include "legoapi/characters/core/character.h"
+#include "legoapi/characters/motion.h"
 #include "legoapi/render/fx.h"
+#include "legoapi/render/core/terrain.h"
+#include "legoapi/render/fx/parts.h"
 #include "globals.h"
 #include "legoapi/world/area.h"
+#include "legoapi/world/world_shared.h"
 #include "legoapi/core/config/cheat.h"
 #include "legoapi/gizmos/fx/gizmopickups.h"
 #include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/items/collect/bolts.h"
+#include "legoapi/items/collect/torpedo.h"
 #include "decomp.h"
 #include "nu2api/nucore/nustring.h"
+#include "nu2api/nufile/nufpar.h"
 #include "legoapi/core/input/qrand.h"
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/nu3d/nuspecial.h"
@@ -21,6 +28,7 @@
 #include "legoapi/characters/core/players.h"
 #include "legoapi/gizmo/base/gizmo.h"
 #include "legoapi/gizmo/base/GizBlowupObjectInterface.h"
+#include "legoapi/gizmo/object/gizmoblowups.h"
 #include <string.h>
 
 extern BOLT_s Bolt[32];
@@ -35,11 +43,6 @@ static void Bolt_GetShootOrigin_Default(GameObject_s *, NUVEC *);
 static i32 Bolt_GetShootDirection_Default(GameObject_s *, NUVEC *);
 static void UpdateBolt_Geonosian(BOLT_s *);
 static void EndBolt_EwokTorpedo(BOLT_s *);
-void Torpedo_InitBolt(BOLT_s *);
-void Torpedo_UpdateBolt(BOLT_s *);
-void Torpedo_EndBolt(BOLT_s *);
-void Torpedo_InitRicochet(BOLT_s *, NUVEC *);
-f32 Torpedo_Scale(BOLT_s *);
 
 #include "legoapi/items/collect/bolttypes_lsw.inc"
 
@@ -49,6 +52,150 @@ static BOLTSYS BoltSys_Default = {
     &GlobalBoltType_Default,        1,    NULL, Bolt_Debris_Default, Bolt_GetShootOrigin_Default,
     Bolt_GetShootDirection_Default, NULL, NULL};
 BOLTSYS *BoltSys = &BoltSys_Default;
+
+static BOLTTYPE_s *BT_bolttype;
+static WORLDINFO_s *BT_worldinfo;
+static NUGSCN *BT_scene;
+static i32 BT_gdeb_moving_count;
+
+// Configuration entry point and parser callbacks share the original BT state.
+void BoltTypes_Configure(WORLDINFO_s *world, char *config) {
+    STUBBED();
+    (void)world;
+    (void)config;
+}
+
+static __used__ void BT_canonlyhitplayers(nufpar_s *) {
+    BT_bolttype->field_60 |= 0x80;
+}
+static __used__ void BT_converge(nufpar_s *) {
+    BT_bolttype->field_60 |= 0x400;
+}
+static __used__ void BT_damage(nufpar_s *parser) {
+    BOLTTYPE_s *bolt_type = BT_bolttype;
+    bolt_type->field_3c = static_cast<u8>(NuFParGetInt(parser));
+}
+static __used__ void BT_debris(nufpar_s *parser) {
+    if (NuFParGetWord(parser) != 0) {
+        BOLTTYPE_s *bolt_type = BT_bolttype;
+        bolt_type->debris_id = static_cast<i16>(FindGameDebris(BT_worldinfo->debris_sys, parser->word_buf));
+    }
+}
+static __used__ void BT_debris_moving(nufpar_s *parser) {
+    if (BT_gdeb_moving_count > 1 || NuFParGetWord(parser) == 0) {
+        return;
+    }
+
+    BT_bolttype->moving_debris[BT_gdeb_moving_count] =
+        static_cast<i16>(FindGameDebris(BT_worldinfo->debris_sys, parser->word_buf));
+    i32 count = static_cast<i32>(NuFParGetFloat(parser));
+    i32 index = BT_gdeb_moving_count++;
+    if (count < 0) {
+        count = -count;
+    }
+    BT_bolttype->moving_debris_counts[index] = static_cast<i16>(count);
+}
+static __used__ void BT_duration(nufpar_s *parser) {
+    BOLTTYPE_s *bolt_type = BT_bolttype;
+    bolt_type->field_14 = NuFParGetFloat(parser);
+}
+static __used__ void BT_glow_obj(nufpar_s *parser) {
+    if (NuFParGetWord(parser) != 0 && BT_scene != NULL) {
+        if (NuSpecialFind(BT_scene, &BT_bolttype->specials.glow_special, parser->word_buf, 1) != 0) {
+            BT_bolttype->specials.reference_glow_special = BT_bolttype->specials.glow_special;
+        }
+    }
+}
+static __used__ void BT_name(nufpar_s *parser) {
+    if (NuFParGetWord(parser) != 0 && NuStrLen(parser->word_buf) < 15) {
+        NuStrCpy(BT_bolttype->name, parser->word_buf);
+    }
+}
+static __used__ void BT_no_collide(nufpar_s *) {
+    BT_bolttype->field_60 |= 0x10000;
+}
+static __used__ void BT_nodeflect(nufpar_s *) {
+    BT_bolttype->field_60 |= 0x100;
+}
+static __used__ void BT_no_terrain(nufpar_s *) {
+    BT_bolttype->field_60 |= 4;
+}
+static __used__ void BT_obj(nufpar_s *parser) {
+    if (NuFParGetWord(parser) != 0 && BT_scene != NULL) {
+        if (NuSpecialFind(BT_scene, &BT_bolttype->specials.object_special, parser->word_buf, 1) != 0) {
+            BT_bolttype->specials.reference_object_special = BT_bolttype->specials.object_special;
+        }
+    }
+}
+static __used__ void BT_part_hit(nufpar_s *parser) {
+    if (NuFParGetWord(parser) != 0) {
+        BOLTTYPE_s *bolt_type = BT_bolttype;
+        bolt_type->field_38 = static_cast<i16>(FindPartDebris(BT_worldinfo->part_debris_sys, parser->word_buf));
+    }
+}
+static __used__ void BT_radius(nufpar_s *parser) {
+    BOLTTYPE_s *bolt_type = BT_bolttype;
+    bolt_type->field_1c = NuFParGetFloat(parser);
+}
+static __used__ void BT_rand_angle(nufpar_s *parser) {
+    BOLTTYPE_s *bolt_type = BT_bolttype;
+    bolt_type->field_40 = static_cast<i32>(NuFParGetFloat(parser) * (65536.0f / 360.0f));
+}
+static __used__ void BT_ref_glow_obj(nufpar_s *parser) {
+    if (NuFParGetWord(parser) != 0 && BT_scene != NULL) {
+        NuSpecialFind(BT_scene, &BT_bolttype->specials.reference_glow_special, parser->word_buf, 1);
+    }
+}
+static __used__ void BT_ref_obj(nufpar_s *parser) {
+    if (NuFParGetWord(parser) != 0 && BT_scene != NULL) {
+        NuSpecialFind(BT_scene, &BT_bolttype->specials.reference_object_special, parser->word_buf, 1);
+    }
+}
+static __used__ void BT_scale(nufpar_s *parser) {
+    BOLTTYPE_s *bolt_type = BT_bolttype;
+    bolt_type->field_20 = NuFParGetFloat(parser);
+}
+static __used__ void BT_sceneconfig(nufpar_s *parser) {
+    if (NuFParGetWord(parser) == 0) {
+        return;
+    }
+    if (NuStrICmp(parser->word_buf, "level") == 0) {
+        BT_scene = BT_worldinfo->current_gscn;
+    } else if (NuStrICmp(parser->word_buf, "area") == 0) {
+        BT_scene = area_scene;
+    } else if (NuStrICmp(parser->word_buf, "vehicle") == 0) {
+        BT_scene = vehicle_scene;
+    } else {
+        BT_scene = things_scene;
+    }
+}
+static __used__ void BT_sfx_hit(nufpar_s *parser) {
+    if (NuFParGetWord(parser) != 0) {
+        BOLTTYPE_s *bolt_type = BT_bolttype;
+        bolt_type->hit_sfx_id = static_cast<i16>(GetSfxId(parser->word_buf));
+    }
+}
+static __used__ void BT_sfx_shoot(nufpar_s *parser) {
+    if (NuFParGetWord(parser) != 0) {
+        BOLTTYPE_s *bolt_type = BT_bolttype;
+        bolt_type->shoot_sfx_id = static_cast<i16>(GetSfxId(parser->word_buf));
+    }
+}
+static __used__ void BT_shadow_obj(nufpar_s *parser) {
+    if (NuFParGetWord(parser) != 0 && BT_scene != NULL) {
+        NuSpecialFind(BT_scene, &BT_bolttype->specials.shadow_special, parser->word_buf, 1);
+    }
+}
+static __used__ void BT_single_debris(nufpar_s *) {
+    BT_bolttype->field_60 |= 0x40000000;
+}
+static __used__ void BT_speed(nufpar_s *parser) {
+    BOLTTYPE_s *bolt_type = BT_bolttype;
+    bolt_type->field_10 = NuFParGetFloat(parser);
+}
+static __used__ void BT_trooper_bolt(nufpar_s *) {
+    BT_bolttype->field_60 |= 0x80000;
+}
 
 BOLT_s *Bolt_Alloc() {
     i32 index = i_bolt;
@@ -63,7 +210,6 @@ BOLT_s *Bolt_Alloc() {
     return &Bolt[index];
 }
 
-extern i32 addbolt_nosfx;
 extern i32 addbolt_newsfx;
 extern NUVEC addbolt_newpos;
 f32 BOLT_SHOOTFLASHTIME = 0.1f;
@@ -71,9 +217,6 @@ f32 Bolt_ObjTargetPosYAdjust(GameObject_s *);
 void FindAnglesXY(NUVEC *, u16 *, u16 *);
 void CalculateInterceptVector(NUVEC *, NUVEC *, NUVEC *, f32, NUVEC *, NUVEC *);
 void GameAudio_PlaySfxById(i32, NUVEC *, i32, i32);
-i16 LEGOACT_SHOOTBACK = -1;
-i16 LEGOACT_SHOOTLEFT = -1;
-i16 LEGOACT_SHOOTRIGHT = -1;
 
 void Bolt_Shoot(GameObject_s *object, i32 type_id, i32 fire_flags) {
     BOLTTYPE_s *type = BoltType_FindByID(type_id, WORLD);
@@ -378,7 +521,6 @@ void BoltTypes_Reset(WORLDINFO_s *world) {
     memset(world->bolt_types, 0, sizeof(world->bolt_types));
 }
 
-void AddPartDebris(PARTDEBSYS_s *, i32, NUVEC *);
 extern "C" void PlaySfx(char *, NUVEC *);
 i32 Player_HasDoubleBoltDamage_FromBolt(BOLT_s *);
 void GameCam_NewShake(GAMECAMERA_s *, f32, f32, f32);
@@ -580,13 +722,12 @@ i32 Bolt_HitGameObjects(BOLT_s *bolt, NUVEC *points, NUVEC *minimum, NUVEC *maxi
 }
 
 void Bolt_HitCustomFn_LSW(BOLT_s *, nuvec_s *) {
+    STUBBED();
 }
 
-i32 LEGOCONTEXT_BLOCK = -1;
-i16 LEGOACT_DEACTIVATED = -1;
 i32 addbolt_nosfx;
 BOLT_s *objhitobj_bolt;
-extern i32 LEGOCONTEXT_HOLD, i_temp_xrot;
+extern i32 i_temp_xrot;
 extern f32 DEACTIVATEDTIME;
 i32 Player_HasDeflectBolts(GameObject_s *);
 i32 CannotKill(GameObject_s *);
@@ -772,10 +913,10 @@ finish:
 }
 
 void Bolt_AddDeflectedBolt(BOLT_s *, nuvec_s *, nuvec_s *, unsigned char *) {
+    STUBBED();
 }
 
 extern "C" TERRAIN_SURFACE_s TerSurface[32];
-i32 GizmoBlowupBlowup(GIZMOBLOWUP_s *, i32, i32, i32, GameObject_s *, i32);
 static __used__ i32 Bolt_HitPlat(BOLT_s *bolt, u8 *hit_flags, WORLDINFO_s *) {
     u32 exclude = GetLevelExBlowupFlags();
     Bolt_PlayHitSfx(bolt);
@@ -805,8 +946,6 @@ static __used__ i32 Bolt_HitPlat(BOLT_s *bolt, u8 *hit_flags, WORLDINFO_s *) {
     return 0;
 }
 
-extern i16 id_XWING, id_MINIXWING, id_MINITIEINTERCEPTOR, id_MINIATAT, id_MINIROYALSTARSHIP, id_MINIIMPERIALSHUTTLE;
-extern i16 id_MILLENNIUMFALCON, id_MINIMILLENNIUMFALCON, id_ATST, id_JEDISTARFIGHTERREDEP3, id_JEDISTARFIGHTERYELLOWEP3;
 i32 Bolt_AlternateFire_LSW(GameObject_s *object, i32 index) {
     i16 id = object->id;
     if (id == id_XWING || id == id_MINIXWING || id == id_MINITIEINTERCEPTOR || id == id_MINIATAT ||
@@ -832,41 +971,6 @@ f32 Bolt_ObjTargetPosYAdjust(GameObject_s *object) {
     return static_cast<f32>(random) * ((height + height) / 65535.0f) - height;
 }
 
-extern "C" i16 id_4LOM;
-extern "C" i16 id_ANAKINSSPEEDER;
-extern "C" i16 id_ANAKINSSPEEDER_GREEN;
-extern "C" i16 id_ATAT;
-extern "C" i16 id_ATST_LOWRES;
-extern "C" i16 id_BIGGUN;
-extern "C" i16 id_BOBAFETT;
-extern "C" i16 id_CATAPULT;
-extern "C" i16 id_CLONEWALKER;
-extern "C" i16 id_EWOK;
-extern "C" i16 id_FLASHSPEEDER;
-extern "C" i16 id_KAMINOANDROID;
-extern "C" i16 id_MINIDROIDEKA;
-extern "C" i16 id_MINISITHINFILTRATOR;
-extern "C" i16 id_MINISOLARSAILOR;
-extern "C" i16 id_MINISTARDESTROYER;
-extern "C" i16 id_MINITIEADVANCED;
-extern "C" i16 id_MINITIEBOMBER;
-extern "C" i16 id_MINITIEFIGHTER;
-extern "C" i16 id_NABOOSTARFIGHTERLIME;
-extern "C" i16 id_NEW_REPUBLIC_GUNSHIP_GREEN;
-extern "C" i16 id_PROBEDROID;
-extern "C" i16 id_REPUBLICGUNSHIP;
-extern "C" i16 id_REPUBLICGUNSHIP_GREEN;
-extern "C" i16 id_SENTRYDROID;
-extern "C" i16 id_SLAVE1;
-extern "C" i16 id_SPEEDERBIKESNOW;
-extern "C" i16 id_STAP2;
-extern "C" i16 id_TIEBOMBER;
-extern "C" i16 id_TIEFIGHTER;
-extern "C" i16 id_TIEFIGHTERDARTH;
-extern "C" i16 id_TIEINTERCEPTOR;
-extern "C" i16 id_WICKET;
-extern "C" i16 id_ZAMSSPEEDER;
-void Move_CANNON(GameObject_s *);
 extern AREADATA *DOGFIGHT_ADATA;
 i32 BoltType_FindIDByCreature(GameObject_s *object, i32 fallback) {
     WORLDINFO_s *world = WorldInfo_CurrentlyActive();
@@ -1036,8 +1140,9 @@ void Bolt_Free(BOLT_s *bolt) {
 static bool Bolt_RayCast(BOLT_s *, NUVEC *, NUVEC *, f32);
 i32 GizmoSys_BoltHit(GIZMOSYS_s *, void *, BOLT_s *, NUVEC *, NUVEC *, NUVEC *, f32, u8 *);
 GIZMOBLOWUP_s *GizmoBlowUp_Hit(GameObject_s *, NUVEC *, i32, f32, NUVEC *, NUVEC *, BOLT_s *, u32, u8 *);
+// The original caller appears to treat this u16-returning function as i32;
+// correcting this declaration lowers its match.
 i32 ObjHitObj_Flags(GameObject_s *);
-extern "C" f32 NewRayCastGetTOFI();
 i32 addbolt_noobjmom, addbolt_newsfx;
 NUVEC addbolt_newpos;
 i32 (*BoltInitSfxFn)(GameObject_s *);
@@ -1272,7 +1377,6 @@ void Bolt_Init(void *storage, NetMessage &message) {
         type->init_callback(bolt);
 }
 
-extern "C" void AddVariableShotDebrisEffectTimed1(i32, NUVEC *, i32, f32, i16, i16, NUMTX *);
 static __used__ void UpdateBolt_Geonosian(BOLT_s *bolt) {
     WORLDINFO_s *world = WorldInfo_CurrentlyActive();
     i32 effect = world->debris_sys->entries[85].effect;
@@ -1281,12 +1385,6 @@ static __used__ void UpdateBolt_Geonosian(BOLT_s *bolt) {
 }
 
 i32 GameRayCast(NUVEC *, NUVEC *, f32, i32);
-extern "C" {
-    void PlatOnOff(i32, i32);
-    i32 TerrainPlatId();
-    i32 NewRayCastGetImpactTerrainType();
-    i32 IgnoreWallSplines;
-}
 static __used__ bool Bolt_RayCast(BOLT_s *bolt, NUVEC *start, NUVEC *movement, f32 radius) {
     NUVEC end;
     NuVecAdd(&end, start, movement);
@@ -1321,7 +1419,6 @@ static __used__ bool Bolt_RayCast(BOLT_s *bolt, NUVEC *start, NUVEC *movement, f
     return hit;
 }
 
-void AddPartDebris(PARTDEBSYS_s *, i32, NUVEC *);
 static __used__ void Bolt_Debris_Default(BOLT_s *bolt, nuvec_s *points, int point, nuvec_s *, int) {
     WORLDINFO_s *world = WorldInfo_CurrentlyActive();
     if (((bolt->flags & 0x40000200) == 0 && point == -1) || point == 0)
@@ -1349,10 +1446,12 @@ static __used__ i32 Bolt_GetShootDirection_Default(GameObject_s *object, nuvec_s
 }
 
 static __used__ unsigned int Batarang_GetTargetPos(BATARANG_s *, int, nuvec_s *) {
+    STUBBED();
     return {};
 }
 
 static __used__ void CollideBoltStarFighter(BOLT_s *, starfighter_s *, _vuv_s *, _vuv_s *) {
+    STUBBED();
 }
 
 EXPLOSION *Detonate(NUVEC *, u16);
@@ -1361,42 +1460,35 @@ static __used__ void EndBolt_EwokTorpedo(BOLT_s *bolt) {
 }
 
 static __used__ void ProcessSpaceLevel(spacelevel_s *) {
+    STUBBED();
 }
 
 static __used__ void ProcessStarFighter(starfighter_s *, quickboltinfo *) {
+    STUBBED();
 }
 
 static __used__ void StarFighterAlign(starfighter_s *, _vuv_s *, f32, i32) {
+    STUBBED();
 }
 
 static __used__ void TrooperTeamSetStateCode(minitrooperteam_s *) {
+    STUBBED();
 }
 
 static __used__ unsigned int BoltInitSfx_LSW(GameObject_s *) {
+    STUBBED();
     return {};
 }
 
 void BoltTypes_Init(WORLDINFO_s *world) {
+    STUBBED();
     (void)world;
 }
-
-void BoltTypes_Configure(WORLDINFO_s *world, char *config) {
-    (void)world;
-    (void)config;
-}
-
-extern "C" {
-
-    void HitParts(void) {
-    }
-
-} // extern "C"
 
 extern "C" {
     void NewTerrHitInfo(u8 *);
     void NewRayCastGetImpactNormal(NUVEC *);
     i32 NewShadowOnPlatform();
-    i32 ShadowInfo();
     void AddVariableShotDebrisEffectTimed5(i32, NUVEC *, NUVEC *, NUVEC *, i32, f32, NUMTX *, NUMTX *, i16, u8);
 }
 f32 GameShadow(GameObject_s *, NUVEC *, f32, i32);

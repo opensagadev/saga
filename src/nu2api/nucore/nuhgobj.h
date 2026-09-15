@@ -4,8 +4,9 @@
 #include "nu2api/numath/numtx.h"
 #include "decomp.h"
 
-struct nudldlistscene_s;
+struct nudisplayscene_s;
 struct nugscn_s;
+struct numtl_s;
 struct ani3_animheader_s;
 struct nuanimdata2_s;
 struct nuanimbuff_s;
@@ -84,8 +85,16 @@ struct nuhgobjshadowgroup_s {
 };
 
 struct nuhgobj_s {
-    u8 data[0x110];
-    nudldlistscene_s *display_list; // 0x110
+    union {
+        u8 data[0x110];
+        struct {
+            u8 scene_header_00[0x0c];
+            numtl_s **materials; // Graphics-scene-compatible prefix, +0x0c.
+            i32 material_count;   // +0x10.
+            u8 scene_header_14[0x110 - 0x14];
+        };
+    };
+    nudisplayscene_s *display_list; // 0x110
     u8 data_0x114[0x54];
     i32 joint_count;              // 0x168
     nuhgobjjoint_s *joints;       // 0x16c
@@ -111,6 +120,8 @@ struct nuhgobj_s {
     NUVEC bounds_min; // 0x1ac
     NUVEC bounds_max; // 0x1b8
 };
+DECOMP_ASSERT(offsetof(nuhgobj_s, materials) == 0x0c, "Hierarchy material array offset");
+DECOMP_ASSERT(offsetof(nuhgobj_s, material_count) == 0x10, "Hierarchy material count offset");
 
 DECOMP_ASSERT(sizeof(nuhgobjpoi_s) == 0x50, "nuhgobjpoi_s size");
 DECOMP_ASSERT(offsetof(nuhgobjpoi_s, joint_index) == 0x44, "nuhgobjpoi_s joint offset");
@@ -159,6 +170,8 @@ extern "C" {
                                f32 frame_b, f32 blend);
     void **NuHGobjEvalDwaBlend2(i32 render_count, i16 *render_indices, nuanimdata2_s *animation_a, f32 frame_a,
                                 nuanimdata2_s *animation_b, f32 frame_b, f32 blend);
+    void NuHGobjRestrictEvaluation(nuhgobj_s *object);
+    void NuHGobjRestoreEvaluation(void);
     i32 NuHGobjRndrMtxDwa(nuhgobj_s *object, NUMTX *world_matrix, i32 render_count, i16 *render_indices,
                           NUMTX *joint_matrices, void **blend_values, i32 render_flags);
 #ifdef __cplusplus

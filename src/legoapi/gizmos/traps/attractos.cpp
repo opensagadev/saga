@@ -6,17 +6,13 @@
 #include <stdio.h>
 #include "globals.h"
 #include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/render/core/terrain.h"
 #include "nu2api/numath/numtx.h"
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nutrig.h"
 #include "legoapi/characters/core/players.h"
-extern "C" {
-    i16 FindPlatInst(i32);
-    i32 DeletePlatinst(i32);
-    i16 NewPlatPickupInst(void *, i32);
-}
 extern "C" void NewTerrPlatformsOff();
 void FindAnglesZX(NUVEC *, u16 *, u16 *);
 
@@ -178,6 +174,13 @@ static void Attractos_StoreProgress(void *context, void *, void *data) {
             if ((attracto->state_flags & 4) != 0)
                 progress->filled |= mask;
         }
+    }
+}
+
+void Attractos_InitTerrain(WORLDINFO_s *world) {
+    for (i32 i = 0; i < world->attracto_count; ++i) {
+        ATTRACTO_s *attracto = &static_cast<ATTRACTO_s *>(world->attractos)[i];
+        attracto->platform_id = NewPlatPickupInst(&attracto->transform, 4);
     }
 }
 

@@ -1,6 +1,7 @@
 #pragma once
 
 struct WORLDINFO_s;
+struct AREASAVE_s;
 
 #include "decomp.h"
 #include "nu2api/nucore/common.h"
@@ -9,9 +10,6 @@ u32 TotalLevelCoinTally(WORLDINFO_s *world, u32 *pickups, u32 *blowups, u32 *bui
                         u32 *turrets, u32 *characters);
 
 struct COLLECTID;
-
-extern i32 CollectCount;
-extern COLLECTID *CollectList;
 
 struct COLLECTION_s {
     struct COLLECTID *list; /* 0x0 */
@@ -42,6 +40,9 @@ void Collection_CreateMaster(char *name, i16 *id_list, COLLECTION_s *collection,
 i32 InCollectList_Index(i32 id, COLLECTID *list, i32 count);
 i32 Collection_Got(i32 id);
 COLLECTID *CollectIDUnlocked(i32 id);
+void CollectAllCharacters(i32 id);
+void ReCalculateCompletionPoints(void);
+i32 AllMiniKitsDone(AREASAVE_s *save);
 i32 Collection_GetIDList(COLLECTION_s *collection, u32 model_flag_mask, u32 required_model_flags, i16 *ids,
                          i32 *first_id, i32 *second_id, i32 unused);
 COLLECTION_s *GetFreePlayCollection(i32 area);

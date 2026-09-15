@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "legoapi/legoapi_types.h"
 #include "globals.h"
 #include "legoapi/characters/core/character.h"
@@ -23,8 +24,6 @@ DECOMP_ASSERT(offsetof(SPECIALMOVE_s, victim_animation) == 8, "SPECIALMOVE victi
 DECOMP_ASSERT(offsetof(SPECIALMOVE_s, flags) == 10, "SPECIALMOVE flags offset");
 static SPECIALMOVE_s *SpecialMove;
 static i32 SpecialMoveCount;
-i32 LEGOCONTEXT_SPECIALMOVE_ATTACKER = -1;
-i32 LEGOCONTEXT_SPECIALMOVE_VICTIM = -1;
 
 i32 StartBackFlip(GameObject_s *object);
 
@@ -50,6 +49,7 @@ i32 SpecialMove_Check(GameObject_s *attacker, GameObject_s *victim) {
 }
 
 void SpecialMove_Cancel(GameObject_s *) {
+    STUBBED();
 }
 
 u32 SpecialMove_GetFlags(i32 index, u32 mask) {
@@ -63,15 +63,19 @@ u32 SpecialMove_GetFlags(i32 index, u32 mask) {
 }
 
 void SpecialMove_VictimCode(GameObject_s *) {
+    STUBBED();
 }
 
 void SpecialMoves_Configure(char *, variptr_u *, variptr_u *) {
+    STUBBED();
 }
 
 void SpecialMove_ReleaseVictim(GameObject_s *) {
+    STUBBED();
 }
 
 void SpecialMove_GetVictimAction(i32) {
+    STUBBED();
 }
 
 // Original 0x497ee0, 43 bytes.
@@ -80,6 +84,7 @@ f32 SpecialMove_GetDistanceApart(i32 index) {
 }
 
 void SpecialMove_GetAttackerAction(i32) {
+    STUBBED();
 }
 
 // Original 0x498410, 198 bytes.

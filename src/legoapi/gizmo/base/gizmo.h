@@ -138,6 +138,7 @@ void GizmoSetVisibility(GIZMOSYS *gizmo_sys, GIZMO *gizmo, i32 visibility, i32 u
 i32 GizmoGetVisibility(GIZMOSYS *gizmo_sys, GIZMO *gizmo);
 char *GizmoGetName(GIZMO *gizmo);
 void GizmoActivate(GIZMOSYS *gizmo_sys, GIZMO *gizmo, i32 unknown1, i32 unknown2);
+void GizmoActivateReverse(GIZMOSYS *gizmo_sys, GIZMO *gizmo, i32 reverse, i32 visibility, i32 unknown);
 char *GizmoGetOutputName(GIZMOSYS *gizmo_sys, GIZMO *gizmo, i32 output_index);
 i32 GizmoGetOutput(GIZMOSYS *gizmo_sys, GIZMO *gizmo, i32 unknown1, i32 unknown2);
 void GizmoSysEarlyUpdate(GIZMOSYS *gizmo_sys, void *world_info, float delta_time);
@@ -169,6 +170,7 @@ i32 Gizmo_FindNuSpecial(nugscn_s *scene, nuhspecial_s *special, char *name, i32 
 NUVEC *GizmoGetPos(GIZMOSYS *gizmo_sys, GIZMO *gizmo);
 void InitPaintPuzzle(WORLDINFO_s *world);
 void ResetPaintPuzzle(WORLDINFO_s *world);
+void UpdatePaintPuzzle(WORLDINFO_s *world);
 GIZAIMESSAGE_s *CheckGizAIMessage(GIZAIMESSAGESYS_s *, char const *, GIZAIMESSAGE_s *);
 GIZAIMESSAGE_s *SetGizAIMessage(GIZAIMESSAGESYS_s *, char const *, float, GIZAIMESSAGE_s *);
 char *GizAIMessage_GetName(GIZAIMESSAGE_s *);

@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "host/platform/input.hpp"
 
 #include <atomic>
@@ -91,11 +92,21 @@ namespace NuInputDevicePS {
     }
 
     bool IsInterceptedPS(u32) {
+        STUBBED();
         return false;
     }
 
     bool HasHeadphonesConnectedPS(u32) {
+        STUBBED();
         return false;
+    }
+
+    void EnableDPDPS(u32) {
+        STUBBED();
+    }
+
+    void DisableDPDPS(u32) {
+        STUBBED();
     }
 
     NUPADTYPE GetTypePS(u32 device) {
@@ -111,10 +122,12 @@ namespace NuInputDevicePS {
     }
 
     f32 GetVolumePS(u32) {
+        STUBBED();
         return 0.0f;
     }
 
     void SetMotorsPS(u32, f32, f32) {
+        STUBBED();
     }
 
     void ReadButtonsPS(u32 device, u32 *states) {

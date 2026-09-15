@@ -3,6 +3,8 @@
 #include "decomp.h"
 #include "nu2api/nucore/common.h"
 #include "nu2api/nucore/fixed_width.h"
+#include "nu2api/nucore/nuhgobj.h"
+#include "nu2api/nufile/nufile.h"
 #include "nu2api/numath/nuvec.h"
 
 struct ani3_animheader_s;
@@ -20,6 +22,8 @@ void NuAnimBuffEvaluate_3_QuatB(numtx_s *base, nuanimbuff_s *buffer, nugscn_s *s
                                 ani3_animheader_s *animation,
                                 void (*root_fn)(numtx_s *, void *, nuvec_s *, nuvec_s *, nuvec_s *, float),
                                 nuvec_s *root_translation, void *root_data);
+u32 NuAnimGetAnimDataSizeANI3(ani3_animheader_s *animation);
+void NuAnimRelocatePtrsANI3(ani3_animheader_s *animation, i32 offset);
 
 enum ANI3_MAGIC : u32 {
     ANI3_MAGIC_VERSION_4 = 0x414e4934,
@@ -89,13 +93,33 @@ struct nuanimdata2_s {
 #ifdef __cplusplus
 extern "C" {
 #endif
+    void buildBitCountTable(void);
+    void *NuAnimDataFixPtrs(void *animation, isize delta);
+    void *NuAnimDataCreate(i32 chunk_count);
+    void *NuAnimCurveSetCreate(i32 curve_count);
+    void *NuAnimDataRead(NUFILE file);
+    void NuAnimInit(i32 max_joints, VARIPTR *buf, VARIPTR buf_end);
+    void *NuAnimData2FixPtrs(void *data, isize delta, isize external_delta, i32 flags);
+    void ANI_FixUpAddrs(ani3_animheader_s *animation, isize delta, i32 flags);
+    void *NuAnimData2Relocate(void **data, VARIPTR *buf);
     void *NuAnimData2Fixup(i32 file_size, void **data);
     void *NuAnimData2LoadBuffEx(char *path, VARIPTR *buf, VARIPTR *buf_end, void **result);
     void *NuAnimData2LoadBuff(char *path, VARIPTR *buf, VARIPTR *buf_end);
     void *NuAnimData2LoadBuffFromPAK(void *data, i32 file_size);
     f32 *NuAnimCurveExtractAllNodeCurves_3(ani3_animheader_s *animation, i32 node, f32 frame, char *curve_mask);
+    void NuAnimBuffAccumulate_3(nuanimbuff_s *buffer, ani3_animheader_s *animation, f32 time, i32 overwrite,
+                                f32 blend, i32 first_joint, nuhgobj_s *object, NUVEC *root_translation);
+    void NuAnimBuffEvaluate_3(nuanimbuff_s *buffer, nuhgobj_s *object, NUMTX *matrices,
+                              ani3_animheader_s *animation, NUHGOBJROOTFN root_fn,
+                              NUVEC *root_translation, void *root_data);
+    void NuAnimCurve2SetApplyToMatrix_3(ani3_animheader_s *animation, i32 node, f32 frame, NUMTX *matrix);
     void NuAnimData2CalcMatrix(struct nuanimdata_s *animation, i32 node, f32 frame, struct numtx_s *matrix);
     void NuAnimBuffEvaluateCallback(NUANIMBUFFEVALUATECB callback, void **data, i32 *joints);
+    void *NuAnimBuffCreate(i32 max_joints, VARIPTR *buf);
+    void NuAnimCurveSetDestroy(void *curve_set, i32 destroy_curves);
+    extern NUANIMBUFFEVALUATECB AnimBuffEvalCB;
+    extern void **AnimBuffEvalData;
+    extern i32 *AnimBuffEvalJoint;
     i32 NuAnimSetUseQuatsFlag(i32 enabled);
     i32 NuAnimGetUseQuatsFlag(void);
     i32 NuAnimPushSetUseQuatsFlag(i32 enabled);
@@ -131,6 +155,11 @@ i32 ANI_SimpleAni3PlayerV4Joint_Quat3(ani3_animheader_s *anim, f32 frame, nuanim
                                       i32 first_joint);
 i32 ANI_SimpleAni3PlayerV4Joint_Quat3W(ani3_animheader_s *anim, f32 frame, nuanimbuff_s *buffer, i32 joint_count,
                                        i32 first_joint);
+f32 CalcValue1648(char *data, i32 quarter, i32 stride, f32 fraction, ani3_scalemin_s *scale_min);
+void CalcValue1648Get2Values(char *data, i32 quarter, i32 stride, ani3_scalemin_s *scale_min,
+                             f32 *first, f32 *second);
+extern void *globalbuffer;
+extern i32 MaxAnimJoints;
 #endif
 
 struct nuanimtime_s {

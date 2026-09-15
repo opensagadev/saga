@@ -1,5 +1,7 @@
 #include "nu2api/nu3d/nuportal.h"
 #include "decomp.h"
+#include "legoapi/actions/character/suit.h"
+#include "legoapi/actions/character/streaks.h"
 #include "gameapi/ai/aisys/aisys.h"
 #include "globals.h"
 #include "legoapi/legoapi_types.h"
@@ -13,13 +15,18 @@
 #include "legoapi/characters/core/charconfig.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/characters/motion.h"
+#include "legoapi/characters/motion/gameanim.h"
 #include "legoapi/items/base/collection.h"
+#include "legoapi/items/base/apiobject.h"
 #include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/menus/screens/store.h"
 #include "legoapi/menus/screens/shop.h"
 #include "legoapi/render/fx.h"
+#include "legoapi/render/light/lighting.h"
+#include "legoapi/render/core/terrain.h"
 #include "legoapi/gizmos/object/lever.h"
-#include "legoapi/gizmos/object/technos.h"
+#include "legoapi/gizmos/door/zipups.h"
+#include "legoapi/props/objects/techno.h"
 #include "legoapi/world/level.h"
 #include "legoapi/world/areas.h"
 #include "legoapi/world/world.h"
@@ -29,6 +36,7 @@
 #include "nu2api/nucore/bgproc.h"
 #include "nu2api/nu3d/nudlist.h"
 #include "nu2api/nu3d/nuspecial.h"
+#include "nu2api/nucore/nustring.h"
 
 #include <string.h>
 #include <stdio.h>
@@ -81,8 +89,6 @@ char *TexAnimList_LSW[32] = {
     (char *)"sebulbaspod",    (char *)"sidious",       (char *)"crowd",       NULL,
 };
 
-void InitStreaks(VARIPTR *, VARIPTR, char *);
-void InitRopeMtl(char *, VARIPTR *, VARIPTR *);
 void InitRipples(ripple_set_s **, VARIPTR *, VARIPTR *, i32);
 void CreateFadeMaterials();
 void CreateUsefulMaterials();
@@ -97,14 +103,10 @@ struct SHOPINPUT;
 void CharConfig_ConfigureAll(i32 permanent, nufpcomjmp_s *game_keywords);
 void ExtraCharacterFixUpAfterConfig();
 extern i32 CHARPAK;
-extern i32 apiloadcharactermodels_nopakfile;
-extern "C" i32 apiloadcharactermodels_append;
 
 extern i32 GetMenuID(void);
 extern i32 InCollectList_Index(i32 id, COLLECTID *list, i32 count);
 extern i32 Collection_Got(i32 id);
-extern void IconScenes_Load(APICHARACTERMODELLIST_s *list, i32 permanent, VARIPTR *buf, VARIPTR *buf_end);
-extern NUGSCN *IconScene_FindById(i32 character_id);
 extern void Customiser_SaveModelTextureIDs(CUSTOMISER *customiser, CHARACTERMODEL_s *model);
 extern CUSTOMISER *CharacterCustomiser;
 extern VARIPTR characterbuffer_ptr;
@@ -147,6 +149,7 @@ void LSW_SetIndy(i32) {
 }
 
 void HairMovement(GameObject_s *) {
+    STUBBED();
 }
 
 void HeadMovement(GameObject_s *object) {
@@ -482,9 +485,6 @@ void HeadMovement(GameObject_s *object) {
     }
 }
 
-void fullcodename(i32) {
-}
-
 nuhspecial_s *CharScene_FindHSpecial(WORLDINFO_s *world, i32 character_id);
 
 void CharScene_Draw(WORLDINFO_s *world, i32 character_id, numtx_s *matrix, numtx_s *reflection_matrix) {
@@ -497,6 +497,39 @@ void CharScene_Draw(WORLDINFO_s *world, i32 character_id, numtx_s *matrix, numtx
             NuSpecialDrawAt(special, reflection_matrix);
         }
     }
+}
+
+i32 CharIDFromName(char *name) {
+    for (i32 i = 0; i < CHARCOUNT; i++) {
+        if (NuStrICmp(CDataList[i].file, name) == 0) {
+            return i;
+        }
+    }
+
+    return -1;
+}
+
+CHARACTERDATA *CDataFromName(char *name) {
+    for (i32 i = 0; i < CHARCOUNT; i++) {
+        if (NuStrICmp(CDataList[i].file, name) == 0) {
+            return &CDataList[i];
+        }
+    }
+
+    return nullptr;
+}
+
+i32 RedirectAnim(char *path, ANIMREDIRECT *redirects, ANIMLIST_s *animation_list, char *directory) {
+    CHARACTERANIM_s *animation = reinterpret_cast<CHARACTERANIM_s *>(animation_list);
+    for (ANIMREDIRECT *redirect = redirects; redirect->name != NULL; ++redirect) {
+        if (redirect->animation_id == animation->animation_id && NuStrICmp(redirect->name, animation->name) == 0) {
+            NuStrCpy(path, directory);
+            NuStrCat(path, animation->name);
+            animation->flags &= ~CHARACTER_ANIMATION_FLAG_BSA;
+            return 1;
+        }
+    }
+    return 0;
 }
 
 void CharScenes_Init(variptr_u *buf, variptr_u *) {
@@ -567,6 +600,7 @@ void FixUpCharacters(CHARFIXUP *fixup) {
 }
 
 void PostAnimate_FETT(GameObject_s *) {
+    STUBBED();
 }
 
 void ResetAICreature(GameObject_s *, AISYS_s *);
@@ -610,6 +644,7 @@ GameObject_s *ActivateCharacter(char *name, nuvec_s *position, i32 angle) {
 }
 
 void FinishWeirdoNames(i32) {
+    STUBBED();
 }
 
 extern i32 addcreature_override_id_check;
@@ -619,11 +654,7 @@ extern void SetGameObjectCharacterData(GameObject_s *obj);
 extern void GetTopBot(GameObject_s *obj);
 extern void GameObjectDimensions(GameObject_s *obj);
 extern void GameObjectOrigin(GameObject_s *obj);
-extern i32 GetDefaultIdle(GameObject_s *obj);
 extern void ResetCharacterIdle(GameObject_s *obj, i32 mode, i32 idle);
-extern void *Suit_GetDefault(i32 id);
-extern void ResetLights(NUVEC *position, rtldata_s *data, void *set);
-extern "C" void ResetAnimPacket(void *packet, i32 enabled);
 extern void ResetPlayerPacket(PLAYERPACKET_s *packet, CHARACTERDATA_s *data);
 
 static u32 LayerBit(u8 layer) {
@@ -901,8 +932,33 @@ i32 NewPlayerCharacter(GameObject_s *object, i32 id, i32 old_id, i32) {
     return 1;
 }
 
-extern "C" f32 AnimDuration(i32 character_id, i32 animation, f32 start_frame, f32 end_frame, i32 subtract_frame_time);
-i32 GetDefaultIdle(GameObject_s *object);
+struct DefaultIdleCharacterData {
+    u8 pad[0x116];
+    u8 use_standard_idle;
+};
+
+i32 GetDefaultIdle(GameObject_s *obj) {
+    CHARACTERDATA *character = obj->apiobj.character_data;
+    DefaultIdleCharacterData *game_character = static_cast<DefaultIdleCharacterData *>(character->field11_0x24);
+
+    i32 animation = 25;
+    i32 table_offset = 100;
+    if (game_character->use_standard_idle == 0 && (character->model_flags & 0x80) != 0) {
+        animation = 118;
+        table_offset = 472;
+    }
+    if (obj->batarang != NULL && *(reinterpret_cast<u8 *>(obj->batarang) + 0x7d) != 0) {
+        return 151;
+    }
+
+    u8 *animation_table = reinterpret_cast<u8 *>(obj->apiobj.character_model->model_data_b);
+    void *entry = *reinterpret_cast<void **>(animation_table + table_offset);
+    if (entry != NULL &&
+        (*reinterpret_cast<i32 *>(animation_table + 4) == 0 || (obj->field_0xe22 & 1) != 0 || obj->field_0xe32 == 1)) {
+        return animation;
+    }
+    return 1;
+}
 
 static i32 IdleRepetitionCount(u8 minimum, u8 maximum) {
     if (maximum <= minimum) {
@@ -1288,9 +1344,6 @@ void CharScenes_LevelDump(WORLDINFO_s *world) {
     }
 }
 
-void CollectAllCharacters(i32) {
-}
-
 extern VARIPTR characterbuffer_base;
 extern i32 CHARACTERBUFFERSIZE;
 extern i32 Area;
@@ -1390,9 +1443,6 @@ void CollectCharcters_Skip(STATUS_STAGE_s *stage, STATUSPACKET_s *packet) {
     NextStatusStage(packet);
 }
 
-void E1CharacterBonus_Init(WORLDINFO_s *) {
-}
-
 AILOCATOR_s *LocalGetRandomLocator(AILOCATOR_s **locators, i32 count, f32 clip_radius, NUVEC *position,
                                    f32 max_distance, i32 outside_camera, f32 max_delta_y, f32 min_delta_y) {
     i32 candidates[64] __attribute__((aligned(16)));
@@ -1449,6 +1499,7 @@ AILOCATOR_s *LocalGetRandomLocator(AILOCATOR_s **locators, i32 count, f32 clip_r
 }
 
 void PostAnimate_ASTROMECH(GameObject_s *) {
+    STUBBED();
 }
 
 nuhspecial_s *CharScene_FindHSpecial(WORLDINFO_s *world, i32 character_id) {
@@ -1570,6 +1621,7 @@ void CollectCharcters_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, floa
 }
 
 void RegisterGizmoTypes_Indy(variptr_u *, variptr_u *) {
+    STUBBED();
 }
 
 i32 SetProtocolDroidFallAnim(GameObject_s *object) {
@@ -1596,6 +1648,7 @@ void CollectCharactersOff_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i3
 }
 
 void CollectCharactersOff_Skip(STATUS_STAGE_s *, STATUSPACKET_s *) {
+    STUBBED();
 }
 
 void ScaleGameObject(GameObject_s *obj);
@@ -1763,4 +1816,5 @@ void LoadPerm2() {
 }
 
 void MapToGrid(nuvec_s *, nuvec_s *, i32 *, i32 *, nuvec_s *, nutexmanager_s *) {
+    STUBBED();
 }

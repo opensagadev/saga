@@ -1,8 +1,10 @@
 #include "decomp.h"
+#include "legoapi/ai/game/creature.h"
 #include "gameapi/ai/aisys/aisys.h"
 #include "globals.h"
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/core/players.h"
+#include "legoapi/items/collect/torpedo.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/world/level.h"
 #include "legoapi/world/mission.h"
@@ -21,7 +23,6 @@ struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
-void FreeTorpedoPacket(TORPEDOPACKET_s **packet);
 void RemoveGameObject(GameObject_s *object, i32 immediate);
 
 void ClearAICreatures() {
@@ -421,6 +422,7 @@ void SpawnCreatureFromCrate(GameObject_s *object, f32 height, f32 delay) {
 }
 
 void SpawnMeleeCreatureType(i32) {
+    STUBBED();
 }
 
 GameObject_s *alert_obj;

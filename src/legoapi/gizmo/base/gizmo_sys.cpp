@@ -3,12 +3,11 @@
 #include "globals.h"
 #include "gameapi/edtools/edfile.h"
 #include "legoapi/gizmo/base/gizmo.h"
+#include "legoapi/gizmo/base/gizflow.h"
 
 #include <stdio.h>
 #include <string.h>
 struct FLOWBOX_s;
-void ResetGizFlowPointers(GIZFLOW_s *giz_flow);
-void GizmoActivateReverse(GIZMOSYS_s *, GIZMO_s *, i32, i32, i32);
 
 i32 gizmoerrorlogsize = 0x800;
 
@@ -99,19 +98,14 @@ void LoadGizmoSys(GIZMOSYS_s *gizmo_sys, void *world, char *config_file) {
         gizmo_sys->flags &= ~GIZMOSYS_FLAG_LOADING;
     }
 }
-static u32 gizmoblowupnametable[256];
-static i32 gizmoblowupnametable_numids;
-
-void GizmoBlowupResetNameTable(void) {
-    gizmoblowupnametable_numids = 0;
-    memset(gizmoblowupnametable, 0, sizeof(gizmoblowupnametable));
-}
 void Hub_LoadAndFixUpMiniKits(WORLDINFO *world, VARIPTR *buf, VARIPTR *buf_end) {
+    STUBBED();
     (void)world;
     (void)buf;
     (void)buf_end;
 }
 void MiniKit_Load(MINIKIT *minikit, i32 id, VARIPTR *buf, VARIPTR *buf_end, void *param) {
+    STUBBED();
     (void)minikit;
     (void)id;
     (void)buf;
@@ -119,12 +113,14 @@ void MiniKit_Load(MINIKIT *minikit, i32 id, VARIPTR *buf, VARIPTR *buf_end, void
     (void)param;
 }
 void MiniKit_InitPieces(MINIKIT *minikit, i32 count, VARIPTR *buf, VARIPTR *buf_end) {
+    STUBBED();
     (void)minikit;
     (void)count;
     (void)buf;
     (void)buf_end;
 }
 void CharacterMiniKits_Load(COLLECTION_s *collection, WORLDINFO *world, VARIPTR *buf, VARIPTR *buf_end) {
+    STUBBED();
     (void)collection;
     (void)world;
     (void)buf;

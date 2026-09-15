@@ -32,6 +32,8 @@ DECOMP_ASSERT(offsetof(ATTRACTO_s, active_position) == 0x64, "ATTRACTO active po
 struct GameObject_s;
 ATTRACTO_s *Attracto_FindNearest(WORLDINFO_s *, NUVEC *, GameObject_s *, f32 *);
 void Attracto_GetPos_Top(ATTRACTO_s *, NUVEC *);
+void Attracto_GetSuctionPos(GameObject_s *, NUVEC *);
+void Attractos_InitTerrain(WORLDINFO_s *);
 
 ADDGIZMOTYPE *Attractos_RegisterGizmo(i32 type_id);
 

@@ -5,6 +5,7 @@
 #include "gameframework/saveload.h"
 #include "globals.h"
 #include "legoapi/characters/core/character.h"
+#include "legoapi/actions/character/streaks.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/core/input/gamepads.h"
 #include "legoapi/core/input/timer.h"
@@ -16,6 +17,7 @@
 #include "legoapi/menus/core/text.h"
 #include "legoapi/menus/screens/movies.h"
 #include "legoapi/render/core/render.h"
+#include "legoapi/render/fx/particles.h"
 #include "legoapi/render/light/shadow.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/areas.h"
@@ -32,6 +34,7 @@
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nu3d/nugscn.h"
 #include "nu2api/nu3d/nudlist.h"
+#include "nu2api/nu3d/nurndr.h"
 #include "nu2api/nu3d/android/nutimebar_plain.h"
 #include "nu2api/numath/nuvec.h"
 #include "nu2api/numusic/numusic.h"
@@ -64,12 +67,8 @@ extern "C" {
     i32 NuRndrBeginScene(i32);
     void NuRndrEndScene(void);
     void NuRndrEndSceneEx(i32);
-    void NuRndrClear(i32, i32, float);
-    void NuRndrGradClear(i32, i32, i32, float);
     void NuRndrSwapStreamBuffers(void);
     void NuRndrGlobalFrameCountPause(i32);
-    void NuRndrShadowOnOff(i32);
-    void NuRndrLine3dDbgFlush(void);
     void NuRndrShadPolys(struct numtl_s *material);
     void NuRndrFx(i32, void *);
     void NuLgtLaserDraw(i32);
@@ -95,7 +94,6 @@ void GameDisplaySettings(LEVELDATADISPLAY *, i32 *);
 void LevelStreaming_Update(WORLDINFO_s *);
 void UpdateCutBorders(void);
 void DrawCutBorders(i32);
-void FixUpLayers(void);
 void ClearLevData(void);
 void WorldInfo_StreamLevel(bgprocinfo_s *);
 void LoadAreaCharacters(void);
@@ -112,7 +110,6 @@ extern "C" {
 #endif
     void DebrisGlassInit(void);
     void Debris(i32);
-    void DebrisSetTimeIncrement(float);
     void DebrisSetCutSceneMode(i32);
     void DebrisDraw(i32, i32);
     void DebrisDrawGlass(void);
@@ -120,7 +117,6 @@ extern "C" {
     void UpdateParts(float);
     void SortDebrisRenderStack(void);
     void UpdateDebrisRenderStackPriority(void);
-    void TerrainTrackFlush(void);
     void RestoreGameCut(void);
     void rtlFrameUpdate(float);
     void rtlProcessLights(void *, float);
@@ -138,19 +134,14 @@ extern "C" {
 
 i32 GetMenuID(void);
 
-void Particles_Start(WORLDINFO_s *);
-void Particles_Stop(WORLDINFO_s *);
 void Parts_Start(WORLDINFO_s *);
 void Parts_Stop(WORLDINFO_s *);
 void UpdateSpecialSfx(WORLDINFO_s *);
 void DebrisKillPlayers(void);
-void AddCameraRain(WORLDINFO_s *, i32);
 void UpdateRippleSet(ripple_set_s *);
 void DrawRippleSet(ripple_set_s *);
 void UpdateExplosions(void);
 void DrawExplosions(void);
-void DrawStreaks(void);
-void UpdateStreaks(float);
 void ZipUps_DrawLines(void);
 void DrawCables(void);
 void UpdateCables(void);
@@ -178,7 +169,6 @@ void ViewCamSetActive(i32, GAMEPAD_s *);
 void DrawParallax(nuhspecial_s *);
 void BackDrop_Update(float);
 void BackDrop_Draw(float, i32);
-void UpdateStats(void);
 void Mission_Clear(MISSIONSYS_s *);
 char IsGrabbingScreen(void);
 void SetTexAnimSignals(void);
@@ -213,11 +203,8 @@ void Grabber_Update(WORLDINFO_s *);
 void Grabber_Draw(WORLDINFO_s *);
 void TrafficAnimSys_Update(TRAFFICANIMSYS_s *);
 void TrafficAnimSys_Draw(TRAFFICANIMSYS_s *);
-void ProcessGizFlow(GIZFLOW_s *, float);
 void AIPathCnxControlSysUpdate(AIPATHCNXCONTROLSYS_s *);
 void ShoveObjectSysReset(void);
-void Teleports_UpdateAfterGameObjects(WORLDINFO_s *);
-void Teleports_UpdateBeforeGameObjects(WORLDINFO_s *);
 void Pulses_Update(PULSESYS_s *);
 void Level_Update(WORLDINFO_s *);
 void Bolts_Update(WORLDINFO_s *);
@@ -233,11 +220,9 @@ void UpdateGameMenu(GAMEPAD_s *, i32);
 i32 MakePlayerList(i32);
 void Faders_Draw(WORLDINFO_s *);
 void Level_Draw(WORLDINFO_s *);
-void SpecialMiniKits_Draw(WORLDINFO_s *);
 void GameObjectToCameraDistances(void);
 void SetCameraMatrices(void);
 void MoveGameCamera(GAMECAMERA_s *);
-void DrawTimer(i32, i32, i32);
 void GameFog_Update(WORLDINFO_s *);
 void GameFog_Set(void);
 void SetLevelLights(void *, float);
@@ -308,15 +293,9 @@ void GameAudio_PlaySfx(i32, nuvec_s *, i32, i32);
 void FreeGameObjectLights(void);
 void ClearUpAreaData(void);
 void StoreStatusTakeOverObjectSys(void);
-void ReleaseAllTakeOvers(void);
 void StoreLevelProgress(WORLDINFO_s *);
 void ClearAreaProgress(i32, i32);
 void Hub_MakeModelList(void);
-void TerrainPlatformOldUpdate(void);
-void TerrainPlatformNewUpdate(void);
-void GrabStillScreen(void);
-void HandleStillRender(void);
-void PanelRender(WORLDINFO_s *);
 void InitCables(WORLDINFO_s *);
 void InitSnakes(WORLDINFO_s *);
 void NewArea(void);

@@ -1,4 +1,5 @@
 #include "decomp.h"
+#include "legoapi/misc/utilities.h"
 #include "legoapi/legoapi_types.h"
 #include "nu2api/nucore/nuhgobj.h"
 #include "nu2api/nu3d/nutex.h"
@@ -7,6 +8,7 @@
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numath/nuvec.h"
 #include "globals.h"
+#include "legoapi/render/fx/game_deb.h"
 
 #include "nu2api/numath/nurand.h"
 
@@ -19,10 +21,10 @@ struct SHOPINPUT;
 
 extern i32 qseed;
 extern i32 GAMERAND;
-extern "C" void DebrisSetSeed(i32);
 extern "C" void NuPartSetSeed(i32);
 
 void HashString(unsigned char *) {
+    STUBBED();
 }
 
 void ResetSeeds() {
@@ -33,9 +35,6 @@ void ResetSeeds() {
     DebrisSetSeed(0);
     NuRandSetSeed(NULL, 0);
     NuPartSetSeed(0);
-}
-
-void makenuvec4(float, float, float, float) {
 }
 
 i32 i_temp_xrot;
@@ -68,12 +67,15 @@ void FindAnglesZX(nuvec_s *normal, u16 *x_rotation, u16 *z_rotation) {
 }
 
 void getNumDigits(i32) {
+    STUBBED();
 }
 
 void LineCrossedXZ(float, float, float, float, float, float, float, float) {
+    STUBBED();
 }
 
 void ScaleAndClamp(i32) {
+    STUBBED();
 }
 
 void VecRotateAxis(nuvec_s *vector, u16 angle, nuvec_s *axis) {
@@ -288,14 +290,7 @@ i32 OnOrInsidePlane(nuvec_s *point, nuvec_s *plane_point, nuvec_s *plane_normal,
 }
 
 void PackCharIntoInt(char, char, char, char) {
-}
-
-NUVEC TerCrossProduct(NUVEC *a, NUVEC *b) {
-    NUVEC result;
-    result.x = a->y * b->z - a->z * b->y;
-    result.y = a->z * b->x - b->z * a->x;
-    result.z = a->x * b->y - b->x * a->y;
-    return result;
+    STUBBED();
 }
 
 f32 DistanceToLineXZ(NUVEC *position, NUVEC *first, NUVEC *second) {
@@ -304,10 +299,12 @@ f32 DistanceToLineXZ(NUVEC *position, NUVEC *first, NUVEC *second) {
 }
 
 i32 MatrixReflection(numtx_s *, i32, float, float, numtx_s *) {
+    STUBBED();
     return 0;
 }
 
 void OnOrOutsidePlane(nuvec_s *, nuvec_s *, nuvec_s *) {
+    STUBBED();
 }
 
 i32 PackShortIntoInt(i16 high, i16 low) {
@@ -318,25 +315,32 @@ i32 PackShortIntoInt(i16 high, i16 low) {
 }
 
 void RatioAlongLineXZ(nuvec_s *, nuvec_s *, nuvec_s *) {
+    STUBBED();
 }
 
 i32 XZLinesIntersect(nuvec_s *, nuvec_s *, nuvec_s *, nuvec_s *, float *, float *) {
+    STUBBED();
     return 0;
 }
 
 void GetRotationAngles(nuvec_s *, u16 *, u16 *) {
+    STUBBED();
 }
 
 void UnpackCharFromInt(i32, char &, char &, char &, char &) {
+    STUBBED();
 }
 
 void RatioBetweenPlanes(nuvec_s *, nuvec_s *, nuvec_s *, nuvec_s *, nuvec_s *) {
+    STUBBED();
 }
 
 void UnpackShortFromInt(i32, i16 &, i16 &) {
+    STUBBED();
 }
 
 void AnglesBetweenPoints(nuvec_s *, nuvec_s *, u16 *, u16 *) {
+    STUBBED();
 }
 
 bool LineIntersectCircle(NUVEC *origin, NUVEC *direction, NUVEC *center, f32 radius_squared) {
@@ -364,12 +368,15 @@ i32 LineIntersectSphere(NUVEC *origin, NUVEC *direction, NUVEC *center, f32 radi
 }
 
 void LineToPlaneDistance(VuVec &, VuVec &, VuVec &) {
+    STUBBED();
 }
 
 void LineToPointDistance(VuVec &, VuVec &, VuVec &, VuVec *) {
+    STUBBED();
 }
 
 void RatioBetweenEdgesXZ(nuvec_s *, nuvec_s *, nuvec_s *, nuvec_s *, nuvec_s *) {
+    STUBBED();
 }
 
 bool SphereSphereOverlap(NUVEC *a, f32 radius_a, NUVEC *b, f32 radius_b) {
@@ -380,46 +387,8 @@ bool SphereSphereOverlap(NUVEC *a, f32 radius_a, NUVEC *b, f32 radius_b) {
     return x * x + y * y + z * z <= radius * radius;
 }
 
-void CalcAveragePosAndRad(GIZBUILDIT_s &buildit, VuVec &position, float &radius, bool include_built) {
-    u32 first = 0;
-    if (!include_built)
-        first = buildit.built_object_count;
-    position = VuVec(0, 0, 0, 1);
-    radius = 0.0f;
-    i32 count = 0;
-    for (u32 i = first; i < buildit.anim_object_count; ++i) {
-        GAMEANIMOBJ_s *object = buildit.anim_objects[i];
-        if (object != NULL) {
-            NUMTX *matrix = NuSpecialGetMtx(&object->special);
-            ++count;
-            position.x += matrix->m30;
-            position.y += matrix->m31;
-            position.z += matrix->m32;
-        }
-    }
-    position.x /= static_cast<f32>(count);
-    position.y /= static_cast<f32>(count);
-    position.z /= static_cast<f32>(count);
-    f32 maximum = 0.0f;
-    for (u32 i = first; i < buildit.anim_object_count; ++i) {
-        GAMEANIMOBJ_s *object = buildit.anim_objects[i];
-        if (object != NULL) {
-            NUMTX *matrix = NuSpecialGetMtx(&object->special);
-            const f32 x = position.x - matrix->m30;
-            const f32 z = position.z - matrix->m32;
-            const f32 distance = x * x + 0.0f + z * z;
-            if (maximum <= distance)
-                maximum = distance;
-        }
-    }
-    if (maximum > 0.0f)
-        maximum = NuFsqrt(maximum);
-    radius = maximum;
-    if (buildit.radius_scale > 0.0f)
-        radius = maximum * buildit.radius_scale;
-}
-
 void LineToPlaneIntersecion(VuVec &, VuVec &, VuVec &, VuVec *) {
+    STUBBED();
 }
 
 void CalculateInterceptVector(NUVEC *origin, NUVEC *target, NUVEC *velocity, f32 speed, NUVEC *direction,
@@ -461,9 +430,11 @@ void CalculateInterceptVector(NUVEC *origin, NUVEC *target, NUVEC *velocity, f32
 }
 
 void LineToSphereIntersection(VuVec &, VuVec &, VuVec &, float, VuVec *, VuVec *) {
+    STUBBED();
 }
 
 i32 MatrixReflectionVU0_AXISY(numtx_s *, float, float, numtx_s *) {
+    STUBBED();
     return 0;
 }
 
@@ -480,21 +451,27 @@ i32 SphereSphereOverlapScaleY(nuvec_s *position_a, float radius_a, float y_radiu
 }
 
 void IToX(char *, i32) {
+    STUBBED();
 }
 
 void XToI(char *) {
+    STUBBED();
 }
 
 void IsTok(char const *, char const *) {
+    STUBBED();
 }
 
 void CapVec(nuvec_s *, float, nuvec_s *) {
+    STUBBED();
 }
 
 void I64ToX(char *, i64) {
+    STUBBED();
 }
 
 void XToI64(char *) {
+    STUBBED();
 }
 
 i32 RotDiff(u16 current, u16 target) {
@@ -508,17 +485,11 @@ i32 RotDiff(u16 current, u16 target) {
 }
 
 void rawClip(VuVec const *, VuVec *, i32, VuVec const &) {
+    STUBBED();
 }
 
 i32 getqseed() {
     return qseed;
-}
-
-f32 clampBias(f32 bias) {
-    if (bias < -16.0f) {
-        return -16.0f;
-    }
-    return 15.96875f < bias ? 15.96875f : bias;
 }
 
 i32 findrange(nugscn_s *scene, i32 first_joint) {
@@ -535,17 +506,17 @@ i32 findrange(nugscn_s *scene, i32 first_joint) {
     return end_joint - 1;
 }
 
-void makenuvec(float, float, float) {
-}
-
 static __used__ i32 MatchExtension(char *, char *, i32) {
+    STUBBED();
     return 0;
 }
 
 static __used__ int icomp(const void *, const void *) {
+    STUBBED();
     return 0;
 }
 
 static __used__ i32 sort32a(void const *, void const *) {
+    STUBBED();
     return 0;
 }

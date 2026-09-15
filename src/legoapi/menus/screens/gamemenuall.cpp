@@ -4,7 +4,7 @@
 #include <string.h>
 #include <math.h>
 #include "MechInputTouch/MechInputTouch_types.h"
-#include "gameapi/gui/apimenu.h"
+#include "gameapi/gui/apimenu_internal.h"
 #include "gameframework/saveload.h"
 #include "globals.h"
 #include "legoapi/legoapi_types.h"
@@ -12,6 +12,7 @@
 #include "legoapi/characters/motion.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/core/config/cheat.h"
+#include "legoapi/core/input/gamepads.h"
 #include "legoapi/menus/screens/gamemenuall.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/level.h"
@@ -39,35 +40,26 @@ static f32 MissionIconTargetX[20];
 static f32 MissionIconX[20];
 extern i32 NextArea_FreePlay;
 void InitMission(MISSIONSYS *, i32);
-extern "C" GAMEPAD_s GamePad[64];
-extern u32 GAMEPAD_MENUSELECT, GAMEPAD_MENUCANCEL, GAMEPAD_DLEFT, GAMEPAD_DRIGHT;
-extern u32 GAMEPAD_TOGGLELEFT, GAMEPAD_TOGGLERIGHT;
 extern f32 ICONSIZE, ICONX, DROPINALPHA, HUB_EPISODETITLEY;
 extern i16 tSELECT, tSELECTED, tSELECTING, tEXIT, tCANCEL;
 void DrawCharIcon(i32, f32, f32, f32, f32, i32, f32, f32, i32, nuhspecial_s *);
 void Hub_DrawImportantBrick(i32, f32, f32, f32, i32, i32);
 void DrawPlayerIconPrompts(i32, i32, f32, i32, i32, i32, i32, i32, i32, f32, i32, i32, i32, i32);
 f32 GetAspectRatio();
-void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
-
-extern "C" void NewMenu(i32 menu_id, i32 menu_y, i32 param3);
 extern "C" void BackupMenu(void);
 extern "C" void BackupMenuNoFn(void);
-extern "C" bool TestForController(void);
 extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
 extern "C" void NuIOS_RecordFlurryEvent(char *event_name);
 extern "C" void DrawMenuButtonPrompts(i32 confirm_prompt, i32 cancel_prompt, i32 enabled, u8 red, u8 green, u8 blue,
                                       u8 alpha);
 extern "C" void DrawMenuButtonPromptsEx(i32 confirm_prompt, i32 cancel_prompt, i32 flags, i32 enabled, u8 red, u8 green,
                                         u8 blue, u8 alpha);
-i32 GameAudio_GetSfxId(i32 sfx);
 extern i32 SAVESLOTS;
 extern i32 MenuSFX;
 extern i32 MENUSFX_MENUSELECT;
 extern i32 MENUSFX_MENUBACK;
 extern i32 MENUSFX_MENUNOENTRY;
 extern i32 MENUSFX_MENUMOVE;
-extern void (*drawslotsfn)(MENU *, f32);
 extern char *apitxt_LOADGAME;
 extern char *apitxt_SAVEGAME;
 extern char *apitxt_CONFIRMSAVE;
@@ -166,11 +158,11 @@ i32 SAVESIZE = 50;
 extern i32 memcard_autosave;
 extern i32 memcard_autosaveenabled;
 extern i32 memcard_autosavedisabled;
-extern i32 header_r;
-extern i32 header_g;
-extern i32 header_b;
-extern i32 MenuDisableHeaders;
-
+static i32 header_r;
+static i32 header_g;
+static i32 header_b;
+void (*drawslotinfofn)(f32, f32, i32, i32) = APIMenuDrawGameState;
+void (*drawslotsfn)(MENU *, f32) = APIMenuDrawMemCardSlots;
 static i32 lastslot;
 static i32 slideleft;
 static i32 slideright;
@@ -196,12 +188,6 @@ void Hub_UpdateFreePlaySelect();
 void WipeBackToHub();
 void NewLevelFromMenu(LEVELDATA_s *level, i32 menu_id, i32 menu_y, i32 remember_hub);
 
-static bool MenuAreaAllowsFreePlay(i32 area) {
-    return area >= 0 && area < AREACOUNT && (LOSTTEMPLE_ADATA == NULL || area != LOSTTEMPLE_ADATA->index) &&
-           FreePlayUnlocked() && (ADataList[area].flags & AREAFLAG_NO_FREEPLAY) == 0 && Game_AreaSave != NULL &&
-           Game_AreaSave[area].area_complete != 0;
-}
-
 extern CHEATSYSTEM CheatSystem;
 void Cheat_SetOn(i32 cheat, i32 enabled, i32 update_save);
 static f32 updateextras_current_y = 0.0f;
@@ -212,6 +198,10 @@ static bool MenuCheatUnlocked(i32 cheat) {
     }
     const u32 *unlocked = reinterpret_cast<const u32 *>(Game.field_0x7c00);
     return (unlocked[cheat >> 5] & (1u << (cheat & 31))) != 0;
+}
+
+void APIMenuDrawMemCardSlots(MENU *menu, f32 time) {
+    UNIMPLEMENTED();
 }
 
 void MenuDrawLoad(MENU_s *menu) {
@@ -245,6 +235,13 @@ void MenuDrawSave(MENU_s *menu) {
     }
 }
 
+void MenuEnterNewGame(MENU_s *) {
+    if (MenuLoadOccurred == 0 && startnewgame_initiated == 0 && startnewgame == 0) {
+        saveload_autosave = -1;
+    }
+    MenuLoadOccurred = MenuSaveOccurred = 0;
+}
+
 void MenuExitLoad(MENU_s *) {
     Menu_InLoadFlow = 0;
 }
@@ -254,6 +251,7 @@ void MenuExitSave(MENU_s *) {
 }
 
 void MenuDrawClips(MENU_s *) {
+    STUBBED();
 }
 
 void MenuDrawHints(MENU_s *menu) {
@@ -262,6 +260,7 @@ void MenuDrawHints(MENU_s *menu) {
 }
 
 void MenuDrawStore(MENU_s *) {
+    STUBBED();
 }
 
 void MenuEnterLoad(MENU_s *menu) {
@@ -331,12 +330,15 @@ void MenuEnterSave(MENU_s *menu) {
 }
 
 void MenuExitStore(MENU_s *) {
+    STUBBED();
 }
 
 void MenuInitClips(MENU_s *) {
+    STUBBED();
 }
 
 void MenuInitStore(MENU_s *) {
+    STUBBED();
 }
 
 void MenuStartLoad() {
@@ -354,6 +356,7 @@ void MenuStartSave() {
 }
 
 void RenderFileSel() {
+    STUBBED();
 }
 
 void MakeMenuPacket() {
@@ -487,9 +490,11 @@ void MenuUpdateSave(MENU_s *menu) {
 }
 
 void ProcessFileSel(float, nupad_s *) {
+    STUBBED();
 }
 
 void RenderFileSel3(i32) {
+    STUBBED();
 }
 
 void EndMissionsMenu() {
@@ -501,7 +506,7 @@ void EndMissionsMenu() {
 }
 
 static NUGSCN **IconScene;
-static char IconPath[0x40];
+static char IconPath[0x40] = "stuff\\icons\\";
 
 void IconScenes_Dump() {
     if (IconScene == NULL) {
@@ -610,10 +615,18 @@ void MenuExitOptions(MENU_s *) {
     RestoreOptions();
 }
 
+void MenuExitNewGame(MENU_s *) {
+    if (PlayerProgress[0].active == 0 && PlayerProgress[1].active == 0) {
+        PlayerProgress[0].active = 1;
+    }
+}
+
 void MenuIsAvailable() {
+    STUBBED();
 }
 
 void MenuUpdateClips(MENU_s *) {
+    STUBBED();
 }
 
 void MenuUpdateHints(MENU_s *menu) {
@@ -624,15 +637,19 @@ void MenuUpdateHints(MENU_s *menu) {
 }
 
 void MenuUpdateStore(MENU_s *) {
+    STUBBED();
 }
 
 void ProcessFileSel3(float, nupad_s *) {
+    STUBBED();
 }
 
 void MenuDrawDeleting(MENU_s *) {
+    STUBBED();
 }
 
 void MenuDrawEpisodes(MENU_s *) {
+    STUBBED();
 }
 
 void MenuDrawFreePlay(MENU_s *) {
@@ -710,6 +727,7 @@ void MenuEnterOptions(MENU_s *) {
 }
 
 void MenuInitEpisodes(MENU_s *) {
+    STUBBED();
 }
 
 void MenuInitFreePlay(MENU_s *menu) {
@@ -789,10 +807,6 @@ void MenuUpdateSaving(MENU_s *) {
     BackupMenuNoFn();
     BackupMenu();
 }
-
-void MenuDrawBonusMode(MENU_s *) {
-}
-
 
 void MenuUpdateLoading(MENU_s *) {
     if (memcard_loadneeded != 0) {
@@ -892,15 +906,19 @@ NUGSCN *IconScene_FindById(i32 character_id) {
 }
 
 void MenuDrawDebugStore(MENU_s *) {
+    STUBBED();
 }
 
 void MenuDrawEndMission(MENU_s *) {
+    STUBBED();
 }
 
 void MenuDrawFormatting(MENU_s *) {
+    STUBBED();
 }
 
 void MenuDrawInsertCard(MENU_s *) {
+    STUBBED();
 }
 
 void MenuDrawLoadCancel(MENU_s *menu) {
@@ -921,34 +939,12 @@ void MenuDrawSaveCancel(MENU_s *menu) {
     DrawMenuEntry(menu, apitxt_NO);
 }
 
-void MenuDrawSelectMode(MENU_s *menu) {
-    const i32 area = LDataList[hub_new_level].area_index;
-    const bool free_play_available = MenuAreaAllowsFreePlay(area);
-
-    if (area >= 0 && area < AREACOUNT && ADataList[area].name_id >= 0) {
-        NuStrCpy(MenuHeader, TTab[ADataList[area].name_id]);
-    }
-
-    GameDrawMenuEntry(menu, TTab[free_play_available ? tREPLAYSTORY : tSTORY]);
-    if (free_play_available) {
-        GameDrawMenuEntry(menu, TTab[tFREEPLAY]);
-    } else {
-        DrawMenuEntryEx(menu, TTab[tFREEPLAY], MenuA / 2);
-    }
-}
-
-void MenuInitSelectMode(MENU_s *menu) {
-    const i32 area = LDataList[hub_new_level].area_index;
-    hub_selectmode = MenuAreaAllowsFreePlay(area) ? 1 : 0;
-    menu->selected_row = static_cast<i16>(hub_selectmode);
-    menu->selected_item = hub_selectmode;
-    selectmodemode = 0;
-}
-
 void MenuUpdateDeleting(MENU_s *) {
+    STUBBED();
 }
 
 void MenuUpdateEpisodes(MENU_s *) {
+    STUBBED();
 }
 
 void MenuUpdateFreePlay(MENU_s *) {
@@ -1079,6 +1075,7 @@ collected_input:
 }
 
 void MenuDrawCardWarning(MENU_s *) {
+    STUBBED();
 }
 
 void MenuDrawFileCorrupt(MENU_s *) {
@@ -1122,19 +1119,19 @@ void MenuEnterHeaderSave(MENU_s *) {
 }
 
 void MenuEnterInsertCard(MENU_s *) {
+    STUBBED();
 }
 
 void MenuExitCardWarning(MENU_s *) {
     Menu_InWarningFlow = 0;
 }
 
-void MenuUpdateBonusMode(MENU_s *) {
-}
-
 void MenuDrawEndChallenge(MENU_s *) {
+    STUBBED();
 }
 
 void MenuDrawFormatCancel(MENU_s *) {
+    STUBBED();
 }
 
 void MenuDrawNoMemoryCard(MENU_s *menu) {
@@ -1145,9 +1142,11 @@ void MenuDrawNoMemoryCard(MENU_s *menu) {
 }
 
 void MenuDrawStoreHolding(MENU_s *) {
+    STUBBED();
 }
 
 void MenuEnterCardWarning(MENU_s *) {
+    STUBBED();
 }
 
 void MenuEnterSaveConfirm(MENU_s *) {
@@ -1161,21 +1160,27 @@ void MenuEnterSaveConfirm(MENU_s *) {
 }
 
 void MenuExitStoreHolding(MENU_s *) {
+    STUBBED();
 }
 
 void MenuInitStoreHolding(MENU_s *) {
+    STUBBED();
 }
 
 void MenuUpdateDebugStore(MENU_s *) {
+    STUBBED();
 }
 
 void MenuUpdateEndMission(MENU_s *) {
+    STUBBED();
 }
 
 void MenuUpdateFormatting(MENU_s *) {
+    STUBBED();
 }
 
 void MenuUpdateInsertCard(MENU_s *) {
+    STUBBED();
 }
 
 void MenuUpdateLoadCancel(MENU_s *menu) {
@@ -1205,15 +1210,82 @@ void MenuUpdateSaveCancel(MENU_s *menu) {
 }
 
 void MenuDrawDeleteConfirm(MENU_s *) {
+    STUBBED();
 }
 
 void MenuDrawFormatConfirm(MENU_s *) {
+    STUBBED();
+}
+
+void MenuInitialiseEx(MENUFNINFO *menu_info, i32 menu_id_count, i32 language_count,
+                      void (*draw_save_slots_info_fn)(f32, f32, i32, i32), i32 is_fade_enabled, i32 is_shadow_enabled) {
+    char menus_used_str[64];
+
+    i32 menu_ids_used = TOTAL_MENUS_COUNT - RESERVED_MENUS_COUNT;
+    if (menu_id_count <= TOTAL_MENUS_COUNT - RESERVED_MENUS_COUNT) {
+        menu_ids_used = menu_id_count;
+    }
+
+    // menu_id_count describes the valid ID range, not the number of records.
+    // The game table is sparse (ID 0x1c is absent), sorted, and ends with the
+    // record for menu_id_count - 1.
+    for (i32 i = 0; i < menu_ids_used; i++) {
+        MenuInfo[RESERVED_MENUS_COUNT + i] = menu_info[i];
+        if (menu_info[i].id >= menu_ids_used - 1) {
+            break;
+        }
+    }
+
+    MenusUsed = menu_ids_used + RESERVED_MENUS_COUNT;
+    sprintf(menus_used_str, "Menus used: %d", MenusUsed);
+
+    MenuLanguages = language_count;
+    MenuHeader[0] = '\0';
+
+    header_r = MENUHEADERR;
+    header_g = MENUHEADERG;
+    header_b = MENUHEADERB;
+
+    if (draw_save_slots_info_fn != NULL) {
+        drawslotinfofn = draw_save_slots_info_fn;
+    }
+
+    MenuFadeEnabled = is_fade_enabled;
+    MenuDrawDropShadows = is_shadow_enabled;
+
+    NUMTL *menu_fade_mtl = NuMtlCreate(1);
+    MenuFadeMtl = menu_fade_mtl;
+
+    menu_fade_mtl->attribs.z_mode = 3;
+    menu_fade_mtl->attribs.alpha_mode = 1;
+
+    menu_fade_mtl->attribs.unknown_2_1_2 = 2;
+
+    menu_fade_mtl->attribs.unknown_1_1_2 = 1;
+    menu_fade_mtl->attribs.unknown_1_4_8 = 1;
+
+    menu_fade_mtl->attribs.unknown_2_4 = 1;
+
+    menu_fade_mtl->attribs.filter_mode = 1;
+
+    NuMtlUpdate(menu_fade_mtl);
+}
+
+void MenuInitialise(MENUFNINFO *menu_info, i32 menu_id_count, i32 language_count,
+                    void (*draw_save_slots_fn)(MENU *, f32), i32 is_fade_enabled, i32 is_shadow_enabled) {
+    MenuInitialiseEx(menu_info, menu_id_count, language_count, NULL, is_fade_enabled, is_shadow_enabled);
+
+    if (draw_save_slots_fn != NULL) {
+        drawslotsfn = draw_save_slots_fn;
+    }
 }
 
 void MenuDrawStorePurchase(MENU_s *) {
+    STUBBED();
 }
 
 void MenuEnterNoMemoryCard(MENU_s *) {
+    STUBBED();
 }
 
 void MenuEnterStartNewGame(MENU_s *) {
@@ -1223,15 +1295,19 @@ void MenuEnterStartNewGame(MENU_s *) {
 }
 
 void MenuExitStorePurchase(MENU_s *) {
+    STUBBED();
 }
 
 void MenuInitStorePurchase(MENU_s *) {
+    STUBBED();
 }
 
 void MenuUpdateCardWarning(MENU_s *) {
+    STUBBED();
 }
 
 void MenuUpdateFileCorrupt(MENU_s *) {
+    STUBBED();
 }
 
 void MenuUpdateLoadConfirm(MENU_s *menu) {
@@ -1267,6 +1343,7 @@ void MenuUpdateSaveConfirm(MENU_s *menu) {
 }
 
 void MenuDrawAutoSaveCancel(MENU_s *) {
+    STUBBED();
 }
 
 void MenuDrawNotEnoughSpace(MENU_s *) {
@@ -1290,54 +1367,67 @@ void MenuDrawSelectControls(MENU_s *menu) {
 }
 
 void MenuDrawStoreRestoring(MENU_s *) {
+    STUBBED();
 }
 
 void MenuExitStoreRestoring(MENU_s *) {
+    STUBBED();
 }
 
 void MenuInitStoreRestoring(MENU_s *) {
+    STUBBED();
 }
 
 void MenuUpdateEndChallenge(MENU_s *) {
+    STUBBED();
 }
 
 void MenuUpdateFormatCancel(MENU_s *) {
+    STUBBED();
 }
 
 void MenuUpdateNoMemoryCard(MENU_s *) {
+    STUBBED();
 }
 
 void MenuUpdateStoreHolding(MENU_s *) {
+    STUBBED();
 }
 
 void MenuDrawAutoSaveWarning(MENU_s *) {
+    STUBBED();
 }
 
 void MenuDrawDoNotRemoveCard(MENU_s *) {
-}
-
-void MenuDrawViewTextStrings(MENU_s *) {
+    STUBBED();
 }
 
 void MenuEnterAutoSaveCancel(MENU_s *) {
+    STUBBED();
 }
 
 void MenuUpdateDeleteConfirm(MENU_s *) {
+    STUBBED();
 }
 
 void MenuUpdateFormatConfirm(MENU_s *) {
+    STUBBED();
 }
 
 void MenuUpdateStorePurchase(MENU_s *) {
+    STUBBED();
 }
 
 void MenuEnterAutoSaveWarning(MENU_s *) {
+    STUBBED();
 }
 
 void MenuUpdateAutoSaveCancel(MENU_s *) {
+    STUBBED();
 }
 
 void MenuUpdateNotEnoughSpace(MENU_s *) {
+    STUBBED();
 }
 
 void MenuUpdateRestoreNewGame(MENU_s *menu) {
@@ -1402,15 +1492,15 @@ void MenuUpdateSelectControls(MENU_s *menu) {
 }
 
 void MenuUpdateStoreRestoring(MENU_s *) {
+    STUBBED();
 }
 
 void MenuUpdateAutoSaveWarning(MENU_s *) {
+    STUBBED();
 }
 
 void MenuUpdateDoNotRemoveCard(MENU_s *) {
-}
-
-void MenuUpdateViewTextStrings(MENU_s *) {
+    STUBBED();
 }
 
 extern "C" {
@@ -1506,9 +1596,11 @@ extern "C" {
     }
 
     void CreateColourPicker(void) {
+        STUBBED();
     }
 
     void CreateTestMenu(void) {
+        STUBBED();
     }
 
     void DrawMenu(i32 paused) {
@@ -1578,6 +1670,7 @@ extern "C" {
     }
 
     void DrawMenuBottomMessage(void) {
+        STUBBED();
     }
 
     void DrawMenuButtonPrompts(i32 confirm_prompt, i32 cancel_prompt, i32 enabled, u8 red, u8 green, u8 blue,
@@ -1586,6 +1679,7 @@ extern "C" {
     }
 
     void DrawMenuButtonPromptsEx(i32, i32, i32, i32, u8, u8, u8, u8) {
+        STUBBED();
     }
 
     void DrawMenuEntry(MENU *menu, char *text) {
@@ -1692,9 +1786,11 @@ extern "C" {
     }
 
     void DrawMenuHeaderMessage(void) {
+        STUBBED();
     }
 
     void DrawMenuTopMessage(void) {
+        STUBBED();
     }
 
     void Draw_CANCEL(MENU *menu) {
@@ -1704,21 +1800,27 @@ extern "C" {
     }
 
     void Draw_CHECKINGMEMORYCARD(void) {
+        STUBBED();
     }
 
     void Draw_DONOTREMOVEMEMORYCARD(void) {
+        STUBBED();
     }
 
     void Draw_NOTENOUGHSPACE(void) {
+        STUBBED();
     }
 
     void Draw_SPACENEEDED(void) {
+        STUBBED();
     }
 
     void FileSelKill(void) {
+        STUBBED();
     }
 
     void FlushMenuHighlights(void) {
+        STUBBED();
     }
 
     i32 MenuCurrentID(void) {
@@ -1726,13 +1828,28 @@ extern "C" {
     }
 
     void MenuDrawBackground(void) {
+        STUBBED();
     }
 
     i32 MenuGetSlotNum(void) {
         return memcard_slot;
     }
 
-    void MenuInCriticalMemoryCard(void) {
+    i32 MenuInCriticalMemoryCard(void) {
+        if (MenuValidated == 0)
+            return 0;
+
+        const i32 menu_id = MenuInfo[GameMenu[GameMenuLevel].menu].id;
+        switch (menu_id) {
+            case 1001:
+            case 1007:
+            case 1009:
+            case 1014:
+            case 1015:
+                return 1;
+            default:
+                return 0;
+        }
     }
 
     i32 MenuInMemoryCard(void) {
@@ -1817,28 +1934,31 @@ extern "C" {
         MENUFLASH1B = flash1_b;
     }
 
-    void MenuSetHeaderDrawFn(void (*draw_fn)(void)) {
-        headerdrawfn = draw_fn;
+    void MenuSetPulsateSpeed(f32 speed) {
+        menu_pulsate_speed = speed;
+    }
+
+    void MenuSetTopBottom(void) {
+        STUBBED();
     }
 
     void MenuSetPreDrawFn(void (*draw_fn)(MENU *)) {
         predrawfn = draw_fn;
     }
 
-    void MenuSetPulsateSpeed(f32 speed) {
-        menu_pulsate_speed = speed;
+    void MenuSetHeaderDrawFn(void (*draw_fn)(void)) {
+        headerdrawfn = draw_fn;
     }
 
-    void MenuSetTopBottom(void) {
-    }
-
-    void MessageBoxInitMtl(void) {
-    }
-
-    void PetesHackOfDeath(void) {
+    void MenuReset(void) {
+        memset(GameMenu, 0, sizeof(GameMenu));
+        GameMenu[0].menu = -1;
+        MenuSFX = -1;
+        GameMenuLevel = 0;
     }
 
     void ProcessFileSel2(void) {
+        STUBBED();
     }
 
     void RemapAddr(void *new_base, void *old_base, void **address) {
@@ -1846,6 +1966,7 @@ extern "C" {
     }
 
     void RenderFileSel2(void) {
+        STUBBED();
     }
 
     void SetButtonScaleMode(i32 mode) {
@@ -1853,9 +1974,11 @@ extern "C" {
     }
 
     void StartFileSel(void) {
+        STUBBED();
     }
 
     void TestMenu(void) {
+        STUBBED();
     }
 
     i32 UpdateMenu(u32 primary_held, u32 primary_pressed, u32 alternate_held, u32 alternate_pressed, f32 elapsed,
@@ -2084,9 +2207,11 @@ extern "C" {
     }
 
     void cbCancelSubMenu(void) {
+        STUBBED();
     }
 
     void cbCancelSubMenuFromItem(void) {
+        STUBBED();
     }
 
     i32 cbCompateDirentByDateAsc(NUFILE_INFO *first, NUFILE_INFO *second) {
@@ -2098,44 +2223,23 @@ extern "C" {
     }
 
     void cbCompateDirentByNameAsc(void) {
+        STUBBED();
     }
 
     void cbCompateDirentByNameDec(void) {
+        STUBBED();
     }
 
     void cbCompateDirentBySizeAsc(void) {
+        STUBBED();
     }
 
     void cbCompateDirentBySizeDec(void) {
-    }
-
-    i32 cbInteractMenuScrollDown(edui_interact_s *interact) {
-        eduimenu_s *menu = interact->menu;
-        if (menu->field_10) {
-            if (menu->field_10->next)
-                menu->field_10 = menu->field_10->next;
-            menu->selected = menu->field_10;
-        }
-        return 0;
-    }
-
-    i32 cbInteractMenuScrollUp(edui_interact_s *interact) {
-        eduimenu_s *menu = interact->menu;
-        if (menu->field_0c) {
-            if (menu->field_0c->previous)
-                menu->field_0c = menu->field_0c->previous;
-            menu->selected = menu->field_0c;
-        }
-        return 0;
-    }
-
-    void cbInteractMenuTitle(void) {
-    }
-
-    void cbModifierAdjust(void) {
+        STUBBED();
     }
 
     void cbTriggerSubMenu(void) {
+        STUBBED();
     }
 
 } // extern "C"

@@ -1,4 +1,6 @@
+#include "decomp.h"
 #include "MechInputTouch_types.h"
+#include "legoapi/gizmos/object/gizbuildits.h"
 #include "globals.h"
 #include "legoapi/items/base/apiobject.h"
 
@@ -35,9 +37,11 @@ MechTouchTask::~MechTouchTask() {
 }
 
 MechTouchTaskTag::MechTouchTaskTag(MechInputTouchGestureBasedController &, GameObject_s &) {
+    STUBBED();
 }
 
 void MechTouchTaskTag::Update() {
+    STUBBED();
 }
 
 MechTouchTaskGoTo::MechTouchTaskGoTo(MechInputTouchGestureBasedController &owner, MechObjectInterface *object)
@@ -47,15 +51,19 @@ MechTouchTaskGoTo::MechTouchTaskGoTo(MechInputTouchGestureBasedController &owner
 }
 
 void MechTouchTaskGoTo::OnStart() {
+    STUBBED();
 }
 
 void MechTouchTaskGoTo::OnStop() {
+    STUBBED();
 }
 
 void MechTouchTaskGoTo::Render() {
+    STUBBED();
 }
 
 bool MechTouchTaskGoTo::Update() {
+    STUBBED();
     return false;
 }
 
@@ -97,18 +105,22 @@ void MechTouchTaskGoTo::UpdateStuck() {
 }
 
 void MechTouchTaskGoTo::UpdateTarget(MechObjectInterface &) {
+    STUBBED();
 }
 
 MechTouchTaskGoTo::~MechTouchTaskGoTo() {
 }
 
 MechTouchTaskJump::MechTouchTaskJump(MechInputTouchGestureBasedController &, JumpTriggerPacket const &, bool, bool) {
+    STUBBED();
 }
 
 void MechTouchTaskJump::OnStop() {
+    STUBBED();
 }
 
 void MechTouchTaskJump::Update() {
+    STUBBED();
 }
 
 MechTouchTaskBlock::MechTouchTaskBlock(MechInputTouchGestureBasedController &owner) : MechTouchTask(owner) {
@@ -121,36 +133,45 @@ bool MechTouchTaskBlock::Update() {
 }
 
 MechTouchTaskPanel::MechTouchTaskPanel(MechInputTouchGestureBasedController &, MechObjectInterface *, VuVec const &) {
+    STUBBED();
 }
 
 void MechTouchTaskPanel::Update() {
+    STUBBED();
 }
 
 MechTouchTaskAttack::MechTouchTaskAttack(MechInputTouchGestureBasedController &, MechObjectInterface *, VuVec const &) {
+    STUBBED();
 }
 
 void MechTouchTaskAttack::OnStart() {
+    STUBBED();
 }
 
 void MechTouchTaskAttack::OnStop() {
+    STUBBED();
 }
 
 void MechTouchTaskAttack::Render() {
+    STUBBED();
 }
 
 void MechTouchTaskAttack::Update() {
+    STUBBED();
 }
 
 MechTouchTaskBigJump::MechTouchTaskBigJump(MechInputTouchGestureBasedController &, MechObjectInterface &, signed char) {
+    STUBBED();
 }
 
 MechTouchTaskBigJump::MechTouchTaskBigJump(MechInputTouchGestureBasedController &, nuvec_s &, signed char) {
+    STUBBED();
 }
 
 void MechTouchTaskBigJump::Update() {
+    STUBBED();
 }
 
-void ForceBuildItToUseNext(GIZBUILDIT_s &);
 
 MechTouchTaskBuildIt::MechTouchTaskBuildIt(MechInputTouchGestureBasedController &owner, MechObjectInterface *object,
                                            VuVec const &)
@@ -162,26 +183,32 @@ MechTouchTaskBuildIt::MechTouchTaskBuildIt(MechInputTouchGestureBasedController 
 }
 
 bool MechTouchTaskBuildIt::Update() {
+    STUBBED();
     return false;
 }
 
 MechTouchTaskUseForce::MechTouchTaskUseForce(MechInputTouchGestureBasedController &, MechObjectInterface *,
                                              VuVec const &) {
+    STUBBED();
 }
 
 void MechTouchTaskUseForce::OnStart() {
+    STUBBED();
 }
 
 void MechTouchTaskUseForce::OnStop() {
+    STUBBED();
 }
 
 void MechTouchTaskUseForce::Update() {
+    STUBBED();
 }
 
 MechTouchTaskUseZipUp::MechTouchTaskUseZipUp(MechInputTouchGestureBasedController &owner) : MechTouchTask(owner) {
 }
 
 void MechTouchTaskUseZipUp::OnStart() {
+    STUBBED();
 }
 
 bool MechTouchTaskUseZipUp::Update() {
@@ -191,44 +218,57 @@ bool MechTouchTaskUseZipUp::Update() {
 
 MechTouchTaskPullLever::MechTouchTaskPullLever(MechInputTouchGestureBasedController &, MechObjectInterface *,
                                                VuVec const &) {
+    STUBBED();
 }
 
 void MechTouchTaskPullLever::Update() {
+    STUBBED();
 }
 
 MechTouchTaskHatMachine::MechTouchTaskHatMachine(MechInputTouchGestureBasedController &, MechObjectInterface *,
                                                  VuVec const &) {
+    STUBBED();
 }
 
 void MechTouchTaskHatMachine::Update() {
+    STUBBED();
 }
 
 void MechTouchTaskPlannedGoTo::AnalysePath() {
+    STUBBED();
 }
 
 void MechTouchTaskPlannedGoTo::BackgroundProcess() {
+    STUBBED();
 }
 
 void MechTouchTaskPlannedGoTo::GenerateWaypoints() {
+    STUBBED();
 }
 
 MechTouchTaskPlannedGoTo::MechTouchTaskPlannedGoTo(MechInputTouchGestureBasedController &, MechObjectInterface *,
                                                    bool *) {
+    STUBBED();
 }
 
 void MechTouchTaskPlannedGoTo::OnResume() {
+    STUBBED();
 }
 
 void MechTouchTaskPlannedGoTo::OnStart() {
+    STUBBED();
 }
 
 void MechTouchTaskPlannedGoTo::OnStop() {
+    STUBBED();
 }
 
 void MechTouchTaskPlannedGoTo::SetupForAnalysis() {
+    STUBBED();
 }
 
 void MechTouchTaskPlannedGoTo::Update() {
+    STUBBED();
 }
 
 MechTouchTaskPlannedGoTo::~MechTouchTaskPlannedGoTo() {
@@ -236,18 +276,23 @@ MechTouchTaskPlannedGoTo::~MechTouchTaskPlannedGoTo() {
 
 MechTouchTaskUseTeleport::MechTouchTaskUseTeleport(MechInputTouchGestureBasedController &, MechObjectInterface *,
                                                    VuVec const &) {
+    STUBBED();
 }
 
 void MechTouchTaskUseTeleport::Update() {
+    STUBBED();
 }
 
 MechTouchTaskAstroJetPack::MechTouchTaskAstroJetPack(MechInputTouchGestureBasedController &) {
+    STUBBED();
 }
 
 void MechTouchTaskAstroJetPack::Update() {
+    STUBBED();
 }
 
 void MechTouchTaskPlannedDoubleClickGoTo::BackgroundProcess() {
+    STUBBED();
 }
 
 MechTouchTaskPlannedDoubleClickGoTo::MechTouchTaskPlannedDoubleClickGoTo(MechInputTouchGestureBasedController &owner,
@@ -256,12 +301,15 @@ MechTouchTaskPlannedDoubleClickGoTo::MechTouchTaskPlannedDoubleClickGoTo(MechInp
 }
 
 void MechTouchTaskPlannedDoubleClickGoTo::OnResume() {
+    STUBBED();
 }
 
 void MechTouchTaskPlannedDoubleClickGoTo::OnStart() {
+    STUBBED();
 }
 
 void MechTouchTaskPlannedDoubleClickGoTo::OnStop() {
+    STUBBED();
 }
 
 bool MechTouchTaskPlannedDoubleClickGoTo::Update() {

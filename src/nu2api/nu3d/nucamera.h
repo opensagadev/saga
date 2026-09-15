@@ -86,6 +86,7 @@ typedef struct nucamerastate_s {
 #ifdef __cplusplus
 
 void NuCameraBuildClipPlanes(void);
+extern NUMTX clip_test_mtx;
 
 extern "C" {
     extern i32 cam_state_count;
@@ -136,6 +137,7 @@ extern "C" {
     extern NUVEC4 NearPlane, AbsNearPlane;
     extern NUMTX AbsFrustrumPlanes, AbsScissorPlanes;
     void BuildCamSpaceClipPlanes(void);
+    void ChooseCorrectLOD(i32 *index, NUVEC *center, f32 *lod_ranges);
     void BuildWorldSpaceClipPlanes(void);
 
     extern f32 zx;

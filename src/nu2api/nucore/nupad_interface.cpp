@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "nu2api/nucore/NuInputDevice.h"
 #include "nu2api/nucore/NuInputManager.h"
 #include "nu2api/nucore/NuTouchInputButton.h"
@@ -203,16 +204,12 @@ const NuInputDevice *NuInputManager::GetFirstDeviceByType(NUPADTYPE type) const 
     return NULL;
 }
 
-void NuInputDevicePS::DisableDPDPS(u32) {
-}
-
-void NuInputDevicePS::EnableDPDPS(u32) {
-}
-
 void NuInputDevicePS::GetIdentifierPS(u32) {
+    STUBBED();
 }
 
 void NuTouchInputStick::Render() {
+    STUBBED();
 }
 
 void NuTouchInputStick::Update(NuInputTouchData const *data) {
@@ -262,6 +259,7 @@ void NuTouchInputStick::Update(NuInputTouchData const *data) {
 }
 
 void NuTouchInputButton::Render() {
+    STUBBED();
 }
 
 NuTouchInputElement::NuTouchInputElement(NuTouchInputElement::TYPE type, i32 id, u32 index) {

@@ -1,6 +1,7 @@
 #include "legoapi/gizmos/transport/ledges.h"
 
 #include "decomp.h"
+#include "legoapi/actions/movement/jumping.h"
 #include "gameapi/edtools/edfile.h"
 #include "nu2api/numath/nuvec.h"
 #include "nu2api/nucore/nustring.h"
@@ -13,7 +14,6 @@
 #include "legoapi/core/input/gamepads.h"
 #include "nu2api/numath/nufloat.h"
 #include "legoapi/legoapi_types.h"
-void StartJump(GameObject_s *, i32);
 
 #include "legoapi/world/level.h"
 #include "legoapi/world/world.h"

@@ -4,6 +4,7 @@
 #include "legoapi/ai/game/lsw_hub_ai.h"
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/core/players.h"
+#include "legoapi/items/collect/torpedo.h"
 #include "legoapi/gizmo/base/GizObstacleObjectInterface.h"
 #include "legoapi/gizmo/base/gizmo.h"
 #include "legoapi/legoapi_types.h"
@@ -52,7 +53,6 @@ char *hub_areas[10] = {"MAINROOM", "EPISODE1", "EPISODE2", "EPISODE3", "EPISODE4
 extern GIZOBSTACLE_s *LevGizObst[8];
 
 extern i32 CheckPosAIArea(AIAREA_s *area, nuvec_s *position, f32 tolerance);
-extern void FreeTorpedoPacket(TORPEDOPACKET_s **packet);
 extern void RemoveGameObject(GameObject_s *object, i32 mode);
 
 extern "C" {

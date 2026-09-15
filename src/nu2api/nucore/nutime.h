@@ -10,6 +10,7 @@ typedef struct nutime_s {
 #ifdef __cplusplus
 
 void NuTimeGetTicksPS(u32 *low, u32 *high);
+void NuTimeGetMicrosecondsPS(u32 *low, u32 *high);
 void NuTimeGetTicksPerSecondPS(u32 *low, u32 *high);
 
 u64 NuGetCurrentTimeMilisecondsPS(void);
@@ -23,6 +24,9 @@ extern "C" {
     f32 NuTimeGetFrameTime(void);
     void NuTimeForceFrameTime(f32 frame_time);
     void NuTimeWait(f32 milliseconds);
+    void NuTimeStartFrame(void);
+    void NuTimeGetStartFrame(void);
+    void NuTimeGetSinceStartFrame(void);
 
     f32 NuTimeSeconds(NUTIME *t);
     f32 NuTimeScanlines(NUTIME *t);

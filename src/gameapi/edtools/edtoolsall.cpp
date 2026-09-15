@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "gameapi_edtools_types.h"
 #include "gameapi/edtools/edcam.h"
 #include "gameapi/edtools/edfile.h"
@@ -6,13 +7,12 @@
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nu3d/nuspline.h"
 #include "nu2api/nucore/nustring.h"
+#include "nu2api/nucore/nuvideo.h"
 #include "nu2api/numath/nuvec.h"
 #include "nu2api/nufile/nufile.h"
 #include <stdio.h>
 #include <string.h>
 #include "nu2api/numath/nurand.h"
-
-extern "C" void NuPs2VideoScreenDump(char *, i32, f32, f32, i32, i32, i32);
 
 EdRegistry theRegistry;
 i32 pad_disabled;
@@ -57,72 +57,95 @@ extern "C" {
 }
 
 void EdTerrInit(void *, void *) {
+    STUBBED();
 }
 
 void edDrawLine(nuvec_s *, nuvec_s *, unsigned char, unsigned char, unsigned char) {
+    STUBBED();
 }
 
 void EdDrawBegin(i32) {
+    STUBBED();
 }
 
 void edpartPlace(i32, nuvec_s *) {
+    STUBBED();
 }
 
 void edppDoInput(nupad_s *) {
+    STUBBED();
 }
 
 void EdTerrShadow(nuvec_s *, float, float, i32) {
+    STUBBED();
 }
 
 void edbriDoInput(nupad_s *) {
+    STUBBED();
 }
 
 void edgraDoInput(nupad_s *) {
+    STUBBED();
 }
 
 void edpartCreate(nuvec_s *, i32) {
+    STUBBED();
 }
 
 void edppPtlPlace(i32, nuvec_s *) {
+    STUBBED();
 }
 
 void EdDrawPolyTri(VuVec const &, VuVec const &, VuVec const &, i32) {
+    STUBBED();
 }
 
 void edanimDoInput(nupad_s *) {
+    STUBBED();
 }
 
 void edbobsDrawBox(nuvec_s *, nuvec_s *, i32) {
+    STUBBED();
 }
 
 void edbriFileSave(char *) {
+    STUBBED();
 }
 
 void edgraFileSave(char *) {
+    STUBBED();
 }
 
 void edpartDoInput(nupad_s *) {
+    STUBBED();
 }
 
 void edppPtlCreate(nuvec_s *, i32) {
+    STUBBED();
 }
 
 void edppPtlShelve(i32) {
+    STUBBED();
 }
 
 void EdDrawLineCube(VuMtx const &, float, i32) {
+    STUBBED();
 }
 
 void EdDrawPolyAxis(VuMtx const &, float, i32) {
+    STUBBED();
 }
 
 void edanimFileSave(char *) {
+    STUBBED();
 }
 
 void edpartInitType(i32) {
+    STUBBED();
 }
 
 void edppDrawCursor() {
+    STUBBED();
 }
 
 extern "C" {
@@ -141,15 +164,19 @@ void edppPtlDestroy(i32 index) {
 }
 
 void EdDrawLineArrow(VuMtx const &, float, i32) {
+    STUBBED();
 }
 
 void EdDrawLineCross(VuVec const &, float, i32) {
+    STUBBED();
 }
 
 void EdDrawPolyArrow(VuVec const &, VuVec const &, i32, i32, float, float, float, float) {
+    STUBBED();
 }
 
 void edbriDrawCursor() {
+    STUBBED();
 }
 
 void edgraClumpPlace(i32 index, NUVEC *position) {
@@ -167,24 +194,31 @@ void edgraClumpPlace(i32 index, NUVEC *position) {
 }
 
 void edgraDrawCursor() {
+    STUBBED();
 }
 
 void edpartPtlShelve(i32) {
+    STUBBED();
 }
 
 void edpartScaleType(i32, float) {
+    STUBBED();
 }
 
 void edppSaveEffects(char *, char) {
+    STUBBED();
 }
 
 void EdDrawLineSphere(VuVec const &, float, float, i32) {
+    STUBBED();
 }
 
 void EdDrawPolySector(VuVec const &, float, i32, i32, i32, i32, i32) {
+    STUBBED();
 }
 
 void edanimDrawCursor() {
+    STUBBED();
 }
 
 i32 edgraClumpCreate(NUVEC *position) {
@@ -265,39 +299,51 @@ i32 edgraClumpCreate(NUVEC *position) {
 }
 
 void edpartDrawCursor() {
+    STUBBED();
 }
 
 void EdDrawLineCircleX(VuVec const &, float, i32, i32) {
+    STUBBED();
 }
 
 void EdDrawLineCircleY(VuVec const &, float, i32, i32) {
+    STUBBED();
 }
 
 void EdDrawLineCircleZ(VuVec const &, float, i32, i32) {
+    STUBBED();
 }
 
 void EdDrawLineSegment(VuVec const &, VuVec const &, i32) {
+    STUBBED();
 }
 
 void edanimParamCreate(i32) {
+    STUBBED();
 }
 
 void edpartSaveEffects(char *, char) {
+    STUBBED();
 }
 
 void edppPtlChangeType(i32, i32) {
+    STUBBED();
 }
 
 void edppPtlCreateCopy(nuvec_s *, i32) {
+    STUBBED();
 }
 
 void EdDrawPolyCylinder(VuMtx const &, float, float, float, i32, i32, i32, i32) {
+    STUBBED();
 }
 
 void EdDrawPolyCylinder(VuVec const &, VuVec const &, i32, i32, i32, float, float, float) {
+    STUBBED();
 }
 
 void edanimParamDestroy(i32) {
+    STUBBED();
 }
 
 void edbitsDoSingleDump(i32 face) {
@@ -315,6 +361,7 @@ void edbitsDoSingleDump(i32 face) {
 }
 
 void edgraCalculatePage(char, i32) {
+    STUBBED();
 }
 
 void edgraInstancePlace(i32 index, NUVEC *position) {
@@ -331,12 +378,15 @@ void edgraInstancePlace(i32 index, NUVEC *position) {
 }
 
 void edpartLookupObject(char *) {
+    STUBBED();
 }
 
 void edSpline_FindAllBeg(nugscn_s *, char *, nugspline_s **, i32) {
+    STUBBED();
 }
 
 void edSpline_FindAllSub(nugscn_s *, char *, nugspline_s **, i32) {
+    STUBBED();
 }
 
 i32 LoadEditorSplines(char *path, VARIPTR *buf, VARIPTR *buf_end) {
@@ -429,12 +479,15 @@ NUGSPLINE *edSpline_SplineFind(NUGSCN *scene, char *name) {
 }
 
 void edSpline_SplineList(nugscn_s *) {
+    STUBBED();
 }
 
 void edanimParticlePlace(i32, nuvec_s *) {
+    STUBBED();
 }
 
 void edanimStartAllPages() {
+    STUBBED();
 }
 
 void edgraInstanceCreate(NUVEC *position) {
@@ -445,12 +498,15 @@ void edgraInstanceCreate(NUVEC *position) {
 }
 
 void edpartPtlChangeType(i32, i32) {
+    STUBBED();
 }
 
 void edppDestroyAllPages() {
+    STUBBED();
 }
 
 void edanimParticleCreate(nuvec_s *) {
+    STUBBED();
 }
 
 void edgraInstanceDestroy(i32 index) {
@@ -498,12 +554,15 @@ void edppDetermineNearest(float max_distance_squared) {
 }
 
 void edppHighlightNearest() {
+    STUBBED();
 }
 
 void edppMultipleCopyCopy() {
+    STUBBED();
 }
 
 void edbriDetermineNearest(float) {
+    STUBBED();
 }
 
 void edgraSortVectorBuffer(i32 index) {
@@ -527,24 +586,31 @@ void edgraSortVectorBuffer(i32 index) {
 }
 
 void edpartDestroyAllPages() {
+    STUBBED();
 }
 
 void edppMultipleCopyClear() {
+    STUBBED();
 }
 
 void edppMultipleCopyPaste() {
+    STUBBED();
 }
 
 void edppStartSingleEffect(i32) {
+    STUBBED();
 }
 
 void edpartHighlightNearest() {
+    STUBBED();
 }
 
 void edpartMultipleCopyCopy() {
+    STUBBED();
 }
 
 void edpartMultipleCopyClear() {
+    STUBBED();
 }
 
 float edanimPlayerAnimDistance(i32 parameter_index) {
@@ -559,12 +625,15 @@ float edanimPlayerAnimDistance(i32 parameter_index) {
 }
 
 void edanimRenderSoundEmitters(i32) {
+    STUBBED();
 }
 
 void edbobs_DrawCoordinateInfo(nuvec_s *, i32, i32) {
+    STUBBED();
 }
 
 void edanimDetermineNearestAnim(float) {
+    STUBBED();
 }
 
 void edgraDetermineNearestClump(f32 distance) {
@@ -590,12 +659,15 @@ void edgraDetermineNearestClump(f32 distance) {
 }
 
 void eduiItemFileSelectorCreate(u32, eduiiattr_s *, void (*)(eduimenu_s *, eduiitem_s *, u32), char *) {
+    STUBBED();
 }
 
 void edanimDetermineNearestSound(float) {
+    STUBBED();
 }
 
 void edanimRenderParticleEmitters(i32) {
+    STUBBED();
 }
 
 void edgraDetermineNearestInstance(f32 distance) {
@@ -625,186 +697,247 @@ void edgraDetermineNearestInstance(f32 distance) {
 }
 
 void edanimDetermineNearestParticle(float) {
+    STUBBED();
 }
 
 void EdDrawEnd() {
+    STUBBED();
 }
 
 void EdDrawMtx(VuMtx const *) {
+    STUBBED();
 }
 
 void EdTerrRay(VuVec &, VuVec &) {
+    STUBBED();
 }
 
 EdManScale::EdManScale() {
+    STUBBED();
 }
 
 void EdManScale::Process(EdInputContext &, ClassObjectList &) {
+    STUBBED();
 }
 
 void EdManScale::Render(ClassObjectList &) {
+    STUBBED();
 }
 
 void EdRegistry::AddMapping(char *, char *) {
+    STUBBED();
 }
 
 void EdRegistry::AddObjectNotifier(EdObjectNotifier *) {
+    STUBBED();
 }
 
 void EdRegistry::ClassIFaceProcess(EdClass *, void *, EdInputContext &) {
+    STUBBED();
 }
 
 void EdRegistry::ClassIFaceProcess(i32, void *, EdInputContext &) {
+    STUBBED();
 }
 
 void EdRegistry::ClassIFaceRender(EdClass *, void *, i32) {
+    STUBBED();
 }
 
 void EdRegistry::ClassIFaceRender(i32, void *, i32) {
+    STUBBED();
 }
 
 void EdRegistry::CreateObject(EdClassInterface *, void *, i32, i32, i32) {
+    STUBBED();
 }
 
 void EdRegistry::DefunctObject(EdClassInterface *, void *, i32, i32) {
+    STUBBED();
 }
 
 void EdRegistry::DestroyObject(EdClassInterface *, void *, i32, i32) {
+    STUBBED();
 }
 
 void EdRegistry::GetClass(char *) {
+    STUBBED();
 }
 
 void EdRegistry::GetClassId(char *) {
+    STUBBED();
 }
 
 void EdRegistry::GetStreamClassMapping(EdStream &, i32 *, i32 &, i32) {
+    STUBBED();
 }
 
 void EdRegistry::GetType(char *) {
+    STUBBED();
 }
 
 void EdRegistry::GetTypeId(char *) {
+    STUBBED();
 }
 
 void EdRegistry::Initialise(variptr_u &, variptr_u &, i32, i32, i32, i32) {
+    STUBBED();
 }
 
 void EdRegistry::MapName(char *) {
+    STUBBED();
 }
 
 void EdRegistry::NotifyCreateObject(void *, EdClass *, void *, i32, i32, i32) {
+    STUBBED();
 }
 
 void EdRegistry::NotifyDefunctObject(void *, EdClass *, i32) {
+    STUBBED();
 }
 
 void EdRegistry::NotifyDestroyObject(void *, EdClass *, i32, i32) {
+    STUBBED();
 }
 
 void EdRegistry::NotifyReviveObject(void *, EdClass *, i32) {
+    STUBBED();
 }
 
 void EdRegistry::RegisterBaseTypes() {
+    STUBBED();
 }
 
 void EdRegistry::RegisterClass(char *, EdClassInterface *, i32) {
+    STUBBED();
 }
 
 void EdRegistry::RegisterType(char *, i32, void (*)(EdStream &, void *, i32)) {
+    STUBBED();
 }
 
 void EdRegistry::Serialise(EdStream &) {
+    STUBBED();
 }
 
 void EdRegistry::SerialiseObjects(EdStream &, EdRegistry *) {
+    STUBBED();
 }
 
 EdManRotate::EdManRotate() {
+    STUBBED();
 }
 
 void EdManRotate::Process(EdInputContext &, ClassObjectList &) {
+    STUBBED();
 }
 
 void EdManRotate::Render(ClassObjectList &) {
+    STUBBED();
 }
 
 void EdManRotate::RotateItem(EdInputContext &, ClassObjectList &, i32, i32) {
+    STUBBED();
 }
 
 void EdRefSpline::GetMemberData(void *, i32, void *, i32) {
+    STUBBED();
 }
 
 void EdRefSpline::SetMemberData(void *, i32, void *, i32, i16 *) {
+    STUBBED();
 }
 
 void EdBitControl::AddMenuItem(eduimenu_s *, EdRef *, void *) {
+    STUBBED();
 }
 
 void EdBitControl::Refresh() {
+    STUBBED();
 }
 
 void EdBitControl::cbButton(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 
 void EdBitControl::cbChanged(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 
 void EdBitControl::cbSelectItem(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 
 void EdDefunctList::ReviveAll(i32) {
+    STUBBED();
 }
 
 void EdEnumControl::AddMenuItem(eduimenu_s *, EdRef *, void *) {
+    STUBBED();
 }
 
 void EdEnumControl::GetEnumString(i32) {
+    STUBBED();
 }
 
 void EdEnumControl::GetEnumValue(char *) {
+    STUBBED();
 }
 
 void EdEnumControl::Refresh() {
+    STUBBED();
 }
 
 void EdEnumControl::cbButton(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 
 void EdEnumControl::cbChanged(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 
 void EdEnumControl::cbSelectItem(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 
 void EdInputStream::SerialiseString(char **) {
+    STUBBED();
 }
 
 void EdInputStream::SerialiseString(char **, i32) {
+    STUBBED();
 }
 
 void EdInputStream::SerialiseString(char *, i32) {
+    STUBBED();
 }
 
 void EdManipulator::DrawAxis(VuVec &, VuMtx *) {
+    STUBBED();
 }
 
 void EdManipulator::DrawRotator(VuVec &) {
+    STUBBED();
 }
 
 void EdManipulator::GetAxisLocators(VuVec &, VuVec *, VuMtx *) {
+    STUBBED();
 }
 
 void EdManipulator::Process(EdInputContext &, ClassObjectList &) {
+    STUBBED();
 }
 
 void EdManipulator::Render(ClassObjectList &) {
+    STUBBED();
 }
 
 void EdManipulator::SelectAxis(EdInputContext &, VuVec &, VuVec &, VuVec &, VuMtx *) {
+    STUBBED();
 }
 
 void EdManipulator::SelectRotator(EdInputContext &, VuVec &, VuVec &) {
+    STUBBED();
 }
 
 void EdInputContext::Clear(i32 input) {
@@ -815,6 +948,7 @@ void EdInputContext::Clear(i32 input) {
 }
 
 EdInputContext::EdInputContext() {
+    STUBBED();
 }
 
 f32 EdInputContext::Get(i32 input) {
@@ -860,267 +994,354 @@ void EdInputContext::Set(i32 input, float value, float repeat_delay) {
 }
 
 void EdInputContext::Update(nucamera_s *, nupad_s *, float, bool) {
+    STUBBED();
 }
 
 void EdOutputStream::SerialiseString(char **) {
+    STUBBED();
 }
 
 void EdOutputStream::SerialiseString(char **, i32) {
+    STUBBED();
 }
 
 void EdOutputStream::SerialiseString(char *, i32) {
+    STUBBED();
 }
 
 void EdRefPlaceable::GetMemberData(void *, i32, void *, i32) {
+    STUBBED();
 }
 
 void EdRefPlaceable::SetMemberData(void *, i32, void *, i32, i16 *) {
+    STUBBED();
 }
 
 void EdColourControl::AddMenuItem(eduimenu_s *, EdRef *, void *) {
+    STUBBED();
 }
 
 EdColourControl::EdColourControl() {
+    STUBBED();
 }
 
 void EdColourControl::Refresh() {
+    STUBBED();
 }
 
 void EdColourControl::cbButton(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 
 void EdColourControl::cbChanged(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 
 void EdColourControl::cbColourSelected(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 
 void EdMatrixControl::AddMenuItem(eduimenu_s *, EdRef *, void *) {
+    STUBBED();
 }
 
 void EdMatrixControl::Destroy() {
+    STUBBED();
 }
 
 EdMatrixControl::EdMatrixControl() {
+    STUBBED();
 }
 
 void EdMatrixControl::Refresh() {
+    STUBBED();
 }
 
 void EdMatrixControl::SetMenuItemAttr(i32, eduiitem_s *, eduiiattr_s *, eduiiattr_s *) {
+    STUBBED();
 }
 
 void EdMatrixControl::cbButton(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 
 void EdMatrixControl::cbChanged(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 
 void EdMatrixControl::cbSelected(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 
 void EdStringControl::AddMenuItem(eduimenu_s *, EdRef *, void *) {
+    STUBBED();
 }
 
 EdStringControl::EdStringControl() {
+    STUBBED();
 }
 
 void EdStringControl::GetVal(char *, i32) {
+    STUBBED();
 }
 
 void EdStringControl::Refresh() {
+    STUBBED();
 }
 
 void EdStringControl::SetVal(char const *) {
+    STUBBED();
 }
 
 void EdStringControl::cbChanged(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 
 void EdStringControl::cbPress(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 
 void EdVectorControl::AddMenuItem(eduimenu_s *, EdRef *, void *) {
+    STUBBED();
 }
 
 void EdVectorControl::Destroy() {
+    STUBBED();
 }
 
 EdVectorControl::EdVectorControl() {
+    STUBBED();
 }
 
 void EdVectorControl::Refresh() {
+    STUBBED();
 }
 
 void EdVectorControl::cbButton(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 
 void EdVectorControl::cbChanged(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 
 void EdVectorControl::cbSelected(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 
 void EdClassInterface::DistanceToObject(VuVec &, VuVec &, void *, EdRef **) {
+    STUBBED();
 }
 
 void EdClassInterface::DistanceToObject(VuVec &, void *, EdRef **) {
+    STUBBED();
 }
 
 void EdClassInterface::GetNextObject(void *, i32 (*)(void *)) {
+    STUBBED();
 }
 
 void EdSfxNameControl::AddMenuItem(eduimenu_s *, EdRef *, void *) {
+    STUBBED();
 }
 
 EdSfxNameControl::EdSfxNameControl() {
+    STUBBED();
 }
 
 void EdSfxNameControl::cbButton(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 
 void EdSfxNameControl::cbChanged(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 
 void EdSfxNameControl::cbSelectSfx(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 
 void EdFileInputStream::BeginBlock(char const *) {
+    STUBBED();
 }
 
 void EdFileInputStream::Eat(i32, i32) {
+    STUBBED();
 }
 
 void EdFileInputStream::EndBlock() {
+    STUBBED();
 }
 
 void EdFileInputStream::Open(i32, i32) {
+    STUBBED();
 }
 
 void EdFileInputStream::SerialiseBuffer(void *, i32, i32) {
+    STUBBED();
 }
 
 void EdFileOutputStream::BeginBlock(char const *) {
+    STUBBED();
 }
 
 void EdFileOutputStream::Eat(i32, i32) {
+    STUBBED();
 }
 
 void EdFileOutputStream::EndBlock() {
+    STUBBED();
 }
 
 void EdFileOutputStream::Open(i32, i32) {
+    STUBBED();
 }
 
 void EdFileOutputStream::SerialiseBuffer(void *, i32, i32) {
+    STUBBED();
 }
 
 void EdRefSpecialObject::GetMemberData(void *, i32, void *, i32) {
+    STUBBED();
 }
 
 void EdRefSpecialObject::SetMemberData(void *, i32, void *, i32, i16 *) {
+    STUBBED();
 }
 
 EdSpecialObjectControl::EdSpecialObjectControl() {
+    STUBBED();
 }
 
 void EdSpecialObjectControl::cbButton(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 
 void EdSpecialObjectControl::cbChanged(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 
 void EdSpecialObjectControl::cbSelectObject(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 
 void EdSpecialObjectControl::AddMenuItem(eduimenu_s *, EdRef *, void *) {
+    STUBBED();
 }
 
 void EdSpecialObjectControl::Process(EdInputContext &) {
+    STUBBED();
 }
 
 void EdSpecialObjectControl::Render() {
+    STUBBED();
 }
 
 void EdClassObjectNameControl::AddMenuItem(eduimenu_s *, EdRef *, void *) {
+    STUBBED();
 }
 
 EdClassObjectNameControl::EdClassObjectNameControl() {
+    STUBBED();
 }
 
 void EdClassObjectNameControl::Process(EdInputContext &) {
+    STUBBED();
 }
 
 void EdClassObjectNameControl::Render() {
+    STUBBED();
 }
 
 void EdClassObjectNameControl::cbButton(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 
 void EdClassObjectNameControl::cbChanged(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 
 void EdClassObjectNameControl::cbSelectClass(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 
 void EdClassObjectNameControl::cbSelectObject(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 
 void EdRef::CheckType(i32) {
+    STUBBED();
 }
 
 EdRef::EdRef(char *, char *, i32, i32, i32, EdControl *, i32) {
+    STUBBED();
 }
 
 void EdRef::GetAttributeData(void *, i32, i32, void *, i32) {
+    STUBBED();
 }
 
 void EdRef::GetMemberData(void *, i32, void *, i32) {
+    STUBBED();
 }
 
 void EdRef::GetMemberObject(void *) {
+    STUBBED();
 }
 
 void EdRef::GetTypeSize(i32, i32) {
+    STUBBED();
 }
 
 void EdRef::Serialise(EdStream &, i32 *) {
+    STUBBED();
 }
 
 void EdRef::SetAttributeData(void *, i32, i32, void *, i32) {
+    STUBBED();
 }
 
 void EdRef::SetMemberData(void *, i32, void *, i32, i16 *) {
+    STUBBED();
 }
 
 void EdType::Serialise(EdStream &) {
+    STUBBED();
 }
 
 EdStream::EdStream() {
+    STUBBED();
 }
 
 EdStream::EdStream(MemoryBuffer *) {
+    STUBBED();
 }
 
 EdStream::EdStream(MemoryBuffer *, MemoryBuffer *) {
+    STUBBED();
 }
 
 void EdString::Set(char const *) {
+    STUBBED();
 }
 
 EdString::~EdString() {
 }
 
 void EdSystem::Initalise(variptr_u &, variptr_u &, i32) {
+    STUBBED();
 }
 
 void EdSystem::Process(float) {
+    STUBBED();
 }
 
 void EdSystem::RegisterSubSystem(EdSubSystem *) {
+    STUBBED();
 }
 
 void EdSystem::Render() {
+    STUBBED();
 }
 
 void EdSystem::Reset() {
@@ -1130,49 +1351,65 @@ void EdSystem::Reset() {
 }
 
 __attribute__((weak)) void EdSubSystem::SubInitialise(variptr_u &, variptr_u &, i32) {
+    STUBBED();
 }
 
 __attribute__((weak)) void EdSubSystem::SubReset() {
+    STUBBED();
 }
 
 __attribute__((weak)) void EdSubSystem::SubProcess(float) {
+    STUBBED();
 }
 
 __attribute__((weak)) void EdSubSystem::SubRender() {
+    STUBBED();
 }
 
 void EdControl::AddMenuItem(eduimenu_s *, EdRef *, void *) {
+    STUBBED();
 }
 
 void EdControl::Process(EdInputContext &) {
+    STUBBED();
 }
 
 void EdControl::Render() {
+    STUBBED();
 }
 
 void EdControl::SelectSubObject() {
+    STUBBED();
 }
 
 void EdControl::Refresh() {
+    STUBBED();
 }
 
 void EdControl::SetMenuItemAttr(i32, eduiitem_s *, eduiiattr_s *, eduiiattr_s *) {
+    STUBBED();
 }
 
 void EdControl::cbSelected(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 
 EdManMove::EdManMove() {
+    STUBBED();
 }
 
 void EdManMove::Process(EdInputContext &, ClassObjectList &) {
+    STUBBED();
 }
 
 void EdManMove::Render(ClassObjectList &) {
+    STUBBED();
 }
 
 void EdRefKnot::GetMemberData(void *, i32, void *, i32) {
+    STUBBED();
 }
 
 void EdRefKnot::SetMemberData(void *, i32, void *, i32, i16 *) {
+    STUBBED();
 }

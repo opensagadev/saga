@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "globals.h"
 #include "nu2api/nu3d/nutexanm.h"
 #include <string.h>
@@ -22,6 +23,7 @@ i32 nta_labels[64];
 nutexanimlist_s ntalsysbuff[64];
 nutexanimlist_s *ntal_first;
 nutexanimlist_s *ntal_free;
+i32 g_texAnimCriticalSection;
 
 extern "C" void NuTexAnimSetMask(i32 mask) {
     script_mask = static_cast<u16>(mask);
@@ -374,10 +376,34 @@ extern "C" void NuTexAnimAddList(nutexanim_s *anim) {
     NuThreadCriticalSectionEnd(g_texAnimCriticalSection);
 }
 
-extern "C" void NuTexAnimCreate(void) {
+extern "C" nutexanim_s *NuTexAnimCreate(VARIPTR *buffer, nutexanimprog_s *program, numtl_s *material, u16 *texture_ids,
+                                        i32 texture_count) {
+    nutexanim_s *animation;
+    if (buffer != NULL) {
+        animation = reinterpret_cast<nutexanim_s *>(ALIGN(buffer->addr, 4));
+        buffer->addr = reinterpret_cast<usize>(animation) + sizeof(nutexanim_s) + texture_count * sizeof(u16);
+    } else {
+        animation =
+            static_cast<nutexanim_s *>(NU_ALLOC(sizeof(nutexanim_s) + texture_count * sizeof(u16), 4, 1, "", 0));
+    }
+    animation->texture_count = texture_count;
+    animation->material = material;
+    animation->previous = NULL;
+    animation->next = NULL;
+    animation->name = NULL;
+    animation->texture_ids = reinterpret_cast<u16 *>(animation + 1);
+    memcpy(animation->texture_ids, texture_ids, texture_count * sizeof(u16));
+    animation->env = NuTexAnimEnvCreate(buffer, material, animation->texture_ids, program);
+    return animation;
 }
 
-extern "C" void NuTexAnimDestroy(void) {
+extern "C" void NuTexAnimDestroy(nutexanim_s *animation) {
+    if (animation->env != NULL) {
+        NuTexAnimEnvDestroy(animation->env);
+    }
+    if (animation->flags != 0) {
+        NU_FREE(animation);
+    }
 }
 
 extern "C" nutexanimenv_s *NuTexAnimEnvCreate(VARIPTR *buffer, numtl_s *material, u16 *ids, nutexanimprog_s *program) {
@@ -391,8 +417,14 @@ extern "C" nutexanimenv_s *NuTexAnimEnvCreate(VARIPTR *buffer, numtl_s *material
     if (env != NULL) {
         env->program = program;
         env->material = material;
-        NuTexAnimEnvReset(env);
+        env->instruction_index = 0;
+        env->loop_depth = 0;
+        env->call_depth = 0;
+        env->wait_base = 0;
+        env->wait_random = 0;
+        env->wait_remaining = 0;
         env->texture_ids = ids;
+        env->texture_index = 0;
         if (buffer == NULL)
             env->flags |= 1;
         else
@@ -401,7 +433,10 @@ extern "C" nutexanimenv_s *NuTexAnimEnvCreate(VARIPTR *buffer, numtl_s *material
     return env;
 }
 
-extern "C" void NuTexAnimEnvDestroy(void) {
+extern "C" void NuTexAnimEnvDestroy(nutexanimenv_s *env) {
+    if ((env->flags & 1) != 0) {
+        NU_FREE(env);
+    }
 }
 
 extern "C" void NuTexAnimEnvProc(nutexanimenv_s *env) {
@@ -608,7 +643,14 @@ extern "C" void NuTexAnimEnvReset(nutexanimenv_s *env) {
     env->texture_index = 0;
 }
 
-extern "C" void NuTexAnimFind(void) {
+extern "C" nutexanim_s *NuTexAnimFind(nutexanim_s *animation, char *name) {
+    while (animation != NULL) {
+        if (NuStrICmp(animation->name, name) == 0) {
+            return animation;
+        }
+        animation = animation->next;
+    }
+    return NULL;
 }
 
 extern "C" void NuTexAnimProgAssembleEnd(nutexanimprog_s *program) {
@@ -650,10 +692,34 @@ extern "C" void NuTexAnimProgAssembleEnd(nutexanimprog_s *program) {
     }
 }
 
-extern "C" void NuTexAnimProgCreate(void) {
+extern "C" nutexanimprog_s *NuTexAnimProgCreate(VARIPTR *buffer, i32 instruction_count, char *name) {
+    nutexanimprog_s *program;
+    if (buffer != NULL) {
+        program = reinterpret_cast<nutexanimprog_s *>(buffer->addr);
+        buffer->addr += sizeof(nutexanimprog_s) + instruction_count * sizeof(i16);
+    } else {
+        program = static_cast<nutexanimprog_s *>(
+            NU_ALLOC(sizeof(nutexanimprog_s) + instruction_count * sizeof(i16), 4, 1, "", 0));
+    }
+    if (program != NULL) {
+        NuTexAnimProgInit(program);
+        if (buffer == NULL)
+            program->flags |= 1;
+        if (name != NULL)
+            NuStrCpy(program->name, name);
+    }
+    return program;
 }
 
-extern "C" void NuTexAnimProgDestroy(void) {
+extern "C" void NuTexAnimProgDestroy(nutexanimprog_s *program) {
+    if (program->previous != NULL)
+        program->previous->next = program->next;
+    else
+        sys_progs = program->next;
+    if (program->next != NULL)
+        program->next->previous = program->previous;
+    if (program->flags & 1)
+        NU_FREE(program);
 }
 
 extern "C" nutexanimprog_s *NuTexAnimProgFind(char *name) {
@@ -664,10 +730,34 @@ extern "C" nutexanimprog_s *NuTexAnimProgFind(char *name) {
     return NULL;
 }
 
-extern "C" void NuTexAnimProgRead(void) {
+extern "C" nutexanimprog_s *NuTexAnimProgRead(VARIPTR *buffer, char *path) {
+    NUFILE file = NuFileOpen(path, NUFILE_READ);
+    nutexanimprog_s *program = NULL;
+    if (file != 0) {
+        i32 size = static_cast<i32>(NuFileOpenSize(file));
+        if (buffer != NULL) {
+            program = reinterpret_cast<nutexanimprog_s *>(ALIGN(buffer->addr, 4));
+            buffer->addr = reinterpret_cast<usize>(program) + size;
+        } else {
+            program = static_cast<nutexanimprog_s *>(NU_ALLOC(size, 4, 1, "", 0));
+        }
+        NuFileRead(file, program, size);
+        NuFileClose(file);
+        program->next = sys_progs;
+        if (sys_progs != NULL)
+            sys_progs->previous = program;
+        program->previous = NULL;
+        sys_progs = program;
+        if (buffer != NULL)
+            program->flags &= ~1;
+        else
+            program->flags |= 1;
+    }
+    return program;
 }
 
 extern "C" void NuTexAnimProgReadCFG(void) {
+    STUBBED();
 }
 
 extern "C" nutexanimprog_s *NuTexAnimProgReadScript(char *path, VARIPTR *buffer) {
@@ -699,7 +789,12 @@ extern "C" void NuTexAnimProgSysInit(void) {
     texanim_rand.value = 0;
 }
 
-extern "C" void NuTexAnimProgWrite(void) {
+extern "C" void NuTexAnimProgWrite(char *path, nutexanimprog_s *program) {
+    NUFILE file = NuFileOpen(path, NUFILE_WRITE);
+    if (file != 0) {
+        NuFileWrite(file, program, sizeof(nutexanimprog_s) + program->instruction_count * sizeof(i16));
+        NuFileClose(file);
+    }
 }
 
 extern "C" void NuTexAnimRemoveList(void *anim) {

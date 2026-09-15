@@ -1,4 +1,5 @@
 
+#include "decomp.h"
 #include "nu2api/nufile/nufile.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nucore/numemory.h"
@@ -30,6 +31,7 @@ struct NuFileWriteBlock {
 static NuFileWriteBlock nufile_wblkinfo[1024];
 static i32 wblkcnt = 1;
 static i32 iff_padsize = 16;
+i32 nufile_lsn_allowed = 1;
 
 struct NuFileReadBlock {
     i32 tag;
@@ -245,6 +247,7 @@ extern "C" {
         return NuFile_SwapEndianOnWrite;
     }
     i32 NuFileGetMediaMode(void) {
+        STUBBED();
         return 0;
     }
     void NuFileInitAddress(i32 capacity) {
@@ -286,6 +289,44 @@ extern "C" {
         if (second->second < first->second)
             return 0;
         return 0;
+    }
+    i32 NuDatGetFileInfo(NUDATHDR *header, char *name, i64 *position, i32 *length) {
+        if (header == NULL) {
+            return -1;
+        }
+
+        const i32 index = NuDatFileFindTree(header, name);
+        if (index < 0) {
+            return -1;
+        }
+
+        const NUDATFINFO *file = &header->file_info[index];
+        const i64 file_position = NuDatCalcPos(header, file->file_offset);
+        if (position != NULL) {
+            if (nufile_lsn_allowed != 0 && header->unknown2 != 0) {
+                *position = header->unknown2 + file_position / 0x800;
+            } else {
+                *position = file_position;
+            }
+        }
+        if (length != NULL) {
+            *length = file->file_len;
+        }
+        return index;
+    }
+    void NuDatClose(NUDATHDR *header) {
+        for (i32 index = 0; index < 20; ++index) {
+            NUDATOPENFILEINFO *open_file = &header->open_files[index];
+            if (open_file->dat_file != 0) {
+                NuFileClose(open_file->dat_file);
+            }
+            if (open_file->info_idx >= 0) {
+                dat_file_infos[open_file->info_idx].is_used = 0;
+            }
+        }
+        if (header->unknown != 0) {
+            NU_FREE(header);
+        }
     }
     void *NuFileLoad(char *path) {
         i32 buffering = nufile_buffering_enabled;

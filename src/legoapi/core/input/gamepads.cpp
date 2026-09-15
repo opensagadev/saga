@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "legoapi/core/input/gamepads.h"
 #include "gameapi/gui/apimenu.h"
 #include "globals.h"
@@ -118,9 +119,11 @@ GAMEPAD_s *GamePad_Allocate() {
 }
 
 void GamePads_NetHost() {
+    STUBBED();
 }
 
 void GamePads_NetReset(i32) {
+    STUBBED();
 }
 
 u16 GamePad_InputAngle(GameObject_s *object, GAMEPAD_s *pad) {
@@ -144,20 +147,25 @@ socket_relative: {
 }
 
 void GamePads_NetClient() {
+    STUBBED();
 }
 
 void GamePads_SkipMovie() {
+    STUBBED();
 }
 
 void GamePad_InitButtons() {
+    STUBBED();
 }
 
 extern "C" {
 
     void Controller_Exit(void) {
+        STUBBED();
     }
 
     void Controller_Init(void) {
+        STUBBED();
     }
 
     i32 Controller_IsConnected(void) {
@@ -165,9 +173,11 @@ extern "C" {
     }
 
     void Controller_Read(void) {
+        STUBBED();
     }
 
     void Controller_Update(void) {
+        STUBBED();
     }
 
     bool TestForController(void) {
@@ -216,9 +226,11 @@ void NewBuzzFrames(nupad_s *pad, i32 frames, i32) {
 }
 
 void TakeHitRumble(GameObject_s *, float) {
+    STUBBED();
 }
 
 void SpaceRumbleProcess() {
+    STUBBED();
 }
 
 void NewRumbleAllPlayers(float strength, float duration, i32 frames, i32) {
@@ -245,18 +257,23 @@ i32 ObjLookingWithLeftStick(GameObject_s *object) {
 }
 
 void PerformPauseButtonStuff() {
+    STUBBED();
 }
 
 void VirtualControlDPad_OnDown_Callback(MechTouchUIElement &, TouchHolder &) {
+    STUBBED();
 }
 
 void VirtualControlButton_OnDown_Callback(MechTouchUIElement &, TouchHolder &) {
+    STUBBED();
 }
 
 void VirtualControlButtonMover_OnDown_Callback(MechTouchUIElement &, TouchHolder &) {
+    STUBBED();
 }
 
 void VirtualControlDPad_LockButton_OnClick_Callback(MechTouchUIElement &, TouchHolder &) {
+    STUBBED();
 }
 
 i32 NoPad(i32 port, i32 require_game_input) {

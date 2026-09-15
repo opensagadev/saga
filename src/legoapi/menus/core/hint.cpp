@@ -1,4 +1,7 @@
 #include "decomp.h"
+#include "legoapi/gizmos/object/gizbuildits.h"
+#include "legoapi/gizmos/transport/teleport.h"
+#include "legoapi/menus/core/gamehint.h"
 #include "globals.h"
 #include "legoapi/legoapi_types.h"
 #include "MechInputTouch/MechInputTouch_types.h"
@@ -45,10 +48,22 @@ i32 HINT_COMPLETE(i32 hint_id) {
 }
 
 i32 Tilt_UpdateHint(HINT_s *) {
+    STUBBED();
     return 0;
 }
 
-void CurrentHintAlpha() {
+f32 CurrentHintAlpha() {
+    if (hintsys.active_hint == NULL)
+        return 0.0f;
+    f32 alpha = 1.0f;
+    f32 duration = hintsys.active_hint->display_duration;
+    f32 fade_start = duration - 0.5f;
+    if (duration > 0.0f && hintsys.display_elapsed >= fade_start) {
+        alpha = 1.0f - (hintsys.display_elapsed - fade_start) / (duration - fade_start);
+        if (alpha < 0.0f)
+            alpha = 0.0f;
+    }
+    return alpha * hintsys.alpha;
 }
 
 i32 Dodge_UpdateHint(HINT_s *hint) {
@@ -294,12 +309,15 @@ i32 ShinyMetal_UpdateHint(HINT_s *hint) {
 }
 
 void CurrentHintButtonScale() {
+    STUBBED();
 }
 
 void initGameHintSys_Batman() {
+    STUBBED();
 }
 
 void IndyUnlocked_UpdateHint(HINT_s *) {
+    STUBBED();
 }
 
 static __used__ i32 Sith_UpdateHint(HINT_s *) {
@@ -356,11 +374,9 @@ static __used__ i32 UnlockHubStuff_UpdateHint(HINT_s *hint) {
 }
 
 i32 GizForce_UpdateHint(HINT_s *);
-i32 GizBuildIts_UpdateHint(HINT_s *);
 i32 ZipUps_UpdateHint(HINT_s *);
 i32 Tag_UpdateHint(HINT_s *);
 i32 Push_UpdateHints(HINT_s *);
-i32 Teleport_UpdateHints(HINT_s *);
 i32 GizPanel_UpdateHint(HINT_s *);
 i32 Shop_UpdateHint(HINT_s *);
 HINT_s Hints_LSW[55] = {

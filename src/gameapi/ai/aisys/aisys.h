@@ -725,6 +725,7 @@ extern "C" {
     extern AISCRIPTPROCESS *pSetStateDebugee;
 
     void AiSysSetStateDebugee(AISCRIPTPROCESS *processor);
+    void *AISysBufferAlloc(VARIPTR *cursor, VARIPTR *buf_end, u32 size);
     void AiSysUsePackFile(i32 enabled);
     void AiSysOnlyUsePakFile(i32 enabled);
     void InitFn_GameParamToFloat(GAMEPARAMTOFLOAT *function);

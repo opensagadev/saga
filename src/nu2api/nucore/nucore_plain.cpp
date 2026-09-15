@@ -1,4 +1,4 @@
-// Nucore plain — C-linkage surface for the original libTTapp.so nucore TU.
+// Temporary C-linkage compatibility surface for unresolved engine owners.
 #include "nu2api/nu3d/nulgtlaser.h"
 #include "nu2api/nu3d/nuprim.h"
 #include "nu2api/numath/nuvec4.h"
@@ -7,41 +7,17 @@ extern "C" {
     i32 NuLgtLaserOldCnt;
 }
 #include "nu2api/nucore/nuonline.h"
-struct NUGCUTLOCATORFNENTRY_s;
-extern "C" NUGCUTLOCATORFNENTRY_s *locatorfns;
 //
-// This file provides the C-callable export table that the original binary
-// exposes from its single large nucore translation unit. Every symbol below
-// is present in the ELF dynamic symbol table; the few with non-trivial
-// bodies are faithful transcriptions (original addresses cited inline) while
-// the remainder are pending-transcription stand-ins that preserve link
-// compatibility until their real bodies land in a domain file.
-//
-// Faithfully transcribed in this TU:
-//   NuDisplayListInit              @0x29ad60 — anchors the static 2D list
-//   NuDisplayListLinkItems         @0x29ae31 — appends N items + NEXT term.
-//   NuDisplayListLinkMtl           @0x2e8cc0 — minimal 2D-path mtl link
-//   NuCameraSet                    via NuCameraSetEx(cam,0) (matrix work stubbed)
-//   NuIOS_GetAspectRatio           inline ratio from nuapi screen dims
-//   NuIOS_GetDeviceLanguage        @0xe3640  — exact locale ladder
-//   NuFrameEnd                     @0x2e??? — frame pacing + swap + pad tick
-// Transcribed elsewhere (stub removed here, comment left as breadcrumb):
-//   Nu360_dxClear                  → nuposteffect_plain.cpp  @0x317070
-//   NuDisplayListSwapBuffers*      → nudlist.cpp             @0x2eb5d0/0x2eaef0
-//   NuHtmlBegin                    → legoapi/misc/supportall @0x2d5ca0
-//   NuIOS_SetVertexFormat          → nuiosdl_gl.cpp          @0x29c070
-//   NuIOS_Wait/WakeRenderThread    → ios_graphics.cpp        @0xe34b0/0xe3590
-//   NuRenderContextSetZFunc        → nuiosdl_gl.cpp          @0x2a3860
-//
-// The remaining ~350 symbols are grouped by subsystem below so a reader can
-// tell at a glance which domain still needs decompilation. Each group is
-// alphabetical; every stub is an empty body that matches the original linkage.
+// This file collects functions whose original TU has not yet been
+// reconstructed. Domain families move to their evidenced owner as complete
+// groups; this file is not itself evidence of one original nucore TU.
 
 #include <string.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <math.h>
 #include <float.h>
+#include <GLES2/gl2.h>
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nucore/numem.h"
 #include "nu2api/nucore/numemory.h"
@@ -54,11 +30,11 @@ void NuErrorPrint(char *);
 void NuDebugMsgPrint(char *);
 extern i32 nuspecial_draw_state;
 extern NUQFNT *system_qfont;
-i32 UnicodeToIndexFast(VUCHARIDX *map, i32 count, u16 unicode);
 void NuLgtArcLaserEx(i32 type, NUVEC *start, NUVEC *end, NUVEC *control, f32 width, f32 segment_length, f32 wobble,
                      f32 duration, i32 colour, i32 flags);
 
 #include "decomp.h"
+#include "java/android.h"
 #include "java/java.h"
 #include "nu2api/nucore/common.h"
 #include "nu2api/nucore/nuanim3.h"
@@ -81,6 +57,7 @@ void NuLgtArcLaserEx(i32 type, NUVEC *start, NUVEC *end, NUVEC *control, f32 wid
 #include "nu2api/nu3d/nuvport.h"
 #include "nu2api/nu3d/nuocclusion.h"
 #include "nu2api/nu3d/nurndr.h"
+#include "nu2api/nu3d/nurendercontext.h"
 #include "nu2api/nu3d/nuscreen.hpp"
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numath/nufloat.h"
@@ -96,17 +73,6 @@ struct nuanimdatachunk_s;
 nuanimdatachunk_s *NuAnimDataChunkCreate(i32 curve_set_count);
 
 extern "C" {
-    static i32 isBitCountTable;
-    void buildBitCountTable(void) {
-        for (u32 value = 0; value < 256; ++value) {
-            BitCountTable[value] = 0;
-            for (u32 bit = 0; bit < 8; ++bit) {
-                if ((value >> bit) & 1)
-                    ++BitCountTable[value];
-            }
-        }
-        isBitCountTable = 1;
-    }
 
     u8 CutSceneBoundingBoxTrackRoot = 0;
     i32 NuGCutAudioStream = 0;
@@ -122,8 +88,6 @@ extern "C" {
     extern i32 g_writingSaveCriticalSection;
 }
 
-extern "C" void ANI_FixUpAddrs(ani3_animheader_s *, isize, i32);
-extern "C" void ANI_Ani3ExtractAllNodeCurves(ani3_animheader_s *, f32, f32 *, i32, char *);
 extern "C" {
     i32 nuspecial_clip_state = -1;
 }
@@ -193,8 +157,6 @@ namespace {
 
 } // namespace
 
-static i32 NuTimeBar_EngineEnabled;
-static i32 NuTimeBar_GpuFrameOutEnabled;
 static i32 clip_special_objects = 1;
 
 using NUHGOBJVIDEOMEMFN = void (*)(nuhgobj_s *);
@@ -213,12 +175,11 @@ extern "C" {
 }
 
 // C++-linkage helpers defined in sibling TUs.
-void DisplayListCreateDynMtlList(VARIPTR *buf, VARIPTR buf_end); // supportall.cpp
-void NuPadRecordEndFrame(void);                                  // nupad_interface.cpp
-void bgSuspendMain(i32);                                         // main.cpp
-void NuAnimBuffInit(i32, VARIPTR *, VARIPTR);                    // nu2api_nucore_misc.cpp
-i32 NuCameraClipHGobj(nugscn_s *, NUMTX *, NUMTX *);             // nu2api_nucore_misc.cpp
-i32 findrange(nugscn_s *, i32);                                  // utilities.cpp
+void NuPadRecordEndFrame(void);                      // nupad_interface.cpp
+void bgSuspendMain(i32);                             // main.cpp
+void NuAnimBuffInit(i32, VARIPTR *, VARIPTR);        // nu2api_nucore_misc.cpp
+i32 NuCameraClipHGobj(nugscn_s *, NUMTX *, NUMTX *); // nu2api_nucore_misc.cpp
+i32 findrange(nugscn_s *, i32);                      // utilities.cpp
 
 extern "C" {
 
@@ -229,44 +190,7 @@ extern "C" {
     i32 NuHasError(void);
     void NuMtlAnimate(f32 frame_time);
     void NuTexAnimProcess(f32 frame_time);
-    void NuWindAnimate(NUWIND *wind, f32 frametime);
-    void NuTimeBarSetRender(i32 set);
     void NuShaderManagerSetfv(i32 semantic, const f32 *values);
-    void *NuScratchAlloc32(i32 size);
-    void NuScratchRelease(void);
-
-    extern VARIPTR *display_list_buffer_end;
-    extern VARIPTR rndrstream_free;
-    extern VARIPTR rndrstream_end;
-
-    i32 NuThreadCreateCriticalSection(void);
-
-    // Shared with the nudlist TU (original file-static in this TU).
-    static void nudlist_SetNext(nudisplaylistitem_s *item, void *next) {
-        item->next = next;
-    }
-
-    void NuDisplayListResetBuffer(void);
-
-    // The static 2D display list's stream-area base lives at manager+0x4C8
-    // (nudisplaylist_s+0x10 of the embedded 2D list at manager+0x4B8) and points
-    // at manager+0x4FC.
-    static const usize NUDLIST_2D_STREAM_BASE_OFFSET = 0x4C8;
-    static const usize NUDLIST_2D_STREAM_AREA_OFFSET = 0x4FC;
-    static const usize NUDLIST_2D_CRITSEC_OFFSET = 0x5EC;
-
-    // original 0x29ad60
-    void NuDisplayListInit(VARIPTR *buf, VARIPTR *buf_end) {
-        u8 *mgr = (u8 *)&global_dlist_manager;
-        // The static 2D list starts anchored on the stream-head sentinel.
-        // DisplayListCreateDynMtlList initialises the sentinel and mtl_last.
-        *(u8 **)(mgr + NUDLIST_2D_STREAM_BASE_OFFSET) = mgr + NUDLIST_2D_STREAM_AREA_OFFSET;
-
-        DisplayListCreateDynMtlList(buf, *buf_end);
-        NuDisplayListResetBuffer();
-
-        *(i32 *)(mgr + NUDLIST_2D_CRITSEC_OFFSET) = NuThreadCreateCriticalSection();
-    }
 
     // ---------------------------------------------------------------------------
     // Redirected symbols — real bodies live elsewhere (kept as comments)
@@ -279,7 +203,7 @@ extern "C" {
     // NuIOS_SetVertexFormat is transcribed in nuiosdl_gl.cpp (original 0x29c070).
     // NuIOS_WaitForRenderThreadCompletion is transcribed in ios_graphics.cpp (original 0xe34b0).
     // NuIOS_WakeRenderThread is transcribed in ios_graphics.cpp (original 0xe3590).
-    // NuRenderContextSetZFunc is transcribed in nuiosdl_gl.cpp (original 0x2a3860).
+    // NuRenderContextSetZFunc is transcribed below (original 0x2a3860).
 
     // ---------------------------------------------------------------------------
     // Camera (thin wrappers; full matrix work is in NuCameraSetEx)
@@ -489,6 +413,7 @@ extern "C" {
         return &vpsmtx;
     }
     void NuCameraIntersectsAABB(void) {
+        STUBBED();
     }
     i32 prev_lock;
     NUCAMERA locked_camera;
@@ -508,7 +433,7 @@ extern "C" {
         }
         prev_lock = lock;
     }
-    extern nudisplayscene_s currentScene;
+    extern nurenderscene_s currentScene;
     i32 NuRndrDoingScreenGrab;
     i32 motionBlurAccumActiveThisFrame;
 
@@ -922,73 +847,9 @@ extern "C" {
     void NuDisplayListEndCriticalSection(void) {
         NuThreadCriticalSectionEnd(global_dlist_manager.loading_critical_section);
     }
-    VARIPTR *NuDisplayListLinkItemVP(nudisplaylist_s *list, u8 type, void *call_addr, VARIPTR *buf) {
-        auto *call = reinterpret_cast<nudisplaylistitem_s *>(buf->void_ptr);
-        list->mtl_last->next = call;
-        call->type = type;
-        call->id = 3;
-        call->next = call_addr != nullptr ? call_addr : call + 2;
-
-        auto *next = call + 1;
-        next->type = 0x8d;
-        next->id = 1;
-        next->next = list->dyn_geom + 1;
-        list->mtl_last = next;
-        buf->addr += sizeof(nudisplaylistitem_s) * 2;
-        return call_addr != nullptr ? nullptr : buf;
-    }
-    void NuDisplayListLinkItem(nudisplaylist_s *list, u8 type, void *call_addr) {
-        NuDisplayListLinkItemVP(list, type, call_addr, NuDisplayListGetBuffer());
-    }
-    // Append `count` item slots from the shared stream buffer, then a NEXT
-    // terminator. Original 0x29ae31.
-    VARIPTR *NuDisplayListLinkItems(nudisplaylist_s *list, i32 count) {
-        VARIPTR *buf = NuDisplayListGetBuffer();
-        nudlist_SetNext(list->mtl_last, buf->void_ptr);
-        list->items = reinterpret_cast<nudisplaylistitem_s *>(buf->void_ptr);
-        buf->addr += count * sizeof(nudisplaylistitem_s);
-
-        auto *terminator = reinterpret_cast<nudisplaylistitem_s *>(buf->void_ptr);
-        terminator->type = 0x8d;
-        terminator->id = 1;
-        nudlist_SetNext(terminator, list->dyn_geom + 1);
-        list->mtl_last = terminator;
-        buf->addr += 0x10;
-        return buf;
-    }
 } // extern "C"
 
 // Local helpers matching original static display-list setters (t local symbols)
-
-static __used__ void NuDisplayListSetID(nudisplaylistitem_s *item, unsigned char id) {
-    item->id = id;
-}
-static __used__ void NuDisplayListAddItem(nudisplaylist_s *list, unsigned char id, void *item) {
-    (void)list;
-    (void)id;
-    (void)item;
-}
-static __used__ void NuDisplayListSetItem(nudisplaylistitem_s *item, unsigned char a, unsigned char b, void *c) {
-    (void)item;
-    (void)a;
-    (void)b;
-    (void)c;
-}
-static __used__ void NuDisplayListSetNext(nudisplaylistitem_s *item, void *next) {
-    item->next = next;
-}
-static __used__ void NuDisplayListSetID_CNT(nudisplaylistitem_s *item) {
-    item->id = 0;
-}
-static __used__ void NuDisplayListSetID_RET(nudisplaylistitem_s *item) {
-    item->id = 4;
-}
-static __used__ void NuDisplayListSetID_CALL(nudisplaylistitem_s *item) {
-    (void)item;
-}
-static __used__ void NuDisplayListSetID_NEXT(nudisplaylistitem_s *item) {
-    item->id = 1;
-}
 
 extern "C" {
     // original 0x2e8cc0
@@ -1043,9 +904,6 @@ extern "C" {
         last->next = continuation;
         last->id = 1;
         list->mtl_last = last;
-    }
-    void *NuDisplayListPrepareFaceonPS(VARIPTR *, void *faceon, NUMTX *) {
-        return faceon;
     }
     void *DisplayListCreateFaceonTransformPS(VARIPTR *buffer, NUMTX *transform, NUMTL *mtl, void *faceon);
     void *DisplayListCreateGeomTransformPS(VARIPTR *buffer, NUMTX *transform, NUMTL *mtl, void *next, void *tx);
@@ -1272,6 +1130,7 @@ extern "C" {
     // ---------------------------------------------------------------------------
 
     void NuDisplaySceneDebug(void) {
+        STUBBED();
     }
 
     // ---------------------------------------------------------------------------
@@ -1297,6 +1156,7 @@ extern "C" {
     // ---------------------------------------------------------------------------
 
     void NuIOS_AwardAchievement(void) {
+        STUBBED();
     }
     void NuIOS_CheckCurrentFramebuffer(void) {
         if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
@@ -1330,6 +1190,7 @@ extern "C" {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
     void NuIOS_DeallocateSystemRenderbuffer(GLuint) {
+        STUBBED();
     }
     void NuIOS_FreeMemoryForSuspend(void) {
         const char *source_path = "i:/SagaTouch-Android_9176564/nu2api.saga/nuandroid/ios_graphics.cpp";
@@ -1341,10 +1202,8 @@ extern "C" {
         NuThreadCriticalSectionBegin(g_performingBgProcWorkCritSec);
         NuThreadCriticalSectionBegin(g_writingSaveCriticalSection);
     }
-    // Locale string filled by the platform layer (Java nativeSetLanguage on
-    // device; LANG environment on host) and cached result index.
-    char g_language[16] = {0}; // original bss @0x66f440
-    i32 g_languageIndex = -1;  // original .data @0x616b80
+    // Locale string is owned by the Android/JNI TU; cache only its index here.
+    i32 g_languageIndex = -1; // original .data @0x616b80
 
     // original 0xe3640 — exact locale-matching ladder of the original.
     i32 NuIOS_GetDeviceLanguage(void) {
@@ -1414,6 +1273,7 @@ extern "C" {
         return g_isLowestEndDevice;
     }
     i32 NuIOS_IsMidRangeDevice(void) {
+        STUBBED();
         return 0;
     }
     i32 NuIOS_IsSmallScreen(void) {
@@ -1434,6 +1294,7 @@ extern "C" {
         env->functions->DeleteLocalRef(env, event);
     }
     void NuIOS_ShowAchievements(void) {
+        STUBBED();
     }
 
     // ---------------------------------------------------------------------------
@@ -1698,126 +1559,6 @@ extern "C" {
             }
         }
     }
-    f32 NuAnimCurve2CalcValEx(nuanimcurve2_s *curve, nuanimtime_s *time, u32 type) {
-        nuanimcurvedata_s *data = curve->data.curvedata;
-        u32 *key_mask = data->key_mask + time->chunk;
-        if (type == 4) {
-            i32 frame = static_cast<i32>(NuFloor(time->time_offset));
-            return static_cast<f32>((*key_mask >> ((frame - 1) & 0x1f)) & 1);
-        }
-
-        u32 key = 0;
-        switch (time->time_byte) {
-            case 0:
-                key = BitCountTable[reinterpret_cast<u8 *>(key_mask)[0] & time->time_mask];
-                break;
-            case 1:
-                key = BitCountTable[reinterpret_cast<u8 *>(key_mask)[0]] +
-                      BitCountTable[reinterpret_cast<u8 *>(key_mask)[1] & time->time_mask];
-                break;
-            case 2:
-                key = BitCountTable[reinterpret_cast<u8 *>(key_mask)[0]] +
-                      BitCountTable[reinterpret_cast<u8 *>(key_mask)[1]] +
-                      BitCountTable[reinterpret_cast<u8 *>(key_mask)[2] & time->time_mask];
-                break;
-            case 3:
-                key = BitCountTable[reinterpret_cast<u8 *>(key_mask)[0]] +
-                      BitCountTable[reinterpret_cast<u8 *>(key_mask)[1]] +
-                      BitCountTable[reinterpret_cast<u8 *>(key_mask)[2]] +
-                      BitCountTable[reinterpret_cast<u8 *>(key_mask)[3] & time->time_mask];
-                break;
-        }
-        u32 key_offset = data->key_offsets[time->chunk];
-        u8 *key_data = static_cast<u8 *>(data->key_data);
-
-        switch (type) {
-            case 1: {
-                f32 *first = reinterpret_cast<f32 *>(key_data + (key + key_offset - 1) * 0x10);
-                f32 span = first[4] - first[0];
-                f32 value_delta = first[2] - first[6];
-                f32 t = (time->time - first[0]) * first[1];
-                f32 tangent0 = first[3] * span;
-                f32 tangent1 = first[7] * span;
-                return (((((value_delta * 2.0f + tangent0 + tangent1) * t + value_delta * -3.0f) - tangent0 * 2.0f) -
-                         tangent1) *
-                            t +
-                        tangent0) *
-                           t +
-                       first[2];
-            }
-            case 2: {
-                f32 *header = reinterpret_cast<f32 *>(key_data);
-                u8 *first = key_data + (key + key_offset + 1) * 4;
-                f32 first_time = static_cast<f32>(static_cast<u32>(first[3]));
-                f32 span = static_cast<f32>(static_cast<u32>(first[7])) - first_time;
-                f32 inverse_span = span == 0.0f ? 0.0f : 1.0f / span;
-                f32 tangent0 = static_cast<f32>(*reinterpret_cast<i8 *>(first + 2)) * header[0] * span;
-                f32 tangent1 = static_cast<f32>(*reinterpret_cast<i8 *>(first + 6)) * header[0] * span;
-                f32 value0 = static_cast<f32>(*reinterpret_cast<i16 *>(first)) * header[1];
-                f32 value_delta = value0 - static_cast<f32>(*reinterpret_cast<i16 *>(first + 4)) * header[1];
-                f32 t = ((time->time - 1.0f) - first_time) * inverse_span;
-                return (((((value_delta * 2.0f + tangent0 + tangent1) * t - value_delta * 3.0f) - tangent0 * 2.0f) -
-                         tangent1) *
-                            t +
-                        tangent0) *
-                           t +
-                       value0;
-            }
-            case 3:
-                return *reinterpret_cast<f32 *>(key_data + (key + key_offset - 1) * 8);
-            case 5: {
-                f32 *header = reinterpret_cast<f32 *>(key_data);
-                f32 header_0 = header[0];
-                f32 header_1 = header[1];
-                f32 header_2 = header[2];
-                i16 *first = reinterpret_cast<i16 *>(key_data + (key + key_offset) * 6 + 0x0c);
-                f32 span = static_cast<f32>(static_cast<u32>(static_cast<u16>(first[5]))) -
-                           static_cast<f32>(static_cast<u32>(static_cast<u16>(first[2])));
-                f32 tangent0 = static_cast<f32>(static_cast<i8>(first[1])) * header_0 * span;
-                f32 tangent1 = static_cast<f32>(static_cast<i8>(first[4])) * header_0 * span;
-                f32 value0 = static_cast<f32>(first[0]) * header_1 + header_2;
-                f32 value_delta = value0 - (static_cast<f32>(first[3]) * header_1 + header_2);
-                f32 inverse_span = 1.0f / span;
-                f32 t = ((time->time - 1.0f) - static_cast<f32>(static_cast<u32>(static_cast<u16>(first[2])))) *
-                        inverse_span;
-                return (((((value_delta * 2.0f + tangent0 + tangent1) * t - value_delta * 3.0f) - tangent0 * 2.0f) -
-                         tangent1) *
-                            t +
-                        tangent0) *
-                           t +
-                       value0;
-            }
-            case 6: {
-                f32 *header = reinterpret_cast<f32 *>(key_data);
-                f32 header_3 = header[3];
-                f32 header_2 = header[2];
-                f32 header_0 = header[0];
-                f32 header_1 = header[1];
-                u8 *first = key_data + (key + key_offset + 3) * 4;
-                f32 first_time = static_cast<f32>(static_cast<u32>(first[3])) * header_3;
-                f32 next_time = static_cast<f32>(static_cast<u32>(first[7])) * header_3;
-                if (next_time == first_time) {
-                    next_time = first_time + 1.0f;
-                }
-                f32 span = next_time - first_time;
-                f32 tangent0 = static_cast<f32>(*reinterpret_cast<i8 *>(first + 2)) * header_0 * span;
-                f32 tangent1 = static_cast<f32>(*reinterpret_cast<i8 *>(first + 6)) * header_0 * span;
-                f32 value0 = static_cast<f32>(*reinterpret_cast<i16 *>(first)) * header_1 + header_2;
-                f32 value_delta =
-                    value0 - (static_cast<f32>(*reinterpret_cast<i16 *>(first + 4)) * header_1 + header_2);
-                f32 inverse_span = 1.0f / span;
-                f32 t = ((time->time - 1.0f) - first_time) * inverse_span;
-                return (((((value_delta * 2.0f + tangent0 + tangent1) * t - value_delta * 3.0f) - tangent0 * 2.0f) -
-                         tangent1) *
-                            t +
-                        tangent0) *
-                           t +
-                       value0;
-            }
-            default:
-                return 0.0f;
-        }
-    }
     void NuAnimCurve2SetApplyToJointTransLoc(nuanimcurve2_s *curves, i8 *types, i8 flags, nuanimtime_s *time,
                                              nuhgobjjoint_s *joint, NUVEC *scale, NUVEC *parent_scale, NUMTX *matrix,
                                              NUJOINTANIM_s *override_anim, NUVEC *root_translation,
@@ -1983,45 +1724,8 @@ extern "C" {
         matrix->m23 = -matrix->m23;
         matrix->m32 = -matrix->m32;
     }
-    f32 NuAnimCurveCalcVal2(nuanimcurve_s *curve, nuanimtime_s *time) {
-        i32 key = 0;
-        switch (time->time_byte) {
-            case 0:
-                key = BitCountTable[curve->key_mask[0] & time->time_mask];
-                break;
-            case 1:
-                key = BitCountTable[curve->key_mask[0]] + BitCountTable[curve->key_mask[1] & time->time_mask];
-                break;
-            case 2:
-                key = BitCountTable[curve->key_mask[0]];
-                key += BitCountTable[curve->key_mask[1]];
-                key += BitCountTable[curve->key_mask[2] & time->time_mask];
-                break;
-            case 3:
-                key = BitCountTable[curve->key_mask[0]];
-                key += BitCountTable[curve->key_mask[1]];
-                key += BitCountTable[curve->key_mask[2]];
-                key += BitCountTable[curve->key_mask[3] & time->time_mask];
-                break;
-        }
-        nuanimkey_s *first = &curve->keys[key - 1];
-        if (curve->flags & 1) {
-            if ((curve->flags & 2) && key <= curve->key_count && time->time - first->time > first[1].time - time->time)
-                return first[1].value;
-            return first->value;
-        }
-        f32 value = first->value;
-        f32 span = first[1].time - first->time;
-        f32 delta = value - first[1].value;
-        f32 t = (time->time - first->time) * first->reciprocal_span;
-        f32 tangent0 = first->tangent * span;
-        f32 tangent1 = first[1].tangent * span;
-        return (((((delta + delta + tangent0 + tangent1) * t + delta * -3.0f) - (tangent0 + tangent0) - tangent1) * t +
-                 tangent0) *
-                t) +
-               value;
-    }
     void *NuAnimCurveCreate(void) {
+        STUBBED();
         return NULL;
     }
     void NuAnimCurveDestroy(void *curve) {
@@ -2331,115 +2035,6 @@ extern "C" {
         time->time_byte = static_cast<u32>((byte_frame >> 3) & 0xff);
         time->time_mask = (1u << ((chunk_frame & 7) + 1)) - 1u;
     }
-    void *NuAnimData2FixPtrs(void *data, isize delta, isize external_delta, i32 flags) {
-
-        buildBitCountTable();
-
-        if (data == NULL) {
-            return NULL;
-        }
-        nuanimdata2_s *anim = reinterpret_cast<nuanimdata2_s *>(reinterpret_cast<usize>(data) + delta);
-        if (*reinterpret_cast<u32 *>(&anim->duration) + 0xbeb1b6ccU < 2) {
-            ANI_FixUpAddrs(reinterpret_cast<ani3_animheader_s *>(anim),
-                           external_delta == 0 ? static_cast<isize>(reinterpret_cast<usize>(anim)) : delta, flags);
-            return anim;
-        }
-
-        if (anim->curves != NULL) {
-            anim->curves = reinterpret_cast<nuanimcurve2_s *>(reinterpret_cast<usize>(anim->curves) + delta);
-        }
-        if (anim->curve_types != NULL) {
-            anim->curve_types = reinterpret_cast<u8 *>(reinterpret_cast<usize>(anim->curve_types) + delta);
-        }
-        if (anim->node_flags != NULL) {
-            anim->node_flags = reinterpret_cast<u8 *>(reinterpret_cast<usize>(anim->node_flags) + delta);
-        }
-        i32 curve_count = static_cast<i32>(anim->curve_count) * static_cast<i32>(anim->node_count);
-        for (i32 i = 0; i < curve_count; ++i) {
-            if (anim->curve_types[i] != 0) {
-                nuanimcurvedata_s *curve = anim->curves[i].data.curvedata;
-                if (curve != NULL) {
-                    curve = reinterpret_cast<nuanimcurvedata_s *>(reinterpret_cast<usize>(curve) + delta);
-                    anim->curves[i].data.curvedata = curve;
-                } else {
-                    continue;
-                }
-                if (curve->key_mask != NULL) {
-                    curve->key_mask = reinterpret_cast<u32 *>(reinterpret_cast<usize>(curve->key_mask) + delta);
-                }
-                if (curve->key_offsets != NULL) {
-                    curve->key_offsets = reinterpret_cast<u16 *>(reinterpret_cast<usize>(curve->key_offsets) + delta);
-                }
-                if (curve->key_data != NULL) {
-                    curve->key_data = reinterpret_cast<u8 *>(reinterpret_cast<usize>(curve->key_data) + delta);
-                }
-            }
-        }
-        return anim;
-    }
-    void *NuAnimData2Fixup(i32 file_size, void **data) {
-        u32 *header = static_cast<u32 *>(*data);
-        u32 magic = header[0];
-        if (static_cast<i32>(header[1]) > static_cast<i32>(0x414e4934)) {
-            return NuPtrBlockFix(header);
-        }
-
-        if (magic == 0x414e4933 || magic == 0x414e4934) {
-            ANI_FixUpAddrs(reinterpret_cast<ani3_animheader_s *>(header),
-                           static_cast<isize>(reinterpret_cast<usize>(header)), 0);
-            return header;
-        }
-
-        header[0] = static_cast<u32>(file_size);
-        const usize relocation_delta = reinterpret_cast<usize>(header) - static_cast<usize>(header[1]);
-        header[2] = reinterpret_cast<usize>(
-            NuAnimData2FixPtrs(reinterpret_cast<void *>(static_cast<usize>(header[2])), (isize)relocation_delta, 0, 0));
-        header = static_cast<u32 *>(*data);
-        header[1] = reinterpret_cast<usize>(header);
-        return reinterpret_cast<void *>(static_cast<usize>(header[2]));
-    }
-
-    void *NuAnimData2LoadBuffEx(char *path, VARIPTR *buf, VARIPTR *buf_end, void **result) {
-        buf->addr = ALIGN(buf->addr, 0x10);
-        const i32 file_size = NuFileLoadBuffer(path, buf->void_ptr, static_cast<i32>(buf_end->addr - buf->addr));
-        if (file_size == 0) {
-            if (NuFileGetLastError() == -1) {
-                *buf = *buf_end;
-            }
-            *result = NULL;
-            return NULL;
-        }
-
-        void *data = buf->void_ptr;
-        if (static_cast<i32>(static_cast<u32 *>(data)[1]) > static_cast<i32>(0x414e4934)) {
-            data = NuPtrBlockFix(data);
-            buf->void_ptr = data;
-            buf->addr += static_cast<usize>(file_size);
-            *result = data;
-            return data;
-        }
-
-        *result = data;
-        buf->addr += static_cast<usize>(file_size);
-        return NuAnimData2Fixup(file_size, result);
-    }
-
-    void *NuAnimData2LoadBuff(char *path, VARIPTR *buf, VARIPTR *buf_end) {
-        void *result;
-        return NuAnimData2LoadBuffEx(path, buf, buf_end, &result);
-    }
-
-    void *NuAnimData2LoadBuffFromPAK(void *data, i32 file_size) {
-        if (file_size == 0) {
-            return NULL;
-        }
-        if (static_cast<i32>(static_cast<u32 *>(data)[1]) > static_cast<i32>(0x414e4934)) {
-            return NuPtrBlockFix(data);
-        }
-        return NuAnimData2Fixup(file_size, &data);
-    }
-    void NuAnimData2Relocate(void) {
-    }
     void NuAnimDataCalcTime(void *animation, f32 frame, nuanimtime_s *time) {
         u8 *data = static_cast<u8 *>(animation);
         const f32 duration = *reinterpret_cast<f32 *>(data);
@@ -2512,55 +2107,6 @@ extern "C" {
         NuFileClose(file);
         return static_cast<i32>(header[0]);
     }
-    static inline void *NuLegacyRelocatePointer(void *pointer, isize delta) {
-        return pointer == NULL ? NULL : reinterpret_cast<void *>(reinterpret_cast<usize>(pointer) + delta);
-    }
-    void *NuAnimDataFixPtrs(void *animation, isize delta) {
-
-        if (isBitCountTable == 0)
-            buildBitCountTable();
-        animation = NuLegacyRelocatePointer(animation, delta);
-        u8 *data = static_cast<u8 *>(animation);
-        void *&name = *reinterpret_cast<void **>(data + 4);
-        name = NuLegacyRelocatePointer(name, delta);
-        void **&chunks = *reinterpret_cast<void ***>(data + 0xc);
-        chunks = static_cast<void **>(NuLegacyRelocatePointer(chunks, delta));
-        if (chunks != NULL) {
-            i32 chunk_count = *reinterpret_cast<i32 *>(data + 8);
-            for (i32 i = 0; i < chunk_count; ++i) {
-                chunks[i] = NuLegacyRelocatePointer(chunks[i], delta);
-                u8 *chunk = static_cast<u8 *>(chunks[i]);
-                if (chunk != NULL) {
-                    void **&sets = *reinterpret_cast<void ***>(chunk + 8);
-                    sets = static_cast<void **>(NuLegacyRelocatePointer(sets, delta));
-                    if (sets != NULL) {
-                        i32 set_count = *reinterpret_cast<i32 *>(chunk);
-                        for (i32 j = 0; j < set_count; ++j) {
-                            sets[j] = NuLegacyRelocatePointer(sets[j], delta);
-                            u8 *set = static_cast<u8 *>(sets[j]);
-                            if (set != NULL) {
-                                void *&constants = *reinterpret_cast<void **>(set + 4);
-                                constants = NuLegacyRelocatePointer(constants, delta);
-                                void **&curves = *reinterpret_cast<void ***>(set + 8);
-                                curves = static_cast<void **>(NuLegacyRelocatePointer(curves, delta));
-                                if (curves != NULL) {
-                                    for (i32 k = 0; k < *reinterpret_cast<i8 *>(set + 0xc); ++k) {
-                                        curves[k] = NuLegacyRelocatePointer(curves[k], delta);
-                                        u8 *curve = static_cast<u8 *>(curves[k]);
-                                        if (curve != NULL) {
-                                            void *&keys = *reinterpret_cast<void **>(curve + 4);
-                                            keys = NuLegacyRelocatePointer(keys, delta);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return animation;
-    }
     void *NuAnimDataLoadBuff(char *path, VARIPTR *buf, VARIPTR *buf_end) {
         buf->addr = ALIGN(buf->addr, 16);
         u8 *file_data = static_cast<u8 *>(buf->void_ptr);
@@ -2571,99 +2117,6 @@ extern "C" {
         *reinterpret_cast<isize *>(file_data + 4) = delta;
         void *animation = NuAnimDataFixPtrs(*reinterpret_cast<void **>(file_data + 8), delta);
         *reinterpret_cast<void **>(file_data + 8) = animation;
-        return animation;
-    }
-    void *NuAnimDataRead(NUFILE file) {
-
-        if (isBitCountTable == 0) {
-            buildBitCountTable();
-        }
-
-        char *name = NULL;
-        const i32 name_size = NuFileReadInt(file);
-        if (name_size != 0) {
-            name = static_cast<char *>(NU_ALLOC(name_size, 4, 1, "", 0));
-            NuFileRead(file, name, name_size);
-        }
-
-        const f32 duration = NuFileReadFloat(file);
-        const i32 chunk_count = NuFileReadInt(file);
-        u8 *animation = static_cast<u8 *>(NuAnimDataCreate(chunk_count));
-        *reinterpret_cast<f32 *>(animation) = duration;
-        *reinterpret_cast<char **>(animation + 4) = name;
-
-        for (i32 chunk_index = 0; chunk_index < *reinterpret_cast<i32 *>(animation + 8); ++chunk_index) {
-            const i32 curve_set_count = NuFileReadInt(file);
-            void **chunk_slot = *reinterpret_cast<void ***>(animation + 0xc) + chunk_index;
-            u8 *chunk = reinterpret_cast<u8 *>(NuAnimDataChunkCreate(curve_set_count));
-            *chunk_slot = chunk;
-            *reinterpret_cast<i32 *>(chunk) = curve_set_count;
-
-            u8 *curve_data = NULL;
-            const i32 curve_data_count = NuFileReadInt(file);
-            if (curve_data_count != 0) {
-                const u32 curve_data_size = static_cast<u32>(curve_data_count) * 0x10;
-                curve_data = static_cast<u8 *>(NU_ALLOC(curve_data_size, 4, 1, "", 0));
-                *reinterpret_cast<void **>(chunk + 0xc) = curve_data;
-                NuFileRead(file, curve_data, curve_data_size);
-                curve_data = *reinterpret_cast<u8 **>(chunk + 0xc);
-            } else {
-                *reinterpret_cast<void **>(chunk + 0xc) = NULL;
-            }
-
-            u8 *shared_curves = NULL;
-            const i32 shared_curve_count = NuFileReadInt(file);
-            if (shared_curve_count != 0) {
-                const u32 shared_curve_size = static_cast<u32>(shared_curve_count) * 0x10;
-                shared_curves = static_cast<u8 *>(NU_ALLOC(shared_curve_size, 4, 1, "", 0));
-                *reinterpret_cast<void **>(chunk + 0x10) = shared_curves;
-                NuFileRead(file, shared_curves, shared_curve_size);
-            } else {
-                *reinterpret_cast<void **>(chunk + 0x10) = NULL;
-            }
-
-            for (i32 set_index = 0; set_index < curve_set_count; ++set_index) {
-                const i32 curve_count = NuFileReadChar(file);
-                if (curve_count == 0) {
-                    continue;
-                }
-
-                void **set_slot = *reinterpret_cast<void ***>(chunk + 8) + set_index;
-                *set_slot = NuAnimCurveSetCreate(curve_count);
-                u8 *curve_set = static_cast<u8 *>((*reinterpret_cast<void ***>(chunk + 8))[set_index]);
-                *reinterpret_cast<i32 *>(curve_set) = NuFileReadInt(file);
-                for (i32 curve_index = 0;
-                     curve_index < *reinterpret_cast<i8 *>(
-                                       static_cast<u8 *>((*reinterpret_cast<void ***>(chunk + 8))[set_index]) + 0xc);
-                     ++curve_index) {
-                    curve_set = static_cast<u8 *>((*reinterpret_cast<void ***>(chunk + 8))[set_index]);
-                    f32 *value = *reinterpret_cast<f32 **>(curve_set + 4) + curve_index;
-                    *value = NuFileReadFloat(file);
-                }
-            }
-
-            u8 *shared_cursor = *reinterpret_cast<u8 **>(chunk + 0x10);
-            u8 *curve_data_cursor = curve_data;
-            for (i32 set_index = 0; set_index < *reinterpret_cast<i32 *>(chunk); ++set_index) {
-                u8 *curve_set = static_cast<u8 *>((*reinterpret_cast<void ***>(chunk + 8))[set_index]);
-                if (curve_set == NULL) {
-                    continue;
-                }
-                for (i32 curve_index = 0;
-                     curve_index < *reinterpret_cast<i8 *>(
-                                       static_cast<u8 *>((*reinterpret_cast<void ***>(chunk + 8))[set_index]) + 0xc);
-                     ++curve_index) {
-                    curve_set = static_cast<u8 *>((*reinterpret_cast<void ***>(chunk + 8))[set_index]);
-                    if ((*reinterpret_cast<f32 **>(curve_set + 4))[curve_index] == FLT_MAX) {
-                        (*reinterpret_cast<void ***>(curve_set + 8))[curve_index] = shared_cursor;
-                        ++*reinterpret_cast<i32 *>(chunk + 4);
-                        *reinterpret_cast<void **>(shared_cursor + 4) = curve_data_cursor;
-                        curve_data_cursor += *reinterpret_cast<i32 *>(shared_cursor + 8) << 4;
-                        shared_cursor += 0x10;
-                    }
-                }
-            }
-        }
         return animation;
     }
     void *NuAnimGetAnimLOD(void *animation, i32 lod) {
@@ -2683,11 +2136,6 @@ extern "C" {
     }
     i32 NuAnimGetUseQuatsFlag(void) {
         return ForceEulerToQuat;
-    }
-    void NuAnimInit(i32 max_joints, VARIPTR *buf, VARIPTR buf_end) {
-
-        buildBitCountTable();
-        NuAnimBuffInit(max_joints, buf, buf_end);
     }
     i32 NuAnimNumNodes(void *animation) {
         const ani3_animheader_s *header = static_cast<const ani3_animheader_s *>(animation);
@@ -2722,48 +2170,6 @@ extern "C" {
     // Bridge / file / heap / memory
     // ---------------------------------------------------------------------------
 
-    void NuDatClose(NUDATHDR *header) {
-        extern NUDATFILEINFO dat_file_infos[20];
-
-        for (i32 index = 0; index < 20; ++index) {
-            NUDATOPENFILEINFO *open_file = &header->open_files[index];
-            if (open_file->dat_file != 0) {
-                NuFileClose(open_file->dat_file);
-            }
-            if (open_file->info_idx >= 0) {
-                dat_file_infos[open_file->info_idx].is_used = 0;
-            }
-        }
-        if (header->unknown != 0) {
-            NU_FREE(header);
-        }
-    }
-    i32 nufile_lsn_allowed = 1;
-
-    i32 NuDatGetFileInfo(NUDATHDR *header, char *name, i64 *position, i32 *length) {
-        if (header == NULL) {
-            return -1;
-        }
-
-        const i32 index = NuDatFileFindTree(header, name);
-        if (index < 0) {
-            return -1;
-        }
-
-        const NUDATFINFO *file = &header->file_info[index];
-        const i64 file_position = NuDatCalcPos(header, file->file_offset);
-        if (position != NULL) {
-            if (nufile_lsn_allowed != 0 && header->unknown2 != 0) {
-                *position = header->unknown2 + file_position / 0x800;
-            } else {
-                *position = file_position;
-            }
-        }
-        if (length != NULL) {
-            *length = file->file_len;
-        }
-        return index;
-    }
     void *NuMemAllocFn(u32 size) {
         return NU_ALLOC(size, 4, 1, "", 0);
     }
@@ -2773,52 +2179,20 @@ extern "C" {
     void *NuMemReAllocFn(void *ptr, u32 size) {
         return NuMemoryGet()->GetThreadMem()->_BlockReAlloc(ptr, size, 4, 1, "", 0);
     }
-    u8 PS2_SCRATCH_BASE[0x8000];
-    static u8 *ps2_scratch_free;
-
-    // Original @0x316d41.
-    void NuScratchReset(void) {
-        ps2_scratch_free = PS2_SCRATCH_BASE;
-    }
-
-    static void *NuScratchAllocAligned(i32 size, usize alignment) {
-        if (ps2_scratch_free == NULL) {
-            NuScratchReset();
-        }
-        u8 *previous = ps2_scratch_free;
-        u8 *allocation = reinterpret_cast<u8 *>(ALIGN(reinterpret_cast<usize>(ps2_scratch_free), alignment));
-        ps2_scratch_free = allocation + ALIGN(size, 4);
-        *reinterpret_cast<u8 **>(ps2_scratch_free) = previous;
-        ps2_scratch_free += sizeof(previous);
-        return allocation;
-    }
-
-    // Original @0x316e45 / 0x316d5d / 0x316dd1.
-    void *NuScratchAlloc128(i32 size) {
-        return NuScratchAllocAligned(size, 16);
-    }
-    void *NuScratchAlloc32(i32 size) {
-        return NuScratchAllocAligned(size, 4);
-    }
-    void *NuScratchAlloc64(i32 size) {
-        return NuScratchAllocAligned(size, 8);
-    }
-
-    // Original @0x316eb9.
-    void NuScratchRelease(void) {
-        ps2_scratch_free = *reinterpret_cast<u8 **>(ps2_scratch_free - sizeof(ps2_scratch_free));
-    }
     void *NuPtrBlockRead(NUFILE file) {
         void *block = NuMemFileAddr(file);
         return NuPtrBlockFix(block);
     }
 
     void NuSysDirClose(void) {
+        STUBBED();
     }
     i32 NuSysDirOpen(void) {
+        STUBBED();
         return 0;
     }
     i32 NuSysDirRead(void) {
+        STUBBED();
         return 0;
     }
 
@@ -2828,26 +2202,6 @@ extern "C" {
 
     f32 NuLog2(f32 value) {
         return NuLog10(value) * 3.321928f;
-    }
-    // Original @0x2babf0.  The VU0 entry point is an ordinary CPU wrapper in
-    // this build; animation evaluation uses it to combine an animated joint
-    // rotation with that joint's bind-pose matrix.
-    void NuMtxMulRVU0(NUMTX *result, NUMTX *left, NUMTX *right) {
-        NuMtxMulR(result, left, right);
-    }
-    void NuMtxMulVU0(NUMTX *result, NUMTX *left, NUMTX *right) {
-        NuMtxMulH(result, left, right);
-    }
-    void NuMtxPreScaleVU0(NUMTX *matrix, NUVEC *scale) {
-        NuMtxPreScale(matrix, scale);
-    }
-    // Original @0x2bad80.  Preserve the public VU0-shaped entry point while
-    // sharing the scalar matrix implementation used by the host build.
-    void NuMtxScaleVU0(NUMTX *matrix, NUVEC *scale) {
-        NuMtxScale(matrix, scale);
-    }
-    void NuMtxSetRotateXYZVU0(NUMTX *matrix, NUANGVEC *angles) {
-        NuMtxSetRotateXYZ(matrix, angles);
     }
     static f32 pow_x[32], pow_y[32], pow_rv[32];
     static i32 pow_cache_free;
@@ -2878,6 +2232,7 @@ extern "C" {
         return power;
     }
     void NuEulerXYZFromQuat(void) {
+        STUBBED();
     }
 
     // ---------------------------------------------------------------------------
@@ -2885,52 +2240,75 @@ extern "C" {
     // ---------------------------------------------------------------------------
 
     void NuFntClose(void) {
+        STUBBED();
     }
     void *NuFntCreate(void) {
+        STUBBED();
         return NULL;
     }
     void NuFntDestroy(void) {
+        STUBBED();
     }
     void NuFntGetScreenHeight(void) {
+        STUBBED();
     }
     void NuFntInit(void) {
+        STUBBED();
     }
     void *NuFntLoadPtr(void) {
+        STUBBED();
         return NULL;
     }
     void NuFntMoveAbs(void) {
+        STUBBED();
     }
     void NuFntMoveRel(void) {
+        STUBBED();
     }
     void NuFntPointSize(void) {
+        STUBBED();
     }
     void NuFntPos(void) {
+        STUBBED();
     }
     void NuFntPrint(void) {
+        STUBBED();
     }
     void NuFntPrintEx(void) {
+        STUBBED();
     }
     void NuFntPrintLen(void) {
+        STUBBED();
     }
     void NuFntPrintLenV(void) {
+        STUBBED();
     }
     void NuFntPrintV(void) {
+        STUBBED();
     }
     void NuFntScale(void) {
+        STUBBED();
     }
     void NuFntSet(void) {
+        STUBBED();
     }
     void NuFntSetFixedWidthNumerals(void) {
+        STUBBED();
     }
     void NuFntSetPen(void) {
+        STUBBED();
     }
     void NuFntToLower(void) {
+        STUBBED();
     }
     void NuFntToUpper(void) {
+        STUBBED();
     }
     void NuFntWrite(void) {
+        STUBBED();
     }
     void NuQFntCreate(void) {
+        STUBBED();
     }
     void NuQFntDestroy(VUFNT *font) {
         if (font != NULL) {
@@ -3074,8 +2452,10 @@ extern "C" {
         NuQFntPopPrintMode();
     }
     void NuQFntWrite(void) {
+        STUBBED();
     }
     void NuQFntWriteUniversalFont(void) {
+        STUBBED();
     }
 
     // ---------------------------------------------------------------------------
@@ -3096,7 +2476,7 @@ extern "C" {
         currentScene.accumulation_frames = frames;
         currentScene.accumulation_mode = mode;
     }
-    extern nudisplayscene_s currentScene;
+    extern nurenderscene_s currentScene;
     void NuBackbufferCopy(i32 texture_id) {
         currentScene.unknown_214 = static_cast<u32>(texture_id);
     }
@@ -3146,17 +2526,23 @@ extern "C" {
         }
     }
     void *NuEffectTexCreate1D(void) {
+        STUBBED();
         return NULL;
     }
     void NuEffectTex360Create2D_aliased(void) {
+        STUBBED();
     }
     void NuEffectTex360Create3D_aliased(void) {
+        STUBBED();
     }
     void NuEffectTexCreateCube(void) {
+        STUBBED();
     }
     void NuEffectTexCreateCube_aliased(void) {
+        STUBBED();
     }
     void NuEffectTexCreateFromNativeTex(void) {
+        STUBBED();
     }
     void NuEffectTexGetDimension(nueffecttex_s *texture, i32 lod, i32 *width, i32 *height) {
         const i16 *dimensions = reinterpret_cast<const i16 *>(texture);
@@ -3186,51 +2572,69 @@ extern "C" {
         return NULL;
     }
     void *NuEffectTexGetLockedVP(void) {
+        STUBBED();
         return NULL;
     }
     void NuEffectTexLockVP(void *buffer, void *buffer_end) {
+        STUBBED();
         (void)buffer;
         (void)buffer_end;
     }
     void NuEffectTexMapNative(nueffecttex_s *texture) {
+        STUBBED();
     }
     void NuEffectTexUnlockVP(void) {
+        STUBBED();
     }
     void NuEffectTexUnmapNative(void) {
+        STUBBED();
     }
     void NuFramebufferAttachTex2D(nuframebuffer_s *, i32, nueffecttex_s *, i32) {
+        STUBBED();
     }
     void NuFramebufferBind(nuframebuffer_s *) {
+        STUBBED();
     }
     static void NuFramebufferClear(void) {
+        STUBBED();
     }
     void NuFramebufferCopyTex2D(i32, nueffecttex_s *, i32, i32, i32, i32, i32) {
+        STUBBED();
     }
     void NuFramebufferDestroy(nuframebuffer_s *) {
+        STUBBED();
     }
     void NuFramebufferDrawBuffers(void) {
+        STUBBED();
     }
     void NuFramebufferEnableGuards(nuframebuffer_s *, bool) {
+        STUBBED();
     }
     nueffecttex_s *NuFramebufferGetAttachedTex(nuframebuffer_s *, i32, i32 *, i32 *) {
+        STUBBED();
         return NULL;
     }
     void *NuFramebufferGetBackBuffer(void) {
+        STUBBED();
         return NULL;
     }
     nuframebuffer_s *NuFramebufferGetBound(void) {
+        STUBBED();
         return NULL;
     }
     nuframebuffer_s *NuFramebufferGetDefault(void) {
+        STUBBED();
         return NULL;
     }
     nuframebuffer_s *NuFramebufferGetFrontBuffer(void) {
+        STUBBED();
         return NULL;
     }
     i32 NuFramebufferGetHeight(nuframebuffer_s *framebuffer) {
         return *reinterpret_cast<const i32 *>(reinterpret_cast<const u8 *>(framebuffer) + 0xe0);
     }
     nuframebuffer_s *NuFramebufferGetObject(i32) {
+        STUBBED();
         return NULL;
     }
     i32 NuFramebufferGetSamples(nuframebuffer_s *framebuffer) {
@@ -3240,21 +2644,22 @@ extern "C" {
         return *reinterpret_cast<const i32 *>(reinterpret_cast<const u8 *>(framebuffer) + 0xdc);
     }
     void NuFramebufferInitEx(void) {
+        STUBBED();
     }
     void NuFramebufferResolve(i32, bool) {
+        STUBBED();
     }
     void NuFramebufferResolveAll(bool) {
+        STUBBED();
     }
     void NuFramebufferResolveMultisample(i32) {
         NuFramebufferResolveAll(true);
     }
     void NuFramebufferSetClearColor(void) {
+        STUBBED();
     }
     static void NuFramebufferSwapBuffers(void) {
-    }
-    void NuLightFogX(f32 near_distance, f32 far_distance, u32 colour, f32, f32, i32, f32 density) {
-        NuRndrStateSetFogEnabled(1);
-        NuRndrStateSetFogState(near_distance, far_distance, colour, density);
+        STUBBED();
     }
     i32 speedblur_enabled = 1;
     f32 NuLightsx, NuLightsy;
@@ -3552,100 +2957,11 @@ extern "C" {
     void NuPostBloom(i32, const NuBloomParameters *parameters) {
         currentScene.bloom = *parameters;
     }
-    // This entry point is empty in the original Android binary.
-    void NuRainSetFall(void) {
-    }
-    void NuRenderContextInit(void) {
-        extern f32 g_renderContext_viewProj[16];
-        extern f32 g_renderContext_view[16];
-        extern f32 g_renderContext_projection[16];
-        extern f32 g_renderContext_world[16];
-        memcpy(g_renderContext_viewProj, &numtx_identity, sizeof(numtx_identity));
-        memcpy(g_renderContext_view, &numtx_identity, sizeof(numtx_identity));
-        memcpy(g_renderContext_projection, &numtx_identity, sizeof(numtx_identity));
-        memcpy(g_renderContext_world, &numtx_identity, sizeof(numtx_identity));
-    }
-    void NuRenderContext360BeginGameTime(void) {
-    }
-    void NuRenderContext360EndGameTime(void) {
-    }
-    void NuRenderContextSetAlphaBlend(void) {
-    }
-    SAGA_HOST_WEAK void NuRenderContextSetViewProj(NUMTX *view, NUMTX *projection) {
-        extern f32 g_renderContext_viewProj[16];
-        extern f32 g_renderContext_viewProjInverse[16];
-        extern f32 g_renderContext_view[16];
-        extern f32 g_renderContext_projection[16];
-        extern f32 g_renderContext_position[4];
-
-        NUVEC scale = {
-            g_NuVpRegion.projection_x_scale,
-            g_NuVpRegion.projection_y_scale,
-            1.0f,
-        };
-        NUVEC translation = {
-            g_NuVpRegion.projection_x_offset,
-            g_NuVpRegion.projection_y_offset,
-            0.0f,
-        };
-        NUMTX scale_mtx;
-        NUMTX translation_mtx;
-        NUMTX adjusted_projection;
-        NuMtxSetScale(&scale_mtx, &scale);
-        NuMtxSetTranslation(&translation_mtx, &translation);
-        NuMtxMulH(&adjusted_projection, projection, &scale_mtx);
-        NuMtxMulH(&adjusted_projection, &adjusted_projection, &translation_mtx);
-
-        memcpy(g_renderContext_view, view, sizeof(NUMTX));
-        memcpy(g_renderContext_projection, &adjusted_projection, sizeof(NUMTX));
-
-        NUMTX inverse_view;
-        NuMtxInv(&inverse_view, view);
-        g_renderContext_position[0] = inverse_view.m30 / inverse_view.m33;
-        g_renderContext_position[1] = inverse_view.m31 / inverse_view.m33;
-        g_renderContext_position[2] = inverse_view.m32 / inverse_view.m33;
-        g_renderContext_position[3] = 1.0f;
-
-        NuMtxMulH(reinterpret_cast<NUMTX *>(g_renderContext_viewProj), view, &adjusted_projection);
-        NuMtxInvH(reinterpret_cast<NUMTX *>(g_renderContext_viewProjInverse),
-                  reinterpret_cast<NUMTX *>(g_renderContext_viewProj));
-
-        // OpenGL's clip-space depth is [-w,+w], while the engine camera
-        // packet contains the original D3D-style [0,+w] projection.
-        NUMTX depth_remap = numtx_identity;
-        depth_remap.m22 = 2.0f;
-        depth_remap.m32 = -1.0f;
-        NuMtxMulH(reinterpret_cast<NUMTX *>(g_renderContext_viewProj),
-                  reinterpret_cast<NUMTX *>(g_renderContext_viewProj), &depth_remap);
-
-        NuShaderManagerSetfv(0x3d, g_renderContext_view);
-        NuShaderManagerSetfv(0x3e, g_renderContext_viewProj);
-        NuShaderManagerSetfv(0x56, g_renderContext_position);
-
-        f32 fov;
-        f32 aspect;
-        f32 near_clip;
-        f32 far_clip;
-        f32 perspective[4];
-        NuMtxGetPerspectiveD3D(projection, &fov, &aspect, &near_clip, &far_clip);
-        perspective[0] = near_clip;
-        perspective[1] = far_clip;
-        perspective[2] = far_clip - near_clip;
-        perspective[3] = perspective[2] / far_clip;
-        NuShaderManagerSetfv(0x49, perspective);
-
-        f32 frustum[4];
-        NuMtxGetFrustumD3D(projection, &frustum[0], &frustum[1], &frustum[2], &frustum[3], &near_clip, &far_clip);
-        frustum[1] -= frustum[0];
-        frustum[3] -= frustum[2];
-        NuShaderManagerSetfv(0x4a, frustum);
-    }
-    // Original 0x2a33d0, 9 bytes: this platform deliberately does nothing.
-    void NuRenderContextSetViewport(i32, i32, i32, i32) {
-    }
     void NuSpecialAddShadowLight(void) {
+        STUBBED();
     }
     void NuSpecialBurstDrawAt(void) {
+        STUBBED();
     }
     void NuSpecialClear(void *special) {
         NuPlainSpecialHandleLayout *handle = static_cast<NuPlainSpecialHandleLayout *>(special);
@@ -3657,6 +2973,7 @@ extern "C" {
         nuspecial_shadowLightHaveClipOverrides = 0;
     }
     void NuSpecialClearShadowLights(void) {
+        STUBBED();
     }
     i32 NuSpecialClipTestExtents(void *special, void *matrix_arg) {
         NUMTX *matrix = static_cast<NUMTX *>(matrix_arg);
@@ -3674,6 +2991,7 @@ extern "C" {
         return NuCameraClipTestExtents(&display->min, &display->max, matrix, 0.0f, 0);
     }
     i32 NuSpecialClipTestShadowLights(NUVEC *, NUVEC *, i32) {
+        STUBBED();
         return 0;
     }
     i32 NuSpecialCompare(nuhspecial_s *first, nuhspecial_s *second) {
@@ -3754,9 +3072,11 @@ extern "C" {
         return 0;
     }
     i32 NuSpecialFindMulti(NUGSCN *, nuhspecial_s *, char *, i32, i32) {
+        STUBBED();
         return 0;
     }
     void NuSpecialFindMultiWC(void) {
+        STUBBED();
     }
     i32 NuSpecialGetActiveShadowLights(void) {
         return nuspecial_shadowLightCount;
@@ -3933,6 +3253,7 @@ extern "C" {
         return nuspecial_shadowLightHaveClipOverrides;
     }
     void NuSpecialList(void) {
+        STUBBED();
     }
     i32 NuSpecialNumMtls(nuhspecial_s *special) {
         NuPlainLegacySpecialLayout *legacy = static_cast<NuPlainLegacySpecialLayout *>(special->special);
@@ -3962,6 +3283,7 @@ extern "C" {
         return 0;
     }
     void NuSpecialSetAlphaTest(void) {
+        STUBBED();
     }
     void NuSpecialSetBounds(nuhspecial_s *special, NUVEC *minimum, NUVEC *maximum) {
         NuPlainLegacySpecialLayout *legacy = static_cast<NuPlainLegacySpecialLayout *>(special->special);
@@ -4007,6 +3329,7 @@ extern "C" {
         }
     }
     void NuSpecialSetRenderPlane(void) {
+        STUBBED();
     }
     void NuSpecialVertexOffsets(i32 count, VARIPTR offsets) {
         nuspecial_vertex_offsets = offsets;
@@ -4016,13 +3339,6 @@ extern "C" {
         nuspecial_vertex_states = states;
         ++render_state.state.global_id;
         ++render_state.state.vertex_groups_id;
-    }
-
-    void NuTimeBarSlotLastValue(void) {
-    }
-    void NuTimeBarSlotLastValueMicroseconds(void) {
-    }
-    void NuTimeBarSlotSetEx(void) {
     }
 
     // ---------------------------------------------------------------------------
@@ -4051,11 +3367,13 @@ extern "C" {
         NuDynamicLight::destroy(light);
     }
     void NuDynamicLightEndCapture(void) {
+        STUBBED();
     }
     i32 NuDynamicLightGetActiveRenderSetCount(NuDynamicLight *light) {
         return light->active_render_set_count;
     }
     void NuDynamicLightGetDList(void) {
+        STUBBED();
     }
     f32 NuDynamicLightGetParameterf(NuDynamicLight *light, i32 parameter) {
         switch (parameter) {
@@ -4208,6 +3526,7 @@ extern "C" {
         light->setupCustomCameraFrustum(camera, splits, count);
     }
     void NuDynamicLightTestShadowExtrusionExtent(void) {
+        STUBBED();
     }
     void NuDynamicLightTestShadowExtrusions(NuDynamicLight *light, const VuVec *first, const VuVec *second) {
         VuVec first_copy;
@@ -4241,17 +3560,6 @@ extern "C" {
         NuVecMtxTransform(&maximum.xyz, &maximum.xyz, matrix);
         light->testShadowExtrusions(minimum, maximum);
     }
-    void NuWindAnimate(NUWIND *wind, f32 frametime) {
-        if (wind != NULL) {
-            wind->unk2.z += (1.0f / 256.0f) * wind->unk2.y * frametime;
-            if (wind->unk2.z >= 1.0f) {
-                wind->unk2.z = NuFmod(wind->unk2.z, 1.0f);
-            }
-            f32 scaled_time = 5.0f * frametime;
-            wind->unk2.w = frametime + wind->unk2.w;
-            wind->unk3 = scaled_time + wind->unk3;
-        }
-    }
     extern "C++" NuWindGType *NuWindAllocateGrp();
     extern "C++" void NuWindFreeGrp(NuWindGType *group);
 
@@ -4279,16 +3587,6 @@ extern "C" {
         } else if (wind->unk0[index] >= 0) {
             wind->unk1 = index;
             nuapi.wind = wind;
-        }
-    }
-    void NuWindSetSpeed(NUWIND *wind, f32 speed) {
-        if (wind != NULL) {
-            wind->unk2.y = 1.0f <= speed ? speed : 1.0f;
-        }
-    }
-    void NuWindSetWorldSize(NUWIND *wind, f32 size) {
-        if (wind != NULL) {
-            wind->unk2.x = 1.0f <= size ? size : 1.0f;
         }
     }
 
@@ -4354,6 +3652,7 @@ extern "C" {
         }
     }
     void NuHGobjEvalAnim(void) {
+        STUBBED();
     }
     // Original @0x2cd730.
     void NuHGobjEvalAnim2(nuhgobj_s *object, ani3_animheader_s *animation, f32 time, i32 override_count,
@@ -4441,6 +3740,7 @@ extern "C" {
         NuAnimBuffDestroyScratch(&buffer);
     }
     void NuHGobjEvalAnimBlend(void) {
+        STUBBED();
     }
     // Original @0x2ce980.
     void NuHGobjEvalAnimBlend2(nuhgobj_s *object, ani3_animheader_s *animation_a, f32 time_a,
@@ -4460,6 +3760,7 @@ extern "C" {
                                     blend, override_count, overrides, matrices, root_fn, root_data);
     }
     void NuHGobjEvalDwa(void) {
+        STUBBED();
     }
     void **NuHGobjEvalDwa2(i32 render_count, i16 *render_indices, nuanimdata2_s *animation, f32 frame) {
         if (animation == NULL || render_count == 0) {
@@ -4696,6 +3997,7 @@ extern "C" {
         NuMtxMulVU0(result, result, world_matrix);
     }
     void NuHGobjPOIMtxFromIX(void) {
+        STUBBED();
     }
     i32 NuHGobjReversibleCharacters(i32 enabled) {
         i32 previous = nuapi.reversible_characters;
@@ -4979,22 +4281,11 @@ extern "C" {
         }
     }
 #undef NUGCUT_CURVE_VALUE
-    void NuGCutSceneDestroy(NUGCUTSCENE_s *cutscene) {
-        if (cutscene->character_system != NULL && NuCutSceneDestroyCharacters != NULL) {
-            NuCutSceneDestroyCharacters(cutscene);
-        }
-    }
-    void NuGCutSceneLoadAddr(void) {
-    }
-    void NuGCutSceneSysInit(NUGCUTLOCATORFNENTRY_s *locator_functions) {
-        locatorfns = locator_functions;
-    }
     void NuGCutSetCutAudioStream(i32 stream) {
         NuGCutAudioStream = stream;
     }
-    void NuGSceneSetCrossFade(void) {
-    }
     void NuGHGRelocate(void) {
+        STUBBED();
     }
 
     // ---------------------------------------------------------------------------
@@ -5034,6 +4325,7 @@ extern "C" {
         return 0;
     }
     void NuPad_Interface_TouchScreenInput(i32, i32, i32, i32, i32, i32, i32, i32) {
+        STUBBED();
     }
     i32 NuPs2ApplyDeadZone(i32 raw_value, i32 dead_zone) {
         i32 value = raw_value - 128;
@@ -5049,8 +4341,6 @@ extern "C" {
             value = (value + dead_zone) * 255 / (255 - dead_zone);
         }
         return value;
-    }
-    void NuPs2VideoScreenDump(void) {
     }
     // ---------------------------------------------------------------------------
     // Culling / visibility / portals / occlusion
@@ -5194,6 +4484,7 @@ extern "C" {
         return -1;
     }
     void NuVisiBoxTree(void) {
+        STUBBED();
     }
     i32 VisiSysCameraLock;
     i32 LoadedOcclusionData;
@@ -5233,10 +4524,13 @@ extern "C" {
         return result;
     }
     void NuVisiInstTree(void *, NUGSCN *) {
+        STUBBED();
     }
     void NuVisiOcclusion(void *) {
+        STUBBED();
     }
     void NuVisiOctree(void) {
+        STUBBED();
     }
     void NuOcclusionManagerAddOccluderOBB(const NUVEC *minimum, const NUVEC *maximum, const NUMTX *matrix) {
         g_OcclusionManager.AddOccluder(minimum, maximum, matrix);
@@ -5269,6 +4563,7 @@ extern "C" {
         g_OcclusionManager.OnCameraSet();
     }
     void NuOcclusionManagerRenderStats(void) {
+        STUBBED();
     }
     void NuOcclusionManagerRenderZPass(void) {
         g_OcclusionManager.RenderZPass();
@@ -5282,15 +4577,6 @@ extern "C" {
     void NuOcclusionManagerSetOccluderScreenSpaceThreshold(f32 threshold) {
         g_OcclusionManager.unknown_15c = threshold;
     }
-    void NuInvalidateClipRanges(nudldlistscene_s *scene) {
-        for (i32 index = 0; index < scene->nclip_objects; ++index) {
-            if (scene->lod_ranges[index] != 0.0f) {
-                scene->lod_ranges[index] = FLT_MAX;
-            }
-            scene->far_clip_ranges[index] = FLT_MAX;
-        }
-    }
-
     // ---------------------------------------------------------------------------
     // Viewport
     // ---------------------------------------------------------------------------
@@ -5299,75 +4585,16 @@ extern "C" {
     // Strings / conversion / Unicode
     // ---------------------------------------------------------------------------
 
-    void NuQTAddElement(void) {
-    }
-    void NuQTCreate(void) {
-    }
-    void NuQTRead(void) {
-    }
-    void NuQTWrite(void) {
-    }
-
     // ---------------------------------------------------------------------------
     // Containers / lists / params
     // ---------------------------------------------------------------------------
 
     // ---------------------------------------------------------------------------
-    // Debug / error / html / profiling
+    // Debug / error / profiling
     // ---------------------------------------------------------------------------
 
     void NuErrorSleep(void) {
-    }
-
-    void NuHtmlHBarGraph(void) {
-    }
-    void NuHtmlHLineGraph(void) {
-    }
-    void NuHtmlVBarGraph(void) {
-    }
-    // Profiling timebar sets are a deferred subsystem (the real one is
-    // NuTimeBarCreateSet @0x2d7450 -> CreateSetEx @0x2d73f0 -> CreateTimeBar
-    // @0x2a9860). Consumers only ever hand the returned handle to the
-    // NuTimeBarSlot* stubs, so NULL behaves like profiling disabled.
-    void *NuTimeBarCreateSet(i32) {
-        return NULL;
-    }
-    void NuTimeBarCreateSetEx2(void) {
-    }
-    void NuTimeBarDestroySet(void) {
-    }
-    void NuTimeBarEnable(i32 enabled) {
-        NuTimeBar_EngineEnabled = enabled;
-    }
-    void NuTimeBarIndicateGpuFrameOut(i32 enabled) {
-        NuTimeBar_GpuFrameOutEnabled = enabled;
-    }
-    void NuTimeBarInit(void) {
-        VARIPTR unused = {};
-        NuTimeBarInitEx(NULL, unused);
-    }
-    extern "C++" {
-        static i32 NuTimeBar_PeakReset;
-    }
-    void NuTimeBarResetPeaks(void) {
-        NuTimeBar_PeakReset = 1;
-    }
-    void NuTimeBarSetRender(i32) {
-    }
-    void NuTimeBarSetRenderHorizontal(void) {
-    }
-    void NuTimeBarSetScaleY(void) {
-    }
-
-    // ---------------------------------------------------------------------------
-    // Time
-    // ---------------------------------------------------------------------------
-
-    void NuTimeGetSinceStartFrame(void) {
-    }
-    void NuTimeGetStartFrame(void) {
-    }
-    void NuTimeStartFrame(void) {
+        STUBBED();
     }
 
     // ---------------------------------------------------------------------------
@@ -5376,10 +4603,12 @@ extern "C" {
 
 #ifndef ANDROID
     void NuGetCurrentThreadId(void) {
+        STUBBED();
     }
 #endif
 #ifndef ANDROID
     void NuThreadCreate(void) {
+        STUBBED();
     }
 #endif
     static f32 nu2api_paused;
@@ -5387,8 +4616,10 @@ extern "C" {
         nu2api_paused = (f32)paused;
     }
     void NuPhoneOSMessagePost(void) {
+        STUBBED();
     }
     void NuPhoneOSMessagePump(void) {
+        STUBBED();
     }
     NUGCUTSCENEGETHGOBJFN NuCutSceneGetHGObj;
 
@@ -5447,86 +4678,7 @@ extern "C" {
     // ---------------------------------------------------------------------------
 
     void NuSplineList(void) {
-    }
-    i32 NuOnlineAchievementAchievedExPS(i32 player, i32 achievement, NUONLINEACHIEVEMENTCALLBACK callback) {
-        // Preserve the original unsigned bound, including its acceptance of index 2.
-        if ((u32)player > 2) {
-            return 0;
-        }
-        return NuOnlineAchievementAchievedProfile(g_nupadMapping[player].port, achievement, callback);
-    }
-    i32 NuOnlineAchievementAchievedPS(i32 achievement, NUONLINEACHIEVEMENTCALLBACK callback) {
-        extern i32 g_signedinUser;
-        return NuOnlineAchievementAchievedProfile(g_signedinUser, achievement, callback);
-    }
-    i32 NuOnlineHasPlayerDownloadedPS(u32) {
-        return 0;
-    }
-    i32 NuOnlineHasPlayerSignedInExPS(void) {
-        return 0;
-    }
-    extern i32 g_signedinUser;
-    i32 NuOnlineHasPlayerSignedInPS(void) {
-        return g_signedinUser != -1;
-    }
-    void NuOnlineInitPS(void) {
-    }
-    void NuOnlineSetContextExPS(i32 player, i32 context, i32 value) {
-        if ((u32)player <= 2) {
-            NuOnlineSetContextProfilePS(g_nupadMapping[player].port, context, value);
-        }
-    }
-    void NuOnlineSetContextPS(i32 context, i32 value) {
-        NuOnlineSetContextProfilePS(g_signedinUser, context, value);
-    }
-    void NuOnlineSetDefaultContextExPS(i32 player, i32 context, i32 value) {
-        if ((u32)player <= 2) {
-            NuOnlineSetDefaultContextProfilePS(g_nupadMapping[player].port, context, value);
-        }
-    }
-    void NuOnlineSetDefaultContextPS(i32 context, i32 value) {
-        NuOnlineSetDefaultContextProfilePS(g_signedinUser, context, value);
-    }
-    void NuOnlineSetDefaultPresenceModeExPS(i32 player, i32 mode) {
-        if ((u32)player <= 2) {
-            NuOnlineSetDefaultPresenceModeProfilePS(g_nupadMapping[player].port, mode);
-        }
-    }
-    void NuOnlineSetDefaultPresenceModePS(i32 mode) {
-        NuOnlineSetDefaultPresenceModeProfilePS(g_signedinUser, mode);
-    }
-    void NuOnlineSetPresenceModeExPS(i32 player, i32 mode) {
-        if ((u32)player <= 2) {
-            NuOnlineSetPresenceModeProfilePS(g_nupadMapping[player].port, mode);
-        }
-    }
-    void NuOnlineSetPresenceModePS(i32 mode) {
-        NuOnlineSetPresenceModeProfilePS(g_signedinUser, mode);
-    }
-    void NuOnlineSetProfilePlayer(void) {
-    }
-    void NuOnlineSetPropertyExPS(i32 player, i32 property, i32 size, void *data) {
-        if ((u32)player <= 2) {
-            NuOnlineSetPropertyProfilePS(g_nupadMapping[player].port, property, size, data);
-        }
-    }
-    void NuOnlineSetPropertyPS(i32 property, i32 size, void *data) {
-        NuOnlineSetPropertyProfilePS(g_signedinUser, property, size, data);
-    }
-    i32 NuOnlineSignInPlayerPS(void) {
-        return 0;
-    }
-    void NuFmvInit(void) {
-    }
-    i32 NuFmvPlayV(i32 option, ...) {
-        return 1;
-    }
-    // The original wrapper forwards eight 32-bit arguments through a tagged
-    // option list. Option meanings beyond this layout remain unrecovered.
-    i32 NuFmvPlay(u32 argument0, i32 enabled, u32 argument2, u32 argument3, u32 argument4, u32 argument5, u32 argument6,
-                  u32 argument7) {
-        return NuFmvPlayV(2, argument0, enabled != 0 ? 3 : 0, 4, argument2, 5, argument3, 6, argument4, 7, argument5, 8,
-                          argument6, argument7, 1);
+        STUBBED();
     }
     extern void (*nuapi_endframe_callbackfn)(void);
     void NuRegisterEndFrameCallBackFn(void (*callback)(void)) {
@@ -5538,6 +4690,7 @@ extern "C" {
     // ---------------------------------------------------------------------------
 
     i32 NuStreamInit(void) {
+        STUBBED();
         return 0;
     }
 
@@ -5553,24 +4706,22 @@ struct nushaderobject_s;
 union variptr_u;
 
 void Nu360ConfigureSMBSharing(char **) {
+    STUBBED();
 }
 void NuFramebuffer360EndZPass() {
+    STUBBED();
 }
 bool NuFramebuffer360HasZPass() {
+    STUBBED();
     return false;
 }
 void NuFramebuffer360BeginZPass(i32) {
+    STUBBED();
 }
 i32 NuFramebuffer360GetTileCount(nuframebuffer_s *) {
+    STUBBED();
     return 0;
 }
-void NuShaderObject360LoadShader(nushaderobject_s *) {
-}
-void NuShaderObject360LoadPackFile(char *, variptr_u *, variptr_u) {
-}
-void NuShaderObject360UnloadShader(nushaderobject_s *) {
-}
-
 void NuLgtSetArcMatEx(i32 type, numtl_s *material, f32 u0, f32 v0, f32 u1, f32 v1) {
     if (type > 3)
         return;

@@ -1,9 +1,11 @@
+#include "decomp.h"
 #include "globals.h"
 #include "legoapi/characters/core/character.h"
 #include "legoapi/world/levels/levels.h"
 #include "legoapi/gizmo/base/TeleportObjectInterface.h"
 #include "nu2api/nu3d/nuspline.h"
 #include "legoapi/gizmos/object/gizpanel.h"
+#include "legoapi/gizmos/object/gizbuildits.h"
 #include "MechInputTouch_types.h"
 #include "gamelib/util/gamelib_util_types.h"
 #include "legoapi/gizmo/base/GizForceObjectInterface.h"
@@ -17,7 +19,6 @@
 
 extern i16 id_RANCOR, id_ANAKINJEDI;
 i32 GameRayCast(NUVEC *, NUVEC *, f32, i32);
-void CalcAveragePosAndRad(GIZBUILDIT_s &, VuVec &, f32 &, bool);
 bool CalculateRayBoxIntersection(VuVec const &, VuVec const &, VuVec const &, VuVec const &, f32, f32 &);
 extern "C" void NewRayCastGetImpactNormal(NUVEC *);
 f32 CalcCapsuleIntersectDistance(VuVec const &, VuVec const &, f32, VuVec const &, f32);
@@ -31,6 +32,7 @@ char const *MechInputTouchSystem::GetName() {
 }
 
 void MechAutoJumpGetBest(JumpTriggerPacket const &, i32) {
+    STUBBED();
 }
 
 void MechAutoJumpSetIsUsing(GameObject_s &object, MechAutoJumpConnection &connection) {
@@ -52,6 +54,7 @@ void MechAutoJumpSetIsUsing(GameObject_s &object, MechAutoJumpConnection &connec
 }
 
 void MechTouchUITagButton_OnClick_Callback(MechTouchUIElement &, TouchHolder &) {
+    STUBBED();
 }
 
 void MechTouchUIPauseButton_OnClick_Callback(MechTouchUIElement &element, TouchHolder &) {
@@ -60,12 +63,15 @@ void MechTouchUIPauseButton_OnClick_Callback(MechTouchUIElement &element, TouchH
 }
 
 void MechTouchUIPartySelector_OnRelease_Callback(MechTouchUIElement &, TouchHolder &) {
+    STUBBED();
 }
 
 void MechInputTouchSystem::AddChangeLayoutButtons(NuVirtualTouchDevice &, i32) {
+    STUBBED();
 }
 
 void MechInputTouchSystem::ChooseTouchLayout(bool) {
+    STUBBED();
 }
 
 void MechInputTouchSystem::ConvertToScreenCoords(float x, float y, float &screen_x, float &screen_y) {
@@ -83,27 +89,35 @@ bool MechInputTouchSystem::CouldTouchBeLockedBy(u32 touch_id, MechInputTouchButt
 }
 
 void MechInputTouchSystem::CreateGamePanels() {
+    STUBBED();
 }
 
 void MechInputTouchSystem::CreateGamePlayLayoutBlank(NuVirtualTouchDevice &, i32) {
+    STUBBED();
 }
 
 void MechInputTouchSystem::CreateGamePlayLayoutConsoleMode(NuVirtualTouchDevice &, i32) {
+    STUBBED();
 }
 
 void MechInputTouchSystem::CreateGamePlayLayoutGestureBased(NuVirtualTouchDevice &, i32) {
+    STUBBED();
 }
 
 void MechInputTouchSystem::CreateGamePlayLayoutGestureBased_Cavalry(NuVirtualTouchDevice &, i32) {
+    STUBBED();
 }
 
 void MechInputTouchSystem::CreateGamePlayLayoutGestureBased_DeathStarTurret(NuVirtualTouchDevice &, i32) {
+    STUBBED();
 }
 
 void MechInputTouchSystem::CreateGamePlayLayoutGestureBased_Podrace(NuVirtualTouchDevice &, i32) {
+    STUBBED();
 }
 
 void MechInputTouchSystem::CreateGamePlayLayoutGestureBased_SpeederChase(NuVirtualTouchDevice &, i32) {
+    STUBBED();
 }
 
 f32 MechInputTouchSystem::DetermineMoveDir2D(GameObject_s &object, VuVec const &target, bool flatten,
@@ -512,6 +526,7 @@ MechInputTouchSystem::MechInputTouchSystem() {
 }
 
 void MechInputTouchSystem::ProcessEvenWhenPaused(ThingProcessData *) {
+    STUBBED();
 }
 
 void MechInputTouchSystem::ResetAllOwners() {

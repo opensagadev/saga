@@ -3,6 +3,7 @@
 #include "nu2api/nu3d/android/nugscn_android.h"
 #include "nu2api/nu3d/android/nurenderthread.h"
 #include "nu2api/nu3d/nurndr.h"
+#include "nu2api/nu3d/nurendercontext.h"
 #include "nu2api/nu3d/nutexanm.h"
 #include "nu2api/nu3d/nushader_plain.h"
 #include "nu2api/nuandroid/ios_graphics.h"
@@ -10,18 +11,20 @@
 #include "nu2api/nucore/nuthread.h"
 #include "nu2api/nusound/nusound.h"
 
-extern "C" void NuRenderContextInit(void);
 extern "C" void NuInitDebrisRenderer(VARIPTR *buffer, VARIPTR buffer_end);
 extern "C" void NuIOSMtlInit(void);
 
 extern "C" NUPADREC *PadRecPtr(void) {
+    STUBBED();
     return NULL;
 }
 
 void NuXboxLiveInit(void) {
+    STUBBED();
 }
 
 void InitializeGLMutex(void) {
+    STUBBED();
 }
 
 i32 NuInitHardwarePS(VARIPTR *buf, VARIPTR *buf_end, i32 heap_size) {
@@ -56,6 +59,7 @@ i32 NuInitHardwarePS(VARIPTR *buf, VARIPTR *buf_end, i32 heap_size) {
 }
 
 i32 NuInitHardwareParseArgsPS(i32 setup_tok, char **args) {
+    STUBBED();
     return 0;
 }
 

@@ -1,7 +1,9 @@
 #include "nu2api/nu3d/nuspecial.h"
 #include "decomp.h"
+#include "legoapi/actions/movement/jumping.h"
 #include "globals.h"
 #include "legoapi/legoapi_types.h"
+#include "legoapi/items/objects/objectsall.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/level.h"
 #include "legoapi/world/world_shared.h"
@@ -15,6 +17,7 @@
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nuvec.h"
 #include "legoapi/characters/motion.h"
+#include "legoapi/characters/motion/gameanim.h"
 
 #include <string.h>
 
@@ -23,13 +26,9 @@ struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
-i32 LEGOCONTEXT_BUCK = -1;
-i16 LEGOACT_BUCK = -1;
 f32 BUCK_RIDERJUMPCLEARANCE = 1.0f;
 void (*BuckStartExtraFn)(GameObject_s *) = NULL;
 void NewRumble(nupad_s *, f32, i32);
-void StartJump(GameObject_s *, i32);
-extern "C" f32 AnimDuration(i32, i32, f32, f32, i32);
 
 void Buck_Start(GameObject_s *object, GameObject_s *rider) {
     if (LEGOCONTEXT_BUCK == -1 || LEGOACT_BUCK == -1 ||
@@ -112,9 +111,11 @@ pushblock_s *BlockInBlock(WORLDINFO_s *world, pushblock_s *block, i32 excluded, 
 }
 
 void Boulder_Kill(PART_s *, i32) {
+    STUBBED();
 }
 
 void Boulder_Move(PART_s *, float) {
+    STUBBED();
 }
 
 void Buck_MoveCode(GameObject_s *object, i32 start) {
@@ -128,9 +129,11 @@ void Buck_MoveCode(GameObject_s *object, i32 start) {
 }
 
 void FindNextBreak(unsigned char *, i32) {
+    STUBBED();
 }
 
 void FindNearestBreak(unsigned char *, i32) {
+    STUBBED();
 }
 
 void BuckStartExtra_LSW(GameObject_s *object) {
@@ -180,9 +183,8 @@ i32 Conveyor_AdjustSpeed(NUVEC *velocity) {
 }
 
 void AddDevice(nufile_device_s *) {
+    STUBBED();
 }
-
-extern NUGSCN *IconScene_FindById(i32 character_id);
 
 // LevelObjects_InitForLevel @0x475630. Creates the runtime model table and
 // resolves each registered model from the scene selected by its table kind.
@@ -263,6 +265,7 @@ void LevelObjects_InitForLevel(WORLDINFO_s *world) {
 }
 
 void EquivalentObjects_Configure(WORLDINFO_s *world, char *config) {
+    STUBBED();
     (void)world;
     (void)config;
 }

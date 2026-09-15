@@ -3,9 +3,11 @@
 #include "nu2api/nucore/common.h"
 
 struct eduimenu_s;
+struct eduiitem_s;
 struct nupad_s;
 struct edui_interact_s;
 typedef void (*EdUiMenuCallback)(eduimenu_s *menu, eduimenu_s *parent);
+typedef void (*EdUiItemCallback)(eduimenu_s *menu, eduiitem_s *item, u32 value);
 
 enum EdUiItemFlags {
     EDUI_ITEM_HIGHLIGHTED = 0x01,
@@ -144,7 +146,19 @@ extern "C" {
     i32 eduiMenuDetach(eduimenu_s *menu);
     i32 eduiMenuIsActive(eduimenu_s *menu);
     void eduiMenuEnsureSelection(eduimenu_s *menu);
+    void eduiMenuFitWidth(eduimenu_s *menu, i32 padding);
     void eduiMenuHighlight(eduimenu_s *menu, eduiitem_s *item);
+    eduiitem_s *eduiItemSelCreate(usize data, const void *colours, i32 selected, i32 group, EdUiItemCallback callback,
+                                  char *text);
+    eduiitem_s *eduiItemCheckCreate(usize data, const void *colours, i32 selected, i32 group, EdUiItemCallback callback,
+                                    char *text);
+    eduiitem_s *eduiItemToggleCreate(usize data, const void *colours, i32 selected, i32 group,
+                                     EdUiItemCallback callback, char *text);
+    eduiitem_s *eduiItemSliderCreate(usize data, const void *colours, i32 group, EdUiItemCallback callback, f32 minimum,
+                                     f32 maximum, f32 value, char *text);
+    eduiitem_s *eduiItemSliderCreateInt(usize data, const void *colours, i32 group, EdUiItemCallback callback,
+                                        i32 minimum, i32 maximum, i32 value, char *text);
+    eduiitem_s *eduiItemTextPickCreate(usize data, const void *colours, EdUiItemCallback callback, char *text);
     i32 eduiItemSetText(eduiitem_s *item, char *text);
     i32 eduiItemPropSetText(edui_prop_s *item, char *text);
     void eduiItemSliderSetVal(edui_slider_s *item, f32 value);
@@ -163,6 +177,9 @@ extern "C" {
     i32 eduiProcessInteracts(eduimenu_s *menu, nupad_s *pad);
     void eduiFlushInteracts(void);
     i32 eduiCursorOverMenu(eduimenu_s *menu);
+    void cbInteractMenuTitle(void);
+    i32 cbInteractMenuScrollUp(edui_interact_s *interact);
+    i32 cbInteractMenuScrollDown(edui_interact_s *interact);
     void cbInteractMenuScrollTo(eduimenu_s *menu, char *text);
     void cbInteractMenuKeySelect(eduimenu_s *menu);
     eduimenu_s *eduiMenuCreate(i32 x, i32 y, i32 width, i32 height, void *font, EdUiMenuCallback callback, char *title);

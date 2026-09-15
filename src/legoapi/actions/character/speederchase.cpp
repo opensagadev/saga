@@ -2,7 +2,12 @@
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/render/fx.h"
+#include "legoapi/render/core/render.h"
+#include "legoapi/menus/core/gamehint.h"
+#include "legoapi/world/levels/levels.h"
+#include "legogame/game.h"
 #include "decomp.h"
+#include "legoapi/actions/character/speederchase.h"
 #include "MechInputTouch/MechInputTouch_types.h"
 #include "globals.h"
 #include "legoapi/gizmo/base/gizmo.h"
@@ -36,7 +41,6 @@ extern i16 id_GAMORREANGUARD;
 i32 ComboOpponent_Behind;
 f32 ComboOpponent_Range2;
 f32 PlayerOpponent_Range2;
-i16 LEGOACT_PUNCH_BEHIND = -1;
 i32 SpecialMove_Check(GameObject_s *, GameObject_s *);
 u32 SpecialMove_GetFlags(i32, u32);
 
@@ -155,15 +159,19 @@ void PodKeyReset() {
 }
 
 void PodLoseSpeed(GameObject_s *, i32, i32) {
+    STUBBED();
 }
 
 void InitBikeParts() {
+    STUBBED();
 }
 
 void SpeederBlowupHack(GIZMOBLOWUP_s *, i32) {
+    STUBBED();
 }
 
 void FindPodHoverHeight(GameObject_s *) {
+    STUBBED();
 }
 
 extern i32 ObjInNarrowSock(GameObject_s *, SOCKSYS *, i32);
@@ -192,22 +200,21 @@ f32 GetVehicleSpeedMul(GameObject_s *object, f32 speed) {
     return effective / ((GAMECHARACTERDATA_s *)object->apiobj.character_data->field11_0x24)->run_speed;
 }
 
-void ObjIsTargetSpeeder(GameObject_s *) {
-}
-
-void PodSeekSubCutSound() {
+i32 ObjIsTargetSpeeder(GameObject_s *) {
+    STUBBED();
+    return 0;
 }
 
 void SpeederChaseA_Init(WORLDINFO_s *) {
-}
-
-void PodSeekMushCutSound() {
+    STUBBED();
 }
 
 void ProcessCurrentSpeed(WORLDINFO_s *, speedup_s *) {
+    STUBBED();
 }
 
 void SpeederChaseA_Panel(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void SpeederChaseA_Reset(WORLDINFO_s *) {
@@ -223,12 +230,15 @@ void SpeederChaseA_Reset(WORLDINFO_s *) {
 }
 
 void SpeedersDroppedBack() {
+    STUBBED();
 }
 
 void SpeederChaseA_Update(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void KillParts_SpeederBike(ADDPART_s *, i32, i32, GameObject_s *) {
+    STUBBED();
 }
 
 // Original 0x4f2e50, 258 bytes. The original returns an integer.
@@ -245,9 +255,6 @@ i32 ObjOpponentStillThere(GameObject_s *object, GameObject_s *opponent, f32 gap)
         }
     }
     return result;
-}
-
-void PodSeekTuskanCutSound() {
 }
 
 f32 SpeederChaseATATInOutMul(nuvec_s *start, nuvec_s *end) {
@@ -281,15 +288,48 @@ f32 GetVehicleAreaRememberSpeed() {
     return speed;
 }
 
-void SpeederChase_DrawMeleeTargets(i16 *, char *, i32) {
+void SpeederChase_DrawMeleeTargets(i16 *character_ids, char *dimmed, i32 count) {
+    if (FadeSys.fade != 0.0f || count <= 0)
+        return;
+
+    f32 base_alpha = statstime;
+    i32 angle = 0x6000;
+    if (SuperStory == 0)
+        angle = (static_cast<i32>(minikittime * 32768.0f + 16384.0f) >> 1) & 0x7fff;
+    i32 left_count = (count + 1) / 2;
+    f32 left_x;
+    f32 right_x;
+    if ((count & 1) != 0) {
+        f32 spread = 1.0f - (1.0f + NuTrigTable[angle]) * 0.5f;
+        left_x = -((0.475f - left_count * 0.05f) * spread);
+        right_x = -0.075f + (0.325f - (left_count - 1.0f) * 0.05f) * spread;
+    } else {
+        f32 spread = 1.0f - (1.0f + NuTrigTable[angle]) * 0.5f;
+        left_x = -0.075f - (0.4f - left_count * 0.05f) * spread;
+        right_x = 0.075f + (0.4f - left_count * 0.05f) * spread;
+    }
+
+    f32 alpha = (1.0f - CurrentHintAlpha()) * base_alpha;
+    for (i32 i = 0; i < count; ++i) {
+        f32 icon_alpha = (dimmed[i] != 0 ? 0.25f : 1.0f) * alpha;
+        if (i < left_count) {
+            DrawCharIcon(character_ids[i], left_x, KITPOSY, 0.0f, 0.16f, 0xa7, icon_alpha, icon_alpha, 1, NULL);
+            left_x -= 0.15f;
+        } else {
+            DrawCharIcon(character_ids[i], right_x, KITPOSY, 0.0f, 0.16f, 0xa7, icon_alpha, icon_alpha, 1, NULL);
+            right_x += 0.15f;
+        }
+    }
 }
 
 void SpeederChase_ObjIsAGroundTroop(GameObject_s *) {
+    STUBBED();
 }
 
 extern "C" {
 
     void cbSetAutoSpeed(void) {
+        STUBBED();
     }
 
 } // extern "C"

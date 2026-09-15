@@ -1,11 +1,14 @@
 #include "decomp.h"
+#include "legoapi/items/collect/minikits.h"
 #include "globals.h"
+#include "legoapi/items/base/collection.h"
 #include "legoapi/gizmos/fx/gizmopickups.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/world/area.h"
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/nucore/nustring.h"
 #include "legoapi/menus/core/text.h"
+#include "legoapi/menus/core/gamemessages.h"
 #include "legoapi/characters/core/character.h"
 #include "legoapi/render/core/render.h"
 #include "nu2api/numath/nutrig.h"
@@ -17,16 +20,12 @@ struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
-static GIZMOPICKUPSYS_s *GizmoPickupSys = &GizmoPickupSys_Game;
-
-void GizmoPickups_InitSys(GIZMOPICKUPSYS_s *pickup_sys) {
-    GizmoPickupSys = pickup_sys;
-}
-
 void MiniKits_Init(variptr_u *, variptr_u *) {
+    STUBBED();
 }
 
 void CollectMinikit(nuvec_s *, char *, i32) {
+    STUBBED();
 }
 
 i32 AllMiniKitsDone(AREASAVE_s *save) {
@@ -43,9 +42,11 @@ i32 AllMiniKitsDone(AREASAVE_s *save) {
 }
 
 void MiniKitDetector(nuvec_s *) {
+    STUBBED();
 }
 
 void CharMiniKit_Draw(i32, numtx_s *, i32, float, float) {
+    STUBBED();
 }
 
 extern i32 currentminikit, newminikitcount;
@@ -58,7 +59,6 @@ void SetDrawGoldBrick(STATUSPACKET_s *, i32);
 void IncreaseScore(u32 *, u64, i32);
 void NewStatusRumbleBuzz(i32, f32, f32, i32);
 extern "C" void PlaySfx(char *, nuvec_s *);
-i32 FindGameMsgsWithID(i32, i32, i32, GAMEMESSAGE_s *);
 void AddStatusMiniKitParts();
 void DrawStatusMiniKit(f32, f32, f32, f32, f32, i32, STATUSPACKET_s *, f32);
 void DrawMiniKitCount(f32, f32, i32, i32);
@@ -311,6 +311,7 @@ void MiniKit_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float ela
 }
 
 void MiniKit_GameMsg_End(GAMEMESSAGE_s *) {
+    STUBBED();
 }
 
 void ResetMinikitCounter() {
@@ -387,37 +388,8 @@ void AllMiniKits_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *packet) {
     NextStatusStage(packet);
 }
 
-void SpecialMiniKits_Draw(WORLDINFO_s *) {
-}
-
 void AddStatusMiniKitParts() {
-}
-
-void SpecialMiniKits_Reset(WORLDINFO_s *world) {
-    WORLDINFO_s *world_info = world;
-    SPECIALMINIKITSYS_s *system = world_info->special_minikits;
-    if (system == NULL || GizmoPickupSys->gizmo_type_id == -1) {
-        return;
-    }
-
-    i32 count = system->count;
-    SPECIALMINIKIT_s *item = system->items;
-    if (count <= 0) {
-        return;
-    }
-
-    i32 index = 0;
-    for (;;) {
-        item->pickup_gizmo = GizmoFindByName(world_info->gizmo_sys, gizmopickup_typeid, item->pickup_name);
-        if ((item->flags & 0x20) != 0) {
-            item->special_gizmo = GizmoFindByName(world_info->gizmo_sys, -1, item->special_name);
-        }
-        ++index;
-        ++item;
-        if (world_info->special_minikits->count <= index) {
-            break;
-        }
-    }
+    STUBBED();
 }
 
 void AllMiniKits_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed) {
@@ -439,9 +411,11 @@ void AllMiniKits_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float
 }
 
 void CharacterMiniKits_Dump(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void MiniKit_GameMsg_Update(GAMEMESSAGE_s *) {
+    STUBBED();
 }
 
 void SetEffectVisibility(char *, i32);
@@ -456,6 +430,7 @@ void EffectOffProgress_Reset(LEVEL_PROGRESS_s *progress) {
 }
 
 void IncrementMinikitCounter(GameObject_s *) {
+    STUBBED();
 }
 
 i32 EffectOffProgress_Update(LEVEL_PROGRESS_s *progress, char *name, i32 visible) {
@@ -479,9 +454,4 @@ i32 EffectOffProgress_Update(LEVEL_PROGRESS_s *progress, char *name, i32 visible
         }
     }
     return 1;
-}
-
-void SpecialMiniKits_Configure(WORLDINFO_s *world, char *config) {
-    (void)world;
-    (void)config;
 }

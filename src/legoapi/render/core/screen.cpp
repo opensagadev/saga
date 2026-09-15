@@ -1,6 +1,7 @@
 #include "decomp.h"
 #include "globals.h"
 #include "legoapi/legoapi_types.h"
+#include "legoapi/render/core/screen.h"
 #include "legoapi/characters/motion.h"
 #include "legoapi/menus/core/text.h"
 #include "gameapi/gui/apimenu.h"
@@ -11,12 +12,11 @@
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nu3d/numtl.h"
 #include "nu2api/nu3d/nutex.h"
+#include "nu2api/nu3d/nurndr.h"
+#include "nu2api/nu3d/nuvport.h"
 #include "nu2api/nu3d/NuRenderDevice.h"
-#include "nu2api/nu3d/nushader_plain.h"
 #include "nu2api/nu3d/android/nutex_ios_ex.h"
 #include "nu2api/nuandroid/ios_graphics.h"
-#include "nu2api/nucore/nustring.h"
-#include "nu2api/nufile/nufile.h"
 
 #include <GLES2/gl2.h>
 #include <stdio.h>
@@ -28,9 +28,11 @@ struct nunativegscene_s;
 struct SHOPINPUT;
 
 void ClearScreen() {
+    STUBBED();
 }
 
 void RenderQuads(i16 *) {
+    STUBBED();
 }
 
 void InitAlphaList() {
@@ -67,7 +69,7 @@ f32 GetAspectRatio() {
 
 static u8 ScreenGrabNeeded;
 static i32 pause_rt;
-NUMTL *pause_rndr_mtl;
+static NUMTL *pause_rndr_mtl;
 extern i32 pause_rndr_on;
 extern i32 pause_fade;
 static i32 old_pause_state;
@@ -86,22 +88,10 @@ extern "C" {
     extern i32 screendump;
 }
 void BackDrop_Draw(f32, i32);
-void DrawStillScreen(i32);
 
 extern "C" i32 NuRndrBeginScene(i32);
 extern "C" void NuRndrEndScene(void);
 extern "C" void NuBackbufferCopy(i32);
-extern "C" void NuRndrClear(i32, i32, f32);
-extern "C" void NuRndrGradClear(i32, i32, i32, f32);
-
-void NeedScreenGrab(i32 needed) {
-    ScreenGrabNeeded = needed != 0;
-}
-
-void ClearStill() {
-    old_pause_state = 0;
-    Paused = 0;
-}
 
 extern f32 CameraZoom;
 extern "C" f32 NuIOS_GetAspectRatio(void);
@@ -110,16 +100,6 @@ void WidescreenCode(i32) {
     pNuCam->aspect = 1.0f / NuIOS_GetAspectRatio();
     pNuCam->fov = (1.0f / NuIOS_GetAspectRatio() + 0.75f) * 0.5f * (1.0f / CameraZoom);
     SmartTextSetWidescreen(1.3333334f / NuIOS_GetAspectRatio(), 1.0f);
-}
-
-void GrabStillScreen() {
-    if (ScreenGrabNeeded != 0) {
-        ScreenGrabNeeded = 0;
-        NuRndrBeginScene(-1);
-        NuBackbufferCopy(pause_rt);
-        NuRndrEndScene();
-        pause_fade = 0;
-    }
 }
 
 SAGA_HOST_WEAK void InitStillRender(variptr_u *, variptr_u) {
@@ -162,45 +142,104 @@ SAGA_HOST_WEAK void InitStillRender(variptr_u *, variptr_u) {
     pause_rndr_on = 0;
 }
 
+void DrawPauseScreenWipe() {
+    NuRndrBeginScene(-1);
+
+    const f32 fade = FadeSys.fade;
+    i32 x = 0;
+    i32 y = 0;
+    i32 width = 0x2800;
+    i32 height = 0xe00;
+    f32 u0 = 0.0f;
+    f32 v0 = 1.0f;
+    f32 u1 = 1.0f;
+    f32 v1 = 0.0f;
+    u32 colours[4];
+
+    if ((FadeSys.direction & 3) != 0) {
+        if ((FadeSys.direction & 1) == 0) {
+            width = static_cast<i32>(fade * 10240.0f);
+            colours[0] = 0x80808080u;
+            colours[1] = 0x00808080u;
+            colours[2] = 0x80808080u;
+            colours[3] = 0x00808080u;
+            NuRndrGradRectUV2di(width, 0, 0x400, 0xe00, fade, 1.0f, fade + 0.1f, 0.0f, colours, pause_rndr_mtl);
+            u1 = fade;
+        } else {
+            u0 = 1.0f - fade;
+            x = static_cast<i32>(u0 * 10240.0f);
+            width = 0x2800 - x;
+            colours[0] = 0x00808080u;
+            colours[1] = 0x80808080u;
+            colours[2] = 0x00808080u;
+            colours[3] = 0x80808080u;
+            NuRndrGradRectUV2di(x - 0x400, 0, 0x400, 0xe00, u0 - 0.1f, 1.0f, u0, 0.0f, colours, pause_rndr_mtl);
+        }
+    } else if ((FadeSys.direction & 0xc) != 0) {
+        if ((FadeSys.direction & 4) == 0) {
+            height = static_cast<i32>(fade * 3584.0f);
+            colours[0] = 0x80808080u;
+            colours[1] = 0x80808080u;
+            colours[2] = 0x00808080u;
+            colours[3] = 0x00808080u;
+            NuRndrGradRectUV2di(0, height, 0x2800, 0x166, 0.0f, 1.0f - fade, 1.0f, 1.0f - (fade + 0.1f), colours,
+                                pause_rndr_mtl);
+            v1 = 1.0f - fade;
+        } else {
+            const f32 edge = 1.0f - fade;
+            y = static_cast<i32>(edge * 3584.0f);
+            height = 0xe00 - y;
+            colours[0] = 0x00808080u;
+            colours[1] = 0x00808080u;
+            colours[2] = 0x80808080u;
+            colours[3] = 0x80808080u;
+            NuRndrGradRectUV2di(0, y - 0x166, 0x2800, 0x166, 0.0f, 1.0f - (edge - 0.1f), 1.0f, 1.0f - edge, colours,
+                                pause_rndr_mtl);
+            v0 = 1.0f - edge;
+        }
+    }
+
+    NuRndrRectUV2di(x, y, width, height, u0, v0, u1, v1, 0x80808080u, pause_rndr_mtl);
+    NuRndrEndScene();
+}
+
+void GrabStillScreen() {
+    if (ScreenGrabNeeded != 0) {
+        ScreenGrabNeeded = 0;
+        NuRndrBeginScene(-1);
+        NuBackbufferCopy(pause_rt);
+        NuRndrEndScene();
+        pause_fade = 0;
+    }
+}
+
+void NeedScreenGrab(i32 needed) {
+    ScreenGrabNeeded = needed != 0;
+}
+
 i8 IsGrabbingScreen() {
     return ScreenGrabNeeded;
 }
 
-bool LoadShaderSource(char **source, i32 *size, u32 key, bool pixel_stage) {
-    static char storage[0x4000];
-
-    *source = NULL;
-    *size = 0;
-
-    char path[256];
-    sprintf(path, "%s/0x%08x.ios_%s", "builtshaders/ios", key, pixel_stage ? "pcode" : "vcode");
-
-    NUFILE file = NuFileOpen(path, NUFILE_READ);
-    if (file == 0) {
-        return false;
+void DrawStillScreen(i32 clear) {
+    NuRndrBeginScene(-1);
+    NuVpGetCurrentViewport();
+    if (clear != 0) {
+        NuRndrClear(0x500, 0, 1.0f);
     }
-
-    *size = NuFileOpenSize(file);
-    NuFileRead(file, storage, *size);
-    NuFileClose(file);
-
-    if (!pixel_stage) {
-        char *precision = strstr(storage, "precision mediump float;");
-        if (precision != NULL) {
-            const char *replacement = "precision highp float;  ";
-            memcpy(precision, replacement, NuStrLen(replacement));
-        }
+    if (MainRenderTime >= 1.0f) {
+        NuRndrRectUV2di(0, 0, 0x2800, 0xe00, 0.0f, 1.0f, 1.0f, 0.0f, 0x80808080u, pause_rndr_mtl);
     } else {
-        char *precision = strstr(storage, "precision lowp float;");
-        if (precision != NULL && strstr(storage, "_envmap_samplerCube") != NULL) {
-            const char *replacement = "precision mediump float;";
-            memcpy(precision, replacement, NuStrLen(replacement));
-        }
+        const u32 colour = (static_cast<i32>(MainRenderTime * 128.0f) << 24) | 0x00808080u;
+        u32 colours[4] = {colour, colour, colour, colour};
+        NuRndrGradRectUV2di(0, 0, 0x2800, 0xe00, 0.0f, 1.0f, 1.0f, 0.0f, colours, pause_rndr_mtl);
     }
+    NuRndrEndScene();
+}
 
-    storage[*size] = '\0';
-    *source = storage;
-    return true;
+void ClearStill() {
+    old_pause_state = 0;
+    Paused = 0;
 }
 
 void UpdateCutBorders() {
@@ -273,43 +312,13 @@ void HandleStillRender() {
 }
 
 void PreRenderFlashHack() {
+    STUBBED();
 }
 
 void UCStretchToCorners(i16 *, i16 *) {
+    STUBBED();
 }
 
 void PostRenderFlashHack() {
-}
-
-bool LookupPreloadedShaderObject(u32 key, u32 **shader, LoadedUniqueShaderRecord *records, u32 count) {
-    i32 upper = static_cast<i32>(count) - 1;
-    if (upper < 0) {
-        return false;
-    }
-
-    i32 index = upper / 2;
-    LoadedUniqueShaderRecord *record = &records[index];
-    if (record->key == key) {
-        *shader = &record->gl_shader;
-        return true;
-    }
-
-    i32 lower = 0;
-    while (true) {
-        if (key > record->key) {
-            lower = index + 1;
-        } else {
-            upper = index - 1;
-        }
-        if (lower > upper) {
-            return false;
-        }
-
-        index = (lower + upper) / 2;
-        record = &records[index];
-        if (record->key == key) {
-            *shader = &record->gl_shader;
-            return true;
-        }
-    }
+    STUBBED();
 }

@@ -1,4 +1,6 @@
 #include "globals.h"
+#include "legoapi/actions/character/suit.h"
+#include "legoapi/characters/core/character.h"
 
 SUIT_s Suit[10] = {
     {"batman", "batman", &tBATMANSUIT, {0x0000}, 'b', 'b', 0x0000, 0, 0, 0},
@@ -14,39 +16,43 @@ SUIT_s Suit[10] = {
 };
 
 void Suits_Init() {
+    for (i32 index = 0; index < 10; ++index) {
+        Suit[index].index = static_cast<u8>(index);
+        Suit[index].character_id = static_cast<i16>(CharIDFromName(Suit[index].base_character_name));
+    }
 }
 
-void Suit_GetLast(i32, i32) {
+SUIT_s *Suit_GetLast(i32 character_id, i32 require_owned) {
+    for (i32 index = 9; index >= 0; --index) {
+        if (require_owned != 0 && (areaSuitBits & (1u << index)) == 0) {
+            continue;
+        }
+        if (Suit[index].character_id == character_id) {
+            return &Suit[index];
+        }
+    }
+    return NULL;
 }
 
-void Suit_GetNext(SUIT_s *) {
+SUIT_s *Suit_GetNext(SUIT_s *suit) {
+    return &Suit[(suit->index + 1) % 10];
 }
 
 i32 Suit_GetIndex(SUIT_s *suit) {
-    if (suit == &Suit[0])
-        return 0;
-    if (suit == &Suit[1])
-        return 1;
-    if (suit == &Suit[2])
-        return 2;
-    if (suit == &Suit[3])
-        return 3;
-    if (suit == &Suit[4])
-        return 4;
-    if (suit == &Suit[5])
-        return 5;
-    if (suit == &Suit[6])
-        return 6;
-    if (suit == &Suit[7])
-        return 7;
-    if (suit == &Suit[8])
-        return 8;
-    if (suit == &Suit[9])
-        return 9;
+    for (i32 index = 0; index < 10; ++index) {
+        if (&Suit[index] == suit) {
+            return index;
+        }
+    }
     return -1;
 }
 
-void *Suit_GetDefault(i32) {
+SUIT_s *Suit_GetDefault(i32 character_id) {
+    for (i32 index = 0; index < 10; ++index) {
+        if (Suit[index].character_id == character_id) {
+            return &Suit[index];
+        }
+    }
     return NULL;
 }
 
@@ -55,8 +61,11 @@ void Suits_CollectAll() {
     areaSuitBits = SAVE_SUIT_ALL;
 }
 
-void Suit_FindFromLetter(char) {
-}
-
-static __used__ void DisguiseAdjust_LSW(int, int, nuvec_s *, nuvec_s *) {
+SUIT_s *Suit_FindFromLetter(char letter) {
+    for (i32 index = 0; index < 10; ++index) {
+        if (Suit[index].letter == letter) {
+            return &Suit[index];
+        }
+    }
+    return NULL;
 }

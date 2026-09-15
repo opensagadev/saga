@@ -5,6 +5,7 @@
 #include "nu2api/numath/nuvec.h"
 #include "globals.h"
 #include "legoapi/characters/core/players.h"
+#include "legoapi/render/core/screen.h"
 #include "legoapi/world/world.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/level.h"
@@ -17,6 +18,7 @@ struct nunativegscene_s;
 struct SHOPINPUT;
 
 void GetClientMineInfo(nuvec_s **, u64 **, u64 **) {
+    STUBBED();
 }
 
 extern void Player_ResetContexts(PLAYERPACKET_s *packet);
@@ -93,6 +95,7 @@ void ResetPlayerPacket(PLAYERPACKET_s *packet, CHARACTERDATA_s *) {
 }
 
 void FinishLoop_Network() {
+    STUBBED();
 }
 
 extern STATUSPACKET_s StatusPacket;
@@ -100,8 +103,6 @@ extern FadeSystem FadeSys;
 extern i32 reset_area;
 extern i32 grab_screen_image;
 extern i32 hub_from_mission;
-void NeedScreenGrab(i32);
-void GrabStillScreen();
 void InitChallenge(i32);
 void InitMission(MISSIONSYS_s *, i32);
 
@@ -167,6 +168,7 @@ destination_selected:
 }
 
 i32 FinishStatusPacket_LSW(WORLDINFO_s *, STATUSPACKET_s *, i32) {
+    STUBBED();
     return 0;
 }
 

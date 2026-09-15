@@ -1,12 +1,14 @@
 #include "gameapi/ai/aisys/aisys.h"
+#include "legoapi/actions/combat/hits.h"
 #include "legoapi/world/level.h"
+#include "legoapi/render/core/terrain.h"
 #include "nu2api/nu3d/nulgtlaser.h"
 #include "legoapi/gizmos/traps/gizforce.h"
 #include "legoapi/gizmos/object/gizobstacles.h"
+#include "legoapi/gizmos/object/newblowup.h"
 #include "legoapi/audio/sfx.h"
 #include "nu2api/numath/nurand.h"
 #include "legoapi/core/input/qrand.h"
-i32 ObjHitObj(GameObject_s *, GameObject_s *, i32, u16, i32, i32);
 i32 Player_HasInvincibility(GameObject_s *);
 void GameAudio_PlaySfxById(i32, NUVEC *, i32, i32);
 extern "C" i32 GetSfxId(const char *);
@@ -36,8 +38,6 @@ struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
-extern "C" i32 FindPlatInst(i32 instance_ix);
-
 // Episode 6 level handlers, in the game's Episode_VI progression:
 // jabbas palace / sarlacc pit / speeder chase / endor battle / death star 2
 // battle / emperor fight, plus the senate bonus.
@@ -47,12 +47,15 @@ extern "C" i32 FindPlatInst(i32 instance_ix);
 // ===========================================================================
 
 void JabbasPalaceA_Init(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void JabbasPalaceB_Init(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void JabbasPalaceE_Init(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void JabbasPalaceA_Reset(WORLDINFO_s *) {
@@ -90,12 +93,15 @@ void JabbasPalaceE_Reset(WORLDINFO_s *world) {
 }
 
 void JabbasPalaceE_Panel(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void JabbasPalaceA_Update(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void JabbasPalaceE_Update(WORLDINFO_s *) {
+    STUBBED();
 }
 
 // ===========================================================================
@@ -103,6 +109,7 @@ void JabbasPalaceE_Update(WORLDINFO_s *) {
 // ===========================================================================
 
 void SarlaccPitA_Draw(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void SarlaccPitA_Reset(WORLDINFO_s *world) {
@@ -117,29 +124,111 @@ void SarlaccPitA_Reset(WORLDINFO_s *world) {
 }
 
 void SarlaccPitB_Init(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void SarlaccPitB_Reset(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void SarlaccPitB_Update(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void SarlaccPitB_SpecialUpdate(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void SarlaccPitC_Init(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void SarlaccPitC_Reset(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void SarlaccPitC_Update(WORLDINFO_s *) {
+    STUBBED();
 }
 
 bool SarlaccPitDiscoActive(WORLDINFO_s *) {
+    STUBBED();
     // Disco-state behavior remains unreconstructed.
     return false;
+}
+
+// ===========================================================================
+// Bonus levels: Lego City, Senate, New Town
+// ===========================================================================
+
+static u8 prevOnTaunTaun;
+static u8 prevOnTractor;
+static u8 prevOnMoonCar;
+static u8 prevOnTownCar;
+
+void LegoCity_Init(WORLDINFO_s *) {
+    STUBBED();
+}
+
+void LegoCity_Reset(WORLDINFO_s *world) {
+    prevOnTaunTaun = 0;
+    prevOnTractor = 0;
+    prevOnMoonCar = 0;
+    prevOnTownCar = 0;
+
+    GIZMOPICKUP_s *pickup = world->pickup_sys->pickups;
+    if (pickup == NULL) {
+        return;
+    }
+    if (world->pickup_sys->pickup_count <= 0) {
+        return;
+    }
+
+    for (i32 pickup_index = 0; pickup != NULL && pickup_index < world->pickup_sys->pickup_count;
+         ++pickup_index, ++pickup) {
+        if ((pickup->runtime_flags & 8) == 0) {
+            switch (pickup->type_id) {
+                case 3:
+                case 4:
+                case 5:
+                case 6:
+                    pickup->collected = 0;
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+}
+
+void LegoCity_Update(WORLDINFO_s *) {
+    STUBBED();
+}
+
+void SenateA_Init(WORLDINFO_s *) {
+    STUBBED();
+}
+
+void NewTown_Init(WORLDINFO_s *world) {
+    LevGizmo[0] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "newtown");
+    char buf[0x18];
+    i32 i = 1;
+    for (;;) {
+        sprintf(buf, "%i", i);
+        GIZMOBLOWUP_s *g = GizmoBlowUp_FindByName(world, buf);
+        if (g == NULL)
+            break;
+        g->field_0xa0 |= 2;
+        i++;
+    }
+}
+
+void NewTown_Reset(WORLDINFO_s *) {
+    STUBBED();
+}
+
+void NewTown_Update(WORLDINFO_s *) {
+    STUBBED();
 }
 
 // ===========================================================================
@@ -147,12 +236,27 @@ bool SarlaccPitDiscoActive(WORLDINFO_s *) {
 // ===========================================================================
 
 void EndorBattleA_Init(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void EndorBattleC_Init(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void EndorBattleA_Update(WORLDINFO_s *) {
+    STUBBED();
+}
+
+void Platform_Init(WORLDINFO_s *world) {
+    NuSpecialFind(world->current_gscn, &LevHSpecial[0], const_cast<char *>("slave1_level"), 0);
+}
+
+void Platform_Reset(WORLDINFO_s *) {
+    NuSpecialSetVisibility(&LevHSpecial[0], 0);
+}
+
+void E1CharacterBonus_Init(WORLDINFO_s *) {
+    STUBBED();
 }
 
 // ===========================================================================
@@ -160,15 +264,19 @@ void EndorBattleA_Update(WORLDINFO_s *) {
 // ===========================================================================
 
 void DeathStar2BattleD_Init(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void DeathStar2BattleD_Update(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void DeathStar2BattleD_InZapRange(GameObject_s *) {
+    STUBBED();
 }
 
 void DeathStar2BattleA_AlwaysUpdate(WORLDINFO_s *) {
+    STUBBED();
 }
 
 // ===========================================================================
@@ -689,6 +797,7 @@ void EmperorFightA_Update(WORLDINFO_s *world) {
 }
 
 void EmperorFightA_Panel(WORLDINFO_s *) {
+    STUBBED();
 }
 
 // ===========================================================================
@@ -696,12 +805,15 @@ void EmperorFightA_Panel(WORLDINFO_s *) {
 // ===========================================================================
 
 void DeathStar2BattleFire_Draw(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void DeathStar2BattleFire_Init(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void DeathStar2BattleFire_Update(WORLDINFO_s *) {
+    STUBBED();
 }
 
 static f32 slowDownTimer[2];

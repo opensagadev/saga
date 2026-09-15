@@ -11,9 +11,11 @@ struct nunativegscene_s;
 struct SHOPINPUT;
 
 void CollectPowerUp(GameObject_s *, nuvec_s *, u16, i32) {
+    STUBBED();
 }
 
 void FindMtlInHGObj(nugscn_s *, i32) {
+    STUBBED();
 }
 
 // CreateThingManager @0x4e8b50: allocate a 0x24-byte GameThingManager from the

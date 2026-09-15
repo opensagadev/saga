@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include <float.h>
 #include "nu2api/nucore/nucore.hpp"
 #include "nu2api/nucore/nuapi.h"
@@ -21,6 +22,7 @@
 #include "nu2api/nu3d/numtl.h"
 extern "C" void DisplaySceneRndrSpecials(NUDLDLISTSCENE *, i32, void *);
 #include "nu2api/nu3d/nucamera.h"
+#include "nu2api/nu3d/nurendercontext.h"
 #include "nu2api/nu3d/nurndr.h"
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/nucore/NuMainFilter.h"
@@ -40,12 +42,11 @@ extern "C" void DisplaySceneRndrSpecials(NUDLDLISTSCENE *, i32, void *);
 #include "nu2api/nucore/nuthread.h"
 #include "nu2api/nu3d/nupostresources.h"
 #include "nu2api/nu3d/nushader.h"
-#include "nu2api/nu3d/android/nuiosdl_gl.h"
+#include "nu2api/nu3d/android/nurndr_android.h"
 #include "nu2api/nu3d/android/nupostshaders.h"
 #include "nu2api/numath/nuvec4.h"
 #include "nu2api/numath/nufloat.h"
 
-extern "C" f32 g_renderContext_kTint[4];
 extern const f32 nuvec4_one[4];
 extern "C" void NuShaderManagerSetfv(i32, const f32 *);
 struct VuVec {
@@ -67,9 +68,6 @@ u32 NuPostFilter::m_fullscreenGridIndexBuffer;
 i32 NuPostFilter::m_quadGridPrimCount;
 extern u32 g_lastBoundVAO;
 extern void *g_nuFullscreenVertexFormat;
-extern "C" f32 g_renderContext_projection[16];
-extern "C" f32 g_renderContext_view[16];
-extern "C" void NuRenderContextSetViewProj(NUMTX *, NUMTX *);
 extern "C" void NuFramebufferClear(u32, u32);
 extern "C" f32 NuPow(f32, f32);
 extern "C" f32 NuLog2(f32);
@@ -131,21 +129,6 @@ NuApplicationState *NuCore::GetApplicationState(void) {
     m_applicationState = state;
 
     return state;
-}
-
-NuApplicationState::NuApplicationState() : status(NUAPPLICATIONSTATUS_IDLE) {
-}
-
-void NuPlatform::Destroy() {
-}
-
-void NuPlatform::Exists() {
-}
-
-NuPlatform::NuPlatform() {
-}
-
-NuPlatform::~NuPlatform() {
 }
 
 void NuCopyFilter::destroyResources() {
@@ -267,84 +250,7 @@ void NuPostFilter::initSharedResources(i32, i32) {
 }
 
 void NuPostFilter::renderFrustum(numtx_s *) {
-}
-
-void NuDeviceSpecs::Exists() {
-}
-
-NuDeviceSpecs::~NuDeviceSpecs() {
-}
-
-#include "nu2api/nu3d/nurndrstat.h"
-template <typename T> struct LightObjectPool {
-    struct __attribute__((aligned(16))) Slot {
-        // Construction is explicit; reserving the pool must not construct every light.
-        u8 storage[sizeof(T)];
-    } slots[8];
-    i8 occupied;
-    i32 next;
-
-    T *allocate() {
-        i32 i;
-        for (i = next; i < 8; ++i) {
-            if ((occupied & (1 << (i & 7))) == 0) {
-                T *result = reinterpret_cast<T *>(slots[i].storage);
-                occupied |= 1 << (i & 7);
-                next = (i + 1) % 8;
-                return result;
-            }
-        }
-        for (i = 0; i < next; ++i) {
-            if ((occupied & (1 << (i & 7))) == 0) {
-                T *result = reinterpret_cast<T *>(slots[i].storage);
-                occupied |= 1 << (i & 7);
-                next = (i + 1) % 8;
-                return result;
-            }
-        }
-        return NULL;
-    }
-};
-static LightObjectPool<NUDISPLAYLISTITEM> dlistItemPool;
-static LightObjectPool<NURNDRSTATE> rndrStatePool;
-static LightObjectPool<NuDynamicLight> dynamicLightPool;
-DECOMP_ASSERT(sizeof(dynamicLightPool) == 16144, "Dynamic light pool size");
-DECOMP_ASSERT(sizeof(dlistItemPool) == 144, "Dynamic light list item pool size");
-DECOMP_ASSERT(sizeof(rndrStatePool) == 528, "Dynamic light render state pool size");
-
-NuDynamicLight::RenderSet::RenderSet() {
-    parameter_100 = 0.01f;
-    geometry_count = 0;
-    shadow_plane_count = 0;
-    parameter_104 = 0.001f;
-    warp_factor = 1.0f;
-    for (i32 i = 0; i < 2; ++i) {
-        list_items[i] = dlistItemPool.allocate();
-        render_states[i] = rndrStatePool.allocate();
-        memset(&display_lists[i], 0, sizeof(display_lists[i]));
-        NUDISPLAYLISTITEM *item = list_items[i];
-        display_lists[i].first = item;
-        item->type = 0x8d;
-        item->next = NULL;
-        item->id = 1;
-        display_lists[i].mtl_last = display_lists[i].first;
-        display_lists[i].state = render_states[i];
-        NuDisplayListReset(&display_lists[i]);
-    }
-}
-NuDynamicLight::NuDynamicLight() {
-    reserved_7bc = 0;
-    render_set_capacity = 2;
-    active_render_set_count = 0;
-    parameter_4 = 0;
-    parameter_5 = 0;
-    used_on_specials = 0;
-    reserved_7c0[1] = 4.0f;
-    reserved_7c8.x = 0.25f;
-    reserved_7c0[0] = 0.8f;
-    reserved_7c8.y = 0.0f;
-    reserved_7c8.z = 100.0f;
-    reserved_7c8.w = 110.0f;
+    STUBBED();
 }
 
 void NuDynamicLight::addShadowCasterScene(nugscn_s *scene) {
@@ -1024,19 +930,6 @@ void NuDynamicLight::computeWarpEffect(NuDynamicLight::RenderSet &set) {
     set.warp = result;
 }
 
-NuDynamicLight *NuDynamicLight::create() {
-    NuDynamicLight *light = dynamicLightPool.allocate();
-    new (light) NuDynamicLight;
-    return light;
-}
-
-void NuDynamicLight::destroy(NuDynamicLight *light) {
-    i32 index = (reinterpret_cast<u8 *>(light) - reinterpret_cast<u8 *>(dynamicLightPool.slots)) /
-                i32(sizeof(dynamicLightPool.slots[0]));
-    dynamicLightPool.next = index;
-    dynamicLightPool.occupied &= ~(1 << (index & 7));
-}
-
 void NuDynamicLight::refreshShadowTransform(RenderSet &set) {
     NUMTX inverse_camera;
     NuMtxInvH(&inverse_camera, &cacheCameraView);
@@ -1208,6 +1101,7 @@ i32 NuDynamicLight::testShadowExtrusions(const VuVec &minimum, const VuVec &maxi
 }
 
 void NuMotionFilter::initResources() {
+    STUBBED();
 }
 
 NuMainFilterGen::NuMainFilterGen() {
@@ -1230,6 +1124,7 @@ void NuMainFilterGen::destroyResources() {
 }
 
 void NuMainFilterGen::destroyTextureResources() {
+    STUBBED();
 }
 
 void NuMainFilterGen::initResources() {
@@ -1699,6 +1594,7 @@ void NuPostFilterGen::copy(nueffecttex_s *, nuframebuffer_s *output) {
 }
 
 void NuPostFilterGen::copyDepth(nueffecttex_s *, nuframebuffer_s *) {
+    STUBBED();
 }
 
 void NuPostFilterGen::destroyResources() {
@@ -1707,9 +1603,11 @@ void NuPostFilterGen::destroyResources() {
 }
 
 void NuPostFilterGen::destroySharedResources() {
+    STUBBED();
 }
 
 void NuPostFilterGen::destroySharedTextureResources() {
+    STUBBED();
 }
 
 void NuPostFilterGen::initResources() {
@@ -1736,12 +1634,15 @@ void NuPostFilterGen::initSharedTextureResources(i32 width, i32 height) {
 }
 
 void NuPostFilterGen::renderFrustum(numtx_s *) {
+    STUBBED();
 }
 
 void NuPostFilterGen::renderQuad() {
+    STUBBED();
 }
 
 void NuPostFilterGen::renderQuadGrid() {
+    STUBBED();
 }
 
 __attribute__((weak)) void NuPostFilterGen::reset() {
@@ -1749,9 +1650,11 @@ __attribute__((weak)) void NuPostFilterGen::reset() {
 }
 
 __attribute__((weak)) void NuPostFilterGen::resetAll() {
+    STUBBED();
 }
 
 void NuDeferredFilter::initResources() {
+    STUBBED();
 }
 
 i32 NuDataPortManager::registerPort(char const *name, void *data) {
@@ -1805,17 +1708,7 @@ void NuMotionFilterGen::render() {
 }
 
 void NuSpeedBlurFilter::initResources() {
-}
-
-void NuApplicationState::SetStatus(NUAPPLICATIONSTATUS value) {
-    status = value;
-}
-
-NUAPPLICATIONSTATUS NuApplicationState::GetStatus() const {
-    return status;
-}
-
-NuApplicationState::~NuApplicationState() {
+    STUBBED();
 }
 
 NuDeferredFilterGen::NuDeferredFilterGen() {
@@ -1936,6 +1829,7 @@ void NuDeferredFilterGen::render() {
 }
 
 void NuDeferredFilterGen::renderStencilMask(NuDynamicLight &) {
+    STUBBED();
 }
 
 void NuDeferredFilterGen::resetAll() {
@@ -1947,9 +1841,11 @@ void NuDeferredFilterGen::resetAll() {
 }
 
 void NuMotionAccumFilter::initResources() {
+    STUBBED();
 }
 
 NuSpeedBlurFilterGen::NuSpeedBlurFilterGen() {
+    STUBBED();
 }
 
 void NuSpeedBlurFilterGen::computeSpeedBlur(VuVec &result) {
@@ -1980,6 +1876,7 @@ void NuSpeedBlurFilterGen::computeSpeedBlur(VuVec &result) {
 }
 
 void NuSpeedBlurFilterGen::destroyTextureResources() {
+    STUBBED();
 }
 
 void NuSpeedBlurFilterGen::initTextureResources(i32 width, i32 height) {
@@ -2042,6 +1939,7 @@ void NuMotionAccumFilterGen::destroyResources() {
 }
 
 void NuMotionAccumFilterGen::destroyTextureResources() {
+    STUBBED();
 }
 
 void NuMotionAccumFilterGen::initResources() {
@@ -2096,24 +1994,31 @@ void NuMotionAccumFilterGen::render() {
 }
 
 void NuNetEmu::FindPacket(nunetaddr_s *, i32) {
+    STUBBED();
 }
 
 NuNetEmu::NuNetEmu() {
+    STUBBED();
 }
 
 void NuNetEmu::RecvFrom(void *, i32, nunetaddr_s &) {
+    STUBBED();
 }
 
 void NuNetEmu::SendTo(void *, i32, nunetaddr_s *, i32) {
+    STUBBED();
 }
 
 void NuNetEmu::SetConditions(NuNetEmu::eConditions) {
+    STUBBED();
 }
 
 void NuNetEmu::SplitSendPacket(NuNetEmu::EmuPacket *) {
+    STUBBED();
 }
 
 void NuNetEmu::Update() {
+    STUBBED();
 }
 
 NUMTX NuDynamicLight::cacheCameraView;

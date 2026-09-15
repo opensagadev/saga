@@ -13,6 +13,19 @@ struct CHARFIXUP {
 typedef struct CHARFIXUP CHARFIXUP;
 
 struct GameObject_s;
+void CharScenes_AreaDump(void);
+void PostAnimate_ASTROMECH(GameObject_s *object);
+void PostAnimate_FETT(GameObject_s *object);
+struct ANIMREDIRECT;
+struct ANIMLIST_s;
+extern "C" i16 id_GRABCONTROL;
+extern "C" i16 id_GRABMACHINE;
+extern "C" i16 id_GRABMAGNET;
+extern "C" i16 id_ROBOTBASE;
+extern "C" i16 id_JEDISTARFIGHTERYELLOWEP3;
+extern "C" i16 id_JEDISTARFIGHTERREDEP3;
+extern "C" i16 id_TIEINTERCEPTOR;
+i32 RedirectAnim(char *path, ANIMREDIRECT *redirects, ANIMLIST_s *animation_list, char *directory);
 struct BLADE_s {
     i16 model;
     i16 glow_model;
@@ -28,6 +41,9 @@ extern BLADE_s BladeTab[4];
 struct nugscn_s;
 struct nuhgobj_s;
 struct CHARACTERMODEL_s;
+struct CHARVARIANT;
+struct APICHARACTERMODELLIST_s;
+struct APIDEBRISSYS_s;
 struct ANIMPACKET_s;
 struct NUJOINTANIM_s;
 struct numtx_s;
@@ -526,6 +542,7 @@ DECOMP_ASSERT(offsetof(CHARACTERDATA, collision_radius) == 0x30, "CHARACTERDATA 
 DECOMP_ASSERT(offsetof(CHARACTERDATA, model_scale) == 0x3c, "CHARACTERDATA model-scale offset");
 
 extern "C" i32 MakeLayerList_Index(CHARACTERMODEL_s *model, i16 *layers, u32 mask);
+i32 GetDefaultIdle(GameObject_s *object);
 extern "C" void StoreLocatorCoordinates(CHARACTERMODEL_s *model, NUMTX *world_matrix, NUMTX *joint_matrices,
                                         NUVEC *positions, NUMTX *matrices);
 extern "C" void APITransparentCharDraw(nuhgobj_s *object, NUMTX *world_matrix, i32 render_count, i16 *render_indices,
@@ -534,8 +551,9 @@ extern "C" i32 APIDrawCharacterModel(CHARACTERMODEL_s *model, CHARACTERDATA *cha
                                      numtx_s *matrix, numtx_s *secondary_matrix, numtx_s *reflection_matrix,
                                      NUVEC *locator_positions, numtx_s *auxiliary_matrix, GameObject_s *object,
                                      u32 flags, NUJOINTANIM_s *joint_overrides, i32 joint_override_count,
-                                     WORLDINFO_s *world, f32 far_clip, numtx_s *output_matrices, i32 value_15,
-                                     void *level_model);
+                                     WORLDINFO_s *world, f32 frame_time, numtx_s *output_matrices,
+                                     void (*footprint_callback)(void *, GameObject_s *, i32, i32),
+                                     APIDEBRISSYS_s *debris_sys);
 
 extern i32 CHARCOUNT;
 extern CHARACTERDATA *CDataList;
@@ -577,6 +595,13 @@ extern "C" {
 #ifdef __cplusplus
 
 i32 CharIDFromName(char *name);
+CHARACTERDATA *CDataFromName(char *name);
+void CharVariants_Init(CHARVARIANT *variants, i32 count);
+i32 CharVariant_Find(char *name);
+void IconScenes_Init(char *path, VARIPTR *buf, VARIPTR *buf_end);
+struct nugscn_s *IconScene_FindById(i32 character_id);
+void IconScenes_Load(APICHARACTERMODELLIST_s *list, i32 permanent, VARIPTR *buf, VARIPTR *buf_end);
+void IconScenes_Dump();
 
 extern "C" {
 #endif
@@ -625,8 +650,13 @@ extern "C" {
     extern i16 id_WOMPRAT;
     extern i16 id_DRAGBOMB;
     extern i16 id_DROIDEKA;
+    extern i16 id_MINIDROIDEKA;
     extern i16 id_CLOUDCITYCITIZEN;
     extern i16 id_GEONOSIAN;
+    extern i16 id_BATMAN;
+    extern i16 id_ROBIN;
+    extern i16 id_BODYGUARD;
+    extern i16 id_CHEWBACCA;
     extern i16 id_BOB;
     extern i16 id_WHIP;
     extern i16 id_JARJAR;
@@ -636,6 +666,69 @@ extern "C" {
     extern i16 id_SUPERBATTLEDROID;
     extern i16 id_BATTLEDROIDSECURITY;
     extern i16 id_BATTLEDROIDGEONOSIAN;
+    extern i16 id_TAUNTAUN;
+    extern i16 id_DEWBACK;
+    extern i16 id_BANTHA;
+    extern i16 id_ATST;
+    extern i16 id_SNOWMOB;
+    extern i16 id_MOONCAR;
+    extern i16 id_MAPCAR;
+    extern i16 id_ATAT;
+    extern i16 id_REPUBLICGUNSHIP;
+    extern i16 id_REPUBLICGUNSHIP_GREEN;
+    extern i16 id_PROBEDROID;
+    extern i16 id_YWING;
+    extern i16 id_TIEFIGHTER;
+    extern i16 id_TIEFIGHTERDARTH;
+    extern i16 id_TIEBOMBER;
+    extern i16 id_SLAVE1;
+    extern i16 id_WOOKIEFLYER;
+    extern i16 id_VULTUREDROID;
+    extern i16 id_DROIDTRIFIGHTER;
+    extern i16 id_ANAKINSNEWPOD;
+    extern i16 id_ANAKINSNEWPODGREEN;
+    extern i16 id_NEW_REPUBLIC_GUNSHIP_GREEN;
+    extern i16 id_NABOOSTARFIGHTERLIME;
+    extern i16 id_ANAKINSSPEEDER;
+    extern i16 id_ANAKINSSPEEDER_GREEN;
+    extern i16 id_SEBULBASPOD;
+    extern i16 id_SNOWTROOPER;
+    extern i16 id_DEATHSTARTROOPER;
+    extern i16 id_GONKDROID;
+    extern i16 id_IMPERIALSPY;
+    extern i16 id_DARTHVADER;
+    extern i16 id_GREEDO;
+    extern i16 id_BOSSK;
+    extern i16 id_IMPERIALGUARD;
+    extern i16 id_UGNAUGHT;
+    extern i16 id_JAWA;
+    extern i16 id_4LOM;
+    extern i16 id_ATST_LOWRES;
+    extern i16 id_BIGGUN;
+    extern i16 id_BOBAFETT;
+    extern i16 id_CATAPULT;
+    extern i16 id_CLONEWALKER;
+    extern i16 id_EWOK;
+    extern i16 id_FLASHSPEEDER;
+    extern i16 id_KAMINOANDROID;
+    extern i16 id_MINIATAT;
+    extern i16 id_MINIIMPERIALSHUTTLE;
+    extern i16 id_MINIMILLENNIUMFALCON;
+    extern i16 id_MINIROYALSTARSHIP;
+    extern i16 id_MINISITHINFILTRATOR;
+    extern i16 id_MINISOLARSAILOR;
+    extern i16 id_MINISTARDESTROYER;
+    extern i16 id_MINITIEADVANCED;
+    extern i16 id_MINITIEBOMBER;
+    extern i16 id_MINITIEFIGHTER;
+    extern i16 id_MINITIEINTERCEPTOR;
+    extern i16 id_MINIXWING;
+    extern i16 id_MINIYWING;
+    extern i16 id_SENTRYDROID;
+    extern i16 id_SPEEDERBIKESNOW;
+    extern i16 id_STAP2;
+    extern i16 id_WICKET;
+    extern i16 id_ZAMSSPEEDER;
 }
 
 void LoadSingleCharacter(bgprocinfo_s *info);

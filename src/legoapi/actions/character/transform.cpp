@@ -1,9 +1,13 @@
+#include "legoapi/actions/character/transform.h"
+#include "legoapi/gizmo/object/gizmoblowups.h"
+
 #include "nu2api/numath/nuquat.h"
 #include "decomp.h"
 #include "globals.h"
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/motion.h"
 #include "legoapi/characters/motion/animlist.h"
+#include "legoapi/characters/motion/gameanim.h"
 #include "legoapi/core/input/gamepads.h"
 #include "legoapi/legoapi_types.h"
 #include "nu2api/nu3d/nutex.h"
@@ -18,50 +22,10 @@ struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
-extern TerrainQuery_s *TerI;
 extern "C" i16 id_MINISLAVE1;
 
 void TurnCodeCamSafe(GameObject_s *object, NUMTX *matrix);
 void ResetForceGlow(PLAYERPACKET_s *packet);
-extern "C" f32 AnimDuration(i32 character, i32 animation, f32 start, f32 end, i32 subtract_frame);
-i32 GizmoBlowupBlowup(GIZMOBLOWUP_s *object, i32 effects, i32 cause, i32 damage, GameObject_s *source, i32 respawn);
-
-void DeRotatePoint(nuvec_s *point) {
-    TerrainQuery_s *query = TerI;
-
-    const f32 sin_pitch = NuTrigTable[(static_cast<i32>(-query->movement_pitch) >> 1) & 0x7fff];
-    const f32 cos_pitch = NuTrigTable[(static_cast<i32>(16384.0f - query->movement_pitch) >> 1) & 0x7fff];
-    const f32 sin_yaw = NuTrigTable[(static_cast<i32>(-query->movement_yaw) >> 1) & 0x7fff];
-    const f32 cos_yaw = NuTrigTable[(static_cast<i32>(16384.0f - query->movement_yaw) >> 1) & 0x7fff];
-
-    const f32 relative_z = point->z - query->position.z;
-    const f32 relative_x = point->x - query->position.x;
-
-    const f32 rotated_x = relative_z * sin_yaw + relative_x * cos_yaw;
-    const f32 rotated_z = relative_z * cos_yaw - relative_x * sin_yaw;
-
-    point->x = rotated_x;
-    const f32 relative_y = point->y + query->collision_radius - query->position.y;
-    point->z = relative_y * sin_pitch + rotated_z * cos_pitch;
-    point->y = relative_y * cos_pitch - rotated_z * sin_pitch;
-}
-
-void RotateVec(NUVEC *source, NUVEC *destination) {
-    TerrainQuery_s *query = TerI;
-    const f32 pitch = query->movement_pitch;
-    const f32 sin_pitch = NuTrigTable[(static_cast<i32>(pitch) >> 1) & (NUTRIGTABLE_COUNT - 1)];
-    const f32 cos_pitch = NuTrigTable[(static_cast<i32>(pitch + 16384.0f) >> 1) & (NUTRIGTABLE_COUNT - 1)];
-
-    const f32 rotated_z = source->y * sin_pitch + source->z * cos_pitch;
-    destination->y = source->y * cos_pitch - source->z * sin_pitch;
-
-    const f32 yaw = query->movement_yaw;
-    const f32 sin_yaw = NuTrigTable[(static_cast<i32>(yaw) >> 1) & (NUTRIGTABLE_COUNT - 1)];
-    const f32 cos_yaw = NuTrigTable[(static_cast<i32>(yaw + 16384.0f) >> 1) & (NUTRIGTABLE_COUNT - 1)];
-
-    destination->z = rotated_z * cos_yaw - source->x * sin_yaw;
-    destination->x = rotated_z * sin_yaw + source->x * cos_yaw;
-}
 
 void ApplyExtraRotation(GameObject_s *object, numtx_s *matrix) {
     switch (object->character_context) {
@@ -253,22 +217,21 @@ void Transform_DrawTarget(nuvec_s *position, float radius, float alpha) {
     }
 }
 
-void DerotateMovementVector() {
-    TerrainQuery_s *query = TerI;
-
-    query->movement_yaw = static_cast<f32>(NuAtan2DA(query->movement.x, query->movement.z));
-    const f32 horizontal_length =
-        NuFsqrt(query->movement.x * query->movement.x + query->movement.z * query->movement.z);
-    query->movement_pitch = static_cast<f32>(NuAtan2DA(-query->movement.y, horizontal_length));
-    query->movement_length = NuFsqrt(query->movement.x * query->movement.x + query->movement.y * query->movement.y +
-                                     query->movement.z * query->movement.z);
-}
-
 i32 Transform_TargettedByObj(void *) {
+    STUBBED();
     return 0;
 }
 
+void GizmoBlowup_TransformDraw_Game(GIZMOBLOWUP_s *blowup) {
+    if (Transform_TargettedByObj(blowup) != 0) {
+        return;
+    }
+
+    Transform_DrawTarget(&blowup->mid_position, 1.4f * blowup->target_scale, 0.4f);
+}
+
 void InterpolateRotationMatrix(numtx_s *, numtx_s *, numtx_s *, float) {
+    STUBBED();
 }
 
 void QuatInterpolateRotationMatrix(NUMTX *result, NUMTX *first, NUMTX *second, f32 fraction) {

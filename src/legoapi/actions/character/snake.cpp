@@ -7,6 +7,7 @@
 #include <string.h>
 #include "legoapi/legoapi_types.h"
 #include "nu2api/nu3d/nutex.h"
+#include "nu2api/numath/numtx.h"
 
 struct AIROW_s;
 struct nuqthdr_s;
@@ -14,6 +15,7 @@ struct nunativegscene_s;
 struct SHOPINPUT;
 
 void GrabVictim(GameObject_s *, GameObject_s *) {
+    STUBBED();
 }
 
 extern "C" {
@@ -28,7 +30,39 @@ void InitSnakes(WORLDINFO_s *world) {
     NuSpecialFind(world->current_gscn, &snake_hspecials[2], (char *)"Snake_bit_3", 1);
 }
 
-extern "C" void NuMtxSetRotationXYVU0(NUMTX *, NUANGVEC *);
+SNAKEBODY_s *CreateSnakeBody(GameObject_s *object, i32 segment_count) {
+    for (i32 index = 0; index < 4; ++index) {
+        SNAKEBODY_s *body = &snakebodies[index];
+        if ((body->flags & 1) != 0)
+            continue;
+        object->snake_body = body;
+        body->flags |= 1;
+        body->segment_count = static_cast<u16>(segment_count);
+        body->scale = 1.0f;
+        for (i32 segment = 0; segment < body->segment_count; ++segment) {
+            body->segments[segment].yaw = object->apiobj.field_0x276;
+            body->segments[segment].pitch = 0;
+            body->segments[segment].ground_height = 1000000000.0f;
+        }
+        return body;
+    }
+    return NULL;
+}
+
+void DestroySnakeBody(GameObject_s *object) {
+    if (object != NULL && object->snake_body != NULL) {
+        memset(object->snake_body, 0, sizeof(*object->snake_body));
+        object->snake_body = NULL;
+    }
+}
+
+void UpdateSnakeBody(GameObject_s *) {
+    STUBBED();
+}
+
+void DrawSnakeBody(GameObject_s *) {
+    STUBBED();
+}
 
 static void AddSnakeSegmentDebris(GameObject_s *object, i32 segment_index) {
     NUMTX matrix;
@@ -66,14 +100,6 @@ static void AddSnakeSegmentDebris(GameObject_s *object, i32 segment_index) {
     }
 }
 
-void SnakeBeenHit(GameObject_s *object) {
-    if (object != NULL && object->snake_body != NULL && object->snake_body->segment_count > 2) {
-        AddSnakeSegmentDebris(object, object->snake_body->segment_count - 1);
-        AddSnakeSegmentDebris(object, object->snake_body->segment_count - 2);
-        object->snake_body->segment_count -= 2;
-    }
-}
-
 void BlowUpSnakeBody(GameObject_s *object) {
     if (object != NULL && object->snake_body != NULL) {
         for (i32 index = 0; index < object->snake_body->segment_count; ++index)
@@ -82,34 +108,14 @@ void BlowUpSnakeBody(GameObject_s *object) {
     }
 }
 
-SNAKEBODY_s *CreateSnakeBody(GameObject_s *object, i32 segment_count) {
-    for (i32 index = 0; index < 4; ++index) {
-        SNAKEBODY_s *body = &snakebodies[index];
-        if ((body->flags & 1) != 0)
-            continue;
-        object->snake_body = body;
-        body->flags |= 1;
-        body->segment_count = static_cast<u16>(segment_count);
-        body->scale = 1.0f;
-        for (i32 segment = 0; segment < body->segment_count; ++segment) {
-            body->segments[segment].yaw = object->apiobj.field_0x276;
-            body->segments[segment].pitch = 0;
-            body->segments[segment].ground_height = 1000000000.0f;
-        }
-        return body;
-    }
-    return NULL;
-}
-
-void UpdateSnakeBody(GameObject_s *) {
-}
-
-void DestroySnakeBody(GameObject_s *object) {
-    if (object != NULL && object->snake_body != NULL) {
-        memset(object->snake_body, 0, sizeof(*object->snake_body));
-        object->snake_body = NULL;
+void SnakeBeenHit(GameObject_s *object) {
+    if (object != NULL && object->snake_body != NULL && object->snake_body->segment_count > 2) {
+        AddSnakeSegmentDebris(object, object->snake_body->segment_count - 1);
+        AddSnakeSegmentDebris(object, object->snake_body->segment_count - 2);
+        object->snake_body->segment_count -= 2;
     }
 }
 
 void EatVictim(GameObject_s *) {
+    STUBBED();
 }

@@ -10,6 +10,7 @@
 #include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/render/core/render.h"
+#include "legoapi/render/core/terrain.h"
 #include "legoapi/render/fx/parts.h"
 #include "legoapi/world/levels/levels.h"
 #include "legoapi/world/world.h"
@@ -27,7 +28,6 @@ extern i32 dagobah_training;
 AILOCATOR_s *locator;
 GameObject_s *gameobj;
 extern u8 troopercannons_beenReset;
-extern "C" i32 FindPlatInst(i32 instance_ix);
 void Asteroid_PartKill(PART_s *, i32);
 void GizmoBlowupUpdateMatrix(GIZMOBLOWUP_s *);
 void PartCollide_3D(PART_s *);
@@ -43,6 +43,7 @@ extern "C" {
 }
 
 void DagobahA_Init(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void DagobahB_Init(WORLDINFO_s *) {
@@ -50,9 +51,11 @@ void DagobahB_Init(WORLDINFO_s *) {
 }
 
 void DagobahC_Init(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void DagobahE_Init(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void DagobahB_Reset(WORLDINFO_s *world) {
@@ -73,20 +76,25 @@ void DagobahB_Reset(WORLDINFO_s *world) {
 }
 
 void DagobahC_Panel(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void KillParts_ATAT(ADDPART_s *, i32, i32, GameObject_s *) {
+    STUBBED();
 }
 
 f32 rocket_speed = 1.2f;
 
 void BobaRocket_Kill(PART_s *, i32) {
+    STUBBED();
 }
 
 void BobaRocket_Move(PART_s *, float) {
+    STUBBED();
 }
 
 void DagobahA_Update(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void HothBattleA_Draw(WORLDINFO_s *world) {
@@ -100,9 +108,11 @@ void HothBattleA_Draw(WORLDINFO_s *world) {
 }
 
 void HothBattleA_Init(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void HothBattleB_Init(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void HothBattleC_Draw(WORLDINFO_s *world) {
@@ -116,6 +126,7 @@ void HothBattleC_Draw(WORLDINFO_s *world) {
 }
 
 void HothBattleC_Init(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void HothBattleE_Draw(WORLDINFO_s *world) {
@@ -132,18 +143,23 @@ void HothBattleE_Draw(WORLDINFO_s *world) {
 }
 
 void HothBattleE_Init(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void HothEscapeA_Init(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void HothEscapeB_Init(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void HothEscapeC_Init(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void HothEscapeD_Init(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void HothBattleA_Reset(WORLDINFO_s *world) {
@@ -180,9 +196,11 @@ void HothBattleC_Reset(WORLDINFO_s *world) {
 }
 
 void HothBattleE_Panel(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void HothEscapeA_Reset(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void HothEscapeB_Reset(WORLDINFO_s *world) {
@@ -193,42 +211,55 @@ void HothEscapeB_Reset(WORLDINFO_s *world) {
 }
 
 void HothEscapeC_Reset(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void HothEscapeD_Reset(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void BobaRocket_Deflect(PART_s *) {
+    STUBBED();
 }
 
 void HothBattleA_Update(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void HothBattleC_Update(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void HothBattleE_Update(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void HothEscapeA_Update(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void HothEscapeB_Update(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void HothEscapeC_Update(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void HothEscapeD_Update(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void InitTrooperCannons(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void CloudCityTrapA_Init(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void CloudCityTrapB_Init(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void CloudCityTrapA_Reset(WORLDINFO_s *) {
@@ -237,27 +268,35 @@ void CloudCityTrapA_Reset(WORLDINFO_s *) {
 }
 
 void CloudCityTrapC_Panel(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void CloudCityTrapC_Reset(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void InitMiniSnowTroopers(WORLDINFO_s *, i32, i32, i32) {
+    STUBBED();
 }
 
 void CloudCityEscapeA_Init(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void CloudCityEscapeC_Init(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void CloudCityTrapA_Update(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void CloudCityTrapB_Update(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void CloudCityTrapC_Update(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void HothBattle_Melee_init(HOTHBATTLE_MELEE_s *melee) {
@@ -271,6 +310,7 @@ void HothBattle_Melee_init(HOTHBATTLE_MELEE_s *melee) {
 }
 
 void CloudCityEscapeA_Panel(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void CloudCityEscapeA_Reset(WORLDINFO_s *world) {
@@ -280,18 +320,23 @@ void CloudCityEscapeA_Reset(WORLDINFO_s *world) {
 }
 
 void HothBattleE_UpdateWave() {
+    STUBBED();
 }
 
 void CloudCityEscapeA_Update(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void CloudCityEscapeC_Update(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void HothBattle_StartNewWave() {
+    STUBBED();
 }
 
 void HothEscapeC_AlwaysUpdate(WORLDINFO_s *) {
+    STUBBED();
 }
 
 i32 isHothBattleWaveCreature(GameObject_s *object) {
@@ -305,6 +350,7 @@ i32 isHothBattleWaveCreature(GameObject_s *object) {
 }
 
 void HothBattle_ManageBackgroundCreatures() {
+    STUBBED();
 }
 
 // ===========================================================================
@@ -467,18 +513,23 @@ static void Asteroids_Reset(WORLDINFO_s *world) {
 }
 
 void AsteroidChaseA_Init(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void AsteroidChaseB_Init(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void AsteroidChaseB_Draw(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void AsteroidChaseC_Init(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void AsteroidChaseD_Init(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void AsteroidChaseA_Reset(WORLDINFO_s *world) {
@@ -494,6 +545,7 @@ void AsteroidChaseC_Reset(WORLDINFO_s *world) {
 }
 
 void AsteroidChaseD_Panel(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void AsteroidChaseA_Update(WORLDINFO_s *) {
@@ -501,10 +553,13 @@ void AsteroidChaseA_Update(WORLDINFO_s *) {
 }
 
 void AsteroidChaseB_Update(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void AsteroidChaseC_Update(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void AsteroidChaseD_Update(WORLDINFO_s *) {
+    STUBBED();
 }

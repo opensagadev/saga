@@ -40,12 +40,9 @@ i32 CircleLevel(LEVELDATA_s *level) {
 }
 
 void CurrentStart(GameObject_s *, i32, i32) {
+    STUBBED();
 }
 
-void CDataFromName(char *) {
-}
-
-void NewRumble(nupad_s *, f32, i32);
 void NewRumbleAllPlayers(f32, f32, i32, i32);
 
 void ConstantRumble(GameObject_s *object, float strength, float phase) {
@@ -63,49 +60,6 @@ void ConstantRumble(GameObject_s *object, float strength, float phase) {
     }
 }
 
-extern i32 AllMiniKitsDone(AREASAVE_s *save);
-
-COLLECTID *CollectIDUnlocked(i32 id) {
-    i32 index = InCollectList_Index(id, CollectList, CollectCount);
-    if (index == -1) {
-        return NULL;
-    }
-
-    COLLECTID *entry = &CollectList[index];
-    if (Game_CharacterSave != NULL && (Game_CharacterSave[id] & SAVE_CHARACTER_UNLOCKED) != 0) {
-        return entry;
-    }
-
-    switch (entry->type) {
-        case 0:
-            return entry;
-        case 2:
-            if (static_cast<i8>(entry->field2_0x3) == -1 || Game_AreaSave == NULL) {
-                return NULL;
-            }
-            return Game_AreaSave[entry->field2_0x3].area_complete != 0 ? entry : NULL;
-        case 3:
-            if (Episodes_Completed() != EPISODECOUNT) {
-                return NULL;
-            }
-            return Game_100PercentComplete() != 0 ? entry : NULL;
-        case 4:
-            return AllMiniKitsDone(Game_AreaSave) != 0 ? entry : NULL;
-        case 6:
-            if (Game_CompletionSave == NULL ||
-                reinterpret_cast<STATUSCOLLECT_s *>(Game_CompletionSave)->gold_bricks < entry->field6_0xa) {
-                return NULL;
-            }
-            return entry;
-        case 7:
-            return Game_100PercentComplete() != 0 ? entry : NULL;
-        case 8:
-            return Store_IsPackUnlocked(static_cast<i8>(entry->field2_0x3)) != 0 ? entry : NULL;
-        default:
-            return NULL;
-    }
-}
-
 void ClearLastSafeTakeOver(GameObject_s *object) {
     if (object == NULL || (object->field_0xefa & 0x10) != 0) {
         return;
@@ -120,9 +74,11 @@ void ClearLastSafeTakeOver(GameObject_s *object) {
 }
 
 void GetNativeTextureFormatName(NUTEXFORMAT) {
+    STUBBED();
 }
 
 void CatIToX(char *, i32) {
+    STUBBED();
 }
 
 void DoInput(WORLDINFO_s *world) {
@@ -177,14 +133,18 @@ void DoInput(WORLDINFO_s *world) {
 }
 
 void CatI64ToX(char *, i64) {
+    STUBBED();
 }
 
 void DieRumble(GameObject_s *) {
+    STUBBED();
 }
 
 void charToInt(char const *) {
+    STUBBED();
 }
 
 static __used__ i32 _fseek64_wrap(__sFILE *, i64, i32) {
+    STUBBED();
     return 0;
 }

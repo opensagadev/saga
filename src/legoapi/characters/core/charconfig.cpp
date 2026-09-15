@@ -1,18 +1,24 @@
 #include "legoapi/characters/core/charconfig.h"
+#include "legoapi/characters/motion.h"
+#include "legoapi/characters/motion/gameanim.h"
 #include "legoapi/gizmo/base/gizactions.h"
 #include "legoapi/world/level.h"
 #include "legoapi/render/fx.h"
 #include "nu2api/numusic/sfx.h"
+#include "nu2api/nufile/nufilepak.h"
+#include "nu2api/nufile/nufpar.h"
+#include "nu2api/nu3d/nutex.h"
+#include "nu2api/nucore/nustring.h"
+#include "globals.h"
 #include <math.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
 extern "C" {
     extern void *perm_debrissys;
     extern u16 SURFACEBITS_DUST;
 }
-i32 LayerFromName(GAMECHARACTERDATA_s *, char *);
-i32 MakeLayerList_Name(CHARACTERMODEL_s *, i16 *, u32);
 
 static void CC_CharClipToBlobShadows(NUFPAR *parser) {
     u8 enabled = 1;
@@ -2204,87 +2210,69 @@ NUFPCOMJMP ConfigChar_GameKeywords[] = {
     {NULL, NULL},
 };
 
-#include "decomp.h"
-#include "globals.h"
-#include "legoapi/characters/core/charconfig.h"
-#include "legoapi/characters/core/character.h"
-#include "legoapi/characters/core/players.h"
-#include "nu2api/nufile/nufilepak.h"
-#include "legoapi/gizmo/base/gizactions.h"
-#include "legoapi/legoapi_types.h"
-#include "legoapi/world/level.h"
-#include "nu2api/nucore/nustring.h"
-#include "nu2api/nufile/nufpar.h"
-#include "nu2api/nu3d/nutex.h"
+static CHARVARIANT *CharVariant;
+static i32 CHARVARIANTCOUNT;
 
-#include <stdio.h>
-#include <string.h>
-
-struct AIROW_s;
-struct nuqthdr_s;
-struct nunativegscene_s;
-struct SHOPINPUT;
-
-extern i16 id_MINIDROIDEKA;
-extern i16 id_SUPERBATTLEDROID;
-extern i16 id_JAWA;
-extern i16 id_UGNAUGHT;
-extern i16 id_REPUBLICGUNSHIP;
-extern i16 id_REPUBLICGUNSHIP_GREEN;
-extern i16 id_PROBEDROID;
-extern i16 id_BODYGUARD;
-extern i16 id_IMPERIALGUARD;
-
-void Move_JEDI(GameObject_s *object);
-void Animate_JEDI(GameObject_s *object);
-void Move_DROIDGENERIC(GameObject_s *object);
-void Animate_PROTOCOL(GameObject_s *object);
-void Animate_ASTROMECH(GameObject_s *object);
-void PostAnimate_ASTROMECH(GameObject_s *object);
-void Move_CANNON(GameObject_s *object);
-void Animate_CANNON(GameObject_s *object);
-void Move_VEHICLE(GameObject_s *object);
-void Animate_VEHICLE(GameObject_s *object);
-void Move_BEAST(GameObject_s *object);
-void Animate_BEAST(GameObject_s *object);
-void Animate_BATTLEDROID(GameObject_s *object);
-void Move_HOVERDROID(GameObject_s *object);
-void Animate_HOVERDROID(GameObject_s *object);
-void Move_WALKER(GameObject_s *object);
-void Animate_WALKER(GameObject_s *object);
-void Move_ATAT(GameObject_s *object);
-void Animate_ATAT(GameObject_s *object);
-void Move_CRITTER(GameObject_s *object);
-void Animate_CRITTER(GameObject_s *object);
-void Move_POD(GameObject_s *object);
-void Animate_POD(GameObject_s *object);
-void PostAnimate_FETT(GameObject_s *object);
-void Move_WEIRDO(GameObject_s *object);
-void Animate_WEIRDO(GameObject_s *object);
-void Move_DROIDEKA(GameObject_s *object);
-void Animate_DROIDEKA(GameObject_s *object);
-void Move_SUPERBATTLEDROID(GameObject_s *object);
-void Animate_SUPERBATTLEDROID(GameObject_s *object);
-void Move_BARMAN(GameObject_s *object);
-void Animate_BARMAN(GameObject_s *object);
-void Move_JAWA(GameObject_s *object);
-void Move_DRAGBOMB(GameObject_s *object);
-void Move_REPUBLICGUNSHIP(GameObject_s *object);
-void Animate_REPUBLICGUNSHIP(GameObject_s *object);
-void Move_SPEEDERBIKE(GameObject_s *object);
-void Animate_SPEEDERBIKE(GameObject_s *object);
-void Animate_DEFAULT(GameObject_s *object);
-void Move_GEONOSIAN(GameObject_s *object);
-void Animate_GEONOSIAN(GameObject_s *object);
-void SetMoveAndAnimateFunctions(u32 model_flag_mask, u32 model_flag_value, u32 game_flag_mask, u32 game_flag_value,
-                                i32 movement_type, void *move_function, void *animate_function, void *draw_function);
-void CharConfig_CalculateJumpStats(f32 jump_speed, f32 gravity, f32 *duration, f32 *height);
-i32 Text_StripComments(char *text, char *destination, i32 separators);
-
-void CharVariant_Find(char *) {
+i32 RandomIDFromFlags(u32, u32, i32, APICHARACTERMODELLIST_s *, i32) {
+    STUBBED();
+    return -1;
 }
 
-void CharVariants_Init(CHARVARIANT *, i32) {
+void CharVariants_Init(CHARVARIANT *variants, i32 count) {
+    if (count > 0 && variants != NULL) {
+        CharVariant = variants;
+        CHARVARIANTCOUNT = count;
+    }
+}
+
+i32 CharVariant_Find(char *name) {
+    if (CharVariant != NULL && CHARVARIANTCOUNT > 0) {
+        for (i32 i = 0; i < CHARVARIANTCOUNT; ++i) {
+            if (NuStrICmp(CharVariant[i].name, name) == 0)
+                return i;
+        }
+    }
+    return -1;
+}
+
+i32 LayerFromName(GAMECHARACTERDATA_s *character, char *name) {
+    for (i32 i = 0; i < character->layer_count; ++i) {
+        if (NuStrICmp(name, character->layers[i].name) == 0) {
+            return character->layers[i].mask_bit;
+        }
+    }
+    return -1;
+}
+
+i32 MakeLayerList_Name(CHARACTERMODEL_s *model, i16 *output, u32 mask) {
+    if (output == NULL || model == NULL)
+        return 0;
+    GAMECHARACTERDATA_s *data = &GCDataList[model->model_id];
+    i32 count = 0;
+    u32 flag = 1;
+    for (i32 bit = 0; bit < 32; ++bit, flag <<= 1) {
+        if ((mask & flag) == 0 || bit >= data->layer_count)
+            continue;
+        i32 layer;
+        if (data->layer_lookup == NULL) {
+            for (layer = 0; layer < data->layer_count; ++layer) {
+                if (data->layers[layer].mask_bit == bit)
+                    break;
+            }
+            if (layer == data->layer_count)
+                continue;
+        } else {
+            layer = data->layer_lookup[bit];
+            if (layer == -1)
+                continue;
+        }
+        const i16 hierarchy_layer = data->layers[layer].hierarchy_layer_index;
+        if (hierarchy_layer != -1) {
+            ++count;
+            *output++ = hierarchy_layer;
+        }
+    }
+    return count;
 }
 
 void CharCategories_Init(CHARCATEGORY *categories) {
@@ -2297,6 +2285,7 @@ void CharCategories_Init(CHARCATEGORY *categories) {
 }
 
 void CanWearHatsInFreePlay(i32) {
+    STUBBED();
 }
 
 i32 CharCategory_FindByName(char *name) {

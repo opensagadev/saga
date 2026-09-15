@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "legoapi/legoapi_types.h"
 #include "MechInputTouch/MechInputTouch_types.h"
 #include "globals.h"
@@ -773,19 +774,22 @@ void Hint_Draw(i32 viewport) {
 // Static game message and hint helpers. Stubbed to satisfy the symbol baseline.
 
 static __used__ void EndRedBrickMessage(GAMEMESSAGE_s *) {
+    STUBBED();
 }
 
 static __used__ int GameMsg_GetExtraObj(GAMEMESSAGE_s *) {
+    STUBBED();
     return 0;
 }
 
 static __used__ void GameMsg_EndDelay_Game(GAMEMESSAGE_s *) {
+    STUBBED();
 }
 
 static __used__ void GameMsg_Draw_MiniKitDetector(GAMEMESSAGE_s *, nuvec_s *, float) {
+    STUBBED();
 }
 
-i16 LEGOACT_PUSH = -1;
 pushblock_s *NearestPushBlock(WORLDINFO_s *, nuvec_s *, f32);
 
 i32 Push_UpdateHints(HINT_s *) {
@@ -802,6 +806,7 @@ i32 Push_UpdateHints(HINT_s *) {
 }
 
 void Percent_UpdateHint(HINT_s *) {
+    STUBBED();
 }
 
 void RegisterWithHintSys(void (*update_fn)(HINT_s *, i32), HINT_s *hints, u32 *save_bits, i32 save_bit_count) {

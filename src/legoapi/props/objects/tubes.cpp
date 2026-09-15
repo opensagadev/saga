@@ -1,4 +1,5 @@
 #include "decomp.h"
+#include "legoapi/actions/combat/hits.h"
 #include "globals.h"
 #include "legoapi/audio/sfx.h"
 #include "legoapi/characters/core/character.h"
@@ -20,7 +21,6 @@ struct SHOPINPUT;
 
 extern "C" void AddVariableShotDebrisEffectTimed1(i32 effect, NUVEC *position, i32 count, f32 time, i16 z_rotation,
                                                   i16 y_rotation, NUMTX *orientation);
-i32 ObjHitObj(GameObject_s *attacker, GameObject_s *target, i32 damage, u16 flags, i32 parameter, i32 context);
 void NewRumble(nupad_s *pad, f32 strength, i32 mode);
 void NewBuzz(nupad_s *pad, f32 duration, i32 mode);
 void GetRotationAngles(NUVEC *direction, u16 *z_rotation, u16 *y_rotation);
@@ -77,5 +77,3 @@ void TractorBeamCode(GameObject_s *object) {
 
     PlaySfx(const_cast<char *>("env_tractorbeam_lp"), &object->apiobj.collision_position);
 }
-
-extern i32 LEGOCONTEXT_TUBE;

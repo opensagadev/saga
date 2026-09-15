@@ -4,7 +4,17 @@
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/world/mission.h"
 #include "legoapi/legoapi_types.h"
+#include "legoapi/gizmos/fx/gizmopickups.h"
+#include "legoapi/gizmo/object/gizmopickup.h"
+#include "legoapi/menus/core/panel.h"
+#include "legoapi/menus/core/gamemessages.h"
+#include "legoapi/menus/core/text.h"
+#include "gameapi/gui/apimenu.h"
 #include "legoapi/render/core/render.h"
+#include "legoapi/render/light/fade_material.h"
+#include "legoapi/render/light/lighting.h"
+#include "legoapi/characters/motion.h"
+#include "legoapi/world/levels/levels.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/level.h"
 #include "legoapi/world/world.h"
@@ -12,34 +22,75 @@
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nu3d/nuprim.h"
+#include "nu2api/nuandroid/ios_graphics.h"
+#include <stdio.h>
 
 struct AIROW_s;
 struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
-extern "C" void SetQFont2D(void);
-extern "C" i32 NuRndrBeginScene(i32 flags);
-extern "C" void NuRndrClear(i32 flags, i32 colour, f32 alpha);
-extern "C" void NuRndrEndScene(void);
-extern FadeSystem FadeSys;
-extern NUCAMERA *pNuCam;
-extern "C" f32 NuIOS_GetAspectRatio(void);
-void SetPanelLights(f32 intensity);
 void TimingBars(void);
 void Arcade_ResetPanel(void);
-void TBOPENFN(char *name, i32 bar);
-void TBCLOSEFN(char *name, i32 bar);
-
-extern NUMTL *FadeMtl2;
-extern i32 TimingBarSet;
-
-extern f32 statstime;
-extern f32 cointotaltime;
-extern f32 goldbricktime;
-extern i32 SuperStory;
 
 static f32 redbrickslidetime;
+f32 TimerAlpha = 0.0f;
+f32 TimerScale = 1.0f;
+
+namespace {
+    enum PANEL_BLOCKING_MENU {
+        PANEL_MENU_EPISODE_I = 20,
+        PANEL_MENU_EPISODE_II = 21,
+        PANEL_MENU_EPISODE_III = 22,
+        PANEL_MENU_EPISODE_IV = 23,
+        PANEL_MENU_SAVE = 25,
+        PANEL_MENU_LOAD = 26,
+    };
+
+    bool CoinTotalCanOpen() {
+        if (FadeSys.fade != 0.0f || CUTSTOPGAME != 0) {
+            return false;
+        }
+        if (Paused == 0 && NetPaused == 0 && DrawCoinTotalTime <= 0.0f) {
+            return false;
+        }
+        if (screendump != 0 || MenuInMemoryCard() != 0) {
+            return false;
+        }
+
+        const i32 menu = GetMenuID();
+        return menu != PANEL_MENU_EPISODE_I && menu != PANEL_MENU_EPISODE_II && menu != PANEL_MENU_EPISODE_III &&
+               menu != PANEL_MENU_EPISODE_IV && menu != PANEL_MENU_SAVE && menu != PANEL_MENU_LOAD;
+    }
+} // namespace
+
+void UpdateStats() {
+    LEVELDATA *level = WORLD->current_level;
+    if ((level->flags & LEVEL_GAMEPLAY) == 0) {
+        return;
+    }
+
+    f32 stats_target = 0.0f;
+    if (FadeSys.fade == 0.0f && CUTSTOPGAME == 0 && newgamecam == 0) {
+        const bool hub_camera_hidden = HUB_ADATA != NULL && WORLD->area == HUB_ADATA && GameCam->mode == 4;
+        const i32 menu = GetMenuID();
+        if (!hub_camera_hidden && (menu < PANEL_MENU_EPISODE_I || menu > PANEL_MENU_EPISODE_IV)) {
+            stats_target = 1.0f;
+        }
+    }
+    statstime = SeekLinearF(statstime, stats_target, FRAMETIME);
+
+    if ((level->flags & LEVEL_SHOW_COIN_TOTAL) != 0) {
+        DrawCoinTotalTime = 1.0f;
+    }
+    if (DrawCoinTotalTime > 0.0f) {
+        DrawCoinTotalTime -= FRAMETIME;
+    }
+
+    const f32 coin_total_target = CoinTotalCanOpen() ? 1.0f : 0.0f;
+    cointotaltime = SeekLinearF(cointotaltime, coin_total_target, FRAMETIME);
+    CoinTotalScale = SeekLinearF(CoinTotalScale, 1.0f, 3.0f * FRAMETIME);
+}
 
 void PanelRender(WORLDINFO_s *) {
     NuRndrBeginScene(-1);
@@ -116,11 +167,7 @@ void Panel_Clear() {
     Arcade_ResetPanel();
 }
 
-extern ADDGAMEMSG AddGameMsg_Default;
-extern u8 CoinTab[4];
 extern f32 COINMSGTIME;
-GAMEMESSAGE_s *AddGameMsg(ADDGAMEMSG *);
-void EndScoreMessage(GAMEMESSAGE_s *);
 void GameMsg_DrawAdjustNewPos_CoinToTotal(GAMEMESSAGE_s *);
 extern "C" void PlaySfx(char *, NUVEC *);
 i32 CoinsGoToMainTotal();
@@ -215,6 +262,26 @@ i32 CoinsGoToMainTotal() {
     return 0;
 }
 
+void DrawTimer(i32 time, i32 expanded, i32 reset) {
+    if (reset != 0) {
+        TimerScale = 1.0f;
+        TimerAlpha = 0.0f;
+        return;
+    }
+    if (expanded != 0)
+        TimerScale = 2.0f;
+    TimerScale = SeekLinearF(TimerScale, 1.0f, FRAMETIME * 2.0f);
+    if (FadeSys.fade != 0.0f)
+        return;
+    if (TimerAlpha < 1.0f)
+        TimerAlpha = TimerAlpha + FRAMETIME * 2.0f < 1.0f ? TimerAlpha + FRAMETIME * 2.0f : 1.0f;
+    char text[16];
+    sprintf(text, "%d", time);
+    f32 scale = TimerScale * 0.75f;
+    Text3DEx(text, 0.0f, BOSSICONY, 1.0f, scale, scale, scale, 0, 255, 0, 255,
+             static_cast<u8>(static_cast<i32>(TimerAlpha * 128.0f)));
+}
+
 void InitPanel(i32) {
     const f32 panel_fov = pNuCam->fov / 0.75f;
     const f32 aspect_ratio = NuIOS_GetAspectRatio();
@@ -224,4 +291,6 @@ void InitPanel(i32) {
 }
 
 // DrawPanel reads the private slide timer maintained by the panel lifecycle.
-f32 Panel_GetRedBrickSlideTime() { return redbrickslidetime; }
+f32 Panel_GetRedBrickSlideTime() {
+    return redbrickslidetime;
+}

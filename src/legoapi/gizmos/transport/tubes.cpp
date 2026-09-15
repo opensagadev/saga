@@ -2,8 +2,11 @@
 
 #include "decomp.h"
 
+#include "gamelib/util/gamelib_util_types.h"
 #include "gameapi/edtools/edfile.h"
 #include "globals.h"
+#include "legoapi/audio/audio.h"
+#include "legoapi/audio/sfx.h"
 #include "legoapi/characters/core/character.h"
 #include "legoapi/items/base/apiobject.h"
 #include "legoapi/world/level.h"
@@ -11,21 +14,6 @@
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nutrig.h"
-
-extern void GameAudio_PlaySfx(i32 sfx_id, NUVEC *position, i32 flags, i32 volume);
-extern i32 GameAudio_GetPlrSfxBits(void *object);
-
-i32 LEGOCONTEXT_TUBE = -1;
-
-i32 ObjInTube(GameObject_s *object) {
-    if (LEGOCONTEXT_TUBE != -1 && object->character_context == LEGOCONTEXT_TUBE) {
-        return 1;
-    }
-    if (LEGOCONTEXT_GLIDE != -1 && object->character_context == LEGOCONTEXT_GLIDE && object->field_0x788 != NULL) {
-        return 1;
-    }
-    return 0;
-}
 
 static const i32 TUBE_AUDIO_EVENT = 0x2e;
 static const u32 CHARACTER_MODEL_FLAG_TUBE_USER = 0x10;
@@ -39,9 +27,118 @@ struct TUBEPROGRESS {
     u32 active_mask;
 };
 
+static void Tubes_Update(void *world_ptr, void *progress_ptr, float frame_time);
+
+static void *Tubes_ReserveBufferSpace(void *world_ptr) {
+    WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
+    void *reserved_space = NULL;
+    world->tubes = NULL;
+    world->tube_count = 0;
+
+    if (world->current_level->max_tubes != 0) {
+        world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 16);
+        world->tubes = reinterpret_cast<TUBE *>(world->giz_buffer.addr);
+        world->giz_buffer.addr += world->current_level->max_tubes * sizeof(TUBE);
+        reserved_space = world->tubes;
+    }
+    return reserved_space;
+}
+
+static void Tube_Activate(GIZMO *gizmo, i32 active) {
+    if (gizmo != NULL) {
+        TUBE *tube = static_cast<TUBE *>(gizmo->object);
+        tube->active = active != 0;
+    }
+}
+
+static i32 Tube_ActivateRev(GIZMO *gizmo, i32 reverse, i32 check_only) {
+    if (gizmo == NULL || gizmo->object == NULL) {
+        return 0;
+    }
+
+    TUBE *tube = static_cast<TUBE *>(gizmo->object);
+    if ((check_only & 1) != 0) {
+        return ((tube->flags & TUBE_FLAG_REVERSED) != 0) != (reverse != 0);
+    }
+
+    if (reverse != 0) {
+        tube->flags = (tube->flags & ~TUBE_FLAG_ACTIVE) | TUBE_FLAG_REVERSED;
+    } else {
+        tube->flags = (tube->flags | TUBE_FLAG_ACTIVE) & ~TUBE_FLAG_REVERSED;
+    }
+    return 1;
+}
+
+static void Tube_SetVisibility(GIZMO *gizmo, i32 visible) {
+    if (gizmo != NULL) {
+        TUBE *tube = static_cast<TUBE *>(gizmo->object);
+        tube->visible = visible != 0;
+    }
+}
+
+static void Tubes_Reset(void *world_ptr, void *, void *progress_ptr) {
+    WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
+    if (world == NULL || world->tubes == NULL || world->tube_count <= 0) {
+        return;
+    }
+
+    TUBEPROGRESS *progress = static_cast<TUBEPROGRESS *>(progress_ptr);
+    TUBE *tube = world->tubes;
+    for (i32 index = 0; index < world->tube_count; ++index, ++tube) {
+        tube->top = tube->position.y + tube->height;
+        tube->radius_squared = tube->radius * tube->radius;
+        tube->flags |= TUBE_FLAG_ACTIVE | TUBE_FLAG_VISIBLE;
+
+        if (index < 32 && progress != NULL) {
+            const u32 tube_bit = 1U << index;
+            const i32 visible_flag = (progress->visible_mask & tube_bit) != 0;
+            tube->flags = static_cast<u8>((tube->flags & ~TUBE_FLAG_VISIBLE) | (visible_flag << 1));
+            const i32 active_flag = (progress->active_mask & tube_bit) != 0;
+            tube->flags = static_cast<u8>((tube->flags & ~TUBE_FLAG_ACTIVE) | active_flag);
+        }
+    }
+}
+
+static void Tubes_Draw(void *, void *, float) {
+    STUBBED();
+}
+
 static i32 Tubes_GetMaxGizmos(void *world_ptr) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
     return world != NULL ? world->current_level->max_tubes : 0;
+}
+
+static char *Tube_GetGizmoName(GIZMO *gizmo) {
+    return gizmo != NULL ? static_cast<TUBE *>(gizmo->object)->name : NULL;
+}
+
+static i32 Tube_GetOutput(GIZMO *gizmo, i32, i32) {
+    TUBE *tube = static_cast<TUBE *>(gizmo->object);
+    return (tube->flags & (TUBE_FLAG_ACTIVE | TUBE_FLAG_VISIBLE)) == (TUBE_FLAG_ACTIVE | TUBE_FLAG_VISIBLE);
+}
+
+static char *Tube_GetOutputName(GIZMO *, i32) {
+    return const_cast<char *>("Active");
+}
+
+static i32 Tube_GetNumOutputs(GIZMO *) {
+    return 1;
+}
+
+static NUVEC *Tube_GetPos(GIZMO *gizmo) {
+    return gizmo != NULL ? &static_cast<TUBE *>(gizmo->object)->position : NULL;
+}
+
+static void Tubes_ClearProgress(void *, void *progress_ptr) {
+    TUBEPROGRESS *progress = static_cast<TUBEPROGRESS *>(progress_ptr);
+    if (progress != NULL) {
+        progress->visible_mask = 0xffffffff;
+        progress->active_mask = 0xffffffff;
+    }
+}
+
+static void *Tubes_AllocateProgressData(VARIPTR *buffer, VARIPTR *buffer_end) {
+    return GizmoBufferAlloc(buffer, buffer_end, sizeof(TUBEPROGRESS));
 }
 
 static void Tubes_AddGizmos(GIZMOSYS *gizmo_sys, i32 type_id, void *world_ptr, void *) {
@@ -51,6 +148,159 @@ static void Tubes_AddGizmos(GIZMOSYS *gizmo_sys, i32 type_id, void *world_ptr, v
             AddGizmo(gizmo_sys, type_id, NULL, &world->tubes[index]);
         }
     }
+}
+
+static i32 Tubes_Load(void *world_ptr, void *) {
+    WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
+    if (world->tube_count != 0) {
+        return 0;
+    }
+
+    const i32 version = EdFileReadInt();
+    world->tube_count = EdFileReadInt();
+
+    TUBE *tube = world->tubes;
+    for (i32 index = 0; index < world->tube_count; ++index, ++tube) {
+        EdFileRead(tube->name, sizeof(tube->name));
+        EdFileReadNuVec(&tube->position);
+        tube->height = EdFileReadFloat();
+        tube->radius = EdFileReadFloat();
+
+        if (version > 1) {
+            const i32 directional = EdFileReadChar() != 0;
+            tube->field_0x24 = 1.25f;
+            tube->flags = static_cast<u8>((tube->flags & ~TUBE_FLAG_DIRECTIONAL) | (directional << 2));
+        } else {
+            tube->field_0x24 = 1.25f;
+            tube->flags &= static_cast<u8>(~TUBE_FLAG_DIRECTIONAL);
+        }
+    }
+
+    return 1;
+}
+
+static void Tubes_StoreProgress(void *world_ptr, void *, void *progress_ptr) {
+    TUBEPROGRESS *progress = static_cast<TUBEPROGRESS *>(progress_ptr);
+    if (progress == NULL) {
+        return;
+    }
+
+    progress->visible_mask = 0xffffffff;
+    progress->active_mask = 0xffffffff;
+
+    WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
+    if (world == NULL || world->tubes == NULL || world->tube_count <= 0) {
+        return;
+    }
+
+    for (i32 index = 0; index < world->tube_count && index < 32; ++index) {
+        const u32 tube_bit = 1U << index;
+        if ((world->tubes[index].flags & TUBE_FLAG_VISIBLE) == 0) {
+            progress->visible_mask &= ~tube_bit;
+        }
+        if ((world->tubes[index].flags & TUBE_FLAG_ACTIVE) == 0) {
+            progress->active_mask &= ~tube_bit;
+        }
+    }
+}
+
+TUBE *Tube_FindByName(WORLDINFO_s *world, char *name) {
+    if (world == NULL || world->tubes == NULL)
+        return NULL;
+    for (i32 index = 0; index < world->tube_count; ++index) {
+        if (NuStrICmp(world->tubes[index].name, name) == 0)
+            return &world->tubes[index];
+    }
+    return NULL;
+}
+
+ADDGIZMOTYPE *Tubes_RegisterGizmo(i32 type_id) {
+    static ADDGIZMOTYPE addtype;
+
+    addtype = Default_ADDGIZMOTYPE;
+    addtype.name = "Tube";
+    addtype.prefix = "";
+    addtype.fns.unknown1 = 8;
+    addtype.fns.early_update_fn = NULL;
+    addtype.fns.panel_draw_fn = NULL;
+    addtype.fns.get_visibility_fn = NULL;
+    addtype.fns.get_max_gizmos_fn = Tubes_GetMaxGizmos;
+    addtype.fns.get_pos_fn = Tube_GetPos;
+    addtype.fns.using_special_fn = NULL;
+    addtype.fns.add_gizmos_fn = Tubes_AddGizmos;
+    addtype.fns.bolt_hit_plat_fn = NULL;
+    addtype.fns.get_best_bolt_target_fn = NULL;
+    addtype.fns.late_update_fn = Tubes_Update;
+    addtype.fns.bolt_hit_fn = NULL;
+    addtype.fns.draw_fn = Tubes_Draw;
+    addtype.fns.get_gizmo_name_fn = Tube_GetGizmoName;
+    addtype.fns.get_output_fn = Tube_GetOutput;
+    addtype.fns.get_output_name_fn = Tube_GetOutputName;
+    addtype.fns.get_num_outputs_fn = Tube_GetNumOutputs;
+    addtype.fns.activate_fn = Tube_Activate;
+    addtype.fns.activate_rev_fn = Tube_ActivateRev;
+    addtype.fns.set_visibility_fn = Tube_SetVisibility;
+    addtype.fns.allocate_progress_data_fn = Tubes_AllocateProgressData;
+    addtype.fns.clear_progress_fn = Tubes_ClearProgress;
+    addtype.fns.store_progress_fn = Tubes_StoreProgress;
+    addtype.fns.reset_fn = Tubes_Reset;
+    addtype.fns.reserve_buffer_space_fn = Tubes_ReserveBufferSpace;
+    addtype.fns.load_fn = Tubes_Load;
+    addtype.fns.post_load_fn = NULL;
+    addtype.fns.add_level_sfx_fn = NULL;
+
+    return &addtype;
+}
+
+i32 Tube_InCylinder(GameObject_s *object, TUBE *tube, f32 *horizontal_distance_squared, i32 ignore_height) {
+    if (tube == NULL || object == NULL) {
+        return 0;
+    }
+
+    if (ignore_height == 0) {
+        if (tube->position.y > object->apiobj.collision_max.y || object->apiobj.collision_min.y > tube->top) {
+            return 0;
+        }
+    }
+
+    const f32 delta_x = object->apiobj.collision_position.x - tube->position.x;
+    const f32 delta_z = object->apiobj.collision_position.z - tube->position.z;
+    const f32 distance_squared = delta_x * delta_x + delta_z * delta_z;
+
+    f32 radius_squared = tube->radius_squared;
+    if ((tube->flags & TUBE_FLAG_TOUCH_RADIUS) != 0 && TouchHacks::TouchControlsActive) {
+        radius_squared *= 0.8f;
+    }
+
+    if (distance_squared > radius_squared) {
+        return 0;
+    }
+    if (horizontal_distance_squared != NULL) {
+        *horizontal_distance_squared = distance_squared;
+    }
+    return 1;
+}
+
+TUBE *Tube_InAnyCylinder(WORLDINFO_s *world, GameObject_s *object, i32 ignore_height) {
+    TUBE *tube = world->tubes;
+    if (tube != NULL) {
+        for (i32 index = 0; index < world->tube_count; ++index, ++tube) {
+            if ((tube->flags & (TUBE_FLAG_ACTIVE | TUBE_FLAG_VISIBLE | TUBE_FLAG_DIRECTIONAL)) ==
+                    (TUBE_FLAG_ACTIVE | TUBE_FLAG_VISIBLE) &&
+                Tube_InCylinder(object, tube, NULL, ignore_height) != 0) {
+                return tube;
+            }
+        }
+    }
+    return NULL;
+}
+
+void Tube_SetObjBit(TUBE *tube, i32 object_index) {
+    tube->occupied_object_masks[object_index / 32] |= 1U << object_index;
+}
+
+i32 Tube_IsObjBitSet(TUBE *tube, i32 object_index) {
+    return tube->occupied_object_masks[object_index / 32] >> object_index & 1;
 }
 
 static void Tubes_Update(void *world_ptr, void *, float frame_time) {
@@ -121,200 +371,55 @@ static void Tubes_Update(void *world_ptr, void *, float frame_time) {
     }
 }
 
-static void Tubes_Draw(void *, void *, float) {
-}
-
-static char *Tube_GetGizmoName(GIZMO *gizmo) {
-    return gizmo != NULL ? static_cast<TUBE *>(gizmo->object)->name : NULL;
-}
-
-static i32 Tube_GetOutput(GIZMO *gizmo, i32, i32) {
-    TUBE *tube = static_cast<TUBE *>(gizmo->object);
-    return (tube->flags & (TUBE_FLAG_ACTIVE | TUBE_FLAG_VISIBLE)) == (TUBE_FLAG_ACTIVE | TUBE_FLAG_VISIBLE);
-}
-
-static char *Tube_GetOutputName(GIZMO *, i32) {
-    return const_cast<char *>("Active");
-}
-
-static i32 Tube_GetNumOutputs(GIZMO *) {
-    return 1;
-}
-
-static void Tube_Activate(GIZMO *gizmo, i32 active) {
-    if (gizmo != NULL) {
-        TUBE *tube = static_cast<TUBE *>(gizmo->object);
-        tube->active = active != 0;
-    }
-}
-
-static i32 Tube_ActivateRev(GIZMO *gizmo, i32 reverse, i32 check_only) {
-    if (gizmo == NULL || gizmo->object == NULL) {
-        return 0;
-    }
-
-    TUBE *tube = static_cast<TUBE *>(gizmo->object);
-    if ((check_only & 1) != 0) {
-        return ((tube->flags & TUBE_FLAG_REVERSED) != 0) != (reverse != 0);
-    }
-
-    if (reverse != 0) {
-        tube->flags = (tube->flags & ~TUBE_FLAG_ACTIVE) | TUBE_FLAG_REVERSED;
-    } else {
-        tube->flags = (tube->flags | TUBE_FLAG_ACTIVE) & ~TUBE_FLAG_REVERSED;
-    }
-    return 1;
-}
-
-static void Tube_SetVisibility(GIZMO *gizmo, i32 visible) {
-    if (gizmo != NULL) {
-        TUBE *tube = static_cast<TUBE *>(gizmo->object);
-        tube->visible = visible != 0;
-    }
-}
-
-static NUVEC *Tube_GetPos(GIZMO *gizmo) {
-    return gizmo != NULL ? &static_cast<TUBE *>(gizmo->object)->position : NULL;
-}
-
-static void *Tubes_AllocateProgressData(VARIPTR *buffer, VARIPTR *buffer_end) {
-    return GizmoBufferAlloc(buffer, buffer_end, sizeof(TUBEPROGRESS));
-}
-
-static void Tubes_ClearProgress(void *, void *progress_ptr) {
-    TUBEPROGRESS *progress = static_cast<TUBEPROGRESS *>(progress_ptr);
-    if (progress != NULL) {
-        progress->visible_mask = 0xffffffff;
-        progress->active_mask = 0xffffffff;
-    }
-}
-
-static void Tubes_StoreProgress(void *world_ptr, void *, void *progress_ptr) {
-    TUBEPROGRESS *progress = static_cast<TUBEPROGRESS *>(progress_ptr);
-    if (progress == NULL) {
+void Tube_MoveCode(GameObject_s *object, WORLDINFO_s *world) {
+    if (LEGOCONTEXT_GLIDE != -1 && object->character_context == LEGOCONTEXT_GLIDE && object->field_0x788 != NULL) {
+        if (Tube_InCylinder(object, static_cast<TUBE *>(object->field_0x788), NULL, 0) == 0)
+            object->field_0x788 = NULL;
         return;
     }
 
-    progress->visible_mask = 0xffffffff;
-    progress->active_mask = 0xffffffff;
-
-    WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
-    if (world == NULL || world->tubes == NULL || world->tube_count <= 0) {
+    if (LEGOCONTEXT_TUBE == -1)
+        return;
+    if (object->character_context == LEGOCONTEXT_TUBE) {
+        if (Tube_InCylinder(object, static_cast<TUBE *>(object->field_0x788), NULL, 0) == 0)
+            object->character_context = -1;
         return;
     }
+    if ((CInfo[object->character_context].flags & 0x4000) != 0 || world->tubes == NULL)
+        return;
 
-    for (i32 index = 0; index < world->tube_count && index < 32; ++index) {
-        const u32 tube_bit = 1U << index;
-        if ((world->tubes[index].flags & TUBE_FLAG_VISIBLE) == 0) {
-            progress->visible_mask &= ~tube_bit;
+    for (i32 index = 0; index < world->tube_count; ++index) {
+        TUBE *tube = &world->tubes[index];
+        if ((tube->flags & (TUBE_FLAG_ACTIVE | TUBE_FLAG_VISIBLE | TUBE_FLAG_DIRECTIONAL)) !=
+            (TUBE_FLAG_ACTIVE | TUBE_FLAG_VISIBLE)) {
+            continue;
         }
-        if ((world->tubes[index].flags & TUBE_FLAG_ACTIVE) == 0) {
-            progress->active_mask &= ~tube_bit;
+        if (Tube_InCylinder(object, tube, NULL, 0) == 0 &&
+            (object->tube_entry_state != 5 || object->tube_entry_data == NULL)) {
+            continue;
         }
-    }
-}
 
-static void Tubes_Reset(void *world_ptr, void *, void *progress_ptr) {
-    WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
-    if (world == NULL || world->tubes == NULL || world->tube_count <= 0) {
+        if (LEGOCONTEXT_GLIDE != -1 && object->character_context == LEGOCONTEXT_GLIDE) {
+            object->field_0x788 = tube;
+            return;
+        }
+        object->field_0x788 = tube;
+        object->field_0xe31 = 0;
+        object->character_context = LEGOCONTEXT_TUBE;
+        if (static_cast<i8>(object->apiobj.flags_low) < 0 && tube->audio_cooldown == 0.0f) {
+            tube->audio_cooldown = 4.0f;
+            GameAudio_PlaySfx(6, &object->apiobj.collision_position, 0, 0);
+        }
         return;
     }
-
-    TUBEPROGRESS *progress = static_cast<TUBEPROGRESS *>(progress_ptr);
-    TUBE *tube = world->tubes;
-    for (i32 index = 0; index < world->tube_count; ++index, ++tube) {
-        tube->top = tube->position.y + tube->height;
-        tube->radius_squared = tube->radius * tube->radius;
-        tube->flags |= TUBE_FLAG_ACTIVE | TUBE_FLAG_VISIBLE;
-
-        if (index < 32 && progress != NULL) {
-            const u32 tube_bit = 1U << index;
-            const i32 visible_flag = (progress->visible_mask & tube_bit) != 0;
-            tube->flags = static_cast<u8>((tube->flags & ~TUBE_FLAG_VISIBLE) | (visible_flag << 1));
-            const i32 active_flag = (progress->active_mask & tube_bit) != 0;
-            tube->flags = static_cast<u8>((tube->flags & ~TUBE_FLAG_ACTIVE) | active_flag);
-        }
-    }
 }
 
-static void *Tubes_ReserveBufferSpace(void *world_ptr) {
-    WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
-    void *reserved_space = NULL;
-    world->tubes = NULL;
-    world->tube_count = 0;
-
-    if (world->current_level->max_tubes != 0) {
-        world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 16);
-        world->tubes = reinterpret_cast<TUBE *>(world->giz_buffer.addr);
-        world->giz_buffer.addr += world->current_level->max_tubes * sizeof(TUBE);
-        reserved_space = world->tubes;
+i32 ObjInTube(GameObject_s *object) {
+    if (LEGOCONTEXT_TUBE != -1 && object->character_context == LEGOCONTEXT_TUBE) {
+        return 1;
     }
-    return reserved_space;
-}
-
-static i32 Tubes_Load(void *world_ptr, void *) {
-    WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
-    if (world->tube_count != 0) {
-        return 0;
+    if (LEGOCONTEXT_GLIDE != -1 && object->character_context == LEGOCONTEXT_GLIDE && object->field_0x788 != NULL) {
+        return 1;
     }
-
-    const i32 version = EdFileReadInt();
-    world->tube_count = EdFileReadInt();
-
-    TUBE *tube = world->tubes;
-    for (i32 index = 0; index < world->tube_count; ++index, ++tube) {
-        EdFileRead(tube->name, sizeof(tube->name));
-        EdFileReadNuVec(&tube->position);
-        tube->height = EdFileReadFloat();
-        tube->radius = EdFileReadFloat();
-
-        if (version > 1) {
-            const i32 directional = EdFileReadChar() != 0;
-            tube->field_0x24 = 1.25f;
-            tube->flags = static_cast<u8>((tube->flags & ~TUBE_FLAG_DIRECTIONAL) | (directional << 2));
-        } else {
-            tube->field_0x24 = 1.25f;
-            tube->flags &= static_cast<u8>(~TUBE_FLAG_DIRECTIONAL);
-        }
-    }
-
-    return 1;
-}
-
-ADDGIZMOTYPE *Tubes_RegisterGizmo(i32 type_id) {
-    static ADDGIZMOTYPE addtype;
-
-    addtype = Default_ADDGIZMOTYPE;
-    addtype.name = "Tube";
-    addtype.prefix = "";
-    addtype.fns.unknown1 = 8;
-    addtype.fns.early_update_fn = NULL;
-    addtype.fns.panel_draw_fn = NULL;
-    addtype.fns.get_visibility_fn = NULL;
-    addtype.fns.get_max_gizmos_fn = Tubes_GetMaxGizmos;
-    addtype.fns.get_pos_fn = Tube_GetPos;
-    addtype.fns.using_special_fn = NULL;
-    addtype.fns.add_gizmos_fn = Tubes_AddGizmos;
-    addtype.fns.bolt_hit_plat_fn = NULL;
-    addtype.fns.get_best_bolt_target_fn = NULL;
-    addtype.fns.late_update_fn = Tubes_Update;
-    addtype.fns.bolt_hit_fn = NULL;
-    addtype.fns.draw_fn = Tubes_Draw;
-    addtype.fns.get_gizmo_name_fn = Tube_GetGizmoName;
-    addtype.fns.get_output_fn = Tube_GetOutput;
-    addtype.fns.get_output_name_fn = Tube_GetOutputName;
-    addtype.fns.get_num_outputs_fn = Tube_GetNumOutputs;
-    addtype.fns.activate_fn = Tube_Activate;
-    addtype.fns.activate_rev_fn = Tube_ActivateRev;
-    addtype.fns.set_visibility_fn = Tube_SetVisibility;
-    addtype.fns.allocate_progress_data_fn = Tubes_AllocateProgressData;
-    addtype.fns.clear_progress_fn = Tubes_ClearProgress;
-    addtype.fns.store_progress_fn = Tubes_StoreProgress;
-    addtype.fns.reset_fn = Tubes_Reset;
-    addtype.fns.reserve_buffer_space_fn = Tubes_ReserveBufferSpace;
-    addtype.fns.load_fn = Tubes_Load;
-    addtype.fns.post_load_fn = NULL;
-    addtype.fns.add_level_sfx_fn = NULL;
-
-    return &addtype;
+    return 0;
 }

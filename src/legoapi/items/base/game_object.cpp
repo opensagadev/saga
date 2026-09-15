@@ -1,7 +1,9 @@
 #include "legoapi/world/world_shared.h"
 
 #include "decomp.h"
+#include "legoapi/actions/character/suit.h"
 #include "legoapi/render/core/rtl.h"
+#include "legoapi/render/light/lighting.h"
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/core/input/gamepads.h"
@@ -25,10 +27,7 @@ extern void SetGameObjectCharacterData(GameObject_s *obj);
 extern void GetTopBot(GameObject_s *obj);
 extern void GameObjectDimensions(GameObject_s *obj);
 extern void GameObjectOrigin(GameObject_s *obj);
-extern i32 GetDefaultIdle(GameObject_s *obj);
 extern void ResetCharacterIdle(GameObject_s *obj, i32 mode, i32 idle);
-extern void *Suit_GetDefault(i32 id);
-extern void ResetLights(NUVEC *position, rtldata_s *data, void *set);
 extern "C" void ResetAnimPacket(void *packet, i32 enabled);
 extern void ResetPlayerPacket(PLAYERPACKET_s *packet, CHARACTERDATA_s *data);
 
@@ -96,53 +95,47 @@ GameObject_s *AddGameObject(i32 id) {
     (void)id;
     return object;
 }
-void InitGameObjectLights(void) {
-    GameObject_s *object = Obj;
-    i32 i;
-    for (i = 0; i < 64; ++i)
-        object[i].dynamic_light_id = -1;
-    for (i = 0; i < HIGHGAMEOBJECT; ++i, ++object) {
-        if ((object->apiobj.field_0x1f8 & 0x1001) != 0x1001)
-            continue;
-        object->dynamic_light_id = rtlDynamicAlloc();
-        if (object->dynamic_light_id == -1)
-            continue;
-        rtlDynamicSetType(object->dynamic_light_id, 2);
-        rtlDynamicEnable(object->dynamic_light_id, 0);
-    }
-}
-
 // Local (static) game-object behaviour codes and per-object helpers. Stubbed
 // as local `t` symbols matching res/libTTapp.so.
 
 static __used__ void ShieldCode(GameObject_s *) {
+    STUBBED();
 }
 
 static __used__ void TrenchMove(GameObject_s *) {
+    STUBBED();
 }
 
 static __used__ void Punch_HitHold(GameObject_s *, GameObject_s *) {
+    STUBBED();
 }
 
 static __used__ i32 Punch_GetDamage_LSW(GameObject_s *, GameObject_s *) {
+    STUBBED();
     return 0;
 }
 
 static __used__ void Punch_HitExtraCode_LSW(GameObject_s *, nuvec_s *) {
+    STUBBED();
 }
 
 static __used__ void TrenchKilledCallback(GameObject_s *) {
+    STUBBED();
 }
 
 static __used__ void SurfaceInfo_ExtraReflect(GameObject_s *) {
+    STUBBED();
 }
 
 static __used__ void PauseGame_ExtraCode() {
+    STUBBED();
 }
 
 static __used__ i32 SpecialObjectFilter(void *) {
+    STUBBED();
     return 0;
 }
 
 static __used__ void KilledTrooperCannon(GameObject_s *) {
+    STUBBED();
 }

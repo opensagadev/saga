@@ -1,31 +1,16 @@
 #include "legoapi/world/level.h"
+#include "legoapi/render/core/terrain.h"
 #include "globals.h"
+#include "nu2api/nucore/nustring.h"
 
 #include <string.h>
 
 extern "C" i32 NuSpecialExistsFn(void *);
-extern "C" i16 FindPlatInst(i32);
 
-void *LevObj_FindByPlatID(WORLDINFO_s *world, i32 platID) {
-    i32 count = LEVELOBJECTCOUNT;
-    LEVEL_OBJECT_RUNTIME *obj;
-    i32 i;
-
-    if (count <= 0) {
-        return NULL;
-    }
-    obj = world->lev_objs;
-    if (obj->platform_id == platID) {
-        return obj;
-    }
-    for (i = 1; i < count; i++) {
-        obj++;
-        if (obj->platform_id == platID) {
-            return obj;
-        }
-    }
-    return NULL;
-}
+static i32 LEVELOBJECTMAX;
+static char *ExtraLevelObject_NameTable;
+static i32 ExtraLevelObject_NameTableSize;
+static i32 ExtraLevelObject_NameTableIndex;
 
 // LevelObjects_InitForGame @0x475400. Registers the perm-loaded object table
 // (ObjTab: 8-byte {kind, pad, ref-flag, name} entries terminated by kind 0xff)
@@ -74,6 +59,24 @@ void LevelObjects_InitForGame(LEVELOBJECT *tab, VARIPTR *buf, VARIPTR *buf_end, 
     }
 }
 
+i32 LevelObject_AddExtra(char *name, i32 kind) {
+    if (LEVELOBJECTCOUNT < LEVELOBJECTMAX && ExtraLevelObject_NameTable != NULL) {
+        i32 nameLen = NuStrLen(name);
+        char *nameDest = ExtraLevelObject_NameTable + ExtraLevelObject_NameTableIndex;
+        LEVELOBJECT *obj = &ObjTabList[LEVELOBJECTCOUNT];
+        if (nameLen + 1 + ExtraLevelObject_NameTableIndex < ExtraLevelObject_NameTableSize) {
+            obj->kind = (u8)kind;
+            obj->name = nameDest;
+            LEVELOBJECTCOUNT++;
+            EXTRALEVELOBJECTCOUNT++;
+            NuStrCpy(nameDest, name);
+            ExtraLevelObject_NameTableIndex += nameLen + 1;
+            return 1;
+        }
+    }
+    return 0;
+}
+
 void LevObj_FixUpPlatIDs(WORLDINFO_s *world) {
     i32 i;
     LEVEL_OBJECT_RUNTIME *obj;
@@ -93,4 +96,25 @@ void LevObj_FixUpPlatIDs(WORLDINFO_s *world) {
             }
         }
     }
+}
+
+void *LevObj_FindByPlatID(WORLDINFO_s *world, i32 platID) {
+    i32 count = LEVELOBJECTCOUNT;
+    LEVEL_OBJECT_RUNTIME *obj;
+    i32 i;
+
+    if (count <= 0) {
+        return NULL;
+    }
+    obj = world->lev_objs;
+    if (obj->platform_id == platID) {
+        return obj;
+    }
+    for (i = 1; i < count; i++) {
+        obj++;
+        if (obj->platform_id == platID) {
+            return obj;
+        }
+    }
+    return NULL;
 }

@@ -26,12 +26,15 @@ BLADE_s BladeTab[4] = {
 };
 
 void DeflectPart(PART_s *, GameObject_s *, float, float, i32, i32) {
+    STUBBED();
 }
 
 void IsDownSwipe(NuVec2 const &, NuVec2 const &) {
+    STUBBED();
 }
 
 void TakeHitCode(GameObject_s *) {
+    STUBBED();
 }
 
 void ComboHitFrame(GameObject_s *object, i32 damage) {
@@ -45,17 +48,18 @@ void ComboHitFrame(GameObject_s *object, i32 damage) {
 }
 
 void IsFacingTarget(nuvec_s *, nuvec_s *, i32, i32) {
+    STUBBED();
 }
 
 void StunGameObject(GameObject_s *, GameObject_s *, float, i32) {
+    STUBBED();
 }
 
 void ComboRotateCode(GameObject_s *, i32) {
+    STUBBED();
 }
 
 BOLTTYPE_s *BoltType_FindByID(i32, WORLDINFO_s *);
-extern "C" f32 AnimDuration(i32, i32, f32, f32, i32);
-void NewBuzzFrames(nupad_s *, i32, i32);
 void SetWeaponIn(GameObject_s *);
 void SetWeaponOut(GameObject_s *);
 DECOMP_ASSERT(offsetof(GameObject_s, field_0x7e4) == 0x7e4, "Quick shoot record offset");
@@ -120,6 +124,7 @@ void StartQuickShoot(GameObject_s *object, i32 action) {
 }
 
 void ForceNextLungeTarget(MechObjectInterface *) {
+    STUBBED();
 }
 
 void ForceNextShootTarget(MechObjectInterface &target) {
@@ -127,7 +132,9 @@ void ForceNextShootTarget(MechObjectInterface &target) {
 }
 
 void SetForcedAttackOpponent(MechObjectInterface *) {
+    STUBBED();
 }
 
 void Punch_Hit(GameObject_s *, GameObject_s *, float, float) {
+    STUBBED();
 }

@@ -87,7 +87,6 @@ extern "C" {
     void NuPortalSetActive(struct nugscn_s *scene, i32 portal_id, i32 active);
     void NuPortalSetActiveDirect(NUPORTAL *portal, i32 active);
     i32 NuPortalWhichRoom(struct nugscn_s *scene, NUVEC *position);
-    void FlagRoomInstancesAsVisible(NUROOM *room, struct nugscn_s *scene);
     i32 clipTestSphere(NUPORTALSPHERE *sphere, NUFRUSTRUM *frustum);
     i32 clipTestBox(NUVEC *minimum, NUVEC *maximum, NUPLANE *planes, i32 plane_count);
     i32 NuPortalClipTestBox(NUVEC *center, NUVEC *extent, NUFRUSTRUM *frustum);

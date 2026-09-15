@@ -1,5 +1,7 @@
 #include "legoapi/world/world_shared.h"
 #include "legoapi/audio/audio.h"
+#include "legoapi/audio/sfx.h"
+#include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/core/config/cheat.h"
 #include "legoapi/characters/core/charconfig.h"
 #include "legoapi/characters/core/players.h"
@@ -52,50 +54,12 @@ extern "C" {
     i32 CruiserD_LiftChase;
 }
 
-i32 GroupBuffer_GetSample(i32 group_id, i32 sequential);
-i32 GroupBuffer_GetNumInGroup(i32 group_id);
-i32 GroupBuffer_GetSampleByIndex(i32 group_id, i32 sample_index);
 void PlayAMusic(i32 stream, i32 track, i32 volume, i32 one_shot);
 
 extern "C" void NuGCutSetCutAudioStream(i32 stream);
 
-bool HandleGroupLimit(i32 group_id) {
-    i32 voice_count = 0;
-    NuSoundVoice *oldest_voice = NULL;
-    f32 oldest_position = -1.0f;
-
-    i32 sample_count = GroupBuffer_GetNumInGroup(group_id);
-    for (i32 i = 0; i < sample_count; i++) {
-        i32 sfx_id = GroupBuffer_GetSampleByIndex(group_id, i);
-        i32 sample_index = g_soundInfo[sfx_id].index;
-        voice_count += NuSound3CountVoices(sample_index);
-
-        f32 playback_position = 0.0f;
-        NuSoundVoice *voice = NuSound3FindOldestVoice(sample_index, &playback_position);
-        if (voice != NULL && oldest_position < playback_position) {
-            oldest_position = playback_position;
-            oldest_voice = voice;
-        }
-    }
-
-    if (voice_count < g_NuSoundMaxVoicesPerSample) {
-        return true;
-    }
-
-    i32 first_sfx = GroupBuffer_GetSampleByIndex(group_id, 0);
-    if (g_soundInfo[first_sfx].field29_0x40 == 1) {
-        NuSound3StopVoice(oldest_voice);
-        return true;
-    }
-    return false;
-}
-
-extern "C" void PlaySfxByIdEx(i32 sfx_id, nuvec_s *position, f32 volume, f32 pitch);
 extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
-void GameAudio_PlaySfxById(i32 sfx_id, nuvec_s *position, i32 flags, i32 volume);
 void GameAudio_PlaySfx(i32 sfx, nuvec_s *position, i32 flags, i32 volume);
-i32 GameAudio_GetPlrSfxBits(void *object);
-void GameAudio_AddSfx(i32 sfx, i32 *sfx_ids, i32 *sfx_count, i32 max_sfx);
 void SetSfxBit_OnEx(i32);
 void SetSfxBit_OffEx(i32);
 void SetSfxBitTab_OnEx(SoundTable *, i32);
@@ -150,33 +114,6 @@ extern "C" {
     void MusicPreSeek(i32 track);
     void NuSound3FlushLoops(void);
     i32 NuSound3SetReverb(i32 mode);
-}
-
-i32 ActionFromQuiet(i32 idx) {
-    static i16 ActionPairTab[14] = {-1};
-    if (idx != -1) {
-        i16 *pair = ActionPairTab;
-        while (*pair != -1) {
-            if (*pair == idx) {
-                return pair[1];
-            }
-            pair += 14;
-        }
-    }
-    return -1;
-}
-i32 AmbientFromQuiet(i32 idx) {
-    static i16 AmbientPairTab[2] = {-1};
-    if (idx != -1) {
-        i16 *pair = AmbientPairTab;
-        while (*pair != -1) {
-            if (*pair == idx) {
-                return pair[1];
-            }
-            pair += 2;
-        }
-    }
-    return -1;
 }
 
 extern "C" void ResetSounds(void) {
@@ -980,150 +917,6 @@ extern "C" {
         PlaySfxByIdEx(sfx_id, position, volume, pitch);
     }
 
-    void PlaySfxByIdEx(i32 sfx_id, nuvec_s *position, f32 volume, f32 pitch) {
-        static u32 seed;
-        static nuvec_s pos;
-
-        if (sfx_id == -1) {
-            return;
-        }
-
-        NUSOUNDINFO *sound = &g_soundInfo[sfx_id];
-        if (sound->disabled != 0 || sound->comment != 0) {
-            return;
-        }
-
-        i8 priority = sound->priority;
-        if (sound->group != -1) {
-            sfx_id = GroupBuffer_GetSample(sound->group, sound->seq);
-            if (sfx_id == -1) {
-                return;
-            }
-            sound = &g_soundInfo[sfx_id];
-        }
-
-        f32 pan = sound->pan;
-        i32 sample_index = sound->index;
-        bool loop = sound->loop != 0;
-        f32 buzz_timer = sound->buzz_timer;
-        i32 rumble_strength = sound->rumble_strength;
-        f32 rumble_sustain = sound->rumble_sustain;
-        f32 rumble_release = sound->rumble_release;
-
-        f32 falloff_near = sound->falloff_near;
-        f32 falloff_far = sound->falloff_far;
-        f32 saved_fade_start = 0.0f;
-        f32 saved_fade_end = 0.0f;
-        bool custom_falloff = falloff_near != 0.0f || falloff_far != 0.0f;
-        if (custom_falloff) {
-            saved_fade_start = nusound_fade_start;
-            saved_fade_end = nusound_fade_end;
-            nusound_fade_start = falloff_near * saved_fade_start * 0.5f;
-            nusound_fade_end = falloff_far * saved_fade_end / 15.0f;
-        } else {
-            falloff_near = 2.0f;
-            falloff_far = 15.0f;
-        }
-
-        const NUMTX *listener = reinterpret_cast<const NUMTX *>(NuSound3GetListener());
-        if (listener == NULL) {
-            return;
-        }
-
-        if (position != NULL) {
-            f32 dx = position->x - listener->m30;
-            f32 dy = position->y - listener->m31;
-            f32 dz = position->z - listener->m32;
-            f32 max_distance_squared = nusound_fade_end * nusound_fade_end;
-            if (dx * dx + dy * dy + dz * dz > max_distance_squared) {
-                if (custom_falloff) {
-                    nusound_fade_start = saved_fade_start;
-                    nusound_fade_end = saved_fade_end;
-                }
-                return;
-            }
-        }
-
-        if (sound->group != -1 && !HandleGroupLimit(sound->group)) {
-            return;
-        }
-
-        f32 volume_scale;
-        if (volume == 1.0f) {
-            volume_scale = static_cast<f32>(sound->volume);
-        } else {
-            if (volume > 1.0f) {
-                volume = 1.0f;
-            }
-            volume_scale = static_cast<f32>(sound->volume) * volume;
-        }
-
-        if (sound->nofade == 0) {
-            volume_scale *= AUDIOFADELEVEL;
-            volume_scale *= numusicGetDuckVolume();
-        }
-        i32 voice_volume = static_cast<i32>(volume_scale * MASTERVOLUME);
-
-        if (sound->pitch_rnd != 0.0f) {
-            f32 pitch_variation = NuRandFloatSeeded(&seed) * sound->pitch_rnd;
-            if ((NuRandIntSeeded(&seed) & 1) == 0) {
-                pitch_variation *= 0.5f;
-                pitch *= 1.0f - pitch_variation;
-            } else {
-                pitch *= 1.0f + pitch_variation;
-            }
-        }
-
-        if (sound->volume_rnd != 0.0f) {
-            voice_volume = static_cast<i32>(static_cast<f32>(voice_volume) *
-                                            (1.0f + NuRandFloatSeeded(&seed) * sound->volume_rnd));
-        }
-
-        if (static_cast<u32>(sample_index) <= 1599) {
-            if (position != NULL) {
-                if (loop) {
-                    NuSound3Play3dLoopSfx(position, sample_index, falloff_near, falloff_far, voice_volume, voice_volume,
-                                          pitch);
-                } else if (priority == 0) {
-                    NuSound3Play3d(position, sample_index, falloff_near, falloff_far, voice_volume, voice_volume, pitch,
-                                   buzz_timer, rumble_strength, rumble_sustain, rumble_release);
-                } else {
-                    NuSound3Play3dPri(position, sample_index, falloff_near, falloff_far, voice_volume, voice_volume,
-                                      pitch, buzz_timer, rumble_strength, rumble_sustain, rumble_release, priority);
-                }
-            } else {
-                i32 volume_left = voice_volume;
-                i32 volume_right = voice_volume;
-                if (pan < 0.0f) {
-                    volume_right = static_cast<i32>(static_cast<f32>(voice_volume) * (1.0f + pan));
-                } else if (pan > 0.0f) {
-                    volume_left = static_cast<i32>(static_cast<f32>(voice_volume) * (1.0f - pan));
-                }
-
-                if (loop) {
-                    pos.x = listener->m30;
-                    pos.y = listener->m31;
-                    pos.z = listener->m32;
-                    nuvec_s *forward = reinterpret_cast<nuvec_s *>(const_cast<f32 *>(&listener->m20));
-                    NuVecAdd(&pos, &pos, forward);
-                    NuSound3Play3dLoopSfx(&pos, sample_index, falloff_near, falloff_far, volume_left, volume_right,
-                                          pitch);
-                } else if (priority == 0) {
-                    NuSound3Play(sample_index, volume_left, volume_right, pitch, buzz_timer, rumble_strength,
-                                 rumble_sustain, rumble_release);
-                } else {
-                    NuSound3PlayPri(sample_index, volume_left, volume_right, pitch, buzz_timer, rumble_strength,
-                                    rumble_sustain, rumble_release, priority);
-                }
-            }
-        }
-
-        if (custom_falloff) {
-            nusound_fade_start = saved_fade_start;
-            nusound_fade_end = saved_fade_end;
-        }
-    }
-
     i32 PlayingCutMusic(void) {
         const i32 stream = 1 - Music.primary_stream;
         u8 &delay = reinterpret_cast<u8 *>(&Music)[0x12 + stream];
@@ -1135,6 +928,12 @@ extern "C" {
             return 0;
         }
         return NuSound3GetStereoStreamStatus(stream) != NUSOUND_STEREO_STREAM_FINISHED;
+    }
+
+    void ClearLinkedCutSceneMusic(void *context) {
+        if (context == NULL || Music.track_data == context) {
+            Music.track_data = NULL;
+        }
     }
 
     void PrepareAllSounds(void) {
@@ -1179,9 +978,11 @@ extern "C" {
     }
 
     void ResumeGameAudio(void) {
+        STUBBED();
     }
 
     void SOUND_SFXRequest_Table(void) {
+        STUBBED();
     }
 
     void SetAudioFadeLevel(f32 level) {
@@ -1697,6 +1498,7 @@ void SetSfxBitTab_OffEx(SoundTable *table, i32 sound) {
 }
 
 void SfxCheckMusicOnOff(OPTIONSSAVE_s *) {
+    STUBBED();
 }
 
 void AddLevelSfxFromName(char *sfx_name, i32 *sfx_ids, i32 *sfx_count, i32 max_sfx_count) {
@@ -1780,14 +1582,13 @@ void AddLevSfx(WORLDINFO_s *world, nuvec_s *position, char *name, i32 sfx) {
     }
 }
 
-void GameAudio_Init(GAMEAUDIO *audio) {
-    GameAudio = audio;
-    for (i32 i = 0; i < 0x55; ++i) {
-        audio->sfx_ids[i] = static_cast<i16>(GetSfxId(audio->sfx_names[i]));
+i32 GameAudio_GetPlrSfxBits(void *object_ptr) {
+    APIOBJECT *object = static_cast<APIOBJECT *>(object_ptr);
+    i32 sfx_bits = 0;
+    if (object != NULL && static_cast<i8>(object->flags_low) < 0) {
+        sfx_bits = 1 << object->field_0x27c;
     }
-
-    MenuRegisterSoundFX(GameAudio_GetSfxId(0x2f), GameAudio_GetSfxId(0x30), GameAudio_GetSfxId(0x31),
-                        GameAudio_GetSfxId(0x32));
+    return sfx_bits;
 }
 
 void GameAudio_Reset() {
@@ -1799,10 +1600,36 @@ void GameAudio_Reset() {
     }
 }
 
+void GameAudio_PlaySfxById(i32 sfx_id, nuvec_s *position, i32 flags, i32) {
+    if (flags == 0) {
+        PlaySfxById(sfx_id, position);
+        return;
+    }
+    if ((flags & ~2) == 1) {
+        nusound_special_positions[1] = *position;
+        PlaySfxById(sfx_id, &nusound_special_positions[1]);
+    }
+    flags -= 2;
+    if (static_cast<u32>(flags) <= 1) {
+        nusound_special_positions[2] = *position;
+        PlaySfxById(sfx_id, &nusound_special_positions[2]);
+    }
+}
+
 void GameAudio_PlaySfx(i32 sfx, nuvec_s *position, i32 flags, i32 volume) {
     if ((u32)sfx < 0x55) {
         GameAudio_PlaySfxById(GameAudio->sfx_ids[sfx], position, flags, volume);
     }
+}
+
+void GameAudio_Init(GAMEAUDIO *audio) {
+    GameAudio = audio;
+    for (i32 i = 0; i < 0x55; ++i) {
+        audio->sfx_ids[i] = static_cast<i16>(GetSfxId(audio->sfx_names[i]));
+    }
+
+    MenuRegisterSoundFX(GameAudio_GetSfxId(0x2f), GameAudio_GetSfxId(0x30), GameAudio_GetSfxId(0x31),
+                        GameAudio_GetSfxId(0x32));
 }
 
 i32 GameAudio_GetSfxId(i32 sfx) {

@@ -1,6 +1,7 @@
 
 #include "decomp.h"
 #include "editor/edpath.h"
+#include "editor/path_connections.h"
 #include "gameapi/ai/aisys/aisys.h"
 #include "gameapi/edtools/edui.h"
 #include "gameapi/edtools/edcam.h"
@@ -14,11 +15,6 @@ extern "C" void aieditor_ClearMainMenu(void);
 extern "C" void aieditor_SetMode(i32 mode);
 extern "C" void AISYSRebuildFromEditorData(void);
 extern "C" i32 aieditor_Register(const char *, void (*)(), void (*)(), void (*)(), void (*)());
-extern "C" void aieditor_RegisterDefaultPathCnxTypes();
-extern "C" eduiitem_s *eduiItemCheckCreate(i32, const void *, i32, i32, void (*)(eduimenu_s *, eduiitem_s *, u32),
-                                           char *);
-extern "C" eduiitem_s *eduiItemSelCreate(i32, const void *, i32, i32, void (*)(eduimenu_s *, eduiitem_s *, u32),
-                                         char *);
 extern "C" void aieditor_cbCancelMainMenu(eduimenu_s *, eduimenu_s *);
 
 struct nupad_s;
@@ -40,17 +36,18 @@ void antinodeEditor_Process(nupad_s *);
 void antinodeEditor_Render(i32, i32, f32, f32);
 
 extern "C" {
-i32 AIEDITOR_PATHS;
-i32 AIEDITOR_ROUTES = -1;
-i32 AIEDITOR_AREAS;
-i32 AIEDITOR_LOCATORS;
-i32 AIEDITOR_CREATURES;
-i32 AIEDITOR_ANTINODES;
+    i32 AIEDITOR_PATHS;
+    i32 AIEDITOR_ROUTES = -1;
+    i32 AIEDITOR_AREAS;
+    i32 AIEDITOR_LOCATORS;
+    i32 AIEDITOR_CREATURES;
+    i32 AIEDITOR_ANTINODES;
 }
 
 aieditor_settings_s aieditorsettings;
+static i16 disable_cylinder_check;
 extern "C" {
-extern void *ed_fnt;
+    extern void *ed_fnt;
 }
 struct EditorItemColours {
     u32 normal;
@@ -59,15 +56,6 @@ struct EditorItemColours {
     u32 background;
 };
 static EditorItemColours attr = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
-struct AIPATHCNXTYPE_s {
-    u32 connection_flag;
-    void *context;
-    char name[0x40];
-    u32 flags;
-};
-DECOMP_ASSERT(sizeof(AIPATHCNXTYPE_s) == 0x4c, "editor path connection type size");
-static i32 naipathcnxtypes;
-static AIPATHCNXTYPE_s aipathcnxtypes[32];
 static __used__ void aieditor_cbSetEditorMode(eduimenu_s *, eduiitem_s *item, unsigned int) {
     if ((u32)item->data < (u32)aieditorsettings.mode_count) {
         aieditor_SetMode(item->data);
@@ -89,7 +77,6 @@ extern "C" {
     AIEDITORMOVEPLAYERS *AIEditorMovePlayersFn;
 
     void aieditor_SetCurrentScript(char *, const AIEditorScriptSelection *);
-    void aieditor_RegisterPathCnxType(const char *, u32, void *, u32);
 
     void InitFn_AIEditorMovePlayers(AIEDITORMOVEPLAYERS *function) {
         AIEditorMovePlayersFn = function;
@@ -106,11 +93,6 @@ extern "C" {
             }
         }
         return outer;
-    }
-
-    void aieditor_ClearAllPathCnxTypes(void) {
-        naipathcnxtypes = 0;
-        memset(aipathcnxtypes, 0, sizeof(aipathcnxtypes));
     }
 
     void aieditor_ClearMainMenu(void) {
@@ -245,6 +227,7 @@ extern "C" {
     }
 
     void aieditor_Proc(void) {
+        STUBBED();
     }
 
     i32 aieditor_Register(const char *name, void (*enter)(), void (*callback_24)(), void (*callback_28)(),
@@ -263,28 +246,12 @@ extern "C" {
         return index;
     }
 
-    void aieditor_RegisterDefaultPathCnxTypes(void) {
-        aieditor_RegisterPathCnxType("Permanent Block", 0x40000000, nullptr, 0);
-        aieditor_RegisterPathCnxType("Temporary Block", 0x80000000, nullptr, 0);
-        aieditor_RegisterPathCnxType("Link Obstacle", 0x20000000, nullptr, 1);
-    }
-
-    void aieditor_RegisterPathCnxType(const char *name, u32 connection_flag, void *context, u32 flags) {
-        if (name == nullptr) {
-            return;
-        }
-        usize length = strlen(name);
-        if (length > 63 || connection_flag == 0 || naipathcnxtypes >= 32) {
-            return;
-        }
-        AIPATHCNXTYPE_s &type = aipathcnxtypes[naipathcnxtypes++];
-        memcpy(type.name, name, length + 1);
-        type.connection_flag = connection_flag;
-        type.context = context;
-        type.flags = flags;
+    void AISysSetPathCylinderCheck(i32 enabled) {
+        disable_cylinder_check = enabled == 0;
     }
 
     void aieditor_Render(void) {
+        STUBBED();
     }
 
     void aieditor_Reset(void) {
@@ -296,6 +263,7 @@ extern "C" {
     }
 
     void aieditor_Save(void) {
+        STUBBED();
     }
 
     void aieditor_SetCurrentScript(char *name, const AIEditorScriptSelection *selection) {
@@ -358,6 +326,7 @@ extern "C" {
     }
 
     void aieditor_cbSave(void) {
+        STUBBED();
     }
 
     void aieditor_cbShowCreaturesSetToggle(eduimenu_s *, eduiitem_s *item, u32) {

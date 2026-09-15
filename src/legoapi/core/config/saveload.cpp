@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include <string.h>
 
 #include "gameframework/saveload.h"
@@ -25,110 +26,141 @@ extern f32 memcard_loadresult_delay;
 extern i16 (*memcard_hashfn)(void);
 
 void InitMemCard() {
+    STUBBED();
 }
 
 void SaveGizmoSys(GIZMOSYS_s *, char *, char *) {
+    STUBBED();
 }
 
 void SerialiseInt(EdStream &, void *, i32) {
+    STUBBED();
 }
 
 void FS_GetDirList(char *, char *, char *) {
+    STUBBED();
 }
 
 void SerialiseChar(EdStream &, void *, i32) {
+    STUBBED();
 }
 
 void FS_PrevNameLen(char *) {
+    STUBBED();
 }
 
 void FS_SortStrings(char *, char *, i32) {
+    STUBBED();
 }
 
 void SerialiseFloat(EdStream &, void *, i32) {
+    STUBBED();
 }
 
 void SerialiseNuMtx(EdStream &, void *, i32) {
+    STUBBED();
 }
 
 void SerialiseNuVec(EdStream &, void *, i32) {
+    STUBBED();
 }
 
 void SerialiseShort(EdStream &, void *, i32) {
+    STUBBED();
 }
 
 void SerialiseVuMtx(EdStream &, void *, i32) {
+    STUBBED();
 }
 
 void SerialiseVuVec(EdStream &, void *, i32) {
+    STUBBED();
 }
 
 void FS_MoveCursorUp(i32) {
+    STUBBED();
 }
 
 void SerialiseString(EdStream &, void *, i32) {
+    STUBBED();
 }
 
 void SerialiseColour3(EdStream &, void *, i32) {
+    STUBBED();
 }
 
 void FS_FileNameFilter(char *) {
+    STUBBED();
 }
 
 void FS_MakeDateString(FS_FILEENTRYHDR *, char *) {
+    STUBBED();
 }
 
 void FS_MakeTimeString(FS_FILEENTRYHDR *, char *) {
+    STUBBED();
 }
 
 void FS_MoveCursorDown(i32) {
+    STUBBED();
 }
 
 void FS_GetDirTextWidth() {
+    STUBBED();
 }
 
 void FS_GetFilterString(char *, char *) {
+    STUBBED();
 }
 
 void getsaveload_status() {
+    STUBBED();
 }
 
 void FS_GetPadWithRepeat(nupad_s *, float, float) {
+    STUBBED();
 }
 
 void SerialiseNuHSpecial(EdStream &, void *, i32) {
+    STUBBED();
 }
 
 void SerialiseStringAddr(EdStream &, void *, i32) {
+    STUBBED();
 }
 
 void FS_BuildFilterBlocks(char *) {
-}
-
-void saveloadGetDirectory() {
+    STUBBED();
 }
 
 void FS_MakeDateTimeString(FS_FILEENTRYHDR *, char *) {
+    STUBBED();
 }
 
 void FS_BuildFilterOutBlocks(char *) {
+    STUBBED();
 }
 
 void FS_SetCursorToLastFileName() {
+    STUBBED();
 }
 
 void LoadState(i32, variptr_u *, variptr_u *, variptr_u *, variptr_u *, variptr_u *, variptr_u *) {
+    STUBBED();
 }
 
 extern "C" {
 
     void FS_SetFileSelPathFromName(void) {
+        STUBBED();
     }
 
     void SaveSystemInitialiseEx(void) {
+        STUBBED();
     }
 
     void SetSaveSuccessFn(void) {
+        STUBBED();
     }
 
     void UpdateSaveSlots(void) {
@@ -226,45 +258,6 @@ extern "C" {
     void loadsaveCallEachFrame(void) {
         saveloadASCallEachFrame();
         UpdateSaveSlots();
-    }
-
-    void saveloadASFormat(void) {
-    }
-
-    void saveloadAutoSave(void) {
-    }
-
-    void saveloadCheckCardFormatted(void) {
-    }
-
-    void saveloadCheckCardFreeSpace(void) {
-    }
-
-    void saveloadCheckCardPresent(void) {
-    }
-
-    void saveloadCheckCardType(void) {
-    }
-
-    void saveloadCheckKeyCode(void) {
-    }
-
-    void saveloadCheckSlotsUsed(void) {
-    }
-
-    void saveloadDeleteSlot(void) {
-    }
-
-    void saveloadFormatCard(void) {
-    }
-
-    void saveloadLoadIcon(void) {
-    }
-
-    void saveloadUnFormatCard(void) {
-    }
-
-    void saveloadWriteKeyCode(void) {
     }
 
     i32 TriggerAutoSave(void) {

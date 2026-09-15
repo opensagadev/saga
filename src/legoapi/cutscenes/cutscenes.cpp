@@ -1,5 +1,7 @@
+#include "decomp.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/cutscenes/cutscenes.h"
+#include "legoapi/audio/sfx.h"
 #include "globals.h"
 #include "MechInputTouch/MechInputTouch_types.h"
 #include "legoapi/characters/core/character.h"
@@ -7,8 +9,8 @@
 #include "legoapi/characters/motion.h"
 #include "legoapi/core/config/cheat.h"
 #include "legoapi/core/input/qrand.h"
-#include "legoapi/cutscenes/cutscenes.h"
 #include "legoapi/gizmo/base/gizmo.h"
+#include "legoapi/menus/core/panel.h"
 #include "legoapi/menus/core/text.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/world.h"
@@ -17,6 +19,10 @@
 #include "legoapi/world/level.h"
 #include "legoapi/world/levels/levels.h"
 #include "legoapi/render/light/shadow.h"
+#include "legoapi/render/core/terrain.h"
+#include "legoapi/render/core/render.h"
+#include "legoapi/render/fx/parts.h"
+#include "legoapi/render/core/screen.h"
 #include "nu2api/nuandroid/ios_graphics.h"
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nucore/nuhgobj.h"
@@ -30,8 +36,6 @@
 #include "nu2api/nusound/nusound.h"
 
 #include <string.h>
-#include "MechInputTouch/MechInputTouch_types.h"
-#include "legoapi/world/level.h"
 #include <stdio.h>
 #include "legoapi/world/mission.h"
 #include "legoapi/world/levels/episode.h"
@@ -59,17 +63,14 @@ static void CutScene_RigidPostRender(NUGCUTRIGID_s *, instNUGCUTRIGID_s *, NUMTX
 static void CutScene_CreateCharacterInstance(NUGCUTCHAR_s *, instNUGCUTCHAR_s *, variptr_u *);
 
 extern "C" {
-    void instNuGCutSceneEnd(instNUGCUTSCENE_s *instance);
     i32 instNuGCutSceneIsFinished(instNUGCUTSCENE_s *instance);
     void instNuGCutScenePause(instNUGCUTSCENE_s *, u8);
     void instNuGCutSceneReset(instNUGCUTSCENE_s *);
     void instNuGCutSceneStart(instNUGCUTSCENE_s *);
     void instNuGCutSceneStop(instNUGCUTSCENE_s *);
     void instNuGCutSceneDestroy(instNUGCUTSCENE_s *);
-    void NuGCutSceneDestroy(NUGCUTSCENE_s *);
     void NuGCutSceneSysRender(i32);
     void NuGCutSceneSysUpdate(i32, i32, f32);
-    void NuGCutSceneSysInit(NUGCUTLOCATORFNENTRY_s *);
     extern NUGCUTLOCATORFNENTRY_s cutscene_locatorfns[];
 }
 
@@ -77,9 +78,7 @@ void SetLevelLights(void *, f32);
 void NewLevelFromMenu(LEVELDATA_s *, i32, i32, i32);
 void FindAndSetLights(NUVEC *, f32, void *);
 void SetZeroLights(void);
-void Panel_Clear(void);
 void GameFog_Reset(void);
-void NeedScreenGrab(i32);
 void EnableShadowMapRendering(i32);
 void ResetShadowMapRendering(void);
 i32 MatrixReflection(NUMTX *, i32, f32, f32, NUMTX *);
@@ -87,19 +86,15 @@ f32 FindReflectionNoPlatforms(NUVEC *);
 extern "C" i32 NewShadowOnPlatform(void);
 void FindAnglesZX(NUVEC *, u16 *, u16 *);
 void CharScene_Draw(WORLDINFO_s *, i32, NUMTX *, NUMTX *);
-void DrawObjectOnCharacter(WORLDINFO_s *, GameObject_s *, i32, nuhspecial_s *, i32, i32, NUMTX *, i32, u32, NUMTX *,
-                           NUVEC *, f32, f32);
 i32 qrand(void);
 void NewRumbleAllPlayers(f32, f32, i32, i32);
 f32 GameShadow(GameObject_s *, NUVEC *, f32, i32);
-extern "C" i32 ShadowInfo(void);
 extern "C" TERRAIN_SURFACE_s TerSurface[32];
 extern "C" void APITransparentCharDraw(nuhgobj_s *, NUMTX *, i32, i16 *, NUMTX *, void **, i32);
 extern "C" void instNuGCutLocatorUpdate(instNUGCUTSCENE_s *, NUGCUTLOCATORSYS_s *, instNUGCUTLOCATOR_s *,
                                         NUGCUTLOCATOR_s *, f32, NUMTX *, i32);
 CUTSCENEPLAYERCLIP *CutScenePlayer_Active(void);
 void CutScenePlayer_SetObjects(CUTINFO *);
-void AddPartDebris(PARTDEBSYS_s *, i32, nuvec_s *);
 extern "C" void DebrisSetRenderGroup(i32);
 extern AREADATA_s *BONUS_GUNSHIP_ADATA;
 extern AREADATA_s *GUNSHIP_ADATA;
@@ -150,7 +145,6 @@ void GameAudio_PlaySfx(i32, nuvec_s *, i32, i32);
 extern "C" {
     void PauseGameAudio(void);
     void PauseGameCut(void);
-    void SetLinkedCutSceneMusic(void *context, i32 state);
     void PlaySfxById(i32 sfx_id, nuvec_s *position);
     extern instNUGCUTSCENE_s *cutscene_load_instance;
     void instNuGCutSceneServiceLoad(void);
@@ -672,6 +666,19 @@ void *CutScene_FindInst(CUTSYS *system, char *name) {
     return NULL;
 }
 
+CUTINFO *CutScene_Find(CUTSYS *cutscene_system, char *name) {
+    if (name == NULL || cutscene_system == NULL) {
+        return NULL;
+    }
+
+    for (i32 i = 0; i < cutscene_system->count; ++i) {
+        if (NuStrICmp(cutscene_system->cuts[i]->name, name) == 0) {
+            return cutscene_system->cuts[i];
+        }
+    }
+    return NULL;
+}
+
 void CutScenes_Destroy(CUTSYS *system) {
     if (system == NULL || system->count <= 0) {
         return;
@@ -720,6 +727,7 @@ void CutScene_SnapToEnd(CUTINFO *cut) {
 }
 
 void CutScene_StartAudio() {
+    STUBBED();
 }
 
 i32 CutScene_IsSkippable(CUTINFO *cut) {
@@ -1365,6 +1373,7 @@ void CutScenes_BGLoadManager() {
 }
 
 void CutScenes_ConfigureList(char *, variptr_u *, variptr_u) {
+    STUBBED();
 }
 
 void CutScene_PreUpdateFn_LSW(CUTINFO *cut) {
@@ -1389,6 +1398,7 @@ void CutScene_PreUpdateFn_LSW(CUTINFO *cut) {
 }
 
 void CutScene_PostUpdateFn_LSW() {
+    STUBBED();
 }
 
 i32 CutScene_PlayingOrRequested(CUTINFO *cut) {
@@ -1558,6 +1568,7 @@ void Fade_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapse
 }
 
 void RelocateCutScene(NUGCUTSCENE_s *, variptr_u *) {
+    STUBBED();
 }
 
 i32 STATUS_R = 255;
@@ -1855,13 +1866,4 @@ void LevelComplete_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, flo
     } else if (stage->field_0x18 >= 0.75f && stage->field_0x18 < reward_end) {
         PlaySfx(const_cast<char *>("PickupCoin"), NULL);
     }
-}
-
-static __used__ void Titles_Draw(WORLDINFO_s *) {
-}
-
-static __used__ void Titles_Init(WORLDINFO_s *) {
-}
-
-static __used__ void Titles_Update(WORLDINFO_s *) {
 }

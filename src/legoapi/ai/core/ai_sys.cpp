@@ -10,7 +10,6 @@ struct nuhspecial_s;
 struct minitrooperteam_s;
 struct nuvec_s;
 
-extern "C" void *AISysBufferAlloc(VARIPTR *cursor, VARIPTR *buf_end, u32 size);
 void *GameBufferAlloc(VARIPTR *, VARIPTR *, i32);
 void AIPathCnxControlSysReset(AIPATHCNXCONTROLSYS_s *system);
 extern "C" void *AISysLoadEx(void *buf, void *buf_end, i32 size, void *gscn, char *dir, char *name, char *param,
@@ -49,6 +48,7 @@ void *AIPathCnxHelperSysCreate(VARIPTR *buf, VARIPTR *buf_end, i32 count) {
     return system;
 }
 void GameAIScriptAddLevelSfx(WORLDINFO *world, NULISTHDR *scripts) {
+    STUBBED();
     (void)world;
     (void)scripts;
 }
@@ -63,22 +63,6 @@ void *CreateClimbObjectSys(VARIPTR *buf, VARIPTR *buf_end, i32 count) {
         static_cast<CLIMBOBJECT_s *>(GameBufferAlloc(buf, buf_end, system->capacity * sizeof(CLIMBOBJECT_s)));
     return system;
 }
-extern "C" APIOBJECTSYS_s *APIObjectSysInit(i32 size, VARIPTR *buf, VARIPTR *buf_end) {
-    APIOBJECTSYS_s *system = static_cast<APIOBJECTSYS_s *>(AISysBufferAlloc(buf, buf_end, sizeof(APIOBJECTSYS_s)));
-    if (system == NULL) {
-        return NULL;
-    }
-
-    memset(system, 0, sizeof(*system));
-    if (size != 0) {
-        system->objects = static_cast<APIOBJECT *>(AISysBufferAlloc(buf, buf_end, static_cast<u32>(size) * 64));
-        if (system->objects != NULL) {
-            system->object_size = static_cast<u32>(size);
-            memset(system->objects, 0, static_cast<u32>(size) * 64);
-        }
-    }
-    return system;
-}
-
 static __used__ void GenerateTrooperTeamShape(minitrooperteam_s *, int) {
+    STUBBED();
 }

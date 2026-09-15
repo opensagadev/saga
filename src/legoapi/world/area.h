@@ -6,6 +6,7 @@
 #include "nu2api/nucore/common.h"
 
 struct SUPERCOUNTER;
+i32 Area_CharIDInCurrentList(i32 character_id);
 enum AREA_EPISODE_INDEX {
     AREA_EPISODE_I = 0,
     AREA_EPISODE_II = 1,
@@ -51,6 +52,7 @@ DECOMP_ASSERT(offsetof(AREADATA, area_index) == 0x87, "AREADATA area index offse
 extern "C" {
 #endif
     extern AREADATA *ADataList;
+    extern AREADATA *LastAData;
     extern AREADATA *HUB_ADATA;
     extern i32 Area;
     extern i32 loadareacharacters_no_backdrop_reset;
@@ -61,6 +63,9 @@ typedef struct AREAFIXUP {
     char *name;
     AREADATA **area;
 } AREAFIXUP;
+
+extern i32 AREA_DEFAULTBONUSTIMETRIALTIME;
+extern i32 AREA_DEFAULTCHALLENGETIME;
 
 AREADATA *Area_FindByName(char *name, i32 *indexDest);
 

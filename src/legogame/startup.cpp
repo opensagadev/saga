@@ -21,12 +21,16 @@
 #include <time.h>
 
 #include "globals.h"
+#include "java/android.h"
+#include "legoapi/gizmo/object/gizmoblowups.h"
 #include "legoapi/gizmo/base/gizactions.h"
 #include "MechInputTouch/MechInputTouch_types.h"
 #include "gameframework/saveload.h"
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/core/players.h"
+#include "legoapi/items/collect/minikits.h"
 #include "legoapi/core/input/timer.h"
+#include "legoapi/render/core/screen.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/levels/episode.h"
 #include "legoapi/world/levels/levels.h"
@@ -65,8 +69,6 @@ extern "C" {
     f32 NuFrameEnd(void);
     i32 NuRndrBeginScene(i32 flags);
     void NuRndrEndScene(void);
-    void NuRndrGradClear(i32 a, i32 b, i32 c, f32 d);
-    void NuRndrClear(u32 flags, u32 colour, f32 alpha);
     void NuMtlDestroy(NUMTL *mtl);
     NUMTL *NuMtlCreate(i32 count);
     void NuMtlUpdate(NUMTL *mtl);
@@ -87,7 +89,6 @@ void Text_InitStringTable(i32, VARIPTR *, VARIPTR *);
 void Text_InitTable(TEXTENTRY *, i32, i32);
 void Text_LoadStrings(VARIPTR *, VARIPTR *);
 void Text_InitDefaultStrings(void);
-void InitStillRender(VARIPTR *buf, VARIPTR buf_end);
 void LevelProgress_ReserveBufferSpace(VARIPTR *buf, VARIPTR buf_end);
 void LevelObjects_InitForGame(LEVELOBJECT *tab, VARIPTR *buf, VARIPTR *buf_end, i32 a4, i32 a5);
 void LevelSplines_InitForGame(LEVELSPLINE *tab);
@@ -101,17 +102,12 @@ void Movies_ConfigureList(char *path, VARIPTR *buf, VARIPTR *buf_end);
 CHARACTERDATA *ConfigureCharacterList(char *path, VARIPTR *buf, VARIPTR *buf_end, i32 max, i32 *count, i32 stride,
                                       GAMECHARACTERDATA **gcdata);
 void CharScenes_Init(VARIPTR *buf, VARIPTR *buf_end);
-void IconScenes_Init(char *prefix, VARIPTR *buf, VARIPTR *buf_end);
 void FixUpCharacters(CHARFIXUP *fixup);
-void MiniKits_Init(VARIPTR *buf, VARIPTR *buf_end);
 void CharCategories_Init(CHARCATEGORY *cat);
 void Cheats_Init(CHEAT *cheats);
-void CharVariants_Init(CHARVARIANT *variants, i32 count);
 LEVELDATA *Levels_ConfigureList(char *path, VARIPTR *buf, VARIPTR *buf_end, i32 max, i32 *count,
                                 void (*set_defaults)(LEVELDATA *, i32));
 void FixUpLevels(LEVELFIXUP *fixup);
-AREADATA *Areas_ConfigureList(char *path, VARIPTR *buf, VARIPTR *buf_end, i32 max, i32 *count);
-void FixUpAreas(void);
 EPISODEDATA *Episodes_ConfigureList(char *path, VARIPTR *buf, VARIPTR *buf_end, i32 max, i32 *count);
 void NewGame(void);
 void InitGameAfterConfig(void);
@@ -346,7 +342,7 @@ static void LoadPermData(BGPROCINFO *proc) {
     Cheats_Init(reinterpret_cast<CHEAT *>(Cheat));
     PlayerID[0] = id_DEFAULTCHARACTER[0];
     PlayerID[1] = id_DEFAULTCHARACTER[1];
-    CharVariants_Init(reinterpret_cast<CHARVARIANT *>(CharVariants_Game), 0x17);
+    CharVariants_Init(CharVariants_Game, 0x17);
 
     LDataList = Levels_ConfigureList((char *)"levels\\levels.txt", &permbuffer_ptr, &permbuffer_end, 0x16d, &LEVELCOUNT,
                                      &Level_SetDefaults);

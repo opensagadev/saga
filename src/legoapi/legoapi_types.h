@@ -307,7 +307,7 @@ struct nuanimbuff_s;
 struct nuanimdata_s;
 struct nucolour3_s;
 struct nudisplaylistitem_s;
-struct nudisplayscene_s;
+struct nurenderscene_s;
 struct nufile_device_s;
 struct nufpar_s;
 struct nufpcomjmp_s;
@@ -724,7 +724,10 @@ struct CHARPLATFORMSYS_s {
     CHARPLATFORM_s platforms[1];
 };
 DECOMP_ASSERT(offsetof(CHARPLATFORMSYS_s, platforms) == 0x8, "CHARPLATFORMSYS platforms offset");
-struct CHARVARIANT {};
+struct CHARVARIANT {
+    char *name;
+};
+DECOMP_ASSERT(sizeof(CHARVARIANT) == 4, "CHARVARIANT size");
 struct CHEAT;
 struct CLIMBOBJECT_s {
     NUVEC normal;
@@ -743,9 +746,11 @@ struct CLIMBOBJECTSYS_s {
 DECOMP_ASSERT(sizeof(CLIMBOBJECT_s) == 0x20, "CLIMBOBJECT_s size");
 DECOMP_ASSERT(sizeof(CLIMBOBJECTSYS_s) == 8, "CLIMBOBJECTSYS_s size");
 struct CUSTOMPIECECATEGORY {
-    u32 field_0;
+    char *name;
     u8 uses_special;
+    i8 material_tag;
 };
+DECOMP_ASSERT(offsetof(CUSTOMPIECECATEGORY, material_tag) == 5, "Customiser material tag offset");
 struct CUSTOMISER {
     union {
         u8 pad_0x00[0x6c];
@@ -766,10 +771,11 @@ struct CUSTOMISER {
     CUSTOMISESAVE_s *save;             // 0x174
     ANIMPACKET_s animation_packets[2]; // 0x178
     i32 model_texture_ids[18];         // 0x208
-    u8 pad_0x250[0xa6c - 0x250];
-    u8 animation_active[2];  // 0xa6c
-    u8 animation_state[2];   // 0xa6e
-    i32 animation_values[2]; // 0xa70
+    u8 pad_0x250[0xa68 - 0x250];
+    u16 *animation_ids_to_load; // 0xa68; 0xffff-terminated allow-list
+    u8 animation_active[2];     // 0xa6c
+    u8 animation_state[2];      // 0xa6e
+    i32 animation_values[2];    // 0xa70
     u8 pad_0xa78[0xc28 - 0xa78];
     i16 default_pieces[2][10]; // 0xc28; nine saved pieces plus one unused entry per character
 };
@@ -783,6 +789,7 @@ DECOMP_ASSERT(offsetof(CUSTOMISER, character_ids) == 0x6c, "CUSTOMISER character
 DECOMP_ASSERT(offsetof(CUSTOMISER, animation_packets) == 0x178, "CUSTOMISER animation packets offset");
 DECOMP_ASSERT(offsetof(CUSTOMISER, model_texture_ids) == 0x208, "CUSTOMISER model texture IDs offset");
 DECOMP_ASSERT(offsetof(CUSTOMISER, animation_active) == 0xa6c, "CUSTOMISER animation active offset");
+DECOMP_ASSERT(offsetof(CUSTOMISER, animation_ids_to_load) == 0xa68, "CUSTOMISER animation load-list offset");
 struct __attribute__((packed)) CUSTOMISESAVE_s {
     i16 pieces[9];           // 0x00
     u8 field_0x12[2];        // 0x12
@@ -811,7 +818,7 @@ DECOMP_ASSERT(offsetof(CUSTOMISESAVE_s, primary_name_unlocked) == 0x34, "CUSTOMI
 DECOMP_ASSERT(offsetof(CUSTOMISESAVE_s, secondary_name) == 0x4c, "CUSTOMISESAVE secondary name offset");
 DECOMP_ASSERT(offsetof(CUSTOMISESAVE_s, secondary_name_unlocked) == 0x6c, "CUSTOMISESAVE secondary flag offset");
 struct CUSTOMPIECE {
-    u8 unknown_00[4];
+    char *name;
     i16 character_id;
     i16 icon_character_id;
     u8 unknown_08[0xa];
@@ -1575,6 +1582,7 @@ enum GIZMOPICKUP_TYPE_FLAGS : u8 {
     GIZMOPICKUP_TYPE_DRAW_Y_ROTATION = 0x02,
     GIZMOPICKUP_TYPE_MINIKIT_DETECTOR = 0x04,
     GIZMOPICKUP_TYPE_RED_BRICK_DETECTOR = 0x08,
+    GIZMOPICKUP_TYPE_COLLISION_FILTER = 0x10,
     GIZMOPICKUP_TYPE_CHALLENGE_MODE_FILTER = 0x20,
     GIZMOPICKUP_TYPE_FLAG_40 = 0x40,
 };
@@ -1693,8 +1701,6 @@ struct GIZMOPICKUPRUNTIMESYS_s {
 };
 DECOMP_ASSERT(sizeof(GIZMOPICKUPRUNTIMESYS_s) == 0x1c, "GIZMOPICKUP runtime system ABI");
 
-extern GIZMO_PICKUP_TYPE GizmoPickupType[10];
-extern GIZMOPICKUPSYS_s GizmoPickupSys_Game;
 i32 GetRandomCoinType();
 
 struct SPECIALMINIKIT_s {
@@ -3140,7 +3146,7 @@ struct minitrooperteam_s {};
 struct nuanimbuff_s;
 struct nucolour3_s;
 struct nudisplaylistitem_s;
-struct nudisplayscene_s;
+struct nurenderscene_s;
 struct nufile_device_s;
 struct nufpar_s;
 struct nufpcomjmp_s;
@@ -5244,7 +5250,7 @@ struct ThingManager {
     i32 count;          // 0x0c
     u32 field_0x10;     // 0x10 high-water cursor (written by the ctor / AllocPool)
     i32 field_0x14;     // 0x14 AddThingAfterThis reservation, folded in by the next AddThing
-    void *timebar;      // 0x18 NuTimeBarCreateSet handle (profiling, stubbed)
+    i32 timebar;        // 0x18 NuTimeBarCreateSet index
     u32 field_0x1c;
     i32 ed_timing_state; // 0x20 editor timing selection state
 };

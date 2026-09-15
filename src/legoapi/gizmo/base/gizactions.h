@@ -15,7 +15,7 @@ struct EXTRAACTIONDATA_s {
 };
 
 void RegisterGizActions(GIZACTIONDEFN_s *definitions);
-extern GIZACTIONDEFN_s game_gizactiondefs[];
+void GameRegisterGizActions(void);
 
 extern "C" {
     i32 ActionFromName(const char *name);

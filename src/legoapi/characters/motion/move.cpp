@@ -1,4 +1,11 @@
 #include "decomp.h"
+#include "legoapi/actions/movement/jumping.h"
+#include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/items/collect/torpedo.h"
+#include "legoapi/actions/combat/hits.h"
+#include "legoapi/gizmos/object/gizbuildits.h"
+#include "legoapi/gizmos/object/hatmachine.h"
+#include "legoapi/characters/motion/action_info.h"
 #include "legoapi/actions/character/snake.h"
 #include "MechInputTouch/MechInputTouch_types.h"
 #include "globals.h"
@@ -14,6 +21,7 @@ static f32 ForceBackRadius2 = 0.0f;
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/characters/motion.h"
+#include "legoapi/actions/movement/carrying.h"
 #include "legoapi/characters/motion/gameanim.h"
 #include "legoapi/core/input/gamepads.h"
 #include "legoapi/core/input/qrand.h"
@@ -21,20 +29,22 @@ static f32 ForceBackRadius2 = 0.0f;
 #include "legoapi/audio/sfx.h"
 #include "legoapi/gizmos/traps/gizforce.h"
 #include "legoapi/gizmos/traps/attractos.h"
-#include "legoapi/gizmos/trigger/signals.h"
+#include "legoapi/props/objects/signal.h"
 #include "legoapi/gizmos/door/securitydoors.h"
-#include "legoapi/gizmos/object/technos.h"
+#include "legoapi/props/objects/techno.h"
 #include "legoapi/gizmos/object/gizbuildits.h"
 #include "legoapi/gizmos/object/gizpanel.h"
 #include "legoapi/gizmos/transport/tubes.h"
+#include "legoapi/gizmos/transport/teleport.h"
 #include "legoapi/gizmos/door/zipups.h"
 #include "legoapi/gizmos/transport/grapples.h"
-#include "legoapi/gizmos/transport/tightropes.h"
+#include "legoapi/props/objects/tightrope.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/menus/screens/shop.h"
 #include "legoapi/props/system/socksys.h"
 #include "legoapi/render/core/rtl.h"
 #include "legoapi/render/fx.h"
+#include "legoapi/render/fx/parts.h"
 #include "legoapi/render/fx/spline_position.h"
 #include "legoapi/world/level.h"
 #include "legoapi/world/area.h"
@@ -50,6 +60,386 @@ static f32 ForceBackRadius2 = 0.0f;
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numath/nuvec.h"
 
+// Original action/context lookup data, with its arrays and pointers in one owner.
+static CHARACTER_CONTEXT_INFO_s _CInfoTab[] = {
+    {"NoContext", -1, 0x00001000, 0},
+    {"Jump", -1, 0x01000000, 0},
+    {"LandJump", -1, 0x00000015, 0},
+    {"LandJump2", -1, 0x00000015, 0},
+    {"LandFlip", -1, 0x00000015, 0},
+    {"LandComboJump", -1, 0x00000015, 0},
+    {"Combo", -1, 0x00800010, 1},
+    {"WeaponIn", -1, 0x00001013, 0},
+    {"WeaponOut", -1, 0x00001013, 0},
+    {"Force", -1, 0x00000222, 0},
+    {"ComboRotate", -1, 0x00000011, 0},
+    {"Shoot", -1, 0x00000011, 0},
+    {"Interface", -1, 0x00000033, 0},
+    {"Block", -1, 0x04000010, 0},
+    {"LandLunge", -1, 0x00800011, 0},
+    {"LandSlam", -1, 0x00800011, 0},
+    {"Teleport", -1, 0x000001b3, 12},
+    {"Swipe", -1, 0x00800010, 0},
+    {"Tube", -1, 0x00000408, 0},
+    {"ForceThrow", -1, 0x00000012, 0},
+    {"HoverUp", -1, 0x00000030, 0},
+    {"Rocket", -1, 0x00000011, 0},
+    {"TakeHit", -1, 0x10000031, 0},
+    {"Zap", -1, 0x00000010, 0},
+    {"Deactivated", -1, 0x10200031, 0},
+    {"Hold", -1, 0x04000010, 0},
+    {"LandSpecial", -1, 0x00000015, 0},
+    {"Communicate", -1, 0x00000033, 0},
+    {"ForcePush", -1, 0x00000002, 0},
+    {"ForcePushed", -1, 0x00000231, 0},
+    {"ForceDeflect", -1, 0x00000002, 0},
+    {"ForceFrozen", -1, 0x0000000b, 0},
+    {"BigJump", -1, 0x02400111, 0},
+    {"BackFlip", -1, 0x00000091, 0},
+    {"Recoil", -1, 0x00000009, 0},
+    {"ForcedBack", -1, 0x00000008, 0},
+    {"DropIn", -1, 0x00040113, 0},
+    {"DropOut", -1, 0x00040113, 0},
+    {"Dodge", -1, 0x00000092, 1},
+    {"Punch", -1, 0x00010032, 1},
+    {"Push", -1, 0x00002030, 0},
+    {"PushSpinner", -1, 0x00003010, 0},
+    {"LandCombatRoll", -1, 0x000000b4, 0},
+    {"Turn", -1, 0x00000190, 0},
+    {"Doomed", -1, 0x00400110, 0},
+    {"Launch", -1, 0x00000000, 0},
+    {"BuildIt", -1, 0x00000010, 0},
+    {"ThrowDetonator", -1, 0x00000033, 0},
+    {"Grabbed", -1, 0x00000013, 0},
+    {"SpecialMoveVictim", -1, 0x00000033, 0},
+    {"Roll", -1, 0x00000010, 16},
+    {"UnRoll", -1, 0x00000013, 16},
+    {"Slide", -1, 0x40000030, 0},
+    {"BeenDragged", -1, 0x00000000, 0},
+    {"ZipDown", -1, 0x00000030, 0},
+    {"Loop", -1, 0x00000190, 0},
+    {"Poo", -1, 0x00000033, 0},
+    {"Grab", -1, 0x00000033, 0},
+    {"Eaten", -1, 0x60020933, 0},
+    {"BarrelRoll", -1, 0x00000190, 0},
+    {"BeenTakenOver", -1, 0x600209b0, 0},
+    {"GetIn", -1, 0x60400130, 0},
+    {"Flatten", -1, 0x00000033, 0},
+    {"Buck", -1, 0x00000033, 0},
+    {"Eat", -1, 0x00000033, 0},
+    {"Disorientate", -1, 0x00000100, 0},
+    {"Activate", -1, 0x00200033, 0},
+    {"ZappedByFloor", -1, 0x00000031, 0},
+    {"Climb", -1, 0x00000431, 0},
+    {"Tightrope", -1, 0x00080431, 0},
+    {"WallShuffle", -1, 0x00003031, 0},
+    {"Grapple", -1, 0x40000430, 0},
+    {"ZipUp", -1, 0x40000430, 0},
+    {"PlaceDetonator", -1, 0x00000033, 0},
+    {"PickUpDetonator", -1, 0x00000031, 0},
+    {"PullLever", -1, 0x00000031, 0},
+    {"Float", -1, 0x00000030, 2},
+    {"Signal", -1, 0x04000433, 0},
+    {"Batarang", -1, 0x08000033, 0},
+    {"Hang", -1, 0x00000430, 0},
+    {"Glide", -1, 0x00000430, 0},
+    {"Catch", -1, 0x00000013, 0},
+    {"Techno", -1, 0x84000031, 0},
+    {"AttractoTarget", -1, 0x04000033, 0},
+    {"AttractoDeposit", -1, 0x00000033, 0},
+    {"Sonar", -1, 0x00000033, 0},
+    {"LedgeTerrain", -1, 0x00000431, 0},
+    {"Transform", -1, 0x00000033, 0},
+    {"WallJumpWait", -1, 0x00002431, 0},
+    {"SuperCarry", -1, 0x00000033, 0},
+    {"PushObstacle", -1, 0x00003010, 0},
+    {"Stunned", -1, 0x10000031, 0},
+    {"Ledge", -1, 0x00000431, 0},
+    {"Security", -1, 0x00000033, 0},
+    {"Ballooning", -1, 0x00100010, 0},
+    {"ThrowQuick", -1, 0x00000033, 0},
+    {"DieAir", -1, 0x000080b1, 0},
+    {"DieGround", -1, 0x000080b1, 0},
+    {"HatMachine", -1, 0x00000033, 0},
+    {"Whip", -1, 0x00000033, 1},
+    {"NetWait", -1, 0x00000023, 0},
+};
+
+static ACTIONINFO_s ActionInfoList[] = {
+    {"?", 0x0},
+    {"walk", 0x2},
+    {"idle", 0x0},
+    {"fire", 0x0},
+    {"run", 0x4},
+    {"tiptoe", 0x1},
+    {"fall", 0x0},
+    {"jump", 0x0},
+    {"land", 0x0},
+    {"idle4", 0x0},
+    {"jump2", 0x0},
+    {"land2", 0x0},
+    {"force", 0x0},
+    {"flip", 0x0},
+    {"flipland", 0x0},
+    {"jump3", 0x0},
+    {"idle2", 0x0},
+    {"weaponin", 0x0},
+    {"weaponout", 0x0},
+    {"combojump", 0x0},
+    {"comboland", 0x0},
+    {"idle3", 0x0},
+    {"land3", 0x0},
+    {"shoot", 0x0},
+    {"run2", 0x4},
+    {"interface", 0x0},
+    {"weaponidle", 0x0},
+    {"block1", 0x8},
+    {"block2", 0x8},
+    {"block3", 0x8},
+    {"run3", 0x4},
+    {"crawl", 0x0},
+    {"lunge", 0x0},
+    {"lungeland", 0x0},
+    {"slam", 0x0},
+    {"slamland", 0x0},
+    {"open", 0x0},
+    {"hover", 0x0},
+    {"fly", 0x0},
+    {"left", 0x0},
+    {"force2", 0x0},
+    {"fall2", 0x0},
+    {"weaponback", 0x0},
+    {"up", 0x0},
+    {"pushed", 0x0},
+    {"in", 0x0},
+    {"out", 0x0},
+    {"combo1_1", 0x0},
+    {"combo1_2a", 0x0},
+    {"combo1_2b", 0x0},
+    {"combo1_3a", 0x0},
+    {"combo1_3b", 0x0},
+    {"combo1_3c", 0x0},
+    {"combo1_3d", 0x0},
+    {"combo2_1", 0x0},
+    {"combo2_2a", 0x0},
+    {"combo2_2b", 0x0},
+    {"combo2_3a", 0x0},
+    {"combo2_3b", 0x0},
+    {"combo2_3c", 0x0},
+    {"combo2_3d", 0x0},
+    {"shoot2", 0x0},
+    {"takehit", 0x0},
+    {"takehit2", 0x0},
+    {"tiptoe2", 0x1},
+    {"walk2", 0x2},
+    {"deactivated", 0x0},
+    {"deactivated2", 0x0},
+    {"deactivated3", 0x0},
+    {"deactivated4", 0x0},
+    {"interface2", 0x0},
+    {"interface3", 0x0},
+    {"interface4", 0x0},
+    {"hoverup", 0x0},
+    {"hoverdown", 0x0},
+    {"land4", 0x0},
+    {"fall3", 0x0},
+    {"fall4", 0x0},
+    {"fire2", 0x0},
+    {"eat", 0x0},
+    {"right", 0x0},
+    {"walkbackwards", 0x0},
+    {"punch", 0x0},
+    {"push", 0x0},
+    {"choked", 0x0},
+    {"zapped", 0x0},
+    {"punch2", 0x0},
+    {"punch3", 0x0},
+    {"combatroll_fire", 0x0},
+    {"forwards", 0x0},
+    {"fallland", 0x0},
+    {"shootleft", 0x0},
+    {"shootright", 0x0},
+    {"shootback", 0x0},
+    {"pulllever", 0x0},
+    {"helmeton", 0x0},
+    {"build", 0x0},
+    {"idle5", 0x0},
+    {"idle6", 0x0},
+    {"idle7", 0x0},
+    {"idle8", 0x0},
+    {"attack", 0x0},
+    {"throw", 0x0},
+    {"pickup", 0x0},
+    {"drop", 0x0},
+    {"grabbed", 0x0},
+    {"attacked", 0x0},
+    {"slide", 0x0},
+    {"communicate", 0x0},
+    {"ride", 0x0},
+    {"helmeton2", 0x0},
+    {"throw2", 0x0},
+    {"throw3", 0x0},
+    {"ride2", 0x0},
+    {"extra_tiptoe", 0x1},
+    {"extra_walk", 0x2},
+    {"extra_run", 0x4},
+    {"extra_fall", 0x0},
+    {"extra_idle", 0x0},
+    {"extra_weaponidle", 0x0},
+    {"backflip", 0x0},
+    {"extra_jump", 0x0},
+    {"extra_jump2", 0x0},
+    {"extra_land", 0x0},
+    {"extra_land2", 0x0},
+    {"extra_lunge", 0x0},
+    {"extra_lungeland", 0x0},
+    {"extra_weaponin", 0x0},
+    {"extra_weaponout", 0x0},
+    {"activate", 0x0},
+    {"deactivate", 0x0},
+    {"walk3", 0x2},
+    {"ride3", 0x0},
+    {"ride4", 0x0},
+    {"splat", 0x0},
+    {"ride5", 0x0},
+    {"climb_idle", 0x0},
+    {"tightrope_idle", 0x0},
+    {"tightrope_move", 0x0},
+    {"wallshuffle_idle", 0x0},
+    {"wallshuffle_left", 0x0},
+    {"wallshuffle_right", 0x0},
+    {"putdown", 0x0},
+    {"float", 0x0},
+    {"tightrope_geton", 0x0},
+    {"target", 0x0},
+    {"hang_idle", 0x0},
+    {"hang_move", 0x0},
+    {"glide", 0x0},
+    {"punch_behind", 0x0},
+    {"tightrope_getoff", 0x0},
+    {"change", 0x0},
+    {"throw_wait", 0x0},
+    {"catch", 0x0},
+    {"hack", 0x0},
+    {"attract", 0x0},
+    {"transfer", 0x0},
+    {"sonar", 0x0},
+    {"ledge_idle", 0x0},
+    {"ledge_left", 0x0},
+    {"ledge_right", 0x0},
+    {"transform", 0x0},
+    {"walljump_wait", 0x0},
+    {"walljump", 0x0},
+    {"supercarry_pickup", 0x0},
+    {"supercarry_idle", 0x0},
+    {"supercarry_walk", 0x0},
+    {"supercarry_throw", 0x0},
+    {"stun", 0x0},
+    {"stun2", 0x0},
+    {"stun3", 0x0},
+    {"stunned", 0x0},
+    {"stunned2", 0x0},
+    {"stunned3", 0x0},
+    {"security", 0x0},
+    {"superpush_idle", 0x0},
+    {"superpush_push", 0x0},
+    {"superpush_pull", 0x0},
+    {"ballooning", 0x0},
+    {"throw_quick", 0x0},
+    {"backpackfallland", 0x0},
+    {"combatroll_jump", 0x0},
+    {"combatroll_fall", 0x0},
+    {"combatroll_land", 0x0},
+    {"recoil", 0x0},
+    {"die_air", 0x0},
+    {"stun_die", 0x0},
+    {"grapple_idle", 0x0},
+    {"grapple_up", 0x0},
+    {"grapple_down", 0x0},
+    {"grapple_hang", 0x0},
+    {"idle9", 0x0},
+    {"idle10", 0x0},
+    {"ride6", 0x0},
+    {"ride7", 0x0},
+    {"ride8", 0x0},
+    {"ride9", 0x0},
+    {"ride10", 0x0},
+    {"magnet_walk_metal", 0x2},
+    {"magnet_tiptoe", 0x1},
+    {"magnet_walk", 0x2},
+    {"magnet_run", 0x4},
+    {"magnet_jump", 0x0},
+    {"magnet_land", 0x0},
+    {"dropin", 0x0},
+    {"dropout", 0x0},
+    {"climb_up", 0x0},
+    {"climb_down", 0x0},
+    {"climb_left", 0x0},
+    {"climb_right", 0x0},
+    {"ai_override1", 0x0},
+    {"ai_override2", 0x0},
+    {"ai_override3", 0x0},
+    {"ai_override4", 0x0},
+    {"supercarry_putdown", 0x0},
+    {"supercarry_bash", 0x0},
+    {"supercarry_jump", 0x0},
+    {"supercarry_land", 0x0},
+    {"supercarry_fallland", 0x0},
+    {"ledge_grab", 0x0},
+    {"teeter", 0x0},
+    {"whip_start", 0x0},
+    {"whip_crack", 0x0},
+    {"whip_grab", 0x0},
+    {"whip_break", 0x0},
+    {"whip_swing_start", 0x0},
+    {"whip_swing_swing", 0x0},
+    {"whip_swing_jump", 0x0},
+    {"crawl_idle", 0x0},
+    {"crawl_move", 0x0},
+    {"swim", 0x0},
+    {"wade", 0x0},
+    {"dig", 0x0},
+    {"winch", 0x0},
+};
+
+CHARACTER_CONTEXT_INFO_s *CInfo = &_CInfoTab[1];
+ACTIONINFO_s *ActionInfo = &ActionInfoList[1];
+EXTRAACTIONDATA_s ExtraActionData[] = {
+    {"run1", 3},
+    {"idle1", 1},
+    {"interface1", 24},
+    {"deactivated1", 65},
+    {"fall1", 5},
+    {"fire1", 2},
+    {"force1", 11},
+    {"walk1", 0},
+    {"tiptoe1", 4},
+    {"jump1", 6},
+    {"land1", 7},
+    {"shoot1", 22},
+    {"block", 26},
+    {"takehit1", 61},
+    {"punch1", 81},
+    {"trooperaccess", 69},
+    {"throw1", 101},
+    {"hunteraccess", 70},
+    {"stun1", 167},
+    {"stunned1", 170},
+    {"ride", 108},
+    {"ride_buggy", 112},
+    {"ride_gyrocopter", 131},
+    {"ride_bantha", 112},
+    {"ride_dewback", 131},
+    {"ride_landspeeder", 132},
+    {"ride_tauntaun", 134},
+    {"ride_speederbike", 192},
+    {"ride_heavyrepeatingcannon", 193},
+    {"ride_troopercannon", 194},
+    {"rideluke", 195},
+    {"rideluke_running", 196},
+    {NULL, 0},
+};
+
 extern AREADATA_s *PODSPRINT_ADATA;
 extern AREADATA_s *PODRACE_ADATA;
 extern AREADATA_s *GUNSHIP_ADATA;
@@ -58,8 +448,6 @@ extern "C" i16 id_GRABCONTROL, id_GRABR2CONTROL;
 
 float SLAMGRAVITY = -15.0f;
 static float applygravity_extrahoveroffset;
-
-extern i32 LEGOCONTEXT_TUBE;
 
 void MovePlayer_DIRECTIONAL(GameObject_s *object);
 i32 CanStepBack(GameObject_s *object);
@@ -78,7 +466,6 @@ i32 MovePlayer_GUNSHIPIN(GameObject_s *object);
 i32 MovePlayer_POD(GameObject_s *object);
 void ApplyGravity(GameObject_s *object, float *gravity, float hover_height, float seek_rate, float *ground_height);
 float VehicleTurnOrLoopOffset(GameObject_s *object);
-void GameObjectOrigin(GameObject_s *object);
 void ComboHitFrame(GameObject_s *object, i32 damage);
 i32 Grapple_LookAtPos(GameObject_s *object, NUVEC *position);
 NUVEC *Technos_TgtPos(TECHNO_s *techno);
@@ -92,7 +479,6 @@ void ShoveSystemCheckGameObject(GameObject_s *object);
 i32 GizmoBlowupCheckProximity(WORLDINFO_s *world, GameObject_s *object);
 void KeepWeaponOut(GameObject_s *object);
 void DropInOutCode(GameObject_s *object);
-void Signal_MoveCode(WORLDINFO_s *world, GameObject_s *object);
 void TakeHitCode(GameObject_s *object);
 void FloatCode(GameObject_s *object);
 void SlideCode(GameObject_s *object);
@@ -102,7 +488,6 @@ void Ledge_MoveCode(WORLDINFO_s *world, GameObject_s *object);
 void LedgeTerrain_MoveCode(GameObject_s *object);
 void Climb_MoveCode(GameObject_s *object);
 void ForcedBackCode(GameObject_s *object);
-void Tube_MoveCode(GameObject_s *object, WORLDINFO_s *world);
 void PushCode(GameObject_s *object, i32 allow_grab);
 void BackFlipCode(GameObject_s *object);
 void TakeOverCode(GameObject_s *object, i32 tag_pressed);
@@ -110,15 +495,12 @@ void Glide_MoveCode(GameObject_s *object);
 void JumpCode(GameObject_s *object, i32 jump_pressed, i32 jump_held, u32 animation_set, i32 action_pressed,
               i32 action_held, i32 special_animation);
 void GizPanel_MoveCode(WORLDINFO_s *world, GameObject_s *object, i32 special_pressed);
-void HatMachine_MoveCode(WORLDINFO_s *world, GameObject_s *object, i32 special_pressed);
 void ZipUp_MoveCode(GameObject_s *object, i32 special_pressed);
-void BuildIt_MoveCode(GameObject_s *object);
 void Lever_MoveCode(WORLDINFO_s *world, GameObject_s *object);
 i32 ThermalDetonator_MoveCode(GameObject_s *object);
 void Detonator_MoveCode(GameObject_s *object);
 extern "C" void AddVariableShotDebrisEffectTimed1(i32, NUVEC *, i32, f32, i16, i16, NUMTX *);
 extern "C" void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
-void Teleport_MoveCode(GameObject_s *object, i32 special_pressed);
 void ComboRotateCode(GameObject_s *object, i32 action_held);
 void WeaponOutCode(GameObject_s *object);
 void WeaponInCode(GameObject_s *object);
@@ -134,20 +516,11 @@ void BlockSfx(GameObject_s *object);
 i32 NewBlockAction(GameObject_s *object);
 void MakeJumpReachHeight(GameObject_s *, f32, i32);
 void PlayJumpSfx(GameObject_s *, i32);
-void NewRumble(nupad_s *, f32, i32);
 void FindAnglesZX(NUVEC *, u16 *, u16 *);
 i32 GrappleSwingMode = 1;
 void Hint_SetComplete(i32);
-i32 LEGOCONTEXT_HOLD = -1;
-i32 LEGOCONTEXT_JUMP = -1;
-i16 LEGOACT_SLAM = -1;
-i16 LEGOACT_WALLSHUFFLE_LEFT = -1;
-i16 LEGOACT_WALLSHUFFLE_RIGHT = -1;
-i16 LEGOACT_WALLSHUFFLE_IDLE = -1;
-i16 LEGOACT_HANG_MOVE = -1;
 i32 (*CanStartHoldFn)(GameObject_s *) = NULL;
 void PlaySabreSfx(char *, GameObject_s *, NUVEC *, i32);
-extern "C" f32 AnimDuration(i32, i32, f32, f32, i32);
 extern "C" f32 *AnimListFrameArray(CHARACTERMODEL_s *, i32);
 void HeadMovement(GameObject_s *object);
 void CloakMovement(GameObject_s *object);
@@ -158,7 +531,6 @@ extern i16 id_IMPERIALGUARD;
 extern i16 id_GAMORREANGUARD;
 BOLT_s *FindIncomingBolt(GameObject_s *, i32, i32);
 PART_s *FindIncomingPart(void *, NUVEC *, f32, u32, f32);
-i32 StartFallLand(GameObject_s *object, i32 action);
 void UpdateLastSafePosition(GameObject_s *object);
 extern "C" TERRAIN_SURFACE_s TerSurface[32];
 i32 NoLayerKill(GameObject_s *object);
@@ -196,11 +568,8 @@ i32 ZapTarget(GameObject_s *);
 i32 CannotKill(GameObject_s *);
 i32 FaceOpponent(GameObject_s *object, NUVEC *position);
 void SetProtocolDroidDeactivatedAction(GameObject_s *);
-extern i16 id_JAWA;
-extern i16 id_GONKDROID;
 void NewBuzz(nupad_s *, f32, i32);
 void Arcade_AIKilled(i32);
-i32 ObjHitObj(GameObject_s *, GameObject_s *, i32, u16, i32, i32);
 i16 *objhitobj_killparts_yrot;
 i32 objhitobj_noimpactsfx;
 void Player_ClearContext(GameObject_s *, i32);
@@ -225,17 +594,12 @@ extern i16 id_BATTLEDROID, id_BUZZDROID, id_SUPERBATTLEDROID, id_PROBEDROID;
 extern i16 id_NAFFDROID1, id_NAFFDROID2, id_NAFFDROID4, id_MOUSEDROID;
 static void DodgeCode(GameObject_s *, i32, i32);
 void Grapple_MoveCode(GameObject_s *);
-void SuperCarry_MoveCode(WORLDINFO_s *, GameObject_s *);
 void SpecialMove_VictimCode(GameObject_s *);
 i32 ObjInNarrowSock(GameObject_s *, SOCKSYS *, i32);
-i32 SuperCarry_Carrying(GameObject_s *);
-void Torpedo_UpdateJobbies(GameObject_s *);
-void TorpedoCode(GameObject_s *, i32, f32);
 void PeriscodeCode(GameObject_s *);
 i32 PodLevel(AREADATA_s *);
 void KeepOnScreen(GameObject_s *);
 void UpdateSnakeBody(GameObject_s *);
-void Teleport_NetMoveCode(GameObject_s *);
 void TractorBeamCode(GameObject_s *);
 void AddSurfaceRipples(GameObject_s *);
 extern i16 id_SNAKE;
@@ -253,7 +617,6 @@ f32 DIEAIRJUMPSPEED = 2.0f;
 void SetObjAsHeadTarget(GameObject_s *, GameObject_s *, i8, f32, f32, f32);
 void KillRumble(GameObject_s *);
 void PlayHurtSfx(GameObject_s *);
-void SetFlicker(GameObject_s *, f32);
 void GameCam_NewShake(GAMECAMERA_s *, f32, f32, f32);
 extern i16 id_BATTLEDROIDSECURITY, id_PKDROID, id_PITDROID;
 void FindForcePushTarget(GameObject_s *, i32, i32);
@@ -262,7 +625,6 @@ void BobaRocket_Move(PART_s *, f32);
 void Boulder_Move(PART_s *, f32);
 void Boulder_Kill(PART_s *, i32);
 extern "C" void NewPartRotation(PART_s *);
-void NewBuzzFrames(nupad_s *, i32, i32);
 void PlayGruntSfx(GameObject_s *);
 extern i32 dagobah_training;
 extern i16 id_LUKESKYWALKERDAGOBAH;
@@ -561,12 +923,15 @@ void Move_BARMAN(GameObject_s *object) {
 }
 
 void Move_CANNON(GameObject_s *) {
+    STUBBED();
 }
 
 void Move_WALKER(GameObject_s *) {
+    STUBBED();
 }
 
 void Move_CRITTER(GameObject_s *) {
+    STUBBED();
 }
 
 void Move_DEFAULT(GameObject_s *object) {
@@ -576,9 +941,11 @@ void Move_DEFAULT(GameObject_s *object) {
 }
 
 void Move_DRAGBOMB(GameObject_s *) {
+    STUBBED();
 }
 
 void Move_DROIDEKA(GameObject_s *) {
+    STUBBED();
 }
 
 i32 PodLevel(AREADATA_s *area);
@@ -655,12 +1022,15 @@ i32 MovePlayer_POD(GameObject_s *object) {
 void Move_CHARACTER(GameObject_s *object);
 
 void Move_GEONOSIAN(GameObject_s *) {
+    STUBBED();
 }
 
 void Move_HOVERDROID(GameObject_s *) {
+    STUBBED();
 }
 
 void MovePlayerSpline(GameObject_s *) {
+    STUBBED();
 }
 
 i32 TwistLevel(LEVELDATA_s *level);
@@ -736,6 +1106,7 @@ i32 MovePlayer_TWIST(GameObject_s *object) {
 }
 
 void Move_SPEEDERBIKE(GameObject_s *) {
+    STUBBED();
 }
 
 // Original: 1,000 bytes.
@@ -809,9 +1180,11 @@ i32 MovePlayer_CIRCLE(GameObject_s *object) {
 }
 
 static __used__ void ZapCode(GameObject_s *, i32, i32) {
+    STUBBED();
 }
 
 static __used__ void FireCode(GameObject_s *, i32, i32, f32, i32) {
+    STUBBED();
 }
 
 static void SelfDestructCode(GameObject_s *object, i32 pressed) {
@@ -1224,9 +1597,11 @@ i32 MovePlayer_GUNSHIPIN(GameObject_s *object) {
 }
 
 void Move_REPUBLICGUNSHIP(GameObject_s *) {
+    STUBBED();
 }
 
 void Move_SUPERBATTLEDROID(GameObject_s *) {
+    STUBBED();
 }
 
 void MovePlayer_DIRECTIONAL(GameObject_s *object) {
@@ -2277,7 +2652,6 @@ void MovePlayer_DIRECTIONAL(GameObject_s *object) {
 extern "C" i16 id_LANDSPEEDER, id_WOOKIEFLYER, id_STAP2;
 extern AREADATA_s *SPEEDERCHASE_ADATA;
 extern GameObject_s *GetOtherActivePlayer(GameObject_s *);
-extern i32 NeedsPretendAnim(GameObject_s *);
 extern GameObject_s *CarWashHack;
 extern i32 IDLESPEEDINNARROWSOCKSONLY;
 extern f32 GetVehicleSpeedMul(GameObject_s *, f32);
@@ -2286,6 +2660,12 @@ extern f32 PodSprint_InStartCountdown(WORLDINFO_s *);
 extern f32 DeathStar2BattleFire_GetSlowDownMul(GameObject_s *);
 extern i32 OutSideSplineArea(NUVEC *, nugspline_s *, NUVEC *, NUVEC *, i32);
 extern void VehicleCollisionCode(GameObject_s *);
+
+i32 NeedsPretendAnim(GameObject_s *object) {
+    return object->apiobj.character_model->model_data_b[object->apiobj.anim_packet.requested_animation] == NULL ||
+           object->id == id_JEDISTARFIGHTERREDEP3 || object->id == id_JEDISTARFIGHTERYELLOWEP3 ||
+           object->id == id_TIEINTERCEPTOR;
+}
 
 void MovePlayer_VEHICLEDIRECTIONAL(GameObject_s *object) {
     APIOBJECT_s &api = object->apiobj;
@@ -2731,13 +3111,106 @@ vehicle_collision:
         VehicleCollisionCode(object);
 }
 
+i32 GetShootDirection_LSW(GameObject_s *object, nuvec_s *direction) {
+    NUVEC temporary;
+    if (direction == NULL)
+        direction = &temporary;
+    if (object->field_0x1086 == 4) {
+        NUMTX matrix = object->apiobj.field_0xb8;
+        NuMtxPreRotateY(&matrix, 0x8000);
+        NuVecMtxRotate(direction, &v001, &matrix);
+        return object->apiobj.facing_angle;
+    }
+    characterdata_s *model = object->apiobj.character_data;
+    GAMECHARACTERDATA *data = model->game_character;
+    if (data->weapon_shoot_joints[0] != -1 &&
+        ((object->id == id_ATAT && (object->apiobj.flags_low & 0x80) == 0) || object->id == id_CLONEWALKER ||
+         object->id == id_ATST || object->id == id_ATST_LOWRES)) {
+        direction->x = direction->y = 0.0f;
+        direction->z = object->id == id_ATAT ? 1.0f : -1.0f;
+        NuVecMtxRotate(direction, direction, &object->joint_matrices[data->weapon_shoot_joints[0]]);
+        return NuAtan2D(direction->x, direction->z);
+    }
+    i32 angle;
+    if ((model->model_flags & 0x2000) != 0 || (data->flags_090 & 0x80) != 0) {
+        angle = object->apiobj.facing_angle;
+        if (object->character_context == 0x2a &&
+            1.0f - object->context_animation_timer / object->airborne_action_duration >= 0.25f)
+            angle -= 0x8000;
+    } else
+        angle = object->apiobj.movement_facing_angle;
+    direction->x = NuTrigTable[static_cast<u16>(angle) >> 1];
+    direction->y = 0.0f;
+    direction->z = NuTrigTable[((static_cast<u16>(angle) + 0x4000) >> 1) & 0x7fff];
+    return angle;
+}
+
+void GetShootOrigin_LSW(GameObject_s *object, nuvec_s *position) {
+    *position = object->apiobj.collision_position;
+    if (object->id == id_ATAT) {
+        u16 angle = object->apiobj.field_0x276;
+        f32 scale = object->apiobj.field_0x1dc;
+        position->x += (NU_SIN_LUT(angle) * scale) * 1.5f;
+        position->z += (scale * NU_COS_LUT(angle)) * 1.5f;
+    }
+}
+
+i32 PODSPRINTDEB = 117;
+
+void PodCollisionCode(GameObject_s *object) {
+    static f32 magdif;
+
+    if (GamePlayTimer.time_elapsed < 1.0f) {
+        return;
+    }
+    if (object->apiobj.field_0x27c == -1) {
+        return;
+    }
+    if (static_cast<i8>(object->apiobj.flags_low) >= 0) {
+        return;
+    }
+    if (object->field_0x1084 == 0) {
+        return;
+    }
+    if (object->contact_normal.y > 0.574f || object->contact_normal.y < -0.574f) {
+        return;
+    }
+
+    if (PODSPRINT_ADATA != NULL) {
+        if (WORLD->area == PODSPRINT_ADATA) {
+            AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[PODSPRINTDEB].effect,
+                                              &object->contact_position, 50, FRAMETIME, 0, 0, NULL);
+            if (qrand() <= 0x7fff) {
+                NewBuzzFrames(object->pad_gamepad->pad, 1, 0);
+            }
+            return;
+        }
+    }
+
+    magdif = (1.0f / object->pre_terrain_speed) * object->post_terrain_speed;
+    if (1.0f > magdif) {
+        if (0.999f > magdif) {
+            ObjHitObj(NULL, object, 1, 0, 0, 1);
+        }
+        PodLoseSpeed(object, 0, 0);
+    }
+}
+
 void Move_POD(GameObject_s *) {
+    STUBBED();
+}
+
+void Move_VEHICLE(GameObject_s *g) {
+    STUBBED();
+    (void)g;
 }
 
 void Move_ATAT(GameObject_s *) {
+    STUBBED();
 }
 
 void Move_JAWA(GameObject_s *) {
+    STUBBED();
 }
 
 static bool JediHasAction(const GameObject_s *object, JEDI_ACTION action) {
@@ -3538,6 +4011,14 @@ static void ForceGlowCode(GameObject_s *object, i32 model) {
     object->field_0xd8c *= 1.125f;
 }
 
+void LightSabre_ColourFromObj(i32, i32 *) {
+    STUBBED();
+}
+
+void LightSabreDebris(GameObject_s *) {
+    STUBBED();
+}
+
 static void ForceCode(GameObject_s *object, i32 pressed, i32 held, i32) {
     u8 previous_force = object->force_repeat_requested;
     object->force_repeat_requested = 0;
@@ -4026,6 +4507,7 @@ static void DeactivatedCode(GameObject_s *object) {
 }
 
 static void DrawLightningBolts(GameObject_s *, GameObject_s *, i32) {
+    STUBBED();
 }
 
 static void ForcePushCode(GameObject_s *object, i32 held, i32) {
@@ -4201,7 +4683,6 @@ static void ForcePushCode(GameObject_s *object, i32 held, i32) {
 }
 
 void NewRumbleAllPlayers(f32, f32, i32, i32);
-void AddPartDebris(PARTDEBSYS_s *, i32, NUVEC *);
 
 static void ForceThrowCode(GameObject_s *object, i32 pressed, i32) {
     if (object->character_context == 0x12) {
@@ -4792,72 +5273,39 @@ void MovePlayer_NETWORK(GameObject_s *object) {
 }
 
 void MoveToMarker::BlowUp() {
+    STUBBED();
 }
 
 void MoveToMarker::FadeOut() {
+    STUBBED();
 }
 
 MoveToMarker::MoveToMarker(MechObjectInterface &) {
+    STUBBED();
 }
 
 void MoveToMarker::Process(float) {
+    STUBBED();
 }
 
 void MoveToMarker::Render() {
+    STUBBED();
 }
 
 extern u8 show_lever_hint;
 
 struct _vuv_s;
 static __used__ void MakeWingFormation(_vuv_s *, _vuv_s *, f32, i32) {
+    STUBBED();
 }
 
 static __used__ void AtatPart_Stop(PART_s *) {
+    STUBBED();
 }
 
 static __used__ void AtatPart_Update(PART_s *) {
+    STUBBED();
 }
-
-extern i16 LEGOACT_COMBOJUMP;
-static i32 BigJump_JumpAction_Default(GameObject_s *object) {
-    if (object->field_0x7aa == 0) {
-        if (LEGOACT_COMBOJUMP != -1 && object->apiobj.character_model->model_data_b[LEGOACT_COMBOJUMP] != NULL)
-            return LEGOACT_COMBOJUMP;
-        if (LEGOACT_JUMP2 != -1 && object->apiobj.character_model->model_data_b[LEGOACT_JUMP2] != NULL)
-            return LEGOACT_JUMP2;
-    } else if (object->field_0x7aa == 4) {
-        if (LEGOACT_FLIP != -1 && object->apiobj.character_model->model_data_b[LEGOACT_FLIP] != NULL)
-            return LEGOACT_FLIP;
-    }
-    return LEGOACT_JUMP;
-}
-i32 (*BigJump_JumpActionFn)(GameObject_s *) = BigJump_JumpAction_Default;
-
-static i32 BigJump_LandAction_Default(GameObject_s *object) {
-    switch (object->field_0x7aa) {
-        case 0:
-            if (LEGOACT_COMBOLAND != -1 && object->apiobj.character_model->model_data_b[LEGOACT_COMBOLAND] != NULL)
-                return LEGOACT_COMBOLAND;
-            break;
-        case 2:
-        case 3:
-            if (LEGOACT_LAND3 != -1 && object->apiobj.character_model->model_data_b[LEGOACT_LAND3] != NULL)
-                return LEGOACT_LAND3;
-            break;
-        case 4:
-            if (LEGOACT_FLIPLAND != -1 && object->apiobj.character_model->model_data_b[LEGOACT_FLIPLAND] != NULL)
-                return LEGOACT_FLIPLAND;
-            return LEGOACT_LAND;
-        case 1:
-            return LEGOACT_LAND;
-        default:
-            return LEGOACT_LAND;
-    }
-    if (LEGOACT_LAND2 != -1 && object->apiobj.character_model->model_data_b[LEGOACT_LAND2] != NULL)
-        return LEGOACT_LAND2;
-    return LEGOACT_LAND;
-}
-i32 (*BigJump_LandActionFn)(GameObject_s *) = BigJump_LandAction_Default;
 
 i32 show_autojump_hint;
 
@@ -4954,6 +5402,7 @@ i32 CanStepBack(GameObject_s *object) {
 }
 
 void FlattenCode(GameObject_s *) {
+    STUBBED();
 }
 
 i32 Glide_Start(GameObject_s *object) {
@@ -4969,6 +5418,7 @@ i32 Glide_Start(GameObject_s *object) {
 }
 
 void JetPackCode(GameObject_s *, i32, i32, i32) {
+    STUBBED();
 }
 
 float SeekLinearF(float current, float target, float step) {
@@ -5415,54 +5865,8 @@ void StartFlatten(GameObject_s *source, GameObject_s *target) {
     NewBuzz(target->pad_gamepad->pad, 0.1f, 0);
 }
 
-GAMEANTINODE_s *GameAntinode_RegisterAntiNodeUsingData(GAMEANTINODESYS_s *, NUVEC *, u16, GAMEANTINODEDATA_s *, f32,
-                                                       i32);
-
-void UpdateMidPos(GIZMOBLOWUP_s *blowup) {
-    if ((blowup->draw_flags & 0x1000) != 0) {
-        blowup->mid_position = blowup->position;
-        if (blowup->anti_node != NULL) {
-            blowup->state_flags &= ~1;
-            return;
-        }
-    }
-    nuhspecial_s *special = blowup->override_special;
-    if (special == NULL || !NuSpecialExistsFn(special)) {
-        special = &blowup->type->animated_special;
-    }
-    NUVEC minimum;
-    NUVEC maximum;
-    NuSpecialGetBounds(special, &minimum, &maximum);
-    NUVEC corners[8] = {
-        {minimum.x, minimum.y, minimum.z}, {maximum.x, minimum.y, minimum.z}, {maximum.x, minimum.y, maximum.z},
-        {minimum.x, minimum.y, maximum.z}, {minimum.x, maximum.y, minimum.z}, {maximum.x, maximum.y, minimum.z},
-        {maximum.x, maximum.y, maximum.z}, {minimum.x, maximum.y, maximum.z},
-    };
-    NuVecMtxTransformVU0(&minimum, &minimum, &blowup->transform);
-    NuVecMtxTransformVU0(&maximum, &maximum, &blowup->transform);
-    for (i32 i = 0; i < 8; ++i) {
-        NuVecMtxTransformVU0(&corners[i], &corners[i], &blowup->transform);
-    }
-    if ((blowup->draw_flags & 0x1000) == 0) {
-        blowup->mid_position.x = (maximum.x - minimum.x) * 0.5f + minimum.x;
-        blowup->mid_position.y = (maximum.y - minimum.y) * 0.5f + minimum.y;
-        blowup->mid_position.z = (maximum.z - minimum.z) * 0.5f + minimum.z;
-    }
-    if (blowup->anti_node == NULL && (blowup->visibility_flags & 0x40) != 0) {
-        blowup->anti_node = GameAntinode_RegisterAntiNodeUsingData(
-            WORLD->game_antinode_sys, &blowup->mid_position, blowup->field_0xf4 + blowup->field_0xf2,
-            &blowup->type->anti_node_data, 0.0f, blowup->draw_flags & 0x4000);
-    }
-    if ((blowup->draw_flags & 0x1000) == 0) {
-        f32 x = maximum.x - blowup->mid_position.x;
-        f32 y = maximum.y - blowup->mid_position.y;
-        f32 z = maximum.z - blowup->mid_position.z;
-        blowup->target_scale = NuFsqrt(x * x + y * y + z * z);
-    }
-    blowup->state_flags &= ~1;
-}
-
 void Hang_MoveCode(GameObject_s *) {
+    STUBBED();
 }
 
 void HoldCode_Copy(GameObject_s *object) {
@@ -5516,9 +5920,6 @@ i32 StartBackFlip(GameObject_s *object) {
     PlayJumpSfx(object, 2);
     return 1;
 }
-
-i32 LEGOCONTEXT_GETIN = -1;
-i32 LEGOCONTEXT_EATEN = -1;
 
 static void ClearLastSafeTakeoverSource(GameObject_s *object) {
     if (object->takeover_source != NULL &&
@@ -6223,9 +6624,11 @@ void JumpCode(GameObject_s *object, i32 jump_pressed, i32 jump_held, u32 animati
 }
 
 void ForcedBackCode(GameObject_s *) {
+    STUBBED();
 }
 
 void Glide_MoveCode(GameObject_s *) {
+    STUBBED();
 }
 
 i32 SetObjOnSurface(GameObject_s *object, i32 mode) {
@@ -6698,9 +7101,11 @@ f32 SeekValF(f32 current, f32 target, f32 rate) {
 }
 
 void TurnCode(GameObject_s *, i32, GAMEPAD_s *) {
+    STUBBED();
 }
 
 void FloatCode(GameObject_s *) {
+    STUBBED();
 }
 
 void SlideCode(GameObject_s *object) {
@@ -6740,6 +7145,7 @@ void StartHold(GameObject_s *object) {
 }
 
 void StartTurn(GameObject_s *) {
+    STUBBED();
 }
 
 static void GrabCode(GameObject_s *object) {
@@ -6971,6 +7377,7 @@ static void CommunicateCode(GameObject_s *object, i32 pressed, i32) {
 }
 
 static __used__ void PunchCode(GameObject_s *, i32, i32, i32, i32, f32) {
+    STUBBED();
 }
 
 static __used__ void ShootThisFrame(GameObject_s *object, i32 bolt_id, i32 flags) {
@@ -7277,6 +7684,7 @@ finish:
 }
 
 static __used__ void DodgeCode(GameObject_s *, i32, i32) {
+    STUBBED();
 }
 
 extern i16 id_EWOK;
@@ -7455,6 +7863,7 @@ void Move_CHARACTER(GameObject_s *object) {
 }
 
 static __used__ void PooCode(GameObject_s *) {
+    STUBBED();
 }
 
 void Buck_MoveCode(GameObject_s *, i32);

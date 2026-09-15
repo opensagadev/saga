@@ -36,30 +36,6 @@ f32 NuFsign(f32 f) {
     }
 }
 
-f32 NuFsqrt(f32 f) {
-    if (f <= 1e-6f) {
-        return 0.0f;
-    }
-
-    return sqrtf(f);
-}
-
-f32 NuFmax(f32 a, f32 b) {
-    if (a > b) {
-        return a;
-    }
-
-    return b;
-}
-
-f32 NuFmin(f32 a, f32 b) {
-    if (a < b) {
-        return a;
-    }
-
-    return b;
-}
-
 f32 NuFmod(f32 a, f32 b) {
     return a - (i32)(a / b) * b;
 }
@@ -108,7 +84,9 @@ f32 NuPowFast(f32 base, f32 exponent) {
 }
 /* Both exception controls are empty in the original Android binary. */
 void NuFpExceptionMask(void) {
+    STUBBED();
 }
 
 void NuFpException(void) {
+    STUBBED();
 }

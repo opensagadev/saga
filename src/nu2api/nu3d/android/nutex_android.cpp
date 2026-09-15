@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "nu2api/nu3d/android/nutex_android.h"
 
 #include <ctype.h>
@@ -18,6 +19,7 @@
 #define TEX_PATH "mnt/sdcard/TTGames/com.wb.lego.tcs/files/androidTextures/"
 
 i32 NuTexCreate(NUTEX *tex) {
+    STUBBED();
     return 0;
 }
 
@@ -167,31 +169,39 @@ void NuTexInitExPS(VARIPTR *buf) {
 }
 
 void NuTexDisplayTexturePage(i32 page, f32 depth, i32 alpha) {
+    STUBBED();
 }
 
 i32 NuTexGetReqSize(i32 tex_id, i32 level) {
+    STUBBED();
     return 0;
 }
 
 i32 NuTexReserve(i32 size) {
+    STUBBED();
     return -1;
 }
 
 void NuTexUnReserve() {
+    STUBBED();
 }
 
-i32 NuTexReadBitmap(char *) {
-    return 0;
+NUTEXBITMAP *NuTexReadBitmap(char *) {
+    STUBBED();
+    return NULL;
 }
 
 void NuTexAssignAddr(i32, i32) {
+    STUBBED();
 }
 
 extern "C" i32 NuTexCreateEx(void) {
+    STUBBED();
     return 0;
 }
 
 void NuTexReadTex(void) {
+    STUBBED();
 }
 
 void NuTexSetTextureWithStagePS(NUNATIVETEX *tex, GLuint stage) {

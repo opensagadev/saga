@@ -282,21 +282,6 @@ void NuQuatBlend(NUQUAT *out, NUQUAT *q0, NUQUAT *q1, f32 blendA, f32 blendB) {
     out->w = q0->w * blendA + q1->w * blendB;
 }
 
-void NuQuatLerp2(NUQUAT *out, NUQUAT *from, NUQUAT *to, f32 t) {
-    f32 dot = to->x * from->x + to->y * from->y + to->z * from->z + to->w * from->w;
-    if (dot < 0.0f) {
-        out->x = (to->x + from->x) * t - from->x;
-        out->y = (to->y + from->y) * t - from->y;
-        out->z = (to->z + from->z) * t - from->z;
-        out->w = (to->w + from->w) * t - from->w;
-    } else {
-        out->x = (to->x - from->x) * t + from->x;
-        out->y = (to->y - from->y) * t + from->y;
-        out->z = (to->z - from->z) * t + from->z;
-        out->w = (to->w - from->w) * t + from->w;
-    }
-}
-
 f32 NuQuatDot(NUQUAT *q0, NUQUAT *q1) {
     return q0->x * q1->x + q0->y * q1->y + q0->z * q1->z + q0->w * q1->w;
 }
@@ -348,75 +333,4 @@ void NuQuatSlerpFast(NUQUAT *out, NUQUAT *from, NUQUAT *to, f32 t) {
         out->z = from->z * from_factor + target->z * to_factor;
         out->w = from->w * from_factor + target->w * to_factor;
     }
-}
-
-void NuQuatSlerp_Accurate(NUQUAT *out, NUQUAT *from, NUQUAT *to, f32 t) {
-    f32 scale;
-    f32 from_factor;
-    f32 to_factor;
-    f32 unused = 0.0f;
-    f32 omega;
-    f32 sin_omega;
-    NUQUAT to_prime;
-    scale = from->x * to->x + from->y * to->y + from->z * to->z + from->w * to->w;
-    if (scale < 0.0f) {
-        scale = -scale;
-        to_prime.x = -to->x;
-        to_prime.y = -to->y;
-        to_prime.z = -to->z;
-        to_prime.w = -to->w;
-    } else {
-        to_prime.x = to->x;
-        to_prime.y = to->y;
-        to_prime.z = to->z;
-        to_prime.w = to->w;
-    }
-    if (1.0f - scale > 0.0f) {
-        omega = 1.5707963705062866f - NuASin_Accurate(scale);
-        sin_omega = NuSin_Accurate(omega);
-        from_factor = NuSin_Accurate((1.0f - t) * omega) / sin_omega;
-        to_factor = NuSin_Accurate(t * omega) / sin_omega;
-    } else {
-        from_factor = 1.0f - t;
-        to_factor = t;
-    }
-    out->x = from->x * from_factor + to_prime.x * to_factor;
-    out->y = from->y * from_factor + to_prime.y * to_factor;
-    out->z = from->z * from_factor + to_prime.z * to_factor;
-    out->w = from->w * from_factor + to_prime.w * to_factor;
-}
-
-struct nuqtentry_s {
-    i16 count;
-    i16 field_02;
-    u8 *data;
-    u32 field_08;
-};
-
-struct nuqthdr_s {
-    u32 field_00[5];
-    nuqtentry_s *entries;
-    i32 entry_count;
-    u32 field_1c;
-    u8 *data;
-};
-
-static void NuQTFixAddress(nuqthdr_s *header) {
-    uintptr_t base = (uintptr_t)header;
-    header->entries = (nuqtentry_s *)((u8 *)header->entries + base);
-    header->data = header->data + base;
-    for (i32 index = 0; index < header->entry_count; ++index) {
-        if (header->entries[index].count > 0)
-            header->entries[index].data = header->entries[index].data + base;
-    }
-}
-
-static void NuQTUnfixAddress(nuqthdr_s *header) {
-    uintptr_t base = -(uintptr_t)header;
-    for (i32 index = 0; index < header->entry_count; ++index) {
-        if (header->entries[index].count > 0)
-            header->entries[index].data = header->entries[index].data + base;
-    }
-    header->entries = (nuqtentry_s *)((u8 *)header->entries + base);
-    header->data = header->data + base;
 }

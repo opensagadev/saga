@@ -1,24 +1,17 @@
+#include "decomp.h"
 #include "nu2api/nucore/common.h"
+#include "nu2api/nu3d/android/nudlist_callbacks.h"
 
 struct NuFadeObjGType;
 
 void NuInitHardwareFirst(i32, variptr_u *, i32 *, i32) {
-}
-
-void NuMarkSceneAsZPrePass() {
+    STUBBED();
 }
 
 void NuDisplayListSetInstSurfGeom(void *) {
-}
-
-void NuRainDrawDrop(i32, i32, float, float, i32) {
-}
-
-void NuRainDrawShape(float) {
+    STUBBED();
 }
 
 void NuTerminateHardware() {
-}
-
-void NuIOSDLDeferredMtlCallback(void *) {
+    STUBBED();
 }

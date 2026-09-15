@@ -1,6 +1,8 @@
 #include "decomp.h"
 #include "globals.h"
 #include "legoapi/legoapi_types.h"
+#include "legoapi/audio/audio.h"
+#include "legoapi/cutscenes/cutscenes.h"
 #include "nu2api/nucore/nugcutscene.h"
 #include "legoapi/world/world_shared.h"
 
@@ -9,6 +11,7 @@
 #include <math.h>
 
 #include "legoapi/characters/core/character.h"
+#include "legoapi/render/fx.h"
 #include "legoapi/menus/core/text.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/level.h"
@@ -26,9 +29,10 @@ struct instNUGCUTCHAR_s;
 struct NUGCUTCHAR_s;
 struct NUGCUTRIGID_s;
 struct instNUGCUTRIGID_s;
-extern "C" void instNuGCutSceneEnd(instNUGCUTSCENE_s *instance);
-i16 GetMusicIndex(char *name, nusound_filename_info_s *table, i32 default_index);
 
+static i32 CS_area = 0;
+CUTSYS *CS_cutsys = NULL;
+static WORLDINFO *CS_worldinfo = NULL;
 static CUTINFO *CS_CutInfo;
 static VARIPTR *CS_buffptr;
 static VARIPTR *CS_buffend;
@@ -96,9 +100,6 @@ static void CS_sfx(NUFPAR *fp) {
 i32 CUTCOUNT = 0;
 CUTINFO *CutList = NULL;
 i32 ACTIVECUTCOUNT = 0;
-i32 CS_area = 0;
-CUTSYS *CS_cutsys = NULL;
-WORLDINFO *CS_worldinfo = NULL;
 f32 CutSceneScale = 1.0f;
 extern "C" {
     u8 CUTSUBTITLEDEFAULT_R = 0xff;
@@ -719,12 +720,9 @@ extern "C" void *NuAnimData2FixPtrs(void *, isize, isize, i32);
 extern "C" StateAnim *StateAnimFixPtrs(StateAnim *, isize);
 extern "C" i32 StateAnimEvaluate(StateAnim *, u8 *, u8 *, f32);
 extern "C" void NuAnimCurve2SetApplyToMatrix_3(ani3_animheader_s *, i32, f32, NUMTX *);
-extern "C" i32 LookupDebrisEffectPage(char *, i32);
-extern "C" i32 LookupDebrisEffectPageOnly(char *, i32);
 extern "C" {
     extern i32 NuGCutDebFixUp_SearchAllPages;
     extern NUGCUTLOCATORFNENTRY_s *locatorfns;
-    extern i32 (*LookupLocatorVfxFn)(char *);
     extern i32 (*NuCutSceneSFXFixUp)(usize);
 }
 void NuGCutRigidCalcMtx(NUGCUTRIGID_s *, f32, numtx_s *);
@@ -740,6 +738,14 @@ static i32 termcutstream_hack;
 extern "C" {
     instNUGCUTSCENE_s *cutscene_load_instance;
     i32 NumCommonStreamingBuffers = 2;
+
+    void instNuGCutSceneFind(void) {
+        STUBBED();
+    }
+
+    void instNuGCutSceneCleanUp(void) {
+        STUBBED();
+    }
 }
 
 static void NuGCutSceneFixPtrs_Title(NUGCUTSCENE_s *cutscene, isize anim_delta) {
@@ -883,11 +889,46 @@ static void NuGCutSceneFixPtrs_Title(NUGCUTSCENE_s *cutscene, isize anim_delta) 
     }
 }
 
+extern "C" void NuGCutSceneSysInit(NUGCUTLOCATORFNENTRY_s *locator_functions) {
+    background_cutscene_instances = NULL;
+    active_cutscene_instances = NULL;
+    locatorfns = locator_functions;
+}
+
+void NuGCutSceneSysInitVfx(NUGCUTLOOKUPLOCATORVFXFN lookup, NUGCUTTRIGGERLOCATORVFXFN trigger,
+                           NUGCUTRELEASELOCATORVFXFN release, NUGCUTUPDATELOCATORVFXFN update) {
+    LookupLocatorVfxFn = lookup;
+    TriggerLocatorVfxFn = trigger;
+    ReleaseLocatorVfxFn = release;
+    UpdateLocatorVfxFn = update;
+}
+
+void NuGCutSceneRemapFocusIdToLocaterNum(NUGCUTSCENE_s *cutscene, VARIPTR *buffer) {
+    if (cutscene->version <= 4 || cutscene->camera_system == NULL ||
+        cutscene->camera_system->focus_state_animation == NULL || cutscene->locator_system == NULL) {
+        return;
+    }
+
+    buffer->addr = ALIGN(buffer->addr, 2);
+    cutscene->focus_camera_indices = reinterpret_cast<u16 *>(buffer->void_ptr);
+    NUGCUTLOCATORSYS_s *system = cutscene->locator_system;
+    for (u32 i = 0; i < system->locator_count; ++i) {
+        NUGCUTLOCATOR_s *locator = &system->locators[i];
+        if ((system->types[locator->type_index].flags & 8) != 0) {
+            *reinterpret_cast<u16 *>(buffer->void_ptr) = static_cast<u16>(i);
+            buffer->void_ptr = reinterpret_cast<u16 *>(buffer->void_ptr) + 1;
+        }
+    }
+}
+
 extern "C" {
 
     i32 NuGCutDebFixUp_SearchAllPages = 0;
     NUGCUTLOCATORFNENTRY_s *locatorfns = NULL;
-    i32 (*LookupLocatorVfxFn)(char *) = NULL;
+    NUGCUTUPDATELOCATORVFXFN UpdateLocatorVfxFn = NULL;
+    NUGCUTRELEASELOCATORVFXFN ReleaseLocatorVfxFn = NULL;
+    NUGCUTTRIGGERLOCATORVFXFN TriggerLocatorVfxFn = NULL;
+    NUGCUTLOOKUPLOCATORVFXFN LookupLocatorVfxFn = NULL;
     i32 (*NuCutSceneSFXFixUp)(usize) = NULL;
     NUGCUTSCENE_s *NuGCutSceneLoad(char *name, VARIPTR *buf, VARIPTR *buf_end, i32 flags) {
         char path[1036];
@@ -982,6 +1023,33 @@ extern "C" {
         buf->addr += bytes;
         return cutscene;
     }
+
+    // Original 0x433910: fix a version-10+ cutscene already resident at
+    // its final address, then remap its focus-camera indices.
+    NUGCUTSCENE_s *NuGCutSceneLoadAddr(NUGCUTSCENE_s *cutscene, i32 loaded_size, VARIPTR *buffer) {
+        if (cutscene->version <= 9) {
+            return NULL;
+        }
+        cutscene->loaded_size = loaded_size;
+        isize anim_delta = reinterpret_cast<isize>(cutscene) - cutscene->relocation_delta;
+        cutscene->string_delta = reinterpret_cast<isize>(cutscene) - cutscene->string_delta;
+        cutscene->relocation_delta = anim_delta;
+        if ((cutscene->flags & 8) != 0) {
+            NuGCutSceneFixPtrs_Title(cutscene, 0);
+        } else {
+            NuGCutSceneFixPtrs_Title(cutscene, anim_delta);
+        }
+        NuGCutSceneRemapFocusIdToLocaterNum(cutscene, buffer);
+        cutscene->string_delta = 0;
+        return cutscene;
+    }
+
+    void NuGCutSceneDestroy(NUGCUTSCENE_s *cutscene) {
+        if (cutscene->character_system != NULL && NuCutSceneDestroyCharacters != NULL) {
+            NuCutSceneDestroyCharacters(cutscene);
+        }
+    }
+
     void NuGCutSceneFixUp(NUGCUTSCENE_s *cutscene, NUGSCN *scene, i32 flags, i8 area) {
         if (cutscene == NULL) {
             return;
@@ -1415,6 +1483,10 @@ extern "C" {
         background_cutscene_instances = NULL;
         active_cutscene_instances = active;
     }
+
+    void PetesHackOfDeath(void) {
+        STUBBED();
+    }
 } // extern "C"
 
 struct instNUGCUTSCENE_s;
@@ -1428,7 +1500,6 @@ extern "C" void NuAnimData2CalcTime(nuanimdata2_s *, f32, nuanimtime_s *);
 extern "C" void instNuGCutLocatorUpdate(instNUGCUTSCENE_s *, NUGCUTLOCATORSYS_s *, instNUGCUTLOCATOR_s *,
                                         NUGCUTLOCATOR_s *, f32, NUMTX *, i32);
 void Draw3DObjectMtx(WORLDINFO_s *, i32, numtx_s *);
-extern CUTSCENESYS *CutSceneSys;
 
 static __used__ void LocatorFunction_Blaster(instNUGCUTSCENE_s *, NUGCUTLOCATORSYS_s *, instNUGCUTLOCATOR_s *,
                                              NUGCUTLOCATOR_s *locator, float frame, numtx_s *parent_mtx, int) {
@@ -1461,7 +1532,6 @@ extern "C" {
 void instNuGCutSceneEndButNotSystems(instNUGCUTSCENE_s *instance);
 void instNuGCutSceneResetCamLock(instNUGCUTSCENE_s *instance);
 extern "C" void DebFreeInstantly(i32 *handle);
-extern "C" void (*ReleaseLocatorVfxFn)(i32);
 
 static __used__ void instNuGCutRigidSysEnd(instNUGCUTSCENE_s *instance, float frame) {
     NUGCUTRIGIDSYS_s *system = instance->cutscene->rigid_system;
@@ -1650,7 +1720,6 @@ static void instNuGCutRigidSysUpdate(instNUGCUTSCENE_s *, float, int);
 static void instNuGCutCamSysUpdate(instNUGCUTSCENE_s *, float);
 static void instNuGCutTriggerSysUpdate(instNUGCUTSCENE_s *, float);
 static void instNuGCutSceneClipTest(instNUGCUTSCENE_s *);
-extern "C" void instNuGCutSceneEnd(instNUGCUTSCENE_s *instance);
 
 static inline i32 instNuGCutSceneRepeatCount(instNUGCUTSCENE_s *instance) {
     const u32 packed = *reinterpret_cast<u32 *>(&instance->flags_88);
@@ -2299,6 +2368,7 @@ extern "C" void NuGCutSceneSysRender(i32 paused) {
 }
 
 static __used__ void CutScene_OverrideConfigFileName_LSW(char *, int, int) {
+    STUBBED();
 }
 
 void NewCopyAnims(instNUGCUTSCENE_s *instance) {

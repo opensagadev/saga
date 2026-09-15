@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "MechInputTouch_types.h"
 #include "globals.h"
 #include "legoapi/legoapi_types.h"
@@ -57,6 +58,7 @@ void MechSystems::ExitLevel(WORLDINFO_s *) {
 }
 
 void MechSystems::FindMoveToMarkerAtPos(VuVec const &, bool) {
+    STUBBED();
 }
 
 i32 MechInputTouchMenuController::AnyTouchesThisFrame = 0;
@@ -88,6 +90,7 @@ void MechSystems::Init() {
 }
 
 void MechSystems::LoadPerm() {
+    STUBBED();
 }
 
 MechSystems::MechSystems() {
@@ -115,6 +118,7 @@ MechSystems::MechSystems() {
 }
 
 void MechSystems::NewMoveToMarker(MechObjectInterface &) {
+    STUBBED();
 }
 
 void MechSystems::NewRadarPulse(VuVec const &position, bool paused) {
@@ -262,6 +266,7 @@ void MechSystems::RenderCurrentPlayerHighlight() {
 }
 
 void MechSystems::Reset(ThingResetData *) {
+    STUBBED();
 }
 
 void MechSystems::UnhookClickToPressStart() {

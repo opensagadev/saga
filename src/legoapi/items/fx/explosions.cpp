@@ -1,8 +1,10 @@
 #include "decomp.h"
+#include "legoapi/actions/combat/hits.h"
 #include "globals.h"
 #include "legoapi/characters/core/character.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/menus/screens/arcade.h"
 #include "legoapi/world/world.h"
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numath/nufloat.h"
@@ -18,8 +20,6 @@ struct SHOPINPUT;
 
 extern EXPLOSION Explosion[8];
 extern i32 i_explosion;
-
-u16 ObjHitObj_Flags(GameObject_s *object);
 
 EXPLOSION *AddExplosion(nuvec_s *position, float radius, float strength, GameObject_s *object, i32 effect, i32 flags) {
     EXPLOSION *explosion = &Explosion[i_explosion];
@@ -44,6 +44,7 @@ EXPLOSION *AddExplosion(nuvec_s *position, float radius, float strength, GameObj
 }
 
 void SetupBlowupSfx(WORLDINFO_s *, specialsfx_s *) {
+    STUBBED();
     // The original Android function has no behavior (padding followed by ret).
 }
 
@@ -77,10 +78,8 @@ extern "C" i32 AddGameDebrisRot(APIDEBRISSYS_s *, i32, NUVEC *, i32, i16, i16);
 i32 SphereSphereOverlapScaleY(NUVEC *, f32, f32, NUVEC *, f32, f32);
 BOLTTYPE_s *BoltType_FindByID(i32, WORLDINFO_s *);
 PART_s *Bolt_HitParts(BOLT_s *, NUVEC *, NUVEC *, NUVEC *, f32, i32);
-i32 Arcade_GetMode(u32 *);
 i32 CannotKill(GameObject_s *);
 i32 Player_HasInvincibility(GameObject_s *);
-i32 ObjHitObj(GameObject_s *, GameObject_s *, i32, u16, i32, i32);
 void ObjHitShield(GameObject_s *, GameObject_s *, i32, BOLT_s *);
 void NewBuzz(nupad_s *, f32, i32);
 void NewRumble(nupad_s *, f32, i32);

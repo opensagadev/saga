@@ -1,4 +1,5 @@
 #include "legoapi/gizmos/transport/grapples.h"
+#include "legoapi/actions/combat/rope.h"
 
 #include "decomp.h"
 #include "globals.h"
@@ -19,7 +20,6 @@
 extern "C" void NewTerrPlatformsOff(void);
 f32 GameShadow(GameObject_s *object, NUVEC *position, f32 probe_height, i32 terrain_mask);
 void FindAnglesZX(NUVEC *normal, u16 *x_rotation, u16 *z_rotation);
-void DrawRopeCurved(NUVEC *start, NUVEC *points, i32 point_count, i32 flags, NUMTL *material);
 void EnableShadowMapRendering(i32 enabled);
 void ResetShadowMapRendering();
 
@@ -34,36 +34,6 @@ struct GRAPPLEPROGRESS {
 
 static NUVEC GrapplePointOffset = {0.0f, -0.023f, 0.169f};
 static GRAPPLE DynamicGrapple[4];
-
-GRAPPLE *Grapple_AddDynamic(void *attached_object, i32 retain_attachment) {
-    for (i32 index = 0; index < 4; ++index) {
-        if (DynamicGrapple[index].attached_object == attached_object) {
-            return &DynamicGrapple[index];
-        }
-    }
-
-    for (i32 index = 0; index < 4; ++index) {
-        GRAPPLE *grapple = &DynamicGrapple[index];
-        if (grapple->attached_object == NULL) {
-            grapple->attached_object = static_cast<GameObject_s *>(attached_object);
-            grapple->retain_attachment = static_cast<u8>(retain_attachment);
-            grapple->flags |= GRAPPLE_FLAG_VISIBLE;
-            return grapple;
-        }
-    }
-    return NULL;
-}
-
-void Grapple_RemoveDynamic(void *attached_object) {
-    for (i32 index = 0; index < 4; ++index) {
-        GRAPPLE *grapple = &DynamicGrapple[index];
-        if (grapple->attached_object == attached_object) {
-            grapple->attached_object = NULL;
-            grapple->flags &= ~GRAPPLE_FLAG_VISIBLE;
-            return;
-        }
-    }
-}
 
 static void Grapple_ResetRopePoints(GRAPPLE *grapple) {
     const f32 segment_length = grapple->rope_length / 6.0f;
@@ -86,9 +56,6 @@ static void Grapple_ResetDynamic(GRAPPLE *grapple, i32 index) {
     grapple->attached_object = NULL;
     grapple->has_terrain_platform = 1;
 }
-
-i32 LEGOCONTEXT_GRAPPLE = -1;
-extern i32 LEGOCONTEXT_JUMP;
 
 GameObject_s *Grapple_Occupied(GRAPPLE *grapple, GameObject_s *object, AIPATHCNX_s *connection) {
     if (LEGOCONTEXT_GRAPPLE != -1) {
@@ -530,6 +497,22 @@ static i32 Grapples_Load(void *, void *) {
     return {};
 }
 
+static __used__ void Grapple_FindNearestInList(nuvec_s *, GRAPPLE_s *, int, GameObject_s *, GRAPPLE_s **, float *) {
+    STUBBED();
+}
+
+void Grapple_FindNearest(WORLDINFO_s *, nuvec_s *, GameObject_s *, float *) {
+    STUBBED();
+}
+
+void Grapple_FindNearestToPos(WORLDINFO_s *, nuvec_s *) {
+    STUBBED();
+}
+
+void Grapple_DrawLine(GameObject_s *) {
+    STUBBED();
+}
+
 ADDGIZMOTYPE *Grapples_RegisterGizmo(i32 type_id) {
     static ADDGIZMOTYPE addtype;
 
@@ -567,4 +550,82 @@ ADDGIZMOTYPE *Grapples_RegisterGizmo(i32 type_id) {
     grapple_gizmotype_id = type_id;
 
     return &addtype;
+}
+
+GRAPPLE *Grapple_AddDynamic(void *attached_object, i32 retain_attachment) {
+    for (i32 index = 0; index < 4; ++index) {
+        if (DynamicGrapple[index].attached_object == attached_object) {
+            return &DynamicGrapple[index];
+        }
+    }
+
+    for (i32 index = 0; index < 4; ++index) {
+        GRAPPLE *grapple = &DynamicGrapple[index];
+        if (grapple->attached_object == NULL) {
+            grapple->attached_object = static_cast<GameObject_s *>(attached_object);
+            grapple->retain_attachment = static_cast<u8>(retain_attachment);
+            grapple->flags |= GRAPPLE_FLAG_VISIBLE;
+            return grapple;
+        }
+    }
+    return NULL;
+}
+
+void Grapple_RemoveDynamic(void *attached_object) {
+    for (i32 index = 0; index < 4; ++index) {
+        GRAPPLE *grapple = &DynamicGrapple[index];
+        if (grapple->attached_object == attached_object) {
+            grapple->attached_object = NULL;
+            grapple->flags &= ~GRAPPLE_FLAG_VISIBLE;
+            return;
+        }
+    }
+}
+
+void Grapple_MoveCode(GameObject_s *) {
+    STUBBED();
+}
+
+// Original 0x4d6eb0, 220 bytes.
+void Grapple_ReachedTop(GameObject_s *) {
+    STUBBED();
+}
+
+void Grapple_SetPlayerTargetPoint(GameObject_s *object, nuvec_s *target) {
+    target->x = 0.0f;
+    target->z = 0.0f;
+    target->y = -object->field_0x768;
+    i32 amplitude = (static_cast<i32>(object->grapple_swing_degrees) << 16) / 360;
+    i32 angle = static_cast<i32>(static_cast<f32>(amplitude) * NuTrigTable[object->grapple_swing_phase >> 1] *
+                                 static_cast<GRAPPLE *>(object->field_0x788)->field_0x4c);
+    NuVecRotateX(target, target, angle);
+    NuVecRotateY(target, target, object->takeover_start_angle);
+    NuVecAdd(target, target, &static_cast<GRAPPLE *>(object->field_0x788)->shadow_probe_position);
+}
+
+// Original 0x4d6f90, 248 bytes.
+i32 Grapple_SetTargetMom(GameObject_s *object) {
+    if (object->field_0x7a3 == 1) {
+        object->target_velocity.x = (object->external_force.x - object->apiobj.upper_position.x) * 20.0f;
+        object->target_velocity.y = (object->external_force.y - object->apiobj.upper_position.y) * 20.0f;
+        object->target_velocity.z = (object->external_force.z - object->apiobj.upper_position.z) * 20.0f;
+    } else {
+        NUVEC point;
+        Grapple_SetPlayerTargetPoint(object, &point);
+        object->target_velocity.x = (point.x - object->apiobj.upper_position.x) * 5.0f;
+        object->target_velocity.y = (point.y - object->apiobj.upper_position.y) * 5.0f;
+        object->target_velocity.z = (point.z - object->apiobj.upper_position.z) * 5.0f;
+    }
+    return 1;
+}
+
+// Original 0x4d7090, 23 bytes.
+void Grapple_SetRotOrder(GameObject_s *object) {
+    if (object->field_0x7a3 != 1)
+        object->field_0x1086 = 2;
+}
+
+i32 Grapple_LookAtPos(GameObject_s *, nuvec_s *) {
+    STUBBED();
+    return 0;
 }

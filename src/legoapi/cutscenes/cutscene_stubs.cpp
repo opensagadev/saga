@@ -2,6 +2,7 @@
 #include "decomp.h"
 #include "legoapi/legoapi_types.h"
 #include "nu2api/nucore/nugcutscene.h"
+#include "nu2api/nucore/NuDynamicLight.h"
 #include "nu2api/nu3d/nurndr.h"
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numusic/numusic.h"
@@ -22,10 +23,7 @@ extern "C" {
     extern i32 processdeb;
     extern f32 glyntestha;
 
-    i32 (*TriggerLocatorVfxFn)(u16, f32 *) = NULL;
-    void (*ReleaseLocatorVfxFn)(i32) = NULL;
     extern void (*NuCutSceneCharacterRelease)(instNUGCUTCHAR_s *, NUGCUTCHAR_s *);
-    void (*UpdateLocatorVfxFn)(i32, f32 *) = NULL;
     void (*NuCutSceneSFXUpdate)(NUGCUTLOCATORSYS_s *, instNUGCUTLOCATOR_s *, NUGCUTLOCATOR_s *, f32, NUMTX *,
                                 i32) = NULL;
 
@@ -47,16 +45,12 @@ extern "C" {
 extern "C" {
 
     i32 CheckStreamFileID(void) {
+        STUBBED();
         return 0;
     }
 
-    void ClearLinkedCutSceneMusic(void *context) {
-        if (context == NULL || Music.track_data == context) {
-            Music.track_data = NULL;
-        }
-    }
-
     void DisplayCutSceneMemory(void) {
+        STUBBED();
     }
 
     void PauseGameCut(void) {
@@ -94,6 +88,7 @@ extern "C" {
     }
 
     void instCutSceneTimeElapsed(void) {
+        STUBBED();
     }
 
     i32 instNuGCutSceneAddCamTgt(instNUGCUTSCENE_s *instance, NUVEC *target, f32 start_frame, f32 duration,
@@ -111,9 +106,11 @@ extern "C" {
     }
 
     void instNuGCutSceneAddCleanUpItem(void) {
+        STUBBED();
     }
 
     void instNuGCutSceneCalculateAverageCentre(void) {
+        STUBBED();
     }
 
     void instNuGCutSceneChain(instNUGCUTSCENE_s *instance, instNUGCUTSCENE_s *next) {
@@ -121,9 +118,7 @@ extern "C" {
     }
 
     void instNuGCutSceneCharGetStartMtx(void) {
-    }
-
-    void instNuGCutSceneCleanUp(void) {
+        STUBBED();
     }
 
     void instNuGCutSceneCreateCamTgtArray(instNUGCUTSCENE_s *instance, i32 count, VARIPTR *buf) {
@@ -146,26 +141,28 @@ extern "C" {
         instance->flags_89 &= ~0x8;
     }
 
-    void instNuGCutSceneFind(void) {
-    }
-
     i32 instNuGCutSceneIsFinished(instNUGCUTSCENE_s *instance) {
         return (instance->flags_89 & 0x10) != 0 ? -1 : 0;
     }
 
     void instNuGCutSceneJumpToEnd(void) {
+        STUBBED();
     }
 
     void instNuGCutSceneJumpToLastFrame(void) {
+        STUBBED();
     }
 
     void instNuGCutScenePlay(void) {
+        STUBBED();
     }
 
     void instNuGCutSceneResetCleanUp(void) {
+        STUBBED();
     }
 
     void instNuGCutSceneRotateY(void) {
+        STUBBED();
     }
 
     void instNuGCutSceneSetEndCallback(instNUGCUTSCENE_s *instance, void (*callback)(instNUGCUTSCENE_s *)) {
@@ -191,9 +188,11 @@ extern "C" {
     }
 
     void instNuGCutSceneSetPos(void) {
+        STUBBED();
     }
 
     void instNuGCutSceneSetRepeat(void) {
+        STUBBED();
     }
 
     void instNuGCutSceneStop(instNUGCUTSCENE_s *instance) {
@@ -262,12 +261,15 @@ extern "C" {
     }
 
     void instNuGCutSceneTranslate(void) {
+        STUBBED();
     }
 
     void instNuGCutSceneWaitAtEnd(void) {
+        STUBBED();
     }
 
     void instNuGCutSoundStream(void) {
+        STUBBED();
     }
 
     void instNuGCutLocatorUpdate(instNUGCUTSCENE_s *instance, NUGCUTLOCATORSYS_s *system,
@@ -368,20 +370,18 @@ extern "C" {
                 }
                 inst_locator->effect_handle = -1;
             } else {
-                NUMTX matrix;
-                NuGCutLocatorCalcMtx(locator, frame, &matrix, &time);
+                VuMtx matrix;
+                NuGCutLocatorCalcMtx(locator, frame, &matrix.matrix, &time);
                 if ((locator->flags & 4) != 0) {
-                    NuMtxPreTranslate(&matrix, &locator->pivot);
+                    NuMtxPreTranslate(&matrix.matrix, &locator->pivot);
                 }
                 if (parent_mtx != NULL) {
-                    NuMtxMul(&matrix, &matrix, parent_mtx);
+                    NuMtxMul(&matrix.matrix, &matrix.matrix, parent_mtx);
                 }
-                f32 values[16];
-                memcpy(values, &matrix, sizeof(values));
                 if (inst_locator->effect_handle < 0) {
-                    inst_locator->effect_handle = TriggerLocatorVfxFn(static_cast<u16>(effect_index), values);
+                    inst_locator->effect_handle = TriggerLocatorVfxFn(effect_index, &matrix);
                 } else {
-                    UpdateLocatorVfxFn(inst_locator->effect_handle, values);
+                    UpdateLocatorVfxFn(inst_locator->effect_handle, &matrix);
                 }
             }
         } else if ((type->flags & 4) != 0 && NuCutSceneSFXUpdate != NULL) {

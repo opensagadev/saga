@@ -1,5 +1,7 @@
 #include <string.h>
 #include "decomp.h"
+#include "legoapi/gizmo/object/gizmoblowups.h"
+#include "legoapi/items/objects/grabber.h"
 #include "nu2api/nu3d/nuspecial.h"
 extern "C" float FRAMETIME;
 #include "nu2api/numath/nutrig.h"
@@ -9,8 +11,13 @@ extern "C" {
     void PlaySfx(const char *, nuvec_s *);
 }
 #include "legoapi/legoapi_types.h"
+#include "legoapi/gizmos/fx/gizmopickups.h"
+#include "legoapi/gizmo/object/gizmopickup.h"
+#include "legoapi/items/collect/minikits.h"
 #include "legoapi/world/level.h"
 #include "legoapi/characters/motion.h"
+#include "legoapi/render/core/terrain.h"
+#include "legoapi/render/core/rtl.h"
 #include "nu2api/numath/numtx.h"
 
 // Original 0x22aae0, 264 bytes.
@@ -127,13 +134,10 @@ extern "C" {
     extern f32 GameTimer;
     extern TERRAIN_SURFACE_s TerSurface[32];
     void NewTerrPlatformsOff();
-    i32 ShadowInfo();
     void PlaySfxAndSetPitch(const char *, NUVEC *, f32);
-    f32 AnimDuration(i32, i32, i32, i32, i32);
     f32 AnimListFrame(CHARACTERMODEL_s *, i32, i32);
     AIANTINODE_s *AIAntinodeCreateSingleFrame(NUVEC *, f32);
 }
-extern GRABBER_s *Grab_grabber;
 extern WORLDINFO_s *WORLD;
 extern LEVELDATA *DEATHSTARESCAPEB_LDATA, *JABBASPALACEB_LDATA, *CLOUDCITYTRAPA_LDATA;
 extern NUVEC ShadNorm;
@@ -153,11 +157,7 @@ void ConstantRumble(GameObject_s *, f32, f32);
 void NewRumbleAllPlayers(f32, f32, i32, i32);
 void Hint_SetComplete(i32);
 i32 GameAnimSet_IsAnimationReset(GAMEANIMSET_s *);
-GIZMOPICKUP_s *GizmoPickup_InBox(WORLDINFO_s *, i32, NUVEC *, NUVEC *);
-void Pup_CollectCoin(WORLDINFO_s *, GIZMOPICKUP_s *, i32, GameObject_s *, i32);
-void CollectMinikit(NUVEC *, char *, i32);
 GIZMOBLOWUP_s *FindNearestGizmoBlowUp(WORLDINFO_s *, NUVEC *, f32);
-i32 GizmoBlowupBlowup(GIZMOBLOWUP_s *, i32, i32, i32, GameObject_s *, i32);
 static __used__ i32 IsGrabbable(GameObject_s *object) {
     return (object->apiobj.character_data->game_character->flags_090 & GAMECHARACTER_FLAG_GRAB_DISABLED) == 0;
 }
@@ -494,7 +494,6 @@ void Grabber_Update(WORLDINFO_s *world) {
 
 #include "legoapi/gizmo/base/gizmo.h"
 extern i32 obstacle_gizmotype_id;
-extern "C" i32 FindPlatInst(i32);
 void Grabber_Reset(WORLDINFO_s *world) {
     GRABBER_s *g = world->grabber;
     if (g == NULL)
@@ -591,11 +590,6 @@ void PartKill_Grabber(PART_s *part, i32) {
 #include "legoapi/characters/core/character.h"
 #include "nu2api/nucore/nuhgobj.h"
 #include "nu2api/nu3d/nurndr.h"
-extern "C" {
-    void rtlResetEx(rtldata_s *, i32);
-    void rtlApplySetScale(void *, rtldata_s *, NUVEC *, NUMTX *, i32, f32);
-    void rtlSetLights(rtldata_s *);
-}
 extern i32 CHARSHADOWS_ON, Paused, Reflections_On;
 extern LEVELDATA *BLOCKADERUNNERC_LDATA;
 extern MAKELAYERLISTFN MakeLayerList;

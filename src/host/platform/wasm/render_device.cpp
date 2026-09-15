@@ -11,8 +11,6 @@
 #include "nu2api/nuandroid/ios_graphics.h"
 #include "nu2api/nucore/nucore.hpp"
 
-extern thread_local i32 gt_glContextIndex;
-extern i32 g_nextGLContextIndex;
 extern u32 g_activeAttributes;
 
 namespace {
@@ -103,6 +101,7 @@ void HostSetMsaaEnabled(bool enabled) {
 }
 
 void NuRenderInspectEGLConfig(EGLDisplay, EGLConfig) {
+    STUBBED();
 }
 
 void NuRenderDevice::BeginCriticalSection(const char *, i32) {

@@ -5,12 +5,14 @@
 
 #include "gameapi/gui/apimenu.h"
 #include "legoapi/characters/core/character.h"
+#include "legoapi/characters/core/customiser.h"
 #include "legoapi/core/config/cheat.h"
 #include "legoapi/core/input/gamepads.h"
 #include "legoapi/core/input/timer.h"
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/items/base/apiobject.h"
 #include "legoapi/legoapi_types.h"
+#include "legoapi/gizmo/object/gizmopickup.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/levels/episode.h"
 #include "nu2api/nucore/nustring.h"
@@ -34,7 +36,6 @@ extern void ResetAdaptiveDifficulty(void);
 extern void Cheats_TurnOff(i32);
 extern void Hint_ClearHintsAndDoneFlags(void);
 extern void GamePad_InitButtons(void);
-extern void Customiser_CopyDefaultPiecesToSave(CUSTOMISER *, CUSTOMISESAVE *);
 extern void FinishWeirdoNames(i32);
 extern void Store_UnlockPack(i32, bool);
 extern void ReCalculateCompletionPoints(void);
@@ -182,6 +183,7 @@ void IncreaseScore(u32 *total, u64 amount, i32 apply_multiplier) {
 }
 
 void RegisterHelpers() {
+    STUBBED();
 }
 
 void NewGame() {

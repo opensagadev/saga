@@ -49,16 +49,21 @@ i32 Game_100PercentComplete();
 GameObject_s *FindGameObject(i32 id, u32 type, i32 a3, i32 a4, i32 a5);
 CABLE_s *CreateCable(GameObject_s *source, GameObject_s *target, i32 flags);
 void KillGameObject(GameObject_s *object, i32 reason, i32 flags);
+void RemoveGameObject(GameObject_s *object, i32);
+void GameObjectOrigin(GameObject_s *object);
+void TakeOverGameObject(GameObject_s *rider, GameObject_s *vehicle, i32 blend_camera, i32 immediate);
+void ReleaseTakeOver(GameObject_s *object, i32 immediate);
+void ReleaseAllTakeOvers();
 void InitSurfaceInfo(GameObject_s *object);
 i32 SetObjOnSurface(GameObject_s *object, i32 mode);
 i32 Game_IgnoreInput();
+i32 GameRayCast(NUVEC *position, NUVEC *displacement, f32 radius, i32 mask);
 GameObject_s *GetNamedGameObject(AISYS_s *aisys, char *name);
 char *GameObj_GetName(i32 model, GameObject_s *object, char *buffer);
 APIOBJECT_s *GameAPIOBJECTFromObjID(u8 object_id);
 f32 GameShadow(GameObject_s *object, NUVEC *position, f32 scale, i32 flags);
 i32 GameDrawCharacterModel(CHARACTERMODEL_s *model, ANIMPACKET_s *animation, NUMTX *matrix, NUMTX *secondary_matrix,
                            NUMTX *tertiary_matrix, NUMTX *auxiliary_matrix, GameObject_s *object, u32 flags);
-extern "C" i32 InModelList(APICHARACTERMODELLIST_s *list, i32 id, i32 *out_index);
 
 void GameAISysInit();
 void GameAISysReset(struct AISYS_s *aisys);

@@ -9,17 +9,21 @@ char application_dir[256];
 i32 g_badGameDiscStatus;
 
 i32 NuFileCreatePath(void) {
+    STUBBED();
     return 0;
 }
 
 i32 NuFileCreateDir(void) {
+    STUBBED();
     return 0;
 }
 
 void NuFileCloseDir(void) {
+    STUBBED();
 }
 
 i32 NuFileOpenDir(void) {
+    STUBBED();
     return 0;
 }
 
@@ -29,6 +33,7 @@ i32 NuFileGetInfo(void) {
 }
 
 i32 NuFileRename(void) {
+    STUBBED();
     return 0;
 }
 
@@ -99,6 +104,7 @@ i32 DEV_FormatName(NUFILE_DEVICE *device, char *formatted_name, char *path, i32 
 }
 
 i32 NuFileReadDir(NUFILE file) {
+    STUBBED();
     return 0;
 }
 

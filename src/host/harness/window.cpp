@@ -20,6 +20,7 @@
 #include "host/platform/runtime.hpp"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/legoapi_types.h"
+#include "legoapi/gizmo/object/gizmopickup.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/level.h"
 #include "nu2api/nu3d/NuRenderDevice.h"
@@ -450,8 +451,7 @@ namespace {
                  display->nspecials, display->nsort_pris);
         for (i32 type = 0; type < 256; ++type) {
             if (item_counts[type] != 0) {
-                LOG_INFO("display-list type 0x%02x: count=%d handler=%p", type, item_counts[type],
-                         reinterpret_cast<void *>(g_nudl_dispatch_table[type]));
+                LOG_INFO("display-list type 0x%02x: count=%d", type, item_counts[type]);
             }
         }
     }

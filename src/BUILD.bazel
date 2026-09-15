@@ -37,7 +37,6 @@ _ENGINE_ROOT_SRCS = [
     "batman.cpp",
     "globals.cpp",
     "java/android.cpp",
-    "java/android_state.cpp",
 ]
 
 _ENGINE_SRCS = _ENGINE_ROOT_SRCS + glob(
@@ -49,7 +48,7 @@ _ENGINE_SRCS = _ENGINE_ROOT_SRCS + glob(
 _HOST_EXCLUDES = [
     "nu2api/nucore/android/nupostresource_create.cpp",
     "java/android.cpp",
-    "nu2api/nu3d/android/gles_extensions.cpp",
+    "nu2api/nu3d/android/NuGLES2Extensions.cpp",
     "nu2api/nucore/android/NuInputDevice_android.cpp",
     "nu2api/nucore/nunew.cpp",
 ]

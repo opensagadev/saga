@@ -42,7 +42,6 @@ u8 ForcePlayEndFrame = 0;
 u8 ForceEulerToQuat = 0;
 u8 QuatPushes[4] = {};
 i32 NumQuatPushes = 0;
-u8 BitCountTable[256] = {};
 f32 MAXFRAMETIME = 0;
 extern "C" {
     f32 partglobaltime = 0;
@@ -72,111 +71,6 @@ NUGCUTSCENERESETCHARACTERSFN NuCutSceneResetCharactersFn = NULL;
 NUGCUTSCENERIGIDPOSTRENDERFN NuCutSceneRigidPostRender = NULL;
 NUGCUTSCENEREQUESTSFXFN NuCutSceneRequestSFX = NULL;
 
-static CHARACTER_CONTEXT_INFO_s CharacterContextInfoTable[] = {
-    {"NoContext", -1, 0x00001000, 0},
-    {"Jump", -1, 0x01000000, 0},
-    {"LandJump", -1, 0x00000015, 0},
-    {"LandJump2", -1, 0x00000015, 0},
-    {"LandFlip", -1, 0x00000015, 0},
-    {"LandComboJump", -1, 0x00000015, 0},
-    {"Combo", -1, 0x00800010, 1},
-    {"WeaponIn", -1, 0x00001013, 0},
-    {"WeaponOut", -1, 0x00001013, 0},
-    {"Force", -1, 0x00000222, 0},
-    {"ComboRotate", -1, 0x00000011, 0},
-    {"Shoot", -1, 0x00000011, 0},
-    {"Interface", -1, 0x00000033, 0},
-    {"Block", -1, 0x04000010, 0},
-    {"LandLunge", -1, 0x00800011, 0},
-    {"LandSlam", -1, 0x00800011, 0},
-    {"Teleport", -1, 0x000001b3, 12},
-    {"Swipe", -1, 0x00800010, 0},
-    {"Tube", -1, 0x00000408, 0},
-    {"ForceThrow", -1, 0x00000012, 0},
-    {"HoverUp", -1, 0x00000030, 0},
-    {"Rocket", -1, 0x00000011, 0},
-    {"TakeHit", -1, 0x10000031, 0},
-    {"Zap", -1, 0x00000010, 0},
-    {"Deactivated", -1, 0x10200031, 0},
-    {"Hold", -1, 0x04000010, 0},
-    {"LandSpecial", -1, 0x00000015, 0},
-    {"Communicate", -1, 0x00000033, 0},
-    {"ForcePush", -1, 0x00000002, 0},
-    {"ForcePushed", -1, 0x00000231, 0},
-    {"ForceDeflect", -1, 0x00000002, 0},
-    {"ForceFrozen", -1, 0x0000000b, 0},
-    {"BigJump", -1, 0x02400111, 0},
-    {"BackFlip", -1, 0x00000091, 0},
-    {"Recoil", -1, 0x00000009, 0},
-    {"ForcedBack", -1, 0x00000008, 0},
-    {"DropIn", -1, 0x00040113, 0},
-    {"DropOut", -1, 0x00040113, 0},
-    {"Dodge", -1, 0x00000092, 1},
-    {"Punch", -1, 0x00010032, 1},
-    {"Push", -1, 0x00002030, 0},
-    {"PushSpinner", -1, 0x00003010, 0},
-    {"LandCombatRoll", -1, 0x000000b4, 0},
-    {"Turn", -1, 0x00000190, 0},
-    {"Doomed", -1, 0x00400110, 0},
-    {"Launch", -1, 0x00000000, 0},
-    {"BuildIt", -1, 0x00000010, 0},
-    {"ThrowDetonator", -1, 0x00000033, 0},
-    {"Grabbed", -1, 0x00000013, 0},
-    {"SpecialMoveVictim", -1, 0x00000033, 0},
-    {"Roll", -1, 0x00000010, 16},
-    {"UnRoll", -1, 0x00000013, 16},
-    {"Slide", -1, 0x40000030, 0},
-    {"BeenDragged", -1, 0x00000000, 0},
-    {"ZipDown", -1, 0x00000030, 0},
-    {"Loop", -1, 0x00000190, 0},
-    {"Poo", -1, 0x00000033, 0},
-    {"Grab", -1, 0x00000033, 0},
-    {"Eaten", -1, 0x60020933, 0},
-    {"BarrelRoll", -1, 0x00000190, 0},
-    {"BeenTakenOver", -1, 0x600209b0, 0},
-    {"GetIn", -1, 0x60400130, 0},
-    {"Flatten", -1, 0x00000033, 0},
-    {"Buck", -1, 0x00000033, 0},
-    {"Eat", -1, 0x00000033, 0},
-    {"Disorientate", -1, 0x00000100, 0},
-    {"Activate", -1, 0x00200033, 0},
-    {"ZappedByFloor", -1, 0x00000031, 0},
-    {"Climb", -1, 0x00000431, 0},
-    {"Tightrope", -1, 0x00080431, 0},
-    {"WallShuffle", -1, 0x00003031, 0},
-    {"Grapple", -1, 0x40000430, 0},
-    {"ZipUp", -1, 0x40000430, 0},
-    {"PlaceDetonator", -1, 0x00000033, 0},
-    {"PickUpDetonator", -1, 0x00000031, 0},
-    {"PullLever", -1, 0x00000031, 0},
-    {"Float", -1, 0x00000030, 2},
-    {"Signal", -1, 0x04000433, 0},
-    {"Batarang", -1, 0x08000033, 0},
-    {"Hang", -1, 0x00000430, 0},
-    {"Glide", -1, 0x00000430, 0},
-    {"Catch", -1, 0x00000013, 0},
-    {"Techno", -1, 0x84000031, 0},
-    {"AttractoTarget", -1, 0x04000033, 0},
-    {"AttractoDeposit", -1, 0x00000033, 0},
-    {"Sonar", -1, 0x00000033, 0},
-    {"LedgeTerrain", -1, 0x00000431, 0},
-    {"Transform", -1, 0x00000033, 0},
-    {"WallJumpWait", -1, 0x00002431, 0},
-    {"SuperCarry", -1, 0x00000033, 0},
-    {"PushObstacle", -1, 0x00003010, 0},
-    {"Stunned", -1, 0x10000031, 0},
-    {"Ledge", -1, 0x00000431, 0},
-    {"Security", -1, 0x00000033, 0},
-    {"Ballooning", -1, 0x00100010, 0},
-    {"ThrowQuick", -1, 0x00000033, 0},
-    {"DieAir", -1, 0x000080b1, 0},
-    {"DieGround", -1, 0x000080b1, 0},
-    {"HatMachine", -1, 0x00000033, 0},
-    {"Whip", -1, 0x00000033, 1},
-    {"NetWait", -1, 0x00000023, 0},
-};
-
-CHARACTER_CONTEXT_INFO_s *CInfo = &CharacterContextInfoTable[1];
 USING_EXTRA_ACTIONS_FN UsingExtraActionsFn = NULL;
 
 // ------------------------------------------------------------------------
@@ -214,6 +108,7 @@ u32 areaSuitBits = 0;
 u8 *Game_LevelSave = NULL;
 EPISODESAVE_s *Game_EpisodeSave = NULL;
 u16 *Game_CompletionSave = NULL;
+void (*CheckLostDataFn)(GIZMOBLOWUP_s *) = NULL;
 MISSIONSAVE *Game_MissionSave = NULL;
 
 // ------------------------------------------------------------------------
@@ -320,15 +215,10 @@ f32 SpaceRumbleTimer = 0.0f;
 EXPLOSION Explosion[8] = {};
 i32 i_explosion = 0;
 
-u16 rtltimer1 = 0;
-f32 rtltimer1adv = 2500.0f;
-
 // ------------------------------------------------------------------------
 // Camera
 // ------------------------------------------------------------------------
 NUCAMERA *pNuCam = NULL;
-static GAMECAMERA_s GameCamera;
-GAMECAMERA_s *GameCam = &GameCamera;
 i32 (*GameCam_ObjLookingWithLeftStick)(GameObject_s *object) = nullptr;
 i32 LookAtBoth = 0;
 PLAYPLANE_s PlayPlane[6] = {};
@@ -345,9 +235,6 @@ u32 GAMEPAD_SKIP = GAMEPAD_BUTTON_START | GAMEPAD_BUTTON_JUMP | GAMEPAD_BUTTON_T
 // ------------------------------------------------------------------------
 // Platform & device info
 // ------------------------------------------------------------------------
-ANativeWindow *g_appWindow = NULL;
-char g_deviceManufacturer[256] = {0};
-char g_deviceModel[256] = {0};
 i32 g_isLowestEndDevice = 0;
 i32 g_isLowEndDevice = 0;
 i32 g_isMidRangeDevice = 0;
@@ -359,11 +246,9 @@ u8 aicreature_sets_alive[16] = {};
 // Render / compatibility options
 // ------------------------------------------------------------------------
 u8 g_forceSysMemVbs = 0;
-i32 g_forceETC1 = 0;
 i32 Reflections_On = 1;
 i32 disable_narrow_socks = 0;
 nugspline_s *script_spline_selected = NULL;
-f32 character_farclip = 0.0f;
 f32 CutBorderScale = 0.0f;
 i32 LEGOCAMMODE_DOORCUT = -1;
 i32 LEGOCAMMODE_OBSTACLE = -1;
@@ -527,7 +412,6 @@ i16 tTECHNOLOGYSUIT = 0;
 i16 tMAGNETSUIT = 0;
 i16 tATTRACTSUIT = 0;
 i32 CHARPAK = 0;
-i32 apiloadcharactermodels_nopakfile = 0;
 
 // ------------------------------------------------------------------------
 // Level object tables
@@ -537,11 +421,7 @@ i32 LevObjRef_LastObj = 0;
 i32 LevObjRef_FirstRefObj = 0;
 LEVELOBJECT *ObjTabList = NULL;
 i32 LEVELOBJECTCOUNT = 0;
-i32 LEVELOBJECTMAX = 0;
 i32 EXTRALEVELOBJECTCOUNT = 0;
-char *ExtraLevelObject_NameTable = NULL;
-i32 ExtraLevelObject_NameTableSize = 0;
-i32 ExtraLevelObject_NameTableIndex = 0;
 i32 KNOBS = -1;
 i32 PLAYERHITPOINTS_2HEARTSIN1 = 1;
 i32 drawbosshitpoints_2rows = 0;
@@ -1391,283 +1271,17 @@ CHEAT Cheat[45] = {
 };
 
 #undef CHEAT_ENTRY
-u8 CharVariants_Game[0x5c]; // in-game character-variant table
+CHARVARIANT CharVariants_Game[23] = {
+    {"weirdo"},       {"stormtrooper"}, {"fett"},       {"macewindu"}, {"battledroid"},
+    {"wookiee"},      {"obiwankenobi"}, {"leia"},       {"clone"},     {"rebel"},
+    {"tie"},          {"lando"},        {"luke"},       {"hansolo"},   {"padme"},
+    {"walker_2legs"}, {"walker_4legs"}, {"hoverdroid"}, {"critter"},   {"naboostarfighter"},
+    {"henchman"},     {NULL},           {NULL},
+};
 MemoryManager theMemoryManager;
 #include "legoapi/menus/core/lsw_text_data.inc"
 TEXTCRAWL_s TextCrawl_LSW = {&tCHAPTER, &tVEHICLEBONUS, &tCHARACTERBONUS, 3};
 
-static ACTIONINFO_s ActionInfoList[] = {
-    {"?", 0x0},
-    {"walk", 0x2},
-    {"idle", 0x0},
-    {"fire", 0x0},
-    {"run", 0x4},
-    {"tiptoe", 0x1},
-    {"fall", 0x0},
-    {"jump", 0x0},
-    {"land", 0x0},
-    {"idle4", 0x0},
-    {"jump2", 0x0},
-    {"land2", 0x0},
-    {"force", 0x0},
-    {"flip", 0x0},
-    {"flipland", 0x0},
-    {"jump3", 0x0},
-    {"idle2", 0x0},
-    {"weaponin", 0x0},
-    {"weaponout", 0x0},
-    {"combojump", 0x0},
-    {"comboland", 0x0},
-    {"idle3", 0x0},
-    {"land3", 0x0},
-    {"shoot", 0x0},
-    {"run2", 0x4},
-    {"interface", 0x0},
-    {"weaponidle", 0x0},
-    {"block1", 0x8},
-    {"block2", 0x8},
-    {"block3", 0x8},
-    {"run3", 0x4},
-    {"crawl", 0x0},
-    {"lunge", 0x0},
-    {"lungeland", 0x0},
-    {"slam", 0x0},
-    {"slamland", 0x0},
-    {"open", 0x0},
-    {"hover", 0x0},
-    {"fly", 0x0},
-    {"left", 0x0},
-    {"force2", 0x0},
-    {"fall2", 0x0},
-    {"weaponback", 0x0},
-    {"up", 0x0},
-    {"pushed", 0x0},
-    {"in", 0x0},
-    {"out", 0x0},
-    {"combo1_1", 0x0},
-    {"combo1_2a", 0x0},
-    {"combo1_2b", 0x0},
-    {"combo1_3a", 0x0},
-    {"combo1_3b", 0x0},
-    {"combo1_3c", 0x0},
-    {"combo1_3d", 0x0},
-    {"combo2_1", 0x0},
-    {"combo2_2a", 0x0},
-    {"combo2_2b", 0x0},
-    {"combo2_3a", 0x0},
-    {"combo2_3b", 0x0},
-    {"combo2_3c", 0x0},
-    {"combo2_3d", 0x0},
-    {"shoot2", 0x0},
-    {"takehit", 0x0},
-    {"takehit2", 0x0},
-    {"tiptoe2", 0x1},
-    {"walk2", 0x2},
-    {"deactivated", 0x0},
-    {"deactivated2", 0x0},
-    {"deactivated3", 0x0},
-    {"deactivated4", 0x0},
-    {"interface2", 0x0},
-    {"interface3", 0x0},
-    {"interface4", 0x0},
-    {"hoverup", 0x0},
-    {"hoverdown", 0x0},
-    {"land4", 0x0},
-    {"fall3", 0x0},
-    {"fall4", 0x0},
-    {"fire2", 0x0},
-    {"eat", 0x0},
-    {"right", 0x0},
-    {"walkbackwards", 0x0},
-    {"punch", 0x0},
-    {"push", 0x0},
-    {"choked", 0x0},
-    {"zapped", 0x0},
-    {"punch2", 0x0},
-    {"punch3", 0x0},
-    {"combatroll_fire", 0x0},
-    {"forwards", 0x0},
-    {"fallland", 0x0},
-    {"shootleft", 0x0},
-    {"shootright", 0x0},
-    {"shootback", 0x0},
-    {"pulllever", 0x0},
-    {"helmeton", 0x0},
-    {"build", 0x0},
-    {"idle5", 0x0},
-    {"idle6", 0x0},
-    {"idle7", 0x0},
-    {"idle8", 0x0},
-    {"attack", 0x0},
-    {"throw", 0x0},
-    {"pickup", 0x0},
-    {"drop", 0x0},
-    {"grabbed", 0x0},
-    {"attacked", 0x0},
-    {"slide", 0x0},
-    {"communicate", 0x0},
-    {"ride", 0x0},
-    {"helmeton2", 0x0},
-    {"throw2", 0x0},
-    {"throw3", 0x0},
-    {"ride2", 0x0},
-    {"extra_tiptoe", 0x1},
-    {"extra_walk", 0x2},
-    {"extra_run", 0x4},
-    {"extra_fall", 0x0},
-    {"extra_idle", 0x0},
-    {"extra_weaponidle", 0x0},
-    {"backflip", 0x0},
-    {"extra_jump", 0x0},
-    {"extra_jump2", 0x0},
-    {"extra_land", 0x0},
-    {"extra_land2", 0x0},
-    {"extra_lunge", 0x0},
-    {"extra_lungeland", 0x0},
-    {"extra_weaponin", 0x0},
-    {"extra_weaponout", 0x0},
-    {"activate", 0x0},
-    {"deactivate", 0x0},
-    {"walk3", 0x2},
-    {"ride3", 0x0},
-    {"ride4", 0x0},
-    {"splat", 0x0},
-    {"ride5", 0x0},
-    {"climb_idle", 0x0},
-    {"tightrope_idle", 0x0},
-    {"tightrope_move", 0x0},
-    {"wallshuffle_idle", 0x0},
-    {"wallshuffle_left", 0x0},
-    {"wallshuffle_right", 0x0},
-    {"putdown", 0x0},
-    {"float", 0x0},
-    {"tightrope_geton", 0x0},
-    {"target", 0x0},
-    {"hang_idle", 0x0},
-    {"hang_move", 0x0},
-    {"glide", 0x0},
-    {"punch_behind", 0x0},
-    {"tightrope_getoff", 0x0},
-    {"change", 0x0},
-    {"throw_wait", 0x0},
-    {"catch", 0x0},
-    {"hack", 0x0},
-    {"attract", 0x0},
-    {"transfer", 0x0},
-    {"sonar", 0x0},
-    {"ledge_idle", 0x0},
-    {"ledge_left", 0x0},
-    {"ledge_right", 0x0},
-    {"transform", 0x0},
-    {"walljump_wait", 0x0},
-    {"walljump", 0x0},
-    {"supercarry_pickup", 0x0},
-    {"supercarry_idle", 0x0},
-    {"supercarry_walk", 0x0},
-    {"supercarry_throw", 0x0},
-    {"stun", 0x0},
-    {"stun2", 0x0},
-    {"stun3", 0x0},
-    {"stunned", 0x0},
-    {"stunned2", 0x0},
-    {"stunned3", 0x0},
-    {"security", 0x0},
-    {"superpush_idle", 0x0},
-    {"superpush_push", 0x0},
-    {"superpush_pull", 0x0},
-    {"ballooning", 0x0},
-    {"throw_quick", 0x0},
-    {"backpackfallland", 0x0},
-    {"combatroll_jump", 0x0},
-    {"combatroll_fall", 0x0},
-    {"combatroll_land", 0x0},
-    {"recoil", 0x0},
-    {"die_air", 0x0},
-    {"stun_die", 0x0},
-    {"grapple_idle", 0x0},
-    {"grapple_up", 0x0},
-    {"grapple_down", 0x0},
-    {"grapple_hang", 0x0},
-    {"idle9", 0x0},
-    {"idle10", 0x0},
-    {"ride6", 0x0},
-    {"ride7", 0x0},
-    {"ride8", 0x0},
-    {"ride9", 0x0},
-    {"ride10", 0x0},
-    {"magnet_walk_metal", 0x2},
-    {"magnet_tiptoe", 0x1},
-    {"magnet_walk", 0x2},
-    {"magnet_run", 0x4},
-    {"magnet_jump", 0x0},
-    {"magnet_land", 0x0},
-    {"dropin", 0x0},
-    {"dropout", 0x0},
-    {"climb_up", 0x0},
-    {"climb_down", 0x0},
-    {"climb_left", 0x0},
-    {"climb_right", 0x0},
-    {"ai_override1", 0x0},
-    {"ai_override2", 0x0},
-    {"ai_override3", 0x0},
-    {"ai_override4", 0x0},
-    {"supercarry_putdown", 0x0},
-    {"supercarry_bash", 0x0},
-    {"supercarry_jump", 0x0},
-    {"supercarry_land", 0x0},
-    {"supercarry_fallland", 0x0},
-    {"ledge_grab", 0x0},
-    {"teeter", 0x0},
-    {"whip_start", 0x0},
-    {"whip_crack", 0x0},
-    {"whip_grab", 0x0},
-    {"whip_break", 0x0},
-    {"whip_swing_start", 0x0},
-    {"whip_swing_swing", 0x0},
-    {"whip_swing_jump", 0x0},
-    {"crawl_idle", 0x0},
-    {"crawl_move", 0x0},
-    {"swim", 0x0},
-    {"wade", 0x0},
-    {"dig", 0x0},
-    {"winch", 0x0},
-};
-ACTIONINFO_s *ActionInfo = &ActionInfoList[1];
-EXTRAACTIONDATA_s ExtraActionData[] = {
-    {"run1", 3},
-    {"idle1", 1},
-    {"interface1", 24},
-    {"deactivated1", 65},
-    {"fall1", 5},
-    {"fire1", 2},
-    {"force1", 11},
-    {"walk1", 0},
-    {"tiptoe1", 4},
-    {"jump1", 6},
-    {"land1", 7},
-    {"shoot1", 22},
-    {"block", 26},
-    {"takehit1", 61},
-    {"punch1", 81},
-    {"trooperaccess", 69},
-    {"throw1", 101},
-    {"hunteraccess", 70},
-    {"stun1", 167},
-    {"stunned1", 170},
-    {"ride", 108},
-    {"ride_buggy", 112},
-    {"ride_gyrocopter", 131},
-    {"ride_bantha", 112},
-    {"ride_dewback", 131},
-    {"ride_landspeeder", 132},
-    {"ride_tauntaun", 134},
-    {"ride_speederbike", 192},
-    {"ride_heavyrepeatingcannon", 193},
-    {"ride_troopercannon", 194},
-    {"rideluke", 195},
-    {"rideluke_running", 196},
-    {NULL, 0},
-};
 void *theGameThings = NULL;
 void *theThingManager = NULL;
 
@@ -1685,8 +1299,6 @@ i32 (*CutScene_ReplaceCharacterModelFn)(CUTINFO *, NUGCUTCHAR_s *) = NULL;
 i32 (*InitBolt_AddMomentumType)(BOLT_s *, GameObject_s *, nuvec_s *) = NULL;
 i32 (*Bolt_HitPlatFn)(BOLT_s *) = NULL;
 void (*Bolt_HitCustomFn)(BOLT_s *, nuvec_s *) = NULL;
-void (*GameBlowUpBlownUpFn)(GIZMOBLOWUP_s *) = NULL;
-void (*GizmoBlowup_TransformDrawFn)(GIZMOBLOWUP_s *) = NULL;
 void (*GizObstacle_SetDefaultSFXFn)(void *, GIZOBSTACLE_s *) = NULL;
 // Original bss @0x6a3f54 / @0x6a3f50.
 i32 LoadPerm_LanguageSelect = 0;
@@ -1724,7 +1336,6 @@ i32 create_qfont3dz = 0;
 // ------------------------------------------------------------------------
 // Cutscene & system misc
 // ------------------------------------------------------------------------
-u32 EXBLOWUPFLAGS = 0;
 i32 BeenAttacked = 0;
 FadeSystem FadeSys;
 i32 Paused = 0;
@@ -1748,19 +1359,9 @@ i32 LEGOMENU_PAUSEMAIN = -1;
 i32 LEGOMENU_PAUSECUT = -1;
 i32 LEGOMENU_CREDITS = -1;
 i32 MiniCutCam = 0;
-i32 LEGOCONTEXT_DROPIN = -1;
-i32 LEGOCONTEXT_COMBO = -1;
-i32 LEGOCONTEXT_DOOMED = -1;
-i32 LEGOCONTEXT_LAND_COMBATROLL = -1;
-i32 LEGOCONTEXT_WALLSHUFFLE = -1;
-i32 LEGOCONTEXT_NETWAIT = -1;
-i16 LEGOACT_BUILD = -1;
 i32 LEGOHINT_BUILD = -1;
 i32 LEGOHINT_PUSHBLOCKS = -1;
 i32 LEGOHINT_FREEPLAYTOGGLE = -1;
-i32 LEGOCONTEXT_BEENTAKENOVER = -1;
-i32 LEGOCONTEXT_WEAPONIN = -1;
-i32 LEGOCONTEXT_WEAPONOUT = -1;
 i32 WeaponInOut_NoAIJediSfx = 0;
 i32 LEGOSPL_SPLIT = 0;
 GAMECUTSCENES_s game_cutscenes;
@@ -1790,15 +1391,10 @@ i32 CUTDRAWWORLD = 0;
 i32 CutSceneWaiting = 0;
 i32 dagobah_training = 0;
 i32 DoubleScore = 0;
-i32 drawcharactermodel_nobsa = 0;
-i32 drawcharactermodel_noani = 0;
-i32 drawcharactermodel_restpose = 0;
-i32 drawcharactermodel_keepmergeaction = 0;
 i32 game_keepmergeaction = 0;
 i32 JointRotation_On = 0;
 MAKELAYERLISTFN MakeLayerList = NULL;
 i32 DRAWCMODELCALLS = 0;
-i32 drawcharactermodel_locatorsupdated = 0;
 i32 editor_active = 0;
 i32 enable_zero_frametime = 0;
 i32 FinishLoop_On = 1;
@@ -1859,21 +1455,6 @@ f32 tieoffsfxwait = 0.0f;
 f32 tieonsfxwait = 0.0f;
 i32 waiting_for_character = -1;
 
-i32 LEGO_AIPATHCNX_JUMP = 0;
-i32 LEGO_AIPATHCNX_DOUBLE_JUMP = 0;
-i32 LEGO_AIPATHCNX_HIGH_JUMP = 0;
-i32 LEGO_AIPATHCNX_R2D2GLIDE = 0;
-i32 LEGO_AIPATHCNX_FORGOODIES = 0;
-i32 LEGO_AIPATHCNX_FORBADDIES = 0;
-i32 LEGO_AIPATHCNX_BLOCKAGE = 0;
-i32 LEGO_AIPATHCNX_DONTTOGGLE = 0;
-i32 LEGO_AIPATHCNX_FULLTERRAIN = 0;
-i32 LEGO_AIPATHCNX_WALLSHUFFLE = 0;
-i32 LEGO_AIPATHCNX_BIGJUMP = 0;
-i32 LEGO_AIPATHCNX_REQUIRESPERMISSION = 0;
-i32 LEGO_AIPATHCNX_NO_DESTINATION_CHECK = 0;
-i32 LEGO_AIPATHCNX_JUMP_NOW = 0;
-i32 LEGO_AIPATHCNX_DONT_JUMP_NOW = 0;
 f32 fakeanimendframe[1];
 f32 fakeanimframe[1];
 f32 ai_moveradius = 0.1f;

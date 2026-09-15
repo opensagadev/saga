@@ -34,3 +34,5 @@ extern TAKEOVEROBJECT_s takeoverobjects[8];
 extern i32 num_takeoverobjects;
 void ClearTakeOverObjectSys();
 void RegisterTakeOverObject(GameObject_s *object);
+void StoreStatusTakeOverObjectSys();
+void ReStoreStatusTakeOverObjectSys(i32 restore_progress);

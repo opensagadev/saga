@@ -1,4 +1,6 @@
+#include "decomp.h"
 #include "legoapi/legoapi_types.h"
+#include "nu2api/nu3d/android/nuptl_android.h"
 
 #include <string.h>
 
@@ -74,11 +76,6 @@ extern "C" {
     extern dma_particle_chunk_s **freedebchunksglass;
     extern particlechunkrendertype_s *ParticleChunkToRender;
     extern particlechunkrendertype_s *ParticleChunkRenderStack[5];
-
-    void LinkDmaParticalSets(dma_particle_chunk_s **, i32);
-
-    void CrashDataPtr(void) {
-    }
 
     i32 DebAlloc(void) {
         if (freedebkeyptr >= maxdebkeys) {
@@ -177,6 +174,7 @@ extern "C" {
     }
 
     void DebFreeAllChunksInstantly(void) {
+        STUBBED();
     }
 
     void DebFreeInstantly(i32 *handle) {

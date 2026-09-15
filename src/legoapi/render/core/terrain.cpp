@@ -1,15 +1,22 @@
+#include "decomp.h"
+#include "legoapi/actions/combat/hits.h"
 #include "legoapi/world/world_shared.h"
+#include "legoapi/render/core/terrain.h"
+#include "legoapi/render/core/terrain_internal.h"
+#include "legoapi/ai/core/legoai.h"
+#include "legoapi/render/core/gameliball.h"
 
 #include <stdio.h>
 
 #include "gameapi/edtools/edstubs.h"
+#include "gameapi/edtools/edgra.h"
 #include "gameapi/gui/apimenu.h"
 #include "globals.h"
 #include "gamelib/util/gamelib_util_types.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/characters/motion/gameanim.h"
 #include "legoapi/core/input/qrand.h"
-#include "legoapi/gizmos/object/technos.h"
+#include "legoapi/props/objects/techno.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/world/level.h"
 #include "nu2api/nucore/numemory.h"
@@ -31,10 +38,6 @@ struct terrsitu_s;
 struct PLATSKININFO;
 struct GAMECAMERA_s;
 struct pushblock_s;
-extern "C" void PlatOnOff(i32 index, i32 enabled);
-extern "C" void TerrainSetImpactData(void *impact_data, i32 *impact_count, i32 maximum_impacts);
-extern "C" void TerrainPlatGetMtx(i32 index, NUMTX **previous, NUMTX **current);
-extern "C" void TerrainSetPlatConnectTol(f32 tolerance);
 void Surface_Deflect(NUVEC *normal, NUVEC *movement, NUVEC *result, i32 mode);
 extern i16 id_ATST;
 extern i16 id_SPEEDERBIKE;
@@ -57,7 +60,6 @@ extern AREADATA_s *PODRACE_ADATA;
 void NewRumble(nupad_s *pad, f32 strength, i32 mode);
 void NewBuzz(nupad_s *pad, f32 duration, i32 mode);
 void GameCam_Blend(GAMECAMERA_s *camera, f32 duration, f32 delay, i32 mode);
-i32 ObjHitObj(GameObject_s *, GameObject_s *, i32, u16, i32, i32);
 i32 NoLayerKill(GameObject_s *object);
 void ClearLastSafeTakeOver(GameObject_s *object);
 void Player_ClearContext(GameObject_s *object, i32 mode);
@@ -72,6 +74,32 @@ void ApplyGravity(GameObject_s *object, f32 *gravity, f32 hover_height, f32 seek
 void InstantKillParts(GameObject_s *object, i32 mode, f32 delay);
 i32 IntersectWater(GameObject_s *object);
 extern "C" void NewTerrPlatformsOff();
+static void *TerImpactData;
+static i32 *TerImpactDataCount;
+static i32 TerImpactDataMax;
+static i32 curPickInst;
+static TERRPICKUPSET *PickupTerr;
+static TerrainQuery_s *TerI;
+static i16 NuTerrPlatsOff;
+static i16 castnum;
+static i16 ecastnum;
+static TERRAIN_SHAPE *EShadRoofPoly;
+static i16 eshadroofhit;
+static i16 ecastroofnum;
+static i16 eshadhit;
+static TERRAIN_SHAPE *EShadPoly;
+static i16 shadroofhit;
+static TERRAIN_SHAPE *ShadRoofPoly;
+static i16 castroofnum;
+static i16 shadhit;
+static tertype **TerrOverRideScan;
+static i32 PlatCrush;
+static i32 plathitid;
+static TERRAIN_TRACK_SLOT *CurTrackInfo;
+static f32 wallover;
+static TERRAIN_AXIS_FREEDOM_SHAPE *TerrShape;
+static i32 TerrShapeAdjCnt;
+
 i32 testshadowfix = 1;
 
 namespace {
@@ -119,22 +147,19 @@ namespace {
 
 } // namespace
 
-void *ScaleTerrainT1;
+static void *ScaleTerrainT1;
 static void *ScaleTerrainT2;
-TERRAIN_SHAPE *ScaleTerrain;
+static TERRAIN_SHAPE *ScaleTerrain;
 static void *TempScanStack;
 static void *TempStackPtr;
 static i32 TerrPlatDis = -1;
 static TERRAIN_WALL_POINT *WallSplList;
 static i32 WallSplCount;
-i32 terraincnt;
-i32 curSphereter;
-i32 platinrange;
-TERRAIN_SHAPE *ShadPoly;
-extern "C" i32 ShadowIntensityInfo(void) {
-    return ShadPoly ? (i32)ShadPoly->normal_flags - 8 : -1;
-}
-TERRAIN_SHAPE *TerrPoly;
+static i32 terraincnt;
+static i32 curSphereter;
+static i32 platinrange;
+static TERRAIN_SHAPE *ShadPoly;
+static TERRAIN_SHAPE *TerrPoly;
 extern "C" void NuRndrLine3dDbg(f32, f32, f32, f32, f32, f32, i32);
 
 extern "C" void SphereDrawEx(NUVEC *centre, f32 radius, f32 vertical_scale, i32 colour) {
@@ -165,54 +190,29 @@ extern "C" void SphereDrawEx(NUVEC *centre, f32 radius, f32 vertical_scale, i32 
 extern "C" void SphereDraw(NUVEC *centre, f32 radius, f32 vertical_scale) {
     SphereDrawEx(centre, radius, vertical_scale, 0x00400000);
 }
-u8 TerrWallInfo;
-u8 TerrWallTab[4];
+static u8 TerrWallInfo;
+static u8 TerrWallTab[4];
 NUVEC TerrWallNorm;
-i32 PlatImpactId;
+static i32 PlatImpactId;
 static TERRAIN_SHAPE PlatImpactTer;
 static NUVEC PlatImpactNorm;
-i32 TerrPolyObj;
+static i32 TerrPolyObj;
 static TERRAIN_SHAPE TerrPolyInfo;
 
-extern TERRSET *CurTerr;
-extern TerrainQuery_s *TerI;
-extern i32 WallSplinesOnly;
-extern "C" i32 IgnoreWallSplines;
-extern i32 curPickInst;
-extern i16 castnum;
-extern f32 wallover;
-extern TERRAIN_TRACK_SLOT *CurTrackInfo;
-extern void *TerImpactData;
-extern i32 *TerImpactDataCount;
-extern i32 TerImpactDataMax;
-extern tertype **TerrOverRideScan;
+i16 InsidePolLines(f32 point_x, f32 point_y, f32 point_z, f32 edge_a_x, f32 edge_a_y, f32 edge_a_z, f32 edge_b_x,
+                   f32 edge_b_y, f32 edge_b_z, NUVEC *normal);
 
-void TerrainSkinAllocate(terrsitu_s *terrain_group);
 void ScanWallSplineTerrain(i32 scan_type, i32 terrain_mask, i32 scan_flags);
-void NewTerrStoreAnyInfo();
 void TerrainMoveImpactData();
-void RotateVec(NUVEC *source, NUVEC *destination);
-TERRAIN_TRACK_SLOT *AllocTerrId();
-void PlatformConnect(char *track_id, NUVEC *position_delta, NUVEC *movement_delta, i32 platform_index);
-void FullDeflectSmallY(NUVEC *normal, NUVEC *movement, NUVEC *result);
-extern "C" void FullDeflect(NUVEC *normal, NUVEC *movement, NUVEC *result);
-void DerotateMovementVector();
-i32 HitTerrain();
 void TerrainImpactNorm();
 void Tag_Check(GameObject_s *object);
 void BigJumpCode(GameObject_s *object);
 f32 GameShadow(GameObject_s *object, NUVEC *position, f32 probe_height, i32 terrain_mask);
 void GetSurfaceInfo(GameObject_s *object, i32 update_surface, f32 shadow_height);
 extern "C" i32 NewShadowOnPlatform();
-extern NUVEC ShadNorm;
-
-extern i32 terrhitflags;
-extern i32 TERRAINMASK_NONWEAPON;
-extern i32 TERRAINMASK_NONDROID;
 extern i32 LEGO_AIPATHCNX_BLOCKAGE;
 extern i32 LEGO_AIPATHCNX_FULLTERRAIN;
 extern i32 LEGO_AIPATHCNX_WALLSHUFFLE;
-NUVEC TerCrossProduct(NUVEC *a, NUVEC *b);
 
 void StorePlatImpact() {
     TerrainQuery_s *query = TerI;
@@ -585,17 +585,8 @@ namespace {
 
 i16 debug_index;
 
-i32 ReadTerrain(unsigned char *base_path, i32 first_group, i16 **buffer, TERRSET *terrain);
-void NuVecCheckForSNANs(NUVEC *vector);
-void TerrFlush();
-
-// Debris and terrain globals — accessed from DebrisSetThinningLevel etc.
-f32 debris_thinning_level;
-i32 forced_debris_thinning;
-i32 debris_detail_level;
-// char *debris_name[147] @0x61e860 (.data): the static debris effect names,
-// seeded into every world's debris system by InitGameDebris.
-char *debris_name[147] = {
+// Original 400-pointer table at 0x61e860: 147 named effects, then empty slots.
+char *debris_name[400] = {
     "BULLET_SPARK",   "SABER_RED",     "SABER_GREEN",   "SABER_BLUE",    "SABER_PURPLE",   "EXPLD_1A",
     "JS_THRUST",      "S1_THRUST",     "COIN_BLUE",     "COIN_GOLD",     "COIN_SILVER",    "R2D2THRUSTER",
     "R2Q5THRUSTER",   "SPLASH",        "RIPPLE",        "HEART",         "HEART_BIG",      "EXPLOSION",
@@ -622,23 +613,54 @@ char *debris_name[147] = {
     "PUNCH_1",        "PUNCH_2",       "GUNSHIP_01",    "GUNSHIP_02",    "SandBlast",      "BULLET1",
     "BULLET2",        "BULLET_HIT",    "POD_SPARK",
 };
-i32 Grass_Available = 1;
-i32 PDEBCOUNT = 0;
-void *PDebNameList = NULL;
+i32 Grass_Available;
 
-extern "C" void DebrisSetThinningLevel(f32 level) {
-    debris_thinning_level = level < 1.0f ? 1.0f : level;
+extern "C" void TerrainSetImpactData(void *impact_data, i32 *impact_count, i32 maximum_impacts) {
+    TerImpactData = impact_data;
+    TerImpactDataCount = impact_count;
+    *impact_count = 0;
+    TerImpactDataMax = maximum_impacts;
 }
-extern "C" void DebrisSetForcedThinning(i32 forced) {
-    forced_debris_thinning = forced;
+
+void TerrFlush() {
+    TerrShapeAdjCnt = 0;
 }
-extern "C" void DebrisSetDetailLevel(i32 level) {
-    debris_detail_level = level;
+
+extern "C" void TerrTempMemory(void **buffer) {
+    u8 *cursor = static_cast<u8 *>(*buffer);
+    if (ScaleTerrainT1 == NULL)
+        ScaleTerrainT1 = cursor;
+    cursor += 0xc800;
+    *buffer = cursor;
+    if (ScaleTerrainT2 == NULL)
+        ScaleTerrainT2 = cursor;
+    cursor += 0xc800;
+    *buffer = cursor;
+    if (TempScanStack == NULL)
+        TempScanStack = cursor;
+    cursor += 0x2000;
+    *buffer = cursor;
+    if (WallSplList == NULL)
+        WallSplList = reinterpret_cast<TERRAIN_WALL_POINT *>(cursor);
+    cursor += 0x600;
+    *buffer = cursor;
 }
 
 // Constructs the fixed terrain header and its variable-sized group, index and
 // platform arrays in the caller's arena. The four bounds arrays and the cell
 // assignment array are temporary storage carved backwards from buf_end.
+#define IS_SNAN(x) (*(u32 *)&(x) == 0xffc00000)
+
+void NuVecCheckForSNANs(NUVEC *v) {
+    if (IS_SNAN(v->x) || IS_SNAN(v->y) || IS_SNAN(v->z)) {
+        v->x = 0.0f;
+        v->y = 1.0f;
+        v->z = 0.0f;
+    }
+}
+
+#undef IS_SNAN
+
 extern "C" void *TerrainInitEx(i32 level_num, void *buf, void *buf_end, i32 options, char *path, void *gscn,
                                i32 scene_id, u32 max_group_indices, u32 max_groups, u32 max_platforms) {
     (void)level_num;
@@ -1115,22 +1137,6 @@ void LoadBridgeFile(WORLDINFO *world) {
         world->page_bridge = page;
     }
 }
-void LoadPartFile(WORLDINFO *world) {
-    char path[256];
-    world->page_part = -1;
-    edpartSetParticlePage(world->page_pp);
-
-    if ((world->current_level->flags & (LEVEL_OUTRO | LEVEL_MIDTRO | LEVEL_INTRO)) == 0) {
-        sprintf(path, "%s.par", world->config_file);
-        i32 page = -1;
-        if (NuFileExists(path)) {
-            page = edpartLoadPage(path, 1, world->current_gscn);
-            world->page_part = page;
-        }
-        world->part_debris_sys = static_cast<PARTDEBSYS_s *>(
-            InitPartDebris(&world->giz_buffer, &world->unknown_0108, 0x40, PDEBCOUNT, (char **)PDebNameList, page));
-    }
-}
 TERRAIN_TRACK_SLOT *ScanTerrId(void *id) {
     TERRSET *terrain = CurTerr;
     if (terrain == NULL) {
@@ -1151,6 +1157,530 @@ i32 UnderWater(GameObject_s *object) {
     }
     return 0;
 }
+i32 CheckCylinder(i32 first_vertex, i32 second_vertex, i32 *vertex_mask, i32 remaining_vertex_mask) {
+    TerrainQuery_s *query = TerI;
+
+    // Reject an edge when both endpoints lie outside the swept sphere's
+    // expanded bounds. Once an edge is rejected this way, its endpoint bits
+    // can be removed from the later vertex tests as well.
+    if ((query->transformed_vertices[first_vertex].x > query->collision_radius &&
+         query->transformed_vertices[second_vertex].x > query->collision_radius) ||
+        (query->transformed_vertices[first_vertex].x < -query->collision_radius &&
+         query->transformed_vertices[second_vertex].x < -query->collision_radius) ||
+        (query->transformed_vertices[first_vertex].y > query->collision_radius &&
+         query->transformed_vertices[second_vertex].y > query->collision_radius) ||
+        (query->transformed_vertices[first_vertex].y < -query->collision_radius &&
+         query->transformed_vertices[second_vertex].y < -query->collision_radius) ||
+        (query->transformed_vertices[first_vertex].z < -query->collision_radius &&
+         query->transformed_vertices[second_vertex].z < -query->collision_radius) ||
+        (query->transformed_vertices[first_vertex].z > query->movement_length + query->collision_radius &&
+         query->transformed_vertices[second_vertex].z > query->movement_length + query->collision_radius)) {
+        *vertex_mask &= remaining_vertex_mask;
+        return 0;
+    }
+
+    NUVEC edge_direction = {
+        query->transformed_vertices[second_vertex].x - query->transformed_vertices[first_vertex].x,
+        query->transformed_vertices[second_vertex].y - query->transformed_vertices[first_vertex].y,
+        query->transformed_vertices[second_vertex].z - query->transformed_vertices[first_vertex].z,
+    };
+    const f32 horizontal_length_sq = edge_direction.x * edge_direction.x + edge_direction.y * edge_direction.y;
+
+    // An almost vertical edge has no stable radial cylinder in the XY plane.
+    // It can only overlap the sphere at the start of the sweep when it crosses
+    // z = 0.
+    if (horizontal_length_sq < 1.0e-12f) {
+        if ((query->transformed_vertices[first_vertex].z < 0.0f &&
+             query->transformed_vertices[second_vertex].z < 0.0f) ||
+            (query->transformed_vertices[first_vertex].z > 0.0f &&
+             query->transformed_vertices[second_vertex].z > 0.0f)) {
+            return 0;
+        }
+
+        const f32 distance_sq =
+            query->transformed_vertices[second_vertex].x * query->transformed_vertices[second_vertex].x +
+            query->transformed_vertices[second_vertex].y * query->transformed_vertices[second_vertex].y;
+        if (distance_sq > query->collision_radius_sq) {
+            return 0;
+        }
+
+        const f32 distance = NuFsqrt(distance_sq);
+        const f32 overlap_time = distance - query->collision_radius;
+        if (query->hit_time <= overlap_time) {
+            return 0;
+        }
+
+        NUVEC local_normal = {
+            -query->transformed_vertices[second_vertex].x,
+            -query->transformed_vertices[second_vertex].y,
+            0.0f,
+        };
+        RotateVec(&local_normal, &local_normal);
+        const NUVEC &surface_normal = query->working_surface->normals[0];
+        if (local_normal.x * surface_normal.x + local_normal.y * surface_normal.y + local_normal.z * surface_normal.z <=
+            0.0f) {
+            return 0;
+        }
+
+        query = TerI;
+        query->hit_time = overlap_time;
+        f32 inverse_distance = 0.0f;
+        if (distance != 0.0f) {
+            inverse_distance = 1.0f / distance;
+        }
+        query->hit_type = TERRAIN_HIT_TYPE_CYLINDER | TERRAIN_HIT_TYPE_SECOND_NORMAL;
+        query->movement_normal.x = -query->transformed_vertices[second_vertex].x * inverse_distance;
+        query->movement_normal.y = -query->transformed_vertices[second_vertex].y * inverse_distance;
+        query->movement_normal.z = 0.0f;
+        return 1;
+    }
+
+    // Squared radial distance from the movement axis to the infinite line
+    // containing the edge. This avoids a square root for the common miss.
+    const f32 line_cross = query->transformed_vertices[first_vertex].x * edge_direction.y -
+                           query->transformed_vertices[first_vertex].y * edge_direction.x;
+    if (line_cross * line_cross > query->collision_radius_sq * horizontal_length_sq) {
+        *vertex_mask &= remaining_vertex_mask;
+        return 0;
+    }
+
+    f32 line_distance_sq = 0.0f;
+    if (horizontal_length_sq != 0.0f && line_cross != 0.0f) {
+        line_distance_sq = line_cross * (line_cross / horizontal_length_sq);
+    }
+
+    const f32 edge_length = NuFsqrt(horizontal_length_sq + edge_direction.z * edge_direction.z);
+    f32 inverse_edge_length = 0.0f;
+    if (edge_length != 0.0f) {
+        inverse_edge_length = 1.0f / edge_length;
+    }
+    edge_direction.x *= inverse_edge_length;
+    edge_direction.y *= inverse_edge_length;
+    edge_direction.z *= inverse_edge_length;
+
+    NUVEC line_cross_vector = {
+        -query->transformed_vertices[first_vertex].x,
+        -query->transformed_vertices[first_vertex].y,
+        -query->transformed_vertices[first_vertex].z,
+    };
+    NuVecCross(&line_cross_vector, &line_cross_vector, &edge_direction);
+
+    NUVEC horizontal_perpendicular = {-edge_direction.y, edge_direction.x, 0.0f};
+    const f32 horizontal_direction_sq = horizontal_perpendicular.x * horizontal_perpendicular.x +
+                                        horizontal_perpendicular.y * horizontal_perpendicular.y;
+    const f32 height_numerator =
+        line_cross_vector.x * horizontal_perpendicular.x + line_cross_vector.y * horizontal_perpendicular.y;
+    f32 negative_closest_height = 0.0f;
+    if (horizontal_direction_sq != 0.0f && height_numerator != 0.0f) {
+        negative_closest_height = height_numerator / horizontal_direction_sq;
+    }
+    const f32 closest_height = -negative_closest_height;
+
+    // This normal lies in the plane formed by the edge and the movement axis.
+    // Its z component tells how far along the sweep the cylinder surface is
+    // reached.
+    NUVEC cylinder_side = {
+        edge_direction.x * edge_direction.z,
+        -edge_direction.y * edge_direction.z,
+        -(edge_direction.x * edge_direction.x + edge_direction.y * edge_direction.y),
+    };
+    const f32 cylinder_side_length = NuFsqrt(cylinder_side.x * cylinder_side.x + cylinder_side.y * cylinder_side.y +
+                                             cylinder_side.z * cylinder_side.z);
+    if (cylinder_side_length != 0.0f && cylinder_side.z != 0.0f) {
+        cylinder_side.z /= cylinder_side_length;
+    } else {
+        cylinder_side.z = 0.0f;
+    }
+
+    const f32 radial_extent = NuFsqrt(query->collision_radius_sq - line_distance_sq);
+    f32 height_offset = 0.0f;
+    if (radial_extent != 0.0f && cylinder_side.z != 0.0f) {
+        height_offset = radial_extent / cylinder_side.z;
+    }
+
+    f32 hit_distance;
+    if (height_offset >= 0.0f) {
+        hit_distance = closest_height - height_offset;
+    } else {
+        hit_distance = height_offset - negative_closest_height;
+    }
+    if (hit_distance >= 0.0f && hit_distance <= query->movement_length) {
+        const f32 edge_parameter = (hit_distance - query->transformed_vertices[first_vertex].z) * edge_direction.z -
+                                   query->transformed_vertices[first_vertex].x * edge_direction.x -
+                                   query->transformed_vertices[first_vertex].y * edge_direction.y;
+        if (edge_parameter > 0.0f && edge_parameter <= edge_length) {
+            f32 hit_time = 0.0f;
+            if (hit_distance != 0.0f && query->movement_length != 0.0f) {
+                hit_time = hit_distance / query->movement_length;
+            }
+            if (query->hit_time <= hit_time) {
+                *vertex_mask &= remaining_vertex_mask;
+                return 0;
+            }
+
+            query->hit_type = TERRAIN_HIT_TYPE_CYLINDER;
+            query->hit_time = hit_time;
+            query->movement_normal.x =
+                -(query->transformed_vertices[first_vertex].x + edge_direction.x * edge_parameter);
+            query->movement_normal.y =
+                -(query->transformed_vertices[first_vertex].y + edge_direction.y * edge_parameter);
+            query->movement_normal.z =
+                hit_distance - query->transformed_vertices[first_vertex].z - edge_direction.z * edge_parameter;
+            *vertex_mask &= remaining_vertex_mask;
+            return 1;
+        }
+    }
+
+    // No forward-time hit was found. Test whether the sphere already overlaps
+    // the finite edge at the start of the sweep.
+    if ((query->transformed_vertices[first_vertex].z < -query->collision_radius &&
+         query->transformed_vertices[second_vertex].z < -query->collision_radius) ||
+        (query->transformed_vertices[first_vertex].z > query->collision_radius &&
+         query->transformed_vertices[second_vertex].z > query->collision_radius)) {
+        return 0;
+    }
+
+    const f32 closest_parameter = -query->transformed_vertices[first_vertex].x * edge_direction.x -
+                                  query->transformed_vertices[first_vertex].y * edge_direction.y -
+                                  query->transformed_vertices[first_vertex].z * edge_direction.z;
+    const f32 edge_projection =
+        (query->transformed_vertices[second_vertex].x - query->transformed_vertices[first_vertex].x) *
+            edge_direction.x +
+        (query->transformed_vertices[second_vertex].y - query->transformed_vertices[first_vertex].y) *
+            edge_direction.y +
+        (query->transformed_vertices[second_vertex].z - query->transformed_vertices[first_vertex].z) * edge_direction.z;
+    if (closest_parameter < 0.0f || closest_parameter > edge_projection) {
+        return 0;
+    }
+
+    // The normalized direction is no longer needed after the closest
+    // parameter has been bounded, so reuse it for the closest point itself.
+    edge_direction = {
+        query->transformed_vertices[first_vertex].x + edge_direction.x * closest_parameter,
+        query->transformed_vertices[first_vertex].y + edge_direction.y * closest_parameter,
+        query->transformed_vertices[first_vertex].z + edge_direction.z * closest_parameter,
+    };
+    const f32 distance_sq =
+        edge_direction.x * edge_direction.x + edge_direction.y * edge_direction.y + edge_direction.z * edge_direction.z;
+    if (distance_sq >= query->collision_radius_sq) {
+        return 0;
+    }
+
+    const f32 distance = NuFsqrt(distance_sq);
+    const f32 overlap_time = distance - query->collision_radius;
+    if (query->hit_time <= overlap_time) {
+        return 0;
+    }
+
+    RotateVec(&edge_direction, &horizontal_perpendicular);
+    const NUVEC &surface_normal = query->working_surface->normals[0];
+    if (horizontal_perpendicular.x * surface_normal.x + horizontal_perpendicular.y * surface_normal.y +
+            horizontal_perpendicular.z * surface_normal.z <
+        0.0f) {
+        query = TerI;
+        query->hit_time = overlap_time;
+        f32 inverse_distance = 0.0f;
+        if (distance != 0.0f) {
+            inverse_distance = 1.0f / distance;
+        }
+        query->hit_type = TERRAIN_HIT_TYPE_CYLINDER | TERRAIN_HIT_TYPE_SECOND_NORMAL;
+        query->movement_normal.x = -edge_direction.x * inverse_distance;
+        query->movement_normal.y = -edge_direction.y * inverse_distance;
+        query->movement_normal.z = -edge_direction.z * inverse_distance;
+        return 1;
+    }
+    return 0;
+}
+
+i32 CheckSphere(i32 vertex_index) {
+    f32 radius = TerI->collision_radius;
+    if (TerI->transformed_vertices[vertex_index].z < -radius ||
+        TerI->transformed_vertices[vertex_index].z > TerI->movement_length + radius) {
+        return 0;
+    }
+
+    f32 radial_distance_sq = TerI->transformed_vertices[vertex_index].x * TerI->transformed_vertices[vertex_index].x +
+                             TerI->transformed_vertices[vertex_index].y * TerI->transformed_vertices[vertex_index].y;
+    if (radial_distance_sq > TerI->collision_radius_sq) {
+        return 0;
+    }
+
+    f32 radial_extent = NuFsqrt(TerI->collision_radius_sq - radial_distance_sq);
+    f32 hit_distance = TerI->transformed_vertices[vertex_index].z - radial_extent;
+    if (0.0f <= hit_distance && TerI->movement_length >= hit_distance) {
+        f32 hit_time = hit_distance / TerI->movement_length;
+        if (TerI->hit_time <= hit_time) {
+            return 0;
+        }
+
+        TerI->hit_time = hit_time;
+        TerI->hit_type = TERRAIN_HIT_TYPE_VERTEX;
+        TerI->movement_normal.x = -TerI->transformed_vertices[vertex_index].x;
+        TerI->movement_normal.y = -TerI->transformed_vertices[vertex_index].y;
+        TerI->movement_normal.z = -radial_extent;
+        return 1;
+    }
+
+    f32 distance_sq =
+        radial_distance_sq + TerI->transformed_vertices[vertex_index].z * TerI->transformed_vertices[vertex_index].z;
+    if (TerI->collision_radius_sq <= distance_sq) {
+        return 0;
+    }
+
+    f32 distance = NuFsqrt(distance_sq);
+    f32 overlap_time = distance - TerI->collision_radius;
+    if (TerI->hit_time <= overlap_time) {
+        return 0;
+    }
+
+    tertype *surface = TerI->working_surface;
+    f32 primary_distance = (TerI->local_start.x - surface->vectors[vertex_index].x) * surface->normals[0].x +
+                           (TerI->local_start.y - surface->vectors[vertex_index].y) * surface->normals[0].y +
+                           (TerI->local_start.z - surface->vectors[vertex_index].z) * surface->normals[0].z;
+    if (0.0f >= primary_distance) {
+        return 0;
+    }
+
+    TerI->hit_time = overlap_time;
+    f32 inverse_distance = 0.0f;
+    if (distance != 0.0f) {
+        inverse_distance = 1.0f / distance;
+    }
+    TerI->hit_type = TERRAIN_HIT_TYPE_VERTEX | TERRAIN_HIT_TYPE_SECOND_NORMAL;
+    TerI->movement_normal.x = -TerI->transformed_vertices[vertex_index].x * inverse_distance;
+    TerI->movement_normal.y = -TerI->transformed_vertices[vertex_index].y * inverse_distance;
+    TerI->movement_normal.z = -TerI->transformed_vertices[vertex_index].z * inverse_distance;
+    return 1;
+}
+
+i32 CheckSphereTer(NUVEC *position, f32 radius) {
+    const f32 terrain_radius = TerI->collision_radius;
+    const f32 combined_radius = radius + terrain_radius;
+
+    if (position->z < -combined_radius || position->z > TerI->movement_length + combined_radius) {
+        return 0;
+    }
+
+    const f32 radial_distance_sq = position->x * position->x + position->y * position->y;
+    const f32 combined_radius_sq = combined_radius * combined_radius;
+    if (radial_distance_sq > combined_radius_sq) {
+        return 0;
+    }
+
+    const f32 radial_extent = NuFsqrt(combined_radius_sq - radial_distance_sq);
+    const f32 hit_distance = position->z - radial_extent;
+    if (hit_distance >= 0.0f && hit_distance <= TerI->movement_length) {
+        const f32 hit_time = hit_distance / TerI->movement_length;
+        if (hit_time >= TerI->hit_time) {
+            return 0;
+        }
+
+        TerI->hit_time = hit_time;
+        TerI->hit_type = TERRAIN_HIT_TYPE_SPHERE;
+        TerI->movement_normal.x = -position->x;
+        TerI->movement_normal.y = -position->y;
+        TerI->movement_normal.z = -radial_extent;
+        return 1;
+    }
+
+    const f32 distance_sq = radial_distance_sq + position->z * position->z;
+    if (distance_sq >= combined_radius_sq) {
+        return 0;
+    }
+
+    const f32 distance = NuFsqrt(distance_sq);
+    f32 inverse_distance = 0.0f;
+    if (distance != 0.0f) {
+        inverse_distance = 1.0f / distance;
+    }
+
+    TerI->hit_time = 0.0f;
+    TerI->hit_type = TERRAIN_HIT_TYPE_SPHERE | TERRAIN_HIT_TYPE_SECOND_NORMAL;
+    TerI->movement_normal.x = -position->x * inverse_distance;
+    TerI->movement_normal.y = -position->y * inverse_distance;
+    TerI->movement_normal.z = -position->z * inverse_distance;
+    return 1;
+}
+
+i32 HitPoly(f32 primary_start, f32 primary_end, f32 secondary_start, f32 secondary_end, tertype *surface) {
+    TerrainQuery_s *query = TerI;
+    const f32 radius = query->collision_radius;
+    const f32 no_secondary_normal = 65536.0f;
+
+    i32 collision_found = 0;
+    f32 candidate_time = 0.0f;
+    NUVEC contact_point;
+
+    const NUVEC &primary_origin = surface->vectors[0];
+    NUVEC &primary_normal = surface->normals[0];
+    contact_point.x = query->local_start.x - radius * primary_normal.x - primary_origin.x;
+    contact_point.y = query->local_start.y - radius * primary_normal.y - primary_origin.y;
+    contact_point.z = query->local_start.z - radius * primary_normal.z - primary_origin.z;
+
+    i32 test_primary_face = 0;
+    if (primary_start > 0.0f && primary_end < 0.0f) {
+        candidate_time = primary_start / (primary_start - primary_end);
+        contact_point.x += query->movement.x * candidate_time;
+        contact_point.y += query->movement.y * candidate_time;
+        contact_point.z += query->movement.z * candidate_time;
+        test_primary_face = 1;
+    } else if (primary_start <= 0.0f && primary_end <= 0.0f && primary_start >= -radius && primary_end >= -radius) {
+        candidate_time = primary_start;
+        const f32 projection_distance = -primary_start;
+        contact_point.x += primary_normal.x * projection_distance;
+        contact_point.y += primary_normal.y * projection_distance;
+        contact_point.z += primary_normal.z * projection_distance;
+        test_primary_face = 1;
+    }
+
+    if (test_primary_face != 0) {
+        const NUVEC edge_0_1 = {
+            surface->vectors[1].x - primary_origin.x,
+            surface->vectors[1].y - primary_origin.y,
+            surface->vectors[1].z - primary_origin.z,
+        };
+        const NUVEC edge_0_2 = {
+            surface->vectors[2].x - primary_origin.x,
+            surface->vectors[2].y - primary_origin.y,
+            surface->vectors[2].z - primary_origin.z,
+        };
+        if (InsidePolLines(contact_point.x, contact_point.y, contact_point.z, edge_0_1.x, edge_0_1.y, edge_0_1.z,
+                           edge_0_2.x, edge_0_2.y, edge_0_2.z, &primary_normal) != 0 &&
+            candidate_time <= query->hit_time) {
+            query->hit_time = candidate_time;
+            query->hit_type =
+                primary_start > 0.0f ? TERRAIN_HIT_TYPE_FACE : TERRAIN_HIT_TYPE_FACE | TERRAIN_HIT_TYPE_SECOND_NORMAL;
+            query->movement_normal = primary_normal;
+            query->shape_adjusted = (surface->normal_flags & TERRAIN_SHAPE_NORMAL_FLAG_FIRST_STEEP) != 0;
+            collision_found = 1;
+        }
+    }
+
+    NUVEC &secondary_normal = surface->normals[1];
+    if (secondary_normal.y < no_secondary_normal) {
+        const NUVEC &secondary_origin = surface->vectors[3];
+        contact_point.x = query->local_start.x - radius * secondary_normal.x - secondary_origin.x;
+        contact_point.y = query->local_start.y - radius * secondary_normal.y - secondary_origin.y;
+        contact_point.z = query->local_start.z - radius * secondary_normal.z - secondary_origin.z;
+
+        i32 test_secondary_face = 0;
+        if (secondary_start > 0.0f && secondary_end < 0.0f) {
+            candidate_time = secondary_start / (secondary_start - secondary_end);
+            contact_point.x += query->movement.x * candidate_time;
+            contact_point.y += query->movement.y * candidate_time;
+            contact_point.z += query->movement.z * candidate_time;
+            test_secondary_face = 1;
+        } else if (secondary_start <= 0.0f && secondary_end <= 0.0f && secondary_start >= -radius &&
+                   secondary_end >= -radius) {
+            candidate_time = secondary_start;
+            const f32 projection_distance = -secondary_start;
+            contact_point.x += secondary_normal.x * projection_distance;
+            contact_point.y += secondary_normal.y * projection_distance;
+            contact_point.z += secondary_normal.z * projection_distance;
+            test_secondary_face = 1;
+        }
+
+        if (test_secondary_face != 0) {
+            const NUVEC edge_3_2 = {
+                surface->vectors[2].x - secondary_origin.x,
+                surface->vectors[2].y - secondary_origin.y,
+                surface->vectors[2].z - secondary_origin.z,
+            };
+            const NUVEC edge_3_1 = {
+                surface->vectors[1].x - secondary_origin.x,
+                surface->vectors[1].y - secondary_origin.y,
+                surface->vectors[1].z - secondary_origin.z,
+            };
+            if (InsidePolLines(contact_point.x, contact_point.y, contact_point.z, edge_3_2.x, edge_3_2.y, edge_3_2.z,
+                               edge_3_1.x, edge_3_1.y, edge_3_1.z, &secondary_normal) != 0 &&
+                candidate_time < query->hit_time) {
+                query->hit_time = candidate_time;
+                query->hit_type = secondary_start > 0.0f ? TERRAIN_HIT_TYPE_FACE
+                                                         : TERRAIN_HIT_TYPE_FACE | TERRAIN_HIT_TYPE_SECOND_NORMAL;
+                query->movement_normal = secondary_normal;
+                query->shape_adjusted = (surface->normal_flags & TERRAIN_SHAPE_NORMAL_FLAG_SECOND_STEEP) != 0;
+                collision_found = 1;
+            }
+        }
+    }
+
+    if (radius != 0.0f) {
+        query->working_surface = surface;
+        i32 vertex_mask = 0xf;
+        DeRotateTerrain(surface);
+
+        if (primary_start >= -radius) {
+            if (CheckCylinder(0, 1, &vertex_mask, 0xc) != 0) {
+                query = TerI;
+                query->hit_edge = TERRAIN_HIT_EDGE_0_1;
+                query->shape_adjusted = (surface->normal_flags & TERRAIN_SHAPE_NORMAL_FLAG_FIRST_STEEP) != 0;
+                collision_found = 1;
+            }
+            if (CheckCylinder(2, 0, &vertex_mask, 0xa) != 0) {
+                query = TerI;
+                query->hit_edge = TERRAIN_HIT_EDGE_2_0;
+                query->shape_adjusted = (surface->normal_flags & TERRAIN_SHAPE_NORMAL_FLAG_FIRST_STEEP) != 0;
+                collision_found = 1;
+            }
+        }
+
+        if (CheckCylinder(1, 2, &vertex_mask, 0x9) != 0) {
+            query = TerI;
+            query->hit_edge = TERRAIN_HIT_EDGE_1_2;
+            query->shape_adjusted = (surface->normal_flags & (TERRAIN_SHAPE_NORMAL_FLAG_FIRST_STEEP |
+                                                              TERRAIN_SHAPE_NORMAL_FLAG_SECOND_STEEP)) != 0;
+            collision_found = 1;
+        }
+
+        if (secondary_normal.y < no_secondary_normal && secondary_start >= -radius) {
+            if (CheckCylinder(1, 3, &vertex_mask, 0x5) != 0) {
+                query = TerI;
+                query->hit_edge = TERRAIN_HIT_EDGE_1_3;
+                query->shape_adjusted = (surface->normal_flags & TERRAIN_SHAPE_NORMAL_FLAG_SECOND_STEEP) != 0;
+                collision_found = 1;
+            }
+            if (CheckCylinder(3, 2, &vertex_mask, 0x3) != 0) {
+                query = TerI;
+                query->hit_edge = TERRAIN_HIT_EDGE_3_2;
+                query->shape_adjusted = (surface->normal_flags & TERRAIN_SHAPE_NORMAL_FLAG_SECOND_STEEP) != 0;
+                collision_found = 1;
+            }
+            if ((vertex_mask & (1 << 3)) != 0 && CheckSphere(3) != 0) {
+                TerI->shape_adjusted = (surface->normal_flags & TERRAIN_SHAPE_NORMAL_FLAG_SECOND_STEEP) != 0;
+                collision_found = 1;
+            }
+        }
+
+        if (primary_start >= -radius) {
+            if ((vertex_mask & (1 << 0)) != 0 && CheckSphere(0) != 0) {
+                TerI->shape_adjusted = (surface->normal_flags & TERRAIN_SHAPE_NORMAL_FLAG_FIRST_STEEP) != 0;
+                collision_found = 1;
+            }
+            if ((vertex_mask & (1 << 1)) != 0 && CheckSphere(1) != 0) {
+                TerI->shape_adjusted = (surface->normal_flags & (TERRAIN_SHAPE_NORMAL_FLAG_FIRST_STEEP |
+                                                                 TERRAIN_SHAPE_NORMAL_FLAG_SECOND_STEEP)) != 0;
+                collision_found = 1;
+            }
+        }
+
+        if ((vertex_mask & (1 << 2)) != 0 && CheckSphere(2) != 0) {
+            TerI->shape_adjusted = (surface->normal_flags & (TERRAIN_SHAPE_NORMAL_FLAG_FIRST_STEEP |
+                                                             TERRAIN_SHAPE_NORMAL_FLAG_SECOND_STEEP)) != 0;
+            collision_found = 1;
+        }
+    }
+
+    query = TerI;
+    if (collision_found != 0) {
+        query->surface = surface;
+    }
+    query->unclamped_hit_time = query->hit_time;
+    if (query->hit_time < 0.0f) {
+        query->hit_time = 0.0f;
+    }
+    return collision_found;
+}
+
 void ScanTerrain(i32 scan_type, i32 terrain_mask, i32 scan_flags) {
     if (WallSplinesOnly != 0) {
         ScanWallSplineTerrain(scan_type, terrain_mask, scan_flags);
@@ -1374,7 +1904,94 @@ NUVEC TerrainSkin(PLATSKININFO *info, nuvec_s *position, float weight, i32 mode)
     result.z = point.z;
     return result;
 }
+void DerotateMovementVector() {
+    TerrainQuery_s *query = TerI;
+
+    query->movement_yaw = static_cast<f32>(NuAtan2DA(query->movement.x, query->movement.z));
+    const f32 horizontal_length =
+        NuFsqrt(query->movement.x * query->movement.x + query->movement.z * query->movement.z);
+    query->movement_pitch = static_cast<f32>(NuAtan2DA(-query->movement.y, horizontal_length));
+    query->movement_length = NuFsqrt(query->movement.x * query->movement.x + query->movement.y * query->movement.y +
+                                     query->movement.z * query->movement.z);
+}
+
+void RotateVec(NUVEC *source, NUVEC *destination) {
+    TerrainQuery_s *query = TerI;
+    const f32 pitch = query->movement_pitch;
+    const f32 sin_pitch = NuTrigTable[(static_cast<i32>(pitch) >> 1) & (NUTRIGTABLE_COUNT - 1)];
+    const f32 cos_pitch = NuTrigTable[(static_cast<i32>(pitch + 16384.0f) >> 1) & (NUTRIGTABLE_COUNT - 1)];
+
+    const f32 rotated_z = source->y * sin_pitch + source->z * cos_pitch;
+    destination->y = source->y * cos_pitch - source->z * sin_pitch;
+
+    const f32 yaw = query->movement_yaw;
+    const f32 sin_yaw = NuTrigTable[(static_cast<i32>(yaw) >> 1) & (NUTRIGTABLE_COUNT - 1)];
+    const f32 cos_yaw = NuTrigTable[(static_cast<i32>(yaw + 16384.0f) >> 1) & (NUTRIGTABLE_COUNT - 1)];
+
+    destination->z = rotated_z * cos_yaw - source->x * sin_yaw;
+    destination->x = rotated_z * sin_yaw + source->x * cos_yaw;
+}
+
 void RotateTerrain(tertype *) {
+    STUBBED();
+}
+
+void DeRotateTerrain(tertype *surface) {
+    TerrainQuery_s *query = TerI;
+
+    const f32 sin_pitch = NuTrigTable[(static_cast<i32>(-query->movement_pitch) >> 1) & 0x7fff];
+    const f32 cos_pitch = NuTrigTable[(static_cast<i32>(16384.0f - query->movement_pitch) >> 1) & 0x7fff];
+    const f32 sin_yaw = NuTrigTable[(static_cast<i32>(-query->movement_yaw) >> 1) & 0x7fff];
+    const f32 cos_yaw = NuTrigTable[(static_cast<i32>(16384.0f - query->movement_yaw) >> 1) & 0x7fff];
+    const f32 start_z = query->local_start.z;
+    const f32 start_x = query->local_start.x;
+    const f32 start_y = query->local_start.y;
+
+    for (i32 vertex_index = 0; vertex_index < 3; ++vertex_index) {
+        const NUVEC &vertex = surface->vectors[vertex_index];
+        NUVEC &transformed = query->transformed_vertices[vertex_index];
+        const f32 relative_z = vertex.z - start_z;
+        const f32 relative_x = vertex.x - start_x;
+        const f32 rotated_x = relative_z * sin_yaw + relative_x * cos_yaw;
+        const f32 rotated_z = relative_z * cos_yaw - relative_x * sin_yaw;
+
+        transformed.x = rotated_x;
+        transformed.y = (vertex.y - start_y) * cos_pitch - rotated_z * sin_pitch;
+        transformed.z = (vertex.y - start_y) * sin_pitch + rotated_z * cos_pitch;
+    }
+
+    if (65536.0f > surface->normals[1].y) {
+        const NUVEC &vertex = surface->vectors[3];
+        NUVEC &transformed = query->transformed_vertices[3];
+        const f32 relative_z = vertex.z - start_z;
+        const f32 relative_x = vertex.x - start_x;
+        const f32 rotated_x = relative_z * sin_yaw + relative_x * cos_yaw;
+        const f32 rotated_z = relative_z * cos_yaw - relative_x * sin_yaw;
+
+        transformed.x = rotated_x;
+        transformed.y = (vertex.y - start_y) * cos_pitch - rotated_z * sin_pitch;
+        transformed.z = (vertex.y - start_y) * sin_pitch + rotated_z * cos_pitch;
+    }
+}
+
+void DeRotatePoint(nuvec_s *point) {
+    TerrainQuery_s *query = TerI;
+
+    const f32 sin_pitch = NuTrigTable[(static_cast<i32>(-query->movement_pitch) >> 1) & 0x7fff];
+    const f32 cos_pitch = NuTrigTable[(static_cast<i32>(16384.0f - query->movement_pitch) >> 1) & 0x7fff];
+    const f32 sin_yaw = NuTrigTable[(static_cast<i32>(-query->movement_yaw) >> 1) & 0x7fff];
+    const f32 cos_yaw = NuTrigTable[(static_cast<i32>(16384.0f - query->movement_yaw) >> 1) & 0x7fff];
+
+    const f32 relative_z = point->z - query->position.z;
+    const f32 relative_x = point->x - query->position.x;
+
+    const f32 rotated_x = relative_z * sin_yaw + relative_x * cos_yaw;
+    const f32 rotated_z = relative_z * cos_yaw - relative_x * sin_yaw;
+
+    point->x = rotated_x;
+    const f32 relative_y = point->y + query->collision_radius - query->position.y;
+    point->z = relative_y * sin_pitch + rotated_z * cos_pitch;
+    point->y = relative_y * cos_pitch - rotated_z * sin_pitch;
 }
 
 namespace {
@@ -2403,8 +3020,18 @@ void MakePlayPlanes(GAMECAMERA_s *camera) {
                  &far_corner[0], &far_corner[3], &far_corner[0]);
 }
 void TerrDrawPlatCol(tertype *, i16, i32) {
+    STUBBED();
 }
+extern "C" void NewRayCastPlatForm(void) {
+    STUBBED();
+}
+
+extern "C" void DrawHitTerrain(void) {
+    STUBBED();
+}
+
 void TerrShowCamTerr() {
+    STUBBED();
 }
 NUVEC TerrainStaticMtx(PLATSKININFO *info, nuvec_s *position, i32) {
     NUVEC4_ALIGNED16 point;
@@ -2418,8 +3045,6 @@ NUVEC TerrainStaticMtx(PLATSKININFO *info, nuvec_s *position, i32) {
     result.y = point.y;
     result.z = point.z;
     return result;
-}
-void ScanTerrainHandel(i32, i16 *) {
 }
 extern "C" void NewShapeInit(NUVEC *offset) {
     offset->x = 0.0f;
@@ -2537,52 +3162,6 @@ i32 TerrainBlockOnBlock(WORLDINFO_s *world, pushblock_s *block, nuvec_s *points,
     return 1;
 }
 
-extern PLATSKININFO *PlatSkinInfo;
-extern PLATSKINMEMINFO *SkinMemInfo;
-extern i32 PlatSkinCnt;
-extern i32 PlatSkinMaxStore;
-extern i32 PlatSkinMaxSize;
-extern i32 TerrainUpadteCnt;
-extern u8 *PlatSkinMem;
-void SkinPlatform(terrsitu_s *, unsigned char *, PLATSKININFO *);
-
-void TerrainSkinAllocate(terrsitu_s *terrain_group) {
-    TERRAIN_GROUP *group = reinterpret_cast<TERRAIN_GROUP *>(terrain_group);
-    i32 skin_index = ~static_cast<i32>(group->scene_index);
-    if (skin_index >= PlatSkinCnt)
-        return;
-    ++TerrainUpadteCnt;
-    PLATSKININFO *info = &PlatSkinInfo[skin_index];
-    if (group->data != NULL) {
-        SkinMemInfo[info->cache_slot].last_used = TerrainUpadteCnt;
-        return;
-    }
-    i32 slot = 0;
-    if (SkinMemInfo[0].skin_index != -1) {
-        i32 oldest = SkinMemInfo[0].last_used;
-        for (i32 i = 1; i < PlatSkinMaxStore; ++i) {
-            if (SkinMemInfo[i].skin_index == -1) {
-                slot = i;
-                break;
-            }
-            if (SkinMemInfo[i].last_used < oldest) {
-                oldest = SkinMemInfo[i].last_used;
-                slot = i;
-            }
-        }
-    }
-    PLATSKINMEMINFO *cache = &SkinMemInfo[slot];
-    if (cache->skin_index >= 0) {
-        CurTerr->groups[PlatSkinInfo[cache->skin_index].terrain_group].data = NULL;
-        for (i32 i = 0; i < 16; ++i)
-            CurTerr->index_levels[i].entry_count = 0;
-    }
-    group->data = info->terrain_data;
-    info->cache_slot = slot;
-    cache->skin_index = skin_index;
-    SkinPlatform(terrain_group, PlatSkinMem + slot * PlatSkinMaxSize, info);
-    SkinMemInfo[slot].last_used = TerrainUpadteCnt;
-}
 void ScanTerrIDRemovePlat(i32 platform_index) {
     TERRAIN_TRACK_SLOT *slot = CurTerr->track_slots;
     i32 remaining = TERRAIN_TRACK_SLOT_COUNT;
@@ -2594,17 +3173,6 @@ void ScanTerrIDRemovePlat(i32 platform_index) {
         --remaining;
     } while (remaining != 0);
 }
-void ScanWallSplineTerrain(i32, i32 terrain_mask, i32) {
-    WallSplinesOnly = 0;
-    ScaleTerrain = static_cast<TERRAIN_SHAPE *>(ScaleTerrainT1);
-    platinrange = 0;
-    TerI->scan_group_index = -1;
-    i16 *terminator = reinterpret_cast<i16 *>(TerI->scan_list_storage);
-    terminator[0] = 0;
-    terminator[1] = 0;
-    TerrainCollectWallSplines(TerrainGetScanBounds(*TerI), terrain_mask);
-}
-
 i32 HitWallSpline() {
     i32 hit = 0;
     if (WallSplCount == 0)
@@ -2717,6 +3285,17 @@ i32 HitWallSpline() {
         TerI->hit_time = 0.0f;
     return hit;
 }
+
+void ScanWallSplineTerrain(i32, i32 terrain_mask, i32) {
+    WallSplinesOnly = 0;
+    ScaleTerrain = static_cast<TERRAIN_SHAPE *>(ScaleTerrainT1);
+    platinrange = 0;
+    TerI->scan_group_index = -1;
+    i16 *terminator = reinterpret_cast<i16 *>(TerI->scan_list_storage);
+    terminator[0] = 0;
+    terminator[1] = 0;
+    TerrainCollectWallSplines(TerrainGetScanBounds(*TerI), terrain_mask);
+}
 i32 TerrainImpactPlatform(unsigned char *hit_flags) {
     TerrainMoveImpactData();
 
@@ -2754,6 +3333,27 @@ i32 TerrainImpactPlatform(unsigned char *hit_flags) {
     query->position.y += query->movement_normal.y * 0.004f;
     return 0;
 }
+void NewTerrStoreAnyInfo() {
+    TerrainQuery_s *query = TerI;
+    TERRAIN_SHAPE *surface = query->surface;
+    if (surface == NULL || query->terrain_group_index == -1) {
+        return;
+    }
+
+    if (surface->material[0] != 0) {
+        TerrainHitInfo[0] = surface->material[0];
+    }
+    if (surface->material[1] != 0) {
+        TerrainHitInfo[1] = surface->material[1];
+    }
+    if (surface->flags != 0) {
+        TerrainHitInfo[2] = surface->flags;
+    }
+    if (surface->normal_flags != 0) {
+        TerrainHitInfo[3] = surface->normal_flags;
+    }
+}
+
 void TerrainMoveImpactData() {
     const i32 stored_class_mask = (1 << TERRAIN_HIT_TYPE_FACE) | (1 << TERRAIN_HIT_TYPE_CYLINDER) |
                                   (1 << TERRAIN_HIT_TYPE_VERTEX) | (1 << TERRAIN_HIT_TYPE_SPHERE);
@@ -2781,6 +3381,96 @@ static NUMTX tertempmat;
 static NUVEC4 tertempvec4;
 
 i32 TerrainPlatformMoveCheck(nuvec_s *, nuvec_s *, i32, i32, i32);
+static f32 TerrWallDeflectYScale;
+
+extern "C" void TerrainScanWallSpline(TERRAIN_SPATIAL_NODE *node) {
+    if (node->point_count <= 2) {
+        node->points[0].y = 2147483648.0f;
+        return;
+    }
+    i32 count = node->point_count <= 14 ? node->point_count + 1 : 16;
+    f32 first_x = node->points[0].x;
+    f32 first_z = node->points[0].z;
+    // The original Android binary repeats this block without advancing
+    // the spline or terminating when point_count is greater than two.
+    for (;;) {
+        f32 min_x = first_x;
+        f32 max_x = first_x;
+        f32 min_z = first_z;
+        f32 max_z = first_z;
+        for (i32 i = 1; i < count; ++i) {
+            f32 x = node->points[i].x;
+            f32 z = node->points[i].z;
+            min_x = x < min_x ? x : min_x;
+            max_x = x > max_x ? x : max_x;
+            min_z = z < min_z ? z : min_z;
+            max_z = z > max_z ? z : max_z;
+        }
+        node->points[0].y = min_x;
+        node->points[1].y = max_x;
+        node->points[2].y = min_z;
+        node->points[3].y = max_z;
+    }
+}
+
+extern "C" void TerrainAddWallSpline(TERRAIN_SPATIAL_NODE *node, TERRSET *terrain) {
+    reinterpret_cast<TERRAIN_SPATIAL_NODE **>(node)[-1] = terrain->spatial_nodes;
+    terrain->spatial_nodes = node;
+}
+
+extern "C" void TerrainRemoveWallSpline(TERRAIN_SPATIAL_NODE *node, TERRSET *terrain) {
+    if (terrain == NULL)
+        return;
+    TERRAIN_SPATIAL_NODE *previous = terrain->spatial_nodes;
+    if (previous == NULL)
+        return;
+    if (previous == node) {
+        terrain->spatial_nodes = reinterpret_cast<TERRAIN_SPATIAL_NODE **>(previous)[-1];
+        return;
+    }
+    TERRAIN_SPATIAL_NODE *next = reinterpret_cast<TERRAIN_SPATIAL_NODE **>(previous)[-1];
+    while (next != NULL && next != node) {
+        previous = next;
+        next = reinterpret_cast<TERRAIN_SPATIAL_NODE **>(previous)[-1];
+    }
+    if (next == node)
+        reinterpret_cast<TERRAIN_SPATIAL_NODE **>(previous)[-1] = reinterpret_cast<TERRAIN_SPATIAL_NODE **>(node)[-1];
+}
+
+extern "C" void FullDeflect(NUVEC *normal, NUVEC *movement, NUVEC *result) {
+    const f32 normal_x = normal->x;
+    const f32 normal_y = normal->y;
+    const f32 normal_z = normal->z;
+    const f32 movement_x = movement->x;
+    const f32 movement_y = movement->y;
+    const f32 movement_z = movement->z;
+    const f32 deflection = -movement_y * normal_y - movement_x * normal_x - movement_z * normal_z + 0.0003f;
+    result->x = movement_x + normal_x * deflection;
+    result->y = movement_y + normal_y * deflection;
+    result->z = movement_z + normal_z * deflection;
+}
+
+void FullDeflectSmallY(NUVEC *normal, NUVEC *movement, NUVEC *result) {
+    // Move just far enough out of the surface to retain a small separation.
+    const f32 normal_x = normal->x;
+    const f32 normal_y = normal->y;
+    const f32 normal_z = normal->z;
+    const f32 movement_x = movement->x;
+    const f32 movement_y = movement->y;
+    const f32 movement_z = movement->z;
+    const f32 deflection = -movement_y * normal_y - movement_x * normal_x - movement_z * normal_z + 0.0003f;
+    result->x = movement_x + normal_x * deflection;
+    result->y = movement_y + normal_y * deflection * TerrWallDeflectYScale;
+    result->z = movement_z + normal_z * deflection;
+}
+
+i32 FullDeflectTest(nuvec_s *normal, nuvec_s *movement, nuvec_s *result) {
+    f32 deflection = ((-movement->y * normal->y - movement->x * normal->x) - movement->z * normal->z) + 0.0003f;
+    NUVEC output = {normal->x * deflection + movement->x, normal->y * deflection + movement->y,
+                    normal->z * deflection + movement->z};
+    *result = output;
+    return deflection > 0.0f;
+}
 
 void FullDeflectSize(nuvec_s *normal, nuvec_s *movement, nuvec_s *result) {
     f32 deflection = (-movement->y * normal->y - movement->x * normal->x) - movement->z * normal->z;
@@ -2795,6 +3485,19 @@ void FullDeflectSize(nuvec_s *normal, nuvec_s *movement, nuvec_s *result) {
         result->y *= scale;
         result->z *= scale;
     }
+}
+
+extern "C" void FullReflect(NUVEC *normal, NUVEC *movement, NUVEC *result) {
+    const f32 normal_x = normal->x;
+    const f32 normal_y = normal->y;
+    const f32 normal_z = normal->z;
+    const f32 movement_x = movement->x;
+    const f32 movement_y = movement->y;
+    const f32 movement_z = movement->z;
+    const f32 reflection = -movement_y * normal_y - movement_x * normal_x - movement_z * normal_z;
+    result->x = movement_x + 2.0f * (normal_x * reflection);
+    result->y = movement_y + 2.0f * (normal_y * reflection);
+    result->z = movement_z + 2.0f * (normal_z * reflection);
 }
 
 void FullReflectTest(nuvec_s *normal, nuvec_s *movement, nuvec_s *result) {
@@ -2812,18 +3515,14 @@ void FullReflectTest(nuvec_s *normal, nuvec_s *movement, nuvec_s *result) {
     }
 }
 
-i32 FullDeflectTest(nuvec_s *normal, nuvec_s *movement, nuvec_s *result) {
-    f32 deflection = ((-movement->y * normal->y - movement->x * normal->x) - movement->z * normal->z) + 0.0003f;
-    NUVEC output = {normal->x * deflection + movement->x, normal->y * deflection + movement->y,
-                    normal->z * deflection + movement->z};
-    *result = output;
-    return deflection > 0.0f;
-}
-
 static f32 TerConTol = 0.1f;
 
 extern "C" void TerrainSetPlatConnectTol(f32 tolerance) {
     TerConTol = tolerance;
+}
+
+extern "C" void TerrainSetWallDeflectYScale(f32 scale) {
+    TerrWallDeflectYScale = scale;
 }
 
 i32 PlatformChecks(i32 count, nuvec_s *movement) {
@@ -3239,6 +3938,14 @@ i32 TerrainPlatformMoveCheck(nuvec_s *position, nuvec_s *normal, i32 platform_in
     TerI->hit_type = saved_hit_type;
     return hit_type == 0;
 }
+NUVEC TerCrossProduct(NUVEC *a, NUVEC *b) {
+    NUVEC result;
+    result.x = a->y * b->z - a->z * b->y;
+    result.y = a->z * b->x - b->z * a->x;
+    result.z = a->x * b->y - b->x * a->y;
+    return result;
+}
+
 // The retained debug renderer reads the older 100-byte terrain record.
 struct TERRAIN_DEBUG_RECORD {
     u8 unknown_00[0x18];
@@ -3442,339 +4149,98 @@ void DrawMSitu(i32 index) {
     }
 }
 
-extern TERRSET *CurTerr;
-extern TerrainQuery_s *TerI;
-extern NUVEC ShadNorm;
-extern TERRAIN_SHAPE *ShadPoly;
-extern i16 castnum;
-extern NUVEC ShadRoofNorm;
-extern f32 ShadRoofY;
-extern TERRAIN_SHAPE *ShadRoofPoly;
-extern i16 castroofnum;
-extern i16 shadroofhit;
-extern i16 shadhit;
-extern NUVEC EShadNorm;
-extern NUVEC EShadRoofNorm;
-extern f32 EShadY;
-extern f32 EShadRoofY;
-extern TERRAIN_SHAPE *EShadPoly;
-extern TERRAIN_SHAPE *EShadRoofPoly;
-extern i16 ecastnum;
-extern i16 ecastroofnum;
-extern i16 eshadhit;
-extern i16 eshadroofhit;
-i16 InsideLineF(f32, f32, f32, f32, f32, f32);
-
-namespace {
-
-    const f32 NO_TERRAIN_HEIGHT = 2000000.0f;
-
-    struct ShadowSurfaceCandidate {
-        f32 height;
-        TERRAIN_SHAPE *surface;
-        NUVEC normal;
-        i16 terrain_group;
-    };
-
-    static void ConsiderShadowTriangle(const NUVEC &local_position, const TERRAIN_GROUP &group, TERRAIN_SHAPE *surface,
-                                       const NUVEC &origin, const NUVEC &edge_a, const NUVEC &edge_b,
-                                       const NUVEC &normal, f32 winding_y, f32 query_height, i16 terrain_group,
-                                       ShadowSurfaceCandidate *floor_candidate,
-                                       ShadowSurfaceCandidate *above_candidate) {
-        const f32 point_x = local_position.x, point_z = local_position.z;
-        if (winding_y > 0.0f) {
-            if (InsideLineF(point_x, point_z, edge_a.x, edge_a.z, origin.x, origin.z) == 0 ||
-                InsideLineF(point_x, point_z, edge_b.x, edge_b.z, edge_a.x, edge_a.z) == 0 ||
-                InsideLineF(point_x, point_z, origin.x, origin.z, edge_b.x, edge_b.z) == 0)
-                return;
-        } else if (winding_y < 0.0f) {
-            if (InsideLineF(point_x, point_z, origin.x, origin.z, edge_a.x, edge_a.z) == 0 ||
-                InsideLineF(point_x, point_z, edge_a.x, edge_a.z, edge_b.x, edge_b.z) == 0 ||
-                InsideLineF(point_x, point_z, edge_b.x, edge_b.z, origin.x, origin.z) == 0)
-                return;
-        } else
-            return;
-
-        const f32 plane_height =
-            (origin.y + group.origin.y) +
-            ((local_position.x - origin.x) * normal.x + (local_position.z - origin.z) * normal.z) / -normal.y;
-        if (plane_height <= query_height) {
-            if (winding_y > 0.0f && plane_height > floor_candidate->height) {
-                floor_candidate->height = plane_height;
-                floor_candidate->surface = surface;
-                floor_candidate->normal = normal;
-                floor_candidate->terrain_group = terrain_group;
+extern "C" void terrainpickupinit(char *path, void **buffer) {
+    TERRPICKUPSET *terrain = static_cast<TERRPICKUPSET *>(*buffer);
+    *buffer = static_cast<u8 *>(*buffer) + sizeof(TERRPICKUPSET);
+    terrain->groups = static_cast<TERRAIN_GROUP *>(*buffer);
+    *buffer = static_cast<u8 *>(*buffer) + 32 * sizeof(TERRAIN_GROUP);
+    terrain->shape_data = *buffer;
+    *buffer = static_cast<u8 *>(*buffer) + 0x1c00;
+    memset(terrain->groups, 0, 32 * sizeof(TERRAIN_GROUP));
+    for (i32 i = 0; i < 32; ++i)
+        terrain->groups[i].chunk_type = -1;
+    for (i32 i = 0; i < 32; ++i) {
+        TERRAIN_PLATFORM &platform = terrain->platforms[i];
+        platform.scene_object = NULL;
+        platform.bounce_impulse = 0.0f;
+        platform.bounce_offset = 0.0f;
+        platform.bounce_velocity = 0.0f;
+        platform.bounce_damping = 0.0f;
+        platform.bounce_spring = 0.0f;
+    }
+    memset(terrain->group_for_type, 0xff, sizeof(terrain->group_for_type));
+    curPickInst = 0;
+    terraincnt = 0;
+    curSphereter = 0;
+    platinrange = 0;
+    ShadPoly = NULL;
+    TerrPoly = NULL;
+    TerrWallInfo = 0;
+    PlatImpactId = -1;
+    terrain->group_count =
+        ReadTerrainPickup(reinterpret_cast<unsigned char *>(path), reinterpret_cast<i16 **>(buffer), terrain);
+    for (i32 i = 0; i < 32; ++i) {
+        TERRAIN_GROUP &group = terrain->groups[i];
+        if (static_cast<u32>(group.chunk_type) > 1)
+            continue;
+        NUVEC minimum = {200000000.0f, 200000000.0f, 200000000.0f};
+        NUVEC maximum = {-200000000.0f, -200000000.0f, -200000000.0f};
+        f32 radius_squared = 0.0f;
+        TERRAIN_SHAPE_BATCH *batch = static_cast<TERRAIN_SHAPE_BATCH *>(group.data);
+        while (batch->marker >= 0) {
+            TERRAIN_SHAPE *shape = reinterpret_cast<TERRAIN_SHAPE *>(batch + 1);
+            for (i32 j = 0; j < batch->shape_count; ++j, ++shape) {
+                if (shape->material[0] == 0xff) {
+                    shape->material[0] = shape->material[1];
+                    shape->material[1] = 0;
+                    shape->flags |= 0x80;
+                }
+                minimum.x = MIN(shape->min_x, minimum.x);
+                minimum.y = MIN(shape->min_y, minimum.y);
+                minimum.z = MIN(shape->min_z, minimum.z);
+                maximum.x = MAX(shape->max_x, maximum.x);
+                maximum.y = MAX(shape->max_y, maximum.y);
+                maximum.z = MAX(shape->max_z, maximum.z);
+                for (i32 k = 0; k < 4; ++k) {
+                    NUVEC &v = shape->vectors[k];
+                    f32 length_squared = (v.x * v.x + v.y * v.y) + v.z * v.z;
+                    radius_squared = MAX(length_squared, radius_squared);
+                }
             }
-        } else if (plane_height < above_candidate->height ||
-                   (plane_height == above_candidate->height && normal.y < above_candidate->normal.y)) {
-            // The target keeps the nearest ordinary surface above the cast
-            // origin as well as the conventional floor below it.  NewCast's
-            // final range check decides whether this surface is reachable.
-            above_candidate->height = plane_height;
-            above_candidate->surface = surface;
-            above_candidate->normal = normal;
-            above_candidate->terrain_group = terrain_group;
+            batch = reinterpret_cast<TERRAIN_SHAPE_BATCH *>(reinterpret_cast<TERRAIN_SHAPE *>(batch + 1) +
+                                                            batch->shape_count);
         }
+        group.radius = NuFsqrt(radius_squared);
+        group.chunk_type = 0;
+        ++terraincnt;
+        group.bounds_min = minimum;
+        group.bounds_max = maximum;
     }
-
-} // namespace
-
-f32 NewCast(nuvec_s *position, f32 height_above, f32 roof_range) {
-    ShadowSurfaceCandidate floor_candidate = {
-        -NO_TERRAIN_HEIGHT,
-        NULL,
-        {0.0f, 1.0f, 0.0f},
-        -1,
-    };
-    ShadowSurfaceCandidate above_candidate = {
-        NO_TERRAIN_HEIGHT,
-        NULL,
-        {0.0f, 1.0f, 0.0f},
-        -1,
-    };
-    ShadowSurfaceCandidate extended_floor = floor_candidate;
-    ShadowSurfaceCandidate extended_above = above_candidate;
-    castnum = -1;
-    ecastnum = -1;
-
-    u8 *scan = TerI->scan_list_storage;
-    i16 shape_count = *reinterpret_cast<i16 *>(scan);
-    while (shape_count > 0) {
-        const i16 group_index = *reinterpret_cast<i16 *>(scan + sizeof(i16));
-        TERRAIN_GROUP &group = CurTerr->groups[group_index];
-        TERRAIN_SHAPE **surfaces = reinterpret_cast<TERRAIN_SHAPE **>(scan) + 1;
-        const NUVEC local_position = {
-            position->x - group.origin.x,
-            position->y - group.origin.y,
-            position->z - group.origin.z,
-        };
-
-        for (i32 shape_index = 0; shape_index < shape_count; ++shape_index) {
-            TERRAIN_SHAPE *surface = surfaces[shape_index];
-            bool extended = surface->material[1] != 0;
-            ShadowSurfaceCandidate *floor = extended ? &extended_floor : &floor_candidate;
-            ShadowSurfaceCandidate *above = extended ? &extended_above : &above_candidate;
-            f32 winding_y = surface->normals[0].y;
-            if (!(winding_y > 0.0f || winding_y < 0.0f))
-                continue;
-            bool second_triangle = false;
-            if (!(surface->normals[1].y > 65535.0f)) {
-                const NUVEC &a = surface->vectors[winding_y > 0.0f ? 2 : 1];
-                const NUVEC &b = surface->vectors[winding_y > 0.0f ? 1 : 2];
-                second_triangle = InsideLineF(local_position.x, local_position.z, a.x, a.z, b.x, b.z) == 0;
-            }
-            if (second_triangle) {
-                ConsiderShadowTriangle(local_position, group, surface, surface->vectors[3], surface->vectors[2],
-                                       surface->vectors[1], surface->normals[1], winding_y, position->y, group_index,
-                                       floor, above);
-            } else {
-                ConsiderShadowTriangle(local_position, group, surface, surface->vectors[0], surface->vectors[1],
-                                       surface->vectors[2], surface->normals[0], winding_y, position->y, group_index,
-                                       floor, above);
-            }
-        }
-
-        scan = reinterpret_cast<u8 *>(surfaces + shape_count);
-        shape_count = *reinterpret_cast<i16 *>(scan);
+    for (i32 i = 0; i < 32; ++i) {
+        terrain->groups[i].scene_index = i;
+        terrain->platforms[i].scene_object = NULL;
     }
-
-    castnum = floor_candidate.terrain_group;
-    ecastnum = extended_floor.terrain_group;
-    bool ordinary_roof = above_candidate.height < NO_TERRAIN_HEIGHT && above_candidate.normal.y < 0.0f &&
-                         position->y + roof_range > above_candidate.height;
-    bool extended_blocked = ordinary_roof && extended_above.height > above_candidate.height;
-    EShadRoofY = NO_TERRAIN_HEIGHT;
-    EShadRoofPoly = NULL;
-    if (extended_above.height < NO_TERRAIN_HEIGHT && extended_above.normal.y < 0.0f &&
-        position->y + roof_range > extended_above.height && !extended_blocked) {
-        EShadRoofY = extended_above.height;
-        EShadRoofPoly = extended_above.surface;
-        EShadRoofNorm = extended_above.normal;
-        eshadroofhit = 1;
-        ecastroofnum = extended_above.terrain_group;
-    }
-    const ShadowSurfaceCandidate *extended_result = NULL;
-    if (extended_above.height < NO_TERRAIN_HEIGHT && extended_above.normal.y > 0.0f &&
-        position->y + roof_range > extended_above.height) {
-        if (!extended_blocked) {
-            extended_result = &extended_above;
-            eshadhit = 1;
-            ecastnum = extended_above.terrain_group;
-        }
-    } else if (extended_floor.height > -NO_TERRAIN_HEIGHT &&
-               !(floor_candidate.height > -NO_TERRAIN_HEIGHT && floor_candidate.height > extended_floor.height)) {
-        extended_result = &extended_floor;
-        eshadhit = 2;
-    }
-    if (extended_result != NULL) {
-        EShadY = extended_result->height;
-        EShadPoly = extended_result->surface;
-        EShadNorm = extended_result->normal;
-    } else {
-        EShadY = NO_TERRAIN_HEIGHT;
-        EShadPoly = NULL;
-        EShadNorm.y = 1.0f;
-        eshadhit = 3;
-    }
-    ShadRoofY = NO_TERRAIN_HEIGHT;
-    ShadRoofPoly = NULL;
-    if (ordinary_roof) {
-        ShadRoofY = above_candidate.height;
-        ShadRoofPoly = above_candidate.surface;
-        ShadRoofNorm = above_candidate.normal;
-        shadroofhit = 1;
-        castroofnum = above_candidate.terrain_group;
-    }
-    const ShadowSurfaceCandidate *selected_candidate = NULL;
-    if (above_candidate.surface != NULL && above_candidate.normal.y > 0.0f &&
-        above_candidate.height < position->y + height_above) {
-        selected_candidate = &above_candidate;
-        shadhit = 1;
-    } else if (floor_candidate.surface != NULL) {
-        selected_candidate = &floor_candidate;
-        shadhit = 2;
-    }
-
-    if (selected_candidate == NULL) {
-        position->y = NO_TERRAIN_HEIGHT;
-        ShadPoly = NULL;
-        ShadNorm.y = 1.0f;
-        shadhit = 3;
-        castnum = -1;
-        return 0.0f;
-    }
-
-    position->y = selected_candidate->height;
-    ShadNorm = selected_candidate->normal;
-    ShadPoly = selected_candidate->surface;
-    castnum = selected_candidate->terrain_group;
-    return 0.0f;
+    PickupTerr = terrain;
 }
 
-extern "C" void TerrainWallAng(f32 slope) {
-    wallover = slope;
-}
-
-extern "C" void TerrainWallSideSlide(NUVEC *movement, void *id, f32 speed, f32 upward_scale, NUANG angle) {
-    if (CurTerr == NULL)
-        return;
-    CurTrackInfo = ScanTerrId(id);
-    if (CurTrackInfo == NULL || CurTrackInfo->wall_contact_state == 0)
-        return;
-    if (speed != 0.0f) {
-        NUVEC slide = {0.0f, 0.0f, speed};
-        NuVecRotateY(&slide, &slide, angle);
-        FullDeflect(&CurTrackInfo->impact_normal, &slide, &slide);
-        slide.x += (speed * CurTrackInfo->impact_normal.x) * 0.4f;
-        slide.z += (speed * CurTrackInfo->impact_normal.z) * 0.4f;
-        movement->z += slide.z;
-        movement->x += slide.x;
-    }
-    if (movement->y > 0.0f)
-        movement->y *= upward_scale;
-}
-
-i32 HitTerrPoly(tertype *surface, i32 group_index);
-
-extern "C" i32 TerrainTrackBack(NUVEC *position, NUVEC *direction, f32 radius, f32 backoff, NUVEC *result) {
-    if (CurTerr == NULL || TerrPolyObj == -1)
-        return 0;
+extern "C" void noterraininit(void) {
+    terraincnt = 0;
+    curSphereter = 0;
+    platinrange = 0;
+    ShadPoly = 0;
     TerI = static_cast<TerrainQuery_s *>(NuScratchAlloc32(sizeof(TerrainQuery_s)));
-    TerI->object_scale = 1.0f;
-    TerI->object_scale_sq = 1.0f;
-    TerI->inverse_object_scale = 1.0f;
-    TerI->inverse_object_scale_sq = 1.0f;
-    TerI->collision_radius = radius;
-    TerI->inverse_collision_radius = radius == 0.0f ? 0.0f : 1.0f / radius;
-    TerI->collision_radius_sq = radius * radius;
-    TerI->position.x = direction->x * (radius + 0.5f) + position->x;
-    TerI->position.y = direction->y * (radius + 0.5f) + position->y;
-    TerI->position.z = direction->z * (radius + 0.5f) + position->z;
-    TerI->movement.x = -direction->x * (radius + 0.8f);
-    TerI->movement.y = -direction->y * (radius + 0.8f);
-    TerI->movement.z = -direction->z * (radius + 0.8f);
-    TerI->object_index = -1;
-    TerI->hit_flags = NULL;
-    DerotateMovementVector();
-    HitTerrPoly(TerrPoly, TerrPolyObj);
-    switch (TerI->hit_type) {
-        case 0:
-        case 17:
-        case 18:
-        case 19:
-        case 20:
-            *result = TerI->position;
-            break;
-        case 1:
-        case 2:
-        case 3:
-        case 4:
-            TerI->hit_time -= backoff;
-            if (TerI->hit_time < 0.0f)
-                TerI->hit_time = 0.0f;
-            result->x = TerI->movement.x * TerI->hit_time + TerI->position.x;
-            result->y = TerI->movement.y * TerI->hit_time + TerI->position.y;
-            result->z = TerI->movement.z * TerI->hit_time + TerI->position.z;
-            break;
-    }
     NuScratchRelease();
-    return TerI->hit_type;
+    CurTerr = NULL;
+    TerrFlush();
 }
 
-extern "C" i32 TerrainInfo() {
-    if (TerrPoly != NULL)
-        return TerrPoly->material[0];
-    if (TerrWallInfo != 0)
-        return TerrWallTab[0];
-    return -1;
+extern "C" void TerrDrawImpactPol(void) {
+    STUBBED();
 }
 
-extern "C" i32 TerrainInfoExtra() {
-    if (TerrPoly != NULL)
-        return TerrPoly->material[1];
-    if (TerrWallInfo != 0)
-        return TerrWallTab[1];
-    return -1;
+void DrawWallSpline(float) {
+    STUBBED();
 }
-
-extern "C" i32 TerrainIntensityInfo() {
-    if (TerrPoly != NULL)
-        return static_cast<i32>(TerrPoly->normal_flags) - 8;
-    if (TerrWallInfo != 0)
-        return static_cast<i32>(TerrWallTab[3]) - 8;
-    return -1;
-}
-
-extern "C" void TerrTempMemory(void **buffer) {
-    u8 *cursor = static_cast<u8 *>(*buffer);
-    if (ScaleTerrainT1 == NULL)
-        ScaleTerrainT1 = cursor;
-    cursor += 0xc800;
-    *buffer = cursor;
-    if (ScaleTerrainT2 == NULL)
-        ScaleTerrainT2 = cursor;
-    cursor += 0xc800;
-    *buffer = cursor;
-    if (TempScanStack == NULL)
-        TempScanStack = cursor;
-    cursor += 0x2000;
-    *buffer = cursor;
-    if (WallSplList == NULL)
-        WallSplList = reinterpret_cast<TERRAIN_WALL_POINT *>(cursor);
-    cursor += 0x600;
-    *buffer = cursor;
-}
-
-// Original 0x378fb0: the optimized rotating scan shares the terrain engine state.
-extern TERRSET *CurTerr;
-extern TerrainQuery_s *TerI;
-extern i16 NuTerrPlatsOff;
-extern TERRAIN_SHAPE *ScaleTerrain;
-extern "C" void *NuScratchAlloc32(i32);
-extern "C" void NuScratchRelease();
-NUVEC TerCrossProduct(NUVEC *, NUVEC *);
-
-void TerrainSkinAllocate(terrsitu_s *terrain_group);
 
 namespace {
 
@@ -3860,13 +4326,8 @@ namespace {
 
 } // namespace
 
-extern "C" void NewRaySetDisablePalt(i32 disabled) {
-    TerrPlatDis = disabled;
-}
-
-extern "C" void NewScanInit(void) {
-    TempStackPtr = TempScanStack;
-    TerrPlatDis = -1;
+void NewScan(nuvec_s *, i32, i32) {
+    STUBBED();
 }
 
 void NewScanRot(nuvec_s *position, i32 terrain_mask) {
@@ -4089,4 +4550,1305 @@ void NewScanRot(nuvec_s *position, i32 terrain_mask) {
     terminator[0] = 0;
     terminator[1] = 0;
     TerI->scan_list = TerI->scan_list_storage;
+}
+
+i16 InsideLineF(f32, f32, f32, f32, f32, f32);
+
+namespace {
+
+    const f32 NO_TERRAIN_HEIGHT = 2000000.0f;
+
+    struct ShadowSurfaceCandidate {
+        f32 height;
+        TERRAIN_SHAPE *surface;
+        NUVEC normal;
+        i16 terrain_group;
+    };
+
+    static void ConsiderShadowTriangle(const NUVEC &local_position, const TERRAIN_GROUP &group, TERRAIN_SHAPE *surface,
+                                       const NUVEC &origin, const NUVEC &edge_a, const NUVEC &edge_b,
+                                       const NUVEC &normal, f32 winding_y, f32 query_height, i16 terrain_group,
+                                       ShadowSurfaceCandidate *floor_candidate,
+                                       ShadowSurfaceCandidate *above_candidate) {
+        const f32 point_x = local_position.x, point_z = local_position.z;
+        if (winding_y > 0.0f) {
+            if (InsideLineF(point_x, point_z, edge_a.x, edge_a.z, origin.x, origin.z) == 0 ||
+                InsideLineF(point_x, point_z, edge_b.x, edge_b.z, edge_a.x, edge_a.z) == 0 ||
+                InsideLineF(point_x, point_z, origin.x, origin.z, edge_b.x, edge_b.z) == 0)
+                return;
+        } else if (winding_y < 0.0f) {
+            if (InsideLineF(point_x, point_z, origin.x, origin.z, edge_a.x, edge_a.z) == 0 ||
+                InsideLineF(point_x, point_z, edge_a.x, edge_a.z, edge_b.x, edge_b.z) == 0 ||
+                InsideLineF(point_x, point_z, edge_b.x, edge_b.z, origin.x, origin.z) == 0)
+                return;
+        } else
+            return;
+
+        const f32 plane_height =
+            (origin.y + group.origin.y) +
+            ((local_position.x - origin.x) * normal.x + (local_position.z - origin.z) * normal.z) / -normal.y;
+        if (plane_height <= query_height) {
+            if (winding_y > 0.0f && plane_height > floor_candidate->height) {
+                floor_candidate->height = plane_height;
+                floor_candidate->surface = surface;
+                floor_candidate->normal = normal;
+                floor_candidate->terrain_group = terrain_group;
+            }
+        } else if (plane_height < above_candidate->height ||
+                   (plane_height == above_candidate->height && normal.y < above_candidate->normal.y)) {
+            // The target keeps the nearest ordinary surface above the cast
+            // origin as well as the conventional floor below it.  NewCast's
+            // final range check decides whether this surface is reachable.
+            above_candidate->height = plane_height;
+            above_candidate->surface = surface;
+            above_candidate->normal = normal;
+            above_candidate->terrain_group = terrain_group;
+        }
+    }
+
+} // namespace
+
+f32 NewCast(nuvec_s *position, f32 height_above, f32 roof_range) {
+    ShadowSurfaceCandidate floor_candidate = {
+        -NO_TERRAIN_HEIGHT,
+        NULL,
+        {0.0f, 1.0f, 0.0f},
+        -1,
+    };
+    ShadowSurfaceCandidate above_candidate = {
+        NO_TERRAIN_HEIGHT,
+        NULL,
+        {0.0f, 1.0f, 0.0f},
+        -1,
+    };
+    ShadowSurfaceCandidate extended_floor = floor_candidate;
+    ShadowSurfaceCandidate extended_above = above_candidate;
+    castnum = -1;
+    ecastnum = -1;
+
+    u8 *scan = TerI->scan_list_storage;
+    i16 shape_count = *reinterpret_cast<i16 *>(scan);
+    while (shape_count > 0) {
+        const i16 group_index = *reinterpret_cast<i16 *>(scan + sizeof(i16));
+        TERRAIN_GROUP &group = CurTerr->groups[group_index];
+        TERRAIN_SHAPE **surfaces = reinterpret_cast<TERRAIN_SHAPE **>(scan) + 1;
+        const NUVEC local_position = {
+            position->x - group.origin.x,
+            position->y - group.origin.y,
+            position->z - group.origin.z,
+        };
+
+        for (i32 shape_index = 0; shape_index < shape_count; ++shape_index) {
+            TERRAIN_SHAPE *surface = surfaces[shape_index];
+            bool extended = surface->material[1] != 0;
+            ShadowSurfaceCandidate *floor = extended ? &extended_floor : &floor_candidate;
+            ShadowSurfaceCandidate *above = extended ? &extended_above : &above_candidate;
+            f32 winding_y = surface->normals[0].y;
+            if (!(winding_y > 0.0f || winding_y < 0.0f))
+                continue;
+            bool second_triangle = false;
+            if (!(surface->normals[1].y > 65535.0f)) {
+                const NUVEC &a = surface->vectors[winding_y > 0.0f ? 2 : 1];
+                const NUVEC &b = surface->vectors[winding_y > 0.0f ? 1 : 2];
+                second_triangle = InsideLineF(local_position.x, local_position.z, a.x, a.z, b.x, b.z) == 0;
+            }
+            if (second_triangle) {
+                ConsiderShadowTriangle(local_position, group, surface, surface->vectors[3], surface->vectors[2],
+                                       surface->vectors[1], surface->normals[1], winding_y, position->y, group_index,
+                                       floor, above);
+            } else {
+                ConsiderShadowTriangle(local_position, group, surface, surface->vectors[0], surface->vectors[1],
+                                       surface->vectors[2], surface->normals[0], winding_y, position->y, group_index,
+                                       floor, above);
+            }
+        }
+
+        scan = reinterpret_cast<u8 *>(surfaces + shape_count);
+        shape_count = *reinterpret_cast<i16 *>(scan);
+    }
+
+    castnum = floor_candidate.terrain_group;
+    ecastnum = extended_floor.terrain_group;
+    bool ordinary_roof = above_candidate.height < NO_TERRAIN_HEIGHT && above_candidate.normal.y < 0.0f &&
+                         position->y + roof_range > above_candidate.height;
+    bool extended_blocked = ordinary_roof && extended_above.height > above_candidate.height;
+    EShadRoofY = NO_TERRAIN_HEIGHT;
+    EShadRoofPoly = NULL;
+    if (extended_above.height < NO_TERRAIN_HEIGHT && extended_above.normal.y < 0.0f &&
+        position->y + roof_range > extended_above.height && !extended_blocked) {
+        EShadRoofY = extended_above.height;
+        EShadRoofPoly = extended_above.surface;
+        EShadRoofNorm = extended_above.normal;
+        eshadroofhit = 1;
+        ecastroofnum = extended_above.terrain_group;
+    }
+    const ShadowSurfaceCandidate *extended_result = NULL;
+    if (extended_above.height < NO_TERRAIN_HEIGHT && extended_above.normal.y > 0.0f &&
+        position->y + roof_range > extended_above.height) {
+        if (!extended_blocked) {
+            extended_result = &extended_above;
+            eshadhit = 1;
+            ecastnum = extended_above.terrain_group;
+        }
+    } else if (extended_floor.height > -NO_TERRAIN_HEIGHT &&
+               !(floor_candidate.height > -NO_TERRAIN_HEIGHT && floor_candidate.height > extended_floor.height)) {
+        extended_result = &extended_floor;
+        eshadhit = 2;
+    }
+    if (extended_result != NULL) {
+        EShadY = extended_result->height;
+        EShadPoly = extended_result->surface;
+        EShadNorm = extended_result->normal;
+    } else {
+        EShadY = NO_TERRAIN_HEIGHT;
+        EShadPoly = NULL;
+        EShadNorm.y = 1.0f;
+        eshadhit = 3;
+    }
+    ShadRoofY = NO_TERRAIN_HEIGHT;
+    ShadRoofPoly = NULL;
+    if (ordinary_roof) {
+        ShadRoofY = above_candidate.height;
+        ShadRoofPoly = above_candidate.surface;
+        ShadRoofNorm = above_candidate.normal;
+        shadroofhit = 1;
+        castroofnum = above_candidate.terrain_group;
+    }
+    const ShadowSurfaceCandidate *selected_candidate = NULL;
+    if (above_candidate.surface != NULL && above_candidate.normal.y > 0.0f &&
+        above_candidate.height < position->y + height_above) {
+        selected_candidate = &above_candidate;
+        shadhit = 1;
+    } else if (floor_candidate.surface != NULL) {
+        selected_candidate = &floor_candidate;
+        shadhit = 2;
+    }
+
+    if (selected_candidate == NULL) {
+        position->y = NO_TERRAIN_HEIGHT;
+        ShadPoly = NULL;
+        ShadNorm.y = 1.0f;
+        shadhit = 3;
+        castnum = -1;
+        return 0.0f;
+    }
+
+    position->y = selected_candidate->height;
+    ShadNorm = selected_candidate->normal;
+    ShadPoly = selected_candidate->surface;
+    castnum = selected_candidate->terrain_group;
+    return 0.0f;
+}
+
+extern "C" void TerrainWallAng(f32 slope) {
+    wallover = slope;
+}
+
+extern "C" void ShadowDir(NUVEC *direction) {
+    if (ShadPoly != NULL) {
+        direction->x = ShadPoly->vectors[1].x - ShadPoly->vectors[0].x;
+        direction->y = ShadPoly->vectors[1].y - ShadPoly->vectors[0].y;
+        direction->z = ShadPoly->vectors[1].z - ShadPoly->vectors[0].z;
+    }
+}
+
+extern "C" i32 EShadowInfo(void) {
+    return EShadPoly != NULL ? EShadPoly->material[1] : -1;
+}
+
+extern "C" i32 ShadowRoofInfo(void) {
+    return ShadRoofPoly != NULL ? ShadRoofPoly->material[0] : -1;
+}
+
+extern "C" i32 EShadowRoofInfo(void) {
+    return EShadRoofPoly != NULL ? EShadRoofPoly->material[1] : -1;
+}
+
+extern "C" void NewTerrPlatformsOff(void) {
+    NuTerrPlatsOff = 1;
+}
+
+extern "C" i32 NewShadowOnPlatform(void) {
+    if (CurTerr == NULL || castnum == -1) {
+        return -1;
+    }
+
+    TERRAIN_GROUP &group = CurTerr->groups[castnum];
+    if (group.chunk_type != TERRAIN_CHUNK_GROUP_SECONDARY) {
+        return -1;
+    }
+    return group.scene_index;
+}
+
+extern "C" i32 NewShadowOnMSitu(void) {
+    return castnum != -1 ? castnum : TerrPolyObj;
+}
+
+extern "C" void AddCollisionSphere(void) {
+    STUBBED();
+}
+
+extern "C" void AddPickupTerr(i32 type, NUVEC *position) {
+    if (CurTerr == NULL)
+        return;
+    i16 source = PickupTerr->group_for_type[type];
+    if (source == -1 || curPickInst >= 128)
+        return;
+    TERRAIN_GROUP *group = &CurTerr->groups[CurTerr->max_groups + curPickInst];
+    *group = PickupTerr->groups[source];
+    group->origin = *position;
+    ++curPickInst;
+}
+
+extern "C" i32 AddPickupTerrRot(i32 type, NUMTX *matrix, NUMTX *previous, i32 rotating) {
+    TERRSET *terrain = CurTerr;
+    if (terrain == NULL)
+        return -1;
+    if (rotating == 0 && previous == NULL) {
+        AddPickupTerr(type, reinterpret_cast<NUVEC *>(&matrix->m30));
+        return -1;
+    }
+    if (terrain->group_index_count >= terrain->max_group_indices || terrain->group_count >= terrain->max_groups ||
+        matrix == NULL || (rotating != 0 && previous == NULL))
+        return -1;
+    i16 source = PickupTerr->group_for_type[type];
+    if (source == -1 || terrain->removed_platform_count >= 32 || terrain->max_platforms <= 0)
+        return -1;
+    i32 index = 0;
+    while (terrain->platforms[index].scene_object != NULL) {
+        if (++index == terrain->max_platforms)
+            return -1;
+    }
+    i16 group_index = terrain->group_count;
+    TERRAIN_GROUP &group = terrain->groups[group_index];
+    group = PickupTerr->groups[source];
+    group.scene_index = index;
+    group.chunk_type = 1;
+    TERRAIN_PLATFORM &platform = terrain->platforms[index];
+    platform.scene_object = matrix;
+    if (rotating != 0) {
+        platform.previous_matrix = *previous;
+        platform.flags |= TERRAIN_PLATFORM_FLAG_ROTATING;
+    } else {
+        NUMTX *old = previous != NULL ? previous : matrix;
+        platform.previous_matrix.m30 = old->m30;
+        platform.previous_matrix.m31 = old->m31;
+        platform.previous_matrix.m32 = old->m32;
+        platform.flags &= ~TERRAIN_PLATFORM_FLAG_ROTATING;
+    }
+    group.origin.x = matrix->m30;
+    group.origin.y = matrix->m31;
+    group.origin.z = matrix->m32;
+    platform.terrain_group_index = group_index;
+    platform.scene_object_index = 0;
+    platform.scene_transform = NULL;
+    terrain->group_indices[terrain->group_index_count++] = group_index;
+    platform.flags &= ~TERRAIN_PLATFORM_FLAG_COLLIDED;
+    platform.bounce_impulse = 0.0f;
+    platform.bounce_offset = 0.0f;
+    platform.bounce_velocity = 0.0f;
+    platform.bounce_damping = 0.0f;
+    platform.bounce_spring = 0.0f;
+    if (terrain->active_platform_count < 96)
+        terrain->active_platform_groups[terrain->active_platform_count++] = terrain->group_count;
+    ++terrain->cells[TERRAIN_PLATFORM_CELL].group_count;
+    ++terrain->group_count;
+    terrain->removed_platforms[terrain->removed_platform_count++] = index;
+    return index;
+}
+
+void TerrainSideClamp(NUVEC *axis, NUVEC *position) {
+    TERRAIN_AXIS_FREEDOM_SHAPE *shape = TerrShape;
+    const f32 shape_x = shape->offset.x;
+    const f32 axis_z = axis->z;
+    const f32 axis_x = axis->x;
+    const f32 shape_z = shape->offset.z;
+    const f32 forward_z = shape_z * axis_z;
+    f32 clamped_forward = shape_x * axis_x;
+    f32 clamped_side = shape_x * axis_z;
+    clamped_forward += forward_z;
+    clamped_side -= shape_z * axis_x;
+
+    const f32 radius = shape->radius;
+    const f32 negative_radius = -radius;
+    clamped_forward = MIN(radius, clamped_forward);
+    clamped_forward = MAX(negative_radius, clamped_forward);
+    const f32 side_radius = radius * 0.2f;
+    const f32 negative_side_radius = negative_radius * 0.2f;
+    clamped_side = MIN(side_radius, clamped_side);
+    clamped_side = MAX(negative_side_radius, clamped_side);
+
+    position->x -= (axis->x * clamped_forward + axis->z * clamped_side) - shape->offset.x;
+    position->z -= (axis->z * clamped_forward - axis->x * clamped_side) - shape->offset.z;
+
+    shape->offset.x = axis->x * clamped_forward + axis->z * clamped_side;
+    shape->offset.z = axis->z * clamped_forward - axis->x * clamped_side;
+}
+
+i32 TerrShapeSideStep(NUVEC *, NUVEC *, u8 *) {
+    enum TERRAIN_SIDE_STEP_RESULT {
+        TERRAIN_SIDE_STEP_HANDLED = 0,
+        TERRAIN_SIDE_STEP_USE_STANDARD_IMPACT = 1,
+    };
+
+    constexpr f32 kCylinderFloorThreshold = 0.5f;
+    constexpr f32 kMaximumWallNormalY = 0.707f;
+    constexpr f32 kMinimumWallNormalY = -0.8f;
+    constexpr f32 kMovementPushScale = 0.15f;
+    constexpr f32 kShapePushScale = 0.05f;
+
+    i32 result = TERRAIN_SIDE_STEP_USE_STANDARD_IMPACT;
+    TerrainQuery_s *query = TerI;
+    const u8 hit_type = query->hit_type;
+    if (hit_type == TERRAIN_HIT_TYPE_NONE) {
+        return result;
+    }
+
+    i32 push_from_collision_normal;
+    switch (hit_type) {
+        case TERRAIN_HIT_TYPE_CYLINDER:
+        case TERRAIN_HIT_TYPE_VERTEX:
+            push_from_collision_normal = kCylinderFloorThreshold <= query->impact_normal.y;
+            break;
+        default:
+            if (query->impact_normal.y >= kMaximumWallNormalY || query->impact_normal.y < kMinimumWallNormalY) {
+                return TERRAIN_SIDE_STEP_USE_STANDARD_IMPACT;
+            }
+            push_from_collision_normal = false;
+            break;
+    }
+
+    const f32 shape_angle = TerrShape->angle;
+    NUVEC axis;
+    axis.x = NuTrigTable[static_cast<i32>(shape_angle + 16384.0f) >> 1 & 0x7fff];
+    axis.y = 0.0f;
+    axis.z = -NuTrigTable[static_cast<i32>(shape_angle) >> 1 & 0x7fff];
+
+    query->start_position.x = query->position.x;
+    query->start_position.y = query->position.y;
+    query->start_position.z = query->position.z;
+    query->start_movement.x = query->movement.x;
+    query->start_movement.y = query->movement.y;
+    query->start_movement.z = query->movement.z;
+    query->movement.y = 0.0f;
+
+    if (push_from_collision_normal == 1) {
+        const f32 push_x = query->movement_normal.x * TerrShape->radius;
+        const f32 push_z = query->movement_normal.z * TerrShape->radius;
+        query->movement.x = push_x * kMovementPushScale;
+        query->movement.z = push_z * kMovementPushScale;
+        TerrShape->offset.x += push_x * kShapePushScale;
+        TerrShape->offset.z += push_z * kShapePushScale;
+    } else {
+        f32 axis_impact = query->impact_normal.x * axis.x + query->impact_normal.z * axis.z;
+        if (axis_impact == 0.0f) {
+            axis_impact = (TerrShape->offset.x * axis.x + TerrShape->offset.z * axis.z) / TerrShape->radius;
+            if (axis_impact == 0.0f) {
+                return TERRAIN_SIDE_STEP_USE_STANDARD_IMPACT;
+            }
+        }
+
+        const f32 signed_distance = axis_impact < 0.0f ? -NuFsqrt(-axis_impact) : NuFsqrt(axis_impact);
+        query = TerI;
+        query->movement.x = axis.x * signed_distance * TerrShape->radius + TerrShape->offset.x;
+        query->movement.z = axis.z * signed_distance * TerrShape->radius + TerrShape->offset.z;
+    }
+
+    u8 side_step_hit_flags[2];
+    NUVEC impact_result;
+    do {
+        DerotateMovementVector();
+        HitTerrain();
+        TerrainImpactNorm();
+        TerrainImpact(&impact_result, &impact_result, side_step_hit_flags);
+
+        --TerrShapeAdjCnt;
+        query = TerI;
+    } while (TerrShapeAdjCnt > 0 && query->hit_type != TERRAIN_HIT_TYPE_NONE);
+
+    if (query->hit_type == TERRAIN_HIT_TYPE_NONE) {
+        query->position.x += query->movement.x;
+        query->position.y += query->movement.y;
+        query->position.z += query->movement.z;
+    }
+
+    TerrShape->offset.x += query->start_position.x - query->position.x;
+    TerrShape->offset.z += query->start_position.z - query->position.z;
+    query->hit_type = TERRAIN_HIT_TYPE_FACE;
+    query->movement.x = query->start_movement.x;
+    query->movement.y = query->start_movement.y;
+    query->movement.z = query->start_movement.z;
+    TerrainSideClamp(&axis, &query->position);
+
+    result = TERRAIN_SIDE_STEP_HANDLED;
+    return result;
+}
+
+extern "C" i32 NewTerrainOnAPlatform(void *id) {
+    if (CurTerr != NULL) {
+        CurTrackInfo = ScanTerrId(id);
+        if (CurTrackInfo != NULL)
+            return CurTrackInfo->platform_contact_state;
+    }
+    return 0;
+}
+
+extern "C" void NewTerrainScaleYMask(NUVEC *position, NUVEC *movement, u8 *hit_flags, i32 object_index, f32 radius,
+                                     f32 collision_radius, f32 object_scale, i32 embedded_retry, i32 scan_flags,
+                                     i32 terrain_mask) {
+    TerrainHitInfo[0] = 0;
+    TerrainHitInfo[1] = 0;
+    TerrainHitInfo[2] = 0;
+    TerrainHitInfo[3] = 0;
+    TerrImpact = 0;
+    plathitid = -1;
+    TerrPolyObj = -1;
+    TerrPoly = 0;
+    TerrWallInfo = 0;
+    PlatCrush = 0;
+    terrhitflags = 0;
+    castnum = -1;
+
+    if (CurTerr == NULL) {
+        TerImpactData = 0;
+        return;
+    }
+
+    TerrLastImpact.hit_type = 0.0f;
+    CurTrackInfo = ScanTerrId(hit_flags);
+    TerrOverRideScan = 0;
+
+    TerI = static_cast<TerrainQuery_s *>(NuScratchAlloc32(0x948));
+    TerrainQuery_s *query = TerI;
+    query->object_scale = object_scale;
+    query->object_scale_sq = object_scale * object_scale;
+    if (object_scale == 0.0f) {
+        query->inverse_object_scale = 0.0f;
+        query->inverse_object_scale_sq = 0.0f;
+    } else {
+        query->inverse_object_scale = 1.0f / object_scale;
+        query->inverse_object_scale_sq = query->inverse_object_scale * query->inverse_object_scale;
+    }
+    query->collision_radius = collision_radius;
+    query->inverse_collision_radius = collision_radius == 0.0f ? 0.0f : 1.0f / collision_radius;
+    query->collision_radius_sq = collision_radius * collision_radius;
+
+    const f32 position_x = position->x;
+    const f32 position_y = position->y + collision_radius * object_scale;
+    const f32 position_z = position->z;
+    query->position.x = position_x;
+    query->start_position.x = position_x;
+    query->position.y = position_y;
+    query->start_position.y = position_y;
+    query->position.z = position_z;
+    query->start_position.z = position_z;
+
+    const f32 movement_x = movement->x;
+    const f32 movement_y = movement->y;
+    const f32 movement_z = movement->z;
+    query->movement.x = movement_x;
+    query->start_movement.x = movement_x;
+    query->movement.y = movement_y;
+    query->start_movement.y = movement_y;
+    query->movement.z = movement_z;
+    query->start_movement.z = movement_z;
+    query->object_index = static_cast<i16>(object_index);
+    query->flags &= static_cast<u8>(~1u);
+    query->hit_flags = hit_flags;
+    query->radius = radius;
+    query->scan_result = 0;
+    query->separation_epsilon = 0.005f;
+    query->compare_epsilon = 0.000005f;
+
+    castnum = -1;
+    ScanTerrain(1, terrain_mask, scan_flags != 0 ? 0x40 : 0);
+
+    if (hit_flags[1] != 0 && radius > fabsf(movement->x) && radius > fabsf(movement->y) &&
+        radius > fabsf(movement->z) && platinrange == 0) {
+        NuScratchRelease();
+        TerrFlush();
+        ShadNorm.x = 0.0f;
+        ShadNorm.y = 1.0f;
+        ShadNorm.z = 0.0f;
+        terrhitflags |= 2;
+        TerImpactData = 0;
+        return;
+    }
+
+    query->position.y *= query->inverse_object_scale;
+    query->movement.y *= query->inverse_object_scale;
+    hit_flags[0] = 0;
+    hit_flags[1] = 0;
+
+    i32 scan_count = PlatformChecks(6, movement);
+    for (;;) {
+        DerotateMovementVector();
+        HitTerrain();
+        TerrainImpactNorm();
+        StorePlatImpact();
+
+        query = TerI;
+        u8 hit_type = query->hit_type;
+        bool impact_already_resolved = false;
+        if (hit_type > TERRAIN_HIT_TYPE_SECOND_NORMAL && query->terrain_group_index != -1 && CurTerr->groups != NULL) {
+            TERRAIN_GROUP *group = &CurTerr->groups[query->terrain_group_index];
+            if (group->chunk_type == TERRAIN_CHUNK_GROUP_SECONDARY) {
+                --scan_count;
+                NewTerrStoreAnyInfo();
+                NUVEC before = query->position;
+                i32 embedded = TerrainPlatformEmbedded(movement);
+                query = TerI;
+                impact_already_resolved =
+                    embedded == 0 &&
+                    (before.x != query->position.x || before.y != query->position.y || before.z != query->position.z);
+                hit_type = query->hit_type;
+            }
+        }
+
+        if (!impact_already_resolved) {
+            if (query->hit_type != TERRAIN_HIT_TYPE_NONE && query->terrain_group_index >= 0 &&
+                CurTerr->groups != NULL) {
+                TERRAIN_GROUP *group = &CurTerr->groups[query->terrain_group_index];
+                ShadNorm.x = query->impact_normal.x;
+                ShadNorm.y = query->impact_normal.y;
+                ShadNorm.z = query->impact_normal.z;
+
+                f32 slope = 0.707f;
+                if (query->surface != NULL) {
+                    slope = query->movement_normal.x * query->surface->normals[0].x +
+                            query->movement_normal.y * query->surface->normals[0].y +
+                            query->movement_normal.z * query->surface->normals[0].z;
+                }
+
+                const u8 hit_class = query->hit_type & TERRAIN_HIT_TYPE_CLASS_MASK;
+                f32 wall_limit;
+                if (group->chunk_type == TERRAIN_CHUNK_GROUP_SECONDARY) {
+                    wall_limit = hit_class > TERRAIN_HIT_TYPE_FACE && 0.95f > slope ? 0.98f : 0.707f;
+                } else {
+                    wall_limit = query->shape_adjusted != 0 ? 1.1f : -1.1f;
+                }
+
+                if (wallover != 0.0f) {
+                    wall_limit = wallover;
+                }
+                if (hit_class != TERRAIN_HIT_TYPE_FACE) {
+                    wall_limit = 0.707f;
+                }
+                if (query->surface != NULL && (query->surface->normal_flags & TERRAIN_SURFACE_CLASS_MASK) ==
+                                                  TERRAIN_SURFACE_CLASS_WALL_OVERRIDE) {
+                    query->position.x += query->movement_normal.x * 0.001f;
+                    query->position.z += query->movement_normal.z * 0.001f;
+                    wall_limit = 1.1f;
+                }
+
+                if (query->impact_normal.y >= wall_limit && group->chunk_type == TERRAIN_CHUNK_GROUP_SECONDARY &&
+                    CurTerr->platforms != NULL) {
+                    CurTerr->platforms[group->scene_index].flags |= TERRAIN_PLATFORM_FLAG_COLLIDED;
+                }
+            }
+
+            if (TerrShapeAdjCnt == 0 || TerrShapeSideStep(position, movement, hit_flags) != 0) {
+                TerrainImpact(position, movement, hit_flags);
+            }
+
+            query = TerI;
+            --scan_count;
+            TerrLastImpact.position.x = query->position.x - query->movement_normal.x * query->collision_radius;
+            TerrLastImpact.position.y =
+                (query->position.y - query->movement_normal.y * query->collision_radius) * query->object_scale;
+            TerrLastImpact.position.z = query->position.z - query->movement_normal.z * query->collision_radius;
+            TerrLastImpact.hit_type = static_cast<f32>(static_cast<u32>(query->hit_type));
+            hit_type = query->hit_type;
+        }
+
+        if (hit_type == TERRAIN_HIT_TYPE_NONE) {
+            if (scan_count > 3 && hit_flags[0] == 0 && hit_flags[1] == 0 && embedded_retry != 0) {
+                query->position.x = position->x;
+                query->position.y = position->y * query->inverse_object_scale + query->collision_radius + 0.003f;
+                query->position.z = position->z;
+                query->movement.x = 0.0f;
+                query->movement.y = -0.007f;
+                query->movement.z = 0.0f;
+                DerotateMovementVector();
+                HitTerrain();
+                query = TerI;
+                if (query->hit_type != TERRAIN_HIT_TYPE_NONE &&
+                    (query->terrain_group_index < 0 || query->surface == NULL ||
+                     (query->surface->normal_flags & TERRAIN_SURFACE_CLASS_MASK) !=
+                         TERRAIN_SURFACE_CLASS_WALL_OVERRIDE)) {
+                    TerrainImpactNorm();
+                    ShadNorm.x = query->impact_normal.x;
+                    ShadNorm.y = query->impact_normal.y;
+                    ShadNorm.z = query->impact_normal.z;
+                    query->start_movement.x = movement->x;
+                    query->start_movement.y = movement->y;
+                    query->start_movement.z = movement->z;
+                    TerrainImpact(position, movement, hit_flags);
+                    query = TerI;
+                    position->x = query->position.x;
+                    position->y =
+                        query->position.y * query->object_scale - query->collision_radius * query->object_scale;
+                    position->z = query->position.z;
+                    movement->x = query->start_movement.x;
+                    movement->y = query->start_movement.y;
+                    movement->z = query->start_movement.z;
+                }
+            }
+            break;
+        }
+
+        TerrImpact = query->surface == NULL ? 2 : 1;
+        TerrImpactPos.x = query->position.x - query->movement_normal.x * query->collision_radius;
+        TerrImpactPos.y =
+            (query->position.y - query->movement_normal.y * query->collision_radius) * query->object_scale;
+        TerrImpactPos.z = query->position.z - query->movement_normal.z * query->collision_radius;
+        TerrImpactNormal = query->impact_normal;
+
+        if (scan_count > 0) {
+            const f32 normal_mag_sq = query->movement_normal.x * query->movement_normal.x +
+                                      query->movement_normal.y * query->movement_normal.y +
+                                      query->movement_normal.z * query->movement_normal.z;
+            if (normal_mag_sq <= 1.5f) {
+                continue;
+            }
+        }
+
+        position->x = query->position.x;
+        position->y = query->position.y * query->object_scale - query->collision_radius * query->object_scale;
+        position->z = query->position.z;
+        break;
+    }
+
+    NuScratchRelease();
+    TerrFlush();
+    TerImpactData = 0;
+}
+
+extern "C" f32 NewRayCastGetTOFI(void) {
+    return TerI->hit_time;
+}
+
+extern "C" i32 NewRayCastGetImpactTerrainType(void) {
+    return TerI->surface != NULL ? TerI->surface->material[0] : 0;
+}
+
+extern "C" void NewRayCastGetImpactNormal(NUVEC *normal) {
+    if (TerI != NULL)
+        *normal = TerI->movement_normal;
+}
+
+extern "C" f32 NewRayCastGetEmbedDist(void) {
+    return TerI->unclamped_hit_time;
+}
+
+extern "C" i32 NewRayCastHitWallSpline(void) {
+    return TerI->shape_adjusted;
+}
+
+extern "C" i32 NewRayCast(NUVEC *position, NUVEC *movement, f32 radius, i32 scan_flags) {
+    plathitid = -1;
+    TerrPolyObj = -1;
+    TerrPoly = NULL;
+    TerrWallInfo = 0;
+    castnum = -1;
+    if (CurTerr == NULL)
+        return 0;
+    TerI = static_cast<TerrainQuery_s *>(NuScratchAlloc32(0x948));
+    TerrOverRideScan = NULL;
+    TerrainQuery_s *query = TerI;
+    query->object_scale = 1.0f;
+    query->object_scale_sq = 1.0f;
+    query->inverse_object_scale = 1.0f;
+    query->inverse_object_scale_sq = 1.0f;
+    query->collision_radius = radius;
+    query->inverse_collision_radius = radius == 0.0f ? 0.0f : 1.0f / radius;
+    query->collision_radius_sq = radius * radius;
+    query->start_position.x = query->position.x = position->x;
+    query->start_position.y = query->position.y = position->y;
+    query->start_position.z = query->position.z = position->z;
+    query->movement = *movement;
+    query->start_movement = query->movement;
+    query->object_index = -1;
+    query->hit_flags = NULL;
+    query->scan_result = 1;
+    query->separation_epsilon = 0.01f;
+    query->compare_epsilon = 0.00001f;
+    ScanTerrain(1, 0, scan_flags != 0 ? 0x40 : 0);
+    DerotateMovementVector();
+    HitTerrain();
+    if (TerI->hit_type != 0) {
+        RayImpact(movement);
+        TerrainImpactNorm();
+        ShadNorm = TerI->movement_normal;
+    }
+    NuScratchRelease();
+    return TerI->hit_type;
+}
+
+extern "C" i32 NewRayCastScaleYMask(NUVEC *, NUVEC *, f32, f32, i32, u32) {
+    STUBBED();
+    return 0;
+}
+
+extern "C" void TerrainPolyEdge(NUVEC *first, NUVEC *second) {
+    if ((TerI->hit_type & 0xf) != TERRAIN_HIT_TYPE_CYLINDER)
+        return;
+    switch (TerI->hit_edge) {
+        case 1: {
+            NUVEC *origin = &CurTerr->groups[TerI->terrain_group_index].origin;
+            TERRAIN_SHAPE *surface = TerI->surface;
+            first->x = origin->x + surface->vectors[0].x;
+            first->y = origin->y + surface->vectors[0].y;
+            first->z = origin->z + surface->vectors[0].z;
+            second->x = origin->x + surface->vectors[1].x;
+            second->y = origin->y + surface->vectors[1].y;
+            second->z = origin->z + surface->vectors[1].z;
+            break;
+        }
+        case 2: {
+            NUVEC *origin = &CurTerr->groups[TerI->terrain_group_index].origin;
+            TERRAIN_SHAPE *surface = TerI->surface;
+            first->x = origin->x + surface->vectors[1].x;
+            first->y = origin->y + surface->vectors[1].y;
+            first->z = origin->z + surface->vectors[1].z;
+            second->x = origin->x + surface->vectors[2].x;
+            second->y = origin->y + surface->vectors[2].y;
+            second->z = origin->z + surface->vectors[2].z;
+            break;
+        }
+        case 3: {
+            NUVEC *origin = &CurTerr->groups[TerI->terrain_group_index].origin;
+            TERRAIN_SHAPE *surface = TerI->surface;
+            first->x = origin->x + surface->vectors[2].x;
+            first->y = origin->y + surface->vectors[2].y;
+            first->z = origin->z + surface->vectors[2].z;
+            second->x = origin->x + surface->vectors[0].x;
+            second->y = origin->y + surface->vectors[0].y;
+            second->z = origin->z + surface->vectors[0].z;
+            break;
+        }
+        case 4: {
+            NUVEC *origin = &CurTerr->groups[TerI->terrain_group_index].origin;
+            TERRAIN_SHAPE *surface = TerI->surface;
+            first->x = origin->x + surface->vectors[1].x;
+            first->y = origin->y + surface->vectors[1].y;
+            first->z = origin->z + surface->vectors[1].z;
+            second->x = origin->x + surface->vectors[3].x;
+            second->y = origin->y + surface->vectors[3].y;
+            second->z = origin->z + surface->vectors[3].z;
+            break;
+        }
+        case 5: {
+            NUVEC *origin = &CurTerr->groups[TerI->terrain_group_index].origin;
+            TERRAIN_SHAPE *surface = TerI->surface;
+            first->x = origin->x + surface->vectors[3].x;
+            first->y = origin->y + surface->vectors[3].y;
+            first->z = origin->z + surface->vectors[3].z;
+            second->x = origin->x + surface->vectors[2].x;
+            second->y = origin->y + surface->vectors[2].y;
+            second->z = origin->z + surface->vectors[2].z;
+            break;
+        }
+        default:
+            break;
+    }
+}
+
+extern "C" void NewRayCastMask(void) {
+    STUBBED();
+}
+
+extern "C" void NewRayCastSet(void) {
+    STUBBED();
+}
+
+extern "C" void NewRayCastSetMask(void) {
+    STUBBED();
+}
+
+extern "C" void NewTerrAxisFreedom(TERRAIN_AXIS_FREEDOM_SHAPE *shape, NUVEC *position) {
+    TerrShape = shape;
+    const f32 shape_angle = shape->angle;
+    TerrShapeAdjCnt = 2;
+
+    NUVEC axis;
+    axis.x = NuTrigTable[static_cast<i32>(shape_angle + 16384.0f) >> 1 & 0x7fff];
+    axis.y = 0.0f;
+    axis.z = -NuTrigTable[static_cast<i32>(shape_angle) >> 1 & 0x7fff];
+    TerrainSideClamp(&axis, position);
+}
+
+extern "C" i16 NewPlatPickupInst(void *object, i32 type) {
+    TERRSET *terrain = CurTerr;
+    if (terrain == NULL || terrain->group_index_count >= terrain->max_group_indices ||
+        terrain->group_count >= terrain->max_groups || object == NULL)
+        return -1;
+    i16 source = PickupTerr->group_for_type[type];
+    if (source == -1 || terrain->max_platforms <= 0)
+        return -1;
+    i32 index = 0;
+    while (terrain->platforms[index].scene_object != NULL) {
+        if (++index == terrain->max_platforms)
+            return -1;
+    }
+    i16 group_index = terrain->group_count;
+    TERRAIN_GROUP &group = terrain->groups[group_index];
+    group = PickupTerr->groups[source];
+    group.scene_index = index;
+    group.chunk_type = 1;
+    TERRAIN_PLATFORM &platform = terrain->platforms[index];
+    platform.scene_object = object;
+    platform.flags &= ~TERRAIN_PLATFORM_FLAG_ROTATING;
+    NUMTX *matrix = static_cast<NUMTX *>(object);
+    group.origin.x = matrix->m30;
+    group.origin.y = matrix->m31;
+    group.origin.z = matrix->m32;
+    platform.terrain_group_index = group_index;
+    platform.scene_object_index = 0;
+    platform.scene_transform = NULL;
+    terrain->group_indices[terrain->group_index_count++] = group_index;
+    platform.flags &= ~TERRAIN_PLATFORM_FLAG_COLLIDED;
+    platform.bounce_impulse = 0.0f;
+    platform.bounce_offset = 0.0f;
+    platform.bounce_velocity = 0.0f;
+    platform.bounce_damping = 0.0f;
+    platform.bounce_spring = 0.0f;
+    ++terrain->group_count;
+    ++terrain->cells[TERRAIN_PLATFORM_CELL].group_count;
+    return index;
+}
+
+extern "C" void ReassignPickupInst(void) {
+    STUBBED();
+}
+
+extern "C" void AddMSituExtraTerrRot(void) {
+    STUBBED();
+}
+
+extern "C" void TerrainWallSideSlide(NUVEC *movement, void *id, f32 speed, f32 upward_scale, NUANG angle) {
+    if (CurTerr == NULL)
+        return;
+    CurTrackInfo = ScanTerrId(id);
+    if (CurTrackInfo == NULL || CurTrackInfo->wall_contact_state == 0)
+        return;
+    if (speed != 0.0f) {
+        NUVEC slide = {0.0f, 0.0f, speed};
+        NuVecRotateY(&slide, &slide, angle);
+        FullDeflect(&CurTrackInfo->impact_normal, &slide, &slide);
+        slide.x += (speed * CurTrackInfo->impact_normal.x) * 0.4f;
+        slide.z += (speed * CurTrackInfo->impact_normal.z) * 0.4f;
+        movement->z += slide.z;
+        movement->x += slide.x;
+    }
+    if (movement->y > 0.0f)
+        movement->y *= upward_scale;
+}
+
+extern "C" void NewRayCastSetHandel(void) {
+    STUBBED();
+}
+
+extern "C" void NewShadowHandelEx(void) {
+    STUBBED();
+}
+
+extern "C" i32 TerrainPlatId(void) {
+    return plathitid;
+}
+
+extern "C" i32 TerrainTrackBack(NUVEC *position, NUVEC *direction, f32 radius, f32 backoff, NUVEC *result) {
+    if (CurTerr == NULL || TerrPolyObj == -1)
+        return 0;
+    TerI = static_cast<TerrainQuery_s *>(NuScratchAlloc32(sizeof(TerrainQuery_s)));
+    TerI->object_scale = 1.0f;
+    TerI->object_scale_sq = 1.0f;
+    TerI->inverse_object_scale = 1.0f;
+    TerI->inverse_object_scale_sq = 1.0f;
+    TerI->collision_radius = radius;
+    TerI->inverse_collision_radius = radius == 0.0f ? 0.0f : 1.0f / radius;
+    TerI->collision_radius_sq = radius * radius;
+    TerI->position.x = direction->x * (radius + 0.5f) + position->x;
+    TerI->position.y = direction->y * (radius + 0.5f) + position->y;
+    TerI->position.z = direction->z * (radius + 0.5f) + position->z;
+    TerI->movement.x = -direction->x * (radius + 0.8f);
+    TerI->movement.y = -direction->y * (radius + 0.8f);
+    TerI->movement.z = -direction->z * (radius + 0.8f);
+    TerI->object_index = -1;
+    TerI->hit_flags = NULL;
+    DerotateMovementVector();
+    HitTerrPoly(TerrPoly, TerrPolyObj);
+    switch (TerI->hit_type) {
+        case 0:
+        case 17:
+        case 18:
+        case 19:
+        case 20:
+            *result = TerI->position;
+            break;
+        case 1:
+        case 2:
+        case 3:
+        case 4:
+            TerI->hit_time -= backoff;
+            if (TerI->hit_time < 0.0f)
+                TerI->hit_time = 0.0f;
+            result->x = TerI->movement.x * TerI->hit_time + TerI->position.x;
+            result->y = TerI->movement.y * TerI->hit_time + TerI->position.y;
+            result->z = TerI->movement.z * TerI->hit_time + TerI->position.z;
+            break;
+    }
+    NuScratchRelease();
+    return TerI->hit_type;
+}
+
+extern "C" i32 TerrainIntensityInfo() {
+    if (TerrPoly != NULL)
+        return static_cast<i32>(TerrPoly->normal_flags) - 8;
+    if (TerrWallInfo != 0)
+        return static_cast<i32>(TerrWallTab[3]) - 8;
+    return -1;
+}
+
+extern "C" i32 TerrainInfo() {
+    if (TerrPoly != NULL)
+        return TerrPoly->material[0];
+    if (TerrWallInfo != 0)
+        return TerrWallTab[0];
+    return -1;
+}
+
+extern "C" i32 TerrainInfoExtra() {
+    if (TerrPoly != NULL)
+        return TerrPoly->material[1];
+    if (TerrWallInfo != 0)
+        return TerrWallTab[1];
+    return -1;
+}
+
+extern "C" i32 ShadowInfo(void) {
+    return ShadPoly != NULL ? ShadPoly->material[0] : -1;
+}
+
+extern "C" i32 ShadowIntensityInfo(void) {
+    return ShadPoly ? (i32)ShadPoly->normal_flags - 8 : -1;
+}
+
+// Original 0x378fb0: the optimized rotating scan shares the terrain engine state.
+extern TERRSET *CurTerr;
+extern "C" void *NuScratchAlloc32(i32);
+extern "C" void NuScratchRelease();
+
+extern "C" void TerrainPlatformOldUpdate(void) {
+    if (CurTerr != NULL) {
+        curPickInst = 0;
+        for (i32 i = 0; i < CurTerr->removed_platform_count; ++i)
+            DeletePlatinst(CurTerr->removed_platforms[i]);
+        CurTerr->removed_platform_count = 0;
+        curSphereter = 0;
+        if (CurTerr->max_platforms <= 0)
+            return;
+        TERRAIN_PLATFORM *platform = CurTerr->platforms;
+        TERRAIN_PLATFORM *end = platform + CurTerr->max_platforms;
+        for (; platform != end; ++platform) {
+            if (platform->scene_object != NULL)
+                platform->previous_matrix = *static_cast<NUMTX *>(platform->scene_object);
+        }
+    }
+}
+
+extern "C" i32 PlatformCrush(void) {
+    return PlatCrush;
+}
+
+extern "C" void NewScanInit(void) {
+    TempStackPtr = TempScanStack;
+    TerrPlatDis = -1;
+}
+
+void NewScanHandelFull(nuvec_s *, nuvec_s *, f32, i32, i32) {
+    STUBBED();
+}
+
+void NewScanHandelSubset(i16 *, nuvec_s *, nuvec_s *, f32, i32) {
+    STUBBED();
+}
+
+extern "C" void NewScanHandel(void) {
+    STUBBED();
+}
+
+extern "C" void NewRaySetDisablePalt(i32 disabled) {
+    TerrPlatDis = disabled;
+}
+
+void ScanTerrainHandel(i32, i16 *) {
+    STUBBED();
+}
+
+extern "C" void TerrainTrackFlush(void) {
+    if (CurTerr == NULL) {
+        return;
+    }
+
+    for (i32 slot_index = 0; slot_index < TERRAIN_TRACK_SLOT_COUNT; ++slot_index) {
+        CurTerr->track_slots[slot_index].id = NULL;
+    }
+}
+
+extern "C" f32 NewShadowEx(NUVEC *position, i32, f32 height_above, f32 height_below, i32 terrain_mask) {
+    TerrPolyObj = -1;
+    castnum = -1;
+    ecastnum = -1;
+    EShadRoofPoly = NULL;
+    EShadRoofY = 2000000.0f;
+    eshadhit = 0;
+    EShadPoly = NULL;
+    ShadRoofPoly = NULL;
+    shadhit = 0;
+    ShadPoly = 0;
+    EShadY = 2000000.0f;
+    EShadNorm.y = 1.0f;
+    ShadRoofY = 2000000.0f;
+    ShadNorm.y = 1.0f;
+
+    f32 shadow_height = 2000000.0f;
+    if (CurTerr != NULL) {
+        TerI = static_cast<TerrainQuery_s *>(NuScratchAlloc32(sizeof(TerrainQuery_s)));
+        ScaleTerrain = static_cast<TERRAIN_SHAPE *>(ScaleTerrainT1);
+        NUVEC scan_position = *position;
+        NewScanRot(&scan_position, terrain_mask);
+        NewCast(&scan_position, height_above, height_below);
+        NuScratchRelease();
+        shadow_height = scan_position.y;
+        NuTerrPlatsOff = 0;
+    }
+    return shadow_height;
+}
+
+i32 HitTerrain() {
+    u8 *scan = reinterpret_cast<u8 *>(TerrOverRideScan);
+    if (scan == NULL) {
+        scan = TerI->scan_list_storage;
+    }
+
+    TerI->hit_time = 999.9f;
+    const f32 radius = TerI->collision_radius;
+    TerI->shape_adjusted = 0;
+    TerI->hit_type = TERRAIN_HIT_TYPE_NONE;
+    TerI->terrain_group_index = -1;
+
+    HitWallSpline();
+
+    TerI->horizontal_movement_length =
+        NuFsqrt(TerI->movement.x * TerI->movement.x + TerI->movement.z * TerI->movement.z);
+
+    i32 collision_found = 0;
+    f32 primary_start_distance = 0.0f;
+    f32 secondary_start_distance = 0.0f;
+    f32 secondary_end_distance = 0.0f;
+    const f32 negative_radius = -radius;
+
+    i16 shape_count = *reinterpret_cast<i16 *>(scan);
+    for (;;) {
+        while (shape_count > 0) {
+            // A scan group packs its count and terrain-group index into the first
+            // pointer-sized slot, followed by the selected shape pointers.
+            TERRAIN_GROUP *group = &CurTerr->groups[*reinterpret_cast<i16 *>(scan + sizeof(i16))];
+            tertype **scan_entries = reinterpret_cast<tertype **>(scan);
+            tertype **surfaces = scan_entries + 1;
+
+            TerrainQuery_s *query = TerI;
+            query->local_start.x = query->position.x - group->origin.x;
+            query->local_start.y = query->position.y - group->origin.y;
+            query->local_start.z = query->position.z - group->origin.z;
+            query->local_end.y = query->position.y + query->movement.y - group->origin.y;
+            query->local_end.x = query->position.x + query->movement.x - group->origin.x;
+            query->local_end.z = query->position.z + query->movement.z - group->origin.z;
+
+            const i32 last_shape_index = shape_count - 1;
+            i32 shape_index = 0;
+            for (;;) {
+                tertype *surface = scan_entries[shape_index + 1];
+                const NUVEC &primary_point = surface->vectors[0];
+                const NUVEC &primary_normal = surface->normals[0];
+
+                f32 primary_end_distance = (query->local_end.x - primary_point.x) * primary_normal.x +
+                                           (query->local_end.y - primary_point.y) * primary_normal.y +
+                                           (query->local_end.z - primary_point.z) * primary_normal.z - radius -
+                                           query->compare_epsilon;
+
+                i32 crosses_surface = 0;
+                if (0.0f > primary_end_distance) {
+                    primary_start_distance = (query->local_start.x - primary_point.x) * primary_normal.x +
+                                             (query->local_start.y - primary_point.y) * primary_normal.y +
+                                             (query->local_start.z - primary_point.z) * primary_normal.z - radius;
+                    crosses_surface = primary_start_distance > negative_radius;
+                }
+
+                const NUVEC &secondary_point = surface->vectors[3];
+                const NUVEC &secondary_normal = surface->normals[1];
+                if (65536.0f > secondary_normal.y) {
+                    secondary_end_distance = (query->local_end.x - secondary_point.x) * secondary_normal.x +
+                                             (query->local_end.y - secondary_point.y) * secondary_normal.y +
+                                             (query->local_end.z - secondary_point.z) * secondary_normal.z - radius -
+                                             query->compare_epsilon;
+                    if (0.0f > secondary_end_distance) {
+                        secondary_start_distance = (query->local_start.x - secondary_point.x) * secondary_normal.x +
+                                                   (query->local_start.y - secondary_point.y) * secondary_normal.y +
+                                                   (query->local_start.z - secondary_point.z) * secondary_normal.z -
+                                                   radius;
+                        if (secondary_start_distance > negative_radius) {
+                            crosses_surface = 1;
+                        }
+                    }
+                }
+
+                if (crosses_surface != 0 && HitPoly(primary_start_distance, primary_end_distance,
+                                                    secondary_start_distance, secondary_end_distance, surface) != 0) {
+                    query = TerI;
+                    query->terrain_group_index = *reinterpret_cast<u16 *>(scan + sizeof(i16));
+                    collision_found = 1;
+                    tertype *hit_surface = query->surface;
+                    if ((query->hit_type & TERRAIN_HIT_TYPE_SECOND_NORMAL) != 0 &&
+                        (hit_surface->flags & TERRAIN_SHAPE_FLAG_MATERIAL_ALIAS) != 0) {
+                        PlatCrush = hit_surface->material[0] + 1;
+                    }
+                }
+                query = TerI;
+                if (shape_index == last_shape_index) {
+                    break;
+                }
+                ++shape_index;
+            }
+
+            const i16 next_shape_count = *reinterpret_cast<i16 *>(surfaces + shape_index + 1);
+            scan = reinterpret_cast<u8 *>(surfaces + shape_count);
+            shape_count = next_shape_count;
+        }
+
+        if (shape_count == 0) {
+            break;
+        }
+        do {
+            scan += (1 - shape_count) * sizeof(tertype *);
+            shape_count = *reinterpret_cast<i16 *>(scan);
+        } while (shape_count < 0);
+    }
+
+    NUVEC sphere_position;
+    for (i32 sphere_index = 0; sphere_index < curSphereter; ++sphere_index) {
+        const TERRAIN_SPHERE &sphere = SphereData[sphere_index];
+        const f32 scaled_collision_radius = TerI->collision_radius * TerI->object_scale;
+        sphere_position = sphere.position;
+        sphere_position.y *= TerI->inverse_object_scale;
+        sphere_position.y -= scaled_collision_radius;
+        DeRotatePoint(&sphere_position);
+        collision_found |= CheckSphereTer(&sphere_position, sphere.radius);
+    }
+
+    TerrainQuery_s *query = TerI;
+    if (query->hit_type != TERRAIN_HIT_TYPE_NONE && query->terrain_group_index != -1) {
+        TERRAIN_GROUP *group = &CurTerr->groups[query->terrain_group_index];
+        if (group->chunk_type == TERRAIN_CHUNK_GROUP_SECONDARY) {
+            plathitid = group->scene_index;
+        }
+    }
+
+    TerrOverRideScan = NULL;
+    return collision_found;
+}
+
+i32 HitTerrPoly(tertype *surface, i32 group_index) {
+    f32 radius = TerI->collision_radius;
+    TerI->hit_type = 0;
+    TerI->hit_time = 999.9f;
+    TerI->horizontal_movement_length =
+        NuFsqrt(TerI->movement.x * TerI->movement.x + TerI->movement.z * TerI->movement.z);
+    NUVEC *origin = &CurTerr->groups[group_index].origin;
+    TerI->local_start.x = TerI->position.x - origin->x;
+    TerI->local_start.y = TerI->position.y - origin->y;
+    TerI->local_start.z = TerI->position.z - origin->z;
+    TerI->local_end.x = (TerI->position.x + TerI->movement.x) - origin->x;
+    TerI->local_end.y = (TerI->position.y + TerI->movement.y) - origin->y;
+    TerI->local_end.z = (TerI->position.z + TerI->movement.z) - origin->z;
+    f32 primary_end = (((TerI->local_end.x - surface->vectors[0].x) * surface->normals[0].x +
+                        (TerI->local_end.y - surface->vectors[0].y) * surface->normals[0].y) +
+                       (TerI->local_end.z - surface->vectors[0].z) * surface->normals[0].z) -
+                      radius - TerI->compare_epsilon;
+    f32 primary_start = 0.0f;
+    bool test = false;
+    if (primary_end < 0.0f) {
+        primary_start = ((TerI->local_start.x - surface->vectors[0].x) * surface->normals[0].x +
+                         (TerI->local_start.y - surface->vectors[0].y) * surface->normals[0].y) +
+                        (TerI->local_start.z - surface->vectors[0].z) * surface->normals[0].z - radius;
+        test = primary_start > -radius;
+    }
+    f32 secondary_start = 0.0f;
+    f32 secondary_end = 0.0f;
+    if (surface->normals[1].y < 65536.0f) {
+        secondary_end = (((TerI->local_end.x - surface->vectors[3].x) * surface->normals[1].x +
+                          (TerI->local_end.y - surface->vectors[3].y) * surface->normals[1].y) +
+                         (TerI->local_end.z - surface->vectors[3].z) * surface->normals[1].z) -
+                        radius - TerI->compare_epsilon;
+        if (secondary_end < 0.0f) {
+            secondary_start = ((TerI->local_start.x - surface->vectors[3].x) * surface->normals[1].x +
+                               (TerI->local_start.y - surface->vectors[3].y) * surface->normals[1].y) +
+                              (TerI->local_start.z - surface->vectors[3].z) * surface->normals[1].z - radius;
+            if (secondary_start > -radius)
+                test = true;
+        }
+    }
+    if (test && HitPoly(primary_start, primary_end, secondary_start, secondary_end, surface)) {
+        TerI->terrain_group_index = group_index;
+        return 1;
+    }
+    return 0;
+}
+
+void RayImpact(NUVEC *movement) {
+    TerrainMoveImpactData();
+    switch (TerI->hit_type) {
+        case 1:
+        case 2:
+        case 3:
+        case 4: {
+            TerI->hit_time -= TerI->separation_epsilon;
+            if (TerI->hit_time < 0.0f)
+                TerI->hit_time = 0.0f;
+            f32 time = TerI->hit_time;
+            movement->x = TerI->movement.x * time;
+            movement->y = TerI->movement.y * time;
+            movement->z = TerI->movement.z * time;
+            break;
+        }
+        case 0x11:
+        case 0x12:
+        case 0x13:
+        case 0x14:
+            movement->x = 0.0f;
+            movement->y = 0.0f;
+            movement->z = 0.0f;
+            break;
+    }
+}
+
+void PlatformConnect(char *track_id, NUVEC *position_delta, NUVEC *movement_delta, i32 platform_index) {
+    if (CurTrackInfo == NULL) {
+        CurTrackInfo = AllocTerrId();
+        if (CurTrackInfo != NULL) {
+            CurTrackInfo->flags |= TERRAIN_TRACK_FLAG_CONNECTED;
+            CurTrackInfo->platform_index = static_cast<i16>(platform_index);
+            CurTrackInfo->id = track_id;
+            CurTrackInfo->platform_contact_state = TERRAIN_TRACK_CONTACT_ACTIVE;
+            position_delta->y = 0.0f;
+            movement_delta->y = 0.0f;
+        }
+    } else {
+        CurTrackInfo->flags |= TERRAIN_TRACK_FLAG_CONNECTED;
+        CurTrackInfo->platform_index = static_cast<i16>(platform_index);
+        CurTrackInfo->platform_contact_state = TERRAIN_TRACK_CONTACT_ACTIVE;
+    }
+
+    castnum = CurTerr->platforms[platform_index].terrain_group_index;
 }

@@ -33,6 +33,8 @@ struct GameObject_s;
 struct nuhspecial_s;
 struct GAMECUTSCENES_s; // full type in legoapi/legoapi_types.h
 
+extern f32 goldbricktime;
+
 extern GIZAIMESSAGESYS_s *gizaimessagesys;
 extern i16 trooper_boltid;
 extern i8 trooper_side[3];
@@ -51,6 +53,8 @@ extern float gungan_a_time_LowEnd;
 extern i32 active_neutral_count;
 extern i32 active_baddy_count;
 extern FadeSystem FadeSys;
+extern float statstime;
+extern float cointotaltime;
 #ifdef __cplusplus
 extern "C" i32 Paused;
 #else
@@ -125,9 +129,8 @@ extern GameObject_s *player;
 
 struct WORLDINFO_s;
 
-void UpdateStatusScreen(struct WORLDINFO_s *);
-void DrawStatusScreen(struct WORLDINFO_s *);
 void Hub_Draw3D(struct WORLDINFO_s *);
+void TurnEpisodeDoorLightsOn(i32);
 void Hub_Update(struct WORLDINFO_s *);
 void JediB_Init(struct WORLDINFO_s *);
 void MaulA_Init(struct WORLDINFO_s *);
@@ -248,6 +251,7 @@ void MosEisleyB_Init(struct WORLDINFO_s *);
 void MosEisleyD_Init(struct WORLDINFO_s *);
 void MosEisleyE_Init(struct WORLDINFO_s *);
 void PodSprintA_Init(struct WORLDINFO_s *);
+f32 PodSprint_RollMul(GameObject_s *object);
 void DookuC_DrawPanel(struct WORLDINFO_s *);
 void GrievousA_Update(struct WORLDINFO_s *);
 void HothBattleA_Draw(struct WORLDINFO_s *);
@@ -277,6 +281,12 @@ void VaderA_DrawPanel(struct WORLDINFO_s *);
 void VaderB_DrawPanel(struct WORLDINFO_s *);
 void VaderC_DrawPanel(struct WORLDINFO_s *);
 void Credits_DrawPanel(struct WORLDINFO_s *);
+void Credits_Init(struct WORLDINFO_s *);
+void Credits_GetInfo(f32 *duration, i32 *flag, f32 *alpha);
+extern f32 CreditsAlpha;
+extern f32 CreditsTime;
+extern f32 CreditsFinishedTime;
+extern i32 CreditsFlag;
 void EndorBattleA_Init(struct WORLDINFO_s *);
 void EndorBattleC_Init(struct WORLDINFO_s *);
 void HothBattleA_Reset(struct WORLDINFO_s *);

@@ -96,15 +96,22 @@ def command_batches(files: list[Path]) -> list[list[str]]:
 
 def format_sources(root: Path, clang_format: Path) -> int:
     files = sorted(
-        path.relative_to(root)
-        for path in (root / "src").rglob("*")
-        if path.is_file() and path.suffix in FORMAT_SUFFIXES
+        path for path in git_paths(root, ["diff", "--cached", "--name-only"])
+        if path.suffix in FORMAT_SUFFIXES and (root / path).is_file()
     )
+    if not files:
+        return 0
+    had_unstaged_changes = git_paths(root, ["diff", "--name-only"])
+    overlapping = [path for path in files if path in had_unstaged_changes]
+    if overlapping:
+        print("staged source files also have unstaged edits; format and stage them deliberately:", file=sys.stderr)
+        for path in overlapping:
+            print(f"  {path.as_posix()}", file=sys.stderr)
+        return 1
+
     before = {
         path: hashlib.sha256((root / path).read_bytes()).digest() for path in files
     }
-    tracked = git_paths(root, ["ls-files"])
-    had_unstaged_changes = git_paths(root, ["diff", "--name-only"])
 
     print(f"+ clang-format -i --style=file ({len(files)} files)", flush=True)
     for batch in command_batches(files):
@@ -124,27 +131,14 @@ def format_sources(root: Path, clang_format: Path) -> int:
     if not changed:
         return 0
 
-    safe_to_stage = [
-        path for path in changed if path in tracked and path not in had_unstaged_changes
-    ]
-    needs_review = [path for path in changed if path not in safe_to_stage]
-    if safe_to_stage:
-        for batch in command_batches(safe_to_stage):
+    if changed:
+        for batch in command_batches(changed):
             status = run(["git", "add", "--", *batch], root)
             if status:
                 return status
         print("Staged clang-format changes:")
-        for path in safe_to_stage:
+        for path in changed:
             print(f"  {path.as_posix()}")
-    if needs_review:
-        print(
-            "clang-format changed files that already had unstaged or untracked edits; "
-            "review and stage them before retrying:",
-            file=sys.stderr,
-        )
-        for path in needs_review:
-            print(f"  {path.as_posix()}", file=sys.stderr)
-        return 1
     return 0
 
 

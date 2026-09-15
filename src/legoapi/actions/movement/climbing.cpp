@@ -1,5 +1,7 @@
 #include "legoapi/legoapi_types.h"
 #include "decomp.h"
+#include "legoapi/actions/movement/jumping.h"
+#include "legoapi/ai/core/legoai.h"
 #include "nu2api/numath/nutrig.h"
 #include "legoapi/core/input/gamepads.h"
 #include <math.h>
@@ -10,14 +12,10 @@
 #include <string.h>
 struct CLIMBOBJECT_s;
 
-void StartJump(GameObject_s *, i32);
 void FindAnglesXY(NUVEC *, u16 *, u16 *);
 void Climb_SetMagnetAction(GameObject_s *);
 void Climb_SetMagnetDrawOffsetTarget(GameObject_s *, NUVEC *);
 
-i32 LEGOCONTEXT_CLIMB = -1;
-i16 LEGOACT_IDLE = -1;
-i16 LEGOACT_WALK = -1;
 f32 MAGNETOFFSET;
 
 void Climb_MoveCode(GameObject_s *object) {
@@ -115,12 +113,6 @@ void Climb_MoveCode(GameObject_s *object) {
 }
 
 #include "legoapi/characters/motion/gameanim.h"
-i16 LEGOACT_CLIMB_IDLE = -1;
-i16 LEGOACT_CLIMB_UP = -1;
-i16 LEGOACT_CLIMB_DOWN = -1;
-i16 LEGOACT_CLIMB_LEFT = -1;
-i16 LEGOACT_CLIMB_RIGHT = -1;
-i16 LEGOACT_MAGNET_WALK_METAL = -1;
 
 // Original 0x4f26a0, 498 bytes.
 i32 Climb_SetTargetMom(GameObject_s *object, u16 input_angle) {
@@ -176,7 +168,6 @@ void Climb_SetMagnetDrawOffsetTarget(GameObject_s *object, nuvec_s *offset) {
 extern "C" TERRAIN_SURFACE_s TerSurface[32];
 extern "C" i8 NewRayCastGetImpactTerrainType();
 extern i32 TERRAINMASK_NONWEAPON, TERRAINMASK_NONDROID;
-u32 LEGO_AIPATHCNX_MAGNETCLIMB, LEGO_AIPATHCNX_CLIMB;
 i32 GameRayCast(NUVEC *, NUVEC *, f32, i32);
 
 static __used__ void ClimbObject_FindNormal(CLIMBOBJECT_s *object) {

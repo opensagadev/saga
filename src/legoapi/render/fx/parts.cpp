@@ -1,19 +1,27 @@
+#include "decomp.h"
+#include "legoapi/actions/combat/hits.h"
 #include "legoapi/audio/sfx.h"
 #include "legoapi/render/fx/parts.h"
+#include "legoapi/gizmos/object/gizbuildits.h"
 #include "legoapi/legoapi_types.h"
 #include "globals.h"
 #include "gamelib/util/gamelib_util_types.h"
 #include "gameapi/edtools/edfile.h"
 #include "legoapi/render/fx.h"
+#include "legoapi/render/core/terrain.h"
 #include "legoapi/render/core/rtl.h"
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/gizmos/fx/gizmopickups.h"
-#include "legoapi/gizmos/traps/giztorpmachine.h"
+#include "legoapi/gizmo/object/gizmopickup.h"
+#include "legoapi/gizmo/object/giztorpedo.h"
+#include "legoapi/items/collect/torpedo.h"
 #include "legoapi/world/world.h"
+#include "legoapi/world/world_shared.h"
 #include "legoapi/world/level.h"
 #include "legoapi/world/area.h"
 #include "legoapi/characters/core/players.h"
 #include "nu2api/nu3d/nuportal.h"
+#include "nu2api/nu3d/android/nuptl_android.h"
 #include "legoapi/characters/core/character.h"
 #include "legoapi/items/base/apiobject.h"
 #include "legoapi/core/input/gamepads.h"
@@ -24,9 +32,11 @@
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nu3d/nurndrstat.h"
 #include "nu2api/nucore/nustring.h"
+#include "nu2api/nufile/nufile.h"
 
 #include <float.h>
 #include <math.h>
+#include <stdio.h>
 #include <string.h>
 
 ADDPART_s Default_ADDPART = {NULL,
@@ -77,7 +87,7 @@ ADDPART_s Default_ADDPART = {NULL,
                              {0, 0, 0}};
 
 struct rtlset;
-extern rtlset *PartRTL;
+rtlset *PartRTL = NULL;
 f32 PARTSCALEUPTIME = 0.5f;
 void NewPartOrderedRotation(PART_s *);
 void PartTimeSlip();
@@ -103,7 +113,6 @@ extern "C" {
     extern f32 timeincrement;
     f32 CameraEmitterDistance(NUVEC *);
     void SetSfxBit_On(i32);
-    void PlaySfxByIdEx(i32, NUVEC *, f32, f32);
     void PlaySfxById(i32, NUVEC *);
     void DebrisEmitterMomentum(i32, f32, f32, f32);
     void DebrisParticleMomentum(i32, f32, f32, f32);
@@ -165,7 +174,6 @@ extern "C" {
     i32 CreateScaledEffect(i32, f32);
     i32 NuCameraClipTestExtentsAxisAligned(NUVEC *, NUVEC *, f32);
     void NuVecAddScale(NUVEC *, NUVEC *, NUVEC *, f32);
-    void LinkDmaParticalSets(dma_particle_chunk_s **, i32);
     void AddVariableShotDebrisEffectTimed3(i32, NUVEC *, NUVEC *, i32, f32, NUMTX *, NUMTX *);
     void AddVariableShotDebrisEffectTimed5(i32, NUVEC *, NUVEC *, NUVEC *, i32, f32, NUMTX *, NUMTX *, i16, u8);
 }
@@ -210,7 +218,6 @@ extern f32 ForceThrowSpeed, ForceThrowGravity;
 extern "C" void KillPart(PART_s *, i32);
 i32 SphereSphereOverlapScaleY(NUVEC *, f32, f32, NUVEC *, f32, f32);
 void DeflectPart(PART_s *, GameObject_s *, f32, f32, i32, i32);
-i32 getMaxTorpedos(GameObject_s *);
 void SetCoinType(i32 model, GIZMOPICKUP_s *pickup) {
     if (static_cast<u32>(model - 0xb7) <= 3) {
         pickup->type_index = 0;
@@ -228,7 +235,6 @@ void SetCoinType(i32 model, GIZMOPICKUP_s *pickup) {
     u8 count = GizmoPickupType[pickup->type_index].random_model_count;
     pickup->model_variant = count ? pickup->model_variant % count : 0;
 }
-void GizmoPickup_CollectCoin(WORLDINFO_s *, NUVEC *, i32, i32, GameObject_s *, i32);
 void CollectPowerUp(GameObject_s *, NUVEC *, u16, i32);
 void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
 void NewBuzz(nupad_s *, f32, i32);
@@ -254,12 +260,9 @@ void CollectHitPoint(GameObject_s *object, NUVEC *position, i32) {
     NewBuzz(object->pad_gamepad->pad, 0.1f, 0);
 }
 void GameCam_Judder(GAMECAMERA_s *, f32, i32, NUVEC *);
-void ReleaseBuildIt(GameObject_s *, i32);
 void ReleasePush(GameObject_s *);
 void ObjHitShield(GameObject_s *, GameObject_s *, i32, BOLT_s *);
 i32 CannotKill(GameObject_s *);
-i32 ObjHitObj(GameObject_s *, GameObject_s *, i32, u16, i32, i32);
-void NewRumble(nupad_s *, f32, i32);
 
 static void PartCollide(PART_s *part, i32 three_dimensional) {
     const NUVEC minimum = {part->position.x - part->field_0e4, part->position.y - part->field_0e4,
@@ -392,18 +395,23 @@ static void PartCollide(PART_s *part, i32 three_dimensional) {
 }
 
 static __used__ void TiePart_Kill(PART_s *, i32) {
+    STUBBED();
 }
 
 static __used__ void TiePart_Move(PART_s *, f32) {
+    STUBBED();
 }
 
 static __used__ void TiePart_Impact(PART_s *) {
+    STUBBED();
 }
 
 static __used__ void TiePart_KillExplode(PART_s *, i32) {
+    STUBBED();
 }
 
 static __used__ void TieSpinZPart_Move(PART_s *, f32) {
+    STUBBED();
 }
 
 extern f32 coinimpactwait;
@@ -481,28 +489,36 @@ static __used__ void PartExtra_PurpleCoin(PART_s *part) {
 }
 
 static __used__ void PowerUp_DrawPart(PART_s *) {
+    STUBBED();
 }
 
 static __used__ void PowerUp_ImpactPart(PART_s *) {
+    STUBBED();
 }
 
 static __used__ void PowerUp_UpdatePart(PART_s *) {
+    STUBBED();
 }
 
 static __used__ void PowerUp_EndMsg(GAMEMESSAGE_s *) {
+    STUBBED();
 }
 
 static __used__ void PowerUp_UpdateMsg(GAMEMESSAGE_s *) {
+    STUBBED();
 }
 
 static __used__ i32 SpeederPart_Draw(PART_s *) {
+    STUBBED();
     return true;
 }
 
 static __used__ void SpeederPart_Kill(PART_s *, i32) {
+    STUBBED();
 }
 
 static __used__ void SpeederPart_Update(PART_s *) {
+    STUBBED();
 }
 
 extern WORLDINFO_s *WORLD;
@@ -533,22 +549,24 @@ static __used__ i32 PartDraw_VehicleHeart(PART_s *part) {
 }
 
 static __used__ i32 PartKill_DrawCreature(PART_s *) {
+    STUBBED();
     return false;
 }
 
 static __used__ void PartMove_VehicleHeart(PART_s *, f32) {
+    STUBBED();
 }
 
 static __used__ void PartMove_VehiclePickup(PART_s *, f32) {
+    STUBBED();
 }
 
 static __used__ void PartKill_EjectedCreature(PART_s *, i32) {
-}
-
-static __used__ void UpdateAnimTimer(CHARACTERMODEL_s *, ANIMPACKET_s *, i16, f32, f32, f32, i32, char *, i32, f32) {
+    STUBBED();
 }
 
 static __used__ void UpdateCustomPieceAnim(CUSTOMPIECEANIM *, u16, u16) {
+    STUBBED();
 }
 
 extern "C" {
@@ -694,6 +712,7 @@ extern "C" {
     }
 
     void AddFiniteShotDebrisEffectUserData(void) {
+        STUBBED();
     }
 
     i32 AddFiniteShotPART(i32 effect, NUVEC *position, i32 count) {
@@ -716,9 +735,6 @@ extern "C" {
     }
 
     void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
-
-    void AddMSituExtraTerrRot(void) {
-    }
 
     i32 AddPARTEffect(i32 effect, NUVEC *position) {
         CheckPartCount();
@@ -894,6 +910,7 @@ extern "C" {
     }
 
     void AddRotatedDebrisEffect(void) {
+        STUBBED();
     }
 
     void AddScaledFiniteShotDebrisEffect(i32 *key, i32 effect, NUVEC *position, NUVEC *orientation, NUVEC *momentum,
@@ -905,9 +922,11 @@ extern "C" {
     }
 
     void AddScaledFiniteShotPART(void) {
+        STUBBED();
     }
 
     void AddScaledVariableShotDebrisEffect(void) {
+        STUBBED();
     }
 
     void AddVariableShotDebrisEffectTimed1(i32, NUVEC *, i32, f32, i16, i16, NUMTX *);
@@ -932,15 +951,19 @@ extern "C" {
     }
 
     void AddScaledVariableShotDebrisEffect3(void) {
+        STUBBED();
     }
 
     void AddScaledVariableShotDebrisEffect4(void) {
+        STUBBED();
     }
 
     void AddScaledVariableShotDebrisEffect5(void) {
+        STUBBED();
     }
 
     void AddScaledVariableShotPARTEffect(void) {
+        STUBBED();
     }
 
     void AddVariableShotDebrisEffectMtx(i32, NUVEC *, i32, i16, i16, NUMTX *);
@@ -1237,15 +1260,8 @@ extern "C" {
     }
 
     void AddVariableShotPARTEffect(void) {
+        STUBBED();
     }
-
-    i32 NewRayCast(NUVEC *, NUVEC *, f32, i32);
-    void NewRayCastGetImpactNormal(NUVEC *);
-    i32 NewRayCastGetImpactTerrainType();
-    f32 NewRayCastGetTOFI();
-    f32 NewRayCastGetEmbedDist();
-    i32 NewRayCastHitWallSpline();
-    i32 TerrainPlatId();
 
     i32 PartRayCast(NUVEC *position, NUVEC *movement, f32 radius, i32 flags) {
         i32 hit = NewRayCast(position, movement, radius, flags);
@@ -1340,6 +1356,7 @@ extern "C" {
     }
 
     void CheckPartCount(void) {
+        STUBBED();
     }
 
     void DrawParts(i32 keep_offscreen) {
@@ -1386,6 +1403,11 @@ extern "C" {
     }
 
     void FindPart(void) {
+        STUBBED();
+    }
+
+    void SetPartRTLSet(usize rtl_set) {
+        PartRTL = reinterpret_cast<rtlset *>(rtl_set);
     }
 
     i32 GetMaxPartTypes(void) {
@@ -1393,9 +1415,11 @@ extern "C" {
     }
 
     void GetPartCount(void) {
+        STUBBED();
     }
 
     void GetPartName(void) {
+        STUBBED();
     }
 
     part_type_s part_types[128];
@@ -1491,15 +1515,19 @@ extern "C" {
     }
 
     void PARTEmitterOrientation(void) {
+        STUBBED();
     }
 
     void PARTEmitterPos(void) {
+        STUBBED();
     }
 
     void PARTGetTotalOffTime(void) {
+        STUBBED();
     }
 
     void PARTGetTotalOnTime(void) {
+        STUBBED();
     }
 
     i32 PARTLookupType(char *name) {
@@ -1589,9 +1617,6 @@ extern "C" {
         edpp_instances_used = 0;
     }
 
-    void ReassignPickupInst(void) {
-    }
-
     void RemovePARTEffect(i32 index) {
         if (index != -1) {
             CheckPartCount();
@@ -1610,7 +1635,6 @@ extern "C" {
         i_part = 0;
     }
 
-    void FullReflect(NUVEC *, NUVEC *, NUVEC *);
     void DebrisStatusAlwaysOff(i32 *);
     i32 rtlDynamicSetPos(i32, NUVEC *);
 
@@ -2201,8 +2225,12 @@ void PartTimeSlip() {
     partglobaltime -= 800.0f;
 }
 
-extern i32 PDEBCOUNT;
-extern void *PDebNameList;
+extern "C" void HitParts(void) {
+    STUBBED();
+}
+
+static i32 PDEBCOUNT;
+static char **PDebNameList;
 
 void InitPartTable(char **names) {
     PDEBCOUNT = 0;
@@ -2210,6 +2238,32 @@ void InitPartTable(char **names) {
     if (names != NULL) {
         while (names[PDEBCOUNT] != NULL) {
             ++PDEBCOUNT;
+        }
+    }
+}
+
+void LoadPartFile(WORLDINFO *world) {
+    char path[256];
+    world->page_part = -1;
+    edpartSetParticlePage(world->page_pp);
+
+    if ((world->current_level->flags & (LEVEL_OUTRO | LEVEL_MIDTRO | LEVEL_INTRO)) == 0) {
+        sprintf(path, "%s.par", world->config_file);
+        i32 page = -1;
+        if (NuFileExists(path)) {
+            page = edpartLoadPage(path, 1, world->current_gscn);
+            world->page_part = page;
+        }
+        world->part_debris_sys = static_cast<PARTDEBSYS_s *>(
+            InitPartDebris(&world->giz_buffer, &world->unknown_0108, 0x40, PDEBCOUNT, PDebNameList, page));
+    }
+}
+
+void AddPartDebris(PARTDEBSYS_s *system, i32 index, nuvec_s *position) {
+    if (index >= 0 && system != NULL && index < PDEBCOUNT) {
+        const i32 type = system->entries[index].type_id;
+        if (type != -1) {
+            AddFiniteShotPART(type, position, 1);
         }
     }
 }
@@ -2229,7 +2283,6 @@ void PartCollide_2D(PART_s *);
 void PartUpdate_Heart(PART_s *);
 void PartStop_Flickerer(PART_s *);
 i32 PartDraw_Flickerer(PART_s *);
-i32 PartDraw_Torp(PART_s *);
 
 void AddTorpedoAsPart(nuvec_s *position, nuvec_s *velocity, float scale, float lifetime) {
     WORLDINFO_s *world = WorldInfo_CurrentlyActive();
@@ -2656,6 +2709,7 @@ PART_s *FindIncomingPart(void *owner, NUVEC *position, f32 radius, u32 flags, f3
 }
 
 void InstantKillParts(GameObject_s *, i32, float) {
+    STUBBED();
 }
 
 void edpartDestroy(i32 index) {
@@ -2712,6 +2766,7 @@ void PartUpdate_Heart(PART_s *part) {
 }
 
 void Asteroid_PartKill(PART_s *, i32) {
+    STUBBED();
 }
 
 void PartStop_Flickerer(PART_s *part) {
@@ -2730,7 +2785,6 @@ i32 PartDraw_Flickerer(PART_s *part) {
     return 1;
 }
 
-void AddPartDebris(PARTDEBSYS_s *, i32, NUVEC *);
 void NewRumbleAllPlayers(f32, f32, i32, i32);
 void GameCam_NewShake(GAMECAMERA_s *, f32, f32, f32);
 
@@ -2768,9 +2822,11 @@ void PartKill_ForceThrow(PART_s *part, i32) {
 }
 
 void PartImpact_Basketball(PART_s *) {
+    STUBBED();
 }
 
 void PartUpdate_Basketball(PART_s *) {
+    STUBBED();
 }
 
 PART_s *Part_FindFromHSpecial(nuhspecial_s *special) {
@@ -2796,4 +2852,5 @@ void NewPartOrderedRotation(PART_s *part) {
 }
 
 void KillParts(GameObject_s *, i32, i32, i32, float, i32, u16 *) {
+    STUBBED();
 }

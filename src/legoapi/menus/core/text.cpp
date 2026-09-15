@@ -1,3 +1,5 @@
+#include "decomp.h"
+#include "gameapi/gui/apimenu_internal.h"
 #include "legoapi/menus/core/text.h"
 char *ASCII_UP = "\xc2\xac";
 #include "legoapi/legoapi_types.h"
@@ -8,6 +10,7 @@ char *ASCII_UP = "\xc2\xac";
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nu3d/nuqfnt.h"
 #include "nu2api/nu3d/nuprim.h"
+#include "nu2api/nu3d/nurndr.h"
 #include "nu2api/nu3d/nushader_plain.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nufile/nufpar.h"
@@ -15,7 +18,6 @@ char *ASCII_UP = "\xc2\xac";
 #include <stdio.h>
 #include <string.h>
 extern char **TTab;
-extern i32 MenuDrawDropShadows;
 f32 text3d_height;
 f32 text3d_width;
 void (*buttonmapfn)(char *, char *);
@@ -47,8 +49,6 @@ extern "C" {
     void NuMtxRotateZ(NUMTX *mtx, i32 angle);
     void NuMtxTranslate(NUMTX *mtx, NUVEC *vec);
 }
-extern "C" void NuRndrClear(u32 flags, u32 colour, f32 alpha);
-extern "C" void Text3DStringEncode(char *src, u16 *dst);
 void Text3DStringEncodeFont(unsigned char *src, u16 *dst, void *font);
 extern "C" void TextDecode(char *source, unsigned char *dest);
 extern "C" void Text3DEx(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment, u8 red,
@@ -280,6 +280,7 @@ void TextCrawl_Draw(float dt, i32 paragraphs, float alpha, char *text) {
     NuQFntPopPrintMode();
 }
 void TextPulseTimer(float) {
+    STUBBED();
 }
 static char **TTab_Original;
 static i32 Text_MaxOverallStrings;
@@ -355,6 +356,7 @@ void *Text_IsFontLoaded() {
     return app_fnt;
 }
 void TextDecodeCodeword(char *, char *) {
+    STUBBED();
 }
 static f32 QFONTSCALEX = 1.0f;
 static f32 QFONTSCALEY = 1.0f;
@@ -530,6 +532,7 @@ i32 Text_ExpandButtonString(char *input, char *output) {
     return 0;
 }
 void Text_InitDefaultStrings() {
+    STUBBED();
 }
 void Text_LoadAndFixUpStrings(unsigned char *filename, unsigned char **buffer, char **table, i32 count) {
     unsigned char *out = *buffer;
@@ -629,6 +632,7 @@ void Text_ExpandAllButtonStrings(char *input, char *output) {
     *output = '\0';
 }
 void Text_FillInExtendedSaveInfo() {
+    STUBBED();
 }
 void Text_InsertCommasIntoNumber(char *number, char *text, i32 length) {
     char separator;
@@ -654,6 +658,18 @@ void Text_InsertCommasIntoNumber(char *number, char *text, i32 length) {
     }
     text[output] = '\0';
 }
+extern "C" void MessageBoxInitMtl(void) {
+    STUBBED();
+}
+
+void DrawMessageBoxRGBA(float, float, float, float, u32, u32, u32, u32, numtl_s *, i32, float) {
+    STUBBED();
+}
+
+void DrawMessageBox(i32, float, float, float, float) {
+    STUBBED();
+}
+
 extern "C" {
     void FixUpButtonsInFont(VUFNT *game_font, VUFNT *button_font) {
         if (game_font == nullptr)
@@ -703,6 +719,7 @@ extern "C" {
         return QFont2D;
     }
     void MatrixText(void) {
+        STUBBED();
     }
     void MenuSmartTextEx(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment, u8 red,
                          u8 green, u8 blue, f32 max_width, i32 max_lines, void *message_box, i32 suppress_draw,
@@ -729,6 +746,7 @@ extern "C" {
         QFont2D = font;
     }
     void SmartText(void) {
+        STUBBED();
     }
     void SmartTextEx(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment, u8 red,
                      u8 green, u8 blue, f32 max_width, i32 max_lines, void *message_box, i32 suppress_draw, u32 alpha) {
@@ -856,6 +874,7 @@ extern "C" {
         SmartTextFont = saved_font;
     }
     void SmartTextExDrop(void) {
+        STUBBED();
     }
     void SmartTextGetWidescreen(f32 *font_scale_x, f32 *coordinate_scale) {
         if (font_scale_x != nullptr)
@@ -875,6 +894,7 @@ extern "C" {
         STCOORDSCALE = coordinate_scale;
     }
     void SplitText(void) {
+        STUBBED();
     }
     void Text3D(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment, u8 red, u8 green,
                 u8 blue) {
@@ -965,96 +985,28 @@ extern "C" {
         }
     }
     void UnloadGameFont(void) {
+        STUBBED();
     }
 }
-bool LookupHash(u32 key, u32 *value, HashRedirect *redirects, u32 count) {
-    i32 upper = static_cast<i32>(count) - 1;
-    if (upper < 0) {
-        return false;
-    }
-
-    i32 index = upper / 2;
-    HashRedirect *redirect = &redirects[index];
-    if (redirect->key == key) {
-        *value = redirect->value;
-        return true;
-    }
-
-    i32 lower = 0;
-    while (true) {
-        if (key > redirect->key) {
-            lower = index + 1;
-        } else {
-            upper = index - 1;
-        }
-        if (lower > upper) {
-            return false;
-        }
-
-        index = (lower + upper) / 2;
-        redirect = &redirects[index];
-        if (redirect->key == key) {
-            *value = redirect->value;
-            return true;
-        }
-    }
+void MenuUpdateViewTextStrings(MENU_s *) {
+    STUBBED();
 }
-void MultilineDump(char const *) {
+
+void MenuDrawViewTextStrings(MENU_s *) {
+    STUBBED();
 }
+
 void GetMatchLength(unsigned char *, unsigned char *, abi_ulong) {
-}
-i32 MakeLayerList_Name(CHARACTERMODEL_s *model, i16 *output, u32 mask) {
-    if (output == NULL || model == NULL)
-        return 0;
-    GAMECHARACTERDATA_s *data = &GCDataList[model->model_id];
-    i32 count = 0;
-    u32 flag = 1;
-    for (i32 bit = 0; bit < 32; ++bit, flag <<= 1) {
-        if ((mask & flag) == 0 || bit >= data->layer_count)
-            continue;
-        i32 layer;
-        if (data->layer_lookup == NULL) {
-            for (layer = 0; layer < data->layer_count; ++layer) {
-                if (data->layers[layer].mask_bit == bit)
-                    break;
-            }
-            if (layer == data->layer_count)
-                continue;
-        } else {
-            layer = data->layer_lookup[bit];
-            if (layer == -1)
-                continue;
-        }
-        const i16 hierarchy_layer = data->layers[layer].hierarchy_layer_index;
-        if (hierarchy_layer != -1) {
-            ++count;
-            *output++ = hierarchy_layer;
-        }
-    }
-    return count;
-}
-i32 UnicodeToIndexFast(vucharidx_s *map, i32 count, u16 unicode) {
-    if (count <= 0 || map[count - 1].unicode < unicode)
-        return -1;
-
-    i32 low = 0;
-    i32 high = count - 1;
-    while (low <= high) {
-        i32 middle = (low + high) >> 1;
-        if (map[middle].unicode == unicode)
-            return map[middle].index;
-        if (map[middle].unicode < unicode)
-            low = middle + 1;
-        else
-            high = middle - 1;
-    }
-    return -1;
+    STUBBED();
 }
 void SplitTextFindNextWS(unsigned char *, i32) {
+    STUBBED();
 }
 void MatrixTextStringEncode(void *, unsigned char *, u16 *) {
+    STUBBED();
 }
 void GetLineW(u16 *, i32) {
+    STUBBED();
 }
 extern "C" void Text3DStringEncode(char *src, u16 *dst) {
     VUFNT *font = SmartTextFont;

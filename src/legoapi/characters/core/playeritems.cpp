@@ -20,8 +20,6 @@ struct nunativegscene_s;
 struct SHOPINPUT;
 
 void GameAudio_PlaySfx(i32 sfx, NUVEC *position, i32 flags, i32 volume);
-extern "C" f32 AnimDuration(i32 character, i32 animation, f32 start, f32 end, i32 subtract_frame_time);
-i32 GetDefaultIdle(GameObject_s *object);
 void ResetCharacterIdle(GameObject_s *object, i32 mode, i32 animation);
 i32 (*Fighting_WeaponInActionFn)(GameObject_s *) = NULL;
 i32 (*Fighting_WeaponOutActionFn)(GameObject_s *) = NULL;
@@ -31,6 +29,7 @@ extern i32 adaptivedifficulty[3];
 extern i8 (*adtab)[4];
 
 void LoseHelmet(GameObject_s *, i32, i32) {
+    STUBBED();
 }
 
 void SetWeaponIn(GameObject_s *object) {
@@ -390,4 +389,5 @@ void WeaponScalingCode(GameObject_s *object) {
 }
 
 void FindPlayerAndSetWeapon(i32, i32) {
+    STUBBED();
 }

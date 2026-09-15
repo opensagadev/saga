@@ -1,14 +1,34 @@
 #include "nu2api/numusic/sfx.h"
 
+#include "nu2api/numath/numtx.h"
+#include "nu2api/numath/nuvec.h"
+#include "nu2api/numusic/numusic.h"
+
 #include "gamelib/crc/crc.h"
 #include "globals.h"
 #include "nu2api/nucore/nustring.h"
+#include "nu2api/numath/nurand.h"
 #include "nu2api/nufile/nufpar.h"
 #include "nu2api/nusound/nusound.h"
 
 #include <cstring>
 
 static float g_audioVersion;
+static u32 seed = 0x20558057;
+
+struct SoundGroup {
+    i16 first_sample;
+    i16 sample_count;
+    i16 field_0x4;
+    i16 field_0x6;
+};
+
+i32 g_numGroups;
+SoundGroup g_groups[128];
+i32 g_lenGroupBuffer;
+i16 g_groupBuffer[512];
+
+DECOMP_ASSERT(sizeof(SoundGroup) == 8, "SoundGroup size");
 
 NUSOUNDINFO *g_soundInfo;
 NUSOUNDINFO *g_revertSoundInfo;
@@ -25,9 +45,6 @@ static char sfx_filename[1600][64];
 static i32 sfx_refcount[1600] = {0};
 
 static char cfgfile_name[256] = "Audio/audio.cfg";
-
-i32 GroupBuffer_MakeGroup(i32 sample_id);
-void GroupBuffer_AddToGroup(i32 group_id, i32 sample_id);
 
 void InitSoundInfo(i32 index) {
     NUSOUNDINFO *info = &g_soundInfo[index];
@@ -327,6 +344,329 @@ void LoadSfx(const char *file, variptr_u *buffer_start, variptr_u buffer_end) {
 
     if (NOSOUND == 0) {
         NuSound3SetRequestTable(SfxBits, 100);
+    }
+}
+
+void GroupBuffer_MoveToEnd(i32 group_id) {
+    i32 first_sample = g_groups[group_id].first_sample;
+    i16 sample_count = g_groups[group_id].sample_count;
+    i32 group_end = first_sample + sample_count;
+    if (g_lenGroupBuffer == group_end) {
+        return;
+    }
+
+    g_groups[group_id].first_sample = static_cast<i16>(g_lenGroupBuffer);
+    memmove(&g_groupBuffer[g_lenGroupBuffer], &g_groupBuffer[first_sample],
+            static_cast<usize>(sample_count) * sizeof(i16));
+    memmove(&g_groupBuffer[first_sample], &g_groupBuffer[group_end],
+            static_cast<usize>(g_lenGroupBuffer - first_sample) * sizeof(i16));
+
+    for (i32 i = 0; i < g_numGroups; i++) {
+        if (g_groups[i].first_sample > first_sample) {
+            g_groups[i].first_sample -= sample_count;
+        }
+    }
+}
+
+void GroupBuffer_AddToGroup(i32 group_id, i32 sample_id) {
+    if (g_lenGroupBuffer == 512) {
+        return;
+    }
+
+    g_groupBuffer[g_lenGroupBuffer++] = static_cast<i16>(sample_id);
+    g_groups[group_id].sample_count++;
+    g_groups[group_id].field_0x4 = 0;
+    g_soundInfo[sample_id].group = static_cast<i16>(group_id);
+}
+
+void GroupBuffer_RemoveFromGroup(i32 group_id, i32 sample_id) {
+    i32 first_sample = g_groups[group_id].first_sample;
+    i16 sample_count = g_groups[group_id].sample_count;
+    i32 end = first_sample + sample_count;
+    i32 index = first_sample;
+    while (index < end && g_groupBuffer[index] != sample_id) {
+        index++;
+    }
+    if (index == end) {
+        return;
+    }
+
+    memmove(&g_groupBuffer[index], &g_groupBuffer[index + 1],
+            static_cast<usize>(g_lenGroupBuffer - index - 1) * sizeof(i16));
+    g_lenGroupBuffer--;
+    g_groups[group_id].sample_count = sample_count - 1;
+    g_groups[group_id].field_0x4 = 0;
+}
+
+void GroupBuffer_RemoveGroup(i32 group_id) {
+    if (group_id == -1) {
+        return;
+    }
+
+    i32 first_sample = g_groups[group_id].first_sample;
+    i16 sample_count = g_groups[group_id].sample_count;
+    memmove(&g_groupBuffer[first_sample], &g_groupBuffer[first_sample + sample_count],
+            static_cast<usize>(g_lenGroupBuffer - first_sample - sample_count) * sizeof(i16));
+    g_lenGroupBuffer -= sample_count;
+
+    for (i32 i = 0; i < g_numGroups; i++) {
+        if (g_groups[i].first_sample > first_sample) {
+            g_groups[i].first_sample -= sample_count;
+        }
+    }
+
+    memmove(&g_groups[group_id], &g_groups[group_id + 1], static_cast<usize>(g_numGroups - 1) * sizeof(SoundGroup));
+    g_numGroups--;
+
+    for (i32 i = 0; i < SFX_MUSIC_COUNT; i++) {
+        if (g_soundInfo[i].group > group_id) {
+            g_soundInfo[i].group--;
+        } else if (g_soundInfo[i].group == group_id) {
+            g_soundInfo[i].group = -1;
+        }
+    }
+}
+
+i32 GroupBuffer_MakeGroup(i32 sample_id) {
+    if (g_numGroups == 128 || g_lenGroupBuffer == 512) {
+        return -1;
+    }
+
+    i32 group_id = g_numGroups;
+    g_groups[group_id].first_sample = static_cast<i16>(g_lenGroupBuffer);
+    g_groups[group_id].sample_count = 1;
+    g_groups[group_id].field_0x4 = 0;
+    g_soundInfo[sample_id].group = static_cast<i16>(group_id);
+    g_groupBuffer[g_lenGroupBuffer++] = static_cast<i16>(sample_id);
+    g_numGroups++;
+    return group_id;
+}
+
+i32 GroupBuffer_InGroup(i32 group_id, i32 sample_id) {
+    i32 index = g_groups[group_id].first_sample;
+    i32 end = index + g_groups[group_id].sample_count;
+    while (index < end) {
+        if (g_groupBuffer[index] == sample_id) {
+            return 1;
+        }
+        index++;
+    }
+    return 0;
+}
+
+i32 GroupBuffer_GetSample(i32 group_id, i32 sequential) {
+    i32 loaded_samples[32];
+    i16 sample_count = g_groups[group_id].sample_count;
+    i16 first_sample = g_groups[group_id].first_sample;
+    memset(loaded_samples, 0, sizeof(loaded_samples));
+    i32 loaded_count = 0;
+
+    i16 *sample = &g_groupBuffer[first_sample];
+    i16 *end = sample + sample_count;
+    while (sample != end) {
+        i32 sample_id = *sample;
+        if (NuSound3IsSampleLoaded(g_soundInfo[sample_id].index)) {
+            loaded_samples[loaded_count++] = *sample;
+        }
+        sample++;
+    }
+
+    if (loaded_count == 0) {
+        return -1;
+    }
+
+    i32 index;
+    if (sequential == 0) {
+        seed = NuRandIntSeeded(&seed);
+        index = static_cast<i32>((seed >> 16) % static_cast<u32>(loaded_count));
+    } else {
+        index = g_groups[group_id].field_0x4++;
+        if (g_groups[group_id].field_0x4 >= loaded_count) {
+            g_groups[group_id].field_0x4 = 0;
+        }
+    }
+
+    return loaded_samples[index];
+}
+
+i32 GroupBuffer_GetNumInGroup(i32 group_id) {
+    return g_groups[group_id].sample_count;
+}
+
+i32 GroupBuffer_GetSampleByIndex(i32 group_id, i32 sample_index) {
+    return g_groupBuffer[g_groups[group_id].first_sample + sample_index];
+}
+
+bool HandleGroupLimit(i32 group_id) {
+    i32 voice_count = 0;
+    NuSoundVoice *oldest_voice = NULL;
+    f32 oldest_position = -1.0f;
+
+    i32 sample_count = GroupBuffer_GetNumInGroup(group_id);
+    for (i32 i = 0; i < sample_count; i++) {
+        i32 sfx_id = GroupBuffer_GetSampleByIndex(group_id, i);
+        i32 sample_index = g_soundInfo[sfx_id].index;
+        voice_count += NuSound3CountVoices(sample_index);
+
+        f32 playback_position = 0.0f;
+        NuSoundVoice *voice = NuSound3FindOldestVoice(sample_index, &playback_position);
+        if (voice != NULL && oldest_position < playback_position) {
+            oldest_position = playback_position;
+            oldest_voice = voice;
+        }
+    }
+
+    if (voice_count < g_NuSoundMaxVoicesPerSample) {
+        return true;
+    }
+
+    i32 first_sfx = GroupBuffer_GetSampleByIndex(group_id, 0);
+    if (g_soundInfo[first_sfx].field29_0x40 == 1) {
+        NuSound3StopVoice(oldest_voice);
+        return true;
+    }
+    return false;
+}
+
+extern "C" void PlaySfxByIdEx(i32 sfx_id, nuvec_s *position, f32 volume, f32 pitch) {
+    static nuvec_s pos;
+
+    if (sfx_id == -1) {
+        return;
+    }
+
+    NUSOUNDINFO *sound = &g_soundInfo[sfx_id];
+    if (sound->disabled != 0 || sound->comment != 0) {
+        return;
+    }
+
+    i8 priority = sound->priority;
+    if (sound->group != -1) {
+        sfx_id = GroupBuffer_GetSample(sound->group, sound->seq);
+        if (sfx_id == -1) {
+            return;
+        }
+        sound = &g_soundInfo[sfx_id];
+    }
+
+    f32 pan = sound->pan;
+    i32 sample_index = sound->index;
+    bool loop = sound->loop != 0;
+    f32 buzz_timer = sound->buzz_timer;
+    i32 rumble_strength = sound->rumble_strength;
+    f32 rumble_sustain = sound->rumble_sustain;
+    f32 rumble_release = sound->rumble_release;
+
+    f32 falloff_near = sound->falloff_near;
+    f32 falloff_far = sound->falloff_far;
+    f32 saved_fade_start = 0.0f;
+    f32 saved_fade_end = 0.0f;
+    bool custom_falloff = falloff_near != 0.0f || falloff_far != 0.0f;
+    if (custom_falloff) {
+        saved_fade_start = nusound_fade_start;
+        saved_fade_end = nusound_fade_end;
+        nusound_fade_start = falloff_near * saved_fade_start * 0.5f;
+        nusound_fade_end = falloff_far * saved_fade_end / 15.0f;
+    } else {
+        falloff_near = 2.0f;
+        falloff_far = 15.0f;
+    }
+
+    const NUMTX *listener = reinterpret_cast<const NUMTX *>(NuSound3GetListener());
+    if (listener == NULL) {
+        return;
+    }
+
+    if (position != NULL) {
+        f32 dx = position->x - listener->m30;
+        f32 dy = position->y - listener->m31;
+        f32 dz = position->z - listener->m32;
+        f32 max_distance_squared = nusound_fade_end * nusound_fade_end;
+        if (dx * dx + dy * dy + dz * dz > max_distance_squared) {
+            if (custom_falloff) {
+                nusound_fade_start = saved_fade_start;
+                nusound_fade_end = saved_fade_end;
+            }
+            return;
+        }
+    }
+
+    if (sound->group != -1 && !HandleGroupLimit(sound->group)) {
+        return;
+    }
+
+    f32 volume_scale;
+    if (volume == 1.0f) {
+        volume_scale = static_cast<f32>(sound->volume);
+    } else {
+        if (volume > 1.0f) {
+            volume = 1.0f;
+        }
+        volume_scale = static_cast<f32>(sound->volume) * volume;
+    }
+
+    if (sound->nofade == 0) {
+        volume_scale *= AUDIOFADELEVEL;
+        volume_scale *= numusicGetDuckVolume();
+    }
+    i32 voice_volume = static_cast<i32>(volume_scale * MASTERVOLUME);
+
+    if (sound->pitch_rnd != 0.0f) {
+        f32 pitch_variation = NuRandFloatSeeded(&seed) * sound->pitch_rnd;
+        if ((NuRandIntSeeded(&seed) & 1) == 0) {
+            pitch_variation *= 0.5f;
+            pitch *= 1.0f - pitch_variation;
+        } else {
+            pitch *= 1.0f + pitch_variation;
+        }
+    }
+
+    if (sound->volume_rnd != 0.0f) {
+        voice_volume =
+            static_cast<i32>(static_cast<f32>(voice_volume) * (1.0f + NuRandFloatSeeded(&seed) * sound->volume_rnd));
+    }
+
+    if (static_cast<u32>(sample_index) <= 1599) {
+        if (position != NULL) {
+            if (loop) {
+                NuSound3Play3dLoopSfx(position, sample_index, falloff_near, falloff_far, voice_volume, voice_volume,
+                                      pitch);
+            } else if (priority == 0) {
+                NuSound3Play3d(position, sample_index, falloff_near, falloff_far, voice_volume, voice_volume, pitch,
+                               buzz_timer, rumble_strength, rumble_sustain, rumble_release);
+            } else {
+                NuSound3Play3dPri(position, sample_index, falloff_near, falloff_far, voice_volume, voice_volume, pitch,
+                                  buzz_timer, rumble_strength, rumble_sustain, rumble_release, priority);
+            }
+        } else {
+            i32 volume_left = voice_volume;
+            i32 volume_right = voice_volume;
+            if (pan < 0.0f) {
+                volume_right = static_cast<i32>(static_cast<f32>(voice_volume) * (1.0f + pan));
+            } else if (pan > 0.0f) {
+                volume_left = static_cast<i32>(static_cast<f32>(voice_volume) * (1.0f - pan));
+            }
+
+            if (loop) {
+                pos.x = listener->m30;
+                pos.y = listener->m31;
+                pos.z = listener->m32;
+                nuvec_s *forward = reinterpret_cast<nuvec_s *>(const_cast<f32 *>(&listener->m20));
+                NuVecAdd(&pos, &pos, forward);
+                NuSound3Play3dLoopSfx(&pos, sample_index, falloff_near, falloff_far, volume_left, volume_right, pitch);
+            } else if (priority == 0) {
+                NuSound3Play(sample_index, volume_left, volume_right, pitch, buzz_timer, rumble_strength,
+                             rumble_sustain, rumble_release);
+            } else {
+                NuSound3PlayPri(sample_index, volume_left, volume_right, pitch, buzz_timer, rumble_strength,
+                                rumble_sustain, rumble_release, priority);
+            }
+        }
+    }
+
+    if (custom_falloff) {
+        nusound_fade_start = saved_fade_start;
+        nusound_fade_end = saved_fade_end;
     }
 }
 

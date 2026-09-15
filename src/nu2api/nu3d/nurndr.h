@@ -11,6 +11,10 @@ typedef struct rndrstream_s RNDRSTREAM;
 extern i32 nurndr_nforced_mtls;
 extern struct numtl_s **nurndr_forced_mtl_table;
 extern struct numtl_s *nurndr_forced_mtl;
+extern i32 nurndr_force_lod;
+extern "C" i32 PS2_REZ_W;
+extern "C" i32 PS2_REZ_H;
+extern "C" void NuRndrEndScene(void);
 
 typedef i32 NUCOLOUR32;
 
@@ -54,13 +58,29 @@ extern i32 g_backingHeight;
 
 #ifdef __cplusplus
 
+void NuMarkSceneAsZPrePass();
 void NuRndrStreamInit(i32 stream_buffer_size, VARIPTR *buffer);
+extern i32 rndr_blend_shape_deformer_wt_cnt;
+extern i32 rndr_blend_shape_deformer_wt_ptrs_cnt;
 void NuLightBurnoutEffect(i32 mode, f32 threshold, f32 intensity, f32 flare);
 // axes[0] is the center; axes[1..3] are the three shape basis vectors.
 void NuRndrCalcRandEllipsePos(struct nuvec4_s *position, NUMTX *matrix, NUVEC *axes);
 void NuRndrCalcRandCylinderPos(struct nuvec4_s *position, NUMTX *matrix, NUVEC *axes);
+i32 NuRndrFlickerBeginScene(void);
+void NuRndrFlickerEnd(void);
 
 extern "C" {
+    void NuRndrSwapStreamBuffers(void);
+    i32 NuRndrSwapScreen(i32 mode);
+    void NuRndrClear(i32 clear_flags, i32 background_colour, f32 alpha);
+    void NuRndrGradClear(i32 clear_flags, i32 top_colour, i32 bottom_colour, f32 alpha);
+    void NuRndrGradRectUV2di(i32 x, i32 y, i32 width, i32 height, f32 u0, f32 v0, f32 u1, f32 v1, u32 *colours,
+                             struct numtl_s *material);
+    void NuRndrRectUV2di(i32 x, i32 y, i32 width, i32 height, f32 u0, f32 v0, f32 u1, f32 v1, i32 colour,
+                         struct numtl_s *material);
+    i32 NuRndrSetBlendData(void);
+    void NuRndrShadowOnOff(i32 enabled);
+    void NuRndrLine3dDbgFlush(void);
     extern i32 g_minmiplevel;
     extern f32 g_mipmapbias;
     void NuRndrSetGlobalMinMipLevel(i32 level);
@@ -117,22 +137,29 @@ extern "C" {
 
     i32 NuRndrSetViewMtx(NUMTX *vpcs_mtx, NUMTX *viewport_vpc_mtx, NUMTX *scissor_vpc_mtx);
     i32 NuRndrStateUpdateCameraState(void);
+    i32 NuRndrBeginSceneEx(i32 begin_flags, i32 layer, i32 mode);
+    void NuRndrEndSceneEx(i32 mode);
+    void NuRndrFx(i32 paused, void *context);
 
     i32 NuRndrSetAmbientLightPS(const NUCOLOUR3 *colour);
     i32 NuRndrSetDirectionalLightsPS(const NUVEC *dir0, const NUCOLOUR3 *colour0, const NUVEC *dir1,
                                      const NUCOLOUR3 *colour1, const NUVEC *dir2, const NUCOLOUR3 *colour2);
     i32 NuRndrSetFxMtx(NUMTX *matrix);
     i32 NuRndrSetSpecularLightPS(const NUVEC *direction, const NUCOLOUR4 *intensity);
+    void NuRndrStateSetSpecularLightEx(const NUVEC *direction, const NUMTX *matrix, const NUCOLOUR3 *colour);
     void NuRndrStartReflectionRender(i32 clear_depth);
     void NuRndrEndReflectionRender(void);
 
     void FaceYDirStream(i32 y_angle);
     void NuRndrAddShadow(NUVEC *position, f32 radius, i32 opacity, i32 x_rotation, i32 y_rotation, i32 z_rotation);
+    void NuLightFogX(f32 near_distance, f32 far_distance, u32 colour, f32 unused_near, f32 unused_far, i32 high_quality,
+                     f32 density);
     f32 *NuRndrCreateBlendShapeDeformerWeightsArray(i32 count);
 #ifdef __cplusplus
 }
 
 f32 **NuRndrCreateBlendShapeDWAPointers(i32 count);
+void NuRndrFlush(i32 mode);
 #endif
 
 extern f32 circle_scale_radius;

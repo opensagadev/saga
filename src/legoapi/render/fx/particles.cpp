@@ -1,9 +1,11 @@
 #include "decomp.h"
+#include "legoapi/render/fx/particles.h"
 #include "legoapi/legoapi_types.h"
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/nu3d/numtl.h"
 #include "nu2api/nu3d/nudlist.h"
 #include "nu2api/nu3d/nurndrstat.h"
+#include "nu2api/nu3d/nurndr.h"
 #include "gameapi/edtools/edstubs.h"
 #include "globals.h"
 #include "legoapi/world/world.h"
@@ -25,15 +27,15 @@ extern "C" {
     void DebFreeAllCreatedEffects(void);
     void DebrisSetRenderGroup(i32 group);
     i32 NuRndrBeginScene(i32 flags);
-    void NuRndrClear(u32 flags, u32 colour, f32 depth);
-    void NuRndrGradClear(i32 flags, i32 top_colour, i32 bottom_colour, f32 depth);
     void NuRndrEndScene(void);
 }
 
 void OctreeRndr(unsigned char *, nuoctreenode_s *, i32) {
+    STUBBED();
 }
 
 void AddCameraRain(WORLDINFO_s *, i32) {
+    STUBBED();
 }
 
 void Particles_Stop(WORLDINFO_s *world) {
@@ -69,30 +71,11 @@ void Particles_Start(WORLDINFO_s *world) {
 }
 
 void Particles_DumpAreaPage() {
+    STUBBED();
 }
 
 void Particles_LoadAreaPage(char *) {
-}
-
-void AddParticleGroupToDisplayList(nunativedebrisdata_s *group) {
-    NUDISPLAYLIST *list = group->material->display_list;
-    if (list == NULL) {
-        return;
-    }
-
-    NUDLDLISTSCENE *display_scene = list->dlist;
-    display_scene->flags |= NUDL_SCENE_FLAG_CLIP_MATERIALS;
-    const i32 material_byte = list->mtl_id >= 0 ? list->mtl_id / 8 : (list->mtl_id + 7) / 8;
-    u8 *material_bits = display_scene->mtl_used[display_scene->render_buffer >> 7];
-    material_bits[material_byte] |= static_cast<u8>(1 << (list->mtl_id & 7));
-
-    DisplayListUpdateRenderState(list, &render_state);
-    NuDisplayListLinkItems(list, 1);
-    NUDISPLAYLISTITEM *item = list->items;
-    item->type = 0xa7;
-    item->id = 3;
-    item->next = group;
-    list->items++;
+    STUBBED();
 }
 
 void NoRender() {

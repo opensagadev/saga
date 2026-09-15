@@ -8,7 +8,9 @@ struct nunativegscene_s;
 struct SHOPINPUT;
 
 void StillMemRestore() {
+    STUBBED();
 }
 
 void MemFileBoundsCheck(i32) {
+    STUBBED();
 }

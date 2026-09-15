@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "nu2api/nucore/nupad.h"
 
 #include <string.h>
@@ -769,12 +770,15 @@ void NuPadRecordEndFrame() {
 extern "C" {
 
     void SavePadRecord(void) {
+        STUBBED();
     }
 
     void SetPadRecPtr(void) {
+        STUBBED();
     }
 
     void InitPadPlayRecord(void) {
+        STUBBED();
     }
 
 } // extern "C"

@@ -406,10 +406,12 @@ bool NuSoundStreamDesc::DecodeStreamOnOpen() const {
 }
 
 i32 NuSoundStreamDesc::GetLoopStart() const {
+    STUBBED();
     return 0;
 }
 
 i32 NuSoundStreamDesc::GetLoopEnd() const {
+    STUBBED();
     return 0;
 }
 
@@ -432,6 +434,7 @@ f32 NuSoundSystem::AmplitudeTodB(f32 amplitude) {
 }
 
 f32 NuSoundSystem::CalculateCrossfadeHeight(NuSoundSystem::CurveData const &, float) const {
+    STUBBED();
     return 0.0f;
 }
 
@@ -809,6 +812,7 @@ void NuSoundSystem::ReleaseEffect(NuSoundEffect *effect) {
 }
 
 bool NuSoundSystem::IsUserPlayingMusic() {
+    STUBBED();
     return false;
 }
 
@@ -816,16 +820,20 @@ void NuSoundSystem::PauseUserMusic() {
 }
 
 void NuSoundSystem::ResumeUserMusic() {
+    STUBBED();
 }
 
 bool NuSoundSystem::TitleHasUserMusicControl() {
+    STUBBED();
     return false;
 }
 
 void NuSoundSystem::OnEnterSystemMenu() {
+    STUBBED();
 }
 
 void NuSoundSystem::OnExitSystemMenu() {
+    STUBBED();
 }
 
 void NuSoundSystem::ReleaseSample(NuSoundSample *sample) {
@@ -880,6 +888,7 @@ void NuSoundSystem::SetGfxMemorySize(u32 size) {
 }
 
 void NuSoundSystem::SetMainThreadID(NuThread *) {
+    STUBBED();
 }
 
 void NuSoundSystem::Shutdown() {
@@ -1124,6 +1133,7 @@ void NuSoundSystem::ReleaseVoice(NuSoundVoice *voice) {
 }
 
 void NuSound3ExitThreads() {
+    STUBBED();
 }
 
 u32 NuSound_GetAllocdSampleMemory() {

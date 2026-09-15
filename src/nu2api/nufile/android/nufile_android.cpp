@@ -82,6 +82,7 @@ isize NuFileAndroidAPK::Read(void *buf, usize size) {
 }
 
 isize NuFileAndroidAPK::Write(const void *buf, usize size) {
+    STUBBED();
     return 0;
 }
 

@@ -2,6 +2,7 @@
 #include "nu2api/nucore/nuthread.h"
 #include "nu2api/nu3d/nuocclusion.h"
 #include "nu2api/nu3d/nurndr.h"
+#include "nu2api/nu3d/android/nutimebar_plain.h"
 #include "gamelib/nuwind/nuwind.h"
 void bgSuspendMain(i32);
 void NuPadRecordEndFrame();
@@ -9,9 +10,7 @@ extern "C" {
     i32 NuHasError();
     void NuMtlAnimate(f32);
     void NuTexAnimProcess(f32);
-    void NuWindAnimate(NUWIND *, f32);
     void NuOcclusionManagerEndFrame();
-    void NuTimeBarSetRender(i32);
     void NuPad_Interface_Render();
     void NuPadUpdatePads();
     extern void (*preRenderFlashingHack)();

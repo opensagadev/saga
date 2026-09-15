@@ -4,11 +4,14 @@
 
 #ifdef __cplusplus
 void *renderThread_main(void *arg);
+i64 getCurrentTime();
 
 extern "C" {
 #endif
     void NuRenderThreadLock(void);
     void NuRenderThreadUnlock(void);
+    void NuRenderThreadPrepareRender(void);
+    void NuRenderThreadStartRender(void);
     i32 NuRenderThreadIsLocked(void);
     i32 NuRenderThreadIsCurrentThread(void);
     void NuRenderThreadCreate(void);

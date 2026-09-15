@@ -1,32 +1,31 @@
 #include "legoapi/gizmos/object/hatmachine.h"
 
 #include "decomp.h"
-#include "globals.h"
-#include "gameapi/edtools/edfile.h"
-#include "legoapi/audio/sfx.h"
-#include "legoapi/items/objects/gameobjects.h"
-#include "legoapi/world/level.h"
-#include "legoapi/world/world.h"
 #include "gamelib/util/gamelib_util_types.h"
+#include "gameapi/edtools/edfile.h"
+#include "globals.h"
+#include "legoapi/audio/sfx.h"
 #include "legoapi/characters/motion/gameanim.h"
 #include "legoapi/core/input/qrand.h"
+#include "legoapi/gizmo/base/HatMachineObjectInterface.h"
+#include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/misc/utilities.h"
+#include "legoapi/render/core/terrain.h"
+#include "legoapi/render/light/shadow.h"
+#include "legoapi/world/level.h"
+#include "legoapi/world/world.h"
+#include "nu2api/nucore/nuanim3.h"
+#include "nu2api/nucore/nustring.h"
 #include "nu2api/nu3d/nurndr.h"
 #include "nu2api/nu3d/nurndrstat.h"
 #include "nu2api/nu3d/nuspecial.h"
-#include "nu2api/nucore/nuanim3.h"
 #include "nu2api/numath/nufloat.h"
-#include "nu2api/numath/nutrig.h"
-#include "nu2api/nucore/nustring.h"
 #include "nu2api/numath/numtx.h"
 #include "nu2api/numath/nurand.h"
+#include "nu2api/numath/nutrig.h"
 #include "nu2api/numath/nuvec.h"
 
 #include <string.h>
-
-void Hat_GetAbsTargetPos(HATMACHINE_s *machine, NUVEC *target_position);
-void FindAnglesZX(NUVEC *normal, u16 *x_rotation, u16 *z_rotation);
-void EnableShadowMapRendering(i32 enable);
-void ResetShadowMapRendering(void);
 
 static const NUVEC HatMachine_HatOffset = {0.0f, 0.3f, 0.0f};
 
@@ -39,12 +38,6 @@ enum HATMACHINE_ANIMATION_STATE {
 enum HATMACHINE_PLATFORM_TYPE {
     HATMACHINE_PLATFORM_COLLISION = 2,
 };
-
-extern "C" {
-    i32 DeletePlatinst(i32 platform_id);
-    i16 NewPlatPickupInst(void *object, i32 object_type);
-    void PlatInstRotate(i32 platform_id, i32 enabled);
-}
 
 struct HATMACHINEPROGRESS {
     i32 preserved_state;
@@ -61,18 +54,104 @@ static i32 HatMachine_GetMaxGizmos(void *world_ptr) {
     return world != NULL ? world->current_level->max_hat_machines : 0;
 }
 
-static void HatMachine_AddGizmos(GIZMOSYS *gizmo_sys, i32 type_id, void *world_ptr, void *) {
+static char *HatMachine_GetGizmoName(GIZMO *gizmo) {
+    if (gizmo == NULL || gizmo->object == NULL) {
+        return NULL;
+    }
+    return static_cast<HATMACHINE *>(gizmo->object)->name;
+}
+
+static i32 HatMachine_GetOutput(GIZMO *gizmo, i32, i32) {
+    HATMACHINE *machine = static_cast<HATMACHINE *>(gizmo->object);
+    return (static_cast<u8>(machine->flags) >> 1) & 1;
+}
+
+static char *HatMachine_GetOutputName(GIZMO *, i32 output_index) {
+    return output_index == 0 ? const_cast<char *>("Finished") : NULL;
+}
+
+static i32 HatMachine_GetNumOutputs(GIZMO *) {
+    return 1;
+}
+
+static i32 HatMachine_Load(void *world_ptr, void *) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
-    if (world == NULL || world->hat_machine_sys == NULL || world->hat_machine_sys->count <= 0) {
+    if (world == NULL) {
+        return 0;
+    }
+
+    HATMACHINESYS_s *system = world->hat_machine_sys;
+    if (system == NULL || system->count != 0) {
+        return 0;
+    }
+
+    const i32 version = EdFileReadInt();
+    system->count = EdFileReadInt();
+    if (system->count > 0) {
+        i32 index = 0;
+        do {
+            HATMACHINE *machine = &system->machines[index];
+            EdFileRead(machine->name, EdFileReadInt());
+            EdFileReadNuVec(&machine->position);
+            machine->yaw = EdFileReadShort();
+            machine->configured_hat = static_cast<u8>(EdFileReadChar());
+
+            if (version <= 2) {
+                machine->model_letter = 'r';
+            } else {
+                machine->model_letter = static_cast<char>(EdFileReadChar());
+                if (version != 3) {
+                    EdFileReadNuVec(&machine->target_offset);
+                    machine->scale = EdFileReadFloat();
+                    if (version != 4) {
+                        const u8 hidden = static_cast<u8>(EdFileReadChar()) & 1;
+                        machine->flags = static_cast<HATMACHINE_FLAGS>(
+                            (machine->flags & ~HATMACHINE_FLAG_HIDE_MACHINE) | (hidden << 5));
+                    }
+                    machine->platform_id = -1;
+                    ++index;
+                    continue;
+                }
+            }
+
+            machine->target_offset.x = 0.0f;
+            machine->target_offset.y = 0.0f;
+            machine->target_offset.z = -0.1441f;
+            machine->scale = 1.0f;
+            machine->platform_id = -1;
+            ++index;
+        } while (system->count > index);
+    }
+    return 1;
+}
+
+static void *HatMachines_ReserveBufferSpace(void *world_ptr) {
+    WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
+    world->hat_machine_sys = NULL;
+    if (world->current_level->max_levers == 0) {
+        return NULL;
+    }
+
+    world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 4);
+    world->hat_machine_sys = static_cast<HATMACHINESYS_s *>(world->giz_buffer.void_ptr);
+    world->giz_buffer.addr += sizeof(HATMACHINESYS_s);
+    memset(world->hat_machine_sys, 0, sizeof(*world->hat_machine_sys));
+
+    world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 16);
+    world->hat_machine_sys->machines = static_cast<HATMACHINE *>(world->giz_buffer.void_ptr);
+    world->giz_buffer.addr += world->current_level->max_hat_machines * sizeof(HATMACHINE);
+    memset(world->hat_machine_sys->machines, 0, world->current_level->max_hat_machines * sizeof(HATMACHINE));
+    return world->hat_machine_sys;
+}
+
+static void HatMachines_ClearProgress(void *, void *progress_data) {
+    HATMACHINEPROGRESS *progress = (HATMACHINEPROGRESS *)progress_data;
+    if (progress == NULL) {
         return;
     }
 
-    for (i32 index = 0; index < world->hat_machine_sys->count; ++index) {
-        HATMACHINE *machine = &world->hat_machine_sys->machines[index];
-        if (NuStrLen(machine->name) != 0) {
-            AddGizmo(gizmo_sys, type_id, NULL, machine);
-        }
-    }
+    progress->enabled_mask = ~0u;
+    progress->visible_mask = ~0u;
 }
 
 static void HatMachine_Update(void *world_ptr, void *, float elapsed) {
@@ -115,6 +194,169 @@ static void HatMachine_Update(void *world_ptr, void *, float elapsed) {
                 }
             }
         }
+    }
+}
+
+static void *HatMachines_AllocateProgressData(VARIPTR *buffer, VARIPTR *buffer_end) {
+    return GizmoBufferAlloc(buffer, buffer_end, sizeof(HATMACHINEPROGRESS));
+}
+
+static void HatMachine_SetVisibility(GIZMO *gizmo, i32 visible) {
+    if (gizmo == NULL || gizmo->object == NULL) {
+        return;
+    }
+
+    HATMACHINE *machine = static_cast<HATMACHINE *>(gizmo->object);
+    u8 flags = machine->flags;
+    u8 previous_visibility = flags;
+    previous_visibility >>= 2;
+    const i32 was_visible = previous_visibility & 1;
+    visible = visible != 0;
+    flags = static_cast<u8>((flags & ~HATMACHINE_FLAG_VISIBLE) | (visible << 2));
+    machine->flags = static_cast<HATMACHINE_FLAGS>(flags);
+
+    if ((flags & HATMACHINE_FLAG_VISIBLE) != 0) {
+        if (was_visible == 0) {
+            machine->platform_id = NewPlatPickupInst(machine, HATMACHINE_PLATFORM_COLLISION);
+            PlatInstRotate(machine->platform_id, 1);
+        }
+    } else if (was_visible != 0) {
+        DeletePlatinst(machine->platform_id);
+    }
+}
+
+static void HatMachine_AddGizmos(GIZMOSYS *gizmo_sys, i32 type_id, void *world_ptr, void *) {
+    WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
+    if (world == NULL || world->hat_machine_sys == NULL || world->hat_machine_sys->count <= 0) {
+        return;
+    }
+
+    for (i32 index = 0; index < world->hat_machine_sys->count; ++index) {
+        HATMACHINE *machine = &world->hat_machine_sys->machines[index];
+        if (NuStrLen(machine->name) != 0) {
+            AddGizmo(gizmo_sys, type_id, NULL, machine);
+        }
+    }
+}
+
+static void HatMachines_StoreProgress(void *world_ptr, void *, void *progress_ptr) {
+    WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
+    HATMACHINEPROGRESS *progress = static_cast<HATMACHINEPROGRESS *>(progress_ptr);
+    if (progress == NULL) {
+        return;
+    }
+
+    progress->enabled_mask = ~0u;
+    progress->visible_mask = ~0u;
+    if (world == NULL || world->hat_machine_sys == NULL || world->hat_machine_sys->machines == NULL) {
+        return;
+    }
+
+    HATMACHINESYS_s *system = world->hat_machine_sys;
+    for (i32 index = 0; index < system->count && index < 32; ++index) {
+        const u32 mask = 1u << index;
+        HATMACHINE *machine = &system->machines[index];
+        if ((machine->flags & HATMACHINE_FLAG_VISIBLE) == 0) {
+            progress->visible_mask &= ~mask;
+        }
+        if ((machine->flags & HATMACHINE_FLAG_ENABLED) == 0) {
+            progress->enabled_mask &= ~mask;
+        }
+    }
+}
+
+void Hat_GetAbsTargetPos(HATMACHINE_s *machine, NUVEC *position) {
+    if (position == NULL || machine == NULL) {
+        return;
+    }
+
+    NUVEC offset = machine->target_offset;
+    NuVecRotateY(&offset, &offset, machine->y_rotation);
+    offset.x += machine->position.x;
+    offset.z += machine->position.z;
+    *position = offset;
+}
+
+static void HatMachine_Reset(HATMACHINE_s *machine) {
+    machine->player_position.y = 0.0f;
+    machine->player_position.x = 0.0f;
+    machine->player_position.z = 0.1441f;
+    NuVecRotateY(&machine->player_position, &machine->player_position, machine->yaw + 0x8000);
+    NuVecAdd(&machine->player_position, &machine->player_position, &machine->position);
+
+    NUVEC target_position;
+    Hat_GetAbsTargetPos(machine, &target_position);
+    target_position.y = machine->position.y;
+
+    machine->player_position.y = GameShadow(NULL, &machine->player_position, 1.0f, -1);
+    const f32 target_y = GameShadow(NULL, &target_position, 1.0f, -1);
+    if (target_y == 2000000.0f) {
+        machine->target_offset.y = target_y;
+    } else {
+        machine->target_offset.y = target_y + 0.005f;
+        FindAnglesZX(&ShadNorm, &machine->terrain_pitch, &machine->terrain_roll);
+    }
+
+    machine->animation_state = 0;
+    machine->progress_state1 = 1;
+    machine->progress_state0 = 1;
+    machine->state_bit0 = 0;
+    machine->state_bit1 = 0;
+    machine->hat_refresh_timer = 0.0f;
+    machine->animation_duration = 0.0f;
+    machine->render_animation_time = 0.0f;
+
+    if (machine->model_letter == 'r') {
+        machine->model_special_index = 0x22;
+    } else {
+        machine->model_special_index = (machine->model_letter == 'o') + 0x20;
+    }
+
+    if (machine->configured_hat != 0) {
+        machine->current_hat = machine->configured_hat;
+    } else {
+        machine->current_hat = static_cast<u8>(NuFloatRand(reinterpret_cast<NURAND *>(&GAMERAND)) * 4.0f) + 1;
+    }
+
+    NuMtxSetRotationY(&machine->matrix, machine->yaw);
+    NuMtxTranslate(&machine->matrix, &machine->position);
+}
+
+static void HatMachines_Reset(void *world_ptr, void *, void *progress_ptr) {
+    WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
+    if (world == NULL) {
+        return;
+    }
+
+    HATMACHINESYS_s *system = world->hat_machine_sys;
+    if (system == NULL || system->machines == NULL || system->count <= 0) {
+        return;
+    }
+
+    HATMACHINEPROGRESS *progress = static_cast<HATMACHINEPROGRESS *>(progress_ptr);
+    for (i32 index = 0; index < system->count; ++index) {
+        HATMACHINE_s *machine = &system->machines[index];
+        HatMachine_Reset(machine);
+
+        if (index <= 31 && progress != NULL) {
+            const u32 mask = 1u << index;
+            machine->progress_state1 = (progress->visible_mask & mask) != 0;
+            machine->progress_state0 = (progress->enabled_mask & mask) != 0;
+        }
+    }
+}
+
+static void HatMachine_Activate(GIZMO *gizmo, i32 enabled) {
+    if (gizmo == NULL || gizmo->object == NULL) {
+        return;
+    }
+
+    HATMACHINE *machine = static_cast<HATMACHINE *>(gizmo->object);
+    if (enabled) {
+        machine->progress_state0 = 1;
+        HatMachine_Reset(machine);
+    } else {
+        machine->progress_state0 = 0;
     }
 }
 
@@ -329,241 +571,27 @@ static void HatMachine_Draw(void *world_ptr, void *, float) {
     ResetShadowMapRendering();
 }
 
-static char *HatMachine_GetGizmoName(GIZMO *gizmo) {
-    if (gizmo == NULL || gizmo->object == NULL) {
-        return NULL;
-    }
-    return static_cast<HATMACHINE *>(gizmo->object)->name;
+void HatMachines_InitTerrain(WORLDINFO_s *) {
+    STUBBED();
 }
 
-static i32 HatMachine_GetOutput(GIZMO *gizmo, i32, i32) {
-    HATMACHINE *machine = static_cast<HATMACHINE *>(gizmo->object);
-    return (static_cast<u8>(machine->flags) >> 1) & 1;
+MechObjectInterface *HATMACHINE_s::GetMechObjectInterface() {
+    if (mech_object_interface == NULL) {
+        new HatMachineObjectInterface(*this);
+    }
+    return mech_object_interface;
 }
 
-static char *HatMachine_GetOutputName(GIZMO *, i32 output_index) {
-    return output_index == 0 ? const_cast<char *>("Finished") : NULL;
+void HATMACHINE_s::ClearMechObjectInterface() {
+    delete mech_object_interface;
 }
 
-static i32 HatMachine_GetNumOutputs(GIZMO *) {
-    return 1;
+void HatMachine_FindNearest(WORLDINFO_s *, nuvec_s *, GameObject_s *, float *) {
+    STUBBED();
 }
 
-static void HatMachine_Activate(GIZMO *gizmo, i32 enabled) {
-    if (gizmo == NULL || gizmo->object == NULL) {
-        return;
-    }
-
-    HATMACHINE *machine = static_cast<HATMACHINE *>(gizmo->object);
-    if (enabled) {
-        machine->progress_state0 = 1;
-        HatMachine_Reset(machine);
-    } else {
-        machine->progress_state0 = 0;
-    }
-}
-
-static void HatMachine_SetVisibility(GIZMO *gizmo, i32 visible) {
-    if (gizmo == NULL || gizmo->object == NULL) {
-        return;
-    }
-
-    HATMACHINE *machine = static_cast<HATMACHINE *>(gizmo->object);
-    u8 flags = machine->flags;
-    u8 previous_visibility = flags;
-    previous_visibility >>= 2;
-    const i32 was_visible = previous_visibility & 1;
-    visible = visible != 0;
-    flags = static_cast<u8>((flags & ~HATMACHINE_FLAG_VISIBLE) | (visible << 2));
-    machine->flags = static_cast<HATMACHINE_FLAGS>(flags);
-
-    if ((flags & HATMACHINE_FLAG_VISIBLE) != 0) {
-        if (was_visible == 0) {
-            machine->platform_id = NewPlatPickupInst(machine, HATMACHINE_PLATFORM_COLLISION);
-            PlatInstRotate(machine->platform_id, 1);
-        }
-    } else if (was_visible != 0) {
-        DeletePlatinst(machine->platform_id);
-    }
-}
-
-static void *HatMachines_AllocateProgressData(VARIPTR *buffer, VARIPTR *buffer_end) {
-    return GizmoBufferAlloc(buffer, buffer_end, sizeof(HATMACHINEPROGRESS));
-}
-
-static void HatMachines_ClearProgress(void *, void *progress_data) {
-    HATMACHINEPROGRESS *progress = (HATMACHINEPROGRESS *)progress_data;
-    if (progress == NULL) {
-        return;
-    }
-
-    progress->enabled_mask = ~0u;
-    progress->visible_mask = ~0u;
-}
-
-static void HatMachines_StoreProgress(void *world_ptr, void *, void *progress_ptr) {
-    WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
-    HATMACHINEPROGRESS *progress = static_cast<HATMACHINEPROGRESS *>(progress_ptr);
-    if (progress == NULL) {
-        return;
-    }
-
-    progress->enabled_mask = ~0u;
-    progress->visible_mask = ~0u;
-    if (world == NULL || world->hat_machine_sys == NULL || world->hat_machine_sys->machines == NULL) {
-        return;
-    }
-
-    HATMACHINESYS_s *system = world->hat_machine_sys;
-    for (i32 index = 0; index < system->count && index < 32; ++index) {
-        const u32 mask = 1u << index;
-        HATMACHINE *machine = &system->machines[index];
-        if ((machine->flags & HATMACHINE_FLAG_VISIBLE) == 0) {
-            progress->visible_mask &= ~mask;
-        }
-        if ((machine->flags & HATMACHINE_FLAG_ENABLED) == 0) {
-            progress->enabled_mask &= ~mask;
-        }
-    }
-}
-
-static void HatMachine_Reset(HATMACHINE_s *machine) {
-    machine->player_position.y = 0.0f;
-    machine->player_position.x = 0.0f;
-    machine->player_position.z = 0.1441f;
-    NuVecRotateY(&machine->player_position, &machine->player_position, machine->yaw + 0x8000);
-    NuVecAdd(&machine->player_position, &machine->player_position, &machine->position);
-
-    NUVEC target_position;
-    Hat_GetAbsTargetPos(machine, &target_position);
-    target_position.y = machine->position.y;
-
-    machine->player_position.y = GameShadow(NULL, &machine->player_position, 1.0f, -1);
-    const f32 target_y = GameShadow(NULL, &target_position, 1.0f, -1);
-    if (target_y == 2000000.0f) {
-        machine->target_offset.y = target_y;
-    } else {
-        machine->target_offset.y = target_y + 0.005f;
-        FindAnglesZX(&ShadNorm, &machine->terrain_pitch, &machine->terrain_roll);
-    }
-
-    machine->animation_state = 0;
-    machine->progress_state1 = 1;
-    machine->progress_state0 = 1;
-    machine->state_bit0 = 0;
-    machine->state_bit1 = 0;
-    machine->hat_refresh_timer = 0.0f;
-    machine->animation_duration = 0.0f;
-    machine->render_animation_time = 0.0f;
-
-    if (machine->model_letter == 'r') {
-        machine->model_special_index = 0x22;
-    } else {
-        machine->model_special_index = (machine->model_letter == 'o') + 0x20;
-    }
-
-    if (machine->configured_hat != 0) {
-        machine->current_hat = machine->configured_hat;
-    } else {
-        machine->current_hat = static_cast<u8>(NuFloatRand(reinterpret_cast<NURAND *>(&GAMERAND)) * 4.0f) + 1;
-    }
-
-    NuMtxSetRotationY(&machine->matrix, machine->yaw);
-    NuMtxTranslate(&machine->matrix, &machine->position);
-}
-
-static void HatMachines_Reset(void *world_ptr, void *, void *progress_ptr) {
-    WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
-    if (world == NULL) {
-        return;
-    }
-
-    HATMACHINESYS_s *system = world->hat_machine_sys;
-    if (system == NULL || system->machines == NULL || system->count <= 0) {
-        return;
-    }
-
-    HATMACHINEPROGRESS *progress = static_cast<HATMACHINEPROGRESS *>(progress_ptr);
-    for (i32 index = 0; index < system->count; ++index) {
-        HATMACHINE_s *machine = &system->machines[index];
-        HatMachine_Reset(machine);
-
-        if (index <= 31 && progress != NULL) {
-            const u32 mask = 1u << index;
-            machine->progress_state1 = (progress->visible_mask & mask) != 0;
-            machine->progress_state0 = (progress->enabled_mask & mask) != 0;
-        }
-    }
-}
-
-static void *HatMachines_ReserveBufferSpace(void *world_ptr) {
-    WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
-    world->hat_machine_sys = NULL;
-    if (world->current_level->max_levers == 0) {
-        return NULL;
-    }
-
-    world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 4);
-    world->hat_machine_sys = static_cast<HATMACHINESYS_s *>(world->giz_buffer.void_ptr);
-    world->giz_buffer.addr += sizeof(HATMACHINESYS_s);
-    memset(world->hat_machine_sys, 0, sizeof(*world->hat_machine_sys));
-
-    world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 16);
-    world->hat_machine_sys->machines = static_cast<HATMACHINE *>(world->giz_buffer.void_ptr);
-    world->giz_buffer.addr += world->current_level->max_hat_machines * sizeof(HATMACHINE);
-    memset(world->hat_machine_sys->machines, 0, world->current_level->max_hat_machines * sizeof(HATMACHINE));
-    return world->hat_machine_sys;
-}
-
-static i32 HatMachine_Load(void *world_ptr, void *) {
-    WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
-    if (world == NULL) {
-        return 0;
-    }
-
-    HATMACHINESYS_s *system = world->hat_machine_sys;
-    if (system == NULL || system->count != 0) {
-        return 0;
-    }
-
-    const i32 version = EdFileReadInt();
-    system->count = EdFileReadInt();
-    if (system->count > 0) {
-        i32 index = 0;
-        do {
-            HATMACHINE *machine = &system->machines[index];
-            EdFileRead(machine->name, EdFileReadInt());
-            EdFileReadNuVec(&machine->position);
-            machine->yaw = EdFileReadShort();
-            machine->configured_hat = static_cast<u8>(EdFileReadChar());
-
-            if (version <= 2) {
-                machine->model_letter = 'r';
-            } else {
-                machine->model_letter = static_cast<char>(EdFileReadChar());
-                if (version != 3) {
-                    EdFileReadNuVec(&machine->target_offset);
-                    machine->scale = EdFileReadFloat();
-                    if (version != 4) {
-                        const u8 hidden = static_cast<u8>(EdFileReadChar()) & 1;
-                        machine->flags = static_cast<HATMACHINE_FLAGS>(
-                            (machine->flags & ~HATMACHINE_FLAG_HIDE_MACHINE) | (hidden << 5));
-                    }
-                    machine->platform_id = -1;
-                    ++index;
-                    continue;
-                }
-            }
-
-            machine->target_offset.x = 0.0f;
-            machine->target_offset.y = 0.0f;
-            machine->target_offset.z = -0.1441f;
-            machine->scale = 1.0f;
-            machine->platform_id = -1;
-            ++index;
-        } while (system->count > index);
-    }
-    return 1;
+i32 HatMachine_BeingUsed(HATMACHINE_s *hat_machine) {
+    return hat_machine->state_bit0;
 }
 
 ADDGIZMOTYPE *HatMachine_RegisterGizmo(i32 type_id) {
@@ -603,4 +631,8 @@ ADDGIZMOTYPE *HatMachine_RegisterGizmo(i32 type_id) {
     hatmachine_gizmotype_id = type_id;
 
     return &addtype;
+}
+
+void HatMachine_MoveCode(WORLDINFO_s *, GameObject_s *, i32) {
+    STUBBED();
 }

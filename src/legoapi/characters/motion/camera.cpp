@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "legoapi/world/area.h"
 #include "legoapi/core/config/cheat.h"
 #include "legoapi/menus/screens/shop.h"
@@ -16,7 +17,7 @@
 #include "legoapi/characters/motion.h"
 #include "legoapi/core/input/gamepads.h"
 #include "legoapi/core/input/qrand.h"
-#include "legoapi/gizmos/object/technos.h"
+#include "legoapi/props/objects/techno.h"
 #include "legoapi/items/base/apiobject.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/world/world.h"
@@ -314,10 +315,12 @@ void GameCameraMakeMiniCut(nugspline_s *spline, f32 start, f32 end, f32 blend_in
 }
 
 void GameCameraMakeMiniCut2(nuvec_s *, nuvec_s *, i32, float, float, float, float, i32, i32, i32) {
+    STUBBED();
 }
 
 void GameCameraMakeMiniCut3(u32, float, i32, i32, i32, void *, i32, nuvec_s *, float, float, float, float, float, float,
                             float, i32, nugspline_s *, char, char) {
+    STUBBED();
 }
 
 u16 GameCam_GetAdjustedYRot(GAMECAMERA_s *camera) {
@@ -1483,6 +1486,7 @@ void MoveGameCamera(GAMECAMERA_s *camera) {
 }
 
 void ViewCamDraw() {
+    STUBBED();
 }
 
 void KeepOnScreen(GameObject_s *object) {
@@ -1623,12 +1627,15 @@ i32 ViewCamGetMode() {
 }
 
 void SetDepthOfField() {
+    STUBBED();
 }
 
 void SpeedBlur_Apply(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void SpeedBlur_Update() {
+    STUBBED();
 }
 
 void ViewCamSetActive(i32 mode, GAMEPAD_s *gamepad) {
@@ -1829,6 +1836,7 @@ void do_Pad_flymode_camera(edcam_s *camera, float delta_time, nupad_s *pad) {
 }
 
 void InitCameraTargetMaterial() {
+    STUBBED();
 }
 
 i32 GoingForwardsAlongNarrowSock(GameObject_s *object) {
@@ -1862,15 +1870,19 @@ extern "C" {
     i32 near_clip_at_cursor;
 
     void cbNearClipAtCursor(void) {
+        STUBBED();
     }
 
     void do_Pad_Standard_camera(edcam_s *, f32, nupad_s *) {
+        STUBBED();
     }
 
     void do_maya_mouse_camera(edcam_s *) {
+        STUBBED();
     }
 
     void do_mouse_flymode_camera(edcam_s *, f32) {
+        STUBBED();
     }
 
 } // extern "C"

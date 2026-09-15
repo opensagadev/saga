@@ -15,8 +15,6 @@
 
 EPISODEDATA *EDataList = NULL;
 
-extern TerrainQuery_s *TerI;
-extern u8 TerrainHitInfo[4];
 extern f32 text3d_width;
 
 void Text_MakeScore(u32 score, char *text);
@@ -195,9 +193,11 @@ struct SHOPINPUT;
 // ===========================================================================
 
 void BossKilled(i32) {
+    STUBBED();
 }
 
 void CountOpenEpisodes() {
+    STUBBED();
 }
 
 i32 Episode_IsComplete(EPISODEDATA *episode, i32 *completed_area_count) {
@@ -229,9 +229,11 @@ i32 Episodes_Completed() {
 }
 
 void Episodes_CompleteAllSuperStories() {
+    STUBBED();
 }
 
 void Episode_FindFromArea(i32) {
+    STUBBED();
 }
 
 i32 EpCompleteTotal, EpCompleteCount;
@@ -331,6 +333,7 @@ i32 Episode_CountOpenAreas(i32 episode_index, i32 area_index, AREASAVE_s *saves)
 }
 
 void InitSuperStory(i32) {
+    STUBBED();
 }
 
 i32 InStory() {
@@ -376,6 +379,7 @@ void CoinTotal_Draw(i32 total, f32 y, f32 scale, i32 remember_positions, f32 ico
 }
 
 void DoubleScoreAlpha() {
+    STUBBED();
 }
 
 // ===========================================================================
@@ -383,46 +387,29 @@ void DoubleScoreAlpha() {
 // ===========================================================================
 
 void TrooperShoot(WORLDINFO_s *, minitrooperteam_s *, minisnowtrooper_s *, u16 *, i32) {
-}
-
-void NewTerrStoreAnyInfo() {
-    TerrainQuery_s *query = TerI;
-    TERRAIN_SHAPE *surface = query->surface;
-    if (surface == NULL || query->terrain_group_index == -1) {
-        return;
-    }
-
-    if (surface->material[0] != 0) {
-        TerrainHitInfo[0] = surface->material[0];
-    }
-    if (surface->material[1] != 0) {
-        TerrainHitInfo[1] = surface->material[1];
-    }
-    if (surface->flags != 0) {
-        TerrainHitInfo[2] = surface->flags;
-    }
-    if (surface->normal_flags != 0) {
-        TerrainHitInfo[3] = surface->normal_flags;
-    }
+    STUBBED();
 }
 
 void SetBobaRocketTarget(MechObjectInterface *) {
+    STUBBED();
 }
 
 void FireBountyHunterRocket(GameObject_s *) {
+    STUBBED();
 }
 
 void ResetTrooperCannons(WORLDINFO_s *, i32) {
+    STUBBED();
 }
 
 void UpdateTrooperCannons(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void UpdateMiniSnowTroopers(WORLDINFO_s *) {
-}
-
-void SetLevelExBlowupFunc(i32 (*)(GIZMOBLOWUP_s *, i32)) {
+    STUBBED();
 }
 
 static __used__ void seed_chase(f32 *, i32, abi_long) {
+    STUBBED();
 }

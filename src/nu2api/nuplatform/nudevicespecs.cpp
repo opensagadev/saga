@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "nudevicespecs.hpp"
 
 #include <GLES2/gl2.h>
@@ -22,11 +23,18 @@ void NuDeviceSpecs::Create() {
     ms_instance->DetermineDeviceSpecs();
 }
 
+void NuDeviceSpecs::Exists() {
+    STUBBED();
+}
+
 void NuDeviceSpecs::Destroy() {
     if (ms_instance != NULL) {
         free(ms_instance);
         ms_instance = NULL;
     }
+}
+
+NuDeviceSpecs::~NuDeviceSpecs() {
 }
 
 void NuDeviceSpecs::DetermineDeviceSpecs() {

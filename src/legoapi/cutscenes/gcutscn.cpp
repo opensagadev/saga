@@ -1,6 +1,8 @@
+#include "decomp.h"
 #include "globals.h"
 #include "legoapi/legoapi_types.h"
 #include "nu2api/nucore/nugcutscene.h"
+#include "nu2api/nucore/nuhgobj.h"
 
 #include "globals.h"
 #include "legoapi/cutscenes/cutscenes.h"
@@ -26,6 +28,32 @@ extern i32 NextArea_FreePlay;
 extern i16 tCHAPTER;
 extern f32 ICONSIZE;
 void NewLevelFromMenu(LEVELDATA_s *, i32, i32, i32);
+
+void EvaluateJointOrientationMtx(nugscn_s *scene, i32 joint_index, numtx_s *matrix) {
+    nuhgobj_s *object = reinterpret_cast<nuhgobj_s *>(scene);
+    NuMtxSetIdentity(matrix);
+
+    while (true) {
+        nuhgobjjoint_s *joint = &object->joints[joint_index];
+        NUMTX *bind_matrix = &joint->animation_bind_matrix;
+        if (bind_matrix->m00 != 1.0f || bind_matrix->m11 != 1.0f || bind_matrix->m22 != 1.0f) {
+            NuMtxMulVU0(matrix, bind_matrix, matrix);
+        }
+
+        if (joint->parent_index == 0xff) {
+            break;
+        }
+        joint_index = joint->parent_index;
+    }
+
+    matrix->m02 = -matrix->m02;
+    matrix->m12 = -matrix->m12;
+    matrix->m20 = -matrix->m20;
+    matrix->m21 = -matrix->m21;
+    matrix->m23 = -matrix->m23;
+    matrix->m32 = -matrix->m32;
+    NuMtxTransposeR(matrix, matrix);
+}
 
 CUTSCENEPLAYER_s *CutScenePlayer = NULL;
 
@@ -289,12 +317,15 @@ void FindGameCutScenes() {
 }
 
 void FindSceneStateObj(nugscn_s *, SCENEPROGRESS_s *, nuhspecial_s *) {
+    STUBBED();
 }
 
 void instGetLookAtLocatorInfo(instNUGCUTSCENE_s *, instNUGCUTLOOKAT_s *) {
+    STUBBED();
 }
 
 void instNuGCutGetNextRigidInfo(instNUGCUTSCENE_s *, float, i32, numtx_s *, nuhspecial_s *) {
+    STUBBED();
 }
 
 i32 instNuGCutSceneSwapBuffers(instNUGCUTSCENE_s *instance, i32 force) {
@@ -332,4 +363,5 @@ void instNuGCutSceneEndButNotSystems(instNUGCUTSCENE_s *instance) {
 }
 
 void instNuGCutContainsInstancedRigids(instNUGCUTSCENE_s *) {
+    STUBBED();
 }

@@ -1,6 +1,10 @@
 #pragma once
 
 #include "decomp.h"
+#include "legoapi/characters/motion/action_info.h"
+#include "legoapi/characters/motion/animation_ids.h"
+#include "legoapi/characters/motion/contexts.h"
+#include "legoapi/render/fx/game_deb.h"
 #include "legoapi/world/level.h"
 #include "legoapi/world/mission.h"
 #include "nu2api/nu3d/nucamera.h"
@@ -13,6 +17,7 @@ struct DETONATOR_s;
 struct PART_s;
 struct NUGCUTCHAR_s;
 struct BOLT_s;
+struct AREADATA_s;
 struct GameObject_s;
 struct CHARACTERMODEL_s;
 struct nuvec_s;
@@ -25,34 +30,21 @@ struct AREASAVE_s;
 struct GAMECAMERA_s;
 struct TEXTCRAWL_s;
 struct COLLECTION_s;
-struct ACTIONINFO_s;
-struct EXTRAACTIONDATA_s;
 class FadeSystem;
 
 extern BOLT_s Bolt[32];
+extern AREADATA_s *BOUNTYHUNTERPURSUIT_ADATA;
+extern AREADATA_s *DOGFIGHT_ADATA;
+extern AREADATA_s *GUNSHIP_ADATA;
+extern AREADATA_s *PODSPRINT_ADATA;
 extern i32 i_bolt;
 extern f32 BOLT_OVERRIDE_PLAYERBOLTSPEED;
 extern f32 BOLT_OVERRIDE_PLAYERBOLTDURATION;
 extern u8 CutSceneCameraCTRL;
 extern f32 nusound_fade_start;
+extern "C" NUVEC nusound_special_positions[5];
 extern f32 nusound_fade_end;
 extern i32 (*SetSoundFadeDistCallBackFn)(WORLDINFO_s *world);
-
-struct CHARACTER_CONTEXT_INFO_s {
-    const char *name;
-    i32 action;
-    u32 flags;
-    i32 parameter;
-};
-
-enum CHARACTER_CONTEXT_INFO_FLAGS : u32 {
-    CHARACTER_CONTEXT_INFO_FLAG_USE_FALL_ANIMATION = 0x00000008,
-    CHARACTER_CONTEXT_INFO_FLAG_OWNS_ANIMATION = 0x00000010,
-    CHARACTER_CONTEXT_INFO_FLAG_DISABLE_BLOB_SHADOW = 0x00020000,
-    CHARACTER_CONTEXT_INFO_FLAG_ALLOW_DISABLED_MOVEMENT_SHADOW = 0x00040000,
-    CHARACTER_CONTEXT_INFO_FLAG_TERRAIN_ORIGIN_AT_TOP = 0x00080000,
-    CHARACTER_CONTEXT_INFO_FLAG_TERRAIN_ORIGIN_AT_POSITION = 0x00100000,
-};
 
 enum TERRAIN_LAYER_FLAGS : u32 {
     TERRAIN_LAYER_FLAG_REJECT_CHARACTER_SHADOW = 0x00000001,
@@ -69,48 +61,13 @@ DECOMP_ASSERT(sizeof(TERRAIN_LAYER_s) == 0x0c, "TERRAIN_LAYER_s ABI");
 
 typedef i32 (*USING_EXTRA_ACTIONS_FN)(GameObject_s *object);
 
-extern CHARACTER_CONTEXT_INFO_s *CInfo;
-extern i32 LEGOCONTEXT_SUPERCARRY;
 extern USING_EXTRA_ACTIONS_FN UsingExtraActionsFn;
 extern u32 LSW_HintConditions;
 extern bool (*IsWearingBackPackFn)(GameObject_s *);
-extern i32 LEGOCONTEXT_LAND_JUMP;
-extern i16 LEGOACT_LAND;
-extern i16 LEGOACT_LAND2;
-extern i16 LEGOACT_FALLLAND;
-extern i16 LEGOACT_BACKPACKFALLLAND;
-extern i16 LEGOACT_EXTRA_LAND2;
-extern i32 LEGOCONTEXT_BACKFLIP;
-extern i16 LEGOACT_JUMP;
-extern i16 LEGOACT_JUMP2;
-extern i16 LEGOACT_FLIP;
-extern i16 LEGOACT_BACKFLIP;
-extern i16 LEGOACT_EXTRA_JUMP;
-extern i16 LEGOACT_EXTRA_JUMP2;
-extern i16 LEGOACT_MAGNET_JUMP;
-extern i16 LEGOACT_FALL;
 extern i32 (*Jump_PreventJumpFn)(GameObject_s *);
 extern i32 (*CanMagnetClimbFn)(GameObject_s *);
 extern i32 (*CanGlideFn)(GameObject_s *);
 extern i32 DoubleJump_AlwaysReachJump2Height;
-extern i32 LEGOCONTEXT_GLIDE;
-extern i16 LEGOACT_JUMP3;
-extern i16 LEGOACT_COMBATROLL_JUMP;
-extern i16 LEGOACT_COMBATROLL_FALL;
-extern i16 LEGOACT_COMBATROLL_LAND;
-extern i16 LEGOACT_COMBATROLL_FIRE;
-extern i16 LEGOACT_LUNGE;
-extern i16 LEGOACT_LAND3;
-extern i16 LEGOACT_EXTRA_LAND;
-extern i16 LEGOACT_FLIPLAND;
-extern i16 LEGOACT_COMBOLAND;
-extern i32 LEGOCONTEXT_LAND_JUMP2;
-extern i32 LEGOCONTEXT_LAND_FLIP;
-extern i32 LEGOCONTEXT_LAND_COMBOJUMP;
-extern i32 LEGOCONTEXT_LAND_LUNGE;
-extern i16 LEGOACT_LUNGELAND;
-extern i32 LEGOCONTEXT_LAND_SLAM;
-extern i16 LEGOACT_SLAMLAND;
 extern i32 (*Slam_GetDebrisFn)(GameObject_s *, i32);
 extern i32 (*FindSlamOrigin_UseCPosFn)(GameObject_s *);
 extern void (*Jump_EndOfLandContextFn)(GameObject_s *);
@@ -446,6 +403,7 @@ extern AREASAVE_s *Game_AreaSave;
 extern EPISODESAVE_s *Game_EpisodeSave;
 extern u8 *Game_CharacterSave;
 extern u16 *Game_CompletionSave;
+extern void (*CheckLostDataFn)(GIZMOBLOWUP_s *);
 extern MISSIONSAVE *Game_MissionSave;
 extern STATUSCOLLECTLIST_s StatusCollectList;
 #ifdef __cplusplus
@@ -559,8 +517,6 @@ extern i32 LevMusicOtherAmbient;
 extern i16 AreaMusic;
 extern i32 radios_playing;
 extern i32 last_chatter_sfx;
-extern u16 rtltimer1;
-extern f32 rtltimer1adv;
 
 // ------------------------------------------------------------------------
 // Camera
@@ -570,11 +526,7 @@ extern NUCAMERA *pNuCam;
 // ------------------------------------------------------------------------
 // Platform & device info
 // ------------------------------------------------------------------------
-struct ANativeWindow;
-extern ANativeWindow *g_appWindow;
 extern volatile bool g_isBlockedInSwapScreen;
-extern char g_deviceManufacturer[256];
-extern char g_deviceModel[256];
 extern i32 g_isLowestEndDevice;
 extern i32 g_isLowEndDevice;
 extern i32 g_isMidRangeDevice;
@@ -587,7 +539,6 @@ extern i32 finishloop_backdroponly;
 // Render / compatibility options
 // ------------------------------------------------------------------------
 extern u8 g_forceSysMemVbs;
-extern i32 g_forceETC1;
 extern i32 texanimbits;
 extern i32 Reflections_On;
 extern i32 disable_narrow_socks;
@@ -598,10 +549,11 @@ extern i32 LEGOCAMMODE_DOORCUT;
 extern i32 LEGOCAMMODE_OBSTACLE;
 extern i32 ObstacleCamBorders;
 extern TEXTCRAWL_s TextCrawl_LSW;
-extern i32 drawcharactermodel_locatorsupdated;
-extern i32 drawcharactermodel_noani;
-extern i32 drawcharactermodel_restpose;
-extern i32 drawcharactermodel_keepmergeaction;
+extern "C" i32 drawcharactermodel_locatorsupdated;
+extern "C" i32 drawcharactermodel_nobsa;
+extern "C" i32 drawcharactermodel_noani;
+extern "C" i32 drawcharactermodel_restpose;
+extern "C" i32 drawcharactermodel_keepmergeaction;
 extern i32 game_keepmergeaction;
 extern i32 JointRotation_On;
 extern i32 (*MakeLayerList)(CHARACTERMODEL_s *, i16 *, u32);
@@ -664,20 +616,6 @@ enum GAMEPAD_BUTTON_FLAGS {
 extern u32 GAMEPAD_SKIP;
 extern i32 MiniCutCam;
 extern i32 ai_fighting;
-extern i32 LEGO_AIPATHCNX_FORGOODIES;
-extern i32 LEGO_AIPATHCNX_FORBADDIES;
-extern i32 LEGO_AIPATHCNX_JUMP;
-extern i32 LEGO_AIPATHCNX_DOUBLE_JUMP;
-extern i32 LEGO_AIPATHCNX_HIGH_JUMP;
-extern i32 LEGO_AIPATHCNX_R2D2GLIDE;
-extern i32 LEGO_AIPATHCNX_BLOCKAGE;
-extern i32 LEGO_AIPATHCNX_DONTTOGGLE;
-extern i32 LEGO_AIPATHCNX_FULLTERRAIN;
-extern i32 LEGO_AIPATHCNX_BIGJUMP;
-extern i32 LEGO_AIPATHCNX_REQUIRESPERMISSION;
-extern i32 LEGO_AIPATHCNX_NO_DESTINATION_CHECK;
-extern i32 LEGO_AIPATHCNX_JUMP_NOW;
-extern i32 LEGO_AIPATHCNX_DONT_JUMP_NOW;
 extern f32 fakeanimendframe[1];
 extern f32 fakeanimframe[1];
 extern f32 ai_moveradius;
@@ -693,20 +631,7 @@ extern f32 DEFAULT_MOVE_RANGE;
 extern u64 _0xffffffffffffffff;
 extern f32 engagefiretime;
 extern f32 idealgoalrange;
-extern i32 LEGOCONTEXT_DROPIN;
-extern i32 LEGOCONTEXT_COMBO;
-extern i32 LEGOCONTEXT_JUMP;
-extern i32 LEGOCONTEXT_DOOMED;
-extern i32 LEGOCONTEXT_LAND_COMBATROLL;
-extern i32 LEGOCONTEXT_WALLSHUFFLE;
-extern i32 LEGOCONTEXT_NETWAIT;
-extern i16 LEGOACT_BUILD;
 extern i32 LEGOHINT_BUILD;
-extern i32 LEGOCONTEXT_BEENTAKENOVER;
-extern i32 LEGOCONTEXT_GETIN;
-extern i32 LEGOCONTEXT_EATEN;
-extern i32 LEGOCONTEXT_WEAPONIN;
-extern i32 LEGOCONTEXT_WEAPONOUT;
 extern i32 WeaponInOut_NoAIJediSfx;
 extern i32 Lap;
 extern PART_s *Part;
@@ -749,6 +674,9 @@ extern GameObject_s *player2;
 extern GameObject_s *player;
 extern GameObject_s *CutDeadVehiclePlayer;
 extern GameObject_s *Player[8];
+extern u8 PlayerRGB[2][3];
+extern char *LEGOASCII_DOWN;
+extern char *txt_UNKNOWN;
 extern struct playerprogress_s PlayerProgress[8];
 extern i32 DEFAULT_PLAYERHITPOINTS;
 extern struct MISSIONSYS_s *MissionSys;
@@ -811,11 +739,7 @@ extern i32 LevObjRef_LastObj;
 extern i32 LevObjRef_FirstRefObj;
 extern LEVELOBJECT *ObjTabList;
 extern i32 LEVELOBJECTCOUNT;
-extern i32 LEVELOBJECTMAX;
 extern i32 EXTRALEVELOBJECTCOUNT;
-extern char *ExtraLevelObject_NameTable;
-extern i32 ExtraLevelObject_NameTableSize;
-extern i32 ExtraLevelObject_NameTableIndex;
 extern i32 KNOBS;
 extern i32 PLAYERHITPOINTS_2HEARTSIN1;
 extern i32 drawbosshitpoints_2rows;
@@ -1089,7 +1013,6 @@ extern u64 LevHSpecialExists;
 // ------------------------------------------------------------------------
 // Cutscene & system misc
 // ------------------------------------------------------------------------
-extern u32 EXBLOWUPFLAGS;
 extern i32 BeenAttacked;
 enum RESETBIT_FLAGS {
     RESETBIT_REINITIALISE_LEVEL = 1 << 0,
@@ -1119,12 +1042,10 @@ extern LEVELOBJECT ObjTab[0x2ee]; // level-object type table (.data @0x618240, 0
 extern struct LEVELSPLINE SplTab[26];
 extern CHARCATEGORY LSW_CharCategory[10];
 extern CHEAT Cheat[45];
-extern u8 CharVariants_Game[0x5c];
+extern CHARVARIANT CharVariants_Game[23];
 extern MemoryManager theMemoryManager;
 extern struct TEXTENTRY LSW_Text[713];
 
-extern ACTIONINFO_s *ActionInfo;
-extern EXTRAACTIONDATA_s ExtraActionData[];
 extern void *theGameThings;
 extern void *theThingManager;
 
@@ -1142,8 +1063,6 @@ extern i32 (*CutScene_ReplaceCharacterModelFn)(CUTINFO *, NUGCUTCHAR_s *);
 extern i32 (*InitBolt_AddMomentumType)(BOLT_s *, GameObject_s *, nuvec_s *);
 extern i32 (*Bolt_HitPlatFn)(BOLT_s *);
 extern void (*Bolt_HitCustomFn)(BOLT_s *, nuvec_s *);
-extern void (*GameBlowUpBlownUpFn)(GIZMOBLOWUP_s *);
-extern void (*GizmoBlowup_TransformDrawFn)(GIZMOBLOWUP_s *);
 extern void (*GizObstacle_SetDefaultSFXFn)(void *, GIZOBSTACLE_s *);
 
 extern i32 PermDataLoaded;          // original .data init 1

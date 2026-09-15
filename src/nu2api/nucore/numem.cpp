@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "nu2api/nucore/numem.h"
 #include "nu2api/nucore/nuheap.h"
 #include "nu2api/nucore/numemory.h"
@@ -6,6 +7,7 @@
 
 // The original Android implementation does not change page protection.
 extern "C" i32 NuPhysicalProtect(void) {
+    STUBBED();
     return 0;
 }
 
@@ -174,10 +176,6 @@ void NuMemSetExternal(VARIPTR *cursor, VARIPTR *end) {
     }
 }
 
-NUMEMEXTERNAL *NuMemGetExternal(void) {
-    return memexternal;
-}
-
 void memmove(void *dest, const void *source, i32 size) {
     u8 *out = (u8 *)dest;
     const u8 *in = (const u8 *)source;
@@ -198,6 +196,14 @@ void memmove(void *dest, const void *source, i32 size) {
             *out = *in;
         }
     }
+}
+
+void numeminit() {
+    STUBBED();
+}
+
+NUMEMEXTERNAL *NuMemGetExternal(void) {
+    return memexternal;
 }
 
 void NuMemCopy128(void *dest, const void *source, i32 count) {

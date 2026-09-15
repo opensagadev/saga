@@ -176,4 +176,5 @@ DECOMP_ASSERT(offsetof(nu2api::ShaderUniformRecord, data.values) == 0x1c, "Shade
 struct numtl_s;
 extern "C" void NuShaderObjectBaseUpdateWaterTable(NUSHADEROBJECT *shader, numtl_s *mtl);
 
+extern "C" void NuShaderObjectGLSLSetupMaterial(NUSHADEROBJECT *shader, numtl_s *mtl);
 extern "C" void NuShaderObjectGLSLSetupTextureStates(NUSHADEROBJECT *shader, numtl_s *mtl);

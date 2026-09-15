@@ -1,6 +1,7 @@
+#include "decomp.h"
 #include "globals.h"
+#include "legoapi/gizmos/object/gizbuildits.h"
 
-extern GAMESAVE_s TempGame;
 #include "batman.h"
 #include "gameapi/gui/apimenu.h"
 #include "legoapi/characters/core/character.h"
@@ -20,10 +21,12 @@ extern GAMESAVE_s TempGame;
 #include "legoapi/menus/screens/gamemenuall.h"
 #include "legoapi/props/doors/door.h"
 #include "legoapi/render/core/render.h"
+#include "legoapi/render/core/screen.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/mission.h"
 #include "legoapi/core/input/gamepads.h"
 #include "legoapi/world/levels/episode.h"
+#include "legoapi/world/levels/levels.h"
 #include "legoapi/world/world.h"
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nu3d/nuqfnt.h"
@@ -49,9 +52,6 @@ extern void InitShop(WORLDINFO_s *);
 extern void DrawShop3D(WORLDINFO_s *);
 extern void Draw3DObjectMtx(WORLDINFO_s *, i32, NUMTX *);
 extern void CutScenePlayer_Reset();
-extern GIZBUILDIT_s *GizBuildIt_Find(WORLDINFO_s *, char *);
-extern void GizBuildIt_SetToEnd(GIZBUILDIT_s *);
-extern GIZBUILDIT_s *GizBuildIt_FindNearest(WORLDINFO_s *, GameObject_s *, BUILDIT_FIND_ENUM, i32);
 extern FadeSystem FadeSys;
 extern GAMESAVE_s TempGame;
 extern i32 shop_save_done;
@@ -75,27 +75,20 @@ extern "C" i32 TriggerAutoSave();
 extern AREADATA *E1VEHICLE_ADATA;
 extern u8 show_unlock_minikitviewer_hint;
 bool HubMinikitViewerUnlocked();
-void Hub_ResetPanel();
 void Hub_ActivateDoorMenu(LEVELDATA_s **);
 bool FreePlayUnlocked();
 extern "C" void PlaySfxAndSetPitch(char *, NUVEC *, f32);
 AILOCATOR_s *LocalGetNearestLocator(AILOCATOR_s **, i32, f32, NUVEC *, f32, i32, f32, f32);
 extern i32 Episode_CountOpenAreas(i32, i32, AREASAVE_s *);
 extern void UpdateCharacterLoad();
-extern i32 Missions_PartyAvailable(MISSIONSYS *);
 extern void ResetForceBack();
 extern void Hint_CancelCurrent();
-extern i32 shop_save_done;
-extern i32 shop_quit;
-extern "C" void NuIOS_RecordFlurryEvent(char *);
-bool HubShopUnlocked();
 extern f32 SeekLinearF(f32, f32, f32);
 extern i32 qrand();
 extern void Door_GoThrough(WORLDINFO_s *, DOOR_s *, i32);
 extern STOREPACK StorePack[11];
 extern GameObject_s *FindGameObject(i32, u32, i32, i32, i32);
 extern void Store_RootPackCustodian(i32, GameObject_s *);
-extern void NeedScreenGrab(i32);
 extern void BackDrop_ResetColours();
 extern void NewGameMode();
 extern f32 MainRenderTargetTime;
@@ -197,7 +190,7 @@ extern f32 HUB_EPISODETITLEY, HUB_EPISODESUBTITLEY;
 extern f32 PANEL_MINIKITCOUNTSCALE, PANEL_MINIKITSCALE, PANEL_MINIKITY, PANEL_MINIKITCOUNTY, PANEL3DMULX;
 extern i32 newgamecam;
 extern f32 newgamecamtime;
-extern i16 tMAP, tSTORY, tFREEPLAY, tCHAPTER, tBONUS2, tMINIKITS, tMINIKIT;
+extern i16 tMAP, tSTORY, tFREEPLAY, tREPLAYSTORY, tCHAPTER, tBONUS2, tMINIKITS, tMINIKIT;
 extern i16 tBOUNTYHUNTERMISSIONS, tBOUNTYHUNTERMISSIONS2, tSTORYCLIPS2;
 extern i32 EpMiniKitCount, EpMiniKitTotal, EpCharKitCount, EpCharKitTotal, EpBuildUpCount, EpBuildUpTotal;
 extern i32 EpStoryBuildUpCount, EpStoryBuildUpTotal, EpFreePlayBuildUpCount, EpFreePlayBuildUpTotal;
@@ -1481,6 +1474,7 @@ void Hub_UpdateKit() {
 }
 
 void Hub_CallBarman(GameObject_s *) {
+    STUBBED();
 }
 
 void Hub_ClearStats() {
@@ -1503,6 +1497,7 @@ void Hub_ResetPanel() {
 }
 
 bool HubShopUnlocked() {
+    STUBBED();
     return true;
 }
 
@@ -1513,6 +1508,10 @@ i32 Hub_BonusBuildIt(GIZBUILDIT_s *buildit) {
         }
     }
     return 0;
+}
+
+void TurnEpisodeDoorLightsOn(i32) {
+    STUBBED();
 }
 
 #include "nu2api/nu3d/nurndr.h"
@@ -1724,9 +1723,11 @@ void Hub_InitMiniKits(WORLDINFO_s *world) {
 }
 
 void Hub_DrawAreaStats(float, i32, i32) {
+    STUBBED();
 }
 
 void Hub_DrawStarField() {
+    STUBBED();
 }
 
 void Hub_MakeModelList() {
@@ -1929,6 +1930,7 @@ void Hub_UpdateMiniKits(WORLDINFO_s *world) {
 }
 
 void Hub_LockUnlockDoors(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void Hub_ActivateDoorMenu(LEVELDATA_s **level) {
@@ -1978,6 +1980,7 @@ void Hub_ActivateDoorMenu(LEVELDATA_s **level) {
 }
 
 bool HubCustomiserUnlocked() {
+    STUBBED();
     return true;
 }
 
@@ -2095,6 +2098,7 @@ initialize_selection:
 }
 
 bool HubMinikitViewerUnlocked() {
+    STUBBED();
     return true;
 }
 
@@ -2320,6 +2324,7 @@ void Hub_Reset(WORLDINFO_s *world) {
 // Private hub menu and drawing helpers.
 
 static __used__ void Hub_DrawArcadeStats(float) {
+    STUBBED();
 }
 
 static void Hub_DrawMiniKitCount(f32 x, f32 y, i32 count, i32 total, f32 alpha) {
@@ -2469,8 +2474,38 @@ static __used__ void Hub_UpdateSelectMode() {
     MenuSFX = GameAudio_GetSfxId(0x32);
 }
 
+static bool MenuAreaAllowsFreePlay(i32 area) {
+    return area >= 0 && area < AREACOUNT && (LOSTTEMPLE_ADATA == NULL || area != LOSTTEMPLE_ADATA->index) &&
+           FreePlayUnlocked() && (ADataList[area].flags & AREAFLAG_NO_FREEPLAY) == 0 && Game_AreaSave != NULL &&
+           Game_AreaSave[area].area_complete != 0;
+}
+
+void MenuInitSelectMode(MENU_s *menu) {
+    const i32 area = LDataList[hub_new_level].area_index;
+    hub_selectmode = MenuAreaAllowsFreePlay(area) ? 1 : 0;
+    menu->selected_row = static_cast<i16>(hub_selectmode);
+    menu->selected_item = hub_selectmode;
+    selectmodemode = 0;
+}
+
 void MenuUpdateSelectMode(MENU_s *) {
     Hub_UpdateSelectMode();
+}
+
+void MenuDrawSelectMode(MENU_s *menu) {
+    const i32 area = LDataList[hub_new_level].area_index;
+    const bool free_play_available = MenuAreaAllowsFreePlay(area);
+
+    if (area >= 0 && area < AREACOUNT && ADataList[area].name_id >= 0) {
+        NuStrCpy(MenuHeader, TTab[ADataList[area].name_id]);
+    }
+
+    GameDrawMenuEntry(menu, TTab[free_play_available ? tREPLAYSTORY : tSTORY]);
+    if (free_play_available) {
+        GameDrawMenuEntry(menu, TTab[tFREEPLAY]);
+    } else {
+        DrawMenuEntryEx(menu, TTab[tFREEPLAY], MenuA / 2);
+    }
 }
 
 extern AREADATA *E1CHARACTER_ADATA, *E2CHARACTER_ADATA, *E3CHARACTER_ADATA, *E4CHARACTER_ADATA, *E5CHARACTER_ADATA,
@@ -2501,6 +2536,12 @@ void MenuInitBonusMode(MENU_s *) {
     hub_bonusarea = LDataList[hub_new_level].area_index;
     hub_bonusepisode = static_cast<i8>(ADataList[hub_bonusarea].episode_index);
     bonusmodearcade = SENATE_ADATA != NULL && hub_bonusarea == SENATE_ADATA->index;
+}
+void MenuUpdateBonusMode(MENU_s *) {
+    STUBBED();
+}
+void MenuDrawBonusMode(MENU_s *) {
+    STUBBED();
 }
 static __used__ void Hub_DrawBonusModeMenu(int selected, float alpha) {
     char text[3][128];
@@ -2667,7 +2708,7 @@ static __used__ void Hub_DrawBonusModeMenu(int selected, float alpha) {
 void Hint_SetHintFromId(i32, i32, i32);
 void Hint_Draw(i32);
 extern f32 text3d_width, text3d_height;
-extern i16 tREPLAYSTORY, tCHALLENGE, tLOCKED;
+extern i16 tCHALLENGE, tLOCKED;
 static __used__ void Hub_DrawSelectModeMenu(int selected, float alpha) {
     const i32 area = LDataList[hub_new_level].area_index;
     const i32 complete = Game.area_save[area].area_complete;
@@ -2751,6 +2792,7 @@ static __used__ void Hub_DrawSelectModeMenu(int selected, float alpha) {
 }
 
 static __used__ void Hub_DrawSuperBonusStats(AREADATA_s *, float) {
+    STUBBED();
 }
 
 void WipeBackToHub() {

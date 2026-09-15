@@ -1,7 +1,9 @@
+#include "decomp.h"
 #include "legoapi/world/level.h"
 #include "globals.h"
 
 i32 KillBoss(i32, i32, float) {
+    STUBBED();
     return 0;
 }
 

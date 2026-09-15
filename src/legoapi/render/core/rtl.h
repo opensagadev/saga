@@ -2,7 +2,10 @@
 
 #include "decomp.h"
 #include "nu2api/nucore/common.h"
+#include "nu2api/numath/numtx.h"
 #include "nu2api/numath/nuvec.h"
+
+struct rtldata_s;
 
 struct rtl_s {
     NUVEC position;
@@ -67,6 +70,8 @@ DECOMP_ASSERT(sizeof(rtlset) == 0x4f84, "RTL set size");
 
 extern "C" {
     extern rtlset *curr_set;
+    extern u16 rtltimer1;
+    extern f32 rtltimer1adv;
 
     i32 rtlInitDynamic(VARIPTR *, VARIPTR, i32);
     i32 rtlDynamicAlloc(void);
@@ -78,4 +83,9 @@ extern "C" {
     i32 rtlDynamicSetColours(i32, NUVEC *, NUVEC *);
     i32 rtlDynamicSetPos(i32, NUVEC *);
     i32 rtlDynamicSetRadii(i32, f32, f32);
+    void rtlResetEx(rtldata_s *, i32);
+    void rtlApplySetScale(void *, rtldata_s *, NUVEC *, NUMTX *, i32, f32);
+    void rtlDynamicMasterEnable(i32);
+    void rtlSetLights(rtldata_s *);
+    rtlset *rtlLoadSet(char *, VARIPTR *, i32);
 }

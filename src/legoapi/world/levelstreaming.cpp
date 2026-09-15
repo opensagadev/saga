@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "legoapi/world/level.h"
 #include "legoapi/world/mission.h"
 #include "globals.h"
@@ -51,6 +52,7 @@ void LevelStreaming_Update(WORLDINFO_s *world) {
 }
 
 void LevelStreaming_DoorOverride(WORLDINFO_s *, LEVELDATA_s *, float, float *) {
+    STUBBED();
 }
 
 void LevelProgress_ReserveBufferSpace(variptr_u *buf, variptr_u) {

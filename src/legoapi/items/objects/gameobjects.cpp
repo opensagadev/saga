@@ -1,7 +1,16 @@
 #include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/ai/core/legoai.h"
+#include "legoapi/items/objects/objectsall.h"
+#include "legoapi/items/collect/torpedo.h"
+#include "legoapi/actions/movement/carrying.h"
+#include "legoapi/actions/combat/hits.h"
+#include "legoapi/actions/character/streaks.h"
+#include "legoapi/gizmos/object/gizbuildits.h"
+#include "legoapi/gizmo/object/gizmoblowups.h"
 #include "legoapi/audio/audio.h"
 #include "legoapi/gizmos/transport/grapples.h"
 #include "legoapi/gizmos/fx/gizmopickups.h"
+#include "legoapi/menus/screens/arcade.h"
 #include "decomp.h"
 #include "gameapi/ai/aisys/aisys.h"
 #include "gameapi/edtools/edfile.h"
@@ -12,6 +21,8 @@
 #include "legoapi/cutscenes/cutscenes.h"
 #include "legoapi/core/config/cheat.h"
 #include "legoapi/render/fx.h"
+#include "legoapi/render/core/terrain.h"
+#include "legoapi/render/light/lighting.h"
 #include "legoapi/render/fx/parts.h"
 #include "legoapi/render/fx/spline_position.h"
 #include "nu2api/nucore/nupad.h"
@@ -20,7 +31,7 @@
 #include "legoapi/ai/core/ai_sys_stubs.h"
 #include "legoapi/world/level.h"
 #include "legoapi/world/mission.h"
-#include "legoapi/gizmos/object/technos.h"
+#include "legoapi/props/objects/techno.h"
 #include "legoapi/world/world.h"
 #include "legoapi/characters/motion.h"
 #include "legoapi/characters/motion/gameanim.h"
@@ -28,6 +39,7 @@
 #include "legoapi/characters/core/CharacterObjectInterface.h"
 #include "legoapi/characters/core/charconfig.h"
 #include "legoapi/menus/core/gamehint.h"
+#include "legoapi/menus/core/gamemessages.h"
 #include "legoapi/gizmos/object/gizobstacles.h"
 #include "legoapi/gizmos/trigger/gizspecial.h"
 #include "legoapi/gizmos/traps/gizforce.h"
@@ -41,13 +53,14 @@
 #include "legoapi/world/area.h"
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/core/input/timer.h"
-#include "legoapi/gizmo/base/gizactions.h"
 #include "legoapi/gizmos/transport/grapples.h"
 #include "nu2api/numath/nufloat.h"
+#include "nu2api/nu3d/nurndr.h"
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numusic/sfx.h"
 #include "nu2api/nucore/numemory.h"
 #include "nu2api/nu3d/nuportal.h"
+#include "nu2api/nu3d/android/nutimebar_plain.h"
 #include "nu2api/nu3d/nucamera.h"
 #include "legoapi/audio/sfx.h"
 #include "nu2api/nuandroid/ios_graphics.h"
@@ -65,16 +78,13 @@ void SetObjAsHeadTarget(GameObject_s *, GameObject_s *, i8, f32, f32, f32);
 void SetBallooningHeight(GameObject_s *, f32);
 void GameObjectSetCanUse(GameObject_s *, void *, u8, u8, f32);
 i32 Suit_GetIndex(SUIT_s *);
-void GameObjectOrigin(GameObject_s *);
 BOLTTYPE_s *BoltType_FindByID(i32, WORLDINFO_s *);
 void Bolt_Shoot(GameObject_s *, i32, i32);
-void Torpedo_Shoot(GameObject_s *);
 void GameAudio_PlaySfxById(i32, NUVEC *, i32, i32);
 void PartUpdate_Basketball(PART_s *);
 void PartImpact_Basketball(PART_s *);
 void AddSlamDebris(GameObject_s *);
 void Batarang_Release(GameObject_s *, i32);
-void SuperCarry_Throw(GameObject_s *, i32);
 void ThermalDetonator_Throw(GameObject_s *);
 void BobaRocket_Kill(PART_s *, i32);
 void BobaRocket_Move(PART_s *, f32);
@@ -107,12 +117,7 @@ static f32 Condition_IAmAPartyCharacter(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET
     return 0.0f;
 }
 
-// NuCore profiling timebars (nucore_plain.cpp): NuTimeBarCreateSet returns a
-// deferred-subsystem stub handle; the slot functions are no-op stubs.
 extern "C" {
-    void *NuTimeBarCreateSet(i32);
-    void _NuTimeBarSlotBegin(void *, i32, char const *);
-    u32 _NuTimeBarSlotEnd(void *, i32);
     void AddToAIGroup(AIGROUP_s *group, APIOBJECT_s *object);
     extern NUVEC plr_lastpos;
     extern i16 id_BAT;
@@ -133,12 +138,10 @@ extern "C" {
     void DebrisPosOrientationMtx(i32, NUMTX *);
     void DebFreeInstantly(i32 *);
     void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
-    f32 NewRayCastGetTOFI();
 }
 
 // Written by ThingManager's ctor (original global @0x124f2e0, .bss).
 extern void *theThingManager;
-extern void ReleaseTakeOver(GameObject_s *object, i32 immediate);
 extern void oneAtOnce_MaintainArray();
 
 void legoSetMusicVolume(float);
@@ -153,15 +156,12 @@ void SnapCreaturePos(GameObject_s *object, NUVEC *position, i32 angle, AIPATHINF
 void MovePlayerSpline(GameObject_s *object);
 void GetTopBot(GameObject_s *object);
 void ResetRumble(RUMBLEPACKET *packet);
-void ResetLights(NUVEC *position, rtldata_s *data, void *set);
-void LightGameObject(GameObject_s *object, void *set);
 void InitSurfaceInfo(GameObject_s *object);
 i32 TightRope_SnapTo(GameObject_s *object, NUVEC *position);
 void Player_ClearContext(GameObject_s *object, i32 mode);
 void Player_ResetContexts(PLAYERPACKET_s *packet);
 i32 SetObjOnSurface(GameObject_s *object, i32 mode);
 void PortalGameObject(GameObject_s *object, i32 enable, i32 immediate, i16 portal, nugscn_s *scene);
-i32 Arcade_GetMode(u32 *mode);
 void StarWars_GameAISysInit();
 void GameAISysSetGame();
 void ClearAICreatures();
@@ -190,9 +190,6 @@ void *Condition_InHubAreaInit(AISYS_s *, char *, AISCRIPT_s *);
 extern i32 LEGO_AIPATHCNX_BLOCKAGE;
 
 extern "C" i32 AISysSetLevelPath(AISYS_s *system, char *path_name);
-
-extern "C" void NuLightFogX(f32 start, f32 end, u32 colour, f32 unused_start, f32 unused_end, i32 high_quality,
-                            f32 density);
 
 GAMEFOG_STATE GameFog = {};
 
@@ -283,7 +280,6 @@ static i32 GameObjectAIUpdateInterval(WORLDINFO_s *world, GameObject_s *object) 
 static const f32 AI_RESPAWN_DELAY = 2.0f;
 
 extern TERRSET *CurTerr;
-extern "C" i32 FindPlatInst(i32 instance);
 
 static f32 Condition_OnForcePlatform(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *argument) {
     GIZFORCE_s *force = static_cast<GIZFORCE_s *>(argument);
@@ -435,6 +431,7 @@ static f32 Condition_ForceAtEnd(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, ch
 
 // The original executable returns zero unconditionally for this condition.
 static f32 Condition_NumForceObjects(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    STUBBED();
     return 0.0f;
 }
 
@@ -603,16 +600,19 @@ static f32 Condition_IsVisible(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, cha
 
 // The reference executable exposes this condition as an unconditional zero.
 static f32 Condition_Indy(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    STUBBED();
     return 0.0f;
 }
 
 // The Android reference executable reports false for the PSP platform.
 static f32 Condition_PSP(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    STUBBED();
     return 0.0f;
 }
 
 // The reference executable exposes this condition as an unconditional zero.
 static f32 Condition_CheatProgress(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    STUBBED();
     return 0.0f;
 }
 
@@ -1048,6 +1048,7 @@ static void *Condition_CutSceneExistsInit(AISYS_s *, char *name, AISCRIPT_s *) {
 }
 
 static f32 Condition_CutScenePlaying(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    STUBBED();
     // The reference target returns zero unconditionally for this condition.
     return 0.0f;
 }
@@ -1863,9 +1864,11 @@ static i32 GameFindAlternativeSpecialObject(AISYS *, nuhspecial_s *special) {
 }
 
 static void GameAILoad(AISYS *, i32, NUGSCN *, VARIPTR *, VARIPTR *) {
+    STUBBED();
 }
 
 static void GlobalCharacterRender(NUVEC *, i16, i32, i32, EDCREATURE_s *) {
+    STUBBED();
 }
 
 static f32 GetCharacterGoalSpeed(APIOBJECT *object) {
@@ -2062,10 +2065,6 @@ static i32 SpecialRouteCharacterTypeID(char *name) {
     return -1;
 }
 
-extern "C" {
-    f32 NewShadowEx(NUVEC *position, i32 handle, f32 height_above, f32 height_below, i32 terrain_mask);
-    void PlatOnOff(i32 platform_id, i32 enabled);
-}
 extern i32 TimingBarSet;
 extern i32 SHADOWCALLS;
 extern u32 LAYER_HOVERIGNORE;
@@ -3084,6 +3083,7 @@ void GameFog_Reset() {
 }
 
 void Game_KillPart(PART_s *, i32) {
+    STUBBED();
 }
 
 void GameAISysReset(AISYS_s *system) {
@@ -3234,6 +3234,7 @@ void MakeBaddiesForgetAboutParty(i32 check_hostility) {
 }
 
 void GameAttackInit() {
+    STUBBED();
 }
 
 extern "C" void MenuRegisterSoundFX(i32 move, i32 select, i32 back, i32 no_entry);
@@ -3241,6 +3242,7 @@ i32 GameAudio_GetSfxId(i32 sfx);
 void GameAudio_PlaySfxById(i32 sfx_id, nuvec_s *position, i32 flags, i32 volume);
 
 void GameFog_Update(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void *GameBufferAlloc(variptr_u *buf, variptr_u *buf_end, i32 size) {
@@ -3286,6 +3288,7 @@ char *GameObj_GetName(i32 model, GameObject_s *object, char *buffer) {
 }
 
 void Game_AutoSaving() {
+    STUBBED();
 }
 
 void GameAISysSetGame() {
@@ -3940,6 +3943,7 @@ void GameObjectSetCanUse(GameObject_s *object, void *target, unsigned char actio
 }
 
 void GameObjOwnsAnyCables(GameObject_s *) {
+    STUBBED();
 }
 
 void GameObjectDimensionsExtra_LSW(GameObject_s *object);
@@ -3981,28 +3985,8 @@ void GameAntiNodeData_Read(GAMEANTINODEDATA_s *data) {
     data->mode = static_cast<u8>(EdFileReadChar());
 }
 
-extern "C" {
-    extern NUVEC nusound_special_positions[5];
-    void PlaySfxById(i32 sfx_id, nuvec_s *position);
-}
-
-void GameAudio_PlaySfxById(i32 sfx_id, nuvec_s *position, i32 flags, i32) {
-    if (flags == 0) {
-        PlaySfxById(sfx_id, position);
-        return;
-    }
-    if ((flags & ~2) == 1) {
-        nusound_special_positions[1] = *position;
-        PlaySfxById(sfx_id, &nusound_special_positions[1]);
-    }
-    flags -= 2;
-    if (static_cast<u32>(flags) <= 1) {
-        nusound_special_positions[2] = *position;
-        PlaySfxById(sfx_id, &nusound_special_positions[2]);
-    }
-}
-
 void Game_GotAllGoldBricks() {
+    STUBBED();
 }
 
 APIOBJECT *GameAPIOBJECTFromObjID(u8 object_id) {
@@ -4044,7 +4028,6 @@ i32 GameDrawCharacterModel(CHARACTERMODEL_s *model, ANIMPACKET_s *animation, NUM
                                  auxiliary_matrix, object, flags, NULL, 0, WORLD, FRAMETIME, output_matrices, 0, NULL);
 }
 
-u32 AdjustLayerBits(u32, GameObject_s *);
 extern i16 id_ANAKINJEDISCARRED;
 
 void GameObjectToCameraCode(GameObject_s *object) {
@@ -4096,20 +4079,8 @@ apply_layers:
     object->field_0x1054 = AdjustLayerBits(object->field_0x1054, object);
 }
 
-void GameRegisterGizActions() {
-    RegisterGizActions(game_gizactiondefs);
-}
-
-i32 GameAudio_GetPlrSfxBits(void *object_ptr) {
-    APIOBJECT *object = static_cast<APIOBJECT *>(object_ptr);
-    i32 sfx_bits = 0;
-    if (object != NULL && static_cast<i8>(object->flags_low) < 0) {
-        sfx_bits = 1 << object->field_0x27c;
-    }
-    return sfx_bits;
-}
-
 void GameBlowUpBlownUpFn_LSW(GIZMOBLOWUP_s *) {
+    STUBBED();
 }
 
 void GameLoadCharacterModels(APICHARACTERMODELLIST_s *list, i32 append, VARIPTR *buf, VARIPTR *buf_end, i32 area_models,
@@ -4434,18 +4405,14 @@ void GameCreatureOpponentSelection(AISYS_s *system, i32 count, APIOBJECT_s **obj
 }
 
 void GameObjectDimensionsExtra_LSW(GameObject_s *) {
+    STUBBED();
 }
 
 i32 AnakinGreenSabre(GameObject_s *object);
 extern "C" i16 id_THEEMPEROR, id_IMPERIALGUARD, id_BODYGUARD;
-void NewRumble(nupad_s *, f32, i32);
 i32 CannotKill(GameObject_s *object);
-u16 ObjHitObj_Flags(GameObject_s *object);
-i32 ObjHitObj(GameObject_s *, GameObject_s *, i32, u16, i32, i32);
-void AddStreakPoints(NUVEC *, f32, u32, void **, i32, void *);
 i32 SphereSphereOverlapScaleY(NUVEC *, f32, f32, NUVEC *, f32, f32);
 GIZMOBLOWUP_s *GizmoBlowUp_Hit(GameObject_s *, NUVEC *, i32, f32, NUVEC *, NUVEC *, BOLT_s *, u32, u8 *);
-i32 GizmoBlowupBlowup(GIZMOBLOWUP_s *, i32, i32, i32, GameObject_s *, i32);
 void AlertSurroundingCreatures(GameObject_s *, NUVEC *);
 extern "C" i32 AddGameDebrisRot(APIDEBRISSYS_s *, i32, NUVEC *, i32, i16, i16);
 
@@ -4946,6 +4913,7 @@ void GameMsg_DrawAdjustNewPos_CoinToTotal(GAMEMESSAGE_s *message) {
 }
 
 i32 Game_Exit(i32) {
+    STUBBED();
     return 0;
 }
 
@@ -5069,6 +5037,7 @@ void ThingManager::DisplayThings(ThingRenderData *data) {
 }
 
 void ThingManager::EffectsThings(ThingRenderData *) {
+    STUBBED();
 }
 
 // ThingManager::EnableActions @0x425930. Finds the first thing whose 0x4 id
@@ -5095,9 +5064,11 @@ void ThingManager::EnableActions(i32 id, i32 flags, i32 invert) {
 }
 
 void ThingManager::EnterLevelThings(ThingLevelData *) {
+    STUBBED();
 }
 
 void ThingManager::ExitLevelThings(ThingLevelData *) {
+    STUBBED();
 }
 
 // ThingManager::ProcessThings @0x425460. Pass 1 always runs
@@ -5166,9 +5137,11 @@ void ThingManager::ProcessThings(ThingProcessData *data) {
 }
 
 void ThingManager::RemoveDependanciesThings(ThingRemoveData *) {
+    STUBBED();
 }
 
 void ThingManager::RemoveTemporaryThings() {
+    STUBBED();
 }
 
 // ThingManager::RenderThings @0x425390. Single pass over Render,
@@ -5251,12 +5224,15 @@ ThingManager::~ThingManager() {
 }
 
 void ThingManager::cbEdTimingSelect(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 
 void ThingManager::cbEdTrackCancel(eduimenu_s *, eduimenu_s *) {
+    STUBBED();
 }
 
 void ThingManager::edTimingEnter() {
+    STUBBED();
 }
 
 void ThingManager::edTimingInit() {
@@ -5264,69 +5240,91 @@ void ThingManager::edTimingInit() {
 }
 
 void ThingManager::edTimingProc(float, nupad_s *) {
+    STUBBED();
 }
 
 void ThingManager::edTimingRender() {
+    STUBBED();
 }
 
 void SpecialObject::Exists() const {
+    STUBBED();
 }
 
 void SpecialObject::GetCollision() const {
+    STUBBED();
 }
 
 void SpecialObject::GetCurrentPosition() const {
+    STUBBED();
 }
 
 void SpecialObject::GetCurrentTransform() const {
+    STUBBED();
 }
 
 void SpecialObject::GetInitialPosition() const {
+    STUBBED();
 }
 
 void SpecialObject::GetInitialTransform() const {
+    STUBBED();
 }
 
 void SpecialObject::GetMtl(i32) const {
+    STUBBED();
 }
 
 void SpecialObject::GetName() const {
+    STUBBED();
 }
 
 void SpecialObject::GetNumMtls() const {
+    STUBBED();
 }
 
 void SpecialObject::GetRadius() const {
+    STUBBED();
 }
 
 void SpecialObject::GetVisibility() const {
+    STUBBED();
 }
 
 void SpecialObject::Render(VuMtx const *) const {
+    STUBBED();
 }
 
 void SpecialObject::SetCollision(i32) {
+    STUBBED();
 }
 
 void SpecialObject::SetCurrentPosition(VuVec const *) {
+    STUBBED();
 }
 
 void SpecialObject::SetCurrentTransform(VuMtx const *) {
+    STUBBED();
 }
 
 void SpecialObject::SetInitialPosition(VuVec const *) {
+    STUBBED();
 }
 
 void SpecialObject::SetInitialTransform(VuMtx const *) {
+    STUBBED();
 }
 
 void SpecialObject::SetVisibility(i32) {
+    STUBBED();
 }
 
 SpecialObject::SpecialObject() {
+    STUBBED();
 }
 
 void GameThingManager::AddLevelOnlyThings() {
+    STUBBED();
 }
 
 // GameThingManager::AddOnceOnlyThings @0x4e8bb0: registers the MechSystems
@@ -5383,35 +5381,46 @@ i32 BaseThing::RemoveDependancies(ThingRemoveData *) {
 }
 
 void BaseThing::EnterLevel(ThingLevelData *) {
+    STUBBED();
 }
 
 void BaseThing::ExitLevel(ThingLevelData *) {
+    STUBBED();
 }
 
 void BaseThing::Reset(ThingResetData *) {
+    STUBBED();
 }
 
 void BaseThing::Process(ThingProcessData *) {
+    STUBBED();
 }
 
 void BaseThing::ProcessEvenWhenPaused(ThingProcessData *) {
+    STUBBED();
 }
 
 void BaseThing::ProcessOnlyWhenPaused(ThingProcessData *) {
+    STUBBED();
 }
 
 void BaseThing::Render(ThingRenderData *) {
+    STUBBED();
 }
 
 void BaseThing::Display(ThingRenderData *) {
+    STUBBED();
 }
 
 void BaseThing::Effects(ThingRenderData *) {
+    STUBBED();
 }
 
 static __used__ void LEGO_100PercentFn() {
+    STUBBED();
 }
 static __used__ void LEGO_AllGoldBricksFn() {
+    STUBBED();
 }
 
 i32 NoLayerKill(GameObject_s *object) {
@@ -5421,11 +5430,7 @@ i32 NoLayerKill(GameObject_s *object) {
     return 0;
 }
 
-void GetUsageMask(NuShaderUsageMask_s *) {
-}
-
 void GetTakeOverPos(GameObject_s *, NUVEC *);
-void ReleaseTakeOver(GameObject_s *, i32);
 void TakeOverGameObject2(GameObject_s *, GameObject_s *, i32);
 void TakeOver2GetIn(GameObject_s *, GameObject_s *);
 void Move_BEAST(GameObject_s *);
@@ -5720,6 +5725,94 @@ void GetTakeOverPos(GameObject_s *object, nuvec_s *position) {
     }
 }
 
+void AICreatureResumeScript(GameObject_s *);
+f32 SpeederChaseATATInOutMul(NUVEC *, NUVEC *);
+
+static NUVEC SpeederChaseATATExitLandPos = {-159.0f, 6.869999885559082f, -17.600000381469727f};
+
+void ReleaseTakeOver(GameObject_s *object, i32) {
+    GameObject_s *rider = object->field_0xcc0;
+    if (rider == NULL)
+        return;
+    if (object->character_context == 0x3b) {
+        GameObject_s *vehicle = rider;
+        rider = object;
+        object = vehicle;
+    }
+    struct ScriptSnapshot {
+        AISCRIPTPROCESS process;
+        void *field_c8;
+    } rider_script, object_script;
+    DECOMP_ASSERT(sizeof(ScriptSnapshot) == 0xcc, "Takeover script snapshot ABI");
+    memcpy(&rider_script.process, &rider->ai.script_process, sizeof(rider_script.process));
+    rider_script.field_c8 = rider->ai.field_0xc8;
+    u8 rider_set = rider->ai.creature_set;
+    memcpy(&object_script.process, &object->ai.script_process, sizeof(object_script.process));
+    object_script.field_c8 = object->ai.field_0xc8;
+    u8 object_set = object->ai.creature_set;
+    u16 rider_flag = rider->apiobj.field_0x1f8 & 0x100;
+    u16 object_flag = object->apiobj.field_0x1f8 & 0x100;
+    if ((rider->field_0xf00 & 2) == 0 && TagCode(rider, object, 1, 0, 0) == 0)
+        return;
+    memcpy(&rider->ai.script_process, &object_script.process, sizeof(object_script.process));
+    rider->ai.field_0xc8 = object_script.field_c8;
+    memcpy(&object->ai.script_process, &rider_script.process, sizeof(rider_script.process));
+    object->ai.field_0xc8 = rider_script.field_c8;
+    rider->ai.creature_set = rider_set;
+    object->ai.creature_set = object_set;
+    AICreatureResumeScript(object);
+    rider->apiobj.field_0x1f8 = (rider->apiobj.field_0x1f8 & ~0x100) | object_flag;
+    object->apiobj.field_0x1f8 = (object->apiobj.field_0x1f8 & ~0x100) | rider_flag;
+    if (rider->field_0xcc0 != NULL) {
+        GetTakeOverPos(rider->field_0xcc0, &rider->apiobj.position);
+        rider->apiobj.pitch_angle = 0;
+        rider->apiobj.roll_angle = 0;
+        rider->apiobj.facing_angle = rider->field_0xcc0->apiobj.facing_angle;
+        rider->apiobj.field_0x276 = rider->apiobj.facing_angle;
+        rider->apiobj.movement_facing_angle = rider->field_0xcc0->apiobj.facing_angle;
+    }
+    GameObjectOrigin(rider);
+    rider->character_context = -1;
+    rider->field_0xcc0 = NULL;
+    if (object->id == id_ATAT && WORLD->current_level == SPEEDERCHASEA_LDATA) {
+        f32 multiplier = SpeederChaseATATInOutMul(&rider->apiobj.position, &SpeederChaseATATExitLandPos);
+        StartBigJump(rider, &SpeederChaseATATExitLandPos, 0, multiplier * 4.0f, 2.5f * multiplier, 0, 0);
+        GameCam_Blend(GameCam, 2.0f, 0.0f, 1);
+    } else {
+        Buck_StartRiderJump(rider, object);
+    }
+    GAMECHARACTERDATA *character = object->apiobj.character_data->game_character;
+    if (character->field_0x28 > 0.0f) {
+        object->apiobj.velocity.y -= 0.5f * rider->apiobj.velocity.y;
+    } else if ((character->flags_094[2] & 2) != 0) {
+        Buck_Start(object, rider);
+    }
+    object->field_0xcc0 = NULL;
+    rider->field_0xe23 &= 0x7f;
+    object->field_0xe23 &= 0x7f;
+    rider->ai.path_info.flags &= ~1;
+    object->saved_position = object->apiobj.position;
+    if (rider->apiobj.field_0x27c != -1 || object->apiobj.field_0x27c != -1) {
+        GameCam_Blend(GameCam, 0.3f, 0.0f, 1);
+    }
+    AISCRIPTPROCESS *rider_process = reinterpret_cast<AISCRIPTPROCESS *>(&rider->ai);
+    AISCRIPTPROCESS *object_process = reinterpret_cast<AISCRIPTPROCESS *>(&object->ai);
+    if (AIScriptSetBaseScriptStateByName(rider_process, const_cast<char *>("ReleasedTakeOver")) != 0) {
+        AIScriptProcess(WORLD->ai_sys, &rider->apiobj, &rider->ai, rider_process, FRAMETIME);
+    }
+    if (AIScriptSetBaseScriptStateByName(object_process, const_cast<char *>("ReleasedTakeOver")) != 0) {
+        AIScriptProcess(WORLD->ai_sys, &object->apiobj, &object->ai, object_process, FRAMETIME);
+    }
+}
+
+void ReleaseAllTakeOvers() {
+    for (i32 index = 0; index < 8; ++index) {
+        if (Player[index] != NULL) {
+            ReleaseTakeOver(Player[index], 0);
+        }
+    }
+}
+
 extern i16 id_ATAT;
 extern i16 id_ATST;
 extern i16 id_ATST_LOWRES;
@@ -5727,11 +5820,9 @@ extern u8 PlayerRGB[2][3];
 extern i16 id_BUGGY, id_GYROCOPTER, id_BANTHA, id_BOMARRMONK, id_DEWBACK;
 extern i16 id_LANDSPEEDER, id_FLASHSPEEDER, id_TAUNTAUN, id_SPEEDERBIKE;
 extern i16 id_HEAVYREPEATINGCANNON, id_BIGGUN, id_TROOPERCANNON, id_STAP2, id_CLONEWALKER;
-extern "C" f32 AnimDuration(i32, i32, f32, f32, i32);
 f32 SpeederChaseATATInOutMul(NUVEC *, NUVEC *);
 void PlayJumpSfx(GameObject_s *, i32);
 void ReleaseForce(GameObject_s *, i32);
-void ReleaseBuildIt(GameObject_s *, i32);
 void ReleasePush(GameObject_s *);
 void Player_ResetContexts(PLAYERPACKET_s *);
 void SetWeaponIn(GameObject_s *);
@@ -5779,7 +5870,6 @@ void ResetForceGlow(PLAYERPACKET_s *);
 extern i32 CUTSKIPLOCK;
 void GizForce_ResetLOS(GameObject_s *);
 void AICreatureResumeScript(GameObject_s *);
-void NewBuzzFrames(nupad_s *, i32, i32);
 
 GameObject_s *player_tag_to;
 GameObject_s *player_tag_from;
@@ -6046,12 +6136,9 @@ void TakeOver2GetIn(GameObject_s *rider, GameObject_s *vehicle) {
 
 extern i32 VehicleArea;
 extern i32 menu_i_pack;
-extern ADDGAMEMSG AddGameMsg_Default;
 extern char *ASCII_DOWN;
 void CollideGameObjects(WORLDINFO_s *world);
 i32 GetMenuID();
-i32 FindGameMsgsWithID(i32, i32, i32, GAMEMESSAGE_s *);
-GAMEMESSAGE_s *AddGameMsg(ADDGAMEMSG *);
 void Hint_CancelCurrent();
 i32 InCollectList_Index(i32, COLLECTID *, i32);
 i32 NuIOS_AreInAppPurchasesAvailable();
@@ -6062,6 +6149,7 @@ void RememberPlayerIDs(i32, i32, i32);
 void Tag_NewTransfer(GameObject_s *, GameObject_s *);
 
 static void DrawPackButton(GAMEMESSAGE_s *, nuvec_s *, float) {
+    STUBBED();
 }
 
 void Tag_Check(GameObject_s *object) {
@@ -6260,6 +6348,7 @@ draw_icon:
 }
 
 void PowerUp_AddPart(nuvec_s *, nuvec_s *, float, float) {
+    STUBBED();
 }
 
 void ScaleGameObject(GameObject_s *object) {
@@ -6408,7 +6497,6 @@ void ResetAICreature(GameObject_s *, AISYS_s *);
 void SpawnCreatureFromCrate(GameObject_s *, f32, f32);
 void SetToLastSafePos(GameObject_s *);
 GameObject_s *GetOtherActivePlayer(GameObject_s *);
-void FreeTorpedoPacket(TORPEDOPACKET_s **);
 void TakeOverGameObject(GameObject_s *, GameObject_s *, i32, i32);
 
 void ManageGameObjects() {
@@ -6662,10 +6750,12 @@ void ManageGameObjects() {
 }
 
 f32 PowerUp_GetPanelY(i32) {
+    STUBBED();
     return 0.0f;
 }
 
 void PowerUp_Particles(WORLDINFO_s *, nuvec_s *) {
+    STUBBED();
 }
 
 extern i32 adaptivedifficulty[3];
@@ -6688,7 +6778,6 @@ extern AREADATA *PODSPRINT_ADATA;
 extern i16 id_ANAKINSNEWPOD, id_ANAKINSNEWPODGREEN, id_SEBULBASPOD;
 extern f32 tieonsfxwait, tieoffsfxwait;
 void MovePlayer_NETWORK(GameObject_s *);
-void SetFlicker(GameObject_s *, f32);
 void UpdateRumble(RUMBLEPACKET *);
 void Player_ToggleCharacter(GameObject_s *, i32, i32);
 void AveragePlayerCurrentSpeedMul();
@@ -7508,6 +7597,7 @@ void DeactivateGameObject(GameObject_s *object) {
 }
 
 i32 EquivalentObject_Find(WORLDINFO_s *, nuhspecial_s *) {
+    STUBBED();
     return 0;
 }
 
@@ -7637,23 +7727,3 @@ void RemoveDebrisEffectFromStack(debkeydatatype_s *key) {
     key->next = NULL;
     key->previous = NULL;
 }
-
-extern "C" {
-
-    i32 InModelList(APICHARACTERMODELLIST_s *list, i32 id, i32 *out_index) {
-        if (list != NULL) {
-            i32 i = 0;
-            for (; list->model_id != -1; list++, i++) {
-                if (list->model_id == id) {
-                    if (out_index != NULL)
-                        *out_index = i;
-                    return 1;
-                }
-            }
-        }
-        if (out_index != NULL)
-            *out_index = -1;
-        return 0;
-    }
-
-} // extern "C"

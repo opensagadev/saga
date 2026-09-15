@@ -4,12 +4,15 @@
 #include "globals.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/render/core/terrain.h"
 #include "legoapi/props/doors/door.h"
 #include "legoapi/gizmo/base/GizObstacleObjectInterface.h"
 #include "legoapi/gizmo/base/GizForceObjectInterface.h"
 #include "legoapi/gizmo/base/GizBlowupObjectInterface.h"
+#include "legoapi/gizmo/object/gizmoblowups.h"
 #include "legoapi/gizmo/base/gizmo.h"
 #include "legoapi/legoapi_types.h"
+#include "legoapi/menus/core/panel.h"
 #include "legoapi/world/levels/levels.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/world.h"
@@ -87,9 +90,11 @@ speedup_s DogFightSpeedList[] = {
 };
 
 void ChrisDogFightAInit(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void ChrisDogFightAReset(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void ChrisDogFightAUpdate(WORLDINFO_s *world) {
@@ -103,9 +108,11 @@ void ChrisDogFightAUpdate(WORLDINFO_s *world) {
 }
 
 void ChrisDogFightADraw(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void ChrisDogFightAPanel(WORLDINFO_s *) {
+    STUBBED();
 }
 
 // ===========================================================================
@@ -144,18 +151,23 @@ void CruiserCReset(WORLDINFO_s *) {
 }
 
 void CruiserCUpdate(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void CruiserCPanel(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void CruiserDInit(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void CruiserDReset(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void CruiserDUpdate(WORLDINFO_s *) {
+    STUBBED();
 }
 
 // ===========================================================================
@@ -228,6 +240,7 @@ void KashyyykA_Init(WORLDINFO_s *world) {
 }
 
 void KashyyykB_Init(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void KashyyykC_Init(WORLDINFO_s *world) {
@@ -240,9 +253,11 @@ void KashyyykC_Init(WORLDINFO_s *world) {
 }
 
 void KashyyykD_Init(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void KashyyykA_Panel(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void KashyyykA_Reset(WORLDINFO_s *) {
@@ -251,9 +266,11 @@ void KashyyykA_Reset(WORLDINFO_s *) {
 }
 
 void KashyyykB_Reset(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void KashyyykD_Reset(WORLDINFO_s *) {
+    STUBBED();
 }
 
 i32 AnakinGreenSabre(GameObject_s *obj) {
@@ -266,15 +283,19 @@ i32 AnakinGreenSabre(GameObject_s *obj) {
 }
 
 void KashyyykA_Update(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void KashyyykB_Update(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void KashyyykC_Update(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void KashyyykD_Update(WORLDINFO_s *) {
+    STUBBED();
 }
 
 // ===========================================================================
@@ -290,9 +311,11 @@ void TempleA_Init(WORLDINFO_s *world) {
 }
 
 void TempleC_Init(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void TempleC_AlwaysUpdate(WORLDINFO_s *) {
+    STUBBED();
 }
 
 // ===========================================================================
@@ -300,14 +323,15 @@ void TempleC_AlwaysUpdate(WORLDINFO_s *) {
 // ===========================================================================
 
 void VaderA_Init(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void VaderB_Init(WORLDINFO_s *) {
+    STUBBED();
 }
 
 i32 Vader_ObiWanKilledAnakin;
 void *vaderc_netpacket;
-extern "C" i32 FindPlatInst(i32);
 
 void VaderC_Init(WORLDINFO_s *world) {
     char *names[10] = {"rock1", "rock2", "rock3", "rock4", "rock5", "rock6", "rock7", "rock8", "rock10", "rock11"};
@@ -351,12 +375,15 @@ void VaderC_Reset(WORLDINFO_s *) {
 }
 
 void VaderA_Update(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void VaderB_Update(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void VaderC_Update(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void VaderA_DrawPanel(WORLDINFO_s *) {
@@ -369,9 +396,11 @@ void VaderA_DrawPanel(WORLDINFO_s *) {
 }
 
 void VaderB_DrawPanel(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void VaderC_DrawPanel(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void VaderA_GoneThroughDoor(WORLDINFO_s *, DOOR_s *door) {

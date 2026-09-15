@@ -67,7 +67,18 @@ extern "C" {
     void ResetSounds(void);
 
     i32 GetSfxId(const char *name);
+    void PlaySfxByIdEx(i32 sfx_id, nuvec_s *position, f32 volume, f32 pitch);
 
 #ifdef __cplusplus
 }
+
+void GroupBuffer_MoveToEnd(i32 group_id);
+void GroupBuffer_AddToGroup(i32 group_id, i32 sample_id);
+void GroupBuffer_RemoveFromGroup(i32 group_id, i32 sample_id);
+void GroupBuffer_RemoveGroup(i32 group_id);
+i32 GroupBuffer_MakeGroup(i32 sample_id);
+i32 GroupBuffer_InGroup(i32 group_id, i32 sample_id);
+i32 GroupBuffer_GetSample(i32 group_id, i32 sequential);
+i32 GroupBuffer_GetNumInGroup(i32 group_id);
+i32 GroupBuffer_GetSampleByIndex(i32 group_id, i32 sample_index);
 #endif

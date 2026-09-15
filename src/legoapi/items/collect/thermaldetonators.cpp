@@ -16,7 +16,6 @@ struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
-void AddPartDebris(PARTDEBSYS_s *, i32, nuvec_s *);
 EXPLOSION *AddExplosion(nuvec_s *, f32, f32, GameObject_s *, i32, i32);
 void NewRumbleAllPlayers(f32, f32, i32, i32);
 void GameCam_NewShake(GAMECAMERA_s *, f32, f32, f32);
@@ -27,6 +26,7 @@ EXPLOSION *Detonate(nuvec_s *position, u16 flags);
 i32 MatrixReflection(NUMTX *matrix, i32 axis, f32 plane, f32 height, NUMTX *result);
 
 void ThermalDetonator_Throw(GameObject_s *) {
+    STUBBED();
 }
 
 i32 PartDraw_ThermalDetonator(PART_s *part) {
@@ -81,16 +81,20 @@ void PartKill_ThermalDetonator(PART_s *part, i32) {
 }
 
 i32 ThermalDetonator_MoveCode(GameObject_s *) {
+    STUBBED();
     return 0;
 }
 
 void ThermalDetonator_ThrowMom(GameObject_s *, nuvec_s *) {
+    STUBBED();
 }
 
 void PartImpact_ThermalDetonator(PART_s *) {
+    STUBBED();
 }
 
 void PartUpdate_ThermalDetonator(PART_s *) {
+    STUBBED();
 }
 
 EXPLOSION *Detonate(nuvec_s *position, u16 flags) {

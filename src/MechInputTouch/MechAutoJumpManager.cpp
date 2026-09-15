@@ -1,8 +1,11 @@
+#include "decomp.h"
 #include "MechInputTouch_types.h"
 
 #include "gameapi/ai/aisys/aisys.h"
+#include "legoapi/ai/core/legoai.h"
 #include "gamelib/util/gamelib_util_types.h"
 #include "globals.h"
+#include "legoapi/actions/character/streaks.h"
 #include "legoapi/core/input/timer.h"
 #include "legoapi/characters/motion.h"
 #include "legoapi/world/world.h"
@@ -23,7 +26,6 @@ f32 testStreakClipTestRadius = 0.2f;
 extern i32 show_autojump_hint;
 extern i32 id_HINT_LSW_AUTOJUMP;
 extern i32 id_HINT_LSW_AUTOJUMP_FAIL;
-void AddStreakPoints(NUVEC *, f32, u32, void **, i32, void *);
 
 namespace {
     struct AutoJumpStreakLink {
@@ -120,6 +122,7 @@ void MechAutoJumpManager::DeleteJumpConnectionsAndStreaks() {
 }
 
 void MechAutoJumpManager::Init() {
+    STUBBED();
 }
 
 MechAutoJumpManager::MechAutoJumpManager(AISYS_s *ai_system) {

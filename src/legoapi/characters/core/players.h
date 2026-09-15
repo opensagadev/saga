@@ -4,6 +4,7 @@
 #include "nu2api/nucore/common.h"
 
 #include "legoapi/items/base/apiobject.h"
+#include "legoapi/items/collect/torpedo.h"
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/motion/animlist.h"
 #include "legoapi/props/doors/door.h"
@@ -11,7 +12,11 @@
 #include "nu2api/numath/nuvec.h"
 
 void ActivatePlayer(GameObject_s *);
+void InitPlayerAI(GameObject_s *object);
+void SetFlicker(GameObject_s *object, f32 duration);
 i32 DeactivatePlayer(GameObject_s *, f32, GameObject_s *);
+u32 AdjustLayerBits(u32 mask, GameObject_s *object);
+void FixUpLayers();
 
 // Per-player saved progress.  Stride is 0x10 in the original binary.
 typedef struct playerprogress_s {
@@ -94,6 +99,11 @@ extern i32 DEFAULT_PLAYERHITPOINTS;
 extern u32 LEGOOBJ_DEFAULTLASTCOIN;
 
 extern APICHARACTERSYS *apicharsys;
+using ANIMREDIRECTFN = i32 (*)(char *, void *, CHARACTERANIM_s *, char *);
+extern "C" i32 apiloadcharactermodels_append;
+extern i32 apiloadcharactermodels_nopakfile;
+extern "C" void APIObjectRegisterAnimRedirect(ANIMREDIRECTFN fn, void *list, char *directory);
+extern "C" void APIResetCharacterRemap(void);
 
 i32 PlayersDropInOut();
 
@@ -119,9 +129,6 @@ i32 AvailableToPlayer(u32 character_flags, i32 character_id, i32 context, i32 re
 i32 ActivePlayerInRange(nuvec_s *position, f32 range_squared, f32 *distance_squared);
 bool FindNearestPlayerToVec(NUVEC *position, GameObject_s **nearest_player, f32 &distance_squared,
                             bool require_character_flags, u32 character_flags);
-TORPEDOPACKET *GetTorpedoPacket(void);
-void FreeTorpedoPacket(TORPEDOPACKET_s **packet);
-i32 getMaxTorpedos(GameObject_s *object);
 void SetHitPoints(GameObject_s *obj, i32 hp);
 void RememberPlayerIDs(i32 a, i32 b, i32 c);
 void Player_CopyEssentials(GameObject_s *source, GameObject_s *destination);
@@ -154,7 +161,6 @@ extern u32 GAMEPAD_SPECIAL;
 extern u32 GAMEPAD_TAG;
 extern u32 GAMEPAD_START;
 void ChatterSfx(GameObject_s *g, i32 a, float b);
-void Move_VEHICLE(GameObject_s *g);
 extern "C" void ComplexSockPosition(SOCKSYS *sock_sys, NUVEC *position, i32 prior_sock, i32 prior_segment,
                                     SOCKPOSITION *result);
 void *CutScenePlayer_Available(void);
