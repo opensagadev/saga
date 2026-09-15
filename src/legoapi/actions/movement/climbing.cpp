@@ -1,6 +1,7 @@
 #include "legoapi/legoapi_types.h"
 #include "decomp.h"
 #include "legoapi/actions/movement/jumping.h"
+#include "legoapi/ai/core/legoai.h"
 #include "nu2api/numath/nutrig.h"
 #include "legoapi/core/input/gamepads.h"
 #include <math.h>
@@ -167,7 +168,6 @@ void Climb_SetMagnetDrawOffsetTarget(GameObject_s *object, nuvec_s *offset) {
 extern "C" TERRAIN_SURFACE_s TerSurface[32];
 extern "C" i8 NewRayCastGetImpactTerrainType();
 extern i32 TERRAINMASK_NONWEAPON, TERRAINMASK_NONDROID;
-u32 LEGO_AIPATHCNX_MAGNETCLIMB, LEGO_AIPATHCNX_CLIMB;
 i32 GameRayCast(NUVEC *, NUVEC *, f32, i32);
 
 static __used__ void ClimbObject_FindNormal(CLIMBOBJECT_s *object) {

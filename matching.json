@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 46.138817,
+    "fuzzy_match_percent": 46.141415,
     "total_code": "4722419",
-    "matched_code": "402062",
-    "matched_code_percent": 8.513899,
+    "matched_code": "402098",
+    "matched_code_percent": 8.514662,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 4770,
-    "matched_functions_percent": 35.44097,
+    "matched_functions": 4771,
+    "matched_functions_percent": 35.4484,
     "total_units": 1
   },
   "text": {
@@ -25019,14 +25019,6 @@
       "source": "src/gameapi/edtools/edanimcallbacks.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_gameapi/edanimcallbacks.o",
       "functions": [
-        {
-          "name": "_ZL26edgizforce_ReadAnimSetDataP13GAMEANIMOBJ_sh",
-          "demangled_name": "edgizforce_ReadAnimSetData(GAMEANIMOBJ_s*, unsigned char)",
-          "address": 1858224,
-          "offset": 968256,
-          "size": 91,
-          "match_percent": 18.6
-        },
         {
           "name": "_ZL28edanimcbToggleParticleSwitchP10eduimenu_sP10eduiitem_sj",
           "demangled_name": "edanimcbToggleParticleSwitch(eduimenu_s*, eduiitem_s*, unsigned int)",
@@ -52250,6 +52242,14 @@
           "match_percent": 4.285714
         },
         {
+          "name": "_Z22GameRegisterGizActionsv",
+          "demangled_name": "GameRegisterGizActions()",
+          "address": 1855760,
+          "offset": 965792,
+          "size": 36,
+          "match_percent": 100.0
+        },
+        {
           "name": "_Z21Action_BoulderSectionP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
           "demangled_name": "Action_BoulderSection(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char**, int, int, float)",
           "address": 2161584,
@@ -54654,157 +54654,6 @@
           "offset": 4330768,
           "size": 376,
           "match_percent": 93.6875
-        }
-      ]
-    },
-    {
-      "name": "legoapi/gizmos/door/securitydoors.cpp.o",
-      "source": "src/legoapi/gizmos/door/securitydoors.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/securitydoors.o",
-      "functions": [
-        {
-          "name": "_ZL32SecurityDoors_ReserveBufferSpacePv",
-          "demangled_name": "SecurityDoors_ReserveBufferSpace(void*)",
-          "address": 1967248,
-          "offset": 1077280,
-          "size": 87,
-          "match_percent": 46.833332
-        },
-        {
-          "name": "_ZL21SecurityDoor_ActivateP7GIZMO_si",
-          "demangled_name": "SecurityDoor_Activate(GIZMO_s*, int)",
-          "address": 1967344,
-          "offset": 1077376,
-          "size": 40,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL26SecurityDoor_SetVisibilityP7GIZMO_si",
-          "demangled_name": "SecurityDoor_SetVisibility(GIZMO_s*, int)",
-          "address": 1967392,
-          "offset": 1077424,
-          "size": 42,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL26SecurityDoors_GetMaxGizmosPv",
-          "demangled_name": "SecurityDoors_GetMaxGizmos(void*)",
-          "address": 1967440,
-          "offset": 1077472,
-          "size": 27,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL25SecurityDoor_GetGizmoNameP7GIZMO_s",
-          "demangled_name": "SecurityDoor_GetGizmoName(GIZMO_s*)",
-          "address": 1967472,
-          "offset": 1077504,
-          "size": 19,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL22SecurityDoor_GetOutputP7GIZMO_sii",
-          "demangled_name": "SecurityDoor_GetOutput(GIZMO_s*, int, int)",
-          "address": 1967504,
-          "offset": 1077536,
-          "size": 20,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL26SecurityDoor_GetOutputNameP7GIZMO_si",
-          "demangled_name": "SecurityDoor_GetOutputName(GIZMO_s*, int)",
-          "address": 1967536,
-          "offset": 1077568,
-          "size": 22,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL26SecurityDoor_GetNumOutputsP7GIZMO_s",
-          "demangled_name": "SecurityDoor_GetNumOutputs(GIZMO_s*)",
-          "address": 1967568,
-          "offset": 1077600,
-          "size": 12,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL19SecurityDoor_GetPosP7GIZMO_s",
-          "demangled_name": "SecurityDoor_GetPos(GIZMO_s*)",
-          "address": 1967584,
-          "offset": 1077616,
-          "size": 19,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL27SecurityDoors_ClearProgressPvS_",
-          "demangled_name": "SecurityDoors_ClearProgress(void*, void*)",
-          "address": 1967616,
-          "offset": 1077648,
-          "size": 31,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL34SecurityDoors_AllocateProgressDataP9variptr_uS0_",
-          "demangled_name": "SecurityDoors_AllocateProgressData(variptr_u*, variptr_u*)",
-          "address": 1967648,
-          "offset": 1077680,
-          "size": 50,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL18SecurityDoors_DrawPvS_f",
-          "demangled_name": "SecurityDoors_Draw(void*, void*, float)",
-          "address": 1967712,
-          "offset": 1077744,
-          "size": 1117,
-          "match_percent": 24.651821
-        },
-        {
-          "name": "_ZL23SecurityDoors_AddGizmosP10GIZMOSYS_siPvS1_",
-          "demangled_name": "SecurityDoors_AddGizmos(GIZMOSYS_s*, int, void*, void*)",
-          "address": 1968832,
-          "offset": 1078864,
-          "size": 140,
-          "match_percent": 87.86364
-        },
-        {
-          "name": "_ZL18SecurityDoors_LoadPvS_",
-          "demangled_name": "SecurityDoors_Load(void*, void*)",
-          "address": 1968976,
-          "offset": 1079008,
-          "size": 159,
-          "match_percent": 99.680855
-        },
-        {
-          "name": "_ZL20SecurityDoors_UpdatePvS_f",
-          "demangled_name": "SecurityDoors_Update(void*, void*, float)",
-          "address": 1969136,
-          "offset": 1079168,
-          "size": 541,
-          "match_percent": 92.625
-        },
-        {
-          "name": "_ZL19SecurityDoors_ResetPvS_S_",
-          "demangled_name": "SecurityDoors_Reset(void*, void*, void*)",
-          "address": 1969680,
-          "offset": 1079712,
-          "size": 897,
-          "match_percent": 58.33155
-        },
-        {
-          "name": "_ZL27SecurityDoors_StoreProgressPvS_S_",
-          "demangled_name": "SecurityDoors_StoreProgress(void*, void*, void*)",
-          "address": 1970592,
-          "offset": 1080624,
-          "size": 174,
-          "match_percent": 45.88889
-        },
-        {
-          "name": "_Z27SecurityDoors_RegisterGizmoi",
-          "demangled_name": "SecurityDoors_RegisterGizmo(int)",
-          "address": 1971376,
-          "offset": 1081408,
-          "size": 376,
-          "match_percent": 98.63492
         }
       ]
     },
@@ -57616,6 +57465,14 @@
           "match_percent": 73.947365
         },
         {
+          "name": "_ZL26edgizforce_ReadAnimSetDataP13GAMEANIMOBJ_sh",
+          "demangled_name": "edgizforce_ReadAnimSetData(GAMEANIMOBJ_s*, unsigned char)",
+          "address": 1858224,
+          "offset": 968256,
+          "size": 91,
+          "match_percent": 74.666664
+        },
+        {
           "name": "_ZL23GizForces_ClearProgressPvS_",
           "demangled_name": "GizForces_ClearProgress(void*, void*)",
           "address": 1858320,
@@ -58229,157 +58086,6 @@
           "offset": 4118128,
           "size": 400,
           "match_percent": 98.52778
-        }
-      ]
-    },
-    {
-      "name": "legoapi/gizmos/traps/shards.cpp.o",
-      "source": "src/legoapi/gizmos/traps/shards.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/shards.o",
-      "functions": [
-        {
-          "name": "_ZL25Shards_ReserveBufferSpacePv",
-          "demangled_name": "Shards_ReserveBufferSpace(void*)",
-          "address": 1939360,
-          "offset": 1049392,
-          "size": 84,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL14Shard_ActivateP7GIZMO_si",
-          "demangled_name": "Shard_Activate(GIZMO_s*, int)",
-          "address": 1939456,
-          "offset": 1049488,
-          "size": 34,
-          "match_percent": 97.5
-        },
-        {
-          "name": "_ZL19Shard_SetVisibilityP7GIZMO_si",
-          "demangled_name": "Shard_SetVisibility(GIZMO_s*, int)",
-          "address": 1939504,
-          "offset": 1049536,
-          "size": 36,
-          "match_percent": 44.666668
-        },
-        {
-          "name": "_ZL29Shards_UpdateBeforeCharactersPvS_f",
-          "demangled_name": "Shards_UpdateBeforeCharacters(void*, void*, float)",
-          "address": 1939552,
-          "offset": 1049584,
-          "size": 59,
-          "match_percent": 77.05882
-        },
-        {
-          "name": "_ZL19Shards_GetMaxGizmosPv",
-          "demangled_name": "Shards_GetMaxGizmos(void*)",
-          "address": 1939616,
-          "offset": 1049648,
-          "size": 27,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL18Shard_GetGizmoNameP7GIZMO_s",
-          "demangled_name": "Shard_GetGizmoName(GIZMO_s*)",
-          "address": 1939648,
-          "offset": 1049680,
-          "size": 19,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL15Shard_GetOutputP7GIZMO_sii",
-          "demangled_name": "Shard_GetOutput(GIZMO_s*, int, int)",
-          "address": 1939680,
-          "offset": 1049712,
-          "size": 17,
-          "match_percent": 90.0
-        },
-        {
-          "name": "_ZL19Shard_GetOutputNameP7GIZMO_si",
-          "demangled_name": "Shard_GetOutputName(GIZMO_s*, int)",
-          "address": 1939712,
-          "offset": 1049744,
-          "size": 22,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL19Shard_GetNumOutputsP7GIZMO_s",
-          "demangled_name": "Shard_GetNumOutputs(GIZMO_s*)",
-          "address": 1939744,
-          "offset": 1049776,
-          "size": 12,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL20Shards_ClearProgressPvS_",
-          "demangled_name": "Shards_ClearProgress(void*, void*)",
-          "address": 1939760,
-          "offset": 1049792,
-          "size": 94,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL27Shards_AllocateProgressDataP9variptr_uS0_",
-          "demangled_name": "Shards_AllocateProgressData(variptr_u*, variptr_u*)",
-          "address": 1939856,
-          "offset": 1049888,
-          "size": 50,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL11Shards_DrawPvS_f",
-          "demangled_name": "Shards_Draw(void*, void*, float)",
-          "address": 1939920,
-          "offset": 1049952,
-          "size": 509,
-          "match_percent": 93.52143
-        },
-        {
-          "name": "_ZL28Shards_UpdateAfterCharactersPvS_f",
-          "demangled_name": "Shards_UpdateAfterCharacters(void*, void*, float)",
-          "address": 1940432,
-          "offset": 1050464,
-          "size": 821,
-          "match_percent": 96.276596
-        },
-        {
-          "name": "_ZL16Shards_AddGizmosP10GIZMOSYS_siPvS1_",
-          "demangled_name": "Shards_AddGizmos(GIZMOSYS_s*, int, void*, void*)",
-          "address": 1941264,
-          "offset": 1051296,
-          "size": 134,
-          "match_percent": 99.64286
-        },
-        {
-          "name": "_ZL12Shards_ResetPvS_S_",
-          "demangled_name": "Shards_Reset(void*, void*, void*)",
-          "address": 1941408,
-          "offset": 1051440,
-          "size": 649,
-          "match_percent": 53.191257
-        },
-        {
-          "name": "_ZL11Shards_LoadPvS_",
-          "demangled_name": "Shards_Load(void*, void*)",
-          "address": 1942064,
-          "offset": 1052096,
-          "size": 319,
-          "match_percent": 82.558136
-        },
-        {
-          "name": "_ZL20Shards_StoreProgressPvS_S_",
-          "demangled_name": "Shards_StoreProgress(void*, void*, void*)",
-          "address": 1942384,
-          "offset": 1052416,
-          "size": 227,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z20Shards_RegisterGizmoi",
-          "demangled_name": "Shards_RegisterGizmo(int)",
-          "address": 1942960,
-          "offset": 1052992,
-          "size": 376,
-          "match_percent": 99.190475
         }
       ]
     },
@@ -61245,12 +60951,156 @@
           "match_percent": 99.35294
         },
         {
+          "name": "_ZL25Shards_ReserveBufferSpacePv",
+          "demangled_name": "Shards_ReserveBufferSpace(void*)",
+          "address": 1939360,
+          "offset": 1049392,
+          "size": 84,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL14Shard_ActivateP7GIZMO_si",
+          "demangled_name": "Shard_Activate(GIZMO_s*, int)",
+          "address": 1939456,
+          "offset": 1049488,
+          "size": 34,
+          "match_percent": 97.5
+        },
+        {
+          "name": "_ZL19Shard_SetVisibilityP7GIZMO_si",
+          "demangled_name": "Shard_SetVisibility(GIZMO_s*, int)",
+          "address": 1939504,
+          "offset": 1049536,
+          "size": 36,
+          "match_percent": 44.666668
+        },
+        {
+          "name": "_ZL29Shards_UpdateBeforeCharactersPvS_f",
+          "demangled_name": "Shards_UpdateBeforeCharacters(void*, void*, float)",
+          "address": 1939552,
+          "offset": 1049584,
+          "size": 59,
+          "match_percent": 77.05882
+        },
+        {
+          "name": "_ZL19Shards_GetMaxGizmosPv",
+          "demangled_name": "Shards_GetMaxGizmos(void*)",
+          "address": 1939616,
+          "offset": 1049648,
+          "size": 27,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL18Shard_GetGizmoNameP7GIZMO_s",
+          "demangled_name": "Shard_GetGizmoName(GIZMO_s*)",
+          "address": 1939648,
+          "offset": 1049680,
+          "size": 19,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL15Shard_GetOutputP7GIZMO_sii",
+          "demangled_name": "Shard_GetOutput(GIZMO_s*, int, int)",
+          "address": 1939680,
+          "offset": 1049712,
+          "size": 17,
+          "match_percent": 90.0
+        },
+        {
+          "name": "_ZL19Shard_GetOutputNameP7GIZMO_si",
+          "demangled_name": "Shard_GetOutputName(GIZMO_s*, int)",
+          "address": 1939712,
+          "offset": 1049744,
+          "size": 22,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL19Shard_GetNumOutputsP7GIZMO_s",
+          "demangled_name": "Shard_GetNumOutputs(GIZMO_s*)",
+          "address": 1939744,
+          "offset": 1049776,
+          "size": 12,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL20Shards_ClearProgressPvS_",
+          "demangled_name": "Shards_ClearProgress(void*, void*)",
+          "address": 1939760,
+          "offset": 1049792,
+          "size": 94,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL27Shards_AllocateProgressDataP9variptr_uS0_",
+          "demangled_name": "Shards_AllocateProgressData(variptr_u*, variptr_u*)",
+          "address": 1939856,
+          "offset": 1049888,
+          "size": 50,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL11Shards_DrawPvS_f",
+          "demangled_name": "Shards_Draw(void*, void*, float)",
+          "address": 1939920,
+          "offset": 1049952,
+          "size": 509,
+          "match_percent": 93.52143
+        },
+        {
+          "name": "_ZL28Shards_UpdateAfterCharactersPvS_f",
+          "demangled_name": "Shards_UpdateAfterCharacters(void*, void*, float)",
+          "address": 1940432,
+          "offset": 1050464,
+          "size": 821,
+          "match_percent": 96.276596
+        },
+        {
+          "name": "_ZL16Shards_AddGizmosP10GIZMOSYS_siPvS1_",
+          "demangled_name": "Shards_AddGizmos(GIZMOSYS_s*, int, void*, void*)",
+          "address": 1941264,
+          "offset": 1051296,
+          "size": 134,
+          "match_percent": 99.64286
+        },
+        {
+          "name": "_ZL12Shards_ResetPvS_S_",
+          "demangled_name": "Shards_Reset(void*, void*, void*)",
+          "address": 1941408,
+          "offset": 1051440,
+          "size": 649,
+          "match_percent": 53.191257
+        },
+        {
+          "name": "_ZL11Shards_LoadPvS_",
+          "demangled_name": "Shards_Load(void*, void*)",
+          "address": 1942064,
+          "offset": 1052096,
+          "size": 319,
+          "match_percent": 82.558136
+        },
+        {
+          "name": "_ZL20Shards_StoreProgressPvS_S_",
+          "demangled_name": "Shards_StoreProgress(void*, void*, void*)",
+          "address": 1942384,
+          "offset": 1052416,
+          "size": 227,
+          "match_percent": 100.0
+        },
+        {
           "name": "_Z17Shard_FindNearestP11WORLDINFO_sP7nuvec_sP12GameObject_sPf",
           "demangled_name": "Shard_FindNearest(WORLDINFO_s*, nuvec_s*, GameObject_s*, float*)",
           "address": 1942624,
           "offset": 1052656,
           "size": 335,
-          "match_percent": 99.63219
+          "match_percent": 99.804596
+        },
+        {
+          "name": "_Z20Shards_RegisterGizmoi",
+          "demangled_name": "Shards_RegisterGizmo(int)",
+          "address": 1942960,
+          "offset": 1052992,
+          "size": 376,
+          "match_percent": 99.269844
         },
         {
           "name": "_Z13Shard_CollectP7SHARD_sP12GameObject_s",
@@ -63500,14 +63350,6 @@
           "offset": 811808,
           "size": 64,
           "match_percent": 100.0
-        },
-        {
-          "name": "_Z22GameRegisterGizActionsv",
-          "demangled_name": "GameRegisterGizActions()",
-          "address": 1855760,
-          "offset": 965792,
-          "size": 36,
-          "match_percent": 74.0
         },
         {
           "name": "_Z36GameMsg_DrawAdjustNewPos_CoinToTotalP13GAMEMESSAGE_s",
@@ -70809,7 +70651,143 @@
           "address": 898464,
           "offset": 8496,
           "size": 93,
-          "match_percent": 29.411764
+          "match_percent": 99.35294
+        },
+        {
+          "name": "_ZL32SecurityDoors_ReserveBufferSpacePv",
+          "demangled_name": "SecurityDoors_ReserveBufferSpace(void*)",
+          "address": 1967248,
+          "offset": 1077280,
+          "size": 87,
+          "match_percent": 46.833332
+        },
+        {
+          "name": "_ZL21SecurityDoor_ActivateP7GIZMO_si",
+          "demangled_name": "SecurityDoor_Activate(GIZMO_s*, int)",
+          "address": 1967344,
+          "offset": 1077376,
+          "size": 40,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL26SecurityDoor_SetVisibilityP7GIZMO_si",
+          "demangled_name": "SecurityDoor_SetVisibility(GIZMO_s*, int)",
+          "address": 1967392,
+          "offset": 1077424,
+          "size": 42,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL26SecurityDoors_GetMaxGizmosPv",
+          "demangled_name": "SecurityDoors_GetMaxGizmos(void*)",
+          "address": 1967440,
+          "offset": 1077472,
+          "size": 27,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL25SecurityDoor_GetGizmoNameP7GIZMO_s",
+          "demangled_name": "SecurityDoor_GetGizmoName(GIZMO_s*)",
+          "address": 1967472,
+          "offset": 1077504,
+          "size": 19,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL22SecurityDoor_GetOutputP7GIZMO_sii",
+          "demangled_name": "SecurityDoor_GetOutput(GIZMO_s*, int, int)",
+          "address": 1967504,
+          "offset": 1077536,
+          "size": 20,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL26SecurityDoor_GetOutputNameP7GIZMO_si",
+          "demangled_name": "SecurityDoor_GetOutputName(GIZMO_s*, int)",
+          "address": 1967536,
+          "offset": 1077568,
+          "size": 22,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL26SecurityDoor_GetNumOutputsP7GIZMO_s",
+          "demangled_name": "SecurityDoor_GetNumOutputs(GIZMO_s*)",
+          "address": 1967568,
+          "offset": 1077600,
+          "size": 12,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL19SecurityDoor_GetPosP7GIZMO_s",
+          "demangled_name": "SecurityDoor_GetPos(GIZMO_s*)",
+          "address": 1967584,
+          "offset": 1077616,
+          "size": 19,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL27SecurityDoors_ClearProgressPvS_",
+          "demangled_name": "SecurityDoors_ClearProgress(void*, void*)",
+          "address": 1967616,
+          "offset": 1077648,
+          "size": 31,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL34SecurityDoors_AllocateProgressDataP9variptr_uS0_",
+          "demangled_name": "SecurityDoors_AllocateProgressData(variptr_u*, variptr_u*)",
+          "address": 1967648,
+          "offset": 1077680,
+          "size": 50,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL18SecurityDoors_DrawPvS_f",
+          "demangled_name": "SecurityDoors_Draw(void*, void*, float)",
+          "address": 1967712,
+          "offset": 1077744,
+          "size": 1117,
+          "match_percent": 24.651821
+        },
+        {
+          "name": "_ZL23SecurityDoors_AddGizmosP10GIZMOSYS_siPvS1_",
+          "demangled_name": "SecurityDoors_AddGizmos(GIZMOSYS_s*, int, void*, void*)",
+          "address": 1968832,
+          "offset": 1078864,
+          "size": 140,
+          "match_percent": 87.86364
+        },
+        {
+          "name": "_ZL18SecurityDoors_LoadPvS_",
+          "demangled_name": "SecurityDoors_Load(void*, void*)",
+          "address": 1968976,
+          "offset": 1079008,
+          "size": 159,
+          "match_percent": 99.680855
+        },
+        {
+          "name": "_ZL20SecurityDoors_UpdatePvS_f",
+          "demangled_name": "SecurityDoors_Update(void*, void*, float)",
+          "address": 1969136,
+          "offset": 1079168,
+          "size": 541,
+          "match_percent": 92.625
+        },
+        {
+          "name": "_ZL19SecurityDoors_ResetPvS_S_",
+          "demangled_name": "SecurityDoors_Reset(void*, void*, void*)",
+          "address": 1969680,
+          "offset": 1079712,
+          "size": 897,
+          "match_percent": 58.33155
+        },
+        {
+          "name": "_ZL27SecurityDoors_StoreProgressPvS_S_",
+          "demangled_name": "SecurityDoors_StoreProgress(void*, void*, void*)",
+          "address": 1970592,
+          "offset": 1080624,
+          "size": 174,
+          "match_percent": 45.88889
         },
         {
           "name": "_Z25SecurityDoors_InitTerrainP11WORLDINFO_s",
@@ -70817,7 +70795,7 @@
           "address": 1970768,
           "offset": 1080800,
           "size": 157,
-          "match_percent": 7.906977
+          "match_percent": 9.767442
         },
         {
           "name": "_Z24SecurityDoor_FindNearestP11WORLDINFO_sP7nuvec_sP12GameObject_sPf",
@@ -70825,7 +70803,15 @@
           "address": 1970928,
           "offset": 1080960,
           "size": 446,
-          "match_percent": 3.090909
+          "match_percent": 3.818182
+        },
+        {
+          "name": "_Z27SecurityDoors_RegisterGizmoi",
+          "demangled_name": "SecurityDoors_RegisterGizmo(int)",
+          "address": 1971376,
+          "offset": 1081408,
+          "size": 376,
+          "match_percent": 98.63492
         },
         {
           "name": "_Z21SecurityDoor_MoveCodeP11WORLDINFO_sP12GameObject_s",
@@ -70833,7 +70819,7 @@
           "address": 1971760,
           "offset": 1081792,
           "size": 723,
-          "match_percent": 2.739726
+          "match_percent": 1.369863
         }
       ]
     },
@@ -116895,7 +116881,6 @@
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
-        "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -116963,7 +116948,6 @@
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
-        "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -117031,7 +117015,6 @@
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
-        "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -117112,7 +117095,6 @@
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
-        "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -117227,7 +117209,6 @@
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
-        "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -117308,7 +117289,6 @@
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
-        "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -117389,7 +117369,6 @@
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
-        "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -117470,7 +117449,6 @@
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
-        "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -117551,7 +117529,6 @@
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
-        "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -117632,7 +117609,6 @@
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
-        "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -117923,7 +117899,6 @@
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
-        "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -118004,7 +117979,6 @@
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
-        "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -118085,7 +118059,6 @@
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
-        "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -118215,7 +118188,6 @@
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
-        "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -118308,7 +118280,6 @@
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
-        "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -118491,7 +118462,6 @@
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
-        "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -118625,7 +118595,6 @@
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
-        "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -118759,7 +118728,6 @@
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
-        "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -118840,7 +118808,6 @@
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
-        "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -118921,7 +118888,6 @@
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
-        "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -119002,7 +118968,6 @@
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
-        "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -119109,7 +119074,6 @@
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
-        "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -119190,7 +119154,6 @@
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
-        "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -119282,7 +119245,6 @@
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
-        "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -119363,7 +119325,6 @@
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
-        "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -119457,7 +119418,6 @@
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
-        "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -119538,7 +119498,6 @@
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
-        "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -119653,7 +119612,6 @@
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
-        "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -119734,7 +119692,6 @@
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
-        "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -119815,7 +119772,6 @@
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
-        "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -119896,7 +119852,6 @@
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
-        "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -120040,7 +119995,6 @@
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
-        "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -120121,7 +120075,6 @@
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
-        "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -120202,7 +120155,6 @@
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
-        "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -120630,7 +120582,6 @@
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
-        "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -120827,7 +120778,6 @@
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
-        "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -120987,7 +120937,6 @@
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
-        "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -121427,7 +121376,6 @@
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
-        "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -121508,7 +121456,6 @@
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
-        "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -128635,7 +128582,7 @@
     }
   ],
   "summary": {
-    "bazel_units": 475,
+    "bazel_units": 473,
     "functions": 13454,
     "assigned_functions": 12354,
     "ambiguous_functions": 212,

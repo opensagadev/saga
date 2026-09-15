@@ -9,6 +9,7 @@
 #include "legoapi/gizmos/object/gizbuildits.h"
 #include "legoapi/gizmos/object/hatmachine.h"
 #include "legoapi/gizmo/object/gizmoblowups.h"
+#include "legoapi/gizmo/base/gizactions.h"
 #include "legoapi/actions/character/transform.h"
 #include "legoapi/props/objects/signal.h"
 
@@ -257,7 +258,6 @@ extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
 f32 GameSetSoundVolume(OPTIONSSAVE_s *);
 f32 GameSetMusicVolume(OPTIONSSAVE_s *);
 void GameAudio_Reset(void);
-void GameRegisterGizActions(void);
 void ResetSeeds(void);
 void GizSpinners_InitTerrain(WORLDINFO_s *world);
 void SecurityDoors_InitTerrain(WORLDINFO_s *world);

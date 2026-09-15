@@ -3,6 +3,7 @@
 #include "legoapi/world/world_shared.h"
 #include "legoapi/render/core/terrain.h"
 #include "legoapi/render/core/terrain_internal.h"
+#include "legoapi/ai/core/legoai.h"
 #include "legoapi/render/core/gameliball.h"
 
 #include <stdio.h>

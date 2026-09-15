@@ -3,6 +3,7 @@
 #include "globals.h"
 #include "legoapi/characters/core/character.h"
 #include "legoapi/ai/core/ai_sys_stubs.h"
+#include "legoapi/ai/core/legoai.h"
 #include "legoapi/characters/motion.h"
 #include "legoapi/gizmos/transport/tubes.h"
 #include "legoapi/items/objects/gameobjects.h"

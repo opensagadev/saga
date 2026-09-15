@@ -2,6 +2,7 @@
 #include "MechInputTouch_types.h"
 
 #include "gameapi/ai/aisys/aisys.h"
+#include "legoapi/ai/core/legoai.h"
 #include "gamelib/util/gamelib_util_types.h"
 #include "globals.h"
 #include "legoapi/actions/character/streaks.h"
