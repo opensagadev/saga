@@ -2,7 +2,7 @@
 #include "gameapi_edtools_types.h"
 
 // Animation editor UI/menu callback stubs (static, internal linkage).
-// edanim* / edgizforce_* symbols from edtools_other_B.txt.
+// edanim* symbols from edtools_other_B.txt.
 
 struct GAMEANIMOBJ_s;
 
@@ -83,10 +83,6 @@ static void edanimcbLocalSoundTypeMenu(eduimenu_s *, eduiitem_s *, u32) {
 }
 
 static void edanimcbMCTBCardDeleteSlot(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
-
-static void edgizforce_ReadAnimSetData(GAMEANIMOBJ_s *, u8) {
     STUBBED();
 }
 

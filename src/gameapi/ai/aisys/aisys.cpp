@@ -4,6 +4,7 @@
 #include "gameapi/ai/aisys/aisys.h"
 #include "globals.h"
 #include "legoapi/ai/core/ai_sys_stubs.h"
+#include "legoapi/ai/core/legoai.h"
 
 #include <stdio.h>
 #include <float.h>

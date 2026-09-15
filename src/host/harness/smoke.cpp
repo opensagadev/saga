@@ -135,7 +135,7 @@ extern "C" void __wrap__Z7EndPermv() {
             if (SDL_strcasecmp(LDataList[i].name, level_name) == 0)
                 destination = &LDataList[i];
     }
-    if (destination == nullptr || !playable(*destination))
+    if (destination == nullptr)
         finish(2, "unknown destination or destination is not a gameplay level");
     Game = fixture;
     BackupGame = fixture;

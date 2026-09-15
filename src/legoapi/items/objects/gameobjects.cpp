@@ -1,4 +1,5 @@
 #include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/ai/core/legoai.h"
 #include "legoapi/items/objects/objectsall.h"
 #include "legoapi/items/collect/torpedo.h"
 #include "legoapi/actions/movement/carrying.h"
@@ -52,7 +53,6 @@
 #include "legoapi/world/area.h"
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/core/input/timer.h"
-#include "legoapi/gizmo/base/gizactions.h"
 #include "legoapi/gizmos/transport/grapples.h"
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/nu3d/nurndr.h"
@@ -4077,10 +4077,6 @@ void GameObjectToCameraCode(GameObject_s *object) {
 apply_layers:
     object->field_0x1054 = mask | object->extra_layer_mask;
     object->field_0x1054 = AdjustLayerBits(object->field_0x1054, object);
-}
-
-void GameRegisterGizActions() {
-    RegisterGizActions(game_gizactiondefs);
 }
 
 void GameBlowUpBlownUpFn_LSW(GIZMOBLOWUP_s *) {

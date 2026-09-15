@@ -1111,7 +1111,7 @@ static __used__ void GizActions_ChangeObstTriggerType(GIZFLOW_s *, FLOWBOX_s *, 
     STUBBED();
 }
 
-GIZACTIONDEFN_s game_gizactiondefs[] = {
+static GIZACTIONDEFN_s game_gizactiondefs[] = {
     {"SetVisibility", GizAction_SetVisibility},
     {"SetGizmoVisibility", GizAction_SetGizmoVisibility},
     {"SetPickupVisibility", GizAction_SetPickupVisibility},
@@ -1137,3 +1137,7 @@ GIZACTIONDEFN_s game_gizactiondefs[] = {
     {"EnableSock", GizActions_EnableSock},
     {NULL, NULL},
 };
+
+void GameRegisterGizActions(void) {
+    RegisterGizActions(game_gizactiondefs);
+}

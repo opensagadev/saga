@@ -1,8 +1,8 @@
 # Original translation-unit reconstruction
 
-At the latest measured target build, there are 475 current translation
-units, 4,770 exact functions, and a 46.1388% whole-binary fuzzy match. The independent structural
-dashboard reports 49.0% largest-run text grouping and 2,628/2,631
+At the latest measured target build, there are 473 current translation
+units, 4,770 exact functions, and a 46.1412% whole-binary fuzzy match. The independent structural
+dashboard reports 49.1% largest-run text grouping and 2,628/2,631
 assessable same-TU writable-state links satisfied (47.9% of original links
 are assessable; three verifiable source splits remain); neither is a
 completion percentage.
@@ -25,7 +25,7 @@ On the current build with file labels hidden, adjacent local-text pairs identify
 the same TU with 90.1% precision, and initializer-delimited blocks have a
 90.0% majority-owner fraction. These are useful survey heuristics, not safe
 boundaries without corroborating local references and linked matching.
-All 476 current units emit at least one named symbol. Four have no matched
+All 473 current units emit at least one named symbol. Four have no matched
 function but still own real data or a tentative ELF `COMMON` definition;
 they are not automatically empty TU shells.
 
@@ -130,8 +130,8 @@ All 4,758 original `.got` slots have relocation entries, while the current
 target has 3,808 slots, a gap of 950. Missing code/data references from
 unfinished bodies can cause this as well as TU layout; do not attribute the
 gap to file placement alone.
-Twelve symbol-free include/comment shells were removed; the include-only
-`legoai.cpp` remains because it owns an original static initializer. An
+Twelve symbol-free include/comment shells were removed; the original-named
+`legoai.cpp` now owns its adjacent AI path flags and static initializer. An
 artificial local `RotDiff` stub was removed, exposing the real owner in
 `socksysall.cpp` and gaining one exact match.
 Three later one-function files were also retired: `FtpFile::Accept()` joined
@@ -190,8 +190,12 @@ linkage.
 
 | Original cluster / strongest anchor | Current source owner(s) | State and remaining structure |
 |---|---|---|
+| GizForce trap run at `0x1c5860–0x1c9020`, LOCAL registration data, and `_GLOBAL__sub_I_gizforce.cpp` | `gizmos/traps/gizforce.cpp`; singular object-interface source remains separate | The editor callback `edgizforce_ReadAnimSetData` now uses its real gizmo implementation with original LOCAL linkage instead of a disconnected editor stub, raising its match 18.6→74.67% and whole fuzzy to 46.1412% without exact losses. Most of the run and registration state were already co-owned; the complete original TU boundary, including the singular interface source, remains unresolved. |
 | Signal gizmo: 22-function run `0x1cd0c0–0x1ceab0`, LOCAL registration state, and `_GLOBAL__sub_I_signal.cpp` | `legoapi/props/objects/signal.cpp` and `signal.h`; formerly split with `gizmos/trigger/signals.cpp` | The callbacks, registration object, and three neighboring exports now share the original-named TU; the duplicate plural constructor is gone. Source order gives 20 of 22 functions in original relative order, while nine exact callbacks, the 98.58%-matched registration body, and whole matching remain unchanged. Seven unfinished callbacks account for the remaining order break; the distant exact `SetTexAnimSignals` is provisional and needs separate owner evidence. |
 | Techno gizmo: 28-function run `0x1da890–0x1dc4b7`, LOCAL registration and movement state, and `_GLOBAL__sub_I_techno.cpp` | `legoapi/props/objects/techno.cpp` and `techno.h`; formerly split with `gizmos/object/technos.cpp` | One original-named `-O3` TU now owns all 28 functions, four data/BSS anchors in their original relative order and sizes, and the registration object; the plural constructor is gone. Source order places 24 of 28 functions in original relative order. Three functions become exact with no losses or other regressions, raising whole fuzzy 46.130043→46.130146%; remaining text inversions and body mismatches need later codegen work. |
+| Shard gizmo: 17 LOCAL helpers followed by four exports at `0x1d97a0–0x1da889`, LOCAL registration state, and `_GLOBAL__sub_I_shard.cpp` | `items/collect/shard.cpp` and `gizmos/traps/shards.h`; formerly split with `gizmos/traps/shards.cpp` | All 21 functions and the registration state now share the original-named `-O3` TU; the plural source/initializer is gone. The registration function directly references its original LOCAL `addtype`. Ordinary definition order raises focused text alignment to 16/21 with no body-score change; `Shard_FindNearest` and `Shards_RegisterGizmo` improved on consolidation and every exact function remains. Full TU extent remains provisional. |
+| Ledge transport: 16 LOCAL callbacks then three exports at `0x1deba0–0x1e0490`, LOCAL registration state, and `_GLOBAL__sub_I_ledge.cpp` | Split between `gizmos/transport/ledges.cpp` (`-O2`) and `props/objects/ledge.cpp` (default optimization) | **Deferred.** A full original-named merge built but lowered the exact `Ledges_ClearProgress` to 24.93%, substantially regressed load/store helpers, and unassigned a terrain helper. It was fully reverted; recover a compatible optimization/ownership cut before merging. |
+| Security-door gizmo: 17 LOCAL helpers and four exports at `0x1e0490–0x1e1910`, LOCAL registration state, and `_GLOBAL__sub_I_securitydoor.cpp` | `props/doors/securitydoor.cpp` and `gizmos/door/securitydoors.h`; formerly split with `gizmos/door/securitydoors.cpp` | All 21 functions and the registration state now share one original-named `-O3` TU. The duplicate plural initializer is gone, and the surviving original-named initializer rises 29.41→99.35%; all exact helpers and the registration body retain their scores. Two unfinished exports gain small fuzzy scores while one unfinished export loses 1.37 points; whole fuzzy still rises to 46.1401%. The wider boundary remains provisional. |
 | Tightrope gizmo: 23-function run `0x1cb370–0x1cd0b9`, LOCAL registration state, and `_GLOBAL__sub_I_tightrope.cpp` | `legoapi/props/objects/tightrope.cpp` and `tightrope.h`; formerly split with the plural implementation and an include-only singular file | All bodies and the 124-byte registration object now share the original-named `-O3` TU. The duplicate plural constructor disappears and the singular constructor rises 29.41→99.35%; source order places 20 of 23 functions in original relative order, `TightRope_InRange` improves, and no function regresses. The remaining inversions include an unfinished draw callback; the wider boundary is still provisional. |
 | Torpedo packets/flight: 19-function run `0x1f7170–0x1f9da0`, `_GLOBAL__sub_I_torpedo.cpp`, and LOCAL 2,176-byte `TorpedoPackets` | `items/collect/torpedo.cpp` and `torpedo.h`; formerly split with `gizmos_tubes.cpp` and a sprite stub in `render.cpp` | All 19 functions now share the original-named `-O3` TU and appear in exact original relative text order. The three present initialized torpedo globals retain their original relative order and spacing; `giztorp_gizmotype_id` and `AREATORPEDOSCALE` remain absent, not fabricated. Three unrelated shooting/pod functions moved to `move.cpp`, co-locating `PodCollisionCode` with its original LOCAL `magdif`. Exact matches stay 4,766; one low-scoring `TorpedoCode` body loses 0.02 points while the whole fuzzy score remains above the prior commit. |
 | Torpedo-machine gizmo: contiguous 16-function run `0x1f9da0–0x1fa8e0`, LOCAL registration state, and `_GLOBAL__sub_I_giztorpedo.cpp` | `legoapi/gizmo/object/giztorpedo.cpp` and `giztorpedo.h`; formerly split with `giztorpmachine.cpp` and one helper in `gizmos_tubes.cpp` | The complete measured run now shares the original-named `-O3` TU and owner header. Source order places 15 of 16 functions in original relative order; global `giztorpmachine_gizmotype_id` and the 124-byte function-local `addtype` retain their original 0x20 BSS spacing. The nearest-machine helper improves to 99.98%, and the singular constructor rises 29.41→99.35% with no function regressions. Whole fuzzy rises 46.131650→46.133064%. |
@@ -244,6 +248,7 @@ linkage.
 | ANI3/NuAnim: apparent `0x2bd180–0x2c8253` run, local `KeyStructSizes`/`CurveGroupMasks`, and evaluator `scale_array` | `nu2api/nucore/nuanim3.cpp` (`-O2`) for the 11-player/extractor dependency group; `nucore_plain.cpp` (`-O3`) for evaluator/accumulator and six-function curve tail; `nuanim.cpp` unchanged | The two local tables and their direct users now share a source owner. Isolated trial gained 0.0001 fuzzy points with no regressed functions; the complete original ANI3 boundary remains **open**. Whole-family co-location trials regressed and were rejected. |
 | `apiobject.c`: `AnimEndFrame` through `ConfigureCharacterList`, ending at `_GLOBAL__sub_I_apiobject.c` (`0x3d223a`) | `legoapi/items/base/apiobject.cpp` and its real shared declarations | All 78 scored bodies in this run are already assigned to the owner in original order; local animation/API state and the six initializer-constructed vectors are likewise attributed there. No further high-confidence source move is available without recovering absent TU-local math helpers or changing bodies. Neighboring globals are not assigned by adjacency. |
 | Post-API-object span: AI expression, editor path/area/creature/locator, and gameplay functions before the next named initializer at `0x52b116` (`glutils.c`) | Several AI/editor/gameplay owners | **Boundary unresolved.** The ~1.3 MiB initializer-free interval is not one inferred TU. Its verified local-state links are sparse or already co-located; missing editor iterator state and ambiguous `attr` candidates prevent a clean atomic cut based on adjacency alone. |
+| LEGO AI path flags: 17 contiguous GLOBAL BSS words at `0x12a60c0–0x12a6103` beside `_GLOBAL__sub_I_legoai.cpp` | `legoapi/ai/core/legoai.cpp` and `legoai.h`; formerly split between `globals.cpp` and `climbing.cpp` | All 17 retain their type, size, and binding and now have zero relative-order inversions (formerly 82/136); the original-named initializer and all exact body matches survive. This is strong data-layout evidence, not proof that the adjacent AI action/condition tables or creature-interaction routine share the TU. |
 | Editor path connection state: one original LOCAL `aipathcnxtypes`/`naipathcnxtypes` pair is referenced by path UI, registration and drawing helpers | `editor/edpath.cpp` with public API in `editor/path_connections.h` and `edpath.h` | The duplicate incompatible state was removed; one correctly typed 0x4c-byte record and local array now serve registration and UI. The drawing stub also moved beside its original state, closing four verified editor-path splits. All 29 exact neighbors remain exact, `pathEditor_Process` rises from 0% to 28.61%, and whole fuzzy rises 45.9964→46.0600%. **Open:** the full original TU extent and drawing body. |
 | Editor cylinder check: `AISysSetPathCylinderCheck` writes a two-byte LOCAL flag read by `aieditor_Proc` in the adjacent original editor run | `editor/aieditor.cpp`; API remains in `aisys.h` | Setter and real local state now share the reader's owner, closing one verified split with no exact loss and a small fuzzy gain. The wider editor/AI TU boundary remains unresolved. |
 | Editor interaction callbacks: original `cbInteractMenuTitle` → scroll-up → scroll-down run at `0x38fc30–0x38fd14`; title references two LOCAL editor UI state objects | `gameapi/edtools/edtoolsall_plain.cpp` and `edui.h`; formerly the three callbacks were in game-menu code | All three emit in original order beside their UI state; both scroll callbacks stay exact, whole matching is unchanged, and two verified writable-state splits close (2,225/2,243 satisfied). The broader callback-table owner remains open. |
@@ -341,8 +346,8 @@ at 99.99% and 99.98%.
 
 The current `matching.json` lists four units with no reported functions and
 20 with one. This is a review queue, not a deletion rule: some are legitimate
-data owners (`animation.cpp`, `contexts.cpp`) or initializer-only units
-(`legoai.cpp`). Include-only sources can still emit original-named
+data owners (`animation.cpp`, `contexts.cpp`) or have only an initializer as
+their reported function (`legoai.cpp`). Include-only sources can still emit original-named
 constructors; textual function counts miss these. Remove or merge a tiny file only after checking its actual
 object symbols and the original TU evidence. Move stray source-local
 prototypes into real headers as their owning families are reconstructed.

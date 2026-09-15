@@ -195,22 +195,22 @@ namespace {
         }
     }
 
-    void edgizforce_ReadAnimSetData(GAMEANIMOBJ_s *object, unsigned char version) {
-        if (object == NULL) {
-            return;
-        }
+} // namespace
 
-        GIZFORCEANIMDATA_s fallback = {};
-        GIZFORCEANIMDATA_s *object_data = static_cast<GIZFORCEANIMDATA_s *>(object->object_data);
-        if (object_data == NULL) {
-            object_data = &fallback;
-        }
-        if (version > 8) {
-            object_data->flags = static_cast<u16>(EdFileReadShort());
-        }
+static void edgizforce_ReadAnimSetData(GAMEANIMOBJ_s *object, unsigned char version) {
+    if (object == NULL) {
+        return;
     }
 
-} // namespace
+    GIZFORCEANIMDATA_s fallback = {};
+    GIZFORCEANIMDATA_s *object_data = static_cast<GIZFORCEANIMDATA_s *>(object->object_data);
+    if (object_data == NULL) {
+        object_data = &fallback;
+    }
+    if (version > 8) {
+        object_data->flags = static_cast<u16>(EdFileReadShort());
+    }
+}
 
 static i32 GizForces_GetMaxGizmos(void *force) {
     WORLDINFO *world = static_cast<WORLDINFO *>(force);

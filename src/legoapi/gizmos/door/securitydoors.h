@@ -36,6 +36,9 @@ DECOMP_ASSERT(offsetof(SECURITYDOOR, position) == 0x90, "SECURITYDOOR position")
 DECOMP_ASSERT(offsetof(SECURITYDOOR, player_position) == 0xa4, "SECURITYDOOR player position");
 
 ADDGIZMOTYPE *SecurityDoors_RegisterGizmo(i32 type_id);
+void SecurityDoors_InitTerrain(WORLDINFO_s *);
+void SecurityDoor_FindNearest(WORLDINFO_s *, NUVEC *, GameObject_s *, f32 *);
+void SecurityDoor_MoveCode(WORLDINFO_s *, GameObject_s *);
 
 extern "C" {
 #endif
