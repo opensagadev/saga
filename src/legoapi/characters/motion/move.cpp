@@ -45,6 +45,7 @@ static f32 ForceBackRadius2 = 0.0f;
 #include "legoapi/render/core/rtl.h"
 #include "legoapi/render/fx.h"
 #include "legoapi/render/fx/parts.h"
+#include "legoapi/render/fx/edsplines.h"
 #include "legoapi/render/fx/spline_position.h"
 #include "legoapi/world/level.h"
 #include "legoapi/world/area.h"
@@ -2658,7 +2659,6 @@ extern f32 GetVehicleSpeedMul(GameObject_s *, f32);
 extern i32 GoingForwardsAlongNarrowSock(GameObject_s *);
 extern f32 PodSprint_InStartCountdown(WORLDINFO_s *);
 extern f32 DeathStar2BattleFire_GetSlowDownMul(GameObject_s *);
-extern i32 OutSideSplineArea(NUVEC *, nugspline_s *, NUVEC *, NUVEC *, i32);
 extern void VehicleCollisionCode(GameObject_s *);
 
 i32 NeedsPretendAnim(GameObject_s *object) {

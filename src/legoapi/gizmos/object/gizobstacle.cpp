@@ -28,6 +28,7 @@ u32 GizObstacles_TotalScore(void *world) {
 #include "legoapi/gizmo/base/GizObstacleObjectInterface.h"
 #include "legoapi/gizmo/object/gizmoblowups.h"
 #include "legoapi/gizmos/fx/gizmopickups.h"
+#include "legoapi/gizmo/object/gizmopickup.h"
 #include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/items/base/apiobject.h"
 #include "legoapi/legoapi_types.h"

@@ -1,4 +1,5 @@
 #include "decomp.h"
+#include "legoapi/core/config/cheat.h"
 #include "legoapi/gizmos/object/gizbuildits.h"
 #include "legoapi/gizmos/transport/teleport.h"
 #include "legoapi/menus/core/gamehint.h"
@@ -254,8 +255,6 @@ void initGameHintSys_LSW() {
     id_HINT_LSW_AUTOJUMP = 0x620;
     id_HINT_LSW_AUTOJUMP_FAIL = 0x621;
 }
-
-i32 Cheat_IsOn(i32);
 
 i32 SmartBomb_UpdateHint(HINT_s *) {
     if (VehicleArea == 0 || BonusArea != 0)

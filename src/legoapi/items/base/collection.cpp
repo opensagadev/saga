@@ -671,39 +671,3 @@ COLLECTION_s *GetFreePlayCollection(i32 area) {
 void ReCalculateCompletionPoints() {
     STUBBED();
 }
-
-i32 Player_HasInvincibility(GameObject_s *object);
-extern i32 adaptivedifficulty[3];
-extern i8 (*adtab)[4];
-
-i32 LoseCoins(GameObject_s *object, i32 cause) {
-    if (Player_HasInvincibility(object) != 0 ||
-        (object->apiobj.character_data->game_character->flags_090 & 0x8000) != 0 || object->coinpacket == NULL ||
-        (Arcade != 0 && (Arcade_Mode[static_cast<i8>(ArcadeItem.field_c_0xc)].field8_0x8 & 8) != 0)) {
-        return 0;
-    }
-    u32 lost = 0;
-    if (cause == 1) {
-        lost = static_cast<u32>(TouchHacks::GetLoseStudsDieValue());
-    } else if (cause == 2) {
-        lost = static_cast<u32>(TouchHacks::GetLoseStudsFallValue());
-    }
-    if (lost != 0) {
-        const i32 adjustment = adtab[adaptivedifficulty[0]][0];
-        if (adjustment == 1) {
-            lost *= 2;
-        } else if (adjustment == -1) {
-            lost >>= 1;
-        }
-        if (lost > object->coinpacket->coins) {
-            lost = object->coinpacket->coins;
-            object->coinpacket->coins = 0;
-        } else if (lost != 0) {
-            object->coinpacket->coins -= lost;
-        }
-    }
-    if (Cheats_CheckFlags(0x7c) != 0 || DoubleScoreTime > 0.0f) {
-        return 0;
-    }
-    return static_cast<i32>(lost);
-}

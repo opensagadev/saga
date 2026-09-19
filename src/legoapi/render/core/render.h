@@ -24,6 +24,10 @@ void DrawStatusIcons(STATUSPACKET_s *status, f32 y, f32 alpha);
 void DrawMiniSnowTroopers(WORLDINFO_s *world);
 void DrawForceBackEffect(nuhspecial_s *special);
 void DrawSaveSlots(MENU_s *menu, float y);
+void DrawBonusScore(f32 y, i32 player0_active, i32 player1_active, f32 alpha, i32 *scores);
+i32 InDoubleScoreZone(GameObject_s *object);
+void DoubleScoreAlpha(void);
+void DrawInDoubleScoreZone(f32 time);
 void Draw_AUTOSAVEWARNING(void);
 #ifdef __cplusplus
 extern "C" {

@@ -57,7 +57,6 @@ f32 GetVehicleAreaRememberSpeed();
 void CharPlatforms_Reset(CHARPLATFORMSYS_s *);
 void SetSoundFadeDist(WORLDINFO_s *, OPTIONSSAVE_s *);
 void GameCameraMakeMiniCut(nugspline_s *, f32, f32, f32, f32, i32, i32);
-void Cheats_TurnOff(i32);
 void CutScene_StartAudio();
 void oneAtOnce_SetNumAttackers(i32);
 void EffectOffProgress_Reset(LEVEL_PROGRESS_s *);
@@ -79,7 +78,6 @@ extern "C" {
 
 void CutScenes_Reset(WORLDINFO_s *);
 void ClearLevelProgress(i32, WORLDINFO_s *);
-void Cheats_Reset(void);
 void ResetScene(nugscn_s *, SCENEPROGRESS_s *);
 void GizmoBlowupVisibilityOverrides(WORLDINFO_s *);
 void SetTexAnimSignals(void);
@@ -94,7 +92,6 @@ void ResetGameMessages(void);
 void Tag_ResetTransfers(void);
 void Tag_SetMode(i32 mode);
 u32 TotalLevelCoinTally(WORLDINFO_s *, u32 *, u32 *, u32 *, u32 *, u32 *, u32 *, u32 *);
-void Cheats_TurnOff(i32);
 void GameCameraMakeMiniCut(nugspline_s *, f32, f32, f32, f32, i32, i32);
 extern i32 bonusmodearcade;
 extern i32 gone_through_door_to_new_level;

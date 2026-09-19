@@ -1,4 +1,5 @@
 #include "decomp.h"
+#include "legoapi/core/config/cheat.h"
 #include "globals.h"
 #include "legoapi/gizmos/object/gizbuildits.h"
 
@@ -76,7 +77,6 @@ extern AREADATA *E1VEHICLE_ADATA;
 extern u8 show_unlock_minikitviewer_hint;
 bool HubMinikitViewerUnlocked();
 void Hub_ActivateDoorMenu(LEVELDATA_s **);
-bool FreePlayUnlocked();
 extern "C" void PlaySfxAndSetPitch(char *, NUVEC *, f32);
 AILOCATOR_s *LocalGetNearestLocator(AILOCATOR_s **, i32, f32, NUVEC *, f32, i32, f32, f32);
 extern i32 Episode_CountOpenAreas(i32, i32, AREASAVE_s *);

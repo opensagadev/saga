@@ -4,6 +4,7 @@
 #include "legoapi/characters/motion/action_info.h"
 #include "legoapi/characters/motion/animation_ids.h"
 #include "legoapi/characters/motion/contexts.h"
+#include "legoapi/core/config/cheat.h"
 #include "legoapi/render/fx/game_deb.h"
 #include "legoapi/world/level.h"
 #include "legoapi/world/mission.h"
@@ -99,25 +100,6 @@ DECOMP_ASSERT(sizeof(AREA_GLOBALS) == 0x34, "AREA_GLOBALS size");
 // ----------------------------------------------------------------------
 // Placeholder save-game / model-list structures.
 // ----------------------------------------------------------------------
-typedef struct CHEAT {
-    char *name;
-    i16 *text_id;
-    byte enabled;
-    undefined field_0x09;
-    undefined field_0x0a;
-    u8 area;
-    i32 field_0x0c;
-    char *code;
-    i32 extra_price;
-    char *extra_name;
-    u32 flag;
-} CHEAT;
-DECOMP_ASSERT(sizeof(CHEAT) == 0x20, "CHEAT size");
-DECOMP_ASSERT(offsetof(CHEAT, enabled) == 0x08, "CHEAT enabled offset");
-DECOMP_ASSERT(offsetof(CHEAT, extra_price) == 0x14, "CHEAT extra price offset");
-DECOMP_ASSERT(offsetof(CHEAT, extra_name) == 0x18, "CHEAT extra name offset");
-DECOMP_ASSERT(offsetof(CHEAT, flag) == 0x1c, "CHEAT flags offset");
-
 #include "legoapi/core/save_values.h"
 
 struct OPTIONSSAVE_s {

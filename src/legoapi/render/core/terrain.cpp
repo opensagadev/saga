@@ -17,6 +17,7 @@
 #include "legoapi/characters/motion/gameanim.h"
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/props/objects/techno.h"
+#include "legoapi/gizmo/object/gizmopickup.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/world/level.h"
 #include "nu2api/nucore/numemory.h"
@@ -51,9 +52,7 @@ extern GameObject_s *CarWashHack;
 GameObject_s *CharPlatform_FindObjFromPlatID(CHARPLATFORMSYS_s *system, i32 platform_id);
 void StartFlatten(GameObject_s *source, GameObject_s *target);
 void AddWaterSplash(GameObject_s *object, NUVEC *position);
-i32 LoseCoins(GameObject_s *object, i32 cause);
 i32 CannotKill(GameObject_s *object);
-void AddPickups(i32, i32, i32, i32, NUVEC *, NUVEC *, f32, i32, f32, f32, GameObject_s *, i32, i32, bool);
 extern i32 gone_through_door_to_new_level;
 extern AREADATA_s *PODSPRINT_ADATA;
 extern AREADATA_s *PODRACE_ADATA;

@@ -14,31 +14,6 @@
 #include "legoapi/world/area.h"
 #include "legoapi/world/world.h"
 
-void GizmoPickups_SetOnOff() {
-    u32 arcade_flags;
-    Arcade_GetMode(&arcade_flags);
-    WORLDINFO_s *world = WORLD;
-    for (i32 index = 0; index < 10; ++index) {
-        if (ChallengeMode != 0) {
-            if (index == 7) {
-                GizmoPickupType[index].field_0x0f = 0;
-            } else {
-                GizmoPickupType[index].field_0x0f = 1;
-            }
-        } else if (index == 7) {
-            GizmoPickupType[index].field_0x0f = 1;
-        } else if (index == 6 && world->level_sub_id != -1 && Game.area_save[world->level_sub_id].field_0x5[1] != 0) {
-            GizmoPickupType[index].field_0x0f = 1;
-        } else if (index == 4 && SuperStory != 0) {
-            GizmoPickupType[index].field_0x0f = 1;
-        } else if (index == 9 && world->area != NULL && (world->area->flags & 0x100) != 0) {
-            GizmoPickupType[index].field_0x0f = 1;
-        } else {
-            GizmoPickupType[index].field_0x0f = (arcade_flags & 0x20) != 0 && index != 9 && index != 5;
-        }
-    }
-}
-
 extern i32 DoubleScore;
 extern TIMER BonusTimer;
 

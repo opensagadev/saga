@@ -198,7 +198,6 @@ build:target --per_file_copt=^src/legoapi/gizmos/object/gizobstacle\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmos/transport/gizportal\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmos/trigger/gizrandom\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmos/trigger/gizspecial\.cpp$@-O3
-build:target --per_file_copt=^src/legoapi/gizmo/object/gizspecial\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmos/trigger/giztimers\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmo/object/giztorpedo\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmos/traps/gizturret\.cpp$@-O3

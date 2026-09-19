@@ -1,6 +1,7 @@
 #include "legoapi/gizmos/object/gizbuildits.h"
 #include "legoapi/gizmo/object/gizmoblowups.h"
 #include "legoapi/gizmos/fx/gizmopickups.h"
+#include "legoapi/gizmo/object/gizmopickup.h"
 #include "legoapi/characters/core/playeritems.h"
 #include "legoapi/audio/audio.h"
 #include "legoapi/render/fx/parts.h"
@@ -41,7 +42,6 @@ f32 GIZBUILDITWOBBLEJUMPHEIGHT = 0.05f;
 i16 GizBuilditGDeb[6] = {0x4c, 0x4d, 0x4e, 0x4f, 0x50, 0x51};
 i32 gizbuildit_gizmotype_id = -1;
 static f32 gizhopsfxwait = 0.0f;
-
 
 namespace {
 
@@ -129,7 +129,6 @@ i32 (*GizBuildIt_CanStartBuildingFn)(GIZBUILDIT_s *, GameObject_s *);
 GIZBUILDIT_s *GizBuildIt_FindNearest(WORLDINFO_s *, GameObject_s *, BUILDIT_FIND_ENUM, i32);
 
 NuMechPtr<MechObjectInterface, 4> nextBuildit;
-
 
 static NUVEC *GizmoBuildit_GetPos(GIZMO *gizmo) {
     if (gizmo != NULL) {

@@ -1607,7 +1607,6 @@ void Coins_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elaps
     }
 }
 extern i16 tWINNER;
-void DrawBonusScore(f32, i32, i32, f32, i32 *);
 void DrawBonusTime(STATUSPACKET_s *, f32, i32);
 
 void BonusWin_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current) {

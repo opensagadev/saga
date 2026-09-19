@@ -14,6 +14,7 @@
 #include "legoapi/menus/screens/gamemenuall.h"
 #include "legoapi/menus/screens/arcade.h"
 #include "legoapi/render/light/fade_material.h"
+#include "legoapi/render/fx/edsplines.h"
 #include "legoapi/world/levels/levels.h"
 #include "nu2api/nu3d/numtl.h"
 #include "nu2api/nu3d/android/nuportal_android.h"
@@ -1467,6 +1468,27 @@ void DrawBonusScore(float, i32, i32, float, i32 *) {
     STUBBED();
 }
 
+i32 InDoubleScoreZone(GameObject_s *object) {
+    if (Mission_Active(NULL) != NULL)
+        return 0;
+    if ((WORLD->current_level->flags & LEVEL_DOUBLE_SCORE) != 0)
+        return 1;
+    for (i32 i = 19; i < 24; ++i) {
+        nugspline_s *spline = reinterpret_cast<nugspline_s *>(WORLD->portal_places[i]);
+        if (spline != NULL && OutSideSplineArea(&object->apiobj.collision_position, spline, NULL, NULL, 0) == 0)
+            return 1;
+    }
+    return 0;
+}
+
+void DoubleScoreAlpha() {
+    STUBBED();
+}
+
+void DrawInDoubleScoreZone(float) {
+    STUBBED();
+}
+
 void DrawBoxMtx_Now(_vum_s *, _vuv_s *, i32, i32) {
     STUBBED();
 }
@@ -2356,10 +2378,6 @@ void Draw_NODATAAVAILABLE() {
                     MENUNORMALG, MENUNORMALB, 1.5f, 3, NULL, 0, MenuA);
 }
 
-void DrawInDoubleScoreZone(float) {
-    STUBBED();
-}
-
 i32 dco_locatorposonly;
 i32 dco_id = -1;
 i32 dco_reflectaxis;
@@ -2835,14 +2853,12 @@ void TransformGameMessages(nuvec_s *, nuvec_s *, nuvec_s *);
 void Customiser_TransformToPanel(CUSTOMISER *);
 char *GameObj_GetName(i32, GameObject_s *, char *);
 f32 PowerUp_GetPanelY(i32);
-u32 Cheat_MultiplyScore(u32);
 void Text_MakeScore(u32, char *);
 void Hub_DrawImportantBrick(i32, f32, f32, f32, i32, i32);
 void Arcade_DrawPanel(i32);
 GameObject_s *Mission_FindTarget(MISSIONSYS *, u64 *);
 void CutScene_DrawSubtitles();
-extern i32 DRAWBGLOAD, customiser_quit, shop_quit, ONEPLAYERPOWERUPS, PickupFlickerFrame, PickUpFlickerFrames,
-    PickUpFlickerTest;
+extern i32 DRAWBGLOAD, customiser_quit, shop_quit, PickupFlickerFrame, PickUpFlickerFrames, PickUpFlickerTest;
 extern i32 arcade_placed_stud_total, Arcade_Points[2], FPSDISPLAY, ShowPlayerCoordinate, drawautosaveicon,
     memcard_saveneeded, memcard_loadneeded;
 extern char *apitxt_CONTROLLERREMOVED, *apitxt_PRESSSTART;

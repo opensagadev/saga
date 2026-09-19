@@ -1,6 +1,8 @@
 #include "decomp.h"
 #include "legoapi/core/input/qrand.h"
+#include "legoapi/core/config/cheat.h"
 #include "legoapi/legoapi_types.h"
+#include "legoapi/ai/core/gameai.h"
 #include "legoapi/gizmo/object/gizmopickup.h"
 #include "nu2api/nu3d/nutex.h"
 #include "globals.h"
@@ -28,6 +30,13 @@ void AddHeartAsPart(GameObject_s *, NUVEC *, NUVEC *, f32, f32);
 void AddTorpedoAsPart(NUVEC *, NUVEC *, f32, f32);
 void PowerUp_AddPart(NUVEC *, NUVEC *, f32, f32);
 void AddCoinsToPanel(i32, NUVEC *, i32, f32, GameObject_s *, i32);
+i32 GetRandomCoinType() {
+    i32 random_value = qrand();
+    if (random_value < 0) {
+        random_value += 0x3fff;
+    }
+    return CoinTab[random_value >> 14];
+}
 
 void AddPickups(i32 coins, i32 hearts, i32 torpedoes, i32 powerups, nuvec_s *position, nuvec_s *direction, float,
                 i32 player_id, float speed, float lifetime, GameObject_s *owner, i32, i32 panel, bool consolidate) {
@@ -174,6 +183,10 @@ void AddPickups(i32 coins, i32 hearts, i32 torpedoes, i32 powerups, nuvec_s *pos
     }
 }
 
+void AddMiscPickups(nuvec_s *, i32, i32, i32) {
+    STUBBED();
+}
+
 i32 IsACoinType(i32 type) {
     for (i32 i = 0; i < 4; ++i) {
         if (CoinTab[i] == type) {
@@ -183,29 +196,59 @@ i32 IsACoinType(i32 type) {
     return 0;
 }
 
-void AddMiscPickups(nuvec_s *, i32, i32, i32) {
-    STUBBED();
-}
-
-i32 GetRandomCoinType() {
-    i32 random_value = qrand();
-    if (random_value < 0) {
-        random_value += 0x3fff;
-    }
-    return CoinTab[random_value >> 14];
-}
-
-i32 OutSideSplineArea(NUVEC *, nugspline_s *, NUVEC *, NUVEC *, i32);
-
-i32 InDoubleScoreZone(GameObject_s *object) {
-    if (Mission_Active(NULL) != NULL)
+i32 LoseCoins(GameObject_s *object, i32 cause) {
+    if (Player_HasInvincibility(object) != 0 ||
+        (object->apiobj.character_data->game_character->flags_090 & 0x8000) != 0 || object->coinpacket == NULL ||
+        (Arcade != 0 && (Arcade_Mode[static_cast<i8>(ArcadeItem.field_c_0xc)].field8_0x8 & 8) != 0)) {
         return 0;
-    if ((WORLD->current_level->flags & LEVEL_DOUBLE_SCORE) != 0)
-        return 1;
-    for (i32 i = 19; i < 24; ++i) {
-        nugspline_s *spline = reinterpret_cast<nugspline_s *>(WORLD->portal_places[i]);
-        if (spline != NULL && OutSideSplineArea(&object->apiobj.collision_position, spline, NULL, NULL, 0) == 0)
-            return 1;
     }
-    return 0;
+    u32 lost = 0;
+    if (cause == 1) {
+        lost = static_cast<u32>(TouchHacks::GetLoseStudsDieValue());
+    } else if (cause == 2) {
+        lost = static_cast<u32>(TouchHacks::GetLoseStudsFallValue());
+    }
+    if (lost != 0) {
+        const i32 adjustment = adtab[adaptivedifficulty[0]][0];
+        if (adjustment == 1) {
+            lost *= 2;
+        } else if (adjustment == -1) {
+            lost >>= 1;
+        }
+        if (lost > object->coinpacket->coins) {
+            lost = object->coinpacket->coins;
+            object->coinpacket->coins = 0;
+        } else if (lost != 0) {
+            object->coinpacket->coins -= lost;
+        }
+    }
+    if (Cheats_CheckFlags(0x7c) != 0 || DoubleScoreTime > 0.0f) {
+        return 0;
+    }
+    return static_cast<i32>(lost);
+}
+
+void GizmoPickups_SetOnOff() {
+    u32 arcade_flags;
+    Arcade_GetMode(&arcade_flags);
+    WORLDINFO_s *world = WORLD;
+    for (i32 index = 0; index < 10; ++index) {
+        if (ChallengeMode != 0) {
+            if (index == 7) {
+                GizmoPickupType[index].field_0x0f = 0;
+            } else {
+                GizmoPickupType[index].field_0x0f = 1;
+            }
+        } else if (index == 7) {
+            GizmoPickupType[index].field_0x0f = 1;
+        } else if (index == 6 && world->level_sub_id != -1 && Game.area_save[world->level_sub_id].field_0x5[1] != 0) {
+            GizmoPickupType[index].field_0x0f = 1;
+        } else if (index == 4 && SuperStory != 0) {
+            GizmoPickupType[index].field_0x0f = 1;
+        } else if (index == 9 && world->area != NULL && (world->area->flags & 0x100) != 0) {
+            GizmoPickupType[index].field_0x0f = 1;
+        } else {
+            GizmoPickupType[index].field_0x0f = (arcade_flags & 0x20) != 0 && index != 9 && index != 5;
+        }
+    }
 }

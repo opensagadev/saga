@@ -6,8 +6,7 @@
 CHEATSYSTEM CheatSystem = {0};
 
 f32 Cheat_PowerUpTime = 0.0f;
-i32 ONEPLAYERPOWERUPS = 0;
-extern i32 VehicleArea;
+i32 ONEPLAYERPOWERUPS = 1;
 
 void Cheat_SetArea(i32 cheat, i32 areaId) {
     if (cheat >= 0 && cheat < CheatSystem.cheats_count && areaId >= 0 && areaId < AREACOUNT) {

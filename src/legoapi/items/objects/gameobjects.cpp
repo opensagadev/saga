@@ -7,6 +7,7 @@
 #include "legoapi/actions/character/streaks.h"
 #include "legoapi/gizmos/object/gizbuildits.h"
 #include "legoapi/gizmo/object/gizmoblowups.h"
+#include "legoapi/render/core/render.h"
 #include "legoapi/audio/audio.h"
 #include "legoapi/gizmos/transport/grapples.h"
 #include "legoapi/gizmos/fx/gizmopickups.h"
@@ -2136,7 +2137,6 @@ extern CUTSCENEPLAYERCLIP *CutScenePlayer_Active();
 void UpdateGameMessages();
 extern i32 DoubleScore;
 extern FadeSystem FadeSys;
-i32 InDoubleScoreZone(GameObject_s *object);
 
 void GameTiming(WORLDINFO_s *, float *game_time) {
     if (Paused == 0) {

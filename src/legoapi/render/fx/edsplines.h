@@ -34,3 +34,4 @@ void PointAlongSpline(NUGSPLINE *, f32, NUVEC *, u16 *, u16 *, i32);
 void InitSplinePosition(SPLINEPOS_s *, NUGSPLINE *, f32, i32);
 void MoveSplinePosition(SPLINEPOS_s *, f32);
 void GetNearestSplinePos(NUVEC *, SPLINEPOS_s *, NUGSPLINE *, i32, i16, i16);
+i32 OutSideSplineArea(NUVEC *position, NUGSPLINE *spline, NUVEC *edge_end, NUVEC *edge_start, i32 inside);

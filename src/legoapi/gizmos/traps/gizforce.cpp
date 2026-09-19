@@ -30,6 +30,7 @@ u32 GizForce_TotalScore(void *world) {
 #include "legoapi/core/input/gamepads.h"
 #include "legoapi/gizmo/object/gizmoblowups.h"
 #include "legoapi/gizmos/fx/gizmopickups.h"
+#include "legoapi/gizmo/object/gizmopickup.h"
 #include "legoapi/misc/supportall.h"
 #include "legoapi/misc/utilities.h"
 #include "legoapi/render/core/terrain.h"

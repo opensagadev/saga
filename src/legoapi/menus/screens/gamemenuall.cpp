@@ -181,15 +181,12 @@ extern f32 selectmodetime;
 extern i32 selectmodemode;
 extern i32 FinishLoop_On;
 extern FadeSystem FadeSys;
-bool FreePlayUnlocked();
 void Hub_DrawFreePlaySelect();
 void Hub_InitFreePlaySelect(i32 area, i32 first_model, i32 second_model);
 void Hub_UpdateFreePlaySelect();
 void WipeBackToHub();
 void NewLevelFromMenu(LEVELDATA_s *level, i32 menu_id, i32 menu_y, i32 remember_hub);
 
-extern CHEATSYSTEM CheatSystem;
-void Cheat_SetOn(i32 cheat, i32 enabled, i32 update_save);
 static f32 updateextras_current_y = 0.0f;
 
 static bool MenuCheatUnlocked(i32 cheat) {

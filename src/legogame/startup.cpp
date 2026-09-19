@@ -16,6 +16,7 @@
 // deliberately inverted legal fade-in quirk).
 
 #include "legogame/startup.h"
+#include "legoapi/core/config/cheat.h"
 
 #include <string.h>
 #include <time.h>
@@ -104,7 +105,6 @@ CHARACTERDATA *ConfigureCharacterList(char *path, VARIPTR *buf, VARIPTR *buf_end
 void CharScenes_Init(VARIPTR *buf, VARIPTR *buf_end);
 void FixUpCharacters(CHARFIXUP *fixup);
 void CharCategories_Init(CHARCATEGORY *cat);
-void Cheats_Init(CHEAT *cheats);
 LEVELDATA *Levels_ConfigureList(char *path, VARIPTR *buf, VARIPTR *buf_end, i32 max, i32 *count,
                                 void (*set_defaults)(LEVELDATA *, i32));
 void FixUpLevels(LEVELFIXUP *fixup);

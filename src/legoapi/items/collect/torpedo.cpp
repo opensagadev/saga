@@ -16,6 +16,7 @@
 #include "legoapi/gizmo/object/gizmoblowups.h"
 #include "legoapi/gizmo/object/giztorpedo.h"
 #include "legoapi/gizmos/fx/gizmopickups.h"
+#include "legoapi/gizmo/object/gizmopickup.h"
 #include "legoapi/gizmos/object/gizobstacles.h"
 #include "legoapi/gizmos/traps/gizturrets.h"
 #include "legoapi/gizmos/transport/tubes.h"

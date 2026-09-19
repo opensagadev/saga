@@ -1,5 +1,6 @@
 #include "decomp.h"
 #include "legoapi/core/config/cheat.h"
+#include "globals.h"
 #include "legoapi/items/base/apiobject.h"
 
 #include <string.h>
@@ -7,14 +8,6 @@
 struct nuvec_s;
 struct nupad_s;
 
-extern CHEATSYSTEM CheatSystem;
-extern f32 Cheat_PowerUpTime;
-extern i32 ONEPLAYERPOWERUPS;
-extern i32 VehicleArea;
-extern f32 FRAMETIME;
-extern GameObject_s *Player[8];
-
-void Cheats_SetFlags();
 void GameAudio_PlaySfx(i32, nuvec_s *, i32, i32);
 void ConstantRumble(GameObject_s *, float, float);
 void NewRumble(nupad_s *, float, int);

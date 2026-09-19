@@ -1,5 +1,6 @@
 #include "legoapi/gizmos/object/newblowup.h"
 #include "legoapi/gizmo/object/gizmoblowups.h"
+#include "legoapi/gizmo/object/gizmopickup.h"
 #include "legoapi/actions/combat/hits.h"
 
 #include "decomp.h"
@@ -121,7 +122,6 @@ void GameCam_NewShake(GAMECAMERA_s *, f32, f32, f32);
 void NewRumbleAllPlayers(f32, f32, i32, i32);
 void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
 i32 ReleaseHearts();
-void AddPickups(i32, i32, i32, i32, NUVEC *, NUVEC *, f32, i32, f32, f32, GameObject_s *, i32, i32, bool);
 EXPLOSION *AddExplosion(NUVEC *, f32, f32, GameObject_s *, i32, i32);
 
 void GizmoBlowUp_AddEffects(nuvec_s *position, GIZMOBLOWUP_s *blowup, i32 offset, i32 flags, GameObject_s *object) {

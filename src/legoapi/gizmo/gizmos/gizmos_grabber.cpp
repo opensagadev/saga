@@ -1,5 +1,6 @@
 #include <string.h>
 #include "decomp.h"
+#include "legoapi/core/config/cheat.h"
 #include "legoapi/gizmo/object/gizmoblowups.h"
 #include "legoapi/items/objects/grabber.h"
 #include "nu2api/nu3d/nuspecial.h"
@@ -151,7 +152,6 @@ u16 SeekRot(u16, u16, f32);
 u16 GamePad_InputAngle(GameObject_s *, GAMEPAD_s *);
 f32 GameShadow(GameObject_s *, NUVEC *, f32, i32);
 void FindAnglesZX(NUVEC *, u16 *, u16 *);
-i32 Cheat_PowerUpActive(i32);
 i32 qrand();
 void ConstantRumble(GameObject_s *, f32, f32);
 void NewRumbleAllPlayers(f32, f32, i32, i32);

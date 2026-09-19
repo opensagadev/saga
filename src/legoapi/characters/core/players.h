@@ -151,6 +151,7 @@ float GetHoverPosY(GameObject_s *obj);
 i32 Player_HasPurpleForce(GameObject_s *obj);
 i32 Player_HasDoubleWeaponDamage(GameObject_s *object);
 i32 Player_HasFastBuild(GameObject_s *obj);
+i32 Player_HasInvincibility(GameObject_s *object);
 extern u32 GAMEPAD_ACTION;
 extern u32 GAMEPAD_DDOWN;
 extern u32 GAMEPAD_DLEFT;

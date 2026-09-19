@@ -1,5 +1,6 @@
 #include "decomp.h"
 #include "legoapi/actions/combat/hits.h"
+#include "legoapi/core/config/cheat.h"
 #include "legoapi/actions/character/speederchase.h"
 #include "legoapi/gizmos/object/gizbuildits.h"
 #include "globals.h"
@@ -7,6 +8,7 @@
 #include "legoapi/characters/motion/gameanim.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/items/collect/torpedo.h"
+#include "legoapi/gizmo/object/gizmopickup.h"
 #include "legoapi/items/base/apiobject.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/world/area.h"
@@ -56,16 +58,13 @@ void SnakeBeenHit(GameObject_s *);
 void PopBalloon(GameObject_s *);
 i32 Player_HasFastBuild(GameObject_s *);
 i32 Player_HasInvincibility(GameObject_s *);
-i32 LoseCoins(GameObject_s *, i32);
 i32 ReleaseHearts();
-void AddPickups(i32, i32, i32, i32, NUVEC *, NUVEC *, f32, i32, f32, f32, GameObject_s *, i32, i32, bool);
 void KillParts(GameObject_s *, i32, i32, i32, f32, i32, u16 *);
 void KillGameObject(GameObject_s *, i32, i32);
 void GameCam_Judder(GAMECAMERA_s *, f32, i32, NUVEC *);
 void Arcade_Kill(i32, i32);
 i32 qrand();
 GAMEPAD_s *ViewCamGetGamePad();
-i32 Cheat_IsOn(i32);
 void Player_ClearContext(GameObject_s *, i32);
 extern "C" void AddGameDebris(APIDEBRISSYS_s *, i32, NUVEC *);
 extern "C" void NuSpecialSetVisibility(void *, i32);

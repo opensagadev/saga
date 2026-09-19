@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 46.18434,
+    "fuzzy_match_percent": 46.184464,
     "total_code": "4722419",
     "matched_code": "402098",
     "matched_code_percent": 8.514662,
@@ -46991,7 +46991,7 @@
           "address": 5117840,
           "offset": 4227872,
           "size": 146,
-          "match_percent": 80.57895
+          "match_percent": 80.710526
         },
         {
           "name": "_Z12Cheats_Resetv",
@@ -47007,7 +47007,7 @@
           "address": 5118048,
           "offset": 4228080,
           "size": 198,
-          "match_percent": 79.585365
+          "match_percent": 79.70731
         }
       ]
     },
@@ -51649,7 +51649,7 @@
           "address": 4913392,
           "offset": 4023424,
           "size": 229,
-          "match_percent": 87.21333
+          "match_percent": 87.613335
         },
         {
           "name": "_Z13GizmoSysResetP10GIZMOSYS_sPvi",
@@ -51657,7 +51657,7 @@
           "address": 4913952,
           "offset": 4023984,
           "size": 285,
-          "match_percent": 43.02222
+          "match_percent": 44.077778
         },
         {
           "name": "_Z19GizmoSysEarlyUpdateP10GIZMOSYS_sPvf",
@@ -51804,6 +51804,14 @@
           "match_percent": 100.0
         },
         {
+          "name": "_Z26GizmoGetGizmosUsingSpecialP10GIZMOSYS_sPvPP7GIZMO_siPc",
+          "demangled_name": "GizmoGetGizmosUsingSpecial(GIZMOSYS_s*, void*, GIZMO_s**, int, char*)",
+          "address": 4918224,
+          "offset": 4028256,
+          "size": 183,
+          "match_percent": 71.91781
+        },
+        {
           "name": "_Z12GizmoGetGuidP10GIZMOSYS_sP7GIZMO_s",
           "demangled_name": "GizmoGetGuid(GIZMOSYS_s*, GIZMO_s*)",
           "address": 4918416,
@@ -51850,6 +51858,14 @@
           "offset": 4030272,
           "size": 158,
           "match_percent": 100.0
+        },
+        {
+          "name": "_Z19Gizmo_FindNuSpecialP8nugscn_sP12nuhspecial_sPciP10GIZMOSYS_sS3_S3_",
+          "demangled_name": "Gizmo_FindNuSpecial(nugscn_s*, nuhspecial_s*, char*, int, GIZMOSYS_s*, char*, char*)",
+          "address": 4920400,
+          "offset": 4030432,
+          "size": 696,
+          "match_percent": 99.92063
         }
       ]
     },
@@ -52287,14 +52303,6 @@
           "offset": 1094896,
           "size": 973,
           "match_percent": 20.91342
-        },
-        {
-          "name": "_Z21GizmoPickups_SetOnOffv",
-          "demangled_name": "GizmoPickups_SetOnOff()",
-          "address": 1994432,
-          "offset": 1104464,
-          "size": 857,
-          "match_percent": 65.89823
         }
       ]
     },
@@ -53688,14 +53696,6 @@
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/0/gizmopickups.o",
       "functions": [
         {
-          "name": "_Z17InDoubleScoreZoneP12GameObject_s",
-          "demangled_name": "InDoubleScoreZone(GameObject_s*)",
-          "address": 1312320,
-          "offset": 422352,
-          "size": 435,
-          "match_percent": 100.0
-        },
-        {
           "name": "_Z17GetRandomCoinTypev",
           "demangled_name": "GetRandomCoinType()",
           "address": 1990208,
@@ -53726,6 +53726,22 @@
           "offset": 1104032,
           "size": 71,
           "match_percent": 100.0
+        },
+        {
+          "name": "_Z9LoseCoinsP12GameObject_si",
+          "demangled_name": "LoseCoins(GameObject_s*, int)",
+          "address": 1994080,
+          "offset": 1104112,
+          "size": 342,
+          "match_percent": 42.587627
+        },
+        {
+          "name": "_Z21GizmoPickups_SetOnOffv",
+          "demangled_name": "GizmoPickups_SetOnOff()",
+          "address": 1994432,
+          "offset": 1104464,
+          "size": 857,
+          "match_percent": 65.89823
         }
       ]
     },
@@ -53741,29 +53757,6 @@
           "offset": 3758432,
           "size": 175,
           "match_percent": 5.533333
-        }
-      ]
-    },
-    {
-      "name": "legoapi/gizmo/object/gizspecial.cpp.o",
-      "source": "src/legoapi/gizmo/object/gizspecial.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/0/gizspecial.o",
-      "functions": [
-        {
-          "name": "_Z26GizmoGetGizmosUsingSpecialP10GIZMOSYS_sPvPP7GIZMO_siPc",
-          "demangled_name": "GizmoGetGizmosUsingSpecial(GIZMOSYS_s*, void*, GIZMO_s**, int, char*)",
-          "address": 4918224,
-          "offset": 4028256,
-          "size": 183,
-          "match_percent": 71.91781
-        },
-        {
-          "name": "_Z19Gizmo_FindNuSpecialP8nugscn_sP12nuhspecial_sPciP10GIZMOSYS_sS3_S3_",
-          "demangled_name": "Gizmo_FindNuSpecial(nugscn_s*, nuhspecial_s*, char*, int, GIZMOSYS_s*, char*, char*)",
-          "address": 4920400,
-          "offset": 4030432,
-          "size": 696,
-          "match_percent": 99.7619
         }
       ]
     },
@@ -58385,7 +58378,7 @@
     {
       "name": "legoapi/gizmos/trigger/gizspecial.cpp.o",
       "source": "src/legoapi/gizmos/trigger/gizspecial.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/1/gizspecial.o",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/gizspecial.o",
       "functions": [
         {
           "name": "_GLOBAL__sub_I_gizspecial.cpp",
@@ -59367,14 +59360,6 @@
           "offset": 1098448,
           "size": 225,
           "match_percent": 99.8125
-        },
-        {
-          "name": "_Z9LoseCoinsP12GameObject_si",
-          "demangled_name": "LoseCoins(GameObject_s*, int)",
-          "address": 1994080,
-          "offset": 1104112,
-          "size": 342,
-          "match_percent": 42.587627
         },
         {
           "name": "_Z13ShipDropCoinsP13starfighter_s",
@@ -72828,6 +72813,22 @@
           "match_percent": 100.0
         },
         {
+          "name": "_Z17InDoubleScoreZoneP12GameObject_s",
+          "demangled_name": "InDoubleScoreZone(GameObject_s*)",
+          "address": 1312320,
+          "offset": 422352,
+          "size": 435,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z16DoubleScoreAlphav",
+          "demangled_name": "DoubleScoreAlpha()",
+          "address": 1312768,
+          "offset": 422800,
+          "size": 121,
+          "match_percent": 16.8
+        },
+        {
           "name": "_Z21DrawInDoubleScoreZonef",
           "demangled_name": "DrawInDoubleScoreZone(float)",
           "address": 1312896,
@@ -72873,7 +72874,7 @@
           "address": 1316752,
           "offset": 426784,
           "size": 12845,
-          "match_percent": 44.078915
+          "match_percent": 44.081
         },
         {
           "name": "_Z19DrawForceGlowSpriteP7nuvec_sfifP12GameObject_s",
@@ -81703,14 +81704,6 @@
           "offset": 414992,
           "size": 639,
           "match_percent": 90.08209
-        },
-        {
-          "name": "_Z16DoubleScoreAlphav",
-          "demangled_name": "DoubleScoreAlpha()",
-          "address": 1312768,
-          "offset": 422800,
-          "size": 121,
-          "match_percent": 16.8
         },
         {
           "name": "_Z19SetBobaRocketTargetP19MechObjectInterface",
@@ -128508,7 +128501,7 @@
     }
   ],
   "summary": {
-    "bazel_units": 473,
+    "bazel_units": 472,
     "functions": 13454,
     "assigned_functions": 12352,
     "ambiguous_functions": 213,

@@ -1701,8 +1701,6 @@ struct GIZMOPICKUPRUNTIMESYS_s {
 };
 DECOMP_ASSERT(sizeof(GIZMOPICKUPRUNTIMESYS_s) == 0x1c, "GIZMOPICKUP runtime system ABI");
 
-i32 GetRandomCoinType();
-
 struct SPECIALMINIKIT_s {
     nuhspecial_s special;
     void *inst_anim;

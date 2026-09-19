@@ -1,4 +1,5 @@
 #include "decomp.h"
+#include "legoapi/core/config/cheat.h"
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/core/input/timer.h"
 #include "legoapi/world/mission.h"
@@ -9,7 +10,6 @@
 extern "C" void PlaySfx(char *, i32);
 
 extern i32 GetMenuID(void);
-extern void Cheats_TurnOff(i32);
 extern void SetBonusWinner(i32);
 extern void ResetGameMessages(void);
 extern GameObject_s *FindGameObject(i32, u32, i32, i32, i32);

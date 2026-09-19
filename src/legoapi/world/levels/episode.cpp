@@ -378,10 +378,6 @@ void CoinTotal_Draw(i32 total, f32 y, f32 scale, i32 remember_positions, f32 ico
     }
 }
 
-void DoubleScoreAlpha() {
-    STUBBED();
-}
-
 // ===========================================================================
 // Shared gameplay helpers
 // ===========================================================================

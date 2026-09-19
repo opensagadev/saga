@@ -33,7 +33,6 @@ extern void ResetPlayer(GameObject_s *, i32, nuvec_s *, i32);
 extern void GameFog_Reset(void);
 extern void ConfigureComplexShadow(GameObject_s *);
 extern void ResetAdaptiveDifficulty(void);
-extern void Cheats_TurnOff(i32);
 extern void Hint_ClearHintsAndDoneFlags(void);
 extern void GamePad_InitButtons(void);
 extern void FinishWeirdoNames(i32);
