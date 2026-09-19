@@ -2,6 +2,7 @@
 #include "legoapi/actions/combat/hits.h"
 #include "legoapi/world/level.h"
 #include "legoapi/render/core/terrain.h"
+#include "legoapi/render/light/surfaces.h"
 #include "nu2api/nu3d/nulgtlaser.h"
 #include "legoapi/gizmos/traps/gizforce.h"
 #include "legoapi/gizmos/object/gizobstacles.h"
@@ -30,8 +31,6 @@ extern f32 testlaser_sizew, testlaser_sizel, testlaser_sizewab, testlaser_endw;
 #include "nu2api/nu3d/nudlist.h"
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nu3d/nutex.h"
-
-extern TERRAIN_SURFACE_s TerSurface[32];
 
 struct AIROW_s;
 struct nuqthdr_s;

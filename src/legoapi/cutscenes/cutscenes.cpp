@@ -1,6 +1,7 @@
 #include "decomp.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/cutscenes/cutscenes.h"
+#include "legoapi/render/light/surfaces.h"
 #include "legoapi/audio/sfx.h"
 #include "globals.h"
 #include "MechInputTouch/MechInputTouch_types.h"
@@ -91,7 +92,6 @@ void CharScene_Draw(WORLDINFO_s *, i32, NUMTX *, NUMTX *);
 i32 qrand(void);
 void NewRumbleAllPlayers(f32, f32, i32, i32);
 f32 GameShadow(GameObject_s *, NUVEC *, f32, i32);
-extern "C" TERRAIN_SURFACE_s TerSurface[32];
 extern "C" void APITransparentCharDraw(nuhgobj_s *, NUMTX *, i32, i16 *, NUMTX *, void **, i32);
 extern "C" void instNuGCutLocatorUpdate(instNUGCUTSCENE_s *, NUGCUTLOCATORSYS_s *, instNUGCUTLOCATOR_s *,
                                         NUGCUTLOCATOR_s *, f32, NUMTX *, i32);

@@ -6,6 +6,7 @@
 #include "legoapi/world/level.h"
 #include "legoapi/world/world.h"
 #include "legoapi/render/core/terrain.h"
+#include "legoapi/render/light/surfaces.h"
 #include "nu2api/nucore/numem.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nu3d/nuspecial.h"
@@ -45,7 +46,6 @@ void GizObstacles_AddTrigger(NUVEC *position);
 void MoveBlocks(WORLDINFO_s *world, pushblock_s *push_block, i32 index, NUVEC *velocity);
 void PushSeekComplete(pushblock_s *push_block, i32 snap_index);
 
-extern "C" TERRAIN_SURFACE_s TerSurface[32];
 extern i32 LEGOHINT_PUSHBLOCKS;
 static NUVEC hothbtestpos = {29.0f, 0.0f, 13.0f};
 i32 SnapPosTaken(WORLDINFO_s *, pushblock_s *, NUVEC *, i32);

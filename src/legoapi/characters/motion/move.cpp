@@ -47,6 +47,7 @@ static f32 ForceBackRadius2 = 0.0f;
 #include "legoapi/render/fx/parts.h"
 #include "legoapi/render/fx/edsplines.h"
 #include "legoapi/render/fx/spline_position.h"
+#include "legoapi/render/light/surfaces.h"
 #include "legoapi/world/level.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/world.h"
@@ -532,8 +533,6 @@ extern i16 id_IMPERIALGUARD;
 extern i16 id_GAMORREANGUARD;
 BOLT_s *FindIncomingBolt(GameObject_s *, i32, i32);
 PART_s *FindIncomingPart(void *, NUVEC *, f32, u32, f32);
-void UpdateLastSafePosition(GameObject_s *object);
-extern "C" TERRAIN_SURFACE_s TerSurface[32];
 i32 NoLayerKill(GameObject_s *object);
 void Punch_Hit(GameObject_s *, GameObject_s *, f32, f32);
 void StartQuickShoot(GameObject_s *, i32);

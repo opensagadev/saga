@@ -4615,12 +4615,6 @@ extern "C" {
     void NuPause(i32 paused) {
         nu2api_paused = (f32)paused;
     }
-    void NuPhoneOSMessagePost(void) {
-        STUBBED();
-    }
-    void NuPhoneOSMessagePump(void) {
-        STUBBED();
-    }
     NUGCUTSCENEGETHGOBJFN NuCutSceneGetHGObj;
 
     void NuSetGetHGObjFromIndxFn(NUGCUTSCENEGETHGOBJFN function) {

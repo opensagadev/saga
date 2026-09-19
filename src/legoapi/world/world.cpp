@@ -11,6 +11,7 @@
 #include "legoapi/gizmos/transport/teleport.h"
 #include "legoapi/render/fx/parts.h"
 #include "legoapi/render/light/lighting.h"
+#include "legoapi/render/light/surfaces.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -309,8 +310,6 @@ static WORLDINFO *LWORLD = &WorldInfo[0];
 void WorldInfo_InitOnce(void) {
     memset(WorldInfo, 0, sizeof(WorldInfo));
 }
-
-extern TERRAIN_SURFACE_s TerSurface[32];
 
 void WorldInfo_Init(WORLDINFO *world) {
     i32 local_menu_id = -1;

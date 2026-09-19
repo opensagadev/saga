@@ -3,6 +3,7 @@
 #include "legoapi/core/config/cheat.h"
 #include "legoapi/gizmo/object/gizmoblowups.h"
 #include "legoapi/items/objects/grabber.h"
+#include "legoapi/render/light/surfaces.h"
 #include "nu2api/nu3d/nuspecial.h"
 extern "C" float FRAMETIME;
 #include "nu2api/numath/nutrig.h"
@@ -133,7 +134,6 @@ static __used__ void Grabber_Drop(GRABBER_s *grabber, NUVEC *previous_position) 
 extern "C" {
     extern i16 id_GRABCONTROL, id_GRABR2CONTROL, id_GRABMACHINE;
     extern f32 GameTimer;
-    extern TERRAIN_SURFACE_s TerSurface[32];
     void NewTerrPlatformsOff();
     void PlaySfxAndSetPitch(const char *, NUVEC *, f32);
     f32 AnimListFrame(CHARACTERMODEL_s *, i32, i32);

@@ -10,6 +10,7 @@
 #include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/render/core/render.h"
+#include "legoapi/render/light/surfaces.h"
 #include "legoapi/render/core/terrain.h"
 #include "legoapi/render/fx/parts.h"
 #include "legoapi/world/levels/levels.h"
@@ -23,7 +24,6 @@
 
 #include <string.h>
 
-extern TERRAIN_SURFACE_s TerSurface[32];
 extern i32 dagobah_training;
 AILOCATOR_s *locator;
 GameObject_s *gameobj;

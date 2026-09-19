@@ -2,6 +2,7 @@
 #include "globals.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/render/core/terrain.h"
+#include "legoapi/render/light/surfaces.h"
 #include "nu2api/nu3d/glutils.h"
 #include "nu2api/nu3d/numtl.h"
 

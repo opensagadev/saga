@@ -3,6 +3,7 @@
 #include "legoapi/world/world_shared.h"
 #include "legoapi/render/core/terrain.h"
 #include "legoapi/render/core/terrain_internal.h"
+#include "legoapi/render/light/surfaces.h"
 #include "legoapi/ai/core/legoai.h"
 #include "legoapi/render/core/gameliball.h"
 
@@ -14,6 +15,7 @@
 #include "globals.h"
 #include "gamelib/util/gamelib_util_types.h"
 #include "legoapi/characters/core/players.h"
+#include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/characters/motion/gameanim.h"
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/props/objects/techno.h"
@@ -68,7 +70,6 @@ extern i16 id_SNAKE, id_TRACTOR;
 extern AREADATA_s *DAGOBAH_ADATA;
 extern f32 MiscTime;
 void TakeOverCode(GameObject_s *object, i32 tag_pressed);
-extern "C" TERRAIN_SURFACE_s TerSurface[32];
 void ApplyGravity(GameObject_s *object, f32 *gravity, f32 hover_height, f32 seek_rate, f32 *ground_height);
 void InstantKillParts(GameObject_s *object, i32 mode, f32 delay);
 i32 IntersectWater(GameObject_s *object);

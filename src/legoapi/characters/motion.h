@@ -33,6 +33,7 @@ void Move_BARMAN(GameObject_s *object);
 void Move_JAWA(GameObject_s *object);
 void Move_DRAGBOMB(GameObject_s *object);
 void Move_REPUBLICGUNSHIP(GameObject_s *object);
+void UpdateLastSafePosition(GameObject_s *object);
 void Move_SPEEDERBIKE(GameObject_s *object);
 void Move_GEONOSIAN(GameObject_s *object);
 void SetMoveAndAnimateFunctions(u32 model_flag_mask, u32 model_flag_value, u32 game_flag_mask, u32 game_flag_value,

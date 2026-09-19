@@ -241,13 +241,18 @@ static __used__ void PodRaceSnipersReset(void) {
 }
 
 // Stub for the original _ZL17CreatePodRaceMineP7nuvec_s (defined in this unit
-// at 0x1faed0). The tracked comparison copy currently lives in
-// legoapi/ai/game/misc_a_game.cpp; this one stays unused so the compiler drops
-// it exactly like today's build does.
+// at 0x1faed0). Its current tiny body is inlined into PodRaceAUpdate, so the
+// standalone LOCAL symbol remains an explicitly tracked implementation gap.
 static void *CreatePodRaceMine(nuvec_s *pos) {
     STUBBED();
     (void)pos;
     return NULL;
+}
+
+void Mine_Kill(PART_s *part, i32 mode) {
+    STUBBED();
+    (void)part;
+    (void)mode;
 }
 
 // Original: _ZL22PodSprint_InitAISplineP11WORLDINFO_sP20PODSPRINT_AISPLINE_sPc

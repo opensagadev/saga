@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 46.1915,
+    "fuzzy_match_percent": 46.193157,
     "total_code": "4722419",
     "matched_code": "402742",
     "matched_code_percent": 8.528299,
@@ -39910,14 +39910,6 @@
           "offset": 1332304,
           "size": 1236,
           "match_percent": 1.468532
-        },
-        {
-          "name": "_Z15SnapCreaturePosP12GameObject_sP7nuvec_siP12AIPATHINFO_si",
-          "demangled_name": "SnapCreaturePos(GameObject_s*, nuvec_s*, int, AIPATHINFO_s*, int)",
-          "address": 4648576,
-          "offset": 3758608,
-          "size": 401,
-          "match_percent": 97.606064
         }
       ]
     },
@@ -40219,21 +40211,6 @@
           "offset": 1468000,
           "size": 340,
           "match_percent": 20.518867
-        }
-      ]
-    },
-    {
-      "name": "legoapi/ai/game/misc_a_game.cpp.o",
-      "source": "src/legoapi/ai/game/misc_a_game.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/misc_a_game.o",
-      "functions": [
-        {
-          "name": "_ZL17CreatePodRaceMineP7nuvec_s",
-          "demangled_name": "CreatePodRaceMine(nuvec_s*)",
-          "address": 2076368,
-          "offset": 1186400,
-          "size": 652,
-          "match_percent": 3.043478
         }
       ]
     },
@@ -44462,14 +44439,6 @@
           "offset": 3754224,
           "size": 41,
           "match_percent": 62.916668
-        },
-        {
-          "name": "_Z19GameObjectNearFloorP12GameObject_sfPf",
-          "demangled_name": "GameObjectNearFloor(GameObject_s*, float, float*)",
-          "address": 4646832,
-          "offset": 3756864,
-          "size": 180,
-          "match_percent": 47.361702
         },
         {
           "name": "_Z24CutScenePlayer_Availablev",
@@ -52497,21 +52466,6 @@
       ]
     },
     {
-      "name": "legoapi/gizmo/object/gizbombgen.cpp.o",
-      "source": "src/legoapi/gizmo/object/gizbombgen.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/0/gizbombgen.o",
-      "functions": [
-        {
-          "name": "_Z9Mine_KillP6PART_si",
-          "demangled_name": "Mine_Kill(PART_s*, int)",
-          "address": 2077024,
-          "offset": 1187056,
-          "size": 130,
-          "match_percent": 7.096774
-        }
-      ]
-    },
-    {
       "name": "legoapi/gizmo/object/gizbuildit.cpp.o",
       "source": "src/legoapi/gizmo/object/gizbuildit.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/gizbuildit.o",
@@ -53679,21 +53633,6 @@
           "offset": 1104464,
           "size": 857,
           "match_percent": 65.89823
-        }
-      ]
-    },
-    {
-      "name": "legoapi/gizmo/object/gizportal.cpp.o",
-      "source": "src/legoapi/gizmo/object/gizportal.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/0/gizportal.o",
-      "functions": [
-        {
-          "name": "_Z16PortalGameObjectP12GameObject_siisP8nugscn_s",
-          "demangled_name": "PortalGameObject(GameObject_s*, int, int, short, nugscn_s*)",
-          "address": 4648400,
-          "offset": 3758432,
-          "size": 175,
-          "match_percent": 5.533333
         }
       ]
     },
@@ -56071,7 +56010,7 @@
     {
       "name": "legoapi/gizmos/transport/gizportal.cpp.o",
       "source": "src/legoapi/gizmos/transport/gizportal.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/1/gizportal.o",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/gizportal.o",
       "functions": [
         {
           "name": "_GLOBAL__sub_I_gizportal.cpp",
@@ -57177,7 +57116,7 @@
     {
       "name": "legoapi/gizmos/traps/gizbombgen.cpp.o",
       "source": "src/legoapi/gizmos/traps/gizbombgen.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/1/gizbombgen.o",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/gizbombgen.o",
       "functions": [
         {
           "name": "_GLOBAL__sub_I_gizbombgen.cpp",
@@ -64066,6 +64005,14 @@
           "match_percent": 99.83422
         },
         {
+          "name": "_Z19GameObjectNearFloorP12GameObject_sfPf",
+          "demangled_name": "GameObjectNearFloor(GameObject_s*, float, float*)",
+          "address": 4646832,
+          "offset": 3756864,
+          "size": 180,
+          "match_percent": 47.361702
+        },
+        {
           "name": "_Z27GameObjectToCameraDistancesv",
           "demangled_name": "GameObjectToCameraDistances()",
           "address": 4647024,
@@ -64080,6 +64027,22 @@
           "offset": 3757296,
           "size": 1136,
           "match_percent": 0.0
+        },
+        {
+          "name": "_Z16PortalGameObjectP12GameObject_siisP8nugscn_s",
+          "demangled_name": "PortalGameObject(GameObject_s*, int, int, short, nugscn_s*)",
+          "address": 4648400,
+          "offset": 3758432,
+          "size": 175,
+          "match_percent": 9.333333
+        },
+        {
+          "name": "_Z15SnapCreaturePosP12GameObject_sP7nuvec_siP12AIPATHINFO_si",
+          "demangled_name": "SnapCreaturePos(GameObject_s*, nuvec_s*, int, AIPATHINFO_s*, int)",
+          "address": 4648576,
+          "offset": 3758608,
+          "size": 401,
+          "match_percent": 97.606064
         },
         {
           "name": "_Z19GameObjectSetCanUseP12GameObject_sPvhhf",
@@ -71855,6 +71818,14 @@
           "offset": 3026543,
           "size": 220,
           "match_percent": 99.13158
+        },
+        {
+          "name": "_ZL15DistanceToPlaneP7nuvec_sS0_S0_",
+          "demangled_name": "DistanceToPlane(nuvec_s*, nuvec_s*, nuvec_s*)",
+          "address": 3917296,
+          "offset": 3027328,
+          "size": 148,
+          "match_percent": 70.13333
         },
         {
           "name": "SockSysFindInScene",
@@ -81888,6 +81859,14 @@
           "offset": 1186000,
           "size": 386,
           "match_percent": 47.30841
+        },
+        {
+          "name": "_Z9Mine_KillP6PART_si",
+          "demangled_name": "Mine_Kill(PART_s*, int)",
+          "address": 2077024,
+          "offset": 1187056,
+          "size": 130,
+          "match_percent": 13.548388
         },
         {
           "name": "_ZL18UpdatePodRaceMinesv",
@@ -91926,6 +91905,22 @@
           "offset": 1686736,
           "size": 27,
           "match_percent": 99.833336
+        },
+        {
+          "name": "NuPhoneOSMessagePost",
+          "demangled_name": "NuPhoneOSMessagePost",
+          "address": 2576736,
+          "offset": 1686768,
+          "size": 659,
+          "match_percent": 2.763158
+        },
+        {
+          "name": "NuPhoneOSMessagePump",
+          "demangled_name": "NuPhoneOSMessagePump",
+          "address": 2577408,
+          "offset": 1687440,
+          "size": 440,
+          "match_percent": 3.652174
         }
       ]
     },
@@ -96887,22 +96882,6 @@
           "offset": 1686720,
           "size": 9,
           "match_percent": 100.0
-        },
-        {
-          "name": "NuPhoneOSMessagePost",
-          "demangled_name": "NuPhoneOSMessagePost",
-          "address": 2576736,
-          "offset": 1686768,
-          "size": 659,
-          "match_percent": 2.763158
-        },
-        {
-          "name": "NuPhoneOSMessagePump",
-          "demangled_name": "NuPhoneOSMessagePump",
-          "address": 2577408,
-          "offset": 1687440,
-          "size": 440,
-          "match_percent": 3.652174
         },
         {
           "name": "NuEulerXYZFromQuat",
@@ -116835,7 +116814,6 @@
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
@@ -116899,7 +116877,6 @@
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
@@ -116963,7 +116940,6 @@
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
@@ -117040,7 +117016,6 @@
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
@@ -117151,7 +117126,6 @@
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
@@ -117228,7 +117202,6 @@
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
@@ -117305,7 +117278,6 @@
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
@@ -117382,7 +117354,6 @@
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
@@ -117459,7 +117430,6 @@
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
@@ -117536,7 +117506,6 @@
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
@@ -117823,7 +117792,6 @@
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
@@ -117900,7 +117868,6 @@
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
@@ -117977,7 +117944,6 @@
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
@@ -118103,7 +118069,6 @@
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
@@ -118192,7 +118157,6 @@
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
@@ -118371,7 +118335,6 @@
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
@@ -118501,7 +118464,6 @@
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
@@ -118631,7 +118593,6 @@
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
@@ -118708,7 +118669,6 @@
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
@@ -118785,7 +118745,6 @@
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
@@ -118862,7 +118821,6 @@
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
@@ -118965,7 +118923,6 @@
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
@@ -119042,7 +118999,6 @@
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
@@ -119130,7 +119086,6 @@
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
@@ -119207,7 +119162,6 @@
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
@@ -119297,7 +119251,6 @@
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
@@ -119374,7 +119327,6 @@
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
@@ -119485,7 +119437,6 @@
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
@@ -119562,7 +119513,6 @@
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
@@ -119639,7 +119589,6 @@
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
@@ -119716,7 +119665,6 @@
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
@@ -119856,7 +119804,6 @@
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
@@ -119933,7 +119880,6 @@
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
@@ -120010,7 +119956,6 @@
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
@@ -120434,7 +120379,6 @@
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
@@ -120583,18 +120527,6 @@
       ]
     },
     {
-      "name": "_ZL15DistanceToPlaneP7nuvec_sS0_S0_",
-      "demangled_name": "DistanceToPlane(nuvec_s*, nuvec_s*, nuvec_s*)",
-      "address": 3917296,
-      "offset": 3027328,
-      "size": 148,
-      "match_percent": 14.088889,
-      "candidate_units": [
-        "legoapi/ai/game/misc_a_game.cpp.o",
-        "legoapi/props/system/socksysall.cpp.o"
-      ]
-    },
-    {
       "name": "_Z41__static_initialization_and_destruction_0ii",
       "demangled_name": "__static_initialization_and_destruction_0(int, int)",
       "address": 3957893,
@@ -120627,7 +120559,6 @@
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
@@ -120795,7 +120726,6 @@
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
@@ -121231,7 +121161,6 @@
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
@@ -121308,7 +121237,6 @@
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
@@ -122507,6 +122435,14 @@
       "address": 2039808,
       "offset": 1149840,
       "size": 3878,
+      "match_percent": 0.0
+    },
+    {
+      "name": "_ZL17CreatePodRaceMineP7nuvec_s",
+      "demangled_name": "CreatePodRaceMine(nuvec_s*)",
+      "address": 2076368,
+      "offset": 1186400,
+      "size": 652,
       "match_percent": 0.0
     },
     {
@@ -128455,10 +128391,10 @@
     }
   ],
   "summary": {
-    "bazel_units": 471,
+    "bazel_units": 468,
     "functions": 13454,
     "assigned_functions": 12352,
-    "ambiguous_functions": 213,
-    "unassigned_functions": 889
+    "ambiguous_functions": 212,
+    "unassigned_functions": 890
   }
 }

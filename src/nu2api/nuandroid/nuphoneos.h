@@ -1,3 +1,6 @@
+#ifndef NU2API_NUANDROID_NUPHONEOS_H
+#define NU2API_NUANDROID_NUPHONEOS_H
+
 #include "decomp.h"
 #include "nu2api/nucore/common.h"
 
@@ -18,6 +21,13 @@ typedef struct NuPhoneOSMessageData {
 
 DECOMP_ASSERT(sizeof(NuPhoneOSMessageData) == 0x14, "NuPhoneOSMessageData must remain 0x14 bytes");
 
+typedef struct NuPhoneOSMessage {
+    i32 type;
+    NuPhoneOSMessageData data;
+} NuPhoneOSMessage;
+
+DECOMP_ASSERT(sizeof(NuPhoneOSMessage) == 0x18, "NuPhoneOSMessage must remain 0x18 bytes");
+
 typedef void PHONEEVENTCALLBACK(const NuPhoneOSMessageData *);
 
 enum {
@@ -31,6 +41,10 @@ enum {
 extern "C" {
 #endif
     void NuPhoneOSRegisterEventCallback(i32 type, PHONEEVENTCALLBACK *callback_fn);
+    void NuPhoneOSMessagePost(const NuPhoneOSMessage *message, i32 nonblocking, i32 wait_until_processed);
+    void NuPhoneOSMessagePump(void);
 #ifdef __cplusplus
 }
+#endif
+
 #endif

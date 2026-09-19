@@ -8,6 +8,7 @@
 #include "legoapi/world/area.h"
 #include "legoapi/world/mission.h"
 #include "legoapi/props/system/socksys.h"
+#include "legoapi/render/light/surfaces.h"
 #include "nu2api/numath/nurand.h"
 #include "nu2api/numath/numtx.h"
 #include "nu2api/numath/nuvec.h"
@@ -78,7 +79,6 @@ i32 qrand(void);
 void GameCam_NewShake(GAMECAMERA_s *camera, f32 amount, f32 duration, f32 speed);
 void GameCam_Judder(GAMECAMERA_s *camera, f32 amount, i32 axis, nuvec_s *source);
 void NewRumbleAllPlayers(f32 intensity, f32 duration, i32 flags, i32 player_index);
-extern "C" TERRAIN_SURFACE_s TerSurface[32];
 i32 Players_AveragePos(nuvec_s *position, SOCKPOSITION_s *socket_position);
 i32 Hub_Outside(void);
 i32 KaminoInside(void);

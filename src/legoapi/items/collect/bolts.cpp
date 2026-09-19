@@ -5,6 +5,7 @@
 #include "legoapi/characters/motion.h"
 #include "legoapi/render/fx.h"
 #include "legoapi/render/core/terrain.h"
+#include "legoapi/render/light/surfaces.h"
 #include "legoapi/render/fx/parts.h"
 #include "globals.h"
 #include "legoapi/world/area.h"
@@ -916,7 +917,6 @@ void Bolt_AddDeflectedBolt(BOLT_s *, nuvec_s *, nuvec_s *, unsigned char *) {
     STUBBED();
 }
 
-extern "C" TERRAIN_SURFACE_s TerSurface[32];
 static __used__ i32 Bolt_HitPlat(BOLT_s *bolt, u8 *hit_flags, WORLDINFO_s *) {
     u32 exclude = GetLevelExBlowupFlags();
     Bolt_PlayHitSfx(bolt);

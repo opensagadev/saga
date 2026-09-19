@@ -5,6 +5,7 @@
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/items/collect/torpedo.h"
+#include "legoapi/gizmos/transport/gizportal.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/world/level.h"
 #include "legoapi/world/mission.h"
@@ -78,8 +79,6 @@ void Player_ClearContext(GameObject_s *object, i32 context);
 void Player_ResetContexts(PLAYERPACKET_s *packet);
 void InitSurfaceInfo(GameObject_s *object);
 i32 SetObjOnSurface(GameObject_s *object, i32 mode);
-void PortalGameObject(GameObject_s *object, i32 enable, i32 immediate, i16 portal, nugscn_s *scene);
-
 enum AI_CREATURE_FLAGS : i32 {
     AI_CREATURE_FLAG_FORMATION_REVERSED = 0x01,
     AI_CREATURE_FLAG_SKIP_LOW_END = 0x20,
@@ -287,31 +286,6 @@ void ResetAICreature(GameObject_s *object, AISYS_s *system) {
         object->field_0x7a5 = 0x17;
         object->context_animation = 0x41;
         ResetAnimPacket(&object->apiobj.anim_packet, 0x41);
-    }
-}
-
-void SnapCreaturePos(GameObject_s *object, nuvec_s *position, i32 angle, AIPATHINFO_s *path_info, i32 set_on_surface) {
-    object->apiobj.position = *position;
-    object->apiobj.field_0x276 = angle;
-    object->apiobj.facing_angle = angle;
-    object->apiobj.movement_facing_angle = angle;
-    object->apiobj.initial_position = object->apiobj.position;
-    object->apiobj.collision_position = object->apiobj.position;
-    plr_lastpos = object->apiobj.position;
-    object->apiobj.start_position = object->apiobj.position;
-    object->apiobj.respawn_position = object->apiobj.position;
-    object->apiobj.last_safe_position = object->apiobj.position;
-    object->ai_update_position = object->apiobj.position;
-    object->reset_velocity = v000;
-    object->apiobj.velocity = v000;
-    InitSurfaceInfo(object);
-    if (set_on_surface != 0) {
-        SetObjOnSurface(object, 0);
-    }
-    if (path_info != NULL) {
-        object->ai.path_info = *path_info;
-    } else {
-        AISysGetCharacterPathPos(WORLD->ai_sys, &object->apiobj, &object->ai, 0xff, 1);
     }
 }
 

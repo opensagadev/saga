@@ -27,6 +27,12 @@ _ZL17DrawParaphernaliaP12GameObject_s
 # an outstanding implementation gap, not a completed or matched function.
 _ZL18DrawLightningBoltsP12GameObject_sS0_i
 
+# These local placeholders are present in their evidenced level owners, but
+# their current tiny bodies are inlined away. They remain implementation gaps;
+# do not force standalone emission with attributes.
+_ZL17CreatePodRaceMineP7nuvec_s
+_ZL29BlockadeRunnerD_EjectCreaturei
+
 # glibc symbols
 sprintf
 strstr

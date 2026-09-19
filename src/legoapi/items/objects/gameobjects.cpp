@@ -11,6 +11,7 @@
 #include "legoapi/render/core/render.h"
 #include "legoapi/audio/audio.h"
 #include "legoapi/gizmos/transport/grapples.h"
+#include "legoapi/gizmos/transport/gizportal.h"
 #include "legoapi/gizmos/fx/gizmopickups.h"
 #include "legoapi/menus/screens/arcade.h"
 #include "decomp.h"
@@ -154,7 +155,6 @@ void KeepOnScreen(GameObject_s *object);
 void SetPlayer();
 void InitPlayerAI(GameObject_s *object);
 void ResetPlayerMoves(GameObject_s *object);
-void SnapCreaturePos(GameObject_s *object, NUVEC *position, i32 angle, AIPATHINFO_s *path_info, i32 set_on_surface);
 void MovePlayerSpline(GameObject_s *object);
 void GetTopBot(GameObject_s *object);
 void ResetRumble(RUMBLEPACKET *packet);
@@ -163,7 +163,6 @@ i32 TightRope_SnapTo(GameObject_s *object, NUVEC *position);
 void Player_ClearContext(GameObject_s *object, i32 mode);
 void Player_ResetContexts(PLAYERPACKET_s *packet);
 i32 SetObjOnSurface(GameObject_s *object, i32 mode);
-void PortalGameObject(GameObject_s *object, i32 enable, i32 immediate, i16 portal, nugscn_s *scene);
 void StarWars_GameAISysInit();
 void GameAISysSetGame();
 void ClearAICreatures();
@@ -3372,6 +3371,35 @@ update_bounds:
             api.field_0x218 < api.collision_origin.y + api.scaled_height) {
             object->ai.terrain_origin.y = api.field_0x218;
         }
+    }
+}
+
+void PortalGameObject(GameObject_s *, i32, i32, i16, nugscn_s *) {
+    STUBBED();
+}
+
+void SnapCreaturePos(GameObject_s *object, NUVEC *position, i32 angle, AIPATHINFO_s *path_info, i32 set_on_surface) {
+    object->apiobj.position = *position;
+    object->apiobj.field_0x276 = angle;
+    object->apiobj.facing_angle = angle;
+    object->apiobj.movement_facing_angle = angle;
+    object->apiobj.initial_position = object->apiobj.position;
+    object->apiobj.collision_position = object->apiobj.position;
+    plr_lastpos = object->apiobj.position;
+    object->apiobj.start_position = object->apiobj.position;
+    object->apiobj.respawn_position = object->apiobj.position;
+    object->apiobj.last_safe_position = object->apiobj.position;
+    object->ai_update_position = object->apiobj.position;
+    object->reset_velocity = v000;
+    object->apiobj.velocity = v000;
+    InitSurfaceInfo(object);
+    if (set_on_surface != 0) {
+        SetObjOnSurface(object, 0);
+    }
+    if (path_info != NULL) {
+        object->ai.path_info = *path_info;
+    } else {
+        AISysGetCharacterPathPos(WORLD->ai_sys, &object->apiobj, &object->ai, 0xff, 1);
     }
 }
 
@@ -6708,7 +6736,6 @@ void UpdateRumble(RUMBLEPACKET *);
 void Player_ToggleCharacter(GameObject_s *, i32, i32);
 void AveragePlayerCurrentSpeedMul();
 void RegenerateHearts(GameObject_s *);
-void UpdateLastSafePosition(GameObject_s *);
 void AddSurfaceRipples(GameObject_s *);
 void AddSurfaceDebris(GameObject_s *);
 
@@ -7585,6 +7612,33 @@ GameObject_s *FindNearestGameObject(NUVEC *position, GameObject_s *exclude, u32 
     if (nearest && distance_squared)
         *distance_squared = nearest_distance;
     return nearest;
+}
+
+i32 GameObjectNearFloor(GameObject_s *object, f32 height, f32 *distance) {
+    const f32 no_floor_height = 2000000.0f;
+    const f32 floor_height = object->apiobj.field_0x218;
+    if (floor_height == no_floor_height) {
+        if (distance != NULL) {
+            *distance = no_floor_height;
+        }
+        return 0;
+    }
+
+    i32 height_steps = static_cast<i32>(height);
+    if (height_steps < 0) {
+        height_steps = 0;
+    }
+    f32 tolerance = static_cast<f32>(height_steps) * 0.025f;
+    const f32 radius_tolerance = object->apiobj.collision_radius / 0.225f * tolerance;
+    if (radius_tolerance > tolerance) {
+        tolerance = radius_tolerance;
+    }
+
+    const f32 floor_distance = object->apiobj.collision_min.y - floor_height;
+    if (distance != NULL) {
+        *distance = floor_distance;
+    }
+    return tolerance > floor_distance;
 }
 
 extern "C" {

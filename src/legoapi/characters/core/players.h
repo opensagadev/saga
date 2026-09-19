@@ -146,7 +146,6 @@ i32 MakePlayerList(i32 count);
 
 void DrawOffsetCode(GameObject_s *obj, i32 param);
 extern "C" bool rtlDynamicEnable(i32 id, i32 param);
-i32 GameObjectNearFloor(GameObject_s *obj, f32 h, f32 *out);
 float GetHoverPosY(GameObject_s *obj);
 i32 Player_HasPurpleForce(GameObject_s *obj);
 i32 Player_HasDoubleWeaponDamage(GameObject_s *object);

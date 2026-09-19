@@ -14,6 +14,8 @@ struct HINT_s;
 #include "legoapi/characters/core/charconfig.h"
 #include "legoapi/core/config/cheat.h"
 #include "legoapi/cutscenes/cutscenes.h"
+#include "legoapi/gizmos/transport/gizportal.h"
+#include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/items/base/collection.h"
 #include "legoapi/world/levels/episode.h"
 #include "legoapi/world/level.h"
@@ -58,8 +60,6 @@ extern void CurrentStart(GameObject_s *obj, i32 mode, i32 start);
 extern void InitSurfaceInfo(GameObject_s *obj);
 extern i32 SetObjOnSurface(GameObject_s *obj, i32 mode);
 extern void GizForce_ResetLOS(GameObject_s *obj);
-extern void PortalGameObject(GameObject_s *obj, i32 enable, i32 immediate, i16 portal, nugscn_s *scene);
-
 void ResetPlayerAI(GameObject_s *obj);
 void ResetPlayerMoves(GameObject_s *obj);
 void SetProtocolDroidDeactivatedAction(GameObject_s *);
@@ -687,35 +687,6 @@ void DrawOffsetCode(GameObject_s *obj, i32 param) {
     STUBBED();
     (void)obj;
     (void)param;
-}
-
-i32 GameObjectNearFloor(GameObject_s *obj, f32 h, f32 *out) {
-    // Target 0x46e7b0..0x46e862. GameShadow uses a large positive
-    // sentinel when it does not find terrain, rather than -1.
-    const f32 no_floor_height = 2000000.0f;
-    const f32 floor_height = obj->apiobj.field_0x218;
-    if (floor_height == no_floor_height) {
-        if (out != NULL) {
-            *out = no_floor_height;
-        }
-        return 0;
-    }
-
-    i32 height_steps = static_cast<i32>(h);
-    if (height_steps < 0) {
-        height_steps = 0;
-    }
-    f32 tolerance = static_cast<f32>(height_steps) * 0.025f;
-    const f32 radius_tolerance = obj->apiobj.collision_radius / 0.225f * tolerance;
-    if (radius_tolerance > tolerance) {
-        tolerance = radius_tolerance;
-    }
-
-    const f32 floor_distance = obj->apiobj.collision_min.y - floor_height;
-    if (out != NULL) {
-        *out = floor_distance;
-    }
-    return tolerance > floor_distance;
 }
 
 float GetHoverPosY(GameObject_s *obj) {

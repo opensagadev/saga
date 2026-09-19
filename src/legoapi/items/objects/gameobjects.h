@@ -14,6 +14,8 @@ GameObject_s *FindNearestGameObject(NUVEC *position, GameObject_s *exclude, u32 
                                     f32 extra_radius, i32 animation, i32 character_id, i32 player_index,
                                     f32 *distance_squared, i32 horizontal_only, i32 (*filter)(GameObject_s *),
                                     bool first_match);
+i32 GameObjectNearFloor(GameObject_s *object, f32 height, f32 *distance);
+void SnapCreaturePos(GameObject_s *object, NUVEC *position, i32 angle, AIPATHINFO_s *path_info, i32 set_on_surface);
 i32 NoLayerKill(GameObject_s *object);
 struct CABLE_s;
 struct AISYS_s;

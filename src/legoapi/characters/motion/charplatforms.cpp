@@ -3,6 +3,7 @@
 #include "legoapi/legoapi_types.h"
 #include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/render/core/terrain.h"
+#include "legoapi/render/light/surfaces.h"
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/nucore/nustring.h"
@@ -17,13 +18,11 @@ struct SHOPINPUT;
 
 extern "C" void NewTerrPlatformsOff(void);
 extern TERRSET *CurTerr;
-extern "C" TERRAIN_SURFACE_s TerSurface[32];
 f32 GameShadow(GameObject_s *, NUVEC *, f32, i32);
 
 i32 SkinFlipTab[8] = {0, 1, 2, 3, 0, 2, 1, 3};
 f32 GameShadow(GameObject_s *, NUVEC *, f32, i32);
 extern "C" void NewTerrPlatformsOff();
-extern "C" TERRAIN_SURFACE_s TerSurface[32];
 
 void SkinPlatform(terrsitu_s *terrain_group, unsigned char *buffer, PLATSKININFO *info) {
     TERRAIN_GROUP *group = reinterpret_cast<TERRAIN_GROUP *>(terrain_group);

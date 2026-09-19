@@ -4,6 +4,7 @@
 #include "legoapi/characters/motion.h"
 #include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/gizmos/transport/ledges.h"
+#include "legoapi/render/light/surfaces.h"
 #include "legoapi/characters/motion/gameanim.h"
 #include "legoapi/core/input/gamepads.h"
 #include "nu2api/numath/nufloat.h"
@@ -19,7 +20,6 @@ struct SHOPINPUT;
 
 f32 LEDGETERRAINLOOKAHEAD = 0.02f;
 i32 LedgeTerrain_CheckAnims = 1;
-extern "C" TERRAIN_SURFACE_s TerSurface[32];
 
 static i32 LedgeTerrain_Attach(GameObject_s *object, u16 facing, NUVEC *position, u16 *wall_angle) {
     *wall_angle = NuAtan2D(object->contact_normal.x, object->contact_normal.z);
