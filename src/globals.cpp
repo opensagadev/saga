@@ -326,7 +326,6 @@ f32 avg_currentspeed_mul = 0.0f;
 i32 pause_rndr_on = 0;
 i32 pause_fade = 0;
 i32 wait_till_next_frame = 0;
-u8 object_switches[0x80] = {0};
 GIZFORCE_s *force_array[4] = {0};
 GameObject_s *ObiWan = NULL;
 GameObject_s **game_objects = NULL;

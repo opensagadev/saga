@@ -225,6 +225,3 @@ static void edpartSetSoundControl(eduimenu_s *, eduiitem_s *, u32) {
 static void edpartCancelCutOffMenu(eduimenu_s *, eduimenu_s *) {
     STUBBED();
 }
-static void edppRender() {
-    STUBBED();
-}

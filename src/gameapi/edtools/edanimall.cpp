@@ -5,34 +5,10 @@
 extern edanim_param_s AnimParams[64];
 extern i32 edanim_nearest;
 extern i32 edanim_nearest_param_id;
-extern i32 edanim_nearest_particle;
 extern i32 edanim_nearest_sound;
-extern i32 edanim_particle_mode;
-extern i32 edanim_particle_type;
-extern i32 edanim_sound_type;
 
 // Animation editor subsystem stubs (static, internal linkage).
 
-static void edanimInit() {
-    STUBBED();
-}
-static void edanimProc(float, nupad_s *) {
-    STUBBED();
-}
-static void edanimClose() {
-    STUBBED();
-}
-static void edanimEnter() {
-    edanim_nearest = -1;
-    edanim_nearest_param_id = -1;
-    edanim_nearest_particle = -1;
-    edanim_particle_mode = 0;
-    edanim_particle_type = -1;
-    edanim_sound_type = -1;
-}
-static void edanimRender() {
-    STUBBED();
-}
 static void edanimcbCubeMap(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }

@@ -11,6 +11,8 @@ extern "C" {
 #endif
 
     extern i32 edbits_editmode;
+    extern i32 edbits_part_general_page;
+    extern void *edbits_base_terrain;
     extern i32 *edbits_editor_enabled;
     void edbitsRegisterEditMode(i32 mode);
     void edbitsRegisterEditorEnabledFlag(i32 *enabled);

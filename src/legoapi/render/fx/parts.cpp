@@ -7,6 +7,7 @@
 #include "globals.h"
 #include "gamelib/util/gamelib_util_types.h"
 #include "gameapi/edtools/edfile.h"
+#include "gameapi/edtools/edstubs.h"
 #include "legoapi/render/fx.h"
 #include "legoapi/render/core/terrain.h"
 #include "legoapi/render/core/rtl.h"
@@ -25,6 +26,7 @@
 #include "legoapi/characters/core/character.h"
 #include "legoapi/items/base/apiobject.h"
 #include "legoapi/core/input/gamepads.h"
+#include "legoapi/world/levels/levels.h"
 #include "nu2api/numath/numtx.h"
 #include "nu2api/numath/nurand.h"
 #include "nu2api/numath/nuvec.h"
@@ -95,7 +97,6 @@ void PartCleanupTypes();
 void UpdatePartEmits(f32);
 static i32 part_raycasts_enabled = 1;
 static NUVEC PartNorm;
-extern u8 object_switches[0x80];
 
 extern "C" {
     void DebFreeInstantly(i32 *handle);
@@ -2100,7 +2101,6 @@ void edpartDetermineNearest(f32 distance) {
     }
 }
 extern "C" {
-    i32 edbits_part_general_page;
     i32 edbits_part_level_page = 1;
 
     i32 edpartLoadPageEx(char *path, i8 mode, nugscn_s **scenes, i32 scene_count) {

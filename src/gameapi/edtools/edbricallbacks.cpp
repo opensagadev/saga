@@ -67,12 +67,3 @@ static void edbricbCancelPlankInstanceMenu(eduimenu_s *, eduimenu_s *) {
 static void edbricbCancelBridgePropertiesMenu(eduimenu_s *, eduimenu_s *) {
     STUBBED();
 }
-
-static void edbriInit() {
-    STUBBED();
-}
-
-static i32 edbriProc(float, nupad_s *) {
-    STUBBED();
-    return 0;
-}

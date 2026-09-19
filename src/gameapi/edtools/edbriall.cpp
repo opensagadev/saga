@@ -3,15 +3,6 @@
 
 // Bridge editor subsystem stubs (static, internal linkage).
 
-static void edbriClose() {
-    STUBBED();
-}
-static void edbriEnter() {
-    STUBBED();
-}
-static void edbriRender() {
-    STUBBED();
-}
 static void edbricbFileLoad(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }

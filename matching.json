@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 46.204628,
+    "fuzzy_match_percent": 46.20653,
     "total_code": "4722419",
-    "matched_code": "402742",
-    "matched_code_percent": 8.528299,
+    "matched_code": "402861",
+    "matched_code_percent": 8.530819,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 4771,
-    "matched_functions_percent": 35.4484,
+    "matched_functions": 4774,
+    "matched_functions_percent": 35.470688,
     "total_units": 1
   },
   "text": {
@@ -24837,22 +24837,6 @@
           "match_percent": 31.428572
         },
         {
-          "name": "_ZL11edanimEnterv",
-          "demangled_name": "edanimEnter()",
-          "address": 3345072,
-          "offset": 2455104,
-          "size": 84,
-          "match_percent": 80.0
-        },
-        {
-          "name": "_ZL11edanimClosev",
-          "demangled_name": "edanimClose()",
-          "address": 3353952,
-          "offset": 2463984,
-          "size": 38,
-          "match_percent": 34.545456
-        },
-        {
           "name": "_ZL22edanimcbCancelMCTBMenuP10eduimenu_sS0_",
           "demangled_name": "edanimcbCancelMCTBMenu(eduimenu_s*, eduimenu_s*)",
           "address": 3354000,
@@ -24957,14 +24941,6 @@
           "match_percent": 2.933333
         },
         {
-          "name": "_ZL10edanimInitv",
-          "demangled_name": "edanimInit()",
-          "address": 3517344,
-          "offset": 2627376,
-          "size": 825,
-          "match_percent": 1.976048
-        },
-        {
           "name": "_ZL21edanimcbSoundTypeMenuP10eduimenu_sP10eduiitem_sj",
           "demangled_name": "edanimcbSoundTypeMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
           "address": 3529152,
@@ -24981,28 +24957,12 @@
           "match_percent": 33.0
         },
         {
-          "name": "_ZL12edanimRenderv",
-          "demangled_name": "edanimRender()",
-          "address": 3538400,
-          "offset": 2648432,
-          "size": 402,
-          "match_percent": 2.391304
-        },
-        {
           "name": "_ZL16edanimcbFileLoadP10eduimenu_sP10eduiitem_sj",
           "demangled_name": "edanimcbFileLoad(eduimenu_s*, eduiitem_s*, unsigned int)",
           "address": 3705328,
           "offset": 2815360,
           "size": 457,
           "match_percent": 3.103448
-        },
-        {
-          "name": "_ZL10edanimProcfP7nupad_s",
-          "demangled_name": "edanimProc(float, nupad_s*)",
-          "address": 3708592,
-          "offset": 2818624,
-          "size": 183,
-          "match_percent": 5.625
         }
       ]
     },
@@ -25315,22 +25275,6 @@
           "match_percent": 18.571428
         },
         {
-          "name": "_ZL10edbriEnterv",
-          "demangled_name": "edbriEnter()",
-          "address": 3345328,
-          "offset": 2455360,
-          "size": 26,
-          "match_percent": 31.428572
-        },
-        {
-          "name": "_ZL10edbriClosev",
-          "demangled_name": "edbriClose()",
-          "address": 3353888,
-          "offset": 2463920,
-          "size": 62,
-          "match_percent": 16.875
-        },
-        {
           "name": "_ZL20edbricbCancelOptMenuP10eduimenu_sS0_",
           "demangled_name": "edbricbCancelOptMenu(eduimenu_s*, eduimenu_s*)",
           "address": 3356016,
@@ -25393,14 +25337,6 @@
           "offset": 2653472,
           "size": 412,
           "match_percent": 3.506494
-        },
-        {
-          "name": "_ZL11edbriRenderv",
-          "demangled_name": "edbriRender()",
-          "address": 3546224,
-          "offset": 2656256,
-          "size": 146,
-          "match_percent": 10.555555
         }
       ]
     },
@@ -25498,14 +25434,6 @@
           "match_percent": 2.074468
         },
         {
-          "name": "_ZL9edbriInitv",
-          "demangled_name": "edbriInit()",
-          "address": 3540320,
-          "offset": 2650352,
-          "size": 205,
-          "match_percent": 7.333334
-        },
-        {
           "name": "_ZL25edbricbSetBridgeStabilityP10eduimenu_sP10eduiitem_sj",
           "demangled_name": "edbricbSetBridgeStability(eduimenu_s*, eduiitem_s*, unsigned int)",
           "address": 3542560,
@@ -25544,14 +25472,6 @@
           "offset": 2652992,
           "size": 78,
           "match_percent": 15.714286
-        },
-        {
-          "name": "_ZL9edbriProcfP7nupad_s",
-          "demangled_name": "edbriProc(float, nupad_s*)",
-          "address": 3547984,
-          "offset": 2658016,
-          "size": 125,
-          "match_percent": 8.125
         }
       ]
     },
@@ -27419,14 +27339,6 @@
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_gameapi/edpartall.o",
       "functions": [
         {
-          "name": "_ZL10edppRenderv",
-          "demangled_name": "edppRender()",
-          "address": 3574368,
-          "offset": 2684400,
-          "size": 57,
-          "match_percent": 20.625
-        },
-        {
           "name": "_ZL18edpartChangeCutOffP10eduimenu_sP10eduiitem_sj",
           "demangled_name": "edpartChangeCutOff(eduimenu_s*, eduiitem_s*, unsigned int)",
           "address": 4261904,
@@ -28050,36 +27962,12 @@
           "match_percent": 18.571428
         },
         {
-          "name": "_ZL9edppApplyv",
-          "demangled_name": "edppApply()",
-          "address": 3350160,
-          "offset": 2460192,
-          "size": 9,
-          "match_percent": 24.444445
-        },
-        {
-          "name": "_ZL9edppEnterv",
-          "demangled_name": "edppEnter()",
-          "address": 3350176,
-          "offset": 2460208,
-          "size": 262,
-          "match_percent": 5.789473
-        },
-        {
           "name": "_ZL25edptlcbJumpToGameLocationP10eduimenu_sP10eduiitem_sj",
           "demangled_name": "edptlcbJumpToGameLocation(eduimenu_s*, eduiitem_s*, unsigned int)",
           "address": 3350448,
           "offset": 2460480,
           "size": 60,
           "match_percent": 27.142857
-        },
-        {
-          "name": "_ZL9edppClosev",
-          "demangled_name": "edppClose()",
-          "address": 3350512,
-          "offset": 2460544,
-          "size": 54,
-          "match_percent": 22.0
         },
         {
           "name": "_ZL27edptlcbCancelTestDetailMenuP10eduimenu_sS0_",
@@ -28210,14 +28098,6 @@
           "match_percent": 15.714286
         },
         {
-          "name": "_ZL8edppInitv",
-          "demangled_name": "edppInit()",
-          "address": 3356096,
-          "offset": 2466128,
-          "size": 2425,
-          "match_percent": 0.708333
-        },
-        {
           "name": "_ZL23edptlcbSoundControlMenuP10eduimenu_sP10eduiitem_sj",
           "demangled_name": "edptlcbSoundControlMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
           "address": 3361024,
@@ -28256,14 +28136,6 @@
           "offset": 2604608,
           "size": 154,
           "match_percent": 6.585366
-        },
-        {
-          "name": "_ZL8edppProcfP7nupad_s",
-          "demangled_name": "edppProc(float, nupad_s*)",
-          "address": 3573328,
-          "offset": 2683360,
-          "size": 168,
-          "match_percent": 7.209302
         },
         {
           "name": "_ZL22edpartChangeRanMaxLifeP10eduimenu_sP10eduiitem_sj",
@@ -31933,6 +31805,22 @@
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_gameapi/edtoolsall_plain.o",
       "functions": [
         {
+          "name": "_ZL11edanimEnterv",
+          "demangled_name": "edanimEnter()",
+          "address": 3345072,
+          "offset": 2455104,
+          "size": 84,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL10edbriEnterv",
+          "demangled_name": "edbriEnter()",
+          "address": 3345328,
+          "offset": 2455360,
+          "size": 26,
+          "match_percent": 100.0
+        },
+        {
           "name": "_ZL10edgraEnterv",
           "demangled_name": "edgraEnter()",
           "address": 3345488,
@@ -31941,12 +31829,60 @@
           "match_percent": 46.666668
         },
         {
+          "name": "_ZL9edppApplyv",
+          "demangled_name": "edppApply()",
+          "address": 3350160,
+          "offset": 2460192,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL9edppEnterv",
+          "demangled_name": "edppEnter()",
+          "address": 3350176,
+          "offset": 2460208,
+          "size": 262,
+          "match_percent": 7.368421
+        },
+        {
+          "name": "_ZL9edppClosev",
+          "demangled_name": "edppClose()",
+          "address": 3350512,
+          "offset": 2460544,
+          "size": 54,
+          "match_percent": 28.0
+        },
+        {
           "name": "_ZL10edgraClosev",
           "demangled_name": "edgraClose()",
           "address": 3353824,
           "offset": 2463856,
           "size": 62,
           "match_percent": 26.25
+        },
+        {
+          "name": "_ZL10edbriClosev",
+          "demangled_name": "edbriClose()",
+          "address": 3353888,
+          "offset": 2463920,
+          "size": 62,
+          "match_percent": 26.25
+        },
+        {
+          "name": "_ZL11edanimClosev",
+          "demangled_name": "edanimClose()",
+          "address": 3353952,
+          "offset": 2463984,
+          "size": 38,
+          "match_percent": 38.18182
+        },
+        {
+          "name": "_ZL8edppInitv",
+          "demangled_name": "edppInit()",
+          "address": 3356096,
+          "offset": 2466128,
+          "size": 2425,
+          "match_percent": 0.875
         },
         {
           "name": "edanimParticleDestroy",
@@ -31963,6 +31899,14 @@
           "offset": 2627264,
           "size": 100,
           "match_percent": 100.0
+        },
+        {
+          "name": "_ZL10edanimInitv",
+          "demangled_name": "edanimInit()",
+          "address": 3517344,
+          "offset": 2627376,
+          "size": 825,
+          "match_percent": 2.51497
         },
         {
           "name": "edanimStartPage",
@@ -32205,6 +32149,14 @@
           "match_percent": 99.830505
         },
         {
+          "name": "_ZL12edanimRenderv",
+          "demangled_name": "edanimRender()",
+          "address": 3538400,
+          "offset": 2648432,
+          "size": 402,
+          "match_percent": 4.565218
+        },
+        {
           "name": "edbriStopPage",
           "demangled_name": "edbriStopPage",
           "address": 3539920,
@@ -32227,6 +32179,14 @@
           "offset": 2650224,
           "size": 119,
           "match_percent": 100.0
+        },
+        {
+          "name": "_ZL9edbriInitv",
+          "demangled_name": "edbriInit()",
+          "address": 3540320,
+          "offset": 2650352,
+          "size": 205,
+          "match_percent": 9.333333
         },
         {
           "name": "_Z17edbriBridgeUpdateiP8nugscn_s",
@@ -32267,6 +32227,22 @@
           "offset": 2654320,
           "size": 83,
           "match_percent": 100.0
+        },
+        {
+          "name": "_ZL11edbriRenderv",
+          "demangled_name": "edbriRender()",
+          "address": 3546224,
+          "offset": 2656256,
+          "size": 146,
+          "match_percent": 11.666667
+        },
+        {
+          "name": "_ZL9edbriProcfP7nupad_s",
+          "demangled_name": "edbriProc(float, nupad_s*)",
+          "address": 3547984,
+          "offset": 2658016,
+          "size": 125,
+          "match_percent": 13.75
         },
         {
           "name": "_Z16GetIndGrassClumpii",
@@ -32405,6 +32381,22 @@
           "match_percent": 2.477876
         },
         {
+          "name": "_ZL8edppProcfP7nupad_s",
+          "demangled_name": "edppProc(float, nupad_s*)",
+          "address": 3573328,
+          "offset": 2683360,
+          "size": 168,
+          "match_percent": 10.232558
+        },
+        {
+          "name": "_ZL10edppRenderv",
+          "demangled_name": "edppRender()",
+          "address": 3574368,
+          "offset": 2684400,
+          "size": 57,
+          "match_percent": 26.25
+        },
+        {
           "name": "edppDeleteEffect",
           "demangled_name": "edppDeleteEffect",
           "address": 3574432,
@@ -32499,6 +32491,14 @@
           "offset": 2813680,
           "size": 1671,
           "match_percent": 44.65333
+        },
+        {
+          "name": "_ZL10edanimProcfP7nupad_s",
+          "demangled_name": "edanimProc(float, nupad_s*)",
+          "address": 3708592,
+          "offset": 2818624,
+          "size": 183,
+          "match_percent": 3.333333
         },
         {
           "name": "cbMMRegSel",

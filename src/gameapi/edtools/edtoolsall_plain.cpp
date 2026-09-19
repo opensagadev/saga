@@ -12,6 +12,7 @@
 #include "legoapi/render/core/terrain.h"
 #include "legoapi/render/fx.h"
 #include "legoapi/render/fx/game_deb.h"
+#include "legoapi/world/levels/levels.h"
 #include "nu2api/nucore/nutime.h"
 #include "nu2api/nucore/nuthread.h"
 #include "nu2api/nucore/nustring.h"
@@ -27,7 +28,6 @@
 #include <math.h>
 
 float edanimPlayerAnimDistance(i32 parameter_index);
-extern u8 object_switches[0x80];
 extern "C" i32 NuRndrDoingScreenGrab;
 static i32 edbits_cubecount;
 static i32 edgra_clumpthin = 1;
@@ -41,19 +41,38 @@ static f32 edui_font_scale_x = 0.9f;
 static f32 edui_font_scale_y = 0.9f;
 static u32 edui_cursor_colour = 0xff000000;
 
+struct EDBITS_GAME_SOUND {
+    char name[16];
+    i32 id;
+};
+
 static void edgraInit();
 static void edgraClose();
 static void edgraEnter();
 static i32 edgraProc(f32 delta_time, nupad_s *pad);
 static void edgraRender();
+static void edppInit();
+static void edppClose();
+static void edppEnter();
+static void edppApply();
+static i32 edppProc(f32 delta_time, nupad_s *pad);
+static void edppRender();
+static void edbriInit();
+static void edbriClose();
+static void edbriEnter();
+static i32 edbriProc(f32 delta_time, nupad_s *pad);
+static void edbriRender();
+static void edanimInit();
+static void edanimClose();
+static void edanimEnter();
+static i32 edanimProc(f32 delta_time, nupad_s *pad);
+static void edanimRender();
 
 extern "C" {
     typedef void (*EDBITSPLAYSOUNDCALLBACK)(NUVEC *, i32);
     typedef i32 (*EDBITSREQUESTSOUNDCALLBACK)(char *);
 
     i32 bCameraEnabled = 1;
-    EDBITSPLAYSOUNDCALLBACK edbitsPlaySound;
-    EDBITSREQUESTSOUNDCALLBACK edbitsRequestSound;
     eduimenu_s *edui_messagemenu;
     edgra_clump_s *GrassClumps;
     i32 EDGRA_MAX_CLUMPS;
@@ -67,6 +86,12 @@ extern "C" {
 
     ed_module_s edgradesc = {NULL, NULL, "Grass Editor", edgraInit,  edgraClose, edgraEnter,  NULL,
                              NULL, NULL, NULL,           0x73617267, edgraProc,  edgraRender, NULL};
+    ed_module_s edptldesc = {NULL, NULL, "Particle Editor", edppInit, edppClose,  edppEnter, NULL, edppApply,
+                             NULL, NULL, 0x706c7470,        edppProc, edppRender, NULL};
+    ed_module_s edbridesc = {NULL, NULL, "Bridge Editor", edbriInit, edbriClose,  edbriEnter, NULL, NULL,
+                             NULL, NULL, 0x64697262,      edbriProc, edbriRender, NULL};
+    ed_module_s edanimdesc = {NULL, NULL, "Animation Editor", edanimInit, edanimClose,  edanimEnter, NULL, NULL,
+                              NULL, NULL, 0x6d696e61,         edanimProc, edanimRender, NULL};
 }
 
 static void edgraInit() {
@@ -87,6 +112,65 @@ static i32 edgraProc(f32, nupad_s *) {
 }
 
 static void edgraRender() {
+    STUBBED();
+}
+
+static void edppInit() {
+    STUBBED();
+}
+
+static void edppClose() {
+    STUBBED();
+}
+
+static void edppEnter() {
+    STUBBED();
+}
+
+static void edppApply() {
+    STUBBED();
+}
+
+static i32 edppProc(f32, nupad_s *) {
+    STUBBED();
+    return 0;
+}
+
+static void edppRender() {
+    STUBBED();
+}
+
+static void edbriInit() {
+    STUBBED();
+}
+
+static void edbriClose() {
+    STUBBED();
+}
+
+static i32 edbriProc(f32, nupad_s *) {
+    STUBBED();
+    return 0;
+}
+
+static void edbriRender() {
+    STUBBED();
+}
+
+static void edanimInit() {
+    STUBBED();
+}
+
+static void edanimClose() {
+    STUBBED();
+}
+
+static i32 edanimProc(f32, nupad_s *) {
+    STUBBED();
+    return 0;
+}
+
+static void edanimRender() {
     STUBBED();
 }
 
@@ -163,32 +247,113 @@ extern "C" {
     i32 part_page_used[8];
     i32 edpart_instances_used;
     edanim_param_s AnimParams[64];
-    i32 edbits_anim_page;
-    i32 edanim_particle_mode;
-    i32 edanim_sound_mode;
-    i32 edanim_next_param;
-    i32 edanim_params_used;
-    i32 edanim_page_on[8];
-    i32 edanim_page_used[8];
+    eduimenu_s *edanim_active_menu;
+    eduimenu_s *edanim_options_menu;
+    eduimenu_s *edanim_particle_menu;
+    eduimenu_s *edanim_particletype_menu;
+    eduimenu_s *edanim_localparticletype_menu;
+    eduimenu_s *edanim_localparticle_menu;
+    eduimenu_s *edanim_switch_menu;
+    eduimenu_s *edanim_switchtype_menu;
+    eduimenu_s *edanim_sound_menu;
+    eduimenu_s *edanim_soundtype_menu;
+    eduimenu_s *edanim_localsoundtype_menu;
+    eduimenu_s *edanim_localsound_menu;
+    eduimenu_s *edanim_bouncy_menu;
+    eduimenu_s *edanim_mctb_menu;
     NUGSCN *edanim_page_scene[8];
+    i32 edanim_page_used[8];
+    i32 edanim_page_on[8];
+    NUMTL *edanim_mtl;
+    f32 edanim_mtl_zoff;
+    NUVEC edanim_cam_pos;
+    f32 edanim_cam_dist;
+    i32 edanim_cam_ax;
+    i32 edanim_cam_ay;
     i32 edanim_nearest;
     i32 edanim_nearest_param_id;
     i32 edanim_nearest_particle;
     i32 edanim_nearest_sound;
+    i32 edanim_next_param;
+    i32 edanim_particle_mode;
     i32 edanim_particle_type;
+    i32 edanim_sound_mode;
     i32 edanim_sound_type;
+    i32 edanim_params_used;
+    i32 edanim_emitrotz;
+    i32 edanim_emitroty;
+}
+
+u8 object_switches[0x80];
+
+extern "C" {
+    u8 edbits_what_game;
+    char edbits_level_filename[256];
+    char edbits_general_save_directory[256];
+    char edbits_general_save_name[256];
+    char edbits_general_save_extension[256];
+    char edbits_level_save_directory[256];
+    char edbits_level_save_name[256];
+    char edbits_level_save_extension[256];
+    char edbits_datapath[256];
+    i32 edSfxAllCount;
     NUGSCN *edbits_base_scene;
-    edbridge_s edBridges[64];
+    NUGSCN *edbits_things_scene;
+    void *edbits_base_terrain;
+    i32 edbits_particle_general_page;
+    i32 edbits_anim_page;
+    i32 edbits_editmode;
+    i32 edbits_part_general_page;
+    NUCAMERA *cubemapcam;
+    i32 edbits_types_error;
+    i32 edbits_duplicates_error;
+    EDBITS_GAME_SOUND edbitsGameSound[320];
+    i32 edbits_numsounds;
+    EDBITSPLAYSOUNDCALLBACK edbitsPlaySound;
+    EDBITSREQUESTSOUNDCALLBACK edbitsRequestSound;
+    eduimenu_s *edbri_active_menu;
+    eduimenu_s *edbri_options_menu;
+    eduimenu_s *edbri_dpadmode_menu;
+    eduimenu_s *edbri_plankinstance_menu;
+    eduimenu_s *edbri_postinstance_menu;
+    eduimenu_s *edbri_plankcount_menu;
+    eduimenu_s *edbri_bridgeproperties_menu;
+    eduimenu_s *edbri_ropecolour_menu;
+    NUMTL *edbri_mtl;
+    f32 edbri_mtl_zoff;
+    NUVEC edbri_cam_pos;
+    f32 edbri_cam_dist;
+    i32 edbri_cam_ax;
+    i32 edbri_cam_ay;
+    i32 edbri_nearest;
+    i32 edbri_plank_instance_type;
+    i32 edbri_post_instance_type;
     i32 edbri_bridges_used;
-    i32 edbri_page_on[8];
-    NUGSCN *edbri_page_scene[8];
     i32 edbri_page_used[8];
-    i32 edbri_rotz, edbri_roty, edbri_pageid;
-    i32 edbri_plank_instance_type, edbri_post_instance_type;
+    i32 edbri_page_on[8];
+    i32 edbri_pageid;
+    i32 edbri_rotz;
+    i32 edbri_roty;
+    i32 edbri_mode;
+    NUGSCN *edbri_page_scene[8];
+    edbridge_s edBridges[64];
     f32 edbri_length = 1.0f;
     f32 edbri_width = 0.5f;
     i32 edbri_planks = 11;
     i32 edbri_post_interval = 5;
+}
+
+static void edbriEnter() {
+    edbri_nearest = -1;
+}
+
+static void edanimEnter() {
+    edanim_nearest = -1;
+    edanim_nearest_param_id = -1;
+    edanim_nearest_particle = -1;
+    edanim_particle_mode = 0;
+    edanim_particle_type = -1;
+    edanim_sound_type = -1;
 }
 
 void FileLoadSingleEffectType(debinftype *, i32, char);
@@ -715,13 +880,6 @@ extern "C" {
         }
         return -1;
     }
-    struct EDBITS_GAME_SOUND {
-        char name[16];
-        i32 id;
-    };
-    i32 edbits_numsounds;
-    EDBITS_GAME_SOUND edbitsGameSound[320];
-
     i32 edbitsLookupSound(char *name) {
         for (i32 index = 0; index < edbits_numsounds; ++index) {
             if (NuStrNICmp(edbitsGameSound[index].name, name, 15) == 0) {
@@ -734,7 +892,6 @@ extern "C" {
         STUBBED();
         return -1;
     }
-    NUCAMERA *cubemapcam;
     i32 edbitsProcessCubemapDump(void) {
         if (edbits_cubecount == 0)
             return 0;
@@ -794,11 +951,6 @@ extern "C" {
         }
         return --edbits_cubecount;
     }
-    char edbits_datapath[256];
-    char edbits_level_filename[256];
-    u8 edbits_what_game;
-    NUGSCN *edbits_things_scene;
-
     void edbitsRegisterDataPath(char *path) {
         if (path) {
             NuStrCpy(edbits_datapath, path);
@@ -806,7 +958,6 @@ extern "C" {
             edbits_datapath[0] = '\0';
         }
     }
-    i32 edbits_editmode;
     static i32 edbits_local_editor_enabled;
     i32 *edbits_editor_enabled = &edbits_local_editor_enabled;
 
@@ -830,13 +981,6 @@ extern "C" {
     void edbitsRegisterRequestSound(EDBITSREQUESTSOUNDCALLBACK callback) {
         edbitsRequestSound = callback;
     }
-    char edbits_general_save_directory[256];
-    char edbits_general_save_name[256];
-    char edbits_general_save_extension[256];
-    char edbits_level_save_directory[256];
-    char edbits_level_save_name[256];
-    char edbits_level_save_extension[256];
-
     void edbitsRegisterSaveFormat(char *general_save_directory, char *general_save_name, char *general_save_extension,
                                   char *level_save_directory, char *level_save_name, char *level_save_extension) {
         if (general_save_directory) {
@@ -882,7 +1026,6 @@ extern "C" {
         edbits_things_scene = scene;
     }
     void edbitsRegisterBaseTerrain(void *terrain) {
-        extern void *edbits_base_terrain;
         edbits_base_terrain = terrain;
     }
     i32 edbitsSfxVol = 100;

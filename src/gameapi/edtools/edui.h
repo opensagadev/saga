@@ -129,6 +129,10 @@ struct edui_interact_s {
 };
 
 extern "C" {
+    extern ed_module_s edptldesc;
+    extern ed_module_s edgradesc;
+    extern ed_module_s edbridesc;
+    extern ed_module_s edanimdesc;
     i32 edmainActivate(ed_module_s *module, i32 notify);
     ed_module_s *edmainCurrent(void);
     i32 edmainRegister(ed_module_s *module);

@@ -42,7 +42,6 @@ extern "C" {
     extern void *edgra_page_terrain[8];
     extern NUMTX *edgra_page_matrix_stack[8];
     extern NUGSCN *edbits_base_scene;
-    void *edbits_base_terrain;
     NUMTX *edgra_mtxbuffer;
     i32 edgra_copy_source = -1;
     i32 edgra_last_clump_in_buffer = -1;

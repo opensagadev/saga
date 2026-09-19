@@ -395,24 +395,3 @@ static void edpartCancelInstanceSettingsMenu(eduimenu_s *, eduimenu_s *) {
 static void edpartDeleteAllInstanceDuplicates(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
-
-static void edppInit() {
-    STUBBED();
-}
-
-static i32 edppProc(float, nupad_s *) {
-    STUBBED();
-    return 0;
-}
-
-static void edppApply() {
-    STUBBED();
-}
-
-static void edppClose() {
-    STUBBED();
-}
-
-static void edppEnter() {
-    STUBBED();
-}
