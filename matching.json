@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 46.141415,
+    "fuzzy_match_percent": 46.18434,
     "total_code": "4722419",
     "matched_code": "402098",
     "matched_code_percent": 8.514662,
@@ -23047,14 +23047,6 @@
           "match_percent": 65.78362
         },
         {
-          "name": "_ZL18ParseAIPathCnxFlagPc",
-          "demangled_name": "ParseAIPathCnxFlag(char*)",
-          "address": 1646672,
-          "offset": 756704,
-          "size": 202,
-          "match_percent": 86.05357
-        },
-        {
           "name": "_ZL20Action_CnxControllerP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
           "demangled_name": "Action_CnxController(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char**, int, int, float)",
           "address": 1646880,
@@ -40258,14 +40250,6 @@
           "offset": 1186400,
           "size": 652,
           "match_percent": 3.043478
-        },
-        {
-          "name": "_ZL29BlockadeRunnerD_EjectCreaturei",
-          "demangled_name": "BlockadeRunnerD_EjectCreature(int)",
-          "address": 2173680,
-          "offset": 1283712,
-          "size": 1921,
-          "match_percent": 1.055409
         }
       ]
     },
@@ -52587,14 +52571,6 @@
           "offset": 1187056,
           "size": 130,
           "match_percent": 7.096774
-        },
-        {
-          "name": "_Z21GizBombGen_FindByNameP15GIZBOMBGENSYS_sPc",
-          "demangled_name": "GizBombGen_FindByName(GIZBOMBGENSYS_s*, char*)",
-          "address": 2304496,
-          "offset": 1414528,
-          "size": 109,
-          "match_percent": 8.666667
         }
       ]
     },
@@ -56168,6 +56144,14 @@
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/1/gizportal.o",
       "functions": [
         {
+          "name": "_GLOBAL__sub_I_gizportal.cpp",
+          "demangled_name": "_GLOBAL__sub_I_gizportal.cpp",
+          "address": 926624,
+          "offset": 36656,
+          "size": 93,
+          "match_percent": 99.35294
+        },
+        {
           "name": "_Z21PortalDoors_ConfigureP11WORLDINFO_sPc",
           "demangled_name": "PortalDoors_Configure(WORLDINFO_s*, char*)",
           "address": 4663568,
@@ -57266,6 +57250,14 @@
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/1/gizbombgen.o",
       "functions": [
         {
+          "name": "_GLOBAL__sub_I_gizbombgen.cpp",
+          "demangled_name": "_GLOBAL__sub_I_gizbombgen.cpp",
+          "address": 900192,
+          "offset": 10224,
+          "size": 93,
+          "match_percent": 99.35294
+        },
+        {
           "name": "_ZL21GizmoBombGen_ActivateP7GIZMO_si",
           "demangled_name": "GizmoBombGen_Activate(GIZMO_s*, int)",
           "address": 2301152,
@@ -57392,6 +57384,14 @@
           "offset": 1414368,
           "size": 147,
           "match_percent": 72.61224
+        },
+        {
+          "name": "_Z21GizBombGen_FindByNameP15GIZBOMBGENSYS_sPc",
+          "demangled_name": "GizBombGen_FindByName(GIZBOMBGENSYS_s*, char*)",
+          "address": 2304496,
+          "offset": 1414528,
+          "size": 109,
+          "match_percent": 9.333333
         },
         {
           "name": "_Z24GizBombGen_RegisterGizmoi",
@@ -59096,14 +59096,6 @@
           "offset": 3099572,
           "size": 159,
           "match_percent": 90.06383
-        },
-        {
-          "name": "_ZL15UpdateAnimTimerP16CHARACTERMODEL_sP12ANIMPACKET_ssfffiPcif",
-          "demangled_name": "UpdateAnimTimer(CHARACTERMODEL_s*, ANIMPACKET_s*, short, float, float, float, int, char*, int, float)",
-          "address": 3989699,
-          "offset": 3099731,
-          "size": 1057,
-          "match_percent": 63.810997
         },
         {
           "name": "UpdateAnimPacket",
@@ -78601,14 +78593,6 @@
           "match_percent": 100.0
         },
         {
-          "name": "_ZL24PartKill_EjectedCreatureP6PART_si",
-          "demangled_name": "PartKill_EjectedCreature(PART_s*, int)",
-          "address": 2171760,
-          "offset": 1281792,
-          "size": 648,
-          "match_percent": 3.111111
-        },
-        {
           "name": "_Z17Asteroid_PartKillP6PART_si",
           "demangled_name": "Asteroid_PartKill(PART_s*, int)",
           "address": 2196480,
@@ -83482,7 +83466,7 @@
           "address": 2184592,
           "offset": 1294624,
           "size": 2494,
-          "match_percent": 0.747331
+          "match_percent": 89.176155
         },
         {
           "name": "_Z21DeathStarRescueB_InitP11WORLDINFO_s",
@@ -116578,18 +116562,6 @@
       ]
     },
     {
-      "name": "_GLOBAL__sub_I_gizbombgen.cpp",
-      "demangled_name": "_GLOBAL__sub_I_gizbombgen.cpp",
-      "address": 900192,
-      "offset": 10224,
-      "size": 93,
-      "match_percent": 99.35294,
-      "candidate_units": [
-        "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmos/traps/gizbombgen.cpp.o"
-      ]
-    },
-    {
       "name": "_GLOBAL__sub_I_missions.cpp",
       "demangled_name": "_GLOBAL__sub_I_missions.cpp",
       "address": 901248,
@@ -116704,18 +116676,6 @@
       ]
     },
     {
-      "name": "_GLOBAL__sub_I_gizportal.cpp",
-      "demangled_name": "_GLOBAL__sub_I_gizportal.cpp",
-      "address": 926624,
-      "offset": 36656,
-      "size": 93,
-      "match_percent": 99.35294,
-      "candidate_units": [
-        "legoapi/gizmo/object/gizportal.cpp.o",
-        "legoapi/gizmos/transport/gizportal.cpp.o"
-      ]
-    },
-    {
       "name": "_GLOBAL__sub_I_edlevelall.cpp",
       "demangled_name": "_GLOBAL__sub_I_edlevelall.cpp",
       "address": 928992,
@@ -116786,6 +116746,18 @@
       ]
     },
     {
+      "name": "_ZL18ParseAIPathCnxFlagPc",
+      "demangled_name": "ParseAIPathCnxFlag(char*)",
+      "address": 1646672,
+      "offset": 756704,
+      "size": 202,
+      "match_percent": 7.5,
+      "candidate_units": [
+        "editor/edpath.cpp.o",
+        "gameapi/ai/aisys/aisys.cpp.o"
+      ]
+    },
+    {
       "name": "_ZL17Action_SetLocatorP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
       "demangled_name": "Action_SetLocator(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char**, int, int, float)",
       "address": 1657184,
@@ -116805,6 +116777,18 @@
       "match_percent": 29.66845,
       "candidate_units": [
         "gameapi/ai/aisys/aisys.cpp.o"
+      ]
+    },
+    {
+      "name": "_ZL24PartKill_EjectedCreatureP6PART_si",
+      "demangled_name": "PartKill_EjectedCreature(PART_s*, int)",
+      "address": 2171760,
+      "offset": 1281792,
+      "size": 648,
+      "match_percent": 3.111111,
+      "candidate_units": [
+        "legoapi/render/fx/parts.cpp.o",
+        "legoapi/world/levels/episodeIV.cpp.o"
       ]
     },
     {
@@ -116871,8 +116855,6 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
@@ -116938,8 +116920,6 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
@@ -117005,8 +116985,6 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
@@ -117085,8 +117063,6 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
@@ -117199,8 +117175,6 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
@@ -117279,8 +117253,6 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
@@ -117359,8 +117331,6 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
@@ -117439,8 +117409,6 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
@@ -117519,8 +117487,6 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
@@ -117599,8 +117565,6 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
@@ -117889,8 +117853,6 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
@@ -117969,8 +117931,6 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
@@ -118049,8 +118009,6 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
@@ -118178,8 +118136,6 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
@@ -118270,8 +118226,6 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
@@ -118452,8 +118406,6 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
@@ -118585,8 +118537,6 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
@@ -118718,8 +118668,6 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
@@ -118798,8 +118746,6 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
@@ -118878,8 +118824,6 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
@@ -118958,8 +118902,6 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
@@ -119064,8 +119006,6 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
@@ -119144,8 +119084,6 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
@@ -119235,8 +119173,6 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
@@ -119315,8 +119251,6 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
@@ -119408,8 +119342,6 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
@@ -119488,8 +119420,6 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
@@ -119602,8 +119532,6 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
@@ -119682,8 +119610,6 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
@@ -119762,8 +119688,6 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
@@ -119842,8 +119766,6 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
@@ -119985,8 +119907,6 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
@@ -120065,8 +119985,6 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
@@ -120145,8 +120063,6 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
@@ -120572,8 +120488,6 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
@@ -120768,8 +120682,6 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
@@ -120889,6 +120801,18 @@
       ]
     },
     {
+      "name": "_ZL15UpdateAnimTimerP16CHARACTERMODEL_sP12ANIMPACKET_ssfffiPcif",
+      "demangled_name": "UpdateAnimTimer(CHARACTERMODEL_s*, ANIMPACKET_s*, short, float, float, float, int, char*, int, float)",
+      "address": 3989699,
+      "offset": 3099731,
+      "size": 1057,
+      "match_percent": 63.810997,
+      "candidate_units": [
+        "legoapi/items/base/apiobject.cpp.o",
+        "legoapi/render/fx/parts.cpp.o"
+      ]
+    },
+    {
       "name": "_Z41__static_initialization_and_destruction_0ii",
       "demangled_name": "__static_initialization_and_destruction_0(int, int)",
       "address": 4006085,
@@ -120927,8 +120851,6 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
@@ -121366,8 +121288,6 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
@@ -121446,8 +121366,6 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
@@ -122674,6 +122592,14 @@
       "address": 2112848,
       "offset": 1222880,
       "size": 570,
+      "match_percent": 0.0
+    },
+    {
+      "name": "_ZL29BlockadeRunnerD_EjectCreaturei",
+      "demangled_name": "BlockadeRunnerD_EjectCreature(int)",
+      "address": 2173680,
+      "offset": 1283712,
+      "size": 1921,
       "match_percent": 0.0
     },
     {
@@ -128584,8 +128510,8 @@
   "summary": {
     "bazel_units": 473,
     "functions": 13454,
-    "assigned_functions": 12354,
-    "ambiguous_functions": 212,
-    "unassigned_functions": 888
+    "assigned_functions": 12352,
+    "ambiguous_functions": 213,
+    "unassigned_functions": 889
   }
 }

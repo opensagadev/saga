@@ -47,20 +47,12 @@ void BlockadeRunnerB_Update(WORLDINFO_s *) {
     STUBBED();
 }
 
-// hacks to get BlockadeRunnerD_Update to match
-// these should go away once BlockadeRunnerD_EjectCreature is implemented
-#if defined(__i386__)
-__attribute__((regparm(1)))
-#endif
-static __used__ __attribute__((noinline)) void BlockadeRunnerD_EjectCreature(int param) {
-#if defined(__i386__)
-    asm volatile("" : : "a"(param));
-#else
-    static_cast<void>(param);
-#endif
+static void BlockadeRunnerD_EjectCreature(int) {
+    STUBBED();
 }
 
-static __used__ void PartKill_EjectedCreature(PART_s *, i32) {
+static void PartKill_EjectedCreature(PART_s *, i32) {
+    STUBBED();
 }
 
 void BlockadeRunnerD_Update(WORLDINFO_s *world) {

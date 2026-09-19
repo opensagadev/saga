@@ -57,6 +57,7 @@ DECOMP_ASSERT(offsetof(GIZBOMBGENSYS, flags) == 0x0c, "GIZBOMBGENSYS flags offse
 DECOMP_ASSERT(offsetof(GIZBOMBGENSYS, progress) == 0x10, "GIZBOMBGENSYS progress offset");
 
 ADDGIZMOTYPE *GizBombGen_RegisterGizmo(i32 type_id);
+void GizBombGen_FindByName(GIZBOMBGENSYS_s *, char *);
 
 extern "C" {
 #endif

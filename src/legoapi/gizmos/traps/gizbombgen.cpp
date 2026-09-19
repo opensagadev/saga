@@ -326,6 +326,10 @@ static i32 GizBombGens_Load(void *world_ptr, void *system_ptr) {
     return 1;
 }
 
+void GizBombGen_FindByName(GIZBOMBGENSYS_s *, char *) {
+    STUBBED();
+}
+
 ADDGIZMOTYPE *GizBombGen_RegisterGizmo(i32 type_id) {
     static ADDGIZMOTYPE addtype;
 
