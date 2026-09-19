@@ -22,6 +22,7 @@
 #include "legoapi/menus/screens/gamemenuall.h"
 #include "legoapi/props/doors/door.h"
 #include "legoapi/render/core/render.h"
+#include "legoapi/menus/core/panel.h"
 #include "legoapi/render/core/screen.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/mission.h"
@@ -202,7 +203,6 @@ extern i32 menu_flash;
 extern AREADATA *SENATE_ADATA;
 void DrawShopPanel();
 i32 Missions_NumCompleted(MISSIONSYS *, MISSIONSAVE *, i32);
-void DrawBuildUpBar(f32, f32, i32, i32, f32, f32, f32, u16);
 void Hub_DrawImportantBrick(i32, f32, f32, f32, i32, i32);
 void Hub_DrawAreaStats(f32, i32, i32);
 static void Hub_DrawMiniKitCount(f32, f32, i32, i32, f32);

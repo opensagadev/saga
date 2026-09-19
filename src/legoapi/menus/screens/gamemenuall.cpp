@@ -20,6 +20,7 @@
 #include "legoapi/audio/audio.h"
 #include "legoapi/menus/core/text.h"
 #include "legoapi/render/core/render.h"
+#include "legoapi/menus/core/panel.h"
 #include "nu2api/nu3d/nugscn.h"
 #include "nu2api/nu3d/nuqfnt.h"
 #include "nu2api/nu3d/nutex.h"
@@ -44,7 +45,6 @@ extern f32 ICONSIZE, ICONX, DROPINALPHA, HUB_EPISODETITLEY;
 extern i16 tSELECT, tSELECTED, tSELECTING, tEXIT, tCANCEL;
 void DrawCharIcon(i32, f32, f32, f32, f32, i32, f32, f32, i32, nuhspecial_s *);
 void Hub_DrawImportantBrick(i32, f32, f32, f32, i32, i32);
-void DrawPlayerIconPrompts(i32, i32, f32, i32, i32, i32, i32, i32, i32, f32, i32, i32, i32, i32);
 f32 GetAspectRatio();
 extern "C" void BackupMenu(void);
 extern "C" void BackupMenuNoFn(void);

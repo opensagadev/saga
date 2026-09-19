@@ -8,6 +8,7 @@
 #include "legoapi/characters/core/character.h"
 #include "legoapi/items/base/collection.h"
 #include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/menus/core/panel.h"
 #include "legoapi/menus/screens/shop.h"
 #include "legoapi/menus/screens/gamemenuall.h"
 #include "legoapi/cutscenes/cutscenes.h"
@@ -1413,7 +1414,6 @@ i32 ItemMenu(MENU_s *menu) {
     return 7;
 }
 extern i16 tSELECT, tEXIT, tBACK, tBUY, tPLAY, tSELECTING;
-void DrawPlayerIconPrompts(i32, i32, f32, i32, i32, i32, i32, i32, i32, f32, i32, i32, i32, i32);
 
 void DrawShopPrompts() {
     i32 select = -1;

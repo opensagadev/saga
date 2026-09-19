@@ -19,6 +19,7 @@ void PostAnimate_FETT(GameObject_s *object);
 struct ANIMREDIRECT;
 struct ANIMLIST_s;
 extern "C" i16 id_GRABCONTROL;
+extern "C" i16 id_GRABR2CONTROL;
 extern "C" i16 id_GRABMACHINE;
 extern "C" i16 id_GRABMAGNET;
 extern "C" i16 id_ROBOTBASE;
@@ -29,6 +30,8 @@ extern "C" i16 id_YODA;
 extern "C" i16 id_QUIGONJINN;
 extern "C" i16 id_MACEWINDU;
 extern "C" i16 id_C3PO;
+extern "C" i16 id_TC14;
+extern "C" i16 id_LUKESKYWALKERDAGOBAH;
 i32 RedirectAnim(char *path, ANIMREDIRECT *redirects, ANIMLIST_s *animation_list, char *directory);
 struct BLADE_s {
     i16 model;

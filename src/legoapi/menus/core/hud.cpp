@@ -8,6 +8,7 @@ void RndrTexQuad(f32, f32, f32, f32, i32, numtl_s *, i32);
 #include "legoapi/legoapi_types.h"
 #include "legoapi/menus/core/text.h"
 #include "legoapi/render/core/render.h"
+#include "legoapi/menus/core/panel.h"
 #include "legoapi/world/level.h"
 #include "legoapi/world/world.h"
 #include "nu2api/nucore/nustring.h"
@@ -19,8 +20,6 @@ extern FadeSystem FadeSys;
 extern f32 statstime;
 extern f32 cointotaltime;
 
-void CoinTotal_Draw(i32 total, f32 y, f32 scale, i32 remember_positions, f32 icon_phase, i32 red, i32 green, i32 blue);
-void DrawSuperStoryTime(f32 x, f32 timer, f32 target, i32 flags, i32 draw_icon);
 void Text_MakeScore(u32 score, char *text);
 
 HudRadarPulse::HudRadarPulse(VuVec const &initial_position) : position(initial_position) {

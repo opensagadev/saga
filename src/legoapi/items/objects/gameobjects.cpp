@@ -1,4 +1,5 @@
 #include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/menus/core/panel.h"
 #include "legoapi/ai/core/legoai.h"
 #include "legoapi/items/objects/objectsall.h"
 #include "legoapi/items/collect/torpedo.h"
@@ -3251,40 +3252,6 @@ void *GameBufferAlloc(variptr_u *buf, variptr_u *buf_end, i32 size) {
     void *ptr = (void *)(usize)buf->addr;
     buf->addr += size;
     return ptr;
-}
-
-extern i16 tUNKNOWN;
-char *GameObj_GetName(i32 model, GameObject_s *object, char *buffer) {
-    if (object != NULL) {
-        if (object->field_0xcc0 != NULL && object->field_0xcc0->apiobj.character_data->name_id != -1)
-            model = object->field_0xcc0->id;
-        else
-            model = object->id;
-    } else if (model == -1) {
-        return TTab[tUNKNOWN];
-    }
-    if (buffer != NULL) {
-        i32 index = -1;
-        if (model == id_WEIRDO1) {
-            if (Game.customizer.primary_use_saved_name)
-                index = 0;
-        } else if (model == id_WEIRDO2) {
-            if (Game.customizer.secondary_use_saved_name)
-                index = 1;
-        }
-        if (index == -1)
-            return TTab[CDataList[model].name_id];
-        NuStrCpy(buffer,
-                 reinterpret_cast<char *>(&Game.customizer) + offsetof(CUSTOMISESAVE_s, primary_name) + index * 0x38);
-        for (i32 i = 14; i >= 0; --i) {
-            if (buffer[i] != ' ')
-                return buffer;
-            buffer[i] = '\0';
-        }
-        NuStrCpy(buffer, "?");
-        return buffer;
-    }
-    return TTab[CDataList[model].name_id];
 }
 
 void Game_AutoSaving() {
@@ -6747,11 +6714,6 @@ void ManageGameObjects() {
         FreeTorpedoPacket(&object->torpedo);
         RemoveGameObject(object, 1);
     }
-}
-
-f32 PowerUp_GetPanelY(i32) {
-    STUBBED();
-    return 0.0f;
 }
 
 void PowerUp_Particles(WORLDINFO_s *, nuvec_s *) {

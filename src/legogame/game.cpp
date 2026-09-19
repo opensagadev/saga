@@ -27,6 +27,7 @@
 #include "legoapi/world/area.h"
 #include "legoapi/characters/core/character.h"
 #include "legoapi/render/core/render.h"
+#include "legoapi/menus/core/panel.h"
 #include "legoapi/render/fx/parts.h"
 #include "nu2api/numath/nuvec.h"
 
@@ -414,11 +415,6 @@ u16 MakeSaveHash(void) {
 }
 
 i32 drawautosaveicon = 0;
-
-void DrawAutoSaveIcon(void) {
-    drawautosaveicon = 1;
-    return;
-}
 
 SUPEROPTIONS_s SuperOptions = {};
 static CUTSCENESYS CutSceneSys_LSW = {0x5b, 0x5c, 0xe7, 2};

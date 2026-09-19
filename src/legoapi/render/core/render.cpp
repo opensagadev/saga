@@ -1464,61 +1464,8 @@ void DrawBezierLine(VuVec &, VuVec &, VuVec &, VuVec &, numtl_s *, i32) {
     STUBBED();
 }
 
-void DrawBonusScore(float, i32, i32, float, i32 *) {
-    STUBBED();
-}
-
-i32 InDoubleScoreZone(GameObject_s *object) {
-    if (Mission_Active(NULL) != NULL)
-        return 0;
-    if ((WORLD->current_level->flags & LEVEL_DOUBLE_SCORE) != 0)
-        return 1;
-    for (i32 i = 19; i < 24; ++i) {
-        nugspline_s *spline = reinterpret_cast<nugspline_s *>(WORLD->portal_places[i]);
-        if (spline != NULL && OutSideSplineArea(&object->apiobj.collision_position, spline, NULL, NULL, 0) == 0)
-            return 1;
-    }
-    return 0;
-}
-
-void DoubleScoreAlpha() {
-    STUBBED();
-}
-
-void DrawInDoubleScoreZone(float) {
-    STUBBED();
-}
-
 void DrawBoxMtx_Now(_vum_s *, _vuv_s *, i32, i32) {
     STUBBED();
-}
-
-void DrawBuildUpBar(float x, float y, i32 amount, i32 maximum, float scale, float width, float alpha, u16 angle) {
-    const f32 progress = static_cast<f32>(amount * 10) / maximum;
-    const i32 full = progress;
-    const f32 fraction = NuFmod(progress, 1.0f);
-    const f32 phase = GlobalTimer.time_elapsed_mod_seconds * 10.0f;
-    const f32 size = scale * 0.085f * width;
-    const f32 step = width * 0.02975f * NuTrigTable[((angle + 0x4000) >> 1) & 0x7fff];
-    f32 px = x - step * 9.0f * 0.5f;
-    i32 shimmer = 0xb3 - static_cast<i32>(phase);
-    for (i32 i = 0; i < 10; ++i) {
-        i32 object;
-        if (amount == maximum) {
-            if (shimmer >= 0xb3)
-                shimmer = 0xa9;
-            object = shimmer++;
-        } else if (i < full)
-            object = 0xb2;
-        else if (i == full)
-            object = fraction * 9.0f + 169.0f;
-        else
-            object = 0xa9;
-        const f32 depth[10] = {1.009f, 1.008f, 1.007f, 1.006f, 1.005f, 1.004f, 1.003f, 1.002f, 1.001f, 1.0f};
-        DrawPanel3DObject(px, y, depth[i], size, size, size, 0, 0, 0,
-                          reinterpret_cast<nuhspecial_s *>(&WORLD->lev_objs[object]), 0, alpha);
-        px += step;
-    }
 }
 
 void *AddGameMessage(char *, NUVEC *, f32, NUVEC *, f32, u8, u8, u8, u32, f32);
@@ -2205,10 +2152,6 @@ void DrawFadeScreenWipe() {
     NuRndrEndScene();
 }
 
-void DrawSuperStoryTime(float, float, float, i32, i32) {
-    STUBBED();
-}
-
 static inline void RotateForceGlowMatrix(NUMTX *matrix, i32 angle) {
     const f32 cosine = NU_COS_LUT(angle);
     const f32 sine = NU_SIN_LUT(angle);
@@ -2470,10 +2413,6 @@ void DrawObjectOnCharacter(WORLDINFO_s *world, GameObject_s *object, i32 object_
             NuSpecialDrawAt(special, &reflected);
         NuRndrEndReflectionRender();
     }
-}
-
-void DrawPlayerIconPrompts(i32, i32, float, i32, i32, i32, i32, i32, i32, float, i32, i32, i32, i32) {
-    STUBBED();
 }
 
 extern f32 DropInOutScale(GameObject_s *object);

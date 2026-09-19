@@ -59,8 +59,6 @@ i32 SetObjOnSurface(GameObject_s *object, i32 mode);
 i32 Game_IgnoreInput();
 i32 GameRayCast(NUVEC *position, NUVEC *displacement, f32 radius, i32 mask);
 GameObject_s *GetNamedGameObject(AISYS_s *aisys, char *name);
-char *GameObj_GetName(i32 model, GameObject_s *object, char *buffer);
-f32 PowerUp_GetPanelY(i32 player_index);
 APIOBJECT_s *GameAPIOBJECTFromObjID(u8 object_id);
 f32 GameShadow(GameObject_s *object, NUVEC *position, f32 scale, i32 flags);
 i32 GameDrawCharacterModel(CHARACTERMODEL_s *model, ANIMPACKET_s *animation, NUMTX *matrix, NUMTX *secondary_matrix,

@@ -19,6 +19,7 @@
 #include "gameapi/gui/apimenu.h"
 #include "MechInputTouch/MechInputTouch_types.h"
 #include "legoapi/render/core/render.h"
+#include "legoapi/menus/core/panel.h"
 #include "legoapi/world/levels/episode.h"
 #include "legoapi/world/mission.h"
 #include "legoapi/characters/core/players.h"
@@ -74,7 +75,6 @@ extern i16 tCOINTOTAL;
 extern i16 tSELECT;
 extern i16 tSELECTING;
 void Text_MakeScore(u32, char *);
-void DrawPlayerIconPrompts(i32, i32, f32, i32, i32, i32, i32, i32, i32, f32, i32, i32, i32, i32);
 void Status_DrawPromptMenu(STATUSPACKET_s *, i32, f32);
 f32 getFinishedStatusAlpha(STATUSPACKET_s *);
 f32 STATUS_TITLE_Y = 0.5f;
@@ -934,7 +934,6 @@ void StatusStage_Reset(STATUS_STAGE_s *stage) {
     }
 }
 
-void DrawBuildUpBar(f32, f32, i32, i32, f32, f32, f32, u16);
 extern i16 tTRUEJEDI, tSTORY, tFREEPLAY;
 extern "C" void NuStrCat(char *, const char *);
 

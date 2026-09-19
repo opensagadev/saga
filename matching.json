@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 46.18497,
+    "fuzzy_match_percent": 46.187763,
     "total_code": "4722419",
     "matched_code": "402098",
     "matched_code_percent": 8.514662,
@@ -37868,14 +37868,6 @@
           "match_percent": 0.0
         },
         {
-          "name": "_Z14Tag_UpdateHintP6HINT_s",
-          "demangled_name": "Tag_UpdateHint(HINT_s*)",
-          "address": 1296880,
-          "offset": 406912,
-          "size": 2390,
-          "match_percent": 38.914192
-        },
-        {
           "name": "_Z19Tag_DrawIcon_BatmanP12GameObject_s",
           "demangled_name": "Tag_DrawIcon_Batman(GameObject_s*)",
           "address": 1330176,
@@ -61817,22 +61809,6 @@
           "match_percent": 54.465908
         },
         {
-          "name": "_Z15GameObj_GetNameiP12GameObject_sPc",
-          "demangled_name": "GameObj_GetName(int, GameObject_s*, char*)",
-          "address": 1299280,
-          "offset": 409312,
-          "size": 474,
-          "match_percent": 87.95042
-        },
-        {
-          "name": "_Z17PowerUp_GetPanelYi",
-          "demangled_name": "PowerUp_GetPanelY(int)",
-          "address": 1301488,
-          "offset": 411520,
-          "size": 158,
-          "match_percent": 11.515152
-        },
-        {
           "name": "_ZL20LightSabreStreakCodeP12GameObject_sii",
           "demangled_name": "LightSabreStreakCode(GameObject_s*, int, int)",
           "address": 1351008,
@@ -65863,12 +65839,108 @@
           "match_percent": 99.35294
         },
         {
+          "name": "_Z14Tag_UpdateHintP6HINT_s",
+          "demangled_name": "Tag_UpdateHint(HINT_s*)",
+          "address": 1296880,
+          "offset": 406912,
+          "size": 2390,
+          "match_percent": 41.960396
+        },
+        {
+          "name": "_Z15GameObj_GetNameiP12GameObject_sPc",
+          "demangled_name": "GameObj_GetName(int, GameObject_s*, char*)",
+          "address": 1299280,
+          "offset": 409312,
+          "size": 474,
+          "match_percent": 87.95042
+        },
+        {
+          "name": "_Z17PowerUp_GetPanelYi",
+          "demangled_name": "PowerUp_GetPanelY(int)",
+          "address": 1301488,
+          "offset": 411520,
+          "size": 158,
+          "match_percent": 11.515152
+        },
+        {
+          "name": "_Z16DrawAutoSaveIconv",
+          "demangled_name": "DrawAutoSaveIcon()",
+          "address": 1301648,
+          "offset": 411680,
+          "size": 26,
+          "match_percent": 100.0
+        },
+        {
           "name": "_Z11UpdateStatsv",
           "demangled_name": "UpdateStats()",
           "address": 1301680,
           "offset": 411712,
           "size": 3254,
-          "match_percent": 9.263514
+          "match_percent": 9.256757
+        },
+        {
+          "name": "_Z21DrawPlayerIconPromptsiifiiiiiifiiii",
+          "demangled_name": "DrawPlayerIconPrompts(int, int, float, int, int, int, int, int, int, float, int, int, int, int)",
+          "address": 1304944,
+          "offset": 414976,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z14CoinTotal_Drawiffifiii",
+          "demangled_name": "CoinTotal_Draw(int, float, float, int, float, int, int, int)",
+          "address": 1304960,
+          "offset": 414992,
+          "size": 639,
+          "match_percent": 90.08209
+        },
+        {
+          "name": "_Z18DrawSuperStoryTimefffii",
+          "demangled_name": "DrawSuperStoryTime(float, float, float, int, int)",
+          "address": 1305600,
+          "offset": 415632,
+          "size": 493,
+          "match_percent": 4.827586
+        },
+        {
+          "name": "_Z14DrawBuildUpBarffiiffft",
+          "demangled_name": "DrawBuildUpBar(float, float, int, int, float, float, float, unsigned short)",
+          "address": 1306096,
+          "offset": 416128,
+          "size": 6194,
+          "match_percent": 39.128155
+        },
+        {
+          "name": "_Z14DrawBonusScorefiifPi",
+          "demangled_name": "DrawBonusScore(float, int, int, float, int*)",
+          "address": 1312304,
+          "offset": 422336,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z17InDoubleScoreZoneP12GameObject_s",
+          "demangled_name": "InDoubleScoreZone(GameObject_s*)",
+          "address": 1312320,
+          "offset": 422352,
+          "size": 435,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z16DoubleScoreAlphav",
+          "demangled_name": "DoubleScoreAlpha()",
+          "address": 1312768,
+          "offset": 422800,
+          "size": 121,
+          "match_percent": 16.8
+        },
+        {
+          "name": "_Z21DrawInDoubleScoreZonef",
+          "demangled_name": "DrawInDoubleScoreZone(float)",
+          "address": 1312896,
+          "offset": 422928,
+          "size": 201,
+          "match_percent": 11.666667
         },
         {
           "name": "_Z11Panel_Clearv",
@@ -65892,7 +65964,7 @@
           "address": 1313312,
           "offset": 423344,
           "size": 710,
-          "match_percent": 68.55944
+          "match_percent": 72.97203
         },
         {
           "name": "_Z20DrawMeleeTargetsRowsPsPcPfi",
@@ -65924,7 +65996,7 @@
           "address": 1316160,
           "offset": 426192,
           "size": 436,
-          "match_percent": 79.77778
+          "match_percent": 87.32222
         },
         {
           "name": "_Z9InitPaneli",
@@ -65940,7 +66012,7 @@
           "address": 1316752,
           "offset": 426784,
           "size": 12845,
-          "match_percent": 44.09478
+          "match_percent": 44.0572
         },
         {
           "name": "_Z11PanelRenderP11WORLDINFO_s",
@@ -72819,62 +72891,6 @@
           "offset": 266560,
           "size": 343,
           "match_percent": 19.094118
-        },
-        {
-          "name": "_Z21DrawPlayerIconPromptsiifiiiiiifiiii",
-          "demangled_name": "DrawPlayerIconPrompts(int, int, float, int, int, int, int, int, int, float, int, int, int, int)",
-          "address": 1304944,
-          "offset": 414976,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z18DrawSuperStoryTimefffii",
-          "demangled_name": "DrawSuperStoryTime(float, float, float, int, int)",
-          "address": 1305600,
-          "offset": 415632,
-          "size": 493,
-          "match_percent": 4.827586
-        },
-        {
-          "name": "_Z14DrawBuildUpBarffiiffft",
-          "demangled_name": "DrawBuildUpBar(float, float, int, int, float, float, float, unsigned short)",
-          "address": 1306096,
-          "offset": 416128,
-          "size": 6194,
-          "match_percent": 39.128155
-        },
-        {
-          "name": "_Z14DrawBonusScorefiifPi",
-          "demangled_name": "DrawBonusScore(float, int, int, float, int*)",
-          "address": 1312304,
-          "offset": 422336,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z17InDoubleScoreZoneP12GameObject_s",
-          "demangled_name": "InDoubleScoreZone(GameObject_s*)",
-          "address": 1312320,
-          "offset": 422352,
-          "size": 435,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z16DoubleScoreAlphav",
-          "demangled_name": "DoubleScoreAlpha()",
-          "address": 1312768,
-          "offset": 422800,
-          "size": 121,
-          "match_percent": 16.8
-        },
-        {
-          "name": "_Z21DrawInDoubleScoreZonef",
-          "demangled_name": "DrawInDoubleScoreZone(float)",
-          "address": 1312896,
-          "offset": 422928,
-          "size": 201,
-          "match_percent": 11.666667
         },
         {
           "name": "_Z19DrawForceGlowSpriteP7nuvec_sfifP12GameObject_s",
@@ -81698,14 +81714,6 @@
           "match_percent": 13.333333
         },
         {
-          "name": "_Z14CoinTotal_Drawiffifiii",
-          "demangled_name": "CoinTotal_Draw(int, float, float, int, float, int, int, int)",
-          "address": 1304960,
-          "offset": 414992,
-          "size": 639,
-          "match_percent": 90.08209
-        },
-        {
           "name": "_Z19SetBobaRocketTargetP19MechObjectInterface",
           "demangled_name": "SetBobaRocketTarget(MechObjectInterface*)",
           "address": 1443936,
@@ -85571,14 +85579,6 @@
           "address": 1234784,
           "offset": 344816,
           "size": 116,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z16DrawAutoSaveIconv",
-          "demangled_name": "DrawAutoSaveIcon()",
-          "address": 1301648,
-          "offset": 411680,
-          "size": 26,
           "match_percent": 100.0
         },
         {

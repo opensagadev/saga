@@ -30,6 +30,5 @@ i32 Episodes_Completed();
 
 u32 Episode_FindAreaFromFlags(EPISODEDATA *ep, u32 flags, u32 want);
 
-void CoinTotal_Draw(i32 total, f32 y, f32 scale, i32 remember_positions, f32 icon_phase, i32 red, i32 green, i32 blue);
 
 #endif

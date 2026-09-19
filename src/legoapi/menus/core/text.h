@@ -15,6 +15,9 @@ void MenuDrawViewTextStrings(MENU_s *menu);
 
 void Text_InitLanguageList(LANGUAGEDATA *list);
 extern i16 tSTRANGER;
+extern i16 tUNKNOWN;
+extern f32 text3d_width;
+extern f32 text3d_height;
 void Text_SetLanguage(i32 lang);
 void Text_SetLanguage_Game(i32 language);
 extern void (*Text_GameSetLanguageFn)(i32 language);
