@@ -118,6 +118,16 @@ enum LEGO_MENU_ID {
 
 DECOMP_ASSERT(sizeof(MENUFNINFO) == 0x1c, "MENUFNINFO size");
 
+extern f32 AUTOSAVEICONY;
+extern f32 AUTOSAVEICONX;
+extern f32 AUTOSAVEICONSIZE;
+extern f32 ICONX;
+extern f32 ICONSIZE;
+extern f32 DROPINALPHA;
+extern i32 shop_quit;
+extern char *apitxt_CONTROLLERREMOVED;
+extern char *apitxt_PRESSSTART;
+
 #ifdef __cplusplus
 extern "C" {
 #endif

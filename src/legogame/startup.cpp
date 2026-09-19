@@ -31,6 +31,7 @@
 #include "legoapi/characters/core/players.h"
 #include "legoapi/items/collect/minikits.h"
 #include "legoapi/core/input/timer.h"
+#include "legoapi/menus/core/panel.h"
 #include "legoapi/render/core/screen.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/levels/episode.h"
@@ -129,7 +130,6 @@ void TextCrawl_Draw(float dt, i32 paragraphs, float alpha, char *text);
 void LoadPerm1(void);
 void LoadPerm2(void);
 void RegisterHelpers(void);
-void InitPanel(i32 panel);
 void UpdateGameMenu(GAMEPAD_s *pad, i32 a2);
 void SetBackgroundMusic(i32 track);
 void UpdateTimer(TIMER *timer);

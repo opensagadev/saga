@@ -18,8 +18,6 @@ void DrawObjectOnCharacter(WORLDINFO_s *world, GameObject_s *object, i32 object_
                            NUVEC *translation, f32 alpha, f32 scale);
 void BackDrop_ResetColours(void);
 extern f32 KITPOSY;
-extern f32 BOSSICONY;
-void DrawBossHitPoints(GameObject_s *obj);
 void DrawStatusIcons(STATUSPACKET_s *status, f32 y, f32 alpha);
 void DrawMiniSnowTroopers(WORLDINFO_s *world);
 void DrawForceBackEffect(nuhspecial_s *special);
@@ -45,9 +43,14 @@ extern "C" {
 }
 #endif
 i32 DrawPanel3DObject(float, float, float, float, float, float, u16, u16, u16, nuhspecial_s *, i32, float);
+void DrawPanel3DObjectMtx(nuhspecial_s *special, numtx_s *matrix, f32 alpha);
+i32 DrawPanel3DObjectNoAlpha(f32 x, f32 y, f32 z, f32 scale_x, f32 scale_y, f32 scale_z, u16 rotate_x, u16 rotate_y,
+                             u16 rotate_z, nuhspecial_s *special, i32 rotate_order);
+void DrawBuildUpBar(f32 x, f32 y, i32 amount, i32 maximum, f32 scale, f32 width, f32 alpha, u16 angle);
+void DrawMiniKitCount(f32 position, f32 scale, i32 count, i32 maximum);
+void DrawSuperStoryTime(f32 x, f32 timer, f32 target, i32 flags, i32 draw_icon);
 void DrawTouchPrompt(char *, char *, bool, bool);
 void DrawCharIcon(i32, float, float, float, float, i32, float, float, i32, nuhspecial_s *);
 void DrawPauseFade(void);
-void DrawPanel(void);
 
 #endif

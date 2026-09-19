@@ -4,25 +4,38 @@
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/world/mission.h"
 #include "legoapi/legoapi_types.h"
+#include "legoapi/characters/core/character.h"
+#include "legoapi/characters/core/customiser.h"
 #include "legoapi/gizmos/fx/gizmopickups.h"
 #include "legoapi/gizmo/object/gizmopickup.h"
 #include "legoapi/menus/core/panel.h"
 #include "legoapi/menus/core/gamemessages.h"
+#include "legoapi/menus/core/gamehint.h"
 #include "legoapi/menus/core/text.h"
+#include "legoapi/menus/screens/arcade.h"
+#include "legoapi/menus/screens/gamemenuall.h"
+#include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/misc.h"
 #include "gameapi/gui/apimenu.h"
 #include "legoapi/render/core/render.h"
 #include "legoapi/render/light/fade_material.h"
 #include "legoapi/render/light/lighting.h"
+#include "legoapi/render/fx/game_deb.h"
 #include "legoapi/characters/motion.h"
 #include "legoapi/world/levels/levels.h"
+#include "legoapi/world/levels/episode.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/level.h"
 #include "legoapi/world/world.h"
+#include "legogame/game.h"
 #include "nu2api/nu3d/nurndr.h"
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nu3d/nuprim.h"
 #include "nu2api/nuandroid/ios_graphics.h"
+#include "nu2api/nucore/nupad.h"
+#include "nu2api/numath/nufloat.h"
+#include "nu2api/numath/nutrig.h"
 #include <stdio.h>
 
 struct AIROW_s;
@@ -64,6 +77,146 @@ namespace {
     }
 } // namespace
 
+enum COIN_TOTAL_SOURCE { COIN_TOTAL_SAVED_GAME, COIN_TOTAL_SUPER_STORY, COIN_TOTAL_BONUS };
+static f32 DrawCoinTotalY = 2000000.0f;
+static void DrawCoinTotal(i32 source, i32 hide_super_story_target) {
+    if (FadeSys.fade != 0.0f || (WORLD->current_level->flags & LEVEL_GAMEPLAY) == 0) {
+        return;
+    }
+
+    const f32 timer = source == COIN_TOTAL_BONUS ? statstime : cointotaltime;
+    const i32 angle = static_cast<i32>(timer * static_cast<f32>(NUANG_90DEG));
+    const f32 y = NuTrigTable[(angle >> 1) & 0x7fff] * (STATSPOSY - STATSPOS2Y) + STATSPOS2Y + COINTOTAL_SCOREDY;
+
+    DrawCoinTotalY = y;
+
+    i32 total;
+    i32 red = 255;
+    i32 green = 191;
+    i32 blue = 0;
+
+    if (source == COIN_TOTAL_SUPER_STORY) {
+        DrawSuperStoryTime(-y, SuperStoryTimer[0], Game.episode_save[SuperStoryEpisode].superstory_time_limit, 0, 1);
+        total = static_cast<i32>(SuperStoryScore);
+
+        if (Game.episode_save[SuperStoryEpisode].superstory_score_target != 0) {
+            if (hide_super_story_target == 0) {
+                char target[64];
+                char text[64];
+                Text_MakeScore(static_cast<u32>(Game.episode_save[SuperStoryEpisode].superstory_score_target), target);
+                NuStrCpy(text, const_cast<char *>("("));
+                NuStrCat(text, target);
+                NuStrCat(text, const_cast<char *>(")"));
+                Text3DEx(text, 0.0f, y - 0.1f, 1.0f, 0.35f, 0.35f, 0.35f, 0, 255, 255, 255, 48);
+            }
+            if (SuperStoryScore > static_cast<u32>(Game.episode_save[SuperStoryEpisode].superstory_score_target)) {
+                red = 63;
+                green = 255;
+                blue = 31;
+            }
+        }
+    } else if (source == COIN_TOTAL_BONUS) {
+        total = BonusCoinTotal;
+    } else {
+        total = static_cast<i32>(Game.coins);
+    }
+
+    CoinTotal_Draw(total, y, CoinTotalScale, 1, 1.0f, red, green, blue);
+}
+
+static void DrawHitPoints(GameObject_s *object, float x, float y, float scale, float alpha, i32 alignment, float, i32) {
+    if (object == NULL || WORLD == NULL) {
+        return;
+    }
+
+    i32 two_rows = 0;
+    if (SuperStory != 0 && WORLD->current_level == VADERC_LDATA && object->hitpoints == 10) {
+        two_rows = 1;
+    }
+    if ((object->field_0xefb & 8) != 0) {
+        two_rows = drawbosshitpoints_2rows != 0;
+        drawbosshitpoints_2rows = 0;
+    }
+
+    const i32 heart_object = object->field_0xcc0 == NULL ? 0xcc : 0xcd;
+    LEVEL_OBJECT_RUNTIME_s &heart = WORLD->lev_objs[heart_object];
+    if (heart.active == 0) {
+        return;
+    }
+
+    i32 hitpoints;
+    i32 current_hp;
+    if (object->hitpoints == 0) {
+        hitpoints = 1;
+        current_hp = 1;
+    } else {
+        hitpoints = object->hitpoints;
+        current_hp = static_cast<i8>(object->current_hp);
+    }
+
+    if (PLAYERHITPOINTS_2HEARTSIN1 != 0 && static_cast<i8>(object->apiobj.flags_low) < 0) {
+        hitpoints = (hitpoints + 1) / 2;
+        current_hp = (current_hp + 1) / 2;
+    }
+
+    i32 transitioning = 0;
+    if (static_cast<u8>(object->apiobj.field_0x27c) <= 1 && hitpoints > 1 && object->apiobj.field_0x287 != 0 &&
+        object->field_0x101c > 0.0f && object->field_0x101c < 1.0f) {
+        current_hp = static_cast<i32>(static_cast<float>(hitpoints) * (1.0f - object->field_0x101c));
+        transitioning = 1;
+    }
+
+    float spacing = scale * 0.35f;
+    const bool widescreen = GetMenuID() == 4 ? TempOptions.field11_0xb != 0
+                                             : Game_OptionsSave != NULL && Game_OptionsSave->field11_0xb != 0;
+    if (widescreen) {
+        spacing *= 0.85f;
+    }
+    if (alignment == 8) {
+        spacing = -spacing;
+    } else if (alignment == 0) {
+        const i32 row_width = two_rows != 0 ? hitpoints / 2 : hitpoints;
+        x -= static_cast<float>(row_width - 1) * spacing * 0.5f;
+    }
+
+    float draw_x = x;
+    float draw_y = y * PANEL3DMULY;
+    const i32 split = hitpoints / 2;
+    for (i32 i = 0; i < hitpoints; ++i) {
+        if (two_rows == 1 && i >= split) {
+            two_rows = 2;
+            draw_y -= scale * 0.14f;
+            draw_x = x;
+        }
+
+        float draw_alpha = 0.5f;
+        float scale_xy = scale;
+        float z = 1.001f;
+        if (i < current_hp) {
+            draw_alpha = 1.0f;
+            if (PLAYERHITPOINTS_2HEARTSIN1 != 0 && static_cast<i8>(object->apiobj.flags_low) < 0 &&
+                i == current_hp - 1 && static_cast<i8>(object->current_hp) < (i + 1) * 2) {
+                draw_alpha = 0.75f;
+            }
+
+            if (transitioning == 0 && current_hp > 0 && i == current_hp - 1) {
+                const float pulse = i == 0 && current_hp == 1 ? 0.5f : 0.2f;
+                const float pulse_scale = 1.0f + pulse - NuFmod(GlobalTimer.time_elapsed, 0.5f) * (pulse * 2.0f);
+                scale_xy *= pulse_scale;
+                z = 0.999f;
+            }
+        }
+
+        NUVEC object_scale = {scale_xy, scale_xy, scale};
+        NUMTX matrix;
+        NuMtxSetScale(&matrix, &object_scale);
+        NUVEC translation = {draw_x * PANEL3DMULX, draw_y, z};
+        NuMtxTranslate(&matrix, &translation);
+        DrawPanel3DObjectMtx(&heart.special, &matrix, draw_alpha * alpha);
+        draw_x += spacing;
+    }
+}
+
 void UpdateStats() {
     LEVELDATA *level = WORLD->current_level;
     if ((level->flags & LEVEL_GAMEPLAY) == 0) {
@@ -90,6 +243,532 @@ void UpdateStats() {
     const f32 coin_total_target = CoinTotalCanOpen() ? 1.0f : 0.0f;
     cointotaltime = SeekLinearF(cointotaltime, coin_total_target, FRAMETIME);
     CoinTotalScale = SeekLinearF(CoinTotalScale, 1.0f, 3.0f * FRAMETIME);
+}
+
+void Panel_Clear() {
+    statstime = 0.0f;
+    DrawMiniKitTime = 0.0f;
+    MiniKitScale = 1.0f;
+    DrawBuildUpTime = 0.0f;
+    builduptime = 0.0f;
+    BuildUpScale = 1.0f;
+    DrawRedBrickTime = 0.0f;
+    RedBrickScale = 1.0f;
+    DrawCoinTotalTime = 0.0f;
+    cointotaltime = 0.0f;
+    CoinTotalScale = 1.0f;
+    redbrickslidetime = 0.0f;
+    goldbricktime = 0.0f;
+    Arcade_ResetPanel();
+}
+
+extern "C" {
+    GameObject_s *drawbosshitpoints = NULL;
+}
+
+void DrawBossHitPoints(GameObject_s *object) {
+    drawbosshitpoints = object;
+}
+
+void SpeederChase_DrawMeleeTargets(i16 *character_ids, char *dimmed, i32 count) {
+    if (FadeSys.fade != 0.0f || count <= 0)
+        return;
+
+    f32 base_alpha = statstime;
+    i32 angle = 0x6000;
+    if (SuperStory == 0)
+        angle = (static_cast<i32>(minikittime * 32768.0f + 16384.0f) >> 1) & 0x7fff;
+    i32 left_count = (count + 1) / 2;
+    f32 left_x;
+    f32 right_x;
+    if ((count & 1) != 0) {
+        f32 spread = 1.0f - (1.0f + NuTrigTable[angle]) * 0.5f;
+        left_x = -((0.475f - left_count * 0.05f) * spread);
+        right_x = -0.075f + (0.325f - (left_count - 1.0f) * 0.05f) * spread;
+    } else {
+        f32 spread = 1.0f - (1.0f + NuTrigTable[angle]) * 0.5f;
+        left_x = -0.075f - (0.4f - left_count * 0.05f) * spread;
+        right_x = 0.075f + (0.4f - left_count * 0.05f) * spread;
+    }
+
+    f32 alpha = (1.0f - CurrentHintAlpha()) * base_alpha;
+    for (i32 i = 0; i < count; ++i) {
+        f32 icon_alpha = (dimmed[i] != 0 ? 0.25f : 1.0f) * alpha;
+        if (i < left_count) {
+            DrawCharIcon(character_ids[i], left_x, KITPOSY, 0.0f, 0.16f, 0xa7, icon_alpha, icon_alpha, 1, NULL);
+            left_x -= 0.15f;
+        } else {
+            DrawCharIcon(character_ids[i], right_x, KITPOSY, 0.0f, 0.16f, 0xa7, icon_alpha, icon_alpha, 1, NULL);
+            right_x += 0.15f;
+        }
+    }
+}
+
+void DrawMeleeTargetsRows(i16 *, char *, float *, i32) {
+    STUBBED();
+}
+
+void DrawMeleeTargetsNumber(i16 *, unsigned char *, i32, unsigned char, nuhspecial_s *) {
+    STUBBED();
+}
+
+void DrawMeleeTargets(i16 *, char *, float *, i32) {
+    STUBBED();
+}
+
+void DrawTimer(i32 time, i32 expanded, i32 reset) {
+    if (reset != 0) {
+        TimerScale = 1.0f;
+        TimerAlpha = 0.0f;
+        return;
+    }
+    if (expanded != 0)
+        TimerScale = 2.0f;
+    TimerScale = SeekLinearF(TimerScale, 1.0f, FRAMETIME * 2.0f);
+    if (FadeSys.fade != 0.0f)
+        return;
+    if (TimerAlpha < 1.0f)
+        TimerAlpha = TimerAlpha + FRAMETIME * 2.0f < 1.0f ? TimerAlpha + FRAMETIME * 2.0f : 1.0f;
+    char text[16];
+    sprintf(text, "%d", time);
+    f32 scale = TimerScale * 0.75f;
+    Text3DEx(text, 0.0f, BOSSICONY, 1.0f, scale, scale, scale, 0, 255, 0, 255,
+             static_cast<u8>(static_cast<i32>(TimerAlpha * 128.0f)));
+}
+
+void InitPanel(i32) {
+    const f32 panel_fov = pNuCam->fov / 0.75f;
+    const f32 aspect_ratio = NuIOS_GetAspectRatio();
+    const f32 divisor = (1.0f - panel_fov) * 0.22f + 2.545f;
+    PANEL3DMULX = aspect_ratio * panel_fov / divisor;
+    PANEL3DMULY = panel_fov / divisor;
+}
+
+void DrawPanel() {
+    const i32 menu = GetMenuID();
+    SetQFont2D();
+    if (CUTSTOPGAME == 0)
+        TransformGameMessages(&GameCam->pos, &GameCam->shaken_right, &GameCam->dir);
+    if (HUB_ADATA != NULL && WORLD->area == HUB_ADATA)
+        Customiser_TransformToPanel(CharacterCustomiser);
+    const i32 paused = screendump ? save_paused : Paused;
+    // The original loading shortcut reads this before initialization. Give that path a stable result.
+    i32 removed_controller = -1;
+    char text[128], auxiliary[128], loading_text[128];
+    // Original debug coordinates were never initialized by this port.
+    NUVEC coordinate_positions[8] = {};
+    f32 status_y = 0.0f;
+    if (PANELOFF && !paused && (WORLD->current_level->flags & LEVEL_GAMEPLAY))
+        return;
+    if (waiting_for_level != -1) {
+        if (DRAWBGLOAD && bgGetProcActive()) {
+            i32 red, green;
+            if (abort_load) {
+                sprintf(loading_text, "Aborting ''%s''", LDataList[waiting_for_level].name);
+                red = 255;
+                green = 0;
+            } else {
+                sprintf(loading_text, "Loading ''%s''", LDataList[waiting_for_level].name);
+                red = 0;
+                green = 255;
+            }
+            f32 y = 0.035f * NU_SIN_LUT(static_cast<u16>(NuFmod(WaitingForLevelTime, 0.430f) / 0.430f * 65536.0f)) -
+                    STATSPOSY;
+            f32 x = 0.035f * NU_SIN_LUT(static_cast<u16>(NuFmod(WaitingForLevelTime, 0.479f) / 0.479f * 65536.0f));
+            Text3D(loading_text, x, y, 1.0f, 0.3f, 0.3f, 0.3f, 0, red, green, 0);
+        }
+        if (gone_through_door_to_new_level)
+            goto draw_panel_menu;
+    }
+    {
+        f32 pulse = 0.25f * NU_SIN_LUT(static_cast<i32>(GlobalTimer.time_elapsed_mod_seconds * 65536.0f));
+        {
+            const i32 i = 0;
+            if (Player[i] != NULL && static_cast<i8>(Player[i]->apiobj.flags_low) < 0 && NoPad(i, 1) &&
+                (WORLD->current_level == NULL || !(WORLD->current_level->flags & 0xe0)) &&
+                !MenuInCriticalMemoryCard()) {
+                removed_controller = GamePad[i].pad->port;
+                sprintf(text, apitxt_CONTROLLERREMOVED, removed_controller + 1, removed_controller + 1);
+                i32 alpha = static_cast<u8>(static_cast<i32>((i == 0 ? 0.75f + pulse : 0.75f - pulse) * 128.0f));
+                SmartTextEx(text, 0.0f, i == 0 ? 0.5f : -0.5f, 1.0f, 0.4f, 0.4f, 0.4f, 0, 63, 127, 255, 1.5f, 4, 0, 0,
+                            alpha);
+            }
+        }
+        {
+            const i32 i = 1;
+            if (Player[i] != NULL && static_cast<i8>(Player[i]->apiobj.flags_low) < 0 && NoPad(i, 1) &&
+                (WORLD->current_level == NULL || !(WORLD->current_level->flags & 0xe0)) &&
+                !MenuInCriticalMemoryCard()) {
+                removed_controller = GamePad[i].pad->port;
+                sprintf(text, apitxt_CONTROLLERREMOVED, removed_controller + 1, removed_controller + 1);
+                i32 alpha = static_cast<u8>(static_cast<i32>((i == 0 ? 0.75f + pulse : 0.75f - pulse) * 128.0f));
+                SmartTextEx(text, 0.0f, i == 0 ? 0.5f : -0.5f, 1.0f, 0.4f, 0.4f, 0.4f, 0, 63, 127, 255, 1.5f, 4, 0, 0,
+                            alpha);
+            }
+        }
+    }
+    if (removed_controller == -1) {
+        LEVELDATA *level = WORLD->current_level;
+        if (level == STATUS_LDATA || (level->flags & LEVEL_STATUS)) {
+            if (level->draw_status_fn != NULL)
+                level->draw_status_fn(WORLD);
+            DrawGameMessages();
+            goto draw_panel_menu;
+        }
+        if (BonusWinner != -1)
+            goto draw_panel_menu;
+        if (!(menu >= 15 && menu <= 19) && !CUTSTOPGAME) {
+            bool player_hud =
+                menu != 8 && menu != 14 && menu != 24 && (menu != 12 || customiser_quit) && (menu != 13 || shop_quit);
+            if (player_hud && FadeSys.fade == 0.0f && (WORLD->current_level->flags & LEVEL_GAMEPLAY)) {
+                u32 arcade_flags;
+                i32 arcade_mode = Arcade_GetMode(&arcade_flags);
+                status_y = NU_SIN_LUT(static_cast<i32>(statstime * 16384.0f)) * (STATSPOSY - STATSPOS2Y) + STATSPOS2Y;
+                bool raised_hearts =
+                    (WORLD->area != NULL && (WORLD->area == HUB_ADATA || (WORLD->area->flags & 0x100))) || SuperStory ||
+                    ChallengeMode || Mission_Active(NULL) != NULL || arcade_mode == 99;
+                GetMenuID();
+                f32 pulse =
+                    NU_SIN_LUT(static_cast<u16>(NuFmod(GlobalTimer.time_elapsed_mod_seconds, 0.5f) * 2.0f * 65536.0f));
+                GameObject_s *object = Player[0];
+                if (object != NULL) {
+                    f32 base_alpha = 1.0f;
+                    if (paused && pause_i_pad != 0 && static_cast<i8>(object->apiobj.flags_low) < 0)
+                        base_alpha = 0.5f;
+                    f32 alpha = base_alpha * (static_cast<i8>(object->apiobj.flags_low) < 0 ? 1.0f : DROPINALPHA);
+                    f32 icon_x = -ICONX;
+                    drawcharicon_i_panel = 0;
+                    i32 alpha_byte = static_cast<i32>(alpha * 128.0f);
+                    f32 icon_size = ICONSIZE;
+                    if (MechSystems::Get()->PlayerButton().hovered)
+                        icon_size *= 1.2f;
+                    bool own_icon = WORLD->current_level == DAGOBAHE_LDATA && object->field_0xcc0 != NULL &&
+                                    object->field_0xcc0->id == id_YODA;
+                    f32 icon_time = object->hud_icon_timer;
+                    i32 visible = icon_time <= 0.0f || (icon_time < 2.0f && NuFmod(icon_time, 0.4f) < 0.2f);
+                    i32 id = own_icon || object->field_0xcc0 == NULL ? object->id : object->field_0xcc0->id;
+                    DrawCharIcon(id, icon_x, status_y, 0.0f, icon_size, 0xa6, alpha, alpha, visible, NULL);
+                    f32 name_x = -(ICONX + 0.075f);
+                    if (static_cast<i8>(object->apiobj.flags_low) < 0 && object->apiobj.character_data->name_id != -1) {
+                        bool draw_name = paused != 0;
+                        if (!draw_name && object->hud_icon_timer > 0.0f && object->hud_icon_timer < 2.0f)
+                            draw_name = NuFmod(object->hud_icon_timer, 0.4f) < 0.2f;
+                        if (draw_name) {
+                            f32 width = Game.options_save.widescreen ? 0.7f : 0.5f;
+                            f32 name_y = status_y - 0.125f;
+                            char *name = GameObj_GetName(-1, object, auxiliary);
+                            SmartTextEx(name, name_x, name_y, 1.0f, 0.35f, 0.35f, 0.35f, 3, 255, 255, 255, width, 2, 0,
+                                        0, static_cast<i32>(base_alpha * 128.0f));
+                        }
+                    }
+                    if (!paused && FadeSys.fade == 0.0f && static_cast<i8>(object->apiobj.flags_low) < 0 &&
+                        MechSystems::Get()->PlayerButton().panel_state == NULL) {
+                        if (ONEPLAYERPOWERUPS && object->field_0xdec > 0.0f) {
+                            if (!FindGameMsgsWithID(7, 0, object->apiobj.field_0x27c, NULL) &&
+                                (object->field_0xdec >= 3.0f ||
+                                 PickupFlickerFrame % PickUpFlickerFrames < PickUpFlickerTest)) {
+                                nuhspecial_s *special = &WORLD->lev_objs[0xd0].special;
+                                u16 angle = PowerUp_PanelYRot;
+                                f32 scale = POWERUPOBJSIZE;
+                                f32 y = PowerUp_GetPanelY(0);
+                                DrawPanel3DObject(-ICONX, y + status_y, 1.0f, scale, scale, scale, 0, angle, 0, special,
+                                                  0, 1.0f);
+                                special = &WORLD->lev_objs[0xd1].special;
+                                angle = PowerUp_PanelYRot;
+                                scale = POWERUPOBJSIZE;
+                                y = PowerUp_GetPanelY(0);
+                                DrawPanel3DObject(-ICONX, y + status_y, 1.0f, scale, scale, scale, 0, angle, 0, special,
+                                                  0, 1.0f);
+                            }
+                        } else {
+                            u32 multiplier = Cheat_MultiplyScore(1);
+                            if (DoubleScore & 1)
+                                multiplier *= 2;
+                            if (multiplier > 1) {
+                                sprintf(text, "x%i", multiplier);
+                                i32 flash_alpha = static_cast<u8>(static_cast<i32>(pulse * 16.0f + 96.0f));
+                                Text3DEx(text, -ICONX, status_y - 0.285f, 1.0f, 0.3f, 0.35f, 0.35f, 1, 255, 0, 255,
+                                         flash_alpha);
+                            }
+                        }
+                    }
+                    if (static_cast<i8>(object->apiobj.flags_low) < 0) {
+                        DrawHitPoints(object, -PANEL_HITPOINTSX, status_y + (raised_hearts ? 0.0f : PANEL_HEARTY),
+                                      0.195f, alpha, 2, 0.0f, 0);
+                    } else if (!paused && !CUTSTOPGAME) {
+                        i32 dropin_alpha = static_cast<i32>(DROPINALPHA * 128.0f);
+                        if (dropin_alpha > 0) {
+                            f32 y = status_y + (raised_hearts ? 0.0f : PANEL_HEARTY);
+                            char *prompt = NoPad(0, 0) ? TTab[tDROPIN_INSERTCONTROLLER] : apitxt_PRESSSTART;
+                            SmartTextEx(prompt, -0.685f, y, 1.0f, 0.35f, 0.35f, 0.35f, 2, 255, 255, 255, 0.3f, 2, 0, 0,
+                                        dropin_alpha);
+                        }
+                    }
+                    if (!raised_hearts) {
+                        if (arcade_flags & 2) {
+                            sprintf(text, "%i/%i", AreaGlobals.values.field_0x2c,
+                                    Arcade_Mode[static_cast<i8>(ArcadeItem.field_c_0xc)].target);
+                            f32 coin_x = -PANEL_COINX;
+                            f32 scale = object->coinpacket->scale * PANEL_SCORESCALE;
+                            f32 y = status_y + PANEL_COINY;
+                            Text3DEx(text, -PANEL_SCOREX, PANEL_COINADJUSTDY + y, 1.0f, scale, scale, scale, 2, 255,
+                                     191, 0, static_cast<u8>(alpha_byte));
+                            if (WORLD->lev_objs[0x35].active) {
+                                scale = object->coinpacket->scale * PANEL_COINSCALE_END;
+                                DrawPanel3DObject(coin_x, y, 1.0f, scale, scale, scale, 0, 0, 0,
+                                                  &WORLD->lev_objs[0x35].special, 0, alpha);
+                            }
+                        } else if (object->coinpacket != NULL) {
+                            Text_MakeScore(object->coinpacket->coins, text);
+                            f32 coin_x = -PANEL_COINX;
+                            f32 scale = object->coinpacket->scale * PANEL_SCORESCALE;
+                            f32 y = status_y + PANEL_COINY;
+                            Text3DEx(text, -PANEL_SCOREX, y + PANEL_COINADJUSTDY, 1.0f, scale, scale, scale, 2, 255,
+                                     191, 0, static_cast<u8>(alpha_byte));
+                            COINPACKET_s *packet = object->coinpacket;
+                            i32 model = static_cast<i16>(packet->lastcoin);
+                            if ((model >= 0xb7 && model <= 0xba) || (model >= 0xbf && model <= 0xc2) ||
+                                (model >= 0xc7 && model <= 0xca))
+                                model -= 4;
+                            else if (model >= 0xd5 && model <= 0xd8)
+                                model += 4;
+                            if (WORLD->lev_objs[model].active) {
+                                scale = packet->scale * PANEL_COINSCALE_END;
+                                DrawPanel3DObject(coin_x, y, 1.0f, scale, scale, scale, 0, 0, 0,
+                                                  &WORLD->lev_objs[model].special, 0, alpha);
+                            }
+                            i32 target = 0;
+                            bool draw_target = false;
+                            if (Arcade) {
+                                if (arcade_flags & 8) {
+                                    target = arcade_placed_stud_total;
+                                    draw_target = target != 0;
+                                } else if (arcade_flags & 4) {
+                                    target = Arcade_Mode[static_cast<i8>(ArcadeItem.field_c_0xc)].target;
+                                    draw_target = target != 0;
+                                }
+                            } else if (BonusArea && VehicleArea) {
+                                target = BonusCoinTarget;
+                                draw_target = true;
+                            }
+                            if (draw_target) {
+                                Text_MakeScore(target, auxiliary);
+                                sprintf(text, "(%s)", auxiliary);
+                                Text3DEx(text, 0.0f, y + PANEL_COINADJUSTDY, 1.0f, 0.35f, 0.35f, 0.35f, 0, 255, 255,
+                                         255, 48);
+                            }
+                        }
+                    }
+                }
+                if (!MenuInMemoryCard()) {
+                    if (WORLD->area != NULL) {
+                        i32 freeplay = GAMEDEMO ? 0 : FreePlay;
+                        if (!SuperStory && !ChallengeMode && Mission_Active(NULL) == NULL && !Arcade &&
+                            (WORLD->area->flags & 0x4010)) {
+                            i32 maximum = freeplay ? WORLD->area->field38_0x90 : WORLD->area->field37_0x8c;
+                            if (maximum != 0) {
+                                status_y =
+                                    NU_SIN_LUT(static_cast<i32>(builduptime * 16384.0f)) * (STATSPOSY - STATSPOS2Y) +
+                                    STATSPOS2Y;
+                                f32 y = status_y + PANEL_COINY;
+                                AREASAVE_s *save = &Game.area_save[WORLD->level_sub_id];
+                                i32 amount;
+                                if (save->story_buildup_complete || save->freeplay_buildup_complete)
+                                    maximum = amount = BuildUpTotal;
+                                else
+                                    amount = BuildUpDone ? maximum : BuildUpTotal;
+                                DrawBuildUpBar(0.0f, y, amount, maximum, 1.0f, BuildUpScale, 1.0f, 0);
+                            }
+                        }
+                        if (!SuperStory && Mission_Active(NULL) == NULL && !Arcade) {
+                            bool draw_minikits = (WORLD->area->flags & 0x10) != 0;
+                            if (!draw_minikits && (WORLD->current_level->flags & 0x200))
+                                draw_minikits = GizmoPickup_NumberOfType(WORLD, 4, 0) > 0;
+                            if (draw_minikits)
+                                DrawMiniKitCount(
+                                    minikittime, MiniKitScale,
+                                    ChallengeMode ? AreaGlobals.values.field_0x20 : AreaGlobals.values.field_0x14, 10);
+                        }
+                        if (!SuperStory && !ChallengeMode && Mission_Active(NULL) == NULL && !Arcade &&
+                            (WORLD->area->flags & 0x10) &&
+                            (AreaGlobals.values.field_0x08 == 2 ||
+                             Game.area_save[WORLD->level_sub_id].red_brick_collected) &&
+                            redbrickslidetime > 0.0f) {
+                            f32 factor = NU_SIN_LUT(static_cast<i32>(redbrickslidetime * 16384.0f));
+                            f32 x = (REDBRICKPOSX - REDBRICKPOS2X) * factor + REDBRICKPOS2X;
+                            status_y = (REDBRICKPOSY - REDBRICKPOS2Y) * factor + REDBRICKPOS2Y;
+                            u16 angle = static_cast<u16>(
+                                static_cast<i32>(NuFmod(GlobalTimer.time_elapsed, 4.0f) * 0.25f * 65536.0f) + 0x1555);
+                            f32 scale = PANEL_REDBRICKSCALE * RedBrickScale;
+                            u16 pitch = static_cast<u16>(1820.0f * NuTrigTable[angle & 0x7fff]);
+                            DrawPanel3DObjectNoAlpha(x, status_y, 1.0f, scale, scale, scale, pitch, angle, 0,
+                                                     &WORLD->lev_objs[0xd2].special, 2);
+                        }
+                    }
+                    if (DoubleScoreTime > 0.0f)
+                        DrawInDoubleScoreZone(DoubleScoreTime);
+                }
+                if (BonusArea && WORLD->area != NULL && (WORLD->area->flags & 0x104) == 4) {
+                    i32 *scores = Arcade ? Arcade_Points : BonusScore;
+                    i32 active2 = Player[1] != NULL && static_cast<i8>(Player[1]->apiobj.flags_low) < 0;
+                    i32 active1 = Player[0] != NULL && static_cast<i8>(Player[0]->apiobj.flags_low) < 0;
+                    DrawBonusScore(status_y, active1, active2, 1.0f, scores);
+                }
+                if (HUB_ADATA != NULL && WORLD->area == HUB_ADATA && goldbricktime > 0.0f) {
+                    f32 y =
+                        (STATSPOS2Y - STATSPOSY) * NU_SIN_LUT(static_cast<i32>(goldbricktime * 16384.0f)) - STATSPOS2Y;
+                    Hub_DrawImportantBrick(0xd3, 0.0f, y, 1.0f, Game.gold_bricks, GOLDBRICKPOINTS);
+                }
+            }
+            i32 hide_target = 0;
+            GameObject_s *boss = drawbosshitpoints;
+            if (boss != NULL && boss->apiobj.field_0x287 == 0 && static_cast<i8>(boss->apiobj.flags_low) >= 0) {
+                if (FadeSys.fade == 0.0f) {
+                    DrawCharIcon(boss->id, 0.0f, BOSSICONY, 0.0f, 0.16f, 0xa7, statstime, statstime, 1, NULL);
+                    DrawHitPoints(boss, 0.0f, 0.47f, 0.2f, statstime, 0, 0.0f, 0);
+                    hide_target = 1;
+                } else
+                    drawbosshitpoints_2rows = 0;
+            }
+            if (WORLD->area == HUB_ADATA)
+                DrawCoinTotal(0, hide_target);
+            else if (SuperStory) {
+                if (WORLD->current_level->flags & 0x2000)
+                    DrawCoinTotal(1, hide_target);
+            } else if (BonusArea) {
+                if (Arcade)
+                    Arcade_DrawPanel(Paused || NetPaused);
+                else {
+                    if (WORLD->area->flags & 0x100) {
+                        DrawCoinTotal(2, hide_target);
+                        if (DrawCoinTotalY != 2000000.0f) {
+                            Text_MakeScore(BonusCoinTarget, auxiliary);
+                            NuStrCpy(text, const_cast<char *>("("));
+                            NuStrCat(text, auxiliary);
+                            NuStrCat(text, const_cast<char *>(")"));
+                            Text3DEx(text, 0.0f, DrawCoinTotalY - 0.1f, 1.0f, 0.35f, 0.35f, 0.35f, 0, 255, 255, 255,
+                                     48);
+                        }
+                    }
+                    if (FadeSys.fade == 0.0f && (WORLD->current_level->flags & LEVEL_GAMEPLAY)) {
+                        f32 y =
+                            NU_SIN_LUT(static_cast<i32>(statstime * 16384.0f)) * (STATSPOSY - STATSPOS2Y) + STATSPOS2Y;
+                        DrawSuperStoryTime(-y, BonusTimer.time_elapsed,
+                                           Game.area_save[WORLD->level_sub_id].challenge_trial_time, 0, 1);
+                    }
+                }
+            } else if (ChallengeMode) {
+                f32 remaining =
+                    static_cast<f32>(ADataList[WORLD->level_sub_id].challenge_trial_time) - ChallengeTimer.time_elapsed;
+                if (remaining < 0.0f)
+                    remaining = 0.0f;
+                Text_MakeTime(remaining, 0, 1, 1, text);
+                f32 y = NU_SIN_LUT(static_cast<i32>(statstime * 16384.0f)) * (STATSPOSY - STATSPOS2Y) + STATSPOS2Y;
+                Text3D(text, 0.0f, y, 1.0f, 0.6f, 0.6f, 0.6f, 0, 255, 191, 0);
+            } else if (Mission_Active(NULL) != NULL) {
+                status_y = NU_SIN_LUT(static_cast<i32>(statstime * 16384.0f)) * (STATSPOSY - STATSPOS2Y) + STATSPOS2Y;
+                i32 mission_index = static_cast<i8>(MissionSys->mission->count);
+                f32 remaining = static_cast<f32>(static_cast<u16>(MissionSys->missions[mission_index].time)) -
+                                MissionSys->timer.time_elapsed;
+                if (remaining < 0.0f)
+                    remaining = 0.0f;
+                Text_MakeTime(remaining, 0, 1, 1, text);
+                Text3D(text, 0.0f, status_y, 1.0f, 0.6f, 0.6f, 0.6f, 0, 255, 191, 0);
+                if (!paused) {
+                    GameObject_s *target = Mission_FindTarget(MissionSys, NULL);
+                    if (target != NULL && player != NULL) {
+                        f32 alpha =
+                            0.8f + 0.2f * NU_SIN_LUT(static_cast<u16>(NuFmod(GameTimer.time_elapsed_mod_seconds, 0.5f) *
+                                                                      2.0f * 65536.0f));
+                        NUVEC target_point = v000;
+                        NUVEC *position = &target->apiobj.collision_position;
+                        bool hide_target = false;
+                        if (target->id == id_QUIGONJINN &&
+                            (player->field_0x661 == 10 || player->field_0x661 == 4 || player->field_0x661 == 11))
+                            hide_target = true;
+                        if (!hide_target) {
+                            if (target->id == id_MACEWINDU && player->field_0x661 != 1) {
+                                target_point.x = 64.7f;
+                                target_point.y = 0.9f;
+                                target_point.z = -3.7f;
+                                position = &target_point;
+                            } else if (target->id == id_C3PO && WORLD->current_level == CLOUDCITYESCAPEA_LDATA &&
+                                       player->field_0x661 != 12) {
+                                target_point.x = 7.9f;
+                                target_point.y = 0.8f;
+                                target_point.z = -33.9f;
+                                position = &target_point;
+                            }
+                            f32 distance = NuVecDistSqr(&player->apiobj.collision_position, position, NULL);
+                            if (player2 != NULL) {
+                                f32 distance2 = NuVecDistSqr(&player2->apiobj.collision_position, position, NULL);
+                                if (distance2 < distance)
+                                    distance = distance2;
+                            }
+                            distance = NuFsqrt(distance);
+                            if (distance > 10.0f)
+                                distance = 10.0f;
+                            alpha *= 1.0f - distance / 10.0f;
+                        } else
+                            alpha = 0.0f;
+                        DrawCharIcon(MissionSys->missions[static_cast<i8>(MissionSys->mission->count)].find_char, 0.0f,
+                                     0.055f - status_y, 0.0f, 0.25f, 0xa7, alpha, alpha, 1, NULL);
+                    }
+                }
+            }
+        }
+    }
+    if (FPSDISPLAY) {
+        sprintf(text, "fps: %d", static_cast<i32>(1.0f / FRAMETIME));
+        Text3D(text, 0.85f, -0.85f, 1.0f, 0.4f, 0.4f, 0.4f, 12, 255, 255, 255);
+    }
+    if (CUTSTOPGAME) {
+        CutScene_DrawSubtitles();
+        goto draw_panel_menu;
+    }
+    if (WORLD->current_level->draw_status_fn == NULL && !(WORLD->current_level->flags & LEVEL_GAMEPLAY))
+        goto draw_panel_menu;
+    for (i32 i = 0; i < 8; ++i) {
+        if (Player[i] != NULL && static_cast<i8>(Player[i]->apiobj.flags_low) < 0 && ShowPlayerCoordinate) {
+            sprintf(text, "X:%.2f Y:%.2f Z:%.2f", Player[i]->apiobj.position.x, Player[i]->apiobj.position.y,
+                    Player[i]->apiobj.position.z);
+            Text3DEx(text, coordinate_positions[i].x, coordinate_positions[i].y, 1.0f, 0.4f, 0.5f, 0.5f, 0, 255, 191, 0,
+                     48);
+        }
+    }
+    if (TimingBarSet == 2) {
+        sprintf(text, "Terrain %i", TERRAINCALLS);
+        Text3D(text, 0.9f, 0.075f, 1.0f, 0.3f, 0.3f, 0.3f, 8, 255, 255, 255);
+        sprintf(text, "Shadow %i", SHADOWCALLS);
+        Text3D(text, 0.9f, 0.0f, 1.0f, 0.3f, 0.3f, 0.3f, 8, 255, 255, 255);
+        sprintf(text, "RayCast %i", RAYCASTCALLS);
+        Text3D(text, 0.9f, -0.075f, 1.0f, 0.3f, 0.3f, 0.3f, 8, 255, 255, 255);
+    }
+    DebrisDraw(paused, 4);
+    if (removed_controller == -1 && WORLD->current_level->draw_status_fn != NULL)
+        WORLD->current_level->draw_status_fn(WORLD);
+    GizmoSysPanelDraw(WORLD->gizmo_sys, WORLD, FRAMETIME);
+    if (!paused) {
+        Hint_Draw(-1);
+        DrawGameMessages();
+    }
+draw_panel_menu:
+    if (removed_controller == -1 && !editor_active)
+        DrawMenu(paused);
+    if (drawautosaveicon && WORLD->lev_objs[0].active) {
+        f32 scale = AUTOSAVEICONSIZE *
+                    (0.9f + 0.1f * NU_SIN_LUT(static_cast<u16>(NuFmod(GlobalTimer.time_elapsed, 1.0f) * 65536.0f)));
+        DrawPanel3DObject(AUTOSAVEICONX, AUTOSAVEICONY, 1.0f, scale, scale, scale, 0, 0, 0, &WORLD->lev_objs[0].special,
+                          0, 1.0f);
+        if (memcard_autosavepredelay == 1.0f || memcard_saveneeded || memcard_loadneeded) {
+            VuVec position(AUTOSAVEICONX, AUTOSAVEICONY, 0.0f, 0.0f);
+            MechSystems::Get()->NewRadarPulse(position, true);
+        }
+    }
+    drawautosaveicon = 0;
+    if (GameCam != NULL)
+        pNuCam->mtx = GameCam->render_mtx;
+    NuCameraSet(pNuCam);
 }
 
 void PanelRender(WORLDINFO_s *) {
@@ -150,108 +829,6 @@ void PanelRender(WORLDINFO_s *) {
     }
 }
 
-void Panel_Clear() {
-    statstime = 0.0f;
-    DrawMiniKitTime = 0.0f;
-    MiniKitScale = 1.0f;
-    DrawBuildUpTime = 0.0f;
-    builduptime = 0.0f;
-    BuildUpScale = 1.0f;
-    DrawRedBrickTime = 0.0f;
-    RedBrickScale = 1.0f;
-    DrawCoinTotalTime = 0.0f;
-    cointotaltime = 0.0f;
-    CoinTotalScale = 1.0f;
-    redbrickslidetime = 0.0f;
-    goldbricktime = 0.0f;
-    Arcade_ResetPanel();
-}
-
-extern f32 COINMSGTIME;
-void GameMsg_DrawAdjustNewPos_CoinToTotal(GAMEMESSAGE_s *);
-extern "C" void PlaySfx(char *, NUVEC *);
-i32 CoinsGoToMainTotal();
-
-void AddCoinsToPanel(i32 coins, nuvec_s *position, i32 player, float, GameObject_s *, i32 random_types) {
-    WORLDINFO_s *world = WorldInfo_CurrentlyActive();
-    if (coins == 0)
-        return;
-    if (ChallengeMode || Mission_Active(NULL) != NULL)
-        coins = 0;
-    u8 counts[10] = {};
-    i32 remainder = coins % 10;
-    if (remainder > 0)
-        coins -= remainder;
-    if (coins > 512000)
-        coins = 512000;
-    if (coins > 0)
-        PlaySfx("CoinsLand", position);
-    if (random_types) {
-        while (coins > 0) {
-            i32 type = GetRandomCoinType();
-            i32 remaining = coins - GizmoPickupType[type].score;
-            if (remaining >= 0) {
-                ++counts[type];
-                coins = remaining;
-            }
-        }
-    } else if (coins > 0) {
-        for (i32 i = 3; coins > 0; --i) {
-            i32 type = CoinTab[i];
-            while (coins - GizmoPickupType[type].score >= 0) {
-                coins -= GizmoPickupType[type].score;
-                ++counts[type];
-            }
-        }
-    }
-    if (static_cast<u32>(player) > 1)
-        player = -1;
-    NUVEC target;
-    target.x = player == 1 ? PANEL_COINX : -PANEL_COINX;
-    bool main_total = CoinsGoToMainTotal() != 0;
-    f32 target_scale;
-    if (main_total) {
-        target.y = STATSPOSY;
-        target_scale = COINTOTAL_COINSIZE;
-    } else {
-        target.y = STATSPOSY + PANEL_COINY;
-        target_scale = PANEL_COINSCALE_END;
-    }
-    target.z = 1.0f;
-    DrawBuildUpTime = COINMSGTIME + 1.0f;
-    for (i32 i = 0; i < 4; ++i) {
-        GIZMO_PICKUP_TYPE *type = &GizmoPickupType[CoinTab[i]];
-        i32 base_model = static_cast<i16>(type->first_model_id);
-        for (i32 j = 0; j < counts[CoinTab[i]]; ++j) {
-            i32 model = base_model;
-            if (type->random_model_count != 0)
-                model += qrand() / (65535 / type->random_model_count + 1);
-            if (world->lev_objs[model].active == 0 || player == -1)
-                continue;
-            ADDGAMEMSG_ALIGNED16 message = AddGameMsg_Default;
-            message.position = position;
-            message.target_position = &target;
-            message.target_scale = target_scale;
-            message.icon = model;
-            message.extra_position = reinterpret_cast<NUVEC *>(&world->lev_objs[message.icon]);
-            message.score = type->score;
-            message.end_fn = EndScoreMessage;
-            message.player_index = player;
-            message.field_0x4d = 1;
-            message.field_0x20 = AddCoinDelay[player];
-            message.flags = 0x12d;
-            message.scale = 1.0f;
-            message.duration = COINMSGTIME;
-            if (main_total) {
-                message.update_fn = GameMsg_DrawAdjustNewPos_CoinToTotal;
-                message.field_0x4e = 1;
-            }
-            AddGameMsg(&message);
-            AddCoinDelay[player] += 0.1f;
-        }
-    }
-}
-
 i32 CoinsGoToMainTotal() {
     WORLDINFO_s *world = WorldInfo_CurrentlyActive();
     if ((HUB_ADATA != NULL && HUB_ADATA == world->area) || SuperStory != 0 ||
@@ -260,37 +837,4 @@ i32 CoinsGoToMainTotal() {
         return 1;
     }
     return 0;
-}
-
-void DrawTimer(i32 time, i32 expanded, i32 reset) {
-    if (reset != 0) {
-        TimerScale = 1.0f;
-        TimerAlpha = 0.0f;
-        return;
-    }
-    if (expanded != 0)
-        TimerScale = 2.0f;
-    TimerScale = SeekLinearF(TimerScale, 1.0f, FRAMETIME * 2.0f);
-    if (FadeSys.fade != 0.0f)
-        return;
-    if (TimerAlpha < 1.0f)
-        TimerAlpha = TimerAlpha + FRAMETIME * 2.0f < 1.0f ? TimerAlpha + FRAMETIME * 2.0f : 1.0f;
-    char text[16];
-    sprintf(text, "%d", time);
-    f32 scale = TimerScale * 0.75f;
-    Text3DEx(text, 0.0f, BOSSICONY, 1.0f, scale, scale, scale, 0, 255, 0, 255,
-             static_cast<u8>(static_cast<i32>(TimerAlpha * 128.0f)));
-}
-
-void InitPanel(i32) {
-    const f32 panel_fov = pNuCam->fov / 0.75f;
-    const f32 aspect_ratio = NuIOS_GetAspectRatio();
-    const f32 divisor = (1.0f - panel_fov) * 0.22f + 2.545f;
-    PANEL3DMULX = aspect_ratio * panel_fov / divisor;
-    PANEL3DMULY = panel_fov / divisor;
-}
-
-// DrawPanel reads the private slide timer maintained by the panel lifecycle.
-f32 Panel_GetRedBrickSlideTime() {
-    return redbrickslidetime;
 }

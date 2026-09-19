@@ -8,5 +8,6 @@
 // Miscellaneous shared game helpers (module legoapi/misc).
 
 i32 XZLinesIntersect(nuvec_s *a0, nuvec_s *a1, nuvec_s *b0, nuvec_s *b1, float *ia, float *ib);
+extern u32 arcade_placed_stud_total;
 
 #endif

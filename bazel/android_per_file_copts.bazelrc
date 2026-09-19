@@ -52,7 +52,7 @@ build:target --per_file_copt=^src/gameframework/savesystem\.cpp$@-O3
 # The click-to-start tracker is an optimized, frameless leaf in the original.
 build:target --per_file_copt=^src/legoapi/core/input/input\.cpp$@-O2
 build:target --per_file_copt=^src/gameapi/gui/apimenu\.cpp$@-O3
-build:target --per_file_copt=^src/legoapi/menus/core/panel\.cpp$@-O2
+build:target --per_file_copt=^src/legoapi/menus/core/panel\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/menus/core/text\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/menus/core/hud\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/menus/core/gamemessages\.cpp$@-O2

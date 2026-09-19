@@ -5,6 +5,7 @@
 #include "batman.h"
 #include "globals.h"
 #include "legogame/game.h"
+#include "legoapi/menus/core/panel.h"
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nu3d/android/nutimebar_plain.h"
 #include "nu2api/nuandroid/ios_graphics.h"
@@ -22,7 +23,6 @@ extern "C" {
     nupad_s *Game_NuPad_Store[2];
 
     nupad_s **Game_NuPad;
-
 };
 
 i32 app_tbgameset;

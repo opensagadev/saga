@@ -114,7 +114,6 @@ void ChrisAllocLevelStuff(WORLDINFO_s *world);
 void PodKeyReset(void);
 void StartLaunch(GameObject_s *object);
 void PodLoseSpeed(GameObject_s *obj, i32 type, i32 unknown);
-void DrawMeleeTargets(i16 *targets, char *icon, float *a, i32 count);
 extern void (*BigJump_EndOfLandFn)(GameObject_s *);
 extern i32 (*BigJump_JumpActionFn)(GameObject_s *);
 extern i32 (*BigJump_LandActionFn)(GameObject_s *);

@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 46.184464,
+    "fuzzy_match_percent": 46.18497,
     "total_code": "4722419",
     "matched_code": "402098",
     "matched_code_percent": 8.514662,
@@ -37536,14 +37536,6 @@
           "match_percent": 2.592592
         },
         {
-          "name": "_Z29SpeederChase_DrawMeleeTargetsPsPci",
-          "demangled_name": "SpeederChase_DrawMeleeTargets(short*, char*, int)",
-          "address": 1313312,
-          "offset": 423344,
-          "size": 710,
-          "match_percent": 68.55944
-        },
-        {
           "name": "_Z27GetVehicleAreaRememberSpeedv",
           "demangled_name": "GetVehicleAreaRememberSpeed()",
           "address": 1378496,
@@ -37605,7 +37597,7 @@
           "address": 2100240,
           "offset": 1210272,
           "size": 2256,
-          "match_percent": 71.85
+          "match_percent": 71.8875
         },
         {
           "name": "_Z19ProcessCurrentSpeedP11WORLDINFO_sP9speedup_s",
@@ -53704,12 +53696,20 @@
           "match_percent": 100.0
         },
         {
+          "name": "_Z15AddCoinsToPaneliP7nuvec_sifP12GameObject_si",
+          "demangled_name": "AddCoinsToPanel(int, nuvec_s*, int, float, GameObject_s*, int)",
+          "address": 1990272,
+          "offset": 1100304,
+          "size": 1142,
+          "match_percent": 24.177778
+        },
+        {
           "name": "_Z10AddPickupsiiiiP7nuvec_sS0_fiffP12GameObject_siib",
           "demangled_name": "AddPickups(int, int, int, int, nuvec_s*, nuvec_s*, float, int, float, float, GameObject_s*, int, int, bool)",
           "address": 1991424,
           "offset": 1101456,
           "size": 2283,
-          "match_percent": 38.54833
+          "match_percent": 38.539032
         },
         {
           "name": "_Z14AddMiscPickupsP7nuvec_siii",
@@ -65847,12 +65847,20 @@
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/panel.o",
       "functions": [
         {
+          "name": "_ZL13DrawCoinTotalii",
+          "demangled_name": "DrawCoinTotal(int, int)",
+          "address": 889968,
+          "offset": 0,
+          "size": 712,
+          "match_percent": 78.72848
+        },
+        {
           "name": "_GLOBAL__sub_I_panel.cpp",
           "demangled_name": "_GLOBAL__sub_I_panel.cpp",
           "address": 894960,
           "offset": 4992,
           "size": 93,
-          "match_percent": 0.0
+          "match_percent": 99.35294
         },
         {
           "name": "_Z11UpdateStatsv",
@@ -65860,7 +65868,7 @@
           "address": 1301680,
           "offset": 411712,
           "size": 3254,
-          "match_percent": 9.243243
+          "match_percent": 9.263514
         },
         {
           "name": "_Z11Panel_Clearv",
@@ -65871,12 +65879,52 @@
           "match_percent": 99.942856
         },
         {
+          "name": "_Z17DrawBossHitPointsP12GameObject_s",
+          "demangled_name": "DrawBossHitPoints(GameObject_s*)",
+          "address": 1313280,
+          "offset": 423312,
+          "size": 24,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z29SpeederChase_DrawMeleeTargetsPsPci",
+          "demangled_name": "SpeederChase_DrawMeleeTargets(short*, char*, int)",
+          "address": 1313312,
+          "offset": 423344,
+          "size": 710,
+          "match_percent": 68.55944
+        },
+        {
+          "name": "_Z20DrawMeleeTargetsRowsPsPcPfi",
+          "demangled_name": "DrawMeleeTargetsRows(short*, char*, float*, int)",
+          "address": 1314032,
+          "offset": 424064,
+          "size": 476,
+          "match_percent": 3.62069
+        },
+        {
+          "name": "_Z22DrawMeleeTargetsNumberPsPhihP12nuhspecial_s",
+          "demangled_name": "DrawMeleeTargetsNumber(short*, unsigned char*, int, unsigned char, nuhspecial_s*)",
+          "address": 1314512,
+          "offset": 424544,
+          "size": 1150,
+          "match_percent": 3.87931
+        },
+        {
+          "name": "_Z16DrawMeleeTargetsPsPcPfi",
+          "demangled_name": "DrawMeleeTargets(short*, char*, float*, int)",
+          "address": 1315664,
+          "offset": 425696,
+          "size": 481,
+          "match_percent": 4.468085
+        },
+        {
           "name": "_Z9DrawTimeriii",
           "demangled_name": "DrawTimer(int, int, int)",
           "address": 1316160,
           "offset": 426192,
           "size": 436,
-          "match_percent": 87.48889
+          "match_percent": 79.77778
         },
         {
           "name": "_Z9InitPaneli",
@@ -65887,20 +65935,20 @@
           "match_percent": 99.85185
         },
         {
+          "name": "_Z9DrawPanelv",
+          "demangled_name": "DrawPanel()",
+          "address": 1316752,
+          "offset": 426784,
+          "size": 12845,
+          "match_percent": 44.09478
+        },
+        {
           "name": "_Z11PanelRenderP11WORLDINFO_s",
           "demangled_name": "PanelRender(WORLDINFO_s*)",
           "address": 1329600,
           "offset": 439632,
           "size": 568,
-          "match_percent": 93.409836
-        },
-        {
-          "name": "_Z15AddCoinsToPaneliP7nuvec_sifP12GameObject_si",
-          "demangled_name": "AddCoinsToPanel(int, nuvec_s*, int, float, GameObject_s*, int)",
-          "address": 1990272,
-          "offset": 1100304,
-          "size": 1142,
-          "match_percent": 22.514814
+          "match_percent": 83.40164
         },
         {
           "name": "_Z18CoinsGoToMainTotalv",
@@ -72661,14 +72709,6 @@
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/render.o",
       "functions": [
         {
-          "name": "_ZL13DrawCoinTotalii",
-          "demangled_name": "DrawCoinTotal(int, int)",
-          "address": 889968,
-          "offset": 0,
-          "size": 712,
-          "match_percent": 78.72848
-        },
-        {
           "name": "_ZL26DrawWeapon_SetSabreObjectsP12GameObject_siiiiPiS1_",
           "demangled_name": "DrawWeapon_SetSabreObjects(GameObject_s*, int, int, int, int, int*, int*)",
           "address": 1028928,
@@ -72835,46 +72875,6 @@
           "offset": 422928,
           "size": 201,
           "match_percent": 11.666667
-        },
-        {
-          "name": "_Z17DrawBossHitPointsP12GameObject_s",
-          "demangled_name": "DrawBossHitPoints(GameObject_s*)",
-          "address": 1313280,
-          "offset": 423312,
-          "size": 24,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z20DrawMeleeTargetsRowsPsPcPfi",
-          "demangled_name": "DrawMeleeTargetsRows(short*, char*, float*, int)",
-          "address": 1314032,
-          "offset": 424064,
-          "size": 476,
-          "match_percent": 3.62069
-        },
-        {
-          "name": "_Z22DrawMeleeTargetsNumberPsPhihP12nuhspecial_s",
-          "demangled_name": "DrawMeleeTargetsNumber(short*, unsigned char*, int, unsigned char, nuhspecial_s*)",
-          "address": 1314512,
-          "offset": 424544,
-          "size": 1150,
-          "match_percent": 3.87931
-        },
-        {
-          "name": "_Z16DrawMeleeTargetsPsPcPfi",
-          "demangled_name": "DrawMeleeTargets(short*, char*, float*, int)",
-          "address": 1315664,
-          "offset": 425696,
-          "size": 481,
-          "match_percent": 4.468085
-        },
-        {
-          "name": "_Z9DrawPanelv",
-          "demangled_name": "DrawPanel()",
-          "address": 1316752,
-          "offset": 426784,
-          "size": 12845,
-          "match_percent": 44.081
         },
         {
           "name": "_Z19DrawForceGlowSpriteP7nuvec_sfifP12GameObject_s",

@@ -10,6 +10,7 @@
 #include "legoapi/gizmo/object/gizmopickup.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/menus/core/gamemessages.h"
+#include "legoapi/menus/core/panel.h"
 #include "legoapi/menus/screens/arcade.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/world.h"
@@ -17,8 +18,6 @@
 extern i32 DoubleScore;
 extern TIMER BonusTimer;
 
-i32 CoinsGoToMainTotal();
-void GameMsg_DrawAdjustNewPos_CoinToTotal(GAMEMESSAGE_s *message);
 void NewBuzz(nupad_s *pad, f32 amount, i32 flags);
 
 void GizmoPickup_CollectCoin(WORLDINFO_s *world, nuvec_s *position, i32 type_index, i32 model_variant,

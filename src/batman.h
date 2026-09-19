@@ -241,7 +241,6 @@ void CutScenes_BGLoadManager(void);
 void FindGameCutScenes(void);
 void UpdateBackgroundMusic(void);
 void WidescreenCode(i32);
-void InitPanel(i32);
 void NewMenu(i32, i32, i32);
 
 // ----------------------------------------------------------------------

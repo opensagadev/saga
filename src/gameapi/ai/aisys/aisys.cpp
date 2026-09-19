@@ -18,6 +18,7 @@
 #include "legoapi/characters/motion/gameanim.h"
 #include "legoapi/audio/sfx.h"
 #include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/menus/core/panel.h"
 #include "legoapi/core/input/gamepads.h"
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/gizmo/base/gizmo.h"
@@ -1768,8 +1769,6 @@ static i32 Action_DisableNarrowSocks(AISYS *, AISCRIPTPROCESS *, AIPACKET *, cha
     disable_narrow_socks = disabled;
     return 1;
 }
-
-extern void DrawBossHitPoints(GameObject_s *);
 
 static i32 Action_DrawBossHitPoints(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char **, i32, i32, f32) {
     if (packet != NULL && packet->owner != NULL)

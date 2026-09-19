@@ -1,6 +1,7 @@
 #ifdef __cplusplus
 
 extern float minikittime;
+extern i32 drawautosaveicon;
 
 struct WORLDINFO_s;
 

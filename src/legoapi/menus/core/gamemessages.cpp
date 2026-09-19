@@ -2,6 +2,7 @@
 
 #include "decomp.h"
 #include "legoapi/menus/core/gamemessages.h"
+#include "legoapi/menus/core/panel.h"
 #include "globals.h"
 #include "gameapi/gui/apimenu.h"
 #include "legoapi/audio/audio.h"
@@ -29,7 +30,6 @@ extern void IncreaseScore(u32 *, u64, i32);
 extern void SetBonusWinner(i32);
 extern void Arcade_CoinCollected(i32, u32 *, u32);
 extern void PlayRepeatSfx(char *, i32, f32, char, f32, nuvec_s *);
-extern i32 CoinsGoToMainTotal();
 void ResetGameMessages();
 void AddFancyMessageRGB(char *, float, float, float, float, i32, unsigned char, unsigned char, unsigned char);
 

@@ -14,3 +14,5 @@ void Customiser_CopyDefaultPiecesToSave(CUSTOMISER *customiser, CUSTOMISESAVE_s 
 void Customiser_LoadAccessories(CUSTOMISER *customiser, APICHARACTERMODELLIST_s *models);
 void Customiser_DumpAccessories(CUSTOMISER *customiser);
 void Customiser_RestoreModelTextureIDs(CUSTOMISER *customiser);
+void Customiser_TransformToPanel(CUSTOMISER *customiser);
+extern i32 customiser_quit;

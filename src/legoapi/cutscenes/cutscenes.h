@@ -42,6 +42,7 @@ void CutScene_SnapToEnd(CUTINFO *cut);
 void CutScene_StoppedFn_LSW(CUTINFO *cut);
 i32 CutScene_PlayingOrRequested(CUTINFO *cut);
 i32 CutScene_IsSkippable(CUTINFO *cut);
+void CutScene_DrawSubtitles();
 extern "C" void instNuGCutSceneEnd(instNUGCUTSCENE_s *instance);
 
 #endif

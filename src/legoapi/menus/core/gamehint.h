@@ -8,6 +8,7 @@
 
 extern HINTSYS_s hintsys;
 f32 CurrentHintAlpha();
+void Hint_Draw(i32 viewport);
 
 HINT_s *Hint_FindHint(i32 hint_id);
 i32 Hint_CurrentId();

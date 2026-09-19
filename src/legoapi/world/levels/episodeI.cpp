@@ -14,6 +14,7 @@
 #include "legoapi/characters/motion.h"
 #include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/menus/core/gamehint.h"
+#include "legoapi/menus/core/panel.h"
 #include "legoapi/menus/core/gamemessage.h"
 #include "legoapi/misc.h"
 #include "legoapi/render/fx.h"
