@@ -1,5 +1,6 @@
 #include "decomp.h"
 #include "globals.h"
+#include "legoapi/menus/screens/gamestructure.h"
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/characters/motion.h"

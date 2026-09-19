@@ -16,6 +16,8 @@
 #include "legoapi/core/input/gamepads.h"
 #include "legoapi/menus/core/text.h"
 #include "legoapi/menus/screens/gamestatus_lsw.h"
+#include "legoapi/menus/screens/store.h"
+#include "legoapi/menus/screens/gamestructure.h"
 #include "gameapi/gui/apimenu.h"
 #include "MechInputTouch/MechInputTouch_types.h"
 #include "legoapi/render/core/render.h"
@@ -58,7 +60,6 @@ void RegisterStatusScreen(STATUS_STAGE_s *, i32 *, REGISTERSTATUSPACKET_s *);
 void EndOfDemo(i32);
 static i32 gamedemo_option;
 static i32 goldbrickmsgcount;
-void AddToGoldBricks();
 
 i32 AddGoldBrickMessage(STATUSPACKET_s *packet, i16 brick) {
     if (goldbrickmsgcount < 16) {
@@ -177,11 +178,6 @@ STATUS_STAGE_s StatusStages_LSW[] = {
     {NULL, Fade_LSW_Update, NULL, 12, 0xffff, 0, 0, 0, 0.0f, 0.0f},
     {NULL, NULL, NULL, -1, 0xffff, 0, 0, 0, 0.0f, 0.0f},
 };
-
-void NewGameMode() {
-    NewMode = 1;
-    reset_load = 1;
-}
 
 void AddStatusStage(STATUSPACKET_s *packet, i32 type, i32 gold_brick_enabled) {
     const u8 index = packet->stage_count;
@@ -306,7 +302,6 @@ extern i16 tSUPERSTORYCOMPLETE, tNEWBESTTIME, tLEVELCOMPLETE, tMISSIONCOMPLETE;
 extern i16 tCHALLENGECOMPLETE, tTRUEHERO, tMINIKIT;
 extern "C" void NuIOS_RecordFlurryEvent(char *);
 extern "C" i32 NuStrCpy(char *, const char *);
-void AddToCompletionPoints(u32);
 i32 AddToCollection(i32);
 i32 Mission_CurrentState(MISSIONSYS *);
 i32 newCharactersCollected(STATUSPACKET_s *);

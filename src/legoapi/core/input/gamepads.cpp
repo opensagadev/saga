@@ -4,7 +4,7 @@
 #include "globals.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/characters/motion.h"
-#include "legoapi/core/startup/game.h"
+#include "legoapi/menus/screens/gamestructure.h"
 #include "legoapi/cutscenes/cutscenes.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/props/system/socksys.h"

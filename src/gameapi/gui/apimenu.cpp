@@ -9,7 +9,7 @@
 #include "gameframework/saveload.h"
 #include "legoapi/cutscenes/cutscenes.h"
 #include "legoapi/core/input/timer.h"
-#include "legoapi/core/startup/game.h"
+#include "legoapi/menus/screens/gamestructure.h"
 #include "legoapi/core/startup/main.h"
 #include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/characters/motion.h"
@@ -18,6 +18,7 @@
 #include "legoapi/menus/screens/gamemenuall.h"
 #include "legoapi/menus/screens/movies.h"
 #include "legoapi/menus/screens/shop.h"
+#include "legoapi/menus/screens/store.h"
 #include "legoapi/props/doors/door.h"
 #include "legoapi/render/core/render.h"
 #include "legoapi/world/area.h"
@@ -140,7 +141,6 @@ void MusicClearAll(void);
 extern "C" void SoundKillAll(void);
 void GameDrawMenuEntry(MENU *menu, char *text);
 void DropOut(i32 player, i32 show_effect, i32 silent, i32 force);
-LEVELDATA_s *CanSaveAndExit(WORLDINFO_s *world);
 void NewLevelFromMenu(LEVELDATA_s *level, i32 menu_id, i32 menu_y, i32 remember_hub);
 struct CUTSCENEPLAYERCLIP;
 extern i32 saveload_autosave;
@@ -191,7 +191,6 @@ extern u8 MENUEXITB;
 extern i32 reset_restart;
 extern u32 ResetBits;
 void Door_Reset(void);
-void NewGameMode(void);
 
 void Arcade_DrawEndMenu(MENU *menu);
 void Arcade_UpdateEndMenu(MENU *menu);
@@ -199,7 +198,6 @@ void Credits_UpdateMenu(MENU *menu);
 void CustomiserMenu_Draw(MENU *menu);
 void CustomiserMenu_Update(MENU *menu);
 void MenuDrawClips(MENU *menu);
-void MenuDrawDebugStore(MENU *menu);
 void MenuDrawEndChallenge(MENU *menu);
 void MenuDrawEndMission(MENU *menu);
 void MenuDrawEpisodes(MENU *menu);
@@ -210,26 +208,13 @@ void MenuDrawMissions(MENU *menu);
 void MenuDrawOptions(MENU *menu);
 void MenuDrawRestoreNewGame(MENU *menu);
 void MenuDrawSelectControls(MENU *menu);
-void MenuDrawStore(MENU *menu);
-void MenuDrawStoreHolding(MENU *menu);
-void MenuDrawStorePurchase(MENU *menu);
-void MenuDrawStoreRestoring(MENU *menu);
 void MenuEnterOptions(MENU *menu);
 void MenuExitOptions(MENU *menu);
-void MenuExitStore(MENU *menu);
-void MenuExitStoreHolding(MENU *menu);
-void MenuExitStorePurchase(MENU *menu);
-void MenuExitStoreRestoring(MENU *menu);
 void MenuInitClips(MENU *menu);
 void MenuInitEpisodes(MENU *menu);
 void MenuInitFreePlay(MENU *menu);
 void MenuInitMissions(MENU *menu);
-void MenuInitStore(MENU *menu);
-void MenuInitStoreHolding(MENU *menu);
-void MenuInitStorePurchase(MENU *menu);
-void MenuInitStoreRestoring(MENU *menu);
 void MenuUpdateClips(MENU *menu);
-void MenuUpdateDebugStore(MENU *menu);
 void MenuUpdateEndChallenge(MENU *menu);
 void MenuUpdateEndMission(MENU *menu);
 void MenuUpdateEpisodes(MENU *menu);
@@ -240,10 +225,6 @@ void MenuUpdateMissions(MENU *menu);
 void MenuUpdateOptions(MENU *menu);
 void MenuUpdateRestoreNewGame(MENU *menu);
 void MenuUpdateSelectControls(MENU *menu);
-void MenuUpdateStore(MENU *menu);
-void MenuUpdateStoreHolding(MENU *menu);
-void MenuUpdateStorePurchase(MENU *menu);
-void MenuUpdateStoreRestoring(MENU *menu);
 
 MENU GameMenu[10];
 

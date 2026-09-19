@@ -561,5 +561,6 @@ void WorldInfo_DrawScene(WORLDINFO *world);
 
 void WorldInfo_UpdateRoomVisibility(WORLDINFO *world, i32 param);
 void WorldInfo_ReArrangeBuffers(i32 area1, i32 area2);
+void StoreLevelProgressFn(WORLDINFO *world, LEVEL_PROGRESS_s *progress, i32 area_progress);
 
 #endif

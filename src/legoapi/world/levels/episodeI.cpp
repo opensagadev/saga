@@ -4,6 +4,7 @@
 #include "decomp.h"
 #include "legoapi/world/level.h"
 #include "globals.h"
+#include "legoapi/menus/screens/gamestructure.h"
 #include "legoapi/ai/core/ai_sys_stubs.h"
 #include "legoapi/audio/sfx.h"
 #include "legoapi/characters/core/players.h"

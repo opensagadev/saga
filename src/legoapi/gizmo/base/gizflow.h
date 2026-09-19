@@ -10,3 +10,4 @@ void ProcessGizFlow(GIZFLOW_s *system, float delta_time);
 void DynamicAddGizmoToFlow(GIZFLOW_s *system, GIZMO_s *gizmo);
 void ResetGizFlowPointers(GIZFLOW_s *system);
 void ResetGizFlow(GIZFLOW_s *system, GIZFLOWPROGRESS_s *progress);
+void GizFlowStoreProgress(GIZFLOW_s *system, GIZFLOWPROGRESS_s *progress);

@@ -3,6 +3,7 @@
 #include "decomp.h"
 #include "legoapi/menus/core/gamemessages.h"
 #include "legoapi/menus/core/panel.h"
+#include "legoapi/menus/screens/store.h"
 #include "globals.h"
 #include "gameapi/gui/apimenu.h"
 #include "legoapi/audio/audio.h"
@@ -25,7 +26,6 @@ struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
-extern void AddToGoldBricks();
 extern void IncreaseScore(u32 *, u64, i32);
 extern void SetBonusWinner(i32);
 extern void Arcade_CoinCollected(i32, u32 *, u32);

@@ -1,6 +1,7 @@
 #include "decomp.h"
 
 #include "batman.h"
+#include "legoapi/menus/screens/gamestructure.h"
 #include "legoapi/gizmo/object/gizmopickup.h"
 #include "legoapi/core/config/cheat.h"
 #include "legoapi/render/core/terrain.h"

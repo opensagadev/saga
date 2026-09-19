@@ -18,6 +18,7 @@
 #include "legoapi/legoapi_types.h"
 #include "legoapi/menus/core/text.h"
 #include "legoapi/menus/screens/store.h"
+#include "legoapi/menus/screens/gamestructure.h"
 #include "legoapi/menus/screens/shop.h"
 #include "legoapi/menus/screens/gamemenuall.h"
 #include "legoapi/props/doors/door.h"
@@ -46,10 +47,7 @@ extern void Customiser_Init(CUSTOMISER *);
 extern void Customiser_Reset(CUSTOMISER *);
 extern void Customiser_Draw3D(CUSTOMISER *);
 extern void Customiser_Update(CUSTOMISER *, WORLDINFO_s *);
-extern void Store_RestorePurchases();
 void Hub_ResetPanel();
-extern void Store_HubDrawFloorTargets(WORLDINFO_s *);
-extern void Store_HubInitFloorTargets(WORLDINFO_s *);
 extern void InitShop(WORLDINFO_s *);
 extern void DrawShop3D(WORLDINFO_s *);
 extern void Draw3DObjectMtx(WORLDINFO_s *, i32, NUMTX *);
@@ -87,11 +85,8 @@ extern void Hint_CancelCurrent();
 extern f32 SeekLinearF(f32, f32, f32);
 extern i32 qrand();
 extern void Door_GoThrough(WORLDINFO_s *, DOOR_s *, i32);
-extern STOREPACK StorePack[11];
 extern GameObject_s *FindGameObject(i32, u32, i32, i32, i32);
-extern void Store_RootPackCustodian(i32, GameObject_s *);
 extern void BackDrop_ResetColours();
-extern void NewGameMode();
 extern f32 MainRenderTargetTime;
 extern void ResetIconWibble();
 extern void MakeFreePlayModelList(i32 first_model, i32 second_model, i32 area, i32 level, i32 include_bonus);

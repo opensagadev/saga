@@ -3,7 +3,7 @@
 #include "gameframework/saveload.h"
 #include "globals.h"
 #include "legoapi/characters/core/players.h"
-#include "legoapi/core/startup/game.h"
+#include "legoapi/menus/screens/gamestructure.h"
 #include "legoapi/core/input/gamepads.h"
 #include "legoapi/cutscenes/cutscenes.h"
 #include "legoapi/items/base/collection.h"
@@ -22,7 +22,6 @@ struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
-extern void RestoreOptions(void);
 extern void *CutStopInfo;
 extern "C" {
     extern i32 Paused;

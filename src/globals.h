@@ -1004,6 +1004,17 @@ enum RESETBIT_FLAGS {
 };
 extern u32 ResetBits;
 extern i32 NetPaused;
+#ifdef __cplusplus
+extern "C" {
+#endif
+    extern i32 Paused;
+    extern i32 NewMode;
+    extern i32 reset_load;
+    extern i32 memcard_autosavedisabled;
+    extern i32 memcard_autosaveenabled;
+#ifdef __cplusplus
+}
+#endif
 extern i32 pause_i_pad;
 extern i32 LEGOMENU_NEWGAME;
 extern i32 LEGOMENU_PAUSEMAIN;

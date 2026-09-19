@@ -34,6 +34,8 @@ struct nuhspecial_s;
 struct GAMECUTSCENES_s; // full type in legoapi/legoapi_types.h
 
 extern f32 goldbricktime;
+extern f32 *HUB_AREAPANELX;
+extern f32 HUB_AREAPANELX_ONETRUEJEDIGOLDBRICK[6];
 void Hub_DrawImportantBrick(i32 object_id, f32 x, f32 y, f32 z, i32 count, i32 points);
 
 extern GIZAIMESSAGESYS_s *gizaimessagesys;

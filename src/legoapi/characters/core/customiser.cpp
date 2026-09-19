@@ -4,6 +4,8 @@
 #include "globals.h"
 #include "batman.h"
 #include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/menus/screens/store.h"
+#include "legoapi/menus/screens/gamestructure.h"
 #include "legoapi/characters/core/character.h"
 #include "legoapi/world/world.h"
 #include "legoapi/world/area.h"

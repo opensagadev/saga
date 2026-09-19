@@ -42,7 +42,6 @@ void Cheat_StartPowerUp(nuvec_s *position, GameObject_s *object);
 i32 Cheat_PowerUpActive(i32 index);
 void Cheats_Reset(void);
 void Cheats_Update(void);
-bool FreePlayUnlocked(void);
 struct CHEATSYSTEM {
     CHEAT *cheats;
     i32 cheats_count;

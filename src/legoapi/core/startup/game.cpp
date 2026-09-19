@@ -12,6 +12,7 @@
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/items/base/apiobject.h"
 #include "legoapi/legoapi_types.h"
+#include "legoapi/menus/screens/store.h"
 #include "legoapi/gizmo/object/gizmopickup.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/levels/episode.h"
@@ -36,7 +37,6 @@ extern void ResetAdaptiveDifficulty(void);
 extern void Hint_ClearHintsAndDoneFlags(void);
 extern void GamePad_InitButtons(void);
 extern void FinishWeirdoNames(i32);
-extern void Store_UnlockPack(i32, bool);
 extern void ReCalculateCompletionPoints(void);
 extern void GameAudio_PlaySfx(i32, nuvec_s *, i32, i32);
 extern "C" void NuSound3StopRumble(void);
@@ -54,28 +54,6 @@ namespace {
     constexpr i32 kSecondaryCustomNameTextId = 0xcd;
 
 } // namespace
-
-void ClearPause() {
-    Paused = 0;
-    NetPaused = 0;
-}
-
-void ResumeGame(i32 play_sound, i32 resume_music) {
-    Paused = 0;
-    NetPaused = 0;
-    MenuRememberCursor(&GameMenu[GameMenuLevel]);
-    MenuReset();
-    music_man.SetFader(1.0f, 0.5f);
-    if (resume_music != 0) {
-        music_man.ResumeTrack(0x10);
-    }
-    if (play_sound != 0) {
-        GameAudio_PlaySfx(0x37, NULL, 0, 0);
-    }
-    if (ResumeGame_ExtraCodeFn != NULL) {
-        ResumeGame_ExtraCodeFn();
-    }
-}
 
 void InitGameMode() {
     if ((WORLD->current_level->flags & LEVEL_GAMEPLAY) != 0) {
@@ -292,37 +270,4 @@ void NewGame() {
     }
 
     ReCalculateCompletionPoints();
-}
-
-void PauseGame(i32 pad_index) {
-    Paused = 1;
-    music_man.SetFader(0.0f, 0.5f);
-    music_man.PauseTrack(0x10);
-    NuSound3StopRumble();
-
-    if (memcard_autosaveenabled != 0 && memcard_autosavedisabled != 0) {
-        NewMenu(0x3f3, 0, -1);
-    } else if (CUTSTOPGAME != 0) {
-        NewMenu(LEGOMENU_PAUSECUT, 0, -1);
-    } else {
-        NewMenu(LEGOMENU_PAUSEMAIN, 0, -1);
-    }
-
-    ResetTimer(&PauseTimer, 0.0f);
-    GameAudio_PlaySfx(0x36, NULL, 0, 0);
-    DoubleScoreTime = 0.0f;
-    ResetTimer(&JoinInTimer, 0.0f);
-    pause_i_pad = pad_index;
-
-    for (i32 i = 0; i < 8; ++i) {
-        if (Player[i] != NULL) {
-            Player[i]->hud_icon_timer = 0.0f;
-            Player[i]->pause_context_state = 0;
-            Player[i]->input_toggle_hold_time = TOGGLEHOLDTIME;
-        }
-    }
-
-    if (PauseGame_ExtraCodeFn != NULL) {
-        PauseGame_ExtraCodeFn();
-    }
 }

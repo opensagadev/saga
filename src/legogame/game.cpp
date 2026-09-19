@@ -1253,8 +1253,6 @@ void CompleteLevel(WORLDINFO *world) {
     }
 }
 
-extern void StoreLevelProgressFn(WORLDINFO_s *, LEVEL_PROGRESS_s *, i32);
-
 void StoreLevelProgress(WORLDINFO *world) {
     if (world != NULL) {
         StoreLevelProgressFn(world, world->level_progress, 0);

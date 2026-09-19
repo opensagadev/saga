@@ -3254,10 +3254,6 @@ void *GameBufferAlloc(variptr_u *buf, variptr_u *buf_end, i32 size) {
     return ptr;
 }
 
-void Game_AutoSaving() {
-    STUBBED();
-}
-
 void GameAISysSetGame() {
     AIPathCnxHelperSysInitFn = NULL;
     StarWars_GameAISysInit();
@@ -3952,10 +3948,6 @@ void GameAntiNodeData_Read(GAMEANTINODEDATA_s *data) {
     data->mode = static_cast<u8>(EdFileReadChar());
 }
 
-void Game_GotAllGoldBricks() {
-    STUBBED();
-}
-
 APIOBJECT *GameAPIOBJECTFromObjID(u8 object_id) {
     if (object_id >= HIGHGAMEOBJECT) {
         return NULL;
@@ -4057,13 +4049,6 @@ void GameLoadCharacterModels(APICHARACTERMODELLIST_s *list, i32 append, VARIPTR 
     }
 
     APILoadCharacterModels(list, append, buf, *buf_end, area_models);
-}
-
-i32 Game_100PercentComplete() {
-    if (Game_CompletionSave == NULL) {
-        return 0;
-    }
-    return reinterpret_cast<STATUSCOLLECT_s *>(Game_CompletionSave)->flags & 1;
 }
 
 void Game_WorldInfo_InitMenu(WORLDINFO_s *world, i32 *menu_id, i32 *) {
@@ -4877,27 +4862,6 @@ void GameObjectStuffAfterAnimation() {
 
 void GameMsg_DrawAdjustNewPos_CoinToTotal(GAMEMESSAGE_s *message) {
     message->target_position.x = cointotal_x[message->player_index];
-}
-
-i32 Game_Exit(i32) {
-    STUBBED();
-    return 0;
-}
-
-LEVELDATA_s *CanSaveAndExit(WORLDINFO_s *world) {
-    extern i32 GAMEDEMO;
-    extern i32 SuperStory;
-    extern i32 ChallengeMode;
-    extern i32 Arcade;
-
-    if (GAMEDEMO == 0 && SuperStory == 0 && world->area != NULL && world->area != HUB_ADATA &&
-        (world->area->flags & 0x146) == 0 && Mission_Active(NULL) == NULL && ChallengeMode == 0 && Arcade == 0 &&
-        CutScenePlayer_Active() == NULL && Game_AreaSave != NULL &&
-        Game_AreaSave[world->level_sub_id].area_complete != 0 && AreaGlobals.values.field_0x18 > 0) {
-        return Area_FindStatusLevel(world->area, NULL);
-    }
-
-    return NULL;
 }
 
 void GameObject_s::ClearAddons() {

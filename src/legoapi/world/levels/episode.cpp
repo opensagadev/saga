@@ -331,17 +331,6 @@ i32 Episode_CountOpenAreas(i32 episode_index, i32 area_index, AREASAVE_s *saves)
     return open;
 }
 
-void InitSuperStory(i32) {
-    STUBBED();
-}
-
-i32 InStory() {
-    if (FreePlay != 0 || ChallengeMode != 0 || Mission_Active(NULL) != NULL || Arcade != 0) {
-        return 0;
-    }
-    return 1;
-}
-
 // ===========================================================================
 // HUD / score helpers
 // ===========================================================================

@@ -14,6 +14,7 @@
 #include "legoapi/core/config/cheat.h"
 #include "legoapi/core/input/gamepads.h"
 #include "legoapi/menus/screens/gamemenuall.h"
+#include "legoapi/menus/screens/gamestructure.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/level.h"
 #include "legoapi/world/mission.h"
@@ -109,7 +110,6 @@ extern f32 PauseMenus_X;
 extern i32 PauseMenus_Align;
 void GameDrawMenuEntry(MENU *menu, char *text);
 i32 GetParentMenuID(void);
-void RestoreOptions(void);
 f32 GameSetSoundVolume(OPTIONSSAVE *options);
 f32 GameSetMusicVolume(OPTIONSSAVE *options);
 void SfxCheckMusicOnOff(OPTIONSSAVE *options);
@@ -256,10 +256,6 @@ void MenuDrawHints(MENU_s *menu) {
     GameDrawMenuEntry(menu, TTab[tBACK]);
 }
 
-void MenuDrawStore(MENU_s *) {
-    STUBBED();
-}
-
 void MenuEnterLoad(MENU_s *menu) {
     memcard_cardchanged = 0;
     i32 last_column = SAVESLOTS - 1;
@@ -326,15 +322,7 @@ void MenuEnterSave(MENU_s *menu) {
     }
 }
 
-void MenuExitStore(MENU_s *) {
-    STUBBED();
-}
-
 void MenuInitClips(MENU_s *) {
-    STUBBED();
-}
-
-void MenuInitStore(MENU_s *) {
     STUBBED();
 }
 
@@ -633,10 +621,6 @@ void MenuUpdateHints(MENU_s *menu) {
     }
 }
 
-void MenuUpdateStore(MENU_s *) {
-    STUBBED();
-}
-
 void ProcessFileSel3(float, nupad_s *) {
     STUBBED();
 }
@@ -902,10 +886,6 @@ NUGSCN *IconScene_FindById(i32 character_id) {
     return IconScene[character_id];
 }
 
-void MenuDrawDebugStore(MENU_s *) {
-    STUBBED();
-}
-
 void MenuDrawEndMission(MENU_s *) {
     STUBBED();
 }
@@ -1138,10 +1118,6 @@ void MenuDrawNoMemoryCard(MENU_s *menu) {
     DrawMenuEntry(menu, apitxt_SLOT);
 }
 
-void MenuDrawStoreHolding(MENU_s *) {
-    STUBBED();
-}
-
 void MenuEnterCardWarning(MENU_s *) {
     STUBBED();
 }
@@ -1154,18 +1130,6 @@ void MenuEnterSaveConfirm(MENU_s *) {
         BackupMenuNoFn();
         NewMenu(1009, 0, -1);
     }
-}
-
-void MenuExitStoreHolding(MENU_s *) {
-    STUBBED();
-}
-
-void MenuInitStoreHolding(MENU_s *) {
-    STUBBED();
-}
-
-void MenuUpdateDebugStore(MENU_s *) {
-    STUBBED();
 }
 
 void MenuUpdateEndMission(MENU_s *) {
@@ -1277,10 +1241,6 @@ void MenuInitialise(MENUFNINFO *menu_info, i32 menu_id_count, i32 language_count
     }
 }
 
-void MenuDrawStorePurchase(MENU_s *) {
-    STUBBED();
-}
-
 void MenuEnterNoMemoryCard(MENU_s *) {
     STUBBED();
 }
@@ -1289,14 +1249,6 @@ void MenuEnterStartNewGame(MENU_s *) {
     memcard_autosaveenabled = 0;
     saveload_autosave = -1;
     BackupMenu();
-}
-
-void MenuExitStorePurchase(MENU_s *) {
-    STUBBED();
-}
-
-void MenuInitStorePurchase(MENU_s *) {
-    STUBBED();
 }
 
 void MenuUpdateCardWarning(MENU_s *) {
@@ -1363,18 +1315,6 @@ void MenuDrawSelectControls(MENU_s *menu) {
     DrawMenuEntry(menu, TTab[tTOUCHSCREEN]);
 }
 
-void MenuDrawStoreRestoring(MENU_s *) {
-    STUBBED();
-}
-
-void MenuExitStoreRestoring(MENU_s *) {
-    STUBBED();
-}
-
-void MenuInitStoreRestoring(MENU_s *) {
-    STUBBED();
-}
-
 void MenuUpdateEndChallenge(MENU_s *) {
     STUBBED();
 }
@@ -1384,10 +1324,6 @@ void MenuUpdateFormatCancel(MENU_s *) {
 }
 
 void MenuUpdateNoMemoryCard(MENU_s *) {
-    STUBBED();
-}
-
-void MenuUpdateStoreHolding(MENU_s *) {
     STUBBED();
 }
 
@@ -1408,10 +1344,6 @@ void MenuUpdateDeleteConfirm(MENU_s *) {
 }
 
 void MenuUpdateFormatConfirm(MENU_s *) {
-    STUBBED();
-}
-
-void MenuUpdateStorePurchase(MENU_s *) {
     STUBBED();
 }
 
@@ -1486,10 +1418,6 @@ void MenuUpdateSelectControls(MENU_s *menu) {
     } else if (menu->cancel_pressed != 0) {
         BackupMenu();
     }
-}
-
-void MenuUpdateStoreRestoring(MENU_s *) {
-    STUBBED();
 }
 
 void MenuUpdateAutoSaveWarning(MENU_s *) {

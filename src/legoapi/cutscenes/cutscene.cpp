@@ -1,5 +1,6 @@
 #include "decomp.h"
 #include "globals.h"
+#include "legoapi/menus/screens/gamestructure.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/audio/audio.h"
 #include "legoapi/cutscenes/cutscenes.h"

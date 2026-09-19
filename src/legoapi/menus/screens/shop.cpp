@@ -13,6 +13,7 @@
 #include "legoapi/menus/screens/gamemenuall.h"
 #include "legoapi/cutscenes/cutscenes.h"
 #include "legoapi/menus/screens/store.h"
+#include "legoapi/menus/screens/gamestructure.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/world/world.h"
 #include "legoapi/world/world_shared.h"
@@ -38,8 +39,6 @@ void *AddGameMessage(char *, NUVEC *, f32, NUVEC *, f32, u8, u8, u8, u32, f32);
 extern f32 HUB_EPISODETITLEY;
 extern f32 HUB_EPISODESUBTITLEY;
 i32 AddToCollection(i32);
-void AddToCompletionPoints(u32);
-void AddToGoldBricks();
 extern GAMESAVE_s TempGame;
 extern i32 hub_forceshopsave;
 i32 POINTS_PER_HINT;

@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 46.187763,
+    "fuzzy_match_percent": 46.1915,
     "total_code": "4722419",
-    "matched_code": "402098",
-    "matched_code_percent": 8.514662,
+    "matched_code": "402742",
+    "matched_code_percent": 8.528299,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
@@ -35359,14 +35359,6 @@
           "match_percent": 20.869566
         },
         {
-          "name": "_Z16NetworkSyncPausev",
-          "demangled_name": "NetworkSyncPause()",
-          "address": 4693808,
-          "offset": 3803840,
-          "size": 529,
-          "match_percent": 4.158416
-        },
-        {
           "name": "_ZN18NetListenerBindingC1EP20NetListenerInterfacehPc",
           "demangled_name": "NetListenerBinding::NetListenerBinding(NetListenerInterface*, unsigned char, char*)",
           "address": 5425840,
@@ -39832,6 +39824,14 @@
           "match_percent": 89.64286
         },
         {
+          "name": "_Z24StoreProgressAICharacterP16LEVEL_PROGRESS_s",
+          "demangled_name": "StoreProgressAICharacter(LEVEL_PROGRESS_s*)",
+          "address": 1037120,
+          "offset": 147152,
+          "size": 167,
+          "match_percent": 100.0
+        },
+        {
           "name": "_Z22AICreatureResumeScriptP12GameObject_s",
           "demangled_name": "AICreatureResumeScript(GameObject_s*)",
           "address": 1037296,
@@ -39845,7 +39845,7 @@
           "address": 1040336,
           "offset": 150368,
           "size": 682,
-          "match_percent": 83.01111
+          "match_percent": 83.094444
         },
         {
           "name": "_Z15ResetAICreatureP12GameObject_sP7AISYS_s",
@@ -40139,7 +40139,7 @@
           "address": 2352144,
           "offset": 1462176,
           "size": 1029,
-          "match_percent": 32.363956
+          "match_percent": 32.381626
         },
         {
           "name": "_ZL19Hub_GoneThroughDoorP11WORLDINFO_s.isra.0",
@@ -46898,14 +46898,6 @@
           "match_percent": 99.35294
         },
         {
-          "name": "_Z16FreePlayUnlockedv",
-          "demangled_name": "FreePlayUnlocked()",
-          "address": 4695696,
-          "offset": 3805728,
-          "size": 12,
-          "match_percent": 100.0
-        },
-        {
           "name": "_Z11Cheats_InitP5CHEAT",
           "demangled_name": "Cheats_Init(CHEAT*)",
           "address": 5116128,
@@ -46992,29 +46984,6 @@
           "offset": 4228080,
           "size": 198,
           "match_percent": 79.70731
-        }
-      ]
-    },
-    {
-      "name": "legoapi/core/config/config.cpp.o",
-      "source": "src/legoapi/core/config/config.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/config.o",
-      "functions": [
-        {
-          "name": "_GLOBAL__sub_I_config.cpp",
-          "demangled_name": "_GLOBAL__sub_I_config.cpp",
-          "address": 895872,
-          "offset": 5904,
-          "size": 93,
-          "match_percent": 29.411764
-        },
-        {
-          "name": "_Z14RestoreOptionsv",
-          "demangled_name": "RestoreOptions()",
-          "address": 4694688,
-          "offset": 3804720,
-          "size": 130,
-          "match_percent": 6.054054
         }
       ]
     },
@@ -47965,30 +47934,6 @@
           "address": 1175424,
           "offset": 285456,
           "size": 989,
-          "match_percent": 99.80851
-        },
-        {
-          "name": "_Z9PauseGamei",
-          "demangled_name": "PauseGame(int)",
-          "address": 4693136,
-          "offset": 3803168,
-          "size": 665,
-          "match_percent": 92.41538
-        },
-        {
-          "name": "_Z10ResumeGameii",
-          "demangled_name": "ResumeGame(int, int)",
-          "address": 4694352,
-          "offset": 3804384,
-          "size": 230,
-          "match_percent": 86.75926
-        },
-        {
-          "name": "_Z10ClearPausev",
-          "demangled_name": "ClearPause()",
-          "address": 4694592,
-          "offset": 3804624,
-          "size": 36,
           "match_percent": 100.0
         },
         {
@@ -47997,7 +47942,7 @@
           "address": 4805776,
           "offset": 3915808,
           "size": 345,
-          "match_percent": 100.0
+          "match_percent": 98.94505
         },
         {
           "name": "_Z15RegisterHelpersv",
@@ -59362,22 +59307,6 @@
           "match_percent": 7.118644
         },
         {
-          "name": "_Z21AddToCompletionPointsj",
-          "demangled_name": "AddToCompletionPoints(unsigned int)",
-          "address": 4695280,
-          "offset": 3805312,
-          "size": 125,
-          "match_percent": 86.0
-        },
-        {
-          "name": "_Z15AddToGoldBricksv",
-          "demangled_name": "AddToGoldBricks()",
-          "address": 4695456,
-          "offset": 3805488,
-          "size": 130,
-          "match_percent": 86.439026
-        },
-        {
           "name": "_Z15ResetCoinPacketP12COINPACKET_s",
           "demangled_name": "ResetCoinPacket(COINPACKET_s*)",
           "address": 4988336,
@@ -63446,7 +63375,7 @@
           "address": 2419824,
           "offset": 1529856,
           "size": 3425,
-          "match_percent": 26.567568
+          "match_percent": 26.64865
         },
         {
           "name": "_Z18TakeOverGameObjectP12GameObject_sS0_ii",
@@ -63886,7 +63815,7 @@
           "address": 4348208,
           "offset": 3458240,
           "size": 86,
-          "match_percent": 71.35135
+          "match_percent": 70.945946
         },
         {
           "name": "_ZN9BaseThing18RemoveDependanciesEP15ThingRemoveData",
@@ -64199,46 +64128,6 @@
           "offset": 3774832,
           "size": 267,
           "match_percent": 5.764706
-        },
-        {
-          "name": "_Z9Game_Exiti",
-          "demangled_name": "Game_Exit(int)",
-          "address": 4695056,
-          "offset": 3805088,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z14CanSaveAndExitP11WORLDINFO_s",
-          "demangled_name": "CanSaveAndExit(WORLDINFO_s*)",
-          "address": 4695072,
-          "offset": 3805104,
-          "size": 203,
-          "match_percent": 99.48276
-        },
-        {
-          "name": "_Z23Game_100PercentCompletev",
-          "demangled_name": "Game_100PercentComplete()",
-          "address": 4695408,
-          "offset": 3805440,
-          "size": 35,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z21Game_GotAllGoldBricksv",
-          "demangled_name": "Game_GotAllGoldBricks()",
-          "address": 4695600,
-          "offset": 3805632,
-          "size": 43,
-          "match_percent": 32.307693
-        },
-        {
-          "name": "_Z15Game_AutoSavingv",
-          "demangled_name": "Game_AutoSaving()",
-          "address": 4695648,
-          "offset": 3805680,
-          "size": 45,
-          "match_percent": 32.307693
         },
         {
           "name": "_Z10GameTimingP11WORLDINFO_sPf",
@@ -68096,150 +67985,6 @@
           "offset": 3699152,
           "size": 91,
           "match_percent": 99.433334
-        },
-        {
-          "name": "_Z20MenuUpdateDebugStoreP6MENU_s",
-          "demangled_name": "MenuUpdateDebugStore(MENU_s*)",
-          "address": 4698992,
-          "offset": 3809024,
-          "size": 230,
-          "match_percent": 7.777778
-        },
-        {
-          "name": "_Z18MenuDrawDebugStoreP6MENU_s",
-          "demangled_name": "MenuDrawDebugStore(MENU_s*)",
-          "address": 4699232,
-          "offset": 3809264,
-          "size": 3007,
-          "match_percent": 0.707071
-        },
-        {
-          "name": "_Z20MenuInitStoreHoldingP6MENU_s",
-          "demangled_name": "MenuInitStoreHolding(MENU_s*)",
-          "address": 4702240,
-          "offset": 3812272,
-          "size": 62,
-          "match_percent": 30.0
-        },
-        {
-          "name": "_Z22MenuUpdateStoreHoldingP6MENU_s",
-          "demangled_name": "MenuUpdateStoreHolding(MENU_s*)",
-          "address": 4702304,
-          "offset": 3812336,
-          "size": 202,
-          "match_percent": 9.6
-        },
-        {
-          "name": "_Z20MenuDrawStoreHoldingP6MENU_s",
-          "demangled_name": "MenuDrawStoreHolding(MENU_s*)",
-          "address": 4702512,
-          "offset": 3812544,
-          "size": 403,
-          "match_percent": 5.384615
-        },
-        {
-          "name": "_Z20MenuExitStoreHoldingP6MENU_s",
-          "demangled_name": "MenuExitStoreHolding(MENU_s*)",
-          "address": 4702928,
-          "offset": 3812960,
-          "size": 62,
-          "match_percent": 30.0
-        },
-        {
-          "name": "_Z13MenuInitStoreP6MENU_s",
-          "demangled_name": "MenuInitStore(MENU_s*)",
-          "address": 4702992,
-          "offset": 3813024,
-          "size": 252,
-          "match_percent": 8.4
-        },
-        {
-          "name": "_Z15MenuUpdateStoreP6MENU_s",
-          "demangled_name": "MenuUpdateStore(MENU_s*)",
-          "address": 4703248,
-          "offset": 3813280,
-          "size": 1858,
-          "match_percent": 1.183099
-        },
-        {
-          "name": "_Z13MenuDrawStoreP6MENU_s",
-          "demangled_name": "MenuDrawStore(MENU_s*)",
-          "address": 4705120,
-          "offset": 3815152,
-          "size": 5064,
-          "match_percent": 0.78346
-        },
-        {
-          "name": "_Z13MenuExitStoreP6MENU_s",
-          "demangled_name": "MenuExitStore(MENU_s*)",
-          "address": 4710192,
-          "offset": 3820224,
-          "size": 62,
-          "match_percent": 30.0
-        },
-        {
-          "name": "_Z22MenuInitStoreRestoringP6MENU_s",
-          "demangled_name": "MenuInitStoreRestoring(MENU_s*)",
-          "address": 4710256,
-          "offset": 3820288,
-          "size": 64,
-          "match_percent": 32.307693
-        },
-        {
-          "name": "_Z24MenuUpdateStoreRestoringP6MENU_s",
-          "demangled_name": "MenuUpdateStoreRestoring(MENU_s*)",
-          "address": 4710320,
-          "offset": 3820352,
-          "size": 1102,
-          "match_percent": 1.363636
-        },
-        {
-          "name": "_Z22MenuDrawStoreRestoringP6MENU_s",
-          "demangled_name": "MenuDrawStoreRestoring(MENU_s*)",
-          "address": 4711424,
-          "offset": 3821456,
-          "size": 944,
-          "match_percent": 2.282609
-        },
-        {
-          "name": "_Z22MenuExitStoreRestoringP6MENU_s",
-          "demangled_name": "MenuExitStoreRestoring(MENU_s*)",
-          "address": 4712368,
-          "offset": 3822400,
-          "size": 181,
-          "match_percent": 13.043478
-        },
-        {
-          "name": "_Z21MenuInitStorePurchaseP6MENU_s",
-          "demangled_name": "MenuInitStorePurchase(MENU_s*)",
-          "address": 4712560,
-          "offset": 3822592,
-          "size": 36,
-          "match_percent": 42.0
-        },
-        {
-          "name": "_Z21MenuDrawStorePurchaseP6MENU_s",
-          "demangled_name": "MenuDrawStorePurchase(MENU_s*)",
-          "address": 4712608,
-          "offset": 3822640,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z21MenuExitStorePurchaseP6MENU_s",
-          "demangled_name": "MenuExitStorePurchase(MENU_s*)",
-          "address": 4712624,
-          "offset": 3822656,
-          "size": 67,
-          "match_percent": 28.0
-        },
-        {
-          "name": "_Z23MenuUpdateStorePurchaseP6MENU_s",
-          "demangled_name": "MenuUpdateStorePurchase(MENU_s*)",
-          "address": 4712912,
-          "offset": 3822944,
-          "size": 1114,
-          "match_percent": 1.909091
         }
       ]
     },
@@ -68671,6 +68416,141 @@
           "offset": 1558896,
           "size": 67,
           "match_percent": 15.95
+        }
+      ]
+    },
+    {
+      "name": "legoapi/menus/screens/gamestructure.cpp.o",
+      "source": "src/legoapi/menus/screens/gamestructure.cpp",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/gamestructure.o",
+      "functions": [
+        {
+          "name": "_GLOBAL__sub_I_gamestructure.cpp",
+          "demangled_name": "_GLOBAL__sub_I_gamestructure.cpp",
+          "address": 918480,
+          "offset": 28512,
+          "size": 93,
+          "match_percent": 99.35294
+        },
+        {
+          "name": "_ZL17StoreUnlockArcadev",
+          "demangled_name": "StoreUnlockArcade()",
+          "address": 4692464,
+          "offset": 3802496,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL16StoreUnlockBonusv",
+          "demangled_name": "StoreUnlockBonus()",
+          "address": 4692480,
+          "offset": 3802512,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL17StoreUnlockBountyv",
+          "demangled_name": "StoreUnlockBounty()",
+          "address": 4692496,
+          "offset": 3802528,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL20StoreUnlockChallengev",
+          "demangled_name": "StoreUnlockChallenge()",
+          "address": 4692512,
+          "offset": 3802544,
+          "size": 26,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL15StoreUnlockJediv",
+          "demangled_name": "StoreUnlockJedi()",
+          "address": 4692544,
+          "offset": 3802576,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL15StoreUnlockSithv",
+          "demangled_name": "StoreUnlockSith()",
+          "address": 4692560,
+          "offset": 3802592,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL14StoreUnlockEp3v",
+          "demangled_name": "StoreUnlockEp3()",
+          "address": 4692576,
+          "offset": 3802608,
+          "size": 102,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL14StoreUnlockEp2v",
+          "demangled_name": "StoreUnlockEp2()",
+          "address": 4692688,
+          "offset": 3802720,
+          "size": 102,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL14StoreUnlockEp6v",
+          "demangled_name": "StoreUnlockEp6()",
+          "address": 4692800,
+          "offset": 3802832,
+          "size": 102,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL14StoreUnlockEp5v",
+          "demangled_name": "StoreUnlockEp5()",
+          "address": 4692912,
+          "offset": 3802944,
+          "size": 102,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL14StoreUnlockEp4v",
+          "demangled_name": "StoreUnlockEp4()",
+          "address": 4693024,
+          "offset": 3803056,
+          "size": 102,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z9PauseGamei",
+          "demangled_name": "PauseGame(int)",
+          "address": 4693136,
+          "offset": 3803168,
+          "size": 665,
+          "match_percent": 92.64616
+        },
+        {
+          "name": "_Z16NetworkSyncPausev",
+          "demangled_name": "NetworkSyncPause()",
+          "address": 4693808,
+          "offset": 3803840,
+          "size": 529,
+          "match_percent": 4.158416
+        },
+        {
+          "name": "_Z10ResumeGameii",
+          "demangled_name": "ResumeGame(int, int)",
+          "address": 4694352,
+          "offset": 3804384,
+          "size": 230,
+          "match_percent": 84.25926
+        },
+        {
+          "name": "_Z10ClearPausev",
+          "demangled_name": "ClearPause()",
+          "address": 4694592,
+          "offset": 3804624,
+          "size": 36,
+          "match_percent": 100.0
         },
         {
           "name": "_Z11NewGameModev",
@@ -68679,6 +68559,318 @@
           "offset": 3804672,
           "size": 36,
           "match_percent": 100.0
+        },
+        {
+          "name": "_Z14RestoreOptionsv",
+          "demangled_name": "RestoreOptions()",
+          "address": 4694688,
+          "offset": 3804720,
+          "size": 130,
+          "match_percent": 93.72973
+        },
+        {
+          "name": "_Z14InitSuperStoryi",
+          "demangled_name": "InitSuperStory(int)",
+          "address": 4694832,
+          "offset": 3804864,
+          "size": 116,
+          "match_percent": 17.5
+        },
+        {
+          "name": "_Z7InStoryv",
+          "demangled_name": "InStory()",
+          "address": 4694960,
+          "offset": 3804992,
+          "size": 83,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z9Game_Exiti",
+          "demangled_name": "Game_Exit(int)",
+          "address": 4695056,
+          "offset": 3805088,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z14CanSaveAndExitP11WORLDINFO_s",
+          "demangled_name": "CanSaveAndExit(WORLDINFO_s*)",
+          "address": 4695072,
+          "offset": 3805104,
+          "size": 203,
+          "match_percent": 98.965515
+        },
+        {
+          "name": "_Z21AddToCompletionPointsj",
+          "demangled_name": "AddToCompletionPoints(unsigned int)",
+          "address": 4695280,
+          "offset": 3805312,
+          "size": 125,
+          "match_percent": 86.0
+        },
+        {
+          "name": "_Z23Game_100PercentCompletev",
+          "demangled_name": "Game_100PercentComplete()",
+          "address": 4695408,
+          "offset": 3805440,
+          "size": 35,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z15AddToGoldBricksv",
+          "demangled_name": "AddToGoldBricks()",
+          "address": 4695456,
+          "offset": 3805488,
+          "size": 130,
+          "match_percent": 86.439026
+        },
+        {
+          "name": "_Z21Game_GotAllGoldBricksv",
+          "demangled_name": "Game_GotAllGoldBricks()",
+          "address": 4695600,
+          "offset": 3805632,
+          "size": 43,
+          "match_percent": 32.307693
+        },
+        {
+          "name": "_Z15Game_AutoSavingv",
+          "demangled_name": "Game_AutoSaving()",
+          "address": 4695648,
+          "offset": 3805680,
+          "size": 45,
+          "match_percent": 32.307693
+        },
+        {
+          "name": "_Z16FreePlayUnlockedv",
+          "demangled_name": "FreePlayUnlocked()",
+          "address": 4695696,
+          "offset": 3805728,
+          "size": 12,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z16Store_UnlockPackib",
+          "demangled_name": "Store_UnlockPack(int, bool)",
+          "address": 4695712,
+          "offset": 3805744,
+          "size": 72,
+          "match_percent": 20.0
+        },
+        {
+          "name": "_Z22Store_RestorePurchasesv",
+          "demangled_name": "Store_RestorePurchases()",
+          "address": 4695792,
+          "offset": 3805824,
+          "size": 80,
+          "match_percent": 8.0
+        },
+        {
+          "name": "_Z22StoreBundle_FindByNamePc",
+          "demangled_name": "StoreBundle_FindByName(char*)",
+          "address": 4695872,
+          "offset": 3805904,
+          "size": 135,
+          "match_percent": 10.769231
+        },
+        {
+          "name": "_Z20Store_IsPackUnlockedi",
+          "demangled_name": "Store_IsPackUnlocked(int)",
+          "address": 4696016,
+          "offset": 3806048,
+          "size": 12,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z21Store_IsPackAvailableiPc",
+          "demangled_name": "Store_IsPackAvailable(int, char*)",
+          "address": 4696032,
+          "offset": 3806064,
+          "size": 73,
+          "match_percent": 92.608696
+        },
+        {
+          "name": "_Z14Store_FindPackiPc",
+          "demangled_name": "Store_FindPack(int, char*)",
+          "address": 4696112,
+          "offset": 3806144,
+          "size": 1244,
+          "match_percent": 67.78704
+        },
+        {
+          "name": "_Z25Store_HubInitFloorTargetsP11WORLDINFO_s",
+          "demangled_name": "Store_HubInitFloorTargets(WORLDINFO_s*)",
+          "address": 4697360,
+          "offset": 3807392,
+          "size": 382,
+          "match_percent": 4.375
+        },
+        {
+          "name": "_Z25Store_HubDrawFloorTargetsP11WORLDINFO_s",
+          "demangled_name": "Store_HubDrawFloorTargets(WORLDINFO_s*)",
+          "address": 4697744,
+          "offset": 3807776,
+          "size": 1240,
+          "match_percent": 1.609195
+        },
+        {
+          "name": "_Z20MenuUpdateDebugStoreP6MENU_s",
+          "demangled_name": "MenuUpdateDebugStore(MENU_s*)",
+          "address": 4698992,
+          "offset": 3809024,
+          "size": 230,
+          "match_percent": 7.777778
+        },
+        {
+          "name": "_Z18MenuDrawDebugStoreP6MENU_s",
+          "demangled_name": "MenuDrawDebugStore(MENU_s*)",
+          "address": 4699232,
+          "offset": 3809264,
+          "size": 3007,
+          "match_percent": 0.707071
+        },
+        {
+          "name": "_Z20MenuInitStoreHoldingP6MENU_s",
+          "demangled_name": "MenuInitStoreHolding(MENU_s*)",
+          "address": 4702240,
+          "offset": 3812272,
+          "size": 62,
+          "match_percent": 30.0
+        },
+        {
+          "name": "_Z22MenuUpdateStoreHoldingP6MENU_s",
+          "demangled_name": "MenuUpdateStoreHolding(MENU_s*)",
+          "address": 4702304,
+          "offset": 3812336,
+          "size": 202,
+          "match_percent": 9.6
+        },
+        {
+          "name": "_Z20MenuDrawStoreHoldingP6MENU_s",
+          "demangled_name": "MenuDrawStoreHolding(MENU_s*)",
+          "address": 4702512,
+          "offset": 3812544,
+          "size": 403,
+          "match_percent": 5.384615
+        },
+        {
+          "name": "_Z20MenuExitStoreHoldingP6MENU_s",
+          "demangled_name": "MenuExitStoreHolding(MENU_s*)",
+          "address": 4702928,
+          "offset": 3812960,
+          "size": 62,
+          "match_percent": 30.0
+        },
+        {
+          "name": "_Z13MenuInitStoreP6MENU_s",
+          "demangled_name": "MenuInitStore(MENU_s*)",
+          "address": 4702992,
+          "offset": 3813024,
+          "size": 252,
+          "match_percent": 8.4
+        },
+        {
+          "name": "_Z15MenuUpdateStoreP6MENU_s",
+          "demangled_name": "MenuUpdateStore(MENU_s*)",
+          "address": 4703248,
+          "offset": 3813280,
+          "size": 1858,
+          "match_percent": 1.183099
+        },
+        {
+          "name": "_Z13MenuDrawStoreP6MENU_s",
+          "demangled_name": "MenuDrawStore(MENU_s*)",
+          "address": 4705120,
+          "offset": 3815152,
+          "size": 5064,
+          "match_percent": 0.78346
+        },
+        {
+          "name": "_Z13MenuExitStoreP6MENU_s",
+          "demangled_name": "MenuExitStore(MENU_s*)",
+          "address": 4710192,
+          "offset": 3820224,
+          "size": 62,
+          "match_percent": 30.0
+        },
+        {
+          "name": "_Z22MenuInitStoreRestoringP6MENU_s",
+          "demangled_name": "MenuInitStoreRestoring(MENU_s*)",
+          "address": 4710256,
+          "offset": 3820288,
+          "size": 64,
+          "match_percent": 32.307693
+        },
+        {
+          "name": "_Z24MenuUpdateStoreRestoringP6MENU_s",
+          "demangled_name": "MenuUpdateStoreRestoring(MENU_s*)",
+          "address": 4710320,
+          "offset": 3820352,
+          "size": 1102,
+          "match_percent": 1.363636
+        },
+        {
+          "name": "_Z22MenuDrawStoreRestoringP6MENU_s",
+          "demangled_name": "MenuDrawStoreRestoring(MENU_s*)",
+          "address": 4711424,
+          "offset": 3821456,
+          "size": 944,
+          "match_percent": 2.282609
+        },
+        {
+          "name": "_Z22MenuExitStoreRestoringP6MENU_s",
+          "demangled_name": "MenuExitStoreRestoring(MENU_s*)",
+          "address": 4712368,
+          "offset": 3822400,
+          "size": 181,
+          "match_percent": 13.043478
+        },
+        {
+          "name": "_Z21MenuInitStorePurchaseP6MENU_s",
+          "demangled_name": "MenuInitStorePurchase(MENU_s*)",
+          "address": 4712560,
+          "offset": 3822592,
+          "size": 36,
+          "match_percent": 42.0
+        },
+        {
+          "name": "_Z21MenuDrawStorePurchaseP6MENU_s",
+          "demangled_name": "MenuDrawStorePurchase(MENU_s*)",
+          "address": 4712608,
+          "offset": 3822640,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z21MenuExitStorePurchaseP6MENU_s",
+          "demangled_name": "MenuExitStorePurchase(MENU_s*)",
+          "address": 4712624,
+          "offset": 3822656,
+          "size": 67,
+          "match_percent": 28.0
+        },
+        {
+          "name": "_Z23Store_RootPackCustodianiP12GameObject_s",
+          "demangled_name": "Store_RootPackCustodian(int, GameObject_s*)",
+          "address": 4712704,
+          "offset": 3822736,
+          "size": 56,
+          "match_percent": 38.18182
+        },
+        {
+          "name": "_Z25Store_UprootPackCustodianiP12GameObject_s",
+          "demangled_name": "Store_UprootPackCustodian(int, GameObject_s*)",
+          "address": 4712768,
+          "offset": 3822800,
+          "size": 132,
+          "match_percent": 13.548388
+        },
+        {
+          "name": "_Z23MenuUpdateStorePurchaseP6MENU_s",
+          "demangled_name": "MenuUpdateStorePurchase(MENU_s*)",
+          "address": 4712912,
+          "offset": 3822944,
+          "size": 1114,
+          "match_percent": 1.909091
         }
       ]
     },
@@ -69004,197 +69196,6 @@
           "offset": 1517872,
           "size": 202,
           "match_percent": 49.333332
-        }
-      ]
-    },
-    {
-      "name": "legoapi/menus/screens/store.cpp.o",
-      "source": "src/legoapi/menus/screens/store.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/store.o",
-      "functions": [
-        {
-          "name": "_Z24StoreProgressAICharacterP16LEVEL_PROGRESS_s",
-          "demangled_name": "StoreProgressAICharacter(LEVEL_PROGRESS_s*)",
-          "address": 1037120,
-          "offset": 147152,
-          "size": 167,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z20StoreLevelProgressFnP11WORLDINFO_sP16LEVEL_PROGRESS_si",
-          "demangled_name": "StoreLevelProgressFn(WORLDINFO_s*, LEVEL_PROGRESS_s*, int)",
-          "address": 1220032,
-          "offset": 330064,
-          "size": 754,
-          "match_percent": 27.010256
-        },
-        {
-          "name": "_ZL17StoreUnlockArcadev",
-          "demangled_name": "StoreUnlockArcade()",
-          "address": 4692464,
-          "offset": 3802496,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL16StoreUnlockBonusv",
-          "demangled_name": "StoreUnlockBonus()",
-          "address": 4692480,
-          "offset": 3802512,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL17StoreUnlockBountyv",
-          "demangled_name": "StoreUnlockBounty()",
-          "address": 4692496,
-          "offset": 3802528,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL20StoreUnlockChallengev",
-          "demangled_name": "StoreUnlockChallenge()",
-          "address": 4692512,
-          "offset": 3802544,
-          "size": 26,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL15StoreUnlockJediv",
-          "demangled_name": "StoreUnlockJedi()",
-          "address": 4692544,
-          "offset": 3802576,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL15StoreUnlockSithv",
-          "demangled_name": "StoreUnlockSith()",
-          "address": 4692560,
-          "offset": 3802592,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL14StoreUnlockEp3v",
-          "demangled_name": "StoreUnlockEp3()",
-          "address": 4692576,
-          "offset": 3802608,
-          "size": 102,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL14StoreUnlockEp2v",
-          "demangled_name": "StoreUnlockEp2()",
-          "address": 4692688,
-          "offset": 3802720,
-          "size": 102,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL14StoreUnlockEp6v",
-          "demangled_name": "StoreUnlockEp6()",
-          "address": 4692800,
-          "offset": 3802832,
-          "size": 102,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL14StoreUnlockEp5v",
-          "demangled_name": "StoreUnlockEp5()",
-          "address": 4692912,
-          "offset": 3802944,
-          "size": 102,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL14StoreUnlockEp4v",
-          "demangled_name": "StoreUnlockEp4()",
-          "address": 4693024,
-          "offset": 3803056,
-          "size": 102,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z16Store_UnlockPackib",
-          "demangled_name": "Store_UnlockPack(int, bool)",
-          "address": 4695712,
-          "offset": 3805744,
-          "size": 72,
-          "match_percent": 20.0
-        },
-        {
-          "name": "_Z22Store_RestorePurchasesv",
-          "demangled_name": "Store_RestorePurchases()",
-          "address": 4695792,
-          "offset": 3805824,
-          "size": 80,
-          "match_percent": 8.0
-        },
-        {
-          "name": "_Z22StoreBundle_FindByNamePc",
-          "demangled_name": "StoreBundle_FindByName(char*)",
-          "address": 4695872,
-          "offset": 3805904,
-          "size": 135,
-          "match_percent": 10.769231
-        },
-        {
-          "name": "_Z20Store_IsPackUnlockedi",
-          "demangled_name": "Store_IsPackUnlocked(int)",
-          "address": 4696016,
-          "offset": 3806048,
-          "size": 12,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z21Store_IsPackAvailableiPc",
-          "demangled_name": "Store_IsPackAvailable(int, char*)",
-          "address": 4696032,
-          "offset": 3806064,
-          "size": 73,
-          "match_percent": 92.608696
-        },
-        {
-          "name": "_Z14Store_FindPackiPc",
-          "demangled_name": "Store_FindPack(int, char*)",
-          "address": 4696112,
-          "offset": 3806144,
-          "size": 1244,
-          "match_percent": 67.75617
-        },
-        {
-          "name": "_Z25Store_HubInitFloorTargetsP11WORLDINFO_s",
-          "demangled_name": "Store_HubInitFloorTargets(WORLDINFO_s*)",
-          "address": 4697360,
-          "offset": 3807392,
-          "size": 382,
-          "match_percent": 4.375
-        },
-        {
-          "name": "_Z25Store_HubDrawFloorTargetsP11WORLDINFO_s",
-          "demangled_name": "Store_HubDrawFloorTargets(WORLDINFO_s*)",
-          "address": 4697744,
-          "offset": 3807776,
-          "size": 1240,
-          "match_percent": 1.609195
-        },
-        {
-          "name": "_Z23Store_RootPackCustodianiP12GameObject_s",
-          "demangled_name": "Store_RootPackCustodian(int, GameObject_s*)",
-          "address": 4712704,
-          "offset": 3822736,
-          "size": 56,
-          "match_percent": 38.18182
-        },
-        {
-          "name": "_Z25Store_UprootPackCustodianiP12GameObject_s",
-          "demangled_name": "Store_UprootPackCustodian(int, GameObject_s*)",
-          "address": 4712768,
-          "offset": 3822800,
-          "size": 132,
-          "match_percent": 13.548388
         }
       ]
     },
@@ -81810,22 +81811,6 @@
           "match_percent": 10.243902
         },
         {
-          "name": "_Z14InitSuperStoryi",
-          "demangled_name": "InitSuperStory(int)",
-          "address": 4694832,
-          "offset": 3804864,
-          "size": 116,
-          "match_percent": 17.5
-        },
-        {
-          "name": "_Z7InStoryv",
-          "demangled_name": "InStory()",
-          "address": 4694960,
-          "offset": 3804992,
-          "size": 83,
-          "match_percent": 100.0
-        },
-        {
           "name": "_Z10BossKilledi",
           "demangled_name": "BossKilled(int)",
           "address": 4815296,
@@ -84960,7 +84945,7 @@
           "address": 1795760,
           "offset": 905792,
           "size": 9054,
-          "match_percent": 13.823558
+          "match_percent": 13.825942
         },
         {
           "name": "_Z17Hub_MakeModelListv",
@@ -85157,6 +85142,14 @@
           "offset": 329232,
           "size": 817,
           "match_percent": 99.837105
+        },
+        {
+          "name": "_Z20StoreLevelProgressFnP11WORLDINFO_sP16LEVEL_PROGRESS_si",
+          "demangled_name": "StoreLevelProgressFn(WORLDINFO_s*, LEVEL_PROGRESS_s*, int)",
+          "address": 1220032,
+          "offset": 330064,
+          "size": 754,
+          "match_percent": 27.08718
         },
         {
           "name": "_Z18CalculateWorldSizeP11WORLDINFO_s",
@@ -116844,7 +116837,6 @@
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
-        "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
@@ -116909,7 +116901,6 @@
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
-        "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
@@ -116974,7 +116965,6 @@
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
-        "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
@@ -117052,7 +117042,6 @@
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
-        "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
@@ -117164,7 +117153,6 @@
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
-        "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
@@ -117242,7 +117230,6 @@
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
-        "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
@@ -117320,7 +117307,6 @@
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
-        "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
@@ -117398,7 +117384,6 @@
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
-        "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
@@ -117476,7 +117461,6 @@
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
-        "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
@@ -117554,7 +117538,6 @@
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
-        "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
@@ -117842,7 +117825,6 @@
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
-        "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
@@ -117920,7 +117902,6 @@
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
-        "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
@@ -117998,7 +117979,6 @@
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
-        "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
@@ -118125,7 +118105,6 @@
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
-        "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
@@ -118215,7 +118194,6 @@
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
-        "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
@@ -118395,7 +118373,6 @@
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
-        "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
@@ -118526,7 +118503,6 @@
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
-        "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
@@ -118657,7 +118633,6 @@
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
-        "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
@@ -118735,7 +118710,6 @@
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
-        "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
@@ -118813,7 +118787,6 @@
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
-        "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
@@ -118891,7 +118864,6 @@
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
-        "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
@@ -118995,7 +118967,6 @@
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
-        "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
@@ -119073,7 +119044,6 @@
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
-        "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
@@ -119162,7 +119132,6 @@
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
-        "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
@@ -119240,7 +119209,6 @@
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
-        "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
@@ -119331,7 +119299,6 @@
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
-        "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
@@ -119409,7 +119376,6 @@
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
-        "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
@@ -119521,7 +119487,6 @@
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
-        "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
@@ -119599,7 +119564,6 @@
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
-        "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
@@ -119677,7 +119641,6 @@
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
-        "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
@@ -119755,7 +119718,6 @@
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
-        "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
@@ -119896,7 +119858,6 @@
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
-        "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
@@ -119974,7 +119935,6 @@
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
-        "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
@@ -120052,7 +120012,6 @@
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
-        "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
@@ -120477,7 +120436,6 @@
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
-        "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
@@ -120671,7 +120629,6 @@
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
-        "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
@@ -120840,7 +120797,6 @@
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
-        "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
@@ -121277,7 +121233,6 @@
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
-        "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
@@ -121355,7 +121310,6 @@
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
-        "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
@@ -121560,6 +121514,14 @@
       "demangled_name": "_GLOBAL__sub_I_game_obj.cpp",
       "address": 894864,
       "offset": 4896,
+      "size": 93,
+      "match_percent": 0.0
+    },
+    {
+      "name": "_GLOBAL__sub_I_config.cpp",
+      "demangled_name": "_GLOBAL__sub_I_config.cpp",
+      "address": 895872,
+      "offset": 5904,
       "size": 93,
       "match_percent": 0.0
     },
@@ -121928,14 +121890,6 @@
       "demangled_name": "_GLOBAL__sub_I_episodes.cpp",
       "address": 918384,
       "offset": 28416,
-      "size": 93,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_GLOBAL__sub_I_gamestructure.cpp",
-      "demangled_name": "_GLOBAL__sub_I_gamestructure.cpp",
-      "address": 918480,
-      "offset": 28512,
       "size": 93,
       "match_percent": 0.0
     },
@@ -128501,7 +128455,7 @@
     }
   ],
   "summary": {
-    "bazel_units": 472,
+    "bazel_units": 471,
     "functions": 13454,
     "assigned_functions": 12352,
     "ambiguous_functions": 213,

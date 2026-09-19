@@ -7,7 +7,8 @@
 
 struct WORLDINFO_s;
 struct LEVEL_PROGRESS_s;
-void StoreLevelProgressFn(WORLDINFO_s *, LEVEL_PROGRESS_s *, i32);
+struct GameObject_s;
+struct MENU_s;
 
 struct storepack_s {
     char *name;
@@ -24,10 +25,7 @@ struct storepack_s {
     };
     u8 field7_0xa;
     u8 field8_0xb;
-    u8 field9_0xc;
-    u8 field10_0xd;
-    u8 field11_0xe;
-    u8 field12_0xf;
+    void (*unlock_fn)();
     u8 field13_0x10;
     u8 field14_0x11;
     u8 field15_0x12;
@@ -86,3 +84,29 @@ typedef struct COLLECTID {
 i32 Store_FindPack(i32 id, char *name);
 bool Store_IsPackUnlocked(i32 pack);
 bool Store_IsPackAvailable(i32 pack, char *reason);
+void Store_UnlockPack(i32 pack, bool save);
+void Store_RestorePurchases(void);
+void StoreBundle_FindByName(char *name);
+void Store_HubInitFloorTargets(WORLDINFO_s *world);
+void Store_HubDrawFloorTargets(WORLDINFO_s *world);
+void Store_RootPackCustodian(i32 pack, GameObject_s *custodian);
+void Store_UprootPackCustodian(i32 pack, GameObject_s *custodian);
+
+void MenuUpdateDebugStore(MENU_s *menu);
+void MenuDrawDebugStore(MENU_s *menu);
+void MenuInitStoreHolding(MENU_s *menu);
+void MenuUpdateStoreHolding(MENU_s *menu);
+void MenuDrawStoreHolding(MENU_s *menu);
+void MenuExitStoreHolding(MENU_s *menu);
+void MenuInitStore(MENU_s *menu);
+void MenuUpdateStore(MENU_s *menu);
+void MenuDrawStore(MENU_s *menu);
+void MenuExitStore(MENU_s *menu);
+void MenuInitStoreRestoring(MENU_s *menu);
+void MenuUpdateStoreRestoring(MENU_s *menu);
+void MenuDrawStoreRestoring(MENU_s *menu);
+void MenuExitStoreRestoring(MENU_s *menu);
+void MenuInitStorePurchase(MENU_s *menu);
+void MenuDrawStorePurchase(MENU_s *menu);
+void MenuExitStorePurchase(MENU_s *menu);
+void MenuUpdateStorePurchase(MENU_s *menu);

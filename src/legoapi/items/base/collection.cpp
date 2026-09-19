@@ -20,6 +20,7 @@ u32 GizmoBlowups_TotalScore(void *world);
 #include "legoapi/gizmos/fx/gizmopickups.h"
 #include "legoapi/characters/core/character.h"
 #include "legoapi/menus/screens/store.h"
+#include "legoapi/menus/screens/gamestructure.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nufile/nufpar.h"
 
@@ -570,22 +571,6 @@ i32 AddToCollection(i32 id) {
     return 0;
 }
 
-void (*Game_AllGoldBricksFn)();
-void (*Game_100PercentFn)();
-
-void AddToGoldBricks() {
-    STATUSCOLLECT_s *save = reinterpret_cast<STATUSCOLLECT_s *>(Game_CompletionSave);
-    const i32 points = GOLDBRICKPOINTS;
-    if (save != NULL && save->gold_bricks < points) {
-        ++save->gold_bricks;
-        if (save->gold_bricks == points && (save->flags & SAVE_REWARD_ALL_GOLD_BRICKS) == 0) {
-            if (Game_AllGoldBricksFn != NULL)
-                Game_AllGoldBricksFn();
-            reinterpret_cast<STATUSCOLLECT_s *>(Game_CompletionSave)->flags |= SAVE_REWARD_ALL_GOLD_BRICKS;
-        }
-    }
-}
-
 void ResetCoinPacket(COINPACKET_s *packet) {
     if (packet != NULL) {
         packet->scale = 1.0f;
@@ -637,24 +622,6 @@ u32 TotalLevelCoinTally(WORLDINFO_s *world, u32 *pickups, u32 *blowups, u32 *bui
     if (characters != NULL)
         *characters = value;
     return total;
-}
-
-void AddToCompletionPoints(u32 points) {
-    STATUSCOLLECT_s *save = reinterpret_cast<STATUSCOLLECT_s *>(Game_CompletionSave);
-    const i32 maximum = COMPLETIONPOINTS;
-    if (save != NULL && save->completion_points < maximum) {
-        save->completion_points += points;
-        if (save->completion_points >= maximum) {
-            save->completion_points = maximum;
-            if ((save->flags & SAVE_REWARD_100_PERCENT) == 0) {
-                if (Game_100PercentFn != NULL) {
-                    Game_100PercentFn();
-                    save = reinterpret_cast<STATUSCOLLECT_s *>(Game_CompletionSave);
-                }
-                save->flags |= SAVE_REWARD_100_PERCENT;
-            }
-        }
-    }
 }
 
 COLLECTION_s *GetFreePlayCollection(i32 area) {

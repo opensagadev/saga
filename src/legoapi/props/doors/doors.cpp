@@ -4,6 +4,7 @@
 #include "legoapi/cutscenes/cutscenes.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/gizmos/transport/gizportal.h"
+#include "legoapi/menus/screens/gamestructure.h"
 #include "legoapi/props/doors/door.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/level.h"
@@ -26,7 +27,6 @@ struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
-void NewGameMode(void);
 void Hub_ActivateDoorMenu(LEVELDATA_s **level);
 extern "C" i32 gone_through_door_to_new_level;
 

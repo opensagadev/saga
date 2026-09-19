@@ -44,7 +44,6 @@ extern f32 lightning_sizel[2];
 extern f32 lightning_sizew[2];
 
 void *GameBufferAlloc(VARIPTR *buf, VARIPTR *buf_end, i32 size);
-i32 Game_100PercentComplete();
 
 GameObject_s *FindGameObject(i32 id, u32 type, i32 a3, i32 a4, i32 a5);
 CABLE_s *CreateCable(GameObject_s *source, GameObject_s *target, i32 flags);
@@ -69,8 +68,5 @@ void GameAISysReset(struct AISYS_s *aisys);
 void GameAnimSys_Update(GAMEANIMSYS_s *system);
 void GameAudio_SetActionMusicTimes(f32 fade_in_time, f32 fade_out_time);
 i32 GameAudio_GetPlrSfxBits(void *object);
-
-// Original returns exit status; code in NuMain checks it.
-i32 Game_Exit(i32 last_area);
 
 #endif

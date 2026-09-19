@@ -12,6 +12,8 @@
 #include "legoapi/gizmo/base/gizmo.h"
 #include "legoapi/menus/core/panel.h"
 #include "legoapi/menus/core/text.h"
+#include "legoapi/menus/screens/store.h"
+#include "legoapi/menus/screens/gamestructure.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/world.h"
 #include "legoapi/items/base/apiobject.h"

@@ -55,6 +55,7 @@ GAMEANIMSET_s *GameAnimSet_Create(VARIPTR *buf, VARIPTR *buf_end, GAMEANIMOBJPOO
                                   GAMEANIMSYS_s *system);
 GAMEANIMOBJPOOL_s *GameAnimSet_CreateObjectPool(VARIPTR *buf, VARIPTR *buf_end, i32 object_data_size, i32 capacity);
 GAMEANIMSYS_s *GameAnimSys_Create(VARIPTR *buf, VARIPTR *buf_end);
+void GameAnimSys_StoreProgress(GAMEANIMSYS_s *system, i32 index);
 void EvalAnim(nuhspecial_s *special, f32 frame, numtx_s *matrix, i32 include_instance_translation);
 void EvalAnim2(nuhspecial_s *special, f32 frame);
 i32 GameAnimSet_Play(GAMEANIMSET_s *set, f32 speed, i32 evaluate_state);

@@ -35,6 +35,23 @@ void ClearAICreatures() {
     }
 }
 
+void StoreProgressAICharacter(LEVEL_PROGRESS_s *progress) {
+    if (progress == NULL)
+        return;
+    progress->disabled_ai_object_mask[0] = 0;
+    progress->disabled_ai_object_mask[1] = 0;
+    GameObject_s *object = Obj;
+    i32 count = HIGHGAMEOBJECT;
+    for (i32 i = 0; i < count; ++i, ++object) {
+        if ((object->apiobj.flags_low & 1) != 0 && (object->apiobj.field_0x1f4 & 0x400) != 0 &&
+            object->ai.reset_mode == 4) {
+            u64 bit = (u64)1 << i;
+            progress->disabled_ai_object_mask[0] |= (u32)bit;
+            progress->disabled_ai_object_mask[1] |= (u32)(bit >> 32);
+        }
+    }
+}
+
 void AICreatureResumeScript(GameObject_s *object) {
     AISCRIPT *script = object->ai.script_process.base_script;
     if (script != NULL) {

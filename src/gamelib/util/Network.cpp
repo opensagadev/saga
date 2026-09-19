@@ -13,10 +13,6 @@ extern EdRegistry theRegistry;
 extern NetTransporter theNetwork;
 extern MemoryManager theMemoryManager;
 
-void NetworkSyncPause() {
-    STUBBED();
-}
-
 void NetRotator2::PredictValue(EdClass const *, void *, NetPredictor::PredictorTime *, NetPredictor::PredictorData **,
                                float *, i32) {
     STUBBED();

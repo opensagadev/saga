@@ -147,6 +147,7 @@ void GizmoSysLateUpdate(GIZMOSYS *gizmo_sys, void *world_info, float delta_time)
 void GizmoSysDraw(GIZMOSYS *gizmo_sys, void *world_info, float delta_time);
 void GizmoSysPanelDraw(GIZMOSYS *gizmo_sys, void *world_info, float delta_time);
 void GizmoSysReset(GIZMOSYS *gizmo_sys, void *world_info, i32 progress_index);
+void GizmoSysStoreProgress(GIZMOSYS *gizmo_sys, void *world_info, i32 progress_index);
 i32 GizmoSys_BoltHitPlat(GIZMOSYS *gizmo_sys, void *world_info, BOLT *bolt, unsigned char *unknown);
 i32 ResetGizmoType(GIZMOSYS *gizmo_sys, i32 type_id, char *name);
 void GizmoSysClearLevelProgress(void *unknown, i32 type_id);

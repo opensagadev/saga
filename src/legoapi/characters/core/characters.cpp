@@ -20,6 +20,7 @@
 #include "legoapi/items/base/apiobject.h"
 #include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/menus/screens/store.h"
+#include "legoapi/menus/screens/gamestructure.h"
 #include "legoapi/menus/screens/shop.h"
 #include "legoapi/render/fx.h"
 #include "legoapi/render/light/lighting.h"
@@ -1562,8 +1563,6 @@ AILOCATOR_s *LocalGetNearestLocator(AILOCATOR_s **locators, i32 count, f32 clip_
     locators[candidates[nearest]] = NULL;
     return result;
 }
-
-void AddToCompletionPoints(u32);
 
 i32 newCharactersCollected(STATUSPACKET_s *) {
     i32 count = 0;

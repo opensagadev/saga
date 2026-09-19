@@ -54,6 +54,8 @@ extern "C" {
     extern AREADATA *ADataList;
     extern AREADATA *LastAData;
     extern AREADATA *HUB_ADATA;
+    extern AREADATA *VADER_ADATA;
+    extern AREADATA *BONUS_GUNSHIP_ADATA;
     extern i32 Area;
     extern i32 loadareacharacters_no_backdrop_reset;
 #ifdef __cplusplus

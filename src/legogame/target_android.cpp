@@ -5,6 +5,7 @@
 #include "batman.h"
 #include "globals.h"
 #include "legogame/game.h"
+#include "legoapi/menus/screens/gamestructure.h"
 #include "legoapi/menus/core/panel.h"
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nu3d/android/nutimebar_plain.h"
