@@ -7,6 +7,7 @@
 #include "globals.h"
 #include "gamelib/util/gamelib_util_types.h"
 #include "gameapi/edtools/edfile.h"
+#include "gameapi/edtools/edpp_internal.h"
 #include "gameapi/edtools/edstubs.h"
 #include "legoapi/render/fx.h"
 #include "legoapi/render/core/terrain.h"
@@ -136,10 +137,6 @@ extern "C" {
     extern debris_chunk_control_s **freechunkcontrols;
     extern i32 freechunkcontrolsptr;
     extern debris_chunk_control_s *debris_chunk_control_stack[2];
-    extern edpp_particle_s edpp_ptls[512];
-    extern i32 edpp_page_used[8];
-    extern i32 edpp_page_on[8];
-    extern i32 edpp_instances_used;
     extern u32 partseed;
 
     void NuPartEnableRayCasts(i32 enabled) {

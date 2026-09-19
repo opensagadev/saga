@@ -1,26 +1,14 @@
 #include "decomp.h"
 #include "gameapi_edtools_types.h"
+#include "gameapi/edtools/edpp_internal.h"
 #include "gameapi/edtools/edstubs.h"
 #include "gameapi/edtools/edui.h"
 #include "legoapi/legoapi_types.h"
 
 extern "C" {
-    extern edpp_particle_s edpp_ptls[512];
-    extern i32 edpp_nearest;
     extern debkeydatatype_s *debkeydata;
     extern debinftype **debtab;
     extern i32 debris_render_group;
-    i32 edpp_dpad_mode;
-    f32 edpp_scale_factor = 1.0f;
-    i32 edpp_create_type = -1;
-    i32 edptl_clipboard_entry = -1;
-    u8 edpp_effect_list;
-    i32 edpp_num_orphans;
-    i32 edptl_repeatboxxzlock = 1;
-    eduimenu_s *edptl_switchtype_menu;
-    eduimenu_s *edptl_page_menu;
-    eduimenu_s *edptl_star_menu;
-    eduimenu_s *edptl_soundid_menu;
     void DebFreeInstantly(i32 *handle);
     void DebReAlloc(debkeydatatype_s *key, i32 particle_count);
     void DebrisSetDetailLevels(i32 handle, i32 detail_levels);

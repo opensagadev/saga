@@ -6,6 +6,7 @@
 #include "legoapi/audio/sfx.h"
 #include "legoapi/render/core/terrain.h"
 #include "legoapi/render/fx/game_deb.h"
+#include "gameapi/edtools/edpp_internal.h"
 #include "legoapi/gizmos/fx/gizmopickups.h"
 #include "legoapi/items/collect/minikits.h"
 #include "legoapi/gizmos/transport/teleport.h"
@@ -103,7 +104,6 @@ void CharScenes_LevelDump(WORLDINFO *world);
 void Customiser_DumpAll(CUSTOMISER *, WORLDINFO *);
 void DestroyRippleMtls(WORLDINFO *);
 extern "C" {
-    extern i32 edpp_page_on[8];
     extern i32 part_page_on[8];
 }
 

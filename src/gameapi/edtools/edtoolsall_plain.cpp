@@ -7,6 +7,8 @@
 #include "gameapi/edtools/gameapi_edtools_types.h"
 #include "gameapi/edtools/edfile.h"
 #include "gameapi/edtools/edcam.h"
+#include "gameapi/edtools/edgra_internal.h"
+#include "gameapi/edtools/edpp_internal.h"
 #include "gameapi/edtools/edstubs.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/render/core/terrain.h"
@@ -72,26 +74,174 @@ extern "C" {
     typedef void (*EDBITSPLAYSOUNDCALLBACK)(NUVEC *, i32);
     typedef i32 (*EDBITSREQUESTSOUNDCALLBACK)(char *);
 
+    // GCC 4.7 emits these file-scope objects in reverse declaration order, so
+    // each group below mirrors the original linked order in reverse.
     i32 bCameraEnabled = 1;
-    eduimenu_s *edui_messagemenu;
-    edgra_clump_s *GrassClumps;
-    i32 EDGRA_MAX_CLUMPS;
-    i32 EDGRA_MAX_UNITS_PER_INDIVIDUAL_CLUMP;
-    edgra_individual_s *IndGrassClumps;
-    void *edgra_free_vecbuffer;
-    i32 edgra_clumps_used;
-    i32 *IndGrassClumpsUsed;
-    i32 edgra_ind_clumps_used;
-    void edgraInitAllClumps(void);
-
+    ed_module_s edanimdesc = {NULL, NULL, "Animation Editor", edanimInit, edanimClose,  edanimEnter, NULL, NULL,
+                              NULL, NULL, 0x6d696e61,         edanimProc, edanimRender, NULL};
+    ed_module_s edbridesc = {NULL, NULL, "Bridge Editor", edbriInit, edbriClose,  edbriEnter, NULL, NULL,
+                             NULL, NULL, 0x64697262,      edbriProc, edbriRender, NULL};
     ed_module_s edgradesc = {NULL, NULL, "Grass Editor", edgraInit,  edgraClose, edgraEnter,  NULL,
                              NULL, NULL, NULL,           0x73617267, edgraProc,  edgraRender, NULL};
     ed_module_s edptldesc = {NULL, NULL, "Particle Editor", edppInit, edppClose,  edppEnter, NULL, edppApply,
                              NULL, NULL, 0x706c7470,        edppProc, edppRender, NULL};
-    ed_module_s edbridesc = {NULL, NULL, "Bridge Editor", edbriInit, edbriClose,  edbriEnter, NULL, NULL,
-                             NULL, NULL, 0x64697262,      edbriProc, edbriRender, NULL};
-    ed_module_s edanimdesc = {NULL, NULL, "Animation Editor", edanimInit, edanimClose,  edanimEnter, NULL, NULL,
-                              NULL, NULL, 0x6d696e61,         edanimProc, edanimRender, NULL};
+    i32 edpp_create_type = -1;
+    f32 edpp_copy_size = 0.2f;
+    f32 edpp_scale_factor = 1.0f;
+    i32 edptl_repeatboxxzlock = 1;
+    i32 edptl_clipboard_entry = -1;
+
+    eduimenu_s *edui_messagemenu;
+
+    eduimenu_s *edgra_active_menu;
+    eduimenu_s *edgra_options_menu;
+    eduimenu_s *edgra_instance_menu;
+    eduimenu_s *edgra_changeinstance_menu;
+    eduimenu_s *edgra_clumpproperties_menu;
+    eduimenu_s *edgra_clumpsizes_menu;
+    eduimenu_s *edgra_clumparea_menu;
+    eduimenu_s *edgra_clumpdist_menu;
+    eduimenu_s *edgra_clumpfade_menu;
+    eduimenu_s *edgra_clumpterrain_menu;
+    eduimenu_s *edgra_clumpmode_menu;
+    eduimenu_s *edgra_dpadmode_menu;
+    eduimenu_s *edgra_sscale_menu;
+    eduimenu_s *edgra_globals_menu;
+    i32 edgra_filter;
+    struct numtl_s *edgra_mtl;
+    f32 edgra_mtl_zoff;
+    NUVEC edgra_cam_pos;
+    f32 edgra_cam_dist;
+    i32 edgra_cam_ax;
+    i32 edgra_cam_ay;
+    f32 edgra_size;
+    i32 edgra_nearest;
+    i32 edgra_nearest_instance;
+    i32 edgra_instance_type;
+    i32 edgra_fadeunits_used;
+    i32 edgra_clumps_used;
+    i32 edgra_fadeclumps_used;
+    i32 edgra_clump_size;
+    i32 edgra_pageid;
+    i32 edgra_rotz;
+    i32 edgra_roty;
+    i32 edgra_dpadmode;
+    i32 edgra_editormode;
+    void *edgra_free_vecbuffer;
+    NUMTX *edgra_mtxbuffer;
+    NUVEC *edgra_vecbuffer;
+    NUGSCN *edgra_page_scene[8];
+    void *edgra_page_terrain[8];
+    NUMTX *edgra_page_matrix_stack[8];
+    i32 EDGRA_MAX_CLUMPS;
+    i32 EDGRA_MAX_INDIVIDUAL_CLUMPS;
+    i32 EDGRA_MAX_UNITS_PER_INDIVIDUAL_CLUMP;
+    edgra_clump_s *GrassClumps;
+    edgra_individual_s *IndGrassClumps;
+    i32 *IndGrassClumpsUsed;
+    i32 edgra_ind_clumps_used;
+
+    i32 edpp_page_used[8];
+    i32 edpp_page_on[8];
+    usize edpp_page_scene[8];
+    i32 edpp_types_used;
+    i32 edpp_copy_source[8];
+    i32 edpp_usememcard;
+    edpp_particle_s edpp_ptls[512];
+    NUVEC edpp_cam_pos;
+    f32 edpp_cam_dist;
+    i32 edpp_cam_ax;
+    i32 edpp_cam_ay;
+    i32 edpp_first_time_this_level;
+    i32 edpp_numparticles;
+    NUMTL *edpp_mtl;
+    NUMTL *edpp_boxmtl;
+    i32 edpp_nearest;
+    edpp_particle_s *edpp_curr;
+    i32 edpp_snap_enabled;
+    u8 edpp_effect_list;
+    i32 edpp_instances_used;
+    i32 edpp_copy_mode;
+    i32 edpp_copy_enclosed;
+    i32 edpp_copy_source_count;
+    NUVEC edpp_copy_source_vec;
+    i32 edpp_num_orphans;
+    i32 edpp_showAllPlaced;
+    i32 edpp_dpad_mode;
+    eduiitem_s *edpp_readout;
+    eduimenu_s *edpp_active_menu;
+    eduimenu_s *ptltypemenu;
+    eduimenu_s *ptloptmenu;
+    eduimenu_s *ptlgsortmenu;
+    eduimenu_s *ptlgcodemenu;
+    eduimenu_s *ptlemitmenu;
+    eduimenu_s *ptlsizemenu;
+    eduimenu_s *ptlrotmenu;
+    eduimenu_s *ptljibmenu;
+    eduimenu_s *ptlcolmenu;
+    eduimenu_s *ptlemitvelmenu;
+    eduimenu_s *ptlgravmenu;
+    eduimenu_s *ptlvaremitmenu;
+    eduimenu_s *ptlvarstartmenu;
+    eduimenu_s *ptlstartvelmenu;
+    eduimenu_s *ptlcutoffmenu;
+    eduimenu_s *ptldatamenu;
+    eduimenu_s *ptlreadoutmenu;
+    eduimenu_s *memcardmenu;
+    eduimenu_s *messagemenu;
+    eduimenu_s *loadeffectsmenu;
+    eduimenu_s *mergeeffectsmenu;
+    eduimenu_s *deleteeffectsmenu;
+    eduimenu_s *filenamemenu;
+    eduimenu_s *namemenu;
+    eduimenu_s *confirmmenu;
+    eduimenu_s *changegenratemenu;
+    eduimenu_s *totalptlsmenu;
+    eduimenu_s *etimemenu;
+    eduimenu_s *emittimemenu;
+    eduimenu_s *sscalemenu;
+    eduimenu_s *texturemenu;
+    eduimenu_s *textureselectmenu;
+    eduimenu_s *collmenu;
+    eduimenu_s *effectlistmenu;
+    eduimenu_s *ptlclipmenu;
+    eduimenu_s *dpadmodemenu;
+    eduimenu_s *edptl_switch_menu;
+    eduimenu_s *edptl_switchtype_menu;
+    eduimenu_s *edptl_sounds_menu;
+    eduimenu_s *edptl_soundx_menu;
+    eduimenu_s *edptl_soundid_menu;
+    eduimenu_s *edptl_soundcontrol_menu;
+    eduimenu_s *edptl_bounce_menu;
+    eduimenu_s *edptl_group_menu;
+    eduimenu_s *edptl_ghost_menu;
+    eduimenu_s *edptl_star_menu;
+    eduimenu_s *edptl_page_menu;
+    eduimenu_s *edptl_drawflag_menu;
+    eduimenu_s *edptl_scaleeffect_menu;
+    eduimenu_s *edptl_orphanlist_menu;
+    eduimenu_s *edptl_instancesettings_menu;
+    eduimenu_s *edptl_torus_menu;
+    eduimenu_s *edptl_damage_menu;
+    eduimenu_s *edptl_damageflag_menu;
+    eduimenu_s *edptl_repeatbox_menu;
+    eduimenu_s *edptl_quickdel_menu;
+    eduimenu_s *edptl_detail_menu;
+    eduimenu_s *edptl_testdetail_menu;
+    i32 edpp_emitrotz;
+    i32 edpp_emitroty;
+    i32 edpp_emitrotx;
+    i32 edpp_rotz;
+    i32 edpp_roty;
+    i32 edpp_offset;
+    i32 edpp_refrotz;
+    i32 edpp_refroty;
+    i32 edpp_copyrotz;
+    i32 edpp_copyroty;
+    i32 edpp_facrotx;
+    i32 edpp_facroty;
+
+    void edgraInitAllClumps(void);
 }
 
 static void edgraInit() {
@@ -223,10 +373,6 @@ extern "C" {
     extern debinftype *effecttypes;
     extern debinftype **debtab;
     extern i32 EDPP_MAX_TYPES;
-    extern i32 edpp_types_used;
-    extern usize edpp_page_scene[8];
-    extern i32 edpp_page_used[8];
-    extern i32 edpp_page_on[8];
     i32 edbitsLookupSoundFX(char *name);
     void edbitsSoundPlay(NUVEC *position, i32 sound);
     void edanimSoundDestroy(i32 parameter_index, i32 sound_index);
@@ -311,6 +457,7 @@ extern "C" {
     i32 edbits_numsounds;
     EDBITSPLAYSOUNDCALLBACK edbitsPlaySound;
     EDBITSREQUESTSOUNDCALLBACK edbitsRequestSound;
+    i32 edbits_override_backups;
     eduimenu_s *edbri_active_menu;
     eduimenu_s *edbri_options_menu;
     eduimenu_s *edbri_dpadmode_menu;
@@ -440,8 +587,6 @@ void edanimDetermineNearestAnim(f32);
 void edppDetermineNearest(float);
 void edppPtlDestroy(i32);
 extern "C" {
-    extern edpp_particle_s edpp_ptls[512];
-    extern i32 edpp_nearest;
     extern debkeydatatype_s *debkeydata;
     extern i32 maxdebkeys;
     void DebFreeOrphansInstantly(debinftype *);
@@ -1209,11 +1354,6 @@ extern "C" {
             count += GrassClumps[i].element_count;
         return count * 0x4c + 0x10;
     }
-    extern i32 edgra_page_used[8];
-    extern NUGSCN *edgra_page_scene[8];
-    extern i32 edgra_page_vectors_valid[8];
-    extern i32 edgra_page_calculate_done[8];
-    NUMTX *edgra_page_matrix_stack[8];
     i32 edgraLoadPage(char *path, void *gscn, i32 terrain, void *buf, void *buf_end) {
         STUBBED();
         (void)path;
@@ -1242,8 +1382,6 @@ extern "C" {
         edgra_page_vectors_valid[page] = 0;
         edgra_page_calculate_done[page] = 0;
     }
-    i32 EDGRA_MAX_INDIVIDUAL_CLUMPS;
-    extern i32 edgra_page_on[8];
     void edgraClumpsReset(void) {
         for (i32 i = 0; i < EDGRA_MAX_CLUMPS; ++i)
             GrassClumps[i].element_count = 0;

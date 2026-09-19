@@ -6,6 +6,7 @@
 #include "legoapi/render/core/gameliball.h"
 #include "legoapi/render/fx.h"
 #include "legoapi/render/fx/game_deb.h"
+#include "gameapi/edtools/edpp_internal.h"
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numath/numtx.h"
@@ -206,7 +207,6 @@ extern "C" {
     extern debinftype **debtab;
     extern i32 EDPP_MAX_TYPES;
     extern i32 EDPP_SCALE_TYPES;
-    extern i32 edpp_types_used;
     extern debinftype *effecttypes;
     extern debscale_s *debscale;
     extern f32 panelglobaltime;

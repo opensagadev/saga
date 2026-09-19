@@ -2,6 +2,8 @@
 #include "gameapi_edtools_types.h"
 #include "gameapi/edtools/edcam.h"
 #include "gameapi/edtools/edfile.h"
+#include "gameapi/edtools/edgra_internal.h"
+#include "gameapi/edtools/edpp_internal.h"
 #include "gameapi/edtools/edstubs.h"
 #include "gameapi/edtools/edgra.h"
 #include "nu2api/nu3d/nuspecial.h"
@@ -23,34 +25,13 @@ static i32 numSplinesLoaded;
 char *EDSPLINE_FILECHECK = const_cast<char *>("EDSPLINE v. ");
 
 extern "C" {
-    extern edgra_clump_s *GrassClumps;
-    extern i32 EDGRA_MAX_UNITS_PER_INDIVIDUAL_CLUMP;
-    i32 edgra_nearest;
-    i32 edgra_rotz, edgra_roty;
-    NUVEC edgra_cam_pos;
-    i32 edgra_nearest_instance;
-    f32 edgra_size;
+    char edgra_filter_string[16] = "GRASS";
     i32 edgra_mode = 1;
-    i32 edgra_clump_size;
-    extern i32 edgra_units_used;
-    extern void *edgra_free_vecbuffer;
-    extern i32 EDGRA_MAX_CLUMPS, EDGRA_MAX_INDIVIDUAL_CLUMPS;
-    extern i32 edgra_clumps_used, edgra_ind_clumps_used;
-    extern i32 *IndGrassClumpsUsed;
-    extern i32 edgra_page_used[8];
-    extern NUGSCN *edgra_page_scene[8];
-    extern void *edgra_page_terrain[8];
-    extern NUMTX *edgra_page_matrix_stack[8];
     extern NUGSCN *edbits_base_scene;
-    NUMTX *edgra_mtxbuffer;
-    i32 edgra_copy_source = -1;
     i32 edgra_last_clump_in_buffer = -1;
-    i32 edgra_pageid, edgra_instance_type;
+    i32 edgra_copy_source = -1;
     f32 edgra_global_fadein = 15.0f, edgra_global_fadeout = 25.0f;
     void edgraInitAllClumps(void);
-    extern edpp_particle_s edpp_ptls[512];
-    extern i32 edpp_nearest;
-    extern NUVEC edpp_cam_pos;
     extern edanim_param_s AnimParams[64];
     extern NUGSCN *edanim_page_scene[8];
 }
@@ -148,8 +129,6 @@ void edppDrawCursor() {
 }
 
 extern "C" {
-    extern edpp_particle_s edpp_ptls[512];
-    extern i32 edpp_instances_used;
     void DebFreeInstantly(i32 *);
 }
 

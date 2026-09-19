@@ -23,7 +23,6 @@ extern "C" {
     extern PartHeader **DmaDebTypes;
     extern i32 EDPP_MAX_DMADEBTYPES;
     extern i32 freeDmaDebType;
-    extern i32 edpp_types_used;
     extern debinftype **debtab;
     extern i32 debris_render_group;
     extern f32 debris_thinning_level;

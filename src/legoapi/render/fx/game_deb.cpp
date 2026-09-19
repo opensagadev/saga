@@ -7,6 +7,7 @@
 #include "legoapi/world/levels/levels.h"
 #include "legoapi/render/fx.h"
 #include "legoapi/render/fx/game_deb.h"
+#include "gameapi/edtools/edpp_internal.h"
 #include "gameapi/edtools/edstubs.h"
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/nu3d/nurndr.h"
@@ -680,17 +681,9 @@ extern "C" {
     debinftype **debtab = NULL;
     i32 EDPP_MAX_TYPES = 0;
     i32 EDPP_SCALE_TYPES = 20;
-    i32 edpp_types_used = 0;
     i32 DEBPAGE_AREA = -1;
     i32 DEBPAGE_CHARACTER = -1;
     i32 DEBPAGE_GENERAL = -1;
-    usize edpp_page_scene[8] = {};
-    i32 edpp_page_on[8] = {};
-    i32 edpp_page_used[8] = {};
-    edpp_particle_s edpp_ptls[512] = {};
-    i32 edpp_nearest;
-    NUVEC edpp_cam_pos;
-    i32 edpp_instances_used = 0;
     debkeydatatype_s *debkeydata = NULL;
     i16 *freedebkeys = NULL;
     i32 freedebkeyptr = 0;

@@ -4,6 +4,7 @@
 #include "legoapi/characters/core/charconfig.h"
 #include "legoapi/characters/motion/gameanim.h"
 #include "gameapi/ai/aisys/aisys.h"
+#include "gameapi/edtools/edpp_internal.h"
 #include "legoapi/render/fx.h"
 #include "legoapi/render/fx/game_deb.h"
 #include "legoapi/characters/core/players.h"
