@@ -91,12 +91,3 @@ static void edgracbCancelChangeInstanceMenu(eduimenu_s *, eduimenu_s *) {
 static void edgracbCancelClumpPropertiesMenu(eduimenu_s *, eduimenu_s *) {
     STUBBED();
 }
-
-static void edgraInit() {
-    STUBBED();
-}
-
-static i32 edgraProc(float, nupad_s *) {
-    STUBBED();
-    return 0;
-}

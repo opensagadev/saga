@@ -42,15 +42,8 @@ void Cheat_StartPowerUp(nuvec_s *position, GameObject_s *object);
 i32 Cheat_PowerUpActive(i32 index);
 void Cheats_Reset(void);
 void Cheats_Update(void);
-struct CHEATSYSTEM {
-    CHEAT *cheats;
-    i32 cheats_count;
-    i32 flags;
-};
-DECOMP_ASSERT(sizeof(CHEATSYSTEM) == 0x0c, "CHEATSYSTEM size");
-
-extern CHEATSYSTEM CheatSystem;
-extern f32 Cheat_PowerUpTime;
 extern i32 ONEPLAYERPOWERUPS;
+extern f32 CHEAT_POWERUPTIME;
+extern i32 POWERUP_TEXTID;
 
 #endif

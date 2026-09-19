@@ -40,6 +40,13 @@ static i32 edui_font;
 static f32 edui_font_scale_x = 0.9f;
 static f32 edui_font_scale_y = 0.9f;
 static u32 edui_cursor_colour = 0xff000000;
+
+static void edgraInit();
+static void edgraClose();
+static void edgraEnter();
+static i32 edgraProc(f32 delta_time, nupad_s *pad);
+static void edgraRender();
+
 extern "C" {
     typedef void (*EDBITSPLAYSOUNDCALLBACK)(NUVEC *, i32);
     typedef i32 (*EDBITSREQUESTSOUNDCALLBACK)(char *);
@@ -57,6 +64,30 @@ extern "C" {
     i32 *IndGrassClumpsUsed;
     i32 edgra_ind_clumps_used;
     void edgraInitAllClumps(void);
+
+    ed_module_s edgradesc = {NULL, NULL, "Grass Editor", edgraInit,  edgraClose, edgraEnter,  NULL,
+                             NULL, NULL, NULL,           0x73617267, edgraProc,  edgraRender, NULL};
+}
+
+static void edgraInit() {
+    STUBBED();
+}
+
+static void edgraClose() {
+    STUBBED();
+}
+
+static void edgraEnter() {
+    STUBBED();
+}
+
+static i32 edgraProc(f32, nupad_s *) {
+    STUBBED();
+    return 0;
+}
+
+static void edgraRender() {
+    STUBBED();
 }
 
 void edgraClumpReseed(i32 index) {

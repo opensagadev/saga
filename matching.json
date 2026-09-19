@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 46.193157,
+    "fuzzy_match_percent": 46.204628,
     "total_code": "4722419",
     "matched_code": "402742",
     "matched_code_percent": 8.528299,
@@ -25863,14 +25863,6 @@
           "match_percent": 18.571428
         },
         {
-          "name": "_ZL10edgraEnterv",
-          "demangled_name": "edgraEnter()",
-          "address": 3345488,
-          "offset": 2455520,
-          "size": 48,
-          "match_percent": 8.888889
-        },
-        {
           "name": "_ZL19edgracbChangeSScaleP10eduimenu_sP10eduiitem_sj",
           "demangled_name": "edgracbChangeSScale(eduimenu_s*, eduiitem_s*, unsigned int)",
           "address": 3345536,
@@ -25893,14 +25885,6 @@
           "offset": 2455760,
           "size": 31,
           "match_percent": 16.25
-        },
-        {
-          "name": "_ZL10edgraClosev",
-          "demangled_name": "edgraClose()",
-          "address": 3353824,
-          "offset": 2463856,
-          "size": 62,
-          "match_percent": 16.875
         },
         {
           "name": "_ZL20edgracbCancelOptMenuP10eduimenu_sS0_",
@@ -26013,14 +25997,6 @@
           "offset": 2663552,
           "size": 414,
           "match_percent": 2.933333
-        },
-        {
-          "name": "_ZL11edgraRenderv",
-          "demangled_name": "edgraRender()",
-          "address": 3556208,
-          "offset": 2666240,
-          "size": 818,
-          "match_percent": 1.271676
         },
         {
           "name": "_ZL22edgracbApplyGlobalFadeP10eduimenu_sP10eduiitem_sj",
@@ -26246,14 +26222,6 @@
           "match_percent": 1.833333
         },
         {
-          "name": "_ZL9edgraInitv",
-          "demangled_name": "edgraInit()",
-          "address": 3551616,
-          "offset": 2661648,
-          "size": 438,
-          "match_percent": 3.333333
-        },
-        {
           "name": "_ZL28edgracbSetClumpTerrainOffsetP10eduimenu_sP10eduiitem_sj",
           "demangled_name": "edgracbSetClumpTerrainOffset(eduimenu_s*, eduiitem_s*, unsigned int)",
           "address": 3605808,
@@ -26292,14 +26260,6 @@
           "offset": 2716752,
           "size": 63,
           "match_percent": 20.0
-        },
-        {
-          "name": "_ZL9edgraProcfP7nupad_s",
-          "demangled_name": "edgraProc(float, nupad_s*)",
-          "address": 3615392,
-          "offset": 2725424,
-          "size": 143,
-          "match_percent": 7.027027
         }
       ]
     },
@@ -31973,6 +31933,22 @@
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_gameapi/edtoolsall_plain.o",
       "functions": [
         {
+          "name": "_ZL10edgraEnterv",
+          "demangled_name": "edgraEnter()",
+          "address": 3345488,
+          "offset": 2455520,
+          "size": 48,
+          "match_percent": 46.666668
+        },
+        {
+          "name": "_ZL10edgraClosev",
+          "demangled_name": "edgraClose()",
+          "address": 3353824,
+          "offset": 2463856,
+          "size": 62,
+          "match_percent": 26.25
+        },
+        {
           "name": "edanimParticleDestroy",
           "demangled_name": "edanimParticleDestroy",
           "address": 3515776,
@@ -32317,6 +32293,14 @@
           "match_percent": 94.375
         },
         {
+          "name": "_ZL9edgraInitv",
+          "demangled_name": "edgraInit()",
+          "address": 3551616,
+          "offset": 2661648,
+          "size": 438,
+          "match_percent": 4.848485
+        },
+        {
           "name": "edGraEnableTerrainSwap",
           "demangled_name": "edGraEnableTerrainSwap",
           "address": 3553936,
@@ -32347,6 +32331,14 @@
           "offset": 2664016,
           "size": 73,
           "match_percent": 100.0
+        },
+        {
+          "name": "_ZL11edgraRenderv",
+          "demangled_name": "edgraRender()",
+          "address": 3556208,
+          "offset": 2666240,
+          "size": 818,
+          "match_percent": 2.427746
         },
         {
           "name": "edgraSetMemoryBuffer",
@@ -32483,6 +32475,14 @@
           "offset": 2719808,
           "size": 2212,
           "match_percent": 1.141805
+        },
+        {
+          "name": "_ZL9edgraProcfP7nupad_s",
+          "demangled_name": "edgraProc(float, nupad_s*)",
+          "address": 3615392,
+          "offset": 2725424,
+          "size": 143,
+          "match_percent": 11.891891
         },
         {
           "name": "edgraClearPage",
@@ -46807,53 +46807,6 @@
       ]
     },
     {
-      "name": "legoapi/core/config/cheat.cpp.o",
-      "source": "src/legoapi/core/config/cheat.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/cheat.o",
-      "functions": [
-        {
-          "name": "_Z16Cheat_FindByNamePc",
-          "demangled_name": "Cheat_FindByName(char*)",
-          "address": 5116208,
-          "offset": 4226240,
-          "size": 111,
-          "match_percent": 99.53846
-        },
-        {
-          "name": "_Z17Cheats_CheckFlagsj",
-          "demangled_name": "Cheats_CheckFlags(unsigned int)",
-          "address": 5116608,
-          "offset": 4226640,
-          "size": 24,
-          "match_percent": 99.85714
-        },
-        {
-          "name": "_Z16Cheat_CheckFlagsij",
-          "demangled_name": "Cheat_CheckFlags(int, unsigned int)",
-          "address": 5116640,
-          "offset": 4226672,
-          "size": 49,
-          "match_percent": 99.86667
-        },
-        {
-          "name": "_Z10Cheat_IsOni",
-          "demangled_name": "Cheat_IsOn(int)",
-          "address": 5116768,
-          "offset": 4226800,
-          "size": 119,
-          "match_percent": 27.083334
-        },
-        {
-          "name": "_Z13Cheat_SetAreaii",
-          "demangled_name": "Cheat_SetArea(int, int)",
-          "address": 5118256,
-          "offset": 4228288,
-          "size": 60,
-          "match_percent": 99.89474
-        }
-      ]
-    },
-    {
       "name": "legoapi/core/config/cheats.cpp.o",
       "source": "src/legoapi/core/config/cheats.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/cheats.o",
@@ -46872,7 +46825,15 @@
           "address": 5116128,
           "offset": 4226160,
           "size": 66,
-          "match_percent": 30.68421
+          "match_percent": 51.63158
+        },
+        {
+          "name": "_Z16Cheat_FindByNamePc",
+          "demangled_name": "Cheat_FindByName(char*)",
+          "address": 5116208,
+          "offset": 4226240,
+          "size": 111,
+          "match_percent": 99.53846
         },
         {
           "name": "_Z15Cheats_SetFlagsv",
@@ -46880,7 +46841,23 @@
           "address": 5116320,
           "offset": 4226352,
           "size": 283,
-          "match_percent": 42.505264
+          "match_percent": 54.589474
+        },
+        {
+          "name": "_Z17Cheats_CheckFlagsj",
+          "demangled_name": "Cheats_CheckFlags(unsigned int)",
+          "address": 5116608,
+          "offset": 4226640,
+          "size": 24,
+          "match_percent": 99.85714
+        },
+        {
+          "name": "_Z16Cheat_CheckFlagsij",
+          "demangled_name": "Cheat_CheckFlags(int, unsigned int)",
+          "address": 5116640,
+          "offset": 4226672,
+          "size": 49,
+          "match_percent": 99.86667
         },
         {
           "name": "_Z11Cheat_SetOniii",
@@ -46888,7 +46865,15 @@
           "address": 5116704,
           "offset": 4226736,
           "size": 62,
-          "match_percent": 56.333332
+          "match_percent": 73.22222
+        },
+        {
+          "name": "_Z10Cheat_IsOni",
+          "demangled_name": "Cheat_IsOn(int)",
+          "address": 5116768,
+          "offset": 4226800,
+          "size": 119,
+          "match_percent": 84.75
         },
         {
           "name": "_Z22Cheat_GetOnOffBitfieldPii",
@@ -46896,7 +46881,7 @@
           "address": 5116896,
           "offset": 4226928,
           "size": 120,
-          "match_percent": 98.54762
+          "match_percent": 99.97619
         },
         {
           "name": "_Z22Cheat_SetOnOffBitfieldPii",
@@ -46904,7 +46889,7 @@
           "address": 5117024,
           "offset": 4227056,
           "size": 94,
-          "match_percent": 61.36842
+          "match_percent": 51.5
         },
         {
           "name": "_Z19Cheat_MultiplyScorej",
@@ -46920,7 +46905,7 @@
           "address": 5117264,
           "offset": 4227296,
           "size": 119,
-          "match_percent": 90.78378
+          "match_percent": 95.21622
         },
         {
           "name": "_Z18Cheat_StartPowerUpP7nuvec_sP12GameObject_s",
@@ -46928,7 +46913,7 @@
           "address": 5117392,
           "offset": 4227424,
           "size": 435,
-          "match_percent": 67.48781
+          "match_percent": 72.5
         },
         {
           "name": "_Z19Cheat_PowerUpActivei",
@@ -46936,7 +46921,7 @@
           "address": 5117840,
           "offset": 4227872,
           "size": 146,
-          "match_percent": 80.710526
+          "match_percent": 83.31579
         },
         {
           "name": "_Z12Cheats_Resetv",
@@ -46944,7 +46929,7 @@
           "address": 5118000,
           "offset": 4228032,
           "size": 37,
-          "match_percent": 82.22222
+          "match_percent": 99.888885
         },
         {
           "name": "_Z13Cheats_Updatev",
@@ -46952,7 +46937,15 @@
           "address": 5118048,
           "offset": 4228080,
           "size": 198,
-          "match_percent": 79.70731
+          "match_percent": 99.902435
+        },
+        {
+          "name": "_Z13Cheat_SetAreaii",
+          "demangled_name": "Cheat_SetArea(int, int)",
+          "address": 5118256,
+          "offset": 4228288,
+          "size": 60,
+          "match_percent": 99.89474
         }
       ]
     },
@@ -66755,7 +66748,7 @@
           "address": 1140320,
           "offset": 250352,
           "size": 880,
-          "match_percent": 0.0
+          "match_percent": 32.788177
         },
         {
           "name": "_Z16MenuUpdateExtrasP6MENU_s",
@@ -66763,7 +66756,7 @@
           "address": 1141200,
           "offset": 251232,
           "size": 337,
-          "match_percent": 55.68919
+          "match_percent": 58.31081
         },
         {
           "name": "_Z15MenuExitOptionsP6MENU_s",
@@ -67827,7 +67820,7 @@
           "address": 4394592,
           "offset": 3504624,
           "size": 399,
-          "match_percent": 99.77528
+          "match_percent": 99.94382
         },
         {
           "name": "_Z22MenuDrawAutoSaveCancelP6MENU_s",
@@ -128398,7 +128391,7 @@
     }
   ],
   "summary": {
-    "bazel_units": 469,
+    "bazel_units": 468,
     "functions": 13454,
     "assigned_functions": 12352,
     "ambiguous_functions": 212,

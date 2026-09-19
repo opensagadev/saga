@@ -87,10 +87,18 @@ struct eduimenu_s {
 struct ed_module_s {
     ed_module_s *next;
     ed_module_s *previous;
-    u8 unknown_08[0x08];
+    const char *name;
+    void (*init)();
     void (*close)();
     void (*activate)();
     void (*deactivate)();
+    void (*apply)();
+    void (*write)(i32 file);
+    void (*read)(i32 file);
+    u32 block_id;
+    i32 (*process)(f32 delta_time, nupad_s *pad);
+    void (*render)();
+    void *reserved;
 };
 
 struct edui_slider_s : eduiitem_s {

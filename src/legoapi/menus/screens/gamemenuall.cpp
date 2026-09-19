@@ -190,7 +190,7 @@ void NewLevelFromMenu(LEVELDATA_s *level, i32 menu_id, i32 menu_y, i32 remember_
 static f32 updateextras_current_y = 0.0f;
 
 static bool MenuCheatUnlocked(i32 cheat) {
-    if (cheat < 0 || cheat >= CheatSystem.cheats_count || cheat >= 64) {
+    if (cheat < 0 || cheat >= 44) {
         return false;
     }
     const u32 *unlocked = reinterpret_cast<const u32 *>(Game.field_0x7c00);
@@ -362,8 +362,8 @@ void MakeMenuPacket() {
 void MenuDrawExtras(MENU_s *menu) {
     char text[256];
     menu->draw_y = -updateextras_current_y * MENUDY * menu->item_scale;
-    for (i32 cheat = 0; cheat < CheatSystem.cheats_count; ++cheat) {
-        CHEAT &entry = CheatSystem.cheats[cheat];
+    for (i32 cheat = 0; cheat < 44; ++cheat) {
+        CHEAT &entry = Cheat[cheat];
         const char *value;
         f32 alpha = 0.5f;
         bool locked_power_brick = false;

@@ -3,15 +3,6 @@
 
 // Graph editor subsystem stubs (static, internal linkage).
 
-static void edgraClose() {
-    STUBBED();
-}
-static void edgraEnter() {
-    STUBBED();
-}
-static void edgraRender() {
-    STUBBED();
-}
 static void edgracbFileLoad(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
