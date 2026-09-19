@@ -64,26 +64,10 @@ void NuErrorPrint(char *message) {
     printf("%s", message);
 }
 
-void NuFntFindEnd(nutex_s *, i32 *, i32 *, i32, i32) {
-    STUBBED();
-}
-
 void NuWindFreeGrp(NuWindGType *group) {
     if (group != NULL) {
         group->in_use = 0;
     }
-}
-
-void NuFntFindStart(nutex_s *, i32 *, i32 *, i32, i32) {
-    STUBBED();
-}
-
-void NuFntPrintChar(char) {
-    STUBBED();
-}
-
-void NuQFntSetMtx2d(void *, numtx_s *) {
-    STUBBED();
 }
 
 void NuWarningPrint(char *message) {
@@ -117,10 +101,6 @@ i32 NuCameraClipHGobj(nugscn_s *scene, numtx_s *world_matrix, numtx_s *root_matr
     NUMTX translated_world = *world_matrix;
     NuMtxPreTranslate(&translated_world, NUMTX_GET_ROW_VEC(root_matrix, 3));
     return NuCameraClipTestExtents(&min, &half_extents, &translated_world, 0.0f, 0);
-}
-
-void NuFntDumpReadable(nufnt_s *, char *) {
-    STUBBED();
 }
 
 // NuIOS_SetCullMode is transcribed in android/nuiosdl_gl.cpp (original 0x29c110).
@@ -722,10 +702,6 @@ f32 NuATanf(f32 value) {
 
 f32 NuATan2f(f32 y, f32 x) {
     return atan2f(y, x);
-}
-
-void NuFntSave(nufnt_s *, i32, char *) {
-    STUBBED();
 }
 
 extern "C" {

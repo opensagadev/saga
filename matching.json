@@ -89928,6 +89928,246 @@
           "match_percent": 100.0
         },
         {
+          "name": "NuQFntWrite",
+          "demangled_name": "NuQFntWrite",
+          "address": 2926496,
+          "offset": 2036528,
+          "size": 1038,
+          "match_percent": 1.777778
+        },
+        {
+          "name": "NuQFntWriteUniversalFont",
+          "demangled_name": "NuQFntWriteUniversalFont",
+          "address": 2927536,
+          "offset": 2037568,
+          "size": 384,
+          "match_percent": 4.242424
+        },
+        {
+          "name": "_Z14NuQFntSetMtx2dPvP7numtx_s",
+          "demangled_name": "NuQFntSetMtx2d(void*, numtx_s*)",
+          "address": 2928368,
+          "offset": 2038400,
+          "size": 59,
+          "match_percent": 28.0
+        },
+        {
+          "name": "NuFntInit",
+          "demangled_name": "NuFntInit",
+          "address": 2928528,
+          "offset": 2038560,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuFntSetFixedWidthNumerals",
+          "demangled_name": "NuFntSetFixedWidthNumerals",
+          "address": 2928544,
+          "offset": 2038576,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuFntToUpper",
+          "demangled_name": "NuFntToUpper",
+          "address": 2928560,
+          "offset": 2038592,
+          "size": 12,
+          "match_percent": 62.5
+        },
+        {
+          "name": "NuFntToLower",
+          "demangled_name": "NuFntToLower",
+          "address": 2928576,
+          "offset": 2038608,
+          "size": 12,
+          "match_percent": 62.5
+        },
+        {
+          "name": "NuFntSetPen",
+          "demangled_name": "NuFntSetPen",
+          "address": 2928592,
+          "offset": 2038624,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z9NuFntSaveP7nufnt_siPc",
+          "demangled_name": "NuFntSave(nufnt_s*, int, char*)",
+          "address": 2928608,
+          "offset": 2038640,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z17NuFntDumpReadableP7nufnt_sPc",
+          "demangled_name": "NuFntDumpReadable(nufnt_s*, char*)",
+          "address": 2928624,
+          "offset": 2038656,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z14NuFntFindStartP7nutex_sPiS1_ii",
+          "demangled_name": "NuFntFindStart(nutex_s*, int*, int*, int, int)",
+          "address": 2928656,
+          "offset": 2038688,
+          "size": 12,
+          "match_percent": 62.5
+        },
+        {
+          "name": "_Z12NuFntFindEndP7nutex_sPiS1_ii",
+          "demangled_name": "NuFntFindEnd(nutex_s*, int*, int*, int, int)",
+          "address": 2928672,
+          "offset": 2038704,
+          "size": 12,
+          "match_percent": 62.5
+        },
+        {
+          "name": "NuFntSet",
+          "demangled_name": "NuFntSet",
+          "address": 2928688,
+          "offset": 2038720,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuFntScale",
+          "demangled_name": "NuFntScale",
+          "address": 2928704,
+          "offset": 2038736,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuFntGetScreenHeight",
+          "demangled_name": "NuFntGetScreenHeight",
+          "address": 2928720,
+          "offset": 2038752,
+          "size": 12,
+          "match_percent": 62.5
+        },
+        {
+          "name": "NuFntPointSize",
+          "demangled_name": "NuFntPointSize",
+          "address": 2928736,
+          "offset": 2038768,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuFntMoveAbs",
+          "demangled_name": "NuFntMoveAbs",
+          "address": 2928752,
+          "offset": 2038784,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuFntMoveRel",
+          "demangled_name": "NuFntMoveRel",
+          "address": 2928768,
+          "offset": 2038800,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuFntPos",
+          "demangled_name": "NuFntPos",
+          "address": 2928784,
+          "offset": 2038816,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuFntPrintLenV",
+          "demangled_name": "NuFntPrintLenV",
+          "address": 2928800,
+          "offset": 2038832,
+          "size": 12,
+          "match_percent": 62.5
+        },
+        {
+          "name": "NuFntPrintLen",
+          "demangled_name": "NuFntPrintLen",
+          "address": 2928816,
+          "offset": 2038848,
+          "size": 12,
+          "match_percent": 62.5
+        },
+        {
+          "name": "_Z14NuFntPrintCharc",
+          "demangled_name": "NuFntPrintChar(char)",
+          "address": 2928832,
+          "offset": 2038864,
+          "size": 12,
+          "match_percent": 62.5
+        },
+        {
+          "name": "NuFntPrintV",
+          "demangled_name": "NuFntPrintV",
+          "address": 2928848,
+          "offset": 2038880,
+          "size": 12,
+          "match_percent": 62.5
+        },
+        {
+          "name": "NuFntPrint",
+          "demangled_name": "NuFntPrint",
+          "address": 2928864,
+          "offset": 2038896,
+          "size": 12,
+          "match_percent": 62.5
+        },
+        {
+          "name": "NuFntClose",
+          "demangled_name": "NuFntClose",
+          "address": 2928880,
+          "offset": 2038912,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuFntPrintEx",
+          "demangled_name": "NuFntPrintEx",
+          "address": 2928896,
+          "offset": 2038928,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuFntCreate",
+          "demangled_name": "NuFntCreate",
+          "address": 2928912,
+          "offset": 2038944,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuFntDestroy",
+          "demangled_name": "NuFntDestroy",
+          "address": 2928928,
+          "offset": 2038960,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuFntWrite",
+          "demangled_name": "NuFntWrite",
+          "address": 2928944,
+          "offset": 2038976,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuFntLoadPtr",
+          "demangled_name": "NuFntLoadPtr",
+          "address": 2928960,
+          "offset": 2038992,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
           "name": "NuQFntDuplicate",
           "demangled_name": "NuQFntDuplicate",
           "address": 3092352,
@@ -94956,54 +95196,6 @@
           "match_percent": 30.0
         },
         {
-          "name": "_Z14NuQFntSetMtx2dPvP7numtx_s",
-          "demangled_name": "NuQFntSetMtx2d(void*, numtx_s*)",
-          "address": 2928368,
-          "offset": 2038400,
-          "size": 59,
-          "match_percent": 28.0
-        },
-        {
-          "name": "_Z9NuFntSaveP7nufnt_siPc",
-          "demangled_name": "NuFntSave(nufnt_s*, int, char*)",
-          "address": 2928608,
-          "offset": 2038640,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z17NuFntDumpReadableP7nufnt_sPc",
-          "demangled_name": "NuFntDumpReadable(nufnt_s*, char*)",
-          "address": 2928624,
-          "offset": 2038656,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z14NuFntFindStartP7nutex_sPiS1_ii",
-          "demangled_name": "NuFntFindStart(nutex_s*, int*, int*, int, int)",
-          "address": 2928656,
-          "offset": 2038688,
-          "size": 12,
-          "match_percent": 62.5
-        },
-        {
-          "name": "_Z12NuFntFindEndP7nutex_sPiS1_ii",
-          "demangled_name": "NuFntFindEnd(nutex_s*, int*, int*, int, int)",
-          "address": 2928672,
-          "offset": 2038704,
-          "size": 12,
-          "match_percent": 62.5
-        },
-        {
-          "name": "_Z14NuFntPrintCharc",
-          "demangled_name": "NuFntPrintChar(char)",
-          "address": 2928832,
-          "offset": 2038864,
-          "size": 12,
-          "match_percent": 62.5
-        },
-        {
           "name": "_Z27NuHGobjEvalAnimBlend2Root_3P8nugscn_sP17ani3_animheader_sfS2_ffiP13NUJOINTANIM_sP7numtx_sPFvS6_PvP7nuvec_sS9_S9_fES7_",
           "demangled_name": "NuHGobjEvalAnimBlend2Root_3(nugscn_s*, ani3_animheader_s*, float, ani3_animheader_s*, float, float, int, NUJOINTANIM_s*, numtx_s*, void (*)(numtx_s*, void*, nuvec_s*, nuvec_s*, nuvec_s*, float), void*)",
           "address": 2942816,
@@ -97980,22 +98172,6 @@
           "match_percent": 100.0
         },
         {
-          "name": "NuQFntWrite",
-          "demangled_name": "NuQFntWrite",
-          "address": 2926496,
-          "offset": 2036528,
-          "size": 1038,
-          "match_percent": 1.777778
-        },
-        {
-          "name": "NuQFntWriteUniversalFont",
-          "demangled_name": "NuQFntWriteUniversalFont",
-          "address": 2927536,
-          "offset": 2037568,
-          "size": 384,
-          "match_percent": 4.242424
-        },
-        {
           "name": "NuQFntSet2d",
           "demangled_name": "NuQFntSet2d",
           "address": 2927920,
@@ -98033,182 +98209,6 @@
           "address": 2928432,
           "offset": 2038464,
           "size": 87,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuFntInit",
-          "demangled_name": "NuFntInit",
-          "address": 2928528,
-          "offset": 2038560,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuFntSetFixedWidthNumerals",
-          "demangled_name": "NuFntSetFixedWidthNumerals",
-          "address": 2928544,
-          "offset": 2038576,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuFntToUpper",
-          "demangled_name": "NuFntToUpper",
-          "address": 2928560,
-          "offset": 2038592,
-          "size": 12,
-          "match_percent": 62.5
-        },
-        {
-          "name": "NuFntToLower",
-          "demangled_name": "NuFntToLower",
-          "address": 2928576,
-          "offset": 2038608,
-          "size": 12,
-          "match_percent": 62.5
-        },
-        {
-          "name": "NuFntSetPen",
-          "demangled_name": "NuFntSetPen",
-          "address": 2928592,
-          "offset": 2038624,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuFntSet",
-          "demangled_name": "NuFntSet",
-          "address": 2928688,
-          "offset": 2038720,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuFntScale",
-          "demangled_name": "NuFntScale",
-          "address": 2928704,
-          "offset": 2038736,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuFntGetScreenHeight",
-          "demangled_name": "NuFntGetScreenHeight",
-          "address": 2928720,
-          "offset": 2038752,
-          "size": 12,
-          "match_percent": 62.5
-        },
-        {
-          "name": "NuFntPointSize",
-          "demangled_name": "NuFntPointSize",
-          "address": 2928736,
-          "offset": 2038768,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuFntMoveAbs",
-          "demangled_name": "NuFntMoveAbs",
-          "address": 2928752,
-          "offset": 2038784,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuFntMoveRel",
-          "demangled_name": "NuFntMoveRel",
-          "address": 2928768,
-          "offset": 2038800,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuFntPos",
-          "demangled_name": "NuFntPos",
-          "address": 2928784,
-          "offset": 2038816,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuFntPrintLenV",
-          "demangled_name": "NuFntPrintLenV",
-          "address": 2928800,
-          "offset": 2038832,
-          "size": 12,
-          "match_percent": 62.5
-        },
-        {
-          "name": "NuFntPrintLen",
-          "demangled_name": "NuFntPrintLen",
-          "address": 2928816,
-          "offset": 2038848,
-          "size": 12,
-          "match_percent": 62.5
-        },
-        {
-          "name": "NuFntPrintV",
-          "demangled_name": "NuFntPrintV",
-          "address": 2928848,
-          "offset": 2038880,
-          "size": 12,
-          "match_percent": 62.5
-        },
-        {
-          "name": "NuFntPrint",
-          "demangled_name": "NuFntPrint",
-          "address": 2928864,
-          "offset": 2038896,
-          "size": 12,
-          "match_percent": 62.5
-        },
-        {
-          "name": "NuFntClose",
-          "demangled_name": "NuFntClose",
-          "address": 2928880,
-          "offset": 2038912,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuFntPrintEx",
-          "demangled_name": "NuFntPrintEx",
-          "address": 2928896,
-          "offset": 2038928,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuFntCreate",
-          "demangled_name": "NuFntCreate",
-          "address": 2928912,
-          "offset": 2038944,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuFntDestroy",
-          "demangled_name": "NuFntDestroy",
-          "address": 2928928,
-          "offset": 2038960,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuFntWrite",
-          "demangled_name": "NuFntWrite",
-          "address": 2928944,
-          "offset": 2038976,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuFntLoadPtr",
-          "demangled_name": "NuFntLoadPtr",
-          "address": 2928960,
-          "offset": 2038992,
-          "size": 9,
           "match_percent": 100.0
         },
         {
@@ -99420,126 +99420,6 @@
           "match_percent": 4.475191
         },
         {
-          "name": "NuSetGetHGObjFromIndxFn",
-          "demangled_name": "NuSetGetHGObjFromIndxFn",
-          "address": 4436480,
-          "offset": 3546512,
-          "size": 24,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuSetCutSceneCharacterProcessFn",
-          "demangled_name": "NuSetCutSceneCharacterProcessFn",
-          "address": 4436512,
-          "offset": 3546544,
-          "size": 24,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuSetCutSceneCharacterRenderFn",
-          "demangled_name": "NuSetCutSceneCharacterRenderFn",
-          "address": 4436544,
-          "offset": 3546576,
-          "size": 24,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuSetCutSceneCharacterEvalFn",
-          "demangled_name": "NuSetCutSceneCharacterEvalFn",
-          "address": 4436576,
-          "offset": 3546608,
-          "size": 24,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuSetCutSceneCharacterReleaseFn",
-          "demangled_name": "NuSetCutSceneCharacterReleaseFn",
-          "address": 4436608,
-          "offset": 3546640,
-          "size": 24,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuSetCutSceneFindCharactersFn",
-          "demangled_name": "NuSetCutSceneFindCharactersFn",
-          "address": 4436640,
-          "offset": 3546672,
-          "size": 24,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuSetCutSceneDestroyCharactersFn",
-          "demangled_name": "NuSetCutSceneDestroyCharactersFn",
-          "address": 4436672,
-          "offset": 3546704,
-          "size": 24,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuSetCutSceneResetCharactersFn",
-          "demangled_name": "NuSetCutSceneResetCharactersFn",
-          "address": 4436704,
-          "offset": 3546736,
-          "size": 24,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuSetCutSceneCharacterCreateDataFn",
-          "demangled_name": "NuSetCutSceneCharacterCreateDataFn",
-          "address": 4436736,
-          "offset": 3546768,
-          "size": 24,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuSetCutSceneCharacterDestroyDataFn",
-          "demangled_name": "NuSetCutSceneCharacterDestroyDataFn",
-          "address": 4436768,
-          "offset": 3546800,
-          "size": 24,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuSetCutSceneRigidCollisionCheckFn",
-          "demangled_name": "NuSetCutSceneRigidCollisionCheckFn",
-          "address": 4436800,
-          "offset": 3546832,
-          "size": 24,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuSetCutSceneSFXFixUpFn",
-          "demangled_name": "NuSetCutSceneSFXFixUpFn",
-          "address": 4436832,
-          "offset": 3546864,
-          "size": 24,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuSetCutSceneSFXUpdateFn",
-          "demangled_name": "NuSetCutSceneSFXUpdateFn",
-          "address": 4436864,
-          "offset": 3546896,
-          "size": 24,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuSetCutSceneRequestSFXFn",
-          "demangled_name": "NuSetCutSceneRequestSFXFn",
-          "address": 4436896,
-          "offset": 3546928,
-          "size": 24,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuSetCutSceneRigidPostRenderFn",
-          "demangled_name": "NuSetCutSceneRigidPostRenderFn",
-          "address": 4436928,
-          "offset": 3546960,
-          "size": 24,
-          "match_percent": 100.0
-        },
-        {
           "name": "NuMemAllocFn",
           "demangled_name": "NuMemAllocFn",
           "address": 5420144,
@@ -99713,6 +99593,133 @@
           "offset": 1658306,
           "size": 26,
           "match_percent": 99.85714
+        }
+      ]
+    },
+    {
+      "name": "nu2api/nucore/nugcutscene.cpp.o",
+      "source": "src/nu2api/nucore/nugcutscene.cpp",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nugcutscene.o",
+      "functions": [
+        {
+          "name": "NuSetGetHGObjFromIndxFn",
+          "demangled_name": "NuSetGetHGObjFromIndxFn",
+          "address": 4436480,
+          "offset": 3546512,
+          "size": 24,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuSetCutSceneCharacterProcessFn",
+          "demangled_name": "NuSetCutSceneCharacterProcessFn",
+          "address": 4436512,
+          "offset": 3546544,
+          "size": 24,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuSetCutSceneCharacterRenderFn",
+          "demangled_name": "NuSetCutSceneCharacterRenderFn",
+          "address": 4436544,
+          "offset": 3546576,
+          "size": 24,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuSetCutSceneCharacterEvalFn",
+          "demangled_name": "NuSetCutSceneCharacterEvalFn",
+          "address": 4436576,
+          "offset": 3546608,
+          "size": 24,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuSetCutSceneCharacterReleaseFn",
+          "demangled_name": "NuSetCutSceneCharacterReleaseFn",
+          "address": 4436608,
+          "offset": 3546640,
+          "size": 24,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuSetCutSceneFindCharactersFn",
+          "demangled_name": "NuSetCutSceneFindCharactersFn",
+          "address": 4436640,
+          "offset": 3546672,
+          "size": 24,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuSetCutSceneDestroyCharactersFn",
+          "demangled_name": "NuSetCutSceneDestroyCharactersFn",
+          "address": 4436672,
+          "offset": 3546704,
+          "size": 24,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuSetCutSceneResetCharactersFn",
+          "demangled_name": "NuSetCutSceneResetCharactersFn",
+          "address": 4436704,
+          "offset": 3546736,
+          "size": 24,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuSetCutSceneCharacterCreateDataFn",
+          "demangled_name": "NuSetCutSceneCharacterCreateDataFn",
+          "address": 4436736,
+          "offset": 3546768,
+          "size": 24,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuSetCutSceneCharacterDestroyDataFn",
+          "demangled_name": "NuSetCutSceneCharacterDestroyDataFn",
+          "address": 4436768,
+          "offset": 3546800,
+          "size": 24,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuSetCutSceneRigidCollisionCheckFn",
+          "demangled_name": "NuSetCutSceneRigidCollisionCheckFn",
+          "address": 4436800,
+          "offset": 3546832,
+          "size": 24,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuSetCutSceneSFXFixUpFn",
+          "demangled_name": "NuSetCutSceneSFXFixUpFn",
+          "address": 4436832,
+          "offset": 3546864,
+          "size": 24,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuSetCutSceneSFXUpdateFn",
+          "demangled_name": "NuSetCutSceneSFXUpdateFn",
+          "address": 4436864,
+          "offset": 3546896,
+          "size": 24,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuSetCutSceneRequestSFXFn",
+          "demangled_name": "NuSetCutSceneRequestSFXFn",
+          "address": 4436896,
+          "offset": 3546928,
+          "size": 24,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuSetCutSceneRigidPostRenderFn",
+          "demangled_name": "NuSetCutSceneRigidPostRenderFn",
+          "address": 4436928,
+          "offset": 3546960,
+          "size": 24,
+          "match_percent": 100.0
         }
       ]
     },
@@ -128391,7 +128398,7 @@
     }
   ],
   "summary": {
-    "bazel_units": 468,
+    "bazel_units": 469,
     "functions": 13454,
     "assigned_functions": 12352,
     "ambiguous_functions": 212,

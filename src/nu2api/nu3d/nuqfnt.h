@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdarg.h>
+
 #include "nu2api/nu3d/numtl.h"
 #include "nu2api/nu3d/nurndr.h"
 #include "nu2api/nucore/common.h"
@@ -129,6 +131,15 @@ extern "C" {
     f32 NuQFntHeightScale(void);
     f32 NuQFntLenScale(void);
     void NuQFntMove2d(NUQFNT *font, f32 x, f32 y, f32 z);
+    void NuQFntSetPrintMode(u32 mode);
+    u32 NuQFntGetPrintMode(void);
+    void NuQFntEncodeUnicodeString(NUQFNT *font, u16 *text);
+    f32 NuQFntPrintLenV(NUQFNT *font, const char *format, va_list arguments);
+    void NuQFntWrite(void);
+    void NuQFntWriteUniversalFont(void);
+    void NuQFntSet2d(NUQFNT *font);
+    void NuQFntSetScale2d(NUQFNT *font, f32 x_scale, f32 y_scale);
+    void NuQFntSetPointSize(NUQFNT *font, f32 width, f32 height);
     void NuQFntPrint2dU(NUQFNT *font, char *text);
     void NuQFntSetColour2d(NUQFNT *font, u32 colour);
     void NuQFntSetSpaceWidth(NUQFNT *font, f32 width);
@@ -136,6 +147,38 @@ extern "C" {
     NUQFNT *NuQFntLoadPtr(char *path, char *name, i32 flags, i32 render_plane, VARIPTR *buf, VARIPTR *buf_end);
     f32 NuQFntPrintJustifiedW(NUQFNT *font, u16 *text, f32 x, f32 y, f32 z, f32 sx, f32 sy, f32 width, f32 line_spacing,
                               u32 colour, NUMTX *mtx);
+
+    void NuFntInit(void);
+    void NuFntSetFixedWidthNumerals(void);
+    void NuFntToUpper(void);
+    void NuFntToLower(void);
+    void NuFntSetPen(void);
+    void NuFntSet(void);
+    void NuFntScale(void);
+    void NuFntGetScreenHeight(void);
+    void NuFntPointSize(void);
+    void NuFntMoveAbs(void);
+    void NuFntMoveRel(void);
+    void NuFntPos(void);
+    void NuFntPrintLenV(void);
+    void NuFntPrintLen(void);
+    void NuFntPrintV(void);
+    void NuFntPrint(void);
+    void NuFntClose(void);
+    void NuFntPrintEx(void);
+    void *NuFntCreate(void);
+    void NuFntDestroy(void);
+    void NuFntWrite(void);
+    void *NuFntLoadPtr(void);
 #ifdef __cplusplus
 }
+
+struct nufnt_s;
+struct nutex_s;
+void NuFntSave(nufnt_s *font, i32 texture_id, char *path);
+void NuFntDumpReadable(nufnt_s *font, char *path);
+void NuFntFindStart(nutex_s *texture, i32 *x, i32 *y, i32 width, i32 height);
+void NuFntFindEnd(nutex_s *texture, i32 *x, i32 *y, i32 width, i32 height);
+void NuFntPrintChar(char character);
+void NuQFntSetMtx2d(void *font, numtx_s *matrix);
 #endif

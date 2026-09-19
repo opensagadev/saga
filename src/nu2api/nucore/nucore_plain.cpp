@@ -2236,77 +2236,9 @@ extern "C" {
     }
 
     // ---------------------------------------------------------------------------
-    // Fonts / text
+    // Quick-font platform rendering (the generic font run lives in nuqfnt.cpp)
     // ---------------------------------------------------------------------------
 
-    void NuFntClose(void) {
-        STUBBED();
-    }
-    void *NuFntCreate(void) {
-        STUBBED();
-        return NULL;
-    }
-    void NuFntDestroy(void) {
-        STUBBED();
-    }
-    void NuFntGetScreenHeight(void) {
-        STUBBED();
-    }
-    void NuFntInit(void) {
-        STUBBED();
-    }
-    void *NuFntLoadPtr(void) {
-        STUBBED();
-        return NULL;
-    }
-    void NuFntMoveAbs(void) {
-        STUBBED();
-    }
-    void NuFntMoveRel(void) {
-        STUBBED();
-    }
-    void NuFntPointSize(void) {
-        STUBBED();
-    }
-    void NuFntPos(void) {
-        STUBBED();
-    }
-    void NuFntPrint(void) {
-        STUBBED();
-    }
-    void NuFntPrintEx(void) {
-        STUBBED();
-    }
-    void NuFntPrintLen(void) {
-        STUBBED();
-    }
-    void NuFntPrintLenV(void) {
-        STUBBED();
-    }
-    void NuFntPrintV(void) {
-        STUBBED();
-    }
-    void NuFntScale(void) {
-        STUBBED();
-    }
-    void NuFntSet(void) {
-        STUBBED();
-    }
-    void NuFntSetFixedWidthNumerals(void) {
-        STUBBED();
-    }
-    void NuFntSetPen(void) {
-        STUBBED();
-    }
-    void NuFntToLower(void) {
-        STUBBED();
-    }
-    void NuFntToUpper(void) {
-        STUBBED();
-    }
-    void NuFntWrite(void) {
-        STUBBED();
-    }
     void NuQFntCreate(void) {
         STUBBED();
     }
@@ -2450,12 +2382,6 @@ extern "C" {
         NuQFntPushPrintMode(2);
         NuQFntSetScale(font, x_scale, y_scale);
         NuQFntPopPrintMode();
-    }
-    void NuQFntWrite(void) {
-        STUBBED();
-    }
-    void NuQFntWriteUniversalFont(void) {
-        STUBBED();
     }
 
     // ---------------------------------------------------------------------------
@@ -4615,58 +4541,6 @@ extern "C" {
     void NuPause(i32 paused) {
         nu2api_paused = (f32)paused;
     }
-    NUGCUTSCENEGETHGOBJFN NuCutSceneGetHGObj;
-
-    void NuSetGetHGObjFromIndxFn(NUGCUTSCENEGETHGOBJFN function) {
-        NuCutSceneGetHGObj = function;
-    }
-    void NuSetCutSceneCharacterCreateDataFn(NUGCUTSCENECHARACTERCREATEDATAFN function) {
-        NuCutSceneCharacterCreateData = function;
-    }
-    NUGCUTSCENECHARACTERDESTROYDATAFN NuCutSceneCharacterDestroyData;
-
-    void NuSetCutSceneCharacterDestroyDataFn(NUGCUTSCENECHARACTERDESTROYDATAFN function) {
-        NuCutSceneCharacterDestroyData = function;
-    }
-    void NuSetCutSceneCharacterEvalFn(NUGCUTSCENECHARACTEREVALFN function) {
-        NuCutSceneCharacterEval = function;
-    }
-    void NuSetCutSceneCharacterProcessFn(NUGCUTSCENECHARACTERPROCESSFN function) {
-        NuCutSceneCharacterProcess = function;
-    }
-    void NuSetCutSceneCharacterReleaseFn(NUGCUTSCENECHARACTERRELEASEFN function) {
-        NuCutSceneCharacterRelease = function;
-    }
-    void NuSetCutSceneCharacterRenderFn(NUGCUTSCENECHARACTERRENDERFN function) {
-        NuCutSceneCharacterRender = function;
-    }
-    void (*NuCutSceneDestroyCharacters)(NUGCUTSCENE_s *);
-    void NuSetCutSceneDestroyCharactersFn(void (*callback)(NUGCUTSCENE_s *)) {
-        NuCutSceneDestroyCharacters = callback;
-    }
-    void NuSetCutSceneFindCharactersFn(NUGCUTSCENEFINDCHARACTERSFN function) {
-        NuCutSceneFindCharacters = function;
-    }
-    void NuSetCutSceneRequestSFXFn(NUGCUTSCENEREQUESTSFXFN function) {
-        NuCutSceneRequestSFX = function;
-    }
-    void NuSetCutSceneResetCharactersFn(NUGCUTSCENERESETCHARACTERSFN function) {
-        NuCutSceneResetCharactersFn = function;
-    }
-    NUGCUTSCENERIGIDCOLLISIONCHECKFN NuCutSceneRigidCollisionCheck;
-    void NuSetCutSceneRigidCollisionCheckFn(NUGCUTSCENERIGIDCOLLISIONCHECKFN callback) {
-        NuCutSceneRigidCollisionCheck = callback;
-    }
-    void NuSetCutSceneRigidPostRenderFn(NUGCUTSCENERIGIDPOSTRENDERFN function) {
-        NuCutSceneRigidPostRender = function;
-    }
-    void NuSetCutSceneSFXFixUpFn(NUGCUTSCENESFXFIXUPFN function) {
-        NuCutSceneSFXFixUp = function;
-    }
-    void NuSetCutSceneSFXUpdateFn(NUGCUTSCENESFXUPDATEFN function) {
-        NuCutSceneSFXUpdate = function;
-    }
-
     // ---------------------------------------------------------------------------
     // Spline / online / net / other gameplay support
     // ---------------------------------------------------------------------------

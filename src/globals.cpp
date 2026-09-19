@@ -61,16 +61,6 @@ f32 nusound_fade_start = 2.0f;
 NUVEC nusound_special_positions[5];
 f32 nusound_fade_end = 15.0f;
 i32 (*SetSoundFadeDistCallBackFn)(WORLDINFO_s *world) = NULL;
-NUGCUTSCENECHARACTERCREATEDATAFN NuCutSceneCharacterCreateData = NULL;
-NUGCUTSCENECHARACTEREVALFN NuCutSceneCharacterEval = NULL;
-NUGCUTSCENECHARACTERRELEASEFN NuCutSceneCharacterRelease = NULL;
-NUGCUTSCENECHARACTERPROCESSFN NuCutSceneCharacterProcess = NULL;
-NUGCUTSCENECHARACTERRENDERFN NuCutSceneCharacterRender = NULL;
-NUGCUTSCENEFINDCHARACTERSFN NuCutSceneFindCharacters = NULL;
-NUGCUTSCENERESETCHARACTERSFN NuCutSceneResetCharactersFn = NULL;
-NUGCUTSCENERIGIDPOSTRENDERFN NuCutSceneRigidPostRender = NULL;
-NUGCUTSCENEREQUESTSFXFN NuCutSceneRequestSFX = NULL;
-
 USING_EXTRA_ACTIONS_FN UsingExtraActionsFn = NULL;
 
 // ------------------------------------------------------------------------

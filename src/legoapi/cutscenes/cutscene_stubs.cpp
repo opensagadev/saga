@@ -23,10 +23,6 @@ extern "C" {
     extern i32 processdeb;
     extern f32 glyntestha;
 
-    extern void (*NuCutSceneCharacterRelease)(instNUGCUTCHAR_s *, NUGCUTCHAR_s *);
-    void (*NuCutSceneSFXUpdate)(NUGCUTLOCATORSYS_s *, instNUGCUTLOCATOR_s *, NUGCUTLOCATOR_s *, f32, NUMTX *,
-                                i32) = NULL;
-
     void NuAnimData2CalcTime(nuanimdata2_s *, f32, nuanimtime_s *);
     void NuMtxPreTranslate(NUMTX *, NUVEC *);
     void NuMtxMul(NUMTX *, NUMTX *, NUMTX *);

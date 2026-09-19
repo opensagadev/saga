@@ -1143,3 +1143,142 @@ f32 NuQFntBaseline(NUQFNT *font) {
 
     return 0.0f;
 }
+
+// Placeholder subset from the contiguous generic quick-font/legacy-font run.
+extern "C" {
+
+    void NuQFntWrite(void) {
+        STUBBED();
+    }
+
+    void NuQFntWriteUniversalFont(void) {
+        STUBBED();
+    }
+
+} // extern "C"
+
+void NuQFntSetMtx2d(void *, numtx_s *) {
+    STUBBED();
+}
+
+extern "C" {
+
+    void NuFntInit(void) {
+        STUBBED();
+    }
+
+    void NuFntSetFixedWidthNumerals(void) {
+        STUBBED();
+    }
+
+    void NuFntToUpper(void) {
+        STUBBED();
+    }
+
+    void NuFntToLower(void) {
+        STUBBED();
+    }
+
+    void NuFntSetPen(void) {
+        STUBBED();
+    }
+
+} // extern "C"
+
+void NuFntSave(nufnt_s *, i32, char *) {
+    STUBBED();
+}
+
+void NuFntDumpReadable(nufnt_s *, char *) {
+    STUBBED();
+}
+
+void NuFntFindStart(nutex_s *, i32 *, i32 *, i32, i32) {
+    STUBBED();
+}
+
+void NuFntFindEnd(nutex_s *, i32 *, i32 *, i32, i32) {
+    STUBBED();
+}
+
+extern "C" {
+
+    void NuFntSet(void) {
+        STUBBED();
+    }
+
+    void NuFntScale(void) {
+        STUBBED();
+    }
+
+    void NuFntGetScreenHeight(void) {
+        STUBBED();
+    }
+
+    void NuFntPointSize(void) {
+        STUBBED();
+    }
+
+    void NuFntMoveAbs(void) {
+        STUBBED();
+    }
+
+    void NuFntMoveRel(void) {
+        STUBBED();
+    }
+
+    void NuFntPos(void) {
+        STUBBED();
+    }
+
+    void NuFntPrintLenV(void) {
+        STUBBED();
+    }
+
+    void NuFntPrintLen(void) {
+        STUBBED();
+    }
+
+} // extern "C"
+
+void NuFntPrintChar(char) {
+    STUBBED();
+}
+
+extern "C" {
+
+    void NuFntPrintV(void) {
+        STUBBED();
+    }
+
+    void NuFntPrint(void) {
+        STUBBED();
+    }
+
+    void NuFntClose(void) {
+        STUBBED();
+    }
+
+    void NuFntPrintEx(void) {
+        STUBBED();
+    }
+
+    void *NuFntCreate(void) {
+        STUBBED();
+        return NULL;
+    }
+
+    void NuFntDestroy(void) {
+        STUBBED();
+    }
+
+    void NuFntWrite(void) {
+        STUBBED();
+    }
+
+    void *NuFntLoadPtr(void) {
+        STUBBED();
+        return NULL;
+    }
+
+} // extern "C"

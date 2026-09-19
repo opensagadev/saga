@@ -724,7 +724,6 @@ extern "C" void NuAnimCurve2SetApplyToMatrix_3(ani3_animheader_s *, i32, f32, NU
 extern "C" {
     extern i32 NuGCutDebFixUp_SearchAllPages;
     extern NUGCUTLOCATORFNENTRY_s *locatorfns;
-    extern i32 (*NuCutSceneSFXFixUp)(usize);
 }
 void NuGCutRigidCalcMtx(NUGCUTRIGID_s *, f32, numtx_s *);
 
@@ -930,7 +929,6 @@ extern "C" {
     NUGCUTRELEASELOCATORVFXFN ReleaseLocatorVfxFn = NULL;
     NUGCUTTRIGGERLOCATORVFXFN TriggerLocatorVfxFn = NULL;
     NUGCUTLOOKUPLOCATORVFXFN LookupLocatorVfxFn = NULL;
-    i32 (*NuCutSceneSFXFixUp)(usize) = NULL;
     NUGCUTSCENE_s *NuGCutSceneLoad(char *name, VARIPTR *buf, VARIPTR *buf_end, i32 flags) {
         char path[1036];
         usize available = buf_end->addr - buf->addr;

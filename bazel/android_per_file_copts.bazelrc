@@ -287,6 +287,7 @@ build:target --per_file_copt=^src/nu2api/nucore/deflate\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nucore/nuanim\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nucore/nuanim3\.cpp$@-O2
 build:target --per_file_copt=^src/nu2api/nucore/nuhgobj\.cpp$@-O3
+build:target --per_file_copt=^src/nu2api/nucore/nugcutscene\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nucore/nutexanim\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nucore/nucore_plain\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nucore/android/nupostresource_create\.cpp$@-O3
