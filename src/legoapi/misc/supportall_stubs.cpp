@@ -9,19 +9,7 @@
 #include "nu2api/numath/numtx.h"
 #include "nu2api/numath/nuvec.h"
 
-void DisplayListGenerateTransforms(nudisplayscene_s *) {
-    STUBBED();
-}
-
 void bgprocIsFrozen() {
-    STUBBED();
-}
-
-void DisplayListCreateGeomItemPS(variptr_u *, void *, numtl_s *) {
-    STUBBED();
-}
-
-void DisplayListCreateInstSurfGeomPS(variptr_u *, numtx_s *) {
     STUBBED();
 }
 

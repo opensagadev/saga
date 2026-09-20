@@ -401,4 +401,5 @@ extern "C" {
 
 // Original core C++ entry point (_Z20NuDisplaySceneUnclipP16nudisplayscene_s).
 void NuDisplaySceneUnclip(NUDLDLISTSCENE *scene);
+void DisplayListGenerateTransforms(nudisplayscene_s *scene);
 #endif

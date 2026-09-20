@@ -69935,30 +69935,6 @@
           "match_percent": 38.57143
         },
         {
-          "name": "_Z27DisplayListCreateGeomItemPSP9variptr_uPvP7numtl_s",
-          "demangled_name": "DisplayListCreateGeomItemPS(variptr_u*, void*, numtl_s*)",
-          "address": 2732846,
-          "offset": 1842878,
-          "size": 10,
-          "match_percent": 80.0
-        },
-        {
-          "name": "_Z31DisplayListCreateInstSurfGeomPSP9variptr_uP7numtx_s",
-          "demangled_name": "DisplayListCreateInstSurfGeomPS(variptr_u*, numtx_s*)",
-          "address": 2733935,
-          "offset": 1843967,
-          "size": 10,
-          "match_percent": 80.0
-        },
-        {
-          "name": "_Z29DisplayListGenerateTransformsP16nudisplayscene_s",
-          "demangled_name": "DisplayListGenerateTransforms(nudisplayscene_s*)",
-          "address": 2733970,
-          "offset": 1844002,
-          "size": 5,
-          "match_percent": 100.0
-        },
-        {
           "name": "_Z24RndrStateBuildKonstStateP19nuglobalrndrstate_s",
           "demangled_name": "RndrStateBuildKonstState(nuglobalrndrstate_s*)",
           "address": 2758862,
@@ -73582,118 +73558,6 @@
       "source": "src/legoapi/render/core/render_stubs.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/render_stubs.o",
       "functions": [
-        {
-          "name": "DisplayListDebugPS",
-          "demangled_name": "DisplayListDebugPS",
-          "address": 2731047,
-          "offset": 1841079,
-          "size": 10,
-          "match_percent": 80.0
-        },
-        {
-          "name": "DisplayListCreatePS",
-          "demangled_name": "DisplayListCreatePS",
-          "address": 2731277,
-          "offset": 1841309,
-          "size": 5,
-          "match_percent": 100.0
-        },
-        {
-          "name": "DisplayListCreateGeomTransformPS",
-          "demangled_name": "DisplayListCreateGeomTransformPS",
-          "address": 2731717,
-          "offset": 1841749,
-          "size": 250,
-          "match_percent": 96.64789
-        },
-        {
-          "name": "DisplayListCreateFaceonTransformPS",
-          "demangled_name": "DisplayListCreateFaceonTransformPS",
-          "address": 2732395,
-          "offset": 1842427,
-          "size": 451,
-          "match_percent": 70.17007
-        },
-        {
-          "name": "DisplayListCreateSkinTransformPS",
-          "demangled_name": "DisplayListCreateSkinTransformPS",
-          "address": 2732856,
-          "offset": 1842888,
-          "size": 1059,
-          "match_percent": 58.47851
-        },
-        {
-          "name": "DisplayListCreateRigidSkinTransformPS",
-          "demangled_name": "DisplayListCreateRigidSkinTransformPS",
-          "address": 2733915,
-          "offset": 1843947,
-          "size": 10,
-          "match_percent": 80.0
-        },
-        {
-          "name": "DisplayListCreateRigidSkin2TransformPS",
-          "demangled_name": "DisplayListCreateRigidSkin2TransformPS",
-          "address": 2733925,
-          "offset": 1843957,
-          "size": 10,
-          "match_percent": 80.0
-        },
-        {
-          "name": "DisplayListPrintItemPS",
-          "demangled_name": "DisplayListPrintItemPS",
-          "address": 2733945,
-          "offset": 1843977,
-          "size": 5,
-          "match_percent": 100.0
-        },
-        {
-          "name": "DisplayListCreateFxItemPS",
-          "demangled_name": "DisplayListCreateFxItemPS",
-          "address": 2733955,
-          "offset": 1843987,
-          "size": 5,
-          "match_percent": 100.0
-        },
-        {
-          "name": "DisplayListDestroyFxItemPS",
-          "demangled_name": "DisplayListDestroyFxItemPS",
-          "address": 2733960,
-          "offset": 1843992,
-          "size": 5,
-          "match_percent": 100.0
-        },
-        {
-          "name": "DisplayListSetFxItemParamPS",
-          "demangled_name": "DisplayListSetFxItemParamPS",
-          "address": 2733965,
-          "offset": 1843997,
-          "size": 5,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuDisplaySceneClonePS",
-          "demangled_name": "NuDisplaySceneClonePS",
-          "address": 2734078,
-          "offset": 1844110,
-          "size": 131,
-          "match_percent": 100.0
-        },
-        {
-          "name": "DisplayListUpdateSpecialTransformPS",
-          "demangled_name": "DisplayListUpdateSpecialTransformPS",
-          "address": 2734209,
-          "offset": 1844241,
-          "size": 5,
-          "match_percent": 100.0
-        },
-        {
-          "name": "DisplayListSetShadowCasterFlagPS",
-          "demangled_name": "DisplayListSetShadowCasterFlagPS",
-          "address": 2734364,
-          "offset": 1844396,
-          "size": 34,
-          "match_percent": 100.0
-        },
         {
           "name": "RndrStateClear",
           "demangled_name": "RndrStateClear",
@@ -86145,6 +86009,22 @@
           "match_percent": 83.23529
         },
         {
+          "name": "NuDisplayListDraw",
+          "demangled_name": "NuDisplayListDraw",
+          "address": 2731042,
+          "offset": 1841074,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
+          "name": "DisplayListDebugPS",
+          "demangled_name": "DisplayListDebugPS",
+          "address": 2731047,
+          "offset": 1841079,
+          "size": 10,
+          "match_percent": 80.0
+        },
+        {
           "name": "NuDisplayListAddClut",
           "demangled_name": "NuDisplayListAddClut",
           "address": 2731057,
@@ -86185,6 +86065,14 @@
           "match_percent": 100.0
         },
         {
+          "name": "DisplayListCreatePS",
+          "demangled_name": "DisplayListCreatePS",
+          "address": 2731277,
+          "offset": 1841309,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
           "name": "NuDisplayListLinkItem",
           "demangled_name": "NuDisplayListLinkItem",
           "address": 2731282,
@@ -86209,12 +86097,148 @@
           "match_percent": 100.0
         },
         {
+          "name": "DisplayListCreateGeomTransformPS",
+          "demangled_name": "DisplayListCreateGeomTransformPS",
+          "address": 2731717,
+          "offset": 1841749,
+          "size": 250,
+          "match_percent": 96.64789
+        },
+        {
+          "name": "DisplayListCreateFaceonTransformPS",
+          "demangled_name": "DisplayListCreateFaceonTransformPS",
+          "address": 2732395,
+          "offset": 1842427,
+          "size": 451,
+          "match_percent": 70.17007
+        },
+        {
+          "name": "_Z27DisplayListCreateGeomItemPSP9variptr_uPvP7numtl_s",
+          "demangled_name": "DisplayListCreateGeomItemPS(variptr_u*, void*, numtl_s*)",
+          "address": 2732846,
+          "offset": 1842878,
+          "size": 10,
+          "match_percent": 80.0
+        },
+        {
+          "name": "DisplayListCreateSkinTransformPS",
+          "demangled_name": "DisplayListCreateSkinTransformPS",
+          "address": 2732856,
+          "offset": 1842888,
+          "size": 1059,
+          "match_percent": 58.47851
+        },
+        {
+          "name": "DisplayListCreateRigidSkinTransformPS",
+          "demangled_name": "DisplayListCreateRigidSkinTransformPS",
+          "address": 2733915,
+          "offset": 1843947,
+          "size": 10,
+          "match_percent": 80.0
+        },
+        {
+          "name": "DisplayListCreateRigidSkin2TransformPS",
+          "demangled_name": "DisplayListCreateRigidSkin2TransformPS",
+          "address": 2733925,
+          "offset": 1843957,
+          "size": 10,
+          "match_percent": 80.0
+        },
+        {
+          "name": "_Z31DisplayListCreateInstSurfGeomPSP9variptr_uP7numtx_s",
+          "demangled_name": "DisplayListCreateInstSurfGeomPS(variptr_u*, numtx_s*)",
+          "address": 2733935,
+          "offset": 1843967,
+          "size": 10,
+          "match_percent": 80.0
+        },
+        {
+          "name": "DisplayListPrintItemPS",
+          "demangled_name": "DisplayListPrintItemPS",
+          "address": 2733945,
+          "offset": 1843977,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
+          "name": "DisplayListSwapBuffersPS",
+          "demangled_name": "DisplayListSwapBuffersPS",
+          "address": 2733950,
+          "offset": 1843982,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
+          "name": "DisplayListCreateFxItemPS",
+          "demangled_name": "DisplayListCreateFxItemPS",
+          "address": 2733955,
+          "offset": 1843987,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
+          "name": "DisplayListDestroyFxItemPS",
+          "demangled_name": "DisplayListDestroyFxItemPS",
+          "address": 2733960,
+          "offset": 1843992,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
+          "name": "DisplayListSetFxItemParamPS",
+          "demangled_name": "DisplayListSetFxItemParamPS",
+          "address": 2733965,
+          "offset": 1843997,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z29DisplayListGenerateTransformsP16nudisplayscene_s",
+          "demangled_name": "DisplayListGenerateTransforms(nudisplayscene_s*)",
+          "address": 2733970,
+          "offset": 1844002,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
           "name": "NuDisplayListPrepareFaceonPS",
           "demangled_name": "NuDisplayListPrepareFaceonPS",
           "address": 2733975,
           "offset": 1844007,
           "size": 19,
           "match_percent": 99.25
+        },
+        {
+          "name": "NuDisplaySceneAddPS",
+          "demangled_name": "NuDisplaySceneAddPS",
+          "address": 2733994,
+          "offset": 1844026,
+          "size": 79,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuDisplaySceneDestroyPS",
+          "demangled_name": "NuDisplaySceneDestroyPS",
+          "address": 2734073,
+          "offset": 1844105,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuDisplaySceneClonePS",
+          "demangled_name": "NuDisplaySceneClonePS",
+          "address": 2734078,
+          "offset": 1844110,
+          "size": 131,
+          "match_percent": 100.0
+        },
+        {
+          "name": "DisplayListUpdateSpecialTransformPS",
+          "demangled_name": "DisplayListUpdateSpecialTransformPS",
+          "address": 2734209,
+          "offset": 1844241,
+          "size": 5,
+          "match_percent": 100.0
         },
         {
           "name": "NuDisplayListSetItemTable",
@@ -86231,6 +86255,14 @@
           "offset": 1844304,
           "size": 92,
           "match_percent": 99.85185
+        },
+        {
+          "name": "DisplayListSetShadowCasterFlagPS",
+          "demangled_name": "DisplayListSetShadowCasterFlagPS",
+          "address": 2734364,
+          "offset": 1844396,
+          "size": 34,
+          "match_percent": 100.0
         }
       ]
     },
@@ -89341,45 +89373,6 @@
           "offset": 2195136,
           "size": 2118,
           "match_percent": 58.608986
-        }
-      ]
-    },
-    {
-      "name": "nu2api/nu3d/nudlist_stubs.cpp.o",
-      "source": "src/nu2api/nu3d/nudlist_stubs.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nudlist_stubs.o",
-      "functions": [
-        {
-          "name": "NuDisplayListDraw",
-          "demangled_name": "NuDisplayListDraw",
-          "address": 2731042,
-          "offset": 1841074,
-          "size": 5,
-          "match_percent": 100.0
-        },
-        {
-          "name": "DisplayListSwapBuffersPS",
-          "demangled_name": "DisplayListSwapBuffersPS",
-          "address": 2733950,
-          "offset": 1843982,
-          "size": 5,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuDisplaySceneAddPS",
-          "demangled_name": "NuDisplaySceneAddPS",
-          "address": 2733994,
-          "offset": 1844026,
-          "size": 79,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuDisplaySceneDestroyPS",
-          "demangled_name": "NuDisplaySceneDestroyPS",
-          "address": 2734073,
-          "offset": 1844105,
-          "size": 5,
-          "match_percent": 100.0
         }
       ]
     },
@@ -117005,6 +116998,7 @@
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/props/system/socksysall.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
+        "nu2api/nu3d/android/nudlist_android.c.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/nubridge.cpp.o",
@@ -117613,6 +117607,7 @@
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/props/system/socksysall.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
+        "nu2api/nu3d/android/nudlist_android.c.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/nubridge.cpp.o",
@@ -117647,6 +117642,7 @@
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/props/system/socksysall.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
+        "nu2api/nu3d/android/nudlist_android.c.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/nubridge.cpp.o",
@@ -119224,6 +119220,7 @@
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/props/system/socksysall.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
+        "nu2api/nu3d/android/nudlist_android.c.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/nubridge.cpp.o",
@@ -120105,6 +120102,7 @@
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/props/system/socksysall.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
+        "nu2api/nu3d/android/nudlist_android.c.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/nubridge.cpp.o",
@@ -120244,6 +120242,7 @@
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/props/system/socksysall.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
+        "nu2api/nu3d/android/nudlist_android.c.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/nubridge.cpp.o",
@@ -120278,6 +120277,7 @@
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/props/system/socksysall.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
+        "nu2api/nu3d/android/nudlist_android.c.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/nubridge.cpp.o",
@@ -120420,6 +120420,7 @@
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/props/system/socksysall.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
+        "nu2api/nu3d/android/nudlist_android.c.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/nubridge.cpp.o",
@@ -120454,6 +120455,7 @@
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/props/system/socksysall.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
+        "nu2api/nu3d/android/nudlist_android.c.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/nubridge.cpp.o",
@@ -128189,7 +128191,7 @@
     }
   ],
   "summary": {
-    "bazel_units": 462,
+    "bazel_units": 461,
     "functions": 13454,
     "assigned_functions": 12354,
     "ambiguous_functions": 211,

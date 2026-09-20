@@ -239,7 +239,6 @@ f32 HUB_EPISODESUBTITLEY = -0.745f;
 f32 HUB_EPISODETITLEY = -0.595f;
 i32 draw_para = 1;
 
-void DisplayListGenerateTransforms(nudisplayscene_s *scene);
 void DrawGameObjectsDraw(i32 pass);
 void EnableShadowMapRendering(i32 enable);
 void ResetShadowMapRendering();
