@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 50.43841,
+    "fuzzy_match_percent": 50.46128,
     "total_code": "4722419",
     "matched_code": "447737",
     "matched_code_percent": 9.481094,
@@ -54875,7 +54875,7 @@
           "address": 5021920,
           "offset": 4131952,
           "size": 2623,
-          "match_percent": 1.051625
+          "match_percent": 40.036327
         },
         {
           "name": "_Z18GizSpinners_UpdatePvS_f",
@@ -54939,7 +54939,7 @@
           "address": 5030880,
           "offset": 4140912,
           "size": 690,
-          "match_percent": 62.345455
+          "match_percent": 70.67879
         },
         {
           "name": "_Z24GizSpinner_GetSpinnerPosP12GIZSPINNER_sP7nuvec_s",
