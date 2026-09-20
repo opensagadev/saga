@@ -596,7 +596,6 @@ static void DodgeCode(GameObject_s *, i32, i32);
 void Grapple_MoveCode(GameObject_s *);
 void SpecialMove_VictimCode(GameObject_s *);
 i32 ObjInNarrowSock(GameObject_s *, SOCKSYS *, i32);
-void PeriscodeCode(GameObject_s *);
 i32 PodLevel(AREADATA_s *);
 void KeepOnScreen(GameObject_s *);
 void UpdateSnakeBody(GameObject_s *);
@@ -1201,6 +1200,10 @@ static void SelfDestructCode(GameObject_s *object, i32 pressed) {
     if (object->camera_screen_position.z > 0.0f)
         AddFancyMessage(TTab[tCHEAT_SELFDESTRUCT], object->camera_screen_position.x, object->camera_screen_position.y,
                         0.25f, 1.0f, 1, 0);
+}
+
+void PeriscodeCode(GameObject_s *) {
+    STUBBED();
 }
 
 void Move_DROIDGENERIC(GameObject_s *object) {

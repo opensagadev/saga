@@ -29,6 +29,7 @@ extern u32 GAMEPAD_MENUSELECT;
 extern u32 GAMEPAD_MENUCANCEL;
 
 void GamePads_Init();
+void GamePad_InitButtons();
 GAMEPAD_s *GamePad_Allocate();
 u16 GamePad_InputAngle(GameObject_s *object, GAMEPAD_s *pad);
 f32 GamePad_Rotate(GameObject_s *object);

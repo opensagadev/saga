@@ -2171,16 +2171,6 @@ void GameTiming(WORLDINFO_s *, float *game_time) {
     qrand();
 }
 
-void GameFog_Set() {
-    if (NuIOS_IsLowEndDevice()) {
-        NuLightFogX(GameFog.low_quality_start, GameFog.low_quality_end, GameFog.colour, 0.0f, 0.0f, 0, 0.0f);
-        return;
-    }
-
-    NuLightFogX(GameFog.high_quality_start, GameFog.high_quality_end, GameFog.colour, 0.0f, 0.0f, 1,
-                GameFog.high_quality_density);
-}
-
 extern "C" i32 NewRayCastScaleYMask(NUVEC *, NUVEC *, f32, f32, i32, u32);
 extern i32 RAYCASTCALLS;
 

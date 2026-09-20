@@ -128,6 +128,7 @@ VARIPTR *GizmoBufferAlloc(VARIPTR *buffer, VARIPTR *buffer_end, i32 size);
 void RegisterGizmoTypes(VARIPTR *buffer, VARIPTR *buffer_end, REGISTERGIZMOTYPEFN *register_gizmo_type_fns,
                         i32 unknown);
 void RegisterGizmoTypes_LSW(VARIPTR *buffer, VARIPTR *buffer_end);
+void RegisterGizmoTypes_Batman(VARIPTR *buffer, VARIPTR *buffer_end);
 GIZMO *AddGizmo(GIZMOSYS *gizmo_sys, i32 type_id, char *name, void *object);
 i32 GizmoFileReadName(char *name);
 i32 GizmoIsNameUnique(GIZMOSYS *gizmo_sys, char *name);

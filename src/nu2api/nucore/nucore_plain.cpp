@@ -81,7 +81,6 @@ extern "C" {
     i32 *AnimBuffEvalJoint = NULL;
     GLuint g_colorRenderbuffer;
     GLuint g_depthRenderbuffer;
-    extern i32 g_writingSaveCriticalSection;
 }
 
 static i32 clip_special_objects = 1;
@@ -1112,16 +1111,6 @@ extern "C" {
     }
     void NuIOS_DeallocateSystemRenderbuffer(GLuint) {
         STUBBED();
-    }
-    void NuIOS_FreeMemoryForSuspend(void) {
-        const char *source_path = "i:/SagaTouch-Android_9176564/nu2api.saga/nuandroid/ios_graphics.cpp";
-        BeginCriticalSectionGL(source_path, 270);
-        NuIOS_DeallocateSystemFramebuffers();
-        glReleaseShaderCompiler();
-        glFinish();
-        EndCriticalSectionGL(source_path, 279);
-        NuThreadCriticalSectionBegin(g_performingBgProcWorkCritSec);
-        NuThreadCriticalSectionBegin(g_writingSaveCriticalSection);
     }
     // Locale string is owned by the Android/JNI TU; cache only its index here.
     i32 g_languageIndex = -1; // original .data @0x616b80

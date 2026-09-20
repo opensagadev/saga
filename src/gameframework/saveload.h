@@ -35,6 +35,7 @@ extern "C" {
     extern i32 memcard_autosaveneeded;
     extern f32 memcard_autosavepredelay;
     extern f32 memcard_autosavepostdelay;
+    extern i32 g_writingSaveCriticalSection;
 
     void saveloadInit(VARIPTR *buf, VARIPTR buf_end, i32, char *prodcode, char *iconname, char *unicodename, i32 unk);
 

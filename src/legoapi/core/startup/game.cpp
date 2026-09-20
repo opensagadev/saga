@@ -35,7 +35,6 @@ extern void GameFog_Reset(void);
 extern void ConfigureComplexShadow(GameObject_s *);
 extern void ResetAdaptiveDifficulty(void);
 extern void Hint_ClearHintsAndDoneFlags(void);
-extern void GamePad_InitButtons(void);
 extern void FinishWeirdoNames(i32);
 extern void ReCalculateCompletionPoints(void);
 extern void GameAudio_PlaySfx(i32, nuvec_s *, i32, i32);

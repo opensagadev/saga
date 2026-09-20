@@ -1,5 +1,6 @@
 #include "decomp.h"
 #include "legoapi/core/input/gamepads.h"
+#include "legoapi/misc/androidbatman.h"
 #include "gameapi/gui/apimenu.h"
 #include "globals.h"
 #include "legoapi/characters/core/players.h"
@@ -16,7 +17,6 @@
 
 #include <string.h>
 
-extern "C" nupad_s **Game_NuPad;
 extern "C" void NuSound3AddRumble(nupad_s *, f32, i32, i32, f32);
 extern GAMECAMERA_s *GameCam;
 extern WORLDINFO_s *WORLD;
@@ -151,10 +151,6 @@ void GamePads_NetClient() {
 }
 
 void GamePads_SkipMovie() {
-    STUBBED();
-}
-
-void GamePad_InitButtons() {
     STUBBED();
 }
 

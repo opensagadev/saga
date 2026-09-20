@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 46.241383,
+    "fuzzy_match_percent": 46.24145,
     "total_code": "4722419",
-    "matched_code": "404906",
-    "matched_code_percent": 8.574123,
+    "matched_code": "405562",
+    "matched_code_percent": 8.588014,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 4794,
-    "matched_functions_percent": 35.61929,
+    "matched_functions": 4796,
+    "matched_functions_percent": 35.634148,
     "total_units": 1
   },
   "text": {
@@ -38032,6 +38032,14 @@
           "match_percent": 63.46154
         },
         {
+          "name": "_Z13ObjZappedBlueP12GameObject_s",
+          "demangled_name": "ObjZappedBlue(GameObject_s*)",
+          "address": 1367552,
+          "offset": 477584,
+          "size": 49,
+          "match_percent": 100.0
+        },
+        {
           "name": "_Z11TakeHitCodeP12GameObject_s",
           "demangled_name": "TakeHitCode(GameObject_s*)",
           "address": 1402304,
@@ -46435,6 +46443,14 @@
           "match_percent": 2.896552
         },
         {
+          "name": "_Z13PeriscodeCodeP12GameObject_s",
+          "demangled_name": "PeriscodeCode(GameObject_s*)",
+          "address": 1510336,
+          "offset": 620368,
+          "size": 592,
+          "match_percent": 3.333333
+        },
+        {
           "name": "_Z17Move_DROIDGENERICP12GameObject_s",
           "demangled_name": "Move_DROIDGENERIC(GameObject_s*)",
           "address": 1510928,
@@ -47334,14 +47350,6 @@
           "offset": 1443360,
           "size": 929,
           "match_percent": 2.513089
-        },
-        {
-          "name": "_Z19GamePad_InitButtonsv",
-          "demangled_name": "GamePad_InitButtons()",
-          "address": 2409760,
-          "offset": 1519792,
-          "size": 120,
-          "match_percent": 20.0
         },
         {
           "name": "TestForController",
@@ -50451,6 +50459,14 @@
           "offset": 498928,
           "size": 43,
           "match_percent": 100.0
+        },
+        {
+          "name": "_Z25RegisterGizmoTypes_BatmanP9variptr_uS0_",
+          "demangled_name": "RegisterGizmoTypes_Batman(variptr_u*, variptr_u*)",
+          "address": 1856048,
+          "offset": 966080,
+          "size": 127,
+          "match_percent": 18.26087
         },
         {
           "name": "_Z22RegisterGizmoTypes_LSWP9variptr_uS0_",
@@ -63158,14 +63174,6 @@
           "match_percent": 99.99219
         },
         {
-          "name": "_Z11GameFog_Setv",
-          "demangled_name": "GameFog_Set()",
-          "address": 2409568,
-          "offset": 1519600,
-          "size": 189,
-          "match_percent": 91.74359
-        },
-        {
           "name": "_ZL14DrawPackButtonP13GAMEMESSAGE_sP7nuvec_sf",
           "demangled_name": "DrawPackButton(GAMEMESSAGE_s*, nuvec_s*, float)",
           "address": 2410720,
@@ -65865,14 +65873,6 @@
           "offset": 443072,
           "size": 445,
           "match_percent": 36.55357
-        },
-        {
-          "name": "_Z23Text_ExpandButtonStringPcS_",
-          "demangled_name": "Text_ExpandButtonString(char*, char*)",
-          "address": 2409024,
-          "offset": 1519056,
-          "size": 535,
-          "match_percent": 99.469696
         },
         {
           "name": "_Z8GetLineWPti",
@@ -69105,28 +69105,68 @@
           "match_percent": 99.35294
         },
         {
-          "name": "_Z13ObjZappedBlueP12GameObject_s",
-          "demangled_name": "ObjZappedBlue(GameObject_s*)",
-          "address": 1367552,
-          "offset": 477584,
-          "size": 49,
+          "name": "_ZL29SystemDidBecomeActiveCallbackPK20NuPhoneOSMessageData",
+          "demangled_name": "SystemDidBecomeActiveCallback(NuPhoneOSMessageData const*)",
+          "address": 2408048,
+          "offset": 1518080,
+          "size": 106,
+          "match_percent": 43.48
+        },
+        {
+          "name": "_ZL19SystemPauseCallbackPK20NuPhoneOSMessageData",
+          "demangled_name": "SystemPauseCallback(NuPhoneOSMessageData const*)",
+          "address": 2408160,
+          "offset": 1518192,
+          "size": 741,
+          "match_percent": 37.57738
+        },
+        {
+          "name": "_ZL13TouchCallbackPK20NuPhoneOSMessageData",
+          "demangled_name": "TouchCallback(NuPhoneOSMessageData const*)",
+          "address": 2408912,
+          "offset": 1518944,
+          "size": 108,
           "match_percent": 100.0
         },
         {
-          "name": "_Z13PeriscodeCodeP12GameObject_s",
-          "demangled_name": "PeriscodeCode(GameObject_s*)",
-          "address": 1510336,
-          "offset": 620368,
-          "size": 592,
-          "match_percent": 3.333333
+          "name": "_Z23Text_ExpandButtonStringPcS_",
+          "demangled_name": "Text_ExpandButtonString(char*, char*)",
+          "address": 2409024,
+          "offset": 1519056,
+          "size": 535,
+          "match_percent": 100.0
         },
         {
-          "name": "_Z25RegisterGizmoTypes_BatmanP9variptr_uS0_",
-          "demangled_name": "RegisterGizmoTypes_Batman(variptr_u*, variptr_u*)",
-          "address": 1856048,
-          "offset": 966080,
-          "size": 127,
-          "match_percent": 18.26087
+          "name": "_Z11GameFog_Setv",
+          "demangled_name": "GameFog_Set()",
+          "address": 2409568,
+          "offset": 1519600,
+          "size": 189,
+          "match_percent": 91.74359
+        },
+        {
+          "name": "_Z19GamePad_InitButtonsv",
+          "demangled_name": "GamePad_InitButtons()",
+          "address": 2409760,
+          "offset": 1519792,
+          "size": 120,
+          "match_percent": 20.0
+        },
+        {
+          "name": "NuIOS_FreeMemoryForSuspend",
+          "demangled_name": "NuIOS_FreeMemoryForSuspend",
+          "address": 2409888,
+          "offset": 1519920,
+          "size": 121,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z8InitOnceiPPc",
+          "demangled_name": "InitOnce(int, char**)",
+          "address": 2410016,
+          "offset": 1520048,
+          "size": 700,
+          "match_percent": 99.9927
         }
       ]
     },
@@ -85301,45 +85341,6 @@
       ]
     },
     {
-      "name": "legogame/target_android.cpp.o",
-      "source": "src/legogame/target_android.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legogame/target_android.o",
-      "functions": [
-        {
-          "name": "_ZL29SystemDidBecomeActiveCallbackPK20NuPhoneOSMessageData",
-          "demangled_name": "SystemDidBecomeActiveCallback(NuPhoneOSMessageData const*)",
-          "address": 2408048,
-          "offset": 1518080,
-          "size": 106,
-          "match_percent": 43.48
-        },
-        {
-          "name": "_ZL19SystemPauseCallbackPK20NuPhoneOSMessageData",
-          "demangled_name": "SystemPauseCallback(NuPhoneOSMessageData const*)",
-          "address": 2408160,
-          "offset": 1518192,
-          "size": 741,
-          "match_percent": 37.57738
-        },
-        {
-          "name": "_ZL13TouchCallbackPK20NuPhoneOSMessageData",
-          "demangled_name": "TouchCallback(NuPhoneOSMessageData const*)",
-          "address": 2408912,
-          "offset": 1518944,
-          "size": 108,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z8InitOnceiPPc",
-          "demangled_name": "InitOnce(int, char**)",
-          "address": 2410016,
-          "offset": 1520048,
-          "size": 700,
-          "match_percent": 99.9927
-        }
-      ]
-    },
-    {
       "name": "nu2api/nu3d/NuDDSFunctions.cpp.o",
       "source": "src/nu2api/nu3d/NuDDSFunctions.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/NuDDSFunctions.o",
@@ -97460,14 +97461,6 @@
           "offset": 43648,
           "size": 9,
           "match_percent": 100.0
-        },
-        {
-          "name": "NuIOS_FreeMemoryForSuspend",
-          "demangled_name": "NuIOS_FreeMemoryForSuspend",
-          "address": 2409888,
-          "offset": 1519920,
-          "size": 121,
-          "match_percent": 99.81481
         },
         {
           "name": "NuErrorSleep",
@@ -128238,7 +128231,7 @@
     }
   ],
   "summary": {
-    "bazel_units": 459,
+    "bazel_units": 458,
     "functions": 13454,
     "assigned_functions": 12357,
     "ambiguous_functions": 211,

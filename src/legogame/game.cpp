@@ -11,6 +11,7 @@
 #include "legoapi/gizmo/object/gizmoblowups.h"
 #include "legoapi/gizmo/base/gizactions.h"
 #include "legoapi/actions/character/transform.h"
+#include "legoapi/actions/combat/fighting.h"
 #include "legoapi/props/objects/signal.h"
 
 #include <string.h>
@@ -66,7 +67,6 @@ void BuyAllShopExtras();
 void ReCalculateCompletionPoints();
 extern i32 Lighting_HighlightFlash;
 extern i32 (*Lighting_BlueFlickerFn)(GameObject_s *);
-i32 ObjZappedBlue(GameObject_s *);
 
 f32 minikittime;
 extern f32 (*Hint_AlphaTargetFn)();

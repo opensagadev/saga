@@ -7,6 +7,7 @@
 #include "legoapi/world/level.h"
 #include "legoapi/core/input/timer.h"
 #include "legoapi/render/core/render.h"
+#include "legoapi/menus/core/text.h"
 #include "gamelib/util/gamelib_util_types.h"
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/nucore/nustring.h"
@@ -67,7 +68,6 @@ i32 (*Hub_PanelBusyFn)();
 extern i32 only_process_this_hint_id;
 f32 SeekLinearF(f32, f32, f32);
 void Hint_SetHint(HINT_s *, i32, i32);
-i32 Text_ExpandButtonString(char *, char *);
 
 extern i32 NewMode, Paused, editor_active, CutSceneWaiting, PANELOFF;
 extern FadeSystem FadeSys;

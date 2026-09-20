@@ -251,6 +251,10 @@ void RegisterGizmoTypes(VARIPTR *buffer, VARIPTR *buffer_end, REGISTERGIZMOTYPEF
     }
 }
 
+void RegisterGizmoTypes_Batman(VARIPTR *, VARIPTR *) {
+    STUBBED();
+}
+
 void RegisterGizmoTypes_LSW(VARIPTR *buffer, VARIPTR *buffer_end) {
     REGISTERGIZMOTYPEFN gizmo_types[GIZMO_TYPES_LSW_COUNT + 1];
     memcpy(gizmo_types, GizmoTypesLSW, sizeof(GizmoTypesLSW));

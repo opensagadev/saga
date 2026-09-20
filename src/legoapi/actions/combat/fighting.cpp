@@ -1,4 +1,5 @@
 #include "decomp.h"
+#include "legoapi/actions/combat/fighting.h"
 #include "MechInputTouch/MechInputTouch_types.h"
 #include "legoapi/characters/motion.h"
 #include "legoapi/characters/core/character.h"
@@ -129,6 +130,17 @@ void ForceNextLungeTarget(MechObjectInterface *) {
 
 void ForceNextShootTarget(MechObjectInterface &target) {
     nextShootTarget = NuMechPtr<MechObjectInterface, 4>(&target);
+}
+
+i32 ObjZappedBlue(GameObject_s *object) {
+    if (object->field_0x7a5 == 0x42)
+        return 1;
+    if (object->field_0x7a5 == 0x1c) {
+        GameObject_s *holder = static_cast<GameObject_s *>(object->field_0x780);
+        if (holder != NULL && (holder->field_0xe21 & 1) != 0)
+            return 1;
+    }
+    return 0;
 }
 
 void SetForcedAttackOpponent(MechObjectInterface *) {

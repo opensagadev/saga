@@ -504,33 +504,6 @@ void Text3DStringEncodeFont(unsigned char *src, u16 *dst, void *font) {
     }
     *dst = 0;
 }
-i32 Text_ExpandButtonString(char *input, char *output) {
-    if (NuStrICmp(input, "[TAG]") == 0 || NuStrICmp(input, "[TRIANGLE]") == 0 || NuStrICmp(input, "[T]") == 0) {
-        strcpy(output, "[[y]]");
-        return 1;
-    }
-    if (NuStrICmp(input, "[SQUARE]") == 0 || NuStrICmp(input, "[S]") == 0 || NuStrICmp(input, "[ACTION]") == 0) {
-        strcpy(output, "[[x]]");
-        return 1;
-    }
-    if (NuStrICmp(input, "[CIRCLE]") == 0 || NuStrICmp(input, "[O]") == 0 || NuStrICmp(input, "[SPECIAL]") == 0) {
-        strcpy(output, "[[b]]");
-        return 1;
-    }
-    if (NuStrICmp(input, "[CROSS]") == 0 || NuStrICmp(input, "[X]") == 0 || NuStrICmp(input, "[JUMP]") == 0) {
-        strcpy(output, "[[a]]");
-        return 1;
-    }
-    if (NuStrICmp(input, "[TOGGLELEFT]") == 0) {
-        strcpy(output, "[[lb]]");
-        return 1;
-    }
-    if (NuStrICmp(input, "[TOGGLERIGHT]") == 0) {
-        strcpy(output, "[[rb]]");
-        return 1;
-    }
-    return 0;
-}
 void Text_InitDefaultStrings() {
     STUBBED();
 }

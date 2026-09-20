@@ -20,6 +20,7 @@ void Move_BEAST(GameObject_s *object);
 void Move_VEHICLE(GameObject_s *object);
 void Move_JEDI(GameObject_s *object);
 void Move_DROIDGENERIC(GameObject_s *object);
+void PeriscodeCode(GameObject_s *object);
 void Move_CANNON(GameObject_s *object);
 void Move_HOVERDROID(GameObject_s *object);
 void Move_WALKER(GameObject_s *object);

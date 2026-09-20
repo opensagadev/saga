@@ -25,7 +25,7 @@
 #include "legoapi/world/world.h"
 #include "legogame/game.h"
 #include "legogame/startup.h"
-#include "legogame/target.h"
+#include "legoapi/misc/androidbatman.h"
 #include "MechInputTouch/MechInputTouch_types.h"
 #include "nu2api/nucore/bgproc.h"
 #include "nu2api/nucore/common.h"
