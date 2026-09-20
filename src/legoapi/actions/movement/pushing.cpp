@@ -9,6 +9,7 @@
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/core/input/gamepads.h"
 #include "legoapi/gizmos/door/push.h"
+#include "legoapi/audio/sfx.h"
 #include "legoapi/legoapi_types.h"
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numath/nuvec.h"
@@ -20,8 +21,17 @@ struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
-void ReleasePush(GameObject_s *) {
-    STUBBED();
+void ReleasePush(GameObject_s *object) {
+    if (object == NULL || object->character_context == -1 ||
+        (CInfo[object->character_context].flags & 0x20000000) == 0) {
+        return;
+    }
+    if (LEGOCONTEXT_PUSHOBSTACLE != -1 && object->character_context == LEGOCONTEXT_PUSHOBSTACLE) {
+        GameCam_Blend(NULL, 0.5f, 0.0f, 1);
+    }
+    object->field_0xdc4 = 0.0f;
+    object->field_0x788 = NULL;
+    object->character_context = -1;
 }
 
 
@@ -183,8 +193,77 @@ void ResetPushProgress(WORLDINFO_s *world, void *progress_data) {
     }
 }
 
-void FindForcePushTarget(GameObject_s *, i32, i32) {
-    STUBBED();
+void SetObjAsHeadTarget(GameObject_s *, GameObject_s *, i8, f32, f32, f32);
+void FastWeaponIn(GameObject_s *, i32);
+void PlayGruntSfx(GameObject_s *);
+i32 FaceOpponent(GameObject_s *, NUVEC *);
+
+void FindForcePushTarget(GameObject_s *object, i32 activate, i32 target_filter) {
+    if (object == NULL || object->apiobj.field_0x27d == 0 || object->character_context == 0x1b ||
+        (object->field_0xe22 & 2) != 0 || (object->field_0xe23 & 1) != 0) {
+        return;
+    }
+
+    GameObject_s *best = object->force_push_target;
+    f32 best_distance = 100.0f;
+    if (best == NULL) {
+        for (i32 index = 0; index < HIGHGAMEOBJECT; ++index) {
+            GameObject_s *candidate = &Obj[index];
+            if (candidate == object || (candidate->apiobj.field_0x1f8 & 0x1001) != 0x1001 ||
+                candidate->apiobj.field_0x287 != 0 || candidate->apiobj.model_draw_result == 0 ||
+                candidate->apiobj.character_data == NULL || candidate->apiobj.character_data->game_character == NULL ||
+                (candidate->apiobj.character_data->game_character->flags_090 & 0x80008000) != 0 ||
+                (candidate->field_0xefc & 0x400010) != 0) {
+                continue;
+            }
+            const bool candidate_is_player = candidate->apiobj.field_0x27c != -1;
+            if ((target_filter == 1 && candidate_is_player) || (target_filter == 2 && !candidate_is_player)) {
+                continue;
+            }
+            const f32 dx = candidate->apiobj.collision_position.x - object->apiobj.collision_position.x;
+            const f32 dy = candidate->apiobj.collision_position.y - object->apiobj.collision_position.y;
+            const f32 dz = candidate->apiobj.collision_position.z - object->apiobj.collision_position.z;
+            const f32 distance = dx * dx + dy * dy + dz * dz;
+            if (distance >= best_distance || dx * object->facing_direction.x + dz * object->facing_direction.z <= 0.0f) {
+                continue;
+            }
+            best = candidate;
+            best_distance = distance;
+        }
+    }
+    if (best == NULL || best->character_context == 0x0f) {
+        return;
+    }
+
+    object->field_0xe22 |= 2;
+    object->force_push_target = best;
+    object->force_glow_candidate = best;
+    object->force_glow_candidate_kind = 2;
+    SetObjAsHeadTarget(object, best, 2, 1.0f, 0.0f, 0.0f);
+    if (activate == 0) {
+        return;
+    }
+
+    object->character_context = 0x1b;
+    object->force_target = best;
+    object->field_0x7a3 = 0;
+    object->context_animation_timer = 0.0f;
+    object->airborne_action_duration = 0.3f;
+    object->apiobj.movement_facing_angle =
+        NuAtan2D(best->apiobj.collision_position.x - object->apiobj.collision_position.x,
+                 best->apiobj.collision_position.z - object->apiobj.collision_position.z);
+    FastWeaponIn(object, 0);
+    PlaySfx(const_cast<char *>("JForcePush"), &object->apiobj.collision_position);
+    PlayGruntSfx(object);
+
+    if (best->apiobj.field_0x27c == -1) {
+        best->force_target = object;
+        best->character_context = 0x1c;
+        best->context_animation = 0x2b;
+        best->action_movement_state = 0;
+        FastWeaponIn(best, 0);
+        FaceOpponent(best, NULL);
+    }
 }
 
 f32 PushingTowardsAngle(u16 input_angle, u16 direction) {
@@ -290,6 +369,52 @@ void PushAway(NUVEC *position, f32 radius, NUVEC *minimum, NUVEC *maximum, GameO
     }
 }
 
-void PushCode(GameObject_s *, i32) {
-    STUBBED();
+void PushCode(GameObject_s *object, i32 allow_push) {
+    if (object == NULL || VehicleArea != 0 || object->apiobj.field_0x27c == -1) {
+        return;
+    }
+
+    u16 wall_angle = 0;
+    i32 surface = -1;
+    i32 angle_difference = 0;
+    const bool against_wall = Pushing(object, &wall_angle, &surface, &angle_difference) != 0;
+    if (against_wall) {
+        wall_angle += 0x8000;
+        object->field_0xdc4 += MAX(FRAMETIME, 1.0f / 30.0f);
+        if (object->field_0xdc4 > 0.5f) {
+            object->field_0xdc4 = 0.5f;
+        }
+        object->takeover_start_angle = wall_angle;
+    } else {
+        object->field_0xdc4 -= FRAMETIME;
+        if (object->field_0xdc4 < 0.0f) {
+            object->field_0xdc4 = 0.0f;
+        }
+    }
+
+    const bool in_push_context =
+        (LEGOCONTEXT_PUSH != -1 && object->character_context == LEGOCONTEXT_PUSH) ||
+        (LEGOCONTEXT_PUSHOBSTACLE != -1 && object->character_context == LEGOCONTEXT_PUSHOBSTACLE) ||
+        (LEGOCONTEXT_PUSHSPINNER != -1 && object->character_context == LEGOCONTEXT_PUSHSPINNER);
+    if (!against_wall || allow_push == 0 || object->pad_gamepad == NULL ||
+        object->pad_gamepad->input_magnitude <= 0.0f) {
+        if (in_push_context && object->field_0xdc4 == 0.0f) {
+            ReleasePush(object);
+        }
+        return;
+    }
+
+    if (!in_push_context && object->field_0xdc4 >= 0.2f) {
+        object->character_context = LEGOCONTEXT_PUSH != -1 ? LEGOCONTEXT_PUSH : LEGOCONTEXT_PUSHOBSTACLE;
+        object->context_animation = LEGOACT_PUSH;
+        object->apiobj.movement_facing_angle = wall_angle;
+        object->apiobj.facing_angle = wall_angle;
+        FastWeaponIn(object, 0);
+        PlayGruntSfx(object);
+    }
+    if (object->character_context == LEGOCONTEXT_PUSH) {
+        object->target_velocity.x = 0.0f;
+        object->target_velocity.z = 0.0f;
+        object->apiobj.movement_facing_angle = wall_angle;
+    }
 }
