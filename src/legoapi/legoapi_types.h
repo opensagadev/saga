@@ -981,7 +981,10 @@ struct DETONATOR_s {
     NUVEC field_0x18;
     GameObject_s *object;
     u8 active;
-    u8 field_0x29[7];
+    u8 draw_result;
+    u16 rotation_x;
+    u16 rotation_y;
+    u16 rotation_z;
     f32 timer;
     void *field_0x34;
 };

@@ -9,6 +9,7 @@ struct WORLDINFO_s;
 struct LEVEL_PROGRESS_s;
 struct GameObject_s;
 struct MENU_s;
+struct DOOR_s;
 
 struct storepack_s {
     char *name;
@@ -26,23 +27,14 @@ struct storepack_s {
     u8 field7_0xa;
     u8 field8_0xb;
     void (*unlock_fn)();
-    u8 field13_0x10;
-    u8 field14_0x11;
-    u8 field15_0x12;
-    u8 field16_0x13;
-    char *custodian_locator_set; // 0x14
-    u8 field21_0x18;
-    u8 field22_0x19;
-    u8 field23_0x1a;
-    u8 field24_0x1b;
-    u8 field25_0x1c;
-    u8 field26_0x1d;
-    u8 field27_0x1e;
-    u8 field28_0x1f;
-    i16 *id;                  // 0x20
-    NUVEC custodian_position; // 0x24
-    u16 custodian_angle;      // 0x30
-    u8 field44_0x32;          // 0x32, camera socket or 0xff
+    char *floor_target_door_name; // 0x10
+    char *custodian_locator_set;  // 0x14
+    i32 offset_floor_target;      // 0x18
+    DOOR_s *floor_target_door;    // 0x1c
+    i16 *id;                      // 0x20
+    NUVEC custodian_position;     // 0x24
+    u16 custodian_angle;          // 0x30
+    u8 field44_0x32;              // 0x32, camera socket or 0xff
     u8 field45_0x33;
 };
 DECOMP_ASSERT(sizeof(storepack_s) == 0x34, "STOREPACK size");

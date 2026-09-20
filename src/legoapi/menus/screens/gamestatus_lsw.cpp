@@ -22,6 +22,7 @@
 #include "MechInputTouch/MechInputTouch_types.h"
 #include "legoapi/render/core/render.h"
 #include "legoapi/menus/core/panel.h"
+#include "legoapi/menus/core/gamemessage.h"
 #include "legoapi/world/levels/episode.h"
 #include "legoapi/world/levels/levels.h"
 #include "legoapi/world/mission.h"
@@ -1653,8 +1654,26 @@ void BonusTime_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 curre
 void BonusTime_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *) {
     STUBBED();
 }
-void ChallangeCash_Draw(STATUS_STAGE_s *, STATUSPACKET_s *, i32) {
-    STUBBED();
+void ChallangeCash_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 draw) {
+    NUVEC position = {0.0f, -0.5f, 1.0f};
+    if (draw == 0) {
+        return;
+    }
+    if (stage->field_0x14 == 0) {
+        iconalphaoverride = 0.0f;
+        return;
+    }
+
+    const f32 time = stage->field_0x18;
+    iconalphaoverride = time < 0.5f ? time * 2.0f : 1.0f;
+    if (time < 2.0f && NuFmod(time, 0.2f) >= 0.1f) {
+        const bool second_player = (packet->field_0xb0 & 0x20) != 0;
+        SmartTextEx(TTab[tWINNER], second_player ? 0.675f : -0.675f, STATSPOSY, 1.0f, 0.7f, 0.7f, 0.7f,
+                    second_player ? 8 : 2, 0, 255, 0, 0.35f, 1, NULL, 0, static_cast<i32>(iconalphaoverride * 128.0f));
+    }
+    if (stage->field_0x14 == 1) {
+        AddGameMessage(TTab[tCHALLENGECOMPLETE], &position, 0.7f, &position, 0.7f, 255, 0, 127, 0x4020, 2.0f);
+    }
 }
 void ChallangeCash_Skip(STATUS_STAGE_s *, STATUSPACKET_s *) {
     STUBBED();

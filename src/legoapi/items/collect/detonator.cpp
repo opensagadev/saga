@@ -2,7 +2,9 @@
 #include "globals.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/items/base/apiobject.h"
+#include "legoapi/gizmos/fx/gizmopickups.h"
 #include "nu2api/nu3d/nucamera.h"
+#include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nu3d/nutex.h"
 
 #include <string.h>
@@ -24,7 +26,33 @@ struct DetonatorHitData {
 };
 
 void Detonators_Draw() {
-    STUBBED();
+    if (!WORLD->lev_objs[0xec].active) {
+        return;
+    }
+
+    for (i32 i = 0; i < 10; ++i) {
+        DETONATOR_s &detonator = Detonator[i];
+        detonator.draw_result = 0;
+        if (!detonator.active) {
+            continue;
+        }
+
+        NUMTX_ALIGNED16 matrix;
+        NuMtxSetRotationY(&matrix, detonator.rotation_y);
+        NuMtxRotateZ(&matrix, detonator.rotation_z);
+        NuMtxRotateX(&matrix, detonator.rotation_x);
+        NuMtxTranslate(&matrix, &detonator.field_0x0c);
+        NuSpecialDrawAt(&WORLD->lev_objs[0xec].special, &matrix);
+
+        const bool flicker_on = PickUpFlickerTest <= PickupFlickerFrame % PickUpFlickerFrames;
+        const bool attached =
+            detonator.timer < 0.5f && (detonator.object == NULL || detonator.object->apiobj.field_0x287 != 0 ||
+                                       detonator.object->field_0xde0 < 0.3f);
+        const i32 special_index = flicker_on || attached ? 0xee : 0xef;
+        if (WORLD->lev_objs[special_index].active) {
+            detonator.draw_result = NuSpecialDrawAt(&WORLD->lev_objs[special_index].special, &matrix);
+        }
+    }
 }
 
 void Detonators_Reset() {

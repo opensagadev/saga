@@ -17,12 +17,16 @@
 #include "legoapi/world/levels/levels.h"
 #include "legoapi/world/mission.h"
 #include "legoapi/cutscenes/cutscenes.h"
+#include "legoapi/props/doors/door.h"
+#include "legoapi/render/core/terrain.h"
+#include "nu2api/nu3d/nuspline.h"
 
 #include "globals.h"
 #include "legoapi/legoapi_types.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nucore/nuvideo.h"
 #include "nu2api/numath/nufloat.h"
+#include "nu2api/numath/nutrig.h"
 #include "nu2api/numusic/numusic.h"
 #include "nu2api/nusound/nusound.h"
 
@@ -391,8 +395,24 @@ i32 Store_FindPack(i32 id, char *name) {
     }
 }
 
-void Store_HubInitFloorTargets(WORLDINFO_s *) {
-    STUBBED();
+void Store_HubInitFloorTargets(WORLDINFO_s *world) {
+    for (i32 i = 0; i < 11; ++i) {
+        STOREPACK &pack = StorePack[i];
+        pack.floor_target_door = Door_FindByName(world, pack.floor_target_door_name);
+        if (pack.floor_target_door != NULL) {
+            NUVEC *points = pack.floor_target_door->spline->pts;
+            NUVEC direction;
+            NuVecSub(&direction, &points[6], &points[4]);
+            pack.custodian_angle = static_cast<u16>(NuAtan2D(direction.x, direction.z) + 0x4000);
+            NuVecAdd(&pack.custodian_position, &points[4], &points[6]);
+            NuVecScale(&pack.custodian_position, &pack.custodian_position, 0.5f);
+            if (pack.offset_floor_target != 0) {
+                pack.custodian_position.x += NU_SIN_LUT(pack.custodian_angle) * 0.5f;
+                pack.custodian_position.z += NU_COS_LUT(pack.custodian_angle) * 0.5f;
+            }
+        }
+        pack.custodian_position.y = NewShadowEx(&pack.custodian_position, 0, 1.0f, 1.0f, 0) + 0.005f;
+    }
 }
 
 void Store_HubDrawFloorTargets(WORLDINFO_s *) {
