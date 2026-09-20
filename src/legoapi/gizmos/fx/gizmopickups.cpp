@@ -888,9 +888,86 @@ ADDGIZMOTYPE *GizmoPickups_RegisterGizmo(i32 type_id) {
 }
 
 void SpecialMiniKits_Configure(WORLDINFO_s *world, char *config) {
-    STUBBED();
-    (void)world;
-    (void)config;
+    world->special_minikits = NULL;
+    if (world->current_gscn == NULL) {
+        return;
+    }
+    NUFPAR *parser = NuFParCreateMem(const_cast<char *>("specialminikits"), config, 0xffff);
+    if (parser == NULL) {
+        return;
+    }
+
+    world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 4);
+    SPECIALMINIKIT_s *items = static_cast<SPECIALMINIKIT_s *>(world->giz_buffer.void_ptr);
+    SPECIALMINIKIT_s *next = items;
+    i32 count = 0;
+
+    while (NuFParGetLine(parser) != 0) {
+        if (NuFParGetWord(parser) == 0 || NuStrICmp(parser->word_buf, const_cast<char *>("specialminikit")) != 0) {
+            continue;
+        }
+
+        SPECIALMINIKIT_s item = {};
+        item.flags = 1;
+        while (NuFParGetWord(parser) != 0) {
+            if (NuStrICmp(parser->word_buf, const_cast<char *>("pickup")) == 0) {
+                if (NuFParGetWord(parser) != 0 && NuStrLen(parser->word_buf) < sizeof(item.pickup_name)) {
+                    NuStrCpy(item.pickup_name, parser->word_buf);
+                }
+            } else if (NuStrICmp(parser->word_buf, const_cast<char *>("at_object")) == 0) {
+                if (NuFParGetWord(parser) != 0) {
+                    NuSpecialFind(world->current_gscn, &item.special, parser->word_buf, 1);
+                    item.flags &= ~0x20;
+                }
+            } else if (NuStrICmp(parser->word_buf, const_cast<char *>("at_gizmo")) == 0) {
+                if (NuFParGetWord(parser) != 0 && NuStrLen(parser->word_buf) < sizeof(item.special_name)) {
+                    NuStrCpy(item.special_name, parser->word_buf);
+                    item.flags |= 0x20;
+                }
+            } else if (NuStrICmp(parser->word_buf, const_cast<char *>("draw_at_start")) == 0) {
+                item.flags = (item.flags & ~1) | 2;
+            } else if (NuStrICmp(parser->word_buf, const_cast<char *>("draw_while_animating")) == 0) {
+                item.flags = (item.flags & ~1) | 4;
+            } else if (NuStrICmp(parser->word_buf, const_cast<char *>("draw_at_end")) == 0) {
+                item.flags = (item.flags & ~1) | 8;
+            } else if (NuStrICmp(parser->word_buf, const_cast<char *>("orientate")) == 0) {
+                item.flags |= 0x10;
+            }
+        }
+
+        if (item.pickup_name[0] == '\0') {
+            continue;
+        }
+        if ((item.flags & 0x20) != 0) {
+            if (item.special_name[0] == '\0') {
+                continue;
+            }
+        } else if (NuSpecialExistsFn(&item.special) == 0) {
+            continue;
+        }
+
+        if (NuSpecialExistsFn(&item.special) != 0) {
+            item.inst_anim = NuSpecialGetInstAnim(&item.special);
+            if (item.inst_anim != NULL) {
+                nuinstanim_s *animation = static_cast<nuinstanim_s *>(item.inst_anim);
+                item.anim_data = item.special.scene->instance_animation_data[animation->anim_ix];
+                item.end_frame = NuAnimEndFrameOld(item.anim_data);
+            }
+        }
+        *next++ = item;
+        ++count;
+    }
+    NuFParDestroy(parser);
+
+    if (count == 0) {
+        return;
+    }
+    world->giz_buffer.addr = reinterpret_cast<usize>(next);
+    SPECIALMINIKITSYS_s *system = static_cast<SPECIALMINIKITSYS_s *>(world->giz_buffer.void_ptr);
+    system->items = items;
+    system->count = count;
+    world->special_minikits = system;
+    world->giz_buffer.addr = ALIGN(world->giz_buffer.addr + sizeof(*system), 4);
 }
 
 void SpecialMiniKits_Reset(WORLDINFO_s *world) {
