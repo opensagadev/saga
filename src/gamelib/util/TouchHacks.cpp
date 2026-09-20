@@ -125,7 +125,10 @@ bool TouchHacks::CanTagTo(GameObject_s &source, GameObject_s &target) {
     }
 
     const f32 vertical_distance = NuFabs(target.apiobj.position.y - source.apiobj.position.y);
-    if (vertical_distance > MAX(target.apiobj.scaled_height, source.apiobj.scaled_height)) {
+    const f32 maximum_height =
+        target.apiobj.scaled_height > source.apiobj.scaled_height ? target.apiobj.scaled_height
+                                                                 : source.apiobj.scaled_height;
+    if (vertical_distance > maximum_height) {
         return false;
     }
     const f32 dx = source.apiobj.position.x - target.apiobj.position.x;
