@@ -11,6 +11,7 @@
 #include "legoapi/audio/sfx.h"
 #include "legoapi/core/config/cheat.h"
 #include "legoapi/characters/core/players.h"
+#include "legoapi/core/input/timer.h"
 #include "legoapi/misc/utilities.h"
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/items/objects/gameobjects.h"
@@ -20,6 +21,10 @@
 #include "legoapi/world/level.h"
 #include "legoapi/world/mission.h"
 #include "legoapi/world/world.h"
+#include "nu2api/numath/nufloat.h"
+#include "nu2api/numath/numtx.h"
+#include "nu2api/numath/nutrig.h"
+#include "nu2api/numath/nuvec.h"
 
 f32 COINMAGNETSCALE = 3.0f;
 f32 COINMSGTIME = 1.0f;
@@ -915,6 +920,77 @@ void SpecialMiniKits_Reset(WORLDINFO_s *world) {
     }
 }
 
-void SpecialMiniKits_Draw(WORLDINFO_s *) {
-    STUBBED();
+void SpecialMiniKits_Draw(WORLDINFO_s *world) {
+    SPECIALMINIKITSYS_s *system = world->special_minikits;
+    if (system == NULL || GizmoPickupSys->gizmo_type_id == -1 ||
+        GizmoPickupSys->types[GizmoPickupSys->gizmo_type_id].field_0x0f != 0) {
+        return;
+    }
+
+    NUVEC scale = {AreaPickupScale, AreaPickupScale, AreaPickupScale};
+    const u16 y_rotation = static_cast<u16>(
+        static_cast<i32>(NuFmod(GameTimer.time_elapsed, 4.0f) * 0.25f * 65536.0f));
+    const u16 x_rotation =
+        static_cast<u16>(static_cast<i32>(NuTrigTable[static_cast<i32>(y_rotation) & 0x7fff] * 1820.0f));
+
+    for (i32 index = 0; index < system->count; ++index) {
+        SPECIALMINIKIT_s *item = &system->items[index];
+        NUMTX matrix;
+        NUVEC *position;
+
+        if ((item->flags & 0x20) != 0) {
+            if (item->special_gizmo == NULL || GizmoGetVisibility(world->gizmo_sys, item->special_gizmo) == 0) {
+                continue;
+            }
+            position = GizmoGetPos(world->gizmo_sys, item->special_gizmo);
+            if (position == NULL) {
+                continue;
+            }
+            NuMtxSetScale(&matrix, &scale);
+            NuMtxTranslate(&matrix, position);
+        } else {
+            if (NuSpecialGetVisibilityFn(&item->special) == 0) {
+                continue;
+            }
+
+            nuinstanim_s *animation = static_cast<nuinstanim_s *>(item->inst_anim);
+            bool draw = (item->flags & 1) != 0 || animation == NULL || item->anim_data == NULL;
+            if (!draw && (animation->flags & NUINSTANIM_FLAG_REPEATING) == 0) {
+                draw = ((item->flags & 2) != 0 && animation->ltime <= 1.0f) ||
+                       ((item->flags & 8) != 0 && item->end_frame <= animation->ltime);
+            }
+            if (!draw && (item->flags & 4) != 0 && (animation->flags & NUINSTANIM_FLAG_PLAYING) != 0) {
+                draw = true;
+            }
+            if (!draw) {
+                continue;
+            }
+
+            position = NuSpecialGetDrawPos(&item->special);
+            matrix = *NuSpecialGetDrawMtx(&item->special);
+            NuVecNorm(NUMTX_GET_ROW_VEC(&matrix, 0), NUMTX_GET_ROW_VEC(&matrix, 0));
+            NuVecNorm(NUMTX_GET_ROW_VEC(&matrix, 1), NUMTX_GET_ROW_VEC(&matrix, 1));
+            NuVecNorm(NUMTX_GET_ROW_VEC(&matrix, 2), NUMTX_GET_ROW_VEC(&matrix, 2));
+            NuMtxPreScale(&matrix, &scale);
+        }
+
+        if (item->pickup_gizmo == NULL) {
+            continue;
+        }
+        GIZMOPICKUP_s *pickup = static_cast<GIZMOPICKUP_s *>(item->pickup_gizmo->object);
+        i32 type_index = pickup->type_index;
+        if ((pickup->state_flags & GIZMOPICKUP_STATE_ALTERNATE_TYPE) != 0 &&
+            GizmoPickupSys->alternate_type != -1) {
+            type_index = GizmoPickupSys->alternate_type;
+        }
+        GIZMO_PICKUP_TYPE *type = &GizmoPickupSys->types[type_index];
+
+        if ((item->flags & 0x10) == 0) {
+            NuMtxSetScale(&matrix, &scale);
+            NuMtxRotateY(&matrix, y_rotation);
+            NuMtxRotateX(&matrix, x_rotation);
+            NuMtxTranslate(&matrix, position);
+        }
+        NuSpecialDrawAt(&world->lev_objs[type->first_model_id].special, &matrix);
+    }
 }
