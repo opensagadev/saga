@@ -2,13 +2,16 @@
 #include "gameapi/ai/aisys/aisys.h"
 #include "globals.h"
 #include "legoapi/characters/core/charconfig.h"
+#include "legoapi/characters/motion/gameanim.h"
 #include "legoapi/cutscenes/cutscenes.h"
 #include "legoapi/gizmo/base/gizactions.h"
 #include "legoapi/gizmo/base/gizmo.h"
 #include "legoapi/gizmos/object/gizbuildits.h"
 #include "legoapi/gizmo/object/gizmoblowups.h"
 #include "legoapi/gizmos/object/gizobstacles.h"
+#include "legoapi/gizmos/traps/gizforce.h"
 #include "legoapi/gizmos/traps/gizturrets.h"
+#include "legoapi/gizmos/trigger/gizspecial.h"
 #include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/props/doors/door.h"
@@ -145,12 +148,85 @@ static void GizActions_PlayRadio(GIZFLOW_s *, FLOWBOX_s *, char **, int) {
     STUBBED();
 }
 
-static void GizActions_PlayForce(GIZFLOW_s *, FLOWBOX_s *, char **, int) {
-    STUBBED();
+static void GizActions_PlayForce(GIZFLOW_s *flow, FLOWBOX_s *, char **params, int count) {
+    if (count <= 0) {
+        return;
+    }
+    char *name = NULL;
+    i32 forwards = 1;
+    i32 snap = 0;
+    for (i32 index = 0; index < count; ++index) {
+        char *value = NuStrIStr(params[index], "Name");
+        if (value != NULL) {
+            name = value + NuStrLen("Name") + 1;
+        } else if (NuStrICmp(params[index], "BACKWARD") == 0) {
+            forwards = 0;
+        } else if (NuStrICmp(params[index], "FORWARD") == 0) {
+            forwards = 1;
+        } else if (NuStrICmp(params[index], "SNAP") == 0) {
+            snap = 1;
+        }
+    }
+    if (name == NULL) {
+        return;
+    }
+    GIZMO_s *gizmo = GizmoFindByName(flow->gizmo_sys, force_gizmotype_id, name);
+    GIZFORCE_s *force = gizmo != NULL ? static_cast<GIZFORCE_s *>(gizmo->object) : NULL;
+    if (force == NULL) {
+        return;
+    }
+    if (forwards != 0) {
+        if (snap != 0) {
+            force->runtime_flags |= 0x80;
+            GameAnimSet_JumpToEnd(force->anim_set);
+        } else {
+            GizForce_PlayForwards(force);
+        }
+    } else if (snap != 0) {
+        GameAnimSet_JumpToStart(force->anim_set);
+    } else {
+        GizForce_PlayBackwards(force);
+    }
 }
 
-static void GizActions_PlaySpecial(GIZFLOW_s *, FLOWBOX_s *, char **, int) {
-    STUBBED();
+static void GizActions_PlaySpecial(GIZFLOW_s *flow, FLOWBOX_s *, char **params, int count) {
+    if (count <= 0) {
+        return;
+    }
+    char *name = NULL;
+    i32 forwards = 1;
+    i32 snap = 0;
+    for (i32 index = 0; index < count; ++index) {
+        char *value = NuStrIStr(params[index], "Name");
+        if (value != NULL) {
+            name = value + NuStrLen("Name") + 1;
+        } else if (NuStrICmp(params[index], "BACKWARD") == 0) {
+            forwards = 0;
+        } else if (NuStrICmp(params[index], "FORWARD") == 0) {
+            forwards = 1;
+        } else if (NuStrICmp(params[index], "SNAP") == 0) {
+            snap = 1;
+        }
+    }
+    if (name == NULL) {
+        return;
+    }
+    GIZMO_s *gizmo = GizmoFindByName(flow->gizmo_sys, gizspecial_gizmotype_id, name);
+    GIZSPECIAL_s *special = gizmo != NULL ? static_cast<GIZSPECIAL_s *>(gizmo->object) : NULL;
+    if (special == NULL) {
+        return;
+    }
+    if (forwards != 0) {
+        if (snap != 0) {
+            GameAnimSet_JumpToEnd(special->anim_set);
+        } else {
+            GameAnimSet_Play(special->anim_set, 1.0f, 0);
+        }
+    } else if (snap != 0) {
+        GameAnimSet_JumpToStart(special->anim_set);
+    } else {
+        GameAnimSet_Play(special->anim_set, -1.0f, 0);
+    }
 }
 
 static void GizActions_PlayObstacle(GIZFLOW_s *, FLOWBOX_s *, char **, int) {
