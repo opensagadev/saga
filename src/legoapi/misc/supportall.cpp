@@ -5,6 +5,7 @@
 #include "nu2api/numath/nufloat.h"
 #include "legoapi/core/config/cheat.h"
 #include "legoapi/actions/character/streaks.h"
+#include "legoapi/actions/combat/hits.h"
 #include <string.h>
 #include <stdio.h>
 #include <stdarg.h>
@@ -15,6 +16,7 @@
 #include "legoapi/core/input/qrand.h"
 #include "gameapi/ai/aisys/aisys.h"
 #include "legoapi/characters/core/character.h"
+#include "legoapi/characters/core/players.h"
 #include "legoapi/characters/motion.h"
 #include "legoapi/characters/core/character.h"
 #include "legoapi/world/mission.h"
@@ -701,8 +703,30 @@ void DebFreeWithoutKey(debkeydatatype_s *key) {
     DebFree(&handle);
 }
 
+i32 CannotKill(GameObject_s *object);
+extern "C" void DebrisPreCheckCollisions(NUVEC *position, f32 radius);
+extern "C" i32 DebrisCollisionCheckScaleY(NUVEC *position, f32 radius, f32 y_scale);
+extern "C" i32 DebrisTorusCollisionCheckScaleY(NUVEC *position, f32 radius, f32 y_scale);
+
 void DebrisKillPlayers() {
-    STUBBED();
+    DebrisPreCheckCollisions(&GameCam->pos, 50.0f);
+    for (i32 player_index = 0; player_index < 8; ++player_index) {
+        GameObject_s *player = Player[player_index];
+        if (player == NULL || (player->apiobj.flags_high & 0x10) == 0 || player->apiobj.field_0x287 != 0 ||
+            player->field_0x1024 > 0.0f || player->spawn_protection_timer > 0.0f ||
+            (player->field_0xefe & 0x40) != 0 || CannotKill(player) != 0 || Player_HasInvincibility(player) != 0 ||
+            (player->apiobj.character_data->game_character->flags_090 & 0x04008000) != 0) {
+            continue;
+        }
+        if (DebrisCollisionCheckScaleY(&player->apiobj.collision_position, player->apiobj.collision_radius,
+                                       player->collision_y_scale) != -1) {
+            ObjHitObj(NULL, player, 1, 0, 0, 1);
+        }
+        if (DebrisTorusCollisionCheckScaleY(&player->apiobj.collision_position, player->apiobj.collision_radius,
+                                            player->collision_y_scale) != -1) {
+            ObjHitObj(NULL, player, 1, 0, 0, 1);
+        }
+    }
 }
 
 void RndrUnfilledCircle(float, float, float, float, float, i32, float, float, numtl_s *) {
