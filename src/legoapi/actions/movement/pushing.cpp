@@ -5,6 +5,7 @@
 #include "globals.h"
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/motion.h"
+#include "legoapi/characters/motion/gameanim.h"
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/core/input/gamepads.h"
 #include "legoapi/legoapi_types.h"
@@ -118,8 +119,75 @@ f32 ForceTowardsMid(GameObject_s *object) {
     return amount;
 }
 
-void ResetPushProgress(WORLDINFO_s *, void *) {
-    STUBBED();
+struct PUSHPROGRESS {
+    u32 visible_mask;
+    u32 state_mask;
+    u32 position_mask;
+    NUVEC positions[16];
+    NUVEC end_positions[2][16];
+};
+
+void ResetPushProgress(WORLDINFO_s *world, void *progress_data) {
+    if (world == NULL || world->push_blocks == NULL || world->push_block_count <= 0) {
+        return;
+    }
+
+    PUSHPROGRESS *progress = static_cast<PUSHPROGRESS *>(progress_data);
+    const i32 count = world->push_block_count < 16 ? world->push_block_count : 16;
+    for (i32 index = 0; index < count; ++index) {
+        pushblock_s *block = &world->push_blocks[index];
+        const u32 bit = 1u << index;
+        if (progress == NULL) {
+            continue;
+        }
+
+        block->flags_0cb = (block->flags_0cb & ~2u) | ((progress->state_mask & bit) != 0 ? 2u : 0u);
+        const bool visible = (progress->visible_mask & bit) != 0;
+        block->flags_0ca = (block->flags_0ca & ~4u) | (visible ? 4u : 0u);
+        if (!visible) {
+            NuSpecialSetVisibility(&block->special, 0);
+            for (i32 output = 0; output < block->end_position_count; ++output) {
+                NuSpecialSetVisibility(&block->end_position_specials[output], 0);
+            }
+        }
+
+        if ((progress->position_mask & bit) == 0) {
+            continue;
+        }
+        nuinstanim_s *animation = NuSpecialGetInstAnim(&block->special);
+        if (!visible && animation != NULL) {
+            NUMTX evaluated;
+            EvalAnim(&block->special, 1.0f, &evaluated, 0);
+            NUMTX *matrix = NuSpecialGetInstanceMtx(&block->special);
+            matrix->m30 = evaluated.m30;
+            matrix->m31 = evaluated.m31;
+            matrix->m32 = evaluated.m32;
+            NuSpecialUpdate(&block->special);
+            for (i32 output = 0; output < block->end_position_count; ++output) {
+                nuhspecial_s *special = &block->end_position_specials[output];
+                EvalAnim(special, 1.0f, &evaluated, 0);
+                matrix = NuSpecialGetInstanceMtx(special);
+                matrix->m30 = evaluated.m30;
+                matrix->m31 = evaluated.m31;
+                matrix->m32 = evaluated.m32;
+                NuSpecialUpdate(special);
+            }
+        } else {
+            NUMTX *matrix = NuSpecialGetInstanceMtx(&block->special);
+            matrix->m30 = progress->positions[index].x;
+            matrix->m31 = progress->positions[index].y;
+            matrix->m32 = progress->positions[index].z;
+            NuSpecialUpdate(&block->special);
+            for (i32 output = 0; output < block->end_position_count; ++output) {
+                matrix = NuSpecialGetInstanceMtx(&block->end_position_specials[output]);
+                const NUVEC &position = progress->end_positions[output][index];
+                matrix->m30 = position.x;
+                matrix->m31 = position.y;
+                matrix->m32 = position.z;
+                NuSpecialUpdate(&block->end_position_specials[output]);
+            }
+        }
+    }
 }
 
 void FindForcePushTarget(GameObject_s *, i32, i32) {

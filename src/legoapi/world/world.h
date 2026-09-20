@@ -331,7 +331,8 @@ typedef struct WORLDINFO_s {
     GIZTURRETSYS_s *giz_turret_sys;        // 0x46bc
     pushblock_s *push_blocks;              // 0x46c0
     i32 push_block_count;                  // 0x46c4
-    char filler7b[0x46d0 - 0x46c8];        // 0x46c8 .. 0x46d0
+    NUVEC *push_block_positions;            // 0x46c8
+    i32 push_block_position_count;          // 0x46cc
     i32 special_sfx_count;                 // 0x46d0
     specialsfx_s *special_sfx;             // 0x46d4
     i32 special_sfx_event_count;           // 0x46d8
