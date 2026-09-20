@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 46.241367,
+    "fuzzy_match_percent": 46.241383,
     "total_code": "4722419",
     "matched_code": "404906",
     "matched_code_percent": 8.574123,
@@ -56891,10 +56891,18 @@
       ]
     },
     {
-      "name": "legoapi/gizmos/traps/attractos.cpp.o",
-      "source": "src/legoapi/gizmos/traps/attractos.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/attractos.o",
+      "name": "legoapi/gizmos/traps/attracto.cpp.o",
+      "source": "src/legoapi/gizmos/traps/attracto.cpp",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/attracto.o",
       "functions": [
+        {
+          "name": "_GLOBAL__sub_I_attracto.cpp",
+          "demangled_name": "_GLOBAL__sub_I_attracto.cpp",
+          "address": 898080,
+          "offset": 8112,
+          "size": 93,
+          "match_percent": 99.35294
+        },
         {
           "name": "_ZL28Attractos_ReserveBufferSpacePv",
           "demangled_name": "Attractos_ReserveBufferSpace(void*)",
@@ -56973,7 +56981,7 @@
           "address": 1951600,
           "offset": 1061632,
           "size": 449,
-          "match_percent": 77.14655
+          "match_percent": 77.27586
         },
         {
           "name": "_ZL23Attractos_ClearProgressPvS_",
@@ -57040,12 +57048,44 @@
           "match_percent": 99.08572
         },
         {
+          "name": "_Z20Attracto_FindNearestP11WORLDINFO_sP7nuvec_sP12GameObject_sPf",
+          "demangled_name": "Attracto_FindNearest(WORLDINFO_s*, nuvec_s*, GameObject_s*, float*)",
+          "address": 1954352,
+          "offset": 1064384,
+          "size": 361,
+          "match_percent": 99.98165
+        },
+        {
+          "name": "_Z19Attracto_GetPos_TopP10ATTRACTO_sP7nuvec_s",
+          "demangled_name": "Attracto_GetPos_Top(ATTRACTO_s*, nuvec_s*)",
+          "address": 1954720,
+          "offset": 1064752,
+          "size": 65,
+          "match_percent": 99.95
+        },
+        {
           "name": "_Z23Attractos_RegisterGizmoi",
           "demangled_name": "Attractos_RegisterGizmo(int)",
           "address": 1954800,
           "offset": 1064832,
           "size": 376,
           "match_percent": 98.63492
+        },
+        {
+          "name": "_Z17Attracto_MoveCodeP11WORLDINFO_sP12GameObject_s",
+          "demangled_name": "Attracto_MoveCode(WORLDINFO_s*, GameObject_s*)",
+          "address": 1955184,
+          "offset": 1065216,
+          "size": 2281,
+          "match_percent": 30.395605
+        },
+        {
+          "name": "_Z22Attracto_GetSuctionPosP12GameObject_sP7nuvec_s",
+          "demangled_name": "Attracto_GetSuctionPos(GameObject_s*, nuvec_s*)",
+          "address": 1957472,
+          "offset": 1067504,
+          "size": 35,
+          "match_percent": 100.0
         }
       ]
     },
@@ -59665,53 +59705,6 @@
           "offset": 4701888,
           "size": 1264,
           "match_percent": 1.666667
-        }
-      ]
-    },
-    {
-      "name": "legoapi/items/collect/attracto.cpp.o",
-      "source": "src/legoapi/items/collect/attracto.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/attracto.o",
-      "functions": [
-        {
-          "name": "_GLOBAL__sub_I_attracto.cpp",
-          "demangled_name": "_GLOBAL__sub_I_attracto.cpp",
-          "address": 898080,
-          "offset": 8112,
-          "size": 93,
-          "match_percent": 99.35294
-        },
-        {
-          "name": "_Z20Attracto_FindNearestP11WORLDINFO_sP7nuvec_sP12GameObject_sPf",
-          "demangled_name": "Attracto_FindNearest(WORLDINFO_s*, nuvec_s*, GameObject_s*, float*)",
-          "address": 1954352,
-          "offset": 1064384,
-          "size": 361,
-          "match_percent": 99.98165
-        },
-        {
-          "name": "_Z19Attracto_GetPos_TopP10ATTRACTO_sP7nuvec_s",
-          "demangled_name": "Attracto_GetPos_Top(ATTRACTO_s*, nuvec_s*)",
-          "address": 1954720,
-          "offset": 1064752,
-          "size": 65,
-          "match_percent": 99.95
-        },
-        {
-          "name": "_Z17Attracto_MoveCodeP11WORLDINFO_sP12GameObject_s",
-          "demangled_name": "Attracto_MoveCode(WORLDINFO_s*, GameObject_s*)",
-          "address": 1955184,
-          "offset": 1065216,
-          "size": 2281,
-          "match_percent": 30.384615
-        },
-        {
-          "name": "_Z22Attracto_GetSuctionPosP12GameObject_sP7nuvec_s",
-          "demangled_name": "Attracto_GetSuctionPos(GameObject_s*, nuvec_s*)",
-          "address": 1957472,
-          "offset": 1067504,
-          "size": 35,
-          "match_percent": 100.0
         }
       ]
     },
@@ -128245,7 +128238,7 @@
     }
   ],
   "summary": {
-    "bazel_units": 460,
+    "bazel_units": 459,
     "functions": 13454,
     "assigned_functions": 12357,
     "ambiguous_functions": 211,

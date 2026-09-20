@@ -33,6 +33,7 @@ struct GameObject_s;
 ATTRACTO_s *Attracto_FindNearest(WORLDINFO_s *, NUVEC *, GameObject_s *, f32 *);
 void Attracto_GetPos_Top(ATTRACTO_s *, NUVEC *);
 void Attracto_GetSuctionPos(GameObject_s *, NUVEC *);
+void Attracto_MoveCode(WORLDINFO_s *, GameObject_s *);
 void Attractos_InitTerrain(WORLDINFO_s *);
 
 ADDGIZMOTYPE *Attractos_RegisterGizmo(i32 type_id);

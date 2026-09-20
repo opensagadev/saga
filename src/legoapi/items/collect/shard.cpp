@@ -11,7 +11,7 @@
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/numath/numtx.h"
-#include "legoapi/gizmos/traps/attractos.h"
+#include "legoapi/gizmos/traps/attracto.h"
 #include "legoapi/characters/motion.h"
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/core/input/gamepads.h"

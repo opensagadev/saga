@@ -57,6 +57,7 @@ DECOMP_ASSERT(offsetof(SHARD_s, spin_angle) == 0x3a, "SHARD spin offset");
 ADDGIZMOTYPE *Shards_RegisterGizmo(i32 type_id);
 struct WORLDINFO_s;
 SHARD *Shard_FindNearest(WORLDINFO_s *, NUVEC *, GameObject_s *, f32 *);
+void Shard_Collect(SHARD_s *, GameObject_s *);
 
 extern "C" {
 #endif

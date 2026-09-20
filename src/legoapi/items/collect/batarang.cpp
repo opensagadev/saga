@@ -1,4 +1,5 @@
 #include "decomp.h"
+#include "legoapi/items/collect/batarang.h"
 #include "legoapi/legoapi_types.h"
 #include "globals.h"
 #include "nu2api/nucore/nustring.h"

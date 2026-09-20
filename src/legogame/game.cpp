@@ -22,7 +22,7 @@
 #include "legoapi/world/world.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/world/world.h"
-#include "legoapi/gizmos/traps/attractos.h"
+#include "legoapi/gizmos/traps/attracto.h"
 #include "legoapi/gizmos/door/zipups.h"
 #include "legoapi/world/area.h"
 #include "legoapi/characters/core/character.h"

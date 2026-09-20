@@ -28,7 +28,7 @@ static f32 ForceBackRadius2 = 0.0f;
 #include "legoapi/core/config/cheat.h"
 #include "legoapi/audio/sfx.h"
 #include "legoapi/gizmos/traps/gizforce.h"
-#include "legoapi/gizmos/traps/attractos.h"
+#include "legoapi/gizmos/traps/attracto.h"
 #include "legoapi/props/objects/signal.h"
 #include "legoapi/gizmos/door/securitydoors.h"
 #include "legoapi/props/objects/techno.h"
@@ -608,7 +608,6 @@ extern i16 id_YODA, id_YODAGHOST;
 extern i16 id_C3PO, id_TC14;
 extern i16 id_DROIDEKA, id_RANCOR;
 extern "C" i16 id_ATST, id_MINIATST, id_ATST_LOWRES, id_MINIATAT, id_MINIATTE;
-void Attracto_MoveCode(WORLDINFO_s *, GameObject_s *);
 void SecurityDoor_MoveCode(WORLDINFO_s *, GameObject_s *);
 void Batarang_MoveCode(GameObject_s *);
 void FireBountyHunterRocket(GameObject_s *);
