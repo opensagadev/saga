@@ -3,6 +3,11 @@
 #include "MechInputTouch/MechInputTouch_types.h"
 #include "legoapi/audio/sfx.h"
 #include "legoapi/core/config/cheat.h"
+#include "legoapi/core/input/gamepads.h"
+#include "legoapi/core/input/qrand.h"
+#include "legoapi/characters/motion.h"
+#include "legoapi/characters/motion/gameanim.h"
+#include "legoapi/actions/combat/hits.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/render/fx.h"
 #include "legoapi/render/fx/parts.h"
@@ -11,6 +16,7 @@
 #include "nu2api/nu3d/nurndr.h"
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nu3d/nutex.h"
+#include "nu2api/numath/nutrig.h"
 
 struct AIROW_s;
 struct nuqthdr_s;
@@ -27,9 +33,56 @@ void AlertSurroundingCreatures(GameObject_s *, NUVEC *);
 i32 qrand();
 EXPLOSION *Detonate(nuvec_s *position, u16 flags);
 i32 MatrixReflection(NUMTX *matrix, i32 axis, f32 plane, f32 height, NUMTX *result);
+void KillPart(PART_s *part, i32 reason);
+void NewBuzzFrames(nupad_s *pad, i32 frames, i32 channel);
+i32 SuperWeirdo(GameObject_s *object);
+void ThermalDetonator_ThrowMom(GameObject_s *object, nuvec_s *velocity);
+void PartUpdate_ThermalDetonator(PART_s *part);
+void PartImpact_ThermalDetonator(PART_s *part);
+void PartKill_ThermalDetonator(PART_s *part, i32 reason);
+i32 PartDraw_ThermalDetonator(PART_s *part);
 
-void ThermalDetonator_Throw(GameObject_s *) {
-    STUBBED();
+void ThermalDetonator_Throw(GameObject_s *object) {
+    if (object == NULL || WORLD == NULL || WORLD->lev_objs == NULL || WORLD->lev_objs[0xea].active == 0) {
+        return;
+    }
+
+    NUMTX matrix;
+    NuMtxSetTranslation(&matrix, &object->apiobj.collision_position);
+    NUVEC velocity;
+    ThermalDetonator_ThrowMom(object, &velocity);
+
+    ADDPART_s params = Default_ADDPART;
+    params.matrix = &matrix;
+    params.velocity = &velocity;
+    params.owner = object;
+    params.field_14 = 0.1f;
+    params.field_18 = 0.1f;
+    params.gravity = -5.0f;
+    params.special = &WORLD->lev_objs[0xea].special;
+    params.flags = 0x08000292;
+    params.update_fn = PartUpdate_ThermalDetonator;
+    params.field_40 = PartImpact_ThermalDetonator;
+    params.field_44 = PartKill_ThermalDetonator;
+    params.stop_fn = PartStop_Flickerer;
+    params.draw_fn = PartDraw_ThermalDetonator;
+    params.time_step = FRAMETIME;
+    params.field_a4 = 10.0f;
+
+    PART_s *part = AddPart(&params);
+    if (part != NULL) {
+        part->force_flags = ObjHitObj_Flags(object) & 0xffff;
+        part->force_player_mask = 0;
+        part->update_callback = PartUpdate_ThermalDetonator;
+        part->reflection_height = 2000000.0f;
+        part->render_flags &= ~0x80;
+        part->reflection_flags &= ~3;
+    }
+    object->movement_runtime_flags &= ~0x40;
+    PlaySfx(const_cast<char *>("ThrowDet"), &object->apiobj.collision_position);
+    if (object->pad_gamepad != NULL) {
+        NewBuzzFrames(object->pad_gamepad->pad, 2, 0);
+    }
 }
 
 i32 PartDraw_ThermalDetonator(PART_s *part) {
@@ -83,21 +136,113 @@ void PartKill_ThermalDetonator(PART_s *part, i32) {
     }
 }
 
-i32 ThermalDetonator_MoveCode(GameObject_s *) {
-    STUBBED();
+i32 ThermalDetonator_MoveCode(GameObject_s *object) {
+    if (object == NULL || object->apiobj.character_model == NULL || object->pad_gamepad == NULL || WORLD == NULL ||
+        WORLD->lev_objs == NULL || WORLD->lev_objs[0xea].active == 0) {
+        return 0;
+    }
+
+    if (object->character_context != 0x2e) {
+        if (static_cast<i8>(object->apiobj.flags_low) >= 0 ||
+            (object->pad_gamepad->buttons_pressed & GAMEPAD_SPECIAL) == 0) {
+            return 0;
+        }
+        const bool can_throw = (object->apiobj.character_data->model_flags & 0x01000000) != 0 ||
+                               object->field_0x108e == 6 || SuperWeirdo(object) != 0;
+        if (!can_throw || (object->apiobj.field_0x27d == 0 && object->field_0xe31 != 1)) {
+            return 0;
+        }
+        const i8 context = object->character_context;
+        if (context != -1 && context != 6 && context != 7 && (CInfo[context].flags & 4) == 0) {
+            return 0;
+        }
+
+        for (i32 index = 0; index < MAXPARTS; ++index) {
+            PART_s *part = &Part[index];
+            if ((part->active & 1) != 0 && part->owner == object &&
+                part->draw_callback == PartDraw_ThermalDetonator) {
+                if ((part->active & 2) != 0 && part->elapsed <= 1.0f) {
+                    return 0;
+                }
+                KillPart(part, 0);
+                return 1;
+            }
+        }
+
+        object->character_context = 0x2e;
+        object->context_animation = object->field_0xe31 == 1 ? 0x6f : (object->field_0xe22 & 1) != 0 ? 0x6e : 0x65;
+        if (object->apiobj.character_model->model_data_b[object->context_animation] == NULL) {
+            object->context_animation = 0x65;
+        }
+        object->context_flags &= ~0x40;
+        object->movement_runtime_flags &= ~0x40;
+        ResetAnimPacket(&object->apiobj.anim_packet, -1);
+        object->context_animation_timer =
+            object->apiobj.character_model->model_data_b[object->context_animation] != NULL
+                ? AnimDuration(object->id, object->context_animation, 0.0f, 0.0f, 1)
+                : 1.0f;
+        return 0;
+    }
+
+    f32 *frame = object->apiobj.character_model->model_data_b[object->context_animation] != NULL
+                     ? AnimPlaying(&object->apiobj.anim_packet, object->context_animation, 1, 0)
+                     : NULL;
+    object->context_animation_timer -= FRAMETIME;
+    const f32 release_frame =
+        object->apiobj.character_model->model_data_b[object->context_animation] != NULL
+            ? AnimListFrame(object->apiobj.character_model, object->context_animation, 2)
+            : 0.0f;
+    if ((object->context_flags & 0x40) == 0 &&
+        ((frame != NULL && *frame > 0.0f && *frame >= release_frame) ||
+         (frame == NULL && object->context_animation_timer <= 0.5f))) {
+        object->context_flags |= 0x40;
+        object->movement_runtime_flags |= 0x40;
+    }
+    if (object->context_animation_timer <= 0.0f) {
+        object->character_context = -1;
+    }
     return 0;
 }
 
-void ThermalDetonator_ThrowMom(GameObject_s *, nuvec_s *) {
-    STUBBED();
+void ThermalDetonator_ThrowMom(GameObject_s *object, nuvec_s *velocity) {
+    if (object == NULL || velocity == NULL) {
+        return;
+    }
+    const u16 angle = object->apiobj.movement_facing_angle;
+    velocity->x = object->apiobj.velocity.x + NU_SIN_LUT(angle) * 2.0f;
+    velocity->y = object->apiobj.velocity.y + 2.0f;
+    velocity->z = object->apiobj.velocity.z + NU_COS_LUT(angle) * 2.0f;
 }
 
-void PartImpact_ThermalDetonator(PART_s *) {
-    STUBBED();
+void PartImpact_ThermalDetonator(PART_s *part) {
+    if (part == NULL) {
+        return;
+    }
+    if ((part->render_flags & 0x80) != 0 || part->field_209 == 0x1c) {
+        KillPart(part, 0);
+        return;
+    }
+    PartImpact_Brick(part);
+    PlaySfx(const_cast<char *>("ThermalDet_Bnce"), &part->position);
+    if ((part->active & 3) == 1) {
+        NUVEC trail = {
+            part->impact_position.x - part->impact_normal.x * part->radius,
+            part->impact_position.y - part->impact_normal.y * part->radius,
+            part->impact_position.z - part->impact_normal.z * part->radius,
+        };
+        AddGameDebris(WORLD->debris_sys, 1, &trail);
+    }
 }
 
-void PartUpdate_ThermalDetonator(PART_s *) {
-    STUBBED();
+void PartUpdate_ThermalDetonator(PART_s *part) {
+    if (part == NULL) {
+        return;
+    }
+    if ((part->active & 2) != 0 && part->elapsed > 0.0f && part->elapsed < 1.0f &&
+        (part->render_flags & 0x40) == 0) {
+        PlaySfx(const_cast<char *>("ThermalDet_Beep"), &part->position);
+        part->render_flags |= 0x40;
+    }
 }
 
 EXPLOSION *Detonate(nuvec_s *position, u16 flags) {
