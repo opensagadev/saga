@@ -826,7 +826,7 @@ struct MechSystems : BaseThing {
             u32 reserved_10[3];
             struct numtl_s *radar_pulse_material;
             MechInputTouchGestureBasedController *gesture_controller;
-            u32 reserved_24;
+            MechInputTouchMenuController *menu_controller;
         };
     };
     MechInputTouchSystem input_touch_system;

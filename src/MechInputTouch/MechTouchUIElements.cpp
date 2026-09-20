@@ -8,10 +8,15 @@
 #include "gameframework/saveload.h"
 #include "globals.h"
 #include "legoapi/items/base/apiobject.h"
+#include "legoapi/items/base/collection.h"
+#include "legoapi/characters/core/character.h"
+#include "legoapi/characters/core/players.h"
+#include "legoapi/core/config/cheat.h"
 #include "legoapi/core/input/timer.h"
 #include "legoapi/cutscenes/cutscenes.h"
 #include "legoapi/render/core/render.h"
 #include "legoapi/menus/core/text.h"
+#include "legoapi/world/area.h"
 #include "legoapi/world/level.h"
 #include "nu2api/nu3d/numtl.h"
 
@@ -23,6 +28,9 @@ extern i32 NewMode;
 extern i32 PANELOFF;
 extern i32 Paused;
 f32 TagButtonSize;
+extern "C" {
+    i32 procActive;
+}
 
 i32 GetMenuID();
 float GetAspectRatio();
@@ -493,7 +501,83 @@ void MechTouchUIPlayerButton::Process(float) {
 }
 
 void MechTouchUIPlayerButton::SetupTargetIds() {
-    STUBBED();
+    for (i32 i = 0; i < 32; ++i) {
+        target_ids[i] = -1;
+        free_play_target_ids[i] = -1;
+        field_0x144[i] = 0;
+    }
+
+    procActive = 0;
+    chooser_mode = 1;
+
+    i32 target_count = 0;
+    for (i32 i = 0; i < 8; ++i) {
+        GameObject_s *player = Player[i];
+        if (player != NULL && (player->apiobj.object_flags & 0x1001) == 0x1001) {
+            target_ids[target_count++] = player->id;
+        }
+    }
+
+    if (FreePlay == 0 || apicharsys == NULL || apicharsys->loaded_model_count <= 0) {
+        return;
+    }
+
+    i32 free_play_count = 0;
+    const bool cheat_enabled = Cheats_CheckFlags(0x100) != 0;
+    for (i32 i = 0; i < apicharsys->loaded_model_count; ++i) {
+        const APICHARACTERMODEL &model = apicharsys->models[i];
+        if ((model.flags & 1) == 0) {
+            continue;
+        }
+
+        const i32 id = model.model_id;
+        const i32 collected = InCollectList_Index(id, NULL, 0);
+        const GAMECHARACTERDATA &game_character = GCDataList[id];
+        const bool bonus_cheat_character =
+            VehicleArea != 0 && BonusArea != 0 && cheat_enabled && (game_character.flags_094[3] & 2) != 0;
+
+        if (collected == -1 && static_cast<i32>(game_character.flags_090) >= 0 &&
+            (game_character.flags_094[3] & 1) == 0 && !bonus_cheat_character) {
+            continue;
+        }
+
+        if (VehicleArea != 0) {
+            const u32 model_flags = CDataList[id].model_flags;
+            if ((model_flags & 0x2000) == 0 && !(BonusArea != 0 && (model_flags & 0x4000000) != 0) &&
+                static_cast<i32>(game_character.flags_090) >= 0 && !bonus_cheat_character) {
+                continue;
+            }
+
+            if (BonusArea != 0) {
+                const i32 area = AreaFromMiniKitID(id);
+                if (area != -1) {
+                    if (Game_AreaSave == NULL || Game_AreaSave[area].minikit_complete == 0) {
+                        continue;
+                    }
+                } else if (static_cast<i32>(game_character.flags_090) >= 0 && !bonus_cheat_character) {
+                    continue;
+                }
+            }
+        } else if ((CDataList[id].model_flags & 0x2000) != 0 || (game_character.flags_090 & 0x40) != 0) {
+            continue;
+        }
+
+        if (BonusArea == 0 || VehicleArea == 0) {
+            if (static_cast<i32>(game_character.flags_090) < 0) {
+                if (!cheat_enabled) {
+                    continue;
+                }
+            } else if ((game_character.flags_094[3] & 1) == 0 &&
+                       (collected == -1 || Collection_Got(id) == 0)) {
+                continue;
+            }
+        }
+
+        free_play_target_ids[free_play_count++] = id;
+        if (free_play_count == 32) {
+            return;
+        }
+    }
 }
 
 void MechTouchUIPlayerButton::ShowChooser() {

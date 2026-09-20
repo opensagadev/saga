@@ -22,6 +22,10 @@ struct COLLECTION_s {
 };
 DECOMP_ASSERT(sizeof(COLLECTION_s) == 0x18, "COLLECTION_s ABI");
 
+extern i32 LEGOOBJ_ICON_FRAME_NEUTRAL;
+extern i32 LEGOOBJ_ICON_FRAME_BLUE;
+extern i32 LEGOOBJ_ICON_FRAME_GREEN;
+
 #ifdef __cplusplus
 extern "C" {
 #endif

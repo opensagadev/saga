@@ -15,6 +15,7 @@
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nucore/common.h"
+#include "nu2api/nucore/NuVirtualTouchDevice.h"
 #include "nu2api/numath/nuvec.h"
 
 extern i16 id_RANCOR, id_ANAKINJEDI;
@@ -23,6 +24,7 @@ bool CalculateRayBoxIntersection(VuVec const &, VuVec const &, VuVec const &, Vu
 extern "C" void NewRayCastGetImpactNormal(NUVEC *);
 f32 CalcCapsuleIntersectDistance(VuVec const &, VuVec const &, f32, VuVec const &, f32);
 void PerformPauseButtonStuff();
+extern NuVirtualTouchDevice *inputTouchDevice;
 
 i32 MechInputTouchSystem::s_baseControlMode = 1;
 i32 MechInputTouchSystem::s_actualTouchMode = 2;
@@ -89,7 +91,29 @@ bool MechInputTouchSystem::CouldTouchBeLockedBy(u32 touch_id, MechInputTouchButt
 }
 
 void MechInputTouchSystem::CreateGamePanels() {
-    STUBBED();
+    if (inputTouchDevice == NULL) {
+        return;
+    }
+
+    MechSystems *systems = MechSystems::Get();
+    inputTouchDevice->AddAlwaysActiveElement(
+        reinterpret_cast<NuTouchInputElement *>(&systems->gesture_tracking_system));
+
+    systems->menu_controller = new MechInputTouchMenuController(0);
+    inputTouchDevice->AddAlwaysActiveElement(
+        reinterpret_cast<NuTouchInputElement *>(systems->menu_controller));
+
+    inputTouchDevice->GetAspectRatio();
+    CreateGamePlayLayoutConsoleMode(*inputTouchDevice, 1);
+    CreateGamePlayLayoutGestureBased(*inputTouchDevice, 2);
+    CreateGamePlayLayoutGestureBased_Podrace(*inputTouchDevice, 3);
+    CreateGamePlayLayoutGestureBased_Cavalry(*inputTouchDevice, 4);
+    CreateGamePlayLayoutGestureBased_DeathStarTurret(*inputTouchDevice, 5);
+    CreateGamePlayLayoutGestureBased_SpeederChase(*inputTouchDevice, 6);
+    CreateGamePlayLayoutBlank(*inputTouchDevice, 7);
+
+    control_mode = SuperOptions.touch_controls == 1 ? 2 : 1;
+    inputTouchDevice->SetCurrentLayoutIndex(control_mode);
 }
 
 void MechInputTouchSystem::CreateGamePlayLayoutBlank(NuVirtualTouchDevice &, i32) {
