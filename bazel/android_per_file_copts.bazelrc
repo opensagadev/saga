@@ -47,7 +47,6 @@ build:target --per_file_copt=^src/gameapi/ai/aisys/gameai_actions\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/items/objects/grabber\.cpp$@-O3
 build:target --per_file_copt=^src/gameapi/edtools/edfile\.cpp$@-O3
 build:target --per_file_copt=^src/gameapi/edtools/edsplines\.cpp$@-O3
-build:target --per_file_copt=^src/gameapi/edtools/edtoolsall_stubs\.cpp$@-O2
 build:target --per_file_copt=^src/gameframework/savesystem\.cpp$@-O3
 # The click-to-start tracker is an optimized, frameless leaf in the original.
 build:target --per_file_copt=^src/legoapi/core/input/input\.cpp$@-O2
@@ -356,7 +355,6 @@ build:target --per_file_copt=^src/MechInputTouch/MechSystems\.cpp$@-O2
 build:target --per_file_copt=^src/MechInputTouch/MechTouchUIElements\.cpp$@-O3
 build:target --per_file_copt=^src/editor/aieditor\.cpp$@-O2
 build:target --per_file_copt=^src/editor/edlevelall\.cpp$@-O2
-build:target --per_file_copt=^src/editor/edlevelall_stubs\.cpp$@-O2
 build:target --per_file_copt=^src/gameapi/edtools/edptlall\.cpp$@-O2
 build:target --per_file_copt=^src/gameapi/edtools/edtoolsall\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/actions/character/streaks\.cpp$@-O2

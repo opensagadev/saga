@@ -1,5 +1,6 @@
 #include "decomp.h"
 #include "gameapi_edtools_types.h"
+#include "gameapi/edtools/edstubs.h"
 
 // Bridge editor subsystem stubs (static, internal linkage).
 
@@ -8,6 +9,12 @@ static void edbricbFileLoad(eduimenu_s *, eduiitem_s *, u32) {
 }
 static void edbricbFileSave(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
+}
+i32 edbriLoadPage(char *path, void *gscn) {
+    STUBBED();
+    (void)path;
+    (void)gscn;
+    return -1;
 }
 static void edbricbSetDpadMode(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();

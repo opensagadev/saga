@@ -1,6 +1,7 @@
 #include "decomp.h"
 #include "gameapi_edtools_types.h"
 #include "gameapi/edtools/edanim_internal.h"
+#include "gameapi/edtools/edstubs.h"
 #include "gameapi/edtools/edui.h"
 
 // Animation editor subsystem stubs (static, internal linkage).
@@ -13,6 +14,10 @@ static void edanimcbFileLoad(eduimenu_s *, eduiitem_s *, u32) {
 }
 static void edanimcbFileSave(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
+}
+void edanimRegisterBaseScene(NUGSCN *scene) {
+    STUBBED();
+    (void)scene;
 }
 static void edanimcbMCTBMenu(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();

@@ -131,6 +131,10 @@ static __used__ void edptlcbSetDetail(eduimenu_s *, eduiitem_s *item, u32) {
     }
     DebrisSetDetailLevels(instance_id, detail_levels);
 }
+void edppStartPage(i32 page) {
+    STUBBED();
+    (void)page;
+}
 static __used__ void edptlcbStartPage(eduimenu_s *, eduiitem_s *item, u32) {
     edppStartPage(static_cast<i8>(item->data));
 }

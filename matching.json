@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 46.20892,
+    "fuzzy_match_percent": 46.21104,
     "total_code": "4722419",
-    "matched_code": "403637",
-    "matched_code_percent": 8.547251,
+    "matched_code": "403661",
+    "matched_code_percent": 8.547759,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 4781,
-    "matched_functions_percent": 35.522697,
+    "matched_functions": 4782,
+    "matched_functions_percent": 35.53013,
     "total_units": 1
   },
   "text": {
@@ -19102,6 +19102,14 @@
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_editor/edlevelall.o",
       "functions": [
         {
+          "name": "_GLOBAL__sub_I_edlevelall.cpp",
+          "demangled_name": "_GLOBAL__sub_I_edlevelall.cpp",
+          "address": 928992,
+          "offset": 39024,
+          "size": 811,
+          "match_percent": 15.006536
+        },
+        {
           "name": "_Z16areaEditor_Enterv",
           "demangled_name": "areaEditor_Enter()",
           "address": 4046944,
@@ -19140,6 +19148,14 @@
           "offset": 3989920,
           "size": 153,
           "match_percent": 10.434783
+        },
+        {
+          "name": "_ZN10BaseEditor10InitialiseER9variptr_uS1_i",
+          "demangled_name": "BaseEditor::Initialise(variptr_u&, variptr_u&, int)",
+          "address": 5467392,
+          "offset": 4577424,
+          "size": 14,
+          "match_percent": 100.0
         },
         {
           "name": "_ZN11ClassEditor9ReadBlockEP7DATAPTR",
@@ -19196,6 +19212,14 @@
           "offset": 4578480,
           "size": 9,
           "match_percent": 100.0
+        },
+        {
+          "name": "_Z23cbEdLevelSetSliderFloatP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbEdLevelSetSliderFloat(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 5468464,
+          "offset": 4578496,
+          "size": 17,
+          "match_percent": 98.0
         },
         {
           "name": "_Z18cbEdLevelToggleIntP10eduimenu_sP10eduiitem_sj",
@@ -19334,6 +19358,14 @@
           "match_percent": 15.555555
         },
         {
+          "name": "_ZN11ClassEditor12RegisterToolER6EdTool",
+          "demangled_name": "ClassEditor::RegisterTool(EdTool&)",
+          "address": 5486656,
+          "offset": 4596688,
+          "size": 56,
+          "match_percent": 100.0
+        },
+        {
           "name": "_ZN11ClassEditor11UpdateListsEP12MemoryBufferS1_",
           "demangled_name": "ClassEditor::UpdateLists(MemoryBuffer*, MemoryBuffer*)",
           "address": 5486720,
@@ -19372,6 +19404,14 @@
           "offset": 4597184,
           "size": 87,
           "match_percent": 13.125
+        },
+        {
+          "name": "_ZN11ClassEditor13UpdateSnapRayER5VuVec",
+          "demangled_name": "ClassEditor::UpdateSnapRay(VuVec&)",
+          "address": 5487248,
+          "offset": 4597280,
+          "size": 71,
+          "match_percent": 0.0
         },
         {
           "name": "_ZN11ClassEditor12CreateObjectEv",
@@ -19414,6 +19454,14 @@
           "match_percent": 11.666667
         },
         {
+          "name": "_ZN15ClassObjectList8IsInListE11ClassObject",
+          "demangled_name": "ClassObjectList::IsInList(ClassObject)",
+          "address": 5487584,
+          "offset": 4597616,
+          "size": 52,
+          "match_percent": 100.0
+        },
+        {
           "name": "_ZN11ClassEditor16IsSelectedObjectER11ClassObject",
           "demangled_name": "ClassEditor::IsSelectedObject(ClassObject&)",
           "address": 5487648,
@@ -19436,6 +19484,14 @@
           "offset": 4597840,
           "size": 53,
           "match_percent": 28.0
+        },
+        {
+          "name": "_ZN15ClassObjectList8IsInListEP7EdClass",
+          "demangled_name": "ClassObjectList::IsInList(EdClass*)",
+          "address": 5487872,
+          "offset": 4597904,
+          "size": 49,
+          "match_percent": 100.0
         },
         {
           "name": "_ZN11ClassEditor15IsSelectedClassEP7EdClass",
@@ -19468,6 +19524,14 @@
           "offset": 4619856,
           "size": 38,
           "match_percent": 34.285713
+        },
+        {
+          "name": "_ZN11LevelEditor14RegisterEditorER10BaseEditor",
+          "demangled_name": "LevelEditor::RegisterEditor(BaseEditor&)",
+          "address": 5509872,
+          "offset": 4619904,
+          "size": 70,
+          "match_percent": 100.0
         },
         {
           "name": "_ZN11LevelEditor14BeginMultiLoadEP9variptr_uS1_",
@@ -19524,6 +19588,14 @@
           "offset": 4621248,
           "size": 115,
           "match_percent": 10.5
+        },
+        {
+          "name": "_ZN11LevelEditor8GetSceneEi",
+          "demangled_name": "LevelEditor::GetScene(int)",
+          "address": 5511344,
+          "offset": 4621376,
+          "size": 35,
+          "match_percent": 100.0
         },
         {
           "name": "_ZN11LevelEditor10GetEdSceneEi",
@@ -19614,6 +19686,14 @@
           "match_percent": 8.75
         },
         {
+          "name": "_Z21cbEdLevelSetSliderIntP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbEdLevelSetSliderInt(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 5518688,
+          "offset": 4628720,
+          "size": 15,
+          "match_percent": 100.0
+        },
+        {
           "name": "_Z16cbEdLevelSetTextP10eduimenu_sP10eduiitem_sj",
           "demangled_name": "cbEdLevelSetText(eduimenu_s*, eduiitem_s*, unsigned int)",
           "address": 5518704,
@@ -19644,6 +19724,14 @@
           "offset": 4629616,
           "size": 86,
           "match_percent": 18.26087
+        },
+        {
+          "name": "_ZN11LevelEditor11SetNextMenuEP10eduimenu_s",
+          "demangled_name": "LevelEditor::SetNextMenu(eduimenu_s*)",
+          "address": 5519680,
+          "offset": 4629712,
+          "size": 24,
+          "match_percent": 100.0
         },
         {
           "name": "_ZN11ClassEditor9SelectLEDEi",
@@ -19742,6 +19830,14 @@
           "match_percent": 61.216217
         },
         {
+          "name": "_ZN12PropertyMenu14ContainsObjectEPv",
+          "demangled_name": "PropertyMenu::ContainsObject(void*)",
+          "address": 5530256,
+          "offset": 4640288,
+          "size": 63,
+          "match_percent": 100.0
+        },
+        {
           "name": "_ZN12PropertyMenu9AddObjectER11ClassObject",
           "demangled_name": "PropertyMenu::AddObject(ClassObject&)",
           "address": 5530320,
@@ -19820,6 +19916,14 @@
           "offset": 4641136,
           "size": 618,
           "match_percent": 2.427746
+        },
+        {
+          "name": "_ZN12PropertyTool14SetMenuControlEP10eduimenu_sP9EdControl",
+          "demangled_name": "PropertyTool::SetMenuControl(eduimenu_s*, EdControl*)",
+          "address": 5532160,
+          "offset": 4642192,
+          "size": 49,
+          "match_percent": 100.0
         },
         {
           "name": "_ZN12PropertyTool12FindItemMenuEP12PropertyMenuP9ClassItem",
@@ -19926,6 +20030,14 @@
           "match_percent": 5.675676
         },
         {
+          "name": "_ZN12PropertyTool13HasActiveMenuEv",
+          "demangled_name": "PropertyTool::HasActiveMenu()",
+          "address": 5534192,
+          "offset": 4644224,
+          "size": 13,
+          "match_percent": 100.0
+        },
+        {
           "name": "_ZN11ClassEditor10InitialiseER9variptr_uS1_i",
           "demangled_name": "ClassEditor::Initialise(variptr_u&, variptr_u&, int)",
           "address": 5536064,
@@ -19980,6 +20092,86 @@
           "offset": 4651744,
           "size": 61,
           "match_percent": 24.705883
+        },
+        {
+          "name": "_ZN7EdClass15SerialiseObjectER8EdStreamPv",
+          "demangled_name": "EdClass::SerialiseObject(EdStream&, void*)",
+          "address": 5542608,
+          "offset": 4652640,
+          "size": 451,
+          "match_percent": 3.664122
+        },
+        {
+          "name": "_ZN7EdClass21SerialiseObjectHeaderER8EdStreamPv",
+          "demangled_name": "EdClass::SerialiseObjectHeader(EdStream&, void*)",
+          "address": 5543472,
+          "offset": 4653504,
+          "size": 78,
+          "match_percent": 17.5
+        },
+        {
+          "name": "_ZN7EdClass10CopyObjectEPvS0_",
+          "demangled_name": "EdClass::CopyObject(void*, void*)",
+          "address": 5543552,
+          "offset": 4653584,
+          "size": 268,
+          "match_percent": 5.6
+        },
+        {
+          "name": "_ZN7EdClass7AddTypeEP5EdRef",
+          "demangled_name": "EdClass::AddType(EdRef*)",
+          "address": 5543824,
+          "offset": 4653856,
+          "size": 149,
+          "match_percent": 9.767442
+        },
+        {
+          "name": "_ZN7EdClass9SerialiseER8EdStreamPi",
+          "demangled_name": "EdClass::Serialise(EdStream&, int*)",
+          "address": 5543984,
+          "offset": 4654016,
+          "size": 1156,
+          "match_percent": 1.292308
+        },
+        {
+          "name": "_ZN7EdClass16GetStreamClassesER8EdStreamPiRii",
+          "demangled_name": "EdClass::GetStreamClasses(EdStream&, int*, int&, int)",
+          "address": 5545936,
+          "offset": 4655968,
+          "size": 241,
+          "match_percent": 5.833334
+        },
+        {
+          "name": "_ZN7EdClass11FindTypeRefEPci",
+          "demangled_name": "EdClass::FindTypeRef(char*, int)",
+          "address": 5547040,
+          "offset": 4657072,
+          "size": 203,
+          "match_percent": 6.666666
+        },
+        {
+          "name": "_ZN7EdClass15SerialiseObjectER8EdStreamPvPS_P10EdRegistry",
+          "demangled_name": "EdClass::SerialiseObject(EdStream&, void*, EdClass*, EdRegistry*)",
+          "address": 5547248,
+          "offset": 4657280,
+          "size": 823,
+          "match_percent": 1.866667
+        },
+        {
+          "name": "_ZN7EdClass11FindTypeRefEii",
+          "demangled_name": "EdClass::FindTypeRef(int, int)",
+          "address": 5548080,
+          "offset": 4658112,
+          "size": 168,
+          "match_percent": 7.0
+        },
+        {
+          "name": "_ZN7EdClass10FindMemberEP8EdMemberPvii",
+          "demangled_name": "EdClass::FindMember(EdMember*, void*, int, int)",
+          "address": 5548816,
+          "offset": 4658848,
+          "size": 220,
+          "match_percent": 5.384615
         },
         {
           "name": "_ZN11ClassObject3SetEPc",
@@ -20262,6 +20454,30 @@
           "match_percent": 2.285714
         },
         {
+          "name": "_ZN7EdClass10FindObjectEPc",
+          "demangled_name": "EdClass::FindObject(char*)",
+          "address": 5568544,
+          "offset": 4678576,
+          "size": 252,
+          "match_percent": 5.526316
+        },
+        {
+          "name": "_ZN14EditorSettingsC1Ev",
+          "demangled_name": "EditorSettings::EditorSettings()",
+          "address": 5571712,
+          "offset": 4681744,
+          "size": 41,
+          "match_percent": 46.666668
+        },
+        {
+          "name": "_ZN14EditorSettingsC2Ev",
+          "demangled_name": "EditorSettings::EditorSettings()",
+          "address": 5571712,
+          "offset": 4681744,
+          "size": 41,
+          "match_percent": 46.666668
+        },
+        {
           "name": "_ZN11LevelEditorC1Ev",
           "demangled_name": "LevelEditor::LevelEditor()",
           "address": 5571760,
@@ -20276,6 +20492,22 @@
           "offset": 4681792,
           "size": 721,
           "match_percent": 3.230769
+        },
+        {
+          "name": "_ZN14EditorSettings12AddMenuItemsEP10eduimenu_s",
+          "demangled_name": "EditorSettings::AddMenuItems(eduimenu_s*)",
+          "address": 5572496,
+          "offset": 4682528,
+          "size": 236,
+          "match_percent": 7.777778
+        },
+        {
+          "name": "_ZN14EditorSettings9SerialiseER8EdStream",
+          "demangled_name": "EditorSettings::Serialise(EdStream&)",
+          "address": 5572992,
+          "offset": 4683024,
+          "size": 95,
+          "match_percent": 18.26087
         },
         {
           "name": "_ZN11LevelEditor11WriteStreamER18EdFileOutputStream",
@@ -20372,117 +20604,6 @@
           "offset": 4721440,
           "size": 246,
           "match_percent": 7.241379
-        }
-      ]
-    },
-    {
-      "name": "editor/edlevelall_stubs.cpp.o",
-      "source": "src/editor/edlevelall_stubs.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_editor/edlevelall_stubs.o",
-      "functions": [
-        {
-          "name": "_ZN10BaseEditor10InitialiseER9variptr_uS1_i",
-          "demangled_name": "BaseEditor::Initialise(variptr_u&, variptr_u&, int)",
-          "address": 5467392,
-          "offset": 4577424,
-          "size": 14,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z23cbEdLevelSetSliderFloatP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbEdLevelSetSliderFloat(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 5468464,
-          "offset": 4578496,
-          "size": 17,
-          "match_percent": 98.0
-        },
-        {
-          "name": "_ZN11ClassEditor12RegisterToolER6EdTool",
-          "demangled_name": "ClassEditor::RegisterTool(EdTool&)",
-          "address": 5486656,
-          "offset": 4596688,
-          "size": 56,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN11ClassEditor13UpdateSnapRayER5VuVec",
-          "demangled_name": "ClassEditor::UpdateSnapRay(VuVec&)",
-          "address": 5487248,
-          "offset": 4597280,
-          "size": 71,
-          "match_percent": 0.0
-        },
-        {
-          "name": "_ZN15ClassObjectList8IsInListE11ClassObject",
-          "demangled_name": "ClassObjectList::IsInList(ClassObject)",
-          "address": 5487584,
-          "offset": 4597616,
-          "size": 52,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN15ClassObjectList8IsInListEP7EdClass",
-          "demangled_name": "ClassObjectList::IsInList(EdClass*)",
-          "address": 5487872,
-          "offset": 4597904,
-          "size": 49,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN11LevelEditor14RegisterEditorER10BaseEditor",
-          "demangled_name": "LevelEditor::RegisterEditor(BaseEditor&)",
-          "address": 5509872,
-          "offset": 4619904,
-          "size": 70,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN11LevelEditor8GetSceneEi",
-          "demangled_name": "LevelEditor::GetScene(int)",
-          "address": 5511344,
-          "offset": 4621376,
-          "size": 35,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z21cbEdLevelSetSliderIntP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbEdLevelSetSliderInt(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 5518688,
-          "offset": 4628720,
-          "size": 15,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN11LevelEditor11SetNextMenuEP10eduimenu_s",
-          "demangled_name": "LevelEditor::SetNextMenu(eduimenu_s*)",
-          "address": 5519680,
-          "offset": 4629712,
-          "size": 24,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN12PropertyMenu14ContainsObjectEPv",
-          "demangled_name": "PropertyMenu::ContainsObject(void*)",
-          "address": 5530256,
-          "offset": 4640288,
-          "size": 63,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN12PropertyTool14SetMenuControlEP10eduimenu_sP9EdControl",
-          "demangled_name": "PropertyTool::SetMenuControl(eduimenu_s*, EdControl*)",
-          "address": 5532160,
-          "offset": 4642192,
-          "size": 49,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN12PropertyTool13HasActiveMenuEv",
-          "demangled_name": "PropertyTool::HasActiveMenu()",
-          "address": 5534192,
-          "offset": 4644224,
-          "size": 13,
-          "match_percent": 100.0
         }
       ]
     },
@@ -25173,6 +25294,14 @@
           "match_percent": 2.933333
         },
         {
+          "name": "edanimRegisterBaseScene",
+          "demangled_name": "edanimRegisterBaseScene",
+          "address": 3517216,
+          "offset": 2627248,
+          "size": 9,
+          "match_percent": 24.444445
+        },
+        {
           "name": "_ZL26edanimcbLocalSoundTypeMenuP10eduimenu_sP10eduiitem_sj",
           "demangled_name": "edanimcbLocalSoundTypeMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
           "address": 3528528,
@@ -25394,6 +25523,14 @@
           "offset": 2649520,
           "size": 422,
           "match_percent": 2.894737
+        },
+        {
+          "name": "edbriLoadPage",
+          "demangled_name": "edbriLoadPage",
+          "address": 3540880,
+          "offset": 2650912,
+          "size": 927,
+          "match_percent": 1.630901
         },
         {
           "name": "_ZL20edbricbSetRopeColourP10eduimenu_sP10eduiitem_sj",
@@ -26159,133 +26296,6 @@
           "offset": 2725568,
           "size": 420,
           "match_percent": 2.78481
-        }
-      ]
-    },
-    {
-      "name": "gameapi/edtools/edlevelall.cpp.o",
-      "source": "src/gameapi/edtools/edlevelall.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_gameapi/edlevelall.o",
-      "functions": [
-        {
-          "name": "_ZN7EdClass15SerialiseObjectER8EdStreamPv",
-          "demangled_name": "EdClass::SerialiseObject(EdStream&, void*)",
-          "address": 5542608,
-          "offset": 4652640,
-          "size": 451,
-          "match_percent": 3.053435
-        },
-        {
-          "name": "_ZN7EdClass21SerialiseObjectHeaderER8EdStreamPv",
-          "demangled_name": "EdClass::SerialiseObjectHeader(EdStream&, void*)",
-          "address": 5543472,
-          "offset": 4653504,
-          "size": 78,
-          "match_percent": 14.166667
-        },
-        {
-          "name": "_ZN7EdClass10CopyObjectEPvS0_",
-          "demangled_name": "EdClass::CopyObject(void*, void*)",
-          "address": 5543552,
-          "offset": 4653584,
-          "size": 268,
-          "match_percent": 4.533333
-        },
-        {
-          "name": "_ZN7EdClass7AddTypeEP5EdRef",
-          "demangled_name": "EdClass::AddType(EdRef*)",
-          "address": 5543824,
-          "offset": 4653856,
-          "size": 149,
-          "match_percent": 5.116279
-        },
-        {
-          "name": "_ZN7EdClass9SerialiseER8EdStreamPi",
-          "demangled_name": "EdClass::Serialise(EdStream&, int*)",
-          "address": 5543984,
-          "offset": 4654016,
-          "size": 1156,
-          "match_percent": 1.230769
-        },
-        {
-          "name": "_ZN7EdClass16GetStreamClassesER8EdStreamPiRii",
-          "demangled_name": "EdClass::GetStreamClasses(EdStream&, int*, int&, int)",
-          "address": 5545936,
-          "offset": 4655968,
-          "size": 241,
-          "match_percent": 4.722222
-        },
-        {
-          "name": "_ZN7EdClass11FindTypeRefEPci",
-          "demangled_name": "EdClass::FindTypeRef(char*, int)",
-          "address": 5547040,
-          "offset": 4657072,
-          "size": 203,
-          "match_percent": 4.722222
-        },
-        {
-          "name": "_ZN7EdClass15SerialiseObjectER8EdStreamPvPS_P10EdRegistry",
-          "demangled_name": "EdClass::SerialiseObject(EdStream&, void*, EdClass*, EdRegistry*)",
-          "address": 5547248,
-          "offset": 4657280,
-          "size": 823,
-          "match_percent": 1.777778
-        },
-        {
-          "name": "_ZN7EdClass11FindTypeRefEii",
-          "demangled_name": "EdClass::FindTypeRef(int, int)",
-          "address": 5548080,
-          "offset": 4658112,
-          "size": 168,
-          "match_percent": 5.5
-        },
-        {
-          "name": "_ZN7EdClass10FindMemberEP8EdMemberPvii",
-          "demangled_name": "EdClass::FindMember(EdMember*, void*, int, int)",
-          "address": 5548816,
-          "offset": 4658848,
-          "size": 220,
-          "match_percent": 4.358975
-        },
-        {
-          "name": "_ZN7EdClass10FindObjectEPc",
-          "demangled_name": "EdClass::FindObject(char*)",
-          "address": 5568544,
-          "offset": 4678576,
-          "size": 252,
-          "match_percent": 5.263158
-        },
-        {
-          "name": "_ZN14EditorSettingsC1Ev",
-          "demangled_name": "EditorSettings::EditorSettings()",
-          "address": 5571712,
-          "offset": 4681744,
-          "size": 41,
-          "match_percent": 8.888889
-        },
-        {
-          "name": "_ZN14EditorSettingsC2Ev",
-          "demangled_name": "EditorSettings::EditorSettings()",
-          "address": 5571712,
-          "offset": 4681744,
-          "size": 41,
-          "match_percent": 8.888889
-        },
-        {
-          "name": "_ZN14EditorSettings12AddMenuItemsEP10eduimenu_s",
-          "demangled_name": "EditorSettings::AddMenuItems(eduimenu_s*)",
-          "address": 5572496,
-          "offset": 4682528,
-          "size": 236,
-          "match_percent": 4.074074
-        },
-        {
-          "name": "_ZN14EditorSettings9SerialiseER8EdStream",
-          "demangled_name": "EditorSettings::Serialise(EdStream&)",
-          "address": 5572992,
-          "offset": 4683024,
-          "size": 95,
-          "match_percent": 9.565217
         }
       ]
     },
@@ -28013,6 +28023,14 @@
           "match_percent": 100.0
         },
         {
+          "name": "edppStartPage",
+          "demangled_name": "edppStartPage",
+          "address": 3592832,
+          "offset": 2702864,
+          "size": 182,
+          "match_percent": 9.056603
+        },
+        {
           "name": "_ZL16edptlcbStartPageP10eduimenu_sP10eduiitem_sj",
           "demangled_name": "edptlcbStartPage(eduimenu_s*, eduiitem_s*, unsigned int)",
           "address": 3593024,
@@ -29596,45 +29614,6 @@
       ]
     },
     {
-      "name": "gameapi/edtools/edstubs.cpp.o",
-      "source": "src/gameapi/edtools/edstubs.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_gameapi/edstubs.o",
-      "functions": [
-        {
-          "name": "edanimRegisterBaseScene",
-          "demangled_name": "edanimRegisterBaseScene",
-          "address": 3517216,
-          "offset": 2627248,
-          "size": 9,
-          "match_percent": 24.444445
-        },
-        {
-          "name": "edbitsRegisterBaseScene",
-          "demangled_name": "edbitsRegisterBaseScene",
-          "address": 3519232,
-          "offset": 2629264,
-          "size": 24,
-          "match_percent": 21.666666
-        },
-        {
-          "name": "edbriLoadPage",
-          "demangled_name": "edbriLoadPage",
-          "address": 3540880,
-          "offset": 2650912,
-          "size": 927,
-          "match_percent": 1.630901
-        },
-        {
-          "name": "edppStartPage",
-          "demangled_name": "edppStartPage",
-          "address": 3592832,
-          "offset": 2702864,
-          "size": 182,
-          "match_percent": 6.415094
-        }
-      ]
-    },
-    {
       "name": "gameapi/edtools/edtoolsall.cpp.o",
       "source": "src/gameapi/edtools/edtoolsall.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_gameapi/edtoolsall.o",
@@ -30584,10 +30563,26 @@
           "match_percent": 100.0
         },
         {
+          "name": "_ZN14EdInputContext10GetReleaseEi",
+          "demangled_name": "EdInputContext::GetRelease(int)",
+          "address": 5488304,
+          "offset": 4598336,
+          "size": 35,
+          "match_percent": 100.0
+        },
+        {
           "name": "_ZN14EdInputContext7GetHoldEi",
           "demangled_name": "EdInputContext::GetHold(int)",
           "address": 5488352,
           "offset": 4598384,
+          "size": 35,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN14EdInputContext9GetRepeatEi",
+          "demangled_name": "EdInputContext::GetRepeat(int)",
+          "address": 5488736,
+          "offset": 4598768,
           "size": 35,
           "match_percent": 100.0
         },
@@ -31000,6 +30995,30 @@
           "match_percent": 4.117647
         },
         {
+          "name": "_Z17eduiSetPinnedMenuP10eduimenu_s",
+          "demangled_name": "eduiSetPinnedMenu(eduimenu_s*)",
+          "address": 5506608,
+          "offset": 4616640,
+          "size": 24,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z16edSetPadDisabledi",
+          "demangled_name": "edSetPadDisabled(int)",
+          "address": 5506800,
+          "offset": 4616832,
+          "size": 24,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z16edGetPadDisabledv",
+          "demangled_name": "edGetPadDisabled()",
+          "address": 5506832,
+          "offset": 4616864,
+          "size": 22,
+          "match_percent": 100.0
+        },
+        {
           "name": "_ZN14EdInputContext6UpdateEP10nucamera_sP7nupad_sfb",
           "demangled_name": "EdInputContext::Update(nucamera_s*, nupad_s*, float, bool)",
           "address": 5506864,
@@ -31184,6 +31203,14 @@
           "match_percent": 5.316456
         },
         {
+          "name": "_ZN10EdRegistry5FlushEv",
+          "demangled_name": "EdRegistry::Flush()",
+          "address": 5535424,
+          "offset": 4645456,
+          "size": 26,
+          "match_percent": 100.0
+        },
+        {
           "name": "_ZN10EdRegistry12RegisterTypeEPciPFvR8EdStreamPviE",
           "demangled_name": "EdRegistry::RegisterType(char*, int, void (*)(EdStream&, void*, int))",
           "address": 5535456,
@@ -31238,6 +31265,14 @@
           "offset": 4646592,
           "size": 115,
           "match_percent": 9.767442
+        },
+        {
+          "name": "_ZN10EdRegistry7GetTypeEi",
+          "demangled_name": "EdRegistry::GetType(int)",
+          "address": 5536688,
+          "offset": 4646720,
+          "size": 35,
+          "match_percent": 100.0
         },
         {
           "name": "_ZN5EdRef9CheckTypeEi",
@@ -31328,12 +31363,28 @@
           "match_percent": 9.767442
         },
         {
+          "name": "_ZN10EdRegistry10GetClassIdEP7EdClass",
+          "demangled_name": "EdRegistry::GetClassId(EdClass*)",
+          "address": 5539120,
+          "offset": 4649152,
+          "size": 21,
+          "match_percent": 100.0
+        },
+        {
           "name": "_ZN10EdRegistry8GetClassEPc",
           "demangled_name": "EdRegistry::GetClass(char*)",
           "address": 5539152,
           "offset": 4649184,
           "size": 115,
           "match_percent": 9.767442
+        },
+        {
+          "name": "_ZN10EdRegistry8GetClassEi",
+          "demangled_name": "EdRegistry::GetClass(int)",
+          "address": 5539280,
+          "offset": 4649312,
+          "size": 35,
+          "match_percent": 100.0
         },
         {
           "name": "_ZN24EdClassObjectNameControl8cbButtonEP10eduimenu_sP10eduiitem_sj",
@@ -32012,6 +32063,14 @@
           "address": 3519168,
           "offset": 2629200,
           "size": 63,
+          "match_percent": 100.0
+        },
+        {
+          "name": "edbitsRegisterBaseScene",
+          "demangled_name": "edbitsRegisterBaseScene",
+          "address": 3519232,
+          "offset": 2629264,
+          "size": 24,
           "match_percent": 100.0
         },
         {
@@ -34236,85 +34295,6 @@
           "address": 4344208,
           "offset": 3454240,
           "size": 352,
-          "match_percent": 100.0
-        }
-      ]
-    },
-    {
-      "name": "gameapi/edtools/edtoolsall_stubs.cpp.o",
-      "source": "src/gameapi/edtools/edtoolsall_stubs.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_gameapi/edtoolsall_stubs.o",
-      "functions": [
-        {
-          "name": "_ZN14EdInputContext10GetReleaseEi",
-          "demangled_name": "EdInputContext::GetRelease(int)",
-          "address": 5488304,
-          "offset": 4598336,
-          "size": 35,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN14EdInputContext9GetRepeatEi",
-          "demangled_name": "EdInputContext::GetRepeat(int)",
-          "address": 5488736,
-          "offset": 4598768,
-          "size": 35,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z17eduiSetPinnedMenuP10eduimenu_s",
-          "demangled_name": "eduiSetPinnedMenu(eduimenu_s*)",
-          "address": 5506608,
-          "offset": 4616640,
-          "size": 24,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z16edSetPadDisabledi",
-          "demangled_name": "edSetPadDisabled(int)",
-          "address": 5506800,
-          "offset": 4616832,
-          "size": 24,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z16edGetPadDisabledv",
-          "demangled_name": "edGetPadDisabled()",
-          "address": 5506832,
-          "offset": 4616864,
-          "size": 22,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN10EdRegistry5FlushEv",
-          "demangled_name": "EdRegistry::Flush()",
-          "address": 5535424,
-          "offset": 4645456,
-          "size": 26,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN10EdRegistry7GetTypeEi",
-          "demangled_name": "EdRegistry::GetType(int)",
-          "address": 5536688,
-          "offset": 4646720,
-          "size": 35,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN10EdRegistry10GetClassIdEP7EdClass",
-          "demangled_name": "EdRegistry::GetClassId(EdClass*)",
-          "address": 5539120,
-          "offset": 4649152,
-          "size": 21,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN10EdRegistry8GetClassEi",
-          "demangled_name": "EdRegistry::GetClass(int)",
-          "address": 5539280,
-          "offset": 4649312,
-          "size": 35,
           "match_percent": 100.0
         }
       ]
@@ -116635,18 +116615,6 @@
       ]
     },
     {
-      "name": "_GLOBAL__sub_I_edlevelall.cpp",
-      "demangled_name": "_GLOBAL__sub_I_edlevelall.cpp",
-      "address": 928992,
-      "offset": 39024,
-      "size": 811,
-      "match_percent": 15.006536,
-      "candidate_units": [
-        "editor/edlevelall.cpp.o",
-        "gameapi/edtools/edlevelall.cpp.o"
-      ]
-    },
-    {
       "name": "_ZN17NuCriticalSectionD1Ev",
       "demangled_name": "NuCriticalSection::~NuCriticalSection()",
       "address": 978256,
@@ -116797,7 +116765,6 @@
         "gameapi/edtools/edanimall.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -116857,7 +116824,6 @@
         "gameapi/edtools/edanimall.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -116917,7 +116883,6 @@
         "gameapi/edtools/edanimall.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -116990,7 +116955,6 @@
         "gameapi/edtools/edanimall.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -117097,7 +117061,6 @@
         "gameapi/edtools/edanimall.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -117170,7 +117133,6 @@
         "gameapi/edtools/edanimall.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -117243,7 +117205,6 @@
         "gameapi/edtools/edanimall.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -117316,7 +117277,6 @@
         "gameapi/edtools/edanimall.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -117389,7 +117349,6 @@
         "gameapi/edtools/edanimall.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -117462,7 +117421,6 @@
         "gameapi/edtools/edanimall.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -117745,7 +117703,6 @@
         "gameapi/edtools/edanimall.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -117818,7 +117775,6 @@
         "gameapi/edtools/edanimall.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -117891,7 +117847,6 @@
         "gameapi/edtools/edanimall.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -118013,7 +117968,6 @@
         "gameapi/edtools/edanimall.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -118098,7 +118052,6 @@
         "gameapi/edtools/edanimall.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -118273,7 +118226,6 @@
         "gameapi/edtools/edanimall.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -118399,7 +118351,6 @@
         "gameapi/edtools/edanimall.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -118525,7 +118476,6 @@
         "gameapi/edtools/edanimall.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -118598,7 +118548,6 @@
         "gameapi/edtools/edanimall.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -118671,7 +118620,6 @@
         "gameapi/edtools/edanimall.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -118744,7 +118692,6 @@
         "gameapi/edtools/edanimall.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -118843,7 +118790,6 @@
         "gameapi/edtools/edanimall.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -118916,7 +118862,6 @@
         "gameapi/edtools/edanimall.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -119000,7 +118945,6 @@
         "gameapi/edtools/edanimall.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -119073,7 +119017,6 @@
         "gameapi/edtools/edanimall.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -119159,7 +119102,6 @@
         "gameapi/edtools/edanimall.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -119232,7 +119174,6 @@
         "gameapi/edtools/edanimall.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -119339,7 +119280,6 @@
         "gameapi/edtools/edanimall.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -119412,7 +119352,6 @@
         "gameapi/edtools/edanimall.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -119485,7 +119424,6 @@
         "gameapi/edtools/edanimall.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -119558,7 +119496,6 @@
         "gameapi/edtools/edanimall.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -119694,7 +119631,6 @@
         "gameapi/edtools/edanimall.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -119767,7 +119703,6 @@
         "gameapi/edtools/edanimall.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -119840,7 +119775,6 @@
         "gameapi/edtools/edanimall.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -120260,7 +120194,6 @@
         "gameapi/edtools/edanimall.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -120437,7 +120370,6 @@
         "gameapi/edtools/edanimall.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -120601,7 +120533,6 @@
         "gameapi/edtools/edanimall.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -121033,7 +120964,6 @@
         "gameapi/edtools/edanimall.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -121106,7 +121036,6 @@
         "gameapi/edtools/edanimall.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -128260,10 +128189,10 @@
     }
   ],
   "summary": {
-    "bazel_units": 466,
+    "bazel_units": 462,
     "functions": 13454,
-    "assigned_functions": 12353,
-    "ambiguous_functions": 212,
+    "assigned_functions": 12354,
+    "ambiguous_functions": 211,
     "unassigned_functions": 889
   }
 }

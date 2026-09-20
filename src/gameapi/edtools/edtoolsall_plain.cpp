@@ -1104,6 +1104,9 @@ extern "C" {
             edbits_datapath[0] = '\0';
         }
     }
+    void edbitsRegisterBaseScene(NUGSCN *scene) {
+        edbits_base_scene = scene;
+    }
     static i32 edbits_local_editor_enabled;
     i32 *edbits_editor_enabled = &edbits_local_editor_enabled;
 

@@ -21,6 +21,18 @@ EdRegistry theRegistry;
 i32 pad_disabled;
 eduimenu_s *edLevelPinnedMenu;
 
+void eduiSetPinnedMenu(eduimenu_s *menu) {
+    edLevelPinnedMenu = menu;
+}
+
+void edSetPadDisabled(i32 disabled) {
+    pad_disabled = disabled;
+}
+
+i32 edGetPadDisabled() {
+    return pad_disabled;
+}
+
 static NUGSPLINE *splineStore;
 static i32 numSplinesLoaded;
 char *EDSPLINE_FILECHECK = const_cast<char *>("EDSPLINE v. ");
@@ -737,12 +749,29 @@ void EdRegistry::DestroyObject(EdClassInterface *, void *, i32, i32) {
     STUBBED();
 }
 
+void EdRegistry::Flush() {
+    type_count = 0;
+    class_count = 0;
+    object_count = 0;
+}
+
 void EdRegistry::GetClass(char *) {
     STUBBED();
 }
 
+EdClass *EdRegistry::GetClass(i32 index) {
+    if (index < 0 || index >= class_count) {
+        return nullptr;
+    }
+    return &classes[index];
+}
+
 void EdRegistry::GetClassId(char *) {
     STUBBED();
+}
+
+i32 EdRegistry::GetClassId(EdClass *object_class) {
+    return object_class - classes;
 }
 
 void EdRegistry::GetStreamClassMapping(EdStream &, i32 *, i32 &, i32) {
@@ -751,6 +780,13 @@ void EdRegistry::GetStreamClassMapping(EdStream &, i32 *, i32 &, i32) {
 
 void EdRegistry::GetType(char *) {
     STUBBED();
+}
+
+EdType *EdRegistry::GetType(i32 index) {
+    if (index < 0 || index >= type_count) {
+        return nullptr;
+    }
+    return &types[index];
 }
 
 void EdRegistry::GetTypeId(char *) {
@@ -944,6 +980,20 @@ f32 EdInputContext::GetHold(i32 input) {
 
 f32 EdInputContext::GetPress(i32 input) {
     if (static_cast<u32>(input) < 40 && pressed[input] != 0) {
+        return values[input];
+    }
+    return 0.0f;
+}
+
+f32 EdInputContext::GetRelease(i32 input) {
+    if (static_cast<u32>(input) < 40 && released[input] != 0) {
+        return values[input];
+    }
+    return 0.0f;
+}
+
+f32 EdInputContext::GetRepeat(i32 input) {
+    if (static_cast<u32>(input) < 40 && repeated[input] != 0) {
         return values[input];
     }
     return 0.0f;
