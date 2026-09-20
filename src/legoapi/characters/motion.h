@@ -104,6 +104,7 @@ extern "C" {
 #endif
 float SeekLinearF(float current, float target, float step);
 float SeekValF(float current, float target, float step);
+i32 LightSabre_ColourFromObj(i32 object_id, i32 *blade_object_id);
 i32 RotDiff(u16 current, u16 target);
 i32 ObjLandReady(GameObject_s *object);
 i32 objInNetWaitContext(GameObject_s *object, i32 context);

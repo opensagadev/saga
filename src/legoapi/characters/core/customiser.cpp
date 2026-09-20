@@ -19,17 +19,6 @@
 #include "nu2api/nuplatform/nuplatform.h"
 #include <string.h>
 
-struct CUSTOMPIECERESOURCE {
-    NUGSCN *scene;
-    nuhspecial_s special;
-    i32 original_texture_id;
-    union {
-        i32 texture_id;
-        void *model;
-    };
-    i32 material_index;
-    CHARACTERMODEL_s *character_model;
-};
 DECOMP_ASSERT(sizeof(CUSTOMPIECERESOURCE) == 0x20, "CUSTOMPIECERESOURCE size");
 DECOMP_ASSERT(offsetof(CUSTOMPIECERESOURCE, texture_id) == 0x14, "Customiser texture offset");
 DECOMP_ASSERT(offsetof(CUSTOMPIECERESOURCE, character_model) == 0x1c, "Customiser model offset");

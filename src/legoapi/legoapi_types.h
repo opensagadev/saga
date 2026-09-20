@@ -797,11 +797,14 @@ struct CUSTOMISER {
     CUSTOMISESAVE_s *save;             // 0x174
     ANIMPACKET_s animation_packets[2]; // 0x178
     i32 model_texture_ids[18];         // 0x208
-    u8 pad_0x250[0xa68 - 0x250];
+    u8 pad_0x250[0x25c - 0x250];
+    i8 layer_indices[9]; // 0x25c; hierarchy layers shared by both preview characters
+    u8 pad_0x265[0x268 - 0x265];
+    NUMTX joint_matrices[2][16]; // 0x268
     u16 *animation_ids_to_load; // 0xa68; 0xffff-terminated allow-list
     u8 animation_active[2];     // 0xa6c
     u8 animation_state[2];      // 0xa6e
-    i32 animation_values[2];    // 0xa70
+    f32 animation_values[2];    // 0xa70
     u8 pad_0xa78[0xc28 - 0xa78];
     i16 default_pieces[2][10]; // 0xc28; nine saved pieces plus one unused entry per character
 };
@@ -847,7 +850,13 @@ struct CUSTOMPIECE {
     char *name;
     i16 character_id;
     i16 icon_character_id;
-    u8 unknown_08[0xa];
+    union {
+        u8 unknown_08[0xa];
+        struct {
+            i16 weapon_model;
+            u8 reserved_0a[0x8];
+        };
+    };
     union {
         struct {
             u8 layer_flags;
@@ -855,10 +864,24 @@ struct CUSTOMPIECE {
         };
         u16 availability_flags;
     }; // 0x12
-    u8 unknown_14[0x14];
+    u32 model_flags;    // 0x14, merged into CHARACTERDATA::model_flags
+    u32 gameplay_flags; // 0x18, merged into GAMECHARACTERDATA::flags_090
+    u8 unknown_1c[0x0c];
 };
 DECOMP_ASSERT(sizeof(CUSTOMPIECE) == 0x28, "CUSTOMPIECE size");
 DECOMP_ASSERT(offsetof(CUSTOMPIECE, layer_flags) == 0x12, "CUSTOMPIECE layer flags offset");
+struct CUSTOMPIECERESOURCE {
+    NUGSCN *scene;
+    nuhspecial_s special;
+    i32 original_texture_id;
+    union {
+        i32 texture_id;
+        void *model;
+    };
+    i32 material_index;
+    CHARACTERMODEL_s *character_model;
+};
+DECOMP_ASSERT(sizeof(CUSTOMPIECERESOURCE) == 0x20, "CUSTOMPIECERESOURCE size");
 DECOMP_ASSERT(offsetof(CUSTOMISESAVE_s, secondary_pieces) == 0x38, "CUSTOMISESAVE secondary pieces offset");
 struct CUTSCENESFX {
     i16 id;
