@@ -7,6 +7,9 @@
 extern "C" {
     extern char edgra_filter_string[16];
     extern i32 edgra_ind_clumps_used;
+    extern i32 edgra_last_clump_in_buffer;
+    extern f32 edgra_global_fadein;
+    extern f32 edgra_global_fadeout;
     extern i32 *IndGrassClumpsUsed;
     extern edgra_individual_s *IndGrassClumps;
     extern edgra_clump_s *GrassClumps;
@@ -61,3 +64,5 @@ extern "C" {
     extern eduimenu_s *edgra_options_menu;
     extern eduimenu_s *edgra_active_menu;
 }
+
+void edgraDetermineNearestClump(f32 distance);
