@@ -8,6 +8,7 @@
 #include "legoapi/characters/motion/gameanim.h"
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/core/input/gamepads.h"
+#include "legoapi/gizmos/door/push.h"
 #include "legoapi/legoapi_types.h"
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numath/nuvec.h"
@@ -118,14 +119,6 @@ f32 ForceTowardsMid(GameObject_s *object) {
     }
     return amount;
 }
-
-struct PUSHPROGRESS {
-    u32 visible_mask;
-    u32 state_mask;
-    u32 position_mask;
-    NUVEC positions[16];
-    NUVEC end_positions[2][16];
-};
 
 void ResetPushProgress(WORLDINFO_s *world, void *progress_data) {
     if (world == NULL || world->push_blocks == NULL || world->push_block_count <= 0) {

@@ -18,13 +18,6 @@
 #include <math.h>
 #include <string.h>
 
-struct PUSHPROGRESS {
-    u32 visible_mask;
-    u32 state_mask;
-    u32 position_mask;
-    NUVEC positions[16];
-    NUVEC end_positions[2][16];
-};
 DECOMP_ASSERT(sizeof(PUSHPROGRESS) == 0x24c, "push-block progress size");
 
 enum PUSHBLOCK_CONFIG_FLAGS {
