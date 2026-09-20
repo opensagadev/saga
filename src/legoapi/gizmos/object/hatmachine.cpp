@@ -6,7 +6,9 @@
 #include "globals.h"
 #include "legoapi/audio/sfx.h"
 #include "legoapi/characters/motion/gameanim.h"
+#include "legoapi/characters/motion.h"
 #include "legoapi/core/input/qrand.h"
+#include "legoapi/core/input/gamepads.h"
 #include "legoapi/gizmo/base/HatMachineObjectInterface.h"
 #include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/misc/utilities.h"
@@ -14,6 +16,7 @@
 #include "legoapi/render/light/shadow.h"
 #include "legoapi/world/level.h"
 #include "legoapi/world/world.h"
+#include "legoapi/menus/core/gamehint.h"
 #include "nu2api/nucore/nuanim3.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nu3d/nurndr.h"
@@ -28,6 +31,13 @@
 #include <string.h>
 
 static const NUVEC HatMachine_HatOffset = {0.0f, 0.3f, 0.0f};
+
+extern u8 show_hatmachine_hint;
+extern "C" i16 id_PRINCESSLEIABOUSHH;
+void LoseHelmet(GameObject_s *, i32, i32);
+void FastWeaponIn(GameObject_s *, i32);
+void AlertSurroundingCreatures(GameObject_s *, NUVEC *);
+void MakeBaddiesForgetAboutParty(i32);
 
 enum HATMACHINE_ANIMATION_STATE {
     HATMACHINE_ANIMATION_IDLE = 0,
@@ -669,6 +679,170 @@ ADDGIZMOTYPE *HatMachine_RegisterGizmo(i32 type_id) {
     return &addtype;
 }
 
-void HatMachine_MoveCode(WORLDINFO_s *, GameObject_s *, i32) {
-    STUBBED();
+void HatMachine_MoveCode(WORLDINFO_s *world, GameObject_s *object, i32 special_pressed) {
+    HATMACHINE_s *machine = static_cast<HATMACHINE_s *>(object->field_0x788);
+    if (object->field_0xdb0 > 0.0f) {
+        object->field_0xdb0 -= FRAMETIME;
+    }
+
+    if (object->character_context != 0x61 || machine == NULL) {
+        if (object->apiobj.character_model->model_data_b[0x5d] == NULL || object->apiobj.field_0x27d == 0 ||
+            ObjLandReady(object) == 0) {
+            return;
+        }
+
+        f32 distance;
+        machine = HatMachine_FindNearest(world, &object->apiobj.collision_position, object, &distance);
+        if (machine == NULL) {
+            return;
+        }
+        if (object == player) {
+            show_hatmachine_hint = 0;
+            if (distance < 1.0f) {
+                show_hatmachine_hint = machine->current_hat;
+            }
+        }
+
+        if (distance < (0.25f + object->apiobj.field_0x1dc) * machine->scale &&
+            (special_pressed != 0 || (object->panel_use_request == 2 && object->big_jump_data != NULL))) {
+            object->field_0x788 = machine;
+            object->field_0x768 = 0.0f;
+            object->delayed_turn_timer = 0.0f;
+            object->apiobj.movement_facing_angle = machine->yaw;
+            object->field_0xe21 &= ~0x10;
+            object->character_context = 0x61;
+            object->field_0x7a3 = 0;
+            FastWeaponIn(object, 0);
+            object->movement_runtime_flags |= 2;
+            object->context_animation = 0x5d;
+            machine->animation_duration = 3.0f;
+            machine->animation_state = 1;
+            const f32 end_frame = AnimListFrame(object->apiobj.character_model, object->context_animation, 0);
+            machine->blink_timer = 0.0f;
+            machine->flags = static_cast<HATMACHINE_FLAGS>(machine->flags | HATMACHINE_FLAG_ANIMATING);
+            machine->state_elapsed = -end_frame;
+            machine->animation_duration += end_frame;
+            LoseHelmet(object, 0, 0);
+            NewRumble(object->pad_gamepad->pad, 0.5f, 0);
+            if (object->apiobj.anim_packet.blending != 0) {
+                ResetAnimPacket(&object->apiobj.anim_packet, -1);
+            }
+            AlertSurroundingCreatures(object, &object->apiobj.collision_position);
+            object->context_animation_timer =
+                AnimDuration(object->id, object->context_animation, 0.0f, 0.0f, 1);
+            machine->animation_duration = object->context_animation_timer;
+            if (object->context_animation_timer <= 0.0f) {
+                object->context_animation_timer = 2.0f;
+            }
+            object->field_0xdb0 = 0.0f;
+            return;
+        }
+
+        if (static_cast<i8>(object->apiobj.flags_low) < 0 &&
+            (object->apiobj.character_data->model_flags & 0x20) != 0 && object->field_0xdb0 <= 0.0f) {
+            PlaySfx(const_cast<char *>("TC14_VLN"), &object->apiobj.collision_position);
+            object->field_0xdb0 = 0.5f;
+        }
+        return;
+    }
+
+    if (object->apiobj.character_model->model_data_b[object->context_animation] == NULL ||
+        AnimPlaying(&object->apiobj.anim_packet, object->context_animation, 1, 0) != NULL) {
+        object->field_0x768 = MIN(object->field_0x768 + FRAMETIME, 1.0f);
+        object->context_animation_timer -= FRAMETIME;
+
+        if (object->field_0x7a3 == 1) {
+            if (machine->animation_state != 4) {
+                return;
+            }
+            if ((object->apiobj.character_data->game_character->flags_090 & 0x10) == 0 &&
+                (object->id != id_PRINCESSLEIABOUSHH || FreePlay == 0)) {
+                PlaySfx(const_cast<char *>("HatOn"), &object->apiobj.upper_position);
+                object->field_0x108e = machine->current_hat;
+                if (object->field_0x108e == 5) {
+                    MakeBaddiesForgetAboutParty(1);
+                }
+                if (static_cast<i8>(object->apiobj.flags_low) < 0) {
+                    if (machine->current_hat == 5) {
+                        Hint_SetComplete(0x627);
+                    } else if (machine->current_hat == 6) {
+                        Hint_SetComplete(0x628);
+                    }
+                }
+            }
+            machine->current_hat = 0;
+            object->field_0x7a3 = 2;
+            machine->animation_state = 6;
+        } else if (object->field_0x7a3 == 0) {
+            if (object->context_animation_timer > 0.0f) {
+                return;
+            }
+            const bool disguise_blocked =
+                (object->apiobj.character_data->game_character->flags_090 & 0x10) == 0 &&
+                (object->id != id_PRINCESSLEIABOUSHH || FreePlay == 0);
+            if (object->apiobj.character_model->model_data_b[0x6d] == NULL || disguise_blocked) {
+                if (object->apiobj.character_model->model_data_b[0x5e] == NULL) {
+                    if (machine->animation_state != 2) {
+                        return;
+                    }
+                    object->context_animation = 1;
+                    object->field_0x7a3 = 1;
+                    machine->animation_duration = 0.2f;
+                    return;
+                }
+                if (machine->animation_state == 2) {
+                    object->context_animation = 0x5e;
+                    object->field_0x7a3 = 1;
+                    object->context_animation_timer = AnimDuration(object->id, 0x5e, 0.0f, 0.0f, 1);
+                    return;
+                }
+            } else if (machine->animation_state == 2) {
+                object->context_animation = 0x6d;
+                object->field_0x7a3 = 1;
+                object->context_animation_timer = AnimDuration(object->id, 0x6d, 0.0f, 0.0f, 1);
+                machine->animation_duration = object->context_animation_timer * 0.35f;
+                return;
+            }
+            object->context_animation = 1;
+            return;
+        } else if (object->field_0x7a3 != 2) {
+            return;
+        }
+
+        if (object->context_animation_timer > 0.0f) {
+            return;
+        }
+        object->character_context = -1;
+        object->context_animation_timer = 0.0f;
+        machine = static_cast<HATMACHINE_s *>(object->field_0x788);
+        if (machine == NULL) {
+            return;
+        }
+        if (machine->configured_hat == 6) {
+            PlaySfx(const_cast<char *>("Hunter_Granted"), &object->apiobj.collision_position);
+        }
+        if (machine->configured_hat == 5) {
+            PlaySfx(const_cast<char *>("Trooper_Granted"), &object->apiobj.collision_position);
+        }
+    } else {
+        object->context_animation_timer -= FRAMETIME;
+        if (object->context_animation_timer > 0.0f) {
+            return;
+        }
+        machine = static_cast<HATMACHINE_s *>(object->field_0x788);
+        if (machine == NULL) {
+            NewRumble(object->pad_gamepad->pad, 0.5f, 0);
+        } else {
+            NewBuzz(object->pad_gamepad->pad, 0.1f, 0);
+            machine->hat_delay = 0.6f;
+            if (machine->configured_hat == 6) {
+                PlaySfx(const_cast<char *>("Hunter_Granted"), &object->apiobj.collision_position);
+            }
+            if (machine->configured_hat == 5) {
+                PlaySfx(const_cast<char *>("Trooper_Granted"), &object->apiobj.collision_position);
+            }
+        }
+        object->character_context = -1;
+    }
+    object->field_0x788 = NULL;
 }
