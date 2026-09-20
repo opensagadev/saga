@@ -937,7 +937,45 @@ void NuMemoryManager::ValidateBlockEndTags(Header *header, const char *caller) {
 }
 
 void NuMemoryManager::ValidateBlockFlags(Header *header, u32 flags, const char *caller) {
-    STUBBED();
+    if ((m_flags & MEM_MANAGER_DEBUG) == 0)
+        return;
+
+    DebugHeader *debug_header = reinterpret_cast<DebugHeader *>(header);
+    const u32 requested_flags = flags & 0xe;
+    const u32 allocated_flags = debug_header->flags.alloc_flags & 0xe;
+    if (requested_flags == allocated_flags)
+        return;
+
+    char address[19];
+    char requested[64] = "";
+    char allocated[64] = "";
+    u8 *data = reinterpret_cast<u8 *>(header) + m_headerSize;
+    const u32 block_size = BLOCK_SIZE(header->value);
+    NuStrFormatAddress(address, sizeof(address), data);
+
+    if ((requested_flags & MEM_ALLOC_ARRAY) != 0)
+        strcat(requested, "[ARRAY]");
+    if ((requested_flags & MEM_ALLOC_UNKNOWN_4) != 0)
+        strcat(requested, "[STRING]");
+    if ((requested_flags & 8) != 0)
+        strcat(requested, "[CONST]");
+
+    if ((allocated_flags & MEM_ALLOC_ARRAY) != 0)
+        strcat(allocated, "[ARRAY]");
+    if ((allocated_flags & MEM_ALLOC_UNKNOWN_4) != 0)
+        strcat(allocated, "[STRING]");
+    if ((allocated_flags & 8) != 0)
+        strcat(allocated, "[CONST]");
+
+    pthread_mutex_lock(&this->error_mutex);
+    m_flags |= MEM_MANAGER_IN_ERROR_STATE;
+    snprintf(this->error_msg, sizeof(this->error_msg),
+             "Mismatching alloc flags detected in %s\n(%s != %s)\nAllocation: %s, Size: %u\nBlockSize: "
+             "%u\n[%02X %02X %02X %02X %02X %02X %02X %02X ...]\n",
+             caller, requested, allocated, address, block_size - m_headerSize - 4, block_size, data[0], data[1],
+             data[2], data[3], data[4], data[5], data[6], data[7]);
+    this->error_handler->HandleError(this, MEM_ERROR_ALLOC_FLAG_MISMATCH, this->error_msg);
+    pthread_mutex_unlock(&this->error_mutex);
 }
 
 void NuMemoryManager::ValidateBlockIsAllocated(Header *header, const char *caller) {
