@@ -21,6 +21,7 @@
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/nucore/nuvuvec.hpp"
 #include "legoapi/render/core/terrain.h"
+#include "legoapi/world/world.h"
 
 f32 GameShadow(GameObject_s *, NUVEC *, f32, i32);
 i32 SuperWeirdo(GameObject_s *);
@@ -277,8 +278,55 @@ void TouchHacks::CheckJumpForLandingSpot(GameObject_s &, float) {
     STUBBED();
 }
 
-void TouchHacks::CleanupAllMechObjectInterfaces(WORLDINFO_s *) {
-    STUBBED();
+void TouchHacks::CleanupAllMechObjectInterfaces(WORLDINFO_s *world) {
+    if (world == NULL) {
+        return;
+    }
+
+    for (i32 i = 0; i < world->gizmo_blowup_count; ++i) {
+        world->gizmo_blowups[i].ClearMechObjectInterface();
+    }
+    if (world->giz_buildit_sys != NULL) {
+        for (i32 i = 0; i < world->giz_buildit_sys->count; ++i) {
+            world->giz_buildit_sys->buildits[i].ClearMechObjectInterface();
+        }
+    }
+    for (i32 i = 0; i < world->nlevers; ++i) {
+        world->levers[i].ClearMechObjectInterface();
+    }
+    if (world->hat_machine_sys != NULL) {
+        for (i32 i = 0; i < world->hat_machine_sys->count; ++i) {
+            world->hat_machine_sys->machines[i].ClearMechObjectInterface();
+        }
+    }
+    for (i32 i = 0; i < world->teleport_count; ++i) {
+        world->teleports[i].ClearMechObjectInterface();
+    }
+    if (world->giz_panel_sys != NULL) {
+        for (i32 i = 0; i < world->giz_panel_sys->count; ++i) {
+            world->giz_panel_sys->panels[i].ClearMechObjectInterface();
+        }
+    }
+    if (world->giz_turret_sys != NULL) {
+        for (i32 i = 0; i < world->giz_turret_sys->count; ++i) {
+            world->giz_turret_sys->turrets[i].ClearMechObjectInterface();
+        }
+    }
+    if (WORLD != NULL && WORLD->giz_obstacle_sys != NULL) {
+        for (i32 i = 0; i < WORLD->giz_obstacle_sys->count; ++i) {
+            WORLD->giz_obstacle_sys->obstacles[i].ClearMechObjectInterface();
+        }
+    }
+    if (world->giz_force_sys != NULL) {
+        for (i32 i = 0; i < world->giz_force_sys->count; ++i) {
+            world->giz_force_sys->forces[i].ClearMechObjectInterface();
+        }
+    }
+    if (Part != NULL) {
+        for (i32 i = 0; i < MAXPARTS; ++i) {
+            Part[i].ClearMechObjectInterface();
+        }
+    }
 }
 
 MechObjectInterface *TouchHacks::FindBombTarget(GameObject_s &object) {

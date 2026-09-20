@@ -1,7 +1,9 @@
 #include "decomp.h"
+#include "gameapi/gui/apimenu.h"
 #include "globals.h"
 #include "legoapi/characters/core/character.h"
 #include "legoapi/world/levels/levels.h"
+#include "legoapi/world/area.h"
 #include "legoapi/gizmo/base/TeleportObjectInterface.h"
 #include "nu2api/nu3d/nuspline.h"
 #include "legoapi/gizmos/object/gizpanel.h"
@@ -10,6 +12,7 @@
 #include "gamelib/util/gamelib_util_types.h"
 #include "legoapi/gizmo/base/GizForceObjectInterface.h"
 #include "legoapi/items/base/apiobject.h"
+#include "legoapi/core/input/gamepads.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/world/world.h"
 #include "nu2api/nu3d/nucamera.h"
@@ -25,6 +28,7 @@ extern "C" void NewRayCastGetImpactNormal(NUVEC *);
 f32 CalcCapsuleIntersectDistance(VuVec const &, VuVec const &, f32, VuVec const &, f32);
 void PerformPauseButtonStuff();
 extern NuVirtualTouchDevice *inputTouchDevice;
+extern i32 players_cannot_exit_speeder;
 
 i32 MechInputTouchSystem::s_baseControlMode = 1;
 i32 MechInputTouchSystem::s_actualTouchMode = 2;
@@ -72,8 +76,40 @@ void MechInputTouchSystem::AddChangeLayoutButtons(NuVirtualTouchDevice &, i32) {
     STUBBED();
 }
 
-void MechInputTouchSystem::ChooseTouchLayout(bool) {
-    STUBBED();
+i32 MechInputTouchSystem::ChooseTouchLayout(bool paused) {
+    i32 layout = control_mode;
+    s_baseControlMode = layout != 1;
+
+    const i32 menu_id = GetMenuID();
+    const bool in_gameplay = menu_id == 0x19 || (!paused && menu_id == -1);
+    if (Controller_IsConnected() != 0) {
+        s_baseControlMode = 0;
+        layout = 7;
+        TouchHacks::TouchControlsActive = false;
+    } else if (in_gameplay && layout != 2) {
+        TouchHacks::TouchControlsActive = layout != 7 && layout != 1;
+    } else if (WORLD != NULL && (WORLD->area == PODRACE_ADATA || WORLD->area == PODSPRINT_ADATA)) {
+        layout = 3;
+        TouchHacks::TouchControlsActive = true;
+    } else if (WORLD != NULL && WORLD->area == BONUS_GUNSHIP_ADATA) {
+        layout = 4;
+        TouchHacks::TouchControlsActive = true;
+    } else if (WORLD != NULL && WORLD->current_level == DEATHSTARRESCUEE_LDATA && Player[0] != NULL &&
+               Player[0]->id == id_GRABCONTROL) {
+        layout = 5;
+        TouchHacks::TouchControlsActive = true;
+    } else if (WORLD != NULL && WORLD->current_level == SPEEDERCHASEA_LDATA &&
+               players_cannot_exit_speeder != 0 && Player[0] != NULL &&
+               (Player[0]->id == id_SPEEDERBIKE || Player[0]->id == id_SPEEDERBIKESNOW)) {
+        layout = 6;
+        TouchHacks::TouchControlsActive = true;
+    } else {
+        layout = 2;
+        TouchHacks::TouchControlsActive = true;
+    }
+
+    s_actualTouchMode = layout;
+    return layout;
 }
 
 void MechInputTouchSystem::ConvertToScreenCoords(float x, float y, float &screen_x, float &screen_y) {
@@ -549,8 +585,15 @@ MechInputTouchSystem::MechInputTouchSystem() {
     }
 }
 
-void MechInputTouchSystem::ProcessEvenWhenPaused(ThingProcessData *) {
-    STUBBED();
+void MechInputTouchSystem::ProcessEvenWhenPaused(ThingProcessData *data) {
+    if (inputTouchDevice == NULL) {
+        return;
+    }
+    const i32 layout = ChooseTouchLayout(data != NULL && data->paused != 0);
+    if (inputTouchDevice->GetCurrentLayoutIndex() != static_cast<u32>(layout)) {
+        ResetAllOwners();
+        inputTouchDevice->SetCurrentLayoutIndex(layout);
+    }
 }
 
 void MechInputTouchSystem::ResetAllOwners() {

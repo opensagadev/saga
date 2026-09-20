@@ -461,7 +461,7 @@ struct MechInputTouchSystem {
     }
     virtual char const *GetName();
     void AddChangeLayoutButtons(NuVirtualTouchDevice &, i32);
-    void ChooseTouchLayout(bool);
+    i32 ChooseTouchLayout(bool);
     static void ConvertToScreenCoords(float, float, float &, float &);
     bool CouldTouchBeLockedBy(u32, MechInputTouchButton *);
     void CreateGamePanels();
@@ -502,7 +502,7 @@ struct MechInputTouchVirtualConsoleController {
 
     void Activate();
     void Deactivate();
-    void LoadPerm();
+    static void LoadPerm();
     MechInputTouchVirtualConsoleController(i32);
     void OnDown(GameObject_s &, TouchHolder &);
     void OnRelease(GameObject_s &, TouchHolder &);
@@ -823,7 +823,9 @@ struct MechSystems : BaseThing {
     union {
         u32 unknown_0x10[6];
         struct {
-            u32 reserved_10[3];
+            struct numtl_s *location_ping_material;
+            struct numtl_s *swipe_material;
+            struct numtl_s *tag_hold_background_material;
             struct numtl_s *radar_pulse_material;
             MechInputTouchGestureBasedController *gesture_controller;
             MechInputTouchMenuController *menu_controller;
