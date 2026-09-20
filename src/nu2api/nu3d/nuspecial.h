@@ -88,11 +88,12 @@ extern "C" {
     i32 NuSpecialGetNumSpecials(NUGSCN *scene);
     i32 NuSpecialGetFirst(NUGSCN *scene, nuhspecial_s *special, i32 flags);
     void NuSpecialGetNext(nuhspecial_s *special);
+    void NuSpecialList(void);
     i32 NuSpecialFind(NUGSCN *scene, nuhspecial_s *dest, char *name, i32 flags);
     i32 NuSpecialFindMulti(NUGSCN *scene, nuhspecial_s *dest, char *name, i32 capacity, i32 flags);
+    void NuSpecialFindMultiWC(void);
     i32 NuSpecialCompare(nuhspecial_s *first, nuhspecial_s *second);
     i32 NuSpecialExistsFn(void *special);
-    i32 NuSpecialGetOnScreenFn(nuhspecial_s *special);
     void NuSpecialClear(void *special);
     void NuSpecialGetBounds(void *special, NUVEC *minimum, NUVEC *maximum);
     void NuSpecialSetBounds(nuhspecial_s *special, NUVEC *minimum, NUVEC *maximum);
@@ -134,6 +135,19 @@ extern "C" {
     void NuSpecialConstTint(i32 enabled, NUVEC *tint);
     float NuSpecialGetOriginRadius(void *special);
     i32 NuSpecialDrawAtAlpha(void *special, NUMTX *mtx, f32 alpha);
+    void NuSpecialVertexStates(NUSPECIALVERTEXSTATES *states);
+    void NuSpecialVertexOffsets(i32 count, VARIPTR offsets);
+    void NuSpecialSetRenderPlane(void);
+    void NuSpecialSetAlphaTest(void);
+    void NuSpecialAddShadowLight(void);
+    void NuSpecialClearShadowLights(void);
+    i32 NuSpecialGetActiveShadowLights(void);
+    i32 NuSpecialHasActiveShadowLights(void);
+    void *NuSpecialGetShadowLight(i32 index);
+    i32 NuSpecialClipTestShadowLights(NUVEC *minimum, NUVEC *maximum, i32 flags);
+    i32 NuSpecialHaveShadowClipTestResults(void);
+    i32 NuSpecialGetShadowClipTestResult(i32 index);
+    void NuSpecialClearShadowClipTestResults(void);
 }
 
 #endif

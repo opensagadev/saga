@@ -335,12 +335,6 @@ namespace {
         u32 pad_cc;
     };
 
-    struct NuLegacySpecialLayout {
-        u8 pad_00[0x40];
-        void *instance;
-        char *name;
-        u32 flags;
-    };
 } // namespace
 
 DECOMP_ASSERT(sizeof(NuDisplaySpecialLayout) == 0xd0, "display special size");
@@ -774,41 +768,6 @@ extern "C" {
         return object;
     }
 } // extern "C"
-
-i32 NuSpecialFind(NUGSCN *scene, nuhspecial_s *dest, char *name, i32 flags) {
-    (void)flags; // Present in the exported ABI; unused by the original body.
-
-    nuhspecial_s *handle = dest;
-    if (name != NULL && scene != NULL) {
-        NUDLDLISTSCENE *display_scene = reinterpret_cast<NUDLDLISTSCENE *>(scene->display_list);
-        if (display_scene != NULL) {
-            NuDisplaySpecialLayout *special = static_cast<NuDisplaySpecialLayout *>(display_scene->specials);
-            for (i32 i = 0; i < display_scene->nspecials; ++i, ++special) {
-                if (NuStrICmp(name, special->name) == 0) {
-                    handle->scene = scene;
-                    handle->special = NULL;
-                    handle->display_special = reinterpret_cast<NUDISPLAYSPECIAL_s *>(special);
-                    return 1;
-                }
-            }
-        } else {
-            NuLegacySpecialLayout *special = reinterpret_cast<NuLegacySpecialLayout *>(scene->specials);
-            for (i32 i = 0; i < scene->numspecial; ++i, ++special) {
-                if (NuStrICmp(name, special->name) == 0) {
-                    handle->scene = scene;
-                    handle->special = special;
-                    handle->display_special = NULL;
-                    return 1;
-                }
-            }
-        }
-    }
-
-    handle->scene = NULL;
-    handle->special = NULL;
-    handle->display_special = NULL;
-    return 0;
-}
 
 void DrawCables() {
     STUBBED();

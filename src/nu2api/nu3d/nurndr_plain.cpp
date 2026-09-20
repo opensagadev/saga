@@ -1570,23 +1570,3 @@ extern "C" void NuTextureBlendEffect(i32 arg0, i32 arg1, NUVEC4 *parameters) {
     currentScene.texture_blend_enabled = 1;
     currentScene.texture_blend_parameters = *parameters;
 }
-extern "C" NUSPECIALVERTEXSTATES *NuVertexStatesCreate(VARIPTR *buffer, i32 count) {
-    buffer->addr = ALIGN(buffer->addr, 4);
-    NUSPECIALVERTEXSTATES *states = (NUSPECIALVERTEXSTATES *)buffer->void_ptr;
-    buffer->u8_ptr += sizeof(NUSPECIALVERTEXSTATES);
-    states->count = count;
-    states->flags = 0;
-    i32 blocks = count / 16;
-    if (count & 15)
-        ++blocks;
-    states->block_count = blocks;
-    i32 size = blocks * 16;
-    states->values = (i8 *)ALIGN(buffer->addr, 16);
-    buffer->addr = ALIGN(buffer->addr, 16) + size;
-    for (i32 i = 0; i < size; ++i)
-        states->values[i] = 0;
-    return states;
-}
-extern "C" void NuVertexStatesSetGroupState(NUSPECIALVERTEXSTATES *states, i32 group, i32 value) {
-    states->values[group] = value;
-}

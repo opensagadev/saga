@@ -21,6 +21,7 @@
 #include "nu2api/nu3d/nudlist.h"
 #include "nu2api/nu3d/nugscn.h"
 #include "nu2api/nu3d/nurndr.h"
+#include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nuandroid/ios_graphics.h"
 #include "nu2api/nucore/nuapi.h"
 #include "nu2api/nucore/nuthread.h"
@@ -39,12 +40,6 @@ static nurenderscene_s sceneParameters_safe[16];
 static i32 sceneParametersCount_safe;
 static void *dynamicLights_safe[64];
 static i32 dynamicLightsCount_safe;
-
-// Special-vertex offset table copied for the render thread every frame.
-extern "C" {
-    VARIPTR nuspecial_vertex_offsets;
-    i32 nuspecial_vertex_noffsets;
-}
 
 // Game-thread scene-parameter queue (defined in nurndr_plain.cpp).
 extern "C" {

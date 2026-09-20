@@ -322,7 +322,6 @@ extern "C" {
         return packet;
     }
 
-    NUSPECIALVERTEXSTATES *nuspecial_vertex_states;
     void *RndrStateBuildVertexGroupsStates(NURNDRSTATE *) {
         f32 *output;
         i8 *input;

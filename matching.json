@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 46.208878,
+    "fuzzy_match_percent": 46.20892,
     "total_code": "4722419",
-    "matched_code": "402861",
-    "matched_code_percent": 8.530819,
+    "matched_code": "403637",
+    "matched_code_percent": 8.547251,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 4774,
-    "matched_functions_percent": 35.470688,
+    "matched_functions": 4781,
+    "matched_functions_percent": 35.522697,
     "total_units": 1
   },
   "text": {
@@ -72878,7 +72878,7 @@
           "address": 1148576,
           "offset": 258608,
           "size": 1716,
-          "match_percent": 4.303279
+          "match_percent": 4.385246
         },
         {
           "name": "_Z13DrawSaveSlotsP6MENU_sf",
@@ -73113,14 +73113,6 @@
           "match_percent": 2.136499
         },
         {
-          "name": "NuSpecialFind",
-          "demangled_name": "NuSpecialFind",
-          "address": 2916976,
-          "offset": 2027008,
-          "size": 272,
-          "match_percent": 37.78022
-        },
-        {
           "name": "NuGScnUpdate",
           "demangled_name": "NuGScnUpdate",
           "address": 2989136,
@@ -73142,7 +73134,7 @@
           "address": 3033344,
           "offset": 2143376,
           "size": 9601,
-          "match_percent": 55.850754
+          "match_percent": 55.843216
         },
         {
           "name": "NuDisplaySceneRndr",
@@ -73398,7 +73390,7 @@
           "address": 4589216,
           "offset": 3699248,
           "size": 989,
-          "match_percent": 87.86341
+          "match_percent": 87.643906
         },
         {
           "name": "_Z21BackDrop_ResetColoursv",
@@ -73526,7 +73518,7 @@
           "address": 4802480,
           "offset": 3912512,
           "size": 431,
-          "match_percent": 99.85849
+          "match_percent": 100.0
         },
         {
           "name": "_Z24DrawPanel3DObjectNoAlphafffffftttP12nuhspecial_si",
@@ -90717,22 +90709,6 @@
           "match_percent": 10.82906
         },
         {
-          "name": "NuVertexStatesCreate",
-          "demangled_name": "NuVertexStatesCreate",
-          "address": 2921856,
-          "offset": 2031888,
-          "size": 113,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuVertexStatesSetGroupState",
-          "demangled_name": "NuVertexStatesSetGroupState",
-          "address": 2921984,
-          "offset": 2032016,
-          "size": 19,
-          "match_percent": 100.0
-        },
-        {
           "name": "NuRndrBeginScene",
           "demangled_name": "NuRndrBeginScene",
           "address": 2943488,
@@ -91458,12 +91434,68 @@
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nuspecial.o",
       "functions": [
         {
+          "name": "NuSpecialList",
+          "demangled_name": "NuSpecialList",
+          "address": 2916960,
+          "offset": 2026992,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuSpecialFind",
+          "demangled_name": "NuSpecialFind",
+          "address": 2916976,
+          "offset": 2027008,
+          "size": 272,
+          "match_percent": 37.615383
+        },
+        {
+          "name": "NuSpecialFindMultiWC",
+          "demangled_name": "NuSpecialFindMultiWC",
+          "address": 2917248,
+          "offset": 2027280,
+          "size": 460,
+          "match_percent": 3.111111
+        },
+        {
+          "name": "NuSpecialFindMulti",
+          "demangled_name": "NuSpecialFindMulti",
+          "address": 2917712,
+          "offset": 2027744,
+          "size": 341,
+          "match_percent": 4.851485
+        },
+        {
           "name": "NuSpecialTestAnim",
           "demangled_name": "NuSpecialTestAnim",
           "address": 2918064,
           "offset": 2028096,
           "size": 63,
-          "match_percent": 99.28571
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuSpecialGetPos",
+          "demangled_name": "NuSpecialGetPos",
+          "address": 2918128,
+          "offset": 2028160,
+          "size": 26,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuSpecialGetDrawPos",
+          "demangled_name": "NuSpecialGetDrawPos",
+          "address": 2918160,
+          "offset": 2028192,
+          "size": 70,
+          "match_percent": 90.92593
+        },
+        {
+          "name": "NuSpecialGetMtx",
+          "demangled_name": "NuSpecialGetMtx",
+          "address": 2918240,
+          "offset": 2028272,
+          "size": 20,
+          "match_percent": 100.0
         },
         {
           "name": "NuSpecialSetMtx",
@@ -91479,6 +91511,22 @@
           "address": 2918400,
           "offset": 2028432,
           "size": 43,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuSpecialVertexStates",
+          "demangled_name": "NuSpecialVertexStates",
+          "address": 2918448,
+          "offset": 2028480,
+          "size": 39,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuSpecialVertexOffsets",
+          "demangled_name": "NuSpecialVertexOffsets",
+          "address": 2918496,
+          "offset": 2028528,
+          "size": 36,
           "match_percent": 100.0
         },
         {
@@ -91514,6 +91562,22 @@
           "match_percent": 100.0
         },
         {
+          "name": "NuSpecialConstAlpha",
+          "demangled_name": "NuSpecialConstAlpha",
+          "address": 2918800,
+          "offset": 2028832,
+          "size": 87,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuSpecialConstTint",
+          "demangled_name": "NuSpecialConstTint",
+          "address": 2918896,
+          "offset": 2028928,
+          "size": 107,
+          "match_percent": 74.28125
+        },
+        {
           "name": "_Z19NuSpecialReflectioni",
           "demangled_name": "NuSpecialReflection(int)",
           "address": 2919008,
@@ -91543,7 +91607,7 @@
           "address": 2919360,
           "offset": 2029392,
           "size": 59,
-          "match_percent": 99.347824
+          "match_percent": 100.0
         },
         {
           "name": "NuSpecialGetVisibilityFn",
@@ -91567,7 +91631,7 @@
           "address": 2919584,
           "offset": 2029616,
           "size": 59,
-          "match_percent": 99.347824
+          "match_percent": 100.0
         },
         {
           "name": "NuSpecialSetOnScreen",
@@ -91575,7 +91639,7 @@
           "address": 2919648,
           "offset": 2029680,
           "size": 80,
-          "match_percent": 98.965515
+          "match_percent": 100.0
         },
         {
           "name": "NuSpecialGetOnScreenFn",
@@ -91583,7 +91647,15 @@
           "address": 2919728,
           "offset": 2029760,
           "size": 38,
-          "match_percent": 99.0
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuSpecialSetRenderPlane",
+          "demangled_name": "NuSpecialSetRenderPlane",
+          "address": 2919776,
+          "offset": 2029808,
+          "size": 9,
+          "match_percent": 100.0
         },
         {
           "name": "NuSpecialGetNumSpecials",
@@ -91610,6 +91682,86 @@
           "match_percent": 100.0
         },
         {
+          "name": "NuSpecialSetAlphaTest",
+          "demangled_name": "NuSpecialSetAlphaTest",
+          "address": 2919984,
+          "offset": 2030016,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuSpecialGetInstanceix",
+          "demangled_name": "NuSpecialGetInstanceix",
+          "address": 2920000,
+          "offset": 2030032,
+          "size": 79,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuSpecialNumMtls",
+          "demangled_name": "NuSpecialNumMtls",
+          "address": 2920080,
+          "offset": 2030112,
+          "size": 136,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuSpecialGetMtl",
+          "demangled_name": "NuSpecialGetMtl",
+          "address": 2920224,
+          "offset": 2030256,
+          "size": 186,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuSpecialGetBounds",
+          "demangled_name": "NuSpecialGetBounds",
+          "address": 2920416,
+          "offset": 2030448,
+          "size": 149,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuDynamicLightTestShadowExtrusionsSpecial",
+          "demangled_name": "NuDynamicLightTestShadowExtrusionsSpecial",
+          "address": 2920576,
+          "offset": 2030608,
+          "size": 136,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuSpecialSetBounds",
+          "demangled_name": "NuSpecialSetBounds",
+          "address": 2920720,
+          "offset": 2030752,
+          "size": 153,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuSpecialGetRadius",
+          "demangled_name": "NuSpecialGetRadius",
+          "address": 2920880,
+          "offset": 2030912,
+          "size": 110,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuSpecialGetOriginRadius",
+          "demangled_name": "NuSpecialGetOriginRadius",
+          "address": 2920992,
+          "offset": 2031024,
+          "size": 132,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuSpecialGetDrawMtx",
+          "demangled_name": "NuSpecialGetDrawMtx",
+          "address": 2921136,
+          "offset": 2031168,
+          "size": 55,
+          "match_percent": 95.681816
+        },
+        {
           "name": "NuSpecialGetInstanceMtx",
           "demangled_name": "NuSpecialGetInstanceMtx",
           "address": 2921200,
@@ -91623,6 +91775,14 @@
           "address": 2921232,
           "offset": 2031264,
           "size": 123,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuSpecialClipTestExtents",
+          "demangled_name": "NuSpecialClipTestExtents",
+          "address": 2921360,
+          "offset": 2031392,
+          "size": 150,
           "match_percent": 100.0
         },
         {
@@ -91640,6 +91800,118 @@
           "offset": 2031600,
           "size": 207,
           "match_percent": 99.98182
+        },
+        {
+          "name": "NuSpecialCompare",
+          "demangled_name": "NuSpecialCompare",
+          "address": 2921776,
+          "offset": 2031808,
+          "size": 46,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuSpecialClear",
+          "demangled_name": "NuSpecialClear",
+          "address": 2921824,
+          "offset": 2031856,
+          "size": 25,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuVertexStatesCreate",
+          "demangled_name": "NuVertexStatesCreate",
+          "address": 2921856,
+          "offset": 2031888,
+          "size": 113,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuVertexStatesSetGroupState",
+          "demangled_name": "NuVertexStatesSetGroupState",
+          "address": 2921984,
+          "offset": 2032016,
+          "size": 19,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuSpecialSetClipping",
+          "demangled_name": "NuSpecialSetClipping",
+          "address": 2922016,
+          "offset": 2032048,
+          "size": 39,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuSpecialAddShadowLight",
+          "demangled_name": "NuSpecialAddShadowLight",
+          "address": 2922064,
+          "offset": 2032096,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuSpecialClearShadowLights",
+          "demangled_name": "NuSpecialClearShadowLights",
+          "address": 2922080,
+          "offset": 2032112,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuSpecialGetActiveShadowLights",
+          "demangled_name": "NuSpecialGetActiveShadowLights",
+          "address": 2922096,
+          "offset": 2032128,
+          "size": 22,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuSpecialHasActiveShadowLights",
+          "demangled_name": "NuSpecialHasActiveShadowLights",
+          "address": 2922128,
+          "offset": 2032160,
+          "size": 28,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuSpecialGetShadowLight",
+          "demangled_name": "NuSpecialGetShadowLight",
+          "address": 2922160,
+          "offset": 2032192,
+          "size": 25,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuSpecialClipTestShadowLights",
+          "demangled_name": "NuSpecialClipTestShadowLights",
+          "address": 2922192,
+          "offset": 2032224,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuSpecialHaveShadowClipTestResults",
+          "demangled_name": "NuSpecialHaveShadowClipTestResults",
+          "address": 2922208,
+          "offset": 2032240,
+          "size": 22,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuSpecialGetShadowClipTestResult",
+          "demangled_name": "NuSpecialGetShadowClipTestResult",
+          "address": 2922240,
+          "offset": 2032272,
+          "size": 46,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuSpecialClearShadowClipTestResults",
+          "demangled_name": "NuSpecialClearShadowClipTestResults",
+          "address": 2922288,
+          "offset": 2032320,
+          "size": 26,
+          "match_percent": 100.0
         },
         {
           "name": "NuGScnNumSpecials",
@@ -97825,278 +98097,6 @@
           "address": 2916832,
           "offset": 2026864,
           "size": 115,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuSpecialList",
-          "demangled_name": "NuSpecialList",
-          "address": 2916960,
-          "offset": 2026992,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuSpecialFindMultiWC",
-          "demangled_name": "NuSpecialFindMultiWC",
-          "address": 2917248,
-          "offset": 2027280,
-          "size": 460,
-          "match_percent": 3.111111
-        },
-        {
-          "name": "NuSpecialFindMulti",
-          "demangled_name": "NuSpecialFindMulti",
-          "address": 2917712,
-          "offset": 2027744,
-          "size": 341,
-          "match_percent": 4.851485
-        },
-        {
-          "name": "NuSpecialGetPos",
-          "demangled_name": "NuSpecialGetPos",
-          "address": 2918128,
-          "offset": 2028160,
-          "size": 26,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuSpecialGetDrawPos",
-          "demangled_name": "NuSpecialGetDrawPos",
-          "address": 2918160,
-          "offset": 2028192,
-          "size": 70,
-          "match_percent": 90.92593
-        },
-        {
-          "name": "NuSpecialGetMtx",
-          "demangled_name": "NuSpecialGetMtx",
-          "address": 2918240,
-          "offset": 2028272,
-          "size": 20,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuSpecialVertexStates",
-          "demangled_name": "NuSpecialVertexStates",
-          "address": 2918448,
-          "offset": 2028480,
-          "size": 39,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuSpecialVertexOffsets",
-          "demangled_name": "NuSpecialVertexOffsets",
-          "address": 2918496,
-          "offset": 2028528,
-          "size": 36,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuSpecialConstAlpha",
-          "demangled_name": "NuSpecialConstAlpha",
-          "address": 2918800,
-          "offset": 2028832,
-          "size": 87,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuSpecialConstTint",
-          "demangled_name": "NuSpecialConstTint",
-          "address": 2918896,
-          "offset": 2028928,
-          "size": 107,
-          "match_percent": 74.28125
-        },
-        {
-          "name": "NuSpecialSetRenderPlane",
-          "demangled_name": "NuSpecialSetRenderPlane",
-          "address": 2919776,
-          "offset": 2029808,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuSpecialSetAlphaTest",
-          "demangled_name": "NuSpecialSetAlphaTest",
-          "address": 2919984,
-          "offset": 2030016,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuSpecialGetInstanceix",
-          "demangled_name": "NuSpecialGetInstanceix",
-          "address": 2920000,
-          "offset": 2030032,
-          "size": 79,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuSpecialNumMtls",
-          "demangled_name": "NuSpecialNumMtls",
-          "address": 2920080,
-          "offset": 2030112,
-          "size": 136,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuSpecialGetMtl",
-          "demangled_name": "NuSpecialGetMtl",
-          "address": 2920224,
-          "offset": 2030256,
-          "size": 186,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuSpecialGetBounds",
-          "demangled_name": "NuSpecialGetBounds",
-          "address": 2920416,
-          "offset": 2030448,
-          "size": 149,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuDynamicLightTestShadowExtrusionsSpecial",
-          "demangled_name": "NuDynamicLightTestShadowExtrusionsSpecial",
-          "address": 2920576,
-          "offset": 2030608,
-          "size": 136,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuSpecialSetBounds",
-          "demangled_name": "NuSpecialSetBounds",
-          "address": 2920720,
-          "offset": 2030752,
-          "size": 153,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuSpecialGetRadius",
-          "demangled_name": "NuSpecialGetRadius",
-          "address": 2920880,
-          "offset": 2030912,
-          "size": 110,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuSpecialGetOriginRadius",
-          "demangled_name": "NuSpecialGetOriginRadius",
-          "address": 2920992,
-          "offset": 2031024,
-          "size": 132,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuSpecialGetDrawMtx",
-          "demangled_name": "NuSpecialGetDrawMtx",
-          "address": 2921136,
-          "offset": 2031168,
-          "size": 55,
-          "match_percent": 95.681816
-        },
-        {
-          "name": "NuSpecialClipTestExtents",
-          "demangled_name": "NuSpecialClipTestExtents",
-          "address": 2921360,
-          "offset": 2031392,
-          "size": 150,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuSpecialCompare",
-          "demangled_name": "NuSpecialCompare",
-          "address": 2921776,
-          "offset": 2031808,
-          "size": 46,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuSpecialClear",
-          "demangled_name": "NuSpecialClear",
-          "address": 2921824,
-          "offset": 2031856,
-          "size": 25,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuSpecialSetClipping",
-          "demangled_name": "NuSpecialSetClipping",
-          "address": 2922016,
-          "offset": 2032048,
-          "size": 39,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuSpecialAddShadowLight",
-          "demangled_name": "NuSpecialAddShadowLight",
-          "address": 2922064,
-          "offset": 2032096,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuSpecialClearShadowLights",
-          "demangled_name": "NuSpecialClearShadowLights",
-          "address": 2922080,
-          "offset": 2032112,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuSpecialGetActiveShadowLights",
-          "demangled_name": "NuSpecialGetActiveShadowLights",
-          "address": 2922096,
-          "offset": 2032128,
-          "size": 22,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuSpecialHasActiveShadowLights",
-          "demangled_name": "NuSpecialHasActiveShadowLights",
-          "address": 2922128,
-          "offset": 2032160,
-          "size": 28,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuSpecialGetShadowLight",
-          "demangled_name": "NuSpecialGetShadowLight",
-          "address": 2922160,
-          "offset": 2032192,
-          "size": 25,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuSpecialClipTestShadowLights",
-          "demangled_name": "NuSpecialClipTestShadowLights",
-          "address": 2922192,
-          "offset": 2032224,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuSpecialHaveShadowClipTestResults",
-          "demangled_name": "NuSpecialHaveShadowClipTestResults",
-          "address": 2922208,
-          "offset": 2032240,
-          "size": 22,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuSpecialGetShadowClipTestResult",
-          "demangled_name": "NuSpecialGetShadowClipTestResult",
-          "address": 2922240,
-          "offset": 2032272,
-          "size": 46,
-          "match_percent": 98.84615
-        },
-        {
-          "name": "NuSpecialClearShadowClipTestResults",
-          "demangled_name": "NuSpecialClearShadowClipTestResults",
-          "address": 2922288,
-          "offset": 2032320,
-          "size": 26,
           "match_percent": 100.0
         },
         {

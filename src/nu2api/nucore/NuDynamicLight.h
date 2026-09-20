@@ -196,3 +196,4 @@ extern "C" {
 }
 
 extern "C" void NuDynamicLightAddShadowCasterScene(NuDynamicLight *, nugscn_s *);
+extern "C" void NuDynamicLightTestShadowExtrusionsSpecial(NuDynamicLight *, void *, NUMTX *);

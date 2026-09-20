@@ -28,7 +28,6 @@ extern "C" {
 
 void NuErrorPrint(char *);
 void NuDebugMsgPrint(char *);
-extern i32 nuspecial_draw_state;
 extern NUQFNT *system_qfont;
 void NuLgtArcLaserEx(i32 type, NUVEC *start, NUVEC *end, NUVEC *control, f32 width, f32 segment_length, f32 wobble,
                      f32 duration, i32 colour, i32 flags);
@@ -52,6 +51,7 @@ void NuLgtArcLaserEx(i32 type, NUVEC *start, NUVEC *end, NUVEC *control, f32 wid
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nu3d/nurndrstat.h"
 #include "nu2api/nu3d/nuspecial.h"
+#include "nu2api/nu3d/nuspecial_internal.h"
 #include "nu2api/nu3d/nupostresources.h"
 #include "nu2api/nu3d/android/nutimebar_plain.h"
 #include "nu2api/nu3d/nuvport.h"
@@ -79,83 +79,10 @@ extern "C" {
     NUANIMBUFFEVALUATECB AnimBuffEvalCB = NULL;
     void **AnimBuffEvalData = NULL;
     i32 *AnimBuffEvalJoint = NULL;
-    i32 nuspecial_shadowLightCount = 0;
-    i32 nuspecial_shadowLightHaveClipOverrides = 0;
-    void *nuspecial_shadowLight[4];
-    i32 nuspecial_shadowLightClipOverride[4];
     GLuint g_colorRenderbuffer;
     GLuint g_depthRenderbuffer;
     extern i32 g_writingSaveCriticalSection;
 }
-
-extern "C" {
-    i32 nuspecial_clip_state = -1;
-}
-
-namespace {
-    struct NuPlainSpecialHandleLayout {
-        NUGSCN *scene;
-        void *special;
-        void *display_special;
-    };
-
-    struct NuPlainLegacySpecialLayout {
-        u8 pad_00[0x40];
-        u8 *instance;
-        char *name;
-        u32 flags;
-    };
-
-    struct NuPlainDisplaySpecialLayout {
-        NUMTX mtx;
-        NUMTX draw_mtx;
-        NUVEC min;
-        f32 min_w;
-        NUVEC max;
-        f32 max_w;
-        NUVEC center;
-        f32 radius;
-        NUCLIPOBJECT *clip_objects;
-        char *name;
-        u32 flags;
-        f32 *clip_range;
-        i32 instance_ix;
-        nuinstanim_s *instance_animation;
-        i16 wind_speed;
-        i16 wind_scale;
-        u32 pad_cc;
-    };
-
-    struct NuPlainLegacySceneLayout {
-        u8 pad_00[0x18];
-        void **objects;
-        i32 instance_count;
-        u8 *instances;
-    };
-
-    struct NuPlainLegacyInstanceBoundsLayout {
-        u8 pad_00[0x40];
-        i16 object_index;
-    };
-
-    struct NuPlainLegacyMaterialLink {
-        NuPlainLegacyMaterialLink *next;
-        NUMTL *material;
-    };
-
-    struct NuPlainLegacyObjectBoundsLayout {
-        NuPlainLegacyMaterialLink *materials;
-        f32 origin_radius;
-        u8 pad_08[4];
-        NUVEC minimum;
-        NUVEC maximum;
-        NUVEC center;
-        f32 radius;
-        u8 pad_34[4];
-        NuPlainLegacyObjectBoundsLayout *next;
-    };
-
-} // namespace
 
 static i32 clip_special_objects = 1;
 
@@ -165,11 +92,6 @@ NUHGOBJVIDEOMEMFN hgobj_to_video_mem;
 NUHGOBJVIDEOMEMFN video_mem_to_hgobj;
 
 extern "C" {
-    i32 nuspecial_const_tint_enabled;
-    NUCOLOUR3 nuspecial_const_tint = {1.0f, 1.0f, 1.0f};
-    i32 nuspecial_const_alpha_enabled;
-    f32 nuspecial_const_alpha = 1.0f;
-    i32 nuspecial_reflection;
     extern NUGLOBALRNDRSTATE render_state;
     void RndrStateSetConstAlphaTint(i32 alpha_enabled, i32 tint_enabled, f32 alpha, const NUCOLOUR3 *tint, NUMTL *mtl);
 }
@@ -992,8 +914,8 @@ extern "C" {
             return 0;
         }
 
-        NuPlainSpecialHandleLayout *handle = reinterpret_cast<NuPlainSpecialHandleLayout *>(special_handle);
-        NuPlainDisplaySpecialLayout *special = static_cast<NuPlainDisplaySpecialLayout *>(handle->display_special);
+        NuSpecialHandleLayout *handle = reinterpret_cast<NuSpecialHandleLayout *>(special_handle);
+        NuSpecialBoundsDisplayLayout *special = static_cast<NuSpecialBoundsDisplayLayout *>(handle->display_special);
         if (handle->scene == NULL || special == NULL) {
             return 0;
         }
@@ -2811,79 +2733,18 @@ extern "C" {
     void NuPostBloom(i32, const NuBloomParameters *parameters) {
         currentScene.bloom = *parameters;
     }
-    void NuSpecialAddShadowLight(void) {
-        STUBBED();
-    }
     void NuSpecialBurstDrawAt(void) {
         STUBBED();
     }
-    void NuSpecialClear(void *special) {
-        NuPlainSpecialHandleLayout *handle = static_cast<NuPlainSpecialHandleLayout *>(special);
-        handle->scene = NULL;
-        handle->special = NULL;
-        handle->display_special = NULL;
-    }
-    void NuSpecialClearShadowClipTestResults(void) {
-        nuspecial_shadowLightHaveClipOverrides = 0;
-    }
-    void NuSpecialClearShadowLights(void) {
-        STUBBED();
-    }
-    i32 NuSpecialClipTestExtents(void *special, void *matrix_arg) {
-        NUMTX *matrix = static_cast<NUMTX *>(matrix_arg);
-        NuPlainSpecialHandleLayout *handle = static_cast<NuPlainSpecialHandleLayout *>(special);
-        if (handle->special != NULL) {
-            NuPlainLegacySceneLayout *scene = reinterpret_cast<NuPlainLegacySceneLayout *>(handle->scene);
-            NuPlainLegacySpecialLayout *legacy = static_cast<NuPlainLegacySpecialLayout *>(handle->special);
-            NuPlainLegacyInstanceBoundsLayout *instance =
-                reinterpret_cast<NuPlainLegacyInstanceBoundsLayout *>(legacy->instance);
-            NuPlainLegacyObjectBoundsLayout *object =
-                static_cast<NuPlainLegacyObjectBoundsLayout *>(scene->objects[instance->object_index]);
-            return NuCameraClipTestExtents(&object->minimum, &object->maximum, matrix, 0.0f, 0);
-        }
-        NuPlainDisplaySpecialLayout *display = static_cast<NuPlainDisplaySpecialLayout *>(handle->display_special);
-        return NuCameraClipTestExtents(&display->min, &display->max, matrix, 0.0f, 0);
-    }
-    i32 NuSpecialClipTestShadowLights(NUVEC *, NUVEC *, i32) {
-        STUBBED();
-        return 0;
-    }
-    i32 NuSpecialCompare(nuhspecial_s *first, nuhspecial_s *second) {
-        if (first->special != NULL && first->special == second->special) {
-            return 1;
-        }
-        if (first->display_special != NULL && first->display_special == second->display_special) {
-            return 1;
-        }
-        return 0;
-    }
-    void NuSpecialConstAlpha(i32 enabled, f32 alpha) {
-        if (enabled != 0) {
-            nuspecial_const_alpha = alpha;
-            nuspecial_draw_state |= 1;
-        } else {
-            nuspecial_draw_state &= ~1;
-        }
-        nuspecial_const_alpha_enabled = enabled;
-    }
-    void NuSpecialConstTint(i32 enabled, NUVEC *tint) {
-        if (enabled != 0) {
-            memcpy(&nuspecial_const_tint, tint, sizeof(nuspecial_const_tint));
-            nuspecial_draw_state |= 2;
-        } else {
-            nuspecial_draw_state &= ~2;
-        }
-        nuspecial_const_tint_enabled = enabled;
-    }
     i32 NuSpecialDrawAt(void *special, NUMTX *mtx) {
-        NuPlainSpecialHandleLayout *handle = reinterpret_cast<NuPlainSpecialHandleLayout *>(special);
+        NuSpecialHandleLayout *handle = reinterpret_cast<NuSpecialHandleLayout *>(special);
         if (handle == NULL || handle->scene == NULL || handle->display_special == NULL) {
             return 0;
         }
         return NuDisplayListRndrSpecial(reinterpret_cast<nuhspecial_s *>(special), mtx, 0, NULL, NULL);
     }
     i32 NuSpecialDrawAtAlpha(void *special, NUMTX *mtx, f32 alpha) {
-        NuPlainSpecialHandleLayout *handle = reinterpret_cast<NuPlainSpecialHandleLayout *>(special);
+        NuSpecialHandleLayout *handle = reinterpret_cast<NuSpecialHandleLayout *>(special);
         if (handle->scene == NULL || alpha <= 0.0f) {
             return 0;
         }
@@ -2896,7 +2757,7 @@ extern "C" {
         return NuDisplayListRndrSpecial(reinterpret_cast<nuhspecial_s *>(special), mtx, 0, NULL, NULL);
     }
     i32 NuSpecialDrawSmoothSkin(void *special, NUMTX *skin_matrices, NUMTX *world_matrix) {
-        NuPlainSpecialHandleLayout *handle = static_cast<NuPlainSpecialHandleLayout *>(special);
+        NuSpecialHandleLayout *handle = static_cast<NuSpecialHandleLayout *>(special);
         if (handle->scene == NULL || handle->display_special == NULL) {
             return 0;
         }
@@ -2905,7 +2766,7 @@ extern "C" {
     }
     i32 NuSpecialDrawSmoothSkinDwa(void *special, NUMTX *skin_matrices, NUMTX *world_matrix,
                                    DEFORMERWEIGHTSARRAY *blend_values) {
-        NuPlainSpecialHandleLayout *handle = static_cast<NuPlainSpecialHandleLayout *>(special);
+        NuSpecialHandleLayout *handle = static_cast<NuSpecialHandleLayout *>(special);
         if (handle->scene == NULL || handle->display_special == NULL) {
             return 0;
         }
@@ -2913,7 +2774,7 @@ extern "C" {
                                         blend_values);
     }
     i32 NuSpecialDrawWith(void *special, NUMTX *mtx) {
-        NuPlainSpecialHandleLayout *handle = static_cast<NuPlainSpecialHandleLayout *>(special);
+        NuSpecialHandleLayout *handle = static_cast<NuSpecialHandleLayout *>(special);
         if (handle->scene == NULL) {
             return 0;
         }
@@ -2925,274 +2786,23 @@ extern "C" {
         NuMtxMul(&combined, static_cast<NUMTX *>(handle->special), mtx);
         return 0;
     }
-    i32 NuSpecialFindMulti(NUGSCN *, nuhspecial_s *, char *, i32, i32) {
-        STUBBED();
-        return 0;
-    }
-    void NuSpecialFindMultiWC(void) {
-        STUBBED();
-    }
-    i32 NuSpecialGetActiveShadowLights(void) {
-        return nuspecial_shadowLightCount;
-    }
-    void NuSpecialGetBounds(void *special, NUVEC *minimum, NUVEC *maximum) {
-        NuPlainSpecialHandleLayout *handle = reinterpret_cast<NuPlainSpecialHandleLayout *>(special);
-        if (handle->special == NULL) {
-            NuPlainDisplaySpecialLayout *display = static_cast<NuPlainDisplaySpecialLayout *>(handle->display_special);
-            if (display != NULL) {
-                *minimum = display->min;
-                *maximum = display->max;
-            }
-            return;
-        }
-
-        NuPlainLegacySceneLayout *scene = reinterpret_cast<NuPlainLegacySceneLayout *>(handle->scene);
-        NuPlainLegacySpecialLayout *legacy = static_cast<NuPlainLegacySpecialLayout *>(handle->special);
-        NuPlainLegacyInstanceBoundsLayout *instance =
-            reinterpret_cast<NuPlainLegacyInstanceBoundsLayout *>(legacy->instance);
-        NuPlainLegacyObjectBoundsLayout *object =
-            static_cast<NuPlainLegacyObjectBoundsLayout *>(scene->objects[instance->object_index]);
-        while (object->next != NULL) {
-            object = object->next;
-        }
-        *minimum = object->minimum;
-        *maximum = object->maximum;
-    }
-    NUMTX *NuSpecialGetDrawMtx(void *special) {
-        NuPlainSpecialHandleLayout *handle = reinterpret_cast<NuPlainSpecialHandleLayout *>(special);
-        NuPlainLegacySpecialLayout *legacy = static_cast<NuPlainLegacySpecialLayout *>(handle->special);
-        if (legacy != NULL) {
-            NUMTX *instance = reinterpret_cast<NUMTX *>(legacy->instance);
-            NUMTX *draw_mtx = *reinterpret_cast<NUMTX **>(legacy->instance + 0x48);
-            return draw_mtx != NULL ? draw_mtx : instance;
-        }
-        NuPlainDisplaySpecialLayout *display = static_cast<NuPlainDisplaySpecialLayout *>(handle->display_special);
-        if (display != NULL) {
-            usize draw_mtx = reinterpret_cast<usize>(display->instance_animation);
-            if (draw_mtx != 0 && draw_mtx != static_cast<usize>(-1)) {
-                return reinterpret_cast<NUMTX *>(display->instance_animation);
-            }
-            return &display->draw_mtx;
-        }
-        return NULL;
-    }
-    NUVEC *NuSpecialGetDrawPos(void *special) {
-        NuPlainSpecialHandleLayout *handle = reinterpret_cast<NuPlainSpecialHandleLayout *>(special);
-        NuPlainDisplaySpecialLayout *display = static_cast<NuPlainDisplaySpecialLayout *>(handle->display_special);
-        if (display != NULL) {
-            usize instance_animation = reinterpret_cast<usize>(display->instance_animation);
-            NUVEC *draw_position = NUMTX_GET_ROW_VEC(&display->draw_mtx, 3);
-            NUVEC *animated_position = reinterpret_cast<NUVEC *>(instance_animation + offsetof(NUMTX, m30));
-            return instance_animation != 0 && instance_animation != static_cast<usize>(-1) ? animated_position
-                                                                                           : draw_position;
-        }
-
-        NuPlainLegacySpecialLayout *legacy = static_cast<NuPlainLegacySpecialLayout *>(handle->special);
-        if (legacy == NULL) {
-            return NULL;
-        }
-        NUMTX *instance = reinterpret_cast<NUMTX *>(legacy->instance);
-        NUMTX *draw_mtx = *reinterpret_cast<NUMTX **>(legacy->instance + 0x48);
-        NUVEC *instance_position = NUMTX_GET_ROW_VEC(instance, 3);
-        NUVEC *draw_position = reinterpret_cast<NUVEC *>(reinterpret_cast<usize>(draw_mtx) + offsetof(NUMTX, m30));
-        return draw_mtx != NULL ? draw_position : instance_position;
-    }
-    i32 NuSpecialGetInstanceix(nuhspecial_s *special) {
-        NuPlainSpecialHandleLayout *handle = reinterpret_cast<NuPlainSpecialHandleLayout *>(special);
-        NuPlainLegacySpecialLayout *legacy = static_cast<NuPlainLegacySpecialLayout *>(handle->special);
-        if (legacy != NULL) {
-            NuPlainLegacySceneLayout *scene = reinterpret_cast<NuPlainLegacySceneLayout *>(handle->scene);
-            for (i32 i = 0; i < scene->instance_count; ++i) {
-                if (scene->instances + i * 0x50 == legacy->instance) {
-                    return i;
-                }
-            }
-            return -1;
-        }
-
-        NuPlainDisplaySpecialLayout *display = static_cast<NuPlainDisplaySpecialLayout *>(handle->display_special);
-        return display != NULL ? display->instance_ix : -1;
-    }
-    NUMTL *NuSpecialGetMtl(nuhspecial_s *special, i32 index) {
-        NuPlainLegacySpecialLayout *legacy = static_cast<NuPlainLegacySpecialLayout *>(special->special);
-        if (legacy != NULL) {
-            NuPlainLegacySceneLayout *scene = reinterpret_cast<NuPlainLegacySceneLayout *>(special->scene);
-            NuPlainLegacyInstanceBoundsLayout *instance =
-                reinterpret_cast<NuPlainLegacyInstanceBoundsLayout *>(legacy->instance);
-            NuPlainLegacyObjectBoundsLayout *object =
-                static_cast<NuPlainLegacyObjectBoundsLayout *>(scene->objects[instance->object_index]);
-            while (object->next != NULL) {
-                object = object->next;
-            }
-            NuPlainLegacyMaterialLink *link = object->materials;
-            while (index != 0) {
-                if (link == NULL) {
-                    return NULL;
-                }
-                --index;
-                link = link->next;
-            }
-            return link->material;
-        } else if (special->display_special != NULL) {
-            NUDISPLAYSPECIAL *display = special->display_special;
-            i32 level = 0;
-            while (display->clip_range[level] != 0.0f) {
-                ++level;
-            }
-            return special->scene->display_list->mtls[display->clip_objects[level].material_ids[index]];
-        }
-        return NULL;
-    }
-    NUMTX *NuSpecialGetMtx(void *special) {
-        NuPlainSpecialHandleLayout *handle = reinterpret_cast<NuPlainSpecialHandleLayout *>(special);
-        if (handle->display_special != NULL) {
-            return static_cast<NUMTX *>(handle->display_special);
-        }
-        return static_cast<NUMTX *>(handle->special);
-    }
-    f32 NuSpecialGetOriginRadius(void *special) {
-        NuPlainSpecialHandleLayout *handle = static_cast<NuPlainSpecialHandleLayout *>(special);
-        NuPlainLegacySpecialLayout *legacy = static_cast<NuPlainLegacySpecialLayout *>(handle->special);
-        if (legacy != NULL) {
-            NuPlainLegacySceneLayout *scene = reinterpret_cast<NuPlainLegacySceneLayout *>(handle->scene);
-            NuPlainLegacyInstanceBoundsLayout *instance =
-                reinterpret_cast<NuPlainLegacyInstanceBoundsLayout *>(legacy->instance);
-            NuPlainLegacyObjectBoundsLayout *object =
-                static_cast<NuPlainLegacyObjectBoundsLayout *>(scene->objects[instance->object_index]);
-            return object->origin_radius;
-        }
-        return NuVecMag(&static_cast<NuPlainDisplaySpecialLayout *>(handle->display_special)->center) +
-               static_cast<NuPlainDisplaySpecialLayout *>(handle->display_special)->radius;
-    }
-    NUVEC *NuSpecialGetPos(void *special) {
-        NuPlainSpecialHandleLayout *handle = static_cast<NuPlainSpecialHandleLayout *>(special);
-        if (handle->display_special != NULL) {
-            return reinterpret_cast<NUVEC *>(&static_cast<NUMTX *>(handle->display_special)->m30);
-        }
-        if (handle->special != NULL) {
-            return reinterpret_cast<NUVEC *>(&static_cast<NUMTX *>(handle->special)->m30);
-        }
-        return NULL;
-    }
-    void NuSpecialGetRadius(void *special, NUVEC *position, f32 *radius) {
-        NuPlainSpecialHandleLayout *handle = reinterpret_cast<NuPlainSpecialHandleLayout *>(special);
-        if (handle->special != NULL) {
-            NuPlainLegacySceneLayout *scene = reinterpret_cast<NuPlainLegacySceneLayout *>(handle->scene);
-            NuPlainLegacySpecialLayout *legacy = static_cast<NuPlainLegacySpecialLayout *>(handle->special);
-            NuPlainLegacyInstanceBoundsLayout *instance =
-                reinterpret_cast<NuPlainLegacyInstanceBoundsLayout *>(legacy->instance);
-            NuPlainLegacyObjectBoundsLayout *object =
-                static_cast<NuPlainLegacyObjectBoundsLayout *>(scene->objects[instance->object_index]);
-            *radius = object->radius;
-            *position = object->center;
-        } else {
-            NuPlainDisplaySpecialLayout *display = static_cast<NuPlainDisplaySpecialLayout *>(handle->display_special);
-            *position = display->center;
-            *radius = display->radius;
-        }
-    }
-    i32 NuSpecialGetShadowClipTestResult(i32 index) {
-        if (nuspecial_shadowLightHaveClipOverrides != 0) {
-            return nuspecial_shadowLightClipOverride[index];
-        }
-        return -1;
-    }
-    void *NuSpecialGetShadowLight(i32 index) {
-        return nuspecial_shadowLight[index];
-    }
-    i32 NuSpecialHasActiveShadowLights(void) {
-        return nuspecial_shadowLightCount > 0;
-    }
-    i32 NuSpecialHaveShadowClipTestResults(void) {
-        return nuspecial_shadowLightHaveClipOverrides;
-    }
-    void NuSpecialList(void) {
-        STUBBED();
-    }
-    i32 NuSpecialNumMtls(nuhspecial_s *special) {
-        NuPlainLegacySpecialLayout *legacy = static_cast<NuPlainLegacySpecialLayout *>(special->special);
-        if (legacy != NULL) {
-            NuPlainLegacySceneLayout *scene = reinterpret_cast<NuPlainLegacySceneLayout *>(special->scene);
-            NuPlainLegacyInstanceBoundsLayout *instance =
-                reinterpret_cast<NuPlainLegacyInstanceBoundsLayout *>(legacy->instance);
-            NuPlainLegacyObjectBoundsLayout *object =
-                static_cast<NuPlainLegacyObjectBoundsLayout *>(scene->objects[instance->object_index]);
-            while (object->next != NULL) {
-                object = object->next;
-            }
-            i32 count = 0;
-            for (NuPlainLegacyMaterialLink *link = object->materials; link != NULL; link = link->next) {
-                ++count;
-            }
-            return count;
-        }
-        if (special->display_special != NULL) {
-            NUDISPLAYSPECIAL *display = special->display_special;
-            i32 level = 0;
-            while (display->clip_range[level] != 0.0f) {
-                ++level;
-            }
-            return display->clip_objects[level].nmaterials;
-        }
-        return 0;
-    }
-    void NuSpecialSetAlphaTest(void) {
-        STUBBED();
-    }
-    void NuSpecialSetBounds(nuhspecial_s *special, NUVEC *minimum, NUVEC *maximum) {
-        NuPlainLegacySpecialLayout *legacy = static_cast<NuPlainLegacySpecialLayout *>(special->special);
-        if (legacy != NULL) {
-            NuPlainLegacySceneLayout *scene = reinterpret_cast<NuPlainLegacySceneLayout *>(special->scene);
-            NuPlainLegacyInstanceBoundsLayout *instance =
-                reinterpret_cast<NuPlainLegacyInstanceBoundsLayout *>(legacy->instance);
-            NuPlainLegacyObjectBoundsLayout *object =
-                static_cast<NuPlainLegacyObjectBoundsLayout *>(scene->objects[instance->object_index]);
-            while (object != NULL) {
-                object->minimum = *minimum;
-                object->maximum = *maximum;
-                object = object->next;
-            }
-        } else {
-            NuPlainDisplaySpecialLayout *display =
-                reinterpret_cast<NuPlainDisplaySpecialLayout *>(special->display_special);
-            display->min = *minimum;
-            display->max = *maximum;
-        }
-    }
-    i32 NuSpecialSetClipping(i32 enabled, i32 state) {
-        i32 previous = nuspecial_clip_state;
-        nuspecial_clip_state = enabled != 0 ? state : -1;
-        return previous;
-    }
     void NuSpecialSetDrawMtx(void *special, NUMTX *mtx) {
-        NuPlainSpecialHandleLayout *handle = reinterpret_cast<NuPlainSpecialHandleLayout *>(special);
+        NuSpecialHandleLayout *handle = reinterpret_cast<NuSpecialHandleLayout *>(special);
         if (handle == NULL || handle->scene == NULL) {
             return;
         }
-        NuPlainLegacySpecialLayout *legacy = static_cast<NuPlainLegacySpecialLayout *>(handle->special);
+        NuSpecialLegacyRuntimeLayout *legacy = static_cast<NuSpecialLegacyRuntimeLayout *>(handle->special);
         if (legacy != NULL) {
             if (legacy->instance != NULL) {
                 *reinterpret_cast<NUMTX *>(legacy->instance) = *mtx;
             }
             return;
         }
-        NuPlainDisplaySpecialLayout *display = static_cast<NuPlainDisplaySpecialLayout *>(handle->display_special);
+        NuSpecialBoundsDisplayLayout *display = static_cast<NuSpecialBoundsDisplayLayout *>(handle->display_special);
         if (display != NULL) {
             display->draw_mtx = *mtx;
             display->flags |= 0x400;
         }
-    }
-    void NuSpecialSetRenderPlane(void) {
-        STUBBED();
-    }
-    void NuSpecialVertexOffsets(i32 count, VARIPTR offsets) {
-        nuspecial_vertex_offsets = offsets;
-        nuspecial_vertex_noffsets = count;
-    }
-    void NuSpecialVertexStates(NUSPECIALVERTEXSTATES *states) {
-        nuspecial_vertex_states = states;
-        ++render_state.state.global_id;
-        ++render_state.state.vertex_groups_id;
     }
 
     // ---------------------------------------------------------------------------
@@ -3404,14 +3014,6 @@ extern "C" {
         maximum.x = center->x + extent->x;
         maximum.y = center->y + extent->y;
         maximum.z = center->z + extent->z;
-        light->testShadowExtrusions(minimum, maximum);
-    }
-    void NuDynamicLightTestShadowExtrusionsSpecial(NuDynamicLight *light, void *special, NUMTX *matrix) {
-        VuVec minimum;
-        VuVec maximum;
-        NuSpecialGetBounds(special, &minimum.xyz, &maximum.xyz);
-        NuVecMtxTransform(&minimum.xyz, &minimum.xyz, matrix);
-        NuVecMtxTransform(&maximum.xyz, &maximum.xyz, matrix);
         light->testShadowExtrusions(minimum, maximum);
     }
     extern "C++" NuWindGType *NuWindAllocateGrp();
