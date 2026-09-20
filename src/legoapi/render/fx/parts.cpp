@@ -7,6 +7,7 @@
 #include "globals.h"
 #include "gamelib/util/gamelib_util_types.h"
 #include "gameapi/edtools/edfile.h"
+#include "gameapi/edtools/edpart_internal.h"
 #include "gameapi/edtools/edpp_internal.h"
 #include "gameapi/edtools/edstubs.h"
 #include "legoapi/render/fx.h"

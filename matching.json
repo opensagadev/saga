@@ -26316,846 +26316,6 @@
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_gameapi/edmenucallbacks.o",
       "functions": [
         {
-          "name": "_ZL18cbPtlChangeEmitVelP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlChangeEmitVel(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3346496,
-          "offset": 2456528,
-          "size": 88,
-          "match_percent": 10.0
-        },
-        {
-          "name": "_ZL12cbPtlChangeXP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlChangeX(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3346592,
-          "offset": 2456624,
-          "size": 168,
-          "match_percent": 6.734694
-        },
-        {
-          "name": "_ZL12cbPtlChangeYP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlChangeY(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3346768,
-          "offset": 2456800,
-          "size": 400,
-          "match_percent": 2.79661
-        },
-        {
-          "name": "_ZL12cbPtlChangeZP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlChangeZ(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3347168,
-          "offset": 2457200,
-          "size": 618,
-          "match_percent": 2.721088
-        },
-        {
-          "name": "_ZL17cbPtlChangeCutOffP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlChangeCutOff(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3347792,
-          "offset": 2457824,
-          "size": 103,
-          "match_percent": 8.461538
-        },
-        {
-          "name": "_ZL16cbPtlChangeCutOnP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlChangeCutOn(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3347904,
-          "offset": 2457936,
-          "size": 99,
-          "match_percent": 8.8
-        },
-        {
-          "name": "_ZL21cbPtlChangeDrawCutOffP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlChangeDrawCutOff(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3348016,
-          "offset": 2458048,
-          "size": 88,
-          "match_percent": 10.0
-        },
-        {
-          "name": "_ZL22cbPtlChangeSoundCutOffP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlChangeSoundCutOff(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3348112,
-          "offset": 2458144,
-          "size": 88,
-          "match_percent": 10.0
-        },
-        {
-          "name": "_ZL23cbPtlChangeCameraCutOffP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlChangeCameraCutOff(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3348208,
-          "offset": 2458240,
-          "size": 88,
-          "match_percent": 10.0
-        },
-        {
-          "name": "_ZL22cbChangeNumCollSpheresP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbChangeNumCollSpheres(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3348864,
-          "offset": 2458896,
-          "size": 89,
-          "match_percent": 10.0
-        },
-        {
-          "name": "_ZL17cbChangeTorusLifeP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbChangeTorusLife(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3348960,
-          "offset": 2458992,
-          "size": 91,
-          "match_percent": 10.0
-        },
-        {
-          "name": "_ZL17cbChangeTorusRad1P10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbChangeTorusRad1(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3349056,
-          "offset": 2459088,
-          "size": 91,
-          "match_percent": 10.0
-        },
-        {
-          "name": "_ZL17cbChangeTorusRad2P10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbChangeTorusRad2(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3349152,
-          "offset": 2459184,
-          "size": 91,
-          "match_percent": 10.0
-        },
-        {
-          "name": "_ZL22cbPtlChangeDamageFlagsP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlChangeDamageFlags(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3349248,
-          "offset": 2459280,
-          "size": 112,
-          "match_percent": 10.645162
-        },
-        {
-          "name": "_ZL21cbPtlChangeRepeatFlagP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlChangeRepeatFlag(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3349360,
-          "offset": 2459392,
-          "size": 124,
-          "match_percent": 6.875
-        },
-        {
-          "name": "_ZL17cbPtlChangeSScaleP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlChangeSScale(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3349792,
-          "offset": 2459824,
-          "size": 27,
-          "match_percent": 13.333333
-        },
-        {
-          "name": "_ZL19cbPtlChangePriorityP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlChangePriority(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3349824,
-          "offset": 2459856,
-          "size": 64,
-          "match_percent": 22.0
-        },
-        {
-          "name": "_ZL26cbPtlToggleDynamicPriorityP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlToggleDynamicPriority(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3349888,
-          "offset": 2459920,
-          "size": 71,
-          "match_percent": 18.333334
-        },
-        {
-          "name": "_ZL16cbPtlSetXZFacingP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlSetXZFacing(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3349968,
-          "offset": 2460000,
-          "size": 58,
-          "match_percent": 5.714286
-        },
-        {
-          "name": "_ZL15cbPtlSelReadoutP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlSelReadout(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3350032,
-          "offset": 2460064,
-          "size": 27,
-          "match_percent": 18.571428
-        },
-        {
-          "name": "_ZL12cbPtlShowAllP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlShowAll(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3350064,
-          "offset": 2460096,
-          "size": 29,
-          "match_percent": 14.444445
-        },
-        {
-          "name": "_ZL15cbPtlSnapToggleP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlSnapToggle(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3350096,
-          "offset": 2460128,
-          "size": 31,
-          "match_percent": 16.25
-        },
-        {
-          "name": "_ZL11cbPtlCancelP10eduimenu_sS0_",
-          "demangled_name": "cbPtlCancel(eduimenu_s*, eduimenu_s*)",
-          "address": 3350128,
-          "offset": 2460160,
-          "size": 26,
-          "match_percent": 31.428572
-        },
-        {
-          "name": "_ZL21cbPtlCancelSScaleMenuP10eduimenu_sS0_",
-          "demangled_name": "cbPtlCancelSScaleMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 3351088,
-          "offset": 2461120,
-          "size": 58,
-          "match_percent": 15.714286
-        },
-        {
-          "name": "_ZL31cbPtlCancelInstanceSettingsMenuP10eduimenu_sS0_",
-          "demangled_name": "cbPtlCancelInstanceSettingsMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 3351216,
-          "offset": 2461248,
-          "size": 58,
-          "match_percent": 15.714286
-        },
-        {
-          "name": "_ZL20cbPtlCancelTorusMenuP10eduimenu_sS0_",
-          "demangled_name": "cbPtlCancelTorusMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 3351280,
-          "offset": 2461312,
-          "size": 88,
-          "match_percent": 12.941176
-        },
-        {
-          "name": "_ZL19cbPtlCancelCollMenuP10eduimenu_sS0_",
-          "demangled_name": "cbPtlCancelCollMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 3351376,
-          "offset": 2461408,
-          "size": 68,
-          "match_percent": 14.666667
-        },
-        {
-          "name": "_ZL25cbPtlCancelDamageFlagMenuP10eduimenu_sS0_",
-          "demangled_name": "cbPtlCancelDamageFlagMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 3351456,
-          "offset": 2461488,
-          "size": 58,
-          "match_percent": 15.714286
-        },
-        {
-          "name": "_ZL21cbPtlCancelDamageMenuP10eduimenu_sS0_",
-          "demangled_name": "cbPtlCancelDamageMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 3351520,
-          "offset": 2461552,
-          "size": 58,
-          "match_percent": 15.714286
-        },
-        {
-          "name": "_ZL18cbPtlCancelJibMenuP10eduimenu_sS0_",
-          "demangled_name": "cbPtlCancelJibMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 3351904,
-          "offset": 2461936,
-          "size": 98,
-          "match_percent": 15.0
-        },
-        {
-          "name": "_ZL18cbPtlCancelRotMenuP10eduimenu_sS0_",
-          "demangled_name": "cbPtlCancelRotMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 3352016,
-          "offset": 2462048,
-          "size": 88,
-          "match_percent": 12.941176
-        },
-        {
-          "name": "_ZL19cbPtlCancelSizeMenuP10eduimenu_sS0_",
-          "demangled_name": "cbPtlCancelSizeMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 3352112,
-          "offset": 2462144,
-          "size": 98,
-          "match_percent": 15.0
-        },
-        {
-          "name": "_ZL21cbPtlCancelCutOffMenuP10eduimenu_sS0_",
-          "demangled_name": "cbPtlCancelCutOffMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 3352432,
-          "offset": 2462464,
-          "size": 58,
-          "match_percent": 15.714286
-        },
-        {
-          "name": "_ZL23cbPtlCancelEmitTimeMenuP10eduimenu_sS0_",
-          "demangled_name": "cbPtlCancelEmitTimeMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 3352496,
-          "offset": 2462528,
-          "size": 58,
-          "match_percent": 15.714286
-        },
-        {
-          "name": "_ZL23cbCancelChangeETimeMenuP10eduimenu_sS0_",
-          "demangled_name": "cbCancelChangeETimeMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 3352560,
-          "offset": 2462592,
-          "size": 58,
-          "match_percent": 15.714286
-        },
-        {
-          "name": "_ZL25cbCancelChangeGenRateMenuP10eduimenu_sS0_",
-          "demangled_name": "cbCancelChangeGenRateMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 3352624,
-          "offset": 2462656,
-          "size": 58,
-          "match_percent": 15.714286
-        },
-        {
-          "name": "_ZL22cbPtlCancelVarEmitMenuP10eduimenu_sS0_",
-          "demangled_name": "cbPtlCancelVarEmitMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 3352688,
-          "offset": 2462720,
-          "size": 58,
-          "match_percent": 15.714286
-        },
-        {
-          "name": "_ZL23cbPtlCancelStartVelMenuP10eduimenu_sS0_",
-          "demangled_name": "cbPtlCancelStartVelMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 3352752,
-          "offset": 2462784,
-          "size": 58,
-          "match_percent": 15.714286
-        },
-        {
-          "name": "_ZL23cbPtlCancelVarStartMenuP10eduimenu_sS0_",
-          "demangled_name": "cbPtlCancelVarStartMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 3352816,
-          "offset": 2462848,
-          "size": 58,
-          "match_percent": 15.714286
-        },
-        {
-          "name": "_ZL19cbPtlCancelGravMenuP10eduimenu_sS0_",
-          "demangled_name": "cbPtlCancelGravMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 3352880,
-          "offset": 2462912,
-          "size": 58,
-          "match_percent": 15.714286
-        },
-        {
-          "name": "_ZL22cbPtlCancelEmitVelMenuP10eduimenu_sS0_",
-          "demangled_name": "cbPtlCancelEmitVelMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 3352944,
-          "offset": 2462976,
-          "size": 58,
-          "match_percent": 15.714286
-        },
-        {
-          "name": "_ZL19cbPtlCancelEmitMenuP10eduimenu_sS0_",
-          "demangled_name": "cbPtlCancelEmitMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 3353008,
-          "offset": 2463040,
-          "size": 58,
-          "match_percent": 15.714286
-        },
-        {
-          "name": "_ZL22cbPtlCancelTextureMenuP10eduimenu_sS0_",
-          "demangled_name": "cbPtlCancelTextureMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 3353072,
-          "offset": 2463104,
-          "size": 84,
-          "match_percent": 12.857142
-        },
-        {
-          "name": "_ZL18cbPtlCancelColMenuP10eduimenu_sS0_",
-          "demangled_name": "cbPtlCancelColMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 3353168,
-          "offset": 2463200,
-          "size": 78,
-          "match_percent": 16.875
-        },
-        {
-          "name": "_ZL20cbPtlCancelGSortMenuP10eduimenu_sS0_",
-          "demangled_name": "cbPtlCancelGSortMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 3353248,
-          "offset": 2463280,
-          "size": 58,
-          "match_percent": 15.714286
-        },
-        {
-          "name": "_ZL22cbPtlCancelReadoutMenuP10eduimenu_sS0_",
-          "demangled_name": "cbPtlCancelReadoutMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 3353312,
-          "offset": 2463344,
-          "size": 58,
-          "match_percent": 15.714286
-        },
-        {
-          "name": "_ZL26cbPtlCancelQuickDeleteMenuP10eduimenu_sS0_",
-          "demangled_name": "cbPtlCancelQuickDeleteMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 3353376,
-          "offset": 2463408,
-          "size": 58,
-          "match_percent": 15.714286
-        },
-        {
-          "name": "_ZL19cbCancelMessageMenuP10eduimenu_sS0_",
-          "demangled_name": "cbCancelMessageMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 3353568,
-          "offset": 2463600,
-          "size": 58,
-          "match_percent": 15.714286
-        },
-        {
-          "name": "_ZL19cbPtlCancelDataMenuP10eduimenu_sS0_",
-          "demangled_name": "cbPtlCancelDataMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 3353632,
-          "offset": 2463664,
-          "size": 58,
-          "match_percent": 15.714286
-        },
-        {
-          "name": "_ZL19cbPtlCancelTypeMenuP10eduimenu_sS0_",
-          "demangled_name": "cbPtlCancelTypeMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 3353696,
-          "offset": 2463728,
-          "size": 58,
-          "match_percent": 15.714286
-        },
-        {
-          "name": "_ZL22cbCancelEffectListMenuP10eduimenu_sS0_",
-          "demangled_name": "cbCancelEffectListMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 3353760,
-          "offset": 2463792,
-          "size": 58,
-          "match_percent": 15.714286
-        },
-        {
-          "name": "_ZL19cbPtlDamageFlagMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlDamageFlagMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3360608,
-          "offset": 2470640,
-          "size": 406,
-          "match_percent": 2.391304
-        },
-        {
-          "name": "_ZL13cbPtlEmitMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlEmitMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3362384,
-          "offset": 2472416,
-          "size": 1331,
-          "match_percent": 1.403509
-        },
-        {
-          "name": "_ZL16cbPtlTextureMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlTextureMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3363728,
-          "offset": 2473760,
-          "size": 827,
-          "match_percent": 2.139037
-        },
-        {
-          "name": "_ZL14cbPtlGSortMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlGSortMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3364560,
-          "offset": 2474592,
-          "size": 1243,
-          "match_percent": 1.444043
-        },
-        {
-          "name": "_ZL13cbPtlDataMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlDataMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3365808,
-          "offset": 2475840,
-          "size": 1043,
-          "match_percent": 1.545454
-        },
-        {
-          "name": "_ZL16cbPtlReadoutMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlReadoutMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3366864,
-          "offset": 2476896,
-          "size": 367,
-          "match_percent": 2.650602
-        },
-        {
-          "name": "_ZL20cbPtlQuickDeleteMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlQuickDeleteMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3367232,
-          "offset": 2477264,
-          "size": 425,
-          "match_percent": 3.119266
-        },
-        {
-          "name": "_ZL16cbEffectListMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbEffectListMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3367984,
-          "offset": 2478016,
-          "size": 414,
-          "match_percent": 3.469388
-        },
-        {
-          "name": "_ZL12cbPtlJibMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlJibMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3377008,
-          "offset": 2487040,
-          "size": 665,
-          "match_percent": 2.739726
-        },
-        {
-          "name": "_ZL15cbPtlCutOffMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlCutOffMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3377680,
-          "offset": 2487712,
-          "size": 871,
-          "match_percent": 1.888889
-        },
-        {
-          "name": "_ZL17cbPtlEmitTimeMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlEmitTimeMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3379248,
-          "offset": 2489280,
-          "size": 659,
-          "match_percent": 2.857143
-        },
-        {
-          "name": "_ZL17cbChangeETimeMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbChangeETimeMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3379920,
-          "offset": 2489952,
-          "size": 354,
-          "match_percent": 4.819277
-        },
-        {
-          "name": "_ZL13cbPtlGravMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlGravMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3380288,
-          "offset": 2490320,
-          "size": 378,
-          "match_percent": 4.597701
-        },
-        {
-          "name": "_ZL16cbPtlEmitVelMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlEmitVelMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3380672,
-          "offset": 2490704,
-          "size": 386,
-          "match_percent": 4.494382
-        },
-        {
-          "name": "_ZL15cbPtlSScaleMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlSScaleMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3384240,
-          "offset": 2494272,
-          "size": 284,
-          "match_percent": 4.426229
-        },
-        {
-          "name": "_ZL19cbChangeGenRateMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbChangeGenRateMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3385408,
-          "offset": 2495440,
-          "size": 356,
-          "match_percent": 4.761905
-        },
-        {
-          "name": "_ZL19cbPtlDefaultCollEnvP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlDefaultCollEnv(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3387584,
-          "offset": 2497616,
-          "size": 334,
-          "match_percent": 4.938271
-        },
-        {
-          "name": "_ZL12cbPtlSelTypeP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlSelType(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3388992,
-          "offset": 2499024,
-          "size": 95,
-          "match_percent": 10.0
-        },
-        {
-          "name": "_ZL15cbSelEffectListP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbSelEffectList(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3389088,
-          "offset": 2499120,
-          "size": 170,
-          "match_percent": 6.929824
-        },
-        {
-          "name": "_ZL13cbPtlSelGCodeP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlSelGCode(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3389264,
-          "offset": 2499296,
-          "size": 143,
-          "match_percent": 8.684211
-        },
-        {
-          "name": "_ZL14cbPtlTorusMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlTorusMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3390080,
-          "offset": 2500112,
-          "size": 3141,
-          "match_percent": 0.682594
-        },
-        {
-          "name": "_ZL13cbPtlCollMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlCollMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3393232,
-          "offset": 2503264,
-          "size": 1749,
-          "match_percent": 1.123595
-        },
-        {
-          "name": "_ZL19cbPtlApplyTorusEnv3P10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlApplyTorusEnv3(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3394992,
-          "offset": 2505024,
-          "size": 186,
-          "match_percent": 7.692308
-        },
-        {
-          "name": "_ZL19cbPtlApplyTorusEnv2P10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlApplyTorusEnv2(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3395184,
-          "offset": 2505216,
-          "size": 186,
-          "match_percent": 7.692308
-        },
-        {
-          "name": "_ZL19cbPtlApplyTorusEnv1P10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlApplyTorusEnv1(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3395376,
-          "offset": 2505408,
-          "size": 186,
-          "match_percent": 7.692308
-        },
-        {
-          "name": "_ZL17cbPtlApplyCollEnvP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlApplyCollEnv(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3395568,
-          "offset": 2505600,
-          "size": 242,
-          "match_percent": 6.666666
-        },
-        {
-          "name": "_ZL13cbPtlApplyJibP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlApplyJib(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3396800,
-          "offset": 2506832,
-          "size": 192,
-          "match_percent": 7.333334
-        },
-        {
-          "name": "_ZL13cbPtlApplyRotP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlApplyRot(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3396992,
-          "offset": 2507024,
-          "size": 364,
-          "match_percent": 4.597701
-        },
-        {
-          "name": "_ZL14cbPtlApplySizeP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlApplySize(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3397360,
-          "offset": 2507392,
-          "size": 552,
-          "match_percent": 3.149606
-        },
-        {
-          "name": "_ZL15cbPtlChangeGravP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlChangeGrav(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3397920,
-          "offset": 2507952,
-          "size": 109,
-          "match_percent": 11.785714
-        },
-        {
-          "name": "_ZL24cbPtlChangeTextureSelectP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlChangeTextureSelect(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3398032,
-          "offset": 2508064,
-          "size": 265,
-          "match_percent": 3.606557
-        },
-        {
-          "name": "_ZL14cbPtlApplyGradP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlApplyGrad(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3398304,
-          "offset": 2508336,
-          "size": 455,
-          "match_percent": 3.539823
-        },
-        {
-          "name": "_ZL12cbPtlRotMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlRotMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3398768,
-          "offset": 2508800,
-          "size": 1797,
-          "match_percent": 1.108033
-        },
-        {
-          "name": "_ZL13cbPtlSizeMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlSizeMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3400576,
-          "offset": 2510608,
-          "size": 3077,
-          "match_percent": 0.652528
-        },
-        {
-          "name": "_ZL16cbPtlVarEmitMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlVarEmitMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3403664,
-          "offset": 2513696,
-          "size": 1642,
-          "match_percent": 1.190476
-        },
-        {
-          "name": "_ZL17cbPtlStartVelMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlStartVelMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3405312,
-          "offset": 2515344,
-          "size": 1539,
-          "match_percent": 1.215806
-        },
-        {
-          "name": "_ZL17cbPtlVarStartMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlVarStartMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3406864,
-          "offset": 2516896,
-          "size": 1539,
-          "match_percent": 1.215806
-        },
-        {
-          "name": "_ZL13cbPtlCopySizeP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlCopySize(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3408960,
-          "offset": 2518992,
-          "size": 2159,
-          "match_percent": 1.017812
-        },
-        {
-          "name": "_ZL22cbPtlTextureSelectMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlTextureSelectMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3411120,
-          "offset": 2521152,
-          "size": 752,
-          "match_percent": 2.197802
-        },
-        {
-          "name": "_ZL12cbPtlColMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlColMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3411872,
-          "offset": 2521904,
-          "size": 3141,
-          "match_percent": 0.63593
-        },
-        {
-          "name": "_ZL13cbPtlSelGSortP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlSelGSort(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3415024,
-          "offset": 2525056,
-          "size": 488,
-          "match_percent": 2.095238
-        },
-        {
-          "name": "_ZL12cbChangeNameP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbChangeName(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3416176,
-          "offset": 2526208,
-          "size": 69,
-          "match_percent": 15.714286
-        },
-        {
-          "name": "_ZL15cbPtlCopyEffectP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlCopyEffect(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3416448,
-          "offset": 2526480,
-          "size": 638,
-          "match_percent": 1.965318
-        },
-        {
-          "name": "_ZL16cbChangeNameMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbChangeNameMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3417088,
-          "offset": 2527120,
-          "size": 310,
-          "match_percent": 5.194805
-        },
-        {
-          "name": "_ZL13cbPtlTypeMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlTypeMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3417408,
-          "offset": 2527440,
-          "size": 869,
-          "match_percent": 1.497797
-        },
-        {
-          "name": "_ZL15cbPtlDamageMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlDamageMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3429056,
-          "offset": 2539088,
-          "size": 416,
-          "match_percent": 3.0
-        },
-        {
-          "name": "_ZL25cbPtlInstanceSettingsMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlInstanceSettingsMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3431248,
-          "offset": 2541280,
-          "size": 537,
-          "match_percent": 1.896552
-        },
-        {
-          "name": "_ZL22cbCancelChangeNameMenuP10eduimenu_sS0_",
-          "demangled_name": "cbCancelChangeNameMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 3435168,
-          "offset": 2545200,
-          "size": 317,
-          "match_percent": 4.230769
-        },
-        {
-          "name": "_ZL14cbPtlAddEffectP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlAddEffect(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3464288,
-          "offset": 2574320,
-          "size": 598,
-          "match_percent": 2.335329
-        },
-        {
-          "name": "_ZL14cbPtlSetFacingP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlSetFacing(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3472960,
-          "offset": 2582992,
-          "size": 176,
-          "match_percent": 7.021276
-        },
-        {
-          "name": "_ZL19cbPtlSelTextureTypeP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlSelTextureType(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3557600,
-          "offset": 2667632,
-          "size": 872,
-          "match_percent": 1.56682
-        },
-        {
-          "name": "_ZL20cbPtlQuickDeleteTypeP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlQuickDeleteType(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3574928,
-          "offset": 2684960,
-          "size": 94,
-          "match_percent": 8.148149
-        },
-        {
-          "name": "_ZL17cbPtlDeleteEffectP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlDeleteEffect(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3575024,
-          "offset": 2685056,
-          "size": 101,
-          "match_percent": 7.857143
-        },
-        {
-          "name": "_ZL17cbFileLoadEffectsP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbFileLoadEffects(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3594352,
-          "offset": 2704384,
-          "size": 1025,
-          "match_percent": 1.603774
-        },
-        {
           "name": "cbSel",
           "demangled_name": "cbSel",
           "address": 3734528,
@@ -27363,6 +26523,14 @@
           "match_percent": 27.0
         },
         {
+          "name": "_ZL22edpartChangeRanMaxLifeP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edpartChangeRanMaxLife(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 4262048,
+          "offset": 3372080,
+          "size": 41,
+          "match_percent": 27.0
+        },
+        {
           "name": "_ZL17edpartChangeTintRP10eduimenu_sP10eduiitem_sj",
           "demangled_name": "edpartChangeTintR(eduimenu_s*, eduiitem_s*, unsigned int)",
           "address": 4262096,
@@ -27383,6 +26551,14 @@
           "demangled_name": "edpartChangeTintB(eduimenu_s*, eduiitem_s*, unsigned int)",
           "address": 4262192,
           "offset": 3372224,
+          "size": 41,
+          "match_percent": 27.0
+        },
+        {
+          "name": "_ZL25edpartChangeInstanceScaleP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edpartChangeInstanceScale(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 4262240,
+          "offset": 3372272,
           "size": 41,
           "match_percent": 27.0
         },
@@ -27427,6 +26603,22 @@
           "match_percent": 11.515152
         },
         {
+          "name": "_ZL23edpartChangeInstanceRotP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edpartChangeInstanceRot(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 4263248,
+          "offset": 3373280,
+          "size": 145,
+          "match_percent": 8.461538
+        },
+        {
+          "name": "_ZL26edpartChangeInstanceVarRotP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edpartChangeInstanceVarRot(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 4263408,
+          "offset": 3373440,
+          "size": 145,
+          "match_percent": 8.461538
+        },
+        {
           "name": "_ZL20edpartChangeVarStartP10eduimenu_sP10eduiitem_sj",
           "demangled_name": "edpartChangeVarStart(eduimenu_s*, eduiitem_s*, unsigned int)",
           "address": 4263568,
@@ -27441,6 +26633,14 @@
           "offset": 3373712,
           "size": 27,
           "match_percent": 13.333333
+        },
+        {
+          "name": "_ZL24edpartChangeInstanceFlagP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edpartChangeInstanceFlag(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 4263712,
+          "offset": 3373744,
+          "size": 55,
+          "match_percent": 13.75
         },
         {
           "name": "_ZL18edpartChangeIvalOnP10eduimenu_sP10eduiitem_sj",
@@ -27463,6 +26663,14 @@
           "demangled_name": "edpartChangeIvalOff(eduimenu_s*, eduiitem_s*, unsigned int)",
           "address": 4263872,
           "offset": 3373904,
+          "size": 41,
+          "match_percent": 27.0
+        },
+        {
+          "name": "_ZL22edpartChangeIvalOffRanP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edpartChangeIvalOffRan(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 4263920,
+          "offset": 3373952,
           "size": 41,
           "match_percent": 27.0
         },
@@ -27491,12 +26699,36 @@
           "match_percent": 27.0
         },
         {
+          "name": "_ZL23edpartChangeDebrisIndexP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edpartChangeDebrisIndex(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 4264112,
+          "offset": 3374144,
+          "size": 147,
+          "match_percent": 6.346154
+        },
+        {
           "name": "_ZL21edpartChangePartIndexP10eduimenu_sP10eduiitem_sj",
           "demangled_name": "edpartChangePartIndex(eduimenu_s*, eduiitem_s*, unsigned int)",
           "address": 4264272,
           "offset": 3374304,
           "size": 54,
           "match_percent": 52.75
+        },
+        {
+          "name": "_ZL24edpartChangeDebrisPerSecP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edpartChangeDebrisPerSec(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 4264336,
+          "offset": 3374368,
+          "size": 95,
+          "match_percent": 11.0
+        },
+        {
+          "name": "_ZL23edpartChangeDebrisScaleP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edpartChangeDebrisScale(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 4264432,
+          "offset": 3374464,
+          "size": 41,
+          "match_percent": 27.0
         },
         {
           "name": "_ZL18edpartToggleFilterP10eduimenu_sP10eduiitem_sj",
@@ -27539,677 +26771,6 @@
           "match_percent": 34.545456
         },
         {
-          "name": "_ZL20edpartCancelDataMenuP10eduimenu_sS0_",
-          "demangled_name": "edpartCancelDataMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 4265056,
-          "offset": 3375088,
-          "size": 58,
-          "match_percent": 15.714286
-        },
-        {
-          "name": "_ZL22edpartCancelCutOffMenuP10eduimenu_sS0_",
-          "demangled_name": "edpartCancelCutOffMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 4266208,
-          "offset": 3376240,
-          "size": 58,
-          "match_percent": 15.714286
-        },
-        {
-          "name": "_ZL20edpartCancelGravMenuP10eduimenu_sS0_",
-          "demangled_name": "edpartCancelGravMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 4266528,
-          "offset": 3376560,
-          "size": 58,
-          "match_percent": 15.714286
-        },
-        {
-          "name": "_ZL20edpartCancelEmitMenuP10eduimenu_sS0_",
-          "demangled_name": "edpartCancelEmitMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 4266656,
-          "offset": 3376688,
-          "size": 58,
-          "match_percent": 15.714286
-        },
-        {
-          "name": "_ZL20edpartCancelTintMenuP10eduimenu_sS0_",
-          "demangled_name": "edpartCancelTintMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 4266784,
-          "offset": 3376816,
-          "size": 58,
-          "match_percent": 15.714286
-        },
-        {
-          "name": "_ZL20edpartCancelTypeMenuP10eduimenu_sS0_",
-          "demangled_name": "edpartCancelTypeMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 4267664,
-          "offset": 3377696,
-          "size": 58,
-          "match_percent": 15.714286
-        },
-        {
-          "name": "_ZL10edpartInitv",
-          "demangled_name": "edpartInit()",
-          "address": 4267728,
-          "offset": 3377760,
-          "size": 269,
-          "match_percent": 5.892857
-        },
-        {
-          "name": "_ZL16edpartChangeNameP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edpartChangeName(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 4268064,
-          "offset": 3378096,
-          "size": 185,
-          "match_percent": 7.222222
-        },
-        {
-          "name": "_ZL16edpartSScaleMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edpartSScaleMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 4268256,
-          "offset": 3378288,
-          "size": 254,
-          "match_percent": 4.736842
-        },
-        {
-          "name": "_ZL14edpartDataMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edpartDataMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 4268512,
-          "offset": 3378544,
-          "size": 1023,
-          "match_percent": 1.626794
-        },
-        {
-          "name": "_ZL20edpartChangeNameMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edpartChangeNameMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 4269536,
-          "offset": 3379568,
-          "size": 291,
-          "match_percent": 3.283582
-        },
-        {
-          "name": "_ZL16edpartSoundsMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edpartSoundsMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 4269840,
-          "offset": 3379872,
-          "size": 528,
-          "match_percent": 2.857143
-        },
-        {
-          "name": "_ZL20edpartImpactPartMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edpartImpactPartMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 4271088,
-          "offset": 3381120,
-          "size": 398,
-          "match_percent": 2.55814
-        },
-        {
-          "name": "_ZL19edpartDieDebrisMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edpartDieDebrisMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 4271488,
-          "offset": 3381520,
-          "size": 398,
-          "match_percent": 2.55814
-        },
-        {
-          "name": "_ZL14edpartEmitMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edpartEmitMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 4273744,
-          "offset": 3383776,
-          "size": 636,
-          "match_percent": 2.463768
-        },
-        {
-          "name": "_ZL14edpartTypeMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edpartTypeMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 4278480,
-          "offset": 3388512,
-          "size": 312,
-          "match_percent": 3.235294
-        },
-        {
-          "name": "_ZL14edpartMoveListP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edpartMoveList(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 4278800,
-          "offset": 3388832,
-          "size": 124,
-          "match_percent": 8.181818
-        },
-        {
-          "name": "_ZL14edpartCopyTypeP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edpartCopyType(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 4278928,
-          "offset": 3388960,
-          "size": 304,
-          "match_percent": 3.953488
-        },
-        {
-          "name": "_ZL19edpartSetSwitchTypeP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edpartSetSwitchType(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 4279232,
-          "offset": 3389264,
-          "size": 100,
-          "match_percent": 8.461538
-        },
-        {
-          "name": "_ZL21edpartSetSoundControlP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edpartSetSoundControl(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 4279344,
-          "offset": 3389376,
-          "size": 223,
-          "match_percent": 5.151515
-        },
-        {
-          "name": "_ZL16edpartSetSoundIDP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edpartSetSoundID(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 4279568,
-          "offset": 3389600,
-          "size": 215,
-          "match_percent": 6.061539
-        },
-        {
-          "name": "_ZL13edpartSelTypeP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edpartSelType(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 4281504,
-          "offset": 3391536,
-          "size": 122,
-          "match_percent": 10.0
-        },
-        {
-          "name": "_ZL21edpartDebrisScaleMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edpartDebrisScaleMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 4281632,
-          "offset": 3391664,
-          "size": 292,
-          "match_percent": 3.492063
-        },
-        {
-          "name": "_ZL18edpartEmitTimeMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edpartEmitTimeMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 4281936,
-          "offset": 3391968,
-          "size": 674,
-          "match_percent": 2.394366
-        },
-        {
-          "name": "_ZL20edpartSwitchTypeMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edpartSwitchTypeMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 4282928,
-          "offset": 3392960,
-          "size": 334,
-          "match_percent": 4.25
-        },
-        {
-          "name": "_ZL18edpartInstanceMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edpartInstanceMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 4283984,
-          "offset": 3394016,
-          "size": 769,
-          "match_percent": 2.0
-        },
-        {
-          "name": "_ZL19edpartLevelTypeMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edpartLevelTypeMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 4284768,
-          "offset": 3394800,
-          "size": 516,
-          "match_percent": 3.305085
-        },
-        {
-          "name": "_ZL21edpartGeneralTypeMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edpartGeneralTypeMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 4285296,
-          "offset": 3395328,
-          "size": 528,
-          "match_percent": 3.277311
-        },
-        {
-          "name": "_ZL16edpartSwitchMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edpartSwitchMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 4287392,
-          "offset": 3397424,
-          "size": 381,
-          "match_percent": 2.682927
-        },
-        {
-          "name": "_ZL16edpartSoundXMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edpartSoundXMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 4287776,
-          "offset": 3397808,
-          "size": 362,
-          "match_percent": 2.650602
-        },
-        {
-          "name": "_ZL19edpartScaleTypeMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edpartScaleTypeMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 4288448,
-          "offset": 3398480,
-          "size": 351,
-          "match_percent": 3.6
-        },
-        {
-          "name": "_ZL16edpartCutOffMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edpartCutOffMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 4288800,
-          "offset": 3398832,
-          "size": 302,
-          "match_percent": 3.384615
-        },
-        {
-          "name": "_ZL17edpartVarEmitMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edpartVarEmitMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 4289104,
-          "offset": 3399136,
-          "size": 496,
-          "match_percent": 3.207547
-        },
-        {
-          "name": "_ZL18edpartVarStartMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edpartVarStartMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 4289600,
-          "offset": 3399632,
-          "size": 496,
-          "match_percent": 3.207547
-        },
-        {
-          "name": "_ZL14edpartGravMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edpartGravMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 4290096,
-          "offset": 3400128,
-          "size": 424,
-          "match_percent": 3.033708
-        },
-        {
-          "name": "_ZL17edpartEmitVelMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edpartEmitVelMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 4290528,
-          "offset": 3400560,
-          "size": 323,
-          "match_percent": 5.333334
-        },
-        {
-          "name": "_ZL14edpartTintMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edpartTintMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 4290864,
-          "offset": 3400896,
-          "size": 478,
-          "match_percent": 2.727273
-        },
-        {
-          "name": "_ZL17edpartSoundIDMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edpartSoundIDMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 4291760,
-          "offset": 3401792,
-          "size": 512,
-          "match_percent": 3.046875
-        },
-        {
-          "name": "_ZL12edpartRenderv",
-          "demangled_name": "edpartRender()",
-          "address": 4304976,
-          "offset": 3415008,
-          "size": 57,
-          "match_percent": 20.625
-        },
-        {
-          "name": "_ZL18edpartAddLevelTypeP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edpartAddLevelType(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 4305472,
-          "offset": 3415504,
-          "size": 407,
-          "match_percent": 4.047619
-        },
-        {
-          "name": "_ZL20edpartAddGeneralTypeP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edpartAddGeneralType(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 4305888,
-          "offset": 3415920,
-          "size": 403,
-          "match_percent": 4.047619
-        },
-        {
-          "name": "_ZL20edpartApplyScaleTypeP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edpartApplyScaleType(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 4306560,
-          "offset": 3416592,
-          "size": 126,
-          "match_percent": 6.285714
-        },
-        {
-          "name": "_ZL21edpartFileSaveEffectsP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edpartFileSaveEffects(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 4310272,
-          "offset": 3420304,
-          "size": 1592,
-          "match_percent": 1.030303
-        },
-        {
-          "name": "_ZL21edpartFileLoadEffectsP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edpartFileLoadEffects(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 4328736,
-          "offset": 3438768,
-          "size": 1142,
-          "match_percent": 1.659751
-        },
-        {
-          "name": "_ZL16edpartDeleteTypeP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edpartDeleteType(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 4330240,
-          "offset": 3440272,
-          "size": 248,
-          "match_percent": 5.230769
-        },
-        {
-          "name": "_ZL10edpartProcfP7nupad_s",
-          "demangled_name": "edpartProc(float, nupad_s*)",
-          "address": 4334528,
-          "offset": 3444560,
-          "size": 133,
-          "match_percent": 6.666666
-        }
-      ]
-    },
-    {
-      "name": "gameapi/edtools/edpartcallbacks.cpp.o",
-      "source": "src/gameapi/edtools/edpartcallbacks.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_gameapi/edpartcallbacks.o",
-      "functions": [
-        {
-          "name": "_ZL24edptlcbApplyBounceOffsetP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edptlcbApplyBounceOffset(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3345952,
-          "offset": 2455984,
-          "size": 77,
-          "match_percent": 15.0
-        },
-        {
-          "name": "_ZL24edptlcbApplyBounceFactorP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edptlcbApplyBounceFactor(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3346032,
-          "offset": 2456064,
-          "size": 77,
-          "match_percent": 15.0
-        },
-        {
-          "name": "_ZL22edptlcbApplyStarPointsP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edptlcbApplyStarPoints(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3346208,
-          "offset": 2456240,
-          "size": 89,
-          "match_percent": 10.0
-        },
-        {
-          "name": "_ZL22edptlcbChangeCSDisableP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edptlcbChangeCSDisable(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3348576,
-          "offset": 2458608,
-          "size": 88,
-          "match_percent": 3.478261
-        },
-        {
-          "name": "_ZL24edptlcbSetDebrisThinningP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edptlcbSetDebrisThinning(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3348672,
-          "offset": 2458704,
-          "size": 31,
-          "match_percent": 31.428572
-        },
-        {
-          "name": "_ZL22edptlcbSetDebrisDetailP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edptlcbSetDebrisDetail(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3348704,
-          "offset": 2458736,
-          "size": 27,
-          "match_percent": 18.571428
-        },
-        {
-          "name": "_ZL25edptlcbJumpToGameLocationP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edptlcbJumpToGameLocation(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3350448,
-          "offset": 2460480,
-          "size": 60,
-          "match_percent": 27.142857
-        },
-        {
-          "name": "_ZL27edptlcbCancelTestDetailMenuP10eduimenu_sS0_",
-          "demangled_name": "edptlcbCancelTestDetailMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 3350640,
-          "offset": 2460672,
-          "size": 58,
-          "match_percent": 15.714286
-        },
-        {
-          "name": "_ZL23edptlcbCancelDetailMenuP10eduimenu_sS0_",
-          "demangled_name": "edptlcbCancelDetailMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 3350704,
-          "offset": 2460736,
-          "size": 58,
-          "match_percent": 15.714286
-        },
-        {
-          "name": "_ZL25edptlcbCancelDrawflagMenuP10eduimenu_sS0_",
-          "demangled_name": "edptlcbCancelDrawflagMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 3350768,
-          "offset": 2460800,
-          "size": 58,
-          "match_percent": 15.714286
-        },
-        {
-          "name": "_ZL22edptlcbCancelGroupMenuP10eduimenu_sS0_",
-          "demangled_name": "edptlcbCancelGroupMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 3350832,
-          "offset": 2460864,
-          "size": 58,
-          "match_percent": 15.714286
-        },
-        {
-          "name": "_ZL27edptlcbCancelSwitchTypeMenuP10eduimenu_sS0_",
-          "demangled_name": "edptlcbCancelSwitchTypeMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 3350896,
-          "offset": 2460928,
-          "size": 58,
-          "match_percent": 15.714286
-        },
-        {
-          "name": "_ZL23edptlcbCancelSwitchMenuP10eduimenu_sS0_",
-          "demangled_name": "edptlcbCancelSwitchMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 3350960,
-          "offset": 2460992,
-          "size": 58,
-          "match_percent": 15.714286
-        },
-        {
-          "name": "_ZL25edptlcbCancelDpadModeMenuP10eduimenu_sS0_",
-          "demangled_name": "edptlcbCancelDpadModeMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 3351024,
-          "offset": 2461056,
-          "size": 58,
-          "match_percent": 15.714286
-        },
-        {
-          "name": "_ZL28edptlcbCancelScaleEffectMenuP10eduimenu_sS0_",
-          "demangled_name": "edptlcbCancelScaleEffectMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 3351152,
-          "offset": 2461184,
-          "size": 58,
-          "match_percent": 15.714286
-        },
-        {
-          "name": "_ZL29edptlcbCancelSoundControlMenuP10eduimenu_sS0_",
-          "demangled_name": "edptlcbCancelSoundControlMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 3351584,
-          "offset": 2461616,
-          "size": 58,
-          "match_percent": 15.714286
-        },
-        {
-          "name": "_ZL24edptlcbCancelSoundIDMenuP10eduimenu_sS0_",
-          "demangled_name": "edptlcbCancelSoundIDMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 3351648,
-          "offset": 2461680,
-          "size": 58,
-          "match_percent": 15.714286
-        },
-        {
-          "name": "_ZL23edptlcbCancelSoundXMenuP10eduimenu_sS0_",
-          "demangled_name": "edptlcbCancelSoundXMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 3351712,
-          "offset": 2461744,
-          "size": 58,
-          "match_percent": 15.714286
-        },
-        {
-          "name": "_ZL23edptlcbCancelSoundsMenuP10eduimenu_sS0_",
-          "demangled_name": "edptlcbCancelSoundsMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 3351776,
-          "offset": 2461808,
-          "size": 58,
-          "match_percent": 15.714286
-        },
-        {
-          "name": "_ZL23edptlcbCancelBounceMenuP10eduimenu_sS0_",
-          "demangled_name": "edptlcbCancelBounceMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 3351840,
-          "offset": 2461872,
-          "size": 58,
-          "match_percent": 15.714286
-        },
-        {
-          "name": "_ZL22edptlcbCancelGhostMenuP10eduimenu_sS0_",
-          "demangled_name": "edptlcbCancelGhostMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 3352288,
-          "offset": 2462320,
-          "size": 58,
-          "match_percent": 15.714286
-        },
-        {
-          "name": "_ZL27edptlcbCancelOrphanListMenuP10eduimenu_sS0_",
-          "demangled_name": "edptlcbCancelOrphanListMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 3353440,
-          "offset": 2463472,
-          "size": 58,
-          "match_percent": 15.714286
-        },
-        {
-          "name": "_ZL26edptlcbCancelClipboardMenuP10eduimenu_sS0_",
-          "demangled_name": "edptlcbCancelClipboardMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 3353504,
-          "offset": 2463536,
-          "size": 58,
-          "match_percent": 15.714286
-        },
-        {
-          "name": "_ZL23edptlcbSoundControlMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edptlcbSoundControlMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3361024,
-          "offset": 2471056,
-          "size": 783,
-          "match_percent": 1.725888
-        },
-        {
-          "name": "_ZL22edptlcbSetSoundControlP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edptlcbSetSoundControl(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3387920,
-          "offset": 2497952,
-          "size": 447,
-          "match_percent": 3.17757
-        },
-        {
-          "name": "_ZL26edptlChangeRepeatBoxXZLockP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edptlChangeRepeatBoxXZLock(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3428912,
-          "offset": 2538944,
-          "size": 140,
-          "match_percent": 9.428572
-        },
-        {
-          "name": "_ZL22edptlcbScaleEffectMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edptlcbScaleEffectMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3429472,
-          "offset": 2539504,
-          "size": 372,
-          "match_percent": 2.75
-        },
-        {
-          "name": "_ZL23edptlcbApplyScaleFactorP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edptlcbApplyScaleFactor(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3494576,
-          "offset": 2604608,
-          "size": 154,
-          "match_percent": 6.585366
-        },
-        {
-          "name": "_ZL22edpartChangeRanMaxLifeP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edpartChangeRanMaxLife(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 4262048,
-          "offset": 3372080,
-          "size": 41,
-          "match_percent": 27.0
-        },
-        {
-          "name": "_ZL25edpartChangeInstanceScaleP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edpartChangeInstanceScale(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 4262240,
-          "offset": 3372272,
-          "size": 41,
-          "match_percent": 27.0
-        },
-        {
-          "name": "_ZL23edpartChangeInstanceRotP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edpartChangeInstanceRot(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 4263248,
-          "offset": 3373280,
-          "size": 145,
-          "match_percent": 8.461538
-        },
-        {
-          "name": "_ZL26edpartChangeInstanceVarRotP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edpartChangeInstanceVarRot(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 4263408,
-          "offset": 3373440,
-          "size": 145,
-          "match_percent": 8.461538
-        },
-        {
-          "name": "_ZL24edpartChangeInstanceFlagP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edpartChangeInstanceFlag(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 4263712,
-          "offset": 3373744,
-          "size": 55,
-          "match_percent": 13.75
-        },
-        {
-          "name": "_ZL22edpartChangeIvalOffRanP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edpartChangeIvalOffRan(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 4263920,
-          "offset": 3373952,
-          "size": 41,
-          "match_percent": 27.0
-        },
-        {
-          "name": "_ZL23edpartChangeDebrisIndexP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edpartChangeDebrisIndex(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 4264112,
-          "offset": 3374144,
-          "size": 147,
-          "match_percent": 6.346154
-        },
-        {
-          "name": "_ZL24edpartChangeDebrisPerSecP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edpartChangeDebrisPerSec(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 4264336,
-          "offset": 3374368,
-          "size": 95,
-          "match_percent": 11.0
-        },
-        {
-          "name": "_ZL23edpartChangeDebrisScaleP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edpartChangeDebrisScale(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 4264432,
-          "offset": 3374464,
-          "size": 41,
-          "match_percent": 27.0
-        },
-        {
           "name": "_ZL22edpartCancelSScaleMenuP10eduimenu_sS0_",
           "demangled_name": "edpartCancelSScaleMenu(eduimenu_s*, eduimenu_s*)",
           "address": 4264864,
@@ -28230,6 +26791,14 @@
           "demangled_name": "edpartCancelChangeNameMenu(eduimenu_s*, eduimenu_s*)",
           "address": 4264992,
           "offset": 3375024,
+          "size": 58,
+          "match_percent": 15.714286
+        },
+        {
+          "name": "_ZL20edpartCancelDataMenuP10eduimenu_sS0_",
+          "demangled_name": "edpartCancelDataMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 4265056,
+          "offset": 3375088,
           "size": 58,
           "match_percent": 15.714286
         },
@@ -28370,6 +26939,14 @@
           "match_percent": 15.714286
         },
         {
+          "name": "_ZL22edpartCancelCutOffMenuP10eduimenu_sS0_",
+          "demangled_name": "edpartCancelCutOffMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 4266208,
+          "offset": 3376240,
+          "size": 58,
+          "match_percent": 15.714286
+        },
+        {
           "name": "_ZL24edpartCancelEmitTimeMenuP10eduimenu_sS0_",
           "demangled_name": "edpartCancelEmitTimeMenu(eduimenu_s*, eduimenu_s*)",
           "address": 4266272,
@@ -28402,6 +26979,14 @@
           "match_percent": 15.714286
         },
         {
+          "name": "_ZL20edpartCancelGravMenuP10eduimenu_sS0_",
+          "demangled_name": "edpartCancelGravMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 4266528,
+          "offset": 3376560,
+          "size": 58,
+          "match_percent": 15.714286
+        },
+        {
           "name": "_ZL23edpartCancelEmitVelMenuP10eduimenu_sS0_",
           "demangled_name": "edpartCancelEmitVelMenu(eduimenu_s*, eduimenu_s*)",
           "address": 4266592,
@@ -28410,10 +26995,26 @@
           "match_percent": 15.714286
         },
         {
+          "name": "_ZL20edpartCancelEmitMenuP10eduimenu_sS0_",
+          "demangled_name": "edpartCancelEmitMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 4266656,
+          "offset": 3376688,
+          "size": 58,
+          "match_percent": 15.714286
+        },
+        {
           "name": "_ZL29edpartCancelInstanceScaleMenuP10eduimenu_sS0_",
           "demangled_name": "edpartCancelInstanceScaleMenu(eduimenu_s*, eduimenu_s*)",
           "address": 4266720,
           "offset": 3376752,
+          "size": 58,
+          "match_percent": 15.714286
+        },
+        {
+          "name": "_ZL20edpartCancelTintMenuP10eduimenu_sS0_",
+          "demangled_name": "edpartCancelTintMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 4266784,
+          "offset": 3376816,
           "size": 58,
           "match_percent": 15.714286
         },
@@ -28498,6 +27099,22 @@
           "match_percent": 15.714286
         },
         {
+          "name": "_ZL20edpartCancelTypeMenuP10eduimenu_sS0_",
+          "demangled_name": "edpartCancelTypeMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 4267664,
+          "offset": 3377696,
+          "size": 58,
+          "match_percent": 15.714286
+        },
+        {
+          "name": "_ZL10edpartInitv",
+          "demangled_name": "edpartInit()",
+          "address": 4267728,
+          "offset": 3377760,
+          "size": 269,
+          "match_percent": 5.892857
+        },
+        {
           "name": "_ZL22edpartChangeFilterNameP10eduimenu_sP10eduiitem_sj",
           "demangled_name": "edpartChangeFilterName(eduimenu_s*, eduiitem_s*, unsigned int)",
           "address": 4268000,
@@ -28506,12 +27123,68 @@
           "match_percent": 27.142857
         },
         {
+          "name": "_ZL16edpartChangeNameP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edpartChangeName(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 4268064,
+          "offset": 3378096,
+          "size": 185,
+          "match_percent": 7.222222
+        },
+        {
+          "name": "_ZL16edpartSScaleMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edpartSScaleMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 4268256,
+          "offset": 3378288,
+          "size": 254,
+          "match_percent": 4.736842
+        },
+        {
+          "name": "_ZL14edpartDataMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edpartDataMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 4268512,
+          "offset": 3378544,
+          "size": 1023,
+          "match_percent": 1.626794
+        },
+        {
+          "name": "_ZL20edpartChangeNameMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edpartChangeNameMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 4269536,
+          "offset": 3379568,
+          "size": 291,
+          "match_percent": 3.283582
+        },
+        {
+          "name": "_ZL16edpartSoundsMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edpartSoundsMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 4269840,
+          "offset": 3379872,
+          "size": 528,
+          "match_percent": 2.857143
+        },
+        {
           "name": "_ZL24edpartDebrisSettingsMenuP10eduimenu_sP10eduiitem_sj",
           "demangled_name": "edpartDebrisSettingsMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
           "address": 4270368,
           "offset": 3380400,
           "size": 718,
           "match_percent": 2.179487
+        },
+        {
+          "name": "_ZL20edpartImpactPartMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edpartImpactPartMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 4271088,
+          "offset": 3381120,
+          "size": 398,
+          "match_percent": 2.55814
+        },
+        {
+          "name": "_ZL19edpartDieDebrisMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edpartDieDebrisMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 4271488,
+          "offset": 3381520,
+          "size": 398,
+          "match_percent": 2.55814
         },
         {
           "name": "_ZL22edpartImpactDebrisMenuP10eduimenu_sP10eduiitem_sj",
@@ -28546,6 +27219,14 @@
           "match_percent": 2.523365
         },
         {
+          "name": "_ZL14edpartEmitMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edpartEmitMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 4273744,
+          "offset": 3383776,
+          "size": 636,
+          "match_percent": 2.463768
+        },
+        {
           "name": "_ZL26edpartInstanceSettingsMenuP10eduimenu_sP10eduiitem_sj",
           "demangled_name": "edpartInstanceSettingsMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
           "address": 4274384,
@@ -28568,6 +27249,54 @@
           "offset": 3386608,
           "size": 1903,
           "match_percent": 0.951219
+        },
+        {
+          "name": "_ZL14edpartTypeMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edpartTypeMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 4278480,
+          "offset": 3388512,
+          "size": 312,
+          "match_percent": 3.235294
+        },
+        {
+          "name": "_ZL14edpartMoveListP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edpartMoveList(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 4278800,
+          "offset": 3388832,
+          "size": 124,
+          "match_percent": 8.181818
+        },
+        {
+          "name": "_ZL14edpartCopyTypeP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edpartCopyType(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 4278928,
+          "offset": 3388960,
+          "size": 304,
+          "match_percent": 3.953488
+        },
+        {
+          "name": "_ZL19edpartSetSwitchTypeP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edpartSetSwitchType(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 4279232,
+          "offset": 3389264,
+          "size": 100,
+          "match_percent": 8.461538
+        },
+        {
+          "name": "_ZL21edpartSetSoundControlP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edpartSetSoundControl(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 4279344,
+          "offset": 3389376,
+          "size": 223,
+          "match_percent": 5.151515
+        },
+        {
+          "name": "_ZL16edpartSetSoundIDP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edpartSetSoundID(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 4279568,
+          "offset": 3389600,
+          "size": 215,
+          "match_percent": 6.061539
         },
         {
           "name": "_ZL33edpartDeleteAllInstanceDuplicatesP10eduimenu_sP10eduiitem_sj",
@@ -28594,6 +27323,30 @@
           "match_percent": 2.857143
         },
         {
+          "name": "_ZL13edpartSelTypeP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edpartSelType(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 4281504,
+          "offset": 3391536,
+          "size": 122,
+          "match_percent": 10.0
+        },
+        {
+          "name": "_ZL21edpartDebrisScaleMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edpartDebrisScaleMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 4281632,
+          "offset": 3391664,
+          "size": 292,
+          "match_percent": 3.492063
+        },
+        {
+          "name": "_ZL18edpartEmitTimeMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edpartEmitTimeMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 4281936,
+          "offset": 3391968,
+          "size": 674,
+          "match_percent": 2.394366
+        },
+        {
           "name": "_ZL23edpartInstanceScaleMenuP10eduimenu_sP10eduiitem_sj",
           "demangled_name": "edpartInstanceScaleMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
           "address": 4282624,
@@ -28602,12 +27355,44 @@
           "match_percent": 3.492063
         },
         {
+          "name": "_ZL20edpartSwitchTypeMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edpartSwitchTypeMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 4282928,
+          "offset": 3392960,
+          "size": 334,
+          "match_percent": 4.25
+        },
+        {
           "name": "_ZL22edpartSoundControlMenuP10eduimenu_sP10eduiitem_sj",
           "demangled_name": "edpartSoundControlMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
           "address": 4283264,
           "offset": 3393296,
           "size": 719,
           "match_percent": 1.827957
+        },
+        {
+          "name": "_ZL18edpartInstanceMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edpartInstanceMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 4283984,
+          "offset": 3394016,
+          "size": 769,
+          "match_percent": 2.0
+        },
+        {
+          "name": "_ZL19edpartLevelTypeMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edpartLevelTypeMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 4284768,
+          "offset": 3394800,
+          "size": 516,
+          "match_percent": 3.305085
+        },
+        {
+          "name": "_ZL21edpartGeneralTypeMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edpartGeneralTypeMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 4285296,
+          "offset": 3395328,
+          "size": 528,
+          "match_percent": 3.277311
         },
         {
           "name": "_ZL24edpartThingsInstanceMenuP10eduimenu_sP10eduiitem_sj",
@@ -28626,6 +27411,22 @@
           "match_percent": 2.041885
         },
         {
+          "name": "_ZL16edpartSwitchMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edpartSwitchMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 4287392,
+          "offset": 3397424,
+          "size": 381,
+          "match_percent": 2.682927
+        },
+        {
+          "name": "_ZL16edpartSoundXMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edpartSoundXMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 4287776,
+          "offset": 3397808,
+          "size": 362,
+          "match_percent": 2.650602
+        },
+        {
           "name": "_ZL23edpartChangeGenRateMenuP10eduimenu_sP10eduiitem_sj",
           "demangled_name": "edpartChangeGenRateMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
           "address": 4288144,
@@ -28634,12 +27435,76 @@
           "match_percent": 3.333333
         },
         {
+          "name": "_ZL19edpartScaleTypeMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edpartScaleTypeMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 4288448,
+          "offset": 3398480,
+          "size": 351,
+          "match_percent": 3.6
+        },
+        {
+          "name": "_ZL16edpartCutOffMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edpartCutOffMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 4288800,
+          "offset": 3398832,
+          "size": 302,
+          "match_percent": 3.384615
+        },
+        {
+          "name": "_ZL17edpartVarEmitMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edpartVarEmitMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 4289104,
+          "offset": 3399136,
+          "size": 496,
+          "match_percent": 3.207547
+        },
+        {
+          "name": "_ZL18edpartVarStartMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edpartVarStartMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 4289600,
+          "offset": 3399632,
+          "size": 496,
+          "match_percent": 3.207547
+        },
+        {
+          "name": "_ZL14edpartGravMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edpartGravMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 4290096,
+          "offset": 3400128,
+          "size": 424,
+          "match_percent": 3.033708
+        },
+        {
+          "name": "_ZL17edpartEmitVelMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edpartEmitVelMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 4290528,
+          "offset": 3400560,
+          "size": 323,
+          "match_percent": 5.333334
+        },
+        {
+          "name": "_ZL14edpartTintMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edpartTintMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 4290864,
+          "offset": 3400896,
+          "size": 478,
+          "match_percent": 2.727273
+        },
+        {
           "name": "_ZL23edpartChangeMaxLifeMenuP10eduimenu_sP10eduiitem_sj",
           "demangled_name": "edpartChangeMaxLifeMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
           "address": 4291344,
           "offset": 3401376,
           "size": 410,
           "match_percent": 2.588235
+        },
+        {
+          "name": "_ZL17edpartSoundIDMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edpartSoundIDMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 4291760,
+          "offset": 3401792,
+          "size": 512,
+          "match_percent": 3.046875
         },
         {
           "name": "_ZL24edpartLevelPartIndexMenuP10eduimenu_sP10eduiitem_sj",
@@ -28682,6 +27547,46 @@
           "match_percent": 1.428572
         },
         {
+          "name": "_ZL12edpartRenderv",
+          "demangled_name": "edpartRender()",
+          "address": 4304976,
+          "offset": 3415008,
+          "size": 57,
+          "match_percent": 20.625
+        },
+        {
+          "name": "_ZL18edpartAddLevelTypeP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edpartAddLevelType(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 4305472,
+          "offset": 3415504,
+          "size": 407,
+          "match_percent": 4.047619
+        },
+        {
+          "name": "_ZL20edpartAddGeneralTypeP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edpartAddGeneralType(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 4305888,
+          "offset": 3415920,
+          "size": 403,
+          "match_percent": 4.047619
+        },
+        {
+          "name": "_ZL20edpartApplyScaleTypeP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edpartApplyScaleType(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 4306560,
+          "offset": 3416592,
+          "size": 126,
+          "match_percent": 6.285714
+        },
+        {
+          "name": "_ZL21edpartFileSaveEffectsP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edpartFileSaveEffects(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 4310272,
+          "offset": 3420304,
+          "size": 1592,
+          "match_percent": 1.030303
+        },
+        {
           "name": "_ZL26edpartFileSaveEffectsLevelP10eduimenu_sP10eduiitem_sj",
           "demangled_name": "edpartFileSaveEffectsLevel(eduimenu_s*, eduiitem_s*, unsigned int)",
           "address": 4311872,
@@ -28696,6 +27601,30 @@
           "offset": 3422896,
           "size": 978,
           "match_percent": 1.708543
+        },
+        {
+          "name": "_ZL21edpartFileLoadEffectsP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edpartFileLoadEffects(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 4328736,
+          "offset": 3438768,
+          "size": 1142,
+          "match_percent": 1.659751
+        },
+        {
+          "name": "_ZL16edpartDeleteTypeP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edpartDeleteType(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 4330240,
+          "offset": 3440272,
+          "size": 248,
+          "match_percent": 5.230769
+        },
+        {
+          "name": "_ZL10edpartProcfP7nupad_s",
+          "demangled_name": "edpartProc(float, nupad_s*)",
+          "address": 4334528,
+          "offset": 3444560,
+          "size": 133,
+          "match_percent": 6.666666
         }
       ]
     },
@@ -29127,6 +28056,1077 @@
           "offset": 2704080,
           "size": 38,
           "match_percent": 100.0
+        }
+      ]
+    },
+    {
+      "name": "gameapi/edtools/edptlcallbacks.cpp.o",
+      "source": "src/gameapi/edtools/edptlcallbacks.cpp",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_gameapi/edptlcallbacks.o",
+      "functions": [
+        {
+          "name": "_ZL24edptlcbApplyBounceOffsetP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edptlcbApplyBounceOffset(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3345952,
+          "offset": 2455984,
+          "size": 77,
+          "match_percent": 15.0
+        },
+        {
+          "name": "_ZL24edptlcbApplyBounceFactorP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edptlcbApplyBounceFactor(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3346032,
+          "offset": 2456064,
+          "size": 77,
+          "match_percent": 15.0
+        },
+        {
+          "name": "_ZL22edptlcbApplyStarPointsP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edptlcbApplyStarPoints(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3346208,
+          "offset": 2456240,
+          "size": 89,
+          "match_percent": 10.0
+        },
+        {
+          "name": "_ZL18cbPtlChangeEmitVelP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlChangeEmitVel(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3346496,
+          "offset": 2456528,
+          "size": 88,
+          "match_percent": 10.0
+        },
+        {
+          "name": "_ZL12cbPtlChangeXP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlChangeX(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3346592,
+          "offset": 2456624,
+          "size": 168,
+          "match_percent": 6.734694
+        },
+        {
+          "name": "_ZL12cbPtlChangeYP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlChangeY(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3346768,
+          "offset": 2456800,
+          "size": 400,
+          "match_percent": 2.79661
+        },
+        {
+          "name": "_ZL12cbPtlChangeZP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlChangeZ(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3347168,
+          "offset": 2457200,
+          "size": 618,
+          "match_percent": 2.721088
+        },
+        {
+          "name": "_ZL17cbPtlChangeCutOffP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlChangeCutOff(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3347792,
+          "offset": 2457824,
+          "size": 103,
+          "match_percent": 8.461538
+        },
+        {
+          "name": "_ZL16cbPtlChangeCutOnP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlChangeCutOn(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3347904,
+          "offset": 2457936,
+          "size": 99,
+          "match_percent": 8.8
+        },
+        {
+          "name": "_ZL21cbPtlChangeDrawCutOffP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlChangeDrawCutOff(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3348016,
+          "offset": 2458048,
+          "size": 88,
+          "match_percent": 10.0
+        },
+        {
+          "name": "_ZL22cbPtlChangeSoundCutOffP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlChangeSoundCutOff(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3348112,
+          "offset": 2458144,
+          "size": 88,
+          "match_percent": 10.0
+        },
+        {
+          "name": "_ZL23cbPtlChangeCameraCutOffP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlChangeCameraCutOff(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3348208,
+          "offset": 2458240,
+          "size": 88,
+          "match_percent": 10.0
+        },
+        {
+          "name": "_ZL22edptlcbChangeCSDisableP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edptlcbChangeCSDisable(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3348576,
+          "offset": 2458608,
+          "size": 88,
+          "match_percent": 3.478261
+        },
+        {
+          "name": "_ZL24edptlcbSetDebrisThinningP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edptlcbSetDebrisThinning(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3348672,
+          "offset": 2458704,
+          "size": 31,
+          "match_percent": 31.428572
+        },
+        {
+          "name": "_ZL22edptlcbSetDebrisDetailP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edptlcbSetDebrisDetail(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3348704,
+          "offset": 2458736,
+          "size": 27,
+          "match_percent": 18.571428
+        },
+        {
+          "name": "_ZL22cbChangeNumCollSpheresP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbChangeNumCollSpheres(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3348864,
+          "offset": 2458896,
+          "size": 89,
+          "match_percent": 10.0
+        },
+        {
+          "name": "_ZL17cbChangeTorusLifeP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbChangeTorusLife(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3348960,
+          "offset": 2458992,
+          "size": 91,
+          "match_percent": 10.0
+        },
+        {
+          "name": "_ZL17cbChangeTorusRad1P10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbChangeTorusRad1(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3349056,
+          "offset": 2459088,
+          "size": 91,
+          "match_percent": 10.0
+        },
+        {
+          "name": "_ZL17cbChangeTorusRad2P10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbChangeTorusRad2(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3349152,
+          "offset": 2459184,
+          "size": 91,
+          "match_percent": 10.0
+        },
+        {
+          "name": "_ZL22cbPtlChangeDamageFlagsP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlChangeDamageFlags(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3349248,
+          "offset": 2459280,
+          "size": 112,
+          "match_percent": 10.645162
+        },
+        {
+          "name": "_ZL21cbPtlChangeRepeatFlagP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlChangeRepeatFlag(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3349360,
+          "offset": 2459392,
+          "size": 124,
+          "match_percent": 6.875
+        },
+        {
+          "name": "_ZL17cbPtlChangeSScaleP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlChangeSScale(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3349792,
+          "offset": 2459824,
+          "size": 27,
+          "match_percent": 13.333333
+        },
+        {
+          "name": "_ZL19cbPtlChangePriorityP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlChangePriority(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3349824,
+          "offset": 2459856,
+          "size": 64,
+          "match_percent": 22.0
+        },
+        {
+          "name": "_ZL26cbPtlToggleDynamicPriorityP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlToggleDynamicPriority(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3349888,
+          "offset": 2459920,
+          "size": 71,
+          "match_percent": 18.333334
+        },
+        {
+          "name": "_ZL16cbPtlSetXZFacingP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlSetXZFacing(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3349968,
+          "offset": 2460000,
+          "size": 58,
+          "match_percent": 5.714286
+        },
+        {
+          "name": "_ZL15cbPtlSelReadoutP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlSelReadout(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3350032,
+          "offset": 2460064,
+          "size": 27,
+          "match_percent": 18.571428
+        },
+        {
+          "name": "_ZL12cbPtlShowAllP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlShowAll(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3350064,
+          "offset": 2460096,
+          "size": 29,
+          "match_percent": 14.444445
+        },
+        {
+          "name": "_ZL15cbPtlSnapToggleP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlSnapToggle(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3350096,
+          "offset": 2460128,
+          "size": 31,
+          "match_percent": 16.25
+        },
+        {
+          "name": "_ZL11cbPtlCancelP10eduimenu_sS0_",
+          "demangled_name": "cbPtlCancel(eduimenu_s*, eduimenu_s*)",
+          "address": 3350128,
+          "offset": 2460160,
+          "size": 26,
+          "match_percent": 31.428572
+        },
+        {
+          "name": "_ZL25edptlcbJumpToGameLocationP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edptlcbJumpToGameLocation(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3350448,
+          "offset": 2460480,
+          "size": 60,
+          "match_percent": 27.142857
+        },
+        {
+          "name": "_ZL27edptlcbCancelTestDetailMenuP10eduimenu_sS0_",
+          "demangled_name": "edptlcbCancelTestDetailMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 3350640,
+          "offset": 2460672,
+          "size": 58,
+          "match_percent": 15.714286
+        },
+        {
+          "name": "_ZL23edptlcbCancelDetailMenuP10eduimenu_sS0_",
+          "demangled_name": "edptlcbCancelDetailMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 3350704,
+          "offset": 2460736,
+          "size": 58,
+          "match_percent": 15.714286
+        },
+        {
+          "name": "_ZL25edptlcbCancelDrawflagMenuP10eduimenu_sS0_",
+          "demangled_name": "edptlcbCancelDrawflagMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 3350768,
+          "offset": 2460800,
+          "size": 58,
+          "match_percent": 15.714286
+        },
+        {
+          "name": "_ZL22edptlcbCancelGroupMenuP10eduimenu_sS0_",
+          "demangled_name": "edptlcbCancelGroupMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 3350832,
+          "offset": 2460864,
+          "size": 58,
+          "match_percent": 15.714286
+        },
+        {
+          "name": "_ZL27edptlcbCancelSwitchTypeMenuP10eduimenu_sS0_",
+          "demangled_name": "edptlcbCancelSwitchTypeMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 3350896,
+          "offset": 2460928,
+          "size": 58,
+          "match_percent": 15.714286
+        },
+        {
+          "name": "_ZL23edptlcbCancelSwitchMenuP10eduimenu_sS0_",
+          "demangled_name": "edptlcbCancelSwitchMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 3350960,
+          "offset": 2460992,
+          "size": 58,
+          "match_percent": 15.714286
+        },
+        {
+          "name": "_ZL25edptlcbCancelDpadModeMenuP10eduimenu_sS0_",
+          "demangled_name": "edptlcbCancelDpadModeMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 3351024,
+          "offset": 2461056,
+          "size": 58,
+          "match_percent": 15.714286
+        },
+        {
+          "name": "_ZL21cbPtlCancelSScaleMenuP10eduimenu_sS0_",
+          "demangled_name": "cbPtlCancelSScaleMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 3351088,
+          "offset": 2461120,
+          "size": 58,
+          "match_percent": 15.714286
+        },
+        {
+          "name": "_ZL28edptlcbCancelScaleEffectMenuP10eduimenu_sS0_",
+          "demangled_name": "edptlcbCancelScaleEffectMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 3351152,
+          "offset": 2461184,
+          "size": 58,
+          "match_percent": 15.714286
+        },
+        {
+          "name": "_ZL31cbPtlCancelInstanceSettingsMenuP10eduimenu_sS0_",
+          "demangled_name": "cbPtlCancelInstanceSettingsMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 3351216,
+          "offset": 2461248,
+          "size": 58,
+          "match_percent": 15.714286
+        },
+        {
+          "name": "_ZL20cbPtlCancelTorusMenuP10eduimenu_sS0_",
+          "demangled_name": "cbPtlCancelTorusMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 3351280,
+          "offset": 2461312,
+          "size": 88,
+          "match_percent": 12.941176
+        },
+        {
+          "name": "_ZL19cbPtlCancelCollMenuP10eduimenu_sS0_",
+          "demangled_name": "cbPtlCancelCollMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 3351376,
+          "offset": 2461408,
+          "size": 68,
+          "match_percent": 14.666667
+        },
+        {
+          "name": "_ZL25cbPtlCancelDamageFlagMenuP10eduimenu_sS0_",
+          "demangled_name": "cbPtlCancelDamageFlagMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 3351456,
+          "offset": 2461488,
+          "size": 58,
+          "match_percent": 15.714286
+        },
+        {
+          "name": "_ZL21cbPtlCancelDamageMenuP10eduimenu_sS0_",
+          "demangled_name": "cbPtlCancelDamageMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 3351520,
+          "offset": 2461552,
+          "size": 58,
+          "match_percent": 15.714286
+        },
+        {
+          "name": "_ZL29edptlcbCancelSoundControlMenuP10eduimenu_sS0_",
+          "demangled_name": "edptlcbCancelSoundControlMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 3351584,
+          "offset": 2461616,
+          "size": 58,
+          "match_percent": 15.714286
+        },
+        {
+          "name": "_ZL24edptlcbCancelSoundIDMenuP10eduimenu_sS0_",
+          "demangled_name": "edptlcbCancelSoundIDMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 3351648,
+          "offset": 2461680,
+          "size": 58,
+          "match_percent": 15.714286
+        },
+        {
+          "name": "_ZL23edptlcbCancelSoundXMenuP10eduimenu_sS0_",
+          "demangled_name": "edptlcbCancelSoundXMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 3351712,
+          "offset": 2461744,
+          "size": 58,
+          "match_percent": 15.714286
+        },
+        {
+          "name": "_ZL23edptlcbCancelSoundsMenuP10eduimenu_sS0_",
+          "demangled_name": "edptlcbCancelSoundsMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 3351776,
+          "offset": 2461808,
+          "size": 58,
+          "match_percent": 15.714286
+        },
+        {
+          "name": "_ZL23edptlcbCancelBounceMenuP10eduimenu_sS0_",
+          "demangled_name": "edptlcbCancelBounceMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 3351840,
+          "offset": 2461872,
+          "size": 58,
+          "match_percent": 15.714286
+        },
+        {
+          "name": "_ZL18cbPtlCancelJibMenuP10eduimenu_sS0_",
+          "demangled_name": "cbPtlCancelJibMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 3351904,
+          "offset": 2461936,
+          "size": 98,
+          "match_percent": 15.0
+        },
+        {
+          "name": "_ZL18cbPtlCancelRotMenuP10eduimenu_sS0_",
+          "demangled_name": "cbPtlCancelRotMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 3352016,
+          "offset": 2462048,
+          "size": 88,
+          "match_percent": 12.941176
+        },
+        {
+          "name": "_ZL19cbPtlCancelSizeMenuP10eduimenu_sS0_",
+          "demangled_name": "cbPtlCancelSizeMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 3352112,
+          "offset": 2462144,
+          "size": 98,
+          "match_percent": 15.0
+        },
+        {
+          "name": "_ZL22edptlcbCancelGhostMenuP10eduimenu_sS0_",
+          "demangled_name": "edptlcbCancelGhostMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 3352288,
+          "offset": 2462320,
+          "size": 58,
+          "match_percent": 15.714286
+        },
+        {
+          "name": "_ZL21cbPtlCancelCutOffMenuP10eduimenu_sS0_",
+          "demangled_name": "cbPtlCancelCutOffMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 3352432,
+          "offset": 2462464,
+          "size": 58,
+          "match_percent": 15.714286
+        },
+        {
+          "name": "_ZL23cbPtlCancelEmitTimeMenuP10eduimenu_sS0_",
+          "demangled_name": "cbPtlCancelEmitTimeMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 3352496,
+          "offset": 2462528,
+          "size": 58,
+          "match_percent": 15.714286
+        },
+        {
+          "name": "_ZL23cbCancelChangeETimeMenuP10eduimenu_sS0_",
+          "demangled_name": "cbCancelChangeETimeMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 3352560,
+          "offset": 2462592,
+          "size": 58,
+          "match_percent": 15.714286
+        },
+        {
+          "name": "_ZL25cbCancelChangeGenRateMenuP10eduimenu_sS0_",
+          "demangled_name": "cbCancelChangeGenRateMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 3352624,
+          "offset": 2462656,
+          "size": 58,
+          "match_percent": 15.714286
+        },
+        {
+          "name": "_ZL22cbPtlCancelVarEmitMenuP10eduimenu_sS0_",
+          "demangled_name": "cbPtlCancelVarEmitMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 3352688,
+          "offset": 2462720,
+          "size": 58,
+          "match_percent": 15.714286
+        },
+        {
+          "name": "_ZL23cbPtlCancelStartVelMenuP10eduimenu_sS0_",
+          "demangled_name": "cbPtlCancelStartVelMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 3352752,
+          "offset": 2462784,
+          "size": 58,
+          "match_percent": 15.714286
+        },
+        {
+          "name": "_ZL23cbPtlCancelVarStartMenuP10eduimenu_sS0_",
+          "demangled_name": "cbPtlCancelVarStartMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 3352816,
+          "offset": 2462848,
+          "size": 58,
+          "match_percent": 15.714286
+        },
+        {
+          "name": "_ZL19cbPtlCancelGravMenuP10eduimenu_sS0_",
+          "demangled_name": "cbPtlCancelGravMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 3352880,
+          "offset": 2462912,
+          "size": 58,
+          "match_percent": 15.714286
+        },
+        {
+          "name": "_ZL22cbPtlCancelEmitVelMenuP10eduimenu_sS0_",
+          "demangled_name": "cbPtlCancelEmitVelMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 3352944,
+          "offset": 2462976,
+          "size": 58,
+          "match_percent": 15.714286
+        },
+        {
+          "name": "_ZL19cbPtlCancelEmitMenuP10eduimenu_sS0_",
+          "demangled_name": "cbPtlCancelEmitMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 3353008,
+          "offset": 2463040,
+          "size": 58,
+          "match_percent": 15.714286
+        },
+        {
+          "name": "_ZL22cbPtlCancelTextureMenuP10eduimenu_sS0_",
+          "demangled_name": "cbPtlCancelTextureMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 3353072,
+          "offset": 2463104,
+          "size": 84,
+          "match_percent": 12.857142
+        },
+        {
+          "name": "_ZL18cbPtlCancelColMenuP10eduimenu_sS0_",
+          "demangled_name": "cbPtlCancelColMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 3353168,
+          "offset": 2463200,
+          "size": 78,
+          "match_percent": 16.875
+        },
+        {
+          "name": "_ZL20cbPtlCancelGSortMenuP10eduimenu_sS0_",
+          "demangled_name": "cbPtlCancelGSortMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 3353248,
+          "offset": 2463280,
+          "size": 58,
+          "match_percent": 15.714286
+        },
+        {
+          "name": "_ZL22cbPtlCancelReadoutMenuP10eduimenu_sS0_",
+          "demangled_name": "cbPtlCancelReadoutMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 3353312,
+          "offset": 2463344,
+          "size": 58,
+          "match_percent": 15.714286
+        },
+        {
+          "name": "_ZL26cbPtlCancelQuickDeleteMenuP10eduimenu_sS0_",
+          "demangled_name": "cbPtlCancelQuickDeleteMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 3353376,
+          "offset": 2463408,
+          "size": 58,
+          "match_percent": 15.714286
+        },
+        {
+          "name": "_ZL27edptlcbCancelOrphanListMenuP10eduimenu_sS0_",
+          "demangled_name": "edptlcbCancelOrphanListMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 3353440,
+          "offset": 2463472,
+          "size": 58,
+          "match_percent": 15.714286
+        },
+        {
+          "name": "_ZL26edptlcbCancelClipboardMenuP10eduimenu_sS0_",
+          "demangled_name": "edptlcbCancelClipboardMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 3353504,
+          "offset": 2463536,
+          "size": 58,
+          "match_percent": 15.714286
+        },
+        {
+          "name": "_ZL19cbCancelMessageMenuP10eduimenu_sS0_",
+          "demangled_name": "cbCancelMessageMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 3353568,
+          "offset": 2463600,
+          "size": 58,
+          "match_percent": 15.714286
+        },
+        {
+          "name": "_ZL19cbPtlCancelDataMenuP10eduimenu_sS0_",
+          "demangled_name": "cbPtlCancelDataMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 3353632,
+          "offset": 2463664,
+          "size": 58,
+          "match_percent": 15.714286
+        },
+        {
+          "name": "_ZL19cbPtlCancelTypeMenuP10eduimenu_sS0_",
+          "demangled_name": "cbPtlCancelTypeMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 3353696,
+          "offset": 2463728,
+          "size": 58,
+          "match_percent": 15.714286
+        },
+        {
+          "name": "_ZL22cbCancelEffectListMenuP10eduimenu_sS0_",
+          "demangled_name": "cbCancelEffectListMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 3353760,
+          "offset": 2463792,
+          "size": 58,
+          "match_percent": 15.714286
+        },
+        {
+          "name": "_ZL19cbPtlDamageFlagMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlDamageFlagMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3360608,
+          "offset": 2470640,
+          "size": 406,
+          "match_percent": 2.391304
+        },
+        {
+          "name": "_ZL23edptlcbSoundControlMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edptlcbSoundControlMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3361024,
+          "offset": 2471056,
+          "size": 783,
+          "match_percent": 1.725888
+        },
+        {
+          "name": "_ZL13cbPtlEmitMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlEmitMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3362384,
+          "offset": 2472416,
+          "size": 1331,
+          "match_percent": 1.403509
+        },
+        {
+          "name": "_ZL16cbPtlTextureMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlTextureMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3363728,
+          "offset": 2473760,
+          "size": 827,
+          "match_percent": 2.139037
+        },
+        {
+          "name": "_ZL14cbPtlGSortMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlGSortMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3364560,
+          "offset": 2474592,
+          "size": 1243,
+          "match_percent": 1.444043
+        },
+        {
+          "name": "_ZL13cbPtlDataMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlDataMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3365808,
+          "offset": 2475840,
+          "size": 1043,
+          "match_percent": 1.545454
+        },
+        {
+          "name": "_ZL16cbPtlReadoutMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlReadoutMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3366864,
+          "offset": 2476896,
+          "size": 367,
+          "match_percent": 2.650602
+        },
+        {
+          "name": "_ZL20cbPtlQuickDeleteMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlQuickDeleteMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3367232,
+          "offset": 2477264,
+          "size": 425,
+          "match_percent": 3.119266
+        },
+        {
+          "name": "_ZL16cbEffectListMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbEffectListMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3367984,
+          "offset": 2478016,
+          "size": 414,
+          "match_percent": 3.469388
+        },
+        {
+          "name": "_ZL12cbPtlJibMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlJibMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3377008,
+          "offset": 2487040,
+          "size": 665,
+          "match_percent": 2.739726
+        },
+        {
+          "name": "_ZL15cbPtlCutOffMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlCutOffMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3377680,
+          "offset": 2487712,
+          "size": 871,
+          "match_percent": 1.888889
+        },
+        {
+          "name": "_ZL17cbPtlEmitTimeMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlEmitTimeMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3379248,
+          "offset": 2489280,
+          "size": 659,
+          "match_percent": 2.857143
+        },
+        {
+          "name": "_ZL17cbChangeETimeMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbChangeETimeMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3379920,
+          "offset": 2489952,
+          "size": 354,
+          "match_percent": 4.819277
+        },
+        {
+          "name": "_ZL13cbPtlGravMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlGravMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3380288,
+          "offset": 2490320,
+          "size": 378,
+          "match_percent": 4.597701
+        },
+        {
+          "name": "_ZL16cbPtlEmitVelMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlEmitVelMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3380672,
+          "offset": 2490704,
+          "size": 386,
+          "match_percent": 4.494382
+        },
+        {
+          "name": "_ZL15cbPtlSScaleMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlSScaleMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3384240,
+          "offset": 2494272,
+          "size": 284,
+          "match_percent": 4.426229
+        },
+        {
+          "name": "_ZL19cbChangeGenRateMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbChangeGenRateMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3385408,
+          "offset": 2495440,
+          "size": 356,
+          "match_percent": 4.761905
+        },
+        {
+          "name": "_ZL19cbPtlDefaultCollEnvP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlDefaultCollEnv(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3387584,
+          "offset": 2497616,
+          "size": 334,
+          "match_percent": 4.938271
+        },
+        {
+          "name": "_ZL22edptlcbSetSoundControlP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edptlcbSetSoundControl(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3387920,
+          "offset": 2497952,
+          "size": 447,
+          "match_percent": 3.17757
+        },
+        {
+          "name": "_ZL12cbPtlSelTypeP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlSelType(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3388992,
+          "offset": 2499024,
+          "size": 95,
+          "match_percent": 10.0
+        },
+        {
+          "name": "_ZL15cbSelEffectListP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbSelEffectList(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3389088,
+          "offset": 2499120,
+          "size": 170,
+          "match_percent": 6.929824
+        },
+        {
+          "name": "_ZL13cbPtlSelGCodeP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlSelGCode(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3389264,
+          "offset": 2499296,
+          "size": 143,
+          "match_percent": 8.684211
+        },
+        {
+          "name": "_ZL14cbPtlTorusMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlTorusMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3390080,
+          "offset": 2500112,
+          "size": 3141,
+          "match_percent": 0.682594
+        },
+        {
+          "name": "_ZL13cbPtlCollMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlCollMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3393232,
+          "offset": 2503264,
+          "size": 1749,
+          "match_percent": 1.123595
+        },
+        {
+          "name": "_ZL19cbPtlApplyTorusEnv3P10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlApplyTorusEnv3(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3394992,
+          "offset": 2505024,
+          "size": 186,
+          "match_percent": 7.692308
+        },
+        {
+          "name": "_ZL19cbPtlApplyTorusEnv2P10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlApplyTorusEnv2(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3395184,
+          "offset": 2505216,
+          "size": 186,
+          "match_percent": 7.692308
+        },
+        {
+          "name": "_ZL19cbPtlApplyTorusEnv1P10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlApplyTorusEnv1(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3395376,
+          "offset": 2505408,
+          "size": 186,
+          "match_percent": 7.692308
+        },
+        {
+          "name": "_ZL17cbPtlApplyCollEnvP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlApplyCollEnv(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3395568,
+          "offset": 2505600,
+          "size": 242,
+          "match_percent": 6.666666
+        },
+        {
+          "name": "_ZL13cbPtlApplyJibP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlApplyJib(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3396800,
+          "offset": 2506832,
+          "size": 192,
+          "match_percent": 7.333334
+        },
+        {
+          "name": "_ZL13cbPtlApplyRotP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlApplyRot(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3396992,
+          "offset": 2507024,
+          "size": 364,
+          "match_percent": 4.597701
+        },
+        {
+          "name": "_ZL14cbPtlApplySizeP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlApplySize(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3397360,
+          "offset": 2507392,
+          "size": 552,
+          "match_percent": 3.149606
+        },
+        {
+          "name": "_ZL15cbPtlChangeGravP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlChangeGrav(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3397920,
+          "offset": 2507952,
+          "size": 109,
+          "match_percent": 11.785714
+        },
+        {
+          "name": "_ZL24cbPtlChangeTextureSelectP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlChangeTextureSelect(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3398032,
+          "offset": 2508064,
+          "size": 265,
+          "match_percent": 3.606557
+        },
+        {
+          "name": "_ZL14cbPtlApplyGradP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlApplyGrad(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3398304,
+          "offset": 2508336,
+          "size": 455,
+          "match_percent": 3.539823
+        },
+        {
+          "name": "_ZL12cbPtlRotMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlRotMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3398768,
+          "offset": 2508800,
+          "size": 1797,
+          "match_percent": 1.108033
+        },
+        {
+          "name": "_ZL13cbPtlSizeMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlSizeMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3400576,
+          "offset": 2510608,
+          "size": 3077,
+          "match_percent": 0.652528
+        },
+        {
+          "name": "_ZL16cbPtlVarEmitMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlVarEmitMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3403664,
+          "offset": 2513696,
+          "size": 1642,
+          "match_percent": 1.190476
+        },
+        {
+          "name": "_ZL17cbPtlStartVelMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlStartVelMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3405312,
+          "offset": 2515344,
+          "size": 1539,
+          "match_percent": 1.215806
+        },
+        {
+          "name": "_ZL17cbPtlVarStartMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlVarStartMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3406864,
+          "offset": 2516896,
+          "size": 1539,
+          "match_percent": 1.215806
+        },
+        {
+          "name": "_ZL13cbPtlCopySizeP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlCopySize(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3408960,
+          "offset": 2518992,
+          "size": 2159,
+          "match_percent": 1.017812
+        },
+        {
+          "name": "_ZL22cbPtlTextureSelectMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlTextureSelectMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3411120,
+          "offset": 2521152,
+          "size": 752,
+          "match_percent": 2.197802
+        },
+        {
+          "name": "_ZL12cbPtlColMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlColMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3411872,
+          "offset": 2521904,
+          "size": 3141,
+          "match_percent": 0.63593
+        },
+        {
+          "name": "_ZL13cbPtlSelGSortP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlSelGSort(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3415024,
+          "offset": 2525056,
+          "size": 488,
+          "match_percent": 2.095238
+        },
+        {
+          "name": "_ZL12cbChangeNameP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbChangeName(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3416176,
+          "offset": 2526208,
+          "size": 69,
+          "match_percent": 15.714286
+        },
+        {
+          "name": "_ZL15cbPtlCopyEffectP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlCopyEffect(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3416448,
+          "offset": 2526480,
+          "size": 638,
+          "match_percent": 1.965318
+        },
+        {
+          "name": "_ZL16cbChangeNameMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbChangeNameMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3417088,
+          "offset": 2527120,
+          "size": 310,
+          "match_percent": 5.194805
+        },
+        {
+          "name": "_ZL13cbPtlTypeMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlTypeMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3417408,
+          "offset": 2527440,
+          "size": 869,
+          "match_percent": 1.497797
+        },
+        {
+          "name": "_ZL26edptlChangeRepeatBoxXZLockP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edptlChangeRepeatBoxXZLock(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3428912,
+          "offset": 2538944,
+          "size": 140,
+          "match_percent": 9.428572
+        },
+        {
+          "name": "_ZL15cbPtlDamageMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlDamageMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3429056,
+          "offset": 2539088,
+          "size": 416,
+          "match_percent": 3.0
+        },
+        {
+          "name": "_ZL22edptlcbScaleEffectMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edptlcbScaleEffectMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3429472,
+          "offset": 2539504,
+          "size": 372,
+          "match_percent": 2.75
+        },
+        {
+          "name": "_ZL25cbPtlInstanceSettingsMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlInstanceSettingsMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3431248,
+          "offset": 2541280,
+          "size": 537,
+          "match_percent": 1.896552
+        },
+        {
+          "name": "_ZL22cbCancelChangeNameMenuP10eduimenu_sS0_",
+          "demangled_name": "cbCancelChangeNameMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 3435168,
+          "offset": 2545200,
+          "size": 317,
+          "match_percent": 4.230769
+        },
+        {
+          "name": "_ZL14cbPtlAddEffectP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlAddEffect(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3464288,
+          "offset": 2574320,
+          "size": 598,
+          "match_percent": 2.335329
+        },
+        {
+          "name": "_ZL14cbPtlSetFacingP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlSetFacing(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3472960,
+          "offset": 2582992,
+          "size": 176,
+          "match_percent": 7.021276
+        },
+        {
+          "name": "_ZL23edptlcbApplyScaleFactorP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edptlcbApplyScaleFactor(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3494576,
+          "offset": 2604608,
+          "size": 154,
+          "match_percent": 6.585366
+        },
+        {
+          "name": "_ZL19cbPtlSelTextureTypeP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlSelTextureType(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3557600,
+          "offset": 2667632,
+          "size": 872,
+          "match_percent": 1.56682
+        },
+        {
+          "name": "_ZL20cbPtlQuickDeleteTypeP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlQuickDeleteType(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3574928,
+          "offset": 2684960,
+          "size": 94,
+          "match_percent": 8.148149
+        },
+        {
+          "name": "_ZL17cbPtlDeleteEffectP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlDeleteEffect(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3575024,
+          "offset": 2685056,
+          "size": 101,
+          "match_percent": 7.857143
+        },
+        {
+          "name": "_ZL17cbFileLoadEffectsP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbFileLoadEffects(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3594352,
+          "offset": 2704384,
+          "size": 1025,
+          "match_percent": 1.603774
         }
       ]
     },
@@ -116824,7 +116824,7 @@
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
-        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edptlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -116887,7 +116887,7 @@
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
-        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edptlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -116950,7 +116950,7 @@
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
-        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edptlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -117026,7 +117026,7 @@
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
-        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edptlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -117136,7 +117136,7 @@
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
-        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edptlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -117212,7 +117212,7 @@
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
-        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edptlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -117288,7 +117288,7 @@
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
-        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edptlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -117364,7 +117364,7 @@
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
-        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edptlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -117440,7 +117440,7 @@
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
-        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edptlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -117516,7 +117516,7 @@
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
-        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edptlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -117802,7 +117802,7 @@
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
-        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edptlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -117878,7 +117878,7 @@
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
-        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edptlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -117954,7 +117954,7 @@
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
-        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edptlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -118079,7 +118079,7 @@
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
-        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edptlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -118167,7 +118167,7 @@
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
-        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edptlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -118345,7 +118345,7 @@
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
-        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edptlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -118474,7 +118474,7 @@
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
-        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edptlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -118603,7 +118603,7 @@
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
-        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edptlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -118679,7 +118679,7 @@
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
-        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edptlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -118755,7 +118755,7 @@
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
-        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edptlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -118831,7 +118831,7 @@
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
-        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edptlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -118933,7 +118933,7 @@
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
-        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edptlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -119009,7 +119009,7 @@
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
-        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edptlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -119096,7 +119096,7 @@
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
-        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edptlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -119172,7 +119172,7 @@
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
-        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edptlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -119261,7 +119261,7 @@
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
-        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edptlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -119337,7 +119337,7 @@
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
-        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edptlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -119447,7 +119447,7 @@
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
-        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edptlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -119523,7 +119523,7 @@
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
-        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edptlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -119599,7 +119599,7 @@
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
-        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edptlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -119675,7 +119675,7 @@
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
-        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edptlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -119814,7 +119814,7 @@
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
-        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edptlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -119890,7 +119890,7 @@
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
-        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edptlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -119966,7 +119966,7 @@
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
-        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edptlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -120389,7 +120389,7 @@
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
-        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edptlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -120569,7 +120569,7 @@
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
-        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edptlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -120736,7 +120736,7 @@
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
-        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edptlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -121171,7 +121171,7 @@
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
-        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edptlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -121247,7 +121247,7 @@
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
-        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edptlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",

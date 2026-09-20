@@ -1,10 +1,10 @@
 #include "decomp.h"
 #include "gameapi_edtools_types.h"
+#include "gameapi/edtools/edpart_internal.h"
 #include "gameapi/edtools/edui.h"
 #include "legoapi/legoapi_types.h"
 
 extern "C" {
-    extern part_typedesc_s *edpart_nearest_type;
     i32 edpart_set_part = 5;
 }
 
@@ -223,5 +223,284 @@ static void edpartSetSoundControl(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
 static void edpartCancelCutOffMenu(eduimenu_s *, eduimenu_s *) {
+    STUBBED();
+}
+static void edpartCancelSScaleMenu(eduimenu_s *, eduimenu_s *) {
+    STUBBED();
+}
+
+static void edpartCancelSoundXMenu(eduimenu_s *, eduimenu_s *) {
+    STUBBED();
+}
+
+static void edpartCancelSoundsMenu(eduimenu_s *, eduimenu_s *) {
+    STUBBED();
+}
+
+static void edpartCancelSwitchMenu(eduimenu_s *, eduimenu_s *) {
+    STUBBED();
+}
+
+static void edpartChangeFilterName(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+
+static void edpartChangeIvalOffRan(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+
+static void edpartChangeRanMaxLife(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+
+static void edpartImpactDebrisMenu(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+
+static void edpartSoundControlMenu(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+
+static void edpartTrail1DebrisMenu(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+
+static void edpartTrail2DebrisMenu(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+
+static void edpartCancelEmitVelMenu(eduimenu_s *, eduimenu_s *) {
+    STUBBED();
+}
+
+static void edpartCancelMessageMenu(eduimenu_s *, eduimenu_s *) {
+    STUBBED();
+}
+
+static void edpartCancelSoundIDMenu(eduimenu_s *, eduimenu_s *) {
+    STUBBED();
+}
+
+static void edpartCancelVarEmitMenu(eduimenu_s *, eduimenu_s *) {
+    STUBBED();
+}
+
+static void edpartChangeDebrisIndex(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+
+static void edpartChangeDebrisScale(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+
+static void edpartChangeGenRateMenu(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+
+static void edpartChangeInstanceRot(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+
+static void edpartChangeMaxLifeMenu(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+
+static void edpartEmitterDebrisMenu(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+
+static void edpartInstanceFlagsMenu(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+
+static void edpartInstanceScaleMenu(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+
+static void edpartWorldInstanceMenu(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+
+static void edpartCancelEmitTimeMenu(eduimenu_s *, eduimenu_s *) {
+    STUBBED();
+}
+
+static void edpartCancelInstanceMenu(eduimenu_s *, eduimenu_s *) {
+    STUBBED();
+}
+
+static void edpartCancelVarStartMenu(eduimenu_s *, eduimenu_s *) {
+    STUBBED();
+}
+
+static void edpartChangeDebrisPerSec(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+
+static void edpartChangeInstanceFlag(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+
+static void edpartDebrisSettingsMenu(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+
+static void edpartInstanceOrientMenu(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+
+static void edpartLevelPartIndexMenu(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+
+static void edpartThingsInstanceMenu(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+
+static void edpartCancelDieDebrisMenu(eduimenu_s *, eduimenu_s *) {
+    STUBBED();
+}
+
+static void edpartCancelLevelTypeMenu(eduimenu_s *, eduimenu_s *) {
+    STUBBED();
+}
+
+static void edpartCancelPartIndexMenu(eduimenu_s *, eduimenu_s *) {
+    STUBBED();
+}
+
+static void edpartCancelScaleTypeMenu(eduimenu_s *, eduimenu_s *) {
+    STUBBED();
+}
+
+static void edpartChangeInstanceScale(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+
+static void edpartInstanceOrphansMenu(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+
+static void edpartCancelChangeNameMenu(eduimenu_s *, eduimenu_s *) {
+    STUBBED();
+}
+
+static void edpartCancelImpactPartMenu(eduimenu_s *, eduimenu_s *) {
+    STUBBED();
+}
+
+static void edpartCancelSwitchTypeMenu(eduimenu_s *, eduimenu_s *) {
+    STUBBED();
+}
+
+static void edpartChangeInstanceVarRot(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+
+static void edpartDeleteInstanceOrphan(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+
+static void edpartFileSaveEffectsLevel(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+
+static void edpartGeneralPartIndexMenu(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+
+static void edpartInstanceSettingsMenu(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+
+static void edpartLevelDebrisIndexMenu(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+
+static void edpartCancelDebrisIndexMenu(eduimenu_s *, eduimenu_s *) {
+    STUBBED();
+}
+
+static void edpartCancelDebrisScaleMenu(eduimenu_s *, eduimenu_s *) {
+    STUBBED();
+}
+
+static void edpartCancelGeneralTypeMenu(eduimenu_s *, eduimenu_s *) {
+    STUBBED();
+}
+
+static void edpartCancelImpactDebrisMenu(eduimenu_s *, eduimenu_s *) {
+    STUBBED();
+}
+
+static void edpartCancelSoundControlMenu(eduimenu_s *, eduimenu_s *) {
+    STUBBED();
+}
+
+static void edpartCancelTrail1DebrisMenu(eduimenu_s *, eduimenu_s *) {
+    STUBBED();
+}
+
+static void edpartCancelTrail2DebrisMenu(eduimenu_s *, eduimenu_s *) {
+    STUBBED();
+}
+
+static void edpartFileSaveEffectsGeneral(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+
+static void edpartGeneralDebrisIndexMenu(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+
+static void edpartCancelChangeGenRateMenu(eduimenu_s *, eduimenu_s *) {
+    STUBBED();
+}
+
+static void edpartCancelChangeMaxLifeMenu(eduimenu_s *, eduimenu_s *) {
+    STUBBED();
+}
+
+static void edpartCancelEmitterDebrisMenu(eduimenu_s *, eduimenu_s *) {
+    STUBBED();
+}
+
+static void edpartCancelInstanceFlagsMenu(eduimenu_s *, eduimenu_s *) {
+    STUBBED();
+}
+
+static void edpartCancelInstanceScaleMenu(eduimenu_s *, eduimenu_s *) {
+    STUBBED();
+}
+
+static void edpartCancelWorldInstanceMenu(eduimenu_s *, eduimenu_s *) {
+    STUBBED();
+}
+
+static void edpartCancelDebrisSettingsMenu(eduimenu_s *, eduimenu_s *) {
+    STUBBED();
+}
+
+static void edpartCancelInstanceOrientMenu(eduimenu_s *, eduimenu_s *) {
+    STUBBED();
+}
+
+static void edpartCancelThingsInstanceMenu(eduimenu_s *, eduimenu_s *) {
+    STUBBED();
+}
+
+static void edpartDeleteAllInstanceOrphans(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+
+static void edpartCancelInstanceOrphansMenu(eduimenu_s *, eduimenu_s *) {
+    STUBBED();
+}
+
+static void edpartCancelInstanceSettingsMenu(eduimenu_s *, eduimenu_s *) {
+    STUBBED();
+}
+
+static void edpartDeleteAllInstanceDuplicates(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
