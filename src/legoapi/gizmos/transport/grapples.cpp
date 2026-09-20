@@ -4,8 +4,13 @@
 #include "decomp.h"
 #include "globals.h"
 #include "gameapi/edtools/edfile.h"
+#include "legoapi/actions/movement/jumping.h"
+#include "legoapi/audio/audio.h"
+#include "legoapi/audio/sfx.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/characters/motion.h"
+#include "legoapi/characters/motion/gameanim.h"
+#include "legoapi/core/input/gamepads.h"
 #include "legoapi/world/world_shared.h"
 #include "legoapi/world/level.h"
 #include "legoapi/world/world.h"
@@ -24,6 +29,7 @@ f32 GameShadow(GameObject_s *object, NUVEC *position, f32 probe_height, i32 terr
 void FindAnglesZX(NUVEC *normal, u16 *x_rotation, u16 *z_rotation);
 void EnableShadowMapRendering(i32 enabled);
 void ResetShadowMapRendering();
+void SetWeaponIn(GameObject_s *object);
 
 extern i32 editor_active;
 extern NUMTL *SolidMtl3D;
@@ -759,8 +765,198 @@ void Grapple_RemoveDynamic(void *attached_object) {
     }
 }
 
-void Grapple_MoveCode(GameObject_s *) {
-    STUBBED();
+void Grapple_MoveCode(GameObject_s *object) {
+    if (object == NULL || object->pad_gamepad == NULL || LEGOCONTEXT_GRAPPLE == -1) {
+        return;
+    }
+    object->field_0xe24 &= ~0x80;
+
+    if (object->character_context != LEGOCONTEXT_GRAPPLE) {
+        if (Grapples_Available == 0 ||
+            (static_cast<i8>(object->apiobj.flags_low) >= 0 && object->field_0xf0c != 1)) {
+            return;
+        }
+        const bool ready = ObjLandReady(object) != 0 || object->character_context == LEGOCONTEXT_JUMP ||
+                           (object->character_context == LEGOCONTEXT_GLIDE && LEGOACT_GLIDE != -1 &&
+                            object->context_animation == LEGOACT_GLIDE && object->field_0x788 == NULL);
+        if (!ready) {
+            return;
+        }
+
+        GRAPPLE *grapple = Grapple_FindNearest(WORLD, &object->apiobj.collision_position, object, NULL);
+        if (grapple == NULL) {
+            return;
+        }
+        if (static_cast<i8>(object->apiobj.flags_low) >= 0 && object->can_use_object != grapple) {
+            return;
+        }
+
+        const bool activate = (object->pad_gamepad->buttons_pressed & GAMEPAD_SPECIAL) != 0 ||
+                              (object->panel_use_request == 4 && object->tube_entry_data != NULL);
+        if (!activate) {
+            SetHeadTarget(object, &grapple->hook_position, 4, 2.0f, 1.0f, 2.0f);
+            return;
+        }
+
+        object->field_0x788 = grapple;
+        object->character_context = static_cast<i8>(LEGOCONTEXT_GRAPPLE);
+        object->context_animation_timer = 0.0f;
+        object->airborne_action_duration = 0.0f;
+        object->field_0x7a3 = 0;
+        object->context_animation = LEGOACT_GRAPPLE_IDLE;
+        object->field_0x768 = 0.0f;
+        object->grapple_swing_degrees = 0;
+        object->grapple_swing_phase = 0x2000;
+        object->takeover_start_angle = object->apiobj.facing_angle;
+        if ((grapple->flags & GRAPPLE_FLAG_DISABLED) == 0) {
+            object->context_variant_flags |= 1;
+            object->apiobj.facing_angle = static_cast<u16>(grapple->y_rotation + 0x8000);
+        } else {
+            object->context_variant_flags &= ~1;
+            SetWeaponIn(object);
+        }
+        if (object->pad_gamepad->input_magnitude > 0.0f) {
+            object->takeover_start_angle = GamePad_InputAngle(object, object->pad_gamepad);
+        }
+        if (GrappleSwingMode == 1) {
+            const i32 difference = RotDiff(object->takeover_start_angle,
+                                           static_cast<u16>(grapple->y_rotation + 0x4000));
+            const i32 absolute_difference = difference < 0 ? -difference : difference;
+            object->takeover_start_angle =
+                static_cast<u16>(grapple->y_rotation + (absolute_difference <= 0x4000 ? 0x4000 : 0xc000));
+        }
+        GameCam_Blend(NULL, 0.5f, 0.0f, 1);
+        GameAudio_PlaySfx(0x44, &object->apiobj.lower_position, 0, 0);
+        object->field_0xe31 = 0;
+        return;
+    }
+
+    GRAPPLE *grapple = static_cast<GRAPPLE *>(object->field_0x788);
+    if (grapple == NULL ||
+        (grapple->flags & (GRAPPLE_FLAG_ACTIVE | GRAPPLE_FLAG_VISIBLE)) !=
+            (GRAPPLE_FLAG_ACTIVE | GRAPPLE_FLAG_VISIBLE) ||
+        (static_cast<i8>(object->apiobj.flags_low) >= 0 && object->can_use_object != grapple)) {
+        if (grapple != NULL) {
+            grapple->activation_progress = 0.0f;
+        }
+        object->character_context = -1;
+        object->field_0x788 = NULL;
+        GameCam_Blend(NULL, 0.5f, 0.0f, 1);
+        return;
+    }
+
+    if ((object->pad_gamepad->buttons_pressed & GAMEPAD_JUMP) != 0) {
+        if ((grapple->flags & GRAPPLE_FLAG_DISABLED) != 0) {
+            grapple->activation_progress = 1.0f;
+        }
+        StartJump(object, 0);
+        object->movement_runtime_flags |= 0x10;
+        object->field_0x788 = NULL;
+        GameAudio_PlaySfx(0x45, &object->apiobj.collision_position, 0, 0);
+        GameCam_Blend(NULL, 0.5f, 0.0f, 1);
+        return;
+    }
+
+    if (object->field_0x7a3 == 1) {
+        if (object->pad_gamepad->input_magnitude > 0.0f) {
+            object->field_0x7a3 = 0;
+            object->airborne_action_duration = 0.0f;
+            object->context_animation = LEGOACT_GRAPPLE_IDLE;
+            object->field_0x768 = 0.1f;
+        }
+        return;
+    }
+
+    object->context_animation_timer += FRAMETIME;
+    if ((object->pad_gamepad->buttons_pressed & GAMEPAD_SPECIAL) != 0 &&
+        object->pad_gamepad->input_magnitude == 0.0f && (grapple->flags & GRAPPLE_FLAG_DISABLED) == 0) {
+        object->context_variant_flags ^= 1;
+    }
+
+    const f32 body_height = object->apiobj.upper_position.y - object->apiobj.lower_position.y;
+    f32 maximum_length = grapple->shadow_probe_position.y - (grapple->ground_position.y + body_height + 0.1f);
+    if ((grapple->flags & GRAPPLE_FLAG_DISABLED) != 0) {
+        const f32 rope_limit = grapple->rope_length - (body_height * 2.0f + 0.1f);
+        if (rope_limit < maximum_length) {
+            maximum_length = rope_limit;
+        }
+    }
+    if (maximum_length < 0.0f) {
+        maximum_length = 0.0f;
+    }
+
+    bool climb_up = (object->context_variant_flags & 1) != 0;
+    bool climb_down = false;
+    if (object->pad_gamepad->input_magnitude > 0.0f) {
+        const u16 input_angle = GamePad_InputAngle(object, object->pad_gamepad);
+        const i32 difference = RotDiff(grapple->y_rotation, input_angle);
+        const i32 absolute_difference = difference < 0 ? -difference : difference;
+        if (absolute_difference < 0x4000) {
+            climb_down = true;
+            climb_up = false;
+            object->apiobj.facing_angle = grapple->y_rotation;
+        } else {
+            climb_up = true;
+            object->apiobj.facing_angle = static_cast<u16>(grapple->y_rotation + 0x8000);
+        }
+    }
+
+    f32 movement_speed = 1.0f;
+    if (climb_up && LEGOACT_GRAPPLE_UP != -1 &&
+        object->apiobj.character_model->model_data_b[LEGOACT_GRAPPLE_UP] != NULL) {
+        object->context_animation = LEGOACT_GRAPPLE_UP;
+        movement_speed = MAX(AnimSpeed(object->apiobj.character_model, LEGOACT_GRAPPLE_UP), 0.5f);
+        object->field_0x768 -= movement_speed * FRAMETIME;
+    } else if (climb_down && LEGOACT_GRAPPLE_DOWN != -1 &&
+               object->apiobj.character_model->model_data_b[LEGOACT_GRAPPLE_DOWN] != NULL) {
+        object->context_animation = LEGOACT_GRAPPLE_DOWN;
+        movement_speed = MAX(AnimSpeed(object->apiobj.character_model, LEGOACT_GRAPPLE_DOWN), 0.5f);
+        object->field_0x768 += movement_speed * FRAMETIME;
+    } else {
+        object->context_animation = LEGOACT_GRAPPLE_IDLE;
+    }
+
+    if (object->field_0x768 < 0.0f) {
+        object->field_0x768 = 0.0f;
+    } else if (object->field_0x768 > maximum_length) {
+        object->field_0x768 = maximum_length;
+        object->field_0xe24 |= 0x80;
+    }
+
+    if (Grapple_RopeSwingRotate != 0 && (grapple->flags & GRAPPLE_FLAG_DISABLED) != 0) {
+        object->apiobj.facing_angle = static_cast<u16>(object->apiobj.facing_angle +
+                                                       Grapple_RopeSwingRotate * FRAMETIME);
+    }
+    object->grapple_swing_phase = static_cast<u16>(
+        object->grapple_swing_phase + static_cast<i32>(0x4000 * FRAMETIME / (object->field_0x768 * 2.0f + 0.5f)));
+    if (object->pad_gamepad->input_magnitude > 0.0f) {
+        object->grapple_swing_degrees = static_cast<u8>(MIN(60, object->grapple_swing_degrees + 10));
+    } else if (object->grapple_swing_degrees >= 10) {
+        object->grapple_swing_degrees -= 10;
+    } else {
+        object->grapple_swing_degrees = 0;
+    }
+
+    if (object->field_0x768 <= 0.0f &&
+        (grapple->flags & (GRAPPLE_FLAG_DISABLED | GRAPPLE_FLAG_REVERSED)) == 0) {
+        object->airborne_action_duration += FRAMETIME;
+        if (object->airborne_action_duration >= 0.5f) {
+            object->field_0x7a3 = 1;
+            object->context_animation =
+                LEGOACT_GRAPPLE_HANG != -1 &&
+                        object->apiobj.character_model->model_data_b[LEGOACT_GRAPPLE_HANG] != NULL
+                    ? LEGOACT_GRAPPLE_HANG
+                    : LEGOACT_LEDGE_IDLE;
+            NUVEC offset = GrapplePointOffset;
+            NuVecRotateX(&offset, &offset, grapple->x_rotation);
+            offset.z += object->apiobj.field_0x1dc;
+            NuVecRotateY(&offset, &offset, grapple->y_rotation);
+            NuVecAdd(&object->external_force, &grapple->position, &offset);
+            object->apiobj.facing_angle = static_cast<u16>(grapple->y_rotation + 0x8000);
+        }
+    } else {
+        object->airborne_action_duration = 0.0f;
+    }
 }
 
 i32 Grapple_ReachedTop(GameObject_s *object) {
