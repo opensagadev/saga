@@ -29,6 +29,7 @@
 #include "legoapi/legoapi_types.h"
 #include "legoapi/menus/core/panel.h"
 #include "legoapi/props/doors/door.h"
+#include "legoapi/props/system/socksys.h"
 #include "legoapi/render/core/render.h"
 #include "legoapi/render/fx.h"
 #include "legoapi/render/fx/game_deb.h"
@@ -162,8 +163,48 @@ void MakeBaddiesForgetAboutParty(i32);
 extern i32 nbaddies_can_see_players;
 i32 reset_reimport;
 
-void CatchUpCode(GameObject_s *, float, float, i32) {
-    STUBBED();
+void CatchUpCode(GameObject_s *object, f32 divisor, f32 maximum, i32 mode) {
+    if (static_cast<u8>(object->apiobj.field_0x27c) == 0xff) {
+        return;
+    }
+
+    const i32 socket_index = static_cast<i8>(object->field_0x661);
+    object->field_0xc38 = 0.0f;
+    if (socket_index == -1 || WORLD->sock_sys == NULL) {
+        return;
+    }
+    if (mode != 0 && static_cast<i8>(object->apiobj.field_0x1f8) >= 0) {
+        return;
+    }
+
+    const bool looping = WORLD->sock_sys->sock[socket_index].looping != 0;
+    GameObject_s *other;
+    if (Player[0] == object) {
+        other = Player[1];
+    } else if (Player[1] == object) {
+        other = Player[0];
+    } else {
+        return;
+    }
+
+    if (other != NULL &&
+        (static_cast<i8>(object->apiobj.field_0x1f8) >= 0 || static_cast<i8>(other->apiobj.field_0x1f8) < 0) &&
+        static_cast<i8>(other->field_0x661) == socket_index &&
+        (mode == 0 || static_cast<i8>(other->apiobj.field_0x1f8) < 0)) {
+        f32 distance = object->sock_position.normalized_distance - other->sock_position.normalized_distance;
+        if (looping) {
+            if (distance >= 0.5f) {
+                distance -= 1.0f;
+            } else if (-0.5f >= distance) {
+                distance += 1.0f;
+            }
+        }
+        if (distance < 0.0f) {
+            const f32 catchup = -distance / divisor;
+            maximum = MIN(maximum, catchup);
+            object->field_0xc38 = maximum;
+        }
+    }
 }
 
 struct TexQuadVertex {
@@ -335,8 +376,34 @@ apply_weights:
     object->field_0x1089 = current_index + 1;
 }
 
-void RndrTexQuad3D(VuMtx const &, i32, numtl_s *) {
-    STUBBED();
+static inline void TexQuadSubmit3D(f32 x, f32 y, i32 colour, i32 u, i32 v) {
+    TexQuadVertex *vertex = static_cast<TexQuadVertex *>(g_NuPrim_StreamBufferPtr->void_ptr);
+    if (g_NuPrim_NeedsOverbrightening != 0) {
+        vertex->colour = colour;
+    } else {
+        vertex->colour = ((colour >> 1) & 0x7f7f7f) | (colour & 0xff000000);
+    }
+    if (g_NuPrim_NeedsHalfUVs != 0) {
+        vertex->half_uv[0] = u != 0 ? 0x3c00 : 0;
+        vertex->half_uv[1] = v != 0 ? 0x3c00 : 0;
+    } else {
+        vertex->uv[0] = static_cast<f32>(u);
+        vertex->uv[1] = static_cast<f32>(v);
+    }
+    vertex->x = x;
+    vertex->y = y;
+    vertex->z = 0.0f;
+    g_NuPrim_StreamBufferPtr->u8_ptr += sizeof(TexQuadVertex);
+    ++g_NuPrim_VertexCount;
+}
+
+void RndrTexQuad3D(VuMtx const &matrix, i32 colour, numtl_s *material) {
+    NuPrim3DBegin(1, 7, material, reinterpret_cast<NUMTX *>(const_cast<VuMtx *>(&matrix)));
+    TexQuadSubmit3D(-0.5f, -0.5f, colour, 0, 0);
+    TexQuadSubmit3D(0.5f, -0.5f, colour, 1, 0);
+    TexQuadSubmit3D(-0.5f, 0.5f, colour, 0, 1);
+    TexQuadSubmit3D(0.5f, 0.5f, colour, 1, 1);
+    NuPrim3DEnd();
 }
 
 void CheckResetBits() {
@@ -1028,7 +1095,8 @@ void DebrisProcessAllocation() {
     }
 }
 
-void DisplayListRenderBuffer() {
+VARIPTR *DisplayListRenderBuffer() {
+    return &rndrstream_free;
 }
 
 static i32 control_stack_lock;
