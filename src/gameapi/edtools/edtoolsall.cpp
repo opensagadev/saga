@@ -84,6 +84,7 @@ extern "C" {
     i32 edgra_mode = 1;
     extern NUGSCN *edbits_base_scene;
     extern part_type_s part_types[128];
+    extern NUVEC edanim_cam_pos;
     i32 edgra_last_clump_in_buffer = -1;
     i32 edgra_copy_source = -1;
     f32 edgra_global_fadein = 15.0f, edgra_global_fadeout = 25.0f;
@@ -1052,8 +1053,41 @@ void edbobs_DrawCoordinateInfo(nuvec_s *, i32, i32) {
     STUBBED();
 }
 
-void edanimDetermineNearestAnim(float) {
-    STUBBED();
+void edanimDetermineNearestAnim(float distance) {
+    if (edbits_base_scene == NULL) {
+        return;
+    }
+
+    nuhspecial_s special;
+    NUVEC delta;
+    if (edanim_nearest != -1) {
+        NuGScnGetSpecial(&special, edbits_base_scene, edanim_nearest);
+        NuVecSub(&delta, &edanim_cam_pos, NuSpecialGetPos(&special));
+        if (delta.x * delta.x + delta.y * delta.y + delta.z * delta.z == 0.0f) {
+            return;
+        }
+    }
+
+    edanim_nearest = -1;
+    edanim_nearest_param_id = -1;
+    const i32 special_count = NuGScnNumSpecials(edbits_base_scene);
+    for (i32 i = 0; i < special_count; ++i) {
+        NuGScnGetSpecial(&special, edbits_base_scene, i);
+        NuVecSub(&delta, &edanim_cam_pos, NuSpecialGetPos(&special));
+        const f32 candidate = delta.x * delta.x + delta.y * delta.y + delta.z * delta.z;
+        if (distance < 0.0f || candidate < distance) {
+            distance = candidate;
+            edanim_nearest = i;
+        }
+    }
+    if (edanim_nearest != -1) {
+        for (i32 i = 0; i < 64; ++i) {
+            if (AnimParams[i].instance_id == edanim_nearest) {
+                edanim_nearest_param_id = i;
+                return;
+            }
+        }
+    }
 }
 
 void edgraDetermineNearestClump(f32 distance) {
