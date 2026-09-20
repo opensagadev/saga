@@ -7,6 +7,8 @@
 #include "gameapi/edtools/gameapi_edtools_types.h"
 #include "gameapi/edtools/edfile.h"
 #include "gameapi/edtools/edcam.h"
+#include "gameapi/edtools/edbri_internal.h"
+#include "gameapi/edtools/edrender.h"
 #include "gameapi/edtools/edgra_internal.h"
 #include "gameapi/edtools/edpp_internal.h"
 #include "gameapi/edtools/edstubs.h"
@@ -982,14 +984,12 @@ extern "C" {
         }
         localframecount += static_cast<i32>(elapsed);
     }
-    void edbitsDrawCube(f32, f32, f32, f32, f32, f32, i32, i32, i32, i32, i32, i32, numtl_s *);
     void edbitsDrawBBox(NUVEC *minimum, NUVEC *maximum, i32 colour, numtl_s *material) {
         edbitsDrawCube((minimum->x + maximum->x) * 0.5f, (minimum->y + maximum->y) * 0.5f,
                        (minimum->z + maximum->z) * 0.5f, (maximum->x - minimum->x) * 0.5f,
                        (maximum->y - minimum->y) * 0.5f, (maximum->z - minimum->z) * 0.5f, 0, 0, 0, 0, 0, colour,
                        material);
     }
-    void edbitsDrawOvalTilted(NUVEC *, f32, f32, i32, i32, i32, i32);
     void edbitsDrawOvalXY(NUVEC *, f32, f32, i32, i32);
     void edbitsDrawCircleTilted(NUVEC *centre, f32 radius, i32 colour, i32 unused, i32 rotation_z, i32 rotation_y) {
         edbitsDrawOvalTilted(centre, radius, radius, colour, unused, rotation_z, rotation_y);

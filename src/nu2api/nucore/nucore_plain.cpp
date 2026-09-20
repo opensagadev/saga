@@ -196,7 +196,7 @@ extern "C" {
     // Redirected symbols — real bodies live elsewhere (kept as comments)
     // ---------------------------------------------------------------------------
 
-    // Nu360_dxClear(u32,u32) is transcribed in nuposteffect_plain.cpp (original 0x317070).
+    // Nu360_dxClear(u32,u32) is implemented in ios_graphics.cpp (original 0x317070).
     // NuDisplayListSwapBuffersBeginFrame / EndFrame are transcribed in full
     // in nudlist.cpp (originals 0x2eb5d0 / 0x2eaef0).
     // NuHtmlBegin(void*) is transcribed in legoapi/misc/supportall.cpp (original 0x2d5ca0).
@@ -2515,78 +2515,6 @@ extern "C" {
     void NuEffectTexUnmapNative(void) {
         STUBBED();
     }
-    void NuFramebufferAttachTex2D(nuframebuffer_s *, i32, nueffecttex_s *, i32) {
-        STUBBED();
-    }
-    void NuFramebufferBind(nuframebuffer_s *) {
-        STUBBED();
-    }
-    static void NuFramebufferClear(void) {
-        STUBBED();
-    }
-    void NuFramebufferCopyTex2D(i32, nueffecttex_s *, i32, i32, i32, i32, i32) {
-        STUBBED();
-    }
-    void NuFramebufferDestroy(nuframebuffer_s *) {
-        STUBBED();
-    }
-    void NuFramebufferDrawBuffers(void) {
-        STUBBED();
-    }
-    void NuFramebufferEnableGuards(nuframebuffer_s *, bool) {
-        STUBBED();
-    }
-    nueffecttex_s *NuFramebufferGetAttachedTex(nuframebuffer_s *, i32, i32 *, i32 *) {
-        STUBBED();
-        return NULL;
-    }
-    void *NuFramebufferGetBackBuffer(void) {
-        STUBBED();
-        return NULL;
-    }
-    nuframebuffer_s *NuFramebufferGetBound(void) {
-        STUBBED();
-        return NULL;
-    }
-    nuframebuffer_s *NuFramebufferGetDefault(void) {
-        STUBBED();
-        return NULL;
-    }
-    nuframebuffer_s *NuFramebufferGetFrontBuffer(void) {
-        STUBBED();
-        return NULL;
-    }
-    i32 NuFramebufferGetHeight(nuframebuffer_s *framebuffer) {
-        return *reinterpret_cast<const i32 *>(reinterpret_cast<const u8 *>(framebuffer) + 0xe0);
-    }
-    nuframebuffer_s *NuFramebufferGetObject(i32) {
-        STUBBED();
-        return NULL;
-    }
-    i32 NuFramebufferGetSamples(nuframebuffer_s *framebuffer) {
-        return *reinterpret_cast<const i32 *>(reinterpret_cast<const u8 *>(framebuffer) + 0xe8);
-    }
-    i32 NuFramebufferGetWidth(nuframebuffer_s *framebuffer) {
-        return *reinterpret_cast<const i32 *>(reinterpret_cast<const u8 *>(framebuffer) + 0xdc);
-    }
-    void NuFramebufferInitEx(void) {
-        STUBBED();
-    }
-    void NuFramebufferResolve(i32, bool) {
-        STUBBED();
-    }
-    void NuFramebufferResolveAll(bool) {
-        STUBBED();
-    }
-    void NuFramebufferResolveMultisample(i32) {
-        NuFramebufferResolveAll(true);
-    }
-    void NuFramebufferSetClearColor(void) {
-        STUBBED();
-    }
-    static void NuFramebufferSwapBuffers(void) {
-        STUBBED();
-    }
     i32 speedblur_enabled = 1;
     f32 NuLightsx, NuLightsy;
     void NuLightSpeedBlur(i32 reuse_camera, f32 scale) {
@@ -4575,20 +4503,6 @@ union variptr_u;
 
 void Nu360ConfigureSMBSharing(char **) {
     STUBBED();
-}
-void NuFramebuffer360EndZPass() {
-    STUBBED();
-}
-bool NuFramebuffer360HasZPass() {
-    STUBBED();
-    return false;
-}
-void NuFramebuffer360BeginZPass(i32) {
-    STUBBED();
-}
-i32 NuFramebuffer360GetTileCount(nuframebuffer_s *) {
-    STUBBED();
-    return 0;
 }
 void NuLgtSetArcMatEx(i32 type, numtl_s *material, f32 u0, f32 v0, f32 u1, f32 v1) {
     if (type > 3)

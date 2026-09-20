@@ -53,15 +53,16 @@ extern "C" i32 Nu360GetCommandLine(char **arguments, i32 capacity) {
 #include "nu2api/nu3d/nuprim.h"
 #include "nu2api/nu3d/nudlist.h"
 #include "nu2api/nu3d/nurndr.h"
+#include "nu2api/nu3d/nupostresources.h"
 #include "nu2api/nu3d/nuvport.h"
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/nufile/nufile.h"
 #include "nu2api/nucore/nuanim3.h"
 #include "nu2api/numath/nutrig.h"
 
-// Nucore bootstrap helpers; display-list initialization is declared in nudlist.h.
+// Nucore bootstrap helpers; display-list and framebuffer initialization are
+// declared by their owning public headers.
 extern "C" {
-    void NuFramebufferInitEx(void);
     void NuPostEffectInit(u32, void *, void *);
 }
 

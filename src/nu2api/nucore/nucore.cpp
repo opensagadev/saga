@@ -68,7 +68,6 @@ u32 NuPostFilter::m_fullscreenGridIndexBuffer;
 i32 NuPostFilter::m_quadGridPrimCount;
 extern u32 g_lastBoundVAO;
 extern void *g_nuFullscreenVertexFormat;
-extern "C" void NuFramebufferClear(u32, u32);
 extern "C" f32 NuPow(f32, f32);
 extern "C" f32 NuLog2(f32);
 

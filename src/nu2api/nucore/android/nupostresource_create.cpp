@@ -5,7 +5,3 @@
 extern "C" nueffecttex_s *NuEffectTexCreate2D(i32, i32, i32, i32, i32) {
     STUBBED();
 }
-
-extern "C" nuframebuffer_s *NuFramebufferCreate() {
-    STUBBED();
-}

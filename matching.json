@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 46.20653,
+    "fuzzy_match_percent": 46.208878,
     "total_code": "4722419",
     "matched_code": "402861",
     "matched_code_percent": 8.530819,
@@ -29126,6 +29126,61 @@
           "address": 3594048,
           "offset": 2704080,
           "size": 38,
+          "match_percent": 100.0
+        }
+      ]
+    },
+    {
+      "name": "gameapi/edtools/edrender.cpp.o",
+      "source": "src/gameapi/edtools/edrender.cpp",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_gameapi/edrender.o",
+      "functions": [
+        {
+          "name": "edbitsDrawBasicCube",
+          "demangled_name": "edbitsDrawBasicCube",
+          "address": 3519392,
+          "offset": 2629424,
+          "size": 1855,
+          "match_percent": 99.996925
+        },
+        {
+          "name": "edbitsDrawCube",
+          "demangled_name": "edbitsDrawCube",
+          "address": 3521248,
+          "offset": 2631280,
+          "size": 2223,
+          "match_percent": 99.99753
+        },
+        {
+          "name": "edbitsDrawDiagonalCross",
+          "demangled_name": "edbitsDrawDiagonalCross",
+          "address": 3523696,
+          "offset": 2633728,
+          "size": 866,
+          "match_percent": 99.98726
+        },
+        {
+          "name": "edbitsDrawCross",
+          "demangled_name": "edbitsDrawCross",
+          "address": 3525392,
+          "offset": 2635424,
+          "size": 636,
+          "match_percent": 99.99187
+        },
+        {
+          "name": "edbitsDrawOvalTilted",
+          "demangled_name": "edbitsDrawOvalTilted",
+          "address": 3531648,
+          "offset": 2641680,
+          "size": 2908,
+          "match_percent": 85.022835
+        },
+        {
+          "name": "edbitsDrawTorus",
+          "demangled_name": "edbitsDrawTorus",
+          "address": 3534832,
+          "offset": 2644864,
+          "size": 1708,
           "match_percent": 100.0
         }
       ]
@@ -72823,7 +72878,7 @@
           "address": 1148576,
           "offset": 258608,
           "size": 1716,
-          "match_percent": 4.289618
+          "match_percent": 4.303279
         },
         {
           "name": "_Z13DrawSaveSlotsP6MENU_sf",
@@ -73138,54 +73193,6 @@
           "match_percent": 100.0
         },
         {
-          "name": "edbitsDrawBasicCube",
-          "demangled_name": "edbitsDrawBasicCube",
-          "address": 3519392,
-          "offset": 2629424,
-          "size": 1855,
-          "match_percent": 99.996925
-        },
-        {
-          "name": "edbitsDrawCube",
-          "demangled_name": "edbitsDrawCube",
-          "address": 3521248,
-          "offset": 2631280,
-          "size": 2223,
-          "match_percent": 99.99753
-        },
-        {
-          "name": "edbitsDrawDiagonalCross",
-          "demangled_name": "edbitsDrawDiagonalCross",
-          "address": 3523696,
-          "offset": 2633728,
-          "size": 866,
-          "match_percent": 99.98726
-        },
-        {
-          "name": "edbitsDrawCross",
-          "demangled_name": "edbitsDrawCross",
-          "address": 3525392,
-          "offset": 2635424,
-          "size": 636,
-          "match_percent": 99.99187
-        },
-        {
-          "name": "edbitsDrawOvalTilted",
-          "demangled_name": "edbitsDrawOvalTilted",
-          "address": 3531648,
-          "offset": 2641680,
-          "size": 2908,
-          "match_percent": 84.897224
-        },
-        {
-          "name": "edbitsDrawTorus",
-          "demangled_name": "edbitsDrawTorus",
-          "address": 3534832,
-          "offset": 2644864,
-          "size": 1708,
-          "match_percent": 100.0
-        },
-        {
           "name": "edbriStartAllPages",
           "demangled_name": "edbriStartAllPages",
           "address": 3543184,
@@ -73207,7 +73214,7 @@
           "address": 3838768,
           "offset": 2948800,
           "size": 591,
-          "match_percent": 94.96875
+          "match_percent": 95.08594
         },
         {
           "name": "RndrCircleXZ",
@@ -73215,7 +73222,7 @@
           "address": 3839360,
           "offset": 2949392,
           "size": 591,
-          "match_percent": 94.96875
+          "match_percent": 95.08594
         },
         {
           "name": "RndrOSquare",
@@ -73239,7 +73246,7 @@
           "address": 4166848,
           "offset": 3276880,
           "size": 700,
-          "match_percent": 87.572464
+          "match_percent": 87.46377
         },
         {
           "name": "LocaledbitsDrawCircleXY",
@@ -73247,7 +73254,7 @@
           "address": 4167664,
           "offset": 3277696,
           "size": 323,
-          "match_percent": 99.74324
+          "match_percent": 99.945946
         },
         {
           "name": "_Z11DrawAreaBoxP7nuvec_sS0_ii",
@@ -84821,7 +84828,7 @@
           "address": 1761824,
           "offset": 871856,
           "size": 4330,
-          "match_percent": 90.74273
+          "match_percent": 90.74832
         },
         {
           "name": "_Z10Hub_InMenuv",
@@ -86316,6 +86323,237 @@
       ]
     },
     {
+      "name": "nu2api/nu3d/android/nuframebuffer_android.cpp.o",
+      "source": "src/nu2api/nu3d/android/nuframebuffer_android.cpp",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nuframebuffer_android.o",
+      "functions": [
+        {
+          "name": "_GLOBAL__sub_I_nuframebuffer_android.cpp",
+          "demangled_name": "_GLOBAL__sub_I_nuframebuffer_android.cpp",
+          "address": 903040,
+          "offset": 13072,
+          "size": 93,
+          "match_percent": 99.35294
+        },
+        {
+          "name": "NuFramebufferInitEx",
+          "demangled_name": "NuFramebufferInitEx",
+          "address": 2762176,
+          "offset": 1872208,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuFramebufferCreate",
+          "demangled_name": "NuFramebufferCreate",
+          "address": 2762192,
+          "offset": 1872224,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuFramebufferDestroy",
+          "demangled_name": "NuFramebufferDestroy",
+          "address": 2762208,
+          "offset": 1872240,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuFramebufferCopyTex2D",
+          "demangled_name": "NuFramebufferCopyTex2D",
+          "address": 2762224,
+          "offset": 1872256,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuFramebufferAttachTex2D",
+          "demangled_name": "NuFramebufferAttachTex2D",
+          "address": 2762240,
+          "offset": 1872272,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuFramebufferGetAttachedTex",
+          "demangled_name": "NuFramebufferGetAttachedTex",
+          "address": 2762256,
+          "offset": 1872288,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuFramebufferResolve",
+          "demangled_name": "NuFramebufferResolve",
+          "address": 2762272,
+          "offset": 1872304,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuFramebufferResolveAll",
+          "demangled_name": "NuFramebufferResolveAll",
+          "address": 2762288,
+          "offset": 1872320,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuFramebufferResolveMultisample",
+          "demangled_name": "NuFramebufferResolveMultisample",
+          "address": 2762304,
+          "offset": 1872336,
+          "size": 34,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuFramebufferEnableGuards",
+          "demangled_name": "NuFramebufferEnableGuards",
+          "address": 2762352,
+          "offset": 1872384,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuFramebufferBind",
+          "demangled_name": "NuFramebufferBind",
+          "address": 2762368,
+          "offset": 1872400,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuFramebufferGetBound",
+          "demangled_name": "NuFramebufferGetBound",
+          "address": 2762384,
+          "offset": 1872416,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuFramebufferGetWidth",
+          "demangled_name": "NuFramebufferGetWidth",
+          "address": 2762400,
+          "offset": 1872432,
+          "size": 15,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuFramebufferGetHeight",
+          "demangled_name": "NuFramebufferGetHeight",
+          "address": 2762416,
+          "offset": 1872448,
+          "size": 15,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuFramebufferDrawBuffers",
+          "demangled_name": "NuFramebufferDrawBuffers",
+          "address": 2762432,
+          "offset": 1872464,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuFramebufferGetDefault",
+          "demangled_name": "NuFramebufferGetDefault",
+          "address": 2762448,
+          "offset": 1872480,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuFramebufferGetFrontBuffer",
+          "demangled_name": "NuFramebufferGetFrontBuffer",
+          "address": 2762464,
+          "offset": 1872496,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuFramebufferGetBackBuffer",
+          "demangled_name": "NuFramebufferGetBackBuffer",
+          "address": 2762480,
+          "offset": 1872512,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuFramebufferSwapBuffers",
+          "demangled_name": "NuFramebufferSwapBuffers",
+          "address": 2762496,
+          "offset": 1872528,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuFramebufferGetSamples",
+          "demangled_name": "NuFramebufferGetSamples",
+          "address": 2762512,
+          "offset": 1872544,
+          "size": 15,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuFramebufferClear",
+          "demangled_name": "NuFramebufferClear",
+          "address": 2762528,
+          "offset": 1872560,
+          "size": 42,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuFramebufferSetClearColor",
+          "demangled_name": "NuFramebufferSetClearColor",
+          "address": 2762576,
+          "offset": 1872608,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuFramebufferGetObject",
+          "demangled_name": "NuFramebufferGetObject",
+          "address": 2762592,
+          "offset": 1872624,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z26NuFramebuffer360BeginZPassi",
+          "demangled_name": "NuFramebuffer360BeginZPass(int)",
+          "address": 2762608,
+          "offset": 1872640,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z24NuFramebuffer360EndZPassv",
+          "demangled_name": "NuFramebuffer360EndZPass()",
+          "address": 2762624,
+          "offset": 1872656,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z24NuFramebuffer360HasZPassv",
+          "demangled_name": "NuFramebuffer360HasZPass()",
+          "address": 2762640,
+          "offset": 1872672,
+          "size": 9,
+          "match_percent": 82.22222
+        },
+        {
+          "name": "_Z28NuFramebuffer360GetTileCountP15nuframebuffer_s",
+          "demangled_name": "NuFramebuffer360GetTileCount(nuframebuffer_s*)",
+          "address": 2762656,
+          "offset": 1872688,
+          "size": 15,
+          "match_percent": 68.57143
+        }
+      ]
+    },
+    {
       "name": "nu2api/nu3d/android/nugscn_android.cpp.o",
       "source": "src/nu2api/nu3d/android/nugscn_android.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nugscn_android.o",
@@ -86613,29 +86851,6 @@
           "offset": 2240207,
           "size": 1216,
           "match_percent": 68.35065
-        }
-      ]
-    },
-    {
-      "name": "nu2api/nu3d/android/nuposteffect_plain.cpp.o",
-      "source": "src/nu2api/nu3d/android/nuposteffect_plain.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nuposteffect_plain.o",
-      "functions": [
-        {
-          "name": "NuFramebufferSwapBuffers",
-          "demangled_name": "NuFramebufferSwapBuffers",
-          "address": 2762496,
-          "offset": 1872528,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuFramebufferClear",
-          "demangled_name": "NuFramebufferClear",
-          "address": 2762528,
-          "offset": 1872560,
-          "size": 42,
-          "match_percent": 100.0
         }
       ]
     },
@@ -90803,7 +91018,7 @@
           "address": 3007920,
           "offset": 2117952,
           "size": 739,
-          "match_percent": 18.455
+          "match_percent": 20.215
         },
         {
           "name": "NuRndr3dLine",
@@ -94150,14 +94365,6 @@
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nupostresource_create.o",
       "functions": [
         {
-          "name": "NuFramebufferCreate",
-          "demangled_name": "NuFramebufferCreate",
-          "address": 2762192,
-          "offset": 1872224,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
           "name": "NuEffectTexCreate2D",
           "demangled_name": "NuEffectTexCreate2D",
           "address": 3142048,
@@ -97139,198 +97346,6 @@
           "offset": 1865287,
           "size": 93,
           "match_percent": 18.4
-        },
-        {
-          "name": "NuFramebufferInitEx",
-          "demangled_name": "NuFramebufferInitEx",
-          "address": 2762176,
-          "offset": 1872208,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuFramebufferDestroy",
-          "demangled_name": "NuFramebufferDestroy",
-          "address": 2762208,
-          "offset": 1872240,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuFramebufferCopyTex2D",
-          "demangled_name": "NuFramebufferCopyTex2D",
-          "address": 2762224,
-          "offset": 1872256,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuFramebufferAttachTex2D",
-          "demangled_name": "NuFramebufferAttachTex2D",
-          "address": 2762240,
-          "offset": 1872272,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuFramebufferGetAttachedTex",
-          "demangled_name": "NuFramebufferGetAttachedTex",
-          "address": 2762256,
-          "offset": 1872288,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuFramebufferResolve",
-          "demangled_name": "NuFramebufferResolve",
-          "address": 2762272,
-          "offset": 1872304,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuFramebufferResolveAll",
-          "demangled_name": "NuFramebufferResolveAll",
-          "address": 2762288,
-          "offset": 1872320,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuFramebufferResolveMultisample",
-          "demangled_name": "NuFramebufferResolveMultisample",
-          "address": 2762304,
-          "offset": 1872336,
-          "size": 34,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuFramebufferEnableGuards",
-          "demangled_name": "NuFramebufferEnableGuards",
-          "address": 2762352,
-          "offset": 1872384,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuFramebufferBind",
-          "demangled_name": "NuFramebufferBind",
-          "address": 2762368,
-          "offset": 1872400,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuFramebufferGetBound",
-          "demangled_name": "NuFramebufferGetBound",
-          "address": 2762384,
-          "offset": 1872416,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuFramebufferGetWidth",
-          "demangled_name": "NuFramebufferGetWidth",
-          "address": 2762400,
-          "offset": 1872432,
-          "size": 15,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuFramebufferGetHeight",
-          "demangled_name": "NuFramebufferGetHeight",
-          "address": 2762416,
-          "offset": 1872448,
-          "size": 15,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuFramebufferDrawBuffers",
-          "demangled_name": "NuFramebufferDrawBuffers",
-          "address": 2762432,
-          "offset": 1872464,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuFramebufferGetDefault",
-          "demangled_name": "NuFramebufferGetDefault",
-          "address": 2762448,
-          "offset": 1872480,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuFramebufferGetFrontBuffer",
-          "demangled_name": "NuFramebufferGetFrontBuffer",
-          "address": 2762464,
-          "offset": 1872496,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuFramebufferGetBackBuffer",
-          "demangled_name": "NuFramebufferGetBackBuffer",
-          "address": 2762480,
-          "offset": 1872512,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuFramebufferGetSamples",
-          "demangled_name": "NuFramebufferGetSamples",
-          "address": 2762512,
-          "offset": 1872544,
-          "size": 15,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuFramebufferSetClearColor",
-          "demangled_name": "NuFramebufferSetClearColor",
-          "address": 2762576,
-          "offset": 1872608,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuFramebufferGetObject",
-          "demangled_name": "NuFramebufferGetObject",
-          "address": 2762592,
-          "offset": 1872624,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z26NuFramebuffer360BeginZPassi",
-          "demangled_name": "NuFramebuffer360BeginZPass(int)",
-          "address": 2762608,
-          "offset": 1872640,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z24NuFramebuffer360EndZPassv",
-          "demangled_name": "NuFramebuffer360EndZPass()",
-          "address": 2762624,
-          "offset": 1872656,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z24NuFramebuffer360HasZPassv",
-          "demangled_name": "NuFramebuffer360HasZPass()",
-          "address": 2762640,
-          "offset": 1872672,
-          "size": 9,
-          "match_percent": 82.22222
-        },
-        {
-          "name": "_Z28NuFramebuffer360GetTileCountP15nuframebuffer_s",
-          "demangled_name": "NuFramebuffer360GetTileCount(nuframebuffer_s*)",
-          "address": 2762656,
-          "offset": 1872688,
-          "size": 15,
-          "match_percent": 68.57143
         },
         {
           "name": "NuOcclusionManagerIsInitialised",
@@ -121550,14 +121565,6 @@
       "match_percent": 0.0
     },
     {
-      "name": "_GLOBAL__sub_I_nuframebuffer_android.cpp",
-      "demangled_name": "_GLOBAL__sub_I_nuframebuffer_android.cpp",
-      "address": 903040,
-      "offset": 13072,
-      "size": 93,
-      "match_percent": 0.0
-    },
-    {
       "name": "_GLOBAL__sub_I_nurendercontext.cpp",
       "demangled_name": "_GLOBAL__sub_I_nurendercontext.cpp",
       "address": 903136,
@@ -128391,10 +128398,10 @@
     }
   ],
   "summary": {
-    "bazel_units": 468,
+    "bazel_units": 469,
     "functions": 13454,
-    "assigned_functions": 12352,
+    "assigned_functions": 12353,
     "ambiguous_functions": 212,
-    "unassigned_functions": 890
+    "unassigned_functions": 889
   }
 }

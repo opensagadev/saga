@@ -835,14 +835,7 @@ extern "C" void NuRndrLine2di(i32 x0, i32 y0, i32 x1, i32 y1, i32 colour, NUMTL 
     NuPrim2DAddXYZ(ex, ey, 0.0f);
     NuPrim2DEnd();
 }
-struct NuLineVertex {
-    NUVEC position;
-    NUVEC normal;
-    i32 colour;
-    f32 u, v;
-};
-
-extern "C" void NuRndrLine3d(NuLineVertex *vertices, NUMTL *material, NUMTX *matrix) {
+extern "C" void NuRndrLine3d(NURND_VERTEX3D *vertices, NUMTL *material, NUMTX *matrix) {
     NuPrim3DBegin(2, 7, material, matrix);
     for (i32 i = 0; i < 2; ++i) {
         if (!g_NuPrim_NeedsOverbrightening)
