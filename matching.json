@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 46.24114,
+    "fuzzy_match_percent": 46.241367,
     "total_code": "4722419",
-    "matched_code": "404791",
-    "matched_code_percent": 8.571688,
+    "matched_code": "404906",
+    "matched_code_percent": 8.574123,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 4793,
-    "matched_functions_percent": 35.61186,
+    "matched_functions": 4794,
+    "matched_functions_percent": 35.61929,
     "total_units": 1
   },
   "text": {
@@ -49648,11 +49648,195 @@
           "match_percent": 99.35294
         },
         {
-          "name": "_Z18RegisterGizActionsP15GIZACTIONDEFN_s",
-          "demangled_name": "RegisterGizActions(GIZACTIONDEFN_s*)",
-          "address": 4934400,
-          "offset": 4044432,
-          "size": 24,
+          "name": "_ZL21GizActions_EnableSockP9GIZFLOW_sP9FLOWBOX_sPPci",
+          "demangled_name": "GizActions_EnableSock(GIZFLOW_s*, FLOWBOX_s*, char**, int)",
+          "address": 1845904,
+          "offset": 955936,
+          "size": 373,
+          "match_percent": 4.0
+        },
+        {
+          "name": "_ZL23GizAction_TurnOnFlowBoxP9GIZFLOW_sP9FLOWBOX_sPPci",
+          "demangled_name": "GizAction_TurnOnFlowBox(GIZFLOW_s*, FLOWBOX_s*, char**, int)",
+          "address": 1846288,
+          "offset": 956320,
+          "size": 291,
+          "match_percent": 87.938774
+        },
+        {
+          "name": "_ZL23GizActions_ActivateBeltP9GIZFLOW_sP9FLOWBOX_sPPci",
+          "demangled_name": "GizActions_ActivateBelt(GIZFLOW_s*, FLOWBOX_s*, char**, int)",
+          "address": 1846592,
+          "offset": 956624,
+          "size": 178,
+          "match_percent": 7.5
+        },
+        {
+          "name": "_ZL32GizActions_ChangeObstTriggerTypeP9GIZFLOW_sP9FLOWBOX_sPPci",
+          "demangled_name": "GizActions_ChangeObstTriggerType(GIZFLOW_s*, FLOWBOX_s*, char**, int)",
+          "address": 1846784,
+          "offset": 956816,
+          "size": 530,
+          "match_percent": 3.265306
+        },
+        {
+          "name": "_ZL20GizActions_HitBlowupP9GIZFLOW_sP9FLOWBOX_sPPci",
+          "demangled_name": "GizActions_HitBlowup(GIZFLOW_s*, FLOWBOX_s*, char**, int)",
+          "address": 1847328,
+          "offset": 957360,
+          "size": 539,
+          "match_percent": 3.287671
+        },
+        {
+          "name": "_ZL23GizActions_PlayCutsceneP9GIZFLOW_sP9FLOWBOX_sPPci",
+          "demangled_name": "GizActions_PlayCutscene(GIZFLOW_s*, FLOWBOX_s*, char**, int)",
+          "address": 1847872,
+          "offset": 957904,
+          "size": 161,
+          "match_percent": 10.434783
+        },
+        {
+          "name": "_ZL20GizActions_PlayRadioP9GIZFLOW_sP9FLOWBOX_sPPci",
+          "demangled_name": "GizActions_PlayRadio(GIZFLOW_s*, FLOWBOX_s*, char**, int)",
+          "address": 1848048,
+          "offset": 958080,
+          "size": 309,
+          "match_percent": 5.217391
+        },
+        {
+          "name": "_ZL20GizActions_PlayForceP9GIZFLOW_sP9FLOWBOX_sPPci",
+          "demangled_name": "GizActions_PlayForce(GIZFLOW_s*, FLOWBOX_s*, char**, int)",
+          "address": 1848368,
+          "offset": 958400,
+          "size": 450,
+          "match_percent": 6.164383
+        },
+        {
+          "name": "_ZL22GizActions_PlaySpecialP9GIZFLOW_sP9FLOWBOX_sPPci",
+          "demangled_name": "GizActions_PlaySpecial(GIZFLOW_s*, FLOWBOX_s*, char**, int)",
+          "address": 1848832,
+          "offset": 958864,
+          "size": 474,
+          "match_percent": 6.0
+        },
+        {
+          "name": "_ZL23GizActions_PlayObstacleP9GIZFLOW_sP9FLOWBOX_sPPci",
+          "demangled_name": "GizActions_PlayObstacle(GIZFLOW_s*, FLOWBOX_s*, char**, int)",
+          "address": 1849312,
+          "offset": 959344,
+          "size": 547,
+          "match_percent": 3.243243
+        },
+        {
+          "name": "_ZL24GizActions_GoThroughDoorP9GIZFLOW_sP9FLOWBOX_sPPci",
+          "demangled_name": "GizActions_GoThroughDoor(GIZFLOW_s*, FLOWBOX_s*, char**, int)",
+          "address": 1849872,
+          "offset": 959904,
+          "size": 199,
+          "match_percent": 99.81035
+        },
+        {
+          "name": "_ZL23GizActions_GoToNewLevelP9GIZFLOW_sP9FLOWBOX_sPPci",
+          "demangled_name": "GizActions_GoToNewLevel(GIZFLOW_s*, FLOWBOX_s*, char**, int)",
+          "address": 1850080,
+          "offset": 960112,
+          "size": 333,
+          "match_percent": 95.591835
+        },
+        {
+          "name": "_ZL20GizAction_SetAIStateP9GIZFLOW_sP9FLOWBOX_sPPci",
+          "demangled_name": "GizAction_SetAIState(GIZFLOW_s*, FLOWBOX_s*, char**, int)",
+          "address": 1850416,
+          "offset": 960448,
+          "size": 897,
+          "match_percent": 2.410714
+        },
+        {
+          "name": "_ZL22GizAction_SetAIMessageP9GIZFLOW_sP9FLOWBOX_sPPci",
+          "demangled_name": "GizAction_SetAIMessage(GIZFLOW_s*, FLOWBOX_s*, char**, int)",
+          "address": 1851328,
+          "offset": 961360,
+          "size": 502,
+          "match_percent": 96.71852
+        },
+        {
+          "name": "_ZL25GizAction_ChangeTechnoTgtP9GIZFLOW_sP9FLOWBOX_sPPci",
+          "demangled_name": "GizAction_ChangeTechnoTgt(GIZFLOW_s*, FLOWBOX_s*, char**, int)",
+          "address": 1851840,
+          "offset": 961872,
+          "size": 943,
+          "match_percent": 1.772152
+        },
+        {
+          "name": "_ZL28GizAction_ActivatePartEffectP9GIZFLOW_sP9FLOWBOX_sPPci",
+          "demangled_name": "GizAction_ActivatePartEffect(GIZFLOW_s*, FLOWBOX_s*, char**, int)",
+          "address": 1852784,
+          "offset": 962816,
+          "size": 220,
+          "match_percent": 12.0
+        },
+        {
+          "name": "_ZL24GizAction_ActivateEffectP9GIZFLOW_sP9FLOWBOX_sPPci",
+          "demangled_name": "GizAction_ActivateEffect(GIZFLOW_s*, FLOWBOX_s*, char**, int)",
+          "address": 1853008,
+          "offset": 963040,
+          "size": 248,
+          "match_percent": 6.760563
+        },
+        {
+          "name": "_ZL22GizAction_ActivateCharP9GIZFLOW_sP9FLOWBOX_sPPci",
+          "demangled_name": "GizAction_ActivateChar(GIZFLOW_s*, FLOWBOX_s*, char**, int)",
+          "address": 1853264,
+          "offset": 963296,
+          "size": 702,
+          "match_percent": 90.10471
+        },
+        {
+          "name": "_ZL23GizAction_ActivateGizmoP9GIZFLOW_sP9FLOWBOX_sPPci",
+          "demangled_name": "GizAction_ActivateGizmo(GIZFLOW_s*, FLOWBOX_s*, char**, int)",
+          "address": 1853968,
+          "offset": 964000,
+          "size": 301,
+          "match_percent": 95.23529
+        },
+        {
+          "name": "_ZL29GizAction_SetPickupVisibilityP9GIZFLOW_sP9FLOWBOX_sPPci",
+          "demangled_name": "GizAction_SetPickupVisibility(GIZFLOW_s*, FLOWBOX_s*, char**, int)",
+          "address": 1854272,
+          "offset": 964304,
+          "size": 511,
+          "match_percent": 3.2
+        },
+        {
+          "name": "_ZL28GizAction_SetGizmoVisibilityP9GIZFLOW_sP9FLOWBOX_sPPci",
+          "demangled_name": "GizAction_SetGizmoVisibility(GIZFLOW_s*, FLOWBOX_s*, char**, int)",
+          "address": 1854784,
+          "offset": 964816,
+          "size": 301,
+          "match_percent": 95.23529
+        },
+        {
+          "name": "_ZL23GizAction_SetVisibilityP9GIZFLOW_sP9FLOWBOX_sPPci",
+          "demangled_name": "GizAction_SetVisibility(GIZFLOW_s*, FLOWBOX_s*, char**, int)",
+          "address": 1855088,
+          "offset": 965120,
+          "size": 279,
+          "match_percent": 94.31169
+        },
+        {
+          "name": "_ZL24GizActions_CompleteLevelP9GIZFLOW_sP9FLOWBOX_sPPci",
+          "demangled_name": "GizActions_CompleteLevel(GIZFLOW_s*, FLOWBOX_s*, char**, int)",
+          "address": 1855376,
+          "offset": 965408,
+          "size": 377,
+          "match_percent": 4.285714
+        },
+        {
+          "name": "_Z22GameRegisterGizActionsv",
+          "demangled_name": "GameRegisterGizActions()",
+          "address": 1855760,
+          "offset": 965792,
+          "size": 36,
           "match_percent": 100.0
         }
       ]
@@ -49820,7 +50004,7 @@
           "address": 4922288,
           "offset": 4032320,
           "size": 925,
-          "match_percent": 8.456522
+          "match_percent": 8.42029
         },
         {
           "name": "_ZL14xConditionTypeP8nufpar_s",
@@ -49916,7 +50100,7 @@
           "address": 4924864,
           "offset": 4034896,
           "size": 626,
-          "match_percent": 73.454544
+          "match_percent": 75.44242
         },
         {
           "name": "_ZL6xGizmoP8nufpar_s",
@@ -50047,12 +50231,20 @@
           "match_percent": 65.89286
         },
         {
+          "name": "_Z18RegisterGizActionsP15GIZACTIONDEFN_s",
+          "demangled_name": "RegisterGizActions(GIZACTIONDEFN_s*)",
+          "address": 4934400,
+          "offset": 4044432,
+          "size": 24,
+          "match_percent": 100.0
+        },
+        {
           "name": "_Z11LoadGizFlowPvP10GIZMOSYS_sPcP9variptr_uS4_",
           "demangled_name": "LoadGizFlow(void*, GIZMOSYS_s*, char*, variptr_u*, variptr_u*)",
           "address": 4934432,
           "offset": 4044464,
           "size": 563,
-          "match_percent": 83.46094
+          "match_percent": 83.34375
         },
         {
           "name": "_Z20ResetGizFlowPointersP9GIZFLOW_s",
@@ -50100,7 +50292,7 @@
           "address": 4937184,
           "offset": 4047216,
           "size": 115,
-          "match_percent": 99.6875
+          "match_percent": 100.0
         }
       ]
     },
@@ -51936,7 +52128,7 @@
           "address": 1704688,
           "offset": 814720,
           "size": 613,
-          "match_percent": 57.248554
+          "match_percent": 56.901733
         },
         {
           "name": "_Z21Action_ReleaseLocatorP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -51944,7 +52136,7 @@
           "address": 1705312,
           "offset": 815344,
           "size": 197,
-          "match_percent": 99.830505
+          "match_percent": 99.32204
         },
         {
           "name": "_Z23Action_DynamicCameraCutP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -51961,198 +52153,6 @@
           "offset": 819360,
           "size": 2451,
           "match_percent": 0.833333
-        },
-        {
-          "name": "_ZL21GizActions_EnableSockP9GIZFLOW_sP9FLOWBOX_sPPci",
-          "demangled_name": "GizActions_EnableSock(GIZFLOW_s*, FLOWBOX_s*, char**, int)",
-          "address": 1845904,
-          "offset": 955936,
-          "size": 373,
-          "match_percent": 4.0
-        },
-        {
-          "name": "_ZL23GizAction_TurnOnFlowBoxP9GIZFLOW_sP9FLOWBOX_sPPci",
-          "demangled_name": "GizAction_TurnOnFlowBox(GIZFLOW_s*, FLOWBOX_s*, char**, int)",
-          "address": 1846288,
-          "offset": 956320,
-          "size": 291,
-          "match_percent": 87.938774
-        },
-        {
-          "name": "_ZL23GizActions_ActivateBeltP9GIZFLOW_sP9FLOWBOX_sPPci",
-          "demangled_name": "GizActions_ActivateBelt(GIZFLOW_s*, FLOWBOX_s*, char**, int)",
-          "address": 1846592,
-          "offset": 956624,
-          "size": 178,
-          "match_percent": 7.5
-        },
-        {
-          "name": "_ZL32GizActions_ChangeObstTriggerTypeP9GIZFLOW_sP9FLOWBOX_sPPci",
-          "demangled_name": "GizActions_ChangeObstTriggerType(GIZFLOW_s*, FLOWBOX_s*, char**, int)",
-          "address": 1846784,
-          "offset": 956816,
-          "size": 530,
-          "match_percent": 3.265306
-        },
-        {
-          "name": "_ZL20GizActions_HitBlowupP9GIZFLOW_sP9FLOWBOX_sPPci",
-          "demangled_name": "GizActions_HitBlowup(GIZFLOW_s*, FLOWBOX_s*, char**, int)",
-          "address": 1847328,
-          "offset": 957360,
-          "size": 539,
-          "match_percent": 3.287671
-        },
-        {
-          "name": "_ZL23GizActions_PlayCutsceneP9GIZFLOW_sP9FLOWBOX_sPPci",
-          "demangled_name": "GizActions_PlayCutscene(GIZFLOW_s*, FLOWBOX_s*, char**, int)",
-          "address": 1847872,
-          "offset": 957904,
-          "size": 161,
-          "match_percent": 10.434783
-        },
-        {
-          "name": "_ZL20GizActions_PlayRadioP9GIZFLOW_sP9FLOWBOX_sPPci",
-          "demangled_name": "GizActions_PlayRadio(GIZFLOW_s*, FLOWBOX_s*, char**, int)",
-          "address": 1848048,
-          "offset": 958080,
-          "size": 309,
-          "match_percent": 5.217391
-        },
-        {
-          "name": "_ZL20GizActions_PlayForceP9GIZFLOW_sP9FLOWBOX_sPPci",
-          "demangled_name": "GizActions_PlayForce(GIZFLOW_s*, FLOWBOX_s*, char**, int)",
-          "address": 1848368,
-          "offset": 958400,
-          "size": 450,
-          "match_percent": 6.164383
-        },
-        {
-          "name": "_ZL22GizActions_PlaySpecialP9GIZFLOW_sP9FLOWBOX_sPPci",
-          "demangled_name": "GizActions_PlaySpecial(GIZFLOW_s*, FLOWBOX_s*, char**, int)",
-          "address": 1848832,
-          "offset": 958864,
-          "size": 474,
-          "match_percent": 6.0
-        },
-        {
-          "name": "_ZL23GizActions_PlayObstacleP9GIZFLOW_sP9FLOWBOX_sPPci",
-          "demangled_name": "GizActions_PlayObstacle(GIZFLOW_s*, FLOWBOX_s*, char**, int)",
-          "address": 1849312,
-          "offset": 959344,
-          "size": 547,
-          "match_percent": 3.243243
-        },
-        {
-          "name": "_ZL24GizActions_GoThroughDoorP9GIZFLOW_sP9FLOWBOX_sPPci",
-          "demangled_name": "GizActions_GoThroughDoor(GIZFLOW_s*, FLOWBOX_s*, char**, int)",
-          "address": 1849872,
-          "offset": 959904,
-          "size": 199,
-          "match_percent": 99.293106
-        },
-        {
-          "name": "_ZL23GizActions_GoToNewLevelP9GIZFLOW_sP9FLOWBOX_sPPci",
-          "demangled_name": "GizActions_GoToNewLevel(GIZFLOW_s*, FLOWBOX_s*, char**, int)",
-          "address": 1850080,
-          "offset": 960112,
-          "size": 333,
-          "match_percent": 95.13265
-        },
-        {
-          "name": "_ZL20GizAction_SetAIStateP9GIZFLOW_sP9FLOWBOX_sPPci",
-          "demangled_name": "GizAction_SetAIState(GIZFLOW_s*, FLOWBOX_s*, char**, int)",
-          "address": 1850416,
-          "offset": 960448,
-          "size": 897,
-          "match_percent": 2.410714
-        },
-        {
-          "name": "_ZL22GizAction_SetAIMessageP9GIZFLOW_sP9FLOWBOX_sPPci",
-          "demangled_name": "GizAction_SetAIMessage(GIZFLOW_s*, FLOWBOX_s*, char**, int)",
-          "address": 1851328,
-          "offset": 961360,
-          "size": 502,
-          "match_percent": 96.82963
-        },
-        {
-          "name": "_ZL25GizAction_ChangeTechnoTgtP9GIZFLOW_sP9FLOWBOX_sPPci",
-          "demangled_name": "GizAction_ChangeTechnoTgt(GIZFLOW_s*, FLOWBOX_s*, char**, int)",
-          "address": 1851840,
-          "offset": 961872,
-          "size": 943,
-          "match_percent": 1.772152
-        },
-        {
-          "name": "_ZL28GizAction_ActivatePartEffectP9GIZFLOW_sP9FLOWBOX_sPPci",
-          "demangled_name": "GizAction_ActivatePartEffect(GIZFLOW_s*, FLOWBOX_s*, char**, int)",
-          "address": 1852784,
-          "offset": 962816,
-          "size": 220,
-          "match_percent": 12.0
-        },
-        {
-          "name": "_ZL24GizAction_ActivateEffectP9GIZFLOW_sP9FLOWBOX_sPPci",
-          "demangled_name": "GizAction_ActivateEffect(GIZFLOW_s*, FLOWBOX_s*, char**, int)",
-          "address": 1853008,
-          "offset": 963040,
-          "size": 248,
-          "match_percent": 6.760563
-        },
-        {
-          "name": "_ZL22GizAction_ActivateCharP9GIZFLOW_sP9FLOWBOX_sPPci",
-          "demangled_name": "GizAction_ActivateChar(GIZFLOW_s*, FLOWBOX_s*, char**, int)",
-          "address": 1853264,
-          "offset": 963296,
-          "size": 702,
-          "match_percent": 90.18324
-        },
-        {
-          "name": "_ZL23GizAction_ActivateGizmoP9GIZFLOW_sP9FLOWBOX_sPPci",
-          "demangled_name": "GizAction_ActivateGizmo(GIZFLOW_s*, FLOWBOX_s*, char**, int)",
-          "address": 1853968,
-          "offset": 964000,
-          "size": 301,
-          "match_percent": 95.23529
-        },
-        {
-          "name": "_ZL29GizAction_SetPickupVisibilityP9GIZFLOW_sP9FLOWBOX_sPPci",
-          "demangled_name": "GizAction_SetPickupVisibility(GIZFLOW_s*, FLOWBOX_s*, char**, int)",
-          "address": 1854272,
-          "offset": 964304,
-          "size": 511,
-          "match_percent": 3.2
-        },
-        {
-          "name": "_ZL28GizAction_SetGizmoVisibilityP9GIZFLOW_sP9FLOWBOX_sPPci",
-          "demangled_name": "GizAction_SetGizmoVisibility(GIZFLOW_s*, FLOWBOX_s*, char**, int)",
-          "address": 1854784,
-          "offset": 964816,
-          "size": 301,
-          "match_percent": 95.05882
-        },
-        {
-          "name": "_ZL23GizAction_SetVisibilityP9GIZFLOW_sP9FLOWBOX_sPPci",
-          "demangled_name": "GizAction_SetVisibility(GIZFLOW_s*, FLOWBOX_s*, char**, int)",
-          "address": 1855088,
-          "offset": 965120,
-          "size": 279,
-          "match_percent": 94.31169
-        },
-        {
-          "name": "_ZL24GizActions_CompleteLevelP9GIZFLOW_sP9FLOWBOX_sPPci",
-          "demangled_name": "GizActions_CompleteLevel(GIZFLOW_s*, FLOWBOX_s*, char**, int)",
-          "address": 1855376,
-          "offset": 965408,
-          "size": 377,
-          "match_percent": 4.285714
-        },
-        {
-          "name": "_Z22GameRegisterGizActionsv",
-          "demangled_name": "GameRegisterGizActions()",
-          "address": 1855760,
-          "offset": 965792,
-          "size": 36,
-          "match_percent": 100.0
         },
         {
           "name": "_Z21Action_BoulderSectionP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",

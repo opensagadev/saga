@@ -3,6 +3,7 @@
 #include "globals.h"
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/core/players.h"
+#include "legoapi/gizmo/base/gizactions.h"
 #include "legoapi/gizmo/base/gizmo.h"
 #include "legoapi/gizmo/base/gizflow.h"
 #include "legoapi/core/config/cheat.h"
@@ -31,7 +32,7 @@ static i32 load_r_noutputs;
 static i32 load_r_outputChance[8];
 static i32 load_nflowboxes;
 static char load_name[32];
-extern GIZACTIONDEFN_s *gizactiondefs;
+GIZACTIONDEFN_s *gizactiondefs;
 
 static void xGizmoType(nufpar_s *parser) {
     NuFParGetWord(parser);
@@ -460,56 +461,6 @@ static void xFlowBox(nufpar_s *parser) {
 static NUFPCOMJMP cfgtab_GitCount[] = {{"FlowBox", xFlowBoxCount}, {NULL, NULL}};
 static NUFPCOMJMP cfgtab_Git[] = {{"FlowBox", xFlowBox}, {"Collapse", xCollapse}, {NULL, NULL}};
 
-void *LoadGizFlow(void *, GIZMOSYS_s *system, char *path, VARIPTR *buffer, VARIPTR *end) {
-    FLOWREMAP remaps[96];
-    numRemaps = 0;
-    remap = remaps;
-    load_buff = buffer;
-    load_endbuff = end;
-    load_nflowboxes = 0;
-    GIZFLOW_s *flow = NULL;
-    NUFILE file = NuFileOpen(path, NUFILE_READ);
-    if (file != 0) {
-        nufpar_s *parser = NuFParOpen(file);
-        if (parser != NULL) {
-            NuFParPushCom(parser, cfgtab_GitCount);
-            while (NuFParGetLine(parser)) {
-                NuFParGetWord(parser);
-                NuFParInterpretWord(parser);
-            }
-            NuFParClose(parser);
-        }
-        if (load_nflowboxes != 0) {
-            parser = NuFParOpen(file);
-            if (parser != NULL) {
-                flow = reinterpret_cast<GIZFLOW_s *>(GizmoBufferAlloc(load_buff, load_endbuff, sizeof(GIZFLOW_s)));
-                if (flow != NULL) {
-                    flow->flowbox_count = load_nflowboxes;
-                    flow->gizmo_sys = system;
-                    flow->flowboxes = reinterpret_cast<FLOWBOX_s *>(
-                        GizmoBufferAlloc(load_buff, load_endbuff, load_nflowboxes * sizeof(FLOWBOX_s)));
-                    load_flowbox = flow->flowboxes;
-                    load_gizflow = flow;
-                    NuFParPushCom(parser, cfgtab_Git);
-                    while (NuFParGetLine(parser)) {
-                        NuFParGetWord(parser);
-                        NuFParInterpretWord(parser);
-                    }
-                }
-                NuFParClose(parser);
-            }
-        }
-        NuFileClose(file);
-        if (flow != NULL)
-            flow->pointers_need_reset = 1;
-    }
-    load_buff = NULL;
-    load_endbuff = NULL;
-    load_gizflow = NULL;
-    load_flowbox = NULL;
-    return flow;
-}
-
 FLOWBOX_s *FlowBoxFindByName(GIZFLOW_s *system, char *name) {
     if (name != NULL && system != NULL) {
         for (i32 i = 0; i < system->flowbox_count; ++i) {
@@ -812,6 +763,60 @@ static i32 ProcessActionFlowBox(GIZFLOW_s *system, FLOWBOX_s *box, u8) {
     }
     PerformActionFlowBox(system, box);
     return 1;
+}
+
+void RegisterGizActions(GIZACTIONDEFN_s *definitions) {
+    gizactiondefs = definitions;
+}
+
+void *LoadGizFlow(void *, GIZMOSYS_s *system, char *path, VARIPTR *buffer, VARIPTR *end) {
+    FLOWREMAP remaps[96];
+    numRemaps = 0;
+    remap = remaps;
+    load_buff = buffer;
+    load_endbuff = end;
+    load_nflowboxes = 0;
+    GIZFLOW_s *flow = NULL;
+    NUFILE file = NuFileOpen(path, NUFILE_READ);
+    if (file != 0) {
+        nufpar_s *parser = NuFParOpen(file);
+        if (parser != NULL) {
+            NuFParPushCom(parser, cfgtab_GitCount);
+            while (NuFParGetLine(parser)) {
+                NuFParGetWord(parser);
+                NuFParInterpretWord(parser);
+            }
+            NuFParClose(parser);
+        }
+        if (load_nflowboxes != 0) {
+            parser = NuFParOpen(file);
+            if (parser != NULL) {
+                flow = reinterpret_cast<GIZFLOW_s *>(GizmoBufferAlloc(load_buff, load_endbuff, sizeof(GIZFLOW_s)));
+                if (flow != NULL) {
+                    flow->flowbox_count = load_nflowboxes;
+                    flow->gizmo_sys = system;
+                    flow->flowboxes = reinterpret_cast<FLOWBOX_s *>(
+                        GizmoBufferAlloc(load_buff, load_endbuff, load_nflowboxes * sizeof(FLOWBOX_s)));
+                    load_flowbox = flow->flowboxes;
+                    load_gizflow = flow;
+                    NuFParPushCom(parser, cfgtab_Git);
+                    while (NuFParGetLine(parser)) {
+                        NuFParGetWord(parser);
+                        NuFParInterpretWord(parser);
+                    }
+                }
+                NuFParClose(parser);
+            }
+        }
+        NuFileClose(file);
+        if (flow != NULL)
+            flow->pointers_need_reset = 1;
+    }
+    load_buff = NULL;
+    load_endbuff = NULL;
+    load_gizflow = NULL;
+    load_flowbox = NULL;
+    return flow;
 }
 
 static i32 ProcessConditionFlowBox(GIZFLOW_s *flow, FLOWBOX_s *box, u8) {

@@ -1060,7 +1060,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
 
     // Per-frame animation/pad update hooks (originals take the frame time).
-    void NuOcclusionManagerEndFrame(void);
     void NuPad_Interface_Render(void);
     void NuPadUpdatePads(void);
 
