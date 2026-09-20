@@ -2,6 +2,7 @@
 #include "gameapi/gui/apimenu.h"
 #include "globals.h"
 #include "legoapi/characters/core/character.h"
+#include "legoapi/audio/audio.h"
 #include "legoapi/world/levels/levels.h"
 #include "legoapi/world/area.h"
 #include "legoapi/gizmo/base/TeleportObjectInterface.h"
@@ -13,6 +14,7 @@
 #include "legoapi/gizmo/base/GizForceObjectInterface.h"
 #include "legoapi/items/base/apiobject.h"
 #include "legoapi/core/input/gamepads.h"
+#include "legoapi/menus/core/gamehint.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/world/world.h"
 #include "nu2api/nu3d/nucamera.h"
@@ -22,6 +24,7 @@
 #include "nu2api/numath/nuvec.h"
 
 extern i16 id_RANCOR, id_ANAKINJEDI;
+extern i16 id_YODA;
 i32 GameRayCast(NUVEC *, NUVEC *, f32, i32);
 bool CalculateRayBoxIntersection(VuVec const &, VuVec const &, VuVec const &, VuVec const &, f32, f32 &);
 extern "C" void NewRayCastGetImpactNormal(NUVEC *);
@@ -29,6 +32,9 @@ f32 CalcCapsuleIntersectDistance(VuVec const &, VuVec const &, f32, VuVec const 
 void PerformPauseButtonStuff();
 extern NuVirtualTouchDevice *inputTouchDevice;
 extern i32 players_cannot_exit_speeder;
+void TakeOver2GetIn(GameObject_s *, GameObject_s *);
+void Tag_NewTransfer(GameObject_s *, GameObject_s *);
+i32 TagCode(GameObject_s *, GameObject_s *, i32, i32, i32);
 
 i32 MechInputTouchSystem::s_baseControlMode = 1;
 i32 MechInputTouchSystem::s_actualTouchMode = 2;
@@ -59,8 +65,30 @@ void MechAutoJumpSetIsUsing(GameObject_s &object, MechAutoJumpConnection &connec
     connection.is_using = 1;
 }
 
-void MechTouchUITagButton_OnClick_Callback(MechTouchUIElement &, TouchHolder &) {
-    STUBBED();
+void MechTouchUITagButton_OnClick_Callback(MechTouchUIElement &element, TouchHolder &) {
+    MechTouchUITagButton &button = static_cast<MechTouchUITagButton &>(element);
+    MechObjectInterface *interface = button.target_object.Get();
+    GameObject_s *target = interface != NULL ? interface->GetCharacterObject() : NULL;
+    if (target == NULL || player == NULL ||
+        (player->field_0xcc0 != NULL && player->field_0xcc0->id != id_YODA) || button.disabled != 0) {
+        GameAudio_PlaySfx(0x32, NULL, 0, 0);
+        return;
+    }
+
+    Hint_SetComplete(0x5f6);
+    player->pause_input_state = 0;
+    bool tagged = false;
+    if ((target->field_0xf00 & 2) != 0) {
+        TakeOver2GetIn(target, player);
+        tagged = true;
+    } else if (TagCode(player, target, 0, 0, 1) == 1) {
+        Tag_NewTransfer(player, target);
+        tagged = true;
+    }
+    if (tagged) {
+        GameAudio_PlaySfx(0x21, NULL, 0, 0);
+    }
+    target->pause_input_state = 0;
 }
 
 void MechTouchUIPauseButton_OnClick_Callback(MechTouchUIElement &element, TouchHolder &) {
@@ -68,8 +96,50 @@ void MechTouchUIPauseButton_OnClick_Callback(MechTouchUIElement &element, TouchH
     PerformPauseButtonStuff();
 }
 
-void MechTouchUIPartySelector_OnRelease_Callback(MechTouchUIElement &, TouchHolder &) {
-    STUBBED();
+void MechTouchUIPartySelector_OnRelease_Callback(MechTouchUIElement &element, TouchHolder &) {
+    MechTouchUICharIcon &icon = static_cast<MechTouchUICharIcon &>(element);
+    if (icon.selector->field_0x88 != 0) {
+        return;
+    }
+    if (player == NULL || player->field_0xcc0 != NULL || icon.disabled != 0) {
+        GameAudio_PlaySfx(0x32, NULL, 0, 0);
+        return;
+    }
+    if (icon.hovered == 0) {
+        return;
+    }
+
+    if (FreePlay != 0) {
+        Hint_SetComplete(0x5f5);
+        NewPlayerCharacter(player, icon.character_id, player->id, 1);
+        GameAudio_PlaySfx(0x24, NULL, 0, 0);
+        player->pause_input_state = 0;
+        return;
+    }
+
+    Hint_SetComplete(0x5f4);
+    GameObject_s *target = NULL;
+    for (i32 i = 0; i < 8; ++i) {
+        if (Player[i] != NULL && Player[i]->id == icon.character_id) {
+            target = Player[i];
+            break;
+        }
+    }
+    if (target != NULL) {
+        bool tagged = false;
+        if ((target->field_0xf00 & 2) != 0) {
+            TakeOver2GetIn(target, player);
+            tagged = true;
+        } else if (TagCode(player, target, 0, 0, 1) == 1) {
+            Tag_NewTransfer(player, target);
+            tagged = true;
+        }
+        if (tagged) {
+            GameAudio_PlaySfx(0x21, NULL, 0, 0);
+        }
+        target->pause_input_state = 0;
+    }
+    player->pause_input_state = 0;
 }
 
 void MechInputTouchSystem::AddChangeLayoutButtons(NuVirtualTouchDevice &, i32) {
