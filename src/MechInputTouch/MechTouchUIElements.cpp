@@ -27,6 +27,7 @@ extern i32 editor_active;
 extern i32 NewMode;
 extern i32 PANELOFF;
 extern i32 Paused;
+extern FadeSystem FadeSys;
 f32 TagButtonSize;
 extern "C" {
     i32 procActive;
@@ -38,6 +39,9 @@ void PlayerButton_OnClick_Callback_NextButton(MechTouchUIElement &, TouchHolder 
 void PlayerButton_OnHold_Callback(MechTouchUIElement &, TouchHolder &);
 void PlayerButton_OnLeave_Callback(MechTouchUIElement &, TouchHolder &);
 void MechTouchUIPauseButton_OnClick_Callback(MechTouchUIElement &, TouchHolder &);
+extern i16 id_YODA;
+i32 TagCode(GameObject_s *, GameObject_s *, i32, i32, i32);
+void Tag_NewTransfer(GameObject_s *, GameObject_s *);
 
 bool MechInputTouchGestureTracker::OnDown(GameObject_s &, TouchHolder &) {
     STUBBED();
@@ -497,7 +501,57 @@ MechTouchUIPlayerButton::MechTouchUIPlayerButton() : MechTouchUIElement(VuVec(-0
 }
 
 void MechTouchUIPlayerButton::Process(float) {
-    STUBBED();
+    disabled = GetMenuID() != -1 || Paused != 0 || NewMode != 0 || NewLData != NULL || CUTSTOPGAME != 0 ||
+               MiniCutCam != 0 || FadeSys.fade > 0.0f || player == NULL;
+
+    if (selector != NULL) {
+        if (owner == NULL && selector->field_0x88 == 0) {
+            selector->BlendOut();
+        }
+        if (selector->BlendedOut()) {
+            delete selector;
+            selector = NULL;
+        }
+    }
+    if (disabled || player == NULL) {
+        return;
+    }
+
+    if (chooser_mode == 0) {
+        const i32 update = procActive++;
+        if (update % 5 != 0) {
+            return;
+        }
+        for (i32 target_index = 0; target_index < 32; ++target_index) {
+            if (field_0x144[target_index] != 0 || target_ids[target_index] < 0) {
+                continue;
+            }
+            for (i32 slot = 0; slot < 8; ++slot) {
+                GameObject_s *target = Player[slot];
+                if (target != NULL && target->id == target_ids[target_index] && TouchHacks::CanTagTo(*player, *target)) {
+                    field_0x144[target_index] = 1;
+                    MechSystems::Get()->NewRadarPulse(position, false);
+                    break;
+                }
+            }
+        }
+        return;
+    }
+
+    if (procActive++ <= 20) {
+        return;
+    }
+    chooser_mode = 0;
+    for (i32 target_index = 0; target_index < 32; ++target_index) {
+        field_0x144[target_index] = 0;
+        for (i32 slot = 0; slot < 8; ++slot) {
+            GameObject_s *target = Player[slot];
+            if (target != NULL && target->id == target_ids[target_index]) {
+                field_0x144[target_index] = target == player || TouchHacks::CanTagTo(*player, *target);
+                break;
+            }
+        }
+    }
 }
 
 void MechTouchUIPlayerButton::SetupTargetIds() {
@@ -593,7 +647,51 @@ void MechTouchUIPlayerButton::ShowChooser() {
 }
 
 void MechTouchUIPlayerButton::TriggerTagNext() {
-    STUBBED();
+    if (player == NULL) {
+        return;
+    }
+    if (FreePlay != 0) {
+        for (i32 index = 0; index < 32; ++index) {
+            target_ids[index] = -1;
+        }
+        i32 target_count = 0;
+        for (i32 slot = 0; slot < 8 && target_count < 32; ++slot) {
+            GameObject_s *target = Player[slot];
+            if (target != NULL && (target->apiobj.field_0x1f8 & 0x1001) == 0x1001) {
+                target_ids[target_count++] = target->id;
+            }
+        }
+    }
+
+    i32 current_index = -1;
+    for (i32 index = 0; index < 32; ++index) {
+        if (target_ids[index] == player->id) {
+            current_index = index;
+            break;
+        }
+    }
+    if (current_index == -1) {
+        return;
+    }
+
+    for (i32 offset = 1; offset < 32; ++offset) {
+        const i32 index = (current_index + offset) & 31;
+        if (target_ids[index] < 0) {
+            continue;
+        }
+        for (i32 slot = 0; slot < 8; ++slot) {
+            GameObject_s *target = Player[slot];
+            if (target == NULL || target->id != target_ids[index] || !TouchHacks::CanTagTo(*player, *target)) {
+                continue;
+            }
+            GameObject_s *source = player;
+            if (TagCode(source, target, 0, 0, 1) == 1) {
+                GameAudio_PlaySfx(0x21, NULL, 0, 0);
+                Tag_NewTransfer(source, target);
+            }
+            return;
+        }
+    }
 }
 
 void MechTouchUIPartySelector::BlendOut() {

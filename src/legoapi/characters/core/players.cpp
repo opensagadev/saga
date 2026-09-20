@@ -1047,8 +1047,13 @@ i32 Player_HasDoubleBoltDamage(GameObject_s *object) {
     return 0;
 }
 
-void PlayerButton_OnHold_Callback(MechTouchUIElement &, TouchHolder &) {
-    STUBBED();
+void PlayerButton_OnHold_Callback(MechTouchUIElement &element, TouchHolder &) {
+    if (player != NULL && (player->field_0xcc0 == NULL || player->field_0xcc0->id == id_YODA)) {
+        static_cast<MechTouchUIPlayerButton &>(element).ShowChooser();
+        GameAudio_PlaySfx(0x30, NULL, 0, 0);
+    } else {
+        GameAudio_PlaySfx(0x32, NULL, 0, 0);
+    }
 }
 
 i32 Player_HasDoubleWeaponDamage(GameObject_s *object) {
@@ -1058,8 +1063,14 @@ i32 Player_HasDoubleWeaponDamage(GameObject_s *object) {
     return 1;
 }
 
-void PlayerButton_OnLeave_Callback(MechTouchUIElement &, TouchHolder &) {
-    STUBBED();
+void PlayerButton_OnLeave_Callback(MechTouchUIElement &element, TouchHolder &holder) {
+    MechTouchUIPlayerButton &button = static_cast<MechTouchUIPlayerButton &>(element);
+    if (player != NULL && (player->field_0xcc0 == NULL || player->field_0xcc0->id == id_YODA) &&
+        button.selector == NULL && holder.touch_position.y <= button.position.y &&
+        holder.touch_position.y != button.position.y) {
+        button.ShowChooser();
+        GameAudio_PlaySfx(0x30, NULL, 0, 0);
+    }
 }
 
 i32 Player_HasDoubleBoltDamage_FromBolt(BOLT_s *bolt) {
@@ -1073,8 +1084,12 @@ i32 Player_HasDoubleBoltDamage_FromBolt(BOLT_s *bolt) {
     return Player_HasDoubleBoltDamage(Player[player]);
 }
 
-void PlayerButton_OnClick_Callback_NextButton(MechTouchUIElement &, TouchHolder &) {
-    STUBBED();
+void PlayerButton_OnClick_Callback_NextButton(MechTouchUIElement &element, TouchHolder &) {
+    if (player != NULL && (player->field_0xcc0 == NULL || player->field_0xcc0->id == id_YODA)) {
+        static_cast<MechTouchUIPlayerButton &>(element).TriggerTagNext();
+    } else {
+        GameAudio_PlaySfx(0x32, NULL, 0, 0);
+    }
 }
 
 static __used__ void Player_ClearContext_Game(GameObject_s *, i32) {
