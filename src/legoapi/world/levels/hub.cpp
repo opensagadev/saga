@@ -1728,8 +1728,110 @@ void Hub_InitMiniKits(WORLDINFO_s *world) {
     }
 }
 
-void Hub_DrawAreaStats(float, i32, i32) {
-    STUBBED();
+void Hub_DrawAreaStats(f32 phase, i32 area_index, i32 mode) {
+    if (area_index < 0 || area_index >= AREACOUNT) {
+        return;
+    }
+
+    AREADATA *area = &ADataList[area_index];
+    const i32 alpha = static_cast<i32>(phase * 128.0f);
+
+    // The lost-temple doorway is the cut-scene viewer. Its original panel has
+    // several selection-transition branches, but the persistent heading is the
+    // useful fallback when no clip selection has been supplied.
+    if (area == LOSTTEMPLE_ADATA || mode == 18) {
+        SmartTextEx(TTab[tSTORYCLIPS2], 0.0f, HUB_EPISODESUBTITLEY, 1.0f, HUB_EPISODESUBTITLESIZE,
+                    HUB_EPISODESUBTITLESIZE, HUB_EPISODESUBTITLESIZE, 0, HUB_EPISODER, HUB_EPISODEG, HUB_EPISODEB,
+                    1.7f, 1, NULL, 0, alpha);
+        return;
+    }
+    if (area == VEHICLES_ADATA) {
+        return;
+    }
+
+    SmartTextEx(TTab[area->name_id], 0.0f, HUB_EPISODESUBTITLEY, 1.0f, HUB_EPISODESUBTITLESIZE,
+                HUB_EPISODESUBTITLESIZE, HUB_EPISODESUBTITLESIZE, 0, HUB_EPISODER, HUB_EPISODEG, HUB_EPISODEB, 1.7f,
+                1, NULL, 0, alpha);
+
+    AREASAVE_s *save = &Game.area_save[area_index];
+    const u16 flags = area->flags;
+    if ((flags & 0x10) != 0) {
+        if (save->complete != 0 && (flags & 4) == 0) {
+            Episode_CountOpenAreas(area->episode_index, area_index, Game.area_save);
+            const f32 icon_phase = NU_SIN_LUT(static_cast<i32>(16384.0f * phase));
+            char text[128];
+
+            if (BOTHTRUEJEDIGOLDBRICKS == 0) {
+                DrawBuildUpBar(HUB_AREAPANELX[1], HUB_EPISODETITLEY + PANEL_MINIKITY - PANEL_MINIKITCOUNTY, 100, 100,
+                               icon_phase, 1.0f, 1.0f, 0);
+                NuStrCpy(text, (save->story_buildup_complete || save->freeplay_buildup_complete) ? "$" : "X");
+                Text3DEx(text, HUB_AREAPANELX[1], HUB_EPISODETITLEY, 1.0f, PANEL_MINIKITCOUNTSCALE,
+                         PANEL_MINIKITCOUNTSCALE, PANEL_MINIKITCOUNTSCALE, 0, 255, 0, 127, static_cast<u8>(alpha));
+            } else {
+                DrawBuildUpBar(HUB_AREAPANELX[1], HUB_EPISODETITLEY + PANEL_MINIKITY - PANEL_MINIKITCOUNTY, 100, 100,
+                               icon_phase, 1.0f, 1.0f, 0);
+                NuStrCpy(text, save->story_buildup_complete ? "$" : "X");
+                Text3DEx(text, HUB_AREAPANELX[1], HUB_EPISODETITLEY, 1.0f, PANEL_MINIKITCOUNTSCALE,
+                         PANEL_MINIKITCOUNTSCALE, PANEL_MINIKITCOUNTSCALE, 0, 255, 0, 127, static_cast<u8>(alpha));
+                SmartTextEx(TTab[tSTORY], HUB_AREAPANELX[1], HUB_EPISODETITLEY + 0.235f, 1.0f, 0.45f, 0.45f, 0.45f,
+                            0, 255, 255, 255, 0.4f, 1, NULL, 0, static_cast<i32>(static_cast<f32>(TJTYPEA) * phase));
+
+                DrawBuildUpBar(HUB_AREAPANELX[4], HUB_EPISODETITLEY + PANEL_MINIKITY - PANEL_MINIKITCOUNTY, 100, 100,
+                               icon_phase, 1.0f, 1.0f, 0);
+                NuStrCpy(text, save->freeplay_buildup_complete ? "$" : "X");
+                Text3DEx(text, HUB_AREAPANELX[4], HUB_EPISODETITLEY, 1.0f, PANEL_MINIKITCOUNTSCALE,
+                         PANEL_MINIKITCOUNTSCALE, PANEL_MINIKITCOUNTSCALE, 0, 255, 0, 127, static_cast<u8>(alpha));
+                SmartTextEx(TTab[tFREEPLAY], HUB_AREAPANELX[4], HUB_EPISODETITLEY + 0.235f, 1.0f, 0.45f, 0.45f,
+                            0.45f, 0, 255, 255, 255, 0.4f, 1, NULL, 0,
+                            static_cast<i32>(static_cast<f32>(TJTYPEA) * phase));
+            }
+
+            Hub_DrawMiniKitCount(HUB_AREAPANELX[0], HUB_EPISODETITLEY, save->minikit_count, 10, phase);
+            Hub_DrawImportantBrick(210, HUB_AREAPANELX[2], HUB_EPISODETITLEY, phase, save->red_brick_collected, 1);
+            Hub_DrawImportantBrick(211, HUB_AREAPANELX[3], HUB_EPISODETITLEY, phase, EpGoldBrickCount,
+                                   EpGoldBrickTotal);
+            if (Store_IsPackUnlocked(8)) {
+                hub_drawminikitcount_charkit = 1;
+                Hub_DrawMiniKitCount(HUB_AREAPANELX[5], HUB_EPISODETITLEY, EpCharKitCount, EpCharKitTotal, phase);
+            }
+            return;
+        }
+
+        if (area->area_index != -1 && (flags & 0x14) == 0x10) {
+            char chapter[128];
+            sprintf(chapter, "%s %i", TTab[tCHAPTER], static_cast<i8>(area->area_index) + 1);
+            SmartTextEx(chapter, 0.0f, HUB_EPISODETITLEY, 1.0f, HUB_EPISODETITLESIZE, HUB_EPISODETITLESIZE,
+                        HUB_EPISODETITLESIZE, 0, HUB_EPISODER, HUB_EPISODEG, HUB_EPISODEB, 1.7f, 1, NULL, 0, alpha);
+        }
+        return;
+    }
+
+    if (save->complete == 0) {
+        return;
+    }
+
+    f32 build_x = 0.0f;
+    if ((flags & 0x4000) != 0) {
+        build_x = 0.201f;
+        if ((flags & 0x800) == 0) {
+            const i32 gold_count = 1 + (save->story_buildup_complete || save->freeplay_buildup_complete);
+            Hub_DrawImportantBrick(211, -0.201f, HUB_EPISODETITLEY, phase, gold_count, 2);
+        }
+    } else if ((flags & 0x800) == 0) {
+        Hub_DrawImportantBrick(211, 0.0f, HUB_EPISODESUBTITLEY + 0.225f, phase, -1, -1);
+    }
+
+    if ((flags & 0x800) != 0) {
+        Hub_DrawImportantBrick(251, build_x, HUB_EPISODESUBTITLEY - 0.225f, phase, -1, -1);
+    }
+    if ((flags & 0x4000) != 0) {
+        DrawBuildUpBar(build_x, HUB_EPISODETITLEY + PANEL_MINIKITY - PANEL_MINIKITCOUNTY, 100, 100,
+                       NU_SIN_LUT(static_cast<i32>(16384.0f * phase)), 1.0f, 1.0f, 0);
+        char text[2];
+        NuStrCpy(text, (save->story_buildup_complete || save->freeplay_buildup_complete) ? "$" : "X");
+        Text3DEx(text, build_x, HUB_EPISODETITLEY, 1.0f, PANEL_MINIKITCOUNTSCALE, PANEL_MINIKITCOUNTSCALE,
+                 PANEL_MINIKITCOUNTSCALE, 0, 255, 0, 127, static_cast<u8>(alpha));
+    }
 }
 
 void Hub_DrawStarField() {
