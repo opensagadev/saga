@@ -13,6 +13,10 @@
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/nu3d/numtl.h"
 #include "nu2api/nucore/nustring.h"
+#include "nu2api/nucore/nuptrblock.h"
+#include "nu2api/nufile/nufile.h"
+#include "nu2api/nufile/nufilepak.h"
+#include "nu2api/nuplatform/nuplatform.h"
 #include <string.h>
 
 struct CUSTOMPIECERESOURCE {
@@ -228,12 +232,124 @@ void Customiser_DumpAccessories(CUSTOMISER *) {
     STUBBED();
 }
 
-void Customiser_LoadAll(CUSTOMISER *, WORLDINFO_s *) {
-    STUBBED();
+void Customiser_LoadAll(CUSTOMISER *customiser, WORLDINFO_s *world) {
+    if (customiser == NULL) {
+        return;
+    }
+
+    Customiser_AccessoriesLoaded = 2;
+    world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 4);
+    for (i32 category_index = 0; category_index < 9; ++category_index) {
+        CUSTOMPIECECATEGORY *category = customiser->categories[category_index];
+        const i32 piece_count = customiser->piece_counts[category_index];
+        if (piece_count < 1 || category == NULL || category->name == NULL || category->name[0] == '\0') {
+            world->customiser_resources[category_index] = NULL;
+            continue;
+        }
+
+        const usize bytes = piece_count * sizeof(CUSTOMPIECERESOURCE);
+        CUSTOMPIECERESOURCE *resources = reinterpret_cast<CUSTOMPIECERESOURCE *>(world->giz_buffer.void_ptr);
+        world->customiser_resources[category_index] = resources;
+        memset(resources, 0, bytes);
+        world->giz_buffer.addr += bytes;
+    }
+
+    void *texture_pack = NULL;
+    extern i32 CHARPAK;
+    if (CHARPAK != 0) {
+        texture_pack = NuFilePakLoad("chars\\weirdo\\all_textures.fpk", &world->giz_buffer,
+                                     world->unknown_0108, 0x20);
+    }
+
+    for (i32 category_index = 0; category_index < 9; ++category_index) {
+        CUSTOMPIECERESOURCE *resources = world->customiser_resources[category_index];
+        world->customiser_shared_scenes[category_index] = NULL;
+        if (resources == NULL) {
+            continue;
+        }
+
+        CUSTOMPIECECATEGORY *category = customiser->categories[category_index];
+        if (CUSTOMISER_USEBIGSCENES != 0 && category->uses_special != 0 && category->shared_scene != NULL) {
+            world->customiser_shared_scenes[category_index] =
+                NuGScnRead(&world->giz_buffer, world->unknown_0108, category->shared_scene);
+        }
+
+        for (i32 piece_index = 0; piece_index < customiser->piece_counts[category_index]; ++piece_index) {
+            CUSTOMPIECERESOURCE *resource = &resources[piece_index];
+            CUSTOMPIECE *piece = &customiser->piece_sets[category_index][piece_index];
+            char piece_name[0x80];
+            char path[0x80];
+            NuStrCpy(piece_name, piece->name);
+            NuStrCpy(path, "chars\\weirdo\\");
+            NuStrCat(path, category->name);
+            NuStrCat(path, "\\");
+            NuStrCat(path, piece_name);
+
+            if (category->uses_special != 0) {
+                resource->scene = world->customiser_shared_scenes[category_index];
+                if (resource->scene == NULL) {
+                    NuStrCat(path, ".gsc");
+                    world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 0x40);
+                    resource->scene = NuGScnRead(&world->giz_buffer, world->unknown_0108, path);
+                }
+                if (resource->scene != NULL) {
+                    NuSpecialFind(resource->scene, &resource->special, piece_name, 1);
+                }
+                continue;
+            }
+
+            if (category->material_tag == -1) {
+                continue;
+            }
+            PLATFORMS_SUPPORTED platform = NuPlatform::Get()->GetCurrentPlatform();
+            if (platform != IOS_PLATFORM && platform != ANDROID_ATITC_PLATFORM) {
+                NuStrCat(path, ".pnt");
+            }
+
+            if (texture_pack != NULL) {
+                char converted_path[0x88];
+                NuFileExtConvert(converted_path, path);
+                i32 item = NuFilePakGetItem(texture_pack, converted_path);
+                void *texture_data;
+                i32 texture_size;
+                if (item != -1 && NuFilePakGetItemInfo(texture_pack, item, &texture_data, &texture_size) != 0) {
+                    resource->texture_id =
+                        NuTexCreateNative(static_cast<NUNATIVETEX *>(NuPtrBlockFix(texture_data)), true);
+                }
+            }
+            if (resource->texture_id == 0) {
+                resource->texture_id = NuTexRead(path, &world->giz_buffer,
+                                                 reinterpret_cast<VARIPTR *>(world->unknown_0108.addr));
+            }
+        }
+    }
 }
 
-void Customiser_DumpAll(CUSTOMISER *, WORLDINFO_s *) {
-    STUBBED();
+void Customiser_DumpAll(CUSTOMISER *customiser, WORLDINFO_s *world) {
+    if (customiser == NULL) {
+        return;
+    }
+    for (i32 category = 0; category < 9; ++category) {
+        CUSTOMPIECERESOURCE *resources = world->customiser_resources[category];
+        if (resources == NULL) {
+            continue;
+        }
+        for (i32 piece = 0; piece < customiser->piece_counts[category]; ++piece) {
+            CUSTOMPIECERESOURCE *resource = &resources[piece];
+            if (resource->scene != NULL) {
+                if (resource->scene != world->customiser_shared_scenes[category]) {
+                    NuGScnRemove(resource->scene);
+                }
+                resource->scene = NULL;
+            } else if (resource->texture_id != 0) {
+                NuTexDestroy(resource->texture_id);
+            }
+        }
+        if (world->customiser_shared_scenes[category] != NULL) {
+            NuGScnRemove(world->customiser_shared_scenes[category]);
+            world->customiser_shared_scenes[category] = NULL;
+        }
+    }
 }
 
 void Customiser_ResetModelTextureIDs(CUSTOMISER *customiser) {
@@ -261,8 +377,24 @@ void Customiser_ResetModelTextureIDs(CUSTOMISER *customiser) {
     customiser->model_texture_ids[17] = 0;
 }
 
-void Customiser_SaveModelTextureIDs(CUSTOMISER *, CHARACTERMODEL_s *) {
-    STUBBED();
+void Customiser_SaveModelTextureIDs(CUSTOMISER *customiser, CHARACTERMODEL_s *model) {
+    if (model == NULL || customiser == NULL) {
+        return;
+    }
+    for (i32 character = 0; character < 2; ++character) {
+        if (customiser->character_ids[character] != model->model_id) {
+            continue;
+        }
+        nuhgobj_s *hierarchy = model->hierarchy;
+        for (i32 category = 0; category < 9; ++category) {
+            for (i32 material = 0; material < hierarchy->material_count; ++material) {
+                NUMTL *entry = hierarchy->materials[material];
+                if (entry->unknown_9a[0] == static_cast<u8>(customiser->categories[category]->material_tag)) {
+                    customiser->model_texture_ids[character * 9 + category] = entry->tex_id;
+                }
+            }
+        }
+    }
 }
 
 void Customiser_RestoreModelTextureIDs(CUSTOMISER *) {

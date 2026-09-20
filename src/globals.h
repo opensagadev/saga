@@ -419,6 +419,7 @@ extern i16 tATTRACTSUIT;
 // ------------------------------------------------------------------------
 extern CUSTOMISER *CharacterCustomiser;
 extern i32 Customiser_AccessoriesLoaded;
+extern i32 CUSTOMISER_USEBIGSCENES;
 
 // ------------------------------------------------------------------------
 // Completion & bonus points

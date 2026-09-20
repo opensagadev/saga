@@ -104,6 +104,7 @@ MISSIONSAVE *Game_MissionSave = NULL;
 // Character customiser
 // ------------------------------------------------------------------------
 i32 Customiser_AccessoriesLoaded = 0;
+i32 CUSTOMISER_USEBIGSCENES = 0;
 CUSTOMISER *CharacterCustomiser = NULL;
 
 // ------------------------------------------------------------------------
