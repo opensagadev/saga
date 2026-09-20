@@ -1455,8 +1455,37 @@ static __used__ unsigned int BoltInitSfx_LSW(GameObject_s *) {
 }
 
 void BoltTypes_Init(WORLDINFO_s *world) {
-    STUBBED();
-    (void)world;
+    for (i32 index = 0; index < BoltSys->count; ++index) {
+        BOLTTYPE_s &type = BoltSys->types[index];
+        memset(&type.specials, 0, sizeof(type.specials));
+
+        const i16 object_id = type.object_ids[0];
+        const i16 glow_id = type.object_ids[1];
+        if (object_id != -1) {
+            type.specials.object_special = world->lev_objs[object_id].special;
+            if (glow_id != -1) {
+                type.specials.glow_special = world->lev_objs[glow_id].special;
+            }
+
+            const i32 reflected_object_id = LevelObject_GetReflection(object_id);
+            if (reflected_object_id == -1) {
+                type.specials.reference_object_special = type.specials.object_special;
+                type.specials.reference_glow_special = type.specials.glow_special;
+            } else {
+                type.specials.reference_object_special = world->lev_objs[reflected_object_id].special;
+                if (glow_id != -1) {
+                    const i32 reflected_glow_id = LevelObject_GetReflection(glow_id);
+                    if (reflected_glow_id != -1) {
+                        type.specials.reference_glow_special = world->lev_objs[reflected_glow_id].special;
+                    }
+                }
+            }
+        }
+
+        if (type.field_2c_lo != -1) {
+            type.specials.shadow_special = world->lev_objs[type.field_2c_lo].special;
+        }
+    }
 }
 
 extern "C" {

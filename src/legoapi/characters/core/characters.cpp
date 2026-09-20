@@ -715,8 +715,23 @@ GameObject_s *ActivateCharacter(char *name, nuvec_s *position, i32 angle) {
     return object;
 }
 
-void FinishWeirdoNames(i32) {
-    STUBBED();
+static void FinishWeirdoName(char *name) {
+    NuStrUpr(name, name);
+    usize length = NuStrLen(name);
+    while (length < 15) {
+        name[length++] = ' ';
+    }
+    name[15] = '\0';
+}
+
+void FinishWeirdoNames(i32 which) {
+    if (which != 1) {
+        FinishWeirdoName(Game.customizer.primary_name);
+        if (which == 0) {
+            return;
+        }
+    }
+    FinishWeirdoName(Game.customizer.secondary_name);
 }
 
 extern i32 addcreature_override_id_check;

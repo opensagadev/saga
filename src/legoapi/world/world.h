@@ -83,7 +83,10 @@ struct BOLTTYPE_s {
     f32 field_1c;
     f32 field_20;
     f32 field_24;
-    i32 field_28;
+    union {
+        i32 field_28;
+        i16 object_ids[2];
+    };
     union {
         i32 field_2c;
         struct {
