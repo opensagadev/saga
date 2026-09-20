@@ -6,16 +6,44 @@
 #include "legoapi/gizmo/base/gizactions.h"
 #include "legoapi/gizmo/base/gizmo.h"
 #include "legoapi/gizmos/object/gizbuildits.h"
+#include "legoapi/gizmo/object/gizmoblowups.h"
+#include "legoapi/gizmos/object/gizobstacles.h"
+#include "legoapi/gizmos/traps/gizturrets.h"
 #include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/props/doors/door.h"
+#include "legoapi/props/system/socksys.h"
+#include "legoapi/render/fx.h"
 #include "legoapi/world/level.h"
 #include "legoapi/world/world.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nu3d/nuspecial.h"
 
-static void GizActions_EnableSock(GIZFLOW_s *, FLOWBOX_s *, char **, int) {
-    STUBBED();
+void SetEffectVisibility(char *name, i32 visible);
+i32 EffectOffProgress_Update(LEVEL_PROGRESS_s *progress, char *name, i32 visible);
+void PlayRadio(char *special_name, char *blowup_name, i32 play);
+
+static void GizActions_EnableSock(GIZFLOW_s *, FLOWBOX_s *, char **params, int count) {
+    i32 sock_index = -1;
+    i32 enabled = 1;
+    for (i32 index = 0; index < count; ++index) {
+        char *value = NuStrIStr(params[index], "ix=");
+        if (value != NULL) {
+            sock_index = static_cast<i32>(NuAToF(value + 3));
+        } else if ((value = NuStrIStr(params[index], "name=")) != NULL) {
+            SOCK *sock = FindSock(WORLD->sock_sys, value + 5);
+            if (sock != NULL) {
+                sock_index = sock - WORLD->sock_sys->sock;
+            }
+        } else if (NuStrIStr(params[index], "FALSE") != NULL) {
+            enabled = 0;
+        }
+    }
+    if (enabled != 0) {
+        SockOn(WORLD->sock_sys, sock_index);
+    } else {
+        SockOff(WORLD->sock_sys, sock_index);
+    }
 }
 
 static void GizAction_TurnOnFlowBox(GIZFLOW_s *flow, FLOWBOX_s *, char **params, int count) {
@@ -40,12 +68,73 @@ static void GizActions_ActivateBelt(GIZFLOW_s *, FLOWBOX_s *, char **, int) {
     STUBBED();
 }
 
-static void GizActions_ChangeObstTriggerType(GIZFLOW_s *, FLOWBOX_s *, char **, int) {
-    STUBBED();
+static void GizActions_ChangeObstTriggerType(GIZFLOW_s *flow, FLOWBOX_s *, char **params, int count) {
+    char *name = NULL;
+    i32 mode = -1;
+    for (i32 index = 0; index < count; ++index) {
+        char *value = NuStrIStr(params[index], "name=");
+        if (value != NULL) {
+            name = value + NuStrLen("name=");
+        } else if (NuStrICmp(params[index], "AUTOSTART") == 0) {
+            mode = 0;
+        } else if (NuStrICmp(params[index], "PROXIMITY") == 0) {
+            mode = 1;
+        } else if (NuStrICmp(params[index], "PROXIMITYGROUND") == 0) {
+            mode = 2;
+        } else if (NuStrICmp(params[index], "NOTRIGGER") == 0) {
+            mode = 3;
+        } else if (NuStrICmp(params[index], "TECHNOONLY") == 0) {
+            mode = 4;
+        } else if (NuStrICmp(params[index], "INBOXANDGROUND") == 0) {
+            mode = 6;
+        } else if (NuStrICmp(params[index], "INBOX") == 0) {
+            mode = 5;
+        } else if (NuStrICmp(params[index], "PUSHONLY") == 0) {
+            mode = 7;
+        }
+    }
+    if (mode == -1 || name == NULL) {
+        return;
+    }
+    GIZMO_s *gizmo = GizmoFindByName(flow->gizmo_sys, obstacle_gizmotype_id, name);
+    if (gizmo != NULL && gizmo->object != NULL) {
+        static_cast<GIZOBSTACLE_s *>(gizmo->object)->mode = static_cast<u8>(mode);
+    }
 }
 
-static void GizActions_HitBlowup(GIZFLOW_s *, FLOWBOX_s *, char **, int) {
-    STUBBED();
+static void GizActions_HitBlowup(GIZFLOW_s *, FLOWBOX_s *, char **params, int count) {
+    if (count <= 0) {
+        return;
+    }
+    char *name = NULL;
+    i32 damage = 0;
+    i8 gizmo_type = 0;
+    for (i32 index = 0; index < count; ++index) {
+        char *value = NuStrIStr(params[index], "name=");
+        if (value != NULL) {
+            name = value + NuStrLen("name=");
+        } else if (NuStrICmp(params[index], "BLOWUP") == 0) {
+            gizmo_type = 0;
+        } else if (NuStrICmp(params[index], "TURRET") == 0) {
+            gizmo_type = 1;
+        } else if ((value = NuStrIStr(params[index], "damage=")) != NULL) {
+            damage = static_cast<i32>(NuAToF(value + NuStrLen("damage=")));
+        }
+    }
+    if (damage == 0 || name == NULL) {
+        return;
+    }
+    if (gizmo_type == 1) {
+        GIZMO_s *gizmo = GizmoFindByName(WORLD->gizmo_sys, turret_gizmotype_id, name);
+        if (gizmo != NULL && gizmo->object != NULL) {
+            GizTurrets_Hit(WORLD, static_cast<GIZTURRET_s *>(gizmo->object), NULL, -1, damage);
+        }
+    } else {
+        GIZMO_s *gizmo = GizmoFindByName(WORLD->gizmo_sys, blowup_gizmotype_id, name);
+        if (gizmo != NULL && gizmo->object != NULL) {
+            GizmoBlowupBlowup(static_cast<GIZMOBLOWUP_s *>(gizmo->object), 1, -1, damage, NULL, 1);
+        }
+    }
 }
 
 static void GizActions_PlayCutscene(GIZFLOW_s *, FLOWBOX_s *, char **, int) {

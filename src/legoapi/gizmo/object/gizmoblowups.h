@@ -9,6 +9,7 @@ struct nuvec_s;
 struct nuinstanim_s;
 
 extern i32 (*BlowupExFunc)(GIZMOBLOWUP_s *, i32);
+extern i32 blowup_gizmotype_id;
 extern u32 EXBLOWUPFLAGS;
 extern i32 (*GizmoBlowUp_NoTargetFn)(WORLDINFO_s *, GameObject_s *);
 extern void (*GizmoBlowUp_SfxFn)(GIZMOBLOWUP_s *, nuvec_s *);
