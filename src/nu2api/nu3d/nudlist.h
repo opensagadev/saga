@@ -3,6 +3,7 @@
 #include "nu2api/nucore/common.h"
 #include "nu2api/numath/numtx.h"
 #include "nu2api/numath/nuvec.h"
+#include "nu2api/nu3d/nurndrstat.h"
 #include "decomp.h"
 
 // Forward declarations shared with sibling headers.
@@ -352,13 +353,6 @@ extern "C" {
     void NuDisplayListAddMicrocode(nudisplaylistitem_s *item, void *mtl);
     void NuDisplayListAddLightState(nudisplaylistitem_s *item, void *mtl);
 
-    // Provided elsewhere (integration handled outside this TU; stubs live in
-    // render_stubs.cpp):
-    void RndrStateResetGlobalState(struct nuglobalrndrstate_s *state);
-    void RndrStateResetSharedGlobalState(void);
-    void RndrStateUpdateFx(void *state, nudisplaylistitem_s *item);
-    void RndrStateUpdate(void *state, NUMTL *mtl, nudisplaylistitem_s *item);
-    void DisplayListUpdateRenderState(void *dl, void *local_state);
     void NuDisplayListLinkItem(nudisplaylist_s *dl, u8 type, void *call_addr);
     void NuDisplayListLinkMtl(nudisplaylist_s *dl, NUMTL *mtl);
     void *DisplayListCreateGeomTransformPS(VARIPTR *buffer, NUMTX *transform, NUMTL *mtl, void *next, void *tx);

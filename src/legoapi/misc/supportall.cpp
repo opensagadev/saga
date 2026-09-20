@@ -1160,10 +1160,6 @@ void DebrisReleaseControlStackLock() {
     STUBBED();
 }
 
-void RndrStateBuildReflectionState(nuglobalrndrstate_s *) {
-    STUBBED();
-}
-
 void xxxNuDisplayListUpdateSpecial(nuhspecial_s *) {
     STUBBED();
 }

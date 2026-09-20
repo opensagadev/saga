@@ -68,8 +68,6 @@ extern "C" {
     i32 sceneParametersCount = 0;
     struct nurenderscene_s sceneParameters[kSceneRingCapacity] = {0};
 
-    // Shared renderer state block (original BSS @0x119b900, 0x1b0 bytes).
-    NUGLOBALRNDRSTATE render_state = {};
 } // extern "C"
 
 // Swap/present pacing flags (original BSS).
@@ -90,8 +88,6 @@ extern "C" {
     i32 NuDisplayListAddRenderScene(void);
     i32 NuDynamicLightIsEnabled(void *);
     void NuDynamicLightAddRenderScene(void *, i32, i32);
-    void RndrStateSetConstAlphaTint(i32 alpha_enabled, i32 tint_enabled, f32 alpha, const NUCOLOUR3 *tint, NUMTL *mtl);
-    void DisplayListUpdateRenderState(void *list, void *state);
     void NuDisplayListLinkMtl(nudisplaylist_s *list, NUMTL *mtl);
     VARIPTR *NuDisplayListLinkItems(nudisplaylist_s *list, i32 count);
 }
@@ -1043,18 +1039,6 @@ extern "C" void NuRndrRectUV2di(i32 x, i32 y, i32 w, i32 h, f32 u0, f32 v0, f32 
     NuPrim2DAddXYZ(sx + sw, sy + sh, 0.0f);
     NuPrim2DEnd();
 }
-extern "C" i32 NuRndrSetAmbientLightPS(const NUCOLOUR3 *colour) {
-    render_state.ambient_intensity = *colour;
-    render_state.light_state = nullptr;
-    render_state.state.global_id++;
-    render_state.state.lights_id++;
-    return 1;
-}
-extern "C" i32 NuRndrSetAmbientLightSpecular(const NUCOLOUR4 *colour) {
-    render_state.global_specular = colour->a;
-    NuRndrSetAmbientLightPS(reinterpret_cast<const NUCOLOUR3 *>(colour));
-    return 0;
-}
 extern "C" void NuRndrSetCullDebug(void) {
     STUBBED();
 }
@@ -1160,21 +1144,6 @@ extern "C" void NuRndrSetDebBox(NUVEC *range) {
     NuRndrDebRangeInv.y = 1.0f / size.y;
     NuRndrDebRangeInv.z = 1.0f / size.z;
 }
-extern "C" i32 NuRndrSetDirectionalLightsPS(const NUVEC *dir0, const NUCOLOUR3 *colour0, const NUVEC *dir1,
-                                            const NUCOLOUR3 *colour1, const NUVEC *dir2, const NUCOLOUR3 *colour2) {
-    NUMTX *view = NuCameraGetViewMtx();
-    const NUVEC *directions[3] = {dir0, dir1, dir2};
-    const NUCOLOUR3 *colours[3] = {colour0, colour1, colour2};
-    for (i32 i = 0; i < 3; i++) {
-        render_state.light_intensity[i] = *colours[i];
-        NuVecMtxRotate(&render_state.light_direction[i], const_cast<NUVEC *>(directions[i]), view);
-        NuVecNorm(&render_state.light_direction[i], &render_state.light_direction[i]);
-    }
-    render_state.light_state = nullptr;
-    render_state.state.global_id++;
-    render_state.state.lights_id++;
-    return 1;
-}
 extern "C" {
     i32 g_minmiplevel = 13;
     f32 g_mipmapbias;
@@ -1186,27 +1155,6 @@ extern "C" void NuRndrSetGlobalMinMipLevel(i32 level) {
 extern "C" void NuRndrSetGlobalMipMapBias(f32 bias) {
     g_mipmapbias = bias;
 }
-extern "C" void NuRndrStateSetSpecularLight(const NUMTX *matrix, const NUCOLOUR3 *colour) {
-    if (matrix != nullptr) {
-        render_state.specular_mtx = *matrix;
-    }
-    if (colour != nullptr) {
-        render_state.specular_colour = *colour;
-    }
-    render_state.light_state = nullptr;
-    render_state.state.global_id++;
-    render_state.state.lights_id++;
-}
-
-extern "C" void NuRndrStateSetSpecularLightEx(const NUVEC *direction, const NUMTX *matrix, const NUCOLOUR3 *colour) {
-    render_state.specular_mtx = *matrix;
-    render_state.specular_colour = *colour;
-    render_state.specular_intensity = *direction;
-    render_state.light_state = nullptr;
-    render_state.state.global_id++;
-    render_state.state.lights_id++;
-}
-
 f32 global_windspeed = 1.0f;
 f32 global_windscale = 1.0f;
 extern "C" void NuRndrSetWind(f32 speed, f32 scale) {
@@ -1356,93 +1304,6 @@ extern "C" void NuRndrStartShadowReceiveRender(void) {
     global_GobjIsShadowReceive = 1;
 }
 
-void *RndrStateBuildKonstState(NUGLOBALRNDRSTATE *state);
-extern "C" void *RndrStateBuildFogState(NUGLOBALRNDRSTATE *state);
-
-static void *RndrStateBuildLightState(NUGLOBALRNDRSTATE *state) {
-    VARIPTR *buffer = NuDisplayListGetBuffer();
-    auto *packet = static_cast<NULIGHTSTATE *>(buffer->void_ptr);
-    buffer->addr += sizeof(NULIGHTSTATE);
-
-    packet->ambient_intensity = {state->ambient_intensity.r, state->ambient_intensity.g, state->ambient_intensity.b,
-                                 1.0f};
-    for (i32 i = 0; i < 3; i++) {
-        packet->light_intensity[i] = {state->light_intensity[i].r, state->light_intensity[i].g,
-                                      state->light_intensity[i].b, 1.0f};
-        packet->light_direction[i] = {state->light_direction[i].x, state->light_direction[i].y,
-                                      state->light_direction[i].z, 1.0f};
-    }
-    packet->specular_mtx = state->specular_mtx;
-    packet->specular_colour = state->specular_colour;
-    packet->specular_intensity = state->specular_intensity;
-    return packet;
-}
-
-// Camera-state portion of original DisplayListUpdateRenderState @0x2fd5d0.
-// The remaining light/fog/konst branches are independent state builders and
-// are left for their respective subsystem transcriptions.
-extern "C" void DisplayListUpdateRenderState(void *display_list, void *state) {
-    auto *dl = static_cast<NUDISPLAYLIST *>(display_list);
-    auto *global = static_cast<NUGLOBALRNDRSTATE *>(state);
-    if (global == nullptr || dl->state->global_id == global->state.global_id) {
-        return;
-    }
-
-    if (dl->state->lights_id != global->state.lights_id) {
-        if (global->light_state == nullptr) {
-            global->light_state = RndrStateBuildLightState(global);
-        }
-        NuDisplayListLinkItem(dl, 0x94, global->light_state);
-        dl->state->lights_id = global->state.lights_id;
-    }
-
-    if (dl->state->camera_id != global->state.camera_id) {
-        if (global->camera_state == nullptr) {
-            struct CameraPacket {
-                i32 id;
-                NUMTX view;
-                NUMTX projection;
-                f32 viewport[4];
-            };
-
-            VARIPTR *buffer = NuDisplayListGetBuffer();
-            auto *packet = static_cast<CameraPacket *>(buffer->void_ptr);
-            global->camera_state = packet;
-            packet->id = nuapi.frame_count + (global->state.camera_id + 5) * (global->state.global_id + 13);
-            packet->view = global->view;
-            memset(&packet->projection, 0, sizeof(packet->projection));
-            packet->projection.m00 = global->proj_00;
-            packet->projection.m11 = global->proj_11;
-            packet->projection.m22 = global->proj_22;
-            packet->projection.m23 = global->proj_23;
-            packet->projection.m32 = global->proj_32;
-            packet->projection.m20 = global->proj_20;
-            packet->projection.m21 = global->proj_21;
-            packet->viewport[0] = global->vpx;
-            packet->viewport[1] = global->vpy;
-            packet->viewport[2] = global->vpw;
-            packet->viewport[3] = global->vph;
-            buffer->addr += sizeof(CameraPacket);
-        }
-        NuDisplayListLinkItem(dl, 0x9a, global->camera_state);
-        dl->state->camera_id = global->state.camera_id;
-    }
-    if (dl->state->fog_id != global->state.fog_id) {
-        if (global->fog_state == nullptr) {
-            global->fog_state = RndrStateBuildFogState(global);
-        }
-        NuDisplayListLinkItem(dl, 0xa6, global->fog_state);
-        dl->state->fog_id = global->state.fog_id;
-    }
-    if (dl->state->konst_id != global->state.konst_id) {
-        if (global->konst_state == nullptr) {
-            global->konst_state = RndrStateBuildKonstState(global);
-        }
-        NuDisplayListLinkItem(dl, 0xa5, global->konst_state);
-        dl->state->konst_id = global->state.konst_id;
-    }
-    dl->state->global_id = global->state.global_id;
-}
 extern "C" i32 NuRndrStrip3d(NURND_VERTEX3D *vertices, numtl_s *material, NUMTX *matrix, i32 count) {
     if (count == 0)
         return 1;

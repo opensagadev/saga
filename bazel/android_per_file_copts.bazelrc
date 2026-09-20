@@ -233,6 +233,8 @@ build:target --per_file_copt=^src/legoapi/render/light/surfaces\.cpp$@-O3
 build --per_file_copt=^src/nu2api/nu3d/glutils\.c$@-x,c++,-std=gnu++11
 build --per_file_copt=^src/nu2api/nu3d/android/nuptl_android\.c$@-x,c++,-std=gnu++11
 build --per_file_copt=^src/nu2api/nu3d/android/nudlist_android\.c$@-x,c++,-std=gnu++11
+build --per_file_copt=^src/nu2api/nu3d/android/nuhgo_android\.c$@-x,c++,-std=gnu++11
+build --per_file_copt=^src/nu2api/nu3d/android/nurndrstat_android\.c$@-x,c++,-std=gnu++11
 build --per_file_copt=^src/nu2api/nu3d/android/nurndr_android\.c$@-x,c++,-std=gnu++11
 build --per_file_copt=^src/nu2api/nu3d/android/nurndr\.c$@-x,c++,-std=gnu++11
 build --per_file_copt=^src/nu2api/nu3d/android/nuprim_android\.c$@-x,c++,-std=gnu++11
@@ -242,6 +244,8 @@ build --per_file_copt=^src/legoapi/render/core/rtl\.c$@-x,c++,-std=gnu++11
 build:target --per_file_copt=^src/nu2api/nu3d/android/nuprim_android\.c$@-O0
 build:target --per_file_copt=^src/nu2api/nu3d/android/nuscratch_android\.c$@-O0
 build:target --per_file_copt=^src/nu2api/nu3d/android/nudlist_android\.c$@-O0
+build:target --per_file_copt=^src/nu2api/nu3d/android/nuhgo_android\.c$@-O0
+build:target --per_file_copt=^src/nu2api/nu3d/android/nurndrstat_android\.c$@-O0
 build:target --per_file_copt=^src/nu2api/nu3d/android/nurndr_android\.c$@-O0
 build:target --per_file_copt=^src/nu2api/nu3d/android/nurndr\.c$@-O0
 build:target --per_file_copt=^src/nu2api/nu3d/glutils\.c$@-O0

@@ -144,10 +144,12 @@ extern "C" {
     void NuRndrFx(i32 paused, void *context);
 
     i32 NuRndrSetAmbientLightPS(const NUCOLOUR3 *colour);
+    i32 NuRndrSetAmbientLightSpecular(const NUCOLOUR4 *colour);
     i32 NuRndrSetDirectionalLightsPS(const NUVEC *dir0, const NUCOLOUR3 *colour0, const NUVEC *dir1,
                                      const NUCOLOUR3 *colour1, const NUVEC *dir2, const NUCOLOUR3 *colour2);
     i32 NuRndrSetFxMtx(NUMTX *matrix);
     i32 NuRndrSetSpecularLightPS(const NUVEC *direction, const NUCOLOUR4 *intensity);
+    void NuRndrStateSetSpecularLight(const NUMTX *matrix, const NUCOLOUR3 *colour);
     void NuRndrStateSetSpecularLightEx(const NUVEC *direction, const NUMTX *matrix, const NUCOLOUR3 *colour);
     void NuRndrStartReflectionRender(i32 clear_depth);
     void NuRndrEndReflectionRender(void);

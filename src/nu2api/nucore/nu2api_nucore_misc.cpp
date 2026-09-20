@@ -52,10 +52,6 @@ i32 GetIntCurveVal(ani3_animheader_s *animation, f32 *values, i32 curve) {
 extern "C" void NuAnimBuffCreateScratch(nuanimbuff_s *buffer);
 extern "C" void NuAnimBuffDestroyScratch(nuanimbuff_s *buffer);
 
-void NuHGobjRead(variptr_u *, char *) {
-    STUBBED();
-}
-
 static void NuHtmlFlush(i32) {
     STUBBED();
 }

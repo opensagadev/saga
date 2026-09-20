@@ -82,6 +82,12 @@ typedef struct nuglobalrndrstate_s {
 
 extern "C" {
     extern NUGLOBALRNDRSTATE render_state;
+    void RndrStateCopyGlobalState(NUGLOBALRNDRSTATE *state);
+    void RndrStateResetGlobalState(NUGLOBALRNDRSTATE *state);
+    void RndrStateResetSharedGlobalState(void);
+    void RndrStateUpdateFx(void *state, struct nudisplaylistitem_s *item);
+    void RndrStateUpdate(void *state, NUMTL *mtl, struct nudisplaylistitem_s *item);
+    void DisplayListUpdateRenderState(void *display_list, void *state);
     void RndrStateSetConstAlphaTint(i32 alpha_enabled, i32 tint_enabled, f32 alpha, const NUCOLOUR3 *tint, NUMTL *mtl);
     void NuRndrStateInit(void);
     i32 NuRndrStateGetFogEnabled(void);

@@ -348,7 +348,6 @@ i32 RemoveNormalMaps = 0;
 NUVIDEORESHEADER g_VideoResHeader;
 
 extern "C" {
-    void RndrStateCopyGlobalState(NUGLOBALRNDRSTATE *state);
     i32 NuDisplayListRndrSpecial(nuhspecial_s *special, NUMTX *mtx, i32 skinned, void *skin_mtx, void *blend_values);
     void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
 
