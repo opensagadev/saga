@@ -9,6 +9,7 @@
 #include "legoapi/world/world.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/level.h"
+#include "legoapi/world/levels/levels.h"
 #include "legoapi/world/mission.h"
 #include "nu2api/nusound/nusound.h"
 
@@ -102,7 +103,6 @@ extern STATUSPACKET_s StatusPacket;
 extern FadeSystem FadeSys;
 extern i32 reset_area;
 extern i32 grab_screen_image;
-extern i32 hub_from_mission;
 void InitChallenge(i32);
 void InitMission(MISSIONSYS_s *, i32);
 

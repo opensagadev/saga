@@ -298,6 +298,8 @@ extern "C" {
     extern LEVELFIXUP LevFixUp;
 
     extern i32 LEVELCOUNT;
+    extern i32 LEGOSPL_START;
+    extern i32 LEGOSPL_SPLIT;
 #ifdef __cplusplus
 }
 

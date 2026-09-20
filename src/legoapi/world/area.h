@@ -54,6 +54,7 @@ extern "C" {
     extern AREADATA *ADataList;
     extern AREADATA *LastAData;
     extern AREADATA *HUB_ADATA;
+    extern AREADATA *VEHICLES_ADATA;
     extern AREADATA *VADER_ADATA;
     extern AREADATA *BONUS_GUNSHIP_ADATA;
     extern i32 Area;

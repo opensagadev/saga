@@ -18,6 +18,8 @@ struct HINT_s;
 #include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/items/base/collection.h"
 #include "legoapi/world/levels/episode.h"
+#include "legoapi/world/levels/levels.h"
+#include "legoapi/menus/screens/shop.h"
 #include "legoapi/world/level.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/actions/movement/carrying.h"

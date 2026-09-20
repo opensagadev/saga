@@ -4,6 +4,7 @@
 #include "legoapi/props/doors/door.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/level.h"
+#include "legoapi/world/levels/levels.h"
 #include "legoapi/world/mission.h"
 #include "legoapi/world/world.h"
 

@@ -14,6 +14,7 @@
 #include "legoapi/menus/core/text.h"
 #include "legoapi/menus/screens/arcade.h"
 #include "legoapi/menus/screens/gamemenuall.h"
+#include "legoapi/props/doors/door.h"
 #include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/misc.h"
 #include "gameapi/gui/apimenu.h"

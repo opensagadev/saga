@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 46.24101,
+    "fuzzy_match_percent": 46.24114,
     "total_code": "4722419",
     "matched_code": "404791",
     "matched_code_percent": 8.571688,
@@ -53826,77 +53826,6 @@
       ]
     },
     {
-      "name": "legoapi/gizmos/door/door.cpp.o",
-      "source": "src/legoapi/gizmos/door/door.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/0/door.o",
-      "functions": [
-        {
-          "name": "_ZL17Door_GetMaxGizmosPv",
-          "demangled_name": "Door_GetMaxGizmos(void*)",
-          "address": 4743104,
-          "offset": 3853136,
-          "size": 27,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL17Door_GetGizmoNameP7GIZMO_s",
-          "demangled_name": "Door_GetGizmoName(GIZMO_s*)",
-          "address": 4743136,
-          "offset": 3853168,
-          "size": 27,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL14Door_GetOutputP7GIZMO_sii",
-          "demangled_name": "Door_GetOutput(GIZMO_s*, int, int)",
-          "address": 4743168,
-          "offset": 3853200,
-          "size": 35,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL18Door_GetNumOutputsP7GIZMO_s",
-          "demangled_name": "Door_GetNumOutputs(GIZMO_s*)",
-          "address": 4743216,
-          "offset": 3853248,
-          "size": 12,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z18Door_GetOutputNameP7GIZMO_si",
-          "demangled_name": "Door_GetOutputName(GIZMO_s*, int)",
-          "address": 4743232,
-          "offset": 3853264,
-          "size": 22,
-          "match_percent": 99.875
-        },
-        {
-          "name": "_Z13Door_ActivateP7GIZMO_si",
-          "demangled_name": "Door_Activate(GIZMO_s*, int)",
-          "address": 4743264,
-          "offset": 3853296,
-          "size": 30,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL14Door_AddGizmosP10GIZMOSYS_siPvS1_",
-          "demangled_name": "Door_AddGizmos(GIZMOSYS_s*, int, void*, void*)",
-          "address": 4743296,
-          "offset": 3853328,
-          "size": 187,
-          "match_percent": 98.53846
-        },
-        {
-          "name": "_Z18Door_RegisterGizmoi",
-          "demangled_name": "Door_RegisterGizmo(int)",
-          "address": 4750992,
-          "offset": 3861024,
-          "size": 366,
-          "match_percent": 99.32727
-        }
-      ]
-    },
-    {
       "name": "legoapi/gizmos/door/gizspinner.cpp.o",
       "source": "src/legoapi/gizmos/door/gizspinner.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/gizspinner.o",
@@ -70447,45 +70376,6 @@
       ]
     },
     {
-      "name": "legoapi/props/doors/door.cpp.o",
-      "source": "src/legoapi/props/doors/door.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/1/door.o",
-      "functions": [
-        {
-          "name": "_ZL23GoThroughDoor_ExtraCodeP11WORLDINFO_sP6DOOR_s",
-          "demangled_name": "GoThroughDoor_ExtraCode(WORLDINFO_s*, DOOR_s*)",
-          "address": 1159952,
-          "offset": 269984,
-          "size": 249,
-          "match_percent": 6.885246
-        },
-        {
-          "name": "_Z15Door_FindByNameP11WORLDINFO_sPc",
-          "demangled_name": "Door_FindByName(WORLDINFO_s*, char*)",
-          "address": 4746320,
-          "offset": 3856352,
-          "size": 117,
-          "match_percent": 51.08889
-        },
-        {
-          "name": "_Z18StartDoorPositionsv",
-          "demangled_name": "StartDoorPositions()",
-          "address": 4746704,
-          "offset": 3856736,
-          "size": 1071,
-          "match_percent": 74.941864
-        },
-        {
-          "name": "_Z16Door_FindByIndexP11WORLDINFO_siiP7nuvec_s",
-          "demangled_name": "Door_FindByIndex(WORLDINFO_s*, int, int, nuvec_s*)",
-          "address": 4750128,
-          "offset": 3860160,
-          "size": 864,
-          "match_percent": 12.447964
-        }
-      ]
-    },
-    {
       "name": "legoapi/props/doors/doors.cpp.o",
       "source": "src/legoapi/props/doors/doors.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/doors.o",
@@ -70537,6 +70427,62 @@
           "offset": 3853104,
           "size": 27,
           "match_percent": 99.85714
+        },
+        {
+          "name": "_ZL17Door_GetMaxGizmosPv",
+          "demangled_name": "Door_GetMaxGizmos(void*)",
+          "address": 4743104,
+          "offset": 3853136,
+          "size": 27,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL17Door_GetGizmoNameP7GIZMO_s",
+          "demangled_name": "Door_GetGizmoName(GIZMO_s*)",
+          "address": 4743136,
+          "offset": 3853168,
+          "size": 27,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL14Door_GetOutputP7GIZMO_sii",
+          "demangled_name": "Door_GetOutput(GIZMO_s*, int, int)",
+          "address": 4743168,
+          "offset": 3853200,
+          "size": 35,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL18Door_GetNumOutputsP7GIZMO_s",
+          "demangled_name": "Door_GetNumOutputs(GIZMO_s*)",
+          "address": 4743216,
+          "offset": 3853248,
+          "size": 12,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z18Door_GetOutputNameP7GIZMO_si",
+          "demangled_name": "Door_GetOutputName(GIZMO_s*, int)",
+          "address": 4743232,
+          "offset": 3853264,
+          "size": 22,
+          "match_percent": 99.875
+        },
+        {
+          "name": "_Z13Door_ActivateP7GIZMO_si",
+          "demangled_name": "Door_Activate(GIZMO_s*, int)",
+          "address": 4743264,
+          "offset": 3853296,
+          "size": 30,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL14Door_AddGizmosP10GIZMOSYS_siPvS1_",
+          "demangled_name": "Door_AddGizmos(GIZMOSYS_s*, int, void*, void*)",
+          "address": 4743296,
+          "offset": 3853328,
+          "size": 187,
+          "match_percent": 98.53846
         },
         {
           "name": "_ZL11D_next_sockP8nufpar_s",
@@ -70616,7 +70562,7 @@
           "address": 4744704,
           "offset": 3854736,
           "size": 678,
-          "match_percent": 8.552631
+          "match_percent": 8.651316
         },
         {
           "name": "_Z10Door_Resetv",
@@ -70632,7 +70578,15 @@
           "address": 4745440,
           "offset": 3855472,
           "size": 865,
-          "match_percent": 55.293816
+          "match_percent": 55.525772
+        },
+        {
+          "name": "_Z15Door_FindByNameP11WORLDINFO_sPc",
+          "demangled_name": "Door_FindByName(WORLDINFO_s*, char*)",
+          "address": 4746320,
+          "offset": 3856352,
+          "size": 117,
+          "match_percent": 51.755554
         },
         {
           "name": "_Z14Door_SetCutCamP6DOOR_s",
@@ -70641,6 +70595,14 @@
           "offset": 3856480,
           "size": 243,
           "match_percent": 100.0
+        },
+        {
+          "name": "_Z18StartDoorPositionsv",
+          "demangled_name": "StartDoorPositions()",
+          "address": 4746704,
+          "offset": 3856736,
+          "size": 1071,
+          "match_percent": 75.058136
         },
         {
           "name": "_Z17Doors_SetLastDoorP6DOOR_s",
@@ -70656,7 +70618,7 @@
           "address": 4747872,
           "offset": 3857904,
           "size": 1090,
-          "match_percent": 76.240814
+          "match_percent": 76.30204
         },
         {
           "name": "_Z11Doors_CheckP11WORLDINFO_sP12GameObject_s",
@@ -70665,6 +70627,22 @@
           "offset": 3859008,
           "size": 1152,
           "match_percent": 62.070866
+        },
+        {
+          "name": "_Z16Door_FindByIndexP11WORLDINFO_siiP7nuvec_s",
+          "demangled_name": "Door_FindByIndex(WORLDINFO_s*, int, int, nuvec_s*)",
+          "address": 4750128,
+          "offset": 3860160,
+          "size": 864,
+          "match_percent": 12.515837
+        },
+        {
+          "name": "_Z18Door_RegisterGizmoi",
+          "demangled_name": "Door_RegisterGizmo(int)",
+          "address": 4750992,
+          "offset": 3861024,
+          "size": 366,
+          "match_percent": 99.32727
         }
       ]
     },
@@ -85207,6 +85185,14 @@
           "offset": 269808,
           "size": 175,
           "match_percent": 84.6383
+        },
+        {
+          "name": "_ZL23GoThroughDoor_ExtraCodeP11WORLDINFO_sP6DOOR_s",
+          "demangled_name": "GoThroughDoor_ExtraCode(WORLDINFO_s*, DOOR_s*)",
+          "address": 1159952,
+          "offset": 269984,
+          "size": 249,
+          "match_percent": 6.885246
         },
         {
           "name": "_Z20InitGameBeforeConfigv",
@@ -128259,7 +128245,7 @@
     }
   ],
   "summary": {
-    "bazel_units": 462,
+    "bazel_units": 460,
     "functions": 13454,
     "assigned_functions": 12357,
     "ambiguous_functions": 211,

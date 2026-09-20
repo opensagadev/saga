@@ -1,13 +1,13 @@
 # Original translation-unit reconstruction
 
-At the latest measured target build, there are 462 current translation
-units, 4,793 exact functions, and a 46.2410% whole-binary fuzzy match. The independent structural
-dashboard reports 51.8% largest-run text grouping and 2,647/2,648
+At the latest measured target build, there are 460 current translation
+units, 4,793 exact functions, and a 46.2411% whole-binary fuzzy match. The independent structural
+dashboard reports 51.9% largest-run text grouping and 2,648/2,649
 assessable same-TU writable-state links satisfied (48.2% of original links
 are assessable; one verifiable source split remains); neither is a
 completion percentage.
 The strict linked-GOT diagnostic currently sees 3,808 slots versus 4,758
-original, covers 70.9% of original targets, and agrees on 17.1% of
+original, covers 71.0% of original targets, and agrees on 17.1% of
 shared-target order; this is a layout warning, not
 evidence for a specific TU boundary.
 This is a source-ownership overview; the matching percentage does not measure
@@ -25,7 +25,7 @@ On the current build with file labels hidden, adjacent local-text pairs identify
 the same TU with 90.1% precision, and initializer-delimited blocks have a
 90.0% majority-owner fraction. These are useful survey heuristics, not safe
 boundaries without corroborating local references and linked matching.
-All 461 current units emit at least one named symbol. Four have no matched
+All 460 current units emit at least one named symbol. Four have no matched
 function but still own real data or a tentative ELF `COMMON` definition;
 they are not automatically empty TU shells.
 
@@ -107,8 +107,8 @@ PYTHONPATH=. python3 scripts/restructure/compare_got_order.py \
 It pairs only uniquely named, exact, allocated `R_386_RELATIVE` targets with
 matching section, type, binding, and size. Its two independent measures are
 shared-target coverage against all original `.got` slots and longest-common-
-subsequence order among shared targets. The current baseline is 3,375/4,758
-slots comparable (70.9%) and 579/3,375 comparable targets in order (17.2%).
+subsequence order among shared targets. The current baseline is 3,376/4,758
+slots comparable (71.0%) and 578/3,376 comparable targets in order (17.1%).
 Imports, aliases, duplicate targets, and `.got.plt` are excluded. Missing
 targets can reflect unfinished bodies; order differences can reflect several
 linker and source-layout causes. A same-named local in two different builds
@@ -127,7 +127,7 @@ and an exact named static target at 11,114 sites. Its section offsets and
 pointer targets help test data grouping and GOT order; a relocation site
 or pointer target alone cannot establish the emitting TU.
 All 4,758 original `.got` slots have relocation entries, while the current
-target has 3,807 slots, a gap of 951. Missing code/data references from
+target has 3,808 slots, a gap of 950. Missing code/data references from
 unfinished bodies can cause this as well as TU layout; do not attribute the
 gap to file placement alone.
 Twelve symbol-free include/comment shells were removed; the original-named
@@ -208,7 +208,7 @@ linkage.
 | Cheat system: 16-function run `0x4e10e0–0x4e1970`, `_GLOBAL__sub_I_cheats.cpp`, LOCAL `CheatSystem` and `Cheat_PowerUpTime` | `core/config/cheats.cpp` and `cheat.h`; the redundant singular implementation file is gone | All 16 functions and their private state now share the original-named `-O3` owner in exact original order. The extras menu uses the original 44-entry global `Cheat` table instead of leaking the private system object, and `CHEAT_POWERUPTIME`, `POWERUP_TEXTID`, and `ONEPLAYERPOWERUPS` have their original linkage and initializers. The merge removes one current TU, preserves all 4,771 exact matches, and raises whole fuzzy matching 46.193157→46.203640%. |
 | Guideline gizmo: complete 17-function original run `0x4aec00–0x4af2f0`, with `GuideLine_FindNearest` between load/store and registration | `legoapi/gizmos/fx/guidelines.cpp` and its header; formerly a lone stub in `props/objects/guidelines.cpp` | All 17 paired functions now emit in exact original relative order (zero inversions); the redundant file and duplicate same-name initializer are gone. The moved stub improves 4.66→6.58%, `GuideLine_SetVisibility` becomes exact, and whole fuzzy rises slightly. Real nearest-line and other stub behavior remain open. |
 | Push-block gizmo: core `0x4f6220–0x4f71e0` under the original `pushblocks.cpp` initializer block | `legoapi/gizmos/door/push.cpp`; movement helpers remain in `actions/movement/pushblocks.cpp` and `pushing.cpp` | The 12 tagged gizmo methods already share an owner; normal definition ordering now lowers 17-pair text inversions from 33 to 25 without changing exact/fuzzy matching. The original run interleaves movement helpers, but the initializer evidence does not yet justify a three-file merge. The `push.cpp`/`pushblocks.cpp` naming and adjacent global BSS still need an evidence-backed final boundary. |
-| Door parser: 14 LOCAL callbacks, `Doors_Configure`, LOCAL `D_worldinfo`/`D_door`, and 160-byte LOCAL keyword table at `0x485f20–0x4868a6` | `legoapi/props/doors/doors.cpp`; duplicate forced-emission callback stubs in `gameapi/ai/gameai_d.cpp` removed | Real callbacks now carry original local names/binding and all 19 assessable state links share the owner. The table's 19 strings and 19 callback pointers match original relocation order; the null terminator has no relocations. Exact matches remain 4,763 and fuzzy rises 46.1107→46.1300%; `D_vehicle` is still a stub and causes the three remaining pairwise order inversions in this slice. The full original door TU boundary remains provisional. |
+| `doors.cpp`: complete 32-function run `0x485f20–0x487ffe`, core door/camera state, registration state, keyword table, and `_GLOBAL__sub_I_doors.cpp` | `legoapi/props/doors/doors.cpp`; the redundant gizmo owner/header and residual `props/doors/door.cpp` are gone | All 32 functions share the original-named `-O3` owner. All ranks agree except the natural compiler swap between unfinished `D_vehicle` and `Door_AddGizmos`; body matching remains 4,793 exact / 46.241140% fuzzy. Core data, BSS, table relocations, and the single natural initializer retain their measured order. The residual state is now owned coherently: the honest `GoThroughDoor_ExtraCode` stub and its real initialization live in `legogame/game.cpp`, hub transition state in `world/levels/hub.cpp`, shop state in `shop.cpp`, and shared area/level pointers in `globals.cpp`, all through canonical headers. The four initialized hub-transition globals and the `HubStartDoor`/cutscene BSS pair now follow original relative order; GOT coverage rises to 3,376 comparable targets with shared order unchanged at 578. Runtime note: the restored callback pointer is non-null and calls the still-stubbed body. |
 | SuperCarry/carrying: contiguous 13-function run `0x4fab00–0x4fd580`, initialized speed/state at `0x668d10–0x668d94`, and `_GLOBAL__sub_I_carrying.cpp` | `actions/movement/carrying.cpp`; formerly split with `supercarry.cpp` and one exact function in `characters/motion/gameanim.cpp` | All 13 paired functions now share the original-named owner, and the synthetic `supercarry.cpp` constructor is gone. All ten measured initialized globals and both BSS globals have original relative order; the carrying constructor stays 99.35% and all body scores/exact matches are unchanged. The text run still has nine pairwise inversions pending wider codegen work. One pre-existing `__used__` remains on a helper whose current callers pass only constants; removing it produces a constprop clone, so recover the original call path before retiring it. |
 | LSW hints: twelve LOCAL callbacks at `0x22dbb0–0x22e1f0` under the original `gamehint.cpp` initializer block | Callbacks and `Hints_LSW` currently in `menus/core/hint.cpp`; core system in `gamehint.cpp` | **Deferred.** A cohesive callback/table/init move improved focused text order but lowered whole fuzzy 46.130043→46.129913% despite one new exact function, so it was reverted. The two original initializer identities must remain distinct; table ownership and `DrawHint_LSW` still need separate evidence. |
 | Lighting run: `SetLights_RTLDATA` through `LightGameObject` at `0x4a64e0–0x4a6e00` | `legoapi/render/light/lighting.cpp` and owner header; formerly also the lone `gizmo/object/gizpanel.cpp` stub and `InitGameObjectLights` in `items/base/game_object.cpp` | `SetPanelLights` and the unchanged 95%-matched initializer now share the original-address lighting group; the obsolete tiny file and panel-local prototype are gone. Source-order passes raise focused alignment to 60.0% (9 in order; 11 paired), with exact/fuzzy body matching preserved. The three RTL environment getters are still outside: their co-location lowered whole fuzzy to 46.110046% and was reverted. A complete runtime-order pass raised alignment to 73.3% but lowered `SetCreatureLights` enough to regress whole fuzzy by 0.000014 points, so it was reverted. |

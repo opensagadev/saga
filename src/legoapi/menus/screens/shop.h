@@ -20,6 +20,7 @@ extern i32 SHOPEXTRACOUNT;
 extern i32 CutScenePlayCount;
 extern i32 SHOPACTIVE;
 extern i32 enteredshop;
+extern i32 shop_from_cutsceneplayer;
 extern f32 ShopNameAlpha;
 extern f32 ShopLockedScale;
 i32 Shop_UpdateHint(HINT_s *hint);

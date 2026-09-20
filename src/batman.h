@@ -333,7 +333,6 @@ extern "C" {
     extern OPTIONSSAVE *Game_OptionsSave;
     extern i32 (*GamePads_IgnoreInputFn)(void);
     extern i32 g_introState;
-    extern i32 gone_through_door_to_new_level;
     extern i32 Grass_Available;
     extern f32 g_val;
     extern i32 highallocaddr;

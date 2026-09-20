@@ -23,6 +23,7 @@
 #include "legoapi/render/core/render.h"
 #include "legoapi/menus/core/panel.h"
 #include "legoapi/world/levels/episode.h"
+#include "legoapi/world/levels/levels.h"
 #include "legoapi/world/mission.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/props/doors/door.h"

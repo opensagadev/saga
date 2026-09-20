@@ -24,6 +24,7 @@
 #include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/menus/core/panel.h"
+#include "legoapi/props/doors/door.h"
 #include "legoapi/render/core/render.h"
 #include "legoapi/render/fx.h"
 #include "legoapi/render/fx/game_deb.h"
@@ -67,7 +68,6 @@ extern rtldata_s lev_rtldata;
 extern "C" {
     extern f32 chattersfxwait, tieonsfxwait, tieoffsfxwait;
     extern i32 party_under_cover, nbaddies_can_see_players;
-    extern i32 gone_through_door_to_new_level;
     extern i32 FalconDebKey[2];
     extern f32 TargetDist_Near2, TargetDist_Mid2;
     extern u16 TargetDeg_Near, TargetDeg_Mid, TargetDeg_Far;
@@ -94,7 +94,6 @@ void Tag_SetMode(i32 mode);
 u32 TotalLevelCoinTally(WORLDINFO_s *, u32 *, u32 *, u32 *, u32 *, u32 *, u32 *, u32 *);
 void GameCameraMakeMiniCut(nugspline_s *, f32, f32, f32, f32, i32, i32);
 extern i32 bonusmodearcade;
-extern i32 gone_through_door_to_new_level;
 u32 arcade_placed_stud_total = 0;
 extern f32 DEFAULT_MOVE_RANGE;
 extern f32 drop_back_in_timer;

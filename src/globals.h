@@ -637,11 +637,7 @@ extern i32 LSW2;
 extern i32 Arcade;
 extern i32 BuildUpTotal;
 extern i32 BuildUpDone;
-extern DOOR_s *Door_Last;
-extern void (*Door_GoThrough_ExtraCodeFn)(WORLDINFO_s *, DOOR_s *);
-extern i32 gone_through_door_to_new_mode;
 extern CUTINFO *newmode_cutinfo;
-extern DOOR_s *setlastdoor_last;
 extern i32 LevelChange;
 extern GameObject_s *BombGenerator_PlayerBomb[2];
 
@@ -942,7 +938,6 @@ extern void *CutStopInfo;
 extern f32 WaitingForLevelTime;
 extern f32 WaitingForCharacterTime;
 extern f32 g_BgLoadDelayHackTimer;
-extern i32 Door_UseCutCam;
 extern i16 LevelLoad[48];
 extern i32 LevelLoadCount;
 

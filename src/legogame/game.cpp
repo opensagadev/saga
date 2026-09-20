@@ -214,6 +214,10 @@ static i32 Slam_GetDebris_Game(GameObject_s *object, i32 effect) {
     return effect == -1 ? 2 : effect;
 }
 
+static void GoThroughDoor_ExtraCode(WORLDINFO_s *, DOOR_s *) {
+    STUBBED();
+}
+
 static i32 FindSlamOrigin_UseCPos(GameObject_s *object) {
     return object->id == id_GRIEVOUS;
 }
@@ -1160,7 +1164,7 @@ void InitGameAfterConfig(void) {
     //  GizSpinnerGDeb_Fail._2_2_ = 1;
     //  GizSpinnerGDeb_Fail._4_2_ = 0x58;
     GamePads_IgnoreInputFn = Game_IgnoreInput;
-    //  Door_GoThrough_ExtraCodeFn = GoThroughDoor_ExtraCode;
+    Door_GoThrough_ExtraCodeFn = GoThroughDoor_ExtraCode;
     GizmoBlowup_TransformDrawFn = GizmoBlowup_TransformDraw_Game;
     LEGOASCII_UP = ASCII_UP;
     //  LEGOASCII_DOWN = ASCII_DOWN;

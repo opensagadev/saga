@@ -14,7 +14,7 @@
 #include "legoapi/gizmo/base/HatMachineObjectInterface.h"
 #include "legoapi/gizmo/base/TeleportObjectInterface.h"
 #include "legoapi/gizmos/trigger/ai.h"
-#include "legoapi/gizmos/door/door.h"
+#include "legoapi/props/doors/door.h"
 #include "legoapi/gizmos/fx/edgizshadowmachine.h"
 #include "legoapi/gizmo/base/gizmessage.h"
 #include "legoapi/gizmos/traps/gizbombgen.h"

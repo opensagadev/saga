@@ -33,6 +33,13 @@ struct GameObject_s;
 struct nuhspecial_s;
 struct GAMECUTSCENES_s; // full type in legoapi/legoapi_types.h
 
+extern void *HubStartDoor;
+extern i32 hub_from_superstory;
+extern i32 hub_from_mission;
+extern i32 hub_from_arcade;
+extern i32 hub_from_cutsceneplayer;
+extern i32 hub_startoutsidebonusdoor_area;
+
 extern f32 goldbricktime;
 extern f32 *HUB_AREAPANELX;
 extern f32 HUB_AREAPANELX_ONETRUEJEDIGOLDBRICK[6];

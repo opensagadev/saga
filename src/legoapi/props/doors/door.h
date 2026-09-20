@@ -9,6 +9,7 @@ struct nugspline_s;
 struct WORLDINFO_s;
 struct GameObject_s;
 struct AREADATA_s;
+struct ADDGIZMOTYPE_s;
 
 enum DOOR_FLAGS : u8 {
     DOOR_FLAG_ONE_WAY = 0x01,
@@ -59,7 +60,7 @@ extern NUVEC Door_CutCamPos0;
 extern NUVEC Door_CutCamPos1;
 extern i32 Door_UseCutCam;
 extern struct nugspline_s *Door_CutSpl;
-extern char Door_ExitCameraSplineName[64];
+extern char Door_ExitCameraSplineName[32];
 extern char Door_ExitName[64];
 extern i32 Door_Start;
 extern i32 Door_NextSock;
@@ -67,17 +68,11 @@ extern f32 Door_CutCamWait;
 extern f32 Door_CutCamWaitTime;
 extern f32 Door_CutCamBlendTime;
 extern i32 Door_CutLookAtPlayers;
-
-extern void *HubStartDoor;
-extern AREADATA_s *VEHICLES_ADATA;
-extern i32 LEGOSPL_START;
-extern i32 LEGOSPL_SPLIT;
-extern i32 hub_from_superstory;
-extern i32 hub_from_mission;
-extern i32 hub_from_arcade;
-extern i32 hub_from_cutsceneplayer;
-extern i32 shop_from_cutsceneplayer;
-extern i32 hub_startoutsidebonusdoor_area;
+extern void (*Door_GoThrough_ExtraCodeFn)(WORLDINFO_s *, DOOR_s *);
+extern DOOR_s *setlastdoor_last;
+extern i32 gone_through_door_to_new_mode;
+extern i32 gone_through_door_to_new_level;
+extern DOOR_s *Door_Last;
 
 void StartDoorPositions(void);
 
@@ -91,3 +86,4 @@ DOOR_s *Door_FindByIndex(WORLDINFO_s *world, i32 area, i32 level, NUVEC *positio
 
 DOOR_s *Door_FindByName(WORLDINFO_s *world, char *name);
 void Doors_SetLastDoor(DOOR_s *door);
+ADDGIZMOTYPE_s *Door_RegisterGizmo(i32 type_id);

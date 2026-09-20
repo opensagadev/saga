@@ -139,7 +139,7 @@ i32 SHOPACTIVE = 0;
 i32 shopmenu = 0;
 i32 col = 0;
 char usercode[6] = {'A', 'A', 'A', 'A', 'A', 'A'};
-extern i32 shop_from_cutsceneplayer;
+i32 shop_from_cutsceneplayer = 0;
 
 static f32 SubBigCharPush = 0.0f;
 static f32 SubNormCharPush = 0.0f;

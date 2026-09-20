@@ -106,6 +106,13 @@ extern void NewLevelFromMenu(LEVELDATA_s *level, i32 menu_id, i32 menu_y, i32 re
 extern u64 LevHSpecialExists;
 extern GIZBUILDIT_s *LevBuildIt[4];
 
+i32 hub_from_superstory = -1;
+i32 hub_from_mission = -1;
+i32 hub_startoutsidebonusdoor_area = -1;
+i32 hub_from_arcade = -1;
+i32 hub_from_cutsceneplayer = 0;
+void *HubStartDoor = NULL;
+
 typedef void (*HUBCALLBACK)(WORLDINFO_s *);
 
 HUBCALLBACK Hub_UpdateAIFn = NULL;

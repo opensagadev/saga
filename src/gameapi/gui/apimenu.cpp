@@ -23,6 +23,7 @@
 #include "legoapi/render/core/render.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/level.h"
+#include "legoapi/world/levels/levels.h"
 #include "legoapi/world/mission.h"
 #include "legoapi/world/world.h"
 #include "nu2api/nu3d/numtl.h"

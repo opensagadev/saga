@@ -9,6 +9,7 @@
 #include "legoapi/world/level.h"
 #include "legoapi/world/world.h"
 #include "legoapi/menus/screens/shop.h"
+#include "legoapi/props/doors/door.h"
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nu3d/numtl.h"
 #include "nu2api/nu3d/nutex.h"
@@ -84,7 +85,6 @@ extern "C" {
     extern f32 MainRenderTime;
     extern i32 back_rgba[2];
     extern i32 clear_screen_onstill;
-    extern i32 gone_through_door_to_new_level;
     extern i32 screendump;
 }
 void BackDrop_Draw(f32, i32);
