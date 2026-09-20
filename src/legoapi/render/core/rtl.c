@@ -31,17 +31,23 @@ struct rtlidata_s {
         struct {
             u8 reserved_00[0x4c];
             rtl_s *cached_light;
-            u8 reserved_50[0x0c];
+            NUVEC shadow_direction;
             f32 cached_value;
-            u8 reserved_60[0x14];
+            NUVEC previous_shadow_direction;
+            f32 previous_shadow_value;
+            f32 shadow_blend;
             u16 cached_light_uid;
-            u8 reserved_76[0xce];
+            u8 reserved_76[0xae];
+            NUVEC blended_shadow_direction;
+            f32 blended_shadow_value;
+            u8 reserved_134[0x10];
         };
     };
 };
 DECOMP_ASSERT(sizeof(rtlidata_s) == 0x144, "rtlidata_s size");
 DECOMP_ASSERT(offsetof(rtlidata_s, cached_light) == 0x4c, "rtlidata_s cached light offset");
 DECOMP_ASSERT(offsetof(rtlidata_s, cached_light_uid) == 0x74, "rtlidata_s cached UID offset");
+DECOMP_ASSERT(offsetof(rtlidata_s, blended_shadow_direction) == 0x124, "rtlidata_s blended shadow offset");
 struct NUFRUSTRUM;
 
 static NULSTHDR *rtl_dynamic_pool;
@@ -602,8 +608,40 @@ static void rtlApplySetScaleLoop(void *set, rtlidata_s *lighting_data, NUVEC *po
     }
 }
 
-static __used__ void rtlCalcShadow(rtlidata_s *) {
-    STUBBED();
+static __used__ void rtlCalcShadow(rtlidata_s *data) {
+    if (data->cached_light != NULL && rtl_frametime != 0.0f &&
+        (data->cached_light->type == 3 || data->cached_light->type == 8)) {
+        data->shadow_direction.x += (NuRandFloat() - 0.5f) * rtl_shadow_flicker.x;
+        data->shadow_direction.y += (NuRandFloat() - 0.5f) * rtl_shadow_flicker.y;
+        data->shadow_direction.z += (NuRandFloat() - 0.5f) * rtl_shadow_flicker.z;
+    }
+
+    if (data->cached_value != 0.0f)
+        NuVecNorm(&data->shadow_direction, &data->shadow_direction);
+
+    if (data->shadow_blend == 0.0f) {
+        data->blended_shadow_direction = data->shadow_direction;
+        data->blended_shadow_value = data->cached_value;
+        return;
+    }
+
+    if (data->shadow_blend == 1.0f) {
+        data->previous_shadow_direction = data->blended_shadow_direction;
+        data->previous_shadow_value = data->blended_shadow_value;
+        data->shadow_blend = 0.999f;
+    }
+
+    if (data->previous_shadow_direction.x == 0.0f && data->previous_shadow_direction.y == 0.0f &&
+        data->previous_shadow_direction.z == 0.0f) {
+        data->blended_shadow_direction = data->shadow_direction;
+    } else {
+        NuVecLerp(&data->blended_shadow_direction, &data->previous_shadow_direction, &data->shadow_direction,
+                  data->shadow_blend);
+    }
+    NuVecNorm(&data->blended_shadow_direction, &data->blended_shadow_direction);
+    data->blended_shadow_value = data->previous_shadow_value * data->shadow_blend +
+                                 (1.0f - data->shadow_blend) * data->cached_value;
+    data->shadow_blend = MAX(0.0f, data->shadow_blend - rtl_frametime * rtl_shadow_blend_rate);
 }
 
 extern "C" {
