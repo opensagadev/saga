@@ -10,6 +10,7 @@ struct SOCKCAMERARESULT {
 };
 DECOMP_ASSERT(sizeof(SOCKCAMERARESULT) == 0x64, "Socket camera result ABI");
 #include "legoapi/items/base/apiobject.h"
+#include "legoapi/render/core/terrain.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -23,7 +24,6 @@ DECOMP_ASSERT(sizeof(SOCKCAMERARESULT) == 0x64, "Socket camera result ABI");
 struct GameObject_s;
 
 extern "C" void PerspectMidPoint(NUVEC *result, NUVEC *first, NUVEC *second, NUVEC *camera_position);
-extern "C" f32 NewShadow(NUVEC *position, f32 height_above, f32 height_below, i32 terrain_mask);
 extern "C" NUFPCOMJMPCTX SockSys_ConfigKeywords[];
 
 extern "C" {

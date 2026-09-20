@@ -11,7 +11,7 @@ extern "C" {
     /// @details Computes the absolute value of the float f and returns the result.
     /// @param f The float to compute the absolute value of
     /// @return The absolute value of the float
-    static f32 NuFabs(f32 f) {
+    static inline f32 NuFabs(f32 f) {
         return fabsf(f);
     }
 
@@ -50,7 +50,7 @@ extern "C" {
     /// @param a The float to divide
     /// @param b The float to divide by
     /// @return The division of the float a and b
-    static f32 NuFdiv(f32 a, f32 b) {
+    static inline f32 NuFdiv(f32 a, f32 b) {
         if (a == 0.0f || b == 0.0f) {
             return 0.0f;
         }

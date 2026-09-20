@@ -19,6 +19,7 @@ _CXX_NAMED_C_SOURCES = [
     "src/nu2api/nu3d/android/nudlist_android.c",
     "src/nu2api/nu3d/android/nuhgo_android.c",
     "src/nu2api/nu3d/android/nurndrstat_android.c",
+    "src/nu2api/nu3d/android/nuobject_android.c",
     "src/nu2api/nu3d/android/nurndr_android.c",
     "src/nu2api/nu3d/android/nurndr.c",
     "src/nu2api/nu3d/android/nuprim_android.c",

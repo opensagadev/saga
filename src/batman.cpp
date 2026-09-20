@@ -15,6 +15,7 @@
 #include "globals.h"
 #include "legoapi/render/fx.h"
 #include "nu2api/nusound/nusound_android.hpp"
+#include "nu2api/nu3d/android/nuobject_android.h"
 
 #include <string.h>
 

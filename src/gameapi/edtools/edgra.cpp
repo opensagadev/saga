@@ -5,9 +5,9 @@
 #include "legoapi/legoapi_types.h"
 #include "legoapi/render/core/terrain.h"
 #include "gamelib/nuwind/nuwind.h"
+#include "nu2api/nu3d/android/nuobject_android.h"
 
 void edgraCalculatePage(char page, i32 calculate_vectors);
-struct NuFadeObjGType;
 
 extern "C" {
     i32 edgra_units_used;
@@ -16,9 +16,7 @@ extern "C" {
     i32 edgra_page_calculate_done[8];
     i32 edgra_page_vectors_valid[8];
     void NuWindInit(void);
-    void NuFadeObjInit(void);
     NuWindGType *NuWindCreateMtx(u32 *, NUMTX *, i16, f32, f32, i32, f32, f32);
-    NuFadeObjGType *NuFadeObjCreateMtx(nuhspecial_s *, NUMTX *, i16, f32, f32, i32);
 
     void edgraStartPage(i8 page) {
         if (!edgra_page_used[page] || !edgra_page_scene[page] || edgra_page_on[page])

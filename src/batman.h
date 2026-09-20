@@ -78,7 +78,6 @@ extern "C" {
     void NuWaterSpeed(float);
     void NuWaterReset(void);
     void NuWindDraw(void);
-    void NuFadeObjDraw(void);
     void edGraEnableTerrainSwap(void);
     void edGraDisableTerrainSwap(void);
     void edgraStopPage(i8);
@@ -191,7 +190,6 @@ void GameAnimSys_Update(GAMEANIMSYS_s *);
 extern "C" {
 #endif
     void NuWindUpdateArray(NUVEC **);
-    void NuFadeObjUpdateArray(NUVEC **);
 #ifdef __cplusplus
 }
 #endif

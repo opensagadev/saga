@@ -24,6 +24,7 @@ nuvec_s TerCrossProduct(nuvec_s *a, nuvec_s *b);
 void DeRotateTerrain(tertype *surface);
 void DeRotatePoint(nuvec_s *point);
 extern "C" f32 NewShadowEx(nuvec_s *position, i32 handle, f32 height_above, f32 height_below, i32 terrain_mask);
+extern "C" f32 NewShadow(nuvec_s *position, f32 height_above, f32 height_below, i32 terrain_mask);
 extern "C" TERRSET *TerrainGetCur(void);
 extern "C" void TerrainSetCur(void *terrain);
 extern "C" void noterraininit(void);

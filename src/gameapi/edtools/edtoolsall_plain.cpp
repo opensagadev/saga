@@ -22,6 +22,7 @@
 #include "nu2api/nucore/nuthread.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nu3d/nuspecial.h"
+#include "nu2api/nu3d/android/nuobject_android.h"
 #include "nu2api/numath/numtx.h"
 #include "nu2api/numath/nuvec.h"
 #include "nu2api/numath/nutrig.h"
@@ -1410,7 +1411,6 @@ extern "C" {
             edgra_elementthin = 1;
     }
     void NuWindSetup(VARIPTR *, VARIPTR, i32, i32);
-    void NuFadeObjSetup(VARIPTR *, VARIPTR, i32, i32);
     void edgraSetup(VARIPTR *buffer, VARIPTR end, i32 clumps, i32 individual_clumps, i32 units_per_clump) {
         EDGRA_MAX_CLUMPS = clumps;
         EDGRA_MAX_INDIVIDUAL_CLUMPS = individual_clumps;

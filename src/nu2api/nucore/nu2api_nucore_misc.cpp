@@ -345,10 +345,6 @@ void NuGCutRigidCalcMtx(NUGCUTRIGID_s *rigid, float frame, numtx_s *mtx) {
 
 // NuIOSDLMtlCallback is transcribed in android/nuiosdl_gl.cpp (original 0x29c480).
 
-void NuFadeSetFxCodeMtls(nugeom_s *, unsigned char *) {
-    STUBBED();
-}
-
 void NuGCutRigidCalcMtx_3(NUGCUTRIGID_s *rigid, float frame, numtx_s *mtx) {
     ani3_animheader_s *animation = reinterpret_cast<ani3_animheader_s *>(rigid->animation);
     f32 *values = NuAnimCurveExtractAllNodeCurves_3(animation, 0, frame, NULL);
