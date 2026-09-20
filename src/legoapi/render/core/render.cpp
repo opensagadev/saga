@@ -8,6 +8,7 @@
 #include "legoapi/core/input/gamepads.h"
 #include "legoapi/gizmos/object/gizbuildits.h"
 #include "legoapi/gizmos/fx/gizmopickups.h"
+#include "legoapi/gizmos/door/zipups.h"
 #include "legoapi/menus/core/text.h"
 #include "legoapi/menus/core/panel.h"
 #include "legoapi/menus/core/gamemessages.h"
@@ -27,6 +28,7 @@
 #include "nu2api/nu3d/nuvport.h"
 #include "legoapi/cutscenes/cutscenes.h"
 #include <stdio.h>
+#include <math.h>
 
 void DrawSubItems();
 
@@ -772,8 +774,97 @@ extern "C" {
     }
 } // extern "C"
 
+i32 solid_cable;
+i32 nsegments_drawn;
+f32 slack_factor = 1.0f;
+f32 cable_slack = 1.0f;
+f32 nsegments_per_unit = 6.0f;
+extern CABLE_s cables[8];
+extern f32 tow_length;
+extern NUMTL *SolidMtl3D;
+
+static void DrawCableSegment(const NUVEC &start, const NUVEC &end, f32 sag) {
+    if (solid_cable == 0) {
+        NURND_VERTEX3D vertices[2] = {};
+        vertices[0].position = start;
+        vertices[1].position = end;
+        vertices[0].colour = 0xff000000;
+        vertices[1].colour = 0xff000000;
+        NuRndrLine3d(vertices, SolidMtl3D, NULL);
+    } else {
+        NUVEC first = start;
+        NUVEC second = end;
+        DrawRopeSingle(&first, &second, 1.0f, ropemtl, sag, sag, 10.0f, 5.0f);
+    }
+    ++nsegments_drawn;
+}
+
 void DrawCables() {
-    STUBBED();
+    nsegments_drawn = 0;
+    for (i32 cable_index = 0; cable_index < 8; ++cable_index) {
+        CABLE_s &cable = cables[cable_index];
+        if ((cable.flags_1e9 & 1) == 0 || cable.point_count < 2) {
+            continue;
+        }
+
+        if ((cable.flags_1e9 & 4) != 0) {
+            cable.slack += FRAMETIME * cable_slack * slack_factor;
+            if (cable.slack > cable_slack) {
+                cable.slack = cable_slack;
+            }
+        } else if (tow_length > 0.0f && cable.total_length < tow_length) {
+            cable.slack = (1.0f - cable.total_length / tow_length) * cable_slack;
+        } else {
+            cable.slack = 0.0f;
+        }
+
+        const f32 first_y = cable.points[0].y;
+        const f32 last_y = cable.points[cable.point_count - 1].y;
+        f32 distance_along = 0.0f;
+        for (i32 segment = 0; segment < cable.point_count - 1; ++segment) {
+            const f32 segment_length = cable.segment_lengths[segment];
+            i32 subdivisions = cable.slack == 0.0f
+                                   ? 1
+                                   : static_cast<i32>(ceilf(segment_length * nsegments_per_unit));
+            if (subdivisions < 1) {
+                subdivisions = 1;
+            }
+            NUVEC previous = cable.points[segment];
+            for (i32 subdivision = 0; subdivision < subdivisions; ++subdivision) {
+                const f32 local_start = static_cast<f32>(subdivision) / static_cast<f32>(subdivisions);
+                const f32 local_end = static_cast<f32>(subdivision + 1) / static_cast<f32>(subdivisions);
+                const f32 global_start = cable.total_length > 0.0f
+                                             ? (distance_along + segment_length * local_start) / cable.total_length
+                                             : 0.0f;
+                const f32 global_end = cable.total_length > 0.0f
+                                           ? (distance_along + segment_length * local_end) / cable.total_length
+                                           : 0.0f;
+                NUVEC start = {cable.points[segment].x +
+                                   (cable.points[segment + 1].x - cable.points[segment].x) * local_start,
+                               first_y + (last_y - first_y) * global_start,
+                               cable.points[segment].z +
+                                   (cable.points[segment + 1].z - cable.points[segment].z) * local_start};
+                NUVEC end = {cable.points[segment].x +
+                                 (cable.points[segment + 1].x - cable.points[segment].x) * local_end,
+                             first_y + (last_y - first_y) * global_end,
+                             cable.points[segment].z +
+                                 (cable.points[segment + 1].z - cable.points[segment].z) * local_end};
+                start.y -= cable.slack * NU_SIN_LUT(static_cast<i32>(global_start * 32768.0f));
+                end.y -= cable.slack * NU_SIN_LUT(static_cast<i32>(global_end * 32768.0f));
+                f32 ground = GameShadow(NULL, &start, 5.0f, -1);
+                if (ground != 2000000.0f && start.y < ground + 0.1f) {
+                    start.y = ground + 0.1f;
+                }
+                ground = GameShadow(NULL, &end, 5.0f, -1);
+                if (ground != 2000000.0f && end.y < ground + 0.1f) {
+                    end.y = ground + 0.1f;
+                }
+                DrawCableSegment(start, end, cable.slack);
+                previous = end;
+            }
+            distance_along += segment_length;
+        }
+    }
 }
 
 void DrawRipple(ripple_node_s *node) {

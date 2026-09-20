@@ -680,7 +680,8 @@ struct CABLE_s {
     f32 segment_lengths[15];
     f32 max_length;
     f32 total_length;
-    u8 unknown_1cc[8];
+    u8 unknown_1cc[4];
+    f32 slack;
     f32 pull_time;
     u8 wrap_indices[15];
     u8 point_count;
@@ -690,6 +691,7 @@ struct CABLE_s {
 };
 DECOMP_ASSERT(offsetof(CABLE_s, segment_lengths) == 0x188, "CABLE_s segment lengths offset");
 DECOMP_ASSERT(offsetof(CABLE_s, total_length) == 0x1c8, "CABLE_s total length offset");
+DECOMP_ASSERT(offsetof(CABLE_s, slack) == 0x1d0, "CABLE_s slack offset");
 DECOMP_ASSERT(offsetof(CABLE_s, pull_time) == 0x1d4, "CABLE_s pull time offset");
 DECOMP_ASSERT(offsetof(CABLE_s, wrap_indices) == 0x1d8, "CABLE_s wrap indices offset");
 DECOMP_ASSERT(offsetof(CABLE_s, wrap_count) == 0x1e8, "CABLE_s wrap count offset");
