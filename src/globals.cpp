@@ -105,6 +105,7 @@ MISSIONSAVE *Game_MissionSave = NULL;
 // ------------------------------------------------------------------------
 i32 Customiser_AccessoriesLoaded = 0;
 i32 CUSTOMISER_USEBIGSCENES = 0;
+f32 catwoman_stun_time = 2.0f;
 CUSTOMISER *CharacterCustomiser = NULL;
 
 // ------------------------------------------------------------------------

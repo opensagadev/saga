@@ -563,17 +563,34 @@ DECOMP_ASSERT(sizeof(AREASAVE_s) == 0xc, "AREASAVE_s size");
 DECOMP_ASSERT(offsetof(AREASAVE_s, area_complete) == 0x1, "AREASAVE area completion offset");
 DECOMP_ASSERT(offsetof(AREASAVE_s, challenge_trial_time) == 0x8, "AREASAVE challenge time offset");
 struct ATTRACTO_s;
+struct BATARANG_TARGET_s {
+    void *object;
+    u8 type;
+    u8 lost;
+    u8 reserved_06[0x14 - 0x06];
+};
+DECOMP_ASSERT(sizeof(BATARANG_TARGET_s) == 0x14, "Batarang target size");
 struct BATARANG_s {
-    u8 pad_0x00[0x7c];
-    u8 active; // 0x7c
-    u8 field_0x7d;
-    u8 pad_0x7e[0x84 - 0x7e];
-    i32 target_id; // 0x84
-    u8 pad_0x88[0xac - 0x88];
-    u16 cooldown; // 0xac
-    u8 pad_0xae[0xb4 - 0xae];
+    BATARANG_TARGET_s targets[5]; // 0x00
+    NUVEC position;               // 0x64
+    NUVEC velocity;               // 0x70
+    u8 active;                    // 0x7c, number of selected targets
+    u8 field_0x7d;                // 0x7d, projectile in flight
+    u8 current_target;            // 0x7e
+    u8 reserved_7f;
+    f32 flight_time;       // 0x80
+    GameObject_s *owner;   // 0x84
+    NUVEC sight_position;  // 0x88
+    NUVEC sight_velocity;  // 0x94
+    NUVEC ricochet_normal; // 0xa0
+    u16 cooldown;          // 0xac, level-object id used to draw the projectile
+    i8 ricochet_count;     // 0xae
+    u8 ricochet_flags;     // 0xaf
+    f32 ricochet_timer;    // 0xb0
 };
 DECOMP_ASSERT(sizeof(BATARANG_s) == 0xb4, "BATARANG_s size");
+DECOMP_ASSERT(offsetof(BATARANG_s, position) == 0x64, "Batarang position offset");
+DECOMP_ASSERT(offsetof(BATARANG_s, owner) == 0x84, "Batarang owner offset");
 struct BOLTTYPE_s;
 struct BOLTSYS {
     BOLTTYPE_s *types;
