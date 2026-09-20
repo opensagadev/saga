@@ -1,4 +1,5 @@
 #include "decomp.h"
+#include "gameapi/edtools/edanim_internal.h"
 #include "gameapi/edtools/edgra.h"
 #include "gameapi/edtools/edui.h"
 #include "nu2api/nucore/numemory.h"

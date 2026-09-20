@@ -24829,149 +24829,6 @@
           "match_percent": 0.0
         },
         {
-          "name": "_ZL21edanimcbCancelOptMenuP10eduimenu_sS0_",
-          "demangled_name": "edanimcbCancelOptMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 3345040,
-          "offset": 2455072,
-          "size": 26,
-          "match_percent": 31.428572
-        },
-        {
-          "name": "_ZL22edanimcbCancelMCTBMenuP10eduimenu_sS0_",
-          "demangled_name": "edanimcbCancelMCTBMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 3354000,
-          "offset": 2464032,
-          "size": 58,
-          "match_percent": 15.714286
-        },
-        {
-          "name": "_ZL16edanimcbMCTBMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edanimcbMCTBMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3368400,
-          "offset": 2478432,
-          "size": 1184,
-          "match_percent": 1.387755
-        },
-        {
-          "name": "_ZL22edanimcbSwitchTypeMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edanimcbSwitchTypeMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3369584,
-          "offset": 2479616,
-          "size": 1559,
-          "match_percent": 1.068493
-        },
-        {
-          "name": "_ZL17edanimcbSoundMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edanimcbSoundMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3371152,
-          "offset": 2481184,
-          "size": 352,
-          "match_percent": 4.878049
-        },
-        {
-          "name": "_ZL20edanimcbParticleMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edanimcbParticleMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3371504,
-          "offset": 2481536,
-          "size": 352,
-          "match_percent": 4.878049
-        },
-        {
-          "name": "_ZL18edanimcbBouncyMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edanimcbBouncyMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3381072,
-          "offset": 2491104,
-          "size": 517,
-          "match_percent": 3.636364
-        },
-        {
-          "name": "_ZL18edanimcbSwitchMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edanimcbSwitchMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3385776,
-          "offset": 2495808,
-          "size": 583,
-          "match_percent": 3.174603
-        },
-        {
-          "name": "_ZL21edanimcbSetSwitchTypeP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edanimcbSetSwitchType(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3389408,
-          "offset": 2499440,
-          "size": 96,
-          "match_percent": 10.0
-        },
-        {
-          "name": "_ZL20edanimcbSetSoundTypeP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edanimcbSetSoundType(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3389680,
-          "offset": 2499712,
-          "size": 97,
-          "match_percent": 9.565217
-        },
-        {
-          "name": "_ZL22edanimcbLocalSoundMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edanimcbLocalSoundMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3418496,
-          "offset": 2528528,
-          "size": 762,
-          "match_percent": 2.339181
-        },
-        {
-          "name": "_ZL22edanimcbMCTBCardFormatP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edanimcbMCTBCardFormat(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3432736,
-          "offset": 2542768,
-          "size": 100,
-          "match_percent": 12.692307
-        },
-        {
-          "name": "_ZL20edanimcbMCTBCardTypeP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edanimcbMCTBCardType(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3433392,
-          "offset": 2543424,
-          "size": 100,
-          "match_percent": 12.692307
-        },
-        {
-          "name": "_ZL16edanimcbFileSaveP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edanimcbFileSave(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3516800,
-          "offset": 2626832,
-          "size": 414,
-          "match_percent": 2.933333
-        },
-        {
-          "name": "_ZL21edanimcbSoundTypeMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edanimcbSoundTypeMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3529152,
-          "offset": 2639184,
-          "size": 472,
-          "match_percent": 2.931035
-        },
-        {
-          "name": "_ZL15edanimcbCubeMapP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edanimcbCubeMap(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3537776,
-          "offset": 2647808,
-          "size": 39,
-          "match_percent": 33.0
-        },
-        {
-          "name": "_ZL16edanimcbFileLoadP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edanimcbFileLoad(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3705328,
-          "offset": 2815360,
-          "size": 457,
-          "match_percent": 3.103448
-        }
-      ]
-    },
-    {
-      "name": "gameapi/edtools/edanimcallbacks.cpp.o",
-      "source": "src/gameapi/edtools/edanimcallbacks.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_gameapi/edanimcallbacks.o",
-      "functions": [
-        {
           "name": "_ZL28edanimcbToggleParticleSwitchP10eduimenu_sP10eduiitem_sj",
           "demangled_name": "edanimcbToggleParticleSwitch(eduimenu_s*, eduiitem_s*, unsigned int)",
           "address": 3344896,
@@ -24986,6 +24843,22 @@
           "offset": 2455008,
           "size": 56,
           "match_percent": 25.384615
+        },
+        {
+          "name": "_ZL21edanimcbCancelOptMenuP10eduimenu_sS0_",
+          "demangled_name": "edanimcbCancelOptMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 3345040,
+          "offset": 2455072,
+          "size": 26,
+          "match_percent": 31.428572
+        },
+        {
+          "name": "_ZL22edanimcbCancelMCTBMenuP10eduimenu_sS0_",
+          "demangled_name": "edanimcbCancelMCTBMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 3354000,
+          "offset": 2464032,
+          "size": 58,
+          "match_percent": 15.714286
         },
         {
           "name": "_ZL28edanimcbCancelSwitchTypeMenuP10eduimenu_sS0_",
@@ -25076,6 +24949,38 @@
           "match_percent": 15.714286
         },
         {
+          "name": "_ZL16edanimcbMCTBMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edanimcbMCTBMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3368400,
+          "offset": 2478432,
+          "size": 1184,
+          "match_percent": 1.387755
+        },
+        {
+          "name": "_ZL22edanimcbSwitchTypeMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edanimcbSwitchTypeMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3369584,
+          "offset": 2479616,
+          "size": 1559,
+          "match_percent": 1.068493
+        },
+        {
+          "name": "_ZL17edanimcbSoundMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edanimcbSoundMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3371152,
+          "offset": 2481184,
+          "size": 352,
+          "match_percent": 4.878049
+        },
+        {
+          "name": "_ZL20edanimcbParticleMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edanimcbParticleMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3371504,
+          "offset": 2481536,
+          "size": 352,
+          "match_percent": 4.878049
+        },
+        {
           "name": "_ZL29edanimcbLocalParticleTypeMenuP10eduimenu_sP10eduiitem_sj",
           "demangled_name": "edanimcbLocalParticleTypeMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
           "address": 3371856,
@@ -25092,6 +24997,22 @@
           "match_percent": 2.857143
         },
         {
+          "name": "_ZL18edanimcbBouncyMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edanimcbBouncyMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3381072,
+          "offset": 2491104,
+          "size": 517,
+          "match_percent": 3.636364
+        },
+        {
+          "name": "_ZL18edanimcbSwitchMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edanimcbSwitchMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3385776,
+          "offset": 2495808,
+          "size": 583,
+          "match_percent": 3.174603
+        },
+        {
           "name": "_ZL25edanimcbLocalParticleMenuP10eduimenu_sP10eduiitem_sj",
           "demangled_name": "edanimcbLocalParticleMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
           "address": 3386368,
@@ -25100,12 +25021,28 @@
           "match_percent": 3.773585
         },
         {
+          "name": "_ZL21edanimcbSetSwitchTypeP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edanimcbSetSwitchType(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3389408,
+          "offset": 2499440,
+          "size": 96,
+          "match_percent": 10.0
+        },
+        {
           "name": "_ZL23edanimcbToggleSoundTypeP10eduimenu_sP10eduiitem_sj",
           "demangled_name": "edanimcbToggleSoundType(eduimenu_s*, eduiitem_s*, unsigned int)",
           "address": 3389504,
           "offset": 2499536,
           "size": 166,
           "match_percent": 6.666666
+        },
+        {
+          "name": "_ZL20edanimcbSetSoundTypeP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edanimcbSetSoundType(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3389680,
+          "offset": 2499712,
+          "size": 97,
+          "match_percent": 9.565217
         },
         {
           "name": "_ZL23edanimcbSetParticleTypeP10eduimenu_sP10eduiitem_sj",
@@ -25140,6 +25077,14 @@
           "match_percent": 12.272727
         },
         {
+          "name": "_ZL22edanimcbLocalSoundMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edanimcbLocalSoundMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3418496,
+          "offset": 2528528,
+          "size": 762,
+          "match_percent": 2.339181
+        },
+        {
           "name": "_ZL28edanimcbMCTBCardCheckKeyCardP10eduimenu_sP10eduiitem_sj",
           "demangled_name": "edanimcbMCTBCardCheckKeyCard(eduimenu_s*, eduiitem_s*, unsigned int)",
           "address": 3432368,
@@ -25160,6 +25105,14 @@
           "demangled_name": "edanimcbMCTBCardUnFormat(eduimenu_s*, eduiitem_s*, unsigned int)",
           "address": 3432624,
           "offset": 2542656,
+          "size": 100,
+          "match_percent": 12.692307
+        },
+        {
+          "name": "_ZL22edanimcbMCTBCardFormatP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edanimcbMCTBCardFormat(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3432736,
+          "offset": 2542768,
           "size": 100,
           "match_percent": 12.692307
         },
@@ -25196,12 +25149,28 @@
           "match_percent": 12.692307
         },
         {
+          "name": "_ZL20edanimcbMCTBCardTypeP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edanimcbMCTBCardType(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3433392,
+          "offset": 2543424,
+          "size": 100,
+          "match_percent": 12.692307
+        },
+        {
           "name": "_ZL23edanimcbMCTBCardPresentP10eduimenu_sP10eduiitem_sj",
           "demangled_name": "edanimcbMCTBCardPresent(eduimenu_s*, eduiitem_s*, unsigned int)",
           "address": 3433504,
           "offset": 2543536,
           "size": 100,
           "match_percent": 12.692307
+        },
+        {
+          "name": "_ZL16edanimcbFileSaveP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edanimcbFileSave(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3516800,
+          "offset": 2626832,
+          "size": 414,
+          "match_percent": 2.933333
         },
         {
           "name": "_ZL26edanimcbLocalSoundTypeMenuP10eduimenu_sP10eduiitem_sj",
@@ -25218,6 +25187,22 @@
           "offset": 2638992,
           "size": 183,
           "match_percent": 6.27907
+        },
+        {
+          "name": "_ZL21edanimcbSoundTypeMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edanimcbSoundTypeMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3529152,
+          "offset": 2639184,
+          "size": 472,
+          "match_percent": 2.931035
+        },
+        {
+          "name": "_ZL15edanimcbCubeMapP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edanimcbCubeMap(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3537776,
+          "offset": 2647808,
+          "size": 39,
+          "match_percent": 33.0
         },
         {
           "name": "_ZL24edanimcbSetBouncyDampingP10eduimenu_sP10eduiitem_sj",
@@ -25242,6 +25227,14 @@
           "offset": 2813552,
           "size": 121,
           "match_percent": 12.692307
+        },
+        {
+          "name": "_ZL16edanimcbFileLoadP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edanimcbFileLoad(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3705328,
+          "offset": 2815360,
+          "size": 457,
+          "match_percent": 3.103448
         }
       ]
     },
@@ -25250,6 +25243,22 @@
       "source": "src/gameapi/edtools/edbriall.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_gameapi/edbriall.o",
       "functions": [
+        {
+          "name": "_ZL26edbricbSetPostInstanceTypeP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edbricbSetPostInstanceType(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3345168,
+          "offset": 2455200,
+          "size": 27,
+          "match_percent": 18.571428
+        },
+        {
+          "name": "_ZL27edbricbSetPlankInstanceTypeP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edbricbSetPlankInstanceType(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3345200,
+          "offset": 2455232,
+          "size": 27,
+          "match_percent": 18.571428
+        },
         {
           "name": "_ZL20edbricbSetPlankCountP10eduimenu_sP10eduiitem_sj",
           "demangled_name": "edbricbSetPlankCount(eduimenu_s*, eduiitem_s*, unsigned int)",
@@ -25271,93 +25280,6 @@
           "demangled_name": "edbricbSetDpadMode(eduimenu_s*, eduiitem_s*, unsigned int)",
           "address": 3345296,
           "offset": 2455328,
-          "size": 27,
-          "match_percent": 18.571428
-        },
-        {
-          "name": "_ZL20edbricbCancelOptMenuP10eduimenu_sS0_",
-          "demangled_name": "edbricbCancelOptMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 3356016,
-          "offset": 2466048,
-          "size": 74,
-          "match_percent": 12.222222
-        },
-        {
-          "name": "_ZL19edbricbDpadModeMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edbricbDpadModeMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3375088,
-          "offset": 2485120,
-          "size": 333,
-          "match_percent": 2.857143
-        },
-        {
-          "name": "_ZL21edbricbPlankCountMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edbricbPlankCountMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3387104,
-          "offset": 2497136,
-          "size": 346,
-          "match_percent": 3.6
-        },
-        {
-          "name": "_ZL21edbricbRopeColourMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edbricbRopeColourMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3422096,
-          "offset": 2532128,
-          "size": 326,
-          "match_percent": 2.894737
-        },
-        {
-          "name": "_ZL15edbricbFileSaveP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edbricbFileSave(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3539488,
-          "offset": 2649520,
-          "size": 422,
-          "match_percent": 2.894737
-        },
-        {
-          "name": "_ZL20edbricbSetRopeColourP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edbricbSetRopeColour(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3542352,
-          "offset": 2652384,
-          "size": 200,
-          "match_percent": 4.074074
-        },
-        {
-          "name": "_ZL20edbricbSetBridgeDampP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edbricbSetBridgeDamp(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3542880,
-          "offset": 2652912,
-          "size": 78,
-          "match_percent": 15.714286
-        },
-        {
-          "name": "_ZL15edbricbFileLoadP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edbricbFileLoad(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3543440,
-          "offset": 2653472,
-          "size": 412,
-          "match_percent": 3.506494
-        }
-      ]
-    },
-    {
-      "name": "gameapi/edtools/edbricallbacks.cpp.o",
-      "source": "src/gameapi/edtools/edbricallbacks.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_gameapi/edbricallbacks.o",
-      "functions": [
-        {
-          "name": "_ZL26edbricbSetPostInstanceTypeP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edbricbSetPostInstanceType(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3345168,
-          "offset": 2455200,
-          "size": 27,
-          "match_percent": 18.571428
-        },
-        {
-          "name": "_ZL27edbricbSetPlankInstanceTypeP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edbricbSetPlankInstanceType(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3345200,
-          "offset": 2455232,
           "size": 27,
           "match_percent": 18.571428
         },
@@ -25410,6 +25332,30 @@
           "match_percent": 15.714286
         },
         {
+          "name": "_ZL20edbricbCancelOptMenuP10eduimenu_sS0_",
+          "demangled_name": "edbricbCancelOptMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 3356016,
+          "offset": 2466048,
+          "size": 74,
+          "match_percent": 12.222222
+        },
+        {
+          "name": "_ZL19edbricbDpadModeMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edbricbDpadModeMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3375088,
+          "offset": 2485120,
+          "size": 333,
+          "match_percent": 2.857143
+        },
+        {
+          "name": "_ZL21edbricbPlankCountMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edbricbPlankCountMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3387104,
+          "offset": 2497136,
+          "size": 346,
+          "match_percent": 3.6
+        },
+        {
           "name": "_ZL23edbricbPostInstanceMenuP10eduimenu_sP10eduiitem_sj",
           "demangled_name": "edbricbPostInstanceMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
           "address": 3419328,
@@ -25426,12 +25372,36 @@
           "match_percent": 2.575757
         },
         {
+          "name": "_ZL21edbricbRopeColourMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edbricbRopeColourMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3422096,
+          "offset": 2532128,
+          "size": 326,
+          "match_percent": 2.894737
+        },
+        {
           "name": "_ZL27edbricbBridgePropertiesMenuP10eduimenu_sP10eduiitem_sj",
           "demangled_name": "edbricbBridgePropertiesMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
           "address": 3430368,
           "offset": 2540400,
           "size": 867,
           "match_percent": 2.074468
+        },
+        {
+          "name": "_ZL15edbricbFileSaveP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edbricbFileSave(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3539488,
+          "offset": 2649520,
+          "size": 422,
+          "match_percent": 2.894737
+        },
+        {
+          "name": "_ZL20edbricbSetRopeColourP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edbricbSetRopeColour(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3542352,
+          "offset": 2652384,
+          "size": 200,
+          "match_percent": 4.074074
         },
         {
           "name": "_ZL25edbricbSetBridgeStabilityP10eduimenu_sP10eduiitem_sj",
@@ -25466,12 +25436,28 @@
           "match_percent": 15.714286
         },
         {
+          "name": "_ZL20edbricbSetBridgeDampP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edbricbSetBridgeDamp(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3542880,
+          "offset": 2652912,
+          "size": 78,
+          "match_percent": 15.714286
+        },
+        {
           "name": "_ZL23edbricbSetBridgeTensionP10eduimenu_sP10eduiitem_sj",
           "demangled_name": "edbricbSetBridgeTension(eduimenu_s*, eduiitem_s*, unsigned int)",
           "address": 3542960,
           "offset": 2652992,
           "size": 78,
           "match_percent": 15.714286
+        },
+        {
+          "name": "_ZL15edbricbFileLoadP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edbricbFileLoad(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3543440,
+          "offset": 2653472,
+          "size": 412,
+          "match_percent": 3.506494
         }
       ]
     },
@@ -25775,6 +25761,14 @@
           "match_percent": 18.571428
         },
         {
+          "name": "_ZL26edgracbToggleClumpReactiveP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edgracbToggleClumpReactive(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3345392,
+          "offset": 2455424,
+          "size": 53,
+          "match_percent": 5.333334
+        },
+        {
           "name": "_ZL18edgracbSetDpadModeP10eduimenu_sP10eduiitem_sj",
           "demangled_name": "edgracbSetDpadMode(eduimenu_s*, eduiitem_s*, unsigned int)",
           "address": 3345456,
@@ -25799,227 +25793,20 @@
           "match_percent": 13.75
         },
         {
-          "name": "_ZL17edgraToggleFilterP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edgraToggleFilter(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3345728,
-          "offset": 2455760,
-          "size": 31,
-          "match_percent": 16.25
-        },
-        {
-          "name": "_ZL20edgracbCancelOptMenuP10eduimenu_sS0_",
-          "demangled_name": "edgracbCancelOptMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 3355552,
-          "offset": 2465584,
-          "size": 74,
-          "match_percent": 12.222222
-        },
-        {
-          "name": "_ZL19edgracbDpadModeMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edgracbDpadModeMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3372800,
-          "offset": 2482832,
-          "size": 365,
-          "match_percent": 2.682927
-        },
-        {
-          "name": "_ZL20edgracbClumpDistMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edgracbClumpDistMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3373168,
-          "offset": 2483200,
-          "size": 600,
-          "match_percent": 2.564103
-        },
-        {
-          "name": "_ZL20edgracbClumpAreaMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edgracbClumpAreaMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3373776,
-          "offset": 2483808,
-          "size": 600,
-          "match_percent": 2.564103
-        },
-        {
-          "name": "_ZL20edgracbClumpModeMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edgracbClumpModeMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3374384,
-          "offset": 2484416,
-          "size": 697,
-          "match_percent": 2.060606
-        },
-        {
-          "name": "_ZL21edgracbClumpSizesMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edgracbClumpSizesMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3382512,
-          "offset": 2492544,
-          "size": 566,
-          "match_percent": 2.919708
-        },
-        {
-          "name": "_ZL17edgracbSScaleMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edgracbSScaleMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3386848,
-          "offset": 2496880,
-          "size": 254,
-          "match_percent": 4.736842
-        },
-        {
-          "name": "_ZL18edgracbDiscardCopyP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edgracbDiscardCopy(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3389888,
-          "offset": 2499920,
-          "size": 91,
-          "match_percent": 8.8
-        },
-        {
-          "name": "_ZL16edgracbCopyClumpP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edgracbCopyClump(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3389984,
-          "offset": 2500016,
-          "size": 95,
-          "match_percent": 8.148149
-        },
-        {
-          "name": "_ZL18edgracbGlobalsMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edgracbGlobalsMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3408416,
-          "offset": 2518448,
-          "size": 542,
-          "match_percent": 2.905983
-        },
-        {
-          "name": "_ZL21edgraChangeFilterNameP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edgraChangeFilterName(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3419264,
-          "offset": 2529296,
-          "size": 55,
-          "match_percent": 27.142857
-        },
-        {
-          "name": "_ZL19edgracbInstanceMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edgracbInstanceMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3421216,
-          "offset": 2531248,
-          "size": 874,
-          "match_percent": 1.666667
-        },
-        {
-          "name": "_ZL20edgracbClumpFadeMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edgracbClumpFadeMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3431792,
-          "offset": 2541824,
-          "size": 566,
-          "match_percent": 1.732284
-        },
-        {
-          "name": "_ZL15edgracbFileSaveP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edgracbFileSave(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3553520,
-          "offset": 2663552,
-          "size": 414,
-          "match_percent": 2.933333
-        },
-        {
-          "name": "_ZL22edgracbApplyGlobalFadeP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edgracbApplyGlobalFade(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3605568,
-          "offset": 2715600,
-          "size": 148,
-          "match_percent": 8.085107
-        },
-        {
-          "name": "_ZL19edgracbSetClumpWindP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edgracbSetClumpWind(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3605728,
-          "offset": 2715760,
-          "size": 68,
-          "match_percent": 20.0
-        },
-        {
-          "name": "_ZL22edgracbToggleClumpTiltP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edgracbToggleClumpTilt(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3605888,
-          "offset": 2715920,
-          "size": 68,
-          "match_percent": 16.5
-        },
-        {
-          "name": "_ZL22edgracbSetClumpFadeOutP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edgracbSetClumpFadeOut(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3606048,
-          "offset": 2716080,
-          "size": 109,
-          "match_percent": 11.785714
-        },
-        {
-          "name": "_ZL21edgracbSetClumpFadeInP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edgracbSetClumpFadeIn(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3606160,
-          "offset": 2716192,
-          "size": 105,
-          "match_percent": 12.222222
-        },
-        {
-          "name": "_ZL19edgracbSetClumpDistP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edgracbSetClumpDist(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3606272,
-          "offset": 2716304,
-          "size": 64,
-          "match_percent": 20.0
-        },
-        {
-          "name": "_ZL19edgracbSetClumpAreaP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edgracbSetClumpArea(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3606336,
-          "offset": 2716368,
-          "size": 64,
-          "match_percent": 20.0
-        },
-        {
-          "name": "_ZL21edgracbSetClumpHeightP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edgracbSetClumpHeight(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3606400,
-          "offset": 2716432,
-          "size": 68,
-          "match_percent": 20.0
-        },
-        {
-          "name": "_ZL19edgracbSetClumpModeP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edgracbSetClumpMode(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3606640,
-          "offset": 2716672,
-          "size": 72,
-          "match_percent": 15.714286
-        },
-        {
-          "name": "_ZL15edgracbFileLoadP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edgracbFileLoad(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3615536,
-          "offset": 2725568,
-          "size": 420,
-          "match_percent": 2.78481
-        }
-      ]
-    },
-    {
-      "name": "gameapi/edtools/edgracallbacks.cpp.o",
-      "source": "src/gameapi/edtools/edgracallbacks.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_gameapi/edgracallbacks.o",
-      "functions": [
-        {
-          "name": "_ZL26edgracbToggleClumpReactiveP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edgracbToggleClumpReactive(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3345392,
-          "offset": 2455424,
-          "size": 53,
-          "match_percent": 5.333334
-        },
-        {
           "name": "_ZL23edgracbSetGlobalFadeOutP10eduimenu_sP10eduiitem_sj",
           "demangled_name": "edgracbSetGlobalFadeOut(eduimenu_s*, eduiitem_s*, unsigned int)",
           "address": 3345648,
           "offset": 2455680,
           "size": 76,
           "match_percent": 12.941176
+        },
+        {
+          "name": "_ZL17edgraToggleFilterP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edgraToggleFilter(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3345728,
+          "offset": 2455760,
+          "size": 31,
+          "match_percent": 16.25
         },
         {
           "name": "_ZL24edgracbCancelGlobalsMenuP10eduimenu_sS0_",
@@ -26118,12 +25905,100 @@
           "match_percent": 15.714286
         },
         {
+          "name": "_ZL20edgracbCancelOptMenuP10eduimenu_sS0_",
+          "demangled_name": "edgracbCancelOptMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 3355552,
+          "offset": 2465584,
+          "size": 74,
+          "match_percent": 12.222222
+        },
+        {
+          "name": "_ZL19edgracbDpadModeMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edgracbDpadModeMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3372800,
+          "offset": 2482832,
+          "size": 365,
+          "match_percent": 2.682927
+        },
+        {
+          "name": "_ZL20edgracbClumpDistMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edgracbClumpDistMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3373168,
+          "offset": 2483200,
+          "size": 600,
+          "match_percent": 2.564103
+        },
+        {
+          "name": "_ZL20edgracbClumpAreaMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edgracbClumpAreaMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3373776,
+          "offset": 2483808,
+          "size": 600,
+          "match_percent": 2.564103
+        },
+        {
+          "name": "_ZL20edgracbClumpModeMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edgracbClumpModeMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3374384,
+          "offset": 2484416,
+          "size": 697,
+          "match_percent": 2.060606
+        },
+        {
           "name": "_ZL26edgracbClumpPropertiesMenuP10eduimenu_sP10eduiitem_sj",
           "demangled_name": "edgracbClumpPropertiesMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
           "address": 3381600,
           "offset": 2491632,
           "size": 904,
           "match_percent": 1.95122
+        },
+        {
+          "name": "_ZL21edgracbClumpSizesMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edgracbClumpSizesMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3382512,
+          "offset": 2492544,
+          "size": 566,
+          "match_percent": 2.919708
+        },
+        {
+          "name": "_ZL17edgracbSScaleMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edgracbSScaleMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3386848,
+          "offset": 2496880,
+          "size": 254,
+          "match_percent": 4.736842
+        },
+        {
+          "name": "_ZL18edgracbDiscardCopyP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edgracbDiscardCopy(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3389888,
+          "offset": 2499920,
+          "size": 91,
+          "match_percent": 8.8
+        },
+        {
+          "name": "_ZL16edgracbCopyClumpP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edgracbCopyClump(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3389984,
+          "offset": 2500016,
+          "size": 95,
+          "match_percent": 8.148149
+        },
+        {
+          "name": "_ZL18edgracbGlobalsMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edgracbGlobalsMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3408416,
+          "offset": 2518448,
+          "size": 542,
+          "match_percent": 2.905983
+        },
+        {
+          "name": "_ZL21edgraChangeFilterNameP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edgraChangeFilterName(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3419264,
+          "offset": 2529296,
+          "size": 55,
+          "match_percent": 27.142857
         },
         {
           "name": "_ZL25edgracbChangeInstanceMenuP10eduimenu_sP10eduiitem_sj",
@@ -26134,12 +26009,52 @@
           "match_percent": 1.979695
         },
         {
+          "name": "_ZL19edgracbInstanceMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edgracbInstanceMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3421216,
+          "offset": 2531248,
+          "size": 874,
+          "match_percent": 1.666667
+        },
+        {
           "name": "_ZL23edgracbClumpTerrainMenuP10eduimenu_sP10eduiitem_sj",
           "demangled_name": "edgracbClumpTerrainMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
           "address": 3429856,
           "offset": 2539888,
           "size": 512,
           "match_percent": 1.833333
+        },
+        {
+          "name": "_ZL20edgracbClumpFadeMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edgracbClumpFadeMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3431792,
+          "offset": 2541824,
+          "size": 566,
+          "match_percent": 1.732284
+        },
+        {
+          "name": "_ZL15edgracbFileSaveP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edgracbFileSave(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3553520,
+          "offset": 2663552,
+          "size": 414,
+          "match_percent": 2.933333
+        },
+        {
+          "name": "_ZL22edgracbApplyGlobalFadeP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edgracbApplyGlobalFade(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3605568,
+          "offset": 2715600,
+          "size": 148,
+          "match_percent": 8.085107
+        },
+        {
+          "name": "_ZL19edgracbSetClumpWindP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edgracbSetClumpWind(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3605728,
+          "offset": 2715760,
+          "size": 68,
+          "match_percent": 20.0
         },
         {
           "name": "_ZL28edgracbSetClumpTerrainOffsetP10eduimenu_sP10eduiitem_sj",
@@ -26150,12 +26065,60 @@
           "match_percent": 20.0
         },
         {
+          "name": "_ZL22edgracbToggleClumpTiltP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edgracbToggleClumpTilt(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3605888,
+          "offset": 2715920,
+          "size": 68,
+          "match_percent": 16.5
+        },
+        {
           "name": "_ZL25edgracbToggleClumpTerrainP10eduimenu_sP10eduiitem_sj",
           "demangled_name": "edgracbToggleClumpTerrain(eduimenu_s*, eduiitem_s*, unsigned int)",
           "address": 3605968,
           "offset": 2716000,
           "size": 68,
           "match_percent": 16.5
+        },
+        {
+          "name": "_ZL22edgracbSetClumpFadeOutP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edgracbSetClumpFadeOut(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3606048,
+          "offset": 2716080,
+          "size": 109,
+          "match_percent": 11.785714
+        },
+        {
+          "name": "_ZL21edgracbSetClumpFadeInP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edgracbSetClumpFadeIn(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3606160,
+          "offset": 2716192,
+          "size": 105,
+          "match_percent": 12.222222
+        },
+        {
+          "name": "_ZL19edgracbSetClumpDistP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edgracbSetClumpDist(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3606272,
+          "offset": 2716304,
+          "size": 64,
+          "match_percent": 20.0
+        },
+        {
+          "name": "_ZL19edgracbSetClumpAreaP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edgracbSetClumpArea(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3606336,
+          "offset": 2716368,
+          "size": 64,
+          "match_percent": 20.0
+        },
+        {
+          "name": "_ZL21edgracbSetClumpHeightP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edgracbSetClumpHeight(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3606400,
+          "offset": 2716432,
+          "size": 68,
+          "match_percent": 20.0
         },
         {
           "name": "_ZL24edgracbSetClumpMaxHeightP10eduimenu_sP10eduiitem_sj",
@@ -26174,12 +26137,28 @@
           "match_percent": 20.0
         },
         {
+          "name": "_ZL19edgracbSetClumpModeP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edgracbSetClumpMode(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3606640,
+          "offset": 2716672,
+          "size": 72,
+          "match_percent": 15.714286
+        },
+        {
           "name": "_ZL25edgracbChangeInstanceTypeP10eduimenu_sP10eduiitem_sj",
           "demangled_name": "edgracbChangeInstanceType(eduimenu_s*, eduiitem_s*, unsigned int)",
           "address": 3606720,
           "offset": 2716752,
           "size": 63,
           "match_percent": 20.0
+        },
+        {
+          "name": "_ZL15edgracbFileLoadP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edgracbFileLoad(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3615536,
+          "offset": 2725568,
+          "size": 420,
+          "match_percent": 2.78481
         }
       ]
     },
@@ -116816,11 +116795,8 @@
         "MechInputTouch/MechObjectInterface.cpp.o",
         "editor/edtoolsall.cpp.o",
         "gameapi/edtools/edanimall.cpp.o",
-        "gameapi/edtools/edanimcallbacks.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edbricallbacks.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edgracallbacks.cpp.o",
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
@@ -116879,11 +116855,8 @@
         "MechInputTouch/MechObjectInterface.cpp.o",
         "editor/edtoolsall.cpp.o",
         "gameapi/edtools/edanimall.cpp.o",
-        "gameapi/edtools/edanimcallbacks.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edbricallbacks.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edgracallbacks.cpp.o",
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
@@ -116942,11 +116915,8 @@
         "MechInputTouch/MechObjectInterface.cpp.o",
         "editor/edtoolsall.cpp.o",
         "gameapi/edtools/edanimall.cpp.o",
-        "gameapi/edtools/edanimcallbacks.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edbricallbacks.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edgracallbacks.cpp.o",
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
@@ -117018,11 +116988,8 @@
         "MechInputTouch/MechObjectInterface.cpp.o",
         "editor/edtoolsall.cpp.o",
         "gameapi/edtools/edanimall.cpp.o",
-        "gameapi/edtools/edanimcallbacks.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edbricallbacks.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edgracallbacks.cpp.o",
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
@@ -117128,11 +117095,8 @@
         "MechInputTouch/MechObjectInterface.cpp.o",
         "editor/edtoolsall.cpp.o",
         "gameapi/edtools/edanimall.cpp.o",
-        "gameapi/edtools/edanimcallbacks.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edbricallbacks.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edgracallbacks.cpp.o",
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
@@ -117204,11 +117168,8 @@
         "MechInputTouch/MechObjectInterface.cpp.o",
         "editor/edtoolsall.cpp.o",
         "gameapi/edtools/edanimall.cpp.o",
-        "gameapi/edtools/edanimcallbacks.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edbricallbacks.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edgracallbacks.cpp.o",
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
@@ -117280,11 +117241,8 @@
         "MechInputTouch/MechObjectInterface.cpp.o",
         "editor/edtoolsall.cpp.o",
         "gameapi/edtools/edanimall.cpp.o",
-        "gameapi/edtools/edanimcallbacks.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edbricallbacks.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edgracallbacks.cpp.o",
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
@@ -117356,11 +117314,8 @@
         "MechInputTouch/MechObjectInterface.cpp.o",
         "editor/edtoolsall.cpp.o",
         "gameapi/edtools/edanimall.cpp.o",
-        "gameapi/edtools/edanimcallbacks.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edbricallbacks.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edgracallbacks.cpp.o",
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
@@ -117432,11 +117387,8 @@
         "MechInputTouch/MechObjectInterface.cpp.o",
         "editor/edtoolsall.cpp.o",
         "gameapi/edtools/edanimall.cpp.o",
-        "gameapi/edtools/edanimcallbacks.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edbricallbacks.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edgracallbacks.cpp.o",
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
@@ -117508,11 +117460,8 @@
         "MechInputTouch/MechObjectInterface.cpp.o",
         "editor/edtoolsall.cpp.o",
         "gameapi/edtools/edanimall.cpp.o",
-        "gameapi/edtools/edanimcallbacks.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edbricallbacks.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edgracallbacks.cpp.o",
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
@@ -117794,11 +117743,8 @@
         "MechInputTouch/MechObjectInterface.cpp.o",
         "editor/edtoolsall.cpp.o",
         "gameapi/edtools/edanimall.cpp.o",
-        "gameapi/edtools/edanimcallbacks.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edbricallbacks.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edgracallbacks.cpp.o",
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
@@ -117870,11 +117816,8 @@
         "MechInputTouch/MechObjectInterface.cpp.o",
         "editor/edtoolsall.cpp.o",
         "gameapi/edtools/edanimall.cpp.o",
-        "gameapi/edtools/edanimcallbacks.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edbricallbacks.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edgracallbacks.cpp.o",
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
@@ -117946,11 +117889,8 @@
         "MechInputTouch/MechObjectInterface.cpp.o",
         "editor/edtoolsall.cpp.o",
         "gameapi/edtools/edanimall.cpp.o",
-        "gameapi/edtools/edanimcallbacks.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edbricallbacks.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edgracallbacks.cpp.o",
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
@@ -118071,11 +118011,8 @@
         "MechInputTouch/MechObjectInterface.cpp.o",
         "editor/edtoolsall.cpp.o",
         "gameapi/edtools/edanimall.cpp.o",
-        "gameapi/edtools/edanimcallbacks.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edbricallbacks.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edgracallbacks.cpp.o",
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
@@ -118159,11 +118096,8 @@
         "MechInputTouch/MechObjectInterface.cpp.o",
         "editor/edtoolsall.cpp.o",
         "gameapi/edtools/edanimall.cpp.o",
-        "gameapi/edtools/edanimcallbacks.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edbricallbacks.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edgracallbacks.cpp.o",
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
@@ -118337,11 +118271,8 @@
         "MechInputTouch/MechObjectInterface.cpp.o",
         "editor/edtoolsall.cpp.o",
         "gameapi/edtools/edanimall.cpp.o",
-        "gameapi/edtools/edanimcallbacks.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edbricallbacks.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edgracallbacks.cpp.o",
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
@@ -118466,11 +118397,8 @@
         "MechInputTouch/MechObjectInterface.cpp.o",
         "editor/edtoolsall.cpp.o",
         "gameapi/edtools/edanimall.cpp.o",
-        "gameapi/edtools/edanimcallbacks.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edbricallbacks.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edgracallbacks.cpp.o",
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
@@ -118595,11 +118523,8 @@
         "MechInputTouch/MechObjectInterface.cpp.o",
         "editor/edtoolsall.cpp.o",
         "gameapi/edtools/edanimall.cpp.o",
-        "gameapi/edtools/edanimcallbacks.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edbricallbacks.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edgracallbacks.cpp.o",
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
@@ -118671,11 +118596,8 @@
         "MechInputTouch/MechObjectInterface.cpp.o",
         "editor/edtoolsall.cpp.o",
         "gameapi/edtools/edanimall.cpp.o",
-        "gameapi/edtools/edanimcallbacks.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edbricallbacks.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edgracallbacks.cpp.o",
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
@@ -118747,11 +118669,8 @@
         "MechInputTouch/MechObjectInterface.cpp.o",
         "editor/edtoolsall.cpp.o",
         "gameapi/edtools/edanimall.cpp.o",
-        "gameapi/edtools/edanimcallbacks.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edbricallbacks.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edgracallbacks.cpp.o",
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
@@ -118823,11 +118742,8 @@
         "MechInputTouch/MechObjectInterface.cpp.o",
         "editor/edtoolsall.cpp.o",
         "gameapi/edtools/edanimall.cpp.o",
-        "gameapi/edtools/edanimcallbacks.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edbricallbacks.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edgracallbacks.cpp.o",
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
@@ -118925,11 +118841,8 @@
         "MechInputTouch/MechObjectInterface.cpp.o",
         "editor/edtoolsall.cpp.o",
         "gameapi/edtools/edanimall.cpp.o",
-        "gameapi/edtools/edanimcallbacks.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edbricallbacks.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edgracallbacks.cpp.o",
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
@@ -119001,11 +118914,8 @@
         "MechInputTouch/MechObjectInterface.cpp.o",
         "editor/edtoolsall.cpp.o",
         "gameapi/edtools/edanimall.cpp.o",
-        "gameapi/edtools/edanimcallbacks.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edbricallbacks.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edgracallbacks.cpp.o",
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
@@ -119088,11 +118998,8 @@
         "MechInputTouch/MechObjectInterface.cpp.o",
         "editor/edtoolsall.cpp.o",
         "gameapi/edtools/edanimall.cpp.o",
-        "gameapi/edtools/edanimcallbacks.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edbricallbacks.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edgracallbacks.cpp.o",
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
@@ -119164,11 +119071,8 @@
         "MechInputTouch/MechObjectInterface.cpp.o",
         "editor/edtoolsall.cpp.o",
         "gameapi/edtools/edanimall.cpp.o",
-        "gameapi/edtools/edanimcallbacks.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edbricallbacks.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edgracallbacks.cpp.o",
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
@@ -119253,11 +119157,8 @@
         "MechInputTouch/MechObjectInterface.cpp.o",
         "editor/edtoolsall.cpp.o",
         "gameapi/edtools/edanimall.cpp.o",
-        "gameapi/edtools/edanimcallbacks.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edbricallbacks.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edgracallbacks.cpp.o",
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
@@ -119329,11 +119230,8 @@
         "MechInputTouch/MechObjectInterface.cpp.o",
         "editor/edtoolsall.cpp.o",
         "gameapi/edtools/edanimall.cpp.o",
-        "gameapi/edtools/edanimcallbacks.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edbricallbacks.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edgracallbacks.cpp.o",
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
@@ -119439,11 +119337,8 @@
         "MechInputTouch/MechObjectInterface.cpp.o",
         "editor/edtoolsall.cpp.o",
         "gameapi/edtools/edanimall.cpp.o",
-        "gameapi/edtools/edanimcallbacks.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edbricallbacks.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edgracallbacks.cpp.o",
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
@@ -119515,11 +119410,8 @@
         "MechInputTouch/MechObjectInterface.cpp.o",
         "editor/edtoolsall.cpp.o",
         "gameapi/edtools/edanimall.cpp.o",
-        "gameapi/edtools/edanimcallbacks.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edbricallbacks.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edgracallbacks.cpp.o",
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
@@ -119591,11 +119483,8 @@
         "MechInputTouch/MechObjectInterface.cpp.o",
         "editor/edtoolsall.cpp.o",
         "gameapi/edtools/edanimall.cpp.o",
-        "gameapi/edtools/edanimcallbacks.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edbricallbacks.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edgracallbacks.cpp.o",
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
@@ -119667,11 +119556,8 @@
         "MechInputTouch/MechObjectInterface.cpp.o",
         "editor/edtoolsall.cpp.o",
         "gameapi/edtools/edanimall.cpp.o",
-        "gameapi/edtools/edanimcallbacks.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edbricallbacks.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edgracallbacks.cpp.o",
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
@@ -119806,11 +119692,8 @@
         "MechInputTouch/MechObjectInterface.cpp.o",
         "editor/edtoolsall.cpp.o",
         "gameapi/edtools/edanimall.cpp.o",
-        "gameapi/edtools/edanimcallbacks.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edbricallbacks.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edgracallbacks.cpp.o",
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
@@ -119882,11 +119765,8 @@
         "MechInputTouch/MechObjectInterface.cpp.o",
         "editor/edtoolsall.cpp.o",
         "gameapi/edtools/edanimall.cpp.o",
-        "gameapi/edtools/edanimcallbacks.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edbricallbacks.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edgracallbacks.cpp.o",
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
@@ -119958,11 +119838,8 @@
         "MechInputTouch/MechObjectInterface.cpp.o",
         "editor/edtoolsall.cpp.o",
         "gameapi/edtools/edanimall.cpp.o",
-        "gameapi/edtools/edanimcallbacks.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edbricallbacks.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edgracallbacks.cpp.o",
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
@@ -120381,11 +120258,8 @@
         "MechInputTouch/MechObjectInterface.cpp.o",
         "editor/edtoolsall.cpp.o",
         "gameapi/edtools/edanimall.cpp.o",
-        "gameapi/edtools/edanimcallbacks.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edbricallbacks.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edgracallbacks.cpp.o",
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
@@ -120561,11 +120435,8 @@
         "MechInputTouch/MechObjectInterface.cpp.o",
         "editor/edtoolsall.cpp.o",
         "gameapi/edtools/edanimall.cpp.o",
-        "gameapi/edtools/edanimcallbacks.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edbricallbacks.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edgracallbacks.cpp.o",
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
@@ -120728,11 +120599,8 @@
         "MechInputTouch/MechObjectInterface.cpp.o",
         "editor/edtoolsall.cpp.o",
         "gameapi/edtools/edanimall.cpp.o",
-        "gameapi/edtools/edanimcallbacks.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edbricallbacks.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edgracallbacks.cpp.o",
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
@@ -121163,11 +121031,8 @@
         "MechInputTouch/MechObjectInterface.cpp.o",
         "editor/edtoolsall.cpp.o",
         "gameapi/edtools/edanimall.cpp.o",
-        "gameapi/edtools/edanimcallbacks.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edbricallbacks.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edgracallbacks.cpp.o",
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
@@ -121239,11 +121104,8 @@
         "MechInputTouch/MechObjectInterface.cpp.o",
         "editor/edtoolsall.cpp.o",
         "gameapi/edtools/edanimall.cpp.o",
-        "gameapi/edtools/edanimcallbacks.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edbricallbacks.cpp.o",
         "gameapi/edtools/edgraall.cpp.o",
-        "gameapi/edtools/edgracallbacks.cpp.o",
         "gameapi/edtools/edlevelall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
@@ -128398,7 +128260,7 @@
     }
   ],
   "summary": {
-    "bazel_units": 469,
+    "bazel_units": 466,
     "functions": 13454,
     "assigned_functions": 12353,
     "ambiguous_functions": 212,

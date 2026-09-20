@@ -1,4 +1,5 @@
 #include "nu2api_nusound_types.h"
+#include "gameapi/edtools/edanim_internal.h"
 #include "gameapi/edtools/gameapi_edtools_types.h"
 #include "globals.h"
 #include "nu2api/nu3d/nuspecial.h"
@@ -6,10 +7,6 @@
 #include <string.h>
 
 extern i32 VehicleArea;
-extern "C" edanim_param_s AnimParams[64];
-extern "C" i32 edanim_nearest;
-extern "C" i32 edanim_nearest_param_id;
-extern "C" i32 edanim_sound_type;
 extern "C" NUGSCN *edbits_base_scene;
 extern "C" char *edbitsGetSoundName(i32 sound_type);
 extern "C" void NuGScnGetSpecial(nuhspecial_s *special, NUGSCN *scene, i32 index);

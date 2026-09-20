@@ -1,4 +1,5 @@
 #include "decomp.h"
+#include "gameapi/edtools/edanim_internal.h"
 #include "gameapi/edtools/gameapi_edtools_types.h"
 #include "nu2api/numusic/numusic.h"
 #include "nu2api/numusic/sfx.h"
@@ -10,7 +11,6 @@ typedef void (*SoundBitCallback)(i32 sound_id);
 
 extern "C" void MusicPreSeek(i32 track);
 extern "C" void RestoreGameMusic(void);
-extern "C" edanim_param_s AnimParams[64];
 
 extern "C" {
     i32 g_NuSoundMaxVoicesPerSample = 3;

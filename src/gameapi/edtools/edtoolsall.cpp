@@ -1,5 +1,6 @@
 #include "decomp.h"
 #include "gameapi_edtools_types.h"
+#include "gameapi/edtools/edanim_internal.h"
 #include "gameapi/edtools/edcam.h"
 #include "gameapi/edtools/edfile.h"
 #include "gameapi/edtools/edgra_internal.h"
@@ -32,8 +33,6 @@ extern "C" {
     i32 edgra_copy_source = -1;
     f32 edgra_global_fadein = 15.0f, edgra_global_fadeout = 25.0f;
     void edgraInitAllClumps(void);
-    extern edanim_param_s AnimParams[64];
-    extern NUGSCN *edanim_page_scene[8];
 }
 
 void EdTerrInit(void *, void *) {
