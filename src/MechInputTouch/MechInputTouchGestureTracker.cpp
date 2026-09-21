@@ -49,12 +49,19 @@ void MechInputTouchGestureTrackingSystem::RegisterGestureTracker(MechInputTouchG
     GestureTrackerRegistration *entries =
         reinterpret_cast<GestureTrackerRegistration *>(reinterpret_cast<u8 *>(this) + 0x2588);
 
+    bool has_vacancy = (entries[0].tracker == NULL) | (entries[1].tracker == NULL) | (entries[2].tracker == NULL) |
+                       (entries[3].tracker == NULL) | (entries[4].tracker == NULL) | (entries[5].tracker == NULL) |
+                       (entries[6].tracker == NULL) | (entries[7].tracker == NULL) | (entries[8].tracker == NULL);
+    if (entries[9].tracker != NULL && !has_vacancy) {
+        return;
+    }
+
     i32 insertion_index = 0;
-    while (insertion_index < 10 && entries[insertion_index].tracker != NULL &&
+    while (insertion_index < 9 && entries[insertion_index].tracker != NULL &&
            entries[insertion_index].priority <= priority) {
         ++insertion_index;
     }
-    if (insertion_index == 10) {
+    if (insertion_index == 9) {
         return;
     }
     for (i32 index = 9; index > insertion_index; --index) {
@@ -65,19 +72,20 @@ void MechInputTouchGestureTrackingSystem::RegisterGestureTracker(MechInputTouchG
 }
 
 void MechInputTouchGestureTrackingSystem::UnregisterGestureTracker(MechInputTouchGestureTracker &tracker) {
-    GestureTrackerRegistration *entries =
-        reinterpret_cast<GestureTrackerRegistration *>(reinterpret_cast<u8 *>(this) + 0x2588);
     i32 index = 0;
-    while (index < 9 && entries[index].tracker != &tracker)
+    while (index < 9 &&
+           reinterpret_cast<GestureTrackerRegistration *>(reinterpret_cast<u8 *>(this) + 0x2588)[index].tracker !=
+               &tracker)
         ++index;
     if (index == 9)
         return;
     do {
-        entries[index] = entries[index + 1];
+        reinterpret_cast<GestureTrackerRegistration *>(reinterpret_cast<u8 *>(this) + 0x2588)[index] =
+            reinterpret_cast<GestureTrackerRegistration *>(reinterpret_cast<u8 *>(this) + 0x2588)[index + 1];
         ++index;
     } while (index != 9);
-    entries[9].tracker = NULL;
-    entries[9].priority = -1;
+    reinterpret_cast<GestureTrackerRegistration *>(reinterpret_cast<u8 *>(this) + 0x2588)[9].tracker = NULL;
+    reinterpret_cast<GestureTrackerRegistration *>(reinterpret_cast<u8 *>(this) + 0x2588)[9].priority = -1;
 }
 
 void MechInputTouchGestureTrackingSystem::Update(NuInputTouchData const *) {

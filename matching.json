@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 51.493206,
+    "fuzzy_match_percent": 51.51212,
     "total_code": "4722419",
-    "matched_code": "452632",
-    "matched_code_percent": 9.584749,
+    "matched_code": "452819",
+    "matched_code_percent": 9.588709,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 5352,
-    "matched_functions_percent": 39.765213,
+    "matched_functions": 5354,
+    "matched_functions_percent": 39.78007,
     "total_units": 1
   },
   "text": {
@@ -16969,7 +16969,7 @@
           "address": 927072,
           "offset": 37104,
           "size": 93,
-          "match_percent": 29.411764
+          "match_percent": 99.35294
         },
         {
           "name": "_ZN35MechInputTouchGestureTrackingSystemD1Ev",
@@ -16977,7 +16977,7 @@
           "address": 5245504,
           "offset": 4355536,
           "size": 312,
-          "match_percent": 16.670732
+          "match_percent": 8.5
         },
         {
           "name": "_ZN35MechInputTouchGestureTrackingSystemD2Ev",
@@ -16985,7 +16985,7 @@
           "address": 5245504,
           "offset": 4355536,
           "size": 312,
-          "match_percent": 16.670732
+          "match_percent": 8.5
         },
         {
           "name": "_ZN35MechInputTouchGestureTrackingSystemD0Ev",
@@ -16993,7 +16993,7 @@
           "address": 5245824,
           "offset": 4355856,
           "size": 56,
-          "match_percent": 24.5
+          "match_percent": 100.0
         },
         {
           "name": "_ZN35MechInputTouchGestureTrackingSystemC1Ev",
@@ -17001,7 +17001,7 @@
           "address": 5245888,
           "offset": 4355920,
           "size": 694,
-          "match_percent": 6.325397
+          "match_percent": 4.801587
         },
         {
           "name": "_ZN35MechInputTouchGestureTrackingSystemC2Ev",
@@ -17009,7 +17009,7 @@
           "address": 5245888,
           "offset": 4355920,
           "size": 694,
-          "match_percent": 6.325397
+          "match_percent": 4.801587
         },
         {
           "name": "_ZN35MechInputTouchGestureTrackingSystem22RegisterGestureTrackerER28MechInputTouchGestureTrackeri",
@@ -17017,7 +17017,7 @@
           "address": 5246592,
           "offset": 4356624,
           "size": 602,
-          "match_percent": 11.129032
+          "match_percent": 13.774194
         },
         {
           "name": "_ZN35MechInputTouchGestureTrackingSystem24UnregisterGestureTrackerER28MechInputTouchGestureTracker",
@@ -17025,7 +17025,7 @@
           "address": 5247200,
           "offset": 4357232,
           "size": 247,
-          "match_percent": 0.0
+          "match_percent": 77.067795
         },
         {
           "name": "_ZN35MechInputTouchGestureTrackingSystem11LookForDownER12GameObject_s",
@@ -17033,7 +17033,7 @@
           "address": 5247456,
           "offset": 4357488,
           "size": 420,
-          "match_percent": 3.0
+          "match_percent": 3.230769
         },
         {
           "name": "_ZN35MechInputTouchGestureTrackingSystem14LookForReleaseER12GameObject_s",
@@ -17041,7 +17041,7 @@
           "address": 5247888,
           "offset": 4357920,
           "size": 436,
-          "match_percent": 2.977099
+          "match_percent": 3.206107
         },
         {
           "name": "_ZN35MechInputTouchGestureTrackingSystem13LookForClicksER12GameObject_s",
@@ -17049,7 +17049,7 @@
           "address": 5248336,
           "offset": 4358368,
           "size": 969,
-          "match_percent": 1.397849
+          "match_percent": 1.72043
         },
         {
           "name": "_ZN35MechInputTouchGestureTrackingSystem11LookForHoldER12GameObject_s",
@@ -17057,7 +17057,7 @@
           "address": 5249312,
           "offset": 4359344,
           "size": 473,
-          "match_percent": 2.377622
+          "match_percent": 3.356643
         },
         {
           "name": "_ZN35MechInputTouchGestureTrackingSystem12LookForSwipeER12GameObject_s",
@@ -17065,7 +17065,7 @@
           "address": 5249792,
           "offset": 4359824,
           "size": 843,
-          "match_percent": 1.756757
+          "match_percent": 1.891892
         },
         {
           "name": "_ZN35MechInputTouchGestureTrackingSystem15LookForGesturesER12GameObject_s",
@@ -17073,7 +17073,7 @@
           "address": 5250640,
           "offset": 4360672,
           "size": 112,
-          "match_percent": 9.642858
+          "match_percent": 15.0
         },
         {
           "name": "_ZN35MechInputTouchGestureTrackingSystem8GetTouchERK12NuInputTouch",
@@ -17081,7 +17081,7 @@
           "address": 5250752,
           "offset": 4360784,
           "size": 562,
-          "match_percent": 2.662162
+          "match_percent": 5.27027
         },
         {
           "name": "_ZN35MechInputTouchGestureTrackingSystem8ReadDataER12GameObject_sRK16NuInputTouchData",
@@ -17089,7 +17089,7 @@
           "address": 5251328,
           "offset": 4361360,
           "size": 3216,
-          "match_percent": 0.681431
+          "match_percent": 0.715503
         },
         {
           "name": "_ZN35MechInputTouchGestureTrackingSystem7ProcessER12GameObject_sRK16NuInputTouchData",
@@ -17097,7 +17097,7 @@
           "address": 5254544,
           "offset": 4364576,
           "size": 84,
-          "match_percent": 12.857142
+          "match_percent": 20.0
         },
         {
           "name": "_ZN35MechInputTouchGestureTrackingSystem6UpdateEPK16NuInputTouchData",
@@ -17105,7 +17105,7 @@
           "address": 5254640,
           "offset": 4364672,
           "size": 74,
-          "match_percent": 14.347826
+          "match_percent": 18.26087
         }
       ]
     },
@@ -17961,7 +17961,7 @@
           "address": 4572016,
           "offset": 3682048,
           "size": 698,
-          "match_percent": 0.0
+          "match_percent": 87.09091
         },
         {
           "name": "_ZN11MechSystems4InitEv",
@@ -18033,7 +18033,7 @@
           "address": 4577600,
           "offset": 3687632,
           "size": 131,
-          "match_percent": 99.67391
+          "match_percent": 100.0
         },
         {
           "name": "_ZN11MechSystems21FindMoveToMarkerAtPosERK5VuVecb",
@@ -18049,7 +18049,7 @@
           "address": 4577968,
           "offset": 3688000,
           "size": 183,
-          "match_percent": 32.4375
+          "match_percent": 32.125
         },
         {
           "name": "_ZN11MechSystems13NewRadarPulseERK5VuVecb",
@@ -18057,7 +18057,7 @@
           "address": 4578160,
           "offset": 3688192,
           "size": 191,
-          "match_percent": 71.54902
+          "match_percent": 71.84314
         },
         {
           "name": "_ZN11MechSystems12NewTagButtonER12GameObject_sR11TouchHolder",
@@ -18065,7 +18065,7 @@
           "address": 4578352,
           "offset": 3688384,
           "size": 263,
-          "match_percent": 46.875
+          "match_percent": 47.5
         },
         {
           "name": "_ZN11MechSystems28RenderCurrentPlayerHighlightEv",
@@ -117899,7 +117899,6 @@
       "candidate_units": [
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
         "MechInputTouch/MechInputTouchSpeederChaseBikeController.cpp.o",
@@ -117959,7 +117958,6 @@
       "candidate_units": [
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
         "MechInputTouch/MechInputTouchSpeederChaseBikeController.cpp.o",
@@ -118019,7 +118017,6 @@
       "candidate_units": [
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
         "MechInputTouch/MechInputTouchSpeederChaseBikeController.cpp.o",
@@ -118095,7 +118092,6 @@
       "candidate_units": [
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
         "MechInputTouch/MechInputTouchSpeederChaseBikeController.cpp.o",
@@ -118188,7 +118184,6 @@
       "candidate_units": [
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
         "MechInputTouch/MechInputTouchSpeederChaseBikeController.cpp.o",
@@ -118264,7 +118259,6 @@
       "candidate_units": [
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
         "MechInputTouch/MechInputTouchSpeederChaseBikeController.cpp.o",
@@ -118340,7 +118334,6 @@
       "candidate_units": [
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
         "MechInputTouch/MechInputTouchSpeederChaseBikeController.cpp.o",
@@ -118416,7 +118409,6 @@
       "candidate_units": [
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
         "MechInputTouch/MechInputTouchSpeederChaseBikeController.cpp.o",
@@ -118492,7 +118484,6 @@
       "candidate_units": [
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
         "MechInputTouch/MechInputTouchSpeederChaseBikeController.cpp.o",
@@ -118564,11 +118555,10 @@
       "address": 2561288,
       "offset": 1671320,
       "size": 373,
-      "match_percent": 99.7,
+      "match_percent": 93.125,
       "candidate_units": [
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
         "MechInputTouch/MechInputTouchSpeederChaseBikeController.cpp.o",
@@ -118815,11 +118805,10 @@
       "address": 2689420,
       "offset": 1799452,
       "size": 373,
-      "match_percent": 93.125,
+      "match_percent": 99.7,
       "candidate_units": [
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
         "MechInputTouch/MechInputTouchSpeederChaseBikeController.cpp.o",
@@ -118895,7 +118884,6 @@
       "candidate_units": [
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
         "MechInputTouch/MechInputTouchSpeederChaseBikeController.cpp.o",
@@ -118971,7 +118959,6 @@
       "candidate_units": [
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
         "MechInputTouch/MechInputTouchSpeederChaseBikeController.cpp.o",
@@ -119096,7 +119083,6 @@
       "candidate_units": [
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
         "MechInputTouch/MechInputTouchSpeederChaseBikeController.cpp.o",
@@ -119184,7 +119170,6 @@
       "candidate_units": [
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
         "MechInputTouch/MechInputTouchSpeederChaseBikeController.cpp.o",
@@ -119361,7 +119346,6 @@
       "candidate_units": [
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
         "MechInputTouch/MechInputTouchSpeederChaseBikeController.cpp.o",
@@ -119489,7 +119473,6 @@
       "candidate_units": [
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
         "MechInputTouch/MechInputTouchSpeederChaseBikeController.cpp.o",
@@ -119617,7 +119600,6 @@
       "candidate_units": [
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
         "MechInputTouch/MechInputTouchSpeederChaseBikeController.cpp.o",
@@ -119693,7 +119675,6 @@
       "candidate_units": [
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
         "MechInputTouch/MechInputTouchSpeederChaseBikeController.cpp.o",
@@ -119769,7 +119750,6 @@
       "candidate_units": [
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
         "MechInputTouch/MechInputTouchSpeederChaseBikeController.cpp.o",
@@ -119845,7 +119825,6 @@
       "candidate_units": [
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
         "MechInputTouch/MechInputTouchSpeederChaseBikeController.cpp.o",
@@ -119947,7 +119926,6 @@
       "candidate_units": [
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
         "MechInputTouch/MechInputTouchSpeederChaseBikeController.cpp.o",
@@ -120023,7 +120001,6 @@
       "candidate_units": [
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
         "MechInputTouch/MechInputTouchSpeederChaseBikeController.cpp.o",
@@ -120110,7 +120087,6 @@
       "candidate_units": [
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
         "MechInputTouch/MechInputTouchSpeederChaseBikeController.cpp.o",
@@ -120186,7 +120162,6 @@
       "candidate_units": [
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
         "MechInputTouch/MechInputTouchSpeederChaseBikeController.cpp.o",
@@ -120275,7 +120250,6 @@
       "candidate_units": [
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
         "MechInputTouch/MechInputTouchSpeederChaseBikeController.cpp.o",
@@ -120351,7 +120325,6 @@
       "candidate_units": [
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
         "MechInputTouch/MechInputTouchSpeederChaseBikeController.cpp.o",
@@ -120444,7 +120417,6 @@
       "candidate_units": [
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
         "MechInputTouch/MechInputTouchSpeederChaseBikeController.cpp.o",
@@ -120520,7 +120492,6 @@
       "candidate_units": [
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
         "MechInputTouch/MechInputTouchSpeederChaseBikeController.cpp.o",
@@ -120596,7 +120567,6 @@
       "candidate_units": [
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
         "MechInputTouch/MechInputTouchSpeederChaseBikeController.cpp.o",
@@ -120672,7 +120642,6 @@
       "candidate_units": [
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
         "MechInputTouch/MechInputTouchSpeederChaseBikeController.cpp.o",
@@ -120811,7 +120780,6 @@
       "candidate_units": [
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
         "MechInputTouch/MechInputTouchSpeederChaseBikeController.cpp.o",
@@ -120887,7 +120855,6 @@
       "candidate_units": [
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
         "MechInputTouch/MechInputTouchSpeederChaseBikeController.cpp.o",
@@ -120963,7 +120930,6 @@
       "candidate_units": [
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
         "MechInputTouch/MechInputTouchSpeederChaseBikeController.cpp.o",
@@ -121370,7 +121336,6 @@
       "candidate_units": [
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
         "MechInputTouch/MechInputTouchSpeederChaseBikeController.cpp.o",
@@ -121515,7 +121480,6 @@
       "candidate_units": [
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
         "MechInputTouch/MechInputTouchSpeederChaseBikeController.cpp.o",
@@ -121647,7 +121611,6 @@
       "candidate_units": [
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
         "MechInputTouch/MechInputTouchSpeederChaseBikeController.cpp.o",
@@ -122099,7 +122062,6 @@
       "candidate_units": [
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
         "MechInputTouch/MechInputTouchSpeederChaseBikeController.cpp.o",
@@ -122175,7 +122137,6 @@
       "candidate_units": [
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
         "MechInputTouch/MechInputTouchSpeederChaseBikeController.cpp.o",

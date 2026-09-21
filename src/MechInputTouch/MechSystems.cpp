@@ -106,24 +106,9 @@ void MechSystems::Init() {
 void MechSystems::LoadPerm() {
     MechInputTouchVirtualConsoleController::LoadPerm();
 
-    struct MaterialLoad {
-        numtl_s **material;
-        const char *texture;
-        bool is_3d;
-    };
-    const MaterialLoad loads[] = {
-        {&location_ping_material, "STUFF/UIBUTTONS/UIBUTTONS_LOCATIONPING", true},
-        {&swipe_material, "STUFF/UIBUTTONS/UIBUTTONS_SWIPE", false},
-        {&tag_hold_background_material, "STUFF/UIBUTTONS/UIBUTTONS_TAGHOLDBGTEX", false},
-        {&radar_pulse_material, "STUFF/UIBUTTONS/UIBUTTONS_RIPPLE", false},
-    };
-
-    for (u32 i = 0; i < sizeof(loads) / sizeof(loads[0]); ++i) {
-        if (*loads[i].material != NULL) {
-            continue;
-        }
-        NUMTL *material = loads[i].is_3d ? NuMtlCreate3D(1) : NuMtlCreate(1);
-        *loads[i].material = material;
+    if (location_ping_material == NULL) {
+        location_ping_material = NuMtlCreate3D(1);
+        NUMTL *material = location_ping_material;
         material->diffuse_color.r = 0.0f;
         material->diffuse_color.g = 0.0f;
         material->diffuse_color.b = 0.0f;
@@ -134,7 +119,55 @@ void MechSystems::LoadPerm() {
         material->opacity = 0.0f;
         raw[0x42] = static_cast<u8>((raw[0x42] & 0x8c) | 0x12);
         material->tex_id = static_cast<i16>(
-            NuTexRead(const_cast<char *>(loads[i].texture), &permbuffer_ptr, permbuffer_end));
+            NuTexRead(const_cast<char *>("STUFF/UIBUTTONS/UIBUTTONS_LOCATIONPING"), &permbuffer_ptr, permbuffer_end));
+        NuMtlUpdate(location_ping_material);
+    }
+    if (swipe_material == NULL) {
+        swipe_material = NuMtlCreate(1);
+        NUMTL *material = swipe_material;
+        material->diffuse_color.r = 0.0f;
+        material->diffuse_color.g = 0.0f;
+        material->diffuse_color.b = 0.0f;
+        material->sort_pri = 0xff;
+        u8 *raw = reinterpret_cast<u8 *>(material);
+        raw[0x41] = static_cast<u8>((raw[0x41] & 0x0f) | 0x60);
+        raw[0x40] = static_cast<u8>((raw[0x40] & 0xf0) | 1);
+        material->opacity = 0.0f;
+        raw[0x42] = static_cast<u8>((raw[0x42] & 0x8c) | 0x12);
+        material->tex_id = static_cast<i16>(
+            NuTexRead(const_cast<char *>("STUFF/UIBUTTONS/UIBUTTONS_SWIPE"), &permbuffer_ptr, permbuffer_end));
+        NuMtlUpdate(swipe_material);
+    }
+    if (tag_hold_background_material == NULL) {
+        tag_hold_background_material = NuMtlCreate(1);
+        NUMTL *material = tag_hold_background_material;
+        material->diffuse_color.r = 0.0f;
+        material->diffuse_color.g = 0.0f;
+        material->diffuse_color.b = 0.0f;
+        material->sort_pri = 0xff;
+        u8 *raw = reinterpret_cast<u8 *>(material);
+        raw[0x41] = static_cast<u8>((raw[0x41] & 0x0f) | 0x60);
+        raw[0x40] = static_cast<u8>((raw[0x40] & 0xf0) | 1);
+        material->opacity = 0.0f;
+        raw[0x42] = static_cast<u8>((raw[0x42] & 0x8c) | 0x12);
+        material->tex_id = static_cast<i16>(
+            NuTexRead(const_cast<char *>("STUFF/UIBUTTONS/UIBUTTONS_TAGHOLDBGTEX"), &permbuffer_ptr, permbuffer_end));
+        NuMtlUpdate(tag_hold_background_material);
+    }
+    if (radar_pulse_material == NULL) {
+        radar_pulse_material = NuMtlCreate(1);
+        NUMTL *material = radar_pulse_material;
+        material->diffuse_color.r = 0.0f;
+        material->diffuse_color.g = 0.0f;
+        material->diffuse_color.b = 0.0f;
+        material->sort_pri = 0xff;
+        u8 *raw = reinterpret_cast<u8 *>(material);
+        raw[0x41] = static_cast<u8>((raw[0x41] & 0x0f) | 0x60);
+        raw[0x40] = static_cast<u8>((raw[0x40] & 0xf0) | 1);
+        material->opacity = 0.0f;
+        raw[0x42] = static_cast<u8>((raw[0x42] & 0x8c) | 0x12);
+        material->tex_id = static_cast<i16>(
+            NuTexRead(const_cast<char *>("STUFF/UIBUTTONS/UIBUTTONS_RIPPLE"), &permbuffer_ptr, permbuffer_end));
         NuMtlUpdate(material);
     }
 }
