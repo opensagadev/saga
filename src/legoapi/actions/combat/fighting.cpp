@@ -336,7 +336,7 @@ void SetForcedAttackOpponent(MechObjectInterface *target) {
     forceNextAttackOpponent = NuMechPtr<MechObjectInterface, 4>(target);
 }
 
-void Punch_Hit(GameObject_s *attacker, GameObject_s *target, float gap, float) {
+void Punch_Hit(GameObject_s *attacker, GameObject_s *target, float, float gap) {
     NUVEC *hit_position;
     attacker->context_flags |= 0x40;
 
@@ -365,10 +365,13 @@ void Punch_Hit(GameObject_s *attacker, GameObject_s *target, float gap, float) {
         }
 
         if (static_cast<i8>(target->apiobj.flags_low) < 0) {
-            if ((LEGOCONTEXT_PUNCH != -1 && target->character_context == LEGOCONTEXT_PUNCH) ||
-                (LEGOCONTEXT_JUMP != -1 && target->character_context == LEGOCONTEXT_JUMP &&
-                 attacker->action_movement_state == 3)) {
+            if (LEGOCONTEXT_PUNCH != -1 && target->character_context == LEGOCONTEXT_PUNCH) {
                 goto finish;
+            }
+            if (LEGOCONTEXT_JUMP != -1 && target->character_context == LEGOCONTEXT_JUMP) {
+                if (attacker->action_movement_state == 3) {
+                    goto finish;
+                }
             }
         }
 
