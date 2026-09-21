@@ -19,9 +19,12 @@
 #include "legoapi/menus/core/text.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/level.h"
+#include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nu3d/numtl.h"
+#include "nu2api/numath/nutrig.h"
 
 void RndrTexQuad(f32, f32, f32, f32, i32, numtl_s *, i32);
+i32 RndrUnfilledCircle(f32, f32, f32, f32, f32, i32, f32, f32, numtl_s *);
 
 extern i32 CutSceneWaiting;
 extern i32 editor_active;
@@ -30,6 +33,9 @@ extern i32 PANELOFF;
 extern i32 Paused;
 extern FadeSystem FadeSys;
 f32 TagButtonSize;
+f32 BorderWidth = 0.02f;
+f32 RadMult = 0.7f;
+f32 GiveUpTime = 4.0f;
 extern "C" {
     i32 procActive;
 }
@@ -41,6 +47,7 @@ void PlayerButton_OnHold_Callback(MechTouchUIElement &, TouchHolder &);
 void PlayerButton_OnLeave_Callback(MechTouchUIElement &, TouchHolder &);
 void MechTouchUIPauseButton_OnClick_Callback(MechTouchUIElement &, TouchHolder &);
 void MechTouchUIPartySelector_OnRelease_Callback(MechTouchUIElement &, TouchHolder &);
+void MechTouchUITagButton_OnClick_Callback(MechTouchUIElement &, TouchHolder &);
 extern "C" i32 NuIOS_IsSmallScreen(void);
 extern i16 id_YODA;
 i32 TagCode(GameObject_s *, GameObject_s *, i32, i32, i32);
@@ -404,12 +411,108 @@ MechTouchUITagButton::MechTouchUITagButton(GameObject_s &object, TouchHolder &ho
     timer = 1.0f;
 }
 
-void MechTouchUITagButton::Process(float) {
-    STUBBED();
+void MechTouchUITagButton::Process(float dt) {
+    MechObjectInterface *interface = target_object.Get();
+    GameObject_s *target = interface != NULL ? interface->GetCharacterObject() : NULL;
+    if (target == NULL) {
+        first_fade.value = 0.0f;
+        first_fade.to = 0.0f;
+        first_fade.elapsed = first_fade.duration;
+        fading_out = 1;
+        visible = 0;
+        return;
+    }
+    if (player == NULL) {
+        FadeOut();
+        return;
+    }
+
+    if (touch_holder->is_down == 0 && (second_fade.value < 1.0f || (enabled != 0 && touched != 0))) {
+        FadeOut();
+    }
+
+    if (!second_fade.IsActive() && on_click == NULL) {
+        on_click = MechTouchUITagButton_OnClick_Callback;
+        on_click(*this, *touch_holder);
+        FadeOut();
+    }
+
+    if (second_fade.IsActive()) {
+        timer = GiveUpTime - dt;
+        if (timer <= 0.0f) {
+            FadeOut();
+        }
+        if (on_click != NULL) {
+            field_0xbc -= dt;
+            if (field_0xbc < 0.0f) {
+                --tag_state;
+                field_0xbc = 0.75f;
+                timer_animation.from = 0.0f;
+                timer_animation.to = 32768.0f;
+                timer_animation.elapsed = 0.0f;
+                timer_animation.duration = 0.5f;
+                timer_animation.delay = 0.0f;
+                *timer_animation.target = 0.0f;
+            }
+        }
+    }
+
+    if (!TouchHacks::CanTagTo(*player, *target)) {
+        FadeOut();
+    }
+
+    enabled = touch_holder->is_down;
+    touched |= !touch_holder->is_down;
+    size_animation.Process(dt);
+    first_fade.Process(dt);
+    second_fade.Process(dt);
+    hover_animation.Process(dt);
+    timer_animation.Process(dt);
+    disabled = second_fade.value < 1.0f;
+
+    NUVEC world_position = {
+        target->apiobj.collision_position.x,
+        target->apiobj.position.y + target->character_top * target->apiobj.field_0xa8 + 0.1f,
+        target->apiobj.collision_position.z,
+    };
+    NUVEC screen_position;
+    NuCameraTransformScreenClip(&screen_position, &world_position, 1, NULL);
+
+    const f32 lower = TagButtonSize - 1.0f;
+    const f32 upper = 1.0f - TagButtonSize;
+    position.x = screen_position.x < lower ? lower : (screen_position.x > upper ? upper : screen_position.x);
+    position.y = screen_position.y < lower ? lower : (screen_position.y > upper ? upper : screen_position.y);
 }
 
 void MechTouchUITagButton::Render() {
-    STUBBED();
+    MechObjectInterface *interface = target_object.Get();
+    if (interface == NULL || WORLD == NULL) {
+        return;
+    }
+    GameObject_s *target = interface->GetCharacterObject();
+    if (target == NULL) {
+        return;
+    }
+
+    f32 circle_radius = radius_x * RadMult;
+    f32 icon_radius = TagButtonSize;
+    if (hovered != 0) {
+        circle_radius *= 1.3f;
+        icon_radius *= 1.3f;
+    } else {
+        f32 pulse = (1.0f + NuTrigTable[(static_cast<i32>(timer_animation.value) >> 1) & 0x7fff]) * 0.5f;
+        pulse = pulse * (tag_state > 0 ? 0.7f : 0.35f) + 0.9f;
+        circle_radius *= pulse;
+        icon_radius *= pulse;
+    }
+
+    DrawCharIcon(target->id, position.x, position.y, position.z, icon_radius, 0xa6, first_fade.value,
+                 hover_animation.value * first_fade.value, 1, NULL);
+
+    const i32 colour = (static_cast<i32>(first_fade.value * size_animation.value * 128.0f) << 24) | 0x808080;
+    RndrUnfilledCircle((position.x + 1.0f) * 0.5f, (1.0f - position.y) * 0.5f, circle_radius, BorderWidth,
+                       GetAspectRatio(), colour, second_fade.value, position.z + 0.002f,
+                       MechSystems::Get()->tag_hold_background_material);
 }
 
 MechTouchUITagButton::~MechTouchUITagButton() {
@@ -581,7 +684,8 @@ void MechTouchUIPlayerButton::Process(float) {
             }
             for (i32 slot = 0; slot < 8; ++slot) {
                 GameObject_s *target = Player[slot];
-                if (target != NULL && target->id == target_ids[target_index] && TouchHacks::CanTagTo(*player, *target)) {
+                if (target != NULL && target->id == target_ids[target_index] &&
+                    TouchHacks::CanTagTo(*player, *target)) {
                     field_0x144[target_index] = 1;
                     MechSystems::Get()->NewRadarPulse(position, false);
                     break;
@@ -674,8 +778,7 @@ void MechTouchUIPlayerButton::SetupTargetIds() {
                 if (!cheat_enabled) {
                     continue;
                 }
-            } else if ((game_character.flags_094[3] & 1) == 0 &&
-                       (collected == -1 || Collection_Got(id) == 0)) {
+            } else if ((game_character.flags_094[3] & 1) == 0 && (collected == -1 || Collection_Got(id) == 0)) {
                 continue;
             }
         }

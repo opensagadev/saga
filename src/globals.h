@@ -671,7 +671,7 @@ extern struct MISSIONSYS_s *MissionSys;
 extern i32 CHARSHADOWS_ON;
 extern i32 ShadowMode;
 extern f32 EShadY;
-extern TERRAIN_LAYER_s TerLayer[17];
+extern TERRAIN_LAYER_s TerLayer[];
 extern NUVEC ShadNorm;
 
 // Feature switches and interaction timing configured by each game variant.

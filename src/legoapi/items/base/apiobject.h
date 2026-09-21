@@ -1119,8 +1119,8 @@ typedef struct GameObject_s {
         u8 pad_e0e[2];
         u16 previous_boundary_angle; // 0xe0e, vehicle boundary steering hysteresis
     };
-    i16 previous_block_animation; // 0x0e10
-    u8 pad_e12[2];
+    i16 previous_block_animation;    // 0x0e10
+    i16 field_0xe12;                 // 0x0e12, previous dodge animation
     i16 held_movement_animation;     // 0x0e14
     i16 released_movement_animation; // 0x0e16
     i16 movement_lean_angle;         // 0x0e18

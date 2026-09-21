@@ -1,8 +1,10 @@
 #include "nu2api/nu3d/nuprim.h"
+#include "nu2api/nu3d/nuprim_internal.h"
 #include "nu2api/nu3d/nuvport.h"
 #include "nu2api/nu3d/android/nuptl_android.h"
 #include "nu2api/numath/nuvec.h"
 #include "nu2api/numath/nufloat.h"
+#include "nu2api/numath/nutrig.h"
 #include "legoapi/core/config/cheat.h"
 #include "legoapi/actions/character/streaks.h"
 #include "legoapi/actions/combat/hits.h"
@@ -809,8 +811,44 @@ void DebrisKillPlayers() {
     }
 }
 
-void RndrUnfilledCircle(float, float, float, float, float, i32, float, float, numtl_s *) {
-    STUBBED();
+i32 RndrUnfilledCircle(f32 x, f32 y, f32 radius, f32 border_width, f32 aspect, i32 colour, f32 progress, f32 z,
+                       numtl_s *material) {
+    NuPrim2DBegin(1, 7, material);
+
+    radius *= 0.5f;
+    const f32 inner_radius = radius - border_width * 0.5f;
+
+    NuRndrPrimSetColour(colour);
+    NuRndrPrimUV(0.0f, 1.0f);
+    NuPrim2DAddXYZ(static_cast<f32>(PS2_VREZ_W) * x, static_cast<f32>(PS2_VREZ_H) * (y - radius), z);
+
+    NuRndrPrimSetColour(colour);
+    NuRndrPrimUV(0.0f, 0.0f);
+    NuPrim2DAddXYZ(static_cast<f32>(PS2_VREZ_W) * x, static_cast<f32>(PS2_VREZ_H) * (y - inner_radius), z);
+
+    const i32 segment_count = static_cast<i32>(progress * 360.0f);
+    if (segment_count >= 0) {
+        f32 angle = 0.0f;
+        for (i32 segment = 0; segment <= segment_count; ++segment, angle += 0.017455555f) {
+            const f32 sine = NuSinf(angle);
+            const f32 negative_cosine = -NuCosf(angle);
+            const f32 outer_x = radius * sine * aspect + x;
+            const f32 outer_y = radius * negative_cosine + y;
+            const f32 inner_x = inner_radius * sine * aspect + x;
+            const f32 inner_y = inner_radius * negative_cosine + y;
+
+            NuRndrPrimSetColour(colour);
+            NuRndrPrimUV(0.0f, 1.0f);
+            NuPrim2DAddXYZ(static_cast<f32>(PS2_VREZ_W) * outer_x, static_cast<f32>(PS2_VREZ_H) * outer_y, z);
+
+            NuRndrPrimSetColour(colour);
+            NuRndrPrimUV(0.0f, 0.0f);
+            NuPrim2DAddXYZ(static_cast<f32>(PS2_VREZ_W) * inner_x, static_cast<f32>(PS2_VREZ_H) * inner_y, z);
+        }
+    }
+
+    NuPrim2DEnd();
+    return 1;
 }
 
 void DebrisProcessSpheres(uv1deb *data, float time, debinftype *effect, debkeydatatype_s *key, i32 finite) {
@@ -1228,7 +1266,7 @@ void DebrisProcessControlChunks(i32 panel_time) {
             --key->controlled_chunk_count;
             --key->allocated_chunk_count;
 
-            if (key->allocated_chunk_count == 0) {
+            if (key->allocated_chunk_count <= 0) {
                 key->particle_count = 0;
                 key->previous_particle_count = 0;
                 for (i32 slot = 0; slot < 8; ++slot) {
