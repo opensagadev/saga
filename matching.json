@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 51.477005,
+    "fuzzy_match_percent": 51.493206,
     "total_code": "4722419",
-    "matched_code": "452581",
-    "matched_code_percent": 9.583669,
+    "matched_code": "452632",
+    "matched_code_percent": 9.584749,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 5351,
-    "matched_functions_percent": 39.757782,
+    "matched_functions": 5352,
+    "matched_functions_percent": 39.765213,
     "total_units": 1
   },
   "text": {
@@ -23149,7 +23149,7 @@
           "address": 1600496,
           "offset": 710528,
           "size": 993,
-          "match_percent": 81.67932
+          "match_percent": 81.55274
         },
         {
           "name": "_ZL17Action_SpinOnSpotP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -23197,7 +23197,7 @@
           "address": 1604496,
           "offset": 714528,
           "size": 580,
-          "match_percent": 86.388885
+          "match_percent": 86.234566
         },
         {
           "name": "_ZL18Action_CreateRiderP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -23813,7 +23813,7 @@
           "address": 1649952,
           "offset": 759984,
           "size": 51,
-          "match_percent": 99.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZL18Action_CameraShakeP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -24381,7 +24381,15 @@
           "address": 1713520,
           "offset": 823552,
           "size": 6967,
-          "match_percent": 76.17874
+          "match_percent": 76.2381
+        },
+        {
+          "name": "_Z23GameAIScriptAddLevelSfxP11WORLDINFO_sP11nulisthdr_s",
+          "demangled_name": "GameAIScriptAddLevelSfx(WORLDINFO_s*, nulisthdr_s*)",
+          "address": 1720496,
+          "offset": 830528,
+          "size": 337,
+          "match_percent": 90.71875
         },
         {
           "name": "_ZL15Condition_TimerP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
@@ -25213,7 +25221,7 @@
           "address": 4123152,
           "offset": 3233184,
           "size": 178,
-          "match_percent": 96.73913
+          "match_percent": 96.95652
         },
         {
           "name": "AISysFindRoute",
@@ -25365,7 +25373,7 @@
           "address": 4168000,
           "offset": 3278032,
           "size": 131,
-          "match_percent": 90.35
+          "match_percent": 89.975
         },
         {
           "name": "CreateAIMessageSys",
@@ -25389,7 +25397,7 @@
           "address": 4168464,
           "offset": 3278496,
           "size": 267,
-          "match_percent": 91.53333
+          "match_percent": 88.21333
         },
         {
           "name": "GetAIMessage",
@@ -25421,7 +25429,7 @@
           "address": 4168976,
           "offset": 3279008,
           "size": 288,
-          "match_percent": 96.76471
+          "match_percent": 96.94118
         },
         {
           "name": "FindLocalAIMessage",
@@ -39882,14 +39890,6 @@
           "offset": 666112,
           "size": 237,
           "match_percent": 19.550724
-        },
-        {
-          "name": "_Z23GameAIScriptAddLevelSfxP11WORLDINFO_sP11nulisthdr_s",
-          "demangled_name": "GameAIScriptAddLevelSfx(WORLDINFO_s*, nulisthdr_s*)",
-          "address": 1720496,
-          "offset": 830528,
-          "size": 337,
-          "match_percent": 0.0
         },
         {
           "name": "AISysLoad",
@@ -60806,7 +60806,7 @@
           "address": 1935216,
           "offset": 1045248,
           "size": 329,
-          "match_percent": 0.0
+          "match_percent": 42.677082
         },
         {
           "name": "_Z28Batarang_GetObjectFromCharIDi",
@@ -69935,7 +69935,7 @@
           "address": 920560,
           "offset": 30592,
           "size": 93,
-          "match_percent": 29.411764
+          "match_percent": 99.35294
         },
         {
           "name": "_ZL14Movie_CallBackv",
@@ -69943,7 +69943,7 @@
           "address": 4818144,
           "offset": 3928176,
           "size": 96,
-          "match_percent": 15.0
+          "match_percent": 19.09091
         },
         {
           "name": "_Z20Movies_ConfigureListPcP9variptr_uS1_",
@@ -69951,7 +69951,7 @@
           "address": 4818240,
           "offset": 3928272,
           "size": 275,
-          "match_percent": 0.0
+          "match_percent": 90.75949
         },
         {
           "name": "_Z10Movie_PlayPcP9variptr_uS1_fPFivEf",
@@ -69959,7 +69959,7 @@
           "address": 4818528,
           "offset": 3928560,
           "size": 481,
-          "match_percent": 3.478261
+          "match_percent": 4.695652
         }
       ]
     },
@@ -117923,7 +117923,6 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -117984,7 +117983,6 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -118045,7 +118043,6 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -118122,7 +118119,6 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -118216,7 +118212,6 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -118293,7 +118288,6 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -118370,7 +118364,6 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -118447,7 +118440,6 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -118524,7 +118516,6 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -118601,7 +118592,6 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -118853,7 +118843,6 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -118930,7 +118919,6 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -119007,7 +118995,6 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -119133,7 +119120,6 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -119222,7 +119208,6 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -119400,7 +119385,6 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -119529,7 +119513,6 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -119658,7 +119641,6 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -119735,7 +119717,6 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -119812,7 +119793,6 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -119889,7 +119869,6 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -119992,7 +119971,6 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -120069,7 +120047,6 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -120157,7 +120134,6 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -120234,7 +120210,6 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -120324,7 +120299,6 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -120401,7 +120375,6 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -120495,7 +120468,6 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -120572,7 +120544,6 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -120649,7 +120620,6 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -120726,7 +120696,6 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -120866,7 +120835,6 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -120943,7 +120911,6 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -121020,7 +120987,6 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -121428,7 +121394,6 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -121574,7 +121539,6 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -121707,7 +121671,6 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -122160,7 +122123,6 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -122237,7 +122199,6 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",

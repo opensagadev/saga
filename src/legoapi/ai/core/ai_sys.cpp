@@ -50,33 +50,6 @@ void *AIPathCnxHelperSysCreate(VARIPTR *buf, VARIPTR *buf_end, i32 count) {
     }
     return system;
 }
-void GameAIScriptAddLevelSfx(WORLDINFO *world, NULISTHDR *scripts) {
-    if (scripts == NULL) {
-        return;
-    }
-    for (NULISTLNK *script_node = NuLinkedListGetHead(scripts); script_node != NULL;
-         script_node = NuLinkedListGetNext(scripts, script_node)) {
-        AISCRIPT *script = reinterpret_cast<AISCRIPT *>(script_node);
-        for (NULISTLNK *state_node = NuLinkedListGetHead(&script->states); state_node != NULL;
-             state_node = NuLinkedListGetNext(&script->states, state_node)) {
-            AISTATE *state = reinterpret_cast<AISTATE *>(state_node);
-            for (NULISTLNK *action_node = NuLinkedListGetHead(&state->actions); action_node != NULL;
-                 action_node = NuLinkedListGetNext(&state->actions, action_node)) {
-                AIACTION *action = reinterpret_cast<AIACTION *>(action_node);
-                if (action->def == NULL || action->def->name == NULL ||
-                    NuStrICmp(action->def->name, const_cast<char *>("PlaySfx")) != 0 || action->param_count <= 0) {
-                    continue;
-                }
-                for (i32 i = 0; i < action->param_count; ++i) {
-                    char *name = NuStrIStr(action->params[i], const_cast<char *>("name="));
-                    if (name != NULL) {
-                        AddLevSfx(world, NULL, name + 5, -1);
-                    }
-                }
-            }
-        }
-    }
-}
 void *CreateClimbObjectSys(VARIPTR *buf, VARIPTR *buf_end, i32 count) {
     if (count == 0)
         return NULL;

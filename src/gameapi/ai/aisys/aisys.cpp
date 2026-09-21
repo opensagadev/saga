@@ -59,6 +59,7 @@
 extern i32 Hub_GetRandomCharType();
 extern void *perm_debrissys;
 void SetHeadTarget(GameObject_s *object, NUVEC *position, i8 priority, f32 time, f32 minimum_delay, f32 maximum_delay);
+void AddLevSfx(WORLDINFO_s *world, nuvec_s *position, char *name, i32 sfx);
 void ResetForceBack();
 void AlertSurroundingCreatures(GameObject_s *object, NUVEC *position);
 void LetGoOfBalloon(GameObject_s *object);
@@ -858,6 +859,33 @@ __used__ static i32 Action_PlaySfx(AISYS *sys, AISCRIPTPROCESS *processor, AIPAC
         PlayRepeatSfx(name, -1, start_delay, play_count, repeat_delay, position_ptr);
     }
     return 1;
+}
+
+void GameAIScriptAddLevelSfx(WORLDINFO *world, NULISTHDR *scripts) {
+    if (scripts == NULL) {
+        return;
+    }
+    for (NULISTLNK *script_node = NuLinkedListGetHead(scripts); script_node != NULL;
+         script_node = NuLinkedListGetNext(scripts, script_node)) {
+        AISCRIPT *script = reinterpret_cast<AISCRIPT *>(script_node);
+        for (NULISTLNK *state_node = NuLinkedListGetHead(&script->states); state_node != NULL;
+             state_node = NuLinkedListGetNext(&script->states, state_node)) {
+            AISTATE *state = reinterpret_cast<AISTATE *>(state_node);
+            for (NULISTLNK *action_node = NuLinkedListGetHead(&state->actions); action_node != NULL;
+                 action_node = NuLinkedListGetNext(&state->actions, action_node)) {
+                AIACTION *action = reinterpret_cast<AIACTION *>(action_node);
+                if (action->def == NULL || action->def->eval_fn != Action_PlaySfx || action->param_count < 1) {
+                    continue;
+                }
+                for (i32 index = 0; index < action->param_count; ++index) {
+                    char *name = NuStrIStr(action->params[index], const_cast<char *>("name="));
+                    if (name != NULL) {
+                        AddLevSfx(world, NULL, name + 5, -1);
+                    }
+                }
+            }
+        }
+    }
 }
 
 __used__ static i32 Action_SetBoss(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params, i32 param_4,
@@ -2916,8 +2944,7 @@ __used__ static i32 Action_ProbeDroid(AISYS *sys, AISCRIPTPROCESS *processor, AI
         object->cable->source = NULL;
         object->cable = NULL;
     }
-    AIMoveInstruction(packet, NULL, 0.0f, NULL, AIPACKET_MOVEMENT_WANDER,
-                      packet->movement_instruction_parameter);
+    AIMoveInstruction(packet, NULL, 0.0f, NULL, AIPACKET_MOVEMENT_WANDER, packet->movement_instruction_parameter);
     char *engage_params[] = {"goalrange 10", "firerange 15", "fireinterval 1.5"};
     Action_EngageOpponent(sys, processor, packet, engage_params, 3, param_5, param_6);
     return 0;
@@ -4492,7 +4519,7 @@ __used__ static i32 Action_AddPartDebris(AISYS *sys, AISCRIPTPROCESS *processor,
 }
 
 __used__ static i32 Action_CanPullLevers(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
-                                        i32 param_4, i32 param_5, f32 param_6) {
+                                         i32 param_4, i32 param_5, f32 param_6) {
     GameObject_s *object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
     if (object != NULL) {
         object->field_0xefe |= 0x80;
@@ -5303,7 +5330,7 @@ __used__ static i32 Action_AddMiscPickups(AISYS *sys, AISCRIPTPROCESS *processor
 }
 
 __used__ static i32 Action_AlertCreatures(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
-                                         i32 param_4, i32 param_5, f32 param_6) {
+                                          i32 param_4, i32 param_5, f32 param_6) {
     if (param_5 != 0) {
         GameObject_s *object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
         for (i32 index = 0; index < param_4; ++index) {
@@ -5433,7 +5460,7 @@ __used__ static i32 Action_AttackOpponent(AISYS *sys, AISCRIPTPROCESS *processor
 }
 
 __used__ static i32 Action_BreakFormation(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
-                                         i32 param_4, i32 param_5, f32 param_6) {
+                                          i32 param_4, i32 param_5, f32 param_6) {
     if (packet != NULL && packet->group != NULL) {
         packet->group->is_in_formation = 0;
     }
@@ -5950,7 +5977,7 @@ __used__ static i32 Action_PrefersPlayers(AISYS *sys, AISCRIPTPROCESS *processor
 }
 
 __used__ static i32 Action_PressTagButton(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
-                                         i32 param_4, i32 param_5, f32 param_6) {
+                                          i32 param_4, i32 param_5, f32 param_6) {
     GameObject_s *object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
     if (object != NULL) {
         object->pad_gamepad->buttons_pressed |= GAMEPAD_TAG;
@@ -5959,7 +5986,7 @@ __used__ static i32 Action_PressTagButton(AISYS *sys, AISCRIPTPROCESS *processor
 }
 
 __used__ static i32 Action_SetCanTakeOver(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
-                                         i32 param_4, i32 param_5, f32 param_6) {
+                                          i32 param_4, i32 param_5, f32 param_6) {
     if (param_5 != 0 && packet != NULL && packet->owner != NULL && packet->owner->apiobj.objptr != NULL) {
         GameObject_s *object = packet->owner->apiobj.objptr;
         for (i32 index = 0; index < param_4; ++index) {
@@ -7525,7 +7552,7 @@ __used__ static i32 Action_SetHearDistance(AISYS *sys, AISCRIPTPROCESS *processo
 }
 
 __used__ static i32 Action_SetHintComplete(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
-                                          i32 param_4, i32 param_5, f32 param_6) {
+                                           i32 param_4, i32 param_5, f32 param_6) {
     (void)sys;
     (void)processor;
     (void)packet;
