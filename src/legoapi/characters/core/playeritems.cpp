@@ -9,6 +9,7 @@
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/items/base/apiobject.h"
 #include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/render/fx/parts.h"
 #include "legoapi/legoapi_types.h"
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/nucore/nuanim3.h"
@@ -28,8 +29,36 @@ extern i32 adaptivedifficulty[3];
 
 extern i8 (*adtab)[4];
 
-void LoseHelmet(GameObject_s *, i32, i32) {
-    STUBBED();
+void LoseHelmet(GameObject_s *object, i32, i32) {
+    if (object->field_0x108e == 0) {
+        return;
+    }
+
+    const i32 locator = object->apiobj.character_data->player_config->helmet_locator;
+    if (locator != -1 && object->apiobj.character_model->points_of_interest[locator] != NULL) {
+        NUVEC velocity;
+        velocity.z = 0.0f;
+        velocity.x = 0.0f;
+        velocity.y = 1.0f;
+        NuVecRotateZ(&velocity, &velocity, qrand());
+        NuVecRotateX(&velocity, &velocity, qrand());
+
+        ADDPART_s params = Default_ADDPART;
+        params.matrix = &object->joint_matrices[locator];
+        params.velocity = &velocity;
+        params.field_14 = 0.1f;
+        params.field_18 = 0.1f;
+        params.gravity = -5.0f;
+        params.special = &WORLD->lev_objs[object->field_0x108e + 0xf9].special;
+        params.flags = 0x90;
+        params.time_step = FRAMETIME;
+        params.stop_fn = PartStop_Flickerer;
+        params.draw_fn = PartDraw_Flickerer;
+        params.field_3c = PartImpact_Brick;
+        params.field_c4 = 1;
+        AddPart(&params);
+    }
+    object->field_0x108e = 0;
 }
 
 void SetWeaponIn(GameObject_s *object) {

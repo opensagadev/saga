@@ -465,7 +465,9 @@ struct PLAYERCHARACTERCONFIG_s {
     i8 collision_origin_joint; // 0x10d; alternate animated collision-origin joint
     u8 unknown_10e;
     i8 model_origin_joint; // 0x10f; primary animated model-origin joint
-    u8 unknown_110[0x117 - 0x110];
+    u8 unknown_110;
+    i8 helmet_locator; // 0x111
+    u8 unknown_112[0x117 - 0x112];
     u8 variant;
 };
 
@@ -489,6 +491,8 @@ DECOMP_ASSERT(offsetof(PLAYERCHARACTERCONFIG_s, collision_origin_joint) == 0x10d
               "PLAYERCHARACTERCONFIG collision-origin joint offset");
 DECOMP_ASSERT(offsetof(PLAYERCHARACTERCONFIG_s, model_origin_joint) == 0x10f,
               "PLAYERCHARACTERCONFIG model-origin joint offset");
+DECOMP_ASSERT(offsetof(PLAYERCHARACTERCONFIG_s, helmet_locator) == 0x111,
+              "PLAYERCHARACTERCONFIG helmet locator offset");
 
 struct characterdata_s { /* PlaceHolder Structure */
     union {
@@ -557,8 +561,8 @@ extern "C" void APITransparentCharDraw(nuhgobj_s *object, NUMTX *world_matrix, i
 extern "C" i32 APIDrawCharacterModel(CHARACTERMODEL_s *model, CHARACTERDATA *character_data, ANIMPACKET_s *animation,
                                      numtx_s *matrix, numtx_s *secondary_matrix, numtx_s *reflection_matrix,
                                      NUVEC *locator_positions, numtx_s *auxiliary_matrix, GameObject_s *object,
-                                     u32 flags, NUJOINTANIM_s *joint_overrides, i32 joint_override_count,
-                                     i32 paused, f32 frame_time, numtx_s *output_matrices,
+                                     u32 flags, NUJOINTANIM_s *joint_overrides, i32 joint_override_count, i32 paused,
+                                     f32 frame_time, numtx_s *output_matrices,
                                      void (*footprint_callback)(void *, GameObject_s *, i32, i32),
                                      APIDEBRISSYS_s *debris_sys);
 
