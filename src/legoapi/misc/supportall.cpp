@@ -1026,6 +1026,7 @@ extern "C" {
 }
 void DebrisGetControlStackLock(void);
 void DebrisReleaseControlStackLock(void);
+void RemoveAnyChunkControls(i32 *);
 void RemoveChunkFromRenderStack(particlechunkrendertype_s *, particlechunkrendertype_s **);
 
 void DebFreeChunksInstantly(i32 *handle) {
@@ -1037,6 +1038,7 @@ void DebFreeChunksInstantly(i32 *handle) {
 
     DebrisGetControlStackLock();
     for (i32 i = 0; i < key->allocated_chunk_count; ++i) {
+        RemoveAnyChunkControls(reinterpret_cast<i32 *>(key->particle_chunks[i]));
         debris_chunk_control_s *control = freechunkcontrols[freechunkcontrolsptr++];
         control->particle_chunk = key->particle_chunks[i];
         control->active = effect->particle_type == 7 ? 9 : 2;

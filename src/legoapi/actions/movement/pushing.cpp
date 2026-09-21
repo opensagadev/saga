@@ -22,18 +22,15 @@ struct nunativegscene_s;
 struct SHOPINPUT;
 
 void ReleasePush(GameObject_s *object) {
-    if (object == NULL || object->character_context == -1 ||
-        (CInfo[object->character_context].flags & 0x20000000) == 0) {
-        return;
+    const i32 context = object->character_context;
+    if ((CInfo[context].flags & 0x2000) != 0) {
+        if (LEGOCONTEXT_PUSHOBSTACLE != -1 && LEGOCONTEXT_PUSHOBSTACLE == context) {
+            GameCam_Blend(NULL, 0.5f, 0.0f, 1);
+        }
+        object->field_0xdc4 = 0.0f;
+        object->character_context = -1;
     }
-    if (LEGOCONTEXT_PUSHOBSTACLE != -1 && object->character_context == LEGOCONTEXT_PUSHOBSTACLE) {
-        GameCam_Blend(NULL, 0.5f, 0.0f, 1);
-    }
-    object->field_0xdc4 = 0.0f;
-    object->field_0x788 = NULL;
-    object->character_context = -1;
 }
-
 
 void SetPushAngle(GameObject_s *object) {
     u16 angle;
@@ -224,7 +221,8 @@ void FindForcePushTarget(GameObject_s *object, i32 activate, i32 target_filter) 
             const f32 dy = candidate->apiobj.collision_position.y - object->apiobj.collision_position.y;
             const f32 dz = candidate->apiobj.collision_position.z - object->apiobj.collision_position.z;
             const f32 distance = dx * dx + dy * dy + dz * dz;
-            if (distance >= best_distance || dx * object->facing_direction.x + dz * object->facing_direction.z <= 0.0f) {
+            if (distance >= best_distance ||
+                dx * object->facing_direction.x + dz * object->facing_direction.z <= 0.0f) {
                 continue;
             }
             best = candidate;
@@ -380,7 +378,7 @@ void PushCode(GameObject_s *object, i32 allow_push) {
     const bool against_wall = Pushing(object, &wall_angle, &surface, &angle_difference) != 0;
     if (against_wall) {
         wall_angle += 0x8000;
-        object->field_0xdc4 += MAX(FRAMETIME, 1.0f / 30.0f);
+        object->field_0xdc4 += 2.0f * MAX(FRAMETIME, 1.0f / 30.0f);
         if (object->field_0xdc4 > 0.5f) {
             object->field_0xdc4 = 0.5f;
         }
@@ -404,17 +402,16 @@ void PushCode(GameObject_s *object, i32 allow_push) {
         return;
     }
 
-    if (!in_push_context && object->field_0xdc4 >= 0.2f) {
-        object->character_context = LEGOCONTEXT_PUSH != -1 ? LEGOCONTEXT_PUSH : LEGOCONTEXT_PUSHOBSTACLE;
-        object->context_animation = LEGOACT_PUSH;
-        object->apiobj.movement_facing_angle = wall_angle;
-        object->apiobj.facing_angle = wall_angle;
-        FastWeaponIn(object, 0);
-        PlayGruntSfx(object);
-    }
-    if (object->character_context == LEGOCONTEXT_PUSH) {
-        object->target_velocity.x = 0.0f;
-        object->target_velocity.z = 0.0f;
-        object->apiobj.movement_facing_angle = wall_angle;
+    if (!in_push_context && object->field_0xdc4 >= 0.25f && surface != 30 && surface != 31 &&
+        (object->field_0xf02 & 2) == 0 &&
+        (allow_push == 0 ||
+         (LEGOACT_PUSH != -1 && object->apiobj.character_model->model_data_b[LEGOACT_PUSH] != NULL))) {
+        object->character_context = LEGOCONTEXT_PUSH;
+        if (object->character_context != -1) {
+            object->context_animation = LEGOACT_PUSH;
+            SetPushAngle(object);
+            FastWeaponIn(object, 0);
+            PlayGruntSfx(object);
+        }
     }
 }
