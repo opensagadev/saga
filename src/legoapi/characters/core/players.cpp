@@ -686,9 +686,36 @@ void ChatterSfx(GameObject_s *g, i32 a, float b) {
 }
 
 void DrawOffsetCode(GameObject_s *obj, i32 param) {
-    STUBBED();
-    (void)obj;
-    (void)param;
+    NUVEC_ALIGNED16 target = v000;
+    u8 *bytes = reinterpret_cast<u8 *>(obj);
+    void *route = *reinterpret_cast<void **>(bytes + 0xcac);
+    if (route != NULL) {
+        const u16 flags = *reinterpret_cast<u16 *>(static_cast<u8 *>(route) + 0xc);
+        if ((flags & 0x10) != 0) {
+            target.y = 0.0076f;
+        } else if ((flags & 0x40) != 0) {
+            target.y = MAGNETOFFSET;
+        }
+    }
+    if ((obj->field_0x7a5 == 0x44 && static_cast<u16>(obj->context_animation - 5) >= 2) ||
+        (obj->movement_context_state & 0xffff00) == 0x54300) {
+        target = obj->context_position_offset;
+    }
+    if (param == 0) {
+        if (obj->render_offset.x == target.x && obj->render_offset.y == target.y && obj->render_offset.z == target.z) {
+            return;
+        }
+        NUVEC delta;
+        const f32 distance = NuVecDist(&target, &obj->render_offset, &delta);
+        const f32 step = 0.4f * FRAMETIME;
+        if (distance > step) {
+            NuVecNorm(&delta, &delta);
+            NuVecScale(&delta, &delta, step);
+            NuVecAdd(&obj->render_offset, &obj->render_offset, &delta);
+            return;
+        }
+    }
+    obj->render_offset = target;
 }
 
 float GetHoverPosY(GameObject_s *obj) {
