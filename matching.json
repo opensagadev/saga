@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 51.611683,
+    "fuzzy_match_percent": 51.613613,
     "total_code": "4722419",
-    "matched_code": "453120",
-    "matched_code_percent": 9.595082,
+    "matched_code": "453007",
+    "matched_code_percent": 9.5926895,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 5356,
-    "matched_functions_percent": 39.794933,
+    "matched_functions": 5355,
+    "matched_functions_percent": 39.787502,
     "total_units": 1
   },
   "text": {
@@ -45102,14 +45102,6 @@
           "match_percent": 99.96
         },
         {
-          "name": "_ZL24Player_ClearContext_GameP12GameObject_si",
-          "demangled_name": "Player_ClearContext_Game(GameObject_s*, int)",
-          "address": 1157600,
-          "offset": 267632,
-          "size": 112,
-          "match_percent": 16.153847
-        },
-        {
           "name": "_Z13PlayerTakeHitP12GameObject_sS0_",
           "demangled_name": "PlayerTakeHit(GameObject_s*, GameObject_s*)",
           "address": 1263152,
@@ -86307,6 +86299,14 @@
           "match_percent": 100.0
         },
         {
+          "name": "_ZL24Player_ClearContext_GameP12GameObject_si",
+          "demangled_name": "Player_ClearContext_Game(GameObject_s*, int)",
+          "address": 1157600,
+          "offset": 267632,
+          "size": 112,
+          "match_percent": 99.42308
+        },
+        {
           "name": "_Z15GizmoBlowUp_SfxP13GIZMOBLOWUP_sP7nuvec_s",
           "demangled_name": "GizmoBlowUp_Sfx(GIZMOBLOWUP_s*, nuvec_s*)",
           "address": 1157712,
@@ -86360,7 +86360,7 @@
           "address": 1160544,
           "offset": 270576,
           "size": 326,
-          "match_percent": 99.85714
+          "match_percent": 99.66234
         },
         {
           "name": "_ZL13Punch_HitHoldP12GameObject_sS0_",
@@ -86368,7 +86368,7 @@
           "address": 1160880,
           "offset": 270912,
           "size": 113,
-          "match_percent": 100.0
+          "match_percent": 99.51613
         },
         {
           "name": "_ZL19Punch_GetDamage_LSWP12GameObject_sS0_",
@@ -86384,7 +86384,7 @@
           "address": 1161344,
           "offset": 271376,
           "size": 1077,
-          "match_percent": 88.045265
+          "match_percent": 87.921814
         },
         {
           "name": "_Z19InitGameAfterConfigv",

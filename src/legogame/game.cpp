@@ -73,6 +73,11 @@ f32 minikittime;
 extern f32 (*Hint_AlphaTargetFn)();
 extern i32 (*Hub_PanelBusyFn)();
 i32 Hub_PanelBusy();
+extern void (*Player_ClearContextFn)(GameObject_s *, i32);
+void ReleaseForce(GameObject_s *object, i32 mode);
+void ReleaseEat(GameObject_s *object);
+void ReleasePush(GameObject_s *object);
+void ReleaseTakeOver(GameObject_s *object, i32 immediate);
 static f32 Hint_AlphaTarget() {
     if (minikittime > 0.0f && ChallengeMode == 0)
         return 0.0f;
@@ -90,6 +95,15 @@ static i32 GizBuildit_AutoBuildPos_Game(void *context, NUVEC *position, NUVEC *r
     if (angle != NULL)
         *angle = attracto->angle;
     return 1;
+}
+
+static void Player_ClearContext_Game(GameObject_s *object, i32 release_takeover) {
+    ReleaseForce(object, 0);
+    ReleaseEat(object);
+    ReleaseBuildIt(object, 0);
+    ReleasePush(object);
+    if (release_takeover != 0)
+        ReleaseTakeOver(object, 1);
 }
 
 static i32 GizBuildIt_CanStartBuildingFn_Game(GIZBUILDIT_s *buildit, GameObject_s *) {
@@ -1246,7 +1260,7 @@ void InitGameAfterConfig(void) {
     CanGlideFn = CanGlide_Game;
     UsingExtraActionsFn = UsingExtraActions_Game;
     CanStartHoldFn = CanStartHold_Game;
-    //  Player_ClearContextFn = Player_ClearContext_Game;
+    Player_ClearContextFn = Player_ClearContext_Game;
     //  LEGOTHINGSSCENE_TER_SPINBASE = 0;
     //  LEGOTHINGSSCENE_TER_SPINARM = 1;
     GizBuildit_AutoBuildPosFn = GizBuildit_AutoBuildPos_Game;

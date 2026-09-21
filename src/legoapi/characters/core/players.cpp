@@ -1094,10 +1094,6 @@ void PlayerButton_OnClick_Callback_NextButton(MechTouchUIElement &element, Touch
     }
 }
 
-static __used__ void Player_ClearContext_Game(GameObject_s *, i32) {
-    STUBBED();
-}
-
 u32 (*CanPushObstaclesFn)(GameObject_s *) = NULL;
 
 i32 KillPlayer(GameObject_s *object, i32 reason, i32 ignore_spawn_protection, nuvec_s *) {
