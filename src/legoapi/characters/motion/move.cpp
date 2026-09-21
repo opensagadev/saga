@@ -474,6 +474,8 @@ i32 MovePlayer_CIRCLE(GameObject_s *object);
 i32 CircleLevel(LEVELDATA_s *level);
 f32 ForceTowardsMid(GameObject_s *object);
 void MoveInactiveVehicle(GameObject_s *object, i32 mode, GameObject_s **vehicle);
+i32 UnderPlayerControl(GameObject_s *object);
+void StartTurn(GameObject_s *object);
 void KeepVehicleOnScreen(GameObject_s *object, i32 sides, i32 top, i32 bottom);
 i32 MovePlayer_GUNSHIPIN(GameObject_s *object);
 i32 MovePlayer_POD(GameObject_s *object);
@@ -8183,8 +8185,178 @@ f32 SeekValF(f32 current, f32 target, f32 rate) {
     return current + (target - current) * blend;
 }
 
-void TurnCode(GameObject_s *, i32, GAMEPAD_s *) {
-    STUBBED();
+void TurnCode(GameObject_s *object, i32 mode, GAMEPAD_s *pad) {
+    if (WORLD->area != NULL && (WORLD->area == DOGFIGHT_ADATA || WORLD->area == PODSPRINT_ADATA)) {
+        return;
+    }
+
+    if (object->character_context != 0x2a) {
+        if (object->character_context != 0x36) {
+            if (object->character_context != -1) {
+                return;
+            }
+        }
+
+        u8 player_active = 0;
+        GameObject_s *other = NULL;
+        if (static_cast<i8>(object->apiobj.flags_low) < 0) {
+            other = GetOtherActivePlayer(object);
+            player_active = object->apiobj.flags_low & 0x80;
+        }
+
+        bool finish_turn = false;
+        if (object->character_context == 0x36) {
+            finish_turn = static_cast<u16>(object->secondary_lean_angle) <= 0x4000;
+        }
+
+        if (player_active != 0 && object->delayed_turn_timer <= 0.0f && object->in_narrow_socket) {
+            if ((object->character_context != 0x36 || finish_turn) && other != NULL) {
+                if (other->in_narrow_socket) {
+                    const i32 forwards = GoingForwardsAlongNarrowSock(object);
+                    const i32 other_forwards = GoingForwardsAlongNarrowSock(other);
+                    if (forwards != other_forwards) {
+                        if (other->character_context == 0x2a &&
+                            0.75f * other->airborne_action_duration <= other->context_animation_timer) {
+                            return;
+                        }
+                        StartTurn(object);
+                        return;
+                    }
+                    if (!object->in_narrow_socket) {
+                        other = NULL;
+                    }
+                }
+                if (other != NULL &&
+                    (other->character_context == 0x36 || other->character_context == 0x2a ||
+                     other->character_context == 0x3a)) {
+                    return;
+                }
+            } else if (other != NULL &&
+                       (other->character_context == 0x36 || other->character_context == 0x2a ||
+                        other->character_context == 0x3a)) {
+                return;
+            }
+        } else if (object->in_narrow_socket && other != NULL &&
+                   (other->character_context == 0x36 || other->character_context == 0x2a ||
+                    other->character_context == 0x3a)) {
+            return;
+        }
+
+        if ((object->field_0xe24 & 2) == 0 && (mode == 0 || object->character_context != -1)) {
+            if ((object->field_0xeff & 0x20) == 0 && UnderPlayerControl(object) == 0) {
+                return;
+            }
+            if (!(pad->input_magnitude > 0.0f)) {
+                return;
+            }
+
+            const u16 input_angle = GamePad_InputAngle(object, pad);
+            if (!object->in_narrow_socket) {
+                if ((object == Player[0] || object == Player[1]) && fabsf(object->pad_gamepad->waggle_magnitude) > 0.25f) {
+                    return;
+                }
+                if (abs(RotDiff(object->apiobj.field_0x276, input_angle)) <= 0x71c6) {
+                    return;
+                }
+                if (object->character_context == 0x36) {
+                    object->field_0xe24 |= 4;
+                    if (!finish_turn) {
+                        return;
+                    }
+                }
+                if (static_cast<i8>(object->apiobj.flags_low) < 0) {
+                    Hint_SetComplete(0x617);
+                }
+            } else {
+                bool turn = false;
+                if (object->delayed_turn_timer <= 0.0f) {
+                    if (abs(RotDiff(object->yrot, object->apiobj.movement_facing_angle)) <= 0x4000) {
+                        turn = abs(RotDiff(object->yrot, input_angle)) > 0x6000;
+                    } else {
+                        turn = abs(RotDiff(object->yrot, input_angle)) < 0x2000;
+                    }
+                }
+
+                if (((object != Player[0] && object != Player[1]) ||
+                     !(fabsf(object->pad_gamepad->waggle_magnitude) > 0.25f)) &&
+                    abs(RotDiff(object->apiobj.field_0x276, input_angle)) > 0x71c6) {
+                    if (object->character_context != 0x36) {
+                        StartTurn(object);
+                        return;
+                    }
+                    object->field_0xe24 |= 4;
+                    turn = finish_turn;
+                }
+                if (!turn) {
+                    return;
+                }
+            }
+        }
+
+        StartTurn(object);
+        return;
+    }
+
+    const f32 half_duration = object->airborne_action_duration * 0.5f;
+    const f32 quarter_duration = half_duration * 0.5f;
+    f32 timer;
+    if ((object->field_0xe24 & 4) == 0) {
+        timer = object->context_animation_timer;
+    } else {
+        const f32 lean = static_cast<f32>(object->secondary_lean_angle) * (1.0f / 16384.0f);
+        object->field_0xe24 &= ~4;
+        timer = object->airborne_action_duration - lean * quarter_duration;
+    }
+
+    timer -= FRAMETIME;
+    object->context_animation_timer = timer;
+    if (timer <= 0.0f) {
+        const i32 outside =
+            OutSideSplineArea(&object->apiobj.collision_position, WORLD->camera_splines[16], NULL, NULL, 0);
+        const i32 inside =
+            OutSideSplineArea(&object->apiobj.collision_position, WORLD->camera_splines[17], NULL, NULL, 1);
+        if (outside != 0 || inside != 0) {
+            object->context_animation_timer = FRAMETIME;
+            return;
+        }
+
+        const u16 angle = object->apiobj.facing_angle + 0x8000;
+        object->field_0xe24 &= ~2;
+        object->character_context = -1;
+        object->apiobj.field_0x276 = angle;
+        object->apiobj.movement_facing_angle = angle;
+        object->apiobj.facing_angle = angle;
+
+        TORPEDOPACKET *packet = object->torpedo;
+        if (packet != NULL) {
+            for (u32 i = 0; i < packet->count; ++i) {
+                packet->pickup_data[i] += 0x8000;
+                packet->pickup_flags[i] = 0x8000 - packet->pickup_flags[i];
+            }
+        }
+
+        object->secondary_lean_angle = 0;
+        object->movement_lean_angle = 0;
+        object->tertiary_lean_angle = 0;
+        object->field_0xdc8 = 1.0f;
+        object->field_0xe24 &= ~4;
+        return;
+    }
+
+    if (timer >= half_duration + quarter_duration) {
+        object->secondary_lean_angle = static_cast<i16>(
+            (1.0f - (1.0f / quarter_duration) * (timer - (half_duration + quarter_duration))) * 16384.0f);
+        return;
+    }
+    if (!(timer >= half_duration)) {
+        return;
+    }
+    const i32 index =
+        (static_cast<i32>((1.0f - (1.0f / quarter_duration) * (timer - half_duration)) * 16384.0f + 49152.0f +
+                          16384.0f) >>
+         1) &
+        0x7fff;
+    object->secondary_lean_angle = static_cast<i16>(20024.0f * NuTrigTable[index] + 16384.0f);
 }
 
 void FloatCode(GameObject_s *) {
@@ -8486,7 +8658,6 @@ static __used__ void ShootThisFrame(GameObject_s *object, i32 bolt_id, i32 flags
 }
 
 i32 PlayerItem_GotAmmo(PLAYERITEM_s *);
-i32 UnderPlayerControl(GameObject_s *);
 extern "C" f32 animduration_blendouttime;
 extern i16 id_GEONOSIAN, id_MINIATST, id_ATST_LOWRES, id_ATAT, id_MINIATAT, id_MINIATTE, id_SENTRYDROID;
 void Move_CANNON(GameObject_s *);
