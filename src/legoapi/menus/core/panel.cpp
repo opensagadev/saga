@@ -460,8 +460,27 @@ void CoinTotal_Draw(i32 total, f32 y, f32 scale, i32 remember_positions, f32 ico
     }
 }
 
-void DrawSuperStoryTime(float, float, float, i32, i32) {
-    STUBBED();
+void DrawSuperStoryTime(f32 y, f32 timer, f32 target, i32 target_above, i32 show_hours) {
+    char time[256];
+    Text_MakeTime(timer, show_hours, 1, 1, time);
+
+    i32 green = 191;
+    if (target > 0.0f) {
+        if (target <= timer) {
+            green = 31;
+        }
+    }
+    Text3DEx(time, 0.0f, y, 1.0f, 0.5f, 0.5f, 0.5f, 0, 255, green, 0, 128);
+
+    if (target > 0.0f) {
+        char target_time[256];
+        Text_MakeTime(target, show_hours, 1, 1, time);
+        NuStrCpy(target_time, const_cast<char *>("("));
+        NuStrCat(target_time, time);
+        NuStrCat(target_time, const_cast<char *>(")"));
+        Text3DEx(target_time, 0.0f, y + (target_above != 0 ? -0.1f : 0.1f), 1.0f, 0.35f, 0.35f, 0.35f, 0, 255, 255, 255,
+                 48);
+    }
 }
 
 void DrawBuildUpBar(float x, float y, i32 amount, i32 maximum, float scale, float width, float alpha, u16 angle) {

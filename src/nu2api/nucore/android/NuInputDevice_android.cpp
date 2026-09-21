@@ -46,7 +46,6 @@ namespace NuInputDevicePS {
     }
 
     void ClassShutdownPS(void) {
-        STUBBED();
     }
 
     void UpdateAllPS(f32 delta_time) {
@@ -107,7 +106,6 @@ namespace NuInputDevicePS {
     }
 
     bool IsInterceptedPS(u32 port) {
-        STUBBED();
         return false;
     }
 
@@ -124,24 +122,19 @@ namespace NuInputDevicePS {
     }
 
     f32 GetVolumePS(u32 port) {
-        STUBBED();
         return 0.0f;
     }
 
     void SetMotorsPS(u32 port, f32 motor_1, f32 motor_2) {
-        STUBBED();
     }
 
     void EnableDPDPS(u32) {
-        STUBBED();
     }
 
     void DisableDPDPS(u32) {
-        STUBBED();
     }
 
     bool HasHeadphonesConnectedPS(u32 port) {
-        STUBBED();
         return false;
     }
 
@@ -255,7 +248,6 @@ namespace NuInputDevicePS {
     }
 
     void HandleSensor_ANDROID_SPECIFIC(i32, f32, f32, f32) {
-        STUBBED();
     }
 
     void HandleKeyDown_ANDROID_SPECIFIC(i32 key) {

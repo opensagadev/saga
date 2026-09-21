@@ -9884,7 +9884,7 @@ finish:
     return 1;
 }
 
-static __used__ void DodgeCode(GameObject_s *object, i32 action_pressed, i32 jump_pressed) {
+static void DodgeCode(GameObject_s *object, i32 action_pressed, i32 jump_pressed) {
     if (object->character_context == 0x25) {
         if (jump_pressed != 0) {
             object->landing_followup = 2;
