@@ -1315,7 +1315,7 @@ extern "C" {
         return 0x20;
     }
 
-    void NuFntSetPen(void) {
+    void NuFntSetPen(i32) {
         STUBBED();
     }
 

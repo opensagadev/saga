@@ -56,8 +56,29 @@ void StartDropOut(GameObject_s *object) {
     object->context_animation = animation;
 }
 
-void DropInOutCode(GameObject_s *) {
-    STUBBED();
+void DropInOutCode(GameObject_s *object) {
+    const u8 context = static_cast<u8>(object->character_context);
+    if (context != CHARACTER_CONTEXT_DROP_IN && context != CHARACTER_CONTEXT_DROP_OUT) {
+        return;
+    }
+
+    object->drop_transition_time += FRAMETIME;
+    if (object->drop_transition_time < object->drop_transition_duration) {
+        if (WORLD->current_level == PODSPRINTA_LDATA) {
+            GameObject_s *other = Player[0] == object ? Player[1] : Player[0];
+            object->apiobj.position = other->apiobj.position;
+        }
+        return;
+    }
+    if (context == CHARACTER_CONTEXT_DROP_OUT) {
+        GameObject_s *other = Player[0] == object ? Player[1] : Player[0];
+        object->apiobj.position = other->apiobj.position;
+    }
+    object->character_context = -1;
+    if ((object->apiobj.character_data->model_flags & 0x2000) == 0) {
+        object->apiobj.field_0x27d = 0;
+        object->apiobj.velocity.y = -0.1f;
+    }
 }
 
 f32 DropInOutScale(GameObject_s *object) {

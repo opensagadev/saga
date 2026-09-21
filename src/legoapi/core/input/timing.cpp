@@ -2,6 +2,8 @@
 #include "globals.h"
 #include "legoapi/core/input/timing.h"
 #include "legoapi/legoapi_types.h"
+#include "nu2api/nu3d/android/nutimebar_plain.h"
+#include "nu2api/nu3d/nuqfnt.h"
 #include "nu2api/nu3d/nutex.h"
 
 struct AIROW_s;
@@ -10,9 +12,39 @@ struct nunativegscene_s;
 struct SHOPINPUT;
 
 i32 do_multiframe_update;
+extern i32 TimingBarSet;
+extern i32 app_tbgameset;
+extern i32 app_tbplayerset;
+extern i32 app_tbaiset;
+extern i32 app_tbdrawset;
 
 void TimingBars() {
-    STUBBED();
+    if (TimingBarSet == 0) {
+        return;
+    }
+    NuFntSet(0);
+    NuFntSetPen(0x7fffffff);
+    NuFntScale(0x10, 0x20);
+    switch (TimingBarSet) {
+        case 1:
+            NuTimeBarSetRender(1);
+            break;
+        case 2:
+            NuTimeBarSetRender(app_tbgameset);
+            break;
+        case 3:
+            NuTimeBarSetRender(app_tbplayerset);
+            break;
+        case 4:
+            NuTimeBarSetRender(app_tbaiset);
+            break;
+        case 5:
+            NuTimeBarSetRender(app_tbdrawset);
+            break;
+        default:
+            NuTimeBarSetRender(0);
+            break;
+    }
 }
 
 void ResetFrameCounters() {

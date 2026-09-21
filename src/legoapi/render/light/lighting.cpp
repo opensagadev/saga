@@ -29,6 +29,9 @@ extern "C" {
 }
 
 rtldata_s lev_rtldata;
+NUCOLOUR3 panelamb = {1.0f, 1.0f, 1.0f};
+NUVEC paneldir[3] = {{-1.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 1.0f}, {0.0f, 0.0f, -1.0f}};
+NUCOLOUR3 panelcol[3] = {{1.0f, 0.5f, 0.5f}, {0.5f, 1.0f, 0.5f}, {0.5f, 0.5f, 1.0f}};
 
 extern "C" {
     void NuLightSpotFadeSet(u32);
@@ -78,8 +81,49 @@ void SetLevelLights(void *set, float) {
     rtlSetLights(&lev_rtldata);
 }
 
-void SetPanelLights(float) {
-    STUBBED();
+// Retail realigns this stack frame for the temporary colour arrays.
+void __attribute__((force_align_arg_pointer)) SetPanelLights(float intensity) {
+    const f32 scale = 0.5f * intensity;
+    NUCOLOUR3 scaled_colours[3];
+    NUCOLOUR3 scaled_ambient;
+    NUCOLOUR3 *colour0;
+    NUCOLOUR3 *colour1;
+    NUCOLOUR3 *colour2;
+    NUCOLOUR3 *ambient;
+
+    if (scale == 1.0f) {
+        colour0 = &panelcol[0];
+        colour1 = &panelcol[1];
+        colour2 = &panelcol[2];
+        ambient = &panelamb;
+    } else {
+        scaled_colours[0].r = panelcol[0].r * scale;
+        scaled_colours[0].g = panelcol[0].g * scale;
+        scaled_colours[0].b = panelcol[0].b * scale;
+        scaled_colours[1].r = panelcol[1].r * scale;
+        scaled_colours[1].g = panelcol[1].g * scale;
+        scaled_colours[1].b = panelcol[1].b * scale;
+        scaled_colours[2].r = panelcol[2].r * scale;
+        scaled_colours[2].g = panelcol[2].g * scale;
+        scaled_colours[2].b = panelcol[2].b * scale;
+        scaled_ambient.r = panelamb.r * scale;
+        scaled_ambient.g = panelamb.g * scale;
+        scaled_ambient.b = panelamb.b * scale;
+        colour0 = &scaled_colours[0];
+        colour1 = &scaled_colours[1];
+        colour2 = &scaled_colours[2];
+        ambient = &scaled_ambient;
+    }
+
+    NuRndrLightingStateCurrent.direction[0] = paneldir[0];
+    NuRndrLightingStateCurrent.direction[1] = paneldir[1];
+    NuRndrLightingStateCurrent.direction[2] = paneldir[2];
+    NuRndrLightingStateCurrent.intensity[0] = colour0[0];
+    NuRndrLightingStateCurrent.intensity[1] = colour0[1];
+    NuRndrLightingStateCurrent.intensity[2] = colour0[2];
+    NuRndrSetDirectionalLightsPS(&paneldir[0], colour0, &paneldir[1], colour1, &paneldir[2], colour2);
+    NuRndrLightingStateCurrent.ambient = *ambient;
+    NuRndrSetAmbientLightPS(ambient);
 }
 
 void ResetLights(nuvec_s *position, rtldata_s *data, void *set) {

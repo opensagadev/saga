@@ -26,6 +26,7 @@
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nuquat.h"
 #include "nu2api/numath/nurand.h"
+#include "nu2api/numath/nutrig.h"
 #include "nu2api/numusic/sfx.h"
 
 #include <float.h>
@@ -53,6 +54,7 @@ extern i16 id_IMPERIALGUARD;
 extern i16 id_YODA;
 extern i16 id_YODAGHOST;
 extern i16 id_GONKDROID;
+extern i16 id_JUMBOHOMINGDROID;
 
 enum CHARACTER_ANIMATION : i16 {
     CHARACTER_ANIMATION_WALK = 0,
@@ -658,8 +660,32 @@ void Animate_DEFAULT(GameObject_s *object) {
     object->apiobj.anim_packet.requested_animation = CHARACTER_ANIMATION_IDLE;
 }
 
-void Animate_VEHICLE(GameObject_s *) {
-    STUBBED();
+extern i32 NeedsPretendAnim(GameObject_s *object);
+
+void Animate_VEHICLE(GameObject_s *object) {
+    ANIMPACKET_s &packet = object->apiobj.anim_packet;
+    if ((CInfo[object->character_context].flags & CHARACTER_CONTEXT_INFO_FLAG_OWNS_ANIMATION) != 0) {
+        packet.requested_animation = object->context_animation;
+    } else {
+        GAMECHARACTERDATA_s *character = object->apiobj.character_data->game_character;
+        if ((reinterpret_cast<u8 *>(character)[0x92] & 0x10) != 0) {
+            packet.requested_animation = 3;
+        } else if ((object->id == id_STAP || object->id == id_STAP2 || object->id == id_JUMBOHOMINGDROID) &&
+                   object->pad_gamepad->input_magnitude > 0.0f &&
+                   object->apiobj.character_model->model_data_b[0] != NULL) {
+            packet.requested_animation = 0;
+        } else {
+            packet.requested_animation = 1;
+        }
+    }
+
+    if (WORLD->current_level == PLATFORM_LDATA && NeedsPretendAnim(object) != 0) {
+        const u16 phase = static_cast<u16>(NuFmod(GameTimer.time_elapsed, 2.1f) / 2.1f * 65536.0f);
+        object->render_offset.x = 0.1f * NU_SIN_LUT(phase);
+        object->render_offset.y = 0.05f * NU_SIN_LUT(static_cast<u16>(phase + 0x2000));
+        object->render_offset.z = 0.025f * NU_SIN_LUT(static_cast<u16>(phase ^ 0x8000));
+        NuVecMtxRotate(&object->render_offset, &object->render_offset, &object->apiobj.field_0xb8);
+    }
 }
 
 void Animate_DROIDEKA(GameObject_s *object) {

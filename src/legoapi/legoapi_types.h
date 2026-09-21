@@ -1790,7 +1790,7 @@ DECOMP_ASSERT(sizeof(SPECIALMINIKITSYS_s) == 0x8, "SPECIALMINIKITSYS_s size");
 
 struct FADER_s {
     nuhspecial_s special;
-    u8 pad_0x0c[0xc];
+    nuhspecial_s while_animating;
 };
 DECOMP_ASSERT(sizeof(FADER_s) == 0x18, "FADER_s size");
 

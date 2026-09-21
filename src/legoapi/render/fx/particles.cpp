@@ -1,6 +1,8 @@
 #include "decomp.h"
 #include "legoapi/render/fx/particles.h"
+#include "legoapi/render/fx.h"
 #include "legoapi/legoapi_types.h"
+#include "nu2api/nufile/nufile.h"
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/nu3d/numtl.h"
 #include "nu2api/nu3d/nudlist.h"
@@ -28,14 +30,22 @@ extern "C" {
     void DebrisSetRenderGroup(i32 group);
     i32 NuRndrBeginScene(i32 flags);
     void NuRndrEndScene(void);
+    i32 edppLoadPage(char *path, i32 flag, usize scene);
 }
 
 void OctreeRndr(unsigned char *, nuoctreenode_s *, i32) {
     STUBBED();
 }
 
-void AddCameraRain(WORLDINFO_s *, i32) {
-    STUBBED();
+void AddCameraRain(WORLDINFO_s *world, i32 mode) {
+    if ((world->current_level->flags & 0x4000) != 0) {
+        NUVEC position = GameCam->pos;
+        position.x += GameCam->dir.x + GameCam->dir.x;
+        position.y += GameCam->dir.y + GameCam->dir.y;
+        position.z += GameCam->dir.z + GameCam->dir.z;
+        AddVariableShotDebrisEffectTimed1(world->debris_sys->entries[mode].effect, &position, 60, FRAMETIME, 0, 0,
+                                          NULL);
+    }
 }
 
 void Particles_Stop(WORLDINFO_s *world) {
@@ -78,8 +88,11 @@ void Particles_DumpAreaPage() {
     }
 }
 
-void Particles_LoadAreaPage(char *) {
-    STUBBED();
+void Particles_LoadAreaPage(char *path) {
+    DEBPAGE_AREA = -1;
+    if (NuFileExists(path) != 0) {
+        DEBPAGE_AREA = edppLoadPage(path, 1, 0);
+    }
 }
 
 void NoRender() {

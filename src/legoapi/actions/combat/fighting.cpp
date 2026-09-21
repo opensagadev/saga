@@ -215,8 +215,27 @@ void StunGameObject(GameObject_s *, GameObject_s *, float, i32) {
     STUBBED();
 }
 
-void ComboRotateCode(GameObject_s *, i32) {
-    STUBBED();
+void ComboRotateCode(GameObject_s *object, i32 action_held) {
+    if (object->character_context != 9) {
+        return;
+    }
+    object->context_animation_timer += FRAMETIME;
+    i32 rotation;
+    if (object->context_animation_timer != object->context_animation_timer) {
+        rotation = static_cast<i32>(object->context_animation_timer / object->airborne_action_duration * 32768.0f);
+    } else {
+        if (action_held == 0) {
+            object->character_context = -1;
+        } else {
+            StartHold(object);
+        }
+        rotation = -0x8000;
+    }
+    u16 angle =
+        object->pad_79f[0] == 1 ? object->carried_object_angle + rotation : object->carried_object_angle - rotation;
+    object->apiobj.field_0x276 = angle;
+    object->apiobj.movement_facing_angle = angle;
+    object->apiobj.facing_angle = angle;
 }
 
 BOLTTYPE_s *BoltType_FindByID(i32, WORLDINFO_s *);
