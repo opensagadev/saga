@@ -534,6 +534,7 @@ extern i32 texanimbits;
 extern i32 Reflections_On;
 extern i32 (*MatrixReflection_CanOverrideFn)(f32);
 extern i32 disable_narrow_socks;
+extern i32 set_speedermode;
 extern nugspline_s *script_spline_selected;
 extern f32 character_farclip;
 extern f32 CutBorderScale;

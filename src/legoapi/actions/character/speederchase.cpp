@@ -29,6 +29,7 @@ struct SHOPINPUT;
 
 // This alignment affects PodRaceAUpdate codegen even though the linked address is 32-byte aligned.
 static i32 PodRaceKey[8] __attribute__((aligned(16))) = {-1, -1, -1, -1, -1, -1, -1, -1};
+static u8 bikeParts[0x1a0];
 
 u8 troopercannons_beenReset = 0;
 i32 players_going_forward = 0;
@@ -176,7 +177,7 @@ void PodLoseSpeed(GameObject_s *object, i32 hit, i32 rumble) {
 }
 
 void InitBikeParts() {
-    STUBBED();
+    memset(bikeParts, 0, 0xd0);
 }
 
 void SpeederBlowupHack(GIZMOBLOWUP_s *, i32) {
@@ -247,8 +248,8 @@ void SpeederChaseA_Reset(WORLDINFO_s *) {
     players_going_forward = 1;
 }
 
-void SpeedersDroppedBack() {
-    STUBBED();
+i32 SpeedersDroppedBack() {
+    return WORLD->current_level == SPEEDERCHASEA_LDATA && disable_narrow_socks == 0 && set_speedermode == 2;
 }
 
 void SpeederChaseA_Update(WORLDINFO_s *) {
@@ -306,8 +307,11 @@ f32 GetVehicleAreaRememberSpeed() {
     return speed;
 }
 
-void SpeederChase_ObjIsAGroundTroop(GameObject_s *) {
-    STUBBED();
+i32 SpeederChase_ObjIsAGroundTroop(GameObject_s *object) {
+    if (object == NULL) {
+        return 1;
+    }
+    return (object->apiobj.character_data->model_flags & 0x2000) == 0;
 }
 
 extern "C" {
