@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 51.228107,
+    "fuzzy_match_percent": 51.233765,
     "total_code": "4722419",
-    "matched_code": "450883",
-    "matched_code_percent": 9.547712,
+    "matched_code": "451030",
+    "matched_code_percent": 9.550825,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 5321,
-    "matched_functions_percent": 39.534885,
+    "matched_functions": 5322,
+    "matched_functions_percent": 39.542313,
     "total_units": 1
   },
   "text": {
@@ -60042,7 +60042,7 @@
           "address": 1403456,
           "offset": 513488,
           "size": 147,
-          "match_percent": 13.125
+          "match_percent": 100.0
         },
         {
           "name": "_Z21GetFreePlayCollectioni",
@@ -86160,7 +86160,7 @@
           "address": 1159952,
           "offset": 269984,
           "size": 249,
-          "match_percent": 6.885246
+          "match_percent": 62.95082
         },
         {
           "name": "_Z20InitGameBeforeConfigv",

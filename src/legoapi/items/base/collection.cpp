@@ -557,8 +557,19 @@ static __used__ void Collection_GetSelectingPlayerIDs(i16 *) {
     STUBBED();
 }
 
-void ReleaseEat(GameObject_s *) {
-    STUBBED();
+void ReleaseEat(GameObject_s *object) {
+    u8 flags = object->field_0xe24;
+    GameObject_s *eaten = static_cast<GameObject_s *>(object->field_0x780);
+    if (eaten != NULL && (flags & 1) != 0) {
+        KillGameObject(eaten, 2, 0);
+        flags = object->field_0xe24;
+        object->field_0x780 = NULL;
+    }
+    if (static_cast<u8>(object->field_0x7a5 - 0x38) <= 1) {
+        object->field_0x780 = NULL;
+        object->field_0x7a5 = 0xff;
+    }
+    object->field_0xe24 = flags & ~1;
 }
 
 void ShipDropCoins(starfighter_s *) {
@@ -692,8 +703,8 @@ void ReCalculateCompletionPoints() {
         AREADATA *area = &ADataList[index];
         AREASAVE_s *save = &Game.area_save[index];
         const u16 flags = area->flags;
-        if (area == HUB_ADATA || (flags & (AREAFLAG_ENDING_AREA | AREAFLAG_TEST_AREA |
-                                           AREAFLAG_NO_COMPLETION_POINTS)) != 0) {
+        if (area == HUB_ADATA ||
+            (flags & (AREAFLAG_ENDING_AREA | AREAFLAG_TEST_AREA | AREAFLAG_NO_COMPLETION_POINTS)) != 0) {
             continue;
         }
 
