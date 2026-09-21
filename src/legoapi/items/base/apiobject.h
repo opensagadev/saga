@@ -1199,6 +1199,7 @@ typedef struct GameObject_s {
     NUVEC movement_spline_offset; // 0x0e90
     union {
         u8 pad_e9c[0xeb0 - 0xe9c];
+        f32 movement_spline_lateral_speed; // 0x0e9c
         struct {
             u8 padding_render_offset[4];
             NUVEC render_offset; // 0x0ea0, world-space displacement added before rendering
@@ -1784,6 +1785,7 @@ typedef struct GameObject_s GameObject_s;
 
 DECOMP_ASSERT(offsetof(GameObject_s, movement_spline_position) == 0xe70, "GameObject spline position offset");
 DECOMP_ASSERT(offsetof(GameObject_s, movement_spline_offset) == 0xe90, "GameObject spline offset");
+DECOMP_ASSERT(offsetof(GameObject_s, movement_spline_lateral_speed) == 0xe9c, "GameObject spline lateral speed offset");
 
 DECOMP_ASSERT(offsetof(GameObject_s, launch_origin) == 0x744, "GameObject launch origin offset");
 DECOMP_ASSERT(offsetof(GameObject_s, big_jump_height) == 0xf18, "GameObject big jump height offset");

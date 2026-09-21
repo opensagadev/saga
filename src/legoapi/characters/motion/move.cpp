@@ -460,6 +460,10 @@ extern "C" i16 id_GRABCONTROL, id_GRABR2CONTROL;
 
 float SLAMGRAVITY = -15.0f;
 float TURNTIME = 1.0f;
+float spline_xoffset_speed_roll = 16384.0f;
+float spline_xoffset_speed_seek = 4.0f;
+float spline_seek_ang = 10.0f;
+float spline_seek_pos = 10.0f;
 static float applygravity_extrahoveroffset;
 
 void MovePlayer_DIRECTIONAL(GameObject_s *object);
@@ -1315,8 +1319,109 @@ void Move_HOVERDROID(GameObject_s *object) {
     GizmoBlowupCheckProximity(WORLD, object);
 }
 
-void MovePlayerSpline(GameObject_s *) {
-    STUBBED();
+void MovePlayerSpline(GameObject_s *object) {
+    APIOBJECT_s &api = object->apiobj;
+    api.field_0x214 = api.field_0x218;
+    api.start_position = api.position;
+    api.initial_position = api.collision_position;
+    api.field_0x27e = api.field_0x27d;
+    object->pad_gamepad->previous_input_angle = object->pad_gamepad->input_angle;
+    object->pad_gamepad->previous_input_magnitude = object->pad_gamepad->input_magnitude;
+    object->previous_movement_angle = api.field_0x276;
+    object->field_0xefd &= ~0x40;
+
+    if (api.model_draw_result == 0)
+        object->field_0xf1c += FRAMETIME;
+    else
+        object->field_0xf1c = 0.0f;
+    if (object->character_context == 0x2b)
+        object->turn_braking += FRAMETIME;
+
+    f32 speed = object->run_speed_override == 1000000000.0f ? api.character_data->game_character->run_speed
+                                                            : object->run_speed_override;
+    const f32 distance = speed * FRAMETIME;
+    MoveSplinePosition(&object->movement_spline_position, distance);
+
+    NUVEC position;
+    u16 angle;
+    u16 pitch;
+    PointAlongSpline(object->movement_spline, object->movement_spline_position.along, &position, &angle, &pitch,
+                     object->movement_spline_position.looping);
+    if (distance < 0.0f) {
+        angle += 0x8000;
+        pitch = -pitch;
+    }
+    api.movement_facing_angle = angle;
+    api.facing_angle = SeekRot(api.facing_angle, angle, spline_seek_ang);
+    api.field_0x276 = api.facing_angle;
+    api.pitch_angle = SeekRot(api.pitch_angle, -pitch, spline_seek_ang);
+
+    if (WORLD->current_level != PODSPRINTA_LDATA || distance > 0.0f) {
+        object->movement_spline_lateral_speed = SeekValF(object->movement_spline_lateral_speed,
+                                                         -object->movement_spline_offset.x, spline_xoffset_speed_seek);
+    }
+    object->movement_spline_offset.x += object->movement_spline_lateral_speed * FRAMETIME;
+    if (object->movement_spline_offset.x != 0.0f || object->movement_spline_offset.y != 0.0f ||
+        object->movement_spline_offset.z != 0.0f) {
+        NUVEC offset;
+        NuVecRotateX(&offset, &object->movement_spline_offset, api.pitch_angle);
+        NuVecRotateY(&offset, &offset, api.field_0x276);
+        NuVecAdd(&position, &position, &offset);
+    }
+
+    if (object->spline_follow_terrain != 0) {
+        const f32 hover_height = GetVehicleHoverHeight(object, NULL);
+        f32 target_y = api.collision_position.y - api.lower_position.y + hover_height;
+        if (WORLD->current_level == PODSPRINTA_LDATA)
+            NewTerrPlatformsOff();
+        api.field_0x218 = GameShadow(object, &position, 5.0f, 0x1f);
+        if (api.field_0x218 == 2000000.0f) {
+            position.y = SeekValF(api.position.y, target_y, 5.0f);
+        } else {
+            position.y = SeekValF(api.position.y, target_y + api.field_0x218, 5.0f);
+            if (position.y < api.field_0x218)
+                position.y = api.field_0x218;
+        }
+        if (WORLD->current_level == PODSPRINTA_LDATA)
+            position.y += object->movement_spline_offset.y;
+    }
+
+    if (object->delayed_turn_timer > 0.0f && object->character_context != 0x2a && object->character_context != 0x36 &&
+        object->character_context != 0x3a) {
+        object->delayed_turn_timer -= FRAMETIME;
+    }
+    if (WORLD->current_level == SPEEDERCHASEA_LDATA)
+        position.y += VehicleTurnOrLoopOffset(object);
+
+    SeekVec(&api.position, &api.position, &position, spline_seek_pos);
+    NuVecSub(&api.velocity, &api.position, &api.start_position);
+    NuVecScale(&api.velocity, &api.velocity, 1.0f / FRAMETIME);
+    object->field_0x1086 = 0;
+
+    if ((api.character_data->game_character->flags_090 & 1) != 0) {
+        i32 roll = 0;
+        if (object->character_context != 0x36 && object->character_context != 0x2a &&
+            object->character_context != 0x3a) {
+            roll = static_cast<i32>(static_cast<f32>(RotDiff(object->previous_movement_angle, api.field_0x276)) /
+                                    FRAMETIME);
+            roll += static_cast<i32>(object->movement_spline_lateral_speed * spline_xoffset_speed_roll);
+        }
+        i32 target_roll;
+        if (roll < -0x10000) {
+            target_roll = -0x2000;
+        } else if (roll > 0x10000) {
+            target_roll = 0x2000;
+        } else {
+            target_roll = roll / 4;
+            if (target_roll < -0x2000)
+                target_roll = -0x2000;
+            else if (target_roll > 0x2000)
+                target_roll = 0x2000;
+        }
+        object->movement_lean_angle = SeekRot(object->movement_lean_angle, target_roll, 8.0f);
+    }
+    APIObjectVelocities(object);
+    GameObjectOrigin(object);
 }
 
 i32 TwistLevel(LEVELDATA_s *level);
