@@ -149,8 +149,79 @@ void LSW_SetIndy(i32) {
     GameAudio_SetActionMusicTimes(1.0f, 6.0f);
 }
 
-void HairMovement(GameObject_s *) {
-    STUBBED();
+void HairMovement(GameObject_s *object) {
+    u8 index;
+    GAMECHARACTERDATA_s *character;
+    f32 phase;
+    i16 animation;
+    u8 current_index;
+    u32 state_index;
+    u8 *state;
+    f32 value;
+    constexpr f32 gravity = -1.8325958f;
+
+    index = object->field_0x1089;
+    if (index > 2) {
+        return;
+    }
+    character = object->apiobj.character_data->game_character;
+    if (character->cloak_joint_2 == -1) {
+        return;
+    }
+
+    phase = NuFsqrt(*reinterpret_cast<f32 *>(reinterpret_cast<u8 *>(object) + index * 0x34 + 0xf50) / gravity);
+    if (LEGOACT_FALL == -1) {
+        goto not_falling;
+    }
+    if (object->apiobj.anim_packet.blending == 0) {
+        animation = object->apiobj.anim_packet.animation_index;
+    } else {
+        animation = object->apiobj.anim_packet.blend_animation_b;
+    }
+    if (LEGOACT_FALL != animation) {
+        goto not_falling;
+    }
+
+    phase = FRAMETIME + FRAMETIME + phase;
+    if (phase <= 1.0f) {
+        goto interpolate;
+    }
+    current_index = object->field_0x1089;
+    state_index = current_index;
+    state = reinterpret_cast<u8 *>(object) + state_index * 0x34;
+    state[0xf78] = static_cast<u8>(object->apiobj.character_data->game_character->cloak_joint_2);
+    *reinterpret_cast<f32 *>(state + 0xf50) = gravity;
+    goto setup_state;
+
+not_falling:
+    phase = phase - (FRAMETIME + FRAMETIME);
+    if (phase < 0.0f) {
+        current_index = object->field_0x1089;
+        state_index = current_index;
+        state = reinterpret_cast<u8 *>(object) + state_index * 0x34;
+        *reinterpret_cast<f32 *>(state + 0xf50) = 0.0f;
+        state[0xf78] = static_cast<u8>(object->apiobj.character_data->game_character->cloak_joint_2);
+        goto increment_index;
+    }
+
+interpolate:
+    current_index = object->field_0x1089;
+    state_index = current_index;
+    state = reinterpret_cast<u8 *>(object) + state_index * 0x34;
+    value = gravity * phase * phase + (1.0f - phase * phase) * 0.0f;
+    state[0xf78] = static_cast<u8>(object->apiobj.character_data->game_character->cloak_joint_2);
+    *reinterpret_cast<f32 *>(state + 0xf50) = value;
+    if (value == 0.0f) {
+        goto increment_index;
+    }
+
+setup_state:
+    state[0xf79] = 0x21;
+    *reinterpret_cast<i16 *>(state + 0xf70) = 0;
+    *reinterpret_cast<i16 *>(state + 0xf76) = static_cast<i16>(0xb556);
+
+increment_index:
+    object->field_0x1089 = current_index + 1;
 }
 
 void HeadMovement(GameObject_s *object) {

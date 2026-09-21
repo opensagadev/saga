@@ -97,8 +97,34 @@ void SpecialMoves_Configure(char *, variptr_u *, variptr_u *) {
     STUBBED();
 }
 
-void SpecialMove_ReleaseVictim(GameObject_s *) {
-    STUBBED();
+i32 SpecialMove_ReleaseVictim(GameObject_s *object) {
+    if (LEGOCONTEXT_SPECIALMOVE_ATTACKER == -1 ||
+        LEGOCONTEXT_SPECIALMOVE_ATTACKER != static_cast<i8>(object->field_0x7a5) || object->field_0x7a7 == -1 ||
+        object->field_0x780 == NULL) {
+        return 0;
+    }
+    GameObject_s *victim = static_cast<GameObject_s *>(object->field_0x780);
+    if (LEGOCONTEXT_SPECIALMOVE_VICTIM == -1 ||
+        LEGOCONTEXT_SPECIALMOVE_VICTIM != static_cast<i8>(victim->field_0x7a5)) {
+        return 0;
+    }
+    if (SpecialMove_GetFlags(object->field_0x7a7, 4) != 0) {
+        if (SpecialMove_GetFlags(victim->field_0x7a7, 0x10) != 0) {
+            objhitobj_throwkillpartsup = 1;
+        }
+        GameObject_s *target = static_cast<GameObject_s *>(victim->field_0x780);
+        i32 damage = -1;
+        if (static_cast<i8>(target->apiobj.field_0x1f8) < 0 && Player_HasInvincibility(target) != 0) {
+            damage = 1;
+        }
+        target = static_cast<GameObject_s *>(victim->field_0x780);
+        ObjHitObj(target, victim, damage, 0x1000, 0, 1);
+    }
+    victim = static_cast<GameObject_s *>(object->field_0x780);
+    if (victim != NULL) {
+        victim->field_0x7a5 = 0xff;
+    }
+    return 1;
 }
 
 void SpecialMove_GetVictimAction(i32) {
