@@ -1278,7 +1278,7 @@ void DebrisProcessControlChunks(i32 panel_time) {
             --freedebchkptr;
             freedebchunks[freedebchkptr] = control->particle_chunk;
             for (dma_particle_s &particle : control->particle_chunk->particles) {
-                particle.start_time = 0.0f;
+                particle.start_time = 10000000000.0f;
                 particle.inverse_lifetime = 128.0f;
             }
             ReleaseChunkControl(control);
@@ -1289,7 +1289,7 @@ void DebrisProcessControlChunks(i32 panel_time) {
             --freedebchkptrg;
             freedebchunksglass[freedebchkptrg] = control->particle_chunk;
             for (i32 i = 0; i < 12; ++i) {
-                control->particle_chunk->particles[i].start_time = 0.0f;
+                control->particle_chunk->particles[i].start_time = 10000000000.0f;
                 control->particle_chunk->particles[i].inverse_lifetime = 128.0f;
             }
             ReleaseChunkControl(control);
