@@ -39,11 +39,9 @@ NuMemoryPS::Mem2EventHandler::Mem2EventHandler() {
 }
 
 bool NuMemoryPS::Mem2EventHandler::AllocatePage(NuMemoryManager *manager, u32 size, u32 _unknown) {
-    STUBBED();
     return false;
 }
 
 bool NuMemoryPS::Mem2EventHandler::ReleasePage(NuMemoryManager *manager, void *ptr, u32 _unknown) {
-    STUBBED();
     return false;
 }
