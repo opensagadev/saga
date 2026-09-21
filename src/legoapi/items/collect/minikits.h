@@ -6,6 +6,9 @@ struct AREASAVE_s;
 struct GameObject_s;
 struct WORLDINFO_s;
 struct nuvec_s;
+struct HUBMINIKITPIECES_s;
+
+extern "C" HUBMINIKITPIECES_s **Char_MiniKit;
 
 void MiniKits_Init(variptr_u *buffer, variptr_u *buffer_end);
 void CollectMinikit(nuvec_s *position, char *name, i32 type);

@@ -2,6 +2,10 @@
 #include "legoapi/legoapi_types.h"
 #include "legoapi/gizmo/object/gizmopickup.h"
 #include "legoapi/gizmos/fx/gizmopickups.h"
+#include "legoapi/render/fx.h"
+#include "legoapi/world/area.h"
+#include "legoapi/world/world.h"
+#include "globals.h"
 
 static void Pup_CollectCharKit(WORLDINFO_s *, GIZMOPICKUP_s *, i32, GameObject_s *, i32) {
     STUBBED();
@@ -15,8 +19,22 @@ static void Pup_UpdatePurpleCoin(WORLDINFO_s *, GIZMOPICKUP_s *) {
     STUBBED();
 }
 
-static void Pup_UpdateBlueCoin(WORLDINFO_s *, GIZMOPICKUP_s *) {
-    STUBBED();
+static void Pup_UpdateBlueCoin(WORLDINFO_s *, GIZMOPICKUP_s *pickup) {
+    if ((pickup->state_flags & 0x30) != 0x30) {
+        return;
+    }
+    i32 effect = WORLD->debris_sys->entries[56].effect;
+    if (effect == -1) {
+        return;
+    }
+    f32 rate = 5.0f;
+    if (WORLD->area != NULL && (WORLD->area->flags & 0x104) == 4) {
+        rate = 2.5f;
+    }
+    i32 count = ParticlesPerSecond(rate, FRAMETIME);
+    if (count > 0) {
+        AddVariableShotDebrisEffect(effect, &pickup->position, count, 0, 0);
+    }
 }
 
 static void Pup_UpdatePowerUp(WORLDINFO_s *, GIZMOPICKUP_s *) {

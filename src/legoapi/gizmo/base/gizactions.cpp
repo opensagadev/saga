@@ -324,8 +324,24 @@ static void GizAction_ActivatePartEffect(GIZFLOW_s *, FLOWBOX_s *, char **, int)
     STUBBED();
 }
 
-static void GizAction_ActivateEffect(GIZFLOW_s *, FLOWBOX_s *, char **, int) {
-    STUBBED();
+static void GizAction_ActivateEffect(GIZFLOW_s *, FLOWBOX_s *, char **params, int count) {
+    if (count <= 0) {
+        return;
+    }
+    char *name = NULL;
+    i32 visible = 1;
+    for (i32 index = 0; index < count; ++index) {
+        char *value = NuStrIStr(params[index], "effect");
+        if (value != NULL) {
+            name = value + NuStrLen("effect") + 1;
+        } else if (NuStrICmp(params[index], "FALSE") == 0) {
+            visible = 0;
+        }
+    }
+    if (name != NULL) {
+        SetEffectVisibility(name, visible);
+        EffectOffProgress_Update(WorldInfo_CurrentlyActive()->level_progress, name, visible);
+    }
 }
 
 static void GizAction_ActivateChar(GIZFLOW_s *flow, FLOWBOX_s *, char **params, int count) {

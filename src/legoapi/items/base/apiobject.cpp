@@ -529,8 +529,14 @@ extern "C" {
         }
     }
 
-    void APIObjectRemoveFromLOSTable(APIOBJECTSYS_s *, APIOBJECT *, APIOBJECT *) {
-        STUBBED();
+    void APIObjectRemoveFromLOSTable(APIOBJECTSYS_s *system, APIOBJECT *source, APIOBJECT *target) {
+        if (source != NULL) {
+            system->line_of_sight[source->field_0x289] &= ~(1ULL << target->field_0x289);
+        } else {
+            u8 index = target->field_0x289;
+            system->hostility_masks[index][0] = 0;
+            system->hostility_masks[index][1] = 0;
+        }
     }
 
     void APIObjectDestroy(APIOBJECTSYS_s *system, APIOBJECT *object) {

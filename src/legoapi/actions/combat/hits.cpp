@@ -7,6 +7,7 @@
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/motion/gameanim.h"
 #include "legoapi/characters/core/players.h"
+#include "legoapi/core/input/gamepads.h"
 #include "legoapi/items/collect/torpedo.h"
 #include "legoapi/gizmo/object/gizmopickup.h"
 #include "legoapi/items/base/apiobject.h"
@@ -164,8 +165,13 @@ static i32 Collide2Objects(APIOBJECT *first, APIOBJECT *second) {
     return collision_result;
 }
 
-void KillRumble(GameObject_s *) {
-    STUBBED();
+void KillRumble(GameObject_s *object) {
+    if (object != NULL) {
+        if (object->apiobj.player_controlled) {
+            NewRumble(object->pad_gamepad->pad, 0.7f, 0);
+            NewBuzz(object->pad_gamepad->pad, 0.1f, 0);
+        }
+    }
 }
 
 void FloatRumble(GameObject_s *) {

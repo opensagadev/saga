@@ -4,6 +4,11 @@
 #include "gameapi/edtools/edfile.h"
 #include "legoapi/gizmo/base/gizmo.h"
 #include "legoapi/gizmo/base/gizflow.h"
+#include "legoapi/characters/core/character.h"
+#include "legoapi/world/area.h"
+#include "nu2api/nucore/nustring.h"
+#include "nu2api/nu3d/nugscn.h"
+#include "nu2api/nu3d/nuspecial.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -99,32 +104,87 @@ void LoadGizmoSys(GIZMOSYS_s *gizmo_sys, void *world, char *config_file) {
     }
 }
 void Hub_LoadAndFixUpMiniKits(WORLDINFO *world, VARIPTR *buf, VARIPTR *buf_end) {
-    STUBBED();
-    (void)world;
-    (void)buf;
-    (void)buf_end;
+    buf->addr = ALIGN(buf->addr, 4);
+    world->hub_minikits = reinterpret_cast<HUBMINIKIT_s *>(buf->addr);
+    buf->addr = ALIGN(buf->addr + static_cast<usize>(AREACOUNT) * sizeof(HUBMINIKIT_s), 4);
+    world->minikit_pieces_buf = reinterpret_cast<HUBMINIKITPIECES_s **>(buf->addr);
+    memset(world->minikit_pieces_buf, 0, static_cast<usize>(AREACOUNT) * sizeof(*world->minikit_pieces_buf));
+    buf->addr += static_cast<usize>(AREACOUNT) * sizeof(*world->minikit_pieces_buf);
+
+    for (i32 i = 0; i < AREACOUNT; ++i) {
+        if ((ADataList[i].flags & AREAFLAG_MINIKIT) == 0 || ADataList[i].minikit_id == -1) {
+            continue;
+        }
+        world->minikit_pieces_buf[i] = reinterpret_cast<HUBMINIKITPIECES_s *>(buf->addr);
+        buf->addr += 0x18;
+        MiniKit_Load(reinterpret_cast<MINIKIT *>(world->minikit_pieces_buf[i]), ADataList[i].minikit_id, buf, buf_end,
+                     NULL);
+        MINIKIT *minikit = reinterpret_cast<MINIKIT *>(world->minikit_pieces_buf[i]);
+        if (minikit->gscn == NULL) {
+            world->minikit_pieces_buf[i] = NULL;
+            buf->addr -= 0x18;
+        } else {
+            MiniKit_InitPieces(minikit, 10, buf, buf_end);
+            minikit->field_0x9 = static_cast<i8>(i);
+        }
+    }
 }
 void MiniKit_Load(MINIKIT *minikit, i32 id, VARIPTR *buf, VARIPTR *buf_end, void *param) {
-    STUBBED();
-    (void)minikit;
-    (void)id;
-    (void)buf;
-    (void)buf_end;
     (void)param;
+    minikit->gscn = NULL;
+    minikit->field_0x4 = NULL;
+    minikit->field_0x8 = 0;
+    minikit->field_0x9 = -1;
+    minikit->id = static_cast<i16>(id);
+    if (id != -1) {
+        char path[268];
+        NuStrCpy(path, const_cast<char *>("chars\\minikits\\"));
+        NuStrCat(path, CDataList[id].file);
+        NuStrCat(path, const_cast<char *>("\\"));
+        NuStrCat(path, CDataList[id].file);
+        NuStrCat(path, const_cast<char *>(".gsc"));
+        buf->addr = ALIGN(buf->addr, 4);
+        minikit->gscn = NuGScnRead(buf, *buf_end, path);
+    }
 }
 void MiniKit_InitPieces(MINIKIT *minikit, i32 count, VARIPTR *buf, VARIPTR *buf_end) {
-    STUBBED();
-    (void)minikit;
-    (void)count;
-    (void)buf;
     (void)buf_end;
-}
-void CharacterMiniKits_Load(COLLECTION_s *collection, WORLDINFO *world, VARIPTR *buf, VARIPTR *buf_end) {
-    STUBBED();
-    (void)collection;
-    (void)world;
-    (void)buf;
-    (void)buf_end;
+    if (minikit->gscn == NULL) {
+        minikit->field_0x9 = -1;
+        return;
+    }
+
+    static const char *const direction_names[] = {"NegX", "PosX", "NegY", "PosY", "NegZ", "PosZ"};
+    u8 direction_counts[6] = {};
+    char name[76];
+
+    buf->addr = ALIGN(buf->addr, 4);
+    minikit->field_0x4 = reinterpret_cast<void *>(buf->addr);
+    minikit->field_0x8 = 0;
+
+    for (i32 index = 0; index < count; ++index) {
+        for (u8 direction = 0; direction < 6; ++direction) {
+            sprintf(name, "%s_%s_%i", CDataList[minikit->id].file, direction_names[direction], index);
+            HUBMINIKITPIECE_s *piece =
+                &reinterpret_cast<HUBMINIKITPIECE_s *>(minikit->field_0x4)[minikit->field_0x8];
+            if (NuSpecialFind(minikit->gscn, &piece->special, name, 1) == 0) {
+                continue;
+            }
+            piece->matrix = *NuSpecialGetInstanceMtx(&piece->special);
+            piece->direction = direction;
+            piece->direction_index = direction_counts[direction]++;
+            ++minikit->field_0x8;
+        }
+    }
+
+    sprintf(name, "%s_shadow", CDataList[minikit->id].file);
+    NuSpecialFind(minikit->gscn, reinterpret_cast<nuhspecial_s *>(reinterpret_cast<u8 *>(minikit) + 0xc), name, 1);
+
+    if (minikit->field_0x8 == 0) {
+        minikit->field_0x4 = NULL;
+        return;
+    }
+    buf->addr += static_cast<usize>(minikit->field_0x8) * sizeof(HUBMINIKITPIECE_s);
 }
 void GizmoSysAddGizmos(GIZMOSYS_s *gizmo_sys, GIZFLOW_s *giz_flow, void *world) {
     if (gizmotypes != NULL && gizmo_sys != NULL) {

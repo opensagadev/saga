@@ -30,6 +30,7 @@
 #include "nu2api/numath/nuvec.h"
 
 void Minicam_InitSystem(void);
+extern "C" void NuLightSpeedBlurOldCameraPos(const NUMTX *camera);
 void GameCam_ResetLookRot(GAMECAMERA_s *camera);
 extern i32 newgamecam;
 i32 GetMenuID(void);
@@ -354,6 +355,10 @@ extern AREADATA_s *PODRACE_ADATA;
 f32 getPodRoll(i32);
 f32 GameShadow(GameObject_s *, NUVEC *, f32, i32);
 f32 PodSprint_InStartCountdown(WORLDINFO_s *);
+i32 PodRace_InStartCountdown(WORLDINFO_s *);
+extern i32 editor_active;
+extern "C" void NuSpeedBlurSetMotionFactors(f32 pan, f32 pull, f32 clamp);
+extern "C" void NuLightSpeedBlur(i32 reuse_camera, f32 scale);
 i32 Players_AveragePos(NUVEC *, SOCKPOSITION_s *);
 GameObject_s *FindNearestGameObject(NUVEC *, GameObject_s *, u32, f32, f32, i32, i32, i32, f32 *, i32,
                                     i32 (*)(GameObject_s *), bool);
@@ -1630,12 +1635,39 @@ void SetDepthOfField() {
     STUBBED();
 }
 
-void SpeedBlur_Apply(WORLDINFO_s *) {
-    STUBBED();
+void SpeedBlur_Apply(WORLDINFO_s *world) {
+    if (editor_active != 0 || CUTSTOPGAME != 0 || MiniCutCam != 0) {
+        return;
+    }
+    LEVELDATA *level = world->current_level;
+    if (level == PODRACEA_LDATA || level == PODRACEB_LDATA || level == PODRACEC_LDATA) {
+        if (PodRace_InStartCountdown(WORLD) != 0) {
+            return;
+        }
+    } else {
+        if (level != PODSPRINTA_LDATA) {
+            return;
+        }
+        long double countdown = PodSprint_InStartCountdown(WORLD);
+        if (countdown > 0.0f) {
+            return;
+        }
+    }
+    NuSpeedBlurSetMotionFactors(0.01f, -0.024f, 0.02f);
+    NuLightSpeedBlur(Paused, 0.5f);
 }
 
 void SpeedBlur_Update() {
-    STUBBED();
+    static NUMTX camera_matrices[2];
+    static i32 last_camera_matrix = -1;
+    if (last_camera_matrix < 0) {
+        camera_matrices[0] = GameCam->render_mtx;
+        camera_matrices[1] = GameCam->render_mtx;
+        last_camera_matrix = 0;
+    }
+    NuLightSpeedBlurOldCameraPos(&camera_matrices[last_camera_matrix]);
+    last_camera_matrix = 1 - last_camera_matrix;
+    camera_matrices[last_camera_matrix] = GameCam->render_mtx;
 }
 
 void ViewCamSetActive(i32 mode, GAMEPAD_s *gamepad) {
