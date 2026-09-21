@@ -35,7 +35,6 @@ extern "C" {
     }
 
     void RndrStateUpdateFx(void *, NUDISPLAYLISTITEM *) {
-        STUBBED();
     }
 
     i32 NuRndrSetAmbientLightPS(const NUCOLOUR3 *colour) {

@@ -597,32 +597,37 @@ void UpdateCoinPacket(COINPACKET_s *packet, i32 active, i32 player_index) {
     if (packet == NULL) {
         return;
     }
-    if (active != 0) {
-        packet->scale = SeekLinearF(packet->scale, 1.0f, 3.0f * FRAMETIME);
-        if (((DoubleScore >> player_index) & 1) == 0) {
-            packet->active = 1;
-            packet->double_score_timer = 0.0f;
-        } else if (packet->double_score_timer > 0.0f) {
-            packet->double_score_timer -= FRAMETIME;
-            if (packet->double_score_timer <= 0.0f) {
-                packet->active = 1;
+    if (active == 0) {
+        packet->active = 1;
+        packet->scale = 1.0f;
+        packet->double_score_timer = 0.0f;
+        if (BonusArea != 0) {
+            if (packet->coins < 10) {
+                packet->coins = 0;
+                return;
             }
+            u32 decrement = static_cast<u32>(static_cast<i32>(20000.0f * FRAMETIME));
+            decrement = (decrement / 10) * 10;
+            if (decrement < 10) {
+                decrement = 10;
+            } else if (packet->coins < decrement) {
+                packet->coins = 0;
+                return;
+            }
+            packet->coins -= decrement;
         }
         return;
     }
-    packet->active = 1;
-    packet->scale = 1.0f;
-    packet->double_score_timer = 0.0f;
-    if (BonusArea != 0) {
-        if (packet->coins < 10) {
-            packet->coins = 0;
-            return;
+
+    packet->scale = SeekLinearF(packet->scale, 1.0f, 3.0f * FRAMETIME);
+    if (((DoubleScore >> player_index) & 1) == 0) {
+        packet->active = 1;
+        packet->double_score_timer = 0.0f;
+    } else if (packet->double_score_timer > 0.0f) {
+        packet->double_score_timer -= FRAMETIME;
+        if (packet->double_score_timer <= 0.0f) {
+            packet->active = 1;
         }
-        u32 decrement = (static_cast<u32>(20000.0f * FRAMETIME) / 10) * 10;
-        if (decrement < 10) {
-            decrement = 10;
-        }
-        packet->coins = packet->coins < decrement ? 0 : packet->coins - decrement;
     }
 }
 

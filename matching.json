@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 51.47258,
+    "fuzzy_match_percent": 51.477005,
     "total_code": "4722419",
-    "matched_code": "452536",
-    "matched_code_percent": 9.582716,
+    "matched_code": "452581",
+    "matched_code_percent": 9.583669,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 5350,
-    "matched_functions_percent": 39.75035,
+    "matched_functions": 5351,
+    "matched_functions_percent": 39.757782,
     "total_units": 1
   },
   "text": {
@@ -60282,7 +60282,7 @@
           "address": 4988368,
           "offset": 4098400,
           "size": 302,
-          "match_percent": 40.31579
+          "match_percent": 84.42105
         },
         {
           "name": "_Z19InCollectList_IndexiP9COLLECTIDi",
@@ -69617,7 +69617,7 @@
           "address": 4695600,
           "offset": 3805632,
           "size": 43,
-          "match_percent": 32.307693
+          "match_percent": 99.61539
         },
         {
           "name": "_Z15Game_AutoSavingv",
@@ -69625,7 +69625,7 @@
           "address": 4695648,
           "offset": 3805680,
           "size": 45,
-          "match_percent": 32.307693
+          "match_percent": 100.0
         },
         {
           "name": "_Z16FreePlayUnlockedv",
@@ -69697,7 +69697,7 @@
           "address": 4697744,
           "offset": 3807776,
           "size": 1240,
-          "match_percent": 60.961685
+          "match_percent": 62.29502
         },
         {
           "name": "_Z20MenuUpdateDebugStoreP6MENU_s",

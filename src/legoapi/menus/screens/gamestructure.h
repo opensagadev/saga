@@ -19,8 +19,8 @@ LEVELDATA_s *CanSaveAndExit(WORLDINFO_s *world);
 void AddToCompletionPoints(u32 points);
 i32 Game_100PercentComplete(void);
 void AddToGoldBricks(void);
-void Game_GotAllGoldBricks(void);
-void Game_AutoSaving(void);
+i32 Game_GotAllGoldBricks(void);
+i32 Game_AutoSaving(void);
 bool FreePlayUnlocked(void);
 
 extern void (*Game_AllGoldBricksFn)(void);

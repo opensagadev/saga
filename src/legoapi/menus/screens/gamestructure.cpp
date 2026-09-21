@@ -270,12 +270,18 @@ void AddToGoldBricks() {
     }
 }
 
-void Game_GotAllGoldBricks() {
-    STUBBED();
+i32 Game_GotAllGoldBricks() {
+    if (Game_CompletionSave == NULL) {
+        return 0;
+    }
+    return (reinterpret_cast<STATUSCOLLECT_s *>(Game_CompletionSave)->flags & SAVE_REWARD_ALL_GOLD_BRICKS) >> 1;
 }
 
-void Game_AutoSaving() {
-    STUBBED();
+i32 Game_AutoSaving() {
+    if (memcard_autosaveneeded != 0) {
+        return 1;
+    }
+    return memcard_autosaveinprogress != 0;
 }
 
 bool FreePlayUnlocked() {
