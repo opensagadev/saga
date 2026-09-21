@@ -23,11 +23,3 @@ struct HostWindowOptions {
 };
 
 i32 host_run_window(const HostWindowOptions &options);
-i32 host_run_autoplay(const char *level_name);
-
-void host_autoplay_print_scripts();
-void host_autoplay_input_tick();
-bool host_autoplay_active();
-bool host_autoplay_done();
-bool host_autoplay_allows_manual_input();
-i32 host_autoplay_result();

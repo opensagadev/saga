@@ -7,23 +7,6 @@ The host executable is a diagnostic aid for the decompilation. A successful
 host run does not justify behavior that is absent from the original binary;
 game-side fixes must still come from the original code, data, and ABI.
 
-## Automated playthroughs
-
-The `autoplay` utility loads a known level script and advances its actions from
-the native host input frame. List the compiled-in scripts or run one by name:
-
-```sh
-bazel run --config=native //src:run_native -- autoplay list
-bazel run --config=native //src:run_native -- autoplay negotiations_a
-```
-
-Scripts live under `src/host/harness/programs/autoplay/scripts/`. They compose
-reusable wait, walking, button, gizmo, flow, and level-transition actions. Walking uses
-the loaded AI path graph for ordinary connections and emits normal host analog
-input; special traversal connections remain explicit script steps. Every
-action has a deadline, and walking retries a stalled route before failing with
-the current level, action, and player position.
-
 ## Direct gameplay smoke tests (Linux)
 
 `saga_smoke` is a separate host executable linked against the native engine.

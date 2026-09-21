@@ -868,10 +868,6 @@ i32 host_run_window(const HostWindowOptions &options) {
             break;
         }
 
-        if (host_autoplay_done()) {
-            break;
-        }
-
         frame_count++;
 
         const Uint64 elapsed_ticks = SDL_GetTicks() - start_ticks;

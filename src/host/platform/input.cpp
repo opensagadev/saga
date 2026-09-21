@@ -96,14 +96,12 @@ namespace NuInputDevicePS {
     }
 
     void UpdateAllPS(f32) {
-        host_autoplay_input_tick();
         for (i32 port = 0; port < 2; ++port) {
             const u32 tapped = host_pending_buttons[port].exchange(0, std::memory_order_acq_rel);
             const u32 held = host_held_buttons[port].load(std::memory_order_acquire);
             const u32 keyboard = host_keyboard_buttons[port].load(std::memory_order_acquire);
             const u32 platform = HostInputConsumePlatform(port);
-            const bool accept_manual_input = !host_autoplay_active() || host_autoplay_allows_manual_input();
-            host_frame_buttons[port] = tapped | held | (accept_manual_input ? keyboard | platform : 0);
+            host_frame_buttons[port] = tapped | held | keyboard | platform;
         }
     }
 

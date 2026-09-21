@@ -815,7 +815,7 @@ void NuMtxGetPerspectiveD3D(NUMTX *mtx, f32 *fovy, f32 *aspect, f32 *zNear, f32 
     *zNear = -mtx->m32 / Q;
     *zFar = (*zNear * Q) / (Q - 1.0f);
     *aspect = mtx->m11 / mtx->m00;
-    *fovy = NuAtan2(1.0f / mtx->m11, 1.0f) * 360.0f / (f32)M_PI;
+    *fovy = NuAtan2(1.0f / mtx->m11, 1.0f) * 360.0f / (f32)3.14159265358979323846;
 }
 
 void NuMtxGetPerspectiveBlend(NUMTX *mtx, f32 *fovy, f32 *aspect, f32 *zNear, f32 *zFar) {
@@ -823,7 +823,7 @@ void NuMtxGetPerspectiveBlend(NUMTX *mtx, f32 *fovy, f32 *aspect, f32 *zNear, f3
     *zNear = -(mtx->m32 * 0.5f) / Q;
     *zFar = (*zNear * Q) / (Q - 1.0f);
     *aspect = mtx->m11 / mtx->m00;
-    *fovy = NuAtan2(1.0f / mtx->m11, 1.0f) * 360.0f / (f32)M_PI;
+    *fovy = NuAtan2(1.0f / mtx->m11, 1.0f) * 360.0f / (f32)3.14159265358979323846;
 }
 
 void NuMtxGetFrustumD3D(NUMTX *mtx, f32 *l, f32 *r, f32 *b, f32 *t, f32 *n, f32 *f) {
@@ -1393,7 +1393,7 @@ void NuMtxGetPerspectivePS3(NUMTX *mtx, f32 *fovy, f32 *aspect, f32 *zNear, f32 
     *zNear = -B / (Q + 1.0f);
     *zFar = (*zNear * B) / ((*zNear + *zNear) + B);
     *aspect = mtx->m11 / mtx->m00;
-    *fovy = NuAtan2(1.0f / mtx->m11, 1.0f) * 360.0f / (f32)M_PI;
+    *fovy = NuAtan2(1.0f / mtx->m11, 1.0f) * 360.0f / (f32)3.14159265358979323846;
 }
 
 void NuMtxGetPerspectiveOGL(NUMTX *mtx, f32 *fovy, f32 *aspect, f32 *zNear, f32 *zFar) {
@@ -1401,7 +1401,7 @@ void NuMtxGetPerspectiveOGL(NUMTX *mtx, f32 *fovy, f32 *aspect, f32 *zNear, f32 
     *zNear = (depth + depth) / mtx->m32 - 1.0f;
     *zFar = (*zNear * depth) / (depth - 1.0f);
     *aspect = mtx->m11 / mtx->m00;
-    *fovy = NuAtan2(1.0f / mtx->m11, 1.0f) * 360.0f / (f32)M_PI;
+    *fovy = NuAtan2(1.0f / mtx->m11, 1.0f) * 360.0f / (f32)3.14159265358979323846;
 }
 
 void NuMtxLookAtInverseD3D(NUMTX *mtx, NUVEC *eye, NUVEC *center, NUVEC *up) {

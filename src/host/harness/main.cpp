@@ -12,28 +12,19 @@
 namespace {
 
     enum class HostUtility {
-        autoplay,
         window,
     };
 
     struct HostHarnessOptions {
         HostUtility utility = HostUtility::window;
-        const char *autoplay_level = nullptr;
         HostWindowOptions window;
     };
 
     void host_print_usage(const char *program) {
         printf("Usage: %s <utility> [options]\n", program);
         printf("\nHost utilities:\n");
-        printf("  autoplay <level|all>   Run one or every known automated level playthrough\n");
         printf("  window [options]       Run the game in an SDL window\n");
         printf("\nRun '%s <utility> --help' for utility-specific options.\n", program);
-    }
-
-    void host_print_autoplay_usage(const char *program) {
-        printf("Usage: %s autoplay <level|all>\n", program);
-        printf("       %s autoplay list\n\n", program);
-        host_autoplay_print_scripts();
     }
 
     void host_print_window_usage(const char *program) {
@@ -154,20 +145,7 @@ namespace {
 
         const i32 utility_argc = argc - 2;
         char **utility_argv = argv + 2;
-        if (strcmp(argv[1], "autoplay") == 0) {
-            options.utility = HostUtility::autoplay;
-            if (utility_argc == 1 && strcmp(utility_argv[0], "--help") == 0) {
-                host_print_autoplay_usage(program);
-                return HostParseResult::help;
-            }
-            if (utility_argc != 1) {
-                fprintf(stderr, "autoplay requires exactly one level name or 'all'\n");
-                host_print_autoplay_usage(program);
-                return HostParseResult::error;
-            }
-            options.autoplay_level = utility_argv[0];
-            return HostParseResult::run;
-        }
+
         if (strcmp(argv[1], "window") == 0) {
             options.utility = HostUtility::window;
             if (utility_argc == 1 && strcmp(utility_argv[0], "--help") == 0) {
@@ -222,9 +200,6 @@ i32 main(i32 argc, char **argv) {
     host_initialize_language();
     i32 utility_result = 1;
     switch (options.utility) {
-        case HostUtility::autoplay:
-            utility_result = host_run_autoplay(options.autoplay_level);
-            break;
         case HostUtility::window:
             utility_result = host_run_window(options.window);
             break;
