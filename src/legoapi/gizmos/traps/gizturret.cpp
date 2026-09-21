@@ -1153,8 +1153,8 @@ GIZTURRET_s *GizTurret_FindByController(GIZTURRETSYS_s *system, GameObject_s &co
     return NULL;
 }
 
-void GizTurrets_OpponentSelection(GIZTURRETSYS_s *system, i32 goody_count, APIOBJECT_s **goodies,
-                                  i32 baddy_count, APIOBJECT_s **baddies) {
+void GizTurrets_OpponentSelection(GIZTURRETSYS_s *system, i32 goody_count, APIOBJECT_s **goodies, i32 baddy_count,
+                                  APIOBJECT_s **baddies) {
     if (system == NULL || system->count == 0) {
         return;
     }
@@ -1172,17 +1172,32 @@ void GizTurrets_OpponentSelection(GIZTURRETSYS_s *system, i32 goody_count, APIOB
     }
 
     turret->field_0xe4 = NULL;
-    if ((flags & 6) != 6 || (flags & 0x38) != 0) {
+    if ((flags & 4) == 0) {
+        return;
+    }
+    if ((flags & 2) == 0) {
+        return;
+    }
+    if ((flags & 8) != 0) {
+        return;
+    }
+    if ((flags & 0x30) != 0) {
         return;
     }
 
-    APIOBJECT_s **candidates = goodies;
-    i32 candidate_count = goody_count;
+    APIOBJECT_s **candidates;
+    i32 candidate_count;
     if ((turret->behavior_flags & 4) != 0) {
         candidates = baddies;
         candidate_count = baddy_count;
+    } else {
+        candidates = goodies;
+        candidate_count = goody_count;
     }
-    if (candidates == NULL || candidate_count <= 0) {
+    if (candidates == NULL || candidate_count == 0) {
+        return;
+    }
+    if (candidate_count <= 0) {
         return;
     }
 
@@ -1191,8 +1206,7 @@ void GizTurrets_OpponentSelection(GIZTURRETSYS_s *system, i32 goody_count, APIOB
     for (i32 i = 0; i < candidate_count; ++i) {
         GameObject_s *candidate = candidates[i]->objptr;
         u32 behavior_flags = turret->behavior_flags;
-        if ((behavior_flags & 0x4000) == 0 &&
-            (candidate->apiobj.character_data->model_flags & 0x80000) != 0) {
+        if ((behavior_flags & 0x4000) == 0 && (candidate->apiobj.character_data->model_flags & 0x80000) != 0) {
             continue;
         }
         if ((behavior_flags & 0x20) != 0 && candidate->field_0xcc0 == NULL) {
@@ -1200,7 +1214,7 @@ void GizTurrets_OpponentSelection(GIZTURRETSYS_s *system, i32 goody_count, APIOB
         }
 
         const f32 distance = NuVecDistSqr(&candidate->apiobj.collision_position, &turret->field_0x30, NULL);
-        if (distance >= turret->field_0xec * turret->field_0xec) {
+        if (!(distance < turret->field_0xec * turret->field_0xec)) {
             continue;
         }
 
@@ -1216,31 +1230,34 @@ void GizTurrets_OpponentSelection(GIZTURRETSYS_s *system, i32 goody_count, APIOB
             behavior_flags = turret->behavior_flags;
         }
 
-        bool choose = false;
         if ((behavior_flags & 0x10) != 0 && selected != NULL) {
-            const bool candidate_priority = (candidate->apiobj.character_data->model_flags & 0x10) != 0;
-            const bool selected_priority = (selected->apiobj.character_data->model_flags & 0x10) != 0;
-            if (candidate_priority != selected_priority) {
-                choose = candidate_priority;
-            } else {
-                choose = distance < selected_distance;
+            const u32 candidate_flags = candidate->apiobj.character_data->model_flags;
+            const u32 selected_flags = selected->apiobj.character_data->model_flags;
+            if ((candidate_flags & 0x10) == 0 || (selected_flags & 0x10) != 0) {
+                if (((candidate_flags ^ selected_flags) & 0x10) != 0) {
+                    continue;
+                }
+                if (!(distance < selected_distance)) {
+                    continue;
+                }
             }
         } else if ((behavior_flags & 8) != 0 && selected != NULL) {
-            const bool candidate_player = static_cast<i8>(candidate->apiobj.flags_low) < 0;
-            const bool selected_player = static_cast<i8>(selected->apiobj.flags_low) < 0;
-            if (candidate_player != selected_player) {
-                choose = candidate_player;
-            } else {
-                choose = distance < selected_distance;
+            const i8 candidate_flags = static_cast<i8>(candidate->apiobj.flags_low);
+            const i8 selected_flags = static_cast<i8>(selected->apiobj.flags_low);
+            if (candidate_flags >= 0 || selected_flags < 0) {
+                if ((candidate_flags ^ selected_flags) < 0) {
+                    continue;
+                }
+                if (!(distance < selected_distance)) {
+                    continue;
+                }
             }
-        } else {
-            choose = distance < selected_distance;
+        } else if (!(distance < selected_distance)) {
+            continue;
         }
 
-        if (choose) {
-            selected = candidate;
-            selected_distance = distance;
-        }
+        selected = candidate;
+        selected_distance = distance;
     }
 
     if (selected != NULL) {
