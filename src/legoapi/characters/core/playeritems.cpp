@@ -3,6 +3,7 @@
 #include "gamelib/util/gamelib_util_types.h"
 #include "legoapi/core/input/gamepads.h"
 #include "legoapi/characters/core/character.h"
+#include "legoapi/characters/core/players.h"
 #include "legoapi/characters/motion.h"
 #include "legoapi/characters/motion/gameanim.h"
 #include "legoapi/characters/motion/animlist.h"
@@ -26,6 +27,7 @@ i32 (*Fighting_WeaponInActionFn)(GameObject_s *) = NULL;
 i32 (*Fighting_WeaponOutActionFn)(GameObject_s *) = NULL;
 
 extern i32 adaptivedifficulty[3];
+extern f32 DEFENDTIME;
 
 extern i8 (*adtab)[4];
 
@@ -417,6 +419,18 @@ void WeaponScalingCode(GameObject_s *object) {
     }
 }
 
-void FindPlayerAndSetWeapon(i32, i32) {
-    STUBBED();
+void FindPlayerAndSetWeapon(i32 id, i32 weapon_out) {
+    GameObject_s *object = Player_FindByID(id);
+    if (object == NULL)
+        return;
+
+    object->field_0xe22 = (object->field_0xe22 & ~GAMEOBJECT_E22_FLAG_WEAPON_ANIMATION) |
+                          (weapon_out & GAMEOBJECT_E22_FLAG_WEAPON_ANIMATION);
+    if (weapon_out != 0) {
+        object->weapon_scale = 1.0f;
+        if (static_cast<i8>(object->apiobj.flags_low) >= 0)
+            object->field_0xed8 = DEFENDTIME;
+    } else {
+        object->weapon_scale = 0.0f;
+    }
 }

@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 51.643204,
+    "fuzzy_match_percent": 51.645855,
     "total_code": "4722419",
-    "matched_code": "453048",
-    "matched_code_percent": 9.593557,
+    "matched_code": "453191",
+    "matched_code_percent": 9.596586,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 5356,
-    "matched_functions_percent": 39.794933,
+    "matched_functions": 5357,
+    "matched_functions_percent": 39.802364,
     "total_units": 1
   },
   "text": {
@@ -44828,7 +44828,7 @@
           "address": 1265488,
           "offset": 375520,
           "size": 143,
-          "match_percent": 12.352942
+          "match_percent": 100.0
         },
         {
           "name": "_Z10LoseHelmetP12GameObject_sii",
