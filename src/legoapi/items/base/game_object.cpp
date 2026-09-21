@@ -41,7 +41,6 @@ extern void ResetPlayerPacket(PLAYERPACKET_s *packet, CHARACTERDATA_s *data);
 extern void Hub_ResetPanel();
 extern f32 VehicleTurnOrLoopOffset(GameObject_s *object);
 extern void StartTurn(GameObject_s *object);
-extern GIZMO *GizmoFindByData(GIZMOSYS *system, i32 type_id, void *data);
 
 extern "C" {
     extern i16 id_MOSEISLEYCITIZEN;
@@ -73,19 +72,6 @@ f32 trench_seek_y = 0.5f;
 f32 trench_seek_x = 4.0f;
 extern f32 TURNTIME;
 f32 LOOPTIME = 1.5f;
-
-struct TROOPERCANNON_s {
-    u32 field_0x00;
-    GIZBUILDIT_s *buildit;
-    GameObject_s *object;
-    char character_name[32];
-    u8 rebuilding;
-    u8 reserved_0x2d[3];
-};
-DECOMP_ASSERT(sizeof(TROOPERCANNON_s) == 0x30, "Trooper cannon state size");
-DECOMP_ASSERT(offsetof(TROOPERCANNON_s, character_name) == 0x0c, "Trooper cannon name offset");
-DECOMP_ASSERT(offsetof(TROOPERCANNON_s, rebuilding) == 0x2c, "Trooper cannon rebuilding offset");
-TROOPERCANNON_s troopercannons[4];
 
 void ClearGameObjects(APIOBJECTSYS_s *api_object_sys) {
     for (i32 i = 0; i < 64; i++) {
@@ -261,24 +247,4 @@ static __used__ void PauseGame_ExtraCode() {
 
 static __used__ i32 SpecialObjectFilter(void *object) {
     return theSceneObjectHelper.scene_id == static_cast<SpecialObject *>(object)->scene_id;
-}
-
-static __used__ void KilledTrooperCannon(GameObject_s *object) {
-    if (netclient != 0)
-        return;
-    i32 i;
-    for (i = 0; i < 4; ++i) {
-        if (troopercannons[i].object == object)
-            break;
-    }
-    if (i < 4) {
-        TROOPERCANNON_s &cannon = troopercannons[i];
-        DeactivateCharacter(cannon.character_name);
-        GizBuildIt_SetToStart(cannon.buildit, 0, 0);
-        GIZMO *gizmo = GizmoFindByData(WORLD->gizmo_sys, gizbuildit_gizmotype_id, cannon.buildit);
-        GizmoActivate(WORLD->gizmo_sys, gizmo, 1, 1);
-        GizBuildit_SetVisibility(cannon.buildit, 1);
-        cannon.rebuilding = 1;
-        WORLD->level_progress->destroyed_trooper_cannon_mask |= 1u << i;
-    }
 }

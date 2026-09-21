@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 51.79747,
+    "fuzzy_match_percent": 51.81265,
     "total_code": "4722419",
-    "matched_code": "455012",
-    "matched_code_percent": 9.635147,
+    "matched_code": "455041",
+    "matched_code_percent": 9.63576,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 5371,
-    "matched_functions_percent": 39.906384,
+    "matched_functions": 5372,
+    "matched_functions_percent": 39.91381,
     "total_units": 1
   },
   "text": {
@@ -60396,14 +60396,6 @@
           "match_percent": 84.06641
         },
         {
-          "name": "_ZL19KilledTrooperCannonP12GameObject_s",
-          "demangled_name": "KilledTrooperCannon(GameObject_s*)",
-          "address": 2196768,
-          "offset": 1306800,
-          "size": 314,
-          "match_percent": 78.81579
-        },
-        {
           "name": "_Z13AddGameObjecti",
           "demangled_name": "AddGameObject(int)",
           "address": 4642352,
@@ -82503,6 +82495,22 @@
           "match_percent": 61.876545
         },
         {
+          "name": "_ZL19KilledTrooperCannonP12GameObject_s",
+          "demangled_name": "KilledTrooperCannon(GameObject_s*)",
+          "address": 2196768,
+          "offset": 1306800,
+          "size": 314,
+          "match_percent": 81.63158
+        },
+        {
+          "name": "_Z18InitTrooperCannonsP11WORLDINFO_s",
+          "demangled_name": "InitTrooperCannons(WORLDINFO_s*)",
+          "address": 2197088,
+          "offset": 1307120,
+          "size": 29,
+          "match_percent": 100.0
+        },
+        {
           "name": "_Z19ResetTrooperCannonsP11WORLDINFO_si",
           "demangled_name": "ResetTrooperCannons(WORLDINFO_s*, int)",
           "address": 2197120,
@@ -82516,7 +82524,7 @@
           "address": 2199904,
           "offset": 1309936,
           "size": 1341,
-          "match_percent": 2.745098
+          "match_percent": 54.27778
         },
         {
           "name": "_Z22Episodes_ConfigureListPcP9variptr_uS1_iPi",
@@ -82524,7 +82532,7 @@
           "address": 4689712,
           "offset": 3799744,
           "size": 872,
-          "match_percent": 19.269566
+          "match_percent": 19.334784
         },
         {
           "name": "_Z20Episode_ContainsAreaiPi",
@@ -82556,7 +82564,7 @@
           "address": 4691056,
           "offset": 3801088,
           "size": 111,
-          "match_percent": 99.07895
+          "match_percent": 99.47369
         },
         {
           "name": "_Z20Episode_FindFromAreai",
@@ -84496,14 +84504,6 @@
           "offset": 1304912,
           "size": 878,
           "match_percent": 80.797356
-        },
-        {
-          "name": "_Z18InitTrooperCannonsP11WORLDINFO_s",
-          "demangled_name": "InitTrooperCannons(WORLDINFO_s*)",
-          "address": 2197088,
-          "offset": 1307120,
-          "size": 29,
-          "match_percent": 46.666668
         },
         {
           "name": "_Z16HothEscapeA_InitP11WORLDINFO_s",

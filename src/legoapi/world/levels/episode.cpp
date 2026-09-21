@@ -3,10 +3,12 @@
 #include "MechInputTouch/MechInputTouch_types.h"
 #include "globals.h"
 #include "legoapi/characters/core/character.h"
+#include "legoapi/characters/core/charconfig.h"
 #include "legoapi/characters/motion/gameanim.h"
 #include "legoapi/core/config/cheat.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/items/base/apiobject.h"
+#include "legoapi/gizmos/object/gizbuildits.h"
 #include "legoapi/menus/core/gamemessages.h"
 #include "legoapi/menus/core/text.h"
 #include "legoapi/menus/screens/store.h"
@@ -19,7 +21,26 @@
 #include "nu2api/nufile/nufpar.h"
 #include "nu2api/numath/nutrig.h"
 
+#include <string.h>
+
 EPISODEDATA *EDataList = NULL;
+
+struct TROOPERCANNON_s {
+    u32 field_0x00;
+    GIZBUILDIT_s *buildit;
+    GameObject_s *object;
+    char character_name[32];
+    u8 rebuilding;
+    u8 reserved_0x2d[3];
+};
+DECOMP_ASSERT(sizeof(TROOPERCANNON_s) == 0x30, "Trooper cannon state size");
+DECOMP_ASSERT(offsetof(TROOPERCANNON_s, character_name) == 0x0c, "Trooper cannon name offset");
+DECOMP_ASSERT(offsetof(TROOPERCANNON_s, rebuilding) == 0x2c, "Trooper cannon rebuilding offset");
+
+TROOPERCANNON_s troopercannons[4];
+
+extern i32 GizBuildIt_AtEnd(GIZBUILDIT_s *buildit);
+extern GIZMO *GizmoFindByData(GIZMOSYS *system, i32 type_id, void *data);
 
 extern f32 text3d_width;
 
@@ -424,12 +445,63 @@ bool FireBountyHunterRocket(GameObject_s *object) {
     return false;
 }
 
+static __used__ void KilledTrooperCannon(GameObject_s *object) {
+    if (netclient != 0)
+        return;
+
+    i32 i;
+    for (i = 0; i < 4; ++i) {
+        if (troopercannons[i].object == object)
+            break;
+    }
+
+    if (i < 4) {
+        TROOPERCANNON_s &cannon = troopercannons[i];
+        DeactivateCharacter(cannon.character_name);
+        GizBuildIt_SetToStart(cannon.buildit, 0, 0);
+        GIZMO *gizmo = GizmoFindByData(WORLD->gizmo_sys, gizbuildit_gizmotype_id, cannon.buildit);
+        GizmoActivate(WORLD->gizmo_sys, gizmo, 1, 1);
+        GizBuildit_SetVisibility(cannon.buildit, 1);
+        cannon.rebuilding = 1;
+        WORLD->level_progress->destroyed_trooper_cannon_mask |= 1u << i;
+    }
+}
+
+void InitTrooperCannons(WORLDINFO_s *) {
+    memset(troopercannons, 0, sizeof(troopercannons));
+}
+
 void ResetTrooperCannons(WORLDINFO_s *, i32) {
     STUBBED();
 }
 
 void UpdateTrooperCannons(WORLDINFO_s *) {
-    STUBBED();
+    for (i32 i = 0; i < 4; ++i) {
+        TROOPERCANNON_s &cannon = troopercannons[i];
+
+        if (cannon.buildit != NULL && netclient == 0 && GizBuildIt_AtEnd(cannon.buildit)) {
+            if (cannon.object != NULL) {
+                if (cannon.rebuilding != 0) {
+                    ActivateCharacter(cannon.character_name, NULL, 0);
+                    GizBuildit_SetVisibility(cannon.buildit, 0);
+                    cannon.rebuilding = 0;
+                    WORLD->level_progress->destroyed_trooper_cannon_mask &= ~(1u << i);
+                }
+            } else {
+                GizBuildIt_KillParts(cannon.buildit);
+                GizBuildIt_SetToStart(cannon.buildit, 0, 0);
+                GizBuildit_SetVisibility(cannon.buildit, 0);
+            }
+        }
+
+        if (cannon.object != NULL && netclient == 0) {
+            GameObject_s *callback_object = cannon.object->field_0xcc0;
+            if (callback_object == NULL)
+                callback_object = cannon.object;
+            if (callback_object->field_0xeb4 == NULL)
+                callback_object->field_0xeb4 = KilledTrooperCannon;
+        }
+    }
 }
 
 void UpdateMiniSnowTroopers(WORLDINFO_s *) {
