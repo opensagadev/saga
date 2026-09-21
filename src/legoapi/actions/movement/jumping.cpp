@@ -379,8 +379,31 @@ void StartBallooning(GameObject_s *object, i32 movement_state) {
     object->field_0x768 = 1000000000.0f;
 }
 
-void StartJetPackFall(GameObject_s *, i32) {
-    STUBBED();
+void StartJetPackFall(GameObject_s *object, i32 fall) {
+    object->context_animation_timer = 0.0f;
+    const u8 context_variant_flags = object->context_variant_flags;
+    object->jump_flags &= ~PLAYER_JUMP_FLAG_SPECIAL_TAKEOFF;
+    object->field_0xe31 = 0;
+    object->character_context = 0;
+    object->context_variant_flags = context_variant_flags & ~PLAYER_JUMP_VARIANT_END_CLEAR;
+    object->action_movement_state = 0;
+    object->context_animation = 6;
+    object->jump_sequence = 2;
+    object->airborne_collision_target = NULL;
+
+    if (fall == 0 && object->apiobj.character_model->model_data_b[0x49] != NULL) {
+        object->context_variant_flags = context_variant_flags & 0x2f;
+        object->apiobj.velocity.y =
+            static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24)->jump_speed;
+        object->context_animation = 0x49;
+        PlayJumpSfx(object, 0);
+    } else {
+        object->character_context = -1;
+    }
+
+    if (static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24)->uses_weapon_action == 2) {
+        PlayJumpSfx(object, 1);
+    }
 }
 
 void MakeJumpReachHeight(GameObject_s *object, float height, i32 force) {
