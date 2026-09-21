@@ -206,8 +206,14 @@ void TerrFlush(void);
 void NewScanRot(NUVEC *position, i32 terrain_mask);
 f32 NewCast(NUVEC *position, f32 height_above, f32 height_below);
 void RemoveChunkControlFromStack(debris_chunk_control_s *, debris_chunk_control_s **);
+i32 DebrisSingleCollisionCheckScaleYFlag(i32, NUVEC *, f32, f32, u8);
+i32 DebrisSingleTorusCollisionCheckScaleYFlag(i32, NUVEC *, f32, f32, u8);
 
 extern "C" {
+    i32 DebrisCollisionCheckScaleYFlag(NUVEC *, f32, f32, u8);
+    i32 DebrisCollisionCheckScaleY(NUVEC *, f32, f32);
+    i32 DebrisTorusCollisionCheckScaleYFlag(NUVEC *, f32, f32, u8);
+    i32 DebrisTorusCollisionCheckScaleY(NUVEC *, f32, f32);
     extern debkeydatatype_s *debkeydata;
     extern i32 maxdebkeys;
     extern debinftype **debtab;
@@ -237,6 +243,11 @@ extern "C" {
     extern particlechunkrendertype_s *ParticleChunkToRender;
     extern particlechunkrendertype_s *ParticleChunkRenderStack[5];
     extern debris_chunk_control_s *debris_chunk_control_stack[2];
+    extern debkeydatatype_s *debris_keystack;
+    extern u32 *spherecolldata;
+    extern u32 *toruscolldata;
+    extern i32 numspherecolldata;
+    extern i32 numtoruscolldata;
     extern NUMTL *DebMat[10];
     extern i32 debris_suspended;
     void DebrisReScale(i32, f32);
@@ -620,24 +631,33 @@ extern "C" {
         }
     }
 
-    void DebrisAllCollisionCheckScaleYFlag(void) {
-        STUBBED();
+    i32 DebrisAllCollisionCheckScaleYFlag(NUVEC *position, f32 radius, f32 y_scale, u8 flags) {
+        i32 result = DebrisCollisionCheckScaleYFlag(position, radius, y_scale, flags);
+        if (result == -1)
+            result = DebrisTorusCollisionCheckScaleYFlag(position, radius, y_scale, flags);
+        return result;
     }
 
-    void DebrisCollisionCheck(void) {
-        STUBBED();
+    i32 DebrisCollisionCheck(NUVEC *position, f32 radius) {
+        return DebrisCollisionCheckScaleY(position, radius, 1.0f);
     }
 
-    void DebrisCollisionCheckFlag(void) {
-        STUBBED();
+    i32 DebrisCollisionCheckFlag(NUVEC *position, f32 radius, u8 flags) {
+        return DebrisCollisionCheckScaleYFlag(position, radius, 1.0f, flags);
     }
 
-    void DebrisCollisionCheckScaleY(void) {
-        STUBBED();
+    i32 DebrisCollisionCheckScaleY(NUVEC *position, f32 radius, f32 y_scale) {
+        return DebrisCollisionCheckScaleYFlag(position, radius, y_scale, 3);
     }
 
-    void DebrisCollisionCheckScaleYFlag(void) {
-        STUBBED();
+    i32 DebrisCollisionCheckScaleYFlag(NUVEC *position, f32 radius, f32 y_scale, u8 flags) {
+        for (i32 i = 0; i < numspherecolldata; ++i) {
+            u32 *entry = spherecolldata + i * 2;
+            if ((entry[1] & flags) != 0 &&
+                DebrisSingleCollisionCheckScaleYFlag(entry[0], position, radius, y_scale, flags) != 0)
+                return entry[0];
+        }
+        return -1;
     }
 
 } // extern "C"
@@ -942,8 +962,37 @@ extern "C" {
         }
     }
 
-    void DebrisPreCheckCollisions(void) {
-        STUBBED();
+    i32 DebrisPreCheckCollisions(NUVEC *position, f32 radius) {
+        numspherecolldata = 0;
+        numtoruscolldata = 0;
+        if (debris_keystack == NULL)
+            return 0;
+
+        for (debkeydatatype_s *key = debris_keystack; key != NULL;) {
+            const i32 effect_index = key->effect_index;
+            debkeydatatype_s *previous = key->previous;
+            i32 key_index = key->allocation_index;
+            if (debtab[effect_index] == NULL) {
+                DebFreeInstantly(&key_index);
+                key->allocation_index = -1;
+            }
+            if (key->field_184 != 0) {
+                if (DebrisSingleCollisionCheckScaleYFlag(key_index, position, radius, 1.0f, 3) != 0) {
+                    u32 *entry = spherecolldata + numspherecolldata * 2;
+                    entry[0] = key_index;
+                    entry[1] = debtab[effect_index]->field_2f2;
+                    ++numspherecolldata;
+                }
+                if (DebrisSingleTorusCollisionCheckScaleYFlag(key_index, position, radius, 1.0f, 3) != 0) {
+                    u32 *entry = toruscolldata + numtoruscolldata * 2;
+                    entry[0] = key_index;
+                    entry[1] = debtab[effect_index]->field_2f2;
+                    ++numtoruscolldata;
+                }
+            }
+            key = previous;
+        }
+        return numspherecolldata + numtoruscolldata;
     }
 
     void DebrisProcessTimeSlip(void) {
@@ -1203,20 +1252,26 @@ extern "C" {
             debkeydata[*handle].field_2f4 = 1;
     }
 
-    void DebrisTorusCollisionCheck(void) {
-        STUBBED();
+    i32 DebrisTorusCollisionCheck(NUVEC *position, f32 radius) {
+        return DebrisTorusCollisionCheckScaleY(position, radius, 1.0f);
     }
 
-    void DebrisTorusCollisionCheckFlag(void) {
-        STUBBED();
+    i32 DebrisTorusCollisionCheckFlag(NUVEC *position, f32 radius, u8 flags) {
+        return DebrisTorusCollisionCheckScaleYFlag(position, radius, 1.0f, flags);
     }
 
-    void DebrisTorusCollisionCheckScaleY(void) {
-        STUBBED();
+    i32 DebrisTorusCollisionCheckScaleY(NUVEC *position, f32 radius, f32 y_scale) {
+        return DebrisTorusCollisionCheckScaleYFlag(position, radius, y_scale, 3);
     }
 
-    void DebrisTorusCollisionCheckScaleYFlag(void) {
-        STUBBED();
+    i32 DebrisTorusCollisionCheckScaleYFlag(NUVEC *position, f32 radius, f32 y_scale, u8 flags) {
+        for (i32 i = 0; i < numtoruscolldata; ++i) {
+            u32 *entry = toruscolldata + i * 2;
+            if ((entry[1] & flags) != 0 &&
+                DebrisSingleTorusCollisionCheckScaleYFlag(entry[0], position, radius, y_scale, flags) != 0)
+                return entry[0];
+        }
+        return -1;
     }
 
     void DebrisTrashableSetup(VARIPTR *buffer, VARIPTR *) {

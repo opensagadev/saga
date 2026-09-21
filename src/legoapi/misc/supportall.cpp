@@ -704,7 +704,7 @@ void DebFreeWithoutKey(debkeydatatype_s *key) {
 }
 
 i32 CannotKill(GameObject_s *object);
-extern "C" void DebrisPreCheckCollisions(NUVEC *position, f32 radius);
+extern "C" i32 DebrisPreCheckCollisions(NUVEC *position, f32 radius);
 extern "C" i32 DebrisCollisionCheckScaleY(NUVEC *position, f32 radius, f32 y_scale);
 extern "C" i32 DebrisTorusCollisionCheckScaleY(NUVEC *position, f32 radius, f32 y_scale);
 
@@ -713,8 +713,8 @@ void DebrisKillPlayers() {
     for (i32 player_index = 0; player_index < 8; ++player_index) {
         GameObject_s *player = Player[player_index];
         if (player == NULL || (player->apiobj.flags_high & 0x10) == 0 || player->apiobj.field_0x287 != 0 ||
-            player->field_0x1024 > 0.0f || player->spawn_protection_timer > 0.0f ||
-            (player->field_0xefe & 0x40) != 0 || CannotKill(player) != 0 || Player_HasInvincibility(player) != 0 ||
+            player->field_0x1024 > 0.0f || player->spawn_protection_timer > 0.0f || (player->field_0xefe & 0x40) != 0 ||
+            CannotKill(player) != 0 || Player_HasInvincibility(player) != 0 ||
             (player->apiobj.character_data->game_character->flags_090 & 0x04008000) != 0) {
             continue;
         }
@@ -1255,12 +1255,118 @@ void xxxNuDisplayListUpdateSpecial(nuhspecial_s *) {
     STUBBED();
 }
 
-void DebrisSingleCollisionCheckScaleYFlag(i32, nuvec_s *, float, float, unsigned char) {
-    STUBBED();
+static inline __attribute__((always_inline)) f32 DebrisInterpolateFloatKeys(const debris_float_key_s *keys, f32 time) {
+    i32 first;
+    i32 second;
+    if (time >= keys[0].time && time <= keys[1].time) {
+        first = 0;
+        second = 1;
+    } else if (time >= keys[1].time && time <= keys[2].time) {
+        first = 1;
+        second = 2;
+    } else if (time >= keys[2].time && time <= keys[3].time) {
+        first = 2;
+        second = 3;
+    } else if (time >= keys[3].time && time <= keys[4].time) {
+        first = 3;
+        second = 4;
+    } else if (time >= keys[4].time && time <= keys[5].time) {
+        first = 4;
+        second = 5;
+    } else if (time >= keys[5].time && time <= keys[6].time) {
+        first = 5;
+        second = 6;
+    } else if (time >= keys[6].time && time <= keys[7].time) {
+        first = 6;
+        second = 7;
+    } else {
+        return 0.0f;
+    }
+    return keys[first].value + ((time - keys[first].time) / (keys[second].time - keys[first].time)) *
+                                   (keys[second].value - keys[first].value);
 }
 
-void DebrisSingleTorusCollisionCheckScaleYFlag(i32, nuvec_s *, float, float, unsigned char) {
-    STUBBED();
+extern "C" {
+    extern debkeydatatype_s *debkeydata;
+    extern debinftype **debtab;
+    extern f32 globaltime;
+    extern NUVEC debris_collide_pt;
+}
+
+i32 DebrisSingleCollisionCheckScaleYFlag(i32 key_index, NUVEC *position, f32 radius, f32 y_scale, u8 flags) {
+    debkeydatatype_s *key = &debkeydata[key_index];
+    const i32 effect_index = key->effect_index;
+    if (static_cast<u16>(effect_index + 1) <= 1)
+        return 0;
+    debinftype *effect = debtab[effect_index];
+    if (effect == NULL || (effect->field_2f2 & flags) == 0)
+        return 0;
+    const i32 sphere_count = static_cast<i8>(effect->process_spheres);
+    if (sphere_count <= 0)
+        return 0;
+
+    for (i32 i = 0; i < sphere_count; ++i) {
+        debris_process_sphere_s *sphere = &key->process_spheres[i];
+        f32 age = globaltime - sphere->time;
+        if (age < 0.0f || age > effect->particle_lifetime)
+            continue;
+
+        debris_collide_pt.x = sphere->position.x + sphere->momentum.x * age;
+        f32 acceleration = age * age;
+        acceleration *= effect->field_0a0;
+        debris_collide_pt.y = sphere->position.y + sphere->momentum.y * age + acceleration;
+        debris_collide_pt.z = sphere->position.z + sphere->momentum.z * age;
+
+        f32 effect_radius = DebrisInterpolateFloatKeys(effect->collision_keys, age / effect->particle_lifetime);
+        if (effect_radius <= 0.0f)
+            continue;
+
+        f32 dx = position->x - debris_collide_pt.x;
+        f32 dy = position->y - debris_collide_pt.y;
+        f32 dz = position->z - debris_collide_pt.z;
+        f32 combined_radius = radius + effect_radius;
+        if (y_scale != 1.0f)
+            dy *= combined_radius / (radius * y_scale + effect_radius);
+        if (combined_radius * combined_radius > dx * dx + dy * dy + dz * dz)
+            return 1;
+    }
+    return 0;
+}
+
+i32 DebrisSingleTorusCollisionCheckScaleYFlag(i32 key_index, NUVEC *position, f32 radius, f32 y_scale, u8 flags) {
+    debkeydatatype_s *key = &debkeydata[key_index];
+    const i32 effect_index = key->effect_index;
+    if (static_cast<u16>(effect_index + 1) <= 1)
+        return 0;
+    debinftype *effect = debtab[effect_index];
+    if (effect == NULL || (effect->field_2f2 & flags) == 0 || effect->torus_lifetime == 0.0f)
+        return 0;
+
+    f32 age =
+        globaltime > key->emission_time ? globaltime - key->emission_time : globaltime - key->previous_emission_time;
+    if (age <= 0.0f || age >= effect->torus_lifetime)
+        return 0;
+    f32 normalised_time = age / effect->torus_lifetime;
+    f32 ring_radius = DebrisInterpolateFloatKeys(effect->torus_keys1, normalised_time) * effect->torus_radius1;
+    f32 horizontal_radius = DebrisInterpolateFloatKeys(effect->torus_keys2, normalised_time) * effect->torus_radius2;
+    f32 vertical_radius = DebrisInterpolateFloatKeys(effect->torus_keys3, normalised_time) * effect->torus_radius2;
+
+    debris_collide_pt.x = position->x - key->position.x;
+    debris_collide_pt.y = 0.0f;
+    debris_collide_pt.z = position->z - key->position.z;
+    NuVecNorm(&debris_collide_pt, &debris_collide_pt);
+    NuVecScale(&debris_collide_pt, &debris_collide_pt, ring_radius);
+    debris_collide_pt.x += key->position.x;
+    debris_collide_pt.y += key->position.y;
+    debris_collide_pt.z += key->position.z;
+
+    f32 dx = position->x - debris_collide_pt.x;
+    f32 dy = position->y - debris_collide_pt.y;
+    f32 dz = position->z - debris_collide_pt.z;
+    f32 combined_radius = radius + horizontal_radius;
+    if (horizontal_radius != vertical_radius || y_scale != 1.0f)
+        dy *= combined_radius / (radius * y_scale + vertical_radius);
+    return combined_radius * combined_radius > dx * dx + dy * dy + dz * dz;
 }
 
 void unref(unsigned char *, unsigned char *) {

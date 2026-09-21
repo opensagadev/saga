@@ -725,6 +725,7 @@ extern "C" {
     usize debris_trash_size = 0;
     u32 *spherecolldata = NULL;
     u32 *toruscolldata = NULL;
+    NUVEC debris_collide_pt;
     debscale_s *debscale = NULL;
     i32 debrischunks = 0;
     i32 debrischunksglass = 0;
