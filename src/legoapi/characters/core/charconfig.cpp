@@ -2284,8 +2284,11 @@ void CharCategories_Init(CHARCATEGORY *categories) {
     }
 }
 
-void CanWearHatsInFreePlay(i32) {
-    STUBBED();
+i32 CanWearHatsInFreePlay(i32 character_id) {
+    if ((GCDataList[character_id].flags_090 & 0x10) != 0) {
+        return 0;
+    }
+    return CanPullLevers(character_id) != 0;
 }
 
 i32 CharCategory_FindByName(char *name) {

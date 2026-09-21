@@ -24,9 +24,11 @@ DECOMP_ASSERT(offsetof(CUSTOMPIECERESOURCE, texture_id) == 0x14, "Customiser tex
 DECOMP_ASSERT(offsetof(CUSTOMPIECERESOURCE, character_model) == 0x1c, "Customiser model offset");
 static CUSTOMPIECERESOURCE Accessory[2][9];
 
-static __used__ bool Customiser_PieceAvailable_Default(CUSTOMPIECE *) {
-    STUBBED();
-    return {};
+static __used__ bool Customiser_PieceAvailable_Default(CUSTOMPIECE *piece) {
+    if ((piece->availability_flags & 0x180) != 0 && Game_100PercentComplete() == 0) {
+        return false;
+    }
+    return true;
 }
 
 void Customiser_SetAnimsToLoad(CUSTOMISER *customiser, i32 enabled) {
@@ -181,8 +183,7 @@ void Customiser_LoadAccessories(CUSTOMISER *customiser, APICHARACTERMODELLIST_s 
                     continue;
                 }
                 NuStrCat(path, ".pnt");
-                resource->texture_id =
-                    NuTexRead(path, &characterbuffer_ptr, characterbuffer_end);
+                resource->texture_id = NuTexRead(path, &characterbuffer_ptr, characterbuffer_end);
                 if (resource->texture_id == 0) {
                     continue;
                 }
@@ -246,8 +247,7 @@ void Customiser_LoadAll(CUSTOMISER *customiser, WORLDINFO_s *world) {
     void *texture_pack = NULL;
     extern i32 CHARPAK;
     if (CHARPAK != 0) {
-        texture_pack = NuFilePakLoad("chars\\weirdo\\all_textures.fpk", &world->giz_buffer,
-                                     world->unknown_0108, 0x20);
+        texture_pack = NuFilePakLoad("chars\\weirdo\\all_textures.fpk", &world->giz_buffer, world->unknown_0108, 0x20);
     }
 
     for (i32 category_index = 0; category_index < 9; ++category_index) {
@@ -307,8 +307,7 @@ void Customiser_LoadAll(CUSTOMISER *customiser, WORLDINFO_s *world) {
                 }
             }
             if (resource->texture_id == 0) {
-                resource->texture_id = NuTexRead(path, &world->giz_buffer,
-                                                 world->unknown_0108);
+                resource->texture_id = NuTexRead(path, &world->giz_buffer, world->unknown_0108);
             }
         }
     }

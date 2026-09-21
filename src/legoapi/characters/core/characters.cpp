@@ -1803,7 +1803,6 @@ void CollectCharactersOff_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i3
 }
 
 void CollectCharactersOff_Skip(STATUS_STAGE_s *, STATUSPACKET_s *) {
-    STUBBED();
 }
 
 void ScaleGameObject(GameObject_s *obj);

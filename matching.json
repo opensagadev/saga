@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 51.67899,
+    "fuzzy_match_percent": 51.680996,
     "total_code": "4722419",
-    "matched_code": "454276",
-    "matched_code_percent": 9.619561,
+    "matched_code": "454398",
+    "matched_code_percent": 9.622145,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 5363,
-    "matched_functions_percent": 39.846943,
+    "matched_functions": 5365,
+    "matched_functions_percent": 39.8618,
     "total_units": 1
   },
   "text": {
@@ -44646,7 +44646,7 @@
           "address": 4632976,
           "offset": 3743008,
           "size": 67,
-          "match_percent": 21.0
+          "match_percent": 100.0
         }
       ]
     },
@@ -44669,7 +44669,7 @@
           "address": 4848416,
           "offset": 3958448,
           "size": 55,
-          "match_percent": 24.444445
+          "match_percent": 100.0
         },
         {
           "name": "_Z25Customiser_SetAnimsToLoadP10CUSTOMISERi",
