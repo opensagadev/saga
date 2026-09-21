@@ -178,7 +178,7 @@ extern "C" {
     }
 
     void DebFreeInstantly(i32 *handle) {
-        if (handle == NULL || *handle == -1) {
+        if (*handle == -1) {
             return;
         }
 
@@ -281,11 +281,79 @@ extern "C" {
         const i32 old_chunk_count = key->allocated_chunk_count;
         const i32 requested_chunk_count = key->previous_allocated_chunk_count;
         const i32 additional_chunks = requested_chunk_count - old_chunk_count;
-        if (additional_chunks <= 0) {
+        if (additional_chunks == 0) {
             return;
         }
 
         const bool glass = effect->particle_type == 7;
+        if (additional_chunks < 0) {
+            const i32 removed_chunk_count = -additional_chunks;
+            if ((debrischunks + debrischunksglass) * 2 < freechunkcontrolsptr + removed_chunk_count) {
+                return;
+            }
+
+            const bool panel_time = effect->time_group == 4;
+            DebrisGetControlStackLock();
+            for (i32 i = 0; i < removed_chunk_count; ++i) {
+                debris_chunk_control_s *control = freechunkcontrols[freechunkcontrolsptr++];
+                control->particle_chunk = key->particle_chunks[requested_chunk_count + i];
+                control->active = glass ? 7 : 0;
+                control->expiry_time = effect->particle_lifetime + (panel_time ? panelglobaltime : globaltime) +
+                                       static_cast<i8>(effect->trail_count) * effect->trail_time;
+                AddChunkControlToStack(control, &debris_chunk_control_stack[panel_time]);
+            }
+            DebrisReleaseControlStackLock();
+
+            particlechunkrendertype_s *render_chunk = NULL;
+            const i32 render_chunk_count = debrischunks + debrischunksglass;
+            if (removed_chunk_count == old_chunk_count) {
+                for (i32 i = 0; i < render_chunk_count; ++i) {
+                    if (ParticleChunkToRender[i].particle_chunk == key->particle_chunks[0]) {
+                        render_chunk = &ParticleChunkToRender[i];
+                        break;
+                    }
+                }
+            } else {
+                LinkDmaParticalSets(&key->particle_chunks[requested_chunk_count], removed_chunk_count);
+                for (i32 i = 0; i < render_chunk_count; ++i) {
+                    if (ParticleChunkToRender[i].particle_chunk == NULL) {
+                        render_chunk = &ParticleChunkToRender[i];
+                        break;
+                    }
+                }
+                if (render_chunk != NULL) {
+                    render_chunk->particle_chunk = key->particle_chunks[requested_chunk_count];
+                    render_chunk->effect = effect;
+                    render_chunk->key = NULL;
+                    render_chunk->effect_orientation = key->effect_orientation;
+                    render_chunk->position = key->position;
+                    render_chunk->render_priority = key->render_priority;
+                    if (key->field_2f6 != 0) {
+                        AddChunkToRenderStack(render_chunk, &ParticleChunkRenderStack[effect->time_group]);
+                    }
+                }
+                render_chunk = NULL;
+            }
+
+            if (render_chunk != NULL) {
+                render_chunk->effect = effect;
+                render_chunk->key = NULL;
+                render_chunk->effect_orientation = key->effect_orientation;
+                render_chunk->position = key->position;
+                render_chunk->render_priority = key->render_priority;
+            }
+
+            for (i32 i = requested_chunk_count; i < old_chunk_count; ++i) {
+                key->particle_chunks[i] = NULL;
+            }
+            key->allocated_chunk_count = key->previous_allocated_chunk_count;
+            key->particle_count = key->previous_particle_count;
+            if (key->previous_particle_count != 0) {
+                LinkDmaParticalSets(key->particle_chunks, key->previous_allocated_chunk_count);
+            }
+            return;
+        }
+
         i32 &free_chunk_count = glass ? freedebchkptrg : freedebchkptr;
         const i32 available_chunk_count = glass ? debrischunksglass : debrischunks;
         dma_particle_chunk_s **free_chunks = glass ? freedebchunksglass : freedebchunks;

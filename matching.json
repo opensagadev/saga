@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 50.340664,
+    "fuzzy_match_percent": 50.354557,
     "total_code": "4722419",
     "matched_code": "446820",
     "matched_code_percent": 9.461677,
@@ -48348,7 +48348,7 @@
           "address": 4757040,
           "offset": 3867072,
           "size": 121,
-          "match_percent": 15.555555
+          "match_percent": 79.07407
         },
         {
           "name": "_Z5NoPadii",
@@ -65745,14 +65745,6 @@
           "match_percent": 29.411764
         },
         {
-          "name": "_Z14CollectPowerUpP12GameObject_sP7nuvec_sti",
-          "demangled_name": "CollectPowerUp(GameObject_s*, nuvec_s*, unsigned short, int)",
-          "address": 1983760,
-          "offset": 1093792,
-          "size": 819,
-          "match_percent": 2.542373
-        },
-        {
           "name": "_Z14FindMtlInHGObjP8nugscn_si",
           "demangled_name": "FindMtlInHGObj(nugscn_s*, int)",
           "address": 4418720,
@@ -70312,7 +70304,7 @@
           "address": 3460432,
           "offset": 2570464,
           "size": 2485,
-          "match_percent": 13.439613
+          "match_percent": 19.47021
         },
         {
           "name": "DebReAlloc",
@@ -70344,7 +70336,7 @@
           "address": 3474592,
           "offset": 2584624,
           "size": 678,
-          "match_percent": 52.892616
+          "match_percent": 57.033558
         },
         {
           "name": "DebFree",
@@ -70678,7 +70670,7 @@
           "address": 3468336,
           "offset": 2578368,
           "size": 755,
-          "match_percent": 40.885246
+          "match_percent": 40.251366
         },
         {
           "name": "_Z22AddDebrisEffectToStackP16debkeydatatype_s",
@@ -79151,6 +79143,14 @@
           "match_percent": 99.933334
         },
         {
+          "name": "_Z14CollectPowerUpP12GameObject_sP7nuvec_sti",
+          "demangled_name": "CollectPowerUp(GameObject_s*, nuvec_s*, unsigned short, int)",
+          "address": 1983760,
+          "offset": 1093792,
+          "size": 819,
+          "match_percent": 55.33898
+        },
+        {
           "name": "_Z16AddTorpedoAsPartP7nuvec_sS0_ff",
           "demangled_name": "AddTorpedoAsPart(nuvec_s*, nuvec_s*, float, float)",
           "address": 1986688,
@@ -79220,7 +79220,7 @@
           "address": 2196480,
           "offset": 1306512,
           "size": 284,
-          "match_percent": 89.7619
+          "match_percent": 80.55556
         },
         {
           "name": "AddVariableShotDebrisEffectTimed5",

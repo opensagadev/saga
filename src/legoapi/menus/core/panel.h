@@ -8,7 +8,8 @@ struct nuhspecial_s;
 struct HINT_s;
 
 extern i32 DRAWBGLOAD;
-extern u16 PowerUp_PanelYRot;
+extern u16 PowerUp_PanelYRot[2];
+extern f32 PowerUp_PanelPosMul[2];
 extern f32 POWERUPOBJSIZE;
 extern f32 REDBRICKPOSX;
 extern f32 REDBRICKPOSY;

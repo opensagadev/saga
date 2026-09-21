@@ -741,13 +741,13 @@ void DrawPanel() {
                                 (object->field_0xdec >= 3.0f ||
                                  PickupFlickerFrame % PickUpFlickerFrames < PickUpFlickerTest)) {
                                 nuhspecial_s *special = &WORLD->lev_objs[0xd0].special;
-                                u16 angle = PowerUp_PanelYRot;
+                                u16 angle = PowerUp_PanelYRot[0];
                                 f32 scale = POWERUPOBJSIZE;
                                 f32 y = PowerUp_GetPanelY(0);
                                 DrawPanel3DObject(-ICONX, y + status_y, 1.0f, scale, scale, scale, 0, angle, 0, special,
                                                   0, 1.0f);
                                 special = &WORLD->lev_objs[0xd1].special;
-                                angle = PowerUp_PanelYRot;
+                                angle = PowerUp_PanelYRot[0];
                                 scale = POWERUPOBJSIZE;
                                 y = PowerUp_GetPanelY(0);
                                 DrawPanel3DObject(-ICONX, y + status_y, 1.0f, scale, scale, scale, 0, angle, 0, special,

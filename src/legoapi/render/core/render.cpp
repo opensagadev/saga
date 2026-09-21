@@ -1606,7 +1606,8 @@ f32 PANEL_MINIKITCOUNTY = -0.1f;
 // DrawPanel HUD globals referenced by the cantina-bar-patrons WIP. Initial
 // red-brick positions come from the Game init values in legogame/game.cpp.
 i32 DRAWBGLOAD = 0;
-u16 PowerUp_PanelYRot = 0;
+u16 PowerUp_PanelYRot[2] = {0, 0};
+f32 PowerUp_PanelPosMul[2] = {0.0f, 0.0f};
 f32 POWERUPOBJSIZE = 0.0f;
 f32 REDBRICKPOSX = 0.0f;
 f32 REDBRICKPOSY = -0.5f;

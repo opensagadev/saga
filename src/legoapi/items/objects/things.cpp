@@ -10,10 +10,6 @@ struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
-void CollectPowerUp(GameObject_s *, nuvec_s *, u16, i32) {
-    STUBBED();
-}
-
 void FindMtlInHGObj(nugscn_s *, i32) {
     STUBBED();
 }

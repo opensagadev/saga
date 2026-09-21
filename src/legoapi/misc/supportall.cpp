@@ -924,9 +924,6 @@ void DebrisReleaseControlStackLock(void);
 void RemoveChunkFromRenderStack(particlechunkrendertype_s *, particlechunkrendertype_s **);
 
 void DebFreeChunksInstantly(i32 *handle) {
-    if (handle == NULL || *handle == -1) {
-        return;
-    }
     debkeydatatype_s *key = &debkeydata[*handle];
     if (key->effect_index == 0 || key->allocated_chunk_count == 0) {
         return;

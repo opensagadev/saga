@@ -221,8 +221,11 @@ void NewBuzzFrames(nupad_s *pad, i32 frames, i32) {
         NuSound3AddRumble(pad, static_cast<f32>(frames) / DEFAULTFPS, 0, 0, 0.0f);
 }
 
-void TakeHitRumble(GameObject_s *, float) {
-    STUBBED();
+void TakeHitRumble(GameObject_s *object, float strength) {
+    if (object != NULL && static_cast<i8>(object->apiobj.flags_low) < 0) {
+        NewRumble(object->pad_gamepad->pad, strength, 0);
+        NewBuzz(object->pad_gamepad->pad, 0.1f, 0);
+    }
 }
 
 void SpaceRumbleProcess() {
