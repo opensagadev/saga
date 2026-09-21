@@ -782,6 +782,69 @@ static __used__ void SpeederPart_Update(PART_s *part) {
     }
 }
 
+void InitBikeParts() {
+    memset(bikeParts, 0, sizeof(BIKEPART_s) * 4);
+}
+
+void KillParts_SpeederBike(ADDPART_s *params, i32, i32, GameObject_s *object) {
+    NUVEC velocity = {object->apiobj.velocity.x * 1.5f, 0.0f, object->apiobj.velocity.z * 1.5f};
+    params->flags = 0x400;
+    params->field_44 = SpeederPart_Kill;
+    params->field_48 = SpeederPart_Update;
+    params->draw_fn = SpeederPart_Draw;
+    params->velocity = &velocity;
+
+    PART_s *part = AddPart(params);
+    if (part == NULL) {
+        return;
+    }
+    part->field_100 = 1.5f;
+    part->field_104 = 1.5f;
+
+    i32 index;
+    if (bikeParts[0].active == 0) {
+        index = 0;
+    } else if (bikeParts[1].active == 0) {
+        index = 1;
+    } else if (bikeParts[2].active == 0) {
+        index = 2;
+    } else if (bikeParts[3].active == 0) {
+        index = 3;
+    } else {
+        part->speeder_index = -1.0f;
+        KillPart(part, 0);
+        return;
+    }
+    part->speeder_index = static_cast<f32>(index);
+
+    if (object->movement_spline == NULL) {
+        KillPart(part, 0);
+        return;
+    }
+
+    f32 distance = NuVecMag(&part->velocity) * FRAMETIME;
+    BIKEPART_s *bike = &bikeParts[static_cast<i32>(part->speeder_index)];
+    bike->spline_position = object->movement_spline_position;
+    bike->active = 1;
+    bike->rider = object->field_0xcc0;
+    if (bike->rider != NULL) {
+        bike->rider->apiobj.velocity = velocity;
+        bike->rider->apiobj.velocity.y += 1.5f;
+    }
+    bike->rider_position = object->apiobj.position;
+
+    NUVEC position;
+    u16 yaw;
+    u16 pitch;
+    PointAlongSpline(bike->spline_position.spline, bike->spline_position.along, &position, &yaw, &pitch, 1);
+    if (distance >= 0.0f) {
+        yaw -= 0x8000;
+    }
+    part->rotation_y = yaw;
+    part->rotation_x = -pitch;
+    part->field_13c = 0;
+}
+
 extern WORLDINFO_s *WORLD;
 extern AREADATA_s *PODRACE_ADATA;
 extern AREADATA_s *BONUS_GUNSHIP_ADATA;

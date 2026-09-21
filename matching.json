@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 51.74263,
+    "fuzzy_match_percent": 51.75023,
     "total_code": "4722419",
     "matched_code": "455012",
     "matched_code_percent": 9.635147,
@@ -38467,22 +38467,6 @@
           "offset": 10512,
           "size": 93,
           "match_percent": 0.0
-        },
-        {
-          "name": "_Z13InitBikePartsv",
-          "demangled_name": "InitBikeParts()",
-          "address": 1276848,
-          "offset": 386880,
-          "size": 51,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z21KillParts_SpeederBikeP9ADDPART_siiP12GameObject_s",
-          "demangled_name": "KillParts_SpeederBike(ADDPART_s*, int, int, GameObject_s*)",
-          "address": 1276912,
-          "offset": 386944,
-          "size": 690,
-          "match_percent": 2.592592
         },
         {
           "name": "_Z27GetVehicleAreaRememberSpeedv",
@@ -79167,6 +79151,22 @@
           "match_percent": 100.0
         },
         {
+          "name": "_Z13InitBikePartsv",
+          "demangled_name": "InitBikeParts()",
+          "address": 1276848,
+          "offset": 386880,
+          "size": 51,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z21KillParts_SpeederBikeP9ADDPART_siiP12GameObject_s",
+          "demangled_name": "KillParts_SpeederBike(ADDPART_s*, int, int, GameObject_s*)",
+          "address": 1276912,
+          "offset": 386944,
+          "size": 690,
+          "match_percent": 54.5
+        },
+        {
           "name": "_Z9KillPartsP12GameObject_siiifiPt",
           "demangled_name": "KillParts(GameObject_s*, int, int, int, float, int, unsigned short*)",
           "address": 1277744,
@@ -79924,7 +79924,7 @@
           "address": 4339712,
           "offset": 3449744,
           "size": 3454,
-          "match_percent": 11.075136
+          "match_percent": 11.095629
         },
         {
           "name": "AddScaledFiniteShotPART",

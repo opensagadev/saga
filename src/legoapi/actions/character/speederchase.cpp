@@ -40,7 +40,6 @@ struct SHOPINPUT;
 
 // This alignment affects PodRaceAUpdate codegen even though the linked address is 32-byte aligned.
 static i32 PodRaceKey[8] __attribute__((aligned(16))) = {-1, -1, -1, -1, -1, -1, -1, -1};
-static u8 bikeParts[0x1a0];
 static i32 snaphack[2];
 static i32 snaphacktimer[2];
 
@@ -200,10 +199,6 @@ void PodLoseSpeed(GameObject_s *object, i32 hit, i32 rumble) {
     if (object->current_speed_mul < 0.333f) {
         object->current_speed_mul = 0.333f;
     }
-}
-
-void InitBikeParts() {
-    memset(bikeParts, 0, 0xd0);
 }
 
 i32 SpeederBlowupHack(GIZMOBLOWUP_s *blowup, i32) {
@@ -446,10 +441,6 @@ i32 SpeedersDroppedBack() {
 }
 
 void SpeederChaseA_Update(WORLDINFO_s *) {
-    STUBBED();
-}
-
-void KillParts_SpeederBike(ADDPART_s *, i32, i32, GameObject_s *) {
     STUBBED();
 }
 
