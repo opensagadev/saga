@@ -6,6 +6,7 @@
 #include "legoapi/render/fx.h"
 #include "legoapi/render/core/render.h"
 #include "legoapi/menus/core/gamehint.h"
+#include "legoapi/menus/core/panel.h"
 #include "legoapi/world/levels/levels.h"
 #include "legogame/game.h"
 #include "decomp.h"
@@ -35,6 +36,18 @@ struct SHOPINPUT;
 // This alignment affects PodRaceAUpdate codegen even though the linked address is 32-byte aligned.
 static i32 PodRaceKey[8] __attribute__((aligned(16))) = {-1, -1, -1, -1, -1, -1, -1, -1};
 static u8 bikeParts[0x1a0];
+
+struct SPEEDERCHASEANETPACKET_s {
+    u8 field_0x0;
+    u8 speeder_count;
+    u8 speeders_killed;
+    u8 field_0x3;
+    u8 panel_state;
+    u8 field_0x5;
+    u8 field_0x6;
+};
+
+SPEEDERCHASEANETPACKET_s *speederchasea_netpacket;
 
 u8 troopercannons_beenReset = 0;
 i32 players_going_forward = 0;
@@ -306,7 +319,42 @@ void ProcessCurrentSpeed(WORLDINFO_s *world, speedup_s *speedup) {
 }
 
 void SpeederChaseA_Panel(WORLDINFO_s *) {
-    STUBBED();
+    i16 character_ids[10];
+    char dimmed[10] = {0};
+
+    if (netclient != 0) {
+        SPEEDERCHASEANETPACKET_s *packet = speederchasea_netpacket;
+        if (packet == NULL || packet->panel_state != 1 || packet->speeder_count == 0) {
+            return;
+        }
+
+        for (i32 i = 0; i < packet->speeder_count; ++i) {
+            character_ids[i] = id_SPEEDERBIKE;
+            if (packet->speeder_count - packet->speeders_killed <= i) {
+                dimmed[i] = 1;
+            }
+        }
+        SpeederChase_DrawMeleeTargets(character_ids, dimmed, packet->speeder_count);
+        return;
+    }
+
+    if (LevAIMessage[0] == NULL || LevAIMessage[1] == NULL || LevAIMessage[3] == NULL ||
+        LevAIMessage[3]->value != 0.0f || !(0.0f < LevAIMessage[0]->value)) {
+        return;
+    }
+
+    i32 count = static_cast<i32>(LevAIMessage[0]->value);
+    if (count > 10) {
+        count = 10;
+    }
+    i32 killed = static_cast<i32>(LevAIMessage[1]->value);
+    for (i32 i = 0; i < count; ++i) {
+        character_ids[i] = id_SPEEDERBIKE;
+        if (count - killed <= i) {
+            dimmed[i] = 1;
+        }
+    }
+    SpeederChase_DrawMeleeTargets(character_ids, dimmed, count);
 }
 
 void SpeederChaseA_Reset(WORLDINFO_s *) {
