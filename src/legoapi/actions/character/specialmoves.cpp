@@ -138,8 +138,8 @@ i32 SpecialMove_ReleaseVictim(GameObject_s *object) {
     return 1;
 }
 
-void SpecialMove_GetVictimAction(i32) {
-    STUBBED();
+i32 SpecialMove_GetVictimAction(i32 index) {
+    return index == -1 ? -1 : SpecialMove[index].victim_animation;
 }
 
 // Original 0x497ee0, 43 bytes.
@@ -147,8 +147,8 @@ f32 SpecialMove_GetDistanceApart(i32 index) {
     return index == -1 ? 0.0f : SpecialMove[index].distance;
 }
 
-void SpecialMove_GetAttackerAction(i32) {
-    STUBBED();
+i32 SpecialMove_GetAttackerAction(i32 index) {
+    return index == -1 ? -1 : SpecialMove[index].attacker_animation;
 }
 
 // Original 0x498410, 198 bytes.

@@ -174,7 +174,12 @@ extern "C" {
     }
 
     void DebFreeAllChunksInstantly(void) {
-        STUBBED();
+        for (i32 i = 0; i < maxdebkeys; ++i) {
+            if (debkeydata[i].effect_index != 0) {
+                i32 handle = i;
+                DebFreeChunksInstantly(&handle);
+            }
+        }
     }
 
     void DebFreeInstantly(i32 *handle) {
