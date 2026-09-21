@@ -29,7 +29,13 @@ struct rtlidata_s {
     union {
         u8 data[sizeof(rtldata_s)];
         struct {
-            u8 reserved_00[0x4c];
+            rtl_s *directional_lights[3];
+            f32 directional_strengths[3];
+            rtl_s *ambient_lights[3];
+            f32 ambient_strengths[3];
+            rtl_s *anti_lights[3];
+            f32 anti_strengths[3];
+            i32 anti_light_count;
             rtl_s *cached_light;
             NUVEC shadow_direction;
             f32 cached_value;
@@ -37,16 +43,26 @@ struct rtlidata_s {
             f32 previous_shadow_value;
             f32 shadow_blend;
             u16 cached_light_uid;
-            u8 reserved_76[0xae];
+            u8 reserved_76[2];
+            NUVEC intensity[3];
+            NUVEC direction[3];
+            NUVEC ambient;
+            u8 reserved_cc[0x54];
+            f32 field_120;
             NUVEC blended_shadow_direction;
             f32 blended_shadow_value;
-            u8 reserved_134[0x10];
+            NUVEC field_134;
+            u8 reserved_140[4];
         };
     };
 };
 DECOMP_ASSERT(sizeof(rtlidata_s) == 0x144, "rtlidata_s size");
+DECOMP_ASSERT(offsetof(rtlidata_s, anti_light_count) == 0x48, "rtlidata_s anti-light count offset");
 DECOMP_ASSERT(offsetof(rtlidata_s, cached_light) == 0x4c, "rtlidata_s cached light offset");
 DECOMP_ASSERT(offsetof(rtlidata_s, cached_light_uid) == 0x74, "rtlidata_s cached UID offset");
+DECOMP_ASSERT(offsetof(rtlidata_s, intensity) == 0x78, "rtlidata_s intensity offset");
+DECOMP_ASSERT(offsetof(rtlidata_s, direction) == 0x9c, "rtlidata_s direction offset");
+DECOMP_ASSERT(offsetof(rtlidata_s, ambient) == 0xc0, "rtlidata_s ambient offset");
 DECOMP_ASSERT(offsetof(rtlidata_s, blended_shadow_direction) == 0x124, "rtlidata_s blended shadow offset");
 struct NUFRUSTRUM;
 
@@ -496,20 +512,32 @@ extern "C" {
     }
 
     void rtlResetEx(rtldata_s *data, i32 reset_cached) {
-        memset(data, 0, 0x48);
-        data->data[0x120] = 0;
-        *reinterpret_cast<f32 *>(data->data + 0x120) = 1.0f;
-        memset(data->data + 0x78, 0, 0x24);
-        const NUVEC default_direction = {1.0f, 0.0f, 0.0f};
-        for (i32 i = 0; i < 3; ++i) {
-            *reinterpret_cast<NUVEC *>(data->data + 0x9c + i * sizeof(NUVEC)) = default_direction;
+        const NUVEC black = {0.0f, 0.0f, 0.0f};
+        rtlidata_s *lighting_data = reinterpret_cast<rtlidata_s *>(data);
+        for (i32 index = 0; index < 3; ++index) {
+            lighting_data->ambient_lights[index] = NULL;
+            lighting_data->directional_lights[index] = lighting_data->ambient_lights[index];
+            lighting_data->ambient_strengths[index] = 0.0f;
+            lighting_data->directional_strengths[index] = lighting_data->ambient_strengths[index];
         }
-        *reinterpret_cast<f32 *>(data->data + 0x134) = 1.0f;
-        *reinterpret_cast<f32 *>(data->data + 0x138) = 0.0f;
-        *reinterpret_cast<f32 *>(data->data + 0x13c) = 0.0f;
+        lighting_data->anti_light_count = 0;
+        lighting_data->field_120 = 1.0f;
+        lighting_data->ambient = black;
+        lighting_data->intensity[2] = lighting_data->ambient;
+        lighting_data->intensity[1] = lighting_data->intensity[2];
+        lighting_data->intensity[0] = lighting_data->intensity[1];
+        lighting_data->direction[2] = nuvec_x;
+        lighting_data->direction[1] = lighting_data->direction[2];
+        lighting_data->direction[0] = lighting_data->direction[1];
+        lighting_data->field_134.x = 1.0f;
+        lighting_data->field_134.y = 0.0f;
+        lighting_data->field_134.z = 0.0f;
         if (reset_cached != 0) {
-            memset(data->data + 0x4c, 0, 0x2c);
-            *reinterpret_cast<f32 *>(data->data + 0x130) = 0.0f;
+            lighting_data->cached_light = NULL;
+            lighting_data->cached_value = 0.0f;
+            lighting_data->shadow_blend = 0.0f;
+            lighting_data->blended_shadow_value = 0.0f;
+            lighting_data->cached_light_uid = 0;
         }
     }
 
@@ -547,19 +575,16 @@ static __used__ void InsertAntiLight(rtl_s *light, rtlidata_s *lighting_data, fl
     }
 }
 
-static __used__ double ApplyAntilights(rtl_s *light, rtlidata_s *lighting_data, float strength) {
-    rtldata_s *data = reinterpret_cast<rtldata_s *>(lighting_data);
-    const i32 count = *reinterpret_cast<i32 *>(data->data + 0x48);
+static __used__ f32 ApplyAntilights(rtl_s *light, rtlidata_s *lighting_data, f32 strength) {
     f32 anti_strength = 0.0f;
-    for (i32 index = 0; index < count; ++index) {
-        rtl_s *anti = *reinterpret_cast<rtl_s **>(data->data + 0x30 + index * 4);
-        const f32 candidate = *reinterpret_cast<f32 *>(data->data + 0x3c + index * 4);
-        if ((anti->field_5e == 0 || (static_cast<u16>(light->field_5e) & static_cast<u16>(anti->field_5e)) != 0) &&
-            anti_strength <= candidate) {
-            anti_strength = candidate;
+    for (i32 index = 0; index < lighting_data->anti_light_count; ++index) {
+        if (lighting_data->anti_lights[index]->field_5e == 0 ||
+            (static_cast<u16>(lighting_data->anti_lights[index]->field_5e) & static_cast<u16>(light->field_5e)) != 0) {
+            anti_strength = MAX(anti_strength, lighting_data->anti_strengths[index]);
         }
     }
-    return strength * (1.0f - anti_strength);
+    strength *= 1.0f - anti_strength;
+    return strength;
 }
 
 extern "C" {
