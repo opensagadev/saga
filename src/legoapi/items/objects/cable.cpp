@@ -7,6 +7,7 @@
 #include "nu2api/numusic/sfx.h"
 #include <string.h>
 #include "legoapi/characters/core/character.h"
+#include "legoapi/characters/motion/action_info.h"
 #include "legoapi/characters/motion/gameanim.h"
 #include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/items/collect/minikits.h"
@@ -396,9 +397,48 @@ void UpdateCables() {
     }
 }
 
-void CableTargetGameObject(GameObject_s *, nuvec_s *, float) {
-    STUBBED();
-}
-void CableCode(GameObject_s *, i32, float) {
-    STUBBED();
+GameObject_s *CableTargetGameObject(GameObject_s *source, nuvec_s *position, f32 radius) {
+    GameObject_s *nearest = NULL;
+    f32 nearest_distance = 100000000.0f;
+    const f32 minimum_x = position->x - radius;
+    const f32 maximum_x = position->x + radius;
+    const f32 minimum_z = position->z - radius;
+    const f32 maximum_z = position->z + radius;
+    const f32 radius_squared = radius * radius;
+
+    GameObject_s *candidate = Obj;
+    for (i32 i = 0; i < HIGHGAMEOBJECT; ++i, ++candidate) {
+        const i8 context = candidate->character_context;
+        if (candidate == source || (candidate->apiobj.field_0x1f8 & 0x1000) == 0 ||
+            candidate->apiobj.field_0x287 != 0 || candidate == Player[0] || candidate == Player[1] ||
+            (CInfo[context].flags & 0x8000) != 0 || context == 0x17) {
+            continue;
+        }
+        if (context == 0x3b || context == 0x41 || context == 0x3d) {
+            continue;
+        }
+        if (candidate->id != id_DRAGBOMB && candidate->id != id_ATAT && candidate->id != id_ATST &&
+            candidate->id != id_ATST_LOWRES) {
+            continue;
+        }
+        if (candidate->apiobj.collision_position.x < minimum_x ||
+            candidate->apiobj.collision_position.x > maximum_x ||
+            candidate->apiobj.collision_position.z < minimum_z ||
+            candidate->apiobj.collision_position.z > maximum_z) {
+            continue;
+        }
+
+        NUVEC delta;
+        f32 distance = NuVecDistSqr(&candidate->apiobj.collision_position, position, &delta);
+        if (candidate->id == id_DRAGBOMB) {
+            distance *= 0.8f;
+        } else if (candidate->id == id_ATAT) {
+            distance *= 0.9f;
+        }
+        if (distance < radius_squared && distance < nearest_distance) {
+            nearest_distance = distance;
+            nearest = candidate;
+        }
+    }
+    return nearest;
 }

@@ -42,14 +42,17 @@ static f32 ForceBackRadius2 = 0.0f;
 #include "legoapi/props/objects/tightrope.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/menus/screens/shop.h"
+#include "legoapi/menus/core/gamemessage.h"
 #include "legoapi/props/system/socksys.h"
 #include "legoapi/render/core/rtl.h"
 #include "legoapi/render/core/terrain.h"
+#include "legoapi/render/core/render.h"
 #include "legoapi/render/fx.h"
 #include "legoapi/render/fx/parts.h"
 #include "legoapi/render/fx/edsplines.h"
 #include "legoapi/render/fx/spline_position.h"
 #include "legoapi/render/light/surfaces.h"
+#include "legoapi/gizmos/fx/gizmopickups.h"
 #include "legoapi/world/level.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/world.h"
@@ -626,6 +629,7 @@ void UpdateSnakeBody(GameObject_s *);
 void TractorBeamCode(GameObject_s *);
 void LoopCode(GameObject_s *, i32, i32, GAMEPAD_s *, i32);
 void CableCode(GameObject_s *, i32, float);
+extern f32 max_cable_length;
 void EngineNoiseCode(GameObject_s *, i32);
 void Buck_MoveCode(GameObject_s *, i32);
 static void AwkwardShapeCode(GameObject_s *, i32);
@@ -4637,6 +4641,59 @@ static void ForceGlowCode(GameObject_s *object, i32 model) {
         }
     }
     object->field_0xd8c *= 1.125f;
+}
+
+void CableCode(GameObject_s *object, i32 special_pressed, f32) {
+    if ((object->apiobj.flags_low & 0x80) != 0 && object->character_context == -1 && object->cable == NULL) {
+        GameObject_s *target =
+            CableTargetGameObject(object, &object->apiobj.collision_position, max_cable_length * 0.9f);
+        if (target != NULL) {
+            object->field_0xe24 |= 0x10;
+            if (special_pressed == 0 && !TouchHacks::ShouldAutoGrabDragBomb(*target)) {
+                object->force_glow_candidate = target;
+                object->force_glow_candidate_kind = 2;
+            } else {
+                MechAddonCollection *addons = target->GetAddons(false);
+                if (addons != NULL) {
+                    MechAddon *addon = addons->first;
+                    while (addon != NULL && addon->hash_id != CantPickupBombTimerAddon::s_hashId.value) {
+                        addon = addon->next;
+                    }
+                    if (addon == NULL) {
+                        object->cable = CreateCable(object, target, 1);
+                        if (target->id == id_DRAGBOMB) {
+                            Hint_SetComplete(0x5ee);
+                        } else if (special_pressed != 0) {
+                            Hint_SetComplete(0x28e);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if (object->apiobj.field_0x287 == 0 && FadeSys.fade == 0.0f) {
+        if (object->force_glow_step <= 0.0f) {
+            ForceGlowCode(object, 0xe3);
+        } else {
+            object->force_glow_step -= FRAMETIME;
+        }
+    } else {
+        ResetForceGlow(reinterpret_cast<PLAYERPACKET_s *>(object->player_packet));
+    }
+
+    if ((object->apiobj.flags_low & 0x80) != 0 && object->force_glow_candidate_kind != 0 &&
+        object->force_glow_candidate != NULL && object->field_0xd80 > 0.0f) {
+        GameObject_s *target = static_cast<GameObject_s *>(object->force_glow_candidate);
+        GAMEMESSAGE_s *message = static_cast<GAMEMESSAGE_s *>(
+            AddGameMessage(const_cast<char *>("X"), &target->apiobj.collision_position,
+                           AreaPickupScale + AreaPickupScale, NULL, 0.0f, 0xff, 0, 0, 0x10c7, 0.0f));
+        if (message != NULL) {
+            message->target_type = 5;
+            message->draw_callback = DrawGameMessage_Targets;
+            message->alpha = static_cast<u8>(object->field_0xd80 / FORCEGLOWTIME * 128.0f);
+        }
+    }
 }
 
 i32 LightSabre_ColourFromObj(i32 model, i32 *glow_model) {

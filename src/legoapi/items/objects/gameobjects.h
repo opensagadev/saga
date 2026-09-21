@@ -49,6 +49,7 @@ void *GameBufferAlloc(VARIPTR *buf, VARIPTR *buf_end, i32 size);
 
 GameObject_s *FindGameObject(i32 id, u32 type, i32 a3, i32 a4, i32 a5);
 CABLE_s *CreateCable(GameObject_s *source, GameObject_s *target, i32 flags);
+GameObject_s *CableTargetGameObject(GameObject_s *source, NUVEC *position, f32 radius);
 CABLE_s *GameObjOwnsAnyCables(GameObject_s *object);
 i32 KillGameObject(GameObject_s *object, i32 reason, i32 flags);
 void RemoveGameObject(GameObject_s *object, i32);
