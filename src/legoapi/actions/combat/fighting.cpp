@@ -25,6 +25,8 @@
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numath/nuvec.h"
 
+#include <stdlib.h>
+
 struct AIROW_s;
 struct nuqthdr_s;
 struct nunativegscene_s;
@@ -218,8 +220,17 @@ void ComboHitFrame(GameObject_s *object, i32 damage) {
     BlockSfx(object);
 }
 
-void IsFacingTarget(nuvec_s *, nuvec_s *, i32, i32) {
-    STUBBED();
+i32 IsFacingTarget(nuvec_s *first, nuvec_s *second, i32 facing_angle, i32 arc_degrees) {
+    const i32 arc = (arc_degrees << 15) / 360;
+    NUVEC direction;
+    NuVecSub(&direction, first, second);
+
+    i32 angle_difference = (NuAtan2D(direction.x, direction.z) - facing_angle) & 0xffff;
+    if (angle_difference >= 0x8000)
+        angle_difference -= 0x10000;
+    angle_difference = abs(angle_difference);
+
+    return arc > angle_difference;
 }
 
 void StunGameObject(GameObject_s *, GameObject_s *, float, i32) {

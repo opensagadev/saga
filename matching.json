@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 51.651234,
+    "fuzzy_match_percent": 51.654114,
     "total_code": "4722419",
-    "matched_code": "453308",
-    "matched_code_percent": 9.599064,
+    "matched_code": "453458",
+    "matched_code_percent": 9.60224,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 5358,
-    "matched_functions_percent": 39.80979,
+    "matched_functions": 5359,
+    "matched_functions_percent": 39.817223,
     "total_units": 1
   },
   "text": {
@@ -39028,7 +39028,7 @@
           "address": 4085696,
           "offset": 3195728,
           "size": 150,
-          "match_percent": 9.545455
+          "match_percent": 100.0
         },
         {
           "name": "_Z11IsDownSwipeRK6NuVec2S1_",
