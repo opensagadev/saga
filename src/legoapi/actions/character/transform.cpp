@@ -237,8 +237,13 @@ void GizmoBlowup_TransformDraw_Game(GIZMOBLOWUP_s *blowup) {
     Transform_DrawTarget(&blowup->mid_position, 1.4f * blowup->target_scale, 0.4f);
 }
 
-void InterpolateRotationMatrix(numtx_s *, numtx_s *, numtx_s *, float) {
-    STUBBED();
+void InterpolateRotationMatrix(numtx_s *result, numtx_s *first, numtx_s *second, float fraction) {
+    SeekVec(NUMTX_GET_ROW_VEC(result, 0), NUMTX_GET_ROW_VEC(first, 0), NUMTX_GET_ROW_VEC(second, 0), fraction);
+    SeekVec(NUMTX_GET_ROW_VEC(result, 1), NUMTX_GET_ROW_VEC(first, 1), NUMTX_GET_ROW_VEC(second, 1), fraction);
+    SeekVec(NUMTX_GET_ROW_VEC(result, 2), NUMTX_GET_ROW_VEC(first, 2), NUMTX_GET_ROW_VEC(second, 2), fraction);
+    NuVecNorm(NUMTX_GET_ROW_VEC(result, 0), NUMTX_GET_ROW_VEC(result, 0));
+    NuVecNorm(NUMTX_GET_ROW_VEC(result, 1), NUMTX_GET_ROW_VEC(result, 1));
+    NuVecNorm(NUMTX_GET_ROW_VEC(result, 2), NUMTX_GET_ROW_VEC(result, 2));
 }
 
 void QuatInterpolateRotationMatrix(NUMTX *result, NUMTX *first, NUMTX *second, f32 fraction) {
