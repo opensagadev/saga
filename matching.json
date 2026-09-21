@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 51.233765,
+    "fuzzy_match_percent": 51.245155,
     "total_code": "4722419",
-    "matched_code": "451030",
-    "matched_code_percent": 9.550825,
+    "matched_code": "451419",
+    "matched_code_percent": 9.559063,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 5322,
-    "matched_functions_percent": 39.542313,
+    "matched_functions": 5344,
+    "matched_functions_percent": 39.705772,
     "total_units": 1
   },
   "text": {
@@ -36156,6 +36156,110 @@
           "match_percent": 12.352942
         },
         {
+          "name": "_ZN20NetListenerInterfaceD1Ev",
+          "demangled_name": "NetListenerInterface::~NetListenerInterface()",
+          "address": 5430400,
+          "offset": 4540432,
+          "size": 29,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN20NetListenerInterfaceD2Ev",
+          "demangled_name": "NetListenerInterface::~NetListenerInterface()",
+          "address": 5430400,
+          "offset": 4540432,
+          "size": 29,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN20NetListenerInterface7ReceiveE10NetMessagehRK7NetPeer",
+          "demangled_name": "NetListenerInterface::Receive(NetMessage, unsigned char, NetPeer const&)",
+          "address": 5430432,
+          "offset": 4540464,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN20NetListenerInterface11PeerRequestERK7NetPeer",
+          "demangled_name": "NetListenerInterface::PeerRequest(NetPeer const&)",
+          "address": 5430448,
+          "offset": 4540480,
+          "size": 12,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN20NetListenerInterface10PeerJoinedERK7NetPeer",
+          "demangled_name": "NetListenerInterface::PeerJoined(NetPeer const&)",
+          "address": 5430464,
+          "offset": 4540496,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN20NetListenerInterface8PeerLeftERK7NetPeer15ePeerLeftReason",
+          "demangled_name": "NetListenerInterface::PeerLeft(NetPeer const&, ePeerLeftReason)",
+          "address": 5430480,
+          "offset": 4540512,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN20NetListenerInterface8PeerDeadERK7NetPeer",
+          "demangled_name": "NetListenerInterface::PeerDead(NetPeer const&)",
+          "address": 5430496,
+          "offset": 4540528,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN20NetListenerInterface9FtpUploadEP7FtpFile",
+          "demangled_name": "NetListenerInterface::FtpUpload(FtpFile*)",
+          "address": 5430512,
+          "offset": 4540544,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN20NetListenerInterface11FtpDownloadEP7FtpFile",
+          "demangled_name": "NetListenerInterface::FtpDownload(FtpFile*)",
+          "address": 5430528,
+          "offset": 4540560,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN20NetListenerInterface11FtpCompleteEP7FtpFilei",
+          "demangled_name": "NetListenerInterface::FtpComplete(FtpFile*, int)",
+          "address": 5430544,
+          "offset": 4540576,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN20NetListenerInterface10NosAcquireEP13NetworkObjectRK7NetPeer",
+          "demangled_name": "NetListenerInterface::NosAcquire(NetworkObject*, NetPeer const&)",
+          "address": 5430560,
+          "offset": 4540592,
+          "size": 12,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN20NetListenerInterface10NosAdoptedEP13NetworkObjectRK7NetPeer",
+          "demangled_name": "NetListenerInterface::NosAdopted(NetworkObject*, NetPeer const&)",
+          "address": 5430576,
+          "offset": 4540608,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN20NetListenerInterfaceD0Ev",
+          "demangled_name": "NetListenerInterface::~NetListenerInterface()",
+          "address": 5430592,
+          "offset": 4540624,
+          "size": 45,
+          "match_percent": 100.0
+        },
+        {
           "name": "_ZN12NetPredictor15StoreSampleDataEPK7EdClassPvPNS_13PredictorTimeEPPNS_13PredictorDataEPfi",
           "demangled_name": "NetPredictor::StoreSampleData(EdClass const*, void*, NetPredictor::PredictorTime*, NetPredictor::PredictorData**, float*, int)",
           "address": 5430640,
@@ -36177,7 +36281,7 @@
           "address": 5430944,
           "offset": 4540976,
           "size": 51,
-          "match_percent": 59.916668
+          "match_percent": 100.0
         },
         {
           "name": "_ZN20NetworkObjectManagerD2Ev",
@@ -36185,7 +36289,7 @@
           "address": 5430944,
           "offset": 4540976,
           "size": 51,
-          "match_percent": 59.916668
+          "match_percent": 100.0
         },
         {
           "name": "_ZN20NetworkObjectManagerD0Ev",
@@ -36353,7 +36457,7 @@
           "address": 5438096,
           "offset": 4548128,
           "size": 153,
-          "match_percent": 17.588236
+          "match_percent": 91.32353
         },
         {
           "name": "_ZN20NetworkObjectManagerC2Ev",
@@ -36361,7 +36465,7 @@
           "address": 5438096,
           "offset": 4548128,
           "size": 153,
-          "match_percent": 17.588236
+          "match_percent": 91.32353
         },
         {
           "name": "_ZN20NetworkObjectManager4InitEv",
@@ -36468,6 +36572,14 @@
           "match_percent": 24.84507
         },
         {
+          "name": "_ZL10NOSGetGuidv",
+          "demangled_name": "NOSGetGuid()",
+          "address": 5440688,
+          "offset": 4550720,
+          "size": 38,
+          "match_percent": 100.0
+        },
+        {
           "name": "_ZN20NetworkObjectManager20AddToLocalObjectListEP13NetworkObject",
           "demangled_name": "NetworkObjectManager::AddToLocalObjectList(NetworkObject*)",
           "address": 5440736,
@@ -36537,6 +36649,14 @@
           "address": 5443248,
           "offset": 4553280,
           "size": 65,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZThn4_N20NetworkObjectManager19NotifyDestroyObjectEPvP7EdClassii",
+          "demangled_name": "{virtual override thunk({offset(-4)}, NetworkObjectManager::NotifyDestroyObject(void*, EdClass*, int, int))}",
+          "address": 5443328,
+          "offset": 4553360,
+          "size": 7,
           "match_percent": 100.0
         },
         {
@@ -36673,6 +36793,14 @@
           "address": 5448032,
           "offset": 4558064,
           "size": 65,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZThn4_N20NetworkObjectManager18NotifyCreateObjectEPvP7EdClassS0_iii",
+          "demangled_name": "{virtual override thunk({offset(-4)}, NetworkObjectManager::NotifyCreateObject(void*, EdClass*, void*, int, int, int))}",
+          "address": 5448112,
+          "offset": 4558144,
+          "size": 7,
           "match_percent": 100.0
         },
         {
@@ -36865,7 +36993,7 @@
           "address": 5456832,
           "offset": 4566864,
           "size": 773,
-          "match_percent": 69.94536
+          "match_percent": 69.907104
         },
         {
           "name": "_ZN20NetworkObjectManager18ReceiveStopMessageER10NetMessageRK7NetPeer",
@@ -36898,6 +37026,38 @@
           "offset": 4569632,
           "size": 439,
           "match_percent": 57.929134
+        },
+        {
+          "name": "_ZN16EdObjectNotifier18NotifyCreateObjectEPvP7EdClassS0_iii",
+          "demangled_name": "EdObjectNotifier::NotifyCreateObject(void*, EdClass*, void*, int, int, int)",
+          "address": 5460048,
+          "offset": 4570080,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16EdObjectNotifier19NotifyDestroyObjectEPvP7EdClassii",
+          "demangled_name": "EdObjectNotifier::NotifyDestroyObject(void*, EdClass*, int, int)",
+          "address": 5460064,
+          "offset": 4570096,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16EdObjectNotifier19NotifyDefunctObjectEPvP7EdClassi",
+          "demangled_name": "EdObjectNotifier::NotifyDefunctObject(void*, EdClass*, int)",
+          "address": 5460080,
+          "offset": 4570112,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16EdObjectNotifier18NotifyReviveObjectEPvP7EdClassi",
+          "demangled_name": "EdObjectNotifier::NotifyReviveObject(void*, EdClass*, int)",
+          "address": 5460096,
+          "offset": 4570128,
+          "size": 9,
+          "match_percent": 100.0
         },
         {
           "name": "_ZN13NetReplicator12DoPredictionEPK7EdClassPvR14ReplicatorDatai",
@@ -48727,14 +48887,6 @@
           "offset": 4535584,
           "size": 211,
           "match_percent": 7.0
-        },
-        {
-          "name": "_ZL10NOSGetGuidv",
-          "demangled_name": "NOSGetGuid()",
-          "address": 5440688,
-          "offset": 4550720,
-          "size": 38,
-          "match_percent": 38.18182
         }
       ]
     },
@@ -126427,158 +126579,6 @@
       "match_percent": 0.0
     },
     {
-      "name": "_ZN20NetListenerInterfaceD1Ev",
-      "demangled_name": "NetListenerInterface::~NetListenerInterface()",
-      "address": 5430400,
-      "offset": 4540432,
-      "size": 29,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN20NetListenerInterfaceD2Ev",
-      "demangled_name": "NetListenerInterface::~NetListenerInterface()",
-      "address": 5430400,
-      "offset": 4540432,
-      "size": 29,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN20NetListenerInterface7ReceiveE10NetMessagehRK7NetPeer",
-      "demangled_name": "NetListenerInterface::Receive(NetMessage, unsigned char, NetPeer const&)",
-      "address": 5430432,
-      "offset": 4540464,
-      "size": 9,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN20NetListenerInterface11PeerRequestERK7NetPeer",
-      "demangled_name": "NetListenerInterface::PeerRequest(NetPeer const&)",
-      "address": 5430448,
-      "offset": 4540480,
-      "size": 12,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN20NetListenerInterface10PeerJoinedERK7NetPeer",
-      "demangled_name": "NetListenerInterface::PeerJoined(NetPeer const&)",
-      "address": 5430464,
-      "offset": 4540496,
-      "size": 9,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN20NetListenerInterface8PeerLeftERK7NetPeer15ePeerLeftReason",
-      "demangled_name": "NetListenerInterface::PeerLeft(NetPeer const&, ePeerLeftReason)",
-      "address": 5430480,
-      "offset": 4540512,
-      "size": 9,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN20NetListenerInterface8PeerDeadERK7NetPeer",
-      "demangled_name": "NetListenerInterface::PeerDead(NetPeer const&)",
-      "address": 5430496,
-      "offset": 4540528,
-      "size": 9,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN20NetListenerInterface9FtpUploadEP7FtpFile",
-      "demangled_name": "NetListenerInterface::FtpUpload(FtpFile*)",
-      "address": 5430512,
-      "offset": 4540544,
-      "size": 9,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN20NetListenerInterface11FtpDownloadEP7FtpFile",
-      "demangled_name": "NetListenerInterface::FtpDownload(FtpFile*)",
-      "address": 5430528,
-      "offset": 4540560,
-      "size": 9,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN20NetListenerInterface11FtpCompleteEP7FtpFilei",
-      "demangled_name": "NetListenerInterface::FtpComplete(FtpFile*, int)",
-      "address": 5430544,
-      "offset": 4540576,
-      "size": 9,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN20NetListenerInterface10NosAcquireEP13NetworkObjectRK7NetPeer",
-      "demangled_name": "NetListenerInterface::NosAcquire(NetworkObject*, NetPeer const&)",
-      "address": 5430560,
-      "offset": 4540592,
-      "size": 12,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN20NetListenerInterface10NosAdoptedEP13NetworkObjectRK7NetPeer",
-      "demangled_name": "NetListenerInterface::NosAdopted(NetworkObject*, NetPeer const&)",
-      "address": 5430576,
-      "offset": 4540608,
-      "size": 9,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN20NetListenerInterfaceD0Ev",
-      "demangled_name": "NetListenerInterface::~NetListenerInterface()",
-      "address": 5430592,
-      "offset": 4540624,
-      "size": 45,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZThn4_N20NetworkObjectManager19NotifyDestroyObjectEPvP7EdClassii",
-      "demangled_name": "{virtual override thunk({offset(-4)}, NetworkObjectManager::NotifyDestroyObject(void*, EdClass*, int, int))}",
-      "address": 5443328,
-      "offset": 4553360,
-      "size": 7,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZThn4_N20NetworkObjectManager18NotifyCreateObjectEPvP7EdClassS0_iii",
-      "demangled_name": "{virtual override thunk({offset(-4)}, NetworkObjectManager::NotifyCreateObject(void*, EdClass*, void*, int, int, int))}",
-      "address": 5448112,
-      "offset": 4558144,
-      "size": 7,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN16EdObjectNotifier18NotifyCreateObjectEPvP7EdClassS0_iii",
-      "demangled_name": "EdObjectNotifier::NotifyCreateObject(void*, EdClass*, void*, int, int, int)",
-      "address": 5460048,
-      "offset": 4570080,
-      "size": 9,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN16EdObjectNotifier19NotifyDestroyObjectEPvP7EdClassii",
-      "demangled_name": "EdObjectNotifier::NotifyDestroyObject(void*, EdClass*, int, int)",
-      "address": 5460064,
-      "offset": 4570096,
-      "size": 9,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN16EdObjectNotifier19NotifyDefunctObjectEPvP7EdClassi",
-      "demangled_name": "EdObjectNotifier::NotifyDefunctObject(void*, EdClass*, int)",
-      "address": 5460080,
-      "offset": 4570112,
-      "size": 9,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN16EdObjectNotifier18NotifyReviveObjectEPvP7EdClassi",
-      "demangled_name": "EdObjectNotifier::NotifyReviveObject(void*, EdClass*, int)",
-      "address": 5460096,
-      "offset": 4570128,
-      "size": 9,
-      "match_percent": 0.0
-    },
-    {
       "name": "_ZN16V2SessionManager4InitEPc",
       "demangled_name": "V2SessionManager::Init(char*)",
       "address": 5461600,
@@ -128222,8 +128222,8 @@
   "summary": {
     "bazel_units": 458,
     "functions": 13454,
-    "assigned_functions": 12475,
+    "assigned_functions": 12494,
     "ambiguous_functions": 214,
-    "unassigned_functions": 765
+    "unassigned_functions": 746
   }
 }

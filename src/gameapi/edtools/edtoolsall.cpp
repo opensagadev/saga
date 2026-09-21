@@ -1405,28 +1405,28 @@ void EdRegistry::NotifyCreateObject(void *object, EdClass *object_class, void *s
                                     i32 flags) {
     for (i32 i = 0; i < notifier_count; ++i) {
         EdObjectNotifier *notifier = notifiers[i];
-        notifier->vtable->create_object(notifier, object, object_class, source, index, context, flags);
+        notifier->NotifyCreateObject(object, object_class, source, index, context, flags);
     }
 }
 
 void EdRegistry::NotifyDefunctObject(void *object, EdClass *object_class, i32 flags) {
     for (i32 i = 0; i < notifier_count; ++i) {
         EdObjectNotifier *notifier = notifiers[i];
-        notifier->vtable->defunct_object(notifier, object, object_class, flags);
+        notifier->NotifyDefunctObject(object, object_class, flags);
     }
 }
 
 void EdRegistry::NotifyDestroyObject(void *object, EdClass *object_class, i32 index, i32 flags) {
     for (i32 i = 0; i < notifier_count; ++i) {
         EdObjectNotifier *notifier = notifiers[i];
-        notifier->vtable->destroy_object(notifier, object, object_class, index, flags);
+        notifier->NotifyDestroyObject(object, object_class, index, flags);
     }
 }
 
 void EdRegistry::NotifyReviveObject(void *object, EdClass *object_class, i32 flags) {
     for (i32 i = 0; i < notifier_count; ++i) {
         EdObjectNotifier *notifier = notifiers[i];
-        notifier->vtable->revive_object(notifier, object, object_class, flags);
+        notifier->NotifyReviveObject(object, object_class, flags);
     }
 }
 

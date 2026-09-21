@@ -6,6 +6,7 @@
 #include "decomp.h"
 #include "gamelib/util/CRC16.h"
 #include "gameapi/edtools/edfile.h"
+#include "gameapi/edtools/EdObjectNotifier.h"
 #include <stddef.h>
 #include <string.h>
 
@@ -60,13 +61,15 @@ struct GIZFORCE_s;
 struct GIZMOBLOWUP_s;
 struct GameObject_s;
 struct NOSContext {
-    u8 bytes[0x10];
+    union {
+        u8 bytes[0x10];
+        u32 words[4];
+    };
 };
 struct NOSFilter {};
 struct NetAddress {
     u32 value;
 };
-struct NetListenerInterface {};
 struct NetPeer {
     struct Vtable {
         void *reserved_00[6];
@@ -278,6 +281,32 @@ struct NetMessage {
     void DebugPrint() const;
     static void RaiseError();
 };
+struct NetListenerInterface {
+    virtual ~NetListenerInterface() {
+    }
+    virtual void Receive(NetMessage, unsigned char, NetPeer const &) {
+    }
+    virtual i32 PeerRequest(NetPeer const &) {
+        return 1;
+    }
+    virtual void PeerJoined(NetPeer const &) {
+    }
+    virtual void PeerLeft(NetPeer const &, ePeerLeftReason) {
+    }
+    virtual void PeerDead(NetPeer const &) {
+    }
+    virtual void FtpUpload(FtpFile *) {
+    }
+    virtual void FtpDownload(FtpFile *) {
+    }
+    virtual void FtpComplete(FtpFile *, i32) {
+    }
+    virtual i32 NosAcquire(NetworkObject *, NetPeer const &) {
+        return 1;
+    }
+    virtual void NosAdopted(NetworkObject *, NetPeer const &) {
+    }
+};
 struct NetSession {
     u8 reserved_00[4];
     i32 status;
@@ -342,15 +371,18 @@ DECOMP_ASSERT(offsetof(NetReplicator, data_size) == 0x14, "NetReplicator data si
 struct NetSmallStats {
     enum eInfo {};
 
-    explicit NetSmallStats(char const *stat_name) : name(stat_name) {}
-    virtual void Update() {}
+    explicit NetSmallStats(char const *stat_name) : name(stat_name) {
+    }
+    virtual void Update() {
+    }
     virtual void Draw(float, float, float, float, NetSmallStats::eInfo) const;
 
     char const *name;
     NetSample total;
 };
 struct NetStats : NetSmallStats {
-    explicit NetStats(char const *stat_name) : NetSmallStats(stat_name), sample_index(0), sample_time(0) {}
+    explicit NetStats(char const *stat_name) : NetSmallStats(stat_name), sample_index(0), sample_time(0) {
+    }
     void Update() override;
     void Draw(float, float, float, float, NetSmallStats::eInfo) const override;
 
@@ -385,7 +417,8 @@ struct NetTransporter {
     void PeerLeft(NetPeer const &, ePeerLeftReason) const;
     void PeerRequest(NetPeer const &) const;
     virtual void RemoveListener(NetListenerInterface *, unsigned char);
-    virtual ~NetTransporter() {}
+    virtual ~NetTransporter() {
+    }
     void StatsReceiveMessage(NetMessage, unsigned char);
     void StatsSendMessage(NetMessage, unsigned char);
     void StatsUpdate();
@@ -403,7 +436,7 @@ struct NetworkObject {
     void Initialise(i32, void *, EdClass *, NetPeer const &, i32);
 };
 static_assert(sizeof(void *) != 4 || sizeof(NetworkObject) == 0x18, "NetworkObject 32-bit size");
-struct NetworkObjectManager {
+struct NetworkObjectManager : NetListenerInterface, EdObjectNotifier {
     // The manager reset routine is an intentional no-op in the original.
     struct NetPeerPush {
         NetPeer const *peer;
@@ -448,17 +481,17 @@ struct NetworkObjectManager {
     i32 IsPeerReady(NetPeer const &) const;
     i32 IsPeerStarted(NetPeer const &) const;
     NetworkObjectManager();
-    void NotifyCreateObject(void *, EdClass *, void *, i32, i32, i32);
-    void NotifyDestroyObject(void *, EdClass *, i32, i32);
+    void NotifyCreateObject(void *, EdClass *, void *, i32, i32, i32) override;
+    void NotifyDestroyObject(void *, EdClass *, i32, i32) override;
     void ObjectCall(void *, i32, NetMessage, NetPeer const *);
     void ObjectOtherCall(void *, i32, NetMessage);
     void ObjectOwnerCall(void *, i32, NetMessage);
     NetPeer const *Owner(i32);
-    void PeerJoined(NetPeer const &);
-    void PeerLeft(NetPeer const &, ePeerLeftReason);
+    void PeerJoined(NetPeer const &) override;
+    void PeerLeft(NetPeer const &, ePeerLeftReason) override;
     void Push(NetworkObject const *, NetReplicator *, ReplicatorData &, NetworkObjectManager::NetPeerPush *);
     void PushObject(NetworkObject *, NetworkObjectManager::NetPeerPush *, i32);
-    void Receive(NetMessage, unsigned char, NetPeer const &);
+    void Receive(NetMessage, unsigned char, NetPeer const &) override;
     void ReceiveAcquireMessage(NetMessage &, NetPeer const &);
     void ReceiveAcquiredMessage(NetMessage &, NetPeer const &);
     void ReceiveAdoptedMessage(NetMessage &, NetPeer const &);
@@ -490,9 +523,9 @@ struct NetworkObjectManager {
     void Term();
     void Update();
     void UpdateLocalObjectList();
-    virtual ~NetworkObjectManager();
+    ~NetworkObjectManager() override;
 
-    u8 reserved_04[8];
+    u8 reserved_08[4];
     i32 active;
     NOSContext context;
     NetPeer const *guid_peers[2];

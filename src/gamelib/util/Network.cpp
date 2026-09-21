@@ -16,6 +16,10 @@ extern EdRegistry theRegistry;
 TTNetwork theNetwork;
 extern MemoryManager theMemoryManager;
 
+static __used__ i32 NOSGetGuid() {
+    return theNos->GetNextGuid();
+}
+
 void NetRotator2::PredictValue(EdClass const *, void *, NetPredictor::PredictorTime *, NetPredictor::PredictorData **,
                                float *, i32) {
     STUBBED();
@@ -323,8 +327,8 @@ void NetworkObjectManager::ChangeContext(NOSContext &new_context) {
 void NetworkObjectManager::ConstructObject(NetworkObject *object, NetworkObjectManager::NetPeerPush *peer_push) {
     u8 constructor_data[256];
     EdClassInterface *interface = object->object_class->interface;
-    i16 size = static_cast<i16>(interface->vtable->get_constructor_data(interface, object->object,
-                                                                      constructor_data, sizeof(constructor_data)));
+    i16 size = static_cast<i16>(
+        interface->vtable->get_constructor_data(interface, object->object, constructor_data, sizeof(constructor_data)));
     i16 class_id = static_cast<i16>(theRegistry.GetClassId(object->object_class));
     NetMessage *message = peer_push->GetReliableMessage(size + 10);
     message->Write8(1);
@@ -449,7 +453,23 @@ i32 NetworkObjectManager::IsPeerStarted(NetPeer const &peer) const {
 }
 
 NetworkObjectManager::NetworkObjectManager() {
-    STUBBED();
+    context.words[0] = 0;
+    context.words[1] = 0;
+    context.words[2] = 0;
+    context.words[3] = 0;
+    ReplicatorList *replicator = replicators;
+    ReplicatorList *end = replicators + 64;
+    do {
+        replicator->head = NULL;
+        replicator->tail = NULL;
+        replicator->count = 0;
+        ++replicator;
+    } while (replicator != end);
+    active = 0;
+    guid_group = -1;
+    next_guid = -1;
+    theNos = this;
+    theRegistry.create_object_guid = NOSGetGuid;
 }
 
 void NetworkObjectManager::NotifyCreateObject(void *object, EdClass *object_class, void *, i32, i32 guid, i32 flags) {
@@ -641,7 +661,7 @@ void NetworkObjectManager::ReceiveObjectCallMessage(NetMessage &message, NetPeer
     }
     if (object->object != NULL) {
         reinterpret_cast<void (*)(void *, NetMessage &)>(registered_calls[call_index].callback)(object->object,
-                                                                                             message);
+                                                                                                message);
     }
 }
 
@@ -796,7 +816,8 @@ void NetworkObjectManager::SendAdoptedMessage(i16) {
 
 i32 NetworkObjectManager::SendPushMessage(NetMessage *message, NetPeerPush const *push, i32 flags) {
     NetPeer *peer = const_cast<NetPeer *>(push->peer);
-    if (message == NULL || message->data == NULL || static_cast<i32>(message->write_offset - message->read_offset) <= 0) {
+    if (message == NULL || message->data == NULL ||
+        static_cast<i32>(message->write_offset - message->read_offset) <= 0) {
         return 1;
     }
     if (peer != NULL) {
@@ -875,6 +896,7 @@ void NetworkObjectManager::UpdateLocalObjectList() {
 }
 
 NetworkObjectManager::~NetworkObjectManager() {
+    theNos = NULL;
 }
 
 static void ReleasePushMessage(NetMessage *&message) {
@@ -885,8 +907,8 @@ static void ReleasePushMessage(NetMessage *&message) {
     message = NULL;
 }
 
-static NetMessage *GetPushMessage(NetworkObjectManager::NetPeerPush *push, NetMessage *&message,
-                                  i32 size, i32 unreliable) {
+static NetMessage *GetPushMessage(NetworkObjectManager::NetPeerPush *push, NetMessage *&message, i32 size,
+                                  i32 unreliable) {
     if (message != NULL) {
         i32 available = message->data != NULL ? 0x4af - message->write_offset : 0;
         if (size > available) {

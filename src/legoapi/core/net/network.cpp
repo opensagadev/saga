@@ -72,7 +72,3 @@ void TTNetwork::Update() {
 
 TTNetwork::~TTNetwork() {
 }
-
-static __used__ void NOSGetGuid() {
-    STUBBED();
-}

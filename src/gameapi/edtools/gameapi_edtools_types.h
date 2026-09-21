@@ -5,6 +5,7 @@
 #include "nu2api/nucore/fixed_width.h"
 #include "nu2api/nucore/nuvuvec.hpp"
 #include "nu2api/numath/nuvec.h"
+#include "gameapi/edtools/EdObjectNotifier.h"
 #include <string.h>
 
 struct ClassObjectList;
@@ -71,16 +72,6 @@ struct ClassObjectList;
 struct EdMember {
     void *object;
     EdRef *reference;
-};
-struct EdObjectNotifier {
-    struct VTable {
-        void (*create_object)(EdObjectNotifier *, void *, EdClass *, void *, i32, i32, i32);
-        void (*destroy_object)(EdObjectNotifier *, void *, EdClass *, i32, i32);
-        void (*defunct_object)(EdObjectNotifier *, void *, EdClass *, i32);
-        void (*revive_object)(EdObjectNotifier *, void *, EdClass *, i32);
-    };
-
-    VTable *vtable;
 };
 struct EdSubSystem {
     virtual ~EdSubSystem();
@@ -269,7 +260,8 @@ struct EdDefunctListEntry {
     EdClass *object_class;
     void *object;
 
-    EdDefunctListEntry() : next(nullptr), previous(nullptr) {}
+    EdDefunctListEntry() : next(nullptr), previous(nullptr) {
+    }
 };
 static_assert(sizeof(void *) != 4 || sizeof(EdControl) == 0x10, "EdControl 32-bit size");
 struct EdDefunctList {
@@ -307,7 +299,8 @@ struct MemoryBuffer {
     }
 };
 struct EdStream {
-    virtual ~EdStream() {}
+    virtual ~EdStream() {
+    }
     virtual i32 Eat(i32, i32) = 0;
     virtual i32 SerialiseBuffer(void *, i32, i32) = 0;
     virtual i32 SerialiseString(char *, i32) = 0;
@@ -329,13 +322,15 @@ struct EdStream {
     EdStream(MemoryBuffer *, MemoryBuffer *);
 };
 struct EdInputStream : EdStream {
-    virtual ~EdInputStream() {}
+    virtual ~EdInputStream() {
+    }
     virtual i32 SerialiseString(char **);
     virtual i32 SerialiseString(char **, i32);
     virtual i32 SerialiseString(char *, i32);
 };
 struct EdOutputStream : EdStream {
-    virtual ~EdOutputStream() {}
+    virtual ~EdOutputStream() {
+    }
     virtual i32 SerialiseString(char **);
     virtual i32 SerialiseString(char **, i32);
     virtual i32 SerialiseString(char *, i32);
@@ -354,7 +349,8 @@ struct EdFileInputStream : EdInputStream {
     i32 pending;
     i32 file;
 
-    virtual ~EdFileInputStream() {}
+    virtual ~EdFileInputStream() {
+    }
     virtual char const *BeginBlock(char const *);
     virtual i32 Eat(i32, i32);
     virtual void EndBlock();
@@ -366,7 +362,8 @@ struct EdFileOutputStream : EdOutputStream {
     i32 block_count;
     i32 file;
 
-    virtual ~EdFileOutputStream() {}
+    virtual ~EdFileOutputStream() {
+    }
     virtual char const *BeginBlock(char const *);
     virtual i32 Eat(i32, i32);
     virtual void EndBlock();
@@ -466,7 +463,8 @@ struct EdRef {
     i32 replication_group;
 
     void CheckType(i32);
-    EdRef() : next(NULL), previous(NULL) {}
+    EdRef() : next(NULL), previous(NULL) {
+    }
     EdRef(char *, char *, i32, i32, i32, EdControl *, i32);
     i32 GetAttributeData(void *, i32, i32, void *, i32);
     i32 GetTypeSize(i32, i32);
@@ -475,10 +473,8 @@ struct EdRef {
 };
 static_assert(sizeof(void *) != 4 || sizeof(EdRef) == 0x28, "EdRef 32-bit size");
 static_assert(sizeof(void *) != 4 || offsetof(EdRef, type_id) == 0xc, "EdRef::type_id 32-bit offset");
-static_assert(sizeof(void *) != 4 || offsetof(EdRef, member_offset) == 0x14,
-              "EdRef::member_offset 32-bit offset");
-static_assert(sizeof(void *) != 4 || offsetof(EdRef, attributes) == 0x1c,
-              "EdRef::attributes 32-bit offset");
+static_assert(sizeof(void *) != 4 || offsetof(EdRef, member_offset) == 0x14, "EdRef::member_offset 32-bit offset");
+static_assert(sizeof(void *) != 4 || offsetof(EdRef, attributes) == 0x1c, "EdRef::attributes 32-bit offset");
 struct EdRefKnot : EdRef {
     void GetMemberData(void *, i32, void *, i32);
     void SetMemberData(void *, i32, void *, i32, i16 *);
@@ -615,8 +611,7 @@ extern EdRegistry theRegistry;
 
 static_assert(sizeof(void *) != 4 || sizeof(EdClass) == 0x18, "EdClass 32-bit size");
 static_assert(sizeof(void *) != 4 || sizeof(EdType) == 0xc, "EdType 32-bit size");
-static_assert(sizeof(void *) != 4 || offsetof(EdType, serialise) == 0x8,
-              "EdType::serialise 32-bit offset");
+static_assert(sizeof(void *) != 4 || offsetof(EdType, serialise) == 0x8, "EdType::serialise 32-bit offset");
 static_assert(sizeof(void *) != 4 || sizeof(EdMember) == 0x8, "EdMember 32-bit size");
 static_assert(sizeof(void *) != 4 || sizeof(EdRegistry) == 0x44, "EdRegistry 32-bit size");
 static_assert(sizeof(void *) != 4 || sizeof(EdObjectNotifier) == 4, "EdObjectNotifier 32-bit size");
@@ -643,7 +638,8 @@ struct EdVectorControl {
     void cbSelected(eduimenu_s *, eduiitem_s *, u32);
 };
 struct EditorSettings {
-    virtual ~EditorSettings() {}
+    virtual ~EditorSettings() {
+    }
     f32 cursor_radius;
     i32 snap_terrain;
 
