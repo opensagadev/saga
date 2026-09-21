@@ -12,6 +12,8 @@ i32 CanPullLevers(i32 character_id) {
 
 #include "legoapi/characters/core/CharacterObjectInterface.h"
 #include "legoapi/characters/core/players.h"
+#include "legoapi/audio/sfx.h"
+#include "legoapi/core/config/cheat.h"
 #include "legoapi/world/area.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nucore/nuanim3.h"
@@ -28,7 +30,6 @@ i32 CanPullLevers(i32 character_id) {
 struct numtx_s;
 struct APICHARACTERMODELLIST_s;
 struct EXTRAMODEL;
-
 
 // Forward declarations for local (static) character/gameplay helper stubs.
 struct nuvec_s;
@@ -567,7 +568,6 @@ GAMECHARACTERDATA GCDATA_DEFAULT = {
 
 i32 g_loadingCharacterInHub;
 
-
 CharacterObjectInterface::CharacterObjectInterface(GameObject_s &value) : object(&value) {
     object->mech_object_interface = this;
 }
@@ -603,12 +603,16 @@ CharacterObjectInterface::~CharacterObjectInterface() {
     object->mech_object_interface = NULL;
 }
 
-static __used__ void ExtraDieSfx_LSW(GameObject_s *) {
-    STUBBED();
+static __used__ void ExtraDieSfx_LSW(GameObject_s *object) {
+    if (object->id == id_CHEWBACCA && Cheat[4].enabled != 0) {
+        PlaySfx("C3_Death", &object->apiobj.collision_position);
+    }
 }
 
-static __used__ void ExtraHurtSfx_LSW(GameObject_s *) {
-    STUBBED();
+static __used__ void ExtraHurtSfx_LSW(GameObject_s *object) {
+    if (object->id == id_CHEWBACCA && Cheat[4].enabled != 0) {
+        PlaySfx("C3_Death", &object->apiobj.collision_position);
+    }
 }
 
 extern AREADATA *DAGOBAH_ADATA;
@@ -617,9 +621,4 @@ extern AREADATA *DEATHSTARRESCUE_ADATA;
 extern AREADATA *HOTHESCAPE_ADATA;
 extern AREADATA *JABBASPALACE_ADATA;
 
-extern "C" {
-
-
-
-
-} // extern "C"
+extern "C" {} // extern "C"

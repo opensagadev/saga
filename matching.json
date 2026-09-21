@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 51.675846,
+    "fuzzy_match_percent": 51.67899,
     "total_code": "4722419",
     "matched_code": "454276",
     "matched_code_percent": 9.619561,
@@ -41602,7 +41602,7 @@
           "address": 1333968,
           "offset": 444000,
           "size": 12082,
-          "match_percent": 80.27392
+          "match_percent": 80.27585
         },
         {
           "name": "SOUND_SFXRequest_Table",
@@ -42376,7 +42376,7 @@
           "address": 1158672,
           "offset": 268704,
           "size": 90,
-          "match_percent": 17.5
+          "match_percent": 99.958336
         },
         {
           "name": "_ZL16ExtraHurtSfx_LSWP12GameObject_s",
@@ -42384,7 +42384,7 @@
           "address": 1158768,
           "offset": 268800,
           "size": 90,
-          "match_percent": 17.5
+          "match_percent": 99.958336
         },
         {
           "name": "_ZNK24CharacterObjectInterface13GetTargetNameEv",
