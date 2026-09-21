@@ -37,6 +37,9 @@ void KillParts(GameObject_s *, i32, i32, i32, f32, i32, u16 *);
 void Arcade_Kill(i32, i32);
 i32 CannotKill(GameObject_s *);
 i32 NewBlockAction(GameObject_s *);
+void Player_ClearContext(GameObject_s *, i32);
+void Player_ResetContexts(PLAYERPACKET_s *);
+i32 qrand();
 
 void (*Punch_HitHoldFn)(GameObject_s *, GameObject_s *);
 i32 (*Punch_GetDamageFn)(GameObject_s *, GameObject_s *);
@@ -233,8 +236,76 @@ i32 IsFacingTarget(nuvec_s *first, nuvec_s *second, i32 facing_angle, i32 arc_de
     return arc > angle_difference;
 }
 
-void StunGameObject(GameObject_s *, GameObject_s *, float, i32) {
-    STUBBED();
+i32 StunGameObject(GameObject_s *object, GameObject_s *attacker, float duration, i32 flags) {
+    if (object->apiobj.field_0x27c != -1)
+        return 0;
+
+    void **animations = object->apiobj.character_model->model_data_b;
+    i32 candidates[5];
+    i32 candidate_count = 0;
+    if (animations[0xa7] != NULL && animations[0xaa] != NULL)
+        candidates[candidate_count++] = 0xa7;
+    if (animations[0xa8] != NULL && animations[0xab] != NULL)
+        candidates[candidate_count++] = 0xa8;
+    if (animations[0xa9] != NULL && animations[0xac] != NULL)
+        candidates[candidate_count++] = 0xa9;
+
+    if ((flags & 0x200) == 0) {
+        if (animations[0x3d] != NULL)
+            candidates[candidate_count++] = 0x3d;
+        if (attacker != NULL && static_cast<i8>(attacker->apiobj.flags_low) < 0 && animations[0xb9] != NULL)
+            candidates[candidate_count++] = 0xb9;
+    }
+
+    i32 animation = 1;
+    if (candidate_count != 0)
+        animation = candidates[qrand() / (0xffff / candidate_count + 1)];
+    if (animation == -1)
+        return 0;
+
+    const u8 saved_variant = object->field_0xe31;
+    object->context_animation = animation;
+    object->external_force.z = AnimSpeed(object->apiobj.character_model, animation);
+    if (animation != 0x3d && animation != 0xb9) {
+        if (object->external_force.z <= 0.0f)
+            object->external_force.z = 1.0f;
+        else if (object->external_force.z <= 0.8f)
+            object->external_force.z = 0.8f;
+    }
+
+    ResetAnimPacket(&object->apiobj.anim_packet, -1);
+    Player_ClearContext(object, 1);
+    Player_ResetContexts(reinterpret_cast<PLAYERPACKET_s *>(object->player_packet));
+    object->character_context = 0x5a;
+    object->field_0x768 = duration;
+    object->field_0x7a3 = 0;
+
+    if (attacker != NULL) {
+        const u16 angle = NuAtan2D(attacker->apiobj.collision_position.x - object->apiobj.collision_position.x,
+                                   attacker->apiobj.collision_position.z - object->apiobj.collision_position.z);
+        object->apiobj.field_0x276 = angle;
+        object->apiobj.movement_facing_angle = angle;
+        object->apiobj.facing_angle = angle;
+    }
+
+    CHARACTERANIM_s *animation_data =
+        static_cast<CHARACTERANIM_s *>(object->apiobj.character_model->model_data_a[animation]);
+    if (animations[animation] != NULL && (animation_data->flags & 2) != 0) {
+        object->context_animation_timer = static_cast<f32>(qrand()) * (1.0f / 65535.0f) * 0.5f + 1.0f;
+    } else {
+        object->context_animation_timer = AnimDuration(object->id, animation, 0.0f, 0.0f, animation != 0xb9);
+        if (object->context_animation_timer <= 0.0f)
+            object->context_animation_timer = 0.6f;
+    }
+
+    if (attacker != NULL) {
+        object->apiobj.movement_facing_angle =
+            NuAtan2D(attacker->apiobj.collision_position.x - object->apiobj.collision_position.x,
+                     attacker->apiobj.collision_position.z - object->apiobj.collision_position.z);
+    }
+
+    object->field_0xe31 = saved_variant;
+    return (animation == 0xb9) + 1;
 }
 
 void ComboRotateCode(GameObject_s *object, i32 action_held) {

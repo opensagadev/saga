@@ -27,7 +27,7 @@ extern i16 id_CATWOMAN;
 void NewRumble(nupad_s *, f32, i32);
 void NewBuzzFrames(nupad_s *, i32, i32);
 void GameCam_HitJudder();
-void StunGameObject(GameObject_s *, GameObject_s *, f32, i32);
+i32 StunGameObject(GameObject_s *, GameObject_s *, f32, i32);
 void Detonator_Detonate(DETONATOR_s *);
 i32 GizmoBlowupBlowup(GIZMOBLOWUP_s *, i32, i32, i32, GameObject_s *, i32);
 i32 TerrainPlatId();
