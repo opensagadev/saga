@@ -885,6 +885,7 @@ typedef struct GameObject_s {
     union {
         struct {
             union {
+                u8 field_0x7a4;
                 u8 build_button_taps; // 0x07a4, capped Build-It acceleration input
                 u8 grapple_swing_degrees;
             };

@@ -27,6 +27,7 @@ extern "C" i16 id_JEDISTARFIGHTERYELLOWEP3;
 extern "C" i16 id_JEDISTARFIGHTERREDEP3;
 extern "C" i16 id_TIEINTERCEPTOR;
 extern "C" i16 id_YODA;
+extern "C" i16 id_YODAGHOST;
 extern "C" i16 id_QUIGONJINN;
 extern "C" i16 id_MACEWINDU;
 extern "C" i16 id_C3PO;
