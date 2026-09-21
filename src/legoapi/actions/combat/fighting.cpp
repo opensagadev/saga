@@ -55,8 +55,8 @@ void DeflectPart(PART_s *, GameObject_s *, float, float, i32, i32) {
     STUBBED();
 }
 
-void IsDownSwipe(NuVec2 const &, NuVec2 const &) {
-    STUBBED();
+bool IsDownSwipe(NuVec2 const &start, NuVec2 const &end) {
+    return abs(RotDiff(NuAtan2D(end.x - start.x, end.y - start.y), 0x8000)) < 0x1c72;
 }
 
 void TakeHitCode(GameObject_s *object) {
