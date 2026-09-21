@@ -2,7 +2,9 @@
 #include "legoapi/legoapi_types.h"
 #include "legoapi/world/world.h"
 #include "globals.h"
+#include "legoapi/characters/motion.h"
 #include "legoapi/characters/core/players.h"
+#include "nu2api/numath/numtx.h"
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nu3d/nuspline.h"
 
@@ -101,12 +103,45 @@ i32 Teleport_UpdateHints(HINT_s *hint) {
     return 0;
 }
 
-void Teleports_UpdateAfterGameObjects(WORLDINFO_s *) {
-    STUBBED();
+void Teleports_UpdateAfterGameObjects(WORLDINFO_s *world) {
+    if (world->teleports == NULL || WORLD->teleport_count <= 0)
+        return;
+
+    TELEPORT_s *teleport = world->teleports;
+    for (i32 i = 0; i < WORLD->teleport_count; ++i, ++teleport) {
+        teleport->field_74 = SeekRot(teleport->field_74, teleport->field_78, 5.0f);
+        if (NuSpecialExistsFn(&teleport->flap1_special)) {
+            NUMTX matrix = teleport->flap1_matrix;
+            if ((teleport->flags & 8) != 0)
+                NuMtxPreRotateX(&matrix, -teleport->field_74);
+            else
+                NuMtxPreRotateX(&matrix, teleport->field_74);
+            NuSpecialSetDrawMtx(&teleport->flap1_special, &matrix);
+            NuSpecialUpdate(&teleport->flap1_special);
+        }
+
+        teleport->field_76 = SeekRot(teleport->field_76, teleport->field_7a, 5.0f);
+        if (NuSpecialExistsFn(&teleport->flap2_special)) {
+            NUMTX matrix = teleport->flap2_matrix;
+            if ((teleport->flags & 8) != 0)
+                NuMtxPreRotateX(&matrix, -teleport->field_76);
+            else
+                NuMtxPreRotateX(&matrix, teleport->field_76);
+            NuSpecialSetDrawMtx(&teleport->flap2_special, &matrix);
+            NuSpecialUpdate(&teleport->flap2_special);
+        }
+    }
 }
 
-void Teleports_UpdateBeforeGameObjects(WORLDINFO_s *) {
-    STUBBED();
+void Teleports_UpdateBeforeGameObjects(WORLDINFO_s *world) {
+    if (world->teleports == NULL || WORLD->teleport_count <= 0)
+        return;
+
+    TELEPORT_s *teleport = world->teleports;
+    for (i32 i = 0; i < WORLD->teleport_count; ++i, ++teleport) {
+        teleport->field_78 = 0;
+        teleport->field_7a = 0;
+    }
 }
 
 #include "legoapi/gizmo/base/TeleportObjectInterface.h"

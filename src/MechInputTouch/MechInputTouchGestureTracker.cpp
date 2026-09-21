@@ -63,8 +63,24 @@ void MechInputTouchGestureTrackingSystem::RegisterGestureTracker(MechInputTouchG
     entries[insertion_index].priority = priority;
 }
 
-void MechInputTouchGestureTrackingSystem::UnregisterGestureTracker(MechInputTouchGestureTracker &) {
-    STUBBED();
+void MechInputTouchGestureTrackingSystem::UnregisterGestureTracker(MechInputTouchGestureTracker &tracker) {
+    struct GestureTrackerRegistration {
+        MechInputTouchGestureTracker *tracker;
+        i32 priority;
+    };
+    GestureTrackerRegistration *entries =
+        reinterpret_cast<GestureTrackerRegistration *>(reinterpret_cast<u8 *>(this) + 0x2588);
+    i32 index = 0;
+    while (index < 9 && entries[index].tracker != &tracker)
+        ++index;
+    if (index == 9)
+        return;
+    do {
+        entries[index] = entries[index + 1];
+        ++index;
+    } while (index != 9);
+    entries[9].tracker = NULL;
+    entries[9].priority = -1;
 }
 
 void MechInputTouchGestureTrackingSystem::Update(NuInputTouchData const *) {
