@@ -1982,7 +1982,7 @@ extern "C" {
         return 0;
     }
 
-    i32 AddGameDebrisRot(APIDEBRISSYS_s *system, i32 type, NUVEC *position, i32 count, i16 z_rotation, i16 y_rotation) {
+    i32 AddGameDebrisRot(APIDEBRISSYS_s *system, i32 type, NUVEC *position, i32 count, u16 z_rotation, u16 y_rotation) {
         if (type >= 0 && type < system->capacity && system->entries[type].effect != -1 && count > 0) {
             AddVariableShotDebrisEffect(system->entries[type].effect, position, count, z_rotation, y_rotation);
             return 1;

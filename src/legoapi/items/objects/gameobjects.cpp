@@ -4699,7 +4699,7 @@ i32 CannotKill(GameObject_s *object);
 i32 SphereSphereOverlapScaleY(NUVEC *, f32, f32, NUVEC *, f32, f32);
 GIZMOBLOWUP_s *GizmoBlowUp_Hit(GameObject_s *, NUVEC *, i32, f32, NUVEC *, NUVEC *, BOLT_s *, u32, u8 *);
 void AlertSurroundingCreatures(GameObject_s *, NUVEC *);
-extern "C" i32 AddGameDebrisRot(APIDEBRISSYS_s *, i32, NUVEC *, i32, i16, i16);
+extern "C" i32 AddGameDebrisRot(APIDEBRISSYS_s *, i32, NUVEC *, i32, u16, u16);
 
 static void LightSabreStreakCode(GameObject_s *object, i32 blade, i32 effect) {
     if (object->weapon_scale < 1.0f)

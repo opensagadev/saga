@@ -642,6 +642,7 @@ void CharScenes_LevelLoad(WORLDINFO *world) {
 }
 
 extern i16 tUNKNOWN;
+extern "C" void PlaySfx(char *, nuvec_s *);
 void Move_CHARACTER(GameObject_s *);
 void Animate_CHARACTER(GameObject_s *);
 
@@ -671,8 +672,35 @@ void FixUpCharacters(CHARFIXUP *fixup) {
     }
 }
 
-void PostAnimate_FETT(GameObject_s *) {
-    STUBBED();
+void PostAnimate_FETT(GameObject_s *object) {
+    if (object->apiobj.field_0x287 != 0) {
+        return;
+    }
+
+    const i8 context = object->character_context;
+    if (context != -1 &&
+        !((context == 0x15 && object->context_animation == 62) ||
+          (context == 0x14 && object->context_animation == 77) ||
+          (context == 0x2e && object->context_animation == 111) ||
+          (context == 0x0a && object->context_animation == 60))) {
+        return;
+    }
+    if (object->field_0xe31 != 1 || object->apiobj.field_0x288 == 0) {
+        return;
+    }
+
+    const i32 count = ParticlesPerSecond(100.0f, FRAMETIME);
+    const i32 first_joint = object->id == id_BOBAFETT ? 10 : 7;
+    if (object->apiobj.character_model->points_of_interest[first_joint] != NULL) {
+        AddGameDebrisRot(WORLD->debris_sys, 27,
+                         NUMTX_GET_ROW_VEC(&object->joint_matrices[first_joint], 3), count, 0,
+                         object->apiobj.facing_angle);
+    }
+    if (object->apiobj.character_model->points_of_interest[8] != NULL) {
+        AddGameDebrisRot(WORLD->debris_sys, 27, NUMTX_GET_ROW_VEC(&object->joint_matrices[8], 3), count, 0,
+                         object->apiobj.facing_angle);
+    }
+    PlaySfx(const_cast<char *>("JgThrust"), &object->apiobj.collision_position);
 }
 
 void ResetAICreature(GameObject_s *, AISYS_s *);

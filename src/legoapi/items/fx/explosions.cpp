@@ -74,7 +74,7 @@ void UpdateExplosions() {
 
 extern WORLDINFO_s *WORLD;
 extern "C" i32 ParticlesPerSecond(f32, f32);
-extern "C" i32 AddGameDebrisRot(APIDEBRISSYS_s *, i32, NUVEC *, i32, i16, i16);
+extern "C" i32 AddGameDebrisRot(APIDEBRISSYS_s *, i32, NUVEC *, i32, u16, u16);
 i32 SphereSphereOverlapScaleY(NUVEC *, f32, f32, NUVEC *, f32, f32);
 BOLTTYPE_s *BoltType_FindByID(i32, WORLDINFO_s *);
 PART_s *Bolt_HitParts(BOLT_s *, NUVEC *, NUVEC *, NUVEC *, f32, i32);

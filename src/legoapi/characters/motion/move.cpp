@@ -567,7 +567,7 @@ i32 SpecialMove_GetAttackerAction(i32);
 i32 SpecialMove_GetVictimAction(i32);
 void StartQuickShoot(GameObject_s *, i32);
 void GameCam_Judder(GAMECAMERA_s *, f32, i32, NUVEC *);
-extern "C" i32 AddGameDebrisRot(APIDEBRISSYS_s *, i32, NUVEC *, i32, i16, i16);
+extern "C" i32 AddGameDebrisRot(APIDEBRISSYS_s *, i32, NUVEC *, i32, u16, u16);
 i32 (*FindSlamOrigin_UseCPosFn)(GameObject_s *) = NULL;
 void (*Jump_EndOfLandContextFn)(GameObject_s *) = NULL;
 void ConstantRumble(GameObject_s *object, f32 strength, f32 duration);
