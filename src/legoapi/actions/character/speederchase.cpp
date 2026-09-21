@@ -1,4 +1,5 @@
 #include "nu2api/numath/nutrig.h"
+#include "nu2api/nucore/nustring.h"
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/render/fx.h"
@@ -180,8 +181,12 @@ void InitBikeParts() {
     memset(bikeParts, 0, 0xd0);
 }
 
-void SpeederBlowupHack(GIZMOBLOWUP_s *, i32) {
-    STUBBED();
+i32 SpeederBlowupHack(GIZMOBLOWUP_s *blowup, i32) {
+    if (blowup == NULL) {
+        return 1;
+    }
+    return NuStrCmp(blowup->name, "thermocrate_011") != 0 && NuStrCmp(blowup->name, "thermocrate_021") != 0 &&
+           NuStrCmp(blowup->name, "thermocrate_031") != 0 && NuStrCmp(blowup->name, "minikit101") != 0;
 }
 
 void FindPodHoverHeight(GameObject_s *) {
