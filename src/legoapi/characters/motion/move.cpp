@@ -617,6 +617,7 @@ static void ForceCode(GameObject_s *, i32, i32, i32);
 static void SelfDestructCode(GameObject_s *, i32);
 void JetPackCode(GameObject_s *, i32, i32, i32);
 void ChatterSfx(GameObject_s *, i32, f32);
+static void ShieldCode(GameObject_s *);
 void KeepWeaponIn(GameObject_s *);
 void BigJumpCode(GameObject_s *);
 void InstantKillParts(GameObject_s *, i32, f32);
@@ -1082,8 +1083,85 @@ void Move_DRAGBOMB(GameObject_s *object) {
     }
 }
 
-void Move_DROIDEKA(GameObject_s *) {
-    STUBBED();
+void Move_DROIDEKA(GameObject_s *object) {
+    const u32 buttons_pressed = object->pad_gamepad->buttons_pressed;
+    const i32 action_pressed = GAMEPAD_ACTION & buttons_pressed;
+    const i32 special_pressed = GAMEPAD_SPECIAL & buttons_pressed;
+
+    KeepWeaponOut(object);
+    DropInOutCode(object);
+    if (object->torpedo != NULL) {
+        *reinterpret_cast<u8 *>(object->torpedo) = 0;
+    }
+    if ((object->field_0xe20 & 0x20) != 0) {
+        return;
+    }
+
+    ApplyGravity(object, NULL, 0.0f, 0.0f, NULL);
+    TakeHitCode(object);
+    FlattenCode(object);
+    SlideCode(object);
+    ForcePushed_MoveCode(object);
+    ForcedBackCode(object);
+    Tube_MoveCode(object, WORLD);
+    DeactivatedCode(object);
+    ShootCode(object, action_pressed, special_pressed, 0, 0, 0);
+
+    if (object->character_context == 0x32) {
+        if (object->apiobj.character_data->game_character->run_speed - 0.1f <= object->pad_gamepad->input_magnitude) {
+            object->character_context = 0x31;
+            object->context_animation = 3;
+        } else {
+            object->context_animation_timer -= FRAMETIME;
+            if (object->context_animation_timer <= 0.0f) {
+                object->character_context = -1;
+            }
+        }
+    } else if (object->character_context == 0x31) {
+        PlaySfx("DDekaRoll", &object->apiobj.collision_position);
+        if (AnimPlaying(&object->apiobj.anim_packet, object->context_animation, 0, 0) != NULL &&
+            object->pad_gamepad->input_magnitude == 0.0f && object->apiobj.field_0x27d != 0) {
+            ResetAnimPacket(&object->apiobj.anim_packet, -1);
+            if (object->apiobj.character_model->model_data_b[0x23] == NULL) {
+                object->character_context = -1;
+            } else {
+                object->character_context = 0x32;
+                object->context_animation = 0x23;
+                object->context_animation_timer = AnimDuration(object->id, 0x23, 0.0f, 0.0f, 1);
+                PlaySfx("DDekaFold", &object->apiobj.collision_position);
+            }
+        }
+    } else if (object->character_context == -1 && object->apiobj.field_0x27d != 0) {
+        if (object->apiobj.character_data->game_character->run_speed - 0.1f <= object->pad_gamepad->input_magnitude) {
+            object->character_context = 0x31;
+            object->context_animation = 3;
+        } else if (CurrentAnim(&object->apiobj.anim_packet) == 5 &&
+                   object->apiobj.character_model->model_data_b[0x23] != NULL) {
+            object->character_context = 0x32;
+            object->context_animation = 0x23;
+            object->context_animation_timer = AnimDuration(object->id, 0x23, 0.0f, 0.0f, 1);
+            PlaySfx("DDekaFold", &object->apiobj.collision_position);
+        }
+    }
+
+    ShieldCode(object);
+    if (object->character_context == -1 && object->field_0xe31 == 0 && object->apiobj.field_0x27d != 0 &&
+        object->apiobj.field_0x27e == 0 &&
+        ((object->movement_runtime_flags & 4) != 0 || object->fall_animation_timer >= 0.2f) &&
+        ((object->movement_runtime_flags & 4) != 0 || object->pad_gamepad->input_magnitude == 0.0f ||
+         (static_cast<i8>(object->apiobj.flags_low) >= 0 &&
+          object->apiobj.character_model->model_data_b[0x59] != NULL))) {
+        StartFallLand(object, -1);
+    }
+    if (object->apiobj.field_0x27d != 0) {
+        object->movement_runtime_flags &= ~4;
+    }
+
+    if ((object->apiobj.character_data->model_flags & 0x10) != 0 && (object->movement_runtime_flags & 2) == 0 &&
+        Cheat_IsOn(0x20)) {
+        SelfDestructCode(object, special_pressed);
+    }
+    GizmoBlowupCheckProximity(WORLD, object);
 }
 
 i32 PodLevel(AREADATA_s *area);
