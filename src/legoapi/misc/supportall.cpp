@@ -39,7 +39,9 @@
 #include "legoapi/world/areas.h"
 #include "legoapi/world/mission.h"
 #include "nu2api/nu3d/nudlist.h"
+#include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nu3d/numtl.h"
+#include "nu2api/nu3d/nupostparams.h"
 #include "nu2api/nu3d/nurndrstat.h"
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/nufile/nufile.h"
@@ -280,8 +282,19 @@ void bgProcClose() {
     STUBBED();
 }
 
-void BurnoutApply(i32) {
-    STUBBED();
+extern "C" void edrtlCalculateBurnoutEx(burnset_s *set, NuBloomParameters *parameters, NUVEC *camera_position,
+                                        f32 frame_time);
+
+void BurnoutApply(i32 paused) {
+    NuBloomParameters parameters = {};
+    CUTINFO *cut = static_cast<CUTINFO *>(CutStopInfo);
+    if (cut != NULL && (cut->flags & 0x80) != 0)
+        return;
+    if (WORLD->burnset == NULL)
+        return;
+    edrtlCalculateBurnoutEx(WORLD->burnset, &parameters, reinterpret_cast<NUVEC *>(&global_camera.mtx.m30), FRAMETIME);
+    if (parameters.intensity > 0.0f)
+        NuPostBloom(paused, &parameters);
 }
 
 void bgprocFreeze() {

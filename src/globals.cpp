@@ -321,7 +321,7 @@ GameObject_s *player2 = NULL;
 extern GameObject_s *CutDeadVehiclePlayer;
 f32 avg_currentspeed_mul = 0.0f;
 i32 pause_rndr_on = 0;
-i32 pause_fade = 0;
+f32 pause_fade = 0.0f;
 i32 wait_till_next_frame = 0;
 GIZFORCE_s *force_array[4] = {0};
 GameObject_s *ObiWan = NULL;

@@ -1876,8 +1876,28 @@ static i32 GameFindAlternativeSpecialObject(AISYS *, nuhspecial_s *special) {
     return EquivalentObject_Find(WorldInfo_CurrentlyActive(), special);
 }
 
-static void GameAILoad(AISYS *, i32, NUGSCN *, VARIPTR *, VARIPTR *) {
-    STUBBED();
+static void GameAILoad(AISYS *system, i32 version, NUGSCN *, VARIPTR *buffer, VARIPTR *buffer_end) {
+    if (version < 12 && system->path_sys != NULL && system->path_sys->path_count != 0) {
+        for (i32 path_index = 0; path_index < system->path_sys->path_count; ++path_index) {
+            AIPATH *path = system->path_sys->paths[path_index];
+            for (i32 connection = 0; connection < path->connection_count; ++connection) {
+                path->connections[connection].traversal_flags[0] = 0;
+                path->connections[connection].traversal_flags[1] = 0;
+                path->connections[connection].original_traversal_flags[0] = 0;
+                path->connections[connection].original_traversal_flags[1] = 0;
+            }
+        }
+    }
+
+    i32 tag_length = static_cast<i8>(EdFileReadChar());
+    if (tag_length > 0 && tag_length < 9) {
+        char tag[12] = {};
+        EdFileRead(tag, tag_length);
+        if (NuStrICmp(tag, "LEGO") == 0) {
+            EdFileReadInt();
+            system->game_sys = AISysBufferAlloc(buffer, buffer_end, 4);
+        }
+    }
 }
 
 static void GlobalCharacterRender(NUVEC *position, i16 angle, i32 character, i32, EDCREATURE_s *) {
@@ -3338,40 +3358,48 @@ void GameFog_Update(WORLDINFO_s *world) {
             GameFog = GameFogNew;
         } else {
             f32 blend = 1.0f - (NU_SIN_LUT(GameFogTime / GameFogDuration * 32768.0f + 16384.0f) + 1.0f) * 0.5f;
-            GameFog.high_quality_colour_channels[0] = GameFogOld.high_quality_colour_channels[0] +
+            GameFog.high_quality_colour_channels[0] =
+                GameFogOld.high_quality_colour_channels[0] +
                 (GameFogNew.high_quality_colour_channels[0] - GameFogOld.high_quality_colour_channels[0]) * blend;
-            GameFog.high_quality_colour_channels[1] = GameFogOld.high_quality_colour_channels[1] +
+            GameFog.high_quality_colour_channels[1] =
+                GameFogOld.high_quality_colour_channels[1] +
                 (GameFogNew.high_quality_colour_channels[1] - GameFogOld.high_quality_colour_channels[1]) * blend;
-            GameFog.high_quality_colour_channels[2] = GameFogOld.high_quality_colour_channels[2] +
+            GameFog.high_quality_colour_channels[2] =
+                GameFogOld.high_quality_colour_channels[2] +
                 (GameFogNew.high_quality_colour_channels[2] - GameFogOld.high_quality_colour_channels[2]) * blend;
-            GameFog.high_quality_colour_channels[3] = GameFogOld.high_quality_colour_channels[3] +
+            GameFog.high_quality_colour_channels[3] =
+                GameFogOld.high_quality_colour_channels[3] +
                 (GameFogNew.high_quality_colour_channels[3] - GameFogOld.high_quality_colour_channels[3]) * blend;
-            GameFog.high_quality_start = GameFogOld.high_quality_start +
-                (GameFogNew.high_quality_start - GameFogOld.high_quality_start) * blend;
-            GameFog.high_quality_end = GameFogOld.high_quality_end +
-                (GameFogNew.high_quality_end - GameFogOld.high_quality_end) * blend;
+            GameFog.high_quality_start =
+                GameFogOld.high_quality_start + (GameFogNew.high_quality_start - GameFogOld.high_quality_start) * blend;
+            GameFog.high_quality_end =
+                GameFogOld.high_quality_end + (GameFogNew.high_quality_end - GameFogOld.high_quality_end) * blend;
             GameFog.high_quality_density = GameFogOld.high_quality_density +
-                (GameFogNew.high_quality_density - GameFogOld.high_quality_density) * blend;
+                                           (GameFogNew.high_quality_density - GameFogOld.high_quality_density) * blend;
             GameFog.low_quality_density = GameFogOld.low_quality_density +
-                (GameFogNew.low_quality_density - GameFogOld.low_quality_density) * blend;
-            GameFog.low_quality_colour_channels[0] = GameFogOld.low_quality_colour_channels[0] +
+                                          (GameFogNew.low_quality_density - GameFogOld.low_quality_density) * blend;
+            GameFog.low_quality_colour_channels[0] =
+                GameFogOld.low_quality_colour_channels[0] +
                 (GameFogNew.low_quality_colour_channels[0] - GameFogOld.low_quality_colour_channels[0]) * blend;
-            GameFog.low_quality_colour_channels[1] = GameFogOld.low_quality_colour_channels[1] +
+            GameFog.low_quality_colour_channels[1] =
+                GameFogOld.low_quality_colour_channels[1] +
                 (GameFogNew.low_quality_colour_channels[1] - GameFogOld.low_quality_colour_channels[1]) * blend;
-            GameFog.low_quality_colour_channels[2] = GameFogOld.low_quality_colour_channels[2] +
+            GameFog.low_quality_colour_channels[2] =
+                GameFogOld.low_quality_colour_channels[2] +
                 (GameFogNew.low_quality_colour_channels[2] - GameFogOld.low_quality_colour_channels[2]) * blend;
-            GameFog.low_quality_colour_channels[3] = GameFogOld.low_quality_colour_channels[3] +
+            GameFog.low_quality_colour_channels[3] =
+                GameFogOld.low_quality_colour_channels[3] +
                 (GameFogNew.low_quality_colour_channels[3] - GameFogOld.low_quality_colour_channels[3]) * blend;
         }
     }
     GameFog.colour = (static_cast<i32>(GameFog.high_quality_colour_channels[0]) << 24) +
-        (static_cast<i32>(GameFog.high_quality_colour_channels[1]) << 16) +
-        (static_cast<i32>(GameFog.high_quality_colour_channels[2]) << 8) +
-        static_cast<i32>(GameFog.high_quality_colour_channels[3]);
+                     (static_cast<i32>(GameFog.high_quality_colour_channels[1]) << 16) +
+                     (static_cast<i32>(GameFog.high_quality_colour_channels[2]) << 8) +
+                     static_cast<i32>(GameFog.high_quality_colour_channels[3]);
     GameFog.low_quality_colour = (static_cast<i32>(GameFog.low_quality_colour_channels[0]) << 24) +
-        (static_cast<i32>(GameFog.low_quality_colour_channels[1]) << 16) +
-        (static_cast<i32>(GameFog.low_quality_colour_channels[2]) << 8) +
-        static_cast<i32>(GameFog.low_quality_colour_channels[3]);
+                                 (static_cast<i32>(GameFog.low_quality_colour_channels[1]) << 16) +
+                                 (static_cast<i32>(GameFog.low_quality_colour_channels[2]) << 8) +
+                                 static_cast<i32>(GameFog.low_quality_colour_channels[3]);
     GameFogSnap = 0;
     g_BackgroundColour = GameFog.colour;
 }
@@ -4211,12 +4239,11 @@ i32 GameDrawCharacterModel(CHARACTERMODEL_s *model, ANIMPACKET_s *animation, NUM
     }
     drawcharactermodel_keepmergeaction = game_keepmergeaction;
     MakeLayerList = GCDataList[model->model_id].make_layer_list;
-    i32 result = APIDrawCharacterModel(
-        model, object != NULL ? object->apiobj.character_data : NULL, animation, matrix, secondary_matrix,
-        reflection_matrix, NULL, auxiliary_matrix, object, flags,
-        object != NULL && JointRotation_On ? object->joint_modifiers : NULL,
-        object != NULL && JointRotation_On ? object->field_0x1089 : 0, Paused, FRAMETIME, output_matrices, NULL,
-        WORLD->debris_sys);
+    i32 result = APIDrawCharacterModel(model, object != NULL ? object->apiobj.character_data : NULL, animation, matrix,
+                                       secondary_matrix, reflection_matrix, NULL, auxiliary_matrix, object, flags,
+                                       object != NULL && JointRotation_On ? object->joint_modifiers : NULL,
+                                       object != NULL && JointRotation_On ? object->field_0x1089 : 0, Paused, FRAMETIME,
+                                       output_matrices, NULL, WORLD->debris_sys);
     if (TimingBarSet == 5)
         TBCLOSEFN("chrs", 5);
 
@@ -4249,7 +4276,7 @@ i32 GameDrawCharacterModel(CHARACTERMODEL_s *model, ANIMPACKET_s *animation, NUM
             if (object->id == id_MOUSEDROID && WORLD->lev_objs[0xa2].active) {
                 special_matrix = *secondary_matrix;
                 NuSpecialDrawAtAlpha(&WORLD->lev_objs[0xa2].special, &special_matrix,
-                                    object->shadow_opacity * object->surface_normal.y);
+                                     object->shadow_opacity * object->surface_normal.y);
             } else if (CHARSHADOWS_ON) {
                 PLAYERCHARACTERCONFIG_s *config = object->apiobj.character_data->player_config;
                 i32 alpha = config->blob_shadow_alpha;
@@ -4335,8 +4362,7 @@ void GameBlowUpBlownUpFn_LSW(GIZMOBLOWUP_s *blowup) {
         return;
     if (WORLD->area == MOSEISLEY_ADATA || WORLD->area == HUB_ADATA) {
         char *name = NuSpecialGetName(&blowup->type->special);
-        if (name == NULL || NuStrIStr(name, "bin_lid") != NULL || NuStrIStr(name, "bin") == NULL ||
-            qrand() >= 49200)
+        if (name == NULL || NuStrIStr(name, "bin_lid") != NULL || NuStrIStr(name, "bin") == NULL || qrand() >= 49200)
             return;
     } else if (WORLD->area == TATOOINE_ADATA) {
         char *name = NuSpecialGetName(&blowup->type->special);
@@ -5522,12 +5548,12 @@ void ThingManager::edTimingEnter() {
         eduiMenuAddItem(edTimingMenu, eduiItemSelCreate(2, EdAttr, 0, 3, cbEdTimingSelect, "No Things"));
         eduiMenuAddItem(edTimingMenu, eduiItemSelCreate(3, EdAttr, 0, 4, cbEdTimingSelect, "All Things"));
         for (i32 i = 0; i < static_cast<ThingManager *>(theThingManager)->count; ++i) {
-            eduiMenuAddItem(edTimingMenu,
-                           eduiItemToggleCreate(i + 4, EdAttr,
-                                               static_cast<ThingManager *>(theThingManager)->things[i]->profiling_0xc,
-                                               i + 5, cbEdTimingSelect,
-                                               const_cast<char *>(static_cast<ThingManager *>(theThingManager)
-                                                                      ->things[i]->GetName())));
+            eduiMenuAddItem(
+                edTimingMenu,
+                eduiItemToggleCreate(
+                    i + 4, EdAttr, static_cast<ThingManager *>(theThingManager)->things[i]->profiling_0xc, i + 5,
+                    cbEdTimingSelect,
+                    const_cast<char *>(static_cast<ThingManager *>(theThingManager)->things[i]->GetName())));
         }
     }
 }
@@ -5598,8 +5624,7 @@ i32 SpecialObject::GetVisibility() const {
 
 void SpecialObject::Render(VuMtx const *matrix) const {
     if (matrix != NULL) {
-        NuSpecialDrawAt(const_cast<nuhspecial_s *>(&special),
-                        reinterpret_cast<NUMTX *>(const_cast<VuMtx *>(matrix)));
+        NuSpecialDrawAt(const_cast<nuhspecial_s *>(&special), reinterpret_cast<NUMTX *>(const_cast<VuMtx *>(matrix)));
     } else {
         NuSpecialDrawAt(const_cast<nuhspecial_s *>(&special),
                         NuSpecialGetDrawMtx(const_cast<nuhspecial_s *>(&special)));
@@ -6008,9 +6033,8 @@ i32 KillGameObject(GameObject_s *object, i32 requested_reason, i32) {
             GameCam_NewShake(GameCam, 1.0f, 1.0f, 1.0f);
             NewRumbleAllPlayers(0.7f, 0.0f, 0, 0);
         } else if (object->id == id_XWING || object->id == id_SNOWSPEEDER || object->id == id_MILLENNIUMFALCON ||
-                   object->id == id_TIEFIGHTER || object->id == id_TIEINTERCEPTOR ||
-                   object->id == id_TIEFIGHTERDARTH || object->id == id_TIEBOMBER ||
-                   object->id == id_IMPERIALSHUTTLE || object->id == id_SLAVE1) {
+                   object->id == id_TIEFIGHTER || object->id == id_TIEINTERCEPTOR || object->id == id_TIEFIGHTERDARTH ||
+                   object->id == id_TIEBOMBER || object->id == id_IMPERIALSHUTTLE || object->id == id_SLAVE1) {
             debris[0] = 34;
             if (WORLD->current_level == DEATHSTARRESCUEE_LDATA && object->apiobj.field_0x27c == -1) {
                 GameCam_Judder(GameCam, qrand() < 32768 ? -0.75f : 0.75f, 2, NULL);
@@ -6055,8 +6079,8 @@ i32 KillGameObject(GameObject_s *object, i32 requested_reason, i32) {
         for (i32 i = 0; i < 4; ++i) {
             if (debris[i] != -1) {
                 if ((object->apiobj.character_data->model_flags & 0x2000) != 0)
-                    AddGameDebrisMomentum(WORLD->debris_sys, debris[i], &object->apiobj.collision_position,
-                                         &momentum, &momentum);
+                    AddGameDebrisMomentum(WORLD->debris_sys, debris[i], &object->apiobj.collision_position, &momentum,
+                                          &momentum);
                 else
                     AddGameDebris(WORLD->debris_sys, debris[i], &object->apiobj.collision_position);
             }
@@ -6168,8 +6192,7 @@ i32 KillGameObject(GameObject_s *object, i32 requested_reason, i32) {
                     if (group->members[i] != NULL) {
                         GameObject_s *candidate = group->members[i]->objptr;
                         if (candidate != object && candidate != NULL &&
-                            (candidate->apiobj.field_0x1f8 & 0x1001) == 0x1001 &&
-                            candidate->apiobj.field_0x287 == 0) {
+                            (candidate->apiobj.field_0x1f8 & 0x1001) == 0x1001 && candidate->apiobj.field_0x287 == 0) {
                             group->leader = &candidate->apiobj;
                             break;
                         }
@@ -6232,8 +6255,8 @@ i32 KillGameObject(GameObject_s *object, i32 requested_reason, i32) {
                 Explosion[i].object = NULL;
         }
     }
-    if (DOGFIGHTA_LDATA != NULL && WorldInfo_CurrentlyActive()->current_level == DOGFIGHTA_LDATA &&
-        BonusWinner == -1 && (object->apiobj.field_0x1f4 & 0x40000) == 0)
+    if (DOGFIGHTA_LDATA != NULL && WorldInfo_CurrentlyActive()->current_level == DOGFIGHTA_LDATA && BonusWinner == -1 &&
+        (object->apiobj.field_0x1f4 & 0x40000) == 0)
         ResetLevel(WorldInfo_CurrentlyActive(), "EP3_DOGFIGHT_DIE", 1);
     if (terminal_kill != 0 && object->apiobj.field_0x27c == -1) {
         bool remove = requested_reason == 5;
@@ -6248,9 +6271,10 @@ i32 KillGameObject(GameObject_s *object, i32 requested_reason, i32) {
                 } else {
                     u32 limit = object->ai_respawn_count + 1;
                     if (creature->max_respawn_count != -1 && object->ai.respawn_locator == NULL)
-                        limit = creature->min_respawn_count +
-                                ((creature->max_respawn_count - creature->min_respawn_count) *
-                                 (Game.difficulty - 1)) / 9 + 1;
+                        limit =
+                            creature->min_respawn_count +
+                            ((creature->max_respawn_count - creature->min_respawn_count) * (Game.difficulty - 1)) / 9 +
+                            1;
                     remove = limit <= object->ai_respawn_count;
                     respawn = !remove;
                 }

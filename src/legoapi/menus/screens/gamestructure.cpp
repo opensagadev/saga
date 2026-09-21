@@ -280,16 +280,24 @@ void Game_AutoSaving() {
 }
 
 bool FreePlayUnlocked() {
-    STUBBED();
     return true;
 }
 
-void Store_UnlockPack(i32, bool) {
-    STUBBED();
+void Store_UnlockPack(i32, bool save) {
+    if (save) {
+        TriggerExtraDataSave();
+        if (WORLD != NULL && WORLD->current_level == HUB_LDATA)
+            TriggerAutoSave();
+    }
 }
 
 void Store_RestorePurchases() {
-    STUBBED();
+    if (WORLD != NULL && HUB_LDATA != NULL && WORLD->current_level == HUB_LDATA) {
+        TriggerExtraDataSave();
+        TriggerAutoSave();
+    } else {
+        TriggerExtraDataSave();
+    }
 }
 
 void StoreBundle_FindByName(char *) {
@@ -433,8 +441,7 @@ void Store_HubDrawFloorTargets(WORLDINFO_s *world) {
             continue;
         }
 
-        const u16 frame_rotation =
-            static_cast<u16>(NuFmod(GameTimer.time_elapsed, 1.5f) / 1.5f * 65536.0f);
+        const u16 frame_rotation = static_cast<u16>(NuFmod(GameTimer.time_elapsed, 1.5f) / 1.5f * 65536.0f);
         Draw3DObjectAlpha(world, LEGOOBJ_ICON_FRAME_GREEN, &pack.custodian_position, 0x4000, frame_rotation, 0, 0.9f,
                           0.9f, 0.9f, 0, frame_alpha);
 
@@ -449,16 +456,14 @@ void Store_HubDrawFloorTargets(WORLDINFO_s *world) {
         }
 
         NUVEC position = pack.custodian_position;
-        position.x += NU_SIN_LUT(static_cast<u16>(NuFmod(GameTimer.time_elapsed, 2.3f) / 2.3f * 65536.0f +
-                                                   i * 0x2000)) *
-                      0.01f;
+        position.x +=
+            NU_SIN_LUT(static_cast<u16>(NuFmod(GameTimer.time_elapsed, 2.3f) / 2.3f * 65536.0f + i * 0x2000)) * 0.01f;
         position.y += CDataList[*pack.id].bounds_max_y * 0.75f - 0.01f;
-        position.y += NU_SIN_LUT(static_cast<u16>(NuFmod(GameTimer.time_elapsed, 2.0f) * 0.5f * 65536.0f +
-                                                   i * 0x2aaa)) *
-                      0.01f;
-        position.z += NU_SIN_LUT(static_cast<u16>(NuFmod(GameTimer.time_elapsed, 2.4f) / 2.4f * 65536.0f +
-                                                   i * 0x2000 + 0x4000)) *
-                      0.01f;
+        position.y +=
+            NU_SIN_LUT(static_cast<u16>(NuFmod(GameTimer.time_elapsed, 2.0f) * 0.5f * 65536.0f + i * 0x2aaa)) * 0.01f;
+        position.z +=
+            NU_SIN_LUT(static_cast<u16>(NuFmod(GameTimer.time_elapsed, 2.4f) / 2.4f * 65536.0f + i * 0x2000 + 0x4000)) *
+            0.01f;
 
         const u16 facing = NuAtan2D(position.x - GameCam->pos.x, position.z - GameCam->pos.z);
         nuhspecial_s icon_special;

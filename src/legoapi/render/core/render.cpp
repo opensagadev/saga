@@ -309,6 +309,8 @@ extern f32 cointotaltime;
 extern f32 MainRenderTime;
 extern i32 editor_active;
 extern i32 Paused;
+extern i32 screendump;
+extern f32 pause_fade;
 extern i32 PANELOFF;
 extern i32 noscenespecials;
 extern void RotateGameMatrix(numtx_s *matrix, i32 order, u16 x, u16 y, u16 z);
@@ -823,9 +825,7 @@ void DrawCables() {
         f32 distance_along = 0.0f;
         for (i32 segment = 0; segment < cable.point_count - 1; ++segment) {
             const f32 segment_length = cable.segment_lengths[segment];
-            i32 subdivisions = cable.slack == 0.0f
-                                   ? 1
-                                   : static_cast<i32>(ceilf(segment_length * nsegments_per_unit));
+            i32 subdivisions = cable.slack == 0.0f ? 1 : static_cast<i32>(ceilf(segment_length * nsegments_per_unit));
             if (subdivisions < 1) {
                 subdivisions = 1;
             }
@@ -839,16 +839,14 @@ void DrawCables() {
                 const f32 global_end = cable.total_length > 0.0f
                                            ? (distance_along + segment_length * local_end) / cable.total_length
                                            : 0.0f;
-                NUVEC start = {cable.points[segment].x +
-                                   (cable.points[segment + 1].x - cable.points[segment].x) * local_start,
-                               first_y + (last_y - first_y) * global_start,
-                               cable.points[segment].z +
-                                   (cable.points[segment + 1].z - cable.points[segment].z) * local_start};
-                NUVEC end = {cable.points[segment].x +
-                                 (cable.points[segment + 1].x - cable.points[segment].x) * local_end,
-                             first_y + (last_y - first_y) * global_end,
-                             cable.points[segment].z +
-                                 (cable.points[segment + 1].z - cable.points[segment].z) * local_end};
+                NUVEC start = {
+                    cable.points[segment].x + (cable.points[segment + 1].x - cable.points[segment].x) * local_start,
+                    first_y + (last_y - first_y) * global_start,
+                    cable.points[segment].z + (cable.points[segment + 1].z - cable.points[segment].z) * local_start};
+                NUVEC end = {
+                    cable.points[segment].x + (cable.points[segment + 1].x - cable.points[segment].x) * local_end,
+                    first_y + (last_y - first_y) * global_end,
+                    cable.points[segment].z + (cable.points[segment + 1].z - cable.points[segment].z) * local_end};
                 start.y -= cable.slack * NU_SIN_LUT(static_cast<i32>(global_start * 32768.0f));
                 end.y -= cable.slack * NU_SIN_LUT(static_cast<i32>(global_end * 32768.0f));
                 f32 ground = GameShadow(NULL, &start, 5.0f, -1);
@@ -1319,7 +1317,23 @@ void DrawGameState(float x, float y, i32 highlight, i32 slot) {
 }
 
 void DrawPauseFade() {
-    STUBBED();
+    if (editor_active != 0 || screendump != 0)
+        return;
+
+    f32 step = FRAMETIME * 2.0f;
+    i32 fade;
+    if (Paused == 0 && NetPaused == 0) {
+        fade = static_cast<i32>(pause_fade - step);
+        if (fade < 0)
+            fade = 0;
+    } else {
+        fade = static_cast<i32>(pause_fade + step);
+        if (fade > 0) {
+            pause_fade = 1.0f;
+            return;
+        }
+    }
+    pause_fade = static_cast<f32>(fade);
 }
 
 void DrawRippleSet(ripple_set_s *set) {

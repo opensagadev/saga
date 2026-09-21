@@ -18,6 +18,23 @@ char *ASCII_UP = "\xc2\xac";
 #include <stdio.h>
 #include <string.h>
 extern char **TTab;
+extern i16 tNULL;
+extern i16 tUNKNOWN;
+extern i16 tENGLISH;
+extern i16 tFRENCH;
+extern i16 tGERMAN;
+extern i16 tITALIAN;
+extern i16 tSPANISH;
+extern i16 tDANISH;
+char *txt_NULL = const_cast<char *>("?");
+char *apitxt_ENGLISH = const_cast<char *>("English");
+char *apitxt_FRENCH = const_cast<char *>("Fran\xc3\xa7"
+                                         "ais");
+char *apitxt_GERMAN = const_cast<char *>("Deutsch");
+char *apitxt_ITALIAN = const_cast<char *>("Italiano");
+char *apitxt_SPANISH = const_cast<char *>("Espa\xc3\xb1"
+                                          "ol");
+char *apitxt_DANISH = const_cast<char *>("Dansk");
 f32 text3d_height;
 f32 text3d_width;
 void (*buttonmapfn)(char *, char *);
@@ -505,7 +522,14 @@ void Text3DStringEncodeFont(unsigned char *src, u16 *dst, void *font) {
     *dst = 0;
 }
 void Text_InitDefaultStrings() {
-    STUBBED();
+    TTab[tNULL] = txt_NULL;
+    TTab[tUNKNOWN] = txt_UNKNOWN;
+    TTab[tENGLISH] = apitxt_ENGLISH;
+    TTab[tFRENCH] = apitxt_FRENCH;
+    TTab[tGERMAN] = apitxt_GERMAN;
+    TTab[tITALIAN] = apitxt_ITALIAN;
+    TTab[tSPANISH] = apitxt_SPANISH;
+    TTab[tDANISH] = apitxt_DANISH;
 }
 void Text_LoadAndFixUpStrings(unsigned char *filename, unsigned char **buffer, char **table, i32 count) {
     unsigned char *out = *buffer;

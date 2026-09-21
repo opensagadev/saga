@@ -10,10 +10,14 @@
 #include "legoapi/world/world.h"
 #include "legoapi/menus/screens/shop.h"
 #include "legoapi/props/doors/door.h"
+#include "legoapi/characters/motion/gameanim.h"
+#include "gamelib/util/gamelib_util_types.h"
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nu3d/numtl.h"
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/nu3d/nurndr.h"
+#include "nu2api/nu3d/nurndrstat.h"
+#include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nu3d/nuvport.h"
 #include "nu2api/nu3d/NuRenderDevice.h"
 #include "nu2api/nu3d/android/nutex_ios_ex.h"
@@ -72,10 +76,17 @@ static u8 ScreenGrabNeeded;
 static i32 pause_rt;
 static NUMTL *pause_rndr_mtl;
 extern i32 pause_rndr_on;
-extern i32 pause_fade;
+extern f32 pause_fade;
 static i32 old_pause_state;
 i32 (*PauseRenderOffFn)(void);
 i32 cut_waiting_for_new_level;
+u32 animSetVisibilityHack[6];
+i32 specVisibilityFlashHack;
+
+void GameAnimSet_Draw(GAMEANIMSET_s &set);
+extern f32 hackFlashTimer;
+extern GAMEANIMSET_s *hackFlashingGameAnimSet;
+extern nuhspecial_s *hackFlashingSpecial;
 
 extern FadeSystem FadeSys;
 extern i32 Paused;
@@ -312,7 +323,38 @@ void HandleStillRender() {
 }
 
 void PreRenderFlashHack() {
-    STUBBED();
+    if (hackFlashingGameAnimSet == NULL && hackFlashingSpecial == NULL)
+        return;
+
+    TouchHacks::TintStack tint;
+    hackFlashTimer -= FRAMETIME;
+    if (TouchHacks::ShouldFlash(hackFlashTimer)) {
+        NUCOLOUR3 *colour = TouchHacks::GetFlashColour();
+        NuRndrLightingStateCurrent.ambient = *colour;
+        NuRndrSetAmbientLightPS(colour);
+    }
+
+    if (hackFlashingGameAnimSet != NULL) {
+        GameAnimSet_Draw(*hackFlashingGameAnimSet);
+        animSetVisibilityHack[1] = 0;
+        GAMEANIMOBJ_s *object = hackFlashingGameAnimSet->objects;
+        animSetVisibilityHack[0] = 0;
+        u32 index = 0;
+        while (object != NULL) {
+            if (NuSpecialGetVisibilityFn(&object->special) != 0)
+                animSetVisibilityHack[index >> 5] |= 1u << (index & 31);
+            ++index;
+            NuSpecialSetVisibility(&object->special, 0);
+            if (index == 0xc0)
+                break;
+            object = object->next;
+        }
+    }
+    if (hackFlashingSpecial != NULL) {
+        NuSpecialDrawAt(hackFlashingSpecial, NuSpecialGetDrawMtx(hackFlashingSpecial));
+        specVisibilityFlashHack = NuSpecialGetVisibilityFn(hackFlashingSpecial);
+        NuSpecialSetVisibility(hackFlashingSpecial, 0);
+    }
 }
 
 void UCStretchToCorners(i16 *, i16 *) {
@@ -320,5 +362,21 @@ void UCStretchToCorners(i16 *, i16 *) {
 }
 
 void PostRenderFlashHack() {
-    STUBBED();
+    if (hackFlashingGameAnimSet != NULL && hackFlashingGameAnimSet->objects != NULL) {
+        GAMEANIMOBJ_s *object = hackFlashingGameAnimSet->objects;
+        NuSpecialSetVisibility(&object->special, animSetVisibilityHack[0] & 1);
+        u32 index = 1;
+        while ((object = object->next) != NULL) {
+            NuSpecialSetVisibility(&object->special,
+                                   (static_cast<i32>(animSetVisibilityHack[index >> 5]) >> (index & 31)) & 1);
+            if (++index == 0xc1)
+                break;
+        }
+    }
+    if (hackFlashingSpecial != NULL)
+        NuSpecialSetVisibility(hackFlashingSpecial, specVisibilityFlashHack);
+    if (hackFlashTimer <= 0.0f && hackFlashTimer != 0.0f) {
+        hackFlashingSpecial = NULL;
+        hackFlashingGameAnimSet = NULL;
+    }
 }

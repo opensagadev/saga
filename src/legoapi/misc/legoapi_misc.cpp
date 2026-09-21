@@ -10,11 +10,13 @@
 #include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/menus/screens/store.h"
+#include "legoapi/props/system/socksys.h"
 #include "legoapi/world/levels/episode.h"
 #include "legoapi/world/world.h"
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nutrig.h"
+#include "nu2api/numath/nuvec.h"
 #include <math.h>
 
 struct AIROW_s;
@@ -38,8 +40,31 @@ i32 CircleLevel(LEVELDATA_s *level) {
     return BONUS_GUNSHIPB_LDATA != NULL && level == BONUS_GUNSHIPB_LDATA;
 }
 
-void CurrentStart(GameObject_s *, i32, i32) {
-    STUBBED();
+extern i32 TwistLevel(LEVELDATA_s *level);
+
+void CurrentStart(GameObject_s *object, i32 require_twist_level, i32 use_socket_rotation) {
+    WORLDINFO_s *world = WorldInfo_CurrentlyActive();
+    object->field_0xc3c = 0;
+    if (object->field_0x661 == 0xff || world->sock_sys == NULL)
+        return;
+
+    SOCK &socket = world->sock_sys->sock[static_cast<i8>(object->field_0x661)];
+    if (socket.current_speed == 0.0f || (require_twist_level == 0 && TwistLevel(world->current_level) == 0))
+        return;
+
+    NUVEC current = {0.0f, 0.0f, socket.current_speed};
+    *reinterpret_cast<f32 *>(&object->field_0xc3c) = socket.current_speed;
+    const f32 multiplier =
+        (object->field_0xf02 & 0x20) == 0 ? object->current_speed_mul : object->current_speed_multiplier;
+    current.z *= multiplier;
+    if (use_socket_rotation == 0) {
+        NuVecRotateY(&object->apiobj.velocity, &object->apiobj.velocity, object->apiobj.movement_facing_angle);
+    } else {
+        NuVecRotateX(&object->apiobj.velocity, &current, object->sock_position.midpoint_rotation.x);
+        NuVecRotateY(&object->apiobj.velocity, &object->apiobj.velocity, object->sock_position.midpoint_rotation.y);
+    }
+    reinterpret_cast<u8 *>(object)[0x4a6] &= static_cast<u8>(~4u);
+    object->target_velocity = object->apiobj.velocity;
 }
 
 void NewRumbleAllPlayers(f32, f32, i32, i32);

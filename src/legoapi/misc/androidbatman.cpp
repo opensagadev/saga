@@ -150,7 +150,15 @@ void GameFog_Set() {
 }
 
 void GamePad_InitButtons() {
-    STUBBED();
+    GAMEPAD_JUMP = 0x40;
+    GAMEPAD_ACTION = 0x80;
+    GAMEPAD_SPECIAL = 0x20;
+    GAMEPAD_TAG = 0x10;
+    GAMEPAD_MENUSELECT = 0x40;
+    GAMEPAD_MENUCANCEL = 0x20;
+    GAMEPAD_SKIP = 0x840;
+    GAMEPAD_TOGGLELEFT = 5;
+    GAMEPAD_TOGGLERIGHT = 10;
 }
 
 extern "C" void NuIOS_FreeMemoryForSuspend(void) {

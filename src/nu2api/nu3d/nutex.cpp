@@ -193,8 +193,14 @@ extern "C" i32 NuTexGenTexture(NUNATIVETEX *tex) {
     return 0;
 }
 
-extern "C" void NuTexDestroy(i32) {
-    STUBBED();
+extern "C" void NuTexDestroy(i32 tex_id) {
+    NuTexUnloadHires(tex_id);
+    if (NuTexGetRefCount(tex_id) > 0) {
+        NuTexRemoveReference(tex_id, NULL);
+        return;
+    }
+    NuTexDestroyPS(texture_list[tex_id - 1]);
+    texture_list[tex_id - 1] = NULL;
 }
 
 NUNATIVETEX *NuTexGetNative(i32 tex_id) {
