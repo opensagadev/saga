@@ -271,7 +271,16 @@ void SetCreatureLights(APIOBJECT_s *object) {
 }
 
 void FreeGameObjectLights() {
-    STUBBED();
+    i32 i = 0;
+    GameObject_s *object = Obj;
+    for (; i < HIGHGAMEOBJECT; ++i, ++object) {
+        if ((object->apiobj.field_0x1f8 & 0x1001) != 0x1001)
+            continue;
+        if (object->dynamic_light_id == -1)
+            continue;
+        rtlDynamicFree(object->dynamic_light_id);
+        object->dynamic_light_id = -1;
+    }
 }
 
 void LoadLights(WORLDINFO_s *world, char *path) {

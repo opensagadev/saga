@@ -71,7 +71,11 @@ void Particles_Start(WORLDINFO_s *world) {
 }
 
 void Particles_DumpAreaPage() {
-    STUBBED();
+    if (DEBPAGE_AREA != -1) {
+        edppStopPage(static_cast<i8>(DEBPAGE_AREA));
+        edppClearPage(static_cast<i8>(DEBPAGE_AREA));
+        DEBPAGE_AREA = -1;
+    }
 }
 
 void Particles_LoadAreaPage(char *) {
