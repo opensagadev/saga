@@ -174,8 +174,14 @@ void KillRumble(GameObject_s *object) {
     }
 }
 
-void FloatRumble(GameObject_s *) {
-    STUBBED();
+void FloatRumble(GameObject_s *object) {
+    if (object != NULL && static_cast<i8>(object->apiobj.flags_low) < 0) {
+        const f32 strength = MIN(1.0f, NuFabs(object->apiobj.velocity.y) /
+                                               object->apiobj.character_data->game_character->movement_speed * 0.15f +
+                                           0.25f);
+        NewRumble(object->pad_gamepad->pad, strength, 0);
+        NewBuzzFrames(object->pad_gamepad->pad, 1, 0);
+    }
 }
 
 i16 InsideLineF(f32 point_u, f32 point_v, f32 line_start_u, f32 line_start_v, f32 line_end_u, f32 line_end_v) {
@@ -416,8 +422,13 @@ i32 CheckCol(nutex_s *, i32, i32, i32, i32) {
     return true;
 }
 
-void HitRumble(GameObject_s *) {
-    STUBBED();
+void HitRumble(GameObject_s *object) {
+    if (object != NULL) {
+        if (object->apiobj.player_controlled) {
+            NewRumble(object->pad_gamepad->pad, 0.5f, 0);
+            NewBuzzFrames(object->pad_gamepad->pad, 2, 0);
+        }
+    }
 }
 
 i32 ObjHitObj(GameObject_s *attacker, GameObject_s *target, i32 damage, u16 flags, i32 probe, i32) {

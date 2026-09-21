@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 51.645855,
+    "fuzzy_match_percent": 51.651234,
     "total_code": "4722419",
-    "matched_code": "453191",
-    "matched_code_percent": 9.596586,
+    "matched_code": "453308",
+    "matched_code_percent": 9.599064,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 5357,
-    "matched_functions_percent": 39.802364,
+    "matched_functions": 5358,
+    "matched_functions_percent": 39.80979,
     "total_units": 1
   },
   "text": {
@@ -39155,7 +39155,7 @@
           "address": 4756912,
           "offset": 3866944,
           "size": 117,
-          "match_percent": 16.153847
+          "match_percent": 100.0
         },
         {
           "name": "_Z11FloatRumbleP12GameObject_s",
@@ -39163,7 +39163,7 @@
           "address": 4757168,
           "offset": 3867200,
           "size": 174,
-          "match_percent": 10.243902
+          "match_percent": 99.902435
         },
         {
           "name": "_Z12InsideLineXZffffff",
