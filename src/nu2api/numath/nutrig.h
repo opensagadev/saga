@@ -51,7 +51,7 @@ static inline i16 NuASin(f32 sin) {
 #endif
 
 #define NUTRIGTABLE_COUNT 32768
-#define NUTRIGTABLE_INTERVAL (f32)(2.0f * M_PI / NUTRIGTABLE_COUNT)
+#define NUTRIGTABLE_INTERVAL (f32)(2.0f * 3.14159265358979323846 / NUTRIGTABLE_COUNT)
 
 /// @brief The sine lookup table
 /// @details The sine lookup table is a table of the sine function for the angles 0 to 2π.

@@ -155,7 +155,7 @@ namespace scripts {
             wait_gizmo_output("obstacle3", GIZOBSTACLE_OUTPUT_AT_END, 1, 30000),
         },
         AutoplayOptions{},
-        480000,
+        Milliseconds{480000},
     };
 
 } // namespace scripts

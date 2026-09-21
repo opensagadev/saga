@@ -19,9 +19,9 @@ f32 distance_3d(const NUVEC &a, const NUVEC &b) {
     return std::sqrt(x * x + y * y + z * z);
 }
 
-bool build_authored_crossing_route(const NUVEC &origin, const NUVEC &crossing_hint, std::vector<NUVEC> &points) {
+std::optional<std::vector<NUVEC>> build_authored_crossing_route(const NUVEC &origin, const NUVEC &crossing_hint) {
     if (WORLD == nullptr || WORLD->ai_sys == nullptr || WORLD->ai_sys->path_sys == nullptr) {
-        return false;
+        return std::nullopt;
     }
     AIPATH *best_path = nullptr;
     i32 best_node_index = -1;
@@ -42,7 +42,7 @@ bool build_authored_crossing_route(const NUVEC &origin, const NUVEC &crossing_hi
         }
     }
     if (best_path == nullptr || best_node_index < 0) {
-        return false;
+        return std::nullopt;
     }
 
     const AIPATHNODE &crossing_node = best_path->nodes[best_node_index];
@@ -65,30 +65,31 @@ bool build_authored_crossing_route(const NUVEC &origin, const NUVEC &crossing_hi
         }
     }
     if (exit_node_index < 0) {
-        return false;
+        return std::nullopt;
     }
 
     const NUVEC crossing = crossing_node.position;
     const NUVEC exit = best_path->nodes[exit_node_index].position;
-    points = {crossing, exit};
+    std::vector<NUVEC> points{crossing, exit};
     LOG_INFO("autoplay: authored crossing on %s node %d -> %d, hint-distance=%.3f, from "
              "(%.3f,%.3f,%.3f) to (%.3f,%.3f,%.3f)",
              best_path->name, best_node_index, exit_node_index, best_distance, crossing.x, crossing.y, crossing.z,
              exit.x, exit.y, exit.z);
-    return true;
+    return points;
 }
 
 bool finite_position(const NUVEC &position) {
     return std::isfinite(position.x) && std::isfinite(position.y) && std::isfinite(position.z);
 }
 
-bool build_forced_ai_route(GameObject_s *character, const NUVEC &target, std::vector<RailWaypoint> &points,
-                           bool *used_authored_route = nullptr) {
-    if (used_authored_route != nullptr) {
-        *used_authored_route = false;
-    }
+struct ForcedRoute {
+    std::vector<RailWaypoint> waypoints;
+    bool authored = false;
+};
+
+std::optional<ForcedRoute> build_forced_ai_route(GameObject_s *character, const NUVEC &target) {
     if (character == nullptr || WORLD == nullptr || WORLD->ai_sys == nullptr || !finite_position(target)) {
-        return false;
+        return std::nullopt;
     }
     NUVEC start = character->apiobj.position;
     NUVEC mutable_target = target;
@@ -99,14 +100,14 @@ bool build_forced_ai_route(GameObject_s *character, const NUVEC &target, std::ve
     AISysGetPathPos2(WORLD->ai_sys, &start, &start_info, &projected_start, nullptr, 0xff);
     AISysGetPathPos2(WORLD->ai_sys, &mutable_target, &target_info, &projected_target, nullptr, 0xff);
 
-    points.clear();
+    ForcedRoute route;
     if (start_info.connection == nullptr || target_info.connection == nullptr || start_info.path == nullptr ||
         start_info.path != target_info.path || start_info.path->node_count == 0) {
-        points.push_back({target});
+        route.waypoints.push_back({target});
         LOG_WARN("autoplay: no shared AI path; using direct forced rail from (%.3f,%.3f,%.3f) to "
                  "(%.3f,%.3f,%.3f)",
                  start.x, start.y, start.z, target.x, target.y, target.z);
-        return true;
+        return route;
     }
 
     AIPATH *path = start_info.path;
@@ -179,9 +180,9 @@ bool build_forced_ai_route(GameObject_s *character, const NUVEC &target, std::ve
         }
     }
     if (goal < 0) {
-        points.push_back({target});
+        route.waypoints.push_back({target});
         LOG_WARN("autoplay: authored AI graph has no route; using direct forced rail");
-        return true;
+        return route;
     }
 
     std::vector<i32> reversed;
@@ -210,14 +211,12 @@ bool build_forced_ai_route(GameObject_s *character, const NUVEC &target, std::ve
                     }
                 }
             }
-            points.push_back(waypoint);
+            route.waypoints.push_back(waypoint);
         }
     }
-    points.push_back({target});
-    if (used_authored_route != nullptr) {
-        *used_authored_route = true;
-    }
+    route.waypoints.push_back({target});
+    route.authored = true;
     LOG_INFO("autoplay: forced AI rail on %s from (%.3f,%.3f,%.3f) to (%.3f,%.3f,%.3f), %u waypoints", path->name,
-             start.x, start.y, start.z, target.x, target.y, target.z, static_cast<unsigned>(points.size()));
-    return true;
+             start.x, start.y, start.z, target.x, target.y, target.z, static_cast<unsigned>(route.waypoints.size()));
+    return route;
 }

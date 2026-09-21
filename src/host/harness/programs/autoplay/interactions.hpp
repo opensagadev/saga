@@ -18,8 +18,8 @@ f32 podrace_centering_input(const GameObject_s &pod) {
     return std::clamp(lateral_error * -0.1f, -1.0f, 1.0f);
 }
 
-DOOR_s *find_podrace_target_door(const AutoplayAction &action, const GameObject_s &pod) {
-    LEVELDATA_s *target = Level_FindByName(const_cast<char *>(action.target_name.c_str()), nullptr);
+DOOR_s *find_podrace_target_door(const DrivePodraceAction &action, const GameObject_s &pod) {
+    LEVELDATA_s *target = Level_FindByName(const_cast<char *>(action.level.c_str()), nullptr);
     return target != nullptr ? Door_FindByIndex(WORLD, -1, target->idx, const_cast<NUVEC *>(&pod.apiobj.position))
                              : nullptr;
 }
@@ -55,6 +55,7 @@ void AutoplayRunner::tick_start_podrace_action() {
 }
 
 void AutoplayRunner::restore_podrace_track(GameObject_s &pod, const SOCKPOSITION &track_position, const char *reason) {
+    auto &state = this->runtime<PodraceRuntime>();
     const NUVEC previous_position = pod.apiobj.position;
     NUVEC recovered_position = track_position.midpoint;
     // The socket midpoint is already the authoritative authored track
@@ -65,8 +66,8 @@ void AutoplayRunner::restore_podrace_track(GameObject_s &pod, const SOCKPOSITION
     pod.sock_angles = track_position.midpoint_rotation;
     pod.field_0x661 = static_cast<u8>(track_position.location.sock);
     pod.sock_segment = track_position.location.segment;
-    ++this->current_action.podrace_recovery_count;
-    if (this->current_action.podrace_recovery_count <= 3) {
+    ++state.recovery_count;
+    if (state.recovery_count <= 3) {
         LOG_WARN("autoplay: restored pod to socket %d:%d ratio %.3f after %s; "
                  "physical=(%.3f,%.3f,%.3f) track=(%.3f,%.3f,%.3f)",
                  static_cast<i32>(track_position.location.sock), static_cast<i32>(track_position.location.segment),
@@ -75,22 +76,22 @@ void AutoplayRunner::restore_podrace_track(GameObject_s &pod, const SOCKPOSITION
     }
 }
 
-void AutoplayRunner::tick_podrace_drive_action(const AutoplayAction &action) {
-    if (this->current_action.podrace_starting_level == nullptr && WORLD != nullptr) {
-        this->current_action.podrace_starting_level = WORLD->current_level;
+void AutoplayRunner::tick_podrace_drive_action(const DrivePodraceAction &action) {
+    auto &state = this->runtime<PodraceRuntime>();
+    if (state.starting_level == nullptr && WORLD != nullptr) {
+        state.starting_level = WORLD->current_level;
     }
-    const bool crossed_finish_line = !this->current_action.podrace_lap_advanced && WORLD != nullptr &&
-                                     this->current_action.podrace_starting_level == PODRACEA_LDATA &&
-                                     WORLD->current_level == PODRACEB_LDATA;
+    const bool crossed_finish_line = !state.lap_advanced && WORLD != nullptr &&
+                                     state.starting_level == PODRACEA_LDATA && WORLD->current_level == PODRACEB_LDATA;
     if (crossed_finish_line) {
         PodRace_IncreaseLap();
-        this->current_action.podrace_lap_advanced = true;
+        state.lap_advanced = true;
         LOG_INFO("autoplay: advanced the Podrace lap after crossing the authored A-to-B door");
 
         // The reconstructed native finish-line update currently cannot reach
         // its own story-mode completion branch. Preserve the authored final
         // crossing, then invoke the same cutscene request that branch issues.
-        if (SDL_strcasecmp(action.target_name.c_str(), "PodRace_Outro1") == 0) {
+        if (SDL_strcasecmp(action.level.c_str(), "PodRace_Outro1") == 0) {
             char outro_name[] = "Ep1_Podrace_Outro1";
             if (NewCutScene(nullptr, WORLD->cutscene_sys, outro_name, 1) == 0) {
                 CompleteLevel(WORLD);
@@ -102,7 +103,7 @@ void AutoplayRunner::tick_podrace_drive_action(const AutoplayAction &action) {
 
     const bool reached_target = WORLD != nullptr && WORLD->loaded != 0 && WORLD->current_level != nullptr &&
                                 NewLData == nullptr &&
-                                SDL_strcasecmp(WORLD->current_level->name, action.target_name.c_str()) == 0;
+                                SDL_strcasecmp(WORLD->current_level->name, action.level.c_str()) == 0;
     if (reached_target) {
         advance_action();
         return;
@@ -130,8 +131,8 @@ void AutoplayRunner::tick_podrace_drive_action(const AutoplayAction &action) {
     HostInputSetHeld(0, 0);
 
     GameObject_s &pod = *Player[0];
-    const Uint64 now = SDL_GetTicks();
-    if (!this->current_action.has_podrace_track_position && pod.sock_position.location.sock == -1) {
+    const u64 now = SDL_GetTicks();
+    if (!state.track_position && pod.sock_position.location.sock == -1) {
         SOCKPOSITION resolved{};
         ComplexSockPosition(WORLD->sock_sys, &pod.apiobj.position, 0, -1, &resolved);
         if (resolved.location.sock == -1) {
@@ -158,12 +159,10 @@ void AutoplayRunner::tick_podrace_drive_action(const AutoplayAction &action) {
     }
     const bool native_socket_continuous =
         native_socket_resolved && finite_position(native_track_position.midpoint) &&
-        (!this->current_action.has_podrace_track_position ||
-         distance_3d(native_track_position.midpoint, this->current_action.podrace_track_position.midpoint) <= 20.0f);
+        (!state.track_position || distance_3d(native_track_position.midpoint, state.track_position->midpoint) <= 20.0f);
     if (native_socket_resolved && native_socket_continuous) {
         pod.sock_position = native_track_position;
-        this->current_action.podrace_track_position = native_track_position;
-        this->current_action.has_podrace_track_position = true;
+        state.track_position = native_track_position;
 
         // The native socket resolver can remain nominally attached after a
         // collision has launched the pod far away from the actual track.
@@ -173,57 +172,54 @@ void AutoplayRunner::tick_podrace_drive_action(const AutoplayAction &action) {
         if (distance_3d(pod.apiobj.position, native_track_position.midpoint) > kMaximumTrackDivergence) {
             this->restore_podrace_track(pod, native_track_position, "diverging from the resolved socket");
         }
-    } else if (this->current_action.has_podrace_track_position) {
-        SOCKPOSITION next = this->current_action.podrace_track_position;
-        const f32 elapsed = this->current_action.podrace_track_updated_at == 0
-                                ? 0.0f
-                                : static_cast<f32>(now - this->current_action.podrace_track_updated_at) * 0.001f;
+    } else if (state.track_position) {
+        SOCKPOSITION next = *state.track_position;
+        const f32 elapsed =
+            state.track_updated_at == 0 ? 0.0f : static_cast<f32>(now - state.track_updated_at) * 0.001f;
         const SOCK &socket = WORLD->sock_sys->sock[next.location.sock];
         const f32 recovery_speed = std::max(20.0f, socket.current_speed * action.speed);
         MoveSockPosition(WORLD->sock_sys, &next, recovery_speed * elapsed, &next);
-        this->current_action.podrace_track_position = next;
+        state.track_position = next;
         this->restore_podrace_track(pod, next,
                                     native_socket_resolved ? "the native resolver jumped to a discontinuous socket"
                                                            : "the native resolver dropped its socket");
     }
-    this->current_action.podrace_track_updated_at = now;
+    state.track_updated_at = now;
 
     // A collision can leave the pod attached to a perfectly valid socket but
     // unable to move along it. Only intervene after sustained zero progress,
     // then advance a short distance through the same authored socket. This is
     // recovery from a host-physics stall, not an alternate route.
     constexpr f32 kPodraceProgressDistance = 1.0f;
-    constexpr Uint64 kPodraceStallTimeoutMs = 500;
-    if (this->current_action.podrace_progress_observed_at == 0 ||
-        planar_distance(pod.apiobj.position, this->current_action.podrace_progress_origin) >=
-            kPodraceProgressDistance) {
-        this->current_action.podrace_progress_origin = pod.apiobj.position;
-        this->current_action.podrace_progress_observed_at = now;
-    } else if (this->current_action.has_podrace_track_position &&
-               now - this->current_action.podrace_progress_observed_at >= kPodraceStallTimeoutMs) {
-        SOCKPOSITION next = this->current_action.podrace_track_position;
+    constexpr u64 kPodraceStallTimeoutMs = 500;
+    if (state.progress_observed_at == 0 ||
+        planar_distance(pod.apiobj.position, state.progress_origin) >= kPodraceProgressDistance) {
+        state.progress_origin = pod.apiobj.position;
+        state.progress_observed_at = now;
+    } else if (state.track_position && now - state.progress_observed_at >= kPodraceStallTimeoutMs) {
+        SOCKPOSITION next = *state.track_position;
         const i32 socket_index = next.location.sock;
         if (socket_index >= 0 && socket_index < kMaximumSocketCount && WORLD->sock_sys->sock[socket_index].valid != 0) {
             const SOCK &socket = WORLD->sock_sys->sock[socket_index];
             const NUVEC previous_track_position = next.midpoint;
             const f32 recovery_distance = std::max(1.0f, socket.current_speed * action.speed * 0.1f);
             MoveSockPosition(WORLD->sock_sys, &next, recovery_distance, &next);
-            this->current_action.podrace_track_position = next;
+            state.track_position = next;
             this->restore_podrace_track(pod, next, "making no forward progress");
             // Preserve the authored sweep for the next native door/trigger
             // check; SnapCreaturePos otherwise collapses it to one point.
             pod.apiobj.start_position = previous_track_position;
-            this->current_action.podrace_progress_origin = pod.apiobj.position;
-            this->current_action.podrace_progress_observed_at = now;
+            state.progress_origin = pod.apiobj.position;
+            state.progress_observed_at = now;
         }
     }
 
-    if (this->current_action.podrace_recovery_count != 0) {
+    if (state.recovery_count != 0) {
         DOOR_s *target_door = find_podrace_target_door(action, pod);
         if (target_door != nullptr && target_door->active == 0 &&
             planar_distance(pod.apiobj.position, target_door->pos) <= std::max(25.0f, target_door->radius + 10.0f)) {
-            LOG_INFO("autoplay: Podrace reached authored endpoint %s; entering native door %s",
-                     action.target_name.c_str(), target_door->name);
+            LOG_INFO("autoplay: Podrace reached authored endpoint %s; entering native door %s", action.level.c_str(),
+                     target_door->name);
             Door_GoThrough(WORLD, target_door, 1);
             return;
         }
@@ -231,8 +227,8 @@ void AutoplayRunner::tick_podrace_drive_action(const AutoplayAction &action) {
     HostInputSetAnalog(0, podrace_centering_input(pod), 0.0f);
 }
 
-void AutoplayRunner::tick_force_action(const AutoplayAction &action) {
-    GIZMO *gizmo = find_gizmo(action.target_name.c_str());
+void AutoplayRunner::tick_force_action(const UseForceAction &action) {
+    GIZMO *gizmo = find_gizmo(action.gizmo.c_str());
     if (gizmo == nullptr || gizmo->type_id != force_gizmotype_id || gizmo->object == nullptr) {
         finish(1, "named Force gizmo was not found");
         return;
@@ -243,10 +239,10 @@ void AutoplayRunner::tick_force_action(const AutoplayAction &action) {
 
     GameObject_s &player = *Player[0];
     GIZFORCE_s *force = static_cast<GIZFORCE_s *>(gizmo->object);
-    if (this->gizmo_position_snapshots.find(action.target_name) == this->gizmo_position_snapshots.end()) {
+    if (this->gizmo_position_snapshots.find(action.gizmo) == this->gizmo_position_snapshots.end()) {
         const NUVEC *position = GizmoGetPos(WORLD->gizmo_sys, gizmo);
         if (position != nullptr) {
-            this->gizmo_position_snapshots.emplace(action.target_name, *position);
+            this->gizmo_position_snapshots.emplace(action.gizmo, *position);
         }
     }
 
@@ -260,20 +256,21 @@ void AutoplayRunner::tick_force_action(const AutoplayAction &action) {
     player.apiobj.facing_angle = angle;
     player.apiobj.movement_facing_angle = angle;
     player.apiobj.field_0x276 = angle;
-    if (!this->current_action.force_started) {
+    auto &state = this->runtime<ForceRuntime>();
+    if (!state.started) {
         const f32 distance_squared = NuVecDistSqr(&force->position, &player.apiobj.collision_position, nullptr);
         const bool usable = force_gizmo_usable_by(*force, player);
         if (!usable) {
             LOG_ERR("autoplay: Force gizmo %s unusable: progress=0x%x complete=%d distance=%.3f radius=%.3f "
                     "stood-on=%d player=(%.3f,%.3f,%.3f) force=(%.3f,%.3f,%.3f)",
-                    action.target_name.c_str(), static_cast<unsigned>(force->progress_flags), GizForce_Complete(force),
+                    action.gizmo.c_str(), static_cast<unsigned>(force->progress_flags), GizForce_Complete(force),
                     std::sqrt(distance_squared), force->interaction_radius, GizForce_StoodOnForce(force, &player),
                     player.apiobj.collision_position.x, player.apiobj.collision_position.y,
                     player.apiobj.collision_position.z, force->position.x, force->position.y, force->position.z);
             finish(1, "named Force gizmo was not currently usable or in range");
             return;
         }
-        this->current_action.force_started = true;
+        state.started = true;
     }
 
     // GizForces_Update consumes and clears this exact owner on every frame.
@@ -282,8 +279,8 @@ void AutoplayRunner::tick_force_action(const AutoplayAction &action) {
     force->using_object = &player;
 }
 
-void AutoplayRunner::tick_panel_action(const AutoplayAction &action) {
-    GIZMO *gizmo = find_gizmo(action.target_name.c_str());
+void AutoplayRunner::tick_panel_action(const UsePanelAction &action) {
+    GIZMO *gizmo = find_gizmo(action.gizmo.c_str());
     if (gizmo == nullptr || gizmo->type_id != gizpanel_gizmotype_id || gizmo->object == nullptr) {
         finish(1, "named panel gizmo was not found");
         return;
@@ -302,13 +299,13 @@ void AutoplayRunner::tick_panel_action(const AutoplayAction &action) {
         return;
     }
     if (Player[0]->character_context != 0x0b || Player[0]->field_0x788 != panel) {
-        LOG_INFO("autoplay: entering exact panel %s with character=%d", action.target_name.c_str(), Player[0]->id);
+        LOG_INFO("autoplay: entering exact panel %s with character=%d", action.gizmo.c_str(), Player[0]->id);
         GizPanel_Use(*Player[0], *panel);
     }
 }
 
-void AutoplayRunner::tick_build_action(const AutoplayAction &action) {
-    GIZMO *gizmo = find_gizmo(action.target_name.c_str());
+void AutoplayRunner::tick_build_action(const UseBuildItAction &action) {
+    GIZMO *gizmo = find_gizmo(action.gizmo.c_str());
     if (gizmo == nullptr || gizmo->type_id != gizbuildit_gizmotype_id || gizmo->object == nullptr) {
         finish(1, "named Build-It gizmo was not found");
         return;
@@ -325,7 +322,8 @@ void AutoplayRunner::tick_build_action(const AutoplayAction &action) {
 
     GameObject_s &player = *Player[0];
 
-    if (!this->current_action.build_started) {
+    auto &state = this->runtime<BuildRuntime>();
+    if (!state.started) {
         if (GizBuildIt_CanStartBuildingFn != nullptr && GizBuildIt_CanStartBuildingFn(&buildit, &player) == 0) {
             finish(1, "named Build-It gizmo cannot currently be built by this character");
             return;
@@ -339,7 +337,7 @@ void AutoplayRunner::tick_build_action(const AutoplayAction &action) {
         player.field_0xe21 &= ~0x40;
         GizBuildIt_SetStepTime(&buildit, &player);
         GizBuildIt_SetHeadTarget(&buildit, &player);
-        this->current_action.build_started = true;
+        state.started = true;
     }
 
     if (player.field_0x788 != &buildit) {
@@ -352,8 +350,8 @@ void AutoplayRunner::tick_build_action(const AutoplayAction &action) {
     BuildIt_MoveCode(&player);
 }
 
-void AutoplayRunner::tick_zipup_action(const AutoplayAction &action) {
-    GIZMO *gizmo = find_gizmo(action.target_name.c_str());
+void AutoplayRunner::tick_zipup_action(const UseZipUpAction &action) {
+    GIZMO *gizmo = find_gizmo(action.gizmo.c_str());
     if (gizmo == nullptr || gizmo->object == nullptr || gizmotypes == nullptr ||
         SDL_strcasecmp(gizmotypes->types[gizmo->type_id].name, "ZipUp") != 0) {
         finish(1, "named zip-up gizmo was not found");
@@ -365,7 +363,8 @@ void AutoplayRunner::tick_zipup_action(const AutoplayAction &action) {
 
     ZIPUP &zipup = *static_cast<ZIPUP *>(gizmo->object);
     GameObject_s &player = *Player[0];
-    if (this->current_action.interaction_started) {
+    auto &state = this->runtime<InteractionRuntime>();
+    if (state.started) {
         if (player.character_context != 0x47 &&
             horizontal_distance(player.apiobj.position, zipup.upper_position) < 1.5f) {
             advance_action();
@@ -394,12 +393,12 @@ void AutoplayRunner::tick_zipup_action(const AutoplayAction &action) {
     if (player.character_context != 0x47 || player.field_0x788 != &zipup) {
         return;
     }
-    this->current_action.interaction_started = true;
-    LOG_INFO("autoplay: started exact zip-up %s", action.target_name.c_str());
+    state.started = true;
+    LOG_INFO("autoplay: started exact zip-up %s", action.gizmo.c_str());
 }
 
-void AutoplayRunner::tick_blaster_hit_action(const AutoplayAction &action) {
-    GIZMO *gizmo = find_gizmo(action.target_name.c_str());
+void AutoplayRunner::tick_blaster_hit_action(const BlasterHitAction &action) {
+    GIZMO *gizmo = find_gizmo(action.gizmo.c_str());
     if (gizmo == nullptr || gizmo->type_id != blowup_gizmotype_id || gizmo->object == nullptr) {
         finish(1, "named blaster target gizmo was not found");
         return;
@@ -417,7 +416,8 @@ void AutoplayRunner::tick_blaster_hit_action(const AutoplayAction &action) {
         finish(1, "current character is not in range of the named blaster target");
         return;
     }
-    if (!this->current_action.interaction_started) {
+    auto &state = this->runtime<InteractionRuntime>();
+    if (!state.started) {
         constexpr i32 kBlasterBoltHitType = 3;
         if (GizmoBlowupBlowup(static_cast<GIZMOBLOWUP_s *>(gizmo->object), 1, kBlasterBoltHitType, 1, nullptr, 1) ==
             0) {
@@ -426,34 +426,31 @@ void AutoplayRunner::tick_blaster_hit_action(const AutoplayAction &action) {
             // the target becomes active or the action timeout expires.
             return;
         }
-        this->current_action.interaction_started = true;
-        LOG_INFO("autoplay: delivered exact native blaster hit to %s", action.target_name.c_str());
+        state.started = true;
+        LOG_INFO("autoplay: delivered exact native blaster hit to %s", action.gizmo.c_str());
     }
 }
 
-void AutoplayRunner::tick_clear_hostiles_action(const AutoplayAction &action) {
+void AutoplayRunner::tick_clear_hostiles_action(const ClearHostilesAction &action) {
     if (!gameplay_ready(nullptr) || Obj == nullptr || Player[0] == nullptr) {
         return;
     }
 
-    const i32 named_character_id = action.kind == AutoplayActionKind::clear_named_characters
-                                       ? CharIDFromName(const_cast<char *>(action.target_name.c_str()))
-                                       : -1;
-    if (action.kind == AutoplayActionKind::clear_named_characters && named_character_id < 0) {
+    const i32 named_character_id =
+        action.character ? CharIDFromName(const_cast<char *>(action.character->c_str())) : -1;
+    if (action.character && named_character_id < 0) {
         this->finish(1, "named combat character type was not found");
         return;
     }
 
     GameObject_s *nearest = nullptr;
-    f32 nearest_distance = action.distance;
+    f32 nearest_distance = action.radius;
     for (i32 index = 0; index < HIGHGAMEOBJECT; ++index) {
         GameObject_s &candidate = Obj[index];
         const bool targets_party =
             candidate.ai.opponent == Player[0] || (Player[1] != nullptr && candidate.ai.opponent == Player[1]);
         const bool opposing_side = ((candidate.apiobj.field_0x1f4 ^ Player[0]->apiobj.field_0x1f4) & 1) != 0;
-        const bool selected = action.kind == AutoplayActionKind::clear_named_characters
-                                  ? candidate.id == named_character_id
-                                  : targets_party || opposing_side;
+        const bool selected = action.character ? candidate.id == named_character_id : targets_party || opposing_side;
         if (&candidate == Player[0] || (candidate.apiobj.field_0x1f8 & 0x1001) != 0x1001 ||
             candidate.apiobj.field_0x287 != 0 || candidate.character_context == LEGOCONTEXT_DOOMED || !selected ||
             (candidate.field_0xefe & 0x40) != 0) {
@@ -467,33 +464,34 @@ void AutoplayRunner::tick_clear_hostiles_action(const AutoplayAction &action) {
         }
     }
 
-    const Uint64 now = SDL_GetTicks();
+    const u64 now = SDL_GetTicks();
+    auto &state = this->runtime<CombatRuntime>();
     if (nearest == nullptr) {
-        if (this->current_action.last_hostile_seen_at == 0) {
-            this->current_action.last_hostile_seen_at = now;
+        if (!state.last_target_seen_at) {
+            state.last_target_seen_at = now;
         }
-        if (now - this->current_action.last_hostile_seen_at >= action.duration_ms) {
+        if (Milliseconds{now - *state.last_target_seen_at} >= action.quiet_period) {
             advance_action();
         }
         return;
     }
 
-    this->current_action.last_hostile_seen_at = now;
-    if (now - this->current_action.last_combat_hit_at < 150) {
+    state.last_target_seen_at = now;
+    if (now - state.last_hit_at < 150) {
         return;
     }
 
     ObjHitObj(Player[0], nearest, 1, 0, 0, 1);
-    this->current_action.last_combat_hit_at = now;
+    state.last_hit_at = now;
     LOG_INFO("autoplay: applied native combat hit to character=%d at distance %.3f", nearest->id, nearest_distance);
 }
 
-void AutoplayRunner::tick_destroy_ai_object_action(const AutoplayAction &action) {
+void AutoplayRunner::tick_destroy_ai_object_action(const DestroyAiObjectAction &action) {
     if (!gameplay_ready(nullptr) || WORLD->ai_sys == nullptr || Player[0] == nullptr) {
         return;
     }
 
-    GameObject_s *target = GetNamedGameObject(WORLD->ai_sys, const_cast<char *>(action.target_name.c_str()));
+    GameObject_s *target = GetNamedGameObject(WORLD->ai_sys, const_cast<char *>(action.object.c_str()));
     if (target == nullptr || target->current_hp <= 0 || target->character_context == LEGOCONTEXT_DOOMED ||
         target->apiobj.field_0x287 != 0) {
         this->advance_action();
@@ -501,60 +499,62 @@ void AutoplayRunner::tick_destroy_ai_object_action(const AutoplayAction &action)
     }
 
     const f32 range = horizontal_distance(Player[0]->apiobj.position, target->apiobj.position);
-    if (range > action.distance) {
+    if (range > action.maximum_range) {
         this->finish(1, "named AI combat target was out of range");
         return;
     }
 
-    const Uint64 now = SDL_GetTicks();
-    if (now - this->current_action.last_combat_hit_at < 150) {
+    const u64 now = SDL_GetTicks();
+    auto &state = this->runtime<CombatRuntime>();
+    if (now - state.last_hit_at < 150) {
         return;
     }
     ObjHitObj(Player[0], target, 1, 0, 0, 1);
-    this->current_action.last_combat_hit_at = now;
-    LOG_INFO("autoplay: applied native combat hit to AI object %s at health=%d", action.target_name.c_str(),
+    state.last_hit_at = now;
+    LOG_INFO("autoplay: applied native combat hit to AI object %s at health=%d", action.object.c_str(),
              static_cast<i32>(target->current_hp));
 }
 
-void AutoplayRunner::tick_damage_character_action(const AutoplayAction &action) {
+void AutoplayRunner::tick_damage_character_action(const DamageCharacterAction &action) {
     if (!gameplay_ready(nullptr) || Player[0] == nullptr) {
         return;
     }
 
-    GameObject_s *target = find_character(action.target_name.c_str());
+    GameObject_s *target = find_character(action.character.c_str());
     if (target == nullptr) {
-        if (action.expected_output == 0) {
+        if (action.target_health == 0) {
             advance_action();
         }
         return;
     }
-    if (target->current_hp <= action.expected_output) {
+    if (target->current_hp <= action.target_health) {
         advance_action();
         return;
     }
 
     const f32 range = horizontal_distance(Player[0]->apiobj.position, target->apiobj.position);
-    if (range > action.distance) {
+    if (range > action.maximum_range) {
         finish(1, "named combat target moved out of range");
         return;
     }
 
-    const Uint64 now = SDL_GetTicks();
-    if (now - this->current_action.last_combat_hit_at < 150) {
+    const u64 now = SDL_GetTicks();
+    auto &state = this->runtime<CombatRuntime>();
+    if (now - state.last_hit_at < 150) {
         return;
     }
     ObjHitObj(Player[0], target, 1, 0, 0, 1);
-    this->current_action.last_combat_hit_at = now;
-    LOG_INFO("autoplay: applied native combat hit to %s at health=%d", action.target_name.c_str(),
+    state.last_hit_at = now;
+    LOG_INFO("autoplay: applied native combat hit to %s at health=%d", action.character.c_str(),
              static_cast<i32>(target->current_hp));
 }
 
-void AutoplayRunner::tick_character_switch(const AutoplayAction &action) {
+void AutoplayRunner::tick_character_switch(const SwitchCharacterAction &action) {
     if (!gameplay_ready(nullptr)) {
         return;
     }
 
-    const i32 character_id = CharIDFromName(const_cast<char *>(action.target_name.c_str()));
+    const i32 character_id = CharIDFromName(const_cast<char *>(action.character.c_str()));
     if (character_id < 0) {
         finish(1, "named character type was not found");
         return;
@@ -564,12 +564,13 @@ void AutoplayRunner::tick_character_switch(const AutoplayAction &action) {
         return;
     }
 
-    GameObject_s *target = find_character(action.target_name.c_str());
+    GameObject_s *target = find_character(action.character.c_str());
     if (target == nullptr) {
         finish(1, "named live character was not found");
         return;
     }
-    if (this->current_action.character_switch_requested) {
+    auto &state = this->runtime<CharacterSwitchRuntime>();
+    if (state.requested) {
         return;
     }
     if (static_cast<i8>(target->apiobj.flags_low) < 0 || (target->tag_context_flags & 2) != 0) {
@@ -579,9 +580,9 @@ void AutoplayRunner::tick_character_switch(const AutoplayAction &action) {
 
     const f32 distance = horizontal_distance(Player[0]->apiobj.position, target->apiobj.position);
     const i32 result = TagCharacter(Player[0], target, 1);
-    this->current_action.character_switch_requested = true;
+    state.requested = true;
     LOG_INFO("autoplay %s: forced native character switch to %s at distance %.3f (result=%d)", this->level_name.c_str(),
-             action.target_name.c_str(), distance, result);
+             action.character.c_str(), distance, result);
     if (result == 0) {
         finish(1, "native forced character switch was rejected");
     } else if (Player[0] != nullptr && Player[0]->id == character_id) {
@@ -589,23 +590,24 @@ void AutoplayRunner::tick_character_switch(const AutoplayAction &action) {
     }
 }
 
-void AutoplayRunner::tick_hold_gizmo_action(const AutoplayAction &action) {
-    if (!gameplay_ready(nullptr) || Player[0] == nullptr || action.speed <= 0.0f) {
+void AutoplayRunner::tick_hold_gizmo_action(const HoldGizmoAction &action) {
+    if (!gameplay_ready(nullptr) || Player[0] == nullptr || action.return_speed <= 0.0f) {
         return;
     }
 
-    GIZMO *watched = find_gizmo(action.condition_name.c_str());
+    const auto &[gizmo_name, output_index, expected] = action.condition;
+    GIZMO *watched = find_gizmo(gizmo_name.c_str());
     if (watched == nullptr) {
         finish(1, "watched gizmo was not found while holding position");
         return;
     }
-    if (GizmoGetOutput(WORLD->gizmo_sys, watched, action.output_index, 1) == action.expected_output) {
+    if (GizmoGetOutput(WORLD->gizmo_sys, watched, output_index, 1) == expected) {
         advance_action();
         return;
     }
-    this->enable_rail_run_speed(action.speed);
+    this->enable_rail_run_speed(action.return_speed);
 
-    const NUVEC &target = this->current_action.rail.waypoints.front().position;
+    const NUVEC &target = this->runtime<RailRuntime>().rail.waypoints.front().position;
 
     GameObject_s &character = *Player[0];
     const NUVEC &position = character.apiobj.position;
@@ -624,30 +626,33 @@ void AutoplayRunner::tick_hold_gizmo_action(const AutoplayAction &action) {
     this->set_rail_input(character, angle);
 }
 
-void AutoplayRunner::tick_hold_party_switches_action(const AutoplayAction &action) {
+void AutoplayRunner::tick_hold_party_switches_action(const HoldPartySwitchesAction &action) {
     if (!gameplay_ready(nullptr)) {
         return;
     }
 
-    GIZMO *watched = find_gizmo(action.condition_name.c_str());
+    const auto &[gizmo_name, output_index, expected] = action.condition;
+    GIZMO *watched = find_gizmo(gizmo_name.c_str());
     if (watched == nullptr) {
         finish(1, "watched gizmo was not found while holding party switches");
         return;
     }
-    if (GizmoGetOutput(WORLD->gizmo_sys, watched, action.output_index, 1) == action.expected_output) {
+    if (GizmoGetOutput(WORLD->gizmo_sys, watched, output_index, 1) == expected) {
         advance_action();
         return;
     }
 
-    for (usize index = 0; index < action.party_switches.size(); ++index) {
-        const PartySwitchPlacement &placement = action.party_switches[index];
-        GameObject_s *character = find_character(placement.character);
-        if (character == nullptr || index >= this->current_action.party_switch_positions.size()) {
+    const auto &positions = this->runtime<PartySwitchRuntime>().positions;
+    for (usize index = 0; index < action.placements.size(); ++index) {
+        const auto &[character_name, gizmo] = action.placements[index];
+        static_cast<void>(gizmo);
+        GameObject_s *character = find_character(character_name.c_str());
+        if (character == nullptr || index >= positions.size()) {
             finish(1, "named party member was not found while holding party switches");
             return;
         }
 
-        const NUVEC &switch_position = this->current_action.party_switch_positions[index];
+        const NUVEC &switch_position = positions[index];
         const NUVEC &position = character->apiobj.position;
         if (std::hypot(position.x - switch_position.x, position.z - switch_position.z) > 0.1f ||
             std::abs(position.y - switch_position.y) > 0.25f) {
@@ -657,24 +662,25 @@ void AutoplayRunner::tick_hold_party_switches_action(const AutoplayAction &actio
     }
 }
 
-void AutoplayRunner::tick_hold_party_forces_action(const AutoplayAction &action) {
+void AutoplayRunner::tick_hold_party_forces_action(const HoldPartyForcesAction &action) {
     if (!gameplay_ready(nullptr)) {
         return;
     }
 
-    GIZMO *watched = find_gizmo(action.condition_name.c_str());
+    const auto &[gizmo_name, output_index, expected] = action.condition;
+    GIZMO *watched = find_gizmo(gizmo_name.c_str());
     if (watched == nullptr) {
         finish(1, "watched gizmo was not found while holding party Force interactions");
         return;
     }
-    if (GizmoGetOutput(WORLD->gizmo_sys, watched, action.output_index, 1) == action.expected_output) {
+    if (GizmoGetOutput(WORLD->gizmo_sys, watched, output_index, 1) == expected) {
         advance_action();
         return;
     }
 
-    for (const PartyForceUse &use : action.party_forces) {
-        GameObject_s *character = find_character(use.character);
-        GIZMO *gizmo = find_gizmo(use.gizmo);
+    for (const auto &[character_name, gizmo_name] : action.uses) {
+        GameObject_s *character = find_character(character_name.c_str());
+        GIZMO *gizmo = find_gizmo(gizmo_name.c_str());
         if (character == nullptr || gizmo == nullptr || gizmo->type_id != force_gizmotype_id ||
             gizmo->object == nullptr) {
             finish(1, "named character or Force gizmo was not found for party Force interaction");

@@ -62,7 +62,7 @@ namespace scripts {
             rail_through_gizmo("poop_map1", 0.0f, 2.5f, 20000, true),
         },
         AutoplayOptions{},
-        180000,
+        Milliseconds{180000},
     };
 
 } // namespace scripts

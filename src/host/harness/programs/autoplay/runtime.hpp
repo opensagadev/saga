@@ -3,88 +3,57 @@
 // Autoplay process state and lifecycle helpers.
 // Included only by autoplay.cpp, inside its anonymous namespace.
 
-const char *action_name(AutoplayActionKind kind) {
-    switch (kind) {
-        case AutoplayActionKind::checkpoint:
-            return "checkpoint";
-        case AutoplayActionKind::wait_loaded:
-            return "wait-loaded";
-        case AutoplayActionKind::wait_time:
-            return "wait";
-        case AutoplayActionKind::start_podrace:
-            return "start-podrace";
-        case AutoplayActionKind::drive_podrace_to_level:
-            return "drive-podrace-to-level";
-        case AutoplayActionKind::rail_forward:
-            return "rail-forward";
-        case AutoplayActionKind::rail_relative_route:
-            return "rail-relative-route";
-        case AutoplayActionKind::rail_to_gizmo:
-            return "rail-to-gizmo";
-        case AutoplayActionKind::rail_through_gizmo:
-            return "rail-through-gizmo";
-        case AutoplayActionKind::rail_through_path_connection:
-            return "rail-through-path-connection";
-        case AutoplayActionKind::rail_to_character:
-            return "rail-to-character";
-        case AutoplayActionKind::rail_to_area:
-            return "rail-to-area";
-        case AutoplayActionKind::rail_to_path_node:
-            return "rail-to-path-node";
-        case AutoplayActionKind::rail_to_locator:
-            return "rail-to-locator";
-        case AutoplayActionKind::rail_through_locator:
-            return "rail-through-locator";
-        case AutoplayActionKind::native_jump_relative:
-            return "native-jump-relative";
-        case AutoplayActionKind::native_jump_to_gizmo:
-            return "native-jump-to-gizmo";
-        case AutoplayActionKind::native_jump_to_locator:
-            return "native-jump-to-locator";
-        case AutoplayActionKind::teleport_to:
-            return "teleport-to";
-        case AutoplayActionKind::use_force_gizmo:
-            return "use-force-gizmo";
-        case AutoplayActionKind::use_panel_gizmo:
-            return "use-panel-gizmo";
-        case AutoplayActionKind::use_buildit_gizmo:
-            return "use-buildit-gizmo";
-        case AutoplayActionKind::use_zipup_gizmo:
-            return "use-zipup-gizmo";
-        case AutoplayActionKind::blaster_hit_gizmo:
-            return "blaster-hit-gizmo";
-        case AutoplayActionKind::clear_nearby_hostiles:
-            return "clear-nearby-hostiles";
-        case AutoplayActionKind::clear_named_characters:
-            return "clear-named-characters";
-        case AutoplayActionKind::destroy_named_ai_object:
-            return "destroy-named-ai-object";
-        case AutoplayActionKind::damage_character_to_health:
-            return "damage-character-to-health";
-        case AutoplayActionKind::switch_to_character:
-            return "switch-to-character";
-        case AutoplayActionKind::wait_gizmo_output:
-            return "wait-gizmo-output";
-        case AutoplayActionKind::hold_gizmo_until_output:
-            return "hold-gizmo-until-output";
-        case AutoplayActionKind::hold_party_switches_until_output:
-            return "hold-party-switches-until-output";
-        case AutoplayActionKind::hold_party_forces_until_output:
-            return "hold-party-forces-until-output";
-        case AutoplayActionKind::wait_ai_message:
-            return "wait-ai-message";
-        case AutoplayActionKind::wait_level:
-            return "wait-level";
-        case AutoplayActionKind::wait_menu:
-            return "wait-menu";
-        case AutoplayActionKind::wait_cutscene_end:
-            return "wait-cutscene-end";
-        case AutoplayActionKind::log_gizmos:
-            return "log-gizmos";
-        case AutoplayActionKind::manual_control:
-            return "manual-control";
-    }
-    return "unknown";
+std::string_view rail_name(const RailDestination &destination) {
+    return std::visit(
+        Overloaded{
+            [](const RailForward &) -> std::string_view { return "rail-forward"; },
+            [](const RailRelativeRoute &) -> std::string_view { return "rail-relative-route"; },
+            [](const RailToGizmo &) -> std::string_view { return "rail-to-gizmo"; },
+            [](const RailThroughGizmo &) -> std::string_view { return "rail-through-gizmo"; },
+            [](const RailThroughPathConnection &) -> std::string_view { return "rail-through-path-connection"; },
+            [](const RailToCharacter &) -> std::string_view { return "rail-to-character"; },
+            [](const RailToArea &) -> std::string_view { return "rail-to-area"; },
+            [](const RailToPathNode &) -> std::string_view { return "rail-to-path-node"; },
+            [](const RailToLocator &) -> std::string_view { return "rail-to-locator"; },
+            [](const RailThroughLocator &) -> std::string_view { return "rail-through-locator"; },
+        },
+        destination);
+}
+
+std::string_view action_name(const AutoplayAction &action) {
+    return std::visit(
+        Overloaded{
+            [](const CheckpointAction &) -> std::string_view { return "checkpoint"; },
+            [](const WaitLoadedAction &) -> std::string_view { return "wait-loaded"; },
+            [](const WaitAction &) -> std::string_view { return "wait"; },
+            [](const StartPodraceAction &) -> std::string_view { return "start-podrace"; },
+            [](const DrivePodraceAction &) -> std::string_view { return "drive-podrace-to-level"; },
+            [](const RailAction &rail) { return rail_name(rail.destination); },
+            [](const NativeJumpAction &) -> std::string_view { return "native-jump"; },
+            [](const TeleportAction &) -> std::string_view { return "teleport-to"; },
+            [](const UseForceAction &) -> std::string_view { return "use-force-gizmo"; },
+            [](const UsePanelAction &) -> std::string_view { return "use-panel-gizmo"; },
+            [](const UseBuildItAction &) -> std::string_view { return "use-buildit-gizmo"; },
+            [](const UseZipUpAction &) -> std::string_view { return "use-zipup-gizmo"; },
+            [](const BlasterHitAction &) -> std::string_view { return "blaster-hit-gizmo"; },
+            [](const ClearHostilesAction &clear) -> std::string_view {
+                return clear.character ? "clear-named-characters" : "clear-nearby-hostiles";
+            },
+            [](const DestroyAiObjectAction &) -> std::string_view { return "destroy-named-ai-object"; },
+            [](const DamageCharacterAction &) -> std::string_view { return "damage-character-to-health"; },
+            [](const SwitchCharacterAction &) -> std::string_view { return "switch-to-character"; },
+            [](const WaitGizmoOutputAction &) -> std::string_view { return "wait-gizmo-output"; },
+            [](const HoldGizmoAction &) -> std::string_view { return "hold-gizmo-until-output"; },
+            [](const HoldPartySwitchesAction &) -> std::string_view { return "hold-party-switches-until-output"; },
+            [](const HoldPartyForcesAction &) -> std::string_view { return "hold-party-forces-until-output"; },
+            [](const WaitAiMessageAction &) -> std::string_view { return "wait-ai-message"; },
+            [](const WaitLevelAction &) -> std::string_view { return "wait-level"; },
+            [](const WaitMenuAction &) -> std::string_view { return "wait-menu"; },
+            [](const WaitCutsceneEndAction &) -> std::string_view { return "wait-cutscene-end"; },
+            [](const LogGizmosAction &) -> std::string_view { return "log-gizmos"; },
+            [](const ManualControlAction &) -> std::string_view { return "manual-control"; },
+        },
+        action.payload);
 }
 
 void AutoplayRunner::release_input() {
@@ -135,22 +104,20 @@ void AutoplayRunner::enable_rail_run_speed(f32 multiplier) {
     }
 
     GAMECHARACTERDATA_s *character_data = Player[0]->apiobj.character_data->game_character;
-    if (this->boosted_character_data == character_data) {
+    if (this->run_speed_override && this->run_speed_override->character == character_data) {
         return;
     }
     this->restore_run_speed();
-    this->boosted_character_data = character_data;
-    this->original_run_speed = character_data->run_speed;
+    this->run_speed_override = RunSpeedOverride{character_data, character_data->run_speed};
     character_data->run_speed *= multiplier;
 }
 
 void AutoplayRunner::restore_run_speed() {
-    if (this->boosted_character_data == nullptr) {
+    if (!this->run_speed_override) {
         return;
     }
-    this->boosted_character_data->run_speed = this->original_run_speed;
-    this->boosted_character_data = nullptr;
-    this->original_run_speed = 0.0f;
+    this->run_speed_override->character->run_speed = this->run_speed_override->original_speed;
+    this->run_speed_override.reset();
 }
 
 void AutoplayRunner::ensure_invincibility() {
@@ -161,12 +128,10 @@ void AutoplayRunner::ensure_invincibility() {
         return;
     }
 
-    if (this->invincibility_cheat_index < 0) {
-        this->invincibility_cheat_index = Cheat_FindByName(const_cast<char *>("invincibility"));
-    }
-    if (this->invincibility_cheat_index >= 0) {
-        Cheat_SetOn(this->invincibility_cheat_index, 1, 0);
-        this->owns_invincibility_cheat = true;
+    const i32 cheat = Cheat_FindByName(const_cast<char *>("invincibility"));
+    if (cheat >= 0) {
+        Cheat_SetOn(cheat, 1, 0);
+        this->owned_invincibility_cheat = cheat;
         LOG_INFO("autoplay %s: enabled invincibility", this->level_name.c_str());
     }
 }
@@ -207,26 +172,26 @@ void AutoplayRunner::attach_podrace_host_state(WORLDINFO_s &world) {
 }
 
 void AutoplayRunner::initialize_podrace_a(WORLDINFO_s *world) {
-    AutoplayRunner::instance.attach_podrace_host_state(*world);
+    AutoplayRunner::get().attach_podrace_host_state(*world);
     PodRaceAInit(world);
 }
 
 void AutoplayRunner::initialize_podrace_b(WORLDINFO_s *world) {
-    AutoplayRunner::instance.attach_podrace_host_state(*world);
+    AutoplayRunner::get().attach_podrace_host_state(*world);
     PodRaceBInit(world);
 }
 
 void AutoplayRunner::initialize_podrace_c(WORLDINFO_s *world) {
-    AutoplayRunner::instance.attach_podrace_host_state(*world);
+    AutoplayRunner::get().attach_podrace_host_state(*world);
     // Podrace C's reconstructed cutscene player does not restore the pod to
     // gameplay state when its Tusken interlude ends. The smoke test exercises
     // the race rather than that known-broken teardown, so suppress only the
     // area's automatic intro through the native one-shot skip flag.
-    if (AutoplayRunner::instance.active()) {
+    if (AutoplayRunner::get().active()) {
         cutskip_dontplaylevelintro = 1;
     }
     PodRaceCInit(world);
-    if (AutoplayRunner::instance.active()) {
+    if (AutoplayRunner::get().active()) {
         char intro_name[] = "Ep1_Podrace_TuskenRaiders";
         CUTINFO *const intro = CutScene_Find(world->cutscene_sys, intro_name);
         CutScene_SnapToEnd(intro);
@@ -242,14 +207,16 @@ void AutoplayRunner::finish(i32 status, const char *reason) {
         LOG_INFO("autoplay %s: PASS: %s", this->level_name.c_str(), reason);
     } else {
         const NUVEC position = Player[0] != nullptr ? Player[0]->apiobj.position : NUVEC{};
-        LOG_ERR("autoplay %s: FAIL at action %u/%u (%s): %s; level=%s position=(%.3f,%.3f,%.3f)",
+        const std::string_view failed_action =
+            this->script != nullptr && this->action_index < this->script->actions.size()
+                ? action_name(this->script->actions[this->action_index])
+                : std::string_view{"startup"};
+        LOG_ERR("autoplay %s: FAIL at action %u/%u (%.*s): %s; level=%s position=(%.3f,%.3f,%.3f)",
                 this->level_name.c_str(), static_cast<unsigned>(this->action_index + 1),
                 this->script != nullptr ? static_cast<unsigned>(this->script->actions.size()) : 0,
-                this->script != nullptr && this->action_index < this->script->actions.size()
-                    ? action_name(this->script->actions[this->action_index].kind)
-                    : "startup",
-                reason, WORLD != nullptr && WORLD->current_level != nullptr ? WORLD->current_level->name : "-",
-                position.x, position.y, position.z);
+                static_cast<i32>(failed_action.size()), failed_action.data(), reason,
+                WORLD != nullptr && WORLD->current_level != nullptr ? WORLD->current_level->name : "-", position.x,
+                position.y, position.z);
     }
     this->result_code.store(status, std::memory_order_relaxed);
     this->is_done.store(true, std::memory_order_release);
@@ -262,18 +229,18 @@ bool AutoplayRunner::select_script() {
 
     const ScheduledScript &scheduled = this->schedule[this->schedule_index];
     this->level_name = scheduled.level_name;
-    this->script = scheduled.script;
+    this->script = &scheduled.script.get();
     this->action_index = 0;
     for (usize index = 0; index < this->script->actions.size(); ++index) {
         const AutoplayAction &action = this->script->actions[index];
-        if (action.kind == AutoplayActionKind::checkpoint &&
-            SDL_strcasecmp(action.target_name.c_str(), this->level_name.c_str()) == 0) {
+        const auto *checkpoint = get_action<CheckpointAction>(action);
+        if (checkpoint != nullptr && SDL_strcasecmp(checkpoint->level.c_str(), this->level_name.c_str()) == 0) {
             this->action_index = index + 1;
             break;
         }
     }
     this->load_requested = false;
-    this->current_action.clear();
+    this->current_action.reset();
     this->gizmo_position_snapshots.clear();
     this->script_started_at = SDL_GetTicks();
 
@@ -319,9 +286,9 @@ void AutoplayRunner::prepare_level() {
         return;
     }
 
-    if (this->loader_mode_overridden) {
-        LOADEROFF = this->previous_loader_mode;
-        this->loader_mode_overridden = false;
+    if (this->overridden_loader_mode) {
+        LOADEROFF = *this->overridden_loader_mode;
+        this->overridden_loader_mode.reset();
     }
     if (!enter_level()) {
         finish(1, "script level does not exist or is not a gameplay level");

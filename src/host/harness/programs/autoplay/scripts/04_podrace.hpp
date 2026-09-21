@@ -19,7 +19,7 @@ namespace scripts {
             dsl::drive_podrace_to_level("PodRace_Outro1"),
         },
         AutoplayOptions{},
-        900000,
+        Milliseconds{900000},
     };
 
 } // namespace scripts

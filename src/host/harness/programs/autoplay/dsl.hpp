@@ -4,290 +4,150 @@
 
 namespace dsl {
 
-    inline AutoplayAction checkpoint(const char *level) {
-        AutoplayAction action{AutoplayActionKind::checkpoint};
-        action.target_name = level;
-        return action;
+    template <typename Payload> AutoplayAction action(Payload payload, u32 timeout_ms = 0) {
+        return {std::move(payload), Milliseconds{timeout_ms}};
     }
 
+    inline AutoplayAction checkpoint(std::string level) {
+        return action(CheckpointAction{std::move(level)});
+    }
     inline AutoplayAction wait_loaded(u32 timeout_ms = 60000) {
-        return AutoplayAction{AutoplayActionKind::wait_loaded, timeout_ms};
+        return action(WaitLoadedAction{}, timeout_ms);
     }
-
     inline AutoplayAction wait_time(u32 duration_ms) {
-        AutoplayAction action{AutoplayActionKind::wait_time, duration_ms + 10000};
-        action.duration_ms = duration_ms;
-        return action;
+        return action(WaitAction{Milliseconds{duration_ms}}, duration_ms + 10000);
     }
-
     inline AutoplayAction start_podrace() {
-        return AutoplayAction{AutoplayActionKind::start_podrace, 1000};
+        return action(StartPodraceAction{}, 1000);
     }
-
-    inline AutoplayAction drive_podrace_to_level(const char *level, f32 speed_multiplier = 2.5f,
+    inline AutoplayAction drive_podrace_to_level(std::string level, f32 speed_multiplier = 2.5f,
                                                  u32 timeout_ms = 120000) {
-        AutoplayAction action{AutoplayActionKind::drive_podrace_to_level, timeout_ms};
-        action.target_name = level;
-        action.speed = speed_multiplier;
-        return action;
+        return action(DrivePodraceAction{std::move(level), speed_multiplier}, timeout_ms);
     }
-
     inline AutoplayAction rail_forward(f32 distance, f32 speed = 6.0f, u32 timeout_ms = 15000) {
-        AutoplayAction action{AutoplayActionKind::rail_forward, timeout_ms};
-        action.distance = distance;
-        action.speed = speed;
-        return action;
+        return action(RailAction{RailForward{distance}, speed, false}, timeout_ms);
     }
-
     inline AutoplayAction rail_relative_route(std::vector<NUVEC> points, f32 speed, u32 timeout_ms,
                                               bool follow_height = false) {
-        AutoplayAction action{AutoplayActionKind::rail_relative_route, timeout_ms};
-        action.speed = speed;
-        action.waypoints = std::move(points);
-        action.follow_height = follow_height;
-        return action;
+        return action(RailAction{RailRelativeRoute{std::move(points)}, speed, follow_height}, timeout_ms);
     }
-
-    inline AutoplayAction rail_to_gizmo(const char *gizmo, f32 speed = 6.0f, u32 timeout_ms = 20000,
+    inline AutoplayAction rail_to_gizmo(std::string gizmo, f32 speed = 6.0f, u32 timeout_ms = 20000,
                                         bool follow_height = false) {
-        AutoplayAction action{AutoplayActionKind::rail_to_gizmo, timeout_ms};
-        action.target_name = gizmo;
-        action.speed = speed;
-        action.follow_height = follow_height;
-        return action;
+        return action(RailAction{RailToGizmo{std::move(gizmo)}, speed, follow_height}, timeout_ms);
     }
-
-    inline AutoplayAction rail_through_gizmo(const char *gizmo, f32 beyond_distance, f32 speed = 4.0f,
+    inline AutoplayAction rail_through_gizmo(std::string gizmo, f32 beyond_distance, f32 speed = 4.0f,
                                              u32 timeout_ms = 20000, bool follow_height = false) {
-        AutoplayAction action{AutoplayActionKind::rail_through_gizmo, timeout_ms};
-        action.target_name = gizmo;
-        action.overshoot = beyond_distance;
-        action.speed = speed;
-        action.follow_height = follow_height;
-        return action;
+        return action(RailAction{RailThroughGizmo{std::move(gizmo), beyond_distance}, speed, follow_height},
+                      timeout_ms);
     }
-
-    inline AutoplayAction rail_through_path_connection(const char *from, const char *to, f32 speed = 4.0f,
+    inline AutoplayAction rail_through_path_connection(std::string from, std::string to, f32 speed = 4.0f,
                                                        u32 timeout_ms = 20000, bool follow_height = false) {
-        AutoplayAction action{AutoplayActionKind::rail_through_path_connection, timeout_ms};
-        action.target_name = from;
-        action.condition_name = to;
-        action.speed = speed;
-        action.follow_height = follow_height;
-        return action;
+        return action(RailAction{RailThroughPathConnection{std::move(from), std::move(to)}, speed, follow_height},
+                      timeout_ms);
     }
-
-    inline AutoplayAction rail_to_character(const char *character, f32 tolerance = 0.75f, f32 speed = 6.0f,
+    inline AutoplayAction rail_to_character(std::string character, f32 tolerance = 0.75f, f32 speed = 6.0f,
                                             u32 timeout_ms = 30000, bool follow_height = false) {
-        AutoplayAction action{AutoplayActionKind::rail_to_character, timeout_ms};
-        action.target_name = character;
-        action.arrival_tolerance = tolerance;
-        action.speed = speed;
-        action.follow_height = follow_height;
-        return action;
+        return action(RailAction{RailToCharacter{std::move(character), tolerance}, speed, follow_height}, timeout_ms);
     }
-
-    inline AutoplayAction rail_to_area(const char *area, f32 speed = 5.0f, u32 timeout_ms = 15000,
+    inline AutoplayAction rail_to_area(std::string area, f32 speed = 5.0f, u32 timeout_ms = 15000,
                                        bool follow_height = false) {
-        AutoplayAction action{AutoplayActionKind::rail_to_area, timeout_ms};
-        action.target_name = area;
-        action.speed = speed;
-        action.follow_height = follow_height;
-        return action;
+        return action(RailAction{RailToArea{std::move(area)}, speed, follow_height}, timeout_ms);
     }
-
-    inline AutoplayAction rail_to_path_node(const char *node, f32 speed = 6.0f, u32 timeout_ms = 20000,
+    inline AutoplayAction rail_to_path_node(std::string node, f32 speed = 6.0f, u32 timeout_ms = 20000,
                                             bool follow_height = false) {
-        AutoplayAction action{AutoplayActionKind::rail_to_path_node, timeout_ms};
-        action.target_name = node;
-        action.speed = speed;
-        action.follow_height = follow_height;
-        return action;
+        return action(RailAction{RailToPathNode{std::move(node)}, speed, follow_height}, timeout_ms);
     }
-
-    inline AutoplayAction rail_to_locator(const char *locator, f32 speed = 6.0f, u32 timeout_ms = 20000,
+    inline AutoplayAction rail_to_locator(std::string locator, f32 speed = 6.0f, u32 timeout_ms = 20000,
                                           bool follow_height = false) {
-        AutoplayAction action{AutoplayActionKind::rail_to_locator, timeout_ms};
-        action.target_name = locator;
-        action.speed = speed;
-        action.follow_height = follow_height;
-        return action;
+        return action(RailAction{RailToLocator{std::move(locator)}, speed, follow_height}, timeout_ms);
     }
-
-    inline AutoplayAction rail_through_locator(const char *locator, f32 speed = 6.0f, u32 timeout_ms = 20000,
+    inline AutoplayAction rail_through_locator(std::string locator, f32 speed = 6.0f, u32 timeout_ms = 20000,
                                                bool follow_height = false) {
-        AutoplayAction action{AutoplayActionKind::rail_through_locator, timeout_ms};
-        action.target_name = locator;
-        action.speed = speed;
-        action.follow_height = follow_height;
-        return action;
+        return action(RailAction{RailThroughLocator{std::move(locator)}, speed, follow_height}, timeout_ms);
     }
-
     inline AutoplayAction native_jump_relative(NUVEC offset, u32 timeout_ms = 10000) {
-        AutoplayAction action{AutoplayActionKind::native_jump_relative, timeout_ms};
-        action.position = offset;
-        return action;
+        return action(NativeJumpAction{JumpRelative{offset}}, timeout_ms);
     }
-
-    inline AutoplayAction native_jump_to_gizmo(const char *gizmo, u32 timeout_ms = 10000) {
-        AutoplayAction action{AutoplayActionKind::native_jump_to_gizmo, timeout_ms};
-        action.target_name = gizmo;
-        return action;
+    inline AutoplayAction native_jump_to_gizmo(std::string gizmo, u32 timeout_ms = 10000) {
+        return action(NativeJumpAction{JumpToGizmo{std::move(gizmo)}}, timeout_ms);
     }
-
-    inline AutoplayAction native_jump_to_locator(const char *locator, u32 timeout_ms = 10000) {
-        AutoplayAction action{AutoplayActionKind::native_jump_to_locator, timeout_ms};
-        action.target_name = locator;
-        return action;
+    inline AutoplayAction native_jump_to_locator(std::string locator, u32 timeout_ms = 10000) {
+        return action(NativeJumpAction{JumpToLocator{std::move(locator)}}, timeout_ms);
     }
-
     inline AutoplayAction teleport_to(f32 x, f32 y, f32 z) {
-        AutoplayAction action{AutoplayActionKind::teleport_to, 1000};
-        action.position = {x, y, z};
-        return action;
+        return action(TeleportAction{{x, y, z}}, 1000);
     }
-
-    inline AutoplayAction use_force_gizmo(const char *name, u32 timeout_ms = 15000) {
-        AutoplayAction action{AutoplayActionKind::use_force_gizmo, timeout_ms};
-        action.target_name = name;
-        return action;
+    inline AutoplayAction use_force_gizmo(std::string name, u32 timeout_ms = 15000) {
+        return action(UseForceAction{std::move(name)}, timeout_ms);
     }
-
-    inline AutoplayAction use_panel_gizmo(const char *name, u32 timeout_ms = 10000) {
-        AutoplayAction action{AutoplayActionKind::use_panel_gizmo, timeout_ms};
-        action.target_name = name;
-        return action;
+    inline AutoplayAction use_panel_gizmo(std::string name, u32 timeout_ms = 10000) {
+        return action(UsePanelAction{std::move(name)}, timeout_ms);
     }
-
-    inline AutoplayAction use_buildit_gizmo(const char *name, u32 timeout_ms = 15000) {
-        AutoplayAction action{AutoplayActionKind::use_buildit_gizmo, timeout_ms};
-        action.target_name = name;
-        return action;
+    inline AutoplayAction use_buildit_gizmo(std::string name, u32 timeout_ms = 15000) {
+        return action(UseBuildItAction{std::move(name)}, timeout_ms);
     }
-
-    inline AutoplayAction use_zipup_gizmo(const char *name, u32 timeout_ms = 10000) {
-        AutoplayAction action{AutoplayActionKind::use_zipup_gizmo, timeout_ms};
-        action.target_name = name;
-        return action;
+    inline AutoplayAction use_zipup_gizmo(std::string name, u32 timeout_ms = 10000) {
+        return action(UseZipUpAction{std::move(name)}, timeout_ms);
     }
-
-    inline AutoplayAction blaster_hit_gizmo(const char *name, u32 timeout_ms = 5000) {
-        AutoplayAction action{AutoplayActionKind::blaster_hit_gizmo, timeout_ms};
-        action.target_name = name;
-        return action;
+    inline AutoplayAction blaster_hit_gizmo(std::string name, u32 timeout_ms = 5000) {
+        return action(BlasterHitAction{std::move(name)}, timeout_ms);
     }
-
     inline AutoplayAction clear_nearby_hostiles(f32 radius = 16.0f, u32 quiet_period_ms = 750, u32 timeout_ms = 30000) {
-        AutoplayAction action{AutoplayActionKind::clear_nearby_hostiles, timeout_ms};
-        action.distance = radius;
-        action.duration_ms = quiet_period_ms;
-        return action;
+        return action(ClearHostilesAction{std::nullopt, radius, Milliseconds{quiet_period_ms}}, timeout_ms);
     }
-
-    inline AutoplayAction clear_named_characters(const char *character, f32 radius, u32 quiet_period_ms = 1000,
+    inline AutoplayAction clear_named_characters(std::string character, f32 radius, u32 quiet_period_ms = 1000,
                                                  u32 timeout_ms = 30000) {
-        AutoplayAction action{AutoplayActionKind::clear_named_characters, timeout_ms};
-        action.target_name = character;
-        action.distance = radius;
-        action.duration_ms = quiet_period_ms;
-        return action;
+        return action(ClearHostilesAction{std::move(character), radius, Milliseconds{quiet_period_ms}}, timeout_ms);
     }
-
-    inline AutoplayAction destroy_named_ai_object(const char *name, f32 maximum_range = 15.0f, u32 timeout_ms = 15000) {
-        AutoplayAction action{AutoplayActionKind::destroy_named_ai_object, timeout_ms};
-        action.target_name = name;
-        action.distance = maximum_range;
-        return action;
+    inline AutoplayAction destroy_named_ai_object(std::string name, f32 maximum_range = 15.0f, u32 timeout_ms = 15000) {
+        return action(DestroyAiObjectAction{std::move(name), maximum_range}, timeout_ms);
     }
-
-    inline AutoplayAction damage_character_to_health(const char *character, i32 health, f32 range = 3.5f,
+    inline AutoplayAction damage_character_to_health(std::string character, i32 health, f32 range = 3.5f,
                                                      u32 timeout_ms = 30000) {
-        AutoplayAction action{AutoplayActionKind::damage_character_to_health, timeout_ms};
-        action.target_name = character;
-        action.expected_output = health;
-        action.distance = range;
-        return action;
+        return action(DamageCharacterAction{std::move(character), health, range}, timeout_ms);
     }
-
-    inline AutoplayAction switch_to_character(const char *name, u32 timeout_ms = 5000) {
-        AutoplayAction action{AutoplayActionKind::switch_to_character, timeout_ms};
-        action.target_name = name;
-        return action;
+    inline AutoplayAction switch_to_character(std::string name, u32 timeout_ms = 5000) {
+        return action(SwitchCharacterAction{std::move(name)}, timeout_ms);
     }
-
-    inline AutoplayAction wait_gizmo_output(const char *name, i32 output_index, i32 expected, u32 timeout_ms) {
-        AutoplayAction action{AutoplayActionKind::wait_gizmo_output, timeout_ms};
-        action.target_name = name;
-        action.output_index = output_index;
-        action.expected_output = expected;
-        return action;
+    inline AutoplayAction wait_gizmo_output(std::string name, i32 output_index, i32 expected, u32 timeout_ms) {
+        return action(WaitGizmoOutputAction{{std::move(name), output_index, expected}}, timeout_ms);
     }
-
-    inline AutoplayAction wait_ai_message(const char *name, i32 expected, u32 timeout_ms = 15000) {
-        AutoplayAction action{AutoplayActionKind::wait_ai_message, timeout_ms};
-        action.target_name = name;
-        action.expected_output = expected;
-        return action;
+    inline AutoplayAction wait_ai_message(std::string name, i32 expected, u32 timeout_ms = 15000) {
+        return action(WaitAiMessageAction{std::move(name), expected}, timeout_ms);
     }
-
-    inline AutoplayAction hold_gizmo_until_output(const char *standing_gizmo, const char *watched_gizmo,
+    inline AutoplayAction hold_gizmo_until_output(std::string standing_gizmo, std::string watched_gizmo,
                                                   i32 output_index, i32 expected, f32 return_speed = 5.0f,
                                                   u32 timeout_ms = 20000) {
-        AutoplayAction action{AutoplayActionKind::hold_gizmo_until_output, timeout_ms};
-        action.target_name = standing_gizmo;
-        action.condition_name = watched_gizmo;
-        action.output_index = output_index;
-        action.expected_output = expected;
-        action.speed = return_speed;
-        return action;
+        return action(HoldGizmoAction{std::move(standing_gizmo),
+                                      {std::move(watched_gizmo), output_index, expected},
+                                      return_speed},
+                      timeout_ms);
     }
-
     inline AutoplayAction hold_party_switches_until_output(std::initializer_list<PartySwitchPlacement> placements,
-                                                           const char *watched_gizmo, i32 output_index, i32 expected,
+                                                           std::string watched_gizmo, i32 output_index, i32 expected,
                                                            u32 timeout_ms = 20000) {
-        AutoplayAction action{AutoplayActionKind::hold_party_switches_until_output, timeout_ms};
-        action.condition_name = watched_gizmo;
-        action.output_index = output_index;
-        action.expected_output = expected;
-        action.party_switches.assign(placements);
-        return action;
+        return action(HoldPartySwitchesAction{{placements}, {std::move(watched_gizmo), output_index, expected}},
+                      timeout_ms);
     }
-
     inline AutoplayAction hold_party_forces_until_output(std::initializer_list<PartyForceUse> uses,
-                                                         const char *watched_gizmo, i32 output_index, i32 expected,
+                                                         std::string watched_gizmo, i32 output_index, i32 expected,
                                                          u32 timeout_ms = 20000) {
-        AutoplayAction action{AutoplayActionKind::hold_party_forces_until_output, timeout_ms};
-        action.condition_name = watched_gizmo;
-        action.output_index = output_index;
-        action.expected_output = expected;
-        action.party_forces.assign(uses);
-        return action;
+        return action(HoldPartyForcesAction{{uses}, {std::move(watched_gizmo), output_index, expected}}, timeout_ms);
     }
-
-    inline AutoplayAction wait_level(const char *name, u32 timeout_ms = 60000) {
-        AutoplayAction action{AutoplayActionKind::wait_level, timeout_ms};
-        action.target_name = name;
-        return action;
+    inline AutoplayAction wait_level(std::string name, u32 timeout_ms = 60000) {
+        return action(WaitLevelAction{std::move(name)}, timeout_ms);
     }
-
     inline AutoplayAction wait_menu(i32 menu_id, u32 timeout_ms = 15000) {
-        AutoplayAction action{AutoplayActionKind::wait_menu, timeout_ms};
-        action.output_index = menu_id;
-        return action;
+        return action(WaitMenuAction{menu_id}, timeout_ms);
     }
-
-    inline AutoplayAction wait_cutscene_end(const char *level_name, u32 timeout_ms = 15000) {
-        AutoplayAction action{AutoplayActionKind::wait_cutscene_end, timeout_ms};
-        action.target_name = level_name;
-        return action;
+    inline AutoplayAction wait_cutscene_end(std::string level_name, u32 timeout_ms = 15000) {
+        return action(WaitCutsceneEndAction{std::move(level_name)}, timeout_ms);
     }
-
     inline AutoplayAction log_gizmos() {
-        return AutoplayAction{AutoplayActionKind::log_gizmos, 1000};
+        return action(LogGizmosAction{}, 1000);
     }
-
     inline AutoplayAction manual_control() {
-        return AutoplayAction{AutoplayActionKind::manual_control};
+        return action(ManualControlAction{});
     }
 
 } // namespace dsl

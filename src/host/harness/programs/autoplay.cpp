@@ -1,14 +1,21 @@
 #include <SDL3/SDL.h>
 
 #include <algorithm>
+#include <array>
 #include <atomic>
+#include <chrono>
 #include <cmath>
 #include <cstdio>
+#include <functional>
 #include <limits>
 #include <map>
+#include <optional>
 #include <string>
+#include <string_view>
+#include <type_traits>
 #include <unordered_map>
 #include <utility>
+#include <variant>
 #include <vector>
 
 #include <unistd.h>
@@ -81,10 +88,6 @@ namespace {
 #include "host/harness/programs/autoplay/interactions.hpp"
 #include "host/harness/programs/autoplay/executor.hpp"
 
-    // The harness exposes C callbacks, but all mutable state belongs to this
-    // one explicitly owned runner.
-    AutoplayRunner AutoplayRunner::instance{};
-
     bool AutoplayRunner::active() const {
         return this->is_active.load(std::memory_order_acquire);
     }
@@ -103,8 +106,8 @@ namespace {
 
     void AutoplayRunner::print_scripts() const {
         printf("Known autoplay levels:\n");
-        for (const auto &entry : scripts::by_level) {
-            printf("  %-30s %s\n", entry.first.c_str(), entry.second.description.c_str());
+        for (const auto &[level, script] : scripts::by_level) {
+            printf("  %-30s %s\n", level.data(), script.get().description.c_str());
         }
         printf("  %-30s Run every known level in story order\n", "all");
     }
@@ -117,14 +120,14 @@ namespace {
         reset_host_antilight_accumulators();
         ensure_invincibility();
 
-        const Uint64 now = SDL_GetTicks();
-        if (this->script != nullptr && this->script->timeout_ms != 0 &&
-            now - this->script_started_at > this->script->timeout_ms) {
+        const u64 now = SDL_GetTicks();
+        if (this->script != nullptr && this->script->timeout != Milliseconds::zero() &&
+            Milliseconds{now - this->script_started_at} > this->script->timeout) {
             finish(1, "script timeout");
             return;
         }
         if (!this->load_requested) {
-            if (now - this->configured_at > kStartupTimeoutMs) {
+            if (Milliseconds{now - this->configured_at} > kStartupTimeout) {
                 finish(1, "game did not reach the host level-selection hook before the startup timeout");
             }
             return;
@@ -136,7 +139,7 @@ namespace {
         }
 
         const AutoplayAction &action = this->script->actions[this->action_index];
-        if (!this->current_action.started && !begin_action(action)) {
+        if (!this->current_action && !begin_action(action)) {
             finish(1, "could not initialize action");
             return;
         }
@@ -151,16 +154,16 @@ namespace {
 
         this->schedule.clear();
         if (level_name != nullptr && SDL_strcasecmp(level_name, "all") == 0) {
-            for (const std::string &story_level : scripts::story_order) {
+            for (const std::string_view story_level : scripts::story_order) {
                 const auto script = scripts::by_level.find(story_level);
                 if (script != scripts::by_level.end()) {
-                    this->schedule.emplace_back(script->first, script->second);
+                    this->schedule.push_back({std::string{script->first}, script->second});
                 }
             }
         } else if (level_name != nullptr) {
-            const auto found = scripts::by_level.find(level_name);
+            const auto found = scripts::by_level.find(std::string_view{level_name});
             if (found != scripts::by_level.end()) {
-                this->schedule.emplace_back(found->first, found->second);
+                this->schedule.push_back({std::string{found->first}, found->second});
             }
         }
         if (this->schedule.empty()) {
@@ -187,7 +190,7 @@ namespace {
         }
 
         this->schedule_index = 0;
-        this->owns_invincibility_cheat = false;
+        this->owned_invincibility_cheat.reset();
         this->result_code.store(1, std::memory_order_relaxed);
         this->is_done.store(false, std::memory_order_relaxed);
         this->configured_at = SDL_GetTicks();
@@ -199,18 +202,18 @@ namespace {
         HostWindowOptions options;
         options.documents_path = documents_path.c_str();
         options.timeout_ms = 0;
-        this->previous_loader_mode = LOADEROFF;
-        this->loader_mode_overridden = true;
+        this->overridden_loader_mode = LOADEROFF;
         LOADEROFF = 1;
         const i32 window_result = host_run_window(options);
 
         release_input();
-        if (this->loader_mode_overridden) {
-            LOADEROFF = this->previous_loader_mode;
-            this->loader_mode_overridden = false;
+        if (this->overridden_loader_mode) {
+            LOADEROFF = *this->overridden_loader_mode;
+            this->overridden_loader_mode.reset();
         }
-        if (this->owns_invincibility_cheat && this->invincibility_cheat_index >= 0) {
-            Cheat_SetOn(this->invincibility_cheat_index, 0, 0);
+        if (this->owned_invincibility_cheat) {
+            Cheat_SetOn(*this->owned_invincibility_cheat, 0, 0);
+            this->owned_invincibility_cheat.reset();
         }
         this->is_active.store(false, std::memory_order_release);
         if (!done()) {
@@ -225,34 +228,34 @@ namespace {
 #if defined(__linux__) && !defined(__EMSCRIPTEN__)
 extern "C" __attribute__((weak)) void __wrap__Z7EndPermv() {
     __real__Z7EndPermv();
-    AutoplayRunner::instance.prepare_level();
+    AutoplayRunner::get().prepare_level();
 }
 #endif
 
 void host_autoplay_print_scripts() {
-    AutoplayRunner::instance.print_scripts();
+    AutoplayRunner::get().print_scripts();
 }
 
 bool host_autoplay_active() {
-    return AutoplayRunner::instance.active();
+    return AutoplayRunner::get().active();
 }
 
 bool host_autoplay_done() {
-    return AutoplayRunner::instance.done();
+    return AutoplayRunner::get().done();
 }
 
 bool host_autoplay_allows_manual_input() {
-    return AutoplayRunner::instance.allows_manual_input();
+    return AutoplayRunner::get().allows_manual_input();
 }
 
 i32 host_autoplay_result() {
-    return AutoplayRunner::instance.result();
+    return AutoplayRunner::get().result();
 }
 
 void host_autoplay_input_tick() {
-    AutoplayRunner::instance.input_tick();
+    AutoplayRunner::get().input_tick();
 }
 
 i32 host_run_autoplay(const char *level_name) {
-    return AutoplayRunner::instance.run(level_name);
+    return AutoplayRunner::get().run(level_name);
 }

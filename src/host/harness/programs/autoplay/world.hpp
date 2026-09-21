@@ -128,10 +128,18 @@ GameObject_s *find_character(const char *name) {
     return nearest;
 }
 
-bool gizmo_use_position(GIZMO *gizmo, NUVEC &position) {
-    if (gizmo == nullptr || WORLD == nullptr) {
-        return false;
+std::optional<NUVEC> valid_position(NUVEC position) {
+    if (!std::isfinite(position.x) || !std::isfinite(position.y) || !std::isfinite(position.z)) {
+        return std::nullopt;
     }
+    return position;
+}
+
+std::optional<NUVEC> gizmo_use_position(GIZMO *gizmo) {
+    if (gizmo == nullptr || WORLD == nullptr) {
+        return std::nullopt;
+    }
+    NUVEC position{};
     NUVEC *gizmo_position = GizmoGetPos(WORLD->gizmo_sys, gizmo);
     if (gizmo_position != nullptr) {
         LOG_INFO("autoplay: gizmo %s position=(%.3f,%.3f,%.3f)", GizmoGetName(gizmo), gizmo_position->x,
@@ -145,21 +153,21 @@ bool gizmo_use_position(GIZMO *gizmo, NUVEC &position) {
                  obstacle.trigger_box_half_extents.x, obstacle.trigger_box_half_extents.y,
                  obstacle.trigger_box_half_extents.z, static_cast<i32>(obstacle.trigger_box_yaw),
                  static_cast<unsigned>(obstacle.mode));
-        return std::isfinite(position.x) && std::isfinite(position.y) && std::isfinite(position.z);
+        return valid_position(position);
     }
     if (gizmo->type_id == gizpanel_gizmotype_id && gizmo->object != nullptr) {
         GIZPANEL_s *panel = static_cast<GIZPANEL_s *>(gizmo->object);
         GizPanel_GetAbsPlayerPos(panel, &position);
         LOG_INFO("autoplay: panel %s player position=(%.3f,%.3f,%.3f)", GizmoGetName(gizmo), position.x, position.y,
                  position.z);
-        return std::isfinite(position.x) && std::isfinite(position.y) && std::isfinite(position.z);
+        return valid_position(position);
     }
     if (gizmo->type_id == gizbuildit_gizmotype_id && gizmo->object != nullptr) {
         const GIZBUILDIT_s &buildit = *static_cast<GIZBUILDIT_s *>(gizmo->object);
         position = buildit.start_position;
         LOG_INFO("autoplay: build-it %s interaction position=(%.3f,%.3f,%.3f)", GizmoGetName(gizmo), position.x,
                  position.y, position.z);
-        return std::isfinite(position.x) && std::isfinite(position.y) && std::isfinite(position.z);
+        return valid_position(position);
     }
     if (gizmo->type_id == blowup_gizmotype_id && gizmo->object != nullptr && gizmo_position != nullptr) {
         position = *gizmo_position;
@@ -174,14 +182,14 @@ bool gizmo_use_position(GIZMO *gizmo, NUVEC &position) {
         }
         LOG_INFO("autoplay: blowup %s firing position=(%.3f,%.3f,%.3f)", GizmoGetName(gizmo), position.x, position.y,
                  position.z);
-        return std::isfinite(position.x) && std::isfinite(position.y) && std::isfinite(position.z);
+        return valid_position(position);
     }
     if (gizmo->object != nullptr && gizmotypes != nullptr &&
         SDL_strcasecmp(gizmotypes->types[gizmo->type_id].name, "Door") == 0) {
         position = static_cast<DOOR_s *>(gizmo->object)->pos;
         LOG_INFO("autoplay: door %s crossing position=(%.3f,%.3f,%.3f)", GizmoGetName(gizmo), position.x, position.y,
                  position.z);
-        return std::isfinite(position.x) && std::isfinite(position.y) && std::isfinite(position.z);
+        return valid_position(position);
     }
     if (gizmo->object != nullptr && gizmotypes != nullptr &&
         SDL_strcasecmp(gizmotypes->types[gizmo->type_id].name, "ZipUp") == 0) {
@@ -189,7 +197,7 @@ bool gizmo_use_position(GIZMO *gizmo, NUVEC &position) {
         position = zipup.lower_position;
         LOG_INFO("autoplay: zip-up %s lower endpoint=(%.3f,%.3f,%.3f)", GizmoGetName(gizmo), position.x, position.y,
                  position.z);
-        return std::isfinite(position.x) && std::isfinite(position.y) && std::isfinite(position.z);
+        return valid_position(position);
     }
     if (gizmo->type_id == force_gizmotype_id && gizmo->object != nullptr && gizmo_position != nullptr) {
         const GIZFORCE_s &force = *static_cast<GIZFORCE_s *>(gizmo->object);
@@ -204,7 +212,7 @@ bool gizmo_use_position(GIZMO *gizmo, NUVEC &position) {
                         position = set.targets[trigger_index].position;
                         LOG_INFO("autoplay: Force gizmo %s authored interaction locator=(%.3f,%.3f,%.3f)",
                                  GizmoGetName(gizmo), position.x, position.y, position.z);
-                        return std::isfinite(position.x) && std::isfinite(position.y) && std::isfinite(position.z);
+                        return valid_position(position);
                     }
                 }
             }
@@ -232,7 +240,7 @@ bool gizmo_use_position(GIZMO *gizmo, NUVEC &position) {
         position.z += direction_z * interaction_offset;
         LOG_INFO("autoplay: Force gizmo %s interaction position=(%.3f,%.3f,%.3f), radius=%.3f", GizmoGetName(gizmo),
                  position.x, position.y, position.z, force.interaction_radius);
-        return std::isfinite(position.x) && std::isfinite(position.y) && std::isfinite(position.z);
+        return valid_position(position);
     }
     if (WORLD->ai_trigger_set_sys != nullptr) {
         for (i32 set_index = 0; set_index < 32; ++set_index) {
@@ -245,14 +253,14 @@ bool gizmo_use_position(GIZMO *gizmo, NUVEC &position) {
                     position = set.targets[trigger_index].position;
                     LOG_INFO("autoplay: gizmo %s AI interaction locator=(%.3f,%.3f,%.3f)", GizmoGetName(gizmo),
                              position.x, position.y, position.z);
-                    return true;
+                    return valid_position(position);
                 }
             }
         }
     }
     if (gizmo_position == nullptr) {
-        return false;
+        return std::nullopt;
     }
     position = *gizmo_position;
-    return true;
+    return valid_position(position);
 }

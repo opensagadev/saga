@@ -134,7 +134,7 @@ namespace scripts {
             wait_time(4000),
         },
         AutoplayOptions{},
-        720000,
+        Milliseconds{720000},
     };
 
 } // namespace scripts
