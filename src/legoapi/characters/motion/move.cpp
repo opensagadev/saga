@@ -476,6 +476,9 @@ f32 ForceTowardsMid(GameObject_s *object);
 void MoveInactiveVehicle(GameObject_s *object, i32 mode, GameObject_s **vehicle);
 i32 UnderPlayerControl(GameObject_s *object);
 void StartTurn(GameObject_s *object);
+static void ShootThisFrame(GameObject_s *object, i32 bolt_id, i32 flags);
+GIZMOBLOWUP_s *GizmoBlowUp_Target(GameObject_s *, NUVEC *, NUVEC *, f32, f32, i32, i32, i32);
+i32 GizmoSys_SetBestBoltTarget(GIZMOSYS *, void *, GameObject_s *, NUVEC *, NUVEC *, f32, f32, i32, i32, i32);
 void KeepVehicleOnScreen(GameObject_s *object, i32 sides, i32 top, i32 bottom);
 i32 MovePlayer_GUNSHIPIN(GameObject_s *object);
 i32 MovePlayer_POD(GameObject_s *object);
@@ -1378,8 +1381,149 @@ static __used__ void ZapCode(GameObject_s *, i32, i32) {
     STUBBED();
 }
 
-static __used__ void FireCode(GameObject_s *, i32, i32, f32, i32) {
-    STUBBED();
+static __used__ void FireCode(GameObject_s *object, i32 pressed, i32 held, f32 fire_delay, i32 delay_pressed) {
+    f32 timer = object->quick_shoot_timer;
+    if (timer > 0.0f) {
+        timer -= FRAMETIME;
+        object->quick_shoot_timer = timer;
+    }
+
+    if (BonusWinner != -1) {
+        return;
+    }
+
+    const i8 context = object->character_context;
+    if (context == 0x36) {
+        if (object->apiobj.field_0x287 != 0) {
+            return;
+        }
+        const f32 turn_progress = 1.0f - object->context_animation_timer / object->airborne_action_duration;
+        if (turn_progress > 0.2f && turn_progress < 0.666f) {
+            return;
+        }
+    } else if (context == 0x2a || context == -1 || context == 0x3a) {
+        if (object->apiobj.field_0x287 != 0) {
+            return;
+        }
+    } else {
+        return;
+    }
+
+    if (fire_delay != 0.0f && timer > 0.0f) {
+        return;
+    }
+    if (pressed == 0) {
+        if (held == 0 || timer > 0.0f) {
+            return;
+        }
+    }
+
+    const i32 bolt_id = BoltType_FindIDByCreature(
+        object, (object->apiobj.character_data->model_flags & 0x10000000) == 0 ? 5 : 0x15);
+    BOLTTYPE_s *bolt_type = BoltType_FindByID(bolt_id, WORLD);
+
+    if (static_cast<i8>(object->apiobj.flags_low) < 0) {
+        NUVEC direction;
+        BoltSys->shoot_direction(object, &direction);
+
+        f32 range;
+        if (BOLT_OVERRIDE_PLAYERBOLTSPEED == 0.0f || BOLT_OVERRIDE_PLAYERBOLTDURATION == 0.0f) {
+            range = bolt_type->field_10 * bolt_type->field_14;
+        } else {
+            range = BOLT_OVERRIDE_PLAYERBOLTSPEED * BOLT_OVERRIDE_PLAYERBOLTDURATION;
+        }
+
+        const i16 animation = object->context_animation;
+        object->context_animation = 2;
+        NUVEC origin;
+        BoltSys->shoot_origin(object, &origin);
+
+        const i32 target_mode = ((bolt_type->field_60 >> 14) ^ 1) & 1;
+        const f32 range_squared = range * range;
+        const bool target_bolts = (bolt_type->field_60 & 0x800) == 0;
+        const AREADATA_s *area = WORLD->area;
+
+        if (area == BONUS_GUNSHIP_ADATA) {
+            if (object->id == id_REPUBLICGUNSHIP || object->id == id_REPUBLICGUNSHIP_GREEN) {
+                i32 angle;
+                if (player2 == NULL) {
+                    angle = WORLD->current_level == BONUS_GUNSHIPB_LDATA ? 3 : 8;
+                } else if (object == player) {
+                    angle = WORLD->current_level == BONUS_GUNSHIPB_LDATA ? 4 : 10;
+                } else if (object == player2) {
+                    angle = WORLD->current_level == BONUS_GUNSHIPB_LDATA ? 0 : 5;
+                } else {
+                    angle = WORLD->current_level == BONUS_GUNSHIPB_LDATA ? 3 : 8;
+                }
+
+                NUVEC offset = {0.0f, 0.0f, 100.0f};
+                NuVecRotateX(&offset, &offset, (angle << 16) / 360);
+                NuVecRotateY(&offset, &offset, object->apiobj.movement_facing_angle);
+                NuVecAdd(&object->attack_target_position, &origin, &offset);
+                object->attack_target_velocity = v000;
+                object->field_0xe21 |= 8;
+            }
+        } else if (target_bolts && (area == NULL || area != DOGFIGHT_ADATA)) {
+            GameObject_s *target = TargetGameObject(object, &origin, &direction, range, range_squared, 0, target_mode,
+                                                     0, bolt_id);
+            if (target != NULL) {
+                SetObjTarget(object, target);
+                if (VehicleArea != 0 && (target->apiobj.character_data->model_flags & 0x2000) != 0) {
+                    NUVEC lateral;
+                    NuVecRotateY(&lateral, &v001,
+                                 NuAtan2D(target->apiobj.velocity.x, target->apiobj.velocity.z) + 0x4000);
+                    const f32 lead =
+                        fabsf(lateral.x * direction.x + lateral.z * direction.z) * 0.5f * bolt_type->field_14;
+                    NUVEC position = {
+                        target->apiobj.collision_position.x + target->apiobj.velocity.x * lead,
+                        target->apiobj.collision_position.y + target->apiobj.velocity.y * lead,
+                        target->apiobj.collision_position.z + target->apiobj.velocity.z * lead,
+                    };
+                    NuVecSub(&position, &position, &origin);
+                    NuVecNorm(&position, &position);
+                    NuVecScale(&position, &position, range);
+                    NuVecAdd(&object->attack_target_position, &origin, &position);
+                }
+            } else if (GizmoSys_SetBestBoltTarget(WORLD->gizmo_sys, WORLD, object, &origin, &direction, range,
+                                                   range_squared, target_mode, 0, bolt_id) == 0) {
+                GIZMOBLOWUP_s *blowup =
+                    GizmoBlowUp_Target(object, &origin, &direction, range, range_squared, target_mode, 0, bolt_id);
+                if (blowup != NULL) {
+                    SetGizmoBlowUpTarget(object, blowup);
+                } else {
+                    PART_s *part = TargetPart(object, &origin, &direction, range, range_squared, target_mode, bolt_id);
+                    if (part != NULL) {
+                        SetPartTarget(object, part);
+                    } else if ((bolt_type->field_60 & 0x400) != 0) {
+                        object->attack_target_position.x =
+                            direction.x * range + origin.x + object->apiobj.velocity.x * bolt_type->field_14;
+                        if (object->field_0x1086 == 4) {
+                            object->attack_target_position.y =
+                                direction.y * range + origin.y + object->apiobj.velocity.y * bolt_type->field_14;
+                        } else {
+                            object->attack_target_position.y = origin.y;
+                        }
+                        object->attack_target_position.z =
+                            direction.z * range + origin.z + object->apiobj.velocity.z * bolt_type->field_14;
+                        object->attack_target_velocity = v000;
+                        object->field_0xe21 |= 8;
+                    }
+                }
+            }
+        }
+
+        object->context_animation = animation;
+    }
+
+    if (WORLD->area == VEHICLES_ADATA && object->id == id_MILLENNIUMFALCON) {
+        object->bolt_fire_phase = 0;
+        ShootThisFrame(object, bolt_id, 3);
+        object->quick_shoot_timer = fire_delay;
+    } else {
+        ShootThisFrame(object, bolt_id, 3);
+        object->quick_shoot_timer = fire_delay;
+        object->bolt_fire_phase = object->bolt_fire_phase == 0;
+    }
 }
 
 static void SelfDestructCode(GameObject_s *object, i32 pressed) {
@@ -8662,8 +8806,6 @@ extern "C" f32 animduration_blendouttime;
 extern i16 id_GEONOSIAN, id_MINIATST, id_ATST_LOWRES, id_ATAT, id_MINIATAT, id_MINIATTE, id_SENTRYDROID;
 void Move_CANNON(GameObject_s *);
 void SetWeaponIn(GameObject_s *);
-GIZMOBLOWUP_s *GizmoBlowUp_Target(GameObject_s *, NUVEC *, NUVEC *, f32, f32, i32, i32, i32);
-i32 GizmoSys_SetBestBoltTarget(GIZMOSYS *, void *, GameObject_s *, NUVEC *, NUVEC *, f32, f32, i32, i32, i32);
 
 static __used__ i32 ShootCode(GameObject_s *object, i32 pressed, i32 special_pressed, i32 weapon_mode,
                               i32 allow_airborne, i32 fire_mode) {
