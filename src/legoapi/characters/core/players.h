@@ -133,6 +133,8 @@ i32 AvailableToPlayer(u32 character_flags, i32 character_id, i32 context, i32 re
 i32 ActivePlayerInRange(nuvec_s *position, f32 range_squared, f32 *distance_squared);
 bool FindNearestPlayerToVec(NUVEC *position, GameObject_s **nearest_player, f32 &distance_squared,
                             bool require_character_flags, u32 character_flags);
+bool FindFurthestPlayerFromVec(NUVEC *position, GameObject_s **furthest_player, f32 &distance_squared,
+                               bool require_character_flags, u32 character_flags);
 void SetHitPoints(GameObject_s *obj, i32 hp);
 void RememberPlayerIDs(i32 a, i32 b, i32 c);
 void Player_CopyEssentials(GameObject_s *source, GameObject_s *destination);

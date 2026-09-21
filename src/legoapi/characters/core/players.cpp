@@ -1952,8 +1952,30 @@ void CheckForPlayersTurnedOff() {
     }
 }
 
-void FindFurthestPlayerFromVec(nuvec_s *, GameObject_s **, float &, bool, u32) {
-    STUBBED();
+bool FindFurthestPlayerFromVec(nuvec_s *position, GameObject_s **furthest_player, float &distance_squared,
+                               bool require_character_flags, u32 character_flags) {
+    *furthest_player = NULL;
+    distance_squared = 0.0f;
+
+    for (i32 index = 0; index < 8; ++index) {
+        GameObject_s *candidate = Player[index];
+        if (candidate == NULL || static_cast<i8>(candidate->apiobj.flags_low) >= 0)
+            continue;
+
+        const f32 candidate_distance = NuVecDistSqr(&candidate->apiobj.position, position, NULL);
+        if (*furthest_player != NULL && candidate_distance <= distance_squared)
+            continue;
+
+        if (require_character_flags &&
+            (candidate->apiobj.character_data->game_character->flags_090 & character_flags) == 0) {
+            continue;
+        }
+
+        distance_squared = candidate_distance;
+        *furthest_player = candidate;
+    }
+
+    return *furthest_player != NULL;
 }
 
 void AveragePlayerCurrentSpeedMul() {
