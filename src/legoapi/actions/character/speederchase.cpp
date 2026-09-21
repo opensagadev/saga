@@ -32,6 +32,7 @@ static i32 PodRaceKey[8] __attribute__((aligned(16))) = {-1, -1, -1, -1, -1, -1,
 u8 troopercannons_beenReset = 0;
 i32 players_going_forward = 0;
 
+NuMechPtr<MechObjectInterface, 4> lungeTarget;
 NuMechPtr<MechObjectInterface, 4> forceNextAttackOpponent;
 NuMechPtr<MechObjectInterface, 4> nextShootTarget;
 i32 objopponent_ignoreaiopponent;

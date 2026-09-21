@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 50.30073,
+    "fuzzy_match_percent": 50.340664,
     "total_code": "4722419",
     "matched_code": "446820",
     "matched_code_percent": 9.461677,
@@ -38836,7 +38836,7 @@
           "address": 1420336,
           "offset": 530368,
           "size": 344,
-          "match_percent": 4.07767
+          "match_percent": 74.61165
         },
         {
           "name": "_Z15ComboRotateCodeP12GameObject_si",
@@ -44995,7 +44995,7 @@
           "address": 1372144,
           "offset": 482176,
           "size": 484,
-          "match_percent": 4.537815
+          "match_percent": 80.655464
         },
         {
           "name": "_Z12PreResetCodeP12GameObject_s",
@@ -45020,14 +45020,6 @@
           "offset": 498976,
           "size": 127,
           "match_percent": 47.27027
-        },
-        {
-          "name": "_ZL14SelectOpponentP12GameObject_sffii",
-          "demangled_name": "SelectOpponent(GameObject_s*, float, float, int, int)",
-          "address": 1405664,
-          "offset": 515696,
-          "size": 429,
-          "match_percent": 4.470588
         },
         {
           "name": "_Z24CheckForPlayersTurnedOffv",
@@ -46866,12 +46858,20 @@
           "match_percent": 89.58451
         },
         {
+          "name": "_ZL14SelectOpponentP12GameObject_sffii",
+          "demangled_name": "SelectOpponent(GameObject_s*, float, float, int, int)",
+          "address": 1405664,
+          "offset": 515696,
+          "size": 429,
+          "match_percent": 33.788235
+        },
+        {
           "name": "_ZL9PunchCodeP12GameObject_siiiif",
           "demangled_name": "PunchCode(GameObject_s*, int, int, int, int, float)",
           "address": 1406096,
           "offset": 516128,
           "size": 3368,
-          "match_percent": 0.617647
+          "match_percent": 9.291177
         },
         {
           "name": "_ZL16SetComboOpponentP12GameObject_sfii",
@@ -46879,7 +46879,7 @@
           "address": 1409472,
           "offset": 519504,
           "size": 1500,
-          "match_percent": 30.243977
+          "match_percent": 30.198795
         },
         {
           "name": "_ZL9BlockCodeP12GameObject_siiii",
@@ -46895,7 +46895,7 @@
           "address": 1413136,
           "offset": 523168,
           "size": 838,
-          "match_percent": 85.94505
+          "match_percent": 86.19231
         },
         {
           "name": "_ZL19LightSabreComboCodeP12GameObject_siiii",
@@ -46903,7 +46903,7 @@
           "address": 1413984,
           "offset": 524016,
           "size": 4225,
-          "match_percent": 24.243792
+          "match_percent": 24.260723
         },
         {
           "name": "_Z11Glide_StartP12GameObject_s",
@@ -46935,7 +46935,7 @@
           "address": 1420688,
           "offset": 530720,
           "size": 801,
-          "match_percent": 18.083832
+          "match_percent": 71.371254
         },
         {
           "name": "_Z11JetPackCodeP12GameObject_siii",
@@ -47167,7 +47167,7 @@
           "address": 1497584,
           "offset": 607616,
           "size": 753,
-          "match_percent": 71.15094
+          "match_percent": 74.798744
         },
         {
           "name": "_Z9Move_JEDIP12GameObject_s",
@@ -47199,7 +47199,7 @@
           "address": 1502368,
           "offset": 612400,
           "size": 2140,
-          "match_percent": 51.582676
+          "match_percent": 49.580708
         },
         {
           "name": "_Z14Move_CHARACTERP12GameObject_s",
@@ -47207,7 +47207,7 @@
           "address": 1504512,
           "offset": 614544,
           "size": 2399,
-          "match_percent": 64.9963
+          "match_percent": 66.327774
         },
         {
           "name": "_Z22FindGunshipHoverHeightP12GameObject_s",
@@ -47247,7 +47247,7 @@
           "address": 1510928,
           "offset": 620960,
           "size": 2051,
-          "match_percent": 66.23414
+          "match_percent": 70.4267
         },
         {
           "name": "_Z11Move_WALKERP12GameObject_s",
@@ -47287,7 +47287,7 @@
           "address": 1515792,
           "offset": 625824,
           "size": 811,
-          "match_percent": 83.541435
+          "match_percent": 83.458565
         },
         {
           "name": "_Z9Move_ATATP12GameObject_s",
@@ -47303,7 +47303,7 @@
           "address": 1517216,
           "offset": 627248,
           "size": 1215,
-          "match_percent": 1.584906
+          "match_percent": 28.464151
         },
         {
           "name": "_Z14Move_GEONOSIANP12GameObject_s",
@@ -47335,7 +47335,7 @@
           "address": 1523712,
           "offset": 633744,
           "size": 4260,
-          "match_percent": 18.49601
+          "match_percent": 18.490309
         },
         {
           "name": "_Z20Move_REPUBLICGUNSHIPP12GameObject_s",
@@ -47567,7 +47567,7 @@
           "address": 5171072,
           "offset": 4281104,
           "size": 308,
-          "match_percent": 86.954544
+          "match_percent": 87.030304
         },
         {
           "name": "_Z10Slam_StartP12GameObject_sf",

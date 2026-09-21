@@ -283,8 +283,8 @@ void StartQuickShoot(GameObject_s *object, i32 action) {
     SetWeaponOut(object);
 }
 
-void ForceNextLungeTarget(MechObjectInterface *) {
-    STUBBED();
+void ForceNextLungeTarget(MechObjectInterface *target) {
+    lungeTarget = NuMechPtr<MechObjectInterface, 4>(target);
 }
 
 void ForceNextShootTarget(MechObjectInterface &target) {
