@@ -451,6 +451,8 @@ extern AREADATA_s *PODSPRINT_ADATA;
 extern AREADATA_s *PODRACE_ADATA;
 extern AREADATA_s *GUNSHIP_ADATA;
 extern AREADATA_s *BONUS_GUNSHIP_ADATA;
+extern AREADATA_s *ANAKINSFLIGHT_ADATA;
+extern AREADATA_s *DEATHSTARBATTLE_ADATA;
 extern "C" i16 id_GRABCONTROL, id_GRABR2CONTROL;
 
 float SLAMGRAVITY = -15.0f;
@@ -473,6 +475,10 @@ void KeepVehicleOnScreen(GameObject_s *object, i32 sides, i32 top, i32 bottom);
 i32 MovePlayer_GUNSHIPIN(GameObject_s *object);
 i32 MovePlayer_POD(GameObject_s *object);
 void ApplyGravity(GameObject_s *object, float *gravity, float hover_height, float seek_rate, float *ground_height);
+float GetVehicleHoverHeight(GameObject_s *object, float *separation_offset);
+float FindGunshipHoverHeight(GameObject_s *object);
+void TurnCode(GameObject_s *object, i32 mode, GAMEPAD_s *pad);
+void DisorientateCode(GameObject_s *object, NUVEC *limit, float range);
 float VehicleTurnOrLoopOffset(GameObject_s *object);
 void ComboHitFrame(GameObject_s *object, i32 damage);
 i32 Grapple_LookAtPos(GameObject_s *object, NUVEC *position);
@@ -618,9 +624,17 @@ i32 PodLevel(AREADATA_s *);
 void KeepOnScreen(GameObject_s *);
 void UpdateSnakeBody(GameObject_s *);
 void TractorBeamCode(GameObject_s *);
+void LoopCode(GameObject_s *, i32, i32, GAMEPAD_s *, i32);
+void CableCode(GameObject_s *, i32, float);
+void EngineNoiseCode(GameObject_s *, i32);
+void Buck_MoveCode(GameObject_s *, i32);
+static void AwkwardShapeCode(GameObject_s *, i32);
+static i32 getvehiclehoverheight_hothbattlehack;
+void CatchUpCode(GameObject_s *, f32, f32, i32);
+GRAPPLE *Grapple_AddDynamic(void *, i32);
 void AddSurfaceRipples(GameObject_s *);
 extern i16 id_SNAKE;
-extern "C" i16 id_ATAT;
+extern "C" i16 id_ATAT, id_DODGEM;
 extern i16 id_YODA, id_YODAGHOST;
 extern i16 id_C3PO, id_TC14;
 extern i16 id_DROIDEKA, id_RANCOR;
@@ -3445,9 +3459,320 @@ void Move_POD(GameObject_s *) {
     STUBBED();
 }
 
-void Move_VEHICLE(GameObject_s *g) {
-    STUBBED();
-    (void)g;
+f32 zam_smoke_rate = 10.0f;
+f32 test_hoverheight;
+void (*LEGO_SET_SLOWDOWNFN)(GameObject_s *);
+
+static __attribute__((noinline)) void ShieldCode(GameObject_s *object) {
+    f32 target;
+    if (object->field_0xe37 == 0) {
+        target = 0.0f;
+    } else if (object->id == id_ZAMSSPEEDER && WORLD->area != NULL && WORLD->area == BOUNTYHUNTERPURSUIT_ADATA) {
+        target = 5.0f;
+    } else {
+        const i32 animation = CurrentAnim(&object->apiobj.anim_packet);
+        if ((object->apiobj.field_0x27d == 0 && !(object->ground_contact_grace_timer > 0.0f)) || animation == 3 ||
+            animation == -1 || animation == 5 || animation == 0x23 || animation == 0x6a ||
+            object->character_context == 0x17 || object->character_context == 0x3d) {
+            target = 0.0f;
+        } else {
+            target = 1.0f;
+        }
+    }
+
+    const f32 previous = object->field_0xd24;
+    object->field_0xd24 = SeekLinearF(previous, target, 5.0f * FRAMETIME);
+    if ((previous == 0.0f && object->field_0xd24 > 0.0f) || (previous == 1.0f && object->field_0xd24 < 1.0f)) {
+        PlaySfx(const_cast<char *>("DDekaShOn"), &object->apiobj.collision_position);
+    }
+}
+
+void Move_VEHICLE(GameObject_s *object) {
+    GAMEPAD_s *pad = object->pad_gamepad;
+    if (FreePlay != 0 && WORLD->area != NULL && WORLD->area == PODSPRINT_ADATA) {
+        Move_POD(object);
+        return;
+    }
+
+    CHARACTERDATA *character = object->apiobj.character_data;
+    GAMECHARACTERDATA *vehicle = character->game_character;
+
+    KeepWeaponOut(object);
+    DropInOutCode(object);
+    if ((object->field_0xe20 & GAMEOBJECT_E20_FLAG_MOVEMENT_DISABLED) != 0) {
+        return;
+    }
+
+    if ((vehicle->flags_094[0] & 0x20) == 0) {
+        if (vehicle->uses_weapon_action == 0x15) {
+            ApplyGravity(object, NULL, FindGunshipHoverHeight(object), 8.0f, NULL);
+        } else {
+            f32 hover_height = 0.0f;
+            if (vehicle->field_0x28 > 0.0f) {
+                hover_height = GetVehicleHoverHeight(object, NULL);
+            }
+            if (hover_height != 0.0f || getvehiclehoverheight_hothbattlehack != 0) {
+                ApplyGravity(object, NULL, hover_height, 10.0f, NULL);
+            } else {
+                if (object->character_context != 0x17) {
+                    hover_height = vehicle->field_0x28;
+                }
+                ApplyGravity(object, NULL, hover_height, 8.0f, NULL);
+            }
+        }
+    }
+
+    DeactivatedCode(object);
+
+    if (object->id == id_SNOWMOB) {
+        Buck_MoveCode(object, pad->buttons_pressed & (GAMEPAD_SPECIAL | GAMEPAD_ACTION));
+    } else if (object->id == id_ZAMSSPEEDER && WORLD->current_level == BOUNTYHUNTERPURSUITE_LDATA &&
+               object->current_hp < static_cast<i32>(object->hitpoints)) {
+        const i32 effect = WORLD->debris_sys->entries[134].effect;
+        if (effect != -1) {
+            i32 count = ParticlesPerSecond(zam_smoke_rate, FRAMETIME) *
+                        ((static_cast<i32>(object->hitpoints) - static_cast<i32>(object->current_hp)) / 2);
+            if (count > 0) {
+                do {
+                    const f32 random = static_cast<f32>(qrand()) * (1.0f / 65535.0f);
+                    NUVEC position = {
+                        object->apiobj.collision_position.x +
+                            (object->apiobj.initial_position.x - object->apiobj.collision_position.x) * random,
+                        object->apiobj.collision_position.y +
+                            (object->apiobj.initial_position.y - object->apiobj.collision_position.y) * random,
+                        object->apiobj.collision_position.z +
+                            (object->apiobj.initial_position.z - object->apiobj.collision_position.z) * random,
+                    };
+                    AddVariableShotDebrisEffect(effect, &position, 1, 0, 0);
+                    count--;
+                } while (count != 0);
+            }
+        }
+    }
+
+    if (vehicle->field_0x28 > 0.0f && (vehicle->flags_090 & 0x10000) == 0) {
+        LoopCode(object, pad->buttons_pressed & GAMEPAD_JUMP, pad->buttons_held & GAMEPAD_JUMP, pad, 1);
+        TurnCode(object, 0, pad);
+        DisorientateCode(object, NULL, 225.0f);
+    }
+
+    if ((character->model_flags & 0x10000000) != 0 && (vehicle->flags_094[0] & 8) == 0) {
+        if (object->id == id_STAP || object->id == id_STAP2) {
+            if (object->apiobj.character_model->model_data_b[0x16] == NULL) {
+                FireCode(object, pad->buttons_pressed & GAMEPAD_ACTION, pad->buttons_held & GAMEPAD_ACTION, 0.25f, 1);
+            } else {
+                ShootCode(object, pad->buttons_pressed & GAMEPAD_ACTION, 0, 0, 0, 1);
+            }
+        } else {
+            FireCode(object, pad->buttons_pressed & GAMEPAD_ACTION, pad->buttons_held & GAMEPAD_ACTION, 0.15f, 0);
+        }
+    }
+    if (WORLD->current_level == DOGFIGHTA_LDATA) {
+        CatchUpCode(object, 0.01f, 2.0f, 0);
+    }
+    if ((vehicle->flags_090 & 0x400) != 0) {
+        CableCode(object, pad->buttons_pressed & GAMEPAD_SPECIAL, 0.5f);
+    }
+    if (WORLD->area != NULL && (WORLD->area->flags & 1) != 0 && static_cast<i8>(object->apiobj.flags_low) < 0 &&
+        (Cheat[29].enabled != 0 || object->field_0xdec > 0.0f)) {
+        TractorBeamCode(object);
+    }
+
+    const f32 speed_multiplier = GetVehicleSpeedMul(object, pad->input_magnitude);
+    const f32 thrust_target = speed_multiplier <= 1.0f ? speed_multiplier * 0.5f + 0.5f : 1.0f;
+    object->thrust_effect_scale =
+        SeekValF(object->thrust_effect_scale, thrust_target, object->thrust_effect_scale < thrust_target ? 4.0f : 2.0f);
+    object->reserved_e27[0] = static_cast<u8>(qrand() >> 8);
+    object->reserved_e27[1] = static_cast<u8>(qrand() >> 8);
+    object->reserved_e27[2] = static_cast<u8>(qrand() >> 8);
+    object->reserved_e27[3] = static_cast<u8>(qrand() >> 8);
+
+    if (object->character_context == 0x2c) {
+        f32 hover_height;
+        if (DEATHSTARBATTLE_ADATA != NULL && WORLD->area == DEATHSTARBATTLE_ADATA) {
+            hover_height = -1.5f;
+        } else if (ANAKINSFLIGHT_ADATA != NULL && WORLD->area == ANAKINSFLIGHT_ADATA && object->ai.locator != NULL) {
+            hover_height = object->ai.locator->position.y + test_hoverheight;
+        } else {
+            hover_height = GetHoverPosY(object);
+            if (hover_height == 2000000.0f) {
+                hover_height = 0.0f;
+            }
+        }
+
+        u16 x_rotation;
+        object->field_0x1086 = 0;
+        if (object->field_0x7a3 == 0) {
+            if (object->apiobj.position.y >= hover_height) {
+                object->field_0x7a3 = 1;
+            } else {
+                object->apiobj.pitch_angle = 0xc000;
+                object->apiobj.roll_angle = 0;
+                object->apiobj.velocity.x = 0.0f;
+                object->apiobj.velocity.y = 0.0f;
+                object->apiobj.velocity.z = 2.0f * vehicle->run_speed;
+                x_rotation = 0xc000;
+                goto rotate_flight_velocity;
+            }
+        }
+        if (object->field_0x7a3 == 1) {
+            object->apiobj.pitch_angle = TurnRot(object->apiobj.pitch_angle, 0, 0x10000, NULL);
+            object->apiobj.roll_angle = 0;
+            object->apiobj.velocity.x = 0.0f;
+            object->apiobj.velocity.y = 0.0f;
+            object->apiobj.velocity.z = 2.0f * vehicle->run_speed;
+            x_rotation = object->apiobj.pitch_angle;
+            if (object->apiobj.pitch_angle == 0) {
+                object->field_0x7a3 = 2;
+                object->context_destination.y = object->apiobj.position.y;
+                object->context_animation_timer = 0.0f;
+            }
+        } else if (object->field_0x7a3 == 2) {
+            object->context_animation_timer += FRAMETIME;
+            f32 remaining;
+            i32 phase;
+            if (object->context_animation_timer < 1.0f) {
+                remaining = 1.0f - object->context_animation_timer;
+                phase = (static_cast<i32>(-65536.0f * object->context_animation_timer + 2.0f) >> 1) & 0x7fff;
+            } else {
+                object->character_context = -1;
+                phase = 0x6000;
+                remaining = 0.0f;
+                object->context_animation_timer = 1.0f;
+            }
+            object->apiobj.pitch_angle = 0;
+            object->apiobj.roll_angle = 0;
+            object->apiobj.velocity.x = 0.0f;
+            object->apiobj.velocity.y = 0.0f;
+            object->apiobj.velocity.z =
+                object->context_animation_timer * vehicle->run_speed + vehicle->run_speed * 2.0f * remaining;
+            x_rotation = 0;
+            const f32 blend = 1.0f - (1.0f + NuTrigTable[phase]) * 2.0f;
+            object->apiobj.position.y = hover_height * blend + (1.0f - blend) * object->context_destination.y;
+        } else {
+            x_rotation = object->apiobj.pitch_angle;
+            object->character_context = -1;
+        }
+
+    rotate_flight_velocity:
+        NuVecRotateX(&object->apiobj.velocity, &object->apiobj.velocity, x_rotation);
+        NuVecRotateY(&object->apiobj.velocity, &object->apiobj.velocity, object->apiobj.field_0x276);
+    }
+
+    FloatCode(object);
+    TorpedoCode(object, pad->buttons_held & GAMEPAD_SPECIAL, 0.5f);
+
+    if (object->id == id_ZAMSSPEEDER && WORLD->area != NULL && WORLD->area == BOUNTYHUNTERPURSUIT_ADATA) {
+        ShieldCode(object);
+    }
+
+    if (!TouchHacks::CanUseVehicleSmartBomb(*object)) {
+        object->combo_input_timer = 0.0f;
+    } else if (object->combo_input_timer == 0.0f) {
+        if ((pad->buttons_pressed & GAMEPAD_SPECIAL) != 0) {
+            object->combo_input_timer = FRAMETIME;
+        }
+    } else if ((pad->buttons_held & GAMEPAD_SPECIAL) != 0) {
+        object->combo_input_timer += FRAMETIME;
+        if (object->combo_input_timer >= 4.0f) {
+            object->combo_input_timer = 0.0f;
+            TouchHacks().TriggerVehicleSmartBomb(*object);
+        } else {
+            TouchHacks().PlaySmartBombBuildupEffects(*object, object->combo_input_timer, 4.0f);
+        }
+    }
+
+    AwkwardShapeCode(object, 0);
+    EngineNoiseCode(object, object->character_context == 0x17);
+
+    if (((static_cast<i8>(object->apiobj.flags_low) < 0 && object->current_hp == 1) ||
+         (static_cast<i8>(object->apiobj.flags_low) >= 0 && object->current_hp <= 1)) &&
+        vehicle->uses_weapon_action == 10 && (character->model_flags & 0x04000000) == 0) {
+        const i32 effect = WORLD->debris_sys->entries[96].effect;
+        if (effect != -1) {
+            i32 count = ParticlesPerSecond(50.0f, FRAMETIME);
+            if (count > 0) {
+                do {
+                    const f32 random = static_cast<f32>(qrand()) * (1.0f / 65535.0f);
+                    NUVEC position = {
+                        object->apiobj.collision_position.x +
+                            (object->apiobj.initial_position.x - object->apiobj.collision_position.x) * random,
+                        object->apiobj.collision_position.y +
+                            (object->apiobj.initial_position.y - object->apiobj.collision_position.y) * random,
+                        object->apiobj.collision_position.z +
+                            (object->apiobj.initial_position.z - object->apiobj.collision_position.z) * random,
+                    };
+                    AddVariableShotDebrisEffect(effect, &position, 1, 0, 0);
+                    count--;
+                } while (count != 0);
+            }
+        }
+    }
+
+    if ((vehicle->flags_090 & 0x100000) != 0) {
+        if (Cheat_IsOn(7) != 0 && (pad->buttons_pressed & (GAMEPAD_ACTION | GAMEPAD_SPECIAL)) != 0) {
+            GameAudio_PlaySfx(0x4b, &object->apiobj.collision_position, 0, 0);
+        }
+        NUJOINTANIM_s &joint = object->joint_modifiers[0];
+        joint.rotation.x = 0.0f;
+        joint.joint_index = 0;
+        joint.flags = NUJOINTANIM_ROTATION;
+        joint.rotation.y = -(static_cast<f32>(RotDiff(object->previous_movement_angle, object->apiobj.field_0x276)) *
+                             0.000095873799f) /
+                           (6.0f * FRAMETIME);
+        joint.rotation.z = 0.0f;
+        object->joint_modifiers[1] = joint;
+        object->joint_modifiers[1].joint_index = 1;
+        object->field_0x1089 = 2;
+    }
+
+    if (object->apiobj.field_0x27c == -1 && (vehicle->flags_090 & 0x40) != 0 &&
+        object->apiobj.character_model->model_data_b[0x2a] != NULL && (vehicle->flags_094[3] & 8) != 0) {
+        Grapple_AddDynamic(object, 0);
+    }
+
+    if (object->id == id_DODGEM) {
+        if (object->current_hp < 2) {
+            const i32 effect = WORLD->debris_sys->entries[24].effect;
+            if (effect != -1) {
+                i32 count = ParticlesPerSecond(5.0f, FRAMETIME);
+                if (count > 0) {
+                    do {
+                        const f32 random = static_cast<f32>(qrand()) * (1.0f / 65535.0f);
+                        NUVEC position = {
+                            object->apiobj.collision_position.x +
+                                (object->apiobj.initial_position.x - object->apiobj.collision_position.x) * random,
+                            object->apiobj.collision_position.y +
+                                (object->apiobj.initial_position.y - object->apiobj.collision_position.y) * random,
+                            object->apiobj.collision_position.z +
+                                (object->apiobj.initial_position.z - object->apiobj.collision_position.z) * random,
+                        };
+                        AddVariableShotDebrisEffect(effect, &position, 1, 0, 0);
+                        count--;
+                    } while (count != 0);
+                }
+            }
+        } else if (object->field_0xcc0 != NULL && object->apiobj.field_0x27c == -1) {
+            GameObject_s *player = Player[0];
+            if (player != NULL && static_cast<i8>(player->apiobj.flags_low) < 0 && player->field_0xcc0 != NULL &&
+                ((object->apiobj.field_0x1e8 & player->apiobj.field_0x1f0) != 0 ||
+                 (object->apiobj.field_0x1e4 & player->apiobj.field_0x1ec) != 0) &&
+                object->field_0x1024 <= 0.0f) {
+                ObjHitObj(player, object, 1, 1, 0, 1);
+            }
+            player = Player[1];
+            if (player != NULL && static_cast<i8>(player->apiobj.flags_low) < 0 && player->field_0xcc0 != NULL &&
+                ((object->apiobj.field_0x1e8 & player->apiobj.field_0x1f0) != 0 ||
+                 (object->apiobj.field_0x1e4 & player->apiobj.field_0x1ec) != 0) &&
+                object->field_0x1024 <= 0.0f) {
+                ObjHitObj(player, object, 1, 1, 0, 1);
+            }
+        }
+    }
+
+    if (GizmoBlowupCheckProximity(WORLD, object) != 0 && LEGO_SET_SLOWDOWNFN != NULL) {
+        LEGO_SET_SLOWDOWNFN(object);
+    }
 }
 
 void Move_ATAT(GameObject_s *object) {

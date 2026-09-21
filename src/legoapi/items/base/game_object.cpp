@@ -148,31 +148,6 @@ GameObject_s *AddGameObject(i32 id) {
     }
     return object;
 }
-// Local (static) game-object behaviour codes and per-object helpers. Stubbed
-// as local `t` symbols matching res/libTTapp.so.
-
-static __used__ void ShieldCode(GameObject_s *object) {
-    f32 target = 0.0f;
-    if (object->field_0xe37 != 0) {
-        if (object->id == id_ZAMSSPEEDER && WORLD->area != NULL && WORLD->area == BOUNTYHUNTERPURSUIT_ADATA) {
-            target = 5.0f;
-        } else {
-            const i32 animation = CurrentAnim(&object->apiobj.anim_packet);
-            if ((object->apiobj.field_0x27d != 0 || object->ground_contact_grace_timer > 0.0f) &&
-                animation != 3 && animation != -1 && animation != 5 && animation != 0x23 && animation != 0x6a &&
-                object->character_context != 0x17 && object->character_context != 0x3d) {
-                target = 1.0f;
-            }
-        }
-    }
-    const f32 previous = object->field_0xd24;
-    object->field_0xd24 = SeekLinearF(previous, target, 5.0f * FRAMETIME);
-    if ((previous == 0.0f && object->field_0xd24 > 0.0f) ||
-        (previous == 1.0f && object->field_0xd24 < 1.0f)) {
-        PlaySfx("DDekaShOn", &object->apiobj.collision_position);
-    }
-}
-
 static __used__ void TrenchMove(GameObject_s *object) {
     APIOBJECT_s &api = object->apiobj;
     api.field_0x214 = api.field_0x218;
