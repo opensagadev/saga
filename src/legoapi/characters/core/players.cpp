@@ -1605,8 +1605,13 @@ i32 AvailableToPlayer(u32 character_flags, i32 weapon_action, i32 context, i32 r
     return 0;
 }
 
-void GetNumLocalPlayers() {
-    STUBBED();
+i32 GetNumLocalPlayers() {
+    i32 count = 0;
+    if (Player[0] != NULL)
+        count = static_cast<i8>(Player[0]->apiobj.field_0x1f8) < 0;
+    if (Player[1] != NULL && (static_cast<u8>(Player[1]->apiobj.field_0x1f8) & 0x80) != 0)
+        count++;
+    return count;
 }
 
 i32 UnderPlayerControl(GameObject_s *object) {
@@ -1819,8 +1824,14 @@ bool FindNearestPlayerToVec(nuvec_s *position, GameObject_s **nearest_player, fl
     return *nearest_player != NULL;
 }
 
-void SetPlayerGroupPosition(float, float, float) {
-    STUBBED();
+void SetPlayerGroupPosition(f32 x, f32 y, f32 z) {
+    NUVEC offset = {0.0f, 0.0f, 0.2f};
+    for (i32 i = 0; i < PLAYERCOUNT; i++) {
+        NUVEC position = {x, y, z};
+        NuVecAdd(&position, &position, &offset);
+        ResetPlayer(Player[i], 1, &position, 1);
+        NuVecRotateY(&offset, &offset, 0x2000);
+    }
 }
 
 i32 (*LastSafePosExtraFn)(GameObject_s *) = NULL;

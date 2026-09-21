@@ -107,6 +107,8 @@ extern "C" void APIObjectRegisterAnimRedirect(ANIMREDIRECTFN fn, void *list, cha
 extern "C" void APIResetCharacterRemap(void);
 
 i32 PlayersDropInOut();
+i32 GetNumLocalPlayers();
+void SetPlayerGroupPosition(f32 x, f32 y, f32 z);
 
 extern "C" APICHARACTERMODEL *APICharacterLoaded(i32 character_id);
 extern "C" void APICharacterModelReset(APICHARACTERMODEL *model);
