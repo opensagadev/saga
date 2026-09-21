@@ -7153,47 +7153,92 @@ void StartFlatten(GameObject_s *source, GameObject_s *target) {
 }
 
 void Hang_MoveCode(GameObject_s *object) {
-    if (LEGOCONTEXT_HANG == -1)
+    i16 animation;
+    i8 context;
+    i32 *hang_context = &LEGOCONTEXT_HANG;
+    if (*hang_context == -1) {
         return;
-    if (object->character_context == LEGOCONTEXT_HANG) {
-        if ((object->pad_gamepad->buttons_pressed & GAMEPAD_JUMP) != 0 && object->field_0x7a6 != 5) {
-            object->apiobj.velocity.y = 0.0f;
-            object->character_context = -1;
-            return;
+    }
+
+    if (*hang_context != static_cast<i8>(object->character_context))
+        goto try_start_hang;
+
+    if ((object->pad_gamepad->buttons_pressed & GAMEPAD_JUMP) != 0)
+        goto check_hang_jump;
+
+check_hang_contact:
+    if (object->apiobj.field_0x27d == 0) {
+        if (object->apiobj.field_0x280 != object->field_0x7a6)
+            goto cancel_hang_velocity;
+
+        if (object->pad_gamepad->input_magnitude > 0.0f) {
+            animation = LEGOACT_HANG_MOVE;
+            if (animation != -1)
+                goto animation_selected;
         }
-        if (object->apiobj.field_0x27d != 0) {
-            object->character_context = -1;
-            return;
-        }
-        if (object->apiobj.field_0x280 != object->field_0x7a6) {
-            object->apiobj.velocity.y = 0.0f;
-            object->character_context = -1;
-            return;
-        }
-        object->context_animation = object->pad_gamepad->input_magnitude > 0.0f && LEGOACT_HANG_MOVE != -1
-                                        ? LEGOACT_HANG_MOVE
-                                        : LEGOACT_HANG_IDLE;
+        animation = LEGOACT_HANG_IDLE;
+    animation_selected:
+        object->context_animation = animation;
         if (object->field_0x1084 != 0 && object->apiobj.field_0x280 == object->field_0x6b0) {
             object->airborne_action_duration = 0.25f;
-            object->external_force = object->contact_normal;
-        } else {
-            object->airborne_action_duration -= FRAMETIME;
-            if (object->airborne_action_duration <= 0.0f)
-                object->character_context = -1;
+            goto copy_hang_force;
         }
-    } else if (object->apiobj.field_0x27d == 0 && object->field_0x1084 != 0 &&
-               CanClimbSurface(object, static_cast<i8>(object->field_0x6b0)) != 0 &&
-               object->contact_normal.y < -NuTrigTable[0x3000] &&
-               (object->character_context == -1 ||
-                (LEGOCONTEXT_CLIMB != -1 && object->character_context == LEGOCONTEXT_CLIMB) ||
-                (LEGOCONTEXT_JUMP != -1 && object->character_context == LEGOCONTEXT_JUMP &&
-                 object->context_animation_timer >= 0.1f))) {
-        object->airborne_action_duration = 0.25f;
-        object->character_context = LEGOCONTEXT_HANG;
-        object->context_animation = LEGOACT_HANG_IDLE;
-        object->field_0x7a6 = object->field_0x6b0;
-        object->external_force = object->contact_normal;
+
+        const f32 duration = object->airborne_action_duration;
+        const f32 frame_time = FRAMETIME;
+        object->airborne_action_duration = duration - frame_time;
+        if (duration - frame_time <= 0.0f)
+            goto cancel_hang;
+        return;
     }
+
+cancel_hang:
+    object->character_context = -1;
+    return;
+
+cancel_hang_velocity:
+    object->apiobj.velocity.y = 0.0f;
+    object->character_context = -1;
+    return;
+
+check_hang_jump:
+    if (object->field_0x7a6 != 5)
+        goto cancel_hang_velocity;
+    goto check_hang_contact;
+
+try_start_hang:
+    if (object->apiobj.field_0x27d != 0)
+        return;
+    if (object->field_0x1084 == 0)
+        return;
+    if (CanClimbSurface(object, static_cast<i8>(object->field_0x6b0)) == 0)
+        return;
+    if (-NuTrigTable[0x3000] > object->contact_normal.y)
+        goto hang_normal_valid;
+    return;
+
+hang_normal_valid:
+    context = object->character_context;
+    if (context != -1) {
+        const i32 climb_context = LEGOCONTEXT_CLIMB;
+        if (climb_context != -1 && climb_context == context)
+            goto start_hang;
+        const i32 jump_context = LEGOCONTEXT_JUMP;
+        if (jump_context == -1 || jump_context != context)
+            return;
+        if (object->context_animation_timer >= 0.1f)
+            goto start_hang;
+        return;
+    }
+
+start_hang:
+    object->airborne_action_duration = 0.25f;
+    object->character_context = static_cast<i8>(*hang_context);
+    object->context_animation = LEGOACT_HANG_IDLE;
+    object->field_0x7a6 = object->field_0x6b0;
+
+copy_hang_force:
+    object->external_force = object->contact_normal;
 }
 
 void HoldCode_Copy(GameObject_s *object) {
@@ -7995,46 +8040,68 @@ void ForcedBackCode(GameObject_s *object) {
 }
 
 void Glide_MoveCode(GameObject_s *object) {
-    if (object->character_context == 0x4f) {
-        if (object->apiobj.field_0x27d == 0 && object->apiobj.field_0x218 != 2000000.0f &&
-            object->apiobj.collision_min.y - object->apiobj.field_0x218 > object->apiobj.field_0x1e0) {
-            if ((object->pad_gamepad->buttons_held & GAMEPAD_ACTION) != 0 &&
-                object->apiobj.character_model->model_data_b[0x21] != NULL) {
-                if (Slam_Start(object, SLAMJUMPSPEED) != 0) {
-                    ResetAnimPacket(&object->apiobj.anim_packet, -1);
-                    ResetMiniAnimPacket(&object->mini_animation, -1);
-                    return;
+    f32 height;
+    i8 context = object->character_context;
+    if (context != 0x4f) {
+        GAMECHARACTERDATA *character = object->apiobj.character_data->game_character;
+        u8 character_can_glide = (character->flags_094[0] >> 6) & 1;
+        if ((object->apiobj.character_data->model_flags & 0x40) != 0) {
+            return;
+        }
+
+        if (!character_can_glide) {
+            SUIT_s *suit = static_cast<SUIT_s *>(object->suit);
+            if (suit == NULL || !suit->can_glide) {
+                return;
+            }
+        }
+        if ((object->pad_gamepad->buttons_pressed & GAMEPAD_JUMP) == 0 || object->apiobj.field_0x27d != 0) {
+            return;
+        }
+        if (!character_can_glide && AnimPlaying(&object->apiobj.anim_packet, 5, 1, 0) == NULL) {
+            return;
+        }
+        if (character_can_glide == 0) {
+            context = object->character_context;
+        }
+        if (context != 0x11 && context != -1) {
+            if (context != 0 || (!character_can_glide && object->context_variant_flags >= 0)) {
+                return;
+            }
+        }
+        Glide_Start(object);
+        return;
+    }
+
+    if (object->apiobj.field_0x27d == 0 && object->apiobj.field_0x218 != 2000000.0f &&
+        (height = object->apiobj.collision_min.y - object->apiobj.field_0x218,
+         object->apiobj.field_0x1e0 <= height && height != object->apiobj.field_0x1e0)) {
+        if ((object->pad_gamepad->buttons_held & GAMEPAD_ACTION) != 0 &&
+            object->apiobj.character_model->model_data_b[0x21] != NULL) {
+            if (Slam_Start(object, SLAMJUMPSPEED) != 0) {
+                ResetAnimPacket(&object->apiobj.anim_packet, -1);
+                ResetMiniAnimPacket(&object->mini_animation, -1);
+                return;
+            }
+        }
+    }
+
+    object->movement_runtime_flags |= 0x10;
+    if (object->apiobj.character_model->model_data_b[object->context_animation] == NULL ||
+        AnimPlaying(&object->apiobj.anim_packet, object->context_animation, 1, 0) != NULL) {
+        object->context_animation_timer += FRAMETIME;
+        if (object->apiobj.field_0x27d == 0) {
+            if ((object->pad_gamepad->buttons_held & GAMEPAD_JUMP) == 0) {
+                object->airborne_action_duration -= FRAMETIME;
+                if (object->airborne_action_duration <= 0.0f) {
+                    StartEndOfJump(object);
                 }
-                object->movement_runtime_flags |= 0x10;
+            } else if (object->airborne_action_duration <= 0.1f && object->airborne_action_duration != 0.1f) {
+                object->airborne_action_duration = 0.1f;
             }
         } else {
-            object->movement_runtime_flags |= 0x10;
-        }
-        if (object->apiobj.character_model->model_data_b[object->context_animation] != NULL &&
-            AnimPlaying(&object->apiobj.anim_packet, object->context_animation, 1, 0) == NULL)
-            return;
-        object->context_animation_timer += FRAMETIME;
-        if (object->apiobj.field_0x27d != 0) {
             object->character_context = -1;
-        } else if ((object->pad_gamepad->buttons_held & GAMEPAD_JUMP) != 0) {
-            if (object->airborne_action_duration < 0.1f)
-                object->airborne_action_duration = 0.1f;
-        } else {
-            object->airborne_action_duration -= FRAMETIME;
-            if (object->airborne_action_duration <= 0.0f)
-                StartEndOfJump(object);
         }
-    } else {
-        i32 can_glide = (object->apiobj.character_data->game_character->flags_094[0] >> 6) & 1;
-        if ((object->apiobj.character_data->model_flags & 0x40) != 0 ||
-            (can_glide == 0 && (object->suit == NULL || (static_cast<SUIT_s *>(object->suit)->store_flag & 2) == 0)) ||
-            (object->pad_gamepad->buttons_pressed & GAMEPAD_JUMP) == 0 || object->apiobj.field_0x27d != 0)
-            return;
-        if (can_glide == 0 && AnimPlaying(&object->apiobj.anim_packet, 5, 1, 0) == NULL)
-            return;
-        if (object->character_context == 0x11 || object->character_context == -1 ||
-            (object->character_context == 0 && (can_glide != 0 || object->context_variant_flags < 0)))
-            Glide_Start(object);
     }
 }
 

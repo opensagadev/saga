@@ -2,6 +2,7 @@
 #include "legoapi/legoapi_types.h"
 #include "globals.h"
 #include "legoapi/characters/core/character.h"
+#include "legoapi/actions/combat/hits.h"
 #include "legoapi/characters/motion/gameanim.h"
 #include "legoapi/core/input/gamepads.h"
 #include "legoapi/items/base/apiobject.h"
@@ -26,6 +27,7 @@ static SPECIALMOVE_s *SpecialMove;
 static i32 SpecialMoveCount;
 
 i32 StartBackFlip(GameObject_s *object);
+extern i32 objhitobj_throwkillpartsup;
 
 i32 SpecialMove_Check(GameObject_s *attacker, GameObject_s *victim) {
     if (SpecialMove != NULL && ((attacker->apiobj.flags_low & 0x80) == 0 || attacker->field_0xda8 <= 0.0f) &&
@@ -62,8 +64,33 @@ u32 SpecialMove_GetFlags(i32 index, u32 mask) {
     return SpecialMove[index].flags;
 }
 
-void SpecialMove_VictimCode(GameObject_s *) {
-    STUBBED();
+void SpecialMove_VictimCode(GameObject_s *object) {
+    if (LEGOCONTEXT_SPECIALMOVE_VICTIM == -1 ||
+        LEGOCONTEXT_SPECIALMOVE_VICTIM != static_cast<i8>(object->field_0x7a5)) {
+        return;
+    }
+    if (object->field_0x780 == NULL) {
+        object->field_0x7a5 = 0xff;
+        return;
+    }
+    const f32 timer = object->context_animation_timer;
+    const f32 frame_time = FRAMETIME;
+    object->context_animation_timer = timer - frame_time;
+    if (timer - frame_time <= 0.0f) {
+        object->field_0x7a5 = 0xff;
+        if (SpecialMove_GetFlags(object->field_0x7a7, 2) != 0) {
+            if (SpecialMove_GetFlags(object->field_0x7a7, 0x10) != 0) {
+                objhitobj_throwkillpartsup = 1;
+            }
+            GameObject_s *victim = static_cast<GameObject_s *>(object->field_0x780);
+            i32 damage = -1;
+            if (static_cast<i8>(victim->apiobj.field_0x1f8) < 0 && Player_HasInvincibility(victim) != 0) {
+                damage = 1;
+            }
+            victim = static_cast<GameObject_s *>(object->field_0x780);
+            ObjHitObj(victim, object, damage, 0x1000, 0, 1);
+        }
+    }
 }
 
 void SpecialMoves_Configure(char *, variptr_u *, variptr_u *) {
