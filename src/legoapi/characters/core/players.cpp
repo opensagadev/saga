@@ -1609,7 +1609,7 @@ i32 GetNumLocalPlayers() {
     i32 count = 0;
     if (Player[0] != NULL)
         count = static_cast<i8>(Player[0]->apiobj.field_0x1f8) < 0;
-    if (Player[1] != NULL && (static_cast<u8>(Player[1]->apiobj.field_0x1f8) & 0x80) != 0)
+    if (Player[1] != NULL && (Player[1]->apiobj.field_0x1f8 & 0x80) != 0)
         count++;
     return count;
 }
