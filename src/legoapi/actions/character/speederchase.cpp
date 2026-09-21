@@ -19,7 +19,10 @@
 #include "legoapi/characters/motion.h"
 #include "legoapi/actions/combat/hits.h"
 #include "legoapi/core/input/gamepads.h"
+#include "legoapi/items/collect/spacelevel.h"
 #include "legoapi/world/world.h"
+#include "gameapi/edtools/edcam.h"
+#include "gameapi/edtools/edui.h"
 #include "nu2api/numath/nuvec.h"
 #include "nu2api/nu3d/nutex.h"
 #include <string.h>
@@ -258,8 +261,48 @@ void SpeederChaseA_Init(WORLDINFO_s *) {
     STUBBED();
 }
 
-void ProcessCurrentSpeed(WORLDINFO_s *, speedup_s *) {
-    STUBBED();
+void ProcessCurrentSpeed(WORLDINFO_s *world, speedup_s *speedup) {
+    spacelevel_s *space = world->space_level;
+    while (speedup->distance != 0.0f) {
+        if (speedup->distance > space->door_elapsed && speedup->distance <= space->door_countdown) {
+            space->value_one_a = speedup->speed;
+        }
+        ++speedup;
+    }
+
+    f32 target_speed = space->value_one_a;
+    if (static_cast<u16>(GameCam->sock_position.next_segment - 120) <= 30) {
+        if (static_cast<i8>(LevBlowUp[0]->state_flags) < 0) {
+            target_speed *= 0.25f;
+        } else if (static_cast<i8>(LevBlowUp[1]->state_flags) < 0) {
+            target_speed *= 0.25f;
+        } else if (static_cast<i8>(LevBlowUp[2]->state_flags) < 0) {
+            target_speed *= 0.25f;
+        } else if (static_cast<i8>(LevBlowUp[3]->state_flags) < 0) {
+            target_speed *= 0.25f;
+        } else if (static_cast<i8>(LevBlowUp[4]->state_flags) < 0) {
+            target_speed *= 0.25f;
+        }
+    }
+
+    if (target_speed > space->value_one_b) {
+        space->value_one_b += FRAMETIME * 0.25f;
+        if (space->value_one_b > target_speed) {
+            space->value_one_b = target_speed;
+        }
+    } else if (space->value_one_b > target_speed) {
+        space->value_one_b -= FRAMETIME * 0.25f;
+        if (space->value_one_b < target_speed) {
+            space->value_one_b = target_speed;
+        }
+    }
+    f32 current_speed = space->value_one_b;
+    f32 vehicle_speed = current_speed * 20.0f;
+    world->sock_sys->sock[0].current_speed = vehicle_speed;
+
+    if (world->current_level == DOGFIGHTA_LDATA && vehicle_speed != 0.0f) {
+        *reinterpret_cast<f32 *>(space->unknown_62ee4) = vehicle_speed / 11.0f;
+    }
 }
 
 void SpeederChaseA_Panel(WORLDINFO_s *) {
@@ -346,8 +389,15 @@ i32 SpeederChase_ObjIsAGroundTroop(GameObject_s *object) {
 
 extern "C" {
 
-    void cbSetAutoSpeed(void) {
-        STUBBED();
+    i32 edmain_auto_speed = 1;
+
+    void cbSetAutoSpeed(eduimenu_s *, eduiitem_s *item, u32) {
+        edmain_auto_speed = item->highlighted;
+        if (edmain_auto_speed != 0) {
+            edcamSetAutoSpeed(0.15f, 0.2f, 0.01f, 0.1f);
+        } else {
+            edcamSetAutoSpeed(0.0f, 0.0f, 0.0f, 0.0f);
+        }
     }
 
 } // extern "C"

@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 51.712112,
+    "fuzzy_match_percent": 51.720955,
     "total_code": "4722419",
-    "matched_code": "454637",
-    "matched_code_percent": 9.627206,
+    "matched_code": "454767",
+    "matched_code_percent": 9.629959,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 5368,
-    "matched_functions_percent": 39.884094,
+    "matched_functions": 5369,
+    "matched_functions_percent": 39.89152,
     "total_units": 1
   },
   "text": {
@@ -38554,7 +38554,7 @@
           "address": 2338128,
           "offset": 1448160,
           "size": 453,
-          "match_percent": 4.038462
+          "match_percent": 71.88461
         },
         {
           "name": "_Z17SpeederBlowupHackP13GIZMOBLOWUP_si",
@@ -38634,7 +38634,7 @@
           "address": 3817104,
           "offset": 2927136,
           "size": 130,
-          "match_percent": 15.0
+          "match_percent": 100.0
         },
         {
           "name": "_Z21ObjOpponentStillThereP12GameObject_sS0_f",
