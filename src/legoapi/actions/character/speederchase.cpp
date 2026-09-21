@@ -1,4 +1,5 @@
 #include "nu2api/numath/nutrig.h"
+#include "nu2api/numath/nufloat.h"
 #include "nu2api/nucore/nustring.h"
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/characters/core/players.h"
@@ -189,8 +190,32 @@ i32 SpeederBlowupHack(GIZMOBLOWUP_s *blowup, i32) {
            NuStrCmp(blowup->name, "thermocrate_031") != 0 && NuStrCmp(blowup->name, "minikit101") != 0;
 }
 
-void FindPodHoverHeight(GameObject_s *) {
-    STUBBED();
+f32 FindPodHoverHeight(GameObject_s *object) {
+    static NUVEC podsprintlifthackpos[3] = {
+        {-395.26f, -5.48f, -165.08f},
+        {-375.38f, -5.04f, -286.5f},
+        {-354.91f, -4.85f, -299.32f},
+    };
+
+    f32 height = 0.15f;
+    if (object == Player[1] && (Player[0]->apiobj.flags_low & 0x80) != 0) {
+        f32 distance_squared = NuVecDistSqr(&Player[0]->apiobj.position, &object->apiobj.position, NULL);
+        if (distance_squared < 4.0f) {
+            f32 distance = NuFsqrt(distance_squared);
+            i32 angle = static_cast<i32>((1.0f - distance * 0.5f) * 16384.0f);
+            height += NuTrigTable[(angle >> 1) & 0x7fff] * 0.5f;
+        }
+    }
+
+    if (PODSPRINT_ADATA != NULL && WORLD->area == PODSPRINT_ADATA && (object->apiobj.flags_low & 0x80) != 0) {
+        for (i32 i = 0; i < 3; ++i) {
+            if (NuVecXZDistSqr(&object->apiobj.position, &podsprintlifthackpos[i], NULL) < 2.0f) {
+                height += 1.5f;
+                break;
+            }
+        }
+    }
+    return height;
 }
 
 extern i32 ObjInNarrowSock(GameObject_s *, SOCKSYS *, i32);
