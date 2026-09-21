@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 51.6681,
+    "fuzzy_match_percent": 51.671455,
     "total_code": "4722419",
-    "matched_code": "453903",
-    "matched_code_percent": 9.611663,
+    "matched_code": "454052",
+    "matched_code_percent": 9.614818,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 5361,
-    "matched_functions_percent": 39.83208,
+    "matched_functions": 5362,
+    "matched_functions_percent": 39.83951,
     "total_units": 1
   },
   "text": {
@@ -38909,7 +38909,7 @@
           "address": 1960592,
           "offset": 1070624,
           "size": 149,
-          "match_percent": 9.772727
+          "match_percent": 100.0
         },
         {
           "name": "_Z30GizmoBlowup_TransformDraw_GameP13GIZMOBLOWUP_s",
@@ -38917,7 +38917,7 @@
           "address": 1960752,
           "offset": 1070784,
           "size": 110,
-          "match_percent": 78.42308
+          "match_percent": 99.96154
         },
         {
           "name": "_Z25InterpolateRotationMatrixP7numtx_sS0_S0_f",

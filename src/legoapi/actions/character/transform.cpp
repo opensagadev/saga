@@ -217,9 +217,16 @@ void Transform_DrawTarget(nuvec_s *position, float radius, float alpha) {
     }
 }
 
-i32 Transform_TargettedByObj(void *) {
-    STUBBED();
-    return 0;
+GameObject_s *Transform_TargettedByObj(void *target) {
+    GameObject_s *object = Obj;
+    for (i32 index = 0; index < HIGHGAMEOBJECT; ++index, ++object) {
+        if ((object->apiobj.field_0x1f8 & 0x1001) == 0x1001 && object->apiobj.field_0x287 == 0 &&
+            (object->apiobj.character_data->game_character->flags_090 & 0x01000000) != 0 &&
+            object->field_0xd80 > 0.0f && object->field_0xd8c > 0.0f && object->force_glow_object == target) {
+            return object;
+        }
+    }
+    return NULL;
 }
 
 void GizmoBlowup_TransformDraw_Game(GIZMOBLOWUP_s *blowup) {

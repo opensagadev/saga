@@ -458,7 +458,6 @@ f32 CalcCapsuleIntersectDistance(VuVec const &start, VuVec const &direction, f32
 }
 
 i32 CheckCol(nutex_s *, i32, i32, i32, i32) {
-    STUBBED();
     return true;
 }
 
