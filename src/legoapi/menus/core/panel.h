@@ -42,6 +42,6 @@ void DrawSuperStoryTime(f32 x, f32 timer, f32 target, i32 flags, i32 draw_icon);
 void DrawBuildUpBar(f32 x, f32 y, i32 amount, i32 maximum, f32 scale, f32 width, f32 alpha, u16 angle);
 void DrawBonusScore(f32 y, i32 player0_active, i32 player1_active, f32 alpha, i32 *scores);
 i32 InDoubleScoreZone(GameObject_s *object);
-void DoubleScoreAlpha();
+f32 DoubleScoreAlpha();
 void DrawInDoubleScoreZone(f32 time);
 i32 CoinsGoToMainTotal();

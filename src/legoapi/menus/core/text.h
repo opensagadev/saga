@@ -27,6 +27,7 @@ i32 Text_GetMaxOverallStrings();
 void Text_MakeTime(f32 time, i32 show_hours, i32 show_minutes, i32 show_centiseconds, char *text);
 void Text_MakeScore(u32 score, char *text);
 extern i16 tDROPIN_INSERTCONTROLLER;
+extern i16 tDOUBLESCOREZONE;
 void TextCrawl_Init(TEXTCRAWL_s *crawl, i32 id, i32 unk);
 void TextCrawl_Draw(f32 dt, i32 paragraphs, f32 alpha, char *text);
 

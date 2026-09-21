@@ -388,9 +388,17 @@ static void DrawHitPoints(GameObject_s *object, float x, float y, float scale, f
     }
 }
 
-f32 PowerUp_GetPanelY(i32) {
-    STUBBED();
-    return 0.0f;
+f32 PowerUp_GetPanelY(i32 player_index) {
+    f32 y = -0.335f;
+    if (player_index == -1) {
+        return y;
+    }
+    if (static_cast<u32>(player_index) <= 1) {
+        const i32 angle = static_cast<i32>(PowerUp_PanelPosMul[player_index] * 32768.0f + 16384.0f);
+        const f32 position = 1.0f - (NU_SIN_LUT(angle) + 1.0f) * 0.5f;
+        y = position * 0.135f - 0.335f;
+    }
+    return y;
 }
 
 void DrawAutoSaveIcon(void) {
@@ -512,7 +520,6 @@ void DrawBuildUpBar(float x, float y, i32 amount, i32 maximum, float scale, floa
 }
 
 void DrawBonusScore(float, i32, i32, float, i32 *) {
-    STUBBED();
 }
 
 i32 InDoubleScoreZone(GameObject_s *object) {
@@ -528,12 +535,14 @@ i32 InDoubleScoreZone(GameObject_s *object) {
     return 0;
 }
 
-void DoubleScoreAlpha() {
-    STUBBED();
+f32 DoubleScoreAlpha() {
+    const i32 angle = static_cast<i32>(NuFmod(GameTimer.time_elapsed_mod_seconds, 0.5f) * 2.0f * 65536.0f);
+    return NU_SIN_LUT(angle) * 0.2f + 0.5f;
 }
 
-void DrawInDoubleScoreZone(float) {
-    STUBBED();
+void DrawInDoubleScoreZone(f32 time) {
+    const i32 alpha = static_cast<i32>(DoubleScoreAlpha() * 128.0f * time);
+    SmartTextEx(TTab[tDOUBLESCOREZONE], 0.0f, -0.6f, 1.0f, 1.0f, 1.0f, 1.0f, 0, 255, 255, 255, 1.5f, 1, NULL, 0, alpha);
 }
 
 void Panel_Clear() {
