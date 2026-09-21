@@ -16,7 +16,6 @@ static void edanimcbFileSave(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
 void edanimRegisterBaseScene(NUGSCN *scene) {
-    STUBBED();
     (void)scene;
 }
 static void edanimcbMCTBMenu(eduimenu_s *, eduiitem_s *, u32) {

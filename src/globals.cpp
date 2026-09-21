@@ -238,6 +238,7 @@ u8 aicreature_sets_alive[16] = {};
 // ------------------------------------------------------------------------
 u8 g_forceSysMemVbs = 0;
 i32 Reflections_On = 1;
+i32 (*MatrixReflection_CanOverrideFn)(f32) = NULL;
 i32 disable_narrow_socks = 0;
 nugspline_s *script_spline_selected = NULL;
 f32 CutBorderScale = 0.0f;

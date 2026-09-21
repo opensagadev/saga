@@ -298,9 +298,43 @@ f32 DistanceToLineXZ(NUVEC *position, NUVEC *first, NUVEC *second) {
     return NuFabs((position->x - first->x) * NU_COS_LUT(angle) + (position->z - first->z) * NU_SIN_LUT(angle));
 }
 
-i32 MatrixReflection(numtx_s *, i32, float, float, numtx_s *) {
-    STUBBED();
-    return 0;
+i32 MatrixReflection(numtx_s *matrix, i32 axis, f32 plane, f32 override_plane, numtx_s *result) {
+    if (static_cast<u8>(Reflections_On) == 0)
+        return 0;
+
+    switch (axis) {
+        case 1:
+            *result = *matrix;
+            result->m00 = -result->m00;
+            result->m10 = -result->m10;
+            result->m20 = -result->m20;
+            result->m30 = plane - (result->m30 - plane);
+            return 1;
+
+        case 2:
+            if (override_plane != 2000000.0f) {
+                if (MatrixReflection_CanOverrideFn != NULL && MatrixReflection_CanOverrideFn(plane) == 0)
+                    return 0;
+                plane = override_plane;
+            }
+            *result = *matrix;
+            result->m01 = -result->m01;
+            result->m11 = -result->m11;
+            result->m21 = -result->m21;
+            result->m31 = plane - (result->m31 - plane);
+            return 1;
+
+        case 3:
+            *result = *matrix;
+            result->m02 = -result->m02;
+            result->m12 = -result->m12;
+            result->m22 = -result->m22;
+            result->m32 = plane - (result->m32 - plane);
+            return 1;
+
+        default:
+            return 0;
+    }
 }
 
 void OnOrOutsidePlane(nuvec_s *, nuvec_s *, nuvec_s *) {
@@ -433,9 +467,20 @@ void LineToSphereIntersection(VuVec &, VuVec &, VuVec &, float, VuVec *, VuVec *
     STUBBED();
 }
 
-i32 MatrixReflectionVU0_AXISY(numtx_s *, float, float, numtx_s *) {
-    STUBBED();
-    return 0;
+i32 MatrixReflectionVU0_AXISY(numtx_s *matrix, f32 plane, f32 override_plane, numtx_s *result) {
+    if (static_cast<u8>(Reflections_On) == 0)
+        return 0;
+    if (override_plane != 2000000.0f) {
+        if (MatrixReflection_CanOverrideFn != NULL && MatrixReflection_CanOverrideFn(plane) == 0)
+            return 0;
+        plane = override_plane;
+    }
+    *result = *matrix;
+    result->m01 = -result->m01;
+    result->m11 = -result->m11;
+    result->m21 = -result->m21;
+    result->m31 = plane - (result->m31 - plane);
+    return 1;
 }
 
 i32 SphereSphereOverlapScaleY(nuvec_s *position_a, float radius_a, float y_radius_a, nuvec_s *position_b,

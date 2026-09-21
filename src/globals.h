@@ -532,6 +532,7 @@ extern i32 finishloop_backdroponly;
 extern u8 g_forceSysMemVbs;
 extern i32 texanimbits;
 extern i32 Reflections_On;
+extern i32 (*MatrixReflection_CanOverrideFn)(f32);
 extern i32 disable_narrow_socks;
 extern nugspline_s *script_spline_selected;
 extern f32 character_farclip;

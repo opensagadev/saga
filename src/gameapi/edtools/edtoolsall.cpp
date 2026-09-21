@@ -1810,7 +1810,6 @@ void EdInputContext::Clear(i32 input) {
 }
 
 EdInputContext::EdInputContext() {
-    STUBBED();
 }
 
 f32 EdInputContext::Get(i32 input) {

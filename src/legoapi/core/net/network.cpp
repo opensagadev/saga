@@ -62,8 +62,18 @@ bool TTNetwork::Suspend() {
     return true;
 }
 
-TTNetwork::TTNetwork() {
-    STUBBED();
+TTNetwork::TTNetwork() : field_20(0), field_24(0), field_2140(0), my_address(), my_host_address() {
+    field_2158 = -0.3f;
+    field_215c = 0.5f;
+    has_my_host_address = 0;
+    field_213c = 0;
+    field_2150 = 0;
+    field_2154 = 1.0f;
+    field_2160 = 1.0f;
+}
+
+char const *TTNetwork::GetName() {
+    return "";
 }
 
 void TTNetwork::Update() {

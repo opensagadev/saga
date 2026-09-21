@@ -1491,7 +1491,6 @@ void MoveGameCamera(GAMECAMERA_s *camera) {
 }
 
 void ViewCamDraw() {
-    STUBBED();
 }
 
 void KeepOnScreen(GameObject_s *object) {
@@ -1632,7 +1631,6 @@ i32 ViewCamGetMode() {
 }
 
 void SetDepthOfField() {
-    STUBBED();
 }
 
 void SpeedBlur_Apply(WORLDINFO_s *world) {

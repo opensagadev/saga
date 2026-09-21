@@ -1183,7 +1183,6 @@ extern "C" {
         return g_isLowestEndDevice;
     }
     i32 NuIOS_IsMidRangeDevice(void) {
-        STUBBED();
         return 0;
     }
     i32 NuIOS_IsSmallScreen(void) {
@@ -2490,7 +2489,6 @@ extern "C" {
         return NULL;
     }
     void NuEffectTexLockVP(void *buffer, void *buffer_end) {
-        STUBBED();
         (void)buffer;
         (void)buffer_end;
     }
@@ -2498,7 +2496,6 @@ extern "C" {
         STUBBED();
     }
     void NuEffectTexUnlockVP(void) {
-        STUBBED();
     }
     void NuEffectTexUnmapNative(void) {
         STUBBED();

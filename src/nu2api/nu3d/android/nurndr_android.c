@@ -293,7 +293,6 @@ extern "C" {
 
 // Original 0x293ac7: the platform error hook is a no-op in this build.
 i32 NuCheckGLErrorsFL(const char *, i32) {
-    STUBBED();
     return 0;
 }
 

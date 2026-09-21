@@ -345,24 +345,24 @@ struct uv1debdata;
 struct vucharidx_s;
 
 struct ADDGAMEMSG {
-    char *text;                         // 0x00
-    nuvec_s *position;                  // 0x04
-    nuvec_s *target_position;           // 0x08
-    f32 scale;                          // 0x0c
-    f32 target_scale;                   // 0x10
-    u8 red;                             // 0x14
-    u8 green;                           // 0x15
-    u8 blue;                            // 0x16
-    u8 alpha;                           // 0x17
-    u32 flags;                          // 0x18
-    f32 duration;                       // 0x1c
-    f32 field_0x20;                     // 0x20
-    u16 field_0x24;                     // 0x24
-    i16 icon;                           // 0x26
+    char *text;               // 0x00
+    nuvec_s *position;        // 0x04
+    nuvec_s *target_position; // 0x08
+    f32 scale;                // 0x0c
+    f32 target_scale;         // 0x10
+    u8 red;                   // 0x14
+    u8 green;                 // 0x15
+    u8 blue;                  // 0x16
+    u8 alpha;                 // 0x17
+    u32 flags;                // 0x18
+    f32 duration;             // 0x1c
+    f32 field_0x20;           // 0x20
+    u16 field_0x24;           // 0x24
+    i16 icon;                 // 0x26
     union {
         nuvec_s *extra_position;
         nuhspecial_s *special;
-    };                                 // 0x28
+    }; // 0x28
     u32 score;                          // 0x2c
     f32 field_0x30;                     // 0x30
     f32 field_0x34;                     // 0x34
@@ -803,10 +803,10 @@ struct CUSTOMISER {
     i8 layer_indices[9]; // 0x25c; hierarchy layers shared by both preview characters
     u8 pad_0x265[0x268 - 0x265];
     NUMTX joint_matrices[2][16]; // 0x268
-    u16 *animation_ids_to_load; // 0xa68; 0xffff-terminated allow-list
-    u8 animation_active[2];     // 0xa6c
-    u8 animation_state[2];      // 0xa6e
-    f32 animation_values[2];    // 0xa70
+    u16 *animation_ids_to_load;  // 0xa68; 0xffff-terminated allow-list
+    u8 animation_active[2];      // 0xa6c
+    u8 animation_state[2];       // 0xa6e
+    f32 animation_values[2];     // 0xa70
     u8 pad_0xa78[0xc28 - 0xa78];
     i16 default_pieces[2][10]; // 0xc28; nine saved pieces plus one unused entry per character
 };
@@ -1067,11 +1067,18 @@ struct EdInputContext;
 struct EdRef;
 struct EdStream;
 struct EdTool {
-    virtual ~EdTool() {}
-    virtual void Initialise(variptr_u &, variptr_u &, i32) {}
-    virtual const char *GetName() { return ""; }
-    virtual i32 Process(EdInputContext &) { return 0; }
-    virtual void Render() {}
+    virtual ~EdTool() {
+    }
+    virtual void Initialise(variptr_u &, variptr_u &, i32) {
+    }
+    virtual const char *GetName() {
+        return "";
+    }
+    virtual i32 Process(EdInputContext &) {
+        return 0;
+    }
+    virtual void Render() {
+    }
 
     EdTool *next;
     EdTool *previous;
@@ -1870,7 +1877,7 @@ struct GIZSPINNER_s {
     GIZSPINNERARM_s arms[8]; // 0x0b4
     u8 field_0x2d4[4];
     f32 field_0x2d8;
-    f32 animation_points[9]; // 0x2dc
+    f32 animation_points[9];   // 0x2dc
     GAMEANTINODE_s *anti_node; // 0x300
 };
 DECOMP_ASSERT(sizeof(GIZSPINNER_s) == 0x304, "GIZSPINNER_s ABI");
@@ -2957,7 +2964,7 @@ struct debinftype {
             f32 cut_on;
         };
     };
-    f32 clip_extent;             // 0x038
+    f32 clip_extent; // 0x038
     f32 sound_range;
     f32 sound_range_override;
     f32 field_044;
@@ -3002,8 +3009,8 @@ struct debinftype {
         u8 fields_2b0[0x40];
         debris_float_key_s collision_keys[8];
     };
-    u8 process_spheres;      // 0x2f0 (target)
-    i8 time_group;           // 0x2f1
+    u8 process_spheres; // 0x2f0 (target)
+    i8 time_group;      // 0x2f1
     u8 field_2f2;
     u8 use_explicit_clip_box; // 0x2f3
     f32 thinning;             // 0x2f4
@@ -3606,19 +3613,33 @@ struct terrsitu_s {};
 struct uv1deb {};
 struct uv1debdata;
 struct BaseEditor {
-    virtual ~BaseEditor() {}
+    virtual ~BaseEditor() {
+    }
     virtual void Initialise(variptr_u &, variptr_u &, i32);
-    virtual char *GetName() { return const_cast<char *>(""); }
-    virtual i32 ReadBlock(DATAPTR *) { return 0; }
-    virtual void WriteBlock(i32) {}
-    virtual void Serialise(EdStream &) {}
-    virtual void ClearLevel(i32) {}
-    virtual void Flush() {}
-    virtual void Enter() {}
-    virtual void Exit() {}
-    virtual void Process(EdInputContext &) {}
-    virtual void Render() {}
-    virtual void AddMenuItems(eduimenu_s *) {}
+    virtual char *GetName() {
+        return const_cast<char *>("");
+    }
+    virtual i32 ReadBlock(DATAPTR *) {
+        return 0;
+    }
+    virtual void WriteBlock(i32) {
+    }
+    virtual void Serialise(EdStream &) {
+    }
+    virtual void ClearLevel(i32) {
+    }
+    virtual void Flush() {
+    }
+    virtual void Enter() {
+    }
+    virtual void Exit() {
+    }
+    virtual void Process(EdInputContext &) {
+    }
+    virtual void Render() {
+    }
+    virtual void AddMenuItems(eduimenu_s *) {
+    }
 
     BaseEditor *next;
     BaseEditor *previous;
@@ -3692,8 +3713,11 @@ struct ClassEditor : BaseEditor {
     i32 class_filter;
 
     ClassEditor();
-    virtual ~ClassEditor() {}
-    char *GetName() { return const_cast<char *>("Class Editor"); }
+    virtual ~ClassEditor() {
+    }
+    char *GetName() {
+        return const_cast<char *>("Class Editor");
+    }
     void AddMenuItems(eduimenu_s *);
     void ClearLevel(i32);
     void *CreateObject();
@@ -4917,7 +4941,9 @@ struct LevelEditor : BaseThing {
     i32 editors_entered;
     i32 active;
 
-    virtual char const *GetName() { return "LevelEditor"; }
+    virtual char const *GetName() {
+        return "LevelEditor";
+    }
 
     void AddInfoText(char *);
     i32 AddScene(char *, nugscn_s *, i32);
@@ -5368,7 +5394,9 @@ struct PropertyTool : EdTool {
     i32 ProcessControls(EdInputContext &);
     i32 ProcessMenu(EdInputContext &);
     PropertyTool();
-    const char *GetName() override { return "Property Tool"; }
+    const char *GetName() override {
+        return "Property Tool";
+    }
     void RefreshMenuControls(PropertyMenu *);
     void Render();
     void RenderMenu(PropertyMenu *);
@@ -5523,13 +5551,24 @@ struct TMClient {
     void SendTTY(char const *, i32);
     void TestKey(i32);
 };
-struct TTNetwork : NetTransporter {
+struct TTNetwork : NetTransporter, BaseThing {
   private:
-    u8 reserved_10[0x215c];
+    i32 field_20;
+    u8 field_24;
+    u8 reserved_25[0x2117];
+    i32 field_213c;
+    i32 field_2140;
+    u8 reserved_2144[0xc];
+    i32 field_2150;
+    f32 field_2154;
+    f32 field_2158;
+    f32 field_215c;
+    f32 field_2160;
+    u8 reserved_2164[8];
     NetAddress my_address;
     NetAddress my_host_address;
     i32 has_my_host_address;
-    u8 reserved_2178[0x1608];
+    NetFtpManager ftp_manager;
 
   public:
     NetworkObjectManager network_objects;
@@ -5538,6 +5577,7 @@ struct TTNetwork : NetTransporter {
     void Display(ThingRenderData *);
     const NetAddress &GetMyAddress() const;
     const NetAddress *GetMyHostAddress() const;
+    char const *GetName() override;
     void Initialise();
     void ProcessEvenWhenPaused(ThingProcessData *);
     void ReliableBroadcast(NetMessage, unsigned char);
@@ -5585,8 +5625,8 @@ struct ThingManager {
     i32 max_things;     // 0x08
     i32 count;          // 0x0c
     i32 permanent_count;
-    i32 field_0x14;     // 0x14 AddThingAfterThis reservation, folded in by the next AddThing
-    i32 timebar;        // 0x18 NuTimeBarCreateSet index
+    i32 field_0x14; // 0x14 AddThingAfterThis reservation, folded in by the next AddThing
+    i32 timebar;    // 0x18 NuTimeBarCreateSet index
     u32 field_0x1c;
     i32 ed_timing_state; // 0x20 editor timing selection state
 };

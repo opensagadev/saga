@@ -8968,7 +8968,6 @@ void TurnCode(GameObject_s *object, i32 mode, GAMEPAD_s *pad) {
 }
 
 void FloatCode(GameObject_s *) {
-    STUBBED();
 }
 
 void SlideCode(GameObject_s *object) {

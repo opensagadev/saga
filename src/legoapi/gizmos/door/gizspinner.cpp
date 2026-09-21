@@ -80,7 +80,6 @@ static char gizspinner_outputName[14] = "100% Complete";
 i16 GizSpinnerGDeb_Fail[3] = {-1, -1, 0};
 
 static void GizSpinner_PanelDraw(void *, void *, float) {
-    STUBBED();
 }
 
 static i32 GizSpinner_GetMaxGizmos(void *world_ptr) {

@@ -389,7 +389,6 @@ static __used__ void rtlSwapEndianess32(void *) {
 }
 
 void rtlSwapSetEndianess(rtlset *) {
-    STUBBED();
 }
 
 extern "C" {

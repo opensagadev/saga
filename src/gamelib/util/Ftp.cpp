@@ -33,7 +33,13 @@ void NetFtpManager::Init() {
 }
 
 NetFtpManager::NetFtpManager() {
-    STUBBED();
+    void **transfer = &files[0].transfer;
+    void **end = reinterpret_cast<void **>(reinterpret_cast<u8 *>(transfer) + sizeof(files));
+    do {
+        *transfer = NULL;
+        transfer = reinterpret_cast<void **>(reinterpret_cast<u8 *>(transfer) + sizeof(FtpFile));
+    } while (transfer != end);
+    field_1604 = 0;
 }
 
 void NetFtpManager::PeerLeft(NetAddress const &, ePeerLeftReason) {

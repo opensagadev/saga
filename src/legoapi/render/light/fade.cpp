@@ -114,7 +114,6 @@ void FadeWipe::InitFade() {
 }
 
 void FadeWipe::UpdateFade() {
-    STUBBED();
 }
 
 void FadeStillWipe::Init(FADEINFO_s *state) {

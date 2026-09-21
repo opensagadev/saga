@@ -12,7 +12,6 @@
 #include <string.h>
 
 NuSoundLoaderWAV::NuSoundLoaderWAV() {
-    STUBBED();
 }
 
 NuSoundLoaderWAV::~NuSoundLoaderWAV() {

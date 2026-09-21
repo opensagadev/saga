@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 51.318935,
+    "fuzzy_match_percent": 51.352295,
     "total_code": "4722419",
-    "matched_code": "451820",
-    "matched_code_percent": 9.567554,
+    "matched_code": "451834",
+    "matched_code_percent": 9.567851,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 5346,
-    "matched_functions_percent": 39.720634,
+    "matched_functions": 5348,
+    "matched_functions_percent": 39.735493,
     "total_units": 1
   },
   "text": {
@@ -35915,7 +35915,7 @@
           "address": 5428544,
           "offset": 4538576,
           "size": 76,
-          "match_percent": 32.666668
+          "match_percent": 99.44444
         },
         {
           "name": "_ZN13NetFtpManagerC2Ev",
@@ -35923,7 +35923,7 @@
           "address": 5428544,
           "offset": 4538576,
           "size": 76,
-          "match_percent": 32.666668
+          "match_percent": 99.44444
         },
         {
           "name": "_ZN13NetFtpManager4InitEv",
@@ -48737,12 +48737,20 @@
           "match_percent": 3.589744
         },
         {
+          "name": "_ZThn16_N9TTNetwork7DisplayEP15ThingRenderData",
+          "demangled_name": "{virtual override thunk({offset(-16)}, TTNetwork::Display(ThingRenderData*))}",
+          "address": 5422416,
+          "offset": 4532448,
+          "size": 10,
+          "match_percent": 70.0
+        },
+        {
           "name": "_ZN9TTNetworkD1Ev",
           "demangled_name": "TTNetwork::~TTNetwork()",
           "address": 5422432,
           "offset": 4532464,
           "size": 248,
-          "match_percent": 29.5
+          "match_percent": 44.896553
         },
         {
           "name": "_ZN9TTNetworkD2Ev",
@@ -48750,7 +48758,15 @@
           "address": 5422432,
           "offset": 4532464,
           "size": 248,
-          "match_percent": 29.5
+          "match_percent": 44.896553
+        },
+        {
+          "name": "_ZThn16_N9TTNetworkD1Ev",
+          "demangled_name": "{virtual override thunk({offset(-16)}, TTNetwork::~TTNetwork())}",
+          "address": 5422688,
+          "offset": 4532720,
+          "size": 10,
+          "match_percent": 70.0
         },
         {
           "name": "_ZN9TTNetworkD0Ev",
@@ -48758,6 +48774,14 @@
           "address": 5422704,
           "offset": 4532736,
           "size": 56,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZThn16_N9TTNetworkD0Ev",
+          "demangled_name": "{virtual override thunk({offset(-16)}, TTNetwork::~TTNetwork())}",
+          "address": 5422768,
+          "offset": 4532800,
+          "size": 7,
           "match_percent": 100.0
         },
         {
@@ -48798,7 +48822,7 @@
           "address": 5424672,
           "offset": 4534704,
           "size": 233,
-          "match_percent": 30.613636
+          "match_percent": 99.97727
         },
         {
           "name": "_ZN9TTNetworkC2Ev",
@@ -48806,7 +48830,7 @@
           "address": 5424672,
           "offset": 4534704,
           "size": 233,
-          "match_percent": 30.613636
+          "match_percent": 99.97727
         },
         {
           "name": "_ZN9TTNetwork10InitialiseEv",
@@ -48887,6 +48911,30 @@
           "offset": 4535584,
           "size": 211,
           "match_percent": 7.0
+        },
+        {
+          "name": "_ZThn16_N9TTNetwork21ProcessEvenWhenPausedEP16ThingProcessData",
+          "demangled_name": "{virtual override thunk({offset(-16)}, TTNetwork::ProcessEvenWhenPaused(ThingProcessData*))}",
+          "address": 5425776,
+          "offset": 4535808,
+          "size": 10,
+          "match_percent": 70.0
+        },
+        {
+          "name": "_ZN9TTNetwork7GetNameEv",
+          "demangled_name": "TTNetwork::GetName()",
+          "address": 5425792,
+          "offset": 4535824,
+          "size": 22,
+          "match_percent": 98.75
+        },
+        {
+          "name": "_ZThn16_N9TTNetwork7GetNameEv",
+          "demangled_name": "{virtual override thunk({offset(-16)}, TTNetwork::GetName())}",
+          "address": 5425824,
+          "offset": 4535856,
+          "size": 7,
+          "match_percent": 100.0
         }
       ]
     },
@@ -53451,7 +53499,7 @@
           "address": 1239088,
           "offset": 349120,
           "size": 432,
-          "match_percent": 4.375
+          "match_percent": 60.916668
         },
         {
           "name": "_Z17Teleport_MoveCodeP12GameObject_si",
@@ -71267,7 +71315,7 @@
           "address": 4788224,
           "offset": 3898256,
           "size": 689,
-          "match_percent": 2.692308
+          "match_percent": 88.45192
         },
         {
           "name": "_Z25MatrixReflectionVU0_AXISYP7numtx_sffS0_",
@@ -71275,7 +71323,7 @@
           "address": 4788928,
           "offset": 3898960,
           "size": 291,
-          "match_percent": 5.116279
+          "match_percent": 67.62791
         },
         {
           "name": "_Z13LineCrossedXZffffffff",
@@ -126531,54 +126579,6 @@
       "match_percent": 0.0
     },
     {
-      "name": "_ZThn16_N9TTNetwork7DisplayEP15ThingRenderData",
-      "demangled_name": "{virtual override thunk({offset(-16)}, TTNetwork::Display(ThingRenderData*))}",
-      "address": 5422416,
-      "offset": 4532448,
-      "size": 10,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZThn16_N9TTNetworkD1Ev",
-      "demangled_name": "{virtual override thunk({offset(-16)}, TTNetwork::~TTNetwork())}",
-      "address": 5422688,
-      "offset": 4532720,
-      "size": 10,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZThn16_N9TTNetworkD0Ev",
-      "demangled_name": "{virtual override thunk({offset(-16)}, TTNetwork::~TTNetwork())}",
-      "address": 5422768,
-      "offset": 4532800,
-      "size": 7,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZThn16_N9TTNetwork21ProcessEvenWhenPausedEP16ThingProcessData",
-      "demangled_name": "{virtual override thunk({offset(-16)}, TTNetwork::ProcessEvenWhenPaused(ThingProcessData*))}",
-      "address": 5425776,
-      "offset": 4535808,
-      "size": 10,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN9TTNetwork7GetNameEv",
-      "demangled_name": "TTNetwork::GetName()",
-      "address": 5425792,
-      "offset": 4535824,
-      "size": 22,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZThn16_N9TTNetwork7GetNameEv",
-      "demangled_name": "{virtual override thunk({offset(-16)}, TTNetwork::GetName())}",
-      "address": 5425824,
-      "offset": 4535856,
-      "size": 7,
-      "match_percent": 0.0
-    },
-    {
       "name": "_ZN16V2SessionManager4InitEPc",
       "demangled_name": "V2SessionManager::Init(char*)",
       "address": 5461600,
@@ -128222,8 +128222,8 @@
   "summary": {
     "bazel_units": 458,
     "functions": 13454,
-    "assigned_functions": 12494,
+    "assigned_functions": 12500,
     "ambiguous_functions": 214,
-    "unassigned_functions": 746
+    "unassigned_functions": 740
   }
 }

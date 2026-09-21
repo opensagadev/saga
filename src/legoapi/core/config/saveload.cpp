@@ -26,7 +26,6 @@ extern f32 memcard_loadresult_delay;
 extern i16 (*memcard_hashfn)(void);
 
 void InitMemCard() {
-    STUBBED();
 }
 
 void SaveGizmoSys(GIZMOSYS_s *, char *, char *) {

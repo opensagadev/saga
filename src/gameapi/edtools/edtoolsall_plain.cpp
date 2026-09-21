@@ -878,13 +878,10 @@ extern "C" {
         return ed_main_menu;
     }
     void edGraDisableTerrainSwap(void) {
-        STUBBED();
     }
     void edGraEnableTerrainSwap(void) {
-        STUBBED();
     }
     void edGraInitTerrainSwapProtection(void) {
-        STUBBED();
     }
     i32 edanimLoadPage(char *path, NUGSCN *scene) {
         i32 page;

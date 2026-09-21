@@ -36,7 +36,6 @@ extern "C" {
         return 0;
     }
     void NuSound3ClearLoopHold(NUVEC *, i32) {
-        STUBBED();
     }
     void NuSound3Close(void) {
         STUBBED();
@@ -80,7 +79,6 @@ extern "C" {
         return 0;
     }
     void NuSound3FlushLoops(void) {
-        STUBBED();
     }
     i32 NuSound3GetSize(void) {
         STUBBED();
@@ -103,7 +101,6 @@ extern "C" {
         STUBBED();
     }
     void NuSound3KillAllAudio(void) {
-        STUBBED();
     }
     void NuSound3KillAllAudioWait(void) {
         STUBBED();
@@ -115,7 +112,6 @@ extern "C" {
         STUBBED();
     }
     i32 NuSound3LoadingSfx(void) {
-        STUBBED();
         return 0;
     }
     void NuSound3PlayChan(void) {
@@ -144,7 +140,6 @@ extern "C" {
         return 0;
     }
     void NuSound3SetDPL(i32, i32) {
-        STUBBED();
     }
     void NuSound3SetDat(void) {
         STUBBED();
@@ -159,24 +154,20 @@ extern "C" {
         STUBBED();
     }
     void NuSound3SetLoopHoldTime(float t) {
-        STUBBED();
         (void)t;
     }
     void NuSound3SetMonoIopBufferSize(void) {
         STUBBED();
     }
     i32 NuSound3SetReverb(i32) {
-        STUBBED();
         return 0;
     }
     void NuSound3SetReverbVol(void) {
         STUBBED();
     }
     void NuSound3SetRumblePads(nupad_s *, nupad_s *) {
-        STUBBED();
     }
     void NuSound3SetSFXPitch(i32) {
-        STUBBED();
     }
     void NuSound3SetSampleTableFromPakFile(void) {
         STUBBED();
@@ -193,10 +184,8 @@ extern "C" {
         return 1;
     }
     void NuSound3StopRumble(void) {
-        STUBBED();
     }
     void NuSound3StopSFX(void) {
-        STUBBED();
     }
     i32 NuSound3StopStream(void) {
         STUBBED();
@@ -218,7 +207,6 @@ extern "C" {
         return 0;
     }
     void NuSound3UpdateRumble(f32) {
-        STUBBED();
     }
     void NuSound3UpdateV(void) {
         STUBBED();

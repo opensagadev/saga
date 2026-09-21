@@ -150,6 +150,7 @@ struct NetConstReplicator : NetReplicator {
 };
 struct NetFtpManager {
     FtpFile files[32];
+    i32 field_1604;
     i32 Abort(char const *, NetAddress const &, i32, i32);
     void FindTransfer(char const *, NetAddress const &, i32);
     void FindTransfer(char const *, NetAddress const &, i32) const;
@@ -401,6 +402,8 @@ struct NetTransporter {
     NetListenerBinding *first_listener;
     NetListenerBinding *last_listener;
     i32 listener_count;
+    NetTransporter() : first_listener(NULL), last_listener(NULL), listener_count(0) {
+    }
     virtual void Send(NetMessage, unsigned char, NetPeer &) = 0;
     virtual void ReliableSend(NetMessage, unsigned char, NetPeer &, char const *, u32) = 0;
     virtual void Broadcast(NetMessage, unsigned char) = 0;

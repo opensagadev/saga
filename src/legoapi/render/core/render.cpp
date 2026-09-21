@@ -1419,7 +1419,6 @@ void DrawCutBorders(i32 widescreen) {
 }
 
 void DrawExplosions() {
-    STUBBED();
 }
 
 void DrawItemMenu2D() {

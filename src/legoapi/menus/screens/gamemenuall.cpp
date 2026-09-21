@@ -1604,7 +1604,6 @@ extern "C" {
     }
 
     void DrawMenuButtonPromptsEx(i32, i32, i32, i32, u8, u8, u8, u8) {
-        STUBBED();
     }
 
     void DrawMenuEntry(MENU *menu, char *text) {

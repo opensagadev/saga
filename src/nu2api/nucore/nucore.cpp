@@ -1100,7 +1100,6 @@ i32 NuDynamicLight::testShadowExtrusions(const VuVec &minimum, const VuVec &maxi
 }
 
 void NuMotionFilter::initResources() {
-    STUBBED();
 }
 
 NuMainFilterGen::NuMainFilterGen() {
@@ -1649,11 +1648,9 @@ __attribute__((weak)) void NuPostFilterGen::reset() {
 }
 
 __attribute__((weak)) void NuPostFilterGen::resetAll() {
-    STUBBED();
 }
 
 void NuDeferredFilter::initResources() {
-    STUBBED();
 }
 
 i32 NuDataPortManager::registerPort(char const *name, void *data) {
@@ -1707,7 +1704,6 @@ void NuMotionFilterGen::render() {
 }
 
 void NuSpeedBlurFilter::initResources() {
-    STUBBED();
 }
 
 NuDeferredFilterGen::NuDeferredFilterGen() {
@@ -1840,11 +1836,9 @@ void NuDeferredFilterGen::resetAll() {
 }
 
 void NuMotionAccumFilter::initResources() {
-    STUBBED();
 }
 
 NuSpeedBlurFilterGen::NuSpeedBlurFilterGen() {
-    STUBBED();
 }
 
 void NuSpeedBlurFilterGen::computeSpeedBlur(VuVec &result) {

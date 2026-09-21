@@ -280,6 +280,5 @@ void NuTexManagerStream(nugscn_s *) {
 }
 
 i32 NuTexGetUnresolvedTextureTIDPS() {
-    STUBBED();
     return 0;
 }
