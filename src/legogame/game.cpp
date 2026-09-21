@@ -60,6 +60,13 @@ static BOLTSYS BoltSys_LSW = {GlobalBoltType,
                               GetShootDirection_LSW,
                               Bolt_HitPart_LSW,
                               Bolt_AlternateFire_LSW};
+extern i32 (*BoltInitSfxFn)(GameObject_s *);
+i32 GameAudio_GetSfxId(i32);
+static i32 BoltInitSfx_LSW(GameObject_s *object) {
+    if (object != NULL && object->id == id_GEONOSIAN && (object->field_0xefd & 2) == 0)
+        return GameAudio_GetSfxId(0x49);
+    return -1;
+}
 extern i16 tALLEXTRASUNLOCKED;
 extern void (*BuckStartExtraFn)(GameObject_s *);
 void BuckStartExtra_LSW(GameObject_s *);
@@ -1058,7 +1065,7 @@ void InitGameAfterConfig(void) {
     //  ExtraHurtSfxFn = ExtraHurtSfx_LSW;
     //  ExtraDieSfxFn = ExtraDieSfx_LSW;
     BuckStartExtraFn = BuckStartExtra_LSW;
-    //  BoltInitSfxFn = BoltInitSfx_LSW;
+    BoltInitSfxFn = BoltInitSfx_LSW;
     //  REDBRICKPOSX = 0.0;
     //  REDBRICKPOSY = -0.5;
     //  REDBRICKPOS2X = 1.25;

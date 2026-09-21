@@ -1,10 +1,14 @@
 #include "decomp.h"
-#include "legoapi/actions/character/streaks.h"
 #include "legoapi/legoapi_types.h"
 #include "globals.h"
 #include "nu2api/numath/nuvec.h"
 #include "nu2api/nu3d/nurndr.h"
 #include "nu2api/nu3d/nutex.h"
+#include "nu2api/nu3d/numtl.h"
+#include "nu2api/numath/nuvec.h"
+#include <string.h>
+
+extern f32 FRAMETIME;
 
 struct AIROW_s;
 struct nuqthdr_s;
@@ -32,12 +36,16 @@ struct STREAKHDR_s {
     u8 flags;
     u8 field_0xf;
     i32 has_new_streak;
-    STREAKHDR_s **owner_slot;
+    void **owner_slot;
     u32 colour;
 };
 
 DECOMP_ASSERT(sizeof(STREAK_s) == 0xe8, "STREAK_s size");
 DECOMP_ASSERT(sizeof(STREAKHDR_s) == 0x1c, "STREAKHDR_s size");
+DECOMP_ASSERT(offsetof(STREAK_s, positions) == 0x38, "Streak first edge samples");
+DECOMP_ASSERT(offsetof(STREAK_s, tangents) == 0x8c, "Streak second edge samples");
+DECOMP_ASSERT(offsetof(STREAK_s, remaining_time) == 0xe4, "Streak lifetime");
+DECOMP_ASSERT(offsetof(STREAKHDR_s, owner_slot) == 0x14, "Streak owner slot");
 
 static STREAKHDR_s streakhdrs[32];
 static STREAKHDR_s *streakhdrs_free;
@@ -45,6 +53,8 @@ static STREAKHDR_s *streakhdrs_used;
 static STREAK_s streaks[128];
 static STREAK_s *streaks_free;
 static STREAK_s *streaks_used;
+numtl_s *streakmtl;
+numtl_s *streakmtl_ref;
 
 numtl_s *streakmtl;
 numtl_s *streakmtl_ref;
@@ -105,7 +115,8 @@ static inline void UnlinkStreakHeader(STREAKHDR_s **head, STREAKHDR_s *header) {
     }
 }
 
-void InitStreaks(variptr_u *, variptr_u, char *) {
+// Original 0x4a4ae0, 450 bytes.
+void InitStreaks(variptr_u *buffer, variptr_u end, char *name) {
     for (i32 i = 0; i < 32; i++) {
         streakhdrs[i].index = i;
         streakhdrs[i].next = &streakhdrs[i + 1];
@@ -114,6 +125,8 @@ void InitStreaks(variptr_u *, variptr_u, char *) {
     }
 
     streakhdrs_free = streakhdrs;
+    streakhdrs[31].next = NULL;
+    streakhdrs[0].prev = NULL;
     streakhdrs_used = NULL;
 
     for (i32 i = 0; i < 128; i++) {
@@ -122,7 +135,40 @@ void InitStreaks(variptr_u *, variptr_u, char *) {
     }
 
     streaks_free = streaks;
+    streaks[127].next = NULL;
+    streaks[0].prev = NULL;
     streaks_used = NULL;
+
+    streakmtl = NuMtlCreate3D(1);
+    streakmtl->sort_pri = 500;
+    streakmtl->attribs.unknown_1_1_2 = 0;
+    streakmtl->attribs.unknown_1_4_8 = 0;
+    streakmtl->attribs.z_mode = 1;
+    streakmtl->opacity = 1.0f;
+    streakmtl->attribs.alpha_mode = 2;
+    streakmtl->attribs.filter_mode = 1;
+    streakmtl->attribs.unknown_2_1_2 = 2;
+    streakmtl->attribs.unknown_2_4 = 1;
+    buffer->addr = ALIGN(buffer->addr, 16);
+    const f32 five = 5.0f;
+    memcpy(&streakmtl->filler3[4], &five, sizeof(five));
+    streakmtl->particle_type_tag = -112;
+    streakmtl->tex_id = NuTexRead(name, buffer, end);
+    NuMtlUpdate(streakmtl);
+    streakmtl_ref = NuMtlCreate3D(1);
+    streakmtl_ref->particle_type_tag = -112;
+    streakmtl_ref->opacity = 1.0f;
+    streakmtl_ref->sort_pri = 1;
+    streakmtl_ref->attribs.unknown_1_1_2 = 0;
+    streakmtl_ref->attribs.unknown_1_4_8 = 0;
+    streakmtl_ref->attribs.z_mode = 0;
+    streakmtl_ref->attribs.alpha_mode = 2;
+    streakmtl_ref->attribs.filter_mode = 1;
+    memcpy(&streakmtl_ref->filler3[4], &five, sizeof(five));
+    streakmtl_ref->attribs.unknown_2_1_2 = 2;
+    streakmtl_ref->attribs.unknown_2_4 = 1;
+    streakmtl_ref->tex_id = streakmtl->tex_id;
+    NuMtlUpdate(streakmtl_ref);
 }
 
 void ResetStreaks() {
@@ -147,9 +193,8 @@ void ResetStreaks() {
         if (header->owner_slot != NULL) {
             if (*header->owner_slot == header) {
                 *header->owner_slot = NULL;
-            } else {
-                header->owner_slot = NULL;
             }
+            header->owner_slot = NULL;
         }
 
         UnlinkStreakHeader(&used_headers, header);

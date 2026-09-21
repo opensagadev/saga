@@ -9,6 +9,11 @@ extern void NewGame();
 extern "C" void __real__Z8LoadPermv();
 extern "C" void __real__Z7EndPermv();
 
+static void HostUnlockAllLevels() {
+    for (i32 area_index = 0; area_index < AREACOUNT; ++area_index)
+        Game.area_save[area_index].complete = 1;
+}
+
 extern "C" void __wrap__Z8LoadPermv() {
     HostLoadPermImmediately(__real__Z8LoadPermv);
 }
@@ -28,6 +33,7 @@ extern "C" void __wrap__Z7EndPermv() {
 
     // Character and area configuration is now available to NewGame.
     NewGame();
+    HostUnlockAllLevels();
     BackupGame = Game;
     HostEnterLevel(*cantina);
     fprintf(stderr, "browser: entering cantina\n");

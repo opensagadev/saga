@@ -44,6 +44,8 @@ extern BOLT_s *objhitobj_bolt;
 extern i32 ObstacleCamHoldUntilPlayersMove;
 extern i32 disable_narrow_socks, players_cannot_exit_speeder, BuildUpDone;
 extern f32 BuildUpScale, DrawBuildUpTime, builduptime;
+extern i32 MiniCutCam;
+f32 SHIELDFLICKERTIME = 0.1f;
 void AlertSurroundingCreatures(GameObject_s *, NUVEC *);
 i32 Hub_InMenu();
 i32 RotDiff(u16, u16);
@@ -199,8 +201,65 @@ i16 InsideLineXZ(f32 point_u, f32 point_v, f32 line_start_u, f32 line_start_v, f
     return side >= 0.0f;
 }
 
-void ObjHitShield(GameObject_s *, GameObject_s *, i32, BOLT_s *) {
-    STUBBED();
+void ObjHitShield(GameObject_s *attacker, GameObject_s *target, i32 damage, BOLT_s *) {
+    if (target == NULL) {
+        return;
+    }
+    if (attacker != NULL && (attacker->apiobj.flags_low & 1) == 0) {
+        attacker = NULL;
+    }
+    if (target->field_0xd24 == 1.0f && target->timer_d28 > 0.0f) {
+        if (attacker != NULL) {
+            if (static_cast<i8>(attacker->apiobj.flags_low) < 0) {
+                AlertSurroundingCreatures(attacker, &attacker->apiobj.collision_position);
+            } else if (attacker->character_context != 0x39) {
+                damage = 0;
+            }
+        }
+    } else if (attacker != NULL && static_cast<i8>(attacker->apiobj.flags_low) < 0) {
+        AlertSurroundingCreatures(attacker, &attacker->apiobj.collision_position);
+    }
+
+    GameAudio_PlaySfx(0x41, &target->apiobj.collision_position, GameAudio_GetPlrSfxBits(attacker), 0);
+    if (static_cast<i8>(target->apiobj.flags_low) < 0) {
+        TakeHitRumble(target, 0.6f);
+    }
+
+    if (MiniCutCam == 0 || static_cast<i8>(target->apiobj.flags_low) >= 0) {
+        if (target->field_0xe37 != 0 && damage > 0) {
+            if (static_cast<i8>(target->apiobj.flags_low) < 0 && Player_HasInvincibility(target)) {
+                damage = 0;
+            }
+            i32 shield = target->field_0xe37 - damage;
+            f32 first_rumble;
+            f32 second_rumble;
+            if (shield > 0) {
+                PlaySfx("DDEkaHit", &target->apiobj.collision_position);
+                target->field_0xe37 = shield;
+                target->timer_d28 = SHIELDFLICKERTIME;
+                first_rumble = 0.5f;
+                second_rumble = 0.0f;
+            } else {
+                PlaySfx("DDEkaFlicker", &target->apiobj.collision_position);
+                target->timer_d28 = 0.5f;
+                target->field_0xe37 = 0;
+                target->field_0xd24 = 0.0f;
+                first_rumble = 0.8f;
+                second_rumble = 0.3f;
+            }
+            if (attacker == NULL) {
+                return;
+            }
+            NewRumble(attacker->pad_gamepad->pad, first_rumble, 0);
+            if (second_rumble > 0.0f) {
+                NewRumble(attacker->pad_gamepad->pad, second_rumble, 0);
+            }
+            return;
+        }
+    }
+    if (attacker != NULL) {
+        NewBuzz(attacker->pad_gamepad->pad, 0.1f, 0);
+    }
 }
 
 i16 InsidePolLines(f32 point_x, f32 point_y, f32 point_z, f32 edge_a_x, f32 edge_a_y, f32 edge_a_z, f32 edge_b_x,

@@ -407,7 +407,8 @@ void StartJetPackFall(GameObject_s *object, i32 fall) {
 }
 
 void MakeJumpReachHeight(GameObject_s *object, float height, i32 force) {
-    const f32 remaining_height = height - (object->apiobj.position.y - object->jump_start_height);
+    const f32 current_height = object->apiobj.collision_min.y - object->jump_start_height;
+    const f32 remaining_height = height - current_height;
     if (remaining_height > 0.0f) {
         const GAMECHARACTERDATA *game_character =
             static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
@@ -426,33 +427,32 @@ void SetBallooningHeight(GameObject_s *object, float height) {
 }
 
 void StartJump(GameObject_s *object, i32 movement_state) {
-    GAMECHARACTERDATA *game_character = Jump_GetCharacterData(object);
-    if (object == NULL || game_character == NULL) {
-        return;
-    }
-
-    object->character_context = CHARACTER_CONTEXT_JUMP;
-    object->action_movement_state = static_cast<u8>(movement_state);
-    object->jump_sequence = 1;
-    object->jump_start_height = object->apiobj.position.y;
-    object->context_animation_timer = 0.0f;
-    object->context_animation = PLAYER_JUMP_ACTION_JUMP;
-    object->jump_flags =
-        static_cast<u8>((object->jump_flags & ~PLAYER_JUMP_FLAG_SPECIAL_TAKEOFF) |
-                        ((movement_state == 3 || movement_state == 4) ? PLAYER_JUMP_FLAG_SPECIAL_TAKEOFF : 0));
-    object->context_variant_flags =
-        static_cast<i8>(static_cast<u8>(object->context_variant_flags) & ~PLAYER_JUMP_VARIANT_START_CLEAR);
-    object->airborne_action_timer = 0.0f;
-    if (movement_state != 6 && movement_state != 7) {
-        PlayJumpSfx(object, 0);
+    if (LEGOCONTEXT_JUMP != -1) {
+        object->character_context = LEGOCONTEXT_JUMP;
+        object->action_movement_state = static_cast<u8>(movement_state);
+        object->jump_sequence = 1;
+        object->jump_start_height = object->apiobj.collision_min.y;
+        object->context_animation_timer = 0.0f;
+        object->context_animation = LEGOACT_JUMP;
+        object->jump_flags =
+            static_cast<u8>((object->jump_flags & ~PLAYER_JUMP_FLAG_SPECIAL_TAKEOFF) |
+                            ((movement_state == 3 || movement_state == 4) ? PLAYER_JUMP_FLAG_SPECIAL_TAKEOFF : 0));
+        object->context_variant_flags =
+            static_cast<i8>(static_cast<u8>(object->context_variant_flags) & ~PLAYER_JUMP_VARIANT_START_CLEAR);
+        object->airborne_action_timer = 0.0f;
+        if (static_cast<u32>(movement_state - 6) > 1) {
+            PlayJumpSfx(object, 0);
+        }
     }
     object->apiobj.field_0x27d = 0;
     object->field_0x105c = 0;
+    GAMECHARACTERDATA *game_character = object->apiobj.character_data->game_character;
+    f32 jump_speed = game_character->jump_speed;
     object->field_0xe22 |= PLAYER_JUMP_RUNTIME_BUTTON_HELD;
     object->delayed_turn_timer = 0.0f;
     object->airborne_input_timer = 0.0f;
+    object->apiobj.velocity.y = jump_speed;
     object->airborne_collision_target = NULL;
-    object->apiobj.velocity.y = game_character->jump_speed;
     ResetAnimPacket(&object->apiobj.anim_packet, -1);
     object->apiobj.pitch_angle = 0;
     object->apiobj.roll_angle = 0;

@@ -31,6 +31,7 @@ extern "C" {
     i32 AddGameDebrisMtx(APIDEBRISSYS_s *system, i32 type, NUVEC *position, i32 count, NUMTX *matrix);
     APIDEBRISSYS_s *InitGameDebris(VARIPTR *cursor, VARIPTR end, i32 count, i32 named_count, char **names, char page);
     i32 PARTLookupType(char *name);
+    i32 PARTLookupTypePageOnly(char *name, i32 page);
     i32 LookupDebrisEffect(char *name);
     i32 LookupDebrisEffectPageIgnore(char *name, i32 page, i32 ignore);
     i32 LookupDebrisEffectPage(char *name, char page);

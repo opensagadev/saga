@@ -23,6 +23,7 @@
 #include <string.h>
 #include "nu2api/nu3d/nuprim_internal.h"
 #include "nu2api/numath/nufloat.h"
+#include "nu2api/numath/nurand.h"
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numath/nuvec.h"
 
@@ -1162,6 +1163,29 @@ f32 global_windscale = 1.0f;
 extern "C" void NuRndrSetWind(f32 speed, f32 scale) {
     global_windspeed = speed;
     global_windscale = scale;
+}
+
+extern "C" void WindShear(NUMTX *destination, NUMTX *source, i32 scale, i32 seed) {
+    f32 wind_scale = (static_cast<f32>(scale) / 65535.0f) * global_windscale;
+    f32 wind_speed = (static_cast<f32>(seed) / 65535.0f) * global_windspeed;
+    u32 random_seed = static_cast<u32>(seed);
+    f32 random = NuRandFloatSeeded(&random_seed);
+    u32 frame = static_cast<u32>(NuRndrGlobalFrameCount());
+    f32 phase = random * 3.142f * 2.0f +
+                (static_cast<f32>(frame >> 16) * 65536.0f + static_cast<f32>(static_cast<u16>(frame))) * wind_speed;
+    f32 shear_x = NuTrigTable[(static_cast<i32>(phase * 4.2f * 10430.378f) >> 1) & 0x7fff] * 0.25f;
+    f32 wave_x = NuTrigTable[(static_cast<i32>(phase * 2.1f * 10430.378f) >> 1) & 0x7fff] * 0.5f;
+    wave_x += NuTrigTable[(static_cast<i32>(phase * 10430.378f) >> 1) & 0x7fff];
+    shear_x = (shear_x + wave_x) * wind_scale;
+    f32 shear_z = NuTrigTable[((static_cast<i32>(phase * 4.4f * 10430.378f) + 0x4000) >> 1) & 0x7fff] * 0.25f;
+    f32 wave_z = NuTrigTable[((static_cast<i32>(phase * 2.3f * 10430.378f) + 0x4000) >> 1) & 0x7fff] * 0.5f;
+    wave_z += NuTrigTable[((static_cast<i32>(phase * 1.1f * 10430.378f) + 0x4000) >> 1) & 0x7fff];
+    shear_z = (shear_z + wave_z) * wind_scale;
+    *destination = *source;
+    destination->m10 = source->m00 * shear_x + source->m10 + source->m20 * shear_z;
+    destination->m11 = source->m01 * shear_x + source->m11 + source->m21 * shear_z;
+    destination->m12 = source->m02 * shear_x + source->m12 + source->m22 * shear_z;
+    destination->m13 = source->m03 * shear_x + source->m13 + source->m23 * shear_z;
 }
 
 extern "C" void NuRndrGrid(NUVEC *centre, NUVEC *size, i32 columns, i32 rows) {

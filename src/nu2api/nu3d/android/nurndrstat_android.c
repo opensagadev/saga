@@ -38,7 +38,9 @@ extern "C" {
     }
 
     i32 NuRndrSetAmbientLightPS(const NUCOLOUR3 *colour) {
-        render_state.ambient_intensity = *colour;
+        render_state.ambient_intensity.r = colour->r;
+        render_state.ambient_intensity.g = colour->g;
+        render_state.ambient_intensity.b = colour->b;
         render_state.light_state = nullptr;
         render_state.state.global_id++;
         render_state.state.lights_id++;
@@ -54,13 +56,15 @@ extern "C" {
     i32 NuRndrSetDirectionalLightsPS(const NUVEC *dir0, const NUCOLOUR3 *colour0, const NUVEC *dir1,
                                      const NUCOLOUR3 *colour1, const NUVEC *dir2, const NUCOLOUR3 *colour2) {
         NUMTX *view = NuCameraGetViewMtx();
-        const NUVEC *directions[3] = {dir0, dir1, dir2};
-        const NUCOLOUR3 *colours[3] = {colour0, colour1, colour2};
-        for (i32 i = 0; i < 3; i++) {
-            render_state.light_intensity[i] = *colours[i];
-            NuVecMtxRotate(&render_state.light_direction[i], const_cast<NUVEC *>(directions[i]), view);
-            NuVecNorm(&render_state.light_direction[i], &render_state.light_direction[i]);
-        }
+        render_state.light_intensity[0] = *colour0;
+        render_state.light_intensity[1] = *colour1;
+        render_state.light_intensity[2] = *colour2;
+        NuVecMtxRotate(&render_state.light_direction[0], const_cast<NUVEC *>(dir0), view);
+        NuVecMtxRotate(&render_state.light_direction[1], const_cast<NUVEC *>(dir1), view);
+        NuVecMtxRotate(&render_state.light_direction[2], const_cast<NUVEC *>(dir2), view);
+        NuVecNorm(&render_state.light_direction[0], &render_state.light_direction[0]);
+        NuVecNorm(&render_state.light_direction[1], &render_state.light_direction[1]);
+        NuVecNorm(&render_state.light_direction[2], &render_state.light_direction[2]);
         render_state.light_state = nullptr;
         render_state.state.global_id++;
         render_state.state.lights_id++;
@@ -178,8 +182,11 @@ void *RndrStateBuildKonstState(nuglobalrndrstate_s *state) {
     return result;
 }
 
-void RndrStateBuildReflectionState(nuglobalrndrstate_s *) {
-    STUBBED();
+void *RndrStateBuildReflectionState(nuglobalrndrstate_s *state) {
+    VARIPTR *buffer = NuDisplayListGetBuffer();
+    void *result = buffer->void_ptr;
+    *buffer->u32_ptr++ = state->reflection;
+    return result;
 }
 
 extern "C" {
@@ -275,10 +282,11 @@ extern "C" {
         memset(&render_state, 0, sizeof(render_state));
     }
 
-    void DisplayListUpdateRenderState(void *display_list, void *state) {
-        auto *dl = static_cast<NUDISPLAYLIST *>(display_list);
-        auto *global = static_cast<NUGLOBALRNDRSTATE *>(state);
-        if (global == nullptr || dl->state->global_id == global->state.global_id) {
+    void DisplayListUpdateRenderState(NUDISPLAYLIST *dl, NUGLOBALRNDRSTATE *global) {
+        if (global == nullptr) {
+            return;
+        }
+        if (dl->state->global_id == global->state.global_id) {
             return;
         }
 
@@ -292,31 +300,23 @@ extern "C" {
 
         if (dl->state->camera_id != global->state.camera_id) {
             if (global->camera_state == nullptr) {
-                struct CameraPacket {
-                    i32 id;
-                    NUMTX view;
-                    NUMTX projection;
-                    f32 viewport[4];
-                };
-
+                NUMTX projection = {};
+                projection.m00 = global->proj_00;
+                projection.m11 = global->proj_11;
+                projection.m22 = global->proj_22;
+                projection.m23 = global->proj_23;
+                projection.m32 = global->proj_32;
+                projection.m20 = global->proj_20;
+                projection.m21 = global->proj_21;
                 VARIPTR *buffer = NuDisplayListGetBuffer();
-                auto *packet = static_cast<CameraPacket *>(buffer->void_ptr);
-                global->camera_state = packet;
-                packet->id = nuapi.frame_count + (global->state.camera_id + 5) * (global->state.global_id + 13);
-                packet->view = global->view;
-                memset(&packet->projection, 0, sizeof(packet->projection));
-                packet->projection.m00 = global->proj_00;
-                packet->projection.m11 = global->proj_11;
-                packet->projection.m22 = global->proj_22;
-                packet->projection.m23 = global->proj_23;
-                packet->projection.m32 = global->proj_32;
-                packet->projection.m20 = global->proj_20;
-                packet->projection.m21 = global->proj_21;
-                packet->viewport[0] = global->vpx;
-                packet->viewport[1] = global->vpy;
-                packet->viewport[2] = global->vpw;
-                packet->viewport[3] = global->vph;
-                buffer->addr += sizeof(CameraPacket);
+                global->camera_state = buffer->void_ptr;
+                *buffer->u32_ptr++ = (global->state.camera_id + 5) * (global->state.global_id + 13) + nuapi.frame_count;
+                *buffer->mtx_ptr++ = global->view;
+                *buffer->mtx_ptr++ = projection;
+                *buffer->f32_ptr++ = global->vpx;
+                *buffer->f32_ptr++ = global->vpy;
+                *buffer->f32_ptr++ = global->vpw;
+                *buffer->f32_ptr++ = global->vph;
             }
             NuDisplayListLinkItem(dl, 0x9a, global->camera_state);
             dl->state->camera_id = global->state.camera_id;
@@ -334,6 +334,20 @@ extern "C" {
             }
             NuDisplayListLinkItem(dl, 0xa5, global->konst_state);
             dl->state->konst_id = global->state.konst_id;
+        }
+        if (dl->state->reflection_id != global->state.reflection_id) {
+            if (global->reflection_state == nullptr) {
+                global->reflection_state = RndrStateBuildReflectionState(global);
+            }
+            NuDisplayListLinkItem(dl, 0xab, global->reflection_state);
+            dl->state->reflection_id = global->state.reflection_id;
+        }
+        if (dl->state->vertex_groups_id != global->state.vertex_groups_id) {
+            void *groups = RndrStateBuildVertexGroupsStates(&global->state);
+            if (groups != nullptr) {
+                NuDisplayListLinkItem(dl, 0xa9, groups);
+            }
+            dl->state->vertex_groups_id = global->state.vertex_groups_id;
         }
         dl->state->global_id = global->state.global_id;
     }

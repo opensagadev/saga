@@ -1291,7 +1291,7 @@ void (*CutScene_StoppedFn)(CUTINFO *) = NULL;
 i32 (*CutScene_ReplaceCharacterModelFn)(CUTINFO *, NUGCUTCHAR_s *) = NULL;
 i32 (*InitBolt_AddMomentumType)(BOLT_s *, GameObject_s *, nuvec_s *) = NULL;
 i32 (*Bolt_HitPlatFn)(BOLT_s *) = NULL;
-void (*Bolt_HitCustomFn)(BOLT_s *, nuvec_s *) = NULL;
+i32 (*Bolt_HitCustomFn)(BOLT_s *, nuvec_s *) = NULL;
 void (*GizObstacle_SetDefaultSFXFn)(void *, GIZOBSTACLE_s *) = NULL;
 // Original bss @0x6a3f54 / @0x6a3f50.
 i32 LoadPerm_LanguageSelect = 0;
@@ -1470,3 +1470,5 @@ i32 NetPaused = 0;
 f32 mtl_animation_speed_scale = 1.0f;
 u16 script_mask = 0xffff;
 i32 (*GizObstacle_CheckExcludeFlagsFn)(GIZOBSTACLE_s *, GameObject_s *) = NULL;
+HUBMINIKITPIECES_s **Char_MiniKit = NULL;
+VARIPTR CharacterMiniKits_permbuffer_base = {0};

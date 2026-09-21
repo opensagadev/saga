@@ -4,8 +4,10 @@
 #include "nu2api/nucore/common.h"
 #include "nu2api/numath/numtx.h"
 #include "nu2api/numath/nuvec.h"
+#include "nu2api/nu3d/nupostparams.h"
 
 struct rtldata_s;
+struct burnset_s;
 
 struct rtl_s {
     NUVEC position;
@@ -121,9 +123,14 @@ extern "C" {
     rtlfog_s *fogAlloc(void);
     void fogFree(rtlfog_s *);
     void rtlSetLights(rtldata_s *);
+    void rtlSetSpecularLight(rtldata_s *);
+    f32 rtlSpecularValue(rtldata_s *);
+    void rtlSetSpecularValue(rtldata_s *, f32);
     rtlset *rtlLoadSet(char *, VARIPTR *, i32);
+    burnset_s *edrtlBurnoutLoad(char *, VARIPTR *, i32);
     void rtlSaveSet(char *, rtlset *);
     void rtlProcessLights(void *, f32);
     rtlfog_s *rtlGetFogSet(rtlset *, NUVEC *);
     rtlfog_s *edrtlGetFogSet(void);
+    void edrtlCalculateBurnoutEx(burnset_s *, NuBloomParameters *, NUVEC *, f32);
 }

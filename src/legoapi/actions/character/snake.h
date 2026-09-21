@@ -34,4 +34,5 @@ DECOMP_ASSERT(offsetof(SNAKEBODY_s, flags) == 0x10e, "Snake body flags offset");
 void InitSnakes(WORLDINFO_s *world);
 SNAKEBODY_s *CreateSnakeBody(GameObject_s *object, i32 segment_count);
 void DestroySnakeBody(GameObject_s *object);
+void BlowUpSnakeBody(GameObject_s *object);
 void DrawSnakeBody(GameObject_s *object);

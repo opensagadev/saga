@@ -11,6 +11,7 @@
 #include "legoapi/legoapi_types.h"
 #include "legoapi/render/core/rtl.h"
 #include "legoapi/render/light/lighting.h"
+#include "legoapi/render/light/surfaces.h"
 #include "legoapi/world/world.h"
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nu3d/nurndr.h"
@@ -59,26 +60,54 @@ void SetLights(NUCOLOUR3 *colour0, NUVEC *direction0, NUCOLOUR3 *colour1, NUVEC 
     NuRndrSetAmbientLightPS(ambient_colour);
 }
 
-void SetLights_RTLDATA(rtldata_s *data, float scale) {
+static inline __attribute__((always_inline)) void SetPanelLightsInline(
+    NUCOLOUR3 *colour0, NUVEC *direction0, NUCOLOUR3 *colour1, NUVEC *direction1, NUCOLOUR3 *colour2,
+    NUVEC *direction2, NUVEC *ambient) {
+    NuRndrLightingStateCurrent.direction[0] = *direction0;
+    NuRndrLightingStateCurrent.direction[1] = *direction1;
+    NuRndrLightingStateCurrent.direction[2] = *direction2;
+    NuRndrLightingStateCurrent.intensity[0] = *colour0;
+    NuRndrLightingStateCurrent.intensity[1] = *colour1;
+    NuRndrLightingStateCurrent.intensity[2] = *colour2;
+    NuRndrSetDirectionalLightsPS(direction0, colour0, direction1, colour1, direction2, colour2);
+    NUCOLOUR3 *ambient_colour = reinterpret_cast<NUCOLOUR3 *>(ambient);
+    NuRndrLightingStateCurrent.ambient = *ambient_colour;
+    NuRndrSetAmbientLightPS(ambient_colour);
+}
+
+__attribute__((force_align_arg_pointer)) void SetLights_RTLDATA(rtldata_s *data, float scale) {
     if (scale == 1.0f) {
         rtlSetLights(data);
         return;
     }
-    rtldata_s scaled = *data;
-    for (i32 i = 0; i < 3; ++i) {
-        scaled.intensity[i].r *= scale;
-        scaled.intensity[i].g *= scale;
-        scaled.intensity[i].b *= scale;
-    }
+    rtldata_s scaled __attribute__((aligned(16))) = *data;
+    scaled.intensity[0].r *= scale;
+    scaled.intensity[0].g *= scale;
+    scaled.intensity[0].b *= scale;
+    scaled.intensity[1].r *= scale;
+    scaled.intensity[1].g *= scale;
+    scaled.intensity[1].b *= scale;
+    scaled.intensity[2].r *= scale;
+    scaled.intensity[2].g *= scale;
+    scaled.intensity[2].b *= scale;
     scaled.ambient.x *= scale;
     scaled.ambient.y *= scale;
     scaled.ambient.z *= scale;
     rtlSetLights(&scaled);
 }
 
-void SetLevelLights(void *set, float) {
+void SetLevelLights(void *set, float scale) {
+    f32 specular_value = rtlSpecularValue(&lev_rtldata);
+    rtlResetEx(&lev_rtldata, 1);
     rtlApplySetScale(set, &lev_rtldata, reinterpret_cast<NUVEC *>(&global_camera.mtx.m30), NULL, 0x10, 1.0f);
-    rtlSetLights(&lev_rtldata);
+    if (rtlSpecularValue(&lev_rtldata) == 0.0f) {
+        rtlSetSpecularValue(&lev_rtldata, specular_value);
+    }
+    SetLights_RTLDATA(&lev_rtldata, scale);
+    rtlSetSpecularLight(&lev_rtldata);
+
+    NUCOLOUR4 ambient = {lev_rtldata.ambient.x, lev_rtldata.ambient.y, lev_rtldata.ambient.z, 128.0f};
+    NuRndrSetAmbientLightSpecular(&ambient);
 }
 
 // Retail realigns this stack frame for the temporary colour arrays.
@@ -150,33 +179,23 @@ void SetZeroLights() {
 }
 
 void LightGameObject(GameObject_s *object, void *set) {
-    rtlApplySetScale(set, &object->light_data, &object->apiobj.position, NULL, -1, 1.0f);
+    rtlResetEx(&object->light_data, 1);
+    rtlApplySetScale(set, &object->light_data, &object->apiobj.collision_position, NULL, -1, 1.0f);
 
     const rtldata_s &target = object->light_data;
     OBJECTLIGHTINGSTATE_s &current = object->lighting_state;
     const bool reset = (object->field_0xefc & 0x80) != 0;
 
-    auto update_colour = [reset](NUCOLOUR3 &value, const NUCOLOUR3 &next) {
-        if (reset) {
-            value = next;
-        } else {
-            value.r = SeekValF(value.r, next.r, 5.0f);
-            value.g = SeekValF(value.g, next.g, 5.0f);
-            value.b = SeekValF(value.b, next.b, 5.0f);
-        }
-    };
-    auto update_direction = [reset](NUVEC &value, const NUVEC &next) {
-        if (reset) {
-            value = next;
-        } else {
-            value.x = SeekValF(value.x, next.x, 5.0f);
-            value.y = SeekValF(value.y, next.y, 5.0f);
-            value.z = SeekValF(value.z, next.z, 5.0f);
-        }
-        if (value.x != 0.0f || value.y != 0.0f || value.z != 0.0f) {
-            NuVecNorm(&value, &value);
-        }
-    };
+    f32 surface_fade = 0.0f;
+    if (object->apiobj.field_0x218 != 2000000.0f &&
+        (TerSurface[static_cast<i8>(object->apiobj.field_0x281)].flags & 8) != 0) {
+        surface_fade = 1.0f;
+    }
+    if (reset) {
+        object->field_0xd6c = surface_fade;
+    } else {
+        object->field_0xd6c = SeekLinearF(object->field_0xd6c, surface_fade, 3.0f * FRAMETIME);
+    }
 
     if (reset) {
         current.ambient = target.ambient;
@@ -185,10 +204,49 @@ void LightGameObject(GameObject_s *object, void *set) {
         current.ambient.y = SeekValF(current.ambient.y, target.ambient.y, 5.0f);
         current.ambient.z = SeekValF(current.ambient.z, target.ambient.z, 5.0f);
     }
-    for (i32 light = 0; light < 3; ++light) {
-        update_colour(current.intensity[light], target.intensity[light]);
-        update_direction(current.direction[light], target.direction[light]);
+
+    if (reset) {
+        current.intensity[0] = target.intensity[0];
+        current.direction[0] = target.direction[0];
+    } else {
+        current.intensity[0].r = SeekValF(current.intensity[0].r, target.intensity[0].r, 5.0f);
+        current.intensity[0].g = SeekValF(current.intensity[0].g, target.intensity[0].g, 5.0f);
+        current.intensity[0].b = SeekValF(current.intensity[0].b, target.intensity[0].b, 5.0f);
+        current.direction[0].x = SeekValF(current.direction[0].x, target.direction[0].x, 5.0f);
+        current.direction[0].y = SeekValF(current.direction[0].y, target.direction[0].y, 5.0f);
+        current.direction[0].z = SeekValF(current.direction[0].z, target.direction[0].z, 5.0f);
     }
+    if (current.direction[0].x != 0.0f || current.direction[0].y != 0.0f || current.direction[0].z != 0.0f)
+        NuVecNorm(&current.direction[0], &current.direction[0]);
+
+    if (reset) {
+        current.intensity[1] = target.intensity[1];
+        current.direction[1] = target.direction[1];
+    } else {
+        current.intensity[1].r = SeekValF(current.intensity[1].r, target.intensity[1].r, 5.0f);
+        current.intensity[1].g = SeekValF(current.intensity[1].g, target.intensity[1].g, 5.0f);
+        current.intensity[1].b = SeekValF(current.intensity[1].b, target.intensity[1].b, 5.0f);
+        current.direction[1].x = SeekValF(current.direction[1].x, target.direction[1].x, 5.0f);
+        current.direction[1].y = SeekValF(current.direction[1].y, target.direction[1].y, 5.0f);
+        current.direction[1].z = SeekValF(current.direction[1].z, target.direction[1].z, 5.0f);
+    }
+    if (current.direction[1].x != 0.0f || current.direction[1].y != 0.0f || current.direction[1].z != 0.0f)
+        NuVecNorm(&current.direction[1], &current.direction[1]);
+
+    if (reset) {
+        current.intensity[2] = target.intensity[2];
+        current.direction[2] = target.direction[2];
+    } else {
+        current.intensity[2].r = SeekValF(current.intensity[2].r, target.intensity[2].r, 5.0f);
+        current.intensity[2].g = SeekValF(current.intensity[2].g, target.intensity[2].g, 5.0f);
+        current.intensity[2].b = SeekValF(current.intensity[2].b, target.intensity[2].b, 5.0f);
+        current.direction[2].x = SeekValF(current.direction[2].x, target.direction[2].x, 5.0f);
+        current.direction[2].y = SeekValF(current.direction[2].y, target.direction[2].y, 5.0f);
+        current.direction[2].z = SeekValF(current.direction[2].z, target.direction[2].z, 5.0f);
+    }
+    if (current.direction[2].x != 0.0f || current.direction[2].y != 0.0f || current.direction[2].z != 0.0f)
+        NuVecNorm(&current.direction[2], &current.direction[2]);
+
     object->field_0xefc &= 0x7f;
 }
 
@@ -205,7 +263,7 @@ void SetSpotLightMode() {
     NuLightSpotFadeSet(kNeutralSpotLightFade);
 }
 
-void SetCreatureLights(APIOBJECT_s *object) {
+__attribute__((force_align_arg_pointer)) void SetCreatureLights(APIOBJECT_s *object) {
     GameObject_s *owner = object->objptr;
 
     if (Cheats_CheckFlags(1) != 0) {
@@ -220,7 +278,14 @@ void SetCreatureLights(APIOBJECT_s *object) {
         return;
     }
 
-    OBJECTLIGHTINGSTATE_s lights = owner->lighting_state;
+    OBJECTLIGHTINGSTATE_s lights;
+    lights.ambient = owner->lighting_state.ambient;
+    lights.intensity[0] = owner->lighting_state.intensity[0];
+    lights.direction[0] = owner->lighting_state.direction[0];
+    lights.intensity[1] = owner->lighting_state.intensity[1];
+    lights.direction[1] = owner->lighting_state.direction[1];
+    lights.intensity[2] = owner->lighting_state.intensity[2];
+    lights.direction[2] = owner->lighting_state.direction[2];
     f32 red = 1.0f, green = 1.0f, blue = 1.0f;
     GAMECHARACTERDATA *character = static_cast<GAMECHARACTERDATA *>(owner->apiobj.character_data->field11_0x24);
     if (owner->field_0x1024 > 0.0f) {
@@ -331,14 +396,15 @@ void LoadLights(WORLDINFO_s *world, char *path) {
     char filename[268];
     sprintf(filename, "%s.rtl", path);
     world->rtl_set = rtlLoadSet(filename, &world->giz_buffer, world->unknown_0108.addr);
+    sprintf(filename, "%s.bur", path);
+    world->burnset = edrtlBurnoutLoad(filename, &world->giz_buffer, world->unknown_0108.addr);
 }
 
 void InitGameObjectLights(void) {
     GameObject_s *object = Obj;
-    i32 i;
-    for (i = 0; i < 64; ++i)
+    for (i32 i = 0; i < 64; ++i)
         object[i].dynamic_light_id = -1;
-    for (i = 0; i < HIGHGAMEOBJECT; ++i, ++object) {
+    for (i32 i = 0; i < HIGHGAMEOBJECT; ++i, ++object) {
         if ((object->apiobj.field_0x1f8 & 0x1001) != 0x1001)
             continue;
         object->dynamic_light_id = rtlDynamicAlloc();

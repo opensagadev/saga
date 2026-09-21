@@ -72,6 +72,7 @@ f32 GameSetSoundVolume(OPTIONSSAVE_s *options);
 i32 GameAudio_GetSfxId(i32 sfx);
 void GameAudio_PlaySfx(i32 sfx, nuvec_s *position, i32 volume, i32 flags);
 void legoSetMusicVolume(f32 volume);
+extern u8 cutskip_dontplaylevelintro;
 void Hint_LoadAllGameState(void);
 void NuIOS_RestoreInAppPurchases(void);
 void NewGame(void);
@@ -819,7 +820,7 @@ static __used__ void MenuDrawBonusWin(MENU *) {
 static void MenuRefreshPauseCutTarget() {
     pausecut_skip_to_level = -1;
     pausecut_skip_to_gameplay = 0;
-    if (CutScenePlayer_Active() != 0 || CutStopInfo == NULL || WORLD == NULL || WORLD->current_level == NULL) {
+    if (CutScenePlayer_Active() != 0) {
         return;
     }
 
@@ -827,15 +828,35 @@ static void MenuRefreshPauseCutTarget() {
     if ((cut->flags & 0x40000) != 0) {
         return;
     }
-    if (cut->skip_level >= 0 && cut->skip_level != WORLD->level_idx) {
-        pausecut_skip_to_level = cut->skip_level;
-    } else if ((WORLD->current_level->flags & LEVEL_GAMEPLAY) != 0) {
+
+    AREADATA *area = WORLD->area;
+    if (area != NULL && (area->flags & 2) != 0) {
+        if (CREDITS_LDATA != NULL) {
+            pausecut_skip_to_level = CREDITS_LDATA->idx;
+        }
+        return;
+    }
+
+    i32 level_flags = WORLD->current_level->flags;
+    i32 skip_level = cut->skip_level;
+    if ((level_flags & LEVEL_OUTRO) != 0 || (cut->flags & 0x20000) != 0 ||
+        (skip_level != -1 && (LDataList[skip_level].flags & LEVEL_UNKNOWN_FLAG_4) != 0)) {
+        Area_FindStatusLevel(area, &pausecut_skip_to_level);
+    } else if ((level_flags & LEVEL_INTRO) != 0) {
+        LEVELDATA_s *level = Area_FindNextPlayLevel(WORLD->level_idx);
+        if (level != WORLD->current_level) {
+            pausecut_skip_to_level = level->idx;
+        }
+    } else if ((level_flags & LEVEL_MIDTRO) != 0 || (cut->flags & 0x80000) != 0) {
+        if (skip_level != -1 && skip_level != WORLD->level_idx) {
+            pausecut_skip_to_level = skip_level;
+        }
+    } else if ((skip_level == -1 || skip_level == WORLD->level_idx) && (level_flags & LEVEL_GAMEPLAY) != 0) {
         pausecut_skip_to_gameplay = 1;
     }
 }
 
 static __used__ void MenuDrawPauseCut(MENU *menu) {
-    MenuRefreshPauseCutTarget();
     GameDrawMenuEntry(menu, TTab[tRESUME]);
     const bool can_skip =
         CutScenePlayer_Active() != 0 || pausecut_skip_to_level != -1 || pausecut_skip_to_gameplay != 0;
@@ -968,12 +989,12 @@ static __used__ void MenuUpdatePauseCut(MENU *menu) {
         return;
     }
     if (menu->confirm_pressed != 0 && menu->selected_item == 1) {
-        if (CutScenePlayer_Active() != 0) {
-            MenuSFX = GameAudio_GetSfxId(0x30);
-            NewLevelFromMenu(HUB_LDATA, -1, -1, 1);
-            hub_from_cutsceneplayer = 1;
+          if (CutScenePlayer_Active() != 0) {
+              NewLevelFromMenu(HUB_LDATA, -1, -1, 1);
+              hub_from_cutsceneplayer = 1;
         } else if (pausecut_skip_to_level != -1) {
             NewLData = &LDataList[pausecut_skip_to_level];
+            cutskip_dontplaylevelintro = 1;
             music_man.StopTrack(0x10, 0);
         } else if (pausecut_skip_to_gameplay != 0) {
             CUTINFO *cut = static_cast<CUTINFO *>(CutStopInfo);
@@ -991,7 +1012,7 @@ static __used__ void MenuUpdatePauseCut(MENU *menu) {
             ResumeGame(0, 0);
             music_man.StopTrack(0x10, 0);
         } else {
-            MenuSFX = GameAudio_GetSfxId(0x32);
+            GameAudio_PlaySfx(0x32, NULL, 0, 0);
         }
     }
 }

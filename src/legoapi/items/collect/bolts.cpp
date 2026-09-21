@@ -783,8 +783,12 @@ i32 Bolt_HitGameObjects(BOLT_s *bolt, NUVEC *points, NUVEC *minimum, NUVEC *maxi
     return 0;
 }
 
-void Bolt_HitCustomFn_LSW(BOLT_s *, nuvec_s *) {
-    STUBBED();
+i32 ChrisExtraBoltCollision(BOLT_s *, nuvec_s *);
+
+i32 Bolt_HitCustomFn_LSW(BOLT_s *bolt, nuvec_s *points) {
+    if (WORLD->current_level == DOGFIGHTA_LDATA)
+        return ChrisExtraBoltCollision(bolt, points);
+    return 0;
 }
 
 i32 addbolt_nosfx;
@@ -974,8 +978,46 @@ finish:
     Bolt_End(bolt, 1);
 }
 
-void Bolt_AddDeflectedBolt(BOLT_s *, nuvec_s *, nuvec_s *, unsigned char *) {
-    STUBBED();
+__attribute__((force_align_arg_pointer)) void Bolt_AddDeflectedBolt(BOLT_s *bolt, nuvec_s *direction,
+                                                                    nuvec_s *normal, unsigned char *processed) {
+    BOLTTYPE_s *type = bolt->type;
+    if ((type->field_60 & 0x100000) != 0)
+        return;
+
+    NUVEC reflected;
+    NUVEC position;
+    Bolt_Reflect(normal, direction, &reflected);
+    NuVecNorm(&reflected, &reflected);
+    FindAnglesXY(&reflected, NULL, NULL);
+
+    if (static_cast<u8>(bolt->field_0x104) > 31 || (TerSurface[bolt->field_0x104].flags & 0x800) == 0) {
+        i_temp_xrot += static_cast<i32>((qrand() * (1.0f / 65535.0f)) * 16384.0f - 8192.0f);
+        temp_yrot = static_cast<u16>(temp_yrot) +
+                    static_cast<i32>((qrand() * (1.0f / 65535.0f)) * 16384.0f - 8192.0f);
+    }
+
+    NUANGVEC angles;
+    angles.x = i_temp_xrot;
+    angles.y = static_cast<u16>(temp_yrot);
+    NUMTX matrix;
+    NuMtxSetRotationXYVU0(&matrix, &angles);
+
+    i32 type_id = static_cast<i8>(type->field_3d);
+    if (type_id < 0 || type_id >= BoltSys->count)
+        type_id = bolt->type_id;
+
+    position = bolt->position;
+    f32 offset = 1.01f * bolt->ray_radius;
+    position.x += reflected.x * offset;
+    position.y += reflected.y * offset;
+    position.z += reflected.z * offset;
+    addbolt_nosfx = 1;
+    BOLT_s *deflected = Bolt_Add(NULL, &position, &matrix, type_id, bolt->hit_flags);
+    if (deflected != NULL) {
+        deflected->flags |= 0x10000000;
+        if (processed != NULL)
+            processed[deflected->index] = 1;
+    }
 }
 
 static __used__ i32 Bolt_HitPlat(BOLT_s *bolt, u8 *hit_flags, WORLDINFO_s *) {
@@ -1783,9 +1825,7 @@ i8 BoltType_FindIDByName(char *name, WORLDINFO *world) {
         if (NuStrICmp(name, world->bolt_types[i].name) == 0)
             return BoltSys->count + i;
     }
-    // Local records were checked above. The original's count + 7 here reads
-    // eight records beyond GlobalBoltType; search only the allocated globals.
-    for (i32 i = BoltSys->count - 1; i >= 0; --i) {
+    for (i32 i = BoltSys->count + 7; i >= 0; --i) {
         if (NuStrICmp(name, BoltSys->types[i].name) == 0)
             return i;
     }

@@ -57,18 +57,43 @@ extern f32 FRAMETIME;
 void UpdateExplosion_Generic(EXPLOSION *);
 
 void UpdateExplosions() {
-    for (i32 i = 0; i < 8; ++i) {
-        EXPLOSION *explosion = &Explosion[i];
-        if (explosion->field_0x1c < explosion->field_0x20) {
-            explosion->field_0x1c += FRAMETIME;
-            if (explosion->field_0x1c >= explosion->field_0x20) {
-                explosion->field_0x1c = explosion->field_0x20;
-            } else {
-                if (explosion->object != NULL && (explosion->object->apiobj.flags_low & 1) == 0)
-                    explosion->object = NULL;
-                UpdateExplosion_Generic(explosion);
-            }
+#define UPDATE_EXPLOSION(index)                                                                                       \
+    do {                                                                                                               \
+        EXPLOSION *explosion = &Explosion[index];                                                                      \
+        if (explosion->field_0x1c < explosion->field_0x20) {                                                           \
+            explosion->field_0x1c += FRAMETIME;                                                                        \
+            if (explosion->field_0x1c >= explosion->field_0x20) {                                                      \
+                explosion->field_0x1c = explosion->field_0x20;                                                         \
+            } else {                                                                                                   \
+                if (explosion->object != NULL && (explosion->object->apiobj.flags_low & 1) == 0) {                     \
+                    explosion->object = NULL;                                                                          \
+                }                                                                                                      \
+                UpdateExplosion_Generic(explosion);                                                                    \
+            }                                                                                                          \
+        }                                                                                                              \
+    } while (0)
+
+    UPDATE_EXPLOSION(0);
+    UPDATE_EXPLOSION(1);
+    UPDATE_EXPLOSION(2);
+    UPDATE_EXPLOSION(3);
+    UPDATE_EXPLOSION(4);
+    UPDATE_EXPLOSION(5);
+    UPDATE_EXPLOSION(6);
+
+#undef UPDATE_EXPLOSION
+
+    EXPLOSION *explosion = &Explosion[7];
+    if (explosion->field_0x1c < explosion->field_0x20) {
+        explosion->field_0x1c += FRAMETIME;
+        if (explosion->field_0x1c >= explosion->field_0x20) {
+            explosion->field_0x1c = explosion->field_0x20;
+            return;
         }
+        if (explosion->object != NULL && (explosion->object->apiobj.flags_low & 1) == 0) {
+            explosion->object = NULL;
+        }
+        UpdateExplosion_Generic(explosion);
     }
 }
 

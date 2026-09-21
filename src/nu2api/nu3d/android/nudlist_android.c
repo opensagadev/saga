@@ -291,24 +291,29 @@ extern "C" void *DisplayListCreateGeomTransformPS(VARIPTR *buffer, NUMTX *transf
 }
 
 extern "C" void *DisplayListCreateFaceonTransformPS(VARIPTR *buffer, NUMTX *transform, NUMTL *, void *faceon_data) {
+    void *faceon = faceon_data;
     buffer->addr = ALIGN(buffer->addr, 4);
-    auto *packet = static_cast<NuFaceOnTransformPacket *>(buffer->void_ptr);
-    buffer->addr += sizeof(*packet);
+    void *packet = buffer->void_ptr;
+    *static_cast<NUMTX *>(buffer->void_ptr) = *transform;
+    const f32 magnitude =
+        NuFsqrt((NuVecMagSqr(reinterpret_cast<NUVEC *>(buffer->void_ptr)) +
+                 NuVecMagSqr(reinterpret_cast<NUVEC *>(buffer->char_ptr + 0x10)) +
+                 NuVecMagSqr(reinterpret_cast<NUVEC *>(buffer->char_ptr + 0x20))) /
+                3.0f);
+    buffer->addr += sizeof(NUMTX);
+    *buffer->f32_ptr++ = magnitude;
 
-    packet->world = *transform;
-    const f32 scale_squared = NuVecMagSqr(reinterpret_cast<NUVEC *>(&transform->m00)) +
-                              NuVecMagSqr(reinterpret_cast<NUVEC *>(&transform->m10)) +
-                              NuVecMagSqr(reinterpret_cast<NUVEC *>(&transform->m20));
-    packet->magnitude = NuFsqrt(scale_squared / 3.0f);
-
-    NUVEC direction = {};
-    if (*static_cast<i32 *>(faceon_data) == 0) {
-        NuMtxCalcCheapFaceOn(&packet->face_on, &direction);
+    NUVEC direction;
+    if (*static_cast<i32 *>(faceon) == 0) {
+        direction.x = 0.0f;
+        direction.y = direction.x;
+        direction.z = direction.y;
+        NuMtxCalcCheapFaceOn(buffer->mtx_ptr++, &direction);
     } else {
         direction.x = transform->m10;
         direction.y = transform->m11;
         direction.z = transform->m12;
-        NuMtxCalcCheapFaceY_v2(&packet->face_on, &direction);
+        NuMtxCalcCheapFaceY_v2(buffer->mtx_ptr++, &direction);
     }
     return packet;
 }

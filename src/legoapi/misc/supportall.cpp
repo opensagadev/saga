@@ -34,6 +34,7 @@
 #include "legoapi/props/doors/door.h"
 #include "legoapi/props/system/socksys.h"
 #include "legoapi/render/core/render.h"
+#include "legoapi/render/core/rtl.h"
 #include "legoapi/render/fx.h"
 #include "legoapi/render/fx/game_deb.h"
 #include "legoapi/world/level.h"
@@ -57,6 +58,7 @@
 #include "legoapi/items/base/collection.h"
 #include "legoapi/gizmos/fx/gizmopickups.h"
 #include "nu2api/nu3d/nuspecial.h"
+#include "nu2api/nu3d/nupostparams.h"
 
 void Hint_SetHintFromId(i32, i32, i32);
 void MakeBaddiesForgetAboutParty(i32);

@@ -59,28 +59,31 @@ extern "C" {
 }
 
 static dma_particle_s *DebrisParticleAt(debkeydatatype_s *key, i16 index, u8 particle_type) {
-    const i32 particles_per_chunk = particle_type == 7 ? 12 : 32;
-    return &key->particle_chunks[index / particles_per_chunk]->particles[index % particles_per_chunk];
+    if (particle_type == 7)
+        return &key->particle_chunks[index / 12]->particles[index % 12];
+    return &key->particle_chunks[index / 32]->particles[index % 32];
 }
 
 uv1deb *GenDebIndex(debkeydatatype_s *key, debinftype *effect, float time) {
-    i16 particle_index = key->field_18a;
-    if (particle_index < key->particle_count) {
-        ++key->field_18a;
+    u16 particle_index = key->field_18a;
+    u16 next_particle_index;
+    if (static_cast<i16>(particle_index) < key->particle_count) {
+        next_particle_index = particle_index + 1;
     } else {
         particle_index = 0;
-        key->field_18a = 1;
+        next_particle_index = 1;
     }
 
     dma_particle_s *particle = DebrisParticleAt(key, particle_index, effect->particle_type);
+    key->field_18a = next_particle_index;
     particle->start_time = time;
     key->emission_epoch = time;
     particle->inverse_lifetime = 64.0f / effect->particle_lifetime;
 
+    NUVEC random_position;
     NUVEC displacement;
     NuVecScale(&displacement, &effect->emitter_velocity, time - key->emission_time);
 
-    NUVEC random_position;
     f32 random = NuRandFloatSeeded(&debrisseed);
     random_position.x = (random + random) * effect->field_058 - effect->field_058;
     random = NuRandFloatSeeded(&debrisseed);
@@ -88,30 +91,41 @@ uv1deb *GenDebIndex(debkeydatatype_s *key, debinftype *effect, float time) {
     random = NuRandFloatSeeded(&debrisseed);
     random_position.z = (random + random) * effect->field_060 - effect->field_060;
     NuVecMtxTransformVU0(&random_position, &random_position, &key->emitter_orientation);
-    NuVecAdd(&particle->position, &random_position, &displacement);
+    particle->position.x = random_position.x + displacement.x;
+    particle->position.y = random_position.y + displacement.y;
+    particle->position.z = random_position.z + displacement.z;
 
     random = NuRandFloatSeeded(&debrisseed);
-    particle->momentum.x = (random + random) * effect->field_04c - effect->field_04c;
+    random_position.x = (random + random) * effect->field_04c - effect->field_04c;
     random = NuRandFloatSeeded(&debrisseed);
-    particle->momentum.y = (random + random) * effect->field_050 - effect->field_050 + effect->field_048;
+    random_position.y = (random + random) * effect->field_050 - effect->field_050 + effect->field_048;
     random = NuRandFloatSeeded(&debrisseed);
-    particle->momentum.z = (random + random) * effect->field_054 - effect->field_054;
-    NuVecMtxTransformVU0(&particle->momentum, &particle->momentum, &key->emitter_orientation);
+    random_position.z = (random + random) * effect->field_054 - effect->field_054;
+    NuVecMtxTransformVU0(&random_position, &random_position, &key->emitter_orientation);
+    particle->momentum.x = random_position.x;
+    particle->momentum.y = random_position.y;
+    particle->momentum.z = random_position.z;
     if (key->momentum_adjuster != NULL) {
         key->momentum_adjuster(key, effect, reinterpret_cast<uv1deb *>(particle));
     }
-    NuVecAdd(&particle->position, &particle->position, &key->emission_position);
-    NuVecAdd(&particle->momentum, &particle->momentum, &key->momentum);
+    particle->position.x += key->emission_position.x;
+    particle->position.y += key->emission_position.y;
+    particle->position.z += key->emission_position.z;
+    particle->momentum.x += key->momentum.x;
+    particle->momentum.y += key->momentum.y;
+    particle->momentum.z += key->momentum.z;
 
     for (i32 trail = 0; trail < static_cast<i8>(effect->trail_count); ++trail) {
-        i16 trail_index = key->field_18a;
-        if (trail_index < key->particle_count) {
-            ++key->field_18a;
+        u16 trail_index = key->field_18a;
+        u16 next_trail_index;
+        if (static_cast<i16>(trail_index) < key->particle_count) {
+            next_trail_index = trail_index + 1;
         } else {
             trail_index = 0;
-            key->field_18a = 1;
+            next_trail_index = 1;
         }
         dma_particle_s *trail_particle = DebrisParticleAt(key, trail_index, effect->particle_type);
+        key->field_18a = next_trail_index;
         *trail_particle = *particle;
         trail_particle->start_time += static_cast<f32>(trail + 1) * effect->trail_time;
     }

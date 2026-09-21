@@ -5,12 +5,16 @@
 #include "gameapi/edtools/edfile.h"
 #include "globals.h"
 #include "legoapi/audio/sfx.h"
+#include "legoapi/characters/core/character.h"
+#include "legoapi/characters/motion.h"
+#include "legoapi/characters/motion/animlist.h"
 #include "legoapi/characters/motion/gameanim.h"
 #include "legoapi/characters/motion.h"
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/core/input/gamepads.h"
 #include "legoapi/gizmo/base/HatMachineObjectInterface.h"
 #include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/menus/core/gamehint.h"
 #include "legoapi/misc/utilities.h"
 #include "legoapi/render/core/terrain.h"
 #include "legoapi/render/light/shadow.h"
@@ -98,39 +102,37 @@ static i32 HatMachine_Load(void *world_ptr, void *) {
     const i32 version = EdFileReadInt();
     system->count = EdFileReadInt();
     if (system->count > 0) {
-        i32 index = 0;
-        do {
-            HATMACHINE *machine = &system->machines[index];
-            EdFileRead(machine->name, EdFileReadInt());
-            EdFileReadNuVec(&machine->position);
-            machine->yaw = EdFileReadShort();
-            machine->configured_hat = static_cast<u8>(EdFileReadChar());
+        for (i32 index = 0; index < system->count; ++index) {
+            EdFileRead(system->machines[index].name, EdFileReadInt());
+            EdFileReadNuVec(&system->machines[index].position);
+            system->machines[index].yaw = EdFileReadShort();
+            system->machines[index].configured_hat = static_cast<u8>(EdFileReadChar());
 
             if (version <= 2) {
-                machine->model_letter = 'r';
+                system->machines[index].model_letter = 'r';
             } else {
-                machine->model_letter = static_cast<char>(EdFileReadChar());
-                if (version != 3) {
-                    EdFileReadNuVec(&machine->target_offset);
-                    machine->scale = EdFileReadFloat();
-                    if (version != 4) {
-                        const u8 hidden = static_cast<u8>(EdFileReadChar()) & 1;
-                        machine->flags = static_cast<HATMACHINE_FLAGS>(
-                            (machine->flags & ~HATMACHINE_FLAG_HIDE_MACHINE) | (hidden << 5));
-                    }
-                    machine->platform_id = -1;
-                    ++index;
-                    continue;
-                }
+                system->machines[index].model_letter = static_cast<char>(EdFileReadChar());
             }
 
-            machine->target_offset.x = 0.0f;
-            machine->target_offset.y = 0.0f;
-            machine->target_offset.z = -0.1441f;
-            machine->scale = 1.0f;
-            machine->platform_id = -1;
-            ++index;
-        } while (system->count > index);
+            if (version <= 3) {
+                HATMACHINE *machine = &system->machines[index];
+                machine->target_offset.y = 0.0f;
+                machine->target_offset.x = 0.0f;
+                machine->target_offset.z = -0.1441f;
+                machine->scale = 1.0f;
+                machine->platform_id = -1;
+                continue;
+            } else {
+                EdFileReadNuVec(&system->machines[index].target_offset);
+                system->machines[index].scale = EdFileReadFloat();
+                if (version != 4) {
+                    const u8 hidden = static_cast<u8>(EdFileReadChar()) & 1;
+                    system->machines[index].flags = static_cast<HATMACHINE_FLAGS>(
+                        (system->machines[index].flags & ~HATMACHINE_FLAG_HIDE_MACHINE) | (hidden << 5));
+                }
+            }
+            system->machines[index].platform_id = -1;
+        }
     }
     return 1;
 }
@@ -180,7 +182,8 @@ static void HatMachine_Update(void *world_ptr, void *, float elapsed) {
                 if (machine->configured_hat_count != 0) {
                     machine->displayed_hat = machine->configured_hat_count;
                 } else {
-                    machine->displayed_hat = static_cast<u8>(NuFloatRand(NULL) * 4.0f) + 1;
+                    machine->displayed_hat =
+                        static_cast<u8>(NuFloatRand(reinterpret_cast<NURAND *>(&GAMERAND)) * 4.0f) + 1;
                 }
                 machine->hat_delay = 1.0f;
             }
@@ -362,12 +365,15 @@ static void HatMachine_Activate(GIZMO *gizmo, i32 enabled) {
     }
 
     HATMACHINE *machine = static_cast<HATMACHINE *>(gizmo->object);
-    if (enabled) {
-        machine->progress_state0 = 1;
-        HatMachine_Reset(machine);
-    } else {
-        machine->progress_state0 = 0;
-    }
+    if (__builtin_expect(enabled == 0, 0))
+        goto disable;
+
+    machine->progress_state0 = 1;
+    HatMachine_Reset(machine);
+    return;
+
+disable:
+    machine->progress_state0 = 0;
 }
 
 static void HatMachine_Draw(void *world_ptr, void *, float) {
@@ -379,7 +385,8 @@ static void HatMachine_Draw(void *world_ptr, void *, float) {
     const u16 spin_angle = static_cast<u16>(NuFmod(GameTimer.time_elapsed, 5.0f) / 5.0f * 65536.0f);
     const f32 pulse_phase = NuFmod(GameTimer.time_elapsed_mod_seconds, 0.5f) * 2.0f * 65536.0f;
     const f32 target_pulse = NuTrigTable[(static_cast<i32>(pulse_phase) >> 1) & 0x7fff] * 0.2f + 0.8f;
-    const f32 ready_alpha = NuTrigTable[(static_cast<i32>(pulse_phase) >> 1) & 0x7fff] * 0.15f + 0.85f;
+    const f32 ready_phase = NuFmod(GameTimer.time_elapsed_mod_seconds, 0.5f) * 2.0f * 65536.0f;
+    const f32 ready_alpha = NuTrigTable[(static_cast<i32>(ready_phase) >> 1) & 0x7fff] * 0.15f + 0.85f;
 
     EnableShadowMapRendering(0);
 
@@ -420,7 +427,7 @@ static void HatMachine_Draw(void *world_ptr, void *, float) {
     HATMACHINESYS_s *system = world->hat_machine_sys;
     for (i32 index = 0; index < system->count; ++index) {
         HATMACHINE_s *machine = &system->machines[index];
-        if ((machine->flags & HATMACHINE_FLAG_VISIBLE) == 0 && !TouchHacks::TouchControlsActive) {
+        if ((machine->flags & HATMACHINE_FLAG_VISIBLE) == 0 && editor_active == 0) {
             continue;
         }
 
@@ -475,12 +482,12 @@ static void HatMachine_Draw(void *world_ptr, void *, float) {
         if (animated_instance_animation != NULL) {
             if (machine->animation_state > 0) {
                 machine->animation_time += FRAMETIME;
-                if (machine->animation_state <= 3 && machine->animation_time >= animated_end_frame) {
+                if (machine->animation_state <= 3 && machine->animation_time >= 3.0f) {
                     machine->animation_state = 4;
                     machine->state_elapsed = 0.0f;
                     machine->state_duration = 2.0f;
                 }
-                animation_frame = machine->animation_time * animated_instance_animation->tfactor * 0.1f;
+                animation_frame = machine->animation_time * animated_instance_animation->tfactor * 60.0f;
                 if (animation_frame > animated_end_frame) {
                     animation_frame = animated_end_frame;
                 }
@@ -516,12 +523,12 @@ static void HatMachine_Draw(void *world_ptr, void *, float) {
             }
         }
 
-        // Draw the three optional animation effects in order.  Their generated
-        // translations are carried forward for the hat's final placement.
+        // Draw the three optional animation effects in order.  The first
+        // effect's translation supplies the hat's final placement.
         NUVEC draw_position = machine->position;
         NUMTX effect_matrix;
         if (effect_instance_animation_a != NULL) {
-            f32 frame = machine->animation_time * effect_instance_animation_a->tfactor * 0.1f;
+            f32 frame = machine->animation_time * animated_instance_animation->tfactor * 60.0f;
             if (frame > effect_end_frame_a)
                 frame = effect_end_frame_a;
             EvalAnim(effect_special_a, frame, &effect_matrix, 0);
@@ -531,42 +538,41 @@ static void HatMachine_Draw(void *world_ptr, void *, float) {
             draw_position.z = effect_matrix.m32;
         }
         if (effect_instance_animation_b != NULL) {
-            f32 frame = machine->animation_time * effect_instance_animation_b->tfactor * 0.1f;
+            f32 frame = machine->animation_time * animated_instance_animation->tfactor * 60.0f;
             if (frame > effect_end_frame_b)
                 frame = effect_end_frame_b;
             EvalAnim(effect_special_b, frame, &effect_matrix, 0);
             NuMtxMulVU0(&effect_matrix, &effect_matrix, &machine->transform);
             NuSpecialDrawAt(effect_special_b, &effect_matrix);
-            draw_position.x = effect_matrix.m30;
-            draw_position.z = effect_matrix.m32;
         }
         if (effect_instance_animation_c != NULL) {
-            f32 frame = machine->animation_time * effect_instance_animation_c->tfactor * 0.1f;
+            f32 frame = machine->animation_time * animated_instance_animation->tfactor * 60.0f;
             if (frame > effect_end_frame_c)
                 frame = effect_end_frame_c;
             EvalAnim(effect_special_c, frame, &effect_matrix, 0);
             NuMtxMulVU0(&effect_matrix, &effect_matrix, &machine->transform);
             NuSpecialDrawAt(effect_special_c, &effect_matrix);
-            draw_position.x = effect_matrix.m30;
-            draw_position.z = effect_matrix.m32;
         }
 
-        if ((machine->flags & HATMACHINE_FLAG_ANIMATING) != 0 && machine->displayed_hat != 0) {
+        if ((machine->flags & HATMACHINE_FLAG_ENABLED) != 0 && machine->displayed_hat != 0) {
             const i32 hat_index = machine->displayed_hat + 249;
             if (machine->animation_time < 2.35f && world->lev_objs[hat_index].active != 0) {
                 const NUVEC *hat_offset = &HatMachine_HatOffset;
                 NUVEC hat_position = *hat_offset;
                 const f32 hat_phase = machine->hat_delay * 32768.0f + 16384.0f;
                 const f32 hat_sine = NuTrigTable[(static_cast<i32>(hat_phase) >> 1) & 0x7fff];
-                const f32 hat_scale = (1.0f - hat_sine) * 0.5f;
-                hat_position.y += hat_scale * 0.1f;
+                const f32 hat_scale = (hat_sine + 1.0f) * 0.5f;
+                hat_position.y += (1.0f - hat_scale) * 0.1f;
 
-                f32 scale = 1.0f;
                 if (machine->animation_state <= 2) {
-                    const f32 frame_fade = animation_frame / 50.0f;
-                    scale = frame_fade <= 1.0f ? (1.0f - frame_fade) * 0.01f : 1.0f;
+                    f32 bob_scale = 0.01f;
+                    if (animation_frame != 0.0f) {
+                        const f32 frame_fade = animation_frame / 50.0f;
+                        bob_scale = frame_fade <= 1.0f ? (1.0f - frame_fade) * 0.01f : 0.0f;
+                    }
+                    hat_position.y +=
+                        NuTrigTable[(static_cast<i32>(GameTimer.time_elapsed * 32768.0f) >> 1) & 0x7fff] * bob_scale;
                 }
-                hat_position.y += NuTrigTable[static_cast<i32>(FRAMETIME * 32768.0f) >> 1 & 0x7fff] * scale;
 
                 NuVecRotateY(&hat_position, &hat_position, machine->yaw);
                 NuMtxSetRotationY(&effect_matrix, machine->yaw + 0x8000);
@@ -603,33 +609,41 @@ void HATMACHINE_s::ClearMechObjectInterface() {
 }
 
 HATMACHINE *HatMachine_FindNearest(WORLDINFO_s *world, nuvec_s *position, GameObject_s *object, float *distance) {
-    HATMACHINE *nearest = NULL;
-    f32 nearest_distance = 1000000000.0f;
     if (world == NULL || world->hat_machine_sys == NULL) {
         return NULL;
     }
 
-    for (i32 index = 0; index < world->hat_machine_sys->count; ++index) {
-        HATMACHINE *machine = &world->hat_machine_sys->machines[index];
-        f32 candidate_distance;
+    f32 nearest_distance = 1.0e9f;
+    HATMACHINE_s *nearest = NULL;
+    if (world->hat_machine_sys->count > 0) {
         if (object != NULL) {
-            if ((machine->flags & (HATMACHINE_FLAG_ANIMATING | HATMACHINE_FLAG_FINISHED | HATMACHINE_FLAG_VISIBLE |
-                                   HATMACHINE_FLAG_ENABLED)) !=
-                    (HATMACHINE_FLAG_VISIBLE | HATMACHINE_FLAG_ENABLED) ||
-                machine->player_position.y == 2000000.0f) {
-                continue;
+            for (i32 index = 0; index < world->hat_machine_sys->count; ++index) {
+                HATMACHINE_s *machine = &world->hat_machine_sys->machines[index];
+                if ((machine->flags & 0xf) != (HATMACHINE_FLAG_VISIBLE | HATMACHINE_FLAG_ENABLED) ||
+                    machine->player_position.y == 2000000.0f) {
+                    continue;
+                }
+
+                NUVEC target_position;
+                Hat_GetAbsTargetPos(machine, &target_position);
+                const f32 candidate_distance = NuVecDistSqr(position, &target_position, NULL);
+                if (candidate_distance < nearest_distance) {
+                    nearest_distance = candidate_distance;
+                    nearest = machine;
+                }
             }
-            NUVEC target_position;
-            Hat_GetAbsTargetPos(machine, &target_position);
-            candidate_distance = NuVecDistSqr(position, &target_position, NULL);
         } else {
-            candidate_distance = NuVecDistSqr(position, &machine->position, NULL);
-        }
-        if (candidate_distance < nearest_distance) {
-            nearest_distance = candidate_distance;
-            nearest = machine;
+            for (i32 index = 0; index < world->hat_machine_sys->count; ++index) {
+                HATMACHINE_s *machine = &world->hat_machine_sys->machines[index];
+                const f32 candidate_distance = NuVecDistSqr(position, &machine->position, NULL);
+                if (candidate_distance < nearest_distance) {
+                    nearest_distance = candidate_distance;
+                    nearest = machine;
+                }
+            }
         }
     }
+
     if (distance != NULL) {
         *distance = nearest_distance;
     }

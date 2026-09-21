@@ -90,7 +90,7 @@ struct BOLTTYPE_s {
     union {
         i32 field_2c;
         struct {
-            i16 field_2c_lo;
+            i16 shadow_object_id;
             i16 debris_id;
         };
     };

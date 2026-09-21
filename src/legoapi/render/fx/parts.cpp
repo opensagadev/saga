@@ -27,6 +27,9 @@
 #include "legoapi/world/level.h"
 #include "legoapi/world/area.h"
 #include "legoapi/characters/core/players.h"
+#include "legoapi/characters/core/customiser.h"
+#include "legoapi/core/config/cheat.h"
+#include "legoapi/characters/motion/gameanim.h"
 #include "nu2api/nu3d/nuportal.h"
 #include "nu2api/nu3d/android/nuptl_android.h"
 #include "legoapi/characters/core/character.h"
@@ -165,6 +168,7 @@ extern "C" {
     }
 
     extern part_type_s part_types[128];
+    extern NUGSCN *part_scene[32];
     extern part_emit_s part_emits[512];
     extern i32 part_emits_used;
     void CheckPartCount();
@@ -414,11 +418,11 @@ static void PartCollide(PART_s *part, i32 three_dimensional) {
     }
 }
 
-static __used__ void TiePart_Kill(PART_s *part, i32) {
+static void TiePart_Kill(PART_s *part, i32) {
     AddGameDebris(WORLD->debris_sys, 0x6a, &part->position);
 }
 
-static __used__ void TiePart_Move(PART_s *part, f32 time) {
+static void TiePart_Move(PART_s *part, f32 time) {
     part->field_124[3] = -32768;
     part->field_13c = static_cast<i32>(-32768.0f * FRAMETIME);
     NUVEC position;
@@ -432,16 +436,16 @@ static __used__ void TiePart_Move(PART_s *part, f32 time) {
     AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[100].effect, &position, 10, FRAMETIME, 0, 0, NULL);
 }
 
-static __used__ void TiePart_Impact(PART_s *part) {
+static void TiePart_Impact(PART_s *part) {
     AddGameDebris(WORLD->debris_sys, 0x6a, &part->position);
 }
 
-static __used__ void TiePart_KillExplode(PART_s *part, i32) {
+static void TiePart_KillExplode(PART_s *part, i32) {
     AddGameDebris(WORLD->debris_sys, 0x6b, &part->position);
     AddPartDebris(WORLD->part_debris_sys, 3, &part->position);
 }
 
-static __used__ void TieSpinZPart_Move(PART_s *part, f32 time) {
+static void TieSpinZPart_Move(PART_s *part, f32 time) {
     static NUVEC vec = {0.0f, 0.0f, -0.05f};
     part->field_124[3] = 200000;
     part->field_13c = static_cast<i32>(200000.0f * FRAMETIME);
@@ -612,6 +616,12 @@ DECOMP_ASSERT(offsetof(BIKEPART_s, rider_position) == 0x28, "BIKEPART rider posi
 static BIKEPART_s bikeParts[8];
 
 void KillParts(GameObject_s *, i32, i32, i32, f32, i32, u16 *);
+void KillParts_TIEFIGHTER(ADDPART_s *, i32, i32, GameObject_s *, i32, u16, u16, NUVEC *);
+void KillParts_ATAT(ADDPART_s *, i32, i32, GameObject_s *);
+void KillParts_SpeederBike(ADDPART_s *, i32, i32, GameObject_s *);
+static i32 SpeederPart_Draw(PART_s *);
+static void SpeederPart_Kill(PART_s *, i32);
+static void SpeederPart_Update(PART_s *);
 
 void CollectPowerUp(GameObject_s *object, NUVEC *position, u16 rotation, i32) {
     if (object == NULL || static_cast<u8>(object->apiobj.field_0x27c) >= 2) {
@@ -673,7 +683,7 @@ static __used__ i32 SpeederPart_Draw(PART_s *) {
     return 1;
 }
 
-static __used__ void SpeederPart_Kill(PART_s *part, i32) {
+static void SpeederPart_Kill(PART_s *part, i32) {
     AddGameDebris(WORLD->debris_sys, 0x6a, &part->position);
     if (part->speeder_index != -1.0f) {
         GameObject_s *rider = bikeParts[static_cast<i32>(part->speeder_index)].rider;
@@ -686,7 +696,7 @@ static __used__ void SpeederPart_Kill(PART_s *part, i32) {
     }
 }
 
-static __used__ void SpeederPart_Update(PART_s *part) {
+static void SpeederPart_Update(PART_s *part) {
     f32 time = part->field_100 / part->field_104;
     f32 distance = Player[0]->apiobj.horizontal_velocity_magnitude * FRAMETIME * 1.1f;
     BIKEPART_s *bike = &bikeParts[static_cast<i32>(part->speeder_index)];
@@ -944,7 +954,7 @@ static __used__ void UpdateCustomPieceAnim(CUSTOMPIECEANIM *anim, u16 minimum, u
 extern "C" {
 
     void AddDebrisEffect(i32 *handle, i32 effect_index, f32 x, f32 y, f32 z) {
-        if (handle == NULL || effect_index < 0 || EDPP_MAX_TYPES <= effect_index || debtab == NULL ||
+        if (static_cast<u32>(effect_index + 1) <= 1 || EDPP_MAX_TYPES <= effect_index ||
             debtab[effect_index] == NULL) {
             return;
         }
@@ -953,7 +963,7 @@ extern "C" {
             return;
         }
 
-        bool newly_allocated = false;
+        i32 newly_allocated = 0;
         i32 key_index = *handle;
         if (key_index == -1) {
             key_index = DebAlloc();
@@ -961,70 +971,83 @@ extern "C" {
             if (key_index == -1) {
                 return;
             }
-            newly_allocated = true;
+            newly_allocated = 1;
         }
 
-        debkeydatatype_s &key = debkeydata[key_index];
         const f32 now = effect->time_group == 4 ? panelglobaltime : globaltime;
-        key.field_184 = 0;
-        key.effect_index = static_cast<i16>(effect_index);
+        debkeydata[key_index].field_184 = 0;
+        debkeydata[key_index].effect_index = static_cast<i16>(effect_index);
         DebrisStartOffset(key_index, effect->emission_period);
-        key.generator = gensorttab[static_cast<i8>(effect->generator_type)];
-        key.momentum_adjuster = gencodetab[static_cast<i8>(effect->momentum_adjustment_type)];
-        key.field_1d4 = 0;
-        key.sphere_next_time = 0.0f;
-        key.emitter_rotation_x = 0;
-        key.emitter_rotation_y = 0;
-        key.field_2c8 = 0;
-        for (i32 i = 0; i < effect->process_spheres; ++i) {
-            key.process_spheres[i].time = -1.0f;
+        debkeydata[key_index].generator = gensorttab[static_cast<i8>(effect->generator_type)];
+        debkeydata[key_index].momentum_adjuster = gencodetab[static_cast<i8>(effect->momentum_adjustment_type)];
+        debkeydata[key_index].field_1d4 = 0;
+        debkeydata[key_index].sphere_next_time = 0.0f;
+        debkeydata[key_index].emitter_rotation_x = 0;
+        debkeydata[key_index].emitter_rotation_y = 0;
+        debkeydata[key_index].field_2c8 = 0;
+        for (i32 i = 0; i < static_cast<i8>(effect->process_spheres); ++i) {
+            debkeydata[key_index].process_spheres[i].time = -1.0f;
         }
-        memset(&key.emission_position, 0, sizeof(key.emission_position));
-        memset(&key.momentum, 0, sizeof(key.momentum));
-        memset(&key.emitter_momentum, 0, sizeof(key.emitter_momentum));
-        key.orientation_dirty = 0.0f;
-        key.cutoff_distance = 1000000.0f;
-        key.field_2f2 = -1;
-        key.field_1d8 = 0;
-        key.field_1da = 7;
-        key.gscene = NULL;
-        key.process_collision_sound = 0;
-        key.last_update_time = now;
-        key.field_2f9 = 1;
-        key.user_data = NULL;
-        key.field_2fa = 0;
-        key.emission_epoch = key.field_1e4 < now ? key.field_1e4 : now;
+        memset(&debkeydata[key_index].emission_position, 0, sizeof(debkeydata[key_index].emission_position));
+        memset(&debkeydata[key_index].momentum, 0, sizeof(debkeydata[key_index].momentum));
+        memset(&debkeydata[key_index].emitter_momentum, 0, sizeof(debkeydata[key_index].emitter_momentum));
+        debkeydata[key_index].orientation_dirty = 0.0f;
+        debkeydata[key_index].cutoff_distance = 999999.0f;
+        debkeydata[key_index].field_2f2 = -1;
+        debkeydata[key_index].field_1d8 = 0;
+        debkeydata[key_index].field_1da = 7;
+        debkeydata[key_index].gscene = NULL;
+        debkeydata[key_index].process_collision_sound = 0;
+        debkeydata[key_index].last_update_time = now;
+        debkeydata[key_index].field_2f9 = 1;
+        debkeydata[key_index].user_data = NULL;
+        debkeydata[key_index].field_2fa = 0;
+        debkeydata[key_index].emission_epoch =
+            debkeydata[key_index].field_1e4 < now ? debkeydata[key_index].field_1e4 : now;
 
         switch (effect->particle_type) {
             case 3:
-                key.render_priority = static_cast<i16>(40000);
+                debkeydata[key_index].render_priority = static_cast<i16>(40000);
                 break;
             case 7:
-                key.render_priority = static_cast<i16>(20000);
+                debkeydata[key_index].render_priority = static_cast<i16>(20000);
                 break;
             case 2:
-                key.render_priority = static_cast<i16>(50000);
+                debkeydata[key_index].render_priority = static_cast<i16>(50000);
                 break;
             default:
-                key.render_priority = static_cast<i16>(30000);
+                debkeydata[key_index].render_priority = static_cast<i16>(30000);
                 break;
         }
-        for (i32 i = 0; i != 4; ++i) {
-            key.collision_timers[i] = 9999;
-            const i32 sound_id = effect->sound_data[i * 3];
-            if (sound_id != -1) {
-                const i32 mode = effect->sound_data[i * 3 + 1];
-                if (mode == 3 || mode == 4) {
-                    key.collision_timers[i] = 1;
-                }
-                key.process_collision_sound = 1;
-            }
+        debkeydata[key_index].collision_timers[0] = 9999;
+        if (effect->sound_data[0] != -1) {
+            if (effect->sound_data[1] == 3 || effect->sound_data[1] == 4)
+                debkeydata[key_index].collision_timers[0] = 1;
+            debkeydata[key_index].process_collision_sound = 1;
+        }
+        debkeydata[key_index].collision_timers[1] = 9999;
+        if (effect->sound_data[3] != -1) {
+            if (effect->sound_data[4] == 3 || effect->sound_data[4] == 4)
+                debkeydata[key_index].collision_timers[1] = 1;
+            debkeydata[key_index].process_collision_sound = 1;
+        }
+        debkeydata[key_index].collision_timers[2] = 9999;
+        if (effect->sound_data[6] != -1) {
+            if (effect->sound_data[7] == 3 || effect->sound_data[7] == 4)
+                debkeydata[key_index].collision_timers[2] = 1;
+            debkeydata[key_index].process_collision_sound = 1;
+        }
+        debkeydata[key_index].collision_timers[3] = 9999;
+        if (effect->sound_data[9] != -1) {
+            if (effect->sound_data[10] == 3 || effect->sound_data[10] == 4)
+                debkeydata[key_index].collision_timers[3] = 1;
+            debkeydata[key_index].process_collision_sound = 1;
         }
         DebrisEmitterPos(key_index, x, y, z);
         DebrisEmitterOrientation(key_index, 0, 0, 0);
         DebrisOrientation(key_index, 0, 0);
         DebrisReflectionOrientation(key_index, 0, 0, 0, 0.9f);
-        DebrisSetTrigger(key_index, 0, -1, 0.0f);
+        DebrisSetTrigger(key_index, 0, -1, 0);
         if (newly_allocated) {
             AddDebrisEffectToStack(debkeydata + key_index);
         }
@@ -1041,38 +1064,42 @@ extern "C" {
         AddDebrisEffect(handle, effect, position->x, position->y, position->z);
         if (*handle == -1)
             return;
-        debkeydatatype_s &key = debkeydata[*handle];
-        key.field_1d4 = count;
+        debkeydata[*handle].field_1d4 = count;
         const f32 now = debtab[effect]->time_group == 4 ? panelglobaltime : globaltime;
-        key.field_184 = 1;
-        key.field_1d8 = 0;
-        const f32 offset = key.emission_time - now;
-        key.emission_time -= offset;
-        key.field_1e4 -= offset;
-        key.emission_epoch = key.last_update_time;
-        key.cutoff_distance = CameraEmitterDistance(position);
-        if (key.process_collision_sound != 0) {
+        debkeydata[*handle].field_184 = 1;
+        debkeydata[*handle].field_1d8 = 0;
+        const f32 offset = debkeydata[*handle].emission_time - now;
+        debkeydata[*handle].emission_time -= offset;
+        debkeydata[*handle].field_1e4 -= offset;
+        debkeydata[*handle].emission_epoch = debkeydata[*handle].last_update_time;
+        debkeydata[*handle].cutoff_distance = CameraEmitterDistance(position);
+        if (debkeydata[*handle].process_collision_sound != 0) {
             f32 range = debtab[effect]->sound_range_override;
             if (range == 0.0f)
                 range = debtab[effect]->sound_range;
             if (range == 0.0f)
                 range = debtab[effect]->clip_extent;
             f32 volume = 0.0f;
-            if (key.cutoff_distance < range) {
-                for (i32 i = 0; i < 4; ++i) {
-                    const i32 sound = debtab[effect]->sound_data[i * 3];
-                    if (sound != -1)
-                        SetSfxBit_On(sound);
-                }
-                volume = (range - key.cutoff_distance) / range;
+            if (debkeydata[*handle].cutoff_distance < range) {
+                if (debtab[effect]->sound_data[0] != -1)
+                    SetSfxBit_On(debtab[effect]->sound_data[0]);
+                if (debtab[effect]->sound_data[3] != -1)
+                    SetSfxBit_On(debtab[effect]->sound_data[3]);
+                if (debtab[effect]->sound_data[6] != -1)
+                    SetSfxBit_On(debtab[effect]->sound_data[6]);
+                if (debtab[effect]->sound_data[9] != -1)
+                    SetSfxBit_On(debtab[effect]->sound_data[9]);
+                volume = (range - debkeydata[*handle].cutoff_distance) / range;
             }
-            if (key.cutoff_distance < range) {
-                for (i32 i = 0; i < 4; ++i) {
-                    const i32 sound = debtab[effect]->sound_data[i * 3];
-                    if (sound != -1 && debtab[effect]->sound_data[i * 3 + 1] == 1) {
-                        PlaySfxByIdEx(sound, position, volume, 1.0f);
-                    }
-                }
+            if (debkeydata[*handle].cutoff_distance < range) {
+                if (debtab[effect]->sound_data[0] != -1 && debtab[effect]->sound_data[1] == 1)
+                    PlaySfxByIdEx(debtab[effect]->sound_data[0], position, volume, 1.0f);
+                if (debtab[effect]->sound_data[3] != -1 && debtab[effect]->sound_data[4] == 1)
+                    PlaySfxByIdEx(debtab[effect]->sound_data[3], position, volume, 1.0f);
+                if (debtab[effect]->sound_data[6] != -1 && debtab[effect]->sound_data[7] == 1)
+                    PlaySfxByIdEx(debtab[effect]->sound_data[6], position, volume, 1.0f);
+                if (debtab[effect]->sound_data[9] != -1 && debtab[effect]->sound_data[10] == 1)
+                    PlaySfxByIdEx(debtab[effect]->sound_data[9], position, volume, 1.0f);
             }
         }
         if (emitter_momentum != NULL) {
@@ -1455,7 +1482,7 @@ extern "C" {
     void AddVariableShotDebrisEffectTimed5(i32 effect_index, NUVEC *position, NUVEC *momentum, NUVEC *position_delta,
                                            i32 count, f32 duration, NUMTX *emitter_orientation,
                                            NUMTX *particle_orientation, u16 render_priority, i8 timed_flags) {
-        if (debris_suspended != 0 || effect_index < 1 || EDPP_MAX_TYPES <= effect_index || debtab == NULL ||
+        if (debris_suspended != 0 || static_cast<u32>(effect_index + 1) <= 1 || EDPP_MAX_TYPES <= effect_index ||
             debtab[effect_index] == NULL || count < 1) {
             return;
         }
@@ -1466,8 +1493,9 @@ extern "C" {
         }
 
         if (effect->time_group != 4) {
+            NUVEC clipped_position = *position;
             NUVEC extent = {1.0f, 1.0f, 1.0f};
-            if (NuCameraClipTestExtentsAxisAligned(position, &extent, effect->clip_extent) == 0) {
+            if (NuCameraClipTestExtentsAxisAligned(&clipped_position, &extent, effect->clip_extent) == 0) {
                 return;
             }
         }
@@ -1493,7 +1521,7 @@ extern "C" {
         const bool panel_time = effect->time_group == 4;
         const f32 now = panel_time ? panelglobaltime : globaltime;
         const f32 end_time = now + duration;
-        const f32 elapsed_intervals = no_interval ? 0.0f : floorf(now / emission_interval);
+        const f32 elapsed_intervals = no_interval ? 0.0f : static_cast<f32>(static_cast<i32>(now / emission_interval));
         f32 emission_time = emission_interval + elapsed_intervals * emission_interval;
         if (end_time < emission_time) {
             return;
@@ -1512,54 +1540,77 @@ extern "C" {
 
         i32 particle_key_slot = -1;
         debkeydatatype_s *key = NULL;
-        for (i32 slot = 0; slot != 8; ++slot) {
-            const i16 key_index = effect->particle_keys[slot];
-            if (key_index == -1) {
-                continue;
-            }
-            debkeydatatype_s *candidate = &debkeydata[key_index];
-            if (candidate->particle_count + particle_count <= maximum_particles) {
-                particle_key_slot = slot;
-                key = candidate;
-                break;
-            }
+        i32 new_key_index;
+
+#define TRY_EXISTING_DEBRIS_KEY(slot)                                                                                  \
+    if (effect->particle_keys[slot] != -1) {                                                                           \
+        key = &debkeydata[effect->particle_keys[slot]];                                                                \
+        if (key->particle_count + particle_count <= maximum_particles) {                                               \
+            particle_key_slot = slot;                                                                                  \
+            goto debris_key_found;                                                                                    \
+        }                                                                                                              \
+    }
+
+#define TRY_OR_ALLOCATE_DEBRIS_KEY(slot)                                                                               \
+    if (effect->particle_keys[slot] == -1) {                                                                           \
+        particle_key_slot = slot;                                                                                      \
+        goto allocate_debris_key;                                                                                      \
+    }                                                                                                                  \
+    key = &debkeydata[effect->particle_keys[slot]];                                                                    \
+    if (key->particle_count + particle_count <= maximum_particles) {                                                   \
+        particle_key_slot = slot;                                                                                      \
+        goto debris_key_found;                                                                                        \
+    }
+
+        if (freedebkeyptr >= maxdebkeys) {
+            TRY_EXISTING_DEBRIS_KEY(0);
+            TRY_EXISTING_DEBRIS_KEY(1);
+            TRY_EXISTING_DEBRIS_KEY(2);
+            TRY_EXISTING_DEBRIS_KEY(3);
+            TRY_EXISTING_DEBRIS_KEY(4);
+            TRY_EXISTING_DEBRIS_KEY(5);
+            TRY_EXISTING_DEBRIS_KEY(6);
+            TRY_EXISTING_DEBRIS_KEY(7);
+            return;
         }
 
-        if (key == NULL) {
-            if (freedebkeyptr >= maxdebkeys) {
-                return;
-            }
-            for (i32 slot = 0; slot != 8; ++slot) {
-                if (effect->particle_keys[slot] == -1) {
-                    const i32 key_index = DebAlloc();
-                    if (key_index == -1) {
-                        return;
-                    }
-                    particle_key_slot = slot;
-                    effect->particle_keys[slot] = static_cast<i16>(key_index);
-                    key = &debkeydata[key_index];
-                    key->effect_index = static_cast<i16>(effect_index);
-                    key->field_1d4 = 0;
-                    key->generator = gensorttab[effect->generator_type];
-                    key->momentum_adjuster = gencodetab[effect->momentum_adjustment_type];
-                    key->effect_orientation = *particle_orientation;
-                    key->effect_orientation.m30 = 0.0f;
-                    key->effect_orientation.m31 = 0.0f;
-                    key->effect_orientation.m32 = 0.0f;
-                    DebrisEmitterPos(key_index, 0.0f, 0.0f, 0.0f);
-                    key->timed_flags = timed_flags;
-                    key->render_priority = render_priority;
-                    break;
-                }
-            }
-            if (key == NULL) {
-                return;
-            }
-        }
+        TRY_OR_ALLOCATE_DEBRIS_KEY(0);
+        TRY_OR_ALLOCATE_DEBRIS_KEY(1);
+        TRY_OR_ALLOCATE_DEBRIS_KEY(2);
+        TRY_OR_ALLOCATE_DEBRIS_KEY(3);
+        TRY_OR_ALLOCATE_DEBRIS_KEY(4);
+        TRY_OR_ALLOCATE_DEBRIS_KEY(5);
+        TRY_OR_ALLOCATE_DEBRIS_KEY(6);
+        TRY_OR_ALLOCATE_DEBRIS_KEY(7);
+        return;
+
+    allocate_debris_key:
+        new_key_index = DebAlloc();
+        effect->particle_keys[particle_key_slot] = static_cast<i16>(new_key_index);
+        key = &debkeydata[new_key_index];
+        key->effect_index = static_cast<i16>(effect_index);
+        key->field_1d4 = 0;
+        key->generator = gensorttab[static_cast<i8>(effect->generator_type)];
+        key->momentum_adjuster = gencodetab[static_cast<i8>(effect->momentum_adjustment_type)];
+        key->effect_orientation = *particle_orientation;
+        key->effect_orientation.m30 = 0.0f;
+        key->effect_orientation.m31 = 0.0f;
+        key->effect_orientation.m32 = 0.0f;
+        DebrisEmitterPos(new_key_index, 0.0f, 0.0f, 0.0f);
+        key->timed_flags = timed_flags;
+        key->render_priority = render_priority;
+
+    debris_key_found:
+#undef TRY_OR_ALLOCATE_DEBRIS_KEY
+#undef TRY_EXISTING_DEBRIS_KEY
 
         const i32 required_particles = key->particle_count + particle_count;
         const i32 required_chunks = (required_particles + particles_per_chunk - 1) / particles_per_chunk;
         i32 allocated_chunks = key->allocated_chunk_count;
+        if (allocated_chunks < 0) {
+            key->allocated_chunk_count = 0;
+            allocated_chunks = 0;
+        }
         if (required_chunks > allocated_chunks) {
             const i32 new_chunk_count = required_chunks - allocated_chunks;
             i32 &free_chunk_count = effect->particle_type == 7 ? freedebchkptrg : freedebchkptr;
@@ -2939,6 +2990,36 @@ void AddHeartAsPart(GameObject_s *recipient, nuvec_s *position, nuvec_s *velocit
         part->rotation_y = qrand();
 }
 
+void PowerUp_AddPart(NUVEC *position, NUVEC *velocity, f32 scale, f32 lifetime) {
+    WORLDINFO_s *world = WorldInfo_CurrentlyActive();
+    ADDPART_ALIGNED16 params = Default_ADDPART;
+    params.position = position;
+    params.velocity = velocity;
+    params.special = &world->lev_objs[0xd0].special;
+    params.field_18 = params.field_14 = scale * GizmoPickupType[9].shadow_radius_x;
+    params.gravity = AreaPickupGravity;
+    params.field_28 = 0xd0;
+    params.flags = 0x256;
+    params.field_3c = PowerUp_ImpactPart;
+    params.field_40 = PartCollide_3D;
+    params.field_48 = PowerUp_UpdatePart;
+    params.stop_fn = PartStop_Flickerer;
+    params.draw_fn = PowerUp_DrawPart;
+    if (params.gravity == 0.0f)
+        params.move_fn = PartMove_VehiclePickup;
+    params.field_88 = lifetime;
+    params.time_step = FRAMETIME;
+    params.field_c0 = scale;
+    PART_s *part = AddPart(&params);
+    if (part != NULL)
+        part->rotation_y = NuFmod(GameTimer.time_elapsed, 4.0f) * 0.25f * 65536.0f;
+}
+
+void PowerUp_Particles(WORLDINFO_s *world, NUVEC *position) {
+    if (VehicleArea == 0 && ParticlesPerSecond(10.0f, FRAMETIME) > 0)
+        AddGameDebris(world->debris_sys, GizBuilditGDeb[qrand() / 10923], position);
+}
+
 i32 FindPartDebris(PARTDEBSYS_s *system, char *name) {
     if (system != NULL) {
         for (i32 i = system->named_count; i < system->capacity; ++i) {
@@ -3465,6 +3546,180 @@ void NewPartOrderedRotation(PART_s *part) {
     part->field_124[2] = base + static_cast<i32>((NuRandFloatSeeded(&partseed) * 2.0f - 1.0f) * range);
 }
 
-void KillParts(GameObject_s *, i32, i32, i32, float, i32, u16 *) {
-    STUBBED();
+void KillParts(GameObject_s *object, i32 animation, i32 excluded_layer, i32 mode, float vertical_scale,
+               i32 use_vehicle_velocity, u16 *angle_override) {
+    CHARACTERDATA *character = object->apiobj.character_data;
+    GAMECHARACTERDATA *game_character = character->game_character;
+    if ((character->model_flags & 0x02000000) != 0 ||
+        (game_character->flags_090 & GAMECHARACTER_FLAG_GRAB_DISABLED) != 0)
+        return;
+
+    GameAudio_PlaySfx(0x4f, &object->apiobj.collision_position, 0, 0);
+
+    extern i16 id_TRAININGREMOTE;
+    extern HUBMINIKITPIECES_s **Char_MiniKit;
+    if ((character->model_flags & 0x04000000) != 0 && object->id != id_TRAININGREMOTE) {
+        HUBMINIKITPIECES_s *pieces = Char_MiniKit[object->id];
+        if (pieces == NULL || pieces->piece_count == 0)
+            return;
+        for (i32 i = 0; i < pieces->piece_count; ++i) {
+            HUBMINIKITPIECE_s *piece = &pieces->pieces[i];
+            if (!NuSpecialExistsFn(&piece->special))
+                continue;
+            NUMTX matrix;
+            NuMtxMul(&matrix, &piece->matrix, &object->apiobj.field_0xb8);
+            NUVEC momentum;
+            SetKillPartMom(&momentum);
+            NuVecScale(&momentum, &momentum, 3.0f);
+            momentum.x += object->apiobj.velocity.x * 0.75f;
+            momentum.y += object->apiobj.velocity.y * 0.75f + 60.0f;
+            momentum.z += object->apiobj.velocity.z * 0.75f;
+            ADDPART_s params = Default_ADDPART;
+            params.matrix = &matrix;
+            params.velocity = &momentum;
+            params.field_14 = params.field_18 = 0.2f;
+            params.gravity = -10.0f;
+            params.special = &piece->special;
+            params.flags = mode < 1 ? 0x480 : 0x90;
+            params.field_3c = PartImpact_Brick;
+            params.stop_fn = PartStop_Flickerer;
+            params.draw_fn = PartDraw_Flickerer;
+            params.time_step = FRAMETIME;
+            params.lighting = Cheats_CheckFlags(1) ? reinterpret_cast<PARTLIGHTSOURCE_s *>(ZeroRTL)
+                                                   : reinterpret_cast<PARTLIGHTSOURCE_s *>(&object->light_data);
+            params.field_c4 = 1;
+            PART_s *part = AddPart(&params);
+            if (part != NULL)
+                part->field_100 = static_cast<f32>(qrand()) * (1.0f / 65535.0f) * 2.0f + 7.0f;
+        }
+        return;
+    }
+
+    const u16 random_rotation_a = static_cast<u16>(static_cast<f32>(qrand()) * (1.0f / 65535.0f) * 25500.0f - 12750.0f);
+    const u16 random_rotation_b = static_cast<u16>(static_cast<f32>(qrand()) * (1.0f / 65535.0f) * 16384.0f - 8192.0f);
+    static i32 previous_variant = -1;
+    i32 random_variant = qrand() / 10923;
+    for (i32 retry = 0; retry < 8 && random_variant == previous_variant; ++retry)
+        random_variant = qrand() / 10923;
+    previous_variant = random_variant;
+
+    u32 layers = (game_character->flags_094[0] & 4) != 0
+                     ? object->field_0x1054
+                     : AdjustLayerBits(game_character->layer_mask_dead, object);
+    if (animation != -1)
+        layers = 1u << animation;
+    else if (excluded_layer != -1)
+        layers &= ~(1u << excluded_layer);
+
+    NUMTX joint_matrices[256];
+    i16 render_indices[32];
+    CHARACTERMODEL_s *model = object->apiobj.character_model;
+    EvalModelAnim(model, &object->apiobj.anim_packet, &object->apiobj.field_0xb8, joint_matrices, NULL, NULL, NULL,
+                  layers);
+    const i32 render_count = game_character->make_layer_list(model, render_indices, layers);
+    i32 part_index = 0;
+    for (i32 render_index = 0; render_index < render_count; ++render_index) {
+        const i32 layer = render_indices[render_index];
+        if (layer == -1 || (animation != -1 && layer != animation) ||
+            (excluded_layer != -1 && layer == excluded_layer))
+            continue;
+        nuhgobjrender_s *render = &model->hierarchy->render_parts[layer];
+        if (render->rigid_specials == NULL)
+            continue;
+        for (i32 joint = 0; joint < model->hierarchy->joint_count; ++joint, ++part_index) {
+            nuhspecial_s *special = static_cast<nuhspecial_s *>(render->rigid_specials[joint]);
+            if (special == NULL)
+                continue;
+            NUMTX matrix;
+            NUVEC momentum;
+            SetKillPartMom(&momentum);
+            ADDPART_s params = Default_ADDPART;
+            if (bonusmodearcade != 0 && (character->model_flags & 0x2000) != 0 && game_character->field_0x28 > 0.0f) {
+                NuMtxMul(&matrix, &joint_matrices[joint], &object->apiobj.field_0xb8);
+                NuVecScale(&momentum, &momentum, 4.0f);
+                momentum.x += object->apiobj.velocity.x * 0.75f;
+                momentum.y += object->apiobj.velocity.y * 0.75f + 60.0f;
+                momentum.z += object->apiobj.velocity.z * 0.75f;
+                params.field_14 = params.field_18 = 0.4f;
+                params.gravity = -10.0f;
+            } else {
+                momentum.y += vertical_scale;
+                if (animation != -1)
+                    momentum.y += 1.0f;
+                if ((character->model_flags & 0x2000) != 0) {
+                    momentum.x += object->apiobj.velocity.x * 0.75f;
+                    momentum.y += object->apiobj.velocity.y * 0.75f;
+                    momentum.z += object->apiobj.velocity.z * 0.75f;
+                } else if (use_vehicle_velocity != 0) {
+                    momentum.x += object->reset_velocity.x * 0.75f;
+                    momentum.y += object->reset_velocity.y * 0.75f;
+                    momentum.z += object->reset_velocity.z * 0.75f;
+                } else if (angle_override != NULL) {
+                    momentum.x += NuTrigTable[(*angle_override >> 1) & 0x7fff] * 2.0f;
+                    momentum.z += NuTrigTable[((static_cast<u16>(*angle_override + 0x4000)) >> 1) & 0x7fff] * 2.0f;
+                }
+                NuMtxMul(&matrix, &joint_matrices[joint], &object->apiobj.field_0xb8);
+                params.field_14 = params.field_18 = 0.1f;
+                params.gravity = -5.0f;
+            }
+            params.matrix = &matrix;
+            params.velocity = &momentum;
+            params.special = special;
+            params.lighting = Cheats_CheckFlags(1) ? reinterpret_cast<PARTLIGHTSOURCE_s *>(ZeroRTL)
+                                                   : reinterpret_cast<PARTLIGHTSOURCE_s *>(&object->light_data);
+            if (object->id == id_TIEFIGHTER) {
+                KillParts_TIEFIGHTER(&params, part_index, mode, object, random_variant, random_rotation_a,
+                                     random_rotation_b, &momentum);
+            } else if (object->id == id_ATAT) {
+                KillParts_ATAT(&params, part_index, mode, object);
+            } else if (object->id == id_SPEEDERBIKE) {
+                KillParts_SpeederBike(&params, part_index, mode, object);
+            } else {
+                params.flags = mode < 1 ? 0x480 : 0x90;
+                params.field_3c = PartImpact_Brick;
+                params.stop_fn = PartStop_Flickerer;
+                params.draw_fn = PartDraw_Flickerer;
+                params.time_step = FRAMETIME;
+                params.field_c4 = 1;
+                PART_s *part = AddPart(&params);
+                if (part != NULL)
+                    part->field_100 = static_cast<f32>(qrand()) * (1.0f / 65535.0f) * 2.0f + 7.0f;
+            }
+        }
+    }
+
+    if ((character->flags & 1) != 0 && bonusmodearcade != 0 && (character->model_flags & 0x2000) != 0 &&
+        game_character->field_0x28 > 0.0f) {
+        extern nuhspecial_s *CharScene_FindHSpecial(WORLDINFO_s *, i32);
+        nuhspecial_s *special = CharScene_FindHSpecial(WORLD, object->id);
+        if (special != NULL) {
+            NUMTX matrix = object->apiobj.field_0xb8;
+            NUVEC momentum;
+            SetKillPartMom(&momentum);
+            NuVecScale(&momentum, &momentum, 4.0f);
+            momentum.x += object->apiobj.velocity.x * 0.75f;
+            momentum.y += object->apiobj.velocity.y * 0.75f + 60.0f;
+            momentum.z += object->apiobj.velocity.z * 0.75f;
+            ADDPART_s params = Default_ADDPART;
+            params.matrix = &matrix;
+            params.velocity = &momentum;
+            params.field_14 = 0.8f;
+            params.field_18 = 0.4f;
+            params.gravity = -10.0f;
+            params.special = special;
+            params.flags = mode < 1 ? 0x480 : 0x90;
+            params.field_3c = PartImpact_Brick;
+            params.stop_fn = PartStop_Flickerer;
+            params.draw_fn = PartDraw_Flickerer;
+            params.time_step = FRAMETIME;
+            params.lighting = Cheats_CheckFlags(1) ? reinterpret_cast<PARTLIGHTSOURCE_s *>(ZeroRTL)
+                                                   : reinterpret_cast<PARTLIGHTSOURCE_s *>(&object->light_data);
+            params.field_c4 = 1;
+            PART_s *part = AddPart(&params);
+            if (part != NULL)
+                part->field_100 = static_cast<f32>(qrand()) * (1.0f / 65535.0f) * 2.0f + 3.0f;
+        }
+    }
+    if (game_character->uses_weapon_action == 0)
+        Customiser_AddPartAccessories(CharacterCustomiser, object, animation, mode, vertical_scale);
 }

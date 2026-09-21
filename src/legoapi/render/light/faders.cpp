@@ -1,4 +1,5 @@
 #include "decomp.h"
+#include "globals.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/world/world.h"
 #include "nu2api/nufile/nufpar.h"

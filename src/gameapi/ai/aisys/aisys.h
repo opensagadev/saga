@@ -262,8 +262,8 @@ typedef struct AICREATURE_s {
 
     u8 activation_difficulty;
 
-    char min_respawn_count;
-    char max_respawn_count;
+    i8 min_respawn_count;
+    i8 max_respawn_count;
 
     u8 activate_type;
 

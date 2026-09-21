@@ -197,3 +197,5 @@ extern "C" {
 
 extern "C" void NuDynamicLightAddShadowCasterScene(NuDynamicLight *, nugscn_s *);
 extern "C" void NuDynamicLightTestShadowExtrusionsSpecial(NuDynamicLight *, void *, NUMTX *);
+extern "C" i32 NuDynamicLightGetActiveRenderSetCount(NuDynamicLight *);
+extern "C" NUDISPLAYLIST *NuDynamicLightGetDList(NuDynamicLight *, i32, struct numtl_s *);

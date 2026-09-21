@@ -16,12 +16,12 @@ static NUCAMERA *cam;
 static NUMTX local_inv_view_mtx;
 static NUVEC world_campos;
 static i16 camera_roomid;
-static NUPLANE cam_plane;
 static NUFRUSTRUM **frustra;
 static i32 *nfrustra;
 static i32 draw_portals;
 
-static i16 rooms_visited[16];
+NUPLANE cam_plane;
+i16 rooms_visited[18];
 
 static NUFRUSTRUM *allocateFrustrum(i16 plane_count, i16 room_id) {
     NUFRUSTRUM *frustum = reinterpret_cast<NUFRUSTRUM *>(ALIGN(fstack_top.addr, 16));
@@ -35,24 +35,85 @@ static NUFRUSTRUM *allocateFrustrum(i16 plane_count, i16 room_id) {
 }
 
 static __used__ void transposeClipPlanes(NUFRUSTRUM *frustum) {
-    for (i32 i = 0; i < 8; ++i) {
-        const NUPLANE &plane = i < frustum->plane_count ? frustum->planes[i] : cam_plane;
-        frustum->transposed_planes[i] = plane.a;
-        frustum->transposed_planes[8 + i] = plane.b;
-        frustum->transposed_planes[16 + i] = plane.c;
-        frustum->transposed_planes[24 + i] = plane.d;
+    f32 cam_a = cam_plane.a;
+    frustum->transposed_planes[3] = cam_a;
+    f32 cam_d = cam_plane.d;
+    f32 cam_b = cam_plane.b;
+    f32 cam_c = cam_plane.c;
+    NUPLANE *planes = frustum->planes;
+    frustum->transposed_planes[7] = cam_b;
+    frustum->transposed_planes[11] = cam_c;
+    frustum->transposed_planes[15] = cam_d;
+    frustum->transposed_planes[16] = cam_a;
+    frustum->transposed_planes[20] = cam_b;
+    frustum->transposed_planes[24] = cam_c;
+    frustum->transposed_planes[28] = cam_d;
+    frustum->transposed_planes[17] = cam_a;
+    frustum->transposed_planes[21] = cam_b;
+    frustum->transposed_planes[25] = cam_c;
+    frustum->transposed_planes[29] = cam_d;
+    frustum->transposed_planes[18] = cam_a;
+    frustum->transposed_planes[22] = cam_b;
+    frustum->transposed_planes[26] = cam_c;
+    frustum->transposed_planes[30] = cam_d;
+    frustum->transposed_planes[19] = cam_a;
+    frustum->transposed_planes[23] = cam_b;
+    frustum->transposed_planes[27] = cam_c;
+    frustum->transposed_planes[31] = cam_d;
+
+    frustum->transposed_planes[0] = planes[0].a;
+    frustum->transposed_planes[4] = planes[0].b;
+    frustum->transposed_planes[8] = planes[0].c;
+    frustum->transposed_planes[12] = planes[0].d;
+    frustum->transposed_planes[1] = planes[1].a;
+    frustum->transposed_planes[5] = planes[1].b;
+    frustum->transposed_planes[9] = planes[1].c;
+    frustum->transposed_planes[13] = planes[1].d;
+    frustum->transposed_planes[2] = planes[2].a;
+    frustum->transposed_planes[6] = planes[2].b;
+    frustum->transposed_planes[10] = planes[2].c;
+    frustum->transposed_planes[14] = planes[2].d;
+    if (frustum->plane_count <= 3) {
+        return;
     }
+    frustum->transposed_planes[3] = planes[3].a;
+    frustum->transposed_planes[7] = planes[3].b;
+    frustum->transposed_planes[11] = planes[3].c;
+    frustum->transposed_planes[15] = planes[3].d;
+    if (frustum->plane_count == 4) {
+        return;
+    }
+    frustum->transposed_planes[16] = planes[4].a;
+    frustum->transposed_planes[20] = planes[4].b;
+    frustum->transposed_planes[24] = planes[4].c;
+    frustum->transposed_planes[28] = planes[4].d;
+    if (frustum->plane_count == 5) {
+        return;
+    }
+    frustum->transposed_planes[17] = planes[5].a;
+    frustum->transposed_planes[21] = planes[5].b;
+    frustum->transposed_planes[25] = planes[5].c;
+    frustum->transposed_planes[29] = planes[5].d;
+    if (frustum->plane_count == 6) {
+        return;
+    }
+    frustum->transposed_planes[18] = planes[6].a;
+    frustum->transposed_planes[22] = planes[6].b;
+    frustum->transposed_planes[26] = planes[6].c;
+    frustum->transposed_planes[30] = planes[6].d;
+    if (frustum->plane_count == 7) {
+        return;
+    }
+    frustum->transposed_planes[19] = planes[7].a;
+    frustum->transposed_planes[23] = planes[7].b;
+    frustum->transposed_planes[27] = planes[7].c;
+    frustum->transposed_planes[31] = planes[7].d;
 }
 
 static void transformFrustrumPlane(NUPLANE *plane) {
-    const f32 x = plane->a;
-    const f32 y = plane->b;
-    const f32 z = plane->c;
-    plane->a = x * local_inv_view_mtx.m00 + y * local_inv_view_mtx.m10 + z * local_inv_view_mtx.m20;
-    plane->b = x * local_inv_view_mtx.m01 + y * local_inv_view_mtx.m11 + z * local_inv_view_mtx.m21;
-    plane->c = x * local_inv_view_mtx.m02 + y * local_inv_view_mtx.m12 + z * local_inv_view_mtx.m22;
-    plane->d =
-        -(local_inv_view_mtx.m30 * plane->a + local_inv_view_mtx.m31 * plane->b + local_inv_view_mtx.m32 * plane->c);
+    NuVec4MtxTransformH(reinterpret_cast<NUVEC4 *>(plane), reinterpret_cast<NUVEC4 *>(plane), &local_inv_view_mtx);
+    plane->d = -(local_inv_view_mtx.m30 * plane->a + local_inv_view_mtx.m31 * plane->b +
+                 local_inv_view_mtx.m32 * plane->c);
 }
 
 static __used__ NUFRUSTRUM *buildFrustrum(NUVEC *minimum, NUVEC *maximum, i16 room_id) {
@@ -261,13 +322,19 @@ void NuPortalSetActiveDirect(NUPORTAL *portal, i32 active) {
 }
 
 void NuPortalSetActive(NUGSCN *scene, i32 portal_id, i32 active) {
-    for (u32 index = 0; index < scene->max_portals; ++index) {
-        NUPORTAL *portal = &scene->portals[index];
-        if (portal->id == portal_id) {
-            if (active != 0) {
-                portal->is_active |= NUPORTAL_FLAG_ACTIVE;
-            } else {
-                portal->is_active = 0;
+    if (scene->max_portals != 0) {
+        NUPORTAL *portal = scene->portals;
+        if (active == 0) {
+            for (u32 index = 0; index < scene->max_portals; index++, portal++) {
+                if (portal->id == portal_id) {
+                    portal->is_active = 0;
+                }
+            }
+        } else {
+            for (u32 index = 0; index < scene->max_portals; index++, portal++) {
+                if (portal->id == portal_id) {
+                    portal->is_active |= NUPORTAL_FLAG_ACTIVE;
+                }
             }
         }
     }
@@ -367,19 +434,28 @@ extern "C" i32 clipTestSphere(NUPORTALSPHERE *sphere, NUFRUSTRUM *frustum) {
 }
 
 extern "C" i32 clipTestBox(NUVEC *minimum, NUVEC *maximum, NUPLANE *planes, i32 plane_count) {
+    NUVEC min = *minimum;
+    NUVEC max = *maximum;
     i32 inside_vertices = 0;
     for (i32 plane_index = 0; plane_index < plane_count; ++plane_index) {
         const NUPLANE &plane = planes[plane_index];
         i32 inside_plane = 0;
-        for (i32 corner = 0; corner < 8; ++corner) {
-            const f32 x = (corner & 1) != 0 ? maximum->x : minimum->x;
-            const f32 y = (corner & 2) != 0 ? maximum->y : minimum->y;
-            const f32 z = (corner & 4) != 0 ? maximum->z : minimum->z;
-            if (plane.a * x + plane.b * y + plane.c * z + plane.d >= 0.0f) {
-                ++inside_plane;
-                ++inside_vertices;
-            }
-        }
+        if (!(plane.a * min.x + plane.b * min.y + plane.c * min.z + plane.d < 0.0f))
+            ++inside_plane, ++inside_vertices;
+        if (!(plane.a * max.x + plane.b * min.y + plane.c * min.z + plane.d < 0.0f))
+            ++inside_plane, ++inside_vertices;
+        if (!(plane.a * max.x + plane.b * max.y + plane.c * min.z + plane.d < 0.0f))
+            ++inside_plane, ++inside_vertices;
+        if (!(plane.a * min.x + plane.b * max.y + plane.c * min.z + plane.d < 0.0f))
+            ++inside_plane, ++inside_vertices;
+        if (!(plane.a * min.x + plane.b * min.y + plane.c * max.z + plane.d < 0.0f))
+            ++inside_plane, ++inside_vertices;
+        if (!(plane.a * max.x + plane.b * min.y + plane.c * max.z + plane.d < 0.0f))
+            ++inside_plane, ++inside_vertices;
+        if (!(plane.a * max.x + plane.b * max.y + plane.c * max.z + plane.d < 0.0f))
+            ++inside_plane, ++inside_vertices;
+        if (!(plane.a * min.x + plane.b * max.y + plane.c * max.z + plane.d < 0.0f))
+            ++inside_plane, ++inside_vertices;
         if (inside_plane == 0) {
             return 0;
         }

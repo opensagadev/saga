@@ -12,9 +12,12 @@
 #include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/render/fx/parts.h"
 #include "legoapi/legoapi_types.h"
+#include "legoapi/render/fx/parts.h"
+#include "legoapi/world/level.h"
+#include "legoapi/world/world.h"
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/nucore/nuanim3.h"
-#include "legoapi/core/input/qrand.h"
+#include "nu2api/numath/nuvec.h"
 
 struct AIROW_s;
 struct nuqthdr_s;
@@ -222,31 +225,36 @@ void KeepWeaponOut(GameObject_s *object) {
 }
 
 i32 ReleaseHearts() {
-    i32 total_hitpoints = 0;
-    i32 missing_hitpoints = 0;
-
     GameObject_s *player = Player[0];
+    i32 total_hitpoints;
+    i32 missing_hitpoints;
     if (player != NULL && player->apiobj.field_0x287 == 0 && player->hitpoints != 0) {
         total_hitpoints = player->hitpoints;
-        missing_hitpoints = player->hitpoints - static_cast<i8>(player->current_hp);
+        missing_hitpoints = total_hitpoints - static_cast<i8>(player->current_hp);
+    } else {
+        total_hitpoints = 0;
+        missing_hitpoints = 0;
     }
 
     player = Player[1];
     if (player != NULL && player->apiobj.field_0x287 == 0 && player->hitpoints != 0) {
-        total_hitpoints += player->hitpoints;
-        missing_hitpoints += player->hitpoints - static_cast<i8>(player->current_hp);
-    }
-
-    if (total_hitpoints == 0) {
+        i32 hitpoints = player->hitpoints;
+        i32 current_hitpoints = static_cast<i8>(player->current_hp);
+        total_hitpoints += hitpoints;
+        missing_hitpoints += hitpoints - current_hitpoints;
+    } else if (total_hitpoints == 0) {
         return 0;
     }
 
     if (missing_hitpoints > 0 && MAXPARTS > 0) {
-        for (i32 index = 0; index < MAXPARTS; ++index) {
-            if ((Part[index].active & 1) != 0 && Part[index].type_id == 0xcb) {
+        PART_s *part = Part;
+        PART_s *end = part + MAXPARTS;
+        do {
+            if ((part->active & 1) != 0 && part->type_id == 0xcb) {
                 --missing_hitpoints;
             }
-        }
+            ++part;
+        } while (part != end);
     }
 
     missing_hitpoints -= Game.save_version;
@@ -257,9 +265,8 @@ i32 ReleaseHearts() {
     }
 
     i32 release_threshold = total_hitpoints;
-    if (missing_hitpoints <= total_hitpoints) {
+    if (missing_hitpoints <= total_hitpoints)
         release_threshold = missing_hitpoints < 0 ? 0 : missing_hitpoints;
-    }
 
     i32 release_chance = (release_threshold << 16) / total_hitpoints;
     const i32 difficulty_adjustment = static_cast<i8>(adtab[adaptivedifficulty[0]][1]);
@@ -268,7 +275,7 @@ i32 ReleaseHearts() {
     } else if (difficulty_adjustment == -1) {
         release_chance += release_chance;
     }
-    return qrand() < release_chance;
+    return release_chance > qrand();
 }
 
 void SlowWeaponOut(GameObject_s *object) {

@@ -37,6 +37,7 @@
 #include "nu2api/nucore/common.h"
 #include "nu2api/nucore/nuapi.h"
 #include "nu2api/numath/nuvec.h"
+#include "nu2api/numath/nuvec4.h"
 
 // ---------------------------------------------------------------------------
 // Renderer binding cache. Other render-context state lives in
@@ -522,7 +523,6 @@ void NuIOSDLTransformCallback(void *arg) {
     }
     Nu360SetObjectShadowFactor(shadow_factor);
 
-    Nu360SetObjectShadowFactor(shadow_factor);
     world->m33 = 1.0f;
     world->m23 = 0.0f;
     NuRenderContextSetWorld(world);
@@ -563,7 +563,6 @@ void NuIOSDLTransformParamsCallback(void *arg) {
     }
     Nu360SetObjectShadowFactor(shadow_factor);
 
-    Nu360SetObjectShadowFactor(shadow_factor);
     stream_matrix->m33 = 1.0f;
     stream_matrix->m32 = 0.0f;
     NuRenderContextSetWorld_transpose(stream_matrix);
@@ -665,35 +664,37 @@ void NuIOSDLLightsCallback(void *arg) {
     NuShaderManagerSetfv(0x38, reinterpret_cast<const f32 *>(&lights->light_intensity[2]));
     NuShaderManagerSetfv(0x4b, reinterpret_cast<const f32 *>(&lights->specular_mtx));
 
-    NUVEC4 average_direction = {
-        lights->light_direction[0].x + lights->light_direction[1].x + lights->light_direction[2].x,
-        lights->light_direction[0].y + lights->light_direction[1].y + lights->light_direction[2].y,
-        lights->light_direction[0].z + lights->light_direction[1].z + lights->light_direction[2].z,
-        1.0f,
-    };
+    NUVEC4 average_direction;
+    NuVec4Add(&average_direction, &lights->light_direction[0], &lights->light_direction[1]);
+    NuVec4Add(&average_direction, &average_direction, &lights->light_direction[2]);
     NuVecNorm(reinterpret_cast<NUVEC *>(&average_direction), reinterpret_cast<NUVEC *>(&average_direction));
     NuShaderManagerSetfv(0x4e, &average_direction.x);
 
-    const f32 max_r = lights->light_intensity[1].r <= lights->light_intensity[2].r ? lights->light_intensity[2].r
-                                                                                   : lights->light_intensity[1].r;
-    const f32 max_g = lights->light_intensity[1].g <= lights->light_intensity[2].g ? lights->light_intensity[2].g
-                                                                                   : lights->light_intensity[1].g;
-    const f32 max_b = lights->light_intensity[1].b <= lights->light_intensity[2].b ? lights->light_intensity[2].b
-                                                                                   : lights->light_intensity[1].b;
-    f32 average_colour[4] = {
-        lights->light_intensity[0].r <= max_r ? max_r : lights->light_intensity[0].r,
-        lights->light_intensity[0].g <= max_g ? max_g : lights->light_intensity[0].g,
-        lights->light_intensity[0].b <= max_b ? max_b : lights->light_intensity[0].b,
-        1.0f,
-    };
-    NuShaderManagerSetfv(0x4d, average_colour);
-    f32 specular_intensity[4] = {
-        lights->specular_intensity.x,
-        lights->specular_intensity.y,
-        lights->specular_intensity.z,
-        1.0f,
-    };
-    NuShaderManagerSetfv(0x57, specular_intensity);
+    NUVEC4 average_colour;
+    average_colour.x =
+        lights->light_intensity[0].r >
+                (lights->light_intensity[1].r > lights->light_intensity[2].r ? lights->light_intensity[1].r
+                                                                            : lights->light_intensity[2].r)
+            ? lights->light_intensity[0].r
+            : (lights->light_intensity[1].r > lights->light_intensity[2].r ? lights->light_intensity[1].r
+                                                                           : lights->light_intensity[2].r);
+    average_colour.y =
+        lights->light_intensity[0].g >
+                (lights->light_intensity[1].g > lights->light_intensity[2].g ? lights->light_intensity[1].g
+                                                                            : lights->light_intensity[2].g)
+            ? lights->light_intensity[0].g
+            : (lights->light_intensity[1].g > lights->light_intensity[2].g ? lights->light_intensity[1].g
+                                                                           : lights->light_intensity[2].g);
+    average_colour.z =
+        lights->light_intensity[0].b >
+                (lights->light_intensity[1].b > lights->light_intensity[2].b ? lights->light_intensity[1].b
+                                                                            : lights->light_intensity[2].b)
+            ? lights->light_intensity[0].b
+            : (lights->light_intensity[1].b > lights->light_intensity[2].b ? lights->light_intensity[1].b
+                                                                           : lights->light_intensity[2].b);
+    average_colour.w = 1.0f;
+    NuShaderManagerSetfv(0x4d, &average_colour.x);
+    NuShaderManagerSetfv(0x57, &lights->specular_intensity.x);
 }
 
 void NuIOSDLDeferredMtlCallback(void *) {

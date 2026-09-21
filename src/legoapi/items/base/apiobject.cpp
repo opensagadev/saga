@@ -2780,8 +2780,4 @@ extern "C" {
         return characterdata;
     }
 
-    void WindShear(void) {
-        STUBBED();
-    }
-
 } // extern "C"

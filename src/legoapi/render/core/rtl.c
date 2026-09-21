@@ -22,6 +22,7 @@
 #include "nu2api/nucore/nupad.h"
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nurand.h"
+#include "nu2api/numath/nutrig.h"
 
 #include <math.h>
 #include <float.h>
@@ -31,6 +32,18 @@
 struct nuqtdim_s;
 struct nuqthdr_s;
 struct rtl_s;
+struct rtlindex_s {
+    i32 enabled;
+    u8 reserved_04[8];
+    i32 width;
+    i32 depth;
+    f32 scale;
+    f32 offset_x;
+    f32 offset_z;
+    char **cells;
+    u8 reserved_24[4];
+};
+DECOMP_ASSERT(sizeof(rtlindex_s) == 0x28, "RTL index size");
 struct rtlidata_s {
     union {
         u8 data[sizeof(rtldata_s)];
@@ -80,6 +93,7 @@ static i32 rtl_dynamic_max;
 static i32 rtl_dynamic_cnt;
 static f32 rtl_frametime;
 static i16 rtl_uid = 1;
+i32 rtl_error = 0;
 u16 rtltimer1 = 0;
 f32 edrtl_text_scale = 1.0f;
 static f32 default_modifiers = 1.0f;
@@ -833,6 +847,8 @@ static void rtlApplySetScaleLoop(void *set, rtlidata_s *lighting_data, NUVEC *po
                 InsertLight(light, lighting_data, strength);
             }
         }
+    } else {
+        light = reinterpret_cast<rtl_s *>(NuLstGetNext(rtl_dynamic_pool, NULL));
     }
 }
 
@@ -940,21 +956,21 @@ static __used__ void rtlApplyModifiersToSingleLight(rtl_s *light) {
     light->ambient.z += light->colour.z * scale;
 }
 
-static __used__ void rtlProcessLight(rtl_s *light, f32 frame_time) {
-    f32 scale;
+static __used__ void rtlProcessLight(rtl_s *light, f32 elapsed) {
     if (light->field_79 != -1 && light->field_7a == -1)
         rtlApplyModifiersToChainLight(light);
+
     switch (light->type) {
         case 0:
             return;
         case 3:
             if (light->parameter_54 >= 0.0f) {
-                light->parameter_54 -= frame_time;
+                light->parameter_54 -= elapsed;
                 light->ambient = light->colour;
                 if (light->parameter_54 <= 0.0f)
                     light->parameter_54 = -light->parameters[2] - NuRandFloat() * light->parameters[3];
             } else {
-                light->parameter_54 += frame_time;
+                light->parameter_54 += elapsed;
                 light->ambient = light->secondary_colour;
                 if (light->parameter_54 >= 0.0f)
                     light->parameter_54 = light->parameters[0] + NuRandFloat() * light->parameters[1];
@@ -965,22 +981,38 @@ static __used__ void rtlProcessLight(rtl_s *light, f32 frame_time) {
                 light->ambient.x = light->colour.x;
                 light->ambient.y = light->colour.y;
                 light->ambient.z = light->colour.z;
-            } else if (light->field_64 > 0.0f) {
-                light->parameter_54 += frame_time;
-                scale = MIN(1.0f, (MAX(0.0f, light->parameter_54 / light->field_64)));
-                light->ambient.x = light->colour.x * scale + (1.0f - scale) * light->secondary_colour.x;
-                light->ambient.y = light->colour.y * scale + (1.0f - scale) * light->secondary_colour.y;
-                light->ambient.z = light->colour.z * scale + (1.0f - scale) * light->secondary_colour.z;
+                break;
+            }
+            if (light->field_64 > 0.0f) {
+                light->parameter_54 += elapsed;
+                f32 blend =
+                    (light->parameter_54 / light->field_64 < 0.0f
+                         ? false
+                         : light->parameter_54 / light->field_64 > 1.0f)
+                        ? 1.0f
+                        : (light->parameter_54 / light->field_64 < 0.0f
+                               ? 0.0f
+                               : light->parameter_54 / light->field_64);
+                light->ambient.x = light->colour.x * blend + light->secondary_colour.x * (1.0f - blend);
+                light->ambient.y = light->colour.y * blend + light->secondary_colour.y * (1.0f - blend);
+                light->ambient.z = light->colour.z * blend + light->secondary_colour.z * (1.0f - blend);
                 if (light->parameter_54 >= light->field_64) {
                     light->field_64 = -light->parameters[2] - NuRandFloat() * light->parameters[3];
                     light->parameter_54 = 0.0f;
                 }
             } else {
-                light->parameter_54 -= frame_time;
-                scale = MIN(1.0f, (MAX(0.0f, light->parameter_54 / light->field_64)));
-                light->ambient.x = light->secondary_colour.x * scale + (1.0f - scale) * light->colour.x;
-                light->ambient.y = light->secondary_colour.y * scale + (1.0f - scale) * light->colour.y;
-                light->ambient.z = light->secondary_colour.z * scale + (1.0f - scale) * light->colour.z;
+                light->parameter_54 -= elapsed;
+                f32 blend =
+                    (light->parameter_54 / light->field_64 < 0.0f
+                         ? false
+                         : light->parameter_54 / light->field_64 > 1.0f)
+                        ? 1.0f
+                        : (light->parameter_54 / light->field_64 < 0.0f
+                               ? 0.0f
+                               : light->parameter_54 / light->field_64);
+                light->ambient.x = light->secondary_colour.x * blend + light->colour.x * (1.0f - blend);
+                light->ambient.y = light->secondary_colour.y * blend + light->colour.y * (1.0f - blend);
+                light->ambient.z = light->secondary_colour.z * blend + light->colour.z * (1.0f - blend);
                 if (light->parameter_54 <= light->field_64) {
                     light->field_64 = light->parameters[0] + NuRandFloat() * light->parameters[1];
                     light->parameter_54 = 0.0f;
@@ -988,12 +1020,18 @@ static __used__ void rtlProcessLight(rtl_s *light, f32 frame_time) {
             }
             break;
         case 8:
-            light->ambient.x = light->secondary_colour.x * light->blend + (1.0f - light->blend) * light->colour.x;
-            light->ambient.y = light->secondary_colour.y * light->blend + (1.0f - light->blend) * light->colour.y;
-            light->ambient.z = light->secondary_colour.z * light->blend + (1.0f - light->blend) * light->colour.z;
-            light->blend += light->blend_rate * frame_time;
-            light->blend = MAX(0.0f, (MIN(1.0f, light->blend)));
-            light->parameter_54 -= frame_time;
+            light->ambient.x = light->secondary_colour.x * light->blend +
+                               light->colour.x * (1.0f - light->blend);
+            light->ambient.y = light->secondary_colour.y * light->blend +
+                               light->colour.y * (1.0f - light->blend);
+            light->ambient.z = light->secondary_colour.z * light->blend +
+                               light->colour.z * (1.0f - light->blend);
+            light->blend += light->blend_rate * elapsed;
+            light->blend =
+                (light->blend < 0.0f ? false : light->blend > 1.0f)
+                    ? 1.0f
+                    : (light->blend < 0.0f ? 0.0f : light->blend);
+            light->parameter_54 -= elapsed;
             if (light->parameter_54 <= 0.0f) {
                 light->parameter_54 = light->parameters[2];
                 if (light->blend_rate >= 0.0f)
@@ -1006,6 +1044,7 @@ static __used__ void rtlProcessLight(rtl_s *light, f32 frame_time) {
             light->ambient = light->colour;
             break;
     }
+
     if (light->field_79 == -1 && light->field_7a == -1)
         rtlApplyModifiersToSingleLight(light);
 }
@@ -2235,7 +2274,7 @@ i32 edrtlBurnoutLoadSet(char *filename, burnset_s *set) {
     return 0;
 }
 
-extern "C" burnset_s *edrtlBurnoutLoad(char *filename, VARIPTR *buffer) {
+extern "C" burnset_s *edrtlBurnoutLoad(char *filename, VARIPTR *buffer, i32) {
     buffer->addr = (buffer->addr + 3) & ~static_cast<usize>(3);
     burnset_s *set = static_cast<burnset_s *>(buffer->void_ptr);
     edrtlInitBurnset(set);

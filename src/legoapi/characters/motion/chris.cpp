@@ -342,8 +342,9 @@ i32 DidBoltHitChrisJobby(WORLDINFO_s *, BOLT_s *) {
     return 0;
 }
 
-void ChrisExtraBoltCollision(BOLT_s *, nuvec_s *) {
+i32 ChrisExtraBoltCollision(BOLT_s *, nuvec_s *) {
     STUBBED();
+    return 0;
 }
 
 void ChrisGetSpaceShipMatrix(GameObject_s *, numtx_s *) {

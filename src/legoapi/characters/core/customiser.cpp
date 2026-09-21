@@ -7,6 +7,8 @@
 #include "legoapi/menus/screens/store.h"
 #include "legoapi/menus/screens/gamestructure.h"
 #include "legoapi/characters/core/character.h"
+#include "legoapi/core/config/cheat.h"
+#include "legoapi/render/fx/parts.h"
 #include "legoapi/world/world.h"
 #include "legoapi/world/area.h"
 #include "nu2api/nu3d/nuspecial.h"
@@ -214,8 +216,48 @@ void Customiser_DrawAccessories(CUSTOMISER *, GameObject_s *, numtx_s *) {
     STUBBED();
 }
 
-void Customiser_AddPartAccessories(CUSTOMISER *, GameObject_s *, i32, i32, float) {
-    STUBBED();
+void Customiser_AddPartAccessories(CUSTOMISER *customiser, GameObject_s *object, i32 animation, i32 mode, float scale) {
+    const i32 joint = static_cast<i8>(object->apiobj.character_data->player_config->unknown_110[1]);
+    if (customiser == NULL || joint == -1 || object->apiobj.character_model->points_of_interest[joint] == NULL)
+        return;
+
+    const i32 side = object->id != customiser->character_ids[0];
+    const i16 *pieces = side == 0 ? customiser->save->pieces : customiser->save->secondary_pieces;
+    for (i32 category = 0; category != 9; ++category) {
+        if (category == 2)
+            continue;
+        if (category == 0 &&
+            ((customiser->piece_sets[1][static_cast<u16>(pieces[1])].availability_flags & 1) != 0 ||
+             (customiser->piece_sets[0][static_cast<u16>(pieces[0])].availability_flags & 0x20) != 0)) {
+            continue;
+        }
+
+        nuhspecial_s *special = &Accessory[side][category].special;
+        if (!NuSpecialExistsFn(special))
+            continue;
+
+        NUVEC momentum;
+        SetKillPartMom(&momentum);
+        momentum.y += scale;
+        if (animation != -1)
+            momentum.y += 1.0f;
+
+        ADDPART_s params = Default_ADDPART;
+        params.matrix = &object->joint_matrices[joint];
+        params.velocity = &momentum;
+        params.field_14 = 0.1f;
+        params.field_18 = 0.1f;
+        params.gravity = -5.0f;
+        params.special = special;
+        params.flags = mode < 1 ? 0x480 : 0x90;
+        params.field_3c = PartImpact_Brick;
+        params.stop_fn = PartStop_Flickerer;
+        params.draw_fn = PartDraw_Flickerer;
+        params.time_step = FRAMETIME;
+        params.lighting = Cheats_CheckFlags(1) ? reinterpret_cast<PARTLIGHTSOURCE_s *>(ZeroRTL)
+                                               : reinterpret_cast<PARTLIGHTSOURCE_s *>(&object->light_data);
+        AddPart(&params);
+    }
 }
 
 void Customiser_DumpAccessories(CUSTOMISER *) {

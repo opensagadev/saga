@@ -43,6 +43,20 @@ EXPLOSION *Detonate(NUVEC *, u16);
 extern "C" void NewPartRotation(PART_s *);
 extern "C" void *AIPAthFindPathCnx(AISYS_s *, AIPATH_s *, char *, char *, i32 *);
 
+extern void AtatPart_Update(PART_s *);
+extern void AtatPart_Stop(PART_s *);
+
+void KillParts_ATAT(ADDPART_s *params, i32, i32 mode, GameObject_s *) {
+    params->flags = mode < 1 ? 0x500 : 0x110;
+    memset(params->velocity, 0, sizeof(NUVEC));
+    params->field_48 = AtatPart_Update;
+    params->stop_fn = AtatPart_Stop;
+    params->draw_fn = PartDraw_Flickerer;
+    PART_s *part = AddPart(params);
+    if (part != NULL)
+        part->field_100 = 10.0f;
+}
+
 static GameObject_s *Vader_obj;
 static GIZAIMESSAGE_s *Vader_ai_message;
 
@@ -135,10 +149,6 @@ void DagobahC_Panel(WORLDINFO_s *) {
             DrawBossHitPoints(Vader_obj);
         }
     }
-}
-
-void KillParts_ATAT(ADDPART_s *, i32, i32, GameObject_s *) {
-    STUBBED();
 }
 
 f32 rocket_speed = 1.2f;

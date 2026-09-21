@@ -8,6 +8,7 @@
 #include "nu2api/nu3d/nurndr.h"
 
 struct numtl_s;
+struct nudisplaylist_s;
 typedef struct numtl_s NUMTL;
 
 // Per-material render-state cache (original type `nurndrstate_s`, 52 bytes).
@@ -88,7 +89,8 @@ extern "C" {
     void RndrStateResetSharedGlobalState(void);
     void RndrStateUpdateFx(void *state, struct nudisplaylistitem_s *item);
     void RndrStateUpdate(void *state, NUMTL *mtl, struct nudisplaylistitem_s *item);
-    void DisplayListUpdateRenderState(void *display_list, void *state);
+    void DisplayListUpdateRenderState(struct nudisplaylist_s *display_list, NUGLOBALRNDRSTATE *state);
+    void DisplayListUpdateRenderStateShadow(struct nudisplaylist_s *display_list, NURNDRSTATE *state);
     void RndrStateSetConstAlphaTint(i32 alpha_enabled, i32 tint_enabled, f32 alpha, const NUCOLOUR3 *tint, NUMTL *mtl);
     void NuRndrStateInit(void);
     i32 NuRndrStateGetFogEnabled(void);

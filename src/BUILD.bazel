@@ -405,11 +405,8 @@ clang_tidy_wasm_check(
 
 cc_binary(
     name = "saga",
-    additional_linker_inputs = ["host-wasm-shell.html"],
-    features = ["-output_format_js"],
     linkopts = [
         "--use-port=sdl3",
-        "--oformat=html",
         "-Wl,--wrap=_Z8LoadPermv",
         "-Wl,--wrap=_Z7EndPermv",
         "-sPROXY_TO_PTHREAD=1",
@@ -421,8 +418,6 @@ cc_binary(
         "-sSTACK_SIZE=5242880",
         "-sASSERTIONS=1",
         "-sEXPORTED_RUNTIME_METHODS=FS,callMain",
-        "--shell-file",
-        "$(location host-wasm-shell.html)",
         "--emrun",
     ],
     linkstatic = True,
@@ -433,7 +428,6 @@ wasm_cc_binary(
     name = "saga_wasm",
     cc_target = ":saga",
     outputs = [
-        "saga.html",
         "saga.js",
         "saga.wasm",
     ],

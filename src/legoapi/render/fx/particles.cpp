@@ -8,6 +8,7 @@
 #include "nu2api/nu3d/nudlist.h"
 #include "nu2api/nu3d/nurndrstat.h"
 #include "nu2api/nu3d/nurndr.h"
+#include "nu2api/nufile/nufile.h"
 #include "gameapi/edtools/edstubs.h"
 #include "globals.h"
 #include "legoapi/world/world.h"
@@ -29,6 +30,7 @@ extern "C" {
     extern i32 DEBPAGE_GENERAL;
     void DebFreeAllCreatedEffects(void);
     void DebrisSetRenderGroup(i32 group);
+    i32 edppLoadPage(char *path, i32 flag, usize scene);
     i32 NuRndrBeginScene(i32 flags);
     void NuRndrEndScene(void);
     i32 edppLoadPage(char *path, i32 flag, usize scene);

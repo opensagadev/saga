@@ -68,6 +68,7 @@ typedef union variptr_u {
     u8 *u8_ptr;
     u32 *u32_ptr;
     f32 *f32_ptr;
+    struct numtx_s *mtx_ptr;
     usize addr;
 } VARIPTR;
 
