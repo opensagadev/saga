@@ -21,7 +21,12 @@
 #include "legoapi/actions/combat/hits.h"
 #include "legoapi/core/input/gamepads.h"
 #include "legoapi/items/collect/spacelevel.h"
+#include "legoapi/gizmo/base/GizBlowupObjectInterface.h"
+#include "legoapi/gizmos/object/gizobstacles.h"
+#include "legoapi/gizmo/object/gizmoblowups.h"
+#include "legoapi/world/level.h"
 #include "legoapi/world/world.h"
+#include "legoapi/world/world_shared.h"
 #include "gameapi/edtools/edcam.h"
 #include "gameapi/edtools/edui.h"
 #include "nu2api/numath/nuvec.h"
@@ -36,6 +41,8 @@ struct SHOPINPUT;
 // This alignment affects PodRaceAUpdate codegen even though the linked address is 32-byte aligned.
 static i32 PodRaceKey[8] __attribute__((aligned(16))) = {-1, -1, -1, -1, -1, -1, -1, -1};
 static u8 bikeParts[0x1a0];
+static i32 snaphack[2];
+static i32 snaphacktimer[2];
 
 struct SPEEDERCHASEANETPACKET_s {
     u8 field_0x0;
@@ -51,6 +58,7 @@ SPEEDERCHASEANETPACKET_s *speederchasea_netpacket;
 
 u8 troopercannons_beenReset = 0;
 i32 players_going_forward = 0;
+extern i32 players_cannot_exit_speeder;
 
 NuMechPtr<MechObjectInterface, 4> lungeTarget;
 NuMechPtr<MechObjectInterface, 4> forceNextAttackOpponent;
@@ -270,8 +278,72 @@ i32 ObjIsTargetSpeeder(GameObject_s *object) {
     return object->apiobj.field_0x27c == -1;
 }
 
-void SpeederChaseA_Init(WORLDINFO_s *) {
-    STUBBED();
+void SetLevelExBlowupFunc(i32 (*callback)(GIZMOBLOWUP_s *, i32));
+void InitTrooperCannons(WORLDINFO_s *world);
+
+void SpeederChaseA_Init(WORLDINFO_s *world) {
+    speederchasea_netpacket = static_cast<SPEEDERCHASEANETPACKET_s *>(SetLevelHack(7));
+    SetLevelExBlowupFlags(3);
+    SetLevelExBlowupFunc(SpeederBlowupHack);
+    InitTrooperCannons(world);
+    players_cannot_exit_speeder = 0;
+    InitBikeParts();
+
+    NuSpecialFind(world->current_gscn, &LevHSpecial[0], "clear1_ffield1", 1);
+    NuSpecialFind(world->current_gscn, &LevHSpecial[1], "clear1_ffield2", 1);
+    NuSpecialFind(world->current_gscn, &LevHSpecial[2], "clear2_ffield1", 1);
+    NuSpecialFind(world->current_gscn, &LevHSpecial[3], "clear2_ffield2", 1);
+    NuSpecialFind(world->current_gscn, &LevHSpecial[4], "clear1_ffield1", 1);
+    NuSpecialFind(world->current_gscn, &LevHSpecial[5], "clear3_ffield1", 1);
+    NuSpecialFind(world->current_gscn, &LevHSpecial[6], "clear3_ffield2", 1);
+    NuSpecialFind(world->current_gscn, &LevHSpecial[7], "clear4_ffield1", 1);
+    NuSpecialFind(world->current_gscn, &LevHSpecial[8], "clear4_ffield2", 1);
+
+    snaphack[1] = 0;
+    snaphack[0] = 0;
+    snaphacktimer[1] = 0;
+    reinterpret_cast<u8 *>(LevSfxFlag)[0] = 0;
+    reinterpret_cast<u8 *>(LevSfxFlag)[1] = 0;
+    reinterpret_cast<u8 *>(LevSfxFlag)[2] = 0;
+    reinterpret_cast<u8 *>(LevSfxFlag)[3] = 0;
+    reinterpret_cast<u8 *>(LevSfxFlag)[4] = 0;
+    reinterpret_cast<u8 *>(LevSfxFlag)[5] = 0;
+    reinterpret_cast<u8 *>(LevSfxFlag)[6] = 0;
+    reinterpret_cast<u8 *>(LevSfxFlag)[7] = 0;
+    reinterpret_cast<u8 *>(LevSfxFlag)[8] = 0;
+    snaphacktimer[0] = 0;
+
+    GIZOBSTACLE_s *obstacle = GizObstacle_FindByName(world->giz_obstacle_sys, "RAISEPLAT");
+    if (obstacle != NULL) {
+        obstacle->field_a1_0xa1 |= 1;
+    }
+
+    GIZMOBLOWUP_s *blowup = GizmoBlowUp_FindByName(world, "bridge_01_13b1");
+    if (blowup != NULL) {
+        blowup->field_0x124 = 1;
+        blowup->field_0x128 = blowup->target_scale * 1.5f;
+    }
+    blowup = GizmoBlowUp_FindByName(world, "bridge_01_14b1");
+    if (blowup != NULL) {
+        blowup->field_0x124 = 1;
+        blowup->field_0x128 = blowup->target_scale * 1.5f;
+    }
+    blowup = GizmoBlowUp_FindByName(world, "tow1_tar1");
+    if (blowup != NULL) {
+        blowup->field_0x124 = 1;
+    }
+    blowup = GizmoBlowUp_FindByName(world, "tow2_tar1");
+    if (blowup != NULL) {
+        blowup->field_0x124 = 1;
+    }
+    blowup = GizmoBlowUp_FindByName(world, "tow3_tar1");
+    if (blowup != NULL) {
+        blowup->field_0x124 = 1;
+    }
+    blowup = GizmoBlowUp_FindByName(world, "tow4_tar1");
+    if (blowup != NULL) {
+        blowup->field_0x124 = 1;
+    }
 }
 
 void ProcessCurrentSpeed(WORLDINFO_s *world, speedup_s *speedup) {

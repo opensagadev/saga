@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 51.726864,
+    "fuzzy_match_percent": 51.74263,
     "total_code": "4722419",
-    "matched_code": "454860",
-    "matched_code_percent": 9.631928,
+    "matched_code": "455012",
+    "matched_code_percent": 9.635147,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 5370,
-    "matched_functions_percent": 39.898952,
+    "matched_functions": 5371,
+    "matched_functions_percent": 39.906384,
     "total_units": 1
   },
   "text": {
@@ -38562,7 +38562,7 @@
           "address": 2344576,
           "offset": 1454608,
           "size": 152,
-          "match_percent": 99.52381
+          "match_percent": 100.0
         },
         {
           "name": "_Z18SpeederChaseA_InitP11WORLDINFO_s",
@@ -38570,7 +38570,7 @@
           "address": 2344736,
           "offset": 1454768,
           "size": 789,
-          "match_percent": 2.485207
+          "match_percent": 96.78698
         },
         {
           "name": "_Z19SpeederChaseA_ResetP11WORLDINFO_s",
