@@ -43,6 +43,7 @@ static CUSTOMISEMOTION_s HeadAnim[2], ArmsAnim[2], LegsAnim[2];
 static u16 CustomiseBob[2];
 static f32 Customise_NameAlpha;
 static f32 CustomiseNameBoardTMul[2], CustomiseNameBoardMul[2], CustomiseNameLetterBlipScale[2];
+static NUVEC CustomiseScreenPos[2];
 u16 CustomiseRotY[2], CustomiseTiltX[2], CustomiseTiltZ[2];
 void Customiser_SetNameAndIcon(CUSTOMISER *, i32);
 

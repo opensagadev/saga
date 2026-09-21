@@ -793,7 +793,7 @@ void PlayerItemType_Find(i32) {
 
 void (*Player_ClearContextFn)(GameObject_s *, i32);
 void Whip_Release(GameObject_s *);
-void SpecialMove_ReleaseVictim(GameObject_s *);
+i32 SpecialMove_ReleaseVictim(GameObject_s *);
 
 void Player_ClearContext(GameObject_s *object, i32 mode) {
     if (Player_ClearContextFn != NULL)

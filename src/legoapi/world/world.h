@@ -454,7 +454,7 @@ typedef struct WORLDINFO_s {
         char filler14b[0x516c - 0x5124];
         struct {
             struct CUSTOMPIECERESOURCE *customiser_resources[9];
-            u8 customiser_resource_tail[0x24];
+            struct nugscn_s *customiser_shared_scenes[9];
         };
     };
 

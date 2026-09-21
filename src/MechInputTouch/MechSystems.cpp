@@ -134,7 +134,7 @@ void MechSystems::LoadPerm() {
         material->opacity = 0.0f;
         raw[0x42] = static_cast<u8>((raw[0x42] & 0x8c) | 0x12);
         material->tex_id = static_cast<i16>(
-            NuTexRead(const_cast<char *>(loads[i].texture), &permbuffer_ptr, &permbuffer_end));
+            NuTexRead(const_cast<char *>(loads[i].texture), &permbuffer_ptr, permbuffer_end));
         NuMtlUpdate(material);
     }
 }

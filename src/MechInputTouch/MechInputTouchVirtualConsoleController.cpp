@@ -42,7 +42,7 @@ void MechInputTouchVirtualConsoleController::LoadPerm() {
     };
     for (u32 i = 0; i < sizeof(textures) / sizeof(textures[0]); ++i) {
         s_textures[textures[i].index] = static_cast<i16>(
-            NuTexRead(const_cast<char *>(textures[i].name), &permbuffer_ptr, &permbuffer_end));
+            NuTexRead(const_cast<char *>(textures[i].name), &permbuffer_ptr, permbuffer_end));
     }
     hasDoneLoadPerm = 1;
 }

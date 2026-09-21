@@ -308,7 +308,7 @@ void Customiser_LoadAll(CUSTOMISER *customiser, WORLDINFO_s *world) {
             }
             if (resource->texture_id == 0) {
                 resource->texture_id = NuTexRead(path, &world->giz_buffer,
-                                                 reinterpret_cast<VARIPTR *>(world->unknown_0108.addr));
+                                                 world->unknown_0108);
             }
         }
     }

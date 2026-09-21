@@ -5960,7 +5960,7 @@ void GetTakeOverPos(GameObject_s *, NUVEC *);
 void SetToLastSafePos(GameObject_s *);
 void ReleaseLever(GameObject_s *);
 void Batarangs_CheckLostData(void *);
-void SpecialMove_ReleaseVictim(GameObject_s *);
+i32 SpecialMove_ReleaseVictim(GameObject_s *);
 void ReleaseEat(GameObject_s *);
 void ReleasePush(GameObject_s *);
 void ReleaseForce(GameObject_s *, i32);
