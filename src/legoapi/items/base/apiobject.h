@@ -1172,7 +1172,8 @@ typedef struct GameObject_s {
     union {
         u8 pad_e3c[3];
         struct {
-            u8 reserved_e3c[2];
+            u8 reserved_e3c;
+            u8 attack_locator;
             u8 quick_shoot_bolt_id;
         };
     };

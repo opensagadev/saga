@@ -136,9 +136,9 @@ GameObject_s *AddGameObject(i32 id) {
     if (addons != NULL) {
         MechEdgeStopAddon *edge_stop = new MechEdgeStopAddon(*object->GetMechObjectInterface());
         addons->Add(*edge_stop);
-        if (VehicleArea != 0 || id == id_SPEEDERBIKE || id == id_SPEEDERBIKESNOW || id == id_STAP ||
-            id == id_STAP2 || id == id_TROOPERCANNON || id == id_CANNON || id == id_MOSCANNON ||
-            id == id_ATST || id == id_BASKETCANNON || id == id_BIGGUN) {
+        if (VehicleArea != 0 || id == id_SPEEDERBIKE || id == id_SPEEDERBIKESNOW || id == id_STAP || id == id_STAP2 ||
+            id == id_TROOPERCANNON || id == id_CANNON || id == id_MOSCANNON || id == id_ATST || id == id_BASKETCANNON ||
+            id == id_BIGGUN) {
             MechObjectInterface *target = object->GetMechObjectInterface();
             MechAutofireAddon *addon = NU_ALLOC_T(MechAutofireAddon, 1, "", 0);
             if (addon != NULL)
@@ -226,43 +226,6 @@ static __used__ void TrenchMove(GameObject_s *object) {
     }
     APIObjectVelocities(object);
     GameObjectOrigin(object);
-}
-
-static __used__ void Punch_HitHold(GameObject_s *attacker, GameObject_s *target) {
-    if (target != NULL && attacker != NULL &&
-        (target->id == id_IMPERIALGUARD || target->id == id_GAMORREANGUARD)) {
-        GameAudio_PlaySfx(0x4a, &target->apiobj.collision_position, 0, 0);
-    }
-}
-
-static __used__ i32 Punch_GetDamage_LSW(GameObject_s *attacker, GameObject_s *target) {
-    if (attacker->apiobj.character_data->game_character->field275_0x116 == 7 && Cheat_IsOn(0x0c)) {
-        GameAudio_PlaySfx(0x4a, target != NULL ? &target->apiobj.collision_position :
-                                             &attacker->apiobj.collision_position, 0, 0);
-        GameCam_NewShake(NULL, 0.75f, 0.75f, 1.0f);
-        return -1;
-    }
-    if (target != NULL && (target->id == id_IMPERIALGUARD || target->id == id_GAMORREANGUARD) &&
-        (target->character_context == 0x18 || target->character_context == 0x0c)) {
-        GameAudio_PlaySfx(0x4a, &target->apiobj.collision_position, 0, 0);
-    }
-    return 1;
-}
-
-static __used__ void Punch_HitExtraCode_LSW(GameObject_s *object, nuvec_s *position) {
-    if (object->id == id_GAMORREANGUARD &&
-        ((object->character_context == 0x26 && object->context_animation == 0x56) ||
-         object->character_context == 0x0d)) {
-        NewRumbleAllPlayers(0.4f, 0.0f, 1, 0);
-        NewRumble(object->pad_gamepad->pad, 0.7f, 0);
-        GameCam_Judder(GameCam, 0.25f, 0, &object->apiobj.collision_position);
-        PlaySfx("fs_gamorr_land", &object->apiobj.lower_position);
-    } else if ((AnimMiscFlags(object->apiobj.character_model, object->context_animation) & 4) != 0) {
-        if (position != NULL)
-            PlaySfx("WhipHit", position);
-        else
-            PlaySfx("WhipNowt", &object->apiobj.collision_position);
-    }
 }
 
 static __used__ void TrenchKilledCallback(GameObject_s *object) {

@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 51.245155,
+    "fuzzy_match_percent": 51.26309,
     "total_code": "4722419",
-    "matched_code": "451419",
-    "matched_code_percent": 9.559063,
+    "matched_code": "451820",
+    "matched_code_percent": 9.567554,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 5344,
-    "matched_functions_percent": 39.705772,
+    "matched_functions": 5346,
+    "matched_functions_percent": 39.720634,
     "total_units": 1
   },
   "text": {
@@ -39044,7 +39044,7 @@
           "address": 5195376,
           "offset": 4305408,
           "size": 1185,
-          "match_percent": 1.627907
+          "match_percent": 71.434105
         }
       ]
     },
@@ -60354,30 +60354,6 @@
           "offset": 268144,
           "size": 217,
           "match_percent": 99.91111
-        },
-        {
-          "name": "_ZL22Punch_HitExtraCode_LSWP12GameObject_sP7nuvec_s",
-          "demangled_name": "Punch_HitExtraCode_LSW(GameObject_s*, nuvec_s*)",
-          "address": 1160544,
-          "offset": 270576,
-          "size": 326,
-          "match_percent": 99.85714
-        },
-        {
-          "name": "_ZL13Punch_HitHoldP12GameObject_sS0_",
-          "demangled_name": "Punch_HitHold(GameObject_s*, GameObject_s*)",
-          "address": 1160880,
-          "offset": 270912,
-          "size": 113,
-          "match_percent": 99.51613
-        },
-        {
-          "name": "_ZL19Punch_GetDamage_LSWP12GameObject_sS0_",
-          "demangled_name": "Punch_GetDamage_LSW(GameObject_s*, GameObject_s*)",
-          "address": 1161008,
-          "offset": 271040,
-          "size": 288,
-          "match_percent": 93.85714
         },
         {
           "name": "_ZL20TrenchKilledCallbackP12GameObject_s",
@@ -86315,12 +86291,36 @@
           "match_percent": 62.95082
         },
         {
+          "name": "_ZL22Punch_HitExtraCode_LSWP12GameObject_sP7nuvec_s",
+          "demangled_name": "Punch_HitExtraCode_LSW(GameObject_s*, nuvec_s*)",
+          "address": 1160544,
+          "offset": 270576,
+          "size": 326,
+          "match_percent": 99.85714
+        },
+        {
+          "name": "_ZL13Punch_HitHoldP12GameObject_sS0_",
+          "demangled_name": "Punch_HitHold(GameObject_s*, GameObject_s*)",
+          "address": 1160880,
+          "offset": 270912,
+          "size": 113,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL19Punch_GetDamage_LSWP12GameObject_sS0_",
+          "demangled_name": "Punch_GetDamage_LSW(GameObject_s*, GameObject_s*)",
+          "address": 1161008,
+          "offset": 271040,
+          "size": 288,
+          "match_percent": 100.0
+        },
+        {
           "name": "_Z20InitGameBeforeConfigv",
           "demangled_name": "InitGameBeforeConfig()",
           "address": 1161344,
           "offset": 271376,
           "size": 1077,
-          "match_percent": 87.921814
+          "match_percent": 88.045265
         },
         {
           "name": "_Z19InitGameAfterConfigv",
