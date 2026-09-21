@@ -587,6 +587,7 @@ i32 ForcePush_SuperMindTrick;
 i32 ForcePush_SuperPush;
 i32 ForcePush_Waft;
 i32 ZapTarget(GameObject_s *);
+NUVEC *GetZapOrigin(GameObject_s *);
 i32 CannotKill(GameObject_s *);
 i32 FaceOpponent(GameObject_s *object, NUVEC *position);
 void SetProtocolDroidDeactivatedAction(GameObject_s *);
@@ -1004,7 +1005,7 @@ void Move_WALKER(GameObject_s *object) {
         object->bolt_fire_phase = !object->bolt_fire_phase;
     if (object->character_context != 0x41 && object->character_context != 0x17)
         GameAudio_PlaySfxById(object->apiobj.character_data->game_character->sfx_engine,
-                             &object->apiobj.collision_position, 0, 0);
+                              &object->apiobj.collision_position, 0, 0);
     if (WORLD->current_level == ENDORBATTLEC_LDATA && static_cast<i8>(object->apiobj.flags_low) < 0) {
         NewTerrPlatformsOff();
         if (GameShadow(NULL, &object->apiobj.position, 5.0f, -1) != 2000000.0f && ShadowInfo() == 0x0e)
@@ -1168,8 +1169,8 @@ void Move_GEONOSIAN(GameObject_s *object) {
     if ((object->field_0xe20 & 0x20) != 0)
         return;
     ApplyGravity(object, NULL,
-                 object->field_0xe31 == 1 ? object->apiobj.character_data->game_character->field_0x28 : 0.0f,
-                 8.0f, NULL);
+                 object->field_0xe31 == 1 ? object->apiobj.character_data->game_character->field_0x28 : 0.0f, 8.0f,
+                 NULL);
     TakeHitCode(object);
     FloatCode(object);
     SlideCode(object);
@@ -1219,10 +1220,10 @@ void Move_HOVERDROID(GameObject_s *object) {
              GAMEPAD_ACTION & object->pad_gamepad->buttons_held, 0.75f, 1);
     if (object->pad_gamepad->input_magnitude > 0.0f && object->character_context != 0x17)
         GameAudio_PlaySfxById(object->apiobj.character_data->game_character->sfx_engine,
-                             &object->apiobj.collision_position, 0, 0);
+                              &object->apiobj.collision_position, 0, 0);
     i32 special_pressed = GAMEPAD_SPECIAL & object->pad_gamepad->buttons_pressed;
-    if ((object->apiobj.character_data->model_flags & 0x10) != 0 &&
-        (object->movement_runtime_flags & 2) == 0 && Cheat_IsOn(0x20))
+    if ((object->apiobj.character_data->model_flags & 0x10) != 0 && (object->movement_runtime_flags & 2) == 0 &&
+        Cheat_IsOn(0x20))
         SelfDestructCode(object, special_pressed);
     GizmoBlowupCheckProximity(WORLD, object);
 }
@@ -1599,8 +1600,8 @@ static __used__ void FireCode(GameObject_s *object, i32 pressed, i32 held, f32 f
         }
     }
 
-    const i32 bolt_id = BoltType_FindIDByCreature(
-        object, (object->apiobj.character_data->model_flags & 0x10000000) == 0 ? 5 : 0x15);
+    const i32 bolt_id =
+        BoltType_FindIDByCreature(object, (object->apiobj.character_data->model_flags & 0x10000000) == 0 ? 5 : 0x15);
     BOLTTYPE_s *bolt_type = BoltType_FindByID(bolt_id, WORLD);
 
     if (static_cast<i8>(object->apiobj.flags_low) < 0) {
@@ -1645,8 +1646,8 @@ static __used__ void FireCode(GameObject_s *object, i32 pressed, i32 held, f32 f
                 object->field_0xe21 |= 8;
             }
         } else if (target_bolts && (area == NULL || area != DOGFIGHT_ADATA)) {
-            GameObject_s *target = TargetGameObject(object, &origin, &direction, range, range_squared, 0, target_mode,
-                                                     0, bolt_id);
+            GameObject_s *target =
+                TargetGameObject(object, &origin, &direction, range, range_squared, 0, target_mode, 0, bolt_id);
             if (target != NULL) {
                 SetObjTarget(object, target);
                 if (VehicleArea != 0 && (target->apiobj.character_data->model_flags & 0x2000) != 0) {
@@ -1666,7 +1667,7 @@ static __used__ void FireCode(GameObject_s *object, i32 pressed, i32 held, f32 f
                     NuVecAdd(&object->attack_target_position, &origin, &position);
                 }
             } else if (GizmoSys_SetBestBoltTarget(WORLD->gizmo_sys, WORLD, object, &origin, &direction, range,
-                                                   range_squared, target_mode, 0, bolt_id) == 0) {
+                                                  range_squared, target_mode, 0, bolt_id) == 0) {
                 GIZMOBLOWUP_s *blowup =
                     GizmoBlowUp_Target(object, &origin, &direction, range, range_squared, target_mode, 0, bolt_id);
                 if (blowup != NULL) {
@@ -2189,8 +2190,8 @@ void Move_SUPERBATTLEDROID(GameObject_s *object) {
               GAMEPAD_SPECIAL & object->pad_gamepad->buttons_pressed, 1, 0, 0);
     CheckFallLand(object);
     i32 special_pressed = GAMEPAD_SPECIAL & object->pad_gamepad->buttons_pressed;
-    if ((object->apiobj.character_data->model_flags & 0x10) != 0 &&
-        (object->movement_runtime_flags & 2) == 0 && Cheat_IsOn(0x20))
+    if ((object->apiobj.character_data->model_flags & 0x10) != 0 && (object->movement_runtime_flags & 2) == 0 &&
+        Cheat_IsOn(0x20))
         SelfDestructCode(object, special_pressed);
     GizmoBlowupCheckProximity(WORLD, object);
 }
@@ -4124,7 +4125,7 @@ void Move_ATAT(GameObject_s *object) {
     if (CurrentAnim(&object->apiobj.anim_packet) == 0 && object->character_context != 0x17 &&
         object->character_context != 0x41)
         GameAudio_PlaySfxById(object->apiobj.character_data->game_character->sfx_engine,
-                             &object->apiobj.collision_position, 0, 0);
+                              &object->apiobj.collision_position, 0, 0);
     GizmoBlowupCheckProximity(WORLD, object);
 }
 
@@ -5049,8 +5050,7 @@ void LightSabreDebris(GameObject_s *object) {
     i32 blade_count = object->id == id_GRIEVOUS ? 4 : object->id == id_DARTHMAUL ? 2 : 1;
     for (i32 blade = 0; blade < blade_count; ++blade) {
         i32 effect;
-        if (object->id == id_GRIEVOUS &&
-            !(object->apiobj.field_0x27c != -1 && Cheat_IsOn(0x19)) &&
+        if (object->id == id_GRIEVOUS && !(object->apiobj.field_0x27c != -1 && Cheat_IsOn(0x19)) &&
             !(object->apiobj.field_0x27c != -1 && Player_HasPurpleForce(object))) {
             effect = blade == 0 || blade == 3 ? 3 : 2;
         } else {
@@ -5063,8 +5063,8 @@ void LightSabreDebris(GameObject_s *object) {
         GAMECHARACTERDATA *data = object->apiobj.character_data->game_character;
         i32 first = data->streak_joints[blade][0];
         i32 second = data->streak_joints[blade][1];
-        if (first == -1 || object->apiobj.character_model->points_of_interest[first] == NULL ||
-            second == -1 || object->apiobj.character_model->points_of_interest[second] == NULL)
+        if (first == -1 || object->apiobj.character_model->points_of_interest[first] == NULL || second == -1 ||
+            object->apiobj.character_model->points_of_interest[second] == NULL)
             continue;
         NUVEC start = *NUMTX_GET_ROW_VEC(&object->joint_matrices[first], 3);
         NUVEC end = *NUMTX_GET_ROW_VEC(&object->joint_matrices[second], 3);
@@ -6457,34 +6457,34 @@ static __used__ void AtatPart_Update(PART_s *part) {
             i16 y_rotation = qrand();
             i16 z_rotation = qrand();
             AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[120].effect, &part->position,
-                                              static_cast<i32>(part->scale_time * 3.0f), FRAMETIME,
-                                              z_rotation, y_rotation, NULL);
+                                              static_cast<i32>(part->scale_time * 3.0f), FRAMETIME, z_rotation,
+                                              y_rotation, NULL);
         } else if (choice > 90.0f) {
             i16 y_rotation = qrand();
             i16 z_rotation = qrand();
             AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[120].effect, &part->position,
-                                              static_cast<i32>(part->scale_time * 15.0f), FRAMETIME,
-                                              z_rotation, y_rotation, NULL);
+                                              static_cast<i32>(part->scale_time * 15.0f), FRAMETIME, z_rotation,
+                                              y_rotation, NULL);
         }
     } else if (part->scale_time < 5.0f) {
         if (choice < 10.0f || choice > 70.0f) {
             i32 count = choice < 10.0f ? 15 : 30;
             i16 y_rotation = qrand();
             i16 z_rotation = qrand();
-            AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[120].effect, &part->position, count,
-                                              FRAMETIME, z_rotation, y_rotation, NULL);
+            AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[120].effect, &part->position, count, FRAMETIME,
+                                              z_rotation, y_rotation, NULL);
         }
         i32 count = choice < 30.0f ? 1 : choice < 70.0f ? 3 : 20;
         i16 y_rotation = qrand();
         i16 z_rotation = qrand();
-        AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[119].effect, &part->position, count,
-                                          FRAMETIME, z_rotation, y_rotation, NULL);
+        AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[119].effect, &part->position, count, FRAMETIME,
+                                          z_rotation, y_rotation, NULL);
     } else if (part->scale_time < 10.0f) {
         i32 count = choice < 30.0f ? 1 : choice < 70.0f ? 3 : 20;
         i16 y_rotation = qrand();
         i16 z_rotation = qrand();
-        AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[119].effect, &part->position, count,
-                                          FRAMETIME, z_rotation, y_rotation, NULL);
+        AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[119].effect, &part->position, count, FRAMETIME,
+                                          z_rotation, y_rotation, NULL);
     }
 }
 
@@ -6682,8 +6682,7 @@ void JetPackCode(GameObject_s *object, i32 jump_pressed, i32 fall, i32) {
         if (!(object->context_animation_timer <= 0.0f))
             return;
     } else {
-        if (jump_pressed == 0 ||
-            (object->apiobj.field_0x27d == 0 && !(object->ground_contact_grace_timer > 0.0f)) ||
+        if (jump_pressed == 0 || (object->apiobj.field_0x27d == 0 && !(object->ground_contact_grace_timer > 0.0f)) ||
             ObjLandReady(object) == 0)
             return;
         if (object->character_context == 6)
@@ -6735,8 +6734,6 @@ void StartLaunch(GameObject_s *object) {
     object->field_0x7a3 = 0;
     object->saved_position = object->launch_origin = object->apiobj.position;
 }
-
-static i32 getvehiclehoverheight_hothbattlehack;
 
 float GetVehicleHoverHeight(GameObject_s *object, float *separation_offset) {
     float height = object->hover_height_override;
@@ -7980,7 +7977,7 @@ void ForcedBackCode(GameObject_s *object) {
         }
         if (ForceBackType == 2)
             AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[111].effect,
-                                             &object->apiobj.collision_position, 50, FRAMETIME, 0, 0, NULL);
+                                              &object->apiobj.collision_position, 50, FRAMETIME, 0, 0, NULL);
         NewRumble(object->pad_gamepad->pad, (qrand() * (1.0f / 65535.0f)) * 0.6f, 0);
     } else if (ForceBackPos != NULL && object != ForceBackObj &&
                (ForceBackType != 2 || (object->apiobj.character_data->model_flags & 0x10) != 0) &&
@@ -8551,14 +8548,12 @@ void TurnCode(GameObject_s *object, i32 mode, GAMEPAD_s *pad) {
                         other = NULL;
                     }
                 }
-                if (other != NULL &&
-                    (other->character_context == 0x36 || other->character_context == 0x2a ||
-                     other->character_context == 0x3a)) {
+                if (other != NULL && (other->character_context == 0x36 || other->character_context == 0x2a ||
+                                      other->character_context == 0x3a)) {
                     return;
                 }
-            } else if (other != NULL &&
-                       (other->character_context == 0x36 || other->character_context == 0x2a ||
-                        other->character_context == 0x3a)) {
+            } else if (other != NULL && (other->character_context == 0x36 || other->character_context == 0x2a ||
+                                         other->character_context == 0x3a)) {
                 return;
             }
         } else if (object->in_narrow_socket && other != NULL &&
@@ -8577,7 +8572,8 @@ void TurnCode(GameObject_s *object, i32 mode, GAMEPAD_s *pad) {
 
             const u16 input_angle = GamePad_InputAngle(object, pad);
             if (!object->in_narrow_socket) {
-                if ((object == Player[0] || object == Player[1]) && fabsf(object->pad_gamepad->waggle_magnitude) > 0.25f) {
+                if ((object == Player[0] || object == Player[1]) &&
+                    fabsf(object->pad_gamepad->waggle_magnitude) > 0.25f) {
                     return;
                 }
                 if (abs(RotDiff(object->apiobj.field_0x276, input_angle)) <= 0x71c6) {
@@ -8676,11 +8672,10 @@ void TurnCode(GameObject_s *object, i32 mode, GAMEPAD_s *pad) {
     if (!(timer >= half_duration)) {
         return;
     }
-    const i32 index =
-        (static_cast<i32>((1.0f - (1.0f / quarter_duration) * (timer - half_duration)) * 16384.0f + 49152.0f +
-                          16384.0f) >>
-         1) &
-        0x7fff;
+    const i32 index = (static_cast<i32>((1.0f - (1.0f / quarter_duration) * (timer - half_duration)) * 16384.0f +
+                                        49152.0f + 16384.0f) >>
+                       1) &
+                      0x7fff;
     object->secondary_lean_angle = static_cast<i16>(20024.0f * NuTrigTable[index] + 16384.0f);
 }
 

@@ -13,12 +13,21 @@
 #include "legoapi/characters/motion/gameanim.h"
 #include "legoapi/characters/motion/animlist.h"
 #include "legoapi/core/input/gamepads.h"
+#include "legoapi/core/config/cheat.h"
+#include "legoapi/characters/core/playeritems.h"
+#include "legoapi/gizmo/object/gizmopickup.h"
+#include "legoapi/items/objects/gameobjects.h"
+#include "nu2api/numath/nutrig.h"
+#include "nu2api/numath/nuvec.h"
 
 struct AIROW_s;
 struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 void BlockSfx(GameObject_s *object);
+void StartHold(GameObject_s *object);
+void KillParts(GameObject_s *, i32, i32, i32, f32, i32, u16 *);
+void Arcade_Kill(i32, i32);
 BLADE_s BladeTab[4] = {
     {101, 223, 1, 59, 64, {255, 31, 0}, {0, 0, 0}},
     {103, 221, 2, 60, 65, {30, 191, 15}, {0, 0, 0}},
@@ -34,8 +43,158 @@ void IsDownSwipe(NuVec2 const &, NuVec2 const &) {
     STUBBED();
 }
 
-void TakeHitCode(GameObject_s *) {
-    STUBBED();
+void TakeHitCode(GameObject_s *object) {
+    f32 timer;
+    f32 frame_time;
+    f32 impact_speed;
+    f32 impact_threshold;
+    i16 animation;
+    i8 context;
+    i32 animation_active;
+    i32 kill_parts_mode;
+    i32 hearts;
+    i32 first_flag;
+    i32 second_flag;
+    u32 coins;
+    bool has_coins;
+
+    animation = object->context_animation;
+    animation_active = 1;
+    if (animation == -1) {
+        animation_active = 0;
+    } else if (object->apiobj.character_model->model_data_b[animation] != NULL &&
+               AnimPlaying(&object->apiobj.anim_packet, animation, 1, 0) == 0) {
+        animation_active = 0;
+    }
+
+    context = object->character_context;
+    if (context == 0x5a)
+        goto context_5a;
+    if (context != 0x5f) {
+        if (context != 0x15 || animation_active == 0)
+            return;
+        timer = object->context_animation_timer;
+        frame_time = FRAMETIME;
+        object->context_animation_timer = timer - frame_time;
+        if (0.0f < timer - frame_time)
+            return;
+        goto finish_context;
+    }
+
+    if (animation_active == 0)
+        return;
+    timer = object->context_animation_timer + FRAMETIME;
+    object->context_animation_timer = timer;
+    if (timer >= object->airborne_action_duration)
+        goto finish_airborne;
+    if (timer > 0.5f)
+        goto check_ground_impact;
+    return;
+
+check_ground_impact:
+    if (0.0f > object->reset_velocity.y && object->apiobj.field_0x27d != 0)
+        goto finish_airborne;
+    if (object->field_0x1084 == 0)
+        return;
+    impact_speed = object->terrain_impact_speed;
+    impact_threshold = timer / object->airborne_action_duration * -0.8f + 0.8f;
+    if (impact_speed > impact_threshold)
+        goto finish_airborne;
+    return;
+
+finish_airborne:
+    kill_parts_mode = 1;
+    if (Arcade != 0 && static_cast<u8>(object->hit_variant) < 2)
+        Arcade_Kill(object->hit_variant, object->apiobj.field_0x27c);
+    goto kill_object;
+
+context_5a:
+    if (animation_active == 0)
+        return;
+    timer = object->context_animation_timer;
+    frame_time = FRAMETIME;
+    object->context_animation_timer = timer - frame_time;
+    if (0.0f < timer - frame_time)
+        return;
+    if (object->field_0x7a3 != 0) {
+        if (object->field_0x7a3 != 1)
+            return;
+        goto finish_context;
+    }
+
+    animation = object->context_animation;
+    object->movement_runtime_flags |= 0x80;
+    if (animation == 0xb9) {
+        kill_parts_mode = 0;
+        goto kill_object;
+    }
+    if (animation == 0x3d)
+        goto finish_context;
+    if (animation == 0xa7)
+        object->context_animation = 0xaa;
+    else if (animation == 0xa8)
+        object->context_animation = 0xab;
+    else if (animation == 0xa9)
+        object->context_animation = 0xac;
+    else
+        object->context_animation = 1;
+
+    object->field_0x7a3 = 1;
+    animation = object->context_animation;
+    if (object->apiobj.character_model->model_data_b[animation] != NULL &&
+        (static_cast<CHARACTERANIM_s *>(object->apiobj.character_model->model_data_a[animation])->flags & 2) == 0) {
+        object->context_animation_timer = AnimDuration(object->id, animation, 0.0f, 0.0f, 1);
+        return;
+    }
+    object->context_animation_timer = object->field_0x768;
+    return;
+
+finish_context:
+    object->character_context = -1;
+    return;
+
+kill_object:
+    KillParts(object, -1, -1, 1, 0.0f, kill_parts_mode, NULL);
+    KillGameObject(object, 2, 0);
+    if (object->apiobj.field_0x27c != -1)
+        return;
+
+    if (BonusArea != 0) {
+        coins = static_cast<u16>(object->apiobj.character_data->game_character->field_0xee);
+        has_coins = static_cast<i32>(coins) > 0;
+    release_hearts:
+        hearts = ReleaseHearts();
+        if (hearts == 0 && !has_coins)
+            return;
+        if (BonusArea == 0) {
+            if (coins > 2499) {
+                first_flag = 0;
+                second_flag = 0;
+                goto add_pickups;
+            }
+        no_bonus_under_limit:
+            first_flag = 1;
+            second_flag = 0;
+            goto add_pickups;
+        }
+    } else {
+        if (Cheat_IsOn(0x10) == 0) {
+            has_coins = false;
+            coins = 0;
+            goto release_hearts;
+        } else {
+            hearts = ReleaseHearts();
+            coins = 350;
+            if (BonusArea == 0)
+                goto no_bonus_under_limit;
+        }
+    }
+
+    first_flag = 0;
+    second_flag = 1;
+add_pickups:
+    AddPickups(coins, hearts, 0, 0, &object->apiobj.collision_position, NULL, 2.0f, -1, 1.0f, 2000000.0f, NULL,
+               first_flag, second_flag, false);
 }
 
 void ComboHitFrame(GameObject_s *object, i32 damage) {
