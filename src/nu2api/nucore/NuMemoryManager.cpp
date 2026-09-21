@@ -898,11 +898,9 @@ void NuMemoryManager::ValidateAddress(void *ptr, const char *caller) {
 }
 
 void NuMemoryManager::ValidateAllocAlignment(u32 alignment) {
-    STUBBED();
 }
 
 void NuMemoryManager::ValidateAllocSize(u32 size) {
-    STUBBED();
 }
 
 void NuMemoryManager::ValidateBlockEndTags(Header *header, const char *caller) {
@@ -1008,7 +1006,6 @@ void NuMemoryManager::ValidateBlockIsAllocated(Header *header, const char *calle
 }
 
 void NuMemoryManager::ValidateBlockIsPaged(void *block, const char *caller) {
-    STUBBED();
 }
 
 void NuMemoryManager::StatsAddFragment(NuMemoryManager::FreeHeader *header) {

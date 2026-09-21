@@ -77,11 +77,9 @@ bool MechInputTouchGestureTracker::OnSwipe(GameObject_s &, TouchHolder &, i32) {
 }
 
 void MechTouchUIElement::Process(float) {
-    STUBBED();
 }
 
 void MechTouchUIElement::Render() {
-    STUBBED();
 }
 
 bool MechTouchUI::AddUIElement(MechTouchUIElement &element) {

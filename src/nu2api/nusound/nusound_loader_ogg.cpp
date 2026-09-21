@@ -89,7 +89,6 @@ i32 NuSoundLoaderOGG::OGGFileCallbacks::GetPosition() const {
 }
 
 int NuSoundLoaderOGG::OggCallbackClose(void *callbacks) {
-    STUBBED();
     (void)callbacks;
     return 0;
 }
@@ -231,7 +230,6 @@ f32 NuSoundHeaderOGG::GetLengthSeconds() const {
 }
 
 u64 NuSoundHeaderOGG::GetDataOffset() const {
-    STUBBED();
     return 0;
 }
 

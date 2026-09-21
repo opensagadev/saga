@@ -218,7 +218,6 @@ i32 InStory() {
 }
 
 i32 Game_Exit(i32) {
-    STUBBED();
     return 0;
 }
 

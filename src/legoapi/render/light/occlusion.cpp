@@ -356,7 +356,6 @@ void OcclusionManager::BeginFrame() {
 }
 
 void OcclusionManager::EndFrame() {
-    STUBBED();
 }
 
 void OcclusionManager::Init(u32 capacity, VARIPTR *buffer, VARIPTR buffer_end) {

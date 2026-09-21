@@ -47,7 +47,6 @@ f32 NuMouseReadZVel(void) {
 }
 
 void NuMouseRead(void) {
-    STUBBED();
 }
 
 f32 NuMouseReadX(void) {

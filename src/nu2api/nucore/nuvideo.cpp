@@ -38,7 +38,6 @@ NUVIDEO_SWAPMODE NuVideoGetSwapMode(void) {
 }
 
 void NuVideoRollingFrameRateReset(void) {
-    STUBBED();
 }
 
 void NuVideoSetBrightness(f32 brightness) {

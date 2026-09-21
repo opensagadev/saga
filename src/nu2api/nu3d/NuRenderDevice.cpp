@@ -133,7 +133,6 @@ bool NuRenderDevice::IsExtensionSupported(const char *wanted) {
 // ---------------------------------------------------------------------------
 
 void NuRenderDevice::FrameEnd() {
-    STUBBED();
     // No-op in this build — original flushed per-frame bookkeeping.
 }
 

@@ -729,7 +729,6 @@ void CutScene_SnapToEnd(CUTINFO *cut) {
 }
 
 void CutScene_StartAudio() {
-    STUBBED();
 }
 
 i32 CutScene_IsSkippable(CUTINFO *cut) {
@@ -1400,7 +1399,6 @@ void CutScene_PreUpdateFn_LSW(CUTINFO *cut) {
 }
 
 void CutScene_PostUpdateFn_LSW() {
-    STUBBED();
 }
 
 i32 CutScene_PlayingOrRequested(CUTINFO *cut) {

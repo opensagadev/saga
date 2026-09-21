@@ -19,7 +19,6 @@
 #define TEX_PATH "mnt/sdcard/TTGames/com.wb.lego.tcs/files/androidTextures/"
 
 i32 NuTexCreate(NUTEX *tex) {
-    STUBBED();
     return 0;
 }
 
@@ -173,17 +172,14 @@ void NuTexDisplayTexturePage(i32 page, f32 depth, i32 alpha) {
 }
 
 i32 NuTexGetReqSize(i32 tex_id, i32 level) {
-    STUBBED();
     return 0;
 }
 
 i32 NuTexReserve(i32 size) {
-    STUBBED();
     return -1;
 }
 
 void NuTexUnReserve() {
-    STUBBED();
 }
 
 NUTEXBITMAP *NuTexReadBitmap(char *) {

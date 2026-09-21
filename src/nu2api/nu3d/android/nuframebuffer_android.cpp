@@ -6,7 +6,6 @@
 extern "C" {
 
     void NuFramebufferInitEx(void) {
-        STUBBED();
     }
 
     SAGA_HOST_WEAK nuframebuffer_s *NuFramebufferCreate(void) {
@@ -22,7 +21,6 @@ extern "C" {
     }
 
     void NuFramebufferAttachTex2D(nuframebuffer_s *, i32, nueffecttex_s *, i32) {
-        STUBBED();
     }
 
     nueffecttex_s *NuFramebufferGetAttachedTex(nuframebuffer_s *, i32, i32 *, i32 *) {
@@ -83,7 +81,6 @@ extern "C" {
     }
 
     void NuFramebufferSwapBuffers(void) {
-        STUBBED();
     }
 
     i32 NuFramebufferGetSamples(nuframebuffer_s *framebuffer) {

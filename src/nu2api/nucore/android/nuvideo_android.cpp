@@ -2,7 +2,6 @@
 #include "nu2api/nucore/nuvideo.h"
 
 void NuVideoSetBrightnessPS() {
-    STUBBED();
 }
 
 void NuVideoSetSwapModePS(NUVIDEO_SWAPMODE video_swap_mode) {

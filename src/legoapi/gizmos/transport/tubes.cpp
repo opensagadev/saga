@@ -100,7 +100,6 @@ static void Tubes_Reset(void *world_ptr, void *, void *progress_ptr) {
 }
 
 static void Tubes_Draw(void *, void *, float) {
-    STUBBED();
 }
 
 static i32 Tubes_GetMaxGizmos(void *world_ptr) {

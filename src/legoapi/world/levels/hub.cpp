@@ -2038,7 +2038,6 @@ void Hub_UpdateMiniKits(WORLDINFO_s *world) {
 }
 
 void Hub_LockUnlockDoors(WORLDINFO_s *) {
-    STUBBED();
 }
 
 void Hub_ActivateDoorMenu(LEVELDATA_s **level) {

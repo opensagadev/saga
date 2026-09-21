@@ -809,7 +809,6 @@ static __used__ void MenuDrawMiniKit(MENU *) {
     STUBBED();
 }
 static __used__ void MenuEnterTitles(MENU *) {
-    STUBBED();
 }
 static __used__ void MenuUpdateMiniKit(MENU *) {
     STUBBED();

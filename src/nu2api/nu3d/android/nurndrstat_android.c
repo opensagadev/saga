@@ -32,7 +32,6 @@ extern "C" {
     }
 
     void RndrStateUpdate(void *, NUMTL *, NUDISPLAYLISTITEM *) {
-        STUBBED();
     }
 
     void RndrStateUpdateFx(void *, NUDISPLAYLISTITEM *) {

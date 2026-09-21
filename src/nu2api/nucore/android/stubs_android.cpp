@@ -20,7 +20,6 @@ void NuPs2PadSetMotors(nupad_s *, i32, i32) {
 }
 
 extern "C" void NuSetPadDemoEndButtons(u32) {
-    STUBBED();
 }
 
 extern "C" void NuPs2VideoSetPos(void) {
@@ -28,7 +27,6 @@ extern "C" void NuPs2VideoSetPos(void) {
 }
 
 extern "C" void NuWaterReset(void) {
-    STUBBED();
 }
 
 extern "C" void NuWaterInit(void) {
@@ -36,7 +34,6 @@ extern "C" void NuWaterInit(void) {
 }
 
 extern "C" void NuRndrShadowInit(u8 *) {
-    STUBBED();
 }
 
 extern "C" void NuRndrTrailEx(void) {
@@ -68,7 +65,6 @@ void NuRndrFlickerEnd(void) {
 }
 
 extern "C" void NuLightSpotFadeSet(u32) {
-    STUBBED();
 }
 
 extern "C" i32 NuMtlReadEventSetHandler(void) {
@@ -81,7 +77,6 @@ void NuPs2GetLanguage(void) {
 }
 
 extern "C" void NuRndrShadowOnOff(i32 enabled) {
-    STUBBED();
     (void)enabled;
 }
 
@@ -90,7 +85,6 @@ void NuRndrSetXYOffset(i32, i32) {
 }
 
 extern "C" void NuRndrLine3dDbgFlush(void) {
-    STUBBED();
 }
 
 extern "C" void NuRndrFootPrints(void) {

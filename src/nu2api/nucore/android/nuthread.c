@@ -113,11 +113,9 @@ void NuThreadSignalRecieve(void) {
 }
 
 void NuEnableVBlank() {
-    STUBBED();
 }
 
 void NuDisableVBlank() {
-    STUBBED();
 }
 
 nuthreaddisableswapfn *NuThreadDisableThreadSwap = &NuDisableVBlank;

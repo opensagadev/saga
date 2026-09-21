@@ -7,7 +7,6 @@
 #include "nu2api/nucore/numouse.h"
 
 static void NuPrimReset() {
-    STUBBED();
 }
 
 void NuFrameBegin(void) {

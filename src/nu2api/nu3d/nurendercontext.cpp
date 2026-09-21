@@ -40,7 +40,6 @@ extern "C" {
 
     // Original 0x2a33d0, 9 bytes: this platform deliberately does nothing.
     void NuRenderContextSetViewport(i32, i32, i32, i32) {
-        STUBBED();
     }
 
     SAGA_HOST_WEAK void NuRenderContextSetViewProj(NUMTX *view, NUMTX *projection) {

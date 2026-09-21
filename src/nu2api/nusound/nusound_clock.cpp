@@ -14,7 +14,6 @@ u64 NuSoundClock::GetClockFrequency() const {
 }
 
 u64 NuSoundClock::GetTicks() const {
-    STUBBED();
     return 0;
 }
 

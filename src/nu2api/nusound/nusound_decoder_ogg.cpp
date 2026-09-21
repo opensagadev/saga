@@ -36,7 +36,6 @@ NuSoundDecoderOGG::~NuSoundDecoderOGG() {
 
 // libTTapp.so 0x32e1a0.
 void NuSoundDecoderOGG::Reset() {
-    STUBBED();
 }
 
 // libTTapp.so 0x32e1e0.

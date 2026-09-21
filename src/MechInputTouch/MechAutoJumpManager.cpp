@@ -122,7 +122,6 @@ void MechAutoJumpManager::DeleteJumpConnectionsAndStreaks() {
 }
 
 void MechAutoJumpManager::Init() {
-    STUBBED();
 }
 
 MechAutoJumpManager::MechAutoJumpManager(AISYS_s *ai_system) {

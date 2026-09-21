@@ -389,7 +389,6 @@ extern "C" void DisplayListPrintItemPS(void) {
 }
 
 extern "C" void DisplayListSwapBuffersPS(void) {
-    STUBBED();
 }
 
 extern "C" void DisplayListCreateFxItemPS(void *, i32) {
@@ -405,7 +404,6 @@ extern "C" void DisplayListSetFxItemParamPS(void *, i32, f32, i32) {
 }
 
 void DisplayListGenerateTransforms(nudisplayscene_s *) {
-    STUBBED();
 }
 
 extern "C" void *NuDisplayListPrepareFaceonPS(VARIPTR *, void *faceon, NUMTX *) {
@@ -425,7 +423,6 @@ extern "C" void NuDisplaySceneAddPS(NUDLDLISTSCENE *scene) {
 
 // NuDisplaySceneDestroyPS @ 0x2ab7f9
 extern "C" void NuDisplaySceneDestroyPS(NUDLDLISTSCENE *) {
-    STUBBED();
 }
 
 extern "C" void NuDisplaySceneClonePS(NUDLDLISTSCENE *source, NUDLDLISTSCENE *destination, VARIPTR *buffer) {

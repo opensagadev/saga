@@ -86,7 +86,6 @@ void Fade::InitFade() {
 }
 
 void Fade::UpdateFade() {
-    STUBBED();
 }
 
 void FadeWipe::DrawFade() {
