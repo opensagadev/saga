@@ -109,6 +109,7 @@ extern "C" void APIResetCharacterRemap(void);
 i32 PlayersDropInOut();
 i32 GetNumLocalPlayers();
 void SetPlayerGroupPosition(f32 x, f32 y, f32 z);
+GameObject_s *Player_FindByID(i32 id);
 
 extern "C" APICHARACTERMODEL *APICharacterLoaded(i32 character_id);
 extern "C" void APICharacterModelReset(APICHARACTERMODEL *model);

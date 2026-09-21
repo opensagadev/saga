@@ -731,8 +731,32 @@ void PlayerItem_Set(PLAYERITEM_s *item, PLAYERITEMTYPE_s *type) {
     }
 }
 
-void Player_FindByID(i32) {
-    STUBBED();
+GameObject_s *Player_FindByID(i32 id) {
+    GameObject_s *object = Player[0];
+    if (object != NULL && (object->apiobj.field_0x1f8 & 0x1001) == 0x1001 && object->id == id)
+        return object;
+    object = Player[1];
+    if (object != NULL && (object->apiobj.field_0x1f8 & 0x1001) == 0x1001 && object->id == id)
+        return object;
+    object = Player[2];
+    if (object != NULL && (object->apiobj.field_0x1f8 & 0x1001) == 0x1001 && object->id == id)
+        return object;
+    object = Player[3];
+    if (object != NULL && (object->apiobj.field_0x1f8 & 0x1001) == 0x1001 && object->id == id)
+        return object;
+    object = Player[4];
+    if (object != NULL && (object->apiobj.field_0x1f8 & 0x1001) == 0x1001 && object->id == id)
+        return object;
+    object = Player[5];
+    if (object != NULL && (object->apiobj.field_0x1f8 & 0x1001) == 0x1001 && object->id == id)
+        return object;
+    object = Player[6];
+    if (object != NULL && (object->apiobj.field_0x1f8 & 0x1001) == 0x1001 && object->id == id)
+        return object;
+    object = Player[7];
+    if (object != NULL && (object->apiobj.field_0x1f8 & 0x1001) == 0x1001 && object->id == id)
+        return object;
+    return NULL;
 }
 
 NUVEC *Player_StartPos(GameObject_s *obj) {
