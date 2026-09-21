@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 50.372635,
+    "fuzzy_match_percent": 50.43841,
     "total_code": "4722419",
-    "matched_code": "446897",
-    "matched_code_percent": 9.463306,
+    "matched_code": "447737",
+    "matched_code_percent": 9.481094,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 5295,
-    "matched_functions_percent": 39.3417,
+    "matched_functions": 5296,
+    "matched_functions_percent": 39.349136,
     "total_units": 1
   },
   "text": {
@@ -54795,7 +54795,7 @@
           "address": 5013232,
           "offset": 4123264,
           "size": 1615,
-          "match_percent": 1.532033
+          "match_percent": 60.114204
         },
         {
           "name": "_ZL15GizSpinner_DrawPvS_f",
@@ -54819,7 +54819,7 @@
           "address": 5015760,
           "offset": 4125792,
           "size": 840,
-          "match_percent": 99.309525
+          "match_percent": 100.0
         },
         {
           "name": "_Z23GizSpinner_UsingSpecialPP7GIZMO_sPviPc",
@@ -55941,7 +55941,7 @@
           "address": 4892688,
           "offset": 4002720,
           "size": 1679,
-          "match_percent": 2.244318
+          "match_percent": 49.573864
         },
         {
           "name": "_ZL27GizmoObstacle_SetVisibilityP7GIZMO_si",
@@ -56101,7 +56101,7 @@
           "address": 4901920,
           "offset": 4011952,
           "size": 112,
-          "match_percent": 39.88889
+          "match_percent": 39.555557
         },
         {
           "name": "_Z23GizObstacle_JumpToStartP13GIZOBSTACLE_s",
@@ -58202,7 +58202,7 @@
           "address": 1859120,
           "offset": 969152,
           "size": 1679,
-          "match_percent": 2.244318
+          "match_percent": 48.269886
         },
         {
           "name": "_ZL14GizForces_DrawPvS_f",
@@ -58226,7 +58226,7 @@
           "address": 1861440,
           "offset": 971472,
           "size": 118,
-          "match_percent": 99.933334
+          "match_percent": 99.433334
         },
         {
           "name": "_ZL23GizForceSFX_completesfxP8nufpar_s",
@@ -58234,7 +58234,7 @@
           "address": 1861568,
           "offset": 971600,
           "size": 118,
-          "match_percent": 99.933334
+          "match_percent": 99.433334
         },
         {
           "name": "_ZL22GizForceSFX_processsfxP8nufpar_s",
@@ -58753,7 +58753,7 @@
           "address": 5005424,
           "offset": 4115456,
           "size": 1169,
-          "match_percent": 2.04698
+          "match_percent": 53.473156
         },
         {
           "name": "_ZN11GIZTURRET_s24ClearMechObjectInterfaceEv",
@@ -70702,7 +70702,7 @@
           "address": 3489040,
           "offset": 2599072,
           "size": 3233,
-          "match_percent": 25.931276
+          "match_percent": 25.559607
         },
         {
           "name": "_Z23DebrisProcessAllocationv",

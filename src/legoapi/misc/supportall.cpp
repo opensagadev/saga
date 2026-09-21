@@ -1105,9 +1105,11 @@ void DebrisProcessControlChunks(i32 panel_time) {
             debkeydatatype_s *key = control->owner;
             debinftype *effect = debtab[key->effect_index];
             i32 chunk_index = 0;
-            while (chunk_index < key->allocated_chunk_count &&
-                   key->particle_chunks[chunk_index] != control->particle_chunk) {
-                ++chunk_index;
+            for (i32 i = 0; i < key->allocated_chunk_count; ++i) {
+                if (key->particle_chunks[i] == control->particle_chunk) {
+                    chunk_index = i;
+                    break;
+                }
             }
 
             const i32 old_chunk_count = key->allocated_chunk_count;
@@ -1173,7 +1175,7 @@ void DebrisProcessControlChunks(i32 panel_time) {
             --freedebchkptr;
             freedebchunks[freedebchkptr] = control->particle_chunk;
             for (dma_particle_s &particle : control->particle_chunk->particles) {
-                particle.start_time = 0.0f;
+                particle.start_time = 10000000000.0f;
                 particle.inverse_lifetime = 128.0f;
             }
             ReleaseChunkControl(control);
@@ -1184,7 +1186,7 @@ void DebrisProcessControlChunks(i32 panel_time) {
             --freedebchkptrg;
             freedebchunksglass[freedebchkptrg] = control->particle_chunk;
             for (i32 i = 0; i < 12; ++i) {
-                control->particle_chunk->particles[i].start_time = 0.0f;
+                control->particle_chunk->particles[i].start_time = 10000000000.0f;
                 control->particle_chunk->particles[i].inverse_lifetime = 128.0f;
             }
             ReleaseChunkControl(control);

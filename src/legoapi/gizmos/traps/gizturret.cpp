@@ -43,6 +43,9 @@ struct GizTurretAnimObjectData {
     i16 platform_id;
 };
 
+extern u16 TargetDeg_Near, TargetDeg_Mid, TargetDeg_Far;
+extern f32 TargetDist_Near2, TargetDist_Mid2;
+
 u32 GizTurrets_TotalScore(void *context) {
     GIZTURRETSYS_s *system = static_cast<WORLDINFO_s *>(context)->giz_turret_sys;
     u32 total = 0;
@@ -544,10 +547,95 @@ static i32 GizTurrets_BoltHitPlat(void *world_ptr, void *system_ptr, BOLT *bolt,
     return 0;
 }
 
-static i32 *GizTurrets_GetBestBoltTarget(GIZMOSET *, float *, NUVEC *, NUVEC *, void *, NUVEC *, NUVEC *, float, float,
-                                         i32, i32, i32) {
-    UNIMPLEMENTED();
-    return {};
+static i32 *GizTurrets_GetBestBoltTarget(GIZMOSET *set, float *result_distance, NUVEC *result_position,
+                                         NUVEC *result_velocity, void *object_ptr, NUVEC *position, NUVEC *direction,
+                                         float radius, float range_squared, i32 directional, i32 planar, i32 bolt_id) {
+    BOLTTYPE_s *bolt_type = BoltType_FindByID(bolt_id, WORLD);
+    if (set == NULL || bolt_type == NULL) {
+        return NULL;
+    }
+
+    NUVEC aim = *direction;
+    const float min_x = position->x - radius;
+    const float max_x = position->x + radius;
+    const float min_z = position->z - radius;
+    const float max_z = position->z + radius;
+    if (directional != 0 && (bolt_type->field_60 & 0x20000) != 0) {
+        aim.y = 0.0f;
+        NuVecNorm(&aim, &aim);
+    }
+
+    GameObject_s *object = static_cast<GameObject_s *>(object_ptr);
+    GIZMO *best = NULL;
+    GIZMO *previous = NULL;
+    NUVEC *best_position = NULL;
+    NUVEC *previous_position = NULL;
+    float nearest_distance = 100000000.0f;
+    GIZMO *gizmo = set->gizmos;
+    for (i32 i = 0; i < set->count; ++i, ++gizmo) {
+        GIZTURRET_s *turret = static_cast<GIZTURRET_s *>(gizmo->object);
+        if (nextShootTarget.Get() != NULL && nextShootTarget.Get() != turret->GetMechObjectInterface()) {
+            continue;
+        }
+        if ((turret->flags & 6) != 6 || (turret->flags & 0x30) != 0 || turret->primary_anim_obj == NULL) {
+            continue;
+        }
+        NUVEC *target_position = NuSpecialGetDrawPos(&turret->primary_anim_obj->special);
+        if (target_position == NULL || target_position->x < min_x || target_position->x > max_x ||
+            target_position->z < min_z || target_position->z > max_z) {
+            continue;
+        }
+
+        NUVEC delta;
+        float distance = planar != 0 ? NuVecXZDistSqr(target_position, position, &delta)
+                                     : NuVecDistSqr(target_position, position, &delta);
+        if (!(range_squared > distance)) {
+            continue;
+        }
+        if (directional == 0) {
+            NuVecRotateY(&aim, &v001, NuAtan2D(target_position->x - position->x, target_position->z - position->z));
+        }
+        if ((bolt_type->field_60 & 0x20000) != 0) {
+            delta.y = 0.0f;
+        }
+        NuVecNorm(&delta, &delta);
+        const float dot = NuVecDot(&delta, &aim);
+        u16 angle;
+        if (TargetDist_Near2 > distance && directional != 0) {
+            angle = TargetDeg_Near;
+        } else if (TargetDist_Mid2 > distance) {
+            angle = TargetDeg_Mid;
+        } else {
+            angle = TargetDeg_Far;
+        }
+        if (!(dot > NuTrigTable[((angle + 0x4000) >> 1) & 0x7fff]) || !(nearest_distance > distance)) {
+            continue;
+        }
+        if (object != NULL && object->attack_gizmo_target == gizmo) {
+            previous = gizmo;
+            previous_position = target_position;
+        } else {
+            nearest_distance = distance;
+            best = gizmo;
+            best_position = target_position;
+        }
+    }
+
+    GIZMO *result = best;
+    NUVEC *target_position = best_position;
+    if (result == NULL) {
+        result = previous;
+        target_position = previous_position;
+        nearest_distance = 1000000000.0f;
+    }
+    if (result != NULL) {
+        *result_distance = nearest_distance;
+        *result_position = *target_position;
+        result_velocity->x = 0.0f;
+        result_velocity->y = 0.0f;
+        result_velocity->z = 0.0f;
+    }
+    return reinterpret_cast<i32 *>(result);
 }
 
 static i32 GizTurrets_BoltHit(void *, void *, void *, NUVEC *, i32, float, NUVEC *, NUVEC *, BOLT *, u32,

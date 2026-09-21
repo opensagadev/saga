@@ -40,6 +40,7 @@ u32 GizObstacles_TotalScore(void *world) {
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nu3d/nuportal.h"
 #include "nu2api/nucore/nustring.h"
+#include "nu2api/numath/nutrig.h"
 #include "nu2api/numath/nuvec.h"
 #include "nu2api/numusic/sfx.h"
 
@@ -440,10 +441,107 @@ static i32 GizObstacles_BoltHitPlat(void *, void *, BOLT *, unsigned char *) {
     return {};
 }
 
-static i32 *GizObstacles_GetBestBoltTarget(GIZMOSET *, float *, NUVEC *, NUVEC *, void *, NUVEC *, NUVEC *, float,
-                                           float, i32, i32, i32) {
-    UNIMPLEMENTED();
-    return {};
+extern u16 TargetDeg_Near, TargetDeg_Mid, TargetDeg_Far;
+extern f32 TargetDist_Near2, TargetDist_Mid2;
+
+static i32 *GizObstacles_GetBestBoltTarget(GIZMOSET *set, float *result_distance, NUVEC *result_position,
+                                           NUVEC *result_velocity, void *object_ptr, NUVEC *position, NUVEC *direction,
+                                           float radius, float range_squared, i32 directional, i32 planar,
+                                           i32 bolt_id) {
+    BOLTTYPE_s *bolt_type = BoltType_FindByID(bolt_id, WORLD);
+    u16 near_angle = TargetDeg_Near, mid_angle = TargetDeg_Mid, far_angle = TargetDeg_Far;
+    f32 near_distance = TargetDist_Near2, mid_distance = TargetDist_Mid2;
+    if (set == NULL) {
+        return NULL;
+    }
+    GIZOBSTACLESYS_s *system = static_cast<GIZOBSTACLESYS_s *>(set->unknown);
+    if (system == NULL || bolt_type == NULL) {
+        return NULL;
+    }
+
+    NUVEC aim = *direction;
+    const float min_x = position->x - radius;
+    const float max_x = position->x + radius;
+    const float min_z = position->z - radius;
+    const float max_z = position->z + radius;
+    if (directional != 0 && (bolt_type->field_60 & 0x20000) != 0) {
+        aim.y = 0.0f;
+        NuVecNorm(&aim, &aim);
+    }
+    if (system->active_gizmo_count == 0) {
+        return NULL;
+    }
+
+    GameObject_s *object = static_cast<GameObject_s *>(object_ptr);
+    GIZMO *best = NULL, *previous = NULL;
+    NUVEC *best_position = NULL, *previous_position = NULL;
+    float nearest_distance = 100000000.0f;
+    for (i32 i = 0; i < system->active_gizmo_count; ++i) {
+        GIZMO *gizmo = system->active_gizmos[i];
+        GIZOBSTACLE_s *obstacle = static_cast<GIZOBSTACLE_s *>(gizmo->object);
+        if ((obstacle->progress_flags & GIZOBSTACLE_PROGRESS_FLAG_VISIBLE) == 0 ||
+            (obstacle->progress_flags & GIZOBSTACLE_PROGRESS_FLAG_ENABLED) == 0 ||
+            (obstacle->runtime_flags & GIZOBSTACLE_RUNTIME_FLAG_DESTROYED) != 0) {
+            continue;
+        }
+        NUVEC *target_position = &obstacle->evaluated_position;
+        if (target_position->x < min_x || target_position->x > max_x || target_position->z < min_z ||
+            target_position->z > max_z) {
+            continue;
+        }
+
+        NUVEC delta;
+        float distance = planar != 0 ? NuVecXZDistSqr(target_position, position, &delta)
+                                     : NuVecDistSqr(target_position, position, &delta);
+        if (!(range_squared > distance)) {
+            continue;
+        }
+        if (directional == 0) {
+            NuVecRotateY(&aim, &v001, NuAtan2D(target_position->x - position->x, target_position->z - position->z));
+        }
+        if ((bolt_type->field_60 & 0x20000) != 0) {
+            delta.y = 0.0f;
+        }
+        NuVecNorm(&delta, &delta);
+        float dot = NuVecDot(&delta, &aim);
+        u16 angle;
+        if (near_distance > distance && directional != 0) {
+            angle = near_angle;
+        } else if (mid_distance > distance) {
+            angle = mid_angle;
+        } else {
+            angle = far_angle;
+        }
+        if (!(dot > NuTrigTable[((angle + 0x4000) >> 1) & 0x7fff]) || !(nearest_distance > distance)) {
+            continue;
+        }
+        if (object != NULL && object->attack_gizmo_target == gizmo) {
+            previous = gizmo;
+            previous_position = target_position;
+        } else {
+            nearest_distance = distance;
+            best = gizmo;
+            best_position = target_position;
+        }
+    }
+
+    if (best != NULL) {
+        *result_position = *best_position;
+        *result_distance = nearest_distance;
+        result_velocity->x = 0.0f;
+        result_velocity->y = 0.0f;
+        result_velocity->z = 0.0f;
+        return reinterpret_cast<i32 *>(best);
+    }
+    if (previous == NULL) {
+        return NULL;
+    }
+    *result_position = *previous_position;
+    *result_distance = 1000000000.0f;
+    result_velocity->x = 0.0f;
+    result_velocity->y = 0.0f;
+    result_velocity->z = 0.0f;
+    return reinterpret_cast<i32 *>(previous);
 }
 
 static i32 GizObstacles_BoltHit(void *, void *, void *, NUVEC *, i32, float, NUVEC *, NUVEC *, BOLT *, u32,
@@ -991,7 +1089,8 @@ void GizObstacle_EvalAveragePosAndRadius(GIZOBSTACLE_s *obstacle, i32 state) {
 
 // Obstacle modes dispatch through this exact eight-entry target table.
 
-static void GizObstacleUpdate_PushOnly(GIZOBSTACLE_s *) {}
+static void GizObstacleUpdate_PushOnly(GIZOBSTACLE_s *) {
+}
 
 static void GizObstacleUpdate_AutoStart(GIZOBSTACLE_s *obstacle) {
     if ((obstacle->config_flags & GIZOBSTACLE_CONFIG_ALWAYS_RUN_PROXIMITY) != 0) {
@@ -1166,7 +1265,8 @@ static void GizObstacleUpdate_Proximity(GIZOBSTACLE_s *obstacle) {
     }
 }
 
-static void GizObstacleUpdate_TechnoOnly(GIZOBSTACLE_s *) {}
+static void GizObstacleUpdate_TechnoOnly(GIZOBSTACLE_s *) {
+}
 
 static i32 GizObstacle_SatisfyingTerrainChecks(GIZOBSTACLE_s *obstacle, GameObject_s *object) {
     if (static_cast<i8>(obstacle->trigger_mode) < 0) {

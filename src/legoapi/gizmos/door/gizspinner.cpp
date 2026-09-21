@@ -197,10 +197,97 @@ static void *GizSpinner_AllocateProgressData(VARIPTR *buffer, VARIPTR *buffer_en
     return GizmoBufferAlloc(buffer, buffer_end, 0x40);
 }
 
-static i32 *GizSpinner_GetBestBoltTarget(GIZMOSET *, float *, NUVEC *, NUVEC *, void *, NUVEC *, NUVEC *, float, float,
-                                         i32, i32, i32) {
-    UNIMPLEMENTED();
-    return {};
+extern u16 TargetDeg_Near, TargetDeg_Mid, TargetDeg_Far;
+extern f32 TargetDist_Near2, TargetDist_Mid2;
+
+static i32 *GizSpinner_GetBestBoltTarget(GIZMOSET *, float *, NUVEC *result_position, NUVEC *result_velocity, void *,
+                                         NUVEC *position, NUVEC *direction, float radius, float range_squared,
+                                         i32 directional, i32, i32) {
+    WORLDINFO_s *world = WorldInfo_CurrentlyActive();
+    NUVEC aim = *direction;
+    if (world->spinners == NULL) {
+        return NULL;
+    }
+
+    GIZMOSET *set = &world->gizmo_sys->sets[spinner_gizmotype_id];
+    if (set->count < 1) {
+        return NULL;
+    }
+    const float min_x = position->x - radius;
+    const float max_x = position->x + radius;
+    const float min_z = position->z - radius;
+    const float max_z = position->z + radius;
+    float best_alignment = 0.0f;
+    GIZMO *result = NULL;
+
+    for (i32 index = 0; index < set->count; ++index) {
+        GIZSPINNER_s *spinner = &world->spinners[index];
+        if (spinner->flags == 0 || (spinner->flags & 0x26) != 0 || (spinner->state_flags & 8) != 0 ||
+            spinner->position.x < min_x || spinner->position.x > max_x || spinner->position.z < min_z ||
+            spinner->position.z > max_z) {
+            continue;
+        }
+
+        NUVEC target_position = spinner->position;
+        target_position.y += spinner->field_0x098;
+        if (spinner->type == 0) {
+            continue;
+        }
+        u16 angle = spinner->rotation + spinner->initial_rotation + spinner->field_0x08c;
+        const u16 angle_step = static_cast<u16>(0x10000 / spinner->type);
+        for (i32 arm = 0; arm < spinner->type; ++arm, angle += angle_step) {
+            target_position.x = spinner->position.x + NuTrigTable[angle >> 1] * spinner->field_0x094;
+            target_position.z =
+                spinner->position.z + NuTrigTable[((angle + 0x4000) >> 1) & 0x7fff] * spinner->field_0x094;
+
+            NUVEC tangent;
+            tangent.x = NuTrigTable[((angle + 0x4000) & 0xffff) >> 1];
+            tangent.z = NuTrigTable[((angle + 0x8000) >> 1) & 0x7fff];
+            NUVEC facing = aim;
+            if (directional == 0) {
+                NuVecRotateY(&facing, &v001,
+                             NuAtan2D(spinner->position.x - position->x, spinner->position.z - position->z));
+            }
+            if (!(__builtin_fabsf(tangent.x * facing.x + tangent.z * facing.z) > NuTrigTable[0x3000])) {
+                continue;
+            }
+
+            NUVEC delta;
+            float distance = NuVecDistSqr(&target_position, position, &delta);
+            if (!(range_squared > distance)) {
+                continue;
+            }
+            if (directional != 0) {
+                aim = *direction;
+            } else {
+                NuVecRotateY(&aim, &v001, NuAtan2D(target_position.x - position->x, target_position.z - position->z));
+            }
+            NuVecNorm(&delta, &delta);
+            float dot = NuVecDot(&delta, &aim);
+            u16 target_angle;
+            if (TargetDist_Near2 > distance && directional != 0) {
+                target_angle = TargetDeg_Near;
+            } else if (TargetDist_Mid2 > distance) {
+                target_angle = TargetDeg_Mid;
+            } else {
+                target_angle = TargetDeg_Far;
+            }
+            if (!(dot > NuTrigTable[((target_angle + 0x4000) >> 1) & 0x7fff])) {
+                continue;
+            }
+
+            NuVecRotateY(&delta, &v001, NuAtan2D(target_position.x - position->x, target_position.z - position->z));
+            float alignment = delta.x * aim.x + delta.z * aim.z;
+            if (!(alignment > best_alignment)) {
+                continue;
+            }
+            best_alignment = alignment;
+            *result_velocity = v000;
+            *result_position = target_position;
+            result = &set->gizmos[index];
+        }
+    }
+    return reinterpret_cast<i32 *>(result);
 }
 
 static void GizSpinner_Draw(void *world_ptr, void *, float) {
@@ -338,8 +425,7 @@ i32 GizSpinner_UsingSpecial(GIZMO **results, void *world_ptr, i32 capacity, char
                 if ((world->spinners[index].flags & GIZSPINNER_FLAG_VALID) == 0) {
                     continue;
                 }
-                for (GAMEANIMOBJ_s *object = spinners[index].anim_set->objects; object != NULL;
-                     object = object->next) {
+                for (GAMEANIMOBJ_s *object = spinners[index].anim_set->objects; object != NULL; object = object->next) {
                     if (NuSpecialCompare(&special, &object->special) != 0) {
                         GIZMO *gizmo = GizmoFindByName(world->gizmo_sys, type_id, name);
                         if (gizmo != NULL) {
@@ -629,7 +715,8 @@ void GizSpinners_InitTerrain(WORLDINFO_s *world) {
                     PlatInstRotate(world->spinners[index].arms[arm].platform_id, 1);
                 }
             } else {
-                world->spinners[index].platform_id = static_cast<i16>(NewPlatInst(&world->spinners[index].matrix, instance));
+                world->spinners[index].platform_id =
+                    static_cast<i16>(NewPlatInst(&world->spinners[index].matrix, instance));
                 for (i32 arm = 0; arm < world->spinners[index].type; ++arm) {
                     world->spinners[index].arms[arm].platform_id = -1;
                 }
@@ -934,8 +1021,8 @@ void Bolt_AddDeflectedBolt(BOLT_s *bolt, NUVEC *velocity, NUVEC *normal, unsigne
 
 static i32 GizSpinner_BoltHitPlat(void *, void *spinner_ptr, BOLT *bolt, unsigned char *hit_flags) {
     GIZSPINNER_s *spinner = static_cast<GIZSPINNER_s *>(spinner_ptr);
-    if (spinner == NULL || (spinner->flags & (GIZSPINNER_FLAG_VALID | GIZSPINNER_FLAG_HIDE_BASE)) !=
-                               GIZSPINNER_FLAG_VALID) {
+    if (spinner == NULL ||
+        (spinner->flags & (GIZSPINNER_FLAG_VALID | GIZSPINNER_FLAG_HIDE_BASE)) != GIZSPINNER_FLAG_VALID) {
         return 0;
     }
 
