@@ -2131,11 +2131,22 @@ struct PLATSKINMEMINFO {
     u8 reserved_06[2];
 };
 DECOMP_ASSERT(sizeof(PLATSKINMEMINFO) == 8, "PLATSKINMEMINFO ABI");
-struct PLAYERITEMTYPE_s {};
+struct PLAYERITEMTYPE_s {
+    i16 id;
+    u8 field_0x2;
+    u8 field_0x3;
+    char *name;
+    u8 field_0x8;
+    u8 field_0x9;
+    u8 field_0xa;
+    u8 field_0xb;
+};
+DECOMP_ASSERT(sizeof(PLAYERITEMTYPE_s) == 0xc, "PLAYERITEMTYPE size");
 struct PLAYERITEM_s {
-    u8 *type;
+    PLAYERITEMTYPE_s *type;
     u8 ammunition;
-    u8 reserved[3];
+    u8 field_0x5;
+    u8 reserved[2];
 };
 DECOMP_ASSERT(sizeof(PLAYERITEM_s) == 8, "PLAYERITEM size");
 

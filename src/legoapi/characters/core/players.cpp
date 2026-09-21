@@ -388,16 +388,7 @@ void Players_InitPositions(WORLDINFO *world) {
     }
 }
 
-typedef struct {
-    i32 field_0;
-    char *name;
-    u8 field_0x8;
-    u8 field_0x9;
-    u8 field_0xa;
-    u8 field_0xb;
-} PlayerItemTypeEntry;
-
-static PlayerItemTypeEntry *PlayerItemType = NULL;
+static PLAYERITEMTYPE_s *PlayerItemType = NULL;
 static i32 PLAYERITEMTYPECOUNT = 0;
 
 extern i8 BoltType_FindIDByName(char *name, WORLDINFO *world);
@@ -729,8 +720,15 @@ void PlayerTakeHit(GameObject_s *, GameObject_s *) {
     STUBBED();
 }
 
-void PlayerItem_Set(PLAYERITEM_s *, PLAYERITEMTYPE_s *) {
-    STUBBED();
+void PlayerItem_Set(PLAYERITEM_s *item, PLAYERITEMTYPE_s *type) {
+    item->type = type;
+    if (type != NULL) {
+        item->ammunition = type->field_0x2;
+        item->field_0x5 = type->field_0x3;
+    } else {
+        item->ammunition = 0;
+        item->field_0x5 = 0;
+    }
 }
 
 void Player_FindByID(i32) {
@@ -752,7 +750,7 @@ i32 PlayersDropInOut() {
 }
 
 i32 PlayerItem_GotAmmo(PLAYERITEM_s *item) {
-    if (item != NULL && item->type != NULL && item->type[8] == 2)
+    if (item != NULL && item->type != NULL && item->type->field_0x8 == 2)
         return item->ammunition != 0;
     return 1;
 }
@@ -789,8 +787,17 @@ i32 Players_BothActive() {
            static_cast<i8>(Player[1]->apiobj.field_0x1f8) < 0;
 }
 
-void PlayerItemType_Find(i32) {
-    STUBBED();
+PLAYERITEMTYPE_s *PlayerItemType_Find(i32 id) {
+    if (PlayerItemType != NULL && PLAYERITEMTYPECOUNT > 0) {
+        i32 i = 0;
+        while (PlayerItemType[i].id != id) {
+            i++;
+            if (i == PLAYERITEMTYPECOUNT)
+                return NULL;
+        }
+        return &PlayerItemType[i];
+    }
+    return NULL;
 }
 
 void (*Player_ClearContextFn)(GameObject_s *, i32);
@@ -810,8 +817,24 @@ i32 Player_HasFastBuild(GameObject_s *player) {
     return Cheats_CheckFlags(0x4000) != 0 || (player != NULL && player->field_0xdec > 0.0f);
 }
 
-void PlayerItemTypes_Init(PLAYERITEMTYPE_s *) {
-    STUBBED();
+void PlayerItemTypes_Init(PLAYERITEMTYPE_s *types) {
+    PlayerItemType = NULL;
+    PLAYERITEMTYPECOUNT = 0;
+    if (types == NULL)
+        return;
+
+    PlayerItemType = types;
+    if (types->id == -1) {
+        PlayerItemType = NULL;
+        return;
+    }
+
+    i32 count = 0;
+    do {
+        types++;
+        count++;
+    } while (types->id != -1);
+    PLAYERITEMTYPECOUNT = count;
 }
 
 void Player_ResetContexts(PLAYERPACKET_s *packet) {

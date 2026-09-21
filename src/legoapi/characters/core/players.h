@@ -139,6 +139,9 @@ i32 CanPullLevers(i32 character_id);
 struct WORLDINFO_s;
 void Players_InitPositions(struct WORLDINFO_s *world);
 void PlayerItemTypes_Reset(struct WORLDINFO_s *world);
+void PlayerItemTypes_Init(PLAYERITEMTYPE_s *types);
+PLAYERITEMTYPE_s *PlayerItemType_Find(i32 id);
+void PlayerItem_Set(PLAYERITEM_s *item, PLAYERITEMTYPE_s *type);
 
 void Players_Init(void);
 i32 Players_AveragePos(NUVEC *position, SOCKPOSITION_s *socket_position);

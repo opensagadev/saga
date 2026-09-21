@@ -73,6 +73,10 @@ f32 minikittime;
 extern f32 (*Hint_AlphaTargetFn)();
 extern i32 (*Hub_PanelBusyFn)();
 i32 Hub_PanelBusy();
+static PLAYERITEMTYPE_s PlayerItemType_INDY[] = {
+    {15, 6, 0, const_cast<char *>("blue"), 2, 0, 0, 0},
+    {-1, 0, 0, NULL, 0, 0, 0, 0},
+};
 extern void (*Player_ClearContextFn)(GameObject_s *, i32);
 void ReleaseForce(GameObject_s *object, i32 mode);
 void ReleaseEat(GameObject_s *object);
@@ -1064,7 +1068,7 @@ void InitGameAfterConfig(void) {
     Punch_HitHoldFn = Punch_HitHold;
     Punch_HitExtraCodeFn = Punch_HitExtraCode_LSW;
     SetSoundFadeDistCallBackFn = SetSoundFadeDistCallBackFn_LSW;
-    //  PlayerItemTypes_Init((PLAYERITEMTYPE_s *)PlayerItemType_INDY);
+    PlayerItemTypes_Init(PlayerItemType_INDY);
     DisguiseAdjustFn = DisguiseAdjust_LSW;
     //  SUPERCARRY_THROWSPEED_XZ = 0x40000000;
     //  SUPERCARRY_THROWSPEED_Y = 0x3fc00000;
