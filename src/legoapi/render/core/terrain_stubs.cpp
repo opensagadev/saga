@@ -1078,8 +1078,15 @@ extern "C" {
         CutoffCameraVec = static_cast<NUVEC *>(position);
     }
 
-    void DebrisReserveTrashableSpace(void) {
-        STUBBED();
+    void DebrisReserveTrashableSpace(VARIPTR *buffer, VARIPTR, i32 chunk_count, i32 glass_chunk_count) {
+        if (debris_trash_space == 0) {
+            buffer->addr = ALIGN(buffer->addr, 0x80);
+            debris_trash_space = buffer->addr;
+            debrischunks = chunk_count;
+            debrischunksglass = glass_chunk_count;
+            buffer->addr += chunk_count * 0x430 + glass_chunk_count * 0x1b0 + EDPP_MAX_DMADEBTYPES * 0xa4c;
+            debris_trash_size = buffer->addr - debris_trash_space;
+        }
     }
 
     void DebrisResetTimers(void) {

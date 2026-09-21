@@ -167,4 +167,4 @@ extern "C" void ComplexSockPosition(SOCKSYS *sock_sys, NUVEC *position, i32 prio
                                     SOCKPOSITION *result);
 void *CutScenePlayer_Available(void);
 
-void KillPlayer(GameObject_s *player, i32 cause, i32 unknown, struct nuvec_s *);
+i32 KillPlayer(GameObject_s *player, i32 cause, i32 unknown, struct nuvec_s *);

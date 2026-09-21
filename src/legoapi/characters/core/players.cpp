@@ -62,6 +62,7 @@ extern void CurrentStart(GameObject_s *obj, i32 mode, i32 start);
 extern void InitSurfaceInfo(GameObject_s *obj);
 extern i32 SetObjOnSurface(GameObject_s *obj, i32 mode);
 extern void GizForce_ResetLOS(GameObject_s *obj);
+void Arcade_PlayerKilled(i32 player, i32 active);
 void ResetPlayerAI(GameObject_s *obj);
 void ResetPlayerMoves(GameObject_s *obj);
 void SetProtocolDroidDeactivatedAction(GameObject_s *);
@@ -1099,8 +1100,30 @@ static __used__ void Player_ClearContext_Game(GameObject_s *, i32) {
 
 u32 (*CanPushObstaclesFn)(GameObject_s *) = NULL;
 
-void KillPlayer(GameObject_s *, i32, i32, nuvec_s *) {
-    STUBBED();
+i32 KillPlayer(GameObject_s *object, i32 reason, i32 ignore_spawn_protection, nuvec_s *) {
+    if (object->apiobj.field_0x287 != 0)
+        return 0;
+
+    if (ignore_spawn_protection != 0)
+        object->spawn_protection_timer = 0.0f;
+    else if (object->spawn_protection_timer > 0.0f)
+        return 0;
+
+    if (Arcade != 0) {
+        i32 other_player = 1;
+        if (object->apiobj.field_0x27c != 0) {
+            if (object->apiobj.field_0x27c != 1)
+                return KillGameObject(object, reason, 0);
+            other_player = 0;
+        }
+
+        i32 active = 0;
+        if (Player[other_player] != NULL)
+            active = (Player[other_player]->apiobj.field_0x1f4 >> 18) & 1;
+        Arcade_PlayerKilled(other_player, active);
+    }
+
+    return KillGameObject(object, reason, 0);
 }
 
 namespace {
