@@ -1210,9 +1210,11 @@ void DebrisProcessControlChunks(i32 panel_time) {
             debkeydatatype_s *key = control->owner;
             debinftype *effect = debtab[key->effect_index];
             i32 chunk_index = 0;
-            while (chunk_index < key->allocated_chunk_count &&
-                   key->particle_chunks[chunk_index] != control->particle_chunk) {
-                ++chunk_index;
+            for (i32 i = 0; i < key->allocated_chunk_count; ++i) {
+                if (key->particle_chunks[i] == control->particle_chunk) {
+                    chunk_index = i;
+                    break;
+                }
             }
 
             const i32 old_chunk_count = key->allocated_chunk_count;
