@@ -6600,8 +6600,8 @@ void FlattenCode(GameObject_s *object) {
             return;
         }
         if (distance < nearest_distance && candidate != object) {
-            nearest = candidate;
             nearest_distance = distance;
+            nearest = candidate;
         }
     }
     object->context_animation_timer += FRAMETIME;
