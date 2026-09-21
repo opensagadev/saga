@@ -50,8 +50,19 @@ i32 SpecialMove_Check(GameObject_s *attacker, GameObject_s *victim) {
     return -1;
 }
 
-void SpecialMove_Cancel(GameObject_s *) {
-    STUBBED();
+void SpecialMove_Cancel(GameObject_s *object) {
+    if ((LEGOCONTEXT_SPECIALMOVE_ATTACKER != -1 && LEGOCONTEXT_SPECIALMOVE_ATTACKER == object->character_context &&
+         object->field_0x7a7 != -1) ||
+        (LEGOCONTEXT_SPECIALMOVE_VICTIM != -1 && LEGOCONTEXT_SPECIALMOVE_VICTIM == object->character_context)) {
+        object->character_context = -1;
+        GameObject_s *other = static_cast<GameObject_s *>(object->field_0x780);
+        if (other != NULL &&
+            ((LEGOCONTEXT_SPECIALMOVE_ATTACKER != -1 && LEGOCONTEXT_SPECIALMOVE_ATTACKER == other->character_context &&
+              other->field_0x7a7 != -1) ||
+             (LEGOCONTEXT_SPECIALMOVE_VICTIM != -1 && LEGOCONTEXT_SPECIALMOVE_VICTIM == other->character_context))) {
+            other->character_context = -1;
+        }
+    }
 }
 
 u32 SpecialMove_GetFlags(i32 index, u32 mask) {
