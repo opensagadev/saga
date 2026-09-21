@@ -70,6 +70,8 @@ i32 TagCharacter(GameObject_s *source, GameObject_s *target, i32 mode);
 void NewBuzz(nupad_s *, f32, i32);
 void GameAudio_PlaySfxById(i32 sfx_id, nuvec_s *position, i32 flags, i32 volume);
 f32 VehicleTurnOrLoopOffset(GameObject_s *object);
+void Player_ClearContext(GameObject_s *object, i32 mode);
+void Player_ResetContexts(PLAYERPACKET_s *packet);
 extern "C" f32 chattersfxwait;
 
 void Players_Init(void) {
@@ -734,8 +736,58 @@ float GetHoverPosY(GameObject_s *obj) {
     return height + hover_height + vehicle_offset;
 }
 
-void PlayerTakeHit(GameObject_s *, GameObject_s *) {
-    STUBBED();
+void PlayerTakeHit(GameObject_s *object, GameObject_s *attacker) {
+    if (object->apiobj.field_0x27c != -1)
+        return;
+
+    const u8 state = object->field_0xe31;
+    i32 animation;
+    if (state != 1) {
+        animation = 0x3d;
+        if (object->apiobj.character_model->model_data_b[0x3d] == NULL) {
+            if ((object->field_0xefb & 8) != 0) {
+                ResetAnimPacket(&object->apiobj.anim_packet, -1);
+                Player_ClearContext(object, 1);
+                Player_ResetContexts(reinterpret_cast<PLAYERPACKET_s *>(object->player_packet));
+            }
+            return;
+        }
+    } else {
+        animation = 0x3e;
+        if (object->apiobj.character_model->model_data_b[0x3e] == NULL) {
+            if ((object->field_0xefb & 8) != 0) {
+                ResetAnimPacket(&object->apiobj.anim_packet, -1);
+                Player_ClearContext(object, 1);
+                Player_ResetContexts(reinterpret_cast<PLAYERPACKET_s *>(object->player_packet));
+            }
+            return;
+        }
+    }
+
+    if (object->field_0x7a5 == 0x1b && object->field_0x780 != NULL) {
+        GameObject_s *partner = static_cast<GameObject_s *>(object->field_0x780);
+        if (partner->field_0x7a5 == 0x1c)
+            partner->field_0x7a5 = 0xff;
+    }
+
+    object->context_animation = animation;
+    ResetAnimPacket(&object->apiobj.anim_packet, -1);
+    Player_ClearContext(object, 1);
+    Player_ResetContexts(reinterpret_cast<PLAYERPACKET_s *>(object->player_packet));
+    object->field_0x7a5 = 0x15;
+
+    const f32 duration = AnimDuration(object->id, object->context_animation, 0.0f, 0.0f, 1);
+    object->field_0xe31 = state;
+    object->context_animation_timer = duration <= 0.0f ? 1.0f : duration;
+    SetFlicker(object, 0.4f);
+
+    if (attacker != NULL) {
+        const u16 angle = NuAtan2D(attacker->apiobj.collision_position.x - object->apiobj.collision_position.x,
+                                   attacker->apiobj.collision_position.z - object->apiobj.collision_position.z);
+        object->apiobj.field_0x276 = angle;
+        object->apiobj.movement_facing_angle = angle;
+        object->apiobj.facing_angle = angle;
+    }
 }
 
 void PlayerItem_Set(PLAYERITEM_s *item, PLAYERITEMTYPE_s *type) {
