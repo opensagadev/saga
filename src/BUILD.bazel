@@ -56,12 +56,11 @@ _HOST_EXCLUDES = [
 _HOST_COMMON_SRCS = [source for source in _ENGINE_SRCS if source not in _HOST_EXCLUDES] + [
     "host/platform/postresource_create.cpp",
     "java/jni_stub.cpp",
-    "host/harness/audio.cpp",
-    "host/harness/load.cpp",
+    "host/harness/fixture.cpp",
     "host/harness/main.cpp",
-    "host/harness/save.cpp",
+    "host/harness/programs/autoplay.cpp",
+    "host/harness/programs/window.cpp",
     "host/harness/startup.cpp",
-    "host/harness/window.cpp",
     "host/platform/compressed_texture.cpp",
     "host/platform/android_assets.cpp",
     "host/platform/documents.cpp",
@@ -268,6 +267,7 @@ cc_binary(
     linkopts = select({
         "//bazel/platforms:linux": [
             "-m32",
+            "-Wl,--wrap=_Z7EndPermv",
             "-Wl,--wrap=NuFrameEnd",
         ],
         "//bazel/platforms:macos": [

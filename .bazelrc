@@ -34,6 +34,8 @@ build:android-armv7 --platforms=//bazel/platforms:android_armv7
 build:android-armv7 --extra_toolchains=@android_ndk_r8e//:toolchain_armv7
 
 build:native --config=saga-common
+# Host binaries use modern C++; the matching target remains on GNU C++11.
+build:native --cxxopt=-std=c++17
 build:native --define=SAGA_BUILD=native
 build:native --define=SAGA_MODE=debug
 build:native --compilation_mode=dbg
@@ -41,6 +43,7 @@ build:native --compilation_mode=dbg
 build:native --per_file_copt=src/gameapi/edtools/edtoolsall_plain.cpp@-fsanitize-recover=address
 
 build:native_release --config=saga-common
+build:native_release --cxxopt=-std=c++17
 build:native_release --define=SAGA_BUILD=native
 build:native_release --define=SAGA_MODE=release
 build:native_release --compilation_mode=opt
@@ -54,11 +57,13 @@ build:windows-mingw --platforms=//bazel/platforms:windows_mingw
 build:windows-mingw --extra_toolchains=@local_config_cc//:cc-toolchain-x64_windows_mingw
 
 build:wasm --config=saga-common
+build:wasm --cxxopt=-std=c++17
 build:wasm --define=SAGA_BUILD=wasm
 build:wasm --define=SAGA_MODE=debug
 build:wasm --compilation_mode=dbg
 
 build:wasm_release --config=saga-common
+build:wasm_release --cxxopt=-std=c++17
 build:wasm_release --define=SAGA_BUILD=wasm
 build:wasm_release --define=SAGA_MODE=release
 build:wasm_release --compilation_mode=opt

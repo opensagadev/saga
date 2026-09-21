@@ -142,12 +142,10 @@ do not need this marker.
 builds. `__FILENAME__` is currently a correct repository-relative path such as
 `src/legoapi/world/world.cpp`; the former `src/src/` prefix bug is fixed.
 
-Host-only diagnostic commands belong under `src/host/harness/`. Keep asset tools
-general: `bazel run --config=native //src:run_native -- load list [filter]`
-lists DAT entries and `bazel run --config=native //src:run_native -- load
-extract <dat-path> <output>` extracts any entry
-(`saga_native.exe` on Windows). Do not add sequence- or level-specific
-extraction code to target translation units.
+Host-only diagnostic commands belong under `src/host/harness/`. Keep asset and
+save-file tools in their standalone repositories rather than adding them to the
+game executable. Do not add sequence- or level-specific extraction code to
+target translation units.
 
 Platform adapters belong under `src/host/platform/`. Prefer implementing an
 imported API (`slCreateEngine`, `eglSwapBuffers`, or

@@ -2,8 +2,8 @@
 
 #include "nu2api/nucore/common.h"
 
-// Serialized values, verified against res/libTTapp.so. Keep the schema in the
-// host save utility in sync when these enums or the save structures change.
+// Serialized values, verified against res/libTTapp.so. Keep the standalone
+// nusave schema in sync when these enums or the save structures change.
 enum SAVE_SWITCH : u8 { SAVE_OFF = 0, SAVE_ON = 1 };
 enum SAVE_PROGRESS : u8 { SAVE_INCOMPLETE = 0, SAVE_COMPLETE = 1 };
 enum SAVE_CHARACTER_FLAGS : u8 {

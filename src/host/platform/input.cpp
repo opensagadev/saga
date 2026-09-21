@@ -4,6 +4,7 @@
 #include <atomic>
 #include <cstring>
 
+#include "host/harness/programs/programs.hpp"
 #include "nu2api/nucore/NuInputDevice.h"
 
 namespace {
@@ -12,6 +13,8 @@ namespace {
     std::atomic<u32> host_pending_buttons[2];
     std::atomic<u32> host_held_buttons[2];
     std::atomic<u32> host_keyboard_buttons[2];
+    std::atomic<f32> host_left_x[2];
+    std::atomic<f32> host_left_y[2];
     u32 host_frame_buttons[2];
 } // namespace
 
@@ -30,6 +33,8 @@ void HostInputReset() {
         host_pending_buttons[port].store(0, std::memory_order_relaxed);
         host_held_buttons[port].store(0, std::memory_order_relaxed);
         host_keyboard_buttons[port].store(0, std::memory_order_relaxed);
+        host_left_x[port].store(0.0f, std::memory_order_relaxed);
+        host_left_y[port].store(0.0f, std::memory_order_relaxed);
         host_frame_buttons[port] = 0;
     }
     HostInputResetPlatform();
@@ -49,6 +54,23 @@ void HostInputSetKeyboardHeld(i32 port, u32 buttons) {
     }
 
     host_keyboard_buttons[port].store(buttons, std::memory_order_release);
+}
+
+void HostInputSetAnalog(i32 port, f32 left_x, f32 left_y) {
+    if (port < 0 || port >= 2) {
+        return;
+    }
+
+    if (left_x < -1.0f)
+        left_x = -1.0f;
+    else if (left_x > 1.0f)
+        left_x = 1.0f;
+    if (left_y < -1.0f)
+        left_y = -1.0f;
+    else if (left_y > 1.0f)
+        left_y = 1.0f;
+    host_left_x[port].store(left_x, std::memory_order_release);
+    host_left_y[port].store(left_y, std::memory_order_release);
 }
 
 void HostInputTap(i32 port, u32 buttons) {
@@ -74,11 +96,14 @@ namespace NuInputDevicePS {
     }
 
     void UpdateAllPS(f32) {
+        host_autoplay_input_tick();
         for (i32 port = 0; port < 2; ++port) {
             const u32 tapped = host_pending_buttons[port].exchange(0, std::memory_order_acq_rel);
             const u32 held = host_held_buttons[port].load(std::memory_order_acquire);
             const u32 keyboard = host_keyboard_buttons[port].load(std::memory_order_acquire);
-            host_frame_buttons[port] = tapped | held | keyboard | HostInputConsumePlatform(port);
+            const u32 platform = HostInputConsumePlatform(port);
+            const bool accept_manual_input = !host_autoplay_active() || host_autoplay_allows_manual_input();
+            host_frame_buttons[port] = tapped | held | (accept_manual_input ? keyboard | platform : 0);
         }
     }
 
@@ -136,8 +161,12 @@ namespace NuInputDevicePS {
         *states = device == host_gamepad_device ? host_frame_buttons[0] : 0;
     }
 
-    void ReadAnalogValuesPS(u32, f32 *values) {
+    void ReadAnalogValuesPS(u32 device, f32 *values) {
         memset(values, 0, sizeof(f32) * 12);
+        if (device == host_gamepad_device) {
+            values[NUPADANALOGVALUE_LEFT_X] = host_left_x[0].load(std::memory_order_acquire);
+            values[NUPADANALOGVALUE_LEFT_Y] = host_left_y[0].load(std::memory_order_acquire);
+        }
     }
 
     void ReadMotionValuesPS(u32, f32 *values) {

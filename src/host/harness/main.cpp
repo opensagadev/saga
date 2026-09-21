@@ -1,7 +1,4 @@
-#include "host/harness/audio.hpp"
-#include "host/harness/load.hpp"
-#include "host/harness/save.hpp"
-#include "host/harness/window.hpp"
+#include "host/harness/programs/programs.hpp"
 #include "host/platform/runtime.hpp"
 #include "java/android.h"
 
@@ -15,36 +12,28 @@
 namespace {
 
     enum class HostUtility {
-        audio,
-        load,
+        autoplay,
         window,
     };
 
     struct HostHarnessOptions {
         HostUtility utility = HostUtility::window;
-        HostLoadOptions load;
+        const char *autoplay_level = nullptr;
         HostWindowOptions window;
     };
 
     void host_print_usage(const char *program) {
         printf("Usage: %s <utility> [options]\n", program);
         printf("\nHost utilities:\n");
-        printf("  audio                  Verify audio playback through the host device\n");
-        printf("  load [list|extract]    Inspect or extract game data\n");
-        printf("  save [list|schema|edit|create] Inspect, explain, edit, or create a save file\n");
+        printf("  autoplay <level|all>   Run one or every known automated level playthrough\n");
         printf("  window [options]       Run the game in an SDL window\n");
         printf("\nRun '%s <utility> --help' for utility-specific options.\n", program);
     }
 
-    void host_print_audio_usage(const char *program) {
-        printf("Usage: %s audio\n", program);
-    }
-
-    void host_print_load_usage(const char *program) {
-        printf("Usage:\n");
-        printf("  %s load\n", program);
-        printf("  %s load list [filter]\n", program);
-        printf("  %s load extract <dat-path> [output]\n", program);
+    void host_print_autoplay_usage(const char *program) {
+        printf("Usage: %s autoplay <level|all>\n", program);
+        printf("       %s autoplay list\n\n", program);
+        host_autoplay_print_scripts();
     }
 
     void host_print_window_usage(const char *program) {
@@ -78,45 +67,6 @@ namespace {
         }
         result = parsed;
         return true;
-    }
-
-    bool host_parse_audio_arguments(i32 argc, char **argv, const char *program) {
-        if (argc == 0) {
-            return true;
-        }
-        fprintf(stderr, "Unexpected argument for audio: %s\n", argv[0]);
-        host_print_audio_usage(program);
-        return false;
-    }
-
-    bool host_parse_load_arguments(i32 argc, char **argv, const char *program, HostLoadOptions &options) {
-        if (argc == 0) {
-            return true;
-        }
-        if (strcmp(argv[0], "list") == 0) {
-            if (argc > 2) {
-                fprintf(stderr, "Too many arguments for load list\n");
-                host_print_load_usage(program);
-                return false;
-            }
-            options.action = HostLoadAction::list;
-            options.filter = argc == 2 ? argv[1] : nullptr;
-            return true;
-        }
-        if (strcmp(argv[0], "extract") == 0) {
-            if (argc < 2 || argc > 3) {
-                fprintf(stderr, "load extract requires a DAT path and accepts one optional output path\n");
-                host_print_load_usage(program);
-                return false;
-            }
-            options.action = HostLoadAction::extract;
-            options.dat_path = argv[1];
-            options.output_path = argc == 3 ? argv[2] : ".work/extracted.bin";
-            return true;
-        }
-        fprintf(stderr, "Unknown load action: %s\n", argv[0]);
-        host_print_load_usage(program);
-        return false;
     }
 
     bool host_parse_window_arguments(i32 argc, char **argv, const char *program, HostWindowOptions &options) {
@@ -204,24 +154,19 @@ namespace {
 
         const i32 utility_argc = argc - 2;
         char **utility_argv = argv + 2;
-        if (strcmp(argv[1], "audio") == 0) {
-            options.utility = HostUtility::audio;
+        if (strcmp(argv[1], "autoplay") == 0) {
+            options.utility = HostUtility::autoplay;
             if (utility_argc == 1 && strcmp(utility_argv[0], "--help") == 0) {
-                host_print_audio_usage(program);
+                host_print_autoplay_usage(program);
                 return HostParseResult::help;
             }
-            return host_parse_audio_arguments(utility_argc, utility_argv, program) ? HostParseResult::run
-                                                                                   : HostParseResult::error;
-        }
-        if (strcmp(argv[1], "load") == 0) {
-            options.utility = HostUtility::load;
-            if (utility_argc == 1 && strcmp(utility_argv[0], "--help") == 0) {
-                host_print_load_usage(program);
-                return HostParseResult::help;
+            if (utility_argc != 1) {
+                fprintf(stderr, "autoplay requires exactly one level name or 'all'\n");
+                host_print_autoplay_usage(program);
+                return HostParseResult::error;
             }
-            return host_parse_load_arguments(utility_argc, utility_argv, program, options.load)
-                       ? HostParseResult::run
-                       : HostParseResult::error;
+            options.autoplay_level = utility_argv[0];
+            return HostParseResult::run;
         }
         if (strcmp(argv[1], "window") == 0) {
             options.utility = HostUtility::window;
@@ -255,9 +200,9 @@ namespace {
     }
 
     void host_finish_engine_session(i32 status) {
-        // NuMain is a process-lifetime entry point and the window/audio
-        // utilities stop observing it before its worker threads have exited.
-        // Keep the hard process boundary local to those utilities until their
+        // NuMain is a process-lifetime entry point and the host programs stop
+        // observing it before its worker threads have exited. Keep the hard
+        // process boundary local to those programs until their
         // reconstructed shutdown path can join every engine thread.
         fflush(nullptr);
         _exit(status);
@@ -268,10 +213,6 @@ namespace {
 i32 main(i32 argc, char **argv) {
     HostPlatformPrepareArguments(&argc, &argv);
 
-    if (argc >= 2 && strcmp(argv[1], "save") == 0) {
-        return host_run_save(argc - 2, argv + 2);
-    }
-
     HostHarnessOptions options;
     const HostParseResult result = host_parse_arguments(argc, argv, options);
     if (result != HostParseResult::run) {
@@ -281,19 +222,12 @@ i32 main(i32 argc, char **argv) {
     host_initialize_language();
     i32 utility_result = 1;
     switch (options.utility) {
-        case HostUtility::audio:
-            utility_result = host_run_audio();
-            break;
-        case HostUtility::load:
-            utility_result = host_run_load(options.load);
+        case HostUtility::autoplay:
+            utility_result = host_run_autoplay(options.autoplay_level);
             break;
         case HostUtility::window:
             utility_result = host_run_window(options.window);
             break;
-    }
-
-    if (options.utility == HostUtility::load) {
-        return utility_result;
     }
     host_finish_engine_session(utility_result);
 }

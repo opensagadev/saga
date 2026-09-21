@@ -10,9 +10,9 @@
 #include <unistd.h>
 #include "globals.h"
 #include "gameframework/saveload.h"
-#include "host/harness/save.hpp"
+#include "host/harness/fixture.hpp"
+#include "host/harness/programs/programs.hpp"
 #include "host/harness/startup.hpp"
-#include "host/harness/window.hpp"
 #include "java/android.h"
 #include "legoapi/world/area.h"
 #include "legoapi/characters/core/players.h"

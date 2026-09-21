@@ -13,7 +13,7 @@
 #include "gameapi/ai/aisys/aisys.h"
 #include "gameapi/gui/apimenu.h"
 #include "gameframework/saveload.h"
-#include "host/harness/window.hpp"
+#include "host/harness/programs/programs.hpp"
 #include "host/platform/free_camera.hpp"
 #include "host/platform/graphics.hpp"
 #include "host/platform/input.hpp"
@@ -865,6 +865,10 @@ i32 host_run_window(const HostWindowOptions &options) {
                 SDL_Delay(host_poll_interval_ms);
                 frame_count++;
             }
+            break;
+        }
+
+        if (host_autoplay_done()) {
             break;
         }
 

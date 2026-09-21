@@ -6,6 +6,7 @@
 void HostInputReset();
 void HostInputTap(i32 port, u32 buttons);
 void HostInputSetHeld(i32 port, u32 buttons);
+void HostInputSetAnalog(i32 port, f32 left_x, f32 left_y);
 void HostInputSetKeyboardHeld(i32 port, u32 buttons);
 void HostInputTouch(i32 x, i32 y, i32 width, i32 height);
 

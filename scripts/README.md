@@ -61,7 +61,7 @@ deployed proxy or API.
   the cross-platform `pre_commit.py` Bazel target owns the actual hook sequence.
 - `src/host/harness/run_native.sh` backs `//src:run_native`, restores the
   directory where `bazel run` was invoked, and then executes `saga_native`.
-- `src/host/harness/make_capture_montage.sh` is a standalone diagnostic helper
+- `src/host/harness/programs/make_capture_montage.sh` is a standalone diagnostic helper
   that calls ImageMagick `montage` and writes a capture contact sheet.
 
 ## Provenance of the current layout

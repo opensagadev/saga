@@ -3,13 +3,13 @@
 Reference: Android x86 `res/libTTapp.so`, inspected with `nm`, `objdump`, raw
 little-endian data reads, and `scripts/objdiff-cli.py`. No Ghidra result was used
 for the changes below. Payload offsets in this document exclude the envelope.
-The live property table is available with `save schema` / `save schema --options`;
-see [host utilities](../host-utilities.md) for commands and editing syntax.
+The standalone [`nusave`](https://github.com/opensagadev/nusave) repository contains the
+editable schema and save inspection commands.
 
 ## Layout and evidence
 
-`Game` occupies `0x7e58` bytes. The utility covers every file byte and checks
-that its schema has neither gaps nor overlapping properties. This is a storage
+`Game` occupies `0x7e58` bytes. `nusave` covers every file byte and checks that
+its schema has neither gaps nor overlapping properties. This is a storage
 inventory, not a claim that every reserved byte has a gameplay interpretation.
 
 | Payload offset | Recovered storage | Original evidence |
@@ -61,7 +61,7 @@ Per-game option offsets are relative to `options_save`: +0/+1 player rumble,
 +2 surround sound, +3 sound volume, +4 music volume, +5 master volume,
 +6 music enabled, +7/+8 initialized-zero unresolved bytes, +9/+10 unresolved
 bytes, +11 widescreen, +12 brightness. Volume and brightness menu ranges are
-0..10; the utility also permits storage-width values for forensic editing.
+0..10; `nusave` also permits storage-width values for forensic editing.
 
 `SuperOptions` is 24 bytes: pack mask at +0, control selection at +2, D-pad
 position lock at +3, four position floats at +4/+8/+12/+16, music toggle at +20,
@@ -87,15 +87,14 @@ renamed together so emitted numeric behavior stays the same.
 
 All 44 `Cheat` names and their order were compared with the original table at
 `0x619e80`, stride `0x20`. These indices select both extra masks. They are
-**not** the `Cheat[i].flag` runtime-effect bits. The host reuses the canonical
-`Cheat` names rather than duplicating its string table. `SAVE_EXTRA_INDEX`
+**not** the `Cheat[i].flag` runtime-effect bits. `SAVE_EXTRA_INDEX`
 records the index enum; other serialized enum values live alongside it in
 `src/legoapi/core/save_values.h`. Unknown bits remain numeric and round-trip.
 
-The host combines the multiword records into logical masks, without changing
+`nusave` combines the multiword records into logical masks, without changing
 the engine structs. Character purchases form one 128-bit field. The 90 names
-in `save_names.hpp` were recovered using the existing archive extractor on
-`chars\collection.txt`: valid, unique `buy_in_shop` entries in source order.
+bundled with `nusave` were recovered from `chars\collection.txt` using
+[`nudat`](https://github.com/opensagadev/nudat): valid, unique `buy_in_shop` entries in source order.
 `LoadPerm2` requests exactly this filter and the original
 `Collection_CreateCustom` checks `COLLECTID.can_buy` at +8. All 90 identifiers
 were checked against the shipped character configuration. These bits index the
@@ -111,7 +110,7 @@ assigned to the separate 96-bit shop-hint purchase storage. Unidentified bits
 in every logical mask retain `BIT_n` names across the entire field width.
 Listings show the full numeric mask and each set bit's number/name in comments,
 followed by an importable named assignment. Full-width decimal and hex parsing
-does not depend on the host's native integer width.
+does not depend on the native integer width.
 
 ## Envelope and limits
 
@@ -119,8 +118,8 @@ does not depend on the host's native integer width.
 `0x52474d48`, version 1 and its size. The extra-data offset at +20 selects a
 prefix before the payload. Other envelope fields/buffers are exposed verbatim;
 there is no evidence to assign them gameplay meanings. Payloads end with a
-four-byte `ChecksumSaveData` result and four-byte slot code. The utility calls
-the reconstructed checksum/hash routines and preserves arbitrary prefix bytes.
+four-byte `ChecksumSaveData` result and four-byte slot code. `nusave` reproduces
+those derived values and preserves arbitrary prefix bytes.
 
 The original has no debug field/type information. Unresolved fields are kept
 explicitly unresolved in the schema. Character/area/mission IDs and customizer
@@ -129,8 +128,8 @@ prove those IDs exist in an asset set. Creation without a template does not
 load assets or synthesize consistent 100% progress. Editing completion counters
 does not imply all related pickups, purchases and rewards have been earned.
 
-When structs or enums change, update the utility registry and descriptions,
-rerun the exact-byte/schema coverage checks, and review both schema commands.
+When structs or enums change, update the standalone `nusave` schema and rerun
+its exact-byte and round-trip checks.
 
 ## Reconstructed routines and validation
 
@@ -152,14 +151,13 @@ retains the current compiler mode's extra frame setup. These are not claimed
 as full binary matches. Existing save consumers were also compared after
 constant/member renaming; names do not alter stored flag values or offsets.
 
-Validation: target and Linux native builds, the four repository checks in
-`//scripts/checks:checks`, and nine native save integration tests. The latter
-cover corrected original offsets, enum combinations and invalid names, complete
-schema byte coverage without overlap, random byte-for-byte export/import,
-NaN/subnormal float preservation, odd-length prefixes, checksum/hash updates,
-default paths, and failed-write preservation. No real save was edited.
-Logical-mask tests also cross 32/64/96/128-bit boundaries, verify original
-character-name positions, and check maximum/overflow values through 192 bits.
+Validation included target and Linux native builds plus the standalone `nusave`
+test suite. Its tests cover corrected original offsets, enum combinations and
+invalid names, complete schema byte coverage without overlap, byte-for-byte
+export/import, non-canonical float preservation, odd-length prefixes,
+checksum/hash updates, default paths, and failed-write preservation. Logical-mask
+tests also cross 32/64/96/128-bit boundaries, verify original character-name
+positions, and check maximum/overflow values through 192 bits.
 
 ## Loaded progress reset during the title-to-hub transition
 
