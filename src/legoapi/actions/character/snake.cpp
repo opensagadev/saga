@@ -15,8 +15,32 @@ struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
-void GrabVictim(GameObject_s *, GameObject_s *) {
-    STUBBED();
+extern i16 id_GAMORREANGUARD;
+
+void GrabVictim(GameObject_s *object, GameObject_s *victim) {
+    if (object->character_context != -1) {
+        return;
+    }
+
+    object->character_context = 0x38;
+    i16 animation = 0x64;
+    i32 animation_offset = 0x190;
+    if (victim->id == id_GAMORREANGUARD) {
+        animation_offset = victim->apiobj.field_0x27c == -1 ? 0x7c : 0x190;
+        animation = victim->apiobj.field_0x27c == -1 ? 0x1f : 0x64;
+    }
+    object->context_animation = animation;
+    if (*(void **)((char *)object->apiobj.character_model->model_data_b + animation_offset) != NULL) {
+        object->airborne_action_duration = AnimDuration(object->id, animation, 0.0f, 0.0f, 1);
+    } else {
+        object->airborne_action_duration = 2.0f;
+    }
+    object->blowup_target = NULL;
+    object->context_animation_timer = 0.0f;
+    object->field_0x780 = victim;
+    object->force_throw_target = NULL;
+    object->field_0xe24 &= ~1;
+    object->context_flags &= ~0x40;
 }
 
 extern "C" {
