@@ -395,9 +395,49 @@ void CollideGameObjects(WORLDINFO_s *world) {
     APIObjectCollisions(collision_count, collision_objects, collision_minimums, collision_maximums, Collide2Objects);
 }
 
-bool CalculateRayBoxIntersection(VuVec const &, VuVec const &, VuVec const &, VuVec const &, float, float &) {
-    STUBBED();
-    return false;
+bool CalculateRayBoxIntersection(VuVec const &minimum, VuVec const &maximum, VuVec const &start, VuVec const &direction,
+                                 float maximum_distance, float &distance) {
+    f32 near_distance;
+    f32 far_distance;
+    if (direction.x >= 0.0f) {
+        near_distance = (minimum.x - start.x) / direction.x;
+        far_distance = (maximum.x - start.x) / direction.x;
+    } else {
+        near_distance = (maximum.x - start.x) / direction.x;
+        far_distance = (minimum.x - start.x) / direction.x;
+    }
+
+    f32 axis_near_distance;
+    f32 axis_far_distance;
+    if (direction.y >= 0.0f) {
+        axis_near_distance = (minimum.y - start.y) / direction.y;
+        axis_far_distance = (maximum.y - start.y) / direction.y;
+    } else {
+        axis_near_distance = (maximum.y - start.y) / direction.y;
+        axis_far_distance = (minimum.y - start.y) / direction.y;
+    }
+
+    if (near_distance > axis_far_distance || axis_near_distance > far_distance) {
+        return false;
+    }
+    near_distance = MAX(axis_near_distance, near_distance);
+    far_distance = MIN(axis_far_distance, far_distance);
+
+    if (direction.z >= 0.0f) {
+        axis_near_distance = (minimum.z - start.z) / direction.z;
+        axis_far_distance = (maximum.z - start.z) / direction.z;
+    } else {
+        axis_near_distance = (maximum.z - start.z) / direction.z;
+        axis_far_distance = (minimum.z - start.z) / direction.z;
+    }
+
+    if (near_distance > axis_far_distance || axis_near_distance > far_distance) {
+        return false;
+    }
+    far_distance = MIN(axis_far_distance, far_distance);
+    near_distance = MAX(axis_near_distance, near_distance);
+    distance = near_distance;
+    return maximum_distance > near_distance && far_distance > 0.0f;
 }
 
 f32 CalcCapsuleIntersectDistance(VuVec const &start, VuVec const &direction, f32 maximum_distance, VuVec const &centre,

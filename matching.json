@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 51.661186,
+    "fuzzy_match_percent": 51.6681,
     "total_code": "4722419",
-    "matched_code": "453560",
-    "matched_code_percent": 9.6044,
+    "matched_code": "453903",
+    "matched_code_percent": 9.611663,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 5360,
-    "matched_functions_percent": 39.824654,
+    "matched_functions": 5361,
+    "matched_functions_percent": 39.83208,
     "total_units": 1
   },
   "text": {
@@ -39131,7 +39131,7 @@
           "address": 4444944,
           "offset": 3554976,
           "size": 343,
-          "match_percent": 4.782609
+          "match_percent": 100.0
         },
         {
           "name": "_Z28CalcCapsuleIntersectDistanceRK5VuVecS1_fS1_f",
