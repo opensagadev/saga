@@ -10,6 +10,7 @@
 #include <stdarg.h>
 #include "decomp.h"
 #include "nu2api/nucore/nustring.h"
+#include "nu2api/nucore/nuthread.h"
 #include "globals.h"
 #include "legoapi/core/input/qrand.h"
 #include "gameapi/ai/aisys/aisys.h"
@@ -858,12 +859,12 @@ void AddChunkToRenderStack(particlechunkrendertype_s *chunk, particlechunkrender
         const u16 priority = static_cast<u16>(chunk->render_priority);
         const u16 current_priority = static_cast<u16>(current->render_priority);
         if (priority <= current_priority &&
-            (priority != current_priority || current->effect->status < chunk->effect->status)) {
+            (priority != current_priority || current->effect->particle_type < chunk->effect->particle_type)) {
             particlechunkrendertype_s *next = current->next;
             while (next != NULL) {
                 const u16 next_priority = static_cast<u16>(next->render_priority);
                 if (next_priority <= priority &&
-                    (priority != next_priority || chunk->effect->status <= next->effect->status)) {
+                    (priority != next_priority || chunk->effect->particle_type <= next->effect->particle_type)) {
                     break;
                 }
                 current = next;
@@ -1004,11 +1005,15 @@ void DebrisProcessAllocation() {
 }
 
 void DisplayListRenderBuffer() {
-    STUBBED();
 }
 
+static i32 control_stack_lock;
+
 void DebrisGetControlStackLock() {
-    STUBBED();
+    while (control_stack_lock != 0) {
+        NuThreadSleep(1);
+    }
+    control_stack_lock = 1;
 }
 
 static particlechunkrendertype_s *FindParticleRenderChunk(dma_particle_chunk_s *particle_chunk) {
@@ -1217,7 +1222,7 @@ void DebrisCleanUpDmaDebTypeTables() {
 }
 
 void DebrisReleaseControlStackLock() {
-    STUBBED();
+    control_stack_lock = 0;
 }
 
 void xxxNuDisplayListUpdateSpecial(nuhspecial_s *) {

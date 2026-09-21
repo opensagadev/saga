@@ -52,6 +52,10 @@ static i32 PlatSkinMax;
 static i32 PlatSkinMaxSize;
 static i32 PlatSkinCnt;
 static i32 PlatSkinResetTotal = -1;
+static i32 debris_sort_delay = 6;
+static i32 debris_update_delay = 3;
+static i32 debris_sort_this_stack;
+static i32 debris_update_this_stack;
 // Runtime-selected groups appended after the fixed terrain allocation.
 i32 WallSplinesOnly;
 extern "C" {
@@ -237,11 +241,14 @@ extern "C" {
     extern i32 debris_suspended;
     void DebrisReScale(i32, f32);
     void DebReAlloc(debkeydatatype_s *, i32);
+    void DebFreeInstantly(i32 *);
     extern "C++" void DebrisProcessSpheres(uv1deb *, f32, debinftype *, debkeydatatype_s *, i32);
     extern "C++" {
+        void AddChunkToRenderStack(particlechunkrendertype_s *, particlechunkrendertype_s **);
         void DebrisCleanUpDmaDebTypeTables(void);
         void DebrisProcessAllocation(void);
         void DebrisProcessControlChunks(i32);
+        void RemoveChunkFromRenderStack(particlechunkrendertype_s *, particlechunkrendertype_s **);
     }
 }
 
@@ -565,15 +572,32 @@ extern "C" {
     }
 
     void DebFreeAllCreatedEffects(void) {
-        STUBBED();
+        for (i32 i = 0; i < maxdebkeys; ++i) {
+            if (debkeydata[i].effect_index != 0 && debkeydata[i].field_2f9 != 0) {
+                i32 handle = i;
+                DebFreeInstantly(&handle);
+            }
+        }
     }
 
     void DebFreeAllDMADebTablesInstantly(void) {
-        STUBBED();
+        for (i32 i = 1; i < EDPP_MAX_TYPES; ++i) {
+            debinftype *effect = debtab[i];
+            if (effect != NULL && effect->native_data != NULL) {
+                DmaDebTypes[--freeDmaDebType] = effect->native_data;
+                effect->native_data = NULL;
+            }
+        }
     }
 
     void DebFreeAllPanelEffects(void) {
-        STUBBED();
+        for (i32 i = 0; i < maxdebkeys; ++i) {
+            const i16 effect_index = debkeydata[i].effect_index;
+            if (effect_index != 0 && debtab[effect_index]->time_group == 4) {
+                i32 handle = i;
+                DebFreeInstantly(&handle);
+            }
+        }
     }
 
     void Debris(i32 update_panel_time) {
@@ -705,8 +729,7 @@ extern "C" {
         }
     }
 
-    i32 DebrisFindAllOfType(i32 effect_index, NUVEC *positions, i32 *handles, i32 capacity, i32 skip,
-                           i32 active_only) {
+    i32 DebrisFindAllOfType(i32 effect_index, NUVEC *positions, i32 *handles, i32 capacity, i32 skip, i32 active_only) {
         i32 count = 0;
         debkeydatatype_s *key = debkeydata;
         for (i32 i = 0; i < maxdebkeys; ++i, ++key) {
@@ -728,7 +751,7 @@ extern "C" {
     }
 
     i32 DebrisGetConeProperties(i32 handle, NUVEC *origin, NUVEC *end, f32 *start_radius, f32 *end_radius,
-                               NUVEC *direction, f32 *length, f32 *speed) {
+                                NUVEC *direction, f32 *length, f32 *speed) {
         debkeydatatype_s *key = &debkeydata[handle];
         debinftype *effect = debtab[key->effect_index];
         if (effect == NULL)
@@ -939,20 +962,20 @@ extern "C" {
             return 0;
         i16 priority = 0;
         switch (static_cast<i8>(debtab[effect_index]->particle_type)) {
-        case 0:
-            priority = 20000;
-            break;
-        case 2:
-            priority = -25536;
-            break;
-        case 3:
-            priority = 30000;
-            break;
-        case 7:
-            priority = 10000;
-            break;
-        default:
-            break;
+            case 0:
+                priority = 20000;
+                break;
+            case 2:
+                priority = -25536;
+                break;
+            case 3:
+                priority = 30000;
+                break;
+            case 7:
+                priority = 10000;
+                break;
+            default:
+                break;
         }
         return priority;
     }
@@ -1435,8 +1458,8 @@ extern "C" {
     void NewTerrainScaleY(NUVEC *position, NUVEC *movement, u8 *hit_flags, i32 object_index, f32 radius,
                           f32 collision_radius, f32 object_scale, i32 embedded_retry, i32 scan_flags);
 
-    void NewTerrain(NUVEC *position, NUVEC *movement, u8 *hit_flags, i32 object_index, f32 radius,
-                    f32 collision_radius, i32 scan_flags) {
+    void NewTerrain(NUVEC *position, NUVEC *movement, u8 *hit_flags, i32 object_index, f32 radius, f32 collision_radius,
+                    i32 scan_flags) {
         if (CurTerr != NULL)
             NewTerrainScaleY(position, movement, hit_flags, object_index, radius, collision_radius, 1.0f, 0,
                              scan_flags);
@@ -1677,7 +1700,39 @@ extern "C" {
     }
 
     void SortDebrisRenderStack(void) {
-        STUBBED();
+        if (--debris_sort_delay > 0) {
+            return;
+        }
+        debris_sort_delay = 6;
+
+        i32 stack_index = debris_sort_this_stack;
+        while (ParticleChunkRenderStack[stack_index] == NULL) {
+            if (++stack_index >= 5) {
+                stack_index = 0;
+            }
+            if (stack_index == debris_sort_this_stack) {
+                debris_sort_this_stack = stack_index;
+                if (ParticleChunkRenderStack[stack_index] == NULL) {
+                    return;
+                }
+                break;
+            }
+        }
+        debris_sort_this_stack = stack_index;
+
+        particlechunkrendertype_s *chunk = ParticleChunkRenderStack[stack_index];
+        while (chunk->next != NULL) {
+            particlechunkrendertype_s *next = chunk->next;
+            const u16 priority = static_cast<u16>(chunk->render_priority);
+            const u16 next_priority = static_cast<u16>(next->render_priority);
+            if (priority < next_priority ||
+                (priority == next_priority && chunk->effect->particle_type > next->effect->particle_type)) {
+                RemoveChunkFromRenderStack(next, &ParticleChunkRenderStack[stack_index]);
+                AddChunkToRenderStack(next, &ParticleChunkRenderStack[debris_sort_this_stack]);
+                return;
+            }
+            chunk = next;
+        }
     }
 
     const char *TerrErrorString(i32 error) {
@@ -1739,11 +1794,46 @@ extern "C" {
     }
 
     void UpdateDebrisRenderStackPriority(void) {
-        STUBBED();
+        if (--debris_update_delay > 0) {
+            return;
+        }
+        debris_update_delay = 6;
+
+        i32 stack_index = debris_update_this_stack;
+        while (ParticleChunkRenderStack[stack_index] == NULL) {
+            if (++stack_index >= 5) {
+                stack_index = 0;
+            }
+            if (stack_index == debris_update_this_stack) {
+                debris_update_this_stack = stack_index;
+                if (ParticleChunkRenderStack[stack_index] == NULL) {
+                    return;
+                }
+                break;
+            }
+        }
+        debris_update_this_stack = stack_index;
+
+        particlechunkrendertype_s *chunk = ParticleChunkRenderStack[debris_sort_this_stack];
+        while (chunk != NULL) {
+            debkeydatatype_s *key = chunk->key;
+            if (key != NULL) {
+                if (key->timed_flags != 0) {
+                    const f32 priority = static_cast<u16>(key->render_priority) + key->cutoff_distance * 25.0f;
+                    i32 updated_priority = -1;
+                    if (!(priority > 65535.0f)) {
+                        updated_priority = static_cast<i32>(priority);
+                    }
+                    chunk->render_priority = static_cast<i16>(updated_priority);
+                } else {
+                    chunk->render_priority = key->render_priority;
+                }
+            }
+            chunk = chunk->next;
+        }
     }
 
-    void *terraininit(i32 level_num, void *buffer, void *buffer_end, i32 options, char *path, void *scene,
-                      i32 group) {
+    void *terraininit(i32 level_num, void *buffer, void *buffer_end, i32 options, char *path, void *scene, i32 group) {
         return TerrainInitEx(level_num, buffer, buffer_end, options, path, scene, group, 0x1000, 0xc00, 0x100);
     }
 
