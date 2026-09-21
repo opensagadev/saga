@@ -69,6 +69,7 @@ void SetProtocolDroidDeactivatedAction(GameObject_s *);
 i32 TagCharacter(GameObject_s *source, GameObject_s *target, i32 mode);
 void NewBuzz(nupad_s *, f32, i32);
 void GameAudio_PlaySfxById(i32 sfx_id, nuvec_s *position, i32 flags, i32 volume);
+f32 VehicleTurnOrLoopOffset(GameObject_s *object);
 extern "C" f32 chattersfxwait;
 
 void Players_Init(void) {
@@ -712,8 +713,25 @@ void DrawOffsetCode(GameObject_s *obj, i32 param) {
 }
 
 float GetHoverPosY(GameObject_s *obj) {
-    (void)obj;
-    return 0.0f;
+    if ((obj->apiobj.character_data->model_flags & 0x2000) == 0 ||
+        (WorldInfo_CurrentlyActive()->current_level->flags & LEVEL_IN_SPACE) != 0) {
+        return 0.0f;
+    }
+
+    const f32 vehicle_offset = VehicleTurnOrLoopOffset(obj);
+    if (obj->apiobj.field_0x27f == 7 || obj->apiobj.field_0x27f == 0x10)
+        return obj->apiobj.water_height + vehicle_offset;
+
+    f32 height = obj->apiobj.field_0x218;
+    if (height == 0.0f)
+        return 0.0f;
+    if (obj->apiobj.water_height != 0.0f)
+        height = MAX(obj->apiobj.water_height, height);
+
+    f32 hover_height = WORLD->current_level->hover_height;
+    if (hover_height == 2000000.0f)
+        hover_height = static_cast<GAMECHARACTERDATA *>(obj->apiobj.character_data->field11_0x24)->field_0x28;
+    return height + hover_height + vehicle_offset;
 }
 
 void PlayerTakeHit(GameObject_s *, GameObject_s *) {
