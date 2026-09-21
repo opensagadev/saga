@@ -9,7 +9,7 @@ struct uv1deb;
 extern "C" void DebrisSetTimeIncrement(f32 increment);
 extern "C" void DebrisStartOffsetEx(debkeydatatype_s *key, f32 offset);
 extern "C" void DebrisSetSeed(i32 seed);
-extern "C" void DebrisGetSeed(void);
+extern "C" u32 DebrisGetSeed(void);
 extern "C" void DebrisSetThinningLevel(f32 level);
 extern "C" void DebrisSetDetailLevel(i32 level);
 extern "C" void DebrisSetForcedThinning(i32 forced);

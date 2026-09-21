@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 51.404243,
+    "fuzzy_match_percent": 51.457077,
     "total_code": "4722419",
-    "matched_code": "451834",
-    "matched_code_percent": 9.567851,
+    "matched_code": "452536",
+    "matched_code_percent": 9.582716,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 5348,
-    "matched_functions_percent": 39.735493,
+    "matched_functions": 5350,
+    "matched_functions_percent": 39.75035,
     "total_units": 1
   },
   "text": {
@@ -78719,7 +78719,7 @@
           "address": 3428800,
           "offset": 2538832,
           "size": 54,
-          "match_percent": 27.142857
+          "match_percent": 100.0
         },
         {
           "name": "_Z19GenDebIndexSpheroidP16debkeydatatype_sP10debinftypef",
@@ -78895,7 +78895,7 @@
           "address": 3513008,
           "offset": 2623040,
           "size": 22,
-          "match_percent": 12.5
+          "match_percent": 99.875
         },
         {
           "name": "DebrisSetCutSceneMode",
@@ -79381,14 +79381,6 @@
           "offset": 1099920,
           "size": 316,
           "match_percent": 94.52564
-        },
-        {
-          "name": "_ZL21PartKill_DrawCreatureP6PART_s",
-          "demangled_name": "PartKill_DrawCreature(PART_s*)",
-          "address": 2171664,
-          "offset": 1281696,
-          "size": 9,
-          "match_percent": 100.0
         },
         {
           "name": "_Z17Asteroid_PartKillP6PART_si",
@@ -84091,6 +84083,30 @@
           "match_percent": 3.181818
         },
         {
+          "name": "_ZL21PartKill_DrawCreatureP6PART_s",
+          "demangled_name": "PartKill_DrawCreature(PART_s*)",
+          "address": 2171664,
+          "offset": 1281696,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL24PartKill_EjectedCreatureP6PART_si",
+          "demangled_name": "PartKill_EjectedCreature(PART_s*, int)",
+          "address": 2171760,
+          "offset": 1281792,
+          "size": 648,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL29BlockadeRunnerD_EjectCreaturei",
+          "demangled_name": "BlockadeRunnerD_EjectCreature(int)",
+          "address": 2173680,
+          "offset": 1283712,
+          "size": 1921,
+          "match_percent": 85.234825
+        },
+        {
           "name": "_Z14TatooineA_InitP11WORLDINFO_s",
           "demangled_name": "TatooineA_Init(WORLDINFO_s*)",
           "address": 2175616,
@@ -84248,7 +84264,7 @@
           "address": 2184592,
           "offset": 1294624,
           "size": 2494,
-          "match_percent": 89.176155
+          "match_percent": 96.04982
         },
         {
           "name": "_Z21DeathStarRescueB_InitP11WORLDINFO_s",
@@ -117846,18 +117862,6 @@
       ]
     },
     {
-      "name": "_ZL24PartKill_EjectedCreatureP6PART_si",
-      "demangled_name": "PartKill_EjectedCreature(PART_s*, int)",
-      "address": 2171760,
-      "offset": 1281792,
-      "size": 648,
-      "match_percent": 3.111111,
-      "candidate_units": [
-        "legoapi/render/fx/parts.cpp.o",
-        "legoapi/world/levels/episodeIV.cpp.o"
-      ]
-    },
-    {
       "name": "VuVecSet",
       "demangled_name": "VuVecSet",
       "address": 2454832,
@@ -123483,14 +123487,6 @@
       "match_percent": 0.0
     },
     {
-      "name": "_ZL29BlockadeRunnerD_EjectCreaturei",
-      "demangled_name": "BlockadeRunnerD_EjectCreature(int)",
-      "address": 2173680,
-      "offset": 1283712,
-      "size": 1921,
-      "match_percent": 0.0
-    },
-    {
       "name": "_ZL12Grabber_DropP9GRABBER_sP7nuvec_s.isra.4",
       "demangled_name": "Grabber_Drop(GRABBER_s*, nuvec_s*) [clone .isra.4]",
       "address": 2274144,
@@ -128222,8 +128218,8 @@
   "summary": {
     "bazel_units": 458,
     "functions": 13454,
-    "assigned_functions": 12500,
-    "ambiguous_functions": 214,
-    "unassigned_functions": 740
+    "assigned_functions": 12502,
+    "ambiguous_functions": 213,
+    "unassigned_functions": 739
   }
 }

@@ -42,10 +42,10 @@ struct nunativegscene_s;
 struct SHOPINPUT;
 
 NUMTL *CreateCopyMat(NUMTL *, i32, i32, i32, i32);
+uv1deb *GenDebIndex(debkeydatatype_s *, debinftype *, float);
 
-uv1deb *GenDebDummy(debkeydatatype_s *, debinftype *, float) {
-    STUBBED();
-    return NULL;
+uv1deb *GenDebDummy(debkeydatatype_s *key, debinftype *effect, float time) {
+    return GenDebIndex(key, effect, time);
 }
 
 extern "C" {
@@ -745,57 +745,57 @@ extern "C" {
     i32 numtoruscolldata;
     NUMTX xzfacingmtx;
     debinftype nulleffecttype = {
-        "null",                                       // name
-        0,                                            // category
-        0,                                            // page
-        0,                                            // cutscene_only
-        0,                                            // disabled
-        100,                                          // max_particles
-        60,                                           // frequency
-        0,                                            // emission_period
-        1.0f,                                         // emission_period_random
-        0,                                            // emission_pause
-        0,                                            // emission_pause_random
-        0,                                            // start_offset_random
-        0,                                            // generator_type
-        0,                                            // momentum_adjustment_type
-        0,                                            // particle_type
-        0,                                            // status
-        {0x0, 0x40, 0x1c, 0x47},                      // fields_030
-        25.0f,                                        // clip_extent
-        0,                                            // sound_range
-        0,                                            // sound_range_override
-        0.5f,                                         // field_044
-        1.0f,                                         // field_048
-        0,                                            // field_04c
-        0,                                            // field_050
-        0,                                            // field_054
-        0,                                            // field_058
-        0,                                            // field_05c
-        0,                                            // field_060
-        {},                                           // emitter_velocity
-        {},                                           // fields_070
-        0,                                            // field_0a0
-        1.0f,                                         // particle_lifetime
-        0,                                            // field_0a8
-        0,                                            // field_0aa
-        0,                                            // field_0ab
-        0,                                            // field_0ac
-        0,                                            // field_0b0
-        0,                                            // field_0b4
-        0,                                            // field_0b8
-        0,                                            // field_0bc
-        {{0.0f, 64, 64, 64, 0}, {1.0f, 0, 0, 0, 0}},  // colour_keys
-        {{0.0f, 64.0f}, {1.0f, 0.0f}},                // alpha_keys
-        0.125f,                                       // field_140
-        0.125f,                                       // field_144
-        0,                                            // field_148
-        500.0f,                                       // field_14c
-        {{0.0f, 500.0f}, {1.0f, 500.0f}},             // width_keys
-        {{0.0f, 500.0f}, {1.0f, 500.0f}},             // height_keys
-        -360.0f,                                      // min_rotation
-        360.0f,                                       // max_rotation
-        {{0.0f, 0.0f}, {1.0f, 0.0f}},                 // rotation_keys
+        "null",                                      // name
+        0,                                           // category
+        0,                                           // page
+        0,                                           // cutscene_only
+        0,                                           // disabled
+        100,                                         // max_particles
+        60,                                          // frequency
+        0,                                           // emission_period
+        1.0f,                                        // emission_period_random
+        0,                                           // emission_pause
+        0,                                           // emission_pause_random
+        0,                                           // start_offset_random
+        0,                                           // generator_type
+        0,                                           // momentum_adjustment_type
+        0,                                           // particle_type
+        0,                                           // status
+        {0x0, 0x40, 0x1c, 0x47},                     // fields_030
+        25.0f,                                       // clip_extent
+        0,                                           // sound_range
+        0,                                           // sound_range_override
+        0.5f,                                        // field_044
+        1.0f,                                        // field_048
+        0,                                           // field_04c
+        0,                                           // field_050
+        0,                                           // field_054
+        0,                                           // field_058
+        0,                                           // field_05c
+        0,                                           // field_060
+        {},                                          // emitter_velocity
+        {},                                          // fields_070
+        0,                                           // field_0a0
+        1.0f,                                        // particle_lifetime
+        0,                                           // field_0a8
+        0,                                           // field_0aa
+        0,                                           // field_0ab
+        0,                                           // field_0ac
+        0,                                           // field_0b0
+        0,                                           // field_0b4
+        0,                                           // field_0b8
+        0,                                           // field_0bc
+        {{0.0f, 64, 64, 64, 0}, {1.0f, 0, 0, 0, 0}}, // colour_keys
+        {{0.0f, 64.0f}, {1.0f, 0.0f}},               // alpha_keys
+        0.125f,                                      // field_140
+        0.125f,                                      // field_144
+        0,                                           // field_148
+        500.0f,                                      // field_14c
+        {{0.0f, 500.0f}, {1.0f, 500.0f}},            // width_keys
+        {{0.0f, 500.0f}, {1.0f, 500.0f}},            // height_keys
+        -360.0f,                                     // min_rotation
+        360.0f,                                      // max_rotation
+        {{0.0f, 0.0f}, {1.0f, 0.0f}},                // rotation_keys
         {
             // fields_218
             0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x80, 0x3f, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,  0x0,
@@ -1494,8 +1494,8 @@ extern "C" {
         debrisseed = static_cast<u32>(seed);
     }
 
-    void DebrisGetSeed(void) {
-        STUBBED();
+    u32 DebrisGetSeed(void) {
+        return debrisseed;
     }
 
     void DebrisSetCutSceneMode(i32 enabled) {

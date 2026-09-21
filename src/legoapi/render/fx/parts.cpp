@@ -809,11 +809,6 @@ static __used__ i32 PartDraw_VehicleHeart(PART_s *part) {
     return 0;
 }
 
-static __used__ i32 PartKill_DrawCreature(PART_s *) {
-    STUBBED();
-    return false;
-}
-
 static __used__ void PartMove_VehicleHeart(PART_s *part, f32) {
     GameObject_s *recipient = part->recipient;
     f32 progress = 1.0f - part->field_100;
@@ -857,10 +852,6 @@ static __used__ void PartMove_VehiclePickup(PART_s *part, f32) {
 }
 
 static __used__ void UpdateAnimTimer(CHARACTERMODEL_s *, ANIMPACKET_s *, i16, f32, f32, f32, i32, char *, i32, f32) {
-}
-
-static __used__ void PartKill_EjectedCreature(PART_s *, i32) {
-    STUBBED();
 }
 
 static __used__ void UpdateCustomPieceAnim(CUSTOMPIECEANIM *anim, u16 minimum, u16 maximum) {

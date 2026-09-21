@@ -4,6 +4,8 @@
 #include "globals.h"
 #include "gameapi/ai/aisys/aisys.h"
 #include "legoapi/audio/sfx.h"
+#include "legoapi/characters/core/character.h"
+#include "legoapi/characters/motion.h"
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/legoapi_types.h"
@@ -17,8 +19,10 @@
 #include "legoapi/gizmos/object/gizobstacles.h"
 #include "legoapi/gizmos/traps/gizforce.h"
 #include "legoapi/menus/screens/gamestructure.h"
+#include "legoapi/render/fx/parts.h"
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nu3d/nutex.h"
+#include "nu2api/numath/numtx.h"
 
 struct AIROW_s;
 struct nuqthdr_s;
@@ -26,6 +30,11 @@ struct nunativegscene_s;
 struct SHOPINPUT;
 
 extern "C" void *AIPAthFindPathCnx(AISYS_s *, AIPATH_s *, char *, char *, i32 *);
+extern "C" {
+    extern i16 id_STORMTROOPER;
+    extern i16 id_BEACHTROOPER;
+    extern i16 id_IMPERIALSHUTTLEPILOT;
+}
 
 struct BLOCKADERUNNERD_LEVFLAG_s {
     u8 obstacle15_active;
@@ -35,6 +44,7 @@ struct BLOCKADERUNNERD_LEVFLAG_s {
 
 static_assert(sizeof(BLOCKADERUNNERD_LEVFLAG_s) == 0x10, "LevFlag size");
 extern BLOCKADERUNNERD_LEVFLAG_s LevFlag;
+i32 test_tb = 1;
 
 // Episode 4 level handlers, in the game's Episode_IV progression:
 // blockade runner / tatooine / mos eisley / death star rescue / escape /
@@ -57,12 +67,62 @@ void BlockadeRunnerB_Update(WORLDINFO_s *) {
         LevBlowUp[0]->state_flags &= ~0x80;
 }
 
-static void BlockadeRunnerD_EjectCreature(int) {
-    STUBBED();
+static i32 PartKill_DrawCreature(PART_s *) {
+    return false;
 }
 
-static void PartKill_EjectedCreature(PART_s *, i32) {
-    STUBBED();
+static void PartKill_EjectedCreature(PART_s *part, i32) {
+    for (i32 i = 0; i < 8; ++i) {
+        if (LevGamePart[i] == part) {
+            if (LevGameObject[i] != NULL) {
+                KillGameObject(LevGameObject[i], 4, 0);
+                LevGameObject[i] = NULL;
+            }
+            LevGamePart[i] = NULL;
+        }
+    }
+}
+
+static void BlockadeRunnerD_EjectCreature(i32 eject_index) {
+    static NUVEC eject_vec[2] = {{13.0f, 1.6f, 7.93f}, {13.0f, 1.6f, 6.55f}};
+    static NUVEC eject_mom = {-0.5f, 0.0f, 0.0f};
+    i32 models[4] = {id_STORMTROOPER, id_BEACHTROOPER, id_STORMTROOPER, id_IMPERIALSHUTTLEPILOT};
+
+    if (static_cast<u32>(eject_index) > 1)
+        return;
+
+    for (i32 i = 0; i < 8; ++i) {
+        if (LevGamePart[i] == NULL) {
+            NUMTX matrix;
+            NuMtxSetTranslation(&matrix, &eject_vec[eject_index]);
+            i32 model = models[qrand() / 0x4000];
+            LevGameObject[i] =
+                AddDynamicCreature(model, &eject_vec[eject_index], 0, "p", NULL, NULL, 0, NULL, NULL, 0, 0);
+            if (LevGameObject[i] != NULL) {
+                LevGameObject[i]->ai.animation_override_from = 0xe9;
+                LevGameObject[i]->ai.animation_override_to = 5;
+                LevGameObject[i]->field_0xefc |= 0x10;
+                LevGameObject[i]->field_0xf00 = (LevGameObject[i]->field_0xf00 & ~0x20) | ((test_tb & 1) << 5);
+                LevGameObject[i]->field_0xeff |= 4;
+
+                ADDPART_s params = Default_ADDPART;
+                params.matrix = &matrix;
+                params.velocity = &eject_mom;
+                params.field_14 = 0.15f;
+                params.field_18 = 0.15f;
+                params.gravity = 0.0f;
+                params.special = &WORLD->lev_objs[254].special;
+                params.flags = 0x8698;
+                params.field_40 = PartCollide_3D;
+                params.field_44 = PartKill_EjectedCreature;
+                params.draw_fn = PartKill_DrawCreature;
+                params.time_step = FRAMETIME;
+                LevGamePart[i] = AddPart(&params);
+                LevGamePart[i]->field_100 = 30.0f;
+                return;
+            }
+        }
+    }
 }
 
 void BlockadeRunnerD_Update(WORLDINFO_s *world) {
@@ -283,8 +343,8 @@ void DeathStarEscapeC_Init(WORLDINFO_s *world) {
     if (blowup != NULL)
         blowup->draw_flags |= 2;
     NuSpecialFind(world->scene, &LevHSpecial[2], "door_push", 1);
-    LevPathCnx[0] = AIPAthFindPathCnx(world->ai_sys, world->ai_sys->path_sys->active_path,
-                                   "droid_rescue_a", "droid_rescue_b", &LevPathCnxDir);
+    LevPathCnx[0] = AIPAthFindPathCnx(world->ai_sys, world->ai_sys->path_sys->active_path, "droid_rescue_a",
+                                      "droid_rescue_b", &LevPathCnxDir);
 }
 
 void DeathStarEscapeA_Update(WORLDINFO_s *) {
@@ -303,8 +363,8 @@ void DeathStarEscapeB_Update(WORLDINFO_s *) {
 void DeathStarEscapeC_Update(WORLDINFO_s *) {
     if (LevPathCnx[0] != NULL) {
         NUVEC *position;
-        if (NuSpecialGetVisibilityFn(&LevHSpecial[2]) &&
-            (position = NuSpecialGetDrawPos(&LevHSpecial[2])) != NULL && position->x < 77.25f) {
+        if (NuSpecialGetVisibilityFn(&LevHSpecial[2]) && (position = NuSpecialGetDrawPos(&LevHSpecial[2])) != NULL &&
+            position->x < 77.25f) {
             AIPATHCNX_s *connection = static_cast<AIPATHCNX_s *>(LevPathCnx[0]);
             connection->traversal_flags[0] &= ~0x80000000;
             connection->traversal_flags[1] &= ~0x80000000;
