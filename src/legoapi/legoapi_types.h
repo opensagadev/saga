@@ -3384,7 +3384,24 @@ DECOMP_ASSERT(offsetof(nunativedebrisdata_s, first_vertex) == 0x08, "native debr
 DECOMP_ASSERT(offsetof(nunativedebrisdata_s, vertex_count) == 0x0c, "native debris vertex count offset");
 DECOMP_ASSERT(offsetof(nunativedebrisdata_s, material) == 0x10, "native debris material offset");
 DECOMP_ASSERT(sizeof(nunativedebrisdata_s) == 0x14, "native debris packet size");
-struct nuoctreenode_s {};
+struct nuoctreenode_s {
+    NUVEC minimum;                  // 0x00
+    u32 field_0c;                   // 0x0c
+    NUVEC maximum;                  // 0x10
+    u32 field_1c;                   // 0x1c
+    nuoctreenode_s *children[8];    // 0x20
+    i32 child_count;                // 0x40
+    i32 fully_visible_count;        // 0x44
+    i32 *fully_visible_indices;     // 0x48
+    i32 partially_visible_count;    // 0x4c
+    i32 *partially_visible_indices; // 0x50
+    u32 field_54;                   // 0x54
+    f32 far_clip;                   // 0x58
+};
+DECOMP_ASSERT(sizeof(nuoctreenode_s) == 0x5c, "nuoctreenode_s size");
+DECOMP_ASSERT(offsetof(nuoctreenode_s, children) == 0x20, "nuoctreenode_s children offset");
+DECOMP_ASSERT(offsetof(nuoctreenode_s, child_count) == 0x40, "nuoctreenode_s child count offset");
+DECOMP_ASSERT(offsetof(nuoctreenode_s, far_clip) == 0x58, "nuoctreenode_s far clip offset");
 struct nupad_s;
 struct nushadermtldesc_s;
 struct nusound_filename_info_s;

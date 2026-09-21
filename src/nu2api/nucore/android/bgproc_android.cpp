@@ -11,6 +11,8 @@
 #include "nu2api/nucore/nuvuvec.hpp"
 
 NuThreadBase *g_bgProcThread;
+i32 bgproc_frozen;
+i32 bgproc_freeze;
 
 static NULSTHDR *procinfo_pool;
 static i32 g_bgCritSec;

@@ -14,6 +14,7 @@
 #include "decomp.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nucore/nuthread.h"
+#include "nu2api/nucore/bgproc.h"
 #include "globals.h"
 #include "legoapi/core/input/qrand.h"
 #include "gameapi/ai/aisys/aisys.h"
@@ -281,7 +282,6 @@ i32 SuperWeirdo(GameObject_s *object) {
 }
 
 void bgProcClose() {
-    STUBBED();
 }
 
 extern "C" void edrtlCalculateBurnoutEx(burnset_s *set, NuBloomParameters *parameters, NUVEC *camera_position,
@@ -300,7 +300,6 @@ void BurnoutApply(i32 paused) {
 }
 
 void bgprocFreeze() {
-    STUBBED();
 }
 
 void FindSlamOrigin(GameObject_s *, NUVEC *, NUVEC *);
@@ -687,11 +686,9 @@ void CheckResetBits() {
 }
 
 void bgProcAbortAll() {
-    STUBBED();
 }
 
 void bgprocUnFreeze() {
-    STUBBED();
 }
 
 extern AREADATA_s *PODRACE_ADATA;
@@ -775,8 +772,11 @@ void AddSurfaceDebris(GameObject_s *object) {
     } while (--count != 0);
 }
 
-void bgprocIsFreezing() {
-    STUBBED();
+i32 bgprocIsFreezing() {
+    i32 freezing = 1;
+    if (bgproc_frozen == 0)
+        freezing = bgproc_freeze != 0;
+    return freezing;
 }
 
 extern "C" void DebFree(i32 *);

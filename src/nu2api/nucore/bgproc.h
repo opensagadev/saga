@@ -58,6 +58,8 @@ extern "C" {
     extern NuThreadBase *g_bgProcThread;
     extern i32 g_performingBgProcWorkCritSec;
     extern i32 multithreaded;
+    extern i32 bgproc_frozen;
+    extern i32 bgproc_freeze;
     extern char *g_CrashDumpId;
 #ifdef __cplusplus
 }
