@@ -4,15 +4,19 @@
 #include "globals.h"
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/core/charconfig.h"
+#include "legoapi/characters/motion.h"
 #include "legoapi/characters/motion/gameanim.h"
 #include "legoapi/core/config/cheat.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/items/base/apiobject.h"
+#include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/gizmos/object/gizbuildits.h"
+#include "legoapi/gizmos/object/gizobstacles.h"
 #include "legoapi/menus/core/gamemessages.h"
 #include "legoapi/menus/core/text.h"
 #include "legoapi/menus/screens/store.h"
 #include "legoapi/render/core/render.h"
+#include "legoapi/render/fx.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/level.h"
 #include "legoapi/world/mission.h"
@@ -21,12 +25,15 @@
 #include "nu2api/nufile/nufpar.h"
 #include "nu2api/numath/nutrig.h"
 
+#include <stdio.h>
 #include <string.h>
 
 EPISODEDATA *EDataList = NULL;
 
+extern u8 troopercannons_beenReset;
+
 struct TROOPERCANNON_s {
-    u32 field_0x00;
+    GIZMO *base;
     GIZBUILDIT_s *buildit;
     GameObject_s *object;
     char character_name[32];
@@ -471,8 +478,60 @@ void InitTrooperCannons(WORLDINFO_s *) {
     memset(troopercannons, 0, sizeof(troopercannons));
 }
 
-void ResetTrooperCannons(WORLDINFO_s *, i32) {
-    STUBBED();
+void ResetTrooperCannons(WORLDINFO_s *world, i32 trooper_id) {
+    if (troopercannons_beenReset != 0) {
+        if (netclient == 0 || troopercannons[0].object != NULL)
+            return;
+    }
+
+    i32 cannon_index = 0;
+    char name[32];
+    for (i32 number = 1; number < 5; ++number) {
+        TROOPERCANNON_s &cannon = troopercannons[cannon_index];
+        memset(&cannon, 0, sizeof(cannon));
+
+        sprintf(name, "trooper_cannon%d", number);
+        cannon.buildit = GizBuildIt_Find(world, name);
+        if (cannon.buildit != NULL) {
+            sprintf(name, "troopercannon_%d", number);
+            cannon.object = GetNamedGameObject(world->ai_sys, name);
+            if (cannon.object != NULL)
+                NuStrCpy(cannon.character_name, name);
+        }
+
+        sprintf(name, "BASE%d", number);
+        cannon.base = GizmoFindByName(world->gizmo_sys, obstacle_gizmotype_id, name);
+
+        if (netclient != 0) {
+            if (cannon.object != NULL)
+                ++cannon_index;
+            continue;
+        }
+
+        if (cannon.buildit != NULL && cannon.object != NULL) {
+            if ((world->level_progress->destroyed_trooper_cannon_mask & (1u << cannon_index)) != 0) {
+                GizBuildIt_SetToStart(cannon.buildit, 0, 0);
+                cannon.rebuilding = 1;
+            } else {
+                if (cannon.base != NULL) {
+                    GizmoSetVisibility(world->gizmo_sys, cannon.base, 1, 1);
+                    GizObstacle_PlayBackwards(static_cast<GIZOBSTACLE_s *>(cannon.base->object));
+                }
+                GizBuildIt_Finish(cannon.buildit);
+                GizBuildit_SetVisibility(cannon.buildit, 0);
+                cannon.rebuilding = 0;
+                ActivateCharacter(name, NULL, 0);
+                AddGameDebris(world->debris_sys, 0x5c, &cannon.object->apiobj.collision_position);
+                GameObject_s *trooper = AddDynamicCreature(trooper_id, &cannon.object->apiobj.collision_position,
+                                                           cannon.object->apiobj.field_0x276, "CannonTrooper",
+                                                           &cannon.object->ai.path_info, NULL, 0, NULL, NULL, 0, 0);
+                if (trooper != NULL)
+                    TakeOverGameObject(trooper, cannon.object, 0, 1);
+            }
+        }
+        ++cannon_index;
+    }
+    troopercannons_beenReset = 1;
 }
 
 void UpdateTrooperCannons(WORLDINFO_s *) {
