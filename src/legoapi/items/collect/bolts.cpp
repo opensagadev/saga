@@ -233,23 +233,23 @@ void BoltTypes_Configure(WORLDINFO_s *world, char *config) {
 
     NuFParPushCom(parser, BoltType_ConfigKeywords);
     BOLTTYPE_s type;
-    bool reading_type = false;
+    i32 reading_type = 0;
     while (NuFParGetLine(parser) != 0) {
         if (NuFParGetWord(parser) == 0) {
             continue;
         }
 
-        if (reading_type) {
+        if (reading_type != 0) {
             if (NuStrICmp(parser->word_buf, const_cast<char *>("bolttype_end")) == 0) {
                 if (type.name[0] != '\0') {
                     for (i32 i = 0; i < 8; ++i) {
-                        if (world->bolt_types[i].name[0] == '\0') {
+                        if (NuStrLen(world->bolt_types[i].name) == 0) {
                             world->bolt_types[i] = type;
                             break;
                         }
                     }
                 }
-                reading_type = false;
+                reading_type = 0;
             } else {
                 NuFParInterpretWord(parser);
             }
@@ -257,15 +257,16 @@ void BoltTypes_Configure(WORLDINFO_s *world, char *config) {
         }
 
         if (NuStrICmp(parser->word_buf, const_cast<char *>("bolttype_start")) == 0) {
-            type = GlobalBoltType_Default;
-            type.name[0] = '\0';
-            type.moving_debris[0] = -1;
-            type.moving_debris[1] = -1;
             BT_worldinfo = world;
             BT_bolttype = &type;
             BT_gdeb_moving_count = 0;
             BT_scene = things_scene;
-            reading_type = true;
+            memset(&type, 0, sizeof(type));
+            type = GlobalBoltType_Default;
+            type.name[0] = '\0';
+            type.moving_debris[0] = -1;
+            type.moving_debris[1] = -1;
+            reading_type = 1;
         }
     }
     NuFParDestroy(parser);
@@ -1528,35 +1529,48 @@ static __used__ unsigned int BoltInitSfx_LSW(GameObject_s *) {
 }
 
 void BoltTypes_Init(WORLDINFO_s *world) {
-    for (i32 index = 0; index < BoltSys->count; ++index) {
-        BOLTTYPE_s &type = BoltSys->types[index];
-        memset(&type.specials, 0, sizeof(type.specials));
+    BOLTTYPE_s *type = BoltSys->types;
+    for (i32 index = 0; index < BoltSys->count; ++index, ++type) {
+        type->specials.object_special.scene = NULL;
+        type->specials.object_special.special = NULL;
+        type->specials.object_special.display_special = NULL;
+        type->specials.glow_special.scene = NULL;
+        type->specials.glow_special.special = NULL;
+        type->specials.glow_special.display_special = NULL;
+        type->specials.reference_object_special.scene = NULL;
+        type->specials.reference_object_special.special = NULL;
+        type->specials.reference_object_special.display_special = NULL;
+        type->specials.reference_glow_special.scene = NULL;
+        type->specials.reference_glow_special.special = NULL;
+        type->specials.reference_glow_special.display_special = NULL;
+        type->specials.shadow_special.scene = NULL;
+        type->specials.shadow_special.special = NULL;
+        type->specials.shadow_special.display_special = NULL;
 
-        const i16 object_id = type.object_ids[0];
-        const i16 glow_id = type.object_ids[1];
+        const i16 object_id = type->object_ids[0];
         if (object_id != -1) {
-            type.specials.object_special = world->lev_objs[object_id].special;
-            if (glow_id != -1) {
-                type.specials.glow_special = world->lev_objs[glow_id].special;
+            type->specials.object_special = world->lev_objs[object_id].special;
+            if (type->object_ids[1] != -1) {
+                type->specials.glow_special = world->lev_objs[type->object_ids[1]].special;
             }
 
             const i32 reflected_object_id = LevelObject_GetReflection(object_id);
             if (reflected_object_id == -1) {
-                type.specials.reference_object_special = type.specials.object_special;
-                type.specials.reference_glow_special = type.specials.glow_special;
+                type->specials.reference_object_special = type->specials.object_special;
+                type->specials.reference_glow_special = type->specials.glow_special;
             } else {
-                type.specials.reference_object_special = world->lev_objs[reflected_object_id].special;
-                if (glow_id != -1) {
-                    const i32 reflected_glow_id = LevelObject_GetReflection(glow_id);
+                type->specials.reference_object_special = world->lev_objs[reflected_object_id].special;
+                if (type->object_ids[1] != -1) {
+                    const i32 reflected_glow_id = LevelObject_GetReflection(type->object_ids[1]);
                     if (reflected_glow_id != -1) {
-                        type.specials.reference_glow_special = world->lev_objs[reflected_glow_id].special;
+                        type->specials.reference_glow_special = world->lev_objs[reflected_glow_id].special;
                     }
                 }
             }
         }
 
-        if (type.field_2c_lo != -1) {
-            type.specials.shadow_special = world->lev_objs[type.field_2c_lo].special;
+        if (type->field_2c_lo != -1) {
+            type->specials.shadow_special = world->lev_objs[type->field_2c_lo].special;
         }
     }
 }

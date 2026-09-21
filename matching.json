@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 51.51212,
+    "fuzzy_match_percent": 51.5304,
     "total_code": "4722419",
-    "matched_code": "452819",
-    "matched_code_percent": 9.588709,
+    "matched_code": "452936",
+    "matched_code_percent": 9.591187,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 5354,
-    "matched_functions_percent": 39.78007,
+    "matched_functions": 5355,
+    "matched_functions_percent": 39.787502,
     "total_units": 1
   },
   "text": {
@@ -41602,7 +41602,7 @@
           "address": 1333968,
           "offset": 444000,
           "size": 12082,
-          "match_percent": 80.27199
+          "match_percent": 80.27392
         },
         {
           "name": "SOUND_SFXRequest_Table",
@@ -42519,7 +42519,7 @@
           "address": 917424,
           "offset": 27456,
           "size": 93,
-          "match_percent": 0.0
+          "match_percent": 99.35294
         },
         {
           "name": "_ZL13SetLayers_BOBP12GameObject_s",
@@ -42535,7 +42535,7 @@
           "address": 1029856,
           "offset": 139888,
           "size": 428,
-          "match_percent": 76.009346
+          "match_percent": 80.41122
         },
         {
           "name": "_Z15FixUpCharactersP9CHARFIXUP",
@@ -42551,7 +42551,7 @@
           "address": 1035696,
           "offset": 145728,
           "size": 117,
-          "match_percent": 99.14286
+          "match_percent": 100.0
         },
         {
           "name": "_Z26SetGameObjectCharacterDataP12GameObject_s",
@@ -42567,7 +42567,7 @@
           "address": 1037440,
           "offset": 147472,
           "size": 177,
-          "match_percent": 51.0
+          "match_percent": 51.175438
         },
         {
           "name": "_Z18ResetCharacterIdleP12GameObject_sii",
@@ -42583,7 +42583,7 @@
           "address": 1038000,
           "offset": 148032,
           "size": 650,
-          "match_percent": 36.026043
+          "match_percent": 33.114582
         },
         {
           "name": "_Z12InitCreatureP12GameObject_sii",
@@ -42591,7 +42591,7 @@
           "address": 1038656,
           "offset": 148688,
           "size": 1537,
-          "match_percent": 53.588234
+          "match_percent": 55.414566
         },
         {
           "name": "_Z17ActivateCharacterPcP7nuvec_si",
@@ -42615,7 +42615,7 @@
           "address": 1050000,
           "offset": 160032,
           "size": 494,
-          "match_percent": 39.575222
+          "match_percent": 30.522123
         },
         {
           "name": "_Z19UpdateCharacterLoadv",
@@ -42623,7 +42623,7 @@
           "address": 1083584,
           "offset": 193616,
           "size": 868,
-          "match_percent": 60.45652
+          "match_percent": 0.0
         },
         {
           "name": "_Z11LSW_SetIndyi",
@@ -42647,7 +42647,7 @@
           "address": 1212112,
           "offset": 322144,
           "size": 1310,
-          "match_percent": 48.88672
+          "match_percent": 49.089844
         },
         {
           "name": "_Z16PostAnimate_FETTP12GameObject_s",
@@ -42695,7 +42695,7 @@
           "address": 1711792,
           "offset": 821824,
           "size": 570,
-          "match_percent": 99.13461
+          "match_percent": 99.96795
         },
         {
           "name": "_Z22LocalGetNearestLocatorPP11AILOCATOR_sifP7nuvec_sfiff",
@@ -42703,7 +42703,7 @@
           "address": 1712368,
           "offset": 822400,
           "size": 1147,
-          "match_percent": 13.302547
+          "match_percent": 77.21974
         },
         {
           "name": "_Z17FinishWeirdoNamesi",
@@ -42711,7 +42711,7 @@
           "address": 1805568,
           "offset": 915600,
           "size": 543,
-          "match_percent": 11.40625
+          "match_percent": 50.54375
         },
         {
           "name": "_Z23RegisterGizmoTypes_IndyP9variptr_uS0_",
@@ -42743,7 +42743,7 @@
           "address": 2022944,
           "offset": 1132976,
           "size": 1409,
-          "match_percent": 75.226616
+          "match_percent": 77.133095
         },
         {
           "name": "_Z21CollectCharcters_SkipP14STATUS_STAGE_sP14STATUSPACKET_s",
@@ -42767,7 +42767,7 @@
           "address": 2034256,
           "offset": 1144288,
           "size": 321,
-          "match_percent": 99.89706
+          "match_percent": 99.97059
         },
         {
           "name": "_Z28TakeOverYodaSeekDistanceHackP12GameObject_sS0_P7nuvec_s",
@@ -42775,7 +42775,7 @@
           "address": 2213824,
           "offset": 1323856,
           "size": 197,
-          "match_percent": 99.962265
+          "match_percent": 99.113205
         },
         {
           "name": "_Z18UpdateCharacterIDsv",
@@ -42839,7 +42839,7 @@
           "address": 4587392,
           "offset": 3697424,
           "size": 332,
-          "match_percent": 73.333336
+          "match_percent": 98.44086
         },
         {
           "name": "_Z19CharScenes_AreaLoadP23APICHARACTERMODELLIST_sP9variptr_uS1_",
@@ -42847,7 +42847,7 @@
           "address": 4587728,
           "offset": 3697760,
           "size": 400,
-          "match_percent": 45.14679
+          "match_percent": 14.256881
         },
         {
           "name": "_Z22CharScene_FindHSpecialP11WORLDINFO_si",
@@ -42887,7 +42887,7 @@
           "address": 4652112,
           "offset": 3762144,
           "size": 3390,
-          "match_percent": 57.12582
+          "match_percent": 57.014416
         },
         {
           "name": "_Z12HairMovementP12GameObject_s",
@@ -61348,7 +61348,7 @@
           "address": 4721344,
           "offset": 3831376,
           "size": 545,
-          "match_percent": 41.198414
+          "match_percent": 81.650795
         },
         {
           "name": "_Z15BoltTypes_ResetP11WORLDINFO_s",
@@ -61364,7 +61364,7 @@
           "address": 4722016,
           "offset": 3832048,
           "size": 623,
-          "match_percent": 4.125
+          "match_percent": 29.208334
         },
         {
           "name": "_Z24Bolt_ObjTargetPosYAdjustP12GameObject_s",

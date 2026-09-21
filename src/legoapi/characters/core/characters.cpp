@@ -745,23 +745,24 @@ GameObject_s *ActivateCharacter(char *name, nuvec_s *position, i32 angle) {
     return object;
 }
 
-static void FinishWeirdoName(char *name) {
-    NuStrUpr(name, name);
-    usize length = NuStrLen(name);
-    while (length < 15) {
-        name[length++] = ' ';
-    }
-    name[15] = '\0';
-}
-
 void FinishWeirdoNames(i32 which) {
     if (which != 1) {
-        FinishWeirdoName(Game.customizer.primary_name);
+        NuStrUpr(Game.customizer.primary_name, Game.customizer.primary_name);
+        i32 length = NuStrLen(Game.customizer.primary_name);
+        for (; length <= 14; length++) {
+            Game.customizer.primary_name[length] = ' ';
+        }
+        Game.customizer.primary_name[15] = '\0';
         if (which == 0) {
             return;
         }
     }
-    FinishWeirdoName(Game.customizer.secondary_name);
+    NuStrUpr(Game.customizer.secondary_name, Game.customizer.secondary_name);
+    i32 length = NuStrLen(Game.customizer.secondary_name);
+    for (; length <= 14; length++) {
+        Game.customizer.secondary_name[length] = ' ';
+    }
+    Game.customizer.secondary_name[15] = '\0';
 }
 
 extern i32 addcreature_override_id_check;
