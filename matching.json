@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 51.680996,
+    "fuzzy_match_percent": 51.68387,
     "total_code": "4722419",
     "matched_code": "454398",
     "matched_code_percent": 9.622145,
@@ -38292,7 +38292,7 @@
           "address": 1403920,
           "offset": 513952,
           "size": 158,
-          "match_percent": 13.125
+          "match_percent": 99.0625
         },
         {
           "name": "_Z10InitSnakesP11WORLDINFO_s",

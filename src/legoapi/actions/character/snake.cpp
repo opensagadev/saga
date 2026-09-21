@@ -3,6 +3,7 @@
 #include "legoapi/world/world.h"
 #include "nu2api/nu3d/nuspecial.h"
 #include "legoapi/render/fx/parts.h"
+#include "legoapi/characters/motion/gameanim.h"
 #include "globals.h"
 #include <string.h>
 #include "legoapi/legoapi_types.h"
@@ -116,6 +117,16 @@ void SnakeBeenHit(GameObject_s *object) {
     }
 }
 
-void EatVictim(GameObject_s *) {
-    STUBBED();
+void EatVictim(GameObject_s *object) {
+    object->character_context = -1;
+    if (object->field_0x780 == NULL || (object->field_0xe24 & 1) == 0) {
+        return;
+    }
+    object->context_animation = 0x4e;
+    if (object->apiobj.character_model->model_data_b[0x4e] == NULL) {
+        return;
+    }
+    object->character_context = 0x3f;
+    object->context_animation_timer = AnimDuration(object->id, 0x4e, 0.0f, 0.0f, 1);
+    object->context_flags &= ~0x40;
 }
