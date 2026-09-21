@@ -3299,8 +3299,48 @@ struct flightspline_s {};
 struct instNUGCUTLOOKAT_s {};
 struct instNUGCUTSCENE_s;
 struct mdct_lookup {};
-struct minisnowtrooper_s {};
-struct minitrooperteam_s {};
+struct minisnowtrooper_s {
+    union {
+        f32 field_000;
+        struct {
+            u8 field_000_byte;
+            u8 state_flags;
+            u8 reserved_002[2];
+        };
+    };
+    u16 rotation;
+    u16 target_rotation;
+    u8 reserved_008[0x0c];
+    NUVEC shot_position; // 0x14
+};
+DECOMP_ASSERT(offsetof(minisnowtrooper_s, rotation) == 0x04, "Mini snowtrooper rotation offset");
+DECOMP_ASSERT(offsetof(minisnowtrooper_s, shot_position) == 0x14, "Mini snowtrooper shot position offset");
+DECOMP_ASSERT(sizeof(minisnowtrooper_s) == 0x20, "Mini snowtrooper size");
+
+struct minitrooperteam_s {
+    u8 reserved_000[0x16];
+    u8 field_016;
+    u8 field_017;
+    u8 reserved_018;
+    u8 team_flags; // 0x19, bit 1 selects the opposing team
+    u8 trooper_count;
+    u8 reserved_01b;
+    u32 state_flags; // 0x1c, bit 0 marks an active team
+    u8 reserved_020[0x10];
+    i32 bolt_type; // 0x30
+    void *field_034;
+    u8 reserved_038[4];
+    minisnowtrooper_s *troopers; // 0x3c
+    NUVEC position;              // 0x40
+    i32 target_index;            // 0x4c
+};
+DECOMP_ASSERT(offsetof(minitrooperteam_s, team_flags) == 0x19, "Mini trooper team flags offset");
+DECOMP_ASSERT(offsetof(minitrooperteam_s, state_flags) == 0x1c, "Mini trooper state flags offset");
+DECOMP_ASSERT(offsetof(minitrooperteam_s, bolt_type) == 0x30, "Mini trooper bolt type offset");
+DECOMP_ASSERT(offsetof(minitrooperteam_s, troopers) == 0x3c, "Mini trooper array offset");
+DECOMP_ASSERT(offsetof(minitrooperteam_s, position) == 0x40, "Mini trooper team position offset");
+DECOMP_ASSERT(offsetof(minitrooperteam_s, target_index) == 0x4c, "Mini trooper target offset");
+DECOMP_ASSERT(sizeof(minitrooperteam_s) == 0x50, "Mini trooper team size");
 struct nuanimbuff_s;
 struct nucolour3_s;
 struct nudisplaylistitem_s;

@@ -10,10 +10,12 @@
 #include "legoapi/legoapi_types.h"
 #include "legoapi/items/base/apiobject.h"
 #include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/core/input/qrand.h"
 #include "legoapi/gizmos/object/gizbuildits.h"
 #include "legoapi/gizmos/object/gizobstacles.h"
 #include "legoapi/menus/core/gamemessages.h"
 #include "legoapi/menus/core/text.h"
+#include "legoapi/misc/utilities.h"
 #include "legoapi/menus/screens/store.h"
 #include "legoapi/render/core/render.h"
 #include "legoapi/render/fx.h"
@@ -24,6 +26,7 @@
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nufile/nufpar.h"
 #include "nu2api/numath/nutrig.h"
+#include "nu2api/numath/nuvec.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -45,6 +48,9 @@ DECOMP_ASSERT(offsetof(TROOPERCANNON_s, character_name) == 0x0c, "Trooper cannon
 DECOMP_ASSERT(offsetof(TROOPERCANNON_s, rebuilding) == 0x2c, "Trooper cannon rebuilding offset");
 
 TROOPERCANNON_s troopercannons[4];
+
+i32 droid_hack;
+static i32 trooperteamcount;
 
 extern i32 GizBuildIt_AtEnd(GIZBUILDIT_s *buildit);
 extern GIZMO *GizmoFindByData(GIZMOSYS *system, i32 type_id, void *data);
@@ -417,8 +423,85 @@ i32 Episode_CountOpenAreas(i32 episode_index, i32 area_index, AREASAVE_s *saves)
 // Shared gameplay helpers
 // ===========================================================================
 
-void TrooperShoot(WORLDINFO_s *, minitrooperteam_s *, minisnowtrooper_s *, u16 *, i32) {
-    STUBBED();
+i32 TrooperShoot(WORLDINFO_s *world, minitrooperteam_s *team, minisnowtrooper_s *trooper, u16 *shot_angle,
+                 i32 team_index) {
+    NUVEC shot_position = trooper->shot_position;
+    NUVEC direction;
+
+    if (droid_hack != 0) {
+        f32 player_distances[2] = {10000.0f, 10000.0f};
+        for (i32 i = 0; i < 2; ++i) {
+            if (static_cast<i8>(Player[i]->apiobj.flags_low) < 0)
+                player_distances[i] = NuVecDist(&Player[i]->apiobj.position, &shot_position, NULL);
+        }
+
+        GameObject_s *target;
+        if (player_distances[1] > player_distances[0]) {
+            if (player_distances[0] >= 60.0f)
+                return 0;
+            target = Player[0];
+        } else {
+            if (player_distances[1] >= 60.0f)
+                return 0;
+            target = Player[1];
+        }
+        NuVecSub(&direction, &target->apiobj.position, &shot_position);
+    } else {
+        minitrooperteam_s *teams = static_cast<minitrooperteam_s *>(world->mini_trooper_teams);
+        f32 nearest_distance_squared = 1.0e9f;
+        minitrooperteam_s *target = NULL;
+
+        for (i32 i = 0; i < trooperteamcount; ++i) {
+            minitrooperteam_s *candidate = &teams[i];
+            if (i == team_index || (candidate->state_flags & 1) == 0 ||
+                ((team->team_flags ^ candidate->team_flags) & 2) == 0)
+                continue;
+
+            const f32 x = candidate->position.x - team->position.x;
+            const f32 z = candidate->position.z - team->position.z;
+            const f32 distance_squared = x * x + z * z;
+            if (distance_squared < nearest_distance_squared) {
+                team->target_index = i;
+                target = candidate;
+                nearest_distance_squared = distance_squared;
+            }
+        }
+
+        if (nearest_distance_squared >= 1.0e9f || target == NULL)
+            return 0;
+        NuVecSub(&direction, &target->position, &shot_position);
+    }
+
+    *shot_angle = static_cast<u16>(NuAtan2D(direction.x, direction.z) + qrand() / 37 - 0x38e);
+    u16 pitch;
+    FindAnglesXY(&direction, &pitch, shot_angle);
+
+    NUMTX matrix;
+    const f32 sin_x = NU_SIN_LUT(pitch);
+    const f32 cos_x = NU_COS_LUT(pitch);
+    const f32 sin_y = NU_SIN_LUT(*shot_angle);
+    const f32 cos_y = NU_COS_LUT(*shot_angle);
+    matrix.m00 = cos_y;
+    matrix.m01 = 0.0f;
+    matrix.m02 = -sin_y;
+    matrix.m03 = 0.0f;
+    matrix.m10 = sin_x * sin_y;
+    matrix.m11 = cos_x;
+    matrix.m12 = sin_x * cos_y;
+    matrix.m13 = 0.0f;
+    matrix.m20 = cos_x * sin_y;
+    matrix.m21 = -sin_x;
+    matrix.m22 = cos_x * cos_y;
+    matrix.m23 = 0.0f;
+    matrix.m30 = 0.0f;
+    matrix.m31 = 0.0f;
+    matrix.m32 = 0.0f;
+    matrix.m33 = 1.0f;
+
+    BOLT_s *bolt = Bolt_Add(NULL, &shot_position, &matrix, team->bolt_type, 0);
+    if (bolt != NULL)
+        Bolt[bolt->index].flags &= ~4;
+    return 1;
 }
 
 NuMechPtr<MechObjectInterface, 4> BobaRocketTarget;
