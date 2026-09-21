@@ -800,6 +800,7 @@ typedef struct GameObject_s {
             u8 player_packet_prefix[0x738 - 0x6b4];
             union {
                 NUVEC external_force;
+                NUVEC disorientation_destination;
                 NUVEC zipup_entry_position; // 0x738, position before the whip start animation
             };
             union {
