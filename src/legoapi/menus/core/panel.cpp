@@ -604,16 +604,152 @@ void SpeederChase_DrawMeleeTargets(i16 *character_ids, char *dimmed, i32 count) 
     }
 }
 
-void DrawMeleeTargetsRows(i16 *, char *, float *, i32) {
-    STUBBED();
+void DrawMeleeTargetsRows(i16 *targets, char *, f32 *values, i32 count) {
+    if (FadeSys.fade != 0.0f || count <= 0)
+        return;
+
+    i32 row_counts[3] = {0, 0, 0};
+    i32 row = 0;
+    for (i32 i = 0; i < count; ++i) {
+        if (targets[i] == -1)
+            ++row;
+        else
+            ++row_counts[row];
+    }
+
+    f32 x = (row_counts[0] - 1) * 0.12f * 0.5f;
+    x = -x;
+    f32 y = 0.615f;
+    row = 0;
+    for (i32 i = 0; i < count; ++i) {
+        const i32 target = targets[i];
+        if (target != -1) {
+            DrawCharIcon(target, x, y, 0.0f, 0.128f, 0xa7, values[i], values[i], 1, NULL);
+            x += 0.12f;
+            continue;
+        }
+
+        const i32 previous_row = row++;
+        y -= 0.14f;
+        const f32 width = row_counts[row] * 0.12f * 0.5f;
+        if (((row_counts[row] - row_counts[previous_row] % 2) + row) & 1)
+            x = -width;
+        else
+            x = 0.06f - width;
+    }
 }
 
-void DrawMeleeTargetsNumber(i16 *, unsigned char *, i32, unsigned char, nuhspecial_s *) {
-    STUBBED();
+static i8 meleeTarg_localCount[4];
+static f32 meleeTarg_flashTime[4];
+static f32 meleeTarg_scaleSize[4];
+static f32 meleeTarg_alpha[4];
+static i8 meleeTarg_maxCount[4];
+
+void DrawMeleeTargetsNumber(i16 *targets, u8 *counts, i32 count, u8 reset, nuhspecial_s *special) {
+    if (count < 1 || count > 4)
+        return;
+
+    if (reset != 0) {
+        meleeTarg_localCount[0] = 0;
+        meleeTarg_localCount[1] = 0;
+        meleeTarg_localCount[2] = 0;
+        meleeTarg_localCount[3] = 0;
+        meleeTarg_flashTime[0] = 0.0f;
+        meleeTarg_flashTime[1] = 0.0f;
+        meleeTarg_flashTime[2] = 0.0f;
+        meleeTarg_flashTime[3] = 0.0f;
+        meleeTarg_scaleSize[0] = 0.0f;
+        meleeTarg_scaleSize[1] = 0.0f;
+        meleeTarg_scaleSize[2] = 0.0f;
+        meleeTarg_scaleSize[3] = 0.0f;
+        meleeTarg_alpha[0] = 0.0f;
+        meleeTarg_alpha[1] = 0.0f;
+        meleeTarg_alpha[2] = 0.0f;
+        meleeTarg_alpha[3] = 0.0f;
+        meleeTarg_maxCount[0] = 0;
+        meleeTarg_maxCount[1] = 0;
+        meleeTarg_maxCount[2] = 0;
+        meleeTarg_maxCount[3] = 0;
+        for (i32 i = 0; i < count; ++i) {
+            meleeTarg_localCount[i] = counts[i];
+            meleeTarg_maxCount[i] = counts[i];
+            meleeTarg_scaleSize[i] = 0.5f;
+            meleeTarg_alpha[i] = 1.0f;
+        }
+        return;
+    }
+
+    {
+        if (FadeSys.fade != 0.0f)
+            return;
+
+        f32 x = (count - 1) * 0.24f * 0.5f;
+        x = -x;
+        for (i32 i = 0; i < count; ++i) {
+            char text[16];
+            sprintf(text, "%i", meleeTarg_localCount[i]);
+
+            if (counts[i] != meleeTarg_localCount[i] && meleeTarg_flashTime[i] == 0.0f)
+                meleeTarg_flashTime[i] = 0.01f;
+            meleeTarg_flashTime[i] += FRAMETIME;
+
+            i32 red;
+            i32 green;
+            if (meleeTarg_flashTime[i] < 0.375f) {
+                const f32 phase = meleeTarg_flashTime[i] / 0.375f * 255.0f;
+                green = static_cast<i32>(phase);
+                red = static_cast<i32>(255.0f - phase);
+                meleeTarg_scaleSize[i] = SeekLinearF(meleeTarg_scaleSize[i], 0.0f, 0.1f);
+            } else if (meleeTarg_flashTime[i] < 0.625f) {
+                meleeTarg_localCount[i] = counts[i];
+                red = 0;
+                green = 255;
+            } else if (meleeTarg_flashTime[i] < 1.0f) {
+                const f32 phase = (meleeTarg_flashTime[i] - 0.5f) * 2.0f * 255.0f;
+                red = static_cast<i32>(phase);
+                green = static_cast<i32>(255.0f - phase);
+                meleeTarg_scaleSize[i] = SeekLinearF(meleeTarg_scaleSize[i], 0.5f, 0.1f);
+            } else {
+                meleeTarg_flashTime[i] = 0.0f;
+                meleeTarg_scaleSize[i] = SeekLinearF(meleeTarg_scaleSize[i], 0.5f, 0.1f);
+                red = 255;
+                green = 0;
+            }
+
+            if (meleeTarg_localCount[i] > 0)
+                Text3D(text, x, 0.492600023746490478515625f, 0.0f, meleeTarg_scaleSize[i], meleeTarg_scaleSize[i],
+                       meleeTarg_scaleSize[i], 0, red, green, 0);
+
+            const f32 alpha_target =
+                static_cast<f32>(meleeTarg_localCount[i]) / static_cast<f32>(meleeTarg_maxCount[i]) * 2.0f;
+            meleeTarg_alpha[i] = SeekLinearF(meleeTarg_alpha[i], alpha_target, 0.005f);
+            DrawCharIcon(targets[i], x, 0.634f, 0.0f, 0.128f, 0xa7, meleeTarg_alpha[i], meleeTarg_alpha[i], 1, special);
+            x += 0.24f;
+        }
+        return;
+    }
 }
 
-void DrawMeleeTargets(i16 *, char *, float *, i32) {
-    STUBBED();
+void DrawMeleeTargets(i16 *targets, char *dimmed, f32 *values, i32 count) {
+    if (FadeSys.fade != 0.0f || count <= 0)
+        return;
+
+    f32 x = (1 - count) * 0.06f * 0.5f;
+    if (values != NULL) {
+        for (i32 i = 0; i < count; ++i) {
+            const f32 y = (i & 1) != 0 ? 0.22f : 0.405f;
+            DrawCharIcon(targets[i], x, y, 0.0f, 0.128f, 0xa7, values[i], values[i], 1, NULL);
+            x += 0.06f;
+        }
+        return;
+    }
+
+    for (i32 i = 0; i < count; ++i) {
+        const f32 y = (i & 1) != 0 ? 0.22f : 0.405f;
+        const f32 alpha = dimmed[i] != 0 ? 0.25f : 1.0f;
+        DrawCharIcon(targets[i], x, y, 0.0f, 0.128f, 0xa7, alpha, alpha, 1, NULL);
+        x += 0.06f;
+    }
 }
 
 void DrawTimer(i32 time, i32 expanded, i32 reset) {
