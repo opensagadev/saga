@@ -314,7 +314,7 @@ extern "C" {
         aieditorsettings.draw_all_paths = item->highlighted;
     }
 
-    void aieditor_cbGoToPlayer(void) {
+    void aieditor_cbGoToPlayer(eduimenu_s *, eduiitem_s *, u32) {
         AISYS_s *system = aieditor->ai_system;
         if (system != nullptr && system->player_1 != nullptr) {
             edcamSetPos(&system->player_1->position);
@@ -322,14 +322,14 @@ extern "C" {
         aieditor_ClearMainMenu();
     }
 
-    void aieditor_cbMovePlayer(void) {
+    void aieditor_cbMovePlayer(eduimenu_s *, eduiitem_s *, u32) {
         if (AIEditorMovePlayersFn != nullptr) {
             AIEditorMovePlayersFn(&aieditor->camera_position);
         }
         aieditor_ClearMainMenu();
     }
 
-    void aieditor_cbSave(void) {
+    void aieditor_cbSave(eduimenu_s *, eduiitem_s *, u32) {
         STUBBED();
     }
 
@@ -357,7 +357,7 @@ extern "C" {
         aieditorsettings.stop_platforms = item->highlighted;
     }
 
-    void aieditor_cvSelectEditorMode(eduimenu_s *parent) {
+    void aieditor_cvSelectEditorMode(eduimenu_s *parent, eduiitem_s *, u32) {
         eduimenu_s *menu = eduiMenuCreate(0xdc, 0x46, 0xf0, 0xfa, ed_fnt, aieditor_cbCancelSelectEditorMode,
                                           (char *)"Select Editor Mode");
         if (menu == nullptr) {

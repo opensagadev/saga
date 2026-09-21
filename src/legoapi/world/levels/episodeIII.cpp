@@ -27,7 +27,7 @@
 extern i32 LevFlag[4];
 
 extern "C" {
-    void *AIPAthFindPathCnx(AISYS_s *, i32, void *, void *, void *);
+    void *AIPAthFindPathCnx(AISYS_s *, AIPATH_s *, char *, char *, i32 *);
 }
 #include "legoapi/render/core/render.h"
 #include "nu2api/nu3d/nutex.h"
@@ -189,8 +189,7 @@ void CruiserCUpdate(WORLDINFO_s *) {
 
 void CruiserCPanel(WORLDINFO_s *) {
     if (netclient == 0) {
-        if (cruiser_c.count_dooku != NULL && cruiser_c.dooku_fight != NULL &&
-            cruiser_c.dooku_fight->value == 1.0f)
+        if (cruiser_c.count_dooku != NULL && cruiser_c.dooku_fight != NULL && cruiser_c.dooku_fight->value == 1.0f)
             DrawBossHitPoints(cruiser_c.count_dooku);
         else
             DrawBossHitPoints(NULL);
@@ -413,8 +412,8 @@ void TempleA_Init(WORLDINFO_s *world) {
 }
 
 void TempleC_Init(WORLDINFO_s *world) {
-    char *force_names[10] = {"force8", "force10", "force5", "force4", "force3",
-                             "force2", "force1", "force23", "force21", "force19"};
+    char *force_names[10] = {"force8", "force10", "force5",  "force4",  "force3",
+                             "force2", "force1",  "force23", "force21", "force19"};
     for (i32 i = 0; i < 10; ++i) {
         GIZFORCE_s *force = GizForces_FindForce(world, force_names[i]);
         if (force != NULL && (force->config_flags & 0x400) != 0) {
@@ -513,14 +512,11 @@ void VaderA_Update(WORLDINFO_s *) {
 }
 
 void VaderB_Update(WORLDINFO_s *) {
-    if (netclient == 0 && vader_b_complete_msg != NULL && vader_b_complete_msg->value == 1.0f &&
-        VADERB_LDATA != NULL)
+    if (netclient == 0 && vader_b_complete_msg != NULL && vader_b_complete_msg->value == 1.0f && VADERB_LDATA != NULL)
         GoToNewLevel(VADERC_LDATA->idx);
     if (vader_b_playersDead == 0 &&
-        ((Player[0] != NULL && Player[0]->apiobj.field_0x287 != 0 &&
-          (Player[0]->apiobj.field_0x1f4 & 0x40000) == 0) ||
-         (Player[1] != NULL && Player[1]->apiobj.field_0x287 != 0 &&
-          (Player[1]->apiobj.field_0x1f4 & 0x40000) == 0))) {
+        ((Player[0] != NULL && Player[0]->apiobj.field_0x287 != 0 && (Player[0]->apiobj.field_0x1f4 & 0x40000) == 0) ||
+         (Player[1] != NULL && Player[1]->apiobj.field_0x287 != 0 && (Player[1]->apiobj.field_0x1f4 & 0x40000) == 0))) {
         vader_b_playersDead = 1;
         ResetLevel(NULL, NULL, 1);
     }
@@ -567,8 +563,8 @@ void VaderA_GoneThroughDoor(WORLDINFO_s *world, DOOR_s *door) {
 static __used__ void VaderA_StartCollapseStage(WORLDINFO_s *world) {
     i32 path_index;
     nuhspecial_s specials[100];
-    u32 *path_connection = (u32 *)AIPAthFindPathCnx(world->ai_sys, (i32)(usize)world->ai_sys->path_sys->active_path,
-                                                    (void *)"Block1_a", (void *)"Block1_b", &path_index);
+    u32 *path_connection = static_cast<u32 *>(
+        AIPAthFindPathCnx(world->ai_sys, world->ai_sys->path_sys->active_path, "Block1_a", "Block1_b", &path_index));
 
     if (path_connection != NULL) {
         path_connection[path_index] |= 0x80000000;

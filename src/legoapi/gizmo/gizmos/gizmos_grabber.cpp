@@ -10,7 +10,7 @@ extern "C" float FRAMETIME;
 extern "C" {
     extern i16 id_GRABMAGNET;
     struct nuvec_s;
-    void PlaySfx(const char *, nuvec_s *);
+    void PlaySfx(char *, nuvec_s *);
 }
 #include "legoapi/legoapi_types.h"
 #include "legoapi/gizmos/fx/gizmopickups.h"
@@ -135,7 +135,7 @@ extern "C" {
     extern i16 id_GRABCONTROL, id_GRABR2CONTROL, id_GRABMACHINE;
     extern f32 GameTimer;
     void NewTerrPlatformsOff();
-    void PlaySfxAndSetPitch(const char *, NUVEC *, f32);
+    void PlaySfxAndSetPitch(char *, NUVEC *, f32);
     f32 AnimListFrame(CHARACTERMODEL_s *, i32, i32);
     AIANTINODE_s *AIAntinodeCreateSingleFrame(NUVEC *, f32);
 }
@@ -252,7 +252,8 @@ void Grabber_Update(WORLDINFO_s *world) {
     if (next.x != g->grab_position.x || next.y != g->grab_position.y || next.z != g->grab_position.z) {
         if (world->current_level != JABBASPALACEB_LDATA &&
             (g->target_velocity.x != 0.0f || g->target_velocity.y != 0.0f || g->target_velocity.z != 0.0f))
-            PlaySfx(world->current_level == CLOUDCITYTRAPA_LDATA ? "CarbonFreezeCraneLp" : "env_crane_mvt_lp",
+            PlaySfx(const_cast<char *>(world->current_level == CLOUDCITYTRAPA_LDATA ? "CarbonFreezeCraneLp"
+                                                                                    : "env_crane_mvt_lp"),
                     &g->grab_position);
         NUVEC query = next;
         query.y += 0.25f;
@@ -670,8 +671,8 @@ void Grabber_Draw(WORLDINFO_s *world) {
         NUMTX joints[256];
         if (APIDrawCharacterModel(g->character_model, &CDataList[g->character_model->model_id], &g->animation, &matrix,
                                   NULL, ((u8)Reflections_On && g->floor_height != 2000000.0f) ? &reflection : NULL,
-                                  NULL, &g->grab_matrix, NULL, 0xffff, NULL, 0, Paused, FRAMETIME,
-                                  joints, 0, WORLD->debris_sys))
+                                  NULL, &g->grab_matrix, NULL, 0xffff, NULL, 0, Paused, FRAMETIME, joints, 0,
+                                  WORLD->debris_sys))
             g->flags_559 |= 1;
         if (g->flags_559 & 0x10)
             ResetShadowMapRendering();

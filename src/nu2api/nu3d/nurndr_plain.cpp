@@ -87,7 +87,7 @@ extern VARIPTR *display_list_buffer;
 extern "C" {
     i32 NuDisplayListAddRenderScene(void);
     i32 NuDynamicLightIsEnabled(void *);
-    void NuDynamicLightAddRenderScene(void *, i32, i32);
+    void NuDynamicLightAddRenderScene(struct NuDynamicLight *, i32, i32);
     void NuDisplayListLinkMtl(nudisplaylist_s *list, NUMTL *mtl);
     VARIPTR *NuDisplayListLinkItems(nudisplaylist_s *list, i32 count);
 }
@@ -158,7 +158,8 @@ extern "C" void NuRndrEndScene(void) {
     // manager now that the render-scene id is known.
     if (has_dynamic_light != 0 && scn->render_scene_id != -1) {
         if (NuDynamicLightIsEnabled(scn->unknown_3c)) {
-            NuDynamicLightAddRenderScene(scn->unknown_3c, scn->unknown_40, scn->render_scene_id);
+            NuDynamicLightAddRenderScene(static_cast<NuDynamicLight *>(scn->unknown_3c), scn->unknown_40,
+                                         scn->render_scene_id);
         } else {
             scn->unknown_38 = 0;
         }
@@ -466,8 +467,8 @@ extern "C" void NuRndrBoundingBox(NUVEC *minimum, NUVEC *maximum, NUMTX *matrix,
 f32 circle_scale_radius = 0.5f;
 static inline void NuRndrPrimSetColour(i32 colour);
 static inline void NuRndrPrimUV(f32 u, f32 v);
-extern "C" i32 NuRndrCircle(f32 x, f32 y, f32 radius, f32 aspect, i32 count, f32 u0, f32 v0, f32 u1, f32 v1,
-                             i32 colour, numtl_s *material) {
+extern "C" i32 NuRndrCircle(f32 x, f32 y, f32 radius, f32 aspect, i32 count, f32 u0, f32 v0, f32 u1, f32 v1, i32 colour,
+                            numtl_s *material) {
     NuPrim2DBegin(0, 7, material);
     radius *= circle_scale_radius;
     u1 -= u0;

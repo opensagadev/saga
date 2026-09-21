@@ -574,8 +574,9 @@ extern "C" {
         return scaled_index;
     }
 
-    void CreateScaledPARTEffect(void) {
+    i32 CreateScaledPARTEffect(i32, f32) {
         STUBBED();
+        return -1;
     }
 
     void CubeImpact(void) {

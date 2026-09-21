@@ -29,7 +29,7 @@ extern "C" {
     i32 NuDisplayListRndrSpecial(nuhspecial_s *special, NUMTX *matrix, i32 skinned, NUMTX *skin_matrices,
                                  DEFORMERWEIGHTSARRAY *deformer_weights);
 
-    void AddColourPick(void) {
+    void AddColourPick(eduimenu_s *, eduiitem_s *, f32 *, f32 *, f32 *, u32 *) {
         STUBBED();
     }
 

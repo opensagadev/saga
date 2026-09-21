@@ -51,7 +51,7 @@ void GizForce_ResetLOS(GameObject_s *object);
 void GameCam_Blend(GAMECAMERA_s *camera, f32 duration, f32 curve, i32 mode);
 void GameAudio_PlaySfx(i32 sfx, NUVEC *position, i32 flags, i32 volume);
 void TakeOver2GetIn(GameObject_s *source, GameObject_s *target);
-void TakeOverYoda(GameObject_s *source, GameObject_s *target, i32 mode, i32 blend);
+i32 TakeOverYoda(GameObject_s *source, GameObject_s *target, i32 mode, i32 blend);
 extern i32 CUTSKIPLOCK;
 extern i16 id_LUKESKYWALKERDAGOBAH;
 extern "C" i32 menu_i_pack;

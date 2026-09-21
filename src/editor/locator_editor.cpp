@@ -1,4 +1,5 @@
 #include "decomp.h"
+#include "editor/edpath_types.h"
 struct EDLOCATOR_s;
 struct EDLOCATORSET_s;
 struct nuvec_s;
@@ -87,15 +88,15 @@ extern "C" {
         STUBBED();
     }
 
-    void locatorEditor_PathDeleted(void) {
+    void locatorEditor_PathDeleted(EDAIPATH_s *) {
         STUBBED();
     }
 
-    void locatorEditor_PathNodeDeleted(void) {
+    void locatorEditor_PathNodeDeleted(EDAIPATHNODE_s *) {
         STUBBED();
     }
 
-    void locatorEditor_PathNodeMoved(void) {
+    void locatorEditor_PathNodeMoved(EDAIPATHNODE_s *) {
         STUBBED();
     }
 

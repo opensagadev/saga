@@ -1901,7 +1901,7 @@ extern "C" {
 
     i32 near_clip_at_cursor;
 
-    void cbNearClipAtCursor(void) {
+    void cbNearClipAtCursor(eduimenu_s *, eduiitem_s *, u32) {
         STUBBED();
     }
 

@@ -191,6 +191,7 @@ def main() -> int:
     for command in (
         ["git", "--no-pager", "diff", "--cached", "--check"],
         ["bazel", "test", "//scripts/checks:checks"],
+        ["bazel", "run", "--config=native", "//scripts/checks:check_forward_declarations"],
     ):
         status = run(command, root)
         if status:

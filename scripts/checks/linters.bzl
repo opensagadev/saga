@@ -239,6 +239,130 @@ clang_tidy_wasm = _clang_tidy_aspect(
     extra_args = ["--extra-arg=--target=wasm32-unknown-emscripten"],
 )
 
+FunctionDeclarationsInfo = provider(fields = ["files"])
+
+def _function_declarations_aspect(source_attribute):
+    def _impl(target, ctx):
+        if CcInfo not in target or not hasattr(ctx.rule.attr, source_attribute):
+            return []
+
+        sources = [
+            source
+            for source in getattr(ctx.rule.files, source_attribute)
+            if source.is_source and source.extension in _SOURCE_EXTENSIONS
+        ]
+        if not sources:
+            return []
+
+        compilation_context = target[CcInfo].compilation_context
+        inputs = depset(
+            transitive = [compilation_context.headers, ctx.attr._clang_headers[DefaultInfo].files],
+        )
+        cc_toolchain = find_cpp_toolchain(ctx)
+        outputs = []
+
+        resource_directory = None
+        for header in ctx.attr._clang_headers[DefaultInfo].files.to_list():
+            if header.path.endswith("/include/stddef.h") and "/lib/clang/" in header.path:
+                resource_directory = header.dirname.removesuffix("/include")
+                break
+
+        for source in sources:
+            output = ctx.actions.declare_file(
+                "{}_function_declarations/{}.tsv".format(target.label.name, source.short_path),
+            )
+            compiler_args, feature_configuration, variables, action_name = _compiler_args(
+                ctx,
+                compilation_context,
+                source,
+            )
+            if resource_directory:
+                compiler_args.append("-resource-dir=" + resource_directory)
+
+            env = dict(cc_common.get_environment_variables(
+                feature_configuration = feature_configuration,
+                action_name = action_name,
+                variables = variables,
+            ))
+            env.update({
+                "MSYS_ARG_CONV_EXCL": "*",
+                "MSYS_NO_PATHCONV": "1",
+            })
+            for runtime in ctx.attr._libclang_runtime[DefaultInfo].files.to_list():
+                if runtime.basename.endswith(".dll"):
+                    env["PATH"] = runtime.dirname + ";" + env.get("PATH", "")
+                elif runtime.basename.endswith(".dylib"):
+                    env["DYLD_LIBRARY_PATH"] = runtime.dirname
+                elif runtime.basename.endswith(".so.22.1"):
+                    env["LD_LIBRARY_PATH"] = runtime.dirname
+
+            arguments = ctx.actions.args()
+            arguments.add(output.path)
+            arguments.add(".")
+            arguments.add(source.path)
+            arguments.add_all(compiler_args)
+            arguments.use_param_file("@%s", use_always = True)
+            arguments.set_param_file_format("multiline")
+
+            ctx.actions.run(
+                executable = ctx.executable._collector,
+                arguments = [arguments],
+                inputs = depset(direct = [source], transitive = [inputs]),
+                outputs = [output],
+                tools = [
+                    ctx.executable._collector,
+                    cc_toolchain.all_files,
+                    ctx.attr._libclang_runtime[DefaultInfo].files,
+                ],
+                env = env,
+                mnemonic = "FunctionDeclarations",
+                progress_message = "Indexing function declarations in %{label}:" + source.basename,
+            )
+            outputs.append(output)
+
+        return [FunctionDeclarationsInfo(files = depset(outputs))]
+
+    return aspect(
+        implementation = _impl,
+        attrs = {
+            "_cc_toolchain": attr.label(
+                default = "@bazel_tools//tools/cpp:current_cc_toolchain",
+            ),
+            "_clang_headers": attr.label(
+                default = "@llvm_tools_llvm//:include",
+                cfg = "exec",
+            ),
+            "_collector": attr.label(
+                default = "//scripts/checks:collect_function_declarations",
+                cfg = "exec",
+                executable = True,
+            ),
+            "_libclang_runtime": attr.label(
+                default = "//scripts/checks:libclang_runtime",
+                cfg = "exec",
+            ),
+        },
+        fragments = ["cpp"],
+        required_providers = [CcInfo],
+        toolchains = ["@bazel_tools//tools/cpp:toolchain_type"],
+    )
+
+function_declarations = _function_declarations_aspect("srcs")
+
+def _function_declaration_index_impl(ctx):
+    return DefaultInfo(files = depset(transitive = [
+        target[FunctionDeclarationsInfo].files
+        for target in ctx.attr.srcs
+        if FunctionDeclarationsInfo in target
+    ]))
+
+function_declaration_index = rule(
+    implementation = _function_declaration_index_impl,
+    attrs = {
+        "srcs": attr.label_list(aspects = [function_declarations]),
+    },
+)
+
 def _clang_tidy_check_impl(_ctx):
     return DefaultInfo()
 

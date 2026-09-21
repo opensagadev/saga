@@ -2131,11 +2131,11 @@ extern "C" {
         return MenuResult;
     }
 
-    void cbCancelSubMenu(void) {
+    void cbCancelSubMenu(eduimenu_s *, eduimenu_s *) {
         STUBBED();
     }
 
-    void cbCancelSubMenuFromItem(void) {
+    void cbCancelSubMenuFromItem(eduimenu_s *, eduiitem_s *, u32) {
         STUBBED();
     }
 
@@ -2163,7 +2163,7 @@ extern "C" {
         STUBBED();
     }
 
-    void cbTriggerSubMenu(void) {
+    void cbTriggerSubMenu(eduimenu_s *, eduiitem_s *, u32) {
         STUBBED();
     }
 

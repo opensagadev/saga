@@ -107,7 +107,7 @@ void CharScenes_Init(VARIPTR *buf, VARIPTR *buf_end);
 void FixUpCharacters(CHARFIXUP *fixup);
 void CharCategories_Init(CHARCATEGORY *cat);
 LEVELDATA *Levels_ConfigureList(char *path, VARIPTR *buf, VARIPTR *buf_end, i32 max, i32 *count,
-                                void (*set_defaults)(LEVELDATA *, i32));
+                                LEVELSETDEFAULTSFN *set_defaults);
 void FixUpLevels(LEVELFIXUP *fixup);
 EPISODEDATA *Episodes_ConfigureList(char *path, VARIPTR *buf, VARIPTR *buf_end, i32 max, i32 *count);
 void NewGame(void);

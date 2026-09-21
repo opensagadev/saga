@@ -48,7 +48,7 @@ void AlertSurroundingCreatures(GameObject_s *, NUVEC *);
 i32 Hub_InMenu();
 i32 RotDiff(u16, u16);
 void NewRumble(nupad_s *, f32, i32);
-void NewBlockAction(GameObject_s *);
+i32 NewBlockAction(GameObject_s *);
 void PlayerTakeHit(GameObject_s *, GameObject_s *);
 void ReleaseForce(GameObject_s *, i32);
 void LoseHelmet(GameObject_s *, i32, i32);
@@ -66,7 +66,7 @@ void Arcade_Kill(i32, i32);
 i32 qrand();
 GAMEPAD_s *ViewCamGetGamePad();
 void Player_ClearContext(GameObject_s *, i32);
-extern "C" void AddGameDebris(APIDEBRISSYS_s *, i32, NUVEC *);
+extern "C" i32 AddGameDebris(APIDEBRISSYS_s *, i32, NUVEC *);
 extern "C" void NuSpecialSetVisibility(void *, i32);
 static const u8 objhit_damage_joints[3] = {6, 8, 7};
 
@@ -248,7 +248,7 @@ i16 InsidePolLines(f32 point_x, f32 point_y, f32 point_z, f32 edge_a_x, f32 edge
     return InsideLineF(point_y, point_z, edge_a_y, edge_a_z, edge_b_y, edge_b_z) != 0;
 }
 
-u16 ObjHitObj_Flags(GameObject_s *object) {
+i32 ObjHitObj_Flags(GameObject_s *object) {
     if (object == NULL)
         return 0;
     const bool player = (object->apiobj.flags_low & 0x80) != 0;
@@ -389,8 +389,9 @@ void CollideGameObjects(WORLDINFO_s *world) {
     APIObjectCollisions(collision_count, collision_objects, collision_minimums, collision_maximums, Collide2Objects);
 }
 
-void CalculateRayBoxIntersection(VuVec const &, VuVec const &, VuVec const &, VuVec const &, float, float &) {
+bool CalculateRayBoxIntersection(VuVec const &, VuVec const &, VuVec const &, VuVec const &, float, float &) {
     STUBBED();
+    return false;
 }
 
 f32 CalcCapsuleIntersectDistance(VuVec const &start, VuVec const &direction, f32 maximum_distance, VuVec const &centre,

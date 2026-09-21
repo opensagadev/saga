@@ -1,6 +1,11 @@
 #include "decomp.h"
 #include "MechInputTouch_types.h"
 
+struct GestureTrackerRegistration {
+    MechInputTouchGestureTracker *tracker;
+    i32 priority;
+};
+
 void MechInputTouchGestureTrackingSystem::GetTouch(NuInputTouch const &) {
     STUBBED();
 }
@@ -41,10 +46,6 @@ void MechInputTouchGestureTrackingSystem::ReadData(GameObject_s &, NuInputTouchD
 }
 
 void MechInputTouchGestureTrackingSystem::RegisterGestureTracker(MechInputTouchGestureTracker &tracker, i32 priority) {
-    struct GestureTrackerRegistration {
-        MechInputTouchGestureTracker *tracker;
-        i32 priority;
-    };
     GestureTrackerRegistration *entries =
         reinterpret_cast<GestureTrackerRegistration *>(reinterpret_cast<u8 *>(this) + 0x2588);
 
@@ -64,10 +65,6 @@ void MechInputTouchGestureTrackingSystem::RegisterGestureTracker(MechInputTouchG
 }
 
 void MechInputTouchGestureTrackingSystem::UnregisterGestureTracker(MechInputTouchGestureTracker &tracker) {
-    struct GestureTrackerRegistration {
-        MechInputTouchGestureTracker *tracker;
-        i32 priority;
-    };
     GestureTrackerRegistration *entries =
         reinterpret_cast<GestureTrackerRegistration *>(reinterpret_cast<u8 *>(this) + 0x2588);
     i32 index = 0;

@@ -1,5 +1,6 @@
 
 #include "decomp.h"
+#include "editor/edpath_types.h"
 struct EDCREATURE_s;
 struct eduiitem_s;
 struct eduimenu_s;
@@ -173,15 +174,15 @@ extern "C" {
         STUBBED();
     }
 
-    void creatureEditor_PathDeleted(void) {
+    void creatureEditor_PathDeleted(EDAIPATH_s *) {
         STUBBED();
     }
 
-    void creatureEditor_PathNodeDeleted(void) {
+    void creatureEditor_PathNodeDeleted(EDAIPATHNODE_s *) {
         STUBBED();
     }
 
-    void creatureEditor_PathNodeMoved(void) {
+    void creatureEditor_PathNodeMoved(EDAIPATHNODE_s *) {
         STUBBED();
     }
 

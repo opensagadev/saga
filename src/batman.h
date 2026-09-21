@@ -121,7 +121,7 @@ extern "C" {
     void rtlProcessLights(void *, float);
     void SoundUpdate(float);
     void SoundKillAll(void);
-    void NuBridgeDraw(i32);
+    void NuBridgeDraw(numtl_s *);
     void NuBridgeUpdate(NUVEC *);
     void NuCameraSet(nucamera_s *);
     void NuIOS_RecordFlurryEvent(char *);
@@ -169,7 +169,7 @@ void DrawParallax(nuhspecial_s *);
 void BackDrop_Update(float);
 void BackDrop_Draw(float, i32);
 void Mission_Clear(MISSIONSYS_s *);
-char IsGrabbingScreen(void);
+i8 IsGrabbingScreen(void);
 void SetTexAnimSignals(void);
 void ClearGizAIMessageSys(GIZAIMESSAGESYS_s *);
 void ResetGizAIMessageSys(GIZAIMESSAGESYS_s *);

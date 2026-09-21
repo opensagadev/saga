@@ -35,7 +35,7 @@ extern "C" {
         STUBBED();
         return 0;
     }
-    void NuSound3ClearLoopHold(void) {
+    void NuSound3ClearLoopHold(NUVEC *, i32) {
         STUBBED();
     }
     void NuSound3Close(void) {
@@ -172,7 +172,7 @@ extern "C" {
     void NuSound3SetReverbVol(void) {
         STUBBED();
     }
-    void NuSound3SetRumblePads(void *, void *) {
+    void NuSound3SetRumblePads(nupad_s *, nupad_s *) {
         STUBBED();
     }
     void NuSound3SetSFXPitch(i32) {

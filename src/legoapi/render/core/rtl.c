@@ -635,8 +635,7 @@ static __used__ i32 rtlCalcLights(nuvec_s *position, numtx_s *rotation, f32 scal
                 *colour = {0.0f, 0.0f, 0.0f};
             } else {
                 const f32 strength = static_cast<f32>(ApplyAntilights(
-                    light, lighting_data,
-                    *reinterpret_cast<f32 *>(data->data + 0x0c + slot * 4) * light->intensity));
+                    light, lighting_data, *reinterpret_cast<f32 *>(data->data + 0x0c + slot * 4) * light->intensity));
                 NuVecScale(colour, &light->ambient, strength);
             }
         }
@@ -660,8 +659,7 @@ static __used__ i32 rtlCalcLights(nuvec_s *position, numtx_s *rotation, f32 scal
             continue;
         }
         const f32 strength = static_cast<f32>(ApplyAntilights(
-            light, lighting_data,
-            *reinterpret_cast<f32 *>(data->data + 0x24 + slot * 4) * light->intensity));
+            light, lighting_data, *reinterpret_cast<f32 *>(data->data + 0x24 + slot * 4) * light->intensity));
         ambient->x = MIN(ambient->x + light->ambient.x * strength, 1.0f);
         ambient->y = MIN(ambient->y + light->ambient.y * strength, 1.0f);
         ambient->z = MIN(ambient->z + light->ambient.z * strength, 1.0f);
@@ -740,7 +738,8 @@ static void rtlApplySetScaleLoop(void *set, rtlidata_s *lighting_data, NUVEC *po
             if (light[i].disabled != 0) {
                 continue;
             }
-            const f32 strength = light[i].type == 5 ? 2.0f : rtlDistanceStrength(reinterpret_cast<u8 *>(&light[i]), position);
+            const f32 strength =
+                light[i].type == 5 ? 2.0f : rtlDistanceStrength(reinterpret_cast<u8 *>(&light[i]), position);
             if (strength == 0.0f) {
                 continue;
             }
@@ -801,8 +800,8 @@ static __used__ void rtlCalcShadow(rtlidata_s *data) {
                   data->shadow_blend);
     }
     NuVecNorm(&data->blended_shadow_direction, &data->blended_shadow_direction);
-    data->blended_shadow_value = data->previous_shadow_value * data->shadow_blend +
-                                 (1.0f - data->shadow_blend) * data->cached_value;
+    data->blended_shadow_value =
+        data->previous_shadow_value * data->shadow_blend + (1.0f - data->shadow_blend) * data->cached_value;
     data->shadow_blend = MAX(0.0f, data->shadow_blend - rtl_frametime * rtl_shadow_blend_rate);
 }
 
@@ -966,8 +965,7 @@ extern "C" {
             light = reinterpret_cast<rtl_s *>(NuLstGetNext(rtl_dynamic_pool, NULL));
             while (light != NULL) {
                 rtlProcessLight(light, frame_time);
-                light = reinterpret_cast<rtl_s *>(
-                    NuLstGetNext(rtl_dynamic_pool, reinterpret_cast<NULNKHDR *>(light)));
+                light = reinterpret_cast<rtl_s *>(NuLstGetNext(rtl_dynamic_pool, reinterpret_cast<NULNKHDR *>(light)));
             }
         }
         if (set != NULL) {
@@ -1102,12 +1100,9 @@ extern "C" {
                     continue;
                 }
                 f32 distance_squared =
-                    (position->x - fog_set->fog[i].position.x) *
-                        (position->x - fog_set->fog[i].position.x) +
-                    (position->y - fog_set->fog[i].position.y) *
-                        (position->y - fog_set->fog[i].position.y) +
-                    (position->z - fog_set->fog[i].position.z) *
-                        (position->z - fog_set->fog[i].position.z);
+                    (position->x - fog_set->fog[i].position.x) * (position->x - fog_set->fog[i].position.x) +
+                    (position->y - fog_set->fog[i].position.y) * (position->y - fog_set->fog[i].position.y) +
+                    (position->z - fog_set->fog[i].position.z) * (position->z - fog_set->fog[i].position.z);
                 if (distance_squared < fog_set->fog[i].radius * fog_set->fog[i].radius) {
                     if (selected != -1) {
                         if (fog_set->fog[i].radius < fog_set->fog[selected].radius) {
@@ -1438,22 +1433,22 @@ static void cbFogAdjRng(eduimenu_s *, eduiitem_s *item, u32) {
     if (fogstart_item) {
         static_cast<edui_slider_s *>(fogstart_item)->range = range;
         eduiItemSliderSetValEx(static_cast<edui_slider_s *>(fogstart_item),
-                              static_cast<edui_slider_s *>(fogstart_item)->value, 0, 0);
+                               static_cast<edui_slider_s *>(fogstart_item)->value, 0, 0);
     }
     if (fogend_item) {
         static_cast<edui_slider_s *>(fogend_item)->range = range;
         eduiItemSliderSetValEx(static_cast<edui_slider_s *>(fogend_item),
-                              static_cast<edui_slider_s *>(fogend_item)->value, 0, 0);
+                               static_cast<edui_slider_s *>(fogend_item)->value, 0, 0);
     }
     if (fogstartpsp_item) {
         static_cast<edui_slider_s *>(fogstartpsp_item)->range = range;
         eduiItemSliderSetValEx(static_cast<edui_slider_s *>(fogstartpsp_item),
-                              static_cast<edui_slider_s *>(fogstartpsp_item)->value, 0, 0);
+                               static_cast<edui_slider_s *>(fogstartpsp_item)->value, 0, 0);
     }
     if (fogendpsp_item) {
         static_cast<edui_slider_s *>(fogendpsp_item)->range = range;
         eduiItemSliderSetValEx(static_cast<edui_slider_s *>(fogendpsp_item),
-                              static_cast<edui_slider_s *>(fogendpsp_item)->value, 0, 0);
+                               static_cast<edui_slider_s *>(fogendpsp_item)->value, 0, 0);
     }
 }
 static void cbFogAdjNear(eduimenu_s *, eduiitem_s *item, u32) {
@@ -1568,8 +1563,8 @@ static void cbSetControls(eduimenu_s *, eduiitem_s *item, u32) {
 static void cbScaleAllMultipliersUp(eduimenu_s *menu, eduiitem_s *, u32) {
     edrtlSaveUndo();
     for (i32 i = 0; i < 128; ++i)
-        curr_set->lights[i].intensity = curr_set->lights[i].intensity *
-                                        static_cast<edui_slider_s *>(global_scale_item)->value;
+        curr_set->lights[i].intensity =
+            curr_set->lights[i].intensity * static_cast<edui_slider_s *>(global_scale_item)->value;
     eduiMenuAttach(menu, global_confirm_menu);
     global_confirm_menu->x = menu->x + 10;
     global_confirm_menu->y = menu->y + 10;
@@ -1578,8 +1573,8 @@ static void cbScaleAllMultipliersUp(eduimenu_s *menu, eduiitem_s *, u32) {
 static void cbScaleAllMultipliersDown(eduimenu_s *menu, eduiitem_s *, u32) {
     edrtlSaveUndo();
     for (i32 i = 0; i < 128; ++i)
-        curr_set->lights[i].intensity = curr_set->lights[i].intensity /
-                                        static_cast<edui_slider_s *>(global_scale_item)->value;
+        curr_set->lights[i].intensity =
+            curr_set->lights[i].intensity / static_cast<edui_slider_s *>(global_scale_item)->value;
     eduiMenuAttach(menu, global_confirm_menu);
     global_confirm_menu->x = menu->x + 10;
     global_confirm_menu->y = menu->y + 10;
@@ -2274,12 +2269,9 @@ static __used__ rtl_s *FindNearestRTL(nuvec_s *position, int ignore_radius) {
     if (base_rtl != NULL) {
         i = base_rtl->field_79;
         while (i != -1) {
-            distance = (curr_set->lights[i].position.x - position->x) *
-                           (curr_set->lights[i].position.x - position->x) +
-                       (curr_set->lights[i].position.y - position->y) *
-                           (curr_set->lights[i].position.y - position->y) +
-                       (curr_set->lights[i].position.z - position->z) *
-                           (curr_set->lights[i].position.z - position->z);
+            distance = (curr_set->lights[i].position.x - position->x) * (curr_set->lights[i].position.x - position->x) +
+                       (curr_set->lights[i].position.y - position->y) * (curr_set->lights[i].position.y - position->y) +
+                       (curr_set->lights[i].position.z - position->z) * (curr_set->lights[i].position.z - position->z);
             if ((ignore_radius || distance < curr_set->lights[i].outer_radius * curr_set->lights[i].outer_radius) &&
                 distance < nearest_distance) {
                 nearest_distance = distance;
@@ -2293,12 +2285,9 @@ static __used__ rtl_s *FindNearestRTL(nuvec_s *position, int ignore_radius) {
                 continue;
             if (curr_set->lights[i].field_7a != -1)
                 continue;
-            distance = (curr_set->lights[i].position.x - position->x) *
-                           (curr_set->lights[i].position.x - position->x) +
-                       (curr_set->lights[i].position.y - position->y) *
-                           (curr_set->lights[i].position.y - position->y) +
-                       (curr_set->lights[i].position.z - position->z) *
-                           (curr_set->lights[i].position.z - position->z);
+            distance = (curr_set->lights[i].position.x - position->x) * (curr_set->lights[i].position.x - position->x) +
+                       (curr_set->lights[i].position.y - position->y) * (curr_set->lights[i].position.y - position->y) +
+                       (curr_set->lights[i].position.z - position->z) * (curr_set->lights[i].position.z - position->z);
             if ((ignore_radius || distance < curr_set->lights[i].outer_radius * curr_set->lights[i].outer_radius) &&
                 distance < nearest_distance) {
                 nearest_distance = distance;
@@ -2374,12 +2363,9 @@ static __used__ EDRTLFOG_s *FindNearestFog(nuvec_s *position) {
     for (i = 0; i < 32; ++i) {
         if (hide_types[curr_set->lights[i].type])
             continue;
-        distance = (curr_set->fog[i].position.x - position->x) *
-                       (curr_set->fog[i].position.x - position->x) +
-                   (curr_set->fog[i].position.y - position->y) *
-                       (curr_set->fog[i].position.y - position->y) +
-                   (curr_set->fog[i].position.z - position->z) *
-                       (curr_set->fog[i].position.z - position->z);
+        distance = (curr_set->fog[i].position.x - position->x) * (curr_set->fog[i].position.x - position->x) +
+                   (curr_set->fog[i].position.y - position->y) * (curr_set->fog[i].position.y - position->y) +
+                   (curr_set->fog[i].position.z - position->z) * (curr_set->fog[i].position.z - position->z);
         if (distance < curr_set->fog[i].radius * curr_set->fog[i].radius && distance < nearest_distance) {
             nearest_distance = distance;
             nearest = i;
@@ -2485,7 +2471,7 @@ extern "C" void edrtlCalculateBurnout(void) {
     STUBBED();
 }
 
-extern "C" void edrtlCalculateBurnoutEx(void) {
+extern "C" void edrtlCalculateBurnoutEx(burnset_s *, NuBloomParameters *, NUVEC *, f32) {
     STUBBED();
 }
 

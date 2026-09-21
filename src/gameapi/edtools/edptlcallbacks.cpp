@@ -106,7 +106,7 @@ extern "C" {
     void DebrisStartOffset(i32 handle, f32 offset);
     void DebrisSetTrigger(i32 handle, i32 type, i32 id, f32 value);
     void DebrisReflectionOrientation(i32 handle, i16 z, i16 y, f32 offset, f32 bounce);
-    void DebrisSetFacing(i32 handle, i8 enabled, i16 x, i16 y);
+    void DebrisSetFacing(i32 handle, u8 enabled, i16 x, i16 y);
     void DebrisSetGroupID(i32 handle, i16 group);
     void DebrisSetRoomID(i32 handle, nugscn_s *scene);
 }
@@ -257,41 +257,35 @@ static void edptlcbCancelSwitchMenu(eduimenu_s *, eduimenu_s *) {
 static void edptlcbSoundControlMenu(eduimenu_s *menu, eduiitem_s *item, u32) {
     u32 colours[4] = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
     debinftype *effect = debtab[debkeydata[edpp_ptls[edpp_nearest].instance_id].effect_index];
-    edptl_soundcontrol_menu = eduiMenuCreate(70, 70, 180, 250, ed_fnt,
-                                          edptlcbCancelSoundControlMenu, "Sound Control");
+    edptl_soundcontrol_menu = eduiMenuCreate(70, 70, 180, 250, ed_fnt, edptlcbCancelSoundControlMenu, "Sound Control");
     if (edptl_soundcontrol_menu != NULL) {
-        eduiMenuAddItem(edptl_soundcontrol_menu,
-                       eduiItemCheckCreate(static_cast<u32>(item->data) << 16, colours,
-                                           effect->sound_data[item->data * 3 + 1] == 0, 1,
-                                           edptlcbSetSoundControl, "Off"));
+        eduiMenuAddItem(edptl_soundcontrol_menu, eduiItemCheckCreate(static_cast<u32>(item->data) << 16, colours,
+                                                                     effect->sound_data[item->data * 3 + 1] == 0, 1,
+                                                                     edptlcbSetSoundControl, "Off"));
         if (edui_last_item->highlighted) {
             edptl_soundcontrol_menu->selected = edui_last_item;
         }
-        eduiMenuAddItem(edptl_soundcontrol_menu,
-                       eduiItemCheckCreate((static_cast<u32>(item->data) << 16) + 1, colours,
-                                           effect->sound_data[item->data * 3 + 1] == 1, 1,
-                                           edptlcbSetSoundControl, "On Edge"));
+        eduiMenuAddItem(edptl_soundcontrol_menu, eduiItemCheckCreate((static_cast<u32>(item->data) << 16) + 1, colours,
+                                                                     effect->sound_data[item->data * 3 + 1] == 1, 1,
+                                                                     edptlcbSetSoundControl, "On Edge"));
         if (edui_last_item->highlighted) {
             edptl_soundcontrol_menu->selected = edui_last_item;
         }
-        eduiMenuAddItem(edptl_soundcontrol_menu,
-                       eduiItemCheckCreate((static_cast<u32>(item->data) << 16) + 2, colours,
-                                           effect->sound_data[item->data * 3 + 1] == 2, 1,
-                                           edptlcbSetSoundControl, "Off Edge"));
+        eduiMenuAddItem(edptl_soundcontrol_menu, eduiItemCheckCreate((static_cast<u32>(item->data) << 16) + 2, colours,
+                                                                     effect->sound_data[item->data * 3 + 1] == 2, 1,
+                                                                     edptlcbSetSoundControl, "Off Edge"));
         if (edui_last_item->highlighted) {
             edptl_soundcontrol_menu->selected = edui_last_item;
         }
-        eduiMenuAddItem(edptl_soundcontrol_menu,
-                       eduiItemCheckCreate((static_cast<u32>(item->data) << 16) + 3, colours,
-                                           effect->sound_data[item->data * 3 + 1] == 3, 1,
-                                           edptlcbSetSoundControl, "Per Particle"));
+        eduiMenuAddItem(edptl_soundcontrol_menu, eduiItemCheckCreate((static_cast<u32>(item->data) << 16) + 3, colours,
+                                                                     effect->sound_data[item->data * 3 + 1] == 3, 1,
+                                                                     edptlcbSetSoundControl, "Per Particle"));
         if (edui_last_item->highlighted) {
             edptl_soundcontrol_menu->selected = edui_last_item;
         }
-        eduiMenuAddItem(edptl_soundcontrol_menu,
-                       eduiItemCheckCreate((static_cast<u32>(item->data) << 16) + 4, colours,
-                                           effect->sound_data[item->data * 3 + 1] == 4, 1,
-                                           edptlcbSetSoundControl, "Continuous"));
+        eduiMenuAddItem(edptl_soundcontrol_menu, eduiItemCheckCreate((static_cast<u32>(item->data) << 16) + 4, colours,
+                                                                     effect->sound_data[item->data * 3 + 1] == 4, 1,
+                                                                     edptlcbSetSoundControl, "Continuous"));
         if (edui_last_item->highlighted) {
             edptl_soundcontrol_menu->selected = edui_last_item;
         }
@@ -544,8 +538,8 @@ static void cbPtlApplyRot(eduimenu_s *, eduiitem_s *, u32) {
     debinftype *effect = debtab[debkeydata[instance].effect_index];
     for (i32 i = 0; i < count; ++i) {
         effect->rotation_keys[i].time = stages[i].time;
-        effect->rotation_keys[i].value = static_cast<i32>((stages[i].red * (maximum - minimum) + minimum) *
-                                                        (65536.0f / 360.0f));
+        effect->rotation_keys[i].value =
+            static_cast<i32>((stages[i].red * (maximum - minimum) + minimum) * (65536.0f / 360.0f));
     }
     effect->min_rotation = minimum;
     effect->max_rotation = maximum;
@@ -576,14 +570,14 @@ static void cbPtlCopySize(eduimenu_s *, eduiitem_s *item, u32) {
     for (i32 i = 0; i < 8; ++i) {
         if (item->data == 1) {
             f32 grey = (effect->height_keys[i].value - effect->min_size) / (effect->max_size - effect->min_size);
-            eduiGradStageAddRGB(static_cast<edui_gradient_pick_s *>(grad_size_h_item),
-                                effect->height_keys[i].time, grey, grey, grey);
+            eduiGradStageAddRGB(static_cast<edui_gradient_pick_s *>(grad_size_h_item), effect->height_keys[i].time,
+                                grey, grey, grey);
             if (effect->height_keys[i].time == 1.0f)
                 break;
         } else {
             f32 grey = (effect->width_keys[i].value - effect->min_size) / (effect->max_size - effect->min_size);
-            eduiGradStageAddRGB(static_cast<edui_gradient_pick_s *>(grad_size_w_item),
-                                effect->width_keys[i].time, grey, grey, grey);
+            eduiGradStageAddRGB(static_cast<edui_gradient_pick_s *>(grad_size_w_item), effect->width_keys[i].time, grey,
+                                grey, grey);
             if (effect->width_keys[i].time == 1.0f)
                 break;
         }
@@ -607,8 +601,8 @@ static void cbPtlGravMenu(eduimenu_s *menu, eduiitem_s *, u32) {
     debinftype *effect = debtab[debkeydata[edpp_ptls[edpp_nearest].instance_id].effect_index];
     ptlgravmenu = eduiMenuCreate(70, 70, 180, 250, ed_fnt, cbPtlCancelGravMenu, "Gravity");
     if (ptlgravmenu != NULL) {
-        eduiMenuAddItem(ptlgravmenu, eduiItemSliderCreate(0, colours, 0, cbPtlChangeGrav,
-                            -10.0f * edptl_superscale, 20.0f * edptl_superscale, effect->field_0a0, "Gravity"));
+        eduiMenuAddItem(ptlgravmenu, eduiItemSliderCreate(0, colours, 0, cbPtlChangeGrav, -10.0f * edptl_superscale,
+                                                          20.0f * edptl_superscale, effect->field_0a0, "Gravity"));
         eduiMenuAttach(menu, ptlgravmenu);
         ptlgravmenu->x = menu->x + 10;
         ptlgravmenu->y = menu->y + 40;
@@ -756,18 +750,18 @@ static void cbPtlGSortMenu(eduimenu_s *menu, eduiitem_s *, u32) {
     ptlgsortmenu = eduiMenuCreate(70, 70, 180, 250, ed_fnt, cbPtlCancelGSortMenu, "GenSort Type");
     if (ptlgsortmenu) {
         eduiMenuAddItem(ptlgsortmenu,
-                       eduiItemCheckCreate(0, colours, effect->generator_type == 0, 1, cbPtlSelGSort, "Normal"));
+                        eduiItemCheckCreate(0, colours, effect->generator_type == 0, 1, cbPtlSelGSort, "Normal"));
         if (effect->particle_type == 7) {
             eduiMenuAddItem(ptlgsortmenu, eduiItemSelCreate(6, edgrey, 0, 0, NULL, "Radial"));
             eduiMenuAddItem(ptlgsortmenu, eduiItemSelCreate(7, edgrey, 0, 0, NULL, "Radial Rotor"));
         } else {
             eduiMenuAddItem(ptlgsortmenu,
-                           eduiItemCheckCreate(6, colours, effect->generator_type == 6, 1, cbPtlSelGSort, "Radial"));
-            eduiMenuAddItem(ptlgsortmenu,
-                           eduiItemCheckCreate(7, colours, effect->generator_type == 7, 1, cbPtlSelGSort, "Radial Rotor"));
+                            eduiItemCheckCreate(6, colours, effect->generator_type == 6, 1, cbPtlSelGSort, "Radial"));
+            eduiMenuAddItem(ptlgsortmenu, eduiItemCheckCreate(7, colours, effect->generator_type == 7, 1, cbPtlSelGSort,
+                                                              "Radial Rotor"));
         }
         eduiMenuAddItem(ptlgsortmenu,
-                       eduiItemCheckCreate(8, colours, effect->generator_type == 8, 1, cbPtlSelGSort, "Spheroid"));
+                        eduiItemCheckCreate(8, colours, effect->generator_type == 8, 1, cbPtlSelGSort, "Spheroid"));
         if (effect->particle_type == 7) {
             eduiMenuAddItem(ptlgsortmenu, eduiItemSelCreate(9, edgrey, 0, 0, NULL, "BounceY"));
             eduiMenuAddItem(ptlgsortmenu, eduiItemSelCreate(10, edgrey, 0, 0, NULL, "BounceXZ"));
@@ -775,13 +769,13 @@ static void cbPtlGSortMenu(eduimenu_s *menu, eduiitem_s *, u32) {
             eduiMenuAddItem(ptlgsortmenu, eduiItemSelCreate(12, edgrey, 0, 0, NULL, "Star Radial"));
         } else {
             eduiMenuAddItem(ptlgsortmenu,
-                           eduiItemCheckCreate(9, colours, effect->generator_type == 9, 1, cbPtlSelGSort, "BounceY"));
-            eduiMenuAddItem(ptlgsortmenu,
-                           eduiItemCheckCreate(10, colours, effect->generator_type == 10, 1, cbPtlSelGSort, "BounceXZ"));
+                            eduiItemCheckCreate(9, colours, effect->generator_type == 9, 1, cbPtlSelGSort, "BounceY"));
+            eduiMenuAddItem(ptlgsortmenu, eduiItemCheckCreate(10, colours, effect->generator_type == 10, 1,
+                                                              cbPtlSelGSort, "BounceXZ"));
             eduiMenuAddItem(ptlgsortmenu, eduiItemCheckCreate(11, colours, effect->generator_type == 11, 1,
-                                                          cbPtlSelGSort, "Improved Radial"));
-            eduiMenuAddItem(ptlgsortmenu,
-                           eduiItemCheckCreate(12, colours, effect->generator_type == 12, 1, cbPtlSelGSort, "Star Radial"));
+                                                              cbPtlSelGSort, "Improved Radial"));
+            eduiMenuAddItem(ptlgsortmenu, eduiItemCheckCreate(12, colours, effect->generator_type == 12, 1,
+                                                              cbPtlSelGSort, "Star Radial"));
         }
     }
     eduiMenuAttach(menu, ptlgsortmenu);
@@ -846,8 +840,8 @@ static void cbPtlSScaleMenu(eduimenu_s *menu, eduiitem_s *, u32) {
     u32 colours[4] = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
     sscalemenu = eduiMenuCreate(70, 70, 180, 300, ed_fnt, cbPtlCancelSScaleMenu, "Super Scale");
     if (sscalemenu != NULL) {
-        eduiMenuAddItem(sscalemenu, eduiItemSliderCreateInt(0, colours, 0, cbPtlChangeSScale,
-                                                        1, 99, edptl_superscale, "Super Scale"));
+        eduiMenuAddItem(sscalemenu, eduiItemSliderCreateInt(0, colours, 0, cbPtlChangeSScale, 1, 99, edptl_superscale,
+                                                            "Super Scale"));
         eduiMenuAttach(menu, sscalemenu);
         sscalemenu->x = menu->x + 10;
         sscalemenu->y = menu->y + 40;
@@ -909,8 +903,9 @@ static void cbPtlEmitVelMenu(eduimenu_s *menu, eduiitem_s *, u32) {
     debinftype *effect = debtab[debkeydata[edpp_ptls[edpp_nearest].instance_id].effect_index];
     ptlemitvelmenu = eduiMenuCreate(70, 70, 180, 250, ed_fnt, cbPtlCancelEmitVelMenu, "Emitter Vel");
     if (ptlemitvelmenu != NULL) {
-        eduiMenuAddItem(ptlemitvelmenu, eduiItemSliderCreate(0, colours, 0, cbPtlChangeEmitVel,
-                            -(10.0f * edptl_superscale), 20.0f * edptl_superscale, effect->field_048, "Emitter Vel"));
+        eduiMenuAddItem(ptlemitvelmenu,
+                        eduiItemSliderCreate(0, colours, 0, cbPtlChangeEmitVel, -(10.0f * edptl_superscale),
+                                             20.0f * edptl_superscale, effect->field_048, "Emitter Vel"));
         eduiMenuAttach(menu, ptlemitvelmenu);
         ptlemitvelmenu->x = menu->x + 10;
         ptlemitvelmenu->y = menu->y + 40;
@@ -921,10 +916,10 @@ static void cbPtlReadoutMenu(eduimenu_s *menu, eduiitem_s *, u32) {
     u32 colours[4] = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
     ptlreadoutmenu = eduiMenuCreate(70, 70, 180, 250, ed_fnt, cbPtlCancelReadoutMenu, "Info Box Style");
     if (ptlreadoutmenu != NULL) {
-        eduiMenuAddItem(ptlreadoutmenu, eduiItemCheckCreate(0, colours, edpp_readout == 0, 1,
-                                                         cbPtlSelReadout, "Normal"));
-        eduiMenuAddItem(ptlreadoutmenu, eduiItemCheckCreate(1, colours, edpp_readout == 1, 1,
-                                                         cbPtlSelReadout, "Co-ordinates"));
+        eduiMenuAddItem(ptlreadoutmenu,
+                        eduiItemCheckCreate(0, colours, edpp_readout == 0, 1, cbPtlSelReadout, "Normal"));
+        eduiMenuAddItem(ptlreadoutmenu,
+                        eduiItemCheckCreate(1, colours, edpp_readout == 1, 1, cbPtlSelReadout, "Co-ordinates"));
     }
     eduiMenuAttach(menu, ptlreadoutmenu);
     ptlreadoutmenu->x = menu->x + 10;
@@ -943,15 +938,15 @@ static void cbPtlTextureMenu(eduimenu_s *menu, eduiitem_s *, u32) {
     debinftype *effect = debtab[debkeydata[edpp_ptls[edpp_nearest].instance_id].effect_index];
     texturemenu = eduiMenuCreate(70, 70, 180, 300, ed_fnt, cbPtlCancelTextureMenu, "Texture");
     if (texturemenu) {
-        eduiMenuAddItem(texturemenu,
-                       eduiItemCheckCreate(0, colours, effect->particle_type == 0, 1, cbPtlSelTextureType, "Addative"));
-        eduiMenuAddItem(texturemenu,
-                       eduiItemCheckCreate(2, colours, effect->particle_type == 2, 1, cbPtlSelTextureType, "Modulative"));
-        eduiMenuAddItem(texturemenu,
-                       eduiItemCheckCreate(3, colours, effect->particle_type == 3, 1, cbPtlSelTextureType, "Subtractive"));
+        eduiMenuAddItem(texturemenu, eduiItemCheckCreate(0, colours, effect->particle_type == 0, 1, cbPtlSelTextureType,
+                                                         "Addative"));
+        eduiMenuAddItem(texturemenu, eduiItemCheckCreate(2, colours, effect->particle_type == 2, 1, cbPtlSelTextureType,
+                                                         "Modulative"));
+        eduiMenuAddItem(texturemenu, eduiItemCheckCreate(3, colours, effect->particle_type == 3, 1, cbPtlSelTextureType,
+                                                         "Subtractive"));
         if (effect->generator_type == 0 || effect->generator_type == 8) {
-            eduiMenuAddItem(texturemenu,
-                           eduiItemCheckCreate(7, colours, effect->particle_type == 7, 1, cbPtlSelTextureType, "Glass"));
+            eduiMenuAddItem(texturemenu, eduiItemCheckCreate(7, colours, effect->particle_type == 7, 1,
+                                                             cbPtlSelTextureType, "Glass"));
         } else {
             eduiMenuAddItem(texturemenu, eduiItemSelCreate(7, edgrey, 0, 0, NULL, "Glass"));
         }
@@ -959,10 +954,10 @@ static void cbPtlTextureMenu(eduimenu_s *menu, eduiitem_s *, u32) {
             eduiMenuAddItem(texturemenu, eduiItemSelCreate(1, edgrey, 0, 0, NULL, "Texture Selector..."));
         } else {
             eduiMenuAddItem(texturemenu,
-                           eduiItemSelCreate(1, colours, 0, 0, cbPtlTextureSelectMenu, "Texture Selector..."));
+                            eduiItemSelCreate(1, colours, 0, 0, cbPtlTextureSelectMenu, "Texture Selector..."));
         }
         eduiMenuAddItem(texturemenu, eduiItemToggleCreate(0, edblack, static_cast<i8>(effect->camera_facing), 2,
-                                                       cbPtlSetXZFacing, "Default to XZ Plane"));
+                                                          cbPtlSetXZFacing, "Default to XZ Plane"));
         eduiMenuAttach(menu, texturemenu);
         texturemenu->x = menu->x + 10;
         texturemenu->y = menu->y + 40;
@@ -1155,10 +1150,10 @@ static void cbPtlDamageFlagMenu(eduimenu_s *menu, eduiitem_s *, u32) {
     debinftype *effect = debtab[debkeydata[edpp_ptls[edpp_nearest].instance_id].effect_index];
     edptl_damageflag_menu = eduiMenuCreate(70, 70, 200, 250, ed_fnt, cbPtlCancelDamageFlagMenu, "Damage Flags");
     if (edptl_damageflag_menu != NULL) {
-        eduiMenuAddItem(edptl_damageflag_menu, eduiItemToggleCreate(1, edblack, effect->field_2f2 & 1, 1,
-                                                                 cbPtlChangeDamageFlags, "Good"));
+        eduiMenuAddItem(edptl_damageflag_menu,
+                        eduiItemToggleCreate(1, edblack, effect->field_2f2 & 1, 1, cbPtlChangeDamageFlags, "Good"));
         eduiMenuAddItem(edptl_damageflag_menu, eduiItemToggleCreate(2, edblack, (effect->field_2f2 >> 1) & 1, 2,
-                                                                 cbPtlChangeDamageFlags, "Evil"));
+                                                                    cbPtlChangeDamageFlags, "Evil"));
     }
     eduiMenuAttach(menu, edptl_damageflag_menu);
     edptl_damageflag_menu->x = menu->x + 10;
@@ -1190,18 +1185,18 @@ static void cbPtlSelTextureType(eduimenu_s *menu, eduiitem_s *item, u32) {
         i8 old_type = static_cast<i8>(effect->particle_type);
         if (old_type != item->data) {
             switch (item->data) {
-            case 0:
-                edpp_ptls[edpp_nearest].render_priority = 20000;
-                break;
-            case 2:
-                edpp_ptls[edpp_nearest].render_priority = static_cast<i16>(40000);
-                break;
-            case 3:
-                edpp_ptls[edpp_nearest].render_priority = 30000;
-                break;
-            case 7:
-                edpp_ptls[edpp_nearest].render_priority = 10000;
-                break;
+                case 0:
+                    edpp_ptls[edpp_nearest].render_priority = 20000;
+                    break;
+                case 2:
+                    edpp_ptls[edpp_nearest].render_priority = static_cast<i16>(40000);
+                    break;
+                case 3:
+                    edpp_ptls[edpp_nearest].render_priority = 30000;
+                    break;
+                case 7:
+                    edpp_ptls[edpp_nearest].render_priority = 10000;
+                    break;
             }
         }
         if (item->data == 7) {
@@ -1275,10 +1270,10 @@ static void cbPtlQuickDeleteMenu(eduimenu_s *menu, eduiitem_s *, u32) {
             }
             if (index < 512) {
                 eduiMenuAddItem(edptl_quickdel_menu,
-                               eduiItemSelCreate(type, edblack, 0, 1, cbPtlQuickDeleteType, effect->name));
+                                eduiItemSelCreate(type, edblack, 0, 1, cbPtlQuickDeleteType, effect->name));
             } else {
                 eduiMenuAddItem(edptl_quickdel_menu,
-                               eduiItemSelCreate(type, eddarkred, 0, 1, cbPtlQuickDeleteType, effect->name));
+                                eduiItemSelCreate(type, eddarkred, 0, 1, cbPtlQuickDeleteType, effect->name));
             }
         }
         eduiMenuAttach(menu, edptl_quickdel_menu);
@@ -1372,7 +1367,7 @@ static void cbPtlTextureSelectMenu(eduimenu_s *menu, eduiitem_s *, u32) {
             return;
         }
         eduiMenuAddItem(textureselectmenu,
-                       eduiItemTexturePickCreate(0, colours, cbPtlChangeTextureSelect, "Texture Select"));
+                        eduiItemTexturePickCreate(0, colours, cbPtlChangeTextureSelect, "Texture Select"));
         edui_texture_pick_s *texture = static_cast<edui_texture_pick_s *>(edui_last_item);
         NUMTL *material = NuMtlCreate(1);
         texture->material = material;

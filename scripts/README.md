@@ -18,6 +18,7 @@ git commit
   -> Bazel-provided clang-format -i (staged C/C++ files under src/)
   -> git diff --cached --check
   -> bazel test //scripts/checks:checks
+  -> bazel run --config=native //scripts/checks:check_forward_declarations
   -> bazel build --config=<mode> //src:clang_tidy_<mode>
   -> bazel build --config=target //src:saga_target
   -> bazel run //scripts/checks:check_symbols
@@ -51,7 +52,7 @@ deployed proxy or API.
 
 ## Checks and launchers
 
-- `scripts/checks/` contains three source-only Bazel tests, the post-build
+- `scripts/checks/` contains source-only Bazel tests, the post-build
   symbol check, and their support data. See
   [`checks/README.md`](checks/README.md).
 - `scripts/lib/` contains import-only Python libraries. Its modules are

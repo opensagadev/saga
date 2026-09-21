@@ -166,7 +166,7 @@ void Climb_SetMagnetDrawOffsetTarget(GameObject_s *object, nuvec_s *offset) {
     NuVecSub(offset, offset, &object->apiobj.position);
 }
 
-extern "C" i8 NewRayCastGetImpactTerrainType();
+extern "C" i32 NewRayCastGetImpactTerrainType();
 extern i32 TERRAINMASK_NONWEAPON, TERRAINMASK_NONDROID;
 i32 GameRayCast(NUVEC *, NUVEC *, f32, i32);
 

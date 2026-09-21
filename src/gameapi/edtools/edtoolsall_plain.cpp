@@ -78,7 +78,8 @@ static inline f32 edppInterpolateTorusCurve(const debris_float_key_s *keys, f32 
     if (index == 7)
         return 0.0f;
     return ((time - keys[index].time) / (keys[index + 1].time - keys[index].time)) *
-               (keys[index + 1].value - keys[index].value) + keys[index].value;
+               (keys[index + 1].value - keys[index].value) +
+           keys[index].value;
 }
 
 void edppDoInput(nupad_s *pad);
@@ -120,8 +121,8 @@ static __used__ void eduiFntPrintEx(void *font, int x, int y, int alignment, cha
     }
 }
 
-static __used__ void eduiFntPrintClipEx(void *font, float x, float y, int alignment, float clip_x,
-                                      float clip_width, char *format, ...) {
+static __used__ void eduiFntPrintClipEx(void *font, float x, float y, int alignment, float clip_x, float clip_width,
+                                        char *format, ...) {
     if (!edui_donotdraw) {
         char text[1024];
         i32 screen_x = static_cast<i32>(x * 16.0f);
@@ -707,7 +708,7 @@ static void edanimEnter() {
 void FileLoadSingleEffectType(debinftype *, i32, char);
 extern "C" void NuBridgeInit(void);
 extern "C" void NuBridgeRemove(i32 bridge);
-extern "C" i32 NuBridgeCreate(NUGSCN *, nuhspecial_s *, nuhspecial_s *, NUVEC *, NUVEC *, f32, i32, f32, f32, f32, f32,
+extern "C" i32 NuBridgeCreate(NUGSCN *, nuhspecial_s *, nuhspecial_s *, NUVEC *, NUVEC *, f32, i16, f32, f32, f32, f32,
                               i32, f32, f32, i32, u32);
 
 void edbriBridgeUpdate(i32 index, NUGSCN *scene) {
@@ -800,7 +801,7 @@ extern "C" {
     void DebrisSetTrigger(i32, i32, i32, f32);
     void DebrisReflectionOrientation(i32, i16, i16, f32, f32);
     void DebrisSetFacing(i32, u8, i16, i16);
-    void DebrisSetGroupID(i32, i32);
+    void DebrisSetGroupID(i32, i16);
     void DebrisSetRoomID(i32, nugscn_s *);
 }
 
@@ -1201,7 +1202,8 @@ extern "C" {
                        material);
     }
     void edbitsDrawOvalXY(NUVEC *, f32, f32, i32, NUMTL *);
-    void edbitsDrawCircleTilted(NUVEC *centre, f32 radius, i32 colour, NUMTL *material, i32 rotation_z, i32 rotation_y) {
+    void edbitsDrawCircleTilted(NUVEC *centre, f32 radius, i32 colour, NUMTL *material, i32 rotation_z,
+                                i32 rotation_y) {
         edbitsDrawOvalTilted(centre, radius, radius, colour, material, rotation_z, rotation_y);
     }
     void edbitsDrawCircleXY(NUVEC *centre, f32 radius, i32 colour, NUMTL *material) {
@@ -2194,8 +2196,8 @@ extern "C" {
                 continue;
             particle->instance_id = -1;
             particle->effect_index = LookupDebrisEffect(particle->name);
-            AddDebrisEffect(&particle->instance_id, particle->effect_index, particle->position.x,
-                            particle->position.y, particle->position.z);
+            AddDebrisEffect(&particle->instance_id, particle->effect_index, particle->position.x, particle->position.y,
+                            particle->position.z);
             if (particle->instance_id != -1) {
                 debkeydata[particle->instance_id].field_2f9 = 0;
                 DebrisOrientation(particle->instance_id, particle->rotation_z, particle->rotation_y);
@@ -2203,12 +2205,12 @@ extern "C" {
                                          particle->emitter_rotation_y, particle->emitter_rotation_x);
                 DebrisStartOffset(particle->instance_id, particle->start_offset);
                 DebrisSetTrigger(particle->instance_id, particle->switch_type, particle->switch_id,
-                                  particle->switch_variable);
+                                 particle->switch_variable);
                 DebrisReflectionOrientation(particle->instance_id, particle->reflection_rotation_z,
                                             particle->reflection_rotation_y, particle->reflection_offset,
                                             particle->reflection_bounce);
                 DebrisSetFacing(particle->instance_id, particle->facing_mode, particle->facing_rotation_x,
-                                 particle->facing_rotation_y);
+                                particle->facing_rotation_y);
                 DebrisSetGroupID(particle->instance_id, particle->render_group);
                 DebrisSetRoomID(particle->instance_id, reinterpret_cast<nugscn_s *>(edpp_page_scene[particle->page]));
             } else {
@@ -2401,8 +2403,7 @@ extern "C" {
                 stage->red = red;
                 stage->green = green;
                 stage->blue = blue;
-                stage->colour = 0x80000000u + static_cast<i32>(red * 255.0f) +
-                                (static_cast<i32>(green * 255.0f) << 8) +
+                stage->colour = 0x80000000u + static_cast<i32>(red * 255.0f) + (static_cast<i32>(green * 255.0f) << 8) +
                                 (static_cast<i32>(blue * 255.0f) << 16);
                 stage->metadata = node->metadata;
             }
@@ -2519,8 +2520,8 @@ extern "C" {
         uimtls[3]->attribs.alpha_mode = 1;
         NuMtlUpdate(uimtls[3]);
     }
-    eduiitem_s *eduiItemCheckCreate(usize data, const void *colours, i32 selected, i32 group,
-                                    EdUiItemCallback callback, char *text) {
+    eduiitem_s *eduiItemCheckCreate(usize data, const void *colours, i32 selected, i32 group, EdUiItemCallback callback,
+                                    char *text) {
         eduiitem_s *item = eduiItemSelCreate(data, colours, selected, group, callback, text);
         if (item) {
             item->type = 2;
@@ -2565,8 +2566,9 @@ extern "C" {
         item->cursor_y = item->value;
     }
     eduiitem_s *eduiItemColourSliderCreate(usize data, const void *colours, i32 group, EdUiItemCallback callback,
-                                          f32 minimum, f32 range, f32 value, u8 red, u8 green, u8 blue, char *text) {
-        edui_colour_slider_s *item = static_cast<edui_colour_slider_s *>(NU_ALLOC(sizeof(edui_colour_slider_s), 4, 1, "", 0));
+                                           f32 minimum, f32 range, f32 value, u8 red, u8 green, u8 blue, char *text) {
+        edui_colour_slider_s *item =
+            static_cast<edui_colour_slider_s *>(NU_ALLOC(sizeof(edui_colour_slider_s), 4, 1, "", 0));
         if (!item)
             return NULL;
         memset(item, 0, sizeof(*item));
@@ -2592,9 +2594,10 @@ extern "C" {
         return item;
     }
     eduiitem_s *eduiItemDataGradPickCreate(usize data, const void *colours, EdUiItemCallback callback,
-                                         EdUiItemCallback press, EdUiItemCallback add, EdUiItemCallback remove,
-                                         EdUiItemCallback copy, EdUiItemCallback paste, char *text) {
-        edui_gradient_pick_s *item = static_cast<edui_gradient_pick_s *>(eduiItemGradPickCreate(data, colours, callback, text));
+                                           EdUiItemCallback press, EdUiItemCallback add, EdUiItemCallback remove,
+                                           EdUiItemCallback copy, EdUiItemCallback paste, char *text) {
+        edui_gradient_pick_s *item =
+            static_cast<edui_gradient_pick_s *>(eduiItemGradPickCreate(data, colours, callback, text));
         if (item) {
             item->type = 9;
             item->press = press;
@@ -2682,7 +2685,8 @@ extern "C" {
         child->previous = NULL;
     }
     eduiitem_s *eduiItemGradPickCreate(usize data, const void *colours, EdUiItemCallback callback, char *text) {
-        edui_gradient_pick_s *item = static_cast<edui_gradient_pick_s *>(NU_ALLOC(sizeof(edui_gradient_pick_s), 4, 1, "", 0));
+        edui_gradient_pick_s *item =
+            static_cast<edui_gradient_pick_s *>(NU_ALLOC(sizeof(edui_gradient_pick_s), 4, 1, "", 0));
         if (!item)
             return NULL;
         memset(item, 0, sizeof(*item));
@@ -2709,8 +2713,8 @@ extern "C" {
             }
         }
     }
-    eduiitem_s *eduiItemGraphCreate(usize data, const void *colours, EdUiItemCallback callback,
-                                   nugraph_s *graph, i32 width, i32 height) {
+    eduiitem_s *eduiItemGraphCreate(usize data, const void *colours, EdUiItemCallback callback, nugraph_s *graph,
+                                    i32 width, i32 height) {
         edui_graph_s *item = static_cast<edui_graph_s *>(NU_ALLOC(sizeof(edui_graph_s), 4, 1, "", 0));
         if (!item)
             return NULL;
@@ -2770,21 +2774,20 @@ extern "C" {
         }
         return item;
     }
-    eduiitem_s *eduiItemNumberCreate(usize data, const void *colours, i32 group, EdUiItemCallback callback,
-                                    f32 minimum, f32 range, f32 value, char *text) {
+    eduiitem_s *eduiItemNumberCreate(usize data, const void *colours, i32 group, EdUiItemCallback callback, f32 minimum,
+                                     f32 range, f32 value, char *text) {
         eduiitem_s *item = eduiItemSliderCreate(data, colours, group, callback, minimum, range, value, text);
         if (item)
             item->render = eduicbRenderNumber;
         return item;
     }
-    eduiitem_s *eduiItemPropCreate(usize data, const void *colours, EdUiItemCallback selected,
-                                  EdUiItemCallback changed, EdUiItemCallback button, i32 button_type,
-                                  char *text, char *value) {
+    eduiitem_s *eduiItemPropCreate(usize data, const void *colours, EdUiItemCallback selected, EdUiItemCallback changed,
+                                   EdUiItemCallback button, i32 button_type, char *text, char *value) {
         return eduiItemPropCreateEx(data, colours, selected, changed, button, button_type, text, value, 0);
     }
     eduiitem_s *eduiItemPropCreateEx(usize data, const void *colours, EdUiItemCallback selected,
-                                    EdUiItemCallback changed, EdUiItemCallback button, i32 button_type,
-                                    char *text, char *value, i32 extra_data) {
+                                     EdUiItemCallback changed, EdUiItemCallback button, i32 button_type, char *text,
+                                     char *value, i32 extra_data) {
         edui_prop_s *item = static_cast<edui_prop_s *>(NU_ALLOC(sizeof(edui_prop_s), 4, 1, "", 0));
         if (!item)
             return NULL;
@@ -2827,8 +2830,8 @@ extern "C" {
     void eduiItemRender(void) {
         STUBBED();
     }
-    eduiitem_s *eduiItemSelCreate(usize data, const void *colours, i32 selected, i32 group,
-                                 EdUiItemCallback callback, char *text) {
+    eduiitem_s *eduiItemSelCreate(usize data, const void *colours, i32 selected, i32 group, EdUiItemCallback callback,
+                                  char *text) {
         edui_sel_s *item = static_cast<edui_sel_s *>(NU_ALLOC(sizeof(edui_sel_s), 4, 1, "", 0));
         if (!item)
             return NULL;
@@ -2850,7 +2853,7 @@ extern "C" {
         return item;
     }
     eduiitem_s *eduiItemSelWithClipColourCreate(usize data, const void *colours, i32 selected, i32 group,
-                                              EdUiItemCallback callback, char *text) {
+                                                EdUiItemCallback callback, char *text) {
         eduiitem_s *item = eduiItemSelCreate(data, colours, selected, group, callback, text);
         if (item)
             item->render = eduicbRenderSelWithClipColour;
@@ -2874,8 +2877,8 @@ extern "C" {
         }
         return 0;
     }
-    eduiitem_s *eduiItemSliderCreate(usize data, const void *colours, i32 group, EdUiItemCallback callback,
-                                    f32 minimum, f32 range, f32 value, char *text) {
+    eduiitem_s *eduiItemSliderCreate(usize data, const void *colours, i32 group, EdUiItemCallback callback, f32 minimum,
+                                     f32 range, f32 value, char *text) {
         edui_slider_s *item = static_cast<edui_slider_s *>(NU_ALLOC(sizeof(edui_slider_s), 4, 1, "", 0));
         if (!item)
             return NULL;
@@ -2900,7 +2903,7 @@ extern "C" {
         return item;
     }
     eduiitem_s *eduiItemSliderCreateInt(usize data, const void *colours, i32 group, EdUiItemCallback callback,
-                                       i32 minimum, i32 range, i32 value, char *text) {
+                                        i32 minimum, i32 range, i32 value, char *text) {
         edui_slider_s *item = static_cast<edui_slider_s *>(
             eduiItemSliderCreate(data, colours, group, callback, minimum, range, value, text));
         if (item) {
@@ -2942,10 +2945,10 @@ extern "C" {
     void eduiItemTextPickSetFmt(edui_textpicker_s *item, char *format) {
         STUBBED();
     }
-    eduiitem_s *eduiItemTextSelectorCreate(usize data, const void *colours, i32 group,
-                                          EdUiItemCallback callback, i32 count, i32 selected,
-                                          char *text, char **options) {
-        edui_text_selector_s *item = static_cast<edui_text_selector_s *>(NU_ALLOC(sizeof(edui_text_selector_s), 4, 1, "", 0));
+    eduiitem_s *eduiItemTextSelectorCreate(usize data, const void *colours, i32 group, EdUiItemCallback callback,
+                                           i32 count, i32 selected, char *text, char **options) {
+        edui_text_selector_s *item =
+            static_cast<edui_text_selector_s *>(NU_ALLOC(sizeof(edui_text_selector_s), 4, 1, "", 0));
         if (!item)
             return NULL;
         memset(item, 0, sizeof(*item));
@@ -2969,7 +2972,8 @@ extern "C" {
         return item;
     }
     eduiitem_s *eduiItemTexturePickCreate(usize data, const void *colours, EdUiItemCallback callback, char *text) {
-        edui_texture_pick_s *item = static_cast<edui_texture_pick_s *>(NU_ALLOC(sizeof(edui_texture_pick_s), 4, 1, "", 0));
+        edui_texture_pick_s *item =
+            static_cast<edui_texture_pick_s *>(NU_ALLOC(sizeof(edui_texture_pick_s), 4, 1, "", 0));
         if (!item)
             return NULL;
         memset(item, 0, sizeof(*item));
@@ -2992,7 +2996,7 @@ extern "C" {
         return item;
     }
     eduiitem_s *eduiItemToggleCreate(usize data, const void *colours, i32 selected, i32 group,
-                                    EdUiItemCallback callback, char *text) {
+                                     EdUiItemCallback callback, char *text) {
         eduiitem_s *item = eduiItemSelCreate(data, colours, selected, group, callback, text);
         if (item) {
             item->type = 3;
@@ -3256,10 +3260,8 @@ extern "C" {
         cbInteractMenuKeySelect(menu);
         if (item_result || !pad)
             return 0;
-        if (menu && menu->selected && menu->selected->input && !menu->selected->disabled &&
-            pad->digital_buttons) {
-            if (menu->selected->input(menu, menu->selected, pad->digital_buttons,
-                                      pad->digital_buttons_pressed))
+        if (menu && menu->selected && menu->selected->input && !menu->selected->disabled && pad->digital_buttons) {
+            if (menu->selected->input(menu, menu->selected, pad->digital_buttons, pad->digital_buttons_pressed))
                 return 0;
         }
         u32 buttons = pad->digital_buttons;
@@ -3424,8 +3426,7 @@ extern "C" {
                 sorted = 1;
                 eduiitem_s *item = first;
                 while (item->next && item->text && item->next->text) {
-                    if (item->type != 20 &&
-                        (item->next->type == 20 || NuStrICmp(item->text, item->next->text) > 0)) {
+                    if (item->type != 20 && (item->next->type == 20 || NuStrICmp(item->text, item->next->text) > 0)) {
                         eduiMenuItemMoveDown(menu, item);
                         if (item == first)
                             first = item->previous;
@@ -3637,10 +3638,12 @@ extern "C" {
         f32 fraction = 0.0f;
         for (i32 sample = 0; sample < 101; ++sample) {
             i32 current_x = static_cast<i32>(width * fraction);
-            i32 current_y = height - static_cast<i32>(height * nugraphGetYatX(graph, fraction * graph->x_extent * graph->x_scale, 2));
+            i32 current_y =
+                height -
+                static_cast<i32>(height * nugraphGetYatX(graph, fraction * graph->x_extent * graph->x_scale, 2));
             if (!edui_donotdraw)
-                NuRndrLine2di((x + previous_x) << 4, (y + previous_y) << 3, (x + current_x) << 4,
-                             (y + current_y) << 3, colour, uimtls[0]);
+                NuRndrLine2di((x + previous_x) << 4, (y + previous_y) << 3, (x + current_x) << 4, (y + current_y) << 3,
+                              colour, uimtls[0]);
             previous_x = current_x;
             previous_y = current_y;
             fraction += 0.01f;
@@ -3663,8 +3666,7 @@ extern "C" {
             pick->cursor_y = (edui_cursor_y - interact->y) / (interact->height * 0.75f);
             pick->dragging_colour = (edui_cursor_buttons & EDUI_CURSOR_PRIMARY) != 0;
         }
-        if (((edui_cursor_x >= interact->x &&
-              edui_cursor_y >= interact->y + interact->height * 0.75f &&
+        if (((edui_cursor_x >= interact->x && edui_cursor_y >= interact->y + interact->height * 0.75f &&
               edui_cursor_x < interact->x + interact->width &&
               edui_cursor_y < interact->y + interact->height * 0.75f + interact->height * 0.125f) ||
              pick->dragging_saturation) &&
@@ -3689,8 +3691,7 @@ extern "C" {
         eduiHSVToRGB(pick->hue, pick->saturation, pick->value, pick->red, pick->green, pick->blue);
         if (edui_cursor_x >= interact->x &&
             edui_cursor_y >= interact->y + interact->height * 0.75f + interact->height * 0.125f &&
-            edui_cursor_x < interact->x + interact->width &&
-            edui_cursor_y < interact->y + interact->height &&
+            edui_cursor_x < interact->x + interact->width && edui_cursor_y < interact->y + interact->height &&
             (edui_cursor_buttons_db & EDUI_CURSOR_PRIMARY)) {
             pick->dragging_colour = 0;
             pick->dragging_saturation = 0;
@@ -4254,7 +4255,7 @@ extern "C" {
         item->y = y;
         if (!edui_donotdraw)
             NuRndrRect2di(x << 4, y << 3, width << 4, height << 3, item->colours[2 + item->highlighted],
-                         uimtls[ui_bgmtl]);
+                          uimtls[ui_bgmtl]);
         if (!edui_donotdraw)
             NuQFntSet(edui_font);
         if (!edui_donotdraw)
@@ -4273,8 +4274,8 @@ extern "C" {
             if (!edui_donotdraw) {
                 i32 left = static_cast<i32>((width << 4) * stage->time);
                 i32 right = static_cast<i32>((width << 4) * stage->next->time);
-                NuRndrGradRect2di((x << 4) + left, (y + half_height) << 3, right - left, half_height << 3,
-                                 colours, uimtls[ui_bgmtl]);
+                NuRndrGradRect2di((x << 4) + left, (y + half_height) << 3, right - left, half_height << 3, colours,
+                                  uimtls[ui_bgmtl]);
             }
         }
         for (edui_gradient_node_s *stage = gradient->first_stage; stage; stage = stage->next) {
@@ -4295,8 +4296,8 @@ extern "C" {
     }
     static __used__ i32 eduicbRenderGreyPick(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width) {
         edui_colour_pick_s *pick = static_cast<edui_colour_pick_s *>(item);
-        i32 colours[4] = {static_cast<i32>(0x80000000), static_cast<i32>(0x80ffffff),
-                          static_cast<i32>(0x80000000), static_cast<i32>(0x80ffffff)};
+        i32 colours[4] = {static_cast<i32>(0x80000000), static_cast<i32>(0x80ffffff), static_cast<i32>(0x80000000),
+                          static_cast<i32>(0x80ffffff)};
         i32 height = width / 4;
         item->x = x;
         item->y = y;
@@ -4308,14 +4309,13 @@ extern "C" {
         for (i32 offset = 1; offset >= -1; --offset) {
             i32 cursor_x = static_cast<i32>(x + offset + (width - 2) * pick->value) << 4;
             if (!edui_donotdraw)
-                NuRndrLine2di(cursor_x, y << 3, cursor_x, (y + (height >> 1) - 1) << 3,
-                             0x80ffffff, uimtls[0]);
+                NuRndrLine2di(cursor_x, y << 3, cursor_x, (y + (height >> 1) - 1) << 3, 0x80ffffff, uimtls[0]);
         }
         for (i32 offset = 1; offset >= -1; --offset) {
             i32 cursor_x = static_cast<i32>(x + offset + (width - 2) * pick->value) << 4;
             if (!edui_donotdraw)
-                NuRndrLine2di(cursor_x, (y + (height >> 1)) << 3, cursor_x, (y + height - 1) << 3,
-                             0x80000000, uimtls[0]);
+                NuRndrLine2di(cursor_x, (y + (height >> 1)) << 3, cursor_x, (y + height - 1) << 3, 0x80000000,
+                              uimtls[0]);
         }
         return height;
     }
@@ -4327,7 +4327,7 @@ extern "C" {
         item->y = y;
         if (!edui_donotdraw)
             NuRndrRect2di(x << 4, y << 3, width << 4, height << 3, item->colours[2 + item->highlighted],
-                         uimtls[ui_bgmtl]);
+                          uimtls[ui_bgmtl]);
         if (!edui_donotdraw)
             NuQFntSet(edui_font);
         if (!edui_donotdraw)
@@ -4352,7 +4352,7 @@ extern "C" {
         item->y = y;
         if (!edui_donotdraw)
             NuRndrRect2di(x << 4, y << 3, width << 4, height << 3, item->colours[2 + item->highlighted],
-                         uimtls[ui_bgmtl]);
+                          uimtls[ui_bgmtl]);
         if (!edui_donotdraw)
             NuQFntSet(edui_font);
         if (!edui_donotdraw)
@@ -4377,8 +4377,8 @@ extern "C" {
         if (!edui_donotdraw)
             NuRndrRect2di(x << 4, y << 3, width << 4, 64, item->colours[2 + item->highlighted], uimtls[ui_bgmtl]);
         if (!edui_donotdraw)
-            NuRndrLine2di((x + 4) << 4, (y << 3) + 32, ((x + width) << 4) - 64, (y << 3) + 32,
-                         0xff000000, uimtls[ui_bgmtl]);
+            NuRndrLine2di((x + 4) << 4, (y << 3) + 32, ((x + width) << 4) - 64, (y << 3) + 32, 0xff000000,
+                          uimtls[ui_bgmtl]);
         return 8;
     }
     static __used__ i32 eduicbRenderSlider(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width) {
@@ -4389,7 +4389,7 @@ extern "C" {
         item->y = y;
         if (!edui_donotdraw)
             NuRndrRect2di(x << 4, y << 3, width << 4, height << 4, item->colours[2 + item->highlighted],
-                         uimtls[ui_bgmtl]);
+                          uimtls[ui_bgmtl]);
         if (!edui_donotdraw)
             NuQFntSet(edui_font);
         if (!edui_donotdraw)
@@ -4457,7 +4457,7 @@ extern "C" {
         item->y = y;
         if (!edui_donotdraw)
             NuRndrRect2di(x << 4, y << 3, width << 4, height << 3, item->colours[2 + item->highlighted],
-                         uimtls[ui_bgmtl]);
+                          uimtls[ui_bgmtl]);
         if (!edui_donotdraw)
             NuQFntSet(edui_font);
         if (!edui_donotdraw)

@@ -56,7 +56,7 @@ extern struct LEVFLAGBYTES_s LevFlag;
 // only consumer within the levels module.
 
 extern "C" {
-    void *AIPAthFindPathCnx(AISYS_s *, i32, char *, void *, void *); // original name keeps the typo
+    void *AIPAthFindPathCnx(AISYS_s *, AIPATH_s *, char *, char *, i32 *); // original name keeps the typo
 }
 
 // --- Cross-file entry points (C++ linkage) ---------------------------------
@@ -815,8 +815,8 @@ void Action_MushroomCollapse(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char 
 }
 
 i32 PodSeekMushCutSound() {
-    if (WORLD->current_level == PODRACEB_LDATA && Lap == 2 &&
-        PodRace->mushroom_timer > 1.0f && mushroom_collapse != 0) {
+    if (WORLD->current_level == PODRACEB_LDATA && Lap == 2 && PodRace->mushroom_timer > 1.0f &&
+        mushroom_collapse != 0) {
         float along = GameCam->sock_position.distance;
         if (along > mushroom0_along - 15.0f && along <= mushroom0_along + 5.0f)
             return 1;
@@ -1623,20 +1623,18 @@ void RetakeE_Init(WORLDINFO_s *world) {
 }
 
 void RetakeG_Init(WORLDINFO_s *world) {
-    char buf[0x10];
+    i32 direction;
     retakeg_netpacket = (RETAKEGNETPACKET_s *)SetLevelHack(4);
     RetakeG_TotalGuards_msg = CheckGizAIMessage(gizaimessagesys, "TotalGuards", NULL);
     RetakeG_GuardsToRescue_msg = CheckGizAIMessage(gizaimessagesys, "GuardsToRescue", NULL);
     LevGizForce[0] = GizForce_FindByName(world->giz_force_sys, "force6");
-    LevPathCnx[0] = AIPAthFindPathCnx(world->ai_sys, 0, "stack1_b", NULL, buf);
-    LevPathCnx[1] = AIPAthFindPathCnx(world->ai_sys, 0, "stack1_a", NULL, buf);
-    LevPathCnx[2] = AIPAthFindPathCnx(world->ai_sys, 0, "stack1_c", NULL, buf);
-    LevPathCnx[3] = AIPAthFindPathCnx(world->ai_sys, 0, "stack1_d", NULL, buf);
+    LevPathCnx[0] = AIPAthFindPathCnx(world->ai_sys, NULL, "stack1_a", "stack1_b", &direction);
+    LevPathCnx[1] = AIPAthFindPathCnx(world->ai_sys, NULL, "stack1_b", "stack1_c", &direction);
+    LevPathCnx[2] = AIPAthFindPathCnx(world->ai_sys, NULL, "stack1_c", "stack1_d", &direction);
     LevGizForce[1] = GizForce_FindByName(world->giz_force_sys, "force3");
-    LevPathCnx[4] = AIPAthFindPathCnx(world->ai_sys, 0, "stack2_b", NULL, buf);
-    LevPathCnx[5] = AIPAthFindPathCnx(world->ai_sys, 0, "stack2_a", NULL, buf);
-    LevPathCnx[6] = AIPAthFindPathCnx(world->ai_sys, 0, "stack2_c", NULL, buf);
-    LevPathCnx[7] = AIPAthFindPathCnx(world->ai_sys, 0, "stack2_d", NULL, buf);
+    LevPathCnx[3] = AIPAthFindPathCnx(world->ai_sys, NULL, "stack2_a", "stack2_b", &direction);
+    LevPathCnx[4] = AIPAthFindPathCnx(world->ai_sys, NULL, "stack2_b", "stack2_c", &direction);
+    LevPathCnx[5] = AIPAthFindPathCnx(world->ai_sys, NULL, "stack2_c", "stack2_d", &direction);
     GIZFORCE_s *f = GizForce_FindByName(world->giz_force_sys, "Force18");
     if (f != NULL)
         f->strength_0x6c = 0.85f;

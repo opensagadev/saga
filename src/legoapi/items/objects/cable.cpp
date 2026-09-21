@@ -27,7 +27,7 @@ f32 cable_speed = 20.0f;
 i32 atat_locators[4] = {0, 1, 2, 3};
 extern AREADATA_s *HOTHBATTLE_ADATA;
 extern LEVELDATA_s *HOTHBATTLED_LDATA;
-void FaceOpponent(GameObject_s *, NUVEC *);
+i32 FaceOpponent(GameObject_s *, NUVEC *);
 extern i16 id_ATAT, id_ATST, id_ATST_LOWRES;
 extern i32 TERRAINMASK_NONDROID;
 i32 GameRayCast(NUVEC *, NUVEC *, f32, i32);
@@ -421,10 +421,8 @@ GameObject_s *CableTargetGameObject(GameObject_s *source, nuvec_s *position, f32
             candidate->id != id_ATST_LOWRES) {
             continue;
         }
-        if (candidate->apiobj.collision_position.x < minimum_x ||
-            candidate->apiobj.collision_position.x > maximum_x ||
-            candidate->apiobj.collision_position.z < minimum_z ||
-            candidate->apiobj.collision_position.z > maximum_z) {
+        if (candidate->apiobj.collision_position.x < minimum_x || candidate->apiobj.collision_position.x > maximum_x ||
+            candidate->apiobj.collision_position.z < minimum_z || candidate->apiobj.collision_position.z > maximum_z) {
             continue;
         }
 

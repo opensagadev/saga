@@ -1,7 +1,29 @@
 load("@bazel_skylib//rules:native_binary.bzl", "native_binary")
-load("@rules_python//python:defs.bzl", "py_binary", "py_test")
+load("@rules_cc//cc:cc_binary.bzl", "cc_binary")
+load("@rules_python//python:defs.bzl", "py_binary", "py_library", "py_test")
 
 _PYTHON_ENV = {"PYTHONDONTWRITEBYTECODE": "1"}
+
+cc_binary(
+    name = "collect_function_declarations",
+    srcs = [
+        "collect_function_declarations.cpp",
+        "@llvm_tools_llvm//:libclang",
+    ],
+    deps = ["@llvm_tools_llvm//:clang_headers"],
+)
+
+filegroup(
+    name = "libclang_runtime",
+    srcs = select({
+        "@platforms//os:macos": ["@llvm_tools_llvm//:lib/libclang.dylib"],
+        "@platforms//os:windows": ["@llvm_tools_llvm//:bin/libclang.dll"],
+        "//conditions:default": [
+            "@llvm_tools_llvm//:lib/libclang.so.22.1",
+            "@llvm_tools_llvm//:lib/libclang.so.22.1.8",
+        ],
+    }),
+)
 
 py_test(
     name = "check_duplicate_definitions",
@@ -67,6 +89,27 @@ py_test(
     main = "check_host_boundary.py",
 )
 
+py_library(
+    name = "forward_declarations",
+    srcs = ["check_forward_declarations.py"],
+)
+
+py_binary(
+    name = "check_forward_declarations",
+    srcs = ["check_forward_declarations.py"],
+    data = ["//src:function_declarations"],
+    env = _PYTHON_ENV,
+    main = "check_forward_declarations.py",
+)
+
+py_test(
+    name = "test_forward_declarations",
+    size = "small",
+    srcs = ["test_forward_declarations.py"],
+    env = _PYTHON_ENV,
+    deps = [":forward_declarations"],
+)
+
 py_test(
     name = "check_bazel_optimization_map",
     size = "small",
@@ -82,9 +125,10 @@ py_test(
 test_suite(
     name = "checks",
     tests = [
-        "//scripts:test_pages",
         ":check_bazel_optimization_map",
         ":check_duplicate_definitions",
         ":check_host_boundary",
+        ":test_forward_declarations",
+        "//scripts:test_pages",
     ],
 )

@@ -146,7 +146,7 @@ void LoadLights(WORLDINFO *world, char *path);
 GAMEANIMSYS_s *GameAnimSys_Create(VARIPTR *buf, VARIPTR *buf_end);
 void *GameAntnode_CreateSys(WORLDINFO *world, VARIPTR *buf, VARIPTR *buf_end, i32 count);
 extern "C" {
-    void SockSys_Configure(void *sock_sys, char *config, i32 param, void *buf, void *buf_end, void *gscn);
+    void SockSys_Configure(SOCKSYS *sock_sys, char *config, i32 param, VARIPTR *buf, VARIPTR *buf_end, NUGSCN *gscn);
     void rtlResetDynamic(void);
     i32 rtlFindByUserId(usize rtl_set, i32 user_id);
     i32 rtlGetDirection(usize rtl_set, i32 id, void **out);

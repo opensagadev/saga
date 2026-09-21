@@ -7,7 +7,7 @@
 #include "legoapi/items/base/collection.h"
 #include "legoapi/world/world_shared.h"
 
-extern "C" void PlaySfx(char *, i32);
+extern "C" void PlaySfx(char *, NUVEC *);
 
 extern i32 GetMenuID(void);
 extern void SetBonusWinner(i32);

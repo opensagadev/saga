@@ -69,12 +69,8 @@ extern struct GUNSHIP_LEVFLAG_s LevFlag;
 
 // --- Cross-file entry points / id globals ---
 //
-// AIPAthFindPathCnx remains local here because it is called with a different
-// argument arity than in episodeI (both are byte-matched as-is), so it cannot
-// live in a shared header.
-
 extern "C" {
-    void *AIPAthFindPathCnx(AISYS_s *, AIPATH *, void *, void *, void *); // legoapi/ai pathfinding
+    void *AIPAthFindPathCnx(AISYS_s *, AIPATH_s *, char *, char *, i32 *); // legoapi/ai pathfinding
 }
 
 void ClearAICreatures();
@@ -1080,9 +1076,8 @@ void KaminoE_Update(WORLDINFO_s *world) {
     NuMtxSetTranslation(matrix, &kamino_e.position);
     NuMtxPreRotateY(matrix, kamino_e.yaw);
     NuMtxPreRotateX(matrix, kamino_e.pitch);
-    i32 *connection =
-        static_cast<i32 *>(AIPAthFindPathCnx(world->ai_sys, world->ai_sys->path_sys->active_path, (void *)"Bridge1_a",
-                                             (void *)"Bridge1_b", &connection_direction));
+    i32 *connection = static_cast<i32 *>(AIPAthFindPathCnx(world->ai_sys, world->ai_sys->path_sys->active_path,
+                                                           "Bridge1_a", "Bridge1_b", &connection_direction));
     AIAREA *fight_area = AISysFindArea(WORLD->ai_sys, "Fight");
     if (connection == NULL || jango == NULL || fight_area == NULL)
         return;
@@ -1135,8 +1130,7 @@ i32 KaminoE_CheckPlatHit(BOLT_s *bolt) {
         return 0;
 
     for (i32 i = 0; i < 4; ++i) {
-        if (kamino_e.turrets[i] != NULL && kamino_e.panels[i] != NULL &&
-            (kamino_e.turrets[i]->flags & 0x32) == 2) {
+        if (kamino_e.turrets[i] != NULL && kamino_e.panels[i] != NULL && (kamino_e.turrets[i]->flags & 0x32) == 2) {
             if (kamino_e.active_turret == NULL)
                 kamino_e.active_turret = kamino_e.turrets[i];
         }
@@ -2376,19 +2370,23 @@ void DookuC_Init(WORLDINFO_s *world) {
     LevGizForce[0] = GizForce_FindByName(world->giz_force_sys, "dooku");
     LevGizForce[1] = GizForce_FindByName(world->giz_force_sys, "dooku1");
     LevGizForce[2] = GizForce_FindByName(world->giz_force_sys, "dooku2");
-    void *path1 = AIPathFindNode(world->ai_sys, NULL, "path1");
+    char *path1_name = "path1";
+    void *path1 = AIPathFindNode(world->ai_sys, NULL, path1_name);
     LevAIPathNode[0] = path1;
-    void *path2 = AIPathFindNode(world->ai_sys, NULL, "path2");
+    char *path2_name = "path2";
+    void *path2 = AIPathFindNode(world->ai_sys, NULL, path2_name);
     LevAIPathNode[1] = path2;
-    void *path3 = AIPathFindNode(world->ai_sys, NULL, "path3");
+    char *path3_name = "path3";
+    void *path3 = AIPathFindNode(world->ai_sys, NULL, path3_name);
     LevAIPathNode[2] = path3;
-    void *path4 = AIPathFindNode(world->ai_sys, NULL, "path4");
+    char *path4_name = "path4";
+    void *path4 = AIPathFindNode(world->ai_sys, NULL, path4_name);
     LevAIPathNode[3] = path4;
-    char buf[0x40];
-    LevPathCnx[0] = AIPAthFindPathCnx(world->ai_sys, 0, path1, path2, buf);
-    LevPathCnx[1] = AIPAthFindPathCnx(world->ai_sys, 0, path2, path3, buf);
-    LevPathCnx[2] = AIPAthFindPathCnx(world->ai_sys, 0, path3, path4, buf);
-    LevPathCnx[3] = AIPAthFindPathCnx(world->ai_sys, 0, path4, (void *)"conn", buf);
+    i32 direction;
+    LevPathCnx[0] = AIPAthFindPathCnx(world->ai_sys, NULL, path1_name, path2_name, &direction);
+    LevPathCnx[1] = AIPAthFindPathCnx(world->ai_sys, NULL, path2_name, path3_name, &direction);
+    LevPathCnx[2] = AIPAthFindPathCnx(world->ai_sys, NULL, path3_name, path4_name, &direction);
+    LevPathCnx[3] = AIPAthFindPathCnx(world->ai_sys, NULL, path4_name, "conn", &direction);
     dookuC_nodesNeedUpdating = 1;
 }
 

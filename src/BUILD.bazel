@@ -9,6 +9,7 @@ load(
     "clang_tidy_android_check",
     "clang_tidy_check",
     "clang_tidy_wasm_check",
+    "function_declaration_index",
 )
 
 package(default_visibility = ["//visibility:public"])
@@ -264,6 +265,11 @@ clang_tidy_check(
     name = "clang_tidy_native",
     srcs = _NATIVE_COMPONENTS + [":saga_native_platform"],
     tags = ["manual"],
+)
+
+function_declaration_index(
+    name = "function_declarations",
+    srcs = _NATIVE_COMPONENTS + [":saga_native_platform"],
 )
 
 cc_binary(

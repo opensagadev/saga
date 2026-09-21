@@ -29,7 +29,7 @@ void NewBuzzFrames(nupad_s *, i32, i32);
 void GameCam_HitJudder();
 void StunGameObject(GameObject_s *, GameObject_s *, f32, i32);
 void Detonator_Detonate(DETONATOR_s *);
-void GizmoBlowupBlowup(GIZMOBLOWUP_s *, i32, i32, i32, GameObject_s *, i32);
+i32 GizmoBlowupBlowup(GIZMOBLOWUP_s *, i32, i32, i32, GameObject_s *, i32);
 i32 TerrainPlatId();
 f32 SeekValF(f32, f32, f32);
 
@@ -44,20 +44,20 @@ static inline bool Batarang_TargetPosition(BATARANG_s *batarang, i32 index, NUVE
     }
     BATARANG_TARGET_s &target = batarang->targets[index];
     switch (target.type) {
-    case 0:
-        *position = static_cast<GameObject_s *>(target.object)->apiobj.collision_position;
-        return true;
-    case 1:
-        *position = static_cast<DETONATOR_s *>(target.object)->field_0x0c;
-        return true;
-    case 2:
-        *position = static_cast<GIZMOBLOWUP_s *>(target.object)->mid_position;
-        return true;
-    case 3:
-        *position = *static_cast<NUVEC *>(target.object);
-        return true;
-    default:
-        return false;
+        case 0:
+            *position = static_cast<GameObject_s *>(target.object)->apiobj.collision_position;
+            return true;
+        case 1:
+            *position = static_cast<DETONATOR_s *>(target.object)->field_0x0c;
+            return true;
+        case 2:
+            *position = static_cast<GIZMOBLOWUP_s *>(target.object)->mid_position;
+            return true;
+        case 3:
+            *position = *static_cast<NUVEC *>(target.object);
+            return true;
+        default:
+            return false;
     }
 }
 
@@ -190,9 +190,9 @@ void Batarang_MoveCode(GameObject_s *object) {
     if (object->character_context != 0x4d) {
         GAMECHARACTERDATA *runtime = object->apiobj.character_data->game_character;
         if (static_cast<i8>(object->apiobj.flags_low) < 0 && (runtime->flags_090 & 0x20000000) != 0 &&
-            object->use_model_origin != 0 && (object->field_0xe24 & 8) != 0 &&
-            object->apiobj.model_draw_result != 0 && object->apiobj.field_0x27d != 0 && ObjLandReady(object) != 0 &&
-            object->hold_timer >= 0.25f && (object->pad_gamepad->buttons_held & GAMEPAD_ACTION) != 0) {
+            object->use_model_origin != 0 && (object->field_0xe24 & 8) != 0 && object->apiobj.model_draw_result != 0 &&
+            object->apiobj.field_0x27d != 0 && ObjLandReady(object) != 0 && object->hold_timer >= 0.25f &&
+            (object->pad_gamepad->buttons_held & GAMEPAD_ACTION) != 0) {
             object->field_0xe22 |= 0x40;
             Batarang_StartTargetting(object);
         }
@@ -208,10 +208,10 @@ void Batarang_MoveCode(GameObject_s *object) {
 
     if (object->field_0x7a3 == 0) {
         object->context_animation_timer += FRAMETIME;
-        batarang->sight_velocity.x = SeekValF(batarang->sight_velocity.x,
-                                              object->pad_gamepad->input_direction_x * 0.5f, 10.0f);
-        batarang->sight_velocity.y = SeekValF(batarang->sight_velocity.y,
-                                              object->pad_gamepad->input_direction_z * 0.5f, 10.0f);
+        batarang->sight_velocity.x =
+            SeekValF(batarang->sight_velocity.x, object->pad_gamepad->input_direction_x * 0.5f, 10.0f);
+        batarang->sight_velocity.y =
+            SeekValF(batarang->sight_velocity.y, object->pad_gamepad->input_direction_z * 0.5f, 10.0f);
         batarang->sight_position.x += batarang->sight_velocity.x * FRAMETIME;
         batarang->sight_position.y += batarang->sight_velocity.y * FRAMETIME;
         KeepPointOnScreen(&batarang->sight_position, &batarang->sight_velocity);
@@ -388,8 +388,8 @@ i32 Batarang_StartTargetting(GameObject_s *object) {
             candidate->apiobj.field_0x287 != 0) {
             continue;
         }
-        const f32 distance = NuVecDistSqr(&object->apiobj.collision_position,
-                                         &candidate->apiobj.collision_position, NULL);
+        const f32 distance =
+            NuVecDistSqr(&object->apiobj.collision_position, &candidate->apiobj.collision_position, NULL);
         if (distance < best && distance < 225.0f) {
             best = distance;
             nearest = candidate;
@@ -428,8 +428,7 @@ i32 GetShootDirection_Batman(GameObject_s *object, nuvec_s *direction) {
         angle = object->apiobj.facing_angle;
     } else {
         GAMECHARACTERDATA *runtime = object->apiobj.character_data->game_character;
-        if ((object->apiobj.character_data->model_flags & 0x2000) == 0 &&
-            (runtime->flags_090 & 0x80000000) == 0) {
+        if ((object->apiobj.character_data->model_flags & 0x2000) == 0 && (runtime->flags_090 & 0x80000000) == 0) {
             angle = object->apiobj.movement_facing_angle;
         } else {
             angle = object->apiobj.facing_angle;

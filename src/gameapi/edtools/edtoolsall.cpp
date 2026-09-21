@@ -94,10 +94,10 @@ extern "C" {
     void DebrisOrientation(i32, i16, i16);
     void DebrisEmitterOrientation(i32, i16, i16, i16);
     void DebrisReflectionOrientation(i32, i16, i16, f32, f32);
-    void DebrisSetFacing(i32, i8, i16, i16);
+    void DebrisSetFacing(i32, u8, i16, i16);
     void DebrisStartOffset(i32, f32);
     void DebrisSetGroupID(i32, i16);
-    void DebrisSetPriority(i32, u16, i8);
+    void DebrisSetPriority(i32, i16, u8);
     void DebrisSetRoomID(i32, NUGSCN *);
     void DebrisSetDetailLevels(i32, i32);
     void AddDebrisEffect(i32 *, i32, f32, f32, f32);
@@ -166,13 +166,13 @@ i32 edppPtlPlace(i32 index, NUVEC *position) {
     DebrisEmitterPos(particle->instance_id, position->x, position->y, position->z);
     DebrisOrientation(particle->instance_id, edpp_rotz, edpp_roty);
     DebrisEmitterOrientation(particle->instance_id, edpp_emitrotz, edpp_emitroty, edpp_emitrotx);
-    DebrisReflectionOrientation(particle->instance_id, edpp_refrotz, edpp_refroty,
-                               particle->reflection_offset, particle->reflection_bounce);
+    DebrisReflectionOrientation(particle->instance_id, edpp_refrotz, edpp_refroty, particle->reflection_offset,
+                                particle->reflection_bounce);
     if (particle->facing_mode != 0) {
         particle->facing_rotation_x = edpp_facrotx;
         particle->facing_rotation_y = edpp_facroty;
-        DebrisSetFacing(particle->instance_id, particle->facing_mode,
-                        particle->facing_rotation_x, particle->facing_rotation_y);
+        DebrisSetFacing(particle->instance_id, particle->facing_mode, particle->facing_rotation_x,
+                        particle->facing_rotation_y);
     }
     edpp_ptls[index].position = *position;
     edpp_ptls[index].emitter_rotation_z = edpp_emitrotz;
@@ -246,18 +246,18 @@ i32 edppPtlCreate(NUVEC *position, i32 effect_index) {
     particle->page = edbits_particle_level_page;
     particle->detail_levels = 7;
     switch (debtab[effect_index]->particle_type) {
-    case 0:
-        particle->render_priority = 20000;
-        break;
-    case 2:
-        particle->render_priority = static_cast<i16>(40000);
-        break;
-    case 3:
-        particle->render_priority = 30000;
-        break;
-    case 7:
-        particle->render_priority = 10000;
-        break;
+        case 0:
+            particle->render_priority = 20000;
+            break;
+        case 2:
+            particle->render_priority = static_cast<i16>(40000);
+            break;
+        case 3:
+            particle->render_priority = 30000;
+            break;
+        case 7:
+            particle->render_priority = 10000;
+            break;
     }
     particle = &edpp_ptls[index];
     particle->dynamic_priority = 0;
@@ -266,14 +266,13 @@ i32 edppPtlCreate(NUVEC *position, i32 effect_index) {
     particle->facing_rotation_y = 0;
     strcpy(particle->name, debtab[particle->effect_index]->name);
     DebrisOrientation(particle->instance_id, particle->rotation_z, particle->rotation_y);
-    DebrisEmitterOrientation(particle->instance_id, particle->emitter_rotation_z,
-                             particle->emitter_rotation_y, particle->emitter_rotation_x);
+    DebrisEmitterOrientation(particle->instance_id, particle->emitter_rotation_z, particle->emitter_rotation_y,
+                             particle->emitter_rotation_x);
     DebrisStartOffset(particle->instance_id, particle->start_offset);
-    DebrisReflectionOrientation(particle->instance_id, particle->reflection_rotation_z,
-                                particle->reflection_rotation_y, particle->reflection_offset,
-                                particle->reflection_bounce);
-    DebrisSetFacing(particle->instance_id, particle->facing_mode,
-                    particle->facing_rotation_x, particle->facing_rotation_y);
+    DebrisReflectionOrientation(particle->instance_id, particle->reflection_rotation_z, particle->reflection_rotation_y,
+                                particle->reflection_offset, particle->reflection_bounce);
+    DebrisSetFacing(particle->instance_id, particle->facing_mode, particle->facing_rotation_x,
+                    particle->facing_rotation_y);
     DebrisSetGroupID(particle->instance_id, particle->render_group);
     DebrisSetPriority(particle->instance_id, particle->render_priority, particle->dynamic_priority);
     DebrisSetRoomID(particle->instance_id, 0);
@@ -296,15 +295,9 @@ void edppPtlShelve(i32 index) {
 
 void EdDrawLineCube(VuMtx const &transform, float size, i32 colour) {
     VuVec points[9] = {
-        VuVec(size, size, -size, 0.0f),
-        VuVec(size, size, size, 0.0f),
-        VuVec(-size, size, size, 0.0f),
-        VuVec(-size, size, -size, 0.0f),
-        VuVec(size, -size, -size, 0.0f),
-        VuVec(size, -size, size, 0.0f),
-        VuVec(-size, -size, size, 0.0f),
-        VuVec(-size, -size, -size, 0.0f),
-        VuVec(0.0f, 0.0f, size, 0.0f),
+        VuVec(size, size, -size, 0.0f),  VuVec(size, size, size, 0.0f),    VuVec(-size, size, size, 0.0f),
+        VuVec(-size, size, -size, 0.0f), VuVec(size, -size, -size, 0.0f),  VuVec(size, -size, size, 0.0f),
+        VuVec(-size, -size, size, 0.0f), VuVec(-size, -size, -size, 0.0f), VuVec(0.0f, 0.0f, size, 0.0f),
     };
     NUMTX *matrix = const_cast<NUMTX *>(&transform.matrix);
     NuVecMtxTransform(&points[0].xyz, &points[0].xyz, matrix);
@@ -562,8 +555,7 @@ void edpartDrawCursor() {
     STUBBED();
 }
 
-template <i32 Axis>
-static inline void EdDrawCircle(VuVec const &centre, float radius, i32 colour, i32 segments) {
+template <i32 Axis> static inline void EdDrawCircle(VuVec const &centre, float radius, i32 colour, i32 segments) {
     VuVec base(0.0f, Axis == 2 ? radius : 0.0f, Axis == 2 ? 0.0f : radius, 0.0f);
     VuVec point(base.x + centre.x, base.y + centre.y, base.z + centre.z, 0.0f);
     for (i32 i = 1; i <= segments; i++) {
@@ -619,8 +611,8 @@ void edppPtlChangeType(i32 index, i32 effect_index) {
     edpp_particle_s *particle = &edpp_ptls[index];
     if (particle->effect_index != effect_index) {
         edppPtlDestroy(index);
-        AddDebrisEffect(&edpp_ptls[index].instance_id, effect_index,
-                        particle->position.x, particle->position.y, particle->position.z);
+        AddDebrisEffect(&edpp_ptls[index].instance_id, effect_index, particle->position.x, particle->position.y,
+                        particle->position.z);
         if (particle->instance_id != -1)
             debkeydata[particle->instance_id].field_2f9 = 0;
         edpp_ptls[index].effect_index = effect_index;
@@ -634,8 +626,7 @@ i32 edppPtlCreateCopy(NUVEC *position, i32 source_index) {
     while (edpp_ptls[index].instance_id != -1)
         ++index;
     edpp_particle_s *source = &edpp_ptls[source_index];
-    AddDebrisEffect(&edpp_ptls[index].instance_id, source->effect_index,
-                    position->x, position->y, position->z);
+    AddDebrisEffect(&edpp_ptls[index].instance_id, source->effect_index, position->x, position->y, position->z);
     edpp_particle_s *particle = &edpp_ptls[index];
     if (particle->instance_id == -1)
         return -1;
@@ -660,14 +651,13 @@ i32 edppPtlCreateCopy(NUVEC *position, i32 source_index) {
     particle->facing_rotation_y = source->facing_rotation_y;
     strcpy(edpp_ptls[index].name, debtab[particle->effect_index]->name);
     DebrisOrientation(particle->instance_id, particle->rotation_z, particle->rotation_y);
-    DebrisEmitterOrientation(particle->instance_id, particle->emitter_rotation_z,
-                             particle->emitter_rotation_y, particle->emitter_rotation_x);
+    DebrisEmitterOrientation(particle->instance_id, particle->emitter_rotation_z, particle->emitter_rotation_y,
+                             particle->emitter_rotation_x);
     DebrisStartOffset(particle->instance_id, particle->start_offset);
-    DebrisReflectionOrientation(particle->instance_id, particle->reflection_rotation_z,
-                                particle->reflection_rotation_y, particle->reflection_offset,
-                                particle->reflection_bounce);
-    DebrisSetFacing(particle->instance_id, particle->facing_mode,
-                    particle->facing_rotation_x, particle->facing_rotation_y);
+    DebrisReflectionOrientation(particle->instance_id, particle->reflection_rotation_z, particle->reflection_rotation_y,
+                                particle->reflection_offset, particle->reflection_bounce);
+    DebrisSetFacing(particle->instance_id, particle->facing_mode, particle->facing_rotation_x,
+                    particle->facing_rotation_y);
     DebrisSetGroupID(particle->instance_id, particle->render_group);
     DebrisSetRoomID(particle->instance_id, reinterpret_cast<NUGSCN *>(edpp_page_scene[particle->page]));
     DebrisSetDetailLevels(particle->instance_id, particle->detail_levels);
@@ -872,8 +862,8 @@ void edSpline_SplineList(nugscn_s *) {
 void edanimParticlePlace(i32 index, NUVEC *position) {
     nuhspecial_s special;
     NuGScnGetSpecial(&special, edbits_base_scene, edanim_nearest);
-    NuVecSub(reinterpret_cast<NUVEC *>(AnimParams[edanim_nearest_param_id].effect_positions[index]),
-             position, NuSpecialGetPos(&special));
+    NuVecSub(reinterpret_cast<NUVEC *>(AnimParams[edanim_nearest_param_id].effect_positions[index]), position,
+             NuSpecialGetPos(&special));
     AnimParams[edanim_nearest_param_id].effect_angles[index] = edanim_emitrotz;
     AnimParams[edanim_nearest_param_id].effect_angle_ranges[index] = edanim_emitroty;
 }
@@ -901,14 +891,22 @@ void edpartPtlChangeType(i32, i32) {
 }
 
 void edppDestroyAllPages() {
-    if (edpp_page_used[0]) edppClearPage(0);
-    if (edpp_page_used[1]) edppClearPage(1);
-    if (edpp_page_used[2]) edppClearPage(2);
-    if (edpp_page_used[3]) edppClearPage(3);
-    if (edpp_page_used[4]) edppClearPage(4);
-    if (edpp_page_used[5]) edppClearPage(5);
-    if (edpp_page_used[6]) edppClearPage(6);
-    if (edpp_page_used[7]) edppClearPage(7);
+    if (edpp_page_used[0])
+        edppClearPage(0);
+    if (edpp_page_used[1])
+        edppClearPage(1);
+    if (edpp_page_used[2])
+        edppClearPage(2);
+    if (edpp_page_used[3])
+        edppClearPage(3);
+    if (edpp_page_used[4])
+        edppClearPage(4);
+    if (edpp_page_used[5])
+        edppClearPage(5);
+    if (edpp_page_used[6])
+        edppClearPage(6);
+    if (edpp_page_used[7])
+        edppClearPage(7);
 }
 
 void edanimParticleCreate(NUVEC *position) {
@@ -1000,14 +998,22 @@ void edgraSortVectorBuffer(i32 index) {
 }
 
 void edpartDestroyAllPages() {
-    if (part_page_used[0]) edpartClearPage(0);
-    if (part_page_used[1]) edpartClearPage(1);
-    if (part_page_used[2]) edpartClearPage(2);
-    if (part_page_used[3]) edpartClearPage(3);
-    if (part_page_used[4]) edpartClearPage(4);
-    if (part_page_used[5]) edpartClearPage(5);
-    if (part_page_used[6]) edpartClearPage(6);
-    if (part_page_used[7]) edpartClearPage(7);
+    if (part_page_used[0])
+        edpartClearPage(0);
+    if (part_page_used[1])
+        edpartClearPage(1);
+    if (part_page_used[2])
+        edpartClearPage(2);
+    if (part_page_used[3])
+        edpartClearPage(3);
+    if (part_page_used[4])
+        edpartClearPage(4);
+    if (part_page_used[5])
+        edpartClearPage(5);
+    if (part_page_used[6])
+        edpartClearPage(6);
+    if (part_page_used[7])
+        edpartClearPage(7);
 }
 
 void edppMultipleCopyClear() {
@@ -1228,8 +1234,7 @@ void EdRegistry::ClassIFaceRender(i32 class_id, void *object, i32 flags) {
     }
 }
 
-void *EdRegistry::CreateObject(EdClassInterface *interface, void *source, i32 index,
-                                i32 guid, i32 flags) {
+void *EdRegistry::CreateObject(EdClassInterface *interface, void *source, i32 index, i32 guid, i32 flags) {
     if (!guid && create_object_guid) {
         guid = create_object_guid();
     }
@@ -1364,8 +1369,8 @@ i32 EdRegistry::GetTypeId(char *name) {
     return -1;
 }
 
-void EdRegistry::Initialise(variptr_u &buffer, variptr_u &, i32 max_classes,
-                            i32 max_types, i32 max_mappings, i32 max_notifiers) {
+void EdRegistry::Initialise(variptr_u &buffer, variptr_u &, i32 max_classes, i32 max_types, i32 max_mappings,
+                            i32 max_notifiers) {
     class_capacity = max_classes;
     type_capacity = max_types;
     mapping_capacity = max_mappings;
@@ -1380,7 +1385,8 @@ void EdRegistry::Initialise(variptr_u &buffer, variptr_u &, i32 max_classes,
     memset(classes, 0, sizeof(EdClass) * class_capacity);
     mappings = static_cast<NameMapping *>(BUFFER_ALLOC(&buffer, sizeof(NameMapping) * mapping_capacity, 16));
     memset(mappings, 0, sizeof(NameMapping) * mapping_capacity);
-    notifiers = static_cast<EdObjectNotifier **>(BUFFER_ALLOC(&buffer, sizeof(EdObjectNotifier *) * notifier_capacity, 16));
+    notifiers =
+        static_cast<EdObjectNotifier **>(BUFFER_ALLOC(&buffer, sizeof(EdObjectNotifier *) * notifier_capacity, 16));
     memset(notifiers, 0, sizeof(EdObjectNotifier *) * notifier_capacity);
     initialised = 1;
 }
@@ -1395,8 +1401,8 @@ char *EdRegistry::MapName(char *name) {
     return name;
 }
 
-void EdRegistry::NotifyCreateObject(void *object, EdClass *object_class, void *source,
-                                    i32 index, i32 context, i32 flags) {
+void EdRegistry::NotifyCreateObject(void *object, EdClass *object_class, void *source, i32 index, i32 context,
+                                    i32 flags) {
     for (i32 i = 0; i < notifier_count; ++i) {
         EdObjectNotifier *notifier = notifiers[i];
         notifier->vtable->create_object(notifier, object, object_class, source, index, context, flags);
@@ -1492,8 +1498,7 @@ void EdRegistry::Serialise(EdStream &stream) {
 
 void EdRegistry::SerialiseObjects(EdStream &stream, EdRegistry *source_registry) {
     char object_name[256];
-    auto get_attribute = [](EdClass *object_class, void *object, i32 attribute, i32 type,
-                            void *data, i32 size) {
+    auto get_attribute = [](EdClass *object_class, void *object, i32 attribute, i32 type, void *data, i32 size) {
         EdMember member;
         if (object_class->FindMember(&member, object, attribute, 1))
             member.reference->GetAttributeData(member.object, attribute, type, data, size);
@@ -1503,8 +1508,7 @@ void EdRegistry::SerialiseObjects(EdStream &stream, EdRegistry *source_registry)
         i16 group = 0;
         get_attribute(object_class, object, 1, EdType_Int, &object_flags, 0);
         get_attribute(object_class, object, 0x100, EdType_Short, &group, 0);
-        return !(object_flags & (stream.flags & 0x400000 ? 0x400000 : 0x10000000)) &&
-               group == stream.unknown_10;
+        return !(object_flags & (stream.flags & 0x400000 ? 0x400000 : 0x10000000)) && group == stream.unknown_10;
     };
     auto read_objects = [&](EdClass *object_class, EdClass *source_class) {
         i32 count;
@@ -1625,21 +1629,21 @@ void EdRefSpline::GetMemberData(void *object, i32 type, void *data, i32 data_siz
     SplineObject *spline = static_cast<SplineObject *>(object);
     CheckType(type);
     switch (member_offset) {
-    case static_cast<i32>(0x80000001):
-        *static_cast<f32 *>(data) = spline->step;
-        break;
-    case static_cast<i32>(0x80000002):
-        *static_cast<f32 *>(data) = spline->height;
-        break;
-    case static_cast<i32>(0x80000003):
-        *static_cast<i32 *>(data) = spline->drop != 0;
-        break;
-    case static_cast<i32>(0x80000004):
-        *static_cast<i32 *>(data) = spline->closed;
-        break;
-    default:
-        EdRef::GetMemberData(object, type, data, data_size);
-        break;
+        case static_cast<i32>(0x80000001):
+            *static_cast<f32 *>(data) = spline->step;
+            break;
+        case static_cast<i32>(0x80000002):
+            *static_cast<f32 *>(data) = spline->height;
+            break;
+        case static_cast<i32>(0x80000003):
+            *static_cast<i32 *>(data) = spline->drop != 0;
+            break;
+        case static_cast<i32>(0x80000004):
+            *static_cast<i32 *>(data) = spline->closed;
+            break;
+        default:
+            EdRef::GetMemberData(object, type, data, data_size);
+            break;
     }
 }
 
@@ -1647,22 +1651,22 @@ void EdRefSpline::SetMemberData(void *object, i32 type, void *data, i32 data_siz
     SplineObject *spline = static_cast<SplineObject *>(object);
     CheckType(type);
     switch (member_offset) {
-    case static_cast<i32>(0x80000001):
-        spline->step = *static_cast<f32 *>(data);
-        break;
-    case static_cast<i32>(0x80000002):
-        spline->height = *static_cast<f32 *>(data);
-        break;
-    case static_cast<i32>(0x80000003):
-        spline->drop = *static_cast<i32 *>(data) != 0;
-        break;
-    case static_cast<i32>(0x80000004):
-        spline->closed = *static_cast<i32 *>(data);
-        break;
-    default:
-        // The original setter delegates unrecognized members to the getter.
-        EdRef::GetMemberData(object, type, data, data_size);
-        return;
+        case static_cast<i32>(0x80000001):
+            spline->step = *static_cast<f32 *>(data);
+            break;
+        case static_cast<i32>(0x80000002):
+            spline->height = *static_cast<f32 *>(data);
+            break;
+        case static_cast<i32>(0x80000003):
+            spline->drop = *static_cast<i32 *>(data) != 0;
+            break;
+        case static_cast<i32>(0x80000004):
+            spline->closed = *static_cast<i32 *>(data);
+            break;
+        default:
+            // The original setter delegates unrecognized members to the getter.
+            EdRef::GetMemberData(object, type, data, data_size);
+            return;
     }
     if (theSplineHelper.auto_generate_points) {
         spline->points.Clear();
@@ -1890,33 +1894,33 @@ void EdRefPlaceable::GetMemberData(void *object, i32 type, void *data, i32 data_
     Placeable *placeable = static_cast<Placeable *>(object);
     CheckType(type);
     switch (member_offset) {
-    case static_cast<i32>(0x80000001):
-        *static_cast<i16 *>(data) = placeable->led_file;
-        break;
-    case static_cast<i32>(0x80000002):
-        *static_cast<i32 *>(data) = placeable->attributes;
-        break;
-    case static_cast<i32>(0x80000003): {
-        const char *object_name = placeable->GetName();
-        NuStrNCpy(static_cast<char *>(data), object_name ? object_name : "", data_size);
-        break;
-    }
-    case static_cast<i32>(0x80000005): {
-        const char *params = placeable->params.data ? placeable->params.data + 1 : NULL;
-        // The original tests the reference name before copying parameter text.
-        NuStrNCpy(static_cast<char *>(data), name ? params : "", data_size);
-        break;
-    }
-    case static_cast<i32>(0x80000006): {
-        const VuMtx *matrix = placeable->GetCurrentTransform();
-        if (matrix) {
-            *static_cast<VuMtx *>(data) = *matrix;
+        case static_cast<i32>(0x80000001):
+            *static_cast<i16 *>(data) = placeable->led_file;
+            break;
+        case static_cast<i32>(0x80000002):
+            *static_cast<i32 *>(data) = placeable->attributes;
+            break;
+        case static_cast<i32>(0x80000003): {
+            const char *object_name = placeable->GetName();
+            NuStrNCpy(static_cast<char *>(data), object_name ? object_name : "", data_size);
+            break;
         }
-        break;
-    }
-    case static_cast<i32>(0x80000007):
-        *static_cast<f32 *>(data) = placeable->GetRadius();
-        break;
+        case static_cast<i32>(0x80000005): {
+            const char *params = placeable->params.data ? placeable->params.data + 1 : NULL;
+            // The original tests the reference name before copying parameter text.
+            NuStrNCpy(static_cast<char *>(data), name ? params : "", data_size);
+            break;
+        }
+        case static_cast<i32>(0x80000006): {
+            const VuMtx *matrix = placeable->GetCurrentTransform();
+            if (matrix) {
+                *static_cast<VuMtx *>(data) = *matrix;
+            }
+            break;
+        }
+        case static_cast<i32>(0x80000007):
+            *static_cast<f32 *>(data) = placeable->GetRadius();
+            break;
     }
 }
 
@@ -1924,30 +1928,30 @@ void EdRefPlaceable::SetMemberData(void *object, i32 type, void *data, i32, i16 
     Placeable *placeable = static_cast<Placeable *>(object);
     CheckType(type);
     switch (member_offset) {
-    case static_cast<i32>(0x80000001):
-        placeable->led_file = *static_cast<i16 *>(data);
-        break;
-    case static_cast<i32>(0x80000002):
-        placeable->attributes = *static_cast<i32 *>(data);
-        break;
-    case static_cast<i32>(0x80000003):
-        if (NuStrLen(static_cast<char *>(data)) > 0) {
-            placeable->SetName(static_cast<char *>(data));
-        } else {
-            placeable->SetName(NULL);
-        }
-        break;
-    case static_cast<i32>(0x80000005):
-        if (NuStrLen(static_cast<char *>(data)) > 0) {
-            placeable->params.Set(static_cast<char *>(data));
-        } else {
-            placeable->params.Set(NULL);
-        }
-        break;
-    case static_cast<i32>(0x80000006):
-        placeable->SetInitialTransform(static_cast<VuMtx *>(data));
-        placeable->SetCurrentTransform(static_cast<VuMtx *>(data));
-        break;
+        case static_cast<i32>(0x80000001):
+            placeable->led_file = *static_cast<i16 *>(data);
+            break;
+        case static_cast<i32>(0x80000002):
+            placeable->attributes = *static_cast<i32 *>(data);
+            break;
+        case static_cast<i32>(0x80000003):
+            if (NuStrLen(static_cast<char *>(data)) > 0) {
+                placeable->SetName(static_cast<char *>(data));
+            } else {
+                placeable->SetName(NULL);
+            }
+            break;
+        case static_cast<i32>(0x80000005):
+            if (NuStrLen(static_cast<char *>(data)) > 0) {
+                placeable->params.Set(static_cast<char *>(data));
+            } else {
+                placeable->params.Set(NULL);
+            }
+            break;
+        case static_cast<i32>(0x80000006):
+            placeable->SetInitialTransform(static_cast<VuMtx *>(data));
+            placeable->SetCurrentTransform(static_cast<VuMtx *>(data));
+            break;
     }
 }
 
@@ -2229,15 +2233,15 @@ void EdRefSpecialObject::GetMemberData(void *object, i32 type, void *data, i32) 
     SpecialObject *special_object = static_cast<SpecialObject *>(object);
     CheckType(type);
     switch (member_offset) {
-    case static_cast<i32>(0x80000008):
-        *static_cast<nuhspecial_s *>(data) = special_object->special;
-        break;
-    case static_cast<i32>(0x80000009):
-        *static_cast<i32 *>(data) = NuSpecialGetVisibilityFn(&special_object->special);
-        break;
-    case static_cast<i32>(0x8000000a):
-        *static_cast<i32 *>(data) = NuSpecialGetCollision(&special_object->special);
-        break;
+        case static_cast<i32>(0x80000008):
+            *static_cast<nuhspecial_s *>(data) = special_object->special;
+            break;
+        case static_cast<i32>(0x80000009):
+            *static_cast<i32 *>(data) = NuSpecialGetVisibilityFn(&special_object->special);
+            break;
+        case static_cast<i32>(0x8000000a):
+            *static_cast<i32 *>(data) = NuSpecialGetCollision(&special_object->special);
+            break;
     }
 }
 
@@ -2245,15 +2249,15 @@ void EdRefSpecialObject::SetMemberData(void *object, i32 type, void *data, i32, 
     SpecialObject *special_object = static_cast<SpecialObject *>(object);
     CheckType(type);
     switch (member_offset) {
-    case static_cast<i32>(0x80000008):
-        special_object->special = *static_cast<nuhspecial_s *>(data);
-        break;
-    case static_cast<i32>(0x80000009):
-        NuSpecialSetVisibility(&special_object->special, *static_cast<i32 *>(data));
-        break;
-    case static_cast<i32>(0x8000000a):
-        NuSpecialSetCollision(&special_object->special, *static_cast<i32 *>(data));
-        break;
+        case static_cast<i32>(0x80000008):
+            special_object->special = *static_cast<nuhspecial_s *>(data);
+            break;
+        case static_cast<i32>(0x80000009):
+            NuSpecialSetVisibility(&special_object->special, *static_cast<i32 *>(data));
+            break;
+        case static_cast<i32>(0x8000000a):
+            NuSpecialSetCollision(&special_object->special, *static_cast<i32 *>(data));
+            break;
     }
 }
 
@@ -2607,24 +2611,24 @@ void EdRefKnot::GetMemberData(void *object, i32 type, void *data, i32 data_size)
     SplineKnot *knot = static_cast<SplineKnot *>(object);
     CheckType(type);
     switch (member_offset) {
-    case static_cast<i32>(0x80000001):
-        NuStrNCpy(static_cast<char *>(data), knot->spline->name, data_size);
-        break;
-    case static_cast<i32>(0x80000002):
-        *static_cast<f32 *>(data) = 0.25f * EdManipulator::Scale;
-        break;
-    case static_cast<i32>(0x80000003):
-        *static_cast<VuVec *>(data) = knot->position;
-        break;
-    case static_cast<i32>(0x80000004):
-        *static_cast<VuVec *>(data) = knot->in_tangent;
-        break;
-    case static_cast<i32>(0x80000005):
-        *static_cast<VuVec *>(data) = knot->out_tangent;
-        break;
-    default:
-        EdRef::GetMemberData(object, type, data, data_size);
-        break;
+        case static_cast<i32>(0x80000001):
+            NuStrNCpy(static_cast<char *>(data), knot->spline->name, data_size);
+            break;
+        case static_cast<i32>(0x80000002):
+            *static_cast<f32 *>(data) = 0.25f * EdManipulator::Scale;
+            break;
+        case static_cast<i32>(0x80000003):
+            *static_cast<VuVec *>(data) = knot->position;
+            break;
+        case static_cast<i32>(0x80000004):
+            *static_cast<VuVec *>(data) = knot->in_tangent;
+            break;
+        case static_cast<i32>(0x80000005):
+            *static_cast<VuVec *>(data) = knot->out_tangent;
+            break;
+        default:
+            EdRef::GetMemberData(object, type, data, data_size);
+            break;
     }
 }
 
@@ -2632,42 +2636,42 @@ void EdRefKnot::SetMemberData(void *object, i32 type, void *data, i32 data_size,
     SplineKnot *knot = static_cast<SplineKnot *>(object);
     CheckType(type);
     switch (member_offset) {
-    case static_cast<i32>(0x80000001):
-    case static_cast<i32>(0x80000002):
-        return;
-    case static_cast<i32>(0x80000003): {
-        VuVec *position = static_cast<VuVec *>(data);
-        f32 dx = position->x - knot->position.x;
-        f32 dy = position->y - knot->position.y;
-        f32 dz = position->z - knot->position.z;
-        knot->position.x += dx;
-        knot->position.y += dy;
-        knot->position.z += dz;
-        knot->position.w = 1.0f;
-        if (!theClassEditor.IsSelectedObject(knot, theKnotHelper.in_tangent_ref)) {
-            knot->in_tangent.x += dx;
-            knot->in_tangent.y += dy;
-            knot->in_tangent.z += dz;
-            theClassEditor.SnapPoint(knot->in_tangent);
+        case static_cast<i32>(0x80000001):
+        case static_cast<i32>(0x80000002):
+            return;
+        case static_cast<i32>(0x80000003): {
+            VuVec *position = static_cast<VuVec *>(data);
+            f32 dx = position->x - knot->position.x;
+            f32 dy = position->y - knot->position.y;
+            f32 dz = position->z - knot->position.z;
+            knot->position.x += dx;
+            knot->position.y += dy;
+            knot->position.z += dz;
+            knot->position.w = 1.0f;
+            if (!theClassEditor.IsSelectedObject(knot, theKnotHelper.in_tangent_ref)) {
+                knot->in_tangent.x += dx;
+                knot->in_tangent.y += dy;
+                knot->in_tangent.z += dz;
+                theClassEditor.SnapPoint(knot->in_tangent);
+            }
+            if (!theClassEditor.IsSelectedObject(knot, theKnotHelper.out_tangent_ref)) {
+                knot->out_tangent.x += dx;
+                knot->out_tangent.y += dy;
+                knot->out_tangent.z += dz;
+                theClassEditor.SnapPoint(knot->out_tangent);
+            }
+            break;
         }
-        if (!theClassEditor.IsSelectedObject(knot, theKnotHelper.out_tangent_ref)) {
-            knot->out_tangent.x += dx;
-            knot->out_tangent.y += dy;
-            knot->out_tangent.z += dz;
-            theClassEditor.SnapPoint(knot->out_tangent);
-        }
-        break;
-    }
-    case static_cast<i32>(0x80000004):
-        knot->in_tangent = *static_cast<VuVec *>(data);
-        break;
-    case static_cast<i32>(0x80000005):
-        knot->out_tangent = *static_cast<VuVec *>(data);
-        break;
-    default:
-        // The original setter delegates unrecognized members to the getter.
-        EdRef::GetMemberData(object, type, data, data_size);
-        return;
+        case static_cast<i32>(0x80000004):
+            knot->in_tangent = *static_cast<VuVec *>(data);
+            break;
+        case static_cast<i32>(0x80000005):
+            knot->out_tangent = *static_cast<VuVec *>(data);
+            break;
+        default:
+            // The original setter delegates unrecognized members to the getter.
+            EdRef::GetMemberData(object, type, data, data_size);
+            return;
     }
     if (theSplineHelper.auto_generate_points && knot->spline) {
         knot->spline->points.Clear();

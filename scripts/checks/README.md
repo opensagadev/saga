@@ -3,14 +3,21 @@
 > Agent/reference document. Human development workflows are in
 > [`CONTRIBUTING.md`](../../CONTRIBUTING.md).
 
-Run the complete fast suite with:
+Run the test suite with:
 
 ```sh
 bazel test //scripts/checks:checks
 ```
 
-The suite runs the three source-only checks. The symbol check runs after the
-target build in both the pre-commit hook and CI; invoke it manually with:
+The suite runs all source-only tests. The forward-declaration checker runs
+immediately afterward in the pre-commit hook. Run it manually with:
+
+```sh
+bazel run --config=native //scripts/checks:check_forward_declarations
+```
+
+The symbol check runs after the target build in both the pre-commit hook and
+CI; invoke it manually with:
 
 ```sh
 bazel run //scripts/checks:check_symbols -- --list
@@ -39,6 +46,7 @@ is generated from the local reference ELF alongside the Pages report.
 | `check_bazel_optimization_map.py` | automatic `py_test` | Every Android per-file optimization mapping is exact, valid, and points to an existing source. |
 | `check_host_boundary.py` | automatic `py_test` | Shared source does not include host-only code or add unapproved `HOST_BUILD` forks. |
 | `check_duplicate_definitions.py` | automatic `py_test` | Duplicate C/C++ type definitions, plus optional duplicate object symbols. |
+| `check_forward_declarations.py` | automatic pre-commit `py_binary` | Uses libclang and the real 32-bit native Bazel compile flags to compare canonical, structural free-function signatures across translation units. Non-32-bit or erroneous parses are rejected; every mismatch fails the check. Pass `--list` to print the declaration index. |
 | `check_symbols.py` | post-build `py_binary` | Missing and unexpected text symbols relative to the original symbol surface; calls an NDK-compatible `nm`. |
 | `check_smoke_utility.py` | manual Linux integration check | Run with the smoke executable path; checks invalid saves/arguments, watchdog timeouts, direct gameplay startup and fixture preservation. Requires the OBB and an X display. |
 | `BUILD.bazel` lint tools | support targets | Exposes Bazel-downloaded `clang-format` and `clang-tidy` executables without wrapper scripts. |
