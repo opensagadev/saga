@@ -15,6 +15,7 @@
 #include "legoapi/legoapi_types.h"
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/motion.h"
+#include "legoapi/actions/combat/hits.h"
 #include "legoapi/core/input/gamepads.h"
 #include "legoapi/world/world.h"
 #include "nu2api/numath/nuvec.h"
@@ -159,8 +160,19 @@ void PodKeyReset() {
     }
 }
 
-void PodLoseSpeed(GameObject_s *, i32, i32) {
-    STUBBED();
+void TakeHitRumble(GameObject_s *, f32);
+
+void PodLoseSpeed(GameObject_s *object, i32 hit, i32 rumble) {
+    if (hit != 0) {
+        ObjHitObj(NULL, object, 1, 0, 0, 1);
+    }
+    if (hit != 0 || rumble != 0) {
+        TakeHitRumble(object, 0.7f);
+    }
+    object->current_speed_mul *= 0.5f;
+    if (object->current_speed_mul < 0.333f) {
+        object->current_speed_mul = 0.333f;
+    }
 }
 
 void InitBikeParts() {
@@ -201,9 +213,14 @@ f32 GetVehicleSpeedMul(GameObject_s *object, f32 speed) {
     return effective / ((GAMECHARACTERDATA_s *)object->apiobj.character_data->field11_0x24)->run_speed;
 }
 
-i32 ObjIsTargetSpeeder(GameObject_s *) {
-    STUBBED();
-    return 0;
+i32 ObjIsTargetSpeeder(GameObject_s *object) {
+    if (object->id != id_SPEEDERBIKE) {
+        return 0;
+    }
+    if (object->field_0xcc0 == NULL) {
+        return 0;
+    }
+    return object->apiobj.field_0x27c == -1;
 }
 
 void SpeederChaseA_Init(WORLDINFO_s *) {
