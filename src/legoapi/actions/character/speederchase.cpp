@@ -2,6 +2,7 @@
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/nucore/nustring.h"
 #include "legoapi/core/input/qrand.h"
+#include "legoapi/audio/sfx.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/render/fx.h"
 #include "legoapi/render/core/render.h"
@@ -30,6 +31,7 @@
 #include "gameapi/edtools/edcam.h"
 #include "gameapi/edtools/edui.h"
 #include "nu2api/numath/nuvec.h"
+#include "nu2api/nucore/nuanim3.h"
 #include "nu2api/nu3d/nutex.h"
 #include <string.h>
 
@@ -66,6 +68,7 @@ i32 objopponent_ignoreaiopponent;
 i32 test_ai_combo;
 i32 CanPunchGirls;
 extern i16 id_GAMORREANGUARD;
+extern i16 id_STORMTROOPER;
 i32 ComboOpponent_Behind;
 f32 ComboOpponent_Range2;
 f32 PlayerOpponent_Range2;
@@ -275,6 +278,9 @@ i32 ObjIsTargetSpeeder(GameObject_s *object) {
 
 void SetLevelExBlowupFunc(i32 (*callback)(GIZMOBLOWUP_s *, i32));
 void InitTrooperCannons(WORLDINFO_s *world);
+void ResetTrooperCannons(WORLDINFO_s *world, i32 trooper_id);
+void UpdateTrooperCannons(WORLDINFO_s *world);
+i32 GoingForwardsAlongNarrowSock(GameObject_s *object);
 
 void SpeederChaseA_Init(WORLDINFO_s *world) {
     speederchasea_netpacket = static_cast<SPEEDERCHASEANETPACKET_s *>(SetLevelHack(7));
@@ -440,8 +446,77 @@ i32 SpeedersDroppedBack() {
     return WORLD->current_level == SPEEDERCHASEA_LDATA && disable_narrow_socks == 0 && set_speedermode == 2;
 }
 
-void SpeederChaseA_Update(WORLDINFO_s *) {
-    STUBBED();
+void SpeederChaseA_Update(WORLDINFO_s *world) {
+    ResetTrooperCannons(world, id_STORMTROOPER);
+    UpdateTrooperCannons(world);
+
+    if (netclient == 0) {
+        players_cannot_exit_speeder = LevAIMessage[4] != NULL && LevAIMessage[4]->value == 1.0f;
+    }
+
+    if (disable_narrow_socks != 0) {
+        if (Player[0] != NULL) {
+            Player[0]->field_0xf03 &= ~1;
+        }
+        if (Player[1] != NULL) {
+            Player[1]->field_0xf03 &= ~1;
+        }
+    } else {
+        for (i32 i = 0; i < 2; ++i) {
+            GameObject_s *object = Player[i];
+            if (object != NULL && WORLD->current_level == SPEEDERCHASEA_LDATA && object->id == id_SPEEDERBIKE &&
+                object->field_0xcc0 != NULL && static_cast<i8>(object->field_0xcc0->apiobj.flags_low) < 0) {
+                object->field_0xf03 |= 1;
+            } else if (object != NULL) {
+                object->field_0xf03 &= ~1;
+            }
+        }
+    }
+
+    players_going_forward = 1;
+    for (i32 i = 0; i < 2; ++i) {
+        GameObject_s *object = Player[i];
+        if (object != NULL && static_cast<i8>(object->apiobj.flags_low) < 0 &&
+            (object->apiobj.field_0x1f4 & 0x40000) == 0 &&
+            (GoingForwardsAlongNarrowSock(object) == 0 || object->field_0x7a5 == 0x2a)) {
+            players_going_forward = 0;
+        }
+    }
+
+    u8 *sound_flags = reinterpret_cast<u8 *>(LevSfxFlag);
+
+#define UPDATE_FORCE_FIELD_SOUND(index)                                                                                \
+    do {                                                                                                               \
+        nuinstanim_s *animation = NuSpecialGetInstAnim(&LevHSpecial[index]);                                           \
+        NUVEC *position = NuSpecialGetDrawPos(&LevHSpecial[index]);                                                    \
+        if (animation != NULL) {                                                                                       \
+            void *animation_data = WORLD->current_gscn->instance_animation_data[animation->anim_ix];                   \
+            if (sound_flags[index] == 0) {                                                                             \
+                if (animation->ltime > 0.0f && animation->ltime != NuAnimEndFrameOld(animation_data)) {                \
+                    PlaySfx("env_laser_gate_on", position);                                                            \
+                    sound_flags[index] = 1;                                                                            \
+                }                                                                                                      \
+            } else if ((animation->flags & NUINSTANIM_FLAG_PLAYING) != 0 ||                                            \
+                       animation->ltime != NuAnimEndFrameOld(animation_data)) {                                        \
+                PlaySfx("env_laser_gate_lp", position);                                                                \
+            } else {                                                                                                   \
+                PlaySfx("env_laser_gate_off", position);                                                               \
+                sound_flags[index] = 0;                                                                                \
+            }                                                                                                          \
+        }                                                                                                              \
+    } while (0)
+
+    UPDATE_FORCE_FIELD_SOUND(0);
+    UPDATE_FORCE_FIELD_SOUND(1);
+    UPDATE_FORCE_FIELD_SOUND(2);
+    UPDATE_FORCE_FIELD_SOUND(3);
+    UPDATE_FORCE_FIELD_SOUND(4);
+    UPDATE_FORCE_FIELD_SOUND(5);
+    UPDATE_FORCE_FIELD_SOUND(6);
+    UPDATE_FORCE_FIELD_SOUND(7);
+    UPDATE_FORCE_FIELD_SOUND(8);
+
+#undef UPDATE_FORCE_FIELD_SOUND
 }
 
 // Original 0x4f2e50, 258 bytes. The original returns an integer.
