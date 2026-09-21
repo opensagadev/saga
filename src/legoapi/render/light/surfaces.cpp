@@ -2,6 +2,7 @@
 #include "globals.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/render/core/terrain.h"
+#include "legoapi/render/core/terrain_internal.h"
 #include "legoapi/render/light/surfaces.h"
 #include "nu2api/nu3d/glutils.h"
 #include "nu2api/nu3d/numtl.h"
@@ -31,12 +32,14 @@ extern "C" {
 
 extern TERRSET *CurTerr;
 extern NUVEC ShadNorm;
+extern i32 VehicleArea;
 
 f32 GameShadow(GameObject_s *object, NUVEC *position, f32 probe_height, i32 terrain_mask);
 f32 FindReflectionNoPlatforms(NUVEC *position);
 i32 UnderWater(GameObject_s *object);
 void FindAnglesZX(NUVEC *normal, u16 *x_rotation, u16 *z_rotation);
 extern "C" i32 NewShadowOnPlatform();
+extern "C" i32 ShadowRoofInfo();
 
 void (*SurfaceInfo_ExtraReflectFn)(GameObject_s *object);
 
@@ -70,39 +73,61 @@ void SurfaceMaskOn(u32 *surface_mask) {
 
 void GetSurfaceInfo(GameObject_s *object, i32 update_surface, f32 shadow_height) {
     APIOBJECT &api = object->apiobj;
+    i32 surface;
     if (shadow_height == 2000000.0f) {
         object->field_0x1020 = 2000000.0f;
         object->field_0x1087 = 0;
         object->field_0x1078 = -1;
+        surface = 0;
     } else {
-        i32 surface = ShadowInfo();
-        if (surface < 0 || surface > 31) {
-            surface = 0;
-        }
+        surface = ShadowInfo();
+        const i32 terrain_surface = static_cast<u32>(surface) <= 31 ? surface : 0;
         object->field_0x1087 = 2;
-        object->field_0x1020 = shadow_height;
+        if ((api.character_data->game_character->flags_090 & 0x8000) != 0 ||
+            (TerSurface[terrain_surface].flags & 2) != 0) {
+            object->field_0x1020 = shadow_height;
+        } else {
+            object->field_0x1020 = 2000000.0f;
+        }
         object->field_0x1078 = static_cast<i16>(NewShadowOnPlatform());
+    }
 
-        if (update_surface != 0) {
-            object->field_0xe41 = static_cast<u8>(surface);
-            api.field_0x281 = static_cast<u8>(surface);
-            object->surface_normal = ShadNorm;
+    if (update_surface != 0) {
+        object->field_0xe41 = static_cast<u8>(surface);
+        api.field_0x281 = static_cast<u8>(surface);
+        object->surface_normal = shadow_height == 2000000.0f && api.field_0x218 == 2000000.0f ? v010 : ShadNorm;
+    }
+
+    api.water_height = EShadY;
+    if (EShadY == 2000000.0f) {
+        api.field_0x27f = 0xff;
+        object->field_0x1068 = 0;
+        object->field_0x106a = 0;
+    } else {
+        i32 layer = EShadowInfo();
+        api.field_0x27f = static_cast<u8>(layer);
+        if (VehicleArea != 0 && BonusArea != 0 && (static_cast<u8>(layer) == 0x10 || static_cast<u8>(layer) == 7)) {
+            api.water_height = 2000000.0f;
+            api.field_0x27f = 0xff;
+            object->field_0x1068 = 0;
+            object->field_0x106a = 0;
+        } else {
+            layer = static_cast<u8>(layer) <= 0x10 ? static_cast<u8>(layer) : 0;
+            layer &= ~(TERRAINMASK_NONWEAPON | TERRAINMASK_NONDROID | 0x40);
+            api.field_0x27f = static_cast<u8>(layer);
+            FindAnglesZX(&EShadNorm, NULL, NULL);
+            object->field_0x1068 = static_cast<u16>(temp_xrot);
+            object->field_0x106a = static_cast<u16>(temp_zrot);
         }
     }
 
-    if (update_surface != 0 && shadow_height == 2000000.0f) {
-        object->field_0xe41 = 0;
-        api.field_0x281 = 0;
-        object->surface_normal = v010;
+    api.field_0x220 = ShadRoofY;
+    if (ShadRoofY == 2000000.0f) {
+        api.field_0x280 = 0xff;
+    } else {
+        const i32 roof_surface = ShadowRoofInfo();
+        api.field_0x280 = static_cast<u8>(roof_surface) <= 31 ? static_cast<u8>(roof_surface) : 0;
     }
-
-    // The extended shadow casts populate water/roof information in the target.
-    // Until that cast path is reconstructed, preserve its no-hit state rather
-    // than manufacturing a surface from the ordinary floor result.
-    api.water_height = 2000000.0f;
-    api.field_0x220 = 2000000.0f;
-    api.field_0x27f = 0xff;
-    api.field_0x280 = 0xff;
 
     if (SurfaceInfo_ExtraReflectFn != NULL) {
         SurfaceInfo_ExtraReflectFn(object);
