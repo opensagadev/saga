@@ -22,7 +22,9 @@
 #include "legoapi/gizmos/trigger/gizspecial.h"
 #include "legoapi/gizmos/object/gizobstacles.h"
 #include "legoapi/items/base/apiobject.h"
+#include "legoapi/items/collect/bolts.h"
 #include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/render/fx/parts.h"
 #include "legoapi/render/fx/spline_position.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/level.h"
@@ -31,7 +33,9 @@
 #include "nu2api/nu3d/nuspline.h"
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numath/nuang.h"
+#include "nu2api/numath/numtx.h"
 #include "nu2api/numath/nuvec.h"
+#include "nu2api/nu3d/nuspecial.h"
 
 extern "C" i32 instNuGCutSceneIsFinished(instNUGCUTSCENE_s *cutscene);
 extern i32 Hub_GetRandomCharType();
@@ -40,6 +44,13 @@ extern void GameObjectOrigin(GameObject_s *object);
 extern void PodSprint_GetIAlongVals(nugspline_s *spline, i16 *first_point, i16 *last_point);
 extern void TakeOverGameObject(GameObject_s *rider, GameObject_s *mount, i32 seat, i32 immediate);
 extern NUVEC plr_lastpos;
+
+NUVEC test_launch = {0.0f, 0.0f, 0.0f};
+f32 test_missile_scale = 8.0f;
+i32 guided_rotate_speed = 240000;
+f32 guided_start_time = 0.5f;
+f32 guided_life = 8.0f;
+f32 guided_speed = 30.0f;
 
 enum AI_CREATURE_SET : isize {
     AI_CREATURE_SET_CURRENT = -1,
@@ -148,13 +159,64 @@ static i32 Action_MoveForward(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_
 }
 
 static __used__ void *Condition_NumBaddiesInit(AISYS_s *, char *, AISCRIPT_s *) {
-    STUBBED();
     return nullptr;
 }
 
-static __used__ i32 Action_LaunchGuidedMissile(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, f32) {
-    STUBBED();
-    return 0;
+static __used__ i32 Action_LaunchGuidedMissile(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_s *, char **params,
+                                               i32 param_count, i32 first_time, f32) {
+    NUVEC offset = {0.0f, 0.0f, 0.0f};
+    if (first_time != 0) {
+        nuhspecial_s source = {};
+        for (i32 index = 0; index < param_count; ++index) {
+            char *value = NuStrIStr(params[index], "from=");
+            if (value != NULL) {
+                NuSpecialFind(WORLD->current_gscn, &source, value + 5, 1);
+            } else if ((value = NuStrIStr(params[index], "dx=")) != NULL) {
+                offset.x = AIParamToFloat(processor, value + 3);
+            } else if ((value = NuStrIStr(params[index], "dy=")) != NULL) {
+                offset.y = AIParamToFloat(processor, value + 3);
+            } else if ((value = NuStrIStr(params[index], "dz=")) != NULL) {
+                offset.z = AIParamToFloat(processor, value + 3);
+            }
+        }
+
+        if (NuSpecialExistsFn(&source) != 0) {
+            NUMTX matrix = *NuSpecialGetDrawMtx(&source);
+            NUVEC scale;
+            scale = NuMtxGetScale(&matrix);
+            scale.x = 1.0f / scale.x;
+            scale.y = 1.0f / scale.y;
+            scale.z = 1.0f / scale.z;
+            NuMtxPreScale(&matrix, &scale);
+            if (offset.x != 0.0f || offset.y != 0.0f || offset.z != 0.0f) {
+                NuMtxTranslate(&matrix, &offset);
+            }
+
+            NUVEC direction = {0.0f, 0.0f, 1.0f};
+            NuVecMtxRotate(&direction, &direction, &matrix);
+
+            ADDPART_s add = Default_ADDPART;
+            add.matrix = &matrix;
+            add.velocity = &direction;
+            NUVEC centre;
+            NuSpecialGetRadius(&WORLD->lev_objs[232].special, &centre, &add.field_14);
+            add.field_28 = 232;
+            add.field_14 *= test_missile_scale;
+            add.field_18 = add.field_14;
+            add.gravity = 0.0f;
+            add.special = &WORLD->lev_objs[232].special;
+            add.flags = 0x831b;
+            add.field_44 = GuidedMissile_Kill;
+            add.move_fn = GuidedMissile_Move;
+            add.update_fn = GuidedMissile_Deflect;
+            add.field_40 = PartCollide_3D;
+            add.recipient = player;
+            add.time_step = FRAMETIME;
+            add.field_c0 = test_missile_scale;
+            AddPart(&add);
+        }
+    }
+    return 1;
 }
 
 static __used__ i32 Action_CreateSplineCreatures(AISYS_s *system, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet,
@@ -298,7 +360,6 @@ static __used__ f32 Condition_HeadTurnRestricted(AISYS_s *, AISCRIPTPROCESS_s *,
 }
 
 static __used__ f32 Condition_NetworkGameOnGoing(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
-    STUBBED();
     return 0;
 }
 
