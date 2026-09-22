@@ -1933,8 +1933,31 @@ void RotateVec(NUVEC *source, NUVEC *destination) {
     destination->x = rotated_z * sin_yaw + source->x * cos_yaw;
 }
 
-void RotateTerrain(tertype *) {
-    STUBBED();
+void RotateTerrain(tertype *surface) {
+    TerrainQuery_s *query = TerI;
+    const f32 pitch = query->movement_pitch;
+    const f32 sin_pitch = NuTrigTable[(static_cast<i32>(pitch) >> 1) & (NUTRIGTABLE_COUNT - 1)];
+    const f32 cos_pitch = NuTrigTable[(static_cast<i32>(pitch + 16384.0f) >> 1) & (NUTRIGTABLE_COUNT - 1)];
+    const f32 yaw = query->movement_yaw;
+    const f32 sin_yaw = NuTrigTable[(static_cast<i32>(yaw) >> 1) & (NUTRIGTABLE_COUNT - 1)];
+    const f32 cos_yaw = NuTrigTable[(static_cast<i32>(yaw + 16384.0f) >> 1) & (NUTRIGTABLE_COUNT - 1)];
+
+    for (i32 vertex_index = 0; vertex_index < 3; ++vertex_index) {
+        const NUVEC &source = surface->vectors[vertex_index];
+        NUVEC &destination = query->transformed_vertices[vertex_index];
+        const f32 rotated_z = source.y * sin_pitch + source.z * cos_pitch;
+        destination.y = source.y * cos_pitch - source.z * sin_pitch;
+        destination.z = rotated_z * cos_yaw - source.x * sin_yaw;
+        destination.x = rotated_z * sin_yaw + source.x * cos_yaw;
+    }
+    if (65536.0f > surface->normals[1].y) {
+        const NUVEC &source = surface->vectors[3];
+        NUVEC &destination = query->transformed_vertices[3];
+        const f32 rotated_z = source.y * sin_pitch + source.z * cos_pitch;
+        destination.y = source.y * cos_pitch - source.z * sin_pitch;
+        destination.z = rotated_z * cos_yaw - source.x * sin_yaw;
+        destination.x = rotated_z * sin_yaw + source.x * cos_yaw;
+    }
 }
 
 void DeRotateTerrain(tertype *surface) {
@@ -3119,7 +3142,36 @@ extern "C" void DrawHitTerrain(void) {
 }
 
 void TerrShowCamTerr() {
-    STUBBED();
+    plathitid = -1;
+    TerrPolyObj = -1;
+    TerrPoly = NULL;
+    TerrWallInfo = 0;
+    PlatCrush = 0;
+    terrhitflags = 0;
+
+    TerI = static_cast<TerrainQuery_s *>(NuScratchAlloc32(sizeof(TerrainQuery_s)));
+    TerI->object_scale = 1.0f;
+    TerI->object_scale_sq = 1.0f;
+    TerI->inverse_object_scale = 1.0f;
+    TerI->inverse_object_scale_sq = 1.0f;
+    TerI->hit_flags = NULL;
+    TerI->collision_radius = 0.1f;
+    TerI->collision_radius_sq = 0.01f;
+    TerI->inverse_collision_radius = 10.0f;
+    TerI->scan_result = 0;
+    TerI->object_index = 0;
+    TerI->separation_epsilon = 0.01f;
+    TerI->compare_epsilon = 0.00001f;
+
+    TerI->start_position.x = TerI->position.x = global_camera.mtx.m30 - 2.0f;
+    TerI->start_position.y = TerI->position.y = global_camera.mtx.m31 - 2.0f;
+    TerI->start_position.z = TerI->position.z = global_camera.mtx.m32 - 2.0f;
+    TerI->start_movement.x = TerI->movement.x = 4.0f;
+    TerI->start_movement.y = TerI->movement.y = 4.0f;
+    TerI->start_movement.z = TerI->movement.z = 4.0f;
+
+    ScanTerrain(1, 1, 0);
+    NuScratchRelease();
 }
 NUVEC TerrainStaticMtx(PLATSKININFO *info, nuvec_s *position, i32) {
     NUVEC4_ALIGNED16 point;
@@ -4323,11 +4375,21 @@ extern "C" void noterraininit(void) {
 }
 
 extern "C" void TerrDrawImpactPol(void) {
-    STUBBED();
+    if (TerI == NULL || TerI->surface == NULL)
+        return;
+    TERRAIN_SHAPE *surface = TerI->surface;
+    if (surface >= ScaleTerrain && surface < ScaleTerrain + 0x200) {
+        surface = *reinterpret_cast<TERRAIN_SHAPE **>(surface);
+    }
+    TerrDraw(surface, TerI->terrain_group_index);
 }
 
-void DrawWallSpline(float) {
-    STUBBED();
+void DrawWallSpline(float height) {
+    for (i32 i = 0; i < WallSplCount; i += 2) {
+        const NUVEC &start = WallSplList[i].position;
+        const NUVEC &end = WallSplList[i + 1].position;
+        NuRndrLine3dDbg(start.x, height, start.z, end.x, height, end.z, 0x80808080);
+    }
 }
 
 namespace {
