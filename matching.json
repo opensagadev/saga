@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 52.530113,
+    "fuzzy_match_percent": 52.560944,
     "total_code": "4722419",
     "matched_code": "459721",
     "matched_code_percent": 9.734862,
@@ -67223,7 +67223,7 @@
           "address": 4397488,
           "offset": 3507520,
           "size": 515,
-          "match_percent": 4.827586
+          "match_percent": 78.83908
         },
         {
           "name": "SmartTextSetFWNMode",
@@ -67311,7 +67311,7 @@
           "address": 4399040,
           "offset": 3509072,
           "size": 497,
-          "match_percent": 4.379562
+          "match_percent": 45.90511
         },
         {
           "name": "_Z22MatrixTextStringEncodePvPhPt",
@@ -67319,7 +67319,7 @@
           "address": 4399552,
           "offset": 3509584,
           "size": 245,
-          "match_percent": 6.233766
+          "match_percent": 56.935066
         },
         {
           "name": "MatrixText",
@@ -67327,7 +67327,7 @@
           "address": 4399808,
           "offset": 3509840,
           "size": 786,
-          "match_percent": 2.64151
+          "match_percent": 99.798744
         },
         {
           "name": "FixUpButtonsInFont",
@@ -67479,7 +67479,7 @@
           "address": 4778720,
           "offset": 3888752,
           "size": 3008,
-          "match_percent": 68.72508
+          "match_percent": 68.06431
         },
         {
           "name": "_Z25MenuUpdateViewTextStringsP6MENU_s",

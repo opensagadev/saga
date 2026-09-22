@@ -74,6 +74,8 @@ extern "C" {
     void NuMtxTranslate(NUMTX *mtx, NUVEC *vec);
 }
 void Text3DStringEncodeFont(unsigned char *src, u16 *dst, void *font);
+void MatrixTextStringEncode(void *font, unsigned char *source, u16 *destination);
+i32 SplitTextFindNextWS(unsigned char *text, i32 position);
 extern "C" void TextDecode(char *source, unsigned char *dest);
 extern "C" void Text3DEx(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment, u8 red,
                          u8 green, u8 blue, i32 alpha);
@@ -824,8 +826,53 @@ extern "C" {
         }
         return QFont2D;
     }
-    void MatrixText(void) {
-        STUBBED();
+    void MatrixText(VUFNT *font, unsigned char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, u32 alignment,
+                    u32 colour, NUMTX *matrix, i32 camera_relative) {
+        if (text == nullptr || text[0] == '\0' || MenuStopDraw != 0)
+            return;
+        if (font == nullptr)
+            font = QFont3DZ;
+        if (font == nullptr)
+            return;
+
+        NuQFntPushPrintMode(4);
+        NuQFntPushCoordinateSystem(NUQFNT_CSMODE_ABSOLUTE);
+        NuQFntSet(font);
+
+        u16 encoded[512];
+        MatrixTextStringEncode(font, text, encoded);
+        NuQFntSetScale(font, x_scale * 0.004f, y_scale * 0.004f);
+        const f32 width = NuQFntPrintLenW(font, encoded);
+        const f32 height = NuQFntHeight(font);
+
+        y -= height * 0.5f;
+        if ((alignment & 4) != 0) {
+            y -= height * 0.5f;
+        } else if ((alignment & 1) != 0) {
+            y += height * 0.5f;
+        }
+
+        if ((alignment & 2) == 0) {
+            if ((alignment & 8) != 0) {
+                x -= width;
+            } else {
+                x -= width * 0.5f;
+            }
+        }
+
+        NUMTX draw_matrix;
+        if (camera_relative == 0) {
+            draw_matrix = *matrix;
+        } else {
+            NuMtxMul(&draw_matrix, matrix, NuCameraGetMtx());
+        }
+        NuQFntSetMtx(font, &draw_matrix);
+        NuQFntSetColour(font, colour);
+        NuQFntSetICGap(font, 2.0f);
+        NuQFntMove(font, x, y, z);
+        NuQFntPrintW(font, encoded);
+        NuQFntPopCoordinateSystem();
+        NuQFntPopPrintMode();
     }
     void MenuSmartTextEx(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment, u8 red,
                          u8 green, u8 blue, f32 max_width, i32 max_lines, void *message_box, i32 suppress_draw,
@@ -981,8 +1028,13 @@ extern "C" {
                     message_box, suppress_draw, alpha);
         SmartTextFont = saved_font;
     }
-    void SmartTextExDrop(void) {
-        STUBBED();
+    void SmartTextExDrop(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment, u32 red,
+                         u32 green, u32 blue, f32 max_width, i32 max_lines, void *message_box, i32 suppress_draw,
+                         u32 alpha) {
+        SmartTextEx2(text, x - x_scale * 0.007f, y - y_scale * 0.01f, z, x_scale, y_scale, z_scale, alignment, 0, 0, 0,
+                     max_width, max_lines, message_box, suppress_draw, alpha);
+        SmartTextEx(text, x, y, z, x_scale, y_scale, z_scale, alignment, red & 0xff, green & 0xff, blue & 0xff,
+                    max_width, max_lines, message_box, suppress_draw, alpha);
     }
     void SmartTextGetWidescreen(f32 *font_scale_x, f32 *coordinate_scale) {
         if (font_scale_x != nullptr)
@@ -1001,8 +1053,58 @@ extern "C" {
         QFONTSCALEY = 1.0f / QFONTSCALEX;
         STCOORDSCALE = coordinate_scale;
     }
-    void SplitText(void) {
-        STUBBED();
+    i32 SplitText(unsigned char *text, f32 max_width) {
+        if (max_width <= 0.0f)
+            return -1;
+
+        i32 line_count = 1;
+        i32 line_start = 0;
+        i32 position = 0;
+        unsigned char substring[512];
+        unsigned char decoded[512];
+        u16 encoded[512];
+
+        while (max_width > 0.0f) {
+            i32 previous_break = position;
+            unsigned char *line = text + line_start;
+
+            for (;;) {
+                const i32 next_break = SplitTextFindNextWS(text, position);
+                i32 length = next_break - line_start;
+                if (length > 511)
+                    length = 511;
+                memcpy(substring, line, length);
+                substring[length] = '\0';
+                TextDecode(reinterpret_cast<char *>(substring), decoded);
+                Text3DStringEncode(reinterpret_cast<char *>(decoded), encoded);
+                const f32 width = NuQFntPrintLenW(QFont2D, encoded);
+
+                position = next_break;
+                while (text[position] == ' ')
+                    ++position;
+
+                if (text[position] == '\0')
+                    return line_count;
+
+                if (text[position] == '\\' && text[position + 1] == 'n') {
+                    previous_break = position + 1;
+                    text[previous_break] = ' ';
+                } else if (max_width > width) {
+                    previous_break = position;
+                    continue;
+                } else if (previous_break == line_start) {
+                    previous_break = position;
+                }
+
+                text[previous_break - 1] = '\n';
+                ++line_count;
+                line_start = previous_break;
+                break;
+            }
+        }
+
+        text[line_start - 1] = '\n';
+        return line_count + 1;
     }
     void Text3D(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment, u8 red, u8 green,
                 u8 blue) {
@@ -1158,8 +1260,29 @@ next_character:
     } while (static_cast<u8>(character - 0x80) <= 0x3f);
     goto check_character;
 }
-void MatrixTextStringEncode(void *, unsigned char *, u16 *) {
-    STUBBED();
+void MatrixTextStringEncode(void *font, unsigned char *source, u16 *destination) {
+    u16 character;
+    while (*source != '\0') {
+        source = NuUnicodeCharFromUTF8(&character, source);
+        if (character == '~') {
+            if (*source == '\0') {
+                break;
+            }
+            source = NuUnicodeCharFromUTF8(&character, source);
+            continue;
+        }
+
+        *destination = NuQFntEncodeUnicodeChar(font, character);
+        if (*destination == 0xffff) {
+            NuUnicodeCharFromUTF8(&character, reinterpret_cast<unsigned char *>(const_cast<char *>("\xe2\x96\xa1")));
+            *destination = NuQFntEncodeUnicodeChar(font, character);
+            if (*destination == 0xffff) {
+                *destination = NuQFntEncodeUnicodeChar(font, '?');
+            }
+        }
+        ++destination;
+    }
+    *destination = 0;
 }
 void GetLineW(u16 *, i32) {
     STUBBED();
