@@ -3,6 +3,7 @@
 #include "nu2api/nu3d/android/nudlist_callbacks.h"
 #include "nu2api/nu3d/nulgtlaser.h"
 #include "nu2api/nu3d/nuprim.h"
+#include "nu2api/nu3d/nuqfnt.h"
 #include "nu2api/numath/nuvec4.h"
 #include "nu2api/numath/nutrig.h"
 extern "C" {
@@ -733,6 +734,55 @@ NuNetEmu::EmuPacket::~EmuPacket() {
     STUBBED();
 }
 
-void NuNetEmu::PackStats::Draw(float, float, float, float, NetSmallStats::eInfo) const {
-    STUBBED();
+void NuNetEmu::PackStats::Draw(float x, float y, float width, float height, NetSmallStats::eInfo info) const {
+    NetStats::Draw(x, y, width, height, info);
+
+    NuQFntPushCoordinateSystem(NUQFNT_CSMODE_NORMALISED);
+    NuQFntPushPrintMode(2);
+    NUQFNT *font = system_qfont;
+    const float font_height = NuQFntHeight(font);
+    y += font_height;
+    y += font_height;
+    y += font_height;
+    y += font_height;
+    y += font_height;
+    NuQFntSetColour(font, 0x80808080);
+    NuQFntSetScale(font, 0.75f, 0.75f);
+
+    char text[128];
+    y += font_height;
+    NuQFntMove(font, x, y, 0.0f);
+    sprintf(text, "Pack Ratio %.3f%%", pack_ratio);
+    NuQFntPrintU(font, text);
+
+    y += font_height;
+    float first_time = 0.0f;
+    float second_time = 0.0f;
+    if (total.values[2] != 0) {
+        first_time = static_cast<float>(packed_values[0]) / static_cast<float>(total.values[2]);
+    }
+    if (total.values[3] != 0) {
+        second_time = static_cast<float>(packed_values[1]) / static_cast<float>(total.values[3]);
+    }
+    NuQFntMove(font, x, y, 0.0f);
+    sprintf(text, "Pack Time %.2f : %.2f", first_time, second_time);
+    NuQFntPrintU(font, text);
+
+    y += font_height;
+    NuQFntMove(font, x, y, 0.0f);
+    sprintf(text, "Ave Packet %.1f", average_packet_size);
+    NuQFntPrintU(font, text);
+
+    y += font_height;
+    NuQFntMove(font, x, y, 0.0f);
+    sprintf(text, "Split Packets %d", split_packets);
+    NuQFntPrintU(font, text);
+
+    y += font_height;
+    NuQFntMove(font, x, y, 0.0f);
+    sprintf(text, "Held Packets %d", held_packets);
+    NuQFntPrintU(font, text);
+
+    NuQFntPopPrintMode();
+    NuQFntPopCoordinateSystem();
 }

@@ -1008,8 +1008,8 @@ i32 NetworkObjectManager::PushObject(NetworkObject *object, NetworkObjectManager
     }
 
     i32 message_limit = theNuNetEmu.field_1c;
-    if (theNuNetEmu.field_1c1c > 0.0f) {
-        message_limit = static_cast<i32>(message_limit * theNuNetEmu.field_1c1c);
+    if (theNuNetEmu.packet_stats.pack_ratio > 0.0f) {
+        message_limit = static_cast<i32>(message_limit * theNuNetEmu.packet_stats.pack_ratio);
     }
 
     i32 result = 1;
@@ -1609,8 +1609,8 @@ void NetworkObjectManager::Update() {
             i32 object_index = push->field_10;
             i32 object_count = local_object_count;
             i32 message_limit = theNuNetEmu.field_1c;
-            if (theNuNetEmu.field_1c1c > 0.0f) {
-                message_limit = static_cast<i32>(message_limit * theNuNetEmu.field_1c1c);
+            if (theNuNetEmu.packet_stats.pack_ratio > 0.0f) {
+                message_limit = static_cast<i32>(message_limit * theNuNetEmu.packet_stats.pack_ratio);
             }
 
             while (object_index < object_count && message_limit < theNuNetEmu.field_00) {
@@ -1632,8 +1632,8 @@ void NetworkObjectManager::Update() {
                 }
 
                 message_limit = theNuNetEmu.field_1c;
-                if (theNuNetEmu.field_1c1c > 0.0f) {
-                    message_limit = static_cast<i32>(message_limit * theNuNetEmu.field_1c1c);
+                if (theNuNetEmu.packet_stats.pack_ratio > 0.0f) {
+                    message_limit = static_cast<i32>(message_limit * theNuNetEmu.packet_stats.pack_ratio);
                 }
                 object_count = local_object_count;
             }

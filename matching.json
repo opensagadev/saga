@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 52.27709,
+    "fuzzy_match_percent": 52.35677,
     "total_code": "4722419",
     "matched_code": "458305",
     "matched_code_percent": 9.704878,
@@ -37063,7 +37063,7 @@
           "address": 5461904,
           "offset": 4571936,
           "size": 812,
-          "match_percent": 2.413793
+          "match_percent": 99.994255
         },
         {
           "name": "_ZN9NetSample5ResetEv",
@@ -37103,7 +37103,7 @@
           "address": 5462896,
           "offset": 4572928,
           "size": 2540,
-          "match_percent": 1.054482
+          "match_percent": 82.28822
         },
         {
           "name": "_ZN8NetStats6UpdateEv",
@@ -97131,7 +97131,7 @@
           "address": 5618656,
           "offset": 4728688,
           "size": 928,
-          "match_percent": 2.245989
+          "match_percent": 99.9893
         },
         {
           "name": "_ZN8NuNetEmu9EmuPacketC1EP11nunetaddr_s",

@@ -14,6 +14,12 @@ struct NuNetEmu {
         explicit PackStats(char const *name) : NetStats(name) {
         }
         void Draw(float, float, float, float, NetSmallStats::eInfo) const;
+
+        u32 packed_values[2];
+        u32 split_packets;
+        u32 held_packets;
+        f32 pack_ratio;
+        f32 average_packet_size;
     };
     enum eConditions {
         CONDITIONS_NORMAL = 0,
@@ -56,15 +62,16 @@ struct NuNetEmu {
     i32 field_17c8;
     NetStats raw_stats;
     PackStats packet_stats;
-    u8 reserved_1c0c[0x10];
-    float field_1c1c;
-    u8 reserved_1c20[4];
 };
 
+DECOMP_ASSERT(sizeof(NuNetEmu::PackStats) == 0x238, "NuNetEmu::PackStats ABI");
+DECOMP_ASSERT(offsetof(NuNetEmu::PackStats, packed_values) == 0x220, "NuNetEmu::PackStats packed values offset");
+DECOMP_ASSERT(offsetof(NuNetEmu::PackStats, pack_ratio) == 0x230, "NuNetEmu::PackStats ratio offset");
 DECOMP_ASSERT(sizeof(NuNetEmu) == 0x1c24, "NuNetEmu ABI");
 DECOMP_ASSERT(offsetof(NuNetEmu, field_1c) == 0x1c, "NuNetEmu field_1c offset");
 DECOMP_ASSERT(offsetof(NuNetEmu, raw_stats) == 0x17cc, "NuNetEmu raw stats offset");
 DECOMP_ASSERT(offsetof(NuNetEmu, packet_stats) == 0x19ec, "NuNetEmu packet stats offset");
-DECOMP_ASSERT(offsetof(NuNetEmu, field_1c1c) == 0x1c1c, "NuNetEmu field_1c1c offset");
+DECOMP_ASSERT(offsetof(NuNetEmu, packet_stats) + offsetof(NuNetEmu::PackStats, pack_ratio) == 0x1c1c,
+              "NuNetEmu packet ratio offset");
 
 extern NuNetEmu theNuNetEmu;
