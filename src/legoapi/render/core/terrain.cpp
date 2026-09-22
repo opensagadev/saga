@@ -3043,8 +3043,97 @@ void MakePlayPlanes(GAMECAMERA_s *camera) {
     SetPlayPlane(&PlayPlane[5], &far_corner[0], &far_corner[1], &far_corner[3], &far_corner[2], &far_corner[1],
                  &far_corner[0], &far_corner[3], &far_corner[0]);
 }
-void TerrDrawPlatCol(tertype *, i16, i32) {
-    STUBBED();
+
+// The retained debug renderers read the older 100-byte terrain record.
+struct TERRAIN_DEBUG_RECORD {
+    u8 unknown_00[0x18];
+    NUVEC vertices[4];
+    NUVEC normals[2];
+    u8 unknown_60[4];
+};
+DECOMP_ASSERT(sizeof(TERRAIN_DEBUG_RECORD) == 100, "Terrain debug record ABI");
+
+void TerrDrawPlatCol(tertype *terrain, i16 index, i32 colour) {
+    TERRAIN_DEBUG_RECORD *record = reinterpret_cast<TERRAIN_DEBUG_RECORD *>(terrain);
+    TERRAIN_GROUP &group = CurTerr->groups[index];
+    TERRAIN_PLATFORM &platform = CurTerr->platforms[group.scene_index];
+    if (platform.scene_transform != NULL) {
+        const u8 visible_mask = (platform.flags & TERRAIN_PLATFORM_FLAG_DISPLAY_LIST_BACKED) != 0 ? 2 : 1;
+        if ((*static_cast<u8 *>(platform.scene_transform) & visible_mask) == 0) {
+            return;
+        }
+    }
+
+    NUVEC4 points[4];
+    for (i32 i = 0; i < 4; ++i) {
+        points[i].x = record->vertices[i].x;
+        points[i].y = record->vertices[i].y;
+        points[i].z = record->vertices[i].z;
+        points[i].w = 0.0f;
+    }
+    NUVEC4 normals[2];
+    for (i32 i = 0; i < 2; ++i) {
+        normals[i].x = record->normals[i].x * 0.4f;
+        normals[i].y = record->normals[i].y * 0.4f;
+        normals[i].z = record->normals[i].z * 0.4f;
+        normals[i].w = 0.0f;
+    }
+
+    const bool quad = record->normals[1].y <= 65535.0f;
+    if ((platform.flags & TERRAIN_PLATFORM_FLAG_ROTATING) != 0) {
+        NUMTX *matrix = static_cast<NUMTX *>(platform.scene_object);
+        NuVec4MtxTransformVU0(&points[0], &points[0], matrix);
+        NuVec4MtxTransformVU0(&points[1], &points[1], matrix);
+        NuVec4MtxTransformVU0(&points[2], &points[2], matrix);
+        NuVec4MtxTransformVU0(&normals[0], &normals[0], matrix);
+        if (quad) {
+            NuVec4MtxTransformVU0(&points[3], &points[3], matrix);
+            NuVec4MtxTransformVU0(&normals[1], &normals[1], matrix);
+        }
+    }
+
+    const NUVEC &origin = group.origin;
+    if (!quad) {
+        for (i32 i = 0; i < 2; ++i) {
+            const f32 t = static_cast<f32>(i);
+            NuRndrLine3dDbg(origin.x + points[0].x, origin.y + points[0].y, origin.z + points[0].z,
+                            origin.x + points[1].x + (points[2].x - points[1].x) * t,
+                            origin.y + points[1].y + (points[2].y - points[1].y) * t,
+                            origin.z + points[1].z + (points[2].z - points[1].z) * t, colour);
+        }
+        for (i32 i = 0; i < 2; ++i) {
+            const f32 t = static_cast<f32>(i);
+            NuRndrLine3dDbg(origin.x + points[1].x, origin.y + points[1].y, origin.z + points[1].z,
+                            origin.x + points[0].x + (points[2].x - points[0].x) * t,
+                            origin.y + points[0].y + (points[2].y - points[0].y) * t,
+                            origin.z + points[0].z + (points[2].z - points[0].z) * t, colour);
+        }
+    } else {
+        for (i32 i = 0; i < 2; ++i) {
+            const f32 t = static_cast<f32>(i);
+            NuRndrLine3dDbg(origin.x + points[0].x + (points[1].x - points[0].x) * t,
+                            origin.y + points[0].y + (points[1].y - points[0].y) * t,
+                            origin.z + points[0].z + (points[1].z - points[0].z) * t,
+                            origin.x + points[2].x + (points[3].x - points[2].x) * t,
+                            origin.y + points[2].y + (points[3].y - points[2].y) * t,
+                            origin.z + points[2].z + (points[3].z - points[2].z) * t, colour);
+        }
+        for (i32 i = 0; i < 2; ++i) {
+            const f32 t = static_cast<f32>(i);
+            NuRndrLine3dDbg(origin.x + points[0].x + (points[2].x - points[0].x) * t,
+                            origin.y + points[0].y + (points[2].y - points[0].y) * t,
+                            origin.z + points[0].z + (points[2].z - points[0].z) * t,
+                            origin.x + points[1].x + (points[3].x - points[1].x) * t,
+                            origin.y + points[1].y + (points[3].y - points[1].y) * t,
+                            origin.z + points[1].z + (points[3].z - points[1].z) * t, colour);
+        }
+        NuRndrLine3dDbg(origin.x + points[3].x, origin.y + points[3].y, origin.z + points[3].z,
+                        origin.x + points[3].x + normals[1].x, origin.y + points[3].y + normals[1].y,
+                        origin.z + points[3].z + normals[1].z, 0xff);
+    }
+    NuRndrLine3dDbg(origin.x + points[0].x, origin.y + points[0].y, origin.z + points[0].z,
+                    origin.x + points[0].x + normals[0].x, origin.y + points[0].y + normals[0].y,
+                    origin.z + points[0].z + normals[0].z, 0xff);
 }
 static inline void ResetRayCastState() {
     plathitid = -1;
@@ -4085,15 +4174,6 @@ NUVEC TerCrossProduct(NUVEC *a, NUVEC *b) {
     result.z = a->x * b->y - b->x * a->y;
     return result;
 }
-
-// The retained debug renderer reads the older 100-byte terrain record.
-struct TERRAIN_DEBUG_RECORD {
-    u8 unknown_00[0x18];
-    NUVEC vertices[4];
-    NUVEC normals[2];
-    u8 unknown_60[4];
-};
-DECOMP_ASSERT(sizeof(TERRAIN_DEBUG_RECORD) == 100, "Terrain debug record ABI");
 
 void TerrDrawSitu(tertype *terrain, terrsitu_s *situation) {
     TERRAIN_DEBUG_RECORD *record = reinterpret_cast<TERRAIN_DEBUG_RECORD *>(terrain);
