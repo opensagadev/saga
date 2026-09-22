@@ -4758,7 +4758,9 @@ f32 NewCast(nuvec_s *position, f32 height_above, f32 roof_range) {
     ecastnum = extended_floor.terrain_group;
     bool ordinary_roof = above_candidate.height < NO_TERRAIN_HEIGHT && above_candidate.normal.y > 0.0f &&
                          position->y + roof_range > above_candidate.height;
-    bool extended_blocked = ordinary_roof && extended_above.height > above_candidate.height;
+    bool extended_blocked = above_candidate.height < NO_TERRAIN_HEIGHT && above_candidate.normal.y < 0.0f &&
+                            position->y + roof_range > above_candidate.height &&
+                            extended_above.height > above_candidate.height;
     EShadRoofY = NO_TERRAIN_HEIGHT;
     EShadRoofPoly = NULL;
     if (extended_above.height < NO_TERRAIN_HEIGHT && extended_above.normal.y < 0.0f &&
