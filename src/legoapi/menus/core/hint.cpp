@@ -8,6 +8,7 @@
 #include "legoapi/legoapi_types.h"
 #include "MechInputTouch/MechInputTouch_types.h"
 #include "nu2api/nu3d/nutex.h"
+#include "nu2api/numath/nutrig.h"
 #include "legoapi/characters/core/players.h"
 #include "nu2api/numath/nuvec.h"
 #include "legoapi/world/area.h"
@@ -50,7 +51,6 @@ i32 HINT_COMPLETE(i32 hint_id) {
 }
 
 i32 Tilt_UpdateHint(HINT_s *) {
-    STUBBED();
     return 0;
 }
 
@@ -142,6 +142,7 @@ i32 DragBomb_UpdateHint(HINT_s *hint) {
 extern u8 show_lever_hint;
 extern i32 show_autojump_hint;
 extern AREADATA_s *PODRACE_ADATA, *PODSPRINT_ADATA, *BONUS_GUNSHIP_ADATA;
+extern FadeSystem FadeSys;
 
 static __used__ i32 Jump_UpdateHint(HINT_s *hint) {
     if (player == NULL || player->field_0x7a5 != 0xff || VehicleArea != 0)
@@ -308,16 +309,21 @@ i32 ShinyMetal_UpdateHint(HINT_s *hint) {
     return 0;
 }
 
-void CurrentHintButtonScale() {
-    STUBBED();
+f32 CurrentHintButtonScale() {
+    return __builtin_fabsf(NuSinf(GlobalTimer.time_elapsed * 3.0f)) * 0.45f + 1.0f;
 }
 
 void initGameHintSys_Batman() {
-    STUBBED();
 }
 
-void IndyUnlocked_UpdateHint(HINT_s *) {
-    STUBBED();
+i32 IndyUnlocked_UpdateHint(HINT_s *hint) {
+    i32 control_mode = MechInputTouchSystem::s_baseControlMode;
+    if (hint->completion_flags[control_mode] != 0 || WORLD->current_level != HUB_LDATA)
+        return 0;
+    if (FadeSys.fade != 0.0f || Game.indy_unlocked == 0)
+        return 0;
+    hint->pad_0x05[0] = 4;
+    return 1;
 }
 
 static __used__ i32 Sith_UpdateHint(HINT_s *) {
