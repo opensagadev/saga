@@ -391,7 +391,24 @@ i32 NetworkObjectManager::GetPeerStatus() {
 }
 
 void NetworkObjectManager::ImportObjects() {
-    STUBBED();
+    i32 class_count = theRegistry.class_count;
+    for (i32 class_index = 0; class_index < class_count; ++class_index) {
+        EdClass *object_class = theRegistry.GetClass(class_index);
+        if (object_class == NULL || object_class->interface == NULL) {
+            continue;
+        }
+
+        void *object = object_class->interface->vtable->get_next_object(object_class->interface, NULL);
+        while (object != NULL) {
+            i32 guid = object_class->interface->vtable->get_object_guid(object_class->interface, object);
+            if (guid == 0) {
+                guid = GetNextGuid();
+                object_class->interface->vtable->set_object_guid(object_class->interface, object, guid);
+            }
+            RegisterObject(object, object_class, guid);
+            object = object_class->interface->vtable->get_next_object(object_class->interface, object);
+        }
+    }
 }
 
 void NetworkObjectManager::Init() {
@@ -876,7 +893,8 @@ void NetworkObjectManager::Stop() {
 }
 
 void NetworkObjectManager::Term() {
-    STUBBED();
+    Reset();
+    theNetwork.RemoveListener(this, 3);
 }
 
 void NetworkObjectManager::Update() {
@@ -884,7 +902,6 @@ void NetworkObjectManager::Update() {
 }
 
 void NetworkObjectManager::UpdateLocalObjectList() {
-    STUBBED();
 }
 
 NetworkObjectManager::~NetworkObjectManager() {

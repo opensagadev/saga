@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 51.957123,
+    "fuzzy_match_percent": 51.980354,
     "total_code": "4722419",
-    "matched_code": "455505",
-    "matched_code_percent": 9.645586,
+    "matched_code": "456421",
+    "matched_code_percent": 9.664984,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 5377,
-    "matched_functions_percent": 39.950962,
+    "matched_functions": 5388,
+    "matched_functions_percent": 40.032692,
     "total_units": 1
   },
   "text": {
@@ -36465,7 +36465,7 @@
           "address": 5438736,
           "offset": 4548768,
           "size": 74,
-          "match_percent": 24.705883
+          "match_percent": 100.0
         },
         {
           "name": "_ZN20NetworkObjectManager10BindFilterEP9NOSFilterPK7EdClass",
@@ -36777,7 +36777,7 @@
           "address": 5448128,
           "offset": 4558160,
           "size": 244,
-          "match_percent": 6.575343
+          "match_percent": 100.0
         },
         {
           "name": "_ZN20NetworkObjectManager11NetPeerPush10GetMessageEi",
@@ -37581,7 +37581,7 @@
           "address": 5426736,
           "offset": 4536768,
           "size": 301,
-          "match_percent": 5.454546
+          "match_percent": 83.545456
         },
         {
           "name": "_ZNK14NetTransporter11PeerRequestERK7NetPeer",
@@ -37589,7 +37589,7 @@
           "address": 5427040,
           "offset": 4537072,
           "size": 73,
-          "match_percent": 16.551723
+          "match_percent": 100.0
         },
         {
           "name": "_ZNK14NetTransporter10PeerJoinedERK7NetPeer",
@@ -37597,7 +37597,7 @@
           "address": 5427120,
           "offset": 4537152,
           "size": 60,
-          "match_percent": 19.09091
+          "match_percent": 100.0
         },
         {
           "name": "_ZNK14NetTransporter8PeerLeftERK7NetPeer15ePeerLeftReason",
@@ -37605,7 +37605,7 @@
           "address": 5427184,
           "offset": 4537216,
           "size": 65,
-          "match_percent": 16.8
+          "match_percent": 80.44
         },
         {
           "name": "_ZNK14NetTransporter8PeerDeadERK7NetPeer",
@@ -37613,7 +37613,7 @@
           "address": 5427264,
           "offset": 4537296,
           "size": 60,
-          "match_percent": 19.09091
+          "match_percent": 100.0
         },
         {
           "name": "_ZNK14NetTransporter9FtpUploadEP7FtpFile",
@@ -37621,7 +37621,7 @@
           "address": 5427328,
           "offset": 4537360,
           "size": 60,
-          "match_percent": 19.09091
+          "match_percent": 100.0
         },
         {
           "name": "_ZNK14NetTransporter11FtpDownloadEP7FtpFile",
@@ -37629,7 +37629,7 @@
           "address": 5427392,
           "offset": 4537424,
           "size": 60,
-          "match_percent": 19.09091
+          "match_percent": 100.0
         },
         {
           "name": "_ZNK14NetTransporter11FtpCompleteEP7FtpFilei",
@@ -37637,7 +37637,7 @@
           "address": 5427456,
           "offset": 4537488,
           "size": 65,
-          "match_percent": 16.8
+          "match_percent": 100.0
         },
         {
           "name": "_ZNK14NetTransporter10NosAcquireEP13NetworkObjectRK7NetPeer",
@@ -37645,7 +37645,7 @@
           "address": 5427536,
           "offset": 4537568,
           "size": 99,
-          "match_percent": 15.74468
+          "match_percent": 100.0
         },
         {
           "name": "_ZNK14NetTransporter10NosAdoptedEP13NetworkObjectRK7NetPeer",
@@ -37653,7 +37653,7 @@
           "address": 5427648,
           "offset": 4537680,
           "size": 65,
-          "match_percent": 16.8
+          "match_percent": 100.0
         },
         {
           "name": "_ZN14NetTransporter11StatsUpdateEv",
@@ -37661,7 +37661,7 @@
           "address": 5427728,
           "offset": 4537760,
           "size": 56,
-          "match_percent": 21.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZN14NetTransporter16StatsSendMessageE10NetMessageh",
@@ -37669,7 +37669,7 @@
           "address": 5427792,
           "offset": 4537824,
           "size": 74,
-          "match_percent": 13.548388
+          "match_percent": 41.032257
         },
         {
           "name": "_ZN14NetTransporter19StatsReceiveMessageE10NetMessageh",
@@ -37677,7 +37677,7 @@
           "address": 5427872,
           "offset": 4537904,
           "size": 74,
-          "match_percent": 13.548388
+          "match_percent": 47.64516
         },
         {
           "name": "_ZN14NetTransporterD1Ev",

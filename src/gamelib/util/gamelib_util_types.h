@@ -431,7 +431,7 @@ struct NetTransporter {
     void PeerDead(NetPeer const &) const;
     void PeerJoined(NetPeer const &) const;
     void PeerLeft(NetPeer const &, ePeerLeftReason) const;
-    void PeerRequest(NetPeer const &) const;
+    i32 PeerRequest(NetPeer const &) const;
     virtual void RemoveListener(NetListenerInterface *, unsigned char);
     virtual ~NetTransporter() {
     }
