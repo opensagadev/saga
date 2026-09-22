@@ -363,10 +363,13 @@ struct ADDGAMEMSG {
         nuvec_s *extra_position;
         nuhspecial_s *special;
     }; // 0x28
-    u32 score;                          // 0x2c
-    f32 field_0x30;                     // 0x30
-    f32 field_0x34;                     // 0x34
-    f32 field_0x38;                     // 0x38
+    u32 score;      // 0x2c
+    f32 field_0x30; // 0x30
+    f32 field_0x34; // 0x34
+    union {
+        f32 field_0x38;
+        void (*delay_fn)(GAMEMESSAGE_s *);
+    }; // 0x38
     f32 field_0x3c;                     // 0x3c
     void (*update_fn)(GAMEMESSAGE_s *); // 0x40
     void *field_0x44;                   // 0x44
@@ -1401,27 +1404,62 @@ DECOMP_ASSERT(sizeof(GAMECUTSCENES_s) == 0x28, "GAMECUTSCENES_s size");
 DECOMP_ASSERT(offsetof(GAMECUTSCENES_s, cutscene) == 0x1c, "GAMECUTSCENES_s active cutscene offset");
 
 struct GAMEMESSAGE_s {
-    char pad_0x00[0x88];
+    char *text;
+    char text_buffer[0x78];
+    NUVEC position_a; // 0x7c
     NUVEC target_position;
-    char pad_0x94[0xe2 - 0x94];
-    u16 rotation_y; // 0xe2
-    char pad_0xe4[2];
-    u16 icon;   // 0xe6
-    u32 color1; // 0xe8
-    u32 color2; // 0xec
-    u32 color3; // 0xf0
-    char pad_0xf4[0xf7 - 0xf4];
-    u8 alpha;  // 0xf7
-    u8 active; // 0xf8
-    u8 pad_0xf9[4];
+    NUVEC position;
+    NUVEC start_position;
+    f32 field_0xac;
+    f32 target_scale;
+    f32 field_0xb4;
+    f32 field_0xb8;
+    f32 elapsed;
+    f32 duration;
+    f32 field_0xc4;
+    f32 field_0xc8;
+    f32 field_0xcc;
+    f32 field_0xd0;
+    f32 field_0xd4;
+    u32 flags;
+    u32 score;
+    u16 field_0xe0;
+    u16 rotation_y;
+    u16 field_0xe4;
+    u16 icon;
+    union {
+        NUVEC color;
+        struct {
+            u32 color1;
+            u32 color2;
+            u32 color3;
+        };
+    };
+    u8 red;
+    u8 green;
+    u8 blue;
+    u8 alpha;
+    u8 active;
+    u8 field_0xf9;
+    u8 field_0xfa;
+    u8 field_0xfb;
+    u8 field_0xfc;
     i8 player_index;
-    u8 target_type; // 0xfe
-    u8 pad_0xff[0x10c - 0xff];
-    void (*draw_callback)(GAMEMESSAGE_s *, NUVEC *, f32); // 0x10c
-    u8 pad_0x110[4];
+    union {
+        u8 field_0xfe;
+        u8 target_type;
+    };
+    u8 field_0xff;
+    u32 field_0x100;
+    u32 field_0x104;
+    void (*update_fn)(GAMEMESSAGE_s *);
+    void (*draw_callback)(GAMEMESSAGE_s *, NUVEC *, f32);
+    void (*end_fn)(GAMEMESSAGE_s *);
 };
 DECOMP_ASSERT(sizeof(GAMEMESSAGE_s) == 0x114, "GAMEMESSAGE_s size");
+static_assert(offsetof(GAMEMESSAGE_s, position_a) == 0x7c, "game message initial position offset");
 static_assert(offsetof(GAMEMESSAGE_s, target_position) == 0x88, "game message target position offset");
+static_assert(offsetof(GAMEMESSAGE_s, position) == 0x94, "game message current position offset");
 DECOMP_ASSERT(offsetof(GAMEMESSAGE_s, rotation_y) == 0xe2, "game message rotation offset");
 static_assert(offsetof(GAMEMESSAGE_s, player_index) == 0xfd, "game message player index offset");
 // Rumble state packet embedded in GAMEPAD_s (20 bytes; floats driven by

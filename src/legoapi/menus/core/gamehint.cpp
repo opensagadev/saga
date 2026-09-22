@@ -1,4 +1,9 @@
 #include "decomp.h"
+#include "legoapi/audio/audio.h"
+#include "legoapi/characters/motion.h"
+#include "legoapi/core/input/gamepads.h"
+#include "legoapi/core/input/qrand.h"
+#include "legoapi/gizmos/fx/gizmopickups.h"
 #include "legoapi/legoapi_types.h"
 #include "MechInputTouch/MechInputTouch_types.h"
 #include "globals.h"
@@ -7,6 +12,7 @@
 #include "legoapi/world/level.h"
 #include "legoapi/core/input/timer.h"
 #include "legoapi/render/core/render.h"
+#include "legoapi/render/fx.h"
 #include "legoapi/menus/core/text.h"
 #include "gamelib/util/gamelib_util_types.h"
 #include "nu2api/numath/nufloat.h"
@@ -107,8 +113,6 @@ struct MechHintUIButton : MechTouchUITexButton {
     }
 };
 DECOMP_ASSERT(sizeof(MechHintUIButton) == 0xa8, "MechHintUIButton size");
-
-void GameAudio_PlaySfx(i32, nuvec_s *, i32, i32);
 
 void MechHintUIButton_OnClick_Callback(MechTouchUIElement &element, TouchHolder &) {
     MechHintUIButton &button = static_cast<MechHintUIButton &>(element);
@@ -273,8 +277,6 @@ i32 HINT_COMPLETE(i32 hint_id);
 void SET_HINT_COMPLETE(i32 hint_id);
 void Hint_SaveGameState(HINT_s *hint);
 void initHintSys();
-i32 qrand();
-
 void Hint_Reset() {
     HINT_s *hint = hintsys.hints;
     if (hint == NULL) {
@@ -776,16 +778,37 @@ void Hint_Draw(i32 viewport) {
 // Static game message and hint helpers. Stubbed to satisfy the symbol baseline.
 
 static __used__ void EndRedBrickMessage(GAMEMESSAGE_s *) {
-    STUBBED();
+    if (AreaGlobals.values.field_0x08 != 0)
+        AreaGlobals.values.field_0x08 = 2;
+    RedBrickScale = 2.0f;
+    GameAudio_PlaySfx(0x26, NULL, 0, 0);
+    NewRumbleAllPlayers(0.6f, 0.0f, 0, 0);
+    GameCam_Judder(GameCam, -0.2f, 0, NULL);
 }
 
-static __used__ int GameMsg_GetExtraObj(GAMEMESSAGE_s *) {
-    STUBBED();
-    return 0;
+static __used__ nuhspecial_s *GameMsg_GetExtraObj(GAMEMESSAGE_s *message) {
+    if (message->icon == 0xd0)
+        return &WORLD->lev_objs[0xd1].special;
+    return NULL;
 }
 
-static __used__ void GameMsg_EndDelay_Game(GAMEMESSAGE_s *) {
-    STUBBED();
+static __used__ void GameMsg_EndDelay_Game(GAMEMESSAGE_s *message) {
+    if (message->score == 0)
+        return;
+    if (VehicleArea != 0) {
+        DrawBuildUpTime = COINMSGTIME + 1.0f;
+        return;
+    }
+    if (message->field_0xfe != 1)
+        return;
+
+    AddGameDebris(WORLD->debris_sys, 0x38, &message->position_a);
+    if (WORLD->area != NULL && (WORLD->area->flags & 0x100) != 0) {
+        message->position.x += static_cast<f32>(qrand()) * (1.0f / 65535.0f) * 0.2f - 0.1f;
+        message->position.y += static_cast<f32>(qrand()) * (1.0f / 65535.0f) * 0.2f - 0.1f;
+        message->position.z += static_cast<f32>(qrand()) * (1.0f / 65535.0f) * 0.2f - 0.1f;
+        message->field_0xf9 = 0;
+    }
 }
 
 static __used__ void GameMsg_Draw_MiniKitDetector(GAMEMESSAGE_s *, nuvec_s *, float) {

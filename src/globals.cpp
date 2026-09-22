@@ -313,19 +313,11 @@ i16 temp_xrot = 0;
 i16 temp_zrot = 0;
 f32 EShadY = 0.0f;
 i32 CHARSHADOWS_ON = 1;
-#ifdef __ANDROID__
 TERRAIN_LAYER_s TerLayer[17] = {
-#else
-TERRAIN_LAYER_s TerrainLayerStorage[18] = {
-    {0.0f, 0, -1, 0},
-#endif
     {1.0f, 0, -1, 0}, {2.0f, 0, -1, 0}, {2.0f, 0, -1, 0}, {1.0f, 1, -1, 0}, {1.0f, 0, -1, 0}, {1.0f, 0x20, -1, 0},
     {1.0f, 1, -1, 0}, {1.0f, 0, -1, 0}, {1.0f, 0, -1, 0}, {1.0f, 0, -1, 0}, {1.0f, 0, -1, 0}, {1.0f, 0, -1, 0},
     {1.0f, 0, -1, 0}, {1.0f, 0, -1, 0}, {1.0f, 0, -1, 0}, {1.0f, 0, -1, 0}, {1.0f, 0, -1, 0},
 };
-#ifndef __ANDROID__
-TERRAIN_LAYER_s *TerLayer = &TerrainLayerStorage[1];
-#endif
 GameObject_s *player = NULL;
 GameObject_s *player2 = NULL;
 extern GameObject_s *CutDeadVehiclePlayer;
