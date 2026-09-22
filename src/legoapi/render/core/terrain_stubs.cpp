@@ -205,6 +205,7 @@ void TerrainImpact(NUVEC *position, NUVEC *movement, u8 *hit_flags);
 void TerrFlush(void);
 void NewScanRot(NUVEC *position, i32 terrain_mask);
 f32 NewCast(NUVEC *position, f32 height_above, f32 height_below);
+void TerrDrawPlat(tertype *terrain, i16 index);
 void RemoveChunkControlFromStack(debris_chunk_control_s *, debris_chunk_control_s **);
 i32 DebrisSingleCollisionCheckScaleYFlag(i32, NUVEC *, f32, f32, u8);
 i32 DebrisSingleTorusCollisionCheckScaleYFlag(i32, NUVEC *, f32, f32, u8);
@@ -1389,8 +1390,23 @@ extern "C" {
         return 1;
     }
 
-    void DrawPlatform(void) {
-        STUBBED();
+    void DrawPlatform(i32 platform_index) {
+        if (CurTerr == NULL || platform_index < 0)
+            return;
+
+        TERRAIN_PLATFORM &platform = CurTerr->platforms[platform_index];
+        const i16 group_index = platform.terrain_group_index;
+        TERRAIN_GROUP &group = CurTerr->groups[group_index];
+        if (static_cast<u32>(group.chunk_type) > TERRAIN_CHUNK_GROUP_SECONDARY)
+            return;
+
+        TERRAIN_SHAPE_BATCH *batch = static_cast<TERRAIN_SHAPE_BATCH *>(group.data);
+        while (batch->marker >= 0) {
+            TERRAIN_SHAPE *shape = reinterpret_cast<TERRAIN_SHAPE *>(batch + 1);
+            for (i32 i = 0; i < batch->shape_count; ++i, ++shape)
+                TerrDrawPlat(shape, group_index);
+            batch = reinterpret_cast<TERRAIN_SHAPE_BATCH *>(shape);
+        }
     }
 
     i32 FindPlatInst(i32 instance) {
