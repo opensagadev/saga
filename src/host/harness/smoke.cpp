@@ -178,7 +178,7 @@ extern "C" void __wrap_NuFrameBegin() {
 
 extern "C" int __wrap_main(int argc, char **argv) {
     const char *save = "res/SavedGames/SaveGame0.LEGO Star Wars - The Complete Saga_SavedGame";
-    HostWindowOptions window;
+    saga::host::harness::WindowOptions window;
     window.offscreen = true;
     window.mute = true;
     window.msaa = false;
@@ -238,6 +238,6 @@ extern "C" int __wrap_main(int argc, char **argv) {
     if (thread == nullptr)
         finish(1, "could not create watchdog");
     SDL_DetachThread(thread);
-    host_run_window(window);
+    saga::host::harness::run_window(window);
     finish(1, "window or engine exited before completing the test");
 }

@@ -2,207 +2,74 @@
 #include "host/platform/runtime.hpp"
 #include "java/android.h"
 
-#include <cerrno>
+#include <algorithm>
+#include <array>
 #include <cstdio>
 #include <cstdlib>
-#include <cstring>
+#include <iostream>
+#include <string_view>
 
 #include <unistd.h>
 
-namespace {
+namespace saga::host::harness {
+    namespace {
 
-    enum class HostUtility {
-        window,
-    };
-
-    struct HostHarnessOptions {
-        HostUtility utility = HostUtility::window;
-        HostWindowOptions window;
-    };
-
-    void host_print_usage(const char *program) {
-        printf("Usage: %s <utility> [options]\n", program);
-        printf("\nHost utilities:\n");
-        printf("  window [options]       Run the game in an SDL window\n");
-        printf("\nRun '%s <utility> --help' for utility-specific options.\n", program);
-    }
-
-    void host_print_window_usage(const char *program) {
-        printf("Usage: %s window [options]\n", program);
-        printf("\nOptions:\n");
-        printf("  --capture              Capture changed frames under .work/capture\n");
-        printf("  --trace-movement       Log player movement state twice per second\n");
-        printf("  --script-input         Exercise the new-game menu flow\n");
-        printf("  --script-load          Exercise the load-game menu flow\n");
-        printf("  --script-play          Exercise the new-game flow and player movement\n");
-        printf("  --script-action        Exercise the new-game flow and one player saber action\n");
-        printf("  --script-pause         Exercise scripted play, then open and resume the pause menu\n");
-        printf("  --camera-orbit         Rotate camera yaw 360 degrees over 10 seconds in the Cantina\n");
-        printf("  --camera-free          Free camera: numpad 8/5/4/6 rotate; hold Shift to move\n");
-        printf("  --offscreen            Create a hidden, non-focusable window\n");
-        printf("  --mute                 Use SDL's dummy audio driver\n");
-        printf("  --fps                  Show a top-left FPS counter\n");
-        printf("  --no-msaa              Disable native-host 4x multisampling\n");
-        printf("  --no-portals           Disable portal culling for host comparison captures\n");
-        printf("  --script-tail-ms <ms>  Wait after scripted input completes (default: 8000)\n");
-        printf("  --timeout-ms <ms>      Stop the window utility after this time (default: unlimited)\n");
-    }
-
-    bool host_parse_milliseconds(const char *option, const char *value, u64 &result) {
-        errno = 0;
-        char *end = nullptr;
-        const u64 parsed = strtoull(value, &end, 10);
-        if (*value == '-' || errno != 0 || end == value || *end != '\0') {
-            fprintf(stderr, "Invalid value for %s: %s\n", option, value);
-            return false;
-        }
-        result = parsed;
-        return true;
-    }
-
-    bool host_parse_window_arguments(i32 argc, char **argv, const char *program, HostWindowOptions &options) {
-        for (i32 i = 0; i < argc; ++i) {
-            const char *argument = argv[i];
-            if (strcmp(argument, "--capture") == 0) {
-                options.capture = true;
-            } else if (strcmp(argument, "--trace-movement") == 0) {
-                options.trace_movement = true;
-            } else if (strcmp(argument, "--script-input") == 0) {
-                options.script_input = true;
-            } else if (strcmp(argument, "--script-load") == 0) {
-                options.script_input = true;
-                options.script_load = true;
-            } else if (strcmp(argument, "--script-play") == 0) {
-                options.script_input = true;
-                options.script_play = true;
-            } else if (strcmp(argument, "--script-action") == 0) {
-                options.script_input = true;
-                options.script_play = true;
-                options.script_action = true;
-            } else if (strcmp(argument, "--script-pause") == 0) {
-                options.script_input = true;
-                options.script_play = true;
-                options.script_pause = true;
-            } else if (strcmp(argument, "--camera-orbit") == 0) {
-                options.script_input = true;
-                options.script_play = true;
-                options.camera_orbit = true;
-            } else if (strcmp(argument, "--camera-free") == 0) {
-                options.script_input = true;
-                options.script_play = true;
-                options.camera_free = true;
-            } else if (strcmp(argument, "--offscreen") == 0) {
-                options.offscreen = true;
-            } else if (strcmp(argument, "--mute") == 0) {
-                options.mute = true;
-            } else if (strcmp(argument, "--fps") == 0) {
-                options.show_fps = true;
-            } else if (strcmp(argument, "--no-msaa") == 0) {
-                options.msaa = false;
-            } else if (strcmp(argument, "--no-portals") == 0) {
-                options.portals = false;
-            } else if (strcmp(argument, "--script-tail-ms") == 0 || strcmp(argument, "--timeout-ms") == 0) {
-                if (++i == argc) {
-                    fprintf(stderr, "Missing value for %s\n", argument);
-                    host_print_window_usage(program);
-                    return false;
-                }
-                u64 &destination =
-                    strcmp(argument, "--script-tail-ms") == 0 ? options.script_tail_ms : options.timeout_ms;
-                if (!host_parse_milliseconds(argument, argv[i], destination)) {
-                    host_print_window_usage(program);
-                    return false;
-                }
-            } else {
-                fprintf(stderr, "Unknown window option: %s\n", argument);
-                host_print_window_usage(program);
-                return false;
-            }
-        }
-        if (options.camera_orbit && options.camera_free) {
-            fprintf(stderr, "--camera-orbit and --camera-free cannot be used together\n");
-            return false;
-        }
-        return true;
-    }
-
-    enum class HostParseResult {
-        run,
-        help,
-        error,
-    };
-
-    HostParseResult host_parse_arguments(i32 argc, char **argv, HostHarnessOptions &options) {
-        const char *program = argv[0];
-        if (argc < 2) {
-            host_print_usage(program);
-            return HostParseResult::error;
-        }
-        if (strcmp(argv[1], "--help") == 0 || strcmp(argv[1], "-h") == 0) {
-            host_print_usage(program);
-            return HostParseResult::help;
+        template <std::size_t program_count>
+        void print_usage(std::string_view executable, const std::array<const Program *, program_count> &programs) {
+            std::cout << "Usage: " << executable << " <program> [options]\n\nHost programs:\n";
+            for (const Program *program : programs)
+                std::cout << "  " << program->name << "\t" << program->description << '\n';
+            std::cout << "\nRun '" << executable << " <program> --help' for program-specific options.\n";
         }
 
-        const i32 utility_argc = argc - 2;
-        char **utility_argv = argv + 2;
+        void initialize_language() {
+            const char *locale = std::getenv("LANG");
+            if (!locale)
+                locale = "en-us";
 
-        if (strcmp(argv[1], "window") == 0) {
-            options.utility = HostUtility::window;
-            if (utility_argc == 1 && strcmp(utility_argv[0], "--help") == 0) {
-                host_print_window_usage(program);
-                return HostParseResult::help;
-            }
-            return host_parse_window_arguments(utility_argc, utility_argv, program, options.window)
-                       ? HostParseResult::run
-                       : HostParseResult::error;
+            std::snprintf(g_language, sizeof(g_language), "%.63s", locale);
+            std::replace(std::begin(g_language), std::end(g_language), '_', '-');
         }
 
-        fprintf(stderr, "Unknown host utility: %s\n", argv[1]);
-        host_print_usage(program);
-        return HostParseResult::error;
-    }
-
-    void host_initialize_language() {
-        // On device Java fills the engine locale string via nativeSetLanguage
-        // before NuMain runs; emulate that once for every host utility.
-        const char *lang = getenv("LANG");
-        if (lang == nullptr) {
-            lang = "en-us";
+        [[noreturn]] void finish_engine_session(int status) {
+            // NuMain is process-lifetime code. Host programs can finish while its
+            // worker threads still exist, so keep that hard boundary in one place.
+            std::cout.flush();
+            std::cerr.flush();
+            std::clog.flush();
+            std::fflush(nullptr);
+            _exit(status);
         }
-        snprintf(g_language, sizeof(g_language), "%.63s", lang);
-        for (char *character = g_language; *character != '\0'; ++character) {
-            if (*character == '_') {
-                *character = '-';
-            }
+
+    } // namespace
+
+    int run(int argc, char **argv) {
+        HostPlatformPrepareArguments(&argc, &argv);
+
+        const std::array programs{&window_program(), &editor_program()};
+        const Arguments arguments{argc, argv};
+        const std::string_view executable = arguments.empty() ? "saga" : arguments[0];
+        if (arguments.size() < 2 || arguments[1] == "--help" || arguments[1] == "-h") {
+            print_usage(executable, programs);
+            return arguments.size() < 2 ? 1 : 0;
         }
+
+        const std::string_view requested = arguments[1];
+        const auto program = std::find_if(programs.begin(), programs.end(),
+                                          [requested](const Program *entry) { return entry->name == requested; });
+        if (program == programs.end()) {
+            std::cerr << "Unknown host program: " << requested << "\n\n";
+            print_usage(executable, programs);
+            return 1;
+        }
+
+        initialize_language();
+        const int result = (*program)->run({executable, arguments.drop(2)});
+        finish_engine_session(result);
     }
 
-    void host_finish_engine_session(i32 status) {
-        // NuMain is a process-lifetime entry point and the host programs stop
-        // observing it before its worker threads have exited. Keep the hard
-        // process boundary local to those programs until their
-        // reconstructed shutdown path can join every engine thread.
-        fflush(nullptr);
-        _exit(status);
-    }
+} // namespace saga::host::harness
 
-} // namespace
-
-i32 main(i32 argc, char **argv) {
-    HostPlatformPrepareArguments(&argc, &argv);
-
-    HostHarnessOptions options;
-    const HostParseResult result = host_parse_arguments(argc, argv, options);
-    if (result != HostParseResult::run) {
-        return result == HostParseResult::help ? 0 : 1;
-    }
-
-    host_initialize_language();
-    i32 utility_result = 1;
-    switch (options.utility) {
-        case HostUtility::window:
-            utility_result = host_run_window(options.window);
-            break;
-    }
-    host_finish_engine_session(utility_result);
+int main(int argc, char **argv) {
+    return saga::host::harness::run(argc, argv);
 }

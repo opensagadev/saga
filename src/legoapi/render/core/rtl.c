@@ -2565,6 +2565,14 @@ static void edrtlRender() {
     STUBBED();
 }
 
+extern "C" {
+    ed_module_s edrtldesc = {NULL,        NULL,       "Realtime Light Editor",
+                             edrtlInit,   edrtlClose, edrtlEnter,
+                             edrtlLeave,  NULL,       NULL,
+                             NULL,        0x2e6c7472, edrtlProc,
+                             edrtlRender, NULL};
+}
+
 extern "C" void rtlFrameUpdate(f32 frame_time) {
     rtltimer1 = static_cast<u16>(static_cast<i32>(rtltimer1adv * frame_time) + rtltimer1);
     NuTimeBarSlotReset(0, 6);

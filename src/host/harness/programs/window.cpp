@@ -1,11 +1,14 @@
 #include <SDL3/SDL.h>
 
 #include <atomic>
-#include <cerrno>
+#include <charconv>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <iostream>
+#include <string_view>
+#include <system_error>
 #include <vector>
 
 #include "decomp.h"
@@ -17,6 +20,7 @@
 #include "host/platform/free_camera.hpp"
 #include "host/platform/graphics.hpp"
 #include "host/platform/input.hpp"
+#include "host/platform/keyboard.hpp"
 #include "host/platform/runtime.hpp"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/legoapi_types.h"
@@ -67,6 +71,13 @@ extern i32 Paused;
 extern FadeSystem FadeSys;
 extern GAMEPAD_s GamePad[64];
 
+using saga::host::harness::Invocation;
+using saga::host::harness::ParseDisposition;
+using saga::host::harness::ParseFailure;
+using saga::host::harness::Program;
+using saga::host::harness::WindowOptions;
+using saga::host::harness::WindowParseResult;
+
 namespace {
     char host_capture_directory[128] = ".work/capture";
 
@@ -101,18 +112,18 @@ namespace {
     constexpr i32 host_tail_frames = 30;
     // Leave enough time for the original asynchronous load result and its
     // one-second menu result delay to complete after the final scripted tap.
-    constexpr Uint64 host_scripted_title_input_ms = 18000;
-    constexpr Uint64 host_scripted_menu_settle_ms = 500;
-    constexpr Uint64 host_scripted_play_move_ms = 2000;
-    constexpr Uint64 host_scripted_play_settle_ms = 1000;
-    constexpr Uint64 host_scripted_play_jump_ready_timeout_ms = 2000;
-    constexpr Uint64 host_scripted_play_jump_ascent_ms = 200;
-    constexpr Uint64 host_scripted_play_second_jump_ms = 64;
-    constexpr Uint64 host_scripted_play_jump_timeout_ms = 2500;
-    constexpr Uint64 host_scripted_action_entry_timeout_ms = 2000;
-    constexpr Uint64 host_scripted_action_release_timeout_ms = 5000;
-    constexpr Uint64 host_scripted_pause_settle_ms = 500;
-    constexpr Uint64 host_camera_orbit_duration_ms = 10000;
+    constexpr u64 host_scripted_title_input_ms = 18000;
+    constexpr u64 host_scripted_menu_settle_ms = 500;
+    constexpr u64 host_scripted_play_move_ms = 2000;
+    constexpr u64 host_scripted_play_settle_ms = 1000;
+    constexpr u64 host_scripted_play_jump_ready_timeout_ms = 2000;
+    constexpr u64 host_scripted_play_jump_ascent_ms = 200;
+    constexpr u64 host_scripted_play_second_jump_ms = 64;
+    constexpr u64 host_scripted_play_jump_timeout_ms = 2500;
+    constexpr u64 host_scripted_action_entry_timeout_ms = 2000;
+    constexpr u64 host_scripted_action_release_timeout_ms = 5000;
+    constexpr u64 host_scripted_pause_settle_ms = 500;
+    constexpr u64 host_camera_orbit_duration_ms = 10000;
     constexpr f32 host_full_camera_rotation = 65536.0f;
 
     enum class HostScriptedInputStage {
@@ -523,8 +534,8 @@ namespace {
         }
     }
 
-    static HostScriptedMenuAction host_scripted_menu_select(i32 row, i32 column, Uint64 elapsed_ticks,
-                                                            Uint64 &last_action_ticks) {
+    static HostScriptedMenuAction host_scripted_menu_select(i32 row, i32 column, u64 elapsed_ticks,
+                                                            u64 &last_action_ticks) {
         if (elapsed_ticks < last_action_ticks + host_scripted_menu_settle_ms) {
             return HostScriptedMenuAction::waiting;
         }
@@ -706,7 +717,7 @@ namespace {
 
 } // namespace
 
-i32 host_run_window(const HostWindowOptions &options) {
+i32 saga::host::harness::run_window(const WindowOptions &options) {
     HostSetReadbackEnabled(options.capture);
     HostSetFpsOverlayEnabled(options.show_fps);
     HostSetMsaaEnabled(options.msaa);
@@ -768,21 +779,21 @@ i32 host_run_window(const HostWindowOptions &options) {
         return 1;
     }
 
-    const Uint64 start_ticks = SDL_GetTicks();
+    const u64 start_ticks = SDL_GetTicks();
     i32 frame_count = 0;
     u64 previous_hash = 0;
     u64 captured_hash = 0;
-    Uint64 last_capture_ticks = 0;
-    Uint64 last_change_ticks = 0;
-    Uint64 next_readback_ticks = 0;
+    u64 last_capture_ticks = 0;
+    u64 last_change_ticks = 0;
+    u64 next_readback_ticks = 0;
     bool have_hash = false;
     bool saw_visible_frame = false;
     bool image_changing = false;
     HostScriptedInputStage scripted_stage = HostScriptedInputStage::title;
-    Uint64 scripted_stage_ticks = 0;
-    Uint64 scripted_jump_ready_wait_ticks = 0;
+    u64 scripted_stage_ticks = 0;
+    u64 scripted_jump_ready_wait_ticks = 0;
     i32 scripted_last_menu = -2;
-    Uint64 scripted_menu_since = 0;
+    u64 scripted_menu_since = 0;
     HostScriptedPlaySnapshot scripted_play_before{};
     HostScriptedPlaySnapshot scripted_play_during{};
     HostScriptedPlaySnapshot scripted_play_after{};
@@ -802,7 +813,7 @@ i32 host_run_window(const HostWindowOptions &options) {
     bool scripted_play_input_held = false;
     bool camera_orbit_started = false;
     bool camera_orbit_finished = false;
-    Uint64 camera_orbit_start_ticks = 0;
+    u64 camera_orbit_start_ticks = 0;
     f32 camera_orbit_base_yaw = 0.0f;
     u32 escape_held_button = 0;
     std::vector<u8> pixels;
@@ -810,10 +821,13 @@ i32 host_run_window(const HostWindowOptions &options) {
     i32 capture_height = 0;
 
     bool quit_requested = false;
-    Uint64 movement_trace_ticks = 0;
+    i32 requested_exit_status = -1;
+    u64 movement_trace_ticks = 0;
     while (!quit_requested) {
         SDL_Event event{};
         while (SDL_PollEvent(&event)) {
+            if (options.hooks.handle_event)
+                options.hooks.handle_event(event);
             if (options.offscreen) {
                 continue;
             }
@@ -841,11 +855,22 @@ i32 host_run_window(const HostWindowOptions &options) {
             break;
         }
 
+        if (options.hooks.requested_exit_status) {
+            requested_exit_status = options.hooks.requested_exit_status();
+            if (requested_exit_status >= 0)
+                break;
+        }
+
         u32 keyboard_buttons = escape_held_button;
         if (!options.offscreen) {
             const bool *keyboard = SDL_GetKeyboardState(nullptr);
+            saga::host::update_keyboard_state(keyboard);
             keyboard_buttons |= HostPlatformKeyboardButtons(keyboard);
+        } else {
+            saga::host::update_keyboard_state(nullptr);
         }
+        if (options.hooks.filter_game_input)
+            keyboard_buttons = options.hooks.filter_game_input(keyboard_buttons);
         HostInputSetKeyboardHeld(0, keyboard_buttons);
 
         if (options.camera_free) {
@@ -870,7 +895,7 @@ i32 host_run_window(const HostWindowOptions &options) {
 
         frame_count++;
 
-        const Uint64 elapsed_ticks = SDL_GetTicks() - start_ticks;
+        const u64 elapsed_ticks = SDL_GetTicks() - start_ticks;
         if (options.trace_movement && elapsed_ticks - movement_trace_ticks >= 500) {
             movement_trace_ticks = elapsed_ticks;
             const GameObject_s *player = Player[0];
@@ -1312,8 +1337,8 @@ i32 host_run_window(const HostWindowOptions &options) {
                          static_cast<unsigned long long>(host_camera_orbit_duration_ms));
             }
 
-            const Uint64 orbit_elapsed = elapsed_ticks - camera_orbit_start_ticks;
-            const Uint64 clamped_elapsed =
+            const u64 orbit_elapsed = elapsed_ticks - camera_orbit_start_ticks;
+            const u64 clamped_elapsed =
                 orbit_elapsed < host_camera_orbit_duration_ms ? orbit_elapsed : host_camera_orbit_duration_ms;
             const f32 progress = static_cast<f32>(clamped_elapsed) / static_cast<f32>(host_camera_orbit_duration_ms);
             GameCam->field_0x218 = camera_orbit_base_yaw - progress * host_full_camera_rotation;
@@ -1337,7 +1362,7 @@ i32 host_run_window(const HostWindowOptions &options) {
             continue;
         }
 
-        const Uint64 readback_ticks = SDL_GetTicks();
+        const u64 readback_ticks = SDL_GetTicks();
         if (readback_ticks < next_readback_ticks) {
             continue;
         }
@@ -1353,7 +1378,7 @@ i32 host_run_window(const HostWindowOptions &options) {
         }
         saw_visible_frame |= host_frame_has_visible_pixels(pixels.data(), static_cast<usize>(capture_width) *
                                                                               static_cast<usize>(capture_height));
-        const Uint64 now = SDL_GetTicks();
+        const u64 now = SDL_GetTicks();
         if (!have_hash) {
             host_capture_frame(frame_count, pixels, capture_width, capture_height);
             captured_hash = current_hash;
@@ -1618,6 +1643,8 @@ i32 host_run_window(const HostWindowOptions &options) {
                                 : scripted_play_movement_observed && scripted_play_jump_observed));
     const bool capture_passed = !options.capture || (have_hash && saw_visible_frame);
     LOG_INFO("presented %d frame_count", frame_count);
+    if (requested_exit_status >= 0)
+        return requested_exit_status;
     if (numain_finished) {
         const i32 result = host_numain_result.load(std::memory_order_relaxed);
         free(buffer);
@@ -1625,3 +1652,124 @@ i32 host_run_window(const HostWindowOptions &options) {
     }
     return scripted_play_passed && capture_passed ? 0 : 1;
 }
+
+namespace saga::host::harness {
+    namespace {
+
+        void print_window_usage(std::string_view executable, std::string_view program_name) {
+            std::cout << "Usage: " << executable << ' ' << program_name << " [options]\n\nOptions:\n"
+                      << "  --capture              Capture changed frames under .work/capture\n"
+                      << "  --trace-movement       Log player movement state twice per second\n"
+                      << "  --script-input         Exercise the new-game menu flow\n"
+                      << "  --script-load          Exercise the load-game menu flow\n"
+                      << "  --script-play          Exercise the new-game flow and player movement\n"
+                      << "  --script-action        Exercise the new-game flow and one player saber action\n"
+                      << "  --script-pause         Exercise scripted play, then open and resume the pause menu\n"
+                      << "  --camera-orbit         Rotate camera yaw 360 degrees over 10 seconds in the Cantina\n"
+                      << "  --camera-free          Free camera: numpad 8/5/4/6 rotate; hold Shift to move\n"
+                      << "  --offscreen            Create a hidden, non-focusable window\n"
+                      << "  --mute                 Use SDL's dummy audio driver\n"
+                      << "  --fps                  Show a top-left FPS counter\n"
+                      << "  --no-msaa              Disable native-host 4x multisampling\n"
+                      << "  --no-portals           Disable portal culling for host comparison captures\n"
+                      << "  --script-tail-ms <ms>  Wait after scripted input completes (default: 8000)\n"
+                      << "  --timeout-ms <ms>      Stop after this time (default: unlimited)\n";
+        }
+
+        bool parse_milliseconds(std::string_view option, std::string_view value, u64 &destination) {
+            u64 parsed = 0;
+            const auto [end, error] = std::from_chars(value.data(), value.data() + value.size(), parsed);
+            if (error != std::errc{} || end != value.data() + value.size()) {
+                std::cerr << "Invalid value for " << option << ": " << value << '\n';
+                return false;
+            }
+            destination = parsed;
+            return true;
+        }
+
+        int run_window_program(const Invocation &invocation) {
+            auto parsed = parse_window_options(invocation, "window");
+            if (const auto *failure = std::get_if<ParseFailure>(&parsed))
+                return failure->disposition == ParseDisposition::help ? 0 : 1;
+            return run_window(std::get<WindowOptions>(parsed));
+        }
+
+    } // namespace
+
+    WindowParseResult parse_window_options(const Invocation &invocation, std::string_view program_name) {
+        WindowOptions options;
+        for (std::size_t index = 0; index < invocation.arguments.size(); ++index) {
+            const std::string_view argument = invocation.arguments[index];
+            if (argument == "--help" || argument == "-h") {
+                print_window_usage(invocation.executable, program_name);
+                return ParseFailure{ParseDisposition::help};
+            }
+            if (argument == "--capture")
+                options.capture = true;
+            else if (argument == "--trace-movement")
+                options.trace_movement = true;
+            else if (argument == "--script-input")
+                options.script_input = true;
+            else if (argument == "--script-load") {
+                options.script_input = true;
+                options.script_load = true;
+            } else if (argument == "--script-play") {
+                options.script_input = true;
+                options.script_play = true;
+            } else if (argument == "--script-action") {
+                options.script_input = true;
+                options.script_play = true;
+                options.script_action = true;
+            } else if (argument == "--script-pause") {
+                options.script_input = true;
+                options.script_play = true;
+                options.script_pause = true;
+            } else if (argument == "--camera-orbit") {
+                options.script_input = true;
+                options.script_play = true;
+                options.camera_orbit = true;
+            } else if (argument == "--camera-free") {
+                options.script_input = true;
+                options.script_play = true;
+                options.camera_free = true;
+            } else if (argument == "--offscreen")
+                options.offscreen = true;
+            else if (argument == "--mute")
+                options.mute = true;
+            else if (argument == "--fps")
+                options.show_fps = true;
+            else if (argument == "--no-msaa")
+                options.msaa = false;
+            else if (argument == "--no-portals")
+                options.portals = false;
+            else if (argument == "--script-tail-ms" || argument == "--timeout-ms") {
+                if (++index == invocation.arguments.size()) {
+                    std::cerr << "Missing value for " << argument << "\n\n";
+                    print_window_usage(invocation.executable, program_name);
+                    return ParseFailure{ParseDisposition::error};
+                }
+                u64 &destination = argument == "--script-tail-ms" ? options.script_tail_ms : options.timeout_ms;
+                if (!parse_milliseconds(argument, invocation.arguments[index], destination)) {
+                    print_window_usage(invocation.executable, program_name);
+                    return ParseFailure{ParseDisposition::error};
+                }
+            } else {
+                std::cerr << "Unknown " << program_name << " option: " << argument << "\n\n";
+                print_window_usage(invocation.executable, program_name);
+                return ParseFailure{ParseDisposition::error};
+            }
+        }
+
+        if (options.camera_orbit && options.camera_free) {
+            std::cerr << "--camera-orbit and --camera-free cannot be used together\n";
+            return ParseFailure{ParseDisposition::error};
+        }
+        return options;
+    }
+
+    const Program &window_program() {
+        static constexpr Program program{"window", "Run the game in an SDL window", run_window_program};
+        return program;
+    }
+
+} // namespace saga::host::harness

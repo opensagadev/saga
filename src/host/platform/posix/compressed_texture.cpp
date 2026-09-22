@@ -46,7 +46,8 @@ extern "C" void glCompressedTexImage2D(GLenum target, GLint level, GLenum intern
 
     // These formats are advertised by the host shim and must never reach a
     // native driver when validation or decoding failed.
-    if (internal_format == 0x8d64 || internal_format == 0x8c00 || internal_format == 0x8c02) {
+    if (internal_format == 0x8d64 || internal_format == 0x8c00 || internal_format == 0x8c01 ||
+        internal_format == 0x8c02 || internal_format == 0x8c03) {
         return;
     }
 

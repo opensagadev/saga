@@ -24,6 +24,7 @@
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nu3d/numtl.h"
+#include "nu2api/nu3d/nuprim.h"
 #include "nu2api/nu3d/nuqfnt.h"
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nu3d/android/nuobject_android.h"
@@ -36,6 +37,7 @@
 
 #include <string.h>
 #include <math.h>
+#include <stdio.h>
 
 float edanimPlayerAnimDistance(i32 parameter_index);
 extern "C" i32 NuRndrDoingScreenGrab;
@@ -48,8 +50,12 @@ static i32 editor_return;
 static i32 bShowCursor = 1;
 static NUQFNT *edui_font;
 static i32 edui_donotdraw;
+static i32 item_width;
+static void *dir_list;
+static char ed_levelfile[256];
 static f32 edui_font_scale_x = 0.9f;
 static f32 edui_font_scale_y = 0.9f;
+static f32 edmain_menu_scale = 1.0f;
 static u32 edui_cursor_colour = 0xff000000;
 static char *edpp_save_names[6];
 static i32 edptl_count;
@@ -245,14 +251,29 @@ extern "C" {
     // GCC 4.7 emits these file-scope objects in reverse declaration order, so
     // each group below mirrors the original linked order in reverse.
     i32 bCameraEnabled = 1;
-    ed_module_s edanimdesc = {NULL, NULL, "Animation Editor", edanimInit, edanimClose,  edanimEnter, NULL, NULL,
-                              NULL, NULL, 0x6d696e61,         edanimProc, edanimRender, NULL};
+    i32 edui_filepick_listsize = 8;
+    u32 eduiitem_context_outline_colour = 0x0000ff00;
+    u32 eduiitem_selected_outline_colour = 0x80ffffff;
+    u32 eduimenu_selected_outline_colour = 0x80ffffff;
+    u32 eduimenu_outline_colour = 0x80404040;
+    f32 edmain_default_camera_speed = 1.0f;
+    i32 ed_main_menu_h = 320;
+    i32 ed_main_menu_w = 180;
+    i32 ed_main_menu_y = 50;
+    i32 ed_main_menu_x = 220;
+    eduiiattr_s ed_attr = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
+    i32 edmain_render_interacts;
+    ed_module_s edanimdesc = {NULL, NULL, "Anim Editor", edanimInit, edanimClose, edanimEnter,  NULL,
+                              NULL, NULL, NULL,          0x6d696e61, edanimProc,  edanimRender, NULL};
     ed_module_s edbridesc = {NULL, NULL, "Bridge Editor", edbriInit, edbriClose,  edbriEnter, NULL, NULL,
                              NULL, NULL, 0x64697262,      edbriProc, edbriRender, NULL};
     ed_module_s edgradesc = {NULL, NULL, "Grass Editor", edgraInit,  edgraClose, edgraEnter,  NULL,
                              NULL, NULL, NULL,           0x73617267, edgraProc,  edgraRender, NULL};
-    ed_module_s edptldesc = {NULL, NULL, "Particle Editor", edppInit, edppClose,  edppEnter, NULL, edppApply,
-                             NULL, NULL, 0x706c7470,        edppProc, edppRender, NULL};
+    ed_module_s edptldesc = {NULL,       NULL,       "Particle Positioner",
+                             edppInit,   edppClose,  edppEnter,
+                             NULL,       edppApply,  NULL,
+                             NULL,       0x706c7470, edppProc,
+                             edppRender, NULL};
     i32 edpp_create_type = -1;
     f32 edpp_copy_size = 0.2f;
     f32 edpp_scale_factor = 1.0f;
@@ -868,6 +889,18 @@ static i32 ed_module_active;
 static ed_module_s *ed_curr;
 static edui_interact_s eduiInteracts[64];
 static edui_interact_s *eduiInteractLocked;
+
+extern "C" {
+    static void cbMMCancel(eduimenu_s *, eduimenu_s *);
+    static void cbMMReturnToApp(eduimenu_s *, eduiitem_s *, u32);
+    static void cbmcfgCameraSpeed(eduimenu_s *, eduiitem_s *, u32);
+    static void cbmcfgCancel(eduimenu_s *, eduimenu_s *);
+    static void cbMMRegSel(eduimenu_s *, eduiitem_s *, u32);
+    static void cbMMEditorConfig(eduimenu_s *, eduiitem_s *, u32);
+    static i32 cbInteractMenuCancelChild(edui_interact_s *);
+    extern i32 edmain_auto_speed;
+    void cbSetAutoSpeed(eduimenu_s *, eduiitem_s *, u32);
+}
 
 extern "C" {
     i32 PadFlyMode = 0;
@@ -1884,14 +1917,124 @@ extern "C" {
     // Shared editor font; edmainInit receives and stores the font handle.
     void *ed_fnt;
 
-    void edmainInit(void) {
-        STUBBED();
+    void edmainInit(void *font, char *configuration_file) {
+        if (ed_init)
+            edmainClose();
+
+        ed_module_active = 0;
+        ed_fnt = font;
+        for (ed_module_s *module = ed_list; module; module = module->next) {
+            if (module->init)
+                module->init();
+        }
+
+        edinternalcam = NuCameraCreate();
+        edmainExtCamera(edinternalcam);
+        eduiInit();
+
+        NuQFntPushCoordinateSystem(NUQFNT_CSMODE_PS2);
+        NuQFntSetScale(system_qfont, edmain_menu_scale, edmain_menu_scale);
+
+        ed_cfg_menu = eduiMenuCreate(220, 50, 180, 320, ed_fnt, cbmcfgCancel, const_cast<char *>("Editor Config"));
+        if (ed_cfg_menu) {
+            eduiMenuAddItem(ed_cfg_menu,
+                            eduiItemSliderCreate(0, &ed_attr, 0, cbmcfgCameraSpeed, 1.0f, 20.0f,
+                                                 edmain_default_camera_speed, const_cast<char *>("Camera Speed")));
+            eduiMenuAddItem(ed_cfg_menu, eduiItemToggleCreate(0, &ed_attr, edmain_auto_speed, 1, cbSetAutoSpeed,
+                                                              const_cast<char *>("Proportional Cursor Speed")));
+            eduiMenuFitWidth(ed_cfg_menu, 8);
+        }
+
+        ed_main_menu = eduiMenuCreate(ed_main_menu_x, ed_main_menu_y, ed_main_menu_w, ed_main_menu_h, ed_fnt,
+                                      cbMMCancel, const_cast<char *>("Editor Options"));
+        if (ed_main_menu) {
+            for (ed_module_s *module = ed_list; module; module = module->next) {
+                eduiitem_s *item =
+                    eduiMenuAddItem(ed_main_menu, eduiItemSelCreate(reinterpret_cast<usize>(module), &ed_attr, 0, 1,
+                                                                    cbMMRegSel, const_cast<char *>(module->name)));
+                if (module == ed_curr)
+                    eduiMenuHighlight(ed_main_menu, item);
+            }
+            eduiMenuAddItem(ed_main_menu, eduiItemSelCreate(0, &ed_attr, 0, 0, cbMMEditorConfig,
+                                                            const_cast<char *>("Editor Config")));
+            eduiMenuAddItem(ed_main_menu,
+                            eduiItemSelCreate(0, &ed_attr, 0, 0, cbMMReturnToApp, const_cast<char *>("Return To App")));
+            eduiMenuFitWidth(ed_main_menu, 8);
+        }
+
+        NuQFntPopCoordinateSystem();
+
+        if (!configuration_file) {
+            ed_levelfile[0] = '\0';
+        } else {
+            NuStrCpy(ed_levelfile, configuration_file);
+            if (ed_levelfile[0]) {
+                i32 file = NuFileOpen(ed_levelfile, NUFILE_READ);
+                if (file) {
+                    NuFileBeginBlkRead(file, 0x3032554e);
+                    i32 block;
+                    while ((block = NuFileBeginBlkRead(file, 0)) != 0) {
+                        for (ed_module_s *module = ed_list; module; module = module->next) {
+                            if (module->block_id == static_cast<u32>(block)) {
+                                if (module->read)
+                                    module->read(file);
+                                break;
+                            }
+                        }
+                        NuFileEndBlkRead(file);
+                    }
+                    NuFileEndBlkRead(file);
+                    NuFileClose(file);
+                }
+            }
+        }
+        ed_init = 1;
     }
-    void edmainInitEx(void) {
-        STUBBED();
+    void edmainInitEx(void *font, char *configuration_file, eduiiattr_s *colours, i32 x, i32 y, i32 width, i32 height) {
+        ed_attr = *colours;
+        ed_main_menu_x = x;
+        ed_main_menu_y = y;
+        ed_main_menu_w = width;
+        ed_main_menu_h = height;
+        edmainInit(font, configuration_file);
     }
-    void edmainProcess(void) {
-        STUBBED();
+    i32 edmainProcess(f32 delta_time, nupad_s *pad) {
+        editor_return = 0;
+        if (edmain_cursor_enabled)
+            eduiProcessCursor(0.0f, NULL);
+
+        if (ed_module_active && ed_curr) {
+            if (!ed_curr->process) {
+                ed_module_active = 0;
+                return editor_return;
+            }
+            i32 result = ed_curr->process(delta_time, pad);
+            if (!result)
+                return editor_return;
+            if (ed_curr->deactivate)
+                ed_curr->deactivate();
+            if (result == 2)
+                editor_return = 1;
+            ed_module_active = 0;
+            return editor_return;
+        }
+
+        if (!ed_curr) {
+            ed_curr = ed_list;
+            eduiSetActiveMenu(ed_main_menu);
+            eduiSetDefaultActiveMenu(ed_main_menu);
+        }
+
+        if (ed_main_menu) {
+            for (eduiitem_s *item = ed_main_menu->first; item; item = item->next) {
+                if (item->data_ptr) {
+                    ed_module_s *module = static_cast<ed_module_s *>(item->data_ptr);
+                    item->disabled = module->reserved != NULL;
+                }
+            }
+            eduiMenuProcess(ed_main_menu, delta_time, pad);
+        }
+        return editor_return;
     }
     NUVEC *edmainQueryLocVec(void) {
         return ed_loc;
@@ -1910,7 +2053,27 @@ extern "C" {
         ed_loc = position;
     }
     void edmainRender(void) {
-        STUBBED();
+        if (edmain_cursor_enabled)
+            eduiFlushInteracts();
+
+        if (ed_module_active && ed_curr) {
+            if (ed_curr->render)
+                ed_curr->render();
+        } else if (ed_main_menu) {
+            NuQFntPushPrintMode(2);
+            NuQFntPushCoordinateSystem(NUQFNT_CSMODE_PS2);
+            NuQFntSet(system_qfont);
+            NuQFntSetScale(system_qfont, edmain_menu_scale, edmain_menu_scale);
+            eduiMenuRender(ed_main_menu);
+            NuQFntPopCoordinateSystem();
+            NuQFntPopPrintMode();
+        }
+
+        if (edmain_cursor_enabled) {
+            eduiRenderCursor();
+            if (edmain_render_interacts)
+                eduiRenderInteracts();
+        }
     }
     void edmainSetCamera(NUMTX *matrix) {
         edmaincam->mtx = *matrix;
@@ -1919,8 +2082,12 @@ extern "C" {
     void edmainSetCursorEnabled(i32 enabled) {
         edmain_cursor_enabled = enabled;
     }
-    void edmainSetMainMenuScale(void) {
-        STUBBED();
+    f32 edmainSetMainMenuScale(f32 scale) {
+        f32 previous = edmain_menu_scale;
+        edmain_menu_scale = scale;
+        if (ed_main_menu)
+            eduiMenuFitWidth(ed_main_menu, 8);
+        return previous;
     }
     void edmainSetReturn(i32 result) {
         editor_return = result;
@@ -2480,7 +2647,9 @@ extern "C" {
         }
     }
     void eduiInit(void) {
-        STUBBED();
+        eduiInitMaterials();
+        if (edui_filepick_listsize && !dir_list)
+            dir_list = NU_ALLOC(static_cast<usize>(edui_filepick_listsize) * 0x118, 4, 1, "", 0);
     }
     void eduiInitMaterials(void) {
         uimtls[0] = NuMtlCreate(1);
@@ -2824,8 +2993,26 @@ extern "C" {
         }
         return 0;
     }
-    void eduiItemRender(void) {
-        STUBBED();
+    i32 eduiItemRender(eduiitem_s *item, eduimenu_s *menu, i32 x, i32 y, i32 width, i32 selected) {
+        item_width = width;
+        typedef i32 (*RenderCallback)(eduimenu_s *, eduiitem_s *, i32, i32, i32, i32);
+        i32 height = reinterpret_cast<RenderCallback>(item->render)(menu, item, x, y, width, selected);
+        if (selected) {
+            u32 colour = (item->flags & 4) ? eduiitem_context_outline_colour : eduiitem_selected_outline_colour;
+            if (!edui_donotdraw)
+                NuRndrLineRect2di(x << 4, (y << 3) + 8, item_width << 4, (height << 3) - 16, colour, uimtls[ui_outmtl]);
+        }
+        if (item->disabled && !edui_donotdraw) {
+            i32 left = x << 4;
+            i32 top = y << 3;
+            i32 right = left + (width << 4);
+            i32 bottom = top + (height << 3);
+            NuRndrLine2di(left, top, left + (width << 2), bottom, item->colours[0], uimtls[ui_bgmtl]);
+            NuRndrLine2di(left + (width << 2), top, left + (width << 3), bottom, item->colours[0], uimtls[ui_bgmtl]);
+            NuRndrLine2di(left + (width << 3), top, left + width * 12, bottom, item->colours[0], uimtls[ui_bgmtl]);
+            NuRndrLine2di(left + width * 12, top, right, bottom, item->colours[0], uimtls[ui_bgmtl]);
+        }
+        return height;
     }
     eduiitem_s *eduiItemSelCreate(usize data, const void *colours, i32 selected, i32 group, EdUiItemCallback callback,
                                   char *text) {
@@ -2856,8 +3043,21 @@ extern "C" {
             item->render = eduicbRenderSelWithClipColour;
         return item;
     }
-    void eduiItemSeparatorCreate(void) {
-        STUBBED();
+    eduiitem_s *eduiItemSeparatorCreate(usize data, const void *colours) {
+        eduiitem_s *item = static_cast<eduiitem_s *>(NU_ALLOC(sizeof(eduiitem_s), 4, 1, "", 0));
+        if (item) {
+            memset(item, 0, sizeof(*item));
+            item->type = 18;
+            item->data = data;
+            memcpy(item->colours, colours, sizeof(item->colours));
+            item->process = eduicbProcessSeparator;
+            item->render = eduicbRenderSeparator;
+            item->destroy = eduicbItemDestroy;
+            item->text_alignment = 0x40;
+            item->selection_group = 0;
+            item->highlighted = 0;
+        }
+        return item;
     }
     i32 eduiItemSetText(eduiitem_s *item, char *text) {
         if (item->text && NuStrLen(item->text) < NuStrLen(text)) {
@@ -3159,8 +3359,73 @@ extern "C" {
         if (menu->y < padding)
             menu->y = padding;
     }
-    void eduiMenuFitWidth(eduimenu_s *, i32) {
-        STUBBED();
+    void eduiMenuFitWidth(eduimenu_s *menu, i32 padding) {
+        eduicbMenuOpenAllexpanders(menu);
+        NuQFntPushCoordinateSystem(NUQFNT_CSMODE_PS2);
+        NuQFntSetScale(edui_font, edui_font_scale_x, edui_font_scale_y);
+
+        i32 width = menu->title ? static_cast<i32>(NuQFntPrintLenU(edui_font, menu->title)) >> 4 : 0;
+        i32 property_label_width = 0;
+        i32 property_value_width = 0;
+
+        for (eduiitem_s *item = menu->first; item; item = item->next) {
+            i32 item_text_width = 0;
+            switch (item->type) {
+                case 1:
+                    item_text_width = (static_cast<i32>(NuQFntHeight(edui_font) * 1.25f) >> 3) * 10;
+                    break;
+                case 2:
+                case 3:
+                    if (item->text) {
+                        item_text_width = (static_cast<i32>(NuQFntHeight(edui_font) * 1.25f) >> 3) +
+                                          (static_cast<i32>(NuQFntPrintLenU(edui_font, item->text)) >> 4);
+                    }
+                    break;
+                case 17: {
+                    edui_prop_s *property = static_cast<edui_prop_s *>(item);
+                    i32 label_width = item->text ? static_cast<i32>(NuQFntPrintLenU(edui_font, item->text)) >> 4 : 30;
+                    i32 value_width = property->property_text
+                                          ? static_cast<i32>(NuQFntPrintLenU(edui_font, property->property_text)) >> 4
+                                          : 30;
+                    if (label_width > property_label_width)
+                        property_label_width = label_width;
+                    if (value_width > property_value_width)
+                        property_value_width = value_width;
+                    item_text_width = value_width;
+                    break;
+                }
+                case 6: {
+                    edui_slider_s *slider = static_cast<edui_slider_s *>(item);
+                    char format[512];
+                    char text[520];
+                    NuStrCpy(format, item->text);
+                    NuStrCat(format, slider->format);
+                    sprintf(text, format, 0, 0x80000000);
+                    item_text_width = static_cast<i32>(NuQFntPrintLenU(edui_font, text)) >> 4;
+                    break;
+                }
+                default:
+                    if (item->text)
+                        item_text_width = static_cast<i32>(NuQFntPrintLenU(edui_font, item->text)) >> 4;
+                    break;
+            }
+            if (item_text_width > width)
+                width = item_text_width;
+        }
+
+        i32 property_width =
+            property_label_width + property_value_width + (static_cast<i32>(NuQFntHeight(edui_font)) >> 3);
+        if (property_width > width)
+            width = property_width;
+
+        for (eduiitem_s *item = menu->first; item; item = item->next) {
+            if (item->type == 17)
+                static_cast<edui_prop_s *>(item)->label_width = static_cast<f32>(property_label_width + 1);
+        }
+        menu->width = width + padding;
+
+        NuQFntPopCoordinateSystem();
+        eduicbMenuCloseAllexpanders(menu);
     }
     void eduiMenuHighlight(eduimenu_s *menu, eduiitem_s *item) {
         if (item->selection_group) {
@@ -3380,7 +3645,172 @@ extern "C" {
         item->previous = NULL;
     }
     void eduiMenuRender(eduimenu_s *menu) {
-        STUBBED();
+        ++NuPrimCSPos;
+        i32 x = menu->x;
+        i32 y = menu->y;
+        NuPrimSetCoordinateSystem(NUPRIM_SCALEMODE_PS2);
+        NuQFntPushCoordinateSystem(NUQFNT_CSMODE_PS2);
+        NuQFntPushPrintMode(2);
+        if (!edui_donotdraw)
+            NuQFntSet(edui_font);
+        NuQFntSetScale(edui_font, edui_font_scale_x, edui_font_scale_y);
+
+        const f32 font_height = NuQFntHeight(edui_font);
+        const f32 baseline = NuQFntBaseline(edui_font);
+        const i32 title_height = static_cast<i32>(font_height * 0.15625f);
+        if (menu->title && menu->title[0]) {
+            if (!menu->child && numInteracts < 64 && !eduiInteractLocked) {
+                edui_interact_s *interact = &eduiInteracts[numInteracts++];
+                interact->x = static_cast<f32>(x);
+                interact->y = static_cast<f32>(y) * 0.125f;
+                interact->width = static_cast<f32>(menu->width);
+                interact->height = static_cast<f32>(title_height) * 0.125f;
+                interact->menu = menu;
+                interact->item = NULL;
+                interact->callback = cbInteractMenuTitle;
+                interact->buttons = 0x40;
+                interact->field_20 = 0;
+            }
+            if (!edui_donotdraw) {
+                NuRndrRect2di(x << 4, y << 3, menu->width << 4, title_height << 3, 0x80000000, uimtls[ui_bgmtl]);
+                NuQFntSet(edui_font);
+                NuQFntSetColour(edui_font, 0x807f7f7f);
+            }
+            eduiFntPrintClipEx(edui_font, static_cast<f32>(x + 1),
+                               font_height * 0.015625f + baseline * 0.125f + static_cast<f32>(y), 0x10,
+                               static_cast<f32>(x), static_cast<f32>(menu->width), menu->title);
+            y += title_height;
+        }
+
+        eduiitem_s *item = menu->field_0c;
+        i32 max_item_height = 0;
+        if (item) {
+            eduiitem_s *selected = menu->selected;
+            bool find_selected = selected != NULL;
+
+            if (item != menu->first) {
+                const i32 scroll_height = static_cast<i32>(font_height * 0.125f);
+                if (!menu->child && numInteracts < 64 && !eduiInteractLocked) {
+                    edui_interact_s *interact = &eduiInteracts[numInteracts++];
+                    interact->x = static_cast<f32>(x);
+                    interact->y = static_cast<f32>(y) * 0.125f;
+                    interact->width = static_cast<f32>(menu->width);
+                    interact->height = static_cast<f32>(scroll_height) * 0.125f;
+                    interact->menu = menu;
+                    interact->item = NULL;
+                    interact->callback = cbInteractMenuScrollUp;
+                    interact->buttons = 0x40;
+                    interact->field_20 = 0;
+                }
+                if (!edui_donotdraw) {
+                    NuRndrRect2di(x << 4, y << 3, menu->width << 4, scroll_height << 3, 0x80000000, uimtls[ui_bgmtl]);
+                    const i32 centre = (x * 2 + menu->width) << 3;
+                    const i32 top = (y << 3) + 8;
+                    const i32 bottom = ((y + scroll_height) << 3) - 16;
+                    NuRndrLine2di(centre, top, centre - ((scroll_height - 2) << 4), bottom, 0x80ffffff, uimtls[0]);
+                    NuRndrLine2di(centre, top, centre + ((scroll_height - 2) << 4), bottom, 0x80ffffff, uimtls[0]);
+                }
+                y += scroll_height;
+            }
+
+            menu->field_10 = item;
+            while (item) {
+                i32 is_selected = 0;
+                if (item == selected) {
+                    find_selected = false;
+                    if (!menu->child)
+                        is_selected = 1;
+                }
+
+                const i32 item_height = eduiItemRender(item, menu, x, y, menu->width, is_selected);
+                if (item_height > max_item_height)
+                    max_item_height = item_height;
+
+                if (!menu->child && numInteracts < 64 && !eduiInteractLocked) {
+                    edui_interact_s *interact = &eduiInteracts[numInteracts++];
+                    interact->x = static_cast<f32>(x);
+                    interact->y = static_cast<f32>(y) * 0.125f;
+                    interact->width = static_cast<f32>(menu->width);
+                    interact->height = static_cast<f32>(item_height) * 0.125f;
+                    interact->menu = menu;
+                    interact->item = item;
+                    interact->callback = reinterpret_cast<edui_sel_s *>(item)->interact;
+                    interact->buttons = 0x40;
+                    interact->field_20 = 0;
+                }
+
+                item = item->next;
+                if (!(menu->flags & 2))
+                    y += item_height;
+                else
+                    x += menu->width;
+
+                if (!item)
+                    break;
+                if (menu->y + menu->height <= y) {
+                    const i32 scroll_height = static_cast<i32>(font_height * 0.125f);
+                    if (!menu->child && numInteracts < 64 && !eduiInteractLocked) {
+                        edui_interact_s *interact = &eduiInteracts[numInteracts++];
+                        interact->x = static_cast<f32>(x);
+                        interact->y = static_cast<f32>(y) * 0.125f;
+                        interact->width = static_cast<f32>(menu->width);
+                        interact->height = static_cast<f32>(scroll_height) * 0.125f;
+                        interact->menu = menu;
+                        interact->item = NULL;
+                        interact->callback = cbInteractMenuScrollDown;
+                        interact->buttons = 0x40;
+                        interact->field_20 = 0;
+                    }
+                    if (!edui_donotdraw) {
+                        NuRndrRect2di(x << 4, y << 3, menu->width << 4, scroll_height << 3, 0x80000000,
+                                      uimtls[ui_bgmtl]);
+                        const i32 centre = (x * 2 + menu->width) << 3;
+                        const i32 top = (y << 3) + 8;
+                        const i32 bottom = ((y + scroll_height - 2) << 3);
+                        NuRndrLine2di(centre, bottom, centre - ((scroll_height - 2) << 4), top, 0x80ffffff, uimtls[0]);
+                        NuRndrLine2di(centre, bottom, centre + ((scroll_height - 2) << 4), top, 0x80ffffff, uimtls[0]);
+                    }
+                    break;
+                }
+                menu->field_10 = item;
+            }
+
+            if (find_selected && menu->field_0c->next)
+                menu->field_0c = menu->field_0c->next;
+        }
+
+        if (!(menu->flags & 2))
+            x += menu->width;
+        else
+            y += max_item_height;
+        menu->field_24 = x - menu->x;
+        menu->field_28 = y - menu->y;
+
+        const u32 outline = eduiGetActiveMenu() == menu ? eduimenu_selected_outline_colour : eduimenu_outline_colour;
+        if (!edui_donotdraw)
+            NuRndrLineRect2di((menu->x - 1) << 4, (menu->y << 3) - 8, (menu->field_24 + 2) << 4,
+                              (menu->field_28 << 3) + 16, outline, uimtls[ui_outmtl]);
+
+        if (menu->child) {
+            if (numInteracts < 64 && !eduiInteractLocked) {
+                edui_interact_s *interact = &eduiInteracts[numInteracts++];
+                interact->x = static_cast<f32>(menu->x);
+                interact->y = static_cast<f32>(menu->y) * 0.125f;
+                interact->width = static_cast<f32>(menu->field_24);
+                interact->height = static_cast<f32>(menu->field_28) * 0.125f;
+                interact->menu = menu;
+                interact->item = NULL;
+                interact->callback = cbInteractMenuCancelChild;
+                interact->buttons = 0x40;
+                interact->field_20 = 1;
+            }
+            eduiMenuRender(menu->child);
+        }
+
+        NuQFntPopPrintMode();
+        NuQFntPopCoordinateSystem();
+        --NuPrimCSPos;
+        NuPrimSetCoordinateSystem(NuPrimCoordSystemStack[NuPrimCSPos]);
     }
     void eduiMenuSelectFirstEntry(eduimenu_s *menu) {
         menu->selected = NULL;
@@ -3614,16 +4044,40 @@ extern "C" {
     // The editor UI callbacks share this translation unit with their cursor,
     // menu, and interaction state in the original binary.
 
-    static __used__ void cbMMRegSel(void *, void *selected) {
-        ed_curr = static_cast<ed_module_s *>(static_cast<eduiitem_s *>(selected)->data_ptr);
+    static __used__ void cbMMCancel(eduimenu_s *, eduimenu_s *) {
+        edmainSetReturn(1);
+    }
+
+    static __used__ i32 cbInteractMenuCancelChild(edui_interact_s *interact) {
+        eduimenu_s *menu = interact->menu;
+        if (menu && menu->child && menu->child->callback)
+            menu->child->callback(menu->child, menu);
+        return 0;
+    }
+
+    static __used__ void cbMMReturnToApp(eduimenu_s *, eduiitem_s *, u32) {
+        edmainSetReturn(1);
+    }
+
+    static __used__ void cbmcfgCameraSpeed(eduimenu_s *, eduiitem_s *item, u32) {
+        f32 divisor = 512.0f / static_cast<edui_slider_s *>(item)->value;
+        f32 speed = 12.0f / divisor;
+        edcamSetSpeed(speed, speed, speed, 1.0f / divisor);
+    }
+
+    static __used__ void cbmcfgCancel(eduimenu_s *menu, eduimenu_s *) {
+        eduiMenuDetach(menu);
+    }
+
+    static __used__ void cbMMRegSel(eduimenu_s *, eduiitem_s *selected, u32) {
+        ed_curr = static_cast<ed_module_s *>(selected->data_ptr);
         if (!ed_curr->reserved) {
             ed_module_active = 1;
             if (ed_curr->activate)
                 ed_curr->activate();
         }
     }
-    static __used__ void cbMMEditorConfig(void *parent) {
-        eduimenu_s *menu = static_cast<eduimenu_s *>(parent);
+    static __used__ void cbMMEditorConfig(eduimenu_s *menu, eduiitem_s *, u32) {
         ed_cfg_menu->x = menu->x + 10;
         ed_cfg_menu->y = menu->y + 10;
         eduiMenuAttach(menu, ed_cfg_menu);

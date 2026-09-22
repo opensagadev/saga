@@ -5573,6 +5573,23 @@ void ThingManager::edTimingRender() {
     eduiMenuRender(edTimingMenu);
 }
 
+extern "C" {
+    ed_module_s edTimingDesc = {NULL,
+                                NULL,
+                                "Timings",
+                                ThingManager::edTimingInit,
+                                NULL,
+                                ThingManager::edTimingEnter,
+                                NULL,
+                                NULL,
+                                NULL,
+                                NULL,
+                                0x656d6974,
+                                ThingManager::edTimingProc,
+                                ThingManager::edTimingRender,
+                                NULL};
+}
+
 i32 SpecialObject::Exists() const {
     return NuSpecialExistsFn(const_cast<nuhspecial_s *>(&special));
 }

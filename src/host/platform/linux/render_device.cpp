@@ -4,6 +4,7 @@
 
 #include "decomp.h"
 #include "globals.h"
+#include "host/harness/frame_hook.hpp"
 #include "host/platform/graphics.hpp"
 #include "java/android.h"
 #include "nu2api/nu3d/nurndr.h"
@@ -24,6 +25,7 @@ void HostSetSDLGraphics(SDL_Window *window, void *context) {
 extern "C" f32 __real_NuFrameEnd(void);
 
 extern "C" f32 __wrap_NuFrameEnd(void) {
+    saga::host::harness::run_frame_callback();
     if (nuapi.max_fps != 0) {
         HostPaceFrame(&nuapi.time, 1.0f / static_cast<f32>(nuapi.max_fps));
     }

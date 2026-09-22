@@ -17,9 +17,9 @@
 // --- PowerVR 'PVR' v3 / PVRTC support (the "ios" texture format) --------------
 // Container: PVRTC-compressed data is placed in a PVR header. On Android this
 // data would go straight to glCompressedTexImage2D; llvmpipe has no such
-// format, so we decode PVRTC 4bpp to RGBA here (a host-only PS step).
+// format, so we decode PVRTC1 2bpp and 4bpp to RGBA here (a host-only PS step).
 //
-// The decoder below is a faithful C++ port of Imagination's PVRTC 4bpp
+// The decoder below is a faithful C++ port of Imagination's PVRTC1
 // decompressor (PVRTDecompress.cpp, PowerVR SDK). It was verified byte-for-byte
 // against the real "LEGAL_ENGLISH_ios.tex" first-boot texture: decoding the
 // 1024x1024 PVRTC 4bpp legal texture reproduces the LEGO copyright screen
@@ -87,15 +87,11 @@ static void host_pvr_get_color_b(u32 cd, u8 rgb[4]) {
     }
 }
 
-// Bilinear upscale of the 2x2 endpoint grid into the 4x4 (bpp==4) texel block.
+// Bilinear upscale of the 2x2 endpoint grid into a PVRTC word-sized texel block.
 static void host_pvr_interpolate_colors(const i32 P[4], const i32 Q[4], const i32 R[4], const i32 S[4], i32 bpp,
-                                        u8 px[16][4]) {
-    i32 W = 4;
-    i32 H = 4;
-    if (bpp == 2) {
-        W = 8;
-        H = 8;
-    }
+                                        u8 px[64][4]) {
+    const i32 W = bpp == 2 ? 8 : 4;
+    constexpr i32 H = 4;
     i32 hP[4] = {P[0], P[1], P[2], P[3]};
     i32 hQ[4] = {Q[0], Q[1], Q[2], Q[3]};
     i32 hR[4] = {R[0], R[1], R[2], R[3]};
@@ -155,55 +151,91 @@ static void host_pvr_interpolate_colors(const i32 P[4], const i32 Q[4], const i3
     }
 }
 
-// Read the 2-bit-per-texel modulation of one 4x4 sub-block into mod_vals.
-static void host_pvr_unpack_modulations(u32 mod_data, u32 cd, i32 offset_x, i32 offset_y, u8 mod_vals[16][16]) {
-    u32 word_mod_mode = cd & 0x1;
-    u32 bits = mod_data;
-    if (word_mod_mode) {
-        for (i32 y = 0; y < 4; y++) {
-            for (i32 x = 0; x < 4; x++) {
-                u32 v = bits & 3;
-                if (v == 1) {
-                    v = 4;
-                } else if (v == 2) {
-                    v = 14; // punch-through alpha
-                } else if (v == 3) {
-                    v = 8;
+// Read one word's modulation data into the shared neighborhood grids.
+static void host_pvr_unpack_modulations(u32 modulation_data, u32 color_data, i32 offset_x, i32 offset_y,
+                                        i32 values[16][8], i32 modes[16][8], i32 bpp) {
+    u32 mode = color_data & 1;
+    if (bpp == 2) {
+        if (mode != 0) {
+            if ((modulation_data & 1) != 0) {
+                mode = (modulation_data & (1 << 20)) != 0 ? 3 : 2;
+                if ((modulation_data & (1 << 21)) != 0)
+                    modulation_data |= 1 << 20;
+                else
+                    modulation_data &= ~(1 << 20);
+            }
+            if ((modulation_data & 2) != 0)
+                modulation_data |= 1;
+            else
+                modulation_data &= ~1u;
+
+            for (i32 y = 0; y < 4; ++y) {
+                for (i32 x = 0; x < 8; ++x) {
+                    modes[x + offset_x][y + offset_y] = static_cast<i32>(mode);
+                    if (((x ^ y) & 1) == 0) {
+                        values[x + offset_x][y + offset_y] = static_cast<i32>(modulation_data & 3);
+                        modulation_data >>= 2;
+                    }
                 }
-                mod_vals[y + offset_y][x + offset_x] = (u8)v;
-                bits >>= 2;
+            }
+        } else {
+            for (i32 y = 0; y < 4; ++y) {
+                for (i32 x = 0; x < 8; ++x) {
+                    modes[x + offset_x][y + offset_y] = 0;
+                    values[x + offset_x][y + offset_y] = (modulation_data & 1) != 0 ? 3 : 0;
+                    modulation_data >>= 1;
+                }
             }
         }
-    } else {
-        for (i32 y = 0; y < 4; y++) {
-            for (i32 x = 0; x < 4; x++) {
-                u32 v = (bits & 3) * 3;
-                if (v > 3) {
-                    v -= 1;
-                }
-                mod_vals[y + offset_y][x + offset_x] = (u8)v;
-                bits >>= 2;
+        return;
+    }
+
+    for (i32 y = 0; y < 4; ++y) {
+        for (i32 x = 0; x < 4; ++x) {
+            i32 value = static_cast<i32>(modulation_data & 3);
+            if (mode != 0) {
+                static constexpr i32 represented_values[] = {0, 4, 14, 8};
+                value = represented_values[value];
+            } else {
+                value *= 3;
+                if (value > 3)
+                    --value;
             }
+            values[y + offset_y][x + offset_x] = value;
+            modulation_data >>= 2;
         }
     }
 }
 
-// Decode a 4x4 texel block from four 16x16 sub-grid words.
+static i32 host_pvr_modulation_value(i32 values[16][8], i32 modes[16][8], u32 x, u32 y, i32 bpp) {
+    if (bpp == 4)
+        return values[x][y];
+
+    static constexpr i32 represented_values[] = {0, 3, 5, 8};
+    if (modes[x][y] == 0 || ((x ^ y) & 1) == 0)
+        return represented_values[values[x][y]];
+    if (modes[x][y] == 1) {
+        return (represented_values[values[x][y - 1]] + represented_values[values[x][y + 1]] +
+                represented_values[values[x - 1][y]] + represented_values[values[x + 1][y]] + 2) /
+               4;
+    }
+    if (modes[x][y] == 2)
+        return (represented_values[values[x - 1][y]] + represented_values[values[x + 1][y]] + 1) / 2;
+    return (represented_values[values[x][y - 1]] + represented_values[values[x][y + 1]] + 1) / 2;
+}
+
+// Decode one word-sized texel block from four neighboring PVRTC words.
 typedef u32 PvrWordPair[2];
 static void host_pvr_get_pixels(const PvrWordPair &P, const PvrWordPair &Q, const PvrWordPair &R, const PvrWordPair &S,
-                                i32 bpp, u8 out[16][4]) {
-    i32 W = 4;
-    i32 H = 4;
-    if (bpp == 2) {
-        W = 8;
-        H = 8;
-    }
-    u8 mod_vals[16][16];
-    memset(mod_vals, 0, sizeof(mod_vals));
-    host_pvr_unpack_modulations(P[0], P[1], 0, 0, mod_vals);
-    host_pvr_unpack_modulations(Q[0], Q[1], W, 0, mod_vals);
-    host_pvr_unpack_modulations(R[0], R[1], 0, H, mod_vals);
-    host_pvr_unpack_modulations(S[0], S[1], W, H, mod_vals);
+                                i32 bpp, u8 out[64][4]) {
+    const i32 W = bpp == 2 ? 8 : 4;
+    constexpr i32 H = 4;
+    i32 modulation_values[16][8] = {};
+    i32 modulation_modes[16][8] = {};
+    host_pvr_unpack_modulations(P[0], P[1], 0, 0, modulation_values, modulation_modes, bpp);
+    host_pvr_unpack_modulations(Q[0], Q[1], W, 0, modulation_values, modulation_modes, bpp);
+    host_pvr_unpack_modulations(R[0], R[1], 0, H, modulation_values, modulation_modes, bpp);
+    host_pvr_unpack_modulations(S[0], S[1], W, H, modulation_values, modulation_modes, bpp);
 
     i32 pa[4], qa[4], ra[4], sa[4], pb[4], qb[4], rb[4], sb[4];
     u8 tmp[4];
@@ -232,14 +264,14 @@ static void host_pvr_get_pixels(const PvrWordPair &P, const PvrWordPair &Q, cons
     for (int i = 0; i < 4; i++)
         sb[i] = tmp[i];
 
-    u8 A[16][4], B[16][4];
+    u8 A[64][4], B[64][4];
     host_pvr_interpolate_colors(pa, qa, ra, sa, bpp, A);
     host_pvr_interpolate_colors(pb, qb, rb, sb, bpp, B);
 
     i32 w, h;
     for (h = 0; h < H; h++) {
         for (w = 0; w < W; w++) {
-            i32 mod = mod_vals[w + W / 2][h + H / 2];
+            i32 mod = host_pvr_modulation_value(modulation_values, modulation_modes, w + W / 2, h + H / 2, bpp);
             bool punch = mod > 10;
             if (punch) {
                 mod -= 10;
@@ -248,23 +280,20 @@ static void host_pvr_get_pixels(const PvrWordPair &P, const PvrWordPair &Q, cons
             i32 gc = (i32)A[h * W + w][1] * (8 - mod) + (i32)B[h * W + w][1] * mod;
             i32 bc = (i32)A[h * W + w][2] * (8 - mod) + (i32)B[h * W + w][2] * mod;
             i32 al = punch ? 0 : ((i32)A[h * W + w][3] * (8 - mod) + (i32)B[h * W + w][3] * mod);
-            out[h + w * W][0] = (u8)((ac / 8) & 0xff);
-            out[h + w * W][1] = (u8)((gc / 8) & 0xff);
-            out[h + w * W][2] = (u8)((bc / 8) & 0xff);
-            out[h + w * W][3] = (u8)((al / 8) & 0xff);
+            const i32 output = bpp == 2 ? h * W + w : h + w * H;
+            out[output][0] = (u8)((ac / 8) & 0xff);
+            out[output][1] = (u8)((gc / 8) & 0xff);
+            out[output][2] = (u8)((bc / 8) & 0xff);
+            out[output][3] = (u8)((al / 8) & 0xff);
         }
     }
 }
 
-// Scatter one 4x4 (bpp4) decoded block into the final RGBA image.
-static void host_pvr_map_data(u8 *out, i32 width, u8 word[16][4], u32 py, u32 px, u32 qy, u32 qx, u32 ry, u32 rx,
+// Scatter one decoded word-sized block into the final RGBA image.
+static void host_pvr_map_data(u8 *out, i32 width, u8 word[64][4], u32 py, u32 px, u32 qy, u32 qx, u32 ry, u32 rx,
                               u32 sy, u32 sx, i32 bpp) {
-    i32 W = 4;
-    i32 H = 4;
-    if (bpp == 2) {
-        W = 8;
-        H = 8;
-    }
+    const i32 W = bpp == 2 ? 8 : 4;
+    constexpr i32 H = 4;
     for (i32 y = 0; y < H / 2; y++) {
         for (i32 x = 0; x < W / 2; x++) {
             u8 *dst;
@@ -280,16 +309,15 @@ static void host_pvr_map_data(u8 *out, i32 width, u8 word[16][4], u32 py, u32 px
     }
 }
 
-// Software-decode a PVRTC 4bpp image (width*height/2 bytes) to RGBA.
-static void host_pvr_decode_4bpp(const u8 *data, usize data_size, i32 width, i32 height, u8 *outRGBA) {
-    i32 bpp = 4;
-    i32 W = 4;
-    i32 H = 4;
-    // PVRTC1 4bpp always stores at least a 2x2-word (8x8-pixel) image,
-    // including mip levels whose logical dimensions are smaller.
+// Software-decode a PVRTC1 image to RGBA.
+static void host_pvr_decode(const u8 *data, usize data_size, i32 width, i32 height, i32 bpp, u8 *outRGBA) {
+    const i32 W = bpp == 2 ? 8 : 4;
+    constexpr i32 H = 4;
+    // PVRTC1 always stores at least a 2x2-word image, including mip levels
+    // whose logical dimensions are smaller.
     const i32 decode_width = std::max(width, W * 2);
     const i32 decode_height = std::max(height, H * 2);
-    const usize compressed_size = static_cast<usize>(decode_width) * decode_height / 2;
+    const usize compressed_size = static_cast<usize>(decode_width) * decode_height * bpp / 8;
     u32 word_count = static_cast<u32>(compressed_size / sizeof(u32));
     std::vector<u32> words(word_count, 0);
     memcpy(words.data(), data, std::min(data_size, compressed_size));
@@ -316,7 +344,7 @@ static void host_pvr_decode_4bpp(const u8 *data, usize data_size, i32 width, i32
             PvrWordPair QW = {words[offs[1]], words[offs[1] + 1]};
             PvrWordPair RW = {words[offs[2]], words[offs[2] + 1]};
             PvrWordPair SW = {words[offs[3]], words[offs[3] + 1]};
-            u8 block[16][4];
+            u8 block[64][4];
             host_pvr_get_pixels(PW, QW, RW, SW, bpp, block);
             host_pvr_map_data(out.data(), decode_width, block, Py, Px, Qy, Qx, Ry, Rx, Sy, Sx, bpp);
         }
@@ -449,14 +477,17 @@ bool HostDecodeCompressedTexture(GLenum internal_format, GLsizei width, GLsizei 
         return true;
     }
 
-    if (internal_format == 0x8c00 || internal_format == 0x8c02) {
-        const usize required_size = static_cast<usize>(std::max(width, 8)) * std::max(height, 8) / 2;
+    if (internal_format == 0x8c00 || internal_format == 0x8c01 || internal_format == 0x8c02 ||
+        internal_format == 0x8c03) {
+        const i32 bpp = internal_format == 0x8c01 || internal_format == 0x8c03 ? 2 : 4;
+        const i32 minimum_width = bpp == 2 ? 16 : 8;
+        const usize required_size = static_cast<usize>(std::max(width, minimum_width)) * std::max(height, 8) * bpp / 8;
         if (!host_pvr_is_pow2(static_cast<u32>(width)) || !host_pvr_is_pow2(static_cast<u32>(height)) ||
             static_cast<usize>(image_size) < required_size) {
             return false;
         }
         rgba.resize(static_cast<usize>(width) * static_cast<usize>(height) * 4);
-        host_pvr_decode_4bpp(static_cast<const u8 *>(data), static_cast<usize>(image_size), width, height, rgba.data());
+        host_pvr_decode(static_cast<const u8 *>(data), static_cast<usize>(image_size), width, height, bpp, rgba.data());
         return true;
     }
 

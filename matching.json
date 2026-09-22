@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 52.769466,
+    "fuzzy_match_percent": 53.022667,
     "total_code": "4722419",
-    "matched_code": "460134",
-    "matched_code_percent": 9.7436075,
+    "matched_code": "460800",
+    "matched_code_percent": 9.757711,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 5449,
-    "matched_functions_percent": 40.48592,
+    "matched_functions": 5460,
+    "matched_functions_percent": 40.56765,
     "total_units": 1
   },
   "text": {
@@ -19558,6 +19558,14 @@
           "match_percent": 100.0
         },
         {
+          "name": "_ZL21cbEdLevelEditorSelectP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbEdLevelEditorSelect(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 5468528,
+          "offset": 4578560,
+          "size": 43,
+          "match_percent": 100.0
+        },
+        {
           "name": "_ZN12PropertyTool10InitialiseER9variptr_uS1_i",
           "demangled_name": "PropertyTool::Initialise(variptr_u&, variptr_u&, int)",
           "address": 5468688,
@@ -19571,7 +19579,7 @@
           "address": 5473616,
           "offset": 4583648,
           "size": 848,
-          "match_percent": 2.41206
+          "match_percent": 59.356785
         },
         {
           "name": "_ZN11ClassEditor16cbEdClassNewMenuEP10eduimenu_sP10eduiitem_sj",
@@ -19579,7 +19587,7 @@
           "address": 5476096,
           "offset": 4586128,
           "size": 378,
-          "match_percent": 4.375
+          "match_percent": 95.020836
         },
         {
           "name": "_ZN11ClassEditor18cbEdClassToolsMenuEP10eduimenu_sP10eduiitem_sj",
@@ -19587,7 +19595,7 @@
           "address": 5476480,
           "offset": 4586512,
           "size": 239,
-          "match_percent": 8.076923
+          "match_percent": 98.71154
         },
         {
           "name": "_Z24cbEdLevelDestroyOnSelectP10eduimenu_sP10eduiitem_sj",
@@ -19611,7 +19619,7 @@
           "address": 5480096,
           "offset": 4590128,
           "size": 588,
-          "match_percent": 3.111111
+          "match_percent": 96.08148
         },
         {
           "name": "_ZN11ClassEditor17cbEdClassSnapMenuEP10eduimenu_sP10eduiitem_sj",
@@ -19619,7 +19627,7 @@
           "address": 5480688,
           "offset": 4590720,
           "size": 381,
-          "match_percent": 4.666666
+          "match_percent": 94.62222
         },
         {
           "name": "_ZN11ClassEditor16cbEdClassSetSnapEP10eduimenu_sP10eduiitem_sj",
@@ -19939,7 +19947,7 @@
           "address": 5511776,
           "offset": 4621808,
           "size": 1552,
-          "match_percent": 2.465753
+          "match_percent": 86.8
         },
         {
           "name": "_ZN11ClassEditor17cbEdClassViewMenuEP10eduimenu_sP10eduiitem_sj",
@@ -19947,7 +19955,7 @@
           "address": 5513328,
           "offset": 4623360,
           "size": 2115,
-          "match_percent": 0.952381
+          "match_percent": 87.89569
         },
         {
           "name": "_ZN11ClassEditor13cbEdFilterLEDEP10eduimenu_sP10eduiitem_sj",
@@ -19955,7 +19963,7 @@
           "address": 5515456,
           "offset": 4625488,
           "size": 134,
-          "match_percent": 11.351352
+          "match_percent": 100.0
         },
         {
           "name": "_ZN11ClassEditor17cbEdClassFileMenuEP10eduimenu_sP10eduiitem_sj",
@@ -19963,7 +19971,7 @@
           "address": 5515600,
           "offset": 4625632,
           "size": 1395,
-          "match_percent": 1.346154
+          "match_percent": 98.25961
         },
         {
           "name": "_ZN11ClassEditor20cbEdLevelDeselectAllEP10eduimenu_sP10eduiitem_sj",
@@ -20035,7 +20043,15 @@
           "address": 5518752,
           "offset": 4628784,
           "size": 254,
-          "match_percent": 6.363637
+          "match_percent": 94.045456
+        },
+        {
+          "name": "_ZL19cbEdLevelEditorListP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbEdLevelEditorList(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 5519008,
+          "offset": 4629040,
+          "size": 52,
+          "match_percent": 100.0
         },
         {
           "name": "_ZN11LevelEditor10CreateMenuEv",
@@ -20043,7 +20059,7 @@
           "address": 5519072,
           "offset": 4629104,
           "size": 498,
-          "match_percent": 3.62069
+          "match_percent": 13.732758
         },
         {
           "name": "_ZN11LevelEditor9CloseMenuEv",
@@ -20427,7 +20443,7 @@
           "address": 5542608,
           "offset": 4652640,
           "size": 451,
-          "match_percent": 66.419846
+          "match_percent": 66.496185
         },
         {
           "name": "_ZN7EdClass21SerialiseObjectHeaderER8EdStreamPv",
@@ -20611,7 +20627,7 @@
           "address": 5553104,
           "offset": 4663136,
           "size": 757,
-          "match_percent": 30.303665
+          "match_percent": 30.382198
         },
         {
           "name": "_ZN11ClassEditor13FocusSelectedEv",
@@ -20683,7 +20699,7 @@
           "address": 5557808,
           "offset": 4667840,
           "size": 813,
-          "match_percent": 2.5
+          "match_percent": 67.0
         },
         {
           "name": "_ZN10CursorTool7ProcessER14EdInputContext",
@@ -20827,7 +20843,15 @@
           "address": 5572496,
           "offset": 4682528,
           "size": 236,
-          "match_percent": 7.777778
+          "match_percent": 99.81481
+        },
+        {
+          "name": "_ZL21cbEdLevelSettingsMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbEdLevelSettingsMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 5572736,
+          "offset": 4682768,
+          "size": 250,
+          "match_percent": 98.67242
         },
         {
           "name": "_ZN14EditorSettings9SerialiseER8EdStream",
@@ -26945,36 +26969,12 @@
           "match_percent": 24.444445
         },
         {
-          "name": "cbInteractMenuCancelChild",
-          "demangled_name": "cbInteractMenuCancelChild",
-          "address": 3734816,
-          "offset": 2844848,
-          "size": 45,
-          "match_percent": 10.588235
-        },
-        {
           "name": "_ZL6cbCopyP10eduimenu_sP10eduiitem_sj",
           "demangled_name": "cbCopy(eduimenu_s*, eduiitem_s*, unsigned int)",
           "address": 3734864,
           "offset": 2844896,
           "size": 141,
           "match_percent": 10.645162
-        },
-        {
-          "name": "cbMMReturnToApp",
-          "demangled_name": "cbMMReturnToApp",
-          "address": 3769808,
-          "offset": 2879840,
-          "size": 34,
-          "match_percent": 36.666668
-        },
-        {
-          "name": "cbMMCancel",
-          "demangled_name": "cbMMCancel",
-          "address": 3769856,
-          "offset": 2879888,
-          "size": 34,
-          "match_percent": 36.666668
         },
         {
           "name": "_ZL21cbToggleIndicatorModeP10eduimenu_sP10eduiitem_sj",
@@ -27055,46 +27055,6 @@
           "offset": 2914512,
           "size": 171,
           "match_percent": 4.888889
-        },
-        {
-          "name": "cbmcfgCancel",
-          "demangled_name": "cbmcfgCancel",
-          "address": 3805424,
-          "offset": 2915456,
-          "size": 34,
-          "match_percent": 33.0
-        },
-        {
-          "name": "cbmcfgCameraSpeed",
-          "demangled_name": "cbmcfgCameraSpeed",
-          "address": 3816944,
-          "offset": 2926976,
-          "size": 91,
-          "match_percent": 17.368422
-        },
-        {
-          "name": "_ZL21cbEdLevelEditorSelectP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbEdLevelEditorSelect(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 5468528,
-          "offset": 4578560,
-          "size": 43,
-          "match_percent": 8.888889
-        },
-        {
-          "name": "_ZL19cbEdLevelEditorListP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbEdLevelEditorList(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 5519008,
-          "offset": 4629040,
-          "size": 52,
-          "match_percent": 23.571428
-        },
-        {
-          "name": "_ZL21cbEdLevelSettingsMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbEdLevelSettingsMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 5572736,
-          "offset": 4682768,
-          "size": 250,
-          "match_percent": 5.689655
         }
       ]
     },
@@ -33319,7 +33279,7 @@
           "address": 3732784,
           "offset": 2842816,
           "size": 125,
-          "match_percent": 88.789474
+          "match_percent": 99.947365
         },
         {
           "name": "eduicbProcessTexturePick",
@@ -33375,6 +33335,14 @@
           "address": 3734768,
           "offset": 2844800,
           "size": 36,
+          "match_percent": 100.0
+        },
+        {
+          "name": "cbInteractMenuCancelChild",
+          "demangled_name": "cbInteractMenuCancelChild",
+          "address": 3734816,
+          "offset": 2844848,
+          "size": 45,
           "match_percent": 100.0
         },
         {
@@ -33463,7 +33431,7 @@
           "address": 3739376,
           "offset": 2849408,
           "size": 334,
-          "match_percent": 50.97468
+          "match_percent": 55.962025
         },
         {
           "name": "eduicbRenderSeparator",
@@ -33543,7 +33511,7 @@
           "address": 3752704,
           "offset": 2862736,
           "size": 764,
-          "match_percent": 41.932365
+          "match_percent": 41.400967
         },
         {
           "name": "eduicbRenderGreyPick",
@@ -33559,7 +33527,7 @@
           "address": 3754272,
           "offset": 2864304,
           "size": 996,
-          "match_percent": 23.974895
+          "match_percent": 26.430962
         },
         {
           "name": "eduicbRenderTextPick",
@@ -33623,7 +33591,7 @@
           "address": 3763856,
           "offset": 2873888,
           "size": 1024,
-          "match_percent": 57.091633
+          "match_percent": 57.151394
         },
         {
           "name": "eduicbInteractColourPick",
@@ -33656,6 +33624,22 @@
           "offset": 2879808,
           "size": 24,
           "match_percent": 99.85714
+        },
+        {
+          "name": "cbMMReturnToApp",
+          "demangled_name": "cbMMReturnToApp",
+          "address": 3769808,
+          "offset": 2879840,
+          "size": 34,
+          "match_percent": 100.0
+        },
+        {
+          "name": "cbMMCancel",
+          "demangled_name": "cbMMCancel",
+          "address": 3769856,
+          "offset": 2879888,
+          "size": 34,
+          "match_percent": 100.0
         },
         {
           "name": "edmainCurrent",
@@ -33695,7 +33679,7 @@
           "address": 3770320,
           "offset": 2880352,
           "size": 31,
-          "match_percent": 42.714287
+          "match_percent": 99.71429
         },
         {
           "name": "edmainSetCursorEnabled",
@@ -33911,7 +33895,7 @@
           "address": 3773936,
           "offset": 2883968,
           "size": 388,
-          "match_percent": 73.02913
+          "match_percent": 72.88349
         },
         {
           "name": "eduiItemSelWithClipColourCreate",
@@ -34247,7 +34231,7 @@
           "address": 3785440,
           "offset": 2895472,
           "size": 335,
-          "match_percent": 5.060241
+          "match_percent": 86.951805
         },
         {
           "name": "eduiMenuFitWidth",
@@ -34255,7 +34239,7 @@
           "address": 3785936,
           "offset": 2895968,
           "size": 800,
-          "match_percent": 2.13198
+          "match_percent": 72.918785
         },
         {
           "name": "edmainSetMainMenuScale",
@@ -34263,7 +34247,7 @@
           "address": 3786736,
           "offset": 2896768,
           "size": 76,
-          "match_percent": 23.333334
+          "match_percent": 99.833336
         },
         {
           "name": "eduiMenuDestroy",
@@ -34295,7 +34279,7 @@
           "address": 3787264,
           "offset": 2897296,
           "size": 183,
-          "match_percent": 92.62222
+          "match_percent": 99.73333
         },
         {
           "name": "edmainRegister",
@@ -34367,7 +34351,7 @@
           "address": 3789344,
           "offset": 2899376,
           "size": 670,
-          "match_percent": 2.45614
+          "match_percent": 42.532166
         },
         {
           "name": "eduiSetUsingMenuFocus",
@@ -34495,7 +34479,7 @@
           "address": 3796400,
           "offset": 2906432,
           "size": 2808,
-          "match_percent": 0.713224
+          "match_percent": 22.157503
         },
         {
           "name": "eduiMenuFitOnScreen",
@@ -34551,6 +34535,14 @@
           "address": 3805088,
           "offset": 2915120,
           "size": 56,
+          "match_percent": 100.0
+        },
+        {
+          "name": "cbmcfgCancel",
+          "demangled_name": "cbmcfgCancel",
+          "address": 3805424,
+          "offset": 2915456,
+          "size": 34,
           "match_percent": 100.0
         },
         {
@@ -34751,7 +34743,7 @@
           "address": 3812016,
           "offset": 2922048,
           "size": 373,
-          "match_percent": 4.565218
+          "match_percent": 80.98913
         },
         {
           "name": "eduiSetCursorColour",
@@ -34775,7 +34767,7 @@
           "address": 3813456,
           "offset": 2923488,
           "size": 266,
-          "match_percent": 6.461538
+          "match_percent": 93.07692
         },
         {
           "name": "eduiInit",
@@ -34783,7 +34775,7 @@
           "address": 3813728,
           "offset": 2923760,
           "size": 137,
-          "match_percent": 13.125
+          "match_percent": 99.4375
         },
         {
           "name": "edmainInit",
@@ -34791,7 +34783,7 @@
           "address": 3813872,
           "offset": 2923904,
           "size": 1047,
-          "match_percent": 3.629032
+          "match_percent": 91.754036
         },
         {
           "name": "edmainInitEx",
@@ -34799,7 +34791,7 @@
           "address": 3814928,
           "offset": 2924960,
           "size": 122,
-          "match_percent": 12.352942
+          "match_percent": 100.0
         },
         {
           "name": "eduiSetFont",
@@ -34840,6 +34832,14 @@
           "offset": 2926896,
           "size": 68,
           "match_percent": 99.63636
+        },
+        {
+          "name": "cbmcfgCameraSpeed",
+          "demangled_name": "cbmcfgCameraSpeed",
+          "address": 3816944,
+          "offset": 2926976,
+          "size": 91,
+          "match_percent": 99.8421
         },
         {
           "name": "edcamSetAutoSpeed",
@@ -42767,7 +42767,7 @@
           "address": 1212112,
           "offset": 322144,
           "size": 1310,
-          "match_percent": 49.089844
+          "match_percent": 49.070312
         },
         {
           "name": "_Z16PostAnimate_FETTP12GameObject_s",
@@ -60727,7 +60727,7 @@
           "address": 5470112,
           "offset": 4580144,
           "size": 56,
-          "match_percent": 26.25
+          "match_percent": 100.0
         },
         {
           "name": "_ZN17SceneObjectHelper29cbEdSceneObjectShowHiddenWireEP10eduimenu_sP10eduiitem_sj",
@@ -60735,7 +60735,7 @@
           "address": 5470176,
           "offset": 4580208,
           "size": 56,
-          "match_percent": 26.25
+          "match_percent": 100.0
         },
         {
           "name": "_ZN17SceneObjectHelper31cbEdSceneObjectShowOwnedObjectsEP10eduimenu_sP10eduiitem_sj",
@@ -60743,7 +60743,7 @@
           "address": 5470240,
           "offset": 4580272,
           "size": 56,
-          "match_percent": 26.25
+          "match_percent": 100.0
         },
         {
           "name": "_ZN17SceneObjectHelper12AddMenuItemsEP10eduimenu_s",
@@ -60751,7 +60751,7 @@
           "address": 5474864,
           "offset": 4584896,
           "size": 292,
-          "match_percent": 6.885246
+          "match_percent": 99.7541
         },
         {
           "name": "_ZN17SceneObjectHelper13GetNextObjectEPv",
@@ -62706,7 +62706,7 @@
           "address": 1266080,
           "offset": 376112,
           "size": 10082,
-          "match_percent": 29.025106
+          "match_percent": 29.03458
         },
         {
           "name": "_Z14KillGameObjectP12GameObject_sii",
@@ -64698,7 +64698,7 @@
           "address": 4345552,
           "offset": 3455584,
           "size": 502,
-          "match_percent": 99.58036
+          "match_percent": 97.30357
         },
         {
           "name": "_ZN12ThingManager15cbEdTrackCancelEP10eduimenu_sS1_",

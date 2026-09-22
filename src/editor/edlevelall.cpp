@@ -3,6 +3,7 @@
 #include "gameapi/edtools/edui.h"
 #include "legoapi/legoapi_types.h"
 #include "nu2api/nucore/nustring.h"
+#include "nu2api/nucore/nukeyboard.h"
 #include "nu2api/nufile/nufile.h"
 #include <string.h>
 #include <new>
@@ -10,9 +11,25 @@
 #include <stdio.h>
 
 extern i32 EdType_String;
+extern eduiiattr_s EdLevelAttr;
+void cbEdLevelDestroy(eduimenu_s *, eduimenu_s *);
+void cbEdLevelSave(eduimenu_s *, eduiitem_s *, u32);
+void cbEdLevelSetSliderFloat(eduimenu_s *, eduiitem_s *, u32);
+void cbEdLevelDestroyOnSelect(eduimenu_s *, eduiitem_s *, u32);
+static void cbEdLevelEditorList(eduimenu_s *, eduiitem_s *, u32);
+static void cbEdLevelEditorSelect(eduimenu_s *, eduiitem_s *, u32);
+static void cbEdLevelSettingsMenu(eduimenu_s *, eduiitem_s *, u32);
 
-static inline i32 get_class_object_attribute(EdClass *ed_class, void *object, EdRef *reference,
-                                            i32 attribute, i32 type, void *data, i32 size) {
+#define EDLEVEL_ADD_ACTIVE_SCENE(menu, scene_index)                                                                    \
+    do {                                                                                                               \
+        LevelEditorScene *scene = theLevelEditor.GetEdScene(scene_index);                                              \
+        if (scene != NULL && scene->active)                                                                            \
+            eduiMenuAddItem(menu, eduiItemToggleCreate((scene_index) << 6, &EdLevelAttr, scene->editable, 1,           \
+                                                       ClassEditor::cbEdFilterLED, scene->name));                      \
+    } while (0)
+
+static inline i32 get_class_object_attribute(EdClass *ed_class, void *object, EdRef *reference, i32 attribute, i32 type,
+                                             void *data, i32 size) {
     if (reference != NULL && reference->GetAttributeData(object, attribute, type, data, size)) {
         return 1;
     }
@@ -35,7 +52,6 @@ DECOMP_ASSERT(offsetof(EdClass, member_count) == 0x10, "EdClass member count off
 DECOMP_ASSERT(offsetof(EdClass, interface) == 0x14, "EdClass interface offset");
 DECOMP_ASSERT(sizeof(EdMember) == 0x08, "EdMember size");
 DECOMP_ASSERT(offsetof(EdMember, reference) == 0x04, "EdMember reference offset");
-
 
 extern EdRegistry theRegistry;
 extern ClassEditor theClassEditor;
@@ -127,8 +143,39 @@ ClassEditor::ClassEditor() {
     class_filter = -1;
 }
 
-void ClassEditor::AddMenuItems(eduimenu_s *) {
-    STUBBED();
+void ClassEditor::AddMenuItems(eduimenu_s *menu) {
+    eduiMenuAddItem(menu, eduiItemSelCreate(0, &EdLevelAttr, 0, 0, cbEdClassFileMenu, const_cast<char *>("File")));
+    eduiMenuAddItem(menu, eduiItemSelCreate(0, &EdLevelAttr, 0, 0, cbEdClassToolsMenu, const_cast<char *>("Tools")));
+    eduiMenuAddItem(menu, eduiItemSelCreate(0, &EdLevelAttr, 0, 0, cbEdClassSnapMenu, const_cast<char *>("Snap")));
+    eduiMenuAddItem(menu, eduiItemSelCreate(0, &EdLevelAttr, 0, 0, cbEdClassModeMenu, const_cast<char *>("Mode")));
+    eduiMenuAddItem(menu, eduiItemSelCreate(0, &EdLevelAttr, 0, 0, cbEdClassViewMenu, const_cast<char *>("Show/Hide")));
+    eduiMenuAddItem(menu, eduiItemSeparatorCreate(0, &EdLevelAttr));
+    eduiMenuAddItem(menu,
+                    eduiItemSelCreate(0, &EdLevelAttr, 0, 0, cbEdClassSelectClassMenu, const_cast<char *>("Select")));
+    eduiMenuAddItem(menu, eduiItemSeparatorCreate(0, &EdLevelAttr));
+
+    if (selected_objects.count == 0) {
+        eduiMenuAddItem(menu, eduiItemSelCreate(0, &EdLevelAttr, 0, 0, cbEdClassNewMenu, const_cast<char *>("New")));
+        return;
+    }
+
+    eduiMenuAddItem(menu, eduiItemSelCreate(0, &EdLevelAttr, 0, 0, cbEdClassNewMenu, const_cast<char *>("New/Copy")));
+    eduiMenuAddItem(menu,
+                    eduiItemSelCreate(0, &EdLevelAttr, 0, 0, cbEdClassDeleteObject, const_cast<char *>("Delete")));
+
+    EdClass *classes[32];
+    i32 class_count = 0;
+    for (ClassObjectListEntry *entry = selected_objects.first; entry != NULL; entry = entry->next) {
+        i32 index = 0;
+        while (index < class_count && classes[index] != entry->ed_class)
+            ++index;
+        if (index == class_count)
+            classes[class_count++] = entry->ed_class;
+    }
+    for (i32 index = 0; index < class_count; ++index) {
+        EdClassInterface *interface = classes[index]->interface;
+        interface->vtable->add_menu_items(interface, menu);
+    }
 }
 
 void ClassEditor::ClearLevel(i32 level) {
@@ -465,19 +512,69 @@ void ClassEditor::cbEdClassDeleteObject(eduimenu_s *, eduiitem_s *, u32) {
 void ClassEditor::cbEdClassExportMenu(eduimenu_s *, eduiitem_s *, u32) {
 }
 
-void ClassEditor::cbEdClassFileMenu(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
+void ClassEditor::cbEdClassFileMenu(eduimenu_s *parent, eduiitem_s *item, u32) {
+    eduimenu_s *menu = eduiMenuCreate(parent->x + item->x, item->y, 180, 250,
+                                      reinterpret_cast<void *>(static_cast<usize>(EdLevelFnt)), cbEdLevelDestroy, NULL);
+    if (menu == NULL)
+        return;
+    EDLEVEL_ADD_ACTIVE_SCENE(menu, 0);
+    EDLEVEL_ADD_ACTIVE_SCENE(menu, 1);
+    EDLEVEL_ADD_ACTIVE_SCENE(menu, 2);
+    EDLEVEL_ADD_ACTIVE_SCENE(menu, 3);
+    EDLEVEL_ADD_ACTIVE_SCENE(menu, 4);
+    EDLEVEL_ADD_ACTIVE_SCENE(menu, 5);
+    EDLEVEL_ADD_ACTIVE_SCENE(menu, 6);
+    EDLEVEL_ADD_ACTIVE_SCENE(menu, 7);
+    EDLEVEL_ADD_ACTIVE_SCENE(menu, 8);
+    EDLEVEL_ADD_ACTIVE_SCENE(menu, 9);
+    eduiMenuAddItem(menu, eduiItemSeparatorCreate(0, &EdLevelAttr));
+    eduiMenuAddItem(menu, eduiItemSelCreate(1, &EdLevelAttr, 0, 0, cbEdLevelSave, const_cast<char *>("Save")));
+    eduiMenuFitWidth(menu, 5);
+    eduiMenuFitOnScreen(menu, 1);
+    eduiMenuAttach(parent, menu);
 }
 
 void ClassEditor::cbEdClassImportMenu(eduimenu_s *, eduiitem_s *, u32) {
 }
 
-void ClassEditor::cbEdClassModeMenu(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
+void ClassEditor::cbEdClassModeMenu(eduimenu_s *parent, eduiitem_s *item, u32) {
+    eduimenu_s *menu = eduiMenuCreate(parent->x + item->x, item->y, 180, 250,
+                                      reinterpret_cast<void *>(static_cast<usize>(EdLevelFnt)), cbEdLevelDestroy, NULL);
+    if (menu == NULL)
+        return;
+    eduiMenuAddItem(menu, eduiItemToggleCreate(0, &EdLevelAttr, theClassEditor.mode == 0, 1, cbEdClassSetMode,
+                                               const_cast<char *>("Select")));
+    eduiMenuAddItem(menu, eduiItemToggleCreate(1, &EdLevelAttr, theClassEditor.mode == 1, 1, cbEdClassSetMode,
+                                               const_cast<char *>("Create")));
+    eduiMenuAddItem(menu, eduiItemToggleCreate(2, &EdLevelAttr, theClassEditor.mode == 2, 1, cbEdClassSetMode,
+                                               const_cast<char *>("Delete")));
+    eduiMenuAddItem(menu, eduiItemToggleCreate(3, &EdLevelAttr, theClassEditor.mode == 3, 1, cbEdClassSetMode,
+                                               const_cast<char *>("Move")));
+    eduiMenuAddItem(menu, eduiItemToggleCreate(4, &EdLevelAttr, theClassEditor.mode == 4, 1, cbEdClassSetMode,
+                                               const_cast<char *>("Rotate")));
+    eduiMenuAddItem(menu, eduiItemToggleCreate(5, &EdLevelAttr, theClassEditor.mode == 5, 1, cbEdClassSetMode,
+                                               const_cast<char *>("Scale")));
+    eduiMenuFitWidth(menu, 5);
+    eduiMenuFitOnScreen(menu, 1);
+    eduiMenuAttach(parent, menu);
 }
 
-void ClassEditor::cbEdClassNewMenu(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
+void ClassEditor::cbEdClassNewMenu(eduimenu_s *parent, eduiitem_s *item, u32) {
+    eduimenu_s *menu = eduiMenuCreate(parent->x + item->x, item->y, 180, 250,
+                                      reinterpret_cast<void *>(static_cast<usize>(EdLevelFnt)), cbEdLevelDestroy, NULL);
+    if (menu == NULL)
+        return;
+    for (i32 index = 0; index < theRegistry.class_count; ++index) {
+        EdClass *ed_class = &theRegistry.classes[index];
+        if ((ed_class->flags & 0x20000000) == 0)
+            eduiMenuAddItem(menu, eduiItemSelCreate(index, &EdLevelAttr, 0, 0, cbEdClassNewObject, ed_class->name));
+    }
+    if (menu->first == NULL)
+        eduiMenuAddItem(menu, eduiItemSelCreate(0, &EdLevelAttr, 0, 0, cbEdLevelDestroyOnSelect,
+                                                const_cast<char *>("No Registered Classes")));
+    eduiMenuFitWidth(menu, 5);
+    eduiMenuFitOnScreen(menu, 1);
+    eduiMenuAttach(parent, menu);
 }
 
 void ClassEditor::cbEdClassNewObject(eduimenu_s *, eduiitem_s *, u32) {
@@ -488,8 +585,35 @@ void ClassEditor::cbEdClassRemoveDuplicates(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
 
-void ClassEditor::cbEdClassSelectClassMenu(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
+void ClassEditor::cbEdClassSelectClassMenu(eduimenu_s *parent, eduiitem_s *item, u32) {
+    eduimenu_s *menu = eduiMenuCreate(parent->x + item->x, item->y, 180, 250,
+                                      reinterpret_cast<void *>(static_cast<usize>(EdLevelFnt)), cbEdLevelDestroy, NULL);
+    if (menu == NULL)
+        return;
+    EDLEVEL_ADD_ACTIVE_SCENE(menu, 0);
+    EDLEVEL_ADD_ACTIVE_SCENE(menu, 1);
+    EDLEVEL_ADD_ACTIVE_SCENE(menu, 2);
+    EDLEVEL_ADD_ACTIVE_SCENE(menu, 3);
+    EDLEVEL_ADD_ACTIVE_SCENE(menu, 4);
+    EDLEVEL_ADD_ACTIVE_SCENE(menu, 5);
+    EDLEVEL_ADD_ACTIVE_SCENE(menu, 6);
+    EDLEVEL_ADD_ACTIVE_SCENE(menu, 7);
+    EDLEVEL_ADD_ACTIVE_SCENE(menu, 8);
+    EDLEVEL_ADD_ACTIVE_SCENE(menu, 9);
+    eduiMenuAddItem(menu, eduiItemSeparatorCreate(0, &EdLevelAttr));
+    for (i32 index = 0; index < theRegistry.class_count; ++index) {
+        EdClass *ed_class = &theRegistry.classes[index];
+        if ((ed_class->flags & 0x20000000) == 0 && ed_class->interface != NULL)
+            eduiMenuAddItem(menu,
+                            eduiItemSelCreate(index, &EdLevelAttr, 0, 0, cbEdClassSelectObjectMenu, ed_class->name));
+    }
+    if (menu->first == NULL)
+        eduiMenuAddItem(menu, eduiItemSelCreate(0, &EdLevelAttr, 0, 0, cbEdLevelDestroyOnSelect,
+                                                const_cast<char *>("No Registered Classes")));
+    eduiMenuFitWidth(menu, 5);
+    eduiMenuFitOnScreen(menu, 1);
+    eduiMenuAttach(parent, menu);
+    eduiMenuSortItemsByTxt(menu);
 }
 
 void ClassEditor::cbEdClassSelectObject(eduimenu_s *, eduiitem_s *item, u32) {
@@ -501,8 +625,39 @@ void ClassEditor::cbEdClassSelectObject(eduimenu_s *, eduiitem_s *item, u32) {
     }
 }
 
-void ClassEditor::cbEdClassSelectObjectMenu(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
+void ClassEditor::cbEdClassSelectObjectMenu(eduimenu_s *parent, eduiitem_s *item, u32) {
+    EdClass *ed_class = theRegistry.GetClass(static_cast<i32>(item->data));
+    theClassEditor.pending_object.ed_class = ed_class;
+    eduimenu_s *menu = eduiMenuCreate(parent->x + item->x, item->y, 180, 250,
+                                      reinterpret_cast<void *>(static_cast<usize>(EdLevelFnt)), cbEdLevelDestroy, NULL);
+    if (menu == NULL)
+        return;
+    if (ed_class != NULL && ed_class->interface != NULL) {
+        EdClassInterface *interface = ed_class->interface;
+        EdRef *name_ref = ed_class->FindTypeRef(2, 1);
+        if (interface->vtable->get_next_object != NULL) {
+            for (void *object = interface->vtable->get_next_object(interface, NULL); object != NULL;
+                 object = interface->vtable->get_next_object(interface, object)) {
+                char name[128];
+                if (name_ref == NULL || !name_ref->GetAttributeData(object, 2, EdType_String, name, sizeof(name)))
+                    NuStrCpy(name, ed_class->name);
+                if (theClassEditor.Editable(object, ed_class, -1))
+                    eduiMenuAddItem(menu, eduiItemSelCreate(reinterpret_cast<usize>(object), &EdLevelAttr, 0, 0,
+                                                            cbEdClassSelectObject, name));
+            }
+        }
+    }
+    if (menu->first == NULL) {
+        eduiMenuAddItem(
+            menu, eduiItemSelCreate(0, &EdLevelAttr, 0, 0, cbEdLevelDestroyOnSelect, const_cast<char *>("No Object")));
+    } else {
+        eduiMenuAddItemFirst(
+            menu, eduiItemFilterCreate(0, &EdLevelAttr, const_cast<char *>("FILTER"), const_cast<char *>("")));
+    }
+    eduiMenuFitWidth(menu, 5);
+    eduiMenuFitOnScreen(menu, 1);
+    eduiMenuAttach(parent, menu);
+    eduiMenuSortItemsByTxt(menu);
 }
 
 void ClassEditor::cbEdClassSetMode(eduimenu_s *menu, eduiitem_s *item, u32) {
@@ -533,34 +688,95 @@ void ClassEditor::cbEdClassSetSnap(eduimenu_s *menu, eduiitem_s *item, u32) {
 
 void ClassEditor::cbEdClassSetView(eduimenu_s *menu, eduiitem_s *item, u32) {
     switch (item->data) {
-    case 0:
-        theClassEditor.class_filter = -1;
-        break;
-    case 1:
-        theClassEditor.class_filter = 0;
-        break;
-    case 2:
-        theClassEditor.class_filter = ~theClassEditor.class_filter;
-        break;
-    default:
-        if (item->data - 3 >= 0) {
-            theClassEditor.class_filter ^= 1 << (item->data - 3);
-        }
-        break;
+        case 0:
+            theClassEditor.class_filter = -1;
+            break;
+        case 1:
+            theClassEditor.class_filter = 0;
+            break;
+        case 2:
+            theClassEditor.class_filter = ~theClassEditor.class_filter;
+            break;
+        default:
+            if (item->data - 3 >= 0) {
+                theClassEditor.class_filter ^= 1 << (item->data - 3);
+            }
+            break;
     }
     SetViewMenuHilight(menu);
 }
 
-void ClassEditor::cbEdClassSnapMenu(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
+void ClassEditor::cbEdClassSnapMenu(eduimenu_s *parent, eduiitem_s *item, u32) {
+    eduimenu_s *menu = eduiMenuCreate(parent->x + item->x, item->y, 180, 250,
+                                      reinterpret_cast<void *>(static_cast<usize>(EdLevelFnt)), cbEdLevelDestroy, NULL);
+    if (menu == NULL)
+        return;
+    eduiMenuAddItem(menu, eduiItemToggleCreate(1, &EdLevelAttr, theClassEditor.snap_mode == 1, 1, cbEdClassSetSnap,
+                                               const_cast<char *>("Height")));
+    eduiMenuAddItem(menu, eduiItemToggleCreate(2, &EdLevelAttr, theClassEditor.snap_mode == 2, 1, cbEdClassSetSnap,
+                                               const_cast<char *>("Ray")));
+    eduiMenuAddItem(menu, eduiItemToggleCreate(0, &EdLevelAttr, theClassEditor.snap_mode == 0, 1, cbEdClassSetSnap,
+                                               const_cast<char *>("Off")));
+    eduiMenuFitWidth(menu, 5);
+    eduiMenuFitOnScreen(menu, 1);
+    eduiMenuAttach(parent, menu);
 }
 
-void ClassEditor::cbEdClassToolsMenu(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
+void ClassEditor::cbEdClassToolsMenu(eduimenu_s *parent, eduiitem_s *item, u32) {
+    eduimenu_s *menu = eduiMenuCreate(parent->x + item->x, item->y, 180, 250,
+                                      reinterpret_cast<void *>(static_cast<usize>(EdLevelFnt)), cbEdLevelDestroy, NULL);
+    if (menu == NULL)
+        return;
+    eduiMenuAddItem(menu, eduiItemSelCreate(1, &EdLevelAttr, 0, 0, cbEdClassRemoveDuplicates,
+                                            const_cast<char *>("Remove Duplicates")));
+    eduiMenuFitWidth(menu, 5);
+    eduiMenuFitOnScreen(menu, 1);
+    eduiMenuAttach(parent, menu);
 }
 
-void ClassEditor::cbEdClassViewMenu(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
+void ClassEditor::cbEdClassViewMenu(eduimenu_s *parent, eduiitem_s *item, u32) {
+    eduimenu_s *menu = eduiMenuCreate(parent->x + item->x, item->y, 180, 250,
+                                      reinterpret_cast<void *>(static_cast<usize>(EdLevelFnt)), cbEdLevelDestroy, NULL);
+    if (menu == NULL)
+        return;
+    eduiMenuAddItem(menu, eduiItemCheckCreate(0, &EdLevelAttr, 0, 0, cbEdClassSetPinned, const_cast<char *>("Pinned")));
+    menu->flags &= ~4;
+    EDLEVEL_ADD_ACTIVE_SCENE(menu, 0);
+    EDLEVEL_ADD_ACTIVE_SCENE(menu, 1);
+    EDLEVEL_ADD_ACTIVE_SCENE(menu, 2);
+    EDLEVEL_ADD_ACTIVE_SCENE(menu, 3);
+    EDLEVEL_ADD_ACTIVE_SCENE(menu, 4);
+    EDLEVEL_ADD_ACTIVE_SCENE(menu, 5);
+    EDLEVEL_ADD_ACTIVE_SCENE(menu, 6);
+    EDLEVEL_ADD_ACTIVE_SCENE(menu, 7);
+    EDLEVEL_ADD_ACTIVE_SCENE(menu, 8);
+    EDLEVEL_ADD_ACTIVE_SCENE(menu, 9);
+    eduiMenuAddItem(menu, eduiItemSeparatorCreate(0, &EdLevelAttr));
+    eduiMenuAddItem(menu, eduiItemSelCreate(0, &EdLevelAttr, 0, 0, cbEdClassSetView, const_cast<char *>("All")));
+    eduiMenuAddItem(menu, eduiItemSelCreate(1, &EdLevelAttr, 0, 0, cbEdClassSetView, const_cast<char *>("None")));
+    eduiMenuAddItem(menu, eduiItemSelCreate(2, &EdLevelAttr, 0, 0, cbEdClassSetView, const_cast<char *>("Invert")));
+    if (theRegistry.class_count < 1) {
+        eduiMenuAddItem(menu, eduiItemSelCreate(0, &EdLevelAttr, 0, 0, cbEdLevelDestroyOnSelect,
+                                                const_cast<char *>("No Registered Classes")));
+    } else {
+        const i32 shortcuts[10] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 0};
+        char label[128];
+        for (i32 index = 0; index < theRegistry.class_count; ++index) {
+            EdClass *ed_class = &theRegistry.classes[index];
+            if ((ed_class->flags & 0x20000000) != 0)
+                continue;
+            if (index < 10)
+                sprintf(label, "%d %s", shortcuts[index], ed_class->name);
+            else
+                sprintf(label, "   %s", ed_class->name);
+            eduiMenuAddItem(menu, eduiItemCheckCreate(index + 3, &EdLevelAttr,
+                                                      (theClassEditor.class_filter >> (index & 31)) & 1, 0,
+                                                      cbEdClassSetView, label));
+        }
+    }
+    eduiMenuFitWidth(menu, 5);
+    eduiMenuFitOnScreen(menu, 1);
+    eduiMenuAttach(parent, menu);
 }
 
 void ClassEditor::cbEdCopySelectedObject(EdInputContext &) {
@@ -571,8 +787,16 @@ void ClassEditor::cbEdCreateClassNewObject(i32) {
     STUBBED();
 }
 
-void ClassEditor::cbEdFilterLED(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
+void ClassEditor::cbEdFilterLED(eduimenu_s *, eduiitem_s *item, u32) {
+    if (item == NULL)
+        return;
+    LevelEditorScene *scene = theLevelEditor.GetEdScene(static_cast<u32>(item->data) >> 6);
+    if (scene == NULL)
+        return;
+    theLevelEditor.current_led_file = 0xffff;
+    i32 editable = scene->editable + 1;
+    scene->editable = editable;
+    item->highlighted = editable;
 }
 
 void ClassEditor::cbEdLevelDeselectAll(eduimenu_s *, eduiitem_s *, u32) {
@@ -707,12 +931,65 @@ void LevelEditor::CloseMenu() {
     edLevelDestroyActiveMenu = 1;
 }
 
-void LevelEditor::CreateEditorList(eduimenu_s *, eduiitem_s *) {
-    STUBBED();
+void LevelEditor::CreateEditorList(eduimenu_s *parent, eduiitem_s *item) {
+    eduimenu_s *menu =
+        eduiMenuCreate(parent->x + item->x, item->y, 180, 250, reinterpret_cast<void *>(static_cast<usize>(EdLevelFnt)),
+                       cbEdLevelDestroy, const_cast<char *>("Editor List"));
+    if (menu == NULL)
+        return;
+    for (BaseEditor *editor = first_editor; editor != NULL; editor = editor->next) {
+        eduiMenuAddItem(menu, eduiItemSelCreate(reinterpret_cast<usize>(editor), &EdLevelAttr, 0, 0,
+                                                cbEdLevelEditorSelect, editor->GetName()));
+    }
+    eduiMenuFitWidth(menu, 5);
+    eduiMenuFitOnScreen(menu, 1);
+    eduiMenuAttach(parent, menu);
+}
+
+static void cbEdLevelEditorList(eduimenu_s *menu, eduiitem_s *item, u32) {
+    theLevelEditor.CreateEditorList(menu, item);
+}
+
+static void cbEdLevelEditorSelect(eduimenu_s *, eduiitem_s *item, u32) {
+    theLevelEditor.active_editor = static_cast<BaseEditor *>(item->data_ptr);
+    edLevelDestroyActiveMenu = 1;
+}
+
+static void cbEdLevelSettingsMenu(eduimenu_s *parent, eduiitem_s *item, u32) {
+    eduimenu_s *menu =
+        eduiMenuCreate(parent->x + item->x, item->y, 180, 250, reinterpret_cast<void *>(static_cast<usize>(EdLevelFnt)),
+                       cbEdLevelDestroy, const_cast<char *>("Options"));
+    if (menu == NULL)
+        return;
+    eduiMenuAddItem(menu, eduiItemSelCreate(1, &EdLevelAttr, 0, 0, cbEdLevelSave, const_cast<char *>("Save Data")));
+    theLevelEditor.settings.AddMenuItems(menu);
+    eduiMenuFitWidth(menu, 5);
+    eduiMenuFitOnScreen(menu, 1);
+    eduiMenuAttach(parent, menu);
 }
 
 void LevelEditor::CreateMenu() {
-    STUBBED();
+    f32 x, y;
+    eduiGetCursorCoords(&x, &y);
+    const i32 menu_x = static_cast<i32>(x * 640.0f);
+    const i32 menu_y = static_cast<i32>(y * 448.0f);
+    const bool keyboard_menu = NuKeyboard(0x0f) != 0;
+    eduimenu_s *menu =
+        eduiMenuCreate(menu_x, menu_y, 100, 200, reinterpret_cast<void *>(static_cast<usize>(EdLevelFnt)),
+                       cbEdLevelDestroy, keyboard_menu ? const_cast<char *>("Level Editor") : NULL);
+    if (menu != NULL) {
+        if (keyboard_menu) {
+            eduiMenuAddItem(
+                menu, eduiItemSelCreate(1, &EdLevelAttr, 0, 0, cbEdLevelEditorList, const_cast<char *>("Editors...")));
+            eduiMenuAddItem(menu, eduiItemSelCreate(0, &EdLevelAttr, 0, 0, cbEdLevelSettingsMenu,
+                                                    const_cast<char *>("Options...")));
+        } else if (active_editor != NULL) {
+            active_editor->AddMenuItems(menu);
+        }
+        eduiMenuFitWidth(menu, 5);
+        eduiMenuFitOnScreen(menu, 1);
+    }
+    edLevelActiveMenu = menu;
 }
 
 void LevelEditor::Display(ThingRenderData *) {
@@ -942,8 +1219,7 @@ void PropertyMenu::SelectAttr(i32 selected) {
     for (eduiitem_s *item = menu->first; item != NULL; item = item->next) {
         EdControl *control = static_cast<EdControl *>(item->data_ptr);
         if (control != NULL) {
-            control->SetMenuItemAttr(selected, item, &thePropertyTool.selected_attr,
-                                     &thePropertyTool.unselected_attr);
+            control->SetMenuItemAttr(selected, item, &thePropertyTool.selected_attr, &thePropertyTool.unselected_attr);
         }
     }
 }
@@ -960,8 +1236,7 @@ void PropertyTool::AutoLocateMenu(PropertyMenu *property_menu) {
     PropertyMenu *other = active_menu;
     while (other != NULL) {
         if (other->menu != menu) {
-            if (menu->x + menu->width >= other->menu->x &&
-                other->menu->x + other->menu->width >= menu->x) {
+            if (menu->x + menu->width >= other->menu->x && other->menu->x + other->menu->width >= menu->x) {
                 menu->x += 10;
                 if (static_cast<float>(menu->x + menu->width) > 590.0f) {
                     menu->x = 20;
@@ -1199,8 +1474,8 @@ i32 ClassObjectList::GetAveragePosition(VuVec &average) {
     i32 position_count = 0;
     for (ClassObjectListEntry *entry = first; entry != NULL; entry = entry->next) {
         VuVec position;
-        if (get_class_object_attribute(entry->ed_class, entry->object, entry->reference,
-                                       8, EdType_VuVec, &position, 0)) {
+        if (get_class_object_attribute(entry->ed_class, entry->object, entry->reference, 8, EdType_VuVec, &position,
+                                       0)) {
             average.x += position.x;
             average.y += position.y;
             average.z += position.z;
@@ -1223,14 +1498,14 @@ i32 ClassObjectList::GetAveragePosition(VuVec &average, float &radius) {
     float radii[64];
     for (ClassObjectListEntry *entry = first; entry != NULL && position_count < 64; entry = entry->next) {
         VuVec &position = positions[position_count];
-        if (get_class_object_attribute(entry->ed_class, entry->object, entry->reference,
-                                       8, EdType_VuVec, &position, 0)) {
+        if (get_class_object_attribute(entry->ed_class, entry->object, entry->reference, 8, EdType_VuVec, &position,
+                                       0)) {
             average.x += position.x;
             average.y += position.y;
             average.z += position.z;
             radii[position_count] = 1.0f;
-            get_class_object_attribute(entry->ed_class, entry->object, entry->reference,
-                                       64, EdType_Float, &radii[position_count], 0);
+            get_class_object_attribute(entry->ed_class, entry->object, entry->reference, 64, EdType_Float,
+                                       &radii[position_count], 0);
             ++position_count;
         }
     }
@@ -1350,7 +1625,7 @@ void EdClass::SerialiseObject(EdStream &stream, void *object) {
         u8 data[256];
         for (EdRef *member = members; member != NULL; member = member->next) {
             if ((stream.flags & 0x400000) != 0 ? (member->attributes & 0x400000) != 0
-                                              : (member->attributes & 0x10000000) != 0) {
+                                               : (member->attributes & 0x10000000) != 0) {
                 continue;
             }
             if (member->attributes < 0) {
@@ -1439,8 +1714,7 @@ void EdClass::Serialise(EdStream &stream, i32 *class_mapping) {
                 }
             } else {
                 if ((member->attributes & 0x10000000) != 0 ||
-                    (class_mapping != NULL && member->attributes < 0 &&
-                     class_mapping[member->type_id] == -1)) {
+                    (class_mapping != NULL && member->attributes < 0 && class_mapping[member->type_id] == -1)) {
                     continue;
                 }
             }
@@ -1454,8 +1728,7 @@ void EdClass::Serialise(EdStream &stream, i32 *class_mapping) {
                 }
             } else {
                 if ((member->attributes & 0x10000000) != 0 ||
-                    (class_mapping != NULL && member->attributes < 0 &&
-                     class_mapping[member->type_id] == -1)) {
+                    (class_mapping != NULL && member->attributes < 0 && class_mapping[member->type_id] == -1)) {
                     continue;
                 }
             }
@@ -1492,7 +1765,7 @@ i32 EdClass::GetStreamClasses(EdStream &stream, i32 *classes, i32 &count, i32 ca
             continue;
         }
         if ((stream.flags & 0x400000) != 0 ? (member->attributes & 0x400000) != 0
-                                          : (member->attributes & 0x10000000) != 0) {
+                                           : (member->attributes & 0x10000000) != 0) {
             continue;
         }
         theRegistry.GetClass(member->type_id)->GetStreamClasses(stream, classes, count, capacity);
@@ -1529,15 +1802,14 @@ void EdClass::SerialiseObject(EdStream &stream, void *object, EdClass *schema, E
                         continue;
                     }
                     if ((stream.flags & 0x400000) != 0 ? (member->attributes & 0x400000) != 0
-                                                      : (member->attributes & 0x10000000) != 0) {
+                                                       : (member->attributes & 0x10000000) != 0) {
                         continue;
                     }
                 }
                 if (member->attributes < 0) {
                     EdClass *source_class = registry->GetClass(source->type_id);
                     EdClass *member_class = theRegistry.GetClass(member->type_id);
-                    member_class->SerialiseObject(stream, member->GetMemberObject(object), source_class,
-                                                 registry);
+                    member_class->SerialiseObject(stream, member->GetMemberObject(object), source_class, registry);
                 } else {
                     registry->GetType(source->type_id);
                     EdType *type = theRegistry.GetType(member->type_id);
@@ -1612,8 +1884,8 @@ void *EdClass::FindObject(char *object_name) {
         i32 string_type = EdType_String;
         if (FindMember(&member, object, 2, 1) != 0) {
             char name_buffer[256];
-            if (member.reference->GetAttributeData(member.object, 2, string_type, name_buffer,
-                                                   sizeof(name_buffer)) != 0 &&
+            if (member.reference->GetAttributeData(member.object, 2, string_type, name_buffer, sizeof(name_buffer)) !=
+                    0 &&
                 NuStrICmp(object_name, name_buffer) == 0) {
                 return object;
             }
@@ -1628,8 +1900,13 @@ EditorSettings::EditorSettings() {
     snap_terrain = 1;
 }
 
-void EditorSettings::AddMenuItems(eduimenu_s *) {
-    STUBBED();
+void EditorSettings::AddMenuItems(eduimenu_s *menu) {
+    eduiMenuAddItem(menu, eduiItemSliderCreate(reinterpret_cast<usize>(&cursor_radius), &EdLevelAttr, 0,
+                                               cbEdLevelSetSliderFloat, 1.0f, 50.0f, cursor_radius,
+                                               const_cast<char *>("Cursor Radius")));
+    eduiMenuAddItem(menu, eduiItemCheckCreate(reinterpret_cast<usize>(&snap_terrain), &EdLevelAttr, snap_terrain, 0,
+                                              cbEdLevelToggleInt, const_cast<char *>("Snap Terrain")));
+    edui_last_item->highlighted = snap_terrain & 1;
 }
 
 void EditorSettings::Serialise(EdStream &) {

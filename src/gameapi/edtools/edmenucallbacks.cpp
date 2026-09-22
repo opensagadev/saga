@@ -8,15 +8,6 @@
 static void cbColourPickSel(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
-static void cbEdLevelEditorList(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
-static void cbEdLevelEditorSelect(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
-static void cbEdLevelSettingsMenu(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
 static void cbToggleIndicatorMode(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
@@ -37,21 +28,6 @@ static u32 cbSortSeg(void const *, void const *) {
 extern "C" {
 
     static void cbGradChange(void) {
-        STUBBED();
-    }
-
-    static i32 cbInteractMenuCancelChild(edui_interact_s *interact) {
-        eduimenu_s *menu = interact->menu;
-        if (menu && menu->child && menu->child->callback)
-            menu->child->callback(menu->child, menu);
-        return 0;
-    }
-
-    static void cbMMCancel(void) {
-        STUBBED();
-    }
-
-    static void cbMMReturnToApp(void) {
         STUBBED();
     }
 
@@ -80,14 +56,6 @@ extern "C" {
     }
 
     static void cbgpcfgPaste(void *, void *, void *) {
-        STUBBED();
-    }
-
-    static void cbmcfgCameraSpeed(void *, void *) {
-        STUBBED();
-    }
-
-    static void cbmcfgCancel(void *) {
         STUBBED();
     }
 

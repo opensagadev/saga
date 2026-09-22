@@ -306,7 +306,6 @@ DECOMP_ASSERT(sizeof(edui_gradient_stage_s) == 0x24, "edui_gradient_stage_s ABI"
 DECOMP_ASSERT(sizeof(edui_gradient_node_s) == 0x20, "edui_gradient_node_s ABI");
 DECOMP_ASSERT(sizeof(edui_gradient_pick_s) == 0x70, "edui_gradient_pick_s ABI");
 
-
 struct edui_interact_s {
     f32 x, y, width, height;
     eduimenu_s *menu;
@@ -321,6 +320,20 @@ extern "C" {
     extern ed_module_s edgradesc;
     extern ed_module_s edbridesc;
     extern ed_module_s edanimdesc;
+    extern ed_module_s edrtldesc;
+    extern ed_module_s edpartdesc;
+    extern ed_module_s edTimingDesc;
+    void edmainInit(void *font, char *configuration_file);
+    void edmainInitEx(void *font, char *configuration_file, eduiiattr_s *colours, i32 x, i32 y, i32 width, i32 height);
+    i32 edmainProcess(f32 delta_time, nupad_s *pad);
+    void edmainRender(void);
+    f32 edmainSetMainMenuScale(f32 scale);
+    void edmainSetCursorEnabled(i32 enabled);
+    void eduiInit(void);
+    void eduiInitMaterials(void);
+    void eduiRenderCursor(void);
+    void eduiRenderInteracts(void);
+    void eduiSetFont(void *font);
     i32 edmainActivate(ed_module_s *module, i32 notify);
     ed_module_s *edmainCurrent(void);
     i32 edmainRegister(ed_module_s *module);
@@ -350,8 +363,10 @@ extern "C" {
     void eduiMenuHighlight(eduimenu_s *menu, eduiitem_s *item);
     eduiitem_s *eduiItemSelCreate(usize data, const void *colours, i32 selected, i32 group, EdUiItemCallback callback,
                                   char *text);
+    eduiitem_s *eduiItemSeparatorCreate(usize data, const void *colours);
     eduiitem_s *eduiItemCheckCreate(usize data, const void *colours, i32 selected, i32 group, EdUiItemCallback callback,
                                     char *text);
+    eduiitem_s *eduiItemFilterCreate(usize data, const void *colours, char *text, char *value);
     eduiitem_s *eduiItemToggleCreate(usize data, const void *colours, i32 selected, i32 group,
                                      EdUiItemCallback callback, char *text);
     eduiitem_s *eduiItemSliderCreate(usize data, const void *colours, i32 group, EdUiItemCallback callback, f32 minimum,
@@ -390,6 +405,7 @@ extern "C" {
     void eduiMenuAddItemAfter(eduimenu_s *menu, eduiitem_s *item, eduiitem_s *after);
     void eduiMenuAddItemBefore(eduimenu_s *menu, eduiitem_s *item, eduiitem_s *before);
     void eduiMenuRemoveItem(eduimenu_s *menu, eduiitem_s *item);
+    i32 eduiItemRender(eduiitem_s *item, eduimenu_s *menu, i32 x, i32 y, i32 width, i32 selected);
     i32 eduiMenuItemMoveUp(eduimenu_s *menu, eduiitem_s *item);
     i32 eduiMenuItemMoveDown(eduimenu_s *menu, eduiitem_s *item);
     void eduiMenuRender(eduimenu_s *menu);
@@ -419,9 +435,9 @@ extern "C" {
     eduiitem_s *eduiItemTexturePickCreate(usize data, const void *colours, EdUiItemCallback callback, char *text);
     eduiitem_s *eduiItemGreyGradPickCreate(usize data, const void *colours, EdUiItemCallback callback, char *text);
     eduiitem_s *eduiItemDataGradPickCreate(usize data, const void *colours, EdUiItemCallback callback,
-                                         EdUiItemCallback press, EdUiItemCallback add, EdUiItemCallback remove,
-                                         EdUiItemCallback copy, EdUiItemCallback paste, char *text);
+                                           EdUiItemCallback press, EdUiItemCallback add, EdUiItemCallback remove,
+                                           EdUiItemCallback copy, EdUiItemCallback paste, char *text);
     eduiitem_s *eduiItemPropCreateEx(usize data, const void *colours, EdUiItemCallback selected,
-                                    EdUiItemCallback changed, EdUiItemCallback button, i32 button_type,
-                                    char *text, char *value, i32 extra_data);
+                                     EdUiItemCallback changed, EdUiItemCallback button, i32 button_type, char *text,
+                                     char *value, i32 extra_data);
 }
