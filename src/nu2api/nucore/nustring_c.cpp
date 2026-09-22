@@ -696,6 +696,87 @@ NUWCHAR8 *NuUTF8CharFromUnicode(NUWCHAR8 *dst, NUWCHAR16 character) {
     return dst;
 }
 
+i32 GetLineW(u16 *line, i32 file) {
+    i32 length = 0;
+    i32 end_of_line;
+    i32 has_text = 0;
+    i32 quoted = 0;
+    u16 character;
+
+    for (;;) {
+        character = NuFileReadWChar(file);
+        switch (character) {
+            case '\r':
+                NuFileReadWChar(file);
+                // Fall through.
+            case '\n':
+                if (length == 0 || has_text == 0) {
+                    has_text = 0;
+                    break;
+                }
+                // Fall through.
+            case '\0':
+            line_complete:
+                line[length] = 0;
+                return length;
+
+            case '"':
+                quoted = 1 - quoted;
+                has_text = 1;
+                line[length++] = character;
+                break;
+
+            case ';':
+                if (quoted != 0)
+                    goto append_character;
+
+                if (length == 0 || has_text == 0) {
+                    end_of_line = 0;
+                    do {
+                        character = NuFileReadWChar(file);
+                        switch (character) {
+                            case '\n':
+                            case '\0':
+                                end_of_line = 1;
+                                break;
+                            case '\r':
+                                NuFileReadWChar(file);
+                                end_of_line = 1;
+                                break;
+                        }
+                    } while (end_of_line == 0);
+                    length = 0;
+                    has_text = 0;
+                    break;
+                }
+
+                do {
+                    character = NuFileReadWChar(file);
+                    switch (character) {
+                        case '\n':
+                        case '\0':
+                            goto line_complete;
+                        case '\r':
+                            NuFileReadWChar(file);
+                            goto line_complete;
+                    }
+                } while (true);
+
+            case ' ':
+            case '\t':
+                if (has_text != 0)
+                    line[length++] = character;
+                break;
+
+            default:
+            append_character:
+                has_text = 1;
+                line[length++] = character;
+                break;
+        }
+    }
+}
+
 void NuStrCat(char *str, const char *ext) {
     while (*str != '\0') {
         str++;

@@ -395,8 +395,90 @@ void Text_SetLanguage(i32 language) {
 void *Text_IsFontLoaded() {
     return app_fnt;
 }
-void TextDecodeCodeword(char *, char *) {
-    STUBBED();
+void TextDecodeCodeword(char *source, char *destination) {
+    if (buttonmapfn != nullptr)
+        buttonmapfn(source, source);
+
+    if (NuStrICmp(source, "accept") == 0)
+        NuStrCpy(source, "cross");
+    if (NuStrICmp(source, "back") == 0)
+        NuStrCpy(source, "triangle");
+    if (NuStrICmp(source, "wii") == 0)
+        NuStrCpy(source, "logo");
+    if (NuStrICmp(source, "playstation") == 0)
+        NuStrCpy(source, "logo");
+
+    NuStrCpy(destination, source);
+    if (NuStrICmp(source, "cross") == 0)
+        NuStrCpy(destination, "~0\xd4\xb1~~");
+    if (NuStrICmp(source, "circle") == 0)
+        NuStrCpy(destination, "~0\xd4\xb2~~");
+    if (NuStrICmp(source, "square") == 0)
+        NuStrCpy(destination, "~0\xd4\xb3~~");
+    if (NuStrICmp(source, "triangle") == 0)
+        NuStrCpy(destination, "~0\xd4\xb4~~");
+    if (NuStrICmp(source, "l1") == 0)
+        NuStrCpy(destination, "~0\xd4\xb5~~");
+    if (NuStrICmp(source, "r1") == 0)
+        NuStrCpy(destination, "~0\xd4\xb6~~");
+    if (NuStrICmp(source, "l2") == 0)
+        NuStrCpy(destination, "~0\xd4\xb7~~");
+    if (NuStrICmp(source, "r2") == 0)
+        NuStrCpy(destination, "~0\xd4\xb8~~");
+    if (NuStrICmp(source, "select") == 0)
+        NuStrCpy(destination, "~0\xd4\xbd~~");
+    if (NuStrICmp(source, "start") == 0)
+        NuStrCpy(destination, "~0\xd4\xbe~~");
+    if (NuStrICmp(source, "home") == 0)
+        NuStrCpy(destination, "~0\xd4\xbf~~");
+    if (NuStrICmp(source, "a") == 0)
+        NuStrCpy(destination, "~0\xd4\xb1~~");
+    if (NuStrICmp(source, "b") == 0)
+        NuStrCpy(destination, "~0\xd4\xb2~~");
+    if (NuStrICmp(source, "x") == 0)
+        NuStrCpy(destination, "~0\xd4\xb3~~");
+    if (NuStrICmp(source, "y") == 0)
+        NuStrCpy(destination, "~0\xd4\xb4~~");
+    if (NuStrICmp(source, "lb") == 0)
+        NuStrCpy(destination, "~0\xd4\xb5~~");
+    if (NuStrICmp(source, "rb") == 0)
+        NuStrCpy(destination, "~0\xd4\xb6~~");
+    if (NuStrICmp(source, "lt") == 0)
+        NuStrCpy(destination, "~0\xd4\xb7~~");
+    if (NuStrICmp(source, "rt") == 0)
+        NuStrCpy(destination, "~0\xd4\xb8~~");
+    if (NuStrICmp(source, "back") == 0)
+        NuStrCpy(destination, "~0\xd4\xbd~~");
+    if (NuStrICmp(source, "guide") == 0)
+        NuStrCpy(destination, "~0\xd4\xbf~~");
+    if (NuStrICmp(source, "xboxguide") == 0)
+        NuStrCpy(destination, "~0\xd4\xbf~~");
+    if (NuStrICmp(source, "xbox guide") == 0)
+        NuStrCpy(destination, "~0\xd4\xbf~~");
+    if (NuStrICmp(source, "xbox") == 0)
+        NuStrCpy(destination, "~0\xd4\xbf~~");
+    if (NuStrICmp(source, "1") == 0)
+        NuStrCpy(destination, "~0\xd4\xb3~~");
+    if (NuStrICmp(source, "2") == 0)
+        NuStrCpy(destination, "~0\xd4\xb4~~");
+    if (NuStrICmp(source, "c") == 0)
+        NuStrCpy(destination, "~0\xd4\xb5~~");
+    if (NuStrICmp(source, "z") == 0)
+        NuStrCpy(destination, "~0\xd4\xb6~~");
+    if (NuStrICmp(source, "-") == 0)
+        NuStrCpy(destination, "~0\xd4\xbd~~");
+    if (NuStrICmp(source, "+") == 0)
+        NuStrCpy(destination, "~0\xd4\xbe~~");
+    if (NuStrICmp(source, "paddown") == 0)
+        NuStrCpy(destination, "~0\xd4\xb9~~");
+    if (NuStrICmp(source, "padright") == 0)
+        NuStrCpy(destination, "~0\xd4\xba~~");
+    if (NuStrICmp(source, "padleft") == 0)
+        NuStrCpy(destination, "~0\xd4\xbb~~");
+    if (NuStrICmp(source, "padup") == 0)
+        NuStrCpy(destination, "~0\xd4\xbc~~");
+    if (NuStrICmp(source, "logo") == 0)
+        NuStrCpy(destination, "\xd5\x80");
 }
 static f32 QFONTSCALEX = 1.0f;
 static f32 QFONTSCALEY = 1.0f;
@@ -1283,9 +1365,6 @@ void MatrixTextStringEncode(void *font, unsigned char *source, u16 *destination)
         ++destination;
     }
     *destination = 0;
-}
-void GetLineW(u16 *, i32) {
-    STUBBED();
 }
 extern "C" void Text3DStringEncode(char *src, u16 *dst) {
     VUFNT *font = SmartTextFont;

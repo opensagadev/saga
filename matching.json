@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 52.560944,
+    "fuzzy_match_percent": 52.610485,
     "total_code": "4722419",
     "matched_code": "459721",
     "matched_code_percent": 9.734862,
@@ -23893,7 +23893,7 @@
           "address": 1656304,
           "offset": 766336,
           "size": 878,
-          "match_percent": 88.75
+          "match_percent": 88.77315
         },
         {
           "name": "_ZL21Action_SetPathCnxFlagP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -24173,7 +24173,7 @@
           "address": 1684160,
           "offset": 794192,
           "size": 2968,
-          "match_percent": 46.689655
+          "match_percent": 46.69715
         },
         {
           "name": "_ZL17Action_ProbeDroidP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -43622,7 +43622,7 @@
           "address": 4600912,
           "offset": 3710944,
           "size": 216,
-          "match_percent": 94.98113
+          "match_percent": 95.07547
         },
         {
           "name": "_ZL11CC_sfx_hurtP8nufpar_s",
@@ -49833,7 +49833,7 @@
           "address": 4828496,
           "offset": 3938528,
           "size": 1790,
-          "match_percent": 98.763596
+          "match_percent": 98.77541
         },
         {
           "name": "_ZL18CS_lowend_disthackP8nufpar_s",
@@ -67066,14 +67066,6 @@
           "match_percent": 36.55357
         },
         {
-          "name": "_Z8GetLineWPti",
-          "demangled_name": "GetLineW(unsigned short*, int)",
-          "address": 2510871,
-          "offset": 1620903,
-          "size": 422,
-          "match_percent": 3.709678
-        },
-        {
           "name": "_Z22Text3DStringEncodeFontPhPtPv",
           "demangled_name": "Text3DStringEncodeFont(unsigned char*, unsigned short*, void*)",
           "address": 4368416,
@@ -67111,7 +67103,7 @@
           "address": 4368816,
           "offset": 3478848,
           "size": 2017,
-          "match_percent": 0.850202
+          "match_percent": 99.327934
         },
         {
           "name": "TextDecode",
@@ -78616,7 +78608,7 @@
           "address": 4673584,
           "offset": 3783616,
           "size": 196,
-          "match_percent": 41.935482
+          "match_percent": 42.01613
         },
         {
           "name": "_Z25LevelSplines_InitForLevelP11WORLDINFO_s",
@@ -104177,6 +104169,14 @@
           "offset": 1620741,
           "size": 162,
           "match_percent": 77.27273
+        },
+        {
+          "name": "_Z8GetLineWPti",
+          "demangled_name": "GetLineW(unsigned short*, int)",
+          "address": 2510871,
+          "offset": 1620903,
+          "size": 422,
+          "match_percent": 87.201614
         },
         {
           "name": "NuStringTableSetFormat",
