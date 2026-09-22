@@ -1,8 +1,12 @@
 #include "decomp.h"
+#include "legoapi/audio/sfx.h"
+#include "legoapi/core/input/gamepads.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/gizmo/object/gizmopickup.h"
 #include "legoapi/gizmos/fx/gizmopickups.h"
+#include "legoapi/items/collect/minikits.h"
 #include "legoapi/render/fx.h"
+#include "legoapi/render/fx/parts.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/world.h"
 #include "globals.h"
@@ -15,8 +19,22 @@ static void Pup_CollectRedBrick(WORLDINFO_s *, GIZMOPICKUP_s *, i32, GameObject_
     STUBBED();
 }
 
-static void Pup_UpdatePurpleCoin(WORLDINFO_s *, GIZMOPICKUP_s *) {
-    STUBBED();
+static void Pup_UpdatePurpleCoin(WORLDINFO_s *, GIZMOPICKUP_s *pickup) {
+    if ((pickup->state_flags & 0x30) != 0x30) {
+        return;
+    }
+    i32 effect = WORLD->debris_sys->entries[57].effect;
+    if (effect == -1) {
+        return;
+    }
+    f32 rate = 5.0f;
+    if (WORLD->area != NULL && (WORLD->area->flags & 0x104) == 4) {
+        rate = 2.5f;
+    }
+    i32 count = ParticlesPerSecond(rate, FRAMETIME);
+    if (count > 0) {
+        AddVariableShotDebrisEffect(effect, &pickup->position, count, 0, 0);
+    }
 }
 
 static void Pup_UpdateBlueCoin(WORLDINFO_s *, GIZMOPICKUP_s *pickup) {
@@ -37,24 +55,26 @@ static void Pup_UpdateBlueCoin(WORLDINFO_s *, GIZMOPICKUP_s *pickup) {
     }
 }
 
-static void Pup_UpdatePowerUp(WORLDINFO_s *, GIZMOPICKUP_s *) {
-    STUBBED();
+static void Pup_UpdatePowerUp(WORLDINFO_s *world, GIZMOPICKUP_s *pickup) {
+    PowerUp_Particles(world, &pickup->position);
+    PlaySfx("Grv_GuardWeaponLp", &pickup->position);
 }
 
-static void Pup_CollectPowerUp(WORLDINFO_s *, GIZMOPICKUP_s *, i32, GameObject_s *, i32) {
-    STUBBED();
+static void Pup_CollectPowerUp(WORLDINFO_s *, GIZMOPICKUP_s *pickup, i32, GameObject_s *object, i32 flags) {
+    CollectPowerUp(object, &pickup->position, pickup->draw_rotation, flags);
 }
 
 void Pup_CollectCoin(WORLDINFO_s *world, GIZMOPICKUP_s *pickup, i32 type, GameObject_s *object, i32 arg) {
     GizmoPickup_CollectCoin(world, &pickup->position, type, pickup->model_variant, object, arg);
 }
 
-static void Pup_CollectMinikit(WORLDINFO_s *, GIZMOPICKUP_s *, i32, GameObject_s *, i32) {
-    STUBBED();
+static void Pup_CollectMinikit(WORLDINFO_s *, GIZMOPICKUP_s *pickup, i32, GameObject_s *object, i32 type) {
+    CollectMinikit(&pickup->position, pickup->name, type);
+    NewBuzz(object->pad_gamepad->pad, 0.2f, 0);
 }
 
-static void Pup_CollectHeart(WORLDINFO_s *, GIZMOPICKUP_s *, i32, GameObject_s *, i32) {
-    STUBBED();
+static void Pup_CollectHeart(WORLDINFO_s *, GIZMOPICKUP_s *pickup, i32, GameObject_s *object, i32 flags) {
+    CollectHitPoint(object, &pickup->position, flags);
 }
 
 u8 CoinTab[4] = {0, 1, 2, 3};

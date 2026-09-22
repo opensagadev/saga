@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 52.66096,
+    "fuzzy_match_percent": 52.66941,
     "total_code": "4722419",
-    "matched_code": "459935",
-    "matched_code_percent": 9.739394,
+    "matched_code": "460134",
+    "matched_code_percent": 9.7436075,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 5446,
-    "matched_functions_percent": 40.46363,
+    "matched_functions": 5449,
+    "matched_functions_percent": 40.48592,
     "total_units": 1
   },
   "text": {
@@ -54687,7 +54687,7 @@
           "address": 1981472,
           "offset": 1091504,
           "size": 226,
-          "match_percent": 7.777778
+          "match_percent": 90.62963
         },
         {
           "name": "_ZL18Pup_UpdateBlueCoinP11WORLDINFO_sP13GIZMOPICKUP_s",
@@ -54703,7 +54703,7 @@
           "address": 1983472,
           "offset": 1093504,
           "size": 77,
-          "match_percent": 22.105263
+          "match_percent": 99.947365
         },
         {
           "name": "_ZL18Pup_CollectPowerUpP11WORLDINFO_sP13GIZMOPICKUP_siP12GameObject_si",
@@ -54711,7 +54711,7 @@
           "address": 1984592,
           "offset": 1094624,
           "size": 61,
-          "match_percent": 24.705883
+          "match_percent": 100.0
         },
         {
           "name": "_Z15Pup_CollectCoinP11WORLDINFO_sP13GIZMOPICKUP_siP12GameObject_si",
@@ -54727,7 +54727,7 @@
           "address": 1986592,
           "offset": 1096624,
           "size": 85,
-          "match_percent": 20.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZL16Pup_CollectHeartP11WORLDINFO_sP13GIZMOPICKUP_siP12GameObject_si",
@@ -54735,7 +54735,7 @@
           "address": 1989040,
           "offset": 1099072,
           "size": 53,
-          "match_percent": 28.0
+          "match_percent": 100.0
         }
       ]
     },
