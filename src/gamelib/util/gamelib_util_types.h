@@ -663,14 +663,14 @@ struct TouchHacks {
         ~TintStack();
     };
     static bool AiPlayerTakeDamageOnKillRescue(GameObject_s &);
-    void CalculateJumpVelToHitPoint(GameObject_s &, VuVec const &);
-    void CalculateJumpVelToHitPointDblJump(GameObject_s &, VuVec const &);
-    void CalculateXZVelForArcToHitPoint(VuVec const &, VuVec const &, float, float);
+    static VuVec CalculateJumpVelToHitPoint(GameObject_s &, VuVec const &);
+    static VuVec CalculateJumpVelToHitPointDblJump(GameObject_s &, VuVec const &);
+    static VuVec CalculateXZVelForArcToHitPoint(VuVec const &, VuVec const &, float, float);
     static i32 CanBlowupBeBlownUp(GIZMOBLOWUP_s &, i32);
-    void CanForceTargetObj(GameObject_s &, GameObject_s &);
+    static bool CanForceTargetObj(GameObject_s &, GameObject_s &);
     static bool CanJump(GameObject_s &);
-    void CanJumpToPoint(GameObject_s &, AIPATHNODE_s const &);
-    void CanJumpToPoint(GameObject_s &, VuVec const &);
+    static bool CanJumpToPoint(GameObject_s &, AIPATHNODE_s const &);
+    static bool CanJumpToPoint(GameObject_s &, VuVec const &);
     static bool CanLunge(GameObject_s &);
     static bool CanPoo(GameObject_s &);
     static bool CanShoot(GameObject_s &);
@@ -688,15 +688,15 @@ struct TouchHacks {
     static bool CanUseVehicleSmartBomb(GameObject_s &);
     static bool CanUseZipup(GameObject_s &);
     static bool CheckForAboutToRunIntoKillTerrain(GameObject_s &, float);
-    void CheckForAboutToRunOffAnEdge(GameObject_s &, float);
-    void CheckJumpForLandingSpot(GameObject_s &, float);
+    static bool CheckForAboutToRunOffAnEdge(GameObject_s &, float);
+    static bool CheckJumpForLandingSpot(GameObject_s &, float);
     static void CleanupAllMechObjectInterfaces(WORLDINFO_s *);
     static MechObjectInterface *FindBombTarget(GameObject_s &);
     static nucolour3_s *GetFlashColour();
     static float GetIncomingPartRange();
     static i32 GetLoseStudsDieValue();
     static i32 GetLoseStudsFallValue();
-    bool InParty(GameObject_s &);
+    static bool InParty(GameObject_s &);
     static void PlaySmartBombBuildupEffects(GameObject_s &, float, float);
     static bool ShouldAutoGrabDragBomb(GameObject_s &);
     static bool ShouldBlock(GameObject_s &);
@@ -704,7 +704,7 @@ struct TouchHacks {
     static bool ShouldFlash(float);
     static bool ShouldKeepWeaponOut(GameObject_s &);
     static bool ShouldPutWeaponAway(GameObject_s &);
-    bool SolveRoot(float, float, float, float &, float &);
+    static bool SolveRoot(float, float, float, float &, float &);
     static void TriggerVehicleSmartBomb(GameObject_s &);
 };
 struct V2SessionManager {

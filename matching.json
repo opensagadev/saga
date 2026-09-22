@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 52.246494,
+    "fuzzy_match_percent": 52.27709,
     "total_code": "4722419",
-    "matched_code": "458244",
-    "matched_code_percent": 9.703587,
+    "matched_code": "458305",
+    "matched_code_percent": 9.704878,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 5430,
-    "matched_functions_percent": 40.34475,
+    "matched_functions": 5431,
+    "matched_functions_percent": 40.35218,
     "total_units": 1
   },
   "text": {
@@ -37222,7 +37222,7 @@
           "address": 4503344,
           "offset": 3613376,
           "size": 242,
-          "match_percent": 4.285714
+          "match_percent": 31.083334
         },
         {
           "name": "_ZN10TouchHacks23CheckJumpForLandingSpotER12GameObject_sf",
@@ -37230,7 +37230,7 @@
           "address": 4503600,
           "offset": 3613632,
           "size": 698,
-          "match_percent": 3.333333
+          "match_percent": 62.29861
         },
         {
           "name": "_ZN10TouchHacks33CheckForAboutToRunIntoKillTerrainER12GameObject_sf",
@@ -37246,7 +37246,7 @@
           "address": 4504752,
           "offset": 3614784,
           "size": 342,
-          "match_percent": 6.0
+          "match_percent": 42.67143
         },
         {
           "name": "_ZN10TouchHacks9SolveRootEfffRfS0_",
@@ -37254,7 +37254,7 @@
           "address": 4505104,
           "offset": 3615136,
           "size": 197,
-          "match_percent": 86.62745
+          "match_percent": 86.72549
         },
         {
           "name": "_ZN10TouchHacks30CalculateXZVelForArcToHitPointERK5VuVecS2_ff",
@@ -37262,7 +37262,7 @@
           "address": 4505312,
           "offset": 3615344,
           "size": 287,
-          "match_percent": 4.675324
+          "match_percent": 45.48052
         },
         {
           "name": "_ZN10TouchHacks26CalculateJumpVelToHitPointER12GameObject_sRK5VuVec",
@@ -37270,7 +37270,7 @@
           "address": 4505600,
           "offset": 3615632,
           "size": 132,
-          "match_percent": 11.25
+          "match_percent": 91.1875
         },
         {
           "name": "_ZN10TouchHacks33CalculateJumpVelToHitPointDblJumpER12GameObject_sRK5VuVec",
@@ -37278,7 +37278,7 @@
           "address": 4505744,
           "offset": 3615776,
           "size": 390,
-          "match_percent": 3.75
+          "match_percent": 58.604168
         },
         {
           "name": "_ZN10TouchHacks14CanJumpToPointER12GameObject_sRK5VuVec",
@@ -37286,7 +37286,7 @@
           "address": 4506144,
           "offset": 3616176,
           "size": 238,
-          "match_percent": 7.368421
+          "match_percent": 42.157894
         },
         {
           "name": "_ZN10TouchHacks8CanLungeER12GameObject_s",
@@ -37310,7 +37310,7 @@
           "address": 4506512,
           "offset": 3616544,
           "size": 256,
-          "match_percent": 7.636363
+          "match_percent": 82.6
         },
         {
           "name": "_ZN10TouchHacks8CanShootER12GameObject_s",
@@ -37326,7 +37326,7 @@
           "address": 4506816,
           "offset": 3616848,
           "size": 127,
-          "match_percent": 30.924528
+          "match_percent": 98.679245
         },
         {
           "name": "_ZN10TouchHacks8CanTagToER12GameObject_sS1_",
@@ -37454,7 +37454,7 @@
           "address": 4510064,
           "offset": 3620096,
           "size": 61,
-          "match_percent": 24.705883
+          "match_percent": 100.0
         },
         {
           "name": "_ZN10TouchHacks18CanBlowupBeBlownUpER13GIZMOBLOWUP_si",
@@ -37486,7 +37486,7 @@
           "address": 4510304,
           "offset": 3620336,
           "size": 675,
-          "match_percent": 35.317307
+          "match_percent": 35.245193
         }
       ]
     },

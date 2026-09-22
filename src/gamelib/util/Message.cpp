@@ -8,5 +8,4 @@ void NetMessage::RaiseError() {
 }
 
 void NetMessage::DebugPrint() const {
-    STUBBED();
 }
