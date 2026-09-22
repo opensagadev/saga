@@ -505,7 +505,7 @@ struct NetworkObjectManager : NetListenerInterface, EdObjectNotifier {
     NetPeer const *Owner(i32);
     void PeerJoined(NetPeer const &) override;
     void PeerLeft(NetPeer const &, ePeerLeftReason) override;
-    void Push(NetworkObject const *, NetReplicator *, ReplicatorData &, NetworkObjectManager::NetPeerPush *);
+    i32 Push(NetworkObject const *, NetReplicator *, ReplicatorData &, NetworkObjectManager::NetPeerPush *);
     void PushObject(NetworkObject *, NetworkObjectManager::NetPeerPush *, i32);
     void Receive(NetMessage, unsigned char, NetPeer const &) override;
     void ReceiveAcquireMessage(NetMessage &, NetPeer const &);

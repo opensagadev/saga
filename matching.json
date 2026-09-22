@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 52.01341,
+    "fuzzy_match_percent": 52.076256,
     "total_code": "4722419",
-    "matched_code": "456775",
-    "matched_code_percent": 9.67248,
+    "matched_code": "456829",
+    "matched_code_percent": 9.673623,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 5390,
-    "matched_functions_percent": 40.047554,
+    "matched_functions": 5401,
+    "matched_functions_percent": 40.12928,
     "total_units": 1
   },
   "text": {
@@ -30803,30 +30803,6 @@
           "match_percent": 7.5
         },
         {
-          "name": "_ZN8EdStreamD1Ev",
-          "demangled_name": "EdStream::~EdStream()",
-          "address": 5420768,
-          "offset": 4530800,
-          "size": 29,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN8EdStreamD2Ev",
-          "demangled_name": "EdStream::~EdStream()",
-          "address": 5420768,
-          "offset": 4530800,
-          "size": 29,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN8EdStreamD0Ev",
-          "demangled_name": "EdStream::~EdStream()",
-          "address": 5421104,
-          "offset": 4531136,
-          "size": 45,
-          "match_percent": 100.0
-        },
-        {
           "name": "_ZN24EdClassObjectNameControl6RenderEv",
           "demangled_name": "EdClassObjectNameControl::Render()",
           "address": 5467824,
@@ -36124,6 +36100,118 @@
           "match_percent": 93.565216
         },
         {
+          "name": "_ZN14NetInputStream10BeginBlockEPKc",
+          "demangled_name": "NetInputStream::BeginBlock(char const*)",
+          "address": 5420832,
+          "offset": 4530864,
+          "size": 11,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN14NetInputStream8EndBlockEv",
+          "demangled_name": "NetInputStream::EndBlock()",
+          "address": 5420848,
+          "offset": 4530880,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN14NetInputStream3EatEii",
+          "demangled_name": "NetInputStream::Eat(int, int)",
+          "address": 5420864,
+          "offset": 4530896,
+          "size": 27,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN15NetOutputStream3EatEii",
+          "demangled_name": "NetOutputStream::Eat(int, int)",
+          "address": 5420896,
+          "offset": 4530928,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN15NetOutputStream10BeginBlockEPKc",
+          "demangled_name": "NetOutputStream::BeginBlock(char const*)",
+          "address": 5420912,
+          "offset": 4530944,
+          "size": 11,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN15NetOutputStream8EndBlockEv",
+          "demangled_name": "NetOutputStream::EndBlock()",
+          "address": 5420928,
+          "offset": 4530960,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN15NetOutputStreamD1Ev",
+          "demangled_name": "NetOutputStream::~NetOutputStream()",
+          "address": 5420944,
+          "offset": 4530976,
+          "size": 29,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN15NetOutputStreamD2Ev",
+          "demangled_name": "NetOutputStream::~NetOutputStream()",
+          "address": 5420944,
+          "offset": 4530976,
+          "size": 29,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN14NetInputStreamD1Ev",
+          "demangled_name": "NetInputStream::~NetInputStream()",
+          "address": 5420976,
+          "offset": 4531008,
+          "size": 29,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN14NetInputStreamD2Ev",
+          "demangled_name": "NetInputStream::~NetInputStream()",
+          "address": 5420976,
+          "offset": 4531008,
+          "size": 29,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN14NetInputStreamD0Ev",
+          "demangled_name": "NetInputStream::~NetInputStream()",
+          "address": 5421152,
+          "offset": 4531184,
+          "size": 45,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN15NetOutputStreamD0Ev",
+          "demangled_name": "NetOutputStream::~NetOutputStream()",
+          "address": 5421200,
+          "offset": 4531232,
+          "size": 45,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN15NetOutputStream15SerialiseBufferEPvii",
+          "demangled_name": "NetOutputStream::SerialiseBuffer(void*, int, int)",
+          "address": 5421456,
+          "offset": 4531488,
+          "size": 230,
+          "match_percent": 12.185715
+        },
+        {
+          "name": "_ZN14NetInputStream15SerialiseBufferEPvii",
+          "demangled_name": "NetInputStream::SerialiseBuffer(void*, int, int)",
+          "address": 5421696,
+          "offset": 4531728,
+          "size": 238,
+          "match_percent": 54.313435
+        },
+        {
           "name": "_ZN20NetListenerInterfaceD1Ev",
           "demangled_name": "NetListenerInterface::~NetListenerInterface()",
           "address": 5430400,
@@ -36305,7 +36393,7 @@
           "address": 5433040,
           "offset": 4543072,
           "size": 111,
-          "match_percent": 75.82353
+          "match_percent": 75.382355
         },
         {
           "name": "_ZN18NetConstReplicator9AllowPushEPK7EdClassPKvR14ReplicatorDataii",
@@ -36529,7 +36617,7 @@
           "address": 5440272,
           "offset": 4550304,
           "size": 205,
-          "match_percent": 7.5
+          "match_percent": 99.375
         },
         {
           "name": "_ZN20NetworkObjectManager11GetNextGuidEv",
@@ -36657,7 +36745,7 @@
           "address": 5443776,
           "offset": 4553808,
           "size": 441,
-          "match_percent": 4.363637
+          "match_percent": 70.06364
         },
         {
           "name": "_ZN20NetworkObjectManager7IsLocalEi",
@@ -36705,7 +36793,7 @@
           "address": 5445408,
           "offset": 4555440,
           "size": 492,
-          "match_percent": 85.64706
+          "match_percent": 86.15126
         },
         {
           "name": "_ZN20NetworkObjectManager11NetPeerPush9NextStageEv",
@@ -36745,7 +36833,7 @@
           "address": 5447392,
           "offset": 4557424,
           "size": 387,
-          "match_percent": 86.0084
+          "match_percent": 85.79832
         },
         {
           "name": "_ZN20NetworkObjectManager14RegisterObjectEPvP7EdClassi",
@@ -36753,7 +36841,7 @@
           "address": 5447792,
           "offset": 4557824,
           "size": 228,
-          "match_percent": 100.0
+          "match_percent": 96.97183
         },
         {
           "name": "_ZN20NetworkObjectManager18NotifyCreateObjectEPvP7EdClassS0_iii",
@@ -36793,7 +36881,7 @@
           "address": 5448736,
           "offset": 4558768,
           "size": 694,
-          "match_percent": 2.198953
+          "match_percent": 72.39267
         },
         {
           "name": "_ZN20NetworkObjectManager10PushObjectEP13NetworkObjectPNS_11NetPeerPushEi",
@@ -36841,7 +36929,7 @@
           "address": 5452000,
           "offset": 4562032,
           "size": 784,
-          "match_percent": 2.432432
+          "match_percent": 65.72523
         },
         {
           "name": "_ZN20NetworkObjectManager18SendAcquireMessageEP13NetworkObject",
@@ -36985,7 +37073,7 @@
           "address": 5458416,
           "offset": 4568448,
           "size": 1173,
-          "match_percent": 1.316614
+          "match_percent": 92.82758
         },
         {
           "name": "_ZN20NetworkObjectManager13GetPeerStatusEv",
@@ -122156,6 +122244,42 @@
       ]
     },
     {
+      "name": "_ZN8EdStreamD1Ev",
+      "demangled_name": "EdStream::~EdStream()",
+      "address": 5420768,
+      "offset": 4530800,
+      "size": 29,
+      "match_percent": 100.0,
+      "candidate_units": [
+        "gameapi/edtools/edtoolsall.cpp.o",
+        "gamelib/util/Network.cpp.o"
+      ]
+    },
+    {
+      "name": "_ZN8EdStreamD2Ev",
+      "demangled_name": "EdStream::~EdStream()",
+      "address": 5420768,
+      "offset": 4530800,
+      "size": 29,
+      "match_percent": 100.0,
+      "candidate_units": [
+        "gameapi/edtools/edtoolsall.cpp.o",
+        "gamelib/util/Network.cpp.o"
+      ]
+    },
+    {
+      "name": "_ZN8EdStreamD0Ev",
+      "demangled_name": "EdStream::~EdStream()",
+      "address": 5421104,
+      "offset": 4531136,
+      "size": 45,
+      "match_percent": 100.0,
+      "candidate_units": [
+        "gameapi/edtools/edtoolsall.cpp.o",
+        "gamelib/util/Network.cpp.o"
+      ]
+    },
+    {
       "name": "_ZNK9Placeable5CloneEi",
       "demangled_name": "Placeable::Clone(int) const",
       "address": 5612816,
@@ -126306,86 +126430,6 @@
       "match_percent": 0.0
     },
     {
-      "name": "_ZN14NetInputStream10BeginBlockEPKc",
-      "demangled_name": "NetInputStream::BeginBlock(char const*)",
-      "address": 5420832,
-      "offset": 4530864,
-      "size": 11,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN14NetInputStream8EndBlockEv",
-      "demangled_name": "NetInputStream::EndBlock()",
-      "address": 5420848,
-      "offset": 4530880,
-      "size": 9,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN14NetInputStream3EatEii",
-      "demangled_name": "NetInputStream::Eat(int, int)",
-      "address": 5420864,
-      "offset": 4530896,
-      "size": 27,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN15NetOutputStream3EatEii",
-      "demangled_name": "NetOutputStream::Eat(int, int)",
-      "address": 5420896,
-      "offset": 4530928,
-      "size": 9,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN15NetOutputStream10BeginBlockEPKc",
-      "demangled_name": "NetOutputStream::BeginBlock(char const*)",
-      "address": 5420912,
-      "offset": 4530944,
-      "size": 11,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN15NetOutputStream8EndBlockEv",
-      "demangled_name": "NetOutputStream::EndBlock()",
-      "address": 5420928,
-      "offset": 4530960,
-      "size": 9,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN15NetOutputStreamD1Ev",
-      "demangled_name": "NetOutputStream::~NetOutputStream()",
-      "address": 5420944,
-      "offset": 4530976,
-      "size": 29,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN15NetOutputStreamD2Ev",
-      "demangled_name": "NetOutputStream::~NetOutputStream()",
-      "address": 5420944,
-      "offset": 4530976,
-      "size": 29,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN14NetInputStreamD1Ev",
-      "demangled_name": "NetInputStream::~NetInputStream()",
-      "address": 5420976,
-      "offset": 4531008,
-      "size": 29,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN14NetInputStreamD2Ev",
-      "demangled_name": "NetInputStream::~NetInputStream()",
-      "address": 5420976,
-      "offset": 4531008,
-      "size": 29,
-      "match_percent": 0.0
-    },
-    {
       "name": "_ZN5TPoolI5TDataILj1200EELj512EED1Ev",
       "demangled_name": "TPool<TData<(unsigned int)1200>, (unsigned int)512>::~TPool()",
       "address": 5421008,
@@ -126410,22 +126454,6 @@
       "match_percent": 0.0
     },
     {
-      "name": "_ZN14NetInputStreamD0Ev",
-      "demangled_name": "NetInputStream::~NetInputStream()",
-      "address": 5421152,
-      "offset": 4531184,
-      "size": 45,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN15NetOutputStreamD0Ev",
-      "demangled_name": "NetOutputStream::~NetOutputStream()",
-      "address": 5421200,
-      "offset": 4531232,
-      "size": 45,
-      "match_percent": 0.0
-    },
-    {
       "name": "_ZN12EdRefNosGuid13SetMemberDataEPviS0_iPs",
       "demangled_name": "EdRefNosGuid::SetMemberData(void*, int, void*, int, short*)",
       "address": 5421248,
@@ -126439,22 +126467,6 @@
       "address": 5421344,
       "offset": 4531376,
       "size": 100,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN15NetOutputStream15SerialiseBufferEPvii",
-      "demangled_name": "NetOutputStream::SerialiseBuffer(void*, int, int)",
-      "address": 5421456,
-      "offset": 4531488,
-      "size": 230,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN14NetInputStream15SerialiseBufferEPvii",
-      "demangled_name": "NetInputStream::SerialiseBuffer(void*, int, int)",
-      "address": 5421696,
-      "offset": 4531728,
-      "size": 238,
       "match_percent": 0.0
     },
     {
@@ -128101,8 +128113,8 @@
   "summary": {
     "bazel_units": 458,
     "functions": 13454,
-    "assigned_functions": 12503,
-    "ambiguous_functions": 213,
-    "unassigned_functions": 738
+    "assigned_functions": 12514,
+    "ambiguous_functions": 216,
+    "unassigned_functions": 724
   }
 }
