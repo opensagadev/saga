@@ -1265,7 +1265,91 @@ void NetworkObjectManager::Term() {
 }
 
 void NetworkObjectManager::Update() {
-    STUBBED();
+    for (i32 i = 0; i < 2048; i++) {
+        NetworkObject *object = &objects[i];
+        if (object->id == 0) {
+            continue;
+        }
+
+        if (object->owner->local != 0) {
+            PushObject(object, NULL, 0);
+            continue;
+        }
+        if ((object->flags & 2) != 0) {
+            continue;
+        }
+
+        i32 class_id = theRegistry.GetClassId(object->object_class);
+        NetReplicator *replicator = replicators[class_id].head;
+        i32 data_offset = 0;
+        while (replicator != NULL) {
+            i32 data_size = replicator->data_size;
+            if ((replicator->replication_group & 4) != 0) {
+                ReplicatorData data;
+                data.start = static_cast<u8 *>(object->replicator_data) + data_offset;
+                data.end = data.start + data_size;
+                data.cursor = data.start;
+                replicator->AllowPush(object->object_class, object->object, data, 0, 0);
+                replicator->DoPrediction(object->object_class, object->object, data, 0);
+            }
+            data_offset += data_size;
+            replicator = replicator->next;
+        }
+    }
+
+    for (i32 i = 0; i < 8; i++) {
+        NetPeerPush *push = &peer_push[i];
+        if (push->peer == NULL) {
+            continue;
+        }
+        if (push->stage == 1 || push->stage == 2) {
+            i32 object_index = push->field_10;
+            i32 object_count = local_object_count;
+            i32 message_limit = theNuNetEmu.field_1c;
+            if (theNuNetEmu.field_1c1c > 0.0f) {
+                message_limit = static_cast<i32>(message_limit * theNuNetEmu.field_1c1c);
+            }
+
+            while (object_index < object_count && message_limit < theNuNetEmu.field_00) {
+                NetworkObject *object = local_objects[object_index++];
+                if (object == NULL || object->object == NULL) {
+                    continue;
+                }
+
+                if (push->stage == 1) {
+                    ConstructObject(object, push);
+                }
+                if (push->stage == 2) {
+                    PushObject(object, push, 1);
+                }
+
+                NetPeer *peer = const_cast<NetPeer *>(push->peer);
+                if (peer->vtable->get_available_messages(peer) <= 15) {
+                    break;
+                }
+
+                message_limit = theNuNetEmu.field_1c;
+                if (theNuNetEmu.field_1c1c > 0.0f) {
+                    message_limit = static_cast<i32>(message_limit * theNuNetEmu.field_1c1c);
+                }
+                object_count = local_object_count;
+            }
+
+            if (object_index >= local_object_count) {
+                push->NextStage();
+            } else {
+                push->field_10 = object_index;
+            }
+        }
+        push->FlushMessages();
+    }
+
+    default_push.FlushMessages();
+    for (i32 i = 0; i < 32; i++) {
+        if (class_stats[i] != NULL) {
+            class_stats[i]->Update();
+        }
+    }
 }
 
 void NetworkObjectManager::UpdateLocalObjectList() {
