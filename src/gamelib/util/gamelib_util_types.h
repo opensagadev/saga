@@ -468,7 +468,7 @@ struct NetworkObjectManager : NetListenerInterface, EdObjectNotifier {
         void Stop();
         void Sync();
     };
-    void Acquire(i32);
+    i32 Acquire(i32);
     void AddToLocalObjectList(NetworkObject *);
     void BindFilter(NOSFilter *, EdClass const *);
     void BindReplicator(NetReplicator *, EdClass const *);
@@ -521,10 +521,10 @@ struct NetworkObjectManager : NetListenerInterface, EdObjectNotifier {
     void ReceiveStatusMessage(NetMessage &, NetPeer const &);
     void ReceiveStopMessage(NetMessage &, NetPeer const &);
     void Recover(NetworkObject *);
-    void RegisterObject(void *, EdClass *, i32);
+    i32 RegisterObject(void *, EdClass *, i32);
     i32 RegisterObjectCall(void (*)(void *, NetMessage &), i32);
     i32 RegisterRemoteCall(void (*)(NetMessage &), i32);
-    void ReleaseObject(void *, EdClass *, i32);
+    i32 ReleaseObject(void *, EdClass *, i32);
     void RemoteCall(i32, NetMessage, NetPeer const *);
     void RemoveFromLocalObjectList(NetworkObject *);
     void RemovePendingObject(NetworkObject *);

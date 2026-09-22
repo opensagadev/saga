@@ -252,8 +252,48 @@ void NetChangedReplicator::InitTable() {
     }
 }
 
-void NetworkObjectManager::Acquire(i32) {
-    STUBBED();
+i32 NetworkObjectManager::Acquire(i32 id) {
+    if (id == 0) {
+        return -1;
+    }
+
+    NetworkObject *object = FindNetworkObject(id);
+    if (object == NULL) {
+        return -1;
+    }
+    if (object->owner->local != 0) {
+        return 1;
+    }
+    if ((object->flags & 8) == 0) {
+        return 0;
+    }
+    if (IsPeerReady(*object->owner) == 0) {
+        return -1;
+    }
+    if ((object->flags & 0x20) != 0) {
+        return 0;
+    }
+
+    PendingObject *pending = FindPendingObject(object);
+    if (pending == NULL) {
+        pending = FindPendingObject(NULL);
+        if (pending == NULL) {
+            pending = StealPendingObject();
+        }
+        if (pending == NULL) {
+            return 0;
+        }
+    }
+
+    u32 now = UtilGetFrameStartTime();
+    if (now <= pending->field_04) {
+        return 0;
+    }
+    pending->field_00 = 1;
+    pending->field_04 = now + 250;
+    pending->object = object;
+    SendAcquireMessage(object);
+    return 0;
 }
 
 void NetworkObjectManager::AddToLocalObjectList(NetworkObject *object) {
@@ -753,12 +793,37 @@ void NetworkObjectManager::ReceiveStopMessage(NetMessage &, NetPeer const &peer)
     }
 }
 
-void NetworkObjectManager::Recover(NetworkObject *) {
-    STUBBED();
+void NetworkObjectManager::Recover(NetworkObject *object) {
+    if (object != NULL) {
+        object->owner = theSession->local_peer;
+        AddToLocalObjectList(object);
+        SendAdoptedMessage(object->id);
+        theNetwork.NosAdopted(object, *object->owner);
+    }
 }
 
-void NetworkObjectManager::RegisterObject(void *, EdClass *, i32) {
-    STUBBED();
+i32 NetworkObjectManager::RegisterObject(void *object, EdClass *object_class, i32 guid) {
+    if (guid == 0) {
+        guid = GetNextGuid();
+    }
+    if (guid <= 0) {
+        return guid;
+    }
+
+    for (i32 i = 0; i < 2048; ++i) {
+        if (objects[i].object == object && field_d96c == 0) {
+            return 0;
+        }
+    }
+
+    NetworkObject *network_object = &objects[guid];
+    network_object->Initialise(guid, object, object_class, *theSession->local_peer, 1);
+    AddToLocalObjectList(network_object);
+    if (active != 0) {
+        ConstructObject(network_object, &default_push);
+        default_push.FlushMessages();
+    }
+    return guid;
 }
 
 i32 NetworkObjectManager::RegisterObjectCall(void (*callback)(void *, NetMessage &), i32 flags) {
@@ -781,8 +846,33 @@ i32 NetworkObjectManager::RegisterRemoteCall(void (*callback)(NetMessage &), i32
     return 0;
 }
 
-void NetworkObjectManager::ReleaseObject(void *, EdClass *, i32) {
-    STUBBED();
+i32 NetworkObjectManager::ReleaseObject(void *object, EdClass *, i32 guid) {
+    if (object == NULL) {
+        return 1;
+    }
+
+    NetworkObject *network_object;
+    if (guid != 0) {
+        network_object = FindNetworkObject(guid);
+    } else {
+        network_object = FindNetworkObject(object);
+    }
+    if (network_object == NULL) {
+        return 1;
+    }
+
+    RemoveFromLocalObjectList(network_object);
+    if (active != 0) {
+        i16 id = network_object->id;
+        i32 class_id = theRegistry.GetClassId(network_object->object_class);
+        NetMessage message;
+        message.Write8(6);
+        message.Write16(id);
+        message.Write16(class_id);
+        theNetwork.ReliableBroadcast(message, 3);
+    }
+    network_object->Destroy();
+    return 1;
 }
 
 void NetworkObjectManager::RemoteCall(i32, NetMessage, NetPeer const *) {
@@ -811,16 +901,25 @@ void NetworkObjectManager::RemovePendingObject(NetworkObject *object) {
 void NetworkObjectManager::Reset() {
 }
 
-void NetworkObjectManager::SendAcquireMessage(NetworkObject *) {
-    STUBBED();
+void NetworkObjectManager::SendAcquireMessage(NetworkObject *object) {
+    NetMessage message;
+    message.Write8(3);
+    message.Write16(object->id);
+    theNetwork.Send(message, 3, *const_cast<NetPeer *>(object->owner));
 }
 
-void NetworkObjectManager::SendAcquiredMessage(i16, NetPeer const &) {
-    STUBBED();
+void NetworkObjectManager::SendAcquiredMessage(i16 id, NetPeer const &peer) {
+    NetMessage message;
+    message.Write8(4);
+    message.Write16(id);
+    theNetwork.ReliableSend(message, 3, const_cast<NetPeer &>(peer), NULL, 0);
 }
 
-void NetworkObjectManager::SendAdoptedMessage(i16) {
-    STUBBED();
+void NetworkObjectManager::SendAdoptedMessage(i16 id) {
+    NetMessage message;
+    message.Write8(5);
+    message.Write16(id);
+    theNetwork.ReliableBroadcast(message, 3);
 }
 
 i32 NetworkObjectManager::SendPushMessage(NetMessage *message, NetPeerPush const *push, i32 flags) {
