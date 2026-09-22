@@ -19,6 +19,7 @@ struct FtpFile;
 struct GIZFORCE_s;
 struct GIZMOBLOWUP_s;
 struct GameObject_s;
+struct NetHost;
 struct MechObjectInterface;
 struct NOSContext;
 struct NOSFilter;
@@ -74,12 +75,18 @@ struct NetAddress {
 };
 struct NetPeer {
     struct Vtable {
-        void *reserved_00[6];
+        void *reserved_00;
+        void (*destroy)(NetPeer *);
+        void (*disconnect)(NetPeer *);
+        void *reserved_0c[3];
         i32 (*get_available_messages)(NetPeer *);
     } *vtable;
-    u8 reserved_04[8];
+    NetPeer *next;
+    NetPeer *previous;
     u8 local;
-    u8 reserved_0d[0x29c - 0xd];
+    u8 reserved_0d[0x18 - 0xd];
+    u32 stats[4];
+    u8 reserved_28[0x29c - 0x28];
     i32 time_offset;
 };
 struct ReplicatorData {
@@ -91,6 +98,9 @@ DECOMP_ASSERT(sizeof(ReplicatorData) == 0xc, "ReplicatorData ABI");
 DECOMP_ASSERT(offsetof(ReplicatorData, cursor) == 8, "ReplicatorData cursor offset");
 struct WORLDINFO_s;
 struct ePeerLeftReason {};
+struct eHostVisibility {
+    i32 value;
+};
 
 struct NuFileDeviceAndroidOBBType {
     enum T { NONE = 0, MAIN = 1, PATCH = 2 };
@@ -698,31 +708,95 @@ struct TouchHacks {
     static void TriggerVehicleSmartBomb(GameObject_s &);
 };
 struct V2SessionManager {
-    u8 reserved_00[0x4];
+    static V2SessionManager *mpSessionManager;
+    static char mLogFilename[32];
+    static i32 mLogHandle;
+
     i32 field_04;
-    u8 reserved_08[0x2c - 0x8];
-    i32 field_2c;
-    u8 reserved_30[0x34 - 0x30];
+    u8 reserved_08[0x14 - 0x8];
+    char name[0x20];
     i32 field_34;
-    u8 reserved_38[0x44 - 0x38];
+    i32 host_visibility;
+    i32 num_local_players;
+    i32 field_40;
     i32 fields_44[9];
     i32 field_68;
     i32 field_6c;
     u8 reserved_70[0x74 - 0x70];
     i32 field_74;
-    u8 reserved_78[0x90 - 0x78];
+    u8 field_78;
+    u8 reserved_79[3];
+    i32 field_7c;
+    i32 field_80;
+    NetPeer *local_peer;
+    i32 field_88;
+    i32 field_8c;
     i32 field_90;
-    u8 reserved_94[0x9c - 0x94];
-    i32 field_9c;
+    NetPeer *first_peer;
+    NetPeer *last_peer;
+    i32 peer_count;
+    NetStats stats;
+
+    virtual void Init(char *) {
+    }
+    virtual void Start() {
+    }
+    virtual void Update();
+    virtual void Leave() {
+    }
+    virtual void Close() {
+    }
+    virtual i32 SignIn() {
+        return 0;
+    }
+    virtual void RemovePeer(NetPeer *, ePeerLeftReason);
+    virtual void Render() {
+    }
+    virtual i32 IsChatRestricted() {
+        return 0;
+    }
+    virtual i32 IsAgeRestricted() {
+        return 0;
+    }
+    virtual void GetLocalAddress(NetAddress *) {
+    }
+    virtual i32 IsSearchingForHosts() {
+        return 0;
+    }
+    virtual void Join(NetHost *) {
+    }
+    virtual void Host(eHostVisibility) {
+    }
+    virtual void SearchForHosts(i32, i32 *) {
+    }
+    virtual void SetHostVisibility(eHostVisibility visibility) {
+        host_visibility = visibility.value;
+    }
+    virtual void SetNumLocalPlayers(i32 count) {
+        num_local_players = count;
+    }
+    virtual void RemoveRemotePlayer(NetPeer &) {
+    }
+    virtual void AcceptInvitation() {
+    }
+    virtual void SendInvitation(char *) {
+    }
+    virtual void ViewInvitations() {
+    }
+    virtual i32 VerifyStrings(char **, char **, i32, char *);
+
     void Log(char *, ...);
     void RemoveAllPeers(ePeerLeftReason);
-    void RemovePeer(NetPeer *, ePeerLeftReason);
     void Reset();
     void SetHostGameData(i32 *, i32);
-    void Update();
     V2SessionManager(char *);
-    void VerifyStrings(char **, char **, i32, char *);
 };
+static_assert(sizeof(void *) != 4 || sizeof(V2SessionManager) == 0x2c0, "V2SessionManager 32-bit size");
+static_assert(sizeof(void *) != 4 || offsetof(V2SessionManager, local_peer) == 0x84,
+              "V2SessionManager local peer 32-bit offset");
+static_assert(sizeof(void *) != 4 || offsetof(V2SessionManager, first_peer) == 0x94,
+              "V2SessionManager first peer 32-bit offset");
+static_assert(sizeof(void *) != 4 || offsetof(V2SessionManager, stats) == 0xa0, "V2SessionManager stats 32-bit offset");
 struct VirtualStackAllocator {
     u8 owns_memory;
     u8 *cursor;

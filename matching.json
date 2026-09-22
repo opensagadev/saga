@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 52.21432,
+    "fuzzy_match_percent": 52.246494,
     "total_code": "4722419",
-    "matched_code": "457954",
-    "matched_code_percent": 9.697446,
+    "matched_code": "458244",
+    "matched_code_percent": 9.703587,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 5410,
-    "matched_functions_percent": 40.19615,
+    "matched_functions": 5430,
+    "matched_functions_percent": 40.34475,
     "total_units": 1
   },
   "text": {
@@ -37726,12 +37726,20 @@
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_gamelib/V2SessionManager.o",
       "functions": [
         {
+          "name": "_GLOBAL__sub_I_V2SessionManager.cpp",
+          "demangled_name": "_GLOBAL__sub_I_V2SessionManager.cpp",
+          "address": 928704,
+          "offset": 38736,
+          "size": 93,
+          "match_percent": 99.35294
+        },
+        {
           "name": "_ZN16V2SessionManager13VerifyStringsEPPcS1_iS0_",
           "demangled_name": "V2SessionManager::VerifyStrings(char**, char**, int, char*)",
           "address": 5460128,
           "offset": 4570160,
           "size": 127,
-          "match_percent": 10.769231
+          "match_percent": 99.61539
         },
         {
           "name": "_ZN16V2SessionManager10RemovePeerEP7NetPeer15ePeerLeftReason",
@@ -37739,7 +37747,7 @@
           "address": 5460256,
           "offset": 4570288,
           "size": 184,
-          "match_percent": 8.75
+          "match_percent": 83.479164
         },
         {
           "name": "_ZN16V2SessionManager6UpdateEv",
@@ -37747,7 +37755,7 @@
           "address": 5460448,
           "offset": 4570480,
           "size": 109,
-          "match_percent": 20.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZN16V2SessionManagerC1EPc",
@@ -37755,7 +37763,7 @@
           "address": 5460560,
           "offset": 4570592,
           "size": 357,
-          "match_percent": 7.741935
+          "match_percent": 75.67742
         },
         {
           "name": "_ZN16V2SessionManagerC2EPc",
@@ -37763,7 +37771,7 @@
           "address": 5460560,
           "offset": 4570592,
           "size": 357,
-          "match_percent": 7.741935
+          "match_percent": 75.67742
         },
         {
           "name": "_ZN16V2SessionManager5ResetEv",
@@ -37771,7 +37779,7 @@
           "address": 5460928,
           "offset": 4570960,
           "size": 199,
-          "match_percent": 37.17073
+          "match_percent": 72.80488
         },
         {
           "name": "_ZN16V2SessionManager15SetHostGameDataEPii",
@@ -37779,7 +37787,7 @@
           "address": 5461136,
           "offset": 4571168,
           "size": 181,
-          "match_percent": 12.328767
+          "match_percent": 93.61644
         },
         {
           "name": "_ZN16V2SessionManager3LogEPcz",
@@ -37787,7 +37795,7 @@
           "address": 5461328,
           "offset": 4571360,
           "size": 132,
-          "match_percent": 16.8
+          "match_percent": 99.68
         },
         {
           "name": "_ZN16V2SessionManager14RemoveAllPeersE15ePeerLeftReason",
@@ -37795,7 +37803,159 @@
           "address": 5461472,
           "offset": 4571504,
           "size": 126,
-          "match_percent": 10.5
+          "match_percent": 86.925
+        },
+        {
+          "name": "_ZN16V2SessionManager4InitEPc",
+          "demangled_name": "V2SessionManager::Init(char*)",
+          "address": 5461600,
+          "offset": 4571632,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16V2SessionManager5StartEv",
+          "demangled_name": "V2SessionManager::Start()",
+          "address": 5461616,
+          "offset": 4571648,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16V2SessionManager5LeaveEv",
+          "demangled_name": "V2SessionManager::Leave()",
+          "address": 5461632,
+          "offset": 4571664,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16V2SessionManager5CloseEv",
+          "demangled_name": "V2SessionManager::Close()",
+          "address": 5461648,
+          "offset": 4571680,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16V2SessionManager6SignInEv",
+          "demangled_name": "V2SessionManager::SignIn()",
+          "address": 5461664,
+          "offset": 4571696,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16V2SessionManager6RenderEv",
+          "demangled_name": "V2SessionManager::Render()",
+          "address": 5461680,
+          "offset": 4571712,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16V2SessionManager16IsChatRestrictedEv",
+          "demangled_name": "V2SessionManager::IsChatRestricted()",
+          "address": 5461696,
+          "offset": 4571728,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16V2SessionManager15IsAgeRestrictedEv",
+          "demangled_name": "V2SessionManager::IsAgeRestricted()",
+          "address": 5461712,
+          "offset": 4571744,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16V2SessionManager15GetLocalAddressEP10NetAddress",
+          "demangled_name": "V2SessionManager::GetLocalAddress(NetAddress*)",
+          "address": 5461728,
+          "offset": 4571760,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16V2SessionManager19IsSearchingForHostsEv",
+          "demangled_name": "V2SessionManager::IsSearchingForHosts()",
+          "address": 5461744,
+          "offset": 4571776,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16V2SessionManager4JoinEP7NetHost",
+          "demangled_name": "V2SessionManager::Join(NetHost*)",
+          "address": 5461760,
+          "offset": 4571792,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16V2SessionManager4HostE15eHostVisibility",
+          "demangled_name": "V2SessionManager::Host(eHostVisibility)",
+          "address": 5461776,
+          "offset": 4571808,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16V2SessionManager14SearchForHostsEiPi",
+          "demangled_name": "V2SessionManager::SearchForHosts(int, int*)",
+          "address": 5461792,
+          "offset": 4571824,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16V2SessionManager17SetHostVisibilityE15eHostVisibility",
+          "demangled_name": "V2SessionManager::SetHostVisibility(eHostVisibility)",
+          "address": 5461808,
+          "offset": 4571840,
+          "size": 14,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16V2SessionManager18SetNumLocalPlayersEi",
+          "demangled_name": "V2SessionManager::SetNumLocalPlayers(int)",
+          "address": 5461824,
+          "offset": 4571856,
+          "size": 14,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16V2SessionManager18RemoveRemotePlayerER7NetPeer",
+          "demangled_name": "V2SessionManager::RemoveRemotePlayer(NetPeer&)",
+          "address": 5461840,
+          "offset": 4571872,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16V2SessionManager16AcceptInvitationEv",
+          "demangled_name": "V2SessionManager::AcceptInvitation()",
+          "address": 5461856,
+          "offset": 4571888,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16V2SessionManager14SendInvitationEPc",
+          "demangled_name": "V2SessionManager::SendInvitation(char*)",
+          "address": 5461872,
+          "offset": 4571904,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16V2SessionManager15ViewInvitationsEv",
+          "demangled_name": "V2SessionManager::ViewInvitations()",
+          "address": 5461888,
+          "offset": 4571920,
+          "size": 9,
+          "match_percent": 100.0
         }
       ]
     },
@@ -122986,14 +123146,6 @@
       "match_percent": 0.0
     },
     {
-      "name": "_GLOBAL__sub_I_V2SessionManager.cpp",
-      "demangled_name": "_GLOBAL__sub_I_V2SessionManager.cpp",
-      "address": 928704,
-      "offset": 38736,
-      "size": 93,
-      "match_percent": 0.0
-    },
-    {
       "name": "_GLOBAL__sub_I_Stats.cpp",
       "demangled_name": "_GLOBAL__sub_I_Stats.cpp",
       "address": 928800,
@@ -126522,158 +126674,6 @@
       "match_percent": 0.0
     },
     {
-      "name": "_ZN16V2SessionManager4InitEPc",
-      "demangled_name": "V2SessionManager::Init(char*)",
-      "address": 5461600,
-      "offset": 4571632,
-      "size": 9,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN16V2SessionManager5StartEv",
-      "demangled_name": "V2SessionManager::Start()",
-      "address": 5461616,
-      "offset": 4571648,
-      "size": 9,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN16V2SessionManager5LeaveEv",
-      "demangled_name": "V2SessionManager::Leave()",
-      "address": 5461632,
-      "offset": 4571664,
-      "size": 9,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN16V2SessionManager5CloseEv",
-      "demangled_name": "V2SessionManager::Close()",
-      "address": 5461648,
-      "offset": 4571680,
-      "size": 9,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN16V2SessionManager6SignInEv",
-      "demangled_name": "V2SessionManager::SignIn()",
-      "address": 5461664,
-      "offset": 4571696,
-      "size": 9,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN16V2SessionManager6RenderEv",
-      "demangled_name": "V2SessionManager::Render()",
-      "address": 5461680,
-      "offset": 4571712,
-      "size": 9,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN16V2SessionManager16IsChatRestrictedEv",
-      "demangled_name": "V2SessionManager::IsChatRestricted()",
-      "address": 5461696,
-      "offset": 4571728,
-      "size": 9,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN16V2SessionManager15IsAgeRestrictedEv",
-      "demangled_name": "V2SessionManager::IsAgeRestricted()",
-      "address": 5461712,
-      "offset": 4571744,
-      "size": 9,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN16V2SessionManager15GetLocalAddressEP10NetAddress",
-      "demangled_name": "V2SessionManager::GetLocalAddress(NetAddress*)",
-      "address": 5461728,
-      "offset": 4571760,
-      "size": 9,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN16V2SessionManager19IsSearchingForHostsEv",
-      "demangled_name": "V2SessionManager::IsSearchingForHosts()",
-      "address": 5461744,
-      "offset": 4571776,
-      "size": 9,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN16V2SessionManager4JoinEP7NetHost",
-      "demangled_name": "V2SessionManager::Join(NetHost*)",
-      "address": 5461760,
-      "offset": 4571792,
-      "size": 9,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN16V2SessionManager4HostE15eHostVisibility",
-      "demangled_name": "V2SessionManager::Host(eHostVisibility)",
-      "address": 5461776,
-      "offset": 4571808,
-      "size": 9,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN16V2SessionManager14SearchForHostsEiPi",
-      "demangled_name": "V2SessionManager::SearchForHosts(int, int*)",
-      "address": 5461792,
-      "offset": 4571824,
-      "size": 9,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN16V2SessionManager17SetHostVisibilityE15eHostVisibility",
-      "demangled_name": "V2SessionManager::SetHostVisibility(eHostVisibility)",
-      "address": 5461808,
-      "offset": 4571840,
-      "size": 14,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN16V2SessionManager18SetNumLocalPlayersEi",
-      "demangled_name": "V2SessionManager::SetNumLocalPlayers(int)",
-      "address": 5461824,
-      "offset": 4571856,
-      "size": 14,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN16V2SessionManager18RemoveRemotePlayerER7NetPeer",
-      "demangled_name": "V2SessionManager::RemoveRemotePlayer(NetPeer&)",
-      "address": 5461840,
-      "offset": 4571872,
-      "size": 9,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN16V2SessionManager16AcceptInvitationEv",
-      "demangled_name": "V2SessionManager::AcceptInvitation()",
-      "address": 5461856,
-      "offset": 4571888,
-      "size": 9,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN16V2SessionManager14SendInvitationEPc",
-      "demangled_name": "V2SessionManager::SendInvitation(char*)",
-      "address": 5461872,
-      "offset": 4571904,
-      "size": 9,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN16V2SessionManager15ViewInvitationsEv",
-      "demangled_name": "V2SessionManager::ViewInvitations()",
-      "address": 5461888,
-      "offset": 4571920,
-      "size": 9,
-      "match_percent": 0.0
-    },
-    {
       "name": "_ZThn12_N17SceneObjectHelper9SubRenderEv",
       "demangled_name": "{virtual override thunk({offset(-12)}, SceneObjectHelper::SubRender())}",
       "address": 5568528,
@@ -128165,8 +128165,8 @@
   "summary": {
     "bazel_units": 458,
     "functions": 13454,
-    "assigned_functions": 12502,
+    "assigned_functions": 12522,
     "ambiguous_functions": 229,
-    "unassigned_functions": 723
+    "unassigned_functions": 703
   }
 }
