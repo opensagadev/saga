@@ -25,6 +25,7 @@ extern "C" void DisplaySceneRndrSpecials(NUDLDLISTSCENE *, i32, void *);
 #include "nu2api/nu3d/nurendercontext.h"
 #include "nu2api/nu3d/nurndr.h"
 #include "nu2api/numath/nutrig.h"
+#include "nu2api/numath/nurand.h"
 #include "nu2api/nucore/NuMainFilter.h"
 #include "nu2api/nucore/NuMainFilterGen.h"
 #include "nu2api/nucore/NuMotionAccumFilter.h"
@@ -38,6 +39,7 @@ extern "C" void DisplaySceneRndrSpecials(NUDLDLISTSCENE *, i32, void *);
 #include "nu2api/nucore/NuSpeedBlurFilter.h"
 #include "nu2api/nucore/NuSpeedBlurFilterGen.h"
 #include "nu2api/nucore/NuVoiceAndroid.h"
+#include "gamelib/util/Utilities.h"
 #include "nu2api/nucore/numemory.h"
 #include "nu2api/nucore/nuthread.h"
 #include "nu2api/nu3d/nupostresources.h"
@@ -1986,11 +1988,58 @@ void NuMotionAccumFilterGen::render() {
     portColorBuffer.set(color);
 }
 
-void NuNetEmu::FindPacket(nunetaddr_s *, i32) {
-    STUBBED();
+NuNetEmu::EmuPacket *NuNetEmu::FindPacket(nunetaddr_s *, i32 size) {
+    EmuPacket *packet = field_04;
+    u32 now = UtilGetFrameStartTime();
+    size += 2;
+    while (packet != NULL) {
+        if (size <= 0xbb8 - packet->payload_size &&
+            (packet->flush_time >= packet->send_time || now <= packet->flush_time)) {
+            break;
+        }
+        packet = packet->next;
+    }
+    return packet;
 }
 
 NuNetEmu theNuNetEmu;
+
+typedef i32 (*NuNetSessionSendToFn)(NetSession *, void *, i32, nunetaddr_s *);
+typedef i32 (*NuNetSessionRecvFromFn)(NetSession *, void *, i32, nunetaddr_s *);
+struct MemoryManager;
+extern MemoryManager theMemoryManager;
+extern "C" void *MemoryManagerAllocPool(MemoryManager *, u32, i32) asm("_ZN13MemoryManager9AllocPoolEji");
+extern "C" void MemoryManagerFreePool(MemoryManager *, void *, u32) asm("_ZN13MemoryManager8FreePoolEPvj");
+
+static inline i32 NuNetSessionSendTo(void *data, i32 size, nunetaddr_s *address) {
+    void **vtable = *reinterpret_cast<void ***>(theSession);
+    return reinterpret_cast<NuNetSessionSendToFn>(vtable[22])(theSession, data, size, address);
+}
+
+static inline i32 NuNetSessionRecvFrom(void *data, i32 size, nunetaddr_s *address) {
+    void **vtable = *reinterpret_cast<void ***>(theSession);
+    return reinterpret_cast<NuNetSessionRecvFromFn>(vtable[23])(theSession, data, size, address);
+}
+
+extern i32 unref(unsigned char *, unsigned char *);
+extern i32 refpack(unsigned char *, abi_long, unsigned char *);
+
+struct NuNetEmuSegment {
+    u16 offset;
+    u16 size;
+};
+
+static i32 cbSortSeg(void const *left, void const *right) {
+    u16 left_size = static_cast<NuNetEmuSegment const *>(left)->size;
+    u16 right_size = static_cast<NuNetEmuSegment const *>(right)->size;
+    if (left_size < right_size) {
+        return 1;
+    }
+    if (left_size > right_size) {
+        return -1;
+    }
+    return 0;
+}
 
 NuNetEmu::NuNetEmu() : raw_stats("EmuRaw"), packet_stats("EmuPack") {
     field_04 = 0;
@@ -2018,12 +2067,87 @@ NuNetEmu::NuNetEmu() : raw_stats("EmuRaw"), packet_stats("EmuPack") {
     field_00 = 0x200;
 }
 
-void NuNetEmu::RecvFrom(void *, i32, nunetaddr_s &) {
-    STUBBED();
+i32 NuNetEmu::RecvFrom(void *data, i32 size, nunetaddr_s &address) {
+    if (field_10 == 0) {
+        return NuNetSessionRecvFrom(data, size, &address);
+    }
+
+    i32 received = 0;
+    if (field_17b0 >= field_17b4) {
+        received = NuNetSessionRecvFrom(packed_buffer, 0xbb8, &address);
+        if (received > 0) {
+            packet_stats.total.values[1] += received;
+            packet_stats.total.values[3]++;
+            field_17b0 = 0;
+            field_17b8 = received;
+            u32 start_time = UtilGetTime();
+            field_17b4 = unref(packed_buffer, unpacked_buffer);
+            packet_stats.packed_values[1] += UtilGetTime() - start_time;
+            raw_stats.total.values[3]++;
+            raw_stats.total.values[1] += field_17b4;
+        }
+    }
+
+    if (field_17b0 < field_17b4 && received >= 0) {
+        i32 payload_size = unpacked_buffer[field_17b0] | (unpacked_buffer[field_17b0 + 1] << 8);
+        i32 copy_size = payload_size <= size ? payload_size : size;
+        memmove(data, unpacked_buffer + field_17b0 + 2, copy_size);
+        field_17b0 += payload_size + 2;
+        return copy_size;
+    }
+    return received;
 }
 
-void NuNetEmu::SendTo(void *, i32, nunetaddr_s *, i32) {
-    STUBBED();
+i32 NuNetEmu::SendTo(void *data, i32 size, nunetaddr_s *address, i32) {
+    if (field_10 == 0) {
+        return NuNetSessionSendTo(data, size, address);
+    }
+
+    if (field_24 == 1) {
+        if (field_34 > NuRandFloat()) {
+            return 0;
+        }
+    } else if (field_24 == 2) {
+        if (field_30 == 0 && field_34 > NuRandFloat()) {
+            field_30 = field_28 + static_cast<i32>(NuRandFloat() * static_cast<f32>(field_2c - field_28));
+        }
+        if (field_30 > 0) {
+            field_30--;
+            return 0;
+        }
+    }
+
+    if (field_0c >= field_17c8) {
+        return 0;
+    }
+
+    EmuPacket *packet = FindPacket(address, size);
+    if (packet == NULL) {
+        packet = new (MemoryManagerAllocPool(&theMemoryManager, sizeof(EmuPacket), 1)) EmuPacket(address);
+        u32 now = UtilGetFrameStartTime();
+        if (field_18 > 0) {
+            packet->send_time =
+                now + field_14 + static_cast<i32>(NuRandFloat() * static_cast<f32>(field_18 - field_14));
+        } else {
+            packet->send_time = 0;
+        }
+        packet->creation_time = now;
+        packet->flush_time = now + field_3c;
+
+        packet->next = NULL;
+        packet->previous = field_08;
+        if (field_08 != NULL) {
+            field_08->next = packet;
+        }
+        field_08 = packet;
+        if (field_04 == NULL) {
+            field_04 = packet;
+        }
+        field_0c++;
+    }
+    packet->AddPayload(data, size);
+    field_1c += size;
+    return size;
 }
 
 void NuNetEmu::SetConditions(NuNetEmu::eConditions conditions) {
@@ -2057,12 +2181,123 @@ void NuNetEmu::SetConditions(NuNetEmu::eConditions conditions) {
     }
 }
 
-void NuNetEmu::SplitSendPacket(NuNetEmu::EmuPacket *) {
-    STUBBED();
+i32 NuNetEmu::SplitSendPacket(NuNetEmu::EmuPacket *packet) {
+    u32 start_time = UtilGetTime();
+    field_17b8 = refpack(packet->payload, packet->payload_size, packed_buffer);
+    packet_stats.packed_values[0] += UtilGetTime() - start_time;
+
+    i32 packed_size = field_17b8;
+    if (packed_size <= 0x4f0) {
+        packet_stats.total.values[0] += packed_size;
+        packet_stats.total.values[2]++;
+        NuNetSessionSendTo(packed_buffer, packed_size, reinterpret_cast<nunetaddr_s *>(&packet->address));
+        return packed_size;
+    }
+
+    packet_stats.split_packets++;
+    NuNetEmuSegment segments[256];
+    u32 segment_count = 0;
+    u32 offset = 0;
+    while (offset < packet->payload_size && segment_count < 256) {
+        i32 payload_size = packet->payload[offset] | (packet->payload[offset + 1] << 8);
+        segments[segment_count].offset = offset;
+        segments[segment_count].size = payload_size + 2;
+        segment_count++;
+        offset += payload_size + 2;
+    }
+    qsort(segments, segment_count, sizeof(NuNetEmuSegment), cbSortSeg);
+
+    EmuPacket *first = new (MemoryManagerAllocPool(&theMemoryManager, sizeof(EmuPacket), 1))
+        EmuPacket(reinterpret_cast<nunetaddr_s *>(&packet->address));
+    EmuPacket *second = new (MemoryManagerAllocPool(&theMemoryManager, sizeof(EmuPacket), 1))
+        EmuPacket(reinterpret_cast<nunetaddr_s *>(&packet->address));
+
+    for (u32 i = 0; i < segment_count; i++) {
+        EmuPacket *destination = second->payload_size < first->payload_size ? second : first;
+        memmove(destination->payload + destination->payload_size, packet->payload + segments[i].offset,
+                segments[i].size);
+        destination->payload_size += segments[i].size;
+    }
+
+    i32 sent = SplitSendPacket(first) + SplitSendPacket(second);
+    if (first != NULL) {
+        first->~EmuPacket();
+        MemoryManagerFreePool(&theMemoryManager, first, sizeof(EmuPacket));
+    }
+    if (second != NULL) {
+        second->~EmuPacket();
+        MemoryManagerFreePool(&theMemoryManager, second, sizeof(EmuPacket));
+    }
+    return sent;
 }
 
 void NuNetEmu::Update() {
-    STUBBED();
+    u32 now = UtilGetFrameStartTime();
+    if (now > static_cast<u32>(field_17bc)) {
+        goto send_packets;
+    }
+
+update_stats:
+    field_1c = 0;
+    for (EmuPacket *packet = field_04; packet != NULL; packet = packet->next) {
+        if (packet->flush_time >= packet->send_time || now <= packet->flush_time) {
+            field_1c += packet->payload_size;
+        }
+    }
+
+    raw_stats.Update();
+    packet_stats.Update();
+    {
+        f32 ratio = 0.0f;
+        if (raw_stats.total.values[0] > 0) {
+            ratio = static_cast<f32>(packet_stats.total.values[0]) / static_cast<f32>(raw_stats.total.values[0]);
+        }
+        packet_stats.pack_ratio = ratio;
+
+        f32 average = 0.0f;
+        if (packet_stats.total.values[2] > 0) {
+            average = static_cast<f32>(packet_stats.total.values[0]) / static_cast<f32>(packet_stats.total.values[2]);
+        }
+        packet_stats.average_packet_size = average;
+    }
+    packet_stats.held_packets = field_0c;
+    return;
+
+send_packets: {
+    u32 bandwidth = field_0c > 2 ? field_17c4 : field_17c0;
+    u32 budget = bandwidth / 30;
+    u32 sent = 0;
+    EmuPacket *packet = field_04;
+    while (sent < budget && packet != NULL) {
+        if (now >= packet->send_time && (now >= packet->flush_time || packet->payload_size >= field_38)) {
+            EmuPacket *next = packet->next;
+            raw_stats.total.values[0] += packet->payload_size;
+            raw_stats.total.values[2]++;
+            sent += SplitSendPacket(packet);
+
+            if (packet->next != NULL) {
+                packet->next->previous = packet->previous;
+            } else {
+                field_08 = packet->previous;
+            }
+            if (packet->previous != NULL) {
+                packet->previous->next = packet->next;
+            } else {
+                field_04 = packet->next;
+            }
+            packet->next = NULL;
+            packet->previous = NULL;
+            field_0c--;
+            packet->~EmuPacket();
+            MemoryManagerFreePool(&theMemoryManager, packet, sizeof(EmuPacket));
+            packet = next;
+        } else {
+            packet = packet->next;
+        }
+    }
+    field_17bc = now + static_cast<i32>(static_cast<f32>(sent) / (static_cast<f32>(bandwidth) / 1000.0f));
+}
+    goto update_stats;
 }
 
 NUMTX NuDynamicLight::cacheCameraView;

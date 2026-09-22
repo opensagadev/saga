@@ -993,8 +993,14 @@ void MenuDrawViewTextStrings(MENU_s *) {
     STUBBED();
 }
 
-void GetMatchLength(unsigned char *, unsigned char *, abi_ulong) {
-    STUBBED();
+abi_ulong GetMatchLength(unsigned char *first, unsigned char *second, abi_ulong maximum) {
+    abi_ulong length = 0;
+    if (maximum != 0 && *first == *second) {
+        do {
+            ++length;
+        } while (length != maximum && first[length] == second[length]);
+    }
+    return length;
 }
 void SplitTextFindNextWS(unsigned char *, i32) {
     STUBBED();

@@ -1490,8 +1490,52 @@ i32 DebrisSingleTorusCollisionCheckScaleYFlag(i32 key_index, NUVEC *position, f3
     return combined_radius * combined_radius > dx * dx + dy * dy + dz * dz;
 }
 
-void unref(unsigned char *, unsigned char *) {
-    STUBBED();
+i32 unref(unsigned char *source, unsigned char *destination) {
+    unsigned char *output_start = destination;
+    for (;;) {
+        const u32 control = *source++;
+        u32 literal_count;
+        u32 match_offset;
+        u32 match_length;
+
+        if (control < 0x80) {
+            literal_count = control & 3;
+            match_offset = ((control & 0x60) << 3) + source[0] + 1;
+            match_length = ((control & 0x1c) >> 2) + 3;
+            source += 1;
+        } else if (control < 0xc0) {
+            literal_count = source[0] >> 6;
+            match_offset = ((source[0] & 0x3f) << 8) + source[1] + 1;
+            match_length = (control & 0x3f) + 4;
+            source += 2;
+        } else if (control < 0xe0) {
+            literal_count = control & 3;
+            match_offset = ((control & 0x10) << 12) + (source[0] << 8) + source[1] + 1;
+            match_length = ((control & 0x0c) << 6) + source[2] + 5;
+            source += 3;
+        } else {
+            literal_count = ((control & 0x1f) << 2) + 4;
+            if (literal_count > 0x70) {
+                literal_count = control & 3;
+                for (u32 index = 0; index < literal_count; ++index) {
+                    *destination++ = *source++;
+                }
+                return destination - output_start;
+            }
+            for (u32 index = 0; index < literal_count; ++index) {
+                *destination++ = *source++;
+            }
+            continue;
+        }
+
+        for (u32 index = 0; index < literal_count; ++index) {
+            *destination++ = *source++;
+        }
+        unsigned char *match = destination - match_offset;
+        for (u32 index = 0; index < match_length; ++index) {
+            *destination++ = *match++;
+        }
+    }
 }
 
 void TBRESET() {

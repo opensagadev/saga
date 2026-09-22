@@ -590,7 +590,7 @@ struct NetworkObjectManager : NetListenerInterface, EdObjectNotifier {
     void UpdateLocalObjectList();
     ~NetworkObjectManager() override;
 
-    u8 reserved_08[4];
+    i32 field_08;
     i32 active;
     NOSContext context;
     NetPeer const *guid_peers[2];

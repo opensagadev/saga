@@ -2,7 +2,10 @@
 #include "gameapi/ai/aisys/aisys.h"
 #include "legoapi/legoapi_types.h"
 #include "gamelib/util/gamelib_util_types.h"
+#include "nu2api/nucore/NuNetEmu.h"
 #include "nu2api/numath/nufloat.h"
+
+void refpack_init();
 
 void TTNetwork::Broadcast(NetMessage, unsigned char) {
     STUBBED();
@@ -25,7 +28,31 @@ const NetAddress *TTNetwork::GetMyHostAddress() const {
 }
 
 void TTNetwork::Initialise() {
-    STUBBED();
+    if (field_2140 != 0) {
+        return;
+    }
+
+    field_2148 = -1;
+    ftp_manager.field_1604 = -1;
+    network_objects.field_08 = -1;
+    field_2134 = 0;
+    field_2138 = 0;
+    session = reinterpret_cast<NetSession *>(V2SessionManager::mpSessionManager);
+    theSession = session;
+    ftp_manager.Init();
+    network_objects.Init();
+
+    void **vtable = *reinterpret_cast<void ***>(session);
+    typedef void (*SessionInitFn)(NetSession *, char *);
+    reinterpret_cast<SessionInitFn>(vtable[0])(session, NULL);
+    typedef void (*SessionGetLocalAddressFn)(NetSession *, NetAddress *);
+    reinterpret_cast<SessionGetLocalAddressFn>(vtable[10])(session, &my_address);
+
+    field_2140 = 1;
+    field_2144 = 0;
+    theNuNetEmu.field_10 = 1;
+    theNuNetEmu.SetConditions(NuNetEmu::CONDITIONS_NORMAL);
+    refpack_init();
 }
 
 void TTNetwork::ProcessEvenWhenPaused(ThingProcessData *) {

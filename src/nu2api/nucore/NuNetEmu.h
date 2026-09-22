@@ -6,6 +6,16 @@ struct nunetaddr_s;
 
 struct NuNetEmu {
     struct EmuPacket {
+        EmuPacket *next;
+        EmuPacket *previous;
+        u32 address;
+        u8 *payload;
+        u32 payload_size;
+        u32 payload_count;
+        u32 flush_time;
+        u32 send_time;
+        u32 creation_time;
+
         void AddPayload(void *, i32);
         EmuPacket(nunetaddr_s *);
         ~EmuPacket();
@@ -27,17 +37,17 @@ struct NuNetEmu {
         CONDITIONS_2 = 2,
         CONDITIONS_3 = 3,
     };
-    void FindPacket(nunetaddr_s *, i32);
+    EmuPacket *FindPacket(nunetaddr_s *, i32);
     NuNetEmu();
-    void RecvFrom(void *, i32, nunetaddr_s &);
-    void SendTo(void *, i32, nunetaddr_s *, i32);
+    i32 RecvFrom(void *, i32, nunetaddr_s &);
+    i32 SendTo(void *, i32, nunetaddr_s *, i32);
     void SetConditions(NuNetEmu::eConditions);
-    void SplitSendPacket(NuNetEmu::EmuPacket *);
+    i32 SplitSendPacket(NuNetEmu::EmuPacket *);
     void Update();
 
     i32 field_00;
-    i32 field_04;
-    i32 field_08;
+    EmuPacket *field_04;
+    EmuPacket *field_08;
     i32 field_0c;
     u8 field_10;
     u8 reserved_11[3];
@@ -52,7 +62,8 @@ struct NuNetEmu {
     float field_34;
     i32 field_38;
     i32 field_3c;
-    u8 reserved_40[0x1770];
+    u8 packed_buffer[0xbb8];
+    u8 unpacked_buffer[0xbb8];
     i32 field_17b0;
     i32 field_17b4;
     i32 field_17b8;
@@ -65,6 +76,10 @@ struct NuNetEmu {
 };
 
 DECOMP_ASSERT(sizeof(NuNetEmu::PackStats) == 0x238, "NuNetEmu::PackStats ABI");
+DECOMP_ASSERT(sizeof(NuNetEmu::EmuPacket) == 0x24, "NuNetEmu::EmuPacket ABI");
+DECOMP_ASSERT(offsetof(NuNetEmu::EmuPacket, payload) == 0xc, "NuNetEmu::EmuPacket payload offset");
+DECOMP_ASSERT(offsetof(NuNetEmu::EmuPacket, payload_size) == 0x10, "NuNetEmu::EmuPacket payload size offset");
+DECOMP_ASSERT(offsetof(NuNetEmu::EmuPacket, flush_time) == 0x18, "NuNetEmu::EmuPacket flush time offset");
 DECOMP_ASSERT(offsetof(NuNetEmu::PackStats, packed_values) == 0x220, "NuNetEmu::PackStats packed values offset");
 DECOMP_ASSERT(offsetof(NuNetEmu::PackStats, pack_ratio) == 0x230, "NuNetEmu::PackStats ratio offset");
 DECOMP_ASSERT(sizeof(NuNetEmu) == 0x1c24, "NuNetEmu ABI");

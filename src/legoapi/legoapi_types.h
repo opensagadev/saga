@@ -5632,10 +5632,14 @@ struct TTNetwork : NetTransporter, BaseThing {
   private:
     i32 field_20;
     u8 field_24;
-    u8 reserved_25[0x2117];
+    u8 reserved_25[0x210f];
+    i32 field_2134;
+    i32 field_2138;
     i32 field_213c;
     i32 field_2140;
-    u8 reserved_2144[0xc];
+    i32 field_2144;
+    i32 field_2148;
+    i32 field_214c;
     i32 field_2150;
     f32 field_2154;
     f32 field_2158;
@@ -5649,6 +5653,7 @@ struct TTNetwork : NetTransporter, BaseThing {
 
   public:
     NetworkObjectManager network_objects;
+    NetSession *session;
     void Broadcast(NetMessage, unsigned char);
     void ClearMyHostAddress();
     void Display(ThingRenderData *);
@@ -5669,6 +5674,7 @@ struct TTNetwork : NetTransporter, BaseThing {
     virtual ~TTNetwork();
 };
 DECOMP_ASSERT(offsetof(TTNetwork, network_objects) == 0x3780, "TTNetwork object manager offset");
+DECOMP_ASSERT(offsetof(TTNetwork, session) == 0x110f0, "TTNetwork session offset");
 // All ThingManager methods are virtual in the original: its vtable order is
 // D2, D0, AddThing, AddThingAfterThis, RemoveTemporaryThings,
 // RemoveDependanciesThings, ResetThings, EnterLevelThings, ExitLevelThings,

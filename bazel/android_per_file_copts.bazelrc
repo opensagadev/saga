@@ -108,6 +108,9 @@ build:target --per_file_copt=^src/legoapi/render/core/screen\.cpp$@-O2
 # Shader material filters use optimized switch lowering and leaf epilogues.
 build:target --per_file_copt=^src/legoapi/render/core/shader\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/render/fx/edsplines\.cpp$@-O3
+# The RefPack encoder uses the original vectorized table initialization and
+# optimized match-search loops.
+build:target --per_file_copt=^src/legoapi/render/fx/inflate\.cpp$@-O3
 # The HTML plotting helpers keep their original optimized codegen after
 # moving out of the mixed spline source.
 build:target --per_file_copt=^src/nu2api/nucore/nuhtml\.cpp$@-O3
