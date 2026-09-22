@@ -25,6 +25,7 @@
 #include "legoapi/world/world.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nufile/nufpar.h"
+#include "nu2api/nu3d/nuspline.h"
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numath/nuvec.h"
 
@@ -422,6 +423,122 @@ i32 Episode_CountOpenAreas(i32 episode_index, i32 area_index, AREASAVE_s *saves)
 // ===========================================================================
 // Shared gameplay helpers
 // ===========================================================================
+
+static __used__ void GenerateTrooperTeamShape(minitrooperteam_s *team, i32 initialize_rotation) {
+    const i32 formation = team->formation_state & 0xf;
+
+    if (formation == 0) {
+        NUVEC width = {team->formation_width, 0.0f, 0.0f};
+        NUVEC depth = {0.0f, 0.0f, team->formation_depth};
+        NuVecRotateY(&width, &width, team->facing_angle);
+        NuVecRotateY(&depth, &depth, team->facing_angle);
+
+        for (i32 i = 0; i < team->trooper_count; ++i) {
+            minisnowtrooper_s &trooper = team->troopers[i];
+            const f32 width_scale = static_cast<f32>(qrand()) * (2.0f / 65536.0f) - 1.0f;
+            const f32 depth_scale = static_cast<f32>(qrand()) * (2.0f / 65536.0f) - 1.0f;
+            trooper.formation_x = width.x * width_scale + depth.x * depth_scale;
+
+            const f32 width_scale_z = static_cast<f32>(qrand()) * (2.0f / 65536.0f) - 1.0f;
+            const f32 depth_scale_z = static_cast<f32>(qrand()) * (2.0f / 65536.0f) - 1.0f;
+            trooper.formation_z = width.z * width_scale_z + depth.z * depth_scale_z;
+        }
+        return;
+    }
+
+    if (formation == 4) {
+        const u16 angle = static_cast<u16>(team->facing_angle + 0x8000);
+        for (i32 i = 0; i < team->trooper_count; ++i) {
+            minisnowtrooper_s &trooper = team->troopers[i];
+            NUVEC offset = {trooper.formation_x, 0.0f, trooper.formation_z};
+            NuVecRotateY(&offset, &offset, angle);
+            trooper.formation_x = offset.x;
+            trooper.formation_z = offset.z;
+        }
+        return;
+    }
+
+    if (formation != 1) {
+        for (i32 i = 0; i < team->trooper_count; ++i) {
+            NUVEC offset = {0.0f, 0.0f, static_cast<f32>(qrand()) * (1.0f / 65536.0f) * team->formation_width};
+            NuVecRotateY(&offset, &offset, qrand());
+            team->troopers[i].formation_x = offset.x;
+            team->troopers[i].formation_z = offset.z;
+        }
+        return;
+    }
+
+    const i32 row_count = team->trooper_count >> 2;
+    const f32 row_step = team->formation_width / static_cast<f32>(row_count);
+    const u16 angle = static_cast<u16>(team->facing_angle + 0x8000);
+
+    NUVEC along = {row_step, 0.0f, 0.0f};
+    NUVEC across = {0.0f, 0.0f, team->formation_depth * 0.25f};
+    NUVEC position = {-static_cast<f32>(row_count) * 0.5f * row_step, 0.0f, -team->formation_depth * 0.5f};
+    NuVecRotateY(&along, &along, angle);
+    NuVecRotateY(&across, &across, angle);
+    NuVecRotateY(&position, &position, angle);
+
+    minisnowtrooper_s *trooper = team->troopers;
+    for (i32 column = 0; column < 4; ++column) {
+        if (droid_hack != 0 && column != 0 && (column & 1) == 0) {
+            position.x += across.x;
+            position.z += across.z;
+        }
+
+        NUVEC current = position;
+        for (i32 row = 0; row < row_count; ++row, ++trooper) {
+            trooper->formation_x = current.x;
+            trooper->formation_z = current.z;
+            if (initialize_rotation != 0)
+                trooper->rotation = team->facing_angle;
+            trooper->target_rotation = team->facing_angle;
+            current.x += along.x;
+            current.z += along.z;
+        }
+
+        position.x += across.x;
+        position.z += across.z;
+    }
+}
+
+static __used__ void TrooperTeamSetStateCode(minitrooperteam_s *team) {
+    team->route_state = (team->route_state & 0x1f) | ((team->waypoint_state >> 3) << 5);
+
+    const i32 waypoint_count = (*reinterpret_cast<u16 *>(&team->waypoint_state) >> 6) & 7;
+    const i32 waypoint = qrand() / (0xffff / waypoint_count + 1);
+    team->waypoint_state = (team->waypoint_state & 0xc7) | ((waypoint & 7) << 3);
+
+    team->route_point = &team->path->pts[team->route_state >> 5];
+    team->formation_state = (team->formation_state & 0xf) | ((qrand() / 0x4000) << 4);
+    team->state_timer = static_cast<f32>(qrand()) * (4.0f / 65536.0f) + 1.0f;
+
+    const NUVEC &destination = team->path->pts[(team->waypoint_state >> 3) & 7];
+    const NUVEC &origin = team->path->pts[team->route_state >> 5];
+    team->facing_angle = NuAtan2D(destination.x - origin.x, destination.z - origin.z);
+
+    if (droid_hack == 0) {
+        if ((team->formation_state & 0xf0) == 0x10)
+            team->formation_state = 0x11;
+        else
+            team->formation_state = (team->formation_state & 0xf0) | (qrand() / (0xffff / 3 + 1) & 0xf);
+    } else {
+        team->formation_state = (team->formation_state & 0xf0) | 4;
+    }
+
+    GenerateTrooperTeamShape(team, 0);
+    for (i32 i = 0; i < team->trooper_count; ++i) {
+        minisnowtrooper_s &trooper = team->troopers[i];
+        trooper.state_flags &= ~0x40;
+        if (droid_hack != 0) {
+            trooper.state_flags = (trooper.state_flags & 0x8f) | 0x20;
+        } else {
+            trooper.state_flags = (trooper.state_flags & 0xcf) | (((qrand() / (0xffff / 3 + 1) + 1) & 3) << 4);
+        }
+        trooper.formation_index = static_cast<u8>(i);
+    }
+    team->route_state |= 0x10;
+}
 
 i32 TrooperShoot(WORLDINFO_s *world, minitrooperteam_s *team, minisnowtrooper_s *trooper, u16 *shot_angle,
                  i32 team_index) {

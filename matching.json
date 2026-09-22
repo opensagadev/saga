@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 51.86263,
+    "fuzzy_match_percent": 51.873398,
     "total_code": "4722419",
     "matched_code": "455041",
     "matched_code_percent": 9.63576,
@@ -39884,14 +39884,6 @@
           "match_percent": 65.0
         },
         {
-          "name": "_ZL24GenerateTrooperTeamShapeP17minitrooperteam_si",
-          "demangled_name": "GenerateTrooperTeamShape(minitrooperteam_s*, int)",
-          "address": 5152304,
-          "offset": 4262336,
-          "size": 1181,
-          "match_percent": 1.393728
-        },
-        {
           "name": "_Z20CreateClimbObjectSysP9variptr_uS0_i",
           "demangled_name": "CreateClimbObjectSys(variptr_u*, variptr_u*, int)",
           "address": 5188544,
@@ -61429,14 +61421,6 @@
           "offset": 3852752,
           "size": 219,
           "match_percent": 99.166664
-        },
-        {
-          "name": "_ZL23TrooperTeamSetStateCodeP17minitrooperteam_s",
-          "demangled_name": "TrooperTeamSetStateCode(minitrooperteam_s*)",
-          "address": 5153488,
-          "offset": 4263520,
-          "size": 497,
-          "match_percent": 3.037975
         }
       ]
     },
@@ -82516,7 +82500,7 @@
           "address": 2197120,
           "offset": 1307152,
           "size": 2776,
-          "match_percent": 75.27302
+          "match_percent": 74.92892
         },
         {
           "name": "_Z20UpdateTrooperCannonsP11WORLDINFO_s",
@@ -82597,6 +82581,22 @@
           "offset": 3925328,
           "size": 116,
           "match_percent": 85.17242
+        },
+        {
+          "name": "_ZL24GenerateTrooperTeamShapeP17minitrooperteam_si",
+          "demangled_name": "GenerateTrooperTeamShape(minitrooperteam_s*, int)",
+          "address": 5152304,
+          "offset": 4262336,
+          "size": 1181,
+          "match_percent": 18.905924
+        },
+        {
+          "name": "_ZL23TrooperTeamSetStateCodeP17minitrooperteam_s",
+          "demangled_name": "TrooperTeamSetStateCode(minitrooperteam_s*)",
+          "address": 5153488,
+          "offset": 4263520,
+          "size": 497,
+          "match_percent": 65.6076
         },
         {
           "name": "_Z12TrooperShootP11WORLDINFO_sP17minitrooperteam_sP17minisnowtrooper_sPti",

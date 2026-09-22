@@ -3300,40 +3300,46 @@ struct instNUGCUTLOOKAT_s {};
 struct instNUGCUTSCENE_s;
 struct mdct_lookup {};
 struct minisnowtrooper_s {
-    union {
-        f32 field_000;
-        struct {
-            u8 field_000_byte;
-            u8 state_flags;
-            u8 reserved_002[2];
-        };
-    };
+    u8 formation_index;
+    u8 state_flags;
+    u8 reserved_002;
+    u8 speed_divisor;
     u16 rotation;
     u16 target_rotation;
-    u8 reserved_008[0x0c];
-    NUVEC shot_position; // 0x14
+    f32 timer;
+    f32 formation_x;
+    f32 formation_z;
+    NUVEC shot_position;
 };
 DECOMP_ASSERT(offsetof(minisnowtrooper_s, rotation) == 0x04, "Mini snowtrooper rotation offset");
+DECOMP_ASSERT(offsetof(minisnowtrooper_s, formation_x) == 0x0c, "Mini snowtrooper formation X offset");
 DECOMP_ASSERT(offsetof(minisnowtrooper_s, shot_position) == 0x14, "Mini snowtrooper shot position offset");
 DECOMP_ASSERT(sizeof(minisnowtrooper_s) == 0x20, "Mini snowtrooper size");
 
 struct minitrooperteam_s {
-    u8 reserved_000[0x16];
-    u8 field_016;
-    u8 field_017;
-    u8 reserved_018;
+    NUVEC origin;
+    f32 formation_width;
+    f32 formation_depth;
+    u16 facing_angle;
+    u8 formation_state;
+    u8 route_state;
+    u8 waypoint_state;
     u8 team_flags; // 0x19, bit 1 selects the opposing team
     u8 trooper_count;
     u8 reserved_01b;
     u32 state_flags; // 0x1c, bit 0 marks an active team
-    u8 reserved_020[0x10];
+    f32 state_timer;
+    f32 debris_timer;
+    f32 fire_timer;
+    f32 reserved_02c;
     i32 bolt_type; // 0x30
-    void *field_034;
-    u8 reserved_038[4];
+    NUVEC *route_point;
+    struct nugspline_s *path;
     minisnowtrooper_s *troopers; // 0x3c
     NUVEC position;              // 0x40
     i32 target_index;            // 0x4c
 };
+DECOMP_ASSERT(offsetof(minitrooperteam_s, facing_angle) == 0x14, "Mini trooper team angle offset");
 DECOMP_ASSERT(offsetof(minitrooperteam_s, team_flags) == 0x19, "Mini trooper team flags offset");
 DECOMP_ASSERT(offsetof(minitrooperteam_s, state_flags) == 0x1c, "Mini trooper state flags offset");
 DECOMP_ASSERT(offsetof(minitrooperteam_s, bolt_type) == 0x30, "Mini trooper bolt type offset");

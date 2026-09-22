@@ -61,6 +61,3 @@ void *CreateClimbObjectSys(VARIPTR *buf, VARIPTR *buf_end, i32 count) {
         static_cast<CLIMBOBJECT_s *>(GameBufferAlloc(buf, buf_end, system->capacity * sizeof(CLIMBOBJECT_s)));
     return system;
 }
-static __used__ void GenerateTrooperTeamShape(minitrooperteam_s *, int) {
-    STUBBED();
-}

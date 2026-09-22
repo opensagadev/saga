@@ -1519,10 +1519,6 @@ static __used__ void StarFighterAlign(starfighter_s *, _vuv_s *, f32, i32) {
     STUBBED();
 }
 
-static __used__ void TrooperTeamSetStateCode(minitrooperteam_s *) {
-    STUBBED();
-}
-
 static __used__ unsigned int BoltInitSfx_LSW(GameObject_s *) {
     STUBBED();
     return {};
