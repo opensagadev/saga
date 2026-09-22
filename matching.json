@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 51.873398,
+    "fuzzy_match_percent": 51.91382,
     "total_code": "4722419",
     "matched_code": "455041",
     "matched_code_percent": 9.63576,
@@ -82476,7 +82476,7 @@
           "address": 1468112,
           "offset": 578144,
           "size": 391,
-          "match_percent": 61.876545
+          "match_percent": 61.691357
         },
         {
           "name": "_ZL19KilledTrooperCannonP12GameObject_s",
@@ -82500,7 +82500,7 @@
           "address": 2197120,
           "offset": 1307152,
           "size": 2776,
-          "match_percent": 74.92892
+          "match_percent": 74.880455
         },
         {
           "name": "_Z20UpdateTrooperCannonsP11WORLDINFO_s",
@@ -82588,7 +82588,7 @@
           "address": 5152304,
           "offset": 4262336,
           "size": 1181,
-          "match_percent": 18.905924
+          "match_percent": 21.86411
         },
         {
           "name": "_ZL23TrooperTeamSetStateCodeP17minitrooperteam_s",
@@ -82596,7 +82596,15 @@
           "address": 5153488,
           "offset": 4263520,
           "size": 497,
-          "match_percent": 65.6076
+          "match_percent": 68.1076
+        },
+        {
+          "name": "_Z20InitMiniSnowTroopersP11WORLDINFO_siii",
+          "demangled_name": "InitMiniSnowTroopers(WORLDINFO_s*, int, int, int)",
+          "address": 5154000,
+          "offset": 4264032,
+          "size": 2844,
+          "match_percent": 27.303244
         },
         {
           "name": "_Z12TrooperShootP11WORLDINFO_sP17minitrooperteam_sP17minisnowtrooper_sPti",
@@ -82604,7 +82612,7 @@
           "address": 5156848,
           "offset": 4266880,
           "size": 1055,
-          "match_percent": 29.387096
+          "match_percent": 32.919353
         },
         {
           "name": "_Z22UpdateMiniSnowTroopersP11WORLDINFO_s",
@@ -82612,7 +82620,7 @@
           "address": 5157904,
           "offset": 4267936,
           "size": 4569,
-          "match_percent": 0.387097
+          "match_percent": 24.15576
         },
         {
           "name": "_ZL10seed_chasePfil",
@@ -85024,14 +85032,6 @@
           "offset": 1339136,
           "size": 514,
           "match_percent": 3.414634
-        },
-        {
-          "name": "_Z20InitMiniSnowTroopersP11WORLDINFO_siii",
-          "demangled_name": "InitMiniSnowTroopers(WORLDINFO_s*, int, int, int)",
-          "address": 5154000,
-          "offset": 4264032,
-          "size": 2844,
-          "match_percent": 1.269394
         }
       ]
     },

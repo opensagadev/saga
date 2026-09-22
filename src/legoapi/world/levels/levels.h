@@ -46,8 +46,8 @@ extern f32 HUB_AREAPANELX_ONETRUEJEDIGOLDBRICK[6];
 void Hub_DrawImportantBrick(i32 object_id, f32 x, f32 y, f32 z, i32 count, i32 points);
 
 extern GIZAIMESSAGESYS_s *gizaimessagesys;
-extern i16 trooper_boltid;
-extern i8 trooper_side[3];
+extern i16 trooper_boltid[2];
+extern i8 trooper_side[10];
 extern nuhspecial_s *hothtroopers;
 extern i32 TimingBarSet;
 extern struct AREADATA_s *PODRACE_ADATA;

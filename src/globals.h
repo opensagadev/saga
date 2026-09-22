@@ -663,6 +663,8 @@ extern GameObject_s *player2;
 extern GameObject_s *player;
 extern GameObject_s *CutDeadVehiclePlayer;
 extern GameObject_s *Player[8];
+extern i32 troopers_gdeb[4];
+extern nuhspecial_s *hothtroopers;
 extern u8 PlayerRGB[2][3];
 extern char *LEGOASCII_DOWN;
 extern char *txt_UNKNOWN;

@@ -3317,7 +3317,9 @@ DECOMP_ASSERT(offsetof(minisnowtrooper_s, shot_position) == 0x14, "Mini snowtroo
 DECOMP_ASSERT(sizeof(minisnowtrooper_s) == 0x20, "Mini snowtrooper size");
 
 struct minitrooperteam_s {
-    NUVEC origin;
+    f32 origin_x;
+    f32 origin_z;
+    f32 height;
     f32 formation_width;
     f32 formation_depth;
     u16 facing_angle;
@@ -3339,6 +3341,7 @@ struct minitrooperteam_s {
     NUVEC position;              // 0x40
     i32 target_index;            // 0x4c
 };
+DECOMP_ASSERT(offsetof(minitrooperteam_s, height) == 0x08, "Mini trooper team height offset");
 DECOMP_ASSERT(offsetof(minitrooperteam_s, facing_angle) == 0x14, "Mini trooper team angle offset");
 DECOMP_ASSERT(offsetof(minitrooperteam_s, team_flags) == 0x19, "Mini trooper team flags offset");
 DECOMP_ASSERT(offsetof(minitrooperteam_s, state_flags) == 0x1c, "Mini trooper state flags offset");

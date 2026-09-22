@@ -1041,10 +1041,10 @@ void InitGameAfterConfig(void) {
     KITPOS2X = 0;
     //  CONVERTOLDPICKUPS = 1;
     //  GrabScreenWhenFading = 1;
-    //  troopers_gdeb._0_4_ = 0x83;
-    //  troopers_gdeb._4_4_ = 0x49;
-    //  troopers_gdeb._8_4_ = 0x4a;
-    //  troopers_gdeb._12_4_ = 0x4b;
+    troopers_gdeb[0] = 0x83;
+    troopers_gdeb[1] = 0x49;
+    troopers_gdeb[2] = 0x4a;
+    troopers_gdeb[3] = 0x4b;
     //  LEGOHINT_SHOOTCAMERAS = 0x266;
     extern i32 LEGOHINT_PUSHBLOCKS;
     LEGOHINT_PUSHBLOCKS = 0x267;

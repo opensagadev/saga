@@ -356,10 +356,6 @@ void CloudCityTrapC_Reset(WORLDINFO_s *) {
     STUBBED();
 }
 
-void InitMiniSnowTroopers(WORLDINFO_s *, i32, i32, i32) {
-    STUBBED();
-}
-
 void CloudCityEscapeA_Init(WORLDINFO_s *) {
     STUBBED();
 }

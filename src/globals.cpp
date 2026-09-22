@@ -770,9 +770,10 @@ i32 LevSafePlatID[2] = {0};
 // Network / multiplayer (podrace, gunship, mines)
 // ------------------------------------------------------------------------
 RETAKEGNETPACKET_s *retakeg_netpacket = NULL;
-i16 trooper_boltid = 0;
-i8 trooper_side[3] = {0};
+i16 trooper_boltid[2] = {0};
+i8 trooper_side[10] = {0};
 nuhspecial_s *hothtroopers = NULL;
+i32 troopers_gdeb[4] = {0};
 i32 TimingBarSet = 0;
 u32 client_mines[0x200] = {0};
 MINESYS_s minesys;

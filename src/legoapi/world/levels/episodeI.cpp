@@ -1796,7 +1796,7 @@ void MaulF_Panel(WORLDINFO_s *world) {
 // ===========================================================================
 
 void AnakinsFlightB_Init(WORLDINFO_s *world) {
-    trooper_boltid = BoltType_FindIDByName("trooper_red", world);
+    trooper_boltid[0] = BoltType_FindIDByName("trooper_red", world);
     trooper_side[0] = 0;
     trooper_side[1] = 0;
     trooper_side[2] = 0;
