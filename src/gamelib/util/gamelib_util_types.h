@@ -104,25 +104,36 @@ struct AndroidOBBUtils {
     static i32 OpenFile(char const *);
 };
 struct FtpFile {
-    u8 reserved_00[8];
+    NetAddress address;
+    i32 direction;
     i32 accepted;
-    u8 reserved_0c[0x94];
+    char name[0x80];
+    i32 size;
+    void *buffer;
+    i32 capacity;
+    i32 transferred;
+    i32 message_swap_endianness;
     struct TransferReference {
         u8 reserved_00[0x4b0];
-        i32 reference_count;
+        u32 reference_count;
     };
-    TransferReference *network_object; // 0xa0
-    u8 reserved_a4[0x8];
-    void *transfer; // 0xac
+    TransferReference *message_data;
+    u32 message_read_offset;
+    u32 message_write_offset;
+    void *transfer;
     i32 Accept();
-    void Accept(i32);
-    void Accept(i32, void *);
+    i32 Accept(i32);
+    i32 Accept(i32, void *);
     void Init(i32, char const *, i32, NetAddress const &, void *, i32);
     void RecvData(NetMessage &);
     void SendData();
     void Term();
     void Update();
 };
+static_assert(sizeof(void *) != 4 || sizeof(FtpFile) == 0xb0, "FtpFile 32-bit size");
+static_assert(sizeof(void *) != 4 || offsetof(FtpFile, name) == 0xc, "FtpFile name 32-bit offset");
+static_assert(sizeof(void *) != 4 || offsetof(FtpFile, message_data) == 0xa0, "FtpFile message data 32-bit offset");
+static_assert(sizeof(void *) != 4 || offsetof(FtpFile, transfer) == 0xac, "FtpFile transfer 32-bit offset");
 struct NetReplicator {
     static i16 smNextId;
 
@@ -151,24 +162,6 @@ struct NetChangedReplicator : NetReplicator {
 };
 struct NetConstReplicator : NetReplicator {
     bool AllowPush(EdClass const *, void const *, ReplicatorData &, i32, i32) override;
-};
-struct NetFtpManager {
-    FtpFile files[32];
-    i32 field_1604;
-    i32 Abort(char const *, NetAddress const &, i32, i32);
-    void FindTransfer(char const *, NetAddress const &, i32);
-    void FindTransfer(char const *, NetAddress const &, i32) const;
-    i32 Get(char const *, void *, i32, NetAddress const &);
-    FtpFile const *GetTransfers() const;
-    void Init();
-    NetFtpManager();
-    void PeerLeft(NetAddress const &, ePeerLeftReason);
-    void Receive(NetMessage, unsigned char, NetAddress const &);
-    void Reset();
-    i32 Send(char const *, void const *, i32, NetAddress const &);
-    void Term();
-    void Update();
-    virtual ~NetFtpManager();
 };
 struct NetMessage {
     struct MessageData {
@@ -304,6 +297,28 @@ struct NetListenerInterface {
     virtual void NosAdopted(NetworkObject *, NetPeer const &) {
     }
 };
+struct NetFtpManager : NetListenerInterface {
+    FtpFile files[32];
+    i32 field_1604;
+    i32 Abort(char const *, NetAddress const &, i32, i32);
+    FtpFile *FindTransfer(char const *, NetAddress const &, i32);
+    FtpFile const *FindTransfer(char const *, NetAddress const &, i32) const;
+    i32 Get(char const *, void *, i32, NetAddress const &);
+    FtpFile const *GetTransfers() const;
+    void Init();
+    NetFtpManager();
+    virtual void PeerLeft(NetAddress const &, ePeerLeftReason);
+    virtual void Receive(NetMessage, unsigned char, NetAddress const &);
+    void Reset();
+    i32 Send(char const *, void const *, i32, NetAddress const &);
+    void Term();
+    void Update();
+    ~NetFtpManager() override;
+};
+static_assert(sizeof(void *) != 4 || sizeof(NetFtpManager) == 0x1608, "NetFtpManager 32-bit size");
+static_assert(sizeof(void *) != 4 || offsetof(NetFtpManager, files) == 4, "NetFtpManager files 32-bit offset");
+static_assert(sizeof(void *) != 4 || offsetof(NetFtpManager, field_1604) == 0x1604,
+              "NetFtpManager trailing field 32-bit offset");
 struct NetSession {
     u8 reserved_00[4];
     i32 status;

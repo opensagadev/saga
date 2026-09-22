@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 52.193295,
+    "fuzzy_match_percent": 52.21432,
     "total_code": "4722419",
-    "matched_code": "457541",
-    "matched_code_percent": 9.6887,
+    "matched_code": "457954",
+    "matched_code_percent": 9.697446,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 5405,
-    "matched_functions_percent": 40.159,
+    "matched_functions": 5410,
+    "matched_functions_percent": 40.19615,
     "total_units": 1
   },
   "text": {
@@ -35875,7 +35875,7 @@
           "address": 5428336,
           "offset": 4538368,
           "size": 140,
-          "match_percent": 17.897436
+          "match_percent": 15.51282
         },
         {
           "name": "_ZN13NetFtpManagerD2Ev",
@@ -35883,7 +35883,7 @@
           "address": 5428336,
           "offset": 4538368,
           "size": 140,
-          "match_percent": 17.897436
+          "match_percent": 15.51282
         },
         {
           "name": "_ZN13NetFtpManagerD0Ev",
@@ -35915,7 +35915,7 @@
           "address": 5428624,
           "offset": 4538656,
           "size": 62,
-          "match_percent": 28.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZN13NetFtpManager4SendEPKcPKviRK10NetAddress",
@@ -35947,7 +35947,7 @@
           "address": 5428736,
           "offset": 4538768,
           "size": 238,
-          "match_percent": 5.384615
+          "match_percent": 85.5641
         },
         {
           "name": "_ZNK13NetFtpManager12FindTransferEPKcRK10NetAddressi",
@@ -35955,7 +35955,7 @@
           "address": 5428976,
           "offset": 4539008,
           "size": 238,
-          "match_percent": 5.384615
+          "match_percent": 85.17949
         },
         {
           "name": "_ZNK13NetFtpManager12GetTransfersEv",
@@ -35979,7 +35979,7 @@
           "address": 5429248,
           "offset": 4539280,
           "size": 121,
-          "match_percent": 15.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZN7FtpFile4TermEv",
@@ -35995,7 +35995,7 @@
           "address": 5429392,
           "offset": 4539424,
           "size": 230,
-          "match_percent": 2.333333
+          "match_percent": 69.5
         },
         {
           "name": "_ZN13NetFtpManager5ResetEv",
@@ -36011,7 +36011,7 @@
           "address": 5429824,
           "offset": 4539856,
           "size": 74,
-          "match_percent": 24.705883
+          "match_percent": 100.0
         },
         {
           "name": "_ZN7FtpFile6AcceptEiPv",
@@ -36019,7 +36019,7 @@
           "address": 5429904,
           "offset": 4539936,
           "size": 118,
-          "match_percent": 15.483871
+          "match_percent": 100.0
         },
         {
           "name": "_ZN7FtpFile6AcceptEi",
@@ -36027,7 +36027,7 @@
           "address": 5430032,
           "offset": 4540064,
           "size": 38,
-          "match_percent": 42.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZN7FtpFile6AcceptEv",
@@ -36059,7 +36059,7 @@
           "address": 5430128,
           "offset": 4540160,
           "size": 262,
-          "match_percent": 6.774194
+          "match_percent": 60.048386
         }
       ]
     },
@@ -36210,110 +36210,6 @@
           "offset": 4531728,
           "size": 238,
           "match_percent": 54.313435
-        },
-        {
-          "name": "_ZN20NetListenerInterfaceD1Ev",
-          "demangled_name": "NetListenerInterface::~NetListenerInterface()",
-          "address": 5430400,
-          "offset": 4540432,
-          "size": 29,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN20NetListenerInterfaceD2Ev",
-          "demangled_name": "NetListenerInterface::~NetListenerInterface()",
-          "address": 5430400,
-          "offset": 4540432,
-          "size": 29,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN20NetListenerInterface7ReceiveE10NetMessagehRK7NetPeer",
-          "demangled_name": "NetListenerInterface::Receive(NetMessage, unsigned char, NetPeer const&)",
-          "address": 5430432,
-          "offset": 4540464,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN20NetListenerInterface11PeerRequestERK7NetPeer",
-          "demangled_name": "NetListenerInterface::PeerRequest(NetPeer const&)",
-          "address": 5430448,
-          "offset": 4540480,
-          "size": 12,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN20NetListenerInterface10PeerJoinedERK7NetPeer",
-          "demangled_name": "NetListenerInterface::PeerJoined(NetPeer const&)",
-          "address": 5430464,
-          "offset": 4540496,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN20NetListenerInterface8PeerLeftERK7NetPeer15ePeerLeftReason",
-          "demangled_name": "NetListenerInterface::PeerLeft(NetPeer const&, ePeerLeftReason)",
-          "address": 5430480,
-          "offset": 4540512,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN20NetListenerInterface8PeerDeadERK7NetPeer",
-          "demangled_name": "NetListenerInterface::PeerDead(NetPeer const&)",
-          "address": 5430496,
-          "offset": 4540528,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN20NetListenerInterface9FtpUploadEP7FtpFile",
-          "demangled_name": "NetListenerInterface::FtpUpload(FtpFile*)",
-          "address": 5430512,
-          "offset": 4540544,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN20NetListenerInterface11FtpDownloadEP7FtpFile",
-          "demangled_name": "NetListenerInterface::FtpDownload(FtpFile*)",
-          "address": 5430528,
-          "offset": 4540560,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN20NetListenerInterface11FtpCompleteEP7FtpFilei",
-          "demangled_name": "NetListenerInterface::FtpComplete(FtpFile*, int)",
-          "address": 5430544,
-          "offset": 4540576,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN20NetListenerInterface10NosAcquireEP13NetworkObjectRK7NetPeer",
-          "demangled_name": "NetListenerInterface::NosAcquire(NetworkObject*, NetPeer const&)",
-          "address": 5430560,
-          "offset": 4540592,
-          "size": 12,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN20NetListenerInterface10NosAdoptedEP13NetworkObjectRK7NetPeer",
-          "demangled_name": "NetListenerInterface::NosAdopted(NetworkObject*, NetPeer const&)",
-          "address": 5430576,
-          "offset": 4540608,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN20NetListenerInterfaceD0Ev",
-          "demangled_name": "NetListenerInterface::~NetListenerInterface()",
-          "address": 5430592,
-          "offset": 4540624,
-          "size": 45,
-          "match_percent": 100.0
         },
         {
           "name": "_ZN12NetPredictor15StoreSampleDataEPK7EdClassPvPNS_13PredictorTimeEPPNS_13PredictorDataEPfi",
@@ -122288,6 +122184,162 @@
       ]
     },
     {
+      "name": "_ZN20NetListenerInterfaceD1Ev",
+      "demangled_name": "NetListenerInterface::~NetListenerInterface()",
+      "address": 5430400,
+      "offset": 4540432,
+      "size": 29,
+      "match_percent": 100.0,
+      "candidate_units": [
+        "gamelib/util/Ftp.cpp.o",
+        "gamelib/util/Network.cpp.o"
+      ]
+    },
+    {
+      "name": "_ZN20NetListenerInterfaceD2Ev",
+      "demangled_name": "NetListenerInterface::~NetListenerInterface()",
+      "address": 5430400,
+      "offset": 4540432,
+      "size": 29,
+      "match_percent": 100.0,
+      "candidate_units": [
+        "gamelib/util/Ftp.cpp.o",
+        "gamelib/util/Network.cpp.o"
+      ]
+    },
+    {
+      "name": "_ZN20NetListenerInterface7ReceiveE10NetMessagehRK7NetPeer",
+      "demangled_name": "NetListenerInterface::Receive(NetMessage, unsigned char, NetPeer const&)",
+      "address": 5430432,
+      "offset": 4540464,
+      "size": 9,
+      "match_percent": 100.0,
+      "candidate_units": [
+        "gamelib/util/Ftp.cpp.o",
+        "gamelib/util/Network.cpp.o"
+      ]
+    },
+    {
+      "name": "_ZN20NetListenerInterface11PeerRequestERK7NetPeer",
+      "demangled_name": "NetListenerInterface::PeerRequest(NetPeer const&)",
+      "address": 5430448,
+      "offset": 4540480,
+      "size": 12,
+      "match_percent": 100.0,
+      "candidate_units": [
+        "gamelib/util/Ftp.cpp.o",
+        "gamelib/util/Network.cpp.o"
+      ]
+    },
+    {
+      "name": "_ZN20NetListenerInterface10PeerJoinedERK7NetPeer",
+      "demangled_name": "NetListenerInterface::PeerJoined(NetPeer const&)",
+      "address": 5430464,
+      "offset": 4540496,
+      "size": 9,
+      "match_percent": 100.0,
+      "candidate_units": [
+        "gamelib/util/Ftp.cpp.o",
+        "gamelib/util/Network.cpp.o"
+      ]
+    },
+    {
+      "name": "_ZN20NetListenerInterface8PeerLeftERK7NetPeer15ePeerLeftReason",
+      "demangled_name": "NetListenerInterface::PeerLeft(NetPeer const&, ePeerLeftReason)",
+      "address": 5430480,
+      "offset": 4540512,
+      "size": 9,
+      "match_percent": 100.0,
+      "candidate_units": [
+        "gamelib/util/Ftp.cpp.o",
+        "gamelib/util/Network.cpp.o"
+      ]
+    },
+    {
+      "name": "_ZN20NetListenerInterface8PeerDeadERK7NetPeer",
+      "demangled_name": "NetListenerInterface::PeerDead(NetPeer const&)",
+      "address": 5430496,
+      "offset": 4540528,
+      "size": 9,
+      "match_percent": 100.0,
+      "candidate_units": [
+        "gamelib/util/Ftp.cpp.o",
+        "gamelib/util/Network.cpp.o"
+      ]
+    },
+    {
+      "name": "_ZN20NetListenerInterface9FtpUploadEP7FtpFile",
+      "demangled_name": "NetListenerInterface::FtpUpload(FtpFile*)",
+      "address": 5430512,
+      "offset": 4540544,
+      "size": 9,
+      "match_percent": 100.0,
+      "candidate_units": [
+        "gamelib/util/Ftp.cpp.o",
+        "gamelib/util/Network.cpp.o"
+      ]
+    },
+    {
+      "name": "_ZN20NetListenerInterface11FtpDownloadEP7FtpFile",
+      "demangled_name": "NetListenerInterface::FtpDownload(FtpFile*)",
+      "address": 5430528,
+      "offset": 4540560,
+      "size": 9,
+      "match_percent": 100.0,
+      "candidate_units": [
+        "gamelib/util/Ftp.cpp.o",
+        "gamelib/util/Network.cpp.o"
+      ]
+    },
+    {
+      "name": "_ZN20NetListenerInterface11FtpCompleteEP7FtpFilei",
+      "demangled_name": "NetListenerInterface::FtpComplete(FtpFile*, int)",
+      "address": 5430544,
+      "offset": 4540576,
+      "size": 9,
+      "match_percent": 100.0,
+      "candidate_units": [
+        "gamelib/util/Ftp.cpp.o",
+        "gamelib/util/Network.cpp.o"
+      ]
+    },
+    {
+      "name": "_ZN20NetListenerInterface10NosAcquireEP13NetworkObjectRK7NetPeer",
+      "demangled_name": "NetListenerInterface::NosAcquire(NetworkObject*, NetPeer const&)",
+      "address": 5430560,
+      "offset": 4540592,
+      "size": 12,
+      "match_percent": 100.0,
+      "candidate_units": [
+        "gamelib/util/Ftp.cpp.o",
+        "gamelib/util/Network.cpp.o"
+      ]
+    },
+    {
+      "name": "_ZN20NetListenerInterface10NosAdoptedEP13NetworkObjectRK7NetPeer",
+      "demangled_name": "NetListenerInterface::NosAdopted(NetworkObject*, NetPeer const&)",
+      "address": 5430576,
+      "offset": 4540608,
+      "size": 9,
+      "match_percent": 100.0,
+      "candidate_units": [
+        "gamelib/util/Ftp.cpp.o",
+        "gamelib/util/Network.cpp.o"
+      ]
+    },
+    {
+      "name": "_ZN20NetListenerInterfaceD0Ev",
+      "demangled_name": "NetListenerInterface::~NetListenerInterface()",
+      "address": 5430592,
+      "offset": 4540624,
+      "size": 45,
+      "match_percent": 100.0,
+      "candidate_units": [
+        "gamelib/util/Ftp.cpp.o",
+        "gamelib/util/Network.cpp.o"
+      ]
+    },
+    {
       "name": "_ZNK9Placeable5CloneEi",
       "demangled_name": "Placeable::Clone(int) const",
       "address": 5612816,
@@ -128113,8 +128165,8 @@
   "summary": {
     "bazel_units": 458,
     "functions": 13454,
-    "assigned_functions": 12515,
-    "ambiguous_functions": 216,
+    "assigned_functions": 12502,
+    "ambiguous_functions": 229,
     "unassigned_functions": 723
   }
 }
