@@ -376,12 +376,12 @@ namespace {
     }
 
     static void TerrainScanPlatformGroup(TerrainScanWriter *writer, const TerrainScanBounds &bounds, i32 group_index,
-                                         i32 terrain_mask, i32 scan_flags, f32 movement_scale) {
+                                         i32 terrain_mask, i32 scan_flags, f32 movement_scale, bool check_visibility) {
         TERRAIN_GROUP &group = CurTerr->groups[group_index];
         TERRAIN_PLATFORM &platform = CurTerr->platforms[group.scene_index];
         if (group.chunk_type == -1)
             return;
-        if (platform.scene_transform != NULL) {
+        if (check_visibility && platform.scene_transform != NULL) {
             const u8 visible_mask = (platform.flags & TERRAIN_PLATFORM_FLAG_DISPLAY_LIST_BACKED) != 0 ? 2 : 1;
             if ((*static_cast<u8 *>(platform.scene_transform) & visible_mask) == 0)
                 return;
@@ -1782,7 +1782,7 @@ void ScanTerrain(i32 scan_type, i32 terrain_mask, i32 scan_flags) {
                 group.origin.z - group.radius > platform_bounds.max_z ||
                 group.origin.z + group.radius < platform_bounds.min_z)
                 continue;
-            TerrainScanPlatformGroup(&writer, platform_bounds, groups[i], terrain_mask, scan_flags, 1.0f);
+            TerrainScanPlatformGroup(&writer, platform_bounds, groups[i], terrain_mask, scan_flags, 1.0f, true);
         }
     }
 
@@ -3339,6 +3339,7 @@ void TerrainImpactNorm() {
     query->impact_normal.z = query->movement_normal.z * inverse_normal_length;
 }
 void ScanTerrainPlatform(i32 group_index, i32 terrain_mask) {
+    NuScratchAlloc32(0xd0);
     ScaleTerrain = static_cast<TERRAIN_SHAPE *>(ScaleTerrainT1);
     platinrange = 0;
     TerI->scan_group_index = -1;
@@ -3350,8 +3351,8 @@ void ScanTerrainPlatform(i32 group_index, i32 terrain_mask) {
     writer.scaled_shape_count = 0;
     TerrainScanBounds bounds = TerrainGetScanBounds(*TerI);
     if (TerI->scan_result != 1) {
-        const f32 reach = TerI->collision_radius_sq + 0.02f + TerI->movement.x * TerI->movement.x +
-                          TerI->movement.y * TerI->movement.y + TerI->movement.z * TerI->movement.z;
+        const f32 reach = NuFsqrt(TerI->collision_radius_sq + 0.02f + TerI->movement.x * TerI->movement.x +
+                                  TerI->movement.y * TerI->movement.y + TerI->movement.z * TerI->movement.z);
         bounds.min_x = TerI->position.x - reach;
         bounds.max_x = TerI->position.x + reach;
         bounds.min_y = TerI->position.y - TerI->object_scale * reach;
@@ -3366,7 +3367,8 @@ void ScanTerrainPlatform(i32 group_index, i32 terrain_mask) {
     bounds.max_y += 0.05f;
     bounds.max_z += 0.05f;
     TerI->scan_list = TerI->scan_list_storage;
-    TerrainScanPlatformGroup(&writer, bounds, group_index, terrain_mask, 0, 1.5f);
+    TerrainScanPlatformGroup(&writer, bounds, group_index, terrain_mask, 0, 1.5f, false);
+    NuScratchRelease();
     i16 *terminator = reinterpret_cast<i16 *>(writer.group_header);
     terminator[0] = 0;
     terminator[1] = 0;
