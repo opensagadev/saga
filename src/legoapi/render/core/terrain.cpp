@@ -4476,8 +4476,192 @@ namespace {
 
 } // namespace
 
-void NewScan(nuvec_s *, i32, i32) {
-    STUBBED();
+void NewScan(nuvec_s *position, i32 scan_platforms, i32 terrain_mask) {
+    i32 cache_index = 0;
+    i32 oldest_age = CurTerr->index_levels[0].cache_age;
+    bool cache_hit = false;
+    for (i32 i = 0; i < 16; ++i) {
+        TERRAIN_INDEX_LEVEL &candidate = CurTerr->index_levels[i];
+        const i32 age = candidate.cache_age;
+        if (age > 0) {
+            const f32 dx = (position->x + 1.0f) - candidate.center_x;
+            const f32 dz = (position->z + 1.0f) - candidate.center_z;
+            if (dx > 0.0f && dx < 2.0f && dz > 0.0f && dz < 2.0f) {
+                cache_index = i;
+                cache_hit = true;
+                break;
+            }
+        }
+        if (age < oldest_age) {
+            oldest_age = age;
+            cache_index = i;
+        }
+    }
+
+    TERRAIN_INDEX_LEVEL &cache = CurTerr->index_levels[cache_index];
+    const bool fill_cache = !cache_hit;
+    ShadowScanWriter writer;
+    writer.group_header = fill_cache ? cache.scan_list : TerI->scan_list_storage;
+    writer.cursor = reinterpret_cast<TERRAIN_SHAPE **>(writer.group_header + sizeof(TERRAIN_SHAPE *));
+    writer.limit = writer.group_header + 0x7f4;
+    writer.shape_count = 0;
+
+    const f32 extent = fill_cache ? 1.0f : SHADOW_SCAN_HALF_EXTENT;
+    f32 min_x = position->x - extent;
+    f32 max_x = position->x + extent;
+    f32 min_z = position->z - extent;
+    f32 max_z = position->z + extent;
+
+    if (!cache_hit) {
+        for (i32 cell_index = 0; cell_index < CurTerr->used_cell_count; ++cell_index) {
+            const TERRAIN_CELL &cell = CurTerr->cells[cell_index];
+            if (max_x < cell.min_x || cell.max_x < min_x || max_z < cell.min_z || cell.max_z < min_z) {
+                continue;
+            }
+            const i16 *group_indices = CurTerr->group_indices + cell.first_group;
+            for (i32 cell_group = 0; cell_group < static_cast<i16>(cell.group_count); ++cell_group) {
+                ShadowScanGroup(group_indices[cell_group], min_x, min_z, max_x, max_z, terrain_mask, false, &writer);
+            }
+        }
+    }
+
+    if (fill_cache) {
+        i16 *terminator = reinterpret_cast<i16 *>(writer.group_header);
+        terminator[0] = 0;
+        terminator[1] = 0;
+        cache.center_x = position->x;
+        cache.center_z = position->z;
+    }
+
+    if (fill_cache || cache_hit) {
+        cache.cache_age = 8;
+        writer.group_header = TerI->scan_list_storage;
+        writer.cursor = reinterpret_cast<TERRAIN_SHAPE **>(writer.group_header + sizeof(TERRAIN_SHAPE *));
+        writer.limit = writer.group_header + 0x7f4;
+        writer.shape_count = 0;
+        min_x = position->x - SHADOW_SCAN_HALF_EXTENT;
+        max_x = position->x + SHADOW_SCAN_HALF_EXTENT;
+        min_z = position->z - SHADOW_SCAN_HALF_EXTENT;
+        max_z = position->z + SHADOW_SCAN_HALF_EXTENT;
+
+        u8 *entry = cache.scan_list;
+        for (;;) {
+            const i16 count = reinterpret_cast<i16 *>(entry)[0];
+            if (count <= 0) {
+                break;
+            }
+            const i16 group_index = reinterpret_cast<i16 *>(entry)[1];
+            TERRAIN_SHAPE **shapes = reinterpret_cast<TERRAIN_SHAPE **>(entry + sizeof(TERRAIN_SHAPE *));
+            entry = reinterpret_cast<u8 *>(shapes + count);
+            TERRAIN_GROUP &group = CurTerr->groups[group_index];
+            if (!ShadowBoundsOverlap(min_x, min_z, max_x, max_z, group.bounds_min, group.bounds_max) ||
+                group.chunk_type == -1) {
+                continue;
+            }
+
+            const f32 local_min_x = min_x - group.origin.x;
+            const f32 local_max_x = max_x - group.origin.x;
+            const f32 local_min_z = min_z - group.origin.z;
+            const f32 local_max_z = max_z - group.origin.z;
+            for (i32 i = 0; i < count; ++i) {
+                TERRAIN_SHAPE *shape = shapes[i];
+                if (local_max_x < shape->min_x || shape->max_x <= local_min_x || local_max_z < shape->min_z ||
+                    shape->max_z <= local_min_z) {
+                    continue;
+                }
+                if (shape->material[1] != 0 && (shape->material[1] & terrain_mask) == 0) {
+                    continue;
+                }
+                if (reinterpret_cast<u8 *>(writer.cursor) >= writer.limit) {
+                    continue;
+                }
+                *writer.cursor++ = shape;
+                ++writer.shape_count;
+            }
+            ShadowFinishGroup(&writer, group_index);
+        }
+    }
+
+    if (scan_platforms != 0) {
+        min_x -= 0.05f;
+        max_x += 0.05f;
+        min_z -= 0.05f;
+        max_z += 0.05f;
+        i16 *platform_groups = CurTerr->active_platform_groups;
+        i32 platform_count = CurTerr->active_platform_count;
+        if (!(min_x > CurTerr->platform_scan_min.x && max_x < CurTerr->platform_scan_max.x &&
+              min_z > CurTerr->platform_scan_min.z && max_z < CurTerr->platform_scan_max.z)) {
+            const TERRAIN_CELL &cell = CurTerr->cells[TERRAIN_PLATFORM_CELL];
+            platform_groups = CurTerr->group_indices + cell.first_group;
+            platform_count = static_cast<i16>(cell.group_count);
+        }
+
+        for (i32 platform_index = 0; platform_index < platform_count; ++platform_index) {
+            const i32 group_index = platform_groups[platform_index];
+            TERRAIN_GROUP &group = CurTerr->groups[group_index];
+            TERRAIN_PLATFORM &platform = CurTerr->platforms[group.scene_index];
+            if (platform.scene_transform != NULL) {
+                const u8 visible_mask = (platform.flags & TERRAIN_PLATFORM_FLAG_DISPLAY_LIST_BACKED) != 0 ? 2 : 1;
+                if ((*static_cast<u8 *>(platform.scene_transform) & visible_mask) == 0) {
+                    continue;
+                }
+            }
+
+            f32 local_min_x = min_x - group.origin.x;
+            f32 local_max_x = max_x - group.origin.x;
+            f32 local_min_z = min_z - group.origin.z;
+            f32 local_max_z = max_z - group.origin.z;
+            NUMTX *matrix = static_cast<NUMTX *>(platform.scene_object);
+            if (matrix != NULL) {
+                const f32 dx = (matrix->m30 - platform.previous_matrix.m30) * 1.5f;
+                const f32 dz = (matrix->m32 - platform.previous_matrix.m32) * 1.5f;
+                if (dx > 0.0f) {
+                    local_max_x += dx;
+                } else {
+                    local_min_x += dx;
+                }
+                if (dz > 0.0f) {
+                    local_max_z += dz;
+                } else {
+                    local_min_z += dz;
+                }
+            }
+            if (!ShadowBoundsOverlap(local_min_x, local_min_z, local_max_x, local_max_z, group.bounds_min,
+                                     group.bounds_max) ||
+                group.chunk_type == -1) {
+                continue;
+            }
+
+            TERRAIN_SHAPE_BATCH *batch = static_cast<TERRAIN_SHAPE_BATCH *>(group.data);
+            while (batch->marker >= 0) {
+                TERRAIN_SHAPE *shapes = reinterpret_cast<TERRAIN_SHAPE *>(batch + 1);
+                if (local_max_x >= batch->min_x && batch->max_x > local_min_x && local_max_z >= batch->min_z &&
+                    batch->max_z > local_min_z) {
+                    for (i32 shape_index = 0; shape_index < batch->shape_count; ++shape_index) {
+                        TERRAIN_SHAPE *shape = &shapes[shape_index];
+                        if (local_max_x < shape->min_x || shape->max_x <= local_min_x || local_max_z < shape->min_z ||
+                            shape->max_z <= local_min_z) {
+                            continue;
+                        }
+                        if (reinterpret_cast<u8 *>(writer.cursor) >= writer.limit) {
+                            continue;
+                        }
+                        if (shape->material[1] != 0 && (shape->material[1] & terrain_mask) == 0) {
+                            continue;
+                        }
+                        *writer.cursor++ = shape;
+                        ++writer.shape_count;
+                    }
+                }
+                batch = reinterpret_cast<TERRAIN_SHAPE_BATCH *>(shapes + batch->shape_count);
+            }
+            ShadowFinishGroup(&writer, group_index);
+        }
+    }
+
+    i16 *terminator = reinterpret_cast<i16 *>(writer.group_header);
+    terminator[0] = 0;
+    terminator[1] = 0;
 }
 
 void NewScanRot(nuvec_s *position, i32 terrain_mask) {
@@ -4541,8 +4725,8 @@ void NewScanRot(nuvec_s *position, i32 terrain_mask) {
     if (fill_cache || cache_hit) {
         cache.cache_age = 8;
         writer.group_header = TerI->scan_list_storage;
-        writer.cursor = reinterpret_cast<TERRAIN_SHAPE **>(writer.group_header + 4);
-        writer.limit = reinterpret_cast<u8 *>(TerI) + 0x93c;
+        writer.cursor = reinterpret_cast<TERRAIN_SHAPE **>(writer.group_header + sizeof(TERRAIN_SHAPE *));
+        writer.limit = writer.group_header + 0x7f4;
         min_x = position->x - SHADOW_SCAN_HALF_EXTENT;
         max_x = position->x + SHADOW_SCAN_HALF_EXTENT;
         min_z = position->z - SHADOW_SCAN_HALF_EXTENT;
@@ -4553,7 +4737,7 @@ void NewScanRot(nuvec_s *position, i32 terrain_mask) {
             if (count <= 0)
                 break;
             i16 group_index = reinterpret_cast<i16 *>(entry)[1];
-            TERRAIN_SHAPE **shapes = reinterpret_cast<TERRAIN_SHAPE **>(entry + 4);
+            TERRAIN_SHAPE **shapes = reinterpret_cast<TERRAIN_SHAPE **>(entry + sizeof(TERRAIN_SHAPE *));
             entry = reinterpret_cast<u8 *>(shapes + count);
             TERRAIN_GROUP &group = CurTerr->groups[group_index];
             if (!ShadowBoundsOverlap(min_x, min_z, max_x, max_z, group.bounds_min, group.bounds_max) ||
