@@ -4637,7 +4637,6 @@ void NewScanRot(nuvec_s *position, i32 terrain_mask) {
     i16 *terminator = reinterpret_cast<i16 *>(writer.group_header);
     terminator[0] = 0;
     terminator[1] = 0;
-    TerI->scan_list = TerI->scan_list_storage;
 }
 
 i16 InsideLineF(f32, f32, f32, f32, f32, f32);

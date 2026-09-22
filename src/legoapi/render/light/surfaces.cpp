@@ -95,7 +95,7 @@ void GetSurfaceInfo(GameObject_s *object, i32 update_surface, f32 shadow_height)
     if (update_surface != 0) {
         object->field_0xe41 = static_cast<u8>(surface);
         api.field_0x281 = static_cast<u8>(surface);
-        object->surface_normal = shadow_height == 2000000.0f && api.field_0x218 == 2000000.0f ? v010 : ShadNorm;
+        object->surface_normal = api.field_0x218 == 2000000.0f ? v010 : ShadNorm;
     }
 
     api.water_height = EShadY;
