@@ -150,10 +150,6 @@ void NetworkObject::Initialise(i32 guid, void *new_object, EdClass *new_class, N
     }
 }
 
-void NetListenerList::Find(NetListenerBinding *) {
-    STUBBED();
-}
-
 bool NetConstReplicator::AllowPush(EdClass const *, void const *, ReplicatorData &data, i32 force, i32) {
     u32 *last_push = reinterpret_cast<u32 *>((reinterpret_cast<uintptr_t>(data.cursor) + 3) & ~3u);
     data.cursor = reinterpret_cast<u8 *>(last_push + 1);
@@ -164,18 +160,6 @@ bool NetConstReplicator::AllowPush(EdClass const *, void const *, ReplicatorData
     }
     *last_push = now;
     return true;
-}
-
-NetListenerBinding::NetListenerBinding(NetListenerInterface *, unsigned char, char *) {
-    STUBBED();
-}
-
-void NetListenerBinding::operator=(NetListenerBinding const &) {
-    STUBBED();
-}
-
-void NetListenerBinding::operator==(NetListenerBinding const &) {
-    STUBBED();
 }
 
 bool NetSimpleReplicator::AllowPush(EdClass const *, void const *, ReplicatorData &data, i32 force, i32) {

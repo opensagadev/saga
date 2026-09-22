@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 51.93305,
+    "fuzzy_match_percent": 51.957123,
     "total_code": "4722419",
-    "matched_code": "455142",
-    "matched_code_percent": 9.637899,
+    "matched_code": "455505",
+    "matched_code_percent": 9.645586,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 5373,
-    "matched_functions_percent": 39.92124,
+    "matched_functions": 5377,
+    "matched_functions_percent": 39.950962,
     "total_units": 1
   },
   "text": {
@@ -36124,46 +36124,6 @@
           "match_percent": 93.565216
         },
         {
-          "name": "_ZN18NetListenerBindingC1EP20NetListenerInterfacehPc",
-          "demangled_name": "NetListenerBinding::NetListenerBinding(NetListenerInterface*, unsigned char, char*)",
-          "address": 5425840,
-          "offset": 4535872,
-          "size": 252,
-          "match_percent": 7.164179
-        },
-        {
-          "name": "_ZN18NetListenerBindingC2EP20NetListenerInterfacehPc",
-          "demangled_name": "NetListenerBinding::NetListenerBinding(NetListenerInterface*, unsigned char, char*)",
-          "address": 5425840,
-          "offset": 4535872,
-          "size": 252,
-          "match_percent": 7.164179
-        },
-        {
-          "name": "_ZN18NetListenerBindingaSERKS_",
-          "demangled_name": "NetListenerBinding::operator=(NetListenerBinding const&)",
-          "address": 5426096,
-          "offset": 4536128,
-          "size": 22,
-          "match_percent": 20.0
-        },
-        {
-          "name": "_ZN18NetListenerBindingeqERKS_",
-          "demangled_name": "NetListenerBinding::operator==(NetListenerBinding const&)",
-          "address": 5426128,
-          "offset": 4536160,
-          "size": 36,
-          "match_percent": 28.0
-        },
-        {
-          "name": "_ZN15NetListenerList4FindEP18NetListenerBinding",
-          "demangled_name": "NetListenerList::Find(NetListenerBinding*)",
-          "address": 5426176,
-          "offset": 4536208,
-          "size": 84,
-          "match_percent": 12.352942
-        },
-        {
           "name": "_ZN20NetListenerInterfaceD1Ev",
           "demangled_name": "NetListenerInterface::~NetListenerInterface()",
           "address": 5430400,
@@ -37552,12 +37512,60 @@
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_gamelib/Transporter.o",
       "functions": [
         {
+          "name": "_GLOBAL__sub_I_Transporter.cpp",
+          "demangled_name": "_GLOBAL__sub_I_Transporter.cpp",
+          "address": 928320,
+          "offset": 38352,
+          "size": 93,
+          "match_percent": 99.35294
+        },
+        {
+          "name": "_ZN18NetListenerBindingC1EP20NetListenerInterfacehPc",
+          "demangled_name": "NetListenerBinding::NetListenerBinding(NetListenerInterface*, unsigned char, char*)",
+          "address": 5425840,
+          "offset": 4535872,
+          "size": 252,
+          "match_percent": 91.07462
+        },
+        {
+          "name": "_ZN18NetListenerBindingC2EP20NetListenerInterfacehPc",
+          "demangled_name": "NetListenerBinding::NetListenerBinding(NetListenerInterface*, unsigned char, char*)",
+          "address": 5425840,
+          "offset": 4535872,
+          "size": 252,
+          "match_percent": 91.07462
+        },
+        {
+          "name": "_ZN18NetListenerBindingaSERKS_",
+          "demangled_name": "NetListenerBinding::operator=(NetListenerBinding const&)",
+          "address": 5426096,
+          "offset": 4536128,
+          "size": 22,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN18NetListenerBindingeqERKS_",
+          "demangled_name": "NetListenerBinding::operator==(NetListenerBinding const&)",
+          "address": 5426128,
+          "offset": 4536160,
+          "size": 36,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN15NetListenerList4FindEP18NetListenerBinding",
+          "demangled_name": "NetListenerList::Find(NetListenerBinding*)",
+          "address": 5426176,
+          "offset": 4536208,
+          "size": 84,
+          "match_percent": 100.0
+        },
+        {
           "name": "_ZN14NetTransporter11AddListenerEP20NetListenerInterfacehPc",
           "demangled_name": "NetTransporter::AddListener(NetListenerInterface*, unsigned char, char*)",
           "address": 5426272,
           "offset": 4536304,
           "size": 221,
-          "match_percent": 5.070176
+          "match_percent": 100.0
         },
         {
           "name": "_ZN14NetTransporter14RemoveListenerEP20NetListenerInterfaceh",
@@ -37565,7 +37573,7 @@
           "address": 5426496,
           "offset": 4536528,
           "size": 229,
-          "match_percent": 5.941176
+          "match_percent": 91.960785
         },
         {
           "name": "_ZNK14NetTransporter10DistributeERK10NetMessagehRK7NetPeer",
@@ -37573,7 +37581,7 @@
           "address": 5426736,
           "offset": 4536768,
           "size": 301,
-          "match_percent": 5.602272
+          "match_percent": 5.454546
         },
         {
           "name": "_ZNK14NetTransporter11PeerRequestERK7NetPeer",
@@ -37581,7 +37589,7 @@
           "address": 5427040,
           "offset": 4537072,
           "size": 73,
-          "match_percent": 13.75862
+          "match_percent": 16.551723
         },
         {
           "name": "_ZNK14NetTransporter10PeerJoinedERK7NetPeer",
@@ -37589,7 +37597,7 @@
           "address": 5427120,
           "offset": 4537152,
           "size": 60,
-          "match_percent": 15.0
+          "match_percent": 19.09091
         },
         {
           "name": "_ZNK14NetTransporter8PeerLeftERK7NetPeer15ePeerLeftReason",
@@ -37597,7 +37605,7 @@
           "address": 5427184,
           "offset": 4537216,
           "size": 65,
-          "match_percent": 15.6
+          "match_percent": 16.8
         },
         {
           "name": "_ZNK14NetTransporter8PeerDeadERK7NetPeer",
@@ -37605,7 +37613,7 @@
           "address": 5427264,
           "offset": 4537296,
           "size": 60,
-          "match_percent": 15.0
+          "match_percent": 19.09091
         },
         {
           "name": "_ZNK14NetTransporter9FtpUploadEP7FtpFile",
@@ -37613,7 +37621,7 @@
           "address": 5427328,
           "offset": 4537360,
           "size": 60,
-          "match_percent": 15.0
+          "match_percent": 19.09091
         },
         {
           "name": "_ZNK14NetTransporter11FtpDownloadEP7FtpFile",
@@ -37621,7 +37629,7 @@
           "address": 5427392,
           "offset": 4537424,
           "size": 60,
-          "match_percent": 15.0
+          "match_percent": 19.09091
         },
         {
           "name": "_ZNK14NetTransporter11FtpCompleteEP7FtpFilei",
@@ -37629,7 +37637,7 @@
           "address": 5427456,
           "offset": 4537488,
           "size": 65,
-          "match_percent": 15.6
+          "match_percent": 16.8
         },
         {
           "name": "_ZNK14NetTransporter10NosAcquireEP13NetworkObjectRK7NetPeer",
@@ -37637,7 +37645,7 @@
           "address": 5427536,
           "offset": 4537568,
           "size": 99,
-          "match_percent": 9.148936
+          "match_percent": 15.74468
         },
         {
           "name": "_ZNK14NetTransporter10NosAdoptedEP13NetworkObjectRK7NetPeer",
@@ -37645,7 +37653,7 @@
           "address": 5427648,
           "offset": 4537680,
           "size": 65,
-          "match_percent": 15.6
+          "match_percent": 16.8
         },
         {
           "name": "_ZN14NetTransporter11StatsUpdateEv",
@@ -37653,7 +37661,7 @@
           "address": 5427728,
           "offset": 4537760,
           "size": 56,
-          "match_percent": 19.0
+          "match_percent": 21.0
         },
         {
           "name": "_ZN14NetTransporter16StatsSendMessageE10NetMessageh",
@@ -37661,7 +37669,7 @@
           "address": 5427792,
           "offset": 4537824,
           "size": 74,
-          "match_percent": 17.35484
+          "match_percent": 13.548388
         },
         {
           "name": "_ZN14NetTransporter19StatsReceiveMessageE10NetMessageh",
@@ -37669,7 +37677,7 @@
           "address": 5427872,
           "offset": 4537904,
           "size": 74,
-          "match_percent": 17.35484
+          "match_percent": 13.548388
         },
         {
           "name": "_ZN14NetTransporterD1Ev",
@@ -37677,7 +37685,7 @@
           "address": 5427952,
           "offset": 4537984,
           "size": 29,
-          "match_percent": 0.0
+          "match_percent": 99.375
         },
         {
           "name": "_ZN14NetTransporterD2Ev",
@@ -37685,7 +37693,7 @@
           "address": 5427952,
           "offset": 4537984,
           "size": 29,
-          "match_percent": 0.0
+          "match_percent": 99.375
         },
         {
           "name": "_ZN14NetTransporterD0Ev",
@@ -37693,7 +37701,7 @@
           "address": 5427984,
           "offset": 4538016,
           "size": 45,
-          "match_percent": 46.076923
+          "match_percent": 99.61539
         }
       ]
     },
@@ -122786,14 +122794,6 @@
       "match_percent": 0.0
     },
     {
-      "name": "_GLOBAL__sub_I_Transporter.cpp",
-      "demangled_name": "_GLOBAL__sub_I_Transporter.cpp",
-      "address": 928320,
-      "offset": 38352,
-      "size": 93,
-      "match_percent": 0.0
-    },
-    {
       "name": "_GLOBAL__sub_I_Utilities.cpp",
       "demangled_name": "_GLOBAL__sub_I_Utilities.cpp",
       "address": 928416,
@@ -128101,8 +128101,8 @@
   "summary": {
     "bazel_units": 458,
     "functions": 13454,
-    "assigned_functions": 12502,
+    "assigned_functions": 12503,
     "ambiguous_functions": 213,
-    "unassigned_functions": 739
+    "unassigned_functions": 738
   }
 }

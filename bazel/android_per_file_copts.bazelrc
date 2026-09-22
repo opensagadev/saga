@@ -35,6 +35,9 @@ build:target --per_file_copt=^src/gamelib/util/CRC16\.cpp$@-O3
 build:target --per_file_copt=^src/gamelib/util/Network_stubs\.cpp$@-O3
 build:target --per_file_copt=^src/gamelib/util/Message\.cpp$@-O3
 build:target --per_file_copt=^src/gamelib/util/Stats\.cpp$@-O3
+# Listener-list registration in the original is optimized, including direct
+# pool allocation and compact intrusive-list insertion/removal paths.
+build:target --per_file_copt=^src/gamelib/util/Transporter\.cpp$@-O3
 # Recovered stub-only device units: -O3 reproduces FileSize exactly and the
 # APK constructor/CreateNuFile and SetCurrentDir bodies apart from relocation.
 build:target --per_file_copt=^src/nu2api/nufile/nufiledevice\.cpp$@-O3

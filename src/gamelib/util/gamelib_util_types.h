@@ -166,14 +166,6 @@ struct NetFtpManager {
     void Update();
     virtual ~NetFtpManager();
 };
-struct NetListenerBinding {
-    NetListenerBinding(NetListenerInterface *, unsigned char, char *);
-    void operator=(NetListenerBinding const &);
-    void operator==(NetListenerBinding const &);
-};
-struct NetListenerList {
-    void Find(NetListenerBinding *);
-};
 struct NetMessage {
     struct MessageData {
         u8 bytes[0x4b0];
@@ -398,6 +390,27 @@ DECOMP_ASSERT(offsetof(NetSmallStats, total) == 8, "NetSmallStats total offset")
 DECOMP_ASSERT(sizeof(NetStats) == 0x220, "NetStats size");
 DECOMP_ASSERT(offsetof(NetStats, sample_index) == 0x18, "NetStats sample index offset");
 DECOMP_ASSERT(offsetof(NetStats, samples) == 0x40, "NetStats sample history offset");
+struct NetListenerBinding {
+    NetListenerBinding *next;
+    NetListenerBinding *previous;
+    NetListenerInterface *listener;
+    u8 channel;
+    char name[0x23];
+    NetStats stats;
+
+    NetListenerBinding(NetListenerInterface *, unsigned char, char *);
+    void operator=(NetListenerBinding const &);
+    bool operator==(NetListenerBinding const &);
+};
+struct NetListenerList {
+    NetListenerBinding *first;
+
+    NetListenerBinding *Find(NetListenerBinding *);
+};
+DECOMP_ASSERT(sizeof(NetListenerBinding) == 0x250, "NetListenerBinding size");
+DECOMP_ASSERT(offsetof(NetListenerBinding, listener) == 8, "NetListenerBinding listener offset");
+DECOMP_ASSERT(offsetof(NetListenerBinding, channel) == 0xc, "NetListenerBinding channel offset");
+DECOMP_ASSERT(offsetof(NetListenerBinding, stats) == 0x30, "NetListenerBinding stats offset");
 struct NetTransporter {
     NetListenerBinding *first_listener;
     NetListenerBinding *last_listener;
