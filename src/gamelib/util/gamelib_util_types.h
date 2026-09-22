@@ -79,6 +79,8 @@ struct NetPeer {
     } *vtable;
     u8 reserved_04[8];
     u8 local;
+    u8 reserved_0d[0x29c - 0xd];
+    i32 time_offset;
 };
 struct ReplicatorData {
     u8 *start;
@@ -318,30 +320,50 @@ DECOMP_ASSERT(offsetof(NetMessage, write_offset) == 12, "NetMessage write cursor
 static_assert(sizeof(NetMessage::MessageData) == 0x4b4, "NetMessage pool entry size");
 static_assert(offsetof(NetMessage::MessageData, references) == 0x4b0, "NetMessage pool reference offset");
 struct NetPredictor : NetReplicator {
-    struct PredictorData {};
-    struct PredictorTime {};
+    struct PredictorData {
+        f32 values[3];
+    };
+    struct PredictorTime {
+        i32 sample_count;
+        f32 values[3];
+        f32 factors[3];
+    };
+
+    f32 maximum_prediction_error;
+    f32 maximum_sample_delta;
+    f32 minimum_value;
+    f32 maximum_value;
+
     bool AllowPush(EdClass const *, void const *, ReplicatorData &, i32, i32) override;
-    void CheckPredictionError(EdClass const *, void *, float *, float *, i32);
-    void DoPrediction(EdClass const *, void *, ReplicatorData &, NetPredictor::PredictorTime *, i32);
+    virtual i32 CheckPredictionError(EdClass const *, void *, float *, float *, i32);
+    i32 DoPrediction(EdClass const *, void *, ReplicatorData &, NetPredictor::PredictorTime *, i32);
     i32 DoPrediction(EdClass const *, void *, ReplicatorData &, i32) override;
-    void SerialiseObject(EdStream &, NetPeer *, EdClass const *, void *, ReplicatorData &,
-                         NetPredictor::PredictorTime *, i16 *);
+    i32 SerialiseObject(EdStream &, NetPeer *, EdClass const *, void *, ReplicatorData &, NetPredictor::PredictorTime *,
+                        i16 *);
     i32 SerialiseObject(EdStream &, NetPeer *, EdClass const *, void *, ReplicatorData &, i16 *) override;
-    void StoreSampleData(EdClass const *, void *, NetPredictor::PredictorTime *, NetPredictor::PredictorData **,
-                         float *, i32);
+    virtual void StoreSampleData(EdClass const *, void *, NetPredictor::PredictorTime *, NetPredictor::PredictorData **,
+                                 float *, i32);
+    virtual void PredictValue(EdClass const *, void *, NetPredictor::PredictorTime *, NetPredictor::PredictorData **,
+                              float *, i32) = 0;
 };
-struct NetPredictor2 {
+struct NetPredictor2 : NetPredictor {
     void PredictValue(EdClass const *, void *, NetPredictor::PredictorTime *, NetPredictor::PredictorData **, float *,
-                      i32);
+                      i32) override;
 };
-struct NetPredictor3 {
+struct NetPredictor3 : NetPredictor {
     void PredictValue(EdClass const *, void *, NetPredictor::PredictorTime *, NetPredictor::PredictorData **, float *,
-                      i32);
+                      i32) override;
 };
-struct NetRotator2 {
+struct NetRotator2 : NetPredictor {
     void PredictValue(EdClass const *, void *, NetPredictor::PredictorTime *, NetPredictor::PredictorData **, float *,
-                      i32);
+                      i32) override;
 };
+static_assert(sizeof(void *) != 4 || sizeof(NetPredictor::PredictorData) == 0xc,
+              "NetPredictor::PredictorData 32-bit size");
+static_assert(sizeof(void *) != 4 || sizeof(NetPredictor::PredictorTime) == 0x1c,
+              "NetPredictor::PredictorTime 32-bit size");
+static_assert(sizeof(void *) != 4 || sizeof(NetPredictor) == 0x28, "NetPredictor 32-bit size");
+static_assert(sizeof(void *) != 4 || offsetof(NetPeer, time_offset) == 0x29c, "NetPeer::time_offset 32-bit offset");
 struct NetSample {
     u32 values[4];
 
