@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 52.765007,
+    "fuzzy_match_percent": 52.766796,
     "total_code": "4722419",
     "matched_code": "460134",
     "matched_code_percent": 9.7436075,
@@ -58586,7 +58586,7 @@
           "address": 1864208,
           "offset": 974240,
           "size": 301,
-          "match_percent": 4.673913
+          "match_percent": 39.608696
         },
         {
           "name": "_ZL17GizForces_BoltHitPvS_S_P7nuvec_sifS1_S1_P6BOLT_sjPh",
@@ -58594,7 +58594,7 @@
           "address": 1864512,
           "offset": 974544,
           "size": 1045,
-          "match_percent": 1.944444
+          "match_percent": 0.0
         },
         {
           "name": "_ZL23GizForces_StoreProgressPvS_S_",
@@ -58754,7 +58754,7 @@
           "address": 1880112,
           "offset": 990144,
           "size": 112,
-          "match_percent": 60.555557
+          "match_percent": 60.22222
         },
         {
           "name": "_Z19GizForces_FindForceP11WORLDINFO_sPc",
