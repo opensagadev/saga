@@ -5833,14 +5833,72 @@ extern "C" void NewScanInit(void) {
     TerrPlatDis = -1;
 }
 
-i16 *NewScanHandelFull(nuvec_s *, nuvec_s *, f32, i32, i32) {
-    STUBBED();
-    return NULL;
+namespace {
+    static i16 *TerrainStoreScanHandle() {
+        if (TempScanStack == NULL || TempStackPtr == NULL)
+            return NULL;
+
+        u8 *arena_begin = static_cast<u8 *>(TempScanStack);
+        u8 *arena_end = arena_begin + 0x2000;
+        u8 *handle_start = static_cast<u8 *>(TempStackPtr);
+        const usize header_size = sizeof(TERRAIN_SHAPE *);
+        if (handle_start < arena_begin || handle_start + header_size * 2 > arena_end)
+            return NULL;
+
+        // The original reserves three target pointer slots below the 0x800
+        // scan-list boundary.  One is the next group header; the other two
+        // leave room for the group terminator and wall-list terminator.
+        u8 *shape_limit = handle_start + 0x800 - header_size * 3;
+        if (shape_limit > arena_end)
+            shape_limit = arena_end;
+
+        u8 *source_group = TerI->scan_list_storage;
+        u8 *output_group = handle_start;
+        for (;;) {
+            i16 *source_header = reinterpret_cast<i16 *>(source_group);
+            i32 source_count = source_header[0];
+            if (source_count <= 0)
+                break;
+
+            TERRAIN_SHAPE **source_shapes = reinterpret_cast<TERRAIN_SHAPE **>(source_group + sizeof(TERRAIN_SHAPE *));
+            TERRAIN_SHAPE **output_shapes = reinterpret_cast<TERRAIN_SHAPE **>(output_group + sizeof(TERRAIN_SHAPE *));
+            i32 output_count = 0;
+            for (i32 i = 0; i < source_count && reinterpret_cast<u8 *>(output_shapes) < shape_limit; ++i) {
+                *output_shapes++ = source_shapes[i];
+                ++output_count;
+            }
+            if (output_count != 0) {
+                i16 *output_header = reinterpret_cast<i16 *>(output_group);
+                output_header[0] = static_cast<i16>(output_count);
+                output_header[1] = source_header[1];
+                output_group = reinterpret_cast<u8 *>(output_shapes);
+            }
+            source_group = reinterpret_cast<u8 *>(source_shapes + source_count);
+        }
+
+        i16 *terminator = reinterpret_cast<i16 *>(output_group);
+        terminator[0] = 0;
+        terminator[1] = 0;
+        TERRAIN_WALL_POINT **wall_output =
+            reinterpret_cast<TERRAIN_WALL_POINT **>(output_group + sizeof(TERRAIN_WALL_POINT *));
+        for (i32 i = 0; i < WallSplCount && reinterpret_cast<u8 *>(wall_output + 1) < arena_end; i += 2)
+            *wall_output++ = &WallSplList[i];
+        *wall_output++ = NULL;
+        TempStackPtr = wall_output;
+        return reinterpret_cast<i16 *>(handle_start);
+    }
+} // namespace
+
+i16 *NewScanHandelFull(nuvec_s *, nuvec_s *, f32, i32 scan_type, i32 terrain_mask) {
+    ScanTerrain(scan_type, terrain_mask, 0);
+    return TerrainStoreScanHandle();
 }
 
-i16 *NewScanHandelSubset(i16 *, nuvec_s *, nuvec_s *, f32, i32) {
-    STUBBED();
-    return NULL;
+i16 *NewScanHandelSubset(i16 *subset, nuvec_s *, nuvec_s *, f32, i32 terrain_mask) {
+    if (subset == NULL)
+        return NULL;
+    ScanTerrainHandel(terrain_mask, subset);
+    return TerrainStoreScanHandle();
 }
 
 extern "C" i16 *NewScanHandel(nuvec_s *position, nuvec_s *movement, f32 radius, i32 scan_type, i16 *subset) {
@@ -5977,7 +6035,8 @@ void ScanTerrainHandel(i32 terrain_mask, i16 *handle) {
     while (handle[0] > 0) {
         i32 count = handle[0];
         i32 group_index = handle[1];
-        TERRAIN_SHAPE **shapes = reinterpret_cast<TERRAIN_SHAPE **>(handle + 2);
+        TERRAIN_SHAPE **shapes =
+            reinterpret_cast<TERRAIN_SHAPE **>(reinterpret_cast<u8 *>(handle) + sizeof(TERRAIN_SHAPE *));
         handle = reinterpret_cast<i16 *>(shapes + count);
         TERRAIN_GROUP &group = CurTerr->groups[group_index];
         TerrainScanBounds local = bounds;
@@ -6043,7 +6102,8 @@ void ScanTerrainHandel(i32 terrain_mask, i16 *handle) {
     bounds.max_x += 0.02f;
     bounds.min_z -= 0.02f;
     bounds.max_z += 0.02f;
-    TERRAIN_WALL_POINT **walls = reinterpret_cast<TERRAIN_WALL_POINT **>(handle + 2);
+    TERRAIN_WALL_POINT **walls =
+        reinterpret_cast<TERRAIN_WALL_POINT **>(reinterpret_cast<u8 *>(handle) + sizeof(TERRAIN_WALL_POINT *));
     while (*walls != NULL) {
         TERRAIN_WALL_POINT *wall = *walls++;
         if (TerrainHandleWallOverlap(bounds, wall) && WallSplCount < 64) {
