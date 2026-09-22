@@ -97,7 +97,7 @@ void V2SessionManager::SetHostGameData(i32 *data, i32 count) {
 void V2SessionManager::Update() {
     stats.total.Reset();
     for (NetPeer *peer = first_peer; peer != NULL; peer = peer->next) {
-        stats.total += *reinterpret_cast<NetSample *>(peer->stats);
+        stats.total += peer->stats.total;
     }
     stats.Update();
 }

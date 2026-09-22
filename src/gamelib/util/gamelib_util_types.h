@@ -73,20 +73,66 @@ struct NOSFilter {
 struct NetAddress {
     u32 value;
 };
+struct NetSample {
+    u32 values[4];
+
+    NetSample() {
+        values[0] = 0;
+        values[1] = 0;
+        values[2] = 0;
+        values[3] = 0;
+    }
+
+    void Max(NetSample const &);
+    void Reset();
+    void operator+=(NetSample const &);
+    void operator-=(NetSample const &);
+};
+struct NetSmallStats {
+    enum eInfo {};
+
+    explicit NetSmallStats(char const *stat_name) : name(stat_name) {
+    }
+    virtual void Update() {
+    }
+    virtual void Draw(float, float, float, float, NetSmallStats::eInfo) const;
+
+    char const *name;
+    NetSample total;
+};
+struct NetStats : NetSmallStats {
+    explicit NetStats(char const *stat_name) : NetSmallStats(stat_name), sample_index(0), sample_time(0) {
+    }
+    void Update() override;
+    void Draw(float, float, float, float, NetSmallStats::eInfo) const override;
+
+    i32 sample_index;
+    u32 sample_time;
+    NetSample maximum;
+    NetSample previous;
+    NetSample samples[30];
+};
+DECOMP_ASSERT(sizeof(NetSmallStats) == 0x18, "NetSmallStats size");
+DECOMP_ASSERT(offsetof(NetSmallStats, total) == 8, "NetSmallStats total offset");
+DECOMP_ASSERT(sizeof(NetStats) == 0x220, "NetStats size");
+DECOMP_ASSERT(offsetof(NetStats, sample_index) == 0x18, "NetStats sample index offset");
+DECOMP_ASSERT(offsetof(NetStats, samples) == 0x40, "NetStats sample history offset");
 struct NetPeer {
     struct Vtable {
         void *reserved_00;
         void (*destroy)(NetPeer *);
         void (*disconnect)(NetPeer *);
-        void *reserved_0c[3];
+        void (*send)(NetPeer *, NetMessage);
+        void (*reliable_send)(NetPeer *, NetMessage, char const *, u32);
+        void *reserved_14;
         i32 (*get_available_messages)(NetPeer *);
     } *vtable;
     NetPeer *next;
     NetPeer *previous;
     u8 local;
-    u8 reserved_0d[0x18 - 0xd];
-    u32 stats[4];
-    u8 reserved_28[0x29c - 0x28];
+    u8 reserved_0d[3];
+    NetStats stats;
+    u8 reserved_230[0x29c - 0x230];
     i32 time_offset;
 };
 struct ReplicatorData {
@@ -389,56 +435,13 @@ static_assert(sizeof(void *) != 4 || sizeof(NetPredictor::PredictorTime) == 0x1c
               "NetPredictor::PredictorTime 32-bit size");
 static_assert(sizeof(void *) != 4 || sizeof(NetPredictor) == 0x28, "NetPredictor 32-bit size");
 static_assert(sizeof(void *) != 4 || offsetof(NetPeer, time_offset) == 0x29c, "NetPeer::time_offset 32-bit offset");
-struct NetSample {
-    u32 values[4];
-
-    NetSample() {
-        values[0] = 0;
-        values[1] = 0;
-        values[2] = 0;
-        values[3] = 0;
-    }
-
-    void Max(NetSample const &);
-    void Reset();
-    void operator+=(NetSample const &);
-    void operator-=(NetSample const &);
-};
+DECOMP_ASSERT(offsetof(NetPeer, stats) == 0x10, "NetPeer stats offset");
 struct NetSimpleReplicator : NetReplicator {
     bool AllowPush(EdClass const *, void const *, ReplicatorData &, i32, i32) override;
 };
 static_assert(sizeof(void *) != 4 || sizeof(NetReplicator) == 0x18, "NetReplicator 32-bit size");
 DECOMP_ASSERT(offsetof(NetReplicator, next) == 4, "NetReplicator next offset");
 DECOMP_ASSERT(offsetof(NetReplicator, data_size) == 0x14, "NetReplicator data size offset");
-struct NetSmallStats {
-    enum eInfo {};
-
-    explicit NetSmallStats(char const *stat_name) : name(stat_name) {
-    }
-    virtual void Update() {
-    }
-    virtual void Draw(float, float, float, float, NetSmallStats::eInfo) const;
-
-    char const *name;
-    NetSample total;
-};
-struct NetStats : NetSmallStats {
-    explicit NetStats(char const *stat_name) : NetSmallStats(stat_name), sample_index(0), sample_time(0) {
-    }
-    void Update() override;
-    void Draw(float, float, float, float, NetSmallStats::eInfo) const override;
-
-    i32 sample_index;
-    u32 sample_time;
-    NetSample maximum;
-    NetSample previous;
-    NetSample samples[30];
-};
-DECOMP_ASSERT(sizeof(NetSmallStats) == 0x18, "NetSmallStats size");
-DECOMP_ASSERT(offsetof(NetSmallStats, total) == 8, "NetSmallStats total offset");
-DECOMP_ASSERT(sizeof(NetStats) == 0x220, "NetStats size");
-DECOMP_ASSERT(offsetof(NetStats, sample_index) == 0x18, "NetStats sample index offset");
-DECOMP_ASSERT(offsetof(NetStats, samples) == 0x40, "NetStats sample history offset");
 struct NetListenerBinding {
     NetListenerBinding *next;
     NetListenerBinding *previous;
