@@ -674,7 +674,12 @@ extern struct MISSIONSYS_s *MissionSys;
 extern i32 CHARSHADOWS_ON;
 extern i32 ShadowMode;
 extern f32 EShadY;
-extern TERRAIN_LAYER_s TerLayer[];
+#ifdef __ANDROID__
+extern TERRAIN_LAYER_s TerLayer[17];
+#else
+extern TERRAIN_LAYER_s TerrainLayerStorage[18];
+extern TERRAIN_LAYER_s *TerLayer;
+#endif
 extern NUVEC ShadNorm;
 
 // Feature switches and interaction timing configured by each game variant.

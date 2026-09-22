@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 52.640793,
+    "fuzzy_match_percent": 52.640884,
     "total_code": "4722419",
     "matched_code": "459721",
     "matched_code_percent": 9.734862,
@@ -37222,7 +37222,7 @@
           "address": 4503600,
           "offset": 3613632,
           "size": 698,
-          "match_percent": 62.29861
+          "match_percent": 62.368057
         },
         {
           "name": "_ZN10TouchHacks33CheckForAboutToRunIntoKillTerrainER12GameObject_sf",
@@ -37230,7 +37230,7 @@
           "address": 4504304,
           "offset": 3614336,
           "size": 441,
-          "match_percent": 99.864586
+          "match_percent": 99.96875
         },
         {
           "name": "_ZN10TouchHacks27CheckForAboutToRunOffAnEdgeER12GameObject_sf",
@@ -37334,7 +37334,7 @@
           "address": 4507344,
           "offset": 3617376,
           "size": 266,
-          "match_percent": 98.98572
+          "match_percent": 99.12857
         },
         {
           "name": "_ZN10TouchHacks13CanTagVehicleER12GameObject_sS1_",
@@ -45427,7 +45427,7 @@
           "address": 4638512,
           "offset": 3748544,
           "size": 2391,
-          "match_percent": 34.393658
+          "match_percent": 34.41231
         },
         {
           "name": "_Z18Players_BothActivev",
@@ -45989,7 +45989,7 @@
           "address": 4812672,
           "offset": 3922704,
           "size": 899,
-          "match_percent": 44.38679
+          "match_percent": 44.433964
         },
         {
           "name": "_Z16CharShadows_Drawv",
@@ -46983,7 +46983,7 @@
           "address": 1368336,
           "offset": 478368,
           "size": 960,
-          "match_percent": 76.9054
+          "match_percent": 76.95045
         },
         {
           "name": "_Z12ApplyGravityP12GameObject_sPfffS1_",
@@ -47743,7 +47743,7 @@
           "address": 4648992,
           "offset": 3759024,
           "size": 1564,
-          "match_percent": 79.920456
+          "match_percent": 79.97727
         },
         {
           "name": "_Z13SetHeadTargetP12GameObject_sP7nuvec_safff",
@@ -62610,7 +62610,7 @@
           "address": 1079344,
           "offset": 189376,
           "size": 3212,
-          "match_percent": 73.586464
+          "match_percent": 73.59399
         },
         {
           "name": "_ZL20LEGO_AllGoldBricksFnv",
@@ -70718,7 +70718,7 @@
           "address": 1533440,
           "offset": 643472,
           "size": 1009,
-          "match_percent": 71.18
+          "match_percent": 71.23
         },
         {
           "name": "_Z13AddSlamDebrisP12GameObject_s",

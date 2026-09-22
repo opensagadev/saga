@@ -313,39 +313,19 @@ i16 temp_xrot = 0;
 i16 temp_zrot = 0;
 f32 EShadY = 0.0f;
 i32 CHARSHADOWS_ON = 1;
-struct TERRAIN_LAYER_STORAGE_s {
-    u8 padding[20];
-    TERRAIN_LAYER_s sentinel;
-    TERRAIN_LAYER_s values[17];
-};
-
-extern "C" __attribute__((visibility("hidden"), aligned(32))) TERRAIN_LAYER_STORAGE_s TerrainLayerStorage = {
-    {},
+#ifdef __ANDROID__
+TERRAIN_LAYER_s TerLayer[17] = {
+#else
+TERRAIN_LAYER_s TerrainLayerStorage[18] = {
     {0.0f, 0, -1, 0},
-    {
-        {1.0f, 0, -1, 0},
-        {2.0f, 0, -1, 0},
-        {2.0f, 0, -1, 0},
-        {1.0f, 1, -1, 0},
-        {1.0f, 0, -1, 0},
-        {1.0f, 0x20, -1, 0},
-        {1.0f, 1, -1, 0},
-        {1.0f, 0, -1, 0},
-        {1.0f, 0, -1, 0},
-        {1.0f, 0, -1, 0},
-        {1.0f, 0, -1, 0},
-        {1.0f, 0, -1, 0},
-        {1.0f, 0, -1, 0},
-        {1.0f, 0, -1, 0},
-        {1.0f, 0, -1, 0},
-        {1.0f, 0, -1, 0},
-        {1.0f, 0, -1, 0},
-    },
+#endif
+    {1.0f, 0, -1, 0}, {2.0f, 0, -1, 0}, {2.0f, 0, -1, 0}, {1.0f, 1, -1, 0}, {1.0f, 0, -1, 0}, {1.0f, 0x20, -1, 0},
+    {1.0f, 1, -1, 0}, {1.0f, 0, -1, 0}, {1.0f, 0, -1, 0}, {1.0f, 0, -1, 0}, {1.0f, 0, -1, 0}, {1.0f, 0, -1, 0},
+    {1.0f, 0, -1, 0}, {1.0f, 0, -1, 0}, {1.0f, 0, -1, 0}, {1.0f, 0, -1, 0}, {1.0f, 0, -1, 0},
 };
-asm(".global TerLayer\n"
-    ".type TerLayer, @object\n"
-    ".set TerLayer, TerrainLayerStorage + 32\n"
-    ".size TerLayer, 204\n");
+#ifndef __ANDROID__
+TERRAIN_LAYER_s *TerLayer = &TerrainLayerStorage[1];
+#endif
 GameObject_s *player = NULL;
 GameObject_s *player2 = NULL;
 extern GameObject_s *CutDeadVehiclePlayer;
