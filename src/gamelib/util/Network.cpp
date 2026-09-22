@@ -411,7 +411,15 @@ void NetworkObjectManager::ImportObjects() {
 }
 
 void NetworkObjectManager::Init() {
-    STUBBED();
+    guid_peers[0] = NULL;
+    guid_peers[1] = NULL;
+    memset(objects, 0, sizeof(objects));
+    memset(local_objects, 0, sizeof(local_objects));
+    theNetwork.AddListener(this, 3, const_cast<char *>("NOS"));
+    theRegistry.AddObjectNotifier(this);
+    guid_group = 0;
+    guid_peers[0] = reinterpret_cast<NetPeer const *>(-1);
+    field_d96c = 1;
 }
 
 void NetworkObjectManager::InitClassStats() {

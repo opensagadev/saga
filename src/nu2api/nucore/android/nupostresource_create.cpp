@@ -3,5 +3,4 @@
 
 // The Android binary supplies empty platform entry points for these resources.
 extern "C" nueffecttex_s *NuEffectTexCreate2D(i32, i32, i32, i32, i32) {
-    STUBBED();
 }
