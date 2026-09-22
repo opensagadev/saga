@@ -1263,18 +1263,23 @@ typedef struct GameObject_s {
     u8 field_0xef9;          // 0x0ef9
     u8 field_0xefa;          // 0x0efa
     u8 field_0xefb;          // 0x0efb, bit 3 requests the two-row hit-point layout
-    u8 field_0xefc;          // 0x0efc
     union {
-        u8 field_0xefd;
+        u32 field_0xefc_word;
         struct {
-            u8 : 1;
-            u8 random_layer_variant : 1;
-            u8 snap_facing : 1;
-            u8 : 5;
+            u8 field_0xefc; // 0x0efc
+            union {
+                u8 field_0xefd;
+                struct {
+                    u8 : 1;
+                    u8 random_layer_variant : 1;
+                    u8 snap_facing : 1;
+                    u8 : 5;
+                };
+            }; // 0x0efd
+            u8 field_0xefe; // 0x0efe
+            u8 field_0xeff; // 0x0eff
         };
-    }; // 0x0efd
-    u8 field_0xefe; // 0x0efe
-    u8 field_0xeff; // 0x0eff
+    };
     union {
         u8 field_0xf00; // 0x0f00
         struct {
