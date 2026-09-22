@@ -3039,7 +3039,7 @@ static inline void SetRayCastUnitScale(TerrainQuery_s *query) {
 }
 
 static inline void ConfigureRayCast(TerrainQuery_s *query, NUVEC *position, NUVEC *movement, f32 radius,
-                                   f32 separation_epsilon, f32 compare_epsilon) {
+                                    f32 separation_epsilon, f32 compare_epsilon) {
     query->collision_radius = radius;
     query->inverse_collision_radius = radius == 0.0f ? 0.0f : 1.0f / radius;
     query->collision_radius_sq = radius * radius;
@@ -3069,7 +3069,7 @@ void ScanTerrainPlatform(i32 group_index, i32 terrain_mask);
 void ScanTerrainHandel(i32 scan_type, i16 *handle);
 
 extern "C" i32 NewRayCastPlatForm(NUVEC *position, NUVEC *movement, f32 radius, f32 separation_epsilon,
-                                 i32 platform_index, i32 terrain_mask) {
+                                  i32 platform_index, i32 terrain_mask) {
     ResetRayCastState();
     if (CurTerr == NULL)
         return 0;
@@ -4757,7 +4757,7 @@ f32 NewCast(nuvec_s *position, f32 height_above, f32 roof_range) {
 
     castnum = floor_candidate.terrain_group;
     ecastnum = extended_floor.terrain_group;
-    bool ordinary_roof = above_candidate.height < NO_TERRAIN_HEIGHT && above_candidate.normal.y < 0.0f &&
+    bool ordinary_roof = above_candidate.height < NO_TERRAIN_HEIGHT && above_candidate.normal.y > 0.0f &&
                          position->y + roof_range > above_candidate.height;
     bool extended_blocked = ordinary_roof && extended_above.height > above_candidate.height;
     EShadRoofY = NO_TERRAIN_HEIGHT;
@@ -4773,11 +4773,9 @@ f32 NewCast(nuvec_s *position, f32 height_above, f32 roof_range) {
     const ShadowSurfaceCandidate *extended_result = NULL;
     if (extended_above.height < NO_TERRAIN_HEIGHT && extended_above.normal.y > 0.0f &&
         position->y + roof_range > extended_above.height) {
-        if (!extended_blocked) {
-            extended_result = &extended_above;
-            eshadhit = 1;
-            ecastnum = extended_above.terrain_group;
-        }
+        extended_result = &extended_above;
+        eshadhit = 1;
+        ecastnum = extended_above.terrain_group;
     } else if (extended_floor.height > -NO_TERRAIN_HEIGHT &&
                !(floor_candidate.height > -NO_TERRAIN_HEIGHT && floor_candidate.height > extended_floor.height)) {
         extended_result = &extended_floor;
@@ -4892,8 +4890,8 @@ extern "C" void AddPickupTerr(i32 type, NUVEC *position) {
     ++curPickInst;
 }
 
-static inline i32 InstallExtraTerrainPlatform(TERRSET *terrain, TERRAIN_GROUP *source, NUMTX *matrix,
-                                              NUMTX *previous, i32 rotating, i32 index) {
+static inline i32 InstallExtraTerrainPlatform(TERRSET *terrain, TERRAIN_GROUP *source, NUMTX *matrix, NUMTX *previous,
+                                              i32 rotating, i32 index) {
     i16 group_index = terrain->group_count;
     TERRAIN_GROUP &group = terrain->groups[group_index];
     group = *source;
@@ -5356,8 +5354,8 @@ extern "C" i32 NewRayCast(NUVEC *position, NUVEC *movement, f32 radius, i32 scan
     return TerI->hit_type;
 }
 
-extern "C" i32 NewRayCastScaleYMask(NUVEC *position, NUVEC *movement, f32 radius, f32 scale_y,
-                                   i32 scan_flags, u32 terrain_mask) {
+extern "C" i32 NewRayCastScaleYMask(NUVEC *position, NUVEC *movement, f32 radius, f32 scale_y, i32 scan_flags,
+                                    u32 terrain_mask) {
     ResetRayCastState();
     if (CurTerr == NULL)
         return 0;
@@ -5457,8 +5455,8 @@ extern "C" i32 NewRayCastMask(NUVEC *position, NUVEC *movement, f32 radius, i32 
     return TerI->hit_type;
 }
 
-extern "C" i32 NewRayCastSet(NUVEC *position, NUVEC *movement, f32 radius, f32 separation_epsilon,
-                            f32 compare_epsilon, i32 scan_type, i32 scan_flags) {
+extern "C" i32 NewRayCastSet(NUVEC *position, NUVEC *movement, f32 radius, f32 separation_epsilon, f32 compare_epsilon,
+                             i32 scan_type, i32 scan_flags) {
     ResetRayCastState();
     if (CurTerr == NULL)
         return 0;
@@ -5473,7 +5471,7 @@ extern "C" i32 NewRayCastSet(NUVEC *position, NUVEC *movement, f32 radius, f32 s
 }
 
 extern "C" i32 NewRayCastSetMask(NUVEC *position, NUVEC *movement, f32 radius, f32 separation_epsilon,
-                                f32 compare_epsilon, i32 scan_type, i32 terrain_mask, i32 scan_flags) {
+                                 f32 compare_epsilon, i32 scan_type, i32 terrain_mask, i32 scan_flags) {
     ResetRayCastState();
     if (CurTerr == NULL)
         return 0;
@@ -5552,8 +5550,7 @@ extern "C" void ReassignPickupInst(i32 index, i32 type) {
     group.bounds_max = source.bounds_max;
 }
 
-extern "C" i32 AddMSituExtraTerrRot(i32 source_index, NUMTX *matrix, NUMTX *previous, i32 rotating,
-                                   TERRSET *source) {
+extern "C" i32 AddMSituExtraTerrRot(i32 source_index, NUMTX *matrix, NUMTX *previous, i32 rotating, TERRSET *source) {
     if (source == NULL)
         return -1;
     if (CurTerr == NULL) {
@@ -5596,7 +5593,7 @@ extern "C" void TerrainWallSideSlide(NUVEC *movement, void *id, f32 speed, f32 u
 }
 
 extern "C" i32 NewRayCastSetHandel(NUVEC *position, NUVEC *movement, f32 radius, f32 separation_epsilon,
-                                  f32 compare_epsilon, i16 *handle, i32 scan_type) {
+                                   f32 compare_epsilon, i16 *handle, i32 scan_type) {
     ResetRayCastState();
     if (CurTerr == NULL || handle == NULL)
         return 0;
@@ -5616,7 +5613,7 @@ void ScanTerrainHandel(i32 terrain_mask, i16 *handle);
 f32 NewCast(nuvec_s *position, f32 height_above, f32 roof_range);
 
 extern "C" f32 NewShadowHandelEx(NUVEC *position, i32, f32 height_above, f32 height_below, i32 terrain_mask,
-                                  i16 *handle) {
+                                 i16 *handle) {
     if (CurTerr == NULL)
         return 2000000.0f;
     if (handle == NULL)
@@ -5855,7 +5852,7 @@ namespace {
     }
 
     static void TerrainHandleFilterShapes(TerrainScanWriter *writer, TERRAIN_SHAPE **shapes, i32 count,
-                                           const TerrainScanBounds &bounds, i32 terrain_mask, bool rotating) {
+                                          const TerrainScanBounds &bounds, i32 terrain_mask, bool rotating) {
         for (i32 i = 0; i < count; ++i) {
             TERRAIN_SHAPE *shape = shapes[i];
             if (!rotating && !TerrainShapeOverlaps(bounds, *shape))
@@ -5877,7 +5874,7 @@ namespace {
                ((wall[0].position.z >= bounds.min_z && wall[1].position.z <= bounds.max_z) ||
                 (wall[1].position.z >= bounds.min_z && wall[0].position.z <= bounds.max_z));
     }
-}
+} // namespace
 
 void ScanTerrainHandel(i32 terrain_mask, i16 *handle) {
     if (handle == NULL)
