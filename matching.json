@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 52.484467,
+    "fuzzy_match_percent": 52.49877,
     "total_code": "4722419",
-    "matched_code": "459146",
-    "matched_code_percent": 9.722687,
+    "matched_code": "459721",
+    "matched_code_percent": 9.734862,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 5440,
-    "matched_functions_percent": 40.419052,
+    "matched_functions": 5444,
+    "matched_functions_percent": 40.44877,
     "total_units": 1
   },
   "text": {
@@ -67031,7 +67031,7 @@
           "address": 1332368,
           "offset": 442400,
           "size": 184,
-          "match_percent": 9.767442
+          "match_percent": 99.88372
         },
         {
           "name": "_Z21Text_SetLanguage_Gamei",
@@ -67167,7 +67167,7 @@
           "address": 4379824,
           "offset": 3489856,
           "size": 127,
-          "match_percent": 12.727273
+          "match_percent": 100.0
         },
         {
           "name": "_Z18DrawMessageBoxRGBAffffjjjjP7numtl_sif",
@@ -67199,7 +67199,7 @@
           "address": 4386048,
           "offset": 3496080,
           "size": 188,
-          "match_percent": 11.351352
+          "match_percent": 100.0
         },
         {
           "name": "SmartTextEx2",
@@ -67271,7 +67271,7 @@
           "address": 4398512,
           "offset": 3508544,
           "size": 144,
-          "match_percent": 10.243902
+          "match_percent": 100.0
         },
         {
           "name": "SetQFont2D",
@@ -67303,7 +67303,7 @@
           "address": 4398912,
           "offset": 3508944,
           "size": 116,
-          "match_percent": 11.052631
+          "match_percent": 100.0
         },
         {
           "name": "SplitText",

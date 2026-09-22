@@ -1,5 +1,7 @@
 #include "decomp.h"
 #include "gameapi/gui/apimenu_internal.h"
+#include "legoapi/core/input/gamepads.h"
+#include "legoapi/core/input/timer.h"
 #include "legoapi/menus/core/text.h"
 char *ASCII_UP = "\xc2\xac";
 #include "legoapi/legoapi_types.h"
@@ -8,6 +10,7 @@ char *ASCII_UP = "\xc2\xac";
 #include "legoapi/world/levels/episode.h"
 #include "legoapi/world/mission.h"
 #include "nu2api/nu3d/nucamera.h"
+#include "nu2api/nu3d/numtl.h"
 #include "nu2api/nu3d/nuqfnt.h"
 #include "nu2api/nu3d/nuprim.h"
 #include "nu2api/nu3d/nurndr.h"
@@ -15,6 +18,7 @@ char *ASCII_UP = "\xc2\xac";
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nufile/nufpar.h"
 #include "nu2api/numath/nufloat.h"
+#include "nu2api/numath/nutrig.h"
 #include <stdio.h>
 #include <string.h>
 extern char **TTab;
@@ -47,6 +51,7 @@ extern "C" {
     VUFNT *LoadGameFont(char *, char *, variptr_u *, variptr_u *, i32);
     VUFNT *LoadButtonFont(char *, char *, variptr_u *, variptr_u *, i32);
     void NuLanguageSet(i32 language);
+    void NuQFntDestroy(VUFNT *font);
 }
 void (*Text_GameSetLanguageFn)(i32);
 char *Text_GetLanguagePath(i32 language);
@@ -296,8 +301,22 @@ void TextCrawl_Draw(float dt, i32 paragraphs, float alpha, char *text) {
     }
     NuQFntPopPrintMode();
 }
-void TextPulseTimer(float) {
-    STUBBED();
+f32 TextPulseTimer(f32 delay) {
+    if (TestForController()) {
+        return 1.0f;
+    }
+
+    f32 elapsed = GlobalTimer.time_elapsed - (LastTouchTime + delay * 4.0f);
+    if (elapsed > 4.0f) {
+        elapsed = NuFmod(elapsed, 4.0f);
+        const i32 angle = static_cast<i32>(elapsed * 0.25f * 65536.0f);
+        f32 pulse = NuTrigTable[(angle >> 1) & 0x7fff] - 0.8f;
+        if (0.0f > pulse) {
+            return 1.0f;
+        }
+        return pulse + 1.0f;
+    }
+    return 1.0f;
 }
 static char **TTab_Original;
 static i32 Text_MaxOverallStrings;
@@ -629,7 +648,6 @@ void Text_ExpandAllButtonStrings(char *input, char *output) {
     *output = '\0';
 }
 void Text_FillInExtendedSaveInfo() {
-    STUBBED();
 }
 void Text_InsertCommasIntoNumber(char *number, char *text, i32 length) {
     char separator;
@@ -655,8 +673,20 @@ void Text_InsertCommasIntoNumber(char *number, char *text, i32 length) {
     }
     text[output] = '\0';
 }
+NUMTL *MessageMtl;
+i32 MessageMtlInit;
+
 extern "C" void MessageBoxInitMtl(void) {
-    STUBBED();
+    MessageMtl = NuMtlCreate(1);
+    MessageMtl->attribs.z_mode = 3;
+    MessageMtl->attribs.alpha_mode = 1;
+    MessageMtl->attribs.unknown_2_1_2 = 2;
+    MessageMtl->attribs.unknown_1_1_2 = 1;
+    MessageMtl->attribs.unknown_1_4_8 = 1;
+    MessageMtl->attribs.unknown_2_4 = 1;
+    MessageMtl->attribs.filter_mode = 1;
+    NuMtlUpdate(MessageMtl);
+    MessageMtlInit = 1;
 }
 
 void DrawMessageBoxRGBA(float, float, float, float, u32, u32, u32, u32, numtl_s *, i32, float) {
@@ -742,8 +772,10 @@ extern "C" {
     void SetGameFont(VUFNT *font) {
         QFont2D = font;
     }
-    void SmartText(void) {
-        STUBBED();
+    void SmartText(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment, u8 red,
+                   u8 green, u8 blue, f32 max_width, i32 max_lines) {
+        SmartTextEx(text, x, y, z, x_scale, y_scale, z_scale, alignment, red, green, blue, max_width, max_lines, NULL,
+                    0, 0x80);
     }
     void SmartTextEx(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment, u8 red,
                      u8 green, u8 blue, f32 max_width, i32 max_lines, void *message_box, i32 suppress_draw, u32 alpha) {
@@ -982,7 +1014,23 @@ extern "C" {
         }
     }
     void UnloadGameFont(void) {
-        STUBBED();
+        if (QFont2DLower != NULL) {
+            NuQFntDestroy(QFont2DLower);
+            QFont2DLower = NULL;
+        }
+        if (QFont2DZ != NULL) {
+            NuQFntDestroy(QFont2DZ);
+            QFont2DZ = NULL;
+        }
+        if (QFont3D != NULL) {
+            NuQFntDestroy(QFont3D);
+            QFont3D = NULL;
+        }
+        if (QFont3DZ != NULL) {
+            NuQFntDestroy(QFont3DZ);
+            QFont3DZ = NULL;
+        }
+        NuQFntDestroy(QFont2D);
     }
 }
 void MenuUpdateViewTextStrings(MENU_s *) {
@@ -1002,8 +1050,34 @@ abi_ulong GetMatchLength(unsigned char *first, unsigned char *second, abi_ulong 
     }
     return length;
 }
-void SplitTextFindNextWS(unsigned char *, i32) {
-    STUBBED();
+i32 SplitTextFindNextWS(unsigned char *text, i32 position) {
+    unsigned char character = text[position];
+check_character:
+    if (character == ' ') {
+        const unsigned char next = text[position + 1];
+        if (next == '?')
+            goto next_character;
+        if (next == '!')
+            goto next_character;
+        if (next == ';')
+            goto next_character;
+        if (next == ':')
+            goto next_character;
+        return position;
+    }
+    if (character == '\0') {
+        return position;
+    }
+    if (character == '\\' && text[position + 1] == 'n') {
+        return position;
+    }
+
+next_character:
+    do {
+        ++position;
+        character = text[position];
+    } while (static_cast<u8>(character - 0x80) <= 0x3f);
+    goto check_character;
 }
 void MatrixTextStringEncode(void *, unsigned char *, u16 *) {
     STUBBED();
