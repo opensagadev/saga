@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 52.743603,
+    "fuzzy_match_percent": 52.765007,
     "total_code": "4722419",
     "matched_code": "460134",
     "matched_code_percent": 9.7436075,
@@ -47232,6 +47232,14 @@
           "offset": 535088,
           "size": 637,
           "match_percent": 0.0
+        },
+        {
+          "name": "_ZL18DrawLightningBoltsP12GameObject_sS0_i",
+          "demangled_name": "DrawLightningBolts(GameObject_s*, GameObject_s*, int)",
+          "address": 1428096,
+          "offset": 538128,
+          "size": 1681,
+          "match_percent": 60.130436
         },
         {
           "name": "_Z24ForcePushed_SetTargetMomP12GameObject_sPf",
@@ -123487,14 +123495,6 @@
       "match_percent": 0.0
     },
     {
-      "name": "_ZL18DrawLightningBoltsP12GameObject_sS0_i",
-      "demangled_name": "DrawLightningBolts(GameObject_s*, GameObject_s*, int)",
-      "address": 1428096,
-      "offset": 538128,
-      "size": 1681,
-      "match_percent": 0.0
-    },
-    {
       "name": "_ZL16ForceDeflectCodeP12GameObject_siii.isra.31",
       "demangled_name": "ForceDeflectCode(GameObject_s*, int, int, int) [clone .isra.31]",
       "address": 1430160,
@@ -128130,8 +128130,8 @@
   "summary": {
     "bazel_units": 458,
     "functions": 13454,
-    "assigned_functions": 12521,
+    "assigned_functions": 12522,
     "ambiguous_functions": 230,
-    "unassigned_functions": 703
+    "unassigned_functions": 702
   }
 }
