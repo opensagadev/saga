@@ -186,10 +186,10 @@ struct FtpFile {
     void Term();
     void Update();
 };
-static_assert(sizeof(void *) != 4 || sizeof(FtpFile) == 0xb0, "FtpFile 32-bit size");
-static_assert(sizeof(void *) != 4 || offsetof(FtpFile, name) == 0xc, "FtpFile name 32-bit offset");
-static_assert(sizeof(void *) != 4 || offsetof(FtpFile, message_data) == 0xa0, "FtpFile message data 32-bit offset");
-static_assert(sizeof(void *) != 4 || offsetof(FtpFile, transfer) == 0xac, "FtpFile transfer 32-bit offset");
+DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(FtpFile) == 0xb0, "FtpFile 32-bit size");
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(FtpFile, name) == 0xc, "FtpFile name 32-bit offset");
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(FtpFile, message_data) == 0xa0, "FtpFile message data 32-bit offset");
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(FtpFile, transfer) == 0xac, "FtpFile transfer 32-bit offset");
 struct NetReplicator {
     static i16 smNextId;
 
@@ -371,9 +371,9 @@ struct NetFtpManager : NetListenerInterface {
     void Update();
     ~NetFtpManager() override;
 };
-static_assert(sizeof(void *) != 4 || sizeof(NetFtpManager) == 0x1608, "NetFtpManager 32-bit size");
-static_assert(sizeof(void *) != 4 || offsetof(NetFtpManager, files) == 4, "NetFtpManager files 32-bit offset");
-static_assert(sizeof(void *) != 4 || offsetof(NetFtpManager, field_1604) == 0x1604,
+DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(NetFtpManager) == 0x1608, "NetFtpManager 32-bit size");
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(NetFtpManager, files) == 4, "NetFtpManager files 32-bit offset");
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(NetFtpManager, field_1604) == 0x1604,
               "NetFtpManager trailing field 32-bit offset");
 struct NetSession {
     u8 reserved_00[4];
@@ -433,13 +433,13 @@ static_assert(sizeof(void *) != 4 || sizeof(NetPredictor::PredictorData) == 0xc,
               "NetPredictor::PredictorData 32-bit size");
 static_assert(sizeof(void *) != 4 || sizeof(NetPredictor::PredictorTime) == 0x1c,
               "NetPredictor::PredictorTime 32-bit size");
-static_assert(sizeof(void *) != 4 || sizeof(NetPredictor) == 0x28, "NetPredictor 32-bit size");
-static_assert(sizeof(void *) != 4 || offsetof(NetPeer, time_offset) == 0x29c, "NetPeer::time_offset 32-bit offset");
+DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(NetPredictor) == 0x28, "NetPredictor 32-bit size");
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(NetPeer, time_offset) == 0x29c, "NetPeer::time_offset 32-bit offset");
 DECOMP_ASSERT(offsetof(NetPeer, stats) == 0x10, "NetPeer stats offset");
 struct NetSimpleReplicator : NetReplicator {
     bool AllowPush(EdClass const *, void const *, ReplicatorData &, i32, i32) override;
 };
-static_assert(sizeof(void *) != 4 || sizeof(NetReplicator) == 0x18, "NetReplicator 32-bit size");
+DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(NetReplicator) == 0x18, "NetReplicator 32-bit size");
 DECOMP_ASSERT(offsetof(NetReplicator, next) == 4, "NetReplicator next offset");
 DECOMP_ASSERT(offsetof(NetReplicator, data_size) == 0x14, "NetReplicator data size offset");
 struct NetListenerBinding {
@@ -503,7 +503,7 @@ struct NetworkObject {
     void Destroy();
     void Initialise(i32, void *, EdClass *, NetPeer const &, i32);
 };
-static_assert(sizeof(void *) != 4 || sizeof(NetworkObject) == 0x18, "NetworkObject 32-bit size");
+DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(NetworkObject) == 0x18, "NetworkObject 32-bit size");
 struct NetworkObjectManager : NetListenerInterface, EdObjectNotifier {
     // The manager reset routine is an intentional no-op in the original.
     struct NetPeerPush {
@@ -621,37 +621,37 @@ struct NetworkObjectManager : NetListenerInterface, EdObjectNotifier {
     NetStats *class_stats[32];
     u8 field_d96c;
 };
-static_assert(sizeof(void *) != 4 || offsetof(NetSession, local_peer) == 0x84, "NetSession local peer offset");
-static_assert(sizeof(void *) != 4 || sizeof(NetworkObjectManager::NetPeerPush) == 0x14,
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(NetSession, local_peer) == 0x84, "NetSession local peer offset");
+DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(NetworkObjectManager::NetPeerPush) == 0x14,
               "NetworkObjectManager::NetPeerPush 32-bit size");
-static_assert(sizeof(void *) != 4 || offsetof(NetworkObjectManager, active) == 0xc,
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(NetworkObjectManager, active) == 0xc,
               "NetworkObjectManager::active 32-bit offset");
-static_assert(sizeof(void *) != 4 || offsetof(NetworkObjectManager, guid_peers) == 0x20,
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(NetworkObjectManager, guid_peers) == 0x20,
               "NetworkObjectManager::guid_peers 32-bit offset");
-static_assert(sizeof(void *) != 4 || offsetof(NetworkObjectManager, peer_push) == 0xd838,
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(NetworkObjectManager, peer_push) == 0xd838,
               "NetworkObjectManager::peer_push 32-bit offset");
-static_assert(sizeof(void *) != 4 || offsetof(NetworkObjectManager, default_push) == 0xd8d8,
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(NetworkObjectManager, default_push) == 0xd8d8,
               "NetworkObjectManager::default_push 32-bit offset");
-static_assert(sizeof(void *) != 4 || offsetof(NetworkObjectManager, class_stats) == 0xd8ec,
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(NetworkObjectManager, class_stats) == 0xd8ec,
               "NetworkObjectManager::class_stats 32-bit offset");
-static_assert(sizeof(void *) != 4 || offsetof(NetworkObjectManager, field_d96c) == 0xd96c,
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(NetworkObjectManager, field_d96c) == 0xd96c,
               "NetworkObjectManager::field_d96c 32-bit offset");
-static_assert(sizeof(void *) != 4 || offsetof(NetworkObjectManager, objects) == 0x30,
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(NetworkObjectManager, objects) == 0x30,
               "NetworkObjectManager::objects 32-bit offset");
-static_assert(sizeof(void *) != 4 || offsetof(NetworkObjectManager, local_object_count) == 0xc030,
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(NetworkObjectManager, local_object_count) == 0xc030,
               "NetworkObjectManager::local_object_count 32-bit offset");
-static_assert(sizeof(void *) != 4 || offsetof(NetworkObjectManager, local_objects) == 0xc034,
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(NetworkObjectManager, local_objects) == 0xc034,
               "NetworkObjectManager::local_objects 32-bit offset");
-static_assert(sizeof(void *) != 4 || offsetof(NetworkObjectManager, pending_objects) == 0xd034,
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(NetworkObjectManager, pending_objects) == 0xd034,
               "NetworkObjectManager::pending_objects 32-bit offset");
 DECOMP_ASSERT(offsetof(NetworkObjectManager, replicators) == 0xd1b4, "NetworkObjectManager replicator lists");
 DECOMP_ASSERT(offsetof(NetworkObjectManager, replicator_data_sizes) == 0xd4b4,
               "NetworkObjectManager replicator data sizes");
-static_assert(sizeof(void *) != 4 || offsetof(NetworkObjectManager, filters) == 0xd5b4,
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(NetworkObjectManager, filters) == 0xd5b4,
               "NetworkObjectManager::filters 32-bit offset");
-static_assert(sizeof(void *) != 4 || offsetof(NetworkObjectManager, registered_calls) == 0xd6b4,
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(NetworkObjectManager, registered_calls) == 0xd6b4,
               "NetworkObjectManager::registered_calls 32-bit offset");
-static_assert(sizeof(void *) != 4 || offsetof(NetworkObjectManager, registered_call_count) == 0xd834,
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(NetworkObjectManager, registered_call_count) == 0xd834,
               "NetworkObjectManager::registered_call_count 32-bit offset");
 DECOMP_ASSERT(offsetof(NetworkObjectManager::RegisteredCall, flags) == 4, "RegisteredCall flags offset");
 DECOMP_ASSERT(offsetof(NetworkObjectManager::RegisteredCall, callback) == 8, "RegisteredCall callback offset");
@@ -794,12 +794,12 @@ struct V2SessionManager {
     void SetHostGameData(i32 *, i32);
     V2SessionManager(char *);
 };
-static_assert(sizeof(void *) != 4 || sizeof(V2SessionManager) == 0x2c0, "V2SessionManager 32-bit size");
-static_assert(sizeof(void *) != 4 || offsetof(V2SessionManager, local_peer) == 0x84,
+DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(V2SessionManager) == 0x2c0, "V2SessionManager 32-bit size");
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(V2SessionManager, local_peer) == 0x84,
               "V2SessionManager local peer 32-bit offset");
-static_assert(sizeof(void *) != 4 || offsetof(V2SessionManager, first_peer) == 0x94,
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(V2SessionManager, first_peer) == 0x94,
               "V2SessionManager first peer 32-bit offset");
-static_assert(sizeof(void *) != 4 || offsetof(V2SessionManager, stats) == 0xa0, "V2SessionManager stats 32-bit offset");
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(V2SessionManager, stats) == 0xa0, "V2SessionManager stats 32-bit offset");
 struct VirtualStackAllocator {
     u8 owns_memory;
     u8 *cursor;

@@ -2,6 +2,7 @@
 #define GAMEAPI_EDTOOLS_TYPES_H
 #pragma once
 
+#include "decomp.h"
 #include "nu2api/nucore/fixed_width.h"
 #include "nu2api/nucore/nuvuvec.hpp"
 #include "nu2api/numath/nuvec.h"
@@ -263,7 +264,7 @@ struct EdDefunctListEntry {
     EdDefunctListEntry() : next(nullptr), previous(nullptr) {
     }
 };
-static_assert(sizeof(void *) != 4 || sizeof(EdControl) == 0x10, "EdControl 32-bit size");
+DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(EdControl) == 0x10, "EdControl 32-bit size");
 struct EdDefunctList {
     EdDefunctListEntry *first;
     EdDefunctListEntry *last;
@@ -471,10 +472,10 @@ struct EdRef {
     void Serialise(EdStream &, i32 *);
     i32 SetAttributeData(void *, i32, i32, void *, i32);
 };
-static_assert(sizeof(void *) != 4 || sizeof(EdRef) == 0x28, "EdRef 32-bit size");
-static_assert(sizeof(void *) != 4 || offsetof(EdRef, type_id) == 0xc, "EdRef::type_id 32-bit offset");
-static_assert(sizeof(void *) != 4 || offsetof(EdRef, member_offset) == 0x14, "EdRef::member_offset 32-bit offset");
-static_assert(sizeof(void *) != 4 || offsetof(EdRef, attributes) == 0x1c, "EdRef::attributes 32-bit offset");
+DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(EdRef) == 0x28, "EdRef 32-bit size");
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(EdRef, type_id) == 0xc, "EdRef::type_id 32-bit offset");
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(EdRef, member_offset) == 0x14, "EdRef::member_offset 32-bit offset");
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(EdRef, attributes) == 0x1c, "EdRef::attributes 32-bit offset");
 struct EdRefKnot : EdRef {
     void GetMemberData(void *, i32, void *, i32);
     void SetMemberData(void *, i32, void *, i32, i16 *);
@@ -609,24 +610,24 @@ extern i32 EdType_NuVec;
 extern i32 EdType_NuMtx;
 extern EdRegistry theRegistry;
 
-static_assert(sizeof(void *) != 4 || sizeof(EdClass) == 0x18, "EdClass 32-bit size");
-static_assert(sizeof(void *) != 4 || sizeof(EdType) == 0xc, "EdType 32-bit size");
-static_assert(sizeof(void *) != 4 || offsetof(EdType, serialise) == 0x8, "EdType::serialise 32-bit offset");
-static_assert(sizeof(void *) != 4 || sizeof(EdMember) == 0x8, "EdMember 32-bit size");
-static_assert(sizeof(void *) != 4 || sizeof(EdRegistry) == 0x44, "EdRegistry 32-bit size");
-static_assert(sizeof(void *) != 4 || sizeof(EdObjectNotifier) == 4, "EdObjectNotifier 32-bit size");
-static_assert(sizeof(void *) != 4 || sizeof(EdDefunctListEntry) == 0x10, "EdDefunctListEntry 32-bit size");
-static_assert(sizeof(void *) != 4 || sizeof(EdDefunctList) == 0xc, "EdDefunctList 32-bit size");
-static_assert(sizeof(void *) != 4 || offsetof(EdRegistry, defunct_objects) == 0x38,
+DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(EdClass) == 0x18, "EdClass 32-bit size");
+DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(EdType) == 0xc, "EdType 32-bit size");
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(EdType, serialise) == 0x8, "EdType::serialise 32-bit offset");
+DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(EdMember) == 0x8, "EdMember 32-bit size");
+DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(EdRegistry) == 0x44, "EdRegistry 32-bit size");
+DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(EdObjectNotifier) == 4, "EdObjectNotifier 32-bit size");
+DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(EdDefunctListEntry) == 0x10, "EdDefunctListEntry 32-bit size");
+DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(EdDefunctList) == 0xc, "EdDefunctList 32-bit size");
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(EdRegistry, defunct_objects) == 0x38,
               "EdRegistry::defunct_objects 32-bit offset");
-static_assert(sizeof(void *) != 4 || offsetof(EdRegistry, notifier_count) == 0x34,
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(EdRegistry, notifier_count) == 0x34,
               "EdRegistry::notifier_count 32-bit offset");
-static_assert(sizeof(void *) != 4 || offsetof(EdRegistry, types) == 0x4, "EdRegistry::types 32-bit offset");
-static_assert(sizeof(void *) != 4 || offsetof(EdRegistry, classes) == 0x8, "EdRegistry::classes 32-bit offset");
-static_assert(sizeof(void *) != 4 || offsetof(EdRegistry, type_count) == 0x1c, "EdRegistry::type_count 32-bit offset");
-static_assert(sizeof(void *) != 4 || offsetof(EdRegistry, class_count) == 0x24,
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(EdRegistry, types) == 0x4, "EdRegistry::types 32-bit offset");
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(EdRegistry, classes) == 0x8, "EdRegistry::classes 32-bit offset");
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(EdRegistry, type_count) == 0x1c, "EdRegistry::type_count 32-bit offset");
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(EdRegistry, class_count) == 0x24,
               "EdRegistry::class_count 32-bit offset");
-static_assert(sizeof(void *) != 4 || offsetof(EdRegistry, object_count) == 0x2c,
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(EdRegistry, object_count) == 0x2c,
               "EdRegistry::object_count 32-bit offset");
 struct EdVectorControl {
     void AddMenuItem(eduimenu_s *, EdRef *, void *);
@@ -647,7 +648,7 @@ struct EditorSettings {
     EditorSettings();
     void Serialise(EdStream &);
 };
-static_assert(sizeof(void *) != 4 || sizeof(EditorSettings) == 0xc, "EditorSettings 32-bit size");
+DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(EditorSettings) == 0xc, "EditorSettings 32-bit size");
 struct KnotHelper {
     u8 reserved_00[0xc];
     EdRef *in_tangent_ref;

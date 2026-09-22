@@ -222,25 +222,25 @@ extern "C" {
 
 #ifdef __cplusplus
 #if UINTPTR_MAX == UINT32_MAX
-    static_assert(sizeof(NUDLDLISTSCENE) == 0x90, "dlist scene size");
-    static_assert(offsetof(NUDLDLISTSCENE, clip_used) == 0x30, "scene.clip_used");
-    static_assert(offsetof(NUDLDLISTSCENE, clip_counts) == 0x18, "scene.clip_counts");
-    static_assert(offsetof(NUDLDLISTSCENE, clip_bounds) == 0x44, "scene.clip_bounds");
-    static_assert(offsetof(NUDLDLISTSCENE, visibility_flags) == 0x48, "scene.visibility_flags");
-    static_assert(offsetof(NUDLDLISTSCENE, nmtls) == 0x4c, "scene.nmtls");
-    static_assert(offsetof(NUDLDLISTSCENE, mtls) == 0x50, "scene.mtls");
-    static_assert(offsetof(NUDLDLISTSCENE, dlist_mtls) == 0x54, "scene.dlist_mtls");
-    static_assert(offsetof(NUDLDLISTSCENE, mtl_used) == 0x58, "scene.mtl_used");
-    static_assert(offsetof(NUDLDLISTSCENE, nsort_pris) == 0x60, "scene.nsort_pris");
-    static_assert(offsetof(NUDLDLISTSCENE, sort_pris) == 0x64, "scene.sort_pris");
-    static_assert(offsetof(NUDLDLISTSCENE, alpha_values) == 0x68, "scene.alpha_values");
-    static_assert(offsetof(NUDLDLISTSCENE, flags) == 0x74, "scene.flags");
-    static_assert(offsetof(NUDLDLISTSCENE, flags_word) == 0x74, "scene.flags_word");
-    static_assert(offsetof(NUDLDLISTSCENE, render_buffer) == 0x75, "scene.render_buffer");
-    static_assert(offsetof(NUDLDLISTSCENE, gscene) == 0x78, "scene.gscene");
-    static_assert(offsetof(NUDLDLISTSCENE, local_state) == 0x80, "scene.local_state");
-    static_assert(offsetof(NUDLDLISTSCENE, portal_visibility_overrides) == 0x88, "scene.portal_visibility_overrides");
-    static_assert(offsetof(NUDLDLISTSCENE, material_animations) == 0x8c, "scene.material_animations");
+    DECOMP_ASSERT(sizeof(NUDLDLISTSCENE) == 0x90, "dlist scene size");
+    DECOMP_ASSERT(offsetof(NUDLDLISTSCENE, clip_used) == 0x30, "scene.clip_used");
+    DECOMP_ASSERT(offsetof(NUDLDLISTSCENE, clip_counts) == 0x18, "scene.clip_counts");
+    DECOMP_ASSERT(offsetof(NUDLDLISTSCENE, clip_bounds) == 0x44, "scene.clip_bounds");
+    DECOMP_ASSERT(offsetof(NUDLDLISTSCENE, visibility_flags) == 0x48, "scene.visibility_flags");
+    DECOMP_ASSERT(offsetof(NUDLDLISTSCENE, nmtls) == 0x4c, "scene.nmtls");
+    DECOMP_ASSERT(offsetof(NUDLDLISTSCENE, mtls) == 0x50, "scene.mtls");
+    DECOMP_ASSERT(offsetof(NUDLDLISTSCENE, dlist_mtls) == 0x54, "scene.dlist_mtls");
+    DECOMP_ASSERT(offsetof(NUDLDLISTSCENE, mtl_used) == 0x58, "scene.mtl_used");
+    DECOMP_ASSERT(offsetof(NUDLDLISTSCENE, nsort_pris) == 0x60, "scene.nsort_pris");
+    DECOMP_ASSERT(offsetof(NUDLDLISTSCENE, sort_pris) == 0x64, "scene.sort_pris");
+    DECOMP_ASSERT(offsetof(NUDLDLISTSCENE, alpha_values) == 0x68, "scene.alpha_values");
+    DECOMP_ASSERT(offsetof(NUDLDLISTSCENE, flags) == 0x74, "scene.flags");
+    DECOMP_ASSERT(offsetof(NUDLDLISTSCENE, flags_word) == 0x74, "scene.flags_word");
+    DECOMP_ASSERT(offsetof(NUDLDLISTSCENE, render_buffer) == 0x75, "scene.render_buffer");
+    DECOMP_ASSERT(offsetof(NUDLDLISTSCENE, gscene) == 0x78, "scene.gscene");
+    DECOMP_ASSERT(offsetof(NUDLDLISTSCENE, local_state) == 0x80, "scene.local_state");
+    DECOMP_ASSERT(offsetof(NUDLDLISTSCENE, portal_visibility_overrides) == 0x88, "scene.portal_visibility_overrides");
+    DECOMP_ASSERT(offsetof(NUDLDLISTSCENE, material_animations) == 0x8c, "scene.material_animations");
 #endif
 #endif
     // The byte pair at 0x74 is also read as one u16 (flags | buffer<<8) by
@@ -288,29 +288,29 @@ extern "C" {
 
 #ifdef __cplusplus
 #if UINTPTR_MAX == UINT32_MAX
-    static_assert(sizeof(NUDLIST_MANAGER) == 0x604, "manager size");
-    static_assert(offsetof(NUDLIST_MANAGER, dlists) == 0x004, "mgr.dlists");
-    static_assert(offsetof(NUDLIST_MANAGER, dyn_mtl_dlist) == 0x404, "mgr.dyn_mtl_dlist");
-    static_assert(offsetof(NUDLIST_MANAGER, nnew_materials) == 0x494, "mgr.nnew_materials");
-    static_assert(offsetof(NUDLIST_MANAGER, ndel_materials) == 0x49c, "mgr.ndel_materials");
-    static_assert(offsetof(NUDLIST_MANAGER, material_used) == 0x4a4, "mgr.material_used");
-    static_assert(offsetof(NUDLIST_MANAGER, mtlbuff) == 0x4ac, "mgr.mtlbuff");
-    static_assert(offsetof(NUDLIST_MANAGER, mtl_buffers_used) == 0x4b4, "mgr.mtl_buffers_used");
-    static_assert(offsetof(NUDLIST_MANAGER, dlist_2d) == 0x4b8, "mgr.dlist_2d");
-    static_assert(offsetof(NUDLIST_MANAGER, dlist_2d_first) == 0x4fc, "mgr.dlist_2d_first");
-    static_assert(offsetof(NUDLIST_MANAGER, nused_sort_pris) == 0x510, "mgr.nused_sort_pris");
-    static_assert(offsetof(NUDLIST_MANAGER, sort_list) == 0x514, "mgr.sort_list");
-    static_assert(offsetof(NUDLIST_MANAGER, nrender_scenes) == 0x518, "mgr.nrender_scenes");
-    static_assert(offsetof(NUDLIST_MANAGER, front_render_scenes) == 0x51c, "mgr.front_render_scenes");
-    static_assert(offsetof(NUDLIST_MANAGER, safe_render_scenes) == 0x57c, "mgr.safe_render_scenes");
-    static_assert(offsetof(NUDLIST_MANAGER, fx_items) == 0x5e8, "mgr.fx_items");
-    static_assert(offsetof(NUDLIST_MANAGER, loading_critical_section) == 0x5ec, "mgr.loading_critical_section");
+    DECOMP_ASSERT(sizeof(NUDLIST_MANAGER) == 0x604, "manager size");
+    DECOMP_ASSERT(offsetof(NUDLIST_MANAGER, dlists) == 0x004, "mgr.dlists");
+    DECOMP_ASSERT(offsetof(NUDLIST_MANAGER, dyn_mtl_dlist) == 0x404, "mgr.dyn_mtl_dlist");
+    DECOMP_ASSERT(offsetof(NUDLIST_MANAGER, nnew_materials) == 0x494, "mgr.nnew_materials");
+    DECOMP_ASSERT(offsetof(NUDLIST_MANAGER, ndel_materials) == 0x49c, "mgr.ndel_materials");
+    DECOMP_ASSERT(offsetof(NUDLIST_MANAGER, material_used) == 0x4a4, "mgr.material_used");
+    DECOMP_ASSERT(offsetof(NUDLIST_MANAGER, mtlbuff) == 0x4ac, "mgr.mtlbuff");
+    DECOMP_ASSERT(offsetof(NUDLIST_MANAGER, mtl_buffers_used) == 0x4b4, "mgr.mtl_buffers_used");
+    DECOMP_ASSERT(offsetof(NUDLIST_MANAGER, dlist_2d) == 0x4b8, "mgr.dlist_2d");
+    DECOMP_ASSERT(offsetof(NUDLIST_MANAGER, dlist_2d_first) == 0x4fc, "mgr.dlist_2d_first");
+    DECOMP_ASSERT(offsetof(NUDLIST_MANAGER, nused_sort_pris) == 0x510, "mgr.nused_sort_pris");
+    DECOMP_ASSERT(offsetof(NUDLIST_MANAGER, sort_list) == 0x514, "mgr.sort_list");
+    DECOMP_ASSERT(offsetof(NUDLIST_MANAGER, nrender_scenes) == 0x518, "mgr.nrender_scenes");
+    DECOMP_ASSERT(offsetof(NUDLIST_MANAGER, front_render_scenes) == 0x51c, "mgr.front_render_scenes");
+    DECOMP_ASSERT(offsetof(NUDLIST_MANAGER, safe_render_scenes) == 0x57c, "mgr.safe_render_scenes");
+    DECOMP_ASSERT(offsetof(NUDLIST_MANAGER, fx_items) == 0x5e8, "mgr.fx_items");
+    DECOMP_ASSERT(offsetof(NUDLIST_MANAGER, loading_critical_section) == 0x5ec, "mgr.loading_critical_section");
 #endif
 #if UINTPTR_MAX == UINT32_MAX
-    static_assert(sizeof(NUDISPLAYLISTITEM) == 0x10, "item size");
-    static_assert(sizeof(NUDISPLAYLIST) == 0x44, "displaylist size");
-    static_assert(sizeof(NUSORTPRI) == 0x24, "sortpri size");
-    static_assert(sizeof(NUDISPLAYLISTRENDERSCENE) == 0x18, "renderscene size");
+    DECOMP_ASSERT(sizeof(NUDISPLAYLISTITEM) == 0x10, "item size");
+    DECOMP_ASSERT(sizeof(NUDISPLAYLIST) == 0x44, "displaylist size");
+    DECOMP_ASSERT(sizeof(NUSORTPRI) == 0x24, "sortpri size");
+    DECOMP_ASSERT(sizeof(NUDISPLAYLISTRENDERSCENE) == 0x18, "renderscene size");
 #endif
 #endif
 

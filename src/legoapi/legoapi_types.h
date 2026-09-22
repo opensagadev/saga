@@ -1457,11 +1457,11 @@ struct GAMEMESSAGE_s {
     void (*end_fn)(GAMEMESSAGE_s *);
 };
 DECOMP_ASSERT(sizeof(GAMEMESSAGE_s) == 0x114, "GAMEMESSAGE_s size");
-static_assert(offsetof(GAMEMESSAGE_s, position_a) == 0x7c, "game message initial position offset");
-static_assert(offsetof(GAMEMESSAGE_s, target_position) == 0x88, "game message target position offset");
-static_assert(offsetof(GAMEMESSAGE_s, position) == 0x94, "game message current position offset");
+DECOMP_ASSERT(offsetof(GAMEMESSAGE_s, position_a) == 0x7c, "game message initial position offset");
+DECOMP_ASSERT(offsetof(GAMEMESSAGE_s, target_position) == 0x88, "game message target position offset");
+DECOMP_ASSERT(offsetof(GAMEMESSAGE_s, position) == 0x94, "game message current position offset");
 DECOMP_ASSERT(offsetof(GAMEMESSAGE_s, rotation_y) == 0xe2, "game message rotation offset");
-static_assert(offsetof(GAMEMESSAGE_s, player_index) == 0xfd, "game message player index offset");
+DECOMP_ASSERT(offsetof(GAMEMESSAGE_s, player_index) == 0xfd, "game message player index offset");
 // Rumble state packet embedded in GAMEPAD_s (20 bytes; floats driven by
 // NuSound3UpdateRumble / UpdateRumble).
 struct RUMBLEPACKET {

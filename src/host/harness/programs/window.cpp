@@ -34,20 +34,20 @@
 
 #if defined(__EMSCRIPTEN__)
 // These movement fields must retain the original 32-bit layout in WASM.
-static_assert(sizeof(GameObject_s) == 0x10e4, "WASM GameObject movement ABI");
-static_assert(offsetof(GAMEPAD_s, input_mode) == 0x25, "WASM input mode offset");
-static_assert(offsetof(GAMEPAD_s, input_direction_z) == 0x2c, "WASM first direction component offset");
-static_assert(offsetof(GAMEPAD_s, input_direction_x) == 0x30, "WASM second direction component offset");
-static_assert(offsetof(APIOBJECT, velocity) == 0x68, "WASM velocity offset");
-static_assert(offsetof(APIOBJECT, collision_position) == 0x80, "WASM collision position offset");
-static_assert(offsetof(APIOBJECT, collision_contact_mask) == 0x1ec, "WASM collision mask offset");
-static_assert(offsetof(APIOBJECT, collision_exclusion_mask) == 0x298, "WASM exclusion mask offset");
-static_assert(offsetof(APIOBJECT, collision_mask_high) == 0x29c, "WASM exclusion mask high offset");
-static_assert(alignof(APIOBJECT) == 4, "WASM API object alignment");
-static_assert(offsetof(GameObject_s, character_context) == 0x7a5, "WASM movement context offset");
-static_assert(offsetof(GameObject_s, pad_gamepad) == 0xc94, "WASM movement controller offset");
-static_assert(offsetof(GameObject_s, delayed_turn_timer) == 0xd40, "WASM turn timer offset");
-static_assert(offsetof(GameObject_s, target_velocity) == 0xf24, "WASM target velocity offset");
+DECOMP_ASSERT(sizeof(GameObject_s) == 0x10e4, "WASM GameObject movement ABI");
+DECOMP_ASSERT(offsetof(GAMEPAD_s, input_mode) == 0x25, "WASM input mode offset");
+DECOMP_ASSERT(offsetof(GAMEPAD_s, input_direction_z) == 0x2c, "WASM first direction component offset");
+DECOMP_ASSERT(offsetof(GAMEPAD_s, input_direction_x) == 0x30, "WASM second direction component offset");
+DECOMP_ASSERT(offsetof(APIOBJECT, velocity) == 0x68, "WASM velocity offset");
+DECOMP_ASSERT(offsetof(APIOBJECT, collision_position) == 0x80, "WASM collision position offset");
+DECOMP_ASSERT(offsetof(APIOBJECT, collision_contact_mask) == 0x1ec, "WASM collision mask offset");
+DECOMP_ASSERT(offsetof(APIOBJECT, collision_exclusion_mask) == 0x298, "WASM exclusion mask offset");
+DECOMP_ASSERT(offsetof(APIOBJECT, collision_mask_high) == 0x29c, "WASM exclusion mask high offset");
+DECOMP_ASSERT(alignof(APIOBJECT) == 4, "WASM API object alignment");
+DECOMP_ASSERT(offsetof(GameObject_s, character_context) == 0x7a5, "WASM movement context offset");
+DECOMP_ASSERT(offsetof(GameObject_s, pad_gamepad) == 0xc94, "WASM movement controller offset");
+DECOMP_ASSERT(offsetof(GameObject_s, delayed_turn_timer) == 0xd40, "WASM turn timer offset");
+DECOMP_ASSERT(offsetof(GameObject_s, target_velocity) == 0xf24, "WASM target velocity offset");
 #endif
 
 extern "C" i32 NuMain(i32 argc, char **argv);

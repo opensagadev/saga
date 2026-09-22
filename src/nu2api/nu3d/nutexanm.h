@@ -60,31 +60,31 @@ struct nutexanim_s {
 };
 
 #ifdef __cplusplus
-static_assert(sizeof(void *) != 4 || offsetof(nutexanim_s, next) == 0x00, "texture animation next offset");
-static_assert(sizeof(void *) != 4 || offsetof(nutexanim_s, env) == 0x14, "texture animation environment offset");
-static_assert(sizeof(void *) != 4 || sizeof(nutexanim_s) == 0x20, "texture animation size");
-static_assert(sizeof(void *) != 4 || offsetof(nutexanim_s, program_name) == 0x1c,
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(nutexanim_s, next) == 0x00, "texture animation next offset");
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(nutexanim_s, env) == 0x14, "texture animation environment offset");
+DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(nutexanim_s) == 0x20, "texture animation size");
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(nutexanim_s, program_name) == 0x1c,
               "texture animation program name offset");
-static_assert(sizeof(void *) != 4 || offsetof(nutexanimenv_s, instruction_index) == 0x04,
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(nutexanimenv_s, instruction_index) == 0x04,
               "texture animation instruction offset");
-static_assert(sizeof(void *) != 4 || offsetof(nutexanimenv_s, loop_depth) == 0x88,
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(nutexanimenv_s, loop_depth) == 0x88,
               "texture animation loop depth offset");
-static_assert(sizeof(void *) != 4 || offsetof(nutexanimenv_s, call_depth) == 0xcc,
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(nutexanimenv_s, call_depth) == 0xcc,
               "texture animation call depth offset");
-static_assert(sizeof(void *) != 4 || offsetof(nutexanimenv_s, material) == 0xdc, "texture animation material offset");
-static_assert(sizeof(void *) != 4 || offsetof(nutexanimenv_s, texture_ids) == 0xe0,
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(nutexanimenv_s, material) == 0xdc, "texture animation material offset");
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(nutexanimenv_s, texture_ids) == 0xe0,
               "texture animation texture table offset");
-static_assert(sizeof(void *) != 4 || offsetof(nutexanimenv_s, texture_index) == 0xe4,
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(nutexanimenv_s, texture_index) == 0xe4,
               "texture animation texture index offset");
-static_assert(sizeof(void *) != 4 || offsetof(nutexanimenv_s, flags) == 0xe8, "texture animation flags offset");
-static_assert(sizeof(void *) != 4 || sizeof(nutexanimenv_s) == 0xec, "texture animation environment size");
-static_assert(sizeof(void *) != 4 || offsetof(nutexanimprog_s, on_signal) == 0x28, "texture program on signal offset");
-static_assert(sizeof(void *) != 4 || offsetof(nutexanimprog_s, off_signal) == 0xa8,
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(nutexanimenv_s, flags) == 0xe8, "texture animation flags offset");
+DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(nutexanimenv_s) == 0xec, "texture animation environment size");
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(nutexanimprog_s, on_signal) == 0x28, "texture program on signal offset");
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(nutexanimprog_s, off_signal) == 0xa8,
               "texture program off signal offset");
-static_assert(sizeof(void *) != 4 || offsetof(nutexanimprog_s, label_ids) == 0x130, "texture program label IDs offset");
-static_assert(sizeof(void *) != 4 || offsetof(nutexanimprog_s, instructions) == 0x1ba,
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(nutexanimprog_s, label_ids) == 0x130, "texture program label IDs offset");
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(nutexanimprog_s, instructions) == 0x1ba,
               "texture program instructions offset");
-static_assert(sizeof(void *) != 4 || sizeof(nutexanimprog_s) == 0x1bc, "texture program size");
+DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(nutexanimprog_s) == 0x1bc, "texture program size");
 #endif
 
 struct nutexanimlist_s {
@@ -110,8 +110,8 @@ extern "C" {
     nutexanimenv_s *NuTexAnimEnvCreate(VARIPTR *buffer, numtl_s *material, u16 *ids, nutexanimprog_s *program);
     void NuTexAnimEnvDestroy(nutexanimenv_s *env);
     void NuTexAnimDestroy(nutexanim_s *animation);
-    nutexanim_s *NuTexAnimCreate(VARIPTR *buffer, nutexanimprog_s *program, numtl_s *material,
-                                  u16 *texture_ids, i32 texture_count);
+    nutexanim_s *NuTexAnimCreate(VARIPTR *buffer, nutexanimprog_s *program, numtl_s *material, u16 *texture_ids,
+                                 i32 texture_count);
     nutexanimprog_s *NuTexAnimProgFind(char *name);
     nutexanim_s *NuTexAnimFind(nutexanim_s *first, char *name);
     nutexanimprog_s *NuTexAnimProgCreate(VARIPTR *buffer, i32 instruction_count, char *name);

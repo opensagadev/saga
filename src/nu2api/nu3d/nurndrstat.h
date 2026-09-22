@@ -1,5 +1,6 @@
 #pragma once
 
+#include "decomp.h"
 #include "nu2api/nucore/common.h"
 #include "nu2api/numath/numtx.h"
 #include "nu2api/numath/nuvec.h"
@@ -136,20 +137,20 @@ typedef struct nufogstate_s {
 
 #ifdef __cplusplus
 #if !defined(__x86_64__) // the tidy pre-pass parses as 64-bit host; real build is i686
-static_assert(sizeof(NURNDRSTATE) == 52, "nurndrstate_s size");
-static_assert(offsetof(NURNDRSTATE, mtl) == 0x08, "state.mtl");
-static_assert(offsetof(NURNDRSTATE, tex_id) == 0x14, "state.tex_id");
-static_assert(offsetof(NURNDRSTATE, konst_id) == 0x1e, "state.konst_id");
-static_assert(offsetof(NURNDRSTATE, global_id) == 0x20, "state.global_id");
-static_assert(offsetof(NURNDRSTATE, lights_id) == 0x24, "state.lights_id");
-static_assert(offsetof(NURNDRSTATE, camera_id) == 0x2c, "state.camera_id");
-static_assert(offsetof(NURNDRSTATE, fog_id) == 0x2e, "state.fog_id");
-static_assert(offsetof(NURNDRSTATE, reflection_id) == 0x32, "state.reflection_id");
-static_assert(sizeof(NUGLOBALRNDRSTATE) == 0x1b0, "nuglobalrndrstate_s size");
+DECOMP_ASSERT(sizeof(NURNDRSTATE) == 52, "nurndrstate_s size");
+DECOMP_ASSERT(offsetof(NURNDRSTATE, mtl) == 0x08, "state.mtl");
+DECOMP_ASSERT(offsetof(NURNDRSTATE, tex_id) == 0x14, "state.tex_id");
+DECOMP_ASSERT(offsetof(NURNDRSTATE, konst_id) == 0x1e, "state.konst_id");
+DECOMP_ASSERT(offsetof(NURNDRSTATE, global_id) == 0x20, "state.global_id");
+DECOMP_ASSERT(offsetof(NURNDRSTATE, lights_id) == 0x24, "state.lights_id");
+DECOMP_ASSERT(offsetof(NURNDRSTATE, camera_id) == 0x2c, "state.camera_id");
+DECOMP_ASSERT(offsetof(NURNDRSTATE, fog_id) == 0x2e, "state.fog_id");
+DECOMP_ASSERT(offsetof(NURNDRSTATE, reflection_id) == 0x32, "state.reflection_id");
+DECOMP_ASSERT(sizeof(NUGLOBALRNDRSTATE) == 0x1b0, "nuglobalrndrstate_s size");
 static_assert(sizeof(NULIGHTINGSTATE) == 0x78, "nulightingstate_s size");
 static_assert(sizeof(NUFOGSTATE) == 0x14, "nufogstate_s size");
-static_assert(offsetof(NUGLOBALRNDRSTATE, camera_state) == 0x110, "global camera_state");
-static_assert(offsetof(NUGLOBALRNDRSTATE, view) == 0x120, "global view");
-static_assert(offsetof(NUGLOBALRNDRSTATE, vpx) == 0x190, "global viewport");
+DECOMP_ASSERT(offsetof(NUGLOBALRNDRSTATE, camera_state) == 0x110, "global camera_state");
+DECOMP_ASSERT(offsetof(NUGLOBALRNDRSTATE, view) == 0x120, "global view");
+DECOMP_ASSERT(offsetof(NUGLOBALRNDRSTATE, vpx) == 0x190, "global viewport");
 #endif
 #endif

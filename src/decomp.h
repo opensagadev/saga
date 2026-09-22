@@ -4,7 +4,7 @@
 
 #include "nu2api/nucore/common.h"
 
-#if defined(__cplusplus) && !defined(HOST_BUILD) && !defined(__clang__)
+#if defined(__ANDROID__) && defined(__cplusplus)
 #define DECOMP_ASSERT(condition, message) static_assert(condition, message)
 #else
 #define DECOMP_ASSERT(condition, message)

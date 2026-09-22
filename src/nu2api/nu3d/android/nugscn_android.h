@@ -1,5 +1,6 @@
 #pragma once
 
+#include "decomp.h"
 #include "nu2api/nucore/common.h"
 #include "nu2api/nufile/nufile.h"
 
@@ -28,15 +29,15 @@ struct nunativegscene_s {
 
 // The original Android executable uses 32-bit pointers; native host builds
 // retain their own natural pointer layout.
-static_assert(sizeof(void *) != 4 || offsetof(nunativegscene_s, vertex_buffers) == 0x04, "native scene vertex buffers");
-static_assert(sizeof(void *) != 4 || offsetof(nunativegscene_s, index_buffers) == 0x0c, "native scene index buffers");
-static_assert(sizeof(void *) != 4 || offsetof(nunativegscene_s, geometries) == 0x10, "native scene geometries");
-static_assert(sizeof(void *) != 4 || offsetof(nunativegscene_s, ngeometries) == 0x14, "native scene geometry count");
-static_assert(sizeof(void *) != 4 || offsetof(nunativegscene_s, vertex_streams) == 0x18, "native scene vertex streams");
-static_assert(sizeof(void *) != 4 || offsetof(nunativegscene_s, nvertex_streams) == 0x1c,
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(nunativegscene_s, vertex_buffers) == 0x04, "native scene vertex buffers");
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(nunativegscene_s, index_buffers) == 0x0c, "native scene index buffers");
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(nunativegscene_s, geometries) == 0x10, "native scene geometries");
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(nunativegscene_s, ngeometries) == 0x14, "native scene geometry count");
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(nunativegscene_s, vertex_streams) == 0x18, "native scene vertex streams");
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(nunativegscene_s, nvertex_streams) == 0x1c,
               "native scene vertex stream count");
-static_assert(sizeof(void *) != 4 || sizeof(nunativegscene_s) == 0x20, "native scene size");
-static_assert(offsetof(nunativevertexstream_s, vertex_buffer) == 0x08, "native vertex stream buffer");
+DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(nunativegscene_s) == 0x20, "native scene size");
+DECOMP_ASSERT(offsetof(nunativevertexstream_s, vertex_buffer) == 0x08, "native vertex stream buffer");
 
 i32 NuGScnUploadGfxDataFromFilePS(VARIPTR *buf, VARIPTR buf_end, i32 file);
 extern u32 g_lastBoundVAO;

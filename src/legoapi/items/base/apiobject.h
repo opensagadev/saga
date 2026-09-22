@@ -1521,16 +1521,16 @@ DECOMP_ASSERT(sizeof(AIPACKET) == 0x208, "AIPACKET size");
 DECOMP_ASSERT(offsetof(AIPACKET, opponent_metric) == 0xe8, "AI opponent metric offset");
 DECOMP_ASSERT(offsetof(AIPACKET, target_metric_e0) == 0xe0, "AI target metric e0 offset");
 DECOMP_ASSERT(offsetof(AIPACKET, target_metric_f0) == 0xf0, "AI target metric f0 offset");
-static_assert(sizeof(void *) != 4 || sizeof(AIPACKET) == 0x208, "AIPACKET 32-bit size");
-static_assert(sizeof(void *) != 4 || sizeof(GameObject_s) == 0x10e4, "GameObject 32-bit size");
-static_assert(sizeof(void *) != 4 || offsetof(GameObject_s, hold_timer) == 0xde4, "GameObject hold timer offset");
-static_assert(sizeof(void *) != 4 || offsetof(GameObject_s, previous_block_animation) == 0xe10,
+DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(AIPACKET) == 0x208, "AIPACKET 32-bit size");
+DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(GameObject_s) == 0x10e4, "GameObject 32-bit size");
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(GameObject_s, hold_timer) == 0xde4, "GameObject hold timer offset");
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(GameObject_s, previous_block_animation) == 0xe10,
               "GameObject previous block animation offset");
-static_assert(sizeof(void *) != 4 || offsetof(GameObject_s, held_movement_animation) == 0xe14,
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(GameObject_s, held_movement_animation) == 0xe14,
               "GameObject held movement animation offset");
-static_assert(sizeof(void *) != 4 || offsetof(GameObject_s, released_movement_animation) == 0xe16,
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(GameObject_s, released_movement_animation) == 0xe16,
               "GameObject released movement animation offset");
-static_assert(sizeof(void *) != 4 || offsetof(AIPACKET, character_type_mask_low) == 0x12c,
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(AIPACKET, character_type_mask_low) == 0x12c,
               "AIPACKET character mask 32-bit offset");
 DECOMP_ASSERT(offsetof(AIPACKET, alternate_script_process) == 0xcc, "AIPACKET alternate script processor offset");
 DECOMP_ASSERT(offsetof(AIPACKET, opponent_object) == 0xe4, "AIPACKET opponent offset");
@@ -1692,9 +1692,9 @@ DECOMP_ASSERT(offsetof(GameObject_s, ground_contact_grace_timer) == 0xd18,
               "GameObject ground-contact grace timer offset");
 DECOMP_ASSERT(offsetof(GameObject_s, weapon_scale) == 0xd30, "GameObject weapon scale offset");
 DECOMP_ASSERT(offsetof(GameObject_s, sabre_flags) == 0xe33, "GameObject sabre flags offset");
-static_assert(sizeof(void *) != 4 || offsetof(GameObject_s, sabre_flags) == 0xe33,
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(GameObject_s, sabre_flags) == 0xe33,
               "GameObject sabre flags must preserve the 32-bit ABI");
-static_assert(sizeof(void *) != 4 || offsetof(GameObject_s, field_0xf00) == 0xf00,
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(GameObject_s, field_0xf00) == 0xf00,
               "GameObject update flags must preserve the 32-bit ABI");
 DECOMP_ASSERT(offsetof(GameObject_s, sabre_damage) == 0xe34, "GameObject sabre damage offset");
 DECOMP_ASSERT(offsetof(GameObject_s, blowup_target) == 0x784, "GameObject blowup target offset");
