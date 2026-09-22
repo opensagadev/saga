@@ -2211,10 +2211,6 @@ void Draw_AUTOSAVECANCEL() {
     STUBBED();
 }
 
-void DrawMiniSnowTroopers(WORLDINFO_s *) {
-    STUBBED();
-}
-
 void DrawPanel3DObjectMtx(nuhspecial_s *special, numtx_s *matrix, float alpha) {
     if (alpha > 0.0f) {
         NUVEC scale = {1.0f / CameraZoom, 1.0f / CameraZoom, 1.0f / CameraZoom};

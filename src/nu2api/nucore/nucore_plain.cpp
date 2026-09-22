@@ -2796,8 +2796,20 @@ extern "C" {
     void NuPostBloom(i32, const NuBloomParameters *parameters) {
         currentScene.bloom = *parameters;
     }
-    void NuSpecialBurstDrawAt(void) {
-        STUBBED();
+    void NuSpecialBurstDrawAt(nuhspecial_s *special, u32 count, NUMTX *matrices, i32 clip) {
+        NuSpecialHandleLayout *handle = reinterpret_cast<NuSpecialHandleLayout *>(special);
+        if (handle == NULL || handle->scene == NULL) {
+            return;
+        }
+
+        NuSpecialLegacyRuntimeLayout *runtime = static_cast<NuSpecialLegacyRuntimeLayout *>(handle->special);
+        if (runtime != NULL && runtime->instance != NULL) {
+            return;
+        }
+        if (handle->display_special == NULL) {
+            return;
+        }
+        NuDisplayListBurstRndrSpecial(special, count, matrices, clip);
     }
     i32 NuSpecialDrawAt(void *special, NUMTX *mtx) {
         NuSpecialHandleLayout *handle = reinterpret_cast<NuSpecialHandleLayout *>(special);

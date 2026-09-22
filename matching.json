@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 51.91382,
+    "fuzzy_match_percent": 51.929733,
     "total_code": "4722419",
-    "matched_code": "455041",
-    "matched_code_percent": 9.63576,
+    "matched_code": "455142",
+    "matched_code_percent": 9.637899,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 5372,
-    "matched_functions_percent": 39.91381,
+    "matched_functions": 5373,
+    "matched_functions_percent": 39.92124,
     "total_units": 1
   },
   "text": {
@@ -74578,14 +74578,6 @@
           "match_percent": 100.0
         },
         {
-          "name": "_Z20DrawMiniSnowTroopersP11WORLDINFO_s",
-          "demangled_name": "DrawMiniSnowTroopers(WORLDINFO_s*)",
-          "address": 5162480,
-          "offset": 4272512,
-          "size": 1412,
-          "match_percent": 1.390729
-        },
-        {
           "name": "_Z14DrawBezierLineR5VuVecS0_S0_S0_P7numtl_si",
           "demangled_name": "DrawBezierLine(VuVec&, VuVec&, VuVec&, VuVec&, numtl_s*, int)",
           "address": 5578176,
@@ -82621,6 +82613,14 @@
           "offset": 4267936,
           "size": 4569,
           "match_percent": 24.15576
+        },
+        {
+          "name": "_Z20DrawMiniSnowTroopersP11WORLDINFO_s",
+          "demangled_name": "DrawMiniSnowTroopers(WORLDINFO_s*)",
+          "address": 5162480,
+          "offset": 4272512,
+          "size": 1412,
+          "match_percent": 48.33775
         },
         {
           "name": "_ZL10seed_chasePfil",
@@ -100171,7 +100171,7 @@
           "address": 3065056,
           "offset": 2175088,
           "size": 101,
-          "match_percent": 12.352942
+          "match_percent": 100.0
         },
         {
           "name": "NuDisplaySceneDebug",
