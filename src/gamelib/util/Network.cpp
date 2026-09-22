@@ -5,6 +5,7 @@
 #include "gamelib/util/Utilities.h"
 #include "gameapi/edtools/gameapi_edtools_types.h"
 #include "legoapi/legoapi_types.h"
+#include "nu2api/nucore/NuNetEmu.h"
 #include <string.h>
 #include <new>
 NetSession *theSession;
@@ -342,8 +343,25 @@ void NetworkObjectManager::BindReplicator(NetReplicator *replicator, EdClass con
     replicator->message_size = static_cast<u16>(message_size);
 }
 
-void NetworkObjectManager::CalcReplicatorDataSize(NetReplicator *, EdClass const *, i32 &, i32 &) {
-    STUBBED();
+void NetworkObjectManager::CalcReplicatorDataSize(NetReplicator *replicator, EdClass const *object_class,
+                                                  i32 &data_size, i32 &message_size) {
+    u8 data_memory[0x1400] = {};
+    u8 object_memory[0x1400] = {};
+    ReplicatorData data;
+    data.start = data_memory;
+    data.end = data_memory + 0x100;
+    data.cursor = data_memory;
+    replicator->AllowPush(object_class, object_memory, data, 1, 1);
+
+    NetOutputStream stream;
+    NetMessage message;
+    i16 flags = 0x10;
+    ForceDummySerialise = 1;
+    stream.message = &message;
+    replicator->SerialiseObject(stream, NULL, object_class, object_memory, data, &flags);
+    data_size = data.cursor - data.start;
+    ForceDummySerialise = 0;
+    message_size = message.data != NULL ? message.write_offset - message.read_offset : 0;
 }
 
 void NetworkObjectManager::ChangeContext(NOSContext &new_context) {
@@ -683,8 +701,62 @@ i32 NetworkObjectManager::Push(NetworkObject const *object, NetReplicator *repli
     return 1;
 }
 
-void NetworkObjectManager::PushObject(NetworkObject *, NetworkObjectManager::NetPeerPush *, i32) {
-    STUBBED();
+i32 NetworkObjectManager::PushObject(NetworkObject *object, NetworkObjectManager::NetPeerPush *peer_push, i32 force) {
+    if (peer_push == NULL) {
+        peer_push = &default_push;
+        object->flags &= ~4;
+    } else if (peer_push->stage == 1 || peer_push->stage == 2) {
+        object->flags |= 4;
+    } else {
+        object->flags &= ~4;
+    }
+
+    i32 class_id = theRegistry.GetClassId(object->object_class);
+    i32 allowed = 1;
+    NOSFilter *filter = filters[class_id];
+    if (filter != NULL && force == 0) {
+        allowed = filter->AllowPush(object->object_class, object->object);
+    }
+
+    i32 message_limit = theNuNetEmu.field_1c;
+    if (theNuNetEmu.field_1c1c > 0.0f) {
+        message_limit = static_cast<i32>(message_limit * theNuNetEmu.field_1c1c);
+    }
+
+    i32 result = 1;
+    if ((allowed | force) != 0) {
+        NetReplicator *replicator = replicators[class_id].head;
+        if (replicator != NULL) {
+            i32 data_offset = 0;
+            i32 permit_push = 1;
+            do {
+                if ((object->flags & 2) != 0) {
+                    replicator->replication_group |= 8;
+                }
+
+                ReplicatorData data;
+                data.start = static_cast<u8 *>(object->replicator_data) + data_offset;
+                data.end = data.start + replicator->data_size;
+                data.cursor = data.start;
+                data_offset += replicator->data_size;
+
+                if (theNuNetEmu.field_00 < message_limit && (replicator->replication_group & 0x40) == 0) {
+                    permit_push = 0;
+                }
+                if ((permit_push | force) != 0 &&
+                    replicator->AllowPush(object->object_class, object->object, data, force, 0) != 0 &&
+                    Push(object, replicator, data, peer_push) == 0) {
+                    result = 0;
+                }
+                replicator = replicator->next;
+            } while (replicator != NULL);
+        }
+    }
+
+    if ((object->flags & 2) != 0) {
+        object->flags &= ~2;
+    }
+    return result;
 }
 
 void NetworkObjectManager::Receive(NetMessage message, unsigned char, NetPeer const &peer) {

@@ -1990,8 +1990,32 @@ void NuNetEmu::FindPacket(nunetaddr_s *, i32) {
     STUBBED();
 }
 
-NuNetEmu::NuNetEmu() {
-    STUBBED();
+NuNetEmu theNuNetEmu;
+
+NuNetEmu::NuNetEmu() : raw_stats("EmuRaw"), packet_stats("EmuPack") {
+    field_04 = 0;
+    field_08 = 0;
+    field_0c = 0;
+    field_10 = 0;
+    field_14 = 0;
+    field_18 = 0;
+    field_20 = 0;
+    field_24 = 0;
+    field_28 = 0;
+    field_2c = 0;
+    field_30 = 0;
+    field_34 = 0.0f;
+    field_38 = 0x320;
+    field_3c = 0x32;
+    field_17bc = 0;
+    field_17c0 = 0x1800;
+    field_17c4 = 0x2800;
+    field_17c8 = 0x80;
+    field_17b0 = 0;
+    field_17b4 = 0;
+    field_17b8 = 0;
+    SetConditions(CONDITIONS_NORMAL);
+    field_00 = 0x200;
 }
 
 void NuNetEmu::RecvFrom(void *, i32, nunetaddr_s &) {
@@ -2002,8 +2026,35 @@ void NuNetEmu::SendTo(void *, i32, nunetaddr_s *, i32) {
     STUBBED();
 }
 
-void NuNetEmu::SetConditions(NuNetEmu::eConditions) {
-    STUBBED();
+void NuNetEmu::SetConditions(NuNetEmu::eConditions conditions) {
+    field_20 = conditions;
+    switch (conditions) {
+        case CONDITIONS_NORMAL:
+            field_24 = 0;
+            field_14 = 0;
+            field_18 = 0;
+            break;
+        case CONDITIONS_1:
+            field_24 = 1;
+            field_14 = 20;
+            field_34 = 0.005f;
+            field_18 = 40;
+            break;
+        case CONDITIONS_2:
+            field_24 = 1;
+            field_14 = 50;
+            field_34 = 0.02f;
+            field_18 = 70;
+            break;
+        case CONDITIONS_3:
+            field_24 = 2;
+            field_28 = 5;
+            field_34 = 0.01f;
+            field_2c = 15;
+            field_14 = 100;
+            field_18 = 120;
+            break;
+    }
 }
 
 void NuNetEmu::SplitSendPacket(NuNetEmu::EmuPacket *) {

@@ -66,7 +66,9 @@ struct NOSContext {
         u32 words[4];
     };
 };
-struct NOSFilter {};
+struct NOSFilter {
+    virtual i32 AllowPush(EdClass const *, void *) = 0;
+};
 struct NetAddress {
     u32 value;
 };
@@ -506,7 +508,7 @@ struct NetworkObjectManager : NetListenerInterface, EdObjectNotifier {
     void PeerJoined(NetPeer const &) override;
     void PeerLeft(NetPeer const &, ePeerLeftReason) override;
     i32 Push(NetworkObject const *, NetReplicator *, ReplicatorData &, NetworkObjectManager::NetPeerPush *);
-    void PushObject(NetworkObject *, NetworkObjectManager::NetPeerPush *, i32);
+    i32 PushObject(NetworkObject *, NetworkObjectManager::NetPeerPush *, i32);
     void Receive(NetMessage, unsigned char, NetPeer const &) override;
     void ReceiveAcquireMessage(NetMessage &, NetPeer const &);
     void ReceiveAcquiredMessage(NetMessage &, NetPeer const &);

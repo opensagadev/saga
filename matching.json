@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 52.076256,
+    "fuzzy_match_percent": 52.10126,
     "total_code": "4722419",
-    "matched_code": "456829",
-    "matched_code_percent": 9.673623,
+    "matched_code": "457239",
+    "matched_code_percent": 9.682304,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 5401,
-    "matched_functions_percent": 40.12928,
+    "matched_functions": 5403,
+    "matched_functions_percent": 40.144142,
     "total_units": 1
   },
   "text": {
@@ -36409,7 +36409,7 @@
           "address": 5433264,
           "offset": 4543296,
           "size": 492,
-          "match_percent": 81.18881
+          "match_percent": 86.94405
         },
         {
           "name": "_ZN13NetworkObject10InitialiseEiPvP7EdClassRK7NetPeeri",
@@ -36793,7 +36793,7 @@
           "address": 5445408,
           "offset": 4555440,
           "size": 492,
-          "match_percent": 86.15126
+          "match_percent": 85.64706
         },
         {
           "name": "_ZN20NetworkObjectManager11NetPeerPush9NextStageEv",
@@ -36833,7 +36833,7 @@
           "address": 5447392,
           "offset": 4557424,
           "size": 387,
-          "match_percent": 85.79832
+          "match_percent": 85.882355
         },
         {
           "name": "_ZN20NetworkObjectManager14RegisterObjectEPvP7EdClassi",
@@ -36841,7 +36841,7 @@
           "address": 5447792,
           "offset": 4557824,
           "size": 228,
-          "match_percent": 96.97183
+          "match_percent": 100.0
         },
         {
           "name": "_ZN20NetworkObjectManager18NotifyCreateObjectEPvP7EdClassS0_iii",
@@ -36889,7 +36889,7 @@
           "address": 5449440,
           "offset": 4559472,
           "size": 549,
-          "match_percent": 3.157895
+          "match_percent": 54.875
         },
         {
           "name": "_ZN20NetworkObjectManager6UpdateEv",
@@ -36905,7 +36905,7 @@
           "address": 5450768,
           "offset": 4560800,
           "size": 496,
-          "match_percent": 3.75
+          "match_percent": 67.89286
         },
         {
           "name": "_ZN20NetworkObjectManager14BindReplicatorEP13NetReplicatorPK7EdClass",
@@ -97488,6 +97488,14 @@
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nucore.o",
       "functions": [
         {
+          "name": "_GLOBAL__sub_I_nucore.cpp",
+          "demangled_name": "_GLOBAL__sub_I_nucore.cpp",
+          "address": 892976,
+          "offset": 3008,
+          "size": 93,
+          "match_percent": 31.764706
+        },
+        {
           "name": "_ZN6NuCore19GetApplicationStateEv",
           "demangled_name": "NuCore::GetApplicationState()",
           "address": 985968,
@@ -98581,7 +98589,7 @@
           "address": 5622528,
           "offset": 4732560,
           "size": 182,
-          "match_percent": 12.55814
+          "match_percent": 100.0
         },
         {
           "name": "_ZN8NuNetEmuC1Ev",
@@ -98589,7 +98597,7 @@
           "address": 5622720,
           "offset": 4732752,
           "size": 631,
-          "match_percent": 4.948453
+          "match_percent": 33.24742
         },
         {
           "name": "_ZN8NuNetEmuC2Ev",
@@ -98597,7 +98605,7 @@
           "address": 5622720,
           "offset": 4732752,
           "size": 631,
-          "match_percent": 4.948453
+          "match_percent": 33.24742
         }
       ]
     },
@@ -122414,14 +122422,6 @@
       "match_percent": 0.0
     },
     {
-      "name": "_GLOBAL__sub_I_nucore.cpp",
-      "demangled_name": "_GLOBAL__sub_I_nucore.cpp",
-      "address": 892976,
-      "offset": 3008,
-      "size": 93,
-      "match_percent": 0.0
-    },
-    {
       "name": "_GLOBAL__sub_I_NuThreadManager.cpp",
       "demangled_name": "_GLOBAL__sub_I_NuThreadManager.cpp",
       "address": 893072,
@@ -128113,8 +128113,8 @@
   "summary": {
     "bazel_units": 458,
     "functions": 13454,
-    "assigned_functions": 12514,
+    "assigned_functions": 12515,
     "ambiguous_functions": 216,
-    "unassigned_functions": 724
+    "unassigned_functions": 723
   }
 }
