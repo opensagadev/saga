@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 52.49877,
+    "fuzzy_match_percent": 52.530113,
     "total_code": "4722419",
     "matched_code": "459721",
     "matched_code_percent": 9.734862,
@@ -67175,7 +67175,7 @@
           "address": 4379952,
           "offset": 3489984,
           "size": 925,
-          "match_percent": 2.110553
+          "match_percent": 81.336685
         },
         {
           "name": "_Z14DrawMessageBoxiffff",
@@ -67183,7 +67183,7 @@
           "address": 4380880,
           "offset": 3490912,
           "size": 770,
-          "match_percent": 2.763158
+          "match_percent": 99.79605
         },
         {
           "name": "SmartTextEx",

@@ -52,6 +52,8 @@ extern "C" {
     VUFNT *LoadButtonFont(char *, char *, variptr_u *, variptr_u *, i32);
     void NuLanguageSet(i32 language);
     void NuQFntDestroy(VUFNT *font);
+    i32 NuRndrBeginScene(i32 flags);
+    void NuRndrRect2di(i32 x, i32 y, i32 width, i32 height, i32 colour, numtl_s *material);
 }
 void (*Text_GameSetLanguageFn)(i32);
 char *Text_GetLanguagePath(i32 language);
@@ -689,12 +691,89 @@ extern "C" void MessageBoxInitMtl(void) {
     MessageMtlInit = 1;
 }
 
-void DrawMessageBoxRGBA(float, float, float, float, u32, u32, u32, u32, numtl_s *, i32, float) {
-    STUBBED();
+void DrawMessageBoxRGBA(f32 x, f32 y, f32 width, f32 height, u32 blue, u32 green, u32 red, u32 alpha, numtl_s *material,
+                        i32 alignment, f32 scale) {
+    const f32 scaled_width = width * scale;
+    const f32 scaled_height = height * scale;
+
+    f32 pulse = 1.0f;
+    if (pulsetimerfn != NULL) {
+        pulse = (pulsetimerfn((1.0f - y) * 0.5f) - 1.0f) * 4.0f + 1.0f;
+    }
+
+    i32 opacity = static_cast<i32>((static_cast<f32>(static_cast<i32>(alpha >> 16)) * 65536.0f +
+                                    static_cast<f32>(static_cast<i32>(alpha & 0xffff))) *
+                                   pulse);
+
+    const i32 box_width = static_cast<i32>(scaled_width * 10240.0f * QFONTSCALEX);
+    const i32 box_height = static_cast<i32>(scaled_height * 3584.0f * QFONTSCALEY);
+    const i32 edge_width = static_cast<i32>(204.79999f * QFONTSCALEX * 0.75f);
+    const i32 edge_height = static_cast<i32>(71.68f * QFONTSCALEY);
+    const i32 corner_width = static_cast<i32>(40.960003f * QFONTSCALEX * 0.75f);
+    const i32 corner_height = static_cast<i32>(14.336f * QFONTSCALEY);
+
+    if ((alignment & 5) == 4) {
+        y += scaled_height;
+    } else if ((alignment & 5) == 0) {
+        y += scaled_height * 0.5f;
+    }
+    if ((alignment & 10) == 8) {
+        x -= scaled_width;
+    } else if ((alignment & 10) == 0) {
+        x -= scaled_width * 0.5f;
+    }
+
+    i32 screen_x = static_cast<i32>((x + 1.0f) * 0.5f * 10240.0f * QFONTSCALEX);
+    i32 screen_y = static_cast<i32>((2.0f - (y + 1.0f)) * 0.5f * 3584.0f * QFONTSCALEY);
+    const u32 colour = (static_cast<u32>(opacity) << 24) | ((red & 0xff) << 16) | ((green & 0xff) << 8) | (blue & 0xff);
+    const u32 edge_colour = (static_cast<u32>(opacity) << 25) | 0xffffff;
+
+    NuRndrRect2di(screen_x, screen_y, box_width, box_height, colour, material);
+    NuRndrRect2di(screen_x, screen_y, edge_width, corner_height, edge_colour, material);
+    NuRndrRect2di(screen_x, screen_y, corner_width, edge_height, edge_colour, material);
+    screen_x += box_width;
+    screen_y += box_height;
+    NuRndrRect2di(screen_x, screen_y, -edge_width, -corner_height, edge_colour, material);
+    NuRndrRect2di(screen_x, screen_y, -corner_width, -edge_height, edge_colour, material);
 }
 
-void DrawMessageBox(i32, float, float, float, float) {
-    STUBBED();
+void DrawMessageBox(i32, f32 x, f32 y, f32 width, f32 height) {
+    if (MessageMtlInit == 0) {
+        MessageBoxInitMtl();
+    }
+
+    if (NuRndrBeginScene(-1) != 0) {
+        const i32 box_width = static_cast<i32>(width * 10240.0f * 0.5f);
+        const i32 box_height = static_cast<i32>(height * 3584.0f * 0.5f);
+        const i32 screen_x = static_cast<i32>((x + 1.0f) * 0.5f * 10240.0f) - box_width / 2;
+        const i32 screen_y = static_cast<i32>((y + 1.0f) * 0.5f * 3584.0f) - box_height / 2;
+
+        NuRndrRect2di(screen_x, screen_y, box_width, box_height, 0x80808080, MessageMtl);
+
+        u32 colours[4] = {0x00808080, 0x80808080, 0x00808080, 0x80808080};
+        NuRndrGradRectUV2di(screen_x - 30, screen_y, 60, box_height, 0.0f, 0.0f, 0.0f, 1.0f, colours, MessageMtl);
+
+        colours[0] = 0x80808080;
+        colours[1] = 0x00808080;
+        colours[2] = 0x80808080;
+        colours[3] = 0x00808080;
+        NuRndrGradRectUV2di(screen_x + box_width, screen_y, 60, box_height, 1.0f, 0.0f, 1.0f, 1.0f, colours,
+                            MessageMtl);
+
+        colours[0] = 0x00808080;
+        colours[1] = 0x00808080;
+        colours[2] = 0x80808080;
+        colours[3] = 0x80808080;
+        NuRndrGradRectUV2di(screen_x, screen_y - 7, box_width, 30, 0.0f, 0.0f, 1.0f, 0.0f, colours, MessageMtl);
+
+        colours[0] = 0x80808080;
+        colours[1] = 0x80808080;
+        colours[2] = 0x00808080;
+        colours[3] = 0x00808080;
+        NuRndrGradRectUV2di(screen_x, screen_y + box_height - 15, box_width, 30, 0.0f, 1.0f, 1.0f, 1.0f, colours,
+                            MessageMtl);
+        NuRndrEndScene();
+    }
 }
 
 extern "C" {
