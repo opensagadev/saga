@@ -586,16 +586,72 @@ void NetworkObjectManager::NotifyDestroyObject(void *object, EdClass *object_cla
     }
 }
 
-void NetworkObjectManager::ObjectCall(void *, i32, NetMessage, NetPeer const *) {
-    STUBBED();
+static NetMessage MakeObjectCallMessage(NetMessage const &message, i32 call_id, NetworkObject const *object) {
+    NetMessage outgoing(message);
+    if (outgoing.data != NULL) {
+        i16 class_id = static_cast<i16>(theRegistry.GetClassId(object->object_class));
+        i16 object_id = object->id;
+        outgoing.read_offset -= 2;
+        memcpy(outgoing.data->bytes + outgoing.read_offset, &class_id, sizeof(class_id));
+        if (outgoing.swap_endianness != 0) {
+            EdFileSwapEndianess16(outgoing.data->bytes + outgoing.read_offset);
+        }
+        outgoing.read_offset -= 2;
+        memcpy(outgoing.data->bytes + outgoing.read_offset, &object_id, sizeof(object_id));
+        if (outgoing.swap_endianness != 0) {
+            EdFileSwapEndianess16(outgoing.data->bytes + outgoing.read_offset);
+        }
+        outgoing.data->bytes[--outgoing.read_offset] = static_cast<u8>(call_id);
+        outgoing.data->bytes[--outgoing.read_offset] = 8;
+    }
+    return outgoing;
 }
 
-void NetworkObjectManager::ObjectOtherCall(void *, i32, NetMessage) {
-    STUBBED();
+i32 NetworkObjectManager::ObjectCall(void *instance, i32 call_id, NetMessage message, NetPeer const *peer) {
+    NetworkObject *object = FindNetworkObject(instance);
+    if (object == NULL) {
+        return 0;
+    }
+
+    NetMessage outgoing = MakeObjectCallMessage(message, call_id, object);
+    if (peer == NULL) {
+        theNetwork.ReliableBroadcast(outgoing, 3);
+        reinterpret_cast<void (*)(void *, NetMessage &)>(registered_calls[call_id - 1].callback)(instance, message);
+    } else if (peer->local != 0) {
+        reinterpret_cast<void (*)(void *, NetMessage &)>(registered_calls[call_id - 1].callback)(instance, message);
+    } else {
+        theNetwork.ReliableSend(outgoing, 3, *const_cast<NetPeer *>(peer), NULL, 0);
+    }
+    return 1;
 }
 
-void NetworkObjectManager::ObjectOwnerCall(void *, i32, NetMessage) {
-    STUBBED();
+i32 NetworkObjectManager::ObjectOtherCall(void *instance, i32 call_id, NetMessage message) {
+    NetworkObject *object = FindNetworkObject(instance);
+    if (object == NULL) {
+        return 0;
+    }
+    if (object->owner->local == 0) {
+        return 1;
+    }
+
+    NetMessage outgoing = MakeObjectCallMessage(message, call_id, object);
+    theNetwork.ReliableBroadcast(outgoing, 3);
+    return 1;
+}
+
+i32 NetworkObjectManager::ObjectOwnerCall(void *instance, i32 call_id, NetMessage message) {
+    NetworkObject *object = FindNetworkObject(instance);
+    if (object == NULL) {
+        return 0;
+    }
+    if (object->owner->local != 0) {
+        reinterpret_cast<void (*)(void *, NetMessage &)>(registered_calls[call_id - 1].callback)(instance, message);
+        return 1;
+    }
+
+    NetMessage outgoing = MakeObjectCallMessage(message, call_id, object);
+    theNetwork.ReliableSend(outgoing, 3, *const_cast<NetPeer *>(object->owner), NULL, 0);
+    return 1;
 }
 
 NetPeer const *NetworkObjectManager::Owner(i32 id) {
@@ -1143,8 +1199,22 @@ i32 NetworkObjectManager::ReleaseObject(void *object, EdClass *, i32 guid) {
     return 1;
 }
 
-void NetworkObjectManager::RemoteCall(i32, NetMessage, NetPeer const *) {
-    STUBBED();
+i32 NetworkObjectManager::RemoteCall(i32 call_id, NetMessage message, NetPeer const *peer) {
+    NetMessage outgoing(message);
+    if (outgoing.data != NULL) {
+        outgoing.data->bytes[--outgoing.read_offset] = static_cast<u8>(call_id);
+        outgoing.data->bytes[--outgoing.read_offset] = 7;
+    }
+
+    if (peer == NULL) {
+        theNetwork.ReliableBroadcast(outgoing, 3);
+        reinterpret_cast<void (*)(NetMessage &)>(registered_calls[call_id - 1].callback)(message);
+    } else if (peer->local != 0) {
+        reinterpret_cast<void (*)(NetMessage &)>(registered_calls[call_id - 1].callback)(message);
+    } else {
+        theNetwork.ReliableSend(outgoing, 3, *const_cast<NetPeer *>(peer), NULL, 0);
+    }
+    return 1;
 }
 
 void NetworkObjectManager::RemoveFromLocalObjectList(NetworkObject *object) {

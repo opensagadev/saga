@@ -501,9 +501,9 @@ struct NetworkObjectManager : NetListenerInterface, EdObjectNotifier {
     NetworkObjectManager();
     void NotifyCreateObject(void *, EdClass *, void *, i32, i32, i32) override;
     void NotifyDestroyObject(void *, EdClass *, i32, i32) override;
-    void ObjectCall(void *, i32, NetMessage, NetPeer const *);
-    void ObjectOtherCall(void *, i32, NetMessage);
-    void ObjectOwnerCall(void *, i32, NetMessage);
+    i32 ObjectCall(void *, i32, NetMessage, NetPeer const *);
+    i32 ObjectOtherCall(void *, i32, NetMessage);
+    i32 ObjectOwnerCall(void *, i32, NetMessage);
     NetPeer const *Owner(i32);
     void PeerJoined(NetPeer const &) override;
     void PeerLeft(NetPeer const &, ePeerLeftReason) override;
@@ -527,7 +527,7 @@ struct NetworkObjectManager : NetListenerInterface, EdObjectNotifier {
     i32 RegisterObjectCall(void (*)(void *, NetMessage &), i32);
     i32 RegisterRemoteCall(void (*)(NetMessage &), i32);
     i32 ReleaseObject(void *, EdClass *, i32);
-    void RemoteCall(i32, NetMessage, NetPeer const *);
+    i32 RemoteCall(i32, NetMessage, NetPeer const *);
     void RemoveFromLocalObjectList(NetworkObject *);
     void RemovePendingObject(NetworkObject *);
     void Reset();
