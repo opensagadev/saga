@@ -60,6 +60,22 @@ char *Text_GetLanguagePath(i32 language);
 void Text_LoadAndFixUpStrings(unsigned char *filename, unsigned char **buffer, char **table, i32 count);
 void IntroText_SetTextID(i32 id);
 void Text_InsertCommasIntoNumber(char *number, char *text, i32 length);
+void GameDrawMenuEntry(MENU *menu, char *text);
+extern "C" void BackupMenu(void);
+extern "C" {
+    extern u8 MENUFLASH1R;
+    extern u8 MENUFLASH1G;
+    extern u8 MENUFLASH1B;
+    extern u8 MENUFLASH0R;
+    extern u8 MENUFLASH0G;
+    extern u8 MENUFLASH0B;
+    extern u8 MENUENTRYR;
+    extern u8 MENUENTRYG;
+    extern u8 MENUENTRYB;
+    extern u8 MENUNORMALR;
+    extern u8 MENUNORMALG;
+    extern u8 MENUNORMALB;
+}
 static VUFNT *app_fnt;
 void Text_LoadFont(char *path, variptr_u *buf, variptr_u *buf_end) {
     create_qfont3dz = 1;
@@ -1296,12 +1312,127 @@ extern "C" {
         NuQFntDestroy(QFont2D);
     }
 }
-void MenuUpdateViewTextStrings(MENU_s *) {
-    STUBBED();
+void MenuUpdateViewTextStrings(MENU_s *menu) {
+    if (menu->cancel_pressed != 0) {
+        BackupMenu();
+        return;
+    }
+
+    if ((Player[0] == nullptr || (Player[0]->pad_gamepad->buttons_held & GAMEPAD_MENUSELECT) == 0) &&
+        (Player[1] == nullptr || (Player[1]->pad_gamepad->buttons_held & GAMEPAD_MENUSELECT) == 0)) {
+        return;
+    }
+
+    if (menu->up_held != 0) {
+        menu->selected_row -= 5;
+        if (menu->selected_row < menu->first_row) {
+            menu->selected_row = menu->last_row;
+        }
+        menu->selected_item = menu->selected_row - menu->first_row;
+    } else if (menu->down_held != 0) {
+        menu->selected_row += 5;
+        if (menu->selected_row > menu->last_row) {
+            menu->selected_row = menu->first_row;
+        }
+        menu->selected_item = menu->selected_row - menu->first_row;
+    }
 }
 
-void MenuDrawViewTextStrings(MENU_s *) {
-    STUBBED();
+static inline u8 Text_MenuColourLerp(u8 first, u8 second, f32 amount) {
+    return static_cast<u8>(
+        static_cast<i32>(static_cast<f32>(first) * amount + static_cast<f32>(second) * (1.0f - amount)));
+}
+
+void MenuDrawViewTextStrings(MENU_s *menu) {
+    menu->item_scale = 2.0f;
+    menu->centre_offset = MENUDY * 2.0f;
+    menu->draw_x = -0.75f;
+    menu->draw_y = static_cast<f32>(-menu->selected_row) * menu->centre_offset;
+
+    char text[2048];
+    for (i32 i = 0; i < Text_MaxOverallStrings; ++i) {
+        dme_sx = 0.6f;
+        dme_sy = menu->item_scale;
+        dme_align = 0;
+        GameDrawMenuEntry(menu, const_cast<char *>(" "));
+
+        const f32 y = menu->draw_y - menu->centre_offset;
+        if (MenuStopDraw != 0 || y < -1.25f || y >= 1.25f) {
+            continue;
+        }
+
+        const bool registered = (Text_StringBits[i >> 5] & (1U << (i & 0x1f))) != 0;
+        i32 red;
+        i32 green;
+        i32 blue;
+        if (registered) {
+            if (menu->selected_item == i) {
+                if (TestForController()) {
+                    if (menu_pulsate > 0.0f) {
+                        red = Text_MenuColourLerp(MENUFLASH0R, MENUFLASH1R, menu_pulsate);
+                        green = Text_MenuColourLerp(MENUFLASH0G, MENUFLASH1G, menu_pulsate);
+                        blue = Text_MenuColourLerp(MENUFLASH0B, MENUFLASH1B, menu_pulsate);
+                    } else if (menu_flash != 0) {
+                        red = MENUFLASH0R;
+                        green = MENUFLASH0G;
+                        blue = MENUFLASH0B;
+                    } else {
+                        red = MENUFLASH1R;
+                        green = MENUFLASH1G;
+                        blue = MENUFLASH1B;
+                    }
+                } else if (menu_pulse > 0.0f) {
+                    red = Text_MenuColourLerp(MENUFLASH0R, MENUNORMALR, menu_pulse);
+                    green = Text_MenuColourLerp(MENUFLASH0G, MENUNORMALG, menu_pulse);
+                    blue = Text_MenuColourLerp(MENUFLASH0B, MENUNORMALB, menu_pulse);
+                } else {
+                    red = MENUENTRYR;
+                    green = MENUENTRYG;
+                    blue = MENUENTRYB;
+                }
+            } else {
+                if (menu_pulse > 0.0f) {
+                    red = Text_MenuColourLerp(MENUFLASH0R, MENUNORMALR, menu_pulse);
+                    green = Text_MenuColourLerp(MENUFLASH0G, MENUNORMALG, menu_pulse);
+                    blue = Text_MenuColourLerp(MENUFLASH0B, MENUNORMALB, menu_pulse);
+                } else {
+                    red = MENUENTRYR;
+                    green = MENUENTRYG;
+                    blue = MENUENTRYB;
+                }
+            }
+        } else {
+            if (menu->selected_item == i) {
+                red = 255;
+                if (menu_flash < 1) {
+                    green = 191;
+                    blue = 0;
+                } else {
+                    green = 255;
+                    blue = 255;
+                }
+            } else {
+                red = 255;
+                green = 0;
+                blue = 0;
+            }
+        }
+
+        dme_r = static_cast<u8>(red);
+        dme_g = static_cast<u8>(green);
+        dme_b = static_cast<u8>(blue);
+        dme_rgb = 1;
+        sprintf(text, "%i", i);
+        SmartTextEx(text, -0.76f, y, 1.0f, MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, 8, static_cast<u8>(red),
+                    static_cast<u8>(green), static_cast<u8>(blue), 0.09000003f, 1, nullptr, 0, MenuA);
+
+        if (TTab[i] != nullptr) {
+            dme_rgb = 1;
+            Text_ExpandAllButtonStrings(TTab[i], text);
+            SmartTextEx(text, -0.74f, y, 1.0f, MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, 2, static_cast<u8>(red),
+                        static_cast<u8>(green), static_cast<u8>(blue), 1.59f, 2, nullptr, 0, MenuA);
+        }
+    }
 }
 
 abi_ulong GetMatchLength(unsigned char *first, unsigned char *second, abi_ulong maximum) {
