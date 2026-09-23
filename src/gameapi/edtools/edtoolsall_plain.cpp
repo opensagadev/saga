@@ -2614,7 +2614,7 @@ extern "C" {
         if (requested + edpp_types_used > EDPP_MAX_TYPES) {
             skipped = requested + edpp_types_used - EDPP_MAX_TYPES;
             requested = EDPP_MAX_TYPES - edpp_types_used;
-            edpp_types_used = EDPP_MAX_TYPES;
+            edbits_types_error = 300;
         }
 
         for (i32 n = 0; n < requested; n++) {
@@ -2722,7 +2722,7 @@ extern "C" {
                     particle->reflection_rotation_z = 0;
                     particle->reflection_rotation_y = 0;
                     particle->reflection_offset = 0.0f;
-                    particle->reflection_bounce = 0.0f;
+                    particle->reflection_bounce = 0.9f;
                 }
                 particle->render_group = version > 14 ? EdFileReadShort() : 0;
                 if (version > 26) {
@@ -2730,12 +2730,12 @@ extern "C" {
                 } else {
                     particle->render_priority = 20000;
                     if (particle->effect_index != -1) {
-                        u8 generator = debtab[particle->effect_index]->generator_type;
-                        if (generator == 2)
+                        u8 particle_type = debtab[particle->effect_index]->particle_type;
+                        if (particle_type == 2)
                             particle->render_priority = 40000;
-                        else if (generator == 3)
+                        else if (particle_type == 3)
                             particle->render_priority = 30000;
-                        else if (generator == 7)
+                        else if (particle_type == 7)
                             particle->render_priority = 10000;
                     }
                 }

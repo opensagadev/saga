@@ -1997,7 +1997,7 @@ extern "C" {
                 i16 angle = TargetAng;
                 if (difference >= -20000 && difference <= 20000)
                     angle = static_cast<i16>(MouseOldAng + difference / 4);
-                MouseOldAng = angle;
+                MouseOldAng = TargetAng;
 
                 f32 sine = NU_SIN_LUT(static_cast<u16>(angle) + 0x2000);
                 if (NuFabs(sine) > 0.1f) {

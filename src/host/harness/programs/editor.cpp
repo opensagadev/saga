@@ -592,6 +592,7 @@ namespace saga::host::harness {
                     HostSceneObject &object = this->scene_objects[index];
                     NuGScnGetSpecial(&object.special, scene, index);
                     object.attributes = 0x12400000;
+                    object.led_file = static_cast<i16>(scene_id);
                     object.reserved_0x28 = 0;
                 }
                 theSceneObjectHelper.scenes[scene_id] = this->scene_objects.data();

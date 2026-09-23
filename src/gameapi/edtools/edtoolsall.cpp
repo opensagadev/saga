@@ -3303,8 +3303,7 @@ i32 EdManScale::Process(EdInputContext &input, ClassObjectList &selected) {
         for (ClassObjectListEntry *entry = selected.first; entry != NULL; entry = entry->next) {
             VuMtx transform;
             NuMtxSetIdentity(&transform.matrix);
-            if (!get_manipulator_attribute(entry, 0x20, EdType_VuMtx, &transform))
-                continue;
+            get_manipulator_attribute(entry, 0x20, EdType_VuMtx, &transform);
 
             f32 scale_x = 1.0f;
             f32 scale_y = 1.0f;
@@ -3330,11 +3329,6 @@ i32 EdManScale::Process(EdInputContext &input, ClassObjectList &selected) {
                 scale_x += local_axis.x * change;
                 scale_y += local_axis.y * change;
                 scale_z += local_axis.z * change;
-                if (axis >= 4) {
-                    scale_x += second_axis.x;
-                    scale_y += second_axis.y;
-                    scale_z += second_axis.z;
-                }
             } else if (axis == 7) {
                 f32 movement = input.Get(1) - input.Get(0) + input.Get(2);
                 if (movement == 0.0f)
@@ -4261,9 +4255,10 @@ i32 EdManipulator::Process(EdInputContext &input, ClassObjectList &selected) {
     if (input.GetHold(14) != 0.0f)
         Scale += step * input.delta_time;
     if (input.GetHold(15) != 0.0f) {
-        Scale -= step * input.delta_time;
-        if (Scale < 0.1f)
+        if (Scale <= 0.1f)
             Scale = 0.1f;
+        else
+            Scale -= step * input.delta_time;
     }
 
     VuVec average;
@@ -4292,7 +4287,9 @@ i32 EdManipulator::Process(EdInputContext &input, ClassObjectList &selected) {
     *last_point = point;
     last_point->w = 0.0f;
     delta->w = 1.0f;
-    *cursor = *last_point;
+    *cursor = *ray_direction;
+    if (EdTerrRay(*cursor, *last_point) == 0)
+        *cursor = *last_point;
     cursor->w = 1.0f;
     *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(this) + 0x08) = 0;
     for (ClassObjectListEntry *entry = selected.first; entry != NULL; entry = entry->next) {

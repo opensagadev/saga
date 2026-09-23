@@ -1018,8 +1018,8 @@ static __used__ void pathEditorCreateSpecialRouteData(AIPATH_s *path, EDAIPATH_s
             if (members[node]) {
                 ++route->route_count;
                 path->nodes[node].route_membership_mask |= 1 << route_index;
-                exits += (path->nodes[node].route_boundary_mask & (1 << route_index)) != 0;
             }
+            exits += (path->nodes[node].route_boundary_mask & (1 << route_index)) != 0;
         }
         route->exit_node_count = exits;
         if (route->route_count == 0) {
