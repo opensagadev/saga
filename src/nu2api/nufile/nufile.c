@@ -18,17 +18,21 @@ i32 NuFileCreateDir(void) {
     return 0;
 }
 
-void NuFileCloseDir(void) {
+void NuFileCloseDir(NUFILE file) {
+    (void)file;
     STUBBED();
 }
 
-i32 NuFileOpenDir(void) {
+NUFILE NuFileOpenDir(char *path) {
+    (void)path;
     STUBBED();
     return 0;
 }
 
 /* The original Android implementations return these fixed results. */
-i32 NuFileGetInfo(void) {
+i32 NuFileGetInfo(char *path, NUFILE_INFO *info) {
+    (void)path;
+    (void)info;
     return 1;
 }
 
@@ -103,7 +107,9 @@ i32 DEV_FormatName(NUFILE_DEVICE *device, char *formatted_name, char *path, i32 
     return 0;
 }
 
-i32 NuFileReadDir(NUFILE file) {
+i32 NuFileReadDir(NUFILE file, void *entry) {
+    (void)file;
+    (void)entry;
     STUBBED();
     return 0;
 }

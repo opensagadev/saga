@@ -90,6 +90,9 @@ i32 BaseEditor::blockStart[8];
 eduimenu_s *edLevelActiveMenu;
 extern eduimenu_s *edLevelPinnedMenu;
 i32 edLevelDestroyActiveMenu;
+eduimenu_s *edLevelDestroyThisMenu;
+eduimenu_s *edLevelDestroyThisMenu2;
+i32 edlevel_mouseandkeyboard;
 LevelEditor theLevelEditor;
 
 extern "C" void eduiSetCameraEnabled(i32);
@@ -98,6 +101,7 @@ extern "C" void NuFntSet(i32);
 extern "C" void NuFntScale(i32, i32);
 extern "C" void NuRndrRect2di(i32, i32, i32, i32, i32, NUMTL *);
 extern "C" void eduiSetCursorColour(u32);
+extern "C" void eduiSetFontScale(f32, f32);
 
 PropertyTool thePropertyTool;
 PropertyMenuMetrics menu_startmetrics = {20, 5, 200, 400};
@@ -259,7 +263,7 @@ void *ClassEditor::CreateObject() {
 }
 
 i32 ClassEditor::CreateObject(ClassObject &source) {
-    if (theLevelEditor.current_led_file == 0xffff) {
+    if (theLevelEditor.current_led_file == -1) {
         SelectLED(-1);
         return 1;
     }
@@ -302,7 +306,7 @@ i32 ClassEditor::CreateObject(EdClass *ed_class) {
 }
 
 i32 ClassEditor::CreateObject(i32 class_id) {
-    if (theLevelEditor.current_led_file == 0xffff) {
+    if (theLevelEditor.current_led_file == -1) {
         SelectLED(class_id);
         return 1;
     }
@@ -1365,7 +1369,7 @@ void ClassEditor::cbEdFilterLED(eduimenu_s *, eduiitem_s *item, u32) {
     LevelEditorScene *scene = theLevelEditor.GetEdScene(static_cast<u32>(item->data) >> 6);
     if (scene == NULL)
         return;
-    theLevelEditor.current_led_file = 0xffff;
+    theLevelEditor.current_led_file = -1;
     i32 editable = scene->editable + 1;
     scene->editable = editable;
     item->highlighted = editable;
@@ -1407,7 +1411,7 @@ void ClassEditor::cbEdPadSetManipulatorMode(eduimenu_s *, eduiitem_s *, u32) {
 void ClassEditor::cbFileSelected(eduimenu_s *, eduiitem_s *item, u32) {
     if (item == NULL)
         return;
-    theLevelEditor.current_led_file = static_cast<u16>(item->data);
+    theLevelEditor.current_led_file = static_cast<i16>(item->data);
     if (class_editor_create_pending != -1) {
         theClassEditor.CreateObject(class_editor_create_pending);
     } else if (theClassEditor.selected_objects.first != NULL) {
@@ -1574,46 +1578,67 @@ static void cbEdLevelSettingsMenu(eduimenu_s *parent, eduiitem_s *item, u32) {
 }
 
 void LevelEditor::CreateMenu() {
-    f32 x, y;
-    eduiGetCursorCoords(&x, &y);
-    const i32 menu_x = static_cast<i32>(x * 640.0f);
-    const i32 menu_y = static_cast<i32>(y * 448.0f);
-    const bool keyboard_menu = NuKeyboard(0x0f) != 0;
-    eduimenu_s *menu =
-        eduiMenuCreate(menu_x, menu_y, 100, 200, reinterpret_cast<void *>(static_cast<usize>(EdLevelFnt)),
-                       cbEdLevelDestroy, keyboard_menu ? const_cast<char *>("Level Editor") : NULL);
-    if (menu != NULL) {
-        if (keyboard_menu) {
-            eduiMenuAddItem(
-                menu, eduiItemSelCreate(1, &EdLevelAttr, 0, 0, cbEdLevelEditorList, const_cast<char *>("Editors...")));
-            eduiMenuAddItem(menu, eduiItemSelCreate(0, &EdLevelAttr, 0, 0, cbEdLevelSettingsMenu,
-                                                    const_cast<char *>("Options...")));
-        } else if (active_editor != NULL) {
+    f32 x[4] __attribute__((aligned(16)));
+    f32 y[4] __attribute__((aligned(16)));
+    eduiGetCursorCoords(x, y);
+    x[0] *= 640.0f;
+    y[0] *= 448.0f;
+    eduimenu_s *menu;
+    if (NuKeyboard(0x0f) != 0) {
+        menu = eduiMenuCreate(static_cast<i32>(x[0]), static_cast<i32>(y[0]), 100, 200,
+                              reinterpret_cast<void *>(static_cast<usize>(EdLevelFnt)), cbEdLevelDestroy,
+                              const_cast<char *>("Level Editor"));
+        if (menu == NULL) {
+            edLevelActiveMenu = NULL;
+            return;
+        }
+        eduiMenuAddItem(
+            menu, eduiItemSelCreate(1, &EdLevelAttr, 0, 0, cbEdLevelEditorList, const_cast<char *>("Editors...")));
+        eduiMenuAddItem(
+            menu, eduiItemSelCreate(0, &EdLevelAttr, 0, 0, cbEdLevelSettingsMenu, const_cast<char *>("Options...")));
+    } else {
+        menu = eduiMenuCreate(static_cast<i32>(x[0]), static_cast<i32>(y[0]), 100, 200,
+                              reinterpret_cast<void *>(static_cast<usize>(EdLevelFnt)), cbEdLevelDestroy, NULL);
+        if (menu == NULL) {
+            edLevelActiveMenu = NULL;
+            return;
+        }
+        if (active_editor != NULL) {
             active_editor->AddMenuItems(menu);
         }
-        eduiMenuFitWidth(menu, 5);
-        eduiMenuFitOnScreen(menu, 1);
     }
+    eduiMenuFitWidth(menu, 5);
+    eduiMenuFitOnScreen(menu, 1);
     edLevelActiveMenu = menu;
 }
 
 void LevelEditor::Display(ThingRenderData *) {
+    f32 cursor_x __attribute__((aligned(16))) = 0.1f;
+    f32 cursor_y __attribute__((aligned(16))) = 0.9f;
     if (!editors_entered) {
         return;
     }
 
-    LevelEditorScene *scene = GetEdScene(current_led_file);
-    if (scene != NULL) {
-        char *name = scene->name;
-        DrawInfoText(&name, 1, static_cast<i32>(0.1f * 640.0f), static_cast<i32>(0.9f * 448.0f), info_width,
-                     info_height, info_colour, info_background);
+    if (theLevelEditor.current_led_file != 0xff) {
+        LevelEditorScene *scene = theLevelEditor.GetEdScene(theLevelEditor.current_led_file);
+        if (scene != NULL) {
+            char *name = scene->name;
+            DrawInfoText(&name, 1, static_cast<i32>(640.0f * cursor_x), static_cast<i32>(448.0f * cursor_y), info_width,
+                         info_height, info_colour, info_background);
+        }
     }
-    if (edmainGetCursorEnabled()) {
+    i32 draw_camera;
+    // The original keeps the no-cursor path in the main render sequence.
+    if (__builtin_expect(edmainGetCursorEnabled() == 0, 1)) {
+        draw_camera = field_0x28;
+    } else {
         eduiFlushInteracts();
+        draw_camera = field_0x28;
     }
-    if (field_0x28 != 0) {
+    if (draw_camera != 0) {
         NUCAMERA *camera = edmainGetCamera();
-        const f32 far_clip = edcamGetDist() * 2.0f;
+        const f32 distance = edcamGetDist();
+        const f32 far_clip = distance + distance;
         if (global_camera.far_clip <= far_clip && global_camera.far_clip != far_clip) {
             camera->far_clip = far_clip;
         }
@@ -1626,11 +1651,9 @@ void LevelEditor::Display(ThingRenderData *) {
         active_editor->Render();
     }
     NuRndrLine3dDbgFlush();
-    f32 cursor_x;
-    f32 cursor_y;
     eduiGetCursorCoords(&cursor_x, &cursor_y);
     DrawInfoText(info_text, 32, static_cast<i32>((1.0f + cursor_x) * 640.0f),
-                 static_cast<i32>((1.0f + cursor_y) * 448.0f), info_width, info_height, info_colour, info_background);
+                 static_cast<i32>((cursor_y + 1.0f) * 448.0f), info_width, info_height, info_colour, info_background);
     if (edLevelActiveMenu != NULL) {
         NuFntSet(EdLevelFnt);
         NuFntScale(EdLevelFntScale, EdLevelFntScale);
@@ -1703,7 +1726,7 @@ void LevelEditor::EndMultiLoad(variptr_u *buffer, variptr_u *buffer_end) {
     MemoryBuffer scratch = {&editor_buffer_cursor, &editor_buffer_end, 0,
                             static_cast<u32>(editor_buffer_end.addr - editor_buffer_begin.addr)};
     theClassEditor.PostLoadInitialisation(&source, &scratch);
-    current_led_file = 0xffff;
+    current_led_file = -1;
     multi_load_active = 0;
 }
 
@@ -1879,27 +1902,141 @@ LevelEditor::LevelEditor() {
     SetPadText(0x100, const_cast<char *>("SELECT"));
 }
 
-void LevelEditor::Load(char *, variptr_u *, variptr_u *, i32) {
-    STUBBED();
+i32 LevelEditor::Load(char *filename, variptr_u *buffer, variptr_u *buffer_end, i32 flags) {
+    MemoryBuffer source = {buffer, buffer_end, 0, static_cast<u32>(buffer_end->addr - buffer->addr)};
+    if (editor_buffer_from_front == 0) {
+        editor_buffer_end = *buffer_end;
+        editor_buffer_begin.addr = buffer_end->addr - 0x20000;
+    }
+
+    char *basename = NuStrRChr(filename, '/');
+    i32 basename_length = NuStrLen(basename + 1);
+    char scene_name[32];
+    char directory[128];
+    NuStrNCpy(scene_name, basename + 1, basename_length - 3);
+    NuStrNCpy(directory, filename, NuStrLen(filename) - basename_length);
+    Placeable::CurrentLedFile = static_cast<i16>(FindSceneId(scene_name));
+    if (Placeable::CurrentLedFile != -1) {
+        NuStrCpy(scenes[Placeable::CurrentLedFile].directory, directory);
+        current_led_file = Placeable::CurrentLedFile;
+    } else {
+        current_led_file = -1;
+    }
+
+    editor_buffer_cursor = editor_buffer_begin;
+    MemoryBuffer scratch = {&editor_buffer_cursor, &editor_buffer_end, 0,
+                            static_cast<u32>(editor_buffer_end.addr - editor_buffer_begin.addr)};
+    SetSaveFilename(filename);
+    if (!multi_load_active) {
+        theClassEditor.PreLoadInitialisation(&source, &scratch);
+    }
+
+    i32 result = -1;
+    void *file_data = editor_buffer_cursor.void_ptr;
+    i32 file_size = NuFileLoadBuffer(save_filename, file_data, scratch.remaining);
+    if (file_size > 0) {
+        if (static_cast<u32>(file_size) < editor_buffer_end.addr - editor_buffer_cursor.addr) {
+            editor_buffer_cursor.addr += file_size;
+            scratch.used += file_size;
+            scratch.remaining -= file_size;
+        }
+        NUFILE file = NuMemFileOpen(file_data, file_size, NUFILE_READ);
+        if (file) {
+            EdFileInputStream stream(&source, &scratch);
+            if (flags) {
+                stream.flags = 0x200000;
+            }
+            stream.Open(file, 4);
+            i32 loaded = ReadStream(stream);
+            stream.file = 0;
+            NuFileClose(file);
+            if (loaded) {
+                result = Placeable::CurrentLedFile;
+                scenes[result].editable = 1;
+                Placeable::CurrentLedFile = -1;
+            }
+        }
+    }
+    if (!multi_load_active) {
+        theClassEditor.PostLoadInitialisation(&source, &scratch);
+    }
+    return result;
 }
 
-void LevelEditor::LoadState(variptr_u *, variptr_u *, variptr_u *, variptr_u *, variptr_u *, variptr_u *) {
-    STUBBED();
+i32 LevelEditor::LoadState(variptr_u *buffer, variptr_u *buffer_end, variptr_u *scratch_begin, variptr_u *scratch_end,
+                           variptr_u *file_begin, variptr_u *file_end) {
+    reserved_0x298 = 1;
+    MemoryBuffer source = {buffer, buffer_end, 0, 0};
+    MemoryBuffer scratch = {scratch_begin, scratch_end, 0, static_cast<u32>(scratch_end->addr - scratch_begin->addr)};
+    if (!multi_load_active) {
+        theClassEditor.PreLoadInitialisation(&source, &scratch);
+    }
+    i32 result = 0;
+    NUFILE file = NuMemFileOpen(file_begin->void_ptr, file_end->addr - file_begin->addr, NUFILE_READ);
+    if (file) {
+        EdFileInputStream stream(&source, &scratch);
+        stream.Open(file, 4);
+        stream.flags = 0x400000;
+        result = ReadStream(stream);
+        stream.file = 0;
+        NuFileClose(file);
+    }
+    if (!multi_load_active) {
+        theClassEditor.PostLoadInitialisation(&source, &scratch);
+    }
+    reserved_0x298 = 0;
+    return result;
 }
 
 void LevelEditor::ProcessEvenWhenPaused(ThingProcessData *data) {
-    if (!editors_entered || data == NULL) {
+    if (!editors_entered) {
         return;
     }
-    nupad_s *pad = data->pads != NULL ? data->pads[0] : NULL;
+    f32 delta_time = data->t;
+    nupad_s *pad = data->pads[0];
     text_length = 0;
     memset(info_text, 0, sizeof(info_text));
+    memset(reserved_0xef8, 0, 0x80);
+    memset(reserved_0xef8 + 0x80, 0, 0x80);
+    field_0x2c = -1;
+    editable_scene_count = 0;
+    if (scenes[0].editable)
+        ++editable_scene_count;
+    if (scenes[1].editable)
+        ++editable_scene_count;
+    if (scenes[2].editable)
+        ++editable_scene_count;
+    if (scenes[3].editable)
+        ++editable_scene_count;
+    if (scenes[4].editable)
+        ++editable_scene_count;
+    if (scenes[5].editable)
+        ++editable_scene_count;
+    if (scenes[6].editable)
+        ++editable_scene_count;
+    if (scenes[7].editable)
+        ++editable_scene_count;
+    if (scenes[8].editable)
+        ++editable_scene_count;
+    if (scenes[9].editable)
+        ++editable_scene_count;
+    if (edLevelActiveMenu == NULL && field_0x38 != 0 && input.GetPress(4) != 0.0f) {
+        eduiSetCameraEnabled(0);
+        eduiSetDefaultActiveMenu(eduiGetActiveMenu());
+        theLevelEditor.CreateMenu();
+    }
     if (edLevelDestroyActiveMenu != 0) {
-        if (edLevelActiveMenu != NULL) {
-            eduiMenuDestroy(edLevelActiveMenu);
-            edLevelActiveMenu = NULL;
-        }
+        eduiMenuDestroy(edLevelActiveMenu);
+        edLevelActiveMenu = NULL;
         edLevelDestroyActiveMenu = 0;
+    }
+    if (edLevelDestroyThisMenu != NULL) {
+        eduiMenuDestroy(edLevelDestroyThisMenu);
+        edLevelDestroyThisMenu = NULL;
+    }
+    if (edLevelDestroyThisMenu2 != NULL) {
+        eduiMenuDestroy(edLevelDestroyThisMenu2);
+        edLevelDestroyThisMenu2 = NULL;
     }
     if (edLevelNextMenu != NULL) {
         if (edLevelActiveMenu != NULL) {
@@ -1908,39 +2045,60 @@ void LevelEditor::ProcessEvenWhenPaused(ThingProcessData *data) {
         edLevelActiveMenu = edLevelNextMenu;
         edLevelNextMenu = NULL;
     }
-    input.Update(edmainGetCamera(), pad, data->t, thePropertyTool.HasActiveMenu());
-    if (edmainGetCursorEnabled()) {
-        eduiProcessCursor(data->t, pad);
+    nucamera_s *camera = &global_camera;
+    if (field_0x28 != 0) {
+        camera = edmainGetCamera();
     }
-    if (eduiGetCameraEnabled()) {
-        edcamMove(pad);
+    input.Update(camera, pad, delta_time, thePropertyTool.HasActiveMenu());
+    if (edmainGetCursorEnabled()) {
+        eduiProcessCursor(0.0f, pad);
+    }
+    if (field_0x28 != 0 && eduiGetCameraEnabled()) {
+        if (edlevel_mouseandkeyboard == 0) {
+            edcamMove(pad);
+        } else {
+            edcamMove(NULL);
+        }
+        edcamGetPosAng(reinterpret_cast<NUVEC *>(background_colour), &field_0x20, &field_0x24);
+    }
+    if (input.GetPress(17) != 0.0f) {
+        overlay_alpha += 0.1f;
+        eduiSetFontScale(overlay_alpha, overlay_alpha);
+    }
+    if (input.GetPress(18) != 0.0f && static_cast<f32>(EdLevelFntScale) > 0.1f) {
+        overlay_alpha -= 0.1f;
+        eduiSetFontScale(overlay_alpha, overlay_alpha);
     }
     if (edLevelActiveMenu != NULL) {
         NuFntSet(EdLevelFnt);
         NuFntScale(EdLevelFntScale, EdLevelFntScale);
-        if (eduiMenuProcess(edLevelActiveMenu, data->t, pad) != 0) {
+        if (eduiMenuProcess(edLevelActiveMenu, delta_time, pad) != 0) {
             input.Clear(3);
+        } else if (edLevelActiveMenu != edLevelPinnedMenu) {
+            if (input.GetPress(3) != 0.0f) {
+                eduiSetCameraEnabled(1);
+                eduiMenuDestroy(edLevelActiveMenu);
+                edLevelActiveMenu = NULL;
+                eduiSetDefaultActiveMenu(NULL);
+            }
+            if (input.GetPress(4) != 0.0f) {
+                eduiMenuDestroy(edLevelActiveMenu);
+                edLevelActiveMenu = NULL;
+                theLevelEditor.CreateMenu();
+            }
         }
-    }
-    if (edLevelPinnedMenu != NULL && edLevelPinnedMenu != edLevelActiveMenu) {
-        eduiMenuProcess(edLevelPinnedMenu, data->t, pad);
-    }
-    if (input.GetPress(4) != 0.0f) {
-        if (edLevelActiveMenu != NULL) {
-            eduiSetCameraEnabled(1);
-            eduiMenuDestroy(edLevelActiveMenu);
-            edLevelActiveMenu = NULL;
-        } else {
-            eduiSetCameraEnabled(0);
-            eduiSetDefaultActiveMenu(eduiGetActiveMenu());
-            CreateMenu();
+    } else if (edLevelPinnedMenu != NULL && !thePropertyTool.HasActiveMenu()) {
+        NuFntSet(EdLevelFnt);
+        NuFntScale(EdLevelFntScale, EdLevelFntScale);
+        if (eduiMenuProcess(edLevelPinnedMenu, delta_time, pad) != 0) {
+            return;
         }
     }
     if (active_editor != NULL) {
         active_editor->Process(input);
     }
     if (input.GetPress(23) != 0.0f) {
-        Save();
+        theLevelEditor.Save();
     }
 }
 
@@ -1975,16 +2133,87 @@ void LevelEditor::Reset() {
     reset_pending = 0;
 }
 
-void LevelEditor::Save() {
-    STUBBED();
+i32 __attribute__((optimize("no-partial-inlining"))) LevelEditor::Save() {
+    i32 saved_any = 0;
+    if (active) {
+#define EDLEVEL_SAVE_SCENE(index)                                                                                      \
+    do {                                                                                                               \
+        LevelEditorScene &scene = scenes[index];                                                                       \
+        theClassEditor.PreSaveInitialisation();                                                                        \
+        sprintf(save_filename, "%s/%s.led", scene.directory, scene.name);                                              \
+        if (scene.editable) {                                                                                          \
+            editor_buffer_cursor = editor_buffer_begin;                                                                \
+            NUFILE memory_file = NuMemFileOpen(editor_buffer_begin.void_ptr,                                           \
+                                               editor_buffer_end.addr - editor_buffer_begin.addr, NUFILE_WRITE);       \
+            if (memory_file) {                                                                                         \
+                EdFileOutputStream stream;                                                                             \
+                stream.Open(memory_file, 4);                                                                           \
+                stream.unknown_10 = index;                                                                             \
+                WriteStream(stream);                                                                                   \
+                i32 size = NuFilePos(memory_file);                                                                     \
+                stream.file = 0;                                                                                       \
+                NuFileClose(memory_file);                                                                              \
+                NUFILE output_file = NuFileOpen(save_filename, NUFILE_WRITE);                                          \
+                if (!output_file) {                                                                                    \
+                    scene.saved = 0;                                                                                   \
+                } else {                                                                                               \
+                    NuFileWrite(output_file, editor_buffer_begin.void_ptr, size);                                      \
+                    NuFileClose(output_file);                                                                          \
+                    scene.saved = 1;                                                                                   \
+                    saved_any = 1;                                                                                     \
+                }                                                                                                      \
+            }                                                                                                          \
+        }                                                                                                              \
+    } while (0)
+        EDLEVEL_SAVE_SCENE(0);
+        EDLEVEL_SAVE_SCENE(1);
+        EDLEVEL_SAVE_SCENE(2);
+        EDLEVEL_SAVE_SCENE(3);
+        EDLEVEL_SAVE_SCENE(4);
+        EDLEVEL_SAVE_SCENE(5);
+        EDLEVEL_SAVE_SCENE(6);
+        EDLEVEL_SAVE_SCENE(7);
+        EDLEVEL_SAVE_SCENE(8);
+        EDLEVEL_SAVE_SCENE(9);
+#undef EDLEVEL_SAVE_SCENE
+        theClassEditor.PostSaveInitialisation();
+    }
+    return saved_any;
 }
 
-void LevelEditor::SaveState(i32, variptr_u *, variptr_u *) {
-    STUBBED();
+i32 LevelEditor::SaveState(i32 scene_index, variptr_u *buffer, variptr_u *buffer_end) {
+    i32 size = buffer_end->addr - buffer->addr;
+    NUFILE file = NuMemFileOpen(buffer->void_ptr, size, NUFILE_WRITE);
+    if (file) {
+        reserved_0x298 = 1;
+        EdFileOutputStream stream;
+        stream.Open(file, 4);
+        stream.flags = 0x400000;
+        stream.unknown_10 = scene_index;
+        WriteStream(stream);
+        size = NuFilePos(file);
+        stream.file = 0;
+        NuFileClose(file);
+    }
+    reserved_0x298 = 0;
+    return size;
 }
 
-void LevelEditor::SaveState(variptr_u *, variptr_u *) {
-    STUBBED();
+i32 LevelEditor::SaveState(variptr_u *buffer, variptr_u *buffer_end) {
+    i32 result = 0;
+    NUFILE file = NuMemFileOpen(buffer->void_ptr, buffer_end->addr - buffer->addr, NUFILE_WRITE);
+    if (file) {
+        reserved_0x298 = 1;
+        EdFileOutputStream stream;
+        stream.Open(file, 4);
+        stream.flags = 0x400000;
+        result = WriteStream(stream);
+        NuFilePos(file);
+        stream.file = 0;
+        NuFileClose(file);
+    }
+    reserved_0x298 = 0;
+    return result;
 }
 
 void LevelEditor::SetPadText(i32 buttons, char *text) {
@@ -2574,12 +2803,44 @@ void DumpAreaData(i32, i32) {
     STUBBED();
 }
 
-void cbEdLevelSave(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
-
-void areaEditor_Enter() {
-    STUBBED();
+void cbEdLevelSave(eduimenu_s *parent, eduiitem_s *item, u32) {
+    theLevelEditor.Save();
+    eduimenu_s *menu =
+        eduiMenuCreate(parent->x + item->x, item->y, 180, 250, reinterpret_cast<void *>(static_cast<usize>(EdLevelFnt)),
+                       cbEdLevelDestroy, const_cast<char *>("Save File"));
+    char message[136];
+    if (!theLevelEditor.active) {
+        if (menu) {
+            strcpy(message, "Saving not allowed in Debug Mode - change to Edit Mode");
+            eduiMenuAddItem(menu, eduiItemSelCreate(1, &EdLevelAttr, 0, 0, cbEdLevelDestroyOnSelect, message));
+            eduiMenuFitWidth(menu, 5);
+            eduiMenuFitOnScreen(menu, 1);
+        }
+    } else {
+        for (i32 scene_index = 0; scene_index < theLevelEditor.reset_pending; ++scene_index) {
+            LevelEditorScene *scene = theLevelEditor.GetEdScene(scene_index);
+            if (!scene) {
+                continue;
+            }
+            if (scene->active && scene->editable && scene->saved) {
+                scene->saved = 0;
+                if (menu) {
+                    sprintf(message, "%s successfully saved", scene->name);
+                    eduiMenuAddItem(menu, eduiItemSelCreate(1, &EdLevelAttr, 0, 0, cbEdLevelDestroyOnSelect, message));
+                    eduiMenuFitWidth(menu, 5);
+                    eduiMenuFitOnScreen(menu, 1);
+                }
+            } else if (menu && scene->active && scene->editable) {
+                sprintf(message, "%s : Save Failed, have you got the lock?", scene->name);
+                eduiMenuAddItem(menu, eduiItemSelCreate(1, &EdLevelAttr, 0, 0, cbEdLevelDestroyOnSelect, message));
+                eduiMenuFitWidth(menu, 5);
+                eduiMenuFitOnScreen(menu, 1);
+            }
+        }
+    }
+    eduiMenuFitWidth(menu, 5);
+    eduiMenuFitOnScreen(menu, 1);
+    eduiMenuAttach(parent, menu);
 }
 
 void cbEdLevelDestroy(eduimenu_s *menu, eduimenu_s *) {
@@ -2601,14 +2862,6 @@ void cbEdLevelDestroy(eduimenu_s *menu, eduimenu_s *) {
 
 void cbEdLevelSetText(eduimenu_s *, eduiitem_s *item, u32) {
     strcpy(static_cast<char *>(item->data_ptr), static_cast<edui_textpicker_s *>(item)->value);
-}
-
-void areaEditor_Render(i32, i32, float, float) {
-    STUBBED();
-}
-
-void areaEditor_Process(nupad_s *) {
-    STUBBED();
 }
 
 void cbEdLevelToggleInt(eduimenu_s *, eduiitem_s *item, u32) {

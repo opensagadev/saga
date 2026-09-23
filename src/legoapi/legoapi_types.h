@@ -5012,13 +5012,16 @@ DECOMP_ASSERT(offsetof(LEVER_s, position) == 0x6c, "LEVER position offset");
 DECOMP_ASSERT(offsetof(LEVER_s, flags) == 0x9c, "LEVER flags offset");
 struct LevelEditorScene {
     char name[0x20];
-    u8 reserved_0x20[0x80];
+    char directory[0x80];
     nugscn_s *scene;
     i32 active : 1;
     i32 editable : 1;
-    u32 reserved_flags : 30;
+    i32 saved : 1;
+    u32 reserved_flags : 29;
 };
 DECOMP_ASSERT(sizeof(LevelEditorScene) == 0xa8, "LevelEditorScene ABI");
+DECOMP_ASSERT(offsetof(LevelEditorScene, directory) == 0x20, "LevelEditorScene directory offset");
+DECOMP_ASSERT(sizeof(LevelEditorScene::directory) == 0x80, "LevelEditorScene directory size");
 
 struct LevelEditor : BaseThing {
     f32 background_colour[4];
@@ -5033,7 +5036,8 @@ struct LevelEditor : BaseThing {
     EdInputContext input;
     u8 reserved_0x298;
     u8 destroying_objects;
-    u8 reserved_0x29a[6];
+    u8 reserved_0x29a[2];
+    i32 editable_scene_count;
     i32 reset_pending;
     LevelEditorScene scenes[10]; // 0x2a4
     BaseEditor *first_editor;
@@ -5044,7 +5048,7 @@ struct LevelEditor : BaseThing {
     char editor_filename[0x80];
     i32 file_version;
     i32 multi_load_active;
-    u16 current_led_file;
+    i16 current_led_file;
     u8 reserved_0xa4e[2];
     variptr_u editor_buffer_cursor;
     variptr_u editor_buffer_begin;
@@ -5097,15 +5101,15 @@ struct LevelEditor : BaseThing {
     i32 IsActiveScene(nugscn_s *);
     i32 IsEditable(i32);
     LevelEditor();
-    void Load(char *, variptr_u *, variptr_u *, i32);
-    void LoadState(variptr_u *, variptr_u *, variptr_u *, variptr_u *, variptr_u *, variptr_u *);
+    i32 Load(char *, variptr_u *, variptr_u *, i32);
+    i32 LoadState(variptr_u *, variptr_u *, variptr_u *, variptr_u *, variptr_u *, variptr_u *);
     void ProcessEvenWhenPaused(ThingProcessData *) override;
     i32 ReadStream(EdFileInputStream &);
     void RegisterEditor(BaseEditor &);
     void Reset();
-    void Save();
-    void SaveState(i32, variptr_u *, variptr_u *);
-    void SaveState(variptr_u *, variptr_u *);
+    i32 Save();
+    i32 SaveState(i32, variptr_u *, variptr_u *);
+    i32 SaveState(variptr_u *, variptr_u *);
     void SetNextMenu(eduimenu_s *);
     void SetPadText(i32, char *);
     void SetSaveFilename(char *);
@@ -5113,6 +5117,7 @@ struct LevelEditor : BaseThing {
 };
 DECOMP_ASSERT(offsetof(LevelEditor, reset_pending) == 0x2a0, "LevelEditor reset_pending offset");
 DECOMP_ASSERT(offsetof(LevelEditor, destroying_objects) == 0x299, "LevelEditor destruction flag offset");
+DECOMP_ASSERT(offsetof(LevelEditor, editable_scene_count) == 0x29c, "LevelEditor editable scene count offset");
 DECOMP_ASSERT(offsetof(LevelEditor, scenes) == 0x2a4, "LevelEditor scenes offset");
 DECOMP_ASSERT(offsetof(LevelEditor, save_filename) == 0x944, "LevelEditor save filename offset");
 DECOMP_ASSERT(offsetof(LevelEditor, text_buffer) == 0xa5c, "LevelEditor text buffer offset");

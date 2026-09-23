@@ -3245,6 +3245,80 @@ void EdVectorControl::cbSelected(eduimenu_s *menu, eduiitem_s *item, u32 value) 
     thePropertyTool.SetMenuControl(menu, control);
 }
 
+void EdClassInterface::ClearLevel(i32) {
+}
+
+void EdClassInterface::DefunctObject(void *) {
+}
+
+void EdClassInterface::ReviveObject(void *) {
+}
+
+void EdClassInterface::SetObjectGuid(void *, i32) {
+}
+
+i32 EdClassInterface::GetObjectGuid(void *) {
+    return 0;
+}
+
+i32 EdClassInterface::GetConstructorData(void *, void *, i32) {
+    return 0;
+}
+
+void EdClassInterface::Construct(void *, void *) {
+}
+
+void EdClassInterface::Process(void *, EdInputContext &) {
+}
+
+void EdClassInterface::Render(void *, i32) {
+}
+
+void EdClassInterface::EnterEditor() {
+}
+
+void EdClassInterface::ExitEditor() {
+}
+
+void EdClassInterface::EnterLevel() {
+}
+
+void EdClassInterface::ExitLevel() {
+}
+
+void EdClassInterface::UpdateLists(MemoryBuffer *, MemoryBuffer *) {
+}
+
+void EdClassInterface::PreLoadInitialisation(MemoryBuffer *, MemoryBuffer *) {
+}
+
+void EdClassInterface::PostLoadInitialisation(MemoryBuffer *, MemoryBuffer *) {
+}
+
+void EdClassInterface::PreSaveInitialisation() {
+}
+
+void EdClassInterface::PostSaveInitialisation() {
+}
+
+void EdClassInterface::SerialiseObject(EdStream &, void *) {
+}
+
+void EdClassInterface::AddMenuItems(eduimenu_s *) {
+}
+
+void EdClassInterface::Import() {
+}
+
+void SplineHelper::Flush() {
+    first_object = NULL;
+    last_object = NULL;
+    object_count = 0;
+}
+
+void KnotHelper::Flush() {
+}
+
 f32 EdClassInterface::DistanceToObject(VuVec &origin, VuVec &direction, void *object, EdRef **reference) {
     f32 radius = 1.0f;
     EdMember member;
@@ -3362,14 +3436,13 @@ void EdFileInputStream::Open(i32 handle, i32) {
 i32 EdFileInputStream::SerialiseBuffer(void *data, i32 size, i32 count) {
     i32 result = NuFileRead(file, data, size * count);
     if (swap_endianness && size > 1) {
-        u8 *cursor = (u8 *)data;
         for (i32 i = 0; i < count; i++) {
             if (size == 2) {
-                EdFileSwapEndianess16(cursor);
-                cursor += 2;
+                EdFileSwapEndianess16(data);
+                data = static_cast<u8 *>(data) + 2;
             } else if (size == 4) {
-                EdFileSwapEndianess32(cursor);
-                cursor += 4;
+                EdFileSwapEndianess32(data);
+                data = static_cast<u8 *>(data) + 4;
             }
         }
     }
@@ -3410,7 +3483,7 @@ void EdFileOutputStream::Open(i32 handle, i32 stream_version) {
 
 i32 EdFileOutputStream::SerialiseBuffer(void *data, i32 size, i32 count) {
     if (swap_endianness && size > 1) {
-        u8 *cursor = (u8 *)data;
+        u8 *cursor = static_cast<u8 *>(data);
         for (i32 i = 0; i < count; i++) {
             if (size == 2) {
                 EdFileSwapEndianess16(cursor);
@@ -3422,15 +3495,14 @@ i32 EdFileOutputStream::SerialiseBuffer(void *data, i32 size, i32 count) {
         }
     }
     i32 result = NuFileWrite(file, data, size * count);
-    if (swap_endianness && size > 1) {
-        u8 *cursor = (u8 *)data;
+    if (swap_endianness) {
         for (i32 i = 0; i < count; i++) {
             if (size == 2) {
-                EdFileSwapEndianess16(cursor);
-                cursor += 2;
+                EdFileSwapEndianess16(data);
+                data = static_cast<u8 *>(data) + 2;
             } else if (size == 4) {
-                EdFileSwapEndianess32(cursor);
-                cursor += 4;
+                EdFileSwapEndianess32(data);
+                data = static_cast<u8 *>(data) + 4;
             }
         }
     }

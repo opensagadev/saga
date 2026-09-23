@@ -278,6 +278,7 @@ class NuFileBase : public NuFile::IFile {
 };
 
 extern "C" {
+    i32 NuFileGetInfo(char *path, NUFILE_INFO *info);
     // Returns one when the second record has the later timestamp.
     i32 NuFileIsNewer(NUFILE_INFO *first, NUFILE_INFO *second);
     // Alignment is specified as a bit mask (for example, 15 for 16-byte alignment).
@@ -364,7 +365,9 @@ extern "C" {
 
     // read types
     i8 NuFileReadChar(NUFILE file);
-    i32 NuFileReadDir(NUFILE file);
+    NUFILE NuFileOpenDir(char *path);
+    i32 NuFileReadDir(NUFILE file, void *entry);
+    void NuFileCloseDir(NUFILE file);
     f32 NuFileReadFloat(NUFILE file);
     i32 NuFileReadInt(NUFILE file);
     i16 NuFileReadShort(NUFILE file);

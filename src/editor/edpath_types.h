@@ -15,6 +15,7 @@ struct EDAIPATHCNX_s {
 struct EDAISHAREDPATHNODE_s {
     NULISTLNK link;
     i8 reference_count;
+    i8 runtime_index;
 };
 struct EDAIPATHROUTE_s {
     char name[0x10];

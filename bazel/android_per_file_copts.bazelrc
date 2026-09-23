@@ -19,6 +19,12 @@ build --per_file_copt=^src/nu2api/nucore/android/nutime_android\.c$@-x,c++,-std=
 build --per_file_copt=^src/nu2api/nucore/android/nuthread\.c$@-x,c++,-std=gnu++11
 # Editor path callbacks in the original use optimized frameless PIC call sequences.
 build:target --per_file_copt=^src/editor/edpath\.cpp$@-O2
+# Area editor pool and menu routines use optimized PIC control flow.
+build:target --per_file_copt=^src/editor/area_editor\.cpp$@-O2
+# Route, creature, and antinode editor callbacks use optimized frameless PIC control flow.
+build:target --per_file_copt=^src/editor/edtoolsall\.cpp$@-O2
+# Locator pool initialization and draw loops in the original use -O3 vectorization.
+build:target --per_file_copt=^src/editor/locator_editor\.cpp$@-O3
 # Recovered Android entry points; -O2 and -O3 emit the same measured bodies.
 build:target --per_file_copt=^src/java/android\.cpp$@-O2
 # Original OBB lookup uses optimized inlined strlen/strcat and omits leaf frames.
@@ -227,6 +233,8 @@ build:target --per_file_copt=^src/legoapi/props/objects/tightrope\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmos/transport/tubes\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/characters/motion/camera\.cpp$@-O2
 build:target --per_file_copt=^src/gameapi/edtools/edtoolsall_plain\.cpp$@-O2
+build:target --per_file_copt=^src/gameapi/edtools/edanimall\.cpp$@-O2
+build:target --per_file_copt=^src/gameapi/edtools/edgraall\.cpp$@-O3
 build:target --per_file_copt=^src/gameapi/edtools/edgra\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/characters/motion/charplatforms\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/cutscenes/gcutscn\.cpp$@-O2

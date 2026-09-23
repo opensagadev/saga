@@ -29,6 +29,8 @@
 #include <array>
 #include <atomic>
 #include <cmath>
+#include <cstdio>
+#include <cstdlib>
 #include <iostream>
 #include <limits>
 #include <mutex>
@@ -93,6 +95,7 @@ namespace saga::host::harness {
                 this->destination = nullptr;
                 this->registered_scene = nullptr;
                 this->registered_scene_id = -1;
+                this->save_directory.clear();
                 this->scene_objects.clear();
                 theClassEditor.selected_objects = {};
                 theClassEditor.current_object = {};
@@ -375,6 +378,16 @@ namespace saga::host::harness {
             }
 
             [[nodiscard]] bool initialize_editor() {
+                if (this->save_directory.empty()) {
+                    std::string directory_template = "/tmp/saga-editor-XXXXXX";
+                    if (!::mkdtemp(directory_template.data())) {
+                        LOG_ERR("editor: could not create a temporary directory for level saves");
+                        this->exit_status.store(1, std::memory_order_release);
+                        return false;
+                    }
+                    this->save_directory = std::move(directory_template);
+                    LOG_INFO("editor: level saves will be written to %s", this->save_directory.c_str());
+                }
                 if (!this->editor_pool_installed) {
                     MemoryManager &manager = theMemoryManager;
                     manager.cursor = reinterpret_cast<usize>(this->editor_pool.data());
@@ -441,6 +454,8 @@ namespace saga::host::harness {
                 }
                 theLevelEditor.reset_pending = 0;
                 const i32 scene_id = theLevelEditor.AddScene(const_cast<char *>("GAME"), scene, 1);
+                std::snprintf(theLevelEditor.scenes[scene_id].directory,
+                              sizeof(theLevelEditor.scenes[scene_id].directory), "%s", this->save_directory.c_str());
                 theLevelEditor.scenes[scene_id].editable = 1;
                 const i32 special_count = NuGScnNumSpecials(scene);
                 if (theClassEditor.selected_objects.first) {
@@ -805,6 +820,7 @@ namespace saga::host::harness {
             LEVELDATA_s *destination = nullptr;
             nugscn_s *registered_scene = nullptr;
             i32 registered_scene_id = -1;
+            std::string save_directory;
             EditorView requested_view = EditorView::modules;
             EditorView active_view = EditorView::game;
             eduimenu_s *module_menu = nullptr;

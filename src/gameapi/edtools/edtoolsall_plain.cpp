@@ -36,12 +36,16 @@
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nurand.h"
 #include "nu2api/nucore/nuvideo.h"
+#include "nu2api/nufile/nufile.h"
 
 #include <string.h>
 #include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 float edanimPlayerAnimDistance(i32 parameter_index);
+void edgraDoInput(nupad_s *pad);
+void edgraDetermineNearestInstance(f32 distance);
 extern "C" i32 NuRndrDoingScreenGrab;
 static i32 edbits_cubecount;
 static i32 edgra_clumpthin = 1;
@@ -54,6 +58,24 @@ static NUQFNT *edui_font;
 static i32 edui_donotdraw;
 static i32 item_width;
 static void *dir_list;
+static i32 dir_size;
+static eduimenu_s *filepick_menu;
+static edui_file_pick_s *filepick_item;
+
+struct FilePickDirectoryEntry {
+    u8 flags;
+    u8 reserved_01[3];
+    i32 size;
+    u8 reserved_08[9];
+    i8 minute;
+    i8 hour;
+    i8 month;
+    i8 day;
+    u8 reserved_15;
+    i16 year;
+    char name[0x100];
+};
+DECOMP_ASSERT(sizeof(FilePickDirectoryEntry) == 0x118, "file picker directory entry ABI");
 static char ed_levelfile[256];
 static f32 edui_font_scale_x = 0.9f;
 static f32 edui_font_scale_y = 0.9f;
@@ -225,6 +247,9 @@ extern "C" {
     static void eduicbItemExpanderClose(edui_expander_s *);
     static i32 eduicbProcessFilter(eduimenu_s *, eduiitem_s *, f32, nupad_s *);
     static i32 eduicbProcessFilePick(eduimenu_s *, eduiitem_s *, f32, nupad_s *);
+    static void eduicbAttachDirectoryList(eduimenu_s *, edui_file_pick_s *);
+    static void eduicbSelectDirectoryEntry(eduimenu_s *, eduiitem_s *, u32);
+    static void eduicbSelectDirectoryExit(eduimenu_s *, eduiitem_s *, u32);
     static i32 eduicbProcessTextPick(eduimenu_s *, eduiitem_s *, f32, nupad_s *);
     static i32 eduicbProcessProp(eduimenu_s *, eduiitem_s *, f32, nupad_s *);
     static i32 eduicbProcessPropKeyboard(eduimenu_s *, edui_prop_s *);
@@ -256,6 +281,7 @@ extern "C" {
     static i32 eduicbInteractExpander(edui_interact_s *);
     static i32 eduicbInteractFilter(edui_interact_s *);
     static i32 eduicbInteractProp(edui_interact_s *);
+    void eduicbCancelMessageMenu(eduimenu_s *, eduimenu_s *);
     typedef void (*EDBITSPLAYSOUNDCALLBACK)(NUVEC *, i32);
     typedef i32 (*EDBITSREQUESTSOUNDCALLBACK)(char *);
 
@@ -456,16 +482,29 @@ static void edgraInit() {
 }
 
 static void edgraClose() {
-    STUBBED();
+    if (edgra_options_menu) {
+        eduiMenuDestroy(edgra_options_menu);
+        edgra_options_menu = NULL;
+    }
 }
 
 static void edgraEnter() {
-    STUBBED();
+    edgra_nearest = -1;
+    edgra_size = 0.5f;
+    edgra_clump_size = 64;
 }
 
-static i32 edgraProc(f32, nupad_s *) {
-    STUBBED();
-    return 0;
+static i32 edgraProc(f32 delta_time, nupad_s *pad) {
+    if (edgra_active_menu) {
+        eduiMenuProcess(edgra_active_menu, delta_time, pad);
+        return 0;
+    }
+    edgraDoInput(pad);
+    if (edgra_editormode == 1)
+        edgraDetermineNearestInstance(1.0f);
+    else
+        edgraDetermineNearestClump(1.0f);
+    return (pad->digital_buttons_pressed >> 11) & 1;
 }
 
 static void edgraRender() {
@@ -2479,11 +2518,37 @@ extern "C" {
         }
         return result;
     }
-    void eduiCreate3LineMessageMenu(void) {
-        STUBBED();
+    void eduiCreate3LineMessageMenu(eduimenu_s *parent, char *first, char *second, char *third, i32 first_highlight,
+                                    i32 second_highlight, i32 third_highlight) {
+        eduiiattr_s normal{0x800000c0, 0x80ff0000, 0x80808080, 0x80404040};
+        eduiiattr_s highlighted{0x8000c000, 0x80ff0000, 0x80808080, 0x80404040};
+        edui_messagemenu =
+            eduiMenuCreate(70, 70, 300, 250, parent->font, eduicbCancelMessageMenu, const_cast<char *>("Message"));
+        if (!edui_messagemenu)
+            return;
+        if (first)
+            eduiMenuAddItem(edui_messagemenu,
+                            eduiItemSelCreate(1, first_highlight ? &highlighted : &normal, 0, 0, NULL, first));
+        if (second)
+            eduiMenuAddItem(edui_messagemenu,
+                            eduiItemSelCreate(1, second_highlight ? &highlighted : &normal, 0, 0, NULL, second));
+        if (third)
+            eduiMenuAddItem(edui_messagemenu,
+                            eduiItemSelCreate(1, third_highlight ? &highlighted : &normal, 0, 0, NULL, third));
+        eduiMenuAttach(parent, edui_messagemenu);
+        edui_messagemenu->x = parent->x + 10;
+        edui_messagemenu->y = parent->y + 40;
     }
-    void eduiCreateMessageMenu(void) {
-        STUBBED();
+    void eduiCreateMessageMenu(eduimenu_s *parent, char *message, i32 highlighted) {
+        eduiiattr_s colours{highlighted == 1 ? 0x8000c000u : 0x800000c0u, 0x80ff0000, 0x80808080, 0x80404040};
+        edui_messagemenu =
+            eduiMenuCreate(70, 70, 180, 250, parent->font, eduicbCancelMessageMenu, const_cast<char *>("Message"));
+        if (!edui_messagemenu)
+            return;
+        eduiMenuAddItem(edui_messagemenu, eduiItemSelCreate(1, &colours, 0, 0, NULL, message));
+        eduiMenuAttach(parent, edui_messagemenu);
+        edui_messagemenu->x = parent->x + 10;
+        edui_messagemenu->y = parent->y + 40;
     }
     i32 eduiCursorOverMenu(eduimenu_s *menu) {
         return edui_cursor_x >= menu->x && edui_cursor_y >= menu->y && edui_cursor_x < menu->x + menu->width &&
@@ -2842,11 +2907,40 @@ extern "C" {
         item->changed = callback;
         return item;
     }
-    void eduiItemFilePickCreate(void) {
-        STUBBED();
+    eduiitem_s *eduiItemFilePickCreate(usize data, const void *colours, EdUiItemCallback callback, char *text) {
+        auto *item = static_cast<edui_file_pick_s *>(NU_ALLOC(sizeof(edui_file_pick_s), 4, 1, "", 0));
+        if (!item)
+            return NULL;
+        memset(item, 0, sizeof(*item));
+        item->type = 1;
+        item->data = data;
+        memcpy(item->colours, colours, sizeof(item->colours));
+        item->process = eduicbProcessFilePick;
+        item->render = eduicbRenderFilePick;
+        item->destroy = eduicbItemFilePickDestroy;
+        item->text_alignment = 0x40;
+        item->selection_group = 0;
+        eduiItemSetText(item, text);
+        item->changed = callback;
+        item->format = NULL;
+        item->name[0] = '\0';
+        item->directory[0] = '\0';
+        item->filename[0] = '\0';
+        item->compare_entries = NULL;
+        eduiItemFilePickSetFmt(item, const_cast<char *>("\"%s\""));
+        return item;
     }
     void eduiItemFilePickSetFmt(edui_file_pick_s *item, char *format) {
-        STUBBED();
+        if (item->format) {
+            i32 old_length = NuStrLen(item->format);
+            i32 new_length = NuStrLen(format);
+            if (old_length >= new_length)
+                goto copy;
+            NU_FREE(item->format);
+        }
+        item->format = static_cast<char *>(NU_ALLOC(NuStrLen(format) + 1, 4, 1, "", 0));
+    copy:
+        NuStrCpy(item->format, format);
     }
     void eduiItemFilterAddItem(edui_filter_s *item, eduiitem_s *child) {
         eduiitem_s *first = item->first_child;
@@ -4081,7 +4175,7 @@ extern "C" {
         }
         return EDUI_ANALOG_PAD_NONE;
     }
-    void eduicbCancelMessageMenu(void) {
+    void eduicbCancelMessageMenu(eduimenu_s *, eduimenu_s *) {
         eduiMenuDestroy(edui_messagemenu);
         edui_messagemenu = NULL;
     }
@@ -4184,6 +4278,67 @@ extern "C" {
     static __used__ void eduicbDestroyDirectoryList(eduimenu_s *menu, eduimenu_s *) {
         eduiMenuDetach(menu);
         eduiMenuDestroy(menu);
+    }
+
+    static void eduicbAttachDirectoryList(eduimenu_s *menu, edui_file_pick_s *picker) {
+        if (!dir_list)
+            return;
+
+        picker->reopen_directory = 0;
+        filepick_menu = menu;
+        filepick_item = picker;
+        eduimenu_s *directory_menu = eduiMenuCreate(menu->x + 20, menu->y + 20, 250, 300, menu->font,
+                                                    eduicbDestroyDirectoryList, const_cast<char *>("Directory"));
+        if (!directory_menu)
+            return;
+
+        char text[1032];
+        sprintf(text, "%s%s", picker->directory, picker->filename);
+        NUFILE directory = NuFileOpenDir(text);
+        if (directory) {
+            dir_size = 0;
+            auto *entries = static_cast<FilePickDirectoryEntry *>(dir_list);
+            while (dir_size < edui_filepick_listsize && NuFileReadDir(directory, &entries[dir_size]) > 0)
+                ++dir_size;
+            if (picker->compare_entries)
+                qsort(entries, dir_size, sizeof(FilePickDirectoryEntry), picker->compare_entries);
+
+            if (picker->filename[0]) {
+                eduiitem_s *parent = eduiItemSelCreate(9999, picker->colours, 0, 1, eduicbSelectDirectoryEntry,
+                                                       const_cast<char *>(".."));
+                parent->text_alignment = 0x10;
+                eduiMenuAddItem(directory_menu, parent);
+            }
+
+            for (i32 index = 0; index < dir_size; ++index) {
+                FilePickDirectoryEntry &entry = entries[index];
+                if (!(entry.flags & 8))
+                    continue;
+                sprintf(text, "<%s>", entry.name);
+                eduiitem_s *item = eduiItemSelCreate(index, picker->colours, 0, 1, eduicbSelectDirectoryEntry, text);
+                item->text_alignment = 0x10;
+                eduiMenuAddItem(directory_menu, item);
+            }
+
+            for (i32 index = 0; index < dir_size; ++index) {
+                FilePickDirectoryEntry &entry = entries[index];
+                if (entry.flags & 8 || (picker->filename[0x100] && !NuStrIStr(entry.name, picker->filename + 0x100)))
+                    continue;
+                sprintf(text, "%s  ( size=%d  date=%d/%d/%d %d:%d )", entry.name, entry.size, entry.month, entry.day,
+                        entry.year, entry.hour, entry.minute);
+                eduiitem_s *item = eduiItemSelCreate(index, picker->colours, 0, 1, eduicbSelectDirectoryEntry, text);
+                item->text_alignment = 0x10;
+                eduiMenuAddItem(directory_menu, item);
+            }
+
+            if (!directory_menu->first)
+                eduiMenuAddItem(directory_menu,
+                                eduiItemSelCreate(dir_size, picker->colours, 0, 1, eduicbSelectDirectoryExit,
+                                                  const_cast<char *>("No Files")));
+            NuFileCloseDir(directory);
+        }
+        eduiMenuFitWidth(directory_menu, 8);
+        eduiMenuAttach(menu, directory_menu);
     }
 
     static __used__ i32 eduicbInteractColourPick(edui_interact_s *interact) {
@@ -4524,7 +4679,12 @@ extern "C" {
         return 0;
     }
     static __used__ i32 eduicbProcessFilePick(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad) {
-        STUBBED();
+        (void)delta_time;
+        auto *picker = static_cast<edui_file_pick_s *>(item);
+        if ((pad->digital_buttons_pressed & EDUI_CURSOR_PRIMARY) || picker->reopen_directory) {
+            eduiMenuHighlight(menu, item);
+            eduicbAttachDirectoryList(menu, picker);
+        }
         return 0;
     }
     static __used__ i32 eduicbProcessFilter(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad) {
@@ -5503,8 +5663,32 @@ extern "C" {
         STUBBED();
         return 0;
     }
-    static __used__ void eduicbSelectDirectoryEntry(void) {
-        STUBBED();
+    static __used__ void eduicbSelectDirectoryEntry(eduimenu_s *menu, eduiitem_s *item, u32 value) {
+        if (!dir_list || !filepick_item)
+            return;
+        if (item->data == 9999) {
+            char *separator = NuStrRChr(filepick_item->filename, '/');
+            if (separator)
+                *separator = '\0';
+            else
+                filepick_item->filename[0] = '\0';
+            filepick_item->reopen_directory = 1;
+        } else if (item->data >= 0 && item->data < dir_size) {
+            auto *entries = static_cast<FilePickDirectoryEntry *>(dir_list);
+            FilePickDirectoryEntry &entry = entries[item->data];
+            if (entry.flags & 8) {
+                if (filepick_item->filename[0])
+                    NuStrCat(filepick_item->filename, const_cast<char *>("/"));
+                NuStrCat(filepick_item->filename, entry.name);
+                filepick_item->reopen_directory = 1;
+            } else {
+                NuStrCpy(filepick_item->name, entry.name);
+                if (filepick_item->changed)
+                    filepick_item->changed(filepick_menu, filepick_item, value);
+            }
+        }
+        eduiMenuDetach(menu);
+        eduiMenuDestroy(menu);
     }
     static __used__ void eduicbSelectDirectoryExit(eduimenu_s *menu, eduiitem_s *, u32) {
         eduiMenuDetach(menu);

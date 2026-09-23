@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 53.87776,
+    "fuzzy_match_percent": 54.646294,
     "total_code": "4722419",
-    "matched_code": "465677",
-    "matched_code_percent": 9.860984,
+    "matched_code": "470517",
+    "matched_code_percent": 9.963474,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 5549,
-    "matched_functions_percent": 41.228916,
+    "matched_functions": 5642,
+    "matched_functions_percent": 41.919907,
     "total_units": 1
   },
   "text": {
@@ -18862,7 +18862,7 @@
           "address": 4174368,
           "offset": 3284400,
           "size": 999,
-          "match_percent": 2.079208
+          "match_percent": 83.871284
         },
         {
           "name": "aieditor_Init",
@@ -18950,7 +18950,7 @@
           "address": 4224160,
           "offset": 3334192,
           "size": 672,
-          "match_percent": 3.085714
+          "match_percent": 86.30857
         },
         {
           "name": "aieditor_cbSave",
@@ -18958,7 +18958,7 @@
           "address": 4224832,
           "offset": 3334864,
           "size": 287,
-          "match_percent": 7.5
+          "match_percent": 99.82143
         },
         {
           "name": "aieditor_SetCurrentScript",
@@ -18982,7 +18982,7 @@
           "address": 4260688,
           "offset": 3370720,
           "size": 1202,
-          "match_percent": 1.584158
+          "match_percent": 22.58746
         }
       ]
     },
@@ -18997,7 +18997,7 @@
           "address": 4009536,
           "offset": 3119568,
           "size": 53,
-          "match_percent": 14.666667
+          "match_percent": 100.0
         },
         {
           "name": "_ZL29areaEditor_cbCancelRenameMenuP10eduimenu_sS0_",
@@ -19005,7 +19005,7 @@
           "address": 4021472,
           "offset": 3131504,
           "size": 34,
-          "match_percent": 33.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZL27areaEditor_cbRenameAreaMenuP10eduimenu_sP10eduiitem_sj",
@@ -19013,7 +19013,7 @@
           "address": 4026480,
           "offset": 3136512,
           "size": 289,
-          "match_percent": 3.384615
+          "match_percent": 73.738464
         },
         {
           "name": "_ZL23areaEditor_cbRenameAreaP10eduimenu_sP10eduiitem_sj",
@@ -19021,7 +19021,23 @@
           "address": 4044752,
           "offset": 3154784,
           "size": 156,
-          "match_percent": 7.090909
+          "match_percent": 85.89091
+        },
+        {
+          "name": "_Z16areaEditor_Enterv",
+          "demangled_name": "areaEditor_Enter()",
+          "address": 4046944,
+          "offset": 3156976,
+          "size": 337,
+          "match_percent": 43.37864
+        },
+        {
+          "name": "_Z18areaEditor_ProcessP7nupad_s",
+          "demangled_name": "areaEditor_Process(nupad_s*)",
+          "address": 4064368,
+          "offset": 3174400,
+          "size": 3322,
+          "match_percent": 41.205196
         },
         {
           "name": "areaEditorSaveData",
@@ -19029,7 +19045,7 @@
           "address": 4176864,
           "offset": 3286896,
           "size": 337,
-          "match_percent": 3.953488
+          "match_percent": 52.034885
         },
         {
           "name": "areaEditorDrawAreas",
@@ -19037,7 +19053,7 @@
           "address": 4178784,
           "offset": 3288816,
           "size": 241,
-          "match_percent": 5.782609
+          "match_percent": 99.76811
         },
         {
           "name": "_ZL23areaEditor_cbDeleteAreaP10eduimenu_sP10eduiitem_sj",
@@ -19045,7 +19061,15 @@
           "address": 4220016,
           "offset": 3330048,
           "size": 342,
-          "match_percent": 2.31579
+          "match_percent": 39.873684
+        },
+        {
+          "name": "_Z17areaEditor_Renderiiff",
+          "demangled_name": "areaEditor_Render(int, int, float, float)",
+          "address": 4259648,
+          "offset": 3369680,
+          "size": 870,
+          "match_percent": 55.188774
         }
       ]
     },
@@ -19060,7 +19084,7 @@
           "address": 4010864,
           "offset": 3120896,
           "size": 39,
-          "match_percent": 8.888889
+          "match_percent": 100.0
         },
         {
           "name": "_ZL28creatureEditor_cb_difficultyP10eduimenu_sP10eduiitem_sj",
@@ -19068,7 +19092,7 @@
           "address": 4010912,
           "offset": 3120944,
           "size": 45,
-          "match_percent": 7.272728
+          "match_percent": 100.0
         },
         {
           "name": "_ZL31creatureEditor_cb_stagger_startP10eduimenu_sP10eduiitem_sj",
@@ -19076,7 +19100,7 @@
           "address": 4010960,
           "offset": 3120992,
           "size": 47,
-          "match_percent": 20.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZL29creatureEditor_cb_assigntosetP10eduimenu_sP10eduiitem_sj",
@@ -19084,7 +19108,7 @@
           "address": 4011008,
           "offset": 3121040,
           "size": 42,
-          "match_percent": 7.272728
+          "match_percent": 100.0
         },
         {
           "name": "_ZL31creatureEditor_cb_maxviewheightP10eduimenu_sP10eduiitem_sj",
@@ -19092,7 +19116,7 @@
           "address": 4011056,
           "offset": 3121088,
           "size": 47,
-          "match_percent": 20.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZL31creatureEditor_cb_minviewheightP10eduimenu_sP10eduiitem_sj",
@@ -19100,7 +19124,7 @@
           "address": 4011104,
           "offset": 3121136,
           "size": 61,
-          "match_percent": 25.0
+          "match_percent": 99.9375
         },
         {
           "name": "_ZL28creatureEditor_cbFlagsToggleP10eduimenu_sP10eduiitem_sj",
@@ -19108,7 +19132,7 @@
           "address": 4011168,
           "offset": 3121200,
           "size": 65,
-          "match_percent": 13.75
+          "match_percent": 90.0
         },
         {
           "name": "_ZL34creatureEditor_cbSetRespawnLocatorP10eduimenu_sP10eduiitem_sj",
@@ -19116,7 +19140,7 @@
           "address": 4014928,
           "offset": 3124960,
           "size": 167,
-          "match_percent": 5.483871
+          "match_percent": 31.85484
         },
         {
           "name": "_ZL34creatureEditor_cbSetAreaActivationP10eduimenu_sP10eduiitem_sj",
@@ -19124,7 +19148,7 @@
           "address": 4015104,
           "offset": 3125136,
           "size": 147,
-          "match_percent": 6.538462
+          "match_percent": 61.673077
         },
         {
           "name": "_ZL27creatureEditor_cbSetLocatorP10eduimenu_sP10eduiitem_sj",
@@ -19132,7 +19156,7 @@
           "address": 4015264,
           "offset": 3125296,
           "size": 175,
-          "match_percent": 5.762712
+          "match_percent": 58.033897
         },
         {
           "name": "_ZL31creatureEditor_cbSetTriggerAreaP10eduimenu_sP10eduiitem_sj",
@@ -19140,7 +19164,7 @@
           "address": 4015440,
           "offset": 3125472,
           "size": 167,
-          "match_percent": 5.483871
+          "match_percent": 34.435482
         },
         {
           "name": "_ZL27creatureEditor_cbVisionMenuP10eduimenu_sP10eduiitem_sj",
@@ -19148,7 +19172,7 @@
           "address": 4017312,
           "offset": 3127344,
           "size": 556,
-          "match_percent": 3.508772
+          "match_percent": 92.17544
         },
         {
           "name": "_ZL26creatureEditor_cbGroupMenuP10eduimenu_sP10eduiitem_sj",
@@ -19156,7 +19180,7 @@
           "address": 4017872,
           "offset": 3127904,
           "size": 602,
-          "match_percent": 2.764228
+          "match_percent": 73.02439
         },
         {
           "name": "_ZL28creatureEditor_cbRespawnMenuP10eduimenu_sP10eduiitem_sj",
@@ -19164,7 +19188,7 @@
           "address": 4018480,
           "offset": 3128512,
           "size": 710,
-          "match_percent": 2.344828
+          "match_percent": 69.66207
         },
         {
           "name": "_ZL30creatureEditor_cb_heardistanceP10eduimenu_sP10eduiitem_sj",
@@ -19172,7 +19196,7 @@
           "address": 4020352,
           "offset": 3130384,
           "size": 92,
-          "match_percent": 17.272728
+          "match_percent": 100.0
         },
         {
           "name": "_ZL30creatureEditor_cb_viewdistanceP10eduimenu_sP10eduiitem_sj",
@@ -19180,7 +19204,7 @@
           "address": 4020448,
           "offset": 3130480,
           "size": 92,
-          "match_percent": 17.272728
+          "match_percent": 100.0
         },
         {
           "name": "_ZL31creatureEditor_cb_max_t_respawnP10eduimenu_sP10eduiitem_sj",
@@ -19188,7 +19212,7 @@
           "address": 4020544,
           "offset": 3130576,
           "size": 92,
-          "match_percent": 17.272728
+          "match_percent": 100.0
         },
         {
           "name": "_ZL31creatureEditor_cb_min_t_respawnP10eduimenu_sP10eduiitem_sj",
@@ -19196,7 +19220,7 @@
           "address": 4020640,
           "offset": 3130672,
           "size": 92,
-          "match_percent": 17.272728
+          "match_percent": 100.0
         },
         {
           "name": "_ZL32creatureEditor_cb_max_n_respawnsP10eduimenu_sP10eduiitem_sj",
@@ -19204,7 +19228,7 @@
           "address": 4020736,
           "offset": 3130768,
           "size": 127,
-          "match_percent": 7.857143
+          "match_percent": 55.142857
         },
         {
           "name": "_ZL32creatureEditor_cb_min_n_respawnsP10eduimenu_sP10eduiitem_sj",
@@ -19212,7 +19236,7 @@
           "address": 4020864,
           "offset": 3130896,
           "size": 127,
-          "match_percent": 7.857143
+          "match_percent": 55.142857
         },
         {
           "name": "_ZL27creatureEditor_cbCancelMenuP10eduimenu_sS0_",
@@ -19220,7 +19244,7 @@
           "address": 4020992,
           "offset": 3131024,
           "size": 34,
-          "match_percent": 33.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZL37creatureEditor_cbSelectRespawnLocatorP10eduimenu_sP10eduiitem_sj",
@@ -19228,7 +19252,7 @@
           "address": 4021520,
           "offset": 3131552,
           "size": 473,
-          "match_percent": 2.982456
+          "match_percent": 16.122807
         },
         {
           "name": "_ZL31creatureEditor_cbActivationMenuP10eduimenu_sP10eduiitem_sj",
@@ -19236,7 +19260,7 @@
           "address": 4022000,
           "offset": 3132032,
           "size": 765,
-          "match_percent": 2.20339
+          "match_percent": 45.124294
         },
         {
           "name": "_ZL30creatureEditor_cbSelectLocatorP10eduimenu_sP10eduiitem_sj",
@@ -19244,7 +19268,7 @@
           "address": 4022768,
           "offset": 3132800,
           "size": 476,
-          "match_percent": 2.931035
+          "match_percent": 33.08621
         },
         {
           "name": "_ZL34creatureEditor_cbSelectTriggerAreaP10eduimenu_sP10eduiitem_sj",
@@ -19252,7 +19276,7 @@
           "address": 4023248,
           "offset": 3133280,
           "size": 608,
-          "match_percent": 2.765957
+          "match_percent": 33.99291
         },
         {
           "name": "_ZL27creatureEditor_cbSelectTypeP10eduimenu_sP10eduiitem_sj",
@@ -19260,7 +19284,7 @@
           "address": 4023856,
           "offset": 3133888,
           "size": 401,
-          "match_percent": 3.366337
+          "match_percent": 46.782177
         },
         {
           "name": "_ZL35creatureEditor_cbRenameCreatureMenuP10eduimenu_sP10eduiitem_sj",
@@ -19268,7 +19292,7 @@
           "address": 4024624,
           "offset": 3134656,
           "size": 289,
-          "match_percent": 3.384615
+          "match_percent": 71.36923
         },
         {
           "name": "_ZL24creatureEditor_cbSetTypeP10eduimenu_sP10eduiitem_sj",
@@ -19276,7 +19300,7 @@
           "address": 4032240,
           "offset": 3142272,
           "size": 319,
-          "match_percent": 2.716049
+          "match_percent": 0.0
         },
         {
           "name": "_ZL31creatureEditor_cbRenameCreatureP10eduimenu_sP10eduiitem_sj",
@@ -19284,7 +19308,7 @@
           "address": 4044064,
           "offset": 3154096,
           "size": 156,
-          "match_percent": 7.090909
+          "match_percent": 73.36364
         },
         {
           "name": "_ZL31creatureEditor_cbSetScriptParamP10eduimenu_sP10eduiitem_sj",
@@ -19292,7 +19316,7 @@
           "address": 4049280,
           "offset": 3159312,
           "size": 242,
-          "match_percent": 3.606557
+          "match_percent": 6.885246
         },
         {
           "name": "_ZL29creatureEditor_cbScriptParamsP10eduimenu_sP10eduiitem_sj",
@@ -19300,7 +19324,7 @@
           "address": 4061056,
           "offset": 3171088,
           "size": 1873,
-          "match_percent": 0.871795
+          "match_percent": 1.076923
         },
         {
           "name": "_ZL29creatureEditor_cbSelectScriptP10eduimenu_sP10eduiitem_sj",
@@ -19308,7 +19332,7 @@
           "address": 4063968,
           "offset": 3174000,
           "size": 393,
-          "match_percent": 3.578947
+          "match_percent": 29.463158
         },
         {
           "name": "_ZL31creatureEditor_cbDeleteCreatureP10eduimenu_sP10eduiitem_sj",
@@ -19316,7 +19340,7 @@
           "address": 4211760,
           "offset": 3321792,
           "size": 235,
-          "match_percent": 3.333333
+          "match_percent": 60.666668
         },
         {
           "name": "creatureEditorSaveData",
@@ -19332,7 +19356,7 @@
           "address": 4225200,
           "offset": 3335232,
           "size": 525,
-          "match_percent": 2.977099
+          "match_percent": 60.190838
         },
         {
           "name": "_ZL28creatureEditor_cbResetParamsP10eduimenu_sP10eduiitem_sj",
@@ -19340,7 +19364,7 @@
           "address": 4231136,
           "offset": 3341168,
           "size": 144,
-          "match_percent": 10.256411
+          "match_percent": 67.74359
         },
         {
           "name": "_ZL26creatureEditor_cbSetScriptP10eduimenu_sP10eduiitem_sj",
@@ -19348,7 +19372,7 @@
           "address": 4231280,
           "offset": 3341312,
           "size": 292,
-          "match_percent": 4.444445
+          "match_percent": 59.488888
         },
         {
           "name": "creatureEditor_PathNodeMoved",
@@ -19364,7 +19388,7 @@
           "address": 4243264,
           "offset": 3353296,
           "size": 347,
-          "match_percent": 3.578947
+          "match_percent": 53.968422
         },
         {
           "name": "creatureEditor_PathDeleted",
@@ -19372,7 +19396,7 @@
           "address": 4245344,
           "offset": 3355376,
           "size": 302,
-          "match_percent": 4.0
+          "match_percent": 67.55294
         },
         {
           "name": "_ZL22creatureEditor_UpdatedP12EDCREATURE_s",
@@ -19380,7 +19404,7 @@
           "address": 4248544,
           "offset": 3358576,
           "size": 111,
-          "match_percent": 10.5
+          "match_percent": 83.47369
         },
         {
           "name": "_ZL26creatureEditor_cb_zspacingP10eduimenu_sP10eduiitem_sj",
@@ -19388,7 +19412,7 @@
           "address": 4248656,
           "offset": 3358688,
           "size": 143,
-          "match_percent": 7.555555
+          "match_percent": 79.4
         },
         {
           "name": "_ZL26creatureEditor_cb_xspacingP10eduimenu_sP10eduiitem_sj",
@@ -19396,7 +19420,7 @@
           "address": 4248800,
           "offset": 3358832,
           "size": 143,
-          "match_percent": 7.555555
+          "match_percent": 79.4
         },
         {
           "name": "_ZL25creatureEditor_cb_nacrossP10eduimenu_sP10eduiitem_sj",
@@ -19404,7 +19428,7 @@
           "address": 4248944,
           "offset": 3358976,
           "size": 143,
-          "match_percent": 7.555555
+          "match_percent": 74.17778
         },
         {
           "name": "_ZL24creatureEditor_cb_ngroupP10eduimenu_sP10eduiitem_sj",
@@ -19412,7 +19436,15 @@
           "address": 4249088,
           "offset": 3359120,
           "size": 143,
-          "match_percent": 7.555555
+          "match_percent": 65.28889
+        },
+        {
+          "name": "_Z22creatureEditor_ProcessP7nupad_s",
+          "demangled_name": "creatureEditor_Process(nupad_s*)",
+          "address": 4249232,
+          "offset": 3359264,
+          "size": 4175,
+          "match_percent": 22.786158
         },
         {
           "name": "creatureEditor_RenderAllCreatures",
@@ -19420,7 +19452,7 @@
           "address": 4253408,
           "offset": 3363440,
           "size": 575,
-          "match_percent": 2.758621
+          "match_percent": 91.227585
         }
       ]
     },
@@ -19436,30 +19468,6 @@
           "offset": 39024,
           "size": 811,
           "match_percent": 44.215687
-        },
-        {
-          "name": "_Z16areaEditor_Enterv",
-          "demangled_name": "areaEditor_Enter()",
-          "address": 4046944,
-          "offset": 3156976,
-          "size": 337,
-          "match_percent": 8.737865
-        },
-        {
-          "name": "_Z18areaEditor_ProcessP7nupad_s",
-          "demangled_name": "areaEditor_Process(nupad_s*)",
-          "address": 4064368,
-          "offset": 3174400,
-          "size": 3322,
-          "match_percent": 1.012987
-        },
-        {
-          "name": "_Z17areaEditor_Renderiiff",
-          "demangled_name": "areaEditor_Render(int, int, float, float)",
-          "address": 4259648,
-          "offset": 3369680,
-          "size": 870,
-          "match_percent": 1.428572
         },
         {
           "name": "_Z12DumpAreaDataii",
@@ -20059,7 +20067,7 @@
           "address": 5519072,
           "offset": 4629104,
           "size": 498,
-          "match_percent": 13.732758
+          "match_percent": 98.47414
         },
         {
           "name": "_ZN11LevelEditor9CloseMenuEv",
@@ -20131,7 +20139,7 @@
           "address": 5521312,
           "offset": 4631344,
           "size": 714,
-          "match_percent": 0.0
+          "match_percent": 84.349396
         },
         {
           "name": "_ZN11LevelEditor5EnterEv",
@@ -20627,7 +20635,7 @@
           "address": 5553104,
           "offset": 4663136,
           "size": 757,
-          "match_percent": 30.382198
+          "match_percent": 38.570683
         },
         {
           "name": "_ZN11ClassEditor13FocusSelectedEv",
@@ -20747,7 +20755,7 @@
           "address": 5561296,
           "offset": 4671328,
           "size": 791,
-          "match_percent": 55.06044
+          "match_percent": 0.0
         },
         {
           "name": "_ZN12PropertyTool20RetrievePropertyMenuEP11ClassObjectP16PropertyMenuList",
@@ -20795,7 +20803,7 @@
           "address": 5567504,
           "offset": 4677536,
           "size": 784,
-          "match_percent": 30.119047
+          "match_percent": 30.261906
         },
         {
           "name": "_ZN7EdClass10FindObjectEPc",
@@ -20827,7 +20835,7 @@
           "address": 5571760,
           "offset": 4681792,
           "size": 721,
-          "match_percent": 94.06923
+          "match_percent": 94.14616
         },
         {
           "name": "_ZN11LevelEditorC2Ev",
@@ -20835,7 +20843,7 @@
           "address": 5571760,
           "offset": 4681792,
           "size": 721,
-          "match_percent": 94.06923
+          "match_percent": 94.14616
         },
         {
           "name": "_ZN14EditorSettings12AddMenuItemsEP10eduimenu_s",
@@ -20875,7 +20883,7 @@
           "address": 5573392,
           "offset": 4683424,
           "size": 392,
-          "match_percent": 72.264465
+          "match_percent": 72.28099
         },
         {
           "name": "_ZN11LevelEditor9LoadStateEP9variptr_uS1_S1_S1_S1_S1_",
@@ -20883,7 +20891,7 @@
           "address": 5583648,
           "offset": 4693680,
           "size": 459,
-          "match_percent": 4.615385
+          "match_percent": 88.71429
         },
         {
           "name": "_ZN11LevelEditor4LoadEPcP9variptr_uS2_i",
@@ -20891,7 +20899,7 @@
           "address": 5584112,
           "offset": 4694144,
           "size": 802,
-          "match_percent": 2.153846
+          "match_percent": 67.90769
         },
         {
           "name": "_ZN11LevelEditor9SaveStateEP9variptr_uS1_",
@@ -20899,7 +20907,7 @@
           "address": 5585040,
           "offset": 4695072,
           "size": 238,
-          "match_percent": 7.924528
+          "match_percent": 100.0
         },
         {
           "name": "_ZN11LevelEditor9SaveStateEiP9variptr_uS1_",
@@ -20907,7 +20915,7 @@
           "address": 5585280,
           "offset": 4695312,
           "size": 251,
-          "match_percent": 7.777778
+          "match_percent": 100.0
         },
         {
           "name": "_ZN11LevelEditor4SaveEv",
@@ -20915,7 +20923,7 @@
           "address": 5585536,
           "offset": 4695568,
           "size": 3600,
-          "match_percent": 0.541936
+          "match_percent": 53.31484
         },
         {
           "name": "_ZN11LevelEditor21ProcessEvenWhenPausedEP16ThingProcessData",
@@ -20923,7 +20931,7 @@
           "address": 5589136,
           "offset": 4699168,
           "size": 1968,
-          "match_percent": 28.542036
+          "match_percent": 80.95354
         },
         {
           "name": "_Z13cbEdLevelSaveP10eduimenu_sP10eduiitem_sj",
@@ -20931,7 +20939,7 @@
           "address": 5591104,
           "offset": 4701136,
           "size": 679,
-          "match_percent": 2.916667
+          "match_percent": 99.666664
         },
         {
           "name": "_ZN11LevelEditor9InitaliseER9variptr_uS1_i",
@@ -21397,12 +21405,20 @@
           "match_percent": 80.27941
         },
         {
+          "name": "_Z19routeEditor_ProcessP7nupad_s",
+          "demangled_name": "routeEditor_Process(nupad_s*)",
+          "address": 4056128,
+          "offset": 3166160,
+          "size": 2948,
+          "match_percent": 23.856346
+        },
+        {
           "name": "_ZL32pathEditorCalculateDistanceTableP8AIPATH_siP9variptr_uS2_",
           "demangled_name": "pathEditorCalculateDistanceTable(AIPATH_s*, int, variptr_u*, variptr_u*)",
           "address": 4087888,
           "offset": 3197920,
           "size": 354,
-          "match_percent": 4.174758
+          "match_percent": 85.11651
         },
         {
           "name": "_ZL18TestPointPathCheckP7nuvec_sP14EDAIPATHNODE_sS2_PfS3_Pif",
@@ -21410,7 +21426,7 @@
           "address": 4126384,
           "offset": 3236416,
           "size": 1477,
-          "match_percent": 84.33871
+          "match_percent": 84.145164
         },
         {
           "name": "aieditor_ClearAllPathCnxTypes",
@@ -21426,7 +21442,7 @@
           "address": 4182336,
           "offset": 3292368,
           "size": 151,
-          "match_percent": 99.57143
+          "match_percent": 99.92857
         },
         {
           "name": "aieditor_RegisterDefaultPathCnxTypes",
@@ -21450,7 +21466,7 @@
           "address": 4185440,
           "offset": 3295472,
           "size": 5632,
-          "match_percent": 0.465567
+          "match_percent": 0.0
         },
         {
           "name": "pathEditorDrawPaths",
@@ -21458,7 +21474,7 @@
           "address": 4191072,
           "offset": 3301104,
           "size": 270,
-          "match_percent": 50.17647
+          "match_percent": 62.964706
         },
         {
           "name": "pathEditor_CalcNodeIXs",
@@ -21506,7 +21522,7 @@
           "address": 4195648,
           "offset": 3305680,
           "size": 4694,
-          "match_percent": 0.475248
+          "match_percent": 19.325743
         },
         {
           "name": "pathEditorCreateData",
@@ -21514,7 +21530,7 @@
           "address": 4201504,
           "offset": 3311536,
           "size": 4142,
-          "match_percent": 0.39886
+          "match_percent": 0.0
         },
         {
           "name": "pathEditorSaveData",
@@ -21538,7 +21554,7 @@
           "address": 4212560,
           "offset": 3322592,
           "size": 994,
-          "match_percent": 1.521739
+          "match_percent": 19.14855
         },
         {
           "name": "_ZL25routeEditor_cbCreateRouteP10eduimenu_sP10eduiitem_sj",
@@ -21546,7 +21562,7 @@
           "address": 4213568,
           "offset": 3323600,
           "size": 1634,
-          "match_percent": 2.189781
+          "match_percent": 15.333333
         },
         {
           "name": "_ZL25pathEditor_cbSetShareNodeP10eduimenu_sP10eduiitem_sj",
@@ -21554,7 +21570,7 @@
           "address": 4215216,
           "offset": 3325248,
           "size": 1093,
-          "match_percent": 3.180212
+          "match_percent": 53.773853
         },
         {
           "name": "_ZL23pathEditor_cbCreatePathP10eduimenu_sP10eduiitem_sj",
@@ -21610,7 +21626,7 @@
           "address": 4232752,
           "offset": 3342784,
           "size": 10501,
-          "match_percent": 28.31957
+          "match_percent": 28.310968
         },
         {
           "name": "_ZL31pathEditor_cbDisconnectPathNodeP10eduimenu_sP10eduiitem_sj",
@@ -21626,7 +21642,7 @@
           "address": 4245184,
           "offset": 3355216,
           "size": 158,
-          "match_percent": 95.55556
+          "match_percent": 95.888885
         },
         {
           "name": "_ZL23pathEditor_cbDeletePathP10eduimenu_sP10eduiitem_sj",
@@ -21642,7 +21658,7 @@
           "address": 4255968,
           "offset": 3366000,
           "size": 2043,
-          "match_percent": 0.941704
+          "match_percent": 29.786995
         }
       ]
     },
@@ -21657,7 +21673,7 @@
           "address": 3582784,
           "offset": 2692816,
           "size": 1552,
-          "match_percent": 1.23125
+          "match_percent": 1.3125
         },
         {
           "name": "_Z20antinodeEditor_Enterv",
@@ -21665,7 +21681,7 @@
           "address": 4016672,
           "offset": 3126704,
           "size": 323,
-          "match_percent": 3.4
+          "match_percent": 9.0
         },
         {
           "name": "_Z22antinodeEditor_ProcessP7nupad_s",
@@ -21673,15 +21689,7 @@
           "address": 4039520,
           "offset": 3149552,
           "size": 3155,
-          "match_percent": 0.55
-        },
-        {
-          "name": "_Z19routeEditor_ProcessP7nupad_s",
-          "demangled_name": "routeEditor_Process(nupad_s*)",
-          "address": 4056128,
-          "offset": 3166160,
-          "size": 2948,
-          "match_percent": 0.53696
+          "match_percent": 17.055714
         },
         {
           "name": "_Z27creatureEditor_IsSelectableP12EDCREATURE_s",
@@ -21689,7 +21697,7 @@
           "address": 4225120,
           "offset": 3335152,
           "size": 65,
-          "match_percent": 17.368422
+          "match_percent": 100.0
         },
         {
           "name": "_Z20creatureEditor_Enterv",
@@ -21697,7 +21705,7 @@
           "address": 4229696,
           "offset": 3339728,
           "size": 1433,
-          "match_percent": 1.031746
+          "match_percent": 2.380952
         },
         {
           "name": "_Z27creatureEditor_CalculatePosP12EDCREATURE_siP7nuvec_si",
@@ -21705,7 +21713,7 @@
           "address": 4246272,
           "offset": 3356304,
           "size": 318,
-          "match_percent": 4.395605
+          "match_percent": 75.71429
         },
         {
           "name": "_Z21creatureEditor_Renderiiff",
@@ -21713,15 +21721,7 @@
           "address": 4246592,
           "offset": 3356624,
           "size": 1947,
-          "match_percent": 0.760626
-        },
-        {
-          "name": "_Z22creatureEditor_ProcessP7nupad_s",
-          "demangled_name": "creatureEditor_Process(nupad_s*)",
-          "address": 4249232,
-          "offset": 3359264,
-          "size": 4175,
-          "match_percent": 0.413223
+          "match_percent": 2.013423
         },
         {
           "name": "_Z21antinodeEditor_Renderiiff",
@@ -21729,7 +21729,7 @@
           "address": 4253984,
           "offset": 3364016,
           "size": 1361,
-          "match_percent": 1.308725
+          "match_percent": 1.409396
         },
         {
           "name": "_Z18routeEditor_Renderiiff",
@@ -21737,7 +21737,7 @@
           "address": 4255360,
           "offset": 3365392,
           "size": 604,
-          "match_percent": 0.0
+          "match_percent": 99.576385
         },
         {
           "name": "_Z20InModelListDataFlagsP23APICHARACTERMODELLIST_sjjii",
@@ -21745,7 +21745,7 @@
           "address": 4593664,
           "offset": 3703696,
           "size": 966,
-          "match_percent": 1.66323
+          "match_percent": 1.924399
         }
       ]
     },
@@ -21760,7 +21760,7 @@
           "address": 4015840,
           "offset": 3125872,
           "size": 541,
-          "match_percent": 2.773723
+          "match_percent": 2.116788
         },
         {
           "name": "_ZL33locatorEditor_cbAddLocatorsByNameP10eduimenu_sP10eduiitem_sj",
@@ -21768,7 +21768,7 @@
           "address": 4017232,
           "offset": 3127264,
           "size": 78,
-          "match_percent": 18.095238
+          "match_percent": 100.0
         },
         {
           "name": "_ZL32locatorEditor_cbSelectLocatorSetP10eduimenu_sP10eduiitem_sj",
@@ -21776,7 +21776,7 @@
           "address": 4020000,
           "offset": 3130032,
           "size": 347,
-          "match_percent": 4.047619
+          "match_percent": 99.82143
         },
         {
           "name": "_ZL38locatorEditor_cbCancelSelectLocatorSetP10eduimenu_sS0_",
@@ -21784,7 +21784,7 @@
           "address": 4021376,
           "offset": 3131408,
           "size": 34,
-          "match_percent": 33.0
+          "match_percent": 99.9
         },
         {
           "name": "_ZL32locatorEditor_cbCancelRenameMenuP10eduimenu_sS0_",
@@ -21792,7 +21792,7 @@
           "address": 4021424,
           "offset": 3131456,
           "size": 34,
-          "match_percent": 33.0
+          "match_percent": 99.9
         },
         {
           "name": "_ZL37locatorEditor_cbAddLocatorsByNameMenuP10eduimenu_sP10eduiitem_sj",
@@ -21800,7 +21800,7 @@
           "address": 4025536,
           "offset": 3135568,
           "size": 328,
-          "match_percent": 2.894737
+          "match_percent": 82.27631
         },
         {
           "name": "_ZL36locatorEditor_cbRenameLocatorSetMenuP10eduimenu_sP10eduiitem_sj",
@@ -21808,7 +21808,7 @@
           "address": 4025872,
           "offset": 3135904,
           "size": 289,
-          "match_percent": 3.384615
+          "match_percent": 81.66154
         },
         {
           "name": "_ZL33locatorEditor_cbRenameLocatorMenuP10eduimenu_sP10eduiitem_sj",
@@ -21816,7 +21816,7 @@
           "address": 4026176,
           "offset": 3136208,
           "size": 289,
-          "match_percent": 3.384615
+          "match_percent": 81.6
         },
         {
           "name": "_ZL32locatorEditor_cbRenameLocatorSetP10eduimenu_sP10eduiitem_sj",
@@ -21824,7 +21824,7 @@
           "address": 4044384,
           "offset": 3154416,
           "size": 200,
-          "match_percent": 3.859649
+          "match_percent": 99.7193
         },
         {
           "name": "_ZL29locatorEditor_cbRenameLocatorP10eduimenu_sP10eduiitem_sj",
@@ -21832,7 +21832,7 @@
           "address": 4044592,
           "offset": 3154624,
           "size": 156,
-          "match_percent": 7.090909
+          "match_percent": 100.0
         },
         {
           "name": "_ZL15AddLocatorToSetP14EDLOCATORSET_sP11EDLOCATOR_sS2_",
@@ -21840,7 +21840,7 @@
           "address": 4051360,
           "offset": 3161392,
           "size": 83,
-          "match_percent": 11.25
+          "match_percent": 0.0
         },
         {
           "name": "_ZL14DestroyLocatorP11EDLOCATOR_s",
@@ -21848,7 +21848,7 @@
           "address": 4051456,
           "offset": 3161488,
           "size": 310,
-          "match_percent": 4.148936
+          "match_percent": 0.0
         },
         {
           "name": "locatorEditorSaveData",
@@ -21856,7 +21856,7 @@
           "address": 4179040,
           "offset": 3289072,
           "size": 972,
-          "match_percent": 1.218638
+          "match_percent": 3.225807
         },
         {
           "name": "locatorEditor_GetNearest",
@@ -21864,7 +21864,7 @@
           "address": 4180016,
           "offset": 3290048,
           "size": 525,
-          "match_percent": 2.721088
+          "match_percent": 91.29932
         },
         {
           "name": "locatorEditor_PathNodeMoved",
@@ -21872,7 +21872,7 @@
           "address": 4180544,
           "offset": 3290576,
           "size": 498,
-          "match_percent": 3.125
+          "match_percent": 3.28125
         },
         {
           "name": "locatorEditor_PathDeleted",
@@ -21880,7 +21880,7 @@
           "address": 4181056,
           "offset": 3291088,
           "size": 149,
-          "match_percent": 8.666667
+          "match_percent": 9.333333
         },
         {
           "name": "locatorEditorDrawLocators",
@@ -21888,7 +21888,7 @@
           "address": 4181808,
           "offset": 3291840,
           "size": 453,
-          "match_percent": 2.5
+          "match_percent": 49.088234
         },
         {
           "name": "locatorEditor_PathNodeDeleted",
@@ -21896,7 +21896,7 @@
           "address": 4195296,
           "offset": 3305328,
           "size": 193,
-          "match_percent": 6.610169
+          "match_percent": 2.372881
         },
         {
           "name": "_Z19locatorEditor_Enterv",
@@ -21904,7 +21904,7 @@
           "address": 4200352,
           "offset": 3310384,
           "size": 1139,
-          "match_percent": 1.186747
+          "match_percent": 39.92771
         },
         {
           "name": "_ZL31locatorEditor_cbEmptyLocatorSetP10eduimenu_sP10eduiitem_sj",
@@ -21912,7 +21912,7 @@
           "address": 4217232,
           "offset": 3327264,
           "size": 547,
-          "match_percent": 2.83688
+          "match_percent": 3.659575
         },
         {
           "name": "_ZL42locatorEditor_cbCancelRenameLocatorSetMenuP10eduimenu_sS0_",
@@ -21920,7 +21920,7 @@
           "address": 4217792,
           "offset": 3327824,
           "size": 27,
-          "match_percent": 41.25
+          "match_percent": 100.0
         },
         {
           "name": "_ZL32locatorEditor_cbDeleteLocatorSetP10eduimenu_sP10eduiitem_sj",
@@ -21928,7 +21928,7 @@
           "address": 4217824,
           "offset": 3327856,
           "size": 493,
-          "match_percent": 1.929825
+          "match_percent": 22.149122
         },
         {
           "name": "_ZL29locatorEditor_cbSetLocatorSetP10eduimenu_sP10eduiitem_sj",
@@ -21936,7 +21936,7 @@
           "address": 4218320,
           "offset": 3328352,
           "size": 233,
-          "match_percent": 3.666667
+          "match_percent": 96.3
         },
         {
           "name": "_ZL32locatorEditor_cbCreateLocatorSetP10eduimenu_sP10eduiitem_sj",
@@ -21944,7 +21944,7 @@
           "address": 4218560,
           "offset": 3328592,
           "size": 403,
-          "match_percent": 3.17757
+          "match_percent": 98.037384
         },
         {
           "name": "_ZL29locatorEditor_cbDeleteLocatorP10eduimenu_sP10eduiitem_sj",
@@ -21952,7 +21952,7 @@
           "address": 4218976,
           "offset": 3329008,
           "size": 198,
-          "match_percent": 4.313726
+          "match_percent": 98.039215
         },
         {
           "name": "_ZL39locatorEditor_cbCancelDeleteLocatorMenuP10eduimenu_sS0_",
@@ -21960,7 +21960,7 @@
           "address": 4219184,
           "offset": 3329216,
           "size": 27,
-          "match_percent": 41.25
+          "match_percent": 100.0
         },
         {
           "name": "_ZL38locatorEditor_cbAddLocatorsByNameYesNoP10eduimenu_sP10eduiitem_sj",
@@ -21968,7 +21968,7 @@
           "address": 4219216,
           "offset": 3329248,
           "size": 799,
-          "match_percent": 1.596244
+          "match_percent": 0.0
         },
         {
           "name": "_Z21locatorEditor_ProcessP7nupad_s",
@@ -21976,7 +21976,7 @@
           "address": 4225728,
           "offset": 3335760,
           "size": 3691,
-          "match_percent": 0.439498
+          "match_percent": 25.430365
         },
         {
           "name": "_Z20locatorEditor_Renderiiff",
@@ -21984,7 +21984,7 @@
           "address": 4258016,
           "offset": 3368048,
           "size": 1627,
-          "match_percent": 1.129943
+          "match_percent": 31.550848
         }
       ]
     },
@@ -22063,7 +22063,7 @@
           "address": 4055024,
           "offset": 3165056,
           "size": 509,
-          "match_percent": 99.51145
+          "match_percent": 99.54962
         },
         {
           "name": "_ZL6xParamP8nufpar_s",
@@ -22119,7 +22119,7 @@
           "address": 4069984,
           "offset": 3180016,
           "size": 925,
-          "match_percent": 99.77143
+          "match_percent": 99.79184
         },
         {
           "name": "_ZL15xConditionMacroP8nufpar_s",
@@ -23605,7 +23605,7 @@
           "address": 1636800,
           "offset": 746832,
           "size": 604,
-          "match_percent": 94.99338
+          "match_percent": 95.02649
         },
         {
           "name": "_ZL21Action_SetScriptParamP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -24845,7 +24845,7 @@
           "address": 4036592,
           "offset": 3146624,
           "size": 311,
-          "match_percent": 93.885056
+          "match_percent": 93.94253
         },
         {
           "name": "_ZL32Condition_NearestPlayerToLocatorP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
@@ -25547,7 +25547,7 @@
           "address": 3344640,
           "offset": 2454672,
           "size": 60,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZL22edanimcbSetSwitchDelayP10eduimenu_sP10eduiitem_sj",
@@ -25555,7 +25555,7 @@
           "address": 3344704,
           "offset": 2454736,
           "size": 62,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZL20edanimcbSetSwitchVarP10eduimenu_sP10eduiitem_sj",
@@ -25563,7 +25563,7 @@
           "address": 3344768,
           "offset": 2454800,
           "size": 62,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZL22edanimcbSetSoundTimingP10eduimenu_sP10eduiitem_sj",
@@ -25571,7 +25571,7 @@
           "address": 3344832,
           "offset": 2454864,
           "size": 56,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZL28edanimcbToggleParticleSwitchP10eduimenu_sP10eduiitem_sj",
@@ -25579,7 +25579,7 @@
           "address": 3344896,
           "offset": 2454928,
           "size": 72,
-          "match_percent": 15.714286
+          "match_percent": 100.0
         },
         {
           "name": "_ZL23edanimcbSetParticleRateP10eduimenu_sP10eduiitem_sj",
@@ -25587,7 +25587,7 @@
           "address": 3344976,
           "offset": 2455008,
           "size": 56,
-          "match_percent": 25.384615
+          "match_percent": 100.0
         },
         {
           "name": "_ZL21edanimcbCancelOptMenuP10eduimenu_sS0_",
@@ -25595,7 +25595,7 @@
           "address": 3345040,
           "offset": 2455072,
           "size": 26,
-          "match_percent": 31.428572
+          "match_percent": 100.0
         },
         {
           "name": "_ZL22edanimcbCancelMCTBMenuP10eduimenu_sS0_",
@@ -25603,7 +25603,7 @@
           "address": 3354000,
           "offset": 2464032,
           "size": 58,
-          "match_percent": 15.714286
+          "match_percent": 100.0
         },
         {
           "name": "_ZL28edanimcbCancelSwitchTypeMenuP10eduimenu_sS0_",
@@ -25611,7 +25611,7 @@
           "address": 3354064,
           "offset": 2464096,
           "size": 58,
-          "match_percent": 15.714286
+          "match_percent": 100.0
         },
         {
           "name": "_ZL24edanimcbCancelSwitchMenuP10eduimenu_sS0_",
@@ -25619,7 +25619,7 @@
           "address": 3354128,
           "offset": 2464160,
           "size": 58,
-          "match_percent": 15.714286
+          "match_percent": 100.0
         },
         {
           "name": "_ZL24edanimcbCancelBouncyMenuP10eduimenu_sS0_",
@@ -25627,7 +25627,7 @@
           "address": 3354192,
           "offset": 2464224,
           "size": 58,
-          "match_percent": 15.714286
+          "match_percent": 100.0
         },
         {
           "name": "_ZL32edanimcbCancelLocalSoundTypeMenuP10eduimenu_sS0_",
@@ -25635,7 +25635,7 @@
           "address": 3354256,
           "offset": 2464288,
           "size": 58,
-          "match_percent": 15.714286
+          "match_percent": 100.0
         },
         {
           "name": "_ZL28edanimcbCancelLocalSoundMenuP10eduimenu_sS0_",
@@ -25643,7 +25643,7 @@
           "address": 3354320,
           "offset": 2464352,
           "size": 58,
-          "match_percent": 15.714286
+          "match_percent": 100.0
         },
         {
           "name": "_ZL27edanimcbCancelSoundTypeMenuP10eduimenu_sS0_",
@@ -25651,7 +25651,7 @@
           "address": 3354384,
           "offset": 2464416,
           "size": 58,
-          "match_percent": 15.714286
+          "match_percent": 100.0
         },
         {
           "name": "_ZL23edanimcbCancelSoundMenuP10eduimenu_sS0_",
@@ -25659,7 +25659,7 @@
           "address": 3354448,
           "offset": 2464480,
           "size": 58,
-          "match_percent": 15.714286
+          "match_percent": 100.0
         },
         {
           "name": "_ZL35edanimcbCancelLocalParticleTypeMenuP10eduimenu_sS0_",
@@ -25667,7 +25667,7 @@
           "address": 3354512,
           "offset": 2464544,
           "size": 58,
-          "match_percent": 15.714286
+          "match_percent": 100.0
         },
         {
           "name": "_ZL31edanimcbCancelLocalParticleMenuP10eduimenu_sS0_",
@@ -25675,7 +25675,7 @@
           "address": 3354576,
           "offset": 2464608,
           "size": 58,
-          "match_percent": 15.714286
+          "match_percent": 100.0
         },
         {
           "name": "_ZL30edanimcbCancelParticleTypeMenuP10eduimenu_sS0_",
@@ -25683,7 +25683,7 @@
           "address": 3354640,
           "offset": 2464672,
           "size": 58,
-          "match_percent": 15.714286
+          "match_percent": 100.0
         },
         {
           "name": "_ZL26edanimcbCancelParticleMenuP10eduimenu_sS0_",
@@ -25691,7 +25691,7 @@
           "address": 3354704,
           "offset": 2464736,
           "size": 58,
-          "match_percent": 15.714286
+          "match_percent": 100.0
         },
         {
           "name": "_ZL16edanimcbMCTBMenuP10eduimenu_sP10eduiitem_sj",
@@ -25699,7 +25699,7 @@
           "address": 3368400,
           "offset": 2478432,
           "size": 1184,
-          "match_percent": 1.387755
+          "match_percent": 1.714286
         },
         {
           "name": "_ZL22edanimcbSwitchTypeMenuP10eduimenu_sP10eduiitem_sj",
@@ -25707,7 +25707,7 @@
           "address": 3369584,
           "offset": 2479616,
           "size": 1559,
-          "match_percent": 1.068493
+          "match_percent": 1.150685
         },
         {
           "name": "_ZL17edanimcbSoundMenuP10eduimenu_sP10eduiitem_sj",
@@ -25715,7 +25715,7 @@
           "address": 3371152,
           "offset": 2481184,
           "size": 352,
-          "match_percent": 4.878049
+          "match_percent": 70.597565
         },
         {
           "name": "_ZL20edanimcbParticleMenuP10eduimenu_sP10eduiitem_sj",
@@ -25723,7 +25723,7 @@
           "address": 3371504,
           "offset": 2481536,
           "size": 352,
-          "match_percent": 4.878049
+          "match_percent": 70.67073
         },
         {
           "name": "_ZL29edanimcbLocalParticleTypeMenuP10eduimenu_sP10eduiitem_sj",
@@ -25731,7 +25731,7 @@
           "address": 3371856,
           "offset": 2481888,
           "size": 439,
-          "match_percent": 3.714286
+          "match_percent": 50.809525
         },
         {
           "name": "_ZL24edanimcbParticleTypeMenuP10eduimenu_sP10eduiitem_sj",
@@ -25739,7 +25739,7 @@
           "address": 3372304,
           "offset": 2482336,
           "size": 481,
-          "match_percent": 2.857143
+          "match_percent": 57.915966
         },
         {
           "name": "_ZL18edanimcbBouncyMenuP10eduimenu_sP10eduiitem_sj",
@@ -25747,7 +25747,7 @@
           "address": 3381072,
           "offset": 2491104,
           "size": 517,
-          "match_percent": 3.636364
+          "match_percent": 58.49091
         },
         {
           "name": "_ZL18edanimcbSwitchMenuP10eduimenu_sP10eduiitem_sj",
@@ -25755,7 +25755,7 @@
           "address": 3385776,
           "offset": 2495808,
           "size": 583,
-          "match_percent": 3.174603
+          "match_percent": 61.325397
         },
         {
           "name": "_ZL25edanimcbLocalParticleMenuP10eduimenu_sP10eduiitem_sj",
@@ -25763,7 +25763,7 @@
           "address": 3386368,
           "offset": 2496400,
           "size": 470,
-          "match_percent": 3.773585
+          "match_percent": 54.707546
         },
         {
           "name": "_ZL21edanimcbSetSwitchTypeP10eduimenu_sP10eduiitem_sj",
@@ -25771,7 +25771,7 @@
           "address": 3389408,
           "offset": 2499440,
           "size": 96,
-          "match_percent": 10.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZL23edanimcbToggleSoundTypeP10eduimenu_sP10eduiitem_sj",
@@ -25779,7 +25779,7 @@
           "address": 3389504,
           "offset": 2499536,
           "size": 166,
-          "match_percent": 6.666666
+          "match_percent": 9.393939
         },
         {
           "name": "_ZL20edanimcbSetSoundTypeP10eduimenu_sP10eduiitem_sj",
@@ -25787,7 +25787,7 @@
           "address": 3389680,
           "offset": 2499712,
           "size": 97,
-          "match_percent": 9.565217
+          "match_percent": 85.391304
         },
         {
           "name": "_ZL23edanimcbSetParticleTypeP10eduimenu_sP10eduiitem_sj",
@@ -25795,7 +25795,7 @@
           "address": 3389792,
           "offset": 2499824,
           "size": 93,
-          "match_percent": 9.565217
+          "match_percent": 85.17391
         },
         {
           "name": "_ZL28edanimcbSetLocalParticleTypeP10eduimenu_sP10eduiitem_sj",
@@ -25803,7 +25803,7 @@
           "address": 3416256,
           "offset": 2526288,
           "size": 187,
-          "match_percent": 4.680851
+          "match_percent": 61.787235
         },
         {
           "name": "_ZL25edanimcbMCTBCardSlotsUsedP10eduimenu_sP10eduiitem_sj",
@@ -25811,7 +25811,7 @@
           "address": 3418288,
           "offset": 2528320,
           "size": 91,
-          "match_percent": 10.476191
+          "match_percent": 20.0
         },
         {
           "name": "_ZL25edanimcbMCTBCardFreeSpaceP10eduimenu_sP10eduiitem_sj",
@@ -25819,7 +25819,7 @@
           "address": 3418384,
           "offset": 2528416,
           "size": 98,
-          "match_percent": 12.272727
+          "match_percent": 19.09091
         },
         {
           "name": "_ZL22edanimcbLocalSoundMenuP10eduimenu_sP10eduiitem_sj",
@@ -25827,7 +25827,7 @@
           "address": 3418496,
           "offset": 2528528,
           "size": 762,
-          "match_percent": 2.339181
+          "match_percent": 2.45614
         },
         {
           "name": "_ZL28edanimcbMCTBCardCheckKeyCardP10eduimenu_sP10eduiitem_sj",
@@ -25835,7 +25835,7 @@
           "address": 3432368,
           "offset": 2542400,
           "size": 116,
-          "match_percent": 11.379311
+          "match_percent": 14.482758
         },
         {
           "name": "_ZL28edanimcbMCTBCardWriteKeyCardP10eduimenu_sP10eduiitem_sj",
@@ -25843,7 +25843,7 @@
           "address": 3432496,
           "offset": 2542528,
           "size": 116,
-          "match_percent": 11.379311
+          "match_percent": 14.482758
         },
         {
           "name": "_ZL24edanimcbMCTBCardUnFormatP10eduimenu_sP10eduiitem_sj",
@@ -25851,7 +25851,7 @@
           "address": 3432624,
           "offset": 2542656,
           "size": 100,
-          "match_percent": 12.692307
+          "match_percent": 16.153847
         },
         {
           "name": "_ZL22edanimcbMCTBCardFormatP10eduimenu_sP10eduiitem_sj",
@@ -25859,7 +25859,7 @@
           "address": 3432736,
           "offset": 2542768,
           "size": 100,
-          "match_percent": 12.692307
+          "match_percent": 16.153847
         },
         {
           "name": "_ZL26edanimcbMCTBCardDeleteSlotP10eduimenu_sP10eduiitem_sj",
@@ -25867,7 +25867,7 @@
           "address": 3432848,
           "offset": 2542880,
           "size": 108,
-          "match_percent": 13.103448
+          "match_percent": 16.551723
         },
         {
           "name": "_ZL24edanimcbMCTBCardLoadSlotP10eduimenu_sP10eduiitem_sj",
@@ -25875,7 +25875,7 @@
           "address": 3432960,
           "offset": 2542992,
           "size": 141,
-          "match_percent": 6.470588
+          "match_percent": 12.352942
         },
         {
           "name": "_ZL24edanimcbMCTBCardSaveSlotP10eduimenu_sP10eduiitem_sj",
@@ -25883,7 +25883,7 @@
           "address": 3433104,
           "offset": 2543136,
           "size": 168,
-          "match_percent": 5.5
+          "match_percent": 10.5
         },
         {
           "name": "_ZL27edanimcbMCTBCardCheckFormatP10eduimenu_sP10eduiitem_sj",
@@ -25891,7 +25891,7 @@
           "address": 3433280,
           "offset": 2543312,
           "size": 100,
-          "match_percent": 12.692307
+          "match_percent": 16.153847
         },
         {
           "name": "_ZL20edanimcbMCTBCardTypeP10eduimenu_sP10eduiitem_sj",
@@ -25899,7 +25899,7 @@
           "address": 3433392,
           "offset": 2543424,
           "size": 100,
-          "match_percent": 12.692307
+          "match_percent": 16.153847
         },
         {
           "name": "_ZL23edanimcbMCTBCardPresentP10eduimenu_sP10eduiitem_sj",
@@ -25907,7 +25907,7 @@
           "address": 3433504,
           "offset": 2543536,
           "size": 100,
-          "match_percent": 12.692307
+          "match_percent": 16.153847
         },
         {
           "name": "_ZL16edanimcbFileSaveP10eduimenu_sP10eduiitem_sj",
@@ -25915,7 +25915,7 @@
           "address": 3516800,
           "offset": 2626832,
           "size": 414,
-          "match_percent": 2.933333
+          "match_percent": 5.6
         },
         {
           "name": "edanimRegisterBaseScene",
@@ -25923,7 +25923,7 @@
           "address": 3517216,
           "offset": 2627248,
           "size": 9,
-          "match_percent": 24.444445
+          "match_percent": 100.0
         },
         {
           "name": "_ZL26edanimcbLocalSoundTypeMenuP10eduimenu_sP10eduiitem_sj",
@@ -25931,7 +25931,7 @@
           "address": 3528528,
           "offset": 2638560,
           "size": 425,
-          "match_percent": 3.786408
+          "match_percent": 46.708736
         },
         {
           "name": "_ZL25edanimcbSetLocalSoundTypeP10eduimenu_sP10eduiitem_sj",
@@ -25939,7 +25939,7 @@
           "address": 3528960,
           "offset": 2638992,
           "size": 183,
-          "match_percent": 6.27907
+          "match_percent": 85.34884
         },
         {
           "name": "_ZL21edanimcbSoundTypeMenuP10eduimenu_sP10eduiitem_sj",
@@ -25947,7 +25947,7 @@
           "address": 3529152,
           "offset": 2639184,
           "size": 472,
-          "match_percent": 2.931035
+          "match_percent": 59.948277
         },
         {
           "name": "_ZL15edanimcbCubeMapP10eduimenu_sP10eduiitem_sj",
@@ -25955,7 +25955,7 @@
           "address": 3537776,
           "offset": 2647808,
           "size": 39,
-          "match_percent": 33.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZL24edanimcbSetBouncyDampingP10eduimenu_sP10eduiitem_sj",
@@ -25963,7 +25963,7 @@
           "address": 3703264,
           "offset": 2813296,
           "size": 121,
-          "match_percent": 12.692307
+          "match_percent": 91.88461
         },
         {
           "name": "_ZL24edanimcbSetBouncyTensionP10eduimenu_sP10eduiitem_sj",
@@ -25971,7 +25971,7 @@
           "address": 3703392,
           "offset": 2813424,
           "size": 121,
-          "match_percent": 12.692307
+          "match_percent": 91.88461
         },
         {
           "name": "_ZL27edanimcbSetBouncyPlayerGravP10eduimenu_sP10eduiitem_sj",
@@ -25979,7 +25979,7 @@
           "address": 3703520,
           "offset": 2813552,
           "size": 121,
-          "match_percent": 12.692307
+          "match_percent": 91.88461
         },
         {
           "name": "_ZL16edanimcbFileLoadP10eduimenu_sP10eduiitem_sj",
@@ -25987,7 +25987,7 @@
           "address": 3705328,
           "offset": 2815360,
           "size": 457,
-          "match_percent": 3.103448
+          "match_percent": 4.827586
         }
       ]
     },
@@ -26519,7 +26519,7 @@
           "address": 3345360,
           "offset": 2455392,
           "size": 27,
-          "match_percent": 18.571428
+          "match_percent": 100.0
         },
         {
           "name": "_ZL26edgracbToggleClumpReactiveP10eduimenu_sP10eduiitem_sj",
@@ -26527,7 +26527,7 @@
           "address": 3345392,
           "offset": 2455424,
           "size": 53,
-          "match_percent": 5.333334
+          "match_percent": 100.0
         },
         {
           "name": "_ZL18edgracbSetDpadModeP10eduimenu_sP10eduiitem_sj",
@@ -26535,7 +26535,7 @@
           "address": 3345456,
           "offset": 2455488,
           "size": 27,
-          "match_percent": 18.571428
+          "match_percent": 100.0
         },
         {
           "name": "_ZL19edgracbChangeSScaleP10eduimenu_sP10eduiitem_sj",
@@ -26543,7 +26543,7 @@
           "address": 3345536,
           "offset": 2455568,
           "size": 27,
-          "match_percent": 13.333333
+          "match_percent": 99.833336
         },
         {
           "name": "_ZL22edgracbSetGlobalFadeInP10eduimenu_sP10eduiitem_sj",
@@ -26551,7 +26551,7 @@
           "address": 3345568,
           "offset": 2455600,
           "size": 72,
-          "match_percent": 13.75
+          "match_percent": 85.3125
         },
         {
           "name": "_ZL23edgracbSetGlobalFadeOutP10eduimenu_sP10eduiitem_sj",
@@ -26559,7 +26559,7 @@
           "address": 3345648,
           "offset": 2455680,
           "size": 76,
-          "match_percent": 12.941176
+          "match_percent": 86.17647
         },
         {
           "name": "_ZL17edgraToggleFilterP10eduimenu_sP10eduiitem_sj",
@@ -26567,7 +26567,7 @@
           "address": 3345728,
           "offset": 2455760,
           "size": 31,
-          "match_percent": 16.25
+          "match_percent": 100.0
         },
         {
           "name": "_ZL24edgracbCancelGlobalsMenuP10eduimenu_sS0_",
@@ -26575,7 +26575,7 @@
           "address": 3354768,
           "offset": 2464800,
           "size": 58,
-          "match_percent": 15.714286
+          "match_percent": 100.0
         },
         {
           "name": "_ZL23edgracbCancelSScaleMenuP10eduimenu_sS0_",
@@ -26583,7 +26583,7 @@
           "address": 3354832,
           "offset": 2464864,
           "size": 58,
-          "match_percent": 15.714286
+          "match_percent": 100.0
         },
         {
           "name": "_ZL25edgracbCancelDpadModeMenuP10eduimenu_sS0_",
@@ -26591,7 +26591,7 @@
           "address": 3354896,
           "offset": 2464928,
           "size": 58,
-          "match_percent": 15.714286
+          "match_percent": 100.0
         },
         {
           "name": "_ZL29edgracbCancelClumpTerrainMenuP10eduimenu_sS0_",
@@ -26599,7 +26599,7 @@
           "address": 3354960,
           "offset": 2464992,
           "size": 58,
-          "match_percent": 15.714286
+          "match_percent": 100.0
         },
         {
           "name": "_ZL26edgracbCancelClumpFadeMenuP10eduimenu_sS0_",
@@ -26607,7 +26607,7 @@
           "address": 3355024,
           "offset": 2465056,
           "size": 78,
-          "match_percent": 16.875
+          "match_percent": 99.875
         },
         {
           "name": "_ZL26edgracbCancelClumpDistMenuP10eduimenu_sS0_",
@@ -26615,7 +26615,7 @@
           "address": 3355104,
           "offset": 2465136,
           "size": 58,
-          "match_percent": 15.714286
+          "match_percent": 100.0
         },
         {
           "name": "_ZL26edgracbCancelClumpAreaMenuP10eduimenu_sS0_",
@@ -26623,7 +26623,7 @@
           "address": 3355168,
           "offset": 2465200,
           "size": 58,
-          "match_percent": 15.714286
+          "match_percent": 100.0
         },
         {
           "name": "_ZL27edgracbCancelClumpSizesMenuP10eduimenu_sS0_",
@@ -26631,7 +26631,7 @@
           "address": 3355232,
           "offset": 2465264,
           "size": 58,
-          "match_percent": 15.714286
+          "match_percent": 100.0
         },
         {
           "name": "_ZL32edgracbCancelClumpPropertiesMenuP10eduimenu_sS0_",
@@ -26639,7 +26639,7 @@
           "address": 3355296,
           "offset": 2465328,
           "size": 58,
-          "match_percent": 15.714286
+          "match_percent": 100.0
         },
         {
           "name": "_ZL26edgracbCancelClumpModeMenuP10eduimenu_sS0_",
@@ -26647,7 +26647,7 @@
           "address": 3355360,
           "offset": 2465392,
           "size": 58,
-          "match_percent": 15.714286
+          "match_percent": 100.0
         },
         {
           "name": "_ZL31edgracbCancelChangeInstanceMenuP10eduimenu_sS0_",
@@ -26655,7 +26655,7 @@
           "address": 3355424,
           "offset": 2465456,
           "size": 58,
-          "match_percent": 15.714286
+          "match_percent": 100.0
         },
         {
           "name": "_ZL25edgracbCancelInstanceMenuP10eduimenu_sS0_",
@@ -26663,7 +26663,7 @@
           "address": 3355488,
           "offset": 2465520,
           "size": 58,
-          "match_percent": 15.714286
+          "match_percent": 100.0
         },
         {
           "name": "_ZL20edgracbCancelOptMenuP10eduimenu_sS0_",
@@ -26671,7 +26671,7 @@
           "address": 3355552,
           "offset": 2465584,
           "size": 74,
-          "match_percent": 12.222222
+          "match_percent": 100.0
         },
         {
           "name": "_ZL19edgracbDpadModeMenuP10eduimenu_sP10eduiitem_sj",
@@ -26679,7 +26679,7 @@
           "address": 3372800,
           "offset": 2482832,
           "size": 365,
-          "match_percent": 2.682927
+          "match_percent": 79.12195
         },
         {
           "name": "_ZL20edgracbClumpDistMenuP10eduimenu_sP10eduiitem_sj",
@@ -26687,7 +26687,7 @@
           "address": 3373168,
           "offset": 2483200,
           "size": 600,
-          "match_percent": 2.564103
+          "match_percent": 80.28205
         },
         {
           "name": "_ZL20edgracbClumpAreaMenuP10eduimenu_sP10eduiitem_sj",
@@ -26695,7 +26695,7 @@
           "address": 3373776,
           "offset": 2483808,
           "size": 600,
-          "match_percent": 2.564103
+          "match_percent": 80.25
         },
         {
           "name": "_ZL20edgracbClumpModeMenuP10eduimenu_sP10eduiitem_sj",
@@ -26703,7 +26703,7 @@
           "address": 3374384,
           "offset": 2484416,
           "size": 697,
-          "match_percent": 2.060606
+          "match_percent": 47.727272
         },
         {
           "name": "_ZL26edgracbClumpPropertiesMenuP10eduimenu_sP10eduiitem_sj",
@@ -26711,7 +26711,7 @@
           "address": 3381600,
           "offset": 2491632,
           "size": 904,
-          "match_percent": 1.95122
+          "match_percent": 2.04878
         },
         {
           "name": "_ZL21edgracbClumpSizesMenuP10eduimenu_sP10eduiitem_sj",
@@ -26719,7 +26719,7 @@
           "address": 3382512,
           "offset": 2492544,
           "size": 566,
-          "match_percent": 2.919708
+          "match_percent": 3.50365
         },
         {
           "name": "_ZL17edgracbSScaleMenuP10eduimenu_sP10eduiitem_sj",
@@ -26727,7 +26727,7 @@
           "address": 3386848,
           "offset": 2496880,
           "size": 254,
-          "match_percent": 4.736842
+          "match_percent": 96.2807
         },
         {
           "name": "_ZL18edgracbDiscardCopyP10eduimenu_sP10eduiitem_sj",
@@ -26735,7 +26735,7 @@
           "address": 3389888,
           "offset": 2499920,
           "size": 91,
-          "match_percent": 8.8
+          "match_percent": 92.8
         },
         {
           "name": "_ZL16edgracbCopyClumpP10eduimenu_sP10eduiitem_sj",
@@ -26743,7 +26743,7 @@
           "address": 3389984,
           "offset": 2500016,
           "size": 95,
-          "match_percent": 8.148149
+          "match_percent": 88.666664
         },
         {
           "name": "_ZL18edgracbGlobalsMenuP10eduimenu_sP10eduiitem_sj",
@@ -26751,7 +26751,7 @@
           "address": 3408416,
           "offset": 2518448,
           "size": 542,
-          "match_percent": 2.905983
+          "match_percent": 3.589744
         },
         {
           "name": "_ZL21edgraChangeFilterNameP10eduimenu_sP10eduiitem_sj",
@@ -26759,7 +26759,7 @@
           "address": 3419264,
           "offset": 2529296,
           "size": 55,
-          "match_percent": 27.142857
+          "match_percent": 100.0
         },
         {
           "name": "_ZL25edgracbChangeInstanceMenuP10eduimenu_sP10eduiitem_sj",
@@ -26767,7 +26767,7 @@
           "address": 3420384,
           "offset": 2530416,
           "size": 826,
-          "match_percent": 1.979695
+          "match_percent": 2.436548
         },
         {
           "name": "_ZL19edgracbInstanceMenuP10eduimenu_sP10eduiitem_sj",
@@ -26775,7 +26775,7 @@
           "address": 3421216,
           "offset": 2531248,
           "size": 874,
-          "match_percent": 1.666667
+          "match_percent": 2.058824
         },
         {
           "name": "_ZL23edgracbClumpTerrainMenuP10eduimenu_sP10eduiitem_sj",
@@ -26783,7 +26783,7 @@
           "address": 3429856,
           "offset": 2539888,
           "size": 512,
-          "match_percent": 1.833333
+          "match_percent": 3.5
         },
         {
           "name": "_ZL20edgracbClumpFadeMenuP10eduimenu_sP10eduiitem_sj",
@@ -26791,7 +26791,7 @@
           "address": 3431792,
           "offset": 2541824,
           "size": 566,
-          "match_percent": 1.732284
+          "match_percent": 3.307087
         },
         {
           "name": "_ZL15edgracbFileSaveP10eduimenu_sP10eduiitem_sj",
@@ -26799,7 +26799,7 @@
           "address": 3553520,
           "offset": 2663552,
           "size": 414,
-          "match_percent": 2.933333
+          "match_percent": 5.6
         },
         {
           "name": "_ZL22edgracbApplyGlobalFadeP10eduimenu_sP10eduiitem_sj",
@@ -26807,7 +26807,7 @@
           "address": 3605568,
           "offset": 2715600,
           "size": 148,
-          "match_percent": 8.085107
+          "match_percent": 99.57447
         },
         {
           "name": "_ZL19edgracbSetClumpWindP10eduimenu_sP10eduiitem_sj",
@@ -26815,7 +26815,7 @@
           "address": 3605728,
           "offset": 2715760,
           "size": 68,
-          "match_percent": 20.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZL28edgracbSetClumpTerrainOffsetP10eduimenu_sP10eduiitem_sj",
@@ -26823,7 +26823,7 @@
           "address": 3605808,
           "offset": 2715840,
           "size": 68,
-          "match_percent": 20.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZL22edgracbToggleClumpTiltP10eduimenu_sP10eduiitem_sj",
@@ -26831,7 +26831,7 @@
           "address": 3605888,
           "offset": 2715920,
           "size": 68,
-          "match_percent": 16.5
+          "match_percent": 100.0
         },
         {
           "name": "_ZL25edgracbToggleClumpTerrainP10eduimenu_sP10eduiitem_sj",
@@ -26839,7 +26839,7 @@
           "address": 3605968,
           "offset": 2716000,
           "size": 68,
-          "match_percent": 16.5
+          "match_percent": 100.0
         },
         {
           "name": "_ZL22edgracbSetClumpFadeOutP10eduimenu_sP10eduiitem_sj",
@@ -26847,7 +26847,7 @@
           "address": 3606048,
           "offset": 2716080,
           "size": 109,
-          "match_percent": 11.785714
+          "match_percent": 89.28571
         },
         {
           "name": "_ZL21edgracbSetClumpFadeInP10eduimenu_sP10eduiitem_sj",
@@ -26855,7 +26855,7 @@
           "address": 3606160,
           "offset": 2716192,
           "size": 105,
-          "match_percent": 12.222222
+          "match_percent": 88.888885
         },
         {
           "name": "_ZL19edgracbSetClumpDistP10eduimenu_sP10eduiitem_sj",
@@ -26863,7 +26863,7 @@
           "address": 3606272,
           "offset": 2716304,
           "size": 64,
-          "match_percent": 20.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZL19edgracbSetClumpAreaP10eduimenu_sP10eduiitem_sj",
@@ -26871,7 +26871,7 @@
           "address": 3606336,
           "offset": 2716368,
           "size": 64,
-          "match_percent": 20.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZL21edgracbSetClumpHeightP10eduimenu_sP10eduiitem_sj",
@@ -26879,7 +26879,7 @@
           "address": 3606400,
           "offset": 2716432,
           "size": 68,
-          "match_percent": 20.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZL24edgracbSetClumpMaxHeightP10eduimenu_sP10eduiitem_sj",
@@ -26887,7 +26887,7 @@
           "address": 3606480,
           "offset": 2716512,
           "size": 68,
-          "match_percent": 20.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZL24edgracbSetClumpMinHeightP10eduimenu_sP10eduiitem_sj",
@@ -26895,7 +26895,7 @@
           "address": 3606560,
           "offset": 2716592,
           "size": 68,
-          "match_percent": 20.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZL19edgracbSetClumpModeP10eduimenu_sP10eduiitem_sj",
@@ -26903,7 +26903,7 @@
           "address": 3606640,
           "offset": 2716672,
           "size": 72,
-          "match_percent": 15.714286
+          "match_percent": 89.28571
         },
         {
           "name": "_ZL25edgracbChangeInstanceTypeP10eduimenu_sP10eduiitem_sj",
@@ -26911,7 +26911,7 @@
           "address": 3606720,
           "offset": 2716752,
           "size": 63,
-          "match_percent": 20.0
+          "match_percent": 85.47369
         },
         {
           "name": "_ZL15edgracbFileLoadP10eduimenu_sP10eduiitem_sj",
@@ -26919,7 +26919,7 @@
           "address": 3615536,
           "offset": 2725568,
           "size": 420,
-          "match_percent": 2.78481
+          "match_percent": 5.316456
         }
       ]
     },
@@ -30392,7 +30392,7 @@
           "address": 3558480,
           "offset": 2668512,
           "size": 869,
-          "match_percent": 70.34562
+          "match_percent": 70.2765
         },
         {
           "name": "_Z17edppPtlCreateCopyP7nuvec_si",
@@ -31048,7 +31048,7 @@
           "address": 5481344,
           "offset": 4591376,
           "size": 388,
-          "match_percent": 36.186993
+          "match_percent": 22.609756
         },
         {
           "name": "_ZN17EdFileInputStream15SerialiseBufferEPvii",
@@ -31056,7 +31056,7 @@
           "address": 5481744,
           "offset": 4591776,
           "size": 188,
-          "match_percent": 38.32143
+          "match_percent": 38.214287
         },
         {
           "name": "_ZN22EdSpecialObjectControl14cbSelectObjectEP10eduimenu_sP10eduiitem_sj",
@@ -31440,7 +31440,7 @@
           "address": 5495216,
           "offset": 4605248,
           "size": 174,
-          "match_percent": 99.61364
+          "match_percent": 99.954544
         },
         {
           "name": "_Z9EdDrawEndv",
@@ -32467,6 +32467,174 @@
           "match_percent": 100.0
         },
         {
+          "name": "_ZN16EdClassInterface10ClearLevelEi",
+          "demangled_name": "EdClassInterface::ClearLevel(int)",
+          "address": 5611760,
+          "offset": 4721792,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16EdClassInterface13DefunctObjectEPv",
+          "demangled_name": "EdClassInterface::DefunctObject(void*)",
+          "address": 5611776,
+          "offset": 4721808,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16EdClassInterface12ReviveObjectEPv",
+          "demangled_name": "EdClassInterface::ReviveObject(void*)",
+          "address": 5611792,
+          "offset": 4721824,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16EdClassInterface13SetObjectGuidEPvi",
+          "demangled_name": "EdClassInterface::SetObjectGuid(void*, int)",
+          "address": 5611808,
+          "offset": 4721840,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16EdClassInterface13GetObjectGuidEPv",
+          "demangled_name": "EdClassInterface::GetObjectGuid(void*)",
+          "address": 5611824,
+          "offset": 4721856,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16EdClassInterface18GetConstructorDataEPvS0_i",
+          "demangled_name": "EdClassInterface::GetConstructorData(void*, void*, int)",
+          "address": 5611840,
+          "offset": 4721872,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16EdClassInterface9ConstructEPvS0_",
+          "demangled_name": "EdClassInterface::Construct(void*, void*)",
+          "address": 5611856,
+          "offset": 4721888,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16EdClassInterface7ProcessEPvR14EdInputContext",
+          "demangled_name": "EdClassInterface::Process(void*, EdInputContext&)",
+          "address": 5611872,
+          "offset": 4721904,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16EdClassInterface6RenderEPvi",
+          "demangled_name": "EdClassInterface::Render(void*, int)",
+          "address": 5611888,
+          "offset": 4721920,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16EdClassInterface11EnterEditorEv",
+          "demangled_name": "EdClassInterface::EnterEditor()",
+          "address": 5611904,
+          "offset": 4721936,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16EdClassInterface10ExitEditorEv",
+          "demangled_name": "EdClassInterface::ExitEditor()",
+          "address": 5611920,
+          "offset": 4721952,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16EdClassInterface10EnterLevelEv",
+          "demangled_name": "EdClassInterface::EnterLevel()",
+          "address": 5611936,
+          "offset": 4721968,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16EdClassInterface9ExitLevelEv",
+          "demangled_name": "EdClassInterface::ExitLevel()",
+          "address": 5611952,
+          "offset": 4721984,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16EdClassInterface11UpdateListsEP12MemoryBufferS1_",
+          "demangled_name": "EdClassInterface::UpdateLists(MemoryBuffer*, MemoryBuffer*)",
+          "address": 5611968,
+          "offset": 4722000,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16EdClassInterface21PreLoadInitialisationEP12MemoryBufferS1_",
+          "demangled_name": "EdClassInterface::PreLoadInitialisation(MemoryBuffer*, MemoryBuffer*)",
+          "address": 5611984,
+          "offset": 4722016,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16EdClassInterface22PostLoadInitialisationEP12MemoryBufferS1_",
+          "demangled_name": "EdClassInterface::PostLoadInitialisation(MemoryBuffer*, MemoryBuffer*)",
+          "address": 5612000,
+          "offset": 4722032,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16EdClassInterface21PreSaveInitialisationEv",
+          "demangled_name": "EdClassInterface::PreSaveInitialisation()",
+          "address": 5612016,
+          "offset": 4722048,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16EdClassInterface22PostSaveInitialisationEv",
+          "demangled_name": "EdClassInterface::PostSaveInitialisation()",
+          "address": 5612032,
+          "offset": 4722064,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16EdClassInterface15SerialiseObjectER8EdStreamPv",
+          "demangled_name": "EdClassInterface::SerialiseObject(EdStream&, void*)",
+          "address": 5612048,
+          "offset": 4722080,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16EdClassInterface12AddMenuItemsEP10eduimenu_s",
+          "demangled_name": "EdClassInterface::AddMenuItems(eduimenu_s*)",
+          "address": 5612064,
+          "offset": 4722096,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16EdClassInterface6ImportEv",
+          "demangled_name": "EdClassInterface::Import()",
+          "address": 5612080,
+          "offset": 4722112,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
           "name": "_ZN9EdControlD1Ev",
           "demangled_name": "EdControl::~EdControl()",
           "address": 5612096,
@@ -32513,6 +32681,22 @@
           "offset": 4722192,
           "size": 29,
           "match_percent": 0.0
+        },
+        {
+          "name": "_ZN12SplineHelper5FlushEv",
+          "demangled_name": "SplineHelper::Flush()",
+          "address": 5612992,
+          "offset": 4723024,
+          "size": 26,
+          "match_percent": 99.6
+        },
+        {
+          "name": "_ZN10KnotHelper5FlushEv",
+          "demangled_name": "KnotHelper::Flush()",
+          "address": 5613024,
+          "offset": 4723056,
+          "size": 9,
+          "match_percent": 100.0
         },
         {
           "name": "_ZN11EdSubSystemD1Ev",
@@ -32863,7 +33047,7 @@
           "address": 3345488,
           "offset": 2455520,
           "size": 48,
-          "match_percent": 46.666668
+          "match_percent": 100.0
         },
         {
           "name": "_ZL9edppApplyv",
@@ -32895,7 +33079,7 @@
           "address": 3353824,
           "offset": 2463856,
           "size": 62,
-          "match_percent": 26.25
+          "match_percent": 100.0
         },
         {
           "name": "_ZL10edbriClosev",
@@ -33519,7 +33703,7 @@
           "address": 3615392,
           "offset": 2725424,
           "size": 143,
-          "match_percent": 11.891891
+          "match_percent": 100.0
         },
         {
           "name": "edgraClearPage",
@@ -34215,7 +34399,7 @@
           "address": 3774896,
           "offset": 2884928,
           "size": 436,
-          "match_percent": 91.21905
+          "match_percent": 91.26667
         },
         {
           "name": "eduiItemFilePickSetFmt",
@@ -34223,7 +34407,7 @@
           "address": 3775616,
           "offset": 2885648,
           "size": 220,
-          "match_percent": 7.777778
+          "match_percent": 99.98148
         },
         {
           "name": "eduiItemFilePickCreate",
@@ -34231,7 +34415,7 @@
           "address": 3775840,
           "offset": 2885872,
           "size": 388,
-          "match_percent": 4.242424
+          "match_percent": 92.69697
         },
         {
           "name": "eduiGradStageSetRGB",
@@ -34679,7 +34863,7 @@
           "address": 3790352,
           "offset": 2900384,
           "size": 466,
-          "match_percent": 3.925234
+          "match_percent": 92.47664
         },
         {
           "name": "eduiCreateMessageMenu",
@@ -34687,7 +34871,7 @@
           "address": 3790832,
           "offset": 2900864,
           "size": 253,
-          "match_percent": 6.774194
+          "match_percent": 59.85484
         },
         {
           "name": "eduicbProcessGradPick",
@@ -34703,7 +34887,7 @@
           "address": 3793264,
           "offset": 2903296,
           "size": 95,
-          "match_percent": 6.4
+          "match_percent": 100.0
         },
         {
           "name": "eduiAddTextPickEntEx",
@@ -34807,7 +34991,7 @@
           "address": 3804720,
           "offset": 2914752,
           "size": 359,
-          "match_percent": 5.060241
+          "match_percent": 31.927711
         },
         {
           "name": "eduicbDestroyDirectoryList",
@@ -51883,7 +52067,7 @@
           "address": 4943600,
           "offset": 4053632,
           "size": 366,
-          "match_percent": 99.34545
+          "match_percent": 99.43636
         }
       ]
     },
@@ -105451,7 +105635,7 @@
           "address": 3243872,
           "offset": 2353904,
           "size": 98,
-          "match_percent": 99.695656
+          "match_percent": 99.91304
         },
         {
           "name": "_ZN22NuFileDeviceAndroidAPKC2EPKcRKN6NuFile8InitDataE",
@@ -105459,7 +105643,7 @@
           "address": 3243872,
           "offset": 2353904,
           "size": 98,
-          "match_percent": 99.695656
+          "match_percent": 99.91304
         }
       ]
     },
@@ -118434,10 +118618,8 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edtoolsall.cpp.o",
-        "gameapi/edtools/edanimall.cpp.o",
+        "editor/creature_editor.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edgraall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -118491,10 +118673,8 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edtoolsall.cpp.o",
-        "gameapi/edtools/edanimall.cpp.o",
+        "editor/creature_editor.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edgraall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -118548,10 +118728,8 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edtoolsall.cpp.o",
-        "gameapi/edtools/edanimall.cpp.o",
+        "editor/creature_editor.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edgraall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -118621,10 +118799,8 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edtoolsall.cpp.o",
-        "gameapi/edtools/edanimall.cpp.o",
+        "editor/creature_editor.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edgraall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -118711,10 +118887,8 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edtoolsall.cpp.o",
-        "gameapi/edtools/edanimall.cpp.o",
+        "editor/creature_editor.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edgraall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -118784,10 +118958,8 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edtoolsall.cpp.o",
-        "gameapi/edtools/edanimall.cpp.o",
+        "editor/creature_editor.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edgraall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -118857,10 +119029,8 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edtoolsall.cpp.o",
-        "gameapi/edtools/edanimall.cpp.o",
+        "editor/creature_editor.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edgraall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -118930,10 +119100,8 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edtoolsall.cpp.o",
-        "gameapi/edtools/edanimall.cpp.o",
+        "editor/creature_editor.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edgraall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -119003,10 +119171,8 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edtoolsall.cpp.o",
-        "gameapi/edtools/edanimall.cpp.o",
+        "editor/creature_editor.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edgraall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -119076,10 +119242,8 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edtoolsall.cpp.o",
-        "gameapi/edtools/edanimall.cpp.o",
+        "editor/creature_editor.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edgraall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -119324,10 +119488,8 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edtoolsall.cpp.o",
-        "gameapi/edtools/edanimall.cpp.o",
+        "editor/creature_editor.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edgraall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -119397,10 +119559,8 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edtoolsall.cpp.o",
-        "gameapi/edtools/edanimall.cpp.o",
+        "editor/creature_editor.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edgraall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -119470,10 +119630,8 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edtoolsall.cpp.o",
-        "gameapi/edtools/edanimall.cpp.o",
+        "editor/creature_editor.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edgraall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -119592,10 +119750,8 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edtoolsall.cpp.o",
-        "gameapi/edtools/edanimall.cpp.o",
+        "editor/creature_editor.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edgraall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -119677,10 +119833,8 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edtoolsall.cpp.o",
-        "gameapi/edtools/edanimall.cpp.o",
+        "editor/creature_editor.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edgraall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -119851,10 +120005,8 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edtoolsall.cpp.o",
-        "gameapi/edtools/edanimall.cpp.o",
+        "editor/creature_editor.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edgraall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -119976,10 +120128,8 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edtoolsall.cpp.o",
-        "gameapi/edtools/edanimall.cpp.o",
+        "editor/creature_editor.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edgraall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -120101,10 +120251,8 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edtoolsall.cpp.o",
-        "gameapi/edtools/edanimall.cpp.o",
+        "editor/creature_editor.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edgraall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -120174,10 +120322,8 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edtoolsall.cpp.o",
-        "gameapi/edtools/edanimall.cpp.o",
+        "editor/creature_editor.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edgraall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -120247,10 +120393,8 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edtoolsall.cpp.o",
-        "gameapi/edtools/edanimall.cpp.o",
+        "editor/creature_editor.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edgraall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -120320,10 +120464,8 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edtoolsall.cpp.o",
-        "gameapi/edtools/edanimall.cpp.o",
+        "editor/creature_editor.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edgraall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -120419,10 +120561,8 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edtoolsall.cpp.o",
-        "gameapi/edtools/edanimall.cpp.o",
+        "editor/creature_editor.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edgraall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -120492,10 +120632,8 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edtoolsall.cpp.o",
-        "gameapi/edtools/edanimall.cpp.o",
+        "editor/creature_editor.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edgraall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -120576,10 +120714,8 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edtoolsall.cpp.o",
-        "gameapi/edtools/edanimall.cpp.o",
+        "editor/creature_editor.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edgraall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -120649,10 +120785,8 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edtoolsall.cpp.o",
-        "gameapi/edtools/edanimall.cpp.o",
+        "editor/creature_editor.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edgraall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -120735,10 +120869,8 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edtoolsall.cpp.o",
-        "gameapi/edtools/edanimall.cpp.o",
+        "editor/creature_editor.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edgraall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -120808,10 +120940,8 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edtoolsall.cpp.o",
-        "gameapi/edtools/edanimall.cpp.o",
+        "editor/creature_editor.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edgraall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -120898,10 +121028,8 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edtoolsall.cpp.o",
-        "gameapi/edtools/edanimall.cpp.o",
+        "editor/creature_editor.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edgraall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -120971,10 +121099,8 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edtoolsall.cpp.o",
-        "gameapi/edtools/edanimall.cpp.o",
+        "editor/creature_editor.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edgraall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -121044,10 +121170,8 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edtoolsall.cpp.o",
-        "gameapi/edtools/edanimall.cpp.o",
+        "editor/creature_editor.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edgraall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -121117,10 +121241,8 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edtoolsall.cpp.o",
-        "gameapi/edtools/edanimall.cpp.o",
+        "editor/creature_editor.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edgraall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -121253,10 +121375,8 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edtoolsall.cpp.o",
-        "gameapi/edtools/edanimall.cpp.o",
+        "editor/creature_editor.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edgraall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -121326,10 +121446,8 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edtoolsall.cpp.o",
-        "gameapi/edtools/edanimall.cpp.o",
+        "editor/creature_editor.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edgraall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -121399,10 +121517,8 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edtoolsall.cpp.o",
-        "gameapi/edtools/edanimall.cpp.o",
+        "editor/creature_editor.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edgraall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -121815,10 +121931,8 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edtoolsall.cpp.o",
-        "gameapi/edtools/edanimall.cpp.o",
+        "editor/creature_editor.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edgraall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -121957,10 +122071,8 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edtoolsall.cpp.o",
-        "gameapi/edtools/edanimall.cpp.o",
+        "editor/creature_editor.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edgraall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -122086,10 +122198,8 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edtoolsall.cpp.o",
-        "gameapi/edtools/edanimall.cpp.o",
+        "editor/creature_editor.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edgraall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -122535,10 +122645,8 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edtoolsall.cpp.o",
-        "gameapi/edtools/edanimall.cpp.o",
+        "editor/creature_editor.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edgraall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -122608,10 +122716,8 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edtoolsall.cpp.o",
-        "gameapi/edtools/edanimall.cpp.o",
+        "editor/creature_editor.cpp.o",
         "gameapi/edtools/edbriall.cpp.o",
-        "gameapi/edtools/edgraall.cpp.o",
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edptlcallbacks.cpp.o",
@@ -122657,6 +122763,7 @@
       "size": 29,
       "match_percent": 100.0,
       "candidate_units": [
+        "editor/edlevelall.cpp.o",
         "gameapi/edtools/edtoolsall.cpp.o",
         "gamelib/util/Network.cpp.o"
       ]
@@ -122669,6 +122776,7 @@
       "size": 29,
       "match_percent": 100.0,
       "candidate_units": [
+        "editor/edlevelall.cpp.o",
         "gameapi/edtools/edtoolsall.cpp.o",
         "gamelib/util/Network.cpp.o"
       ]
@@ -122681,6 +122789,7 @@
       "size": 45,
       "match_percent": 100.0,
       "candidate_units": [
+        "editor/edlevelall.cpp.o",
         "gameapi/edtools/edtoolsall.cpp.o",
         "gamelib/util/Network.cpp.o"
       ]
@@ -127191,190 +127300,6 @@
       "match_percent": 0.0
     },
     {
-      "name": "_ZN16EdClassInterface10ClearLevelEi",
-      "demangled_name": "EdClassInterface::ClearLevel(int)",
-      "address": 5611760,
-      "offset": 4721792,
-      "size": 9,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN16EdClassInterface13DefunctObjectEPv",
-      "demangled_name": "EdClassInterface::DefunctObject(void*)",
-      "address": 5611776,
-      "offset": 4721808,
-      "size": 9,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN16EdClassInterface12ReviveObjectEPv",
-      "demangled_name": "EdClassInterface::ReviveObject(void*)",
-      "address": 5611792,
-      "offset": 4721824,
-      "size": 9,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN16EdClassInterface13SetObjectGuidEPvi",
-      "demangled_name": "EdClassInterface::SetObjectGuid(void*, int)",
-      "address": 5611808,
-      "offset": 4721840,
-      "size": 9,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN16EdClassInterface13GetObjectGuidEPv",
-      "demangled_name": "EdClassInterface::GetObjectGuid(void*)",
-      "address": 5611824,
-      "offset": 4721856,
-      "size": 9,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN16EdClassInterface18GetConstructorDataEPvS0_i",
-      "demangled_name": "EdClassInterface::GetConstructorData(void*, void*, int)",
-      "address": 5611840,
-      "offset": 4721872,
-      "size": 9,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN16EdClassInterface9ConstructEPvS0_",
-      "demangled_name": "EdClassInterface::Construct(void*, void*)",
-      "address": 5611856,
-      "offset": 4721888,
-      "size": 9,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN16EdClassInterface7ProcessEPvR14EdInputContext",
-      "demangled_name": "EdClassInterface::Process(void*, EdInputContext&)",
-      "address": 5611872,
-      "offset": 4721904,
-      "size": 9,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN16EdClassInterface6RenderEPvi",
-      "demangled_name": "EdClassInterface::Render(void*, int)",
-      "address": 5611888,
-      "offset": 4721920,
-      "size": 9,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN16EdClassInterface11EnterEditorEv",
-      "demangled_name": "EdClassInterface::EnterEditor()",
-      "address": 5611904,
-      "offset": 4721936,
-      "size": 9,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN16EdClassInterface10ExitEditorEv",
-      "demangled_name": "EdClassInterface::ExitEditor()",
-      "address": 5611920,
-      "offset": 4721952,
-      "size": 9,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN16EdClassInterface10EnterLevelEv",
-      "demangled_name": "EdClassInterface::EnterLevel()",
-      "address": 5611936,
-      "offset": 4721968,
-      "size": 9,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN16EdClassInterface9ExitLevelEv",
-      "demangled_name": "EdClassInterface::ExitLevel()",
-      "address": 5611952,
-      "offset": 4721984,
-      "size": 9,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN16EdClassInterface11UpdateListsEP12MemoryBufferS1_",
-      "demangled_name": "EdClassInterface::UpdateLists(MemoryBuffer*, MemoryBuffer*)",
-      "address": 5611968,
-      "offset": 4722000,
-      "size": 9,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN16EdClassInterface21PreLoadInitialisationEP12MemoryBufferS1_",
-      "demangled_name": "EdClassInterface::PreLoadInitialisation(MemoryBuffer*, MemoryBuffer*)",
-      "address": 5611984,
-      "offset": 4722016,
-      "size": 9,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN16EdClassInterface22PostLoadInitialisationEP12MemoryBufferS1_",
-      "demangled_name": "EdClassInterface::PostLoadInitialisation(MemoryBuffer*, MemoryBuffer*)",
-      "address": 5612000,
-      "offset": 4722032,
-      "size": 9,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN16EdClassInterface21PreSaveInitialisationEv",
-      "demangled_name": "EdClassInterface::PreSaveInitialisation()",
-      "address": 5612016,
-      "offset": 4722048,
-      "size": 9,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN16EdClassInterface22PostSaveInitialisationEv",
-      "demangled_name": "EdClassInterface::PostSaveInitialisation()",
-      "address": 5612032,
-      "offset": 4722064,
-      "size": 9,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN16EdClassInterface15SerialiseObjectER8EdStreamPv",
-      "demangled_name": "EdClassInterface::SerialiseObject(EdStream&, void*)",
-      "address": 5612048,
-      "offset": 4722080,
-      "size": 9,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN16EdClassInterface12AddMenuItemsEP10eduimenu_s",
-      "demangled_name": "EdClassInterface::AddMenuItems(eduimenu_s*)",
-      "address": 5612064,
-      "offset": 4722096,
-      "size": 9,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN16EdClassInterface6ImportEv",
-      "demangled_name": "EdClassInterface::Import()",
-      "address": 5612080,
-      "offset": 4722112,
-      "size": 9,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN12SplineHelper5FlushEv",
-      "demangled_name": "SplineHelper::Flush()",
-      "address": 5612992,
-      "offset": 4723024,
-      "size": 26,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN10KnotHelper5FlushEv",
-      "demangled_name": "KnotHelper::Flush()",
-      "address": 5613024,
-      "offset": 4723056,
-      "size": 9,
-      "match_percent": 0.0
-    },
-    {
       "name": "_ZN18PlaceableInterfaceD1Ev",
       "demangled_name": "PlaceableInterface::~PlaceableInterface()",
       "address": 5613216,
@@ -128194,8 +128119,8 @@
   "summary": {
     "bazel_units": 458,
     "functions": 13454,
-    "assigned_functions": 12568,
+    "assigned_functions": 12591,
     "ambiguous_functions": 243,
-    "unassigned_functions": 643
+    "unassigned_functions": 620
   }
 }

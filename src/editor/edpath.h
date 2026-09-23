@@ -28,6 +28,7 @@ extern "C" {
     void pathEditor_OnPathCheck(nuvec_s *point, EDAIPATHCHECK_s *result, EDAIPATH_s *path, f32 tolerance);
     void pathEditor_QuickOnPathCheck(nuvec_s *point, EDAIPATHCHECK_s *previous, EDAIPATHCHECK_s *result);
     void pathEditorSaveData(AIPATHSYS_s *system);
+    AIPATHSYS_s *pathEditorCreateData(VARIPTR *cursor, VARIPTR *end, void **scratch_cursor, void **scratch_end);
 }
 
 eduimenu_s *pathEditor_Process(nupad_s *pad);

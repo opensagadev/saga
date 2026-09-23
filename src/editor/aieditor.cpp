@@ -5,11 +5,20 @@
 #include "gameapi/ai/aisys/aisys.h"
 #include "gameapi/edtools/edui.h"
 #include "gameapi/edtools/edcam.h"
+#include "gameapi/edtools/edrender.h"
+#include "gameapi/edtools/edfile.h"
 #include "legoapi/items/base/apiobject.h"
+#include "legoapi/render/core/terrain.h"
+#include "legoapi/render/core/terrain_internal.h"
+#include "globals.h"
+#include "nu2api/nucore/nupad.h"
 #include "nu2api/nucore/nustring.h"
+#include "nu2api/numath/nufloat.h"
 #include "nu2api/nu3d/numtl.h"
+#include "nu2api/nu3d/nuqfnt.h"
 
 #include <string.h>
+#include <stdio.h>
 
 extern "C" {
     i32 aidata_version = 20;
@@ -20,23 +29,34 @@ extern "C" void aieditor_SetMode(i32 mode);
 extern "C" void AISYSRebuildFromEditorData(void);
 extern "C" i32 aieditor_Register(const char *, void (*)(), void (*)(), void (*)(), void (*)());
 extern "C" void aieditor_cbCancelMainMenu(eduimenu_s *, eduimenu_s *);
+extern "C" f32 AITerrShadow(NUVEC *, f32, f32, i32);
+extern "C" i32 AITerrShadowOnPlatform(void);
+extern "C" i32 near_clip_at_cursor;
+extern "C" void NuRndrRect2di(i32, i32, i32, i32, i32, NUMTL *);
+extern "C" void NuRndrLine2di(i32, i32, i32, i32, i32, NUMTL *);
+extern "C" void areaEditorSaveData(void);
+extern "C" void locatorEditorSaveData(AIPATHSYS_s *);
+extern "C" void creatureEditorSaveData(AIPATHSYS_s *);
+extern "C" void antinodeEditorSaveData(void);
+extern "C" void (*GameAISaveFn)(void);
+void NuSpecialFindByPlatformID(nugscn_s *, nuhspecial_s *, i32);
 
 struct nupad_s;
 void pathEditor_Enter();
 void pathEditor_Render(i32, i32, f32, f32);
-void routeEditor_Process(nupad_s *);
+eduimenu_s *routeEditor_Process(nupad_s *);
 void routeEditor_Render(i32, i32, f32, f32);
 void areaEditor_Enter();
-void areaEditor_Process(nupad_s *);
+eduimenu_s *areaEditor_Process(nupad_s *);
 void areaEditor_Render(i32, i32, f32, f32);
 void locatorEditor_Enter();
-void locatorEditor_Process(nupad_s *);
+eduimenu_s *locatorEditor_Process(nupad_s *);
 void locatorEditor_Render(i32, i32, f32, f32);
 void creatureEditor_Enter();
-void creatureEditor_Process(nupad_s *);
+eduimenu_s *creatureEditor_Process(nupad_s *);
 void creatureEditor_Render(i32, i32, f32, f32);
 void antinodeEditor_Enter();
-void antinodeEditor_Process(nupad_s *);
+eduimenu_s *antinodeEditor_Process(nupad_s *);
 void antinodeEditor_Render(i32, i32, f32, f32);
 
 extern "C" {
@@ -230,8 +250,82 @@ extern "C" {
         aieditor->flags &= ~u8(2);
     }
 
-    void aieditor_Proc(void) {
-        STUBBED();
+    bool aieditor_Proc(f32 menu_delta_time, nupad_s *pad, f32 frame_delta_time, u32 exit_buttons) {
+        aieditor->pad_buttons = pad->digital_buttons;
+        aieditor->pad_pressed = pad->digital_buttons_pressed;
+        if (aieditor->main_menu != nullptr) {
+            eduiMenuProcess(aieditor->main_menu, menu_delta_time, pad);
+            return false;
+        }
+        if (NuStrLen(aieditor->warning) != 0) {
+            aieditor->main_menu = aieditor_AddMessage((char *)"Warning", aieditor->warning);
+            NuStrCpy(aieditor->warning, "");
+            if (aieditor->main_menu != nullptr) {
+                return false;
+            }
+        }
+
+        aieditorsettings.elapsed_time = NuFmod(frame_delta_time + aieditorsettings.elapsed_time, 1.0f);
+        if ((pad->digital_buttons & 0x100) == 0 && (aieditor->flags & 4) == 0) {
+            edcamMoveEx(pad, frame_delta_time);
+        }
+
+        NUVEC previous_position = aieditor->cursor_position;
+        edcamGetPosAng(&aieditor->cursor_position, &aieditor->camera_pitch, &aieditor->camera_yaw);
+        NuVecSub(&aieditor->cursor_movement, &aieditor->cursor_position, &previous_position);
+        aieditor->flags &= ~u8(4);
+        memset(&aieditor->cursor_platform, 0, sizeof(aieditor->cursor_platform));
+        aieditor->camera_position = aieditor->cursor_position;
+        f32 terrain_height = AITerrShadow(&aieditor->cursor_position, 0.0f, 5.0f, -1);
+        i32 platform = AITerrShadowOnPlatform();
+        NuSpecialFindByPlatformID(static_cast<nugscn_s *>(aieditor->enter_context), &aieditor->cursor_platform,
+                                  platform);
+
+        if (aieditorsettings.snap_height_display) {
+            const f32 absent_height = 2000000.0f;
+            f32 closest = absent_height;
+            if (terrain_height != absent_height) {
+                aieditor->camera_position.y = terrain_height;
+                closest = __builtin_fabsf(aieditor->cursor_position.y - terrain_height);
+            }
+            if (EShadY != absent_height) {
+                f32 distance = __builtin_fabsf(aieditor->cursor_position.y - EShadY);
+                if (distance < closest) {
+                    aieditor->camera_position.y = EShadY;
+                    closest = distance;
+                }
+            }
+            if (ShadRoofY != absent_height && __builtin_fabsf(aieditor->cursor_position.y - ShadRoofY) < closest) {
+                aieditor->camera_position.y = ShadRoofY;
+            }
+            if (disable_cylinder_check == 0 && aieditor->current_path != nullptr &&
+                aieditor->current_path->current_node != nullptr &&
+                aieditor->current_path->current_node == aieditor->current_path->nearest_node &&
+                aieditor->camera_position.y < aieditor->cursor_position.y &&
+                terrain_height == aieditor->camera_position.y) {
+                NUVEC movement;
+                NuVecSub(&movement, &aieditor->camera_position, &aieditor->cursor_position);
+                union {
+                    u32 bits;
+                    f32 value;
+                } ray_scale = {0x233877aa};
+                i32 hit = NewRayCastScaleY(&aieditor->cursor_position, &movement,
+                                           aieditor->current_path->current_node->radius, ray_scale.value, 0);
+                if (hit != 0 && (hit & 0x10) == 0) {
+                    NuVecAdd(&aieditor->camera_position, &aieditor->cursor_position, &movement);
+                }
+            }
+            aieditor->camera_position.y += aieditorsettings.path_height_offset;
+            if (aieditorsettings.unknown_060_bit5) {
+                aieditor->cursor_position = aieditor->camera_position;
+            }
+        }
+        auto process = reinterpret_cast<eduimenu_s *(*)(nupad_s *)>(
+            aieditorsettings.modes[static_cast<i16>(aieditorsettings.current_mode)].callback_24);
+        if (process != nullptr) {
+            aieditor->main_menu = process(pad);
+        }
+        return aieditor->main_menu == nullptr && (pad->digital_buttons_pressed & exit_buttons) != 0;
     }
 
     i32 aieditor_Register(const char *name, void (*enter)(), void (*callback_24)(), void (*callback_28)(),
@@ -254,8 +348,55 @@ extern "C" {
         disable_cylinder_check = enabled == 0;
     }
 
-    void aieditor_Render(void) {
-        STUBBED();
+    void aieditor_Render(f32 x_scale, f32 y_scale) {
+        NUCAMERA *camera = edmainGetCamera();
+        if (near_clip_at_cursor == 0) {
+            camera->near_clip = 0.15f;
+        } else {
+            camera->near_clip =
+                NuVecDist(&aieditor->cursor_position, reinterpret_cast<NUVEC *>(&camera->mtx.m30), nullptr) - 5.0f;
+        }
+        edcamSet();
+
+        f32 cursor_radius = 0.5f;
+        i32 cursor_colour = -1;
+        if (aieditorsettings.snap_height_display) {
+            edbitsDrawCross(aieditor->cursor_position.x, aieditor->cursor_position.y, aieditor->cursor_position.z, 0.5f,
+                            -1, aieditorsettings.path_material);
+            cursor_radius = 0.25f;
+            cursor_colour = 0xff00ff00;
+        }
+        edbitsDrawCross(aieditor->camera_position.x, aieditor->camera_position.y, aieditor->camera_position.z,
+                        cursor_radius, cursor_colour, aieditorsettings.path_material);
+        NuRndrRect2di(0x1680, 0x9b0, 0x1180, 0x488, 0x80808080, aieditorsettings.overlay_material);
+        NuRndrRect2di(0x1670, 0x8f0, 0x11a0, 0xc0, 0x80000000, aieditorsettings.overlay_material);
+        NuRndrLine2di(0x1670, 0x9b0, 0x1670, 0xe40, 0x80000000, aieditorsettings.overlay_material);
+        NuRndrLine2di(0x2810, 0x9b0, 0x2810, 0xe40, 0x80000000, aieditorsettings.overlay_material);
+        NuRndrLine2di(0x1670, 0xe40, 0x2810, 0xe40, 0x80000000, aieditorsettings.overlay_material);
+
+        NuQFntPushPrintMode(2);
+        NuQFntPushCoordinateSystem(NUQFNT_CSMODE_PS2);
+        NuQFntSet(system_qfont);
+        NuQFntSetColour(system_qfont, 0x80808080);
+        NuQFntSetScale(system_qfont, x_scale, y_scale);
+        auto render = reinterpret_cast<void (*)(i32, i32, f32, f32)>(
+            aieditorsettings.modes[static_cast<i16>(aieditorsettings.current_mode)].callback_28);
+        if (render != nullptr) {
+            render(0x168, 0x136, x_scale, y_scale);
+        }
+        NuQFntSet(system_qfont);
+        NuQFntSetColour(system_qfont, 0x80000000);
+        NuQFntSetScale(system_qfont, x_scale, y_scale);
+        NuQFntPrintEx(system_qfont, 0x1720, 0xde8, 0x10, "%5.2f", static_cast<f64>(aieditor->camera_position.x));
+        NuQFntPrintEx(system_qfont, 0x1b80, 0xde8, 0x10, "%5.2f", static_cast<f64>(aieditor->camera_position.y));
+        NuQFntPrintEx(system_qfont, 0x1fe0, 0xde8, 0x10, "%5.2f", static_cast<f64>(aieditor->camera_position.z));
+        if (aieditor->main_menu != nullptr) {
+            NuQFntSetColour(system_qfont, 0x80000000);
+            NuQFntSetScale(system_qfont, x_scale, y_scale);
+            eduiMenuRender(aieditor->main_menu);
+        }
+        NuQFntPopPrintMode();
+        NuQFntPopCoordinateSystem();
     }
 
     void aieditor_Reset(void) {
@@ -266,8 +407,56 @@ extern "C" {
         aieditor_SetCurrentScript((char *)"default", 0);
     }
 
-    void aieditor_Save(void) {
-        STUBBED();
+    i32 aieditor_Save(void) {
+        VARIPTR cursor;
+        VARIPTR end;
+        cursor.u8_ptr = aieditor->save_scratch;
+        end.char_ptr = aieditor->warning;
+        memset(cursor.u8_ptr, 0, sizeof(aieditor->save_scratch));
+        AIPATHSYS_s *paths = pathEditorCreateData(&cursor, &end, &aieditorsettings.external_display_a,
+                                                  &aieditorsettings.external_display_b);
+        if (paths == nullptr) {
+            return 1;
+        }
+        if (aieditor->enter_extra_2 == nullptr) {
+            return 1;
+        }
+
+        char filename[128];
+        sprintf(filename, "%sLevels\\%s\\%s\\%s.ai2", AiLevelPathName, static_cast<char *>(aieditor->enter_extra_1),
+                static_cast<char *>(aieditor->enter_extra_3), static_cast<char *>(aieditor->enter_extra_2));
+        if (NuFileExists(filename)) {
+            NUFILE_INFO info;
+            if (NuFileGetInfo(filename, &info)) {
+                char *basename = filename;
+                for (char *separator = NuStrIStr(basename, (char *)"\\"); separator != nullptr;
+                     separator = NuStrIStr(basename, (char *)"\\")) {
+                    basename = separator + 1;
+                }
+                char backup[128];
+                sprintf(backup, "ai_backups\\%s.%d_%d_%d_%d_%d_%d", basename, info.year, info.month, info.day,
+                        info.hour, info.minute, info.second);
+                NuFileCopy(backup, filename);
+            }
+            char backup[128];
+            sprintf(backup, "%s.bak", filename);
+            NuFileCopy(backup, filename);
+        }
+        EdFileSetMedia(1);
+        if (!EdFileOpen(filename, NUFILE_WRITE)) {
+            return 0;
+        }
+        EdFileWriteInt(aidata_version);
+        pathEditorSaveData(paths);
+        areaEditorSaveData();
+        locatorEditorSaveData(paths);
+        creatureEditorSaveData(paths);
+        antinodeEditorSaveData();
+        if (GameAISaveFn != nullptr) {
+            reinterpret_cast<void (*)(AIPATHSYS_s *)>(GameAISaveFn)(paths);
+        }
+        EdFileClose();
+        return 1;
     }
 
     void aieditor_SetCurrentScript(char *name, const AIEditorScriptSelection *selection) {
@@ -329,8 +518,19 @@ extern "C" {
         aieditor_ClearMainMenu();
     }
 
-    void aieditor_cbSave(eduimenu_s *, eduiitem_s *, u32) {
-        STUBBED();
+    void aieditor_cbSave(eduimenu_s *parent, eduiitem_s *, u32) {
+        if (aieditor_Save() == 0) {
+            eduimenu_s *menu = eduiMenuCreate(0x78, 0x5a, 0x1b8, 0xfa, ed_fnt, nullptr, (char *)"AI Save FAILED");
+            if (menu != nullptr) {
+                char message[128];
+                sprintf(message, "Make sure there is a folder called \"%s\" in your level directory",
+                        static_cast<char *>(aieditor->enter_extra_3));
+                eduiMenuAddItem(menu, eduiItemSelCreate(1, &attr, 0, 0, aieditor_cbCancelSaveMenu, message));
+                eduiMenuAttach(parent, menu);
+            }
+        } else {
+            aieditor_ClearMainMenu();
+        }
     }
 
     void aieditor_cbShowCreaturesSetToggle(eduimenu_s *, eduiitem_s *item, u32) {

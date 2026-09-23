@@ -218,10 +218,32 @@ struct EdClassInterface {
     EdClassInterfaceVTable *vtable;
     EdClass *object_class;
 
+    void ClearLevel(i32);
+    void DefunctObject(void *);
+    void ReviveObject(void *);
+    void SetObjectGuid(void *, i32);
+    i32 GetObjectGuid(void *);
+    i32 GetConstructorData(void *, void *, i32);
+    void Construct(void *, void *);
+    void Process(void *, EdInputContext &);
+    void Render(void *, i32);
+    void EnterEditor();
+    void ExitEditor();
+    void EnterLevel();
+    void ExitLevel();
+    void UpdateLists(MemoryBuffer *, MemoryBuffer *);
+    void PreLoadInitialisation(MemoryBuffer *, MemoryBuffer *);
+    void PostLoadInitialisation(MemoryBuffer *, MemoryBuffer *);
+    void PreSaveInitialisation();
+    void PostSaveInitialisation();
+    void SerialiseObject(EdStream &, void *);
+    void AddMenuItems(eduimenu_s *);
+    void Import();
     f32 DistanceToObject(VuVec &, VuVec &, void *, EdRef **);
     f32 DistanceToObject(VuVec &, void *, EdRef **);
     void *GetNextObject(void *, i32 (*)(void *));
 };
+DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(EdClassInterface) == 0x8, "EdClassInterface size");
 struct EdClassObjectNameControl {
     void AddMenuItem(eduimenu_s *, EdRef *, void *);
     EdClassObjectNameControl();
@@ -360,6 +382,10 @@ struct EdStream {
     EdStream(MemoryBuffer *, MemoryBuffer *);
 };
 struct EdInputStream : EdStream {
+    EdInputStream() : EdStream() {
+    }
+    EdInputStream(MemoryBuffer *buffer, MemoryBuffer *secondary) : EdStream(buffer, secondary) {
+    }
     virtual ~EdInputStream() {
     }
     virtual i32 SerialiseString(char **);
@@ -374,6 +400,20 @@ struct EdOutputStream : EdStream {
     virtual i32 SerialiseString(char *, i32);
 };
 struct EdFileInputStream : EdInputStream {
+    EdFileInputStream() : EdInputStream() {
+        mode = 1;
+        block_count = 0;
+        name_length = 0;
+        pending = 0;
+        file = 0;
+    }
+    EdFileInputStream(MemoryBuffer *buffer, MemoryBuffer *secondary) : EdInputStream(buffer, secondary) {
+        mode = 1;
+        block_count = 0;
+        name_length = 0;
+        pending = 0;
+        file = 0;
+    }
     struct Block {
         i32 position;
         i32 size;
@@ -399,6 +439,12 @@ struct EdFileOutputStream : EdOutputStream {
     i32 block_positions[8];
     i32 block_count;
     i32 file;
+
+    EdFileOutputStream() {
+        mode = 2;
+        block_count = 0;
+        file = 0;
+    }
 
     virtual ~EdFileOutputStream() {
     }
@@ -707,6 +753,7 @@ struct KnotHelper {
     EdRef *in_tangent_ref;
     EdRef *out_tangent_ref;
 
+    void Flush();
     void *CreateObject(void *, i32, i32);
     void DestroyObject(void *, i32);
     f32 DistanceToObject(VuVec &, VuVec &, void *, EdRef **);
@@ -723,6 +770,7 @@ struct SplineHelper {
     i32 object_count;
     i32 auto_generate_points;
 
+    void Flush();
     void AddMenuItems(eduimenu_s *);
     void ClearLevel(i32);
     void *CreateObject(void *, i32, i32);
@@ -819,6 +867,7 @@ DECOMP_ASSERT(sizeof(SplineObject) == 0x58, "SplineObject size");
 DECOMP_ASSERT(offsetof(SplineObject, points) == 0x38, "SplineObject points offset");
 DECOMP_ASSERT(offsetof(SplineObject, step) == 0x48, "SplineObject step offset");
 DECOMP_ASSERT(offsetof(SplineHelper, auto_generate_points) == 0x14, "SplineHelper automatic generation offset");
+DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(SplineHelper) == 0x18, "SplineHelper size");
 DECOMP_ASSERT(sizeof(KnotHelper) == 0x14, "KnotHelper size");
 extern SplineHelper theSplineHelper;
 extern KnotHelper theKnotHelper;

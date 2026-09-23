@@ -209,11 +209,12 @@ struct edui_file_pick_s : eduiitem_s {
     i32 (*interact)(edui_interact_s *);
     EdUiItemCallback changed;
     char *format;
-    u8 unknown_54[4];
+    u16 reserved_54;
+    u16 reopen_directory;
     char name[0x40];
     char directory[0x100];
     char filename[0x108];
-    void *directory_list;
+    i32 (*compare_entries)(const void *, const void *);
 };
 
 struct edui_prop_s : eduiitem_s {
@@ -423,6 +424,7 @@ extern "C" {
     void eduiSetGlobalSliderAccel(f32 acceleration);
     i32 eduiGradPickRead(eduiitem_s *item, edui_gradient_stage_s *stages, i32 count);
     void eduiItemTextPickSetFmt(edui_textpicker_s *item, char *format);
+    eduiitem_s *eduiItemFilePickCreate(usize data, const void *colours, EdUiItemCallback callback, char *text);
     void eduiItemFilePickSetFmt(edui_file_pick_s *item, char *format);
     void eduiItemGraphAddOnionSkin(edui_graph_s *item, nugraph_s *graph);
     void eduiItemGraphSetCursor(edui_graph_s *item, f32 x, f32 y);

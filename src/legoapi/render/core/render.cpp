@@ -900,6 +900,7 @@ void DrawBox_Now(_vuv_s *, _vuv_s *, i32, i32) {
 
 extern "C" {
     f32 aiEditor_DrawYOffset = 0.25f;
+    f32 aiEditor_LocatorWidth = 0.25f;
     void AiRndrLine3d(NURND_VERTEX3D *, NUMTL *, NUMTX *);
 }
 
