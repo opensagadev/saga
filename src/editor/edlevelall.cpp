@@ -509,10 +509,10 @@ void ClassEditor::WriteBlock(i32) {
 }
 
 void ClassEditor::DestroySelectedObjects() {
-    f32 x, y;
-    eduiGetCursorCoords(&x, &y);
     char title[136];
     NuStrCpy(title, "Destroy Selected Objects");
+    f32 x, y;
+    eduiGetCursorCoords(&x, &y);
     eduimenu_s *confirm_menu =
         eduiMenuCreate(static_cast<i32>(x * 640.0f), static_cast<i32>(y * 448.0f), 300, 50,
                        reinterpret_cast<void *>(static_cast<usize>(EdLevelFnt)), cbDestroyMenu, title);

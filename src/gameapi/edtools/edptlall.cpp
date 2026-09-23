@@ -703,11 +703,13 @@ static void edptlcbClipboardMenu(eduimenu_s *parent, eduiitem_s *, u32) {
     if (ptlclipmenu == NULL)
         return;
 
-    char *list_name = "General List";
-    if (edpp_effect_list == 1)
-        list_name = "Level List";
+    char list_name[32];
+    if (edpp_effect_list == 0)
+        strcpy(list_name, "General List");
+    else if (edpp_effect_list == 1)
+        strcpy(list_name, "Level List");
     else if (edpp_effect_list == 5)
-        list_name = "Char List";
+        strcpy(list_name, "Char List");
     char label[60];
     if (edptl_clipboard_entry == -1) {
         sprintf(label, "Cut %s from %s", debtab[edpp_create_type]->name, list_name);

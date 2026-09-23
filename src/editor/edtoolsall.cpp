@@ -191,8 +191,7 @@ void creatureEditor_Render(i32 x, i32 y, float xscale, float yscale) {
         return;
     i32 count = NuLinkedListCheck(&aieditor->creatures);
     i32 text_x = (x + 10) * 16;
-    i32 text_y = y * 8;
-    NuQFntPrintEx(system_qfont, text_x, text_y - 40, 16, "Creature Editor  (%d placed)", count);
+    NuQFntPrintEx(system_qfont, text_x, y * 8 - 40, 16, "Creature Editor  (%d placed)", count);
     NuQFntSetColour(system_qfont, 0x80000000);
     NuQFntSetScale(system_qfont, xscale, yscale);
 
@@ -204,10 +203,10 @@ void creatureEditor_Render(i32 x, i32 y, float xscale, float yscale) {
         f32 distance =
             NuVecXZDist(reinterpret_cast<nuvec_s *>(display + 0x28), &aieditor->camera_position, &displacement);
         if (*reinterpret_cast<u32 *>(display + 0x68) & 0x20) {
-            NuQFntPrintEx(system_qfont, text_x, text_y + 120, 16, "\"%s\", xzrng=%.2f (NotLowEnd)", display + 8,
+            NuQFntPrintEx(system_qfont, text_x, y * 8 + 120, 16, "\"%s\", xzrng=%.2f (NotLowEnd)", display + 8,
                           distance);
         } else {
-            NuQFntPrintEx(system_qfont, text_x, text_y + 120, 16, "\"%s\", xzrng=%.2f", display + 8, distance);
+            NuQFntPrintEx(system_qfont, text_x, y * 8 + 120, 16, "\"%s\", xzrng=%.2f", display + 8, distance);
         }
         u8 set = display[0x5a];
         char set_name[32];
@@ -217,32 +216,32 @@ void creatureEditor_Render(i32 x, i32 y, float xscale, float yscale) {
             strcpy(set_name, "Set=NONE");
         }
         if (display[0x18] != 0) {
-            NuQFntPrintEx(system_qfont, text_x, text_y + 240, 16, "Script = \"%s\", %s", display + 0x18, set_name);
+            NuQFntPrintEx(system_qfont, text_x, y * 8 + 240, 16, "Script = \"%s\", %s", display + 0x18, set_name);
         } else {
-            NuQFntPrintEx(system_qfont, text_x, text_y + 240, 16, "Script = NONE, %s", set_name);
+            NuQFntPrintEx(system_qfont, text_x, y * 8 + 240, 16, "Script = NONE, %s", set_name);
         }
         EDLOCATOR_s *area = *reinterpret_cast<EDLOCATOR_s **>(display + 0x80);
         EDLOCATOR_s *locator = *reinterpret_cast<EDLOCATOR_s **>(display + 0x84);
         if (area != nullptr)
-            NuQFntPrintEx(system_qfont, text_x, text_y + 360, 16, "Area = \"%s\"", area->name);
+            NuQFntPrintEx(system_qfont, text_x, y * 8 + 360, 16, "Area = \"%s\"", area->name);
         if (locator != nullptr)
-            NuQFntPrintEx(system_qfont, text_x, text_y + 480, 16, "Locator = \"%s\"", locator->name);
+            NuQFntPrintEx(system_qfont, text_x, y * 8 + 480, 16, "Locator = \"%s\"", locator->name);
     }
-    NuQFntPrintEx(system_qfont, text_x, text_y + 600, 16, "SQR - Options");
+    NuQFntPrintEx(system_qfont, text_x, y * 8 + 600, 16, "SQR - Options");
     if (nearest == nullptr) {
-        NuQFntPrintEx(system_qfont, text_x, text_y + 720, 16, "X - Create creature");
+        NuQFntPrintEx(system_qfont, text_x, y * 8 + 720, 16, "X - Create creature");
         if (selected != nullptr)
-            NuQFntPrintEx(system_qfont, text_x, text_y + 840, 16, "TRI - Deselect selected");
-        NuQFntPrintEx(system_qfont, text_x, text_y + 960, 16, "LLEFT/LRight - Rotate");
+            NuQFntPrintEx(system_qfont, text_x, y * 8 + 840, 16, "TRI - Deselect selected");
+        NuQFntPrintEx(system_qfont, text_x, y * 8 + 960, 16, "LLEFT/LRight - Rotate");
     } else if (nearest != selected) {
-        NuQFntPrintEx(system_qfont, text_x, text_y + 720, 16, "X - Select creature");
+        NuQFntPrintEx(system_qfont, text_x, y * 8 + 720, 16, "X - Select creature");
     } else {
-        NuQFntPrintEx(system_qfont, text_x, text_y + 720, 16, "X - Move selected");
-        NuQFntPrintEx(system_qfont, text_x, text_y + 840, 16, "TRI - Delete selected");
-        NuQFntPrintEx(system_qfont, text_x, text_y + 960, 16, "LLEFT/LRight - Rotate");
+        NuQFntPrintEx(system_qfont, text_x, y * 8 + 720, 16, "X - Move selected");
+        NuQFntPrintEx(system_qfont, text_x, y * 8 + 840, 16, "TRI - Delete selected");
+        NuQFntPrintEx(system_qfont, text_x, y * 8 + 960, 16, "LLEFT/LRight - Rotate");
     }
     if (selected != nullptr && aieditor->nearest_locator != nullptr)
-        NuQFntPrintEx(system_qfont, text_x, text_y + 720, 16, "O - Set locator.");
+        NuQFntPrintEx(system_qfont, text_x, y * 8 + 720, 16, "O - Set locator.");
 
     for (NULISTLNK *link = NuLinkedListGetHead(&aieditor->creatures); link != nullptr;
          link = NuLinkedListGetNext(&aieditor->creatures, link)) {

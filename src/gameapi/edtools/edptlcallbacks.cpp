@@ -783,21 +783,31 @@ static void cbPtlCopySize(eduimenu_s *, eduiitem_s *item, u32) {
     }
     while (gradient->first_stage)
         eduiGradStageDelete(gradient, gradient->first_stage);
-    for (i32 i = 0; i < 8; ++i) {
-        if (item->data == 1) {
-            f32 grey = (effect->height_keys[i].value - effect->min_size) / (effect->max_size - effect->min_size);
-            eduiGradStageAddRGB(static_cast<edui_gradient_pick_s *>(grad_size_h_item), effect->height_keys[i].time,
-                                grey, grey, grey);
-            if (effect->height_keys[i].time == 1.0f)
-                break;
-        } else {
-            f32 grey = (effect->width_keys[i].value - effect->min_size) / (effect->max_size - effect->min_size);
-            eduiGradStageAddRGB(static_cast<edui_gradient_pick_s *>(grad_size_w_item), effect->width_keys[i].time, grey,
-                                grey, grey);
-            if (effect->width_keys[i].time == 1.0f)
-                break;
-        }
+    // Keep the eight stages explicit: the original callback expands each stage separately.
+#define COPY_SIZE_STAGE(i)                                                                                             \
+    if (item->data == 1) {                                                                                             \
+        f32 grey = (effect->height_keys[i].value - effect->min_size) / (effect->max_size - effect->min_size);          \
+        eduiGradStageAddRGB(static_cast<edui_gradient_pick_s *>(grad_size_h_item), effect->height_keys[i].time, grey,  \
+                            grey, grey);                                                                               \
+        if (effect->height_keys[i].time == 1.0f)                                                                       \
+            goto copy_size_done;                                                                                       \
+    } else {                                                                                                           \
+        f32 grey = (effect->width_keys[i].value - effect->min_size) / (effect->max_size - effect->min_size);           \
+        eduiGradStageAddRGB(static_cast<edui_gradient_pick_s *>(grad_size_w_item), effect->width_keys[i].time, grey,   \
+                            grey, grey);                                                                               \
+        if (effect->width_keys[i].time == 1.0f)                                                                        \
+            goto copy_size_done;                                                                                       \
     }
+    COPY_SIZE_STAGE(0)
+    COPY_SIZE_STAGE(1)
+    COPY_SIZE_STAGE(2)
+    COPY_SIZE_STAGE(3)
+    COPY_SIZE_STAGE(4)
+    COPY_SIZE_STAGE(5)
+    COPY_SIZE_STAGE(6)
+    COPY_SIZE_STAGE(7)
+#undef COPY_SIZE_STAGE
+copy_size_done:
     GenericDebinfoDmaTypeUpdate(effect);
 }
 
@@ -1302,11 +1312,11 @@ static void cbPtlCopyEffect(eduimenu_s *menu, eduiitem_s *, u32) {
             ++edpp_types_used;
             edpp_create_type = index;
         }
-        eduimenu_s *child = menu->child;
-        if (child != NULL)
+        eduimenu_s *parent = menu->parent;
+        if (parent != NULL)
             eduiMenuDetach(menu);
         if (menu->callback != NULL)
-            menu->callback(menu, child);
+            menu->callback(menu, parent);
     }
 }
 

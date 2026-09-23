@@ -1403,9 +1403,7 @@ extern "C" {
         VARIPTR scratch_limit;
         scratch_limit.void_ptr = *scratch_end;
         distance_tables = (f32 ***)AISysBufferAlloc(&scratch, &scratch_limit, path_count * sizeof(f32 **));
-        if (distance_tables != nullptr) {
-            memset(distance_tables, 0, path_count * sizeof(f32 **));
-        }
+        memset(distance_tables, 0, path_count * sizeof(f32 **));
 
         i32 shared_count = 0;
         for (EDAISHAREDPATHNODE_s *shared = (EDAISHAREDPATHNODE_s *)NuLinkedListGetHead(&aieditor->shared_path_nodes);
@@ -1414,17 +1412,9 @@ extern "C" {
             shared->runtime_index = shared_count++;
         }
         system->special_route_count = shared_count;
-        system->paths = (AIPATH_s **)AISysBufferAlloc(cursor, end, path_count * sizeof(AIPATH_s *));
-        if (system->paths == nullptr) {
-            return nullptr;
-        }
-        memset(system->paths, 0, path_count * sizeof(AIPATH_s *));
         if (shared_count != 0) {
             system->special_routes = (AIPATHSPECIALROUTE_s *)AISysBufferAlloc(
                 &scratch, &scratch_limit, shared_count * sizeof(AIPATHSPECIALROUTE_s));
-            if (system->special_routes == nullptr) {
-                return nullptr;
-            }
             memset(system->special_routes, 0, shared_count * sizeof(AIPATHSPECIALROUTE_s));
             for (EDAISHAREDPATHNODE_s *shared =
                      (EDAISHAREDPATHNODE_s *)NuLinkedListGetHead(&aieditor->shared_path_nodes);
@@ -1433,12 +1423,14 @@ extern "C" {
                 AIPATHSPECIALROUTE_s *route = &system->special_routes[shared->runtime_index];
                 i32 participants = shared->reference_count;
                 route->paths = (AIPATH_s **)AISysBufferAlloc(&scratch, &scratch_limit, participants * sizeof(AIPATH_s));
-                if (route->paths == nullptr) {
-                    return nullptr;
-                }
                 memset(route->paths, 0, participants * sizeof(AIPATH_s));
             }
         }
+        system->paths = (AIPATH_s **)AISysBufferAlloc(cursor, end, path_count * sizeof(AIPATH_s *));
+        if (system->paths == nullptr) {
+            return nullptr;
+        }
+        memset(system->paths, 0, path_count * sizeof(AIPATH_s *));
         i32 path_index = 0;
         for (EDAIPATH_s *editor_path = (EDAIPATH_s *)NuLinkedListGetHead(&aieditor->paths); editor_path != nullptr;
              editor_path = (EDAIPATH_s *)NuLinkedListGetNext(&aieditor->paths, &editor_path->link), ++path_index) {

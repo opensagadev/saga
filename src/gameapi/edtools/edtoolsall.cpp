@@ -3843,14 +3843,17 @@ void EdManRotate::Render(ClassObjectList &selected) {
         DrawRotator(average);
 }
 
-i32 EdManRotate::RotateItem(EdInputContext &, ClassObjectList &objects, i32 angle, i32 axis) {
+// The original realigns the incoming stack for its matrix and vector locals.
+__attribute__((force_align_arg_pointer)) i32 EdManRotate::RotateItem(EdInputContext &, ClassObjectList &objects,
+                                                                     i32 angle, i32 axis) {
+    ClassObjectListEntry *first = objects.first;
     VuVec average;
     objects.GetAveragePosition(average);
-    if (angle == 0 || objects.first == NULL)
+    if (angle == 0 || first == NULL)
         return axis;
     i32 sine_index = (angle >> 1) & 0x7fff;
     i32 cosine_index = ((angle + 0x4000) >> 1) & 0x7fff;
-    for (ClassObjectListEntry *entry = objects.first; entry != NULL; entry = entry->next) {
+    for (ClassObjectListEntry *entry = first; entry != NULL; entry = entry->next) {
         NUMTX matrix;
         NuMtxSetIdentity(&matrix);
         EdMember member;
