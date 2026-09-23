@@ -1188,22 +1188,31 @@ static void edpartFileSaveEffects(eduimenu_s *parent, eduiitem_s *, u32) {
     sprintf(backup, "%s\\%s.%s.bak", level_directory, level_name, level_extension);
     bool level_backup = edbits_override_backups || EdFileBackup(path, backup);
     bool level_saved = edpartSaveEffects(path, 1) != 0;
-    const char *message;
-    if (!general_saved && !level_saved)
-        message = "Both Saves Failed";
-    else if (!general_saved)
-        message = "General Save Failed";
-    else if (!level_saved)
-        message = "Level Save Failed";
-    else if (!general_backup && !level_backup)
-        message = "Saved OK - Both Backups Failed";
-    else if (!general_backup)
-        message = "Saved OK - General Backup Failed";
-    else if (!level_backup)
-        message = "Saved OK - Level Backup Failed";
-    else
-        message = "Saved OK";
-    edpartSaveMessage(parent, message, general_saved && level_saved && general_backup && level_backup);
+    if (!general_saved && !level_saved) {
+        edpartSaveMessage(parent, "Both Saves Failed", false);
+        return;
+    }
+    if (!general_saved) {
+        edpartSaveMessage(parent, "General Save Failed", false);
+        return;
+    }
+    if (!level_saved) {
+        edpartSaveMessage(parent, "Level Save Failed", false);
+        return;
+    }
+    if (!general_backup && !level_backup) {
+        edpartSaveMessage(parent, "Saved OK - Both Backups Failed", false);
+        return;
+    }
+    if (!general_backup) {
+        edpartSaveMessage(parent, "Saved OK - General Backup Failed", false);
+        return;
+    }
+    if (!level_backup) {
+        edpartSaveMessage(parent, "Saved OK - Level Backup Failed", false);
+        return;
+    }
+    edpartSaveMessage(parent, "Saved OK", true);
 }
 static void edpartGeneralTypeMenu(eduimenu_s *menu, eduiitem_s *, u32) {
     edpart_generaltype_menu =

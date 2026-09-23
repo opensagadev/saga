@@ -1995,7 +1995,7 @@ void pathEditor_Enter(void) {
         for (i32 path_index = 0; path_index < runtime_system->path_count; ++path_index) {
             AIPATH_s *runtime_path = runtime_system->paths[path_index];
             EDAIPATH_s *path = (EDAIPATH_s *)NuLinkedListGetHead(&aieditor->free_paths);
-            if (runtime_path == nullptr || path == nullptr) {
+            if (path == nullptr) {
                 break;
             }
             NuLinkedListRemove(&aieditor->free_paths, &path->link);
@@ -2014,16 +2014,16 @@ void pathEditor_Enter(void) {
 
             for (i32 node_index = 0; node_index < runtime_path->node_count; ++node_index) {
                 AIPATHNODE_s *source = &runtime_path->nodes[node_index];
+                if (path->node_count >= 254) {
+                    break;
+                }
                 EDAIPATHNODE_s *node = (EDAIPATHNODE_s *)NuLinkedListGetHead(&aieditor->free_path_nodes);
-                if (node == nullptr || path->node_count >= 254) {
+                if (node == nullptr) {
                     break;
                 }
                 NuLinkedListRemove(&aieditor->free_path_nodes, &node->link);
                 NuLinkedListAppend(&path->nodes, &node->link);
-                node->index = node_index;
                 ++path->node_count;
-                if (source->name != nullptr)
-                    strcpy(node->name, source->name);
                 node->position = source->position;
                 node->radius = source->radius;
                 node->lower_height = source->min_height - source->position.y;
@@ -2031,6 +2031,9 @@ void pathEditor_Enter(void) {
                 node->flags = source->runtime_flags;
                 node->special = source->special_handle;
                 node->special_position = source->special_position;
+                node->index = node_index;
+                if (source->name != nullptr)
+                    strcpy(node->name, source->name);
                 if (source->special_route_index < runtime_path->special_route_count) {
                     AIPATHNODELINK_s *link = &runtime_path->special_routes[source->special_route_index];
                     i32 shared_index = link->special_route_index;

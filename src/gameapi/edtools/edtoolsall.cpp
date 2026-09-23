@@ -6179,13 +6179,19 @@ void EdControl::Process(EdInputContext &) {
 void EdControl::Render() {
 }
 
-i32 EdControl::SelectSubObject() {
+// The original realigns the stack for its local ClassObject.
+__attribute__((force_align_arg_pointer)) i32 EdControl::SelectSubObject() {
+    ClassObject selection = {};
+    void *target = object;
     for (ClassObjectListEntry *entry = theClassEditor.selected_objects.first; entry; entry = entry->next) {
-        if (entry->object != object)
+        if (entry->object != target)
             continue;
-        ClassObject selection = {entry->ed_class, entry->object, reference};
+        selection.ed_class = entry->ed_class;
+        selection.object = entry->object;
+        selection.reference = entry->reference;
         if (selection.object != NULL) {
             i32 mode = static_cast<i32>(Input->GetHold(16)) >= 1 ? 1 : 2;
+            selection.reference = reference;
             theClassEditor.SelectObject(selection, mode);
             if (!theClassEditor.selected_objects.IsInList(selection.object, NULL))
                 theClassEditor.SelectObject(selection, 1);

@@ -562,7 +562,8 @@ void ClassEditor::DrawObjectSphere(ClassObject &selected, i32 colour) {
             radius = 1.0f;
         }
     }
-    VuMtx transform;
+    // The original places this matrix on a 16-byte-aligned stack slot.
+    VuMtx transform __attribute__((aligned(16)));
     if ((selected.reference == NULL ||
          selected.reference->GetAttributeData(selected.object, 0x10, EdType_VuMtx, &transform, 0) == 0) &&
         (selected.ed_class->FindMember(&member, selected.object, 0x10, 1) == 0 ||

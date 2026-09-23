@@ -159,11 +159,14 @@ static void edbricbPostInstanceMenu(eduimenu_s *parent, eduiitem_s *, u32) {
     for (i32 i = 0; i < count; ++i) {
         nuhspecial_s special;
         NuGScnGetSpecial(&special, edbits_base_scene, i);
-        eduiMenuAddItem(edbri_postinstance_menu,
-                        eduiItemCheckCreate(i, edblack, edbri_post_instance_type == i, 1, edbricbSetPostInstanceType,
-                                            NuSpecialGetName(&special)));
-        if (edbri_post_instance_type == i)
+        if (edbri_post_instance_type == i) {
+            eduiMenuAddItem(edbri_postinstance_menu, eduiItemCheckCreate(i, edblack, 1, 1, edbricbSetPostInstanceType,
+                                                                         NuSpecialGetName(&special)));
             edbri_postinstance_menu->selected = edui_last_item;
+        } else {
+            eduiMenuAddItem(edbri_postinstance_menu, eduiItemCheckCreate(i, edblack, 0, 1, edbricbSetPostInstanceType,
+                                                                         NuSpecialGetName(&special)));
+        }
     }
     edbriAttachMenu(parent, edbri_postinstance_menu);
 }
@@ -178,11 +181,14 @@ static void edbricbPlankInstanceMenu(eduimenu_s *parent, eduiitem_s *, u32) {
     for (i32 i = 0; i < count; ++i) {
         nuhspecial_s special;
         NuGScnGetSpecial(&special, edbits_base_scene, i);
-        eduiMenuAddItem(edbri_plankinstance_menu,
-                        eduiItemCheckCreate(i, edblack, edbri_plank_instance_type == i, 1, edbricbSetPlankInstanceType,
-                                            NuSpecialGetName(&special)));
-        if (edbri_plank_instance_type == i)
+        if (edbri_plank_instance_type == i) {
+            eduiMenuAddItem(edbri_plankinstance_menu, eduiItemCheckCreate(i, edblack, 1, 1, edbricbSetPlankInstanceType,
+                                                                          NuSpecialGetName(&special)));
             edbri_plankinstance_menu->selected = edui_last_item;
+        } else {
+            eduiMenuAddItem(edbri_plankinstance_menu, eduiItemCheckCreate(i, edblack, 0, 1, edbricbSetPlankInstanceType,
+                                                                          NuSpecialGetName(&special)));
+        }
     }
     edbriAttachMenu(parent, edbri_plankinstance_menu);
 }
