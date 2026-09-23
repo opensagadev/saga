@@ -244,8 +244,15 @@ void *KnotHelper::CreateObject(void *, i32, i32) {
             break;
     }
     if (spline == NULL) {
-        spline = static_cast<SplineObject *>(theSplineHelper.CreateObject(NULL, 0, 0));
+        spline = new (theMemoryManager.AllocPool(sizeof(SplineObject), 1)) SplineObject();
         theClassEditor.MakeUniqueName("NewSpline", spline->name, sizeof(spline->name));
+        spline->previous = theSplineHelper.last_object;
+        if (theSplineHelper.last_object != NULL)
+            theSplineHelper.last_object->next = spline;
+        else
+            theSplineHelper.first_object = spline;
+        theSplineHelper.last_object = spline;
+        ++theSplineHelper.object_count;
     }
     SplineKnot *knot = static_cast<SplineKnot *>(theMemoryManager.AllocPool(sizeof(SplineKnot), 1));
     knot->spline = spline;
@@ -288,8 +295,20 @@ void KnotHelper::DestroyObject(void *object, i32) {
     knot->previous = NULL;
     --spline->knots.count;
     theMemoryManager.FreePool(knot, sizeof(SplineKnot));
-    if (spline->knots.count == 0)
-        theSplineHelper.DestroyObject(spline, 0);
+    if (spline->knots.count == 0) {
+        if (spline->previous != NULL)
+            spline->previous->next = spline->next;
+        else
+            theSplineHelper.first_object = spline->next;
+        if (spline->next != NULL)
+            spline->next->previous = spline->previous;
+        else
+            theSplineHelper.last_object = spline->previous;
+        spline->next = NULL;
+        spline->previous = NULL;
+        --theSplineHelper.object_count;
+        delete spline;
+    }
 }
 
 void *KnotHelper::GetNextObject(void *current) {

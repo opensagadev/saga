@@ -19,9 +19,11 @@
 #include "nu2api/nu3d/nugscn.h"
 #include "nu2api/nucore/NuDynamicLight.h"
 #include "nu2api/numath/nutrig.h"
+#include "nu2api/numath/nurand.h"
 #include "nu2api/nufile/nufile.h"
 #include <string.h>
 #include <new>
+#include <float.h>
 
 #include <stdio.h>
 
@@ -158,6 +160,14 @@ void CursorTool::Initialise(variptr_u &, variptr_u &, i32) {
 i32 CursorTool::Process(EdInputContext &input) {
     VuVec &origin = *reinterpret_cast<VuVec *>(input.reserved_00 + 0x20);
     VuVec &direction = *reinterpret_cast<VuVec *>(input.reserved_00 + 0x30);
+    const bool extend_selection = input.GetHold(16) != 0.0f;
+    VuVec end = origin;
+    end.x += direction.x;
+    end.y += direction.y;
+    end.z += direction.z;
+    EdDrawBegin(0);
+    EdDrawLineSegment(origin, end, NuRandInt());
+    EdDrawEnd();
     if (theLevelEditor.field_0x30 == 0)
         return 0;
 
@@ -170,32 +180,33 @@ i32 CursorTool::Process(EdInputContext &input) {
     if (theClassEditor.FindNearestObject(origin, direction, hover, 1)) {
         theClassEditor.current_object = hover;
         if (input.GetPress(3) != 0.0f) {
-            ClassObject selected = {NULL, NULL, NULL};
-            theClassEditor.FindNearestObject(origin, direction, selected, after, 1);
-            theClassEditor.SelectObject(selected, input.GetHold(16) != 0.0f ? 1 : 0);
+            theClassEditor.FindNearestObject(origin, direction, hover, after, 1);
+            theClassEditor.SelectObject(hover, extend_selection ? 1 : 0);
         }
         char name[128];
-        hover.GetName(name, sizeof(name));
-        theLevelEditor.AddInfoText(name);
+        if (!get_class_object_attribute(hover.ed_class, hover.object, hover.reference, 2, EdType_String, name,
+                                        sizeof(name))) {
+            theLevelEditor.AddInfoText(const_cast<char *>("object : no name"));
+        } else {
+            char text[136];
+            sprintf(text, "object : %s", name);
+            theLevelEditor.AddInfoText(text);
+        }
     } else {
         theClassEditor.current_object = {NULL, NULL, NULL};
-        if (input.GetPress(3) != 0.0f) {
-            ClassObject none = {NULL, NULL, NULL};
-            theClassEditor.SelectObject(none, 0);
+        if (input.GetPress(11) != 0.0f) {
+            if (after.object != NULL)
+                theClassEditor.CreateObject(after);
+            else
+                theClassEditor.CreateObject();
         }
     }
-
-    if (input.GetPress(11) != 0.0f) {
-        if (theClassEditor.selected_objects.first != NULL) {
-            ClassObjectListEntry *entry = theClassEditor.selected_objects.first;
-            ClassObject selected = {entry->ed_class, entry->object, entry->reference};
-            theClassEditor.CreateObject(selected);
-        } else {
-            theClassEditor.CreateObject();
-        }
-    }
-    if (input.GetPress(12) != 0.0f && theClassEditor.selected_objects.count > 0)
+    if (input.GetPress(12) != 0.0f)
         theClassEditor.DestroySelectedObjects();
+    if (hover.object == NULL && input.GetPress(3) != 0.0f) {
+        ClassObject none = {NULL, NULL, NULL};
+        theClassEditor.SelectObject(none, 0);
+    }
     return 0;
 }
 
@@ -564,16 +575,25 @@ i32 ClassEditor::FindNearestObject(VuVec &point, ClassObject &result, ClassObjec
         EdClass *ed_class = &theRegistry.classes[class_index];
         EdClassInterface *interface = ed_class->interface;
         if (!Editable(NULL, ed_class, class_index) || interface == NULL || (ed_class->flags & 8) == 0 ||
-            interface->vtable->get_next_object == NULL || interface->vtable->distance_to_point == NULL)
+            interface->vtable->get_next_object == NULL)
             continue;
         for (void *object = interface->vtable->get_next_object(interface, NULL); object != NULL;
              object = interface->vtable->get_next_object(interface, object)) {
             if (!Editable(object, ed_class, -1))
                 continue;
-            EdRef *reference = NULL;
-            f32 distance = interface->vtable->distance_to_point(interface, point, object, &reference);
-            if (distance < 0.01f && candidate_count < 16)
-                candidates[candidate_count++] = {ed_class, object, reference};
+            EdMember member;
+            if (!ed_class->FindMember(&member, object, 8, 1))
+                continue;
+            VuVec position;
+            member.reference->GetAttributeData(member.object, 8, EdType_VuVec, &position, 0);
+            f32 dx = position.x - point.x;
+            f32 dy = position.y - point.y;
+            f32 dz = position.z - point.z;
+            f32 radius = 1.0f;
+            if (ed_class->FindMember(&member, object, 0x40, 1))
+                member.reference->GetAttributeData(member.object, 0x40, EdType_Float, &radius, 0);
+            if (dx * dx + dy * dy + dz * dz < radius * radius && candidate_count < 16)
+                candidates[candidate_count++] = {ed_class, object, NULL};
         }
     }
     if (candidate_count == 0)
@@ -587,13 +607,54 @@ i32 ClassEditor::FindNearestObject(VuVec &point, ClassObject &result, ClassObjec
             }
         }
     }
-    result = candidates[choice];
+    result.ed_class = candidates[choice].ed_class;
+    result.object = candidates[choice].object;
     return 1;
 }
 
 i32 ClassEditor::FindNearestObject(VuVec &point, ClassObject &result, i32 filter) {
-    ClassObject after = {NULL, NULL, NULL};
-    return FindNearestObject(point, result, after, filter);
+    EdClass *nearest_class = NULL;
+    void *nearest_object = NULL;
+    f32 nearest_distance = FLT_MAX;
+    for (i32 class_index = 0; class_index < theRegistry.class_count; ++class_index) {
+        EdClass *ed_class = &theRegistry.classes[class_index];
+        EdClassInterface *interface = ed_class->interface;
+        if (!Editable(NULL, ed_class, class_index) || interface == NULL || (ed_class->flags & 8) == 0 ||
+            interface->vtable->get_next_object == NULL)
+            continue;
+        for (void *object = interface->vtable->get_next_object(interface, NULL); object != NULL;
+             object = interface->vtable->get_next_object(interface, object)) {
+            EdMember member;
+            if (!ed_class->FindMember(&member, object, 8, 1))
+                continue;
+            VuVec position;
+            member.reference->GetAttributeData(member.object, 8, EdType_VuVec, &position, 0);
+            f32 dx = position.x - point.x;
+            f32 dy = position.y - point.y;
+            f32 dz = position.z - point.z;
+            f32 distance = dx * dx + dy * dy + dz * dz;
+            if (distance < nearest_distance) {
+                nearest_class = ed_class;
+                nearest_object = object;
+                nearest_distance = distance;
+            }
+        }
+    }
+    if (nearest_object != NULL && filter != 0) {
+        f32 radius = 1.0f;
+        if ((nearest_class->flags & 0x40) != 0) {
+            EdMember member;
+            if (nearest_class->FindMember(&member, nearest_object, 0x40, 1))
+                member.reference->GetAttributeData(member.object, 0x40, EdType_Float, &radius, 0);
+        }
+        if (NuFsqrt(nearest_distance) > radius) {
+            nearest_class = NULL;
+            nearest_object = NULL;
+        }
+    }
+    result.ed_class = nearest_class;
+    result.object = nearest_object;
+    return nearest_object != NULL;
 }
 
 i32 ClassEditor::FindNearestObject(VuVec &origin, VuVec &direction, ClassObject &result, ClassObject &after,
@@ -632,8 +693,36 @@ i32 ClassEditor::FindNearestObject(VuVec &origin, VuVec &direction, ClassObject 
 }
 
 i32 ClassEditor::FindNearestObject(VuVec &origin, VuVec &direction, ClassObject &result, i32 filter) {
-    ClassObject after = {NULL, NULL, NULL};
-    return FindNearestObject(origin, direction, result, after, filter);
+    EdClass *nearest_class = NULL;
+    void *nearest_object = NULL;
+    EdRef *nearest_reference = NULL;
+    f32 nearest_distance = FLT_MAX;
+    for (i32 class_index = 0; class_index < theRegistry.class_count; ++class_index) {
+        EdClass *ed_class = &theRegistry.classes[class_index];
+        EdClassInterface *interface = ed_class->interface;
+        if (!Editable(NULL, ed_class, class_index) || interface == NULL || (ed_class->flags & 8) == 0 ||
+            interface->vtable->get_next_object == NULL || interface->vtable->distance_to_ray == NULL)
+            continue;
+        for (void *object = interface->vtable->get_next_object(interface, NULL); object != NULL;
+             object = interface->vtable->get_next_object(interface, object)) {
+            if (!Editable(object, ed_class, -1))
+                continue;
+            EdRef *reference = NULL;
+            f32 distance = interface->vtable->distance_to_ray(interface, origin, direction, object, &reference);
+            if (distance < nearest_distance) {
+                nearest_class = ed_class;
+                nearest_object = object;
+                nearest_reference = reference;
+                nearest_distance = distance;
+            }
+        }
+    }
+    if (filter != 0 && nearest_distance > 0.1f) {
+        nearest_class = NULL;
+        nearest_object = NULL;
+    }
+    result = {nearest_class, nearest_object, nearest_reference};
+    return nearest_object != NULL;
 }
 
 void ClassEditor::FocusSelected() {

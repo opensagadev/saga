@@ -4710,37 +4710,48 @@ extern "C" {
     }
     static __used__ i32 eduicbInteractProp(struct edui_interact_s *interact) {
         edui_prop_s *property = static_cast<edui_prop_s *>(interact->item);
-        if (!(edui_cursor_buttons_db & EDUI_CURSOR_PRIMARY) || (property->unknown_property_flags & 0x0a))
+        if (!(edui_cursor_buttons & EDUI_CURSOR_PRIMARY) || (property->unknown_property_flags & 0x0a))
             return (property->unknown_property_flags & 0x0b) != 0;
         f32 label_end = interact->x + property->label_width;
         f32 cursor_bottom = interact->y + interact->height;
-        bool in_row = edui_cursor_x >= interact->x && edui_cursor_y >= interact->y && edui_cursor_y < cursor_bottom;
+        bool in_row = edui_cursor_y >= interact->y && edui_cursor_y < cursor_bottom;
         if (property->unknown_property_flags & 1) {
             if (in_row && edui_cursor_x >= label_end + 1.0f && edui_cursor_x < property->button_x) {
+                property->unknown_property_flags |= 1;
                 eduiPropTextPos = -1;
                 return 1;
             }
             return (property->unknown_property_flags & 0x0b) != 0;
         }
-        if (in_row && edui_cursor_x < label_end - 1.0f) {
-            if (property->selected)
-                property->selected(interact->menu, property, 0);
-        } else if (in_row && edui_cursor_x < label_end + 1.0f) {
+        edui_prop_s *bounds_property = property;
+        if (in_row && edui_cursor_x >= interact->x && edui_cursor_x < label_end - 1.0f && property->selected) {
+            property->selected(interact->menu, property, 0);
+            bounds_property = static_cast<edui_prop_s *>(interact->item);
+            label_end = interact->x + bounds_property->label_width;
+        }
+        if (in_row && edui_cursor_x >= label_end - 1.0f && edui_cursor_x < label_end + 1.0f) {
             property->unknown_property_flags |= 0x06;
-        } else if (in_row && edui_cursor_x < property->button_x) {
+            bounds_property = static_cast<edui_prop_s *>(interact->item);
+            label_end = interact->x + bounds_property->label_width;
+        }
+        if (in_row && edui_cursor_x >= label_end + 1.0f && edui_cursor_x < bounds_property->button_x) {
             if (property->selected)
                 property->selected(interact->menu, property, 0);
             NuKeyFlush();
             property->unknown_property_flags |= 1;
-            NuStrNCpy(eduiPropTextEdit, property->property_text ? property->property_text : "",
-                      sizeof(eduiPropTextEdit));
-            NuStrNCpy(eduiPropTextStore, eduiPropTextEdit, sizeof(eduiPropTextStore));
-            eduiPropTextPos = NuStrLen(eduiPropTextEdit);
+            NuStrCpy(eduiPropTextStore, property->property_text);
+            NuStrCpy(eduiPropTextEdit, property->property_text);
+            eduiPropTextPos = NuStrLen(property->property_text);
         }
-        if (edui_cursor_x >= property->button_x && edui_cursor_x < property->button_x + property->button_size &&
-            edui_cursor_y >= property->button_y * 0.5f &&
-            edui_cursor_y < (property->button_y + property->button_size) * 0.5f && property->button)
+        if ((eduiInteractLocked ||
+             (edui_cursor_x >= property->button_x && edui_cursor_x < property->button_x + property->button_size &&
+              edui_cursor_y >= property->button_y * 0.5f &&
+              edui_cursor_y < (property->button_y + property->button_size) * 0.5f)) &&
+            property->button) {
             property->button(interact->menu, property, 0);
+            if (property->unknown_property_flags & 0x20)
+                return 1;
+        }
         return (property->unknown_property_flags & 0x0b) != 0;
     }
     static __used__ i32 eduicbInteractFilter(struct edui_interact_s *interact) {

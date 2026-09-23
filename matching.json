@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 56.993435,
+    "fuzzy_match_percent": 57.082664,
     "total_code": "4722419",
-    "matched_code": "484069",
-    "matched_code_percent": 10.250445,
+    "matched_code": "484269",
+    "matched_code_percent": 10.254681,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 5836,
-    "matched_functions_percent": 43.361317,
+    "matched_functions": 5838,
+    "matched_functions_percent": 43.37618,
     "total_units": 1
   },
   "text": {
@@ -18870,7 +18870,7 @@
           "address": 4026784,
           "offset": 3136816,
           "size": 269,
-          "match_percent": 61.148647
+          "match_percent": 61.162163
         },
         {
           "name": "_ZL33antinodeEditor_GetNearestAntinodei",
@@ -18878,7 +18878,7 @@
           "address": 4038544,
           "offset": 3148576,
           "size": 970,
-          "match_percent": 28.85776
+          "match_percent": 18.112068
         },
         {
           "name": "_Z22antinodeEditor_ProcessP7nupad_s",
@@ -18886,7 +18886,7 @@
           "address": 4039520,
           "offset": 3149552,
           "size": 3155,
-          "match_percent": 34.485714
+          "match_percent": 37.33143
         },
         {
           "name": "_ZL27antinodeEditor_cbSelectTypeP10eduimenu_sP10eduiitem_sj",
@@ -19236,7 +19236,7 @@
           "address": 4015104,
           "offset": 3125136,
           "size": 147,
-          "match_percent": 61.673077
+          "match_percent": 63.596153
         },
         {
           "name": "_ZL27creatureEditor_cbSetLocatorP10eduimenu_sP10eduiitem_sj",
@@ -19420,7 +19420,7 @@
           "address": 4061056,
           "offset": 3171088,
           "size": 1873,
-          "match_percent": 27.889744
+          "match_percent": 30.65641
         },
         {
           "name": "_ZL29creatureEditor_cbSelectScriptP10eduimenu_sP10eduiitem_sj",
@@ -19439,12 +19439,20 @@
           "match_percent": 60.666668
         },
         {
+          "name": "_ZL37pathEditor_cbCancelDeleteCreatureMenuP10eduimenu_sS0_",
+          "demangled_name": "pathEditor_cbCancelDeleteCreatureMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 4212000,
+          "offset": 3322032,
+          "size": 27,
+          "match_percent": 100.0
+        },
+        {
           "name": "creatureEditorSaveData",
           "demangled_name": "creatureEditorSaveData",
           "address": 4222448,
           "offset": 3332480,
           "size": 1704,
-          "match_percent": 71.32029
+          "match_percent": 71.94376
         },
         {
           "name": "creatureEditor_GetNearest",
@@ -19548,7 +19556,7 @@
           "address": 4249232,
           "offset": 3359264,
           "size": 4175,
-          "match_percent": 33.159092
+          "match_percent": 33.309917
         },
         {
           "name": "creatureEditor_RenderAllCreatures",
@@ -20723,7 +20731,7 @@
           "address": 5552576,
           "offset": 4662608,
           "size": 401,
-          "match_percent": 17.637255
+          "match_percent": 17.784313
         },
         {
           "name": "_ZN11ClassEditor12ViewSelectedEv",
@@ -20779,7 +20787,7 @@
           "address": 5555072,
           "offset": 4665104,
           "size": 512,
-          "match_percent": 12.131035
+          "match_percent": 57.17931
         },
         {
           "name": "_ZN11ClassEditor21UpdateSelectedObjectsER14EdInputContext",
@@ -20795,7 +20803,7 @@
           "address": 5556336,
           "offset": 4666368,
           "size": 749,
-          "match_percent": 10.301508
+          "match_percent": 51.974873
         },
         {
           "name": "_ZN11ClassEditor17FindNearestObjectER5VuVecR11ClassObjecti",
@@ -20803,7 +20811,7 @@
           "address": 5557088,
           "offset": 4667120,
           "size": 707,
-          "match_percent": 8.381503
+          "match_percent": 50.21387
         },
         {
           "name": "_ZN11ClassEditor25cbEdClassSelectObjectMenuEP10eduimenu_sP10eduiitem_sj",
@@ -20819,7 +20827,7 @@
           "address": 5558624,
           "offset": 4668656,
           "size": 1069,
-          "match_percent": 0.0
+          "match_percent": 61.01172
         },
         {
           "name": "_ZN11ClassObject7GetNameEPci",
@@ -20979,7 +20987,7 @@
           "address": 5573088,
           "offset": 4683120,
           "size": 295,
-          "match_percent": 92.5
+          "match_percent": 92.20238
         },
         {
           "name": "_ZN11LevelEditor10ReadStreamER17EdFileInputStream",
@@ -20987,7 +20995,7 @@
           "address": 5573392,
           "offset": 4683424,
           "size": 392,
-          "match_percent": 72.28099
+          "match_percent": 72.38843
         },
         {
           "name": "_ZN11LevelEditor9LoadStateEP9variptr_uS1_S1_S1_S1_S1_",
@@ -21043,7 +21051,7 @@
           "address": 5591104,
           "offset": 4701136,
           "size": 679,
-          "match_percent": 99.666664
+          "match_percent": 98.69444
         },
         {
           "name": "_ZN11LevelEditor9InitaliseER9variptr_uS1_i",
@@ -21477,6 +21485,14 @@
           "match_percent": 13.448052
         },
         {
+          "name": "_ZL22routeEditor_AddToRouteP14EDAIPATHNODE_sS0_.part.7",
+          "demangled_name": "routeEditor_AddToRoute(EDAIPATHNODE_s*, EDAIPATHNODE_s*) [clone .part.7]",
+          "address": 4031696,
+          "offset": 3141728,
+          "size": 531,
+          "match_percent": 26.223022
+        },
+        {
           "name": "_ZL25routeEditor_cbRenameRouteP10eduimenu_sP10eduiitem_sj",
           "demangled_name": "routeEditor_cbRenameRoute(eduimenu_s*, eduiitem_s*, unsigned int)",
           "address": 4043456,
@@ -21514,7 +21530,7 @@
           "address": 4056128,
           "offset": 3166160,
           "size": 2948,
-          "match_percent": 23.856346
+          "match_percent": 15.234309
         },
         {
           "name": "_ZL32pathEditorCalculateDistanceTableP8AIPATH_siP9variptr_uS2_",
@@ -21645,14 +21661,6 @@
           "match_percent": 89.46845
         },
         {
-          "name": "_ZL37pathEditor_cbCancelDeleteCreatureMenuP10eduimenu_sS0_",
-          "demangled_name": "pathEditor_cbCancelDeleteCreatureMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 4212000,
-          "offset": 3322032,
-          "size": 27,
-          "match_percent": 100.0
-        },
-        {
           "name": "_ZL25routeEditor_cbDeleteRouteP10eduimenu_sP10eduiitem_sj",
           "demangled_name": "routeEditor_cbDeleteRoute(eduimenu_s*, eduiitem_s*, unsigned int)",
           "address": 4212560,
@@ -21674,7 +21682,7 @@
           "address": 4215216,
           "offset": 3325248,
           "size": 1093,
-          "match_percent": 53.773853
+          "match_percent": 53.738518
         },
         {
           "name": "_ZL23pathEditor_cbCreatePathP10eduimenu_sP10eduiitem_sj",
@@ -21746,7 +21754,7 @@
           "address": 4245184,
           "offset": 3355216,
           "size": 158,
-          "match_percent": 95.888885
+          "match_percent": 95.55556
         },
         {
           "name": "_ZL23pathEditor_cbDeletePathP10eduimenu_sP10eduiitem_sj",
@@ -27853,7 +27861,7 @@
           "address": 5472048,
           "offset": 4582080,
           "size": 237,
-          "match_percent": 57.43077
+          "match_percent": 90.16923
         },
         {
           "name": "_ZN12SplineHelper12AddMenuItemsEP10eduimenu_s",
@@ -27981,7 +27989,7 @@
           "address": 5579584,
           "offset": 4689616,
           "size": 261,
-          "match_percent": 57.64557
+          "match_percent": 57.83544
         },
         {
           "name": "_ZN15SplinePointList5ClearEv",
@@ -28165,7 +28173,7 @@
           "address": 5596752,
           "offset": 4706784,
           "size": 571,
-          "match_percent": 50.7451
+          "match_percent": 51.66013
         },
         {
           "name": "_ZN10KnotHelper16DistanceToObjectER5VuVecS1_PvPP5EdRef",
@@ -33307,7 +33315,7 @@
           "address": 3538400,
           "offset": 2648432,
           "size": 402,
-          "match_percent": 88.45652
+          "match_percent": 74.978264
         },
         {
           "name": "edbriStopPage",
@@ -34115,7 +34123,7 @@
           "address": 3762016,
           "offset": 2872048,
           "size": 761,
-          "match_percent": 15.777174
+          "match_percent": 0.0
         },
         {
           "name": "eduicbInteractFilter",
@@ -41662,7 +41670,7 @@
           "address": 4109344,
           "offset": 3219376,
           "size": 1714,
-          "match_percent": 1.521739
+          "match_percent": 93.5942
         },
         {
           "name": "_Z24AISysDrawAntinode_CircleP12AIANTINODE_sj",
@@ -41670,7 +41678,7 @@
           "address": 4166752,
           "offset": 3276784,
           "size": 91,
-          "match_percent": 21.0
+          "match_percent": 100.0
         },
         {
           "name": "_Z25AISysDrawAntinode_EllipseP12AIANTINODE_sj",
@@ -41678,7 +41686,7 @@
           "address": 4167552,
           "offset": 3277584,
           "size": 109,
-          "match_percent": 17.5
+          "match_percent": 100.0
         },
         {
           "name": "antinodeEditor_UpdateAntiNodesOnPlatforms",
@@ -41686,7 +41694,7 @@
           "address": 4220704,
           "offset": 3330736,
           "size": 257,
-          "match_percent": 6.857143
+          "match_percent": 0.0
         },
         {
           "name": "antinodeEditorDrawAntinodes",
@@ -41694,7 +41702,7 @@
           "address": 4220976,
           "offset": 3331008,
           "size": 796,
-          "match_percent": 3.243243
+          "match_percent": 43.64324
         },
         {
           "name": "antinodeEditorSaveData",
@@ -41702,7 +41710,7 @@
           "address": 4221776,
           "offset": 3331808,
           "size": 665,
-          "match_percent": 2.608696
+          "match_percent": 70.7764
         },
         {
           "name": "_Z21GameAntnode_CreateSysP11WORLDINFO_sP9variptr_uS2_i",
@@ -41758,7 +41766,7 @@
           "address": 4906528,
           "offset": 4016560,
           "size": 399,
-          "match_percent": 5.384615
+          "match_percent": 99.80769
         },
         {
           "name": "_Z19GameAntinode_UpdateP17GAMEANTINODESYS_s",
@@ -125016,14 +125024,6 @@
       "match_percent": 0.0
     },
     {
-      "name": "_ZL22routeEditor_AddToRouteP14EDAIPATHNODE_sS0_.part.7",
-      "demangled_name": "routeEditor_AddToRoute(EDAIPATHNODE_s*, EDAIPATHNODE_s*) [clone .part.7]",
-      "address": 4031696,
-      "offset": 3141728,
-      "size": 531,
-      "match_percent": 0.0
-    },
-    {
       "name": "_ZL20AIMoveFindDivertNodeP7AISYS_sP8AIPATH_sP10AIPACKET_sP7nuvec_s.isra.26",
       "demangled_name": "AIMoveFindDivertNode(AISYS_s*, AIPATH_s*, AIPACKET_s*, nuvec_s*) [clone .isra.26]",
       "address": 4036912,
@@ -127931,8 +127931,8 @@
   "summary": {
     "bazel_units": 454,
     "functions": 13454,
-    "assigned_functions": 12607,
+    "assigned_functions": 12608,
     "ambiguous_functions": 242,
-    "unassigned_functions": 605
+    "unassigned_functions": 604
   }
 }

@@ -1021,10 +1021,6 @@ static __used__ void pathEditor_cbDrawWallsplinesToggle(eduimenu_s *, eduiitem_s
     aieditorsettings.draw_wallsplines = item->highlighted;
 }
 
-static __used__ void pathEditor_cbCancelDeleteCreatureMenu(eduimenu_s *, eduimenu_s *) {
-    aieditor_ClearMainMenu();
-}
-
 static __used__ void pathEditor_cbCancelDisconnectNodeMenu(eduimenu_s *, eduimenu_s *) {
     aieditor_ClearMainMenu();
 }
@@ -1363,10 +1359,12 @@ extern "C" {
                     runtime->node_indices[0] = node->index;
                     runtime->node_indices[1] = other->index;
                     runtime->traversal_flags[0] = connection->flags;
+                    runtime->original_traversal_flags[0] = connection->flags;
                     runtime->route_mask = connection->route_mask;
                     for (i32 reverse = 0; reverse < 8; ++reverse) {
                         if (other->connections[reverse].node == node) {
                             runtime->traversal_flags[1] = other->connections[reverse].flags;
+                            runtime->original_traversal_flags[1] = other->connections[reverse].flags;
                             runtime->route_mask |= other->connections[reverse].route_mask;
                             break;
                         }
@@ -1455,8 +1453,8 @@ extern "C" {
                                     continue;
                                 }
                                 i32 neighbor = connection->node_indices[!direction];
-                                f32 distance =
-                                    connection->distance + distance_tables[path_index][neighbor][destination];
+                                f32 distance = distance_tables[path_index][source][neighbor] +
+                                               distance_tables[path_index][neighbor][destination];
                                 if (distance < best) {
                                     best = distance;
                                     path->route_matrix[source][destination] = neighbor;
@@ -1998,6 +1996,33 @@ static EDAIPATHNODE_s *pathEditor_GetNearestNode(EDAIPATH_s *path, i32 require_r
     return nearest;
 }
 
+static __used__ i32 routeEditor_AddToRoute(EDAIPATHNODE_s *node, EDAIPATHNODE_s *other) __asm__(
+    "_ZL22routeEditor_AddToRouteP14EDAIPATHNODE_sS0_.part.7");
+
+static __used__ i32 routeEditor_AddToRoute(EDAIPATHNODE_s *node, EDAIPATHNODE_s *other) {
+    EDAIPATH_s *path = aieditor->current_path;
+    if (path == nullptr || path->current_route == nullptr)
+        return 0;
+    i32 index = path->current_route - path->routes;
+    if (index > 15)
+        return 0;
+    u16 mask = 1u << index;
+    for (i32 slot = 0; slot < 8; ++slot) {
+        EDAIPATHCNX_s *connection = &node->connections[slot];
+        if (connection->node != other)
+            continue;
+        if (!(connection->route_mask & mask)) {
+            connection->route_mask |= mask;
+            return 1;
+        }
+        connection->route_mask &= ~mask;
+        if (other->connections[slot].node != nullptr && (other->connections[slot].route_mask & mask))
+            other->route_mask &= ~mask;
+        return -1;
+    }
+    return 0;
+}
+
 eduimenu_s *routeEditor_Process(nupad_s *pad) {
     if (pad->digital_buttons_pressed & 0x80) {
         eduimenu_s *menu =
@@ -2024,7 +2049,7 @@ eduimenu_s *routeEditor_Process(nupad_s *pad) {
     if (path == nullptr)
         return nullptr;
     if (pad->digital_buttons_pressed & 0x1000) {
-        i32 index = path->current_route == nullptr ? -1 : path->current_route - path->routes;
+        i32 index = path->current_route == nullptr ? 0 : path->current_route - path->routes;
         path->current_route = nullptr;
         for (i32 step = 1; step <= 16; ++step) {
             EDAIPATHROUTE_s *route = &path->routes[(index + step) & 15];
@@ -2033,13 +2058,51 @@ eduimenu_s *routeEditor_Process(nupad_s *pad) {
                 break;
             }
         }
+        if (path->current_route == nullptr)
+            return nullptr;
+    } else if (pad->digital_buttons_pressed & 0x4000) {
+        i32 index = path->current_route == nullptr ? 0 : path->current_route - path->routes;
+        path->current_route = nullptr;
+        for (i32 step = 1; step <= 16; ++step) {
+            EDAIPATHROUTE_s *route = &path->routes[(index - step) & 15];
+            if (route->flags & 1) {
+                path->current_route = route;
+                break;
+            }
+        }
+        if (path->current_route == nullptr)
+            return nullptr;
+    } else if (path->current_route == nullptr) {
+        return nullptr;
     }
-    if ((pad->digital_buttons & 0x40) && (pad->digital_buttons_pressed & 0x40) && path->nearest_node != nullptr &&
-        path->nearest_node != path->current_node) {
+    if ((pad->digital_buttons & 0x40) && (pad->digital_buttons_pressed & 0x40) && path->nearest_node != nullptr) {
         path->current_node = path->nearest_node;
         nuvec_s position = path->current_node->position;
         position.y = aieditor->cursor_position.y;
         edcamSetPos(&position);
+    }
+    if ((pad->digital_buttons_pressed & 0x20) && path->current_node != nullptr && path->nearest_node != nullptr &&
+        path->current_node != path->nearest_node) {
+        EDAIPATHNODE_s *nearest = path->nearest_node;
+        i32 change = routeEditor_AddToRoute(path->current_node, nearest);
+        routeEditor_AddToRoute(nearest, path->current_node);
+        if (change == 1 || change == -1) {
+            path->current_node = nearest;
+            nuvec_s position = nearest->position;
+            position.y = aieditor->cursor_position.y;
+            edcamSetPos(&position);
+        }
+    }
+    if ((pad->digital_buttons_pressed & 0x10) && path->current_node != nullptr) {
+        i32 index = path->current_route - path->routes;
+        u16 mask = 1u << index;
+        for (i32 slot = 0; slot < 8; ++slot) {
+            EDAIPATHCNX_s *connection = &path->current_node->connections[slot];
+            if (connection->node != nullptr && (connection->route_mask & mask)) {
+                path->current_node->route_mask ^= mask;
+                break;
+            }
+        }
     }
     if (pad->digital_buttons_pressed & 0x100) {
         path->current_node = pathEditor_GetNearestNode(path, 0);
@@ -2047,6 +2110,9 @@ eduimenu_s *routeEditor_Process(nupad_s *pad) {
             edcamSetPos(&path->current_node->position);
     }
     path->nearest_node = pathEditor_GetNearestNode(path, 1);
+    aieditor->flags &= ~u8(1);
+    if (path->current_node != nullptr && path->current_node == path->nearest_node)
+        aieditor->flags |= 1;
     return nullptr;
 }
 

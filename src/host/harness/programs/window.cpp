@@ -81,6 +81,7 @@ using saga::host::harness::WindowParseResult;
 
 namespace {
     char host_capture_directory[128] = ".work/capture";
+    SDL_Window *host_sdl_window = nullptr;
 
     struct HostSpecialHandleLayout {
         NUGSCN *scene;
@@ -669,6 +670,7 @@ namespace {
             LOG_ERR("SDL_CreateWindow failed: %s", SDL_GetError());
             return;
         }
+        host_sdl_window = window;
 
         if (strcmp(SDL_GetCurrentVideoDriver(), video_driver) != 0) {
             LOG_ERR("unexpected video driver: %s", SDL_GetCurrentVideoDriver());
@@ -852,7 +854,10 @@ i32 saga::host::harness::run_window(const WindowOptions &options) {
             } else if (event.type == SDL_EVENT_WINDOW_FOCUS_LOST) {
                 escape_held_button = 0;
             }
-            HostPlatformHandleInputEvent(event, host_window_width, host_window_height);
+            i32 input_width = host_window_width;
+            i32 input_height = host_window_height;
+            SDL_GetWindowSize(host_sdl_window, &input_width, &input_height);
+            HostPlatformHandleInputEvent(event, input_width, input_height);
         }
         if (quit_requested) {
             break;
@@ -871,7 +876,10 @@ i32 saga::host::harness::run_window(const WindowOptions &options) {
             float mouse_x = 0.0f;
             float mouse_y = 0.0f;
             const SDL_MouseButtonFlags mouse_buttons = SDL_GetMouseState(&mouse_x, &mouse_y);
-            saga::host::update_mouse_state(mouse_x, mouse_y, mouse_buttons, host_window_width, host_window_height);
+            i32 input_width = host_window_width;
+            i32 input_height = host_window_height;
+            SDL_GetWindowSize(host_sdl_window, &input_width, &input_height);
+            saga::host::update_mouse_state(mouse_x, mouse_y, mouse_buttons, input_width, input_height);
             keyboard_buttons |= HostPlatformKeyboardButtons(keyboard);
         } else {
             saga::host::update_keyboard_state(nullptr);

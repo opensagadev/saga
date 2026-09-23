@@ -163,8 +163,8 @@ void antinodeEditor_Enter() {
         node->game_flags = source->game_flags;
         node->special = source->special_handle;
         node->special_position = source->special_position;
-        node->flags = source->rotation_offset;
-        node->rotation_offset = source->flags;
+        node->rotation_offset = source->rotation_offset;
+        node->flags = source->flags;
         node->base_radius = source->base_radius;
         node->base_height = source->base_height;
         node->type = source->type;
@@ -267,20 +267,23 @@ static EDANTINODE_REGPARM1 EDANTINODE_s *antinodeEditor_GetNearestAntinode(i32 r
             if (node->type == 0) {
                 if (distance >= node->radius * node->radius)
                     continue;
-            } else {
-                f32 extent = node->base_radius > node->base_height ? node->base_radius : node->base_height;
-                if (distance >= extent * extent)
+            } else if (node->type == 2) {
+                f32 diagonal = NuFsqrt(node->base_radius * node->base_radius + node->base_height * node->base_height);
+                if (NuFabs(offset.x) > diagonal || NuFabs(offset.z) > diagonal)
                     continue;
                 NuVecRotateY(&offset, &offset, -node->flags);
-                if (node->type == 2) {
-                    if (NuFabs(offset.x) >= node->base_radius || NuFabs(offset.z) >= node->base_height)
-                        continue;
-                } else {
-                    f32 normalized_x = offset.x / node->base_radius;
-                    f32 normalized_z = offset.z / node->base_height;
-                    if (normalized_x * normalized_x + normalized_z * normalized_z >= 1.0f)
-                        continue;
-                }
+                if (NuFabs(offset.x) >= node->base_radius || NuFabs(offset.z) >= node->base_height)
+                    continue;
+            } else if (node->type == 1) {
+                f32 extent = node->base_radius > node->base_height ? node->base_radius : node->base_height;
+                if (NuFabs(offset.x) > extent || NuFabs(offset.z) > extent || distance >= extent * extent)
+                    continue;
+                NuVecRotateY(&offset, &offset, -node->flags);
+                i32 angle = NuAtan2D((node->base_height / node->base_radius) * offset.x, offset.z);
+                f32 ellipse_x = NuTrigTable[(angle >> 1) & 0x7fff] * node->base_radius;
+                f32 ellipse_z = NuTrigTable[((angle + 0x4000) >> 1) & 0x7fff] * node->base_height;
+                if (distance >= ellipse_x * ellipse_x + ellipse_z * ellipse_z)
+                    continue;
             }
         }
         nearest = node;
@@ -353,13 +356,13 @@ eduimenu_s *antinodeEditor_Process(nupad_s *pad) {
                 antinodeEditor_AntinodeMoved(selected);
                 if (selected->type != 0) {
                     if (held & 0x8000)
-                        selected->base_radius = NuFmax(0.2f, selected->base_radius * 0.95f);
+                        selected->base_radius = NuFmax(0.05f, selected->base_radius * 0.99f);
                     else if (held & 0x2000)
-                        selected->base_radius *= 1.05f;
+                        selected->base_radius *= 1.01f;
                     else if (held & 0x1000)
-                        selected->base_height *= 1.05f;
+                        selected->base_height *= 1.01f;
                     else if (held & 0x4000)
-                        selected->base_height = NuFmax(0.2f, selected->base_height * 0.95f);
+                        selected->base_height = NuFmax(0.05f, selected->base_height * 0.99f);
                 }
             }
         }
@@ -379,28 +382,12 @@ eduimenu_s *antinodeEditor_Process(nupad_s *pad) {
         if (selected != nullptr)
             edcamSetPos(&selected->position);
     } else if ((held & 0x100) == 0 && selected != nullptr && selected == nearest) {
-        if (aieditorsettings.solid_antinode_display && (held & (0x1000 | 0x4000))) {
-            aieditor->flags |= 4;
-            f32 step = (selected->upper_height - selected->lower_height) * 0.05f;
-            if (held & 0x1000) {
-                if (held & 4)
-                    selected->upper_height += step;
-                else if (held & 1)
-                    selected->upper_height -= step;
-                selected->upper_height = NuFmax(selected->upper_height, selected->lower_height + 0.1f);
-            } else {
-                if (held & 4)
-                    selected->lower_height += step;
-                else if (held & 1)
-                    selected->lower_height -= step;
-                selected->lower_height = NuFmin(selected->lower_height, selected->upper_height - 0.1f);
-            }
-        } else if (held & (0x8000 | 0x2000)) {
+        if (held & (0x8000 | 0x2000)) {
             if (selected->type == 0) {
                 if (held & 0x8000)
-                    selected->radius = NuFmax(0.2f, selected->radius * 0.95f);
+                    selected->radius = NuFmax(0.05f, selected->radius * 0.99f);
                 else
-                    selected->radius *= 1.05f;
+                    selected->radius *= 1.01f;
             } else {
                 aieditorsettings.area_rotation = selected->flags;
                 if (pressed & (0x8000 | 0x2000))
@@ -412,6 +399,22 @@ eduimenu_s *antinodeEditor_Process(nupad_s *pad) {
                                                   : NuAngAdd(selected->flags, antinode_rotation_repeat());
                 aieditorsettings.area_rotation = selected->flags;
                 antinodeEditor_AntinodeMoved(selected);
+            }
+        } else if (aieditorsettings.solid_antinode_display && (held & (0x1000 | 0x4000))) {
+            aieditor->flags |= 4;
+            f32 step = (selected->upper_height - selected->lower_height) * 0.05f;
+            if (held & 0x1000) {
+                if (held & 4)
+                    selected->upper_height += step;
+                else if (held & 1)
+                    selected->upper_height -= step;
+                selected->upper_height = NuFmax(selected->upper_height, selected->lower_height + 0.01f);
+            } else {
+                if (held & 4)
+                    selected->lower_height += step;
+                else if (held & 1)
+                    selected->lower_height -= step;
+                selected->lower_height = NuFmin(selected->lower_height, selected->upper_height - 0.01f);
             }
         }
     }
