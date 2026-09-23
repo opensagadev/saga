@@ -218,21 +218,20 @@ static __used__ void ParseAIPathCnxFlag(char *) {
 void pathEditorDrawNode(NUVEC *position, f32 radius, f32 lower_height, f32 upper_height, u32 colour, numtl_s *material,
                         i32 segments, i32 solid);
 
-static __used__ void pathEditorDrawPath(EDAIPATH_s *path, i32 path_index) {
-    if (path == nullptr) {
-        return;
-    }
+static void pathEditorDrawPath(EDAIPATH_s *path, i32 path_index) {
     u8 drawn_connections[0x1fe0] = {};
-    u32 colour =
-        path == aieditor->current_path ? 0xffffffff : AISysGetPathColour(path_index % AISysGetPathColourCount());
-    i32 solid =
-        aieditorsettings.solid_path_display && (static_cast<i16>(aieditorsettings.current_mode) == AIEDITOR_PATHS ||
-                                                static_cast<i16>(aieditorsettings.current_mode) == AIEDITOR_CREATURES ||
-                                                static_cast<i16>(aieditorsettings.current_mode) == AIEDITOR_LOCATORS);
+    i16 mode = aieditorsettings.current_mode;
+    i32 solid = aieditorsettings.solid_path_display &&
+                (mode == AIEDITOR_PATHS || mode == AIEDITOR_CREATURES || mode == AIEDITOR_LOCATORS);
     u32 active_route = 0;
-    if (aieditorsettings.current_mode == AIEDITOR_ROUTES && aieditor->current_path != nullptr) {
+    if (mode == AIEDITOR_ROUTES && aieditor->current_path != nullptr) {
         EDAIPATH_s *selected = aieditor->current_path;
         active_route = selected->current_route != nullptr ? 1u << (selected->current_route - selected->routes) : 1u;
+    }
+    u32 colour =
+        path == aieditor->current_path ? 0xffffffff : AISysGetPathColour(path_index % AISysGetPathColourCount());
+    if (path == nullptr) {
+        return;
     }
     for (EDAIPATHNODE_s *node = (EDAIPATHNODE_s *)NuLinkedListGetHead(&path->nodes); node != nullptr;
          node = (EDAIPATHNODE_s *)NuLinkedListGetNext(&path->nodes, &node->link)) {

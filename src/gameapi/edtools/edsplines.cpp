@@ -184,13 +184,13 @@ static EdVectorControl *make_spline_vector_control() {
 }
 
 static EdEnumControl *make_spline_yes_no_control() {
-    EdEnumControl *control = new (theMemoryManager.AllocPool(sizeof(EdEnumControl), 1)) EdEnumControl();
+    EdEnumControl *control = new (theMemoryManager.AllocPool(sizeof(EdEnumControl), 1)) EdEnumControl;
     control->items = EdEnumControl::YesNoItems;
     return control;
 }
 
 static EdFloatControl *make_spline_float_control(f32 minimum, f32 maximum) {
-    EdFloatControl *control = new (theMemoryManager.AllocPool(sizeof(EdFloatControl), 1)) EdFloatControl();
+    EdFloatControl *control = new (theMemoryManager.AllocPool(sizeof(EdFloatControl), 1)) EdFloatControl;
     control->value_type = EdType_Float;
     control->format = const_cast<char *>("%.2f");
     control->minimum = minimum;
@@ -204,13 +204,15 @@ f32 SplineLength(nugspline_s *spline, i32 closed) {
     i32 segment_count = closed != 0 ? spline->length : spline->length - 1;
     f32 length = 0.0f;
     NUVEC *previous = spline->pts;
-    for (i32 segment = 1; segment <= segment_count; ++segment) {
+    i32 segment = 1;
+    do {
         NUVEC *next = &spline->pts[segment == spline->length ? 0 : segment];
         NUVEC difference;
         NuVecSub(&difference, next, previous);
         length += NuVecMag(&difference);
         previous = next;
-    }
+        ++segment;
+    } while (segment <= segment_count);
     return length;
 }
 

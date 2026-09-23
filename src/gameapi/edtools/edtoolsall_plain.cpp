@@ -5616,11 +5616,14 @@ extern "C" {
             if (picker->cursor <= 0)
                 return;
             --picker->cursor;
-            if (picker->value[picker->cursor + 1])
+            if (picker->value[picker->cursor + 1]) {
+                if (picker->cursor > 0xfe)
+                    return;
                 memmove(picker->value + picker->cursor, picker->value + picker->cursor + 1,
                         sizeof(picker->value) - picker->cursor - 1);
-            else
+            } else {
                 picker->value[picker->cursor] = '\0';
+            }
         };
         auto insert_character = [&](char character) {
             if (NuStrLen(picker->value) >= picker->max_length)

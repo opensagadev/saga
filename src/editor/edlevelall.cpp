@@ -696,8 +696,7 @@ i32 ClassEditor::FindNearestObject(VuVec &origin, VuVec &direction, ClassObject 
     for (i32 class_index = 0; class_index < theRegistry.class_count; ++class_index) {
         EdClass *ed_class = &theRegistry.classes[class_index];
         EdClassInterface *interface = ed_class->interface;
-        if (!Editable(NULL, ed_class, class_index) || interface == NULL || (ed_class->flags & 8) == 0 ||
-            interface->vtable->get_next_object == NULL || interface->vtable->distance_to_ray == NULL)
+        if (!Editable(NULL, ed_class, class_index) || interface == NULL || (ed_class->flags & 8) == 0)
             continue;
         for (void *object = interface->vtable->get_next_object(interface, NULL); object != NULL;
              object = interface->vtable->get_next_object(interface, object)) {

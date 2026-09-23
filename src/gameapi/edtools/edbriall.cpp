@@ -357,12 +357,9 @@ extern "C" i32 edbriLoadPage(char *path, void *gscn) {
 }
 
 void edbriDoInput(nupad_s *pad) {
-    bool camera_locked = (pad->digital_buttons & 0x100) != 0;
-    if (!camera_locked) {
+    if ((pad->digital_buttons & 0x100) == 0)
         edcamMove(pad);
-        camera_locked = (pad->digital_buttons & 0x100) != 0;
-    }
-    if (camera_locked) {
+    if (pad->digital_buttons & 0x100) {
         if (edbri_nearest == -1) {
             edbriDetermineNearest(-1.0f);
         } else {
@@ -398,7 +395,7 @@ void edbriDoInput(nupad_s *pad) {
         }
     }
     edcamGetPosAng(&edbri_cam_pos, &edbri_cam_ax, &edbri_cam_ay);
-    if (!camera_locked) {
+    if ((pad->digital_buttons & 0x100) == 0) {
         const u32 pressed = pad->digital_buttons_pressed;
         if (pressed & 0x80) {
             edbri_options_menu = eduiMenuCreate(70, 70, 220, 300, ed_fnt, edbricbCancelOptMenu, "Options");

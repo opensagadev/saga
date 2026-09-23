@@ -600,16 +600,19 @@ static __used__ void creatureEditor_cbSelectType(eduimenu_s *parent, eduiitem_s 
     eduimenu_s *menu = eduiMenuCreate(220, 70, 240, 250, ed_fnt, creatureEditor_cbCancelMenu, "Select AI Type");
     if (menu == nullptr)
         return;
-    for (i32 index = 0;; ++index) {
-        i32 type = LevelCharacterGlobalIDFn(static_cast<u8>(index));
-        if (type == -1)
-            break;
-        bool selected = aieditorsettings.current_path_type == type;
-        eduiMenuAddItem(menu, eduiItemCheckCreate(type, creature_editor_item_colours, selected, 1,
-                                                  creatureEditor_cbSetType, GlobalCharacterNameFn(type)));
-        if (selected)
+    i32 index = 0;
+    i32 type = LevelCharacterGlobalIDFn(0);
+    while (type != -1) {
+        if (aieditorsettings.current_path_type == type) {
+            eduiMenuAddItem(menu, eduiItemCheckCreate(type, creature_editor_item_colours, 1, 1,
+                                                      creatureEditor_cbSetType, GlobalCharacterNameFn(type)));
             menu->selected = edui_last_item;
+        } else {
+            eduiMenuAddItem(menu, eduiItemCheckCreate(type, creature_editor_item_colours, 0, 1,
+                                                      creatureEditor_cbSetType, GlobalCharacterNameFn(type)));
+        }
         eduiMenuAttach(parent, menu);
+        type = LevelCharacterGlobalIDFn(static_cast<u8>(++index));
     }
 }
 

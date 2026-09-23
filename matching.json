@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 58.26596,
+    "fuzzy_match_percent": 58.28591,
     "total_code": "4722419",
     "matched_code": "487087",
     "matched_code_percent": 10.314354,
@@ -19236,7 +19236,7 @@
           "address": 4015104,
           "offset": 3125136,
           "size": 147,
-          "match_percent": 61.673077
+          "match_percent": 59.75
         },
         {
           "name": "_ZL27creatureEditor_cbSetLocatorP10eduimenu_sP10eduiitem_sj",
@@ -19380,7 +19380,7 @@
           "address": 4023856,
           "offset": 3133888,
           "size": 401,
-          "match_percent": 43.59406
+          "match_percent": 78.18812
         },
         {
           "name": "_ZL35creatureEditor_cbRenameCreatureMenuP10eduimenu_sP10eduiitem_sj",
@@ -19396,7 +19396,7 @@
           "address": 4032240,
           "offset": 3142272,
           "size": 319,
-          "match_percent": 75.62963
+          "match_percent": 73.09876
         },
         {
           "name": "_ZL31creatureEditor_cbRenameCreatureP10eduimenu_sP10eduiitem_sj",
@@ -20779,7 +20779,7 @@
           "address": 5554448,
           "offset": 4664480,
           "size": 616,
-          "match_percent": 38.99422
+          "match_percent": 45.872833
         },
         {
           "name": "_ZN11ClassEditor17FindNearestObjectER5VuVecS1_R11ClassObjecti",
@@ -21586,7 +21586,7 @@
           "address": 4185440,
           "offset": 3295472,
           "size": 5632,
-          "match_percent": 21.059166
+          "match_percent": 25.327837
         },
         {
           "name": "pathEditorDrawPaths",
@@ -21594,7 +21594,7 @@
           "address": 4191072,
           "offset": 3301104,
           "size": 270,
-          "match_percent": 62.964706
+          "match_percent": 68.49412
         },
         {
           "name": "pathEditor_CalcNodeIXs",
@@ -25843,7 +25843,7 @@
           "address": 3546384,
           "offset": 2656416,
           "size": 1591,
-          "match_percent": 55.00822
+          "match_percent": 76.70137
         }
       ]
     },
@@ -27765,7 +27765,7 @@
           "address": 4791344,
           "offset": 3901376,
           "size": 238,
-          "match_percent": 42.64789
+          "match_percent": 43.549297
         },
         {
           "name": "_ZN12SplineHelper21PreLoadInitialisationEP12MemoryBufferS1_",
@@ -28045,7 +28045,7 @@
           "address": 5581168,
           "offset": 4691200,
           "size": 1951,
-          "match_percent": 46.66
+          "match_percent": 48.535
         },
         {
           "name": "_ZN12SplineHelper4FindEPc",
@@ -29660,7 +29660,7 @@
           "address": 5522256,
           "offset": 4632288,
           "size": 1532,
-          "match_percent": 37.57143
+          "match_percent": 39.11012
         },
         {
           "name": "_ZN13EdManipulator8DrawAxisER5VuVecP5VuMtx",
@@ -30164,7 +30164,7 @@
           "address": 5546528,
           "offset": 4656560,
           "size": 509,
-          "match_percent": 70.910255
+          "match_percent": 71.84615
         },
         {
           "name": "_ZN24EdClassObjectNameControl13cbSelectClassEP10eduimenu_sP10eduiitem_sj",
@@ -30452,7 +30452,7 @@
           "address": 5604832,
           "offset": 4714864,
           "size": 1154,
-          "match_percent": 35.6
+          "match_percent": 41.61091
         },
         {
           "name": "_ZN16EdClassInterface16DistanceToObjectER5VuVecS1_PvPP5EdRef",
@@ -35043,7 +35043,7 @@
           "address": 3793936,
           "offset": 2903968,
           "size": 2363,
-          "match_percent": 27.246454
+          "match_percent": 28.69149
         },
         {
           "name": "cbMMEditorConfig",

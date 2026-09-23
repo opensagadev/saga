@@ -4265,16 +4265,40 @@ void EdManipulator::DrawRotator(VuVec &origin) {
 }
 
 void EdManipulator::GetAxisLocators(VuVec &origin, VuVec *points, VuMtx *matrix) {
-    const f32 scale = Scale;
-    const f32 half = scale * 0.5f;
-    points[0] = VuVec(0.0f, 0.0f, 0.0f, 1.0f);
-    points[1] = VuVec(scale, 0.0f, 0.0f, 1.0f);
-    points[2] = VuVec(0.0f, scale, 0.0f, 1.0f);
-    points[3] = VuVec(0.0f, 0.0f, scale, 1.0f);
-    points[4] = VuVec(half, half, 0.0f, 0.0f);
-    points[5] = VuVec(half, 0.0f, half, 0.0f);
-    points[6] = VuVec(0.0f, half, half, 0.0f);
-    points[7] = VuVec(0.0f, 0.0f, 0.0f, 1.0f);
+    const f32 scale = Scale + 0.0f;
+    const f32 half = (scale + 0.0f) * 0.5f;
+    points[3].x = 0.0f;
+    points[3].y = 0.0f;
+    points[3].w = 1.0f;
+    points[2].x = 0.0f;
+    points[2].z = 0.0f;
+    points[2].w = 1.0f;
+    points[1].y = 0.0f;
+    points[1].z = 0.0f;
+    points[1].w = 1.0f;
+    points[7].x = 0.0f;
+    points[7].y = 0.0f;
+    points[7].z = 0.0f;
+    points[7].w = 1.0f;
+    points[0].x = 0.0f;
+    points[0].y = 0.0f;
+    points[0].z = 0.0f;
+    points[0].w = 1.0f;
+    points[1].x = scale;
+    points[2].y = scale;
+    points[3].z = scale;
+    points[4].x = half;
+    points[4].y = half;
+    points[4].z = 0.0f;
+    points[4].w = 0.0f;
+    points[5].x = half;
+    points[5].y = 0.0f;
+    points[5].z = half;
+    points[5].w = 0.0f;
+    points[6].x = 0.0f;
+    points[6].y = half;
+    points[6].z = half;
+    points[6].w = 0.0f;
     if (matrix != NULL) {
 #define TRANSFORM_LOCATOR(index)                                                                                       \
     {                                                                                                                  \
@@ -6231,10 +6255,8 @@ i32 EdManMove::Process(EdInputContext &input, ClassObjectList &selected) {
     VuVec second_axis;
     i32 axis = SelectAxis(input, average, first_axis, second_axis, NULL);
     theLevelEditor.field_0x2c = AxisColour[axis];
-    if (axis == 0)
-        return 0;
     if (input.GetHold(3) == 0.0f && input.GetHold(38) == 0.0f)
-        return 1;
+        return axis != 0;
     const VuVec *delta = reinterpret_cast<VuVec const *>(reinterpret_cast<u8 *>(this) + 0x40);
     for (ClassObjectListEntry *entry = selected.first; entry != NULL; entry = entry->next) {
         VuVec position = VuVec_Zero;
@@ -6242,9 +6264,7 @@ i32 EdManMove::Process(EdInputContext &input, ClassObjectList &selected) {
         if (axis == 7) {
             if (input.GetHold(38) == 0.0f)
                 continue;
-            position.x = theLevelEditor.background_colour[0];
-            position.y = theLevelEditor.background_colour[1];
-            position.z = theLevelEditor.background_colour[2];
+            memcpy(&position, theLevelEditor.background_colour, sizeof(position));
         } else {
             f32 amount = delta->x * first_axis.x + delta->y * first_axis.y + delta->z * first_axis.z;
             if (amount != 0.0f) {
@@ -6268,7 +6288,7 @@ i32 EdManMove::Process(EdInputContext &input, ClassObjectList &selected) {
         theClassEditor.SnapPoint(position);
         set_manipulator_attribute(entry, 8, EdType_VuVec, &position);
     }
-    return 1;
+    return axis != 0;
 }
 
 void EdManMove::Render(ClassObjectList &selected) {
