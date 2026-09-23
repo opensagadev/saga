@@ -1501,7 +1501,7 @@ __attribute__((optimize("O2"))) eduimenu_s *creatureEditor_Process(nupad_s *pad)
                 }
                 strcpy(created->name, name);
                 if (aieditorsettings.current_script_name[0] != 0)
-                    NuStrCpy(created->script_name, aieditorsettings.current_script_name);
+                    strcpy(created->script_name, aieditorsettings.current_script_name);
                 memcpy(created->script_params, aieditorsettings.current_script_params, sizeof(created->script_params));
                 created->flags = (created->flags & ~0x1eu) | aieditorsettings.current_script_flags;
                 memcpy(created->path_check, reinterpret_cast<u8 *>(aieditor) + 0x48, sizeof(created->path_check));

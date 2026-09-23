@@ -1114,7 +1114,7 @@ void ClassEditor::UpdateSelectedObjects(EdInputContext &input) {
             object = interface->vtable->get_next_object(interface, entry->object);
             if (object == NULL)
                 object = interface->vtable->get_next_object(interface, NULL);
-            for (i32 remaining = 4096; remaining != 0 && object != NULL; --remaining) {
+            for (i32 remaining = 4096; remaining != 0; --remaining) {
                 if (Editable(object, entry->ed_class, -1))
                     break;
                 object = interface->vtable->get_next_object(interface, object);

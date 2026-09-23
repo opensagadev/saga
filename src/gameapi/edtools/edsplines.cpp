@@ -874,7 +874,13 @@ void SplinePointList::AddPoint(VuVec &point) {
         block = new (theMemoryManager.AllocPool(sizeof(SplinePointBlock), 1)) SplinePointBlock();
         if (block == NULL)
             return;
-        block->points[block->point_count++] = point;
+        i32 index = block->point_count;
+        block->point_count = index + 1;
+        VuVec &destination = block->points[index];
+        destination.x = point.x;
+        destination.y = point.y;
+        destination.z = point.z;
+        destination.w = point.w;
         block->next = NULL;
         block->previous = last;
         if (last != NULL)
@@ -885,7 +891,13 @@ void SplinePointList::AddPoint(VuVec &point) {
         ++block_count;
         return;
     }
-    block->points[block->point_count++] = point;
+    i32 index = block->point_count;
+    block->point_count = index + 1;
+    VuVec &destination = block->points[index];
+    destination.x = point.x;
+    destination.y = point.y;
+    destination.z = point.z;
+    destination.w = point.w;
 }
 
 void SplinePointList::Clear() {

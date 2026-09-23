@@ -4883,12 +4883,13 @@ void EdMatrixControl::AddMenuItem(eduimenu_s *menu, EdRef *member, void *target)
                                                     cbChanged, cbButton, 2, const_cast<char *>(label), value);         \
     control->components[index]->unknown_10 = index % 3 + 1;                                                            \
     eduiItemExpanderAddChild(static_cast<edui_expander_s *>(control->item), control->components[index])
-    if (member->attributes & 8) {
+    // These enabled groups are the common path in the original block layout.
+    if (__builtin_expect(member->attributes & 8, 1)) {
         ADD_MATRIX_COMPONENT(0, "pos x", matrix.matrix.m30);
         ADD_MATRIX_COMPONENT(1, "pos y", matrix.matrix.m31);
         ADD_MATRIX_COMPONENT(2, "pos z", matrix.matrix.m32);
     }
-    if (member->attributes & 0x10) {
+    if (__builtin_expect(member->attributes & 0x10, 1)) {
         NUANG x, y, z;
         NuMtxGetEulerXYZ(&matrix.matrix, &x, &y, &z);
         ADD_MATRIX_COMPONENT(3, "rot x", static_cast<f32>(x) * (360.0f / 65536.0f));

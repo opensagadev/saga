@@ -133,17 +133,14 @@ static __used__ void locatorEditor_cbEmptyLocatorSet(eduimenu_s *parent, eduiite
     if (item == nullptr) {
         return;
     }
-    if (item->data == 1) {
-        EDLOCATORSET_s *set = aieditor->current_locator_set;
-        if (set != nullptr) {
-            for (i32 index = 0; index < 64; ++index) {
-                set->locators[index] = nullptr;
-            }
-        }
-        aieditor_ClearMainMenu();
-    } else if (item->data == 2) {
-        aieditor_ClearMainMenu();
-    } else if (item->data == 0) {
+    u32 data = (u32)item->data;
+    if (__builtin_expect(data == 1, 0)) {
+        goto empty_set;
+    }
+    if (__builtin_expect(data >= 1, 0)) {
+        goto maybe_cancel;
+    }
+    {
         eduimenu_s *menu =
             eduiMenuCreate(0xf0, 0x5a, 0xf0, 0xfa, ed_fnt, nullptr, (char *)"Empty current locator set?");
         if (menu != nullptr) {
@@ -153,7 +150,21 @@ static __used__ void locatorEditor_cbEmptyLocatorSet(eduimenu_s *parent, eduiite
                             eduiItemSelCreate(1, locator_attr, 0, 0, locatorEditor_cbEmptyLocatorSet, (char *)"Yes"));
             eduiMenuAttach(parent, menu);
         }
+        return;
     }
+maybe_cancel:
+    if (data == 2) {
+        aieditor_ClearMainMenu();
+    }
+    return;
+empty_set:
+    EDLOCATORSET_s *set = aieditor->current_locator_set;
+    if (set != nullptr) {
+        for (i32 index = 0; index < 64; ++index) {
+            set->locators[index] = nullptr;
+        }
+    }
+    aieditor_ClearMainMenu();
 }
 static __used__ void locatorEditor_cbCreateLocatorSet(eduimenu_s *, eduiitem_s *, u32) {
     EDLOCATORSET_s *set = (EDLOCATORSET_s *)NuLinkedListGetHead(&aieditor->free_locator_sets);

@@ -1383,12 +1383,13 @@ extern "C" {
         if (aieditor->current_path == nullptr) {
             return nullptr;
         }
-        if (NuLinkedListGetHead(&aieditor->paths) == nullptr) {
+        EDAIPATH_s *first_editor_path = (EDAIPATH_s *)NuLinkedListGetHead(&aieditor->paths);
+        if (first_editor_path == nullptr) {
             return nullptr;
         }
 
         i32 path_count = 0;
-        for (EDAIPATH_s *path = (EDAIPATH_s *)NuLinkedListGetHead(&aieditor->paths); path != nullptr;
+        for (EDAIPATH_s *path = first_editor_path; path != nullptr;
              path = (EDAIPATH_s *)NuLinkedListGetNext(&aieditor->paths, &path->link)) {
             path->draw_index = path_count++;
         }
@@ -1413,6 +1414,11 @@ extern "C" {
             shared->runtime_index = shared_count++;
         }
         system->special_route_count = shared_count;
+        system->paths = (AIPATH_s **)AISysBufferAlloc(cursor, end, path_count * sizeof(AIPATH_s *));
+        if (system->paths == nullptr) {
+            return nullptr;
+        }
+        memset(system->paths, 0, path_count * sizeof(AIPATH_s *));
         if (shared_count != 0) {
             system->special_routes = (AIPATHSPECIALROUTE_s *)AISysBufferAlloc(
                 &scratch, &scratch_limit, shared_count * sizeof(AIPATHSPECIALROUTE_s));
@@ -1433,12 +1439,6 @@ extern "C" {
                 memset(route->paths, 0, participants * sizeof(AIPATH_s));
             }
         }
-        system->paths = (AIPATH_s **)AISysBufferAlloc(cursor, end, path_count * sizeof(AIPATH_s *));
-        if (system->paths == nullptr) {
-            return nullptr;
-        }
-        memset(system->paths, 0, path_count * sizeof(AIPATH_s *));
-
         i32 path_index = 0;
         for (EDAIPATH_s *editor_path = (EDAIPATH_s *)NuLinkedListGetHead(&aieditor->paths); editor_path != nullptr;
              editor_path = (EDAIPATH_s *)NuLinkedListGetNext(&aieditor->paths, &editor_path->link), ++path_index) {
