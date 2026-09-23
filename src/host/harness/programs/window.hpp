@@ -28,6 +28,7 @@ namespace saga::host::harness {
         bool script_pause = false;
         bool camera_orbit = false;
         bool camera_free = false;
+        bool hide_system_cursor = false;
         bool offscreen = false;
         bool mute = false;
         bool show_fps = false;

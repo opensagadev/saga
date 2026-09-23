@@ -760,11 +760,19 @@ void SplineObject::GenPoints() {
 
 void SplineObject::ReverseKnots() {
     SplineKnot *knot = knots.last;
+    SplineKnot *old_first = knots.first;
     knots.first = NULL;
     knots.last = NULL;
     knots.count = 0;
     while (knot != NULL) {
         SplineKnot *prior = knot->previous;
+        SplineKnot *next = knot->next;
+        if (next != NULL)
+            next->previous = prior;
+        if (prior != NULL)
+            prior->next = next;
+        else
+            old_first = next;
         knot->next = NULL;
         knot->previous = knots.last;
         if (knots.last != NULL)
@@ -774,6 +782,17 @@ void SplineObject::ReverseKnots() {
         knots.last = knot;
         ++knots.count;
         knot = prior;
+    }
+    while (old_first != NULL) {
+        SplineKnot *next = old_first->next;
+        if (next != NULL)
+            next->previous = old_first->previous;
+        if (old_first->previous != NULL)
+            old_first->previous->next = next;
+        old_first->next = NULL;
+        old_first->previous = NULL;
+        theMemoryManager.FreePool(old_first, sizeof(SplineKnot));
+        old_first = next;
     }
 }
 

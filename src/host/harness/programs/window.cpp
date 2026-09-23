@@ -83,6 +83,36 @@ namespace {
     char host_capture_directory[128] = ".work/capture";
     SDL_Window *host_sdl_window = nullptr;
 
+    class WindowCursor final {
+      public:
+        WindowCursor(SDL_Window *window, bool enabled) : window{window}, enabled{enabled} {
+            if (this->enabled && this->window && SDL_GetMouseFocus() == this->window)
+                SDL_HideCursor();
+        }
+
+        ~WindowCursor() {
+            if (this->enabled)
+                SDL_ShowCursor();
+        }
+
+        WindowCursor(const WindowCursor &) = delete;
+        WindowCursor &operator=(const WindowCursor &) = delete;
+
+        void handle(const SDL_Event &event) const {
+            if (!this->enabled || !this->window)
+                return;
+            if (event.type == SDL_EVENT_WINDOW_MOUSE_ENTER ||
+                (event.type == SDL_EVENT_WINDOW_FOCUS_GAINED && SDL_GetMouseFocus() == this->window))
+                SDL_HideCursor();
+            else if (event.type == SDL_EVENT_WINDOW_MOUSE_LEAVE || event.type == SDL_EVENT_WINDOW_FOCUS_LOST)
+                SDL_ShowCursor();
+        }
+
+      private:
+        SDL_Window *window;
+        bool enabled;
+    };
+
     struct HostSpecialHandleLayout {
         NUGSCN *scene;
         void *special;
@@ -727,6 +757,7 @@ i32 saga::host::harness::run_window(const WindowOptions &options) {
     HostFreeCameraConfigure(options.camera_free);
     NuPortalEnabled(options.portals ? 1 : 0);
     host_sdl_init(options.offscreen, options.mute, options.msaa);
+    const WindowCursor cursor{host_sdl_window, options.hide_system_cursor && !options.offscreen};
     const char *documents_path = options.documents_path != nullptr ? options.documents_path : "res/";
     char scripted_documents_path[256];
     if (options.script_input) {
@@ -829,6 +860,7 @@ i32 saga::host::harness::run_window(const WindowOptions &options) {
     while (!quit_requested) {
         SDL_Event event{};
         while (SDL_PollEvent(&event)) {
+            cursor.handle(event);
             if (event.type == SDL_EVENT_KEY_DOWN)
                 saga::host::queue_key_event(event.key.scancode, event.key.mod);
             if (options.hooks.handle_event)

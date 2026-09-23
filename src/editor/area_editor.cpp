@@ -386,18 +386,22 @@ eduimenu_s *areaEditor_Process(nupad_s *pad) {
     }
     area_hovered() = areaEditorFindHover();
     if ((pad->digital_buttons & 0x40) != 0) {
+        bool selected_hover_on_press = false;
         if ((pad->digital_buttons_pressed & 0x40) != 0) {
             if (area_hovered() != NULL) {
                 area_selected() = area_hovered();
                 aieditorsettings.area_rotation = area_selected()->rotation;
                 edcamSetPos(&area_selected()->position);
+                selected_hover_on_press = true;
             } else {
                 areaEditorCreateArea();
             }
         }
         EDAIAREA_s *selected = area_selected();
         if (selected != NULL && area_hovered() != NULL) {
-            selected->position = aieditor->camera_position;
+            if (!selected_hover_on_press) {
+                selected->position = aieditor->camera_position;
+            }
             u32 buttons = pad->digital_buttons;
             if (buttons & 0x2000) {
                 selected->size.x *= 1.01f;

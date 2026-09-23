@@ -999,6 +999,7 @@ namespace saga::host::harness {
             window.hooks.free_camera_ready = &EditorSession::is_free_camera_ready;
             window.hooks.requested_exit_status = &EditorSession::requested_exit_status;
             window.camera_free = true;
+            window.hide_system_cursor = true;
             return run_window(window);
         }
 

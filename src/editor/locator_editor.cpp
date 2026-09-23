@@ -66,8 +66,13 @@ void DrawLocator(nuvec_s *, f32, i32, i32);
 static void locatorEditor_cbCancelSelectLocatorSet(eduimenu_s *, eduimenu_s *);
 static void locatorEditor_cbCancelRenameMenu(eduimenu_s *, eduimenu_s *);
 static void locatorEditor_cbCancelRenameLocatorSetMenu(eduimenu_s *, eduimenu_s *);
+#if defined(__i386__)
+static void __attribute__((regparm(1))) DestroyLocator(EDLOCATOR_s *);
+static unsigned int __attribute__((regparm(2))) AddLocatorToSet(EDLOCATORSET_s *, EDLOCATOR_s *, EDLOCATOR_s *);
+#else
 static void DestroyLocator(EDLOCATOR_s *);
 static unsigned int AddLocatorToSet(EDLOCATORSET_s *, EDLOCATOR_s *, EDLOCATOR_s *);
+#endif
 static __used__ void locatorEditor_cbAddLocatorsByNameYesNo(eduimenu_s *, eduiitem_s *, u32);
 
 struct eduimenu_s;

@@ -1495,7 +1495,7 @@ extern "C" {
                 runtime->min_height_offset = node->lower_height;
                 runtime->max_height = node->position.y + node->upper_height;
                 runtime->max_height_offset = node->upper_height;
-                runtime->flags = node->flags;
+                runtime->runtime_flags = node->flags;
                 runtime->special_handle = node->special;
                 runtime->special_position = node->special_position;
                 runtime->has_special = NuSpecialExistsFn(&runtime->special_handle) != 0;
@@ -1542,9 +1542,7 @@ extern "C" {
                             connection->node_indices[0] = node->index;
                             connection->node_indices[1] = other->index;
                             connection->traversal_flags[0] = editor_connection->flags;
-                            connection->traversal_flags[1] = editor_connection->flags;
                             connection->original_traversal_flags[0] = editor_connection->flags;
-                            connection->original_traversal_flags[1] = editor_connection->flags;
                             NUVEC difference;
                             connection->distance = NuVecDist(&other->position, &node->position, &difference);
                             connection->horizontal_distance =

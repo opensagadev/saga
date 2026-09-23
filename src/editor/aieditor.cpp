@@ -274,32 +274,42 @@ static EDANTINODE_REGPARM1 EDANTINODE_s *antinodeEditor_GetNearestAntinode(i32 r
          node = reinterpret_cast<EDANTINODE_s *>(NuLinkedListGetNext(antinode_list(), &node->link))) {
         nuvec_s offset;
         f32 distance = NuVecXZDistSqr(&aieditor->camera_position, &node->position, &offset);
-        if (distance >= nearest_distance)
+        if (!(nearest_distance > distance))
             continue;
         f32 height = aieditor->camera_position.y - node->position.y;
         if (height > NuFmax(0.2f, node->upper_height) || height < NuFmin(-0.2f, node->lower_height))
             continue;
         if (require_inside) {
             if (node->type == 0) {
-                if (distance >= node->radius * node->radius)
+                if (!(node->radius * node->radius > distance))
                     continue;
             } else if (node->type == 1) {
                 f32 extent = node->base_radius > node->base_height ? node->base_radius : node->base_height;
-                if (offset.x > extent || offset.x < -extent || offset.z > extent || offset.z < -extent ||
-                    distance >= extent * extent)
+                nuvec_s ellipse_offset = {aieditor->camera_position.x - node->position.x, 0.0f,
+                                          aieditor->camera_position.z - node->position.z};
+                if (ellipse_offset.x > extent || ellipse_offset.x < -extent || ellipse_offset.z > extent ||
+                    ellipse_offset.z < -extent)
                     continue;
-                NuVecRotateY(&offset, &offset, -node->flags);
-                i32 angle = NuAtan2D((node->base_height / node->base_radius) * offset.x, offset.z);
+                f32 ellipse_distance = ellipse_offset.x * ellipse_offset.x + ellipse_offset.z * ellipse_offset.z;
+                if (!(extent * extent > ellipse_distance))
+                    continue;
+                nuvec_s rotated;
+                NuVecRotateY(&rotated, &ellipse_offset, -node->flags);
+                i32 angle = NuAtan2D((node->base_height / node->base_radius) * rotated.x, rotated.z);
                 f32 ellipse_x = NuTrigTable[(angle >> 1) & 0x7fff] * node->base_radius;
                 f32 ellipse_z = NuTrigTable[((angle + 0x4000) >> 1) & 0x7fff] * node->base_height;
-                if (distance >= ellipse_x * ellipse_x + ellipse_z * ellipse_z)
+                if (!(ellipse_x * ellipse_x + ellipse_z * ellipse_z > ellipse_distance))
                     continue;
             } else if (node->type == 2) {
                 f32 diagonal = NuFsqrt(node->base_radius * node->base_radius + node->base_height * node->base_height);
-                if (offset.x > diagonal || offset.x < -diagonal || offset.z > diagonal || offset.z < -diagonal)
+                nuvec_s rectangle_offset = {aieditor->camera_position.x - node->position.x, 0.0f,
+                                            aieditor->camera_position.z - node->position.z};
+                if (rectangle_offset.x > diagonal || rectangle_offset.x < -diagonal || rectangle_offset.z > diagonal ||
+                    rectangle_offset.z < -diagonal)
                     continue;
-                NuVecRotateY(&offset, &offset, -node->flags);
-                if (NuFabs(offset.x) >= node->base_radius || NuFabs(offset.z) >= node->base_height)
+                NuVecRotateY(&rectangle_offset, &rectangle_offset, -node->flags);
+                if (!(node->base_radius > NuFabs(rectangle_offset.x)) ||
+                    !(node->base_height > NuFabs(rectangle_offset.z)))
                     continue;
             } else {
                 continue;

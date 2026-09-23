@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 57.966835,
+    "fuzzy_match_percent": 57.971752,
     "total_code": "4722419",
-    "matched_code": "485885",
-    "matched_code_percent": 10.288901,
+    "matched_code": "486425",
+    "matched_code_percent": 10.300335,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 5865,
-    "matched_functions_percent": 43.57679,
+    "matched_functions": 5868,
+    "matched_functions_percent": 43.59908,
     "total_units": 1
   },
   "text": {
@@ -18878,7 +18878,7 @@
           "address": 4038544,
           "offset": 3148576,
           "size": 970,
-          "match_percent": 42.36638
+          "match_percent": 55.875
         },
         {
           "name": "_Z22antinodeEditor_ProcessP7nupad_s",
@@ -19125,7 +19125,7 @@
           "address": 4064368,
           "offset": 3174400,
           "size": 3322,
-          "match_percent": 41.838963
+          "match_percent": 42.42078
         },
         {
           "name": "areaEditorSaveData",
@@ -21936,7 +21936,7 @@
           "address": 4180016,
           "offset": 3290048,
           "size": 525,
-          "match_percent": 91.19728
+          "match_percent": 91.29932
         },
         {
           "name": "locatorEditor_PathNodeMoved",
@@ -21952,7 +21952,7 @@
           "address": 4181056,
           "offset": 3291088,
           "size": 149,
-          "match_percent": 83.44444
+          "match_percent": 100.0
         },
         {
           "name": "locatorEditorDrawLocators",
@@ -21960,7 +21960,7 @@
           "address": 4181808,
           "offset": 3291840,
           "size": 453,
-          "match_percent": 49.088234
+          "match_percent": 49.161766
         },
         {
           "name": "locatorEditor_PathNodeDeleted",
@@ -21968,7 +21968,7 @@
           "address": 4195296,
           "offset": 3305328,
           "size": 193,
-          "match_percent": 80.23729
+          "match_percent": 100.0
         },
         {
           "name": "_Z19locatorEditor_Enterv",
@@ -22024,7 +22024,7 @@
           "address": 4218976,
           "offset": 3329008,
           "size": 198,
-          "match_percent": 98.039215
+          "match_percent": 100.0
         },
         {
           "name": "_ZL39locatorEditor_cbCancelDeleteLocatorMenuP10eduimenu_sS0_",
@@ -22048,7 +22048,7 @@
           "address": 4225728,
           "offset": 3335760,
           "size": 3691,
-          "match_percent": 8.558219
+          "match_percent": 8.079908
         },
         {
           "name": "_Z20locatorEditor_Renderiiff",
@@ -28021,7 +28021,7 @@
           "address": 5580448,
           "offset": 4690480,
           "size": 324,
-          "match_percent": 27.979382
+          "match_percent": 37.75258
         },
         {
           "name": "_ZN12SplineObject4DrawEiiif",
