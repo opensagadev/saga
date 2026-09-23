@@ -31,6 +31,7 @@
 #include <atomic>
 #include <cmath>
 #include <cstdio>
+#include <cstring>
 #include <cstdlib>
 #include <iostream>
 #include <mutex>
@@ -123,7 +124,7 @@ namespace saga::host::harness {
                 LOG_INFO("editor: F1 modules, F2 Level Editor, F3 free camera; Enter selects, Escape goes back");
                 LOG_INFO("editor RTL default keys: M options, N add, R drag, I inspect, Delete remove, Tab next mode; "
                          "WASD move, Q/E lower/raise, Z/X zoom, numpad 4/6/8/5 look");
-                LOG_INFO("editor RTL Steve controls: I options, M add, N drag, R inspect");
+                LOG_INFO("editor RTL keyboard actions follow the selected Ralph/Steve control table");
             }
 
             static void handle_event(const SDL_Event &event) {
@@ -205,6 +206,15 @@ namespace saga::host::harness {
             static constexpr f32 menu_movement_speed = 240.0f;
             // The editor checks bit 4 directly; the game remaps GAMEPAD_MENUCANCEL to bit 5 at startup.
             static constexpr u32 editor_cancel_button = 1u << 4;
+            static constexpr u32 rtl_control_buttons[2][8] = {
+                {0x80, 0x10, 0x40, 0x1000, 0x100, 0x20, 0x8000, 0x2000},
+                {0x40, 0x10, 0x20, 0x1000, 0x80, 0x100, 0x4, 0x8},
+            };
+
+            struct RtlControlItem {
+                eduiitem_s *item = nullptr;
+                EdUiItemCallback selected = nullptr;
+            };
 
             enum EditorKey : u32 {
                 key_up = 1u << 0,
@@ -385,7 +395,11 @@ namespace saga::host::harness {
                     at_main_menu &&
                     ((pad.digital_buttons_pressed & editor_cancel_button) ||
                      ((pad.digital_buttons_pressed & GAMEPAD_MENUSELECT) && main_menu->selected == main_menu->last));
+                if (edmainCurrent() == &edrtldesc)
+                    this->track_rtl_control_menu();
                 const i32 process_result = edmainProcess(FRAMETIME, &pad);
+                if (edmainCurrent() == &edrtldesc)
+                    this->track_rtl_control_menu();
                 if (process_result) {
                     if (requested_return) {
                         main_menu->selected = main_menu->first;
@@ -521,6 +535,8 @@ namespace saga::host::harness {
 
                 eduiSetFont(system_qfont);
                 this->register_original_modules();
+                // edmainInit rebuilds RTL's menus; their previous item addresses may be reused.
+                this->rtl_control_items.fill({});
                 edmainInit(system_qfont, nullptr);
                 edmainSetCursorEnabled(0);
 
@@ -827,6 +843,43 @@ namespace saga::host::harness {
                 LOG_INFO("editor: initialized original Placeable, SceneObject, Spline, and Knot classes");
             }
 
+            static void rtl_control_selected(eduimenu_s *menu, eduiitem_s *item, u32 value) {
+                auto &session = instance();
+                for (const RtlControlItem &watched : session.rtl_control_items) {
+                    if (watched.item != item)
+                        continue;
+                    watched.selected(menu, item, value);
+                    session.rtl_control_index = item->data;
+                    return;
+                }
+            }
+
+            void track_rtl_control_menu() {
+                eduimenu_s *menu = this->active_root_menu();
+                if (!menu || !menu->title ||
+                    (std::strcmp(menu->title, "Light Editor Options") != 0 &&
+                     std::strcmp(menu->title, "Fog Editor Options") != 0))
+                    return;
+                for (eduiitem_s *item = menu->first; item; item = item->next) {
+                    if (item->type != 2 || item->selection_group != 4 || item->data < 0 || item->data > 1 ||
+                        !item->text ||
+                        (std::strcmp(item->text, "Ralph Controls") != 0 &&
+                         std::strcmp(item->text, "Steve Controls") != 0))
+                        continue;
+                    auto found = std::find_if(this->rtl_control_items.begin(), this->rtl_control_items.end(),
+                                              [item](const RtlControlItem &watched) { return watched.item == item; });
+                    if (found != this->rtl_control_items.end())
+                        continue;
+                    auto free = std::find_if(this->rtl_control_items.begin(), this->rtl_control_items.end(),
+                                             [](const RtlControlItem &watched) { return watched.item == nullptr; });
+                    if (free == this->rtl_control_items.end())
+                        return;
+                    auto *selection = static_cast<edui_sel_s *>(item);
+                    *free = {item, selection->selected};
+                    selection->selected = &EditorSession::rtl_control_selected;
+                }
+            }
+
             void configure_rtl_pad(nupad_s &pad, u32 &buttons) {
                 const u32 keys = this->editor_keys.load(std::memory_order_acquire);
                 const auto held = [keys](EditorKey key) { return (keys & key) != 0; };
@@ -854,31 +907,28 @@ namespace saga::host::harness {
                     return;
                 }
 
-                // RTL interprets these raw pad bits through its selectable Ralph/Steve control table.
+                // Match the control table selected in the original RTL menu.
+                const u32 *ctl = rtl_control_buttons[this->rtl_control_index];
                 if (escape_pressed)
                     buttons |= GAMEPAD_START;
                 if (held(key_tab))
                     buttons |= 0x4000;
                 if (held(key_menu))
-                    buttons |= 0x80;
+                    buttons |= ctl[4];
                 if (held(key_add))
-                    buttons |= 0x40;
+                    buttons |= ctl[0];
                 if (held(key_delete))
-                    buttons |= 0x10;
+                    buttons |= ctl[1];
                 if (held(key_drag))
-                    buttons |= 0x20;
+                    buttons |= ctl[2];
                 if (held(key_inspect))
-                    buttons |= 0x100;
+                    buttons |= ctl[5];
                 if (held(key_lock))
-                    buttons |= 0x1000;
-                if (held(key_group))
-                    buttons |= 0x8000;
-                if (held(key_group_next))
-                    buttons |= 0x2000;
-                if (held(key_previous))
-                    buttons |= 0x4;
-                if (held(key_next))
-                    buttons |= 0x8;
+                    buttons |= ctl[3];
+                if (held(key_group) || held(key_previous))
+                    buttons |= ctl[6];
+                if (held(key_group_next) || held(key_next))
+                    buttons |= ctl[7];
                 if (held(key_burn_previous))
                     buttons |= 0x2;
 
@@ -978,6 +1028,8 @@ namespace saga::host::harness {
             alignas(16) std::array<u8, rtl_undo_bytes> rtl_undo_storage{};
             bool editor_pool_installed = false;
             bool rtl_undo_installed = false;
+            i32 rtl_control_index = 1;
+            std::array<RtlControlItem, 4> rtl_control_items{};
             std::vector<HostSceneObject> scene_objects;
             std::mutex filter_input_mutex;
             std::string pending_filter_input;

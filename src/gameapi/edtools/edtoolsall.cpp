@@ -1417,7 +1417,7 @@ void edpartScaleType(i32 index, float scale) {
 }
 
 i32 edppSaveEffects(char *filename, char page) {
-    const i8 category = page == 6 ? 1 : page;
+    const u8 category = page == 6 ? 1 : static_cast<u8>(page);
     i32 effect_count = 0;
     for (i32 index = 1; index < EDPP_MAX_TYPES; ++index) {
         if (debtab[index] == NULL)
@@ -4403,6 +4403,7 @@ i32 EdManipulator::SelectRotator(EdInputContext &input, VuVec &center, VuVec &pl
     i32 *last_angle = reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(this) + 0x64);
     i32 *angle_delta = reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(this) + 0x68);
     VuVec *selected_plane = reinterpret_cast<VuVec *>(reinterpret_cast<u8 *>(this) + 0x10);
+    VuVec *secondary_plane = reinterpret_cast<VuVec *>(reinterpret_cast<u8 *>(this) + 0x20);
     f32 pressed = input.GetPress(3);
     if (pressed != 0.0f || input.GetHold(3) == 0.0f) {
         VuVec far_point;
@@ -4443,7 +4444,7 @@ i32 EdManipulator::SelectRotator(EdInputContext &input, VuVec &center, VuVec &pl
             *selected_axis = axis;
             *angle_delta = 0;
             if (axis == 0) {
-                *selected_plane = VuVec_Zero;
+                *selected_plane = plane;
                 *start_angle = *last_angle = 0;
                 return 0;
             }
@@ -4462,6 +4463,7 @@ i32 EdManipulator::SelectRotator(EdInputContext &input, VuVec &center, VuVec &pl
         *selected_axis = 0;
         *start_angle = *last_angle = *angle_delta = 0;
         *selected_plane = VuVec_Zero;
+        *secondary_plane = VuVec_Zero;
         return axis;
     }
     i32 axis = *selected_axis;
@@ -4469,7 +4471,7 @@ i32 EdManipulator::SelectRotator(EdInputContext &input, VuVec &center, VuVec &pl
     f32 start_distance = ray_origin.x * plane.x + ray_origin.y * plane.y + ray_origin.z * plane.z + plane.w;
     f32 end_distance = (ray_origin.x + ray_direction.x) * plane.x + (ray_origin.y + ray_direction.y) * plane.y +
                        (ray_origin.z + ray_direction.z) * plane.z + plane.w;
-    if (start_distance * end_distance >= 0.0f) {
+    if (!(start_distance * end_distance < 0.0f)) {
         *angle_delta = 0;
         return axis;
     }
@@ -4477,7 +4479,7 @@ i32 EdManipulator::SelectRotator(EdInputContext &input, VuVec &center, VuVec &pl
     f32 x = ray_origin.x + ray_direction.x * t - center.x;
     f32 y = ray_origin.y + ray_direction.y * t - center.y;
     f32 z = ray_origin.z + ray_direction.z * t - center.z;
-    i32 angle = axis == 1 ? NuAtan2DA(y, z) : axis == 2 ? NuAtan2DA(x, -z) : NuAtan2DA(x, y);
+    i32 angle = axis == 1 ? NuAtan2DA(y, z) : axis == 2 ? NuAtan2DA(x, -z) : axis == 3 ? NuAtan2DA(x, y) : 0;
     i32 delta = (*last_angle - angle) & 0xffff;
     if (delta >= 0x8000)
         delta -= 0x10000;

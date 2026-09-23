@@ -20,7 +20,10 @@
 #include "globals.h"
 extern "C" {
     extern void *ed_fnt;
+    extern i32 AIEDITOR_PATHS;
     extern i32 AIEDITOR_ROUTES;
+    extern i32 AIEDITOR_LOCATORS;
+    extern i32 AIEDITOR_CREATURES;
     extern i32 aidata_version;
     extern i32 near_clip_at_cursor;
     extern f32 default_path_heighttol;
@@ -228,12 +231,17 @@ static __used__ void pathEditorDrawPath(EDAIPATH_s *path, i32 path_index) {
     if (path == nullptr) {
         return;
     }
+    u8 drawn_connections[0x1fe0] = {};
     u32 colour =
         path == aieditor->current_path ? 0xffffffff : AISysGetPathColour(path_index % AISysGetPathColourCount());
-    i32 solid = aieditorsettings.solid_path_display;
-    u16 active_route = 0;
-    if (aieditorsettings.current_mode == AIEDITOR_ROUTES && path == aieditor->current_path) {
-        active_route = path->current_route != nullptr ? 1 << (path->current_route - path->routes) : 1;
+    i32 solid =
+        aieditorsettings.solid_path_display && (static_cast<i16>(aieditorsettings.current_mode) == AIEDITOR_PATHS ||
+                                                static_cast<i16>(aieditorsettings.current_mode) == AIEDITOR_CREATURES ||
+                                                static_cast<i16>(aieditorsettings.current_mode) == AIEDITOR_LOCATORS);
+    u32 active_route = 0;
+    if (aieditorsettings.current_mode == AIEDITOR_ROUTES && aieditor->current_path != nullptr) {
+        EDAIPATH_s *selected = aieditor->current_path;
+        active_route = selected->current_route != nullptr ? 1u << (selected->current_route - selected->routes) : 1u;
     }
     for (EDAIPATHNODE_s *node = (EDAIPATHNODE_s *)NuLinkedListGetHead(&path->nodes); node != nullptr;
          node = (EDAIPATHNODE_s *)NuLinkedListGetNext(&path->nodes, &node->link)) {
@@ -250,6 +258,22 @@ static __used__ void pathEditorDrawPath(EDAIPATH_s *path, i32 path_index) {
         }
         pathEditorDrawNodeVolume(&node->position, node->radius, node->position.y + node->lower_height,
                                  node->position.y + node->upper_height, node_colour, nullptr, segments, solid);
+        if (node->shared_node != nullptr && !(node->shared_node->draw_flags & 1)) {
+            NURND_VERTEX3D vertices[2];
+            vertices[0].position = node->position;
+            vertices[1].position = node->position;
+            vertices[0].colour = node_colour;
+            vertices[1].colour = node_colour;
+            vertices[0].position.x += node->radius;
+            vertices[1].position.x -= node->radius;
+            AiRndrLine3d(vertices, nullptr, nullptr);
+            vertices[0].position = node->position;
+            vertices[1].position = node->position;
+            vertices[0].position.z += node->radius;
+            vertices[1].position.z -= node->radius;
+            AiRndrLine3d(vertices, nullptr, nullptr);
+            node->shared_node->draw_flags |= 1;
+        }
         if (active_route != 0 && (node->route_mask & active_route)) {
             pathEditorDrawNodeVolume(&node->position, node->radius * 0.9f, node->position.y + node->lower_height,
                                      node->position.y + node->upper_height, node_colour, nullptr, segments, solid);
@@ -257,18 +281,80 @@ static __used__ void pathEditorDrawPath(EDAIPATH_s *path, i32 path_index) {
         for (i32 slot = 0; slot < 8; ++slot) {
             EDAIPATHCNX_s *connection = &node->connections[slot];
             EDAIPATHNODE_s *other = connection->node;
-            if (other == nullptr || node->index >= other->index) {
+            if (other == nullptr) {
                 continue;
             }
+            u32 connection_colour = colour;
+            if (path == aieditor->current_path && node == path->current_node && other == path->other_node) {
+                connection_colour = 0xff00ffff;
+            }
+            pathEditorDrawConnectionInfo(&node->position, node->radius, &other->position, connection->flags,
+                                         connection_colour);
+
+            i32 first_index = node->index;
+            i32 second_index = other->index;
+            if (first_index >= 0 && first_index < 255 && second_index >= 0 && second_index < 255) {
+                u8 &seen = drawn_connections[first_index * 32 + second_index / 8];
+                u8 bit = static_cast<u8>(1u << (second_index & 7));
+                if (seen & bit) {
+                    continue;
+                }
+                seen |= bit;
+                drawn_connections[second_index * 32 + first_index / 8] |= static_cast<u8>(1u << (first_index & 7));
+            }
+
+            bool current_edge =
+                path == aieditor->current_path && (node == path->current_node || other == path->current_node);
+            bool selected_pair =
+                path == aieditor->current_path && ((node == path->current_node && other == path->other_node) ||
+                                                   (node == path->other_node && other == path->current_node));
+            u32 edge_colour = selected_pair ? 0xff00ffff : current_edge ? 0xff0000ff : colour;
+            NUVEC direction;
+            f32 distance = NuVecXZDist(&node->position, &other->position, &direction);
+            if (distance > 0.0f) {
+                direction.x /= distance;
+                direction.z /= distance;
+            }
+            i32 angle = 0x4000;
+            if (distance > 0.0f && node->radius != other->radius) {
+                angle -= NuASin((other->radius - node->radius) / distance);
+            }
             NURND_VERTEX3D vertices[2];
-            vertices[0].position = node->position;
-            vertices[1].position = other->position;
-            vertices[0].position.y += aiEditor_DrawYOffset;
-            vertices[1].position.y += aiEditor_DrawYOffset;
-            vertices[0].colour = colour;
-            vertices[1].colour = colour;
-            AiRndrLine3d(vertices, nullptr, nullptr);
-            pathEditorDrawConnectionInfo(&node->position, node->radius, &other->position, connection->flags, colour);
+            vertices[0].colour = edge_colour;
+            vertices[1].colour = edge_colour;
+            for (i32 side_index = 0; side_index < 2; ++side_index) {
+                NUVEC side;
+                NuVecRotateY(&side, &direction, side_index == 0 ? angle : -angle);
+                vertices[0].position = node->position;
+                vertices[1].position = other->position;
+                vertices[0].position.x += node->radius * side.x;
+                vertices[0].position.z += node->radius * side.z;
+                vertices[1].position.x += other->radius * side.x;
+                vertices[1].position.z += other->radius * side.z;
+                if (solid) {
+                    vertices[0].position.y += node->lower_height;
+                    vertices[1].position.y += other->lower_height;
+                    AiRndrLine3d(vertices, nullptr, nullptr);
+                    vertices[0].position.y = node->position.y + node->upper_height;
+                    vertices[1].position.y = other->position.y + other->upper_height;
+                    AiRndrLine3d(vertices, nullptr, nullptr);
+                } else {
+                    vertices[0].position.y += aiEditor_DrawYOffset;
+                    vertices[1].position.y += aiEditor_DrawYOffset;
+                    AiRndrLine3d(vertices, nullptr, nullptr);
+                }
+            }
+
+            if (active_route != 0 && (connection->route_mask & active_route)) {
+                vertices[0].position = node->position;
+                vertices[1].position = other->position;
+                vertices[0].position.y += aiEditor_DrawYOffset + 0.02f;
+                vertices[1].position.y += aiEditor_DrawYOffset + 0.02f;
+                u32 route_colour = selected_pair ? 0xff00ffff : 0xffff0000;
+                vertices[0].colour = route_colour;
+                vertices[1].colour = route_colour;
+                AiRndrLine3d(vertices, nullptr, nullptr);
+            }
         }
     }
 }
@@ -884,16 +970,29 @@ static __used__ void pathEditorCreateSpecialRouteData(AIPATH_s *path, EDAIPATH_s
         route->character_masks[1] = editor_route->user_mask;
     }
 
-    for (i32 edge = 0; edge < path->connection_count; ++edge) {
-        AIPATHCNX_s *connection = &path->connections[edge];
-        u16 editor_mask = connection->route_mask;
-        u16 dense_mask = 0;
-        for (i32 route_index = 0; route_index < route_count; ++route_index) {
-            if (editor_mask & (1 << route_slots[route_index])) {
-                dense_mask |= 1 << route_index;
+    for (EDAIPATHNODE_s *editor_node = (EDAIPATHNODE_s *)NuLinkedListGetHead(&editor_path->nodes);
+         editor_node != nullptr;
+         editor_node = (EDAIPATHNODE_s *)NuLinkedListGetNext(&editor_path->nodes, &editor_node->link)) {
+        AIPATHNODE_s *runtime_node = &path->nodes[editor_node->index];
+        for (i32 slot = 0; slot < 8; ++slot) {
+            EDAIPATHCNX_s *editor_connection = &editor_node->connections[slot];
+            if (editor_connection->node == nullptr || editor_connection->route_mask == 0) {
+                continue;
+            }
+            for (i32 edge = 0; edge < runtime_node->connection_count; ++edge) {
+                AIPATHCNX_s *connection = runtime_node->connections[edge];
+                if (connection == nullptr || (connection->node_indices[0] != editor_connection->node->index &&
+                                              connection->node_indices[1] != editor_connection->node->index)) {
+                    continue;
+                }
+                for (i32 route_index = 0; route_index < route_count; ++route_index) {
+                    if (editor_connection->route_mask & (1u << route_slots[route_index])) {
+                        connection->route_mask |= 1u << route_index;
+                    }
+                }
+                break;
             }
         }
-        connection->route_mask = dense_mask;
     }
 
     for (i32 route_index = 0; route_index < route_count; ++route_index) {
@@ -1265,11 +1364,6 @@ extern "C" {
             memset(path, 0, sizeof(*path));
             strcpy(path->name, editor_path->name);
             path->index = path_index;
-            path->node_count = editor_path->node_count;
-            path->flags = editor_path->flags;
-            if (editor_path == aieditor->current_path) {
-                system->active_path = path;
-            }
 
             i32 edge_count = 0;
             i32 special_count = 0;
@@ -1282,6 +1376,7 @@ extern "C" {
                 }
                 special_count += node->shared_node != nullptr;
             }
+            path->node_count = node_index;
             path->connection_count = edge_count / 2;
             path->special_route_count = special_count;
             if (path->connection_count != 0) {
@@ -1348,61 +1443,53 @@ extern "C" {
             i32 connection_index = 0;
             for (EDAIPATHNODE_s *node = (EDAIPATHNODE_s *)NuLinkedListGetHead(&editor_path->nodes); node != nullptr;
                  node = (EDAIPATHNODE_s *)NuLinkedListGetNext(&editor_path->nodes, &node->link)) {
-                for (i32 slot = 0; slot < 8; ++slot) {
-                    EDAIPATHCNX_s *connection = &node->connections[slot];
-                    EDAIPATHNODE_s *other = connection->node;
-                    if (other == nullptr || other->index <= node->index || connection_index >= path->connection_count ||
-                        path->connections == nullptr) {
-                        continue;
-                    }
-                    AIPATHCNX_s *runtime = &path->connections[connection_index++];
-                    runtime->node_indices[0] = node->index;
-                    runtime->node_indices[1] = other->index;
-                    runtime->traversal_flags[0] = connection->flags;
-                    runtime->original_traversal_flags[0] = connection->flags;
-                    runtime->route_mask = connection->route_mask;
-                    for (i32 reverse = 0; reverse < 8; ++reverse) {
-                        if (other->connections[reverse].node == node) {
-                            runtime->traversal_flags[1] = other->connections[reverse].flags;
-                            runtime->original_traversal_flags[1] = other->connections[reverse].flags;
-                            runtime->route_mask |= other->connections[reverse].route_mask;
-                            break;
-                        }
-                    }
-                    NUVEC difference;
-                    runtime->distance = NuVecDist(&node->position, &other->position, &difference);
-                    runtime->horizontal_distance = NuVecXZDist(&node->position, &other->position, &difference);
-                    if (runtime->horizontal_distance == 0.0f) {
-                        runtime->horizontal_distance = 0.0001f;
-                    }
-                    runtime->rotation = (i16)(NuAtan2(difference.x, difference.z) * 10430.378f);
-                }
-            }
-            path->connection_count = connection_index;
-            for (EDAIPATHNODE_s *node = (EDAIPATHNODE_s *)NuLinkedListGetHead(&editor_path->nodes); node != nullptr;
-                 node = (EDAIPATHNODE_s *)NuLinkedListGetNext(&editor_path->nodes, &node->link)) {
                 AIPATHNODE_s *runtime = &path->nodes[node->index];
                 if (runtime->connection_count != 0) {
                     runtime->connections = (AIPATHCNX_s **)AISysBufferAlloc(
                         cursor, end, runtime->connection_count * sizeof(AIPATHCNX_s *));
+                    if (runtime->connections == nullptr) {
+                        distance_tables = nullptr;
+                        return nullptr;
+                    }
+                    memset(runtime->connections, 0, runtime->connection_count * sizeof(AIPATHCNX_s *));
                     i32 next = 0;
-                    for (i32 slot = 0; slot < 8 && runtime->connections != nullptr; ++slot) {
-                        EDAIPATHNODE_s *other = node->connections[slot].node;
+                    for (i32 slot = 0; slot < 8; ++slot) {
+                        EDAIPATHCNX_s *editor_connection = &node->connections[slot];
+                        EDAIPATHNODE_s *other = editor_connection->node;
                         if (other == nullptr) {
                             continue;
                         }
-                        for (i32 edge = 0; edge < connection_index; ++edge) {
-                            AIPATHCNX_s *connection = &path->connections[edge];
-                            if ((connection->node_indices[0] == node->index &&
-                                 connection->node_indices[1] == other->index) ||
-                                (connection->node_indices[1] == node->index &&
-                                 connection->node_indices[0] == other->index)) {
-                                runtime->connections[next++] = connection;
-                                break;
+                        if (other->index < node->index) {
+                            AIPATHNODE_s *other_runtime = &path->nodes[other->index];
+                            for (i32 reverse = 0; reverse < other_runtime->connection_count; ++reverse) {
+                                AIPATHCNX_s *connection = other_runtime->connections[reverse];
+                                if (connection != nullptr && connection->node_indices[1] == node->index) {
+                                    runtime->connections[next] = connection;
+                                    connection->traversal_flags[1] = editor_connection->flags;
+                                    connection->original_traversal_flags[1] = editor_connection->flags;
+                                    break;
+                                }
                             }
+                        } else {
+                            AIPATHCNX_s *connection = &path->connections[connection_index++];
+                            runtime->connections[next] = connection;
+                            connection->node_indices[0] = node->index;
+                            connection->node_indices[1] = other->index;
+                            connection->traversal_flags[0] = editor_connection->flags;
+                            connection->traversal_flags[1] = editor_connection->flags;
+                            connection->original_traversal_flags[0] = editor_connection->flags;
+                            connection->original_traversal_flags[1] = editor_connection->flags;
+                            NUVEC difference;
+                            connection->distance = NuVecDist(&other->position, &node->position, &difference);
+                            connection->horizontal_distance =
+                                NuVecXZDist(&other->position, &node->position, &difference);
+                            if (connection->horizontal_distance == 0.0f) {
+                                connection->horizontal_distance = 0.0001f;
+                            }
+                            connection->rotation = (i16)(NuAtan2(difference.x, difference.z) * 10430.378f);
                         }
+                        ++next;
                     }
-                    runtime->connection_count = next;
                 }
                 if (node->shared_node != nullptr && path->special_routes != nullptr) {
                     AIPATHNODELINK_s *link =

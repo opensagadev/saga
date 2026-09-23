@@ -812,6 +812,8 @@ eduimenu_s *locatorEditor_Process(nupad_s *pad) {
                 locator->position = aieditor->camera_position;
                 memcpy(locator->path_check, reinterpret_cast<u8 *>(aieditor) + 0x48, 0x1c);
                 locator->path_angle = NuAngSub(locator->direction, locator->path_angle);
+            } else if (aieditor->current_locator != nullptr) {
+                edcamSetPos(&aieditor->current_locator->position);
             }
         } else if ((pad->digital_buttons_pressed & 0x40) != 0 &&
                    *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(aieditor) + 0x48) != 0) {
@@ -852,6 +854,9 @@ eduimenu_s *locatorEditor_Process(nupad_s *pad) {
                 locator->path_angle = NuAngSub(locator->direction, locator->path_angle);
                 if (aieditor->current_locator_set != nullptr) {
                     AddLocatorToSet(aieditor->current_locator_set, locator, nullptr);
+                    if (previous != nullptr && previous != locator) {
+                        AddLocatorToSet(aieditor->current_locator_set, locator, previous);
+                    }
                 }
             }
         }

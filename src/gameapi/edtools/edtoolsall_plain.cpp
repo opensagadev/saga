@@ -2570,14 +2570,10 @@ extern "C" {
         }
         return count - skip;
     }
-    // Parts-page loader (edppLoadPage @0x36c630).  The normal general (0) and
-    // character (5) pages only contain effect-type records; instance records
-    // are read by the page-1/0 branches in the original and are deliberately
-    // not entered here.
+    // Parts-page loader (edppLoadPage @0x36c630).
     i32 edppLoadPage(char *path, i32 flag, usize scene) {
-        (void)scene;
-        u8 category;
-        i32 page_index;
+        i8 category = static_cast<i8>(flag);
+        i32 page_index = -1;
         if (flag == 0) {
             category = 0;
             page_index = 0;
@@ -2585,12 +2581,19 @@ extern "C" {
             category = 5;
             page_index = 1;
         } else {
-            // The remaining page kinds have their own instance-record paths;
-            // they are outside the general/character pages recovered here.
-            return -1;
+            if (flag == 6)
+                category = 1;
+            for (i32 page = 2; page < 8; ++page) {
+                if (edpp_page_used[page] == 0) {
+                    page_index = page;
+                    break;
+                }
+            }
+            if (page_index == -1)
+                return -1;
         }
 
-        EdFileSetMedia(1);
+        EdFileSetMedia(edpp_usememcard == 0 ? 1 : 2);
         if (EdFileOpen(path, NUFILE_READ) == 0) {
             return -1;
         }
@@ -2607,12 +2610,11 @@ extern "C" {
         edpp_page_scene[page_index] = scene;
 
         i32 requested = EdFileReadInt();
-        i32 available = EDPP_MAX_TYPES - edpp_types_used;
-        if (requested > available) {
-            requested = available;
-        }
-        if (requested < 0) {
-            requested = 0;
+        i32 skipped = 0;
+        if (requested + edpp_types_used > EDPP_MAX_TYPES) {
+            skipped = requested + edpp_types_used - EDPP_MAX_TYPES;
+            requested = EDPP_MAX_TYPES - edpp_types_used;
+            edpp_types_used = EDPP_MAX_TYPES;
         }
 
         for (i32 n = 0; n < requested; n++) {
@@ -2630,7 +2632,120 @@ extern "C" {
             effect->last_render_time = 0.0f;
             effect->page = static_cast<u8>(page_index);
             debtab[index] = effect;
+            f32 elapsed_time = 0.0f;
+            f32 active_time = 0.0f;
+            while (effect->particle_lifetime > elapsed_time) {
+                f32 remaining_time = effect->particle_lifetime - elapsed_time;
+                f32 emission_time = effect->emission_period_random + effect->emission_pause;
+                f32 emitted = remaining_time < emission_time ? remaining_time : emission_time;
+                active_time += emitted;
+                elapsed_time += emitted;
+                remaining_time = effect->particle_lifetime - elapsed_time;
+                elapsed_time +=
+                    remaining_time < effect->emission_pause_random ? remaining_time : effect->emission_pause_random;
+            }
+            i16 particle_count = static_cast<i16>(static_cast<i32>(
+                static_cast<f32>(effect->frequency) * (active_time / elapsed_time) * effect->particle_lifetime));
+            if (particle_count < 1)
+                particle_count = 1;
+            effect->max_particles = static_cast<i16>(particle_count * (effect->trail_count + 1));
+            for (i32 particle_index = 0; particle_index < 512; ++particle_index) {
+                i32 instance_id = edpp_ptls[particle_index].instance_id;
+                if (instance_id == -1 || instance_id == 99999)
+                    continue;
+                debkeydatatype_s *key = &debkeydata[instance_id];
+                if (debtab[key->effect_index] == effect)
+                    DebReAlloc(key, effect->max_particles);
+            }
             edpp_types_used++;
+        }
+
+        debinftype discarded;
+        for (i32 n = 0; n < skipped; ++n)
+            FileLoadSingleEffectType(&discarded, version, category);
+
+        if (flag == 1 || flag == 2) {
+            i32 instances = EdFileReadInt();
+            if (instances + edpp_instances_used > 512)
+                instances = 512 - edpp_instances_used;
+            edpp_instances_used = 0;
+            for (i32 n = 0; n < instances; ++n) {
+                i32 index = 0;
+                while (index < 512 && edpp_ptls[index].instance_id != -1)
+                    ++index;
+                if (index == 512)
+                    break;
+                edpp_particle_s *particle = &edpp_ptls[index];
+                particle->page = static_cast<i8>(page_index);
+                particle->position.x = EdFileReadFloat();
+                particle->position.y = EdFileReadFloat();
+                particle->position.z = EdFileReadFloat();
+                if (version <= 6) {
+                    particle->rotation_z = 0;
+                    particle->rotation_y = 0;
+                    particle->emitter_rotation_z = static_cast<i16>(EdFileReadInt());
+                    particle->emitter_rotation_y = static_cast<i16>(EdFileReadInt());
+                } else {
+                    particle->rotation_z = EdFileReadShort();
+                    particle->rotation_y = EdFileReadShort();
+                    particle->emitter_rotation_z = EdFileReadShort();
+                    particle->emitter_rotation_y = EdFileReadShort();
+                }
+                particle->emitter_rotation_x = version > 21 ? EdFileReadShort() : 0;
+                if (version > 33)
+                    particle->start_offset = EdFileReadFloat();
+                else if (version > 7)
+                    particle->start_offset = static_cast<f32>(EdFileReadInt()) / 60.0f;
+                else
+                    particle->start_offset = 0.0f;
+                EdFileRead(particle->name, 16);
+                particle->instance_id = 99999;
+                particle->effect_index = LookupDebrisEffectPageOnly(particle->name, static_cast<char>(page_index));
+                if (particle->effect_index == -1)
+                    ++edpp_instances_used;
+
+                if (version > 8) {
+                    particle->switch_type = EdFileReadInt();
+                    particle->switch_id = EdFileReadInt();
+                    particle->switch_variable = EdFileReadFloat();
+                } else {
+                    particle->switch_type = 0;
+                    particle->switch_id = -1;
+                    particle->switch_variable = 0.0f;
+                }
+                if (version > 11) {
+                    particle->reflection_rotation_z = EdFileReadShort();
+                    particle->reflection_rotation_y = EdFileReadShort();
+                    particle->reflection_offset = EdFileReadFloat();
+                    particle->reflection_bounce = version == 12 ? 0.9f : EdFileReadFloat();
+                } else {
+                    particle->reflection_rotation_z = 0;
+                    particle->reflection_rotation_y = 0;
+                    particle->reflection_offset = 0.0f;
+                    particle->reflection_bounce = 0.0f;
+                }
+                particle->render_group = version > 14 ? EdFileReadShort() : 0;
+                if (version > 26) {
+                    particle->render_priority = EdFileReadUnsignedShort();
+                } else {
+                    particle->render_priority = 20000;
+                    if (particle->effect_index != -1) {
+                        u8 generator = debtab[particle->effect_index]->generator_type;
+                        if (generator == 2)
+                            particle->render_priority = 40000;
+                        else if (generator == 3)
+                            particle->render_priority = 30000;
+                        else if (generator == 7)
+                            particle->render_priority = 10000;
+                    }
+                }
+                particle->dynamic_priority = version > 26 ? EdFileReadChar() : 0;
+                particle->detail_levels = version > 35 ? EdFileReadChar() : 7;
+                particle->facing_mode = version > 37 ? EdFileReadChar() : 0;
+                particle->facing_rotation_x = version > 37 ? EdFileReadShort() : 0;
+                particle->facing_rotation_y = version > 37 ? EdFileReadShort() : 0;
+                ++edpp_instances_used;
+            }
         }
 
         EdFileSetReadWrongEndianess(0);
@@ -2641,6 +2756,8 @@ extern "C" {
             DEBPAGE_GENERAL = page_index;
         } else if (flag == 5) {
             DEBPAGE_CHARACTER = page_index;
+        } else if (flag == 1) {
+            DEBPAGE_AREA = page_index;
         }
         return page_index;
     }
@@ -4716,7 +4833,7 @@ extern "C" {
         f32 cursor_bottom = interact->y + interact->height;
         bool in_row = edui_cursor_y >= interact->y && edui_cursor_y < cursor_bottom;
         if (property->unknown_property_flags & 1) {
-            if (in_row && edui_cursor_x >= label_end + 1.0f && edui_cursor_x < property->button_x) {
+            if (in_row && edui_cursor_x >= label_end + 1.0f) {
                 property->unknown_property_flags |= 1;
                 eduiPropTextPos = -1;
                 return 1;
@@ -5780,7 +5897,7 @@ extern "C" {
             const u32 button_line_colour = over_button ? 0xffffffff : 0xff000000;
             NuRndrLineRect2di(static_cast<i32>(button_x * 16.0f), static_cast<i32>(button_y * 8.0f),
                               static_cast<i32>(button_size * 16.0f), static_cast<i32>(button_size * 8.0f), 0xff000000,
-                              uimtls[0]);
+                              uimtls[ui_outmtl]);
             const f32 mid_x = button_x + button_size * 0.5f;
             const f32 mid_y = button_y + button_size * 0.5f;
             NuRndrLine2di(static_cast<i32>((button_x + 2.0f) * 16.0f), static_cast<i32>(mid_y * 8.0f),
@@ -6118,6 +6235,14 @@ extern "C" {
                 NuRndrLine2di(guide_x, y << 3, guide_x, static_cast<i32>((static_cast<f32>(y) + row_height) * 8.0f),
                               0xff000000, uimtls[0]);
             }
+        }
+        eduiFntPrintClipEx(edui_font, static_cast<f32>(x) + indentation, static_cast<f32>(y) + baseline, 16,
+                           static_cast<f32>(x) - indentation, property->label_width, item->text);
+        const f32 value_x = property->button_x - 2.0f;
+        const f32 value_clip_x = static_cast<f32>(x) + property->label_width;
+        eduiFntPrintClipEx(edui_font, value_x, static_cast<f32>(y) + baseline, 32, value_clip_x, value_x - value_clip_x,
+                           property->property_text);
+        if (!edui_donotdraw) {
             const f32 button_x = property->button_x;
             const f32 button_y = property->button_y;
             const f32 button_size = property->button_size;
@@ -6130,7 +6255,7 @@ extern "C" {
             }
             NuRndrLineRect2di(static_cast<i32>(button_x * 16.0f), static_cast<i32>(button_y * 8.0f),
                               static_cast<i32>(button_size * 16.0f), static_cast<i32>(button_size * 8.0f), 0xff000000,
-                              uimtls[0]);
+                              uimtls[ui_outmtl]);
             const auto px = [&](f32 fraction) { return static_cast<i32>((button_x + button_size * fraction) * 16.0f); };
             const auto py = [&](f32 fraction) { return static_cast<i32>((button_y + button_size * fraction) * 8.0f); };
             const u32 icon_colour = button_highlighted ? 0xffffffff : 0xff000000;
@@ -6143,15 +6268,6 @@ extern "C" {
                 NuRndrTriStrip2di(up, NULL, 3, icon_colour, uimtls[0]);
                 NuRndrTriStrip2di(down, NULL, 3, icon_colour, uimtls[0]);
             }
-        }
-        eduiFntPrintClipEx(edui_font, static_cast<f32>(x) + indentation, static_cast<f32>(y) + baseline, 16,
-                           static_cast<f32>(x) - indentation, property->label_width, item->text);
-        char *value = (property->unknown_property_flags & 1) ? eduiPropTextEdit : property->property_text;
-        if (value) {
-            const f32 value_x = property->button_x - 2.0f;
-            const f32 value_clip_x = static_cast<f32>(x) + property->label_width;
-            eduiFntPrintClipEx(edui_font, value_x, static_cast<f32>(y) + baseline, 32, value_clip_x,
-                               value_x - value_clip_x, value);
         }
         return height;
     }
@@ -6347,7 +6463,7 @@ extern "C" {
             memcpy(prefix, picker->value, position);
             prefix[position] = '\0';
             i32 offset = static_cast<i32>(NuQFntPrintLenU(edui_font, prefix));
-            char at_cursor[2] = {picker->value[position] ? picker->value[position] : 'A', '\0'};
+            char at_cursor[2] = {position < NuStrLen(picker->value) ? picker->value[position] : 'A', '\0'};
             NuRndrRect2di((x << 4) + offset, value_y - static_cast<i32>(NuQFntBaseline(edui_font)),
                           static_cast<i32>(NuQFntPrintLenU(edui_font, at_cursor)),
                           static_cast<i32>(NuQFntHeight(edui_font)), item->colours[1] ^ 0xffffff, NULL);

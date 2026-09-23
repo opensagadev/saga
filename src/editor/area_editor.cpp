@@ -445,17 +445,17 @@ eduimenu_s *areaEditor_Process(nupad_s *pad) {
             aieditorsettings.area_rotation = selected->rotation;
         }
         if (buttons & 0x2000) {
-            area_rotation_step() = pressed & 0x2000 ? 20 : area_rotation_step() + 20;
-            if (area_rotation_step() > 600) {
-                area_rotation_step() = 600;
-            }
-            aieditorsettings.area_rotation = NuAngSub(aieditorsettings.area_rotation, area_rotation_step());
-        } else {
             area_rotation_step() = pressed & 0x8000 ? 20 : area_rotation_step() + 20;
             if (area_rotation_step() > 600) {
                 area_rotation_step() = 600;
             }
             aieditorsettings.area_rotation = NuAngAdd(aieditorsettings.area_rotation, area_rotation_step());
+        } else {
+            area_rotation_step() = pressed & 0x2000 ? 20 : area_rotation_step() + 20;
+            if (area_rotation_step() > 600) {
+                area_rotation_step() = 600;
+            }
+            aieditorsettings.area_rotation = NuAngSub(aieditorsettings.area_rotation, area_rotation_step());
         }
         if (selected != NULL && selected == area_hovered()) {
             selected->rotation = static_cast<i16>(aieditorsettings.area_rotation);

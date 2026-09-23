@@ -337,8 +337,7 @@ eduimenu_s *antinodeEditor_Process(nupad_s *pad) {
             if (pressed & 0x40) {
                 selected = CreateAntinode(&aieditor->camera_position);
                 aieditor->mode_selection_42e9c = selected;
-                if (selected != nullptr)
-                    antinodeEditor_AntinodeMoved(selected);
+                antinodeEditor_AntinodeMoved(selected);
             }
         } else if (pressed & 0x40) {
             aieditor->mode_selection_42e9c = nearest;
@@ -420,9 +419,19 @@ eduimenu_s *antinodeEditor_Process(nupad_s *pad) {
         }
     }
 
-    if ((held & 0x100) && (pressed & (1 | 2 | 4 | 8))) {
-        bool forward = (pressed & (8 | 4)) != 0;
-        bool skip_platforms = (pressed & (1 | 4)) != 0;
+    if ((held & 0x40) == 0 && (pressed & 0x100) == 0 && (held & 0x100) && (pressed & (1 | 2 | 4 | 8))) {
+        bool forward = false;
+        bool skip_platforms = false;
+        if (pressed & 8) {
+            forward = true;
+        } else if (pressed & 2) {
+            forward = false;
+        } else if (pressed & 4) {
+            forward = true;
+            skip_platforms = true;
+        } else {
+            skip_platforms = true;
+        }
         EDANTINODE_s *candidate = selected;
         EDANTINODE_s *first = selected;
         bool have_first = selected != nullptr;
@@ -434,7 +443,7 @@ eduimenu_s *antinodeEditor_Process(nupad_s *pad) {
             if (next == nullptr)
                 next = forward ? NuLinkedListGetHead(antinode_list()) : NuLinkedListGetTail(antinode_list());
             candidate = reinterpret_cast<EDANTINODE_s *>(next);
-            if (candidate == nullptr || (have_first && candidate == first)) {
+            if (candidate == nullptr || (skip_platforms && have_first && candidate == first)) {
                 candidate = nullptr;
                 break;
             }

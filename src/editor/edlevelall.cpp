@@ -3352,7 +3352,8 @@ void *EdClass::FindObject(char *object_name) {
         EdMember member;
         i32 string_type = EdType_String;
         if (FindMember(&member, object, 2, 1) != 0) {
-            char name_buffer[256];
+            // The original aligns the stack for this name buffer.
+            char name_buffer[256] __attribute__((aligned(16)));
             if (member.reference->GetAttributeData(member.object, 2, string_type, name_buffer, sizeof(name_buffer)) !=
                     0 &&
                 NuStrICmp(object_name, name_buffer) == 0) {

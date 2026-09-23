@@ -132,8 +132,9 @@ static __attribute__((used)) void edanimcbSetParticleType(eduimenu_s *menu, edui
 static __attribute__((used)) void edanimcbToggleSoundType(eduimenu_s *menu, eduiitem_s *item, u32) {
     edanim_soundtype_menu = NULL;
     auto &param = AnimParams[edanim_nearest_param_id];
-    param.sound_values[edanim_nearest_sound] = item->highlighted ? 50.0f : 1.0f;
-    param.sound_flags[edanim_nearest_sound] = item->highlighted ? 1 : 0;
+    const bool repeating = (item->highlighted & 1) != 0;
+    param.sound_values[edanim_nearest_sound] = repeating ? 50.0f : 1.0f;
+    param.sound_flags[edanim_nearest_sound] = repeating ? 1 : 0;
     eduiMenuDetach(menu);
     eduiMenuDestroy(menu);
 }

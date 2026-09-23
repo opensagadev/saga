@@ -3,7 +3,9 @@
 #include <atomic>
 #include <cstring>
 
+#include "batman.h"
 #include "gameapi/edtools/edcam.h"
+#include "gameapi/edtools/edui.h"
 #include "globals.h"
 #include "legoapi/world/world.h"
 #include "nu2api/nu3d/nushader_plain.h"
@@ -18,6 +20,7 @@ extern f32 g_renderContext_view[16];
 extern f32 g_renderContext_projection[16];
 extern f32 g_renderContext_position[4];
 extern i32 global_frame_count;
+extern i32 edlevel_mouseandkeyboard;
 
 namespace {
     std::atomic<bool> host_free_camera_enabled{false};
@@ -27,10 +30,35 @@ namespace {
     bool host_free_camera_initialized = false;
     u32 host_free_camera_previous_controls = 0;
     i32 host_free_camera_last_move_frame = -1;
+    i32 host_free_camera_previous_pad_fly_mode = 0;
+    i32 host_free_camera_previous_editor_input_mode = 0;
+    bool host_free_camera_overrode_editor_input = false;
 
     constexpr u8 host_pad_center = 0x80;
     constexpr u8 host_pad_minimum = 0x00;
     constexpr u8 host_pad_maximum = 0xff;
+
+    void host_free_camera_capture_editor_input() {
+        if (editor_active && !host_free_camera_overrode_editor_input) {
+            host_free_camera_previous_editor_input_mode = edlevel_mouseandkeyboard;
+            // Let the editor process mouse input; the host supplies pad input below.
+            edlevel_mouseandkeyboard = 1;
+            host_free_camera_overrode_editor_input = true;
+        }
+    }
+
+    void host_free_camera_restore() {
+        if (host_free_camera_initialized) {
+            PadFlyMode = host_free_camera_previous_pad_fly_mode;
+        }
+        if (host_free_camera_overrode_editor_input) {
+            edlevel_mouseandkeyboard = host_free_camera_previous_editor_input_mode;
+            host_free_camera_overrode_editor_input = false;
+        }
+        host_free_camera_initialized = false;
+        host_free_camera_previous_controls = 0;
+        host_free_camera_last_move_frame = -1;
+    }
 
     void host_free_camera_initialize(NUMTX *incoming_view) {
         edcam_s *editor_camera = edcamGetEdCam();
@@ -47,7 +75,9 @@ namespace {
         }
         editor_camera->offset = {0.0f, 0.0f, 0.0f};
 
+        host_free_camera_previous_pad_fly_mode = PadFlyMode;
         PadFlyMode = 1;
+        host_free_camera_capture_editor_input();
         host_free_camera_initialized = true;
         LOG_INFO("host free camera: using built-in edcam at (%.3f, %.3f, %.3f), distance=%.3f", incoming_position.x,
                  incoming_position.y, incoming_position.z, editor_camera->distance);
@@ -81,9 +111,6 @@ void HostFreeCameraConfigure(bool enabled) {
     host_free_camera_enabled.store(enabled, std::memory_order_relaxed);
     host_free_camera_ready.store(false, std::memory_order_relaxed);
     host_free_camera_controls.store(0, std::memory_order_relaxed);
-    host_free_camera_initialized = false;
-    host_free_camera_previous_controls = 0;
-    host_free_camera_last_move_frame = -1;
 }
 
 void HostFreeCameraSetReady(bool ready) {
@@ -100,7 +127,8 @@ bool HostFreeCameraActive(void) {
 }
 
 static void host_free_camera_apply(NUMTX *view) {
-    if (!host_free_camera_initialized) {
+    const bool newly_initialized = !host_free_camera_initialized;
+    if (newly_initialized) {
         host_free_camera_initialize(view);
     }
 
@@ -111,14 +139,28 @@ static void host_free_camera_apply(NUMTX *view) {
         host_free_camera_previous_controls = controls;
     }
 
-    if (host_free_camera_last_move_frame != global_frame_count) {
+    if (host_free_camera_last_move_frame != global_frame_count && !(newly_initialized && editor_active) &&
+        (!editor_active || eduiGetCameraEnabled())) {
         nupad_s pad = host_free_camera_pad(controls);
+        const i32 cursor_enabled = edmainGetCursorEnabled();
+        // The editor has already processed the mouse this frame.
+        edmainSetCursorEnabled(0);
         edcamMoveEx(&pad, NuTimeGetFrameTime());
+        edmainSetCursorEnabled(cursor_enabled);
         host_free_camera_last_move_frame = global_frame_count;
     }
+    if (newly_initialized && editor_active)
+        host_free_camera_last_move_frame = global_frame_count;
     NUMTX camera_world;
     edcamMtx(&camera_world);
     NuMtxInv(view, &camera_world);
+    if (editor_active) {
+        // Editor rays read these camera matrices on the next Process frame.
+        if (NUCAMERA *camera = edmainGetCamera()) {
+            camera->mtx = camera_world;
+        }
+        global_camera.mtx = camera_world;
+    }
 
     if (WORLD != NULL) {
         WORLD->room_visibility_flag = 1;
@@ -131,6 +173,8 @@ extern "C" void NuRenderContextSetViewProj(NUMTX *view, NUMTX *projection) {
     NUMTX active_view = *view;
     if (HostFreeCameraActive() && GameCam != NULL) {
         host_free_camera_apply(&active_view);
+    } else if (host_free_camera_initialized || host_free_camera_overrode_editor_input) {
+        host_free_camera_restore();
     }
 
     NUVEC scale = {
