@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 57.90173,
+    "fuzzy_match_percent": 57.956238,
     "total_code": "4722419",
     "matched_code": "485548",
     "matched_code_percent": 10.281765,
@@ -18878,7 +18878,7 @@
           "address": 4038544,
           "offset": 3148576,
           "size": 970,
-          "match_percent": 42.431034
+          "match_percent": 42.36638
         },
         {
           "name": "_Z22antinodeEditor_ProcessP7nupad_s",
@@ -18886,7 +18886,7 @@
           "address": 4039520,
           "offset": 3149552,
           "size": 3155,
-          "match_percent": 32.645714
+          "match_percent": 36.56286
         },
         {
           "name": "_ZL27antinodeEditor_cbSelectTypeP10eduimenu_sP10eduiitem_sj",
@@ -18894,7 +18894,7 @@
           "address": 4044992,
           "offset": 3155024,
           "size": 696,
-          "match_percent": 30.203947
+          "match_percent": 93.0329
         },
         {
           "name": "aieditor_Register",
@@ -19149,7 +19149,7 @@
           "address": 4220016,
           "offset": 3330048,
           "size": 342,
-          "match_percent": 39.873684
+          "match_percent": 50.073685
         },
         {
           "name": "_Z17areaEditor_Renderiiff",
@@ -19396,7 +19396,7 @@
           "address": 4032240,
           "offset": 3142272,
           "size": 319,
-          "match_percent": 73.09876
+          "match_percent": 74.27161
         },
         {
           "name": "_ZL31creatureEditor_cbRenameCreatureP10eduimenu_sP10eduiitem_sj",
@@ -19420,7 +19420,7 @@
           "address": 4061056,
           "offset": 3171088,
           "size": 1873,
-          "match_percent": 30.65641
+          "match_percent": 49.607693
         },
         {
           "name": "_ZL29creatureEditor_cbSelectScriptP10eduimenu_sP10eduiitem_sj",
@@ -20411,7 +20411,7 @@
           "address": 5532976,
           "offset": 4643008,
           "size": 189,
-          "match_percent": 26.710144
+          "match_percent": 33.405796
         },
         {
           "name": "_ZN12PropertyTool13GetActiveMenuEP12PropertyMenu",
@@ -20883,7 +20883,7 @@
           "address": 5562144,
           "offset": 4672176,
           "size": 1029,
-          "match_percent": 29.875
+          "match_percent": 14.506411
         },
         {
           "name": "_ZN12PropertyTool7ProcessER14EdInputContext",
@@ -21626,7 +21626,7 @@
           "address": 4192640,
           "offset": 3302672,
           "size": 2656,
-          "match_percent": 18.571627
+          "match_percent": 61.620304
         },
         {
           "name": "pathEditor_GetPath",
@@ -21984,7 +21984,7 @@
           "address": 4217232,
           "offset": 3327264,
           "size": 547,
-          "match_percent": 3.659575
+          "match_percent": 0.0
         },
         {
           "name": "_ZL42locatorEditor_cbCancelRenameLocatorSetMenuP10eduimenu_sS0_",
@@ -22040,7 +22040,7 @@
           "address": 4219216,
           "offset": 3329248,
           "size": 799,
-          "match_percent": 0.0
+          "match_percent": 9.29108
         },
         {
           "name": "_Z21locatorEditor_ProcessP7nupad_s",
@@ -23861,7 +23861,7 @@
           "address": 1646880,
           "offset": 756912,
           "size": 1968,
-          "match_percent": 54.10811
+          "match_percent": 54.118504
         },
         {
           "name": "_ZL24Condition_CategoryIsInitP7AISYS_sPcP10AISCRIPT_s",
@@ -29092,7 +29092,7 @@
           "address": 5481344,
           "offset": 4591376,
           "size": 388,
-          "match_percent": 22.609756
+          "match_percent": 22.365854
         },
         {
           "name": "_ZN17EdFileInputStream15SerialiseBufferEPvii",
@@ -29100,7 +29100,7 @@
           "address": 5481744,
           "offset": 4591776,
           "size": 188,
-          "match_percent": 58.714287
+          "match_percent": 58.44643
         },
         {
           "name": "_ZN22EdSpecialObjectControl14cbSelectObjectEP10eduimenu_sP10eduiitem_sj",
@@ -29116,7 +29116,7 @@
           "address": 5482800,
           "offset": 4592832,
           "size": 843,
-          "match_percent": 31.395123
+          "match_percent": 84.92683
         },
         {
           "name": "_ZN13EdInputStream15SerialiseStringEPPc",
@@ -29268,7 +29268,7 @@
           "address": 5489472,
           "offset": 4599504,
           "size": 1584,
-          "match_percent": 10.356126
+          "match_percent": 0.0
         },
         {
           "name": "_ZN15EdMatrixControl7DestroyEv",
@@ -29484,7 +29484,7 @@
           "address": 5495216,
           "offset": 4605248,
           "size": 174,
-          "match_percent": 99.954544
+          "match_percent": 99.61364
         },
         {
           "name": "_Z9EdDrawEndv",
@@ -33627,7 +33627,7 @@
           "address": 3591616,
           "offset": 2701648,
           "size": 489,
-          "match_percent": 72.655464
+          "match_percent": 72.36134
         },
         {
           "name": "_ZL21edptlcbResetParticlesP10eduimenu_sP10eduiitem_sj",
@@ -34075,7 +34075,7 @@
           "address": 3753472,
           "offset": 2863504,
           "size": 800,
-          "match_percent": 0.0
+          "match_percent": 35.472908
         },
         {
           "name": "eduicbRenderColourSlider",

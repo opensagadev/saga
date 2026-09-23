@@ -73,21 +73,23 @@ extern "C" void locatorEditorDrawLocators();
 static eduiiattr_s area_attr = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
 
 static __used__ void areaEditor_cbDeleteArea(eduimenu_s *menu, eduiitem_s *, unsigned int) {
-    EDAIAREA_s *selected = area_selected();
-    if (menu != NULL && menu->field_0c != NULL && selected != NULL && selected == area_hovered()) {
+    if (menu != NULL && menu->field_0c != NULL && area_selected() != NULL && area_selected() == area_hovered()) {
         NULISTHDR *scripts = reinterpret_cast<NULISTHDR *>(reinterpret_cast<u8 *>(aieditor) + 0x36924);
         for (NULISTLNK *node = NuLinkedListGetHead(scripts); node != NULL; node = NuLinkedListGetNext(scripts, node)) {
             u8 *script = reinterpret_cast<u8 *>(node);
-            if (*reinterpret_cast<EDAIAREA_s **>(script + 0x80) == selected) {
+            if (*reinterpret_cast<EDAIAREA_s **>(script + 0x80) == area_selected()) {
                 *reinterpret_cast<EDAIAREA_s **>(script + 0x80) = NULL;
             }
-            if (*reinterpret_cast<EDAIAREA_s **>(script + 0x6c) == selected) {
+            if (*reinterpret_cast<EDAIAREA_s **>(script + 0x6c) == area_selected()) {
                 *reinterpret_cast<EDAIAREA_s **>(script + 0x6c) = NULL;
             }
         }
-        NuLinkedListRemove(area_list(), &selected->link);
-        memset(selected, 0, sizeof(*selected));
-        NuLinkedListAppend(area_free_list(), &selected->link);
+        EDAIAREA_s *selected = area_selected();
+        if (selected != NULL) {
+            NuLinkedListRemove(area_list(), &selected->link);
+            memset(selected, 0, sizeof(*selected));
+            NuLinkedListAppend(area_free_list(), &selected->link);
+        }
         area_selected() = NULL;
     }
     aieditor_ClearMainMenu();

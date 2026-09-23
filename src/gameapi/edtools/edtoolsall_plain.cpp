@@ -6123,17 +6123,24 @@ extern "C" {
             i32 right = static_cast<i32>(1.0f * (width << 4));
             NuRndrGradRect2di((x << 4) + left, y << 3, right - left, height << 3, colours, uimtls[ui_bgmtl]);
         }
-        for (i32 offset = 1; offset >= -1; --offset) {
-            i32 cursor_x = static_cast<i32>(x + offset + (width - 2) * pick->value) << 4;
-            if (!edui_donotdraw)
-                NuRndrLine2di(cursor_x, y << 3, cursor_x, (y + (height >> 1) - 1) << 3, 0x80ffffff, uimtls[0]);
-        }
-        for (i32 offset = 1; offset >= -1; --offset) {
-            i32 cursor_x = static_cast<i32>(x + offset + (width - 2) * pick->value) << 4;
-            if (!edui_donotdraw)
-                NuRndrLine2di(cursor_x, (y + (height >> 1)) << 3, cursor_x, (y + height - 1) << 3, 0x80000000,
-                              uimtls[0]);
-        }
+        i32 cursor_x = static_cast<i32>(x + 1 + (width - 2) * pick->value) << 4;
+        if (!edui_donotdraw)
+            NuRndrLine2di(cursor_x, y << 3, cursor_x, (y + (height >> 1) - 1) << 3, 0x80ffffff, uimtls[0]);
+        cursor_x = static_cast<i32>(x + (width - 2) * pick->value) << 4;
+        if (!edui_donotdraw)
+            NuRndrLine2di(cursor_x, y << 3, cursor_x, (y + (height >> 1) - 1) << 3, 0x80ffffff, uimtls[0]);
+        cursor_x = static_cast<i32>(x - 1 + (width - 2) * pick->value) << 4;
+        if (!edui_donotdraw)
+            NuRndrLine2di(cursor_x, y << 3, cursor_x, (y + (height >> 1) - 1) << 3, 0x80ffffff, uimtls[0]);
+        cursor_x = static_cast<i32>(x + 1 + (width - 2) * pick->value) << 4;
+        if (!edui_donotdraw)
+            NuRndrLine2di(cursor_x, (y + (height >> 1)) << 3, cursor_x, (y + height - 1) << 3, 0x80000000, uimtls[0]);
+        cursor_x = static_cast<i32>(x + (width - 2) * pick->value) << 4;
+        if (!edui_donotdraw)
+            NuRndrLine2di(cursor_x, (y + (height >> 1)) << 3, cursor_x, (y + height - 1) << 3, 0x80000000, uimtls[0]);
+        cursor_x = static_cast<i32>(x - 1 + (width - 2) * pick->value) << 4;
+        if (!edui_donotdraw)
+            NuRndrLine2di(cursor_x, (y + (height >> 1)) << 3, cursor_x, (y + height - 1) << 3, 0x80000000, uimtls[0]);
         return height;
     }
     static __used__ i32 eduicbRenderNumber(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width) {

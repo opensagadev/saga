@@ -1881,25 +1881,35 @@ extern "C" {
         }
         EDAIPATHNODE_s *node = (EDAIPATHNODE_s *)NuLinkedListGetHead(&path->nodes);
         while (node != nullptr) {
-            for (i32 index = 0; index < 8; ++index) {
-                EDAIPATHNODE_s *other = node->connections[index].node;
-                if (other != nullptr && !(checked[node->index][other->index / 8] & (1 << (other->index % 8)))) {
-                    checked[node->index][other->index / 8] |= 1 << (other->index % 8);
-                    checked[other->index][node->index / 8] |= 1 << (node->index % 8);
-                    f32 fraction;
-                    f32 width;
-                    i32 angle;
-                    if (TestPointPathCheck(point, node, other, &fraction, &width, &angle, tolerance)) {
-                        result->on_path = 1;
-                        result->path = path;
-                        result->first = node;
-                        result->second = node->connections[index].node;
-                        result->fraction = fraction;
-                        result->width = width;
-                        result->angle = angle;
-                    }
-                }
-            }
+#define CHECK_PATH_CONNECTION(slot)                                                                                    \
+    {                                                                                                                  \
+        EDAIPATHNODE_s *other = node->connections[slot].node;                                                          \
+        if (other != nullptr && !(checked[node->index][other->index / 8] & (1 << (other->index % 8)))) {               \
+            checked[node->index][other->index / 8] |= 1 << (other->index % 8);                                         \
+            checked[other->index][node->index / 8] |= 1 << (node->index % 8);                                          \
+            f32 fraction;                                                                                              \
+            f32 width;                                                                                                 \
+            i32 angle;                                                                                                 \
+            if (TestPointPathCheck(point, node, other, &fraction, &width, &angle, tolerance)) {                        \
+                result->on_path = 1;                                                                                   \
+                result->path = path;                                                                                   \
+                result->first = node;                                                                                  \
+                result->second = other;                                                                                \
+                result->fraction = fraction;                                                                           \
+                result->width = width;                                                                                 \
+                result->angle = angle;                                                                                 \
+            }                                                                                                          \
+        }                                                                                                              \
+    }
+            CHECK_PATH_CONNECTION(0);
+            CHECK_PATH_CONNECTION(1);
+            CHECK_PATH_CONNECTION(2);
+            CHECK_PATH_CONNECTION(3);
+            CHECK_PATH_CONNECTION(4);
+            CHECK_PATH_CONNECTION(5);
+            CHECK_PATH_CONNECTION(6);
+            CHECK_PATH_CONNECTION(7);
+#undef CHECK_PATH_CONNECTION
             node = (EDAIPATHNODE_s *)NuLinkedListGetNext(&path->nodes, &node->link);
         }
     }

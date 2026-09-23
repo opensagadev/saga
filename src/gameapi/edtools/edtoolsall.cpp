@@ -4853,38 +4853,36 @@ void EdMatrixControl::AddMenuItem(eduimenu_s *menu, EdRef *member, void *target)
     control->object = target;
     VuMtx matrix;
     member->GetMemberData(target, EdType_VuMtx, &matrix, 0);
-    f32 values[9];
-    values[0] = matrix.matrix.m30;
-    values[1] = matrix.matrix.m31;
-    values[2] = matrix.matrix.m32;
+    control->item = eduiItemExpanderCreate(reinterpret_cast<usize>(control), &EdLevelAttr, cbSelected, member->name);
+    eduiMenuAddItem(menu, control->item);
+    char value[128];
+#define ADD_MATRIX_COMPONENT(index, label, number)                                                                     \
+    sprintf(value, "%.2f", number);                                                                                    \
+    control->components[index] = eduiItemPropCreate(reinterpret_cast<usize>(control), &EdLevelAttr, cbSelected,        \
+                                                    cbChanged, cbButton, 2, const_cast<char *>(label), value);         \
+    control->components[index]->unknown_10 = index % 3 + 1;                                                            \
+    eduiItemExpanderAddChild(static_cast<edui_expander_s *>(control->item), control->components[index])
+    if (member->attributes & 8) {
+        ADD_MATRIX_COMPONENT(0, "pos x", matrix.matrix.m30);
+        ADD_MATRIX_COMPONENT(1, "pos y", matrix.matrix.m31);
+        ADD_MATRIX_COMPONENT(2, "pos z", matrix.matrix.m32);
+    }
     if (member->attributes & 0x10) {
         NUANG x, y, z;
         NuMtxGetEulerXYZ(&matrix.matrix, &x, &y, &z);
-        values[3] = static_cast<f32>(x) * (360.0f / 65536.0f);
-        values[4] = static_cast<f32>(y) * (360.0f / 65536.0f);
-        values[5] = static_cast<f32>(z) * (360.0f / 65536.0f);
+        ADD_MATRIX_COMPONENT(3, "rot x", static_cast<f32>(x) * (360.0f / 65536.0f));
+        ADD_MATRIX_COMPONENT(4, "rot y", static_cast<f32>(y) * (360.0f / 65536.0f));
+        ADD_MATRIX_COMPONENT(5, "rot z", static_cast<f32>(z) * (360.0f / 65536.0f));
     }
     if (member->attributes & 0x20) {
-        values[6] = NuVecMag(reinterpret_cast<NUVEC *>(&matrix.matrix.m00));
-        values[7] = NuVecMag(reinterpret_cast<NUVEC *>(&matrix.matrix.m10));
-        values[8] = NuVecMag(reinterpret_cast<NUVEC *>(&matrix.matrix.m20));
+        f32 x = NuVecMag(reinterpret_cast<NUVEC *>(&matrix.matrix.m00));
+        f32 y = NuVecMag(reinterpret_cast<NUVEC *>(&matrix.matrix.m10));
+        f32 z = NuVecMag(reinterpret_cast<NUVEC *>(&matrix.matrix.m20));
+        ADD_MATRIX_COMPONENT(6, "scale x", x);
+        ADD_MATRIX_COMPONENT(7, "scale y", y);
+        ADD_MATRIX_COMPONENT(8, "scale z", z);
     }
-    control->item = eduiItemExpanderCreate(reinterpret_cast<usize>(control), &EdLevelAttr, cbSelected, member->name);
-    eduiMenuAddItem(menu, control->item);
-    static char *names[9] = {
-        const_cast<char *>("pos x"),   const_cast<char *>("pos y"),   const_cast<char *>("pos z"),
-        const_cast<char *>("rot x"),   const_cast<char *>("rot y"),   const_cast<char *>("rot z"),
-        const_cast<char *>("scale x"), const_cast<char *>("scale y"), const_cast<char *>("scale z")};
-    for (i32 index = 0; index < 9; ++index) {
-        if (!(member->attributes & (8 << (index / 3))))
-            continue;
-        char value[128];
-        sprintf(value, "%.2f", values[index]);
-        control->components[index] = eduiItemPropCreate(reinterpret_cast<usize>(control), &EdLevelAttr, cbSelected,
-                                                        cbChanged, cbButton, 2, names[index], value);
-        control->components[index]->unknown_10 = index % 3 + 1;
-        eduiItemExpanderAddChild(static_cast<edui_expander_s *>(control->item), control->components[index]);
-    }
+#undef ADD_MATRIX_COMPONENT
 }
 
 void EdMatrixControl::Destroy() {
@@ -4922,30 +4920,26 @@ inline void EdMatrixControl::operator delete(void *memory) {
 void EdMatrixControl::Refresh() {
     VuMtx matrix;
     reference->GetMemberData(object, EdType_VuMtx, &matrix, 0);
-    f32 values[9];
-    values[0] = matrix.matrix.m30;
-    values[1] = matrix.matrix.m31;
-    values[2] = matrix.matrix.m32;
+    char value[128];
+#define REFRESH_MATRIX_COMPONENT(index, number)                                                                        \
+    if (components[index]) {                                                                                           \
+        sprintf(value, "%.2f", number);                                                                                \
+        eduiItemPropSetText(static_cast<edui_prop_s *>(components[index]), value);                                     \
+    }
+    REFRESH_MATRIX_COMPONENT(0, matrix.matrix.m30);
+    REFRESH_MATRIX_COMPONENT(1, matrix.matrix.m31);
+    REFRESH_MATRIX_COMPONENT(2, matrix.matrix.m32);
     if (components[3] || components[4] || components[5]) {
         NUANG x, y, z;
         NuMtxGetEulerXYZ(&matrix.matrix, &x, &y, &z);
-        values[3] = static_cast<f32>(x) * (360.0f / 65536.0f);
-        values[4] = static_cast<f32>(y) * (360.0f / 65536.0f);
-        values[5] = static_cast<f32>(z) * (360.0f / 65536.0f);
+        REFRESH_MATRIX_COMPONENT(3, static_cast<f32>(x) * (360.0f / 65536.0f));
+        REFRESH_MATRIX_COMPONENT(4, static_cast<f32>(y) * (360.0f / 65536.0f));
+        REFRESH_MATRIX_COMPONENT(5, static_cast<f32>(z) * (360.0f / 65536.0f));
     }
-    if (components[6])
-        values[6] = NuVecMag(reinterpret_cast<NUVEC *>(&matrix.matrix.m00));
-    if (components[7])
-        values[7] = NuVecMag(reinterpret_cast<NUVEC *>(&matrix.matrix.m10));
-    if (components[8])
-        values[8] = NuVecMag(reinterpret_cast<NUVEC *>(&matrix.matrix.m20));
-    for (i32 index = 0; index < 9; ++index) {
-        if (!components[index])
-            continue;
-        char value[128];
-        sprintf(value, "%.2f", values[index]);
-        eduiItemPropSetText(static_cast<edui_prop_s *>(components[index]), value);
-    }
+    REFRESH_MATRIX_COMPONENT(6, NuVecMag(reinterpret_cast<NUVEC *>(&matrix.matrix.m00)));
+    REFRESH_MATRIX_COMPONENT(7, NuVecMag(reinterpret_cast<NUVEC *>(&matrix.matrix.m10)));
+    REFRESH_MATRIX_COMPONENT(8, NuVecMag(reinterpret_cast<NUVEC *>(&matrix.matrix.m20)));
+#undef REFRESH_MATRIX_COMPONENT
 }
 
 void EdMatrixControl::SetMenuItemAttr(i32 mask, eduiitem_s *menu_item, eduiiattr_s *selected, eduiiattr_s *unselected) {

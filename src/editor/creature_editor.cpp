@@ -527,22 +527,41 @@ static __used__ void creatureEditor_cbScriptParams(eduimenu_s *parent, eduiitem_
             menu, eduiItemSelCreate(1, creature_editor_item_colours, 0, 0, creatureEditor_cbSelectLocator, label));
     }
     AISCRIPT *script = AIScriptFind(aieditor->ai_system, creature->script_name, 1, 1, 1);
-    edui_slider_s *first_slider = nullptr;
-    for (i32 index = 0; index < 4; ++index) {
-        const char *name = script != nullptr ? script->params[index].name : nullptr;
-        if (name != nullptr)
-            sprintf(label, name);
-        else
-            sprintf(label, "Param%d", index);
-        eduiMenuAddItem(menu,
-                        eduiItemSliderCreate(index, creature_editor_item_colours, 0, creatureEditor_cbSetScriptParam,
-                                             0.0f, 100.0f, aieditorsettings.current_script_params[index], label));
-        if (index == 0)
-            first_slider = reinterpret_cast<edui_slider_s *>(edui_last_item);
-        edui_slider_s *granularity_target =
-            script == nullptr ? first_slider : reinterpret_cast<edui_slider_s *>(edui_last_item);
-        eduiItemSliderSetGranularity(granularity_target, 0.1f);
-    }
+    const char *param_name = script != nullptr ? script->params[0].name : nullptr;
+    if (param_name != nullptr)
+        sprintf(label, param_name);
+    else
+        sprintf(label, "Param%d", 0);
+    eduiMenuAddItem(menu, eduiItemSliderCreate(0, creature_editor_item_colours, 0, creatureEditor_cbSetScriptParam,
+                                               0.0f, 100.0f, aieditorsettings.current_script_params[0], label));
+    eduiItemSliderSetGranularity(reinterpret_cast<edui_slider_s *>(edui_last_item), 0.1f);
+
+    param_name = script != nullptr ? script->params[1].name : nullptr;
+    if (param_name != nullptr)
+        sprintf(label, param_name);
+    else
+        sprintf(label, "Param%d", 1);
+    eduiMenuAddItem(menu, eduiItemSliderCreate(1, creature_editor_item_colours, 0, creatureEditor_cbSetScriptParam,
+                                               0.0f, 100.0f, aieditorsettings.current_script_params[1], label));
+    eduiItemSliderSetGranularity(reinterpret_cast<edui_slider_s *>(edui_last_item), 0.1f);
+
+    param_name = script != nullptr ? script->params[2].name : nullptr;
+    if (param_name != nullptr)
+        sprintf(label, param_name);
+    else
+        sprintf(label, "Param%d", 2);
+    eduiMenuAddItem(menu, eduiItemSliderCreate(2, creature_editor_item_colours, 0, creatureEditor_cbSetScriptParam,
+                                               0.0f, 100.0f, aieditorsettings.current_script_params[2], label));
+    eduiItemSliderSetGranularity(reinterpret_cast<edui_slider_s *>(edui_last_item), 0.1f);
+
+    param_name = script != nullptr ? script->params[3].name : nullptr;
+    if (param_name != nullptr)
+        sprintf(label, param_name);
+    else
+        sprintf(label, "Param%d", 3);
+    eduiMenuAddItem(menu, eduiItemSliderCreate(3, creature_editor_item_colours, 0, creatureEditor_cbSetScriptParam,
+                                               0.0f, 100.0f, aieditorsettings.current_script_params[3], label));
+    eduiItemSliderSetGranularity(reinterpret_cast<edui_slider_s *>(edui_last_item), 0.1f);
     reset_params_option = nullptr;
     if ((aieditorsettings.current_script_flags & 0x1e) != 0) {
         reset_params_option = eduiMenuAddItem(menu, eduiItemToggleCreate(1, creature_editor_item_colours, 1, 1,

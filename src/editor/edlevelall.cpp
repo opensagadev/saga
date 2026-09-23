@@ -2580,14 +2580,14 @@ void PropertyTool::BringToFront(PropertyMenu *menu) {
         position = position->next;
     }
     if (position != NULL) {
-        menu->next = position;
-        menu->previous = position->previous;
-        if (position->previous != NULL) {
-            position->previous->next = menu;
+        menu->next = position->next;
+        menu->previous = position;
+        if (position->next != NULL) {
+            position->next->previous = menu;
         } else {
-            active_menu = menu;
+            last_menu = menu;
         }
-        position->previous = menu;
+        position->next = menu;
     } else {
         menu->previous = last_menu;
         if (last_menu != NULL) {
@@ -2700,7 +2700,7 @@ i32 PropertyTool::ProcessMenu(EdInputContext &input) {
         menu->order = order++;
     }
     for (ClassObjectListEntry *entry = theClassEditor.selected_objects.first; entry != NULL; entry = entry->next) {
-        ClassObject object = {entry->ed_class, entry->object, entry->reference};
+        ClassObject &object = *reinterpret_cast<ClassObject *>(&entry->ed_class);
         PropertyMenu *menu = FindItemMenu(active_menu, reinterpret_cast<ClassItem *>(entry));
         if (menu != NULL) {
             menu->ClearObjecs();
@@ -2715,6 +2715,8 @@ i32 PropertyTool::ProcessMenu(EdInputContext &input) {
             } else {
                 active_menu = menu->next;
             }
+            menu->next = NULL;
+            menu->previous = NULL;
             --menu_count;
         } else {
             menu = FindItemMenu(rebuilt.first, reinterpret_cast<ClassItem *>(entry));
@@ -2725,33 +2727,32 @@ i32 PropertyTool::ProcessMenu(EdInputContext &input) {
             for (PropertyMenu *other = active_menu; other != NULL; other = other->next) {
                 ediMenuStoreMetrics(other->menu);
             }
-            menu = RetrievePropertyMenu(&object, &rebuilt);
+            menu = RetrievePropertyMenu(&object, reinterpret_cast<PropertyMenuList *>(&active_menu));
             ediMenuRetrieveMetrics(menu->menu);
             menu->order = -1;
         }
 
-        menu->next = NULL;
-        menu->previous = NULL;
-        PropertyMenu *before = rebuilt.first;
+        PropertyMenu *position = rebuilt.first;
         if (menu->order == -1) {
-            while (before != NULL && before->order < 0) {
-                before = before->next;
+            while (position != NULL && position->order < 0) {
+                position = position->next;
             }
         } else {
-            while (before != NULL && before->order <= menu->order) {
-                before = before->next;
+            while (position != NULL && position->order <= menu->order) {
+                position = position->next;
             }
         }
-        if (before != NULL) {
-            menu->next = before;
-            menu->previous = before->previous;
-            if (before->previous != NULL) {
-                before->previous->next = menu;
+        if (position != NULL) {
+            menu->next = position->next;
+            menu->previous = position;
+            if (position->next != NULL) {
+                position->next->previous = menu;
             } else {
-                rebuilt.first = menu;
+                rebuilt.last = menu;
             }
-            before->previous = menu;
+            position->next = menu;
         } else {
+            menu->next = NULL;
             menu->previous = rebuilt.last;
             if (rebuilt.last != NULL) {
                 rebuilt.last->next = menu;
@@ -2796,7 +2797,7 @@ i32 PropertyTool::ProcessMenu(EdInputContext &input) {
         }
     }
     for (PropertyMenu *menu = active_menu; menu != NULL; menu = menu->next) {
-        if (menu == active || menu->menu == NULL) {
+        if (menu == active) {
             continue;
         }
         RefreshMenuControls(menu);
@@ -2804,7 +2805,7 @@ i32 PropertyTool::ProcessMenu(EdInputContext &input) {
             return 1;
         }
     }
-    if (input.pad != NULL && (input.pad->digital_buttons_pressed & 0x100) != 0) {
+    if ((input.pad->digital_buttons_pressed & 0x100) != 0) {
         ToggleActiveMenu();
     }
     EdControl::Input = NULL;

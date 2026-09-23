@@ -198,13 +198,27 @@ static void antinodeEditor_cbSelectType(eduimenu_s *parent, eduiitem_s *, unsign
         eduiMenuCreate(220, 70, 240, 250, ed_fnt, antinodeEditor_cbCancelMenu, const_cast<char *>("Select AI Type"));
     if (menu == nullptr)
         return;
-    for (i32 i = 0; i < 3; ++i) {
-        eduiMenuAddItem(menu,
-                        eduiItemCheckCreate(i, &attr, node->type == i, 1, antinodeEditor_cbSetType, antinode_types[i]));
-        if (node->type == i)
-            menu->selected = menu->last;
-        eduiMenuAttach(parent, menu);
+    if (antinode_selected()->type == 0) {
+        eduiMenuAddItem(menu, eduiItemCheckCreate(0, &attr, 1, 1, antinodeEditor_cbSetType, antinode_types[0]));
+        menu->selected = edui_last_item;
+    } else {
+        eduiMenuAddItem(menu, eduiItemCheckCreate(0, &attr, 0, 1, antinodeEditor_cbSetType, antinode_types[0]));
     }
+    eduiMenuAttach(parent, menu);
+    if (antinode_selected()->type == 1) {
+        eduiMenuAddItem(menu, eduiItemCheckCreate(1, &attr, 1, 1, antinodeEditor_cbSetType, antinode_types[1]));
+        menu->selected = edui_last_item;
+    } else {
+        eduiMenuAddItem(menu, eduiItemCheckCreate(1, &attr, 0, 1, antinodeEditor_cbSetType, antinode_types[1]));
+    }
+    eduiMenuAttach(parent, menu);
+    if (antinode_selected()->type == 2) {
+        eduiMenuAddItem(menu, eduiItemCheckCreate(2, &attr, 1, 1, antinodeEditor_cbSetType, antinode_types[2]));
+        menu->selected = edui_last_item;
+    } else {
+        eduiMenuAddItem(menu, eduiItemCheckCreate(2, &attr, 0, 1, antinodeEditor_cbSetType, antinode_types[2]));
+    }
+    eduiMenuAttach(parent, menu);
 }
 
 static void antinodeEditor_cbAntiNodeFlagsToggle(eduimenu_s *, eduiitem_s *item, unsigned int) {
@@ -359,13 +373,15 @@ eduimenu_s *antinodeEditor_Process(nupad_s *pad) {
                 antinodeEditor_AntinodeMoved(selected);
                 if (selected->type != 0) {
                     if (held & 0x8000)
-                        selected->base_radius = NuFmax(0.05f, selected->base_radius * 0.99f);
+                        selected->base_radius =
+                            selected->base_radius * 0.99f < 0.05f ? 0.05f : selected->base_radius * 0.99f;
                     else if (held & 0x2000)
                         selected->base_radius *= 1.01f;
                     else if (held & 0x1000)
                         selected->base_height *= 1.01f;
                     else if (held & 0x4000)
-                        selected->base_height = NuFmax(0.05f, selected->base_height * 0.99f);
+                        selected->base_height =
+                            selected->base_height * 0.99f < 0.05f ? 0.05f : selected->base_height * 0.99f;
                 }
             }
         }
@@ -388,7 +404,7 @@ eduimenu_s *antinodeEditor_Process(nupad_s *pad) {
         if (held & (0x8000 | 0x2000)) {
             if (selected->type == 0) {
                 if (held & 0x8000)
-                    selected->radius = NuFmax(0.05f, selected->radius * 0.99f);
+                    selected->radius = selected->radius * 0.99f < 0.05f ? 0.05f : selected->radius * 0.99f;
                 else
                     selected->radius *= 1.01f;
             } else {
@@ -411,13 +427,17 @@ eduimenu_s *antinodeEditor_Process(nupad_s *pad) {
                     selected->upper_height += step;
                 else if (held & 1)
                     selected->upper_height -= step;
-                selected->upper_height = NuFmax(selected->upper_height, selected->lower_height + 0.01f);
+                selected->upper_height = selected->upper_height < selected->lower_height + 0.01f
+                                             ? selected->lower_height + 0.01f
+                                             : selected->upper_height;
             } else {
                 if (held & 4)
                     selected->lower_height += step;
                 else if (held & 1)
                     selected->lower_height -= step;
-                selected->lower_height = NuFmin(selected->lower_height, selected->upper_height - 0.01f);
+                selected->lower_height = selected->lower_height > selected->upper_height - 0.01f
+                                             ? selected->upper_height - 0.01f
+                                             : selected->lower_height;
             }
         }
     }

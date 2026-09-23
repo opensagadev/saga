@@ -139,8 +139,11 @@ static __used__ void locatorEditor_cbEmptyLocatorSet(eduimenu_s *parent, eduiite
             eduiMenuAttach(parent, menu);
         }
     } else if (item->data == 1) {
-        if (aieditor->current_locator_set != nullptr) {
-            memset(aieditor->current_locator_set->locators, 0, sizeof(aieditor->current_locator_set->locators));
+        EDLOCATORSET_s *set = aieditor->current_locator_set;
+        if (set != nullptr) {
+            for (i32 index = 0; index < 64; ++index) {
+                set->locators[index] = nullptr;
+            }
         }
         aieditor_ClearMainMenu();
     } else if (item->data == 2) {
@@ -298,7 +301,7 @@ static __used__ void locatorEditor_cbAddLocatorsByNameMenu(eduimenu_s *parent, e
     menu->y = parent->y + 40;
 }
 static __used__ void locatorEditor_cbAddLocatorsByNameYesNo(eduimenu_s *, eduiitem_s *item, u32) {
-    if (item != nullptr && item->data != 0 && aieditor->pending_locator_name[0] != 0 &&
+    if (item != nullptr && item->data != 0 && NuStrLen(aieditor->pending_locator_name) != 0 &&
         aieditor->current_locator_set != nullptr) {
         EDLOCATORSET_s *set = aieditor->current_locator_set;
         EDLOCATOR_s *locator = (EDLOCATOR_s *)NuLinkedListGetHead(&aieditor->locators);
