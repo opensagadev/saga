@@ -5,6 +5,7 @@
 #include "gameapi/edtools/edcam.h"
 #include "gameapi/edtools/gameapi_edtools_types.h"
 #include "legoapi/render/core/rtl.h"
+#include "legoapi/world/world.h"
 #include "legoapi/render/core/render.h"
 #include "nu2api/nu3d/nuqfnt.h"
 #include "nu2api/nu3d/nurndr.h"
@@ -89,6 +90,16 @@ f32 def_fr = 2.0f;
 static i32 fogmode;
 static NUCAMERA *usr_cam;
 static NUMTL *mtls[3];
+static i32 edrtl_mode;
+static i32 ed_just_entered;
+static i32 rtl_near_clip_at_cursor;
+static f32 lockflash;
+static f32 lockflash_rate = 0.7f;
+static i32 rtl_undo_cnt;
+static i32 rtl_undo_maxcnt;
+static i32 rtl_undo_ix;
+static eduiitem_s *undo_item;
+static eduiitem_s *redo_item;
 
 extern "C" {
     rtlset *curr_set = NULL;
@@ -96,6 +107,8 @@ extern "C" {
     rtl_s *rtl_locked;
     rtl_s *base_rtl;
     i32 RTL_EditorActive;
+    i32 rtled_menu_active;
+    eduimenu_s *edrtl_active_menu;
     extern rtlfog_s *curr_fog;
     extern rtl_s clipboard_light;
 }
@@ -977,8 +990,8 @@ extern "C" {
         STUBBED();
     }
 
-    void rtlGetEnvSet(void) {
-        STUBBED();
+    rtlset *rtlGetEnvSet(void) {
+        return WORLD->rtl_set;
     }
 
     void rtlProcessLights(void *set, f32 frame_time) {
@@ -1020,7 +1033,11 @@ static void edrtlRedo() {
 }
 
 static void edrtlInvalidateUndo() {
-    STUBBED();
+    rtl_undo_cnt = 0;
+    rtl_undo_maxcnt = 0;
+    rtl_undo_ix = 0;
+    undo_item->disabled = 1;
+    redo_item->disabled = 1;
 }
 
 static __used__ i32 rtlCmp(rtl_s *first, rtl_s *second) {
@@ -1239,8 +1256,6 @@ static eduiitem_s *copy_item;
 static eduiitem_s *paste_item;
 static eduiitem_s *pasteinto_item;
 static eduiitem_s *copytogroup_item;
-static eduiitem_s *undo_item;
-static eduiitem_s *redo_item;
 static eduimenu_s *fog_menu;
 static eduiitem_s *fogcol_item;
 static eduiitem_s *fogalpha_item;
@@ -2273,11 +2288,34 @@ static void edrtlInit() {
 // RTL editor subsystem stubs (static, internal linkage).
 
 static void edrtlClose() {
-    STUBBED();
 }
 
 static void edrtlEnter() {
-    STUBBED();
+    RTL_EditorActive = 1;
+    ed_just_entered = 1;
+    edmainExtCamera(usr_cam);
+    curr_set = rtlGetEnvSet();
+    *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(curr_set) + 0x4f84) = 0;
+    rtl_locked = NULL;
+    rtled_menu_active = 0;
+    delete_menu_active = 0;
+    curr_fog = NULL;
+    curr_rtl = NULL;
+    base_rtl = NULL;
+    game_nearclip = global_camera.near_clip;
+    game_farclip = global_camera.far_clip;
+    if (fogadjfar_item) {
+        edui_slider_s *slider = static_cast<edui_slider_s *>(fogadjfar_item);
+        slider->range = game_farclip * 2.0f;
+        slider->minimum = game_nearclip;
+        eduiItemSliderSetValEx(slider, game_farclip, 0, 0);
+    }
+    if (fogadjnear_item) {
+        edui_slider_s *slider = static_cast<edui_slider_s *>(fogadjnear_item);
+        slider->range = game_farclip - slider->minimum;
+        eduiItemSliderSetValEx(slider, game_nearclip, 0, 0);
+    }
+    edrtlInvalidateUndo();
 }
 
 static void edrtlLeave() {
@@ -2375,8 +2413,9 @@ void SelectPrevRTL() {
     }
 }
 
-static void edrtlProcRTL(float, nupad_s *) {
+static i32 edrtlProcRTL(float, nupad_s *) {
     STUBBED();
+    return 0;
 }
 
 static __used__ EDRTLFOG_s *FindNearestFog(nuvec_s *position) {
@@ -2461,8 +2500,9 @@ static EDRTLFOG_s *SelectNextFog() {
     return NULL;
 }
 
-static void edrtlProcFog(float, nupad_s *) {
+static i32 edrtlProcFog(float, nupad_s *) {
     STUBBED();
+    return 0;
 }
 
 void edrtlDetermineNearestBurn(float distance, burnset_s *set) {
@@ -2487,8 +2527,9 @@ void edrtlDetermineNearestBurn(float distance, burnset_s *set) {
     }
 }
 
-static void edrtlProcBurn(float, nupad_s *) {
+static i32 edrtlProcBurn(float, nupad_s *) {
     STUBBED();
+    return 0;
 }
 
 extern "C" void edrtlCalculateBurnout(void) {
@@ -2503,9 +2544,17 @@ static void edrtlRndrLine3d(nuvtx_tc1_s *, numtl_s *, numtx_s *) {
     STUBBED();
 }
 
-static i32 edrtlProc(float, nupad_s *) {
-    STUBBED();
-    return 0;
+static i32 edrtlProc(float delta_time, nupad_s *pad) {
+    lockflash -= delta_time;
+    if (lockflash < 0.0f)
+        lockflash += lockflash_rate;
+    if (edrtl_mode == 0)
+        return edrtlProcRTL(delta_time, pad);
+    if (edrtl_mode == 2)
+        return edrtlProcFog(delta_time, pad);
+    if (edrtl_mode == 1)
+        return edrtlProcBurn(delta_time, pad);
+    return 1;
 }
 
 static void edrtlDrawCursor() {
@@ -2562,7 +2611,37 @@ static void edrtlDrawBurnInfo() {
 }
 
 static void edrtlRender() {
-    STUBBED();
+    NuQFntPushCoordinateSystem(NUQFNT_CSMODE_PS2);
+    NuQFntPushPrintMode(2);
+    usr_cam->near_clip =
+        rtl_near_clip_at_cursor ? NuVecDist(&pcpos, NUMTX_GET_ROW_VEC(&usr_cam->mtx, 3), NULL) - 1.0f : game_nearclip;
+    usr_cam->far_clip = game_farclip;
+    edcamSet();
+    if (edrtl_mode == 0) {
+        edrtlDrawLights();
+        edrtlDrawCursor();
+        edrtlDrawRTLInfo();
+        if (rtled_menu_active) {
+            NuQFntSetScale(system_qfont, edrtl_text_scale, edrtl_text_scale);
+            eduiMenuRender(main_menu);
+        }
+        if (delete_menu_active)
+            eduiMenuRender(delete_menu);
+    } else if (edrtl_mode == 2) {
+        edrtlDrawFogs();
+        edrtlDrawCursor();
+        edrtlDrawFogInfo();
+        if (rtled_menu_active)
+            eduiMenuRender(fog_main_menu);
+    } else if (edrtl_mode == 1) {
+        edrtlDrawCursor();
+        edrtlDrawBurnInfo();
+        edrtlDrawBurnouts();
+        if (edrtl_active_menu)
+            eduiMenuRender(edrtl_active_menu);
+    }
+    NuQFntPopCoordinateSystem();
+    NuQFntPopPrintMode();
 }
 
 extern "C" {

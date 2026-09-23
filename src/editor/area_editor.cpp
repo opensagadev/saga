@@ -9,6 +9,7 @@
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nucore/nupad.h"
 #include "nu2api/numath/nuang.h"
+#include "nu2api/numath/nufloat.h"
 #include "nu2api/nu3d/nuqfnt.h"
 #include <string.h>
 #include <stdio.h>
@@ -215,35 +216,41 @@ extern "C" void areaEditorDrawAreas() {
 
 void areaEditor_Render(i32 x, i32 y, f32, f32) {
     i32 text_x = (x + 10) * 16;
-    i32 text_y = y * 8;
-    NuQFntPrintEx(system_qfont, text_x, text_y - 40, 16, "Area Editor");
+    NuQFntPrintEx(system_qfont, text_x, y * 8 - 40, 16, "Area Editor");
     NuQFntSetColour(system_qfont, 0x80000000);
     EDAIAREA_s *focus = area_selected() != NULL ? area_selected() : area_hovered();
     if (focus != NULL) {
         NUVEC delta;
         f32 range = NuVecXZDist(&focus->position, &aieditor->camera_position, &delta);
-        NuQFntPrintEx(system_qfont, text_x, text_y + 120, 16, "\"%s\", xzrng=%.2f", focus->name,
-                      static_cast<f64>(range));
+        y += 15;
+        NuQFntPrintEx(system_qfont, text_x, y * 8, 16, "\"%s\", xzrng=%.2f", focus->name, static_cast<f64>(range));
     }
-    NuQFntPrintEx(system_qfont, text_x, text_y + 240, 16, "SQR - Options");
+    i32 text_y = y * 8;
+    NuQFntPrintEx(system_qfont, text_x, text_y + 120, 16, "SQR - Options");
     if (area_hovered() == NULL) {
-        NuQFntPrintEx(system_qfont, text_x, text_y + 360, 16, "X - Create area");
+        NuQFntPrintEx(system_qfont, text_x, text_y + 240, 16, "X - Create area");
+        NuQFntPrintEx(system_qfont, text_x, text_y + 360, 16, "SELECT - Select nearest");
     } else if (area_hovered() != area_selected()) {
-        NuQFntPrintEx(system_qfont, text_x, text_y + 360, 16, "X - Select area");
-        NuQFntPrintEx(system_qfont, text_x, text_y + 480, 16, "SELECT - Goto nearest");
+        NuQFntPrintEx(system_qfont, text_x, text_y + 240, 16, "X - Select area");
+        NuQFntPrintEx(system_qfont, text_x, text_y + 360, 16, "SELECT - Goto nearest");
     } else {
-        NuQFntPrintEx(system_qfont, text_x, text_y + 360, 16, "X - Move selected");
+        NuQFntPrintEx(system_qfont, text_x, text_y + 240, 16, "X - Move selected");
         if ((aieditor->pad_buttons & 0x40) != 0) {
             if (focus->flags & 1) {
-                NuQFntPrintEx(system_qfont, text_x, text_y + 480, 16, "LRIGHT/LLEFT - Adjust Radius");
+                NuQFntPrintEx(system_qfont, text_x, text_y + 360, 16, "LRIGHT/LLEFT - Adjust Radius");
             } else {
-                NuQFntPrintEx(system_qfont, text_x, text_y + 480, 16, "LRIGHT/LLEFT - Adjust X size");
-                NuQFntPrintEx(system_qfont, text_x, text_y + 600, 16, "LUP/LDOWN - Adjust Z size");
+                NuQFntPrintEx(system_qfont, text_x, text_y + 360, 16, "LRIGHT/LLEFT - Adjust X size");
+                NuQFntPrintEx(system_qfont, text_x, text_y + 480, 16, "LUP/LDOWN - Adjust Z size");
             }
         } else {
-            NuQFntPrintEx(system_qfont, text_x, text_y + 480, 16, "LLEFT/LRIGHT - Rotate");
-            NuQFntPrintEx(system_qfont, text_x, text_y + 600, 16, "LUP - Increase height");
-            NuQFntPrintEx(system_qfont, text_x, text_y + 720, 16, "LDOWN - Decrease height");
+            NuQFntPrintEx(system_qfont, text_x, text_y + 360, 16, "TRI - Delete selected");
+            i32 next_line = text_y + 480;
+            if ((focus->flags & 1) == 0) {
+                NuQFntPrintEx(system_qfont, text_x, next_line, 16, "LLEFT/LRIGHT - Rotate");
+                next_line += 120;
+            }
+            NuQFntPrintEx(system_qfont, text_x, next_line, 16, "LUP - Increase height");
+            NuQFntPrintEx(system_qfont, text_x, next_line + 120, 16, "LDOWN - Decrease height");
         }
     }
     areaEditorDrawAreas();
@@ -363,6 +370,13 @@ static EDAIAREA_s *areaEditorCreateArea() {
     }
 }
 
+static void areaEditorNormalizeCylinder() {
+    EDAIAREA_s *selected = area_selected();
+    if (selected != NULL && (selected->flags & 1) != 0 && selected->size.x != selected->size.z) {
+        selected->size.x = NuFmin(selected->size.x, selected->size.z);
+    }
+}
+
 eduimenu_s *areaEditor_Process(nupad_s *pad) {
     if ((pad->digital_buttons_pressed & 0x80) != 0) {
         return areaEditorOptionsMenu();
@@ -379,35 +393,31 @@ eduimenu_s *areaEditor_Process(nupad_s *pad) {
             }
         }
         EDAIAREA_s *selected = area_selected();
-        if (selected != NULL) {
+        if (selected != NULL && area_hovered() != NULL) {
             selected->position = aieditor->camera_position;
-            if (selected == area_hovered()) {
-                u32 buttons = pad->digital_buttons;
-                if (selected->flags & 1) {
-                    if (buttons & 0x2000) {
-                        selected->size.x *= 1.01f;
-                    } else if (buttons & 0x8000) {
-                        selected->size.x *= 0.99f;
-                    }
-                    selected->size.z = selected->size.x;
-                } else {
-                    if (buttons & 0x2000) {
-                        selected->size.x *= 1.01f;
-                    } else if (buttons & 0x8000) {
-                        selected->size.x *= 0.99f;
-                    }
-                    if (buttons & 0x1000) {
-                        selected->size.z *= 1.01f;
-                    } else if (buttons & 0x4000) {
-                        selected->size.z *= 0.99f;
-                    }
-                }
+            u32 buttons = pad->digital_buttons;
+            if (buttons & 0x2000) {
+                selected->size.x *= 1.01f;
+            } else if (buttons & 0x8000) {
+                selected->size.x *= 0.99f;
+            }
+            if ((selected->flags & 1) != 0) {
+                selected->size.z = selected->size.x;
+            } else if (buttons & 0x1000) {
+                selected->size.z *= 1.01f;
+            } else if (buttons & 0x4000) {
+                selected->size.z *= 0.99f;
             }
         }
+        areaEditorNormalizeCylinder();
         return NULL;
     }
-    if ((pad->digital_buttons_pressed & 0x10) != 0 && area_selected() != NULL && area_selected() == area_hovered()) {
-        return areaEditorDeleteMenu();
+    if ((pad->digital_buttons_pressed & 0x10) != 0) {
+        if (area_selected() != NULL && area_selected() == area_hovered()) {
+            return areaEditorDeleteMenu();
+        }
+        areaEditorNormalizeCylinder();
+        return NULL;
     }
     if ((pad->digital_buttons_pressed & 0x100) != 0) {
         EDAIAREA_s *nearest = NULL;
@@ -424,17 +434,52 @@ eduimenu_s *areaEditor_Process(nupad_s *pad) {
         if (nearest != NULL) {
             edcamSetPos(&nearest->position);
         }
+        areaEditorNormalizeCylinder();
+        return NULL;
     }
-    if ((pad->digital_buttons & 0x100) != 0 && (pad->digital_buttons_pressed & 0x0a) != 0) {
+    u32 buttons = pad->digital_buttons;
+    u32 pressed = pad->digital_buttons_pressed;
+    EDAIAREA_s *selected = area_selected();
+    if (buttons & 0x2000 || buttons & 0x8000) {
+        if (selected != NULL && selected == area_hovered()) {
+            aieditorsettings.area_rotation = selected->rotation;
+        }
+        if (buttons & 0x2000) {
+            area_rotation_step() = pressed & 0x2000 ? 20 : area_rotation_step() + 20;
+            if (area_rotation_step() > 600) {
+                area_rotation_step() = 600;
+            }
+            aieditorsettings.area_rotation = NuAngSub(aieditorsettings.area_rotation, area_rotation_step());
+        } else {
+            area_rotation_step() = pressed & 0x8000 ? 20 : area_rotation_step() + 20;
+            if (area_rotation_step() > 600) {
+                area_rotation_step() = 600;
+            }
+            aieditorsettings.area_rotation = NuAngAdd(aieditorsettings.area_rotation, area_rotation_step());
+        }
+        if (selected != NULL && selected == area_hovered()) {
+            selected->rotation = static_cast<i16>(aieditorsettings.area_rotation);
+        }
+        areaEditorNormalizeCylinder();
+        return NULL;
+    }
+    if (buttons & 0x4000 || buttons & 0x1000) {
+        if (selected != NULL && selected == area_hovered()) {
+            selected->size.y *= buttons & 0x4000 ? 0.99f : 1.01f;
+        }
+        areaEditorNormalizeCylinder();
+        return NULL;
+    }
+    if ((buttons & 0x100) != 0 && (pressed & 0x0a) != 0) {
         EDAIAREA_s *next = NULL;
-        if (pad->digital_buttons_pressed & 0x08) {
+        if (pressed & 0x08) {
             next = area_selected() == NULL
                        ? area_head()
                        : reinterpret_cast<EDAIAREA_s *>(NuLinkedListGetNext(area_list(), &area_selected()->link));
             if (next == NULL) {
                 next = area_head();
             }
-        } else if (pad->digital_buttons_pressed & 0x02) {
+        } else if (pressed & 0x02) {
             next = area_selected() == NULL
                        ? reinterpret_cast<EDAIAREA_s *>(NuLinkedListGetTail(area_list()))
                        : reinterpret_cast<EDAIAREA_s *>(NuLinkedListGetPrev(area_list(), &area_selected()->link));
@@ -447,37 +492,6 @@ eduimenu_s *areaEditor_Process(nupad_s *pad) {
             edcamSetPos(&next->position);
         }
     }
-    EDAIAREA_s *selected = area_selected();
-    if (selected != NULL) {
-        u32 buttons = pad->digital_buttons;
-        u32 pressed = pad->digital_buttons_pressed;
-        if (selected == area_hovered() && ((buttons & 0xa000) != 0)) {
-            aieditorsettings.area_rotation = selected->rotation;
-        }
-        if (buttons & 0x2000) {
-            area_rotation_step() = pressed & 0x2000 ? 20 : area_rotation_step() + 20;
-            if (area_rotation_step() > 600) {
-                area_rotation_step() = 600;
-            }
-            aieditorsettings.area_rotation = NuAngSub(aieditorsettings.area_rotation, area_rotation_step());
-        } else if (buttons & 0x8000) {
-            area_rotation_step() = pressed & 0x8000 ? 20 : area_rotation_step() + 20;
-            if (area_rotation_step() > 600) {
-                area_rotation_step() = 600;
-            }
-            aieditorsettings.area_rotation = NuAngAdd(aieditorsettings.area_rotation, area_rotation_step());
-        }
-        if (selected != area_hovered()) {
-            return NULL;
-        }
-        if (buttons & 0xa000) {
-            selected->rotation = static_cast<i16>(aieditorsettings.area_rotation);
-        }
-        if (buttons & 0x1000) {
-            selected->size.y *= 1.01f;
-        } else if (buttons & 0x4000) {
-            selected->size.y *= 0.99f;
-        }
-    }
+    areaEditorNormalizeCylinder();
     return NULL;
 }

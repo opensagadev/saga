@@ -8,6 +8,7 @@
 #include "gameapi/edtools/edcam.h"
 #include "gameapi/edtools/edrender.h"
 #include "gameapi/edtools/edfile.h"
+#include "legoapi/characters/core/character.h"
 #include "legoapi/items/base/apiobject.h"
 #include "legoapi/render/core/terrain.h"
 #include "legoapi/render/core/terrain_internal.h"
@@ -191,7 +192,7 @@ static void antinodeEditor_cbCancelMenu(eduimenu_s *menu, eduimenu_s *) {
 
 static void antinodeEditor_cbSelectType(eduimenu_s *parent, eduiitem_s *, unsigned int) {
     EDANTINODE_s *node = antinode_selected();
-    if (node == nullptr || parent == nullptr || ed_fnt == nullptr)
+    if (node == nullptr || LevelCharacterGlobalIDFn == nullptr || GlobalCharacterNameFn == nullptr)
         return;
     eduimenu_s *menu =
         eduiMenuCreate(220, 70, 240, 250, ed_fnt, antinodeEditor_cbCancelMenu, const_cast<char *>("Select AI Type"));
@@ -220,8 +221,8 @@ static void antinodeEditor_cbAntiNodeFlagsToggle(eduimenu_s *, eduiitem_s *item,
         memset(&node->special, 0, sizeof(node->special));
 }
 
-static void antinodeEditor_cbDeleteAntinode(eduimenu_s *menu, eduiitem_s *, unsigned int) {
-    if (menu != nullptr && menu->field_0c != nullptr) {
+static void antinodeEditor_cbDeleteAntinode(eduimenu_s *, eduiitem_s *item, unsigned int) {
+    if (item != nullptr && item->data != 0) {
         EDANTINODE_s *node = antinode_selected();
         if (node != nullptr && node == antinode_nearest()) {
             NuLinkedListRemove(antinode_list(), &node->link);
@@ -390,7 +391,7 @@ eduimenu_s *antinodeEditor_Process(nupad_s *pad) {
                     selected->radius *= 1.01f;
             } else {
                 aieditorsettings.area_rotation = selected->flags;
-                if (pressed & (0x8000 | 0x2000))
+                if (pressed & ((held & 0x8000) ? 0x2000 : 0x8000))
                     antinode_rotation_repeat() = 20;
                 else
                     antinode_rotation_repeat() =
@@ -424,6 +425,7 @@ eduimenu_s *antinodeEditor_Process(nupad_s *pad) {
         bool skip_platforms = (pressed & (1 | 4)) != 0;
         EDANTINODE_s *candidate = selected;
         EDANTINODE_s *first = selected;
+        bool have_first = selected != nullptr;
         do {
             NULISTLNK *next = candidate == nullptr ? (forward ? NuLinkedListGetHead(antinode_list())
                                                               : NuLinkedListGetTail(antinode_list()))
@@ -432,9 +434,13 @@ eduimenu_s *antinodeEditor_Process(nupad_s *pad) {
             if (next == nullptr)
                 next = forward ? NuLinkedListGetHead(antinode_list()) : NuLinkedListGetTail(antinode_list());
             candidate = reinterpret_cast<EDANTINODE_s *>(next);
-            if (candidate == nullptr || candidate == first) {
+            if (candidate == nullptr || (have_first && candidate == first)) {
                 candidate = nullptr;
                 break;
+            }
+            if (!have_first) {
+                first = candidate;
+                have_first = true;
             }
         } while (skip_platforms && NuSpecialExistsFn(&candidate->special));
         aieditor->mode_selection_42e9c = candidate;

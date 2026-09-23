@@ -517,9 +517,10 @@ void edanimDoInput(nupad_s *pad) {
     if (edanim_nearest_param_id != -1) {
         auto &param = AnimParams[edanim_nearest_param_id];
         for (i32 effect = 0; effect < param.effect_count;) {
-            if (param.effect_ids[effect] == -1 && param.effect_names[effect][0] != '\0') {
+            if ((param.effect_ids[effect] == -1 || debtab[param.effect_ids[effect]] == nullptr) &&
+                param.effect_names[effect][0] != '\0') {
                 param.effect_ids[effect] = LookupDebrisEffect(param.effect_names[effect]);
-                if (debtab[param.effect_ids[effect]] == nullptr) {
+                if (param.effect_ids[effect] == -1) {
                     edanimParticleDestroy(edanim_nearest_param_id, effect);
                     continue;
                 }
@@ -3328,9 +3329,9 @@ i32 EdManScale::Process(EdInputContext &input, ClassObjectList &selected) {
                 scale_y += local_axis.y * change;
                 scale_z += local_axis.z * change;
                 if (axis >= 4) {
-                    scale_x += second_axis.x * change;
-                    scale_y += second_axis.y * change;
-                    scale_z += second_axis.z * change;
+                    scale_x += second_axis.x;
+                    scale_y += second_axis.y;
+                    scale_z += second_axis.z;
                 }
             } else if (axis == 7) {
                 f32 movement = input.Get(1) - input.Get(0) + input.Get(2);
@@ -3364,10 +3365,14 @@ void EdManScale::Render(ClassObjectList &selected) {
     if (selected.GetAveragePosition(average) == 0)
         return;
     VuMtx transform;
-    VuMtx *matrix = NULL;
-    if (selected.first != NULL && get_manipulator_attribute(selected.first, 0x20, EdType_VuMtx, &transform))
-        matrix = &transform;
-    DrawAxis(average, matrix);
+    ClassObjectListEntry *entry = selected.first;
+    if (entry->reference == NULL ||
+        entry->reference->GetAttributeData(entry->object, 0x20, EdType_VuMtx, &transform, 0) == 0) {
+        EdMember member;
+        if (entry->ed_class->FindMember(&member, entry->object, 0x20, 1) != 0)
+            member.reference->GetAttributeData(member.object, 0x20, EdType_VuMtx, &transform, 0);
+    }
+    DrawAxis(average, &transform);
 }
 
 i32 EdRegistry::AddMapping(char *source, char *destination) {
@@ -3813,6 +3818,7 @@ i32 EdManRotate::Process(EdInputContext &input, ClassObjectList &selected) {
         return 0;
     VuVec axis;
     i32 selected_axis = SelectRotator(input, average, axis);
+    theLevelEditor.field_0x2c = AxisColour[selected_axis];
     i32 angle = *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(this) + 0x68);
     return RotateItem(input, selected, angle, selected_axis);
 }
@@ -4095,9 +4101,11 @@ void EdEnumControl::cbButton(eduimenu_s *menu, eduiitem_s *item, u32) {
     for (Item *entry = control->items; entry != NULL && entry->name != NULL; ++entry)
         eduiMenuAddItem(
             choices, eduiItemSelCreate(reinterpret_cast<usize>(entry), item->colours, 0, 0, cbSelectItem, entry->name));
+    choices->flags |= 1;
     eduiMenuAttach(menu, choices);
     eduiMenuFitWidth(choices, 5);
     eduiMenuFitOnScreen(choices, 30);
+    static_cast<edui_prop_s *>(item)->unknown_property_flags &= ~8u;
 }
 
 void EdEnumControl::cbChanged(eduimenu_s *, eduiitem_s *item, u32) {
@@ -4312,24 +4320,19 @@ i32 EdManipulator::SelectAxis(EdInputContext &input, VuVec &origin, VuVec &first
 
     VuVec *ray_origin = reinterpret_cast<VuVec *>(input.reserved_00 + 0x20);
     VuVec *ray_direction = reinterpret_cast<VuVec *>(input.reserved_00 + 0x30);
-    f32 nearest_distance = 0.25f * Scale;
+    f32 nearest_distance = __FLT_MAX__;
     i32 nearest = 0;
     for (i32 index = 1; index < 8; ++index) {
         VuVec closest;
         f32 distance = LineToPointDistance(*ray_origin, *ray_direction, locators[index], &closest);
-        if (distance < nearest_distance) {
+        f32 radius = (index <= 3 ? 0.25f : 0.1f) * Scale;
+        if (distance < radius && distance < nearest_distance) {
             nearest_distance = distance;
             nearest = index;
         }
     }
 
     i32 *selected_axis = reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(this) + 0x0c);
-    if (input.GetHold(3) != 0.0f && *selected_axis != 0)
-        nearest = *selected_axis;
-    if (input.GetHold(3) == 0.0f)
-        *selected_axis = 0;
-    else if (*selected_axis == 0)
-        *selected_axis = nearest;
 
     switch (nearest) {
         case 1:
@@ -4353,6 +4356,10 @@ i32 EdManipulator::SelectAxis(EdInputContext &input, VuVec &origin, VuVec &first
             first_axis.y = 1.0f;
             second_axis.z = 1.0f;
             break;
+        case 7:
+            first_axis.y = 1.0f;
+            second_axis.z = 1.0f;
+            break;
         default:
             break;
     }
@@ -4367,11 +4374,21 @@ i32 EdManipulator::SelectAxis(EdInputContext &input, VuVec &origin, VuVec &first
             axis.x = x * transform.m00 + y * transform.m10 + z * transform.m20;
             axis.y = x * transform.m01 + y * transform.m11 + z * transform.m21;
             axis.z = x * transform.m02 + y * transform.m12 + z * transform.m22;
+            NuVecNorm(reinterpret_cast<NUVEC *>(&axis), reinterpret_cast<NUVEC *>(&axis));
         }
     }
-    if (input.GetHold(3) != 0.0f) {
+    if (input.GetPress(3) != 0.0f) {
+        *selected_axis = nearest;
         *reinterpret_cast<VuVec *>(reinterpret_cast<u8 *>(this) + 0x10) = first_axis;
         *reinterpret_cast<VuVec *>(reinterpret_cast<u8 *>(this) + 0x20) = second_axis;
+    } else if (input.GetHold(3) == 0.0f) {
+        *selected_axis = 0;
+        *reinterpret_cast<VuVec *>(reinterpret_cast<u8 *>(this) + 0x10) = VuVec_Zero;
+        *reinterpret_cast<VuVec *>(reinterpret_cast<u8 *>(this) + 0x20) = VuVec_Zero;
+    } else {
+        nearest = *selected_axis;
+        first_axis = *reinterpret_cast<VuVec *>(reinterpret_cast<u8 *>(this) + 0x10);
+        second_axis = *reinterpret_cast<VuVec *>(reinterpret_cast<u8 *>(this) + 0x20);
     }
     return nearest;
 }
@@ -4384,67 +4401,77 @@ i32 EdManipulator::SelectRotator(EdInputContext &input, VuVec &center, VuVec &pl
     i32 *last_angle = reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(this) + 0x64);
     i32 *angle_delta = reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(this) + 0x68);
     VuVec *selected_plane = reinterpret_cast<VuVec *>(reinterpret_cast<u8 *>(this) + 0x10);
-    if (input.GetPress(3) != 0.0f) {
+    f32 pressed = input.GetPress(3);
+    if (pressed != 0.0f || input.GetHold(3) == 0.0f) {
         VuVec far_point;
         VuVec near_point;
-        if (LineToSphereIntersection(ray_origin, ray_direction, center, Scale + 0.01f, &far_point, &near_point) == 0) {
-            *selected_axis = 0;
-            *start_angle = 0;
-            *last_angle = 0;
+        i32 axis = 0;
+        VuVec chosen = VuVec_Zero;
+        f32 nearest_distance = __FLT_MAX__;
+        if (LineToSphereIntersection(ray_origin, ray_direction, center, Scale + 0.01f, &far_point, &near_point) != 0) {
+            const VuVec points[2] = {far_point, near_point};
+            for (i32 candidate = 1; candidate <= 3; ++candidate) {
+                for (i32 side = 0; side < 2; ++side) {
+                    const VuVec &point = points[side];
+                    VuVec projection = point;
+                    if (candidate == 1)
+                        projection.x = center.x;
+                    else if (candidate == 2)
+                        projection.y = center.y;
+                    else
+                        projection.z = center.z;
+                    VuVec screen_point;
+                    VuVec screen_projection;
+                    NuCameraTransformScreenClip(reinterpret_cast<NUVEC *>(&screen_projection),
+                                                reinterpret_cast<NUVEC *>(&projection), 1, NULL);
+                    NuCameraTransformScreenClip(reinterpret_cast<NUVEC *>(&screen_point),
+                                                reinterpret_cast<NUVEC *>(const_cast<VuVec *>(&point)), 1, NULL);
+                    VuVec difference = {screen_point.x - screen_projection.x, screen_point.y - screen_projection.y,
+                                        screen_point.z - screen_projection.z, 0.0f};
+                    f32 distance = NuVecMag(reinterpret_cast<NUVEC *>(&difference));
+                    if (distance < 0.05f && distance < nearest_distance) {
+                        nearest_distance = distance;
+                        chosen = point;
+                        axis = candidate;
+                    }
+                }
+            }
+        }
+        if (pressed != 0.0f) {
+            *selected_axis = axis;
             *angle_delta = 0;
-            *selected_plane = VuVec_Zero;
-            return 0;
+            if (axis == 0) {
+                *selected_plane = VuVec_Zero;
+                *start_angle = *last_angle = 0;
+                return 0;
+            }
+            plane = VuVec(axis == 1 ? 1.0f : 0.0f, axis == 2 ? 1.0f : 0.0f, axis == 3 ? 1.0f : 0.0f,
+                          axis == 1   ? -center.x
+                          : axis == 2 ? -center.y
+                                      : -center.z);
+            *selected_plane = plane;
+            f32 x = chosen.x - center.x;
+            f32 y = chosen.y - center.y;
+            f32 z = chosen.z - center.z;
+            i32 angle = axis == 1 ? NuAtan2DA(y, z) : axis == 2 ? NuAtan2DA(x, -z) : NuAtan2DA(x, y);
+            *start_angle = *last_angle = angle;
+            return axis;
         }
-        VuVec point = near_point;
-        f32 forward = (near_point.x - ray_origin.x) * ray_direction.x +
-                      (near_point.y - ray_origin.y) * ray_direction.y + (near_point.z - ray_origin.z) * ray_direction.z;
-        if (forward < 0.0f)
-            point = far_point;
-        f32 x = point.x - center.x;
-        f32 y = point.y - center.y;
-        f32 z = point.z - center.z;
-        f32 ax = x < 0.0f ? -x : x;
-        f32 ay = y < 0.0f ? -y : y;
-        f32 az = z < 0.0f ? -z : z;
-        i32 axis = ax <= ay && ax <= az ? 1 : ay <= az ? 2 : 3;
-        if ((axis == 1 ? ax : axis == 2 ? ay : az) > Scale * 0.25f)
-            axis = 0;
-        *selected_axis = axis;
-        *angle_delta = 0;
-        if (axis == 0) {
-            *selected_plane = VuVec_Zero;
-            *start_angle = *last_angle = 0;
-            return 0;
-        }
-        plane = VuVec(axis == 1 ? 1.0f : 0.0f, axis == 2 ? 1.0f : 0.0f, axis == 3 ? 1.0f : 0.0f,
-                      axis == 1   ? -center.x
-                      : axis == 2 ? -center.y
-                                  : -center.z);
-        *selected_plane = plane;
-        i32 angle = axis == 1 ? NuAtan2DA(y, z) : axis == 2 ? NuAtan2DA(x, -z) : NuAtan2DA(x, y);
-        *start_angle = *last_angle = angle;
-        return axis;
-    }
-    if (input.GetHold(3) == 0.0f) {
         *selected_axis = 0;
         *start_angle = *last_angle = *angle_delta = 0;
         *selected_plane = VuVec_Zero;
-        return 0;
+        return axis;
     }
     i32 axis = *selected_axis;
     plane = *selected_plane;
-    if (axis == 0) {
-        *angle_delta = 0;
-        return 0;
-    }
-    f32 direction = axis == 1 ? ray_direction.x : axis == 2 ? ray_direction.y : ray_direction.z;
-    if (direction == 0.0f) {
+    f32 start_distance = ray_origin.x * plane.x + ray_origin.y * plane.y + ray_origin.z * plane.z + plane.w;
+    f32 end_distance = (ray_origin.x + ray_direction.x) * plane.x + (ray_origin.y + ray_direction.y) * plane.y +
+                       (ray_origin.z + ray_direction.z) * plane.z + plane.w;
+    if (start_distance * end_distance >= 0.0f) {
         *angle_delta = 0;
         return axis;
     }
-    f32 position = axis == 1 ? ray_origin.x : axis == 2 ? ray_origin.y : ray_origin.z;
-    f32 target = axis == 1 ? center.x : axis == 2 ? center.y : center.z;
-    f32 t = (target - position) / direction;
+    f32 t = -start_distance / (end_distance - start_distance);
     f32 x = ray_origin.x + ray_direction.x * t - center.x;
     f32 y = ray_origin.y + ray_direction.y * t - center.y;
     f32 z = ray_origin.z + ray_direction.z * t - center.z;
@@ -4510,10 +4537,13 @@ void EdInputContext::Set(i32 input, float value, float repeat_delay) {
         float next_repeat = repeat_times[input];
         pressed[input] = held[input] == 0;
         held[input] = 1;
-        if (next_repeat >= repeat_threshold || next_repeat == 0.0f) {
+        if (next_repeat >= repeat_threshold) {
+            repeated[input] = 1;
+            next_repeat = now;
+        } else if (next_repeat == 0.0f) {
             repeated[input] = 1;
         }
-        repeat_times[input] = now + repeat_delay;
+        repeat_times[input] = next_repeat + repeat_delay;
         return;
     }
 
@@ -4526,7 +4556,6 @@ void EdInputContext::Set(i32 input, float value, float repeat_delay) {
 void EdInputContext::Update(nucamera_s *camera, nupad_s *new_pad, float elapsed, bool) {
     pad = new_pad;
     delta_time = elapsed;
-    current_time += elapsed;
 
     f32 *view = reinterpret_cast<f32 *>(reserved_00);
     view[0] = camera->mtx.m30;
@@ -4550,18 +4579,24 @@ void EdInputContext::Update(nucamera_s *camera, nupad_s *new_pad, float elapsed,
     view[14] = ray_end.z - view[10];
     view[15] = 0.0f;
 
-    memset(pressed, 0, sizeof(pressed));
-    memset(released, 0, sizeof(released));
-    memset(repeated, 0, sizeof(repeated));
-    memset(cleared, 0, sizeof(cleared));
+    // The original editor suppresses its input context while a property text
+    // field is being edited, releasing held actions before returning.
+    if (eduiPropTextPos >= 0) {
+        for (i32 input_index = 0; input_index < 40; ++input_index)
+            Set(input_index, 0.0f, elapsed);
+        memset(cleared, 0, sizeof(cleared));
+        return;
+    }
 
     const u32 buttons = new_pad != NULL ? new_pad->digital_buttons : 0;
     const u32 mouse_buttons = NuMouseReadButtons();
+    const bool pad_enabled = edGetPadDisabled() == 0;
+    const bool menu_closed = pad_enabled && eduiGetActiveMenu() == NULL;
     const i32 shift_or_s = NuKeyboard(0x2a) | NuKeyboard(0x36) | NuKeyboard(0x1f);
     const i32 alt_or_space = NuKeyboard(0x38) | NuKeyboard(0xb8) | NuKeyboard(0x39);
     const i32 control_or_c = NuKeyboard(0x1d) | NuKeyboard(0x9d) | NuKeyboard(0x2e);
     const i32 left_click = (mouse_buttons == 1 || (buttons & 0x800) != 0) && !alt_or_space;
-    const i32 right_click = (mouse_buttons == 2 || (!edGetPadDisabled() && (buttons & 0x20) != 0)) && !alt_or_space;
+    const i32 right_click = (mouse_buttons == 2 || (pad_enabled && (buttons & 0x20) != 0)) && !alt_or_space;
     Set(0, NuMouseReadXVel(), elapsed);
     Set(1, NuMouseReadYVel(), elapsed);
     Set(2, NuMouseReadZVel(), elapsed);
@@ -4585,10 +4620,11 @@ void EdInputContext::Update(nucamera_s *camera, nupad_s *new_pad, float elapsed,
     Set(25, static_cast<f32>(left_click && control_or_c), elapsed);
     for (i32 input_index = 26; input_index <= 35; ++input_index)
         Set(input_index, static_cast<f32>(NuKeyboard(input_index - 24)), elapsed);
-    Set(36, static_cast<f32>(NuKeyboard(0x0b)), elapsed);
-    Set(37, static_cast<f32>(eduiGetActiveMenu() == NULL ? buttons & 0x80 : 0), elapsed);
-    Set(38, static_cast<f32>(eduiGetActiveMenu() == NULL ? buttons & 0x40 : 0), elapsed);
+    Set(37, static_cast<f32>(menu_closed ? buttons & 0x80 : 0), elapsed);
+    if (menu_closed)
+        Set(38, static_cast<f32>(buttons & 0x40), elapsed);
     Set(39, static_cast<f32>(buttons & 0x800), elapsed);
+    memset(cleared, 0, sizeof(cleared));
 }
 
 i32 EdOutputStream::SerialiseString(char **text) {
@@ -5428,12 +5464,14 @@ void EdFileInputStream::Open(i32 handle, i32) {
 
 i32 EdFileInputStream::SerialiseBuffer(void *data, i32 size, i32 count) {
     i32 result = NuFileRead(file, data, size * count);
-    if (swap_endianness && size > 1) {
-        for (i32 i = 0; i < count; i++) {
-            if (size == 2) {
+    if (swap_endianness && size > 1 && count > 0) {
+        if (size == 2) {
+            for (i32 i = 0; i < count; ++i) {
                 EdFileSwapEndianess16(data);
                 data = static_cast<u8 *>(data) + 2;
-            } else if (size == 4) {
+            }
+        } else if (size == 4) {
+            for (i32 i = 0; i < count; ++i) {
                 EdFileSwapEndianess32(data);
                 data = static_cast<u8 *>(data) + 4;
             }
@@ -6108,6 +6146,7 @@ i32 EdManMove::Process(EdInputContext &input, ClassObjectList &selected) {
     VuVec first_axis;
     VuVec second_axis;
     i32 axis = SelectAxis(input, average, first_axis, second_axis, NULL);
+    theLevelEditor.field_0x2c = AxisColour[axis];
     if (axis == 0)
         return 0;
     if (input.GetHold(3) == 0.0f && input.GetHold(38) == 0.0f)
@@ -6115,8 +6154,7 @@ i32 EdManMove::Process(EdInputContext &input, ClassObjectList &selected) {
     const VuVec *delta = reinterpret_cast<VuVec const *>(reinterpret_cast<u8 *>(this) + 0x40);
     for (ClassObjectListEntry *entry = selected.first; entry != NULL; entry = entry->next) {
         VuVec position = VuVec_Zero;
-        if (!get_manipulator_attribute(entry, 8, EdType_VuVec, &position))
-            continue;
+        get_manipulator_attribute(entry, 8, EdType_VuVec, &position);
         if (axis == 7) {
             if (input.GetHold(38) == 0.0f)
                 continue;

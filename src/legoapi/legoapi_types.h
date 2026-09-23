@@ -5575,14 +5575,21 @@ struct SNIPER_s {
     float state;      // 0x1c
 }; // 0x20 bytes: the original strides this array by 0x20
 
-struct SceneObjectHelperSubSystem : EdSubSystem {
-    void SubRender() override asm("_ZThn12_N17SceneObjectHelper9SubRenderEv");
+struct SceneObjectHelperVTableObject {
+    void *offset_to_top;
+    void *type_info;
+    EdClassInterfaceVTable methods;
+    void (*sub_render)(SceneObjectHelper *);
+    i32 subsystem_offset_to_top;
+    void *subsystem_type_info;
+    void (*subsystem_methods[6])();
 };
+extern const SceneObjectHelperVTableObject sceneObjectHelperVTable asm("_ZTV17SceneObjectHelper");
 
 struct SceneObjectHelper {
     EdClassInterface class_interface;
     i32 scene_id;
-    SceneObjectHelperSubSystem subsystem;
+    EdSubSystem subsystem;
     u8 reserved_0x18[4];
     SceneObject *scenes[10];
     i32 scene_counts[10];
@@ -5596,6 +5603,13 @@ struct SceneObjectHelper {
     i32 show_hidden_solid;
     i32 show_hidden_wire;
     i32 show_owned_objects;
+
+    SceneObjectHelper() {
+        class_interface.vtable = const_cast<EdClassInterfaceVTable *>(&sceneObjectHelperVTable.methods);
+        *reinterpret_cast<void **>(&subsystem) =
+            const_cast<void *>(static_cast<void const *>(&sceneObjectHelperVTable.subsystem_methods));
+    }
+    ~SceneObjectHelper();
 
     void AddMenuItems(eduimenu_s *);
     void ClearLevel(i32);
@@ -5615,6 +5629,9 @@ struct SceneObjectHelper {
     static void cbEdSceneObjectShowOwnedObjects(eduimenu_s *, eduiitem_s *, u32);
 };
 
+DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(SceneObjectHelperVTableObject) == 0xa8, "SceneObjectHelper vtable size");
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(SceneObjectHelperVTableObject, subsystem_methods) == 0x90,
+              "SceneObjectHelper secondary vtable offset");
 DECOMP_ASSERT(sizeof(SceneObjectHelper) == 0xb0, "SceneObjectHelper size");
 DECOMP_ASSERT(offsetof(SceneObjectHelper, scene_id) == 8, "SceneObjectHelper scene ID offset");
 DECOMP_ASSERT(offsetof(SceneObjectHelper, scenes) == 0x1c, "SceneObjectHelper scene-array offset");

@@ -5739,25 +5739,61 @@ extern "C" {
         return height * 2;
     }
     static __used__ i32 eduicbRenderExpander(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width) {
-        (void)menu;
         edui_expander_s *expander = static_cast<edui_expander_s *>(item);
-        i32 height = static_cast<i32>(NuQFntHeight(edui_font) * 0.15625f);
-        i32 baseline = static_cast<i32>(NuQFntHeight(edui_font) * 0.125f + NuQFntBaseline(edui_font));
-        item->x = x;
-        item->y = y;
-        expander->button_size = static_cast<f32>(height - 2);
-        expander->button_x = static_cast<f32>(x + 2 + expander->depth * (height - 2));
-        expander->button_y = static_cast<f32>(y + 2);
+        const bool over_button = edui_cursor_x >= expander->button_x && edui_cursor_y >= expander->button_y * 0.5f &&
+                                 edui_cursor_x < expander->button_x + expander->button_size &&
+                                 edui_cursor_y < (expander->button_y + expander->button_size) * 0.5f;
+        expander->unknown_flags = (expander->unknown_flags & ~1u) | static_cast<u32>(over_button);
+
         if (!edui_donotdraw) {
-            NuRndrRect2di(x << 4, y << 3, width << 4, height << 3, item->colours[2 + item->highlighted],
-                          uimtls[ui_bgmtl]);
             NuQFntSet(edui_font);
             NuQFntSetColour(edui_font, item->colours[item->highlighted]);
         }
-        char *glyph = expander->open ? const_cast<char *>("-") : const_cast<char *>("+");
-        eduiFntPrintEx(edui_font, static_cast<i32>(expander->button_x) << 4, (y << 3) + baseline, 16, glyph);
-        eduiFntPrintEx(edui_font, static_cast<i32>(expander->button_x + expander->button_size + 2) << 4,
-                       (y << 3) + baseline, 16, item->text);
+        const f32 row_height = NuQFntHeight(edui_font) * 1.25f * 0.125f;
+        const i32 height = static_cast<i32>(row_height);
+        const f32 baseline = (NuQFntHeight(edui_font) * 0.125f + NuQFntBaseline(edui_font)) * 0.125f;
+        item->x = x;
+        item->y = y;
+        for (eduimenu_s *ancestor = menu; ancestor; ancestor = ancestor->parent) {
+            if (ancestor == eduiGetActiveMenu()) {
+                if (!edui_donotdraw)
+                    NuRndrRect2di(x << 4, y << 3, width << 4, height << 3, item->colours[2 + item->highlighted],
+                                  uimtls[ui_bgmtl]);
+                break;
+            }
+        }
+        const f32 button_size = row_height - 2.0f;
+        if (!edui_donotdraw) {
+            for (i32 depth = 0; depth < expander->depth; ++depth) {
+                const i32 guide_x =
+                    static_cast<i32>((static_cast<f32>(x) + (static_cast<f32>(depth) + 0.5f) * button_size) * 16.0f);
+                NuRndrLine2di(guide_x, y << 3, guide_x, static_cast<i32>((static_cast<f32>(y) + row_height) * 8.0f),
+                              0xff000000, uimtls[0]);
+            }
+        }
+        const f32 button_x = static_cast<f32>(x) + static_cast<f32>(expander->depth) * button_size + 2.0f;
+        const f32 button_y = static_cast<f32>(y) + 2.0f;
+        expander->button_size = button_size;
+        expander->button_x = button_x;
+        expander->button_y = button_y;
+        if (expander->first_child && !edui_donotdraw) {
+            const u32 button_line_colour = over_button ? 0xffffffff : 0xff000000;
+            NuRndrLineRect2di(static_cast<i32>(button_x * 16.0f), static_cast<i32>(button_y * 8.0f),
+                              static_cast<i32>(button_size * 16.0f), static_cast<i32>(button_size * 8.0f), 0xff000000,
+                              uimtls[0]);
+            const f32 mid_x = button_x + button_size * 0.5f;
+            const f32 mid_y = button_y + button_size * 0.5f;
+            NuRndrLine2di(static_cast<i32>((button_x + 2.0f) * 16.0f), static_cast<i32>(mid_y * 8.0f),
+                          static_cast<i32>((button_x + button_size - 2.0f) * 16.0f), static_cast<i32>(mid_y * 8.0f),
+                          button_line_colour, uimtls[0]);
+            if (!expander->open)
+                NuRndrLine2di(static_cast<i32>(mid_x * 16.0f), static_cast<i32>((button_y + 2.0f) * 8.0f),
+                              static_cast<i32>(mid_x * 16.0f), static_cast<i32>((button_y + button_size - 2.0f) * 8.0f),
+                              button_line_colour, uimtls[0]);
+        }
+        const f32 text_x = button_x + button_size + 2.0f;
+        eduiFntPrintClipEx(edui_font, text_x, static_cast<f32>(y) + baseline, 16, text_x,
+                           static_cast<f32>(width) - button_size + 2.0f, item->text);
         return height;
     }
     static __used__ i32 eduicbRenderFilePick(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width) {
@@ -6004,48 +6040,119 @@ extern "C" {
         return height;
     }
     static __used__ i32 eduicbRenderProp(struct eduimenu_s *menu, struct eduiitem_s *item, i32 x, i32 y, i32 scale) {
-        (void)menu;
         edui_prop_s *property = static_cast<edui_prop_s *>(item);
-        i32 height = static_cast<i32>(NuQFntHeight(edui_font) * 0.15625f);
-        i32 baseline = static_cast<i32>(NuQFntHeight(edui_font) * 0.125f + NuQFntBaseline(edui_font));
+        const bool over_button = edui_cursor_x >= property->button_x && edui_cursor_y >= property->button_y * 0.5f &&
+                                 edui_cursor_x < property->button_x + property->button_size &&
+                                 edui_cursor_y < (property->button_y + property->button_size) * 0.5f &&
+                                 !eduiInteractLocked;
+        const bool button_highlighted = (property->unknown_property_flags & 8) || over_button;
+        property->unknown_property_flags = (property->unknown_property_flags & ~16u) | (button_highlighted ? 16u : 0u);
+        const f32 row_height = NuQFntHeight(edui_font) * 1.25f * 0.125f;
+        const i32 height = static_cast<i32>(row_height);
+        const f32 baseline = (NuQFntHeight(edui_font) * 0.125f + NuQFntBaseline(edui_font)) * 0.125f;
         item->x = x;
         item->y = y;
-        property->button_size = static_cast<f32>(height - 2);
-        property->button_x = static_cast<f32>(x + scale - 1) - property->button_size;
-        property->button_y = static_cast<f32>(y + 1);
         if (!edui_donotdraw) {
-            NuRndrRect2di(x << 4, y << 3, scale << 4, height << 3, item->colours[2 + item->highlighted],
-                          uimtls[ui_bgmtl]);
             NuQFntSet(edui_font);
-            NuQFntSetColour(edui_font, item->colours[item->highlighted]);
-            i32 divider_x = static_cast<i32>(x + property->label_width) << 4;
-            NuRndrLine2di(divider_x, y << 3, divider_x, (y + height) << 3, 0xffffffff, uimtls[0]);
-            i32 button_x = static_cast<i32>(property->button_x) << 4;
-            i32 button_y = static_cast<i32>(property->button_y) << 3;
-            i32 button_width = static_cast<i32>(property->button_size) << 4;
-            i32 button_height = static_cast<i32>(property->button_size) << 3;
-            NuRndrLineRect2di(button_x, button_y, button_width, button_height, 0xff000000, uimtls[0]);
+            const u32 text_colour = item->unknown_10 == 1   ? 0xff000060
+                                    : item->unknown_10 == 2 ? 0xff006000
+                                    : item->unknown_10 == 3 ? 0xff600000
+                                                            : item->colours[item->highlighted];
+            NuQFntSetColour(edui_font, text_colour);
+        }
+        const f32 indentation = static_cast<f32>(property->depth) * (row_height - 2.0f);
+        if (property->unknown_property_flags & 1) {
+            const f32 text_width = NuQFntPrintLenU(edui_font, eduiPropTextEdit) * 0.0625f;
+            f32 edit_width = static_cast<f32>(scale) - property->label_width - 4.0f;
+            if (edit_width < text_width)
+                edit_width = text_width;
+            if (!edui_donotdraw) {
+                NuRndrRect2di(x << 4, y << 3, scale << 4, static_cast<i32>(row_height * 8.0f),
+                              item->colours[2 + item->highlighted], uimtls[ui_bgmtl]);
+                NuRndrRect2di(static_cast<i32>((static_cast<f32>(x) + property->label_width + 2.0f) * 16.0f),
+                              static_cast<i32>((static_cast<f32>(y) + 2.0f) * 8.0f),
+                              static_cast<i32>(edit_width * 16.0f), static_cast<i32>((row_height - 4.0f) * 8.0f),
+                              0xffffffff, uimtls[0]);
+                for (i32 depth = 0; depth < property->depth; ++depth) {
+                    const i32 guide_x = static_cast<i32>(
+                        (static_cast<f32>(x) + (static_cast<f32>(depth) + 0.5f) * (row_height - 2.0f)) * 16.0f);
+                    NuRndrLine2di(guide_x, y << 3, guide_x, static_cast<i32>((static_cast<f32>(y) + row_height) * 8.0f),
+                                  0xff000000, uimtls[0]);
+                }
+                const i32 divider_x = static_cast<i32>((static_cast<f32>(x) + property->label_width) * 16.0f);
+                NuRndrLine2di(divider_x, y << 3, divider_x, static_cast<i32>((static_cast<f32>(y) + row_height) * 8.0f),
+                              (property->unknown_property_flags & 4) ? 0xffffffff : 0x0ff00000, uimtls[0]);
+            }
+            eduiFntPrintClipEx(edui_font, static_cast<f32>(x) + indentation, static_cast<f32>(y) + baseline, 16,
+                               static_cast<f32>(x) - indentation, property->label_width, item->text);
+            const f32 text_x = static_cast<f32>(x) + property->label_width + 2.0f;
+            eduiFntPrintEx(edui_font, static_cast<i32>(text_x * 16.0f),
+                           static_cast<i32>((static_cast<f32>(y) + baseline) * 8.0f), 16, eduiPropTextEdit);
+            char prefix[256];
+            NuStrNCpy(prefix, eduiPropTextEdit, eduiPropTextPos + 1);
+            prefix[eduiPropTextPos + 1] = '\0';
+            if (!edui_donotdraw) {
+                const i32 caret_x = static_cast<i32>((text_x + NuQFntPrintLenU(edui_font, prefix) * 0.0625f) * 16.0f);
+                NuRndrLine2di(caret_x, y << 3, caret_x, static_cast<i32>((static_cast<f32>(y) + row_height) * 8.0f),
+                              0xff000000, uimtls[0]);
+            }
+            return height;
+        }
+        property->button_size = row_height - 2.0f;
+        property->button_x = static_cast<f32>(x + scale) - (2.0f + property->button_size);
+        property->button_y = static_cast<f32>(y) + 2.0f;
+        if (!edui_donotdraw) {
+            for (eduimenu_s *ancestor = menu; ancestor; ancestor = ancestor->parent) {
+                if (ancestor == eduiGetActiveMenu()) {
+                    NuRndrRect2di(x << 4, y << 3, scale << 4, static_cast<i32>(row_height * 8.0f),
+                                  item->colours[2 + item->highlighted], uimtls[ui_bgmtl]);
+                    break;
+                }
+            }
+            const i32 divider_x = static_cast<i32>((static_cast<f32>(x) + property->label_width) * 16.0f);
+            NuRndrLine2di(divider_x, y << 3, divider_x, static_cast<i32>((static_cast<f32>(y) + row_height) * 8.0f),
+                          (property->unknown_property_flags & 4) ? 0xffffffff : 0x0ff00000, uimtls[0]);
+            for (i32 depth = 0; depth < property->depth; ++depth) {
+                const i32 guide_x = static_cast<i32>(
+                    (static_cast<f32>(x) + (static_cast<f32>(depth) + 0.5f) * property->button_size) * 16.0f);
+                NuRndrLine2di(guide_x, y << 3, guide_x, static_cast<i32>((static_cast<f32>(y) + row_height) * 8.0f),
+                              0xff000000, uimtls[0]);
+            }
+            const f32 button_x = property->button_x;
+            const f32 button_y = property->button_y;
+            const f32 button_size = property->button_size;
+            if (property->button_type == 3) {
+                u32 fill_colour;
+                memcpy(&fill_colour, property->unknown_4e + 2, sizeof(fill_colour));
+                NuRndrRect2di(static_cast<i32>(button_x * 16.0f), static_cast<i32>(button_y * 8.0f),
+                              static_cast<i32>(button_size * 16.0f), static_cast<i32>(button_size * 8.0f), fill_colour,
+                              uimtls[0]);
+            }
+            NuRndrLineRect2di(static_cast<i32>(button_x * 16.0f), static_cast<i32>(button_y * 8.0f),
+                              static_cast<i32>(button_size * 16.0f), static_cast<i32>(button_size * 8.0f), 0xff000000,
+                              uimtls[0]);
+            const auto px = [&](f32 fraction) { return static_cast<i32>((button_x + button_size * fraction) * 16.0f); };
+            const auto py = [&](f32 fraction) { return static_cast<i32>((button_y + button_size * fraction) * 8.0f); };
+            const u32 icon_colour = button_highlighted ? 0xffffffff : 0xff000000;
             if (property->button_type == 1) {
-                i32 points[6] = {button_x + button_width / 3,     button_y + button_height / 4,
-                                 button_x + button_width / 3,     button_y + button_height * 3 / 4,
-                                 button_x + button_width * 3 / 4, button_y + button_height / 2};
-                NuRndrTriStrip2di(points, NULL, 3, 0xffffffff, uimtls[0]);
+                i32 points[6] = {px(0.1f), py(0.1f), px(0.9f), py(0.5f), px(0.1f), py(0.9f)};
+                NuRndrTriStrip2di(points, NULL, 3, icon_colour, uimtls[0]);
             } else if (property->button_type == 2) {
-                i32 up[6] = {button_x + button_width / 4,     button_y + button_height / 2,
-                             button_x + button_width / 2,     button_y + button_height / 4,
-                             button_x + button_width * 3 / 4, button_y + button_height / 2};
-                i32 down[6] = {button_x + button_width / 4,     button_y + button_height * 3 / 4,
-                               button_x + button_width / 2,     button_y + button_height / 2,
-                               button_x + button_width * 3 / 4, button_y + button_height * 3 / 4};
-                NuRndrTriStrip2di(up, NULL, 3, 0xffffffff, uimtls[0]);
-                NuRndrTriStrip2di(down, NULL, 3, 0xffffffff, uimtls[0]);
+                i32 up[6] = {px(0.1f), py(0.45f), px(0.5f), py(0.1f), px(0.9f), py(0.45f)};
+                i32 down[6] = {px(0.1f), py(0.55f), px(0.5f), py(0.9f), px(0.9f), py(0.55f)};
+                NuRndrTriStrip2di(up, NULL, 3, icon_colour, uimtls[0]);
+                NuRndrTriStrip2di(down, NULL, 3, icon_colour, uimtls[0]);
             }
         }
-        i32 label_x = (x + 2 + property->depth * 8) << 4;
-        eduiFntPrintEx(edui_font, label_x, (y << 3) + baseline, 16, item->text);
+        eduiFntPrintClipEx(edui_font, static_cast<f32>(x) + indentation, static_cast<f32>(y) + baseline, 16,
+                           static_cast<f32>(x) - indentation, property->label_width, item->text);
         char *value = (property->unknown_property_flags & 1) ? eduiPropTextEdit : property->property_text;
-        if (value)
-            eduiFntPrintEx(edui_font, (static_cast<i32>(property->button_x) - 1) << 4, (y << 3) + baseline, 32, value);
+        if (value) {
+            const f32 value_x = property->button_x - 2.0f;
+            const f32 value_clip_x = static_cast<f32>(x) + property->label_width;
+            eduiFntPrintClipEx(edui_font, value_x, static_cast<f32>(y) + baseline, 32, value_clip_x,
+                               value_x - value_clip_x, value);
+        }
         return height;
     }
     static __used__ i32 eduicbRenderFilter(struct eduimenu_s *menu, struct eduiitem_s *item, i32 x, i32 y, i32 scale) {

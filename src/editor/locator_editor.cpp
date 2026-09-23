@@ -611,16 +611,11 @@ extern "C" {
 } // extern "C"
 
 void locatorEditor_Enter(void) {
-    aieditor->locators.head = nullptr;
-    aieditor->locators.tail = nullptr;
-    aieditor->current_locator = nullptr;
-    aieditor->nearest_locator = nullptr;
+    memset(&aieditor->locators, 0, 0x48);
     for (i32 index = 0; index < 256; ++index) {
         NuLinkedListAppend(&aieditor->free_locators, &aieditor->locator_pool[index].link);
     }
-    aieditor->locator_sets.head = nullptr;
-    aieditor->locator_sets.tail = nullptr;
-    aieditor->current_locator_set = nullptr;
+    memset(&aieditor->locator_sets, 0, 0x118);
     for (i32 index = 0; index < 64; ++index) {
         NuLinkedListAppend(&aieditor->free_locator_sets, &aieditor->locator_set_pool[index].link);
     }

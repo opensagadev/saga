@@ -232,8 +232,8 @@ static __used__ void pathEditorDrawPath(EDAIPATH_s *path, i32 path_index) {
         path == aieditor->current_path ? 0xffffffff : AISysGetPathColour(path_index % AISysGetPathColourCount());
     i32 solid = aieditorsettings.solid_path_display;
     u16 active_route = 0;
-    if (path == aieditor->current_path && path->current_route != nullptr) {
-        active_route = 1 << (path->current_route - path->routes);
+    if (aieditorsettings.current_mode == AIEDITOR_ROUTES && path == aieditor->current_path) {
+        active_route = path->current_route != nullptr ? 1 << (path->current_route - path->routes) : 1;
     }
     for (EDAIPATHNODE_s *node = (EDAIPATHNODE_s *)NuLinkedListGetHead(&path->nodes); node != nullptr;
          node = (EDAIPATHNODE_s *)NuLinkedListGetNext(&path->nodes, &node->link)) {
@@ -1818,6 +1818,7 @@ void pathEditor_Enter(void) {
     if (runtime_system != nullptr && runtime_system->paths != nullptr) {
         EDAISHAREDPATHNODE_s *shared_nodes[256];
         memset(shared_nodes, 0, sizeof(shared_nodes));
+        i32 node_storage_start = 0;
         for (i32 path_index = 0; path_index < runtime_system->path_count; ++path_index) {
             AIPATH_s *runtime_path = runtime_system->paths[path_index];
             EDAIPATH_s *path = (EDAIPATH_s *)NuLinkedListGetHead(&state->free_paths);
@@ -1828,7 +1829,6 @@ void pathEditor_Enter(void) {
             memset((u8 *)path + sizeof(path->link), 0, sizeof(*path) - sizeof(path->link));
             NuLinkedListAppend(&state->paths, &path->link);
             strcpy(path->name, runtime_path->name);
-            path->flags = runtime_path->flags;
             path->runtime_start = -1;
             path->runtime_end = -1;
             path->runtime_nearest = -1;
@@ -1845,8 +1845,6 @@ void pathEditor_Enter(void) {
                 route->user_mask = source->character_masks[1];
             }
 
-            EDAIPATHNODE_s *nodes[256];
-            memset(nodes, 0, sizeof(nodes));
             for (i32 node_index = 0; node_index < runtime_path->node_count; ++node_index) {
                 AIPATHNODE_s *source = &runtime_path->nodes[node_index];
                 EDAIPATHNODE_s *node = (EDAIPATHNODE_s *)NuLinkedListGetHead(&state->free_path_nodes);
@@ -1856,7 +1854,6 @@ void pathEditor_Enter(void) {
                 NuLinkedListRemove(&state->free_path_nodes, &node->link);
                 memset((u8 *)node + sizeof(node->link), 0, sizeof(*node) - sizeof(node->link));
                 NuLinkedListAppend(&path->nodes, &node->link);
-                nodes[node_index] = node;
                 node->index = node_index;
                 ++path->node_count;
                 if (source->name != nullptr) {
@@ -1893,28 +1890,58 @@ void pathEditor_Enter(void) {
                     }
                 }
             }
-            for (i32 edge_index = 0; edge_index < runtime_path->connection_count; ++edge_index) {
-                AIPATHCNX_s *connection = &runtime_path->connections[edge_index];
-                i32 first = connection->node_indices[0];
-                i32 second = connection->node_indices[1];
-                if (first >= path->node_count || second >= path->node_count || nodes[first] == nullptr ||
-                    nodes[second] == nullptr) {
+            for (i32 node_index = 0; node_index < runtime_path->node_count; ++node_index) {
+                AIPATHNODE_s *source = &runtime_path->nodes[node_index];
+                EDAIPATHNODE_s *node = &state->node_storage[node_storage_start + node_index];
+                if (source->connection_count == 0)
                     continue;
-                }
-                for (i32 direction = 0; direction < 2; ++direction) {
-                    EDAIPATHNODE_s *node = nodes[direction ? second : first];
-                    EDAIPATHNODE_s *other = nodes[direction ? first : second];
+                for (i32 edge_index = 0; edge_index < source->connection_count; ++edge_index) {
+                    AIPATHCNX_s *connection = source->connections[edge_index];
+                    i32 direction = connection->node_indices[0] != node_index;
+                    i32 other_index = connection->node_indices[direction ^ 1];
+                    EDAIPATHNODE_s *other = &state->node_storage[node_storage_start + other_index];
+                    EDAIPATHCNX_s *editor_connection = nullptr;
                     for (i32 slot = 0; slot < 8; ++slot) {
-                        EDAIPATHCNX_s *editor_connection = &node->connections[slot];
-                        if (editor_connection->node == nullptr) {
-                            editor_connection->node = other;
-                            editor_connection->flags = connection->traversal_flags[direction] & ~0x10000000u;
-                            editor_connection->route_mask = connection->route_mask;
+                        if (node->connections[slot].node == other) {
+                            editor_connection = &node->connections[slot];
                             break;
                         }
                     }
+                    if (editor_connection == nullptr) {
+                        EDAIPATHCNX_s *reciprocal = nullptr;
+                        for (i32 slot = 0; slot < 8; ++slot) {
+                            if (node->connections[slot].node == nullptr) {
+                                editor_connection = &node->connections[slot];
+                                break;
+                            }
+                        }
+                        for (i32 slot = 0; slot < 8; ++slot) {
+                            if (other->connections[slot].node == nullptr) {
+                                reciprocal = &other->connections[slot];
+                                break;
+                            }
+                        }
+                        if (editor_connection == nullptr || reciprocal == nullptr)
+                            continue;
+                        editor_connection->node = other;
+                        editor_connection->flags = 0;
+                        reciprocal->node = node;
+                        reciprocal->flags = 0;
+                    }
+                    editor_connection->flags = connection->traversal_flags[direction] & ~0x10000000u;
+                    editor_connection->route_mask |= connection->route_mask;
                 }
             }
+            node_storage_start += runtime_path->node_count;
+        }
+    }
+    if (runtime_system == nullptr || runtime_system->paths == nullptr) {
+        EDAIPATH_s *path = (EDAIPATH_s *)NuLinkedListGetHead(&state->free_paths);
+        if (path != nullptr) {
+            NuLinkedListRemove(&state->free_paths, &path->link);
+            NuLinkedListAppend(&state->paths, &path->link);
+            strcpy(path->name, "LevelPath");
+            path->flags |= 1;
         }
     }
     state->current_path = pathEditor_GetPath(aieditorsettings.current_path_name);

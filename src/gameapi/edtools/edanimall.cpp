@@ -8,6 +8,8 @@
 #include "nu2api/nu3d/nuspecial.h"
 #include "gameframework/saveload.h"
 
+extern "C" i32 edSfxAllCount;
+
 // Animation editor subsystem stubs (static, internal linkage).
 
 static __attribute__((used)) void edanimcbCubeMap(eduimenu_s *, eduiitem_s *, u32) {
@@ -195,7 +197,7 @@ static __attribute__((used)) void edanimcbLocalParticleMenu(eduimenu_s *, eduiit
 
 static __attribute__((used)) void edanimcbMCTBCardFreeSpace(eduimenu_s *menu, eduiitem_s *, u32) {
     char message[36];
-    sprintf(message, "Space = %05d", saveloadCheckCardFreeSpace());
+    sprintf(message, "Space = %05d", saveloadCheckCardFreeSpace(0));
     eduiCreateMessageMenu(menu, message, 1);
 }
 
@@ -259,12 +261,12 @@ static __attribute__((used)) void edanimcbCancelSwitchTypeMenu(eduimenu_s *, edu
 }
 
 static __attribute__((used)) void edanimcbMCTBCardCheckKeyCard(eduimenu_s *menu, eduiitem_s *, u32) {
-    const bool valid = saveloadCheckKeyCode() != 0;
+    const bool valid = saveloadCheckKeyCode(id_test, code_test) != 0;
     eduiCreateMessageMenu(menu, const_cast<char *>(valid ? "KeyCard Check OK" : "KeyCard Check Fail"), valid);
 }
 
 static __attribute__((used)) void edanimcbMCTBCardWriteKeyCard(eduimenu_s *menu, eduiitem_s *, u32) {
-    const bool written = saveloadWriteKeyCode() != 0;
+    const bool written = saveloadWriteKeyCode(id_test, code_test) != 0;
     eduiCreateMessageMenu(menu, const_cast<char *>(written ? "KeyCard Write OK" : "KeyCard Write Fail"), written);
 }
 
@@ -447,7 +449,7 @@ static __attribute__((used)) void edanimcbSoundTypeMenu(eduimenu_s *parent, edui
 
     eduiMenuAddItem(menu, eduiItemCheckCreate(0x1869f, colours, edanim_sound_type == -1, 0, edanimcbSetSoundType,
                                               const_cast<char *>("NONE")));
-    for (i32 index = 0; index < edbits_numsounds; ++index) {
+    for (i32 index = 0; index < edSfxAllCount; ++index) {
         const bool selected = edanim_sound_type == index;
         eduiMenuAddItem(
             menu, eduiItemCheckCreate(index, colours, selected, 1, edanimcbSetSoundType, edbitsGetSoundName(index)));
@@ -471,7 +473,7 @@ static __attribute__((used)) void edanimcbLocalSoundTypeMenu(eduimenu_s *parent,
     }
 
     const auto current_type = AnimParams[edanim_nearest_param_id].sound_ids[edanim_nearest_sound];
-    for (i32 index = 0; index < edbits_numsounds; ++index) {
+    for (i32 index = 0; index < edSfxAllCount; ++index) {
         const bool selected = current_type == index;
         eduiMenuAddItem(menu, eduiItemCheckCreate(index, colours, selected, 1, edanimcbSetLocalSoundType,
                                                   edbitsGetSoundName(index)));

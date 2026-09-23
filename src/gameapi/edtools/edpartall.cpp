@@ -69,6 +69,7 @@ extern "C" {
     extern i32 EDPP_MAX_TYPES;
     extern i32 part_types_used;
     extern i32 part_emits_used;
+    extern i32 part_platimpactcnt;
     extern i32 part_page_on[8];
     extern i32 part_page_used[8];
     extern NUGSCN *part_scene[32];
@@ -1045,6 +1046,7 @@ static void edpartFileLoadEffects(eduimenu_s *parent, eduiitem_s *, u32) {
     memset(part_page_on, 0, sizeof(i32) * 8);
     memset(part_scene, 0, sizeof(NUGSCN *) * 32);
     memset(part_scene_pageid, -1, sizeof(i32) * 32);
+    part_platimpactcnt = 0;
     char path[256];
     char directory[256], name[256], extension[256];
     strcpy(directory, edbits_general_save_directory[0] ? edbits_general_save_directory : ".");

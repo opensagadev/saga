@@ -28,6 +28,11 @@ i32 saveload_freespace = 0x800;
 i32 saveload_filecorrupt;
 i32 SAVESIZE_ADDITIONAL = 3;
 
+extern "C" {
+    char id_test[17] = "Travellers Tales";
+    u8 code_test[16] = {1, 2, 3, 4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+}
+
 i32 PCSaveSlot(i32 slot, void *extradata, i32 extradata_size, u32 hash);
 
 i32 saveload_slotused[6] = {0};
@@ -264,7 +269,7 @@ extern "C" {
         return 1;
     }
 
-    i32 saveloadCheckCardFreeSpace(void) {
+    i32 saveloadCheckCardFreeSpace(i32) {
         return 1;
     }
 
@@ -276,7 +281,7 @@ extern "C" {
         return 1;
     }
 
-    i32 saveloadCheckKeyCode(void) {
+    i32 saveloadCheckKeyCode(char *, u8 *) {
         return 0;
     }
 
@@ -309,7 +314,7 @@ extern "C" {
         return 1;
     }
 
-    i32 saveloadWriteKeyCode(void) {
+    i32 saveloadWriteKeyCode(char *, u8 *) {
         return 0;
     }
 }

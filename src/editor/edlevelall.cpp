@@ -894,10 +894,10 @@ void ClassEditor::SelectLED(i32 class_id) {
     class_editor_create_pending = class_id;
     eduimenu_s *led_menu = eduiMenuCreate(static_cast<i32>(x * 640.0f), static_cast<i32>(y * 448.0f), 300, 250,
                                           reinterpret_cast<void *>(static_cast<usize>(EdLevelFnt)), cbEdLevelDestroy,
-                                          const_cast<char *>("Choose LED file"));
+                                          const_cast<char *>("Select LED File"));
     if (led_menu == NULL)
         return;
-    for (i32 index = 0; index < 10; ++index) {
+    for (i32 index = 0; index < theLevelEditor.reset_pending; ++index) {
         LevelEditorScene *scene = theLevelEditor.GetEdScene(index);
         if (scene != NULL && scene->editable)
             eduiMenuAddItem(led_menu, eduiItemSelCreate(index, &EdLevelAttr, 0, 0, cbFileSelected, scene->name));

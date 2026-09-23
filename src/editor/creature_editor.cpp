@@ -71,6 +71,8 @@ DECOMP_ASSERT(offsetof(CreatureEditorRecord, character_type) == 0x58, "creature 
 DECOMP_ASSERT(offsetof(CreatureEditorRecord, path) == 0x3c, "creature path offset");
 DECOMP_ASSERT(offsetof(CreatureEditorRecord, set) == 0x5a, "creature set offset");
 DECOMP_ASSERT(offsetof(CreatureEditorRecord, flags) == 0x68, "creature flags offset");
+DECOMP_ASSERT(offsetof(CreatureEditorRecord, activation_area) == 0x6c, "creature activation area offset");
+DECOMP_ASSERT(offsetof(CreatureEditorRecord, trigger_area) == 0x80, "creature trigger area offset");
 DECOMP_ASSERT(offsetof(CreatureEditorRecord, activation) == 0x8f, "creature activation offset");
 DECOMP_ASSERT(offsetof(CreatureEditorRecord, view_distance) == 0x9c, "creature view distance offset");
 DECOMP_ASSERT(offsetof(CreatureEditorRecord, negative_min_view_height) == 0xa8, "creature min view height offset");
@@ -263,7 +265,7 @@ __attribute__((optimize("O3"))) void creatureEditor_Enter() {
                 }
             }
             if (source->area != nullptr)
-                creature->activation_area = FindCreatureArea(source->area->name);
+                creature->trigger_area = FindCreatureArea(source->area->name);
             if (source->locator != nullptr)
                 creature->locator = FindCreatureLocator(source->locator->name);
             if (source->respawn_locator != nullptr)
@@ -272,8 +274,8 @@ __attribute__((optimize("O3"))) void creatureEditor_Enter() {
             if (source->activate_type == 1) {
                 creature->activation = 0;
                 if (source->activate_area != nullptr) {
-                    creature->trigger_area = FindCreatureArea(source->activate_area->name);
-                    if (creature->trigger_area != nullptr)
+                    creature->activation_area = FindCreatureArea(source->activate_area->name);
+                    if (creature->activation_area != nullptr)
                         creature->activation = 1;
                 }
             }

@@ -5524,7 +5524,7 @@ void ThingManager::cbEdTimingSelect(eduimenu_s *menu, eduiitem_s *item, u32) {
             edTimingMenu = NULL;
         } else {
             i32 index = 0;
-            for (eduiitem_s *entry = menu->first->next; entry != NULL; entry = entry->next) {
+            for (eduiitem_s *entry = menu->first; entry != NULL; entry = entry->next) {
                 entry->highlighted = index < 3 ? 0 : enabled;
                 ++index;
             }

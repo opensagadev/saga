@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 57.08422,
+    "fuzzy_match_percent": 57.112576,
     "total_code": "4722419",
-    "matched_code": "484269",
-    "matched_code_percent": 10.254681,
+    "matched_code": "484670",
+    "matched_code_percent": 10.263172,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 5838,
-    "matched_functions_percent": 43.37618,
+    "matched_functions": 5847,
+    "matched_functions_percent": 43.443047,
     "total_units": 1
   },
   "text": {
@@ -18886,7 +18886,7 @@
           "address": 4039520,
           "offset": 3149552,
           "size": 3155,
-          "match_percent": 37.33143
+          "match_percent": 33.654285
         },
         {
           "name": "_ZL27antinodeEditor_cbSelectTypeP10eduimenu_sP10eduiitem_sj",
@@ -18894,7 +18894,7 @@
           "address": 4044992,
           "offset": 3155024,
           "size": 696,
-          "match_percent": 30.723684
+          "match_percent": 30.203947
         },
         {
           "name": "aieditor_Register",
@@ -18966,7 +18966,7 @@
           "address": 4212032,
           "offset": 3322064,
           "size": 235,
-          "match_percent": 80.28788
+          "match_percent": 77.65151
         },
         {
           "name": "_ZL41antinodeEditor_cbCancelDeleteAntinodeMenuP10eduimenu_sS0_",
@@ -19125,7 +19125,7 @@
           "address": 4064368,
           "offset": 3174400,
           "size": 3322,
-          "match_percent": 39.096104
+          "match_percent": 43.8013
         },
         {
           "name": "areaEditorSaveData",
@@ -19157,7 +19157,7 @@
           "address": 4259648,
           "offset": 3369680,
           "size": 870,
-          "match_percent": 55.188774
+          "match_percent": 57.280613
         }
       ]
     },
@@ -19236,7 +19236,7 @@
           "address": 4015104,
           "offset": 3125136,
           "size": 147,
-          "match_percent": 63.596153
+          "match_percent": 61.673077
         },
         {
           "name": "_ZL27creatureEditor_cbSetLocatorP10eduimenu_sP10eduiitem_sj",
@@ -19468,7 +19468,7 @@
           "address": 4229696,
           "offset": 3339728,
           "size": 1433,
-          "match_percent": 54.71164
+          "match_percent": 54.714287
         },
         {
           "name": "_ZL28creatureEditor_cbResetParamsP10eduimenu_sP10eduiitem_sj",
@@ -20203,7 +20203,7 @@
           "address": 5519712,
           "offset": 4629744,
           "size": 375,
-          "match_percent": 76.0
+          "match_percent": 78.85555
         },
         {
           "name": "_ZN11ClassEditor22DestroySelectedObjectsEv",
@@ -21586,7 +21586,7 @@
           "address": 4185440,
           "offset": 3295472,
           "size": 5632,
-          "match_percent": 11.123181
+          "match_percent": 0.0
         },
         {
           "name": "pathEditorDrawPaths",
@@ -21642,7 +21642,7 @@
           "address": 4195648,
           "offset": 3305680,
           "size": 4694,
-          "match_percent": 19.325743
+          "match_percent": 19.724752
         },
         {
           "name": "pathEditorCreateData",
@@ -21801,7 +21801,7 @@
           "address": 4246592,
           "offset": 3356624,
           "size": 1947,
-          "match_percent": 52.809845
+          "match_percent": 53.47651
         },
         {
           "name": "_Z21antinodeEditor_Renderiiff",
@@ -21976,7 +21976,7 @@
           "address": 4200352,
           "offset": 3310384,
           "size": 1139,
-          "match_percent": 39.92771
+          "match_percent": 54.292168
         },
         {
           "name": "_ZL31locatorEditor_cbEmptyLocatorSetP10eduimenu_sP10eduiitem_sj",
@@ -22056,7 +22056,7 @@
           "address": 4258016,
           "offset": 3368048,
           "size": 1627,
-          "match_percent": 31.536724
+          "match_percent": 31.522598
         }
       ]
     },
@@ -28628,7 +28628,7 @@
           "address": 3706192,
           "offset": 2816224,
           "size": 2393,
-          "match_percent": 28.967241
+          "match_percent": 26.32069
         },
         {
           "name": "_Z26eduiItemFileSelectorCreatejP11eduiiattr_sPFvP10eduimenu_sP10eduiitem_sjEPc",
@@ -29020,7 +29020,7 @@
           "address": 5475808,
           "offset": 4585840,
           "size": 277,
-          "match_percent": 73.19718
+          "match_percent": 77.45071
         },
         {
           "name": "_ZN15EdVectorControl8cbButtonEP10eduimenu_sP10eduiitem_sj",
@@ -29100,7 +29100,7 @@
           "address": 5481744,
           "offset": 4591776,
           "size": 188,
-          "match_percent": 38.214287
+          "match_percent": 58.714287
         },
         {
           "name": "_ZN22EdSpecialObjectControl14cbSelectObjectEP10eduimenu_sP10eduiitem_sj",
@@ -29164,7 +29164,7 @@
           "address": 5488000,
           "offset": 4598032,
           "size": 161,
-          "match_percent": 88.97436
+          "match_percent": 100.0
         },
         {
           "name": "_ZN14EdInputContext5ClearEi",
@@ -29652,7 +29652,7 @@
           "address": 5506864,
           "offset": 4616896,
           "size": 2954,
-          "match_percent": 0.0
+          "match_percent": 34.338104
         },
         {
           "name": "_ZN13EdManipulator15GetAxisLocatorsER5VuVecPS0_P5VuMtx",
@@ -30228,7 +30228,7 @@
           "address": 5566896,
           "offset": 4676928,
           "size": 345,
-          "match_percent": 6.395605
+          "match_percent": 63.285713
         },
         {
           "name": "_ZN11EdManRotate6RenderER15ClassObjectList",
@@ -30436,7 +30436,7 @@
           "address": 5599872,
           "offset": 4709904,
           "size": 1795,
-          "match_percent": 26.72796
+          "match_percent": 15.846348
         },
         {
           "name": "_ZN10EdManScale7ProcessER14EdInputContextR15ClassObjectList",
@@ -30444,7 +30444,7 @@
           "address": 5601680,
           "offset": 4711712,
           "size": 3144,
-          "match_percent": 15.086735
+          "match_percent": 16.095238
         },
         {
           "name": "_ZN9EdManMove7ProcessER14EdInputContextR15ClassObjectList",
@@ -30452,7 +30452,7 @@
           "address": 5604832,
           "offset": 4714864,
           "size": 1154,
-          "match_percent": 37.01818
+          "match_percent": 24.927273
         },
         {
           "name": "_ZN16EdClassInterface16DistanceToObjectER5VuVecS1_PvPP5EdRef",
@@ -30468,7 +30468,7 @@
           "address": 5607616,
           "offset": 4717648,
           "size": 3355,
-          "match_percent": 0.0
+          "match_percent": 17.040663
         },
         {
           "name": "_ZN11EdManRotate7ProcessER14EdInputContextR15ClassObjectList",
@@ -30476,7 +30476,7 @@
           "address": 5610976,
           "offset": 4721008,
           "size": 420,
-          "match_percent": 89.53061
+          "match_percent": 93.05102
         },
         {
           "name": "_ZN13EdInputStreamD1Ev",
@@ -32675,7 +32675,7 @@
           "address": 3408960,
           "offset": 2518992,
           "size": 2159,
-          "match_percent": 15.511451
+          "match_percent": 14.890585
         },
         {
           "name": "_ZL22cbPtlTextureSelectMenuP10eduimenu_sP10eduiitem_sj",
@@ -32747,7 +32747,7 @@
           "address": 3417408,
           "offset": 2527440,
           "size": 869,
-          "match_percent": 56.3348
+          "match_percent": 56.312775
         },
         {
           "name": "_ZL25edanimcbMCTBCardSlotsUsedP10eduimenu_sP10eduiitem_sj",
@@ -32763,7 +32763,7 @@
           "address": 3418384,
           "offset": 2528416,
           "size": 98,
-          "match_percent": 85.13636
+          "match_percent": 99.40909
         },
         {
           "name": "_ZL22edanimcbLocalSoundMenuP10eduimenu_sP10eduiitem_sj",
@@ -32811,7 +32811,7 @@
           "address": 3432368,
           "offset": 2542400,
           "size": 116,
-          "match_percent": 52.482758
+          "match_percent": 61.275864
         },
         {
           "name": "_ZL28edanimcbMCTBCardWriteKeyCardP10eduimenu_sP10eduiitem_sj",
@@ -32819,7 +32819,7 @@
           "address": 3432496,
           "offset": 2542528,
           "size": 116,
-          "match_percent": 52.482758
+          "match_percent": 61.275864
         },
         {
           "name": "_ZL24edanimcbMCTBCardUnFormatP10eduimenu_sP10eduiitem_sj",
@@ -34011,7 +34011,7 @@
           "address": 3743056,
           "offset": 2853088,
           "size": 546,
-          "match_percent": 34.312057
+          "match_percent": 34.68085
         },
         {
           "name": "eduicbRenderSliderInt",
@@ -34171,7 +34171,7 @@
           "address": 3768816,
           "offset": 2878848,
           "size": 955,
-          "match_percent": 56.77966
+          "match_percent": 56.758476
         },
         {
           "name": "edmainSetReturn",
@@ -35083,7 +35083,7 @@
           "address": 3799392,
           "offset": 2909424,
           "size": 3872,
-          "match_percent": 16.285175
+          "match_percent": 0.0
         },
         {
           "name": "eduicbRenderFilter",
@@ -35187,7 +35187,7 @@
           "address": 3805472,
           "offset": 2915504,
           "size": 1601,
-          "match_percent": 18.260504
+          "match_percent": 0.0
         },
         {
           "name": "eduiGetTopLevelParent",
@@ -38733,24 +38733,7 @@
       "name": "globals.cpp.o",
       "source": "src/globals.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_root/globals.o",
-      "functions": [
-        {
-          "name": "_ZN17SceneObjectHelperD1Ev",
-          "demangled_name": "SceneObjectHelper::~SceneObjectHelper()",
-          "address": 5613472,
-          "offset": 4723504,
-          "size": 39,
-          "match_percent": 13.4
-        },
-        {
-          "name": "_ZN17SceneObjectHelperD2Ev",
-          "demangled_name": "SceneObjectHelper::~SceneObjectHelper()",
-          "address": 5613472,
-          "offset": 4723504,
-          "size": 39,
-          "match_percent": 13.4
-        }
-      ]
+      "functions": []
     },
     {
       "name": "java/android.cpp.o",
@@ -41710,7 +41693,7 @@
           "address": 4221776,
           "offset": 3331808,
           "size": 665,
-          "match_percent": 70.7764
+          "match_percent": 53.850933
         },
         {
           "name": "_Z21GameAntnode_CreateSysP11WORLDINFO_sP9variptr_uS2_i",
@@ -61404,7 +61387,7 @@
           "address": 5568528,
           "offset": 4678560,
           "size": 10,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZN11SceneObjectC1Ev",
@@ -61460,7 +61443,71 @@
           "address": 5591856,
           "offset": 4701888,
           "size": 1264,
-          "match_percent": 27.055555
+          "match_percent": 26.849207
+        },
+        {
+          "name": "_ZN16EdClassInterfaceD1Ev",
+          "demangled_name": "EdClassInterface::~EdClassInterface()",
+          "address": 5611728,
+          "offset": 4721760,
+          "size": 29,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN16EdClassInterfaceD2Ev",
+          "demangled_name": "EdClassInterface::~EdClassInterface()",
+          "address": 5611728,
+          "offset": 4721760,
+          "size": 29,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN17SceneObjectHelperD1Ev",
+          "demangled_name": "SceneObjectHelper::~SceneObjectHelper()",
+          "address": 5613472,
+          "offset": 4723504,
+          "size": 39,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN17SceneObjectHelperD2Ev",
+          "demangled_name": "SceneObjectHelper::~SceneObjectHelper()",
+          "address": 5613472,
+          "offset": 4723504,
+          "size": 39,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZThn12_N17SceneObjectHelperD1Ev",
+          "demangled_name": "{virtual override thunk({offset(-12)}, SceneObjectHelper::~SceneObjectHelper())}",
+          "address": 5613520,
+          "offset": 4723552,
+          "size": 10,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN17SceneObjectHelperD0Ev",
+          "demangled_name": "SceneObjectHelper::~SceneObjectHelper()",
+          "address": 5613536,
+          "offset": 4723568,
+          "size": 39,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZThn12_N17SceneObjectHelperD0Ev",
+          "demangled_name": "{virtual override thunk({offset(-12)}, SceneObjectHelper::~SceneObjectHelper())}",
+          "address": 5613584,
+          "offset": 4723616,
+          "size": 7,
+          "match_percent": 70.0
+        },
+        {
+          "name": "_ZN16EdClassInterfaceD0Ev",
+          "demangled_name": "EdClassInterface::~EdClassInterface()",
+          "address": 5615840,
+          "offset": 4725872,
+          "size": 45,
+          "match_percent": 100.0
         },
         {
           "name": "_ZN11SceneObjectD1Ev",
@@ -65367,7 +65414,7 @@
           "address": 4346112,
           "offset": 3456144,
           "size": 240,
-          "match_percent": 75.33735
+          "match_percent": 85.33735
         },
         {
           "name": "_ZN12ThingManager13EffectsThingsEP15ThingRenderData",
@@ -67780,7 +67827,7 @@
           "address": 4368816,
           "offset": 3478848,
           "size": 2017,
-          "match_percent": 99.30769
+          "match_percent": 99.327934
         },
         {
           "name": "TextDecode",
@@ -75834,7 +75881,7 @@
           "address": 3861864,
           "offset": 2971896,
           "size": 78,
-          "match_percent": 23.529411
+          "match_percent": 99.70588
         },
         {
           "name": "_ZL6rtlCmpP5rtl_sS0_",
@@ -76770,7 +76817,7 @@
           "address": 3893953,
           "offset": 3003985,
           "size": 389,
-          "match_percent": 4.878049
+          "match_percent": 88.52439
         },
         {
           "name": "_ZL10edrtlLeavev",
@@ -76810,7 +76857,7 @@
           "address": 3896007,
           "offset": 3006039,
           "size": 3116,
-          "match_percent": 0.522876
+          "match_percent": 0.575163
         },
         {
           "name": "_ZL14FindNearestFogP7nuvec_s",
@@ -76850,7 +76897,7 @@
           "address": 3900112,
           "offset": 3010144,
           "size": 1642,
-          "match_percent": 0.990099
+          "match_percent": 1.089109
         },
         {
           "name": "_Z25edrtlDetermineNearestBurnfP9burnset_s",
@@ -76866,7 +76913,7 @@
           "address": 3902217,
           "offset": 3012249,
           "size": 1147,
-          "match_percent": 1.360544
+          "match_percent": 1.666667
         },
         {
           "name": "edrtlCalculateBurnout",
@@ -76898,7 +76945,7 @@
           "address": 3905914,
           "offset": 3015946,
           "size": 207,
-          "match_percent": 7.857143
+          "match_percent": 99.78571
         },
         {
           "name": "_ZL15edrtlDrawCursorv",
@@ -76994,7 +77041,7 @@
           "address": 3915311,
           "offset": 3025343,
           "size": 414,
-          "match_percent": 3.809524
+          "match_percent": 95.88571
         },
         {
           "name": "rtlFrameUpdate",
@@ -77034,7 +77081,7 @@
           "address": 4876832,
           "offset": 3986864,
           "size": 26,
-          "match_percent": 13.333333
+          "match_percent": 50.0
         }
       ]
     },
@@ -127216,22 +127263,6 @@
       "match_percent": 0.0
     },
     {
-      "name": "_ZN16EdClassInterfaceD1Ev",
-      "demangled_name": "EdClassInterface::~EdClassInterface()",
-      "address": 5611728,
-      "offset": 4721760,
-      "size": 29,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN16EdClassInterfaceD2Ev",
-      "demangled_name": "EdClassInterface::~EdClassInterface()",
-      "address": 5611728,
-      "offset": 4721760,
-      "size": 29,
-      "match_percent": 0.0
-    },
-    {
       "name": "_ZN18PlaceableInterfaceD1Ev",
       "demangled_name": "PlaceableInterface::~PlaceableInterface()",
       "address": 5613216,
@@ -127248,42 +127279,10 @@
       "match_percent": 0.0
     },
     {
-      "name": "_ZThn12_N17SceneObjectHelperD1Ev",
-      "demangled_name": "{virtual override thunk({offset(-12)}, SceneObjectHelper::~SceneObjectHelper())}",
-      "address": 5613520,
-      "offset": 4723552,
-      "size": 10,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN17SceneObjectHelperD0Ev",
-      "demangled_name": "SceneObjectHelper::~SceneObjectHelper()",
-      "address": 5613536,
-      "offset": 4723568,
-      "size": 39,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZThn12_N17SceneObjectHelperD0Ev",
-      "demangled_name": "{virtual override thunk({offset(-12)}, SceneObjectHelper::~SceneObjectHelper())}",
-      "address": 5613584,
-      "offset": 4723616,
-      "size": 7,
-      "match_percent": 0.0
-    },
-    {
       "name": "_ZN18PlaceableInterfaceD0Ev",
       "demangled_name": "PlaceableInterface::~PlaceableInterface()",
       "address": 5615456,
       "offset": 4725488,
-      "size": 45,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN16EdClassInterfaceD0Ev",
-      "demangled_name": "EdClassInterface::~EdClassInterface()",
-      "address": 5615840,
-      "offset": 4725872,
       "size": 45,
       "match_percent": 0.0
     },
@@ -127931,8 +127930,8 @@
   "summary": {
     "bazel_units": 454,
     "functions": 13454,
-    "assigned_functions": 12608,
+    "assigned_functions": 12614,
     "ambiguous_functions": 242,
-    "unassigned_functions": 604
+    "unassigned_functions": 598
   }
 }
