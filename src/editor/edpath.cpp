@@ -1243,39 +1243,70 @@ static __used__ void routeEditor_cbDeleteRoute(eduimenu_s *parent, eduiitem_s *i
     if (item == nullptr) {
         return;
     }
-    if (item->data == 0) {
-        eduimenu_s *menu = eduiMenuCreate(240, 90, 240, 250, ed_fnt, nullptr, "Delete current route??");
-        if (menu != nullptr) {
-            eduiMenuAddItem(menu, eduiItemSelCreate(2, attr, 0, 0, routeEditor_cbDeleteRoute, "No"));
-            eduiMenuAddItem(menu, eduiItemSelCreate(1, attr, 0, 0, routeEditor_cbDeleteRoute, "Yes"));
-            eduiMenuAttach(parent, menu);
-        }
-    } else if (item->data == 2) {
-        eduiMenuDestroy(parent);
-    } else if (item->data == 1) {
-        EDAIPATH_s *path = aieditor->current_path;
-        EDAIPATHROUTE_s *route = path->current_route;
-        if (route == nullptr) {
-            return;
-        }
-        i32 index = route - path->routes;
-        route->flags &= ~u8(1);
-        path->current_route = nullptr;
-        u16 mask = ~(u16)(1 << index);
-        for (EDAIPATHNODE_s *node = (EDAIPATHNODE_s *)NuLinkedListGetHead(&path->nodes); node != nullptr;
-             node = (EDAIPATHNODE_s *)NuLinkedListGetNext(&path->nodes, &node->link)) {
-            for (i32 connection = 0; connection < 8; ++connection) {
-                node->connections[connection].route_mask &= mask;
+    switch (item->data) {
+        case 0: {
+            eduimenu_s *menu = eduiMenuCreate(240, 90, 240, 250, ed_fnt, nullptr, "Delete current route??");
+            if (menu != nullptr) {
+                eduiMenuAddItem(menu, eduiItemSelCreate(2, attr, 0, 0, routeEditor_cbDeleteRoute, "No"));
+                eduiMenuAddItem(menu, eduiItemSelCreate(1, attr, 0, 0, routeEditor_cbDeleteRoute, "Yes"));
+                eduiMenuAttach(parent, menu);
             }
-            node->route_mask &= mask;
+            break;
         }
-        for (i32 step = 1; step <= 15; ++step) {
-            EDAIPATHROUTE_s *candidate = &path->routes[(index + step) & 15];
-            if (candidate->flags & 1) {
-                path->current_route = candidate;
+        case 2:
+            eduiMenuDestroy(parent);
+            break;
+        case 1: {
+            EDAIPATH_s *path = aieditor->current_path;
+            EDAIPATHROUTE_s *route = path->current_route;
+            if (route == nullptr) {
+                return;
             }
+            i32 index = route - path->routes;
+            route->flags &= ~u8(1);
+            path->current_route = nullptr;
+            u16 mask = ~(u16)(1 << index);
+            for (EDAIPATHNODE_s *node = (EDAIPATHNODE_s *)NuLinkedListGetHead(&path->nodes); node != nullptr;
+                 node = (EDAIPATHNODE_s *)NuLinkedListGetNext(&path->nodes, &node->link)) {
+#define CLEAR_CONNECTION_ROUTE(N) node->connections[N].route_mask &= mask
+                CLEAR_CONNECTION_ROUTE(0);
+                CLEAR_CONNECTION_ROUTE(1);
+                CLEAR_CONNECTION_ROUTE(2);
+                CLEAR_CONNECTION_ROUTE(3);
+                CLEAR_CONNECTION_ROUTE(4);
+                CLEAR_CONNECTION_ROUTE(5);
+                CLEAR_CONNECTION_ROUTE(6);
+                CLEAR_CONNECTION_ROUTE(7);
+#undef CLEAR_CONNECTION_ROUTE
+                node->route_mask &= mask;
+            }
+            i32 next_index = index;
+#define TRY_NEXT_ROUTE()                                                                                               \
+    ++next_index;                                                                                                      \
+    if (next_index >= 16)                                                                                              \
+        next_index = 0;                                                                                                \
+    if (path->routes[next_index].flags & 1)                                                                            \
+    path->current_route = &path->routes[next_index]
+            TRY_NEXT_ROUTE();
+            TRY_NEXT_ROUTE();
+            TRY_NEXT_ROUTE();
+            TRY_NEXT_ROUTE();
+            TRY_NEXT_ROUTE();
+            TRY_NEXT_ROUTE();
+            TRY_NEXT_ROUTE();
+            TRY_NEXT_ROUTE();
+            TRY_NEXT_ROUTE();
+            TRY_NEXT_ROUTE();
+            TRY_NEXT_ROUTE();
+            TRY_NEXT_ROUTE();
+            TRY_NEXT_ROUTE();
+            TRY_NEXT_ROUTE();
+            TRY_NEXT_ROUTE();
+            TRY_NEXT_ROUTE();
+#undef TRY_NEXT_ROUTE
+            aieditor_ClearMainMenu();
+            break;
         }
-        aieditor_ClearMainMenu();
     }
 }
 

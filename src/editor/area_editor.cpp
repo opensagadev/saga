@@ -156,8 +156,8 @@ void areaEditor_Enter() {
     }
     for (i32 index = 0; index < aieditor->ai_system->area_count; ++index) {
         AIAREA *source = &aieditor->ai_system->areas[index];
-        i16 rotation = source->rotation;
         u8 flags = source->game_flags;
+        i16 rotation = source->rotation;
         EDAIAREA_s *area = reinterpret_cast<EDAIAREA_s *>(NuLinkedListGetHead(area_free_list()));
         if (area != NULL) {
             NuLinkedListRemove(area_free_list(), &area->link);

@@ -1090,9 +1090,25 @@ static inline void edpartSavePath(char *path, char *backup, bool level) {
     char *save_directory = level ? edbits_level_save_directory : edbits_general_save_directory;
     char *save_name = level ? edbits_level_save_name : edbits_general_save_name;
     char *save_extension = level ? edbits_level_save_extension : edbits_general_save_extension;
-    strcpy(directory, save_directory[0] ? save_directory : ".");
-    strcpy(name, save_name[0] ? save_name : "part");
-    strcpy(extension, save_extension[0] ? save_extension : "par");
+    if (save_directory[0])
+        strcpy(directory, save_directory);
+    else {
+        directory[0] = '.';
+        directory[1] = '\0';
+    }
+    if (save_name[0])
+        strcpy(name, save_name);
+    else {
+        name[0] = 'p';
+        name[1] = 'a';
+        name[2] = 'r';
+        name[3] = 't';
+        name[4] = '\0';
+    }
+    if (save_extension[0])
+        strcpy(extension, save_extension);
+    else
+        __builtin_memcpy(extension, "par", 4);
     sprintf(path, "%s\\%s.%s", directory, name, extension);
     sprintf(backup, "%s\\%s.%s.bak", directory, name, extension);
 }
@@ -1110,10 +1126,53 @@ static inline void edpartSaveMessage(eduimenu_s *parent, const char *message, bo
 
 static void edpartFileSaveEffects(eduimenu_s *parent, eduiitem_s *, u32) {
     char path[256], backup[256];
-    edpartSavePath(path, backup, false);
+    char general_directory[256], general_name[256], general_extension[256];
+    char level_directory[256], level_name[256], level_extension[256];
+    if (edbits_general_save_directory[0])
+        strcpy(general_directory, edbits_general_save_directory);
+    else {
+        general_directory[0] = '.';
+        general_directory[1] = '\0';
+    }
+    if (edbits_general_save_name[0])
+        strcpy(general_name, edbits_general_save_name);
+    else {
+        general_name[0] = 'p';
+        general_name[1] = 'a';
+        general_name[2] = 'r';
+        general_name[3] = 't';
+        general_name[4] = '\0';
+    }
+    if (edbits_general_save_extension[0])
+        strcpy(general_extension, edbits_general_save_extension);
+    else
+        __builtin_memcpy(general_extension, "par", 4);
+    if (edbits_level_save_directory[0])
+        strcpy(level_directory, edbits_level_save_directory);
+    else {
+        level_directory[0] = '.';
+        level_directory[1] = '\0';
+    }
+    if (edbits_level_save_name[0])
+        strcpy(level_name, edbits_level_save_name);
+    else {
+        level_name[0] = 'p';
+        level_name[1] = 'a';
+        level_name[2] = 'r';
+        level_name[3] = 't';
+        level_name[4] = '\0';
+    }
+    if (edbits_level_save_extension[0])
+        strcpy(level_extension, edbits_level_save_extension);
+    else
+        __builtin_memcpy(level_extension, "par", 4);
+
+    sprintf(path, "%s\\%s.%s", general_directory, general_name, general_extension);
+    sprintf(backup, "%s\\%s.%s.bak", general_directory, general_name, general_extension);
     bool general_backup = edbits_override_backups || EdFileBackup(path, backup);
     bool general_saved = edpartSaveEffects(path, 0) != 0;
-    edpartSavePath(path, backup, true);
+    sprintf(path, "%s\\%s.%s", level_directory, level_name, level_extension);
+    sprintf(backup, "%s\\%s.%s.bak", level_directory, level_name, level_extension);
     bool level_backup = edbits_override_backups || EdFileBackup(path, backup);
     bool level_saved = edpartSaveEffects(path, 1) != 0;
     const char *message;

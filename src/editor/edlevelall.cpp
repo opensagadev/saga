@@ -2952,7 +2952,7 @@ void PropertyTool::ediMenuStoreMetrics(eduimenu_s *menu) {
 }
 
 i32 ClassObjectList::GetAveragePosition(VuVec &average) {
-    average = VuVec_Zero;
+    average = VuVec(0.0f, 0.0f, 0.0f, 1.0f);
     i32 position_count = 0;
     for (ClassObjectListEntry *entry = first; entry != NULL; entry = entry->next) {
         VuVec position;
@@ -2974,7 +2974,7 @@ i32 ClassObjectList::GetAveragePosition(VuVec &average) {
 }
 
 i32 ClassObjectList::GetAveragePosition(VuVec &average, float &radius) {
-    average = VuVec_Zero;
+    average = VuVec(0.0f, 0.0f, 0.0f, 1.0f);
     i32 position_count = 0;
     VuVec positions[64];
     float radii[64];

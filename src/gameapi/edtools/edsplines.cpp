@@ -369,15 +369,21 @@ void KnotHelper::Render(void *object, i32) {
 }
 
 void SplineKnot::Smooth() {
-    VuVec before = previous != NULL ? previous->position : position;
-    VuVec after = next != NULL ? next->position : position;
+    VuVec before = position;
+    VuVec after = position;
+    if (previous != NULL)
+        before = previous->position;
+    if (next != NULL)
+        after = next->position;
     if (previous == NULL && next == NULL) {
         before = VuVec{0.0f, 0.0f, 0.0f, 0.0f};
         after = before;
     }
-    VuVec delta{(after.x - before.x) * 0.1f, (after.y - before.y) * 0.1f, (after.z - before.z) * 0.1f, 0.0f};
-    VuVec in{position.x - delta.x, position.y - delta.y, position.z - delta.z, 0.0f};
-    VuVec out{position.x + delta.x, position.y + delta.y, position.z + delta.z, 0.0f};
+    f32 dx = (after.x - before.x) * 0.1f;
+    f32 dy = (after.y - before.y) * 0.1f;
+    f32 dz = (after.z - before.z) * 0.1f;
+    VuVec out{position.x + dx, position.y + dy, position.z + dz, 0.0f};
+    VuVec in{position.x - dx, position.y - dy, position.z - dz, 0.0f};
     if (spline != NULL) {
         spline->DropPoint(out);
         spline->DropPoint(in);

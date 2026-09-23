@@ -3301,7 +3301,6 @@ i32 EdManScale::Process(EdInputContext &input, ClassObjectList &selected) {
         return 0;
 
     VuMtx orientation;
-    NuMtxSetIdentity(&orientation.matrix);
     get_manipulator_attribute(selected.first, 0x10, EdType_VuMtx, &orientation);
     VuVec first_axis;
     VuVec second_axis;
@@ -3311,7 +3310,6 @@ i32 EdManScale::Process(EdInputContext &input, ClassObjectList &selected) {
         VuVec const &delta = *reinterpret_cast<VuVec const *>(reinterpret_cast<u8 *>(this) + 0x40);
         for (ClassObjectListEntry *entry = selected.first; entry != NULL; entry = entry->next) {
             VuMtx transform;
-            NuMtxSetIdentity(&transform.matrix);
             get_manipulator_attribute(entry, 0x20, EdType_VuMtx, &transform);
 
             f32 scale_x = 1.0f;
@@ -3336,9 +3334,15 @@ i32 EdManScale::Process(EdInputContext &input, ClassObjectList &selected) {
                 NuVecNorm(reinterpret_cast<NUVEC *>(&local_axis), reinterpret_cast<NUVEC *>(&local_axis));
                 f32 scaled_magnitude = Scale * magnitude;
                 f32 change = (scaled_magnitude + movement) / scaled_magnitude - 1.0f;
-                scale_x = second_axis.x * change + local_axis.x * change + 1.0f;
-                scale_y = second_axis.y * change + local_axis.y * change + 1.0f;
-                scale_z = second_axis.z * change + local_axis.z * change + 1.0f;
+                if (axis >= 4) {
+                    scale_x = second_axis.x * change + local_axis.x * change + 1.0f;
+                    scale_y = second_axis.y * change + local_axis.y * change + 1.0f;
+                    scale_z = second_axis.z * change + local_axis.z * change + 1.0f;
+                } else {
+                    scale_x = local_axis.x * change + 1.0f;
+                    scale_y = local_axis.y * change + 1.0f;
+                    scale_z = local_axis.z * change + 1.0f;
+                }
             } else if (axis == 7) {
                 f32 movement = input.Get(1) - input.Get(0) + input.Get(2);
                 if (movement == 0.0f)

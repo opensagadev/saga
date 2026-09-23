@@ -185,16 +185,14 @@ static __used__ void locatorEditor_cbDeleteLocatorSet(eduimenu_s *parent, eduiit
     if (item == nullptr) {
         return;
     }
-    if (item->data == 1) {
-        EDLOCATORSET_s *set = aieditor->current_locator_set;
-        if (set != nullptr) {
-            NuLinkedListRemove(&aieditor->locator_sets, &set->link);
-            memset(set, 0, sizeof(*set));
-            NuLinkedListAppend(&aieditor->free_locator_sets, &set->link);
-            aieditor->current_locator_set = nullptr;
-            aieditor_ClearMainMenu();
-        }
-    } else if (item->data < 1) {
+    u32 data = (u32)item->data;
+    if (__builtin_expect(data == 1, 0)) {
+        goto delete_set;
+    }
+    if (__builtin_expect(data >= 1, 0)) {
+        goto maybe_cancel;
+    }
+    {
         eduimenu_s *menu =
             eduiMenuCreate(0xf0, 0x5a, 0xf0, 0xfa, ed_fnt, nullptr, (char *)"Delete current locator set?");
         if (menu != nullptr) {
@@ -204,7 +202,20 @@ static __used__ void locatorEditor_cbDeleteLocatorSet(eduimenu_s *parent, eduiit
                             eduiItemSelCreate(1, locator_attr, 0, 0, locatorEditor_cbDeleteLocatorSet, (char *)"Yes"));
             eduiMenuAttach(parent, menu);
         }
-    } else if (item->data == 2) {
+        return;
+    }
+maybe_cancel:
+    if (data == 2) {
+        aieditor_ClearMainMenu();
+    }
+    return;
+delete_set:
+    EDLOCATORSET_s *set = aieditor->current_locator_set;
+    if (set != nullptr) {
+        NuLinkedListRemove(&aieditor->locator_sets, &set->link);
+        memset(set, 0, sizeof(*set));
+        NuLinkedListAppend(&aieditor->free_locator_sets, &set->link);
+        aieditor->current_locator_set = nullptr;
         aieditor_ClearMainMenu();
     }
 }
@@ -305,7 +316,8 @@ static __used__ void locatorEditor_cbAddLocatorsByNameMenu(eduimenu_s *parent, e
     menu->x = parent->x + 10;
     menu->y = parent->y + 40;
 }
-static __used__ void locatorEditor_cbAddLocatorsByNameYesNo(eduimenu_s *, eduiitem_s *item, u32) {
+static __used__ __attribute__((optimize("no-tree-vectorize"))) void
+locatorEditor_cbAddLocatorsByNameYesNo(eduimenu_s *, eduiitem_s *item, u32) {
     if (item != nullptr && item->data != 0 && NuStrLen(aieditor->pending_locator_name) != 0 &&
         aieditor->current_locator_set != nullptr) {
         EDLOCATORSET_s *set = aieditor->current_locator_set;
