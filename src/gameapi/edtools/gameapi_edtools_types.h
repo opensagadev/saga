@@ -152,13 +152,6 @@ struct edanim_param_s {
 };
 static_assert(sizeof(edanim_param_s) == 0x2d4, "edanim_param_s size");
 
-struct EdBitControl {
-    void AddMenuItem(eduimenu_s *, EdRef *, void *);
-    void Refresh();
-    void cbButton(eduimenu_s *, eduiitem_s *, u32);
-    void cbChanged(eduimenu_s *, eduiitem_s *, u32);
-    void cbSelectItem(eduimenu_s *, eduiitem_s *, u32);
-};
 struct EdClass {
     char *name;
     i32 flags;
@@ -244,16 +237,6 @@ struct EdClassInterface {
     void *GetNextObject(void *, i32 (*)(void *));
 };
 DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(EdClassInterface) == 0x8, "EdClassInterface size");
-struct EdClassObjectNameControl {
-    void AddMenuItem(eduimenu_s *, EdRef *, void *);
-    EdClassObjectNameControl();
-    void Process(EdInputContext &);
-    void Render();
-    void cbButton(eduimenu_s *, eduiitem_s *, u32);
-    void cbChanged(eduimenu_s *, eduiitem_s *, u32);
-    void cbSelectClass(eduimenu_s *, eduiitem_s *, u32);
-    void cbSelectObject(eduimenu_s *, eduiitem_s *, u32);
-};
 struct EdControl {
     static EdInputContext *Input;
     virtual ~EdControl();
@@ -340,6 +323,16 @@ struct EdEnumControl : EdControl {
     static Item OnOffItems[];
     static Item YesNoItems[];
 };
+struct EdBitControl : EdEnumControl {
+    u32 bit_mask;
+
+    void AddMenuItem(eduimenu_s *, EdRef *, void *) override;
+    void Refresh() override;
+    static void cbButton(eduimenu_s *, eduiitem_s *, u32);
+    static void cbChanged(eduimenu_s *, eduiitem_s *, u32);
+    static void cbSelectItem(eduimenu_s *, eduiitem_s *, u32);
+};
+DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(EdBitControl) == 0x18, "EdBitControl 32-bit size");
 struct MemoryBuffer {
     variptr_u *position;
     variptr_u *end;
@@ -634,13 +627,6 @@ struct EdRegistry {
     void Serialise(EdStream &);
     void SerialiseObjects(EdStream &, EdRegistry *);
 };
-struct EdSfxNameControl {
-    void AddMenuItem(eduimenu_s *, EdRef *, void *);
-    EdSfxNameControl();
-    void cbButton(eduimenu_s *, eduiitem_s *, u32);
-    void cbChanged(eduimenu_s *, eduiitem_s *, u32);
-    void cbSelectSfx(eduimenu_s *, eduiitem_s *, u32);
-};
 struct EdSpecialObjectControl : EdControl {
     eduimenu_s *menu;
     EdSpecialObjectControl();
@@ -670,6 +656,32 @@ struct EdStringControl : EdControl {
     static void cbChanged(eduimenu_s *, eduiitem_s *, u32);
     static void cbPress(eduimenu_s *, eduiitem_s *, u32);
 };
+struct EdSfxNameControl : EdStringControl {
+    EdSfxNameControl();
+    void AddMenuItem(eduimenu_s *, EdRef *, void *) override;
+    static void cbButton(eduimenu_s *, eduiitem_s *, u32);
+    static void cbChanged(eduimenu_s *, eduiitem_s *, u32);
+    static void cbSelectSfx(eduimenu_s *, eduiitem_s *, u32);
+};
+DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(EdSfxNameControl) == 0x10, "EdSfxNameControl ABI");
+struct EdClassObjectNameControl : EdStringControl {
+    EdClass *selected_class;
+    void *selected_object;
+    EdRef *selected_reference;
+
+    EdClassObjectNameControl();
+    ~EdClassObjectNameControl() override;
+    static void operator delete(void *);
+    void AddMenuItem(eduimenu_s *, EdRef *, void *) override;
+    void Process(EdInputContext &) override;
+    void Render() override;
+    static void cbButton(eduimenu_s *, eduiitem_s *, u32);
+    static void cbChanged(eduimenu_s *, eduiitem_s *, u32);
+    static void cbSelectClass(eduimenu_s *, eduiitem_s *, u32);
+    static void cbSelectObject(eduimenu_s *, eduiitem_s *, u32);
+};
+DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(EdClassObjectNameControl) == 0x1c,
+              "EdClassObjectNameControl original size");
 struct EdSystem {
     EdSubSystem *first_subsystem;
     EdSubSystem *last_subsystem;

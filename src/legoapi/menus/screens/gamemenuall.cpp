@@ -1520,10 +1520,6 @@ extern "C" {
         }
     }
 
-    void CreateColourPicker(void) {
-        STUBBED();
-    }
-
     void CreateTestMenu(void) {
         STUBBED();
     }

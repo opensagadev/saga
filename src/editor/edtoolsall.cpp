@@ -4,6 +4,7 @@
 #include "gameapi/edtools/edui.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/characters/core/character.h"
+#include "legoapi/items/base/collection.h"
 #include "nu2api/nucore/nulist.h"
 #include "nu2api/nucore/nupad.h"
 #include "nu2api/nu3d/nurndr.h"
@@ -20,6 +21,7 @@ struct SHOPINPUT;
 struct EDCREATURE_s;
 i32 creatureEditor_CalculatePos(EDCREATURE_s *, i32, nuvec_s *, i32);
 i32 creatureEditor_IsSelectable(EDCREATURE_s *);
+i32 CanWearHatsInFreePlay(i32);
 
 extern "C" {
     extern void *ed_fnt;
@@ -119,10 +121,6 @@ static eduimenu_s *editorModeOptions(i32 mode, i32 height) {
     return menu;
 }
 
-void cbFileSaveEffects(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
-
 void routeEditor_Render(i32 x, i32 y, float xscale, float yscale) {
     if (aieditor->current_path != NULL) {
         NuQFntPrintEx(system_qfont, (x + 10) * 16, y * 8 - 40, 16, "Edit Routes (Path = \"%s\")",
@@ -156,9 +154,53 @@ void routeEditor_Render(i32 x, i32 y, float xscale, float yscale) {
     antinodeEditorDrawAntinodes();
 }
 
-i32 InModelListDataFlags(APICHARACTERMODELLIST_s *, u32, u32, i32, i32) {
-    STUBBED();
+template <bool RequireHats, bool RejectFlag40, bool RejectFlag80>
+static __attribute__((always_inline)) inline i32 FindModelListDataFlags(APICHARACTERMODELLIST_s *models,
+                                                                        u32 model_flags, u32 game_flags, i32 first_id) {
+    for (i32 id = first_id; id != -1; ++models, id = models->model_id) {
+        if (Collection_Got(id) == 0)
+            continue;
+        const GAMECHARACTERDATA &game_data = GCDataList[id];
+        if ((game_data.flags_090 & game_flags) != game_flags ||
+            (CDataList[id].model_flags & model_flags) != model_flags)
+            continue;
+        if (RejectFlag40 && (game_data.flags_094[1] & 0x40) != 0)
+            continue;
+        if (RejectFlag80 && static_cast<i8>(game_data.flags_094[1]) < 0)
+            continue;
+        if (RequireHats && CanWearHatsInFreePlay(id) == 0)
+            continue;
+        return 1;
+    }
     return 0;
+}
+
+i32 InModelListDataFlags(APICHARACTERMODELLIST_s *models, u32 model_flags, u32 game_flags, i32 require_hats,
+                         i32 reject_flag_40) {
+    if (models == nullptr)
+        return 0;
+    const i32 first_id = models->model_id;
+    if (first_id == -1)
+        return 0;
+    const u32 reject_flag_80 = model_flags & 8;
+    if (require_hats != 0) {
+        if (reject_flag_80 != 0) {
+            if (reject_flag_40 != 0)
+                return FindModelListDataFlags<true, true, true>(models, model_flags, game_flags, first_id);
+            return FindModelListDataFlags<true, false, true>(models, model_flags, game_flags, first_id);
+        }
+        if (reject_flag_40 != 0)
+            return FindModelListDataFlags<true, true, false>(models, model_flags, game_flags, first_id);
+        return FindModelListDataFlags<true, false, false>(models, model_flags, game_flags, first_id);
+    }
+    if (reject_flag_80 != 0) {
+        if (reject_flag_40 != 0)
+            return FindModelListDataFlags<false, true, true>(models, model_flags, game_flags, first_id);
+        return FindModelListDataFlags<false, false, true>(models, model_flags, game_flags, first_id);
+    }
+    if (reject_flag_40 != 0)
+        return FindModelListDataFlags<false, true, false>(models, model_flags, game_flags, first_id);
+    return FindModelListDataFlags<false, false, false>(models, model_flags, game_flags, first_id);
 }
 
 void antinodeEditor_Enter() {

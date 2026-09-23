@@ -95,6 +95,7 @@ extern "C" {
     extern u32 edgrey[4];
     extern u32 eddarkred[4];
     extern i32 EDPP_MAX_TYPES;
+    extern i32 edbits_particle_level_page;
     extern debkeydatatype_s *debkeydata;
     extern debinftype **debtab;
     extern DEBRISGENERATOR gensorttab[13];
@@ -146,6 +147,15 @@ static void cbPtlCancelQuickDeleteMenu(eduimenu_s *, eduimenu_s *);
 static void cbPtlQuickDeleteType(eduimenu_s *, eduiitem_s *, u32);
 static void cbPtlSelTextureType(eduimenu_s *, eduiitem_s *, u32);
 static void cbPtlTextureSelectMenu(eduimenu_s *, eduiitem_s *, u32);
+static void cbPtlAddEffect(eduimenu_s *, eduiitem_s *, u32);
+static void cbPtlCopyEffect(eduimenu_s *, eduiitem_s *, u32);
+static void cbPtlDeleteEffect(eduimenu_s *, eduiitem_s *, u32);
+static void cbPtlCancelDataMenu(eduimenu_s *, eduimenu_s *);
+static void cbChangeNameMenu(eduimenu_s *, eduiitem_s *, u32);
+static void cbPtlQuickDeleteMenu(eduimenu_s *, eduiitem_s *, u32);
+static void cbPtlReadoutMenu(eduimenu_s *, eduiitem_s *, u32);
+static void cbFileLoadEffects(eduimenu_s *, eduiitem_s *, u32);
+static void cbCancelEffectListMenu(eduimenu_s *, eduimenu_s *);
 
 // Particle-list editor UI/menu callbacks.
 
@@ -181,7 +191,7 @@ static void edptlcbChangeCSDisable(eduimenu_s *, eduiitem_s *item, u32) {
     effect->cutscene_only = item->highlighted;
 }
 
-static void edptlcbScaleEffectMenu(eduimenu_s *, eduiitem_s *, u32) {
+static __attribute__((used)) void edptlcbScaleEffectMenu(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
 
@@ -189,7 +199,7 @@ static void edptlcbSetDebrisDetail(eduimenu_s *, eduiitem_s *item, u32) {
     debris_detail_level = item->data;
 }
 
-static void edptlcbSetSoundControl(eduimenu_s *menu, eduiitem_s *item, u32) {
+static __attribute__((used)) void edptlcbSetSoundControl(eduimenu_s *menu, eduiitem_s *item, u32) {
     edptl_soundcontrol_menu = NULL;
     u32 data = static_cast<u32>(item->data);
     if (edpp_nearest != -1 && edpp_ptls[edpp_nearest].instance_id != -1) {
@@ -225,7 +235,7 @@ static void edptlcbSetSoundControl(eduimenu_s *menu, eduiitem_s *item, u32) {
     eduiMenuDestroy(menu);
 }
 
-static void edptlcbApplyScaleFactor(eduimenu_s *, eduiitem_s *, u32) {
+static __attribute__((used)) void edptlcbApplyScaleFactor(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
 
@@ -239,7 +249,7 @@ static void edptlcbCancelDetailMenu(eduimenu_s *, eduimenu_s *) {
     edptl_detail_menu = NULL;
 }
 
-static void edptlcbCancelSoundXMenu(eduimenu_s *, eduimenu_s *) {
+static __attribute__((used)) void edptlcbCancelSoundXMenu(eduimenu_s *, eduimenu_s *) {
     eduiMenuDestroy(edptl_soundx_menu);
     edptl_soundx_menu = NULL;
 }
@@ -254,7 +264,7 @@ static void edptlcbCancelSwitchMenu(eduimenu_s *, eduimenu_s *) {
     edptl_switch_menu = NULL;
 }
 
-static void edptlcbSoundControlMenu(eduimenu_s *menu, eduiitem_s *item, u32) {
+static __attribute__((used)) void edptlcbSoundControlMenu(eduimenu_s *menu, eduiitem_s *item, u32) {
     u32 colours[4] = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
     debinftype *effect = debtab[debkeydata[edpp_ptls[edpp_nearest].instance_id].effect_index];
     edptl_soundcontrol_menu = eduiMenuCreate(70, 70, 180, 250, ed_fnt, edptlcbCancelSoundControlMenu, "Sound Control");
@@ -319,7 +329,7 @@ static void edptlcbApplyBounceOffset(eduimenu_s *, eduiitem_s *item, u32) {
     debkeydata[particle->instance_id].collision_plane = particle->reflection_offset;
 }
 
-static void edptlcbCancelSoundIDMenu(eduimenu_s *, eduimenu_s *) {
+static __attribute__((used)) void edptlcbCancelSoundIDMenu(eduimenu_s *, eduimenu_s *) {
     eduiMenuDestroy(edptl_soundid_menu);
     edptl_soundid_menu = NULL;
 }
@@ -346,7 +356,7 @@ static void edptlChangeRepeatBoxXZLock(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
 
-static void edptlcbCancelClipboardMenu(eduimenu_s *, eduimenu_s *) {
+static __attribute__((used)) void edptlcbCancelClipboardMenu(eduimenu_s *, eduimenu_s *) {
     eduiMenuDestroy(ptlclipmenu);
     ptlclipmenu = NULL;
 }
@@ -356,7 +366,7 @@ static void edptlcbCancelOrphanListMenu(eduimenu_s *, eduimenu_s *) {
     edptl_orphanlist_menu = NULL;
 }
 
-static void edptlcbCancelSwitchTypeMenu(eduimenu_s *, eduimenu_s *) {
+static __attribute__((used)) void edptlcbCancelSwitchTypeMenu(eduimenu_s *, eduimenu_s *) {
     eduiMenuDestroy(edptl_switchtype_menu);
     edptl_switchtype_menu = NULL;
 }
@@ -366,12 +376,12 @@ static void edptlcbCancelTestDetailMenu(eduimenu_s *, eduimenu_s *) {
     edptl_testdetail_menu = NULL;
 }
 
-static void edptlcbCancelScaleEffectMenu(eduimenu_s *, eduimenu_s *) {
+static __attribute__((used)) void edptlcbCancelScaleEffectMenu(eduimenu_s *, eduimenu_s *) {
     eduiMenuDestroy(edptl_scaleeffect_menu);
     edptl_scaleeffect_menu = NULL;
 }
 
-static void edptlcbCancelSoundControlMenu(eduimenu_s *, eduimenu_s *) {
+static __attribute__((used)) void edptlcbCancelSoundControlMenu(eduimenu_s *, eduimenu_s *) {
     eduiMenuDestroy(edptl_soundcontrol_menu);
     edptl_soundcontrol_menu = NULL;
 }
@@ -384,7 +394,7 @@ static void cbChangeName(eduimenu_s *, eduiitem_s *item, u32) {
     }
 }
 
-static void cbPtlChangeX(eduimenu_s *menu, eduiitem_s *item, u32) {
+static __attribute__((used)) void cbPtlChangeX(eduimenu_s *menu, eduiitem_s *item, u32) {
     if (edpp_nearest == -1)
         return;
     i32 instance_id = edpp_ptls[edpp_nearest].instance_id;
@@ -401,7 +411,7 @@ static void cbPtlChangeX(eduimenu_s *menu, eduiitem_s *item, u32) {
     }
 }
 
-static void cbPtlChangeY(eduimenu_s *menu, eduiitem_s *item, u32) {
+static __attribute__((used)) void cbPtlChangeY(eduimenu_s *menu, eduiitem_s *item, u32) {
     if (edpp_nearest == -1)
         return;
     i32 instance_id = edpp_ptls[edpp_nearest].instance_id;
@@ -435,7 +445,7 @@ static void cbPtlChangeY(eduimenu_s *menu, eduiitem_s *item, u32) {
     }
 }
 
-static void cbPtlChangeZ(eduimenu_s *menu, eduiitem_s *item, u32) {
+static __attribute__((used)) void cbPtlChangeZ(eduimenu_s *menu, eduiitem_s *item, u32) {
     if (edpp_nearest == -1)
         return;
     i32 instance_id = edpp_ptls[edpp_nearest].instance_id;
@@ -491,7 +501,7 @@ static void cbPtlRotMenu(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
 
-static void cbPtlSelType(eduimenu_s *menu, eduiitem_s *item, u32) {
+static __attribute__((used)) void cbPtlSelType(eduimenu_s *menu, eduiitem_s *item, u32) {
     ptltypemenu = NULL;
     edpp_active_menu = NULL;
     edpp_create_type = item->data;
@@ -503,7 +513,7 @@ static void cbPtlShowAll(eduimenu_s *, eduiitem_s *, u32) {
     edpp_showAllPlaced = !edpp_showAllPlaced;
 }
 
-static void cbPtlApplyJib(eduimenu_s *, eduiitem_s *, u32) {
+static __attribute__((used)) void cbPtlApplyJib(eduimenu_s *, eduiitem_s *, u32) {
     if (edpp_nearest == -1)
         return;
     i32 instance = edpp_ptls[edpp_nearest].instance_id;
@@ -521,7 +531,7 @@ static void cbPtlApplyJib(eduimenu_s *, eduiitem_s *, u32) {
     GenericDebinfoDmaTypeUpdate(effect);
 }
 
-static void cbPtlApplyRot(eduimenu_s *, eduiitem_s *, u32) {
+static __attribute__((used)) void cbPtlApplyRot(eduimenu_s *, eduiitem_s *, u32) {
     edui_gradient_stage_s stages[8];
     if (!grad_rot_min_item || !grad_rot_max_item || !grad_rot_item)
         return;
@@ -550,7 +560,7 @@ static void cbPtlCollMenu(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
 
-static void cbPtlCopySize(eduimenu_s *, eduiitem_s *item, u32) {
+static __attribute__((used)) void cbPtlCopySize(eduimenu_s *, eduiitem_s *item, u32) {
     if (edpp_nearest == -1)
         return;
     i32 instance = edpp_ptls[edpp_nearest].instance_id;
@@ -585,15 +595,46 @@ static void cbPtlCopySize(eduimenu_s *, eduiitem_s *item, u32) {
     GenericDebinfoDmaTypeUpdate(effect);
 }
 
-static void cbPtlDataMenu(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
+static void cbPtlDataMenu(eduimenu_s *parent, eduiitem_s *, u32) {
+    u32 colours[4] = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
+    ptldatamenu = eduiMenuCreate(70, 70, 180, 250, ed_fnt, cbPtlCancelDataMenu, "Data Menu");
+    if (ptldatamenu == NULL)
+        return;
+    eduiMenuAddItem(ptldatamenu, eduiItemSelCreate(1, colours, 0, 0, cbChangeNameMenu, "Type Name..."));
+    if (edpp_create_type != -1) {
+        eduiMenuAddItem(ptldatamenu, eduiItemSelCreate(1, colours, 0, 0, cbPtlDeleteEffect, "Delete Effect"));
+        eduiMenuAddItem(ptldatamenu, eduiItemSelCreate(1, colours, 0, 0, cbPtlCopyEffect, "Copy Effect"));
+    }
+    char *save_label = NULL;
+    if (edpp_effect_list == 0)
+        save_label = "Save General list";
+    else if (edpp_effect_list == 1)
+        save_label = "Save Level list";
+    else if (edpp_effect_list == 5)
+        save_label = "Save Char list";
+    if (save_label != NULL)
+        eduiMenuAddItem(ptldatamenu, eduiItemSelCreate(1, colours, 0, 0, cbFileSaveEffects, save_label));
+    eduiMenuAddItem(ptldatamenu, eduiItemSelCreate(1, colours, 0, 0, cbFileLoadEffects, "Load all from file"));
+    if (edpp_create_type != -1)
+        eduiMenuAddItem(ptldatamenu, eduiItemSelCreate(1, colours, 0, 0, edptlcbClipboardMenu, "Clipboard..."));
+    if (edpp_num_orphans != 0) {
+        eduiMenuAddItem(ptldatamenu, eduiItemSelCreate(1, colours, 0, 0, edptlcbOrphanListMenu, "List Orphans..."));
+        eduiMenuAddItem(ptldatamenu, eduiItemSelCreate(1, colours, 0, 0, edptlcbDeleteOrphans, "Delete Orphans"));
+    }
+    eduiMenuAddItem(ptldatamenu, eduiItemSelCreate(1, colours, 0, 0, cbPtlQuickDeleteMenu, "Quick Delete Types..."));
+    eduiMenuAddItem(ptldatamenu, eduiItemSelCreate(1, colours, 0, 0, cbPtlReadoutMenu, "Info Box Style..."));
+    eduiMenuAddItem(ptldatamenu,
+                    eduiItemToggleCreate(1, colours, edpp_showAllPlaced, 2, cbPtlShowAll, "Show All Placed"));
+    eduiMenuAttach(parent, ptldatamenu);
+    ptldatamenu->x = parent->x + 10;
+    ptldatamenu->y = parent->y + 40;
 }
 
 static void cbPtlEmitMenu(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
 
-static void cbPtlGravMenu(eduimenu_s *menu, eduiitem_s *, u32) {
+static __attribute__((used)) void cbPtlGravMenu(eduimenu_s *menu, eduiitem_s *, u32) {
     u32 colours[4] = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
     if (edpp_nearest == -1 || edpp_ptls[edpp_nearest].instance_id == -1) {
         return;
@@ -667,11 +708,11 @@ static void cbPtlTypeMenu(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
 
-static void cbPtlAddEffect(eduimenu_s *, eduiitem_s *, u32) {
+static __attribute__((used)) void cbPtlAddEffect(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
 
-static void cbPtlApplyGrad(eduimenu_s *, eduiitem_s *, u32) {
+static __attribute__((used)) void cbPtlApplyGrad(eduimenu_s *, eduiitem_s *, u32) {
     edui_gradient_stage_s stages[8];
     if (grad_item) {
         i32 count = eduiGradPickRead(grad_item, stages, 8);
@@ -705,7 +746,7 @@ static void cbPtlApplyGrad(eduimenu_s *, eduiitem_s *, u32) {
     }
 }
 
-static void cbPtlApplySize(eduimenu_s *, eduiitem_s *, u32) {
+static __attribute__((used)) void cbPtlApplySize(eduimenu_s *, eduiitem_s *, u32) {
     edui_gradient_stage_s stages[8];
     if (!grad_size_min_item || !grad_size_max_item || !grad_size_h_item || !grad_size_w_item)
         return;
@@ -783,7 +824,7 @@ static void cbPtlGSortMenu(eduimenu_s *menu, eduiitem_s *, u32) {
     ptlgsortmenu->y = menu->y + 40;
 }
 
-static void cbPtlSetFacing(eduimenu_s *, eduiitem_s *item, u32) {
+static __attribute__((used)) void cbPtlSetFacing(eduimenu_s *, eduiitem_s *item, u32) {
     edpp_particle_s *particle = &edpp_ptls[edpp_nearest];
     particle->facing_mode = item->highlighted;
     if (item->highlighted) {
@@ -801,7 +842,7 @@ static void cbPtlTorusMenu(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
 
-static void cbPtlChangeGrav(eduimenu_s *, eduiitem_s *item, u32) {
+static __attribute__((used)) void cbPtlChangeGrav(eduimenu_s *, eduiitem_s *item, u32) {
     if (edpp_nearest == -1) {
         return;
     }
@@ -817,7 +858,7 @@ static void cbPtlCopyEffect(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
 
-static void cbPtlCutOffMenu(eduimenu_s *, eduiitem_s *, u32) {
+static __attribute__((used)) void cbPtlCutOffMenu(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
 
@@ -856,8 +897,22 @@ static void cbPtlSnapToggle(eduimenu_s *, eduiitem_s *item, u32) {
     edpp_snap_enabled = item->highlighted;
 }
 
-static void cbSelEffectList(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
+static void cbSelEffectList(eduimenu_s *menu, eduiitem_s *item, u32) {
+    if (item->data != static_cast<i8>(edpp_effect_list)) {
+        edpp_effect_list = static_cast<i8>(item->data);
+        edpp_create_type = -1;
+        for (i32 index = 1; index < EDPP_MAX_TYPES; ++index) {
+            if (debtab[index] != NULL && debtab[index]->category == edpp_effect_list) {
+                edpp_create_type = index;
+                break;
+            }
+        }
+    }
+    eduimenu_s *parent = menu->parent;
+    if (parent != NULL)
+        eduiMenuDetach(menu);
+    if (menu->callback != NULL)
+        menu->callback(menu, parent);
 }
 
 static void cbChangeNameMenu(eduimenu_s *menu, eduiitem_s *, u32) {
@@ -877,11 +932,22 @@ static void cbChangeNameMenu(eduimenu_s *menu, eduiitem_s *, u32) {
     }
 }
 
-static void cbEffectListMenu(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
+static void cbEffectListMenu(eduimenu_s *parent, eduiitem_s *, u32) {
+    u32 colours[4] = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
+    effectlistmenu = eduiMenuCreate(70, 70, 180, 250, ed_fnt, cbCancelEffectListMenu, "Effect List");
+    if (effectlistmenu == NULL)
+        return;
+    eduiMenuAddItem(effectlistmenu,
+                    eduiItemCheckCreate(0, colours, edpp_effect_list == 0, 1, cbSelEffectList, "General"));
+    eduiMenuAddItem(effectlistmenu,
+                    eduiItemCheckCreate(1, colours, edpp_effect_list == 1, 1, cbSelEffectList, "Level"));
+    eduiMenuAddItem(effectlistmenu, eduiItemCheckCreate(5, colours, edpp_effect_list == 5, 1, cbSelEffectList, "Char"));
+    eduiMenuAttach(parent, effectlistmenu);
+    effectlistmenu->x = parent->x + 10;
+    effectlistmenu->y = parent->y + 40;
 }
 
-static void cbPtlChangeCutOn(eduimenu_s *, eduiitem_s *item, u32) {
+static __attribute__((used)) void cbPtlChangeCutOn(eduimenu_s *, eduiitem_s *item, u32) {
     if (edpp_nearest == -1) {
         return;
     }
@@ -895,7 +961,7 @@ static void cbPtlChangeCutOn(eduimenu_s *, eduiitem_s *item, u32) {
     }
 }
 
-static void cbPtlEmitVelMenu(eduimenu_s *menu, eduiitem_s *, u32) {
+static __attribute__((used)) void cbPtlEmitVelMenu(eduimenu_s *menu, eduiitem_s *, u32) {
     u32 colours[4] = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
     if (edpp_nearest == -1 || edpp_ptls[edpp_nearest].instance_id == -1) {
         return;
@@ -964,15 +1030,15 @@ static void cbPtlTextureMenu(eduimenu_s *menu, eduiitem_s *, u32) {
     }
 }
 
-static void cbPtlVarEmitMenu(eduimenu_s *, eduiitem_s *, u32) {
+static __attribute__((used)) void cbPtlVarEmitMenu(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
 
-static void cbChangeETimeMenu(eduimenu_s *, eduiitem_s *, u32) {
+static __attribute__((used)) void cbChangeETimeMenu(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
 
-static void cbChangeTorusLife(eduimenu_s *, eduiitem_s *item, u32) {
+static __attribute__((used)) void cbChangeTorusLife(eduimenu_s *, eduiitem_s *item, u32) {
     if (edpp_nearest == -1) {
         return;
     }
@@ -983,7 +1049,7 @@ static void cbChangeTorusLife(eduimenu_s *, eduiitem_s *item, u32) {
     effect->torus_lifetime = static_cast<edui_slider_s *>(item)->value;
 }
 
-static void cbChangeTorusRad1(eduimenu_s *, eduiitem_s *item, u32) {
+static __attribute__((used)) void cbChangeTorusRad1(eduimenu_s *, eduiitem_s *item, u32) {
     if (edpp_nearest == -1) {
         return;
     }
@@ -994,7 +1060,7 @@ static void cbChangeTorusRad1(eduimenu_s *, eduiitem_s *item, u32) {
     effect->torus_radius1 = static_cast<edui_slider_s *>(item)->value;
 }
 
-static void cbChangeTorusRad2(eduimenu_s *, eduiitem_s *item, u32) {
+static __attribute__((used)) void cbChangeTorusRad2(eduimenu_s *, eduiitem_s *item, u32) {
     if (edpp_nearest == -1) {
         return;
     }
@@ -1009,7 +1075,7 @@ static void cbFileLoadEffects(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
 
-static void cbPtlApplyCollEnv(eduimenu_s *, eduiitem_s *, u32) {
+static __attribute__((used)) void cbPtlApplyCollEnv(eduimenu_s *, eduiitem_s *, u32) {
     edui_gradient_stage_s stages[8];
     if (!coll_env_item)
         return;
@@ -1028,7 +1094,7 @@ static void cbPtlApplyCollEnv(eduimenu_s *, eduiitem_s *, u32) {
     }
 }
 
-static void cbPtlChangeCutOff(eduimenu_s *, eduiitem_s *item, u32) {
+static __attribute__((used)) void cbPtlChangeCutOff(eduimenu_s *, eduiitem_s *item, u32) {
     if (edpp_nearest == -1) {
         return;
     }
@@ -1058,19 +1124,19 @@ static void cbPtlDeleteEffect(eduimenu_s *menu, eduiitem_s *, u32) {
     }
 }
 
-static void cbPtlEmitTimeMenu(eduimenu_s *, eduiitem_s *, u32) {
+static __attribute__((used)) void cbPtlEmitTimeMenu(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
 
-static void cbPtlStartVelMenu(eduimenu_s *, eduiitem_s *, u32) {
+static __attribute__((used)) void cbPtlStartVelMenu(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
 
-static void cbPtlVarStartMenu(eduimenu_s *, eduiitem_s *, u32) {
+static __attribute__((used)) void cbPtlVarStartMenu(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
 
-static void cbPtlChangeEmitVel(eduimenu_s *, eduiitem_s *item, u32) {
+static __attribute__((used)) void cbPtlChangeEmitVel(eduimenu_s *, eduiitem_s *item, u32) {
     if (edpp_nearest == -1) {
         return;
     }
@@ -1081,11 +1147,11 @@ static void cbPtlChangeEmitVel(eduimenu_s *, eduiitem_s *item, u32) {
     effect->field_048 = static_cast<edui_slider_s *>(item)->value;
 }
 
-static void cbChangeGenRateMenu(eduimenu_s *, eduiitem_s *, u32) {
+static __attribute__((used)) void cbChangeGenRateMenu(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
 
-static void cbPtlApplyTorusEnv1(eduimenu_s *, eduiitem_s *, u32) {
+static __attribute__((used)) void cbPtlApplyTorusEnv1(eduimenu_s *, eduiitem_s *, u32) {
     edui_gradient_stage_s stages[8];
     if (!torus_env1_item)
         return;
@@ -1102,7 +1168,7 @@ static void cbPtlApplyTorusEnv1(eduimenu_s *, eduiitem_s *, u32) {
     }
 }
 
-static void cbPtlApplyTorusEnv2(eduimenu_s *, eduiitem_s *, u32) {
+static __attribute__((used)) void cbPtlApplyTorusEnv2(eduimenu_s *, eduiitem_s *, u32) {
     edui_gradient_stage_s stages[8];
     if (!torus_env2_item)
         return;
@@ -1119,7 +1185,7 @@ static void cbPtlApplyTorusEnv2(eduimenu_s *, eduiitem_s *, u32) {
     }
 }
 
-static void cbPtlApplyTorusEnv3(eduimenu_s *, eduiitem_s *, u32) {
+static __attribute__((used)) void cbPtlApplyTorusEnv3(eduimenu_s *, eduiitem_s *, u32) {
     edui_gradient_stage_s stages[8];
     if (!torus_env3_item)
         return;
@@ -1136,7 +1202,7 @@ static void cbPtlApplyTorusEnv3(eduimenu_s *, eduiitem_s *, u32) {
     }
 }
 
-static void cbPtlChangePriority(eduimenu_s *, eduiitem_s *item, u32) {
+static __attribute__((used)) void cbPtlChangePriority(eduimenu_s *, eduiitem_s *item, u32) {
     i16 priority = static_cast<i32>(static_cast<edui_slider_s *>(item)->value);
     edpp_particle_s *particle = &edpp_ptls[edpp_nearest];
     particle->render_priority = priority;
@@ -1160,7 +1226,7 @@ static void cbPtlDamageFlagMenu(eduimenu_s *menu, eduiitem_s *, u32) {
     edptl_damageflag_menu->y = menu->y + 40;
 }
 
-static void cbPtlDefaultCollEnv(eduimenu_s *menu, eduiitem_s *, u32) {
+static __attribute__((used)) void cbPtlDefaultCollEnv(eduimenu_s *menu, eduiitem_s *, u32) {
     if (edpp_nearest != -1) {
         i32 instance = edpp_ptls[edpp_nearest].instance_id;
         if (instance != -1) {
@@ -1293,7 +1359,7 @@ static void cbPtlQuickDeleteType(eduimenu_s *menu, eduiitem_s *item, u32) {
     }
 }
 
-static void cbPtlChangeDrawCutOff(eduimenu_s *, eduiitem_s *item, u32) {
+static __attribute__((used)) void cbPtlChangeDrawCutOff(eduimenu_s *, eduiitem_s *item, u32) {
     if (edpp_nearest == -1) {
         return;
     }
@@ -1304,7 +1370,7 @@ static void cbPtlChangeDrawCutOff(eduimenu_s *, eduiitem_s *item, u32) {
     effect->sound_range = static_cast<edui_slider_s *>(item)->value;
 }
 
-static void cbPtlChangeRepeatFlag(eduimenu_s *, eduiitem_s *item, u32) {
+static __attribute__((used)) void cbPtlChangeRepeatFlag(eduimenu_s *, eduiitem_s *item, u32) {
     if (edpp_nearest == -1) {
         return;
     }
@@ -1318,7 +1384,7 @@ static void cbPtlChangeRepeatFlag(eduimenu_s *, eduiitem_s *item, u32) {
     }
 }
 
-static void cbChangeNumCollSpheres(eduimenu_s *, eduiitem_s *item, u32) {
+static __attribute__((used)) void cbChangeNumCollSpheres(eduimenu_s *, eduiitem_s *item, u32) {
     if (edpp_nearest == -1) {
         return;
     }
@@ -1344,7 +1410,7 @@ static void cbPtlChangeDamageFlags(eduimenu_s *, eduiitem_s *item, u32) {
     }
 }
 
-static void cbPtlChangeSoundCutOff(eduimenu_s *, eduiitem_s *item, u32) {
+static __attribute__((used)) void cbPtlChangeSoundCutOff(eduimenu_s *, eduiitem_s *item, u32) {
     if (edpp_nearest == -1) {
         return;
     }
@@ -1396,7 +1462,7 @@ static void cbPtlTextureSelectMenu(eduimenu_s *menu, eduiitem_s *, u32) {
     }
 }
 
-static void cbPtlChangeCameraCutOff(eduimenu_s *, eduiitem_s *item, u32) {
+static __attribute__((used)) void cbPtlChangeCameraCutOff(eduimenu_s *, eduiitem_s *item, u32) {
     if (edpp_nearest == -1) {
         return;
     }
@@ -1431,7 +1497,7 @@ static void cbPtlInstanceSettingsMenu(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
 
-static void cbPtlToggleDynamicPriority(eduimenu_s *, eduiitem_s *item, u32) {
+static __attribute__((used)) void cbPtlToggleDynamicPriority(eduimenu_s *, eduiitem_s *item, u32) {
     edpp_particle_s *particle = &edpp_ptls[edpp_nearest];
     particle->dynamic_priority = item->highlighted;
     debkeydata[particle->instance_id].timed_flags = item->highlighted;
@@ -1441,14 +1507,14 @@ static void cbPtlCancel(eduimenu_s *, eduimenu_s *) {
     edpp_active_menu = NULL;
 }
 
-static void cbPtlCancelColMenu(eduimenu_s *, eduimenu_s *) {
+static __attribute__((used)) void cbPtlCancelColMenu(eduimenu_s *, eduimenu_s *) {
     eduiMenuDestroy(ptlcolmenu);
     ptlcolmenu = NULL;
     grad_item = NULL;
     grad_alpha_item = NULL;
 }
 
-static void cbPtlCancelJibMenu(eduimenu_s *, eduimenu_s *) {
+static __attribute__((used)) void cbPtlCancelJibMenu(eduimenu_s *, eduimenu_s *) {
     eduiMenuDestroy(ptljibmenu);
     ptljibmenu = NULL;
     grad_jib_x_freq_item = NULL;
@@ -1457,7 +1523,7 @@ static void cbPtlCancelJibMenu(eduimenu_s *, eduimenu_s *) {
     grad_jib_y_amp_item = NULL;
 }
 
-static void cbPtlCancelRotMenu(eduimenu_s *, eduimenu_s *) {
+static __attribute__((used)) void cbPtlCancelRotMenu(eduimenu_s *, eduimenu_s *) {
     eduiMenuDestroy(ptlrotmenu);
     ptlrotmenu = NULL;
     grad_rot_item = NULL;
@@ -1470,7 +1536,7 @@ static void cbCancelMessageMenu(eduimenu_s *, eduimenu_s *) {
     messagemenu = NULL;
 }
 
-static void cbPtlCancelCollMenu(eduimenu_s *, eduimenu_s *) {
+static __attribute__((used)) void cbPtlCancelCollMenu(eduimenu_s *, eduimenu_s *) {
     eduiMenuDestroy(collmenu);
     collmenu = NULL;
     coll_env_item = NULL;
@@ -1481,17 +1547,17 @@ static void cbPtlCancelDataMenu(eduimenu_s *, eduimenu_s *) {
     ptldatamenu = NULL;
 }
 
-static void cbPtlCancelEmitMenu(eduimenu_s *, eduimenu_s *) {
+static __attribute__((used)) void cbPtlCancelEmitMenu(eduimenu_s *, eduimenu_s *) {
     eduiMenuDestroy(ptlemitmenu);
     ptlemitmenu = NULL;
 }
 
-static void cbPtlCancelGravMenu(eduimenu_s *, eduimenu_s *) {
+static __attribute__((used)) void cbPtlCancelGravMenu(eduimenu_s *, eduimenu_s *) {
     eduiMenuDestroy(ptlgravmenu);
     ptlgravmenu = NULL;
 }
 
-static void cbPtlCancelSizeMenu(eduimenu_s *, eduimenu_s *) {
+static __attribute__((used)) void cbPtlCancelSizeMenu(eduimenu_s *, eduimenu_s *) {
     eduiMenuDestroy(ptlsizemenu);
     ptlsizemenu = NULL;
     grad_size_w_item = NULL;
@@ -1500,7 +1566,7 @@ static void cbPtlCancelSizeMenu(eduimenu_s *, eduimenu_s *) {
     grad_size_max_item = NULL;
 }
 
-static void cbPtlCancelTypeMenu(eduimenu_s *, eduimenu_s *) {
+static __attribute__((used)) void cbPtlCancelTypeMenu(eduimenu_s *, eduimenu_s *) {
     eduiMenuDestroy(ptltypemenu);
     ptltypemenu = NULL;
 }
@@ -1510,7 +1576,7 @@ static void cbPtlCancelGSortMenu(eduimenu_s *, eduimenu_s *) {
     ptlgsortmenu = NULL;
 }
 
-static void cbPtlCancelTorusMenu(eduimenu_s *, eduimenu_s *) {
+static __attribute__((used)) void cbPtlCancelTorusMenu(eduimenu_s *, eduimenu_s *) {
     eduiMenuDestroy(edptl_torus_menu);
     edptl_torus_menu = NULL;
     torus_env1_item = NULL;
@@ -1518,7 +1584,7 @@ static void cbPtlCancelTorusMenu(eduimenu_s *, eduimenu_s *) {
     torus_env3_item = NULL;
 }
 
-static void cbPtlCancelCutOffMenu(eduimenu_s *, eduimenu_s *) {
+static __attribute__((used)) void cbPtlCancelCutOffMenu(eduimenu_s *, eduimenu_s *) {
     eduiMenuDestroy(ptlcutoffmenu);
     ptlcutoffmenu = NULL;
 }
@@ -1557,7 +1623,7 @@ static void cbCancelEffectListMenu(eduimenu_s *, eduimenu_s *) {
     effectlistmenu = NULL;
 }
 
-static void cbPtlCancelEmitVelMenu(eduimenu_s *, eduimenu_s *) {
+static __attribute__((used)) void cbPtlCancelEmitVelMenu(eduimenu_s *, eduimenu_s *) {
     eduiMenuDestroy(ptlemitvelmenu);
     ptlemitvelmenu = NULL;
 }
@@ -1576,32 +1642,32 @@ static void cbPtlCancelTextureMenu(eduimenu_s *, eduimenu_s *) {
     texturemenu = NULL;
 }
 
-static void cbPtlCancelVarEmitMenu(eduimenu_s *, eduimenu_s *) {
+static __attribute__((used)) void cbPtlCancelVarEmitMenu(eduimenu_s *, eduimenu_s *) {
     eduiMenuDestroy(ptlvaremitmenu);
     ptlvaremitmenu = NULL;
 }
 
-static void cbCancelChangeETimeMenu(eduimenu_s *, eduimenu_s *) {
+static __attribute__((used)) void cbCancelChangeETimeMenu(eduimenu_s *, eduimenu_s *) {
     eduiMenuDestroy(etimemenu);
     etimemenu = NULL;
 }
 
-static void cbPtlCancelEmitTimeMenu(eduimenu_s *, eduimenu_s *) {
+static __attribute__((used)) void cbPtlCancelEmitTimeMenu(eduimenu_s *, eduimenu_s *) {
     eduiMenuDestroy(emittimemenu);
     emittimemenu = NULL;
 }
 
-static void cbPtlCancelStartVelMenu(eduimenu_s *, eduimenu_s *) {
+static __attribute__((used)) void cbPtlCancelStartVelMenu(eduimenu_s *, eduimenu_s *) {
     eduiMenuDestroy(ptlstartvelmenu);
     ptlstartvelmenu = NULL;
 }
 
-static void cbPtlCancelVarStartMenu(eduimenu_s *, eduimenu_s *) {
+static __attribute__((used)) void cbPtlCancelVarStartMenu(eduimenu_s *, eduimenu_s *) {
     eduiMenuDestroy(ptlvarstartmenu);
     ptlvarstartmenu = NULL;
 }
 
-static void cbCancelChangeGenRateMenu(eduimenu_s *, eduimenu_s *) {
+static __attribute__((used)) void cbCancelChangeGenRateMenu(eduimenu_s *, eduimenu_s *) {
     eduiMenuDestroy(changegenratemenu);
     changegenratemenu = NULL;
 }
@@ -1616,7 +1682,7 @@ static void cbPtlCancelQuickDeleteMenu(eduimenu_s *, eduimenu_s *) {
     edptl_quickdel_menu = NULL;
 }
 
-static void cbPtlCancelInstanceSettingsMenu(eduimenu_s *, eduimenu_s *) {
+static __attribute__((used)) void cbPtlCancelInstanceSettingsMenu(eduimenu_s *, eduimenu_s *) {
     eduiMenuDestroy(edptl_instancesettings_menu);
     edptl_instancesettings_menu = NULL;
 }

@@ -57,17 +57,17 @@ extern "C" {
     void saveloadASCallEachFrame(void);
     void saveloadASFormat(void);
     void saveloadAutoSave(void);
-    void saveloadCheckCardFormatted(void);
-    void saveloadCheckCardFreeSpace(void);
-    void saveloadCheckCardPresent(void);
-    void saveloadCheckCardType(void);
-    void saveloadCheckKeyCode(void);
-    void saveloadCheckSlotsUsed(void);
-    void saveloadDeleteSlot(void);
-    void saveloadFormatCard(void);
+    i32 saveloadCheckCardFormatted(void);
+    i32 saveloadCheckCardFreeSpace(void);
+    i32 saveloadCheckCardPresent(void);
+    i32 saveloadCheckCardType(void);
+    i32 saveloadCheckKeyCode(void);
+    i32 saveloadCheckSlotsUsed(void);
+    i32 saveloadDeleteSlot(i32 slot);
+    i32 saveloadFormatCard(void);
     void saveloadLoadIcon(void);
-    void saveloadUnFormatCard(void);
-    void saveloadWriteKeyCode(void);
+    i32 saveloadUnFormatCard(void);
+    i32 saveloadWriteKeyCode(void);
 #ifdef __cplusplus
 }
 

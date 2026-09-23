@@ -15,6 +15,7 @@
 #include "nu2api/nucore/nuanim3.h"
 
 #include <string.h>
+#include <stdint.h>
 #include "nu2api/nucore/nulist.h"
 
 struct AIROW_s;
@@ -25,6 +26,11 @@ struct SHOPINPUT;
 extern "C" void *AIPAthFindPathCnx(AISYS_s *, AIPATH_s *, char *, char *, i32 *);
 extern void *CutScene_FindInst(CUTSYS *, char *);
 extern FLOWBOX_s *FlowBoxFindByName(GIZFLOW_s *, char *);
+extern "C" {
+    extern f32 aiEditor_DrawYOffset;
+    void LocaledbitsDrawCircleXY(NUVEC *, f32, u32, i32, i32);
+    void LocaledbitsDrawSolidCircleXY(NUVEC *, f32, f32, f32, u32, i32, i32);
+}
 
 void AIPathCalcExtents(AIPATH *path) {
     const f32 max_float = 3.402823466e+38f;
@@ -77,8 +83,17 @@ i32 AIPathCheckExtents(AIPATH *path, NUVEC *position) {
     return position->z <= path->bounds_max.z;
 }
 
-void pathEditorDrawNode(nuvec_s *, float, float, float, u32, numtl_s *, i32, i32) {
-    STUBBED();
+__attribute__((force_align_arg_pointer)) void pathEditorDrawNode(nuvec_s *position, float radius, float lower_height,
+                                                                 float upper_height, u32 colour, numtl_s *material,
+                                                                 i32 segments, i32 solid) {
+    NUVEC centre = {position->x, position->y + aiEditor_DrawYOffset, position->z};
+    if (solid == 0) {
+        LocaledbitsDrawCircleXY(&centre, radius, colour, static_cast<i32>(reinterpret_cast<uintptr_t>(material)),
+                                segments);
+    } else {
+        LocaledbitsDrawSolidCircleXY(&centre, radius, lower_height, upper_height, colour,
+                                     static_cast<i32>(reinterpret_cast<uintptr_t>(material)), segments);
+    }
 }
 
 void (*AIPathCnxHelperSysInitFn)(WORLDINFO_s *) = NULL;

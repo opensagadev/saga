@@ -1,14 +1,22 @@
 #include "decomp.h"
+#include "globals.h"
 #include "gameapi/edtools/edcam.h"
 #include "MechInputTouch/MechInputTouch_types.h"
 #include "gameapi/edtools/gameapi_edtools_types.h"
 #include "gameapi/edtools/edui.h"
 #include "legoapi/legoapi_types.h"
+#include "legoapi/characters/core/character.h"
+#include "legoapi/characters/core/customiser.h"
+#include "legoapi/items/base/apiobject.h"
+#include "legoapi/render/fx/particles.h"
+#include "legoapi/render/core/rtl.h"
+#include "legoapi/render/light/lighting.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nucore/nukeyboard.h"
 #include "nu2api/nu3d/numtl.h"
 #include "nu2api/nu3d/nuqfnt.h"
 #include "nu2api/nu3d/nurndr.h"
+#include "nu2api/nu3d/nugscn.h"
 #include "nu2api/nucore/NuDynamicLight.h"
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/nufile/nufile.h"
@@ -2818,8 +2826,29 @@ i32 ClassObjectList::IsInList(void *object, EdRef *reference) {
     return false;
 }
 
-void DumpAreaData(i32, i32) {
-    STUBBED();
+void DumpAreaData(i32 mode, i32) {
+    if (big_icon_scene != NULL) {
+        NuGScnRemove(big_icon_scene);
+    }
+    big_icon_scene = NULL;
+    if (area_scene != NULL) {
+        NuGScnRemove(area_scene);
+    }
+    area_scene = NULL;
+    if (vehicle_scene != NULL) {
+        NuGScnRemove(vehicle_scene);
+    }
+    vehicle_scene = NULL;
+    if (Customiser_AccessoriesLoaded == 2) {
+        Customiser_RestoreModelTextureIDs(reinterpret_cast<CUSTOMISER *>(Game_Customiser));
+    } else if (Customiser_AccessoriesLoaded == 1) {
+        Customiser_DumpAccessories(reinterpret_cast<CUSTOMISER *>(Game_Customiser));
+    }
+    Customiser_AccessoriesLoaded = 0;
+    IconScenes_Dump();
+    CharScenes_AreaDump();
+    APIDumpCharacterModels(mode);
+    Particles_DumpAreaPage();
 }
 
 void cbEdLevelSave(eduimenu_s *parent, eduiitem_s *item, u32) {
@@ -2894,8 +2923,15 @@ void cbCEDeleteConfirmed(eduimenu_s *menu, eduiitem_s *item, u32 buttons) {
     cbEdLevelDestroyOnSelect(menu, item, buttons);
 }
 
-void LightEverythingInEditor(void *) {
-    STUBBED();
+void LightEverythingInEditor(void *light_set) {
+    rtlProcessLights(light_set, FRAMETIME);
+    GameObject_s *object = Obj;
+    for (i32 index = 0; index < HIGHGAMEOBJECT; ++index, ++object) {
+        if ((object->apiobj.field_0x1f8 & 0x1001) == 0x1001) {
+            object->field_0xefc |= 0x80;
+            LightGameObject(object, light_set);
+        }
+    }
 }
 
 void cbEdLevelDestroyOnSelect(eduimenu_s *menu, eduiitem_s *, u32) {

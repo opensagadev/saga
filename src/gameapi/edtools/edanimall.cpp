@@ -4,6 +4,9 @@
 #include "gameapi/edtools/edstubs.h"
 #include "gameapi/edtools/edui.h"
 #include "legoapi/legoapi_types.h"
+#include "nu2api/nufile/nufile.h"
+#include "nu2api/nu3d/nuspecial.h"
+#include "gameframework/saveload.h"
 
 // Animation editor subsystem stubs (static, internal linkage).
 
@@ -11,11 +14,34 @@ static __attribute__((used)) void edanimcbCubeMap(eduimenu_s *, eduiitem_s *, u3
     edanim_active_menu = NULL;
     edbitsStartCubemapDump();
 }
-static __attribute__((used)) void edanimcbFileLoad(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
+static __attribute__((used)) void edanimcbFileLoad(eduimenu_s *menu, eduiitem_s *, u32) {
+    char path[256];
+    char directory[256];
+    char name[256];
+    char extension[256];
+    strcpy(directory, edbits_level_save_directory[0] ? edbits_level_save_directory : ".");
+    strcpy(name, edbits_level_save_name[0] ? edbits_level_save_name : "anims");
+    strcpy(extension, edbits_level_save_extension[0] ? edbits_level_save_extension : "anm");
+    sprintf(path, "%s\\%s.%s", directory, name, extension);
+    edanimParamReset();
+    i32 page = -1;
+    if (NuFileExists(path)) {
+        page = edanimLoadPage(path, edbits_base_scene);
+    }
+    edanimStartAllPages();
+    eduiCreateMessageMenu(menu, const_cast<char *>(page < 0 ? "File Load Error" : "Loaded OK"), page >= 0);
 }
-static __attribute__((used)) void edanimcbFileSave(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
+static __attribute__((used)) void edanimcbFileSave(eduimenu_s *menu, eduiitem_s *, u32) {
+    char path[256];
+    char directory[256];
+    char name[256];
+    char extension[256];
+    strcpy(directory, edbits_level_save_directory[0] ? edbits_level_save_directory : ".");
+    strcpy(name, edbits_level_save_name[0] ? edbits_level_save_name : "anims");
+    strcpy(extension, edbits_level_save_extension[0] ? edbits_level_save_extension : "anm");
+    sprintf(path, "%s\\%s.%s", directory, name, extension);
+    const bool saved = edanimFileSave(path) != 0;
+    eduiCreateMessageMenu(menu, const_cast<char *>(saved ? "Saved OK" : "File Save Error"), saved);
 }
 void edanimRegisterBaseScene(NUGSCN *scene) {
     (void)scene;
@@ -30,8 +56,9 @@ static __attribute__((used)) void edanimcbSetSwitchId(eduimenu_s *, eduiitem_s *
     }
     AnimParams[edanim_nearest_param_id].field_010 = static_cast<i32>(static_cast<edui_slider_s *>(item)->value);
 }
-static __attribute__((used)) void edanimcbMCTBCardType(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
+static __attribute__((used)) void edanimcbMCTBCardType(eduimenu_s *menu, eduiitem_s *, u32) {
+    const bool valid = saveloadCheckCardType() != 0;
+    eduiCreateMessageMenu(menu, const_cast<char *>(valid ? "PS2 Card" : "Not a PS2 Card"), valid);
 }
 static __attribute__((used)) void edanimcbParticleMenu(eduimenu_s *, eduiitem_s *, u32);
 static __attribute__((used)) void edanimcbSetSoundType(eduimenu_s *menu, eduiitem_s *item, u32) {
@@ -60,11 +87,10 @@ static __attribute__((used)) void edanimcbCancelMCTBMenu(eduimenu_s *, eduimenu_
     eduiMenuDestroy(edanim_mctb_menu);
     edanim_mctb_menu = NULL;
 }
-static __attribute__((used)) void edanimcbLocalSoundMenu(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
-static __attribute__((used)) void edanimcbMCTBCardFormat(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
+static __attribute__((used)) void edanimcbLocalSoundMenu(eduimenu_s *, eduiitem_s *, u32);
+static __attribute__((used)) void edanimcbMCTBCardFormat(eduimenu_s *menu, eduiitem_s *, u32) {
+    const bool formatted = saveloadFormatCard() != 0;
+    eduiCreateMessageMenu(menu, const_cast<char *>(formatted ? "Format OK" : "Format Fail"), formatted);
 }
 static __attribute__((used)) void edanimcbSetSoundTiming(eduimenu_s *, eduiitem_s *item, u32) {
     AnimParams[edanim_nearest_param_id].sound_values[edanim_nearest_sound] = static_cast<edui_slider_s *>(item)->value;
@@ -84,8 +110,9 @@ static __attribute__((used)) void edanimcbCancelSoundMenu(eduimenu_s *, eduimenu
     edanim_sound_menu = NULL;
 }
 
-static __attribute__((used)) void edanimcbMCTBCardPresent(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
+static __attribute__((used)) void edanimcbMCTBCardPresent(eduimenu_s *menu, eduiitem_s *, u32) {
+    const bool present = saveloadCheckCardPresent() != 0;
+    eduiCreateMessageMenu(menu, const_cast<char *>(present ? "Present" : "Not Present"), present);
 }
 
 static __attribute__((used)) void edanimcbSetParticleRate(eduimenu_s *, eduiitem_s *item, u32) {
@@ -119,16 +146,25 @@ static __attribute__((used)) void edanimcbCancelSwitchMenu(eduimenu_s *, eduimen
     edanim_switch_menu = NULL;
 }
 
-static __attribute__((used)) void edanimcbMCTBCardLoadSlot(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
+static __attribute__((used)) void edanimcbMCTBCardLoadSlot(eduimenu_s *menu, eduiitem_s *item, u32) {
+    char data[32];
+    if (saveloadLoadSlot(item->data, data, sizeof(data))) {
+        eduiCreateMessageMenu(menu, data, 1);
+    } else {
+        eduiCreateMessageMenu(menu, const_cast<char *>("Load Error"), 0);
+    }
 }
 
-static __attribute__((used)) void edanimcbMCTBCardSaveSlot(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
+static __attribute__((used)) void edanimcbMCTBCardSaveSlot(eduimenu_s *menu, eduiitem_s *item, u32) {
+    char data[32];
+    sprintf(data, "This is slot %d", item->data);
+    const bool saved = saveloadSaveSlot(item->data, data, sizeof(data)) != 0;
+    eduiCreateMessageMenu(menu, const_cast<char *>(saved ? "Saved OK" : "Save Error"), saved);
 }
 
-static __attribute__((used)) void edanimcbMCTBCardUnFormat(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
+static __attribute__((used)) void edanimcbMCTBCardUnFormat(eduimenu_s *menu, eduiitem_s *, u32) {
+    const bool formatted = saveloadUnFormatCard() != 0;
+    eduiCreateMessageMenu(menu, const_cast<char *>(formatted ? "Unformat OK" : "Unformat Fail"), formatted);
 }
 
 static __attribute__((used)) void edanimcbParticleTypeMenu(eduimenu_s *, eduiitem_s *, u32);
@@ -157,12 +193,16 @@ static __attribute__((used)) void edanimcbSetBouncyTension(eduimenu_s *, eduiite
 
 static __attribute__((used)) void edanimcbLocalParticleMenu(eduimenu_s *, eduiitem_s *, u32);
 
-static __attribute__((used)) void edanimcbMCTBCardFreeSpace(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
+static __attribute__((used)) void edanimcbMCTBCardFreeSpace(eduimenu_s *menu, eduiitem_s *, u32) {
+    char message[36];
+    sprintf(message, "Space = %05d", saveloadCheckCardFreeSpace());
+    eduiCreateMessageMenu(menu, message, 1);
 }
 
-static __attribute__((used)) void edanimcbMCTBCardSlotsUsed(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
+static __attribute__((used)) void edanimcbMCTBCardSlotsUsed(eduimenu_s *menu, eduiitem_s *, u32) {
+    char message[36];
+    sprintf(message, "Slots Used = %02d", saveloadCheckSlotsUsed());
+    eduiCreateMessageMenu(menu, message, 1);
 }
 
 static __attribute__((used)) void edanimcbSetLocalSoundType(eduimenu_s *menu, eduiitem_s *item, u32) {
@@ -182,8 +222,9 @@ static __attribute__((used)) void edanimcbCancelParticleMenu(eduimenu_s *, eduim
 
 static __attribute__((used)) void edanimcbLocalSoundTypeMenu(eduimenu_s *, eduiitem_s *, u32);
 
-static __attribute__((used)) void edanimcbMCTBCardDeleteSlot(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
+static __attribute__((used)) void edanimcbMCTBCardDeleteSlot(eduimenu_s *menu, eduiitem_s *item, u32) {
+    const bool deleted = saveloadDeleteSlot(item->data) != 0;
+    eduiCreateMessageMenu(menu, const_cast<char *>(deleted ? "Delete OK" : "Delete Error"), deleted);
 }
 
 static __attribute__((used)) void edanimcbCancelSoundTypeMenu(eduimenu_s *, eduimenu_s *) {
@@ -191,8 +232,9 @@ static __attribute__((used)) void edanimcbCancelSoundTypeMenu(eduimenu_s *, edui
     edanim_soundtype_menu = NULL;
 }
 
-static __attribute__((used)) void edanimcbMCTBCardCheckFormat(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
+static __attribute__((used)) void edanimcbMCTBCardCheckFormat(eduimenu_s *menu, eduiitem_s *, u32) {
+    const bool formatted = saveloadCheckCardFormatted() != 0;
+    eduiCreateMessageMenu(menu, const_cast<char *>(formatted ? "Formatted" : "Not Formatted"), formatted);
 }
 
 static __attribute__((used)) void edanimcbSetBouncyPlayerGrav(eduimenu_s *, eduiitem_s *item, u32) {
@@ -216,12 +258,14 @@ static __attribute__((used)) void edanimcbCancelSwitchTypeMenu(eduimenu_s *, edu
     edanim_switchtype_menu = NULL;
 }
 
-static __attribute__((used)) void edanimcbMCTBCardCheckKeyCard(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
+static __attribute__((used)) void edanimcbMCTBCardCheckKeyCard(eduimenu_s *menu, eduiitem_s *, u32) {
+    const bool valid = saveloadCheckKeyCode() != 0;
+    eduiCreateMessageMenu(menu, const_cast<char *>(valid ? "KeyCard Check OK" : "KeyCard Check Fail"), valid);
 }
 
-static __attribute__((used)) void edanimcbMCTBCardWriteKeyCard(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
+static __attribute__((used)) void edanimcbMCTBCardWriteKeyCard(eduimenu_s *menu, eduiitem_s *, u32) {
+    const bool written = saveloadWriteKeyCode() != 0;
+    eduiCreateMessageMenu(menu, const_cast<char *>(written ? "KeyCard Write OK" : "KeyCard Write Fail"), written);
 }
 
 static __attribute__((used)) void edanimcbSetLocalParticleType(eduimenu_s *menu, eduiitem_s *item, u32) {
@@ -559,6 +603,49 @@ static __attribute__((used)) void edanimcbMCTBMenu(eduimenu_s *parent, eduiitem_
     add_item(1, edanimcbMCTBCardUnFormat, "Unformat Card");
     add_item(1, edanimcbMCTBCardWriteKeyCard, "Write KeyCard");
     add_item(1, edanimcbMCTBCardCheckKeyCard, "Check KeyCard");
+
+    eduiMenuAttach(parent, menu);
+    menu->x = parent->x + 10;
+    menu->y = parent->y + 40;
+}
+
+static __attribute__((used)) void edanimcbLocalSoundMenu(eduimenu_s *parent, eduiitem_s *, u32) {
+    u32 colours[4] = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
+    if (edanim_nearest_sound == -1) {
+        return;
+    }
+    auto *menu = eduiMenuCreate(70, 70, 250, 300, ed_fnt, edanimcbCancelLocalSoundMenu,
+                                const_cast<char *>("Highlighted Sound Settings"));
+    edanim_localsound_menu = menu;
+    if (!menu) {
+        return;
+    }
+
+    auto &param = AnimParams[edanim_nearest_param_id];
+    const i32 sound = edanim_nearest_sound;
+    eduiMenuAddItem(menu, eduiItemSelCreate(1, colours, 0, 0, edanimcbLocalSoundTypeMenu,
+                                            const_cast<char *>("Highlighted Sound Type...")));
+    const bool repeats = param.sound_flags[sound] == 1;
+    eduiMenuAddItem(menu, eduiItemToggleCreate(1, colours, repeats, 1, edanimcbToggleSoundType,
+                                               const_cast<char *>("Repeating Sound")));
+    if (repeats) {
+        eduiMenuAddItem(menu, eduiItemSliderCreateInt(0, colours, 0, edanimcbSetSoundTiming, 1, 99,
+                                                      static_cast<i32>(param.sound_values[sound]),
+                                                      const_cast<char *>("Repeat Every")));
+    } else {
+        nuhspecial_s special;
+        NuGScnGetSpecial(&special, edbits_base_scene, edanim_nearest);
+        if (NuSpecialTestAnim(&special)) {
+            const auto *instance = NuSpecialGetInstAnim(&special);
+            const f32 end_frame =
+                *reinterpret_cast<const f32 *>(edbits_base_scene->instance_animation_data[instance->anim_ix]);
+            eduiMenuAddItem(menu,
+                            eduiItemSliderCreate(0, colours, 0, edanimcbSetSoundTiming, 1.0f, end_frame,
+                                                 param.sound_values[sound], const_cast<char *>("Sound Trigger Time")));
+            eduiItemSliderSetFmt(static_cast<edui_slider_s *>(edui_last_item), const_cast<char *>("(%1.01f)"));
+            eduiItemSliderSetGranularity(static_cast<edui_slider_s *>(edui_last_item), 0.1f);
+        }
+    }
 
     eduiMenuAttach(parent, menu);
     menu->x = parent->x + 10;

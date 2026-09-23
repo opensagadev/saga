@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <float.h>
+#include <stdint.h>
 
 #include "gameapi/edtools/edui.h"
 #include "gameapi/edtools/edfile.h"
@@ -215,9 +216,11 @@ static void pathEditorDrawNodeVolume(NUVEC *position, f32 radius, f32 lower_heig
     NUVEC centre = *position;
     centre.y += aiEditor_DrawYOffset;
     if (solid == 0) {
-        LocaledbitsDrawCircleXY(&centre, radius, colour, (i32)material, segments);
+        LocaledbitsDrawCircleXY(&centre, radius, colour, static_cast<i32>(reinterpret_cast<uintptr_t>(material)),
+                                segments);
     } else {
-        LocaledbitsDrawSolidCircleXY(&centre, radius, lower_height, upper_height, colour, (i32)material, segments);
+        LocaledbitsDrawSolidCircleXY(&centre, radius, lower_height, upper_height, colour,
+                                     static_cast<i32>(reinterpret_cast<uintptr_t>(material)), segments);
     }
 }
 

@@ -270,11 +270,14 @@ extern "C" {
             edcamMoveEx(pad, frame_delta_time);
         }
 
+        NUVEC movement;
         NUVEC previous_position = aieditor->cursor_position;
         edcamGetPosAng(&aieditor->cursor_position, &aieditor->camera_pitch, &aieditor->camera_yaw);
         NuVecSub(&aieditor->cursor_movement, &aieditor->cursor_position, &previous_position);
         aieditor->flags &= ~u8(4);
-        memset(&aieditor->cursor_platform, 0, sizeof(aieditor->cursor_platform));
+        aieditor->cursor_platform.scene = nullptr;
+        aieditor->cursor_platform.special = nullptr;
+        aieditor->cursor_platform.display_special = nullptr;
         aieditor->camera_position = aieditor->cursor_position;
         f32 terrain_height = AITerrShadow(&aieditor->cursor_position, 0.0f, 5.0f, -1);
         i32 platform = AITerrShadowOnPlatform();
@@ -303,7 +306,6 @@ extern "C" {
                 aieditor->current_path->current_node == aieditor->current_path->nearest_node &&
                 aieditor->camera_position.y < aieditor->cursor_position.y &&
                 terrain_height == aieditor->camera_position.y) {
-                NUVEC movement;
                 NuVecSub(&movement, &aieditor->camera_position, &aieditor->cursor_position);
                 union {
                     u32 bits;
@@ -471,9 +473,10 @@ extern "C" {
         }
         AISCRIPT *script = AIScriptFind(aieditor->ai_system, aieditorsettings.current_script_name, 1, 1, 1);
         if (script != nullptr) {
-            for (i32 i = 0; i < 4; ++i) {
-                aieditorsettings.current_script_params[i] = script->params[i].default_val;
-            }
+            aieditorsettings.current_script_params[0] = script->params[0].default_val;
+            aieditorsettings.current_script_params[1] = script->params[1].default_val;
+            aieditorsettings.current_script_params[2] = script->params[2].default_val;
+            aieditorsettings.current_script_params[3] = script->params[3].default_val;
         } else {
             memset(aieditorsettings.current_script_params, 0, sizeof(aieditorsettings.current_script_params));
         }

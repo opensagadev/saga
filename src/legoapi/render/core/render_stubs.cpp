@@ -29,10 +29,6 @@ extern "C" {
     i32 NuDisplayListRndrSpecial(nuhspecial_s *special, NUMTX *matrix, i32 skinned, NUMTX *skin_matrices,
                                  DEFORMERWEIGHTSARRAY *deformer_weights);
 
-    void AddColourPick(eduimenu_s *, eduiitem_s *, f32 *, f32 *, f32 *, u32 *) {
-        STUBBED();
-    }
-
     void DisplaySceneRndrSpecials(NUDLDLISTSCENE *scene, i32, void *visibility_context) {
         NuVisibilityResult *visibility =
             static_cast<NuVisibilityResult *>(NuVisiEvaluate(scene->gscene, &visibility_context));

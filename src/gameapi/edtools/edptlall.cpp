@@ -5,6 +5,7 @@
 #include "gameapi/edtools/edui.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/render/fx.h"
+#include <stdio.h>
 
 extern "C" {
     extern debkeydatatype_s *debkeydata;
@@ -13,6 +14,15 @@ extern "C" {
     extern void *ed_fnt;
     extern u32 edblack[4];
     extern eduimenu_s *edptl_repeatbox_menu;
+    extern i32 edpp_usememcard;
+    extern i32 edbits_override_backups;
+    extern char edbits_datapath[256];
+    extern char edbits_general_save_directory[256];
+    extern char edbits_general_save_name[256];
+    extern char edbits_general_save_extension[256];
+    extern char edbits_level_save_directory[256];
+    extern char edbits_level_save_name[256];
+    extern char edbits_level_save_extension[256];
     void DebFreeInstantly(i32 *handle);
     void DebReAlloc(debkeydatatype_s *key, i32 particle_count);
     void DebrisSetDetailLevels(i32 handle, i32 detail_levels);
@@ -22,9 +32,102 @@ extern "C" {
 
 void edppStartSingleEffect(i32 index);
 void edppPtlDestroy(i32 index);
+i32 edppSaveEffects(char *filename, char page);
+void cbFileSaveEffects(eduimenu_s *, eduiitem_s *, u32);
+static void edptlcbClipboardMenu(eduimenu_s *, eduiitem_s *, u32);
+static void edptlcbOrphanListMenu(eduimenu_s *, eduiitem_s *, u32);
+static void edptlcbDeleteOrphans(eduimenu_s *, eduiitem_s *, u32);
+
+// The original particle editor's private callbacks and menu state share this TU.
+#include "gameapi/edtools/edptlcallbacks.cpp"
+
+void cbFileSaveEffects(eduimenu_s *parent, eduiitem_s *, u32) {
+    char original_directory[64] = {};
+    if (edbits_datapath[0] != '\0') {
+        NuFileGetCurrentDirectory(original_directory);
+        NuFileSetCurrentDirectory(edbits_datapath);
+    }
+
+    char general_directory[256];
+    char general_name[256];
+    char general_extension[256];
+    char level_directory[256];
+    char level_name[256];
+    char level_extension[256];
+    strcpy(general_directory, edbits_general_save_directory[0] ? edbits_general_save_directory : ".");
+    strcpy(general_name, edbits_general_save_name[0] ? edbits_general_save_name : "particle");
+    strcpy(general_extension, edbits_general_save_extension[0] ? edbits_general_save_extension : "ptl");
+    strcpy(level_directory, edbits_level_save_directory[0] ? edbits_level_save_directory : ".");
+    strcpy(level_name, edbits_level_save_name[0] ? edbits_level_save_name : "particle");
+    strcpy(level_extension, edbits_level_save_extension[0] ? edbits_level_save_extension : "ptl");
+
+    char filename[256];
+    char backup[256];
+    bool valid_page = true;
+    const char *saved_name = NULL;
+    if (edpp_effect_list == 0) {
+        saved_name = edpp_save_names[0];
+        if (saved_name == NULL) {
+            sprintf(filename, "%s\\%s.%s", general_directory, general_name, general_extension);
+            sprintf(backup, "%s\\%s.%s.bak", general_directory, general_name, general_extension);
+        }
+    } else if (edpp_effect_list == 1) {
+        saved_name = edpp_save_names[1];
+        if (saved_name == NULL) {
+            sprintf(filename, "%s\\%s.%s", level_directory, level_name, level_extension);
+            sprintf(backup, "%s\\%s.%s.bak", level_directory, level_name, level_extension);
+        }
+    } else if (edpp_effect_list == 5) {
+        saved_name = edpp_save_names[5];
+        if (saved_name == NULL) {
+            sprintf(filename, "%s\\char.%s", general_directory, general_extension);
+            sprintf(backup, "%s\\char.%s.bak", general_directory, general_extension);
+        }
+    } else {
+        valid_page = false;
+    }
+    if (saved_name != NULL) {
+        NuStrCpy(filename, const_cast<char *>(saved_name));
+        NuStrCpy(backup, filename);
+        NuStrCat(backup, const_cast<char *>(".bak"));
+    }
+
+    i32 backup_succeeded = 1;
+    i32 save_succeeded = 0;
+    if (valid_page) {
+        if (edpp_usememcard == 0 && edbits_override_backups == 0)
+            backup_succeeded = EdFileBackup(filename, backup);
+        save_succeeded = edppSaveEffects(filename, edpp_effect_list);
+    }
+    const char *message = "File Save Error";
+    if (save_succeeded != 0)
+        message = backup_succeeded != 0 ? "Saved OK" : "Saved OK - Backup Failed";
+    u32 colours[4] = {save_succeeded != 0 ? 0x8000c000u : 0x800000c0u, 0x80ff0000, 0x80808080, 0x80404040};
+    messagemenu = eduiMenuCreate(70, 70, 180, 250, ed_fnt, cbCancelMessageMenu, "Message");
+    if (messagemenu != NULL) {
+        eduiMenuAddItem(messagemenu, eduiItemSelCreate(1, colours, 0, 0, NULL, const_cast<char *>(message)));
+        eduiMenuAttach(parent, messagemenu);
+        messagemenu->x = parent->x + 10;
+        messagemenu->y = parent->y + 40;
+    }
+    if (original_directory[0] != '\0')
+        NuFileSetCurrentDirectory(original_directory);
+}
 
 static edui_slider_s *repeatbox_x_item;
 static edui_slider_s *repeatbox_z_item;
+static void edptlChangeRepeatBox(eduimenu_s *, eduiitem_s *, u32);
+static void edptlcbDrawflagMenu(eduimenu_s *, eduiitem_s *, u32);
+static void edptlcbApplyStarRatio(eduimenu_s *, eduiitem_s *, u32);
+static void edptlcbApplyGhostTime(eduimenu_s *, eduiitem_s *, u32);
+static void edptlcbApplyNumGhosts(eduimenu_s *, eduiitem_s *, u32);
+static void edptlcbCancelStarMenu(eduimenu_s *, eduimenu_s *);
+static void edptlcbSetMasterGroup(eduimenu_s *, eduiitem_s *, u32);
+static void edptlcbSetMaxThin(eduimenu_s *, eduiitem_s *, u32);
+static void edptlcbTestDetailMenu(eduimenu_s *, eduiitem_s *, u32);
+static void edptlcbSetSwitchId(eduimenu_s *, eduiitem_s *, u32);
+static void edptlcbSetSwitchVar(eduimenu_s *, eduiitem_s *, u32);
+static void edptlcbSwitchTypeMenu(eduimenu_s *, eduiitem_s *, u32);
 static void edptlcbCancelPageMenu(eduimenu_s *, eduimenu_s *);
 static void edptlcbStartPage(eduimenu_s *, eduiitem_s *, u32);
 static void edptlcbStopPage(eduimenu_s *, eduiitem_s *, u32);
@@ -37,8 +140,29 @@ static __used__ void cbPtlCancelRepeatBoxMenu(eduimenu_s *, eduimenu_s *) {
     repeatbox_x_item = NULL;
     repeatbox_z_item = NULL;
 }
-static __used__ void cbPtlRepeatBoxMenu(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
+static __used__ void cbPtlRepeatBoxMenu(eduimenu_s *parent, eduiitem_s *, u32) {
+    if (edpp_nearest == -1 || edpp_ptls[edpp_nearest].instance_id == -1)
+        return;
+    debinftype *effect = debtab[debkeydata[edpp_ptls[edpp_nearest].instance_id].effect_index];
+    edptl_repeatbox_menu = eduiMenuCreate(70, 70, 250, 300, ed_fnt, cbPtlCancelRepeatBoxMenu, "Repeat Box");
+    if (edptl_repeatbox_menu == NULL)
+        return;
+    eduiMenuAddItem(edptl_repeatbox_menu,
+                    eduiItemToggleCreate(0, edblack, edptl_repeatboxxzlock, 1, edptlChangeRepeatBoxXZLock, "XZ Lock"));
+    eduiMenuAddItem(edptl_repeatbox_menu,
+                    eduiItemSliderCreate(0, edblack, 0, edptlChangeRepeatBox, 0.1f, 10.0f * edptl_superscale,
+                                         effect->repeat_box.x, "Repeat Box X"));
+    repeatbox_x_item = static_cast<edui_slider_s *>(edui_last_item);
+    eduiMenuAddItem(edptl_repeatbox_menu,
+                    eduiItemSliderCreate(1, edblack, 0, edptlChangeRepeatBox, 0.1f, 10.0f * edptl_superscale,
+                                         effect->repeat_box.y, "Repeat Box Y"));
+    eduiMenuAddItem(edptl_repeatbox_menu,
+                    eduiItemSliderCreate(2, edblack, 0, edptlChangeRepeatBox, 0.1f, 10.0f * edptl_superscale,
+                                         effect->repeat_box.z, "Repeat Box Z"));
+    repeatbox_z_item = static_cast<edui_slider_s *>(edui_last_item);
+    eduiMenuAttach(parent, edptl_repeatbox_menu);
+    edptl_repeatbox_menu->x = parent->x + 10;
+    edptl_repeatbox_menu->y = parent->y + 40;
 }
 
 static void UpdateTotalPtls(debinftype *effect) {
@@ -123,8 +247,22 @@ static __used__ void edptlcbSetGroup(eduimenu_s *, eduiitem_s *item, u32) {
     edpp_ptls[edpp_nearest].render_group = render_group;
     debkeydata[edpp_ptls[edpp_nearest].instance_id].render_group = render_group;
 }
-static __used__ void edptlcbStarMenu(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
+static __used__ void edptlcbStarMenu(eduimenu_s *parent, eduiitem_s *, u32) {
+    if (edpp_nearest == -1 || edpp_ptls[edpp_nearest].instance_id == -1)
+        return;
+    debinftype *effect = debtab[debkeydata[edpp_ptls[edpp_nearest].instance_id].effect_index];
+    u32 colours[4] = {0xc479c000, 0xc479c000, 0xc479c000, 0xc479c000};
+    edptl_star_menu = eduiMenuCreate(70, 70, 200, 300, ed_fnt, edptlcbCancelStarMenu, "Star Settings");
+    if (edptl_star_menu == NULL)
+        return;
+    eduiMenuAddItem(edptl_star_menu,
+                    eduiItemSliderCreateInt(0, colours, 0, edptlcbApplyStarPoints, 3, 17,
+                                            static_cast<i8>(effect->radial_segments), "Number of Points"));
+    eduiMenuAddItem(edptl_star_menu, eduiItemSliderCreate(0, colours, 0, edptlcbApplyStarRatio, 0.1f, 0.8f,
+                                                          effect->radial_floor, "Radius Ratio"));
+    eduiMenuAttach(parent, edptl_star_menu);
+    edptl_star_menu->x = parent->x + 10;
+    edptl_star_menu->y = parent->y + 40;
 }
 static __used__ void edptlcbStopPage(eduimenu_s *, eduiitem_s *item, u32) {
     edppStopPage(static_cast<i8>(item->data));
@@ -132,11 +270,47 @@ static __used__ void edptlcbStopPage(eduimenu_s *, eduiitem_s *item, u32) {
 static __used__ void edptlcbClearPage(eduimenu_s *, eduiitem_s *item, u32) {
     edppClearPage(static_cast<i8>(item->data));
 }
-static __used__ void edptlcbGhostMenu(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
+static __used__ void edptlcbGhostMenu(eduimenu_s *parent, eduiitem_s *, u32) {
+    if (edpp_nearest == -1 || edpp_ptls[edpp_nearest].instance_id == -1)
+        return;
+    debinftype *effect = debtab[debkeydata[edpp_ptls[edpp_nearest].instance_id].effect_index];
+    u32 colours[4] = {0xc479c000, 0xc479c000, 0xc479c000, 0xc479c000};
+    edptl_ghost_menu = eduiMenuCreate(70, 70, 200, 300, ed_fnt, edptlcbCancelGhostMenu, "Particle Ghosts");
+    if (edptl_ghost_menu == NULL)
+        return;
+    eduiMenuAddItem(edptl_ghost_menu,
+                    eduiItemSliderCreateInt(0, colours, 0, edptlcbApplyNumGhosts, 0, 10,
+                                            static_cast<i8>(effect->trail_count), "Number of Ghosts"));
+    eduiMenuAddItem(edptl_ghost_menu,
+                    eduiItemSliderCreate(0, colours, 0, edptlcbApplyGhostTime, 0.0f, 1.0f,
+                                         static_cast<f32>(static_cast<i32>(effect->trail_time)), "Ghost Separation"));
+    eduiMenuAttach(parent, edptl_ghost_menu);
+    edptl_ghost_menu->x = parent->x + 10;
+    edptl_ghost_menu->y = parent->y + 40;
 }
-static __used__ void edptlcbGroupMenu(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
+static __used__ void edptlcbGroupMenu(eduimenu_s *parent, eduiitem_s *, u32) {
+    edptl_group_menu = eduiMenuCreate(70, 70, 250, 250, ed_fnt, edptlcbCancelGroupMenu, "Render Settings");
+    if (edptl_group_menu == NULL)
+        return;
+    u32 *colours = edblack;
+    if (edpp_nearest != -1 && edpp_ptls[edpp_nearest].instance_id != -1) {
+        debinftype *effect = debtab[debkeydata[edpp_ptls[edpp_nearest].instance_id].effect_index];
+        if (effect->particle_type == 7) {
+            eduiMenuAddItem(edptl_group_menu, eduiItemSelCreate(1, edgrey, 0, 0, NULL, "Draw Flag..."));
+            colours = edblack;
+        } else {
+            eduiMenuAddItem(edptl_group_menu, eduiItemSelCreate(1, edblack, 0, 0, edptlcbDrawflagMenu, "Draw Flag..."));
+        }
+        eduiMenuAddItem(edptl_group_menu, eduiItemToggleCreate(2, colours, effect->cutscene_only != 0, 1,
+                                                               edptlcbChangeCSDisable, "Disable in Cut-Scenes"));
+        eduiMenuAddItem(edptl_group_menu, eduiItemSliderCreateInt(0, colours, 0, edptlcbSetGroup, 0, 32,
+                                                                  edpp_ptls[edpp_nearest].render_group, "Group ID"));
+    }
+    eduiMenuAddItem(edptl_group_menu, eduiItemSliderCreateInt(0, colours, 0, edptlcbSetMasterGroup, 0, 32,
+                                                              debris_render_group, "Master Test Switch"));
+    eduiMenuAttach(parent, edptl_group_menu);
+    edptl_group_menu->x = parent->x + 10;
+    edptl_group_menu->y = parent->y + 40;
 }
 static __used__ void edptlcbSetDetail(eduimenu_s *, eduiitem_s *item, u32) {
     i32 nearest = edpp_nearest;
@@ -185,11 +359,44 @@ page_started:
 static __used__ void edptlcbStartPage(eduimenu_s *, eduiitem_s *item, u32) {
     edppStartPage(static_cast<i8>(item->data));
 }
-static __used__ void edptlcbBounceMenu(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
+static __used__ void edptlcbBounceMenu(eduimenu_s *parent, eduiitem_s *, u32) {
+    u32 colours[4] = {0xc479c000, 0xc479c000, 0xc479c000, 0xc479c000};
+    if (edpp_nearest == -1 || edpp_ptls[edpp_nearest].instance_id == -1)
+        return;
+    debkeydatatype_s *key = &debkeydata[edpp_ptls[edpp_nearest].instance_id];
+    edptl_bounce_menu = eduiMenuCreate(70, 70, 200, 300, ed_fnt, edptlcbCancelBounceMenu, "Particle Bounce");
+    if (edptl_bounce_menu == NULL)
+        return;
+    eduiMenuAddItem(edptl_bounce_menu,
+                    eduiItemSliderCreate(0, colours, 0, edptlcbApplyBounceOffset, -10.0f * edptl_superscale,
+                                         10.0f * edptl_superscale, key->collision_plane, "Plane Offset"));
+    eduiMenuAddItem(edptl_bounce_menu, eduiItemSliderCreate(0, colours, 0, edptlcbApplyBounceFactor, 0.0f, 2.0f,
+                                                            key->reflection_scale, "Bounce Factor"));
+    eduiMenuAttach(parent, edptl_bounce_menu);
+    edptl_bounce_menu->x = parent->x + 10;
+    edptl_bounce_menu->y = parent->y + 40;
 }
-static __used__ void edptlcbDetailMenu(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
+static __used__ void edptlcbDetailMenu(eduimenu_s *parent, eduiitem_s *, u32) {
+    edptl_detail_menu = eduiMenuCreate(70, 70, 250, 250, ed_fnt, edptlcbCancelDetailMenu, "Detail Level Settings");
+    if (edptl_detail_menu == NULL)
+        return;
+    if (edpp_nearest != -1 && edpp_ptls[edpp_nearest].instance_id != -1) {
+        edpp_particle_s *particle = &edpp_ptls[edpp_nearest];
+        debinftype *effect = debtab[debkeydata[particle->instance_id].effect_index];
+        eduiMenuAddItem(edptl_detail_menu, eduiItemSliderCreate(0, edblack, 0, edptlcbSetMaxThin, 1.0f, 9.0f,
+                                                                effect->thinning, "Maximum Thinning"));
+        eduiMenuAddItem(edptl_detail_menu, eduiItemToggleCreate(4, edblack, (particle->detail_levels >> 2) & 1, 1,
+                                                                edptlcbSetDetail, "High Detail"));
+        eduiMenuAddItem(edptl_detail_menu, eduiItemToggleCreate(2, edblack, (particle->detail_levels >> 1) & 1, 2,
+                                                                edptlcbSetDetail, "Medium Detail"));
+        eduiMenuAddItem(edptl_detail_menu, eduiItemToggleCreate(1, edblack, particle->detail_levels & 1, 3,
+                                                                edptlcbSetDetail, "Low Detail"));
+        eduiMenuAddItem(edptl_detail_menu,
+                        eduiItemSelCreate(1, edblack, 0, 0, edptlcbTestDetailMenu, "Detail Level Test..."));
+    }
+    eduiMenuAttach(parent, edptl_detail_menu);
+    edptl_detail_menu->x = parent->x + 10;
+    edptl_detail_menu->y = parent->y + 40;
 }
 static __used__ void edptlcbSetMaxThin(eduimenu_s *, eduiitem_s *item, u32) {
     if (edpp_nearest == -1) {
@@ -251,11 +458,38 @@ static __used__ void edptlcbSetSoundID(eduimenu_s *menu, eduiitem_s *item, u32) 
 static __used__ void edptlcbSoundXMenu(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
-static __used__ void edptlcbSoundsMenu(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
+static __used__ void edptlcbSoundsMenu(eduimenu_s *parent, eduiitem_s *, u32) {
+    u32 colours[4] = {0xc479c000, 0xc479c000, 0xc479c000, 0xc479c000};
+    if (edpp_nearest == -1 || edpp_ptls[edpp_nearest].instance_id == -1)
+        return;
+    edptl_sounds_menu = eduiMenuCreate(70, 70, 250, 300, ed_fnt, edptlcbCancelSoundsMenu, "Attached Sounds");
+    if (edptl_sounds_menu == NULL)
+        return;
+    for (i32 index = 0; index < 4; ++index) {
+        char title[12];
+        sprintf(title, "Sound %d...", index + 1);
+        eduiMenuAddItem(edptl_sounds_menu, eduiItemSelCreate(index, colours, 0, 0, edptlcbSoundXMenu, title));
+    }
+    eduiMenuAttach(parent, edptl_sounds_menu);
+    edptl_sounds_menu->x = parent->x + 10;
+    edptl_sounds_menu->y = parent->y + 40;
 }
-static __used__ void edptlcbSwitchMenu(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
+static __used__ void edptlcbSwitchMenu(eduimenu_s *parent, eduiitem_s *, u32) {
+    u32 colours[4] = {0xc479c000, 0xc479c000, 0xc479c000, 0xc479c000};
+    if (edpp_nearest == -1 || edpp_ptls[edpp_nearest].instance_id == -1)
+        return;
+    edpp_particle_s *particle = &edpp_ptls[edpp_nearest];
+    edptl_switch_menu = eduiMenuCreate(70, 70, 180, 250, ed_fnt, edptlcbCancelSwitchMenu, "Switch Menu");
+    if (edptl_switch_menu == NULL)
+        return;
+    eduiMenuAddItem(edptl_switch_menu, eduiItemSelCreate(1, colours, 0, 0, edptlcbSwitchTypeMenu, "Switch Type..."));
+    eduiMenuAddItem(edptl_switch_menu, eduiItemSliderCreateInt(0, colours, 0, edptlcbSetSwitchId, -1, 129,
+                                                               particle->switch_id, "Switch ID"));
+    eduiMenuAddItem(edptl_switch_menu, eduiItemSliderCreate(0, colours, 0, edptlcbSetSwitchVar, 0.0f, 20.0f,
+                                                            particle->switch_variable, "Switch Var"));
+    eduiMenuAttach(parent, edptl_switch_menu);
+    edptl_switch_menu->x = parent->x + 10;
+    edptl_switch_menu->y = parent->y + 40;
 }
 static __used__ void edptlcbSetDpadMode(eduimenu_s *, eduiitem_s *item, u32) {
     edpp_dpad_mode = item->data;
@@ -306,11 +540,43 @@ static __used__ void edptlcbCutClipboard(eduimenu_s *menu, eduiitem_s *, u32) {
         menu->callback(menu, parent);
     }
 }
-static __used__ void edptlcbDpadModeMenu(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
+static __used__ void edptlcbDpadModeMenu(eduimenu_s *parent, eduiitem_s *, u32) {
+    u32 colours[4] = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
+    dpadmodemenu = eduiMenuCreate(70, 70, 180, 250, ed_fnt, edptlcbCancelDpadModeMenu, "Dpad Mode");
+    if (dpadmodemenu == NULL)
+        return;
+    eduiMenuAddItem(dpadmodemenu,
+                    eduiItemCheckCreate(0, colours, edpp_dpad_mode == 0, 1, edptlcbSetDpadMode, "Emitter Rotate"));
+    eduiMenuAddItem(dpadmodemenu,
+                    eduiItemCheckCreate(1, colours, edpp_dpad_mode == 1, 1, edptlcbSetDpadMode, "Gravity Rotate"));
+    eduiMenuAddItem(dpadmodemenu,
+                    eduiItemCheckCreate(2, colours, edpp_dpad_mode == 2, 1, edptlcbSetDpadMode, "Offset"));
+    eduiMenuAddItem(dpadmodemenu,
+                    eduiItemCheckCreate(3, colours, edpp_dpad_mode == 3, 1, edptlcbSetDpadMode, "Reflections"));
+    eduiMenuAddItem(dpadmodemenu,
+                    eduiItemCheckCreate(4, colours, edpp_dpad_mode == 4, 1, edptlcbSetDpadMode, "Texture Facing"));
+    eduiMenuAttach(parent, dpadmodemenu);
+    dpadmodemenu->x = parent->x + 10;
+    dpadmodemenu->y = parent->y + 40;
 }
-static __used__ void edptlcbDrawflagMenu(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
+static __used__ void edptlcbDrawflagMenu(eduimenu_s *parent, eduiitem_s *, u32) {
+    if (edpp_nearest == -1 || edpp_ptls[edpp_nearest].instance_id == -1)
+        return;
+    debinftype *effect = debtab[debkeydata[edpp_ptls[edpp_nearest].instance_id].effect_index];
+    edptl_drawflag_menu = eduiMenuCreate(70, 70, 180, 300, ed_fnt, edptlcbCancelDrawflagMenu, "Draw Flag");
+    if (edptl_drawflag_menu == NULL)
+        return;
+    eduiMenuAddItem(edptl_drawflag_menu,
+                    eduiItemCheckCreate(1, edblack, effect->time_group == 1, 1, edptlcbSetDrawflag, "Before Fog"));
+    eduiMenuAddItem(edptl_drawflag_menu,
+                    eduiItemCheckCreate(0, edblack, effect->time_group == 0, 1, edptlcbSetDrawflag, "After Fog"));
+    eduiMenuAddItem(edptl_drawflag_menu,
+                    eduiItemCheckCreate(3, edblack, effect->time_group == 3, 1, edptlcbSetDrawflag, "Super Early"));
+    eduiMenuAddItem(edptl_drawflag_menu,
+                    eduiItemCheckCreate(4, edblack, effect->time_group == 4, 1, edptlcbSetDrawflag, "Panel Mode"));
+    eduiMenuAttach(parent, edptl_drawflag_menu);
+    edptl_drawflag_menu->x = parent->x + 10;
+    edptl_drawflag_menu->y = parent->y + 40;
 }
 static __used__ void edptlcbSetSwitchVar(eduimenu_s *, eduiitem_s *item, u32) {
     if (edpp_nearest == -1) {
@@ -574,8 +840,19 @@ static __used__ void edptlcbEmptyClipboard(eduimenu_s *menu, eduiitem_s *, u32) 
     edptl_clipboard_entry = -1;
     edpp_create_type = create_type;
 }
-static __used__ void edptlcbOrphanListMenu(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
+static __used__ void edptlcbOrphanListMenu(eduimenu_s *parent, eduiitem_s *, u32) {
+    edptl_orphanlist_menu = eduiMenuCreate(70, 70, 180, 250, ed_fnt, edptlcbCancelOrphanListMenu, "Orphan List");
+    if (edptl_orphanlist_menu == NULL)
+        return;
+    for (i32 index = 0; index < 512; ++index) {
+        if (edpp_ptls[index].effect_index != -1)
+            continue;
+        eduiMenuAddItem(edptl_orphanlist_menu, eduiItemSelCreate(0, edblack, 0, 0, NULL, edpp_ptls[index].name));
+        edui_last_item->text_alignment = 0x10;
+    }
+    eduiMenuAttach(parent, edptl_orphanlist_menu);
+    edptl_orphanlist_menu->x = parent->x + 10;
+    edptl_orphanlist_menu->y = parent->y + 40;
 }
 static __used__ void edptlcbPasteClipboard(eduimenu_s *menu, eduiitem_s *, u32) {
     debinftype *effect = debtab[edptl_clipboard_entry];
@@ -609,6 +886,19 @@ static __used__ void edptlcbSetScaleFactor(eduimenu_s *, eduiitem_s *item, u32) 
 static __used__ void edptlcbSwitchTypeMenu(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
-static __used__ void edptlcbTestDetailMenu(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
+static __used__ void edptlcbTestDetailMenu(eduimenu_s *parent, eduiitem_s *, u32) {
+    edptl_testdetail_menu = eduiMenuCreate(70, 70, 250, 250, ed_fnt, edptlcbCancelTestDetailMenu, "Detail Level Test");
+    if (edptl_testdetail_menu == NULL)
+        return;
+    eduiMenuAddItem(edptl_testdetail_menu, eduiItemSliderCreate(0, edblack, 0, edptlcbSetDebrisThinning, 1.0f, 9.0f,
+                                                                debris_thinning_level, "Thinning Level"));
+    eduiMenuAddItem(edptl_testdetail_menu, eduiItemCheckCreate(4, edblack, debris_detail_level == 4, 1,
+                                                               edptlcbSetDebrisDetail, "High Detail"));
+    eduiMenuAddItem(edptl_testdetail_menu, eduiItemCheckCreate(2, edblack, debris_detail_level == 2, 1,
+                                                               edptlcbSetDebrisDetail, "Medium Detail"));
+    eduiMenuAddItem(edptl_testdetail_menu,
+                    eduiItemCheckCreate(1, edblack, debris_detail_level == 1, 1, edptlcbSetDebrisDetail, "Low Detail"));
+    eduiMenuAttach(parent, edptl_testdetail_menu);
+    edptl_testdetail_menu->x = parent->x + 10;
+    edptl_testdetail_menu->y = parent->y + 40;
 }
