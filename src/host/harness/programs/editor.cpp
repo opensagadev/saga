@@ -301,6 +301,7 @@ namespace saga::host::harness {
                 if ((requests & 4u) && this->active_view == EditorView::level) {
                     this->free_camera_enabled = !this->free_camera_enabled;
                     this->free_camera_ready.store(this->free_camera_enabled, std::memory_order_release);
+                    theLevelEditor.field_0x28 = this->free_camera_enabled ? 1 : 0;
                     LOG_INFO("editor: free camera %s (numpad 4/5/6/8, hold Shift to move)",
                              this->free_camera_enabled ? "on" : "off");
                 }
@@ -656,6 +657,9 @@ namespace saga::host::harness {
                 this->previous_editor_buttons = this->editor_buttons.load(std::memory_order_acquire);
                 this->capture_game_input.store(true, std::memory_order_release);
                 if (view == EditorView::level) {
+                    // Keep editor rays and 3D overlays on the rendered game camera
+                    // until the optional free camera takes ownership of edcam.
+                    theLevelEditor.field_0x28 = this->free_camera_enabled ? 1 : 0;
                     edmainSetCursorEnabled(1);
                     saga::host::set_editor_mouse_enabled(true);
                     const auto [mouse_x, mouse_y] = saga::host::editor_mouse_position();
@@ -685,6 +689,7 @@ namespace saga::host::harness {
                 if (this->active_view == EditorView::level) {
                     edLevelDestroyActiveMenu = 0;
                     theLevelEditor.Exit();
+                    theLevelEditor.field_0x28 = 1;
                     this->destroy_level_menu();
                 } else if (this->active_view == EditorView::modules) {
                     this->module_menu = eduiGetActiveMenu();

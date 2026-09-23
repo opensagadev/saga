@@ -886,7 +886,9 @@ eduimenu_s *locatorEditor_Process(nupad_s *pad) {
                 next = index < 0 || index >= 63 || set->locators[index + 1] == nullptr ? set->locators[0]
                                                                                        : set->locators[index + 1];
             } else {
-                if (index > 0) {
+                if (aieditor->current_locator == nullptr) {
+                    next = set->locators[0];
+                } else if (index > 0) {
                     next = set->locators[index - 1];
                 } else {
                     for (i32 i = 63; i >= 0; --i) {

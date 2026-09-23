@@ -3344,7 +3344,7 @@ extern "C" {
 
     AIEDITORCALLBACK *AIPathDeletedFn;
     AIEDITORPATHNODECALLBACK *AIPathNodeDeletedFn;
-    AIEDITORCALLBACK *AIPathNodeMovedFn;
+    AIEDITORPATHNODECALLBACK *AIPathNodeMovedFn;
     AIEDITORCALLBACK *GameAISYSRebuildFromEditorDataFn;
     AIEDITORCALLBACK *GameAISaveFn;
 
@@ -3356,7 +3356,7 @@ extern "C" {
         AIPathNodeDeletedFn = function;
     }
 
-    void InitFn_AIPathNodeMoved(AIEDITORCALLBACK *function) {
+    void InitFn_AIPathNodeMoved(AIEDITORPATHNODECALLBACK *function) {
         AIPathNodeMovedFn = function;
     }
 

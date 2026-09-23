@@ -180,6 +180,7 @@ static u32 attr[4] = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
 static void DestroyAIPathNode(EDAIPATHNODE_s *, EDAIPATH_s *);
 static void pathEditor_DestroySharedNode(EDAISHAREDPATHNODE_s *);
 extern "C" void aieditor_ClearMainMenu(void);
+extern "C" AIEDITORPATHNODECALLBACK *AIPathNodeMovedFn;
 
 static inline void pathEditor_DisconnectNodes(EDAIPATHNODE_s *node, EDAIPATHNODE_s *other) {
     for (i32 i = 0; i < 8; ++i) {
@@ -899,11 +900,44 @@ static __used__ void pathEditor_cbDisconnectPathNode(eduimenu_s *, eduiitem_s *i
         EDAIPATHNODE_s *node = aieditor->current_path->current_node;
         EDAIPATHNODE_s *other = aieditor->current_path->other_node;
         if (node != nullptr && other != nullptr && node != other) {
-            pathEditor_DisconnectNodes(node, other);
+            i32 i;
+            i32 j;
+#define DISCONNECT_OTHER(J)                                                                                            \
+    if (other->connections[J].node == node) {                                                                          \
+        j = J;                                                                                                         \
+        goto disconnect_found;                                                                                         \
+    }
+#define DISCONNECT_NODE(I)                                                                                             \
+    if (node->connections[I].node == other) {                                                                          \
+        i = I;                                                                                                         \
+        DISCONNECT_OTHER(0)                                                                                            \
+        DISCONNECT_OTHER(1)                                                                                            \
+        DISCONNECT_OTHER(2)                                                                                            \
+        DISCONNECT_OTHER(3)                                                                                            \
+        DISCONNECT_OTHER(4)                                                                                            \
+        DISCONNECT_OTHER(5)                                                                                            \
+        DISCONNECT_OTHER(6)                                                                                            \
+        DISCONNECT_OTHER(7)                                                                                            \
+    }
+            DISCONNECT_NODE(0)
+            DISCONNECT_NODE(1)
+            DISCONNECT_NODE(2)
+            DISCONNECT_NODE(3)
+            DISCONNECT_NODE(4)
+            DISCONNECT_NODE(5)
+            DISCONNECT_NODE(6)
+            DISCONNECT_NODE(7)
+#undef DISCONNECT_NODE
+#undef DISCONNECT_OTHER
+            goto disconnected;
+        disconnect_found:
+            memset(&node->connections[i], 0, sizeof(EDAIPATHCNX_s));
+            memset(&other->connections[j], 0, sizeof(EDAIPATHCNX_s));
+        disconnected:
             creatureEditor_PathNodeDeleted(aieditor->current_path->current_node);
             locatorEditor_PathNodeDeleted(aieditor->current_path->current_node);
-            if (AIPathNodeDeletedFn != nullptr) {
-                AIPathNodeDeletedFn(aieditor->current_path->current_node);
+            if (AIPathNodeMovedFn != nullptr) {
+                AIPathNodeMovedFn(aieditor->current_path->current_node);
             }
         }
     }

@@ -629,37 +629,39 @@ static __used__ void creatureEditor_cbSetType(eduimenu_s *, eduiitem_s *item, un
     if (item != nullptr)
         aieditorsettings.current_path_type = item->data;
     CreatureEditorRecord *creature = creatureEditor_Current();
+    if (creature == nullptr)
+        return;
     CreatureEditorRecord *nearest = *reinterpret_cast<CreatureEditorRecord **>(aieditor->unknown_3692c);
-    if (creature == nullptr || creature != nearest)
+    if (creature != nearest)
         return;
     i32 type = aieditorsettings.current_path_type;
     creature->character_type = type;
-    if (GetViewRangeFn == nullptr) {
-        creature->view_distance = 1.0f;
-    } else {
+    if (GetViewRangeFn != nullptr) {
         const f32 value = GetViewRangeFn(type);
         creature->view_distance = value;
         creature = creatureEditor_Current();
-    }
-    if (GetHearDistanceFn == nullptr) {
-        creature->hear_distance = 1.0f;
     } else {
+        creature->view_distance = 1.0f;
+    }
+    if (GetHearDistanceFn != nullptr) {
         const f32 value = GetHearDistanceFn(aieditorsettings.current_path_type);
         creature->hear_distance = value;
         creature = creatureEditor_Current();
-    }
-    if (GetMaxViewHeightFn == nullptr) {
-        creature->max_view_height = 1.0f;
     } else {
+        creature->hear_distance = 1.0f;
+    }
+    if (GetMaxViewHeightFn != nullptr) {
         const f32 value = GetMaxViewHeightFn(aieditorsettings.current_path_type);
         creature->max_view_height = value;
         creature = creatureEditor_Current();
-    }
-    if (GetMinViewHeightFn == nullptr) {
-        creature->negative_min_view_height = 1.0f;
     } else {
+        creature->max_view_height = 1.0f;
+    }
+    if (GetMinViewHeightFn != nullptr) {
         const f32 value = GetMinViewHeightFn(aieditorsettings.current_path_type);
         creature->negative_min_view_height = value;
+    } else {
+        creature->negative_min_view_height = 1.0f;
     }
 }
 
@@ -732,13 +734,17 @@ static __used__ void creatureEditor_cbSelectRespawnLocator(eduimenu_s *parent, e
                                               creatureEditor_cbSetRespawnLocator, "NONE"));
     i32 index = 0;
     for (NULISTLNK *link = NuLinkedListGetHead(creatureEditor_LocatorList()); link != nullptr;
-         link = NuLinkedListGetNext(creatureEditor_LocatorList(), link), ++index) {
+         link = NuLinkedListGetNext(creatureEditor_LocatorList(), link)) {
         EDLOCATOR_s *locator = reinterpret_cast<EDLOCATOR_s *>(link);
-        bool selected = creatureEditor_Current()->respawn_locator == locator;
-        eduiMenuAddItem(menu, eduiItemCheckCreate(index, creature_editor_item_colours, selected, 1,
-                                                  creatureEditor_cbSetRespawnLocator, locator->name));
-        if (selected)
+        if (creatureEditor_Current()->respawn_locator == locator) {
+            eduiMenuAddItem(menu, eduiItemCheckCreate(index, creature_editor_item_colours, 1, 1,
+                                                      creatureEditor_cbSetRespawnLocator, locator->name));
             menu->selected = edui_last_item;
+        } else {
+            eduiMenuAddItem(menu, eduiItemCheckCreate(index, creature_editor_item_colours, 0, 1,
+                                                      creatureEditor_cbSetRespawnLocator, locator->name));
+        }
+        ++index;
         eduiMenuAttach(parent, menu);
     }
 }

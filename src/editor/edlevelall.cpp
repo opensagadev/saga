@@ -1081,18 +1081,12 @@ void ClassEditor::UpdateLists(MemoryBuffer *first, MemoryBuffer *second) {
 void ClassEditor::UpdateSelectedObjects(EdInputContext &input) {
     for (ClassObjectListEntry *entry = selected_objects.first; entry != NULL;) {
         ClassObjectListEntry *next_entry = entry->next;
-        EdClassInterface *interface = entry->ed_class != NULL ? entry->ed_class->interface : NULL;
-        i32 exists = 0;
-        if (interface != NULL && interface->vtable->get_next_object != NULL) {
-            for (void *object = interface->vtable->get_next_object(interface, NULL); object != NULL;
-                 object = interface->vtable->get_next_object(interface, object)) {
-                if (object == entry->object) {
-                    exists = 1;
-                    break;
-                }
-            }
+        EdClassInterface *interface = entry->ed_class->interface;
+        void *object = interface->vtable->get_next_object(interface, NULL);
+        while (object != NULL && object != entry->object) {
+            object = interface->vtable->get_next_object(interface, object);
         }
-        if (!exists) {
+        if (object == NULL) {
             if (entry->next != NULL)
                 entry->next->previous = entry->previous;
             else
@@ -1113,8 +1107,6 @@ void ClassEditor::UpdateSelectedObjects(EdInputContext &input) {
     if (input.GetPress(19) != 0.0f || input.GetPress(20) != 0.0f) {
         ClassObjectListEntry *entry = selected_objects.first;
         EdClassInterface *interface = entry->ed_class->interface;
-        if (interface == NULL || interface->vtable->get_next_object == NULL)
-            return;
         void *object = NULL;
         if (input.GetPress(19) != 0.0f) {
             object = interface->vtable->get_next_object(interface, entry->object);

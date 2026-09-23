@@ -262,28 +262,29 @@ static EDANTINODE_REGPARM1 EDANTINODE_s *antinodeEditor_GetNearestAntinode(i32 r
         if (distance >= nearest_distance)
             continue;
         f32 height = aieditor->camera_position.y - node->position.y;
-        if (height < NuFmin(-0.2f, node->lower_height) || height > NuFmax(0.2f, node->upper_height))
+        if (height > NuFmax(0.2f, node->upper_height) || height < NuFmin(-0.2f, node->lower_height))
             continue;
         if (require_inside) {
             if (node->type == 0) {
                 if (distance >= node->radius * node->radius)
                     continue;
-            } else if (node->type == 2) {
-                f32 diagonal = NuFsqrt(node->base_radius * node->base_radius + node->base_height * node->base_height);
-                if (NuFabs(offset.x) > diagonal || NuFabs(offset.z) > diagonal)
-                    continue;
-                NuVecRotateY(&offset, &offset, -node->flags);
-                if (NuFabs(offset.x) >= node->base_radius || NuFabs(offset.z) >= node->base_height)
-                    continue;
             } else if (node->type == 1) {
                 f32 extent = node->base_radius > node->base_height ? node->base_radius : node->base_height;
-                if (NuFabs(offset.x) > extent || NuFabs(offset.z) > extent || distance >= extent * extent)
+                if (offset.x > extent || offset.x < -extent || offset.z > extent || offset.z < -extent ||
+                    distance >= extent * extent)
                     continue;
                 NuVecRotateY(&offset, &offset, -node->flags);
                 i32 angle = NuAtan2D((node->base_height / node->base_radius) * offset.x, offset.z);
                 f32 ellipse_x = NuTrigTable[(angle >> 1) & 0x7fff] * node->base_radius;
                 f32 ellipse_z = NuTrigTable[((angle + 0x4000) >> 1) & 0x7fff] * node->base_height;
                 if (distance >= ellipse_x * ellipse_x + ellipse_z * ellipse_z)
+                    continue;
+            } else if (node->type == 2) {
+                f32 diagonal = NuFsqrt(node->base_radius * node->base_radius + node->base_height * node->base_height);
+                if (offset.x > diagonal || offset.x < -diagonal || offset.z > diagonal || offset.z < -diagonal)
+                    continue;
+                NuVecRotateY(&offset, &offset, -node->flags);
+                if (NuFabs(offset.x) >= node->base_radius || NuFabs(offset.z) >= node->base_height)
                     continue;
             } else {
                 continue;

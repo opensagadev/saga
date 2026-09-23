@@ -4851,7 +4851,8 @@ extern "C" {
             bounds_property = static_cast<edui_prop_s *>(interact->item);
             label_end = interact->x + bounds_property->label_width;
         }
-        if (in_row && edui_cursor_x >= label_end + 1.0f && edui_cursor_x < bounds_property->button_x) {
+        if (in_row && edui_cursor_x >= label_end + 1.0f && edui_cursor_x < bounds_property->button_x &&
+            !(property->unknown_property_flags & 1)) {
             if (property->selected)
                 property->selected(interact->menu, property, 0);
             NuKeyFlush();
