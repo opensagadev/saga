@@ -659,13 +659,11 @@ static void edgracbCancelClumpPropertiesMenu(eduimenu_s *, eduimenu_s *) {
 }
 
 void edgraDoInput(nupad_s *pad) {
-    bool camera_locked = (pad->digital_buttons & 0x100) != 0;
-    if (!camera_locked) {
+    if ((pad->digital_buttons & 0x100) == 0) {
         edcamMove(pad);
-        camera_locked = (pad->digital_buttons & 0x100) != 0;
     }
 
-    if (camera_locked) {
+    if ((pad->digital_buttons & 0x100) != 0) {
         const u32 pressed = pad->digital_buttons_pressed;
         if ((pressed & 0x20) && edgra_nearest != -1)
             edgraClumpReseed(edgra_nearest);
@@ -745,7 +743,7 @@ void edgraDoInput(nupad_s *pad) {
     }
 
     edcamGetPosAng(&edgra_cam_pos, &edgra_cam_ax, &edgra_cam_ay);
-    if (!camera_locked) {
+    if ((pad->digital_buttons & 0x100) == 0) {
         const u32 pressed = pad->digital_buttons_pressed;
         if (pressed & 0x80) {
             edgra_options_menu = eduiMenuCreate(70, 70, 220, 300, ed_fnt, edgracbCancelOptMenu, "Options");

@@ -458,8 +458,7 @@ void ClassEditor::Render() {
             manipulator->Render(selected_objects);
         } else {
             for (ClassObjectListEntry *entry = selected_objects.first; entry != NULL; entry = entry->next) {
-                ClassObject selected = {entry->ed_class, entry->object, entry->reference};
-                DrawObjectSphere(selected, 0xff800000);
+                DrawObjectSphere(*reinterpret_cast<ClassObject *>(&entry->ed_class), 0xff800000);
             }
         }
         for (ClassObjectListEntry *entry = selected_objects.first; entry != NULL; entry = entry->next)
@@ -478,10 +477,10 @@ void ClassEditor::Render() {
                 continue;
 
             ClassObject selected = {ed_class, object, NULL};
-            const bool is_selected = selected_objects.IsInList(selected) != 0;
-            if ((ed_class->flags & 0x08000000) != 0 && !is_selected)
+            if ((ed_class->flags & 0x08000000) != 0 && selected_objects.IsInList(selected) == 0)
                 theRegistry.ClassIFaceRender(ed_class, object, 0);
-            if ((ed_class->flags & 0x80) != 0 && is_selected && object != current_object.object)
+            if ((ed_class->flags & 0x80) != 0 && selected_objects.IsInList(selected) != 0 &&
+                object != current_object.object)
                 DrawObjectSphere(selected, 0xff000080);
         }
     }

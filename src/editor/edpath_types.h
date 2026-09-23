@@ -15,10 +15,8 @@ struct EDAIPATHCNX_s {
 struct EDAISHAREDPATHNODE_s {
     NULISTLNK link;
     i8 reference_count;
-    union {
-        i8 runtime_index;
-        u8 draw_flags;
-    };
+    i8 runtime_index;
+    u8 draw_flags;
 };
 struct EDAIPATHROUTE_s {
     char name[0x10];
@@ -92,6 +90,8 @@ DECOMP_ASSERT(sizeof(EDAIPATHCNX_s) == 0x0c, "editor connection stride");
 DECOMP_ASSERT(offsetof(EDAIPATHROUTE_s, flags) == 0x18, "editor route flags offset");
 DECOMP_ASSERT(offsetof(EDAIPATHNODE_s, route_mask) == 0x96, "editor node route mask offset");
 DECOMP_ASSERT(offsetof(EDAISHAREDPATHNODE_s, reference_count) == 0x08, "editor shared node reference count offset");
+DECOMP_ASSERT(offsetof(EDAISHAREDPATHNODE_s, runtime_index) == 0x09, "editor shared node runtime index offset");
+DECOMP_ASSERT(offsetof(EDAISHAREDPATHNODE_s, draw_flags) == 0x0a, "editor shared node draw flags offset");
 DECOMP_ASSERT(offsetof(EDAIPATH_s, current_node) == 0x20, "editor current node offset");
 DECOMP_ASSERT(offsetof(EDAIPATH_s, current_route) == 0x28, "editor current route offset");
 DECOMP_ASSERT(offsetof(EDAIPATH_s, flags) == 0x2c, "editor path flags offset");

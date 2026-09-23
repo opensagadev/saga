@@ -225,10 +225,12 @@ static __attribute__((always_inline, optimize("O3"))) inline EDLOCATOR_s *FindCr
 __attribute__((optimize("O3"))) void creatureEditor_Enter() {
     aieditor->creatures.head = nullptr;
     aieditor->creatures.tail = nullptr;
-    NULISTHDR *free_creatures = reinterpret_cast<NULISTHDR *>(reinterpret_cast<u8 *>(aieditor) + 0x3691c);
-    CreatureEditorRecord *pool = reinterpret_cast<CreatureEditorRecord *>(reinterpret_cast<u8 *>(aieditor) + 0x3131c);
-    for (i32 i = 0; i < 128; ++i)
+    for (i32 i = 0; i < 128; ++i) {
+        NULISTHDR *free_creatures = reinterpret_cast<NULISTHDR *>(reinterpret_cast<u8 *>(aieditor) + 0x3691c);
+        CreatureEditorRecord *pool =
+            reinterpret_cast<CreatureEditorRecord *>(reinterpret_cast<u8 *>(aieditor) + 0x3131c);
         NuLinkedListAppend(free_creatures, &pool[i].link);
+    }
 
     AISYS *system = aieditor->ai_system;
     if (system != nullptr) {
@@ -240,10 +242,12 @@ __attribute__((optimize("O3"))) void creatureEditor_Enter() {
                 continue;
             EDAIPATH_s *path = pathEditor_GetPath(reinterpret_cast<const char *>(source->path_info.path));
             f32 tolerance = 0.0f;
-            do {
+            for (;;) {
                 pathEditor_OnPathCheck(&creature->position, (EDAIPATHCHECK_s *)creature->path_check, path, tolerance);
+                if (*reinterpret_cast<i32 *>(creature->path_check) != 0)
+                    break;
                 tolerance += 0.01f;
-            } while (*reinterpret_cast<i32 *>(creature->path_check) == 0);
+            }
             i32 *path_angle = reinterpret_cast<i32 *>(creature->path_check + 0x18);
             *path_angle = NuAngSub(creature->angle, *path_angle);
             strcpy(creature->name, source->name);
@@ -1501,7 +1505,7 @@ __attribute__((optimize("O2"))) eduimenu_s *creatureEditor_Process(nupad_s *pad)
                 memcpy(created->script_params, aieditorsettings.current_script_params, sizeof(created->script_params));
                 created->flags = (created->flags & ~0x1eu) | aieditorsettings.current_script_flags;
                 memcpy(created->path_check, reinterpret_cast<u8 *>(aieditor) + 0x48, sizeof(created->path_check));
-                created->angle =
+                reinterpret_cast<EDAIPATHCHECK_s *>(created->path_check)->angle =
                     NuAngSub(created->angle, *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(aieditor) + 0x60));
                 created->set = set;
                 creatureEditor_Updated(reinterpret_cast<EDCREATURE_s *>(created));

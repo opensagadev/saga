@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 58.121872,
+    "fuzzy_match_percent": 58.170067,
     "total_code": "4722419",
-    "matched_code": "486707",
-    "matched_code_percent": 10.306307,
+    "matched_code": "486921",
+    "matched_code_percent": 10.310839,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 5870,
-    "matched_functions_percent": 43.613937,
+    "matched_functions": 5871,
+    "matched_functions_percent": 43.62137,
     "total_units": 1
   },
   "text": {
@@ -18886,7 +18886,7 @@
           "address": 4039520,
           "offset": 3149552,
           "size": 3155,
-          "match_percent": 37.184284
+          "match_percent": 35.984287
         },
         {
           "name": "_ZL27antinodeEditor_cbSelectTypeP10eduimenu_sP10eduiitem_sj",
@@ -19070,7 +19070,7 @@
           "address": 4260688,
           "offset": 3370720,
           "size": 1202,
-          "match_percent": 23.69307
+          "match_percent": 92.514854
         }
       ]
     },
@@ -19236,7 +19236,7 @@
           "address": 4015104,
           "offset": 3125136,
           "size": 147,
-          "match_percent": 59.75
+          "match_percent": 63.596153
         },
         {
           "name": "_ZL27creatureEditor_cbSetLocatorP10eduimenu_sP10eduiitem_sj",
@@ -19396,7 +19396,7 @@
           "address": 4032240,
           "offset": 3142272,
           "size": 319,
-          "match_percent": 73.16049
+          "match_percent": 75.62963
         },
         {
           "name": "_ZL31creatureEditor_cbRenameCreatureP10eduimenu_sP10eduiitem_sj",
@@ -19468,7 +19468,7 @@
           "address": 4229696,
           "offset": 3339728,
           "size": 1433,
-          "match_percent": 54.714287
+          "match_percent": 57.88095
         },
         {
           "name": "_ZL28creatureEditor_cbResetParamsP10eduimenu_sP10eduiitem_sj",
@@ -20915,7 +20915,7 @@
           "address": 5567504,
           "offset": 4677536,
           "size": 784,
-          "match_percent": 39.95714
+          "match_percent": 51.25714
         },
         {
           "name": "_ZN7EdClass10FindObjectEPc",
@@ -21530,7 +21530,7 @@
           "address": 4056128,
           "offset": 3166160,
           "size": 2948,
-          "match_percent": 25.27615
+          "match_percent": 26.870293
         },
         {
           "name": "_ZL32pathEditorCalculateDistanceTableP8AIPATH_siP9variptr_uS2_",
@@ -21586,7 +21586,7 @@
           "address": 4185440,
           "offset": 3295472,
           "size": 5632,
-          "match_percent": 21.058195
+          "match_percent": 21.059166
         },
         {
           "name": "pathEditorDrawPaths",
@@ -21809,7 +21809,7 @@
           "address": 4253984,
           "offset": 3364016,
           "size": 1361,
-          "match_percent": 47.40604
+          "match_percent": 80.157715
         },
         {
           "name": "_Z18routeEditor_Renderiiff",
@@ -22048,7 +22048,7 @@
           "address": 4225728,
           "offset": 3335760,
           "size": 3691,
-          "match_percent": 32.723743
+          "match_percent": 39.160957
         },
         {
           "name": "_Z20locatorEditor_Renderiiff",
@@ -26544,7 +26544,7 @@
           "address": 3612000,
           "offset": 2722032,
           "size": 3387,
-          "match_percent": 54.57412
+          "match_percent": 58.972363
         },
         {
           "name": "_ZL15edgracbFileLoadP10eduimenu_sP10eduiitem_sj",
@@ -26783,7 +26783,7 @@
           "address": 4264336,
           "offset": 3374368,
           "size": 95,
-          "match_percent": 32.466667
+          "match_percent": 99.6
         },
         {
           "name": "_ZL23edpartChangeDebrisScaleP10eduimenu_sP10eduiitem_sj",
@@ -27119,7 +27119,7 @@
           "address": 4267104,
           "offset": 3377136,
           "size": 214,
-          "match_percent": 31.4
+          "match_percent": 100.0
         },
         {
           "name": "_ZL30edpartCancelThingsInstanceMenuP10eduimenu_sS0_",
@@ -28085,7 +28085,7 @@
           "address": 5594544,
           "offset": 4704576,
           "size": 276,
-          "match_percent": 54.53521
+          "match_percent": 99.788734
         },
         {
           "name": "_ZN12SplineObject9GenPointsEv",
@@ -30468,7 +30468,7 @@
           "address": 5607616,
           "offset": 4717648,
           "size": 3355,
-          "match_percent": 21.144579
+          "match_percent": 24.870481
         },
         {
           "name": "_ZN11EdManRotate7ProcessER14EdInputContextR15ClassObjectList",

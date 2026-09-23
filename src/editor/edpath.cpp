@@ -2474,7 +2474,24 @@ route_selected:
         }
     }
     if (pad->digital_buttons_pressed & 0x100) {
-        path->current_node = pathEditor_GetNearestNode(path, 0);
+        EDAIPATHNODE_s *nearest = nullptr;
+        f32 nearest_distance = FLT_MAX;
+        for (EDAIPATHNODE_s *node = reinterpret_cast<EDAIPATHNODE_s *>(NuLinkedListGetHead(&path->nodes));
+             node != nullptr;
+             node = reinterpret_cast<EDAIPATHNODE_s *>(NuLinkedListGetNext(&path->nodes, &node->link))) {
+            NUVEC delta;
+            f32 distance = NuVecXZDistSqr(&aieditor->cursor_position, &node->position, &delta);
+            if (nearest_distance > distance) {
+                f32 height = aieditor->cursor_position.y - node->position.y;
+                f32 upper = NuFmax(0.2f, node->height_max);
+                f32 lower = NuFmin(-0.2f, node->height_min);
+                if (height <= upper && height >= lower) {
+                    nearest = node;
+                    nearest_distance = distance;
+                }
+            }
+        }
+        path->current_node = nearest;
         if (path->current_node != nullptr)
             edcamSetPos(&path->current_node->position);
     }

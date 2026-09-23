@@ -772,7 +772,7 @@ __attribute__((optimize("no-tree-vectorize"))) eduimenu_s *locatorEditor_Process
     if ((pad->digital_buttons_pressed & 0x80) != 0) {
         goto options;
     }
-    if (NuStrLen(aieditor->pending_locator_name) == 0) {
+    if (__builtin_expect(NuStrLen(aieditor->pending_locator_name) == 0, 0)) {
         goto process_buttons;
     }
     {

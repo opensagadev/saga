@@ -1674,14 +1674,12 @@ static void edpartCancelVarStartMenu(eduimenu_s *, eduimenu_s *) {
 
 static void edpartChangeDebrisPerSec(eduimenu_s *, eduiitem_s *item, u32) {
     if (edpart_nearest_type != NULL) {
-        switch (edpart_set_debris) {
-            case 0:
-                edpart_nearest_type->trail_rates[0] = static_cast<i32>(static_cast<edui_slider_s *>(item)->value);
-                break;
-            case 1:
+        if (edpart_set_debris != 0) {
+            if (edpart_set_debris == 1)
                 edpart_nearest_type->trail_rates[1] = static_cast<i32>(static_cast<edui_slider_s *>(item)->value);
-                break;
+            return;
         }
+        edpart_nearest_type->trail_rates[0] = static_cast<i32>(static_cast<edui_slider_s *>(item)->value);
     }
 }
 
@@ -2128,10 +2126,21 @@ static __attribute__((optimize("O3"))) void edpartDeleteAllInstanceOrphans(eduim
 
 static void edpartCancelInstanceOrphansMenu(eduimenu_s *, eduimenu_s *) {
     if (edpart_nearest_type->variant_count == 0) {
-        for (i32 i = 0; i < 8; i++) {
-            edpart_nearest_type->effect_ids[i] = -1;
-            edpart_nearest_type->effect_pages[i] = 1;
-        }
+        edpart_nearest_type->effect_pages[0] = 1;
+        edpart_nearest_type->effect_ids[1] = -1;
+        edpart_nearest_type->effect_pages[1] = 1;
+        edpart_nearest_type->effect_ids[2] = -1;
+        edpart_nearest_type->effect_pages[2] = 1;
+        edpart_nearest_type->effect_ids[3] = -1;
+        edpart_nearest_type->effect_pages[3] = 1;
+        edpart_nearest_type->effect_ids[4] = -1;
+        edpart_nearest_type->effect_pages[4] = 1;
+        edpart_nearest_type->effect_ids[5] = -1;
+        edpart_nearest_type->effect_pages[5] = 1;
+        edpart_nearest_type->effect_ids[6] = -1;
+        edpart_nearest_type->effect_pages[6] = 1;
+        edpart_nearest_type->effect_ids[7] = -1;
+        edpart_nearest_type->effect_pages[7] = 1;
         edpart_nearest_type->effect_ids[0] = 9999;
         edpart_nearest_type->flags |= 0x10;
     }

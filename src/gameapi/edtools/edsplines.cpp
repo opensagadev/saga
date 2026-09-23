@@ -773,14 +773,21 @@ void SplineObject::GenBezierPoints() {
 
 void SplineObject::GenLinearPoints() {
     points.Clear();
+    VuVec point;
     for (SplineKnot *knot = knots.first; knot != NULL; knot = knot->next) {
-        VuVec point = knot->position;
+        point.x = knot->position.x;
+        point.y = knot->position.y;
+        point.z = knot->position.z;
+        point.w = knot->position.w;
         DropPoint(point);
         point.y += height;
         points.AddPoint(point);
     }
     if (closed != 0 && knots.first != NULL) {
-        VuVec point = knots.first->position;
+        point.x = knots.first->position.x;
+        point.y = knots.first->position.y;
+        point.z = knots.first->position.z;
+        point.w = knots.first->position.w;
         DropPoint(point);
         point.y += height;
         points.AddPoint(point);

@@ -469,8 +469,7 @@ eduimenu_s *antinodeEditor_Process(nupad_s *pad) {
             skip_platforms = true;
         }
         EDANTINODE_s *candidate = selected;
-        EDANTINODE_s *first = selected;
-        bool have_first = selected != nullptr;
+        EDANTINODE_s *first = nullptr;
         do {
             NULISTLNK *next = candidate == nullptr ? (forward ? NuLinkedListGetHead(antinode_list())
                                                               : NuLinkedListGetTail(antinode_list()))
@@ -479,13 +478,12 @@ eduimenu_s *antinodeEditor_Process(nupad_s *pad) {
             if (next == nullptr)
                 next = forward ? NuLinkedListGetHead(antinode_list()) : NuLinkedListGetTail(antinode_list());
             candidate = reinterpret_cast<EDANTINODE_s *>(next);
-            if (candidate == nullptr || (skip_platforms && have_first && candidate == first)) {
+            if (candidate == nullptr || (skip_platforms && candidate == first)) {
                 candidate = nullptr;
                 break;
             }
-            if (!have_first) {
+            if (first == nullptr) {
                 first = candidate;
-                have_first = true;
             }
         } while (skip_platforms && NuSpecialExistsFn(&candidate->special));
         aieditor->mode_selection_42e9c = candidate;
@@ -744,7 +742,9 @@ extern "C" {
         if (process != nullptr) {
             aieditor->main_menu = process(pad);
         }
-        return aieditor->main_menu == nullptr && (pad->digital_buttons_pressed & exit_buttons) != 0;
+        if (aieditor->main_menu != nullptr)
+            return false;
+        return (pad->digital_buttons_pressed & exit_buttons) != 0;
     }
 
     i32 aieditor_Register(const char *name, void (*enter)(), void (*callback_24)(), void (*callback_28)(),

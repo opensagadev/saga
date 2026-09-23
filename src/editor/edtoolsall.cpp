@@ -127,53 +127,56 @@ i32 InModelListDataFlags(APICHARACTERMODELLIST_s *models, u32 model_flags, u32 g
 }
 
 void antinodeEditor_Render(i32 x, i32 y, float xscale, float yscale) {
-    i32 text_x = (x + 10) * 16;
-    i32 text_y = y * 8;
-    NuQFntPrintEx(system_qfont, text_x, text_y - 40, 16, "Antinode Editor");
+    NuQFntPrintEx(system_qfont, (x + 10) * 16, y * 8 - 40, 16, "Antinode Editor");
     NuQFntSetColour(system_qfont, 0x80000000);
     NuQFntSetScale(system_qfont, xscale, yscale);
     EDANTINODE_s *selected = reinterpret_cast<EDANTINODE_s *>(aieditor->mode_selection_42e9c);
-    EDANTINODE_s *nearest = *reinterpret_cast<EDANTINODE_s **>(reinterpret_cast<u8 *>(aieditor) + 0x42ea0);
-    EDANTINODE_s *display = selected != nullptr ? selected : nearest;
+    EDANTINODE_s *display = selected;
+    if (display == nullptr)
+        display = *reinterpret_cast<EDANTINODE_s **>(reinterpret_cast<u8 *>(aieditor) + 0x42ea0);
     if (display != nullptr) {
         nuvec_s displacement;
         NuVecXZDist(&display->position, &aieditor->camera_position, &displacement);
     }
+    EDANTINODE_s *nearest = *reinterpret_cast<EDANTINODE_s **>(reinterpret_cast<u8 *>(aieditor) + 0x42ea0);
     if (selected != nullptr && nearest != nullptr && selected == nearest) {
         char *platform_name = NuSpecialGetName(&selected->special);
         if (platform_name != nullptr) {
-            NuQFntPrintEx(system_qfont, text_x, text_y + 120, 16, "Platform=%s", platform_name);
+            NuQFntPrintEx(system_qfont, (x + 10) * 16, y * 8 + 120, 16, "Platform=%s", platform_name);
         } else {
-            NuQFntPrintEx(system_qfont, text_x, text_y + 120, 16, "Not attached to platform");
+            NuQFntPrintEx(system_qfont, (x + 10) * 16, y * 8 + 120, 16, "Not attached to platform");
         }
-        NuQFntPrintEx(system_qfont, text_x, text_y + 240, 16, "X - Move selected/Adjust size");
-        NuQFntPrintEx(system_qfont, text_x, text_y + 360, 16, "TRI - Delete selected");
-        if (selected->type == 0) {
-            NuQFntPrintEx(system_qfont, text_x, text_y + 480, 16, "LRIGHT - Increase radius, %.2f", selected->radius);
-            NuQFntPrintEx(system_qfont, text_x, text_y + 600, 16, "LLEFT - Decrease radius");
+        NuQFntPrintEx(system_qfont, (x + 10) * 16, y * 8 + 240, 16, "X - Move selected/Adjust size");
+        NuQFntPrintEx(system_qfont, (x + 10) * 16, y * 8 + 360, 16, "TRI - Delete selected");
+        if (reinterpret_cast<EDANTINODE_s *>(aieditor->mode_selection_42e9c)->type == 0) {
+            NuQFntPrintEx(system_qfont, (x + 10) * 16, y * 8 + 480, 16, "LRIGHT - Increase radius, %.2f",
+                          selected->radius);
+            NuQFntPrintEx(system_qfont, (x + 10) * 16, y * 8 + 600, 16, "LLEFT - Decrease radius");
         } else if (aieditor->pad_buttons & 0x40) {
-            NuQFntPrintEx(system_qfont, text_x, text_y + 480, 16, "LRIGHT - Increase X, %.2f", selected->base_radius);
-            NuQFntPrintEx(system_qfont, text_x, text_y + 600, 16, "LLEFT - Decrease X");
-            NuQFntPrintEx(system_qfont, text_x, text_y + 720, 16, "LUP - Increase Z, %.2f", selected->base_height);
-            NuQFntPrintEx(system_qfont, text_x, text_y + 840, 16, "LDOWN - Decrease Z");
+            NuQFntPrintEx(system_qfont, (x + 10) * 16, y * 8 + 480, 16, "LRIGHT - Increase X, %.2f",
+                          selected->base_radius);
+            NuQFntPrintEx(system_qfont, (x + 10) * 16, y * 8 + 600, 16, "LLEFT - Decrease X");
+            NuQFntPrintEx(system_qfont, (x + 10) * 16, y * 8 + 720, 16, "LUP - Increase Z, %.2f",
+                          reinterpret_cast<EDANTINODE_s *>(aieditor->mode_selection_42e9c)->base_height);
+            NuQFntPrintEx(system_qfont, (x + 10) * 16, y * 8 + 840, 16, "LDOWN - Decrease Z");
         } else if (aieditorsettings.solid_antinode_display && (aieditor->pad_buttons & 0x1000)) {
-            NuQFntPrintEx(system_qfont, text_x, text_y + 480, 16, "L1 - Increase upper height");
-            NuQFntPrintEx(system_qfont, text_x, text_y + 600, 16, "R1 - Decrease upper height");
+            NuQFntPrintEx(system_qfont, (x + 10) * 16, y * 8 + 480, 16, "L1 - Increase upper height");
+            NuQFntPrintEx(system_qfont, (x + 10) * 16, y * 8 + 600, 16, "R1 - Decrease upper height");
         } else if (aieditorsettings.solid_antinode_display && (aieditor->pad_buttons & 0x4000)) {
-            NuQFntPrintEx(system_qfont, text_x, text_y + 480, 16, "L1 - Increase lower height");
-            NuQFntPrintEx(system_qfont, text_x, text_y + 600, 16, "R1 - Decrease lower height");
+            NuQFntPrintEx(system_qfont, (x + 10) * 16, y * 8 + 480, 16, "L1 - Increase lower height");
+            NuQFntPrintEx(system_qfont, (x + 10) * 16, y * 8 + 600, 16, "R1 - Decrease lower height");
         } else {
-            NuQFntPrintEx(system_qfont, text_x, text_y + 480, 16, "LLEFT - Rotate left");
-            NuQFntPrintEx(system_qfont, text_x, text_y + 600, 16, "LRIGHT - Rotate right");
+            NuQFntPrintEx(system_qfont, (x + 10) * 16, y * 8 + 480, 16, "LLEFT - Rotate left");
+            NuQFntPrintEx(system_qfont, (x + 10) * 16, y * 8 + 600, 16, "LRIGHT - Rotate right");
             if (aieditorsettings.solid_antinode_display) {
-                NuQFntPrintEx(system_qfont, text_x, text_y + 720, 16, "LUP - Adjust upper height");
-                NuQFntPrintEx(system_qfont, text_x, text_y + 840, 16, "LDOWN - Adjust lower height");
+                NuQFntPrintEx(system_qfont, (x + 10) * 16, y * 8 + 720, 16, "LUP - Adjust upper height");
+                NuQFntPrintEx(system_qfont, (x + 10) * 16, y * 8 + 840, 16, "LDOWN - Adjust lower height");
             }
         }
     } else {
-        NuQFntPrintEx(system_qfont, text_x, text_y + 240, 16,
+        NuQFntPrintEx(system_qfont, (x + 10) * 16, y * 8 + 240, 16,
                       nearest != nullptr ? "X - Select antinode" : "X - Create antinode");
-        NuQFntPrintEx(system_qfont, text_x, text_y + 360, 16, "SELECT - Select nearest");
+        NuQFntPrintEx(system_qfont, (x + 10) * 16, y * 8 + 360, 16, "SELECT - Select nearest");
     }
     antinodeEditorDrawAntinodes();
     areaEditorDrawAreas();

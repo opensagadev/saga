@@ -4469,10 +4469,9 @@ i32 EdManipulator::SelectRotator(EdInputContext &input, VuVec &center, VuVec &pl
         if (LineToSphereIntersection(ray_origin, ray_direction, center, Scale + 0.01f, &far_point, &near_point) != 0) {
             SpherePos1 = far_point;
             SpherePos2 = near_point;
-            const VuVec points[2] = {far_point, near_point};
             for (i32 candidate = 1; candidate <= 3; ++candidate) {
                 for (i32 side = 0; side < 2; ++side) {
-                    const VuVec &point = points[side];
+                    const VuVec &point = side == 0 ? far_point : near_point;
                     VuVec normal = {candidate == 1 ? 1.0f : 0.0f, candidate == 2 ? 1.0f : 0.0f,
                                     candidate == 3 ? 1.0f : 0.0f,
                                     candidate == 1   ? -center.x
@@ -4498,7 +4497,7 @@ i32 EdManipulator::SelectRotator(EdInputContext &input, VuVec &center, VuVec &pl
                 }
             }
         }
-        if (pressed != 0.0f) {
+        if (input.GetPress(3) != 0.0f) {
             *selected_axis = axis;
             *angle_delta = 0;
             if (axis == 0) {
@@ -4872,7 +4871,8 @@ void EdMatrixControl::AddMenuItem(eduimenu_s *menu, EdRef *member, void *target)
         return;
     control->reference = member;
     control->object = target;
-    VuMtx matrix;
+    // Keep the matrix at the 16-byte aligned stack address used by the original.
+    VuMtx matrix __attribute__((aligned(16)));
     member->GetMemberData(target, EdType_VuMtx, &matrix, 0);
     control->item = eduiItemExpanderCreate(reinterpret_cast<usize>(control), &EdLevelAttr, cbSelected, member->name);
     eduiMenuAddItem(menu, control->item);

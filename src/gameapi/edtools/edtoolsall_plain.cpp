@@ -5285,11 +5285,11 @@ extern "C" {
         u8 increase = pad->analog_r1;
         if (decrease)
             goto decrease_time;
-        if (increase)
-            goto increase_time;
         decrease = left2;
         if (decrease)
             goto decrease_time;
+        if (increase)
+            goto increase_time;
         increase = right2;
         if (!increase)
             return 0;
