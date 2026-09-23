@@ -24,6 +24,7 @@
 #include "nu2api/nu3d/nurndr.h"
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nucore/nupad.h"
+#include "nu2api/nucore/numouse.h"
 #include "nu2api/nuplatform/nuplatform.h"
 
 #include <algorithm>
@@ -651,7 +652,11 @@ namespace saga::host::harness {
                 theClassEditor.pending_object = selection;
                 theClassEditor.current_object = selection;
                 theClassEditor.SelectObject(selection, 0);
-                theClassEditor.FocusSelected();
+                // The original list callback focuses the camera on selection.
+                // Mouse selection in the host editor should only select; keep
+                // the original focus behavior for keyboard activation.
+                if (NuMouseReadButtons() == 0)
+                    theClassEditor.FocusSelected();
                 LOG_INFO("editor: selected scene object %s", object->GetName());
                 theLevelEditor.CloseMenu();
             }

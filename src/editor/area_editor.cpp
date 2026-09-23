@@ -145,26 +145,23 @@ static __used__ void areaEditor_cbAreaCylinderToggle(eduimenu_s *, eduiitem_s *i
 }
 
 void areaEditor_Enter() {
-    NULISTHDR *free_list = area_free_list();
-    NULISTHDR *active_list = area_list();
-    active_list->head = NULL;
-    active_list->tail = NULL;
-    EDAIAREA_s *pool = reinterpret_cast<EDAIAREA_s *>(reinterpret_cast<u8 *>(aieditor) + 0x36938);
+    area_list()->head = NULL;
+    area_list()->tail = NULL;
     for (i32 index = 0; index < 64; ++index) {
-        NuLinkedListAppend(free_list, &pool[index].link);
+        EDAIAREA_s *pool = reinterpret_cast<EDAIAREA_s *>(reinterpret_cast<u8 *>(aieditor) + 0x36938);
+        NuLinkedListAppend(area_free_list(), &pool[index].link);
     }
-    AISYS_s *system = aieditor->ai_system;
-    if (system == NULL) {
+    if (aieditor->ai_system == NULL) {
         return;
     }
-    for (i32 index = 0; index < system->area_count; ++index) {
-        AIAREA *source = &system->areas[index];
+    for (i32 index = 0; index < aieditor->ai_system->area_count; ++index) {
+        AIAREA *source = &aieditor->ai_system->areas[index];
         i16 rotation = source->rotation;
         u8 flags = source->game_flags;
-        EDAIAREA_s *area = reinterpret_cast<EDAIAREA_s *>(NuLinkedListGetHead(free_list));
+        EDAIAREA_s *area = reinterpret_cast<EDAIAREA_s *>(NuLinkedListGetHead(area_free_list()));
         if (area != NULL) {
-            NuLinkedListRemove(free_list, &area->link);
-            NuLinkedListAppend(active_list, &area->link);
+            NuLinkedListRemove(area_free_list(), &area->link);
+            NuLinkedListAppend(area_list(), &area->link);
             area->position = source->position;
             memcpy(&area->size, &source->half_width, sizeof(area->size));
             area->rotation = rotation;
