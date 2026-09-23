@@ -414,21 +414,34 @@ void EdDrawPolyTri(VuVec const &a, VuVec const &b, VuVec const &c, i32 colour) {
 }
 
 void edanimDoInput(nupad_s *pad) {
-    const auto pressed = pad->digital_buttons_pressed;
-    const bool selection_mode = (pad->digital_buttons & 0x100) != 0;
-
-    if (!selection_mode) {
+    if ((pad->digital_buttons & 0x100) == 0)
         edcamMove(pad);
-    }
+    const auto pressed = pad->digital_buttons_pressed;
 
-    if ((pad->digital_buttons & 0x100) != 0) {
+    if ((pad->digital_buttons & 0x100) == 0) {
+        if (edanim_nearest_param_id != -1) {
+            auto &param = AnimParams[edanim_nearest_param_id];
+            for (i32 effect = 0; effect < param.effect_count;) {
+                if ((param.effect_ids[effect] == -1 || debtab[param.effect_ids[effect]] == nullptr) &&
+                    param.effect_names[effect][0] != '\0') {
+                    param.effect_ids[effect] = LookupDebrisEffect(param.effect_names[effect]);
+                    if (param.effect_ids[effect] == -1) {
+                        edanimParticleDestroy(edanim_nearest_param_id, effect);
+                        continue;
+                    }
+                }
+                ++effect;
+            }
+        }
+    } else {
         bool particle_selection_started = false;
         bool sound_selection_started = false;
         if (edanim_sound_mode == 0 && edanim_particle_mode != 0 && (pressed & 0x80)) {
             edanim_particle_mode = 0;
         } else if (edanim_sound_mode != 0 && (pressed & 0x10)) {
             edanim_sound_mode = 0;
-        } else if (edanim_particle_mode == 0 && edanim_sound_mode == 0 && edanim_nearest_param_id != -1) {
+        } else if (edanim_particle_mode == 0 && edanim_sound_mode == 0 && edanim_nearest != -1 &&
+                   edanim_nearest_param_id != -1) {
             if (pressed & 0x80) {
                 edanim_particle_mode = 1;
                 edanim_nearest_particle = -1;
@@ -445,14 +458,16 @@ void edanimDoInput(nupad_s *pad) {
             if (edanim_nearest_particle == -1) {
                 if (!particle_selection_started)
                     edanimDetermineNearestParticle(-1.0f);
-            } else if (pressed & 0x8) {
+            } else {
                 auto &param = AnimParams[edanim_nearest_param_id];
-                if (++edanim_nearest_particle == param.effect_count)
-                    edanim_nearest_particle = 0;
-            } else if (pressed & 0x2) {
-                auto &param = AnimParams[edanim_nearest_param_id];
-                if (--edanim_nearest_particle == -1)
-                    edanim_nearest_particle = param.effect_count - 1;
+                if (pressed & 0x8) {
+                    if (++edanim_nearest_particle == param.effect_count)
+                        edanim_nearest_particle = 0;
+                }
+                if (pressed & 0x2) {
+                    if (--edanim_nearest_particle == -1)
+                        edanim_nearest_particle = param.effect_count - 1;
+                }
             }
             if (edanim_nearest_particle != -1) {
                 nuhspecial_s special;
@@ -470,14 +485,16 @@ void edanimDoInput(nupad_s *pad) {
             if (edanim_nearest_sound == -1) {
                 if (!sound_selection_started)
                     edanimDetermineNearestSound(-1.0f);
-            } else if (pressed & 0x8) {
+            } else {
                 auto &param = AnimParams[edanim_nearest_param_id];
-                if (++edanim_nearest_sound == param.sound_count)
-                    edanim_nearest_sound = 0;
-            } else if (pressed & 0x2) {
-                auto &param = AnimParams[edanim_nearest_param_id];
-                if (--edanim_nearest_sound == -1)
-                    edanim_nearest_sound = param.sound_count - 1;
+                if (pressed & 0x8) {
+                    if (++edanim_nearest_sound == param.sound_count)
+                        edanim_nearest_sound = 0;
+                }
+                if (pressed & 0x2) {
+                    if (--edanim_nearest_sound == -1)
+                        edanim_nearest_sound = param.sound_count - 1;
+                }
             }
             if (edanim_nearest_sound != -1) {
                 nuhspecial_s special;
@@ -492,12 +509,15 @@ void edanimDoInput(nupad_s *pad) {
         } else {
             if (edanim_nearest == -1) {
                 edanimDetermineNearestAnim(-1.0f);
-            } else if (pressed & 0x8) {
-                if (++edanim_nearest == NuGScnNumSpecials(edbits_base_scene))
-                    edanim_nearest = 0;
-            } else if (pressed & 0x2) {
-                if (--edanim_nearest == -1)
-                    edanim_nearest = NuGScnNumSpecials(edbits_base_scene) - 1;
+            } else {
+                if (pressed & 0x8) {
+                    if (++edanim_nearest == NuGScnNumSpecials(edbits_base_scene))
+                        edanim_nearest = 0;
+                }
+                if (pressed & 0x2) {
+                    if (--edanim_nearest == -1)
+                        edanim_nearest = NuGScnNumSpecials(edbits_base_scene) - 1;
+                }
             }
             if (edanim_nearest != -1) {
                 nuhspecial_s special;
@@ -514,66 +534,50 @@ void edanimDoInput(nupad_s *pad) {
         }
     }
 
-    if (edanim_nearest_param_id != -1) {
-        auto &param = AnimParams[edanim_nearest_param_id];
-        for (i32 effect = 0; effect < param.effect_count;) {
-            if ((param.effect_ids[effect] == -1 || debtab[param.effect_ids[effect]] == nullptr) &&
-                param.effect_names[effect][0] != '\0') {
-                param.effect_ids[effect] = LookupDebrisEffect(param.effect_names[effect]);
-                if (param.effect_ids[effect] == -1) {
-                    edanimParticleDestroy(edanim_nearest_param_id, effect);
-                    continue;
-                }
-            }
-            ++effect;
-        }
-    }
-
     edcamGetPosAng(&edanim_cam_pos, &edanim_cam_ax, &edanim_cam_ay);
-    if ((pad->digital_buttons & 0x100) != 0) {
-        if (edanim_particle_mode != 0) {
-            edanim_emitroty += pad->analog_left_pad_right - pad->analog_left_pad_left;
-            const i32 raised = edanim_emitrotz + pad->analog_left_pad_up;
-            const i32 rotation = (raised < 0 ? raised : 0) - pad->analog_left_pad_down;
-            edanim_emitrotz = rotation > -32768 ? rotation : -32768;
-        }
-        return;
-    }
-
-    if (pressed & 0x80)
-        edanim_active_menu = edanim_options_menu;
-    if (pressed & 0x40) {
-        if (edanim_particle_mode != 0) {
-            edanimParticleCreate(&edanim_cam_pos);
-        } else if (edanim_sound_mode != 0) {
-            edanimSoundCreate(&edanim_cam_pos);
-        } else if (edanim_nearest != -1 && edanim_nearest_param_id == -1) {
-            edanim_nearest_param_id = edanimParamCreate(edanim_nearest);
-        }
-    }
-    if (pad->digital_buttons & 0x20) {
-        if (edanim_particle_mode != 0 && edanim_nearest_particle != -1) {
-            edanimParticlePlace(edanim_nearest_particle, &edanim_cam_pos);
-        } else if (edanim_sound_mode != 0 && edanim_nearest_sound != -1) {
-            edanimSoundPlace(edanim_nearest_sound, &edanim_cam_pos);
-        }
-    }
-    if (pressed & 0x10) {
-        if (edanim_particle_mode != 0) {
-            if (edanim_nearest_particle != -1) {
-                edanimParticleDestroy(edanim_nearest_param_id, edanim_nearest_particle);
-                edanim_nearest_particle = -1;
+    if ((pad->digital_buttons & 0x100) == 0) {
+        if (pressed & 0x80)
+            edanim_active_menu = edanim_options_menu;
+        if (pressed & 0x40) {
+            if (edanim_particle_mode != 0) {
+                edanimParticleCreate(&edanim_cam_pos);
+            } else if (edanim_sound_mode != 0) {
+                edanimSoundCreate(&edanim_cam_pos);
+            } else if (edanim_nearest != -1 && edanim_nearest_param_id == -1) {
+                edanim_nearest_param_id = edanimParamCreate(edanim_nearest);
             }
-        } else if (edanim_sound_mode != 0) {
-            if (edanim_nearest_sound != -1) {
-                edanimSoundDestroy(edanim_nearest_param_id, edanim_nearest_sound);
-                edanim_nearest_sound = -1;
-            }
-        } else if (edanim_nearest_param_id != -1) {
-            edanimParamDestroy(edanim_nearest_param_id);
-            edanim_nearest_param_id = -1;
-            edanim_nearest = -1;
         }
+        if (pad->digital_buttons & 0x20) {
+            if (edanim_particle_mode != 0 && edanim_nearest_particle != -1) {
+                edanimParticlePlace(edanim_nearest_particle, &edanim_cam_pos);
+            } else if (edanim_sound_mode != 0 && edanim_nearest_sound != -1) {
+                edanimSoundPlace(edanim_nearest_sound, &edanim_cam_pos);
+            }
+        }
+        if (pressed & 0x10) {
+            if (edanim_particle_mode != 0) {
+                if (edanim_nearest_particle != -1) {
+                    edanimParticleDestroy(edanim_nearest_param_id, edanim_nearest_particle);
+                    edanim_nearest_particle = -1;
+                }
+            } else if (edanim_sound_mode != 0) {
+                if (edanim_nearest_sound != -1) {
+                    edanimSoundDestroy(edanim_nearest_param_id, edanim_nearest_sound);
+                    edanim_nearest_sound = -1;
+                }
+            } else {
+                if (edanim_nearest_param_id != -1)
+                    edanimParamDestroy(edanim_nearest_param_id);
+                edanim_nearest_param_id = -1;
+                edanim_nearest = -1;
+            }
+        }
+    }
+    if (edanim_particle_mode != 0) {
+        edanim_emitroty += pad->analog_left_pad_right - pad->analog_left_pad_left;
+        const i32 raised = edanim_emitrotz + pad->analog_left_pad_up;
+        const i32 rotation = (raised < 0 ? raised : 0) - pad->analog_left_pad_down;
+        edanim_emitrotz = rotation > -32768 ? rotation : -32768;
     }
 }
 
@@ -621,7 +625,6 @@ i32 edbriFileSave(char *path) {
             NuGScnGetSpecial(&special, edbits_base_scene, bridge.special_20);
             strncpy(name, NuSpecialGetName(&special), sizeof(name));
         }
-        name[19] = '\0';
         EdFileWrite(name, sizeof(name));
         if (bridge.special_24 == -1)
             name[0] = '\0';
@@ -630,7 +633,6 @@ i32 edbriFileSave(char *path) {
             NuGScnGetSpecial(&special, edbits_base_scene, bridge.special_24);
             strncpy(name, NuSpecialGetName(&special), sizeof(name));
         }
-        name[19] = '\0';
         EdFileWrite(name, sizeof(name));
         EdFileWriteFloat(bridge.field_28);
         EdFileWriteFloat(bridge.field_2c);
@@ -4554,6 +4556,7 @@ void EdInputContext::Set(i32 input, float value, float repeat_delay) {
 }
 
 void EdInputContext::Update(nucamera_s *camera, nupad_s *new_pad, float elapsed, bool) {
+    static __used__ volatile u8 UseMouse;
     pad = new_pad;
     delta_time = elapsed;
 
@@ -4567,8 +4570,9 @@ void EdInputContext::Update(nucamera_s *camera, nupad_s *new_pad, float elapsed,
 
     f32 cursor_x = 0.5f;
     f32 cursor_y = 0.5f;
-    if (new_pad != NULL && eduiUsedAlgPad(new_pad) > 0) {
+    if (eduiUsedAlgPad(new_pad) > 0) {
         eduiSetCursorCoords(cursor_x, cursor_y);
+        UseMouse = 0;
     } else {
         eduiGetCursorCoords(&cursor_x, &cursor_y);
     }
@@ -4588,15 +4592,16 @@ void EdInputContext::Update(nucamera_s *camera, nupad_s *new_pad, float elapsed,
         return;
     }
 
-    const u32 buttons = new_pad != NULL ? new_pad->digital_buttons : 0;
-    const u32 mouse_buttons = NuMouseReadButtons();
+    const u32 buttons = new_pad->digital_buttons;
+    const u32 left_mouse_buttons = NuMouseReadButtons();
     const bool pad_enabled = edGetPadDisabled() == 0;
     const bool menu_closed = pad_enabled && eduiGetActiveMenu() == NULL;
     const i32 shift_or_s = NuKeyboard(0x2a) | NuKeyboard(0x36) | NuKeyboard(0x1f);
     const i32 alt_or_space = NuKeyboard(0x38) | NuKeyboard(0xb8) | NuKeyboard(0x39);
     const i32 control_or_c = NuKeyboard(0x1d) | NuKeyboard(0x9d) | NuKeyboard(0x2e);
-    const i32 left_click = (mouse_buttons == 1 || (buttons & 0x800) != 0) && !alt_or_space;
-    const i32 right_click = (mouse_buttons == 2 || (pad_enabled && (buttons & 0x20) != 0)) && !alt_or_space;
+    const i32 left_click = (left_mouse_buttons == 1 || (buttons & 0x800) != 0) && !alt_or_space;
+    const u32 right_mouse_buttons = NuMouseReadButtons();
+    const i32 right_click = (right_mouse_buttons == 2 || (pad_enabled && (buttons & 0x20) != 0)) && !alt_or_space;
     Set(0, NuMouseReadXVel(), elapsed);
     Set(1, NuMouseReadYVel(), elapsed);
     Set(2, NuMouseReadZVel(), elapsed);

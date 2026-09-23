@@ -16,6 +16,12 @@ namespace {
     float pending_delta_y = 0.0f;
     float frame_delta_x = 0.0f;
     float frame_delta_y = 0.0f;
+    float pending_relative_x = 0.0f;
+    float pending_relative_y = 0.0f;
+    float pending_relative_z = 0.0f;
+    float frame_relative_x = 0.0f;
+    float frame_relative_y = 0.0f;
+    float frame_relative_z = 0.0f;
     float previous_x = 0.0f;
     float previous_y = 0.0f;
     bool previous_position_valid = false;
@@ -23,6 +29,11 @@ namespace {
     float read_motion(bool horizontal) {
         std::lock_guard lock{motion_mutex};
         return horizontal ? frame_delta_x : frame_delta_y;
+    }
+
+    float read_relative(int axis) {
+        std::lock_guard lock{motion_mutex};
+        return axis == 0 ? frame_relative_x : axis == 1 ? frame_relative_y : frame_relative_z;
     }
 
 } // namespace
@@ -35,6 +46,12 @@ namespace saga::host {
         frame_delta_y = pending_delta_y;
         pending_delta_x = 0.0f;
         pending_delta_y = 0.0f;
+        frame_relative_x = pending_relative_x;
+        frame_relative_y = pending_relative_y;
+        frame_relative_z = pending_relative_z;
+        pending_relative_x = 0.0f;
+        pending_relative_y = 0.0f;
+        pending_relative_z = 0.0f;
     }
 
     void set_editor_mouse_enabled(bool enabled) noexcept {
@@ -45,6 +62,12 @@ namespace saga::host {
             pending_delta_y = 0.0f;
             frame_delta_x = 0.0f;
             frame_delta_y = 0.0f;
+            pending_relative_x = 0.0f;
+            pending_relative_y = 0.0f;
+            pending_relative_z = 0.0f;
+            frame_relative_x = 0.0f;
+            frame_relative_y = 0.0f;
+            frame_relative_z = 0.0f;
             mouse_buttons.store(0, std::memory_order_release);
         }
     }
@@ -56,6 +79,8 @@ namespace saga::host {
             enabled && previous_position_valid && width > 0 ? -10.0f * (x - previous_x) * (640.0f / width) : 0.0f;
         const float delta_y =
             enabled && previous_position_valid && height > 0 ? -10.0f * (y - previous_y) * (224.0f / height) : 0.0f;
+        const float relative_x = enabled && previous_position_valid ? x - previous_x : 0.0f;
+        const float relative_y = enabled && previous_position_valid ? y - previous_y : 0.0f;
         previous_x = x;
         previous_y = y;
         previous_position_valid = true;
@@ -67,6 +92,8 @@ namespace saga::host {
             std::lock_guard lock{motion_mutex};
             pending_delta_x += delta_x;
             pending_delta_y += delta_y;
+            pending_relative_x += relative_x;
+            pending_relative_y += relative_y;
         }
 
         u32 mapped_buttons = 0;
@@ -81,10 +108,29 @@ namespace saga::host {
         return {normalized_mouse_x.load(std::memory_order_acquire), normalized_mouse_y.load(std::memory_order_acquire)};
     }
 
+    void add_editor_mouse_wheel(float y) noexcept {
+        if (!editor_mouse_enabled.load(std::memory_order_acquire))
+            return;
+        std::lock_guard lock{motion_mutex};
+        pending_relative_z -= y;
+    }
+
 } // namespace saga::host
 
 extern "C" f32 __wrap_NuMouseReadXVel() {
     return read_motion(true);
+}
+
+extern "C" f32 __wrap_NuMouseReadXRel() {
+    return read_relative(0);
+}
+
+extern "C" f32 __wrap_NuMouseReadYRel() {
+    return read_relative(1);
+}
+
+extern "C" f32 __wrap_NuMouseReadZRel() {
+    return read_relative(2);
 }
 
 extern "C" f32 __wrap_NuMouseReadYVel() {
@@ -92,7 +138,7 @@ extern "C" f32 __wrap_NuMouseReadYVel() {
 }
 
 extern "C" f32 __wrap_NuMouseReadZVel() {
-    return 0.0f;
+    return read_relative(2);
 }
 
 extern "C" u32 __wrap_NuMouseReadButtons() {

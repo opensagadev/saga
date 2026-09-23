@@ -2028,7 +2028,6 @@ extern "C" {
                 } else {
                     clump->individual_index = static_cast<i16>(individual);
                     IndGrassClumpsUsed[individual] = 1;
-                    ++edgra_ind_clumps_used;
                     if (clump->element_count > EDGRA_MAX_UNITS_PER_INDIVIDUAL_CLUMP) {
                         skipped_individuals = clump->element_count - EDGRA_MAX_UNITS_PER_INDIVIDUAL_CLUMP;
                         clump->element_count = EDGRA_MAX_UNITS_PER_INDIVIDUAL_CLUMP;
@@ -2058,7 +2057,8 @@ extern "C" {
                 for (i32 element = 0; element < clump->element_count; ++element) {
                     EdFileReadNuVec(&vectors[element]);
                 }
-            } else if (clump->element_count < 4) {
+            }
+            if (clump->element_count < 4) {
                 clump->element_count = 4;
             }
 

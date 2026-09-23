@@ -15,6 +15,7 @@
 #include "legoapi/core/input/gamepads.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/misc/androidbatman.h"
+#include "legoapi/render/core/rtl.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/level.h"
 #include "legoapi/world/world.h"
@@ -42,6 +43,10 @@
 extern eduimenu_s *edLevelActiveMenu;
 extern eduimenu_s *edLevelPinnedMenu;
 extern i32 edLevelDestroyActiveMenu;
+extern i32 delete_menu_active;
+extern "C" i32 rtled_menu_active;
+extern "C" eduimenu_s *edrtl_active_menu;
+extern "C" void rtlSetUndoBuffer(VARIPTR *buffer, VARIPTR end, i32 count);
 extern ClassEditor theClassEditor;
 extern PropertyTool thePropertyTool;
 void EdDrawBegin(i32 material);
@@ -103,10 +108,12 @@ namespace saga::host::harness {
                 this->module_menu = nullptr;
                 this->detached_level_menus.clear();
                 this->previous_editor_buttons = 0;
+                this->previous_rtl_escape_held = false;
                 this->last_selection_count = -1;
                 this->last_property_menu_count = -1;
                 this->toggle_requests.store(0, std::memory_order_relaxed);
                 this->editor_buttons.store(0, std::memory_order_relaxed);
+                this->editor_keys.store(0, std::memory_order_relaxed);
                 this->capture_game_input.store(false, std::memory_order_relaxed);
                 this->free_camera_enabled = false;
                 this->free_camera_ready.store(false, std::memory_order_relaxed);
@@ -114,6 +121,9 @@ namespace saga::host::harness {
                 this->exit_status.store(no_exit_requested, std::memory_order_relaxed);
                 set_frame_callback(&EditorSession::update);
                 LOG_INFO("editor: F1 modules, F2 Level Editor, F3 free camera; Enter selects, Escape goes back");
+                LOG_INFO("editor RTL default keys: M options, N add, R drag, I inspect, Delete remove, Tab next mode; "
+                         "WASD move, Q/E lower/raise, Z/X zoom, numpad 4/6/8/5 look");
+                LOG_INFO("editor RTL Steve controls: I options, M add, N drag, R inspect");
             }
 
             static void handle_event(const SDL_Event &event) {
@@ -157,6 +167,12 @@ namespace saga::host::harness {
             static u32 filter_game_input(u32 buttons) {
                 EditorSession &session = instance();
                 const bool *keyboard = SDL_GetKeyboardState(nullptr);
+                u32 keys = 0;
+                for (const auto &[scancode, bit] : editor_key_bindings) {
+                    if (keyboard[scancode])
+                        keys |= bit;
+                }
+                session.editor_keys.store(keys, std::memory_order_release);
                 // The game binds WASD and E/F to pad actions. Editor keyboard
                 // shortcuts use those keys directly, so only dedicated menu
                 // keys may enter the synthetic editor pad.
@@ -176,6 +192,11 @@ namespace saga::host::harness {
           private:
             static constexpr std::size_t font_working_headroom = 16 * 1024;
             static constexpr std::size_t editor_pool_size = 1024 * 1024;
+            static constexpr i32 rtl_undo_snapshots = 16;
+            static constexpr std::size_t rtl_undo_bytes_per_snapshot =
+                128 * sizeof(rtl_s) + 3 * sizeof(rtl_s *) + sizeof(NUVEC);
+            static_assert(rtl_undo_bytes_per_snapshot == 0x4618);
+            static constexpr std::size_t rtl_undo_bytes = rtl_undo_bytes_per_snapshot * rtl_undo_snapshots;
             static constexpr int no_exit_requested = -1;
             static constexpr int editor_width = 640;
             static constexpr int editor_height = 448;
@@ -184,6 +205,73 @@ namespace saga::host::harness {
             static constexpr f32 menu_movement_speed = 240.0f;
             // The editor checks bit 4 directly; the game remaps GAMEPAD_MENUCANCEL to bit 5 at startup.
             static constexpr u32 editor_cancel_button = 1u << 4;
+
+            enum EditorKey : u32 {
+                key_up = 1u << 0,
+                key_down = 1u << 1,
+                key_left = 1u << 2,
+                key_right = 1u << 3,
+                key_enter = 1u << 4,
+                key_escape = 1u << 5,
+                key_tab = 1u << 6,
+                key_menu = 1u << 7,
+                key_add = 1u << 8,
+                key_delete = 1u << 9,
+                key_drag = 1u << 10,
+                key_inspect = 1u << 11,
+                key_lock = 1u << 12,
+                key_group = 1u << 13,
+                key_group_next = 1u << 14,
+                key_previous = 1u << 15,
+                key_next = 1u << 16,
+                key_burn_previous = 1u << 17,
+                key_forward = 1u << 18,
+                key_strafe_left = 1u << 19,
+                key_backward = 1u << 20,
+                key_strafe_right = 1u << 21,
+                key_lower = 1u << 22,
+                key_raise = 1u << 23,
+                key_zoom_out = 1u << 24,
+                key_zoom_in = 1u << 25,
+                key_look_left = 1u << 26,
+                key_look_right = 1u << 27,
+                key_look_up = 1u << 28,
+                key_look_down = 1u << 29,
+            };
+
+            static constexpr std::array editor_key_bindings{
+                std::pair{SDL_SCANCODE_UP, key_up},
+                std::pair{SDL_SCANCODE_DOWN, key_down},
+                std::pair{SDL_SCANCODE_LEFT, key_left},
+                std::pair{SDL_SCANCODE_RIGHT, key_right},
+                std::pair{SDL_SCANCODE_RETURN, key_enter},
+                std::pair{SDL_SCANCODE_KP_ENTER, key_enter},
+                std::pair{SDL_SCANCODE_ESCAPE, key_escape},
+                std::pair{SDL_SCANCODE_TAB, key_tab},
+                std::pair{SDL_SCANCODE_M, key_menu},
+                std::pair{SDL_SCANCODE_N, key_add},
+                std::pair{SDL_SCANCODE_DELETE, key_delete},
+                std::pair{SDL_SCANCODE_R, key_drag},
+                std::pair{SDL_SCANCODE_I, key_inspect},
+                std::pair{SDL_SCANCODE_L, key_lock},
+                std::pair{SDL_SCANCODE_G, key_group},
+                std::pair{SDL_SCANCODE_H, key_group_next},
+                std::pair{SDL_SCANCODE_LEFTBRACKET, key_previous},
+                std::pair{SDL_SCANCODE_RIGHTBRACKET, key_next},
+                std::pair{SDL_SCANCODE_COMMA, key_burn_previous},
+                std::pair{SDL_SCANCODE_W, key_forward},
+                std::pair{SDL_SCANCODE_A, key_strafe_left},
+                std::pair{SDL_SCANCODE_S, key_backward},
+                std::pair{SDL_SCANCODE_D, key_strafe_right},
+                std::pair{SDL_SCANCODE_Q, key_lower},
+                std::pair{SDL_SCANCODE_E, key_raise},
+                std::pair{SDL_SCANCODE_Z, key_zoom_out},
+                std::pair{SDL_SCANCODE_X, key_zoom_in},
+                std::pair{SDL_SCANCODE_KP_4, key_look_left},
+                std::pair{SDL_SCANCODE_KP_6, key_look_right},
+                std::pair{SDL_SCANCODE_KP_8, key_look_up},
+                std::pair{SDL_SCANCODE_KP_5, key_look_down},
+            };
 
             struct MenuPosition final {
                 eduimenu_s *menu;
@@ -399,6 +487,19 @@ namespace saga::host::harness {
                     this->editor_pool_installed = true;
                     LOG_INFO("editor: supplied %zu bytes of persistent host memory for UI objects",
                              this->editor_pool.size());
+                }
+                if (!this->rtl_undo_installed) {
+                    VARIPTR cursor{};
+                    cursor.u8_ptr = this->rtl_undo_storage.data();
+                    VARIPTR end{};
+                    end.u8_ptr = this->rtl_undo_storage.data() + this->rtl_undo_storage.size();
+                    rtlSetUndoBuffer(&cursor, end, rtl_undo_snapshots);
+                    if (cursor.u8_ptr != end.u8_ptr) {
+                        LOG_ERR("editor: RTL undo buffer size does not match the original allocator");
+                        this->exit_status.store(1, std::memory_order_release);
+                        return false;
+                    }
+                    this->rtl_undo_installed = true;
                 }
                 if (!system_qfont) {
                     VARIPTR cursor;
@@ -694,6 +795,9 @@ namespace saga::host::harness {
                 if (edLevelActiveMenu)
                     edLevelActiveMenu->child = nullptr;
                 eduiSetActiveMenu(nullptr);
+                if (edLevelPinnedMenu == edLevelActiveMenu ||
+                    std::find(children.begin(), children.end(), edLevelPinnedMenu) != children.end())
+                    edLevelPinnedMenu = nullptr;
                 for (auto menu = children.rbegin(); menu != children.rend(); ++menu) {
                     (*menu)->parent = nullptr;
                     (*menu)->child = nullptr;
@@ -723,6 +827,71 @@ namespace saga::host::harness {
                 LOG_INFO("editor: initialized original Placeable, SceneObject, Spline, and Knot classes");
             }
 
+            void configure_rtl_pad(nupad_s &pad, u32 &buttons) {
+                const u32 keys = this->editor_keys.load(std::memory_order_acquire);
+                const auto held = [keys](EditorKey key) { return (keys & key) != 0; };
+                const bool menu_open = rtled_menu_active || delete_menu_active || edrtl_active_menu;
+                const bool escape_held = held(key_escape);
+                const bool escape_pressed = escape_held && !this->previous_rtl_escape_held;
+                this->previous_rtl_escape_held = escape_held;
+                buttons = 0;
+                pad.is_valid = 1;
+                pad.has_analog_sticks = 1;
+                pad.has_analog_buttons = 1;
+                if (menu_open) {
+                    if (held(key_up))
+                        buttons |= GAMEPAD_DUP;
+                    if (held(key_down))
+                        buttons |= GAMEPAD_DDOWN;
+                    if (held(key_left))
+                        buttons |= GAMEPAD_DLEFT;
+                    if (held(key_right))
+                        buttons |= GAMEPAD_DRIGHT;
+                    if (held(key_enter))
+                        buttons |= GAMEPAD_MENUSELECT;
+                    if (escape_pressed)
+                        buttons |= editor_cancel_button;
+                    return;
+                }
+
+                // RTL interprets these raw pad bits through its selectable Ralph/Steve control table.
+                if (escape_pressed)
+                    buttons |= GAMEPAD_START;
+                if (held(key_tab))
+                    buttons |= 0x4000;
+                if (held(key_menu))
+                    buttons |= 0x80;
+                if (held(key_add))
+                    buttons |= 0x40;
+                if (held(key_delete))
+                    buttons |= 0x10;
+                if (held(key_drag))
+                    buttons |= 0x20;
+                if (held(key_inspect))
+                    buttons |= 0x100;
+                if (held(key_lock))
+                    buttons |= 0x1000;
+                if (held(key_group))
+                    buttons |= 0x8000;
+                if (held(key_group_next))
+                    buttons |= 0x2000;
+                if (held(key_previous))
+                    buttons |= 0x4;
+                if (held(key_next))
+                    buttons |= 0x8;
+                if (held(key_burn_previous))
+                    buttons |= 0x2;
+
+                pad.analog_left_x = held(key_strafe_left) ? 0 : held(key_strafe_right) ? 0xff : 0x80;
+                pad.analog_left_y = held(key_forward) ? 0 : held(key_backward) ? 0xff : 0x80;
+                pad.analog_right_x = held(key_look_left) ? 0xff : held(key_look_right) ? 0 : 0x80;
+                pad.analog_right_y = held(key_look_up) ? 0 : held(key_look_down) ? 0xff : 0x80;
+                pad.analog_l1 = held(key_raise) ? 0xff : 0;
+                pad.analog_l2 = held(key_lower) ? 0xff : 0;
+                pad.analog_r1 = held(key_zoom_in) ? 0xff : 0;
+                pad.analog_r2 = held(key_zoom_out) ? 0xff : 0;
+            }
+
             [[nodiscard]] nupad_s make_editor_pad() {
                 nupad_s pad{};
                 pad.analog_left_x = 0x80;
@@ -730,7 +899,9 @@ namespace saga::host::harness {
                 pad.analog_right_x = 0x80;
                 pad.analog_right_y = 0x80;
 
-                const u32 buttons = this->editor_buttons.load(std::memory_order_acquire);
+                u32 buttons = this->editor_buttons.load(std::memory_order_acquire);
+                if (this->active_view == EditorView::modules && edmainCurrent() == &edrtldesc)
+                    this->configure_rtl_pad(pad, buttons);
                 pad.digital_buttons = buttons;
                 pad.digital_buttons_prev = this->previous_editor_buttons;
                 pad.digital_buttons_pressed = buttons & ~this->previous_editor_buttons;
@@ -791,10 +962,12 @@ namespace saga::host::harness {
             eduimenu_s *module_menu = nullptr;
             std::vector<eduimenu_s *> detached_level_menus;
             u32 previous_editor_buttons = 0;
+            bool previous_rtl_escape_held = false;
             i32 last_selection_count = -1;
             i32 last_property_menu_count = -1;
             std::atomic<unsigned> toggle_requests{0};
             std::atomic<u32> editor_buttons{0};
+            std::atomic<u32> editor_keys{0};
             std::atomic<bool> capture_game_input{false};
             bool free_camera_enabled = false;
             std::atomic<bool> free_camera_ready{false};
@@ -802,7 +975,9 @@ namespace saga::host::harness {
             alignas(16) std::array<u8, 64 * 1024> font_storage{};
             alignas(16) std::array<u8, 256 * 1024> level_editor_storage{};
             alignas(16) std::array<u8, editor_pool_size> editor_pool{};
+            alignas(16) std::array<u8, rtl_undo_bytes> rtl_undo_storage{};
             bool editor_pool_installed = false;
+            bool rtl_undo_installed = false;
             std::vector<HostSceneObject> scene_objects;
             std::mutex filter_input_mutex;
             std::string pending_filter_input;
@@ -815,7 +990,9 @@ namespace saga::host::harness {
                       << "A destination may be a gameplay level name or an area file name.\n"
                       << "F1 toggles module editors; F2 toggles the Level Editor.\n"
                       << "F3 toggles free camera in the Level Editor; numpad 4/5/6/8 rotate, Shift moves.\n"
-                      << "Enter selects; Escape goes back.\n";
+                      << "Enter selects; Escape goes back.\n"
+                      << "Realtime Light Editor default keys: M options, N add, R drag, I inspect, Delete remove, "
+                         "Tab next mode; WASD move, Q/E lower/raise, Z/X zoom, numpad 4/6/8/5 look.\n";
         }
 
         using EditorParseResult = std::variant<EditorOptions, int>;

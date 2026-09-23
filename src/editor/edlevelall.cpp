@@ -160,7 +160,7 @@ void CursorTool::Initialise(variptr_u &, variptr_u &, i32) {
 i32 CursorTool::Process(EdInputContext &input) {
     VuVec &origin = *reinterpret_cast<VuVec *>(input.reserved_00 + 0x20);
     VuVec &direction = *reinterpret_cast<VuVec *>(input.reserved_00 + 0x30);
-    const bool extend_selection = input.GetHold(16) != 0.0f;
+    const bool extend_selection = static_cast<i32>(input.GetHold(16)) != 0;
     VuVec end = origin;
     end.x += direction.x;
     end.y += direction.y;
@@ -211,6 +211,7 @@ i32 CursorTool::Process(EdInputContext &input) {
 }
 
 void CursorTool::Render() {
+    thePropertyTool.Render();
 }
 
 ClassEditor::ClassEditor() {

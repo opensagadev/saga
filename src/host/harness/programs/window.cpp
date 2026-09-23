@@ -853,6 +853,8 @@ i32 saga::host::harness::run_window(const WindowOptions &options) {
                 }
             } else if (event.type == SDL_EVENT_WINDOW_FOCUS_LOST) {
                 escape_held_button = 0;
+            } else if (event.type == SDL_EVENT_MOUSE_WHEEL) {
+                saga::host::add_editor_mouse_wheel(event.wheel.y);
             }
             i32 input_width = host_window_width;
             i32 input_height = host_window_height;

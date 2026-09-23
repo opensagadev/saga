@@ -298,6 +298,9 @@ cc_binary(
             "-Wl,--wrap=NuMouseReadXVel",
             "-Wl,--wrap=NuMouseReadYVel",
             "-Wl,--wrap=NuMouseReadZVel",
+            "-Wl,--wrap=NuMouseReadXRel",
+            "-Wl,--wrap=NuMouseReadYRel",
+            "-Wl,--wrap=NuMouseReadZRel",
             "-Wl,--wrap=NuMouseReadButtons",
         ],
         "//bazel/platforms:macos": [
@@ -347,6 +350,9 @@ cc_binary(
         "-Wl,--wrap=NuMouseReadXVel",
         "-Wl,--wrap=NuMouseReadYVel",
         "-Wl,--wrap=NuMouseReadZVel",
+        "-Wl,--wrap=NuMouseReadXRel",
+        "-Wl,--wrap=NuMouseReadYRel",
+        "-Wl,--wrap=NuMouseReadZRel",
         "-Wl,--wrap=NuMouseReadButtons",
     ] + select({
         ":native_linux_debug": ["-fsanitize=address,undefined"],
