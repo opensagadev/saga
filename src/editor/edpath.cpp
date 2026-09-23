@@ -2330,26 +2330,40 @@ static __used__ i32 routeEditor_AddToRoute(EDAIPATHNODE_s *node, EDAIPATHNODE_s 
 
 static __used__ i32 routeEditor_AddToRoute(EDAIPATHNODE_s *node, EDAIPATHNODE_s *other) {
     EDAIPATH_s *path = aieditor->current_path;
-    if (path == nullptr || path->current_route == nullptr)
+    if (path->current_route == nullptr)
         return 0;
     i32 index = path->current_route - path->routes;
     if (index > 15)
         return 0;
     u16 mask = 1u << index;
-    for (i32 slot = 0; slot < 8; ++slot) {
-        EDAIPATHCNX_s *connection = &node->connections[slot];
-        if (connection->node != other)
-            continue;
-        if (!(connection->route_mask & mask)) {
-            connection->route_mask |= mask;
-            return 1;
-        }
-        connection->route_mask &= ~mask;
-        if (other->connections[slot].node != nullptr && (other->connections[slot].route_mask & mask))
-            other->route_mask &= ~mask;
-        return -1;
+    i32 slot;
+    if (node->connections[0].node == other)
+        slot = 0;
+    else if (node->connections[1].node == other)
+        slot = 1;
+    else if (node->connections[2].node == other)
+        slot = 2;
+    else if (node->connections[3].node == other)
+        slot = 3;
+    else if (node->connections[4].node == other)
+        slot = 4;
+    else if (node->connections[5].node == other)
+        slot = 5;
+    else if (node->connections[6].node == other)
+        slot = 6;
+    else if (node->connections[7].node == other)
+        slot = 7;
+    else
+        return 0;
+    EDAIPATHCNX_s *connection = &node->connections[slot];
+    if (!(connection->route_mask & mask)) {
+        connection->route_mask |= mask;
+        return 1;
     }
-    return 0;
+    connection->route_mask &= ~mask;
+    if (other->connections[slot].node != nullptr && (other->connections[slot].route_mask & mask))
+        other->route_mask &= ~mask;
+    return -1;
 }
 
 eduimenu_s *routeEditor_Process(nupad_s *pad) {

@@ -2646,12 +2646,14 @@ PropertyMenu *PropertyTool::GetActiveMenu(PropertyMenu *menu) {
 }
 
 void PropertyTool::GetClassName(EdRef *reference, char *name) {
-    EdClass *ed_class = show_type_names != 0 ? theRegistry.GetClass(reference->type_id) : NULL;
-    if (ed_class != NULL) {
-        sprintf(name, "%s %s", ed_class->name, reference->name);
-    } else {
-        NuStrCpy(name, reference->name);
+    if (show_type_names != 0) {
+        EdClass *ed_class = theRegistry.GetClass(reference->type_id);
+        if (ed_class != NULL) {
+            sprintf(name, "%s %s", ed_class->name, reference->name);
+            return;
+        }
     }
+    NuStrCpy(name, reference->name);
 }
 
 PropertyMenu *PropertyTool::GetNextActiveMenu() {
@@ -2667,12 +2669,14 @@ eduimenu_s *PropertyTool::GetNextDefaultActiveMenu(eduimenu_s *menu) {
 }
 
 void PropertyTool::GetTypeName(EdRef *reference, char *name) {
-    EdType *type = show_type_names != 0 ? theRegistry.GetType(reference->type_id) : NULL;
-    if (type != NULL) {
-        sprintf(name, "%s %s", type->name, reference->name);
-    } else {
-        NuStrCpy(name, reference->name);
+    if (show_type_names != 0) {
+        EdType *type = theRegistry.GetType(reference->type_id);
+        if (type != NULL) {
+            sprintf(name, "%s %s", type->name, reference->name);
+            return;
+        }
     }
+    NuStrCpy(name, reference->name);
 }
 
 void PropertyTool::Initialise(variptr_u &, variptr_u &, i32) {

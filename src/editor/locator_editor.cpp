@@ -705,12 +705,11 @@ void locatorEditor_Enter(void) {
 
 void locatorEditor_Render(i32 x, i32 y, float x_scale, float y_scale) {
     i32 text_x = (x + 10) * 16;
-    i32 text_y = y * 8;
     if (aieditor->current_locator_set != nullptr) {
-        NuQFntPrintEx(system_qfont, text_x, text_y - 40, 16, "Locator Editor: Set=\"%s\"",
+        NuQFntPrintEx(system_qfont, text_x, y * 8 - 40, 16, "Locator Editor: Set=\"%s\"",
                       aieditor->current_locator_set->name);
     } else {
-        NuQFntPrintEx(system_qfont, text_x, text_y - 40, 16, "Locator Editor: Set=\"NONE\"");
+        NuQFntPrintEx(system_qfont, text_x, y * 8 - 40, 16, "Locator Editor: Set=\"NONE\"");
     }
     NuQFntSetColour(system_qfont, 0x80000000);
     NuQFntSetScale(system_qfont, x_scale, y_scale);
@@ -719,19 +718,19 @@ void locatorEditor_Render(i32 x, i32 y, float x_scale, float y_scale) {
     if (display_locator != nullptr) {
         NUVEC delta;
         f32 distance = NuVecXZDist(&display_locator->position, &aieditor->camera_position, &delta);
-        NuQFntPrintEx(system_qfont, text_x, text_y + 120, 16, "\"%s\", xzrng=%.2f", display_locator->name,
+        NuQFntPrintEx(system_qfont, text_x, (y + 15) * 8, 16, "\"%s\", xzrng=%.2f", display_locator->name,
                       static_cast<f64>(distance));
     }
-    NuQFntPrintEx(system_qfont, text_x, text_y + 240, 16, "SQR - Options");
+    NuQFntPrintEx(system_qfont, text_x, (y + 30) * 8, 16, "SQR - Options");
     if (aieditor->nearest_locator == nullptr) {
-        NuQFntPrintEx(system_qfont, text_x, text_y + 360, 16, "X - Create locator");
+        NuQFntPrintEx(system_qfont, text_x, (y + 45) * 8, 16, "X - Create locator");
     } else if (aieditor->nearest_locator != aieditor->current_locator) {
-        NuQFntPrintEx(system_qfont, text_x, text_y + 360, 16, "X - Select locator");
+        NuQFntPrintEx(system_qfont, text_x, (y + 45) * 8, 16, "X - Select locator");
     } else {
-        NuQFntPrintEx(system_qfont, text_x, text_y + 360, 16, "X - Move selected");
-        NuQFntPrintEx(system_qfont, text_x, text_y + 480, 16, "TRI - Delete selected");
-        NuQFntPrintEx(system_qfont, text_x, text_y + 600, 16, "LLEFT - Rotate left");
-        NuQFntPrintEx(system_qfont, text_x, text_y + 720, 16, "LRIGHT - Rotate right");
+        NuQFntPrintEx(system_qfont, text_x, (y + 45) * 8, 16, "X - Move selected");
+        NuQFntPrintEx(system_qfont, text_x, (y + 60) * 8, 16, "TRI - Delete selected");
+        NuQFntPrintEx(system_qfont, text_x, (y + 75) * 8, 16, "LLEFT - Rotate left");
+        NuQFntPrintEx(system_qfont, text_x, (y + 90) * 8, 16, "LRIGHT - Rotate right");
     }
     if (aieditor->nearest_locator == nullptr &&
         *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(aieditor) + 0x48) != 0 &&

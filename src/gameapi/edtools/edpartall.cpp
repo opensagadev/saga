@@ -1461,23 +1461,16 @@ static void edpartCancelVarEmitMenu(eduimenu_s *, eduimenu_s *) {
 
 static void edpartChangeDebrisIndex(eduimenu_s *, eduiitem_s *item, u32) {
     if (edpart_nearest_type != NULL) {
-        switch (edpart_set_debris) {
-            case 0:
-                edpart_nearest_type->trail_effects[0] = item->data;
-                break;
-            case 1:
-                edpart_nearest_type->trail_effects[1] = item->data;
-                break;
-            case 2:
-                edpart_nearest_type->attached_effect = item->data;
-                break;
-            case 3:
-                edpart_nearest_type->impact_effect = item->data;
-                break;
-            case 4:
-                edpart_nearest_type->kill_effect = item->data;
-                break;
-        }
+        if (edpart_set_debris == 0)
+            edpart_nearest_type->trail_effects[0] = item->data;
+        else if (edpart_set_debris == 1)
+            edpart_nearest_type->trail_effects[1] = item->data;
+        else if (edpart_set_debris == 2)
+            edpart_nearest_type->attached_effect = item->data;
+        else if (edpart_set_debris == 3)
+            edpart_nearest_type->impact_effect = item->data;
+        else if (edpart_set_debris == 4)
+            edpart_nearest_type->kill_effect = item->data;
     }
 }
 

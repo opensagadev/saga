@@ -5826,8 +5826,13 @@ extern "C" {
         }
         return height;
     }
-    static __attribute__((noinline, used)) void eduiDrawHueValueBand(i32 x, i32 y, i32 width, i32 height, u32 first,
-                                                                     u32 second, f32 start, f32 end) {
+#if defined(__i386__) && defined(__SSE__)
+#define EDUI_GRAD_CALL __attribute__((regparm(2), sseregparm))
+#else
+#define EDUI_GRAD_CALL
+#endif
+    static __attribute__((noinline, used)) EDUI_GRAD_CALL void
+    eduiDrawHueValueBand(i32 x, i32 y, i32 width, i32 height, f32 start, f32 end, u32 first, u32 second) {
         i32 left = (x << 4) + static_cast<i32>(start * static_cast<f32>(width << 4));
         i32 band_width = static_cast<i32>(end * static_cast<f32>(width << 4)) -
                          static_cast<i32>(start * static_cast<f32>(width << 4));
@@ -5863,6 +5868,7 @@ extern "C" {
         EDUI_DRAW_VALUE_STRIP(7);
 #undef EDUI_DRAW_VALUE_STRIP
     }
+#undef EDUI_GRAD_CALL
     static __used__ i32 eduicbRenderColourPick(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width) {
         (void)menu;
         edui_colour_pick_s *picker = static_cast<edui_colour_pick_s *>(item);
@@ -5872,8 +5878,8 @@ extern "C" {
         static const u32 hues[7] = {0x800000ffu, 0x8000ffffu, 0x8000ff00u, 0x80ffff00u,
                                     0x80ff0000u, 0x80ff00ffu, 0x800000ffu};
         for (i32 band = 0; band < 6; ++band)
-            eduiDrawHueValueBand(x, y, width, main_height, hues[band], hues[band + 1], static_cast<f32>(band) / 6.0f,
-                                 static_cast<f32>(band + 1) / 6.0f);
+            eduiDrawHueValueBand(x, y, width, main_height, static_cast<f32>(band) / 6.0f,
+                                 static_cast<f32>(band + 1) / 6.0f, hues[band], hues[band + 1]);
         if (!edui_donotdraw) {
             i32 value_y = static_cast<i32>(y + main_height * picker->cursor_y) << 3;
             i32 hue_x = static_cast<i32>(x + width * picker->cursor_x) << 4;
