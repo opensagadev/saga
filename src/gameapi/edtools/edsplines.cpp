@@ -634,21 +634,39 @@ inline SplineObject::SplineObject()
     : next(NULL), previous(NULL), knots{}, points{}, led_file(Placeable::CurrentLedFile) {
 }
 
-SplineObject::~SplineObject() {
-    while (points.first != NULL) {
-        SplinePointBlock *block = points.first;
-        points.first = block->next;
+inline SplineObject::~SplineObject() {
+    SplinePointList *point_list = &points;
+    while (point_list->first != NULL) {
+        SplinePointBlock *block = point_list->first;
+        if (block->next != NULL)
+            block->next->previous = block->previous;
+        else
+            point_list->last = block->previous;
+        if (block->previous != NULL)
+            block->previous->next = block->next;
+        else
+            point_list->first = block->next;
+        block->next = NULL;
+        block->previous = NULL;
+        --point_list->block_count;
         delete block;
     }
-    points.last = NULL;
-    points.block_count = 0;
-    while (knots.first != NULL) {
-        SplineKnot *knot = knots.first;
-        knots.first = knot->next;
+    SplineKnotList *knot_list = &knots;
+    while (knot_list->first != NULL) {
+        SplineKnot *knot = knot_list->first;
+        if (knot->next != NULL)
+            knot->next->previous = knot->previous;
+        else
+            knot_list->last = knot->previous;
+        if (knot->previous != NULL)
+            knot->previous->next = knot->next;
+        else
+            knot_list->first = knot->next;
+        knot->next = NULL;
+        knot->previous = NULL;
+        --knot_list->count;
         theMemoryManager.FreePool(knot, sizeof(SplineKnot));
     }
-    knots.last = NULL;
-    knots.count = 0;
 }
 
 inline void SplineObject::operator delete(void *memory) {
@@ -660,10 +678,7 @@ SplineObject *SplineObject::Clone() {
     NuStrCpy(clone->name, name);
     SplineKnot *source = knots.first;
     for (i32 index = 0; index < knots.count; ++index) {
-        SplineKnot *knot = static_cast<SplineKnot *>(theMemoryManager.AllocPool(sizeof(SplineKnot), 1));
-        knot->position = source->position;
-        knot->in_tangent = source->in_tangent;
-        knot->out_tangent = source->out_tangent;
+        SplineKnot *knot = new (theMemoryManager.AllocPool(sizeof(SplineKnot), 1)) SplineKnot();
         knot->next = NULL;
         knot->previous = clone->knots.last;
         knot->spline = clone;
@@ -674,6 +689,18 @@ SplineObject *SplineObject::Clone() {
             clone->knots.first = knot;
         clone->knots.last = knot;
         ++clone->knots.count;
+        knot->position.x = source->position.x;
+        knot->position.y = source->position.y;
+        knot->position.z = source->position.z;
+        knot->position.w = source->position.w;
+        knot->in_tangent.x = source->in_tangent.x;
+        knot->in_tangent.y = source->in_tangent.y;
+        knot->in_tangent.z = source->in_tangent.z;
+        knot->in_tangent.w = source->in_tangent.w;
+        knot->out_tangent.x = source->out_tangent.x;
+        knot->out_tangent.y = source->out_tangent.y;
+        knot->out_tangent.z = source->out_tangent.z;
+        knot->out_tangent.w = source->out_tangent.w;
         source = source->next;
     }
     clone->step = step;

@@ -1263,7 +1263,7 @@ extern "C" {
 
 } // extern "C"
 
-__attribute__((optimize("O3"))) eduimenu_s *creatureEditor_Process(nupad_s *pad) {
+__attribute__((optimize("O2"))) eduimenu_s *creatureEditor_Process(nupad_s *pad) {
     if (pad->digital_buttons_pressed & 0x80) {
         eduimenu_s *menu =
             eduiMenuCreate(200, 70, 240, 330, ed_fnt, aieditor_cbCancelMainMenu, const_cast<char *>("Options"));

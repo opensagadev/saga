@@ -2150,31 +2150,36 @@ void edpartDoInput(nupad_s *pad) {
             if (edpart_opt_menu != NULL) {
                 eduiMenuAddItem(edpart_opt_menu,
                                 eduiItemSelCreate(1, edblack, 0, 0, edpartTypeMenu, "Emitter Type..."));
-                bool has_emitter = edpart_nearest != -1;
-                eduiMenuAddItem(edpart_opt_menu,
-                                eduiItemSelCreate(1, has_emitter ? edblack : edgrey, 0, 0,
-                                                  has_emitter ? edpartInstanceMenu : NULL, "Instance Select..."));
-                eduiMenuAddItem(edpart_opt_menu, eduiItemSelCreate(1, has_emitter ? edblack : edgrey, 0, 0,
-                                                                   has_emitter ? edpartInstanceSettingsMenu : NULL,
-                                                                   "Instance Settings..."));
-                eduiMenuAddItem(edpart_opt_menu,
-                                eduiItemSelCreate(1, has_emitter ? edblack : edgrey, 0, 0,
-                                                  has_emitter ? edpartEmitMenu : NULL, "Emitter Settings..."));
-                eduiMenuAddItem(edpart_opt_menu,
-                                eduiItemSelCreate(1, has_emitter ? edblack : edgrey, 0, 0,
-                                                  has_emitter ? edpartDebrisSettingsMenu : NULL, "Debris Settings..."));
-                eduiMenuAddItem(edpart_opt_menu,
-                                eduiItemSelCreate(1, has_emitter ? edblack : edgrey, 0, 0,
-                                                  has_emitter ? edpartSoundsMenu : NULL, "Attached Sounds..."));
-                eduiMenuAddItem(edpart_opt_menu,
-                                eduiItemSelCreate(1, has_emitter ? edblack : edgrey, 0, 0,
-                                                  has_emitter ? edpartSwitchMenu : NULL, "Switch Menu..."));
-                eduiMenuAddItem(edpart_opt_menu,
-                                eduiItemSelCreate(1, has_emitter ? edblack : edgrey, 0, 0,
-                                                  has_emitter ? edpartScaleTypeMenu : NULL, "Scale Type..."));
-                eduiMenuAddItem(edpart_opt_menu, eduiItemSelCreate(1, edblack, 0, 0, edpartDataMenu, "Data Menu..."));
-                eduiMenuAddItem(edpart_opt_menu,
-                                eduiItemSelCreate(1, edblack, 0, 0, edpartSScaleMenu, "Super Scale..."));
+                if (edpart_nearest != -1) {
+                    eduiMenuAddItem(edpart_opt_menu,
+                                    eduiItemSelCreate(1, edblack, 0, 0, edpartInstanceMenu, "Instance Select..."));
+                    eduiMenuAddItem(edpart_opt_menu, eduiItemSelCreate(1, edblack, 0, 0, edpartInstanceSettingsMenu,
+                                                                       "Instance Settings..."));
+                    eduiMenuAddItem(edpart_opt_menu,
+                                    eduiItemSelCreate(1, edblack, 0, 0, edpartEmitMenu, "Emitter Settings..."));
+                    eduiMenuAddItem(edpart_opt_menu, eduiItemSelCreate(1, edblack, 0, 0, edpartDebrisSettingsMenu,
+                                                                       "Debris Settings..."));
+                    eduiMenuAddItem(edpart_opt_menu,
+                                    eduiItemSelCreate(1, edblack, 0, 0, edpartSoundsMenu, "Attached Sounds..."));
+                    eduiMenuAddItem(edpart_opt_menu,
+                                    eduiItemSelCreate(1, edblack, 0, 0, edpartSwitchMenu, "Switch Menu..."));
+                    eduiMenuAddItem(edpart_opt_menu,
+                                    eduiItemSelCreate(1, edblack, 0, 0, edpartScaleTypeMenu, "Scale Type..."));
+                    eduiMenuAddItem(edpart_opt_menu,
+                                    eduiItemSelCreate(1, edblack, 0, 0, edpartDataMenu, "Data Menu..."));
+                    eduiMenuAddItem(edpart_opt_menu,
+                                    eduiItemSelCreate(1, edblack, 0, 0, edpartSScaleMenu, "Super Scale..."));
+                } else {
+                    eduiMenuAddItem(edpart_opt_menu, eduiItemSelCreate(1, edgrey, 0, 0, NULL, "Instance Select..."));
+                    eduiMenuAddItem(edpart_opt_menu, eduiItemSelCreate(1, edgrey, 0, 0, NULL, "Instance Settings..."));
+                    eduiMenuAddItem(edpart_opt_menu, eduiItemSelCreate(1, edgrey, 0, 0, NULL, "Emitter Settings..."));
+                    eduiMenuAddItem(edpart_opt_menu, eduiItemSelCreate(1, edgrey, 0, 0, NULL, "Debris Settings..."));
+                    eduiMenuAddItem(edpart_opt_menu, eduiItemSelCreate(1, edgrey, 0, 0, NULL, "Attached Sounds..."));
+                    eduiMenuAddItem(edpart_opt_menu, eduiItemSelCreate(1, edgrey, 0, 0, NULL, "Switch Menu..."));
+                    eduiMenuAddItem(edpart_opt_menu, eduiItemSelCreate(1, edgrey, 0, 0, NULL, "Scale Type..."));
+                    eduiMenuAddItem(edpart_opt_menu, eduiItemSelCreate(1, edgrey, 0, 0, NULL, "Data Menu..."));
+                    eduiMenuAddItem(edpart_opt_menu, eduiItemSelCreate(1, edgrey, 0, 0, NULL, "Super Scale..."));
+                }
                 eduiMenuAddItem(edpart_opt_menu, eduiItemToggleCreate(1, edblack, edpart_filter, 1, edpartToggleFilter,
                                                                       "Instance Filter"));
                 eduiMenuAddItem(edpart_opt_menu,

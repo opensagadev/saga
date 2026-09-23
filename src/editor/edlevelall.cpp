@@ -2703,11 +2703,10 @@ i32 PropertyTool::ProcessMenu(EdInputContext &input) {
         menu->order = order++;
     }
     for (ClassObjectListEntry *entry = theClassEditor.selected_objects.first; entry != NULL; entry = entry->next) {
-        ClassObject &object = *reinterpret_cast<ClassObject *>(&entry->ed_class);
         PropertyMenu *menu = FindItemMenu(active_menu, reinterpret_cast<ClassItem *>(entry));
         if (menu != NULL) {
             menu->ClearObjecs();
-            menu->AddObject(object);
+            menu->AddObject(*reinterpret_cast<ClassObject *>(&entry->ed_class));
             if (menu->next != NULL) {
                 menu->next->previous = menu->previous;
             } else {
@@ -2724,13 +2723,14 @@ i32 PropertyTool::ProcessMenu(EdInputContext &input) {
         } else {
             menu = FindItemMenu(rebuilt.first, reinterpret_cast<ClassItem *>(entry));
             if (menu != NULL) {
-                menu->AddObject(object);
+                menu->AddObject(*reinterpret_cast<ClassObject *>(&entry->ed_class));
                 continue;
             }
             for (PropertyMenu *other = active_menu; other != NULL; other = other->next) {
                 ediMenuStoreMetrics(other->menu);
             }
-            menu = RetrievePropertyMenu(&object, reinterpret_cast<PropertyMenuList *>(&active_menu));
+            menu = RetrievePropertyMenu(reinterpret_cast<ClassObject *>(&entry->ed_class),
+                                        reinterpret_cast<PropertyMenuList *>(&active_menu));
             ediMenuRetrieveMetrics(menu->menu);
             menu->order = -1;
         }
@@ -2740,30 +2740,43 @@ i32 PropertyTool::ProcessMenu(EdInputContext &input) {
             while (position != NULL && position->order < 0) {
                 position = position->next;
             }
+            if (position != NULL) {
+                menu->next = position;
+                menu->previous = position->previous;
+                if (position->previous != NULL) {
+                    position->previous->next = menu;
+                } else {
+                    rebuilt.first = menu;
+                }
+                position->previous = menu;
+                ++rebuilt.count;
+                continue;
+            }
         } else {
             while (position != NULL && position->order <= menu->order) {
                 position = position->next;
             }
-        }
-        if (position != NULL) {
-            menu->next = position->next;
-            menu->previous = position;
-            if (position->next != NULL) {
-                position->next->previous = menu;
-            } else {
-                rebuilt.last = menu;
+            if (position != NULL) {
+                menu->next = position;
+                menu->previous = position->previous;
+                if (position->previous != NULL) {
+                    position->previous->next = menu;
+                } else {
+                    rebuilt.first = menu;
+                }
+                position->previous = menu;
+                ++rebuilt.count;
+                continue;
             }
-            position->next = menu;
+        }
+        menu->next = NULL;
+        menu->previous = rebuilt.last;
+        if (rebuilt.last != NULL) {
+            rebuilt.last->next = menu;
         } else {
-            menu->next = NULL;
-            menu->previous = rebuilt.last;
-            if (rebuilt.last != NULL) {
-                rebuilt.last->next = menu;
-            } else {
-                rebuilt.first = menu;
-            }
-            rebuilt.last = menu;
+            rebuilt.first = menu;
         }
+        rebuilt.last = menu;
         ++rebuilt.count;
     }
     for (PropertyMenu *menu = active_menu; menu != NULL;) {

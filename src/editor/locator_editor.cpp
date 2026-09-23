@@ -756,44 +756,14 @@ void locatorEditor_Render(i32 x, i32 y, float x_scale, float y_scale) {
     }
 }
 
-eduimenu_s *locatorEditor_Process(nupad_s *pad) {
+__attribute__((optimize("no-tree-vectorize"))) eduimenu_s *locatorEditor_Process(nupad_s *pad) {
     if ((pad->digital_buttons_pressed & 0x80) != 0) {
-        eduimenu_s *menu = eduiMenuCreate(200, 70, 240, 270, ed_fnt, aieditor_cbCancelMainMenu, (char *)"Options");
-        if (menu == nullptr) {
-            return nullptr;
-        }
-        eduiMenuAddItem(menu, eduiItemSelCreate(AIEDITOR_ROUTES, locator_attr, 0, 0, aieditor_cvSelectEditorMode,
-                                                (char *)"Select Editor Mode"));
-        eduiMenuAddItem(menu, eduiItemSelCreate(1, locator_attr, 0, 0, aieditor_cbSave, (char *)"Save AI Data"));
-        eduiMenuAddItem(menu, eduiItemSelCreate(1, locator_attr, 0, 0, aieditor_cbGoToPlayer, (char *)"Go To Player"));
-        eduiMenuAddItem(menu, eduiItemSelCreate(1, locator_attr, 0, 0, aieditor_cbMovePlayer, (char *)"Move Player"));
-        if (aieditor->current_locator != nullptr && AIScriptNameFromIx(aieditor->ai_system, 0) != nullptr) {
-            eduiMenuAddItem(menu, eduiItemSelCreate(1, locator_attr, 0, 0, locatorEditor_cbRenameLocatorMenu,
-                                                    (char *)"Rename Locator"));
-        }
-        eduiMenuAddItem(menu, eduiItemSelCreate(1, locator_attr, 0, 0, locatorEditor_cbCreateLocatorSet,
-                                                (char *)"Create Locator Set"));
-        if (NuLinkedListGetHead(&aieditor->locator_sets) != nullptr) {
-            eduiMenuAddItem(menu, eduiItemSelCreate(1, locator_attr, 0, 0, locatorEditor_cbSelectLocatorSet,
-                                                    (char *)"Select Locator Set"));
-            if (aieditor->current_locator_set != nullptr) {
-                eduiMenuAddItem(menu, eduiItemSelCreate(0, locator_attr, 0, 0, locatorEditor_cbDeleteLocatorSet,
-                                                        (char *)"Delete Locator Set"));
-                eduiMenuAddItem(menu, eduiItemSelCreate(1, locator_attr, 0, 0, locatorEditor_cbRenameLocatorSetMenu,
-                                                        (char *)"Rename Locator Set"));
-                eduiMenuAddItem(menu, eduiItemSelCreate(1, locator_attr, 0, 0, locatorEditor_cbAddLocatorsByNameMenu,
-                                                        (char *)"Add Locators To Set By Name"));
-                eduiMenuAddItem(menu, eduiItemSelCreate(0, locator_attr, 0, 0, locatorEditor_cbEmptyLocatorSet,
-                                                        (char *)"Empty Locator Set"));
-            }
-        }
-        eduiMenuAddItem(menu, eduiItemToggleCreate(1, locator_attr, -i32(aieditorsettings.stop_platforms), 3,
-                                                   aieditor_cbStopPlatformsToggle, (char *)"Stop Platforms"));
-        eduiMenuAddItem(menu, eduiItemToggleCreate(1, locator_attr, -i32(aieditorsettings.snap_height_display), 2,
-                                                   aieditor_cbSnapHeightToggle, (char *)"Snap Height"));
-        return menu;
+        goto options;
     }
-    if (NuStrLen(aieditor->pending_locator_name) != 0) {
+    if (NuStrLen(aieditor->pending_locator_name) == 0) {
+        goto process_buttons;
+    }
+    {
         if (aieditor->current_locator_set != nullptr) {
             char title[128];
             sprintf(title, "Add locators \"%s\" to set \"%s\"?", aieditor->pending_locator_name,
@@ -809,6 +779,46 @@ eduimenu_s *locatorEditor_Process(nupad_s *pad) {
         }
         memset(aieditor->pending_locator_name, 0, sizeof(aieditor->pending_locator_name));
     }
+    goto process_buttons;
+
+options: {
+    eduimenu_s *menu = eduiMenuCreate(200, 70, 240, 270, ed_fnt, aieditor_cbCancelMainMenu, (char *)"Options");
+    if (menu == nullptr) {
+        return nullptr;
+    }
+    eduiMenuAddItem(menu, eduiItemSelCreate(AIEDITOR_ROUTES, locator_attr, 0, 0, aieditor_cvSelectEditorMode,
+                                            (char *)"Select Editor Mode"));
+    eduiMenuAddItem(menu, eduiItemSelCreate(1, locator_attr, 0, 0, aieditor_cbSave, (char *)"Save AI Data"));
+    eduiMenuAddItem(menu, eduiItemSelCreate(1, locator_attr, 0, 0, aieditor_cbGoToPlayer, (char *)"Go To Player"));
+    eduiMenuAddItem(menu, eduiItemSelCreate(1, locator_attr, 0, 0, aieditor_cbMovePlayer, (char *)"Move Player"));
+    if (aieditor->current_locator != nullptr && AIScriptNameFromIx(aieditor->ai_system, 0) != nullptr) {
+        eduiMenuAddItem(menu, eduiItemSelCreate(1, locator_attr, 0, 0, locatorEditor_cbRenameLocatorMenu,
+                                                (char *)"Rename Locator"));
+    }
+    eduiMenuAddItem(
+        menu, eduiItemSelCreate(1, locator_attr, 0, 0, locatorEditor_cbCreateLocatorSet, (char *)"Create Locator Set"));
+    if (NuLinkedListGetHead(&aieditor->locator_sets) != nullptr) {
+        eduiMenuAddItem(menu, eduiItemSelCreate(1, locator_attr, 0, 0, locatorEditor_cbSelectLocatorSet,
+                                                (char *)"Select Locator Set"));
+        if (aieditor->current_locator_set != nullptr) {
+            eduiMenuAddItem(menu, eduiItemSelCreate(0, locator_attr, 0, 0, locatorEditor_cbDeleteLocatorSet,
+                                                    (char *)"Delete Locator Set"));
+            eduiMenuAddItem(menu, eduiItemSelCreate(1, locator_attr, 0, 0, locatorEditor_cbRenameLocatorSetMenu,
+                                                    (char *)"Rename Locator Set"));
+            eduiMenuAddItem(menu, eduiItemSelCreate(1, locator_attr, 0, 0, locatorEditor_cbAddLocatorsByNameMenu,
+                                                    (char *)"Add Locators To Set By Name"));
+            eduiMenuAddItem(menu, eduiItemSelCreate(0, locator_attr, 0, 0, locatorEditor_cbEmptyLocatorSet,
+                                                    (char *)"Empty Locator Set"));
+        }
+    }
+    eduiMenuAddItem(menu, eduiItemToggleCreate(1, locator_attr, -i32(aieditorsettings.stop_platforms), 3,
+                                               aieditor_cbStopPlatformsToggle, (char *)"Stop Platforms"));
+    eduiMenuAddItem(menu, eduiItemToggleCreate(1, locator_attr, -i32(aieditorsettings.snap_height_display), 2,
+                                               aieditor_cbSnapHeightToggle, (char *)"Snap Height"));
+    return menu;
+}
+
+process_buttons:
     if ((pad->digital_buttons & 0x40) != 0) {
         if (aieditor->nearest_locator != nullptr) {
             if ((pad->digital_buttons_pressed & 0x40) != 0) {

@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 58.01993,
+    "fuzzy_match_percent": 58.10145,
     "total_code": "4722419",
     "matched_code": "486707",
     "matched_code_percent": 10.306307,
@@ -19556,7 +19556,7 @@
           "address": 4249232,
           "offset": 3359264,
           "size": 4175,
-          "match_percent": 31.515495
+          "match_percent": 33.258263
         },
         {
           "name": "creatureEditor_RenderAllCreatures",
@@ -20883,7 +20883,7 @@
           "address": 5562144,
           "offset": 4672176,
           "size": 1029,
-          "match_percent": 14.506411
+          "match_percent": 33.99359
         },
         {
           "name": "_ZN12PropertyTool7ProcessER14EdInputContext",
@@ -20899,7 +20899,7 @@
           "address": 5563280,
           "offset": 4673312,
           "size": 1328,
-          "match_percent": 68.77469
+          "match_percent": 68.820984
         },
         {
           "name": "_ZN11ClassEditor16DrawObjectSphereER11ClassObjecti",
@@ -21043,7 +21043,7 @@
           "address": 5589136,
           "offset": 4699168,
           "size": 1968,
-          "match_percent": 80.95354
+          "match_percent": 80.986725
         },
         {
           "name": "_Z13cbEdLevelSaveP10eduimenu_sP10eduiitem_sj",
@@ -21642,7 +21642,7 @@
           "address": 4195648,
           "offset": 3305680,
           "size": 4694,
-          "match_percent": 13.987128
+          "match_percent": 39.59901
         },
         {
           "name": "pathEditorCreateData",
@@ -22048,7 +22048,7 @@
           "address": 4225728,
           "offset": 3335760,
           "size": 3691,
-          "match_percent": 8.079908
+          "match_percent": 32.723743
         },
         {
           "name": "_Z20locatorEditor_Renderiiff",
@@ -27687,7 +27687,7 @@
           "address": 4331232,
           "offset": 3441264,
           "size": 3295,
-          "match_percent": 9.197479
+          "match_percent": 11.977591
         },
         {
           "name": "_ZL10edpartProcfP7nupad_s",
@@ -28117,7 +28117,7 @@
           "address": 5595136,
           "offset": 4705168,
           "size": 483,
-          "match_percent": 32.247864
+          "match_percent": 64.90598
         },
         {
           "name": "_ZN12SplineHelper22PostLoadInitialisationEP12MemoryBufferS1_",
@@ -28245,7 +28245,7 @@
           "address": 5616144,
           "offset": 4726176,
           "size": 256,
-          "match_percent": 36.595745
+          "match_percent": 70.75532
         },
         {
           "name": "_ZN12SplineObjectD2Ev",
@@ -28253,7 +28253,7 @@
           "address": 5616144,
           "offset": 4726176,
           "size": 256,
-          "match_percent": 36.595745
+          "match_percent": 70.75532
         },
         {
           "name": "_ZN12SplineObjectD0Ev",
@@ -28261,7 +28261,7 @@
           "address": 5616400,
           "offset": 4726432,
           "size": 277,
-          "match_percent": 9.524753
+          "match_percent": 70.47525
         }
       ]
     },
@@ -29652,7 +29652,7 @@
           "address": 5506864,
           "offset": 4616896,
           "size": 2954,
-          "match_percent": 33.37746
+          "match_percent": 62.93739
         },
         {
           "name": "_ZN13EdManipulator15GetAxisLocatorsER5VuVecPS0_P5VuMtx",
@@ -34123,7 +34123,7 @@
           "address": 3762016,
           "offset": 2872048,
           "size": 761,
-          "match_percent": 0.505435
+          "match_percent": 0.0
         },
         {
           "name": "eduicbInteractFilter",

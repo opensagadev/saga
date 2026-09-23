@@ -4904,7 +4904,7 @@ extern "C" {
             return (property->unknown_property_flags & 0x0b) != 0;
         }
         edui_prop_s *bounds_property = property;
-        if (in_row && edui_cursor_x >= interact->x && edui_cursor_x < label_end - 1.0f && property->selected) {
+        if (in_row && edui_cursor_x < label_end - 1.0f && property->selected) {
             property->selected(interact->menu, property, 0);
             bounds_property = static_cast<edui_prop_s *>(interact->item);
             label_end = interact->x + bounds_property->label_width;

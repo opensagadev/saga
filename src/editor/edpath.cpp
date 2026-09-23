@@ -1945,40 +1945,39 @@ extern "C" void pathEditor_CalcNodeIXs(void);
 extern "C" EDAIPATH_s *pathEditor_GetPath(const char *name);
 
 void pathEditor_Enter(void) {
-    AIEDITOR_RENDER_STATE *state = aieditor;
-    state->paths.head = nullptr;
-    state->paths.tail = nullptr;
+    aieditor->paths.head = nullptr;
+    aieditor->paths.tail = nullptr;
     for (i32 index = 0; index < 32; ++index) {
-        NuLinkedListAppend(&state->free_paths, &state->path_storage[index].link);
+        NuLinkedListAppend(&aieditor->free_paths, &aieditor->path_storage[index].link);
     }
-    state->free_path_nodes.head = nullptr;
-    state->free_path_nodes.tail = nullptr;
+    aieditor->free_path_nodes.head = nullptr;
+    aieditor->free_path_nodes.tail = nullptr;
     for (i32 index = 0; index < 1024; ++index) {
-        NuLinkedListAppend(&state->free_path_nodes, &state->node_storage[index].link);
+        NuLinkedListAppend(&aieditor->free_path_nodes, &aieditor->node_storage[index].link);
     }
-    state->free_shared_nodes.head = nullptr;
-    state->free_shared_nodes.tail = nullptr;
+    aieditor->free_shared_nodes.head = nullptr;
+    aieditor->free_shared_nodes.tail = nullptr;
     for (i32 index = 0; index < 64; ++index) {
-        NuLinkedListAppend(&state->free_shared_nodes, &state->shared_node_storage[index].link);
+        NuLinkedListAppend(&aieditor->free_shared_nodes, &aieditor->shared_node_storage[index].link);
     }
 
-    AIPATHSYS_s *runtime_system = state->ai_system != nullptr ? state->ai_system->path_sys : nullptr;
-    bool rebuild_paths = state->cached_path_system != runtime_system;
+    EDAISHAREDPATHNODE_s *shared_nodes[64];
+    memset(shared_nodes, 0, sizeof(shared_nodes));
+    AIPATHSYS_s *runtime_system = aieditor->ai_system != nullptr ? aieditor->ai_system->path_sys : nullptr;
+    bool rebuild_paths = aieditor->cached_path_system != runtime_system;
     if (rebuild_paths) {
-        state->cached_path_system = runtime_system;
+        aieditor->cached_path_system = runtime_system;
     }
-    if (rebuild_paths && runtime_system != nullptr && runtime_system->paths != nullptr) {
-        EDAISHAREDPATHNODE_s *shared_nodes[256];
-        memset(shared_nodes, 0, sizeof(shared_nodes));
+    if (rebuild_paths && runtime_system != nullptr && runtime_system->path_count != 0) {
         i32 node_storage_start = 0;
         for (i32 path_index = 0; path_index < runtime_system->path_count; ++path_index) {
             AIPATH_s *runtime_path = runtime_system->paths[path_index];
-            EDAIPATH_s *path = (EDAIPATH_s *)NuLinkedListGetHead(&state->free_paths);
+            EDAIPATH_s *path = (EDAIPATH_s *)NuLinkedListGetHead(&aieditor->free_paths);
             if (runtime_path == nullptr || path == nullptr) {
                 break;
             }
-            NuLinkedListRemove(&state->free_paths, &path->link);
-            NuLinkedListAppend(&state->paths, &path->link);
+            NuLinkedListRemove(&aieditor->free_paths, &path->link);
+            NuLinkedListAppend(&aieditor->paths, &path->link);
             strcpy(path->name, runtime_path->name);
             if (NuStrICmp(path->name, "LevelPath") == 0) {
                 path->flags |= 1;
@@ -1993,17 +1992,16 @@ void pathEditor_Enter(void) {
 
             for (i32 node_index = 0; node_index < runtime_path->node_count; ++node_index) {
                 AIPATHNODE_s *source = &runtime_path->nodes[node_index];
-                EDAIPATHNODE_s *node = (EDAIPATHNODE_s *)NuLinkedListGetHead(&state->free_path_nodes);
+                EDAIPATHNODE_s *node = (EDAIPATHNODE_s *)NuLinkedListGetHead(&aieditor->free_path_nodes);
                 if (node == nullptr || path->node_count >= 254) {
                     break;
                 }
-                NuLinkedListRemove(&state->free_path_nodes, &node->link);
+                NuLinkedListRemove(&aieditor->free_path_nodes, &node->link);
                 NuLinkedListAppend(&path->nodes, &node->link);
                 node->index = node_index;
                 ++path->node_count;
-                if (source->name != nullptr) {
-                    strncpy(node->name, source->name, sizeof(node->name) - 1);
-                }
+                if (source->name != nullptr)
+                    strcpy(node->name, source->name);
                 node->position = source->position;
                 node->radius = source->radius;
                 node->lower_height = source->min_height - source->position.y;
@@ -2011,18 +2009,16 @@ void pathEditor_Enter(void) {
                 node->flags = source->runtime_flags;
                 node->special = source->special_handle;
                 node->special_position = source->special_position;
-                node->route_mask = source->route_boundary_mask;
-                if (source->special_route_index < runtime_path->special_route_count &&
-                    runtime_path->special_routes != nullptr) {
+                if (source->special_route_index < runtime_path->special_route_count) {
                     AIPATHNODELINK_s *link = &runtime_path->special_routes[source->special_route_index];
                     i32 shared_index = link->special_route_index;
-                    if (shared_index >= 0 && shared_index < 256) {
+                    if (shared_index >= 0 && shared_index < 64) {
                         EDAISHAREDPATHNODE_s *shared = shared_nodes[shared_index];
                         if (shared == nullptr) {
-                            shared = (EDAISHAREDPATHNODE_s *)NuLinkedListGetHead(&state->free_shared_nodes);
+                            shared = (EDAISHAREDPATHNODE_s *)NuLinkedListGetHead(&aieditor->free_shared_nodes);
                             if (shared != nullptr) {
-                                NuLinkedListRemove(&state->free_shared_nodes, &shared->link);
-                                NuLinkedListAppend(&state->shared_path_nodes, &shared->link);
+                                NuLinkedListRemove(&aieditor->free_shared_nodes, &shared->link);
+                                NuLinkedListAppend(&aieditor->shared_path_nodes, &shared->link);
                                 shared_nodes[shared_index] = shared;
                             }
                         }
@@ -2044,72 +2040,158 @@ void pathEditor_Enter(void) {
             }
             for (i32 node_index = 0; node_index < runtime_path->node_count; ++node_index) {
                 AIPATHNODE_s *source = &runtime_path->nodes[node_index];
-                EDAIPATHNODE_s *node = &state->node_storage[node_storage_start + node_index];
-                if (source->connection_count == 0)
-                    continue;
+                EDAIPATHNODE_s *node = &aieditor->node_storage[node_storage_start + node_index];
                 for (i32 edge_index = 0; edge_index < source->connection_count; ++edge_index) {
                     AIPATHCNX_s *connection = source->connections[edge_index];
                     i32 direction = connection->node_indices[0] != node_index;
                     i32 other_index = connection->node_indices[direction ^ 1];
-                    EDAIPATHNODE_s *other = &state->node_storage[node_storage_start + other_index];
+                    EDAIPATHNODE_s *other = &aieditor->node_storage[node_storage_start + other_index];
                     EDAIPATHCNX_s *editor_connection = nullptr;
-                    for (i32 slot = 0; slot < 8; ++slot) {
-                        if (node->connections[slot].node == other) {
-                            editor_connection = &node->connections[slot];
-                            break;
-                        }
-                    }
+                    if (node->connections[0].node == other)
+                        editor_connection = &node->connections[0];
+                    else if (node->connections[1].node == other)
+                        editor_connection = &node->connections[1];
+                    else if (node->connections[2].node == other)
+                        editor_connection = &node->connections[2];
+                    else if (node->connections[3].node == other)
+                        editor_connection = &node->connections[3];
+                    else if (node->connections[4].node == other)
+                        editor_connection = &node->connections[4];
+                    else if (node->connections[5].node == other)
+                        editor_connection = &node->connections[5];
+                    else if (node->connections[6].node == other)
+                        editor_connection = &node->connections[6];
+                    else if (node->connections[7].node == other)
+                        editor_connection = &node->connections[7];
                     if (editor_connection == nullptr) {
-                        EDAIPATHCNX_s *reciprocal = nullptr;
-                        for (i32 slot = 0; slot < 8; ++slot) {
-                            if (node->connections[slot].node == nullptr) {
-                                editor_connection = &node->connections[slot];
-                                break;
-                            }
+                        i32 free_node_slot = -1;
+                        i32 free_other_slot = -1;
+#define FIND_FREE_OTHER(source_slot)                                                                                   \
+    if (other->connections[0].node == nullptr) {                                                                       \
+        free_node_slot = source_slot;                                                                                  \
+        free_other_slot = 0;                                                                                           \
+    } else if (other->connections[1].node == nullptr) {                                                                \
+        free_node_slot = source_slot;                                                                                  \
+        free_other_slot = 1;                                                                                           \
+    } else if (other->connections[2].node == nullptr) {                                                                \
+        free_node_slot = source_slot;                                                                                  \
+        free_other_slot = 2;                                                                                           \
+    } else if (other->connections[3].node == nullptr) {                                                                \
+        free_node_slot = source_slot;                                                                                  \
+        free_other_slot = 3;                                                                                           \
+    } else if (other->connections[4].node == nullptr) {                                                                \
+        free_node_slot = source_slot;                                                                                  \
+        free_other_slot = 4;                                                                                           \
+    } else if (other->connections[5].node == nullptr) {                                                                \
+        free_node_slot = source_slot;                                                                                  \
+        free_other_slot = 5;                                                                                           \
+    } else if (other->connections[6].node == nullptr) {                                                                \
+        free_node_slot = source_slot;                                                                                  \
+        free_other_slot = 6;                                                                                           \
+    } else if (other->connections[7].node == nullptr) {                                                                \
+        free_node_slot = source_slot;                                                                                  \
+        free_other_slot = 7;                                                                                           \
+    }
+                        if (node->connections[0].node == nullptr) {
+                            FIND_FREE_OTHER(0)
+                        } else if (node->connections[1].node == nullptr) {
+                            FIND_FREE_OTHER(1)
+                        } else if (node->connections[2].node == nullptr) {
+                            FIND_FREE_OTHER(2)
+                        } else if (node->connections[3].node == nullptr) {
+                            FIND_FREE_OTHER(3)
+                        } else if (node->connections[4].node == nullptr) {
+                            FIND_FREE_OTHER(4)
+                        } else if (node->connections[5].node == nullptr) {
+                            FIND_FREE_OTHER(5)
+                        } else if (node->connections[6].node == nullptr) {
+                            FIND_FREE_OTHER(6)
+                        } else if (node->connections[7].node == nullptr) {
+                            FIND_FREE_OTHER(7)
                         }
-                        for (i32 slot = 0; slot < 8; ++slot) {
-                            if (other->connections[slot].node == nullptr) {
-                                reciprocal = &other->connections[slot];
-                                break;
-                            }
-                        }
-                        if (editor_connection == nullptr || reciprocal == nullptr)
+#undef FIND_FREE_OTHER
+                        if (free_node_slot < 0 || free_other_slot < 0)
                             continue;
+                        editor_connection = &node->connections[free_node_slot];
+                        EDAIPATHCNX_s *reciprocal = &other->connections[free_other_slot];
                         editor_connection->node = other;
                         editor_connection->flags = 0;
                         reciprocal->node = node;
                         reciprocal->flags = 0;
                     }
-                    editor_connection->flags = connection->traversal_flags[direction] & ~0x10000000u;
                     editor_connection->route_mask |= connection->route_mask;
                 }
+                node->route_mask = source->route_boundary_mask;
             }
             node_storage_start += runtime_path->node_count;
         }
     }
-    if (runtime_system == nullptr || (rebuild_paths && runtime_system->paths == nullptr)) {
-        EDAIPATH_s *path = (EDAIPATH_s *)NuLinkedListGetHead(&state->free_paths);
+    if (runtime_system == nullptr) {
+        EDAIPATH_s *path = (EDAIPATH_s *)NuLinkedListGetHead(&aieditor->free_paths);
         if (path != nullptr) {
-            NuLinkedListRemove(&state->free_paths, &path->link);
-            NuLinkedListAppend(&state->paths, &path->link);
+            NuLinkedListRemove(&aieditor->free_paths, &path->link);
+            NuLinkedListAppend(&aieditor->paths, &path->link);
             strcpy(path->name, "LevelPath");
             path->flags |= 1;
         }
     }
     if (aieditorsettings.current_path_name[0] != '\0') {
-        state->current_path = pathEditor_GetPath(aieditorsettings.current_path_name);
+        aieditor->current_path = pathEditor_GetPath(aieditorsettings.current_path_name);
     } else {
-        state->current_path = (EDAIPATH_s *)NuLinkedListGetHead(&state->paths);
+        aieditor->current_path = (EDAIPATH_s *)NuLinkedListGetHead(&aieditor->paths);
     }
     pathEditor_CalcNodeIXs();
-    if (state->current_path != nullptr) {
-        state->current_path->current_route = nullptr;
-        for (i32 route = 0; route < 16; ++route) {
-            if (state->current_path->routes[route].flags & 1) {
-                state->current_path->current_route = &state->current_path->routes[route];
-                break;
-            }
-        }
+    EDAIPATH_s *path = aieditor->current_path;
+    if (path != nullptr) {
+        path->current_route = &path->routes[0];
+        if (path->routes[0].flags & 1)
+            goto route_selected;
+        path->current_route = &path->routes[1];
+        if (path->routes[1].flags & 1)
+            goto route_selected;
+        path->current_route = &path->routes[2];
+        if (path->routes[2].flags & 1)
+            goto route_selected;
+        path->current_route = &path->routes[3];
+        if (path->routes[3].flags & 1)
+            goto route_selected;
+        path->current_route = &path->routes[4];
+        if (path->routes[4].flags & 1)
+            goto route_selected;
+        path->current_route = &path->routes[5];
+        if (path->routes[5].flags & 1)
+            goto route_selected;
+        path->current_route = &path->routes[6];
+        if (path->routes[6].flags & 1)
+            goto route_selected;
+        path->current_route = &path->routes[7];
+        if (path->routes[7].flags & 1)
+            goto route_selected;
+        path->current_route = &path->routes[8];
+        if (path->routes[8].flags & 1)
+            goto route_selected;
+        path->current_route = &path->routes[9];
+        if (path->routes[9].flags & 1)
+            goto route_selected;
+        path->current_route = &path->routes[10];
+        if (path->routes[10].flags & 1)
+            goto route_selected;
+        path->current_route = &path->routes[11];
+        if (path->routes[11].flags & 1)
+            goto route_selected;
+        path->current_route = &path->routes[12];
+        if (path->routes[12].flags & 1)
+            goto route_selected;
+        path->current_route = &path->routes[13];
+        if (path->routes[13].flags & 1)
+            goto route_selected;
+        path->current_route = &path->routes[14];
+        if (path->routes[14].flags & 1)
+            goto route_selected;
+        path->current_route = &path->routes[15];
+        if ((path->current_route->flags & 1) == 0)
+            path->current_route = nullptr;
+    route_selected:;
     }
 }
 

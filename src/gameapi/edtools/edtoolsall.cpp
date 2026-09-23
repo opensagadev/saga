@@ -4617,9 +4617,12 @@ void EdInputContext::Update(nucamera_s *camera, nupad_s *new_pad, float elapsed,
     view[0] = camera->mtx.m30;
     view[1] = camera->mtx.m31;
     view[2] = camera->mtx.m32;
-    view[4] = camera->mtx.m10 * 1000.0f;
-    view[5] = camera->mtx.m11 * 1000.0f;
-    view[6] = camera->mtx.m12 * 1000.0f;
+    view[4] = camera->mtx.m10;
+    view[5] = camera->mtx.m11;
+    view[6] = camera->mtx.m12;
+    view[4] *= 1000.0f;
+    view[5] *= 1000.0f;
+    view[6] *= 1000.0f;
 
     f32 cursor_x = 0.5f;
     f32 cursor_y = 0.5f;
@@ -4645,39 +4648,53 @@ void EdInputContext::Update(nucamera_s *camera, nupad_s *new_pad, float elapsed,
         return;
     }
 
-    const u32 buttons = new_pad->digital_buttons;
-    const u32 left_mouse_buttons = NuMouseReadButtons();
-    const bool pad_enabled = edGetPadDisabled() == 0;
-    const bool menu_closed = pad_enabled && eduiGetActiveMenu() == NULL;
     const i32 shift_or_s = NuKeyboard(0x2a) | NuKeyboard(0x36) | NuKeyboard(0x1f);
     const i32 alt_or_space = NuKeyboard(0x38) | NuKeyboard(0xb8) | NuKeyboard(0x39);
     const i32 control_or_c = NuKeyboard(0x1d) | NuKeyboard(0x9d) | NuKeyboard(0x2e);
-    const i32 left_click = (left_mouse_buttons == 1 || (buttons & 0x800) != 0) && !alt_or_space;
-    const u32 right_mouse_buttons = NuMouseReadButtons();
-    const i32 right_click = (right_mouse_buttons == 2 || (pad_enabled && (buttons & 0x20) != 0)) && !alt_or_space;
-    Set(0, NuMouseReadXVel(), elapsed);
-    Set(1, NuMouseReadYVel(), elapsed);
-    Set(2, NuMouseReadZVel(), elapsed);
+    const u32 buttons = new_pad->digital_buttons;
+    const i32 left_click = (NuMouseReadButtons() == 1 || (buttons & 0x800) != 0) && !alt_or_space;
+    const f32 mouse_x = NuMouseReadXVel();
+    const f32 mouse_y = NuMouseReadYVel();
+    const f32 mouse_z = NuMouseReadZVel();
+    const bool pad_enabled = edGetPadDisabled() == 0;
+    const bool menu_closed = pad_enabled && eduiGetActiveMenu() == NULL;
+    const i32 right_click = NuMouseReadButtons() == 2 || (pad_enabled && (buttons & 0x20) != 0);
+    Set(0, mouse_x, elapsed);
+    Set(1, mouse_y, elapsed);
+    Set(2, mouse_z, elapsed);
     Set(3, left_click && !control_or_c, elapsed);
-    Set(4, right_click && !control_or_c, elapsed);
-    const i32 direct_keys[19] = {0x10, 0x11, 0x12, 0x13, 0x21, 0x22, 0xd2, 0xd3, 0,
-                                 0x0d, 0x0c, 0,    0x1b, 0x1a, 0xcd, 0xcb, 0,    0};
-    for (i32 input_index = 5; input_index <= 22; ++input_index) {
-        i32 key = direct_keys[input_index - 5];
-        f32 value = key != 0 ? static_cast<f32>(NuKeyboard(key)) : 0.0f;
-        if (input_index == 13)
-            value = static_cast<f32>(alt_or_space);
-        if (input_index == 16 || input_index == 21)
-            value = static_cast<f32>(shift_or_s);
-        if (input_index == 22)
-            value = static_cast<f32>(control_or_c);
-        Set(input_index, value, elapsed);
-    }
+    Set(4, right_click && !alt_or_space && !control_or_c, elapsed);
+    Set(5, static_cast<f32>(NuKeyboard(0x10)), elapsed);
+    Set(6, static_cast<f32>(NuKeyboard(0x11)), elapsed);
+    Set(7, static_cast<f32>(NuKeyboard(0x12)), elapsed);
+    Set(8, static_cast<f32>(NuKeyboard(0x13)), elapsed);
+    Set(9, static_cast<f32>(NuKeyboard(0x21)), elapsed);
+    Set(10, static_cast<f32>(NuKeyboard(0x22)), elapsed);
+    Set(11, static_cast<f32>(NuKeyboard(0xd2)), elapsed);
+    Set(12, static_cast<f32>(NuKeyboard(0xd3)), elapsed);
+    Set(13, static_cast<f32>(alt_or_space), elapsed);
+    Set(14, static_cast<f32>(NuKeyboard(0x0d)), elapsed);
+    Set(15, static_cast<f32>(NuKeyboard(0x0c)), elapsed);
+    Set(16, static_cast<f32>(shift_or_s), elapsed);
+    Set(17, static_cast<f32>(NuKeyboard(0x1b)), elapsed);
+    Set(18, static_cast<f32>(NuKeyboard(0x1a)), elapsed);
+    Set(19, static_cast<f32>(NuKeyboard(0xcd)), elapsed);
+    Set(20, static_cast<f32>(NuKeyboard(0xcb)), elapsed);
+    Set(21, static_cast<f32>(shift_or_s), elapsed);
+    Set(22, static_cast<f32>(control_or_c), elapsed);
     Set(23, static_cast<f32>(NuKeyboard(0x1f) && control_or_c), elapsed);
     Set(24, static_cast<f32>(NuKeyboard(0x01)), elapsed);
     Set(25, static_cast<f32>(left_click && control_or_c), elapsed);
-    for (i32 input_index = 26; input_index <= 35; ++input_index)
-        Set(input_index, static_cast<f32>(NuKeyboard(input_index - 24)), elapsed);
+    Set(26, static_cast<f32>(NuKeyboard(2)), elapsed);
+    Set(27, static_cast<f32>(NuKeyboard(3)), elapsed);
+    Set(28, static_cast<f32>(NuKeyboard(4)), elapsed);
+    Set(29, static_cast<f32>(NuKeyboard(5)), elapsed);
+    Set(30, static_cast<f32>(NuKeyboard(6)), elapsed);
+    Set(31, static_cast<f32>(NuKeyboard(7)), elapsed);
+    Set(32, static_cast<f32>(NuKeyboard(8)), elapsed);
+    Set(33, static_cast<f32>(NuKeyboard(9)), elapsed);
+    Set(34, static_cast<f32>(NuKeyboard(10)), elapsed);
+    Set(35, static_cast<f32>(NuKeyboard(11)), elapsed);
     Set(37, static_cast<f32>(menu_closed ? buttons & 0x80 : 0), elapsed);
     if (menu_closed)
         Set(38, static_cast<f32>(buttons & 0x40), elapsed);
