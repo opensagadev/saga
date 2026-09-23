@@ -1582,6 +1582,7 @@ extern "C" {
                     distance_tables = nullptr;
                     return nullptr;
                 }
+                memset(path->route_matrix, 0, path->node_count * sizeof(u8 *));
                 {
                     for (i32 source = 0; source < path->node_count; ++source) {
                         path->route_matrix[source] = (u8 *)AISysBufferAlloc(cursor, end, path->node_count);
@@ -1589,11 +1590,12 @@ extern "C" {
                             distance_tables = nullptr;
                             return nullptr;
                         }
-                        memset(path->route_matrix[source], 0xff, path->node_count);
+                        memset(path->route_matrix[source], 0, path->node_count);
                         if (distance_tables == nullptr || distance_tables[path_index] == nullptr) {
                             continue;
                         }
                         for (i32 destination = 0; destination < path->node_count; ++destination) {
+                            path->route_matrix[source][destination] = 0xff;
                             if (destination == source) {
                                 continue;
                             }

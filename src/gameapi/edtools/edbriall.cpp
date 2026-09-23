@@ -260,10 +260,19 @@ static void edbricbBridgePropertiesMenu(eduimenu_s *parent, eduiitem_s *, u32) {
 }
 
 static void edbriMakePath(char *path) {
-    char directory[256], name[256], extension[268];
-    strcpy(directory, edbits_level_save_directory[0] ? edbits_level_save_directory : ".");
-    strcpy(name, edbits_level_save_name[0] ? edbits_level_save_name : "bridge");
-    strcpy(extension, edbits_level_save_extension[0] ? edbits_level_save_extension : "bri");
+    char directory[256], name[256], extension[256];
+    if (!edbits_level_save_directory[0])
+        strcpy(directory, ".");
+    else
+        strcpy(directory, edbits_level_save_directory);
+    if (!edbits_level_save_name[0])
+        strcpy(name, "bridge");
+    else
+        strcpy(name, edbits_level_save_name);
+    if (edbits_level_save_extension[0])
+        strcpy(extension, edbits_level_save_extension);
+    else
+        strcpy(extension, "bri");
     sprintf(path, "%s\\%s.%s", directory, name, extension);
 }
 static void edbricbFileSave(eduimenu_s *menu, eduiitem_s *, u32) {

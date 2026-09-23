@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 57.88891,
+    "fuzzy_match_percent": 57.90173,
     "total_code": "4722419",
     "matched_code": "485548",
     "matched_code_percent": 10.281765,
@@ -25763,7 +25763,7 @@
           "address": 3539488,
           "offset": 2649520,
           "size": 422,
-          "match_percent": 43.86842
+          "match_percent": 99.8421
         },
         {
           "name": "edbriLoadPage",
@@ -25835,7 +25835,7 @@
           "address": 3543440,
           "offset": 2653472,
           "size": 412,
-          "match_percent": 48.363636
+          "match_percent": 99.97403
         },
         {
           "name": "_Z12edbriDoInputP7nupad_s",
@@ -26392,7 +26392,7 @@
           "address": 3420384,
           "offset": 2530416,
           "size": 826,
-          "match_percent": 36.319798
+          "match_percent": 43.436546
         },
         {
           "name": "_ZL19edgracbInstanceMenuP10eduimenu_sP10eduiitem_sj",
@@ -26400,7 +26400,7 @@
           "address": 3421216,
           "offset": 2531248,
           "size": 874,
-          "match_percent": 42.89706
+          "match_percent": 46.64706
         },
         {
           "name": "_ZL23edgracbClumpTerrainMenuP10eduimenu_sP10eduiitem_sj",
@@ -28117,7 +28117,7 @@
           "address": 5595136,
           "offset": 4705168,
           "size": 483,
-          "match_percent": 28.564102
+          "match_percent": 32.247864
         },
         {
           "name": "_ZN12SplineHelper22PostLoadInitialisationEP12MemoryBufferS1_",
@@ -28141,7 +28141,7 @@
           "address": 5595792,
           "offset": 4705824,
           "size": 514,
-          "match_percent": 32.768
+          "match_percent": 41.816
         },
         {
           "name": "_ZN12SplineHelper20cbEdSplineSmoothKnotEP10eduimenu_sP10eduiitem_sj",

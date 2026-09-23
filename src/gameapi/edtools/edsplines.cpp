@@ -373,12 +373,14 @@ void SplineKnot::Smooth() {
         after = before;
     }
     VuVec delta{(after.x - before.x) * 0.1f, (after.y - before.y) * 0.1f, (after.z - before.z) * 0.1f, 0.0f};
-    in_tangent = VuVec{position.x - delta.x, position.y - delta.y, position.z - delta.z, 0.0f};
-    out_tangent = VuVec{position.x + delta.x, position.y + delta.y, position.z + delta.z, 0.0f};
+    VuVec in{position.x - delta.x, position.y - delta.y, position.z - delta.z, 0.0f};
+    VuVec out{position.x + delta.x, position.y + delta.y, position.z + delta.z, 0.0f};
     if (spline != NULL) {
-        spline->DropPoint(out_tangent);
-        spline->DropPoint(in_tangent);
+        spline->DropPoint(out);
+        spline->DropPoint(in);
     }
+    in_tangent = in;
+    out_tangent = out;
 }
 
 void SplineTool::Initialise(variptr_u &, variptr_u &, i32) {
@@ -653,8 +655,12 @@ inline void SplineObject::operator delete(void *memory) {
 SplineObject *SplineObject::Clone() {
     SplineObject *clone = new (theMemoryManager.AllocPool(sizeof(SplineObject), 1)) SplineObject();
     NuStrCpy(clone->name, name);
-    for (SplineKnot *source = knots.first; source != NULL; source = source->next) {
+    SplineKnot *source = knots.first;
+    for (i32 index = 0; index < knots.count; ++index) {
         SplineKnot *knot = static_cast<SplineKnot *>(theMemoryManager.AllocPool(sizeof(SplineKnot), 1));
+        knot->position = source->position;
+        knot->in_tangent = source->in_tangent;
+        knot->out_tangent = source->out_tangent;
         knot->next = NULL;
         knot->previous = clone->knots.last;
         knot->spline = clone;
@@ -665,9 +671,7 @@ SplineObject *SplineObject::Clone() {
             clone->knots.first = knot;
         clone->knots.last = knot;
         ++clone->knots.count;
-        knot->position = source->position;
-        knot->in_tangent = source->in_tangent;
-        knot->out_tangent = source->out_tangent;
+        source = source->next;
     }
     clone->step = step;
     clone->height = height;

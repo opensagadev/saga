@@ -5220,19 +5220,16 @@ extern "C" {
         u8 left2 = pad->analog_l2;
         u8 decrease = pad->analog_l1;
         u8 increase = pad->analog_r1;
-        if (!decrease) {
-            decrease = left2;
-            if (!increase) {
-                if (decrease)
-                    goto decrease_time;
-                increase = right2;
-                if (!increase)
-                    return 0;
-                goto increase_time;
-            }
-        }
         if (decrease)
             goto decrease_time;
+        if (increase)
+            goto increase_time;
+        decrease = left2;
+        if (decrease)
+            goto decrease_time;
+        increase = right2;
+        if (!increase)
+            return 0;
     increase_time:
         stage->time += static_cast<f32>(static_cast<i32>(increase)) / 15360.0f;
         if (stage->time > upper)

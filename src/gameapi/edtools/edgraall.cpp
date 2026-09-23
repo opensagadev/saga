@@ -238,8 +238,8 @@ static void edgracbInstanceMenu(eduimenu_s *parent, eduiitem_s *, u32) {
                        const_cast<char *>(edgra_filter ? "Base Instance Select (Filtered)" : "Base Instance Select"));
     if (!edgra_instance_menu || !edbits_base_scene)
         return;
-    bool selected_found = false;
-    i32 added = 0;
+    i32 selected_found = 0;
+    i32 added = 1;
     const i32 count = NuSpecialGetNumSpecials(edbits_base_scene);
     char *name = NULL;
     for (i32 i = 0; i < count; ++i) {
@@ -254,11 +254,11 @@ static void edgracbInstanceMenu(eduimenu_s *parent, eduiitem_s *, u32) {
                         eduiItemCheckCreate(i, edblack, selected, 1, edgracbSetInstanceType, name));
         ++added;
         if (selected) {
-            selected_found = true;
+            selected_found = 1;
             edgra_instance_menu->selected = edui_last_item;
         }
     }
-    if (!added)
+    if (added == 1)
         eduiMenuAddItem(edgra_instance_menu, eduiItemSelCreate(1, edgrey, 0, 0, NULL, "All Instances Filtered"));
     eduiMenuAddItemFirst(edgra_instance_menu,
                          eduiItemCheckCreate(static_cast<usize>(-1), edblack, edgra_instance_type == -1, 1,
@@ -511,16 +511,13 @@ static void edgracbChangeInstanceMenu(eduimenu_s *parent, eduiitem_s *, u32) {
                        const_cast<char *>(edgra_filter ? "Change Instance (Filtered)" : "Change Instance"));
     if (!edgra_changeinstance_menu || !edbits_base_scene)
         return;
-    bool selected_found = false;
-    i32 added = 0;
+    i32 selected_found = 0;
+    i32 added = 1;
     const i32 count = NuSpecialGetNumSpecials(edbits_base_scene);
     char *name = NULL;
     for (i32 i = 0; i < count; ++i) {
         nuhspecial_s special;
-        NuGScnGetSpecial(&special, edbits_base_scene, i);
-        if (NuSpecialExistsFn(&special))
-            name = NuSpecialGetName(&special);
-        const bool selected = i == GrassClumps[edgra_nearest].special_index;
+        const i32 selected = i == GrassClumps[edgra_nearest].special_index;
         NuGScnGetSpecial(&special, edbits_base_scene, i);
         if (NuSpecialExistsFn(&special))
             name = NuSpecialGetName(&special);
@@ -530,11 +527,11 @@ static void edgracbChangeInstanceMenu(eduimenu_s *parent, eduiitem_s *, u32) {
                         eduiItemCheckCreate(i, edblack, selected, 1, edgracbChangeInstanceType, name));
         ++added;
         if (selected) {
-            selected_found = true;
+            selected_found = 1;
             edgra_changeinstance_menu->selected = edui_last_item;
         }
     }
-    if (!added)
+    if (added == 1)
         eduiMenuAddItem(edgra_changeinstance_menu, eduiItemSelCreate(1, edgrey, 0, 0, NULL, "All Instances Filtered"));
     edgraAttachMenu(parent, edgra_changeinstance_menu);
     if (selected_found)
