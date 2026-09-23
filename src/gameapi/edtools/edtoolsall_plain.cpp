@@ -3524,15 +3524,20 @@ extern "C" {
             if (!edui_donotdraw)
                 NuRndrLineRect2di(x << 4, (y << 3) + 8, item_width << 4, (height << 3) - 16, colour, uimtls[ui_outmtl]);
         }
-        if (item->disabled && !edui_donotdraw) {
+        if (item->disabled) {
             i32 left = x << 4;
             i32 top = y << 3;
             i32 right = left + (width << 4);
             i32 bottom = top + (height << 3);
-            NuRndrLine2di(left, top, left + (width << 2), bottom, item->colours[0], uimtls[ui_bgmtl]);
-            NuRndrLine2di(left + (width << 2), top, left + (width << 3), bottom, item->colours[0], uimtls[ui_bgmtl]);
-            NuRndrLine2di(left + (width << 3), top, left + width * 12, bottom, item->colours[0], uimtls[ui_bgmtl]);
-            NuRndrLine2di(left + width * 12, top, right, bottom, item->colours[0], uimtls[ui_bgmtl]);
+            if (!edui_donotdraw)
+                NuRndrLine2di(left, top, left + (width << 2), bottom, item->colours[0], uimtls[ui_bgmtl]);
+            if (!edui_donotdraw)
+                NuRndrLine2di(left + (width << 2), top, left + (width << 3), bottom, item->colours[0],
+                              uimtls[ui_bgmtl]);
+            if (!edui_donotdraw)
+                NuRndrLine2di(left + (width << 3), top, left + width * 12, bottom, item->colours[0], uimtls[ui_bgmtl]);
+            if (!edui_donotdraw)
+                NuRndrLine2di(left + width * 12, top, right, bottom, item->colours[0], uimtls[ui_bgmtl]);
         }
         return height;
     }

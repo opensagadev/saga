@@ -215,18 +215,8 @@ DECOMP_ASSERT(offsetof(EdUiNameInputItem, max_name_length) == 0x15a, "editor nam
 static __used__ void ParseAIPathCnxFlag(char *) {
 }
 
-static void pathEditorDrawNodeVolume(NUVEC *position, f32 radius, f32 lower_height, f32 upper_height, u32 colour,
-                                     numtl_s *material, i32 segments, i32 solid) {
-    NUVEC centre = *position;
-    centre.y += aiEditor_DrawYOffset;
-    if (solid == 0) {
-        LocaledbitsDrawCircleXY(&centre, radius, colour, static_cast<i32>(reinterpret_cast<uintptr_t>(material)),
-                                segments);
-    } else {
-        LocaledbitsDrawSolidCircleXY(&centre, radius, lower_height, upper_height, colour,
-                                     static_cast<i32>(reinterpret_cast<uintptr_t>(material)), segments);
-    }
-}
+void pathEditorDrawNode(NUVEC *position, f32 radius, f32 lower_height, f32 upper_height, u32 colour, numtl_s *material,
+                        i32 segments, i32 solid);
 
 static __used__ void pathEditorDrawPath(EDAIPATH_s *path, i32 path_index) {
     if (path == nullptr) {
@@ -257,8 +247,8 @@ static __used__ void pathEditorDrawPath(EDAIPATH_s *path, i32 path_index) {
                 segments = 32;
             }
         }
-        pathEditorDrawNodeVolume(&node->position, node->radius, node->position.y + node->lower_height,
-                                 node->position.y + node->upper_height, node_colour, nullptr, segments, solid);
+        pathEditorDrawNode(&node->position, node->radius, node->position.y + node->lower_height,
+                           node->position.y + node->upper_height, node_colour, nullptr, segments, solid);
         if (node->shared_node != nullptr && !(node->shared_node->draw_flags & 1)) {
             NURND_VERTEX3D vertices[2];
             vertices[0].position = node->position;
@@ -276,8 +266,8 @@ static __used__ void pathEditorDrawPath(EDAIPATH_s *path, i32 path_index) {
             node->shared_node->draw_flags |= 1;
         }
         if (active_route != 0 && (node->route_mask & active_route)) {
-            pathEditorDrawNodeVolume(&node->position, node->radius * 0.9f, node->position.y + node->lower_height,
-                                     node->position.y + node->upper_height, node_colour, nullptr, segments, solid);
+            pathEditorDrawNode(&node->position, node->radius * 0.9f, node->position.y + node->lower_height,
+                               node->position.y + node->upper_height, node_colour, nullptr, segments, solid);
         }
         for (i32 slot = 0; slot < 8; ++slot) {
             EDAIPATHCNX_s *connection = &node->connections[slot];

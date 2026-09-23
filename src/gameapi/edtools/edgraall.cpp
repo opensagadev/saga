@@ -142,10 +142,19 @@ static void edgracbFileLoad(eduimenu_s *menu, eduiitem_s *, u32) {
     char path[256];
     char directory[256];
     char name[256];
-    char extension[268];
-    strcpy(directory, edbits_level_save_directory[0] ? edbits_level_save_directory : ".");
-    strcpy(name, edbits_level_save_name[0] ? edbits_level_save_name : "grass");
-    strcpy(extension, edbits_level_save_extension[0] ? edbits_level_save_extension : "gra");
+    char extension[256];
+    if (edbits_level_save_directory[0] == 0)
+        strcpy(directory, ".");
+    else
+        strcpy(directory, edbits_level_save_directory);
+    if (edbits_level_save_name[0] == 0)
+        strcpy(name, "grass");
+    else
+        strcpy(name, edbits_level_save_name);
+    if (edbits_level_save_extension[0] == 0)
+        strcpy(extension, "gra");
+    else
+        strcpy(extension, edbits_level_save_extension);
     sprintf(path, "%s\\%s.%s", directory, name, extension);
     edgraClumpsReset();
     if (NuFileExists(path))
@@ -157,10 +166,19 @@ static void edgracbFileSave(eduimenu_s *menu, eduiitem_s *, u32) {
     char path[256];
     char directory[256];
     char name[256];
-    char extension[268];
-    strcpy(directory, edbits_level_save_directory[0] ? edbits_level_save_directory : ".");
-    strcpy(name, edbits_level_save_name[0] ? edbits_level_save_name : "grass");
-    strcpy(extension, edbits_level_save_extension[0] ? edbits_level_save_extension : "gra");
+    char extension[256];
+    if (edbits_level_save_directory[0] == 0)
+        strcpy(directory, ".");
+    else
+        strcpy(directory, edbits_level_save_directory);
+    if (edbits_level_save_name[0] == 0)
+        strcpy(name, "grass");
+    else
+        strcpy(name, edbits_level_save_name);
+    if (edbits_level_save_extension[0] == 0)
+        strcpy(extension, "gra");
+    else
+        strcpy(extension, edbits_level_save_extension);
     sprintf(path, "%s\\%s.%s", directory, name, extension);
     if (edgraFileSave(path))
         eduiCreateMessageMenu(menu, "Saved OK", 1);

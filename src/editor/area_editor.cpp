@@ -107,7 +107,7 @@ static __used__ void areaEditor_cbRenameArea(eduimenu_s *, eduiitem_s *item, uns
             return;
         }
     }
-    strcpy(selected->name, name);
+    strcpy(area_selected()->name, name);
 }
 
 static __used__ void areaEditor_cbCancelRenameMenu(eduimenu_s *menu, eduimenu_s *) {

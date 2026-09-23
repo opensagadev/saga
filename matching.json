@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 57.971752,
+    "fuzzy_match_percent": 57.983814,
     "total_code": "4722419",
-    "matched_code": "486425",
-    "matched_code_percent": 10.300335,
+    "matched_code": "486581",
+    "matched_code_percent": 10.303638,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 5868,
-    "matched_functions_percent": 43.59908,
+    "matched_functions": 5869,
+    "matched_functions_percent": 43.606506,
     "total_units": 1
   },
   "text": {
@@ -19109,7 +19109,7 @@
           "address": 4044752,
           "offset": 3154784,
           "size": 156,
-          "match_percent": 85.89091
+          "match_percent": 100.0
         },
         {
           "name": "_Z16areaEditor_Enterv",
@@ -21562,7 +21562,7 @@
           "address": 4182336,
           "offset": 3292368,
           "size": 151,
-          "match_percent": 99.57143
+          "match_percent": 99.92857
         },
         {
           "name": "aieditor_RegisterDefaultPathCnxTypes",
@@ -21586,7 +21586,7 @@
           "address": 4185440,
           "offset": 3295472,
           "size": 5632,
-          "match_percent": 19.190107
+          "match_percent": 21.058195
         },
         {
           "name": "pathEditorDrawPaths",
@@ -21928,7 +21928,7 @@
           "address": 4179040,
           "offset": 3289072,
           "size": 972,
-          "match_percent": 66.72043
+          "match_percent": 67.200714
         },
         {
           "name": "locatorEditor_GetNearest",
@@ -26424,7 +26424,7 @@
           "address": 3553520,
           "offset": 2663552,
           "size": 414,
-          "match_percent": 44.453335
+          "match_percent": 99.84
         },
         {
           "name": "_ZL22edgracbApplyGlobalFadeP10eduimenu_sP10eduiitem_sj",
@@ -26552,7 +26552,7 @@
           "address": 3615536,
           "offset": 2725568,
           "size": 420,
-          "match_percent": 50.93671
+          "match_percent": 99.974686
         }
       ]
     },
@@ -34931,7 +34931,7 @@
           "address": 3789344,
           "offset": 2899376,
           "size": 670,
-          "match_percent": 42.532166
+          "match_percent": 42.847954
         },
         {
           "name": "eduiSetUsingMenuFocus",
