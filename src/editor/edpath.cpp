@@ -1147,7 +1147,7 @@ static __used__ void routeEditor_cbRouteUsers(eduimenu_s *parent, eduiitem_s *, 
         ++index;
         name = SpecialRouteCharacterNameFn(index);
     }
-    if (index == 0 || index == 64) {
+    if (index < 64) {
         i32 selected = (aieditor->current_path->current_route->user_mask >> 63) & 1;
         eduiitem_s *item = eduiItemCheckCreate(63, &attr, selected, 64, routeEditor_cbSetRouteUsers, (char *)"Global");
         eduiMenuAddItem(menu, item);
@@ -1901,8 +1901,11 @@ void pathEditor_Enter(void) {
     }
 
     AIPATHSYS_s *runtime_system = state->ai_system != nullptr ? state->ai_system->path_sys : nullptr;
-    state->current_path = nullptr;
-    if (runtime_system != nullptr && runtime_system->paths != nullptr) {
+    bool rebuild_paths = state->cached_path_system != runtime_system;
+    if (rebuild_paths) {
+        state->cached_path_system = runtime_system;
+    }
+    if (rebuild_paths && runtime_system != nullptr && runtime_system->paths != nullptr) {
         EDAISHAREDPATHNODE_s *shared_nodes[256];
         memset(shared_nodes, 0, sizeof(shared_nodes));
         i32 node_storage_start = 0;
@@ -2022,7 +2025,7 @@ void pathEditor_Enter(void) {
             node_storage_start += runtime_path->node_count;
         }
     }
-    if (runtime_system == nullptr || runtime_system->paths == nullptr) {
+    if (runtime_system == nullptr || (rebuild_paths && runtime_system->paths == nullptr)) {
         EDAIPATH_s *path = (EDAIPATH_s *)NuLinkedListGetHead(&state->free_paths);
         if (path != nullptr) {
             NuLinkedListRemove(&state->free_paths, &path->link);
@@ -2031,12 +2034,14 @@ void pathEditor_Enter(void) {
             path->flags |= 1;
         }
     }
-    state->current_path = pathEditor_GetPath(aieditorsettings.current_path_name);
-    if (state->current_path == nullptr) {
+    if (aieditorsettings.current_path_name[0] != '\0') {
+        state->current_path = pathEditor_GetPath(aieditorsettings.current_path_name);
+    } else {
         state->current_path = (EDAIPATH_s *)NuLinkedListGetHead(&state->paths);
     }
     pathEditor_CalcNodeIXs();
     if (state->current_path != nullptr) {
+        state->current_path->current_route = nullptr;
         for (i32 route = 0; route < 16; ++route) {
             if (state->current_path->routes[route].flags & 1) {
                 state->current_path->current_route = &state->current_path->routes[route];

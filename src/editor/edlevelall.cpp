@@ -1920,12 +1920,26 @@ void LevelEditor::Exit() {
 }
 
 i32 LevelEditor::FindSceneId(char *name) {
-    for (i32 i = 0; i < 10; ++i) {
-        if (NuStrICmp(scenes[i].name, name) == 0) {
-            return i;
-        }
-    }
-    return -1;
+    if (NuStrICmp(scenes[0].name, name) == 0)
+        return 0;
+    if (NuStrICmp(scenes[1].name, name) == 0)
+        return 1;
+    if (NuStrICmp(scenes[2].name, name) == 0)
+        return 2;
+    if (NuStrICmp(scenes[3].name, name) == 0)
+        return 3;
+    if (NuStrICmp(scenes[4].name, name) == 0)
+        return 4;
+    if (NuStrICmp(scenes[5].name, name) == 0)
+        return 5;
+    if (NuStrICmp(scenes[6].name, name) == 0)
+        return 6;
+    if (NuStrICmp(scenes[7].name, name) == 0)
+        return 7;
+    if (NuStrICmp(scenes[8].name, name) == 0)
+        return 8;
+    // The original accepts any comparison result below 1 for the final slot.
+    return NuStrICmp(scenes[9].name, name) < 1 ? 9 : -1;
 }
 
 void LevelEditor::Flush() {

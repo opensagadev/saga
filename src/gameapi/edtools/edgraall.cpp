@@ -396,7 +396,7 @@ static void edgracbSetClumpHeight(eduimenu_s *, eduiitem_s *item, u32) {
     edgraInitAllClumps();
 }
 static void edgracbApplyGlobalFade(eduimenu_s *menu, eduiitem_s *, u32) {
-    for (i32 i = 0; i < edgra_clumps_used; ++i) {
+    for (i32 i = 0; i < EDGRA_MAX_CLUMPS; ++i) {
         if (GrassClumps[i].element_count) {
             GrassClumps[i].near_distance = edgra_global_fadein;
             GrassClumps[i].far_distance = edgra_global_fadeout;

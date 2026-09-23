@@ -17,6 +17,7 @@ i32 edfile_buffer_pointer;
 i32 edfile_lock[2];
 
 i32 edfile_readwrongendianess;
+i32 edfile_mcresult;
 
 i32 EdFileBackup(char *source, char *destination) {
     i64 remaining = NuFileSize(source);

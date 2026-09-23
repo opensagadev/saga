@@ -285,6 +285,8 @@ static EDANTINODE_REGPARM1 EDANTINODE_s *antinodeEditor_GetNearestAntinode(i32 r
                 f32 ellipse_z = NuTrigTable[((angle + 0x4000) >> 1) & 0x7fff] * node->base_height;
                 if (distance >= ellipse_x * ellipse_x + ellipse_z * ellipse_z)
                     continue;
+            } else {
+                continue;
             }
         }
         nearest = node;

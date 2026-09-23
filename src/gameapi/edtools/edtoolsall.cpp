@@ -4984,7 +4984,7 @@ void EdMatrixControl::cbChanged(eduimenu_s *, eduiitem_s *item, u32) {
         matrix = rebuilt;
     }
     matrix.m33 = 1.0f;
-    control->reference->SetMemberData(control->object, control->reference->type_id, &source, 0, nullptr);
+    control->reference->SetMemberData(control->object, EdType_VuMtx, &source, 0, nullptr);
     char text[32];
     sprintf(text, "%.2f", changed_value);
     eduiItemPropSetText(static_cast<edui_prop_s *>(item), text);

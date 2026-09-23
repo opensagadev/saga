@@ -157,16 +157,16 @@ void areaEditor_Enter() {
     }
     for (i32 index = 0; index < system->area_count; ++index) {
         AIAREA *source = &system->areas[index];
+        i16 rotation = source->rotation;
+        u8 flags = source->game_flags;
         EDAIAREA_s *area = reinterpret_cast<EDAIAREA_s *>(NuLinkedListGetHead(free_list));
         if (area != NULL) {
             NuLinkedListRemove(free_list, &area->link);
             NuLinkedListAppend(active_list, &area->link);
             area->position = source->position;
-            area->size.x = source->half_width;
-            area->size.y = source->height;
-            area->size.z = source->half_depth;
-            area->rotation = source->rotation;
-            area->flags = source->game_flags;
+            memcpy(&area->size, &source->half_width, sizeof(area->size));
+            area->rotation = rotation;
+            area->flags = flags;
         }
         NuStrNCpy(area->name, source->name, 16);
     }

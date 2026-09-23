@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 57.649723,
+    "fuzzy_match_percent": 57.63392,
     "total_code": "4722419",
-    "matched_code": "485400",
-    "matched_code_percent": 10.27863,
+    "matched_code": "485548",
+    "matched_code_percent": 10.281765,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 5863,
-    "matched_functions_percent": 43.561928,
+    "matched_functions": 5864,
+    "matched_functions_percent": 43.56936,
     "total_units": 1
   },
   "text": {
@@ -19117,7 +19117,7 @@
           "address": 4046944,
           "offset": 3156976,
           "size": 337,
-          "match_percent": 43.37864
+          "match_percent": 54.300972
         },
         {
           "name": "_Z18areaEditor_ProcessP7nupad_s",
@@ -20035,7 +20035,7 @@
           "address": 5510848,
           "offset": 4620880,
           "size": 367,
-          "match_percent": 14.990196
+          "match_percent": 0.0
         },
         {
           "name": "_ZN11LevelEditor8GetSceneEPc",
@@ -21514,7 +21514,7 @@
           "address": 4045696,
           "offset": 3155728,
           "size": 461,
-          "match_percent": 82.42857
+          "match_percent": 86.63025
         },
         {
           "name": "_ZL27pathEditor_cbRenamePathMenuP10eduimenu_sP10eduiitem_sj",
@@ -21642,7 +21642,7 @@
           "address": 4195648,
           "offset": 3305680,
           "size": 4694,
-          "match_percent": 19.724752
+          "match_percent": 17.746534
         },
         {
           "name": "pathEditorCreateData",
@@ -22048,7 +22048,7 @@
           "address": 4225728,
           "offset": 3335760,
           "size": 3691,
-          "match_percent": 7.785388
+          "match_percent": 7.194064
         },
         {
           "name": "_Z20locatorEditor_Renderiiff",
@@ -25771,7 +25771,7 @@
           "address": 3540880,
           "offset": 2650912,
           "size": 927,
-          "match_percent": 70.19313
+          "match_percent": 0.0
         },
         {
           "name": "_ZL20edbricbSetRopeColourP10eduimenu_sP10eduiitem_sj",
@@ -26432,7 +26432,7 @@
           "address": 3605568,
           "offset": 2715600,
           "size": 148,
-          "match_percent": 99.893616
+          "match_percent": 100.0
         },
         {
           "name": "_ZL19edgracbSetClumpWindP10eduimenu_sP10eduiitem_sj",
@@ -29132,7 +29132,7 @@
           "address": 5484064,
           "offset": 4594096,
           "size": 1332,
-          "match_percent": 47.96233
+          "match_percent": 49.311646
         },
         {
           "name": "_ZN15EdMatrixControl8cbButtonEP10eduimenu_sP10eduiitem_sj",

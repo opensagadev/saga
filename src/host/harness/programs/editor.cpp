@@ -23,7 +23,6 @@
 #include "nu2api/nu3d/nurndr.h"
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nucore/nupad.h"
-#include "nu2api/nucore/nustring.h"
 #include "nu2api/nuplatform/nuplatform.h"
 
 #include <algorithm>
@@ -34,7 +33,6 @@
 #include <cstring>
 #include <cstdlib>
 #include <iostream>
-#include <mutex>
 #include <optional>
 #include <string>
 #include <utility>
@@ -101,7 +99,6 @@ namespace saga::host::harness {
                 this->registered_scene = nullptr;
                 this->registered_scene_id = -1;
                 this->save_directory.clear();
-                this->scene_objects.clear();
                 theClassEditor.selected_objects = {};
                 theClassEditor.current_object = {};
                 this->requested_view = EditorView::modules;
@@ -136,25 +133,6 @@ namespace saga::host::harness {
                     instance().toggle_requests.fetch_or(2u, std::memory_order_release);
                 else if (!event.key.repeat && event.key.scancode == SDL_SCANCODE_F3)
                     instance().toggle_requests.fetch_or(4u, std::memory_order_release);
-                if (!instance().capture_game_input.load(std::memory_order_acquire))
-                    return;
-                char input = 0;
-                if (event.key.key >= SDLK_A && event.key.key <= SDLK_Z)
-                    input = static_cast<char>(event.key.key);
-                else if (event.key.key >= SDLK_0 && event.key.key <= SDLK_9)
-                    input = static_cast<char>(event.key.key);
-                else if (event.key.key == SDLK_SPACE)
-                    input = ' ';
-                else if (event.key.key == SDLK_MINUS)
-                    input = (event.key.mod & SDL_KMOD_SHIFT) ? '_' : '-';
-                else if (event.key.key == SDLK_PERIOD)
-                    input = '.';
-                else if (event.key.key == SDLK_BACKSPACE)
-                    input = '\b';
-                if (input) {
-                    std::lock_guard lock{instance().filter_input_mutex};
-                    instance().pending_filter_input += input;
-                }
             }
 
             static int requested_exit_status() {
@@ -359,7 +337,7 @@ namespace saga::host::harness {
                         this->destroy_level_menu();
                     }
                     const auto menu_positions = this->capture_menu_positions();
-                    this->update_scene_filter();
+                    this->bind_scene_object_selection();
                     nupad_s *pads[]{&pad, nullptr};
                     ThingProcessData process_data{FRAMETIME, static_cast<u32>(Paused), pads, 2};
                     theLevelEditor.ProcessEvenWhenPaused(&process_data);
@@ -570,34 +548,20 @@ namespace saga::host::harness {
                     this->return_to_game();
                 }
                 theLevelEditor.reset_pending = 0;
+                if (this->registered_scene_id >= 0) {
+                    if (theClassEditor.selected_objects.first) {
+                        ClassObject empty{};
+                        theClassEditor.SelectObject(empty, 0);
+                    }
+                    theClassEditor.current_object = {};
+                    theLevelEditor.ClearLevel(this->registered_scene_id);
+                }
                 const i32 scene_id = theLevelEditor.AddScene(const_cast<char *>("GAME"), scene, 1);
                 std::snprintf(theLevelEditor.scenes[scene_id].directory,
                               sizeof(theLevelEditor.scenes[scene_id].directory), "%s", this->save_directory.c_str());
                 theLevelEditor.scenes[scene_id].editable = 1;
                 const i32 special_count = NuGScnNumSpecials(scene);
-                if (theClassEditor.selected_objects.first) {
-                    ClassObject empty{};
-                    theClassEditor.SelectObject(empty, 0);
-                }
-                theClassEditor.current_object = {};
-                if (this->registered_scene_id >= 0 && this->registered_scene_id < 10) {
-                    theSceneObjectHelper.scenes[this->registered_scene_id] = nullptr;
-                    theSceneObjectHelper.scene_counts[this->registered_scene_id] = 0;
-                }
-                while (theSceneObjectHelper.owned_first)
-                    theSceneObjectHelper.DestroyObject(theSceneObjectHelper.owned_first, 0);
-                this->scene_objects.clear();
-                this->scene_objects.resize(special_count);
-                for (i32 index = 0; index < special_count; ++index) {
-                    HostSceneObject &object = this->scene_objects[index];
-                    NuGScnGetSpecial(&object.special, scene, index);
-                    object.attributes = 0x12400000;
-                    object.led_file = static_cast<i16>(scene_id);
-                    object.reserved_0x28 = 0;
-                }
-                theSceneObjectHelper.scenes[scene_id] = this->scene_objects.data();
-                theSceneObjectHelper.scene_counts[scene_id] = special_count;
-                theSceneObjectHelper.scene_object_count = special_count;
+                theSceneObjectHelper.PreLoadInitialisation(nullptr, nullptr);
                 this->registered_scene_id = scene_id;
                 this->registered_scene = scene;
                 i32 enumerated = 0;
@@ -615,10 +579,13 @@ namespace saga::host::harness {
 
             void render_scene_object_debug() const {
                 // The original helper renders its editor-owned objects from a linked list.
-                // The host currently registers the scene specials directly, so draw the
-                // hidden subset here while the Level Editor's 3D scene is active.
-                if (theSceneObjectHelper.show_hidden_solid != 0 || theSceneObjectHelper.show_hidden_wire != 0) {
-                    for (const HostSceneObject &object : this->scene_objects) {
+                // Draw hidden scene specials separately while the Level Editor is active.
+                if (this->registered_scene_id >= 0 &&
+                    (theSceneObjectHelper.show_hidden_solid != 0 || theSceneObjectHelper.show_hidden_wire != 0)) {
+                    const HostSceneObject *objects = theSceneObjectHelper.scenes[this->registered_scene_id];
+                    const i32 count = theSceneObjectHelper.scene_counts[this->registered_scene_id];
+                    for (i32 index = 0; index < count; ++index) {
+                        const HostSceneObject &object = objects[index];
                         if (object.reserved_0x28 || object.GetVisibility() != 0 || !object.Exists())
                             continue;
 
@@ -649,66 +616,11 @@ namespace saga::host::harness {
                 return theSceneObjectHelper.GetNextObject(previous);
             }
 
-            static i32 process_scene_filter(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *) {
-                auto *filter = static_cast<edui_filter_s *>(item);
-                char *query = filter->property_text;
-                if (!query)
-                    return 0;
-
-                bool changed = false;
-                for (eduiitem_s *candidate = menu->first; candidate;) {
-                    eduiitem_s *next = candidate->next;
-                    if (candidate->type != 0x12 && candidate->type != 0x14 && candidate->text &&
-                        !NuStrIStr(candidate->text, query)) {
-                        eduiMenuRemoveItem(menu, candidate);
-                        eduiItemFilterAddItem(filter, candidate);
-                        changed = true;
-                    }
-                    candidate = next;
-                }
-                for (eduiitem_s *candidate = filter->first_child; candidate;) {
-                    eduiitem_s *next = candidate->next;
-                    if (!query[0] || (candidate->text && NuStrIStr(candidate->text, query))) {
-                        eduiItemFilterRemoveItem(filter, candidate);
-                        eduiMenuAddItem(menu, candidate);
-                        changed = true;
-                    }
-                    candidate = next;
-                }
-                if (changed)
-                    eduiMenuSortItemsByTxt(menu);
-                return 0;
-            }
-
-            static i32 render_scene_filter(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width) {
-                auto &session = instance();
-                if (!session.scene_object_item_renderer)
-                    return 0;
-                auto *filter = static_cast<edui_filter_s *>(item);
-                std::string label = "FILTER: ";
-                if (filter->property_text)
-                    label += filter->property_text;
-                char *original = item->text;
-                item->text = label.data();
-                const i32 height = session.scene_object_item_renderer(menu, item, x, y, width);
-                item->text = original;
-                return height;
-            }
-
-            void update_scene_filter() {
-                std::string input;
-                {
-                    std::lock_guard lock{this->filter_input_mutex};
-                    input.swap(this->pending_filter_input);
-                }
+            void bind_scene_object_selection() {
                 eduimenu_s *menu = eduiGetActiveMenu();
                 if (!menu || !menu->first || menu->first->type != 0x14)
                     return;
                 auto *filter = static_cast<edui_filter_s *>(menu->first);
-                if (filter->next && filter->next->render && !this->scene_object_item_renderer)
-                    this->scene_object_item_renderer = filter->next->render;
-                filter->process = &EditorSession::process_scene_filter;
-                filter->render = &EditorSession::render_scene_filter;
                 for (eduiitem_s *candidate = filter->next; candidate; candidate = candidate->next) {
                     if (candidate->type == 0)
                         static_cast<edui_sel_s *>(candidate)->selected = &EditorSession::select_scene_object;
@@ -717,18 +629,6 @@ namespace saga::host::harness {
                     if (candidate->type == 0)
                         static_cast<edui_sel_s *>(candidate)->selected = &EditorSession::select_scene_object;
                 }
-                if (menu->selected != filter || input.empty())
-                    return;
-                std::string query = filter->property_text ? filter->property_text : "";
-                for (const char character : input) {
-                    if (character == '\b') {
-                        if (!query.empty())
-                            query.pop_back();
-                    } else if (query.size() < 63) {
-                        query += character;
-                    }
-                }
-                eduiItemPropSetText(filter, query.data());
             }
 
             static void select_scene_object(eduimenu_s *, eduiitem_s *item, u32) {
@@ -1031,10 +931,6 @@ namespace saga::host::harness {
             bool rtl_undo_installed = false;
             i32 rtl_control_index = 1;
             std::array<RtlControlItem, 4> rtl_control_items{};
-            std::vector<HostSceneObject> scene_objects;
-            std::mutex filter_input_mutex;
-            std::string pending_filter_input;
-            decltype(eduiitem_s::render) scene_object_item_renderer = nullptr;
         };
 
         void print_editor_usage(std::string_view executable) {

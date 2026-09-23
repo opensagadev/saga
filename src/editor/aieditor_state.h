@@ -12,6 +12,7 @@ struct EDAIPATHWALL_s;
 struct eduimenu_s;
 struct AISYS_s;
 struct AIPATH_s;
+struct AIPATHSYS_s;
 struct EDLOCATOR_s;
 struct EDLOCATORSET_s;
 
@@ -111,7 +112,7 @@ struct AIEDITOR_RENDER_STATE {
     union {
         u8 unknown_31314[0x36924 - 0x31314];
         struct {
-            u32 unknown_31314_word;
+            AIPATHSYS_s *cached_path_system;
             AIPATH_s *runtime_path;
             u8 unknown_3131c_to_36924[0x36924 - 0x3131c];
         };

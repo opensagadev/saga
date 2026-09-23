@@ -777,9 +777,9 @@ eduimenu_s *locatorEditor_Process(nupad_s *pad) {
                                                         (char *)"Empty Locator Set"));
             }
         }
-        eduiMenuAddItem(menu, eduiItemToggleCreate(1, locator_attr, aieditorsettings.stop_platforms, 3,
+        eduiMenuAddItem(menu, eduiItemToggleCreate(1, locator_attr, -i32(aieditorsettings.stop_platforms), 3,
                                                    aieditor_cbStopPlatformsToggle, (char *)"Stop Platforms"));
-        eduiMenuAddItem(menu, eduiItemToggleCreate(1, locator_attr, aieditorsettings.snap_height_display, 2,
+        eduiMenuAddItem(menu, eduiItemToggleCreate(1, locator_attr, -i32(aieditorsettings.snap_height_display), 2,
                                                    aieditor_cbSnapHeightToggle, (char *)"Snap Height"));
         return menu;
     }
@@ -853,10 +853,8 @@ eduimenu_s *locatorEditor_Process(nupad_s *pad) {
                 memcpy(locator->path_check, reinterpret_cast<u8 *>(aieditor) + 0x48, 0x1c);
                 locator->path_angle = NuAngSub(locator->direction, locator->path_angle);
                 if (aieditor->current_locator_set != nullptr) {
-                    AddLocatorToSet(aieditor->current_locator_set, locator, nullptr);
-                    if (previous != nullptr && previous != locator) {
-                        AddLocatorToSet(aieditor->current_locator_set, locator, previous);
-                    }
+                    EDLOCATOR_s *before = previous != locator ? previous : nullptr;
+                    AddLocatorToSet(aieditor->current_locator_set, locator, before);
                 }
             }
         }
@@ -973,7 +971,8 @@ eduimenu_s *locatorEditor_Process(nupad_s *pad) {
                 break;
             }
         }
-        if (aieditor->current_locator != nearest && AddLocatorToSet(set, nearest, aieditor->current_locator) != 0) {
+        EDLOCATOR_s *before = aieditor->current_locator != nearest ? aieditor->current_locator : nullptr;
+        if (AddLocatorToSet(set, nearest, before) != 0) {
             aieditor->current_locator = nearest;
             aieditor->current_path = nearest->path;
             aieditorsettings.area_rotation = nearest->direction;
