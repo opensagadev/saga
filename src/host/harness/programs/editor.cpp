@@ -51,7 +51,7 @@ namespace saga::host::harness {
             i32 owned = 0;
             i32 removed = 0;
         };
-        static_assert(sizeof(HostSceneObject) == 0x2c);
+        DECOMP_ASSERT(sizeof(HostSceneObject) == 0x2c, "HostSceneObject size");
 
         class PlatformSelection final {
           public:
