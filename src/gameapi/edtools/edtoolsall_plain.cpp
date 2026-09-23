@@ -3015,14 +3015,14 @@ extern "C" {
     f32 eduiGetAnalougePadValue(nupad_s *pad) {
         f32 value = 0.0f;
         if (pad && (pad->digital_buttons & EDUI_CURSOR_PRIMARY)) {
-            if (pad->analog_right_x > 192)
-                value = (pad->analog_right_y - 128.0f) * 0.01f;
-            else if (pad->analog_right_x < 64)
-                value = (128.0f - pad->analog_right_y) * -0.01f;
             if (pad->analog_left_x > 192)
-                value = (pad->analog_left_y - 128.0f) * 0.001f;
+                value = (pad->analog_left_y - 128.0f) * 0.01f;
             else if (pad->analog_left_x < 64)
-                value = (128.0f - pad->analog_left_y) * -0.001f;
+                value = (128.0f - pad->analog_left_y) * -0.01f;
+            if (pad->analog_right_x > 192)
+                value = (pad->analog_right_y - 128.0f) * 0.001f;
+            else if (pad->analog_right_x < 64)
+                value = (128.0f - pad->analog_right_y) * -0.001f;
         }
         return value;
     }

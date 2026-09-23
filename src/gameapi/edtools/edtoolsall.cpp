@@ -6206,8 +6206,11 @@ void EdControl::Refresh() {
 
 void EdControl::SetMenuItemAttr(i32 mask, eduiitem_s *menu_item, eduiiattr_s *selected, eduiiattr_s *unselected) {
     if (reference->attributes & mask) {
+        ClassObjectListEntry *entry = theClassEditor.selected_objects.first;
+        if (entry == NULL)
+            goto use_unselected;
         volatile i32 subobject_count = 0;
-        for (ClassObjectListEntry *entry = theClassEditor.selected_objects.first; entry; entry = entry->next) {
+        for (; entry; entry = entry->next) {
             if (entry->object != object || entry->reference == NULL)
                 continue;
             ++subobject_count;

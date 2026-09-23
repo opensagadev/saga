@@ -793,20 +793,25 @@ static __used__ void creatureEditor_cbSelectTriggerArea(eduimenu_s *parent, edui
     if (menu == nullptr)
         return;
     CreatureEditorRecord *creature = creatureEditor_Current();
-    bool none_selected = creature->trigger_area == nullptr;
-    eduiMenuAddItem(menu, eduiItemCheckCreate(-1, attr, none_selected, 1, creatureEditor_cbSetTriggerArea, "NONE"));
-    if (none_selected)
+    if (creature->trigger_area == nullptr) {
+        eduiMenuAddItem(menu, eduiItemCheckCreate(-1, attr, 1, 1, creatureEditor_cbSetTriggerArea, "NONE"));
         menu->selected = edui_last_item;
+    } else {
+        eduiMenuAddItem(menu, eduiItemCheckCreate(-1, attr, 0, 1, creatureEditor_cbSetTriggerArea, "NONE"));
+    }
     eduiMenuAttach(parent, menu);
     i32 index = 0;
     NULISTHDR *list = creatureEditor_AreaList();
     for (NULISTLNK *link = NuLinkedListGetHead(list); link != nullptr;
          link = NuLinkedListGetNext(list, link), ++index) {
-        bool selected = creatureEditor_Current()->trigger_area == link;
-        eduiMenuAddItem(menu, eduiItemCheckCreate(index, attr, selected, 1, creatureEditor_cbSetTriggerArea,
-                                                  reinterpret_cast<char *>(link) + 8));
-        if (selected)
+        if (creatureEditor_Current()->trigger_area == link) {
+            eduiMenuAddItem(menu, eduiItemCheckCreate(index, attr, 1, 1, creatureEditor_cbSetTriggerArea,
+                                                      reinterpret_cast<char *>(link) + 8));
             menu->selected = edui_last_item;
+        } else {
+            eduiMenuAddItem(menu, eduiItemCheckCreate(index, attr, 0, 1, creatureEditor_cbSetTriggerArea,
+                                                      reinterpret_cast<char *>(link) + 8));
+        }
         eduiMenuAttach(parent, menu);
     }
 }

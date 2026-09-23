@@ -1287,12 +1287,11 @@ static void edpartSetInstanceType(eduimenu_s *, eduiitem_s *item, u32) {
 }
 static void edpartSetSoundControl(eduimenu_s *menu, eduiitem_s *item, u32) {
     edpart_soundcontrol_menu = NULL;
-    u32 slot = static_cast<u32>(item->data) >> 16;
-    i32 value = item->data & 0xffff;
-    if (value == 9999)
-        value = -1;
+    u32 data = item->data;
+    u32 value = static_cast<u16>(data);
+    u32 slot = data >> 16;
     if (edpart_nearest_type != NULL)
-        edpart_nearest_type->sound_modes[slot] = value;
+        edpart_nearest_type->sound_modes[slot] = value == 9999 ? -1 : value;
     edpartRefreshEmitterSounds();
     eduiMenuDetach(menu);
     eduiMenuDestroy(menu);

@@ -217,18 +217,18 @@ static void edgracbGlobalsMenu(eduimenu_s *parent, eduiitem_s *, u32) {
         eduiMenuCreate(70, 70, 220, 300, ed_fnt, edgracbCancelGlobalsMenu, "Global Options (Take Care!)");
     if (!edgra_globals_menu)
         return;
-    edgra_global_fadein_slider = static_cast<edui_slider_s *>(
-        eduiItemSliderCreate(0, edblack, 0, edgracbSetGlobalFadeIn, 0.0f, edgra_superscale * 2.0f, edgra_global_fadein,
-                             "Global Start of Fade"));
-    eduiMenuAddItem(edgra_globals_menu, edgra_global_fadein_slider);
-    eduiItemSliderSetFmt(edgra_global_fadein_slider, "(%1.01f)");
-    eduiItemSliderSetGranularity(edgra_global_fadein_slider, 0.1f);
-    edgra_global_fadeout_slider = static_cast<edui_slider_s *>(
-        eduiItemSliderCreate(0, edblack, 0, edgracbSetGlobalFadeOut, 0.0f, edgra_superscale * 2.0f,
-                             edgra_global_fadeout, "Global End of Fade"));
-    eduiMenuAddItem(edgra_globals_menu, edgra_global_fadeout_slider);
-    eduiItemSliderSetFmt(edgra_global_fadeout_slider, "(%1.01f)");
-    eduiItemSliderSetGranularity(edgra_global_fadeout_slider, 0.1f);
+    eduiMenuAddItem(edgra_globals_menu,
+                    eduiItemSliderCreate(0, edblack, 0, edgracbSetGlobalFadeIn, 0.0f, edgra_superscale * 2.0f,
+                                         edgra_global_fadein, "Global Start of Fade"));
+    edgra_global_fadein_slider = static_cast<edui_slider_s *>(edui_last_item);
+    eduiItemSliderSetFmt(static_cast<edui_slider_s *>(edui_last_item), "(%1.01f)");
+    eduiItemSliderSetGranularity(static_cast<edui_slider_s *>(edui_last_item), 0.1f);
+    eduiMenuAddItem(edgra_globals_menu,
+                    eduiItemSliderCreate(0, edblack, 0, edgracbSetGlobalFadeOut, 0.0f, edgra_superscale * 2.0f,
+                                         edgra_global_fadeout, "Global End of Fade"));
+    edgra_global_fadeout_slider = static_cast<edui_slider_s *>(edui_last_item);
+    eduiItemSliderSetFmt(static_cast<edui_slider_s *>(edui_last_item), "(%1.01f)");
+    eduiItemSliderSetGranularity(static_cast<edui_slider_s *>(edui_last_item), 0.1f);
     eduiMenuAddItem(edgra_globals_menu,
                     eduiItemSelCreate(1, edblack, 0, 0, edgracbApplyGlobalFade, "Apply Globally (Careful!)"));
     edgraAttachMenu(parent, edgra_globals_menu);

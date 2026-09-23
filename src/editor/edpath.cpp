@@ -720,31 +720,58 @@ static __used__ void pathEditor_cbCnxFlagsToggle(eduimenu_s *, eduiitem_s *item,
     if (other == nullptr || node == nullptr) {
         return;
     }
-    for (i32 i = 0; i < 8; ++i) {
-        if (node->connections[i].node != other) {
-            continue;
-        }
-        AIPATHCNXTYPE_s *type = &aipathcnxtypes[type_index];
-        EDAIPATHCNX_s *connection = &node->connections[i];
-        u32 mask = type->connection_flag;
+    i32 i;
+    if (node->connections[0].node == other)
+        i = 0;
+    else if (node->connections[1].node == other)
+        i = 1;
+    else if (node->connections[2].node == other)
+        i = 2;
+    else if (node->connections[3].node == other)
+        i = 3;
+    else if (node->connections[4].node == other)
+        i = 4;
+    else if (node->connections[5].node == other)
+        i = 5;
+    else if (node->connections[6].node == other)
+        i = 6;
+    else if (node->connections[7].node == other)
+        i = 7;
+    else
+        return;
+    AIPATHCNXTYPE_s *type = &aipathcnxtypes[type_index];
+    EDAIPATHCNX_s *connection = &node->connections[i];
+    u32 mask = type->connection_flag;
+    if (connection->flags & mask) {
+        connection->flags &= ~mask;
+    } else {
+        connection->flags |= mask;
+    }
+    if (type->flags != 0) {
+        i32 j;
+        if (other->connections[0].node == node)
+            j = 0;
+        else if (other->connections[1].node == node)
+            j = 1;
+        else if (other->connections[2].node == node)
+            j = 2;
+        else if (other->connections[3].node == node)
+            j = 3;
+        else if (other->connections[4].node == node)
+            j = 4;
+        else if (other->connections[5].node == node)
+            j = 5;
+        else if (other->connections[6].node == node)
+            j = 6;
+        else if (other->connections[7].node == node)
+            j = 7;
+        else
+            return;
         if (connection->flags & mask) {
-            connection->flags &= ~mask;
+            other->connections[j].flags |= mask;
         } else {
-            connection->flags |= mask;
+            other->connections[j].flags &= ~mask;
         }
-        if (type->flags != 0) {
-            for (i32 j = 0; j < 8; ++j) {
-                if (other->connections[j].node == node) {
-                    if (connection->flags & mask) {
-                        other->connections[j].flags |= mask;
-                    } else {
-                        other->connections[j].flags &= ~mask;
-                    }
-                    break;
-                }
-            }
-        }
-        break;
     }
 }
 
