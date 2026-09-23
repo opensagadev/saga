@@ -155,17 +155,30 @@ static inline void edpartFinishMenu(eduimenu_s *menu) {
 
 static inline void edpartAddType(eduimenu_s *menu, i8 page) {
     if (part_types_used < 128) {
-        for (i32 index = 0; index < 128; ++index) {
-            part_typedesc_s *type = &part_types[index];
-            if (type->name[0] == '\0') {
+        part_typedesc_s *scan = part_types;
+        for (i32 index = 0; index < 128; ++index, ++scan) {
+            if (scan->name[0] == '\0') {
+                part_typedesc_s *type = &part_types[index];
                 sprintf(type->name, "New%d", index);
                 edpartInitType(index);
                 type->field_b3 = page;
                 type->page = page;
-                for (i32 variant = 0; variant < 8; ++variant) {
-                    type->effect_ids[variant] = -1;
-                    type->effect_pages[variant] = -1;
-                }
+                type->effect_ids[0] = -1;
+                type->effect_pages[0] = -1;
+                type->effect_ids[1] = -1;
+                type->effect_pages[1] = -1;
+                type->effect_ids[2] = -1;
+                type->effect_pages[2] = -1;
+                type->effect_ids[3] = -1;
+                type->effect_pages[3] = -1;
+                type->effect_ids[4] = -1;
+                type->effect_pages[4] = -1;
+                type->effect_ids[5] = -1;
+                type->effect_pages[5] = -1;
+                type->effect_ids[6] = -1;
+                type->effect_pages[6] = -1;
+                type->effect_ids[7] = -1;
+                type->effect_pages[7] = -1;
                 part_page_on[page] = 1;
                 ++part_types_used;
                 part_page_used[page] = 1;

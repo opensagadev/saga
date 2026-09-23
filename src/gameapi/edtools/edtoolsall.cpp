@@ -6166,22 +6166,21 @@ void EdControl::Refresh() {
 
 void EdControl::SetMenuItemAttr(i32 mask, eduiitem_s *menu_item, eduiiattr_s *selected, eduiiattr_s *unselected) {
     if (reference->attributes & mask) {
-        i32 subobject_count = 0;
+        volatile i32 subobject_count = 0;
         for (ClassObjectListEntry *entry = theClassEditor.selected_objects.first; entry; entry = entry->next) {
             if (entry->object != object || entry->reference == NULL)
                 continue;
             ++subobject_count;
-            if (entry->reference == reference) {
-                memcpy(menu_item->colours, unselected, sizeof(*unselected));
-                return;
-            }
+            if (entry->reference == reference)
+                goto use_unselected;
         }
-        if (subobject_count == 0) {
-            memcpy(menu_item->colours, unselected, sizeof(*unselected));
-            return;
-        }
+        if (subobject_count == 0)
+            goto use_unselected;
     }
     memcpy(menu_item->colours, selected, sizeof(*selected));
+    return;
+use_unselected:
+    memcpy(menu_item->colours, unselected, sizeof(*unselected));
 }
 
 void EdControl::cbSelected(eduimenu_s *menu, eduiitem_s *menu_item, u32) {

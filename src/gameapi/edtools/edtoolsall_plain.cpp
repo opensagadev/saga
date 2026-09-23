@@ -2891,8 +2891,10 @@ extern "C" {
         picker->cursor = NuStrLen(picker->value);
         memcpy(picker->colours, source->colours, sizeof(picker->colours));
         picker->max_length = static_cast<edui_textpicker_s *>(source)->max_length;
-        picker->keyboard_flags =
-            (picker->keyboard_flags & ~2u) | (static_cast<edui_textpicker_s *>(source)->keyboard_flags & 2u);
+        u8 *picker_flags = reinterpret_cast<u8 *>(&picker->keyboard_flags);
+        const u8 *source_flags =
+            reinterpret_cast<const u8 *>(&static_cast<edui_textpicker_s *>(source)->keyboard_flags);
+        *picker_flags = (*picker_flags & ~2u) | (*source_flags & 2u);
     }
     i32 eduiClearActiveMenu(void) {
         eduiSetActiveMenu(NULL);

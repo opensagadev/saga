@@ -811,8 +811,8 @@ void SplineObject::GenPoints() {
 void SplineObject::ReverseKnots() {
     SplineKnot *knot = knots.last;
     SplineKnot *old_first = knots.first;
-    knots.first = NULL;
     knots.last = NULL;
+    knots.first = NULL;
     knots.count = 0;
     while (knot != NULL) {
         SplineKnot *prior = knot->previous;
