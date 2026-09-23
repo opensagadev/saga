@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 57.958797,
+    "fuzzy_match_percent": 57.9664,
     "total_code": "4722419",
-    "matched_code": "485548",
-    "matched_code_percent": 10.281765,
+    "matched_code": "485885",
+    "matched_code_percent": 10.288901,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 5864,
-    "matched_functions_percent": 43.56936,
+    "matched_functions": 5865,
+    "matched_functions_percent": 43.57679,
     "total_units": 1
   },
   "text": {
@@ -18814,7 +18814,7 @@
           "address": 4010704,
           "offset": 3120736,
           "size": 147,
-          "match_percent": 37.92683
+          "match_percent": 40.390244
         },
         {
           "name": "_ZL36antinodeEditor_cbAntiNodeFlagsToggleP10eduimenu_sP10eduiitem_sj",
@@ -18886,7 +18886,7 @@
           "address": 4039520,
           "offset": 3149552,
           "size": 3155,
-          "match_percent": 36.56286
+          "match_percent": 37.184284
         },
         {
           "name": "_ZL27antinodeEditor_cbSelectTypeP10eduimenu_sP10eduiitem_sj",
@@ -19101,7 +19101,7 @@
           "address": 4026480,
           "offset": 3136512,
           "size": 289,
-          "match_percent": 73.738464
+          "match_percent": 99.76923
         },
         {
           "name": "_ZL23areaEditor_cbRenameAreaP10eduimenu_sP10eduiitem_sj",
@@ -19133,7 +19133,7 @@
           "address": 4176864,
           "offset": 3286896,
           "size": 337,
-          "match_percent": 52.034885
+          "match_percent": 100.0
         },
         {
           "name": "areaEditorDrawAreas",
@@ -19380,7 +19380,7 @@
           "address": 4023856,
           "offset": 3133888,
           "size": 401,
-          "match_percent": 46.435642
+          "match_percent": 43.59406
         },
         {
           "name": "_ZL35creatureEditor_cbRenameCreatureMenuP10eduimenu_sP10eduiitem_sj",
@@ -19396,7 +19396,7 @@
           "address": 4032240,
           "offset": 3142272,
           "size": 319,
-          "match_percent": 74.27161
+          "match_percent": 73.16049
         },
         {
           "name": "_ZL31creatureEditor_cbRenameCreatureP10eduimenu_sP10eduiitem_sj",
@@ -19460,7 +19460,7 @@
           "address": 4225200,
           "offset": 3335232,
           "size": 525,
-          "match_percent": 60.190838
+          "match_percent": 81.03053
         },
         {
           "name": "_Z20creatureEditor_Enterv",
@@ -19500,7 +19500,7 @@
           "address": 4243264,
           "offset": 3353296,
           "size": 347,
-          "match_percent": 52.91579
+          "match_percent": 53.968422
         },
         {
           "name": "creatureEditor_PathDeleted",
@@ -21682,7 +21682,7 @@
           "address": 4215216,
           "offset": 3325248,
           "size": 1093,
-          "match_percent": 53.685513
+          "match_percent": 53.80212
         },
         {
           "name": "_ZL23pathEditor_cbCreatePathP10eduimenu_sP10eduiitem_sj",

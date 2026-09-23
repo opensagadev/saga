@@ -177,12 +177,13 @@ static void antinodeEditor_cbSetType(eduimenu_s *, eduiitem_s *item, unsigned in
     u8 previous_type = node->type;
     if (item != nullptr)
         node->type = static_cast<u8>(item->data);
+    node = antinode_selected();
     if (node->type == 0) {
         if (previous_type != 0)
             node->radius = node->base_radius > node->base_height ? node->base_radius : node->base_height;
     } else if (previous_type == 0) {
-        node->base_radius = node->radius;
         node->base_height = node->radius;
+        node->base_radius = node->radius;
     }
 }
 
@@ -328,6 +329,7 @@ eduimenu_s *antinodeEditor_Process(nupad_s *pad) {
                         eduiItemSelCreate(1, &attr, 0, 0, aieditor_cbGoToPlayer, const_cast<char *>("Go To Player")));
         eduiMenuAddItem(menu,
                         eduiItemSelCreate(1, &attr, 0, 0, aieditor_cbMovePlayer, const_cast<char *>("Move Player")));
+        selected = antinode_selected();
         if (selected != nullptr)
             eduiMenuAddItem(menu, eduiItemSelCreate(1, &attr, 0, 0, antinodeEditor_cbSelectType,
                                                     const_cast<char *>("Select Antinode Type")));
@@ -339,6 +341,7 @@ eduimenu_s *antinodeEditor_Process(nupad_s *pad) {
                                              aieditor_cbStopPlatformsToggle, const_cast<char *>("Stop Platforms")));
         eduiMenuAddItem(menu, eduiItemToggleCreate(1, &attr, -i32(aieditorsettings.snap_height_display), 3,
                                                    aieditor_cbSnapHeightToggle, const_cast<char *>("Snap Height")));
+        selected = antinode_selected();
         if (selected != nullptr) {
             eduiMenuAddItem(menu, eduiItemToggleCreate(0x80, &attr, selected->game_flags >> 7, 4,
                                                        antinodeEditor_cbAntiNodeFlagsToggle,

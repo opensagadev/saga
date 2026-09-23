@@ -260,7 +260,10 @@ cc_library(
     ],
     includes = ["."],
     linkopts = select({
-        "//bazel/platforms:linux": ["-Wl,--wrap=MenuInMemoryCard"],
+        "//bazel/platforms:linux": [
+            "-Wl,--wrap=MenuInMemoryCard",
+            "-Wl,--wrap=edcamMove",
+        ],
         "//conditions:default": [],
     }),
     linkstatic = True,

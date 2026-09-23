@@ -596,7 +596,7 @@ static __used__ void creatureEditor_cbSelectType(eduimenu_s *parent, eduiitem_s 
     eduimenu_s *menu = eduiMenuCreate(220, 70, 240, 250, ed_fnt, creatureEditor_cbCancelMenu, "Select AI Type");
     if (menu == nullptr)
         return;
-    for (i32 index = 0; index < 256; ++index) {
+    for (i32 index = 0;; ++index) {
         i32 type = LevelCharacterGlobalIDFn(static_cast<u8>(index));
         if (type == -1)
             break;
@@ -1114,7 +1114,7 @@ extern "C" {
             }
             NUVEC delta;
             f32 distance = NuVecXZDistSqr(&aieditor->camera_position, &record->position, &delta);
-            if (distance >= nearest_distance)
+            if (!(distance < nearest_distance))
                 continue;
             if (use_radius == 0) {
                 nearest = creature;
@@ -1126,7 +1126,7 @@ extern "C" {
                 height += min_height;
                 lower = record->position.y;
             }
-            if (radius * radius <= distance)
+            if (!(distance < radius * radius))
                 continue;
             if (aieditor->camera_position.y < lower - aieditor_y_tolerance)
                 continue;

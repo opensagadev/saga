@@ -632,13 +632,13 @@ static __used__ void pathEditor_cbSetShareNode(eduimenu_s *, eduiitem_s *item, u
             }
             node->shared_node = shared;
             ++shared->reference_count;
+            node->position = current->position;
+            node->radius = current->radius;
+            node->lower_height = current->lower_height;
+            node->upper_height = current->upper_height;
+            node->special = current->special;
+            node->special_position = current->special_position;
         }
-        node->position = current->position;
-        node->radius = current->radius;
-        node->lower_height = current->lower_height;
-        node->upper_height = current->upper_height;
-        node->special = current->special;
-        node->special_position = current->special_position;
     }
     if (item->data == 0) {
         aieditor_ClearMainMenu();

@@ -26,6 +26,7 @@ namespace {
     std::atomic<bool> host_free_camera_enabled{false};
     std::atomic<bool> host_free_camera_ready{false};
     std::atomic<u32> host_free_camera_controls{0};
+    thread_local bool host_suppress_editor_camera_input = false;
 
     bool host_free_camera_initialized = false;
     u32 host_free_camera_previous_controls = 0;
@@ -41,8 +42,9 @@ namespace {
     void host_free_camera_capture_editor_input() {
         if (editor_active && !host_free_camera_overrode_editor_input) {
             host_free_camera_previous_editor_input_mode = edlevel_mouseandkeyboard;
-            // Let the editor process mouse input; the host supplies pad input below.
-            edlevel_mouseandkeyboard = 1;
+            // Mouse motion controls the editor cursor. Only the host's numpad
+            // controls should move the free camera, not edcamMove(NULL).
+            edlevel_mouseandkeyboard = 0;
             host_free_camera_overrode_editor_input = true;
         }
     }
@@ -125,6 +127,19 @@ bool HostFreeCameraActive(void) {
     return host_free_camera_enabled.load(std::memory_order_relaxed) &&
            host_free_camera_ready.load(std::memory_order_relaxed);
 }
+
+void HostFreeCameraSuppressEditorCameraInput(bool suppress) {
+    host_suppress_editor_camera_input = suppress;
+}
+
+#ifdef __linux__
+extern "C" void __real_edcamMove(nupad_s *pad);
+
+extern "C" void __wrap_edcamMove(nupad_s *pad) {
+    if (!host_suppress_editor_camera_input)
+        __real_edcamMove(pad);
+}
+#endif
 
 static void host_free_camera_apply(NUMTX *view) {
     const bool newly_initialized = !host_free_camera_initialized;

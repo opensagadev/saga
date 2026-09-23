@@ -124,11 +124,10 @@ static __used__ void areaEditor_cbRenameAreaMenu(eduimenu_s *parent, eduiitem_s 
     if (menu == NULL) {
         return;
     }
-    eduiitem_s *item = eduiItemTextPickCreate(0, &area_attr, areaEditor_cbRenameArea, const_cast<char *>("Area Name"));
-    eduiMenuAddItem(menu, item);
-    edui_textpicker_s *picker = static_cast<edui_textpicker_s *>(item);
-    strcpy(picker->value, selected->name);
-    picker->max_length = 15;
+    eduiMenuAddItem(menu,
+                    eduiItemTextPickCreate(0, &area_attr, areaEditor_cbRenameArea, const_cast<char *>("Area Name")));
+    strcpy(static_cast<edui_textpicker_s *>(edui_last_item)->value, area_selected()->name);
+    static_cast<edui_textpicker_s *>(edui_last_item)->max_length = 15;
     eduiMenuAttach(parent, menu);
     menu->x = parent->x + 10;
     menu->y = parent->y + 40;
@@ -190,7 +189,11 @@ extern "C" void areaEditorSaveData() {
         EdFileWriteFloat(area->size.y);
         EdFileWriteFloat(area->size.z);
         EdFileWriteShort(area->rotation);
-        EdFileWriteChar(aidata_version > 19 ? area->flags : 0);
+        if (aidata_version > 19) {
+            EdFileWriteChar(area->flags);
+        } else {
+            EdFileWriteChar(0);
+        }
         EdFileWriteChar(0);
     }
 }

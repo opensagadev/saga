@@ -14,3 +14,4 @@ void HostFreeCameraConfigure(bool enabled);
 void HostFreeCameraSetReady(bool ready);
 void HostFreeCameraSetControls(u32 controls);
 bool HostFreeCameraActive(void);
+void HostFreeCameraSuppressEditorCameraInput(bool suppress);

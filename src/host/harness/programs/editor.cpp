@@ -10,6 +10,7 @@
 #include "host/harness/frame_hook.hpp"
 #include "host/harness/programs/window.hpp"
 #include "host/harness/startup.hpp"
+#include "host/platform/free_camera.hpp"
 #include "host/platform/keyboard.hpp"
 #include "host/platform/mouse.hpp"
 #include "legoapi/core/input/gamepads.h"
@@ -301,7 +302,7 @@ namespace saga::host::harness {
                 if ((requests & 4u) && this->active_view == EditorView::level) {
                     this->free_camera_enabled = !this->free_camera_enabled;
                     this->free_camera_ready.store(this->free_camera_enabled, std::memory_order_release);
-                    theLevelEditor.field_0x28 = this->free_camera_enabled ? 1 : 0;
+                    this->configure_level_camera();
                     LOG_INFO("editor: free camera %s (numpad 4/5/6/8, hold Shift to move)",
                              this->free_camera_enabled ? "on" : "off");
                 }
@@ -339,9 +340,13 @@ namespace saga::host::harness {
                     }
                     const auto menu_positions = this->capture_menu_positions();
                     this->bind_scene_object_selection();
+                    if (this->free_camera_enabled)
+                        edcamSet();
                     nupad_s *pads[]{&pad, nullptr};
                     ThingProcessData process_data{FRAMETIME, static_cast<u32>(Paused), pads, 2};
+                    HostFreeCameraSuppressEditorCameraInput(this->free_camera_enabled);
                     theLevelEditor.ProcessEvenWhenPaused(&process_data);
+                    HostFreeCameraSuppressEditorCameraInput(false);
                     if (this->last_selection_count != theClassEditor.selected_objects.count ||
                         this->last_property_menu_count != thePropertyTool.menu_count) {
                         this->last_selection_count = theClassEditor.selected_objects.count;
@@ -657,9 +662,7 @@ namespace saga::host::harness {
                 this->previous_editor_buttons = this->editor_buttons.load(std::memory_order_acquire);
                 this->capture_game_input.store(true, std::memory_order_release);
                 if (view == EditorView::level) {
-                    // Keep editor rays and 3D overlays on the rendered game camera
-                    // until the optional free camera takes ownership of edcam.
-                    theLevelEditor.field_0x28 = this->free_camera_enabled ? 1 : 0;
+                    this->configure_level_camera();
                     edmainSetCursorEnabled(1);
                     saga::host::set_editor_mouse_enabled(true);
                     const auto [mouse_x, mouse_y] = saga::host::editor_mouse_position();
@@ -689,6 +692,7 @@ namespace saga::host::harness {
                 if (this->active_view == EditorView::level) {
                     edLevelDestroyActiveMenu = 0;
                     theLevelEditor.Exit();
+                    edmainExtCamera(nullptr);
                     theLevelEditor.field_0x28 = 1;
                     this->destroy_level_menu();
                 } else if (this->active_view == EditorView::modules) {
@@ -701,6 +705,13 @@ namespace saga::host::harness {
                 this->active_view = EditorView::game;
                 this->lifecycle = Lifecycle::in_game;
                 LOG_INFO("editor: returned to game");
+            }
+
+            void configure_level_camera() {
+                // The game remains visible while the editor runs. Its scenery and
+                // editor geometry must use the same projection in free-camera mode.
+                edmainExtCamera(this->free_camera_enabled ? &global_camera : nullptr);
+                theLevelEditor.field_0x28 = this->free_camera_enabled ? 1 : 0;
             }
 
             void destroy_level_menu() {
