@@ -638,28 +638,27 @@ static __used__ void creatureEditor_cbSetType(eduimenu_s *, eduiitem_s *item, un
         creature->view_distance = 1.0f;
     } else {
         const f32 value = GetViewRangeFn(type);
-        creature = creatureEditor_Current();
         creature->view_distance = value;
+        creature = creatureEditor_Current();
     }
     if (GetHearDistanceFn == nullptr) {
         creature->hear_distance = 1.0f;
     } else {
         const f32 value = GetHearDistanceFn(aieditorsettings.current_path_type);
-        creature = creatureEditor_Current();
         creature->hear_distance = value;
+        creature = creatureEditor_Current();
     }
     if (GetMaxViewHeightFn == nullptr) {
         creature->max_view_height = 1.0f;
     } else {
         const f32 value = GetMaxViewHeightFn(aieditorsettings.current_path_type);
-        creature = creatureEditor_Current();
         creature->max_view_height = value;
+        creature = creatureEditor_Current();
     }
     if (GetMinViewHeightFn == nullptr) {
         creature->negative_min_view_height = 1.0f;
     } else {
         const f32 value = GetMinViewHeightFn(aieditorsettings.current_path_type);
-        creature = creatureEditor_Current();
         creature->negative_min_view_height = value;
     }
 }

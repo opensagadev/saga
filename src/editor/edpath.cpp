@@ -1294,8 +1294,12 @@ extern "C" {
 
     AIPATHSYS_s *pathEditorCreateData(VARIPTR *cursor, VARIPTR *end, void **scratch_cursor, void **scratch_end) {
         iterator_count = 0;
-        distance_tables = nullptr;
-        if (aieditor->current_path == nullptr || NuLinkedListGetHead(&aieditor->paths) == nullptr) {
+        VARIPTR scratch;
+        scratch.void_ptr = *scratch_cursor;
+        if (aieditor->current_path == nullptr) {
+            return nullptr;
+        }
+        if (NuLinkedListGetHead(&aieditor->paths) == nullptr) {
             return nullptr;
         }
 
@@ -1310,8 +1314,7 @@ extern "C" {
         }
         memset(system, 0, sizeof(*system));
         system->path_count = path_count;
-        VARIPTR scratch;
-        scratch.void_ptr = *scratch_cursor;
+        distance_tables = nullptr;
         VARIPTR scratch_limit;
         scratch_limit.void_ptr = *scratch_end;
         distance_tables = (f32 ***)AISysBufferAlloc(&scratch, &scratch_limit, path_count * sizeof(f32 **));
@@ -1544,7 +1547,7 @@ extern "C" {
                                                distance_tables[path_index][neighbor][destination];
                                 if (distance < best) {
                                     best = distance;
-                                    path->route_matrix[source][destination] = neighbor;
+                                    path->route_matrix[source][destination] = edge;
                                 }
                             }
                         }
@@ -2094,18 +2097,41 @@ void pathEditor_Render(i32 x, i32 y, float x_scale, float y_scale) {
 }
 
 static EDAIPATHNODE_s *pathEditor_GetNearestNode(EDAIPATH_s *path, i32 require_radius) {
-    EDAIPATHNODE_s *nearest = NULL;
-    f32 nearest_distance = 3.402823466e38f;
-    if (path != NULL) {
-        for (EDAIPATHNODE_s *node = reinterpret_cast<EDAIPATHNODE_s *>(NuLinkedListGetHead(&path->nodes)); node != NULL;
+    if (path == nullptr) {
+        return nullptr;
+    }
+    EDAIPATHNODE_s *node = reinterpret_cast<EDAIPATHNODE_s *>(NuLinkedListGetHead(&path->nodes));
+    if (node == nullptr) {
+        return nullptr;
+    }
+    EDAIPATHNODE_s *nearest = nullptr;
+    f32 nearest_distance = FLT_MAX;
+    if (require_radius) {
+        for (; node != nullptr;
              node = reinterpret_cast<EDAIPATHNODE_s *>(NuLinkedListGetNext(&path->nodes, &node->link))) {
             NUVEC delta;
             f32 distance = NuVecXZDistSqr(&aieditor->cursor_position, &node->position, &delta);
-            if (distance < nearest_distance) {
+            if (distance >= nearest_distance) {
+                continue;
+            }
+            f32 height = aieditor->cursor_position.y - node->position.y;
+            f32 upper = NuFmax(0.2f, node->height_max);
+            f32 lower = NuFmin(-0.2f, node->height_min);
+            if (height <= upper && height >= lower && distance < node->radius * node->radius) {
+                nearest = node;
+                nearest_distance = distance;
+            }
+        }
+    } else {
+        for (; node != nullptr;
+             node = reinterpret_cast<EDAIPATHNODE_s *>(NuLinkedListGetNext(&path->nodes, &node->link))) {
+            NUVEC delta;
+            f32 distance = NuVecXZDistSqr(&aieditor->cursor_position, &node->position, &delta);
+            if (nearest_distance > distance) {
                 f32 height = aieditor->cursor_position.y - node->position.y;
                 f32 upper = NuFmax(0.2f, node->height_max);
                 f32 lower = NuFmin(-0.2f, node->height_min);
-                if (height <= upper && height >= lower && (!require_radius || distance < node->radius * node->radius)) {
+                if (height <= upper && height >= lower) {
                     nearest = node;
                     nearest_distance = distance;
                 }

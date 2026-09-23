@@ -580,30 +580,32 @@ static void edgracbClumpPropertiesMenu(eduimenu_s *parent, eduiitem_s *, u32) {
     u32 colours[4] = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
     if (edgra_nearest == -1 || !GrassClumps[edgra_nearest].element_count)
         return;
-    edgra_clump_s &clump = GrassClumps[edgra_nearest];
     edgra_clumpproperties_menu =
         eduiMenuCreate(70, 70, 220, 250, ed_fnt, edgracbCancelClumpPropertiesMenu, "Clump Properties");
     if (!edgra_clumpproperties_menu)
         return;
     eduiMenuAddItem(edgra_clumpproperties_menu,
                     eduiItemSelCreate(1, colours, 0, 0, edgracbClumpSizesMenu, "Clump Sizes..."));
-    const bool individual = clump.kind == 3;
-    eduiMenuAddItem(edgra_clumpproperties_menu,
-                    eduiItemSelCreate(1, individual ? edgrey : colours, 0, 0, individual ? NULL : edgracbClumpAreaMenu,
-                                      "Clump Area Type..."));
-    eduiMenuAddItem(edgra_clumpproperties_menu,
-                    eduiItemSelCreate(1, individual ? edgrey : colours, 0, 0, individual ? NULL : edgracbClumpDistMenu,
-                                      "Clump Distribution..."));
+    if (GrassClumps[edgra_nearest].kind == 3) {
+        eduiMenuAddItem(edgra_clumpproperties_menu, eduiItemSelCreate(1, edgrey, 0, 0, NULL, "Clump Area Type..."));
+        eduiMenuAddItem(edgra_clumpproperties_menu, eduiItemSelCreate(1, edgrey, 0, 0, NULL, "Clump Distribution..."));
+    } else {
+        eduiMenuAddItem(edgra_clumpproperties_menu,
+                        eduiItemSelCreate(1, colours, 0, 0, edgracbClumpAreaMenu, "Clump Area Type..."));
+        eduiMenuAddItem(edgra_clumpproperties_menu,
+                        eduiItemSelCreate(1, colours, 0, 0, edgracbClumpDistMenu, "Clump Distribution..."));
+    }
     eduiMenuAddItem(edgra_clumpproperties_menu,
                     eduiItemSelCreate(1, colours, 0, 0, edgracbClumpFadeMenu, "Clump Fading..."));
     eduiMenuAddItem(edgra_clumpproperties_menu,
                     eduiItemSelCreate(1, colours, 0, 0, edgracbClumpTerrainMenu, "Clump Terraining..."));
-    if (clump.kind == 1)
-        eduiMenuAddItem(edgra_clumpproperties_menu, eduiItemSliderCreate(0, colours, 0, edgracbSetClumpWind, 0.01f,
-                                                                         1.99f, clump.field_18, "Wind Effect"));
-    eduiMenuAddItem(
-        edgra_clumpproperties_menu,
-        eduiItemToggleCreate(0, colours, clump.flags, 1, edgracbToggleClumpReactive, "Collide with Player"));
+    if (GrassClumps[edgra_nearest].kind == 1)
+        eduiMenuAddItem(edgra_clumpproperties_menu,
+                        eduiItemSliderCreate(0, colours, 0, edgracbSetClumpWind, 0.01f, 1.99f,
+                                             GrassClumps[edgra_nearest].field_18, "Wind Effect"));
+    eduiMenuAddItem(edgra_clumpproperties_menu,
+                    eduiItemToggleCreate(0, colours, GrassClumps[edgra_nearest].flags, 1, edgracbToggleClumpReactive,
+                                         "Collide with Player"));
     edgraAttachMenu(parent, edgra_clumpproperties_menu);
 }
 

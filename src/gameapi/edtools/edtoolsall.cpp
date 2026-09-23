@@ -39,6 +39,10 @@
 #include "nu2api/numath/nurand.h"
 
 EdRegistry theRegistry;
+extern "C" VuVec SpherePos1;
+extern "C" VuVec SpherePos2;
+VuVec SpherePos1;
+VuVec SpherePos2;
 EdInputContext *EdControl::Input;
 extern MemoryManager theMemoryManager;
 extern LevelEditor theLevelEditor;
@@ -238,12 +242,16 @@ void edppDoInput(nupad_s *pad) {
         } else {
             if (pad->digital_buttons_pressed & 8) {
                 do {
-                    edpp_nearest = (edpp_nearest + 1) % 512;
+                    ++edpp_nearest;
+                    if (edpp_nearest == 512)
+                        edpp_nearest = 0;
                 } while (edpp_ptls[edpp_nearest].instance_id == 99999 || edpp_ptls[edpp_nearest].instance_id == -1);
             }
             if (pad->digital_buttons_pressed & 2) {
                 do {
-                    edpp_nearest = (edpp_nearest + 511) % 512;
+                    --edpp_nearest;
+                    if (edpp_nearest == -1)
+                        edpp_nearest = 511;
                 } while (edpp_ptls[edpp_nearest].instance_id == 99999 || edpp_ptls[edpp_nearest].instance_id == -1);
             }
         }
@@ -4228,26 +4236,49 @@ void EdManipulator::DrawRotator(VuVec &origin) {
 void EdManipulator::GetAxisLocators(VuVec &origin, VuVec *points, VuMtx *matrix) {
     const f32 scale = Scale;
     const f32 half = scale * 0.5f;
-    const VuVec local[8] = {
-        {0.0f, 0.0f, 0.0f, 1.0f}, {scale, 0.0f, 0.0f, 1.0f}, {0.0f, scale, 0.0f, 1.0f}, {0.0f, 0.0f, scale, 1.0f},
-        {half, half, 0.0f, 0.0f}, {half, 0.0f, half, 0.0f},  {0.0f, half, half, 0.0f},  {0.0f, 0.0f, 0.0f, 1.0f},
-    };
-    for (i32 index = 0; index < 8; ++index) {
-        VuVec point = local[index];
-        if (matrix != NULL) {
-            const NUMTX &transform = matrix->matrix;
-            const f32 x = point.x;
-            const f32 y = point.y;
-            const f32 z = point.z;
-            point.x = x * transform.m00 + y * transform.m10 + z * transform.m20;
-            point.y = x * transform.m01 + y * transform.m11 + z * transform.m21;
-            point.z = x * transform.m02 + y * transform.m12 + z * transform.m22;
-        }
-        point.x += origin.x;
-        point.y += origin.y;
-        point.z += origin.z;
-        points[index] = point;
+    points[0] = VuVec(0.0f, 0.0f, 0.0f, 1.0f);
+    points[1] = VuVec(scale, 0.0f, 0.0f, 1.0f);
+    points[2] = VuVec(0.0f, scale, 0.0f, 1.0f);
+    points[3] = VuVec(0.0f, 0.0f, scale, 1.0f);
+    points[4] = VuVec(half, half, 0.0f, 0.0f);
+    points[5] = VuVec(half, 0.0f, half, 0.0f);
+    points[6] = VuVec(0.0f, half, half, 0.0f);
+    points[7] = VuVec(0.0f, 0.0f, 0.0f, 1.0f);
+    if (matrix != NULL) {
+#define TRANSFORM_LOCATOR(index)                                                                                       \
+    {                                                                                                                  \
+        VuVec &point = points[index];                                                                                  \
+        const NUMTX &transform = matrix->matrix;                                                                       \
+        const f32 x = point.x;                                                                                         \
+        const f32 y = point.y;                                                                                         \
+        const f32 z = point.z;                                                                                         \
+        point.x = x * transform.m00 + y * transform.m10 + z * transform.m20;                                           \
+        point.y = x * transform.m01 + y * transform.m11 + z * transform.m21;                                           \
+        point.z = x * transform.m02 + y * transform.m12 + z * transform.m22;                                           \
     }
+        TRANSFORM_LOCATOR(0);
+        TRANSFORM_LOCATOR(1);
+        TRANSFORM_LOCATOR(2);
+        TRANSFORM_LOCATOR(3);
+        TRANSFORM_LOCATOR(4);
+        TRANSFORM_LOCATOR(5);
+        TRANSFORM_LOCATOR(6);
+        TRANSFORM_LOCATOR(7);
+#undef TRANSFORM_LOCATOR
+    }
+#define OFFSET_LOCATOR(index)                                                                                          \
+    points[index].x += origin.x;                                                                                       \
+    points[index].y += origin.y;                                                                                       \
+    points[index].z += origin.z
+    OFFSET_LOCATOR(0);
+    OFFSET_LOCATOR(1);
+    OFFSET_LOCATOR(2);
+    OFFSET_LOCATOR(3);
+    OFFSET_LOCATOR(4);
+    OFFSET_LOCATOR(5);
+    OFFSET_LOCATOR(6);
+    OFFSET_LOCATOR(7);
+#undef OFFSET_LOCATOR
 }
 
 i32 EdManipulator::Process(EdInputContext &input, ClassObjectList &selected) {
@@ -4287,7 +4318,7 @@ i32 EdManipulator::Process(EdInputContext &input, ClassObjectList &selected) {
     *last_point = point;
     last_point->w = 0.0f;
     delta->w = 1.0f;
-    *cursor = *ray_direction;
+    *cursor = *reinterpret_cast<VuVec *>(input.reserved_00);
     if (EdTerrRay(*cursor, *last_point) == 0)
         *cursor = *last_point;
     cursor->w = 1.0f;
@@ -4409,17 +4440,20 @@ i32 EdManipulator::SelectRotator(EdInputContext &input, VuVec &center, VuVec &pl
         VuVec chosen = VuVec_Zero;
         f32 nearest_distance = __FLT_MAX__;
         if (LineToSphereIntersection(ray_origin, ray_direction, center, Scale + 0.01f, &far_point, &near_point) != 0) {
+            SpherePos1 = far_point;
+            SpherePos2 = near_point;
             const VuVec points[2] = {far_point, near_point};
             for (i32 candidate = 1; candidate <= 3; ++candidate) {
                 for (i32 side = 0; side < 2; ++side) {
                     const VuVec &point = points[side];
-                    VuVec projection = point;
-                    if (candidate == 1)
-                        projection.x = center.x;
-                    else if (candidate == 2)
-                        projection.y = center.y;
-                    else
-                        projection.z = center.z;
+                    VuVec normal = {candidate == 1 ? 1.0f : 0.0f, candidate == 2 ? 1.0f : 0.0f,
+                                    candidate == 3 ? 1.0f : 0.0f,
+                                    candidate == 1   ? -center.x
+                                    : candidate == 2 ? -center.y
+                                                     : -center.z};
+                    f32 distance_to_plane = point.x * normal.x + point.y * normal.y + point.z * normal.z + normal.w;
+                    VuVec projection = {point.x - normal.x * distance_to_plane, point.y - normal.y * distance_to_plane,
+                                        point.z - normal.z * distance_to_plane, 0.0f};
                     VuVec screen_point;
                     VuVec screen_projection;
                     NuCameraTransformScreenClip(reinterpret_cast<NUVEC *>(&screen_projection),
@@ -4465,17 +4499,14 @@ i32 EdManipulator::SelectRotator(EdInputContext &input, VuVec &center, VuVec &pl
     }
     i32 axis = *selected_axis;
     plane = *selected_plane;
-    f32 start_distance = ray_origin.x * plane.x + ray_origin.y * plane.y + ray_origin.z * plane.z + plane.w;
-    f32 end_distance = (ray_origin.x + ray_direction.x) * plane.x + (ray_origin.y + ray_direction.y) * plane.y +
-                       (ray_origin.z + ray_direction.z) * plane.z + plane.w;
-    if (!(start_distance * end_distance < 0.0f)) {
+    VuVec intersection;
+    if (LineToPlaneIntersecion(ray_origin, ray_direction, plane, &intersection) == 0) {
         *angle_delta = 0;
         return axis;
     }
-    f32 t = -start_distance / (end_distance - start_distance);
-    f32 x = ray_origin.x + ray_direction.x * t - center.x;
-    f32 y = ray_origin.y + ray_direction.y * t - center.y;
-    f32 z = ray_origin.z + ray_direction.z * t - center.z;
+    f32 x = intersection.x - center.x;
+    f32 y = intersection.y - center.y;
+    f32 z = intersection.z - center.z;
     i32 angle = axis == 1 ? NuAtan2DA(y, z) : axis == 2 ? NuAtan2DA(x, -z) : axis == 3 ? NuAtan2DA(x, y) : 0;
     i32 delta = (*last_angle - angle) & 0xffff;
     if (delta >= 0x8000)
@@ -6167,14 +6198,22 @@ i32 EdManMove::Process(EdInputContext &input, ClassObjectList &selected) {
             position.z = theLevelEditor.background_colour[2];
         } else {
             f32 amount = delta->x * first_axis.x + delta->y * first_axis.y + delta->z * first_axis.z;
-            position.x += first_axis.x * amount;
-            position.y += first_axis.y * amount;
-            position.z += first_axis.z * amount;
+            if (amount != 0.0f) {
+                position.x += first_axis.x * amount;
+                position.y += first_axis.y * amount;
+                position.z += first_axis.z * amount;
+            }
             if (axis >= 4) {
-                amount = delta->x * second_axis.x + delta->y * second_axis.y + delta->z * second_axis.z;
-                position.x += second_axis.x * amount;
-                position.y += second_axis.y * amount;
-                position.z += second_axis.z * amount;
+                f32 second_amount = delta->x * second_axis.x + delta->y * second_axis.y + delta->z * second_axis.z;
+                if (second_amount != 0.0f) {
+                    position.x += second_axis.x * second_amount;
+                    position.y += second_axis.y * second_amount;
+                    position.z += second_axis.z * second_amount;
+                } else if (amount == 0.0f) {
+                    continue;
+                }
+            } else if (amount == 0.0f) {
+                continue;
             }
         }
         theClassEditor.SnapPoint(position);

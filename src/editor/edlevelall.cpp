@@ -283,23 +283,26 @@ void *ClassEditor::CreateObject() {
 }
 
 i32 ClassEditor::CreateObject(ClassObject &source) {
+    ClassObject created = {source.ed_class, NULL, NULL};
     if (theLevelEditor.current_led_file == -1) {
         SelectLED(-1);
         return 1;
     }
     Placeable::CurrentLedFile = theLevelEditor.current_led_file;
-    EdClass *ed_class = source.ed_class;
+    EdClass *ed_class = created.ed_class;
     EdClassInterface *interface = ed_class->interface;
     void *object = theRegistry.CreateObject(interface, (ed_class->flags & 0x04000000) ? source.object : NULL, 4, 0, 2);
     if (object == NULL)
         return 0;
 
-    ClassObject created = {ed_class, object, NULL};
+    created.object = object;
     if (ed_class->flags & 0x04000000) {
         i32 flags = 0x04000000;
-        EdMember member;
-        if (ed_class->FindMember(&member, object, 1, 1))
-            member.reference->SetAttributeData(member.object, 1, EdType_Int, &flags, 0);
+        if (created.reference == NULL || !created.reference->SetAttributeData(object, 1, EdType_Int, &flags, 0)) {
+            EdMember member;
+            if (ed_class->FindMember(&member, object, 1, 1))
+                member.reference->SetAttributeData(member.object, 1, EdType_Int, &flags, 0);
+        }
     } else {
         ed_class->CopyObject(object, source.object);
         interface->vtable->construct(interface, object, source.object);
@@ -574,7 +577,7 @@ void ClassEditor::DrawObjectSphere(ClassObject &selected, i32 colour) {
         return;
     }
 
-    VuVec position = *reinterpret_cast<VuVec *>(&transform.matrix.m30);
+    VuVec const &position = *reinterpret_cast<VuVec const *>(&transform.matrix.m30);
     EdDrawBegin(0);
     EdDrawLineSphere(position, radius, 1.0f, colour);
     VuVec tip(transform.matrix.m30 - transform.matrix.m20 * radius,
@@ -1938,8 +1941,8 @@ i32 LevelEditor::FindSceneId(char *name) {
         return 7;
     if (NuStrICmp(scenes[8].name, name) == 0)
         return 8;
-    // The original accepts any comparison result below 1 for the final slot.
-    return NuStrICmp(scenes[9].name, name) < 1 ? 9 : -1;
+    // The original's unsigned carry test accepts only an exact match here.
+    return (NuStrICmp(scenes[9].name, name) == 0) * 10 - 1;
 }
 
 void LevelEditor::Flush() {
@@ -2579,8 +2582,7 @@ void PropertyTool::BringToFront(PropertyMenu *menu) {
 }
 
 PropertyMenu *PropertyTool::CreatePropertyMenu(ClassObject &object) {
-    PropertyMenu *property_menu = static_cast<PropertyMenu *>(theMemoryManager.AllocPool(sizeof(PropertyMenu), 1));
-    memset(property_menu, 0, sizeof(PropertyMenu));
+    PropertyMenu *property_menu = new (theMemoryManager.AllocPool(sizeof(PropertyMenu), 1)) PropertyMenu();
     PropertyMenuMetrics metrics = ediGetMenuStartMetrics();
     char name[64];
     char title[128];
@@ -2742,6 +2744,19 @@ i32 PropertyTool::ProcessMenu(EdInputContext &input) {
     }
     for (PropertyMenu *menu = active_menu; menu != NULL;) {
         PropertyMenu *next = menu->next;
+        if (next != NULL) {
+            next->previous = menu->previous;
+        } else {
+            last_menu = menu->previous;
+        }
+        if (menu->previous != NULL) {
+            menu->previous->next = next;
+        } else {
+            active_menu = next;
+        }
+        menu->next = NULL;
+        menu->previous = NULL;
+        --menu_count;
         menu->Destroy();
         theMemoryManager.FreePool(menu, sizeof(PropertyMenu));
         menu = next;
@@ -3326,37 +3341,59 @@ void EdClass::SerialiseObject(EdStream &stream, void *object, EdClass *schema, E
 }
 
 EdRef *EdClass::FindTypeRef(i32 attributes, i32 recursive) {
-    for (EdRef *member = members; member != NULL; member = member->next) {
-        if (member->attributes < 0) {
-            if (recursive != 0) {
-                EdRef *reference = theRegistry.GetClass(member->type_id)->FindTypeRef(attributes, 1);
-                if (reference != NULL) {
-                    return reference;
-                }
-            }
-        } else if ((member->attributes & attributes) != 0) {
-            return member;
-        }
+    EdRef *member = members;
+    if (member == NULL)
+        return NULL;
+    if (recursive == 0) {
+        do {
+            if (member->attributes >= 0 && (member->attributes & attributes) != 0)
+                return member;
+            member = member->next;
+        } while (member != NULL);
+        return NULL;
     }
+    do {
+        if (member->attributes >= 0) {
+            if ((member->attributes & attributes) != 0)
+                return member;
+        } else {
+            EdRef *reference = theRegistry.GetClass(member->type_id)->FindTypeRef(attributes, 1);
+            if (reference != NULL)
+                return reference;
+        }
+        member = member->next;
+    } while (member != NULL);
     return NULL;
 }
 
 i32 EdClass::FindMember(EdMember *result, void *object, i32 attributes, i32 recursive) {
-    for (EdRef *member = members; member != NULL; member = member->next) {
-        if (member->attributes < 0) {
-            if (recursive != 0) {
-                EdClass *member_class = theRegistry.GetClass(member->type_id);
-                void *member_object = member->GetMemberObject(object);
-                if (member_class->FindMember(result, member_object, attributes, 1) != 0) {
-                    return 1;
-                }
+    EdRef *member = members;
+    if (member == NULL)
+        return 0;
+    if (recursive == 0) {
+        do {
+            if (member->attributes >= 0 && (member->attributes & attributes) != 0) {
+                result->object = object;
+                result->reference = member;
+                return 1;
             }
+            member = member->next;
+        } while (member != NULL);
+        return 0;
+    }
+    do {
+        if (member->attributes < 0) {
+            EdClass *member_class = theRegistry.GetClass(member->type_id);
+            void *member_object = member->GetMemberObject(object);
+            if (member_class->FindMember(result, member_object, attributes, 1) != 0)
+                return 1;
         } else if ((member->attributes & attributes) != 0) {
             result->object = object;
             result->reference = member;
             return 1;
         }
-    }
+        member = member->next;
+    } while (member != NULL);
     return 0;
 }
 

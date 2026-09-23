@@ -4827,13 +4827,13 @@ extern "C" {
     }
     static __used__ i32 eduicbInteractProp(struct edui_interact_s *interact) {
         edui_prop_s *property = static_cast<edui_prop_s *>(interact->item);
-        if (!(edui_cursor_buttons & EDUI_CURSOR_PRIMARY) || (property->unknown_property_flags & 0x0a))
+        if (!(edui_cursor_buttons_db & EDUI_CURSOR_PRIMARY) || (property->unknown_property_flags & 0x0a))
             return (property->unknown_property_flags & 0x0b) != 0;
         f32 label_end = interact->x + property->label_width;
         f32 cursor_bottom = interact->y + interact->height;
         bool in_row = edui_cursor_y >= interact->y && edui_cursor_y < cursor_bottom;
         if (property->unknown_property_flags & 1) {
-            if (in_row && edui_cursor_x >= label_end + 1.0f) {
+            if (in_row && edui_cursor_x >= label_end + 1.0f && edui_cursor_x < property->button_x) {
                 property->unknown_property_flags |= 1;
                 eduiPropTextPos = -1;
                 return 1;

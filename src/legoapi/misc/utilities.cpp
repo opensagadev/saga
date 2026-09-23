@@ -470,8 +470,23 @@ bool SphereSphereOverlap(NUVEC *a, f32 radius_a, NUVEC *b, f32 radius_b) {
     return x * x + y * y + z * z <= radius * radius;
 }
 
-void LineToPlaneIntersecion(VuVec &, VuVec &, VuVec &, VuVec *) {
-    STUBBED();
+i32 LineToPlaneIntersecion(VuVec &origin, VuVec &direction, VuVec &plane, VuVec *intersection) {
+    f32 start_distance = origin.x * plane.x + origin.y * plane.y + origin.z * plane.z + plane.w;
+    f32 end_distance = (origin.x + direction.x) * plane.x + (origin.y + direction.y) * plane.y +
+                       (origin.z + direction.z) * plane.z + plane.w;
+    if (!(start_distance * end_distance < 0.0f))
+        return 0;
+    if (intersection != NULL) {
+        f32 t = -start_distance / (end_distance - start_distance);
+        intersection->x = direction.x * t;
+        intersection->y = direction.y * t;
+        intersection->z = direction.z * t;
+        intersection->w = 0.0f;
+        intersection->x += origin.x;
+        intersection->y += origin.y;
+        intersection->z += origin.z;
+    }
+    return 1;
 }
 
 void CalculateInterceptVector(NUVEC *origin, NUVEC *target, NUVEC *velocity, f32 speed, NUVEC *direction,

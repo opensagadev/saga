@@ -52,7 +52,7 @@ extern "C" void locatorEditorSaveData(AIPATHSYS_s *);
 extern "C" void creatureEditorSaveData(AIPATHSYS_s *);
 extern "C" void antinodeEditorSaveData(void);
 extern "C" void (*GameAISaveFn)(void);
-void NuSpecialFindByPlatformID(nugscn_s *, nuhspecial_s *, i32);
+i32 NuSpecialFindByPlatformID(nugscn_s *, nuhspecial_s *, i32);
 
 struct nupad_s;
 void pathEditor_Enter();

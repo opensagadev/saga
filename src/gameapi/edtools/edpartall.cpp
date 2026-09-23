@@ -1035,10 +1035,18 @@ static void edpartFileLoadEffects(eduimenu_s *parent, eduiitem_s *, u32) {
     ResetParts();
     memset(part_types, 0, sizeof(part_types));
     for (i32 type = 0; type < 128; ++type) {
-        for (i32 variant = 0; variant < 8; ++variant) {
-            part_types[type].effect_ids[variant] = -1;
-            part_types[type].effect_pages[variant] = -1;
-        }
+#define EDPART_INIT_EFFECT(variant)                                                                                    \
+    part_types[type].effect_ids[variant] = -1;                                                                         \
+    part_types[type].effect_pages[variant] = -1;
+        EDPART_INIT_EFFECT(0)
+        EDPART_INIT_EFFECT(1)
+        EDPART_INIT_EFFECT(2)
+        EDPART_INIT_EFFECT(3)
+        EDPART_INIT_EFFECT(4)
+        EDPART_INIT_EFFECT(5)
+        EDPART_INIT_EFFECT(6)
+        EDPART_INIT_EFFECT(7)
+#undef EDPART_INIT_EFFECT
     }
     part_types_used = 0;
     memset(part_emits, 0, 40 * sizeof(part_emit_s));
@@ -1051,17 +1059,18 @@ static void edpartFileLoadEffects(eduimenu_s *parent, eduiitem_s *, u32) {
     memset(part_scene_pageid, -1, sizeof(i32) * 32);
     part_platimpactcnt = 0;
     char path[256];
-    char directory[256], name[256], extension[256];
-    strcpy(directory, edbits_general_save_directory[0] ? edbits_general_save_directory : ".");
-    strcpy(name, edbits_general_save_name[0] ? edbits_general_save_name : "part");
-    strcpy(extension, edbits_general_save_extension[0] ? edbits_general_save_extension : "par");
-    sprintf(path, "%s\\%s.%s", directory, name, extension);
+    char general_directory[256], general_name[256], general_extension[256];
+    char level_directory[256], level_name[256], level_extension[256];
+    strcpy(general_directory, edbits_general_save_directory[0] ? edbits_general_save_directory : ".");
+    strcpy(general_name, edbits_general_save_name[0] ? edbits_general_save_name : "part");
+    strcpy(general_extension, edbits_general_save_extension[0] ? edbits_general_save_extension : "par");
+    strcpy(level_directory, edbits_level_save_directory[0] ? edbits_level_save_directory : ".");
+    strcpy(level_name, edbits_level_save_name[0] ? edbits_level_save_name : "part");
+    strcpy(level_extension, edbits_level_save_extension[0] ? edbits_level_save_extension : "par");
+    sprintf(path, "%s\\%s.%s", general_directory, general_name, general_extension);
     if (NuFileExists(path))
         edpartLoadPage(path, 0, edbits_things_scene);
-    strcpy(directory, edbits_level_save_directory[0] ? edbits_level_save_directory : ".");
-    strcpy(name, edbits_level_save_name[0] ? edbits_level_save_name : "part");
-    strcpy(extension, edbits_level_save_extension[0] ? edbits_level_save_extension : "par");
-    sprintf(path, "%s\\%s.%s", directory, name, extension);
+    sprintf(path, "%s\\%s.%s", level_directory, level_name, level_extension);
     if (NuFileExists(path)) {
         i32 page = edpartLoadPage(path, 1, edbits_base_scene);
         edpartStartPage(static_cast<i8>(page));
@@ -1155,14 +1164,22 @@ static void edpartSetInstanceType(eduimenu_s *, eduiitem_s *item, u32) {
     if (edpart_nearest_type == NULL)
         return;
     if (item->data == 9999) {
-        for (i32 index = 0; index < 8; ++index) {
-            edpart_nearest_type->effect_ids[index] = -1;
-            edpart_nearest_type->effect_pages[index] = 1;
-        }
+#define EDPART_CLEAR_INSTANCE(index)                                                                                   \
+    edpart_nearest_type->effect_ids[index] = -1;                                                                       \
+    edpart_nearest_type->effect_pages[index] = 1;
+        EDPART_CLEAR_INSTANCE(0)
+        EDPART_CLEAR_INSTANCE(1)
+        EDPART_CLEAR_INSTANCE(2)
+        EDPART_CLEAR_INSTANCE(3)
+        EDPART_CLEAR_INSTANCE(4)
+        EDPART_CLEAR_INSTANCE(5)
+        EDPART_CLEAR_INSTANCE(6)
+        EDPART_CLEAR_INSTANCE(7)
+#undef EDPART_CLEAR_INSTANCE
         if (item->highlighted)
             edpart_nearest_type->effect_ids[0] = 9999;
-        edpart_nearest_type->variant_count = 0;
         edpart_nearest_type->flags |= 0x10;
+        edpart_nearest_type->variant_count = 0;
         return;
     }
     edpart_nullobject_highlight->highlighted = 0;
@@ -1176,12 +1193,24 @@ static void edpartSetInstanceType(eduimenu_s *, eduiitem_s *item, u32) {
             item->highlighted = 0;
         }
     } else {
-        for (i32 index = 0; index < 8; ++index) {
-            if (edpart_nearest_type->effect_ids[index] == item->data) {
-                edpartRemoveInstance(edpart_nearest_type, index);
-                break;
-            }
-        }
+        i32 index;
+#define EDPART_FIND_INSTANCE(slot)                                                                                     \
+    if (edpart_nearest_type->effect_ids[slot] == item->data) {                                                         \
+        index = slot;                                                                                                  \
+        goto remove_instance;                                                                                          \
+    }
+        EDPART_FIND_INSTANCE(0)
+        EDPART_FIND_INSTANCE(1)
+        EDPART_FIND_INSTANCE(2)
+        EDPART_FIND_INSTANCE(3)
+        EDPART_FIND_INSTANCE(4)
+        EDPART_FIND_INSTANCE(5)
+        EDPART_FIND_INSTANCE(6)
+        EDPART_FIND_INSTANCE(7)
+#undef EDPART_FIND_INSTANCE
+        return;
+    remove_instance:
+        edpartRemoveInstance(edpart_nearest_type, index);
     }
 }
 static void edpartSetSoundControl(eduimenu_s *menu, eduiitem_s *item, u32) {
@@ -1769,16 +1798,24 @@ static void edpartInstanceOrphansMenu(eduimenu_s *parent, eduiitem_s *, u32) {
     if (edpart_instanceorphans_menu == NULL || edpart_nearest_type == NULL)
         return;
     i32 group = 1;
-    for (i32 index = 0; index < 8; ++index) {
-        if (edpart_nearest_type->effect_ids[index] != 9998)
-            continue;
-        char effect_name[20];
-        char label[38];
-        NuStrNCpy(effect_name, edpart_nearest_type->object_names[index], 17);
-        sprintf(label, "Remove - %s", effect_name);
-        eduiMenuAddItem(edpart_instanceorphans_menu,
-                        eduiItemSelCreate(index, edblack, 0, group++, edpartDeleteInstanceOrphan, label));
+    char effect_name[20];
+    char label[38];
+#define EDPART_ORPHAN_ITEM(index)                                                                                      \
+    if (edpart_nearest_type->effect_ids[index] == 9998) {                                                              \
+        NuStrNCpy(effect_name, edpart_nearest_type->object_names[index], 17);                                          \
+        sprintf(label, "Remove - %s", effect_name);                                                                    \
+        eduiMenuAddItem(edpart_instanceorphans_menu,                                                                   \
+                        eduiItemSelCreate(index, edblack, 0, group++, edpartDeleteInstanceOrphan, label));             \
     }
+    EDPART_ORPHAN_ITEM(0)
+    EDPART_ORPHAN_ITEM(1)
+    EDPART_ORPHAN_ITEM(2)
+    EDPART_ORPHAN_ITEM(3)
+    EDPART_ORPHAN_ITEM(4)
+    EDPART_ORPHAN_ITEM(5)
+    EDPART_ORPHAN_ITEM(6)
+    EDPART_ORPHAN_ITEM(7)
+#undef EDPART_ORPHAN_ITEM
     eduiMenuAddItem(edpart_instanceorphans_menu,
                     eduiItemSelCreate(8, edpart_nearest_orphans ? edblack : edgrey, 0, 0,
                                       edpart_nearest_orphans ? edpartDeleteAllInstanceOrphans : NULL,

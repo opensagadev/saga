@@ -303,11 +303,14 @@ extern "C" i32 edbriLoadPage(char *path, void *gscn) {
     if (count + edbri_bridges_used > 64)
         count = 64 - edbri_bridges_used;
     i32 index = 0;
-    for (i32 i = 0; i < count; ++i) {
+    i32 i = 0;
+    while (i < count) {
         while (index < 64 && edBridges[index].connection_index != 0xff)
             ++index;
-        if (index >= 64)
+        if (index >= 64) {
+            ++i;
             continue;
+        }
         edbridge_s &bridge = edBridges[index];
         bridge.instance_id = -1;
         EdFileReadNuVec(&bridge.position);
@@ -318,7 +321,7 @@ extern "C" i32 edbriLoadPage(char *path, void *gscn) {
         bridge.connection_index = page;
         bridge.field_1d = EdFileReadChar();
         bridge.field_1e = EdFileReadChar();
-        char name[28];
+        char name[20];
         EdFileRead(name, 20);
         bridge.special_20 = name[0] ? edbitsLookupInstance(name, static_cast<NUGSCN *>(gscn)) : -1;
         EdFileRead(name, 20);
@@ -334,6 +337,7 @@ extern "C" i32 edbriLoadPage(char *path, void *gscn) {
         bridge.blue = EdFileReadChar();
         bridge.field_43 = EdFileReadChar();
         ++edbri_bridges_used;
+        ++i;
     }
     EdFileClose();
     edbri_nearest = -1;

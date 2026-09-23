@@ -6,6 +6,24 @@
 #include "nu2api/nu3d/nuqfnt.h"
 #include "nu2api/numath/nuvec4.h"
 #include "nu2api/numath/nutrig.h"
+#include "nu2api/nu3d/nuspecial.h"
+
+struct TERRSET;
+extern TERRSET *CurTerr;
+
+namespace {
+    struct SpecialPlatform {
+        u8 pad_00[0x4a];
+        i16 scene_object_index;
+        u8 pad_4c[0x20];
+    };
+    struct SpecialTerrain {
+        u8 pad_00[0x68];
+        SpecialPlatform *platforms;
+    };
+    DECOMP_ASSERT(sizeof(SpecialPlatform) == 0x6c, "terrain platform stride for special lookup");
+} // namespace
+
 extern "C" {
     i32 NuRndrBeginSceneEx(i32, i32, i32);
     void NuRndrEndSceneEx(i32);
@@ -468,8 +486,25 @@ void NuIOS_GetShaderProgramKey(ShaderObjectKey const &) {
     STUBBED();
 }
 
-void NuSpecialFindByPlatformID(nugscn_s *, nuhspecial_s *, i32) {
-    STUBBED();
+i32 NuSpecialFindByPlatformID(nugscn_s *scene, nuhspecial_s *result, i32 platform_id) {
+    result->scene = NULL;
+    result->special = NULL;
+    result->display_special = NULL;
+    if (scene == NULL || CurTerr == NULL || platform_id == -1)
+        return 0;
+
+    const i32 special_count = NuGScnNumSpecials(scene);
+    const auto *terrain = reinterpret_cast<const SpecialTerrain *>(CurTerr);
+    const i32 instance_index = terrain->platforms[platform_id].scene_object_index;
+    for (i32 index = 0; index < special_count; ++index) {
+        nuhspecial_s candidate;
+        NuGScnGetSpecial(&candidate, scene, index);
+        if (NuSpecialGetInstanceix(&candidate) == instance_index) {
+            *result = candidate;
+            return 1;
+        }
+    }
+    return 0;
 }
 
 void NuIOS_GetNumInAppPurchases() {

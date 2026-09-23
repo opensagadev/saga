@@ -7,6 +7,7 @@ struct numtx_s;
 struct VuVec;
 
 f32 LineToPointDistance(VuVec &origin, VuVec &direction, VuVec &point, VuVec *closest);
+i32 LineToPlaneIntersecion(VuVec &origin, VuVec &direction, VuVec &plane, VuVec *intersection);
 i32 LineToSphereIntersection(VuVec &origin, VuVec &direction, VuVec &center, f32 radius, VuVec *far_intersection,
                              VuVec *near_intersection);
 

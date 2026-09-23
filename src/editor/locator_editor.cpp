@@ -23,7 +23,7 @@ extern "C" {
     extern f32 aiEditor_LocatorWidth;
     struct EDCREATURE_s;
     EDCREATURE_s *creatureEditor_GetNearest(i32);
-    extern i32 AIEDITOR_LOCATORS;
+    extern i32 AIEDITOR_ROUTES;
     void aieditor_ClearMainMenu();
     void aieditor_cbCancelMainMenu(eduimenu_s *, eduimenu_s *);
     void aieditor_cvSelectEditorMode(eduimenu_s *, eduiitem_s *, u32);
@@ -752,7 +752,7 @@ eduimenu_s *locatorEditor_Process(nupad_s *pad) {
         if (menu == nullptr) {
             return nullptr;
         }
-        eduiMenuAddItem(menu, eduiItemSelCreate(AIEDITOR_LOCATORS, locator_attr, 0, 0, aieditor_cvSelectEditorMode,
+        eduiMenuAddItem(menu, eduiItemSelCreate(AIEDITOR_ROUTES, locator_attr, 0, 0, aieditor_cvSelectEditorMode,
                                                 (char *)"Select Editor Mode"));
         eduiMenuAddItem(menu, eduiItemSelCreate(1, locator_attr, 0, 0, aieditor_cbSave, (char *)"Save AI Data"));
         eduiMenuAddItem(menu, eduiItemSelCreate(1, locator_attr, 0, 0, aieditor_cbGoToPlayer, (char *)"Go To Player"));
