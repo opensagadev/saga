@@ -5029,7 +5029,7 @@ struct LevelEditor : BaseThing {
     i32 field_0x30;
     f32 overlay_alpha;
     i32 field_0x38;
-    i32 field_0x3c;
+    i32 editor_buffer_from_front;
     EdInputContext input;
     u8 reserved_0x298;
     u8 destroying_objects;
@@ -5042,9 +5042,13 @@ struct LevelEditor : BaseThing {
     BaseEditor *active_editor;
     char save_filename[0x80];
     char editor_filename[0x80];
-    u8 reserved_0xa44[8];
+    i32 file_version;
+    i32 multi_load_active;
     u16 current_led_file;
-    u8 reserved_0xa4e[0xe];
+    u8 reserved_0xa4e[2];
+    variptr_u editor_buffer_cursor;
+    variptr_u editor_buffer_begin;
+    variptr_u editor_buffer_end;
     char text_buffer[0x400];
     i32 text_length;
     char *info_text[32];
@@ -5096,7 +5100,7 @@ struct LevelEditor : BaseThing {
     void Load(char *, variptr_u *, variptr_u *, i32);
     void LoadState(variptr_u *, variptr_u *, variptr_u *, variptr_u *, variptr_u *, variptr_u *);
     void ProcessEvenWhenPaused(ThingProcessData *) override;
-    void ReadStream(EdFileInputStream &);
+    i32 ReadStream(EdFileInputStream &);
     void RegisterEditor(BaseEditor &);
     void Reset();
     void Save();
@@ -5105,7 +5109,7 @@ struct LevelEditor : BaseThing {
     void SetNextMenu(eduimenu_s *);
     void SetPadText(i32, char *);
     void SetSaveFilename(char *);
-    void WriteStream(EdFileOutputStream &);
+    i32 WriteStream(EdFileOutputStream &);
 };
 DECOMP_ASSERT(offsetof(LevelEditor, reset_pending) == 0x2a0, "LevelEditor reset_pending offset");
 DECOMP_ASSERT(offsetof(LevelEditor, destroying_objects) == 0x299, "LevelEditor destruction flag offset");
@@ -5409,32 +5413,37 @@ struct PlaceableHelper {
         PlaceableInterface *interface;
     } object_types[16];
 
-    void Find(char *);
-    void Find(char *, Placeable **, i32);
-    void FindObject(char *);
+    Placeable *Find(char *);
+    i32 Find(char *, Placeable **, i32);
+    Placeable *FindObject(char *);
     void *GetNextObject(void *);
     void *GetNextObject(void *, i32 (*)(void *));
     void Initialise();
-    void IsEditorObject(ClassObject &);
+    i32 IsEditorObject(ClassObject &);
     PlaceableHelper();
     void RegisterObjectType(char *, PlaceableInterface *);
 };
 DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(PlaceableHelper) == 0x88, "PlaceableHelper size");
 extern PlaceableHelper thePlaceableHelper;
 struct PlaceableInterface {
-    void DebugOutputObjects();
-    void Find(char *);
-    void Find(char *, Placeable **, i32);
+    i32 DebugOutputObjects();
+    Placeable *Find(char *);
+    i32 Find(char *, Placeable **, i32);
 };
-struct PlaceableNameControl {
-    void AddMenuItem(eduimenu_s *, EdRef *, void *);
+struct PlaceableNameControl : EdStringControl {
+    void AddMenuItem(eduimenu_s *, EdRef *, void *) override;
     PlaceableNameControl();
-    void Process(EdInputContext &);
-    void Render();
-    void cbButton(eduimenu_s *, eduiitem_s *, u32);
-    void cbChanged(eduimenu_s *, eduiitem_s *, u32);
-    void cbSelectObject(eduimenu_s *, eduiitem_s *, u32);
+    ~PlaceableNameControl() override;
+    static void operator delete(void *);
+    void Process(EdInputContext &) override;
+    void Render() override;
+    static void cbButton(eduimenu_s *, eduiitem_s *, u32);
+    static void cbChanged(eduimenu_s *, eduiitem_s *, u32);
+    static void cbSelectObject(eduimenu_s *, eduiitem_s *, u32);
+
+    i32 reserved_10;
 };
+DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(PlaceableNameControl) == 0x14, "PlaceableNameControl size");
 // Pod race net packet (podrace_netpacket).
 struct PODRACENETPACKET_s {
     char pad_0x00[0xc];
@@ -5648,11 +5657,13 @@ struct SceneObject : SpecialObject {
 };
 DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(SceneObject) == 0x2c, "SceneObject size");
 struct SceneInstance : SceneObject {
-    SceneInstance *previous;
     SceneInstance *next;
+    SceneInstance *previous;
     NUMTX initial_transform;
     NUMTX current_transform;
     i32 visibility;
+
+    static void operator delete(void *pointer);
 
     char const *GetName() const override;
     void SetName(char const *) override;

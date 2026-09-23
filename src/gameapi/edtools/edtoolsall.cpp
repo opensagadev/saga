@@ -16,6 +16,7 @@
 #include "nu2api/nucore/NuDynamicLight.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nucore/nukeyboard.h"
+#include "nu2api/nucore/nupad.h"
 #include "nu2api/nucore/numouse.h"
 #include "nu2api/nucore/nuvideo.h"
 #include "nu2api/nu3d/nucamera.h"
@@ -37,6 +38,8 @@ extern eduiiattr_s EdLevelAttr;
 extern i32 EdLevelFnt;
 extern "C" void eduiSetCameraEnabled(i32);
 extern "C" void eduiAddPropTextPickEnt(eduimenu_s *, eduiitem_s *);
+extern "C" eduiitem_s *eduiItemColourPickCreate(usize, const void *, EdUiItemCallback, char *);
+extern "C" void eduiItemColourPickSetRGB(edui_colour_pick_s *, f32, f32, f32);
 static i32 get_manipulator_attribute(ClassObjectListEntry *, i32, i32, void *);
 static void set_manipulator_attribute(ClassObjectListEntry *, i32, i32, void *);
 void cbEdLevelDestroy(eduimenu_s *, eduimenu_s *);
@@ -98,6 +101,9 @@ NUMTL *EdDrawMtl[2];
 static i32 NewPrim;
 static i32 NewMtl;
 static const VuMtx *NewMtx;
+void EdDrawPolyArrow(VuVec const &, VuVec const &, i32, i32, float, float, float, float);
+void EdDrawPolyCylinder(VuMtx const &, float, float, float, i32, i32, i32, i32);
+void EdDrawMtx(VuMtx const *);
 char *EDSPLINE_FILECHECK = const_cast<char *>("EDSPLINE v. ");
 
 extern "C" {
@@ -348,8 +354,20 @@ void EdDrawLineCube(VuMtx const &transform, float size, i32 colour) {
     EdDrawLineSegment(points[6], points[8], colour);
 }
 
-void EdDrawPolyAxis(VuMtx const &, float, i32) {
-    STUBBED();
+void EdDrawPolyAxis(VuMtx const &transform, float size, i32 opacity) {
+    const NUMTX &matrix = transform.matrix;
+    VuVec origin(matrix.m30, matrix.m31, matrix.m32, 0.0f);
+    VuVec tip(matrix.m30 + matrix.m00 * size, matrix.m31 + matrix.m01 * size, matrix.m32 + matrix.m02 * size, 0.0f);
+    const float width = size * 0.02f;
+    EdDrawPolyArrow(origin, tip, 8, static_cast<i32>(0xff000000 | (opacity & 0xff)), width, width, 0.02f, 0.0f);
+    tip.x = matrix.m30 + matrix.m10 * size;
+    tip.y = matrix.m31 + matrix.m11 * size;
+    tip.z = matrix.m32 + matrix.m12 * size;
+    EdDrawPolyArrow(origin, tip, 8, static_cast<i32>(0xff000000 | ((opacity & 0xff) << 8)), width, width, 0.02f, 0.0f);
+    tip.x = matrix.m30 + matrix.m20 * size;
+    tip.y = matrix.m31 + matrix.m21 * size;
+    tip.z = matrix.m32 + matrix.m22 * size;
+    EdDrawPolyArrow(origin, tip, 8, static_cast<i32>(0xff000000 | ((opacity & 0xff) << 16)), width, width, 0.02f, 0.0f);
 }
 
 void edanimFileSave(char *) {
@@ -445,8 +463,45 @@ void EdDrawLineCross(VuVec const &position, float size, i32 colour) {
     EdDrawLineSegment(start, end, colour);
 }
 
-void EdDrawPolyArrow(VuVec const &, VuVec const &, i32, i32, float, float, float, float) {
-    STUBBED();
+void EdDrawPolyArrow(VuVec const &start, VuVec const &end, i32 sides, i32 colour, float radius, float limit,
+                     float radius_factor, float radius_offset) {
+    VuVec direction(end.x - start.x, end.y - start.y, end.z - start.z, 0.0f);
+    const float length = NuVecMag(&direction.xyz);
+    if (length <= 0.0f)
+        return;
+    const float inverse_length = 1.0f / length;
+    direction.x *= inverse_length;
+    direction.y *= inverse_length;
+    direction.z *= inverse_length;
+    const float half_length = length * 0.4f;
+    const float minimum_radius = radius_factor * half_length + radius_offset;
+    if (radius < minimum_radius)
+        radius = minimum_radius;
+    if (limit > radius)
+        limit = radius;
+
+    NUANGVEC angles{};
+    if (direction.x == 0.0f && direction.z == 0.0f) {
+        angles.x = -0x4000;
+    } else {
+        angles.y = NuAtan2D(direction.x, direction.z);
+        NuVecRotateY(&direction.xyz, &direction.xyz, -angles.y);
+        angles.x = -NuAtan2D(direction.y, direction.z);
+    }
+
+    NUMTX transform;
+    NuMtxSetRotateXYZVU0(&transform, &angles);
+    NUVEC center{start.x + (end.x - start.x) * 0.4f, start.y + (end.y - start.y) * 0.4f,
+                 start.z + (end.z - start.z) * 0.4f};
+    NuMtxTranslate(&transform, &center);
+    EdDrawPolyCylinder(*reinterpret_cast<VuMtx *>(&transform), half_length, limit, limit, sides, colour, 1, 0);
+    NuMtxTranslateNeg(&transform, &center);
+    center.x = end.x - (end.x - start.x) * 0.1f;
+    center.y = end.y - (end.y - start.y) * 0.1f;
+    center.z = end.z - (end.z - start.z) * 0.1f;
+    NuMtxTranslate(&transform, &center);
+    EdDrawPolyCylinder(*reinterpret_cast<VuMtx *>(&transform), half_length * 0.25f, limit * 1.6f, 0.0f, sides, colour,
+                       1, 0);
 }
 
 void edbriDrawCursor() {
@@ -484,33 +539,85 @@ void edppSaveEffects(char *, char) {
 }
 
 void EdDrawLineSphere(VuVec const &center, float radius, float scale, i32 colour) {
-    const f32 scaled_radius = radius * scale;
-    for (i32 plane = 0; plane < 3; ++plane) {
-        VuVec previous;
-        for (i32 segment = 0; segment <= 32; ++segment) {
-            i32 angle = segment * 0x800;
-            f32 sine = NU_SIN_LUT(angle) * scaled_radius;
-            f32 cosine = NU_COS_LUT(angle) * scaled_radius;
-            VuVec point = center;
-            if (plane == 0) {
-                point.x += cosine;
-                point.y += sine;
-            } else if (plane == 1) {
-                point.y += cosine;
-                point.z += sine;
-            } else {
-                point.x += cosine;
-                point.z += sine;
-            }
-            if (segment != 0)
-                EdDrawLineSegment(previous, point, colour);
-            previous = point;
+    const float radius_squared = radius * radius;
+    for (i32 latitude = 0; latitude < 8; ++latitude) {
+        float first_radius;
+        float second_radius;
+        if (latitude < 4) {
+            first_radius = radius * NuTrigTable[latitude * 0x800];
+            second_radius = radius * NuTrigTable[(latitude + 1) * 0x800];
+        } else {
+            first_radius = radius * NuTrigTable[(8 - latitude) * 0x800];
+            second_radius = radius * NuTrigTable[(7 - latitude) * 0x800];
         }
+        float first_height = NuFsqrt(radius_squared - first_radius * first_radius) * scale;
+        float second_height = NuFsqrt(radius_squared - second_radius * second_radius) * scale;
+        if (latitude >= 5)
+            first_height = -first_height;
+        if (latitude >= 4)
+            second_height = -second_height;
+#define ED_DRAW_SPHERE_LONGITUDE(angle, next_angle)                                                                    \
+    {                                                                                                                  \
+        const VuVec first(center.x + first_radius * NU_COS_LUT(angle), center.y + first_height,                        \
+                          center.z + first_radius * NU_SIN_LUT(angle), 1.0f);                                          \
+        const VuVec second(center.x + second_radius * NU_COS_LUT(angle), center.y + second_height,                     \
+                           center.z + second_radius * NU_SIN_LUT(angle), 1.0f);                                        \
+        EdDrawLineSegment(first, second, colour);                                                                      \
+        if (latitude != 0) {                                                                                           \
+            const VuVec next(center.x + first_radius * NU_COS_LUT(next_angle), center.y + first_height,                \
+                             center.z + first_radius * NU_SIN_LUT(next_angle), 1.0f);                                  \
+            EdDrawLineSegment(first, next, colour);                                                                    \
+        }                                                                                                              \
+    }
+        ED_DRAW_SPHERE_LONGITUDE(0x0000, 0x2000);
+        ED_DRAW_SPHERE_LONGITUDE(0x2000, 0x4000);
+        ED_DRAW_SPHERE_LONGITUDE(0x4000, 0x6000);
+        ED_DRAW_SPHERE_LONGITUDE(0x6000, 0x8000);
+        ED_DRAW_SPHERE_LONGITUDE(0x8000, 0xa000);
+        ED_DRAW_SPHERE_LONGITUDE(0xa000, 0xc000);
+        ED_DRAW_SPHERE_LONGITUDE(0xc000, 0xe000);
+        ED_DRAW_SPHERE_LONGITUDE(0xe000, 0x10000);
+#undef ED_DRAW_SPHERE_LONGITUDE
     }
 }
 
-void EdDrawPolySector(VuVec const &, float, i32, i32, i32, i32, i32) {
-    STUBBED();
+void EdDrawPolySector(VuVec const &center, float radius, i32 axis, i32 first_angle, i32 last_angle, i32 colour,
+                      i32 segments) {
+    const i32 step = segments != 0 ? 0x10000 / segments : 0x1000;
+    i32 angle = first_angle < last_angle ? first_angle : last_angle;
+    i32 remaining = (first_angle < last_angle ? last_angle - first_angle : first_angle - last_angle) & 0xffff;
+    if (remaining == 0 || remaining >= 0x8000)
+        return;
+    do {
+        const i32 delta = remaining < step ? remaining : step;
+        VuVec first(0.0f, 0.0f, 0.0f, 1.0f);
+        VuVec second(0.0f, 0.0f, 0.0f, 1.0f);
+        if (axis == 0) {
+            first.z = radius;
+            second.z = radius;
+            NuVecRotateX(&first.xyz, &first.xyz, -angle);
+            NuVecRotateX(&second.xyz, &second.xyz, -angle - delta);
+        } else if (axis == 1) {
+            first.z = -radius;
+            second.z = -radius;
+            NuVecRotateY(&first.xyz, &first.xyz, -angle);
+            NuVecRotateY(&second.xyz, &second.xyz, -angle - delta);
+        } else if (axis == 2) {
+            first.y = radius;
+            second.y = radius;
+            NuVecRotateZ(&first.xyz, &first.xyz, -angle);
+            NuVecRotateZ(&second.xyz, &second.xyz, -angle - delta);
+        }
+        first.x += center.x;
+        first.y += center.y;
+        first.z += center.z;
+        second.x += center.x;
+        second.y += center.y;
+        second.z += center.z;
+        EdDrawPolyTri(center, first, second, colour);
+        angle += delta;
+        remaining -= delta;
+    } while (remaining > 0);
 }
 
 void edanimDrawCursor() {
@@ -708,12 +815,96 @@ i32 edppPtlCreateCopy(NUVEC *position, i32 source_index) {
     return index;
 }
 
-void EdDrawPolyCylinder(VuMtx const &, float, float, float, i32, i32, i32, i32) {
-    STUBBED();
+void EdDrawPolyCylinder(VuMtx const &transform, float half_length, float radius, float end_radius, i32 sides,
+                        i32 colour, i32 cap_start, i32 cap_end) {
+    const float taper = end_radius / radius;
+    EdDrawMtx(&transform);
+    i32 segment_colour = colour;
+    if (sides > 0) {
+        float previous_sine = NU_SIN_LUT(0) * radius;
+        float previous_cosine = NU_COS_LUT(0) * radius;
+        for (i32 segment = 1; segment <= sides; ++segment) {
+            const i32 angle = segment * 0x10000 / sides;
+            const float sine = NU_SIN_LUT(angle) * radius;
+            const float cosine = NU_COS_LUT(angle) * radius;
+            const VuVec previous_top(previous_sine * taper, previous_cosine * taper, half_length, 1.0f);
+            const VuVec top(sine * taper, cosine * taper, half_length, 1.0f);
+            const VuVec bottom(sine, cosine, -half_length, 1.0f);
+            const VuVec previous_bottom(previous_sine, previous_cosine, -half_length, 1.0f);
+            EdDrawPolyTri(previous_top, top, bottom, segment_colour);
+            EdDrawPolyTri(previous_top, bottom, previous_bottom, segment_colour);
+            previous_sine = sine;
+            previous_cosine = cosine;
+            if (segment != sides) {
+                segment_colour = (segment & 1) == 0 ? colour
+                                                    : static_cast<i32>((static_cast<u32>(colour) & 0xff000000) |
+                                                                       (((colour & 0xff) * 0xdc) >> 8) |
+                                                                       ((((colour >> 8) & 0xff) * 0xdc) & 0xff00) |
+                                                                       (((((colour >> 16) & 0xff) * 0xdc) >> 8) << 16));
+            }
+        }
+    }
+    if ((cap_start != 0 || cap_end != 0) && sides > 2) {
+        const float negative_half_length = -half_length;
+        float first_sine = NU_SIN_LUT(0);
+        float first_cosine = NU_COS_LUT(0);
+        const i32 first_angle = 0x10000 / sides;
+        float previous_sine = NU_SIN_LUT(first_angle) * radius;
+        float previous_cosine = NU_COS_LUT(first_angle) * radius;
+        for (i32 segment = 0; segment < sides - 2; ++segment) {
+            const i32 angle = (segment + 2) * 0x10000 / sides;
+            const float sine = NU_SIN_LUT(angle) * radius;
+            const float cosine = NU_COS_LUT(angle) * radius;
+            if (cap_end != 0) {
+                const VuVec first(first_sine * radius * taper, first_cosine * radius * taper, half_length, 1.0f);
+                const VuVec current(sine * taper, cosine * taper, half_length, 1.0f);
+                const VuVec previous(previous_sine * taper, previous_cosine * taper, half_length, 1.0f);
+                EdDrawPolyTri(first, current, previous, segment_colour);
+            }
+            if (cap_start != 0) {
+                const VuVec first(first_sine * radius, first_cosine * radius, negative_half_length, 1.0f);
+                const VuVec previous(previous_sine, previous_cosine, negative_half_length, 1.0f);
+                const VuVec current(sine, cosine, negative_half_length, 1.0f);
+                EdDrawPolyTri(first, previous, current, segment_colour);
+            }
+            previous_sine = sine;
+            previous_cosine = cosine;
+        }
+    }
+    EdDrawMtx(NULL);
 }
 
-void EdDrawPolyCylinder(VuVec const &, VuVec const &, i32, i32, i32, float, float, float) {
-    STUBBED();
+void EdDrawPolyCylinder(VuVec const &start, VuVec const &end, i32 sides, i32 colour, i32 cap_colour, float radius,
+                        float limit, float offset) {
+    VuVec direction(end.x - start.x, end.y - start.y, end.z - start.z, 0.0f);
+    const float length = NuVecMag(&direction.xyz);
+    if (length <= 0.0f)
+        return;
+    const float inverse_length = 1.0f / length;
+    direction.x *= inverse_length;
+    direction.y *= inverse_length;
+    direction.z *= inverse_length;
+    NUANGVEC angles{};
+    if (direction.x == 0.0f && direction.z == 0.0f) {
+        angles.x = 0x2000;
+    } else {
+        angles.y = NuAtan2D(direction.x, direction.z);
+        NuVecRotateY(&direction.xyz, &direction.xyz, -angles.y);
+        angles.x = -NuAtan2D(direction.y, direction.z);
+    }
+    NUMTX transform;
+    NuMtxSetRotateXYZVU0(&transform, &angles);
+    NUVEC center{(start.x + end.x) * 0.5f, (start.y + end.y) * 0.5f, (start.z + end.z) * 0.5f};
+    NuMtxTranslate(&transform, &center);
+    const float minimum_radius = radius * 0.5f * length;
+    float first_radius = limit > minimum_radius ? limit : minimum_radius;
+    if (first_radius > offset)
+        first_radius = offset;
+    float second_radius = limit > minimum_radius * 0.1f ? limit : minimum_radius * 0.1f;
+    if (second_radius > offset)
+        second_radius = offset;
+    EdDrawPolyCylinder(*reinterpret_cast<VuMtx *>(&transform), length * 0.5f, first_radius, second_radius, sides,
+                       colour, 1, 1);
 }
 
 void edanimParamDestroy(i32 index) {
@@ -2023,21 +2214,35 @@ i32 EdManipulator::AxisColour[8] = {
 void EdManipulator::DrawAxis(VuVec &origin, VuMtx *matrix) {
     VuVec points[8];
     GetAxisLocators(origin, points, matrix);
-    i32 active = *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(this) + 8);
+    const i32 active = *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(this) + 8);
     EdDrawBegin(1);
     for (i32 axis = 1; axis <= 3; ++axis) {
-        i32 colour = active != 0 ? AxisColour[axis] : static_cast<i32>(0xff808080);
+        const i32 colour = active != 0 ? AxisColour[axis] : static_cast<i32>(0xff808080);
         EdDrawLineSphere(points[axis], Scale * 0.25f, 1.0f, colour);
-        EdDrawLineSegment(points[0], points[axis], colour);
     }
-    for (i32 plane = 4; plane <= 6; ++plane) {
-        VuMtx box;
-        NuMtxSetIdentity(&box.matrix);
+    VuMtx box;
+    NuMtxSetIdentity(&box.matrix);
+    for (i32 plane = 4; plane <= 7; ++plane) {
         box.matrix.m30 = points[plane].x;
         box.matrix.m31 = points[plane].y;
         box.matrix.m32 = points[plane].z;
-        i32 colour = active != 0 ? AxisColour[plane] : static_cast<i32>(0xff808080);
+        box.matrix.m33 = 1.0f;
+        const i32 colour = active != 0 ? AxisColour[plane] : static_cast<i32>(0xff808080);
         EdDrawLineCube(box, Scale * 0.1f, colour);
+    }
+    EdDrawEnd();
+    EdDrawBegin(0);
+    const float arrow_half_size = Scale * 0.25f * 0.5f;
+    const float arrow_radius = Scale * 0.25f * 0.2f;
+    for (i32 axis = 1; axis <= 3; ++axis) {
+        const VuVec &point = points[axis];
+        const VuVec &center = points[7];
+        const VuVec offset((point.x - center.x) * arrow_half_size, (point.y - center.y) * arrow_half_size,
+                           (point.z - center.z) * arrow_half_size, 0.0f);
+        const VuVec start(point.x - offset.x, point.y - offset.y, point.z - offset.z, 0.0f);
+        const VuVec end(point.x + offset.x, point.y + offset.y, point.z + offset.z, 0.0f);
+        const i32 colour = active != 0 ? AxisColour[axis] : static_cast<i32>(0xff808080);
+        EdDrawPolyArrow(start, end, 8, colour, arrow_radius, arrow_radius, axis == 1 ? 0.5f : 0.2f, 0.0f);
     }
     EdDrawEnd();
 }
@@ -2049,6 +2254,15 @@ void EdManipulator::DrawRotator(VuVec &origin) {
     EdDrawLineCircleY(origin, Scale, active != 0 ? AxisColour[2] : static_cast<i32>(0xff808080), 32);
     EdDrawLineCircleZ(origin, Scale, active != 0 ? AxisColour[3] : static_cast<i32>(0xff808080), 32);
     EdDrawEnd();
+    const u8 *data = reinterpret_cast<const u8 *>(this);
+    const i32 start_angle = *reinterpret_cast<const i32 *>(data + 0x60);
+    const i32 end_angle = *reinterpret_cast<const i32 *>(data + 0x64);
+    const i32 selected_axis = *reinterpret_cast<const i32 *>(data + 0x0c);
+    if (start_angle != end_angle && selected_axis != 0) {
+        EdDrawBegin(1);
+        EdDrawPolySector(origin, Scale, selected_axis - 1, start_angle, end_angle, static_cast<i32>(0x80808080), 32);
+        EdDrawEnd();
+    }
 }
 
 void EdManipulator::GetAxisLocators(VuVec &origin, VuVec *points, VuMtx *matrix) {
@@ -2503,46 +2717,82 @@ void EdRefPlaceable::SetMemberData(void *object, i32 type, void *data, i32, i16 
     }
 }
 
-void EdColourControl::AddMenuItem(eduimenu_s *, EdRef *, void *) {
-    STUBBED();
+static EdColourControl *edColourControl;
+
+static inline void set_colour_preview(eduiitem_s *item, const NUVEC &colour) {
+    u32 value = 0xff000000 | (static_cast<i32>(colour.x * 255.0f) & 0xff) |
+                ((static_cast<i32>(colour.y * 255.0f) & 0xff) << 8) |
+                ((static_cast<i32>(colour.z * 255.0f) & 0xff) << 16);
+    *reinterpret_cast<u32 *>(reinterpret_cast<u8 *>(item) + 0x50) = value;
+}
+
+void EdColourControl::AddMenuItem(eduimenu_s *menu, EdRef *member, void *target) {
+    EdColourControl *control = new (theMemoryManager.AllocPool(sizeof(EdColourControl), 1)) EdColourControl();
+    if (control == NULL)
+        return;
+    control->reference = member;
+    control->object = target;
+    NUVEC colour;
+    member->GetMemberData(target, EdType_Colour3, &colour, 0);
+    char name[128];
+    strcpy(name, member->name);
+    char value[128];
+    sprintf(value, "%.2f %.2f %.2f", colour.x, colour.y, colour.z);
+    control->item = eduiItemPropCreate(reinterpret_cast<usize>(control), &EdLevelAttr, EdControl::cbSelected, cbChanged,
+                                       cbButton, 3, name, value);
+    set_colour_preview(control->item, colour);
+    eduiMenuAddItem(menu, control->item);
 }
 
 EdColourControl::EdColourControl() {
-    STUBBED();
 }
 
 void EdColourControl::Refresh() {
-    STUBBED();
+    NUVEC colour;
+    reference->GetMemberData(object, EdType_Colour3, &colour, 0);
+    char value[128];
+    sprintf(value, "%.2f %.2f %.2f", colour.x, colour.y, colour.z);
+    eduiItemPropSetText(static_cast<edui_prop_s *>(item), value);
+    set_colour_preview(item, colour);
 }
 
-void EdColourControl::cbButton(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
+void EdColourControl::cbButton(eduimenu_s *menu, eduiitem_s *item, u32) {
+    edColourControl = static_cast<EdColourControl *>(item->data_ptr);
+    eduimenu_s *picker_menu =
+        eduiMenuCreate(menu->x + item->x, item->y, 180, 250, reinterpret_cast<void *>(static_cast<usize>(EdLevelFnt)),
+                       cbEdLevelDestroy, NULL);
+    if (picker_menu == NULL)
+        return;
+    NUVEC colour;
+    edColourControl->reference->GetMemberData(edColourControl->object, EdType_Colour3, &colour, 0);
+    eduiitem_s *picker = eduiItemColourPickCreate(0, item->colours, cbColourSelected, const_cast<char *>("Colour"));
+    eduiItemColourPickSetRGB(static_cast<edui_colour_pick_s *>(picker), colour.x, colour.y, colour.z);
+    eduiMenuAddItem(picker_menu, picker);
+    eduiMenuAttach(menu, picker_menu);
+    static_cast<edui_prop_s *>(item)->unknown_property_flags &= ~8;
 }
 
-void EdColourControl::cbChanged(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
+void EdColourControl::cbChanged(eduimenu_s *, eduiitem_s *item, u32) {
+    EdColourControl *control = static_cast<EdColourControl *>(item->data_ptr);
+    NUVEC colour;
+    control->reference->GetMemberData(control->object, EdType_Colour3, &colour, 0);
+    sscanf(static_cast<edui_prop_s *>(item)->property_text, "%f %f %f", &colour.x, &colour.y, &colour.z);
+    control->reference->SetMemberData(control->object, EdType_Colour3, &colour, 0, NULL);
+    char value[128];
+    sprintf(value, "%.2f %.2f %.2f", colour.x, colour.y, colour.z);
+    eduiItemPropSetText(static_cast<edui_prop_s *>(item), value);
+    set_colour_preview(item, colour);
 }
 
-void EdColourControl::cbColourSelected(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
-
-static void edMatrixControlValues(const NUMTX &matrix, f32 *values) {
-    values[0] = matrix.m30;
-    values[1] = matrix.m31;
-    values[2] = matrix.m32;
-    NUMTX rotation = matrix;
-    NUVEC scale = {NuVecMag(reinterpret_cast<NUVEC *>(&rotation.m00)),
-                   NuVecMag(reinterpret_cast<NUVEC *>(&rotation.m10)),
-                   NuVecMag(reinterpret_cast<NUVEC *>(&rotation.m20))};
-    values[6] = scale.x;
-    values[7] = scale.y;
-    values[8] = scale.z;
-    NUANG x, y, z;
-    NuMtxGetEulerXYZ(&rotation, &x, &y, &z);
-    values[3] = static_cast<f32>(x) * (360.0f / 65536.0f);
-    values[4] = static_cast<f32>(y) * (360.0f / 65536.0f);
-    values[5] = static_cast<f32>(z) * (360.0f / 65536.0f);
+void EdColourControl::cbColourSelected(eduimenu_s *menu, eduiitem_s *item, u32 flags) {
+    edui_colour_pick_s *picker = static_cast<edui_colour_pick_s *>(item);
+    NUVEC colour = {picker->red, picker->green, picker->blue};
+    edColourControl->reference->SetMemberData(edColourControl->object, EdType_Colour3, &colour, 0, NULL);
+    char value[128];
+    sprintf(value, "%.2f %.2f %.2f", colour.x, colour.y, colour.z);
+    eduiItemPropSetText(static_cast<edui_prop_s *>(edColourControl->item), value);
+    set_colour_preview(edColourControl->item, colour);
+    cbEdLevelDestroyOnSelect(menu, item, flags);
 }
 
 void EdMatrixControl::AddMenuItem(eduimenu_s *menu, EdRef *member, void *target) {
@@ -2552,9 +2802,23 @@ void EdMatrixControl::AddMenuItem(eduimenu_s *menu, EdRef *member, void *target)
     control->reference = member;
     control->object = target;
     VuMtx matrix;
-    member->GetMemberData(target, member->type_id, &matrix, 0);
+    member->GetMemberData(target, EdType_VuMtx, &matrix, 0);
     f32 values[9];
-    edMatrixControlValues(matrix.matrix, values);
+    values[0] = matrix.matrix.m30;
+    values[1] = matrix.matrix.m31;
+    values[2] = matrix.matrix.m32;
+    if (member->attributes & 0x10) {
+        NUANG x, y, z;
+        NuMtxGetEulerXYZ(&matrix.matrix, &x, &y, &z);
+        values[3] = static_cast<f32>(x) * (360.0f / 65536.0f);
+        values[4] = static_cast<f32>(y) * (360.0f / 65536.0f);
+        values[5] = static_cast<f32>(z) * (360.0f / 65536.0f);
+    }
+    if (member->attributes & 0x20) {
+        values[6] = NuVecMag(reinterpret_cast<NUVEC *>(&matrix.matrix.m00));
+        values[7] = NuVecMag(reinterpret_cast<NUVEC *>(&matrix.matrix.m10));
+        values[8] = NuVecMag(reinterpret_cast<NUVEC *>(&matrix.matrix.m20));
+    }
     control->item = eduiItemExpanderCreate(reinterpret_cast<usize>(control), &EdLevelAttr, cbSelected, member->name);
     eduiMenuAddItem(menu, control->item);
     static char *names[9] = {
@@ -2564,11 +2828,11 @@ void EdMatrixControl::AddMenuItem(eduimenu_s *menu, EdRef *member, void *target)
     for (i32 index = 0; index < 9; ++index) {
         if (!(member->attributes & (8 << (index / 3))))
             continue;
-        char value[32];
+        char value[128];
         sprintf(value, "%.2f", values[index]);
         control->components[index] = eduiItemPropCreate(reinterpret_cast<usize>(control), &EdLevelAttr, cbSelected,
                                                         cbChanged, cbButton, 2, names[index], value);
-        control->components[index]->unknown_10 = index + 1;
+        control->components[index]->unknown_10 = index % 3 + 1;
         eduiItemExpanderAddChild(static_cast<edui_expander_s *>(control->item), control->components[index]);
     }
 }
@@ -2607,22 +2871,54 @@ inline void EdMatrixControl::operator delete(void *memory) {
 
 void EdMatrixControl::Refresh() {
     VuMtx matrix;
-    reference->GetMemberData(object, reference->type_id, &matrix, 0);
+    reference->GetMemberData(object, EdType_VuMtx, &matrix, 0);
     f32 values[9];
-    edMatrixControlValues(matrix.matrix, values);
+    values[0] = matrix.matrix.m30;
+    values[1] = matrix.matrix.m31;
+    values[2] = matrix.matrix.m32;
+    if (components[3] || components[4] || components[5]) {
+        NUANG x, y, z;
+        NuMtxGetEulerXYZ(&matrix.matrix, &x, &y, &z);
+        values[3] = static_cast<f32>(x) * (360.0f / 65536.0f);
+        values[4] = static_cast<f32>(y) * (360.0f / 65536.0f);
+        values[5] = static_cast<f32>(z) * (360.0f / 65536.0f);
+    }
+    if (components[6])
+        values[6] = NuVecMag(reinterpret_cast<NUVEC *>(&matrix.matrix.m00));
+    if (components[7])
+        values[7] = NuVecMag(reinterpret_cast<NUVEC *>(&matrix.matrix.m10));
+    if (components[8])
+        values[8] = NuVecMag(reinterpret_cast<NUVEC *>(&matrix.matrix.m20));
     for (i32 index = 0; index < 9; ++index) {
         if (!components[index])
             continue;
-        char value[32];
+        char value[128];
         sprintf(value, "%.2f", values[index]);
         eduiItemPropSetText(static_cast<edui_prop_s *>(components[index]), value);
     }
 }
 
-void EdMatrixControl::SetMenuItemAttr(i32, eduiitem_s *, eduiiattr_s *, eduiiattr_s *) {
+void EdMatrixControl::SetMenuItemAttr(i32 mask, eduiitem_s *menu_item, eduiiattr_s *selected, eduiiattr_s *unselected) {
+    if (menu_item == components[0] || menu_item == components[1] || menu_item == components[2])
+        memcpy(menu_item->colours, (mask & 8) ? unselected : selected, sizeof(*selected));
+    if (menu_item == components[3] || menu_item == components[4] || menu_item == components[5])
+        memcpy(menu_item->colours, (mask && (mask & 0x10)) ? unselected : selected, sizeof(*selected));
+    if (menu_item == components[6] || menu_item == components[7] || menu_item == components[8])
+        memcpy(menu_item->colours, (mask && (mask & 0x20)) ? unselected : selected, sizeof(*selected));
 }
 
-void EdMatrixControl::cbButton(eduimenu_s *, eduiitem_s *, u32) {
+void EdMatrixControl::cbButton(eduimenu_s *menu, eduiitem_s *item, u32 value) {
+    nupad_s *pad = EdControl::Input->pad;
+    static_cast<edui_prop_s *>(item)->unknown_property_flags |= 0x20;
+    f32 current = NuAToF(static_cast<edui_prop_s *>(item)->property_text);
+    f32 dx;
+    f32 dy;
+    eduiGetCursorDelta(&dx, &dy);
+    f32 changed = current - dy * 100.0f - eduiGetAnalougePadValue(pad);
+    char text[128];
+    sprintf(text, "%.2f", changed);
+    eduiItemPropSetText(static_cast<edui_prop_s *>(item), text);
+    cbChanged(menu, item, value);
 }
 
 void EdMatrixControl::cbChanged(eduimenu_s *, eduiitem_s *item, u32) {
@@ -2691,6 +2987,7 @@ void EdMatrixControl::cbChanged(eduimenu_s *, eduiitem_s *item, u32) {
         rebuilt.m32 = matrix.m32;
         matrix = rebuilt;
     }
+    matrix.m33 = 1.0f;
     control->reference->SetMemberData(control->object, control->reference->type_id, &source, 0, nullptr);
     char text[32];
     sprintf(text, "%.2f", changed_value);
@@ -2698,7 +2995,19 @@ void EdMatrixControl::cbChanged(eduimenu_s *, eduiitem_s *item, u32) {
 }
 
 void EdMatrixControl::cbSelected(eduimenu_s *menu, eduiitem_s *item, u32 value) {
-    EdControl::cbSelected(menu, item, value);
+    EdMatrixControl *control = static_cast<EdMatrixControl *>(item->data_ptr);
+    control->SelectSubObject();
+    if (item == control->item || item == control->components[0] || item == control->components[1] ||
+        item == control->components[2]) {
+        theClassEditor.SetMode(3);
+    }
+    if (item == control->components[3] || item == control->components[4] || item == control->components[5]) {
+        theClassEditor.SetMode(4);
+    }
+    if (item == control->components[6] || item == control->components[7] || item == control->components[8]) {
+        theClassEditor.SetMode(5);
+    }
+    thePropertyTool.SetMenuControl(menu, control);
 }
 
 void EdStringControl::AddMenuItem(eduimenu_s *menu, EdRef *member, void *target) {
@@ -2808,16 +3117,36 @@ template <> void EdValueControl<f32>::cbChanged(eduimenu_s *, eduiitem_s *item, 
 
 template <> void EdValueControl<f32>::cbButton(eduimenu_s *, eduiitem_s *item, u32) {
     EdValueControl<f32> *control = static_cast<EdValueControl<f32> *>(item->data_ptr);
-    f32 dx = 0.0f;
-    f32 dy = 0.0f;
-    eduiGetCursorDelta(&dx, &dy);
-    f32 value = NuAToF(static_cast<edui_prop_s *>(item)->property_text) - dy * MouseScale;
+    f32 sensitivity = control->maximum - control->minimum < 5.0f ? 0.001f : 0.01f;
+    static_cast<edui_prop_s *>(item)->unknown_property_flags |= 0x20;
+    f32 value = NuAToF(static_cast<edui_prop_s *>(item)->property_text);
+    nupad_s *pad = EdControl::Input->pad;
+    f32 change = 0.0f;
+    if (pad && (pad->digital_buttons & EDUI_CURSOR_PRIMARY)) {
+        if (pad->analog_right_y > 128)
+            change = 10.0f * sensitivity * (pad->analog_right_y - 128.0f);
+        else if (pad->analog_right_y < 128)
+            change = -10.0f * sensitivity * (128.0f - pad->analog_right_y);
+        if (pad->analog_left_y > 128)
+            change = 0.1f * sensitivity * (pad->analog_left_y - 128.0f);
+        else if (pad->analog_left_y < 128)
+            change = -0.1f * sensitivity * (128.0f - pad->analog_left_y);
+    } else {
+        f32 dx = 0.0f;
+        f32 dy = 0.0f;
+        eduiGetCursorDelta(&dx, &dy);
+        change = dy * MouseScale;
+    }
+    value -= change;
+    char text[128];
+    sprintf(text, control->format, value);
+    eduiItemPropSetText(static_cast<edui_prop_s *>(item), text);
+    value = NuAToF(static_cast<edui_prop_s *>(item)->property_text);
     if (value < control->minimum)
         value = control->minimum;
     if (value > control->maximum)
         value = control->maximum;
     control->reference->SetMemberData(control->object, control->value_type, &value, 0, NULL);
-    char text[128];
     sprintf(text, control->format, value);
     eduiItemPropSetText(static_cast<edui_prop_s *>(item), text);
 }
@@ -2828,11 +3157,11 @@ void EdVectorControl::AddMenuItem(eduimenu_s *menu, EdRef *member, void *target)
         return;
     control->reference = member;
     control->object = target;
-    NUVEC vector;
+    VuVec vector;
     member->GetMemberData(target, EdType_VuVec, &vector, 0);
     control->item = eduiItemExpanderCreate(reinterpret_cast<usize>(control), &EdLevelAttr, cbSelected, member->name);
     eduiMenuAddItem(menu, control->item);
-    char value[32];
+    char value[128];
     f32 *values = &vector.x;
     static char *names[3] = {const_cast<char *>("tx"), const_cast<char *>("ty"), const_cast<char *>("tz")};
     for (i32 index = 0; index < 3; ++index) {
@@ -2865,32 +3194,55 @@ inline void EdVectorControl::operator delete(void *memory) {
 }
 
 void EdVectorControl::Refresh() {
-    NUVEC vector;
+    VuVec vector;
     reference->GetMemberData(object, EdType_VuVec, &vector, 0);
     f32 *values = &vector.x;
-    char value[32];
+    char value[128];
     for (i32 index = 0; index < 3; ++index) {
         sprintf(value, "%.2f", values[index]);
         eduiItemPropSetText(static_cast<edui_prop_s *>(components[index]), value);
     }
 }
 
-void EdVectorControl::cbButton(eduimenu_s *, eduiitem_s *, u32) {
+void EdVectorControl::cbButton(eduimenu_s *menu, eduiitem_s *item, u32 value) {
+    nupad_s *pad = EdControl::Input->pad;
+    static_cast<edui_prop_s *>(item)->unknown_property_flags |= 0x20;
+    f32 current = NuAToF(static_cast<edui_prop_s *>(item)->property_text);
+    f32 dx;
+    f32 dy;
+    eduiGetCursorDelta(&dx, &dy);
+    f32 changed = current - dy * 100.0f - eduiGetAnalougePadValue(pad);
+    char text[128];
+    sprintf(text, "%.2f", changed);
+    eduiItemPropSetText(static_cast<edui_prop_s *>(item), text);
+    cbChanged(menu, item, value);
 }
 
 void EdVectorControl::cbChanged(eduimenu_s *, eduiitem_s *item, u32) {
     EdVectorControl *control = static_cast<EdVectorControl *>(item->data_ptr);
-    NUVEC vector;
+    VuVec vector;
     control->reference->GetMemberData(control->object, EdType_VuVec, &vector, 0);
+    f32 value = 0.0f;
     for (i32 index = 0; index < 3; ++index)
-        if (item == control->components[index])
-            (&vector.x)[index] = NuAToF(static_cast<edui_prop_s *>(item)->property_text);
+        if (item == control->components[index]) {
+            value = NuAToF(static_cast<edui_prop_s *>(item)->property_text);
+            (&vector.x)[index] = value;
+        }
+    vector.w = 1.0f;
     control->reference->SetMemberData(control->object, EdType_VuVec, &vector, 0, nullptr);
-    control->Refresh();
+    char text[128];
+    sprintf(text, "%.2f", value);
+    eduiItemPropSetText(static_cast<edui_prop_s *>(item), text);
 }
 
 void EdVectorControl::cbSelected(eduimenu_s *menu, eduiitem_s *item, u32 value) {
-    EdControl::cbSelected(menu, item, value);
+    EdVectorControl *control = static_cast<EdVectorControl *>(item->data_ptr);
+    control->item = item;
+    if (control->SelectSubObject() != 0)
+        theClassEditor.SetMode(3);
+    else
+        theClassEditor.SetMode(0);
+    thePropertyTool.SetMenuControl(menu, control);
 }
 
 f32 EdClassInterface::DistanceToObject(VuVec &origin, VuVec &direction, void *object, EdRef **reference) {
@@ -3528,8 +3880,12 @@ i32 EdControl::SelectSubObject() {
         if (entry->object != object)
             continue;
         ClassObject selection = {entry->ed_class, entry->object, reference};
-        if (!theClassEditor.selected_objects.IsInList(selection.object, selection.reference))
-            theClassEditor.SelectObject(selection, 1);
+        if (selection.object != NULL) {
+            i32 mode = static_cast<i32>(Input->GetHold(16)) >= 1 ? 1 : 2;
+            theClassEditor.SelectObject(selection, mode);
+            if (!theClassEditor.selected_objects.IsInList(selection.object, NULL))
+                theClassEditor.SelectObject(selection, 1);
+        }
         return 1;
     }
     return 1;
@@ -3539,14 +3895,31 @@ void EdControl::Refresh() {
 }
 
 void EdControl::SetMenuItemAttr(i32 mask, eduiitem_s *menu_item, eduiiattr_s *selected, eduiiattr_s *unselected) {
-    eduiiattr_s *attributes = (reference->attributes & mask) ? selected : unselected;
-    memcpy(menu_item->colours, attributes, sizeof(*attributes));
+    if (reference->attributes & mask) {
+        i32 subobject_count = 0;
+        for (ClassObjectListEntry *entry = theClassEditor.selected_objects.first; entry; entry = entry->next) {
+            if (entry->object != object || entry->reference == NULL)
+                continue;
+            ++subobject_count;
+            if (entry->reference == reference) {
+                memcpy(menu_item->colours, unselected, sizeof(*unselected));
+                return;
+            }
+        }
+        if (subobject_count == 0) {
+            memcpy(menu_item->colours, unselected, sizeof(*unselected));
+            return;
+        }
+    }
+    memcpy(menu_item->colours, selected, sizeof(*selected));
 }
 
 void EdControl::cbSelected(eduimenu_s *menu, eduiitem_s *menu_item, u32) {
     EdControl *control = static_cast<EdControl *>(menu_item->data_ptr);
-    control->SelectSubObject();
+    i32 selected = control->SelectSubObject();
     theClassEditor.SetMode(0);
+    if (selected != 0)
+        memcpy(menu_item->colours, &thePropertyTool.unselected_attr, sizeof(eduiiattr_s));
     thePropertyTool.SetMenuControl(menu, control);
 }
 

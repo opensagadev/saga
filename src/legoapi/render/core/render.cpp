@@ -1,5 +1,6 @@
 #include "decomp.h"
 #include "gameapi/edtools/edbri_internal.h"
+#include "gameapi/edtools/edstubs.h"
 #include "legoapi/render/core/render.h"
 #include "legoapi/items/collect/torpedo.h"
 #include "legoapi/actions/character/transform.h"
@@ -26,6 +27,7 @@
 #include "nu2api/nuandroid/ios_graphics.h"
 #include "nu2api/nu3d/android/nuportal_android.h"
 #include "nu2api/nu3d/nuvport.h"
+#include "nu2api/nucore/nuvuvec.hpp"
 #include "legoapi/cutscenes/cutscenes.h"
 #include <stdio.h>
 #include <math.h>
@@ -1379,8 +1381,45 @@ void DrawAlphaImage(i32, i32, numtl_s *, i32, NuBloomParameters *) {
     STUBBED();
 }
 
-void DrawBezierLine(VuVec &, VuVec &, VuVec &, VuVec &, numtl_s *, i32) {
-    STUBBED();
+void DrawBezierLine(VuVec &start, VuVec &start_control, VuVec &end, VuVec &end_control, numtl_s *material, i32 colour) {
+    static i32 bezier_draw_depth;
+
+    const f32 camera_x = global_camera.mtx.m30;
+    const f32 camera_y = global_camera.mtx.m31;
+    const f32 camera_z = global_camera.mtx.m32;
+    const f32 start_x = start.x - camera_x;
+    const f32 start_y = start.y - camera_y;
+    const f32 start_z = start.z - camera_z;
+    const f32 end_x = end.x - camera_x;
+    const f32 end_y = end.y - camera_y;
+    const f32 end_z = end.z - camera_z;
+    const f32 start_distance = start_x * start_x + start_y * start_y + start_z * start_z;
+    const f32 end_distance = end_x * end_x + end_y * end_y + end_z * end_z;
+    const f32 distance = end_distance < start_distance ? end_distance : start_distance;
+    const f32 threshold = distance < 5.5f ? 0.0055f : distance * 0.001f;
+
+    const f32 chord_x = end.x - start.x;
+    const f32 chord_y = end.y - start.y;
+    const f32 chord_z = end.z - start.z;
+    if (chord_x * chord_x + chord_y * chord_y + chord_z * chord_z <= threshold || bezier_draw_depth > 15) {
+        EdDrawLineSegment(start, end, colour);
+        return;
+    }
+
+    ++bezier_draw_depth;
+    VuVec first = {(start.x + start_control.x) * 0.5f, (start.y + start_control.y) * 0.5f,
+                   (start.z + start_control.z) * 0.5f, 0.0f};
+    VuVec second = {(start_control.x + end_control.x) * 0.5f, (start_control.y + end_control.y) * 0.5f,
+                    (start_control.z + end_control.z) * 0.5f, 0.0f};
+    VuVec third = {(end_control.x + end.x) * 0.5f, (end_control.y + end.y) * 0.5f, (end_control.z + end.z) * 0.5f,
+                   0.0f};
+    VuVec fourth = {(first.x + second.x) * 0.5f, (first.y + second.y) * 0.5f, (first.z + second.z) * 0.5f, 0.0f};
+    VuVec fifth = {(second.x + third.x) * 0.5f, (second.y + third.y) * 0.5f, (second.z + third.z) * 0.5f, 0.0f};
+    VuVec midpoint = {(fourth.x + fifth.x) * 0.5f, (fourth.y + fifth.y) * 0.5f, (fourth.z + fifth.z) * 0.5f, 0.0f};
+
+    DrawBezierLine(start, first, midpoint, fourth, material, colour);
+    DrawBezierLine(midpoint, fifth, end, third, material, colour);
+    --bezier_draw_depth;
 }
 
 void DrawBoxMtx_Now(_vum_s *, _vuv_s *, i32, i32) {

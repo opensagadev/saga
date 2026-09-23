@@ -2,11 +2,17 @@
 #include "legoapi/legoapi_types.h"
 #include "globals.h"
 #include "nu2api/nucore/NuDynamicLight.h"
+#include "nu2api/nucore/nustring.h"
 
 #include <new>
 
 i16 Placeable::CurrentLedFile;
 PlaceableHelper thePlaceableHelper;
+extern ClassEditor theClassEditor;
+extern eduiiattr_s EdLevelAttr;
+extern i32 EdLevelFnt;
+void cbEdLevelDestroy(eduimenu_s *, eduimenu_s *);
+static EdStringControl *edObjectNameControl;
 
 template <typename Ref>
 static void add_placeable_reference(EdClass *object_class, char *type, char *name, i32 offset, i32 size, i32 attributes,
@@ -17,16 +23,32 @@ static void add_placeable_reference(EdClass *object_class, char *type, char *nam
     object_class->AddType(reference);
 }
 
-void PlaceableHelper::Find(char *) {
-    STUBBED();
+Placeable *PlaceableHelper::Find(char *name) {
+    for (i32 index = 0; index < object_type_count; ++index) {
+        Placeable *object = object_types[index].interface->Find(name);
+        if (object != NULL)
+            return object;
+    }
+    return NULL;
 }
 
-void PlaceableHelper::Find(char *, Placeable **, i32) {
-    STUBBED();
+i32 PlaceableHelper::Find(char *name, Placeable **objects, i32 capacity) {
+    i32 count = 0;
+    for (i32 index = 0; index < object_type_count; ++index)
+        count += object_types[index].interface->Find(name, objects + count, capacity - count);
+    return count;
 }
 
-void PlaceableHelper::FindObject(char *) {
-    STUBBED();
+Placeable *PlaceableHelper::FindObject(char *name) {
+    for (i32 index = 0; index < object_type_count; ++index) {
+        EdClassInterface *interface = reinterpret_cast<EdClassInterface *>(object_types[index].interface);
+        for (Placeable *object = static_cast<Placeable *>(interface->vtable->get_next_object(interface, NULL));
+             object != NULL; object = static_cast<Placeable *>(interface->vtable->get_next_object(interface, object))) {
+            if (NuStrICmp(object->GetName(), name) == 0)
+                return object;
+        }
+    }
+    return NULL;
 }
 
 void *PlaceableHelper::GetNextObject(void *object) {
@@ -73,8 +95,15 @@ void PlaceableHelper::Initialise() {
                                             matrix_control);
 }
 
-void PlaceableHelper::IsEditorObject(ClassObject &) {
-    STUBBED();
+i32 PlaceableHelper::IsEditorObject(ClassObject &object) {
+    if (object.object != NULL) {
+        for (i32 index = 0; index < object_type_count; ++index) {
+            EdClassInterface *interface = reinterpret_cast<EdClassInterface *>(object_types[index].interface);
+            if (interface->object_class == object.ed_class)
+                return 1;
+        }
+    }
+    return 0;
 }
 
 PlaceableHelper::PlaceableHelper() {
@@ -88,44 +117,119 @@ void PlaceableHelper::RegisterObjectType(char *name, PlaceableInterface *interfa
     *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(interface) + 8) = object_type_count;
 }
 
-void PlaceableInterface::DebugOutputObjects() {
-    STUBBED();
+i32 PlaceableInterface::DebugOutputObjects() {
+    EdClassInterface *interface = reinterpret_cast<EdClassInterface *>(this);
+    i32 count = 0;
+    for (void *object = interface->vtable->get_next_object(interface, NULL); object != NULL;
+         object = interface->vtable->get_next_object(interface, object))
+        ++count;
+    return count;
 }
 
-void PlaceableInterface::Find(char *) {
-    STUBBED();
+Placeable *PlaceableInterface::Find(char *name) {
+    EdClassInterface *interface = reinterpret_cast<EdClassInterface *>(this);
+    for (Placeable *object = static_cast<Placeable *>(interface->vtable->get_next_object(interface, NULL));
+         object != NULL; object = static_cast<Placeable *>(interface->vtable->get_next_object(interface, object))) {
+        if (NuStrICmp(name, object->GetName()) == 0)
+            return object;
+    }
+    return NULL;
 }
 
-void PlaceableInterface::Find(char *, Placeable **, i32) {
-    STUBBED();
+i32 PlaceableInterface::Find(char *name, Placeable **objects, i32 capacity) {
+    EdClassInterface *interface = reinterpret_cast<EdClassInterface *>(this);
+    i32 count = 0;
+    Placeable *object = static_cast<Placeable *>(interface->vtable->get_next_object(interface, NULL));
+    while (object != NULL && count < capacity) {
+        if (NuStrIStr(const_cast<char *>(object->GetName()), name) != NULL)
+            objects[count++] = object;
+        object = static_cast<Placeable *>(interface->vtable->get_next_object(interface, object));
+    }
+    return count;
 }
 
-void PlaceableNameControl::AddMenuItem(eduimenu_s *, EdRef *, void *) {
-    STUBBED();
+void PlaceableNameControl::AddMenuItem(eduimenu_s *menu, EdRef *reference, void *object) {
+    PlaceableNameControl *control =
+        new (theMemoryManager.AllocPool(sizeof(PlaceableNameControl), 1)) PlaceableNameControl();
+    if (control == NULL)
+        return;
+    control->reference = reference;
+    control->object = object;
+    char value[128];
+    control->GetVal(value, sizeof(value));
+    control->item = eduiItemPropCreate(reinterpret_cast<usize>(control), &EdLevelAttr, EdControl::cbSelected, cbChanged,
+                                       cbButton, 1, reference->name, value);
+    eduiMenuAddItem(menu, control->item);
 }
 
-PlaceableNameControl::PlaceableNameControl() {
-    STUBBED();
+PlaceableNameControl::PlaceableNameControl() : reserved_10(0) {
 }
 
-void PlaceableNameControl::Process(EdInputContext &) {
-    STUBBED();
+PlaceableNameControl::~PlaceableNameControl() {
+}
+
+inline void PlaceableNameControl::operator delete(void *memory) {
+    theMemoryManager.FreePool(memory, sizeof(PlaceableNameControl));
+}
+
+void PlaceableNameControl::Process(EdInputContext &input) {
+    if (input.GetHold(0x16) != 0.0f) {
+        ClassObject object = theClassEditor.current_object;
+        if (thePlaceableHelper.IsEditorObject(object) == 0) {
+            theClassEditor.field_3c = static_cast<i32>(0xff000080);
+        } else {
+            theClassEditor.field_3c = static_cast<i32>(0xff008000);
+            if (input.GetPress(0x19) != 0.0f)
+                SetVal(static_cast<Placeable *>(object.object)->GetName());
+        }
+    }
 }
 
 void PlaceableNameControl::Render() {
-    STUBBED();
 }
 
-void PlaceableNameControl::cbButton(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
+void PlaceableNameControl::cbButton(eduimenu_s *parent, eduiitem_s *item, u32) {
+    edObjectNameControl = static_cast<EdStringControl *>(item->data_ptr);
+    eduimenu_s *menu = eduiMenuCreate(parent->x + item->x, item->y, 180, 250,
+                                      reinterpret_cast<void *>(static_cast<usize>(EdLevelFnt)), cbEdLevelDestroy, NULL);
+    if (menu == NULL)
+        return;
+
+    char value[128];
+    edObjectNameControl->GetVal(value, sizeof(value));
+    eduiMenuAddItem(menu, eduiItemSelCreate(0, item->colours, 0, 0, cbSelectObject, const_cast<char *>("None")));
+    for (Placeable *object = static_cast<Placeable *>(thePlaceableHelper.GetNextObject(NULL)); object != NULL;
+         object = static_cast<Placeable *>(thePlaceableHelper.GetNextObject(object))) {
+        eduiMenuAddItem(menu, eduiItemSelCreate(reinterpret_cast<usize>(object), item->colours, 0, 0, cbSelectObject,
+                                                const_cast<char *>(object->GetName())));
+        if (NuStrICmp(value, object->GetName()) == 0)
+            menu->selected = edui_last_item;
+    }
+    menu->flags |= 1;
+    eduiMenuAttach(parent, menu);
+    eduiMenuFitWidth(menu, 5);
+    static_cast<edui_prop_s *>(item)->unknown_property_flags &= ~8;
 }
 
-void PlaceableNameControl::cbChanged(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
+void PlaceableNameControl::cbChanged(eduimenu_s *, eduiitem_s *item, u32) {
+    EdStringControl *control = static_cast<EdStringControl *>(item->data_ptr);
+    for (Placeable *object = static_cast<Placeable *>(thePlaceableHelper.GetNextObject(NULL)); object != NULL;
+         object = static_cast<Placeable *>(thePlaceableHelper.GetNextObject(object))) {
+        if (NuStrICmp(static_cast<edui_prop_s *>(item)->property_text, object->GetName()) == 0) {
+            eduiItemPropSetText(static_cast<edui_prop_s *>(item), const_cast<char *>(object->GetName()));
+            control->SetVal(object->GetName());
+            return;
+        }
+    }
 }
 
-void PlaceableNameControl::cbSelectObject(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
+void PlaceableNameControl::cbSelectObject(eduimenu_s *, eduiitem_s *item, u32) {
+    if (edObjectNameControl != NULL) {
+        Placeable *object = static_cast<Placeable *>(item->data_ptr);
+        char const *name = object != NULL ? object->GetName() : "None";
+        eduiItemPropSetText(static_cast<edui_prop_s *>(edObjectNameControl->item), const_cast<char *>(name));
+        edObjectNameControl->SetVal(name);
+    }
 }
 
 VuVec const *Placeable::GetCurrentPosition() const {

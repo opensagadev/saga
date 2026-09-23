@@ -318,6 +318,7 @@ struct edui_interact_s {
 };
 
 extern "C" {
+    extern i32 eduiPropTextPos;
     extern ed_module_s edptldesc;
     extern ed_module_s edgradesc;
     extern ed_module_s edbridesc;

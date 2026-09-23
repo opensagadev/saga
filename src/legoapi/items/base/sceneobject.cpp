@@ -116,11 +116,10 @@ Placeable *SceneObject::Clone(i32 attributes) const {
     SceneInstance *copy = static_cast<SceneInstance *>(theSceneObjectHelper.CreateObject(NULL, 0, 0));
     if (copy == NULL)
         return NULL;
-    EdClass *object_class = reinterpret_cast<EdClassInterface *>(&theSceneObjectHelper)->object_class;
-    if (object_class != NULL)
-        object_class->CopyObject(copy, const_cast<SceneObject *>(this));
+    EdClass *object_class = theSceneObjectHelper.class_interface.object_class;
+    object_class->CopyObject(copy, const_cast<SceneObject *>(this));
     char unique_name[128];
-    theClassEditor.MakeUniqueName(GetName(), unique_name, sizeof(unique_name));
+    theClassEditor.MakeUniqueName(copy->GetName(), unique_name, sizeof(unique_name));
     copy->SetName(unique_name);
     copy->attributes = attributes;
     return copy;
@@ -128,7 +127,6 @@ Placeable *SceneObject::Clone(i32 attributes) const {
 
 SceneObject::SceneObject() {
     editor_owned = 0;
-    reserved_0x28 = 0;
     scene_id = static_cast<i16>(theSceneObjectHelper.scene_id);
 }
 
@@ -143,71 +141,94 @@ void SceneObjectHelper::AddMenuItems(eduimenu_s *menu) {
 }
 
 void SceneObjectHelper::ClearLevel(i32 level) {
-    for (SceneObject *object = static_cast<SceneObject *>(GetNextObject(NULL)); object != NULL;) {
-        SceneObject *next_object = static_cast<SceneObject *>(GetNextObject(object));
+    for (SceneObject *object =
+             static_cast<SceneObject *>(class_interface.vtable->get_next_object(&class_interface, NULL));
+         object != NULL;) {
+        SceneObject *next_object =
+            static_cast<SceneObject *>(class_interface.vtable->get_next_object(&class_interface, object));
         if (object->led_file == level)
-            DestroyObject(object, 0);
+            class_interface.vtable->destroy_object(&class_interface, object, 0);
         object = next_object;
     }
-    if (static_cast<u32>(level) < 10) {
-        scenes[level] = NULL;
-        scene_counts[level] = 0;
-    }
+    i32 scene_index;
+    if (level == 0)
+        scene_index = 0;
+    else if (level == 1)
+        scene_index = 1;
+    else if (level == 2)
+        scene_index = 2;
+    else if (level == 3)
+        scene_index = 3;
+    else if (level == 4)
+        scene_index = 4;
+    else if (level == 5)
+        scene_index = 5;
+    else if (level == 6)
+        scene_index = 6;
+    else if (level == 7)
+        scene_index = 7;
+    else if (level == 8)
+        scene_index = 8;
+    else if (level == 9)
+        scene_index = 9;
+    else
+        return;
+    scenes[scene_index] = NULL;
+    scene_counts[scene_index] = 0;
 }
 
 void *SceneObjectHelper::CreateObject(void *, i32, i32) {
     void *storage = theMemoryManager.AllocPool(sizeof(SceneInstance), 1);
-    if (storage == NULL)
-        return NULL;
     SceneInstance *object = new (storage) SceneInstance();
-    object->previous = owned_last;
-    if (owned_last != NULL)
-        owned_last->next = object;
-    else
-        owned_first = object;
-    owned_last = object;
-    ++owned_object_count;
-    object->SetName("Object");
+    if (object != NULL) {
+        object->next = NULL;
+        object->previous = owned_last;
+        if (owned_last != NULL)
+            owned_last->next = object;
+        owned_last = object;
+        if (owned_first == NULL)
+            owned_first = object;
+        ++owned_object_count;
+        object->SetName("object");
+    }
     return object;
 }
 
 void SceneObjectHelper::DestroyObject(void *item, i32) {
     theLevelEditor.destroying_objects = 1;
     SceneInstance *object = static_cast<SceneInstance *>(item);
-    if (object == NULL || object->editor_owned == 0)
+    if (object->editor_owned == 0)
         return;
-    if (object->previous != NULL)
-        object->previous->next = object->next;
-    else
-        owned_first = object->next;
     if (object->next != NULL)
         object->next->previous = object->previous;
     else
         owned_last = object->previous;
-    object->previous = NULL;
+    if (object->previous != NULL)
+        object->previous->next = object->next;
+    else
+        owned_first = object->next;
     object->next = NULL;
+    object->previous = NULL;
     --owned_object_count;
-    object->~SceneInstance();
-    theMemoryManager.FreePool(object, sizeof(SceneInstance));
+    delete object;
 }
 
 void SceneObjectHelper::Flush() {
     memset(scenes, 0, sizeof(scenes));
     memset(scene_counts, 0, sizeof(scene_counts));
-    owned_first = NULL;
     owned_last = NULL;
+    owned_first = NULL;
     owned_object_count = 0;
 }
 
 void *SceneObjectHelper::GetNextObject(void *item) {
-    if (item != NULL && static_cast<SceneObject *>(item)->editor_owned != 0)
-        return static_cast<SceneInstance *>(item)->next;
-
     if (item == NULL) {
         iteration_scene_index = 0;
         iteration_object_index = 0;
     } else {
         ++iteration_object_index;
+        if (iteration_scene_index > 9)
+            goto owned_objects;
     }
     for (; iteration_scene_index < 10; ++iteration_scene_index, iteration_object_index = 0) {
         for (; iteration_object_index < scene_counts[iteration_scene_index]; ++iteration_object_index) {
@@ -215,11 +236,15 @@ void *SceneObjectHelper::GetNextObject(void *item) {
                 reinterpret_cast<u8 *>(scenes[iteration_scene_index]) + iteration_object_index * sizeof(SceneObject));
             char *filter = scene_filter;
             if (object->reserved_0x28 == 0 &&
-                (filter[0] == 0 || NuStrIStr(const_cast<char *>(object->GetName()), filter) != NULL))
+                (filter[0] == 0 || NuStrIStr(const_cast<char *>(object->GetName()), filter) == NULL))
                 return object;
         }
     }
-    return item != NULL ? owned_first : NULL;
+    if (item == NULL)
+        return NULL;
+
+owned_objects:
+    return static_cast<SceneObject *>(item)->editor_owned != 0 ? static_cast<SceneInstance *>(item)->next : owned_first;
 }
 
 i32 SceneObjectHelper::GetNumObjects() {
@@ -289,15 +314,55 @@ void SceneObjectHelper::Initialise() {
     }
     thePlaceableHelper.RegisterObjectType("Scene Object", reinterpret_cast<PlaceableInterface *>(this));
     theEdSystem.RegisterSubSystem(&subsystem);
-    memset(scenes, 0, sizeof(scenes));
+    memset(scene_counts, 0, sizeof(scene_counts));
 }
 
 void SceneObjectHelper::PostLoadInitialisation(MemoryBuffer *, MemoryBuffer *) {
-    STUBBED();
 }
 
 void SceneObjectHelper::PreLoadInitialisation(MemoryBuffer *, MemoryBuffer *) {
-    STUBBED();
+    SceneObject **scene_slot = scenes;
+    i32 *count_slot = scene_counts;
+    for (i32 level = 0; level < 10; ++level, ++scene_slot, ++count_slot) {
+        nugscn_s *scene = theLevelEditor.GetScene(level);
+        if (scene != NULL && *count_slot == 0) {
+            *count_slot = NuGScnNumSpecials(scene);
+            const usize bytes = *count_slot * sizeof(SceneObject);
+            SceneObject *objects = NULL;
+            if (bytes < *theMemoryManager.end_cell - *theMemoryManager.cursor_cell) {
+                const usize aligned = ALIGN(*theMemoryManager.cursor_cell, 0x10);
+                *theMemoryManager.cursor_cell = aligned + bytes;
+                objects = reinterpret_cast<SceneObject *>(aligned);
+                memset(objects, 0, bytes);
+                theMemoryManager.allocated += bytes;
+                theMemoryManager.remaining -= bytes;
+                theMemoryManager.high_water = *theMemoryManager.cursor_cell;
+            }
+            *scene_slot = objects;
+            for (i32 index = 0; index < *count_slot; ++index)
+                new (&(*scene_slot)[index]) SceneObject();
+        }
+    }
+
+    scene_object_count = 0;
+    scene_slot = scenes;
+    count_slot = scene_counts;
+    for (i32 level = 0; level < 10; ++level, ++scene_slot, ++count_slot) {
+        SceneObject *object = *scene_slot;
+        nugscn_s *scene = theLevelEditor.GetScene(level);
+        if (scene != NULL) {
+            for (i32 index = 0; index < *count_slot; ++index) {
+                NuGScnGetSpecial(&object->special, scene, index);
+                object->attributes = 0x12400000;
+                object->led_file = level;
+                char *name = NuSpecialGetName(&object->special);
+                if (name != NULL)
+                    NuStrICmp(name, "reflectport");
+                ++object;
+                ++scene_object_count;
+            }
+        }
+    }
 }
 
 void SceneObjectHelper::SetSceneFilter(char *filter) {
@@ -306,30 +371,25 @@ void SceneObjectHelper::SetSceneFilter(char *filter) {
 }
 
 void SceneObjectHelper::SubRender() {
-    // The original helper keeps editor-owned SceneObjects in a linked list at
-    // 0x98. These members still need names in the public layout; use the
-    // verified offsets here so the target render path remains available.
-    auto *object = *reinterpret_cast<Placeable **>(reinterpret_cast<u8 *>(this) + 0x98);
-    for (; object != nullptr; object = *reinterpret_cast<Placeable **>(reinterpret_cast<u8 *>(object) + 0x2c)) {
-        if (*reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(object) + 0x28) != 0)
+    for (SceneInstance *object = owned_first; object != NULL; object = object->next) {
+        if (object->reserved_0x28 != 0)
             continue;
-        if (*reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(object) + 0xb4) != 0 ||
-            (__builtin_expect(show_hidden_solid != 0, 1) && theLevelEditor.editors_entered != 0)) {
-            EdDrawBegin(0);
-            object->Render(nullptr);
-            EdDrawEnd();
+        if (object->visibility == 0 &&
+            (__builtin_expect(show_hidden_solid == 0, 0) || theLevelEditor.editors_entered == 0)) {
+            if (__builtin_expect(show_hidden_wire != 0, 0) && theLevelEditor.editors_entered != 0) {
+                ClassObject selection{class_interface.object_class, object, NULL};
+                theClassEditor.DrawObjectSphere(selection, 0x80808080);
+            }
             continue;
         }
-        if (__builtin_expect(show_hidden_wire != 0, 0) && theLevelEditor.editors_entered != 0) {
-            auto *object_class = *reinterpret_cast<EdClass **>(reinterpret_cast<u8 *>(this) + 4);
-            ClassObject selection{object_class, object, nullptr};
-            theClassEditor.DrawObjectSphere(selection, 0x80808080);
-        }
+        EdDrawBegin(0);
+        object->Render(NULL);
+        EdDrawEnd();
     }
 }
 
-void SceneObjectHelper::UpdateLists(MemoryBuffer *, MemoryBuffer *) {
-    STUBBED();
+void SceneObjectHelper::UpdateLists(MemoryBuffer *first, MemoryBuffer *second) {
+    class_interface.vtable->pre_load_initialisation(&class_interface, first, second);
 }
 
 void SceneObjectHelper::cbEdSceneObjectShowHiddenSolid(eduimenu_s *, eduiitem_s *item, u32) {

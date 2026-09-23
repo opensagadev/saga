@@ -409,10 +409,13 @@ namespace saga::host::harness {
                 this->register_original_modules();
                 edmainInit(system_qfont, nullptr);
                 edmainSetCursorEnabled(0);
+
+                VARIPTR editor_cursor{};
+                editor_cursor.u8_ptr = this->level_editor_storage.data();
+                VARIPTR editor_end{};
+                editor_end.u8_ptr = this->level_editor_storage.data() + this->level_editor_storage.size();
+                theLevelEditor.Initalise(editor_cursor, editor_end, 1);
                 this->initialize_menu_classes();
-                if (!theLevelEditor.first_editor)
-                    theLevelEditor.RegisterEditor(theClassEditor);
-                theLevelEditor.active_editor = &theClassEditor;
 
                 eduimenu_s *menu = edGetMainMenu();
                 if (menu)
@@ -457,6 +460,7 @@ namespace saga::host::harness {
                     HostSceneObject &object = this->scene_objects[index];
                     NuGScnGetSpecial(&object.special, scene, index);
                     object.attributes = 0x12400000;
+                    object.reserved_0x28 = 0;
                 }
                 theSceneObjectHelper.scenes[scene_id] = this->scene_objects.data();
                 theSceneObjectHelper.scene_counts[scene_id] = special_count;
@@ -706,14 +710,6 @@ namespace saga::host::harness {
             }
 
             void initialize_menu_classes() {
-                if (!theRegistry.initialised) {
-                    VARIPTR cursor{};
-                    cursor.u8_ptr = this->registry_storage.data();
-                    VARIPTR end{};
-                    end.u8_ptr = this->registry_storage.data() + this->registry_storage.size();
-                    theRegistry.Initialise(cursor, end, 32, 32, 10, 1);
-                    theRegistry.RegisterBaseTypes();
-                }
                 if (theRegistry.class_count != 0)
                     return;
 
@@ -822,7 +818,7 @@ namespace saga::host::harness {
             std::atomic<bool> free_camera_ready{false};
             std::atomic<int> exit_status{no_exit_requested};
             alignas(16) std::array<u8, 64 * 1024> font_storage{};
-            alignas(16) std::array<u8, 16 * 1024> registry_storage{};
+            alignas(16) std::array<u8, 256 * 1024> level_editor_storage{};
             alignas(16) std::array<u8, editor_pool_size> editor_pool{};
             bool editor_pool_installed = false;
             std::vector<HostSceneObject> scene_objects;

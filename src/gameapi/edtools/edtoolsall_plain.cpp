@@ -6,6 +6,7 @@
 #include "nu2api/nucore/numemory.h"
 #include "nu2api/nucore/numouse.h"
 #include "nu2api/nucore/nukeyboard.h"
+#include "nu2api/nucore/nupad.h"
 #include "gameapi/edtools/gameapi_edtools_types.h"
 #include "gameapi/edtools/edfile.h"
 #include "gameapi/edtools/edcam.h"
@@ -58,9 +59,11 @@ static f32 edui_font_scale_x = 0.9f;
 static f32 edui_font_scale_y = 0.9f;
 static f32 edmain_menu_scale = 1.0f;
 static u32 edui_cursor_colour = 0xff000000;
-static char edui_prop_edit_buffer[256];
-static char edui_prop_original_buffer[256];
-static i32 edui_prop_edit_cursor = -1;
+static char eduiPropTextEdit[256];
+static char eduiPropTextStore[256];
+static char *textrow[8];
+static char TextPickCopyBuffer[0x40];
+static i32 cursor_flash;
 static char *edpp_save_names[6];
 static i32 edptl_count;
 static NUVEC entry_position;
@@ -99,6 +102,8 @@ void edppHighlightNearest();
 extern "C" void DebrisStatusNormal(i32 *handle);
 
 extern "C" {
+    __attribute__((visibility("hidden"))) void tpentOnEnter(eduimenu_s *, eduiitem_s *, u32);
+    __attribute__((visibility("hidden"))) void tpentPropOnEnter(eduimenu_s *, eduiitem_s *, u32);
     extern numtl_s *uimtls[5];
     extern i32 ui_bgmtl;
     extern i32 ui_outmtl;
@@ -222,6 +227,7 @@ extern "C" {
     static i32 eduicbProcessFilePick(eduimenu_s *, eduiitem_s *, f32, nupad_s *);
     static i32 eduicbProcessTextPick(eduimenu_s *, eduiitem_s *, f32, nupad_s *);
     static i32 eduicbProcessProp(eduimenu_s *, eduiitem_s *, f32, nupad_s *);
+    static i32 eduicbProcessPropKeyboard(eduimenu_s *, edui_prop_s *);
     static i32 eduicbRenderSel(eduimenu_s *, eduiitem_s *, i32, i32, i32);
     static i32 eduicbRenderSelWithClipColour(eduimenu_s *, eduiitem_s *, i32, i32, i32);
     static i32 eduicbRenderCheck(eduimenu_s *, eduiitem_s *, i32, i32, i32);
@@ -267,6 +273,7 @@ extern "C" {
     i32 ed_main_menu_y = 50;
     i32 ed_main_menu_x = 220;
     eduiiattr_s ed_attr = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
+    i32 eduiPropTextPos = -1;
     i32 edmain_render_interacts;
     ed_module_s edanimdesc = {NULL, NULL, "Anim Editor", edanimInit, edanimClose, edanimEnter,  NULL,
                               NULL, NULL, NULL,          0x6d696e61, edanimProc,  edanimRender, NULL};
@@ -2423,14 +2430,38 @@ extern "C" {
     void edqrand(void) {
         STUBBED();
     }
-    void eduiAddPropTextPickEnt(eduimenu_s *, eduiitem_s *) {
-        STUBBED();
+    edui_textpicker_s *eduiAddTextPickEntEx(eduimenu_s *menu, eduiitem_s *source, EdUiItemCallback callback) {
+        static eduimenu_s *tpent;
+        tpent =
+            eduiMenuCreate(source->x + 10, source->y + 10, 180, 50, menu->font, NULL, const_cast<char *>("Enter Text"));
+        tpent->flags |= 2;
+        auto *picker = static_cast<edui_textpicker_s *>(
+            eduiItemTextPickCreate(reinterpret_cast<usize>(source), &ed_attr, callback, const_cast<char *>("")));
+        eduiMenuAddItem(tpent, picker);
+        eduiMenuAttach(menu, tpent);
+        picker->editing = 1;
+        eduiMenuFitWidth(tpent, 8);
+        picker->cursor = NuStrLen(picker->value);
+        return picker;
     }
-    void eduiAddTextPickEnt(void) {
-        STUBBED();
+    void eduiAddPropTextPickEnt(eduimenu_s *menu, eduiitem_s *source) {
+        auto *picker = eduiAddTextPickEntEx(menu, source, tpentPropOnEnter);
+        if (!picker)
+            return;
+        NuStrCpy(picker->value, static_cast<edui_prop_s *>(source)->property_text);
+        picker->cursor = NuStrLen(picker->value);
+        memcpy(picker->colours, source->colours, sizeof(picker->colours));
     }
-    void eduiAddTextPickEntEx(void) {
-        STUBBED();
+    void eduiAddTextPickEnt(eduimenu_s *menu, eduiitem_s *source) {
+        auto *picker = eduiAddTextPickEntEx(menu, source, tpentOnEnter);
+        if (!picker)
+            return;
+        NuStrCpy(picker->value, static_cast<edui_textpicker_s *>(source)->value);
+        picker->cursor = NuStrLen(picker->value);
+        memcpy(picker->colours, source->colours, sizeof(picker->colours));
+        picker->max_length = static_cast<edui_textpicker_s *>(source)->max_length;
+        picker->keyboard_flags =
+            (picker->keyboard_flags & ~2u) | (static_cast<edui_textpicker_s *>(source)->keyboard_flags & 2u);
     }
     i32 eduiClearActiveMenu(void) {
         eduiSetActiveMenu(NULL);
@@ -3140,12 +3171,42 @@ extern "C" {
         if (notify && item->changed)
             item->changed(NULL, item, 0);
     }
-    eduiitem_s *eduiItemTextPickCreate(usize, const void *, EdUiItemCallback, char *) {
-        STUBBED();
-        return NULL;
+    eduiitem_s *eduiItemTextPickCreate(usize data, const void *colours, EdUiItemCallback callback, char *text) {
+        auto *item = static_cast<edui_textpicker_s *>(NU_ALLOC(sizeof(edui_textpicker_s), 4, 1, "", 0));
+        if (!item)
+            return NULL;
+        memset(item, 0, sizeof(*item));
+        item->type = 1;
+        item->data = data;
+        memcpy(item->colours, colours, sizeof(item->colours));
+        item->process = eduicbProcessTextPick;
+        item->render = eduicbRenderTextPick;
+        item->destroy = eduicbItemTextPickDestroy;
+        item->text_alignment = 0x40;
+        item->selection_group = 0;
+        eduiItemSetText(item, text);
+        item->max_length = 255;
+        item->callback = callback;
+        item->format = NULL;
+        item->cursor = 0;
+        eduiItemTextPickSetFmt(item, const_cast<char *>("\"%s\""));
+        textrow[0] = const_cast<char *>("1234567890");
+        textrow[1] = const_cast<char *>("QWERTYUIOP");
+        textrow[2] = const_cast<char *>("ASDFGHJKL_");
+        textrow[3] = const_cast<char *>("ZXCVBNM<>?");
+        return item;
     }
     void eduiItemTextPickSetFmt(edui_textpicker_s *item, char *format) {
-        STUBBED();
+        if (item->format) {
+            i32 old_length = NuStrLen(item->format);
+            i32 new_length = NuStrLen(format);
+            if (old_length >= new_length)
+                goto copy;
+            NU_FREE(item->format);
+        }
+        item->format = static_cast<char *>(NU_ALLOC(NuStrLen(format) + 1, 4, 1, "", 0));
+    copy:
+        NuStrCpy(item->format, format);
     }
     eduiitem_s *eduiItemTextSelectorCreate(usize data, const void *colours, i32 group, EdUiItemCallback callback,
                                            i32 count, i32 selected, char *text, char **options) {
@@ -4215,7 +4276,7 @@ extern "C" {
         bool in_row = edui_cursor_x >= interact->x && edui_cursor_y >= interact->y && edui_cursor_y < cursor_bottom;
         if (property->unknown_property_flags & 1) {
             if (in_row && edui_cursor_x >= label_end + 1.0f && edui_cursor_x < property->button_x) {
-                edui_prop_edit_cursor = -1;
+                eduiPropTextPos = -1;
                 return 1;
             }
             return (property->unknown_property_flags & 0x0b) != 0;
@@ -4230,10 +4291,10 @@ extern "C" {
                 property->selected(interact->menu, property, 0);
             NuKeyFlush();
             property->unknown_property_flags |= 1;
-            NuStrNCpy(edui_prop_edit_buffer, property->property_text ? property->property_text : "",
-                      sizeof(edui_prop_edit_buffer));
-            NuStrNCpy(edui_prop_original_buffer, edui_prop_edit_buffer, sizeof(edui_prop_original_buffer));
-            edui_prop_edit_cursor = NuStrLen(edui_prop_edit_buffer);
+            NuStrNCpy(eduiPropTextEdit, property->property_text ? property->property_text : "",
+                      sizeof(eduiPropTextEdit));
+            NuStrNCpy(eduiPropTextStore, eduiPropTextEdit, sizeof(eduiPropTextStore));
+            eduiPropTextPos = NuStrLen(eduiPropTextEdit);
         }
         if (edui_cursor_x >= property->button_x && edui_cursor_x < property->button_x + property->button_size &&
             edui_cursor_y >= property->button_y * 0.5f &&
@@ -4467,7 +4528,65 @@ extern "C" {
         return 0;
     }
     static __used__ i32 eduicbProcessFilter(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad) {
-        STUBBED();
+        auto *filter = static_cast<edui_filter_s *>(item);
+        (void)delta_time;
+        if (filter->unknown_property_flags & 2) {
+            filter->label_width = edui_cursor_x - static_cast<f32>(item->x);
+            if (filter->label_width < 1.0f)
+                filter->label_width = 1.0f;
+            for (eduiitem_s *other = menu->first; other; other = other->next) {
+                if (other->type == 17 && other != item)
+                    static_cast<edui_prop_s *>(other)->label_width = filter->label_width;
+            }
+            if (!(edui_cursor_buttons & EDUI_CURSOR_PRIMARY))
+                filter->unknown_property_flags &= ~2;
+        }
+        eduicbProcessPropKeyboard(menu, filter);
+        eduiSetCameraEnabled(1);
+        if ((filter->unknown_property_flags & 8) ||
+            (pad && item->type == 17 && (pad->digital_buttons & EDUI_CURSOR_PRIMARY))) {
+            if (filter->button) {
+                eduiSetCameraEnabled(0);
+                filter->button(menu, item, edui_cursor_buttons);
+                filter->unknown_property_flags &= ~8;
+            }
+            if (!(edui_cursor_buttons & EDUI_CURSOR_PRIMARY))
+                filter->unknown_property_flags &= ~8;
+        }
+        char *query = (filter->unknown_property_flags & 1) ? eduiPropTextEdit : filter->property_text;
+        bool changed = false;
+        if (!*query) {
+            for (eduiitem_s *child = filter->first_child; child;) {
+                eduiitem_s *next = child->next;
+                eduiItemFilterRemoveItem(filter, child);
+                eduiMenuAddItem(menu, child);
+                child = next;
+                changed = true;
+            }
+        } else {
+            for (eduiitem_s *candidate = menu->first; candidate;) {
+                eduiitem_s *next = candidate->next;
+                if (candidate->type != 18 && candidate->type != 20 && !NuStrIStr(candidate->text, query)) {
+                    eduiMenuRemoveItem(menu, candidate);
+                    eduiItemFilterAddItem(filter, candidate);
+                    changed = true;
+                }
+                candidate = next;
+            }
+            for (eduiitem_s *candidate = filter->first_child; candidate;) {
+                eduiitem_s *next = candidate->next;
+                if (NuStrIStr(candidate->text, query)) {
+                    eduiItemFilterRemoveItem(filter, candidate);
+                    eduiMenuAddItem(menu, candidate);
+                    changed = true;
+                }
+                candidate = next;
+            }
+        }
+        if (changed || !(filter->unknown_84[4] & 1)) {
+            eduiMenuSortItemsByTxt(menu);
+            filter->unknown_84[4] |= 1;
+        }
         return 0;
     }
     static __used__ i32 eduicbProcessGradPick(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad) {
@@ -4591,55 +4710,82 @@ extern "C" {
             pick->changed(menu, item, pad->digital_buttons);
         return 0;
     }
-    static __attribute__((noinline)) void eduicbProcessPropKeyboard(eduimenu_s *menu, edui_prop_s *property) {
+    static i32 eduicbProcessPropKeyboard(eduimenu_s *menu, edui_prop_s *property) {
         if (!(property->unknown_property_flags & 1))
-            return;
-        i32 length = NuStrLen(edui_prop_edit_buffer);
-        if (edui_prop_edit_cursor < 0)
-            edui_prop_edit_cursor = 0;
-        if (edui_prop_edit_cursor > length)
-            edui_prop_edit_cursor = length;
+            return 0;
+        i32 length = NuStrLen(eduiPropTextEdit);
+        if (eduiPropTextPos < 0)
+            eduiPropTextPos = 0;
+        if (eduiPropTextPos > length)
+            eduiPropTextPos = length;
         u32 modifiers = 0;
         i32 key = NuKeyGet(&modifiers);
         if (key == -1)
-            return;
+            return 0;
         if (key == 0x1c) {
-            eduiItemPropSetText(property, edui_prop_edit_buffer);
+            eduiItemPropSetText(property, eduiPropTextEdit);
             if (property->changed)
                 property->changed(menu, property, 0);
             property->unknown_property_flags &= ~1;
-            edui_prop_edit_cursor = -1;
-            return;
+            eduiPropTextPos = -1;
+            return 0;
         }
-        if (key == 1) {
-            property->unknown_property_flags &= ~1;
-            edui_prop_edit_cursor = -1;
-            return;
-        }
-        if (key == 0xcb) {
-            if (edui_prop_edit_cursor > 0)
-                --edui_prop_edit_cursor;
-            return;
-        }
-        if (key == 0xcd) {
-            if (edui_prop_edit_cursor < length)
-                ++edui_prop_edit_cursor;
-            return;
-        }
-        if (key == 0xe || key == 0xd3) {
-            i32 position = edui_prop_edit_cursor - (key == 0xe);
-            if (position >= 0 && position < length) {
-                memmove(edui_prop_edit_buffer + position, edui_prop_edit_buffer + position + 1, length - position);
-                edui_prop_edit_cursor = position;
+        if (key < 0x1d) {
+            if (key == 1) {
+                property->unknown_property_flags &= ~1;
+                eduiPropTextPos = -1;
+                return 0;
             }
-            return;
+            if (key == 0xe) {
+                if (eduiPropTextPos < 1)
+                    return 0;
+                char *cursor = eduiPropTextEdit + eduiPropTextPos - 1;
+                --eduiPropTextPos;
+                char character = *cursor;
+                while (character) {
+                    character = cursor[1];
+                    *cursor++ = character;
+                }
+                return 0;
+            }
+        } else {
+            if (key == 0xcd) {
+                if (eduiPropTextPos < length)
+                    ++eduiPropTextPos;
+                return 0;
+            }
+            if (key == 0xd3) {
+                if (eduiPropTextPos >= length)
+                    return 0;
+                char *cursor = eduiPropTextEdit + eduiPropTextPos;
+                char character = *cursor;
+                while (character) {
+                    character = cursor[1];
+                    *cursor++ = character;
+                }
+                return 0;
+            }
+            if (key == 0xcb) {
+                if (eduiPropTextPos > 0)
+                    --eduiPropTextPos;
+                return 0;
+            }
         }
-        i32 letter = NuKeyToAscii(key, modifiers & 1);
-        if (letter && length < 254) {
-            memmove(edui_prop_edit_buffer + edui_prop_edit_cursor + 1, edui_prop_edit_buffer + edui_prop_edit_cursor,
-                    length - edui_prop_edit_cursor + 1);
-            edui_prop_edit_buffer[edui_prop_edit_cursor++] = static_cast<char>(letter);
+        char letter = NuKeyToAscii(key, modifiers & 1);
+        if (letter) {
+            eduiPropTextEdit[length + 1] = '\0';
+            char *cursor = eduiPropTextEdit + length;
+            char *insertion = eduiPropTextEdit + eduiPropTextPos;
+            if (insertion < cursor) {
+                do {
+                    *cursor = cursor[-1];
+                    --cursor;
+                } while (cursor != insertion);
+            }
+            *cursor = letter;
+            ++eduiPropTextPos;
         }
+        return 0;
     }
     static __used__ i32 eduicbProcessProp(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad) {
         (void)delta_time;
@@ -4745,8 +4891,130 @@ extern "C" {
         }
         return 0;
     }
-    static __used__ i32 eduicbProcessTextPick(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad) {
-        STUBBED();
+    static __used__ i32 eduicbProcessTextPick(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad) {
+        auto *picker = static_cast<edui_textpicker_s *>(item);
+        u32 modifiers;
+        i32 key = NuKeyGet(&modifiers);
+        NuStrLen(picker->value);
+
+        auto delete_previous = [&]() {
+            if (picker->cursor <= 0)
+                return;
+            --picker->cursor;
+            if (picker->value[picker->cursor + 1])
+                memmove(picker->value + picker->cursor, picker->value + picker->cursor + 1,
+                        sizeof(picker->value) - picker->cursor - 1);
+            else
+                picker->value[picker->cursor] = '\0';
+        };
+        auto insert_character = [&](char character) {
+            if (NuStrLen(picker->value) >= picker->max_length)
+                return;
+            if (picker->cursor < static_cast<i32>(sizeof(picker->value)))
+                memmove(picker->value + picker->cursor + 1, picker->value + picker->cursor,
+                        sizeof(picker->value) - picker->cursor - 1);
+            picker->value[picker->cursor++] = character;
+        };
+        auto next_row = [&]() {
+            if (++picker->keyboard_row > ((picker->keyboard_flags & 2) ? 5 : 3))
+                picker->keyboard_row = 0;
+        };
+        auto previous_row = [&]() {
+            if (--picker->keyboard_row < 0)
+                picker->keyboard_row = (picker->keyboard_flags & 2) ? 5 : 3;
+        };
+        auto next_column = [&]() {
+            if (picker->keyboard_row >= 4)
+                return;
+            if (++picker->keyboard_column >= NuStrLen(textrow[picker->keyboard_row]))
+                picker->keyboard_column = 0;
+        };
+        auto previous_column = [&]() {
+            if (picker->keyboard_row >= 4)
+                return;
+            if (--picker->keyboard_column < 0)
+                picker->keyboard_column = NuStrLen(textrow[picker->keyboard_row]) - 1;
+        };
+
+        switch (key) {
+            case 0xc8:
+                previous_row();
+                break;
+            case 0xd0:
+                next_row();
+                break;
+            case 0xcb:
+                previous_column();
+                break;
+            case 0xcd:
+                next_column();
+                break;
+            case 0x0e:
+            case 0xd3:
+                delete_previous();
+                break;
+            case 0x1c:
+            case 1:
+                if (picker->callback)
+                    picker->callback(menu, item, pad->digital_buttons);
+                break;
+            default:
+                if (key != -1) {
+                    char character = NuKeyToAscii(key, modifiers & 1);
+                    if (character)
+                        insert_character(character);
+                }
+                break;
+        }
+
+        if (!picker->editing) {
+            if (pad->digital_buttons_pressed & 0x40)
+                eduiAddTextPickEnt(menu, item);
+            return 0;
+        }
+
+        if (pad->digital_buttons_pressed & 0x4000)
+            next_row();
+        if (pad->digital_buttons_pressed & 0x1000)
+            previous_row();
+        if (pad->digital_buttons_pressed & 0x8000)
+            previous_column();
+        if (pad->digital_buttons_pressed & 0x2000)
+            next_column();
+        if ((pad->digital_buttons_pressed & 0x10) && picker->callback)
+            picker->callback(menu, item, pad->digital_buttons);
+        if ((pad->digital_buttons & 0xc) == 0xc) {
+            picker->cursor = 0;
+            picker->value[0] = '\0';
+            if ((picker->keyboard_flags & 2) && TextPickCopyBuffer[0]) {
+                NuStrNCpy(picker->value, TextPickCopyBuffer, picker->max_length - 1);
+                picker->value[picker->max_length - 1] = '\0';
+                picker->cursor = NuStrLen(picker->value);
+            }
+        }
+        if ((pad->digital_buttons & 3) == 3 && (picker->keyboard_flags & 2)) {
+            NuStrNCpy(TextPickCopyBuffer, picker->value, 0x40);
+            picker->value[0x3f] = '\0';
+        }
+        if (pad->digital_buttons_pressed & 4)
+            picker->cursor = picker->cursor > 0 ? picker->cursor - 1 : 0;
+        if (pad->digital_buttons_pressed & 8) {
+            if (picker->cursor < NuStrLen(picker->value))
+                ++picker->cursor;
+            else
+                picker->cursor = NuStrLen(picker->value);
+        }
+        if (pad->digital_buttons_pressed & 0x40)
+            insert_character(textrow[picker->keyboard_row][picker->keyboard_column]);
+        if (pad->digital_buttons_pressed & 0x80)
+            delete_previous();
+        if (pad->digital_buttons_pressed & 0x20) {
+            bool uppercase = textrow[1][0] == 'Q';
+            textrow[0] = const_cast<char *>("1234567890");
+            textrow[1] = uppercase ? const_cast<char *>("qwertyuiop") : const_cast<char *>("QWERTYUIOP");
+            textrow[2] = uppercase ? const_cast<char *>("asdfghjkl_") : const_cast<char *>("ASDFGHJKL_");
+            textrow[3] = uppercase ? const_cast<char *>("zxcvbnm<>?") : const_cast<char *>("ZXCVBNM<>?");
+        }
         return 0;
     }
     static __used__ i32 eduicbProcessTexturePick(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad) {
@@ -5021,7 +5289,7 @@ extern "C" {
         }
         i32 label_x = (x + 2 + property->depth * 8) << 4;
         eduiFntPrintEx(edui_font, label_x, (y << 3) + baseline, 16, item->text);
-        char *value = (property->unknown_property_flags & 1) ? edui_prop_edit_buffer : property->property_text;
+        char *value = (property->unknown_property_flags & 1) ? eduiPropTextEdit : property->property_text;
         if (value)
             eduiFntPrintEx(edui_font, (static_cast<i32>(property->button_x) - 1) << 4, (y << 3) + baseline, 32, value);
         return height;
@@ -5129,9 +5397,87 @@ extern "C" {
             NuRndrLine2di(marker_x, top, marker_x, bottom, item->colours[item->highlighted], uimtls[0]);
         return height * 2;
     }
-    static __used__ i32 eduicbRenderTextPick(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width) {
-        STUBBED();
-        return 0;
+    static __used__ i32 eduicbRenderTextPick(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width) {
+        auto *picker = static_cast<edui_textpicker_s *>(item);
+        i32 height = static_cast<i32>(NuQFntHeight(edui_font) * 1.25f) >> 3;
+        i32 baseline = static_cast<i32>(NuQFntHeight(edui_font) * 0.125f + NuQFntBaseline(edui_font));
+        item->x = x;
+        item->y = y;
+
+        if (!picker->editing) {
+            if (!(picker->keyboard_flags & 1)) {
+                if (!edui_donotdraw)
+                    NuRndrRect2di(x << 4, y << 3, width << 4, height << 3, item->colours[2 + item->highlighted],
+                                  uimtls[ui_bgmtl]);
+                char formatted[256];
+                sprintf(formatted, picker->format, picker->value);
+                if (!edui_donotdraw) {
+                    NuQFntSet(edui_font);
+                    NuQFntSetColour(edui_font, item->colours[item->highlighted]);
+                }
+                eduiFntPrintEx(edui_font, x << 4, (y << 3) + baseline, 16, const_cast<char *>("%s %s"), item->text,
+                               formatted);
+                return height;
+            }
+            if (!edui_donotdraw) {
+                NuRndrRect2di(x << 4, y << 3, width << 4, height << 4, item->colours[2 + item->highlighted],
+                              uimtls[ui_bgmtl]);
+                NuQFntSet(edui_font);
+                NuQFntSetColour(edui_font, item->colours[item->highlighted]);
+            }
+            i32 centre = (x * 2 + width) << 3;
+            eduiFntPrintEx(edui_font, centre, (y << 3) + baseline, 64, item->text);
+            eduiFntPrintEx(edui_font, centre, ((y + height) << 3) + baseline, 64, picker->format, picker->value);
+            return height * 2;
+        }
+
+        item_width = width > height * 10 ? width : height * 10;
+        i32 total_height = (picker->keyboard_flags & 2) ? height * 6 : height * 5;
+        if (!edui_donotdraw)
+            NuRndrRect2di(x << 4, y << 3, item_width << 4, total_height << 3, item->colours[2], uimtls[ui_bgmtl]);
+        for (i32 row = 0; row < 4; ++row) {
+            for (i32 column = 0; column < 10; ++column) {
+                if (!edui_donotdraw) {
+                    NuQFntSet(edui_font);
+                    NuQFntSetColour(edui_font,
+                                    item->colours[row == picker->keyboard_row && column == picker->keyboard_column]);
+                }
+                char letter[2] = {textrow[row][column], '\0'};
+                eduiFntPrintEx(edui_font, (x + height * column) << 4, ((y + row * height) << 3) + baseline, 16, letter);
+            }
+        }
+        if (!edui_donotdraw) {
+            NuQFntSet(edui_font);
+            NuQFntSetColour(edui_font, item->colours[1]);
+        }
+        i32 value_y = ((y + height * 4) << 3) + baseline;
+        eduiFntPrintEx(edui_font, x << 4, value_y, 16, picker->value);
+        if (--cursor_flash < 1)
+            cursor_flash = 32;
+        if (cursor_flash >= 16 && !edui_donotdraw) {
+            char prefix[256];
+            i32 position = picker->cursor;
+            if (position < 0)
+                position = 0;
+            if (position > 255)
+                position = 255;
+            memcpy(prefix, picker->value, position);
+            prefix[position] = '\0';
+            i32 offset = static_cast<i32>(NuQFntPrintLenU(edui_font, prefix));
+            char at_cursor[2] = {picker->value[position] ? picker->value[position] : 'A', '\0'};
+            NuRndrRect2di((x << 4) + offset, value_y - static_cast<i32>(NuQFntBaseline(edui_font)),
+                          static_cast<i32>(NuQFntPrintLenU(edui_font, at_cursor)),
+                          static_cast<i32>(NuQFntHeight(edui_font)), item->colours[1] ^ 0xffffff, NULL);
+        }
+        if (picker->keyboard_flags & 2) {
+            if (!edui_donotdraw) {
+                NuQFntSet(edui_font);
+                NuQFntSetColour(edui_font, item->colours[0]);
+            }
+            eduiFntPrintEx(edui_font, x << 4, ((y + height * 5) << 3) + baseline, 16,
+                           TextPickCopyBuffer[0] ? TextPickCopyBuffer : const_cast<char *>("Copy L2+R2 Paste L1+R1"));
+        }
+        return total_height;
     }
     static __used__ i32 eduicbRenderTextSelector(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width) {
         edui_text_selector_s *selector = static_cast<edui_text_selector_s *>(item);

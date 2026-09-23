@@ -232,14 +232,6 @@ struct EdClassObjectNameControl {
     void cbSelectClass(eduimenu_s *, eduiitem_s *, u32);
     void cbSelectObject(eduimenu_s *, eduiitem_s *, u32);
 };
-struct EdColourControl {
-    void AddMenuItem(eduimenu_s *, EdRef *, void *);
-    EdColourControl();
-    void Refresh();
-    void cbButton(eduimenu_s *, eduiitem_s *, u32);
-    void cbChanged(eduimenu_s *, eduiitem_s *, u32);
-    void cbColourSelected(eduimenu_s *, eduiitem_s *, u32);
-};
 struct EdControl {
     static EdInputContext *Input;
     virtual ~EdControl();
@@ -257,6 +249,15 @@ struct EdControl {
     i32 SelectSubObject();
     static void cbSelected(eduimenu_s *, eduiitem_s *, u32);
 };
+struct EdColourControl : EdControl {
+    EdColourControl();
+    void AddMenuItem(eduimenu_s *, EdRef *, void *) override;
+    void Refresh() override;
+    static void cbButton(eduimenu_s *, eduiitem_s *, u32);
+    static void cbChanged(eduimenu_s *, eduiitem_s *, u32);
+    static void cbColourSelected(eduimenu_s *, eduiitem_s *, u32);
+};
+DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(EdColourControl) == 0x10, "EdColourControl 32-bit size");
 template <typename T> struct EdValueControl : EdControl {
     i32 value_type;
     char *format;
@@ -706,9 +707,9 @@ struct KnotHelper {
     EdRef *in_tangent_ref;
     EdRef *out_tangent_ref;
 
-    void CreateObject(void *, i32, i32);
+    void *CreateObject(void *, i32, i32);
     void DestroyObject(void *, i32);
-    void DistanceToObject(VuVec &, VuVec &, void *, EdRef **);
+    f32 DistanceToObject(VuVec &, VuVec &, void *, EdRef **);
     void *GetNextObject(void *);
     i32 GetNumObjects();
     void Process(void *, EdInputContext &);
@@ -718,13 +719,13 @@ struct SplineHelper {
     void *vtable;
     EdClass *object_class;
     SplineObject *first_object;
-    u8 reserved_0x0c[4];
+    SplineObject *last_object;
     i32 object_count;
     i32 auto_generate_points;
 
     void AddMenuItems(eduimenu_s *);
     void ClearLevel(i32);
-    void CreateObject(void *, i32, i32);
+    void *CreateObject(void *, i32, i32);
     void DestroyObject(void *, i32);
     SplineObject *Find(char *);
     i32 Find(char *, SplineObject **, i32);
@@ -786,7 +787,7 @@ struct SplinePointList {
     i32 GetPoint(i32, VuVec &);
 };
 struct SplineObject {
-    u8 reserved_0x00[4];
+    virtual ~SplineObject();
     SplineObject *next;
     SplineObject *previous;
     char name[32];
@@ -799,7 +800,9 @@ struct SplineObject {
     i32 drop;
     i32 closed;
 
-    void Clone();
+    SplineObject();
+    static void operator delete(void *);
+    SplineObject *Clone();
     void Draw(i32, i32, i32, float);
     void DropPoint(VuVec &);
     void GenBezierPoints();
