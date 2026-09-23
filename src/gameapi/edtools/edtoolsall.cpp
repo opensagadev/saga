@@ -5682,8 +5682,7 @@ void EdSpecialObjectControl::cbChanged(eduimenu_s *, eduiitem_s *item, u32) {
 }
 
 void EdSpecialObjectControl::cbSelectObject(eduimenu_s *, eduiitem_s *item, u32) {
-    EdSpecialObjectControl *control = active_special_object_control;
-    if (control == NULL)
+    if (active_special_object_control == NULL)
         return;
     nuhspecial_s selected;
     nuhspecial_s *choice;
@@ -5694,8 +5693,9 @@ void EdSpecialObjectControl::cbSelectObject(eduimenu_s *, eduiitem_s *item, u32)
         choice = &static_cast<SpecialObject *>(item->data_ptr)->special;
         char *name = NuSpecialGetName(choice);
         if (name != NULL)
-            eduiItemPropSetText(reinterpret_cast<edui_prop_s *>(control->item), name);
+            eduiItemPropSetText(reinterpret_cast<edui_prop_s *>(active_special_object_control->item), name);
     }
+    EdSpecialObjectControl *control = active_special_object_control;
     control->reference->SetMemberData(control->object, EdType_NuHSpecial, choice, 0, NULL);
 }
 

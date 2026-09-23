@@ -134,7 +134,8 @@ extern "C" {
     eduimenu_s *edpart_type_menu;
 }
 
-static inline void edpartRemoveInstance(part_typedesc_s *type, i32 index) {
+static __attribute__((always_inline, optimize("O3"))) inline void edpartRemoveInstance(part_typedesc_s *type,
+                                                                                       i32 index) {
     for (i32 next = index; next < 7; ++next) {
         type->effect_ids[next] = type->effect_ids[next + 1];
         type->effect_pages[next] = type->effect_pages[next + 1];
@@ -1863,7 +1864,7 @@ static void edpartChangeInstanceVarRot(eduimenu_s *, eduiitem_s *item, u32) {
     }
 }
 
-static void edpartDeleteInstanceOrphan(eduimenu_s *menu, eduiitem_s *item, u32) {
+static __attribute__((optimize("O3"))) void edpartDeleteInstanceOrphan(eduimenu_s *menu, eduiitem_s *item, u32) {
     edpartRemoveInstance(edpart_nearest_type, item->data);
     --edpart_nearest_orphans;
     edpartFinishMenu(menu);
@@ -2055,7 +2056,7 @@ static void edpartCancelThingsInstanceMenu(eduimenu_s *, eduimenu_s *) {
     edpart_thingsinstance_menu = NULL;
 }
 
-static void edpartDeleteAllInstanceOrphans(eduimenu_s *menu, eduiitem_s *, u32) {
+static __attribute__((optimize("O3"))) void edpartDeleteAllInstanceOrphans(eduimenu_s *menu, eduiitem_s *, u32) {
     for (i32 index = 0; index < 8; ++index) {
         if (edpart_nearest_type->effect_ids[index] == 9998) {
             edpartRemoveInstance(edpart_nearest_type, index);
@@ -2084,7 +2085,7 @@ static void edpartCancelInstanceSettingsMenu(eduimenu_s *, eduimenu_s *) {
     edpart_instancesettings_menu = NULL;
 }
 
-static void edpartDeleteAllInstanceDuplicates(eduimenu_s *menu, eduiitem_s *, u32) {
+static __attribute__((optimize("O3"))) void edpartDeleteAllInstanceDuplicates(eduimenu_s *menu, eduiitem_s *, u32) {
     for (i32 index = 0; index < 8; ++index) {
         i16 effect = edpart_nearest_type->effect_ids[index];
         if (effect == 9999 || effect == -1 || effect == 9998)

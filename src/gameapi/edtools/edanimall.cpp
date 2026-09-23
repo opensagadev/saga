@@ -21,9 +21,18 @@ static __attribute__((used)) void edanimcbFileLoad(eduimenu_s *menu, eduiitem_s 
     char directory[256];
     char name[256];
     char extension[256];
-    strcpy(directory, edbits_level_save_directory[0] ? edbits_level_save_directory : ".");
-    strcpy(name, edbits_level_save_name[0] ? edbits_level_save_name : "anims");
-    strcpy(extension, edbits_level_save_extension[0] ? edbits_level_save_extension : "anm");
+    if (!edbits_level_save_directory[0])
+        strcpy(directory, ".");
+    else
+        strcpy(directory, edbits_level_save_directory);
+    if (!edbits_level_save_name[0])
+        strcpy(name, "anims");
+    else
+        strcpy(name, edbits_level_save_name);
+    if (!edbits_level_save_extension[0])
+        strcpy(extension, "anm");
+    else
+        strcpy(extension, edbits_level_save_extension);
     sprintf(path, "%s\\%s.%s", directory, name, extension);
     edanimParamReset();
     i32 page = -1;
@@ -31,19 +40,33 @@ static __attribute__((used)) void edanimcbFileLoad(eduimenu_s *menu, eduiitem_s 
         page = edanimLoadPage(path, edbits_base_scene);
     }
     edanimStartAllPages();
-    eduiCreateMessageMenu(menu, const_cast<char *>(page < 0 ? "File Load Error" : "Loaded OK"), page >= 0);
+    if (page < 0)
+        eduiCreateMessageMenu(menu, const_cast<char *>("File Load Error"), 0);
+    else
+        eduiCreateMessageMenu(menu, const_cast<char *>("Loaded OK"), 1);
 }
 static __attribute__((used)) void edanimcbFileSave(eduimenu_s *menu, eduiitem_s *, u32) {
     char path[256];
     char directory[256];
     char name[256];
     char extension[256];
-    strcpy(directory, edbits_level_save_directory[0] ? edbits_level_save_directory : ".");
-    strcpy(name, edbits_level_save_name[0] ? edbits_level_save_name : "anims");
-    strcpy(extension, edbits_level_save_extension[0] ? edbits_level_save_extension : "anm");
+    if (!edbits_level_save_directory[0])
+        strcpy(directory, ".");
+    else
+        strcpy(directory, edbits_level_save_directory);
+    if (!edbits_level_save_name[0])
+        strcpy(name, "anims");
+    else
+        strcpy(name, edbits_level_save_name);
+    if (!edbits_level_save_extension[0])
+        strcpy(extension, "anm");
+    else
+        strcpy(extension, edbits_level_save_extension);
     sprintf(path, "%s\\%s.%s", directory, name, extension);
-    const bool saved = edanimFileSave(path) != 0;
-    eduiCreateMessageMenu(menu, const_cast<char *>(saved ? "Saved OK" : "File Save Error"), saved);
+    if (edanimFileSave(path))
+        eduiCreateMessageMenu(menu, const_cast<char *>("Saved OK"), 1);
+    else
+        eduiCreateMessageMenu(menu, const_cast<char *>("File Save Error"), 0);
 }
 void edanimRegisterBaseScene(NUGSCN *scene) {
     (void)scene;
@@ -59,8 +82,10 @@ static __attribute__((used)) void edanimcbSetSwitchId(eduimenu_s *, eduiitem_s *
     AnimParams[edanim_nearest_param_id].field_010 = static_cast<i32>(static_cast<edui_slider_s *>(item)->value);
 }
 static __attribute__((used)) void edanimcbMCTBCardType(eduimenu_s *menu, eduiitem_s *, u32) {
-    const bool valid = saveloadCheckCardType() != 0;
-    eduiCreateMessageMenu(menu, const_cast<char *>(valid ? "PS2 Card" : "Not a PS2 Card"), valid);
+    if (saveloadCheckCardType())
+        eduiCreateMessageMenu(menu, const_cast<char *>("PS2 Card"), 1);
+    else
+        eduiCreateMessageMenu(menu, const_cast<char *>("Not a PS2 Card"), 0);
 }
 static __attribute__((used)) void edanimcbParticleMenu(eduimenu_s *, eduiitem_s *, u32);
 static __attribute__((used)) void edanimcbSetSoundType(eduimenu_s *menu, eduiitem_s *item, u32) {
@@ -161,8 +186,10 @@ static __attribute__((used)) void edanimcbMCTBCardLoadSlot(eduimenu_s *menu, edu
 static __attribute__((used)) void edanimcbMCTBCardSaveSlot(eduimenu_s *menu, eduiitem_s *item, u32) {
     char data[32];
     sprintf(data, "This is slot %d", item->data);
-    const bool saved = saveloadSaveSlot(item->data, data, sizeof(data)) != 0;
-    eduiCreateMessageMenu(menu, const_cast<char *>(saved ? "Saved OK" : "Save Error"), saved);
+    if (saveloadSaveSlot(item->data, data, sizeof(data)))
+        eduiCreateMessageMenu(menu, const_cast<char *>("Saved OK"), 1);
+    else
+        eduiCreateMessageMenu(menu, const_cast<char *>("Save Error"), 0);
 }
 
 static __attribute__((used)) void edanimcbMCTBCardUnFormat(eduimenu_s *menu, eduiitem_s *, u32) {
@@ -226,8 +253,10 @@ static __attribute__((used)) void edanimcbCancelParticleMenu(eduimenu_s *, eduim
 static __attribute__((used)) void edanimcbLocalSoundTypeMenu(eduimenu_s *, eduiitem_s *, u32);
 
 static __attribute__((used)) void edanimcbMCTBCardDeleteSlot(eduimenu_s *menu, eduiitem_s *item, u32) {
-    const bool deleted = saveloadDeleteSlot(item->data) != 0;
-    eduiCreateMessageMenu(menu, const_cast<char *>(deleted ? "Delete OK" : "Delete Error"), deleted);
+    if (saveloadDeleteSlot(item->data))
+        eduiCreateMessageMenu(menu, const_cast<char *>("Delete OK"), 1);
+    else
+        eduiCreateMessageMenu(menu, const_cast<char *>("Delete Error"), 0);
 }
 
 static __attribute__((used)) void edanimcbCancelSoundTypeMenu(eduimenu_s *, eduimenu_s *) {

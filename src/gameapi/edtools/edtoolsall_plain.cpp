@@ -3393,12 +3393,26 @@ extern "C" {
     }
     void eduiItemGraphAddOnionSkin(edui_graph_s *item, nugraph_s *graph) {
         if (item->type == 15) {
-            for (i32 i = 0; i < 8; ++i) {
-                if (!item->onion_skins[i]) {
-                    item->onion_skins[i] = graph;
-                    break;
-                }
-            }
+            i32 slot;
+            if (!item->onion_skins[0])
+                slot = 0;
+            else if (!item->onion_skins[1])
+                slot = 1;
+            else if (!item->onion_skins[2])
+                slot = 2;
+            else if (!item->onion_skins[3])
+                slot = 3;
+            else if (!item->onion_skins[4])
+                slot = 4;
+            else if (!item->onion_skins[5])
+                slot = 5;
+            else if (!item->onion_skins[6])
+                slot = 6;
+            else if (!item->onion_skins[7])
+                slot = 7;
+            else
+                return;
+            item->onion_skins[slot] = graph;
         }
     }
     eduiitem_s *eduiItemGraphCreate(usize data, const void *colours, EdUiItemCallback callback, nugraph_s *graph,
@@ -5392,15 +5406,13 @@ extern "C" {
         i32 left = pad->analog_l1 ? pad->analog_l1 : pad->analog_l2;
         i32 right = pad->analog_r1 ? pad->analog_r1 : pad->analog_r2;
         if (left) {
-            pick->value -= left / 4192.0f;
-            if (pick->value < 0.0f)
-                pick->value = 0.0f;
+            f32 value = pick->value - left / 4192.0f;
+            pick->value = value < 0.0f ? 0.0f : value;
             return 1;
         }
         if (right) {
-            pick->value += right / 4192.0f;
-            if (pick->value > 1.0f)
-                pick->value = 1.0f;
+            f32 value = pick->value + right / 4192.0f;
+            pick->value = value > 1.0f ? 1.0f : value;
             return 1;
         }
         pick->saturation = 0.0f;
@@ -5718,8 +5730,28 @@ extern "C" {
     }
     static __used__ i32 eduicbProcessTexturePick(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad) {
         edui_texture_pick_s *pick = static_cast<edui_texture_pick_s *>(item);
-        f32 x = NuPs2ApplyDeadZone(pad->analog_left_x, 32);
-        f32 y = NuPs2ApplyDeadZone(pad->analog_left_y, 32);
+        i32 stick_x = static_cast<i32>(pad->analog_left_x) - 128;
+        i32 stick_y = static_cast<i32>(pad->analog_left_y) - 128;
+        if (stick_x > 0) {
+            if (stick_x < 32)
+                stick_x = 0;
+            else
+                stick_x = (stick_x - 32) * 255 / 223;
+        } else if (stick_x > -32)
+            stick_x = 0;
+        else
+            stick_x = (stick_x + 32) * 255 / 223;
+        if (stick_y > 0) {
+            if (stick_y < 32)
+                stick_y = 0;
+            else
+                stick_y = (stick_y - 32) * 255 / 223;
+        } else if (stick_y > -32)
+            stick_y = 0;
+        else
+            stick_y = (stick_y + 32) * 255 / 223;
+        f32 x = static_cast<f32>(stick_x);
+        f32 y = static_cast<f32>(stick_y);
         i32 corner = pick->selected_corner;
         x = pick->uv_x[corner] + x / (8192.0f * pick->zoom);
         y = pick->uv_y[corner] + y / (8192.0f * pick->zoom);
@@ -5736,15 +5768,13 @@ extern "C" {
         i32 left = pad->analog_l1 ? pad->analog_l1 : pad->analog_l2;
         i32 right = pad->analog_r1 ? pad->analog_r1 : pad->analog_r2;
         if (left) {
-            pick->zoom -= left / 4192.0f;
-            if (pick->zoom < 1.0f)
-                pick->zoom = 1.0f;
+            f32 zoom = pick->zoom - left / 4192.0f;
+            pick->zoom = zoom < 1.0f ? 1.0f : zoom;
             return 1;
         }
         if (right) {
-            pick->zoom += right / 4192.0f;
-            if (pick->zoom > 16.0f)
-                pick->zoom = 16.0f;
+            f32 zoom = pick->zoom + right / 4192.0f;
+            pick->zoom = zoom > 16.0f ? 16.0f : zoom;
             return 1;
         }
         if (pad->digital_buttons_pressed & 0x100) {
@@ -6624,13 +6654,16 @@ extern "C" {
             else
                 filepick_item->filename[0] = '\0';
             filepick_item->reopen_directory = 1;
-        } else if (item->data >= 0 && item->data < dir_size) {
+        } else {
             auto *entries = static_cast<FilePickDirectoryEntry *>(dir_list);
             FilePickDirectoryEntry &entry = entries[item->data];
             if (entry.flags & 8) {
-                if (filepick_item->filename[0])
+                if (filepick_item->filename[0]) {
                     NuStrCat(filepick_item->filename, const_cast<char *>("/"));
-                NuStrCat(filepick_item->filename, entry.name);
+                    NuStrCat(filepick_item->filename, entry.name);
+                } else {
+                    NuStrCpy(filepick_item->filename, entry.name);
+                }
                 filepick_item->reopen_directory = 1;
             } else {
                 NuStrCpy(filepick_item->name, entry.name);

@@ -580,17 +580,22 @@ static void edptlcbSoundIDMenu(eduimenu_s *parent, eduiitem_s *item, u32) {
         return;
 
     const i32 slot = item->data;
-    const i32 selected_sound = effect->sound_data[slot * 3];
-    eduiMenuAddItem(edptl_soundid_menu, eduiItemCheckCreate((slot << 16) + 9999, colours, selected_sound == -1, 0,
-                                                            edptlcbSetSoundID, "NONE"));
+    eduiMenuAddItem(edptl_soundid_menu,
+                    eduiItemCheckCreate((slot << 16) + 9999, colours, effect->sound_data[slot * 3] == -1, 0,
+                                        edptlcbSetSoundID, "NONE"));
     for (i32 sound = 0; sound < 1600; ++sound) {
         if (g_soundInfo[sound].sfx_name == NULL)
             continue;
-        eduiMenuAddItem(edptl_soundid_menu,
-                        eduiItemCheckCreate((slot << 16) + sound, colours, selected_sound == sound, 1,
-                                            edptlcbSetSoundID, const_cast<char *>(g_soundInfo[sound].sfx_name)));
-        if (selected_sound == sound)
+        if (effect->sound_data[slot * 3] == sound) {
+            eduiMenuAddItem(edptl_soundid_menu,
+                            eduiItemCheckCreate((slot << 16) + sound, colours, 1, 1, edptlcbSetSoundID,
+                                                const_cast<char *>(g_soundInfo[sound].sfx_name)));
             edptl_soundid_menu->selected = edui_last_item;
+        } else {
+            eduiMenuAddItem(edptl_soundid_menu,
+                            eduiItemCheckCreate((slot << 16) + sound, colours, 0, 1, edptlcbSetSoundID,
+                                                const_cast<char *>(g_soundInfo[sound].sfx_name)));
+        }
     }
     eduiMenuAttach(parent, edptl_soundid_menu);
     edptl_soundid_menu->x = parent->x + 10;

@@ -6,6 +6,9 @@
 #include "nu2api/nu3d/nuspline.h"
 #include "nu2api/nucore/nustring.h"
 #include <new>
+#if defined(__i386__) && defined(__SSE__)
+#include <xmmintrin.h>
+#endif
 
 // EdClassInterface's field-based representation preserves the original ABI for
 // the rest of the editor.  These two objects are its original Itanium vtables:
@@ -801,9 +804,9 @@ void SplineObject::SmoothKnots() {
         knot->Smooth();
 }
 
-i32 SplineKnotList::GetPoint(i32 index, VuVec &point) {
+__attribute__((force_align_arg_pointer)) i32 SplineKnotList::GetPoint(i32 index, VuVec &point) {
     SplineKnot *knot = first;
-    while (knot != NULL && index != 0) {
+    while (index != 0 && knot != NULL) {
         knot = knot->next;
         index--;
     }
@@ -812,7 +815,14 @@ i32 SplineKnotList::GetPoint(i32 index, VuVec &point) {
         return false;
     }
 
+#if defined(__i386__) && defined(__SSE__)
+    __m128 lanes = _mm_loadl_pi(_mm_setzero_ps(), reinterpret_cast<const __m64 *>(&knot->position));
+    lanes = _mm_loadh_pi(lanes, reinterpret_cast<const __m64 *>(&knot->position.z));
+    _mm_storel_pi(reinterpret_cast<__m64 *>(&point), lanes);
+    _mm_storeh_pi(reinterpret_cast<__m64 *>(&point.z), lanes);
+#else
     point = knot->position;
+#endif
     return true;
 }
 
@@ -875,17 +885,27 @@ i32 SplinePointList::GetNumPoints() {
     return point_count;
 }
 
-i32 SplinePointList::GetPoint(i32 index, VuVec &point) {
+__attribute__((force_align_arg_pointer)) i32 SplinePointList::GetPoint(i32 index, VuVec &point) {
     SplinePointBlock *block = first;
-    while (block != NULL && index >= block->point_count) {
-        block = block->next;
-    }
-
-    if (block == NULL) {
+    if (block == NULL)
         return false;
+    if (index >= block->point_count) {
+        do {
+            block = block->next;
+            if (block == NULL)
+                return false;
+        } while (index >= block->point_count);
     }
 
+#if defined(__i386__) && defined(__SSE__)
+    const VuVec &source = block->points[index];
+    __m128 lanes = _mm_loadl_pi(_mm_setzero_ps(), reinterpret_cast<const __m64 *>(&source));
+    lanes = _mm_loadh_pi(lanes, reinterpret_cast<const __m64 *>(&source.z));
+    _mm_storel_pi(reinterpret_cast<__m64 *>(&point), lanes);
+    _mm_storeh_pi(reinterpret_cast<__m64 *>(&point.z), lanes);
+#else
     point = block->points[index];
+#endif
     return true;
 }
 

@@ -73,7 +73,10 @@ static __used__ void cbCopy(eduimenu_s *, eduiitem_s *, u32) {
     i32 red_byte = static_cast<i32>(red * 255.0f) & 0xff;
     i32 green_byte = static_cast<i32>(green * 255.0f) & 0xff;
     i32 blue_byte = static_cast<i32>(blue * 255.0f) & 0xff;
-    cp_paste->colours[2] = 0x80000000u | (blue_byte << 16) | (green_byte << 8) | red_byte;
+    u32 colour = 0x80000000u | red_byte;
+    colour |= green_byte << 8;
+    colour |= blue_byte << 16;
+    cp_paste->colours[2] = colour;
 }
 static __used__ void cbPaste(eduimenu_s *, eduiitem_s *, u32) {
     *cp_r = clipboard_r;

@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 57.968243,
+    "fuzzy_match_percent": 58.01993,
     "total_code": "4722419",
-    "matched_code": "486581",
-    "matched_code_percent": 10.303638,
+    "matched_code": "486707",
+    "matched_code_percent": 10.306307,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 5869,
-    "matched_functions_percent": 43.606506,
+    "matched_functions": 5870,
+    "matched_functions_percent": 43.613937,
     "total_units": 1
   },
   "text": {
@@ -21754,7 +21754,7 @@
           "address": 4245184,
           "offset": 3355216,
           "size": 158,
-          "match_percent": 95.888885
+          "match_percent": 96.0
         },
         {
           "name": "_ZL23pathEditor_cbDeletePathP10eduimenu_sP10eduiitem_sj",
@@ -26176,7 +26176,7 @@
           "address": 3345568,
           "offset": 2455600,
           "size": 72,
-          "match_percent": 85.3125
+          "match_percent": 99.9375
         },
         {
           "name": "_ZL23edgracbSetGlobalFadeOutP10eduimenu_sP10eduiitem_sj",
@@ -26184,7 +26184,7 @@
           "address": 3345648,
           "offset": 2455680,
           "size": 76,
-          "match_percent": 86.17647
+          "match_percent": 99.94118
         },
         {
           "name": "_ZL17edgraToggleFilterP10eduimenu_sP10eduiitem_sj",
@@ -26312,7 +26312,7 @@
           "address": 3373168,
           "offset": 2483200,
           "size": 600,
-          "match_percent": 80.378204
+          "match_percent": 81.84615
         },
         {
           "name": "_ZL20edgracbClumpAreaMenuP10eduimenu_sP10eduiitem_sj",
@@ -26472,7 +26472,7 @@
           "address": 3606048,
           "offset": 2716080,
           "size": 109,
-          "match_percent": 89.28571
+          "match_percent": 99.96429
         },
         {
           "name": "_ZL21edgracbSetClumpFadeInP10eduimenu_sP10eduiitem_sj",
@@ -26480,7 +26480,7 @@
           "address": 3606160,
           "offset": 2716192,
           "size": 105,
-          "match_percent": 88.888885
+          "match_percent": 99.96296
         },
         {
           "name": "_ZL19edgracbSetClumpDistP10eduimenu_sP10eduiitem_sj",
@@ -27367,7 +27367,7 @@
           "address": 4279792,
           "offset": 3389824,
           "size": 626,
-          "match_percent": 26.884394
+          "match_percent": 69.73988
         },
         {
           "name": "_ZL30edpartDeleteAllInstanceOrphansP10eduimenu_sP10eduiitem_sj",
@@ -27375,7 +27375,7 @@
           "address": 4280432,
           "offset": 3390464,
           "size": 556,
-          "match_percent": 26.527027
+          "match_percent": 87.41892
         },
         {
           "name": "_ZL26edpartDeleteInstanceOrphanP10eduimenu_sP10eduiitem_sj",
@@ -27383,7 +27383,7 @@
           "address": 4280992,
           "offset": 3391024,
           "size": 498,
-          "match_percent": 20.564285
+          "match_percent": 70.2
         },
         {
           "name": "_ZL13edpartSelTypeP10eduimenu_sP10eduiitem_sj",
@@ -27535,7 +27535,7 @@
           "address": 4290096,
           "offset": 3400128,
           "size": 424,
-          "match_percent": 99.8764
+          "match_percent": 99.93259
         },
         {
           "name": "_ZL17edpartEmitVelMenuP10eduimenu_sP10eduiitem_sj",
@@ -27551,7 +27551,7 @@
           "address": 4290864,
           "offset": 3400896,
           "size": 478,
-          "match_percent": 99.64646
+          "match_percent": 99.84849
         },
         {
           "name": "_ZL23edpartChangeMaxLifeMenuP10eduimenu_sP10eduiitem_sj",
@@ -27559,7 +27559,7 @@
           "address": 4291344,
           "offset": 3401376,
           "size": 410,
-          "match_percent": 99.6
+          "match_percent": 99.776474
         },
         {
           "name": "_ZL17edpartSoundIDMenuP10eduimenu_sP10eduiitem_sj",
@@ -27639,7 +27639,7 @@
           "address": 4306560,
           "offset": 3416592,
           "size": 126,
-          "match_percent": 99.22857
+          "match_percent": 100.0
         },
         {
           "name": "_ZL21edpartFileSaveEffectsP10eduimenu_sP10eduiitem_sj",
@@ -27981,7 +27981,7 @@
           "address": 5579488,
           "offset": 4689520,
           "size": 85,
-          "match_percent": 24.32353
+          "match_percent": 70.82353
         },
         {
           "name": "_ZN15SplinePointList8AddPointER5VuVec",
@@ -28013,7 +28013,7 @@
           "address": 5580368,
           "offset": 4690400,
           "size": 78,
-          "match_percent": 32.25
+          "match_percent": 78.125
         },
         {
           "name": "_ZN12SplineObject12ReverseKnotsEv",
@@ -29108,7 +29108,7 @@
           "address": 5482192,
           "offset": 4592224,
           "size": 158,
-          "match_percent": 38.81818
+          "match_percent": 80.704544
         },
         {
           "name": "_ZN15EdMatrixControl7RefreshEv",
@@ -32147,7 +32147,7 @@
           "address": 3361808,
           "offset": 2471840,
           "size": 568,
-          "match_percent": 54.29286
+          "match_percent": 65.057144
         },
         {
           "name": "_ZL13cbPtlEmitMenuP10eduimenu_sP10eduiitem_sj",
@@ -32427,7 +32427,7 @@
           "address": 3387584,
           "offset": 2497616,
           "size": 334,
-          "match_percent": 45.358025
+          "match_percent": 79.22222
         },
         {
           "name": "_ZL22edptlcbSetSoundControlP10eduimenu_sP10eduiitem_sj",
@@ -32843,7 +32843,7 @@
           "address": 3432848,
           "offset": 2542880,
           "size": 108,
-          "match_percent": 62.827587
+          "match_percent": 99.655174
         },
         {
           "name": "_ZL24edanimcbMCTBCardLoadSlotP10eduimenu_sP10eduiitem_sj",
@@ -32859,7 +32859,7 @@
           "address": 3433104,
           "offset": 2543136,
           "size": 168,
-          "match_percent": 59.575
+          "match_percent": 99.725
         },
         {
           "name": "_ZL27edanimcbMCTBCardCheckFormatP10eduimenu_sP10eduiitem_sj",
@@ -32875,7 +32875,7 @@
           "address": 3433392,
           "offset": 2543424,
           "size": 100,
-          "match_percent": 58.53846
+          "match_percent": 99.61539
         },
         {
           "name": "_ZL23edanimcbMCTBCardPresentP10eduimenu_sP10eduiitem_sj",
@@ -33003,7 +33003,7 @@
           "address": 3516800,
           "offset": 2626832,
           "size": 414,
-          "match_percent": 23.04
+          "match_percent": 99.84
         },
         {
           "name": "edanimRegisterBaseScene",
@@ -33787,7 +33787,7 @@
           "address": 3705328,
           "offset": 2815360,
           "size": 457,
-          "match_percent": 41.563217
+          "match_percent": 95.72414
         },
         {
           "name": "_ZL10edanimProcfP7nupad_s",
@@ -33819,7 +33819,7 @@
           "address": 3732912,
           "offset": 2842944,
           "size": 824,
-          "match_percent": 26.887445
+          "match_percent": 41.190475
         },
         {
           "name": "eduicbProcessSlider",
@@ -33899,7 +33899,7 @@
           "address": 3734864,
           "offset": 2844896,
           "size": 141,
-          "match_percent": 68.064514
+          "match_percent": 92.41936
         },
         {
           "name": "eduicbItemDestroyProp",
@@ -33979,7 +33979,7 @@
           "address": 3737888,
           "offset": 2847920,
           "size": 297,
-          "match_percent": 32.61644
+          "match_percent": 75.136986
         },
         {
           "name": "eduiRenderGraphLine",
@@ -34667,7 +34667,7 @@
           "address": 3781440,
           "offset": 2891472,
           "size": 151,
-          "match_percent": 10.526316
+          "match_percent": 95.210526
         },
         {
           "name": "eduiItemGraphSetCursor",
@@ -35163,7 +35163,7 @@
           "address": 3804720,
           "offset": 2914752,
           "size": 359,
-          "match_percent": 31.927711
+          "match_percent": 58.44578
         },
         {
           "name": "eduicbDestroyDirectoryList",

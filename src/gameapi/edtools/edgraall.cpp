@@ -334,11 +334,14 @@ static void edgracbClumpDistMenu(eduimenu_s *parent, eduiitem_s *, u32) {
     edgra_clumpdist_menu = eduiMenuCreate(70, 70, 180, 250, ed_fnt, edgracbCancelClumpDistMenu, "Clump Distribution");
     if (!edgra_clumpdist_menu)
         return;
-    const char *names[] = {"Legacy", "Random", "Linear", "Bell Curve"};
-    for (i32 i = 1; i <= 4; ++i)
-        eduiMenuAddItem(edgra_clumpdist_menu,
-                        eduiItemCheckCreate(i, colours, GrassClumps[edgra_nearest].unknown_26 == i, 1,
-                                            edgracbSetClumpDist, const_cast<char *>(names[i - 1])));
+    eduiMenuAddItem(edgra_clumpdist_menu, eduiItemCheckCreate(1, colours, GrassClumps[edgra_nearest].unknown_26 == 1, 1,
+                                                              edgracbSetClumpDist, "Legacy"));
+    eduiMenuAddItem(edgra_clumpdist_menu, eduiItemCheckCreate(2, colours, GrassClumps[edgra_nearest].unknown_26 == 2, 1,
+                                                              edgracbSetClumpDist, "Random"));
+    eduiMenuAddItem(edgra_clumpdist_menu, eduiItemCheckCreate(3, colours, GrassClumps[edgra_nearest].unknown_26 == 3, 1,
+                                                              edgracbSetClumpDist, "Linear"));
+    eduiMenuAddItem(edgra_clumpdist_menu, eduiItemCheckCreate(4, colours, GrassClumps[edgra_nearest].unknown_26 == 4, 1,
+                                                              edgracbSetClumpDist, "Bell Curve"));
     edgraAttachMenu(parent, edgra_clumpdist_menu);
 }
 static void edgracbClumpFadeMenu(eduimenu_s *parent, eduiitem_s *, u32) {
@@ -396,12 +399,12 @@ static void edgracbClumpSizesMenu(eduimenu_s *parent, eduiitem_s *, u32) {
     edgraAttachMenu(parent, edgra_clumpsizes_menu);
 }
 static void edgracbSetClumpFadeIn(eduimenu_s *, eduiitem_s *item, u32) {
+    edui_slider_s *slider = edgra_clump_fadeout_slider;
     if (edgra_nearest != -1) {
         edgra_clump_s &clump = GrassClumps[edgra_nearest];
         clump.near_distance = static_cast<edui_slider_s *>(item)->value;
         if (clump.near_distance > clump.far_distance) {
             clump.far_distance = clump.near_distance;
-            edui_slider_s *slider = edgra_clump_fadeout_slider;
             slider->value = clump.far_distance;
             slider->normalized_value = (slider->value - slider->minimum) / slider->range;
         }
@@ -428,12 +431,12 @@ static void edgracbApplyGlobalFade(eduimenu_s *menu, eduiitem_s *, u32) {
         menu->callback(menu, parent);
 }
 static void edgracbSetClumpFadeOut(eduimenu_s *, eduiitem_s *item, u32) {
+    edui_slider_s *slider = edgra_clump_fadein_slider;
     if (edgra_nearest != -1) {
         edgra_clump_s &clump = GrassClumps[edgra_nearest];
         clump.far_distance = static_cast<edui_slider_s *>(item)->value;
         if (clump.near_distance > clump.far_distance) {
             clump.near_distance = clump.far_distance;
-            edui_slider_s *slider = edgra_clump_fadein_slider;
             slider->value = clump.near_distance;
             slider->normalized_value = (slider->value - slider->minimum) / slider->range;
         }
@@ -441,10 +444,10 @@ static void edgracbSetClumpFadeOut(eduimenu_s *, eduiitem_s *item, u32) {
     edgraInitAllClumps();
 }
 static void edgracbSetGlobalFadeIn(eduimenu_s *, eduiitem_s *item, u32) {
+    edui_slider_s *slider = edgra_global_fadeout_slider;
     edgra_global_fadein = static_cast<edui_slider_s *>(item)->value;
     if (edgra_global_fadein > edgra_global_fadeout) {
         edgra_global_fadeout = edgra_global_fadein;
-        edui_slider_s *slider = edgra_global_fadeout_slider;
         slider->value = edgra_global_fadeout;
         slider->normalized_value = (slider->value - slider->minimum) / slider->range;
     }
@@ -487,10 +490,10 @@ static void edgracbClumpTerrainMenu(eduimenu_s *parent, eduiitem_s *, u32) {
 }
 
 static void edgracbSetGlobalFadeOut(eduimenu_s *, eduiitem_s *item, u32) {
+    edui_slider_s *slider = edgra_global_fadein_slider;
     edgra_global_fadeout = static_cast<edui_slider_s *>(item)->value;
     if (edgra_global_fadein > edgra_global_fadeout) {
         edgra_global_fadein = edgra_global_fadeout;
-        edui_slider_s *slider = edgra_global_fadein_slider;
         slider->value = edgra_global_fadein;
         slider->normalized_value = (slider->value - slider->minimum) / slider->range;
     }

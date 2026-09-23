@@ -757,8 +757,8 @@ static __used__ void pathEditor_cbDeletePathNode(eduimenu_s *, eduiitem_s *item,
             DestroyAIPathNode(node, path);
             creatureEditor_PathNodeDeleted(node);
             locatorEditor_PathNodeDeleted(node);
-            if (AIPathNodeDeletedFn != nullptr) {
-                AIPathNodeDeletedFn(node);
+            if (AIPathNodeMovedFn != nullptr) {
+                AIPathNodeMovedFn(node);
             }
             if (node == aieditor->current_path->current_node) {
                 aieditor->current_path->current_node = nullptr;
