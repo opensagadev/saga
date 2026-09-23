@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 56.940216,
+    "fuzzy_match_percent": 56.993435,
     "total_code": "4722419",
-    "matched_code": "484008",
-    "matched_code_percent": 10.249154,
+    "matched_code": "484069",
+    "matched_code_percent": 10.250445,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 5834,
-    "matched_functions_percent": 43.34646,
+    "matched_functions": 5836,
+    "matched_functions_percent": 43.361317,
     "total_units": 1
   },
   "text": {
@@ -18809,6 +18809,46 @@
           "match_percent": 100.0
         },
         {
+          "name": "_ZL24antinodeEditor_cbSetTypeP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "antinodeEditor_cbSetType(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 4010704,
+          "offset": 3120736,
+          "size": 147,
+          "match_percent": 37.92683
+        },
+        {
+          "name": "_ZL36antinodeEditor_cbAntiNodeFlagsToggleP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "antinodeEditor_cbAntiNodeFlagsToggle(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 4014608,
+          "offset": 3124640,
+          "size": 156,
+          "match_percent": 27.02381
+        },
+        {
+          "name": "_ZL14CreateAntinodeP7nuvec_s",
+          "demangled_name": "CreateAntinode(nuvec_s*)",
+          "address": 4016384,
+          "offset": 3126416,
+          "size": 277,
+          "match_percent": 58.55263
+        },
+        {
+          "name": "_Z20antinodeEditor_Enterv",
+          "demangled_name": "antinodeEditor_Enter()",
+          "address": 4016672,
+          "offset": 3126704,
+          "size": 323,
+          "match_percent": 87.05
+        },
+        {
+          "name": "_ZL27antinodeEditor_cbCancelMenuP10eduimenu_sS0_",
+          "demangled_name": "antinodeEditor_cbCancelMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 4021040,
+          "offset": 3131072,
+          "size": 34,
+          "match_percent": 100.0
+        },
+        {
           "name": "_ZL33aieditor_cbCancelSelectEditorModeP10eduimenu_sS0_",
           "demangled_name": "aieditor_cbCancelSelectEditorMode(eduimenu_s*, eduimenu_s*)",
           "address": 4021088,
@@ -18823,6 +18863,38 @@
           "offset": 3134304,
           "size": 345,
           "match_percent": 77.15116
+        },
+        {
+          "name": "_ZL28antinodeEditor_AntinodeMovedP12EDANTINODE_s",
+          "demangled_name": "antinodeEditor_AntinodeMoved(EDANTINODE_s*)",
+          "address": 4026784,
+          "offset": 3136816,
+          "size": 269,
+          "match_percent": 61.148647
+        },
+        {
+          "name": "_ZL33antinodeEditor_GetNearestAntinodei",
+          "demangled_name": "antinodeEditor_GetNearestAntinode(int)",
+          "address": 4038544,
+          "offset": 3148576,
+          "size": 970,
+          "match_percent": 28.85776
+        },
+        {
+          "name": "_Z22antinodeEditor_ProcessP7nupad_s",
+          "demangled_name": "antinodeEditor_Process(nupad_s*)",
+          "address": 4039520,
+          "offset": 3149552,
+          "size": 3155,
+          "match_percent": 34.485714
+        },
+        {
+          "name": "_ZL27antinodeEditor_cbSelectTypeP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "antinodeEditor_cbSelectType(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 4044992,
+          "offset": 3155024,
+          "size": 696,
+          "match_percent": 30.723684
         },
         {
           "name": "aieditor_Register",
@@ -18889,6 +18961,22 @@
           "match_percent": 100.0
         },
         {
+          "name": "_ZL31antinodeEditor_cbDeleteAntinodeP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "antinodeEditor_cbDeleteAntinode(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 4212032,
+          "offset": 3322064,
+          "size": 235,
+          "match_percent": 80.28788
+        },
+        {
+          "name": "_ZL41antinodeEditor_cbCancelDeleteAntinodeMenuP10eduimenu_sS0_",
+          "demangled_name": "antinodeEditor_cbCancelDeleteAntinodeMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 4212272,
+          "offset": 3322304,
+          "size": 27,
+          "match_percent": 100.0
+        },
+        {
           "name": "_ZL25aieditor_cbCancelSaveMenuP10eduimenu_sP10eduiitem_sj",
           "demangled_name": "aieditor_cbCancelSaveMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
           "address": 4212304,
@@ -18950,7 +19038,7 @@
           "address": 4224160,
           "offset": 3334192,
           "size": 672,
-          "match_percent": 86.30857
+          "match_percent": 86.28
         },
         {
           "name": "aieditor_cbSave",
@@ -19292,7 +19380,7 @@
           "address": 4023856,
           "offset": 3133888,
           "size": 401,
-          "match_percent": 46.782177
+          "match_percent": 46.435642
         },
         {
           "name": "_ZL35creatureEditor_cbRenameCreatureMenuP10eduimenu_sP10eduiitem_sj",
@@ -19372,7 +19460,7 @@
           "address": 4229696,
           "offset": 3339728,
           "size": 1433,
-          "match_percent": 2.386243
+          "match_percent": 54.71164
         },
         {
           "name": "_ZL28creatureEditor_cbResetParamsP10eduimenu_sP10eduiitem_sj",
@@ -19388,7 +19476,7 @@
           "address": 4231280,
           "offset": 3341312,
           "size": 292,
-          "match_percent": 59.488888
+          "match_percent": 59.655556
         },
         {
           "name": "creatureEditor_PathNodeMoved",
@@ -19460,7 +19548,7 @@
           "address": 4249232,
           "offset": 3359264,
           "size": 4175,
-          "match_percent": 28.60124
+          "match_percent": 33.159092
         },
         {
           "name": "creatureEditor_RenderAllCreatures",
@@ -21642,7 +21730,7 @@
           "address": 4232752,
           "offset": 3342784,
           "size": 10501,
-          "match_percent": 28.310968
+          "match_percent": 28.308817
         },
         {
           "name": "_ZL31pathEditor_cbDisconnectPathNodeP10eduimenu_sP10eduiitem_sj",
@@ -21684,22 +21772,6 @@
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_editor/edtoolsall.o",
       "functions": [
         {
-          "name": "_Z20antinodeEditor_Enterv",
-          "demangled_name": "antinodeEditor_Enter()",
-          "address": 4016672,
-          "offset": 3126704,
-          "size": 323,
-          "match_percent": 87.05
-        },
-        {
-          "name": "_Z22antinodeEditor_ProcessP7nupad_s",
-          "demangled_name": "antinodeEditor_Process(nupad_s*)",
-          "address": 4039520,
-          "offset": 3149552,
-          "size": 3155,
-          "match_percent": 17.055714
-        },
-        {
           "name": "_Z27creatureEditor_IsSelectableP12EDCREATURE_s",
           "demangled_name": "creatureEditor_IsSelectable(EDCREATURE_s*)",
           "address": 4225120,
@@ -21713,7 +21785,7 @@
           "address": 4246272,
           "offset": 3356304,
           "size": 318,
-          "match_percent": 75.75824
+          "match_percent": 75.71429
         },
         {
           "name": "_Z21creatureEditor_Renderiiff",
@@ -28112,6 +28184,54 @@
           "match_percent": 99.375
         },
         {
+          "name": "_ZN10KnotHelperD1Ev",
+          "demangled_name": "KnotHelper::~KnotHelper()",
+          "address": 5613376,
+          "offset": 4723408,
+          "size": 29,
+          "match_percent": 35.0
+        },
+        {
+          "name": "_ZN10KnotHelperD2Ev",
+          "demangled_name": "KnotHelper::~KnotHelper()",
+          "address": 5613376,
+          "offset": 4723408,
+          "size": 29,
+          "match_percent": 35.0
+        },
+        {
+          "name": "_ZN12SplineHelperD1Ev",
+          "demangled_name": "SplineHelper::~SplineHelper()",
+          "address": 5613408,
+          "offset": 4723440,
+          "size": 29,
+          "match_percent": 35.0
+        },
+        {
+          "name": "_ZN12SplineHelperD2Ev",
+          "demangled_name": "SplineHelper::~SplineHelper()",
+          "address": 5613408,
+          "offset": 4723440,
+          "size": 29,
+          "match_percent": 35.0
+        },
+        {
+          "name": "_ZN12SplineHelperD0Ev",
+          "demangled_name": "SplineHelper::~SplineHelper()",
+          "address": 5615264,
+          "offset": 4725296,
+          "size": 45,
+          "match_percent": 22.384615
+        },
+        {
+          "name": "_ZN10KnotHelperD0Ev",
+          "demangled_name": "KnotHelper::~KnotHelper()",
+          "address": 5615312,
+          "offset": 4725344,
+          "size": 45,
+          "match_percent": 22.384615
+        },
+        {
           "name": "_ZN12SplineObjectD1Ev",
           "demangled_name": "SplineObject::~SplineObject()",
           "address": 5616144,
@@ -28396,7 +28516,7 @@
           "address": 3571568,
           "offset": 2681600,
           "size": 1753,
-          "match_percent": 19.348341
+          "match_percent": 24.893366
         },
         {
           "name": "_Z20edppHighlightNearestv",
@@ -28980,7 +29100,7 @@
           "address": 5482192,
           "offset": 4592224,
           "size": 158,
-          "match_percent": 34.295456
+          "match_percent": 38.81818
         },
         {
           "name": "_ZN15EdMatrixControl7RefreshEv",
@@ -29628,7 +29748,7 @@
           "address": 5528368,
           "offset": 4638400,
           "size": 504,
-          "match_percent": 73.439026
+          "match_percent": 71.544716
         },
         {
           "name": "_ZN22EdSpecialObjectControl9cbChangedEP10eduimenu_sP10eduiitem_sj",
@@ -40773,7 +40893,7 @@
           "address": 4099904,
           "offset": 3209936,
           "size": 6313,
-          "match_percent": 13.840412
+          "match_percent": 13.837194
         },
         {
           "name": "AISysProcess",
@@ -41537,54 +41657,6 @@
           "match_percent": 0.0
         },
         {
-          "name": "_ZL24antinodeEditor_cbSetTypeP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "antinodeEditor_cbSetType(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 4010704,
-          "offset": 3120736,
-          "size": 147,
-          "match_percent": 10.243902
-        },
-        {
-          "name": "_ZL36antinodeEditor_cbAntiNodeFlagsToggleP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "antinodeEditor_cbAntiNodeFlagsToggle(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 4014608,
-          "offset": 3124640,
-          "size": 156,
-          "match_percent": 10.0
-        },
-        {
-          "name": "_ZL27antinodeEditor_cbCancelMenuP10eduimenu_sS0_",
-          "demangled_name": "antinodeEditor_cbCancelMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 4021040,
-          "offset": 3131072,
-          "size": 34,
-          "match_percent": 42.0
-        },
-        {
-          "name": "_ZL28antinodeEditor_AntinodeMovedP12EDANTINODE_s",
-          "demangled_name": "antinodeEditor_AntinodeMoved(EDANTINODE_s*)",
-          "address": 4026784,
-          "offset": 3136816,
-          "size": 269,
-          "match_percent": 6.486486
-        },
-        {
-          "name": "_ZL33antinodeEditor_GetNearestAntinodei",
-          "demangled_name": "antinodeEditor_GetNearestAntinode(int)",
-          "address": 4038544,
-          "offset": 3148576,
-          "size": 970,
-          "match_percent": 3.189655
-        },
-        {
-          "name": "_ZL27antinodeEditor_cbSelectTypeP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "antinodeEditor_cbSelectType(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 4044992,
-          "offset": 3155024,
-          "size": 696,
-          "match_percent": 2.763158
-        },
-        {
           "name": "_Z27AISysDrawAntinode_RectangleP12AIANTINODE_sj",
           "demangled_name": "AISysDrawAntinode_Rectangle(AIANTINODE_s*, unsigned int)",
           "address": 4109344,
@@ -41607,22 +41679,6 @@
           "offset": 3277584,
           "size": 109,
           "match_percent": 17.5
-        },
-        {
-          "name": "_ZL31antinodeEditor_cbDeleteAntinodeP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "antinodeEditor_cbDeleteAntinode(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 4212032,
-          "offset": 3322064,
-          "size": 235,
-          "match_percent": 6.363637
-        },
-        {
-          "name": "_ZL41antinodeEditor_cbCancelDeleteAntinodeMenuP10eduimenu_sS0_",
-          "demangled_name": "antinodeEditor_cbCancelDeleteAntinodeMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 4212272,
-          "offset": 3322304,
-          "size": 27,
-          "match_percent": 35.0
         },
         {
           "name": "antinodeEditor_UpdateAntiNodesOnPlatforms",
@@ -122145,18 +122201,6 @@
       ]
     },
     {
-      "name": "_ZL14CreateAntinodeP7nuvec_s",
-      "demangled_name": "CreateAntinode(nuvec_s*)",
-      "address": 4016384,
-      "offset": 3126416,
-      "size": 277,
-      "match_percent": 58.55263,
-      "candidate_units": [
-        "editor/edtoolsall.cpp.o",
-        "legoapi/ai/game/gameantinode.cpp.o"
-      ]
-    },
-    {
       "name": "_ZL15Action_DontPushP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
       "demangled_name": "Action_DontPush(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char**, int, int, float)",
       "address": 4035280,
@@ -127204,38 +127248,6 @@
       "match_percent": 0.0
     },
     {
-      "name": "_ZN10KnotHelperD1Ev",
-      "demangled_name": "KnotHelper::~KnotHelper()",
-      "address": 5613376,
-      "offset": 4723408,
-      "size": 29,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN10KnotHelperD2Ev",
-      "demangled_name": "KnotHelper::~KnotHelper()",
-      "address": 5613376,
-      "offset": 4723408,
-      "size": 29,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN12SplineHelperD1Ev",
-      "demangled_name": "SplineHelper::~SplineHelper()",
-      "address": 5613408,
-      "offset": 4723440,
-      "size": 29,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN12SplineHelperD2Ev",
-      "demangled_name": "SplineHelper::~SplineHelper()",
-      "address": 5613408,
-      "offset": 4723440,
-      "size": 29,
-      "match_percent": 0.0
-    },
-    {
       "name": "_ZThn12_N17SceneObjectHelperD1Ev",
       "demangled_name": "{virtual override thunk({offset(-12)}, SceneObjectHelper::~SceneObjectHelper())}",
       "address": 5613520,
@@ -127257,22 +127269,6 @@
       "address": 5613584,
       "offset": 4723616,
       "size": 7,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN12SplineHelperD0Ev",
-      "demangled_name": "SplineHelper::~SplineHelper()",
-      "address": 5615264,
-      "offset": 4725296,
-      "size": 45,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN10KnotHelperD0Ev",
-      "demangled_name": "KnotHelper::~KnotHelper()",
-      "address": 5615312,
-      "offset": 4725344,
-      "size": 45,
       "match_percent": 0.0
     },
     {
@@ -127935,8 +127931,8 @@
   "summary": {
     "bazel_units": 454,
     "functions": 13454,
-    "assigned_functions": 12600,
-    "ambiguous_functions": 243,
-    "unassigned_functions": 611
+    "assigned_functions": 12607,
+    "ambiguous_functions": 242,
+    "unassigned_functions": 605
   }
 }

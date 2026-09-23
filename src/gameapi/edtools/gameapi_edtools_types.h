@@ -758,6 +758,13 @@ struct EditorSettings {
     void Serialise(EdStream &);
 };
 DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(EditorSettings) == 0xc, "EditorSettings 32-bit size");
+struct EdClassInterfaceVTableObject {
+    void *offset_to_top;
+    void *type_info;
+    EdClassInterfaceVTable methods;
+};
+extern const EdClassInterfaceVTableObject splineHelperVTable asm("_ZTV12SplineHelper");
+extern const EdClassInterfaceVTableObject knotHelperVTable asm("_ZTV10KnotHelper");
 struct KnotHelper {
     void *vtable;
     EdClass *object_class;
@@ -765,6 +772,11 @@ struct KnotHelper {
     EdRef *in_tangent_ref;
     EdRef *out_tangent_ref;
 
+    KnotHelper()
+        : vtable(const_cast<EdClassInterfaceVTable *>(&knotHelperVTable.methods)), object_class(NULL),
+          position_ref(NULL), in_tangent_ref(NULL), out_tangent_ref(NULL) {
+    }
+    ~KnotHelper();
     void Flush();
     void *CreateObject(void *, i32, i32);
     void DestroyObject(void *, i32);
@@ -782,6 +794,11 @@ struct SplineHelper {
     i32 object_count;
     i32 auto_generate_points;
 
+    SplineHelper()
+        : vtable(const_cast<EdClassInterfaceVTable *>(&splineHelperVTable.methods)), object_class(NULL),
+          first_object(NULL), last_object(NULL), object_count(0), auto_generate_points(0) {
+    }
+    ~SplineHelper();
     void Flush();
     void AddMenuItems(eduimenu_s *);
     void ClearLevel(i32);

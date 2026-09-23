@@ -195,7 +195,7 @@ static __used__ void *CreateCreature(i32 type, nuvec_s *position, i32 angle) {
     return creature;
 }
 
-static void *FindCreatureArea(const char *name) {
+static __attribute__((always_inline, optimize("O3"))) inline void *FindCreatureArea(const char *name) {
     if (name == nullptr)
         return nullptr;
     NULISTHDR *areas = reinterpret_cast<NULISTHDR *>(reinterpret_cast<u8 *>(aieditor) + 0x37a40);
@@ -208,7 +208,7 @@ static void *FindCreatureArea(const char *name) {
     return nullptr;
 }
 
-static EDLOCATOR_s *FindCreatureLocator(const char *name) {
+static __attribute__((always_inline, optimize("O3"))) inline EDLOCATOR_s *FindCreatureLocator(const char *name) {
     if (name == nullptr)
         return nullptr;
     EDLOCATOR_s *locator = (EDLOCATOR_s *)NuLinkedListGetHead(&aieditor->locators);
@@ -220,7 +220,7 @@ static EDLOCATOR_s *FindCreatureLocator(const char *name) {
     return nullptr;
 }
 
-void creatureEditor_Enter() {
+__attribute__((optimize("O3"))) void creatureEditor_Enter() {
     aieditor->creatures.head = nullptr;
     aieditor->creatures.tail = nullptr;
     NULISTHDR *free_creatures = reinterpret_cast<NULISTHDR *>(reinterpret_cast<u8 *>(aieditor) + 0x3691c);
@@ -1194,7 +1194,7 @@ extern "C" {
 
 } // extern "C"
 
-eduimenu_s *creatureEditor_Process(nupad_s *pad) {
+__attribute__((optimize("O3"))) eduimenu_s *creatureEditor_Process(nupad_s *pad) {
     if (pad->digital_buttons_pressed & 0x80) {
         eduimenu_s *menu =
             eduiMenuCreate(200, 70, 240, 330, ed_fnt, aieditor_cbCancelMainMenu, const_cast<char *>("Options"));
@@ -1290,28 +1290,110 @@ eduimenu_s *creatureEditor_Process(nupad_s *pad) {
                 else if (selected->path == locator->path)
                     selected->locator = locator;
             }
-        } else if (pad->digital_buttons_pressed & 0x100) {
-            EDCREATURE_s *nearest = creatureEditor_GetNearest(0);
-            aieditor->mode_selection_36930 = reinterpret_cast<EditorNamedEntry *>(nearest);
-            if (nearest != nullptr) {
-                CreatureEditorRecord *selected = reinterpret_cast<CreatureEditorRecord *>(nearest);
-                aieditor->current_path = reinterpret_cast<EDAIPATH_s *>(selected->path);
-                edcamSetPos(&selected->position);
-                aieditorsettings.current_path_type = selected->character_type;
-                aieditor_SetCurrentScript(selected->script_name,
-                                          reinterpret_cast<const AIEditorScriptSelection *>(selected));
+        } else {
+            NULISTHDR *creatures = &aieditor->creatures;
+            CreatureEditorRecord *selected = creatureEditor_Current();
+            CreatureEditorRecord *next = nullptr;
+            bool change_selection = false;
+            if ((pad->digital_buttons_pressed & 0x1000) != 0 ||
+                ((pad->digital_buttons & 0x100) != 0 && (pad->digital_buttons_pressed & 8) != 0)) {
+                next = selected != nullptr
+                           ? reinterpret_cast<CreatureEditorRecord *>(NuLinkedListGetNext(creatures, &selected->link))
+                           : nullptr;
+                if (next == nullptr)
+                    next = reinterpret_cast<CreatureEditorRecord *>(NuLinkedListGetHead(creatures));
+                change_selection = true;
+            } else if ((pad->digital_buttons & 0x100) != 0 && (pad->digital_buttons_pressed & 2) != 0) {
+                next = selected != nullptr
+                           ? reinterpret_cast<CreatureEditorRecord *>(NuLinkedListGetPrev(creatures, &selected->link))
+                           : nullptr;
+                if (next == nullptr)
+                    next = reinterpret_cast<CreatureEditorRecord *>(NuLinkedListGetTail(creatures));
+                change_selection = true;
+            } else if (pad->digital_buttons_pressed & 0x100) {
+                next = reinterpret_cast<CreatureEditorRecord *>(creatureEditor_GetNearest(0));
+                change_selection = true;
+            }
+
+            if (change_selection) {
+                aieditor->mode_selection_36930 = reinterpret_cast<EditorNamedEntry *>(next);
+                if (next != nullptr) {
+                    aieditor->current_path = reinterpret_cast<EDAIPATH_s *>(next->path);
+                    edcamSetPos(&next->position);
+                    aieditorsettings.current_path_type = next->character_type;
+                    aieditor_SetCurrentScript(next->script_name,
+                                              reinterpret_cast<const AIEditorScriptSelection *>(next));
+                }
+            } else if ((pad->digital_buttons & 0x100) == 0) {
+                EDAIPATHCHECK_s *check = reinterpret_cast<EDAIPATHCHECK_s *>(reinterpret_cast<u8 *>(aieditor) + 0x48);
+                i32 angle = aieditorsettings.area_rotation;
+                bool rotate = false;
+                if (pad->digital_buttons & (0x2000 | 0x8000)) {
+                    rotate = true;
+                    CreatureEditorRecord *hover = *reinterpret_cast<CreatureEditorRecord **>(aieditor->unknown_3692c);
+                    if (selected != nullptr && selected == hover)
+                        angle = selected->angle;
+                    i32 &step = *reinterpret_cast<i32 *>(aieditor->unknown_36934);
+                    const u32 direction = (pad->digital_buttons & 0x2000) ? 0x2000 : 0x8000;
+                    if (pad->digital_buttons_pressed & direction)
+                        step = 0x14;
+                    else if (step < 600)
+                        step += 0x14;
+                    if (step > 600)
+                        step = 600;
+                    angle = (pad->digital_buttons & 0x2000) ? NuAngAdd(angle, step) : NuAngSub(angle, step);
+                } else if (pad->digital_buttons & 0x4000) {
+                    rotate = true;
+                    const i32 relative = NuAngSub(angle, check->angle);
+                    i32 quarter_turns = relative / 0x4000;
+                    if (relative % 0x4000 > 0x2000)
+                        ++quarter_turns;
+                    else if (relative % 0x4000 < -0x2000)
+                        --quarter_turns;
+                    angle = NuAngAdd(quarter_turns << 14, check->angle);
+                }
+                if (rotate) {
+                    aieditorsettings.area_rotation = angle;
+                    CreatureEditorRecord *hover = *reinterpret_cast<CreatureEditorRecord **>(aieditor->unknown_3692c);
+                    if (selected != nullptr && selected == hover) {
+                        selected->angle = angle;
+                        check = reinterpret_cast<EDAIPATHCHECK_s *>(selected->path_check);
+                        check->angle = NuAngSub(
+                            angle, reinterpret_cast<EDAIPATHCHECK_s *>(reinterpret_cast<u8 *>(aieditor) + 0x48)->angle);
+                        creatureEditor_Updated(reinterpret_cast<EDCREATURE_s *>(selected));
+                    }
+                }
             }
         }
-    } else if (pad->digital_buttons_pressed & 0x40) {
+    } else {
         CreatureEditorRecord *nearest = *reinterpret_cast<CreatureEditorRecord **>(aieditor->unknown_3692c);
         if (nearest != nullptr) {
-            aieditor->mode_selection_36930 = reinterpret_cast<EditorNamedEntry *>(nearest);
-            aieditor->current_path = reinterpret_cast<EDAIPATH_s *>(nearest->path);
-            aieditorsettings.area_rotation = nearest->angle;
-            edcamSetPos(&nearest->position);
-            aieditorsettings.current_path_type = nearest->character_type;
-            aieditor_SetCurrentScript(nearest->script_name, reinterpret_cast<const AIEditorScriptSelection *>(nearest));
-        } else if (reinterpret_cast<EDAIPATHCHECK_s *>(reinterpret_cast<u8 *>(aieditor) + 0x48)->on_path != 0) {
+            if (pad->digital_buttons_pressed & 0x40) {
+                aieditor->mode_selection_36930 = reinterpret_cast<EditorNamedEntry *>(nearest);
+                aieditor->current_path = reinterpret_cast<EDAIPATH_s *>(nearest->path);
+                aieditorsettings.area_rotation = nearest->angle;
+                edcamSetPos(&nearest->position);
+                aieditorsettings.current_path_type = nearest->character_type;
+                aieditor_SetCurrentScript(nearest->script_name,
+                                          reinterpret_cast<const AIEditorScriptSelection *>(nearest));
+            } else {
+                CreatureEditorRecord *selected = creatureEditor_Current();
+                if (selected != nullptr) {
+                    EDAIPATHCHECK_s *check =
+                        reinterpret_cast<EDAIPATHCHECK_s *>(reinterpret_cast<u8 *>(aieditor) + 0x48);
+                    if (check->on_path == 0) {
+                        edcamSetPos(&selected->position);
+                    } else {
+                        selected->position = aieditor->camera_position;
+                        memcpy(selected->path_check, check, sizeof(selected->path_check));
+                        reinterpret_cast<EDAIPATHCHECK_s *>(selected->path_check)->angle =
+                            NuAngSub(selected->angle, check->angle);
+                        creatureEditor_Updated(reinterpret_cast<EDCREATURE_s *>(selected));
+                    }
+                }
+            }
+        } else if ((pad->digital_buttons_pressed & 0x40) != 0 &&
+                   reinterpret_cast<EDAIPATHCHECK_s *>(reinterpret_cast<u8 *>(aieditor) + 0x48)->on_path != 0) {
             CreatureEditorRecord *previous = creatureEditor_Current();
             char base_name[0x10];
             u8 set = 0;

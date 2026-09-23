@@ -8,7 +8,6 @@
 #include "nu2api/numath/nuvec.h"
 #include "nu2api/numath/nufloat.h"
 #include <string.h>
-struct EDANTINODE_s;
 
 extern "C" {
     u64 GameAntinode_grid[64];
@@ -238,44 +237,6 @@ GAMEANTINODE_s *GameAntinode_UpdateAntiNodeUsingData(GAMEANTINODESYS_s *system, 
     }
 
     return node;
-}
-
-static __used__ void *CreateAntinode(nuvec_s *) {
-    STUBBED();
-    return {};
-}
-
-static __used__ void antinodeEditor_AntinodeMoved(EDANTINODE_s *) {
-    STUBBED();
-}
-
-static __used__ void *antinodeEditor_GetNearestAntinode(int) {
-    STUBBED();
-    return {};
-}
-
-static __used__ void antinodeEditor_cbSetType(eduimenu_s *, eduiitem_s *, unsigned int) {
-    STUBBED();
-}
-
-static __used__ void antinodeEditor_cbSelectType(eduimenu_s *, eduiitem_s *, unsigned int) {
-    STUBBED();
-}
-
-static __used__ void antinodeEditor_cbAntiNodeFlagsToggle(eduimenu_s *, eduiitem_s *, unsigned int) {
-    STUBBED();
-}
-
-static __used__ void antinodeEditor_cbDeleteAntinode(eduimenu_s *, eduiitem_s *, unsigned int) {
-    STUBBED();
-}
-
-static __used__ void antinodeEditor_cbCancelDeleteAntinodeMenu(eduimenu_s *, eduimenu_s *) {
-    STUBBED();
-}
-
-static __used__ void antinodeEditor_cbCancelMenu(eduimenu_s *, eduimenu_s *) {
-    STUBBED();
 }
 
 extern "C" {

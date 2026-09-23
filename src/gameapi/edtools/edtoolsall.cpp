@@ -225,9 +225,9 @@ void edppDoInput(nupad_s *pad) {
     extern f32 edpp_offset;
     extern eduimenu_s *edpp_active_menu, *ptloptmenu;
 
-    if ((pad->digital_buttons & 0x100) == 0) {
+    if ((pad->digital_buttons & 0x100) == 0)
         edcamMove(pad);
-    } else {
+    if (pad->digital_buttons & 0x100) {
         if (pad->digital_buttons_pressed & 0x20) {
             edpp_copy_mode = !edpp_copy_mode;
             if (edpp_copy_mode)
@@ -5561,7 +5561,7 @@ void EdSpecialObjectControl::cbButton(eduimenu_s *parent, eduiitem_s *item, u32)
          object = static_cast<Placeable *>(thePlaceableHelper.GetNextObject(object, SpecialObjectFilter))) {
         eduiMenuAddItem(choices, eduiItemSelCreate(reinterpret_cast<usize>(object), item->colours, 0, 0, cbSelectObject,
                                                    const_cast<char *>(object->GetName())));
-        if (NuSpecialCompare(static_cast<SpecialObject *>(object)->GetNuHSpecial(), &selected) != 0)
+        if (NuSpecialCompare(&static_cast<SpecialObject *>(object)->special, &selected) != 0)
             choices->selected = choices->last;
     }
     eduiMenuSortItemsByTxt(choices);
@@ -5596,15 +5596,17 @@ void EdSpecialObjectControl::cbSelectObject(eduimenu_s *, eduiitem_s *item, u32)
     if (control == NULL)
         return;
     nuhspecial_s selected;
+    nuhspecial_s *choice;
     if (item->data == -1) {
         NuSpecialClear(&selected);
+        choice = &selected;
     } else {
-        selected = *static_cast<SpecialObject *>(item->data_ptr)->GetNuHSpecial();
-        char *name = NuSpecialGetName(&selected);
+        choice = &static_cast<SpecialObject *>(item->data_ptr)->special;
+        char *name = NuSpecialGetName(choice);
         if (name != NULL)
             eduiItemPropSetText(reinterpret_cast<edui_prop_s *>(control->item), name);
     }
-    control->reference->SetMemberData(control->object, EdType_NuHSpecial, &selected, 0, NULL);
+    control->reference->SetMemberData(control->object, EdType_NuHSpecial, choice, 0, NULL);
 }
 
 void EdSpecialObjectControl::AddMenuItem(eduimenu_s *parent, EdRef *member, void *target) {

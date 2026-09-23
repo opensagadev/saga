@@ -7,6 +7,148 @@
 #include "nu2api/nucore/nustring.h"
 #include <new>
 
+// EdClassInterface's field-based representation preserves the original ABI for
+// the rest of the editor.  These two objects are its original Itanium vtables:
+// two header words followed by the 31 EdClassInterface slots.
+#define EDVT_SYMBOL(name, symbol) extern "C" void name() asm(symbol)
+#define EDVT_SLOT(field, symbol) reinterpret_cast<decltype(EdClassInterfaceVTable::field)>(symbol)
+EDVT_SYMBOL(edvt_base_clear, "_ZN16EdClassInterface10ClearLevelEi");
+EDVT_SYMBOL(edvt_base_next_filtered, "_ZN16EdClassInterface13GetNextObjectEPvPFiS0_E");
+EDVT_SYMBOL(edvt_base_defunct, "_ZN16EdClassInterface13DefunctObjectEPv");
+EDVT_SYMBOL(edvt_base_revive, "_ZN16EdClassInterface12ReviveObjectEPv");
+EDVT_SYMBOL(edvt_base_set_guid, "_ZN16EdClassInterface13SetObjectGuidEPvi");
+EDVT_SYMBOL(edvt_base_get_guid, "_ZN16EdClassInterface13GetObjectGuidEPv");
+EDVT_SYMBOL(edvt_base_constructor_data, "_ZN16EdClassInterface18GetConstructorDataEPvS0_i");
+EDVT_SYMBOL(edvt_base_construct, "_ZN16EdClassInterface9ConstructEPvS0_");
+EDVT_SYMBOL(edvt_base_enter_editor, "_ZN16EdClassInterface11EnterEditorEv");
+EDVT_SYMBOL(edvt_base_exit_editor, "_ZN16EdClassInterface10ExitEditorEv");
+EDVT_SYMBOL(edvt_base_enter_level, "_ZN16EdClassInterface10EnterLevelEv");
+EDVT_SYMBOL(edvt_base_exit_level, "_ZN16EdClassInterface9ExitLevelEv");
+EDVT_SYMBOL(edvt_base_update_lists, "_ZN16EdClassInterface11UpdateListsEP12MemoryBufferS1_");
+EDVT_SYMBOL(edvt_base_pre_load, "_ZN16EdClassInterface21PreLoadInitialisationEP12MemoryBufferS1_");
+EDVT_SYMBOL(edvt_base_post_load, "_ZN16EdClassInterface22PostLoadInitialisationEP12MemoryBufferS1_");
+EDVT_SYMBOL(edvt_base_pre_save, "_ZN16EdClassInterface21PreSaveInitialisationEv");
+EDVT_SYMBOL(edvt_base_post_save, "_ZN16EdClassInterface22PostSaveInitialisationEv");
+EDVT_SYMBOL(edvt_base_serialise, "_ZN16EdClassInterface15SerialiseObjectER8EdStreamPv");
+EDVT_SYMBOL(edvt_base_distance_ray, "_ZN16EdClassInterface16DistanceToObjectER5VuVecS1_PvPP5EdRef");
+EDVT_SYMBOL(edvt_base_distance_point, "_ZN16EdClassInterface16DistanceToObjectER5VuVecPvPP5EdRef");
+EDVT_SYMBOL(edvt_base_add_menu, "_ZN16EdClassInterface12AddMenuItemsEP10eduimenu_s");
+EDVT_SYMBOL(edvt_base_import, "_ZN16EdClassInterface6ImportEv");
+EDVT_SYMBOL(edvt_spline_clear, "_ZN12SplineHelper10ClearLevelEi");
+EDVT_SYMBOL(edvt_spline_flush, "_ZN12SplineHelper5FlushEv");
+EDVT_SYMBOL(edvt_spline_count, "_ZN12SplineHelper13GetNumObjectsEv");
+EDVT_SYMBOL(edvt_spline_next, "_ZN12SplineHelper13GetNextObjectEPv");
+EDVT_SYMBOL(edvt_spline_create, "_ZN12SplineHelper12CreateObjectEPvii");
+EDVT_SYMBOL(edvt_spline_destroy, "_ZN12SplineHelper13DestroyObjectEPvi");
+EDVT_SYMBOL(edvt_spline_process, "_ZN12SplineHelper7ProcessEPvR14EdInputContext");
+EDVT_SYMBOL(edvt_spline_render, "_ZN12SplineHelper6RenderEPvi");
+EDVT_SYMBOL(edvt_spline_pre_load, "_ZN12SplineHelper21PreLoadInitialisationEP12MemoryBufferS1_");
+EDVT_SYMBOL(edvt_spline_post_load, "_ZN12SplineHelper22PostLoadInitialisationEP12MemoryBufferS1_");
+EDVT_SYMBOL(edvt_spline_serialise, "_ZN12SplineHelper15SerialiseObjectER8EdStreamPv");
+EDVT_SYMBOL(edvt_spline_add_menu, "_ZN12SplineHelper12AddMenuItemsEP10eduimenu_s");
+EDVT_SYMBOL(edvt_knot_flush, "_ZN10KnotHelper5FlushEv");
+EDVT_SYMBOL(edvt_knot_count, "_ZN10KnotHelper13GetNumObjectsEv");
+EDVT_SYMBOL(edvt_knot_next, "_ZN10KnotHelper13GetNextObjectEPv");
+EDVT_SYMBOL(edvt_knot_create, "_ZN10KnotHelper12CreateObjectEPvii");
+EDVT_SYMBOL(edvt_knot_destroy, "_ZN10KnotHelper13DestroyObjectEPvi");
+EDVT_SYMBOL(edvt_knot_process, "_ZN10KnotHelper7ProcessEPvR14EdInputContext");
+EDVT_SYMBOL(edvt_knot_render, "_ZN10KnotHelper6RenderEPvi");
+EDVT_SYMBOL(edvt_knot_distance_ray, "_ZN10KnotHelper16DistanceToObjectER5VuVecS1_PvPP5EdRef");
+EDVT_SYMBOL(edvt_spline_destructor, "_ZN12SplineHelperD1Ev");
+EDVT_SYMBOL(edvt_spline_delete, "_ZN12SplineHelperD0Ev");
+EDVT_SYMBOL(edvt_knot_destructor, "_ZN10KnotHelperD1Ev");
+EDVT_SYMBOL(edvt_knot_delete, "_ZN10KnotHelperD0Ev");
+
+extern const EdClassInterfaceVTableObject splineHelperVTable asm("_ZTV12SplineHelper")
+    __attribute__((weak)) = {NULL,
+                             NULL,
+                             {reinterpret_cast<decltype(EdClassInterfaceVTable::destroy)>(edvt_spline_destructor),
+                              reinterpret_cast<decltype(EdClassInterfaceVTable::delete_object)>(edvt_spline_delete),
+                              EDVT_SLOT(clear_level, edvt_spline_clear),
+                              EDVT_SLOT(flush, edvt_spline_flush),
+                              EDVT_SLOT(get_num_objects, edvt_spline_count),
+                              EDVT_SLOT(get_next_object, edvt_spline_next),
+                              EDVT_SLOT(get_next_filtered_object, edvt_base_next_filtered),
+                              EDVT_SLOT(create_object, edvt_spline_create),
+                              EDVT_SLOT(destroy_object, edvt_spline_destroy),
+                              EDVT_SLOT(defunct_object, edvt_base_defunct),
+                              EDVT_SLOT(revive_object, edvt_base_revive),
+                              EDVT_SLOT(set_object_guid, edvt_base_set_guid),
+                              EDVT_SLOT(get_object_guid, edvt_base_get_guid),
+                              EDVT_SLOT(get_constructor_data, edvt_base_constructor_data),
+                              EDVT_SLOT(construct, edvt_base_construct),
+                              EDVT_SLOT(process, edvt_spline_process),
+                              EDVT_SLOT(render, edvt_spline_render),
+                              EDVT_SLOT(enter_editor, edvt_base_enter_editor),
+                              EDVT_SLOT(exit_editor, edvt_base_exit_editor),
+                              EDVT_SLOT(enter_level, edvt_base_enter_level),
+                              EDVT_SLOT(exit_level, edvt_base_exit_level),
+                              EDVT_SLOT(update_lists, edvt_base_update_lists),
+                              EDVT_SLOT(pre_load_initialisation, edvt_spline_pre_load),
+                              EDVT_SLOT(post_load_initialisation, edvt_spline_post_load),
+                              EDVT_SLOT(pre_save_initialisation, edvt_base_pre_save),
+                              EDVT_SLOT(post_save_initialisation, edvt_base_post_save),
+                              EDVT_SLOT(serialise_object, edvt_spline_serialise),
+                              EDVT_SLOT(distance_to_ray, edvt_base_distance_ray),
+                              EDVT_SLOT(distance_to_point, edvt_base_distance_point),
+                              EDVT_SLOT(add_menu_items, edvt_spline_add_menu),
+                              EDVT_SLOT(import, edvt_base_import)}};
+
+extern const EdClassInterfaceVTableObject knotHelperVTable asm("_ZTV10KnotHelper")
+    __attribute__((weak)) = {NULL,
+                             NULL,
+                             {reinterpret_cast<decltype(EdClassInterfaceVTable::destroy)>(edvt_knot_destructor),
+                              reinterpret_cast<decltype(EdClassInterfaceVTable::delete_object)>(edvt_knot_delete),
+                              EDVT_SLOT(clear_level, edvt_base_clear),
+                              EDVT_SLOT(flush, edvt_knot_flush),
+                              EDVT_SLOT(get_num_objects, edvt_knot_count),
+                              EDVT_SLOT(get_next_object, edvt_knot_next),
+                              EDVT_SLOT(get_next_filtered_object, edvt_base_next_filtered),
+                              EDVT_SLOT(create_object, edvt_knot_create),
+                              EDVT_SLOT(destroy_object, edvt_knot_destroy),
+                              EDVT_SLOT(defunct_object, edvt_base_defunct),
+                              EDVT_SLOT(revive_object, edvt_base_revive),
+                              EDVT_SLOT(set_object_guid, edvt_base_set_guid),
+                              EDVT_SLOT(get_object_guid, edvt_base_get_guid),
+                              EDVT_SLOT(get_constructor_data, edvt_base_constructor_data),
+                              EDVT_SLOT(construct, edvt_base_construct),
+                              EDVT_SLOT(process, edvt_knot_process),
+                              EDVT_SLOT(render, edvt_knot_render),
+                              EDVT_SLOT(enter_editor, edvt_base_enter_editor),
+                              EDVT_SLOT(exit_editor, edvt_base_exit_editor),
+                              EDVT_SLOT(enter_level, edvt_base_enter_level),
+                              EDVT_SLOT(exit_level, edvt_base_exit_level),
+                              EDVT_SLOT(update_lists, edvt_base_update_lists),
+                              EDVT_SLOT(pre_load_initialisation, edvt_base_pre_load),
+                              EDVT_SLOT(post_load_initialisation, edvt_base_post_load),
+                              EDVT_SLOT(pre_save_initialisation, edvt_base_pre_save),
+                              EDVT_SLOT(post_save_initialisation, edvt_base_post_save),
+                              EDVT_SLOT(serialise_object, edvt_base_serialise),
+                              EDVT_SLOT(distance_to_ray, edvt_knot_distance_ray),
+                              EDVT_SLOT(distance_to_point, edvt_base_distance_point),
+                              EDVT_SLOT(add_menu_items, edvt_base_add_menu),
+                              EDVT_SLOT(import, edvt_base_import)}};
+
+#undef EDVT_SLOT
+#undef EDVT_SYMBOL
+
+SplineHelper::~SplineHelper() {
+}
+KnotHelper::~KnotHelper() {
+}
+
+extern "C" void splineHelperDeletingDestructor(SplineHelper *object) asm("_ZN12SplineHelperD0Ev");
+void splineHelperDeletingDestructor(SplineHelper *object) {
+    object->~SplineHelper();
+    ::operator delete(object);
+}
+
+extern "C" void knotHelperDeletingDestructor(KnotHelper *object) asm("_ZN10KnotHelperD0Ev");
+void knotHelperDeletingDestructor(KnotHelper *object) {
+    object->~KnotHelper();
+    ::operator delete(object);
+}
+
 extern eduiiattr_s EdLevelAttr;
 extern ClassEditor theClassEditor;
 extern MemoryManager theMemoryManager;

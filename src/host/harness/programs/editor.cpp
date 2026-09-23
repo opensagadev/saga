@@ -32,7 +32,6 @@
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>
-#include <limits>
 #include <mutex>
 #include <optional>
 #include <string>
@@ -731,31 +730,8 @@ namespace saga::host::harness {
                 thePlaceableHelper.Initialise();
                 theSceneObjectHelper.Initialise();
 
-                // Spline and Knot registration remains available while their
-                // original helpers are still incomplete.
-                static EdClassInterfaceVTable menu_interface_vtable = [] {
-                    EdClassInterfaceVTable table{};
-                    table.get_next_object = [](EdClassInterface *, void *) -> void * { return nullptr; };
-                    table.enter_editor = [](EdClassInterface *) {};
-                    table.exit_editor = [](EdClassInterface *) {};
-                    table.clear_level = [](EdClassInterface *, i32) {};
-                    table.flush = [](EdClassInterface *) {};
-                    table.add_menu_items = [](EdClassInterface *, eduimenu_s *) {};
-                    table.process = [](EdClassInterface *, void *, EdInputContext &) {};
-                    table.render = [](EdClassInterface *, void *, i32) {};
-                    table.distance_to_ray = [](EdClassInterface *, VuVec &, VuVec &, void *, EdRef **) {
-                        return std::numeric_limits<f32>::max();
-                    };
-                    table.distance_to_point = [](EdClassInterface *, VuVec &, void *, EdRef **) {
-                        return std::numeric_limits<f32>::max();
-                    };
-                    return table;
-                }();
-                for (EdClassInterface &interface : this->menu_class_interfaces)
-                    interface.vtable = &menu_interface_vtable;
-                theRegistry.RegisterClass(const_cast<char *>("Spline"), &this->menu_class_interfaces[0], 0x08400100);
-                theRegistry.RegisterClass(const_cast<char *>("Knot"), &this->menu_class_interfaces[1], 0x18400000);
-                LOG_INFO("editor: initialized original Placeable and SceneObject class metadata");
+                theSplineHelper.Initialise();
+                LOG_INFO("editor: initialized original Placeable, SceneObject, Spline, and Knot classes");
             }
 
             [[nodiscard]] nupad_s make_editor_pad() {
@@ -841,7 +817,6 @@ namespace saga::host::harness {
             std::mutex filter_input_mutex;
             std::string pending_filter_input;
             decltype(eduiitem_s::render) scene_object_item_renderer = nullptr;
-            std::array<EdClassInterface, 2> menu_class_interfaces{};
         };
 
         void print_editor_usage(std::string_view executable) {

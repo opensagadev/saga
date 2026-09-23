@@ -1,5 +1,6 @@
 #include "decomp.h"
 #include "editor/edpath.h"
+#include "editor/antinode_editor_private.h"
 #include "gameapi/edtools/edcam.h"
 #include "gameapi/edtools/edui.h"
 #include "legoapi/legoapi_types.h"
@@ -41,84 +42,6 @@ extern "C" {
     void locatorEditorDrawLocators();
     void antinodeEditorDrawAntinodes();
     void AiRndrLine3d(NURND_VERTEX3D *, numtl_s *, NUMTX *);
-}
-
-static eduiiattr_s editor_mode_attr = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
-
-struct EDANTINODE_s {
-    NULISTLNK link;
-    nuvec_s position;
-    f32 radius;
-    f32 lower_height;
-    f32 upper_height;
-    nuhspecial_s special;
-    nuvec_s special_position;
-    i32 flags;
-    i32 rotation_offset;
-    f32 base_radius;
-    f32 base_height;
-    u8 game_flags;
-    u8 type;
-    u8 unknown_4a[2];
-};
-DECOMP_ASSERT(sizeof(EDANTINODE_s) == 0x4c, "editor antinode stride");
-
-static inline EDANTINODE_s *antinode_pool() {
-    return reinterpret_cast<EDANTINODE_s *>(reinterpret_cast<u8 *>(aieditor) + 0x4088c);
-}
-static inline NULISTHDR *antinode_free_list() {
-    return reinterpret_cast<NULISTHDR *>(reinterpret_cast<u8 *>(aieditor) + 0x42e8c);
-}
-static inline NULISTHDR *antinode_list() {
-    return reinterpret_cast<NULISTHDR *>(reinterpret_cast<u8 *>(aieditor) + 0x42e94);
-}
-
-extern "C" f32 default_path_heighttol;
-
-#if defined(__i386__)
-#define EDANTINODE_REGPARM1 __attribute__((regparm(1)))
-#else
-#define EDANTINODE_REGPARM1
-#endif
-
-static __used__ __attribute__((noinline, force_align_arg_pointer)) EDANTINODE_REGPARM1 EDANTINODE_s *
-CreateAntinode(nuvec_s *position) {
-    EDANTINODE_s *node = reinterpret_cast<EDANTINODE_s *>(NuLinkedListGetHead(antinode_free_list()));
-    if (node == nullptr)
-        return nullptr;
-    NuLinkedListRemove(antinode_free_list(), &node->link);
-    NuLinkedListAppend(antinode_list(), &node->link);
-    node->position = *position;
-    EDANTINODE_s *selected = reinterpret_cast<EDANTINODE_s *>(aieditor->mode_selection_42e9c);
-    if (selected != nullptr) {
-        node->radius = selected->radius;
-        node->lower_height = selected->lower_height;
-        node->upper_height = selected->upper_height;
-        node->type = selected->type;
-        node->base_radius = selected->base_radius;
-        node->base_height = selected->base_height;
-    } else {
-        node->radius = 0.25f;
-        node->lower_height = -default_path_heighttol;
-        node->upper_height = default_path_heighttol;
-    }
-    return node;
-}
-
-static eduimenu_s *editorModeOptions(i32 mode, i32 height) {
-    eduimenu_s *menu =
-        eduiMenuCreate(200, 70, 240, height, ed_fnt, aieditor_cbCancelMainMenu, const_cast<char *>("Options"));
-    if (menu == nullptr)
-        return nullptr;
-    eduiMenuAddItem(menu, eduiItemSelCreate(mode, &editor_mode_attr, 0, 0, aieditor_cvSelectEditorMode,
-                                            const_cast<char *>("Select Editor Mode")));
-    eduiMenuAddItem(menu,
-                    eduiItemSelCreate(1, &editor_mode_attr, 0, 0, aieditor_cbSave, const_cast<char *>("Save AI Data")));
-    eduiMenuAddItem(
-        menu, eduiItemSelCreate(1, &editor_mode_attr, 0, 0, aieditor_cbGoToPlayer, const_cast<char *>("Go To Player")));
-    eduiMenuAddItem(
-        menu, eduiItemSelCreate(1, &editor_mode_attr, 0, 0, aieditor_cbMovePlayer, const_cast<char *>("Move Player")));
-    return menu;
 }
 
 void routeEditor_Render(i32 x, i32 y, float xscale, float yscale) {
@@ -201,33 +124,6 @@ i32 InModelListDataFlags(APICHARACTERMODELLIST_s *models, u32 model_flags, u32 g
     if (reject_flag_40 != 0)
         return FindModelListDataFlags<false, true, false>(models, model_flags, game_flags, first_id);
     return FindModelListDataFlags<false, false, false>(models, model_flags, game_flags, first_id);
-}
-
-void antinodeEditor_Enter() {
-    antinode_list()->head = nullptr;
-    antinode_list()->tail = nullptr;
-    for (i32 i = 0; i < 128; ++i) {
-        NuLinkedListAppend(antinode_free_list(), &antinode_pool()[i].link);
-    }
-    AISYS_s *system = aieditor->ai_system;
-    for (i32 i = 0; i < system->antinode_count; ++i) {
-        AIANTINODE *source = &system->antinodes[i];
-        EDANTINODE_s *node = CreateAntinode(&source->position);
-        if (node == nullptr)
-            continue;
-        node->position = source->position;
-        node->radius = source->radius;
-        node->lower_height = source->min_y - source->position.y;
-        node->upper_height = source->max_y - source->position.y;
-        node->game_flags = source->game_flags;
-        node->special = source->special_handle;
-        node->special_position = source->special_position;
-        node->flags = source->rotation_offset;
-        node->rotation_offset = source->flags;
-        node->base_radius = source->base_radius;
-        node->base_height = source->base_height;
-        node->type = source->type;
-    }
 }
 
 void antinodeEditor_Render(i32 x, i32 y, float xscale, float yscale) {
@@ -384,31 +280,6 @@ void creatureEditor_Render(i32 x, i32 y, float xscale, float yscale) {
     areaEditorDrawAreas();
     locatorEditorDrawLocators();
     antinodeEditorDrawAntinodes();
-}
-
-eduimenu_s *antinodeEditor_Process(nupad_s *pad) {
-    if (pad->digital_buttons_pressed & 0x80) {
-        eduimenu_s *menu = editorModeOptions(AIEDITOR_ANTINODES, 270);
-        if (menu != nullptr) {
-            eduiMenuAddItem(menu,
-                            eduiItemToggleCreate(1, &editor_mode_attr, -i32(aieditorsettings.solid_antinode_display), 4,
-                                                 aieditor_cbSolidAntinodeDisplayToggle,
-                                                 const_cast<char *>("Solid Antinode Display")));
-            eduiMenuAddItem(menu,
-                            eduiItemToggleCreate(1, &editor_mode_attr, -i32(aieditorsettings.stop_platforms), 3,
-                                                 aieditor_cbStopPlatformsToggle, const_cast<char *>("Stop Platforms")));
-            eduiMenuAddItem(menu,
-                            eduiItemToggleCreate(1, &editor_mode_attr, -i32(aieditorsettings.snap_height_display), 2,
-                                                 aieditor_cbSnapHeightToggle, const_cast<char *>("Snap Height")));
-        }
-        return menu;
-    }
-    void *nearest = *reinterpret_cast<void **>(reinterpret_cast<u8 *>(aieditor) + 0x42ea0);
-    if ((pad->digital_buttons & 0x40) && (pad->digital_buttons_pressed & 0x40) && nearest != nullptr) {
-        aieditor->mode_selection_42e9c = nearest;
-        edcamSetPos(reinterpret_cast<nuvec_s *>(reinterpret_cast<u8 *>(aieditor->mode_selection_42e9c) + 8));
-    }
-    return nullptr;
 }
 
 struct CreaturePositionRecord {
