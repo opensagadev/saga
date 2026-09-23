@@ -2353,7 +2353,8 @@ static __used__ i32 routeEditor_AddToRoute(EDAIPATHNODE_s *node, EDAIPATHNODE_s 
 }
 
 eduimenu_s *routeEditor_Process(nupad_s *pad) {
-    if (pad->digital_buttons_pressed & 0x80) {
+    u32 pressed = pad->digital_buttons_pressed;
+    if (pressed & 0x80) {
         eduimenu_s *menu =
             eduiMenuCreate(200, 70, 240, 270, ed_fnt, aieditor_cbCancelMainMenu, const_cast<char *>("Options"));
         if (menu == nullptr)
@@ -2378,7 +2379,7 @@ eduimenu_s *routeEditor_Process(nupad_s *pad) {
     if (path == nullptr)
         return nullptr;
     // Both route cycling directions are expanded across the 16 fixed slots in the original.
-    if (pad->digital_buttons_pressed & 0x1000) {
+    if (pressed & 0x1000) {
         i32 index = path->current_route == nullptr ? 1 : path->current_route - path->routes + 1;
 #define ROUTE_EDITOR_TRY_FORWARD()                                                                                     \
     if (index >= 16)                                                                                                   \
@@ -2406,7 +2407,7 @@ eduimenu_s *routeEditor_Process(nupad_s *pad) {
 #undef ROUTE_EDITOR_TRY_FORWARD
         path->current_route = nullptr;
         return nullptr;
-    } else if (pad->digital_buttons_pressed & 0x4000) {
+    } else if (pressed & 0x4000) {
         i32 index = path->current_route == nullptr ? 15 : path->current_route - path->routes - 1;
 #define ROUTE_EDITOR_TRY_BACKWARD()                                                                                    \
     if (index < 0)                                                                                                     \
@@ -2438,13 +2439,13 @@ eduimenu_s *routeEditor_Process(nupad_s *pad) {
         return nullptr;
     }
 route_selected:
-    if ((pad->digital_buttons & 0x40) && (pad->digital_buttons_pressed & 0x40) && path->nearest_node != nullptr) {
+    if ((pad->digital_buttons & 0x40) && (pressed & 0x40) && path->nearest_node != nullptr) {
         path->current_node = path->nearest_node;
         nuvec_s position = path->current_node->position;
         position.y = aieditor->cursor_position.y;
         edcamSetPos(&position);
     }
-    if ((pad->digital_buttons_pressed & 0x20) && path->current_node != nullptr && path->nearest_node != nullptr &&
+    if ((pressed & 0x20) && path->current_node != nullptr && path->nearest_node != nullptr &&
         path->current_node != path->nearest_node) {
         EDAIPATHNODE_s *nearest = path->nearest_node;
         i32 change = routeEditor_AddToRoute(path->current_node, nearest);
@@ -2456,7 +2457,7 @@ route_selected:
             edcamSetPos(&position);
         }
     }
-    if ((pad->digital_buttons_pressed & 0x10) && path->current_node != nullptr) {
+    if ((pressed & 0x10) && path->current_node != nullptr) {
         i32 index = path->current_route - path->routes;
         u16 mask = 1u << index;
         for (i32 slot = 0; slot < 8; ++slot) {
@@ -2467,7 +2468,7 @@ route_selected:
             }
         }
     }
-    if (pad->digital_buttons_pressed & 0x100) {
+    if (pressed & 0x100) {
         EDAIPATHNODE_s *nearest = nullptr;
         f32 nearest_distance = FLT_MAX;
         for (EDAIPATHNODE_s *node = reinterpret_cast<EDAIPATHNODE_s *>(NuLinkedListGetHead(&path->nodes));

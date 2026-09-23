@@ -247,19 +247,23 @@ static void edbricbBridgePropertiesMenu(eduimenu_s *parent, eduiitem_s *, u32) {
         eduiMenuCreate(70, 70, 180, 250, ed_fnt, edbricbCancelBridgePropertiesMenu, "Bridge Properties");
     if (!edbri_bridgeproperties_menu)
         return;
-    edbridge_s &bridge = edBridges[edbri_nearest];
-    eduiMenuAddItem(edbri_bridgeproperties_menu, eduiItemSliderCreate(0, edblack, 0, edbricbSetBridgeTension, 0.0f,
-                                                                      1.0f, bridge.field_28, "Tension"));
     eduiMenuAddItem(edbri_bridgeproperties_menu,
-                    eduiItemSliderCreate(0, edblack, 0, edbricbSetBridgeDamp, 0.0f, 1.0f, bridge.field_2c, "Damp"));
-    eduiMenuAddItem(edbri_bridgeproperties_menu, eduiItemSliderCreate(0, edblack, 0, edbricbSetBridgeGravity, -0.1f,
-                                                                      0.2f, bridge.field_30, "Gravity"));
-    eduiMenuAddItem(edbri_bridgeproperties_menu, eduiItemSliderCreate(0, edblack, 0, edbricbSetBridgePlrweight, 0.0f,
-                                                                      10.0f, bridge.field_34, "Plrweight"));
-    eduiMenuAddItem(edbri_bridgeproperties_menu, eduiItemSliderCreate(0, edblack, 0, edbricbSetBridgeRopeheight, 0.0f,
-                                                                      2.0f, bridge.field_38, "Rope Height"));
-    eduiMenuAddItem(edbri_bridgeproperties_menu, eduiItemSliderCreate(0, edblack, 0, edbricbSetBridgeStability, 0.0f,
-                                                                      10.0f, bridge.field_3c, "Stability"));
+                    eduiItemSliderCreate(0, edblack, 0, edbricbSetBridgeTension, 0.0f, 1.0f,
+                                         edBridges[edbri_nearest].field_28, "Tension"));
+    eduiMenuAddItem(edbri_bridgeproperties_menu, eduiItemSliderCreate(0, edblack, 0, edbricbSetBridgeDamp, 0.0f, 1.0f,
+                                                                      edBridges[edbri_nearest].field_2c, "Damp"));
+    eduiMenuAddItem(edbri_bridgeproperties_menu,
+                    eduiItemSliderCreate(0, edblack, 0, edbricbSetBridgeGravity, -0.1f, 0.2f,
+                                         edBridges[edbri_nearest].field_30, "Gravity"));
+    eduiMenuAddItem(edbri_bridgeproperties_menu,
+                    eduiItemSliderCreate(0, edblack, 0, edbricbSetBridgePlrweight, 0.0f, 10.0f,
+                                         edBridges[edbri_nearest].field_34, "Plrweight"));
+    eduiMenuAddItem(edbri_bridgeproperties_menu,
+                    eduiItemSliderCreate(0, edblack, 0, edbricbSetBridgeRopeheight, 0.0f, 2.0f,
+                                         edBridges[edbri_nearest].field_38, "Rope Height"));
+    eduiMenuAddItem(edbri_bridgeproperties_menu,
+                    eduiItemSliderCreate(0, edblack, 0, edbricbSetBridgeStability, 0.0f, 10.0f,
+                                         edBridges[edbri_nearest].field_3c, "Stability"));
     eduiMenuAddItem(edbri_bridgeproperties_menu,
                     eduiItemSelCreate(1, edblack, 0, 0, edbricbRopeColourMenu, "Rope Colour..."));
     edbriAttachMenu(parent, edbri_bridgeproperties_menu);

@@ -2952,9 +2952,16 @@ i32 ClassObjectList::GetAveragePosition(VuVec &average) {
     average = VuVec(0.0f, 0.0f, 0.0f, 1.0f);
     i32 position_count = 0;
     for (ClassObjectListEntry *entry = first; entry != NULL; entry = entry->next) {
-        VuVec position;
-        if (get_class_object_attribute(entry->ed_class, entry->object, entry->reference, 8, EdType_VuVec, &position,
-                                       0)) {
+        // The original's local vector is 16-byte aligned.
+        VuVec position __attribute__((aligned(16)));
+        bool found = entry->reference != NULL &&
+                     entry->reference->GetAttributeData(entry->object, 8, EdType_VuVec, &position, 0) != 0;
+        if (!found) {
+            EdMember member;
+            found = entry->ed_class->FindMember(&member, entry->object, 8, 1) != 0 &&
+                    member.reference->GetAttributeData(member.object, 8, EdType_VuVec, &position, 0) != 0;
+        }
+        if (found) {
             average.x += position.x;
             average.y += position.y;
             average.z += position.z;
@@ -3406,11 +3413,8 @@ i32 EdClass::FindMember(EdMember *result, void *object, i32 attributes, i32 recu
         return 0;
     if (recursive == 0) {
         do {
-            if (member->attributes >= 0 && (member->attributes & attributes) != 0) {
-                result->object = object;
-                result->reference = member;
-                return 1;
-            }
+            if (member->attributes >= 0 && (member->attributes & attributes) != 0)
+                goto found;
             member = member->next;
         } while (member != NULL);
         return 0;
@@ -3421,14 +3425,15 @@ i32 EdClass::FindMember(EdMember *result, void *object, i32 attributes, i32 recu
             void *member_object = member->GetMemberObject(object);
             if (member_class->FindMember(result, member_object, attributes, 1) != 0)
                 return 1;
-        } else if ((member->attributes & attributes) != 0) {
-            result->object = object;
-            result->reference = member;
-            return 1;
-        }
+        } else if ((member->attributes & attributes) != 0)
+            goto found;
         member = member->next;
     } while (member != NULL);
     return 0;
+found:
+    result->object = object;
+    result->reference = member;
+    return 1;
 }
 
 void *EdClass::FindObject(char *object_name) {

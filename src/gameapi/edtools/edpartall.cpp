@@ -854,17 +854,12 @@ static void edpartChangeMaxLife(eduimenu_s *, eduiitem_s *item, u32) {
 }
 static void edpartChangeVarEmit(eduimenu_s *, eduiitem_s *item, u32) {
     if (edpart_nearest_type != NULL) {
-        switch (item->data) {
-            case 0:
-                edpart_nearest_type->velocity_random.x = static_cast<edui_slider_s *>(item)->value;
-                break;
-            case 1:
-                edpart_nearest_type->velocity_random.y = static_cast<edui_slider_s *>(item)->value;
-                break;
-            case 2:
-                edpart_nearest_type->velocity_random.z = static_cast<edui_slider_s *>(item)->value;
-                break;
-        }
+        if (item->data == 0)
+            edpart_nearest_type->velocity_random.x = static_cast<edui_slider_s *>(item)->value;
+        else if (item->data == 1)
+            edpart_nearest_type->velocity_random.y = static_cast<edui_slider_s *>(item)->value;
+        else if (item->data == 2)
+            edpart_nearest_type->velocity_random.z = static_cast<edui_slider_s *>(item)->value;
     }
 }
 static void edpartDieDebrisMenu(eduimenu_s *menu, eduiitem_s *, u32) {
@@ -978,17 +973,12 @@ static void edpartChangeNameMenu(eduimenu_s *menu, eduiitem_s *, u32) {
 }
 static void edpartChangeVarStart(eduimenu_s *, eduiitem_s *item, u32) {
     if (edpart_nearest_type != NULL) {
-        switch (item->data) {
-            case 0:
-                edpart_nearest_type->position_random.x = static_cast<edui_slider_s *>(item)->value;
-                break;
-            case 1:
-                edpart_nearest_type->position_random.y = static_cast<edui_slider_s *>(item)->value;
-                break;
-            case 2:
-                edpart_nearest_type->position_random.z = static_cast<edui_slider_s *>(item)->value;
-                break;
-        }
+        if (item->data == 0)
+            edpart_nearest_type->position_random.x = static_cast<edui_slider_s *>(item)->value;
+        else if (item->data == 1)
+            edpart_nearest_type->position_random.y = static_cast<edui_slider_s *>(item)->value;
+        else if (item->data == 2)
+            edpart_nearest_type->position_random.z = static_cast<edui_slider_s *>(item)->value;
     }
 }
 static void edpartImpactPartMenu(eduimenu_s *menu, eduiitem_s *, u32) {
@@ -2179,7 +2169,11 @@ static __attribute__((optimize("O3"))) void edpartDeleteAllInstanceDuplicates(ed
         }
     }
     edpart_nearest_duplicates = 0;
-    edpartFinishMenu(menu);
+    eduimenu_s *parent = menu->parent;
+    if (parent)
+        eduiMenuDetach(menu);
+    if (menu->callback)
+        menu->callback(menu, parent);
 }
 
 void edpartDoInput(nupad_s *pad) {

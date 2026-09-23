@@ -174,7 +174,7 @@ void antinodeEditor_Enter() {
 
 static void antinodeEditor_cbSetType(eduimenu_s *, eduiitem_s *item, unsigned int) {
     EDANTINODE_s *node = antinode_selected();
-    u8 previous_type = node->type;
+    i32 previous_type = node->type;
     if (item != nullptr)
         node->type = static_cast<u8>(item->data);
     node = antinode_selected();

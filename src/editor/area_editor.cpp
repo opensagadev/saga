@@ -146,7 +146,7 @@ static __used__ void areaEditor_cbAreaCylinderToggle(eduimenu_s *, eduiitem_s *i
     }
 }
 
-void areaEditor_Enter() {
+__attribute__((optimize("no-tree-loop-optimize"))) void areaEditor_Enter() {
     area_list()->head = NULL;
     area_list()->tail = NULL;
     for (i32 index = 0; index < 64; ++index) {
@@ -230,32 +230,32 @@ void areaEditor_Render(i32 x, i32 y, f32, f32) {
         y += 15;
         NuQFntPrintEx(system_qfont, text_x, y * 8, 16, "\"%s\", xzrng=%.2f", focus->name, static_cast<f64>(range));
     }
-    i32 text_y = y * 8;
-    NuQFntPrintEx(system_qfont, text_x, text_y + 120, 16, "SQR - Options");
+    NuQFntPrintEx(system_qfont, text_x, (y + 15) * 8, 16, "SQR - Options");
     if (area_hovered() == NULL) {
-        NuQFntPrintEx(system_qfont, text_x, text_y + 240, 16, "X - Create area");
-        NuQFntPrintEx(system_qfont, text_x, text_y + 360, 16, "SELECT - Select nearest");
+        NuQFntPrintEx(system_qfont, text_x, (y + 30) * 8, 16, "X - Create area");
+        NuQFntPrintEx(system_qfont, text_x, (y + 45) * 8, 16, "SELECT - Select nearest");
     } else if (area_hovered() != area_selected()) {
-        NuQFntPrintEx(system_qfont, text_x, text_y + 240, 16, "X - Select area");
-        NuQFntPrintEx(system_qfont, text_x, text_y + 360, 16, "SELECT - Goto nearest");
+        NuQFntPrintEx(system_qfont, text_x, (y + 30) * 8, 16, "X - Select area");
+        NuQFntPrintEx(system_qfont, text_x, (y + 45) * 8, 16, "SELECT - Goto nearest");
     } else {
-        NuQFntPrintEx(system_qfont, text_x, text_y + 240, 16, "X - Move selected");
+        NuQFntPrintEx(system_qfont, text_x, (y + 30) * 8, 16, "X - Move selected");
         if ((aieditor->pad_buttons & 0x40) != 0) {
             if (focus->flags & 1) {
-                NuQFntPrintEx(system_qfont, text_x, text_y + 360, 16, "LRIGHT/LLEFT - Adjust Radius");
+                NuQFntPrintEx(system_qfont, text_x, (y + 45) * 8, 16, "LRIGHT/LLEFT - Adjust Radius");
             } else {
-                NuQFntPrintEx(system_qfont, text_x, text_y + 360, 16, "LRIGHT/LLEFT - Adjust X size");
-                NuQFntPrintEx(system_qfont, text_x, text_y + 480, 16, "LUP/LDOWN - Adjust Z size");
+                NuQFntPrintEx(system_qfont, text_x, (y + 45) * 8, 16, "LRIGHT/LLEFT - Adjust X size");
+                NuQFntPrintEx(system_qfont, text_x, (y + 60) * 8, 16, "LUP/LDOWN - Adjust Z size");
             }
         } else {
-            NuQFntPrintEx(system_qfont, text_x, text_y + 360, 16, "TRI - Delete selected");
-            i32 next_line = text_y + 480;
+            i32 next_line = y + 45;
+            NuQFntPrintEx(system_qfont, text_x, next_line * 8, 16, "TRI - Delete selected");
+            next_line += 15;
             if ((focus->flags & 1) == 0) {
-                NuQFntPrintEx(system_qfont, text_x, next_line, 16, "LLEFT/LRIGHT - Rotate");
-                next_line += 120;
+                NuQFntPrintEx(system_qfont, text_x, next_line * 8, 16, "LLEFT/LRIGHT - Rotate");
+                next_line += 15;
             }
-            NuQFntPrintEx(system_qfont, text_x, next_line, 16, "LUP - Increase height");
-            NuQFntPrintEx(system_qfont, text_x, next_line + 120, 16, "LDOWN - Decrease height");
+            NuQFntPrintEx(system_qfont, text_x, next_line * 8, 16, "LUP - Increase height");
+            NuQFntPrintEx(system_qfont, text_x, (next_line + 15) * 8, 16, "LDOWN - Decrease height");
         }
     }
     areaEditorDrawAreas();

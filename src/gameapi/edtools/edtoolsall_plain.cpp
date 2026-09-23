@@ -5246,11 +5246,12 @@ extern "C" {
                 pick = eduiItemGreyPickCreate(reinterpret_cast<usize>(item), &ed_attr, cbgpcfgCPPress, "Colourpick");
             else if (item->type == 9)
                 pick = eduiItemSelCreate(reinterpret_cast<usize>(item), &ed_attr, 0, 0, cbgpcfgCPPress, "Edit");
-            else
+            else {
                 pick = eduiItemColourPickCreate(reinterpret_cast<usize>(item), &ed_attr, cbgpcfgCPPress, "Colourpick");
-            if (item->type != 9 && gradient->selected_stage)
-                eduiItemColourPickSetHSV(static_cast<edui_colour_pick_s *>(pick), gradient->selected_stage->hue,
-                                         gradient->selected_stage->saturation, gradient->selected_stage->value);
+                if (gradient->selected_stage)
+                    eduiItemColourPickSetHSV(static_cast<edui_colour_pick_s *>(pick), gradient->selected_stage->hue,
+                                             gradient->selected_stage->saturation, gradient->selected_stage->value);
+            }
             eduiMenuAddItem(gpcfg, pick);
             eduiMenuAddItem(gpcfg, eduiItemSelCreate(reinterpret_cast<usize>(item), &ed_attr, 0, 0, cbgpcfgAdd, "Add"));
             eduiMenuAddItem(gpcfg, eduiItemSelCreate(reinterpret_cast<usize>(item), &ed_attr, 0, 0, cbgpcfgDel, "Del"));
@@ -5825,31 +5826,42 @@ extern "C" {
         }
         return height;
     }
-    static void eduiDrawHueValueBand(i32 x, i32 y, i32 width, i32 height, u32 first, u32 second, f32 start, f32 end) {
+    static __attribute__((noinline, used)) void eduiDrawHueValueBand(i32 x, i32 y, i32 width, i32 height, u32 first,
+                                                                     u32 second, f32 start, f32 end) {
         i32 left = (x << 4) + static_cast<i32>(start * static_cast<f32>(width << 4));
         i32 band_width = static_cast<i32>(end * static_cast<f32>(width << 4)) -
                          static_cast<i32>(start * static_cast<f32>(width << 4));
         i32 strip_height = height;
-        for (i32 strip = 0; strip < 8; ++strip) {
-            i32 scale_top = strip > 1 ? strip - 1 : 0;
-            i32 scale_bottom = strip;
-            u32 top_left = 0x80000000u;
-            u32 top_right = 0x80000000u;
-            u32 bottom_left = 0x80000000u;
-            u32 bottom_right = 0x80000000u;
-            for (i32 channel = 0; channel < 3; ++channel) {
-                i32 shift = channel * 8;
-                top_left |= (((first >> shift) & 0xff) * scale_top / 8) << shift;
-                top_right |= (((second >> shift) & 0xff) * scale_top / 8) << shift;
-                bottom_left |= (((first >> shift) & 0xff) * scale_bottom / 8) << shift;
-                bottom_right |= (((second >> shift) & 0xff) * scale_bottom / 8) << shift;
-            }
-            i32 colours[4] = {static_cast<i32>(top_left), static_cast<i32>(top_right), static_cast<i32>(bottom_left),
-                              static_cast<i32>(bottom_right)};
-            if (!edui_donotdraw)
-                NuRndrGradRect2di(left, (y << 3) + strip * strip_height, band_width, strip_height, colours,
-                                  uimtls[ui_bgmtl]);
-        }
+        i32 colours[4] = {static_cast<i32>(0x80000000u), static_cast<i32>(0x80000000u), static_cast<i32>(0x80000000u),
+                          static_cast<i32>(0x80000000u)};
+        if (!edui_donotdraw)
+            NuRndrGradRect2di(left, y << 3, band_width, strip_height, colours, uimtls[ui_bgmtl]);
+#define EDUI_DRAW_VALUE_STRIP(strip)                                                                                   \
+    {                                                                                                                  \
+        colours[0] = colours[2];                                                                                       \
+        colours[1] = colours[3];                                                                                       \
+        u8 *bottom_left = reinterpret_cast<u8 *>(&colours[2]);                                                         \
+        u8 *bottom_right = reinterpret_cast<u8 *>(&colours[3]);                                                        \
+        bottom_left[0] = ((first & 0xff) * (strip)) / 8;                                                               \
+        bottom_left[1] = (((first >> 8) & 0xff) * (strip)) / 8;                                                        \
+        bottom_left[2] = (((first >> 16) & 0xff) * (strip)) / 8;                                                       \
+        bottom_left[3] = 0x80 + ((static_cast<i32>(first >> 24) - 0x80) * (strip)) / 8;                                \
+        bottom_right[0] = ((second & 0xff) * (strip)) / 8;                                                             \
+        bottom_right[1] = (((second >> 8) & 0xff) * (strip)) / 8;                                                      \
+        bottom_right[2] = (((second >> 16) & 0xff) * (strip)) / 8;                                                     \
+        bottom_right[3] = 0x80 + ((static_cast<i32>(second >> 24) - 0x80) * (strip)) / 8;                              \
+        if (!edui_donotdraw)                                                                                           \
+            NuRndrGradRect2di(left, (y << 3) + (strip) * strip_height, band_width, strip_height, colours,              \
+                              uimtls[ui_bgmtl]);                                                                       \
+    }
+        EDUI_DRAW_VALUE_STRIP(1);
+        EDUI_DRAW_VALUE_STRIP(2);
+        EDUI_DRAW_VALUE_STRIP(3);
+        EDUI_DRAW_VALUE_STRIP(4);
+        EDUI_DRAW_VALUE_STRIP(5);
+        EDUI_DRAW_VALUE_STRIP(6);
+        EDUI_DRAW_VALUE_STRIP(7);
+#undef EDUI_DRAW_VALUE_STRIP
     }
     static __used__ i32 eduicbRenderColourPick(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width) {
         (void)menu;

@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 58.299274,
+    "fuzzy_match_percent": 58.322464,
     "total_code": "4722419",
-    "matched_code": "487087",
-    "matched_code_percent": 10.314354,
+    "matched_code": "487525",
+    "matched_code_percent": 10.323628,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 5872,
-    "matched_functions_percent": 43.6288,
+    "matched_functions": 5876,
+    "matched_functions_percent": 43.65852,
     "total_units": 1
   },
   "text": {
@@ -18814,7 +18814,7 @@
           "address": 4010704,
           "offset": 3120736,
           "size": 147,
-          "match_percent": 40.390244
+          "match_percent": 100.0
         },
         {
           "name": "_ZL36antinodeEditor_cbAntiNodeFlagsToggleP10eduimenu_sP10eduiitem_sj",
@@ -19117,7 +19117,7 @@
           "address": 4046944,
           "offset": 3156976,
           "size": 337,
-          "match_percent": 60.4466
+          "match_percent": 64.24272
         },
         {
           "name": "_Z18areaEditor_ProcessP7nupad_s",
@@ -19157,7 +19157,7 @@
           "address": 4259648,
           "offset": 3369680,
           "size": 870,
-          "match_percent": 57.280613
+          "match_percent": 70.47959
         }
       ]
     },
@@ -20635,7 +20635,7 @@
           "address": 5548816,
           "offset": 4658848,
           "size": 220,
-          "match_percent": 47.78205
+          "match_percent": 50.346153
         },
         {
           "name": "_ZN11ClassObject3SetEPc",
@@ -20731,7 +20731,7 @@
           "address": 5552576,
           "offset": 4662608,
           "size": 401,
-          "match_percent": 22.745098
+          "match_percent": 25.77451
         },
         {
           "name": "_ZN11ClassEditor12ViewSelectedEv",
@@ -20787,7 +20787,7 @@
           "address": 5555072,
           "offset": 4665104,
           "size": 512,
-          "match_percent": 59.213795
+          "match_percent": 59.17931
         },
         {
           "name": "_ZN11ClassEditor21UpdateSelectedObjectsER14EdInputContext",
@@ -20995,7 +20995,7 @@
           "address": 5573392,
           "offset": 4683424,
           "size": 392,
-          "match_percent": 72.28099
+          "match_percent": 72.264465
         },
         {
           "name": "_ZN11LevelEditor9LoadStateEP9variptr_uS1_S1_S1_S1_S1_",
@@ -21003,7 +21003,7 @@
           "address": 5583648,
           "offset": 4693680,
           "size": 459,
-          "match_percent": 88.71429
+          "match_percent": 83.03297
         },
         {
           "name": "_ZN11LevelEditor4LoadEPcP9variptr_uS2_i",
@@ -21011,7 +21011,7 @@
           "address": 5584112,
           "offset": 4694144,
           "size": 802,
-          "match_percent": 67.90769
+          "match_percent": 67.83077
         },
         {
           "name": "_ZN11LevelEditor9SaveStateEP9variptr_uS1_",
@@ -21530,7 +21530,7 @@
           "address": 4056128,
           "offset": 3166160,
           "size": 2948,
-          "match_percent": 26.870293
+          "match_percent": 27.058577
         },
         {
           "name": "_ZL32pathEditorCalculateDistanceTableP8AIPATH_siP9variptr_uS2_",
@@ -21642,7 +21642,7 @@
           "address": 4195648,
           "offset": 3305680,
           "size": 4694,
-          "match_percent": 41.237625
+          "match_percent": 41.232674
         },
         {
           "name": "pathEditorCreateData",
@@ -21682,7 +21682,7 @@
           "address": 4215216,
           "offset": 3325248,
           "size": 1093,
-          "match_percent": 53.80212
+          "match_percent": 53.837456
         },
         {
           "name": "_ZL23pathEditor_cbCreatePathP10eduimenu_sP10eduiitem_sj",
@@ -21754,7 +21754,7 @@
           "address": 4245184,
           "offset": 3355216,
           "size": 158,
-          "match_percent": 96.0
+          "match_percent": 95.666664
         },
         {
           "name": "_ZL23pathEditor_cbDeletePathP10eduimenu_sP10eduiitem_sj",
@@ -25755,7 +25755,7 @@
           "address": 3430368,
           "offset": 2540400,
           "size": 867,
-          "match_percent": 62.574467
+          "match_percent": 93.335106
         },
         {
           "name": "_ZL15edbricbFileSaveP10eduimenu_sP10eduiitem_sj",
@@ -26400,7 +26400,7 @@
           "address": 3421216,
           "offset": 2531248,
           "size": 874,
-          "match_percent": 46.64706
+          "match_percent": 66.161766
         },
         {
           "name": "_ZL23edgracbClumpTerrainMenuP10eduimenu_sP10eduiitem_sj",
@@ -26663,7 +26663,7 @@
           "address": 4263136,
           "offset": 3373168,
           "size": 103,
-          "match_percent": 63.121212
+          "match_percent": 100.0
         },
         {
           "name": "_ZL23edpartChangeInstanceRotP10eduimenu_sP10eduiitem_sj",
@@ -26687,7 +26687,7 @@
           "address": 4263568,
           "offset": 3373600,
           "size": 103,
-          "match_percent": 63.121212
+          "match_percent": 100.0
         },
         {
           "name": "_ZL18edpartChangeSScaleP10eduimenu_sP10eduiitem_sj",
@@ -27367,7 +27367,7 @@
           "address": 4279792,
           "offset": 3389824,
           "size": 626,
-          "match_percent": 69.73988
+          "match_percent": 77.82081
         },
         {
           "name": "_ZL30edpartDeleteAllInstanceOrphansP10eduimenu_sP10eduiitem_sj",
@@ -30212,7 +30212,7 @@
           "address": 5564608,
           "offset": 4674640,
           "size": 1275,
-          "match_percent": 21.14235
+          "match_percent": 22.604982
         },
         {
           "name": "_ZN13EdManipulator6RenderER15ClassObjectList",
@@ -30220,7 +30220,7 @@
           "address": 5566800,
           "offset": 4676832,
           "size": 85,
-          "match_percent": 46.23077
+          "match_percent": 100.0
         },
         {
           "name": "_ZN10EdManScale6RenderER15ClassObjectList",
@@ -34067,7 +34067,7 @@
           "address": 3752704,
           "offset": 2862736,
           "size": 764,
-          "match_percent": 41.932365
+          "match_percent": 41.400967
         },
         {
           "name": "eduicbRenderGreyPick",
@@ -34083,7 +34083,7 @@
           "address": 3754272,
           "offset": 2864304,
           "size": 996,
-          "match_percent": 23.974895
+          "match_percent": 26.430962
         },
         {
           "name": "eduicbRenderTextPick",
@@ -34163,7 +34163,7 @@
           "address": 3766064,
           "offset": 2876096,
           "size": 2741,
-          "match_percent": 21.920584
+          "match_percent": 30.463533
         },
         {
           "name": "eduicbRenderSelWithClipColour",
@@ -34171,7 +34171,7 @@
           "address": 3768816,
           "offset": 2878848,
           "size": 955,
-          "match_percent": 56.758476
+          "match_percent": 56.84322
         },
         {
           "name": "edmainSetReturn",

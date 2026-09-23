@@ -3852,8 +3852,8 @@ __attribute__((force_align_arg_pointer)) i32 EdManRotate::RotateItem(EdInputCont
     objects.GetAveragePosition(average);
     if (angle == 0 || first == NULL)
         return axis;
-    i32 sine_index = (angle >> 1) & 0x7fff;
     i32 cosine_index = ((angle + 0x4000) >> 1) & 0x7fff;
+    i32 sine_index = (angle >> 1) & 0x7fff;
     for (ClassObjectListEntry *entry = first; entry != NULL; entry = entry->next) {
         NUMTX matrix;
         NuMtxSetIdentity(&matrix);
@@ -4389,7 +4389,7 @@ i32 EdManipulator::Process(EdInputContext &input, ClassObjectList &selected) {
 
 void EdManipulator::Render(ClassObjectList &selected) {
     for (ClassObjectListEntry *entry = selected.first; entry != NULL; entry = entry->next) {
-        ClassObject object = {entry->ed_class, entry->object, entry->reference};
+        ClassObject &object = *reinterpret_cast<ClassObject *>(&entry->ed_class);
         theClassEditor.DrawObjectSphere(object, static_cast<i32>(0xff800000));
     }
 }

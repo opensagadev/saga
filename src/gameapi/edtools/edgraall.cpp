@@ -265,13 +265,19 @@ static void edgracbInstanceMenu(eduimenu_s *parent, eduiitem_s *, u32) {
         NuGScnGetSpecial(&special, edbits_base_scene, i);
         if (NuSpecialExistsFn(&special))
             name = NuSpecialGetName(&special);
-        const bool selected = i == edgra_instance_type;
-        if (edgra_filter && NuStrNCmp(edgra_filter_string, name, NuStrLen(edgra_filter_string)) && !selected)
-            continue;
-        eduiMenuAddItem(edgra_instance_menu,
-                        eduiItemCheckCreate(i, edblack, selected, 1, edgracbSetInstanceType, name));
-        ++added;
-        if (selected) {
+        const i32 selected = i == edgra_instance_type;
+        if (edgra_filter) {
+            if (NuStrNCmp(edgra_filter_string, name, NuStrLen(edgra_filter_string)) && !selected)
+                continue;
+            eduiMenuAddItem(edgra_instance_menu,
+                            eduiItemCheckCreate(i, edblack, selected, 1, edgracbSetInstanceType, name));
+            ++added;
+        } else {
+            eduiMenuAddItem(edgra_instance_menu,
+                            eduiItemCheckCreate(i, edblack, selected, 1, edgracbSetInstanceType, name));
+            ++added;
+        }
+        if (selected != 0) {
             selected_found = 1;
             edgra_instance_menu->selected = edui_last_item;
         }
