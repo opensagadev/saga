@@ -75,17 +75,10 @@ static void *scene_get_next_filtered_object(EdClassInterface *interface, void *i
     return item;
 }
 
-static f32 scene_distance_to_ray(EdClassInterface *, VuVec &, VuVec &, void *, EdRef **reference) {
-    if (reference != NULL)
-        *reference = NULL;
-    return 1.0e10f;
-}
-
-static f32 scene_distance_to_point(EdClassInterface *, VuVec &, void *, EdRef **reference) {
-    if (reference != NULL)
-        *reference = NULL;
-    return 1.0e10f;
-}
+extern "C" f32 scene_base_distance_to_ray(EdClassInterface *, VuVec &, VuVec &, void *,
+                                          EdRef **) asm("_ZN16EdClassInterface16DistanceToObjectER5VuVecS1_PvPP5EdRef");
+extern "C" f32 scene_base_distance_to_point(EdClassInterface *, VuVec &, void *,
+                                            EdRef **) asm("_ZN16EdClassInterface16DistanceToObjectER5VuVecPvPP5EdRef");
 
 static void scene_pre_load(EdClassInterface *interface, MemoryBuffer *first, MemoryBuffer *second) {
     scene_helper(interface)->PreLoadInitialisation(first, second);
@@ -278,8 +271,8 @@ void SceneObjectHelper::Initialise() {
     scene_object_class_vtable.pre_save_initialisation = scene_noop;
     scene_object_class_vtable.post_save_initialisation = scene_noop;
     scene_object_class_vtable.serialise_object = scene_noop_serialise;
-    scene_object_class_vtable.distance_to_ray = scene_distance_to_ray;
-    scene_object_class_vtable.distance_to_point = scene_distance_to_point;
+    scene_object_class_vtable.distance_to_ray = scene_base_distance_to_ray;
+    scene_object_class_vtable.distance_to_point = scene_base_distance_to_point;
     scene_object_class_vtable.import = scene_noop;
     class_interface.vtable = &scene_object_class_vtable;
 

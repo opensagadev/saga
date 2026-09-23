@@ -101,6 +101,7 @@ namespace saga::host::harness {
                 this->requested_view = EditorView::modules;
                 this->active_view = EditorView::game;
                 this->module_menu = nullptr;
+                this->detached_level_menus.clear();
                 this->previous_editor_buttons = 0;
                 this->last_selection_count = -1;
                 this->last_property_menu_count = -1;
@@ -512,31 +513,6 @@ namespace saga::host::harness {
                         }
                     }
                 }
-
-                // Draw selection feedback until the original sphere primitive is available.
-                const ClassObjectList &selected = theClassEditor.selected_objects;
-                if (selected.count <= 0)
-                    return;
-                i32 remaining = selected.count;
-                for (ClassObjectListEntry *entry = selected.first; entry && remaining > 0;
-                     entry = entry->next, --remaining) {
-                    bool found = false;
-                    for (const HostSceneObject &object : this->scene_objects) {
-                        if (entry->object == &object && object.Exists()) {
-                            this->draw_object_wire_sphere(object, 0xff800000);
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (found)
-                        continue;
-                    for (SceneInstance *object = theSceneObjectHelper.owned_first; object; object = object->next) {
-                        if (entry->object == object) {
-                            this->draw_object_wire_sphere(*object, 0xff800000);
-                            break;
-                        }
-                    }
-                }
             }
 
             void draw_object_wire_sphere(const HostSceneObject &object, i32 colour) const {
@@ -641,6 +617,12 @@ namespace saga::host::harness {
                 auto *object = static_cast<HostSceneObject *>(item->data_ptr);
                 if (!object)
                     return;
+                // CloseMenu detaches the submenu but defers destroying the root.
+                // Retain the detached branch until the next frame, after this
+                // selection callback has returned to the menu processor.
+                auto &session = instance();
+                if (edLevelActiveMenu && edLevelActiveMenu->child)
+                    session.detached_level_menus.push_back(edLevelActiveMenu->child);
                 ClassObject selection{theClassEditor.pending_object.ed_class, object, nullptr};
                 theClassEditor.pending_object = selection;
                 theClassEditor.current_object = selection;
@@ -700,11 +682,18 @@ namespace saga::host::harness {
 
             void destroy_level_menu() {
                 std::vector<eduimenu_s *> children;
-                for (eduimenu_s *menu = edLevelActiveMenu ? edLevelActiveMenu->child : nullptr; menu;
-                     menu = menu->child)
-                    children.push_back(menu);
+                const auto collect_branch = [&children](eduimenu_s *menu) {
+                    for (; menu && std::find(children.begin(), children.end(), menu) == children.end();
+                         menu = menu->child)
+                        children.push_back(menu);
+                };
+                collect_branch(edLevelActiveMenu ? edLevelActiveMenu->child : nullptr);
+                for (eduimenu_s *menu : this->detached_level_menus)
+                    collect_branch(menu);
+                this->detached_level_menus.clear();
                 if (edLevelActiveMenu)
                     edLevelActiveMenu->child = nullptr;
+                eduiSetActiveMenu(nullptr);
                 for (auto menu = children.rbegin(); menu != children.rend(); ++menu) {
                     (*menu)->parent = nullptr;
                     (*menu)->child = nullptr;
@@ -800,6 +789,7 @@ namespace saga::host::harness {
             EditorView requested_view = EditorView::modules;
             EditorView active_view = EditorView::game;
             eduimenu_s *module_menu = nullptr;
+            std::vector<eduimenu_s *> detached_level_menus;
             u32 previous_editor_buttons = 0;
             i32 last_selection_count = -1;
             i32 last_property_menu_count = -1;

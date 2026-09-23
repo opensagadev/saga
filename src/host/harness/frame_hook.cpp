@@ -1,4 +1,5 @@
 #include "host/harness/frame_hook.hpp"
+#include "host/platform/mouse.hpp"
 
 #include <atomic>
 
@@ -14,6 +15,7 @@ namespace saga::host::harness {
     }
 
     void run_frame_callback() noexcept {
+        saga::host::begin_editor_mouse_frame();
         if (const auto current = callback.load(std::memory_order_acquire))
             current();
     }

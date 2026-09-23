@@ -447,11 +447,38 @@ void ClassEditor::Render() {
     if (current_object.object != NULL && !IsSelectedObject(current_object))
         DrawObjectSphere(current_object, field_3c);
     if (selected_objects.count > 0) {
-        if (manipulator != NULL)
+        if (manipulator != NULL) {
             manipulator->Render(selected_objects);
+        } else {
+            for (ClassObjectListEntry *entry = selected_objects.first; entry != NULL; entry = entry->next) {
+                ClassObject selected = {entry->ed_class, entry->object, entry->reference};
+                DrawObjectSphere(selected, 0xff800000);
+            }
+        }
         for (ClassObjectListEntry *entry = selected_objects.first; entry != NULL; entry = entry->next)
             theRegistry.ClassIFaceRender(entry->ed_class, entry->object, 1);
     }
+
+    for (i32 index = 0; index < theRegistry.class_count; ++index) {
+        EdClass *ed_class = theRegistry.GetClass(index);
+        if (!Editable(NULL, ed_class, index) || ed_class->interface == NULL || (ed_class->flags & 0x08000080) == 0)
+            continue;
+
+        EdClassInterface *interface = ed_class->interface;
+        for (void *object = interface->vtable->get_next_object(interface, NULL); object != NULL;
+             object = interface->vtable->get_next_object(interface, object)) {
+            if (!Editable(object, ed_class, -1))
+                continue;
+
+            ClassObject selected = {ed_class, object, NULL};
+            const bool is_selected = selected_objects.IsInList(selected) != 0;
+            if ((ed_class->flags & 0x08000000) != 0 && !is_selected)
+                theRegistry.ClassIFaceRender(ed_class, object, 0);
+            if ((ed_class->flags & 0x80) != 0 && is_selected && object != current_object.object)
+                DrawObjectSphere(selected, 0xff000080);
+        }
+    }
+
     if (menu != NULL)
         eduiMenuRender(menu);
 }

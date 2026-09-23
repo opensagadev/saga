@@ -5,8 +5,6 @@
 #include <atomic>
 #include <mutex>
 
-extern i32 global_frame_count;
-
 namespace {
 
     std::atomic<bool> editor_mouse_enabled{false};
@@ -18,26 +16,26 @@ namespace {
     float pending_delta_y = 0.0f;
     float frame_delta_x = 0.0f;
     float frame_delta_y = 0.0f;
-    i32 motion_frame = -1;
     float previous_x = 0.0f;
     float previous_y = 0.0f;
     bool previous_position_valid = false;
 
     float read_motion(bool horizontal) {
         std::lock_guard lock{motion_mutex};
-        if (motion_frame != global_frame_count) {
-            frame_delta_x = pending_delta_x;
-            frame_delta_y = pending_delta_y;
-            pending_delta_x = 0.0f;
-            pending_delta_y = 0.0f;
-            motion_frame = global_frame_count;
-        }
         return horizontal ? frame_delta_x : frame_delta_y;
     }
 
 } // namespace
 
 namespace saga::host {
+
+    void begin_editor_mouse_frame() noexcept {
+        std::lock_guard lock{motion_mutex};
+        frame_delta_x = pending_delta_x;
+        frame_delta_y = pending_delta_y;
+        pending_delta_x = 0.0f;
+        pending_delta_y = 0.0f;
+    }
 
     void set_editor_mouse_enabled(bool enabled) noexcept {
         editor_mouse_enabled.store(enabled, std::memory_order_release);
