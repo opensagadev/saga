@@ -356,13 +356,17 @@ void edbriDoInput(nupad_s *pad) {
             i32 index = edbri_nearest;
             if (pad->digital_buttons_pressed & 8) {
                 do {
-                    index = (index + 1) & 63;
+                    ++index;
+                    if (index == 64)
+                        index = 0;
                 } while (edBridges[index].instance_id == -1);
                 edbri_nearest = index;
             }
             if (pad->digital_buttons_pressed & 2) {
                 do {
-                    index = (index + 63) & 63;
+                    --index;
+                    if (index == -1)
+                        index = 63;
                 } while (edBridges[index].instance_id == -1);
                 edbri_nearest = index;
             }

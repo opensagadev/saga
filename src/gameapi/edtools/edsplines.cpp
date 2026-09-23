@@ -208,9 +208,8 @@ void SplineKnot::Smooth() {
     VuVec before = previous != NULL ? previous->position : position;
     VuVec after = next != NULL ? next->position : position;
     if (previous == NULL && next == NULL) {
-        in_tangent = VuVec{0.0f, 0.0f, 0.0f, 0.0f};
-        out_tangent = in_tangent;
-        return;
+        before = VuVec{0.0f, 0.0f, 0.0f, 0.0f};
+        after = before;
     }
     VuVec delta{(after.x - before.x) * 0.1f, (after.y - before.y) * 0.1f, (after.z - before.z) * 0.1f, 0.0f};
     in_tangent = VuVec{position.x - delta.x, position.y - delta.y, position.z - delta.z, 0.0f};

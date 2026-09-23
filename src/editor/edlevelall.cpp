@@ -995,10 +995,34 @@ void ClassEditor::UpdateSelectedObjects(EdInputContext &input) {
         EdClassInterface *interface = entry->ed_class->interface;
         if (interface == NULL || interface->vtable->get_next_object == NULL)
             return;
-        void *object = interface->vtable->get_next_object(interface, entry->object);
-        if (object == NULL)
-            object = interface->vtable->get_next_object(interface, NULL);
-        if (object != NULL && Editable(object, entry->ed_class, -1)) {
+        void *object = NULL;
+        if (input.GetPress(19) != 0.0f) {
+            object = interface->vtable->get_next_object(interface, entry->object);
+            if (object == NULL)
+                object = interface->vtable->get_next_object(interface, NULL);
+            for (i32 remaining = 4096; remaining != 0 && object != NULL; --remaining) {
+                if (Editable(object, entry->ed_class, -1))
+                    break;
+                object = interface->vtable->get_next_object(interface, object);
+                if (object == NULL)
+                    object = interface->vtable->get_next_object(interface, NULL);
+            }
+        }
+        if (input.GetPress(20) != 0.0f) {
+            void *current = entry->object;
+            void *previous = NULL;
+            for (i32 remaining = 4096; remaining != 0; --remaining) {
+                if (Editable(current, entry->ed_class, -1))
+                    previous = current;
+                current = interface->vtable->get_next_object(interface, current);
+                if (current == NULL)
+                    current = interface->vtable->get_next_object(interface, NULL);
+                if (current == entry->object)
+                    break;
+            }
+            object = previous;
+        }
+        if (object != NULL) {
             ClassObject selected = {entry->ed_class, object, NULL};
             SelectObject(selected, 0);
             ViewSelected();

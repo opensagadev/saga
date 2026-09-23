@@ -5,7 +5,10 @@
 #include "legoapi/legoapi_types.h"
 #include "gameapi/edtools/edcam.h"
 #include "gameapi/edtools/edstubs.h"
+#include "gameapi/edtools/edfile.h"
 #include "nu2api/nu3d/numtl.h"
+#include "nu2api/nu3d/nuspecial.h"
+#include "nu2api/nufile/nufile.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/numusic/sfx.h"
 
@@ -23,6 +26,7 @@ void edpartPlace(i32 index, nuvec_s *position);
 void edpartCreate(nuvec_s *position, i32 type);
 void edpartMultipleCopyCopy();
 void edpartMultipleCopyClear();
+i32 edpartSaveEffects(char *path, char page);
 
 extern "C" {
     i32 edpart_set_part = 5;
@@ -42,6 +46,18 @@ extern "C" {
     f32 edpart_offset;
     i32 edpart_dpad_mode;
     i32 edpart_copy_mode;
+    i32 edpart_copy_enclosed;
+    i32 edpart_copy_source[8];
+    i32 edpart_copy_source_count;
+    NUVEC edpart_copy_source_vec;
+    i32 edpart_copyrotz;
+    f32 edpart_copy_size = 0.2f;
+    i32 edpart_copyroty;
+    i32 edpart_snap_enabled;
+    i32 edpart_refroty;
+    i32 edpart_refrotz;
+    i32 edpart_num_orphans;
+    i32 edpart_readout;
     f32 edpart_scale_factor = 1.0f;
     NUMTL *edpart_mtl;
     NUMTL *edpart_boxmtl;
@@ -52,12 +68,18 @@ extern "C" {
     extern debinftype **debtab;
     extern i32 EDPP_MAX_TYPES;
     extern i32 part_types_used;
+    extern i32 part_emits_used;
     extern i32 part_page_on[8];
     extern i32 part_page_used[8];
     extern NUGSCN *part_scene[32];
     extern i32 part_scene_pageid[32];
     extern NUGSCN *edbits_base_scene;
     extern NUGSCN *edbits_things_scene;
+    extern char edbits_general_save_directory[256], edbits_general_save_name[256], edbits_general_save_extension[256];
+    extern char edbits_level_save_directory[256], edbits_level_save_name[256], edbits_level_save_extension[256];
+    extern i32 edbits_part_general_page, edbits_part_level_page;
+    extern i32 edbits_override_backups;
+    void ResetParts(void);
     extern eduimenu_s *edpart_active_menu;
     extern eduimenu_s *edpart_opt_menu;
     extern eduimenu_s *edpart_type_menu;
@@ -272,6 +294,13 @@ static void edpartSetDistribution(eduimenu_s *, eduiitem_s *, u32);
 static void edpartWorldInstanceMenu(eduimenu_s *, eduiitem_s *, u32);
 static void edpartThingsInstanceMenu(eduimenu_s *, eduiitem_s *, u32);
 static void edpartInstanceOrphansMenu(eduimenu_s *, eduiitem_s *, u32);
+static void edpartCancelWorldInstanceMenu(eduimenu_s *, eduimenu_s *);
+static void edpartCancelThingsInstanceMenu(eduimenu_s *, eduimenu_s *);
+static void edpartCancelInstanceOrphansMenu(eduimenu_s *, eduimenu_s *);
+static void edpartCancelMessageMenu(eduimenu_s *, eduimenu_s *);
+static void edpartDeleteInstanceOrphan(eduimenu_s *, eduiitem_s *, u32);
+static void edpartDeleteAllInstanceOrphans(eduimenu_s *, eduiitem_s *, u32);
+static void edpartDeleteAllInstanceDuplicates(eduimenu_s *, eduiitem_s *, u32);
 
 extern "C" {
     i32 edpart_which_scene = 1;
@@ -998,11 +1027,96 @@ static void edpartDebrisScaleMenu(eduimenu_s *menu, eduiitem_s *, u32) {
         edpart_debrisscale_menu->y = menu->y + 40;
     }
 }
-static void edpartFileLoadEffects(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
+static void edpartFileLoadEffects(eduimenu_s *parent, eduiitem_s *, u32) {
+    ResetParts();
+    memset(part_types, 0, sizeof(part_types));
+    for (i32 type = 0; type < 128; ++type) {
+        for (i32 variant = 0; variant < 8; ++variant) {
+            part_types[type].effect_ids[variant] = -1;
+            part_types[type].effect_pages[variant] = -1;
+        }
+    }
+    part_types_used = 0;
+    memset(part_emits, 0, 40 * sizeof(part_emit_s));
+    for (i32 emitter = 0; emitter < 40; ++emitter)
+        part_emits[emitter].effect_id = -1;
+    part_emits_used = 0;
+    memset(part_page_used, 0, sizeof(i32) * 8);
+    memset(part_page_on, 0, sizeof(i32) * 8);
+    memset(part_scene, 0, sizeof(NUGSCN *) * 32);
+    memset(part_scene_pageid, -1, sizeof(i32) * 32);
+    char path[256];
+    char directory[256], name[256], extension[256];
+    strcpy(directory, edbits_general_save_directory[0] ? edbits_general_save_directory : ".");
+    strcpy(name, edbits_general_save_name[0] ? edbits_general_save_name : "part");
+    strcpy(extension, edbits_general_save_extension[0] ? edbits_general_save_extension : "par");
+    sprintf(path, "%s\\%s.%s", directory, name, extension);
+    if (NuFileExists(path))
+        edpartLoadPage(path, 0, edbits_things_scene);
+    strcpy(directory, edbits_level_save_directory[0] ? edbits_level_save_directory : ".");
+    strcpy(name, edbits_level_save_name[0] ? edbits_level_save_name : "part");
+    strcpy(extension, edbits_level_save_extension[0] ? edbits_level_save_extension : "par");
+    sprintf(path, "%s\\%s.%s", directory, name, extension);
+    if (NuFileExists(path)) {
+        i32 page = edpartLoadPage(path, 1, edbits_base_scene);
+        edpartStartPage(static_cast<i8>(page));
+    }
+    u32 colours[4] = {0x8000c000, 0x80ff0000, 0x80808080, 0x80404040};
+    edpart_message_menu = eduiMenuCreate(70, 70, 300, 250, ed_fnt, edpartCancelMessageMenu, "Message");
+    if (edpart_message_menu != NULL) {
+        eduiMenuAddItem(edpart_message_menu, eduiItemSelCreate(1, colours, 0, 0, NULL, "Loaded OK"));
+        eduiMenuAttach(parent, edpart_message_menu);
+        edpart_message_menu->x = parent->x + 10;
+        edpart_message_menu->y = parent->y + 40;
+    }
 }
-static void edpartFileSaveEffects(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
+static inline void edpartSavePath(char *path, char *backup, bool level) {
+    char directory[256], name[256], extension[256];
+    char *save_directory = level ? edbits_level_save_directory : edbits_general_save_directory;
+    char *save_name = level ? edbits_level_save_name : edbits_general_save_name;
+    char *save_extension = level ? edbits_level_save_extension : edbits_general_save_extension;
+    strcpy(directory, save_directory[0] ? save_directory : ".");
+    strcpy(name, save_name[0] ? save_name : "part");
+    strcpy(extension, save_extension[0] ? save_extension : "par");
+    sprintf(path, "%s\\%s.%s", directory, name, extension);
+    sprintf(backup, "%s\\%s.%s.bak", directory, name, extension);
+}
+
+static inline void edpartSaveMessage(eduimenu_s *parent, const char *message, bool success) {
+    u32 colours[4] = {success ? 0x8000c000u : 0x800000c0u, 0x80ff0000, 0x80808080, 0x80404040};
+    edpart_message_menu = eduiMenuCreate(70, 70, 300, 250, ed_fnt, edpartCancelMessageMenu, "Message");
+    if (edpart_message_menu != NULL) {
+        eduiMenuAddItem(edpart_message_menu, eduiItemSelCreate(1, colours, 0, 0, NULL, const_cast<char *>(message)));
+        eduiMenuAttach(parent, edpart_message_menu);
+        edpart_message_menu->x = parent->x + 10;
+        edpart_message_menu->y = parent->y + 40;
+    }
+}
+
+static void edpartFileSaveEffects(eduimenu_s *parent, eduiitem_s *, u32) {
+    char path[256], backup[256];
+    edpartSavePath(path, backup, false);
+    bool general_backup = edbits_override_backups || EdFileBackup(path, backup);
+    bool general_saved = edpartSaveEffects(path, 0) != 0;
+    edpartSavePath(path, backup, true);
+    bool level_backup = edbits_override_backups || EdFileBackup(path, backup);
+    bool level_saved = edpartSaveEffects(path, 1) != 0;
+    const char *message;
+    if (!general_saved && !level_saved)
+        message = "Both Saves Failed";
+    else if (!general_saved)
+        message = "General Save Failed";
+    else if (!level_saved)
+        message = "Level Save Failed";
+    else if (!general_backup && !level_backup)
+        message = "Saved OK - Both Backups Failed";
+    else if (!general_backup)
+        message = "Saved OK - General Backup Failed";
+    else if (!level_backup)
+        message = "Saved OK - Level Backup Failed";
+    else
+        message = "Saved OK";
+    edpartSaveMessage(parent, message, general_saved && level_saved && general_backup && level_backup);
 }
 static void edpartGeneralTypeMenu(eduimenu_s *menu, eduiitem_s *, u32) {
     edpart_generaltype_menu =
@@ -1224,7 +1338,7 @@ static void edpartCancelEmitVelMenu(eduimenu_s *, eduimenu_s *) {
     edpart_emitvel_menu = NULL;
 }
 
-static void __used__ edpartCancelMessageMenu(eduimenu_s *, eduimenu_s *) {
+static void edpartCancelMessageMenu(eduimenu_s *, eduimenu_s *) {
     eduiMenuDestroy(edpart_message_menu);
     edpart_message_menu = NULL;
 }
@@ -1408,8 +1522,44 @@ static void edpartInstanceScaleMenu(eduimenu_s *menu, eduiitem_s *, u32) {
     }
 }
 
-static void edpartWorldInstanceMenu(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
+static void edpartWorldInstanceMenu(eduimenu_s *parent, eduiitem_s *, u32) {
+    edpart_which_scene = 0;
+    edpart_worldinstance_menu =
+        eduiMenuCreate(70, 70, 250, 250, ed_fnt, edpartCancelWorldInstanceMenu,
+                       const_cast<char *>(edpart_filter ? "World Scene (Filtered)" : "World Scene"));
+    if (edpart_worldinstance_menu == NULL || edbits_base_scene == NULL || edpart_nearest_type == NULL)
+        return;
+    i32 group = 1;
+    bool selected_first = false;
+    i32 count = NuGScnNumSpecials(edbits_base_scene);
+    for (i32 index = 0; index < count; ++index) {
+        nuhspecial_s special;
+        NuGScnGetSpecial(&special, edbits_base_scene, index);
+        char *name = NuSpecialExistsFn(&special) ? NuSpecialGetName(&special) : NULL;
+        bool selected = false;
+        bool included = false;
+        for (i32 variant = 0; variant < edpart_nearest_type->variant_count; ++variant) {
+            if (edpart_nearest_type->effect_ids[variant] == index) {
+                if (edpart_nearest_type->effect_pages[variant] == 0)
+                    selected = true;
+                else
+                    included = true;
+            }
+        }
+        if (edpart_filter && NuStrNCmp(edpart_filter_string, name, NuStrLen(edpart_filter_string)) != 0 && !included)
+            continue;
+        eduiitem_s *item = eduiItemToggleCreate(index, edblack, selected, group++, edpartSetInstanceType, name);
+        eduiMenuAddItem(edpart_worldinstance_menu, item);
+        if (selected && !selected_first) {
+            selected_first = true;
+            edpart_worldinstance_menu->selected = item;
+        }
+    }
+    if (group == 1)
+        eduiMenuAddItem(edpart_worldinstance_menu, eduiItemSelCreate(1, edgrey, 0, 0, NULL, "No Things"));
+    eduiMenuAttach(parent, edpart_worldinstance_menu);
+    edpart_worldinstance_menu->x = parent->x + 10;
+    edpart_worldinstance_menu->y = parent->y + 40;
 }
 
 static void edpartCancelEmitTimeMenu(eduimenu_s *, eduimenu_s *) {
@@ -1542,8 +1692,44 @@ static void edpartLevelPartIndexMenu(eduimenu_s *menu, eduiitem_s *item, u32 val
     edpartPartIndexMenu(menu, item, value);
 }
 
-static void edpartThingsInstanceMenu(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
+static void edpartThingsInstanceMenu(eduimenu_s *parent, eduiitem_s *, u32) {
+    edpart_which_scene = 1;
+    edpart_thingsinstance_menu =
+        eduiMenuCreate(70, 70, 250, 250, ed_fnt, edpartCancelThingsInstanceMenu,
+                       const_cast<char *>(edpart_filter ? "Things Scene (Filtered)" : "Things Scene"));
+    if (edpart_thingsinstance_menu == NULL || edbits_things_scene == NULL || edpart_nearest_type == NULL)
+        return;
+    i32 group = 1;
+    bool selected_first = false;
+    i32 count = NuGScnNumSpecials(edbits_things_scene);
+    for (i32 index = 0; index < count; ++index) {
+        nuhspecial_s special;
+        NuGScnGetSpecial(&special, edbits_things_scene, index);
+        char *name = NuSpecialExistsFn(&special) ? NuSpecialGetName(&special) : NULL;
+        bool selected = false;
+        bool included = false;
+        for (i32 variant = 0; variant < edpart_nearest_type->variant_count; ++variant) {
+            if (edpart_nearest_type->effect_ids[variant] == index) {
+                if (edpart_nearest_type->effect_pages[variant] == 1)
+                    selected = true;
+                else
+                    included = true;
+            }
+        }
+        if (edpart_filter && NuStrNCmp(edpart_filter_string, name, NuStrLen(edpart_filter_string)) != 0 && !included)
+            continue;
+        eduiitem_s *item = eduiItemToggleCreate(index, edblack, selected, group++, edpartSetInstanceType, name);
+        eduiMenuAddItem(edpart_thingsinstance_menu, item);
+        if (selected && !selected_first) {
+            selected_first = true;
+            edpart_thingsinstance_menu->selected = item;
+        }
+    }
+    if (group == 1)
+        eduiMenuAddItem(edpart_thingsinstance_menu, eduiItemSelCreate(1, edgrey, 0, 0, NULL, "No Things"));
+    eduiMenuAttach(parent, edpart_thingsinstance_menu);
+    edpart_thingsinstance_menu->x = parent->x + 10;
+    edpart_thingsinstance_menu->y = parent->y + 40;
 }
 
 static void edpartCancelDieDebrisMenu(eduimenu_s *, eduimenu_s *) {
@@ -1571,8 +1757,34 @@ static void edpartChangeInstanceScale(eduimenu_s *, eduiitem_s *item, u32) {
         edpart_nearest_type->particle_scale = static_cast<edui_slider_s *>(item)->value;
 }
 
-static void edpartInstanceOrphansMenu(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
+static void edpartInstanceOrphansMenu(eduimenu_s *parent, eduiitem_s *, u32) {
+    edpart_which_scene = 1;
+    edpart_instanceorphans_menu =
+        eduiMenuCreate(70, 70, 250, 250, ed_fnt, edpartCancelInstanceOrphansMenu, "Instance Orphans/Dupes");
+    if (edpart_instanceorphans_menu == NULL || edpart_nearest_type == NULL)
+        return;
+    i32 group = 1;
+    for (i32 index = 0; index < 8; ++index) {
+        if (edpart_nearest_type->effect_ids[index] != 9998)
+            continue;
+        char effect_name[20];
+        char label[38];
+        NuStrNCpy(effect_name, edpart_nearest_type->object_names[index], 17);
+        sprintf(label, "Remove - %s", effect_name);
+        eduiMenuAddItem(edpart_instanceorphans_menu,
+                        eduiItemSelCreate(index, edblack, 0, group++, edpartDeleteInstanceOrphan, label));
+    }
+    eduiMenuAddItem(edpart_instanceorphans_menu,
+                    eduiItemSelCreate(8, edpart_nearest_orphans ? edblack : edgrey, 0, 0,
+                                      edpart_nearest_orphans ? edpartDeleteAllInstanceOrphans : NULL,
+                                      "Remove All Orphans"));
+    eduiMenuAddItem(edpart_instanceorphans_menu,
+                    eduiItemSelCreate(8, edpart_nearest_duplicates ? edblack : edgrey, 0, 0,
+                                      edpart_nearest_duplicates ? edpartDeleteAllInstanceDuplicates : NULL,
+                                      "Remove Duplicates"));
+    eduiMenuAttach(parent, edpart_instanceorphans_menu);
+    edpart_instanceorphans_menu->x = parent->x + 10;
+    edpart_instanceorphans_menu->y = parent->y + 40;
 }
 
 static void edpartCancelChangeNameMenu(eduimenu_s *, eduimenu_s *) {
@@ -1609,14 +1821,22 @@ static void edpartChangeInstanceVarRot(eduimenu_s *, eduiitem_s *item, u32) {
     }
 }
 
-static void __used__ edpartDeleteInstanceOrphan(eduimenu_s *menu, eduiitem_s *item, u32) {
+static void edpartDeleteInstanceOrphan(eduimenu_s *menu, eduiitem_s *item, u32) {
     edpartRemoveInstance(edpart_nearest_type, item->data);
     --edpart_nearest_orphans;
     edpartFinishMenu(menu);
 }
 
-static void edpartFileSaveEffectsLevel(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
+static void edpartFileSaveEffectsLevel(eduimenu_s *parent, eduiitem_s *, u32) {
+    char path[256], backup[256];
+    edpartSavePath(path, backup, true);
+    bool backed_up = edbits_override_backups || EdFileBackup(path, backup);
+    bool saved = edpartSaveEffects(path, 1) != 0;
+    edpartSaveMessage(parent,
+                      !saved      ? "Save Failed"
+                      : backed_up ? "Saved OK"
+                                  : "Saved OK - Backup Failed",
+                      saved && backed_up);
 }
 
 static void edpartGeneralPartIndexMenu(eduimenu_s *menu, eduiitem_s *item, u32 value) {
@@ -1731,8 +1951,16 @@ static void edpartCancelTrail2DebrisMenu(eduimenu_s *, eduimenu_s *) {
     edpart_trail2debris_menu = NULL;
 }
 
-static void edpartFileSaveEffectsGeneral(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
+static void edpartFileSaveEffectsGeneral(eduimenu_s *parent, eduiitem_s *, u32) {
+    char path[256], backup[256];
+    edpartSavePath(path, backup, false);
+    bool backed_up = edbits_override_backups || EdFileBackup(path, backup);
+    bool saved = edpartSaveEffects(path, 0) != 0;
+    edpartSaveMessage(parent,
+                      !saved      ? "Save Failed"
+                      : backed_up ? "Saved OK"
+                                  : "Saved OK - Backup Failed",
+                      saved && backed_up);
 }
 
 static void edpartGeneralDebrisIndexMenu(eduimenu_s *menu, eduiitem_s *item, u32 value) {
@@ -1765,7 +1993,7 @@ static void edpartCancelInstanceScaleMenu(eduimenu_s *, eduimenu_s *) {
     edpart_instancescale_menu = NULL;
 }
 
-static void __used__ edpartCancelWorldInstanceMenu(eduimenu_s *, eduimenu_s *) {
+static void edpartCancelWorldInstanceMenu(eduimenu_s *, eduimenu_s *) {
     eduiMenuDestroy(edpart_worldinstance_menu);
     edpart_worldinstance_menu = NULL;
 }
@@ -1780,12 +2008,12 @@ static void edpartCancelInstanceOrientMenu(eduimenu_s *, eduimenu_s *) {
     edpart_instorient_menu = NULL;
 }
 
-static void __used__ edpartCancelThingsInstanceMenu(eduimenu_s *, eduimenu_s *) {
+static void edpartCancelThingsInstanceMenu(eduimenu_s *, eduimenu_s *) {
     eduiMenuDestroy(edpart_thingsinstance_menu);
     edpart_thingsinstance_menu = NULL;
 }
 
-static void __used__ edpartDeleteAllInstanceOrphans(eduimenu_s *menu, eduiitem_s *, u32) {
+static void edpartDeleteAllInstanceOrphans(eduimenu_s *menu, eduiitem_s *, u32) {
     for (i32 index = 0; index < 8; ++index) {
         if (edpart_nearest_type->effect_ids[index] == 9998) {
             edpartRemoveInstance(edpart_nearest_type, index);
@@ -1796,7 +2024,7 @@ static void __used__ edpartDeleteAllInstanceOrphans(eduimenu_s *menu, eduiitem_s
     edpartFinishMenu(menu);
 }
 
-static void __used__ edpartCancelInstanceOrphansMenu(eduimenu_s *, eduimenu_s *) {
+static void edpartCancelInstanceOrphansMenu(eduimenu_s *, eduimenu_s *) {
     if (edpart_nearest_type->variant_count == 0) {
         for (i32 i = 0; i < 8; i++) {
             edpart_nearest_type->effect_ids[i] = -1;
@@ -1814,7 +2042,7 @@ static void edpartCancelInstanceSettingsMenu(eduimenu_s *, eduimenu_s *) {
     edpart_instancesettings_menu = NULL;
 }
 
-static void __used__ edpartDeleteAllInstanceDuplicates(eduimenu_s *menu, eduiitem_s *, u32) {
+static void edpartDeleteAllInstanceDuplicates(eduimenu_s *menu, eduiitem_s *, u32) {
     for (i32 index = 0; index < 8; ++index) {
         i16 effect = edpart_nearest_type->effect_ids[index];
         if (effect == 9999 || effect == -1 || effect == 9998)
@@ -1837,20 +2065,32 @@ void edpartDoInput(nupad_s *pad) {
     } else {
         if (edpart_nearest == -1)
             edpartDetermineNearest(-1.0f);
-        else if (pad->digital_buttons_pressed & (8 | 2)) {
-            i32 direction = (pad->digital_buttons_pressed & 8) ? 1 : -1;
-            i32 index = edpart_nearest;
-            do {
-                index = (index + direction + 40) % 40;
-            } while (part_emits[index].effect_id == -1 && index != edpart_nearest);
-            edpart_nearest = index;
+        else {
+            if (pad->digital_buttons_pressed & 8) {
+                do {
+                    ++edpart_nearest;
+                    if (edpart_nearest == 40)
+                        edpart_nearest = 0;
+                } while (part_emits[edpart_nearest].effect_id == -1);
+            }
+            if (pad->digital_buttons_pressed & 2) {
+                do {
+                    --edpart_nearest;
+                    if (edpart_nearest == -1)
+                        edpart_nearest = 39;
+                } while (part_emits[edpart_nearest].effect_id == -1);
+            }
         }
         if (edpart_nearest != -1) {
             part_emit_s *emit = &part_emits[edpart_nearest];
             edcamSetPos(&emit->position);
-            edpart_roty = emit->rotation_2e;
-            edpart_rotz = emit->rotation_2c;
+            const i16 *reference_rotation = reinterpret_cast<const i16 *>(&emit->trailing_state_words[1]);
+            edpart_rotz = reference_rotation[0];
+            edpart_roty = reference_rotation[1];
+            edpart_emitrotz = emit->rotation_2c;
+            edpart_emitroty = emit->rotation_2e;
             edpart_emitrotx = emit->rotation_30;
+            edpart_offset = *reinterpret_cast<f32 *>(&emit->trailing_state_words[2]);
             edpart_create_type = emit->effect_id;
             if (emit->effect_id >= 0 && emit->effect_id < 128)
                 edpart_effect_list = part_types[emit->effect_id].field_b3;
@@ -1859,7 +2099,10 @@ void edpartDoInput(nupad_s *pad) {
 
     NUVEC position;
     i32 pitch, yaw;
-    edcamGetPosAng(&position, &pitch, &yaw);
+    if (edpart_snap_enabled)
+        edcamGetPosAngSnap(&position, &pitch, &yaw);
+    else
+        edcamGetPosAng(&position, &pitch, &yaw);
 
     if ((pad->digital_buttons & 0x100) == 0) {
         if (pad->digital_buttons_pressed & 0x80) {
@@ -1902,14 +2145,18 @@ void edpartDoInput(nupad_s *pad) {
             }
             edpart_active_menu = edpart_opt_menu;
         }
-        if (pad->digital_buttons_pressed & 0x40) {
+        if ((pad->digital_buttons_pressed & 0x40) && edpart_copy_mode == 0) {
             if (edpart_create_type != -1)
                 edpartCreate(&position, edpart_create_type);
         }
-        if ((pad->digital_buttons & 0x20) && edpart_copy_mode)
-            edpartMultipleCopyCopy();
-        if (pad->digital_buttons_pressed & 0x400) {
-            if (edpart_nearest != -1)
+        if (pad->digital_buttons & 0x20) {
+            if (edpart_copy_mode)
+                edpartMultipleCopyCopy();
+            else if (edpart_nearest != -1)
+                edpartPlace(edpart_nearest, &position);
+        }
+        if (pad->digital_buttons & 0x400) {
+            if (!edpart_copy_mode && edpart_nearest != -1)
                 edpartPlace(edpart_nearest, &position);
         }
         if (pad->digital_buttons_pressed & 0x10) {
@@ -1920,6 +2167,64 @@ void edpartDoInput(nupad_s *pad) {
                 edpart_nearest = -1;
             }
         }
+    }
+
+    if (edpart_copy_mode == 0) {
+        i32 right = pad->analog_left_pad_right;
+        i32 left = pad->analog_left_pad_left;
+        i32 up = pad->analog_left_pad_up;
+        i32 down = pad->analog_left_pad_down;
+        if (edpart_dpad_mode == 0) {
+            if (pad->digital_buttons & 0x200)
+                edpart_emitrotx = edpart_emitroty = edpart_emitrotz = 0;
+            if (pad->digital_buttons & 0x400)
+                edpart_emitrotx += right - left;
+            else {
+                edpart_emitroty += right - left;
+                i32 rotation = edpart_emitrotz + up;
+                if (rotation > 0x8000)
+                    rotation = 0x8000;
+                rotation -= down;
+                if (rotation < -0x8000)
+                    rotation = -0x8000;
+                edpart_emitrotz = rotation;
+            }
+        } else if (edpart_dpad_mode == 1) {
+            if (pad->digital_buttons & 0x200)
+                edpart_roty = edpart_rotz = 0;
+            edpart_roty += right - left;
+            i32 rotation = edpart_rotz + up;
+            if (rotation > 0)
+                rotation = 0;
+            rotation -= down;
+            if (rotation < -0x8000)
+                rotation = -0x8000;
+            edpart_rotz = rotation;
+        } else if (edpart_dpad_mode == 2) {
+            if (up == 255 || (pad->digital_buttons_pressed & 0x1000))
+                edpart_offset += 1.25f;
+            if (down == 255 || (pad->digital_buttons_pressed & 0x4000))
+                edpart_offset -= 1.25f;
+            if (edpart_offset < 0.0f)
+                edpart_offset = 0.0f;
+        } else if (edpart_dpad_mode == 3) {
+            edpart_refroty += right - left;
+            i32 rotation = edpart_refrotz + up;
+            if (rotation > 0)
+                rotation = 0;
+            rotation -= down;
+            if (rotation < -0x8000)
+                rotation = -0x8000;
+            edpart_refrotz = rotation;
+        }
+    } else {
+        f32 size = edpart_copy_size + static_cast<f32>(pad->analog_left_pad_up - pad->analog_left_pad_down) / 5000.0f;
+        if (size < 0.05f)
+            size = 0.05f;
+        if (size > 2.0f)
+            size = 2.0f;
+        edpart_copy_size = size;
+        edpart_copyroty += pad->analog_left_pad_right - pad->analog_left_pad_left;
     }
 
     edpart_nearest_emit = edpart_nearest == -1 ? NULL : &part_emits[edpart_nearest];

@@ -305,6 +305,9 @@ static __used__ void locatorEditor_cbAddLocatorsByNameYesNo(eduimenu_s *, eduiit
                 EDLOCATOR_s *before = nullptr;
                 for (i32 index = 0; index < 64 && set->locators[index] != nullptr; ++index) {
                     if (NuStrICmp(set->locators[index]->name, locator->name) > 0) {
+                        if (NuStrLen(set->locators[index]->name) < NuStrLen(locator->name)) {
+                            continue;
+                        }
                         before = set->locators[index];
                         break;
                     }
@@ -333,189 +336,6 @@ static __used__ void locatorEditor_cbCancelDeleteLocatorMenu(eduimenu_s *, eduim
 }
 static __used__ void locatorEditor_cbCancelRenameLocatorSetMenu(eduimenu_s *, eduimenu_s *) {
     aieditor_ClearMainMenu();
-}
-
-struct LocatorCreatureRecord {
-    NULISTLNK link;
-    char name[0x10];
-    char script_name[0x10];
-    NUVEC position;
-    i32 angle;
-    u8 path_check[0x1c];
-    u32 valid_positions;
-    i16 type;
-    u8 set;
-    u8 group_count;
-    u8 across_count;
-    u8 unknown_5d[3];
-    f32 x_spacing;
-    f32 z_spacing;
-    u32 flags;
-    void *activation_area;
-    f32 script_params[4];
-    void *trigger_area;
-    EDLOCATOR_s *locator;
-    EDLOCATOR_s *respawn_locator;
-    u8 difficulty;
-    u8 min_respawns;
-    u8 max_respawns;
-    u8 activation;
-    f32 min_respawn_time;
-    f32 max_respawn_time;
-    f32 stagger_start;
-    f32 view_distance;
-    f32 hear_distance;
-    f32 max_view_height;
-    f32 min_view_height;
-};
-DECOMP_ASSERT(sizeof(LocatorCreatureRecord) == 0xac, "locator-created creature record stride");
-DECOMP_ASSERT(offsetof(LocatorCreatureRecord, type) == 0x58, "locator-created creature type offset");
-DECOMP_ASSERT(offsetof(LocatorCreatureRecord, difficulty) == 0x8c, "locator-created creature defaults offset");
-DECOMP_ASSERT(offsetof(LocatorCreatureRecord, path_check) == 0x38, "locator-created creature path check offset");
-
-static __used__ void *CreateCreature(i32 type, nuvec_s *position, i32 angle) {
-    if (type == -1) {
-        return nullptr;
-    }
-    NULISTHDR *free_creatures = reinterpret_cast<NULISTHDR *>(reinterpret_cast<u8 *>(aieditor) + 0x3691c);
-    LocatorCreatureRecord *creature = (LocatorCreatureRecord *)NuLinkedListGetHead(free_creatures);
-    if (creature == nullptr) {
-        return nullptr;
-    }
-    NuLinkedListRemove(free_creatures, &creature->link);
-    NuLinkedListAppend(&aieditor->creatures, &creature->link);
-    creature->type = type;
-    creature->set = 0;
-    creature->group_count = default_ngroup;
-    creature->across_count = default_nacross;
-    creature->x_spacing = default_xspacing;
-    creature->z_spacing = default_zspacing;
-    creature->stagger_start = default_stagger_start;
-    creature->view_distance = GetViewRangeFn != nullptr ? GetViewRangeFn(type) : 1.0f;
-    creature->hear_distance = GetHearDistanceFn != nullptr ? GetHearDistanceFn(type) : 1.0f;
-    creature->max_view_height = GetMaxViewHeightFn != nullptr ? GetMaxViewHeightFn(type) : 1.0f;
-    creature->min_view_height = GetMinViewHeightFn != nullptr ? GetMinViewHeightFn(type) : 1.0f;
-    creature->difficulty = default_activate_difficulty;
-    creature->min_respawns = default_min_n_respawns;
-    creature->max_respawns = default_max_n_respawns;
-    creature->min_respawn_time = default_min_t_respawn;
-    creature->max_respawn_time = default_max_t_respawn;
-    if (position != nullptr) {
-        creature->position = *position;
-        creature->angle = angle;
-    }
-    return creature;
-}
-
-static void *FindCreatureArea(const char *name) {
-    if (name == nullptr)
-        return nullptr;
-    NULISTHDR *areas = reinterpret_cast<NULISTHDR *>(reinterpret_cast<u8 *>(aieditor) + 0x37a40);
-    EditorNamedEntry *area = (EditorNamedEntry *)NuLinkedListGetHead(areas);
-    while (area != nullptr) {
-        if (NuStrICmp(area->name, name) == 0)
-            return area;
-        area = (EditorNamedEntry *)NuLinkedListGetNext(areas, &area->link);
-    }
-    return nullptr;
-}
-
-static EDLOCATOR_s *FindCreatureLocator(const char *name) {
-    if (name == nullptr)
-        return nullptr;
-    EDLOCATOR_s *locator = (EDLOCATOR_s *)NuLinkedListGetHead(&aieditor->locators);
-    while (locator != nullptr) {
-        if (NuStrICmp(locator->name, name) == 0)
-            return locator;
-        locator = (EDLOCATOR_s *)NuLinkedListGetNext(&aieditor->locators, &locator->link);
-    }
-    return nullptr;
-}
-
-void creatureEditor_Enter() {
-    aieditor->creatures.head = nullptr;
-    aieditor->creatures.tail = nullptr;
-    NULISTHDR *free_creatures = reinterpret_cast<NULISTHDR *>(reinterpret_cast<u8 *>(aieditor) + 0x3691c);
-    LocatorCreatureRecord *pool = reinterpret_cast<LocatorCreatureRecord *>(reinterpret_cast<u8 *>(aieditor) + 0x3131c);
-    for (i32 i = 0; i < 128; ++i)
-        NuLinkedListAppend(free_creatures, &pool[i].link);
-
-    AISYS *system = aieditor->ai_system;
-    if (system != nullptr) {
-        for (i32 i = 0; i < system->creature_count; ++i) {
-            AICREATURE *source = &system->creatures[i];
-            LocatorCreatureRecord *creature =
-                (LocatorCreatureRecord *)CreateCreature(source->type, &source->pos, source->y_rot);
-            if (creature == nullptr)
-                continue;
-            EDAIPATH_s *path = pathEditor_GetPath(reinterpret_cast<const char *>(source->path_info.path));
-            f32 tolerance = 0.0f;
-            do {
-                pathEditor_OnPathCheck(&creature->position, (EDAIPATHCHECK_s *)creature->path_check, path, tolerance);
-                tolerance += 0.01f;
-            } while (*reinterpret_cast<i32 *>(creature->path_check) == 0);
-            i32 *path_angle = reinterpret_cast<i32 *>(creature->path_check + 0x18);
-            *path_angle = NuAngSub(creature->angle, *path_angle);
-            strcpy(creature->name, source->name);
-            strcpy(creature->script_name, source->script_name);
-            creature->set = source->set;
-            creature->group_count = source->count;
-            creature->across_count = source->count_across;
-            creature->valid_positions = source->active_mask;
-            creature->x_spacing = source->x_spacing;
-            creature->flags = source->flags;
-            creature->z_spacing = source->z_spacing;
-            for (i32 p = 0; p < 4; ++p)
-                creature->script_params[p] = source->script_params[p];
-            AISCRIPT *script = AIScriptFind(system, creature->script_name, 1, 1, 1);
-            if (script != nullptr) {
-                for (i32 p = 0; p < 4; ++p) {
-                    if ((source->flags & (2 << p)) == 0)
-                        creature->script_params[p] = script->params[p].default_val;
-                }
-            }
-            if (source->area != nullptr)
-                creature->activation_area = FindCreatureArea(source->area->name);
-            if (source->locator != nullptr)
-                creature->locator = FindCreatureLocator(source->locator->name);
-            if (source->respawn_locator != nullptr)
-                creature->respawn_locator = FindCreatureLocator(source->respawn_locator->name);
-            creature->activation = source->activate_type;
-            if (source->activate_type == 1) {
-                creature->activation = 0;
-                if (source->activate_area != nullptr) {
-                    creature->trigger_area = FindCreatureArea(source->activate_area->name);
-                    if (creature->trigger_area != nullptr)
-                        creature->activation = 1;
-                }
-            }
-            creature->difficulty = source->activation_difficulty;
-            creature->min_respawns = source->min_respawn_count;
-            creature->max_respawns = source->max_respawn_count;
-            creature->min_respawn_time = source->min_respawn_time;
-            creature->max_respawn_time = source->max_respawn_time;
-            creature->stagger_start = source->start_stagger;
-            creature->view_distance = source->view_distance;
-            creature->hear_distance = source->hear_distance;
-            creature->max_view_height = source->max_view_height;
-            creature->min_view_height = source->min_view_height;
-        }
-    }
-    if (aieditorsettings.current_path_type == -1 && LevelCharacterGlobalIDFn != nullptr)
-        aieditorsettings.current_path_type = LevelCharacterGlobalIDFn(0);
-    if (ClearAICreaturesFn != nullptr)
-        ClearAICreaturesFn();
-    if (aieditorsettings.current_area_name[0] != 0) {
-        LocatorCreatureRecord *creature = (LocatorCreatureRecord *)NuLinkedListGetHead(&aieditor->creatures);
-        while (creature != nullptr) {
-            if (NuStrICmp(creature->name, aieditorsettings.current_area_name) == 0) {
-                aieditor->mode_selection_36930 = (EditorNamedEntry *)creature;
-                aieditor_SetCurrentScript(creature->script_name, (AIEditorScriptSelection *)creature);
-                break;
-            }
-            creature = (LocatorCreatureRecord *)NuLinkedListGetNext(&aieditor->creatures, &creature->link);
-        }
-    }
 }
 
 static __used__ void DestroyLocator(EDLOCATOR_s *locator) {
@@ -559,10 +379,10 @@ static __used__ unsigned int AddLocatorToSet(EDLOCATORSET_s *set, EDLOCATOR_s *l
     if (before != nullptr) {
         for (i32 index = 0; index < 64; ++index) {
             if (set->locators[index] == before) {
-                for (i32 move = 62; move >= index; --move) {
+                for (i32 move = 62; move > index; --move) {
                     set->locators[move + 1] = set->locators[move];
                 }
-                set->locators[index] = locator;
+                set->locators[index + 1] = locator;
                 return 1;
             }
         }

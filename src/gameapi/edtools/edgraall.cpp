@@ -666,10 +666,16 @@ void edgraDoInput(nupad_s *pad) {
                 edgraDetermineNearestInstance(-1.0f);
             } else if (edgra_nearest != -1) {
                 const i32 count = GrassClumps[edgra_nearest].element_count;
-                if (pressed & 8)
-                    edgra_nearest_instance = (edgra_nearest_instance + 1) % count;
-                if (pressed & 2)
-                    edgra_nearest_instance = (edgra_nearest_instance + count - 1) % count;
+                if (pressed & 8) {
+                    ++edgra_nearest_instance;
+                    if (edgra_nearest_instance == count)
+                        edgra_nearest_instance = 0;
+                }
+                if (pressed & 2) {
+                    --edgra_nearest_instance;
+                    if (edgra_nearest_instance == -1)
+                        edgra_nearest_instance = count - 1;
+                }
             }
         } else {
             if (edgra_nearest == -1) {
@@ -677,13 +683,17 @@ void edgraDoInput(nupad_s *pad) {
             } else {
                 if (pressed & 8) {
                     do {
-                        edgra_nearest = (edgra_nearest + 1) % EDGRA_MAX_CLUMPS;
+                        ++edgra_nearest;
+                        if (edgra_nearest == EDGRA_MAX_CLUMPS)
+                            edgra_nearest = 0;
                     } while (!GrassClumps[edgra_nearest].element_count);
                     edgraSortVectorBuffer(edgra_nearest);
                 }
                 if (pressed & 2) {
                     do {
-                        edgra_nearest = (edgra_nearest + EDGRA_MAX_CLUMPS - 1) % EDGRA_MAX_CLUMPS;
+                        --edgra_nearest;
+                        if (edgra_nearest == -1)
+                            edgra_nearest = EDGRA_MAX_CLUMPS - 1;
                     } while (!GrassClumps[edgra_nearest].element_count);
                     edgraSortVectorBuffer(edgra_nearest);
                 }
@@ -693,12 +703,12 @@ void edgraDoInput(nupad_s *pad) {
         if (edgra_editormode == 1) {
             if (edgra_nearest != -1 && edgra_nearest_instance != -1) {
                 edgra_clump_s &clump = GrassClumps[edgra_nearest];
-                edgra_individual_s *instance = GetIndGrassClump(clump.individual_index, edgra_nearest_instance);
                 NUVEC position;
-                NuVecAdd(&position, &clump.position, &instance->position);
+                NuVecAdd(&position, &clump.position,
+                         &GetIndGrassClump(clump.individual_index, edgra_nearest_instance)->position);
                 edcamSetPos(&position);
-                edgra_rotz = instance->field_10;
-                edgra_roty = instance->field_12;
+                edgra_rotz = GetIndGrassClump(clump.individual_index, edgra_nearest_instance)->field_10;
+                edgra_roty = GetIndGrassClump(clump.individual_index, edgra_nearest_instance)->field_12;
             }
         } else if (edgra_nearest != -1) {
             edgra_clump_s &clump = GrassClumps[edgra_nearest];
@@ -746,9 +756,9 @@ void edgraDoInput(nupad_s *pad) {
                                 eduiItemSelCreate(1, edblack, 0, 0, edgracbSScaleMenu, "Super Scale..."));
                 eduiMenuAddItem(edgra_options_menu, eduiItemToggleCreate(1, edblack, edgra_filter, 1, edgraToggleFilter,
                                                                          "Instance Filter"));
-                edui_textpicker_s *filter = static_cast<edui_textpicker_s *>(
-                    eduiItemTextPickCreate(0, edblack, edgraChangeFilterName, "Filter String: "));
-                eduiMenuAddItem(edgra_options_menu, filter);
+                eduiMenuAddItem(edgra_options_menu,
+                                eduiItemTextPickCreate(0, edblack, edgraChangeFilterName, "Filter String: "));
+                edui_textpicker_s *filter = static_cast<edui_textpicker_s *>(edui_last_item);
                 strcpy(filter->value, edgra_filter_string);
                 filter->max_length = 15;
                 eduiMenuAddItem(edgra_options_menu,
@@ -787,19 +797,20 @@ void edgraDoInput(nupad_s *pad) {
         if (edgra_mode == 3) {
             if (edgra_nearest != -1 && edgra_nearest_instance != -1) {
                 edgra_clump_s &clump = GrassClumps[edgra_nearest];
-                edgra_individual_s *individual = GetIndGrassClump(clump.individual_index, edgra_nearest_instance);
-                individual->field_0c +=
-                    (static_cast<f32>(pad->analog_left_pad_up) - static_cast<f32>(pad->analog_left_pad_down)) / 5000.0f;
-                if (individual->field_0c > 1.0f)
-                    individual->field_0c = 1.0f;
-                if (individual->field_0c < 0.1f)
-                    individual->field_0c = 0.1f;
+                GetIndGrassClump(clump.individual_index, edgra_nearest_instance)->field_0c +=
+                    static_cast<f32>(pad->analog_left_pad_up) / 5000.0f;
+                GetIndGrassClump(clump.individual_index, edgra_nearest_instance)->field_0c -=
+                    static_cast<f32>(pad->analog_left_pad_down) / 5000.0f;
+                if (GetIndGrassClump(clump.individual_index, edgra_nearest_instance)->field_0c > 1.0f)
+                    GetIndGrassClump(clump.individual_index, edgra_nearest_instance)->field_0c = 1.0f;
+                if (GetIndGrassClump(clump.individual_index, edgra_nearest_instance)->field_0c < 0.1f)
+                    GetIndGrassClump(clump.individual_index, edgra_nearest_instance)->field_0c = 0.1f;
             }
             if (pad->analog_left_pad_up || pad->analog_left_pad_down)
                 edgraInitAllClumps();
         } else {
-            edgra_size +=
-                (static_cast<f32>(pad->analog_left_pad_up) - static_cast<f32>(pad->analog_left_pad_down)) / 5000.0f;
+            edgra_size += static_cast<f32>(pad->analog_left_pad_up) / 5000.0f;
+            edgra_size -= static_cast<f32>(pad->analog_left_pad_down) / 5000.0f;
             if (edgra_size < 0.1f)
                 edgra_size = 0.1f;
             if (edgra_size > 10.0f)

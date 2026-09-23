@@ -48,6 +48,7 @@
 #include "gameapi/edtools/edmenucallbacks.cpp"
 
 float edanimPlayerAnimDistance(i32 parameter_index);
+void edpartDestroy(i32 index);
 void edgraDoInput(nupad_s *pad);
 void edgraDetermineNearestInstance(f32 distance);
 void edgraDrawCursor();
@@ -1370,7 +1371,6 @@ extern "C" {
         --parameters[parameter_index].effect_count;
     }
     void edanimRegisterCubeDumpInfo(void) {
-        STUBBED();
     }
     void edanimStartPage(i32 page) {
         if (edanim_page_used[page] != 0 && edanim_page_scene[page] != NULL && edanim_page_on[page] == 0)
@@ -1546,7 +1546,6 @@ extern "C" {
         edbitsDrawCircleTilted(centre, radius, colour, material, 0x4000, 0x6000);
     }
     char *edbitsGetSoundName(i32) {
-        STUBBED();
         return NULL;
     }
     i32 edbitsLookupInstance(char *name, NUGSCN *scene) {
@@ -1570,7 +1569,6 @@ extern "C" {
         return -1;
     }
     i32 edbitsLookupSoundFX(char *) {
-        STUBBED();
         return -1;
     }
     i32 edbitsProcessCubemapDump(void) {
@@ -2323,7 +2321,7 @@ extern "C" {
             for (eduiitem_s *item = ed_main_menu->first; item; item = item->next) {
                 if (item->data_ptr) {
                     ed_module_s *module = static_cast<ed_module_s *>(item->data_ptr);
-                    item->disabled = module->reserved != NULL;
+                    item->disabled = (reinterpret_cast<usize>(module->reserved) & 1) != 0;
                 }
             }
             eduiMenuProcess(ed_main_menu, delta_time, pad);
@@ -2416,7 +2414,9 @@ extern "C" {
         part_page_used[page] = 0;
     }
     void edpartDestroyAllParticles(void) {
-        STUBBED();
+        for (i32 index = 0; index < 512; ++index) {
+            edpartDestroy(index);
+        }
     }
     void edpartParticleReset(void) {
         part_emit_s *emit = part_emits;
@@ -2709,8 +2709,9 @@ extern "C" {
             DebFreeOrphansInstantly(debtab[index]);
         }
     }
+    i32 edqseed = 12345;
     void edqrand(void) {
-        STUBBED();
+        edqseed = (edqseed * 0x24cd + 1) & 0xffff;
     }
     edui_textpicker_s *eduiAddTextPickEntEx(eduimenu_s *menu, eduiitem_s *source, EdUiItemCallback callback) {
         static eduimenu_s *tpent;
@@ -5086,19 +5087,34 @@ extern "C" {
             return 1;
         f32 lower = stage->previous ? stage->previous->time : 0.0f;
         f32 upper = stage->next ? stage->next->time : 1.0f;
-        u8 decrease = pad->analog_l1 ? pad->analog_l1 : pad->analog_l2;
-        u8 increase = pad->analog_r1 ? pad->analog_r1 : pad->analog_r2;
-        if (decrease) {
-            stage->time -= static_cast<f32>(static_cast<i32>(decrease)) / 15360.0f;
-            if (stage->time < lower)
-                stage->time = lower;
-            gradient->change_timer = 60;
-        } else if (increase) {
-            stage->time += static_cast<f32>(static_cast<i32>(increase)) / 15360.0f;
-            if (stage->time > upper)
-                stage->time = upper;
-            gradient->change_timer = 60;
+        u8 right2 = pad->analog_r2;
+        u8 left2 = pad->analog_l2;
+        u8 decrease = pad->analog_l1;
+        u8 increase = pad->analog_r1;
+        if (!decrease) {
+            decrease = left2;
+            if (!increase) {
+                if (decrease)
+                    goto decrease_time;
+                increase = right2;
+                if (!increase)
+                    return 0;
+                goto increase_time;
+            }
         }
+        if (decrease)
+            goto decrease_time;
+    increase_time:
+        stage->time += static_cast<f32>(static_cast<i32>(increase)) / 15360.0f;
+        if (stage->time > upper)
+            stage->time = upper;
+        gradient->change_timer = 60;
+        return 0;
+    decrease_time:
+        stage->time -= static_cast<f32>(static_cast<i32>(decrease)) / 15360.0f;
+        if (stage->time < lower)
+            stage->time = lower;
+        gradient->change_timer = 60;
         return 0;
     }
     static __used__ i32 eduicbProcessGraph(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad) {
@@ -5640,7 +5656,7 @@ extern "C" {
             NuRndrLine2di(x << 4, value_y, (x + width - 1) << 4, value_y, 0x80ffffff, uimtls[0]);
             NuRndrLine2di(hue_x, y << 3, hue_x, ((y + main_height) << 3) - 8, 0x80ffffff, uimtls[0]);
         }
-        i32 bar_height = width >> 3;
+        i32 bar_height = (width + 7) >> 3;
         f32 full_red, full_green, full_blue;
         eduiHSVToRGB(picker->hue, 1.0f, picker->value, full_red, full_green, full_blue);
         i32 grey_byte = static_cast<i32>(picker->value * 255.0f);
@@ -5834,7 +5850,7 @@ extern "C" {
         }
         if (picker->x_scale > 0.0f) {
             f32 tick_count = graph->x_extent * graph->x_scale / picker->x_scale;
-            i32 label_interval = static_cast<i32>(tick_count / 6.0f) + 1;
+            i32 label_interval = static_cast<i32>(tick_count / 10.0f) + 1;
             for (i32 tick = 1; tick <= static_cast<i32>(tick_count); ++tick) {
                 i32 line_x = static_cast<i32>(plot_x + static_cast<f32>(graph_width * tick) / tick_count) << 4;
                 u32 colour = 0x80260000;
@@ -5850,7 +5866,7 @@ extern "C" {
         }
         if (picker->y_scale > 0.0f) {
             f32 tick_count = graph->y_extent * graph->y_scale / picker->y_scale;
-            i32 label_interval = static_cast<i32>(tick_count / 6.0f) + 1;
+            i32 label_interval = static_cast<i32>(tick_count / 10.0f) + 1;
             for (i32 tick = 1; tick <= static_cast<i32>(tick_count); ++tick) {
                 i32 line_y = static_cast<i32>(plot_bottom - static_cast<f32>(graph_height * tick) / tick_count) << 3;
                 u32 colour = 0x80260000;
@@ -5868,7 +5884,7 @@ extern "C" {
         eduiFntPrintEx(edui_font, (x + picker->width - 3) << 4, (y + picker->height) << 3, 32, picker->y_label);
         eduiFntPrintEx(edui_font, plot_x << 4, (y << 3) + font_height, 16, picker->title);
         eduiFntPrintEx(edui_font, (x + 28) << 4, (plot_bottom << 3) - 48 + font_height, 32, "0.0");
-        u32 cursor_colour = width ? 0x80707070 : 0x80b0b030;
+        u32 cursor_colour = width ? 0x80707070 : 0x80303030;
         if (!edui_donotdraw) {
             i32 cursor_y = static_cast<i32>(plot_y + (1.0f - picker->cursor_y) * graph_height) << 3;
             i32 cursor_x = static_cast<i32>(plot_x + picker->cursor_x * graph_width) << 4;
@@ -5885,7 +5901,7 @@ extern "C" {
                 NuRndrLine2di(px << 4, (py << 3) - 80, px << 4, (py << 3) + 80, 0x80505050, uimtls[0]);
             }
             f32 distance = fabsf(picker->cursor_x - graph->x[point]) + fabsf(picker->cursor_y - graph->y[point]);
-            if (distance < closest && distance < 0.1f) {
+            if (distance < closest && distance < 0.05f) {
                 picker->selected_point = point;
                 closest = distance;
             }
@@ -6306,7 +6322,7 @@ extern "C" {
             NuQFntSetColour(edui_font, item->colours[item->highlighted]);
         }
         eduiFntPrintEx(edui_font, (x * 2 + width) << 3, (label_y << 3) + baseline, 64, "%1.03f,%1.03f",
-                       picker->uv_x[picker->selected_corner] * 100.0f, picker->uv_y[picker->selected_corner] * 100.0f);
+                       picker->uv_x[picker->selected_corner] * 256.0f, picker->uv_y[picker->selected_corner] * 256.0f);
         return width + height;
     }
     static __used__ void eduicbSelectDirectoryEntry(eduimenu_s *menu, eduiitem_s *item, u32 value) {

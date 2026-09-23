@@ -328,6 +328,7 @@ static EDAIAREA_s *areaEditorCreateArea() {
     EDAIAREA_s *previous = area_selected();
     EDAIAREA_s *area = reinterpret_cast<EDAIAREA_s *>(NuLinkedListGetHead(area_free_list()));
     if (area == NULL) {
+        area_selected() = NULL;
         return NULL;
     }
     NuLinkedListRemove(area_free_list(), &area->link);

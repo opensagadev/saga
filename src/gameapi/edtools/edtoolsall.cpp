@@ -10,6 +10,7 @@
 #include "gameapi/edtools/edstubs.h"
 #include "gameapi/edtools/edgra.h"
 #include "legoapi/legoapi_types.h"
+#include "legoapi/render/core/terrain.h"
 #include "legoapi/misc/utilities.h"
 #include "legoapi/render/fx.h"
 #include "nu2api/nucore/NuDynamicLight.h"
@@ -21,6 +22,7 @@
 #include "nu2api/nucore/nukeyboard.h"
 #include "nu2api/nucore/nupad.h"
 #include "nu2api/nucore/numouse.h"
+#include "nu2api/nucore/numemory.h"
 #include "nu2api/nucore/nuvideo.h"
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nu3d/nurndr.h"
@@ -44,6 +46,7 @@ extern PropertyTool thePropertyTool;
 extern eduiiattr_s EdLevelAttr;
 extern i32 EdLevelFnt;
 extern "C" void eduiSetCameraEnabled(i32);
+extern "C" void eduicbItemDestroy(eduimenu_s *, eduiitem_s *);
 extern "C" i32 edbri_nearest;
 extern "C" NUVEC edbri_cam_pos;
 extern "C" NUMTL *edbri_mtl, *edbri_mtl_zoff;
@@ -129,7 +132,10 @@ extern "C" {
     char edgra_filter_string[16] = "GRASS";
     i32 edgra_mode = 1;
     extern NUGSCN *edbits_base_scene;
+    extern NUGSCN *edbits_things_scene;
     extern part_type_s part_types[128];
+    extern part_emit_s part_emits[512];
+    extern i32 edpart_emitrotx, edpart_emitroty, edpart_emitrotz;
     extern NUVEC edanim_cam_pos;
     i32 edgra_last_clump_in_buffer = -1;
     i32 edgra_copy_source = -1;
@@ -146,12 +152,21 @@ extern "C" {
     void DebrisSetPriority(i32, i16, u8);
     void DebrisSetRoomID(i32, NUGSCN *);
     void DebrisSetDetailLevels(i32, i32);
+    void DebrisSetTrigger(i32, i32, i32, f32);
     void AddDebrisEffect(i32 *, i32, f32, f32, f32);
+    i32 AddPARTEffect(i32, NUVEC *);
     extern debkeydatatype_s *debkeydata;
     extern debinftype **debtab;
     extern debinftype *effecttypes;
     extern i32 EDPP_MAX_TYPES;
     extern i32 edpp_usememcard;
+    extern i32 edpp_copy_mode, edpp_copyrotz, edpp_copyroty, edpp_copy_source_count, edpp_copy_enclosed;
+    extern i32 edpp_readout, edpp_num_orphans;
+    extern i32 globalframes;
+    extern f32 edpp_copy_size;
+    extern NUMTL *edpp_mtl, *edpp_boxmtl;
+    void edppDrawSpheres(debinftype *, i32);
+    void edppDrawTorus(debinftype *, i32);
     extern i32 part_page_used[8];
     extern i32 edanim_params_used;
     extern i32 edanim_particle_type;
@@ -161,10 +176,11 @@ extern "C" {
     i32 edbits_particle_level_page;
 }
 
+void edpartDestroy(i32 index);
+
 i32 edpartLookupObjectInScene(char *, NUGSCN *);
 
 void EdTerrInit(void *, void *) {
-    STUBBED();
 }
 
 void edDrawLine(nuvec_s *, nuvec_s *, unsigned char, unsigned char, unsigned char) {
@@ -186,20 +202,178 @@ void EdDrawBegin(i32 material) {
     NewMtl = material;
 }
 
-void edpartPlace(i32, nuvec_s *) {
-    STUBBED();
+void edpartPlace(i32 index, nuvec_s *position) {
+    part_emit_s *emitter = &part_emits[index];
+    emitter->position = *position;
+    emitter->rotation_2c = static_cast<i16>(edpart_emitrotz);
+    emitter->rotation_30 = static_cast<i16>(edpart_emitrotx);
+    emitter->rotation_2e = static_cast<i16>(edpart_emitroty);
 }
 
-void edppDoInput(nupad_s *) {
-    STUBBED();
+void edppDetermineNearest(f32);
+void edppMultipleCopyPaste();
+void edppMultipleCopyCopy();
+void edppMultipleCopyClear();
+i32 edppPtlCreate(NUVEC *, i32);
+i32 edppPtlPlace(i32, NUVEC *);
+void edppPtlDestroy(i32);
+
+void edppDoInput(nupad_s *pad) {
+    extern i32 edpp_copy_mode, edpp_copy_source_count, edpp_snap_enabled;
+    extern i32 edpp_cam_ax, edpp_cam_ay;
+    extern i32 edpp_copyroty;
+    extern f32 edpp_offset;
+    extern eduimenu_s *edpp_active_menu, *ptloptmenu;
+
+    if ((pad->digital_buttons & 0x100) == 0) {
+        edcamMove(pad);
+    } else {
+        if (pad->digital_buttons_pressed & 0x20) {
+            edpp_copy_mode = !edpp_copy_mode;
+            if (edpp_copy_mode)
+                edpp_copy_source_count = 0;
+        }
+        if (edpp_nearest == -1) {
+            edppDetermineNearest(-1.0f);
+        } else {
+            if (pad->digital_buttons_pressed & 8) {
+                do {
+                    edpp_nearest = (edpp_nearest + 1) % 512;
+                } while (edpp_ptls[edpp_nearest].instance_id == 99999 || edpp_ptls[edpp_nearest].instance_id == -1);
+            }
+            if (pad->digital_buttons_pressed & 2) {
+                do {
+                    edpp_nearest = (edpp_nearest + 511) % 512;
+                } while (edpp_ptls[edpp_nearest].instance_id == 99999 || edpp_ptls[edpp_nearest].instance_id == -1);
+            }
+        }
+        if (edpp_nearest != -1) {
+            edpp_particle_s &particle = edpp_ptls[edpp_nearest];
+            edcamSetPos(&particle.position);
+            edpp_rotz = particle.rotation_z;
+            edpp_roty = particle.rotation_y;
+            edpp_emitrotz = particle.emitter_rotation_z;
+            edpp_emitroty = particle.emitter_rotation_y;
+            edpp_emitrotx = particle.emitter_rotation_x;
+            edpp_offset = particle.start_offset;
+            edpp_create_type = particle.effect_index;
+            edpp_effect_list = debtab[particle.effect_index]->category;
+        }
+    }
+
+    if (edpp_snap_enabled == 0)
+        edcamGetPosAng(&edpp_cam_pos, &edpp_cam_ax, &edpp_cam_ay);
+    else
+        edcamGetPosAngSnap(&edpp_cam_pos, &edpp_cam_ax, &edpp_cam_ay);
+
+    if ((pad->digital_buttons & 0x100) == 0) {
+        if (pad->digital_buttons_pressed & 0x80)
+            edpp_active_menu = ptloptmenu;
+        if (pad->digital_buttons_pressed & 0x40) {
+            if (edpp_copy_mode != 0)
+                edppMultipleCopyPaste();
+            else if (edpp_create_type != -1)
+                edppPtlCreate(&edpp_cam_pos, edpp_create_type);
+        }
+        if (pad->digital_buttons & 0x20) {
+            if (edpp_copy_mode != 0)
+                edppMultipleCopyCopy();
+            else if (edpp_nearest != -1)
+                edppPtlPlace(edpp_nearest, &edpp_cam_pos);
+        }
+        if ((pad->digital_buttons & 0x400) && edpp_copy_mode == 0 && edpp_nearest != -1)
+            edppPtlPlace(edpp_nearest, &edpp_cam_pos);
+        if (pad->digital_buttons_pressed & 0x10) {
+            if (edpp_copy_mode != 0)
+                edppMultipleCopyClear();
+            else if (edpp_nearest != -1) {
+                edppPtlDestroy(edpp_nearest);
+                edpp_nearest = -1;
+            }
+        }
+    }
+
+    const i32 right = pad->analog_left_pad_right;
+    const i32 left = pad->analog_left_pad_left;
+    const i32 up = pad->analog_left_pad_up;
+    const i32 down = pad->analog_left_pad_down;
+    if (edpp_copy_mode != 0) {
+        edpp_copy_size += static_cast<f32>(up - down) / 5000.0f;
+        if (edpp_copy_size < 0.05f)
+            edpp_copy_size = 0.05f;
+        if (edpp_copy_size > 2.0f)
+            edpp_copy_size = 2.0f;
+        edpp_copyroty += right - left;
+        return;
+    }
+
+    switch (edpp_dpad_mode) {
+        case 0:
+            if (pad->digital_buttons & 0x200)
+                edpp_emitrotz = edpp_emitroty = edpp_emitrotx = 0;
+            if (pad->digital_buttons & 0x400) {
+                edpp_emitrotx += right - left;
+            } else {
+                edpp_emitroty += right - left;
+                i32 rotation = edpp_emitrotz + up;
+                if (rotation > 0x8000)
+                    rotation = 0x8000;
+                rotation -= down;
+                if (rotation < -0x8000)
+                    rotation = -0x8000;
+                edpp_emitrotz = rotation;
+            }
+            break;
+        case 1: {
+            if (pad->digital_buttons & 0x200)
+                edpp_rotz = edpp_roty = 0;
+            edpp_roty += right - left;
+            i32 rotation = edpp_rotz + up;
+            if (rotation > 0)
+                rotation = 0;
+            rotation -= down;
+            if (rotation < -0x8000)
+                rotation = -0x8000;
+            edpp_rotz = rotation;
+            break;
+        }
+        case 2:
+            if (up == 255 || (pad->digital_buttons_pressed & 0x1000))
+                edpp_offset += 1.25f;
+            if (down == 255 || (pad->digital_buttons_pressed & 0x4000))
+                edpp_offset -= 1.25f;
+            if (edpp_offset < 0.0f)
+                edpp_offset = 0.0f;
+            break;
+        case 3: {
+            edpp_refroty += right - left;
+            i32 rotation = edpp_refrotz + up;
+            if (rotation > 0)
+                rotation = 0;
+            rotation -= down;
+            if (rotation < -0x8000)
+                rotation = -0x8000;
+            edpp_refrotz = rotation;
+            break;
+        }
+        case 4:
+            edpp_facroty += right - left;
+            edpp_facrotx -= up;
+            if (edpp_facrotx < -0x4000)
+                edpp_facrotx = -0x4000;
+            edpp_facrotx += down;
+            if (edpp_facrotx > 0x4000)
+                edpp_facrotx = 0x4000;
+            break;
+    }
 }
 
-void EdTerrShadow(nuvec_s *, float, float, i32) {
-    STUBBED();
+void EdTerrShadow(nuvec_s *position, float height_above, float height_below, i32 terrain_mask) {
+    reinterpret_cast<void (*)(nuvec_s *, f32, f32, i32)>(NewShadow)(position, height_above, height_below, terrain_mask);
 }
 
-void edpartCreate(nuvec_s *, i32) {
-    STUBBED();
+void edpartCreate(nuvec_s *position, i32 type) {
+    AddPARTEffect(type, position);
 }
 
 i32 edppPtlPlace(i32 index, NUVEC *position) {
@@ -248,7 +422,9 @@ void edanimDoInput(nupad_s *pad) {
     }
 
     if ((pad->digital_buttons & 0x100) != 0) {
-        if (edanim_particle_mode != 0 && (pressed & 0x80)) {
+        bool particle_selection_started = false;
+        bool sound_selection_started = false;
+        if (edanim_sound_mode == 0 && edanim_particle_mode != 0 && (pressed & 0x80)) {
             edanim_particle_mode = 0;
         } else if (edanim_sound_mode != 0 && (pressed & 0x10)) {
             edanim_sound_mode = 0;
@@ -257,15 +433,18 @@ void edanimDoInput(nupad_s *pad) {
                 edanim_particle_mode = 1;
                 edanim_nearest_particle = -1;
                 edanimDetermineNearestParticle(-1.0f);
+                particle_selection_started = true;
             } else if (pressed & 0x10) {
                 edanim_sound_mode = 1;
                 edanim_nearest_sound = -1;
                 edanimDetermineNearestSound(-1.0f);
+                sound_selection_started = true;
             }
         }
         if (edanim_particle_mode != 0) {
             if (edanim_nearest_particle == -1) {
-                edanimDetermineNearestParticle(-1.0f);
+                if (!particle_selection_started)
+                    edanimDetermineNearestParticle(-1.0f);
             } else if (pressed & 0x8) {
                 auto &param = AnimParams[edanim_nearest_param_id];
                 if (++edanim_nearest_particle == param.effect_count)
@@ -289,7 +468,8 @@ void edanimDoInput(nupad_s *pad) {
             }
         } else if (edanim_sound_mode != 0) {
             if (edanim_nearest_sound == -1) {
-                edanimDetermineNearestSound(-1.0f);
+                if (!sound_selection_started)
+                    edanimDetermineNearestSound(-1.0f);
             } else if (pressed & 0x8) {
                 auto &param = AnimParams[edanim_nearest_param_id];
                 if (++edanim_nearest_sound == param.sound_count)
@@ -694,15 +874,15 @@ i32 edanimFileSave(char *path) {
 
         for (i32 effect = 0; effect < param.effect_count; ++effect) {
             EdFileWrite(const_cast<char *>(param.effect_names[effect]), sizeof(param.effect_names[effect]));
-            EdFileWriteInt(param.effect_ids[effect]);
             EdFileWriteInt(param.effect_intervals[effect]);
+            EdFileWriteInt(param.effect_flags[effect]);
             EdFileWriteNuVec(reinterpret_cast<NUVEC *>(const_cast<f32 *>(param.effect_positions[effect])));
             EdFileWriteShort(param.effect_angles[effect]);
             EdFileWriteShort(param.effect_angle_ranges[effect]);
         }
         for (i32 sound = 0; sound < param.sound_count; ++sound) {
             EdFileWrite(const_cast<char *>(param.sound_names[sound]), sizeof(param.sound_names[sound]));
-            EdFileWriteInt(param.sound_ids[sound]);
+            EdFileWriteInt(param.sound_flags[sound]);
             EdFileWriteFloat(param.sound_values[sound]);
             EdFileWriteNuVec(reinterpret_cast<NUVEC *>(const_cast<f32 *>(param.sound_positions[sound])));
         }
@@ -751,7 +931,211 @@ void edpartInitType(i32 index) {
 }
 
 void edppDrawCursor() {
-    STUBBED();
+    const i32 rotation_z = edpp_copy_mode == 0 ? edpp_rotz : edpp_copyrotz;
+    const i32 rotation_y = edpp_copy_mode == 0 ? edpp_roty : edpp_copyroty;
+    NURND_VERTEX3D line[2];
+    auto rotate = [&](NUVEC &vector) {
+        NuVecRotateZ(&vector, &vector, rotation_z);
+        NuVecRotateY(&vector, &vector, rotation_y);
+    };
+    auto draw_axis = [&](NUVEC vector) {
+        rotate(vector);
+        line[0].position = {edpp_cam_pos.x - vector.x, edpp_cam_pos.y - vector.y, edpp_cam_pos.z - vector.z};
+        line[0].colour = 0xffffffff;
+        line[1].position = edpp_cam_pos;
+        line[1].colour = 0xffffffff;
+        NuRndrLine3d(line, edpp_mtl, NULL);
+        line[0].position = edpp_cam_pos;
+        line[0].colour = 0xff00ff00;
+        line[1].position = {edpp_cam_pos.x + vector.x, edpp_cam_pos.y + vector.y, edpp_cam_pos.z + vector.z};
+        line[1].colour = 0xff00ff00;
+        NuRndrLine3d(line, edpp_mtl, NULL);
+    };
+    draw_axis({0.5f, 0.0f, 0.0f});
+    draw_axis({0.0f, 0.5f, 0.0f});
+    draw_axis({0.0f, 0.0f, 0.5f});
+    auto draw_mark = [&](NUVEC start, NUVEC end) {
+        rotate(start);
+        rotate(end);
+        line[0].position = {edpp_cam_pos.x + start.x, edpp_cam_pos.y + start.y, edpp_cam_pos.z + start.z};
+        line[1].position = {edpp_cam_pos.x + end.x, edpp_cam_pos.y + end.y, edpp_cam_pos.z + end.z};
+        line[0].colour = line[1].colour = 0xff00ff00;
+        NuRndrLine3d(line, edpp_mtl, NULL);
+    };
+    draw_mark({0.55f, 0.05f, 0.0f}, {0.6f, -0.05f, 0.0f});
+    draw_mark({0.6f, 0.05f, 0.0f}, {0.55f, -0.05f, 0.0f});
+    draw_mark({0.0f, 0.65f, -0.025f}, {0.0f, 0.6f, 0.0f});
+    draw_mark({0.0f, 0.65f, 0.025f}, {0.0f, 0.6f, 0.0f});
+    draw_mark({0.0f, 0.6f, 0.0f}, {0.0f, 0.55f, 0.0f});
+    draw_mark({0.0f, 0.05f, 0.55f}, {0.0f, 0.05f, 0.6f});
+    draw_mark({0.0f, 0.05f, 0.6f}, {0.0f, -0.05f, 0.55f});
+    draw_mark({0.0f, -0.05f, 0.55f}, {0.0f, -0.05f, 0.6f});
+
+    if (edpp_copy_mode == 0) {
+        auto draw_direction = [&](NUVEC direction, u32 colour) {
+            rotate(direction);
+            line[0].position = edpp_cam_pos;
+            line[1].position = {edpp_cam_pos.x + direction.x, edpp_cam_pos.y + direction.y,
+                                edpp_cam_pos.z + direction.z};
+            line[0].colour = line[1].colour = colour;
+            NuRndrLine3d(line, edpp_mtl, NULL);
+        };
+        NUVEC emitter_tip = {0.0f, 0.375f, 0.0f};
+        NuVecRotateZ(&emitter_tip, &emitter_tip, edpp_emitrotz);
+        NuVecRotateY(&emitter_tip, &emitter_tip, edpp_emitroty);
+        NuVecRotateX(&emitter_tip, &emitter_tip, edpp_emitrotx);
+        draw_direction(emitter_tip, 0xff0000ff);
+        NUVEC emitter_side = {0.0f, 0.375f, 0.125f};
+        NuVecRotateZ(&emitter_side, &emitter_side, edpp_emitrotz);
+        NuVecRotateY(&emitter_side, &emitter_side, edpp_emitroty);
+        NuVecRotateX(&emitter_side, &emitter_side, edpp_emitrotx);
+        rotate(emitter_side);
+        line[0].position = {edpp_cam_pos.x + emitter_side.x, edpp_cam_pos.y + emitter_side.y,
+                            edpp_cam_pos.z + emitter_side.z};
+        line[0].colour = 0xff0000ff;
+        NuRndrLine3d(line, edpp_mtl, NULL);
+        if (edpp_dpad_mode == 3) {
+            NUVEC reflection = {0.0f, 0.25f, 0.0f};
+            NuVecRotateZ(&reflection, &reflection, edpp_refrotz);
+            NuVecRotateY(&reflection, &reflection, edpp_refroty);
+            draw_direction(reflection, 0xffff0000);
+            if (edpp_nearest != -1) {
+                reflection = {0.0f, edpp_ptls[edpp_nearest].reflection_offset, 0.0f};
+                NuVecRotateZ(&reflection, &reflection, edpp_refrotz);
+                NuVecRotateY(&reflection, &reflection, edpp_refroty);
+                rotate(reflection);
+                edbitsDrawCube(edpp_cam_pos.x + reflection.x, edpp_cam_pos.y + reflection.y,
+                               edpp_cam_pos.z + reflection.z, 0.25f, 0.0f, 0.25f, edpp_refrotz, edpp_refroty, 0,
+                               rotation_z, rotation_y, 0xffff0000, edpp_mtl);
+            }
+        }
+        if (edpp_dpad_mode == 4) {
+            NUVEC facing = {0.0f, 0.0f, 0.25f};
+            NuVecRotateX(&facing, &facing, edpp_facrotx);
+            NuVecRotateY(&facing, &facing, edpp_facroty);
+            line[0].position = edpp_cam_pos;
+            line[1].position = {edpp_cam_pos.x + facing.x, edpp_cam_pos.y + facing.y, edpp_cam_pos.z + facing.z};
+            line[0].colour = line[1].colour = 0xffff0000;
+            NuRndrLine3d(line, edpp_mtl, NULL);
+            edbitsDrawBasicCube(edpp_cam_pos.x, edpp_cam_pos.y, edpp_cam_pos.z, 0.25f, 0.25f, 0.0f, edpp_facrotx,
+                                edpp_facroty, 0, 0xffff0000, edpp_mtl);
+        }
+    } else {
+        edbitsDrawCube(edpp_cam_pos.x, edpp_cam_pos.y, edpp_cam_pos.z, edpp_copy_size, edpp_copy_size, edpp_copy_size,
+                       0, 0, 0, 0, 0, 0xffffffff, edpp_mtl);
+    }
+
+    NuRndrRect2di(0x1680, 0x9b0, 4000, 0x410, 0x80808080, edpp_boxmtl);
+    NuRndrRect2di(0x1670, 0x8f0, 0xfc0, 0xc0, 0x80000000, edpp_boxmtl);
+    NuRndrLine2di(0x1670, 0x9b0, 0x1670, 0xdc8, 0x80000000, edpp_boxmtl);
+    NuRndrLine2di(0x2630, 0x9b0, 0x2630, 0xdc8, 0x80000000, edpp_boxmtl);
+    NuRndrLine2di(0x1670, 0xdc8, 0x2630, 0xdc8, 0x80000000, edpp_boxmtl);
+    NuQFntPushPrintMode(2);
+    NuQFntPushCoordinateSystem(NUQFNT_CSMODE_PS2);
+    NuQFntSet(system_qfont);
+    if (edpp_readout == 0) {
+        if (globalframes % 200 < 101 || edpp_num_orphans < 1) {
+            NuQFntSetColour(system_qfont, 0xe0e0e0e0);
+            NuQFntPrintEx(system_qfont, 0x1720, 0x988, 0x10, "Info Box");
+        } else {
+            NuQFntSetColour(system_qfont, 0x80202080);
+            NuQFntPrintEx(system_qfont, 0x1720, 0x988, 0x10, "WARNING: %d Orphan(s)", edpp_num_orphans);
+        }
+    } else if (edpp_readout == 1) {
+        NuQFntSetColour(system_qfont, 0x80808080);
+        NuQFntPrintEx(system_qfont, 0x1720, 0x988, 0x10, "Co-ordinates");
+    }
+    NuQFntSetColour(system_qfont, 0x80000000);
+    if (edpp_readout == 1) {
+        if (edpp_nearest == -1) {
+            NuQFntPrintEx(system_qfont, 0x1720, 0xa50, 0x10, "Highlight: <none>");
+        } else {
+            edpp_particle_s &particle = edpp_ptls[edpp_nearest];
+            debkeydatatype_s &key = debkeydata[particle.instance_id];
+            NuQFntPrintEx(system_qfont, 0x1720, 0xa50, 0x10, "Highlight: %s", debtab[key.effect_index]->name);
+            NuQFntPrintEx(system_qfont, 0x1720, 0xaf0, 0x10, "XYZ: %0.2f %0.2f %0.2f", key.position.x, key.position.y,
+                          key.position.z);
+            NuQFntPrintEx(system_qfont, 0x1720, 0xb90, 0x10, "RotZ: %d", particle.rotation_z);
+            NuQFntPrintEx(system_qfont, 0x1720, 0xc30, 0x10, "RotY: %d", particle.rotation_y);
+            NuQFntPrintEx(system_qfont, 0x1720, 0xcd0, 0x10, "EmitRotZ: %d", particle.emitter_rotation_z);
+            NuQFntPrintEx(system_qfont, 0x1720, 0xd70, 0x10, "EmitRotY: %d", particle.emitter_rotation_y);
+        }
+    } else if (edpp_readout == 0) {
+        if (edpp_copy_mode == 0) {
+            if (edpp_effect_list == 1)
+                NuQFntPrintEx(system_qfont, 0x1720, 0xa50, 0x10, "Current List: Level");
+            else if (edpp_effect_list == 0)
+                NuQFntPrintEx(system_qfont, 0x1720, 0xa50, 0x10, "Current List: General");
+            else if (edpp_effect_list == 5)
+                NuQFntPrintEx(system_qfont, 0x1720, 0xa50, 0x10, "Current List: Character");
+            if (edpp_create_type == -1)
+                NuQFntPrintEx(system_qfont, 0x1720, 0xaf0, 0x10, "Current Type: <none>");
+            else
+                NuQFntPrintEx(system_qfont, 0x1720, 0xaf0, 0x10, "Current Type: %s", debtab[edpp_create_type]->name);
+            if (edptl_clipboard_entry == -1)
+                NuQFntPrintEx(system_qfont, 0x1720, 0xb90, 0x10, "Clipboard: <none>");
+            else
+                NuQFntPrintEx(system_qfont, 0x1720, 0xb90, 0x10, "Clipboard: %s", debtab[edptl_clipboard_entry]->name);
+            if (edpp_nearest == -1) {
+                NuQFntPrintEx(system_qfont, 0x1720, 0xc30, 0x10, "Highlight: <none>");
+            } else {
+                edpp_particle_s &particle = edpp_ptls[edpp_nearest];
+                debkeydatatype_s &key = debkeydata[particle.instance_id];
+                debinftype *effect = debtab[key.effect_index];
+                if (effect->generator_type == 0) {
+                    edbitsDrawCube(edpp_cam_pos.x, edpp_cam_pos.y, edpp_cam_pos.z, effect->field_058, effect->field_05c,
+                                   effect->field_060, edpp_emitrotz, edpp_emitroty, edpp_emitrotx, rotation_z,
+                                   rotation_y, 0xff0000ff, edpp_mtl);
+                    edppDrawSpheres(effect, particle.instance_id);
+                }
+                edppDrawTorus(effect, particle.instance_id);
+                NuQFntSet(system_qfont);
+                NuQFntPrintEx(system_qfont, 0x1720, 0xc30, 0x10, "Highlight: %s", effect->name);
+                NuQFntPrintEx(system_qfont, 0x1720, 0xcd0, 0x10, "Particles:");
+                const i32 group = effect->particle_type == 7 ? 12 : 32;
+                const i32 limit = effect->particle_type == 7 ? 384 : 1024;
+                const i32 count = effect->max_particles;
+                if (count > limit)
+                    NuQFntSetColour(system_qfont, 0x80000080);
+                const i32 rounded = ((count - 1) / group + 1) * group;
+                NuQFntPrintEx(system_qfont, 0x1cc0, 0xcd0, 0x10, "%d (%d)", count, rounded);
+                NuQFntSetColour(system_qfont, 0x80000000);
+            }
+        } else {
+            if (edpp_copy_source_count == 0)
+                NuQFntPrintEx(system_qfont, 0x1720, 0xb90, 0x10, "Clipboard: <none>");
+            else
+                NuQFntPrintEx(system_qfont, 0x1720, 0xb90, 0x10, "Clipboard: %d items", edpp_copy_source_count);
+            if (edpp_copy_enclosed > 8)
+                NuQFntSetColour(system_qfont, 0x80000080);
+            NuQFntPrintEx(system_qfont, 0x1720, 0xc30, 0x10, "Enclosed: %d", edpp_copy_enclosed);
+            NuQFntSetColour(system_qfont, 0x80000000);
+        }
+        const char *mode = edpp_copy_mode ? "Multiple Copy Mode" : nullptr;
+        if (edpp_copy_mode == 0) {
+            switch (edpp_dpad_mode) {
+                case 0:
+                    mode = "Dpad Mode: Emit Rotate";
+                    break;
+                case 1:
+                    mode = "Dpad Mode: Grav Rotate";
+                    break;
+                case 2:
+                    NuQFntPrintEx(system_qfont, 0x1720, 0xd70, 0x10, "Dpad Mode: Offset (%0.2f)", edpp_offset);
+                    break;
+                case 3:
+                    mode = "Dpad Mode: Reflections";
+                    break;
+                case 4:
+                    mode = "Dpad Mode: Facing";
+                    break;
+            }
+        }
+        if (mode)
+            NuQFntPrintEx(system_qfont, 0x1720, 0xd70, 0x10, mode);
+    }
+    NuQFntPopPrintMode();
+    NuQFntPopCoordinateSystem();
 }
 
 extern "C" {
@@ -928,23 +1312,30 @@ void edgraClumpPlace(i32 index, NUVEC *position) {
 void edgraDrawCursor() {
     NURND_VERTEX3D line[2];
     line[0].colour = line[1].colour = 0xffffffff;
-    line[0].position = line[1].position = edgra_cam_pos;
-    line[0].position.x -= 0.5f;
-    line[1].position.x += 0.5f;
+    line[0].position.x = edgra_cam_pos.x - 0.5f;
+    line[1].position.x = edgra_cam_pos.x + 0.5f;
+    line[0].position.y = line[1].position.y = edgra_cam_pos.y;
+    line[0].position.z = line[1].position.z = edgra_cam_pos.z;
     NuRndrLine3d(line, edgra_mtl, NULL);
-    line[0].position = line[1].position = edgra_cam_pos;
-    line[0].position.y -= 0.5f;
-    line[1].position.y += 0.5f;
+    line[0].position.x = line[1].position.x = edgra_cam_pos.x;
+    line[0].position.y = edgra_cam_pos.y - 0.5f;
+    line[1].position.y = edgra_cam_pos.y + 0.5f;
+    line[0].position.z = line[1].position.z = edgra_cam_pos.z;
+    line[0].colour = line[1].colour = 0xffffffff;
     NuRndrLine3d(line, edgra_mtl, NULL);
-    line[0].position = line[1].position = edgra_cam_pos;
-    line[0].position.z -= 0.5f;
-    line[1].position.z += 0.5f;
+    line[0].position.x = line[1].position.x = edgra_cam_pos.x;
+    line[0].position.y = line[1].position.y = edgra_cam_pos.y;
+    line[0].position.z = edgra_cam_pos.z - 0.5f;
+    line[1].position.z = edgra_cam_pos.z + 0.5f;
+    line[0].colour = line[1].colour = 0xffffffff;
     NuRndrLine3d(line, edgra_mtl, NULL);
     NUVEC arrow = {0.0f, 0.5f, 0.0f};
     NuVecRotateZ(&arrow, &arrow, edgra_rotz);
     NuVecRotateY(&arrow, &arrow, edgra_roty);
     line[0].position = edgra_cam_pos;
-    NuVecAdd(&line[1].position, &edgra_cam_pos, &arrow);
+    line[1].position.x = edgra_cam_pos.x + arrow.x;
+    line[1].position.y = edgra_cam_pos.y + arrow.y;
+    line[1].position.z = edgra_cam_pos.z + arrow.z;
     line[0].colour = line[1].colour = 0xff0000ff;
     NuRndrLine3d(line, edgra_mtl, NULL);
 
@@ -1000,12 +1391,26 @@ void edgraDrawCursor() {
     NuQFntPopCoordinateSystem();
 }
 
-void edpartPtlShelve(i32) {
-    STUBBED();
+void edpartPtlShelve(i32 index) {
+    if (part_emits[index].instance_id != -1 && part_emits[index].instance_id != 99999) {
+        DebFreeInstantly(&part_emits[index].instance_id);
+        part_emits[index].instance_id = 99999;
+    }
 }
 
-void edpartScaleType(i32, float) {
-    STUBBED();
+void edpartScaleType(i32 index, float scale) {
+    part_type_s *type = &part_types[index];
+    type->particle_scale *= scale;
+    type->effect_scale *= scale;
+    type->speed *= scale;
+    type->gravity *= scale;
+    type->position_random.x *= scale;
+    type->position_random.y *= scale;
+    type->position_random.z *= scale;
+    type->velocity_random.x *= scale;
+    type->velocity_random.y *= scale;
+    type->velocity_random.z *= scale;
+    type->maximum_distance *= scale;
 }
 
 i32 edppSaveEffects(char *filename, char page) {
@@ -1270,9 +1675,8 @@ void edanimDrawCursor() {
         auto &param = AnimParams[edanim_nearest_param_id];
         if (edanim_particle_mode != 0) {
             NuQFntPrintEx(system_qfont, 0x1810, 0xc30, 0x10, "Particles: %d (Max %d)", param.effect_count, 8);
-            const char *name = edanim_particle_type == -1 ? nullptr : debtab[edanim_particle_type]->name;
-            if (name != nullptr) {
-                NuQFntPrintEx(system_qfont, 0x1810, 0xcd0, 0x10, "Select Type: %s", name);
+            if (edanim_particle_type != -1) {
+                NuQFntPrintEx(system_qfont, 0x1810, 0xcd0, 0x10, "Select Type: %s", debtab[edanim_particle_type]->name);
             } else {
                 NuQFntPrintEx(system_qfont, 0x1810, 0xcd0, 0x10, "Select Type: <none>");
             }
@@ -1371,7 +1775,197 @@ i32 edgraClumpCreate(NUVEC *position) {
 }
 
 void edpartDrawCursor() {
-    STUBBED();
+    extern i32 edpart_copy_mode, edpart_copyrotz, edpart_copyroty, edpart_rotz, edpart_roty;
+    extern i32 edpart_emitrotz, edpart_emitroty, edpart_emitrotx, edpart_refrotz, edpart_refroty;
+    extern i32 edpart_dpad_mode, edpart_nearest, edpart_readout, edpart_num_orphans;
+    extern i32 edpart_create_type, edpart_nearest_orphans, edpart_nearest_duplicates, edpart_copy_enclosed;
+    extern i32 part_types_used, part_emits_used;
+    extern i8 edpart_effect_list;
+    extern f32 edpart_copy_size;
+    extern NUVEC edpart_cam_pos;
+    extern NUMTL *edpart_mtl, *edpart_boxmtl;
+    extern part_emit_s *edpart_nearest_emit;
+    extern part_typedesc_s *edpart_nearest_type;
+
+    const i32 rotation_z = edpart_copy_mode == 0 ? edpart_rotz : edpart_copyrotz;
+    const i32 rotation_y = edpart_copy_mode == 0 ? edpart_roty : edpart_copyroty;
+    NURND_VERTEX3D line[2];
+    auto rotate = [&](NUVEC &vector) {
+        NuVecRotateZ(&vector, &vector, rotation_z);
+        NuVecRotateY(&vector, &vector, rotation_y);
+    };
+    auto draw_axis = [&](NUVEC vector) {
+        rotate(vector);
+        line[0].position.x = edpart_cam_pos.x - vector.x;
+        line[0].position.y = edpart_cam_pos.y - vector.y;
+        line[0].position.z = edpart_cam_pos.z - vector.z;
+        line[0].colour = 0xffffffff;
+        line[1].position = edpart_cam_pos;
+        line[1].colour = 0xffffffff;
+        NuRndrLine3d(line, edpart_mtl, NULL);
+        line[0].position = edpart_cam_pos;
+        line[0].colour = 0xff00ff00;
+        line[1].position.x = edpart_cam_pos.x + vector.x;
+        line[1].position.y = edpart_cam_pos.y + vector.y;
+        line[1].position.z = edpart_cam_pos.z + vector.z;
+        line[1].colour = 0xff00ff00;
+        NuRndrLine3d(line, edpart_mtl, NULL);
+    };
+    draw_axis({0.5f, 0.0f, 0.0f});
+    draw_axis({0.0f, 0.5f, 0.0f});
+    draw_axis({0.0f, 0.0f, 0.5f});
+    auto draw_mark = [&](NUVEC start, NUVEC end) {
+        rotate(start);
+        rotate(end);
+        line[0].position.x = edpart_cam_pos.x + start.x;
+        line[0].position.y = edpart_cam_pos.y + start.y;
+        line[0].position.z = edpart_cam_pos.z + start.z;
+        line[1].position.x = edpart_cam_pos.x + end.x;
+        line[1].position.y = edpart_cam_pos.y + end.y;
+        line[1].position.z = edpart_cam_pos.z + end.z;
+        line[0].colour = line[1].colour = 0xff00ff00;
+        NuRndrLine3d(line, edpart_mtl, NULL);
+    };
+    draw_mark({0.55f, 0.05f, 0.0f}, {0.6f, -0.05f, 0.0f});
+    draw_mark({0.6f, 0.05f, 0.0f}, {0.55f, -0.05f, 0.0f});
+    draw_mark({0.0f, 0.65f, -0.025f}, {0.0f, 0.6f, 0.0f});
+    draw_mark({0.0f, 0.65f, 0.025f}, {0.0f, 0.6f, 0.0f});
+    draw_mark({0.0f, 0.6f, 0.0f}, {0.0f, 0.55f, 0.0f});
+    draw_mark({0.0f, 0.05f, 0.55f}, {0.0f, 0.05f, 0.6f});
+    draw_mark({0.0f, 0.05f, 0.6f}, {0.0f, -0.05f, 0.55f});
+    draw_mark({0.0f, -0.05f, 0.55f}, {0.0f, -0.05f, 0.6f});
+
+    if (edpart_copy_mode == 0) {
+        NUVEC emitter_tip = {0.0f, 0.375f, 0.0f};
+        NuVecRotateZ(&emitter_tip, &emitter_tip, edpart_emitrotz);
+        NuVecRotateY(&emitter_tip, &emitter_tip, edpart_emitroty);
+        NuVecRotateX(&emitter_tip, &emitter_tip, edpart_emitrotx);
+        rotate(emitter_tip);
+        line[0].position = edpart_cam_pos;
+        line[1].position.x = edpart_cam_pos.x + emitter_tip.x;
+        line[1].position.y = edpart_cam_pos.y + emitter_tip.y;
+        line[1].position.z = edpart_cam_pos.z + emitter_tip.z;
+        line[0].colour = line[1].colour = 0xff0000ff;
+        NuRndrLine3d(line, edpart_mtl, NULL);
+        NUVEC emitter_side = {0.0f, 0.375f, 0.125f};
+        NuVecRotateZ(&emitter_side, &emitter_side, edpart_emitrotz);
+        NuVecRotateY(&emitter_side, &emitter_side, edpart_emitroty);
+        NuVecRotateX(&emitter_side, &emitter_side, edpart_emitrotx);
+        rotate(emitter_side);
+        line[0].position.x = edpart_cam_pos.x + emitter_side.x;
+        line[0].position.y = edpart_cam_pos.y + emitter_side.y;
+        line[0].position.z = edpart_cam_pos.z + emitter_side.z;
+        line[0].colour = 0xff0000ff;
+        NuRndrLine3d(line, edpart_mtl, NULL);
+        if (edpart_dpad_mode == 3) {
+            NUVEC reflection = {0.0f, 0.25f, 0.0f};
+            NuVecRotateZ(&reflection, &reflection, edpart_refrotz);
+            NuVecRotateY(&reflection, &reflection, edpart_refroty);
+            rotate(reflection);
+            line[0].position = edpart_cam_pos;
+            line[1].position.x = edpart_cam_pos.x + reflection.x;
+            line[1].position.y = edpart_cam_pos.y + reflection.y;
+            line[1].position.z = edpart_cam_pos.z + reflection.z;
+            line[0].colour = line[1].colour = 0xffff0000;
+            NuRndrLine3d(line, edpart_mtl, NULL);
+            if (edpart_nearest != -1) {
+                reflection.x = 0.0f;
+                reflection.y = *reinterpret_cast<f32 *>(&part_emits[edpart_nearest].trailing_state_words[4]);
+                reflection.z = 0.0f;
+                NuVecRotateZ(&reflection, &reflection, edpart_refrotz);
+                NuVecRotateY(&reflection, &reflection, edpart_refroty);
+                rotate(reflection);
+                edbitsDrawCube(edpart_cam_pos.x + reflection.x, edpart_cam_pos.y + reflection.y,
+                               edpart_cam_pos.z + reflection.z, 0.25f, 0.0f, 0.25f, edpart_refrotz, edpart_refroty, 0,
+                               rotation_z, rotation_y, 0xffff0000, edpart_mtl);
+            }
+        }
+    } else {
+        edbitsDrawCube(edpart_cam_pos.x, edpart_cam_pos.y, edpart_cam_pos.z, edpart_copy_size, edpart_copy_size,
+                       edpart_copy_size, 0, 0, 0, 0, 0, 0xffffffff, edpart_mtl);
+    }
+
+    NuRndrRect2di(0x1720, 0x9b0, 0xf00, 0x410, 0x80808080, edpart_boxmtl);
+    NuRndrRect2di(0x1710, 0x8f0, 0xf20, 0xc0, 0x80000000, edpart_boxmtl);
+    NuRndrLine2di(0x1710, 0x9b0, 0x1710, 0xdc8, 0x80000000, edpart_boxmtl);
+    NuRndrLine2di(0x2630, 0x9b0, 0x2630, 0xdc8, 0x80000000, edpart_boxmtl);
+    NuRndrLine2di(0x1710, 0xdc8, 0x2630, 0xdc8, 0x80000000, edpart_boxmtl);
+    NuQFntPushPrintMode(2);
+    NuQFntPushCoordinateSystem(NUQFNT_CSMODE_PS2);
+    NuQFntSet(system_qfont);
+    NuQFntSetColour(system_qfont, 0x80808080);
+    NuQFntPrintEx(system_qfont, 0x17c0, 0x988, 0x10, "Info Box");
+    if (edpart_readout == 0) {
+        if (edpart_num_orphans < 1) {
+            NuQFntSetColour(system_qfont, 0x80808080);
+            NuQFntPrintEx(system_qfont, 0x17c0, 0x988, 0x10, "Info Box");
+        } else {
+            NuQFntSetColour(system_qfont, 0x80202080);
+            NuQFntPrintEx(system_qfont, 0x17c0, 0x988, 0x10, "WARNING: %d Orphans", edpart_num_orphans);
+        }
+    } else if (edpart_readout == 1) {
+        NuQFntSetColour(system_qfont, 0x80808080);
+        NuQFntPrintEx(system_qfont, 0x17c0, 0x988, 0x10, "Co-ordinates");
+    }
+    NuQFntSetColour(system_qfont, 0x80000000);
+    if (edpart_readout == 1) {
+        if (edpart_nearest == -1) {
+            NuQFntPrintEx(system_qfont, 0x17c0, 0xa50, 0x10, "Highlight: <none>");
+        } else {
+            NuQFntPrintEx(system_qfont, 0x17c0, 0xa50, 0x10, "Highlight: %s", edpart_nearest_type->name);
+            NuQFntPrintEx(system_qfont, 0x17c0, 0xaf0, 0x10, "XYZ: %0.2f %0.2f %0.2f", edpart_nearest_emit->position.x,
+                          edpart_nearest_emit->position.y, edpart_nearest_emit->position.z);
+            const i16 *rotation = reinterpret_cast<const i16 *>(&edpart_nearest_emit->trailing_state_words[0]);
+            NuQFntPrintEx(system_qfont, 0x17c0, 0xb90, 0x10, "RotZ: %d", rotation[0]);
+            NuQFntPrintEx(system_qfont, 0x17c0, 0xc30, 0x10, "RotY: %d", rotation[1]);
+            NuQFntPrintEx(system_qfont, 0x17c0, 0xcd0, 0x10, "EmitRotZ: %d", edpart_nearest_emit->rotation_2c);
+            NuQFntPrintEx(system_qfont, 0x17c0, 0xd70, 0x10, "EmitRotY: %d", edpart_nearest_emit->rotation_2e);
+        }
+    } else if (edpart_readout == 0) {
+        if (edpart_copy_mode == 0) {
+            if (edpart_create_type == -1)
+                NuQFntPrintEx(system_qfont, 0x17c0, 0xa50, 0x10, "Current Type: <none>");
+            else
+                NuQFntPrintEx(system_qfont, 0x17c0, 0xa50, 0x10, "Current Type: %s",
+                              part_types[edpart_create_type].name);
+            if (edpart_create_type == -1)
+                NuQFntPrintEx(system_qfont, 0x17c0, 0xaf0, 0x10, "Current List: <none>");
+            else if (edpart_effect_list == 1)
+                NuQFntPrintEx(system_qfont, 0x17c0, 0xaf0, 0x10, "Current List: Level");
+            else if (edpart_effect_list == 0)
+                NuQFntPrintEx(system_qfont, 0x17c0, 0xaf0, 0x10, "Current List: General");
+            if (edpart_nearest == -1) {
+                NuQFntPrintEx(system_qfont, 0x17c0, 0xc30, 0x10, "Highlight: <none>");
+            } else {
+                edbitsDrawCube(edpart_cam_pos.x, edpart_cam_pos.y, edpart_cam_pos.z,
+                               edpart_nearest_type->position_random.x, edpart_nearest_type->position_random.y,
+                               edpart_nearest_type->position_random.z, edpart_emitrotz, edpart_emitroty,
+                               edpart_emitrotx, rotation_z, rotation_y, 0xff0000ff, edpart_mtl);
+                NuQFntSet(system_qfont);
+                NuQFntSetColour(system_qfont, 0x80000000);
+                NuQFntPrintEx(system_qfont, 0x17c0, 0xc30, 0x10, "Highlight: %s", edpart_nearest_type->name);
+                if (edpart_nearest_orphans == 0 && edpart_nearest_duplicates == 0) {
+                    NuQFntPrintEx(system_qfont, 0x1860, 0xcd0, 0x10, "Instances: %d of %d",
+                                  edpart_nearest_type->variant_count, 8);
+                } else {
+                    NuQFntSetColour(system_qfont, 0x80000080);
+                    NuQFntPrintEx(system_qfont, 0x1860, 0xcd0, 0x10, "Instances: %d of %d (Or = %d, Du = %d)",
+                                  edpart_nearest_type->variant_count, 8, edpart_nearest_orphans,
+                                  edpart_nearest_duplicates);
+                    NuQFntSetColour(system_qfont, 0x80000000);
+                }
+            }
+        } else {
+            if (edpart_copy_enclosed > 8)
+                NuQFntSetColour(system_qfont, 0x80000080);
+            NuQFntPrintEx(system_qfont, 0x17c0, 0xc30, 0x10, "Enclosed: %d", edpart_copy_enclosed);
+            NuQFntSetColour(system_qfont, 0x80000000);
+        }
+        NuQFntPrintEx(system_qfont, 0x17c0, 0xd70, 0x10, "Types: %d/%d; Emits: %d/%d", part_types_used, 128,
+                      part_emits_used, 40);
+    }
+    NuQFntPopPrintMode();
+    NuQFntPopCoordinateSystem();
 }
 
 template <i32 Axis> static inline void EdDrawCircle(VuVec const &centre, float radius, i32 colour, i32 segments) {
@@ -1456,8 +2050,136 @@ i32 edanimParamCreate(i32 instance_id) {
     return index;
 }
 
-void edpartSaveEffects(char *, char) {
-    STUBBED();
+i32 edpartSaveEffects(char *filename, char page) {
+    i32 type_count = 0;
+    for (i32 index = 0; index < 128; ++index) {
+        const part_type_s &type = part_types[index];
+        if (type.name[0] != '\0' && type.field_b3 == static_cast<u8>(page))
+            ++type_count;
+    }
+
+    EdFileSetMedia(1);
+    if (EdFileOpen(filename, NUFILE_WRITE) == 0)
+        return 0;
+    EdFileSetReadWrongEndianess(1);
+    EdFileWriteInt(16);
+    EdFileWriteInt(type_count);
+
+    char empty_name[16] = {};
+    static char null_instance_name[16] = "NULL instance";
+    for (i32 index = 0; index < 128; ++index) {
+        part_type_s &type = part_types[index];
+        if (type.name[0] == '\0' || type.field_b3 != static_cast<u8>(page))
+            continue;
+
+        EdFileWrite(type.name, 16);
+        EdFileWriteChar(type.effect_pages[0]);
+        EdFileWriteChar(type.effect_pages[1]);
+        EdFileWriteChar(type.effect_pages[2]);
+        EdFileWriteChar(type.effect_pages[3]);
+        EdFileWriteChar(type.effect_pages[4]);
+        EdFileWriteChar(type.effect_pages[5]);
+        EdFileWriteChar(type.effect_pages[6]);
+        EdFileWriteChar(type.effect_pages[7]);
+#define WRITE_PART_OBJECT_NAME(variant)                                                                                \
+    do {                                                                                                               \
+        char *name = empty_name;                                                                                       \
+        i16 effect_id = type.effect_ids[variant];                                                                      \
+        if (effect_id == 9999)                                                                                         \
+            name = null_instance_name;                                                                                 \
+        else if (effect_id == 9998)                                                                                    \
+            name = type.object_names[variant];                                                                         \
+        else if (effect_id != -1) {                                                                                    \
+            if (type.effect_pages[variant] == 0 || type.effect_pages[variant] == 1) {                                  \
+                NUGSCN *scene = type.effect_pages[variant] == 0 ? edbits_base_scene : edbits_things_scene;             \
+                nuhspecial_s special;                                                                                  \
+                NuGScnGetSpecial(&special, scene, effect_id);                                                          \
+                name = NuSpecialGetName(&special);                                                                     \
+                EdFileWrite(name, 16);                                                                                 \
+                break;                                                                                                 \
+            }                                                                                                          \
+        }                                                                                                              \
+        EdFileWrite(name, 16);                                                                                         \
+    } while (0)
+        WRITE_PART_OBJECT_NAME(0);
+        WRITE_PART_OBJECT_NAME(1);
+        WRITE_PART_OBJECT_NAME(2);
+        WRITE_PART_OBJECT_NAME(3);
+        WRITE_PART_OBJECT_NAME(4);
+        WRITE_PART_OBJECT_NAME(5);
+        WRITE_PART_OBJECT_NAME(6);
+        WRITE_PART_OBJECT_NAME(7);
+#undef WRITE_PART_OBJECT_NAME
+        EdFileWriteChar(type.variant_mode);
+        EdFileWriteFloat(type.particle_scale);
+        EdFileWriteFloat(type.effect_scale);
+        EdFileWriteFloat(type.lifetime);
+        EdFileWriteFloat(type.lifetime_random);
+        EdFileWriteFloat(type.speed);
+        EdFileWriteFloat(type.gravity);
+        EdFileWriteFloat(type.emission_rate);
+        EdFileWriteFloat(type.bounce);
+        EdFileWriteNuVec(&type.position_random);
+        EdFileWriteNuVec(&type.velocity_random);
+        EdFileWriteFloat(type.emission_period);
+        EdFileWriteFloat(type.emission_period_random);
+        EdFileWriteFloat(type.emission_pause);
+        EdFileWriteFloat(type.emission_pause_random);
+        EdFileWriteInt(type.rotation[0]);
+        EdFileWriteInt(type.rotation[1]);
+        EdFileWriteInt(type.rotation[2]);
+        EdFileWriteInt(type.rotation_random[0]);
+        EdFileWriteInt(type.rotation_random[1]);
+        EdFileWriteInt(type.rotation_random[2]);
+        EdFileWriteUnsignedInt(type.flags);
+
+        EdFileWrite(type.trail_effects[0] == -1 ? empty_name : debtab[type.trail_effects[0]]->name, 16);
+        EdFileWrite(type.trail_effects[1] == -1 ? empty_name : debtab[type.trail_effects[1]]->name, 16);
+        EdFileWrite(type.attached_effect == -1 ? empty_name : debtab[type.attached_effect]->name, 16);
+        EdFileWriteFloat(type.trail_rates[0]);
+        EdFileWriteFloat(type.trail_rates[1]);
+        EdFileWrite(type.kill_effect == -1 ? empty_name : debtab[type.kill_effect]->name, 16);
+        EdFileWrite(type.impact_effect == -1 ? empty_name : debtab[type.impact_effect]->name, 16);
+        EdFileWrite(type.impact_part == -1 ? empty_name : part_types[type.impact_part].name, 16);
+        EdFileWrite(type.sounds[0] == -1 ? empty_name : const_cast<char *>(g_soundInfo[type.sounds[0]].sfx_name), 16);
+        EdFileWrite(type.sounds[1] == -1 ? empty_name : const_cast<char *>(g_soundInfo[type.sounds[1]].sfx_name), 16);
+        EdFileWrite(type.sounds[2] == -1 ? empty_name : const_cast<char *>(g_soundInfo[type.sounds[2]].sfx_name), 16);
+        EdFileWrite(type.sounds[3] == -1 ? empty_name : const_cast<char *>(g_soundInfo[type.sounds[3]].sfx_name), 16);
+        EdFileWriteChar(type.sound_modes[0]);
+        EdFileWriteChar(type.sound_modes[1]);
+        EdFileWriteChar(type.sound_modes[2]);
+        EdFileWriteChar(type.sound_modes[3]);
+        EdFileWriteFloat(type.maximum_distance);
+        EdFileWriteFloat(type.field_160);
+        EdFileWriteFloat(type.field_164);
+        EdFileWriteFloat(type.field_168);
+    }
+
+    if (page == 1) {
+        i32 emitter_count = 0;
+        for (i32 index = 0; index < 40; ++index) {
+            if (part_emits[index].effect_id != -1 && part_emits[index].shots_remaining == 0)
+                ++emitter_count;
+        }
+        EdFileWriteInt(emitter_count);
+        for (i32 index = 0; index < 40; ++index) {
+            part_emit_s &emitter = part_emits[index];
+            if (emitter.effect_id == -1)
+                continue;
+            EdFileWriteNuVec(&emitter.position);
+            EdFileWrite(emitter.name, 16);
+            EdFileWriteShort(emitter.rotation_30);
+            EdFileWriteShort(emitter.rotation_2e);
+            EdFileWriteShort(emitter.rotation_2c);
+            EdFileWriteShort(emitter.field_44);
+            EdFileWriteShort(emitter.field_46);
+        }
+    } else {
+        EdFileWriteInt(0);
+    }
+    EdFileSetReadWrongEndianess(0);
+    EdFileClose();
+    return 1;
 }
 
 void edppPtlChangeType(i32 index, i32 effect_index) {
@@ -1636,9 +2358,10 @@ void edgraCalculatePage(char page, i32 calculate_vectors) {
         edgra_page_on[page_index])
         return;
     NUMTX *matrix = edgra_page_matrix_stack[page_index];
-    for (i32 clump_index = 0; clump_index < EDGRA_MAX_CLUMPS; ++clump_index) {
+    i32 max_clumps = EDGRA_MAX_CLUMPS;
+    for (i32 clump_index = 0; clump_index < max_clumps; ++clump_index) {
         edgra_clump_s &clump = GrassClumps[clump_index];
-        if (!clump.element_count || static_cast<i8>(clump.page) != page)
+        if (clump.element_count <= 0 || static_cast<i8>(clump.page) != page)
             continue;
         struct Sample {
             NUVEC position;
@@ -1650,22 +2373,28 @@ void edgraCalculatePage(char page, i32 calculate_vectors) {
             Sample &sample = samples[element];
             f32 distance = 0.0f;
             if (clump.kind == 3) {
-                edgra_individual_s *individual = GetIndGrassClump(clump.individual_index, element);
-                sample.position = individual->position;
+                sample.position.x = GetIndGrassClump(clump.individual_index, element)->position.x;
+                sample.position.y = GetIndGrassClump(clump.individual_index, element)->position.y;
+                sample.position.z = GetIndGrassClump(clump.individual_index, element)->position.z;
             } else {
                 NUVEC offset = {};
                 switch (clump.unknown_25) {
-                    case 1:
-                    case 2: {
+                    case 1: {
                         u32 angle = NuRandIntSeeded(&seed) & 0xffff;
                         f32 radius = NuRandFloatSeeded(&seed) * clump.size;
                         offset.x = NU_SIN_LUT(angle) * radius;
                         offset.z = NU_COS_LUT(angle) * radius;
                         distance = NuFsqrt(offset.x * offset.x + offset.z * offset.z);
-                        if (clump.unknown_25 == 1) {
-                            offset.x *= distance + 1.5f;
-                            offset.z *= distance + 1.5f;
-                        }
+                        offset.x *= distance + 1.5f;
+                        offset.z *= distance + 1.5f;
+                        break;
+                    }
+                    case 2: {
+                        u32 angle = NuRandIntSeeded(&seed) & 0xffff;
+                        f32 radius = NuRandFloatSeeded(&seed) * clump.size;
+                        offset.x = radius * NU_SIN_LUT(angle);
+                        offset.z = radius * NU_COS_LUT(angle);
+                        distance = NuFsqrt(offset.x * offset.x + offset.z * offset.z);
                         break;
                     }
                     case 3:
@@ -1694,8 +2423,9 @@ void edgraCalculatePage(char page, i32 calculate_vectors) {
             sample.position.y += clump.position.y;
             sample.position.z += clump.position.z;
             if (clump.kind == 3) {
-                edgra_individual_s *individual = GetIndGrassClump(clump.individual_index, element);
-                sample.scale = (clump.field_30 - clump.field_2c) * individual->field_0c + clump.field_2c;
+                sample.scale =
+                    (clump.field_30 - clump.field_2c) * GetIndGrassClump(clump.individual_index, element)->field_0c +
+                    clump.field_2c;
             } else {
                 sample.scale = distance;
                 switch (clump.unknown_26) {
@@ -1726,34 +2456,48 @@ void edgraCalculatePage(char page, i32 calculate_vectors) {
             }
         }
         seed = clump.seed;
-        clump.matrices = matrix;
+        NUMTX *matrix_start = matrix;
         NUVEC *terrain_values = static_cast<NUVEC *>(clump.vector_buffer);
         for (i32 element = 0; element < count; ++element) {
             Sample &sample = samples[element];
-            if (clump.field_42 && calculate_vectors)
-                terrain_values[element] = NuFadeObjGetAngleTerrainValues(&sample.position);
-            NuMtxSetIdentity(matrix);
             if (clump.kind == 3) {
-                edgra_individual_s *individual = GetIndGrassClump(clump.individual_index, element);
-                NuMtxRotateZ(matrix, individual->field_10);
-                NuMtxRotateY(matrix, individual->field_12);
+                if (clump.field_42 && calculate_vectors)
+                    terrain_values[element] = NuFadeObjGetAngleTerrainValues(&sample.position);
+                NuMtxSetIdentity(matrix);
+                NuMtxRotateZ(matrix, GetIndGrassClump(clump.individual_index, element)->field_10);
+                NuMtxRotateY(matrix, GetIndGrassClump(clump.individual_index, element)->field_12);
+                if (clump.field_42 && clump.field_43) {
+                    NuMtxRotateZ(matrix, static_cast<i32>(terrain_values[element].z));
+                    NuMtxRotateX(matrix, static_cast<i32>(terrain_values[element].x));
+                }
+                NUVEC scale = {sample.scale, sample.scale, sample.scale};
+                NuMtxScale(matrix, &scale);
+                NUVEC position = sample.position;
+                if (clump.field_42)
+                    position.y = clump.field_44 + terrain_values[element].y;
+                NuMtxTranslate(matrix, &position);
             } else {
+                if (clump.field_42 && calculate_vectors)
+                    terrain_values[element] = NuFadeObjGetAngleTerrainValues(&sample.position);
+                NuMtxSetIdentity(matrix);
                 NuMtxPreRotateY(matrix, static_cast<u16>(NuRandIntSeeded(&seed)));
+                if (clump.kind != 1 && clump.field_42 && clump.field_43) {
+                    NuMtxRotateZ(matrix, static_cast<i32>(terrain_values[element].z));
+                    NuMtxRotateX(matrix, static_cast<i32>(terrain_values[element].x));
+                }
+                NUVEC scale = {sample.scale, sample.scale, sample.scale};
+                NuMtxScale(matrix, &scale);
+                NUVEC position = sample.position;
+                if (clump.field_42)
+                    position.y = clump.field_44 + terrain_values[element].y;
+                NuMtxTranslate(matrix, &position);
+                if (clump.kind == 1)
+                    matrix->m33 = clump.field_18 * sample.scale;
             }
-            if (clump.kind != 1 && clump.field_42 && clump.field_43) {
-                NuMtxRotateZ(matrix, static_cast<i32>(terrain_values[element].z));
-                NuMtxRotateX(matrix, static_cast<i32>(terrain_values[element].x));
-            }
-            NUVEC scale = {sample.scale, sample.scale, sample.scale};
-            NuMtxScale(matrix, &scale);
-            NUVEC position = sample.position;
-            if (clump.field_42)
-                position.y = clump.field_44 + terrain_values[element].y;
-            NuMtxTranslate(matrix, &position);
-            if (clump.kind == 1)
-                matrix->m33 = clump.field_18 * sample.scale;
             ++matrix;
         }
+        clump.matrices = matrix_start;
+        max_clumps = EDGRA_MAX_CLUMPS;
     }
 }
 
@@ -1916,7 +2660,6 @@ NUGSPLINE *edSpline_SplineFind(NUGSCN *scene, char *name) {
 }
 
 void edSpline_SplineList(nugscn_s *) {
-    STUBBED();
 }
 
 void edanimParticlePlace(i32 index, NUVEC *position) {
@@ -1946,8 +2689,14 @@ void edgraInstanceCreate(NUVEC *position) {
     }
 }
 
-void edpartPtlChangeType(i32, i32) {
-    STUBBED();
+i32 edpartPtlChangeType(i32 index, i32 type) {
+    if (part_emits[index].effect_id != type) {
+        edpartDestroy(index);
+        AddDebrisEffect(&part_emits[index].instance_id, type, part_emits[index].position.x,
+                        part_emits[index].position.y, part_emits[index].position.z);
+        part_emits[index].effect_id = type;
+    }
+    return index;
 }
 
 void edppDestroyAllPages() {
@@ -2026,11 +2775,72 @@ void edppDetermineNearest(float max_distance_squared) {
 }
 
 void edppHighlightNearest() {
-    STUBBED();
+    extern i32 edpp_copy_mode, edpp_copy_enclosed, edpp_copy_source_count, edpp_copy_source[8], edpp_copyroty;
+    extern i32 edpp_showAllPlaced;
+    extern NUVEC edpp_copy_source_vec;
+    extern NUMTL *edpp_mtl;
+
+    if (edpp_copy_mode == 0) {
+        if (edpp_nearest != -1) {
+            const NUVEC &position = edpp_ptls[edpp_nearest].position;
+            edbitsDrawCube(position.x, position.y, position.z, 0.5f, 0.5f, 0.5f, 0, 0, 0, 0, 0, 0xffffffff, edpp_mtl);
+        }
+        if (edpp_showAllPlaced != 0) {
+            for (i32 index = 0; index < 512; ++index) {
+                const edpp_particle_s &particle = edpp_ptls[index];
+                if (particle.effect_index > 0 && index != edpp_nearest) {
+                    edbitsDrawCube(particle.position.x, particle.position.y, particle.position.z, 0.5f, 0.5f, 0.5f, 0,
+                                   0, 0, 0, 0, 0xff000000, edpp_mtl);
+                }
+            }
+        }
+        return;
+    }
+
+    edpp_copy_enclosed = 0;
+    for (i32 index = 0; index < 512; ++index) {
+        edpp_particle_s &particle = edpp_ptls[index];
+        if (particle.instance_id == 99999 || particle.instance_id == -1)
+            continue;
+        NUVEC delta;
+        NuVecSub(&delta, &edpp_cam_pos, &particle.position);
+        if (__builtin_fabsf(delta.x) > edpp_copy_size || __builtin_fabsf(delta.y) > edpp_copy_size ||
+            __builtin_fabsf(delta.z) > edpp_copy_size)
+            continue;
+        ++edpp_copy_enclosed;
+        edbitsDrawDiagonalCross(particle.position.x, particle.position.y, particle.position.z, 0.05f, 0xffffffff,
+                                edpp_mtl);
+    }
+    for (i32 source = 0; source < edpp_copy_source_count; ++source) {
+        NUVEC offset, position;
+        NuVecSub(&offset, &edpp_ptls[edpp_copy_source[source]].position, &edpp_copy_source_vec);
+        NuVecRotateY(&offset, &offset, edpp_copyroty);
+        NuVecAdd(&position, &edpp_cam_pos, &offset);
+        edbitsDrawDiagonalCross(position.x, position.y, position.z, 0.05f, 0xff808080, edpp_mtl);
+    }
 }
 
 void edppMultipleCopyCopy() {
-    STUBBED();
+    extern i32 edpp_copy_source_count, edpp_copy_source[8], edpp_copyroty;
+    extern NUVEC edpp_copy_source_vec;
+
+    edpp_copy_source_count = 0;
+    edpp_particle_s *particle = edpp_ptls;
+    for (i32 index = 0; index < 512; ++index, ++particle) {
+        if (particle->instance_id == 99999 || particle->instance_id == -1)
+            continue;
+
+        NUVEC delta;
+        NuVecSub(&delta, &edpp_cam_pos, &particle->position);
+        if (__builtin_fabsf(delta.x) <= edpp_copy_size && __builtin_fabsf(delta.y) <= edpp_copy_size &&
+            __builtin_fabsf(delta.z) <= edpp_copy_size) {
+            edpp_copy_source[edpp_copy_source_count++] = index;
+            if (edpp_copy_source_count == 8)
+                break;
+        }
+    }
+    edpp_copy_source_vec = edpp_cam_pos;
+    edpp_copyroty = 0;
 }
 
 void edbriDetermineNearest(float distance) {
@@ -2094,27 +2904,119 @@ void edpartDestroyAllPages() {
 }
 
 void edppMultipleCopyClear() {
-    STUBBED();
+    extern i32 edpp_copy_source_count, edpp_copyroty;
+    edpp_copy_source_count = 0;
+    edpp_copyroty = 0;
 }
 
 void edppMultipleCopyPaste() {
-    STUBBED();
+    extern i32 edpp_copy_source_count, edpp_copy_source[8], edpp_copyroty;
+    extern NUVEC edpp_copy_source_vec;
+
+    for (i32 source = 0; source < edpp_copy_source_count; ++source) {
+        NUVEC offset, position;
+        const i32 source_index = edpp_copy_source[source];
+        NuVecSub(&offset, &edpp_ptls[source_index].position, &edpp_copy_source_vec);
+        NuVecRotateY(&offset, &offset, edpp_copyroty);
+        NuVecAdd(&position, &edpp_cam_pos, &offset);
+        const i32 index = edppPtlCreateCopy(&position, source_index);
+        if (index != -1) {
+            edpp_particle_s &particle = edpp_ptls[index];
+            particle.emitter_rotation_y += static_cast<i16>(edpp_copyroty);
+            DebrisEmitterOrientation(particle.instance_id, particle.emitter_rotation_z, particle.emitter_rotation_y,
+                                     particle.emitter_rotation_x);
+        }
+    }
 }
 
-void edppStartSingleEffect(i32) {
-    STUBBED();
+void edppStartSingleEffect(i32 index) {
+    edpp_particle_s &particle = edpp_ptls[index];
+    if (particle.instance_id != -1)
+        return;
+    AddDebrisEffect(&particle.instance_id, particle.effect_index, particle.position.x, particle.position.y,
+                    particle.position.z);
+    if (particle.instance_id == -1)
+        return;
+
+    debkeydata[particle.instance_id].field_2f9 = 0;
+    DebrisOrientation(particle.instance_id, particle.rotation_z, particle.rotation_y);
+    DebrisEmitterOrientation(particle.instance_id, particle.emitter_rotation_z, particle.emitter_rotation_y,
+                             particle.emitter_rotation_x);
+    DebrisStartOffset(particle.instance_id, particle.start_offset);
+    DebrisSetTrigger(particle.instance_id, particle.switch_type, particle.switch_id, particle.switch_variable);
+    DebrisReflectionOrientation(particle.instance_id, particle.reflection_rotation_z, particle.reflection_rotation_y,
+                                particle.reflection_offset, particle.reflection_bounce);
+    DebrisSetFacing(particle.instance_id, particle.facing_mode, particle.facing_rotation_x, particle.facing_rotation_y);
+    DebrisSetGroupID(particle.instance_id, particle.render_group);
+    DebrisSetRoomID(particle.instance_id, reinterpret_cast<NUGSCN *>(edpp_page_scene[particle.page]));
+    DebrisSetDetailLevels(particle.instance_id, particle.detail_levels);
 }
 
 void edpartHighlightNearest() {
-    STUBBED();
+    extern i32 edpart_copy_mode, edpart_nearest, edpart_copy_enclosed;
+    extern i32 edpart_copy_source_count, edpart_copy_source[8], edpart_copyroty;
+    extern f32 edpart_copy_size;
+    extern NUVEC edpart_cam_pos, edpart_copy_source_vec;
+    extern NUMTL *edpart_mtl;
+    if (edpart_copy_mode != 0) {
+        edpart_copy_enclosed = 0;
+        part_emit_s *emitter = part_emits;
+        for (i32 index = 0; index < 512; ++index, ++emitter) {
+            if (emitter->instance_id == 99999)
+                continue;
+            if (emitter->instance_id == -1)
+                continue;
+            NUVEC delta;
+            NuVecSub(&delta, &edpart_cam_pos, &part_emits[index].position);
+            if (edpart_copy_size < __builtin_fabsf(delta.x) || edpart_copy_size < __builtin_fabsf(delta.y) ||
+                edpart_copy_size < __builtin_fabsf(delta.z))
+                continue;
+            ++edpart_copy_enclosed;
+            edbitsDrawDiagonalCross(emitter->position.x, emitter->position.y, emitter->position.z, 0.05f, 0xffffffff,
+                                    edpart_mtl);
+        }
+        for (i32 index = 0; index < edpart_copy_source_count; ++index) {
+            NUVEC offset, destination;
+            NuVecSub(&offset, &part_emits[edpart_copy_source[index]].position, &edpart_copy_source_vec);
+            NuVecRotateY(&offset, &offset, edpart_copyroty);
+            NuVecAdd(&destination, &edpart_cam_pos, &offset);
+            edbitsDrawDiagonalCross(destination.x, destination.y, destination.z, 0.05f, 0xff808080, edpart_mtl);
+        }
+    } else if (edpart_nearest != -1) {
+        const NUVEC &position = part_emits[edpart_nearest].position;
+        edbitsDrawCube(position.x, position.y, position.z, 0.5f, 0.5f, 0.5f, 0, 0, 0, 0, 0, 0xffffffff, edpart_mtl);
+    }
 }
 
 void edpartMultipleCopyCopy() {
-    STUBBED();
+    extern i32 edpart_copy_source_count, edpart_copy_source[8], edpart_copyroty;
+    extern f32 edpart_copy_size;
+    extern NUVEC edpart_cam_pos, edpart_copy_source_vec;
+
+    edpart_copy_source_count = 0;
+    for (i32 index = 0; index < 512; ++index) {
+        part_emit_s &emitter = part_emits[index];
+        if (emitter.instance_id == 99999 || emitter.instance_id == -1)
+            continue;
+
+        NUVEC delta;
+        NuVecSub(&delta, &edpart_cam_pos, &emitter.position);
+        if (__builtin_fabsf(delta.x) > edpart_copy_size || __builtin_fabsf(delta.y) > edpart_copy_size ||
+            __builtin_fabsf(delta.z) > edpart_copy_size)
+            continue;
+
+        edpart_copy_source[edpart_copy_source_count++] = index;
+        if (edpart_copy_source_count == 8)
+            break;
+    }
+    edpart_copy_source_vec = edpart_cam_pos;
+    edpart_copyroty = 0;
 }
 
 void edpartMultipleCopyClear() {
-    STUBBED();
+    extern i32 edpart_copy_source_count, edpart_copyroty;
+    edpart_copy_source_count = 0;
+    edpart_copyroty = 0;
 }
 
 float edanimPlayerAnimDistance(i32 parameter_index) {
@@ -2210,8 +3112,36 @@ void edgraDetermineNearestClump(f32 distance) {
         edgraSortVectorBuffer(edgra_nearest);
 }
 
-void eduiItemFileSelectorCreate(u32, eduiiattr_s *, void (*)(eduimenu_s *, eduiitem_s *, u32), char *) {
-    STUBBED();
+eduiitem_s *eduiItemFileSelectorCreate(u32 data, eduiiattr_s *colours, EdUiItemCallback callback, char *text) {
+    struct FileSelectorItem : eduiitem_s {
+        i32 field_48;
+        f32 field_4c;
+        f32 field_50;
+        f32 field_54;
+        f32 field_58;
+        f32 field_5c;
+        EdUiItemCallback callback;
+    };
+    DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(FileSelectorItem) == 0x64, "file selector item ABI");
+
+    auto *item = static_cast<FileSelectorItem *>(NU_ALLOC(sizeof(FileSelectorItem), 4, 1, "", 0));
+    if (item == NULL)
+        return NULL;
+    memset(item, 0, sizeof(*item));
+    item->type = 0x10;
+    item->data = data;
+    memcpy(item->colours, colours, sizeof(item->colours));
+    item->destroy = eduicbItemDestroy;
+    item->text_alignment = 0x40;
+    item->selection_group = 0;
+    eduiItemSetText(item, text);
+    item->field_4c = 0.5f;
+    item->field_50 = 0.5f;
+    item->field_54 = 180.0f;
+    item->field_5c = 0.5f;
+    item->field_58 = 1.0f;
+    item->callback = callback;
+    return item;
 }
 
 void edanimDetermineNearestSound(float distance) {
@@ -3042,39 +3972,47 @@ void EdBitControl::cbButton(eduimenu_s *menu, eduiitem_s *item, u32) {
 
 __attribute__((force_align_arg_pointer)) void EdBitControl::cbChanged(eduimenu_s *, eduiitem_s *item, u32) {
     EdBitControl *control = static_cast<EdBitControl *>(item->data_ptr);
-    edui_prop_s *property = reinterpret_cast<edui_prop_s *>(item);
-    for (Item *entry = control->items; entry != NULL && entry->name != NULL; ++entry) {
-        if (NuStrICmp(entry->name, property->property_text) == 0) {
-            eduiItemPropSetText(property, entry->name);
+    for (Item *entry = control->items; entry->name != NULL; ++entry) {
+        if (NuStrICmp(entry->name, reinterpret_cast<edui_prop_s *>(item)->property_text) == 0) {
+            eduiItemPropSetText(reinterpret_cast<edui_prop_s *>(item), entry->name);
             return;
         }
     }
-    i32 value = NuAToI(property->property_text);
-    for (Item *entry = control->items; entry != NULL && entry->name != NULL; ++entry) {
-        if (entry->value == value) {
-            eduiItemPropSetText(property, entry->name);
-            return;
-        }
+    i32 values[4];
+    values[0] = NuAToI(reinterpret_cast<edui_prop_s *>(item)->property_text);
+    Item *entry = control->items;
+    char *text = entry->name;
+    while (text != NULL) {
+        if (entry->value == values[0])
+            break;
+        ++entry;
+        text = entry->name;
     }
-    control->reference->GetMemberData(control->object, EdType_Int, &value, 0);
-    char text[0x40];
-    sprintf(text, "%d", value);
-    eduiItemPropSetText(property, text);
+    char number[0x80];
+    if (text == NULL) {
+        control->reference->GetMemberData(control->object, EdType_Int, values, 0);
+        sprintf(number, "%d", values[0]);
+        text = number;
+    }
+    eduiItemPropSetText(reinterpret_cast<edui_prop_s *>(item), text);
 }
 
-void EdBitControl::cbSelectItem(eduimenu_s *menu, eduiitem_s *item, u32 flags) {
+__attribute__((force_align_arg_pointer)) void EdBitControl::cbSelectItem(eduimenu_s *menu, eduiitem_s *item,
+                                                                         u32 flags) {
     if (edBitControl == NULL)
         return;
     Item *choice = static_cast<Item *>(item->data_ptr);
     eduiItemPropSetText(edBitItem, edBitControl->GetEnumString(choice->value));
-    i32 value = 0;
-    edBitControl->reference->GetMemberData(edBitControl->object, EdType_Int, &value, 0);
-    if (choice->value == 0) {
-        value &= ~(1u << edBitIndex);
+    u32 value[3] __attribute__((aligned(16)));
+    edBitControl->reference->GetMemberData(edBitControl->object, EdType_Int, value, 0);
+    u32 bits;
+    if (choice->value != 0) {
+        bits = (1u << edBitIndex) | value[0];
     } else {
-        value |= 1u << edBitIndex;
+        bits = ~(1u << edBitIndex) & value[0];
     }
-    edBitControl->reference->SetMemberData(edBitControl->object, EdType_Int, &value, 0, NULL);
+    value[0] = bits;
+    edBitControl->reference->SetMemberData(edBitControl->object, EdType_Int, value, 0, NULL);
     cbEdLevelDestroyOnSelect(menu, item, flags);
 }
 
@@ -3130,7 +4068,7 @@ char *EdEnumControl::GetEnumString(i32 value) {
 
 i32 EdEnumControl::GetEnumValue(char *name) {
     for (Item *entry = items; entry != NULL && entry->name != NULL; ++entry) {
-        if (NuStrICmp(entry->name, name) == 0)
+        if (NuStrICmp(entry->name, name) != 0)
             return entry->value;
     }
     return 0;
@@ -3165,19 +4103,34 @@ void EdEnumControl::cbButton(eduimenu_s *menu, eduiitem_s *item, u32) {
 void EdEnumControl::cbChanged(eduimenu_s *, eduiitem_s *item, u32) {
     EdEnumControl *control = static_cast<EdEnumControl *>(item->data_ptr);
     edui_prop_s *property = reinterpret_cast<edui_prop_s *>(item);
-    i32 value = control->GetEnumValue(property->property_text);
-    control->reference->SetMemberData(control->object, EdType_Int, &value, 0, NULL);
-    control->Refresh();
+    for (Item *entry = control->items; entry->name != NULL; ++entry) {
+        if (NuStrICmp(entry->name, property->property_text) == 0) {
+            eduiItemPropSetText(property, entry->name);
+            return;
+        }
+    }
+    i32 value = NuAToI(property->property_text);
+    for (Item *entry = control->items; entry->name != NULL; ++entry) {
+        if (entry->value == value) {
+            eduiItemPropSetText(property, entry->name);
+            return;
+        }
+    }
+    control->reference->GetMemberData(control->object, EdType_Int, &value, 0);
+    char text[128];
+    sprintf(text, "%d", value);
+    eduiItemPropSetText(property, text);
 }
 
 void EdEnumControl::cbSelectItem(eduimenu_s *menu, eduiitem_s *item, u32 flags) {
     if (active_enum_control != NULL) {
         Item *choice = static_cast<Item *>(item->data_ptr);
         i32 value = choice->value;
+        eduiItemPropSetText(static_cast<edui_prop_s *>(active_enum_control->item),
+                            active_enum_control->GetEnumString(value));
         active_enum_control->reference->SetMemberData(active_enum_control->object, EdType_Int, &value, 0, NULL);
-        active_enum_control->Refresh();
+        cbEdLevelDestroyOnSelect(menu, item, flags);
     }
-    cbEdLevelDestroyOnSelect(menu, item, flags);
 }
 
 i32 EdInputStream::SerialiseString(char **text) {
@@ -5044,19 +5997,15 @@ EdSubSystem::~EdSubSystem() {
 }
 
 __attribute__((weak)) void EdSubSystem::SubInitialise(variptr_u &, variptr_u &, i32) {
-    STUBBED();
 }
 
 __attribute__((weak)) void EdSubSystem::SubReset() {
-    STUBBED();
 }
 
 __attribute__((weak)) void EdSubSystem::SubProcess(float) {
-    STUBBED();
 }
 
 __attribute__((weak)) void EdSubSystem::SubRender() {
-    STUBBED();
 }
 
 EdControl::~EdControl() {
