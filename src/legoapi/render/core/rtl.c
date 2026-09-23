@@ -58,7 +58,7 @@ struct rtlidata_s {
             NUVEC blended_shadow_direction;
             f32 blended_shadow_value;
             NUVEC field_134;
-            u8 reserved_140[4];
+            f32 specular_value;
         };
     };
 };
@@ -211,13 +211,8 @@ void edrtlInitBurnset(burnset_s *set) {
 }
 
 extern "C" {
-    void rtlSetAssocName(void) {
-        STUBBED();
-    }
-
-    void rtlSetUserIdName(void) {
-        STUBBED();
-    }
+    void rtlSetAssocName(i32 index, char *name);
+    void rtlSetUserIdName(i32 index, char *name);
 
     i32 rtlFindByUserId(usize rtl_set, i32 user_id) {
         if (rtl_set != 0) {
@@ -420,7 +415,6 @@ extern "C" {
 }
 
 static __used__ void rtlSwapEndianess32(void *) {
-    STUBBED();
 }
 
 void rtlSwapSetEndianess(rtlset *) {
@@ -636,14 +630,14 @@ extern "C" {
         NuRndrSetAmbientLightPS(reinterpret_cast<const NUCOLOUR3 *>(data->data + 0xc0));
     }
 
-    void rtlSetSpecularLight(void) {
-        STUBBED();
+    void rtlSetSpecularLight(rtlidata_s *data) {
+        if (data->specular_value > 0.0f)
+            NuRndrSetSpecularLight(&data->field_134, NULL);
     }
 }
 
-static __used__ bool InsideLineXZ(float, float, float, float, float, float) {
-    STUBBED();
-    return false;
+static __used__ bool InsideLineXZ(float x, float z, float x0, float z0, float x1, float z1) {
+    return 0.0f <= (x - x0) * (z1 - z0) + (z - z0) * (x0 - x1);
 }
 
 static f32 ClampUnit(f32 value) {
@@ -730,18 +724,32 @@ static __used__ i32 rtlCalcLights(nuvec_s *position, numtx_s *rotation, f32 scal
     return 0;
 }
 
-static __used__ rtl_s *GetNextRTL(void *, rtl_s *, char *, int *) {
-    STUBBED();
-    return nullptr;
+static __used__ rtl_s *GetNextRTL(void *set, rtl_s *light, char *indices, int *index) {
+    if (set != NULL) {
+        if (indices != NULL && index != NULL) {
+            if (*index < static_cast<i32>(*indices)) {
+                ++*index;
+                light = &static_cast<rtlset *>(set)->lights[indices[*index]];
+            } else {
+                light = NULL;
+            }
+        } else {
+            ++light;
+        }
+    } else {
+        light = reinterpret_cast<rtl_s *>(NuLstGetNext(rtl_dynamic_pool, reinterpret_cast<NULNKHDR *>(light)));
+    }
+    return light;
 }
 
 extern "C" {
-    void rtlSpecularValue(void) {
-        STUBBED();
+    f32 rtlSpecularValue(rtlidata_s *data) {
+        return data != NULL ? data->specular_value : 0.0f;
     }
 
-    void rtlSetSpecularValue(void) {
-        STUBBED();
+    void rtlSetSpecularValue(rtlidata_s *data, f32 value) {
+        if (data != NULL)
+            data->specular_value = value;
     }
 }
 
@@ -1299,6 +1307,15 @@ static eduiitem_s *excludeid_items[16];
 static eduimenu_s *userid_menu;
 static char *userid_names[16] = {"NO ID", "ID 1", "ID 2",  "ID 3",  "ID 4",  "ID 5",  "ID 6",  "ID 7",
                                  "ID 8",  "ID 9", "ID 10", "ID 11", "ID 12", "ID 13", "ID 14", "ID 15"};
+extern "C" void rtlSetAssocName(i32 index, char *name) {
+    if (index < 16)
+        camdir_id_names[index] = name;
+}
+
+extern "C" void rtlSetUserIdName(i32 index, char *name) {
+    if (index < 16 && index > 0)
+        userid_names[index] = name;
+}
 static eduiitem_s *userid_items[16];
 static eduimenu_s *type_menu;
 static eduiitem_s *point_item;

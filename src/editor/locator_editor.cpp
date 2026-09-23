@@ -13,6 +13,7 @@
 #include "nu2api/numath/nuang.h"
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/nu3d/nuqfnt.h"
+#include "nu2api/nu3d/nurndr.h"
 #include <string.h>
 #include <stdio.h>
 #include <float.h>
@@ -36,6 +37,7 @@ extern "C" {
     void pathEditorDrawPaths();
     void antinodeEditorDrawAntinodes();
     void creatureEditor_RenderAllCreatures();
+    void AiRndrLine3d(NURND_VERTEX3D *, struct numtl_s *, struct numtx_s *);
     void aieditor_SetCurrentScript(char *, const AIEditorScriptSelection *);
     extern void (*ClearAICreaturesFn)();
     extern u8 default_ngroup;
@@ -679,10 +681,12 @@ void locatorEditor_Render(i32 x, i32 y, float x_scale, float y_scale) {
     }
     NuQFntSetColour(system_qfont, 0x80000000);
     NuQFntSetScale(system_qfont, x_scale, y_scale);
-    if (aieditor->current_locator != nullptr) {
+    EDLOCATOR_s *display_locator =
+        aieditor->current_locator != nullptr ? aieditor->current_locator : aieditor->nearest_locator;
+    if (display_locator != nullptr) {
         NUVEC delta;
-        f32 distance = NuVecXZDist(&aieditor->current_locator->position, &aieditor->camera_position, &delta);
-        NuQFntPrintEx(system_qfont, text_x, text_y + 120, 16, "\"%s\", xzrng=%.2f", aieditor->current_locator->name,
+        f32 distance = NuVecXZDist(&display_locator->position, &aieditor->camera_position, &delta);
+        NuQFntPrintEx(system_qfont, text_x, text_y + 120, 16, "\"%s\", xzrng=%.2f", display_locator->name,
                       static_cast<f64>(distance));
     }
     NuQFntPrintEx(system_qfont, text_x, text_y + 240, 16, "SQR - Options");
@@ -693,7 +697,13 @@ void locatorEditor_Render(i32 x, i32 y, float x_scale, float y_scale) {
     } else {
         NuQFntPrintEx(system_qfont, text_x, text_y + 360, 16, "X - Move selected");
         NuQFntPrintEx(system_qfont, text_x, text_y + 480, 16, "TRI - Delete selected");
-        NuQFntPrintEx(system_qfont, text_x, text_y + 600, 16, "LLEFT/LRight - Rotate");
+        NuQFntPrintEx(system_qfont, text_x, text_y + 600, 16, "LLEFT - Rotate left");
+        NuQFntPrintEx(system_qfont, text_x, text_y + 720, 16, "LRIGHT - Rotate right");
+    }
+    if (aieditor->nearest_locator == nullptr &&
+        *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(aieditor) + 0x48) != 0 &&
+        aieditorsettings.elapsed_time < 0.5f) {
+        DrawLocator(&aieditor->camera_position, aiEditor_LocatorWidth, aieditorsettings.area_rotation, 0);
     }
     areaEditorDrawAreas();
     locatorEditorDrawLocators();
@@ -701,6 +711,38 @@ void locatorEditor_Render(i32 x, i32 y, float x_scale, float y_scale) {
     antinodeEditorDrawAntinodes();
     if (aieditorsettings.show_creatures_display) {
         creatureEditor_RenderAllCreatures();
+    }
+    EDLOCATORSET_s *set = aieditor->current_locator_set;
+    if (set != nullptr && set->locators[0] != nullptr) {
+        NUVEC previous = set->locators[0]->position;
+        for (i32 index = 1; index < 64 && set->locators[index] != nullptr; ++index) {
+            NUVEC current = set->locators[index]->position;
+            if (index != 1) {
+                NURND_VERTEX3D vertices[2] = {};
+                vertices[0].colour = 0x32323232;
+                vertices[1].colour = 0x32323232;
+                vertices[0].position = current;
+                vertices[1].position = previous;
+                AiRndrLine3d(vertices, nullptr, nullptr);
+                NUVEC direction;
+                NuVecSub(&direction, &previous, &current);
+                NuVecNorm(&direction, &direction);
+                NuVecScale(&direction, &direction, 0.05f);
+                NUVEC midpoint;
+                NuVecAdd(&midpoint, &current, &previous);
+                NuVecScale(&midpoint, &midpoint, 0.5f);
+                NUVEC tip = {midpoint.x - direction.x * 0.5f, midpoint.y - direction.y * 0.5f,
+                             midpoint.z - direction.z * 0.5f};
+                vertices[0].position = tip;
+                NuVecRotateY(&vertices[1].position, &direction, 0xe39);
+                NuVecAdd(&vertices[1].position, &vertices[1].position, &tip);
+                AiRndrLine3d(vertices, nullptr, nullptr);
+                NuVecRotateY(&vertices[1].position, &direction, -0xe39);
+                NuVecAdd(&vertices[1].position, &vertices[1].position, &tip);
+                AiRndrLine3d(vertices, nullptr, nullptr);
+            }
+            previous = current;
+        }
     }
 }
 
@@ -884,13 +926,13 @@ eduimenu_s *locatorEditor_Process(nupad_s *pad) {
             aieditorsettings.area_rotation = aieditor->current_locator->direction;
         }
         if ((pad->digital_buttons & 0x2000) != 0) {
-            step = (pad->digital_buttons_pressed & 0x2000) != 0 ? 20 : step + 20;
+            step = (pad->digital_buttons_pressed & 0x8000) != 0 ? 20 : step + 20;
             if (step > 600) {
                 step = 600;
             }
             aieditorsettings.area_rotation = NuAngAdd(aieditorsettings.area_rotation, step);
         } else {
-            step = (pad->digital_buttons_pressed & 0x8000) != 0 ? 20 : step + 20;
+            step = (pad->digital_buttons_pressed & 0x2000) != 0 ? 20 : step + 20;
             if (step > 600) {
                 step = 600;
             }
@@ -901,6 +943,36 @@ eduimenu_s *locatorEditor_Process(nupad_s *pad) {
             aieditor->current_locator->path_angle =
                 NuAngSub(aieditor->current_locator->direction,
                          *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(aieditor) + 0x60));
+        }
+    } else if ((pad->digital_buttons & 0x4000) != 0) {
+        i32 path_angle = *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(aieditor) + 0x60);
+        i32 difference = NuAngSub(aieditorsettings.area_rotation, path_angle);
+        i32 quadrant = difference < 0 ? (difference + 0x3fff) >> 14 : difference >> 14;
+        i32 remainder = difference % 0x4000;
+        if (remainder > 0x2000) {
+            ++quadrant;
+        } else if (remainder < -0x2000) {
+            --quadrant;
+        }
+        aieditorsettings.area_rotation = NuAngAdd(path_angle, quadrant << 14);
+    } else if ((pad->digital_buttons & 0x20) != 0 && aieditor->current_locator_set != nullptr &&
+               (pad->digital_buttons_pressed & 0x20) != 0 && aieditor->nearest_locator != nullptr) {
+        EDLOCATORSET_s *set = aieditor->current_locator_set;
+        EDLOCATOR_s *nearest = aieditor->nearest_locator;
+        for (i32 index = 0; index < 64 && set->locators[index] != nullptr; ++index) {
+            if (set->locators[index] == nearest) {
+                for (i32 move = index; move < 63; ++move) {
+                    set->locators[move] = set->locators[move + 1];
+                }
+                set->locators[63] = nullptr;
+                break;
+            }
+        }
+        if (aieditor->current_locator != nearest && AddLocatorToSet(set, nearest, aieditor->current_locator) != 0) {
+            aieditor->current_locator = nearest;
+            aieditor->current_path = nearest->path;
+            aieditorsettings.area_rotation = nearest->direction;
+            edcamSetPos(&nearest->position);
         }
     }
     *reinterpret_cast<EDCREATURE_s **>(reinterpret_cast<u8 *>(aieditor) + 0x3692c) = creatureEditor_GetNearest(1);

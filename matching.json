@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 57.61565,
+    "fuzzy_match_percent": 57.62071,
     "total_code": "4722419",
-    "matched_code": "485376",
-    "matched_code_percent": 10.278122,
+    "matched_code": "485400",
+    "matched_code_percent": 10.27863,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 5862,
-    "matched_functions_percent": 43.5545,
+    "matched_functions": 5863,
+    "matched_functions_percent": 43.561928,
     "total_units": 1
   },
   "text": {
@@ -21809,7 +21809,7 @@
           "address": 4253984,
           "offset": 3364016,
           "size": 1361,
-          "match_percent": 47.439598
+          "match_percent": 47.40604
         },
         {
           "name": "_Z18routeEditor_Renderiiff",
@@ -22048,7 +22048,7 @@
           "address": 4225728,
           "offset": 3335760,
           "size": 3691,
-          "match_percent": 25.430365
+          "match_percent": 8.634704
         },
         {
           "name": "_Z20locatorEditor_Renderiiff",
@@ -22056,7 +22056,7 @@
           "address": 4258016,
           "offset": 3368048,
           "size": 1627,
-          "match_percent": 31.522598
+          "match_percent": 65.49152
         }
       ]
     },
@@ -75513,7 +75513,7 @@
           "address": 3842376,
           "offset": 2952408,
           "size": 36,
-          "match_percent": 30.90909
+          "match_percent": 99.90909
         },
         {
           "name": "rtlSetUserIdName",
@@ -75521,7 +75521,7 @@
           "address": 3842412,
           "offset": 2952444,
           "size": 42,
-          "match_percent": 26.153847
+          "match_percent": 99.92308
         },
         {
           "name": "rtlFindByUserId",
@@ -75761,7 +75761,7 @@
           "address": 3848807,
           "offset": 2958839,
           "size": 84,
-          "match_percent": 16.666666
+          "match_percent": 90.208336
         },
         {
           "name": "_ZL13rtlCalcLightsP7nuvec_sP7numtx_sfP10rtlidata_s",
@@ -75777,7 +75777,7 @@
           "address": 3851143,
           "offset": 2961175,
           "size": 167,
-          "match_percent": 8.839286
+          "match_percent": 86.94643
         },
         {
           "name": "rtlSpecularValue",
@@ -75785,7 +75785,7 @@
           "address": 3851310,
           "offset": 2961342,
           "size": 55,
-          "match_percent": 21.25
+          "match_percent": 99.9375
         },
         {
           "name": "rtlSetSpecularValue",
@@ -75793,7 +75793,7 @@
           "address": 3851365,
           "offset": 2961397,
           "size": 24,
-          "match_percent": 37.77778
+          "match_percent": 100.0
         },
         {
           "name": "_ZL20rtlApplySetScaleLoopPvP10rtlidata_sP7nuvec_sP7numtx_sif",

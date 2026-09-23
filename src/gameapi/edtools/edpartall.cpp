@@ -2229,9 +2229,13 @@ void edpartDoInput(nupad_s *pad) {
         edpart_copyroty += pad->analog_left_pad_right - pad->analog_left_pad_left;
     }
 
-    edpart_nearest_emit = edpart_nearest == -1 ? NULL : &part_emits[edpart_nearest];
-    if (edpart_nearest_emit != NULL && edpart_nearest_emit->effect_id >= 0 && edpart_nearest_emit->effect_id < 128) {
+    if (edpart_nearest == -1)
+        return;
+
+    edpart_nearest_emit = &part_emits[edpart_nearest];
+    if (edpart_nearest_emit->effect_id >= 0 && edpart_nearest_emit->effect_id < 128)
         edpart_nearest_type = &part_types[edpart_nearest_emit->effect_id];
+    if (edpart_nearest_type != NULL) {
         edpart_nearest_orphans = 0;
         edpart_nearest_duplicates = 0;
         for (i32 variant = 0; variant < 8; ++variant) {
@@ -2247,10 +2251,6 @@ void edpartDoInput(nupad_s *pad) {
                 }
             }
         }
-    } else {
-        edpart_nearest_type = NULL;
-        edpart_nearest_orphans = 0;
-        edpart_nearest_duplicates = 0;
     }
 }
 

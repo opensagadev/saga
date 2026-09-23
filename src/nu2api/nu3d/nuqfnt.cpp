@@ -1300,11 +1300,9 @@ void NuQFntSetMtx2d(void *font, numtx_s *matrix) {
 extern "C" {
 
     void NuFntInit(void) {
-        STUBBED();
     }
 
     void NuFntSetFixedWidthNumerals(void) {
-        STUBBED();
     }
 
     i32 NuFntToUpper(void) {
@@ -1316,17 +1314,14 @@ extern "C" {
     }
 
     void NuFntSetPen(i32) {
-        STUBBED();
     }
 
 } // extern "C"
 
 void NuFntSave(nufnt_s *, i32, char *) {
-    STUBBED();
 }
 
 void NuFntDumpReadable(nufnt_s *, char *) {
-    STUBBED();
 }
 
 i32 NuFntFindStart(nutex_s *, i32 *, i32 *, i32, i32) {
@@ -1340,11 +1335,9 @@ i32 NuFntFindEnd(nutex_s *, i32 *, i32 *, i32, i32) {
 extern "C" {
 
     void NuFntSet(i32) {
-        STUBBED();
     }
 
     void NuFntScale(i32, i32) {
-        STUBBED();
     }
 
     i32 NuFntGetScreenHeight(void) {
@@ -1352,19 +1345,15 @@ extern "C" {
     }
 
     void NuFntPointSize(void) {
-        STUBBED();
     }
 
     void NuFntMoveAbs(void) {
-        STUBBED();
     }
 
     void NuFntMoveRel(void) {
-        STUBBED();
     }
 
     void NuFntPos(void) {
-        STUBBED();
     }
 
     i32 NuFntPrintLenV(void) {
@@ -1392,28 +1381,22 @@ extern "C" {
     }
 
     void NuFntClose(void) {
-        STUBBED();
     }
 
     void NuFntPrintEx(void) {
-        STUBBED();
     }
 
     void *NuFntCreate(void) {
-        STUBBED();
         return NULL;
     }
 
     void NuFntDestroy(void) {
-        STUBBED();
     }
 
     void NuFntWrite(void) {
-        STUBBED();
     }
 
     void *NuFntLoadPtr(void) {
-        STUBBED();
         return NULL;
     }
 

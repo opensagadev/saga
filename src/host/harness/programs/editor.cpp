@@ -195,7 +195,7 @@ namespace saga::host::harness {
             static constexpr i32 rtl_undo_snapshots = 16;
             static constexpr std::size_t rtl_undo_bytes_per_snapshot =
                 128 * sizeof(rtl_s) + 3 * sizeof(rtl_s *) + sizeof(NUVEC);
-            static_assert(rtl_undo_bytes_per_snapshot == 0x4618);
+            static_assert(sizeof(void *) != 4 || rtl_undo_bytes_per_snapshot == 0x4618);
             static constexpr std::size_t rtl_undo_bytes = rtl_undo_bytes_per_snapshot * rtl_undo_snapshots;
             static constexpr int no_exit_requested = -1;
             static constexpr int editor_width = 640;
