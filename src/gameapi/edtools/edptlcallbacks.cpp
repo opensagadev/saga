@@ -1071,11 +1071,11 @@ static void cbPtlAddEffect(eduimenu_s *menu, eduiitem_s *, u32) {
         ++edpp_types_used;
         UpdateTotalPtls(effect);
     }
-    eduimenu_s *child = menu->child;
-    if (child != NULL)
+    eduimenu_s *parent = menu->parent;
+    if (parent != NULL)
         eduiMenuDetach(menu);
     if (menu->callback != NULL)
-        menu->callback(menu, child);
+        menu->callback(menu, parent);
 }
 
 static void cbPtlApplyGrad(eduimenu_s *, eduiitem_s *, u32) {

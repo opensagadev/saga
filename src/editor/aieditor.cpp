@@ -884,8 +884,9 @@ extern "C" {
         }
         if (selection != nullptr) {
             aieditorsettings.current_script_flags = selection->flags & 0x1e;
-            memcpy(aieditorsettings.current_script_params, selection->script_params,
-                   sizeof(aieditorsettings.current_script_params));
+            for (i32 index = 0; index < 4; ++index) {
+                aieditorsettings.current_script_params[index] = selection->script_params[index];
+            }
             return;
         }
         AISCRIPT *script = AIScriptFind(aieditor->ai_system, aieditorsettings.current_script_name, 1, 1, 1);

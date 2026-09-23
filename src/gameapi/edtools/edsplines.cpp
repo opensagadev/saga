@@ -732,13 +732,20 @@ void SplineObject::Draw(i32, i32 colour_mode, i32 straight, float show_points) {
     EdDrawEnd();
 }
 
-void SplineObject::DropPoint(VuVec &point) {
+__attribute__((force_align_arg_pointer)) void SplineObject::DropPoint(VuVec &point) {
     if (drop != 0) {
         VuVec start = point;
         point.y -= 10.0f;
         VuVec direction{0.0f, -1000.0f, 0.0f, 1.0f};
-        if (EdTerrRay(start, direction) != 0)
+        if (EdTerrRay(start, direction) != 0) {
+#if defined(__i386__) && defined(__SSE__)
+            __m128 lanes = _mm_load_ps(&start.x);
+            _mm_storel_pi(reinterpret_cast<__m64 *>(&point), lanes);
+            _mm_storeh_pi(reinterpret_cast<__m64 *>(&point.z), lanes);
+#else
             point = start;
+#endif
+        }
     }
 }
 

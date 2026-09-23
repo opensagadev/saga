@@ -1492,20 +1492,15 @@ static void edpartChangeGenRateMenu(eduimenu_s *menu, eduiitem_s *, u32) {
 
 static void edpartChangeInstanceRot(eduimenu_s *, eduiitem_s *item, u32) {
     if (edpart_nearest_type != NULL) {
-        switch (item->data) {
-            case 0:
-                edpart_nearest_type->rotation[0] =
-                    static_cast<i32>(static_cast<edui_slider_s *>(item)->value * (65536.0f / 360.0f));
-                break;
-            case 1:
-                edpart_nearest_type->rotation[1] =
-                    static_cast<i32>(static_cast<edui_slider_s *>(item)->value * (65536.0f / 360.0f));
-                break;
-            case 2:
-                edpart_nearest_type->rotation[2] =
-                    static_cast<i32>(static_cast<edui_slider_s *>(item)->value * (65536.0f / 360.0f));
-                break;
-        }
+        if (item->data == 0)
+            edpart_nearest_type->rotation[0] =
+                static_cast<i32>(static_cast<edui_slider_s *>(item)->value * (65536.0f / 360.0f));
+        else if (item->data == 1)
+            edpart_nearest_type->rotation[1] =
+                static_cast<i32>(static_cast<edui_slider_s *>(item)->value * (65536.0f / 360.0f));
+        else if (item->data == 2)
+            edpart_nearest_type->rotation[2] =
+                static_cast<i32>(static_cast<edui_slider_s *>(item)->value * (65536.0f / 360.0f));
     }
 }
 
@@ -1904,20 +1899,15 @@ static void edpartCancelSwitchTypeMenu(eduimenu_s *, eduimenu_s *) {
 
 static void edpartChangeInstanceVarRot(eduimenu_s *, eduiitem_s *item, u32) {
     if (edpart_nearest_type != NULL) {
-        switch (item->data) {
-            case 0:
-                edpart_nearest_type->rotation_random[0] =
-                    static_cast<i32>(static_cast<edui_slider_s *>(item)->value * (65536.0f / 360.0f));
-                break;
-            case 1:
-                edpart_nearest_type->rotation_random[1] =
-                    static_cast<i32>(static_cast<edui_slider_s *>(item)->value * (65536.0f / 360.0f));
-                break;
-            case 2:
-                edpart_nearest_type->rotation_random[2] =
-                    static_cast<i32>(static_cast<edui_slider_s *>(item)->value * (65536.0f / 360.0f));
-                break;
-        }
+        if (item->data == 0)
+            edpart_nearest_type->rotation_random[0] =
+                static_cast<i32>(static_cast<edui_slider_s *>(item)->value * (65536.0f / 360.0f));
+        else if (item->data == 1)
+            edpart_nearest_type->rotation_random[1] =
+                static_cast<i32>(static_cast<edui_slider_s *>(item)->value * (65536.0f / 360.0f));
+        else if (item->data == 2)
+            edpart_nearest_type->rotation_random[2] =
+                static_cast<i32>(static_cast<edui_slider_s *>(item)->value * (65536.0f / 360.0f));
     }
 }
 

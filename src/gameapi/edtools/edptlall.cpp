@@ -985,11 +985,10 @@ static void edptlcbSwitchTypeMenu(eduimenu_s *parent, eduiitem_s *, u32) {
     edptl_switchtype_menu = eduiMenuCreate(70, 70, 180, 250, ed_fnt, edptlcbCancelSwitchTypeMenu, "Switch Type");
     if (edptl_switchtype_menu == NULL)
         return;
-    const i32 switch_type = edpp_ptls[edpp_nearest].switch_type;
-    eduiMenuAddItem(edptl_switchtype_menu,
-                    eduiItemCheckCreate(0, colours, switch_type == 0, 1, edptlcbSetSwitchType, "None"));
-    eduiMenuAddItem(edptl_switchtype_menu,
-                    eduiItemCheckCreate(1, colours, switch_type == 1, 1, edptlcbSetSwitchType, "Global Switch"));
+    eduiMenuAddItem(edptl_switchtype_menu, eduiItemCheckCreate(0, colours, edpp_ptls[edpp_nearest].switch_type == 0, 1,
+                                                               edptlcbSetSwitchType, "None"));
+    eduiMenuAddItem(edptl_switchtype_menu, eduiItemCheckCreate(1, colours, edpp_ptls[edpp_nearest].switch_type == 1, 1,
+                                                               edptlcbSetSwitchType, "Global Switch"));
     eduiMenuAttach(parent, edptl_switchtype_menu);
     edptl_switchtype_menu->x = parent->x + 10;
     edptl_switchtype_menu->y = parent->y + 40;

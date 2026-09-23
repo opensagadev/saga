@@ -320,7 +320,7 @@ __attribute__((force_align_arg_pointer)) i32 creatureEditor_CalculatePos(EDCREAT
     i32 column = index % across;
     i32 row = index / across;
     nuvec_s offset = {((column + 1) / 2) * record->x_spacing * ((column & 1) ? -1.0f : 1.0f), 0.0f,
-                      -row * record->z_spacing};
+                      -record->z_spacing * row};
     NuVecRotateY(&offset, &offset, record->angle);
     NuVecAdd(position, &offset, &record->position);
     if (check_path != 0) {

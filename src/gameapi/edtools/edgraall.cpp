@@ -479,11 +479,11 @@ static void edgracbClumpTerrainMenu(eduimenu_s *parent, eduiitem_s *, u32) {
         eduiMenuCreate(70, 70, 250, 250, ed_fnt, edgracbCancelClumpTerrainMenu, "Clump Terraining");
     if (!edgra_clumpterrain_menu)
         return;
-    eduiMenuAddItem(edgra_clumpterrain_menu,
-                    eduiItemToggleCreate(0, edblack, clump.field_42, 1, edgracbToggleClumpTerrain, "Clump Terraining"));
+    eduiMenuAddItem(edgra_clumpterrain_menu, eduiItemToggleCreate(0, edblack, static_cast<i8>(clump.field_42), 1,
+                                                                  edgracbToggleClumpTerrain, "Clump Terraining"));
     if (clump.kind != 1)
-        eduiMenuAddItem(edgra_clumpterrain_menu,
-                        eduiItemToggleCreate(0, edblack, clump.field_43, 2, edgracbToggleClumpTilt, "Clump Tilting"));
+        eduiMenuAddItem(edgra_clumpterrain_menu, eduiItemToggleCreate(0, edblack, static_cast<i8>(clump.field_43), 2,
+                                                                      edgracbToggleClumpTilt, "Clump Tilting"));
     eduiMenuAddItem(edgra_clumpterrain_menu, eduiItemSliderCreate(0, edblack, 0, edgracbSetClumpTerrainOffset, -1.0f,
                                                                   2.0f, clump.field_44, "Terraining Offset"));
     edgraAttachMenu(parent, edgra_clumpterrain_menu);

@@ -4989,7 +4989,8 @@ void EdMatrixControl::cbButton(eduimenu_s *menu, eduiitem_s *item, u32 value) {
 
 void EdMatrixControl::cbChanged(eduimenu_s *, eduiitem_s *item, u32) {
     EdMatrixControl *control = static_cast<EdMatrixControl *>(item->data_ptr);
-    VuMtx source;
+    // The original stores the source matrix at a 16-byte aligned stack address.
+    VuMtx source __attribute__((aligned(16)));
     control->reference->GetMemberData(control->object, EdType_VuMtx, &source, 0);
     f32 changed_value = NuAToF(static_cast<edui_prop_s *>(item)->property_text);
     NUMTX &matrix = source.matrix;
@@ -5055,7 +5056,7 @@ void EdMatrixControl::cbChanged(eduimenu_s *, eduiitem_s *item, u32) {
     }
     matrix.m33 = 1.0f;
     control->reference->SetMemberData(control->object, EdType_VuMtx, &source, 0, nullptr);
-    char text[32];
+    char text[128];
     sprintf(text, "%.2f", changed_value);
     eduiItemPropSetText(static_cast<edui_prop_s *>(item), text);
 }

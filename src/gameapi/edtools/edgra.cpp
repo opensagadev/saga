@@ -24,11 +24,11 @@ extern "C" {
         void *terrain = TerrainGetCur();
         TerrainSetCur(edgra_page_terrain[page]);
         if (!edgra_page_calculate_done[page]) {
-            if (!edgra_page_vectors_valid[page]) {
+            if (edgra_page_vectors_valid[page]) {
+                edgraCalculatePage(page, 0);
+            } else {
                 edgraCalculatePage(page, 1);
                 edgra_page_vectors_valid[page] = 1;
-            } else {
-                edgraCalculatePage(page, 0);
             }
             edgra_page_calculate_done[page] = 1;
         }

@@ -371,7 +371,7 @@ static __used__ void locatorEditor_cbCancelRenameLocatorSetMenu(eduimenu_s *, ed
     aieditor_ClearMainMenu();
 }
 
-static __used__ void DestroyLocator(EDLOCATOR_s *locator) {
+static __used__ __attribute__((optimize("no-tree-vectorize"))) void DestroyLocator(EDLOCATOR_s *locator) {
     if (locator == nullptr) {
         return;
     }

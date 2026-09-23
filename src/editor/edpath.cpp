@@ -2524,11 +2524,9 @@ static void pathEditor_PathNodeMoved(EDAIPATHNODE_s *node) {
                  other = reinterpret_cast<EDAIPATHNODE_s *>(NuLinkedListGetNext(&path->nodes, &other->link))) {
                 if (other != node && other->shared_node == node->shared_node) {
                     other->radius = node->radius;
-                    other->position.x = node->position.x;
                     other->height_min = node->height_min;
-                    other->position.y = node->position.y;
                     other->height_max = node->height_max;
-                    other->position.z = node->position.z;
+                    other->position = node->position;
                     other->platform = node->platform;
                     other->platform_position = node->platform_position;
                     creatureEditor_PathNodeMoved(other);

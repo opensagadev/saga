@@ -76,7 +76,9 @@ static eduiiattr_s area_attr = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
 static __used__ void areaEditor_cbDeleteArea(eduimenu_s *menu, eduiitem_s *, unsigned int) {
     if (menu != NULL && menu->field_0c != NULL && area_selected() != NULL && area_selected() == area_hovered()) {
         NULISTHDR *scripts = reinterpret_cast<NULISTHDR *>(reinterpret_cast<u8 *>(aieditor) + 0x36924);
-        for (NULISTLNK *node = NuLinkedListGetHead(scripts); node != NULL; node = NuLinkedListGetNext(scripts, node)) {
+        for (NULISTLNK *node = NuLinkedListGetHead(scripts); node != NULL;
+             node =
+                 NuLinkedListGetNext(reinterpret_cast<NULISTHDR *>(reinterpret_cast<u8 *>(aieditor) + 0x36924), node)) {
             u8 *script = reinterpret_cast<u8 *>(node);
             if (*reinterpret_cast<EDAIAREA_s **>(script + 0x80) == area_selected()) {
                 *reinterpret_cast<EDAIAREA_s **>(script + 0x80) = NULL;

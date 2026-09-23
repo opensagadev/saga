@@ -630,15 +630,19 @@ static __used__ __attribute__((force_align_arg_pointer)) void creatureEditor_cbS
 }
 
 static __used__ void creatureEditor_cbSetScriptParam(eduimenu_s *menu, eduiitem_s *item, unsigned int) {
+    if (item == nullptr)
+        return;
     CreatureEditorRecord *creature = creatureEditor_Current();
-    if (item == nullptr || creature == nullptr)
+    if (creature == nullptr)
         return;
     i32 index = item->data;
     f32 value = reinterpret_cast<edui_slider_s *>(item)->value;
     if (value == aieditorsettings.current_script_params[index])
         return;
     aieditorsettings.current_script_params[index] = value;
-    u32 bit = (index & 0x20) != 0 ? 0 : 2u << index;
+    u32 bit = 2u << (index & 31);
+    if (index & 0x20)
+        bit = 0;
     aieditorsettings.current_script_flags |= bit;
     creature->script_params[index] = value;
     creature->flags = (creature->flags & ~0x1e) | aieditorsettings.current_script_flags;

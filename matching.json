@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 58.202633,
+    "fuzzy_match_percent": 58.22079,
     "total_code": "4722419",
-    "matched_code": "486921",
-    "matched_code_percent": 10.310839,
+    "matched_code": "487087",
+    "matched_code_percent": 10.314354,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 5871,
-    "matched_functions_percent": 43.62137,
+    "matched_functions": 5872,
+    "matched_functions_percent": 43.6288,
     "total_units": 1
   },
   "text": {
@@ -19054,7 +19054,7 @@
           "address": 4229424,
           "offset": 3339456,
           "size": 269,
-          "match_percent": 60.633804
+          "match_percent": 72.323944
         },
         {
           "name": "aieditor_Reset",
@@ -19149,7 +19149,7 @@
           "address": 4220016,
           "offset": 3330048,
           "size": 342,
-          "match_percent": 50.073685
+          "match_percent": 54.221054
         },
         {
           "name": "_Z17areaEditor_Renderiiff",
@@ -19236,7 +19236,7 @@
           "address": 4015104,
           "offset": 3125136,
           "size": 147,
-          "match_percent": 63.596153
+          "match_percent": 61.673077
         },
         {
           "name": "_ZL27creatureEditor_cbSetLocatorP10eduimenu_sP10eduiitem_sj",
@@ -19412,7 +19412,7 @@
           "address": 4049280,
           "offset": 3159312,
           "size": 242,
-          "match_percent": 26.47541
+          "match_percent": 38.606556
         },
         {
           "name": "_ZL29creatureEditor_cbScriptParamsP10eduimenu_sP10eduiitem_sj",
@@ -21730,7 +21730,7 @@
           "address": 4232224,
           "offset": 3342256,
           "size": 523,
-          "match_percent": 92.377625
+          "match_percent": 99.8951
         },
         {
           "name": "_Z18pathEditor_ProcessP7nupad_s",
@@ -21793,7 +21793,7 @@
           "address": 4246272,
           "offset": 3356304,
           "size": 318,
-          "match_percent": 75.71429
+          "match_percent": 78.07692
         },
         {
           "name": "_Z21creatureEditor_Renderiiff",
@@ -21920,7 +21920,7 @@
           "address": 4051456,
           "offset": 3161488,
           "size": 310,
-          "match_percent": 0.0
+          "match_percent": 84.09574
         },
         {
           "name": "locatorEditorSaveData",
@@ -26113,7 +26113,7 @@
           "address": 3604384,
           "offset": 2714416,
           "size": 637,
-          "match_percent": 77.28742
+          "match_percent": 79.65868
         },
         {
           "name": "edgraInitAllClumps",
@@ -26408,7 +26408,7 @@
           "address": 3429856,
           "offset": 2539888,
           "size": 512,
-          "match_percent": 70.35833
+          "match_percent": 72.333336
         },
         {
           "name": "_ZL20edgracbClumpFadeMenuP10eduimenu_sP10eduiitem_sj",
@@ -26671,7 +26671,7 @@
           "address": 4263248,
           "offset": 3373280,
           "size": 145,
-          "match_percent": 53.794872
+          "match_percent": 99.92308
         },
         {
           "name": "_ZL26edpartChangeInstanceVarRotP10eduimenu_sP10eduiitem_sj",
@@ -26679,7 +26679,7 @@
           "address": 4263408,
           "offset": 3373440,
           "size": 145,
-          "match_percent": 53.794872
+          "match_percent": 99.92308
         },
         {
           "name": "_ZL20edpartChangeVarStartP10eduimenu_sP10eduiitem_sj",
@@ -28069,7 +28069,7 @@
           "address": 5593968,
           "offset": 4704000,
           "size": 179,
-          "match_percent": 58.12
+          "match_percent": 94.66
         },
         {
           "name": "_ZN12SplineObject15GenBezierPointsEv",
@@ -29116,7 +29116,7 @@
           "address": 5482800,
           "offset": 4592832,
           "size": 843,
-          "match_percent": 84.92683
+          "match_percent": 84.85366
         },
         {
           "name": "_ZN13EdInputStream15SerialiseStringEPPc",
@@ -29132,7 +29132,7 @@
           "address": 5484064,
           "offset": 4594096,
           "size": 1332,
-          "match_percent": 49.311646
+          "match_percent": 51.61644
         },
         {
           "name": "_ZN15EdMatrixControl8cbButtonEP10eduimenu_sP10eduiitem_sj",
@@ -32115,7 +32115,7 @@
           "address": 3359680,
           "offset": 2469712,
           "size": 365,
-          "match_percent": 51.697674
+          "match_percent": 79.441864
         },
         {
           "name": "_ZL19edptlcbDpadModeMenuP10eduimenu_sP10eduiitem_sj",
@@ -32499,7 +32499,7 @@
           "address": 3389504,
           "offset": 2499536,
           "size": 166,
-          "match_percent": 26.969696
+          "match_percent": 100.0
         },
         {
           "name": "_ZL20edanimcbSetSoundTypeP10eduimenu_sP10eduiitem_sj",
@@ -32963,7 +32963,7 @@
           "address": 3464288,
           "offset": 2574320,
           "size": 598,
-          "match_percent": 30.467066
+          "match_percent": 30.473053
         },
         {
           "name": "_ZL14cbPtlSetFacingP10eduimenu_sP10eduiitem_sj",
