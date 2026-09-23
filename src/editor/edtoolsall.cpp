@@ -251,7 +251,6 @@ void creatureEditor_Render(i32 x, i32 y, float xscale, float yscale) {
         u32 valid_positions = *reinterpret_cast<u32 *>(record + 0x54);
         for (i32 group = 0; group < group_count; ++group) {
             if (group >= 32 || !(valid_positions & (1u << group)) || !creatureEditor_IsSelectable(creature)) {
-                render_colour = 0;
                 continue;
             }
             nuvec_s position;

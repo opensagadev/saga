@@ -1287,10 +1287,15 @@ static void cbPtlCopyEffect(eduimenu_s *menu, eduiitem_s *, u32) {
             *effect = *debtab[edpp_create_type];
             effect->native_data = NULL;
             effect->last_render_time = 0.0f;
-            char short_name[13];
-            memcpy(short_name, debtab[edpp_create_type]->name, 12);
-            short_name[12] = '\0';
-            sprintf(effect->name, "%s%03d", short_name, index);
+            const char *source_name = debtab[edpp_create_type]->name;
+            char short_name[32];
+            size_t name_length = strlen(source_name);
+            if (name_length > 12) {
+                memcpy(short_name, source_name, name_length + 1);
+                short_name[12] = '\0';
+                source_name = short_name;
+            }
+            sprintf(effect->name, "%s%03d", source_name, index);
             ++edpp_types_used;
             edpp_create_type = index;
         }

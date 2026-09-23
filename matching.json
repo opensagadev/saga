@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 57.983814,
+    "fuzzy_match_percent": 57.989697,
     "total_code": "4722419",
     "matched_code": "486581",
     "matched_code_percent": 10.303638,
@@ -19244,7 +19244,7 @@
           "address": 4015264,
           "offset": 3125296,
           "size": 175,
-          "match_percent": 58.033897
+          "match_percent": 69.66102
         },
         {
           "name": "_ZL31creatureEditor_cbSetTriggerAreaP10eduimenu_sP10eduiitem_sj",
@@ -19252,7 +19252,7 @@
           "address": 4015440,
           "offset": 3125472,
           "size": 167,
-          "match_percent": 34.435482
+          "match_percent": 34.35484
         },
         {
           "name": "_ZL14CreateCreatureiP7nuvec_si",
@@ -19452,7 +19452,7 @@
           "address": 4222448,
           "offset": 3332480,
           "size": 1704,
-          "match_percent": 71.85574
+          "match_percent": 72.03912
         },
         {
           "name": "creatureEditor_GetNearest",
@@ -21801,7 +21801,7 @@
           "address": 4246592,
           "offset": 3356624,
           "size": 1947,
-          "match_percent": 53.47651
+          "match_percent": 53.697987
         },
         {
           "name": "_Z21antinodeEditor_Renderiiff",
@@ -27877,7 +27877,7 @@
           "address": 5481136,
           "offset": 4591168,
           "size": 120,
-          "match_percent": 50.825
+          "match_percent": 66.15
         },
         {
           "name": "_ZN10KnotHelper13GetNextObjectEPv",
@@ -32571,7 +32571,7 @@
           "address": 3395824,
           "offset": 2505856,
           "size": 571,
-          "match_percent": 34.778625
+          "match_percent": 69.63359
         },
         {
           "name": "_ZL17edptlcbSoundXMenuP10eduimenu_sP10eduiitem_sj",
@@ -32731,7 +32731,7 @@
           "address": 3416448,
           "offset": 2526480,
           "size": 638,
-          "match_percent": 37.618496
+          "match_percent": 37.248554
         },
         {
           "name": "_ZL16cbChangeNameMenuP10eduimenu_sP10eduiitem_sj",
@@ -33187,7 +33187,7 @@
           "address": 3528528,
           "offset": 2638560,
           "size": 425,
-          "match_percent": 48.941746
+          "match_percent": 57.14563
         },
         {
           "name": "_ZL25edanimcbSetLocalSoundTypeP10eduimenu_sP10eduiitem_sj",

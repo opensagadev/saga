@@ -723,8 +723,10 @@ static __used__ void creatureEditor_cbSelectLocator(eduimenu_s *parent, eduiitem
 }
 
 static __used__ void creatureEditor_cbSetLocator(eduimenu_s *, eduiitem_s *item, unsigned int) {
+    if (item == nullptr)
+        return;
     CreatureEditorRecord *creature = creatureEditor_Current();
-    if (item == nullptr || creature == nullptr)
+    if (creature == nullptr)
         return;
     if (item->data == -1) {
         creature->locator = nullptr;
@@ -734,9 +736,9 @@ static __used__ void creatureEditor_cbSetLocator(eduimenu_s *, eduiitem_s *item,
     i32 index = 0;
     for (NULISTLNK *locator = NuLinkedListGetHead(list); locator != nullptr;
          locator = NuLinkedListGetNext(list, locator)) {
-        if (*reinterpret_cast<void **>(reinterpret_cast<u8 *>(locator) + 0x2c) == creature->path) {
+        if (*reinterpret_cast<void **>(reinterpret_cast<u8 *>(locator) + 0x2c) == creatureEditor_Current()->path) {
             if (index == item->data) {
-                creature->locator = locator;
+                creatureEditor_Current()->locator = locator;
                 return;
             }
             ++index;

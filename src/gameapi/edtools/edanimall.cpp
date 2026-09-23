@@ -473,9 +473,8 @@ static __attribute__((used)) void edanimcbLocalSoundTypeMenu(eduimenu_s *parent,
         return;
     }
 
-    const auto current_type = AnimParams[edanim_nearest_param_id].sound_ids[edanim_nearest_sound];
     for (i32 index = 0; index < edSfxAllCount; ++index) {
-        const bool selected = current_type == index;
+        const bool selected = AnimParams[edanim_nearest_param_id].sound_ids[edanim_nearest_sound] == index;
         eduiMenuAddItem(menu, eduiItemCheckCreate(index, colours, selected, 1, edanimcbSetLocalSoundType,
                                                   edbitsGetSoundName(index)));
         if (selected) {

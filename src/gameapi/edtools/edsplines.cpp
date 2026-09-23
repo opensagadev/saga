@@ -410,8 +410,8 @@ void SplineHelper::AddMenuItems(eduimenu_s *menu) {
 void SplineHelper::ClearLevel(i32 level) {
     if (level == -1)
         return;
-    for (SplineObject *spline = first_object; spline != NULL;) {
-        SplineObject *next = spline->next;
+    for (SplineObject *spline = static_cast<SplineObject *>(GetNextObject(NULL)); spline != NULL;) {
+        SplineObject *next = static_cast<SplineObject *>(GetNextObject(spline));
         if (spline->led_file == level)
             DestroyObject(spline, 0);
         spline = next;
