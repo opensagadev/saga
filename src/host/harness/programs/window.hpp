@@ -13,6 +13,7 @@ namespace saga::host::harness {
     struct WindowHooks final {
         void (*handle_event)(const SDL_Event &) = nullptr;
         u32 (*filter_game_input)(u32 buttons) = nullptr;
+        bool (*free_camera_ready)() = nullptr;
         int (*requested_exit_status)() = nullptr;
     };
 

@@ -223,7 +223,9 @@ struct edui_prop_s : eduiitem_s {
     u16 remaining_property_flags : 7;
     u8 unknown_4e[6];
     f32 label_width;
-    u8 unknown_58[0xc];
+    f32 button_size;
+    f32 button_x;
+    f32 button_y;
     char *property_text;
     u8 unknown_68[4];
     i32 depth;
@@ -347,6 +349,7 @@ extern "C" {
     i32 eduiUsedAlgPad(nupad_s *pad);
     extern i32 bUsingMenuFocus;
     i32 eduiGetUsingMenuFocus(void);
+    i32 eduiGetCameraEnabled(void);
     void eduiSetUsingMenuFocus(i32 enabled);
     eduimenu_s *eduiGetActiveMenu(void);
     eduimenu_s *eduiGetActiveMenuParent(void);
@@ -364,6 +367,7 @@ extern "C" {
     eduiitem_s *eduiItemSelCreate(usize data, const void *colours, i32 selected, i32 group, EdUiItemCallback callback,
                                   char *text);
     eduiitem_s *eduiItemSeparatorCreate(usize data, const void *colours);
+    eduiitem_s *eduiItemExpanderCreate(usize data, const void *colours, EdUiItemCallback callback, char *text);
     eduiitem_s *eduiItemCheckCreate(usize data, const void *colours, i32 selected, i32 group, EdUiItemCallback callback,
                                     char *text);
     eduiitem_s *eduiItemFilterCreate(usize data, const void *colours, char *text, char *value);
@@ -440,4 +444,6 @@ extern "C" {
     eduiitem_s *eduiItemPropCreateEx(usize data, const void *colours, EdUiItemCallback selected,
                                      EdUiItemCallback changed, EdUiItemCallback button, i32 button_type, char *text,
                                      char *value, i32 extra_data);
+    eduiitem_s *eduiItemPropCreate(usize data, const void *colours, EdUiItemCallback selected, EdUiItemCallback changed,
+                                   EdUiItemCallback button, i32 button_type, char *text, char *value);
 }

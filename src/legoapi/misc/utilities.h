@@ -4,6 +4,11 @@
 
 struct nuvec_s;
 struct numtx_s;
+struct VuVec;
+
+f32 LineToPointDistance(VuVec &origin, VuVec &direction, VuVec &point, VuVec *closest);
+i32 LineToSphereIntersection(VuVec &origin, VuVec &direction, VuVec &center, f32 radius, VuVec *far_intersection,
+                             VuVec *near_intersection);
 
 void MakeThrowVector(nuvec_s *result, nuvec_s *origin, nuvec_s *target, nuvec_s *target_velocity, f32 speed,
                      f32 gravity);

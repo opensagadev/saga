@@ -1,5 +1,14 @@
 #include "decomp.h"
 #include "legoapi/legoapi_types.h"
+#include "nu2api/nu3d/nuspecial.h"
+
+char const *SceneInstance::GetName() const {
+    return name.data != NULL ? name.data + 1 : NULL;
+}
+
+void SceneInstance::SetName(char const *value) {
+    name.Set(value);
+}
 
 VuVec const *SceneInstance::GetCurrentPosition() const {
     return reinterpret_cast<VuVec const *>(&current_transform.m30);
@@ -22,11 +31,17 @@ int SceneInstance::GetVisibility() const {
 }
 
 void SceneInstance::Render(VuMtx const *) const {
-    STUBBED();
+    NuSpecialDrawAt(const_cast<nuhspecial_s *>(&special), const_cast<NUMTX *>(&current_transform));
 }
 
 SceneInstance::SceneInstance() {
-    STUBBED();
+    editor_owned = 1;
+    previous = NULL;
+    next = NULL;
+    scene_id = static_cast<i16>(theSceneObjectHelper.scene_id);
+    NuMtxSetIdentity(&initial_transform);
+    NuMtxSetIdentity(&current_transform);
+    visibility = 1;
 }
 
 void SceneInstance::SetCurrentPosition(VuVec const *position) {

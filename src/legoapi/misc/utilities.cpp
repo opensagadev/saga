@@ -429,8 +429,33 @@ void LineToPlaneDistance(VuVec &, VuVec &, VuVec &) {
     STUBBED();
 }
 
-void LineToPointDistance(VuVec &, VuVec &, VuVec &, VuVec *) {
-    STUBBED();
+f32 LineToPointDistance(VuVec &origin, VuVec &direction, VuVec &point, VuVec *closest) {
+    f32 length = NuVecMag(reinterpret_cast<NUVEC *>(&direction));
+    f32 inverse_length = 1.0f / length;
+    f32 nx = direction.x * inverse_length;
+    f32 ny = direction.y * inverse_length;
+    f32 nz = direction.z * inverse_length;
+    f32 projection = (point.x - origin.x) * nx + (point.y - origin.y) * ny + (point.z - origin.z) * nz;
+
+    VuVec on_segment = origin;
+    if (projection > 0.0f) {
+        if (projection >= length) {
+            on_segment.x += direction.x;
+            on_segment.y += direction.y;
+            on_segment.z += direction.z;
+        } else {
+            on_segment.x += nx * projection;
+            on_segment.y += ny * projection;
+            on_segment.z += nz * projection;
+        }
+        on_segment.w = 0.0f;
+    }
+
+    VuVec difference = {on_segment.x - point.x, on_segment.y - point.y, on_segment.z - point.z, 0.0f};
+    f32 distance = NuVecMag(reinterpret_cast<NUVEC *>(&difference));
+    if (closest != NULL)
+        *closest = on_segment;
+    return distance;
 }
 
 void RatioBetweenEdgesXZ(nuvec_s *, nuvec_s *, nuvec_s *, nuvec_s *, nuvec_s *) {
@@ -487,8 +512,32 @@ void CalculateInterceptVector(NUVEC *origin, NUVEC *target, NUVEC *velocity, f32
         *intercept = prediction;
 }
 
-void LineToSphereIntersection(VuVec &, VuVec &, VuVec &, float, VuVec *, VuVec *) {
-    STUBBED();
+i32 LineToSphereIntersection(VuVec &origin, VuVec &direction, VuVec &center, f32 radius, VuVec *far_intersection,
+                             VuVec *near_intersection) {
+    f32 a = direction.x * direction.x + direction.y * direction.y + direction.z * direction.z;
+    if (a < 1.1920928955078125e-7f)
+        return 0;
+    f32 dx = origin.x - center.x;
+    f32 dy = origin.y - center.y;
+    f32 dz = origin.z - center.z;
+    f32 b = 2.0f * (dx * direction.x + dy * direction.y + dz * direction.z);
+    f32 c = dx * dx + dy * dy + dz * dz - radius * radius;
+    f32 discriminant = b * b - 4.0f * a * c;
+    if (discriminant < 0.0f)
+        return 0;
+    f32 root = NuFsqrt(discriminant);
+    f32 denominator = a + a;
+    if (far_intersection != NULL) {
+        f32 t = (root - b) / denominator;
+        *far_intersection =
+            VuVec(origin.x + direction.x * t, origin.y + direction.y * t, origin.z + direction.z * t, 0.0f);
+    }
+    if (near_intersection != NULL) {
+        f32 t = (-b - root) / denominator;
+        *near_intersection =
+            VuVec(origin.x + direction.x * t, origin.y + direction.y * t, origin.z + direction.z * t, 0.0f);
+    }
+    return 1;
 }
 
 i32 MatrixReflectionVU0_AXISY(numtx_s *matrix, f32 plane, f32 override_plane, numtx_s *result) {

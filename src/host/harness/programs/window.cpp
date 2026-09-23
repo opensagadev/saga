@@ -21,6 +21,7 @@
 #include "host/platform/graphics.hpp"
 #include "host/platform/input.hpp"
 #include "host/platform/keyboard.hpp"
+#include "host/platform/mouse.hpp"
 #include "host/platform/runtime.hpp"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/legoapi_types.h"
@@ -826,6 +827,8 @@ i32 saga::host::harness::run_window(const WindowOptions &options) {
     while (!quit_requested) {
         SDL_Event event{};
         while (SDL_PollEvent(&event)) {
+            if (event.type == SDL_EVENT_KEY_DOWN)
+                saga::host::queue_key_event(event.key.scancode, event.key.mod);
             if (options.hooks.handle_event)
                 options.hooks.handle_event(event);
             if (options.offscreen) {
@@ -865,9 +868,14 @@ i32 saga::host::harness::run_window(const WindowOptions &options) {
         if (!options.offscreen) {
             const bool *keyboard = SDL_GetKeyboardState(nullptr);
             saga::host::update_keyboard_state(keyboard);
+            float mouse_x = 0.0f;
+            float mouse_y = 0.0f;
+            const SDL_MouseButtonFlags mouse_buttons = SDL_GetMouseState(&mouse_x, &mouse_y);
+            saga::host::update_mouse_state(mouse_x, mouse_y, mouse_buttons, host_window_width, host_window_height);
             keyboard_buttons |= HostPlatformKeyboardButtons(keyboard);
         } else {
             saga::host::update_keyboard_state(nullptr);
+            saga::host::update_mouse_state(0.0f, 0.0f, 0, host_window_width, host_window_height);
         }
         if (options.hooks.filter_game_input)
             keyboard_buttons = options.hooks.filter_game_input(keyboard_buttons);
@@ -882,7 +890,8 @@ i32 saga::host::harness::run_window(const WindowOptions &options) {
             controls |= keyboard[SDL_SCANCODE_KP_8] ? HOST_FREE_CAMERA_NUMPAD_8 : 0;
             controls |= keyboard[SDL_SCANCODE_LSHIFT] || keyboard[SDL_SCANCODE_RSHIFT] ? HOST_FREE_CAMERA_SHIFT : 0;
             HostFreeCameraSetControls(controls);
-            HostFreeCameraSetReady(host_scripted_play_ready());
+            HostFreeCameraSetReady(options.hooks.free_camera_ready ? options.hooks.free_camera_ready()
+                                                                   : host_scripted_play_ready());
         }
 
         if (host_numain_done.load(std::memory_order_acquire)) {

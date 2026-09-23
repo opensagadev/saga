@@ -72,6 +72,7 @@ _HOST_COMMON_SRCS = [source for source in _ENGINE_SRCS if source not in _HOST_EX
     "host/platform/free_camera_culling.cpp",
     "host/platform/input.cpp",
     "host/platform/keyboard.cpp",
+    "host/platform/mouse.cpp",
     "host/platform/opensl.cpp",
     "host/platform/runtime.cpp",
 ]
@@ -282,6 +283,12 @@ cc_binary(
             "-m32",
             "-Wl,--wrap=NuFrameEnd",
             "-Wl,--wrap=NuKeyboard",
+            "-Wl,--wrap=NuKeyGet",
+            "-Wl,--wrap=NuKeyFlush",
+            "-Wl,--wrap=NuMouseReadXVel",
+            "-Wl,--wrap=NuMouseReadYVel",
+            "-Wl,--wrap=NuMouseReadZVel",
+            "-Wl,--wrap=NuMouseReadButtons",
         ],
         "//bazel/platforms:macos": [
             "-framework",
@@ -325,6 +332,12 @@ cc_binary(
         "-Wl,--wrap=NuFrameBegin",
         "-Wl,--wrap=NuFrameEnd",
         "-Wl,--wrap=NuKeyboard",
+        "-Wl,--wrap=NuKeyGet",
+        "-Wl,--wrap=NuKeyFlush",
+        "-Wl,--wrap=NuMouseReadXVel",
+        "-Wl,--wrap=NuMouseReadYVel",
+        "-Wl,--wrap=NuMouseReadZVel",
+        "-Wl,--wrap=NuMouseReadButtons",
     ] + select({
         ":native_linux_debug": ["-fsanitize=address,undefined"],
         "//conditions:default": [],

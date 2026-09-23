@@ -4,14 +4,18 @@
 
 #include "nu2api/nucore/nukeyboard.h"
 
+#include <algorithm>
 #include <array>
 #include <atomic>
+#include <deque>
+#include <mutex>
+#include <utility>
 
 namespace {
 
     // NuKeyboard uses the original PC set-1 scan codes, not SDL scan codes.
     constexpr auto sdl_scancodes = [] {
-        std::array<SDL_Scancode, 0x59> keys{};
+        std::array<SDL_Scancode, 0xd4> keys{};
         keys[0x01] = SDL_SCANCODE_ESCAPE;
         keys[0x02] = SDL_SCANCODE_1;
         keys[0x03] = SDL_SCANCODE_2;
@@ -97,14 +101,30 @@ namespace {
         keys[0x53] = SDL_SCANCODE_KP_PERIOD;
         keys[0x57] = SDL_SCANCODE_F11;
         keys[0x58] = SDL_SCANCODE_F12;
+        keys[0x9d] = SDL_SCANCODE_RCTRL;
+        keys[0xb8] = SDL_SCANCODE_RALT;
+        keys[0xc8] = SDL_SCANCODE_UP;
+        keys[0xcb] = SDL_SCANCODE_LEFT;
+        keys[0xcd] = SDL_SCANCODE_RIGHT;
+        keys[0xd0] = SDL_SCANCODE_DOWN;
+        keys[0xd2] = SDL_SCANCODE_INSERT;
+        keys[0xd3] = SDL_SCANCODE_DELETE;
         return keys;
     }();
 
     std::array<std::atomic<bool>, sdl_scancodes.size()> held{};
+    std::atomic<bool> editor_arrow_selection_enabled{true};
+    std::mutex key_queue_mutex;
+    std::deque<std::pair<i32, u32>> key_queue;
+    bool editing_property_text = false;
 
 } // namespace
 
 namespace saga::host {
+
+    void set_editor_arrow_selection_enabled(bool enabled) noexcept {
+        editor_arrow_selection_enabled.store(enabled, std::memory_order_release);
+    }
 
     void update_keyboard_state(const bool *keys) noexcept {
         for (std::size_t index = 0; index < held.size(); ++index) {
@@ -118,10 +138,48 @@ namespace saga::host {
         }
     }
 
+    void queue_key_event(SDL_Scancode scancode, SDL_Keymod modifiers) {
+        const auto match = std::find(sdl_scancodes.begin(), sdl_scancodes.end(), scancode);
+        if (match == sdl_scancodes.end() || scancode == SDL_SCANCODE_UNKNOWN)
+            return;
+        const i32 key = static_cast<i32>(match - sdl_scancodes.begin());
+        const u32 original_modifiers = (modifiers & SDL_KMOD_SHIFT) != 0 ? 1u : 0u;
+        std::lock_guard lock{key_queue_mutex};
+        // The game maps WASD to movement; feeding those keystrokes to the
+        // editor's optional menu type-ahead also changes its selection. The
+        // property editor explicitly calls NuKeyFlush when text entry begins.
+        if (!editing_property_text)
+            return;
+        if (key_queue.size() == 256)
+            key_queue.pop_front();
+        key_queue.emplace_back(key, original_modifiers);
+    }
+
 } // namespace saga::host
 
 extern "C" i32 __wrap_NuKeyboard(i32 key) {
+    if ((key == 0xcb || key == 0xcd) && !editor_arrow_selection_enabled.load(std::memory_order_acquire))
+        return 0;
     return key >= 0 && static_cast<std::size_t>(key) < held.size()
                ? held[static_cast<std::size_t>(key)].load(std::memory_order_acquire)
                : 0;
+}
+
+extern "C" i32 __wrap_NuKeyGet(u32 *modifiers) {
+    std::lock_guard lock{key_queue_mutex};
+    if (!editing_property_text || key_queue.empty())
+        return -1;
+    const auto [key, flags] = key_queue.front();
+    key_queue.pop_front();
+    if (key == 0x1c || key == 0x01)
+        editing_property_text = false;
+    if (modifiers)
+        *modifiers = flags;
+    return key;
+}
+
+extern "C" void __wrap_NuKeyFlush() {
+    std::lock_guard lock{key_queue_mutex};
+    key_queue.clear();
+    editing_property_text = true;
 }

@@ -10,6 +10,8 @@
 #include "host/harness/frame_hook.hpp"
 #include "host/harness/programs/window.hpp"
 #include "host/harness/startup.hpp"
+#include "host/platform/keyboard.hpp"
+#include "host/platform/mouse.hpp"
 #include "legoapi/core/input/gamepads.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/misc/androidbatman.h"
@@ -21,7 +23,6 @@
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nucore/nupad.h"
 #include "nu2api/nucore/nustring.h"
-#include "nu2api/numath/nutrig.h"
 #include "nu2api/nuplatform/nuplatform.h"
 
 #include <algorithm>
@@ -29,6 +30,7 @@
 #include <atomic>
 #include <cmath>
 #include <iostream>
+#include <limits>
 #include <mutex>
 #include <optional>
 #include <string>
@@ -37,8 +39,15 @@
 #include <vector>
 
 extern eduimenu_s *edLevelActiveMenu;
+extern eduimenu_s *edLevelPinnedMenu;
 extern i32 edLevelDestroyActiveMenu;
 extern ClassEditor theClassEditor;
+extern PropertyTool thePropertyTool;
+void EdDrawBegin(i32 material);
+void EdDrawEnd();
+void EdDrawLineCircleX(VuVec const &centre, float radius, i32 colour, i32 segments);
+void EdDrawLineCircleY(VuVec const &centre, float radius, i32 colour, i32 segments);
+void EdDrawLineCircleZ(VuVec const &centre, float radius, i32 colour, i32 segments);
 
 namespace saga::host::harness {
     namespace {
@@ -47,10 +56,7 @@ namespace saga::host::harness {
             std::optional<std::string> destination;
         };
 
-        struct HostSceneObject final : SpecialObject {
-            i32 owned = 0;
-            i32 removed = 0;
-        };
+        using HostSceneObject = SceneObject;
         DECOMP_ASSERT(sizeof(HostSceneObject) == 0x2c, "HostSceneObject size");
 
         class PlatformSelection final {
@@ -86,6 +92,7 @@ namespace saga::host::harness {
                                                                     : DestinationState::not_requested;
                 this->destination = nullptr;
                 this->registered_scene = nullptr;
+                this->registered_scene_id = -1;
                 this->scene_objects.clear();
                 theClassEditor.selected_objects = {};
                 theClassEditor.current_object = {};
@@ -93,13 +100,17 @@ namespace saga::host::harness {
                 this->active_view = EditorView::game;
                 this->module_menu = nullptr;
                 this->previous_editor_buttons = 0;
+                this->last_selection_count = -1;
+                this->last_property_menu_count = -1;
                 this->toggle_requests.store(0, std::memory_order_relaxed);
                 this->editor_buttons.store(0, std::memory_order_relaxed);
                 this->capture_game_input.store(false, std::memory_order_relaxed);
+                this->free_camera_enabled = false;
+                this->free_camera_ready.store(false, std::memory_order_relaxed);
+                saga::host::set_editor_mouse_enabled(false);
                 this->exit_status.store(no_exit_requested, std::memory_order_relaxed);
                 set_frame_callback(&EditorSession::update);
-                LOG_INFO(
-                    "editor: F1 toggles module editors, F2 toggles the Level Editor; Enter selects; Escape goes back");
+                LOG_INFO("editor: F1 modules, F2 Level Editor, F3 free camera; Enter selects, Escape goes back");
             }
 
             static void handle_event(const SDL_Event &event) {
@@ -109,6 +120,8 @@ namespace saga::host::harness {
                     instance().toggle_requests.fetch_or(1u, std::memory_order_release);
                 else if (!event.key.repeat && event.key.scancode == SDL_SCANCODE_F2)
                     instance().toggle_requests.fetch_or(2u, std::memory_order_release);
+                else if (!event.key.repeat && event.key.scancode == SDL_SCANCODE_F3)
+                    instance().toggle_requests.fetch_or(4u, std::memory_order_release);
                 if (!instance().capture_game_input.load(std::memory_order_acquire))
                     return;
                 char input = 0;
@@ -134,10 +147,21 @@ namespace saga::host::harness {
                 return instance().exit_status.load(std::memory_order_acquire);
             }
 
+            static bool is_free_camera_ready() {
+                return instance().free_camera_ready.load(std::memory_order_acquire);
+            }
+
             static u32 filter_game_input(u32 buttons) {
                 EditorSession &session = instance();
                 const bool *keyboard = SDL_GetKeyboardState(nullptr);
-                u32 editor_buttons = buttons & ~(GAMEPAD_START | GAMEPAD_TAG);
+                // The game binds WASD and E/F to pad actions. Editor keyboard
+                // shortcuts use those keys directly, so only dedicated menu
+                // keys may enter the synthetic editor pad.
+                u32 editor_buttons = 0;
+                if (keyboard[SDL_SCANCODE_UP])
+                    editor_buttons |= GAMEPAD_DUP;
+                if (keyboard[SDL_SCANCODE_DOWN])
+                    editor_buttons |= GAMEPAD_DDOWN;
                 if (keyboard[SDL_SCANCODE_RETURN] || keyboard[SDL_SCANCODE_KP_ENTER])
                     editor_buttons |= GAMEPAD_MENUSELECT;
                 if (keyboard[SDL_SCANCODE_ESCAPE])
@@ -148,6 +172,7 @@ namespace saga::host::harness {
 
           private:
             static constexpr std::size_t font_working_headroom = 16 * 1024;
+            static constexpr std::size_t editor_pool_size = 1024 * 1024;
             static constexpr int no_exit_requested = -1;
             static constexpr int editor_width = 640;
             static constexpr int editor_height = 448;
@@ -194,6 +219,12 @@ namespace saga::host::harness {
                 if (requests & 2u)
                     this->requested_view =
                         this->requested_view == EditorView::level ? EditorView::game : EditorView::level;
+                if ((requests & 4u) && this->active_view == EditorView::level) {
+                    this->free_camera_enabled = !this->free_camera_enabled;
+                    this->free_camera_ready.store(this->free_camera_enabled, std::memory_order_release);
+                    LOG_INFO("editor: free camera %s (numpad 4/5/6/8, hold Shift to move)",
+                             this->free_camera_enabled ? "on" : "off");
+                }
 
                 this->update_destination();
                 if (this->destination_state == DestinationState::failed)
@@ -220,32 +251,42 @@ namespace saga::host::harness {
                     return;
 
                 nupad_s pad = this->make_editor_pad();
-                const auto menu_positions = this->capture_menu_positions();
                 if (this->active_view == EditorView::level) {
-                    eduimenu_s *menu = edLevelActiveMenu;
-                    this->update_scene_filter();
-                    if (menu)
-                        eduiMenuProcess(menu, FRAMETIME, &pad);
+                    saga::host::set_editor_arrow_selection_enabled(!thePropertyTool.HasActiveMenu());
                     if (edLevelDestroyActiveMenu) {
                         edLevelDestroyActiveMenu = 0;
                         this->destroy_level_menu();
-                        theLevelEditor.CreateMenu();
-                        eduiSetActiveMenu(edLevelActiveMenu);
-                        eduiSetDefaultActiveMenu(edLevelActiveMenu);
                     }
-                    if (!edLevelActiveMenu) {
-                        this->requested_view = EditorView::game;
-                        this->return_to_game();
-                        return;
+                    const auto menu_positions = this->capture_menu_positions();
+                    this->update_scene_filter();
+                    nupad_s *pads[]{&pad, nullptr};
+                    ThingProcessData process_data{FRAMETIME, static_cast<u32>(Paused), pads, 2};
+                    theLevelEditor.ProcessEvenWhenPaused(&process_data);
+                    if (this->last_selection_count != theClassEditor.selected_objects.count ||
+                        this->last_property_menu_count != thePropertyTool.menu_count) {
+                        this->last_selection_count = theClassEditor.selected_objects.count;
+                        this->last_property_menu_count = thePropertyTool.menu_count;
+                        LOG_INFO("editor: selected objects=%d property panels=%d", this->last_selection_count,
+                                 this->last_property_menu_count);
+                        for (PropertyMenu *menu = thePropertyTool.active_menu; menu; menu = menu->next)
+                            LOG_INFO("editor: property panel=%p title=%s at (%d,%d)", menu->menu,
+                                     menu->menu && menu->menu->title ? menu->menu->title : "",
+                                     menu->menu ? menu->menu->x : 0, menu->menu ? menu->menu->y : 0);
+                        LOG_INFO("editor: level menu=%p pinned=%p class menu=%p", edLevelActiveMenu, edLevelPinnedMenu,
+                                 theClassEditor.menu);
                     }
                     this->constrain_menus(menu_positions);
                     if (NuRndrBeginSceneEx(-1, -2, 0)) {
-                        eduiMenuRender(edLevelActiveMenu);
+                        eduiFlushInteracts();
+                        this->render_scene_object_debug();
+                        ThingRenderData render_data{};
+                        theLevelEditor.Display(&render_data);
                         NuRndrEndSceneEx(0);
                     }
                     return;
                 }
 
+                const auto menu_positions = this->capture_menu_positions();
                 eduimenu_s *main_menu = edGetMainMenu();
                 const bool at_main_menu =
                     main_menu && !main_menu->child && !edmainCurrent() && eduiGetActiveMenu() == main_menu;
@@ -334,6 +375,18 @@ namespace saga::host::harness {
             }
 
             [[nodiscard]] bool initialize_editor() {
+                if (!this->editor_pool_installed) {
+                    MemoryManager &manager = theMemoryManager;
+                    manager.cursor = reinterpret_cast<usize>(this->editor_pool.data());
+                    manager.end = manager.cursor + this->editor_pool.size();
+                    manager.cursor_cell = &manager.cursor;
+                    manager.end_cell = &manager.end;
+                    manager.high_water = manager.cursor;
+                    manager.remaining += this->editor_pool.size();
+                    this->editor_pool_installed = true;
+                    LOG_INFO("editor: supplied %zu bytes of persistent host memory for UI objects",
+                             this->editor_pool.size());
+                }
                 if (!system_qfont) {
                     VARIPTR cursor;
                     cursor.u8_ptr = this->font_storage.data() + font_working_headroom;
@@ -387,16 +440,28 @@ namespace saga::host::harness {
                 const i32 scene_id = theLevelEditor.AddScene(const_cast<char *>("GAME"), scene, 1);
                 theLevelEditor.scenes[scene_id].editable = 1;
                 const i32 special_count = NuGScnNumSpecials(scene);
-                theClassEditor.selected_objects = {};
+                if (theClassEditor.selected_objects.first) {
+                    ClassObject empty{};
+                    theClassEditor.SelectObject(empty, 0);
+                }
                 theClassEditor.current_object = {};
+                if (this->registered_scene_id >= 0 && this->registered_scene_id < 10) {
+                    theSceneObjectHelper.scenes[this->registered_scene_id] = nullptr;
+                    theSceneObjectHelper.scene_counts[this->registered_scene_id] = 0;
+                }
+                while (theSceneObjectHelper.owned_first)
+                    theSceneObjectHelper.DestroyObject(theSceneObjectHelper.owned_first, 0);
                 this->scene_objects.clear();
                 this->scene_objects.resize(special_count);
                 for (i32 index = 0; index < special_count; ++index) {
                     HostSceneObject &object = this->scene_objects[index];
                     NuGScnGetSpecial(&object.special, scene, index);
-                    object.scene_id = scene_id;
                     object.attributes = 0x12400000;
                 }
+                theSceneObjectHelper.scenes[scene_id] = this->scene_objects.data();
+                theSceneObjectHelper.scene_counts[scene_id] = special_count;
+                theSceneObjectHelper.scene_object_count = special_count;
+                this->registered_scene_id = scene_id;
                 this->registered_scene = scene;
                 i32 enumerated = 0;
                 HostSceneObject *first = nullptr;
@@ -411,14 +476,65 @@ namespace saga::host::harness {
                          first_name ? first_name : "none");
             }
 
+            void render_scene_object_debug() const {
+                // The original helper renders its editor-owned objects from a linked list.
+                // The host currently registers the scene specials directly, so draw the
+                // hidden subset here while the Level Editor's 3D scene is active.
+                if (theSceneObjectHelper.show_hidden_solid != 0 || theSceneObjectHelper.show_hidden_wire != 0) {
+                    for (const HostSceneObject &object : this->scene_objects) {
+                        if (object.reserved_0x28 || object.GetVisibility() != 0 || !object.Exists())
+                            continue;
+
+                        if (theSceneObjectHelper.show_hidden_solid != 0) {
+                            EdDrawBegin(0);
+                            object.Render(nullptr);
+                            EdDrawEnd();
+                        } else {
+                            this->draw_object_wire_sphere(object, 0x80808080);
+                        }
+                    }
+                }
+
+                // Draw selection feedback until the original sphere primitive is available.
+                const ClassObjectList &selected = theClassEditor.selected_objects;
+                if (selected.count <= 0)
+                    return;
+                i32 remaining = selected.count;
+                for (ClassObjectListEntry *entry = selected.first; entry && remaining > 0;
+                     entry = entry->next, --remaining) {
+                    bool found = false;
+                    for (const HostSceneObject &object : this->scene_objects) {
+                        if (entry->object == &object && object.Exists()) {
+                            this->draw_object_wire_sphere(object, 0xff800000);
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (found)
+                        continue;
+                    for (SceneInstance *object = theSceneObjectHelper.owned_first; object; object = object->next) {
+                        if (entry->object == object) {
+                            this->draw_object_wire_sphere(*object, 0xff800000);
+                            break;
+                        }
+                    }
+                }
+            }
+
+            void draw_object_wire_sphere(const HostSceneObject &object, i32 colour) const {
+                const VuVec *position = object.GetCurrentPosition();
+                if (!position)
+                    return;
+                const float radius = std::max(object.GetRadius(), 0.01f);
+                EdDrawBegin(0);
+                EdDrawLineCircleX(*position, radius, colour, 16);
+                EdDrawLineCircleY(*position, radius, colour, 16);
+                EdDrawLineCircleZ(*position, radius, colour, 16);
+                EdDrawEnd();
+            }
+
             void *next_scene_object(void *previous) {
-                if (this->scene_objects.empty())
-                    return nullptr;
-                if (!previous)
-                    return &this->scene_objects.front();
-                auto *object = static_cast<HostSceneObject *>(previous);
-                auto *next = object + 1;
-                return next < this->scene_objects.data() + this->scene_objects.size() ? next : nullptr;
+                return theSceneObjectHelper.GetNextObject(previous);
             }
 
             static i32 process_scene_filter(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *) {
@@ -504,32 +620,14 @@ namespace saga::host::harness {
             }
 
             static void select_scene_object(eduimenu_s *, eduiitem_s *item, u32) {
-                auto &session = instance();
                 auto *object = static_cast<HostSceneObject *>(item->data_ptr);
                 if (!object)
                     return;
                 ClassObject selection{theClassEditor.pending_object.ed_class, object, nullptr};
                 theClassEditor.pending_object = selection;
                 theClassEditor.current_object = selection;
-                session.selected_entry = {nullptr, nullptr, selection.ed_class, object, nullptr};
-                theClassEditor.selected_objects = {&session.selected_entry, &session.selected_entry, 1};
-
-                VuVec position;
-                f32 radius;
-                if (theClassEditor.selected_objects.GetAveragePosition(position, radius)) {
-                    theLevelEditor.background_colour[0] = position.x;
-                    theLevelEditor.background_colour[1] = position.y;
-                    theLevelEditor.background_colour[2] = position.z;
-                    theLevelEditor.background_colour[3] = position.w;
-                    edcamSetPos(reinterpret_cast<NUVEC *>(theLevelEditor.background_colour));
-                    if (auto *camera = edmainGetCamera()) {
-                        const i32 angle = static_cast<i32>(0.5f * camera->fov * 10430.3779296875f);
-                        const f32 cosine = NuTrigTable[((angle + 0x4000) >> 1) & 0x7fff];
-                        const f32 sine = NuTrigTable[(angle >> 1) & 0x7fff];
-                        if (sine != 0.0f)
-                            edcamSetDist(-1.2f * radius * cosine / sine);
-                    }
-                }
+                theClassEditor.SelectObject(selection, 0);
+                theClassEditor.FocusSelected();
                 LOG_INFO("editor: selected scene object %s", object->GetName());
                 theLevelEditor.CloseMenu();
             }
@@ -540,21 +638,32 @@ namespace saga::host::harness {
                 this->previous_editor_buttons = this->editor_buttons.load(std::memory_order_acquire);
                 this->capture_game_input.store(true, std::memory_order_release);
                 if (view == EditorView::level) {
+                    edmainSetCursorEnabled(1);
+                    saga::host::set_editor_mouse_enabled(true);
+                    const auto [mouse_x, mouse_y] = saga::host::editor_mouse_position();
+                    eduiSetCursorCoords(std::clamp(mouse_x, 0.0f, 1.0f), std::clamp(mouse_y, 0.0f, 1.0f));
                     edLevelDestroyActiveMenu = 0;
                     theLevelEditor.Enter();
                     theLevelEditor.CreateMenu();
                     eduiSetActiveMenu(edLevelActiveMenu);
                     eduiSetDefaultActiveMenu(edLevelActiveMenu);
                 } else {
+                    edmainSetCursorEnabled(0);
                     eduiSetActiveMenu(this->module_menu ? this->module_menu : edGetMainMenu());
                     eduiSetDefaultActiveMenu(edGetMainMenu());
                 }
                 this->active_view = view;
                 this->lifecycle = Lifecycle::in_editor;
+                this->free_camera_ready.store(view == EditorView::level && this->free_camera_enabled,
+                                              std::memory_order_release);
                 LOG_INFO("editor: entered %s", view == EditorView::level ? "Level Editor" : "module editors");
             }
 
             void return_to_game() {
+                saga::host::set_editor_arrow_selection_enabled(true);
+                this->free_camera_ready.store(false, std::memory_order_release);
+                saga::host::set_editor_mouse_enabled(false);
+                edmainSetCursorEnabled(0);
                 if (this->active_view == EditorView::level) {
                     edLevelDestroyActiveMenu = 0;
                     theLevelEditor.Exit();
@@ -608,9 +717,11 @@ namespace saga::host::harness {
                 if (theRegistry.class_count != 0)
                     return;
 
-                // These names and flags are the four original RegisterClass calls
-                // in PlaceableHelper, SplineHelper (twice), and SceneObjectHelper.
-                // Their object-editing helpers are not initialized by the host yet.
+                thePlaceableHelper.Initialise();
+                theSceneObjectHelper.Initialise();
+
+                // Spline and Knot registration remains available while their
+                // original helpers are still incomplete.
                 static EdClassInterfaceVTable menu_interface_vtable = [] {
                     EdClassInterfaceVTable table{};
                     table.get_next_object = [](EdClassInterface *, void *) -> void * { return nullptr; };
@@ -619,54 +730,29 @@ namespace saga::host::harness {
                     table.clear_level = [](EdClassInterface *, i32) {};
                     table.flush = [](EdClassInterface *) {};
                     table.add_menu_items = [](EdClassInterface *, eduimenu_s *) {};
+                    table.process = [](EdClassInterface *, void *, EdInputContext &) {};
+                    table.render = [](EdClassInterface *, void *, i32) {};
+                    table.distance_to_ray = [](EdClassInterface *, VuVec &, VuVec &, void *, EdRef **) {
+                        return std::numeric_limits<f32>::max();
+                    };
+                    table.distance_to_point = [](EdClassInterface *, VuVec &, void *, EdRef **) {
+                        return std::numeric_limits<f32>::max();
+                    };
                     return table;
                 }();
                 for (EdClassInterface &interface : this->menu_class_interfaces)
                     interface.vtable = &menu_interface_vtable;
-                static EdClassInterfaceVTable scene_object_menu_vtable = [] {
-                    auto table = menu_interface_vtable;
-                    table.get_next_object = [](EdClassInterface *, void *previous) -> void * {
-                        return EditorSession::instance().next_scene_object(previous);
-                    };
-                    table.add_menu_items = [](EdClassInterface *, eduimenu_s *menu) {
-                        theSceneObjectHelper.AddMenuItems(menu);
-                    };
-                    return table;
-                }();
-                this->menu_class_interfaces[2].vtable = &scene_object_menu_vtable;
-                theRegistry.RegisterClass(const_cast<char *>("Placeable"), nullptr, 0);
                 theRegistry.RegisterClass(const_cast<char *>("Spline"), &this->menu_class_interfaces[0], 0x08400100);
                 theRegistry.RegisterClass(const_cast<char *>("Knot"), &this->menu_class_interfaces[1], 0x18400000);
-                EdClass *scene_class = theRegistry.RegisterClass(const_cast<char *>("SceneObject"),
-                                                                 &this->menu_class_interfaces[2], 0x100);
-                static EdRefPlaceable scene_object_name;
-                scene_object_name.type_id = EdType_String;
-                scene_object_name.name = const_cast<char *>("Object");
-                scene_object_name.member_offset = static_cast<i32>(0x80000003);
-                scene_object_name.size = 0;
-                scene_object_name.attributes = 0x10400002;
-                scene_class->AddType(&scene_object_name);
-                static EdRefPlaceable scene_object_transform;
-                scene_object_transform.type_id = EdType_VuMtx;
-                scene_object_transform.name = const_cast<char *>("Mtx");
-                scene_object_transform.member_offset = static_cast<i32>(0x80000006);
-                scene_object_transform.size = 0;
-                scene_object_transform.attributes = 0x10400008;
-                scene_class->AddType(&scene_object_transform);
-                static EdRefPlaceable scene_object_radius;
-                scene_object_radius.type_id = EdType_Float;
-                scene_object_radius.name = const_cast<char *>("Radius");
-                scene_object_radius.member_offset = static_cast<i32>(0x80000007);
-                scene_object_radius.size = 0;
-                scene_object_radius.attributes = 0x10400040;
-                scene_class->AddType(&scene_object_radius);
-                LOG_INFO("editor: registered Level Editor classes and scene-object enumeration");
+                LOG_INFO("editor: initialized original Placeable and SceneObject class metadata");
             }
 
             [[nodiscard]] nupad_s make_editor_pad() {
                 nupad_s pad{};
-                if (Game_NuPad && Game_NuPad[0])
-                    pad = *Game_NuPad[0];
+                pad.analog_left_x = 0x80;
+                pad.analog_left_y = 0x80;
+                pad.analog_right_x = 0x80;
+                pad.analog_right_y = 0x80;
 
                 const u32 buttons = this->editor_buttons.load(std::memory_order_acquire);
                 pad.digital_buttons = buttons;
@@ -722,22 +808,28 @@ namespace saga::host::harness {
             DestinationState destination_state = DestinationState::not_requested;
             LEVELDATA_s *destination = nullptr;
             nugscn_s *registered_scene = nullptr;
+            i32 registered_scene_id = -1;
             EditorView requested_view = EditorView::modules;
             EditorView active_view = EditorView::game;
             eduimenu_s *module_menu = nullptr;
             u32 previous_editor_buttons = 0;
+            i32 last_selection_count = -1;
+            i32 last_property_menu_count = -1;
             std::atomic<unsigned> toggle_requests{0};
             std::atomic<u32> editor_buttons{0};
             std::atomic<bool> capture_game_input{false};
+            bool free_camera_enabled = false;
+            std::atomic<bool> free_camera_ready{false};
             std::atomic<int> exit_status{no_exit_requested};
             alignas(16) std::array<u8, 64 * 1024> font_storage{};
             alignas(16) std::array<u8, 16 * 1024> registry_storage{};
+            alignas(16) std::array<u8, editor_pool_size> editor_pool{};
+            bool editor_pool_installed = false;
             std::vector<HostSceneObject> scene_objects;
-            ClassObjectListEntry selected_entry{};
             std::mutex filter_input_mutex;
             std::string pending_filter_input;
             decltype(eduiitem_s::render) scene_object_item_renderer = nullptr;
-            std::array<EdClassInterface, 3> menu_class_interfaces{};
+            std::array<EdClassInterface, 2> menu_class_interfaces{};
         };
 
         void print_editor_usage(std::string_view executable) {
@@ -745,6 +837,7 @@ namespace saga::host::harness {
                       << "With no destination, the game follows its normal startup flow.\n"
                       << "A destination may be a gameplay level name or an area file name.\n"
                       << "F1 toggles module editors; F2 toggles the Level Editor.\n"
+                      << "F3 toggles free camera in the Level Editor; numpad 4/5/6/8 rotate, Shift moves.\n"
                       << "Enter selects; Escape goes back.\n";
         }
 
@@ -779,7 +872,9 @@ namespace saga::host::harness {
             WindowOptions window;
             window.hooks.handle_event = &EditorSession::handle_event;
             window.hooks.filter_game_input = &EditorSession::filter_game_input;
+            window.hooks.free_camera_ready = &EditorSession::is_free_camera_ready;
             window.hooks.requested_exit_status = &EditorSession::requested_exit_status;
+            window.camera_free = true;
             return run_window(window);
         }
 

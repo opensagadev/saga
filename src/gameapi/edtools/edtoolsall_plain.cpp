@@ -25,6 +25,7 @@
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nu3d/numtl.h"
 #include "nu2api/nu3d/nuprim.h"
+#include "nu2api/nu3d/nuprim_internal.h"
 #include "nu2api/nu3d/nuqfnt.h"
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nu3d/android/nuobject_android.h"
@@ -57,6 +58,9 @@ static f32 edui_font_scale_x = 0.9f;
 static f32 edui_font_scale_y = 0.9f;
 static f32 edmain_menu_scale = 1.0f;
 static u32 edui_cursor_colour = 0xff000000;
+static char edui_prop_edit_buffer[256];
+static char edui_prop_original_buffer[256];
+static i32 edui_prop_edit_cursor = -1;
 static char *edpp_save_names[6];
 static i32 edptl_count;
 static NUVEC entry_position;
@@ -213,6 +217,7 @@ extern "C" {
     static i32 eduicbProcessTexturePick(eduimenu_s *, eduiitem_s *, f32, nupad_s *);
     static i32 eduicbProcessColourSlider(eduimenu_s *, eduiitem_s *, f32, nupad_s *);
     static i32 eduicbProcessExpander(eduimenu_s *, eduiitem_s *, f32, nupad_s *);
+    static void eduicbItemExpanderClose(edui_expander_s *);
     static i32 eduicbProcessFilter(eduimenu_s *, eduiitem_s *, f32, nupad_s *);
     static i32 eduicbProcessFilePick(eduimenu_s *, eduiitem_s *, f32, nupad_s *);
     static i32 eduicbProcessTextPick(eduimenu_s *, eduiitem_s *, f32, nupad_s *);
@@ -2418,7 +2423,7 @@ extern "C" {
     void edqrand(void) {
         STUBBED();
     }
-    void eduiAddPropTextPickEnt(void) {
+    void eduiAddPropTextPickEnt(eduimenu_s *, eduiitem_s *) {
         STUBBED();
     }
     void eduiAddTextPickEnt(void) {
@@ -3662,9 +3667,9 @@ extern "C" {
             if (!menu->child && numInteracts < 64 && !eduiInteractLocked) {
                 edui_interact_s *interact = &eduiInteracts[numInteracts++];
                 interact->x = static_cast<f32>(x);
-                interact->y = static_cast<f32>(y) * 0.125f;
+                interact->y = static_cast<f32>(y) * 0.5f;
                 interact->width = static_cast<f32>(menu->width);
-                interact->height = static_cast<f32>(title_height) * 0.125f;
+                interact->height = static_cast<f32>(title_height) * 0.5f;
                 interact->menu = menu;
                 interact->item = NULL;
                 interact->callback = cbInteractMenuTitle;
@@ -3693,9 +3698,9 @@ extern "C" {
                 if (!menu->child && numInteracts < 64 && !eduiInteractLocked) {
                     edui_interact_s *interact = &eduiInteracts[numInteracts++];
                     interact->x = static_cast<f32>(x);
-                    interact->y = static_cast<f32>(y) * 0.125f;
+                    interact->y = static_cast<f32>(y) * 0.5f;
                     interact->width = static_cast<f32>(menu->width);
-                    interact->height = static_cast<f32>(scroll_height) * 0.125f;
+                    interact->height = static_cast<f32>(scroll_height) * 0.5f;
                     interact->menu = menu;
                     interact->item = NULL;
                     interact->callback = cbInteractMenuScrollUp;
@@ -3729,9 +3734,9 @@ extern "C" {
                 if (!menu->child && numInteracts < 64 && !eduiInteractLocked) {
                     edui_interact_s *interact = &eduiInteracts[numInteracts++];
                     interact->x = static_cast<f32>(x);
-                    interact->y = static_cast<f32>(y) * 0.125f;
+                    interact->y = static_cast<f32>(y) * 0.5f;
                     interact->width = static_cast<f32>(menu->width);
-                    interact->height = static_cast<f32>(item_height) * 0.125f;
+                    interact->height = static_cast<f32>(item_height) * 0.5f;
                     interact->menu = menu;
                     interact->item = item;
                     interact->callback = reinterpret_cast<edui_sel_s *>(item)->interact;
@@ -3752,9 +3757,9 @@ extern "C" {
                     if (!menu->child && numInteracts < 64 && !eduiInteractLocked) {
                         edui_interact_s *interact = &eduiInteracts[numInteracts++];
                         interact->x = static_cast<f32>(x);
-                        interact->y = static_cast<f32>(y) * 0.125f;
+                        interact->y = static_cast<f32>(y) * 0.5f;
                         interact->width = static_cast<f32>(menu->width);
-                        interact->height = static_cast<f32>(scroll_height) * 0.125f;
+                        interact->height = static_cast<f32>(scroll_height) * 0.5f;
                         interact->menu = menu;
                         interact->item = NULL;
                         interact->callback = cbInteractMenuScrollDown;
@@ -3795,9 +3800,9 @@ extern "C" {
             if (numInteracts < 64 && !eduiInteractLocked) {
                 edui_interact_s *interact = &eduiInteracts[numInteracts++];
                 interact->x = static_cast<f32>(menu->x);
-                interact->y = static_cast<f32>(menu->y) * 0.125f;
+                interact->y = static_cast<f32>(menu->y) * 0.5f;
                 interact->width = static_cast<f32>(menu->field_24);
-                interact->height = static_cast<f32>(menu->field_28) * 0.125f;
+                interact->height = static_cast<f32>(menu->field_28) * 0.5f;
                 interact->menu = menu;
                 interact->item = NULL;
                 interact->callback = cbInteractMenuCancelChild;
@@ -3931,7 +3936,21 @@ extern "C" {
         return result;
     }
     void eduiRenderCursor(void) {
-        STUBBED();
+        if (edui_cursor_locked)
+            return;
+        NuPrim2DBegin(0, 7, uimtls[0]);
+#define EDUI_CURSOR_VERTEX(xoff, yoff)                                                                                 \
+    NuRndrPrimSetColour(edui_cursor_colour);                                                                           \
+    NuRndrPrimUV(0.0f, 0.0f);                                                                                          \
+    NuPrim2DAddXYZ(edui_cursor_x + (xoff), edui_cursor_y + (yoff), 0.0f)
+        EDUI_CURSOR_VERTEX(0.0f, 0.0f);
+        EDUI_CURSOR_VERTEX(8.0f, 2.0f);
+        EDUI_CURSOR_VERTEX(4.0f, 4.0f);
+        EDUI_CURSOR_VERTEX(0.0f, 0.0f);
+        EDUI_CURSOR_VERTEX(12.0f, 5.4f);
+        EDUI_CURSOR_VERTEX(10.8f, 6.0f);
+#undef EDUI_CURSOR_VERTEX
+        NuPrim2DEnd();
     }
     void eduiRenderInteracts(void) {
         STUBBED();
@@ -4150,13 +4169,77 @@ extern "C" {
         }
         return pick->dragging_colour || pick->dragging_saturation;
     }
+    static void eduicbItemExpanderClose(edui_expander_s *expander) {
+        for (eduiitem_s *child = expander->first_child; child; child = child->next) {
+            if (child->type == EDUI_ITEM_EXPANDER)
+                eduicbItemExpanderClose(static_cast<edui_expander_s *>(child));
+            if (child == expander->last_child)
+                break;
+        }
+        if (expander->first_child && expander->open) {
+            expander->next = expander->last_child->next;
+            if (expander->last_child->next)
+                expander->last_child->next->previous = expander;
+            expander->first_child->previous = NULL;
+            expander->open = 0;
+        }
+    }
     static __used__ i32 eduicbInteractExpander(edui_interact_s *interact) {
-        STUBBED();
+        if (edui_cursor_buttons_db & EDUI_CURSOR_PRIMARY) {
+            edui_expander_s *expander = static_cast<edui_expander_s *>(interact->item);
+            if (expander->changed)
+                expander->changed(interact->menu, expander, 0);
+            if (edui_cursor_x >= expander->button_x && edui_cursor_y >= expander->button_y * 0.5f &&
+                edui_cursor_x < expander->button_x + expander->button_size &&
+                edui_cursor_y < (expander->button_y + expander->button_size) * 0.5f && expander->first_child) {
+                if (!expander->open) {
+                    expander->last_child->next = expander->next;
+                    if (expander->next)
+                        expander->next->previous = expander->last_child;
+                    expander->first_child->previous = expander;
+                    expander->next = expander->first_child;
+                    expander->open = 1;
+                } else {
+                    eduicbItemExpanderClose(expander);
+                }
+            }
+        }
         return 0;
     }
     static __used__ i32 eduicbInteractProp(struct edui_interact_s *interact) {
-        STUBBED();
-        return 0;
+        edui_prop_s *property = static_cast<edui_prop_s *>(interact->item);
+        if (!(edui_cursor_buttons_db & EDUI_CURSOR_PRIMARY) || (property->unknown_property_flags & 0x0a))
+            return (property->unknown_property_flags & 0x0b) != 0;
+        f32 label_end = interact->x + property->label_width;
+        f32 cursor_bottom = interact->y + interact->height;
+        bool in_row = edui_cursor_x >= interact->x && edui_cursor_y >= interact->y && edui_cursor_y < cursor_bottom;
+        if (property->unknown_property_flags & 1) {
+            if (in_row && edui_cursor_x >= label_end + 1.0f && edui_cursor_x < property->button_x) {
+                edui_prop_edit_cursor = -1;
+                return 1;
+            }
+            return (property->unknown_property_flags & 0x0b) != 0;
+        }
+        if (in_row && edui_cursor_x < label_end - 1.0f) {
+            if (property->selected)
+                property->selected(interact->menu, property, 0);
+        } else if (in_row && edui_cursor_x < label_end + 1.0f) {
+            property->unknown_property_flags |= 0x06;
+        } else if (in_row && edui_cursor_x < property->button_x) {
+            if (property->selected)
+                property->selected(interact->menu, property, 0);
+            NuKeyFlush();
+            property->unknown_property_flags |= 1;
+            NuStrNCpy(edui_prop_edit_buffer, property->property_text ? property->property_text : "",
+                      sizeof(edui_prop_edit_buffer));
+            NuStrNCpy(edui_prop_original_buffer, edui_prop_edit_buffer, sizeof(edui_prop_original_buffer));
+            edui_prop_edit_cursor = NuStrLen(edui_prop_edit_buffer);
+        }
+        if (edui_cursor_x >= property->button_x && edui_cursor_x < property->button_x + property->button_size &&
+            edui_cursor_y >= property->button_y * 0.5f &&
+            edui_cursor_y < (property->button_y + property->button_size) * 0.5f && property->button)
+            property->button(interact->menu, property, 0);
+        return (property->unknown_property_flags & 0x0b) != 0;
     }
     static __used__ i32 eduicbInteractFilter(struct edui_interact_s *interact) {
         return eduicbInteractProp(interact);
@@ -4359,7 +4442,24 @@ extern "C" {
         return 0;
     }
     static __used__ i32 eduicbProcessExpander(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad) {
-        STUBBED();
+        (void)delta_time;
+        edui_expander_s *expander = static_cast<edui_expander_s *>(item);
+        if (pad->digital_buttons_pressed & EDUI_CURSOR_PRIMARY) {
+            if (expander->changed)
+                expander->changed(menu, item, 0);
+            if (expander->first_child) {
+                if (!expander->open) {
+                    expander->last_child->next = item->next;
+                    if (item->next)
+                        item->next->previous = expander->last_child;
+                    expander->first_child->previous = item;
+                    item->next = expander->first_child;
+                    expander->open = 1;
+                } else {
+                    eduicbItemExpanderClose(expander);
+                }
+            }
+        }
         return 0;
     }
     static __used__ i32 eduicbProcessFilePick(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad) {
@@ -4491,8 +4591,82 @@ extern "C" {
             pick->changed(menu, item, pad->digital_buttons);
         return 0;
     }
+    static __attribute__((noinline)) void eduicbProcessPropKeyboard(eduimenu_s *menu, edui_prop_s *property) {
+        if (!(property->unknown_property_flags & 1))
+            return;
+        i32 length = NuStrLen(edui_prop_edit_buffer);
+        if (edui_prop_edit_cursor < 0)
+            edui_prop_edit_cursor = 0;
+        if (edui_prop_edit_cursor > length)
+            edui_prop_edit_cursor = length;
+        u32 modifiers = 0;
+        i32 key = NuKeyGet(&modifiers);
+        if (key == -1)
+            return;
+        if (key == 0x1c) {
+            eduiItemPropSetText(property, edui_prop_edit_buffer);
+            if (property->changed)
+                property->changed(menu, property, 0);
+            property->unknown_property_flags &= ~1;
+            edui_prop_edit_cursor = -1;
+            return;
+        }
+        if (key == 1) {
+            property->unknown_property_flags &= ~1;
+            edui_prop_edit_cursor = -1;
+            return;
+        }
+        if (key == 0xcb) {
+            if (edui_prop_edit_cursor > 0)
+                --edui_prop_edit_cursor;
+            return;
+        }
+        if (key == 0xcd) {
+            if (edui_prop_edit_cursor < length)
+                ++edui_prop_edit_cursor;
+            return;
+        }
+        if (key == 0xe || key == 0xd3) {
+            i32 position = edui_prop_edit_cursor - (key == 0xe);
+            if (position >= 0 && position < length) {
+                memmove(edui_prop_edit_buffer + position, edui_prop_edit_buffer + position + 1, length - position);
+                edui_prop_edit_cursor = position;
+            }
+            return;
+        }
+        i32 letter = NuKeyToAscii(key, modifiers & 1);
+        if (letter && length < 254) {
+            memmove(edui_prop_edit_buffer + edui_prop_edit_cursor + 1, edui_prop_edit_buffer + edui_prop_edit_cursor,
+                    length - edui_prop_edit_cursor + 1);
+            edui_prop_edit_buffer[edui_prop_edit_cursor++] = static_cast<char>(letter);
+        }
+    }
     static __used__ i32 eduicbProcessProp(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad) {
-        STUBBED();
+        (void)delta_time;
+        edui_prop_s *property = static_cast<edui_prop_s *>(item);
+        if (property->unknown_property_flags & 2) {
+            property->label_width = edui_cursor_x - static_cast<f32>(item->x);
+            if (property->label_width < 1.0f)
+                property->label_width = 1.0f;
+            for (eduiitem_s *other = menu->first; other; other = other->next) {
+                if (other->type == 17 && other != item)
+                    static_cast<edui_prop_s *>(other)->label_width = property->label_width;
+            }
+            if (!(edui_cursor_buttons & EDUI_CURSOR_PRIMARY))
+                property->unknown_property_flags &= ~2;
+        }
+        eduicbProcessPropKeyboard(menu, property);
+        eduiSetCameraEnabled(1);
+        if ((property->unknown_property_flags & 8) ||
+            (pad && item->type == 17 && (pad->digital_buttons & EDUI_CURSOR_PRIMARY))) {
+            if (property->button) {
+                eduiSetCameraEnabled(0);
+                property->button(menu, item, edui_cursor_buttons);
+                property->unknown_property_flags &= ~8;
+            }
+            if (!(edui_cursor_buttons & EDUI_CURSOR_PRIMARY))
+                property->unknown_property_flags &= ~8;
+        }
         return 0;
     }
     static __used__ i32 eduicbProcessSel(eduimenu_s *menu, eduiitem_s *item, f32, nupad_s *pad) {
@@ -4691,8 +4865,26 @@ extern "C" {
         return height * 2;
     }
     static __used__ i32 eduicbRenderExpander(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width) {
-        STUBBED();
-        return 0;
+        (void)menu;
+        edui_expander_s *expander = static_cast<edui_expander_s *>(item);
+        i32 height = static_cast<i32>(NuQFntHeight(edui_font) * 0.15625f);
+        i32 baseline = static_cast<i32>(NuQFntHeight(edui_font) * 0.125f + NuQFntBaseline(edui_font));
+        item->x = x;
+        item->y = y;
+        expander->button_size = static_cast<f32>(height - 2);
+        expander->button_x = static_cast<f32>(x + 2 + expander->depth * (height - 2));
+        expander->button_y = static_cast<f32>(y + 2);
+        if (!edui_donotdraw) {
+            NuRndrRect2di(x << 4, y << 3, width << 4, height << 3, item->colours[2 + item->highlighted],
+                          uimtls[ui_bgmtl]);
+            NuQFntSet(edui_font);
+            NuQFntSetColour(edui_font, item->colours[item->highlighted]);
+        }
+        char *glyph = expander->open ? const_cast<char *>("-") : const_cast<char *>("+");
+        eduiFntPrintEx(edui_font, static_cast<i32>(expander->button_x) << 4, (y << 3) + baseline, 16, glyph);
+        eduiFntPrintEx(edui_font, static_cast<i32>(expander->button_x + expander->button_size + 2) << 4,
+                       (y << 3) + baseline, 16, item->text);
+        return height;
     }
     static __used__ i32 eduicbRenderFilePick(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width) {
         STUBBED();
@@ -4790,8 +4982,49 @@ extern "C" {
         return height;
     }
     static __used__ i32 eduicbRenderProp(struct eduimenu_s *menu, struct eduiitem_s *item, i32 x, i32 y, i32 scale) {
-        STUBBED();
-        return 0;
+        (void)menu;
+        edui_prop_s *property = static_cast<edui_prop_s *>(item);
+        i32 height = static_cast<i32>(NuQFntHeight(edui_font) * 0.15625f);
+        i32 baseline = static_cast<i32>(NuQFntHeight(edui_font) * 0.125f + NuQFntBaseline(edui_font));
+        item->x = x;
+        item->y = y;
+        property->button_size = static_cast<f32>(height - 2);
+        property->button_x = static_cast<f32>(x + scale - 1) - property->button_size;
+        property->button_y = static_cast<f32>(y + 1);
+        if (!edui_donotdraw) {
+            NuRndrRect2di(x << 4, y << 3, scale << 4, height << 3, item->colours[2 + item->highlighted],
+                          uimtls[ui_bgmtl]);
+            NuQFntSet(edui_font);
+            NuQFntSetColour(edui_font, item->colours[item->highlighted]);
+            i32 divider_x = static_cast<i32>(x + property->label_width) << 4;
+            NuRndrLine2di(divider_x, y << 3, divider_x, (y + height) << 3, 0xffffffff, uimtls[0]);
+            i32 button_x = static_cast<i32>(property->button_x) << 4;
+            i32 button_y = static_cast<i32>(property->button_y) << 3;
+            i32 button_width = static_cast<i32>(property->button_size) << 4;
+            i32 button_height = static_cast<i32>(property->button_size) << 3;
+            NuRndrLineRect2di(button_x, button_y, button_width, button_height, 0xff000000, uimtls[0]);
+            if (property->button_type == 1) {
+                i32 points[6] = {button_x + button_width / 3,     button_y + button_height / 4,
+                                 button_x + button_width / 3,     button_y + button_height * 3 / 4,
+                                 button_x + button_width * 3 / 4, button_y + button_height / 2};
+                NuRndrTriStrip2di(points, NULL, 3, 0xffffffff, uimtls[0]);
+            } else if (property->button_type == 2) {
+                i32 up[6] = {button_x + button_width / 4,     button_y + button_height / 2,
+                             button_x + button_width / 2,     button_y + button_height / 4,
+                             button_x + button_width * 3 / 4, button_y + button_height / 2};
+                i32 down[6] = {button_x + button_width / 4,     button_y + button_height * 3 / 4,
+                               button_x + button_width / 2,     button_y + button_height / 2,
+                               button_x + button_width * 3 / 4, button_y + button_height * 3 / 4};
+                NuRndrTriStrip2di(up, NULL, 3, 0xffffffff, uimtls[0]);
+                NuRndrTriStrip2di(down, NULL, 3, 0xffffffff, uimtls[0]);
+            }
+        }
+        i32 label_x = (x + 2 + property->depth * 8) << 4;
+        eduiFntPrintEx(edui_font, label_x, (y << 3) + baseline, 16, item->text);
+        char *value = (property->unknown_property_flags & 1) ? edui_prop_edit_buffer : property->property_text;
+        if (value)
+            eduiFntPrintEx(edui_font, (static_cast<i32>(property->button_x) - 1) << 4, (y << 3) + baseline, 32, value);
+        return height;
     }
     static __used__ i32 eduicbRenderFilter(struct eduimenu_s *menu, struct eduiitem_s *item, i32 x, i32 y, i32 scale) {
         return eduicbRenderProp(menu, item, x, y, scale);
