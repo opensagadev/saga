@@ -3294,7 +3294,8 @@ EdManScale::EdManScale() {
     selected_attribute = 32;
 }
 
-i32 EdManScale::Process(EdInputContext &input, ClassObjectList &selected) {
+// The original realigns the stack for its matrix and vector locals.
+__attribute__((force_align_arg_pointer)) i32 EdManScale::Process(EdInputContext &input, ClassObjectList &selected) {
     EdManipulator::Process(input, selected);
     VuVec average;
     if (selected.GetAveragePosition(average) == 0)
@@ -4369,14 +4370,20 @@ void EdManipulator::Render(ClassObjectList &selected) {
     }
 }
 
-i32 EdManipulator::SelectAxis(EdInputContext &input, VuVec &origin, VuVec &first_axis, VuVec &second_axis,
-                              VuMtx *matrix) {
+// The original realigns the stack for its local locator vectors.
+__attribute__((force_align_arg_pointer)) i32 EdManipulator::SelectAxis(EdInputContext &input, VuVec &origin,
+                                                                       VuVec &first_axis, VuVec &second_axis,
+                                                                       VuMtx *matrix) {
     VuVec locators[8];
-    GetAxisLocators(origin, locators, matrix);
-    first_axis = VuVec_Zero;
-    second_axis = VuVec_Zero;
+    first_axis.x = 0.0f;
+    first_axis.y = 0.0f;
+    first_axis.z = 0.0f;
     first_axis.w = 1.0f;
+    second_axis.x = 0.0f;
+    second_axis.y = 0.0f;
+    second_axis.z = 0.0f;
     second_axis.w = 1.0f;
+    GetAxisLocators(origin, locators, matrix);
 
     VuVec *ray_origin = reinterpret_cast<VuVec *>(input.reserved_00 + 0x20);
     VuVec *ray_direction = reinterpret_cast<VuVec *>(input.reserved_00 + 0x30);

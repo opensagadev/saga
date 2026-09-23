@@ -5170,7 +5170,8 @@ extern "C" {
     static __used__ i32 eduicbProcessFilter(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad) {
         auto *filter = static_cast<edui_filter_s *>(item);
         (void)delta_time;
-        if (filter->unknown_property_flags & 2) {
+        u8 *filter_flags = reinterpret_cast<u8 *>(filter) + 0x4c;
+        if (*filter_flags & 2) {
             filter->label_width = edui_cursor_x - static_cast<f32>(item->x);
             if (filter->label_width < 1.0f)
                 filter->label_width = 1.0f;
@@ -5179,7 +5180,7 @@ extern "C" {
                     static_cast<edui_prop_s *>(other)->label_width = filter->label_width;
             }
             if (!(edui_cursor_buttons & EDUI_CURSOR_PRIMARY))
-                filter->unknown_property_flags &= ~2;
+                *filter_flags &= ~2;
         }
         eduicbProcessPropKeyboard(menu, filter);
         eduiSetCameraEnabled(1);
@@ -5194,14 +5195,14 @@ extern "C" {
                 filter->unknown_property_flags &= ~8;
         }
         char *query = (filter->unknown_property_flags & 1) ? eduiPropTextEdit : filter->property_text;
-        bool changed = false;
+        i32 changed = 0;
         if (!*query) {
             for (eduiitem_s *child = filter->first_child; child;) {
                 eduiitem_s *next = child->next;
                 eduiItemFilterRemoveItem(filter, child);
                 eduiMenuAddItem(menu, child);
                 child = next;
-                changed = true;
+                changed = 1;
             }
         } else {
             for (eduiitem_s *candidate = menu->first; candidate;) {
@@ -5209,7 +5210,7 @@ extern "C" {
                 if (candidate->type != 18 && candidate->type != 20 && !NuStrIStr(candidate->text, query)) {
                     eduiMenuRemoveItem(menu, candidate);
                     eduiItemFilterAddItem(filter, candidate);
-                    changed = true;
+                    changed = 1;
                 }
                 candidate = next;
             }
@@ -5218,7 +5219,7 @@ extern "C" {
                 if (NuStrIStr(candidate->text, query)) {
                     eduiItemFilterRemoveItem(filter, candidate);
                     eduiMenuAddItem(menu, candidate);
-                    changed = true;
+                    changed = 1;
                 }
                 candidate = next;
             }
@@ -5503,7 +5504,8 @@ extern "C" {
     static __used__ i32 eduicbProcessProp(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad) {
         (void)delta_time;
         edui_prop_s *property = static_cast<edui_prop_s *>(item);
-        if (property->unknown_property_flags & 2) {
+        u8 *property_flags = reinterpret_cast<u8 *>(property) + 0x4c;
+        if (*property_flags & 2) {
             property->label_width = edui_cursor_x - static_cast<f32>(item->x);
             if (property->label_width < 1.0f)
                 property->label_width = 1.0f;
@@ -5512,7 +5514,7 @@ extern "C" {
                     static_cast<edui_prop_s *>(other)->label_width = property->label_width;
             }
             if (!(edui_cursor_buttons & EDUI_CURSOR_PRIMARY))
-                property->unknown_property_flags &= ~2;
+                *property_flags &= ~2;
         }
         eduicbProcessPropKeyboard(menu, property);
         eduiSetCameraEnabled(1);

@@ -398,21 +398,59 @@ eduimenu_s *antinodeEditor_Process(nupad_s *pad) {
                 }
             }
         }
-    } else if ((pressed & 0x10) && selected != nullptr && selected == nearest) {
-        eduimenu_s *menu = eduiMenuCreate(200, 70, 240, 270, ed_fnt, antinodeEditor_cbCancelDeleteAntinodeMenu,
-                                          const_cast<char *>("Delete Antinode??"));
-        if (menu == nullptr)
-            return nullptr;
-        eduiMenuAddItem(menu,
-                        eduiItemSelCreate(0, &attr, 0, 0, antinodeEditor_cbDeleteAntinode, const_cast<char *>("No")));
-        eduiMenuAddItem(menu,
-                        eduiItemSelCreate(1, &attr, 0, 0, antinodeEditor_cbDeleteAntinode, const_cast<char *>("Yes")));
-        return menu;
+    } else if (pressed & 0x10) {
+        if (selected != nullptr && selected == nearest) {
+            eduimenu_s *menu = eduiMenuCreate(200, 70, 240, 270, ed_fnt, antinodeEditor_cbCancelDeleteAntinodeMenu,
+                                              const_cast<char *>("Delete Antinode??"));
+            if (menu == nullptr)
+                return nullptr;
+            eduiMenuAddItem(
+                menu, eduiItemSelCreate(0, &attr, 0, 0, antinodeEditor_cbDeleteAntinode, const_cast<char *>("No")));
+            eduiMenuAddItem(
+                menu, eduiItemSelCreate(1, &attr, 0, 0, antinodeEditor_cbDeleteAntinode, const_cast<char *>("Yes")));
+            return menu;
+        }
+        antinode_nearest() = antinodeEditor_GetNearestAntinode(1);
+        return nullptr;
     } else if (pressed & 0x100) {
         selected = antinodeEditor_GetNearestAntinode(0);
         aieditor->mode_selection_42e9c = selected;
         if (selected != nullptr)
             edcamSetPos(&selected->position);
+    } else if ((held & 0x100) && (pressed & (1 | 2 | 4 | 8))) {
+        bool forward = false;
+        bool skip_platforms = false;
+        if (pressed & 8) {
+            forward = true;
+        } else if (pressed & 2) {
+            forward = false;
+        } else if (pressed & 4) {
+            forward = true;
+            skip_platforms = true;
+        } else {
+            skip_platforms = true;
+        }
+        EDANTINODE_s *candidate = selected;
+        EDANTINODE_s *first = nullptr;
+        do {
+            NULISTLNK *next = candidate == nullptr ? (forward ? NuLinkedListGetHead(antinode_list())
+                                                              : NuLinkedListGetTail(antinode_list()))
+                                                   : (forward ? NuLinkedListGetNext(antinode_list(), &candidate->link)
+                                                              : NuLinkedListGetPrev(antinode_list(), &candidate->link));
+            if (next == nullptr)
+                next = forward ? NuLinkedListGetHead(antinode_list()) : NuLinkedListGetTail(antinode_list());
+            candidate = reinterpret_cast<EDANTINODE_s *>(next);
+            if (candidate == nullptr || (skip_platforms && candidate == first)) {
+                candidate = nullptr;
+                break;
+            }
+            if (first == nullptr) {
+                first = candidate;
+            }
+        } while (skip_platforms && NuSpecialExistsFn(&candidate->special));
+        aieditor->mode_selection_42e9c = candidate;
+        if (candidate != nullptr)
+            edcamSetPos(&candidate->position);
     } else if ((held & 0x100) == 0 && selected != nullptr && selected == nearest) {
         if (held & (0x8000 | 0x2000)) {
             if (selected->type == 0) {
@@ -455,41 +493,6 @@ eduimenu_s *antinodeEditor_Process(nupad_s *pad) {
         }
     }
 
-    if ((held & 0x40) == 0 && (pressed & 0x100) == 0 && (held & 0x100) && (pressed & (1 | 2 | 4 | 8))) {
-        bool forward = false;
-        bool skip_platforms = false;
-        if (pressed & 8) {
-            forward = true;
-        } else if (pressed & 2) {
-            forward = false;
-        } else if (pressed & 4) {
-            forward = true;
-            skip_platforms = true;
-        } else {
-            skip_platforms = true;
-        }
-        EDANTINODE_s *candidate = selected;
-        EDANTINODE_s *first = nullptr;
-        do {
-            NULISTLNK *next = candidate == nullptr ? (forward ? NuLinkedListGetHead(antinode_list())
-                                                              : NuLinkedListGetTail(antinode_list()))
-                                                   : (forward ? NuLinkedListGetNext(antinode_list(), &candidate->link)
-                                                              : NuLinkedListGetPrev(antinode_list(), &candidate->link));
-            if (next == nullptr)
-                next = forward ? NuLinkedListGetHead(antinode_list()) : NuLinkedListGetTail(antinode_list());
-            candidate = reinterpret_cast<EDANTINODE_s *>(next);
-            if (candidate == nullptr || (skip_platforms && candidate == first)) {
-                candidate = nullptr;
-                break;
-            }
-            if (first == nullptr) {
-                first = candidate;
-            }
-        } while (skip_platforms && NuSpecialExistsFn(&candidate->special));
-        aieditor->mode_selection_42e9c = candidate;
-        if (candidate != nullptr)
-            edcamSetPos(&candidate->position);
-    }
     antinode_nearest() = antinodeEditor_GetNearestAntinode(1);
     return nullptr;
 }

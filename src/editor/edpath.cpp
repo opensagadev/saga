@@ -2227,7 +2227,7 @@ void pathEditor_Render(i32 x, i32 y, float x_scale, float y_scale) {
             NuQFntPrintEx(system_qfont, screen_x, screen_y - 40, 16, "Show Routes : \"%s\"", path->name);
             NuQFntSetColour(system_qfont, 0x80000000);
             NuQFntSetScale(system_qfont, x_scale, y_scale);
-            NuQFntPrintEx(system_qfont, screen_x, screen_y + 120, 16, "%s", path->name);
+            NuQFntPrintEx(system_qfont, screen_x, screen_y + 120, 16, "%s", aieditor->current_path->name);
             NuQFntPrintEx(system_qfont, screen_x, screen_y + 240, 16, "SQR - Sub menu");
             NuQFntPrintEx(system_qfont, screen_x, screen_y + 360, 16, "SELECT - Goto nearest");
             if (path->runtime_nearest >= 0) {

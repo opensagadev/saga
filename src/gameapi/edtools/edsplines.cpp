@@ -727,7 +727,9 @@ void SplineObject::Draw(i32, i32 colour_mode, i32 straight, float show_points) {
         else
             DrawBezierLine(knot->position, knot->out_tangent, next->position, next->in_tangent, edLevel3dMtl, colour);
     }
-    if (show_points != 0.0f && step > 0.1f)
+    u32 show_points_bits;
+    __builtin_memcpy(&show_points_bits, &show_points, sizeof(show_points_bits));
+    if (show_points_bits != 0 && step > 0.1f)
         points.Draw();
     EdDrawEnd();
 }
