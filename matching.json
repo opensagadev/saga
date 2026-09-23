@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 57.989697,
+    "fuzzy_match_percent": 57.968243,
     "total_code": "4722419",
     "matched_code": "486581",
     "matched_code_percent": 10.303638,
@@ -19867,7 +19867,7 @@
           "address": 5487248,
           "offset": 4597280,
           "size": 71,
-          "match_percent": 0.0
+          "match_percent": 81.73913
         },
         {
           "name": "_ZN11ClassEditor12CreateObjectEv",
@@ -21984,7 +21984,7 @@
           "address": 4217232,
           "offset": 3327264,
           "size": 547,
-          "match_percent": 0.0
+          "match_percent": 46.82979
         },
         {
           "name": "_ZL42locatorEditor_cbCancelRenameLocatorSetMenuP10eduimenu_sS0_",
@@ -43013,7 +43013,7 @@
           "address": 3584336,
           "offset": 2694368,
           "size": 5342,
-          "match_percent": 24.843689
+          "match_percent": 0.0
         },
         {
           "name": "_Z14SpecialSfxLoadPcP11WORLDINFO_s",

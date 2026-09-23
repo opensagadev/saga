@@ -341,10 +341,9 @@ template <typename T> static inline void EffectField(debinftype *effect, usize o
 }
 
 void FileLoadSingleEffectType(debinftype *effect, i32 version, char category) {
-    // All shipped Android general/character pages use version 41.  Keep this
-    // branch expressed as the original typed reads: the file record is not a
+    // The shipped area pages also use version 40. The file record is not a
     // byte-for-byte image of debinftype (runtime fields and padding differ).
-    if (version != 41) {
+    if (version != 40 && version != 41) {
         return;
     }
 
@@ -433,9 +432,9 @@ void FileLoadSingleEffectType(debinftype *effect, i32 version, char category) {
         effect->sound_data[index + 2] = EdFileReadInt();
     }
 
-    effect->trail_count = static_cast<u8>(EdFileReadChar());
+    effect->trail_count = static_cast<u8>(version == 41 ? EdFileReadChar() : EdFileReadInt());
     effect->trail_time = EdFileReadFloat();
-    effect->radial_segments = static_cast<u8>(EdFileReadChar());
+    effect->radial_segments = static_cast<u8>(version == 41 ? EdFileReadChar() : EdFileReadInt());
     effect->radial_floor = EdFileReadFloat();
     effect->scale_in_time = EdFileReadFloat();
     effect->scale = 1.0f;
