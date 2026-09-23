@@ -2791,43 +2791,44 @@ void edppHighlightNearest() {
     extern NUVEC edpp_copy_source_vec;
     extern NUMTL *edpp_mtl;
 
-    if (edpp_copy_mode == 0) {
+    if (edpp_copy_mode != 0) {
+        edpp_copy_enclosed = 0;
+        edpp_particle_s *particle = edpp_ptls;
+        for (i32 index = 0; index < 512; ++index, ++particle) {
+            if (particle->instance_id == 99999)
+                continue;
+            if (particle->instance_id == -1)
+                continue;
+            NUVEC delta;
+            NuVecSub(&delta, &edpp_cam_pos, &particle->position);
+            if (!(__builtin_fabsf(delta.x) <= edpp_copy_size) || !(__builtin_fabsf(delta.y) <= edpp_copy_size) ||
+                !(__builtin_fabsf(delta.z) <= edpp_copy_size))
+                continue;
+            ++edpp_copy_enclosed;
+            edbitsDrawDiagonalCross(particle->position.x, particle->position.y, particle->position.z, 0.05f, 0xffffffff,
+                                    edpp_mtl);
+        }
+        for (i32 source = 0; source < edpp_copy_source_count; ++source) {
+            NUVEC offset, position;
+            NuVecSub(&offset, &edpp_ptls[edpp_copy_source[source]].position, &edpp_copy_source_vec);
+            NuVecRotateY(&offset, &offset, edpp_copyroty);
+            NuVecAdd(&position, &edpp_cam_pos, &offset);
+            edbitsDrawDiagonalCross(position.x, position.y, position.z, 0.05f, 0xff808080, edpp_mtl);
+        }
+    } else {
         if (edpp_nearest != -1) {
             const NUVEC &position = edpp_ptls[edpp_nearest].position;
             edbitsDrawCube(position.x, position.y, position.z, 0.5f, 0.5f, 0.5f, 0, 0, 0, 0, 0, 0xffffffff, edpp_mtl);
         }
         if (edpp_showAllPlaced != 0) {
-            for (i32 index = 0; index < 512; ++index) {
-                const edpp_particle_s &particle = edpp_ptls[index];
-                if (particle.effect_index > 0 && index != edpp_nearest) {
-                    edbitsDrawCube(particle.position.x, particle.position.y, particle.position.z, 0.5f, 0.5f, 0.5f, 0,
-                                   0, 0, 0, 0, 0xff000000, edpp_mtl);
+            const edpp_particle_s *particle = edpp_ptls;
+            for (i32 index = 0; index < 512; ++index, ++particle) {
+                if (particle->effect_index > 0 && index != edpp_nearest) {
+                    edbitsDrawCube(particle->position.x, particle->position.y, particle->position.z, 0.5f, 0.5f, 0.5f,
+                                   0, 0, 0, 0, 0, 0xff000000, edpp_mtl);
                 }
             }
         }
-        return;
-    }
-
-    edpp_copy_enclosed = 0;
-    for (i32 index = 0; index < 512; ++index) {
-        edpp_particle_s &particle = edpp_ptls[index];
-        if (particle.instance_id == 99999 || particle.instance_id == -1)
-            continue;
-        NUVEC delta;
-        NuVecSub(&delta, &edpp_cam_pos, &particle.position);
-        if (__builtin_fabsf(delta.x) > edpp_copy_size || __builtin_fabsf(delta.y) > edpp_copy_size ||
-            __builtin_fabsf(delta.z) > edpp_copy_size)
-            continue;
-        ++edpp_copy_enclosed;
-        edbitsDrawDiagonalCross(particle.position.x, particle.position.y, particle.position.z, 0.05f, 0xffffffff,
-                                edpp_mtl);
-    }
-    for (i32 source = 0; source < edpp_copy_source_count; ++source) {
-        NUVEC offset, position;
-        NuVecSub(&offset, &edpp_ptls[edpp_copy_source[source]].position, &edpp_copy_source_vec);
-        NuVecRotateY(&offset, &offset, edpp_copyroty);
-        NuVecAdd(&position, &edpp_cam_pos, &offset);
-        edbitsDrawDiagonalCross(position.x, position.y, position.z, 0.05f, 0xff808080, edpp_mtl);
     }
 }
 
@@ -3333,10 +3334,11 @@ i32 EdManScale::Process(EdInputContext &input, ClassObjectList &selected) {
                 NuVecInvMtxRotate(reinterpret_cast<NUVEC *>(&local_axis), reinterpret_cast<NUVEC *>(&local_axis),
                                   &matrix);
                 NuVecNorm(reinterpret_cast<NUVEC *>(&local_axis), reinterpret_cast<NUVEC *>(&local_axis));
-                f32 change = movement / (Scale * magnitude);
-                scale_x += local_axis.x * change;
-                scale_y += local_axis.y * change;
-                scale_z += local_axis.z * change;
+                f32 scaled_magnitude = Scale * magnitude;
+                f32 change = (scaled_magnitude + movement) / scaled_magnitude - 1.0f;
+                scale_x = second_axis.x * change + local_axis.x * change + 1.0f;
+                scale_y = second_axis.y * change + local_axis.y * change + 1.0f;
+                scale_z = second_axis.z * change + local_axis.z * change + 1.0f;
             } else if (axis == 7) {
                 f32 movement = input.Get(1) - input.Get(0) + input.Get(2);
                 if (movement == 0.0f)
@@ -3346,15 +3348,17 @@ i32 EdManScale::Process(EdInputContext &input, ClassObjectList &selected) {
                 continue;
             }
             NUMTX &matrix = transform.matrix;
-            matrix.m00 *= scale_x;
-            matrix.m01 *= scale_x;
-            matrix.m02 *= scale_x;
-            matrix.m10 *= scale_y;
-            matrix.m11 *= scale_y;
-            matrix.m12 *= scale_y;
-            matrix.m20 *= scale_z;
-            matrix.m21 *= scale_z;
-            matrix.m22 *= scale_z;
+            const NUMTX original = matrix;
+            const f32 zero = 0.0f;
+            matrix.m00 = scale_x * original.m00 + zero * original.m10 + zero * original.m20;
+            matrix.m01 = scale_x * original.m01 + zero * original.m11 + zero * original.m21;
+            matrix.m02 = scale_x * original.m02 + zero * original.m12 + zero * original.m22;
+            matrix.m10 = zero * original.m00 + scale_y * original.m10 + zero * original.m20;
+            matrix.m11 = zero * original.m01 + scale_y * original.m11 + zero * original.m21;
+            matrix.m12 = zero * original.m02 + scale_y * original.m12 + zero * original.m22;
+            matrix.m20 = zero * original.m00 + zero * original.m10 + scale_z * original.m20;
+            matrix.m21 = zero * original.m01 + zero * original.m11 + scale_z * original.m21;
+            matrix.m22 = zero * original.m02 + zero * original.m12 + scale_z * original.m22;
             matrix.m03 = matrix.m13 = matrix.m23 = 0.0f;
             set_manipulator_attribute(entry, 0x20, EdType_VuMtx, &transform);
         }
@@ -3840,6 +3844,8 @@ i32 EdManRotate::RotateItem(EdInputContext &, ClassObjectList &objects, i32 angl
     objects.GetAveragePosition(average);
     if (angle == 0 || objects.first == NULL)
         return axis;
+    i32 sine_index = (angle >> 1) & 0x7fff;
+    i32 cosine_index = ((angle + 0x4000) >> 1) & 0x7fff;
     for (ClassObjectListEntry *entry = objects.first; entry != NULL; entry = entry->next) {
         NUMTX matrix;
         NuMtxSetIdentity(&matrix);
@@ -3854,25 +3860,42 @@ i32 EdManRotate::RotateItem(EdInputContext &, ClassObjectList &objects, i32 angl
         }
         if (!got_matrix)
             continue;
-        f32 x = matrix.m30;
-        f32 y = matrix.m31;
-        f32 z = matrix.m32;
+        f32 sine = NuTrigTable[sine_index];
+        f32 cosine = NuTrigTable[cosine_index];
         switch (axis) {
-            case 1:
-                NuMtxRotateX(&matrix, angle);
+            case 1: {
+                f32 m01 = matrix.m01, m11 = matrix.m11, m21 = matrix.m21;
+                matrix.m01 = m01 * cosine - matrix.m02 * sine;
+                matrix.m02 = m01 * sine + matrix.m02 * cosine;
+                matrix.m11 = m11 * cosine - matrix.m12 * sine;
+                matrix.m12 = m11 * sine + matrix.m12 * cosine;
+                matrix.m21 = m21 * cosine - matrix.m22 * sine;
+                matrix.m22 = m21 * sine + matrix.m22 * cosine;
                 break;
-            case 2:
-                NuMtxRotateY(&matrix, angle);
+            }
+            case 2: {
+                f32 m00 = matrix.m00, m10 = matrix.m10, m20 = matrix.m20;
+                matrix.m00 = m00 * cosine + matrix.m02 * sine;
+                matrix.m02 = matrix.m02 * cosine - m00 * sine;
+                matrix.m10 = m10 * cosine + matrix.m12 * sine;
+                matrix.m12 = matrix.m12 * cosine - m10 * sine;
+                matrix.m20 = m20 * cosine + matrix.m22 * sine;
+                matrix.m22 = matrix.m22 * cosine - m20 * sine;
                 break;
-            case 3:
-                NuMtxRotateZ(&matrix, angle);
+            }
+            case 3: {
+                f32 m00 = matrix.m00, m10 = matrix.m10, m20 = matrix.m20;
+                matrix.m00 = m00 * cosine - matrix.m01 * sine;
+                matrix.m01 = m00 * sine + matrix.m01 * cosine;
+                matrix.m10 = m10 * cosine - matrix.m11 * sine;
+                matrix.m11 = m10 * sine + matrix.m11 * cosine;
+                matrix.m20 = m20 * cosine - matrix.m21 * sine;
+                matrix.m21 = m20 * sine + matrix.m21 * cosine;
                 break;
+            }
             default:
                 continue;
         }
-        matrix.m30 = x;
-        matrix.m31 = y;
-        matrix.m32 = z;
         if (entry->reference != NULL &&
             entry->reference->SetAttributeData(entry->object, 0x10, EdType_VuMtx, &matrix, 0) != 0)
             continue;

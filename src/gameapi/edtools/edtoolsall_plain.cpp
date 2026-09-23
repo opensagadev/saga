@@ -5661,7 +5661,7 @@ extern "C" {
         if (pad->digital_buttons_pressed & 0x80)
             delete_previous();
         if (pad->digital_buttons_pressed & 0x20) {
-            bool uppercase = textrow[1][0] == 'Q';
+            bool uppercase = textrow[1] == const_cast<char *>("QWERTYUIOP");
             textrow[0] = const_cast<char *>("1234567890");
             textrow[1] = uppercase ? const_cast<char *>("qwertyuiop") : const_cast<char *>("QWERTYUIOP");
             textrow[2] = uppercase ? const_cast<char *>("asdfghjkl_") : const_cast<char *>("ASDFGHJKL_");
@@ -5857,6 +5857,9 @@ extern "C" {
     }
     static __used__ i32 eduicbRenderExpander(eduimenu_s *menu, eduiitem_s *item, i32 x, i32 y, i32 width) {
         edui_expander_s *expander = static_cast<edui_expander_s *>(item);
+        const u32 button_colours[2] = {0xff000000, 0xffffffff};
+        item->x = x;
+        item->y = y;
         const bool over_button = edui_cursor_x >= expander->button_x && edui_cursor_y >= expander->button_y * 0.5f &&
                                  edui_cursor_x < expander->button_x + expander->button_size &&
                                  edui_cursor_y < (expander->button_y + expander->button_size) * 0.5f;
@@ -5869,8 +5872,6 @@ extern "C" {
         const f32 row_height = NuQFntHeight(edui_font) * 1.25f * 0.125f;
         const i32 height = static_cast<i32>(row_height);
         const f32 baseline = (NuQFntHeight(edui_font) * 0.125f + NuQFntBaseline(edui_font)) * 0.125f;
-        item->x = x;
-        item->y = y;
         for (eduimenu_s *ancestor = menu; ancestor; ancestor = ancestor->parent) {
             if (ancestor == eduiGetActiveMenu()) {
                 if (!edui_donotdraw)
@@ -5880,8 +5881,8 @@ extern "C" {
             }
         }
         const f32 button_size = row_height - 2.0f;
-        if (!edui_donotdraw) {
-            for (i32 depth = 0; depth < expander->depth; ++depth) {
+        for (i32 depth = 0; depth < expander->depth; ++depth) {
+            if (!edui_donotdraw) {
                 const i32 guide_x =
                     static_cast<i32>((static_cast<f32>(x) + (static_cast<f32>(depth) + 0.5f) * button_size) * 16.0f);
                 NuRndrLine2di(guide_x, y << 3, guide_x, static_cast<i32>((static_cast<f32>(y) + row_height) * 8.0f),
@@ -5894,7 +5895,7 @@ extern "C" {
         expander->button_x = button_x;
         expander->button_y = button_y;
         if (expander->first_child && !edui_donotdraw) {
-            const u32 button_line_colour = over_button ? 0xffffffff : 0xff000000;
+            const u32 button_line_colour = button_colours[expander->unknown_flags & 1];
             NuRndrLineRect2di(static_cast<i32>(button_x * 16.0f), static_cast<i32>(button_y * 8.0f),
                               static_cast<i32>(button_size * 16.0f), static_cast<i32>(button_size * 8.0f), 0xff000000,
                               uimtls[ui_outmtl]);
@@ -6158,17 +6159,14 @@ extern "C" {
     }
     static __used__ i32 eduicbRenderProp(struct eduimenu_s *menu, struct eduiitem_s *item, i32 x, i32 y, i32 scale) {
         edui_prop_s *property = static_cast<edui_prop_s *>(item);
+        item->x = x;
+        item->y = y;
         const bool over_button = edui_cursor_x >= property->button_x && edui_cursor_y >= property->button_y * 0.5f &&
                                  edui_cursor_x < property->button_x + property->button_size &&
                                  edui_cursor_y < (property->button_y + property->button_size) * 0.5f &&
                                  !eduiInteractLocked;
         const bool button_highlighted = (property->unknown_property_flags & 8) || over_button;
         property->unknown_property_flags = (property->unknown_property_flags & ~16u) | (button_highlighted ? 16u : 0u);
-        const f32 row_height = NuQFntHeight(edui_font) * 1.25f * 0.125f;
-        const i32 height = static_cast<i32>(row_height);
-        const f32 baseline = (NuQFntHeight(edui_font) * 0.125f + NuQFntBaseline(edui_font)) * 0.125f;
-        item->x = x;
-        item->y = y;
         if (!edui_donotdraw) {
             NuQFntSet(edui_font);
             const u32 text_colour = item->unknown_10 == 1   ? 0xff000060
@@ -6177,6 +6175,9 @@ extern "C" {
                                                             : item->colours[item->highlighted];
             NuQFntSetColour(edui_font, text_colour);
         }
+        const f32 row_height = NuQFntHeight(edui_font) * 1.25f * 0.125f;
+        const i32 height = static_cast<i32>(row_height);
+        const f32 baseline = (NuQFntHeight(edui_font) * 0.125f + NuQFntBaseline(edui_font)) * 0.125f;
         const f32 indentation = static_cast<f32>(property->depth) * (row_height - 2.0f);
         if (property->unknown_property_flags & 1) {
             const f32 text_width = NuQFntPrintLenU(edui_font, eduiPropTextEdit) * 0.0625f;

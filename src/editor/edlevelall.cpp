@@ -1546,26 +1546,54 @@ void ClassEditor::cbEdFilterLED(eduimenu_s *, eduiitem_s *item, u32) {
     item->highlighted = editable;
 }
 
-void ClassEditor::cbEdLevelDeselectAll(eduimenu_s *, eduiitem_s *item, u32) {
-    for (i32 index = 0; index < 10; ++index) {
-        LevelEditorScene *scene = theLevelEditor.GetEdScene(index);
-        if (scene != NULL && scene->active) {
-            scene->editable = 0;
-            item = item->previous;
-            item->highlighted = 0;
-        }
-    }
+void ClassEditor::cbEdLevelDeselectAll(eduimenu_s *menu, eduiitem_s *, u32) {
+    // The original callback walks the first explicit argument as an item list.
+    eduiitem_s *item = reinterpret_cast<eduiitem_s *>(menu);
+#define EDLEVEL_DESELECT_SCENE(index)                                                                                  \
+    do {                                                                                                               \
+        LevelEditorScene *scene = theLevelEditor.GetEdScene(index);                                                    \
+        if (scene != NULL && scene->active) {                                                                          \
+            item = item->previous;                                                                                     \
+            scene->editable = 0;                                                                                       \
+            item->highlighted = 0;                                                                                     \
+        }                                                                                                              \
+    } while (0)
+    EDLEVEL_DESELECT_SCENE(0);
+    EDLEVEL_DESELECT_SCENE(1);
+    EDLEVEL_DESELECT_SCENE(2);
+    EDLEVEL_DESELECT_SCENE(3);
+    EDLEVEL_DESELECT_SCENE(4);
+    EDLEVEL_DESELECT_SCENE(5);
+    EDLEVEL_DESELECT_SCENE(6);
+    EDLEVEL_DESELECT_SCENE(7);
+    EDLEVEL_DESELECT_SCENE(8);
+    EDLEVEL_DESELECT_SCENE(9);
+#undef EDLEVEL_DESELECT_SCENE
 }
 
-void ClassEditor::cbEdLevelSelectAll(eduimenu_s *, eduiitem_s *item, u32) {
-    for (i32 index = 0; index < 10; ++index) {
-        LevelEditorScene *scene = theLevelEditor.GetEdScene(index);
-        if (scene != NULL && scene->active) {
-            scene->editable = 1;
-            item = item->previous;
-            item->highlighted = 1;
-        }
-    }
+void ClassEditor::cbEdLevelSelectAll(eduimenu_s *menu, eduiitem_s *, u32) {
+    // The original callback walks the first explicit argument as an item list.
+    eduiitem_s *item = reinterpret_cast<eduiitem_s *>(menu);
+#define EDLEVEL_SELECT_SCENE(index)                                                                                    \
+    do {                                                                                                               \
+        LevelEditorScene *scene = theLevelEditor.GetEdScene(index);                                                    \
+        if (scene != NULL && scene->active) {                                                                          \
+            item = item->previous;                                                                                     \
+            scene->editable = 1;                                                                                       \
+            item->highlighted = 1;                                                                                     \
+        }                                                                                                              \
+    } while (0)
+    EDLEVEL_SELECT_SCENE(0);
+    EDLEVEL_SELECT_SCENE(1);
+    EDLEVEL_SELECT_SCENE(2);
+    EDLEVEL_SELECT_SCENE(3);
+    EDLEVEL_SELECT_SCENE(4);
+    EDLEVEL_SELECT_SCENE(5);
+    EDLEVEL_SELECT_SCENE(6);
+    EDLEVEL_SELECT_SCENE(7);
+    EDLEVEL_SELECT_SCENE(8);
+    EDLEVEL_SELECT_SCENE(9);
+#undef EDLEVEL_SELECT_SCENE
 }
 
 void ClassEditor::cbEdPadSetManipulatorMode(eduimenu_s *, eduiitem_s *, u32) {

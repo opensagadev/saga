@@ -345,15 +345,18 @@ void *SceneObjectHelper::GetNextObject(void *item) {
         if (iteration_scene_index > 9)
             goto owned_objects;
     }
-    for (; iteration_scene_index < 10; ++iteration_scene_index, iteration_object_index = 0) {
-        for (; iteration_object_index < scene_counts[iteration_scene_index]; ++iteration_object_index) {
+    while (iteration_scene_index < 10) {
+        while (scene_counts[iteration_scene_index] > iteration_object_index) {
             SceneObject *object = reinterpret_cast<SceneObject *>(
                 reinterpret_cast<u8 *>(scenes[iteration_scene_index]) + iteration_object_index * sizeof(SceneObject));
-            char *filter = scene_filter;
-            if (object->reserved_0x28 == 0 &&
-                (filter[0] == 0 || NuStrIStr(const_cast<char *>(object->GetName()), filter) == NULL))
-                return object;
+            if (object->reserved_0x28 == 0) {
+                if (scene_filter[0] == 0 || NuStrIStr(const_cast<char *>(object->GetName()), scene_filter) == NULL)
+                    return object;
+            }
+            ++iteration_object_index;
         }
+        ++iteration_scene_index;
+        iteration_object_index = 0;
     }
     if (item == NULL)
         return NULL;

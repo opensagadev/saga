@@ -1157,33 +1157,62 @@ static __used__ void routeEditor_cbRouteUsers(eduimenu_s *parent, eduiitem_s *, 
 static __used__ void routeEditor_cbCreateRoute(eduimenu_s *, eduiitem_s *, u32) {
     EDAIPATH_s *path = aieditor->current_path;
     i32 index = path->current_route != nullptr ? path->current_route - path->routes + 1 : 1;
-    for (i32 count = 0; count < 16; ++count, ++index) {
-        if (index >= 16) {
-            index = 0;
-        }
-        EDAIPATHROUTE_s *route = &path->routes[index];
-        if (!(route->flags & 1)) {
-            route->flags |= 1;
-            route->user_mask = 0;
-            path->current_route = route;
-            char name[16];
-            i32 number = 0;
-            i32 duplicate;
-            do {
-                sprintf(name, "route%d", ++number);
-                duplicate = 0;
-                for (i32 other = 0; other < 16; ++other) {
-                    if ((path->routes[other].flags & 1) && NuStrICmp(name, path->routes[other].name) == 0) {
-                        duplicate = 1;
-                        break;
-                    }
-                }
-            } while (duplicate);
-            strcpy(route->name, name);
-            aieditor_ClearMainMenu();
-            return;
-        }
-    }
+    // The original checks each of the fixed 16 slots in sequence.
+#define ROUTE_EDITOR_TRY_FREE()                                                                                        \
+    if (index >= 16)                                                                                                   \
+        index = 0;                                                                                                     \
+    if (!(path->routes[index].flags & 1))                                                                              \
+        goto route_found;                                                                                              \
+    ++index
+    ROUTE_EDITOR_TRY_FREE();
+    ROUTE_EDITOR_TRY_FREE();
+    ROUTE_EDITOR_TRY_FREE();
+    ROUTE_EDITOR_TRY_FREE();
+    ROUTE_EDITOR_TRY_FREE();
+    ROUTE_EDITOR_TRY_FREE();
+    ROUTE_EDITOR_TRY_FREE();
+    ROUTE_EDITOR_TRY_FREE();
+    ROUTE_EDITOR_TRY_FREE();
+    ROUTE_EDITOR_TRY_FREE();
+    ROUTE_EDITOR_TRY_FREE();
+    ROUTE_EDITOR_TRY_FREE();
+    ROUTE_EDITOR_TRY_FREE();
+    ROUTE_EDITOR_TRY_FREE();
+    ROUTE_EDITOR_TRY_FREE();
+    ROUTE_EDITOR_TRY_FREE();
+#undef ROUTE_EDITOR_TRY_FREE
+    return;
+route_found:
+    EDAIPATHROUTE_s *route = &path->routes[index];
+    route->flags |= 1;
+    route->user_mask = 0;
+    path->current_route = route;
+    char name[16];
+    i32 number = 0;
+next_name:
+    sprintf(name, "route%d", ++number);
+#define ROUTE_EDITOR_CHECK_NAME(N)                                                                                     \
+    if ((path->routes[N].flags & 1) && NuStrICmp(name, path->routes[N].name) == 0)                                     \
+    goto next_name
+    ROUTE_EDITOR_CHECK_NAME(0);
+    ROUTE_EDITOR_CHECK_NAME(1);
+    ROUTE_EDITOR_CHECK_NAME(2);
+    ROUTE_EDITOR_CHECK_NAME(3);
+    ROUTE_EDITOR_CHECK_NAME(4);
+    ROUTE_EDITOR_CHECK_NAME(5);
+    ROUTE_EDITOR_CHECK_NAME(6);
+    ROUTE_EDITOR_CHECK_NAME(7);
+    ROUTE_EDITOR_CHECK_NAME(8);
+    ROUTE_EDITOR_CHECK_NAME(9);
+    ROUTE_EDITOR_CHECK_NAME(10);
+    ROUTE_EDITOR_CHECK_NAME(11);
+    ROUTE_EDITOR_CHECK_NAME(12);
+    ROUTE_EDITOR_CHECK_NAME(13);
+    ROUTE_EDITOR_CHECK_NAME(14);
+    ROUTE_EDITOR_CHECK_NAME(15);
+#undef ROUTE_EDITOR_CHECK_NAME
+    strcpy(route->name, name);
+    aieditor_ClearMainMenu();
 }
 
 static __used__ void routeEditor_cbDeleteRoute(eduimenu_s *parent, eduiitem_s *item, u32) {
@@ -2193,33 +2222,67 @@ eduimenu_s *routeEditor_Process(nupad_s *pad) {
     EDAIPATH_s *path = aieditor->current_path;
     if (path == nullptr)
         return nullptr;
+    // Both route cycling directions are expanded across the 16 fixed slots in the original.
     if (pad->digital_buttons_pressed & 0x1000) {
-        i32 index = path->current_route == nullptr ? 0 : path->current_route - path->routes;
+        i32 index = path->current_route == nullptr ? 1 : path->current_route - path->routes + 1;
+#define ROUTE_EDITOR_TRY_FORWARD()                                                                                     \
+    if (index >= 16)                                                                                                   \
+        index = 0;                                                                                                     \
+    path->current_route = &path->routes[index];                                                                        \
+    if (path->current_route->flags & 1)                                                                                \
+        goto route_selected;                                                                                           \
+    ++index
+        ROUTE_EDITOR_TRY_FORWARD();
+        ROUTE_EDITOR_TRY_FORWARD();
+        ROUTE_EDITOR_TRY_FORWARD();
+        ROUTE_EDITOR_TRY_FORWARD();
+        ROUTE_EDITOR_TRY_FORWARD();
+        ROUTE_EDITOR_TRY_FORWARD();
+        ROUTE_EDITOR_TRY_FORWARD();
+        ROUTE_EDITOR_TRY_FORWARD();
+        ROUTE_EDITOR_TRY_FORWARD();
+        ROUTE_EDITOR_TRY_FORWARD();
+        ROUTE_EDITOR_TRY_FORWARD();
+        ROUTE_EDITOR_TRY_FORWARD();
+        ROUTE_EDITOR_TRY_FORWARD();
+        ROUTE_EDITOR_TRY_FORWARD();
+        ROUTE_EDITOR_TRY_FORWARD();
+        ROUTE_EDITOR_TRY_FORWARD();
+#undef ROUTE_EDITOR_TRY_FORWARD
         path->current_route = nullptr;
-        for (i32 step = 1; step <= 16; ++step) {
-            EDAIPATHROUTE_s *route = &path->routes[(index + step) & 15];
-            if (route->flags & 1) {
-                path->current_route = route;
-                break;
-            }
-        }
-        if (path->current_route == nullptr)
-            return nullptr;
+        return nullptr;
     } else if (pad->digital_buttons_pressed & 0x4000) {
-        i32 index = path->current_route == nullptr ? 0 : path->current_route - path->routes;
+        i32 index = path->current_route == nullptr ? 15 : path->current_route - path->routes - 1;
+#define ROUTE_EDITOR_TRY_BACKWARD()                                                                                    \
+    if (index < 0)                                                                                                     \
+        index = 15;                                                                                                    \
+    path->current_route = &path->routes[index];                                                                        \
+    if (path->current_route->flags & 1)                                                                                \
+        goto route_selected;                                                                                           \
+    --index
+        ROUTE_EDITOR_TRY_BACKWARD();
+        ROUTE_EDITOR_TRY_BACKWARD();
+        ROUTE_EDITOR_TRY_BACKWARD();
+        ROUTE_EDITOR_TRY_BACKWARD();
+        ROUTE_EDITOR_TRY_BACKWARD();
+        ROUTE_EDITOR_TRY_BACKWARD();
+        ROUTE_EDITOR_TRY_BACKWARD();
+        ROUTE_EDITOR_TRY_BACKWARD();
+        ROUTE_EDITOR_TRY_BACKWARD();
+        ROUTE_EDITOR_TRY_BACKWARD();
+        ROUTE_EDITOR_TRY_BACKWARD();
+        ROUTE_EDITOR_TRY_BACKWARD();
+        ROUTE_EDITOR_TRY_BACKWARD();
+        ROUTE_EDITOR_TRY_BACKWARD();
+        ROUTE_EDITOR_TRY_BACKWARD();
+        ROUTE_EDITOR_TRY_BACKWARD();
+#undef ROUTE_EDITOR_TRY_BACKWARD
         path->current_route = nullptr;
-        for (i32 step = 1; step <= 16; ++step) {
-            EDAIPATHROUTE_s *route = &path->routes[(index - step) & 15];
-            if (route->flags & 1) {
-                path->current_route = route;
-                break;
-            }
-        }
-        if (path->current_route == nullptr)
-            return nullptr;
+        return nullptr;
     } else if (path->current_route == nullptr) {
         return nullptr;
     }
+route_selected:
     if ((pad->digital_buttons & 0x40) && (pad->digital_buttons_pressed & 0x40) && path->nearest_node != nullptr) {
         path->current_node = path->nearest_node;
         nuvec_s position = path->current_node->position;
