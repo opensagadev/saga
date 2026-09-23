@@ -652,7 +652,7 @@ extern "C" {
         aieditor->flags &= ~u8(2);
     }
 
-    bool aieditor_Proc(f32 menu_delta_time, nupad_s *pad, f32 frame_delta_time, u32 exit_buttons) {
+    i32 aieditor_Proc(f32 menu_delta_time, nupad_s *pad, f32 frame_delta_time, u32 exit_buttons) {
         aieditor->pad_buttons = pad->digital_buttons;
         aieditor->pad_pressed = pad->digital_buttons_pressed;
         if (aieditor->main_menu != nullptr) {
@@ -688,20 +688,22 @@ extern "C" {
 
         if (aieditorsettings.snap_height_display) {
             const f32 absent_height = 2000000.0f;
+            f32 ground_shadow = EShadY;
+            f32 roof_shadow = ShadRoofY;
             f32 closest = absent_height;
             if (terrain_height != absent_height) {
                 aieditor->camera_position.y = terrain_height;
                 closest = __builtin_fabsf(aieditor->cursor_position.y - terrain_height);
             }
-            if (EShadY != absent_height) {
-                f32 distance = __builtin_fabsf(aieditor->cursor_position.y - EShadY);
+            if (ground_shadow != absent_height) {
+                f32 distance = __builtin_fabsf(aieditor->cursor_position.y - ground_shadow);
                 if (distance < closest) {
-                    aieditor->camera_position.y = EShadY;
+                    aieditor->camera_position.y = ground_shadow;
                     closest = distance;
                 }
             }
-            if (ShadRoofY != absent_height && __builtin_fabsf(aieditor->cursor_position.y - ShadRoofY) < closest) {
-                aieditor->camera_position.y = ShadRoofY;
+            if (roof_shadow != absent_height && __builtin_fabsf(aieditor->cursor_position.y - roof_shadow) < closest) {
+                aieditor->camera_position.y = roof_shadow;
             }
             if (disable_cylinder_check == 0 && aieditor->current_path != nullptr &&
                 aieditor->current_path->current_node != nullptr &&

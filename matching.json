@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 57.956238,
+    "fuzzy_match_percent": 57.958797,
     "total_code": "4722419",
     "matched_code": "485548",
     "matched_code_percent": 10.281765,
@@ -19070,7 +19070,7 @@
           "address": 4260688,
           "offset": 3370720,
           "size": 1202,
-          "match_percent": 24.765676
+          "match_percent": 23.69307
         }
       ]
     },
@@ -19125,7 +19125,7 @@
           "address": 4064368,
           "offset": 3174400,
           "size": 3322,
-          "match_percent": 43.8
+          "match_percent": 41.838963
         },
         {
           "name": "areaEditorSaveData",
@@ -19556,7 +19556,7 @@
           "address": 4249232,
           "offset": 3359264,
           "size": 4175,
-          "match_percent": 33.309917
+          "match_percent": 31.515495
         },
         {
           "name": "creatureEditor_RenderAllCreatures",
@@ -21642,7 +21642,7 @@
           "address": 4195648,
           "offset": 3305680,
           "size": 4694,
-          "match_percent": 17.746534
+          "match_percent": 13.987128
         },
         {
           "name": "pathEditorCreateData",
@@ -21770,7 +21770,7 @@
           "address": 4255968,
           "offset": 3366000,
           "size": 2043,
-          "match_percent": 29.786995
+          "match_percent": 43.746635
         }
       ]
     },
@@ -29596,7 +29596,7 @@
           "address": 5502896,
           "offset": 4612928,
           "size": 1716,
-          "match_percent": 18.93871
+          "match_percent": 19.583872
         },
         {
           "name": "_Z18EdDrawPolyCylinderRK5VuVecS1_iiifff",
@@ -33315,7 +33315,7 @@
           "address": 3538400,
           "offset": 2648432,
           "size": 402,
-          "match_percent": 88.45652
+          "match_percent": 74.978264
         },
         {
           "name": "edbriStopPage",
@@ -35067,7 +35067,7 @@
           "address": 3796400,
           "offset": 2906432,
           "size": 2808,
-          "match_percent": 25.228827
+          "match_percent": 32.6523
         },
         {
           "name": "eduiMenuFitOnScreen",

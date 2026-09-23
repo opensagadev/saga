@@ -1466,12 +1466,12 @@ __attribute__((optimize("O3"))) eduimenu_s *creatureEditor_Process(nupad_s *pad)
             u8 set = 0;
             if (previous == nullptr) {
                 NuStrNCpy(base_name, GlobalCharacterNameFn(aieditorsettings.current_path_type), 0xd);
-                base_name[0xd] = 0;
             } else {
                 NuStrCpy(base_name, previous->name);
                 char *suffix = strrchr(base_name, '_');
                 if (suffix != nullptr)
                     *suffix = 0;
+                base_name[12] = 0;
                 set = previous->set;
             }
 
@@ -1493,7 +1493,7 @@ __attribute__((optimize("O3"))) eduimenu_s *creatureEditor_Process(nupad_s *pad)
                     if (!in_use)
                         break;
                 }
-                NuStrCpy(created->name, name);
+                strcpy(created->name, name);
                 if (aieditorsettings.current_script_name[0] != 0)
                     NuStrCpy(created->script_name, aieditorsettings.current_script_name);
                 memcpy(created->script_params, aieditorsettings.current_script_params, sizeof(created->script_params));

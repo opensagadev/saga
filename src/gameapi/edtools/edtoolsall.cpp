@@ -2280,7 +2280,7 @@ void EdDrawPolyCylinder(VuMtx const &transform, float half_length, float radius,
             }
         }
     }
-    if ((cap_start != 0 || cap_end != 0) && sides > 2) {
+    if (cap_start != 0 || cap_end != 0) {
         const float negative_half_length = -half_length;
         float first_sine = NU_SIN_LUT(0);
         float first_cosine = NU_COS_LUT(0);

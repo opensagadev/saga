@@ -1960,8 +1960,6 @@ void pathEditor_Enter(void) {
     AIEDITOR_RENDER_STATE *state = aieditor;
     state->paths.head = nullptr;
     state->paths.tail = nullptr;
-    state->free_paths.head = nullptr;
-    state->free_paths.tail = nullptr;
     for (i32 index = 0; index < 32; ++index) {
         NuLinkedListAppend(&state->free_paths, &state->path_storage[index].link);
     }
@@ -1972,8 +1970,6 @@ void pathEditor_Enter(void) {
     }
     state->free_shared_nodes.head = nullptr;
     state->free_shared_nodes.tail = nullptr;
-    state->shared_path_nodes.head = nullptr;
-    state->shared_path_nodes.tail = nullptr;
     for (i32 index = 0; index < 64; ++index) {
         NuLinkedListAppend(&state->free_shared_nodes, &state->shared_node_storage[index].link);
     }
@@ -1994,22 +1990,16 @@ void pathEditor_Enter(void) {
                 break;
             }
             NuLinkedListRemove(&state->free_paths, &path->link);
-            memset((u8 *)path + sizeof(path->link), 0, sizeof(*path) - sizeof(path->link));
             NuLinkedListAppend(&state->paths, &path->link);
             strcpy(path->name, runtime_path->name);
-            path->runtime_start = -1;
-            path->runtime_end = -1;
-            path->runtime_nearest = -1;
             if (NuStrICmp(path->name, "LevelPath") == 0) {
                 path->flags |= 1;
             }
-            for (i32 route_index = 0; route_index < runtime_path->route_count && route_index < 16; ++route_index) {
+            for (i32 route_index = 0; route_index < runtime_path->route_count; ++route_index) {
                 AIPATHROUTE_s *source = &runtime_path->routes[route_index];
                 EDAIPATHROUTE_s *route = &path->routes[route_index];
                 route->flags |= 1;
-                if (source->name != nullptr) {
-                    strncpy(route->name, source->name, sizeof(route->name) - 1);
-                }
+                NuStrCpy(route->name, source->name);
                 route->user_mask = source->character_masks[1];
             }
 
@@ -2020,7 +2010,6 @@ void pathEditor_Enter(void) {
                     break;
                 }
                 NuLinkedListRemove(&state->free_path_nodes, &node->link);
-                memset((u8 *)node + sizeof(node->link), 0, sizeof(*node) - sizeof(node->link));
                 NuLinkedListAppend(&path->nodes, &node->link);
                 node->index = node_index;
                 ++path->node_count;
@@ -2045,15 +2034,22 @@ void pathEditor_Enter(void) {
                             shared = (EDAISHAREDPATHNODE_s *)NuLinkedListGetHead(&state->free_shared_nodes);
                             if (shared != nullptr) {
                                 NuLinkedListRemove(&state->free_shared_nodes, &shared->link);
-                                shared->reference_count = 0;
-                                shared->runtime_index = shared_index;
                                 NuLinkedListAppend(&state->shared_path_nodes, &shared->link);
                                 shared_nodes[shared_index] = shared;
                             }
                         }
                         if (shared != nullptr) {
-                            node->shared_node = shared;
-                            ++shared->reference_count;
+                            if (node->shared_node != shared) {
+                                if (node->shared_node != nullptr) {
+                                    EDAISHAREDPATHNODE_s *previous = node->shared_node;
+                                    --previous->reference_count;
+                                    if (previous->reference_count <= 1) {
+                                        pathEditor_DestroySharedNode(previous);
+                                    }
+                                }
+                                node->shared_node = shared;
+                                ++shared->reference_count;
+                            }
                         }
                     }
                 }
@@ -2150,15 +2146,33 @@ void pathEditor_Render(i32 x, i32 y, float x_scale, float y_scale) {
             NuQFntSetColour(system_qfont, 0x80000000);
             NuQFntSetScale(system_qfont, x_scale, y_scale);
             if (path->current_node != nullptr) {
-                NuQFntPrintEx(system_qfont, screen_x, screen_y + 120, 16, "\"%s\" %d nodes", path->current_node->name,
-                              path->node_count);
+                if (path->current_node->name[0] != '\0') {
+                    NuQFntPrintEx(system_qfont, screen_x, screen_y + 120, 16, "\"%s\" %d nodes",
+                                  path->current_node->name, path->node_count);
+                } else {
+                    NuQFntPrintEx(system_qfont, screen_x, screen_y + 120, 16, "ix=%d, %d nodes",
+                                  path->current_node->index, path->node_count);
+                }
             } else {
                 NuQFntPrintEx(system_qfont, screen_x, screen_y + 120, 16, "%d nodes", path->node_count);
             }
             NuQFntPrintEx(system_qfont, screen_x, screen_y + 240, 16, "SQR - Sub menu");
             NuQFntPrintEx(system_qfont, screen_x, screen_y + 360, 16, "SELECT - Select nearest");
-            if (path->nearest_node != nullptr) {
+            if (aieditor->flags & 1) {
+                NuQFntPrintEx(system_qfont, screen_x, screen_y + 480, 16, "X - Move selected");
+                NuQFntPrintEx(system_qfont, screen_x, screen_y + 600, 16, "TRI - Delete selected");
+                if (path->current_node != nullptr) {
+                    NuQFntPrintEx(system_qfont, screen_x, screen_y + 840, 16, "LRIGHT - Increase radius, %.2f",
+                                  path->current_node->radius);
+                } else {
+                    NuQFntPrintEx(system_qfont, screen_x, screen_y + 840, 16, "LRIGHT - Increase radius");
+                }
+                NuQFntPrintEx(system_qfont, screen_x, screen_y + 960, 16, "LLEFT - Decrease radius");
+            } else if (path->nearest_node != nullptr) {
                 NuQFntPrintEx(system_qfont, screen_x, screen_y + 480, 16, "X - Select");
+                NuQFntPrintEx(system_qfont, screen_x, screen_y + 720, 16, "O - Link/unlink to selected");
+            } else {
+                NuQFntPrintEx(system_qfont, screen_x, screen_y + 480, 16, "X - Create");
             }
         }
     }

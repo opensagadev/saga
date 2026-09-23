@@ -202,6 +202,37 @@ static __used__ void eduiFntPrintClipEx(void *font, float x, float y, int alignm
         NuQFntPopPrintMode();
     }
 }
+static void eduiFntPrintClipEx(void *font, i32 x, i32 y, i32 alignment, i32 clip_x, i32 clip_width, char *format, ...) {
+    if (edui_donotdraw)
+        return;
+
+    char text[1024];
+    NuQFntPushPrintMode(2);
+    va_list arguments;
+    va_start(arguments, format);
+    NuVSPrintf(text, format, arguments);
+    va_end(arguments);
+    i32 width = static_cast<i32>(NuQFntPrintLenU(font, text));
+    if (alignment == 32)
+        x -= width;
+    else if (alignment == 64)
+        x -= width / 2;
+    if (x < clip_x)
+        x = clip_x;
+    i32 length = NuStrLen(text);
+    if (width > clip_width) {
+        char *end = text + length - 1;
+        while (end > text) {
+            *end-- = '\0';
+            width = static_cast<i32>(NuQFntPrintLenU(font, text));
+            if (width <= clip_width)
+                break;
+        }
+    }
+    NuQFntMove(font, static_cast<f32>(x), static_cast<f32>(y), 0.0f);
+    NuQFntPrintU(font, text);
+    NuQFntPopPrintMode();
+}
 static i32 show_x_scale_help;
 static i32 show_y_scale_help;
 
@@ -4177,6 +4208,7 @@ extern "C" {
         NuQFntSetScale(edui_font, edui_font_scale_x, edui_font_scale_y);
 
         const f32 font_height = NuQFntHeight(edui_font);
+        const f32 title_font_height = NuQFntHeight(edui_font);
         const f32 baseline = NuQFntBaseline(edui_font);
         const i32 title_height = static_cast<i32>(font_height * 0.15625f);
         if (menu->title && menu->title[0]) {
@@ -4194,12 +4226,16 @@ extern "C" {
             }
             if (!edui_donotdraw) {
                 NuRndrRect2di(x << 4, y << 3, menu->width << 4, title_height << 3, 0x80000000, uimtls[ui_bgmtl]);
+            }
+            if (!edui_donotdraw) {
                 NuQFntSet(edui_font);
+            }
+            if (!edui_donotdraw) {
                 NuQFntSetColour(edui_font, 0x807f7f7f);
             }
-            eduiFntPrintClipEx(edui_font, static_cast<f32>(x + 1),
-                               font_height * 0.015625f + baseline * 0.125f + static_cast<f32>(y), 0x10,
-                               static_cast<f32>(x), static_cast<f32>(menu->width), menu->title);
+            eduiFntPrintClipEx(edui_font, (x + 1) << 4,
+                               static_cast<i32>(title_font_height * 0.125f + baseline) + (y << 3), 0x10, x << 4,
+                               menu->width << 4, menu->title);
             y += title_height;
         }
 
@@ -4210,7 +4246,7 @@ extern "C" {
             bool find_selected = selected != NULL;
 
             if (item != menu->first) {
-                const i32 scroll_height = static_cast<i32>(font_height * 0.125f);
+                const i32 scroll_height = static_cast<i32>(NuQFntHeight(edui_font) * 0.125f);
                 if (!menu->child && numInteracts < 64 && !eduiInteractLocked) {
                     edui_interact_s *interact = &eduiInteracts[numInteracts++];
                     interact->x = static_cast<f32>(x);
@@ -4225,10 +4261,14 @@ extern "C" {
                 }
                 if (!edui_donotdraw) {
                     NuRndrRect2di(x << 4, y << 3, menu->width << 4, scroll_height << 3, 0x80000000, uimtls[ui_bgmtl]);
-                    const i32 centre = (x * 2 + menu->width) << 3;
-                    const i32 top = (y << 3) + 8;
-                    const i32 bottom = ((y + scroll_height) << 3) - 16;
+                }
+                const i32 centre = (x * 2 + menu->width) << 3;
+                const i32 top = (y << 3) + 8;
+                const i32 bottom = ((y + scroll_height) << 3) - 16;
+                if (!edui_donotdraw) {
                     NuRndrLine2di(centre, top, centre - ((scroll_height - 2) << 4), bottom, 0x80ffffff, uimtls[0]);
+                }
+                if (!edui_donotdraw) {
                     NuRndrLine2di(centre, top, centre + ((scroll_height - 2) << 4), bottom, 0x80ffffff, uimtls[0]);
                 }
                 y += scroll_height;
@@ -4269,7 +4309,7 @@ extern "C" {
                 if (!item)
                     break;
                 if (menu->y + menu->height <= y) {
-                    const i32 scroll_height = static_cast<i32>(font_height * 0.125f);
+                    const i32 scroll_height = static_cast<i32>(NuQFntHeight(edui_font) * 0.125f);
                     if (!menu->child && numInteracts < 64 && !eduiInteractLocked) {
                         edui_interact_s *interact = &eduiInteracts[numInteracts++];
                         interact->x = static_cast<f32>(x);
@@ -4285,10 +4325,14 @@ extern "C" {
                     if (!edui_donotdraw) {
                         NuRndrRect2di(x << 4, y << 3, menu->width << 4, scroll_height << 3, 0x80000000,
                                       uimtls[ui_bgmtl]);
-                        const i32 centre = (x * 2 + menu->width) << 3;
-                        const i32 top = (y << 3) + 8;
-                        const i32 bottom = ((y + scroll_height - 2) << 3);
+                    }
+                    const i32 centre = (x * 2 + menu->width) << 3;
+                    const i32 top = (y << 3) + 8;
+                    const i32 bottom = ((y + scroll_height - 2) << 3);
+                    if (!edui_donotdraw) {
                         NuRndrLine2di(centre, bottom, centre - ((scroll_height - 2) << 4), top, 0x80ffffff, uimtls[0]);
+                    }
+                    if (!edui_donotdraw) {
                         NuRndrLine2di(centre, bottom, centre + ((scroll_height - 2) << 4), top, 0x80ffffff, uimtls[0]);
                     }
                     break;

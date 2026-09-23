@@ -63,6 +63,7 @@ extern "C" void aieditor_cbSnapHeightToggle(eduimenu_s *, eduiitem_s *, u32);
 extern "C" void SetAiRndrCullDistance(f32);
 extern "C" f32 AiRndrCullDistance;
 extern "C" i32 aidata_version;
+extern "C" i32 AIEDITOR_ROUTES;
 void DrawAreaBox(NUVEC *, NUVEC *, i32, i32);
 void DrawAreaCylinder(NUVEC *, NUVEC *, i32);
 extern "C" void pathEditorDrawPaths();
@@ -270,7 +271,7 @@ static eduimenu_s *areaEditorOptionsMenu() {
     if (menu == NULL) {
         return NULL;
     }
-    eduiMenuAddItem(menu, eduiItemSelCreate(0, &area_attr, 0, 0, aieditor_cvSelectEditorMode,
+    eduiMenuAddItem(menu, eduiItemSelCreate(AIEDITOR_ROUTES, &area_attr, 0, 0, aieditor_cvSelectEditorMode,
                                             const_cast<char *>("Select Editor Mode")));
     eduiMenuAddItem(menu, eduiItemSelCreate(1, &area_attr, 0, 0, aieditor_cbSave, const_cast<char *>("Save AI Data")));
     eduiMenuAddItem(menu,
