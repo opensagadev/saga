@@ -4,11 +4,15 @@
 #include "gameapi/edtools/edstubs.h"
 #include "gameapi/edtools/edui.h"
 #include "legoapi/legoapi_types.h"
+#include "legoapi/render/fx.h"
 
 extern "C" {
     extern debkeydatatype_s *debkeydata;
     extern debinftype **debtab;
     extern i32 debris_render_group;
+    extern void *ed_fnt;
+    extern u32 edblack[4];
+    extern eduimenu_s *edptl_repeatbox_menu;
     void DebFreeInstantly(i32 *handle);
     void DebReAlloc(debkeydatatype_s *key, i32 particle_count);
     void DebrisSetDetailLevels(i32 handle, i32 detail_levels);
@@ -21,10 +25,17 @@ void edppPtlDestroy(i32 index);
 
 static edui_slider_s *repeatbox_x_item;
 static edui_slider_s *repeatbox_z_item;
+static void edptlcbCancelPageMenu(eduimenu_s *, eduimenu_s *);
+static void edptlcbStartPage(eduimenu_s *, eduiitem_s *, u32);
+static void edptlcbStopPage(eduimenu_s *, eduiitem_s *, u32);
+static void edptlcbClearPage(eduimenu_s *, eduiitem_s *, u32);
 
 // These callbacks and the repeat-box sliders belong to the same original TU.
 static __used__ void cbPtlCancelRepeatBoxMenu(eduimenu_s *, eduimenu_s *) {
-    STUBBED();
+    eduiMenuDestroy(edptl_repeatbox_menu);
+    edptl_repeatbox_menu = NULL;
+    repeatbox_x_item = NULL;
+    repeatbox_z_item = NULL;
 }
 static __used__ void cbPtlRepeatBoxMenu(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
@@ -77,8 +88,27 @@ static void UpdateTotalPtls(debinftype *effect) {
 
 // Particle list editor subsystem stubs (static, internal linkage).
 
-static __used__ void edptlcbPageMenu(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
+static __used__ void edptlcbPageMenu(eduimenu_s *parent, eduiitem_s *, u32) {
+    u32 colours[4] = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
+    edptl_page_menu =
+        eduiMenuCreate(70, 70, 180, 250, ed_fnt, edptlcbCancelPageMenu, const_cast<char *>("Test Page Menu"));
+    if (edptl_page_menu == NULL)
+        return;
+    eduiMenuAddItem(edptl_page_menu,
+                    eduiItemSelCreate(1, colours, 0, 0, edptlcbStartPage, const_cast<char *>("Start Page 1")));
+    eduiMenuAddItem(edptl_page_menu,
+                    eduiItemSelCreate(2, colours, 0, 0, edptlcbStartPage, const_cast<char *>("Start Page 2")));
+    eduiMenuAddItem(edptl_page_menu,
+                    eduiItemSelCreate(1, colours, 0, 0, edptlcbStopPage, const_cast<char *>("Stop Page 1")));
+    eduiMenuAddItem(edptl_page_menu,
+                    eduiItemSelCreate(2, colours, 0, 0, edptlcbStopPage, const_cast<char *>("Stop Page 2")));
+    eduiMenuAddItem(edptl_page_menu,
+                    eduiItemSelCreate(1, colours, 0, 0, edptlcbClearPage, const_cast<char *>("Clear Page 1")));
+    eduiMenuAddItem(edptl_page_menu,
+                    eduiItemSelCreate(2, colours, 0, 0, edptlcbClearPage, const_cast<char *>("Clear Page 2")));
+    eduiMenuAttach(parent, edptl_page_menu);
+    edptl_page_menu->x = parent->x + 10;
+    edptl_page_menu->y = parent->y + 40;
 }
 static __used__ void edptlcbSetGroup(eduimenu_s *, eduiitem_s *item, u32) {
     if (edpp_nearest == -1) {
@@ -132,8 +162,25 @@ static __used__ void edptlcbSetDetail(eduimenu_s *, eduiitem_s *item, u32) {
     DebrisSetDetailLevels(instance_id, detail_levels);
 }
 void edppStartPage(i32 page) {
-    STUBBED();
-    (void)page;
+    i32 index = 0;
+    edpp_particle_s *particle = edpp_ptls;
+    while (index != 512) {
+        while (particle->page != static_cast<i8>(page) || particle->instance_id != 99999) {
+            ++index;
+            ++particle;
+            if (index == 512)
+                goto page_started;
+        }
+        particle->instance_id = -1;
+        particle->effect_index = LookupDebrisEffectPage(particle->name, static_cast<i8>(page));
+        edppStartSingleEffect(index);
+        if (particle->instance_id == -1)
+            particle->instance_id = 99999;
+        ++index;
+        ++particle;
+    }
+page_started:
+    edpp_page_on[static_cast<i8>(page)] = 1;
 }
 static __used__ void edptlcbStartPage(eduimenu_s *, eduiitem_s *item, u32) {
     edppStartPage(static_cast<i8>(item->data));

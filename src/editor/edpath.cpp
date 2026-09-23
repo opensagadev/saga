@@ -36,6 +36,8 @@ extern "C" {
     void locatorEditorDrawLocators(void);
     void antinodeEditorDrawAntinodes(void);
     void pathEditorDrawPaths(void);
+    void LocaledbitsDrawCircleXY(NUVEC *, f32, u32, i32, i32);
+    void LocaledbitsDrawSolidCircleXY(NUVEC *, f32, f32, f32, u32, i32, i32);
     extern void (*AIPathDeletedFn)(EDAIPATH_s *);
     void aieditor_cbCancelMainMenu(eduimenu_s *, eduimenu_s *);
     void aieditor_cvSelectEditorMode(eduimenu_s *, eduiitem_s *, u32);
@@ -208,14 +210,47 @@ DECOMP_ASSERT(offsetof(EdUiNameInputItem, max_name_length) == 0x15a, "editor nam
 static __used__ void ParseAIPathCnxFlag(char *) {
 }
 
+static void pathEditorDrawNodeVolume(NUVEC *position, f32 radius, f32 lower_height, f32 upper_height, u32 colour,
+                                     numtl_s *material, i32 segments, i32 solid) {
+    NUVEC centre = *position;
+    centre.y += aiEditor_DrawYOffset;
+    if (solid == 0) {
+        LocaledbitsDrawCircleXY(&centre, radius, colour, (i32)material, segments);
+    } else {
+        LocaledbitsDrawSolidCircleXY(&centre, radius, lower_height, upper_height, colour, (i32)material, segments);
+    }
+}
+
 static __used__ void pathEditorDrawPath(EDAIPATH_s *path, i32 path_index) {
     if (path == nullptr) {
         return;
     }
     u32 colour =
         path == aieditor->current_path ? 0xffffffff : AISysGetPathColour(path_index % AISysGetPathColourCount());
+    i32 solid = aieditorsettings.solid_path_display;
+    u16 active_route = 0;
+    if (path == aieditor->current_path && path->current_route != nullptr) {
+        active_route = 1 << (path->current_route - path->routes);
+    }
     for (EDAIPATHNODE_s *node = (EDAIPATHNODE_s *)NuLinkedListGetHead(&path->nodes); node != nullptr;
          node = (EDAIPATHNODE_s *)NuLinkedListGetNext(&path->nodes, &node->link)) {
+        u32 node_colour = colour;
+        i32 segments = 8;
+        if (path == aieditor->current_path) {
+            if (node == path->current_node) {
+                node_colour = 0xff0000ff;
+                segments = 32;
+            } else if (node == path->other_node) {
+                node_colour = 0xff00ffff;
+                segments = 32;
+            }
+        }
+        pathEditorDrawNodeVolume(&node->position, node->radius, node->position.y + node->lower_height,
+                                 node->position.y + node->upper_height, node_colour, nullptr, segments, solid);
+        if (active_route != 0 && (node->route_mask & active_route)) {
+            pathEditorDrawNodeVolume(&node->position, node->radius * 0.9f, node->position.y + node->lower_height,
+                                     node->position.y + node->upper_height, node_colour, nullptr, segments, solid);
+        }
         for (i32 slot = 0; slot < 8; ++slot) {
             EDAIPATHCNX_s *connection = &node->connections[slot];
             EDAIPATHNODE_s *other = connection->node;
@@ -846,6 +881,18 @@ static __used__ void pathEditorCreateSpecialRouteData(AIPATH_s *path, EDAIPATH_s
         route->character_masks[1] = editor_route->user_mask;
     }
 
+    for (i32 edge = 0; edge < path->connection_count; ++edge) {
+        AIPATHCNX_s *connection = &path->connections[edge];
+        u16 editor_mask = connection->route_mask;
+        u16 dense_mask = 0;
+        for (i32 route_index = 0; route_index < route_count; ++route_index) {
+            if (editor_mask & (1 << route_slots[route_index])) {
+                dense_mask |= 1 << route_index;
+            }
+        }
+        connection->route_mask = dense_mask;
+    }
+
     for (i32 route_index = 0; route_index < route_count; ++route_index) {
         AIPATHROUTE_s *route = &path->routes[route_index];
         i32 slot = route_slots[route_index];
@@ -1221,11 +1268,6 @@ extern "C" {
             path->index = path_index;
             path->node_count = editor_path->node_count;
             path->flags = editor_path->flags;
-            i32 route_map[16];
-            i32 active_routes = 0;
-            for (i32 route = 0; route < 16; ++route) {
-                route_map[route] = (editor_path->routes[route].flags & 1) ? active_routes++ : -1;
-            }
             if (editor_path == aieditor->current_path) {
                 system->active_path = path;
             }
@@ -1326,13 +1368,6 @@ extern "C" {
                             break;
                         }
                     }
-                    u16 mapped_mask = 0;
-                    for (i32 route = 0; route < 16; ++route) {
-                        if (route_map[route] >= 0 && (runtime->route_mask & (1 << route))) {
-                            mapped_mask |= 1 << route_map[route];
-                        }
-                    }
-                    runtime->route_mask = mapped_mask;
                     NUVEC difference;
                     runtime->distance = NuVecDist(&node->position, &other->position, &difference);
                     runtime->horizontal_distance = NuVecXZDist(&node->position, &other->position, &difference);
@@ -1429,7 +1464,7 @@ extern "C" {
                 }
             }
             pathEditorCreateSpecialRouteData(path, editor_path, cursor, end);
-            if (active_routes != 0 && path->routes == nullptr) {
+            if (path->route_count != 0 && path->routes == nullptr) {
                 distance_tables = nullptr;
                 return nullptr;
             }

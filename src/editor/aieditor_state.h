@@ -7,6 +7,7 @@
 #include "nu2api/nu3d/nuhspecial.h"
 
 struct EDAIPATH_s;
+struct EDAIPATHNODE_s;
 struct EDAIPATHWALL_s;
 struct eduimenu_s;
 struct AISYS_s;
@@ -29,11 +30,14 @@ struct EDLOCATOR_s {
         struct {
             i32 on_path;
             EDAIPATH_s *path;
-            u8 unknown_30[0x10];
+            EDAIPATHNODE_s *first_node;
+            EDAIPATHNODE_s *second_node;
+            f32 path_fraction;
+            f32 path_width;
             i32 path_angle;
         };
     };
-    u8 unknown_44[2];
+    u16 runtime_index;
     u8 drawn;
     u8 unknown_47;
 };
@@ -52,6 +56,12 @@ struct EDCREATURELOCATOR_s {
 
 DECOMP_ASSERT(sizeof(EDLOCATOR_s) == 0x48, "editor locator stride");
 DECOMP_ASSERT(offsetof(EDLOCATOR_s, path) == 0x2c, "editor locator path offset");
+DECOMP_ASSERT(offsetof(EDLOCATOR_s, first_node) == 0x30, "editor locator first path node offset");
+DECOMP_ASSERT(offsetof(EDLOCATOR_s, second_node) == 0x34, "editor locator second path node offset");
+DECOMP_ASSERT(offsetof(EDLOCATOR_s, path_fraction) == 0x38, "editor locator path fraction offset");
+DECOMP_ASSERT(offsetof(EDLOCATOR_s, path_width) == 0x3c, "editor locator path width offset");
+DECOMP_ASSERT(offsetof(EDLOCATOR_s, path_angle) == 0x40, "editor locator path angle offset");
+DECOMP_ASSERT(offsetof(EDLOCATOR_s, runtime_index) == 0x44, "editor locator runtime index offset");
 DECOMP_ASSERT(sizeof(EDLOCATORSET_s) == 0x118, "editor locator set stride");
 
 struct AIEDITOR_RENDER_STATE {

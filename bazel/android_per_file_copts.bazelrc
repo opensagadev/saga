@@ -233,7 +233,6 @@ build:target --per_file_copt=^src/legoapi/props/objects/tightrope\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmos/transport/tubes\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/characters/motion/camera\.cpp$@-O2
 build:target --per_file_copt=^src/gameapi/edtools/edtoolsall_plain\.cpp$@-O2
-build:target --per_file_copt=^src/gameapi/edtools/edanimall\.cpp$@-O2
 build:target --per_file_copt=^src/gameapi/edtools/edgraall\.cpp$@-O3
 build:target --per_file_copt=^src/gameapi/edtools/edgra\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/characters/motion/charplatforms\.cpp$@-O3

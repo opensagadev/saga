@@ -277,11 +277,9 @@ i32 ClassEditor::CreateObject(ClassObject &source) {
     ClassObject created = {ed_class, object, NULL};
     if (ed_class->flags & 0x04000000) {
         i32 flags = 0x04000000;
-        if (source.reference == NULL || !source.reference->SetAttributeData(object, 1, EdType_Int, &flags, 0)) {
-            EdMember member;
-            if (ed_class->FindMember(&member, object, 1, 1))
-                member.reference->SetAttributeData(member.object, 1, EdType_Int, &flags, 0);
-        }
+        EdMember member;
+        if (ed_class->FindMember(&member, object, 1, 1))
+            member.reference->SetAttributeData(member.object, 1, EdType_Int, &flags, 0);
     } else {
         ed_class->CopyObject(object, source.object);
         interface->vtable->construct(interface, object, source.object);
@@ -371,31 +369,52 @@ void ClassEditor::Process(EdInputContext &input) {
     field_3c = 0xff808080;
     theLevelEditor.field_0x30 = 1;
     theLevelEditor.field_0x38 = 1;
-    if (thePropertyTool.Process(input) != 0) {
-        if (selected_objects.count == 0)
-            return;
+    if (thePropertyTool.Process(input) == 0) {
+        if (input.GetPress(5) != 0.0f)
+            SetMode(0);
+        if (input.GetPress(6) != 0.0f)
+            SetMode(3);
+        if (input.GetPress(7) != 0.0f)
+            SetMode(4);
+        if (input.GetPress(8) != 0.0f)
+            SetMode(5);
+        if (input.GetPress(37) != 0.0f) {
+            ClassObject nearest = {};
+            VuVec &origin = *reinterpret_cast<VuVec *>(input.reserved_00 + 0x20);
+            VuVec &direction = *reinterpret_cast<VuVec *>(input.reserved_00 + 0x30);
+            if (FindNearestObject(origin, direction, nearest, 1) == 0)
+                cbEdCopySelectedObject(input);
+            else
+                DestroySelectedObjects();
+        }
+        if (manipulator == NULL)
+            manipulator = &theDefaultManipulator;
+        if (manipulator->Process(input, selected_objects) == 0 && active_tool != NULL)
+            active_tool->Process(input);
+    }
+    if (selected_objects.count > 0) {
         if (input.GetPress(9) != 0.0f)
             FocusSelected();
         if (input.GetPress(10) != 0.0f)
             ViewSelected();
         for (ClassObjectListEntry *entry = selected_objects.first; entry != NULL; entry = entry->next)
             theRegistry.ClassIFaceProcess(entry->ed_class, entry->object, input);
-        return;
+        if (input.GetPress(39) != 0.0f) {
+            ClassObjectListEntry *entry = selected_objects.first;
+            VuVec position;
+            get_class_object_attribute(entry->ed_class, entry->object, entry->reference, 8, EdType_VuVec, &position, 0);
+            theLevelEditor.background_colour[0] = position.x;
+            theLevelEditor.background_colour[1] = position.y;
+            theLevelEditor.background_colour[2] = position.z;
+            theLevelEditor.background_colour[3] = position.w;
+            edcamSetPos(reinterpret_cast<NUVEC *>(theLevelEditor.background_colour));
+            thePropertyTool.Process(input);
+            if (mode == 0)
+                mode = 3;
+            SetMode(mode);
+            thePropertyTool.SetDefaultActiveMenu(NULL);
+        }
     }
-    if (input.GetPress(5) != 0.0f)
-        SetMode(0);
-    if (input.GetPress(6) != 0.0f)
-        SetMode(3);
-    if (input.GetPress(7) != 0.0f)
-        SetMode(4);
-    if (input.GetPress(8) != 0.0f)
-        SetMode(5);
-    if (input.GetPress(37) != 0.0f)
-        cbEdCopySelectedObject(input);
-    if (manipulator == NULL)
-        manipulator = &theDefaultManipulator;
-    if (manipulator->Process(input, selected_objects) == 0 && active_tool != NULL)
-        active_tool->Process(input);
 }
 
 i32 ClassEditor::ReadBlock(DATAPTR *) {
@@ -440,9 +459,11 @@ void ClassEditor::WriteBlock(i32) {
 void ClassEditor::DestroySelectedObjects() {
     f32 x, y;
     eduiGetCursorCoords(&x, &y);
-    eduimenu_s *confirm_menu = eduiMenuCreate(static_cast<i32>(x * 640.0f), static_cast<i32>(y * 448.0f), 300, 50,
-                                              reinterpret_cast<void *>(static_cast<usize>(EdLevelFnt)),
-                                              cbEdLevelDestroy, const_cast<char *>("Delete selected objects?"));
+    char title[136];
+    NuStrCpy(title, "Destroy Selected Objects");
+    eduimenu_s *confirm_menu =
+        eduiMenuCreate(static_cast<i32>(x * 640.0f), static_cast<i32>(y * 448.0f), 300, 50,
+                       reinterpret_cast<void *>(static_cast<usize>(EdLevelFnt)), cbDestroyMenu, title);
     if (confirm_menu == NULL)
         return;
     eduiMenuAddItem(confirm_menu, eduiItemSelCreate(1, &EdLevelAttr, 0, 0, cbDestroyObject, const_cast<char *>("Yes")));
@@ -1342,20 +1363,18 @@ void ClassEditor::cbEdClassViewMenu(eduimenu_s *parent, eduiitem_s *item, u32) {
     eduiMenuAttach(parent, menu);
 }
 
-void ClassEditor::cbEdCopySelectedObject(EdInputContext &) {
+i32 ClassEditor::cbEdCopySelectedObject(EdInputContext &) {
     if (selected_objects.first != NULL) {
-        ClassObject object = {selected_objects.first->ed_class, selected_objects.first->object,
-                              selected_objects.first->reference};
-        CreateObject(object);
+        return CreateObject(*reinterpret_cast<ClassObject *>(&selected_objects.first->ed_class));
     }
+    return 0;
 }
 
 i32 ClassEditor::cbEdCreateClassNewObject(i32 class_id) {
     EdClass *ed_class = theRegistry.GetClass(class_id);
     for (ClassObjectListEntry *entry = selected_objects.first; entry != NULL; entry = entry->next) {
         if (entry->ed_class == ed_class) {
-            ClassObject object = {entry->ed_class, entry->object, entry->reference};
-            return CreateObject(object);
+            return CreateObject(*reinterpret_cast<ClassObject *>(&entry->ed_class));
         }
     }
     if (ed_class == NULL || (ed_class->flags & 0x04000000))
@@ -2419,7 +2438,7 @@ PropertyMenu *PropertyTool::CreatePropertyMenu(ClassObject &object) {
     property_menu->objects[0] = object;
     property_menu->object_count = 1;
     property_menu->control = NULL;
-    property_menu->SelectAttr(eduiGetActiveMenuParent() != NULL && eduiGetActiveMenuParent()->last != NULL);
+    property_menu->SelectAttr(theClassEditor.manipulator != NULL ? theClassEditor.manipulator->selected_attribute : 0);
     return property_menu;
 }
 
@@ -2587,7 +2606,7 @@ i32 PropertyTool::ProcessMenu(EdInputContext &input) {
             return 1;
         }
     }
-    if (input.pad != NULL && (input.pad->digital_buttons_pressed & 0x200) != 0) {
+    if (input.pad != NULL && (input.pad->digital_buttons_pressed & 0x100) != 0) {
         ToggleActiveMenu();
     }
     EdControl::Input = NULL;

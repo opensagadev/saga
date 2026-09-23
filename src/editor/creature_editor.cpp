@@ -6,10 +6,13 @@
 #include "editor/aieditor_settings.h"
 #include "gameapi/ai/aisys/aisys.h"
 #include "gameapi/edtools/edcam.h"
+#include "gameapi/edtools/edfile.h"
 #include "gameapi/edtools/edui.h"
 #include "legoapi/characters/core/character.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nucore/nupad.h"
+#include "nu2api/numath/nuang.h"
+#include "nu2api/numath/nutrig.h"
 #include "nu2api/nu3d/nurndr.h"
 #include <float.h>
 #include <stdio.h>
@@ -24,8 +27,8 @@ struct CreatureEditorRecord {
     char name[0x10];
     char script_name[0x10];
     NUVEC position;
-    i16 angle;
-    u8 unknown_36[0x3c - 0x36];
+    i32 angle;
+    u8 unknown_38[0x3c - 0x38];
     void *path;
     u8 unknown_40[0x54 - 0x40];
     u32 valid_positions;
@@ -96,7 +99,8 @@ extern "C" void AiRndrLine3d(NURND_VERTEX3D *, struct numtl_s *, struct numtx_s 
 extern "C" f32 aieditor_y_tolerance;
 extern "C" void aieditor_SetCurrentScript(char *, const AIEditorScriptSelection *);
 extern "C" void aieditor_ClearMainMenu(void);
-static i32 reset_params_option;
+extern "C" i32 aidata_version;
+static eduiitem_s *reset_params_option;
 static u32 creature_editor_item_colours[4] = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
 extern "C" void *ed_fnt;
 extern "C" i32 AIEDITOR_CREATURES;
@@ -129,6 +133,10 @@ static void creatureEditor_cb_assigntoset(eduimenu_s *, eduiitem_s *, u32);
 static void creatureEditor_cbCancelMenu(eduimenu_s *, eduimenu_s *);
 static void creatureEditor_cbSetType(eduimenu_s *, eduiitem_s *, u32);
 static void creatureEditor_cbSetScript(eduimenu_s *, eduiitem_s *, u32);
+static void creatureEditor_cbResetParams(eduimenu_s *, eduiitem_s *, u32);
+static void creatureEditor_cbSelectTriggerArea(eduimenu_s *, eduiitem_s *, u32);
+static void creatureEditor_cbSelectLocator(eduimenu_s *, eduiitem_s *, u32);
+static void creatureEditor_cbSetScriptParam(eduimenu_s *, eduiitem_s *, u32);
 static void creatureEditor_cb_min_n_respawns(eduimenu_s *, eduiitem_s *, u32);
 static void creatureEditor_cb_max_n_respawns(eduimenu_s *, eduiitem_s *, u32);
 static void creatureEditor_cb_min_t_respawn(eduimenu_s *, eduiitem_s *, u32);
@@ -271,7 +279,7 @@ static __used__ __attribute__((force_align_arg_pointer)) void creatureEditor_cbR
     }
     eduiMenuDetach(menu);
     eduiMenuDestroy(menu);
-    reset_params_option = 0;
+    reset_params_option = nullptr;
 }
 
 static __used__ void creatureEditor_cbRespawnMenu(eduimenu_s *parent, eduiitem_s *, unsigned int) {
@@ -322,8 +330,50 @@ static __used__ __attribute__((force_align_arg_pointer)) void creatureEditor_cbV
     eduiMenuAttach(parent, menu);
 }
 
-static __used__ void creatureEditor_cbScriptParams(eduimenu_s *, eduiitem_s *, unsigned int) {
-    STUBBED();
+static __used__ void creatureEditor_cbScriptParams(eduimenu_s *parent, eduiitem_s *, unsigned int) {
+    CreatureEditorRecord *creature = creatureEditor_Current();
+    if (creature == nullptr)
+        return;
+    eduimenu_s *menu = eduiMenuCreate(220, 70, 240, 250, ed_fnt, creatureEditor_cbCancelMenu, "Script Params");
+    if (menu == nullptr)
+        return;
+    char label[64];
+    if (NuLinkedListGetHead(creatureEditor_AreaList()) != nullptr) {
+        if (creature->trigger_area != nullptr) {
+            sprintf(label, "Trigger Area \"%s\"", reinterpret_cast<char *>(creature->trigger_area) + 8);
+        } else {
+            strcpy(label, "Trigger Area NONE");
+        }
+        eduiMenuAddItem(
+            menu, eduiItemSelCreate(1, creature_editor_item_colours, 0, 0, creatureEditor_cbSelectTriggerArea, label));
+    }
+    if (NuLinkedListGetHead(creatureEditor_LocatorList()) != nullptr) {
+        if (creature->locator != nullptr) {
+            sprintf(label, "Locator \"%s\"", reinterpret_cast<char *>(creature->locator) + 8);
+        } else {
+            strcpy(label, "Locator NONE");
+        }
+        eduiMenuAddItem(
+            menu, eduiItemSelCreate(1, creature_editor_item_colours, 0, 0, creatureEditor_cbSelectLocator, label));
+    }
+    AISCRIPT *script = AIScriptFind(aieditor->ai_system, creature->script_name, 1, 1, 1);
+    for (i32 index = 0; index < 4; ++index) {
+        const char *name = script != nullptr ? script->params[index].name : nullptr;
+        if (name != nullptr)
+            sprintf(label, name);
+        else
+            sprintf(label, "Param%d", index);
+        eduiMenuAddItem(menu,
+                        eduiItemSliderCreate(index, creature_editor_item_colours, 0, creatureEditor_cbSetScriptParam,
+                                             0.0f, 100.0f, aieditorsettings.current_script_params[index], label));
+        eduiItemSliderSetGranularity(reinterpret_cast<edui_slider_s *>(edui_last_item), 0.1f);
+    }
+    reset_params_option = nullptr;
+    if ((aieditorsettings.current_script_flags & 0x1e) != 0) {
+        reset_params_option = eduiMenuAddItem(menu, eduiItemToggleCreate(1, creature_editor_item_colours, 1, 1,
+                                                                         creatureEditor_cbResetParams, "Reset Params"));
+    }
+    eduiMenuAttach(parent, menu);
 }
 
 static __used__ void creatureEditor_cbSelectScript(eduimenu_s *parent, eduiitem_s *, unsigned int) {
@@ -381,8 +431,23 @@ static __used__ __attribute__((force_align_arg_pointer)) void creatureEditor_cbS
     }
 }
 
-static __used__ void creatureEditor_cbSetScriptParam(eduimenu_s *, eduiitem_s *, unsigned int) {
-    STUBBED();
+static __used__ void creatureEditor_cbSetScriptParam(eduimenu_s *menu, eduiitem_s *item, unsigned int) {
+    CreatureEditorRecord *creature = creatureEditor_Current();
+    if (item == nullptr || creature == nullptr)
+        return;
+    i32 index = item->data;
+    f32 value = reinterpret_cast<edui_slider_s *>(item)->value;
+    if (value == aieditorsettings.current_script_params[index])
+        return;
+    aieditorsettings.current_script_params[index] = value;
+    u32 bit = (index & 0x20) != 0 ? 0 : 2u << index;
+    aieditorsettings.current_script_flags |= bit;
+    creature->script_params[index] = value;
+    creature->flags = (creature->flags & ~0x1e) | aieditorsettings.current_script_flags;
+    if (menu != nullptr && reset_params_option == nullptr) {
+        reset_params_option = eduiMenuAddItem(menu, eduiItemToggleCreate(1, creature_editor_item_colours, 1, 1,
+                                                                         creatureEditor_cbResetParams, "Reset Params"));
+    }
 }
 
 static __used__ void creatureEditor_cbSetType(eduimenu_s *, eduiitem_s *item, unsigned int) {
@@ -680,8 +745,120 @@ extern "C" {
 
     f32 aieditor_y_tolerance = 0.1f;
 
-    void creatureEditorSaveData(AIPATHSYS_s *) {
-        STUBBED();
+    __attribute__((optimize("O2", "omit-frame-pointer"))) void creatureEditorSaveData(AIPATHSYS_s *system) {
+        if (GlobalCharacterNameFn == nullptr) {
+            EdFileWriteInt(0);
+            return;
+        }
+
+        NULISTHDR *list = &aieditor->creatures;
+        i32 count = 0;
+        for (NULISTLNK *link = NuLinkedListGetHead(list); link != nullptr; link = NuLinkedListGetNext(list, link)) {
+            CreatureEditorRecord *creature = reinterpret_cast<CreatureEditorRecord *>(link);
+            if (creature->path != nullptr && GlobalCharacterNameFn(creature->character_type) != nullptr)
+                ++count;
+        }
+        EdFileWriteInt(count);
+
+        for (NULISTLNK *link = NuLinkedListGetHead(list); link != nullptr; link = NuLinkedListGetNext(list, link)) {
+            CreatureEditorRecord *creature = reinterpret_cast<CreatureEditorRecord *>(link);
+            char *character_name = GlobalCharacterNameFn(creature->character_type);
+            if (creature->path == nullptr || character_name == nullptr)
+                continue;
+
+            EdFileWrite(creature->name, 0x10);
+            EdFileWrite(creature->script_name, 0x10);
+            EdFileWrite(character_name, aidata_version > 13 ? 0x20 : 0x10);
+            EdFileWriteFloat(creature->position.x);
+            EdFileWriteFloat(creature->position.y);
+            EdFileWriteFloat(creature->position.z);
+            EdFileWriteShort(creature->angle);
+            if (aidata_version > 15)
+                EdFileWriteChar(creature->set);
+            EdFileWriteChar(creature->group_count);
+            EdFileWriteChar(creature->across_count);
+            EdFileWriteInt(creature->valid_positions);
+            EdFileWriteFloat(creature->x_spacing);
+            EdFileWriteFloat(creature->z_spacing);
+            EdFileWriteInt(creature->flags);
+
+            EDAIPATH_s *editor_path = reinterpret_cast<EDAIPATH_s *>(creature->path);
+            EdFileWriteChar(editor_path->draw_index);
+            AIPATH *runtime_path = system->paths[editor_path->draw_index];
+            EDAIPATHCHECK_s *check = reinterpret_cast<EDAIPATHCHECK_s *>(reinterpret_cast<u8 *>(creature) + 0x38);
+            i16 connection_index = 0;
+            bool connection_found = false;
+            for (i32 index = 0; index < runtime_path->connection_count; ++index) {
+                AIPATHCNX *connection = &runtime_path->connections[index];
+                i32 first_index = check->first->index;
+                i32 second_index = check->second->index;
+                if ((connection->node_indices[0] == first_index && connection->node_indices[1] == second_index) ||
+                    (connection->node_indices[0] == second_index && connection->node_indices[1] == first_index)) {
+                    connection_index = index;
+                    connection_found = true;
+                    break;
+                }
+            }
+            i32 path_angle = check->angle;
+            EdFileWriteChar(connection_found && (path_angle < 0 ? -path_angle : path_angle) > 0x3fff);
+            EdFileWriteShort(connection_index);
+
+            for (i32 index = 0; index < 4; ++index)
+                EdFileWriteFloat(creature->script_params[index]);
+            if (creature->trigger_area != nullptr) {
+                EdFileWriteInt(1);
+                EdFileWrite(reinterpret_cast<char *>(creature->trigger_area) + 8, 0x10);
+            } else {
+                EdFileWriteInt(0);
+            }
+            if (creature->locator != nullptr) {
+                EdFileWriteInt(1);
+                EdFileWrite(reinterpret_cast<char *>(creature->locator) + 8, 0x10);
+            } else {
+                EdFileWriteInt(0);
+            }
+            if (aidata_version > 16) {
+                if (creature->respawn_locator != nullptr) {
+                    EdFileWriteInt(1);
+                    EdFileWrite(reinterpret_cast<char *>(creature->respawn_locator) + 8, 0x10);
+                } else {
+                    EdFileWriteInt(0);
+                }
+            }
+
+            if (aidata_version <= 7)
+                continue;
+            EdFileWriteChar(creature->difficulty);
+            EdFileWriteChar(creature->min_respawns);
+            EdFileWriteChar(creature->max_respawns);
+            EdFileWriteChar(creature->activation);
+            EdFileWriteFloat(creature->min_respawn_time);
+            EdFileWriteFloat(creature->max_respawn_time);
+            if (aidata_version > 9)
+                EdFileWriteFloat(creature->stagger_start);
+            if (creature->activation == 1) {
+                EdFileWrite(reinterpret_cast<char *>(creature->activation_area) + 8, 0x10);
+            }
+            if (aidata_version <= 10)
+                continue;
+            EdFileWriteFloat(GetViewRangeFn != nullptr &&
+                                     creature->view_distance == GetViewRangeFn(creature->character_type)
+                                 ? 0.0f
+                                 : creature->view_distance);
+            EdFileWriteFloat(GetHearDistanceFn != nullptr &&
+                                     creature->hear_distance == GetHearDistanceFn(creature->character_type)
+                                 ? 0.0f
+                                 : creature->hear_distance);
+            EdFileWriteFloat(GetMaxViewHeightFn != nullptr &&
+                                     creature->max_view_height == GetMaxViewHeightFn(creature->character_type)
+                                 ? 0.0f
+                                 : creature->max_view_height);
+            EdFileWriteFloat(GetMinViewHeightFn != nullptr &&
+                                     creature->negative_min_view_height == GetMinViewHeightFn(creature->character_type)
+                                 ? 0.0f
+                                 : creature->negative_min_view_height);
+            EdFileWriteInt(0);
+        }
     }
 
     __attribute__((optimize("O2", "omit-frame-pointer"))) EDCREATURE_s *creatureEditor_GetNearest(i32 use_radius) {
@@ -771,8 +948,42 @@ extern "C" {
         }
     }
 
-    void creatureEditor_PathNodeMoved(EDAIPATHNODE_s *) {
-        STUBBED();
+    __attribute__((optimize("O2", "omit-frame-pointer"), force_align_arg_pointer)) void
+    creatureEditor_PathNodeMoved(EDAIPATHNODE_s *node) {
+        NULISTHDR *list = &aieditor->creatures;
+        for (NULISTLNK *link = NuLinkedListGetHead(list); link != nullptr; link = NuLinkedListGetNext(list, link)) {
+            CreatureEditorRecord *record = reinterpret_cast<CreatureEditorRecord *>(link);
+            EDAIPATHCHECK_s *check = reinterpret_cast<EDAIPATHCHECK_s *>(reinterpret_cast<u8 *>(record) + 0x38);
+            if (check->first != node && check->second != node)
+                continue;
+
+            NUVEC direction;
+            NuVecSub(&direction, &check->second->position, &check->first->position);
+            NUVEC perpendicular;
+            NuVecNorm(&perpendicular, &direction);
+            f32 fraction = check->fraction;
+            f32 radius;
+            if (fraction > 1.0f)
+                radius = check->second->radius;
+            else if (fraction < 0.0f)
+                radius = check->first->radius;
+            else
+                radius = check->first->radius * (1.0f - fraction) + check->second->radius * fraction;
+
+            f32 old_y = record->position.y;
+            record->position = check->first->position;
+            f32 normalized_x = perpendicular.x;
+            perpendicular.x = perpendicular.z * radius;
+            perpendicular.z = -normalized_x * radius;
+            NUVEC scaled;
+            NuVecScale(&scaled, &direction, fraction);
+            NuVecAdd(&record->position, &record->position, &scaled);
+            NuVecScale(&scaled, &perpendicular, check->width);
+            NuVecAdd(&record->position, &record->position, &scaled);
+            if (fabsf(old_y - record->position.y) > 1.5f)
+                record->position.y = old_y;
+            record->angle = NuAngAdd(static_cast<i32>(NuAtan2(direction.x, direction.z) * 10430.378f), check->angle);
+        }
     }
 
     __attribute__((optimize("O2", "omit-frame-pointer"), force_align_arg_pointer)) void

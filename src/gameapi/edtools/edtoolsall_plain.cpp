@@ -43,9 +43,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+// The original animation editor callbacks and lifecycle share file-local state.
+#include "gameapi/edtools/edanimall.cpp"
+
 float edanimPlayerAnimDistance(i32 parameter_index);
 void edgraDoInput(nupad_s *pad);
 void edgraDetermineNearestInstance(f32 distance);
+void edgraDrawCursor();
+extern "C" void edgraClumpsReset(void);
+extern "C" void edbitsDrawCircleTilted(NUVEC *centre, f32 radius, i32 colour, NUMTL *material, i32 rotation_z,
+                                       i32 rotation_y);
 extern "C" i32 NuRndrDoingScreenGrab;
 static i32 edbits_cubecount;
 static i32 edgra_clumpthin = 1;
@@ -342,7 +349,7 @@ extern "C" {
     eduimenu_s *edgra_globals_menu;
     i32 edgra_filter;
     struct numtl_s *edgra_mtl;
-    f32 edgra_mtl_zoff;
+    NUMTL *edgra_mtl_zoff;
     NUVEC edgra_cam_pos;
     f32 edgra_cam_dist;
     i32 edgra_cam_ax;
@@ -478,7 +485,37 @@ extern "C" {
 }
 
 static void edgraInit() {
-    STUBBED();
+    edgraClumpsReset();
+
+    edgra_mtl = NuMtlCreate3D(1);
+    edgra_mtl->diffuse_color = {0.5f, 0.5f, 0.5f};
+    edgra_mtl->opacity = 1.0f;
+    auto *material_attributes = reinterpret_cast<u8 *>(&edgra_mtl->attribs);
+    material_attributes[0] &= 0xf0;
+    material_attributes[1] = (material_attributes[1] & 0x0f) | 0x20;
+    NuMtlUpdate(edgra_mtl);
+
+    edgra_mtl_zoff = NuMtlCreate(1);
+    edgra_mtl_zoff->diffuse_color = {0.5f, 0.5f, 0.5f};
+    edgra_mtl_zoff->opacity = 1.0f;
+    material_attributes = reinterpret_cast<u8 *>(&edgra_mtl_zoff->attribs);
+    material_attributes[0] &= 0xf0;
+    material_attributes[1] = (material_attributes[1] & 0xcf) | 0xe0;
+    NuMtlUpdate(edgra_mtl_zoff);
+
+    if (gra_ptr.addr == 0) {
+        edgra_mtxbuffer = static_cast<NUMTX *>(NU_ALLOC(0xc0080, 4, 1, "", 0));
+        edgra_vecbuffer = static_cast<NUVEC *>(NU_ALLOC(0x24000, 4, 1, "", 0));
+    } else {
+        usize aligned = (gra_ptr.addr + 15) & ~usize(15);
+        edgra_mtxbuffer = reinterpret_cast<NUMTX *>(aligned);
+        edgra_vecbuffer = reinterpret_cast<NUVEC *>(aligned + 0xc0080);
+        gra_ptr.addr = aligned + 0xe4080;
+    }
+    for (i32 index = 0; index < EDGRA_MAX_CLUMPS; ++index)
+        GrassClumps[index].vector_buffer = NULL;
+    edgra_free_vecbuffer = edgra_vecbuffer;
+    edgra_instance_type = -1;
 }
 
 static void edgraClose() {
@@ -508,7 +545,38 @@ static i32 edgraProc(f32 delta_time, nupad_s *pad) {
 }
 
 static void edgraRender() {
-    STUBBED();
+    edcamSet();
+    edgraDrawCursor();
+    if (edgra_nearest != -1) {
+        edgra_clump_s &clump = GrassClumps[edgra_nearest];
+        if (clump.kind == 3) {
+            if (edgra_editormode == 1) {
+                edbitsDrawDiagonalCross(clump.position.x, clump.position.y, clump.position.z, 0.125f, 0xffff0000,
+                                        edgra_mtl);
+                if (edgra_nearest_instance != -1) {
+                    edgra_individual_s *individual = GetIndGrassClump(clump.individual_index, edgra_nearest_instance);
+                    edbitsDrawCross(clump.position.x + individual->position.x,
+                                    clump.position.y + individual->position.y,
+                                    clump.position.z + individual->position.z, 0.125f, 0xff80ffff, edgra_mtl);
+                }
+            } else {
+                edbitsDrawDiagonalCross(clump.position.x, clump.position.y, clump.position.z, 0.125f, 0xff80ffff,
+                                        edgra_mtl);
+            }
+        } else {
+            edbitsDrawDiagonalCross(clump.position.x, clump.position.y, clump.position.z, 0.125f, 0xff80ffff,
+                                    edgra_mtl);
+            if (static_cast<u8>(clump.unknown_25 - 3) < 2) {
+                edbitsDrawCube(clump.position.x, clump.position.y, clump.position.z, clump.size, 0.0f, clump.size, 0, 0,
+                               0, clump.rotation_z, clump.rotation_y, 0xff80ffff, edgra_mtl);
+            } else {
+                edbitsDrawCircleTilted(&clump.position, clump.size, 0xff80ffff, edgra_mtl, clump.rotation_z,
+                                       clump.rotation_y);
+            }
+        }
+    }
+    if (edgra_active_menu)
+        eduiMenuRender(edgra_active_menu);
 }
 
 static void edppInit() {
@@ -582,20 +650,105 @@ static void edbriRender() {
 }
 
 static void edanimInit() {
-    STUBBED();
+    u32 colours[4] = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
+    edanimParamReset();
+
+    edanim_mtl = NuMtlCreate3D(1);
+    edanim_mtl->diffuse_color = {0.5f, 0.5f, 0.5f};
+    edanim_mtl->opacity = 1.0f;
+    edanim_mtl->attribs.alpha_mode = 0;
+    edanim_mtl->attribs.cull_mode = 2;
+    edanim_mtl->attribs.z_mode = 0;
+    NuMtlUpdate(edanim_mtl);
+
+    edanim_mtl_zoff = NuMtlCreate(1);
+    edanim_mtl_zoff->diffuse_color = {0.5f, 0.5f, 0.5f};
+    edanim_mtl_zoff->opacity = 1.0f;
+    edanim_mtl_zoff->attribs.alpha_mode = 0;
+    edanim_mtl_zoff->attribs.cull_mode = 2;
+    edanim_mtl_zoff->attribs.z_mode = 3;
+    NuMtlUpdate(edanim_mtl_zoff);
+
+    edanim_options_menu =
+        eduiMenuCreate(70, 70, 220, 300, ed_fnt, edanimcbCancelOptMenu, const_cast<char *>("Options"));
+    if (!edanim_options_menu) {
+        return;
+    }
+
+    eduiMenuAddItem(edanim_options_menu, eduiItemSelCreate(1, colours, 0, 0, edanimcbParticleMenu,
+                                                           const_cast<char *>("Attached Particles...")));
+    eduiMenuAddItem(edanim_options_menu,
+                    eduiItemSelCreate(1, colours, 0, 0, edanimcbSoundMenu, const_cast<char *>("Attached Sounds...")));
+    eduiMenuAddItem(edanim_options_menu,
+                    eduiItemSelCreate(1, colours, 0, 0, edanimcbBouncyMenu, const_cast<char *>("Bounciness...")));
+    eduiMenuAddItem(edanim_options_menu, eduiItemSelCreate(1, colours, 0, 0, edanimcbSwitchMenu,
+                                                           const_cast<char *>("Switch Properties...")));
+    eduiMenuAddItem(edanim_options_menu,
+                    eduiItemSelCreate(1, colours, 0, 0, edanimcbFileSave, const_cast<char *>("Save Params")));
+    eduiMenuAddItem(edanim_options_menu,
+                    eduiItemSelCreate(1, colours, 0, 0, edanimcbFileLoad, const_cast<char *>("Load Params")));
+    eduiMenuAddItem(edanim_options_menu,
+                    eduiItemSelCreate(1, colours, 0, 0, edanimcbCubeMap, const_cast<char *>("Dump Cube Map")));
+    eduiMenuAddItem(edanim_options_menu, eduiItemSelCreate(1, colours, 0, 0, edanimcbMCTBMenu,
+                                                           const_cast<char *>("Memory Card Test Bed...")));
 }
 
 static void edanimClose() {
-    STUBBED();
+    eduiMenuDestroy(edanim_options_menu);
 }
 
-static i32 edanimProc(f32, nupad_s *) {
-    STUBBED();
+static i32 edanimProc(f32 delta_time, nupad_s *pad) {
+    if (edanim_active_menu) {
+        eduiMenuProcess(edanim_active_menu, delta_time, pad);
+        return 0;
+    }
+
+    edanimDoInput(pad);
+    if (edanim_particle_mode) {
+        edanimDetermineNearestParticle(1.0f);
+    } else if (edanim_sound_mode) {
+        edanimDetermineNearestSound(1.0f);
+    } else {
+        edanimDetermineNearestAnim(1.0f);
+    }
+
+    if (pad->digital_buttons_pressed & 0x800) {
+        edanim_particle_mode = 0;
+        return 1;
+    }
     return 0;
 }
 
 static void edanimRender() {
-    STUBBED();
+    if (edbitsProcessCubemapDump()) {
+        return;
+    }
+    edcamSet();
+    edanimDrawCursor();
+
+    if (edanim_nearest != -1) {
+        i32 colour = 0xffff0000;
+        if (edanim_particle_mode) {
+            colour = 0xff00ff00;
+        } else if (!edanim_sound_mode) {
+            colour = edanim_nearest_param_id == -1 ? 0xff808080 : 0xffffffff;
+        }
+
+        nuhspecial_s special;
+        NuGScnGetSpecial(&special, edbits_base_scene, edanim_nearest);
+        NUVEC *position = NuSpecialGetPos(&special);
+        edbitsDrawCube(position->x, position->y, position->z, 0.5f, 0.5f, 0.5f, 0, 0, 0, 0, 0, colour, edanim_mtl);
+
+        if (edanim_particle_mode) {
+            edanimRenderParticleEmitters(edanim_nearest_param_id);
+        } else if (edanim_sound_mode) {
+            edanimRenderSoundEmitters(edanim_nearest_param_id);
+        }
+    }
+
+    if (edanim_active_menu) {
+        eduiMenuRender(edanim_active_menu);
+    }
 }
 
 void edgraClumpReseed(i32 index) {
@@ -685,7 +838,7 @@ extern "C" {
     i32 edanim_page_used[8];
     i32 edanim_page_on[8];
     NUMTL *edanim_mtl;
-    f32 edanim_mtl_zoff;
+    NUMTL *edanim_mtl_zoff;
     NUVEC edanim_cam_pos;
     f32 edanim_cam_dist;
     i32 edanim_cam_ax;

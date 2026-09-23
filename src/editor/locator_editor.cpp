@@ -4,11 +4,14 @@
 #include "editor/aieditor_settings.h"
 #include "editor/edpath.h"
 #include "gameapi/ai/aisys/aisys.h"
+#include "legoapi/characters/core/character.h"
 #include "gameapi/edtools/edui.h"
 #include "gameapi/edtools/edcam.h"
+#include "gameapi/edtools/edfile.h"
 #include "nu2api/nucore/nupad.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/numath/nuang.h"
+#include "nu2api/numath/nutrig.h"
 #include "nu2api/nu3d/nuqfnt.h"
 #include <string.h>
 #include <stdio.h>
@@ -33,6 +36,27 @@ extern "C" {
     void pathEditorDrawPaths();
     void antinodeEditorDrawAntinodes();
     void creatureEditor_RenderAllCreatures();
+    void aieditor_SetCurrentScript(char *, const AIEditorScriptSelection *);
+    extern void (*ClearAICreaturesFn)();
+    extern u8 default_ngroup;
+    extern u8 default_nacross;
+    extern f32 default_xspacing;
+    extern f32 default_zspacing;
+    extern f32 default_stagger_start;
+    extern u8 default_activate_difficulty;
+    extern u8 default_min_n_respawns;
+    extern u8 default_max_n_respawns;
+    extern f32 default_min_t_respawn;
+    extern f32 default_max_t_respawn;
+    extern i32 aidata_version;
+}
+
+extern "C" {
+    u8 default_ngroup = 1;
+    u8 default_nacross = 2;
+    f32 default_xspacing = 0.4f;
+    f32 default_zspacing = 0.4f;
+    f32 default_stagger_start;
 }
 
 static u32 locator_attr[4] = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
@@ -311,9 +335,187 @@ static __used__ void locatorEditor_cbCancelRenameLocatorSetMenu(eduimenu_s *, ed
     aieditor_ClearMainMenu();
 }
 
-static __used__ void *CreateCreature(int, nuvec_s *, int) {
-    STUBBED();
-    return {};
+struct LocatorCreatureRecord {
+    NULISTLNK link;
+    char name[0x10];
+    char script_name[0x10];
+    NUVEC position;
+    i32 angle;
+    u8 path_check[0x1c];
+    u32 valid_positions;
+    i16 type;
+    u8 set;
+    u8 group_count;
+    u8 across_count;
+    u8 unknown_5d[3];
+    f32 x_spacing;
+    f32 z_spacing;
+    u32 flags;
+    void *activation_area;
+    f32 script_params[4];
+    void *trigger_area;
+    EDLOCATOR_s *locator;
+    EDLOCATOR_s *respawn_locator;
+    u8 difficulty;
+    u8 min_respawns;
+    u8 max_respawns;
+    u8 activation;
+    f32 min_respawn_time;
+    f32 max_respawn_time;
+    f32 stagger_start;
+    f32 view_distance;
+    f32 hear_distance;
+    f32 max_view_height;
+    f32 min_view_height;
+};
+DECOMP_ASSERT(sizeof(LocatorCreatureRecord) == 0xac, "locator-created creature record stride");
+DECOMP_ASSERT(offsetof(LocatorCreatureRecord, type) == 0x58, "locator-created creature type offset");
+DECOMP_ASSERT(offsetof(LocatorCreatureRecord, difficulty) == 0x8c, "locator-created creature defaults offset");
+DECOMP_ASSERT(offsetof(LocatorCreatureRecord, path_check) == 0x38, "locator-created creature path check offset");
+
+static __used__ void *CreateCreature(i32 type, nuvec_s *position, i32 angle) {
+    if (type == -1) {
+        return nullptr;
+    }
+    NULISTHDR *free_creatures = reinterpret_cast<NULISTHDR *>(reinterpret_cast<u8 *>(aieditor) + 0x3691c);
+    LocatorCreatureRecord *creature = (LocatorCreatureRecord *)NuLinkedListGetHead(free_creatures);
+    if (creature == nullptr) {
+        return nullptr;
+    }
+    NuLinkedListRemove(free_creatures, &creature->link);
+    NuLinkedListAppend(&aieditor->creatures, &creature->link);
+    creature->type = type;
+    creature->set = 0;
+    creature->group_count = default_ngroup;
+    creature->across_count = default_nacross;
+    creature->x_spacing = default_xspacing;
+    creature->z_spacing = default_zspacing;
+    creature->stagger_start = default_stagger_start;
+    creature->view_distance = GetViewRangeFn != nullptr ? GetViewRangeFn(type) : 1.0f;
+    creature->hear_distance = GetHearDistanceFn != nullptr ? GetHearDistanceFn(type) : 1.0f;
+    creature->max_view_height = GetMaxViewHeightFn != nullptr ? GetMaxViewHeightFn(type) : 1.0f;
+    creature->min_view_height = GetMinViewHeightFn != nullptr ? GetMinViewHeightFn(type) : 1.0f;
+    creature->difficulty = default_activate_difficulty;
+    creature->min_respawns = default_min_n_respawns;
+    creature->max_respawns = default_max_n_respawns;
+    creature->min_respawn_time = default_min_t_respawn;
+    creature->max_respawn_time = default_max_t_respawn;
+    if (position != nullptr) {
+        creature->position = *position;
+        creature->angle = angle;
+    }
+    return creature;
+}
+
+static void *FindCreatureArea(const char *name) {
+    if (name == nullptr)
+        return nullptr;
+    NULISTHDR *areas = reinterpret_cast<NULISTHDR *>(reinterpret_cast<u8 *>(aieditor) + 0x37a40);
+    EditorNamedEntry *area = (EditorNamedEntry *)NuLinkedListGetHead(areas);
+    while (area != nullptr) {
+        if (NuStrICmp(area->name, name) == 0)
+            return area;
+        area = (EditorNamedEntry *)NuLinkedListGetNext(areas, &area->link);
+    }
+    return nullptr;
+}
+
+static EDLOCATOR_s *FindCreatureLocator(const char *name) {
+    if (name == nullptr)
+        return nullptr;
+    EDLOCATOR_s *locator = (EDLOCATOR_s *)NuLinkedListGetHead(&aieditor->locators);
+    while (locator != nullptr) {
+        if (NuStrICmp(locator->name, name) == 0)
+            return locator;
+        locator = (EDLOCATOR_s *)NuLinkedListGetNext(&aieditor->locators, &locator->link);
+    }
+    return nullptr;
+}
+
+void creatureEditor_Enter() {
+    aieditor->creatures.head = nullptr;
+    aieditor->creatures.tail = nullptr;
+    NULISTHDR *free_creatures = reinterpret_cast<NULISTHDR *>(reinterpret_cast<u8 *>(aieditor) + 0x3691c);
+    LocatorCreatureRecord *pool = reinterpret_cast<LocatorCreatureRecord *>(reinterpret_cast<u8 *>(aieditor) + 0x3131c);
+    for (i32 i = 0; i < 128; ++i)
+        NuLinkedListAppend(free_creatures, &pool[i].link);
+
+    AISYS *system = aieditor->ai_system;
+    if (system != nullptr) {
+        for (i32 i = 0; i < system->creature_count; ++i) {
+            AICREATURE *source = &system->creatures[i];
+            LocatorCreatureRecord *creature =
+                (LocatorCreatureRecord *)CreateCreature(source->type, &source->pos, source->y_rot);
+            if (creature == nullptr)
+                continue;
+            EDAIPATH_s *path = pathEditor_GetPath(reinterpret_cast<const char *>(source->path_info.path));
+            f32 tolerance = 0.0f;
+            do {
+                pathEditor_OnPathCheck(&creature->position, (EDAIPATHCHECK_s *)creature->path_check, path, tolerance);
+                tolerance += 0.01f;
+            } while (*reinterpret_cast<i32 *>(creature->path_check) == 0);
+            i32 *path_angle = reinterpret_cast<i32 *>(creature->path_check + 0x18);
+            *path_angle = NuAngSub(creature->angle, *path_angle);
+            strcpy(creature->name, source->name);
+            strcpy(creature->script_name, source->script_name);
+            creature->set = source->set;
+            creature->group_count = source->count;
+            creature->across_count = source->count_across;
+            creature->valid_positions = source->active_mask;
+            creature->x_spacing = source->x_spacing;
+            creature->flags = source->flags;
+            creature->z_spacing = source->z_spacing;
+            for (i32 p = 0; p < 4; ++p)
+                creature->script_params[p] = source->script_params[p];
+            AISCRIPT *script = AIScriptFind(system, creature->script_name, 1, 1, 1);
+            if (script != nullptr) {
+                for (i32 p = 0; p < 4; ++p) {
+                    if ((source->flags & (2 << p)) == 0)
+                        creature->script_params[p] = script->params[p].default_val;
+                }
+            }
+            if (source->area != nullptr)
+                creature->activation_area = FindCreatureArea(source->area->name);
+            if (source->locator != nullptr)
+                creature->locator = FindCreatureLocator(source->locator->name);
+            if (source->respawn_locator != nullptr)
+                creature->respawn_locator = FindCreatureLocator(source->respawn_locator->name);
+            creature->activation = source->activate_type;
+            if (source->activate_type == 1) {
+                creature->activation = 0;
+                if (source->activate_area != nullptr) {
+                    creature->trigger_area = FindCreatureArea(source->activate_area->name);
+                    if (creature->trigger_area != nullptr)
+                        creature->activation = 1;
+                }
+            }
+            creature->difficulty = source->activation_difficulty;
+            creature->min_respawns = source->min_respawn_count;
+            creature->max_respawns = source->max_respawn_count;
+            creature->min_respawn_time = source->min_respawn_time;
+            creature->max_respawn_time = source->max_respawn_time;
+            creature->stagger_start = source->start_stagger;
+            creature->view_distance = source->view_distance;
+            creature->hear_distance = source->hear_distance;
+            creature->max_view_height = source->max_view_height;
+            creature->min_view_height = source->min_view_height;
+        }
+    }
+    if (aieditorsettings.current_path_type == -1 && LevelCharacterGlobalIDFn != nullptr)
+        aieditorsettings.current_path_type = LevelCharacterGlobalIDFn(0);
+    if (ClearAICreaturesFn != nullptr)
+        ClearAICreaturesFn();
+    if (aieditorsettings.current_area_name[0] != 0) {
+        LocatorCreatureRecord *creature = (LocatorCreatureRecord *)NuLinkedListGetHead(&aieditor->creatures);
+        while (creature != nullptr) {
+            if (NuStrICmp(creature->name, aieditorsettings.current_area_name) == 0) {
+                aieditor->mode_selection_36930 = (EditorNamedEntry *)creature;
+                aieditor_SetCurrentScript(creature->script_name, (AIEditorScriptSelection *)creature);
+                break;
+            }
+            creature = (LocatorCreatureRecord *)NuLinkedListGetNext(&aieditor->creatures, &creature->link);
+        }
+    }
 }
 
 static __used__ void DestroyLocator(EDLOCATOR_s *locator) {
@@ -421,8 +623,79 @@ extern "C" {
         }
     }
 
-    void locatorEditorSaveData(AIPATHSYS_s *) {
-        STUBBED();
+    void locatorEditorSaveData(AIPATHSYS_s *path_system) {
+        i32 locator_count = 0;
+        EDLOCATOR_s *locator = (EDLOCATOR_s *)NuLinkedListGetHead(&aieditor->locators);
+        while (locator != nullptr) {
+            locator->runtime_index = 0xff;
+            if (locator->path != nullptr) {
+                locator->runtime_index = locator_count++;
+            }
+            locator = (EDLOCATOR_s *)NuLinkedListGetNext(&aieditor->locators, &locator->link);
+        }
+        EdFileWriteInt(locator_count);
+        locator = (EDLOCATOR_s *)NuLinkedListGetHead(&aieditor->locators);
+        while (locator != nullptr) {
+            if (locator->path != nullptr) {
+                EdFileWrite(locator->name, 16);
+                EdFileWriteFloat(locator->position.x);
+                EdFileWriteFloat(locator->position.y);
+                EdFileWriteFloat(locator->position.z);
+                EdFileWriteShort(locator->direction);
+                i32 path_index = locator->path->draw_index;
+                EdFileWriteChar(path_index);
+                i32 connection_index = 0;
+                AIPATH_s *path = path_system->paths[path_index];
+                for (i32 index = 0; index < path->connection_count; ++index) {
+                    AIPATHCNX_s *connection = &path->connections[index];
+                    i32 first = locator->first_node->index;
+                    i32 second = locator->second_node->index;
+                    if ((connection->node_indices[0] == first && connection->node_indices[1] == second) ||
+                        (connection->node_indices[0] == second && connection->node_indices[1] == first)) {
+                        connection_index = index;
+                        break;
+                    }
+                }
+                i32 angle = locator->path_angle;
+                i32 magnitude = angle < 0 ? -angle : angle;
+                EdFileWriteChar(magnitude > 0x3fff);
+                EdFileWriteShort(connection_index);
+                EdFileWriteFloat(locator->path_fraction);
+                EdFileWriteFloat(locator->path_width);
+                if (aidata_version > 14) {
+                    EdFileWriteInt(angle);
+                }
+            }
+            locator = (EDLOCATOR_s *)NuLinkedListGetNext(&aieditor->locators, &locator->link);
+        }
+        if (aidata_version > 17) {
+            i32 set_count = 0;
+            EDLOCATORSET_s *set = (EDLOCATORSET_s *)NuLinkedListGetHead(&aieditor->locator_sets);
+            while (set != nullptr) {
+                ++set_count;
+                set = (EDLOCATORSET_s *)NuLinkedListGetNext(&aieditor->locator_sets, &set->link);
+            }
+            EdFileWriteInt(set_count);
+            set = (EDLOCATORSET_s *)NuLinkedListGetHead(&aieditor->locator_sets);
+            while (set != nullptr) {
+                i32 member_count = 0;
+                for (i32 index = 0; index < 64 && set->locators[index] != nullptr; ++index) {
+                    if (set->locators[index]->runtime_index != 0xff) {
+                        ++member_count;
+                    }
+                }
+                EdFileWrite(set->name, 16);
+                EdFileWriteInt(member_count);
+                if (member_count != 0) {
+                    for (i32 index = 0; index < 64 && set->locators[index] != nullptr; ++index) {
+                        if (set->locators[index]->runtime_index != 0xff) {
+                            EdFileWriteChar(set->locators[index]->runtime_index);
+                        }
+                    }
+                }
+                set = (EDLOCATORSET_s *)NuLinkedListGetNext(&aieditor->locator_sets, &set->link);
+            }
+        }
     }
 
     EDLOCATOR_s *locatorEditor_GetNearest(i32 use_width) {
@@ -451,16 +724,68 @@ extern "C" {
         return nearest;
     }
 
-    void locatorEditor_PathDeleted(EDAIPATH_s *) {
-        STUBBED();
+    void locatorEditor_PathDeleted(EDAIPATH_s *path) {
+        EDLOCATOR_s *locator = (EDLOCATOR_s *)NuLinkedListGetHead(&aieditor->locators);
+        while (locator != nullptr) {
+            EDLOCATOR_s *next = (EDLOCATOR_s *)NuLinkedListGetNext(&aieditor->locators, &locator->link);
+            if (locator->path == path) {
+                DestroyLocator(locator);
+                if (aieditor->current_locator == locator) {
+                    aieditor->current_locator = nullptr;
+                }
+            }
+            locator = next;
+        }
     }
 
-    void locatorEditor_PathNodeDeleted(EDAIPATHNODE_s *) {
-        STUBBED();
+    void locatorEditor_PathNodeDeleted(EDAIPATHNODE_s *node) {
+        EDLOCATOR_s *locator = (EDLOCATOR_s *)NuLinkedListGetHead(&aieditor->locators);
+        while (locator != nullptr) {
+            EDLOCATOR_s *next = (EDLOCATOR_s *)NuLinkedListGetNext(&aieditor->locators, &locator->link);
+            if (locator->first_node == node || locator->second_node == node) {
+                pathEditor_OnPathCheck(&locator->position, (EDAIPATHCHECK_s *)locator->path_check,
+                                       aieditor->current_path, 0.0f);
+                if (!locator->on_path) {
+                    DestroyLocator(locator);
+                    if (aieditor->current_locator == locator) {
+                        aieditor->current_locator = nullptr;
+                    }
+                }
+            }
+            locator = next;
+        }
     }
 
-    void locatorEditor_PathNodeMoved(EDAIPATHNODE_s *) {
-        STUBBED();
+    void locatorEditor_PathNodeMoved(EDAIPATHNODE_s *node) {
+        EDLOCATOR_s *locator = (EDLOCATOR_s *)NuLinkedListGetHead(&aieditor->locators);
+        while (locator != nullptr) {
+            if (locator->first_node == node || locator->second_node == node) {
+                NUVEC difference;
+                NUVEC direction;
+                NUVEC movement;
+                NuVecSub(&difference, &locator->second_node->position, &locator->first_node->position);
+                NuVecNorm(&direction, &difference);
+                f32 radius;
+                if (locator->path_fraction > 1.0f) {
+                    radius = locator->second_node->radius;
+                } else if (locator->path_fraction < 0.0f) {
+                    radius = locator->first_node->radius;
+                } else {
+                    radius = locator->second_node->radius * locator->path_fraction +
+                             locator->first_node->radius * (1.0f - locator->path_fraction);
+                }
+                locator->position = locator->first_node->position;
+                direction.x = -direction.x * radius;
+                direction.z *= radius;
+                NuVecScale(&movement, &difference, locator->path_fraction);
+                NuVecAdd(&locator->position, &locator->position, &movement);
+                NuVecScale(&movement, &direction, locator->path_width);
+                NuVecAdd(&locator->position, &locator->position, &movement);
+                locator->direction =
+                    NuAngAdd((i32)(NuAtan2(difference.x, difference.z) * 10430.378f), locator->path_angle);
+            }
+            locator = (EDLOCATOR_s *)NuLinkedListGetNext(&aieditor->locators, &locator->link);
+        }
     }
 
 } // extern "C"

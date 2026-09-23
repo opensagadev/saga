@@ -180,10 +180,6 @@ void edbriDoInput(nupad_s *) {
     STUBBED();
 }
 
-void edgraDoInput(nupad_s *) {
-    STUBBED();
-}
-
 void edpartCreate(nuvec_s *, i32) {
     STUBBED();
 }
@@ -237,8 +233,72 @@ void edbriFileSave(char *) {
     STUBBED();
 }
 
-void edgraFileSave(char *) {
-    STUBBED();
+i32 edgraFileSave(char *path) {
+    i32 clump_count = 0;
+    i32 element_count = 0;
+    for (i32 i = 0; i < EDGRA_MAX_CLUMPS; ++i) {
+        edgra_clump_s &clump = GrassClumps[i];
+        if (clump.element_count)
+            ++clump_count;
+        element_count += clump.element_count;
+    }
+
+    EdFileSetMedia(1);
+    if (!EdFileOpen(path, NUFILE_WRITE))
+        return 0;
+    EdFileSetReadWrongEndianess(1);
+    EdFileWriteInt(9);
+    EdFileWriteFloat(edgra_global_fadein);
+    EdFileWriteFloat(edgra_global_fadeout);
+    EdFileWriteInt(clump_count);
+    EdFileWriteInt(element_count);
+
+    for (i32 i = 0; i < EDGRA_MAX_CLUMPS; ++i) {
+        edgra_clump_s &clump = GrassClumps[i];
+        if (!clump.element_count)
+            continue;
+        nuhspecial_s special;
+        NuGScnGetSpecial(&special, edbits_base_scene, clump.special_index);
+        char name[20];
+        strncpy(name, NuSpecialGetName(&special), sizeof(name));
+        name[19] = '\0';
+        EdFileWrite(name, sizeof(name));
+        EdFileWriteInt(clump.element_count);
+        EdFileWriteNuVec(&clump.position);
+        EdFileWriteFloat(clump.size);
+        EdFileWriteFloat(clump.field_18);
+        EdFileWriteInt(clump.flags);
+        EdFileWriteFloat(clump.field_20);
+        EdFileWriteChar(clump.unknown_25);
+        EdFileWriteChar(clump.unknown_26);
+        EdFileWriteChar(clump.kind);
+        EdFileWriteInt(clump.seed);
+        EdFileWriteFloat(clump.field_2c);
+        EdFileWriteFloat(clump.field_30);
+        EdFileWriteShort(clump.rotation_z);
+        EdFileWriteShort(clump.rotation_y);
+        EdFileWriteFloat(clump.near_distance);
+        EdFileWriteFloat(clump.far_distance);
+        EdFileWriteChar(clump.field_42);
+        EdFileWriteChar(clump.field_43);
+        EdFileWriteFloat(clump.field_44);
+        if (clump.kind == 3) {
+            for (i32 j = 0; j < clump.element_count; ++j) {
+                edgra_individual_s *individual = GetIndGrassClump(clump.individual_index, j);
+                EdFileWriteNuVec(&individual->position);
+                EdFileWriteFloat(individual->field_0c);
+                EdFileWriteShort(individual->field_10);
+                EdFileWriteShort(individual->field_12);
+            }
+        }
+        NUVEC *vectors = static_cast<NUVEC *>(clump.vector_buffer);
+        for (i32 j = 0; j < clump.element_count; ++j)
+            EdFileWriteNuVec(&vectors[j]);
+    }
+
+    EdFileSetReadWrongEndianess(0);
+    EdFileClose();
+    return 1;
 }
 
 void edpartDoInput(nupad_s *) {

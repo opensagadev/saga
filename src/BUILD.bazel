@@ -43,6 +43,7 @@ _ENGINE_ROOT_SRCS = [
 _ENGINE_SRCS = _ENGINE_ROOT_SRCS + glob(
     [directory + "/**/*.c" for directory in _ENGINE_DIRS] +
     [directory + "/**/*.cpp" for directory in _ENGINE_DIRS],
+    exclude = ["gameapi/edtools/edanimall.cpp"],
     allow_empty = True,
 )
 
@@ -113,6 +114,7 @@ _PUBLIC_HEADERS = glob(
 )
 
 _TEXTUAL_HEADERS = [
+    "gameapi/edtools/edanimall.cpp",
     "legoapi/items/collect/bolttypes_lsw.inc",
     "legoapi/menus/core/lsw_text_data.inc",
     "nu2api/nu3d/android/nuios_shader_sources.inc",

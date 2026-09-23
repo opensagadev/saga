@@ -45,7 +45,7 @@ extern "C" {
     extern i32 edgra_cam_ax;
     extern f32 edgra_cam_dist;
     extern NUVEC edgra_cam_pos;
-    extern f32 edgra_mtl_zoff;
+    extern struct numtl_s *edgra_mtl_zoff;
     extern struct numtl_s *edgra_mtl;
     extern i32 edgra_filter;
 
