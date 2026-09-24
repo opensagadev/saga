@@ -5249,9 +5249,12 @@ extern "C" {
             if (!gpcfg)
                 return 0;
             eduiitem_s *pick;
-            if (item->type == 8)
+            if (item->type == 8) {
                 pick = eduiItemGreyPickCreate(reinterpret_cast<usize>(item), &ed_attr, cbgpcfgCPPress, "Colourpick");
-            else if (item->type == 9)
+                if (gradient->selected_stage)
+                    eduiItemColourPickSetHSV(static_cast<edui_colour_pick_s *>(pick), gradient->selected_stage->hue,
+                                             gradient->selected_stage->saturation, gradient->selected_stage->value);
+            } else if (item->type == 9)
                 pick = eduiItemSelCreate(reinterpret_cast<usize>(item), &ed_attr, 0, 0, cbgpcfgCPPress, "Edit");
             else {
                 pick = eduiItemColourPickCreate(reinterpret_cast<usize>(item), &ed_attr, cbgpcfgCPPress, "Colourpick");

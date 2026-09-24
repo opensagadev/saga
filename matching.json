@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 58.432198,
+    "fuzzy_match_percent": 58.47574,
     "total_code": "4722419",
     "matched_code": "487746",
     "matched_code_percent": 10.328308,
@@ -19236,7 +19236,7 @@
           "address": 4015104,
           "offset": 3125136,
           "size": 147,
-          "match_percent": 61.673077
+          "match_percent": 59.75
         },
         {
           "name": "_ZL27creatureEditor_cbSetLocatorP10eduimenu_sP10eduiitem_sj",
@@ -19396,7 +19396,7 @@
           "address": 4032240,
           "offset": 3142272,
           "size": 319,
-          "match_percent": 75.62963
+          "match_percent": 73.22222
         },
         {
           "name": "_ZL31creatureEditor_cbRenameCreatureP10eduimenu_sP10eduiitem_sj",
@@ -19420,7 +19420,7 @@
           "address": 4061056,
           "offset": 3171088,
           "size": 1873,
-          "match_percent": 49.607693
+          "match_percent": 56.29231
         },
         {
           "name": "_ZL29creatureEditor_cbSelectScriptP10eduimenu_sP10eduiitem_sj",
@@ -21793,7 +21793,7 @@
           "address": 4246272,
           "offset": 3356304,
           "size": 318,
-          "match_percent": 78.07692
+          "match_percent": 99.16483
         },
         {
           "name": "_Z21creatureEditor_Renderiiff",
@@ -21801,7 +21801,7 @@
           "address": 4246592,
           "offset": 3356624,
           "size": 1947,
-          "match_percent": 73.31544
+          "match_percent": 73.29307
         },
         {
           "name": "_Z21antinodeEditor_Renderiiff",
@@ -27687,7 +27687,7 @@
           "address": 4331232,
           "offset": 3441264,
           "size": 3295,
-          "match_percent": 11.977591
+          "match_percent": 66.04762
         },
         {
           "name": "_ZL10edpartProcfP7nupad_s",
@@ -28077,7 +28077,7 @@
           "address": 5594160,
           "offset": 4704192,
           "size": 380,
-          "match_percent": 68.86275
+          "match_percent": 74.64706
         },
         {
           "name": "_ZN12SplineObject15GenLinearPointsEv",
@@ -28117,7 +28117,7 @@
           "address": 5595136,
           "offset": 4705168,
           "size": 483,
-          "match_percent": 64.90598
+          "match_percent": 64.991455
         },
         {
           "name": "_ZN12SplineHelper22PostLoadInitialisationEP12MemoryBufferS1_",
@@ -30444,7 +30444,7 @@
           "address": 5601680,
           "offset": 4711712,
           "size": 3144,
-          "match_percent": 11.362245
+          "match_percent": 13.624149
         },
         {
           "name": "_ZN9EdManMove7ProcessER14EdInputContextR15ClassObjectList",

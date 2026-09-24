@@ -3357,9 +3357,9 @@ __attribute__((force_align_arg_pointer)) i32 EdManScale::Process(EdInputContext 
                 f32 scaled_magnitude = Scale * magnitude;
                 f32 change = (scaled_magnitude + movement) / scaled_magnitude - 1.0f;
                 if (axis >= 4) {
-                    scale_x = second_axis.x * change + local_axis.x * change + 1.0f;
-                    scale_y = second_axis.y * change + local_axis.y * change + 1.0f;
-                    scale_z = second_axis.z * change + local_axis.z * change + 1.0f;
+                    scale_x = local_axis.x * change + second_axis.x * change + 1.0f;
+                    scale_y = local_axis.y * change + second_axis.y * change + 1.0f;
+                    scale_z = local_axis.z * change + second_axis.z * change + 1.0f;
                 } else {
                     scale_x = local_axis.x * change + 1.0f;
                     scale_y = local_axis.y * change + 1.0f;

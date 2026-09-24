@@ -762,7 +762,7 @@ void SplineObject::GenBezierPoints() {
     if (start == NULL)
         return;
     SplineKnot *end = start->next;
-    bool closing = false;
+    i32 closing = 0;
     f32 distance = 0.0f;
     while (end != NULL) {
         f32 length = BezierLineLength(start->position, start->out_tangent, end->position, end->in_tangent);
@@ -774,12 +774,12 @@ void SplineObject::GenBezierPoints() {
             points.AddPoint(point);
         }
         distance -= length;
-        if (closing)
-            return;
         start = end;
         end = end->next;
+        if (closing)
+            return;
         if (end == NULL && closed != 0) {
-            closing = true;
+            closing = 1;
             end = knots.first;
         }
     }
