@@ -87,6 +87,7 @@ _NATIVE_PLATFORM_SRCS = ["host/platform/native_render_device.cpp"] + select({
     "//bazel/platforms:linux": [
         "host/platform/linux/render_device.cpp",
         "host/platform/linux/runtime.cpp",
+        "host/platform/linux/sound.cpp",
         "host/platform/posix/compressed_texture.cpp",
         "host/platform/posix/egl.cpp",
     ],
@@ -263,6 +264,7 @@ cc_library(
         "//bazel/platforms:linux": [
             "-Wl,--wrap=MenuInMemoryCard",
             "-Wl,--wrap=edcamMove",
+            "-Wl,--wrap=_ZN12NuSoundVoice11SetPositionEP5VuVec",
         ],
         "//conditions:default": [],
     }),
