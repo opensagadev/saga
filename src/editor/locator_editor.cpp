@@ -1070,17 +1070,15 @@ process_buttons:
             }
         }
         EDLOCATOR_s *before = aieditor->current_locator;
-        unsigned int added;
         if (before != nullptr && before != nearest) {
-            added = AddLocatorToSet(set, nearest, before);
+            if (AddLocatorToSet(set, nearest, before) != 0) {
+                aieditor->current_locator = nearest;
+                aieditor->current_path = nearest->path;
+                aieditorsettings.area_rotation = nearest->direction;
+                edcamSetPos(&nearest->position);
+            }
         } else {
-            added = AddLocatorToSetAtEnd(set, nearest);
-        }
-        if (added != 0) {
-            aieditor->current_locator = nearest;
-            aieditor->current_path = nearest->path;
-            aieditorsettings.area_rotation = nearest->direction;
-            edcamSetPos(&nearest->position);
+            AddLocatorToSetAtEnd(set, nearest);
         }
     }
     *reinterpret_cast<EDCREATURE_s **>(reinterpret_cast<u8 *>(aieditor) + 0x3692c) = creatureEditor_GetNearest(1);
