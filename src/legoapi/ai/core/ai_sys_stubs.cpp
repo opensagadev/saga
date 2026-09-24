@@ -1726,15 +1726,14 @@ extern "C" {
             return;
         }
 
-        NULISTHDR *areas = reinterpret_cast<NULISTHDR *>(reinterpret_cast<u8 *>(aieditor) + 0x37a40);
-        NULISTHDR *antinode_sets = reinterpret_cast<NULISTHDR *>(reinterpret_cast<u8 *>(aieditor) + 0x42e94);
-
         memset(system->storage, 0, system->storage_size);
         system->storage_cursor.addr = reinterpret_cast<usize>(system->storage);
         system->path_sys =
             pathEditorCreateData(&system->storage_cursor, &system->storage_end, &aieditorsettings.external_display_a,
                                  &aieditorsettings.external_display_b);
+        system = aieditor->ai_system;
         memset(system->groups, 0, sizeof(system->groups));
+        NULISTHDR *areas = reinterpret_cast<NULISTHDR *>(reinterpret_cast<u8 *>(aieditor) + 0x37a40);
         system->area_count = 0;
         for (NULISTLNK *area = NuLinkedListGetHead(areas); area != NULL; area = NuLinkedListGetNext(areas, area)) {
             ++system->area_count;
@@ -1954,6 +1953,8 @@ extern "C" {
                 GameAISYSRebuildFromEditorDataFn(system, &system->storage_cursor, &system->storage_end);
             }
         }
+        system = aieditor->ai_system;
+        NULISTHDR *antinode_sets = reinterpret_cast<NULISTHDR *>(reinterpret_cast<u8 *>(aieditor) + 0x42e94);
         system->antinode_count = 0;
         for (EDANTINODE_s *node = reinterpret_cast<EDANTINODE_s *>(NuLinkedListGetHead(antinode_sets)); node != NULL;
              node = reinterpret_cast<EDANTINODE_s *>(NuLinkedListGetNext(antinode_sets, &node->link))) {

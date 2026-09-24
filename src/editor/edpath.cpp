@@ -1516,6 +1516,7 @@ extern "C" {
                 }
             }
 
+            i32 connection_index = 0;
             for (EDAIPATHNODE_s *node = (EDAIPATHNODE_s *)NuLinkedListGetHead(&editor_path->nodes); node != nullptr;
                  node = (EDAIPATHNODE_s *)NuLinkedListGetNext(&editor_path->nodes, &node->link)) {
                 if (path->nodes == nullptr) {
@@ -1545,12 +1546,6 @@ extern "C" {
                 }
                 runtime->distance_cache_nodes[0] = 0xff;
                 runtime->distance_cache_nodes[1] = 0xff;
-            }
-
-            i32 connection_index = 0;
-            for (EDAIPATHNODE_s *node = (EDAIPATHNODE_s *)NuLinkedListGetHead(&editor_path->nodes); node != nullptr;
-                 node = (EDAIPATHNODE_s *)NuLinkedListGetNext(&editor_path->nodes, &node->link)) {
-                AIPATHNODE_s *runtime = &path->nodes[node->index];
                 if (runtime->connection_count != 0) {
                     runtime->connections = (AIPATHCNX_s **)AISysBufferAlloc(
                         cursor, end, runtime->connection_count * sizeof(AIPATHCNX_s *));

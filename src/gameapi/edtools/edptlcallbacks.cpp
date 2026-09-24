@@ -749,15 +749,26 @@ static void cbPtlCollMenu(eduimenu_s *parent, eduiitem_s *, u32) {
 
     eduiMenuAddItem(collmenu, eduiItemGreyGradPickCreate(0, colours, cbPtlApplyCollEnv, "Collision Envelope"));
     coll_env_item = edui_last_item;
-    const f32 minimum = effect->min_size / 10000.0f;
-    const f32 maximum = effect->max_size / 10000.0f;
-    for (i32 index = 0; index < 8; ++index) {
-        const debris_float_key_s &key = effect->collision_keys[index];
-        const f32 value = minimum == maximum ? 1.0f : (key.value - minimum) / (maximum - minimum);
-        eduiGradStageAddRGB(static_cast<edui_gradient_pick_s *>(coll_env_item), key.time, value, value, value);
-        if (key.time == 1.0f)
-            break;
+#define COLL_STAGE(index)                                                                                              \
+    {                                                                                                                  \
+        const debris_float_key_s &key = effect->collision_keys[index];                                                 \
+        const f32 minimum = effect->min_size / 10000.0f;                                                               \
+        const f32 range = (effect->max_size - effect->min_size) / 10000.0f;                                            \
+        const f32 value = effect->min_size == effect->max_size ? 1.0f : (key.value - minimum) / range;                 \
+        eduiGradStageAddRGB(static_cast<edui_gradient_pick_s *>(coll_env_item), key.time, value, value, value);        \
+        if (key.time == 1.0f)                                                                                          \
+            goto coll_stages_done;                                                                                     \
     }
+    COLL_STAGE(0)
+    COLL_STAGE(1)
+    COLL_STAGE(2)
+    COLL_STAGE(3)
+    COLL_STAGE(4)
+    COLL_STAGE(5)
+    COLL_STAGE(6)
+    COLL_STAGE(7)
+#undef COLL_STAGE
+coll_stages_done:
     eduiMenuAddItem(collmenu, eduiItemSliderCreateInt(0, colours, 0, cbChangeNumCollSpheres, 0, 8,
                                                       static_cast<i8>(effect->process_spheres), "Num Spheres"));
     eduiMenuAddItem(collmenu, eduiItemSelCreate(1, colours, 0, 0, cbPtlDefaultCollEnv, "Default Envelope"));

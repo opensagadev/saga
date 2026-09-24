@@ -687,18 +687,15 @@ void edgraDoInput(nupad_s *pad) {
         if ((pressed & 0x20) && edgra_nearest != -1)
             edgraClumpReseed(edgra_nearest);
 
-        bool instance_mode = edgra_editormode == 1;
         if ((pressed & 0x40) && edgra_nearest != -1) {
-            if (instance_mode) {
+            if (edgra_editormode == 1) {
                 edgra_editormode = 0;
-                instance_mode = false;
             } else if (edgra_mode == 3) {
                 edgra_editormode = 1;
-                instance_mode = true;
             }
         }
 
-        if (instance_mode) {
+        if (edgra_editormode == 1) {
             if (edgra_nearest_instance == -1) {
                 edgraDetermineNearestInstance(-1.0f);
             } else if (edgra_nearest != -1) {
