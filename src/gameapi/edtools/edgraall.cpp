@@ -266,8 +266,8 @@ static void edgracbInstanceMenu(eduimenu_s *parent, eduiitem_s *, u32) {
         if (NuSpecialExistsFn(&special))
             name = NuSpecialGetName(&special);
         const i32 selected = i == edgra_instance_type;
-        if (edgra_filter) {
-            if (NuStrNCmp(edgra_filter_string, name, NuStrLen(edgra_filter_string)) && !selected)
+        if (edgra_filter && NuStrNCmp(edgra_filter_string, name, NuStrLen(edgra_filter_string))) {
+            if (!selected)
                 continue;
             eduiMenuAddItem(edgra_instance_menu,
                             eduiItemCheckCreate(i, edblack, selected, 1, edgracbSetInstanceType, name));

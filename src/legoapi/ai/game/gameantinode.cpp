@@ -267,23 +267,21 @@ GAMEANTINODE_s *GameAntinode_UpdateAntiNodeUsingData(GAMEANTINODESYS_s *system, 
 extern "C" {
 
     void antinodeEditorDrawAntinodes(void) {
+        i32 solid = aieditorsettings.solid_antinode_display;
         NULISTHDR *list = reinterpret_cast<NULISTHDR *>(reinterpret_cast<u8 *>(aieditor) + 0x42e94);
-        EDANTINODE_s *selected = static_cast<EDANTINODE_s *>(aieditor->mode_selection_42e9c);
-        EDANTINODE_s *nearest = *reinterpret_cast<EDANTINODE_s **>(reinterpret_cast<u8 *>(aieditor) + 0x42ea0);
-        const bool active_mode = aieditorsettings.current_mode == AIEDITOR_ANTINODES;
-        const bool solid = aieditorsettings.solid_antinode_display;
         for (EDANTINODE_s *node = reinterpret_cast<EDANTINODE_s *>(NuLinkedListGetHead(list)); node != nullptr;
-             node = reinterpret_cast<EDANTINODE_s *>(NuLinkedListGetNext(list, &node->link))) {
+             node = reinterpret_cast<EDANTINODE_s *>(NuLinkedListGetNext(
+                 reinterpret_cast<NULISTHDR *>(reinterpret_cast<u8 *>(aieditor) + 0x42e94), &node->link))) {
             u32 colour = 0x50505050;
             i32 segments = 8;
-            if (active_mode) {
-                if (node == selected) {
+            if (aieditorsettings.current_mode == AIEDITOR_ANTINODES) {
+                if (node == aieditor->mode_selection_42e9c) {
                     segments = 32;
-                    if (node == nearest)
+                    if (node == *reinterpret_cast<EDANTINODE_s **>(reinterpret_cast<u8 *>(aieditor) + 0x42ea0))
                         colour = NuSpecialExistsFn(&node->special) ? 0xffff0064 : 0xffff0000;
                     else
                         colour = NuSpecialExistsFn(&node->special) ? 0x80800064 : 0x80800000;
-                } else if (node == nearest) {
+                } else if (node == *reinterpret_cast<EDANTINODE_s **>(reinterpret_cast<u8 *>(aieditor) + 0x42ea0)) {
                     colour = 0xffffffff;
                     segments = 32;
                 } else {
@@ -316,13 +314,22 @@ extern "C" {
         if (aidata_version <= 12)
             return;
         NULISTHDR *list = reinterpret_cast<NULISTHDR *>(reinterpret_cast<u8 *>(aieditor) + 0x42e94);
+        EDANTINODE_s *head = reinterpret_cast<EDANTINODE_s *>(NuLinkedListGetHead(list));
+        if (head == nullptr) {
+            EdFileWriteInt(0);
+            return;
+        }
         i32 count = 0;
-        for (EDANTINODE_s *node = reinterpret_cast<EDANTINODE_s *>(NuLinkedListGetHead(list)); node != nullptr;
-             node = reinterpret_cast<EDANTINODE_s *>(NuLinkedListGetNext(list, &node->link)))
+        for (EDANTINODE_s *node = head; node != nullptr;
+             node = reinterpret_cast<EDANTINODE_s *>(NuLinkedListGetNext(
+                 reinterpret_cast<NULISTHDR *>(reinterpret_cast<u8 *>(aieditor) + 0x42e94), &node->link)))
             ++count;
         EdFileWriteInt(count);
-        for (EDANTINODE_s *node = reinterpret_cast<EDANTINODE_s *>(NuLinkedListGetHead(list)); node != nullptr;
-             node = reinterpret_cast<EDANTINODE_s *>(NuLinkedListGetNext(list, &node->link))) {
+        for (EDANTINODE_s *node = reinterpret_cast<EDANTINODE_s *>(
+                 NuLinkedListGetHead(reinterpret_cast<NULISTHDR *>(reinterpret_cast<u8 *>(aieditor) + 0x42e94)));
+             node != nullptr;
+             node = reinterpret_cast<EDANTINODE_s *>(NuLinkedListGetNext(
+                 reinterpret_cast<NULISTHDR *>(reinterpret_cast<u8 *>(aieditor) + 0x42e94), &node->link))) {
             if (node->type == 2)
                 node->radius = NuFsqrt(node->base_radius * node->base_radius + node->base_height * node->base_height);
             else if (node->type == 1)
@@ -360,16 +367,18 @@ extern "C" {
 
     void antinodeEditor_UpdateAntiNodesOnPlatforms(void) {
         NULISTHDR *list = reinterpret_cast<NULISTHDR *>(reinterpret_cast<u8 *>(aieditor) + 0x42e94);
+        NUVEC rotated;
         NUVEC forward = {0.0f, 0.0f, 1.0f};
         for (EDANTINODE_s *node = reinterpret_cast<EDANTINODE_s *>(NuLinkedListGetHead(list)); node != nullptr;
-             node = reinterpret_cast<EDANTINODE_s *>(NuLinkedListGetNext(list, &node->link))) {
+             node = reinterpret_cast<EDANTINODE_s *>(NuLinkedListGetNext(
+                 reinterpret_cast<NULISTHDR *>(reinterpret_cast<u8 *>(aieditor) + 0x42e94), &node->link))) {
             if (!NuSpecialExistsFn(&node->special))
                 continue;
             NUMTX *matrix = NuSpecialGetDrawMtx(&node->special);
             NuVecMtxTransform(&node->position, &node->special_position, matrix);
-            NUVEC rotated;
             NuVecMtxRotate(&rotated, &forward, matrix);
-            node->flags = NuAngAdd(NuAtan2D(rotated.x, rotated.z), node->rotation_offset);
+            node->flags = NuAtan2D(rotated.x, rotated.z);
+            node->flags = NuAngAdd(node->flags, node->rotation_offset);
         }
     }
 

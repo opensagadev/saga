@@ -2621,8 +2621,10 @@ static void edrtlBurnoutFileSave(eduimenu_s *menu, eduiitem_s *, u32) {
     strcpy(name, edbits_level_save_name[0] ? edbits_level_save_name : "burnout");
     strcpy(extension, edbits_level_save_extension[0] ? edbits_level_save_extension : "bur");
     sprintf(filepath, "%s\\%s.%s", directory, name, extension);
-    i32 saved = edrtlBurnoutSave(filepath, edrtl_edit_burnset);
-    eduiCreateMessageMenu(menu, const_cast<char *>(saved ? "Saved OK" : "File Save Error"), saved ? 1 : 0);
+    if (edrtlBurnoutSave(filepath, edrtl_edit_burnset))
+        eduiCreateMessageMenu(menu, const_cast<char *>("Saved OK"), 1);
+    else
+        eduiCreateMessageMenu(menu, const_cast<char *>("File Save Error"), 0);
 }
 static void edrtlBurnoutFileLoad(eduimenu_s *menu, eduiitem_s *, u32) {
     char filepath[256];

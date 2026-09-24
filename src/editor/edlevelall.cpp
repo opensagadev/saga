@@ -2943,12 +2943,12 @@ i32 ClassObjectList::GetAveragePosition(VuVec &average) {
     average = VuVec(0.0f, 0.0f, 0.0f, 1.0f);
     i32 position_count = 0;
     for (ClassObjectListEntry *entry = first; entry != NULL; entry = entry->next) {
+        EdMember member;
         // The original's local vector is 16-byte aligned.
         VuVec position __attribute__((aligned(16)));
         bool found = entry->reference != NULL &&
                      entry->reference->GetAttributeData(entry->object, 8, EdType_VuVec, &position, 0) != 0;
         if (!found) {
-            EdMember member;
             found = entry->ed_class->FindMember(&member, entry->object, 8, 1) != 0 &&
                     member.reference->GetAttributeData(member.object, 8, EdType_VuVec, &position, 0) != 0;
         }
