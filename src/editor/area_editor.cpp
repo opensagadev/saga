@@ -370,7 +370,7 @@ static EDAIAREA_s *areaEditorCreateArea() {
             }
         }
         if (!duplicate) {
-            strcpy(area->name, name);
+            strcpy(area_selected()->name, name);
             return area;
         }
     }

@@ -794,7 +794,7 @@ extern "C" {
 
         f32 cursor_radius = 0.5f;
         i32 cursor_colour = -1;
-        if (aieditorsettings.snap_height_display) {
+        if (__builtin_expect(aieditorsettings.snap_height_display, 1)) {
             edbitsDrawCross(aieditor->cursor_position.x, aieditor->cursor_position.y, aieditor->cursor_position.z, 0.5f,
                             -1, aieditorsettings.path_material);
             cursor_radius = 0.25f;

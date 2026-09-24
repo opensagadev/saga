@@ -567,6 +567,10 @@ struct EdRefKnot : EdRef {
     void GetMemberData(void *, i32, void *, i32);
     void SetMemberData(void *, i32, void *, i32, i16 *);
 };
+struct EdRefNosGuid : EdRef {
+    void GetMemberData(void *, i32, void *, i32);
+    void SetMemberData(void *, i32, void *, i32, i16 *);
+};
 struct EdRefPlaceable : EdRef {
     void GetMemberData(void *, i32, void *, i32);
     void SetMemberData(void *, i32, void *, i32, i16 *);

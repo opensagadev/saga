@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 58.92046,
+    "fuzzy_match_percent": 58.92706,
     "total_code": "4722419",
-    "matched_code": "489198",
-    "matched_code_percent": 10.3590555,
+    "matched_code": "489382",
+    "matched_code_percent": 10.362951,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 5894,
-    "matched_functions_percent": 43.792255,
+    "matched_functions": 5896,
+    "matched_functions_percent": 43.807117,
     "total_units": 1
   },
   "text": {
@@ -18934,7 +18934,7 @@
           "address": 4174368,
           "offset": 3284400,
           "size": 999,
-          "match_percent": 83.89604
+          "match_percent": 93.24753
         },
         {
           "name": "aieditor_Init",
@@ -19125,7 +19125,7 @@
           "address": 4064368,
           "offset": 3174400,
           "size": 3322,
-          "match_percent": 53.58961
+          "match_percent": 54.04286
         },
         {
           "name": "areaEditorSaveData",
@@ -27671,7 +27671,7 @@
           "address": 4310272,
           "offset": 3420304,
           "size": 1592,
-          "match_percent": 50.58788
+          "match_percent": 52.248486
         },
         {
           "name": "_ZL26edpartFileSaveEffectsLevelP10eduimenu_sP10eduiitem_sj",
@@ -27711,7 +27711,7 @@
           "address": 4331232,
           "offset": 3441264,
           "size": 3295,
-          "match_percent": 66.803925
+          "match_percent": 66.58123
         },
         {
           "name": "_ZL10edpartProcfP7nupad_s",
@@ -36853,6 +36853,22 @@
           "address": 5421200,
           "offset": 4531232,
           "size": 45,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN12EdRefNosGuid13SetMemberDataEPviS0_iPs",
+          "demangled_name": "EdRefNosGuid::SetMemberData(void*, int, void*, int, short*)",
+          "address": 5421248,
+          "offset": 4531280,
+          "size": 84,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN12EdRefNosGuid13GetMemberDataEPviS0_i",
+          "demangled_name": "EdRefNosGuid::GetMemberData(void*, int, void*, int)",
+          "address": 5421344,
+          "offset": 4531376,
+          "size": 100,
           "match_percent": 100.0
         },
         {
@@ -127261,22 +127277,6 @@
       "match_percent": 0.0
     },
     {
-      "name": "_ZN12EdRefNosGuid13SetMemberDataEPviS0_iPs",
-      "demangled_name": "EdRefNosGuid::SetMemberData(void*, int, void*, int, short*)",
-      "address": 5421248,
-      "offset": 4531280,
-      "size": 84,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN12EdRefNosGuid13GetMemberDataEPviS0_i",
-      "demangled_name": "EdRefNosGuid::GetMemberData(void*, int, void*, int)",
-      "address": 5421344,
-      "offset": 4531376,
-      "size": 100,
-      "match_percent": 0.0
-    },
-    {
       "name": "_ZN18PlaceableInterfaceD1Ev",
       "demangled_name": "PlaceableInterface::~PlaceableInterface()",
       "address": 5613216,
@@ -127936,8 +127936,8 @@
   "summary": {
     "bazel_units": 454,
     "functions": 13454,
-    "assigned_functions": 12617,
+    "assigned_functions": 12619,
     "ambiguous_functions": 242,
-    "unassigned_functions": 595
+    "unassigned_functions": 593
   }
 }

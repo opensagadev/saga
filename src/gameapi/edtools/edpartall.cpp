@@ -1188,7 +1188,7 @@ static void edpartFileSaveEffects(eduimenu_s *parent, eduiitem_s *, u32) {
     sprintf(path, "%s\\%s.%s", general_directory, general_name, general_extension);
     sprintf(backup, "%s\\%s.%s.bak", general_directory, general_name, general_extension);
     bool general_backup = edbits_override_backups || EdFileBackup(path, backup);
-    bool general_saved = edpartSaveEffects(path, 0) != 0;
+    i32 general_saved = edpartSaveEffects(path, 0);
     sprintf(path, "%s\\%s.%s", level_directory, level_name, level_extension);
     sprintf(backup, "%s\\%s.%s.bak", level_directory, level_name, level_extension);
     bool level_backup = edbits_override_backups || EdFileBackup(path, backup);

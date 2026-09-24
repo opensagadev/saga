@@ -23,6 +23,21 @@ static __used__ i32 NOSGetGuid() {
     return theNos->GetNextGuid();
 }
 
+__attribute__((weak)) void EdRefNosGuid::SetMemberData(void *object, i32, void *data, i32, i16 *) {
+    void *member = static_cast<u8 *>(object) + member_offset;
+    if (attributes & 0x40000000)
+        member = *static_cast<void **>(member);
+    *static_cast<void **>(member) = theNos->GetObject(*static_cast<i16 *>(data));
+}
+
+__attribute__((weak)) void EdRefNosGuid::GetMemberData(void *object, i32 type, void *data, i32) {
+    CheckType(type);
+    void *member = static_cast<u8 *>(object) + member_offset;
+    if (attributes & 0x40000000)
+        member = *static_cast<void **>(member);
+    *static_cast<i16 *>(data) = static_cast<i16>(theNos->GetGuid(*static_cast<void **>(member)));
+}
+
 static f32 NetworkFrameTime() {
     u32 time = UtilGetFrameStartTime();
     return static_cast<f32>(time & 0xffff) + static_cast<f32>(time >> 16) * 65536.0f;
