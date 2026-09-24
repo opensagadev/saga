@@ -135,20 +135,24 @@ extern const EdClassInterfaceVTableObject knotHelperVTable asm("_ZTV10KnotHelper
 #undef EDVT_SLOT
 #undef EDVT_SYMBOL
 
+extern const EdClassInterfaceVTableObject edClassInterfaceVTable asm("_ZTV16EdClassInterface");
+
 SplineHelper::~SplineHelper() {
+    vtable = const_cast<EdClassInterfaceVTable *>(&edClassInterfaceVTable.methods);
 }
 KnotHelper::~KnotHelper() {
+    vtable = const_cast<EdClassInterfaceVTable *>(&edClassInterfaceVTable.methods);
 }
 
 extern "C" void splineHelperDeletingDestructor(SplineHelper *object) asm("_ZN12SplineHelperD0Ev");
 void splineHelperDeletingDestructor(SplineHelper *object) {
-    object->~SplineHelper();
+    object->vtable = const_cast<EdClassInterfaceVTable *>(&edClassInterfaceVTable.methods);
     ::operator delete(object);
 }
 
 extern "C" void knotHelperDeletingDestructor(KnotHelper *object) asm("_ZN10KnotHelperD0Ev");
 void knotHelperDeletingDestructor(KnotHelper *object) {
-    object->~KnotHelper();
+    object->vtable = const_cast<EdClassInterfaceVTable *>(&edClassInterfaceVTable.methods);
     ::operator delete(object);
 }
 

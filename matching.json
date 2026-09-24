@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 58.704773,
+    "fuzzy_match_percent": 58.729603,
     "total_code": "4722419",
-    "matched_code": "488394",
-    "matched_code_percent": 10.342031,
+    "matched_code": "488523",
+    "matched_code_percent": 10.344762,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 5881,
-    "matched_functions_percent": 43.695667,
+    "matched_functions": 5888,
+    "matched_functions_percent": 43.747677,
     "total_units": 1
   },
   "text": {
@@ -19125,7 +19125,7 @@
           "address": 4064368,
           "offset": 3174400,
           "size": 3322,
-          "match_percent": 42.42078
+          "match_percent": 45.696102
         },
         {
           "name": "areaEditorSaveData",
@@ -20483,7 +20483,7 @@
           "address": 5533904,
           "offset": 4643936,
           "size": 38,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZN12PropertyTool14AutoLocateMenuEP12PropertyMenu",
@@ -20651,7 +20651,7 @@
           "address": 5549840,
           "offset": 4659872,
           "size": 342,
-          "match_percent": 3.478723
+          "match_percent": 72.64893
         },
         {
           "name": "_ZN11ClassEditor14MakeUniqueNameEPKcPci",
@@ -20795,7 +20795,7 @@
           "address": 5555584,
           "offset": 4665616,
           "size": 749,
-          "match_percent": 31.075758
+          "match_percent": 36.18687
         },
         {
           "name": "_ZN11ClassEditor17FindNearestObjectER5VuVecR11ClassObjectS3_i",
@@ -21666,7 +21666,7 @@
           "address": 4212560,
           "offset": 3322592,
           "size": 994,
-          "match_percent": 35.405796
+          "match_percent": 43.90942
         },
         {
           "name": "_ZL25routeEditor_cbCreateRouteP10eduimenu_sP10eduiitem_sj",
@@ -21907,12 +21907,20 @@
           "match_percent": 100.0
         },
         {
+          "name": "_ZL15AddLocatorToSetP14EDLOCATORSET_sP11EDLOCATOR_sS2_.part.5",
+          "demangled_name": "AddLocatorToSet(EDLOCATORSET_s*, EDLOCATOR_s*, EDLOCATOR_s*) [clone .part.5]",
+          "address": 4051088,
+          "offset": 3161120,
+          "size": 259,
+          "match_percent": 0.0
+        },
+        {
           "name": "_ZL15AddLocatorToSetP14EDLOCATORSET_sP11EDLOCATOR_sS2_",
           "demangled_name": "AddLocatorToSet(EDLOCATORSET_s*, EDLOCATOR_s*, EDLOCATOR_s*)",
           "address": 4051360,
           "offset": 3161392,
           "size": 83,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZL14DestroyLocatorP11EDLOCATOR_s",
@@ -21960,7 +21968,7 @@
           "address": 4181808,
           "offset": 3291840,
           "size": 453,
-          "match_percent": 49.088234
+          "match_percent": 49.161766
         },
         {
           "name": "locatorEditor_PathNodeDeleted",
@@ -22024,7 +22032,7 @@
           "address": 4218976,
           "offset": 3329008,
           "size": 198,
-          "match_percent": 100.0
+          "match_percent": 99.70588
         },
         {
           "name": "_ZL39locatorEditor_cbCancelDeleteLocatorMenuP10eduimenu_sS0_",
@@ -22040,7 +22048,7 @@
           "address": 4219216,
           "offset": 3329248,
           "size": 799,
-          "match_percent": 28.544601
+          "match_percent": 15.985915
         },
         {
           "name": "_Z21locatorEditor_ProcessP7nupad_s",
@@ -27223,7 +27231,7 @@
           "address": 4269840,
           "offset": 3379872,
           "size": 528,
-          "match_percent": 51.87395
+          "match_percent": 99.85714
         },
         {
           "name": "_ZL24edpartDebrisSettingsMenuP10eduimenu_sP10eduiitem_sj",
@@ -27311,7 +27319,7 @@
           "address": 4276576,
           "offset": 3386608,
           "size": 1903,
-          "match_percent": 70.085365
+          "match_percent": 70.04878
         },
         {
           "name": "_ZL14edpartTypeMenuP10eduimenu_sP10eduiitem_sj",
@@ -27447,7 +27455,7 @@
           "address": 4284768,
           "offset": 3394800,
           "size": 516,
-          "match_percent": 58.22034
+          "match_percent": 76.45763
         },
         {
           "name": "_ZL21edpartGeneralTypeMenuP10eduimenu_sP10eduiitem_sj",
@@ -27455,7 +27463,7 @@
           "address": 4285296,
           "offset": 3395328,
           "size": 528,
-          "match_percent": 61.865547
+          "match_percent": 76.23529
         },
         {
           "name": "_ZL24edpartThingsInstanceMenuP10eduimenu_sP10eduiitem_sj",
@@ -28197,7 +28205,7 @@
           "address": 5613376,
           "offset": 4723408,
           "size": 29,
-          "match_percent": 35.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZN10KnotHelperD2Ev",
@@ -28205,7 +28213,7 @@
           "address": 5613376,
           "offset": 4723408,
           "size": 29,
-          "match_percent": 35.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZN12SplineHelperD1Ev",
@@ -28213,7 +28221,7 @@
           "address": 5613408,
           "offset": 4723440,
           "size": 29,
-          "match_percent": 35.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZN12SplineHelperD2Ev",
@@ -28221,7 +28229,7 @@
           "address": 5613408,
           "offset": 4723440,
           "size": 29,
-          "match_percent": 35.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZN12SplineHelperD0Ev",
@@ -28229,7 +28237,7 @@
           "address": 5615264,
           "offset": 4725296,
           "size": 45,
-          "match_percent": 22.384615
+          "match_percent": 100.0
         },
         {
           "name": "_ZN10KnotHelperD0Ev",
@@ -28237,7 +28245,7 @@
           "address": 5615312,
           "offset": 4725344,
           "size": 45,
-          "match_percent": 22.384615
+          "match_percent": 100.0
         },
         {
           "name": "_ZN12SplineObjectD1Ev",
@@ -31084,7 +31092,7 @@
           "address": 5616688,
           "offset": 4726720,
           "size": 635,
-          "match_percent": 27.60135
+          "match_percent": 31.54054
         },
         {
           "name": "_ZN15EdVectorControlD1Ev",
@@ -32675,7 +32683,7 @@
           "address": 3408960,
           "offset": 2518992,
           "size": 2159,
-          "match_percent": 52.086514
+          "match_percent": 53.323154
         },
         {
           "name": "_ZL22cbPtlTextureSelectMenuP10eduimenu_sP10eduiitem_sj",
@@ -33315,7 +33323,7 @@
           "address": 3538400,
           "offset": 2648432,
           "size": 402,
-          "match_percent": 74.978264
+          "match_percent": 88.45652
         },
         {
           "name": "edbriStopPage",
@@ -33435,7 +33443,7 @@
           "address": 3551616,
           "offset": 2661648,
           "size": 438,
-          "match_percent": 87.181816
+          "match_percent": 85.56566
         },
         {
           "name": "edGraEnableTerrainSwap",
@@ -33627,7 +33635,7 @@
           "address": 3591616,
           "offset": 2701648,
           "size": 489,
-          "match_percent": 72.655464
+          "match_percent": 72.36134
         },
         {
           "name": "_ZL21edptlcbResetParticlesP10eduimenu_sP10eduiitem_sj",
@@ -34123,7 +34131,7 @@
           "address": 3762016,
           "offset": 2872048,
           "size": 761,
-          "match_percent": 5.956522
+          "match_percent": 8.331522
         },
         {
           "name": "eduicbInteractFilter",
@@ -125101,14 +125109,6 @@
       "match_percent": 0.0
     },
     {
-      "name": "_ZL15AddLocatorToSetP14EDLOCATORSET_sP11EDLOCATOR_sS2_.part.5",
-      "demangled_name": "AddLocatorToSet(EDLOCATORSET_s*, EDLOCATOR_s*, EDLOCATOR_s*) [clone .part.5]",
-      "address": 4051088,
-      "offset": 3161120,
-      "size": 259,
-      "match_percent": 0.0
-    },
-    {
       "name": "_ZL23ConditionsParseFinaliseP13AICONDITION_sP8nufpar_s.part.51",
       "demangled_name": "ConditionsParseFinalise(AICONDITION_s*, nufpar_s*) [clone .part.51]",
       "address": 4051776,
@@ -127936,8 +127936,8 @@
   "summary": {
     "bazel_units": 454,
     "functions": 13454,
-    "assigned_functions": 12614,
+    "assigned_functions": 12615,
     "ambiguous_functions": 242,
-    "unassigned_functions": 598
+    "unassigned_functions": 597
   }
 }

@@ -21,6 +21,9 @@
 #if defined(__i386__) && defined(__SSE__)
 #include <xmmintrin.h>
 #endif
+#if defined(__i386__) && defined(__SSE2__)
+#include <emmintrin.h>
+#endif
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numath/nurand.h"
 #include "nu2api/nufile/nufile.h"
@@ -117,7 +120,7 @@ extern "C" void eduiSetCursorColour(u32);
 extern "C" void eduiSetFontScale(f32, f32);
 
 PropertyTool thePropertyTool;
-PropertyMenuMetrics menu_startmetrics = {20, 5, 200, 400};
+PropertyMenuMetrics menu_startmetrics __attribute__((aligned(16))) = {20, 5, 200, 400};
 eduiiattr_s EdLevelAttr = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
 i32 EdLevelFnt;
 i32 EdLevelFntScale = 24;
@@ -815,7 +818,9 @@ i32 ClassEditor::IsUniqueName(char *name) {
         }
 
         void *object = interface->vtable->get_next_object(interface, NULL);
-        while (object != NULL) {
+        if (object == NULL)
+            continue;
+        do {
             EdMember member;
             char candidate_name[128];
             if (ed_class->FindMember(&member, object, 2, 1)) {
@@ -826,7 +831,7 @@ i32 ClassEditor::IsUniqueName(char *name) {
             }
             interface = ed_class->interface;
             object = interface->vtable->get_next_object(interface, object);
-        }
+        } while (object != NULL);
     }
     return 1;
 }
@@ -1109,41 +1114,39 @@ void ClassEditor::UpdateSelectedObjects(EdInputContext &input) {
     }
     if (selected_objects.first == NULL)
         return;
-    if (input.GetPress(19) != 0.0f || input.GetPress(20) != 0.0f) {
-        ClassObjectListEntry *entry = selected_objects.first;
-        EdClassInterface *interface = entry->ed_class->interface;
-        void *object = NULL;
-        if (input.GetPress(19) != 0.0f) {
-            object = interface->vtable->get_next_object(interface, entry->object);
+    ClassObjectListEntry *entry = selected_objects.first;
+    EdClassInterface *interface = entry->ed_class->interface;
+    void *object = NULL;
+    if (input.GetPress(19) != 0.0f) {
+        object = interface->vtable->get_next_object(interface, entry->object);
+        if (object == NULL)
+            object = interface->vtable->get_next_object(interface, NULL);
+        for (i32 remaining = 4096; remaining != 0; --remaining) {
+            if (Editable(object, entry->ed_class, -1))
+                break;
+            object = interface->vtable->get_next_object(interface, object);
             if (object == NULL)
                 object = interface->vtable->get_next_object(interface, NULL);
-            for (i32 remaining = 4096; remaining != 0; --remaining) {
-                if (Editable(object, entry->ed_class, -1))
-                    break;
-                object = interface->vtable->get_next_object(interface, object);
-                if (object == NULL)
-                    object = interface->vtable->get_next_object(interface, NULL);
-            }
         }
-        if (input.GetPress(20) != 0.0f) {
-            void *current = entry->object;
-            void *previous = NULL;
-            for (i32 remaining = 4096; remaining != 0; --remaining) {
-                if (Editable(current, entry->ed_class, -1))
-                    previous = current;
-                current = interface->vtable->get_next_object(interface, current);
-                if (current == NULL)
-                    current = interface->vtable->get_next_object(interface, NULL);
-                if (current == entry->object)
-                    break;
-            }
-            object = previous;
+    }
+    if (input.GetPress(20) != 0.0f) {
+        void *current = entry->object;
+        void *previous = NULL;
+        for (i32 remaining = 4096; remaining != 0; --remaining) {
+            if (Editable(current, entry->ed_class, -1))
+                previous = current;
+            current = interface->vtable->get_next_object(interface, current);
+            if (current == NULL)
+                current = interface->vtable->get_next_object(interface, NULL);
+            if (current == entry->object)
+                break;
         }
-        if (object != NULL) {
-            ClassObject selected = {entry->ed_class, object, NULL};
-            SelectObject(selected, 0);
-            ViewSelected();
-        }
+        object = previous;
+    }
+    if (object != NULL) {
+        ClassObject selected = {entry->ed_class, object, NULL};
+        SelectObject(selected, 0);
+        ViewSelected();
     }
 }
 
@@ -2929,7 +2932,12 @@ PropertyMenuMetrics PropertyTool::ediGetMenuStartMetrics() {
 }
 
 void PropertyTool::ediMenuRetrieveMetrics(eduimenu_s *menu) {
+#if defined(__i386__) && defined(__SSE2__)
+    __m128i metrics = _mm_load_si128(reinterpret_cast<const __m128i *>(&menu_startmetrics));
+    _mm_storeu_si128(reinterpret_cast<__m128i *>(&menu->x), metrics);
+#else
     memcpy(&menu->x, &menu_startmetrics, sizeof(menu_startmetrics));
+#endif
 }
 
 void PropertyTool::ediMenuStoreMetrics(eduimenu_s *menu) {

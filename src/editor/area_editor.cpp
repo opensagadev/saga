@@ -315,7 +315,7 @@ static EDAIAREA_s *areaEditorFindHover() {
     for (EDAIAREA_s *area = area_head(); area != NULL; area = area_next(area)) {
         NUVEC difference;
         f32 distance = NuVecXZDistSqr(&aieditor->camera_position, &area->position, &difference);
-        if (distance >= best_distance) {
+        if (!(distance < best_distance)) {
             continue;
         }
         f32 height = aieditor->camera_position.y - area->position.y;

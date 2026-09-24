@@ -640,11 +640,15 @@ static void edpartSoundsMenu(eduimenu_s *menu, eduiitem_s *, u32) {
     if (edpart_nearest_type != NULL) {
         edpart_sounds_menu = eduiMenuCreate(70, 70, 250, 300, ed_fnt, edpartCancelSoundsMenu, "Attached Sounds");
         if (edpart_sounds_menu != NULL) {
-            char text[20];
-            for (i32 sound = 0; sound < 4; ++sound) {
-                sprintf(text, "Sound %d...", sound + 1);
-                eduiMenuAddItem(edpart_sounds_menu, eduiItemSelCreate(sound, edblack, 0, 0, edpartSoundXMenu, text));
-            }
+            char text[16];
+            sprintf(text, "Sound %d...", 1);
+            eduiMenuAddItem(edpart_sounds_menu, eduiItemSelCreate(0, edblack, 0, 0, edpartSoundXMenu, text));
+            sprintf(text, "Sound %d...", 2);
+            eduiMenuAddItem(edpart_sounds_menu, eduiItemSelCreate(1, edblack, 0, 0, edpartSoundXMenu, text));
+            sprintf(text, "Sound %d...", 3);
+            eduiMenuAddItem(edpart_sounds_menu, eduiItemSelCreate(2, edblack, 0, 0, edpartSoundXMenu, text));
+            sprintf(text, "Sound %d...", 4);
+            eduiMenuAddItem(edpart_sounds_menu, eduiItemSelCreate(3, edblack, 0, 0, edpartSoundXMenu, text));
             eduiMenuAttach(menu, edpart_sounds_menu);
             edpart_sounds_menu->x = menu->x + 10;
             edpart_sounds_menu->y = menu->y + 40;
@@ -888,14 +892,17 @@ static void edpartLevelTypeMenu(eduimenu_s *menu, eduiitem_s *, u32) {
             eduiMenuAddItem(edpart_leveltype_menu, eduiItemSelCreate(1, edblack, 0, 0, edpartAddLevelType, "Add Type"));
         else
             eduiMenuAddItem(edpart_leveltype_menu, eduiItemSelCreate(1, edgrey, 0, 0, NULL, "Add Type"));
-        for (i32 index = 0; index < 128; ++index) {
-            part_type_s *type = &part_types[index];
+        part_type_s *type = part_types;
+        for (i32 index = 0; index < 128; ++index, ++type) {
             if (type->name[0] != '\0' && type->field_b3 == 1) {
-                eduiitem_s *item =
-                    eduiItemCheckCreate(index, edblack, index == edpart_create_type, 1, edpartSelType, type->name);
-                eduiMenuAddItem(edpart_leveltype_menu, item);
-                if (index == edpart_create_type)
-                    edpart_leveltype_menu->selected = item;
+                if (index == edpart_create_type) {
+                    eduiMenuAddItem(edpart_leveltype_menu,
+                                    eduiItemCheckCreate(index, edblack, 1, 1, edpartSelType, type->name));
+                    edpart_leveltype_menu->selected = edui_last_item;
+                } else {
+                    eduiMenuAddItem(edpart_leveltype_menu,
+                                    eduiItemCheckCreate(index, edblack, 0, 1, edpartSelType, type->name));
+                }
             }
         }
         eduiMenuAttach(menu, edpart_leveltype_menu);
@@ -1201,14 +1208,17 @@ static void edpartGeneralTypeMenu(eduimenu_s *menu, eduiitem_s *, u32) {
                             eduiItemSelCreate(1, edblack, 0, 0, edpartAddGeneralType, "Add Type"));
         else
             eduiMenuAddItem(edpart_generaltype_menu, eduiItemSelCreate(1, edgrey, 0, 0, NULL, "Add Type"));
-        for (i32 index = 0; index < 128; ++index) {
-            part_type_s *type = &part_types[index];
+        part_type_s *type = part_types;
+        for (i32 index = 0; index < 128; ++index, ++type) {
             if (type->name[0] != '\0' && type->field_b3 == 0) {
-                eduiitem_s *item =
-                    eduiItemCheckCreate(index, edblack, index == edpart_create_type, 1, edpartSelType, type->name);
-                eduiMenuAddItem(edpart_generaltype_menu, item);
-                if (index == edpart_create_type)
-                    edpart_generaltype_menu->selected = item;
+                if (index == edpart_create_type) {
+                    eduiMenuAddItem(edpart_generaltype_menu,
+                                    eduiItemCheckCreate(index, edblack, 1, 1, edpartSelType, type->name));
+                    edpart_generaltype_menu->selected = edui_last_item;
+                } else {
+                    eduiMenuAddItem(edpart_generaltype_menu,
+                                    eduiItemCheckCreate(index, edblack, 0, 1, edpartSelType, type->name));
+                }
             }
         }
         eduiMenuAttach(menu, edpart_generaltype_menu);

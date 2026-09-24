@@ -1292,7 +1292,7 @@ static __used__ void routeEditor_cbDeleteRoute(eduimenu_s *parent, eduiitem_s *i
             i32 index = route - path->routes;
             route->flags &= ~u8(1);
             path->current_route = nullptr;
-            u16 mask = ~(u16)(1 << index);
+            u64 mask = ~(1ULL << index);
             for (EDAIPATHNODE_s *node = (EDAIPATHNODE_s *)NuLinkedListGetHead(&path->nodes); node != nullptr;
                  node = (EDAIPATHNODE_s *)NuLinkedListGetNext(&path->nodes, &node->link)) {
 #define CLEAR_CONNECTION_ROUTE(N) node->connections[N].route_mask &= mask
@@ -1310,8 +1310,7 @@ static __used__ void routeEditor_cbDeleteRoute(eduimenu_s *parent, eduiitem_s *i
             i32 next_index = index;
 #define TRY_NEXT_ROUTE()                                                                                               \
     ++next_index;                                                                                                      \
-    if (next_index >= 16)                                                                                              \
-        next_index = 0;                                                                                                \
+    next_index = next_index >= 16 ? 0 : next_index;                                                                    \
     if (path->routes[next_index].flags & 1)                                                                            \
     path->current_route = &path->routes[next_index]
             TRY_NEXT_ROUTE();

@@ -393,13 +393,12 @@ static __used__ __attribute__((optimize("no-tree-vectorize"))) void DestroyLocat
     NuLinkedListAppend(&aieditor->free_locators, &locator->link);
 }
 
-static __used__ unsigned int AddLocatorToSet(EDLOCATORSET_s *set, EDLOCATOR_s *locator, EDLOCATOR_s *before) {
-    if (set == nullptr || locator == nullptr || set->locators[63] != nullptr) {
-        return 0;
-    }
-    if (set->locators[0] != nullptr && set->locators[0]->path != locator->path) {
-        return 0;
-    }
+static __attribute__((noinline, optimize("no-tree-vectorize"))) unsigned int
+AddLocatorToSetBody(EDLOCATORSET_s *set, EDLOCATOR_s *locator,
+                    EDLOCATOR_s *before) __asm__("_ZL15AddLocatorToSetP14EDLOCATORSET_sP11EDLOCATOR_sS2_.part.5");
+
+static __attribute__((noinline, optimize("no-tree-vectorize"))) unsigned int
+AddLocatorToSetBody(EDLOCATORSET_s *set, EDLOCATOR_s *locator, EDLOCATOR_s *before) {
     for (i32 index = 0; index < 64 && set->locators[index] != nullptr; ++index) {
         if (set->locators[index] == locator) {
             for (i32 move = index; move < 63; ++move) {
@@ -430,6 +429,16 @@ static __used__ unsigned int AddLocatorToSet(EDLOCATORSET_s *set, EDLOCATOR_s *l
         }
     }
     return 0;
+}
+
+static __used__ unsigned int AddLocatorToSet(EDLOCATORSET_s *set, EDLOCATOR_s *locator, EDLOCATOR_s *before) {
+    if (locator == nullptr || set == nullptr || set->locators[63] != nullptr) {
+        return 0;
+    }
+    if (set->locators[0] != nullptr && set->locators[0]->path != locator->path) {
+        return 0;
+    }
+    return AddLocatorToSetBody(set, locator, before);
 }
 
 extern "C" {

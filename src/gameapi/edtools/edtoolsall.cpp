@@ -5467,7 +5467,8 @@ template <> void EdValueControl<f32>::cbChanged(eduimenu_s *, eduiitem_s *item, 
     eduiItemPropSetText(static_cast<edui_prop_s *>(item), text);
 }
 
-template <> void EdValueControl<f32>::cbButton(eduimenu_s *, eduiitem_s *item, u32) {
+template <>
+__attribute__((force_align_arg_pointer)) void EdValueControl<f32>::cbButton(eduimenu_s *, eduiitem_s *item, u32) {
     EdValueControl<f32> *control = static_cast<EdValueControl<f32> *>(item->data_ptr);
     f32 sensitivity = control->maximum - control->minimum < 5.0f ? 0.001f : 0.01f;
     static_cast<edui_prop_s *>(item)->unknown_property_flags |= 0x20;
