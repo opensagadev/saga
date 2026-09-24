@@ -1145,8 +1145,8 @@ void ClassEditor::UpdateSelectedObjects(EdInputContext &input) {
     }
     if (object != NULL) {
         ClassObject selected = {entry->ed_class, object, NULL};
-        SelectObject(selected, 0);
-        ViewSelected();
+        theClassEditor.SelectObject(selected, 0);
+        theClassEditor.ViewSelected();
     }
 }
 
@@ -1519,14 +1519,14 @@ i32 ClassEditor::cbEdCopySelectedObject(EdInputContext &) {
 
 i32 ClassEditor::cbEdCreateClassNewObject(i32 class_id) {
     EdClass *ed_class = theRegistry.GetClass(class_id);
-    for (ClassObjectListEntry *entry = selected_objects.first; entry != NULL; entry = entry->next) {
+    for (ClassObjectListEntry *entry = theClassEditor.selected_objects.first; entry != NULL; entry = entry->next) {
         if (entry->ed_class == ed_class) {
-            return CreateObject(*reinterpret_cast<ClassObject *>(&entry->ed_class));
+            return theClassEditor.CreateObject(*reinterpret_cast<ClassObject *>(&entry->ed_class));
         }
     }
-    if (ed_class == NULL || (ed_class->flags & 0x04000000))
+    if (ed_class->flags & 0x04000000)
         return 0;
-    return CreateObject(class_id);
+    return theClassEditor.CreateObject(class_id);
 }
 
 void ClassEditor::cbEdFilterLED(eduimenu_s *, eduiitem_s *item, u32) {

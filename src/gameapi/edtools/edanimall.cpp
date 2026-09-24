@@ -697,7 +697,9 @@ static __attribute__((used)) void edanimcbLocalSoundMenu(eduimenu_s *parent, edu
         nuhspecial_s special;
         NuGScnGetSpecial(&special, edbits_base_scene, edanim_nearest);
         if (NuSpecialTestAnim(&special)) {
-            const auto *instance = NuSpecialGetInstAnim(&special);
+            const auto *legacy_specials = reinterpret_cast<const NuSpecialLegacyLayout *>(edbits_base_scene->specials);
+            const auto *instance =
+                static_cast<const NuLegacyInstanceLayout *>(legacy_specials[edanim_nearest].instance)->animation;
             const f32 end_frame =
                 *reinterpret_cast<const f32 *>(edbits_base_scene->instance_animation_data[instance->anim_ix]);
             eduiMenuAddItem(edanim_localsound_menu,

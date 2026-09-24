@@ -1953,7 +1953,11 @@ static void edpartChangeInstanceVarRot(eduimenu_s *, eduiitem_s *item, u32) {
 static __attribute__((optimize("O3"))) void edpartDeleteInstanceOrphan(eduimenu_s *menu, eduiitem_s *item, u32) {
     edpartRemoveInstance(edpart_nearest_type, item->data);
     --edpart_nearest_orphans;
-    edpartFinishMenu(menu);
+    eduimenu_s *parent = menu->parent;
+    if (parent)
+        eduiMenuDetach(menu);
+    if (menu->callback)
+        menu->callback(menu, parent);
 }
 
 static void edpartFileSaveEffectsLevel(eduimenu_s *parent, eduiitem_s *, u32) {
@@ -2189,7 +2193,11 @@ static void edpartCancelInstanceSettingsMenu(eduimenu_s *, eduimenu_s *) {
 static __attribute__((optimize("O3"))) void edpartDeleteAllInstanceDuplicates(eduimenu_s *menu, eduiitem_s *, u32) {
     for (i32 index = 0; index < 8; ++index) {
         i16 effect = edpart_nearest_type->effect_ids[index];
-        if (effect == 9999 || effect == -1 || effect == 9998)
+        if (effect == 9999)
+            continue;
+        if (effect == -1)
+            continue;
+        if (effect == 9998)
             continue;
         for (i32 previous = 0; previous < index; ++previous) {
             if (effect == edpart_nearest_type->effect_ids[previous]) {

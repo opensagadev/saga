@@ -467,7 +467,7 @@ eduimenu_s *antinodeEditor_Process(nupad_s *pad) {
                     selected->radius *= 1.01f;
             } else {
                 aieditorsettings.area_rotation = selected->flags;
-                if (pressed & ((held & 0x8000) ? 0x2000 : 0x8000))
+                if (pressed & ((held & 0x8000) ? 0x8000 : 0x2000))
                     antinode_rotation_repeat() = 20;
                 else
                     antinode_rotation_repeat() =

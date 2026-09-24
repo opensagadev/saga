@@ -10,6 +10,21 @@
 #include "nu2api/numath/numtx.h"
 
 struct nuinstanim_s;
+struct NuLegacyInstanceLayout {
+    u8 pad_00[0x44];
+    union {
+        u8 flags;
+        struct {
+            u8 visible : 1;
+            u8 on_screen : 1;
+            u8 unused_flag_2 : 1;
+            u8 no_visibility_test : 1;
+            u8 unused_flags_4_7 : 4;
+        };
+    };
+    u8 pad_45[3];
+    nuinstanim_s *animation;
+};
 struct NuSpecialLegacyLayout {
     u8 pad_00[0x40];
     void *instance;

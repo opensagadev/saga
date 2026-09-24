@@ -393,12 +393,17 @@ static __used__ __attribute__((optimize("no-tree-vectorize"))) void DestroyLocat
     NuLinkedListAppend(&aieditor->free_locators, &locator->link);
 }
 
-static __attribute__((noinline, optimize("no-tree-vectorize"))) unsigned int
+#if defined(__i386__)
+#define LOCATOR_SET_BODY_ATTR __attribute__((noinline, optimize("no-tree-vectorize"), regparm(2)))
+#else
+#define LOCATOR_SET_BODY_ATTR __attribute__((noinline, optimize("no-tree-vectorize")))
+#endif
+static LOCATOR_SET_BODY_ATTR unsigned int
 AddLocatorToSetBody(EDLOCATORSET_s *set, EDLOCATOR_s *locator,
                     EDLOCATOR_s *before) __asm__("_ZL15AddLocatorToSetP14EDLOCATORSET_sP11EDLOCATOR_sS2_.part.5");
 
-static __attribute__((noinline, optimize("no-tree-vectorize"))) unsigned int
-AddLocatorToSetBody(EDLOCATORSET_s *set, EDLOCATOR_s *locator, EDLOCATOR_s *before) {
+static LOCATOR_SET_BODY_ATTR unsigned int AddLocatorToSetBody(EDLOCATORSET_s *set, EDLOCATOR_s *locator,
+                                                              EDLOCATOR_s *before) {
     for (i32 index = 0; index < 64 && set->locators[index] != nullptr; ++index) {
         if (set->locators[index] == locator) {
             for (i32 move = index; move < 63; ++move) {
@@ -430,6 +435,7 @@ AddLocatorToSetBody(EDLOCATORSET_s *set, EDLOCATOR_s *locator, EDLOCATOR_s *befo
     }
     return 0;
 }
+#undef LOCATOR_SET_BODY_ATTR
 
 static __used__ unsigned int AddLocatorToSet(EDLOCATORSET_s *set, EDLOCATOR_s *locator, EDLOCATOR_s *before) {
     if (locator == nullptr || set == nullptr || set->locators[63] != nullptr) {

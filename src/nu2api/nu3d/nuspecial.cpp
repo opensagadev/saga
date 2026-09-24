@@ -12,24 +12,6 @@
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nuvec4.h"
 
-namespace {
-    struct NuLegacyInstanceLayout {
-        u8 pad_00[0x44];
-        union {
-            u8 flags;
-            struct {
-                u8 visible : 1;
-                u8 on_screen : 1;
-                u8 unused_flag_2 : 1;
-                u8 no_visibility_test : 1;
-                u8 unused_flags_4_7 : 4;
-            };
-        };
-        u8 pad_45[3];
-        nuinstanim_s *animation;
-    };
-} // namespace
-
 DECOMP_ASSERT(offsetof(NuSpecialLegacyLayout, instance) == 0x40, "legacy special instance offset");
 DECOMP_ASSERT(offsetof(NuSpecialLegacyLayout, name) == 0x44, "legacy special name offset");
 DECOMP_ASSERT(offsetof(NuSpecialLegacyLayout, flags) == 0x48, "legacy special flags offset");
