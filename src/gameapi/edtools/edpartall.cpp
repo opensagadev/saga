@@ -425,13 +425,15 @@ static void edpartCopyType(eduimenu_s *menu, eduiitem_s *, u32) {
                 part_type_s *source = &part_types[edpart_create_type];
                 part_type_s *copy = &part_types[index];
                 *copy = *source;
-                if (strlen(source->name) > 12) {
+                size_t name_length = strlen(source->name);
+                if (name_length <= 12) {
+                    sprintf(copy->name, "%s%03d", source->name, index);
+                } else {
                     char name[16];
-                    strcpy(name, source->name);
+                    memcpy(name, source->name, name_length + 1);
                     name[12] = '\0';
                     sprintf(copy->name, "%s%03d", name, index);
-                } else
-                    sprintf(copy->name, "%s%03d", source->name, index);
+                }
                 ++part_types_used;
                 edpart_create_type = index;
                 break;

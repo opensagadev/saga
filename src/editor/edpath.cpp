@@ -2321,7 +2321,7 @@ static EDAIPATHNODE_s *pathEditor_GetNearestNode(EDAIPATH_s *path, i32 require_r
              node = reinterpret_cast<EDAIPATHNODE_s *>(NuLinkedListGetNext(&path->nodes, &node->link))) {
             NUVEC delta;
             f32 distance = NuVecXZDistSqr(&aieditor->cursor_position, &node->position, &delta);
-            if (distance >= nearest_distance) {
+            if (!(nearest_distance > distance)) {
                 continue;
             }
             f32 height = aieditor->cursor_position.y - node->position.y;

@@ -561,11 +561,13 @@ static __attribute__((used)) void edanimcbParticleTypeMenu(eduimenu_s *parent, e
         if (!debtab[index]) {
             continue;
         }
-        const bool selected = edanim_particle_type == index;
-        eduiMenuAddItem(menu,
-                        eduiItemCheckCreate(index, colours, selected, 1, edanimcbSetParticleType, debtab[index]->name));
-        if (selected) {
+        if (edanim_particle_type == index) {
+            eduiMenuAddItem(menu,
+                            eduiItemCheckCreate(index, colours, 1, 1, edanimcbSetParticleType, debtab[index]->name));
             menu->selected = edui_last_item;
+        } else {
+            eduiMenuAddItem(menu,
+                            eduiItemCheckCreate(index, colours, 0, 1, edanimcbSetParticleType, debtab[index]->name));
         }
     }
 

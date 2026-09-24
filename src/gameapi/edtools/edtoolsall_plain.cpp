@@ -6305,13 +6305,19 @@ extern "C" {
         const bool button_highlighted = (property->unknown_property_flags & 8) || over_button;
         u8 *property_flags = reinterpret_cast<u8 *>(property) + 0x4c;
         *property_flags = (*property_flags & ~16u) | (button_highlighted ? 16u : 0u);
-        if (!edui_donotdraw) {
+        if (!edui_donotdraw)
             NuQFntSet(edui_font);
-            const u32 text_colour = item->unknown_10 == 1   ? 0xff000060
-                                    : item->unknown_10 == 2 ? 0xff006000
-                                    : item->unknown_10 == 3 ? 0xff600000
-                                                            : item->colours[item->highlighted];
-            NuQFntSetColour(edui_font, text_colour);
+        if (item->unknown_10 == 2) {
+            if (!edui_donotdraw)
+                NuQFntSetColour(edui_font, 0xff006000);
+        } else if (item->unknown_10 == 3) {
+            if (!edui_donotdraw)
+                NuQFntSetColour(edui_font, 0xff600000);
+        } else if (item->unknown_10 == 1) {
+            if (!edui_donotdraw)
+                NuQFntSetColour(edui_font, 0xff000060);
+        } else if (!edui_donotdraw) {
+            NuQFntSetColour(edui_font, item->colours[item->highlighted]);
         }
         const f32 row_height = NuQFntHeight(edui_font) * 1.25f * 0.125f;
         const i32 height = static_cast<i32>(row_height);

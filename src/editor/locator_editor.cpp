@@ -860,6 +860,18 @@ process_buttons:
         } else if ((pad->digital_buttons_pressed & 0x40) != 0 &&
                    *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(aieditor) + 0x48) != 0) {
             EDLOCATOR_s *previous = aieditor->current_locator;
+            char base[32];
+            if (aieditor->current_locator_set != nullptr && NuStrLen(aieditor->current_locator_set->name) != 0) {
+                NuStrCpy(base, aieditor->current_locator_set->name);
+            } else if (previous != nullptr) {
+                NuStrCpy(base, previous->name);
+            } else {
+                NuStrCpy(base, "Locator");
+            }
+            char *suffix = strrchr(base, '_');
+            if (suffix != nullptr) {
+                *suffix = 0;
+            }
             EDLOCATOR_s *locator = (EDLOCATOR_s *)NuLinkedListGetHead(&aieditor->free_locators);
             if (locator != nullptr) {
                 NuLinkedListRemove(&aieditor->free_locators, &locator->link);
@@ -869,18 +881,6 @@ process_buttons:
             }
             aieditor->current_locator = locator;
             if (locator != nullptr) {
-                char base[32];
-                if (aieditor->current_locator_set != nullptr && aieditor->current_locator_set->name[0] != 0) {
-                    NuStrCpy(base, aieditor->current_locator_set->name);
-                } else if (previous != nullptr) {
-                    NuStrCpy(base, previous->name);
-                } else {
-                    NuStrCpy(base, "Locator");
-                }
-                char *suffix = strrchr(base, '_');
-                if (suffix != nullptr) {
-                    *suffix = 0;
-                }
                 char name[16];
                 i32 index = 0;
                 EDLOCATOR_s *other;
