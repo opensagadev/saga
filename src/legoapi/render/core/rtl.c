@@ -644,9 +644,10 @@ extern "C" {
         NuRndrSetAmbientLightPS(reinterpret_cast<const NUCOLOUR3 *>(data->data + 0xc0));
     }
 
-    void rtlSetSpecularLight(rtlidata_s *data) {
-        if (data->specular_value > 0.0f)
-            NuRndrSetSpecularLight(&data->field_134, NULL);
+    void rtlSetSpecularLight(rtldata_s *data) {
+        rtlidata_s *record = reinterpret_cast<rtlidata_s *>(data);
+        if (record->specular_value > 0.0f)
+            NuRndrSetSpecularLight(&record->field_134, NULL);
     }
 }
 
@@ -757,13 +758,13 @@ static __used__ rtl_s *GetNextRTL(void *set, rtl_s *light, char *indices, int *i
 }
 
 extern "C" {
-    f32 rtlSpecularValue(rtlidata_s *data) {
-        return data != NULL ? data->specular_value : 0.0f;
+    f32 rtlSpecularValue(rtldata_s *data) {
+        return data != NULL ? reinterpret_cast<rtlidata_s *>(data)->specular_value : 0.0f;
     }
 
-    void rtlSetSpecularValue(rtlidata_s *data, f32 value) {
+    void rtlSetSpecularValue(rtldata_s *data, f32 value) {
         if (data != NULL)
-            data->specular_value = value;
+            reinterpret_cast<rtlidata_s *>(data)->specular_value = value;
     }
 }
 

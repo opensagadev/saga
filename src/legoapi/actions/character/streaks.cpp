@@ -320,7 +320,7 @@ void AddStreakPoints(nuvec_s *points, float duration, u32 colour, void **handle,
             streakhdrs_used->prev = header;
         header->prev = NULL;
         header->streaks = NULL;
-        header->owner_slot = reinterpret_cast<STREAKHDR_s **>(handle);
+        header->owner_slot = handle;
         *handle = header;
         streakhdrs_used = header;
         header->colour = colour;

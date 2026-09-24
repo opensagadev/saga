@@ -919,31 +919,12 @@ extern "C" {
             return 0;
         }
 
-        NUMTX wind_matrix;
-        if (special->wind_speed != 0) {
-            WindShear(&wind_matrix, mtx, special->wind_scale, special->wind_speed);
-            mtx = &wind_matrix;
-        }
-
         NUDLDLISTSCENE *scene = reinterpret_cast<NUDLDLISTSCENE *>(handle->scene->display_list);
         i32 clip_state = nuspecial_clip_state;
         if (clip_state == -1) {
             clip_state = NuCameraClipTestExtents(&special->min, &special->max, mtx, 0.0f, 0);
         }
-
-        i32 had_shadow_clip_results = 0;
-        i32 shadow_clip = 0;
-        if ((scene->visibility_flags[special->instance_ix] & 0x20) != 0 && NuSpecialHasActiveShadowLights() != 0) {
-            had_shadow_clip_results = NuSpecialHaveShadowClipTestResults();
-            NUVEC shadow_min;
-            NUVEC shadow_max;
-            NuVecMtxTransform(&shadow_min, &special->min, mtx);
-            NuVecMtxTransform(&shadow_max, &special->max, mtx);
-            shadow_clip = NuSpecialClipTestShadowLights(&shadow_min, &shadow_max, 0);
-        }
-        if ((clip_state | shadow_clip) == 0) {
-            if (had_shadow_clip_results == 0)
-                NuSpecialClearShadowClipTestResults();
+        if (clip_state == 0) {
             return 0;
         }
 
@@ -958,15 +939,10 @@ extern "C" {
         }
 
         NUCLIPOBJECT *clip_object = special->clip_objects;
-        if (special->clip_range[0] != 0.0f) {
+        if (special->clip_range != NULL && special->clip_range[0] != 0.0f) {
             i32 lod = 0;
-            if (nurndr_force_lod != 0) {
-                do {
-                    ++lod;
-                } while (lod != nurndr_force_lod && special->clip_range[lod] != 0.0f);
-            } else {
-                while (special->clip_range[lod] > distance_sqr)
-                    ++lod;
+            while (distance_sqr < special->clip_range[lod]) {
+                ++lod;
             }
             clip_object += lod;
         }
@@ -1001,155 +977,67 @@ extern "C" {
             u32 material_index = material_indices[i];
             NUDISPLAYLISTITEM *geometry = scene->items + item_indices[i];
 
-            NUMTL *material = scene->mtls[material_index];
-            const u8 forced_index = reinterpret_cast<u8 *>(material)[0x9a];
-            NUMTL *forced_material;
-            if (nurndr_forced_mtl_table != NULL && forced_index != 0)
-                forced_material = nurndr_forced_mtl_table[forced_index];
-            else
-                forced_material = nurndr_forced_mtl;
-            if (forced_material != NULL) {
-                if (material->shader_desc.vtx_desc.flags == forced_material->shader_desc.vtx_desc.flags)
-                    material = forced_material;
-                else
-                    material = NuMtlFindVariantMtl(material, forced_material);
-                if (material == NULL)
-                    continue;
-            }
-
             // A clip entry names the head of a material-variant chain. The
             // original submits every material linked through NUMTL::next.
-            for (; material != NULL; material = material->next) {
+            for (NUMTL *material = scene->mtls[material_index]; material != NULL; material = material->next) {
                 NUDISPLAYLIST *list = material->display_list;
                 if (list == NULL) {
                     continue;
                 }
 
-                if (clip_state != 0) {
-                    scene->flags |= NUDL_SCENE_FLAG_CLIP_MATERIALS;
-                    const i32 used_material = list->mtl_id;
-                    u8 *used = scene->mtl_used[scene->render_buffer >> 7];
-                    used[used_material >> 3] |= static_cast<u8>(1U << (used_material & 7));
+                scene->flags |= NUDL_SCENE_FLAG_CLIP_MATERIALS;
+                const i32 used_material = list->mtl_id;
+                u8 *used = scene->mtl_used[scene->render_buffer >> 7];
+                used[used_material >> 3] |= static_cast<u8>(1U << (used_material & 7));
 
-                    RndrStateSetConstAlphaTint(nuspecial_const_alpha_enabled, nuspecial_const_tint_enabled,
-                                               nuspecial_const_alpha, &nuspecial_const_tint, material);
-                    DisplayListUpdateRenderState(list, &render_state);
+                RndrStateSetConstAlphaTint(nuspecial_const_alpha_enabled, nuspecial_const_tint_enabled,
+                                           nuspecial_const_alpha, &nuspecial_const_tint, material);
+                DisplayListUpdateRenderState(list, &render_state);
 
-                    const i32 shadow_caster =
-                        (scene->visibility_flags[special->instance_ix] & 0x20) != 0 && nuspecial_reflection == 0;
-                    if (geometry->type == 0x8f) {
+                if (geometry->type == 0x8f) {
                     VARIPTR *buffer = NuDisplayListLinkItems(list, 2);
                     NUDISPLAYLISTITEM *items = list->items;
                     items[0].type = 0x90;
                     items[0].id = 3;
-                    items[0].next = DisplayListCreateFaceonTransformPS(
-                        buffer, mtx, list->dlist->mtls[list->mtl_id], geometry->next);
+                    items[0].next = DisplayListCreateFaceonTransformPS(buffer, mtx, material, geometry->next);
                     items[1].type = 0x8f;
                     items[1].id = 3;
                     items[1].next = NuDisplayListPrepareFaceonPS(buffer, geometry->next, mtx);
                     list->items = items + 2;
                     DisplayListSetAlphaPS(items, items + 1, distance_alpha);
-                    } else if (skin_matrices != NULL) {
+                } else if (skin_matrices != NULL) {
                     NUDISPLAYLISTITEM *first_and_last[2];
+                    i32 shadow_caster = 0;
+                    if ((scene->visibility_flags[special->instance_ix] & 0x20) != 0 && nuspecial_reflection == 0) {
+                        shadow_caster = 1;
+                    }
                     DisplayListProcessSkin(material, list, geometry, first_and_last, mtx, &transform_packet,
                                            skin_matrices, blend_values, shadow_caster);
-                    } else {
+                } else {
                     const isize geometry_index = geometry - scene->items;
                     const bool has_lightmap_command =
                         geometry_index > 1 &&
                         (geometry[-2].type == 0xae || geometry[-2].type == 0xaf || geometry[-2].type == 0xb0);
-                        if (static_cast<i32>(material->shader_desc.flags) < 0 && has_lightmap_command) {
+                    if (static_cast<i32>(material->shader_desc.flags) < 0 && has_lightmap_command) {
                         NUDISPLAYLISTITEM *first_and_last[3];
                         DisplayListProcessLightmapped(material, list, geometry, first_and_last, mtx, &transform_packet,
                                                       distance_alpha);
-                        } else {
+                    } else {
                         VARIPTR *buffer = NuDisplayListLinkItems(list, 2);
                         NUDISPLAYLISTITEM *items = list->items;
                         items[0].type = 0x8c;
                         items[0].id = 3;
-                        transform_packet = DisplayListCreateGeomTransformPS(
-                            buffer, mtx, list->dlist->mtls[list->mtl_id], geometry->next, transform_packet);
-                        items[0].next = transform_packet;
+                        items[0].next = DisplayListCreateGeomTransformPS(buffer, mtx, material, geometry->next, NULL);
                         items[1].type = 0x82;
                         items[1].id = 3;
                         items[1].next = geometry->next;
                         list->items = items + 2;
                         DisplayListSetAlphaPS(items, items + 1, distance_alpha);
-                        DisplayListSetShadowCasterFlagPS(items, items + 1, shadow_caster);
-                        }
-                    }
-                }
-
-                if (shadow_clip != 0 && nuspecial_reflection == 0) {
-                    const i32 shadow_light_count = NuSpecialGetActiveShadowLights();
-                    for (i32 light_index = 0; light_index < shadow_light_count; ++light_index) {
-                        NuDynamicLight *light = static_cast<NuDynamicLight *>(NuSpecialGetShadowLight(light_index));
-                        const i32 render_set_count = NuDynamicLightGetActiveRenderSetCount(light);
-                        const i32 render_set_mask = NuSpecialGetShadowClipTestResult(light_index);
-                        for (i32 render_set = 0; render_set < render_set_count; ++render_set) {
-                            if ((render_set_mask & (1 << render_set)) == 0)
-                                continue;
-
-                            NUDISPLAYLIST *shadow_list = NuDynamicLightGetDList(light, render_set, material);
-                            shadow_list->dlist = scene;
-                            NuDisplayListLinkItems(shadow_list, 1);
-                            NUDISPLAYLISTITEM *material_item = shadow_list->items;
-                            material_item->type = 0x80;
-                            material_item->id = 3;
-                            material_item->next = material;
-                            shadow_list->items = material_item + 1;
-                            DisplayListUpdateRenderStateShadow(shadow_list, &render_state.state);
-
-                            if (geometry->type == 0x8f) {
-                                VARIPTR *buffer = NuDisplayListLinkItems(shadow_list, 2);
-                                NUDISPLAYLISTITEM *items = shadow_list->items;
-                                items[0].type = 0x90;
-                                items[0].id = 3;
-                                items[0].next = DisplayListCreateFaceonTransformPS(
-                                    buffer, mtx, shadow_list->dlist->mtls[shadow_list->mtl_id], geometry->next);
-                                items[1].type = 0x8f;
-                                items[1].id = 3;
-                                items[1].next = NuDisplayListPrepareFaceonPS(buffer, geometry->next, mtx);
-                                shadow_list->items = items + 2;
-                                DisplayListSetAlphaPS(items, items + 1, distance_alpha);
-                            } else if (skin_matrices != NULL) {
-                                NUDISPLAYLISTITEM *first_and_last[2];
-                                DisplayListProcessSkin(material, shadow_list, geometry, first_and_last, mtx,
-                                                       &transform_packet, skin_matrices, blend_values, 1);
-                            } else {
-                                const isize geometry_index = geometry - scene->items;
-                                const bool has_lightmap_command =
-                                    geometry_index > 1 && (geometry[-2].type == 0xae || geometry[-2].type == 0xaf ||
-                                                           geometry[-2].type == 0xb0);
-                                if (static_cast<i32>(material->shader_desc.flags) < 0 && has_lightmap_command) {
-                                    NUDISPLAYLISTITEM *first_and_last[3];
-                                    DisplayListProcessLightmapped(material, shadow_list, geometry, first_and_last, mtx,
-                                                                  &transform_packet, distance_alpha);
-                                } else {
-                                    VARIPTR *buffer = NuDisplayListLinkItems(shadow_list, 2);
-                                    NUDISPLAYLISTITEM *items = shadow_list->items;
-                                    items[0].type = 0x8c;
-                                    items[0].id = 3;
-                                    transform_packet = DisplayListCreateGeomTransformPS(
-                                        buffer, mtx, shadow_list->dlist->mtls[shadow_list->mtl_id], geometry->next,
-                                        transform_packet);
-                                    items[0].next = transform_packet;
-                                    items[1].type = 0x82;
-                                    items[1].id = 3;
-                                    items[1].next = geometry->next;
-                                    shadow_list->items = items + 2;
-                                    DisplayListSetAlphaPS(items, items + 1, distance_alpha);
-                                    DisplayListSetShadowCasterFlagPS(items, items + 1, 1);
-                                }
-                            }
-                        }
                     }
                 }
             }
         }
         RndrStateSetConstAlphaTint(0, 0, 0.0f, NULL, NULL);
-        if (had_shadow_clip_results == 0)
-            NuSpecialClearShadowClipTestResults();
         return clip_state;
     }
     void DisplayListSetFxItemParamPS(void *item, i32 parameter, f32 value, i32 mode);
@@ -3023,9 +2911,8 @@ extern "C" {
     i32 NuDynamicLightGetActiveRenderSetCount(NuDynamicLight *light) {
         return light->active_render_set_count;
     }
-    NUDISPLAYLIST *NuDynamicLightGetDList(NuDynamicLight *light, i32 render_set, NUMTL *material) {
-        i32 list_index = reinterpret_cast<u8 *>(material)[0x268] != 0 ? 1 : 0;
-        return &light->render_sets[render_set].display_lists[list_index];
+    void NuDynamicLightGetDList(void) {
+        STUBBED();
     }
     f32 NuDynamicLightGetParameterf(NuDynamicLight *light, i32 parameter) {
         switch (parameter) {
@@ -4034,54 +3921,43 @@ extern "C" {
         }
 
         i16 candidate_count = 0;
-        NUROOM *rooms = scene->rooms;
-        for (i32 room_index = 0; room_index < scene->num_rooms; room_index++, rooms++) {
-            u8 plane_count = rooms->plane_count;
-            i16 room_id = static_cast<i16>(room_index);
+        for (i32 room_index = 0; room_index < scene->num_rooms; ++room_index) {
+            NUROOM *room = &scene->rooms[room_index];
             f32 plane_distance = 0.0f;
-            NUPLANE *plane = rooms->planes;
-            if (plane_count != 0) {
+            i32 plane_count = room->plane_count;
+            NUPLANE *plane = room->planes;
+            while (plane_count != 0) {
                 plane_distance = plane->a * position->x + plane->b * position->y + plane->c * position->z + plane->d;
-                if (plane_distance <= 0.0f) {
-                    plane_count--;
-                    while (plane_count != 0) {
-                        plane++;
-                        plane_distance = plane->a * position->x + plane->b * position->y +
-                                         plane->c * position->z + plane->d;
-                        if (plane_distance > 0.0f) {
-                            break;
-                        }
-                        plane_count--;
-                    }
+                if (plane_distance > 0.0f) {
+                    break;
                 }
+                ++plane;
+                --plane_count;
             }
             if (plane_distance > 0.0f) {
                 continue;
             }
 
             if (candidate_count == 2) {
-                NUROOM *first = &scene->rooms[candidates[0]];
-                NUROOM *second = &scene->rooms[candidates[1]];
-                if (first->priority < second->priority) {
-                    candidates[0] = room_id;
+                NUROOM &first = scene->rooms[candidates[0]];
+                NUROOM &second = scene->rooms[candidates[1]];
+                if (first.priority < second.priority) {
+                    candidates[0] = static_cast<i16>(room_index);
                 } else {
-                    candidates[1] = room_id;
+                    candidates[1] = static_cast<i16>(room_index);
                 }
                 candidate_count = 3;
                 continue;
             }
 
-            candidates[candidate_count] = room_id;
-            candidate_count++;
+            candidates[candidate_count++] = static_cast<i16>(room_index);
             if (candidate_count != 2) {
                 continue;
             }
-            NUROOM *first = &scene->rooms[candidates[0]];
-            NUROOM *second = &scene->rooms[candidates[1]];
-            if ((first->flags & NUROOM_FLAG_OVERLAPPING) != 0) {
-                continue;
-            }
-            if ((second->flags & NUROOM_FLAG_OVERLAPPING) != 0) {
+
+            NUROOM &first = scene->rooms[candidates[0]];
+            NUROOM &second = scene->rooms[candidates[1]];
+            if ((first.flags & NUROOM_FLAG_OVERLAPPING) != 0 || (second.flags & NUROOM_FLAG_OVERLAPPING) != 0) {
                 continue;
             }
             break;
@@ -4094,17 +3970,19 @@ extern "C" {
             return -1;
         }
 
-        NUROOM *first = &scene->rooms[candidates[0]];
-        NUROOM *second = &scene->rooms[candidates[1]];
-        for (i32 first_portal = 0; first_portal < first->portal_count; first_portal++) {
-            i16 portal_index = first->portal_indices[first_portal];
-            for (i32 second_portal = 0; second_portal < second->portal_count; second_portal++) {
-                if (second->portal_indices[second_portal] == portal_index) {
-                    NUPORTAL *portal = &scene->portals[portal_index];
-                    f32 side = portal->plane.a * position->x + portal->plane.b * position->y +
-                               portal->plane.c * position->z + portal->plane.d;
-                    return side < 0.0f ? portal->front_room : portal->back_room;
+        NUROOM &first = scene->rooms[candidates[0]];
+        NUROOM &second = scene->rooms[candidates[1]];
+        for (i32 first_portal = 0; first_portal < first.portal_count; ++first_portal) {
+            const i16 portal_index = first.portal_indices[first_portal];
+            for (i32 second_portal = 0; second_portal < second.portal_count; ++second_portal) {
+                if (second.portal_indices[second_portal] != portal_index) {
+                    continue;
                 }
+
+                const NUPORTAL &portal = scene->portals[portal_index];
+                const f32 side = portal.plane.a * position->x + portal.plane.b * position->y +
+                                 portal.plane.c * position->z + portal.plane.d;
+                return side < 0.0f ? portal.front_room : portal.back_room;
             }
         }
         return -1;

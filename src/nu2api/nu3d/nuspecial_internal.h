@@ -35,8 +35,8 @@ struct NuSpecialBoundsDisplayLayout {
     f32 *clip_range;
     i32 instance_ix;
     nuinstanim_s *instance_animation;
-    i16 wind_scale;
     i16 wind_speed;
+    i16 wind_scale;
     u32 pad_cc;
 };
 

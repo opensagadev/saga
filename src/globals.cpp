@@ -1470,5 +1470,3 @@ i32 NetPaused = 0;
 f32 mtl_animation_speed_scale = 1.0f;
 u16 script_mask = 0xffff;
 i32 (*GizObstacle_CheckExcludeFlagsFn)(GIZOBSTACLE_s *, GameObject_s *) = NULL;
-HUBMINIKITPIECES_s **Char_MiniKit = NULL;
-VARIPTR CharacterMiniKits_permbuffer_base = {0};

@@ -555,14 +555,14 @@ void GizmoBlowupTypeRemove(GIZMOBLOWUPTYPE_s *type, WORLDINFO_s *world) {
     }
 
     GIZMOBLOWUPTYPE_s *types = world->gizmo_blowup_types;
-    GIZMOBLOWUPTYPE_s *capacity_end = types + world->current_level->max_gizmo_blowup_types;
-    if (type < types || type > capacity_end) {
+    GIZMOBLOWUPTYPE_s *active_end = types + world->gizmo_blowup_type_count;
+    if (type < types || type >= active_end) {
         return;
     }
 
-    GIZMOBLOWUPTYPE_s *last_capacity_type = capacity_end - 1;
-    if (type < last_capacity_type && last_capacity_type >= type + 1) {
-        for (GIZMOBLOWUPTYPE_s *moved_type = type + 1; moved_type <= last_capacity_type; ++moved_type) {
+    GIZMOBLOWUPTYPE_s *last_type = active_end - 1;
+    if (type < last_type) {
+        for (GIZMOBLOWUPTYPE_s *moved_type = type + 1; moved_type <= last_type; ++moved_type) {
             for (i32 index = 0; index < world->gizmo_blowup_count; ++index) {
                 if (world->gizmo_blowups[index].type == moved_type) {
                     world->gizmo_blowups[index].type = moved_type - 1;
@@ -570,9 +570,6 @@ void GizmoBlowupTypeRemove(GIZMOBLOWUPTYPE_s *type, WORLDINFO_s *world) {
             }
         }
     }
-    asm volatile("" ::: "memory");
-
-    GIZMOBLOWUPTYPE_s *last_type = types + world->gizmo_blowup_type_count - 1;
     while (type != last_type) {
         *type = *(type + 1);
         ++type;
@@ -1742,7 +1739,7 @@ static void Blowups_Reset(void *world_ptr, void *, void *progress_ptr) {
 
             if (index <= 511 && has_progress) {
                 u32 bit = 1;
-                bit <<= index;
+                bit <<= (index & 31);
                 const i32 word = index >> 5;
 
                 const u8 blown_up = (progress->blown_up[word] & bit) != 0;

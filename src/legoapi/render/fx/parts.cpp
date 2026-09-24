@@ -418,11 +418,11 @@ static void PartCollide(PART_s *part, i32 three_dimensional) {
     }
 }
 
-static void TiePart_Kill(PART_s *part, i32) {
+static __used__ void TiePart_Kill(PART_s *part, i32) {
     AddGameDebris(WORLD->debris_sys, 0x6a, &part->position);
 }
 
-static void TiePart_Move(PART_s *part, f32 time) {
+static __used__ void TiePart_Move(PART_s *part, f32 time) {
     part->field_124[3] = -32768;
     part->field_13c = static_cast<i32>(-32768.0f * FRAMETIME);
     NUVEC position;
@@ -436,16 +436,16 @@ static void TiePart_Move(PART_s *part, f32 time) {
     AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[100].effect, &position, 10, FRAMETIME, 0, 0, NULL);
 }
 
-static void TiePart_Impact(PART_s *part) {
+static __used__ void TiePart_Impact(PART_s *part) {
     AddGameDebris(WORLD->debris_sys, 0x6a, &part->position);
 }
 
-static void TiePart_KillExplode(PART_s *part, i32) {
+static __used__ void TiePart_KillExplode(PART_s *part, i32) {
     AddGameDebris(WORLD->debris_sys, 0x6b, &part->position);
     AddPartDebris(WORLD->part_debris_sys, 3, &part->position);
 }
 
-static void TieSpinZPart_Move(PART_s *part, f32 time) {
+static __used__ void TieSpinZPart_Move(PART_s *part, f32 time) {
     static NUVEC vec = {0.0f, 0.0f, -0.05f};
     part->field_124[3] = 200000;
     part->field_13c = static_cast<i32>(200000.0f * FRAMETIME);
@@ -616,8 +616,6 @@ DECOMP_ASSERT(offsetof(BIKEPART_s, rider_position) == 0x28, "BIKEPART rider posi
 static BIKEPART_s bikeParts[8];
 
 void KillParts(GameObject_s *, i32, i32, i32, f32, i32, u16 *);
-void KillParts_TIEFIGHTER(ADDPART_s *, i32, i32, GameObject_s *, i32, u16, u16, NUVEC *);
-void KillParts_ATAT(ADDPART_s *, i32, i32, GameObject_s *);
 void KillParts_SpeederBike(ADDPART_s *, i32, i32, GameObject_s *);
 static i32 SpeederPart_Draw(PART_s *);
 static void SpeederPart_Kill(PART_s *, i32);
@@ -683,7 +681,7 @@ static __used__ i32 SpeederPart_Draw(PART_s *) {
     return 1;
 }
 
-static void SpeederPart_Kill(PART_s *part, i32) {
+static __used__ void SpeederPart_Kill(PART_s *part, i32) {
     AddGameDebris(WORLD->debris_sys, 0x6a, &part->position);
     if (part->speeder_index != -1.0f) {
         GameObject_s *rider = bikeParts[static_cast<i32>(part->speeder_index)].rider;
@@ -696,7 +694,7 @@ static void SpeederPart_Kill(PART_s *part, i32) {
     }
 }
 
-static void SpeederPart_Update(PART_s *part) {
+static __used__ void SpeederPart_Update(PART_s *part) {
     f32 time = part->field_100 / part->field_104;
     f32 distance = Player[0]->apiobj.horizontal_velocity_magnitude * FRAMETIME * 1.1f;
     BIKEPART_s *bike = &bikeParts[static_cast<i32>(part->speeder_index)];
@@ -3559,6 +3557,8 @@ void KillParts(GameObject_s *object, i32 animation, i32 excluded_layer, i32 mode
     extern i16 id_TRAININGREMOTE;
     extern HUBMINIKITPIECES_s **Char_MiniKit;
     if ((character->model_flags & 0x04000000) != 0 && object->id != id_TRAININGREMOTE) {
+        if (Char_MiniKit == NULL || object->id < 0 || object->id >= CHARCOUNT)
+            return;
         HUBMINIKITPIECES_s *pieces = Char_MiniKit[object->id];
         if (pieces == NULL || pieces->piece_count == 0)
             return;
@@ -3667,12 +3667,7 @@ void KillParts(GameObject_s *object, i32 animation, i32 excluded_layer, i32 mode
             params.special = special;
             params.lighting = Cheats_CheckFlags(1) ? reinterpret_cast<PARTLIGHTSOURCE_s *>(ZeroRTL)
                                                    : reinterpret_cast<PARTLIGHTSOURCE_s *>(&object->light_data);
-            if (object->id == id_TIEFIGHTER) {
-                KillParts_TIEFIGHTER(&params, part_index, mode, object, random_variant, random_rotation_a,
-                                     random_rotation_b, &momentum);
-            } else if (object->id == id_ATAT) {
-                KillParts_ATAT(&params, part_index, mode, object);
-            } else if (object->id == id_SPEEDERBIKE) {
+            if (object->id == id_SPEEDERBIKE) {
                 KillParts_SpeederBike(&params, part_index, mode, object);
             } else {
                 params.flags = mode < 1 ? 0x480 : 0x90;

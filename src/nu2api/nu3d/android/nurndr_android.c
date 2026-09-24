@@ -668,6 +668,7 @@ void NuIOSDLLightsCallback(void *arg) {
     NuVec4Add(&average_direction, &lights->light_direction[0], &lights->light_direction[1]);
     NuVec4Add(&average_direction, &average_direction, &lights->light_direction[2]);
     NuVecNorm(reinterpret_cast<NUVEC *>(&average_direction), reinterpret_cast<NUVEC *>(&average_direction));
+    average_direction.w = 1.0f;
     NuShaderManagerSetfv(0x4e, &average_direction.x);
 
     NUVEC4 average_colour;

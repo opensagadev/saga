@@ -46,7 +46,6 @@ static_assert(sizeof(BLOCKADERUNNERD_LEVFLAG_s) == 0x10, "LevFlag size");
 extern BLOCKADERUNNERD_LEVFLAG_s LevFlag;
 i32 test_tb = 1;
 
-
 // Episode 4 level handlers, in the game's Episode_IV progression:
 // blockade runner / tatooine / mos eisley / death star rescue / escape /
 // battle.
@@ -399,6 +398,10 @@ void DeathStarEscapeB_AlwaysUpdate(WORLDINFO_s *) {
         else if (DEATHSTARESCAPEC_LDATA != NULL && socket_position.location.sock > 6)
             other_level_override = DEATHSTARESCAPEC_LDATA->idx;
     }
+}
+
+void KillParts_TIEFIGHTER(ADDPART_s *, i32, i32, GameObject_s *, i32, u16, u16, nuvec_s *) {
+    STUBBED();
 }
 
 // ===========================================================================

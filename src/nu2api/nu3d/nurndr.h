@@ -110,8 +110,6 @@ extern "C" {
     extern i32 global_GobjWasDrawnUnreflected;
     extern f32 global_windspeed;
     extern f32 global_windscale;
-    i32 NuRndrGlobalFrameCount(void);
-    void WindShear(NUMTX *destination, NUMTX *source, i32 scale, i32 seed);
     i32 NuRndrWasDrawnUnreflectedGobj(void);
     void NuRndrStartShadowReceiveRender(void);
     void NuRndrEndShadowReceiveRender(void);

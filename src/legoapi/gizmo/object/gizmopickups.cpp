@@ -14,7 +14,6 @@
 #include "legoapi/menus/core/gamemessages.h"
 #include "legoapi/menus/core/panel.h"
 #include "legoapi/menus/screens/arcade.h"
-#include "legoapi/render/fx/parts.h"
 #include "legoapi/world/world.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/mission.h"
@@ -31,6 +30,7 @@ void MakePartVector(NUVEC *, NUVEC *, f32);
 void AddCoinsAsParts(i32, NUVEC *, NUVEC *, f32, f32);
 void AddHeartAsPart(GameObject_s *, NUVEC *, NUVEC *, f32, f32);
 void AddTorpedoAsPart(NUVEC *, NUVEC *, f32, f32);
+void PowerUp_AddPart(NUVEC *, NUVEC *, f32, f32);
 i32 GetRandomCoinType() {
     i32 random_value = qrand();
     if (random_value < 0) {

@@ -217,8 +217,11 @@ void Customiser_DrawAccessories(CUSTOMISER *, GameObject_s *, numtx_s *) {
 }
 
 void Customiser_AddPartAccessories(CUSTOMISER *customiser, GameObject_s *object, i32 animation, i32 mode, float scale) {
-    const i32 joint = static_cast<i8>(object->apiobj.character_data->player_config->unknown_110[1]);
-    if (customiser == NULL || joint == -1 || object->apiobj.character_model->points_of_interest[joint] == NULL)
+    if (customiser == NULL || object == NULL || object->apiobj.character_data == NULL ||
+        object->apiobj.character_data->player_config == NULL || object->apiobj.character_model == NULL)
+        return;
+    const i32 joint = object->apiobj.character_data->player_config->helmet_locator;
+    if (joint == -1 || object->apiobj.character_model->points_of_interest[joint] == NULL)
         return;
 
     const i32 side = object->id != customiser->character_ids[0];

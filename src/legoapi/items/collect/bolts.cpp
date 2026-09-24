@@ -1607,8 +1607,8 @@ void BoltTypes_Init(WORLDINFO_s *world) {
             }
         }
 
-        if (type->field_2c_lo != -1) {
-            type->specials.shadow_special = world->lev_objs[type->field_2c_lo].special;
+        if (type->shadow_object_id != -1) {
+            type->specials.shadow_special = world->lev_objs[type->shadow_object_id].special;
         }
     }
 }
@@ -1825,7 +1825,7 @@ i8 BoltType_FindIDByName(char *name, WORLDINFO *world) {
         if (NuStrICmp(name, world->bolt_types[i].name) == 0)
             return BoltSys->count + i;
     }
-    for (i32 i = BoltSys->count + 7; i >= 0; --i) {
+    for (i32 i = BoltSys->count - 1; i >= 0; --i) {
         if (NuStrICmp(name, BoltSys->types[i].name) == 0)
             return i;
     }

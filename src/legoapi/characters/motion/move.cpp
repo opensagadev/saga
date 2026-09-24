@@ -625,16 +625,6 @@ static void ShootThisFrame(GameObject_s *, i32, i32);
 static void FireCode(GameObject_s *, i32, i32, f32, i32);
 static void AwkwardShapeCode(GameObject_s *, i32);
 f32 FindGunshipHoverHeight(GameObject_s *);
-f32 GetVehicleHoverHeight(GameObject_s *, f32 *);
-void TurnCode(GameObject_s *, i32, GAMEPAD_s *);
-void LoopCode(GameObject_s *, i32, i32, GAMEPAD_s *, i32);
-void StartTurn(GameObject_s *);
-i32 UnderPlayerControl(GameObject_s *);
-void DisorientateCode(GameObject_s *, NUVEC *, f32);
-void CatchUpCode(GameObject_s *, f32, f32, i32);
-void EngineNoiseCode(GameObject_s *, i32);
-void Buck_MoveCode(GameObject_s *, i32);
-static i32 getvehiclehoverheight_hothbattlehack;
 void Move_VEHICLE(GameObject_s *);
 void CableCode(GameObject_s *, i32, f32);
 void KillParts(GameObject_s *, i32, i32, i32, f32, i32, u16 *);
@@ -6707,12 +6697,12 @@ static __used__ void MakeWingFormation(_vuv_s *, _vuv_s *, f32, i32) {
     STUBBED();
 }
 
-void AtatPart_Stop(PART_s *part) {
+static __used__ void AtatPart_Stop(PART_s *part) {
     PlaySfx("EXPLODE1", &part->position);
     PartStop_Flickerer(part);
 }
 
-void AtatPart_Update(PART_s *part) {
+static __used__ void AtatPart_Update(PART_s *part) {
     f32 choice = NuFloatRand(reinterpret_cast<NURAND *>(&GAMERAND)) * 100.0f + 1.0f;
     if (part->scale_time < 1.0f) {
         AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[118].effect, &part->position,

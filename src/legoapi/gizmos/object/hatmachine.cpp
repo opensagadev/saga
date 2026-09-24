@@ -37,6 +37,7 @@
 static const NUVEC HatMachine_HatOffset = {0.0f, 0.3f, 0.0f};
 
 extern u8 show_hatmachine_hint;
+extern i32 editor_active;
 extern "C" i16 id_PRINCESSLEIABOUSHH;
 void LoseHelmet(GameObject_s *, i32, i32);
 void FastWeaponIn(GameObject_s *, i32);

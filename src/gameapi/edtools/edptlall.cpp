@@ -32,7 +32,6 @@ extern "C" {
     void DebFreeInstantly(i32 *handle);
     void DebReAlloc(debkeydatatype_s *key, i32 particle_count);
     void DebrisSetDetailLevels(i32 handle, i32 detail_levels);
-    i32 LookupDebrisEffectPage(char *name, i32 page);
     void edppDeleteEffect(i32 index);
     i32 edppLoadPage(char *path, i32 flag, usize scene);
     void eduiCreateMessageMenu(eduimenu_s *parent, char *message, i32 highlighted);
