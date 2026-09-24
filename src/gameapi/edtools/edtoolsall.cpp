@@ -6564,7 +6564,7 @@ static void set_manipulator_attribute(ClassObjectListEntry *entry, i32 attribute
         member.reference->SetAttributeData(member.object, attribute, type, data, 0);
 }
 
-i32 EdManMove::Process(EdInputContext &input, ClassObjectList &selected) {
+__attribute__((force_align_arg_pointer)) i32 EdManMove::Process(EdInputContext &input, ClassObjectList &selected) {
     EdManipulator::Process(input, selected);
     VuVec average;
     if (selected.GetAveragePosition(average) == 0)

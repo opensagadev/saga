@@ -1104,7 +1104,11 @@ void ClassEditor::UpdateSelectedObjects(EdInputContext &input) {
         ClassObjectListEntry *next_entry = entry->next;
         EdClassInterface *interface = entry->ed_class->interface;
         void *object = interface->vtable->get_next_object(interface, NULL);
-        while (object != NULL && object != entry->object) {
+        for (;;) {
+            if (object == NULL)
+                break;
+            if (object == entry->object)
+                break;
             object = interface->vtable->get_next_object(interface, object);
         }
         if (object == NULL) {

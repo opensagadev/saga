@@ -6429,8 +6429,8 @@ extern "C" {
         property->button_x = static_cast<f32>(x + scale) - (2.0f + property->button_size);
         property->button_y = static_cast<f32>(y) + 2.0f;
         if (!edui_donotdraw) {
-            for (eduimenu_s *ancestor = menu; ancestor; ancestor = ancestor->parent) {
-                if (ancestor == eduiGetActiveMenu()) {
+            for (eduimenu_s *descendant = menu; descendant; descendant = descendant->child) {
+                if (descendant == eduiGetActiveMenu()) {
                     NuRndrRect2di(x << 4, y << 3, scale << 4, static_cast<i32>(row_height * 8.0f),
                                   item->colours[2 + item->highlighted], uimtls[ui_bgmtl]);
                     break;

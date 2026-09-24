@@ -895,7 +895,8 @@ extern "C" {
         return 1;
     }
 
-    void aieditor_SetCurrentScript(char *name, const AIEditorScriptSelection *selection) {
+    __attribute__((force_align_arg_pointer)) void aieditor_SetCurrentScript(char *name,
+                                                                            const AIEditorScriptSelection *selection) {
         if (NuStrICmp(name, aieditorsettings.current_script_name) != 0) {
             strcpy(aieditorsettings.current_script_name, name);
         }
