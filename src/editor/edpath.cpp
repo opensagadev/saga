@@ -856,11 +856,11 @@ static __used__ void pathEditor_cbSetCurrentPath(eduimenu_s *, eduiitem_s *item,
     if (item != nullptr) {
         EDAIPATH_s *path = (EDAIPATH_s *)NuLinkedListGetHead(&aieditor->paths);
         i32 index = 0;
-        while (path != nullptr && index < item->data) {
+        while (path != nullptr && index != item->data) {
             path = (EDAIPATH_s *)NuLinkedListGetNext(&aieditor->paths, &path->link);
             ++index;
         }
-        if (path != nullptr && item->data >= 0) {
+        if (path != nullptr) {
             aieditor->current_path = path;
             EDAIPATHNODE_s *nearest = nullptr;
             f32 best_distance = 3.402823466e38f;

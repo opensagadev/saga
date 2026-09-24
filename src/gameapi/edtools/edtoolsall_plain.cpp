@@ -5063,14 +5063,26 @@ extern "C" {
         eduiMenuDestroy(menu);
     }
 
+    static __attribute__((always_inline)) inline i32 eduiPickerDeadZone32(i32 raw_value) {
+        i32 value = raw_value - 128;
+        if (value > 0) {
+            if (value < 32)
+                return 0;
+            return (value - 32) * 255 / 223;
+        }
+        if (value > -32)
+            return 0;
+        return (value + 32) * 255 / 223;
+    }
+
     static __used__ i32 eduicbProcessColourPick(eduimenu_s *menu, eduiitem_s *item, f32 delta_time, nupad_s *pad) {
         edui_colour_pick_s *pick = static_cast<edui_colour_pick_s *>(item);
         if (!edui_cursor_buttons) {
             pick->dragging_colour = 0;
             pick->dragging_saturation = 0;
         }
-        f32 dx = NuPs2ApplyDeadZone(pad->analog_left_x, 32) * 0.001f;
-        f32 dy = NuPs2ApplyDeadZone(pad->analog_left_y, 32) * 0.001f;
+        f32 dx = eduiPickerDeadZone32(pad->analog_left_x) * 0.001f;
+        f32 dy = eduiPickerDeadZone32(pad->analog_left_y) * 0.001f;
         pick->cursor_x += dx;
         pick->cursor_y += dy;
         if (pick->cursor_x < 0.0f)

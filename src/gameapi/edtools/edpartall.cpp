@@ -1068,17 +1068,45 @@ static void edpartFileLoadEffects(eduimenu_s *parent, eduiitem_s *, u32) {
     memset(part_page_used, 0, sizeof(i32) * 8);
     memset(part_page_on, 0, sizeof(i32) * 8);
     memset(part_scene, 0, sizeof(NUGSCN *) * 32);
-    memset(part_scene_pageid, -1, sizeof(i32) * 32);
+    typedef i32 ScenePageVector __attribute__((vector_size(16)));
+    ScenePageVector blank_pages = {-1, -1, -1, -1};
+    ScenePageVector *scene_pages = reinterpret_cast<ScenePageVector *>(__builtin_assume_aligned(part_scene_pageid, 16));
+    scene_pages[0] = blank_pages;
+    scene_pages[1] = blank_pages;
+    scene_pages[2] = blank_pages;
+    scene_pages[3] = blank_pages;
+    scene_pages[4] = blank_pages;
+    scene_pages[5] = blank_pages;
+    scene_pages[6] = blank_pages;
+    scene_pages[7] = blank_pages;
     part_platimpactcnt = 0;
     char path[256];
     char general_directory[256], general_name[256], general_extension[256];
     char level_directory[256], level_name[256], level_extension[256];
-    strcpy(general_directory, edbits_general_save_directory[0] ? edbits_general_save_directory : ".");
-    strcpy(general_name, edbits_general_save_name[0] ? edbits_general_save_name : "part");
-    strcpy(general_extension, edbits_general_save_extension[0] ? edbits_general_save_extension : "par");
-    strcpy(level_directory, edbits_level_save_directory[0] ? edbits_level_save_directory : ".");
-    strcpy(level_name, edbits_level_save_name[0] ? edbits_level_save_name : "part");
-    strcpy(level_extension, edbits_level_save_extension[0] ? edbits_level_save_extension : "par");
+    if (!edbits_general_save_directory[0])
+        __builtin_memcpy(general_directory, ".", 2);
+    else
+        strcpy(general_directory, edbits_general_save_directory);
+    if (!edbits_general_save_name[0])
+        __builtin_memcpy(general_name, "part", 5);
+    else
+        strcpy(general_name, edbits_general_save_name);
+    if (!edbits_general_save_extension[0])
+        __builtin_memcpy(general_extension, "par", 4);
+    else
+        strcpy(general_extension, edbits_general_save_extension);
+    if (!edbits_level_save_directory[0])
+        __builtin_memcpy(level_directory, ".", 2);
+    else
+        strcpy(level_directory, edbits_level_save_directory);
+    if (!edbits_level_save_name[0])
+        __builtin_memcpy(level_name, "part", 5);
+    else
+        strcpy(level_name, edbits_level_save_name);
+    if (!edbits_level_save_extension[0])
+        __builtin_memcpy(level_extension, "par", 4);
+    else
+        strcpy(level_extension, edbits_level_save_extension);
     sprintf(path, "%s\\%s.%s", general_directory, general_name, general_extension);
     if (NuFileExists(path))
         edpartLoadPage(path, 0, edbits_things_scene);
@@ -1101,25 +1129,18 @@ static inline void edpartSavePath(char *path, char *backup, bool level) {
     char *save_directory = level ? edbits_level_save_directory : edbits_general_save_directory;
     char *save_name = level ? edbits_level_save_name : edbits_general_save_name;
     char *save_extension = level ? edbits_level_save_extension : edbits_general_save_extension;
-    if (save_directory[0])
-        strcpy(directory, save_directory);
-    else {
-        directory[0] = '.';
-        directory[1] = '\0';
-    }
-    if (save_name[0])
-        strcpy(name, save_name);
-    else {
-        name[0] = 'p';
-        name[1] = 'a';
-        name[2] = 'r';
-        name[3] = 't';
-        name[4] = '\0';
-    }
-    if (save_extension[0])
-        strcpy(extension, save_extension);
+    if (!save_directory[0])
+        __builtin_memcpy(directory, ".", 2);
     else
+        strcpy(directory, save_directory);
+    if (!save_name[0])
+        __builtin_memcpy(name, "part", 5);
+    else
+        strcpy(name, save_name);
+    if (!save_extension[0])
         __builtin_memcpy(extension, "par", 4);
+    else
+        strcpy(extension, save_extension);
     sprintf(path, "%s\\%s.%s", directory, name, extension);
     sprintf(backup, "%s\\%s.%s.bak", directory, name, extension);
 }
@@ -1139,30 +1160,30 @@ static void edpartFileSaveEffects(eduimenu_s *parent, eduiitem_s *, u32) {
     char path[256], backup[256];
     char general_directory[256], general_name[256], general_extension[256];
     char level_directory[256], level_name[256], level_extension[256];
-    if (edbits_general_save_directory[0])
-        strcpy(general_directory, edbits_general_save_directory);
-    else
+    if (!edbits_general_save_directory[0])
         __builtin_memcpy(general_directory, ".", 2);
-    if (edbits_general_save_name[0])
-        strcpy(general_name, edbits_general_save_name);
     else
+        strcpy(general_directory, edbits_general_save_directory);
+    if (!edbits_general_save_name[0])
         __builtin_memcpy(general_name, "part", 5);
-    if (edbits_general_save_extension[0])
-        strcpy(general_extension, edbits_general_save_extension);
     else
+        strcpy(general_name, edbits_general_save_name);
+    if (!edbits_general_save_extension[0])
         __builtin_memcpy(general_extension, "par", 4);
-    if (edbits_level_save_directory[0])
-        strcpy(level_directory, edbits_level_save_directory);
     else
+        strcpy(general_extension, edbits_general_save_extension);
+    if (!edbits_level_save_directory[0])
         __builtin_memcpy(level_directory, ".", 2);
-    if (edbits_level_save_name[0])
-        strcpy(level_name, edbits_level_save_name);
     else
+        strcpy(level_directory, edbits_level_save_directory);
+    if (!edbits_level_save_name[0])
         __builtin_memcpy(level_name, "part", 5);
-    if (edbits_level_save_extension[0])
-        strcpy(level_extension, edbits_level_save_extension);
     else
+        strcpy(level_name, edbits_level_save_name);
+    if (!edbits_level_save_extension[0])
         __builtin_memcpy(level_extension, "par", 4);
+    else
+        strcpy(level_extension, edbits_level_save_extension);
 
     sprintf(path, "%s\\%s.%s", general_directory, general_name, general_extension);
     sprintf(backup, "%s\\%s.%s.bak", general_directory, general_name, general_extension);
@@ -1940,11 +1961,13 @@ static void edpartFileSaveEffectsLevel(eduimenu_s *parent, eduiitem_s *, u32) {
     edpartSavePath(path, backup, true);
     bool backed_up = edbits_override_backups || EdFileBackup(path, backup);
     bool saved = edpartSaveEffects(path, 1) != 0;
-    edpartSaveMessage(parent,
-                      !saved      ? "Save Failed"
-                      : backed_up ? "Saved OK"
-                                  : "Saved OK - Backup Failed",
-                      saved && backed_up);
+    if (!saved) {
+        edpartSaveMessage(parent, "Save Failed", false);
+    } else if (!backed_up) {
+        edpartSaveMessage(parent, "Saved OK - Backup Failed", false);
+    } else {
+        edpartSaveMessage(parent, "Saved OK", true);
+    }
 }
 
 static void edpartGeneralPartIndexMenu(eduimenu_s *menu, eduiitem_s *item, u32 value) {
@@ -2064,11 +2087,13 @@ static void edpartFileSaveEffectsGeneral(eduimenu_s *parent, eduiitem_s *, u32) 
     edpartSavePath(path, backup, false);
     bool backed_up = edbits_override_backups || EdFileBackup(path, backup);
     bool saved = edpartSaveEffects(path, 0) != 0;
-    edpartSaveMessage(parent,
-                      !saved      ? "Save Failed"
-                      : backed_up ? "Saved OK"
-                                  : "Saved OK - Backup Failed",
-                      saved && backed_up);
+    if (!saved) {
+        edpartSaveMessage(parent, "Save Failed", false);
+    } else if (!backed_up) {
+        edpartSaveMessage(parent, "Saved OK - Backup Failed", false);
+    } else {
+        edpartSaveMessage(parent, "Saved OK", true);
+    }
 }
 
 static void edpartGeneralDebrisIndexMenu(eduimenu_s *menu, eduiitem_s *item, u32 value) {

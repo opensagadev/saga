@@ -752,15 +752,15 @@ void edgraDoInput(nupad_s *pad) {
                 edgra_roty = GetIndGrassClump(clump.individual_index, edgra_nearest_instance)->field_12;
             }
         } else if (edgra_nearest != -1) {
-            edgra_clump_s &clump = GrassClumps[edgra_nearest];
-            edcamSetPos(&clump.position);
-            edgra_mode = clump.kind;
-            edgra_instance_type = clump.special_index;
-            if (clump.kind != 3) {
-                edgra_size = clump.size;
-                edgra_clump_size = clump.element_count;
-                edgra_rotz = clump.rotation_z;
-                edgra_roty = clump.rotation_y;
+            edcamSetPos(&GrassClumps[edgra_nearest].position);
+            const i32 kind = static_cast<i8>(GrassClumps[edgra_nearest].kind);
+            edgra_mode = kind;
+            edgra_instance_type = GrassClumps[edgra_nearest].special_index;
+            if (kind != 3) {
+                edgra_size = GrassClumps[edgra_nearest].size;
+                edgra_clump_size = GrassClumps[edgra_nearest].element_count;
+                edgra_rotz = GrassClumps[edgra_nearest].rotation_z;
+                edgra_roty = GrassClumps[edgra_nearest].rotation_y;
             }
         }
     }

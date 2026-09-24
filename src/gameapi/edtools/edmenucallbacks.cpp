@@ -41,12 +41,12 @@ static __attribute__((always_inline)) inline u32 cpPackColour(f32 red, f32 green
            ((static_cast<i32>(green * 255.0f) & 0xff) << 8) | (static_cast<i32>(red * 255.0f) & 0xff);
 }
 
-static __attribute__((always_inline)) inline void cpUpdateInfo(eduiitem_s *info) {
+static __attribute__((always_inline)) inline void cpUpdateInfo(eduiitem_s *info, edui_colour_pick_s *picker) {
     char text[256];
-    if (info->data == 0) {
-        sprintf(text, "H:%1.2f S:%1.2f V:%1.2f", cp_item->hue, cp_item->saturation, cp_item->value);
+    if (info->data != 0) {
+        sprintf(text, "R:%1.2f G:%1.2f B:%1.2f", picker->red, picker->green, picker->blue);
     } else {
-        sprintf(text, "R:%1.2f G:%1.2f B:%1.2f", cp_item->red, cp_item->green, cp_item->blue);
+        sprintf(text, "H:%1.2f S:%1.2f V:%1.2f", picker->hue, picker->saturation, picker->value);
     }
     eduiItemSetText(info, text);
 }
@@ -60,8 +60,9 @@ static __used__ void cbColourPickSel(eduimenu_s *menu, eduiitem_s *, u32) {
     eduiMenuDetach(menu);
 }
 static __used__ void cbToggleIndicatorMode(eduimenu_s *, eduiitem_s *item, u32) {
+    edui_colour_pick_s *picker = cp_item;
     item->data = 1 - item->data;
-    cpUpdateInfo(item);
+    cpUpdateInfo(item, picker);
 }
 static __used__ void cbCopy(eduimenu_s *, eduiitem_s *, u32) {
     f32 red = *cp_r;
@@ -87,8 +88,15 @@ static __used__ void cbPaste(eduimenu_s *, eduiitem_s *, u32) {
     eduiItemColourPickSetRGB(cp_item, clipboard_r, clipboard_g, clipboard_b);
 }
 static __used__ i32 cbProcessColourPick(eduimenu_s *menu, eduiitem_s *item, float delta_time, nupad_s *pad) {
+    edui_colour_pick_s *picker = cp_item;
     i32 result = cp_process(menu, item, delta_time, pad);
-    cpUpdateInfo(cp_info);
+    char text[256];
+    i32 mode = cp_info->data;
+    if (mode != 0)
+        sprintf(text, "R:%1.2f G:%1.2f B:%1.2f", picker->red, picker->green, picker->blue);
+    else
+        sprintf(text, "H:%1.2f S:%1.2f V:%1.2f", picker->hue, picker->saturation, picker->value);
+    eduiItemSetText(cp_info, text);
     return result;
 }
 
