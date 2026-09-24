@@ -1947,20 +1947,20 @@ extern "C" {
 
     void pathEditor_QuickOnPathCheck(nuvec_s *point, EDAIPATHCHECK_s *previous, EDAIPATHCHECK_s *result) {
         result->on_path = 0;
-        if (TestPointPathCheck(point, previous->second, previous->first, &result->fraction, &result->width,
+        if (TestPointPathCheck(point, previous->first, previous->second, &result->fraction, &result->width,
                                &result->angle, 0.0f)) {
             result->on_path = 1;
             return;
         }
         for (i32 index = 0; index < 8; ++index) {
             EDAIPATHNODE_s *other = previous->first->connections[index].node;
-            if (other != nullptr && TestPointPathCheck(point, previous->first, other, &result->fraction, &result->width,
+            if (other != nullptr && TestPointPathCheck(point, other, previous->first, &result->fraction, &result->width,
                                                        &result->angle, 0.0f)) {
                 result->on_path = 1;
                 return;
             }
             other = previous->second->connections[index].node;
-            if (other != nullptr && TestPointPathCheck(point, other, previous->second, &result->fraction,
+            if (other != nullptr && TestPointPathCheck(point, previous->second, other, &result->fraction,
                                                        &result->width, &result->angle, 0.0f)) {
                 result->on_path = 1;
                 return;

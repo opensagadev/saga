@@ -497,6 +497,13 @@ void ClassEditor::Render() {
         eduiMenuRender(menu);
 }
 
+template <typename T> T *CreateObject(MemoryBuffer *buffer) {
+    void *storage = buffer->Allocate(sizeof(T));
+    if (storage == NULL)
+        return NULL;
+    return new (storage) T();
+}
+
 void ClassEditor::Serialise(EdStream &stream) {
     if (stream.mode == 2) {
         theRegistry.Serialise(stream);
@@ -505,7 +512,7 @@ void ClassEditor::Serialise(EdStream &stream) {
     if (stream.mode == 1) {
         MemoryBuffer *saved = stream.memory_buffer;
         stream.memory_buffer = stream.secondary_buffer;
-        EdRegistry *source = static_cast<EdRegistry *>(stream.secondary_buffer->Allocate(sizeof(EdRegistry)));
+        EdRegistry *source = ::CreateObject<EdRegistry>(stream.secondary_buffer);
         source->Initialise(*stream.secondary_buffer->position, *stream.secondary_buffer->end, 50, 50, 10, 1);
         source->Serialise(stream);
         stream.memory_buffer = saved;

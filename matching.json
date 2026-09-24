@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 58.878082,
+    "fuzzy_match_percent": 58.882095,
     "total_code": "4722419",
-    "matched_code": "488884",
-    "matched_code_percent": 10.352406,
+    "matched_code": "489130",
+    "matched_code_percent": 10.357615,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 5891,
-    "matched_functions_percent": 43.769966,
+    "matched_functions": 5892,
+    "matched_functions_percent": 43.777397,
     "total_units": 1
   },
   "text": {
@@ -21075,7 +21075,7 @@
           "address": 5611408,
           "offset": 4721440,
           "size": 246,
-          "match_percent": 53.58621
+          "match_percent": 100.0
         },
         {
           "name": "_ZN12PropertyToolD1Ev",
@@ -21340,6 +21340,14 @@
           "offset": 4726080,
           "size": 82,
           "match_percent": 100.0
+        },
+        {
+          "name": "_Z12CreateObjectI10EdRegistryEPT_P12MemoryBuffer",
+          "demangled_name": "EdRegistry* CreateObject<EdRegistry>(MemoryBuffer*)",
+          "address": 5618512,
+          "offset": 4728544,
+          "size": 77,
+          "match_percent": 96.85714
         }
       ]
     },
@@ -127293,14 +127301,6 @@
       "match_percent": 0.0
     },
     {
-      "name": "_Z12CreateObjectI10EdRegistryEPT_P12MemoryBuffer",
-      "demangled_name": "EdRegistry* CreateObject<EdRegistry>(MemoryBuffer*)",
-      "address": 5618512,
-      "offset": 4728544,
-      "size": 77,
-      "match_percent": 0.0
-    },
-    {
       "name": "oggpack_writeinit",
       "demangled_name": "oggpack_writeinit",
       "address": 5624512,
@@ -127936,8 +127936,8 @@
   "summary": {
     "bazel_units": 454,
     "functions": 13454,
-    "assigned_functions": 12616,
+    "assigned_functions": 12617,
     "ambiguous_functions": 242,
-    "unassigned_functions": 596
+    "unassigned_functions": 595
   }
 }
