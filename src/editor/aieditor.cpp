@@ -147,7 +147,7 @@ static __attribute__((noinline,
     return node;
 }
 
-void antinodeEditor_Enter() {
+__attribute__((optimize("no-tree-loop-optimize"))) void antinodeEditor_Enter() {
     antinode_list()->head = nullptr;
     antinode_list()->tail = nullptr;
     for (i32 i = 0; i < 128; ++i)

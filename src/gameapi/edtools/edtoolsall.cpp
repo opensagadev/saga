@@ -4116,8 +4116,6 @@ __attribute__((force_align_arg_pointer)) i32 EdManRotate::RotateItem(EdInputCont
         NUMTX matrix;
         NuMtxSetIdentity(&matrix);
         EdMember member;
-        member.object = NULL;
-        member.reference = NULL;
         i32 got_matrix = entry->reference != NULL &&
                          entry->reference->GetAttributeData(entry->object, 0x10, EdType_VuMtx, &matrix, 0) != 0;
         if (!got_matrix) {
@@ -4126,10 +4124,10 @@ __attribute__((force_align_arg_pointer)) i32 EdManRotate::RotateItem(EdInputCont
         }
         if (!got_matrix)
             continue;
-        f32 sine = NuTrigTable[sine_index];
-        f32 cosine = NuTrigTable[cosine_index];
         switch (axis) {
             case 1: {
+                f32 sine = NuTrigTable[sine_index];
+                f32 cosine = NuTrigTable[cosine_index];
                 f32 m01 = matrix.m01, m11 = matrix.m11, m21 = matrix.m21;
                 matrix.m01 = m01 * cosine - matrix.m02 * sine;
                 matrix.m02 = m01 * sine + matrix.m02 * cosine;
@@ -4140,6 +4138,8 @@ __attribute__((force_align_arg_pointer)) i32 EdManRotate::RotateItem(EdInputCont
                 break;
             }
             case 2: {
+                f32 sine = NuTrigTable[sine_index];
+                f32 cosine = NuTrigTable[cosine_index];
                 f32 m00 = matrix.m00, m10 = matrix.m10, m20 = matrix.m20;
                 matrix.m00 = m00 * cosine + matrix.m02 * sine;
                 matrix.m02 = matrix.m02 * cosine - m00 * sine;
@@ -4150,6 +4150,8 @@ __attribute__((force_align_arg_pointer)) i32 EdManRotate::RotateItem(EdInputCont
                 break;
             }
             case 3: {
+                f32 sine = NuTrigTable[sine_index];
+                f32 cosine = NuTrigTable[cosine_index];
                 f32 m00 = matrix.m00, m10 = matrix.m10, m20 = matrix.m20;
                 matrix.m00 = m00 * cosine - matrix.m01 * sine;
                 matrix.m01 = m00 * sine + matrix.m01 * cosine;

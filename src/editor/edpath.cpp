@@ -1463,8 +1463,7 @@ extern "C" {
             AIPATH_s *path = (AIPATH_s *)AISysBufferAlloc(cursor, end, sizeof(AIPATH_s));
             system->paths[path_index] = path;
             if (path == nullptr) {
-                distance_tables = nullptr;
-                return nullptr;
+                continue;
             }
             memset(path, 0, sizeof(*path));
             strcpy(path->name, editor_path->name);
