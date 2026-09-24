@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 58.866196,
+    "fuzzy_match_percent": 58.869816,
     "total_code": "4722419",
-    "matched_code": "488779",
-    "matched_code_percent": 10.350183,
+    "matched_code": "488884",
+    "matched_code_percent": 10.352406,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 5890,
-    "matched_functions_percent": 43.76254,
+    "matched_functions": 5891,
+    "matched_functions_percent": 43.769966,
     "total_units": 1
   },
   "text": {
@@ -19556,7 +19556,7 @@
           "address": 4249232,
           "offset": 3359264,
           "size": 4175,
-          "match_percent": 50.991737
+          "match_percent": 50.992767
         },
         {
           "name": "creatureEditor_RenderAllCreatures",
@@ -26129,7 +26129,7 @@
           "address": 3604384,
           "offset": 2714416,
           "size": 637,
-          "match_percent": 80.257484
+          "match_percent": 81.33533
         },
         {
           "name": "edgraInitAllClumps",
@@ -28948,7 +28948,7 @@
           "address": 5470896,
           "offset": 4580928,
           "size": 262,
-          "match_percent": 60.2
+          "match_percent": 99.818184
         },
         {
           "name": "_ZN15EdVectorControl9cbChangedEP10eduimenu_sP10eduiitem_sj",
@@ -29316,7 +29316,7 @@
           "address": 5491648,
           "offset": 4601680,
           "size": 283,
-          "match_percent": 87.31645
+          "match_percent": 87.50633
         },
         {
           "name": "_ZN13EdEnumControl11AddMenuItemEP10eduimenu_sP5EdRefPv",
@@ -29332,7 +29332,7 @@
           "address": 5492208,
           "offset": 4602240,
           "size": 105,
-          "match_percent": 44.366665
+          "match_percent": 100.0
         },
         {
           "name": "_ZN13EdEnumControl12cbSelectItemEP10eduimenu_sP10eduiitem_sj",
@@ -29692,7 +29692,7 @@
           "address": 5525488,
           "offset": 4635520,
           "size": 333,
-          "match_percent": 39.385544
+          "match_percent": 39.746986
         },
         {
           "name": "_ZN9EdManMoveC1Ev",

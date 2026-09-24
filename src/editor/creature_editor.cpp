@@ -1440,7 +1440,7 @@ __attribute__((optimize("O2"))) eduimenu_s *creatureEditor_Process(nupad_s *pad)
                     if (selected != nullptr && selected == hover)
                         angle = selected->angle;
                     i32 &step = *reinterpret_cast<i32 *>(aieditor->unknown_36934);
-                    if (pad->digital_buttons_pressed & 0x2000)
+                    if (pad->digital_buttons_pressed & 0x8000)
                         step = 0x14;
                     else
                         step += 0x14;
@@ -1453,7 +1453,7 @@ __attribute__((optimize("O2"))) eduimenu_s *creatureEditor_Process(nupad_s *pad)
                     if (selected != nullptr && selected == hover)
                         angle = selected->angle;
                     i32 &step = *reinterpret_cast<i32 *>(aieditor->unknown_36934);
-                    if (pad->digital_buttons_pressed & 0x8000)
+                    if (pad->digital_buttons_pressed & 0x2000)
                         step = 0x14;
                     else
                         step += 0x14;

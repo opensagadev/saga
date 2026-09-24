@@ -4370,9 +4370,7 @@ i32 EdEnumControl::GetEnumValue(char *name) {
 }
 
 void EdEnumControl::Refresh() {
-    if (reference == NULL || item == NULL)
-        return;
-    i32 value = 0;
+    i32 value;
     reference->GetMemberData(object, EdType_Int, &value, 0);
     eduiItemPropSetText(reinterpret_cast<edui_prop_s *>(item), GetEnumString(value));
 }
@@ -5572,12 +5570,13 @@ inline void EdVectorControl::operator delete(void *memory) {
 void EdVectorControl::Refresh() {
     VuVec vector;
     reference->GetMemberData(object, EdType_VuVec, &vector, 0);
-    f32 *values = &vector.x;
     char value[128];
-    for (i32 index = 0; index < 3; ++index) {
-        sprintf(value, "%.2f", values[index]);
-        eduiItemPropSetText(static_cast<edui_prop_s *>(components[index]), value);
-    }
+    sprintf(value, "%.2f", vector.x);
+    eduiItemPropSetText(static_cast<edui_prop_s *>(components[0]), value);
+    sprintf(value, "%.2f", vector.y);
+    eduiItemPropSetText(static_cast<edui_prop_s *>(components[1]), value);
+    sprintf(value, "%.2f", vector.z);
+    eduiItemPropSetText(static_cast<edui_prop_s *>(components[2]), value);
 }
 
 void EdVectorControl::cbButton(eduimenu_s *menu, eduiitem_s *item, u32 value) {
