@@ -351,7 +351,8 @@ void *SceneObjectHelper::GetNextObject(void *item) {
                 reinterpret_cast<u8 *>(scenes[iteration_scene_index]) + iteration_object_index * sizeof(SceneObject));
             if (object->reserved_0x28 == 0) {
                 if (scene_filter[0] == 0 || NuStrIStr(const_cast<char *>(object->GetName()), scene_filter) == NULL)
-                    return object;
+                    return reinterpret_cast<SceneObject *>(reinterpret_cast<u8 *>(scenes[iteration_scene_index]) +
+                                                           iteration_object_index * sizeof(SceneObject));
             }
             ++iteration_object_index;
         }

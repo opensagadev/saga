@@ -995,8 +995,13 @@ static __used__ f32 **pathEditorCalculateDistanceTable(AIPATH_s *path, i32 route
 // The route records use a dense route index, while the editor keeps sixteen
 // independently switchable slots.  The original helper first marks both ends
 // of every route connection, then builds the compact node lookup and matrix.
-static __used__ void pathEditorCreateSpecialRouteData(AIPATH_s *path, EDAIPATH_s *editor_path, VARIPTR *cursor,
-                                                      VARIPTR *end) {
+#if defined(__i386__)
+#define EDPATH_SPECIAL_ROUTE_CALL __attribute__((regparm(2)))
+#else
+#define EDPATH_SPECIAL_ROUTE_CALL
+#endif
+static __used__ EDPATH_SPECIAL_ROUTE_CALL void pathEditorCreateSpecialRouteData(AIPATH_s *path, EDAIPATH_s *editor_path,
+                                                                                VARIPTR *cursor, VARIPTR *end) {
     i32 route_slots[16];
     i32 route_count = 0;
     for (i32 slot = 0; slot < 16; ++slot) {
@@ -1156,6 +1161,7 @@ static __used__ void pathEditorCreateSpecialRouteData(AIPATH_s *path, EDAIPATH_s
         }
     }
 }
+#undef EDPATH_SPECIAL_ROUTE_CALL
 
 static __used__ void pathEditor_cbCancelDeleteAreaMenu(eduimenu_s *, eduimenu_s *) {
     aieditor_ClearMainMenu();

@@ -3536,7 +3536,13 @@ __attribute__((force_align_arg_pointer)) i32 EdManScale::Process(EdInputContext 
         return 0;
 
     VuMtx orientation;
-    get_manipulator_attribute(selected.first, 0x10, EdType_VuMtx, &orientation);
+    ClassObjectListEntry *first = selected.first;
+    if (first->reference == NULL ||
+        first->reference->GetAttributeData(first->object, 0x10, EdType_VuMtx, &orientation, 0) == 0) {
+        EdMember member;
+        if (first->ed_class->FindMember(&member, first->object, 0x10, 1) != 0)
+            member.reference->GetAttributeData(member.object, 0x10, EdType_VuMtx, &orientation, 0);
+    }
     VuVec first_axis;
     VuVec second_axis;
     i32 axis = SelectAxis(input, average, first_axis, second_axis, &orientation);
@@ -3545,7 +3551,12 @@ __attribute__((force_align_arg_pointer)) i32 EdManScale::Process(EdInputContext 
         VuVec const &delta = *reinterpret_cast<VuVec const *>(reinterpret_cast<u8 *>(this) + 0x40);
         for (ClassObjectListEntry *entry = selected.first; entry != NULL; entry = entry->next) {
             VuMtx transform;
-            get_manipulator_attribute(entry, 0x20, EdType_VuMtx, &transform);
+            if (entry->reference == NULL ||
+                entry->reference->GetAttributeData(entry->object, 0x20, EdType_VuMtx, &transform, 0) == 0) {
+                EdMember member;
+                if (entry->ed_class->FindMember(&member, entry->object, 0x20, 1) != 0)
+                    member.reference->GetAttributeData(member.object, 0x20, EdType_VuMtx, &transform, 0);
+            }
 
             f32 scale_x = 1.0f;
             f32 scale_y = 1.0f;
@@ -3623,7 +3634,12 @@ __attribute__((force_align_arg_pointer)) i32 EdManScale::Process(EdInputContext 
             matrix.m21 = zero * original.m01 + zero * original.m11 + scale_z * original.m21;
             matrix.m22 = zero * original.m02 + zero * original.m12 + scale_z * original.m22;
             matrix.m03 = matrix.m13 = matrix.m23 = 0.0f;
-            set_manipulator_attribute(entry, 0x20, EdType_VuMtx, &transform);
+            if (entry->reference == NULL ||
+                entry->reference->SetAttributeData(entry->object, 0x20, EdType_VuMtx, &transform, 0) == 0) {
+                EdMember member;
+                if (entry->ed_class->FindMember(&member, entry->object, 0x20, 1) != 0)
+                    member.reference->SetAttributeData(member.object, 0x20, EdType_VuMtx, &transform, 0);
+            }
         }
     }
     return axis != 0;

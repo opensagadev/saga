@@ -1081,8 +1081,10 @@ extern "C" {
             EdFileWriteChar(connection_found && (turned_around != reversed));
             EdFileWriteShort(connection_index);
 
-            for (i32 index = 0; index < 4; ++index)
-                EdFileWriteFloat(creature->script_params[index]);
+            EdFileWriteFloat(creature->script_params[0]);
+            EdFileWriteFloat(creature->script_params[1]);
+            EdFileWriteFloat(creature->script_params[2]);
+            EdFileWriteFloat(creature->script_params[3]);
             if (creature->trigger_area != nullptr) {
                 EdFileWriteInt(1);
                 EdFileWrite(reinterpret_cast<char *>(creature->trigger_area) + 8, 0x10);

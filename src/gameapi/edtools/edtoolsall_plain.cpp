@@ -6358,7 +6358,9 @@ extern "C" {
         eduiFntPrintEx(edui_font, x << 4, (y << 3) + baseline, 16, format, number->value);
         return height;
     }
-    static __used__ i32 eduicbRenderProp(struct eduimenu_s *menu, struct eduiitem_s *item, i32 x, i32 y, i32 scale) {
+    static __used__ __attribute__((optimize("no-omit-frame-pointer"))) i32 eduicbRenderProp(struct eduimenu_s *menu,
+                                                                                            struct eduiitem_s *item,
+                                                                                            i32 x, i32 y, i32 scale) {
         edui_prop_s *property = static_cast<edui_prop_s *>(item);
         item->x = x;
         item->y = y;

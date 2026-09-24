@@ -549,22 +549,29 @@ extern "C" {
                 i32 path_index = locator->path->draw_index;
                 EdFileWriteChar(path_index);
                 i32 connection_index = 0;
-                bool connection_found = false;
+                i32 connection_direction = 0;
                 AIPATH_s *path = path_system->paths[path_index];
                 for (i32 index = 0; index < path->connection_count; ++index) {
                     AIPATHCNX_s *connection = &path->connections[index];
                     i32 first = locator->first_node->index;
                     i32 second = locator->second_node->index;
-                    if ((connection->node_indices[0] == first && connection->node_indices[1] == second) ||
-                        (connection->node_indices[0] == second && connection->node_indices[1] == first)) {
+                    if (connection->node_indices[0] == first && connection->node_indices[1] == second) {
                         connection_index = index;
-                        connection_found = true;
+                        i32 angle = locator->path_angle;
+                        i32 magnitude = angle < 0 ? -angle : angle;
+                        connection_direction = magnitude > 0x3fff;
+                        break;
+                    }
+                    if (connection->node_indices[0] == second && connection->node_indices[1] == first) {
+                        connection_index = index;
+                        i32 angle = locator->path_angle;
+                        i32 magnitude = angle < 0 ? -angle : angle;
+                        connection_direction = magnitude <= 0x3fff;
                         break;
                     }
                 }
                 i32 angle = locator->path_angle;
-                i32 magnitude = angle < 0 ? -angle : angle;
-                EdFileWriteChar(connection_found && magnitude > 0x3fff);
+                EdFileWriteChar(connection_direction);
                 EdFileWriteShort(connection_index);
                 EdFileWriteFloat(locator->path_fraction);
                 EdFileWriteFloat(locator->path_width);

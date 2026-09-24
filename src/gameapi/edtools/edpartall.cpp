@@ -2346,9 +2346,9 @@ void edpartDoInput(nupad_s *pad) {
             if (pad->digital_buttons & 0x200)
                 edpart_emitrotx = edpart_emitroty = edpart_emitrotz = 0;
             if (pad->digital_buttons & 0x400)
-                edpart_emitrotx += right - left;
+                edpart_emitrotx = edpart_emitrotx + right - left;
             else {
-                edpart_emitroty += right - left;
+                edpart_emitroty = edpart_emitroty + right - left;
                 i32 rotation = edpart_emitrotz + up;
                 if (rotation > 0x8000)
                     rotation = 0x8000;
@@ -2358,7 +2358,7 @@ void edpartDoInput(nupad_s *pad) {
                 edpart_emitrotz = rotation;
             }
         } else if (edpart_dpad_mode == 3) {
-            edpart_refroty += right - left;
+            edpart_refroty = edpart_refroty + right - left;
             i32 rotation = edpart_refrotz + up;
             if (rotation > 0)
                 rotation = 0;
