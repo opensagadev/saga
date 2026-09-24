@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 58.56837,
+    "fuzzy_match_percent": 58.583427,
     "total_code": "4722419",
     "matched_code": "488137",
     "matched_code_percent": 10.336588,
@@ -19228,7 +19228,7 @@
           "address": 4014928,
           "offset": 3124960,
           "size": 167,
-          "match_percent": 34.35484
+          "match_percent": 58.16129
         },
         {
           "name": "_ZL34creatureEditor_cbSetAreaActivationP10eduimenu_sP10eduiitem_sj",
@@ -21801,7 +21801,7 @@
           "address": 4246592,
           "offset": 3356624,
           "size": 1947,
-          "match_percent": 73.29307
+          "match_percent": 76.154366
         },
         {
           "name": "_Z21antinodeEditor_Renderiiff",
@@ -26328,7 +26328,7 @@
           "address": 3374384,
           "offset": 2484416,
           "size": 697,
-          "match_percent": 56.139393
+          "match_percent": 97.93939
         },
         {
           "name": "_ZL26edgracbClumpPropertiesMenuP10eduimenu_sP10eduiitem_sj",
@@ -27647,7 +27647,7 @@
           "address": 4310272,
           "offset": 3420304,
           "size": 1592,
-          "match_percent": 42.58788
+          "match_percent": 43.245453
         },
         {
           "name": "_ZL26edpartFileSaveEffectsLevelP10eduimenu_sP10eduiitem_sj",
@@ -34051,7 +34051,7 @@
           "address": 3747168,
           "offset": 2857200,
           "size": 4706,
-          "match_percent": 30.876556
+          "match_percent": 37.545643
         },
         {
           "name": "eduicbRenderFilePick",

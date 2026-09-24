@@ -1133,38 +1133,24 @@ static void edpartFileSaveEffects(eduimenu_s *parent, eduiitem_s *, u32) {
     char level_directory[256], level_name[256], level_extension[256];
     if (edbits_general_save_directory[0])
         strcpy(general_directory, edbits_general_save_directory);
-    else {
-        general_directory[0] = '.';
-        general_directory[1] = '\0';
-    }
+    else
+        __builtin_memcpy(general_directory, ".", 2);
     if (edbits_general_save_name[0])
         strcpy(general_name, edbits_general_save_name);
-    else {
-        general_name[0] = 'p';
-        general_name[1] = 'a';
-        general_name[2] = 'r';
-        general_name[3] = 't';
-        general_name[4] = '\0';
-    }
+    else
+        __builtin_memcpy(general_name, "part", 5);
     if (edbits_general_save_extension[0])
         strcpy(general_extension, edbits_general_save_extension);
     else
         __builtin_memcpy(general_extension, "par", 4);
     if (edbits_level_save_directory[0])
         strcpy(level_directory, edbits_level_save_directory);
-    else {
-        level_directory[0] = '.';
-        level_directory[1] = '\0';
-    }
+    else
+        __builtin_memcpy(level_directory, ".", 2);
     if (edbits_level_save_name[0])
         strcpy(level_name, edbits_level_save_name);
-    else {
-        level_name[0] = 'p';
-        level_name[1] = 'a';
-        level_name[2] = 'r';
-        level_name[3] = 't';
-        level_name[4] = '\0';
-    }
+    else
+        __builtin_memcpy(level_name, "part", 5);
     if (edbits_level_save_extension[0])
         strcpy(level_extension, edbits_level_save_extension);
     else

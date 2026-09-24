@@ -196,9 +196,9 @@ void creatureEditor_Render(i32 x, i32 y, float xscale, float yscale) {
     NuQFntSetColour(system_qfont, 0x80000000);
     NuQFntSetScale(system_qfont, xscale, yscale);
 
-    u8 *selected = reinterpret_cast<u8 *>(aieditor->mode_selection_36930);
-    u8 *nearest = *reinterpret_cast<u8 **>(aieditor->unknown_3692c);
-    u8 *display = selected != nullptr ? selected : nearest;
+    u8 *display = reinterpret_cast<u8 *>(aieditor->mode_selection_36930);
+    if (display == nullptr)
+        display = *reinterpret_cast<u8 **>(aieditor->unknown_3692c);
     if (display != nullptr) {
         nuvec_s displacement;
         f32 distance =
@@ -249,8 +249,9 @@ void creatureEditor_Render(i32 x, i32 y, float xscale, float yscale) {
          link = NuLinkedListGetNext(&aieditor->creatures, link)) {
         u8 *record = reinterpret_cast<u8 *>(link);
         EDCREATURE_s *creature = reinterpret_cast<EDCREATURE_s *>(record);
-        i32 render_colour =
-            record == selected ? (record == nearest ? 0xff0000ff : 0x800000ff) : (record == nearest ? -1 : 0);
+        i32 render_colour = record == reinterpret_cast<u8 *>(aieditor->mode_selection_36930)
+                                ? (record == nearest_for_menu ? 0xff0000ff : 0x800000ff)
+                                : (record == nearest_for_menu ? -1 : 0);
         for (i32 group = 0; group < record[0x5b]; ++group) {
             u32 valid_positions = *reinterpret_cast<u32 *>(record + 0x54);
             if (!((static_cast<u64>(valid_positions) >> (group & 63)) & 1) || !creatureEditor_IsSelectable(creature)) {
@@ -284,7 +285,7 @@ void creatureEditor_Render(i32 x, i32 y, float xscale, float yscale) {
             render_colour = 0;
         }
     }
-    if (nearest == nullptr && *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(aieditor) + 0x48) != 0 &&
+    if (nearest_for_menu == nullptr && *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(aieditor) + 0x48) != 0 &&
         *reinterpret_cast<f32 *>(reinterpret_cast<u8 *>(aieditor) + 0x42ea4) < 1.0f &&
         aieditorsettings.current_path_type >= 0) {
         GlobalCharacterRenderFn(&aieditor->camera_position, static_cast<i16>(aieditorsettings.area_rotation),

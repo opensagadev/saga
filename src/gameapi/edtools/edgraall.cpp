@@ -374,18 +374,22 @@ static void edgracbClumpModeMenu(eduimenu_s *parent, eduiitem_s *, u32) {
     edgra_clumpmode_menu = eduiMenuCreate(70, 70, 200, 250, ed_fnt, edgracbCancelClumpModeMenu, "Clump Mode");
     if (!edgra_clumpmode_menu)
         return;
-    bool individual = edgra_nearest != -1 && GrassClumps[edgra_nearest].kind == 3;
-    eduiMenuAddItem(edgra_clumpmode_menu,
-                    individual ? eduiItemSelCreate(1, edgrey, edgra_mode == 1, 0, NULL, "Wind Mode")
-                               : eduiItemCheckCreate(1, edblack, edgra_mode == 1, 1, edgracbSetClumpMode, "Wind Mode"));
-    eduiMenuAddItem(
-        edgra_clumpmode_menu,
-        individual ? eduiItemSelCreate(2, edgrey, edgra_mode == 2, 0, NULL, "Faded Static Mode")
-                   : eduiItemCheckCreate(2, edblack, edgra_mode == 2, 1, edgracbSetClumpMode, "Faded Static Mode"));
-    eduiMenuAddItem(edgra_clumpmode_menu,
-                    edgra_nearest == -1 || individual
-                        ? eduiItemCheckCreate(3, edblack, edgra_mode == 3, 1, edgracbSetClumpMode, "Individual FS Mode")
-                        : eduiItemSelCreate(3, edgrey, edgra_mode == 3, 0, NULL, "Individual FS Mode"));
+    if (edgra_nearest != -1 && GrassClumps[edgra_nearest].kind == 3) {
+        eduiMenuAddItem(edgra_clumpmode_menu, eduiItemSelCreate(1, edgrey, edgra_mode == 1, 0, NULL, "Wind Mode"));
+        eduiMenuAddItem(edgra_clumpmode_menu,
+                        eduiItemSelCreate(2, edgrey, edgra_mode == 2, 0, NULL, "Faded Static Mode"));
+    } else {
+        eduiMenuAddItem(edgra_clumpmode_menu,
+                        eduiItemCheckCreate(1, edblack, edgra_mode == 1, 1, edgracbSetClumpMode, "Wind Mode"));
+        eduiMenuAddItem(edgra_clumpmode_menu,
+                        eduiItemCheckCreate(2, edblack, edgra_mode == 2, 1, edgracbSetClumpMode, "Faded Static Mode"));
+    }
+    if (edgra_nearest != -1 && GrassClumps[edgra_nearest].kind != 3)
+        eduiMenuAddItem(edgra_clumpmode_menu,
+                        eduiItemSelCreate(3, edgrey, edgra_mode == 3, 0, NULL, "Individual FS Mode"));
+    else
+        eduiMenuAddItem(edgra_clumpmode_menu,
+                        eduiItemCheckCreate(3, edblack, edgra_mode == 3, 1, edgracbSetClumpMode, "Individual FS Mode"));
     edgraAttachMenu(parent, edgra_clumpmode_menu);
 }
 static void edgracbClumpSizesMenu(eduimenu_s *parent, eduiitem_s *, u32) {

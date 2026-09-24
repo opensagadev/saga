@@ -6183,9 +6183,22 @@ extern "C" {
                 closest = distance;
             }
         }
-        for (i32 onion = 0; onion < 8; ++onion)
-            if (picker->onion_skins[onion])
-                eduiRenderGraphLine(picker->onion_skins[onion], plot_x, plot_y, graph_width, graph_height, 0x80402000);
+        if (picker->onion_skins[0])
+            eduiRenderGraphLine(picker->onion_skins[0], plot_x, plot_y, graph_width, graph_height, 0x80402000);
+        if (picker->onion_skins[1])
+            eduiRenderGraphLine(picker->onion_skins[1], plot_x, plot_y, graph_width, graph_height, 0x80402000);
+        if (picker->onion_skins[2])
+            eduiRenderGraphLine(picker->onion_skins[2], plot_x, plot_y, graph_width, graph_height, 0x80402000);
+        if (picker->onion_skins[3])
+            eduiRenderGraphLine(picker->onion_skins[3], plot_x, plot_y, graph_width, graph_height, 0x80402000);
+        if (picker->onion_skins[4])
+            eduiRenderGraphLine(picker->onion_skins[4], plot_x, plot_y, graph_width, graph_height, 0x80402000);
+        if (picker->onion_skins[5])
+            eduiRenderGraphLine(picker->onion_skins[5], plot_x, plot_y, graph_width, graph_height, 0x80402000);
+        if (picker->onion_skins[6])
+            eduiRenderGraphLine(picker->onion_skins[6], plot_x, plot_y, graph_width, graph_height, 0x80402000);
+        if (picker->onion_skins[7])
+            eduiRenderGraphLine(picker->onion_skins[7], plot_x, plot_y, graph_width, graph_height, 0x80402000);
         eduiRenderGraphLine(graph, plot_x, plot_y, graph_width, graph_height, 0x80800000);
         if (picker->selected_point >= 0 && !edui_donotdraw) {
             i32 point = picker->selected_point;

@@ -804,8 +804,10 @@ static __used__ void creatureEditor_cbSelectRespawnLocator(eduimenu_s *parent, e
 }
 
 static __used__ void creatureEditor_cbSetRespawnLocator(eduimenu_s *, eduiitem_s *item, unsigned int) {
+    if (item == nullptr)
+        return;
     CreatureEditorRecord *creature = creatureEditor_Current();
-    if (item == nullptr || creature == nullptr)
+    if (creature == nullptr)
         return;
     if (item->data == -1) {
         creature->locator = nullptr;
