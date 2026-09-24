@@ -570,24 +570,27 @@ void ClassEditor::DrawObjectSphere(ClassObject &selected, i32 colour) {
         return;
     f32 radius;
     EdMember member;
+    i32 radius_type = EdType_Float;
     if (selected.reference == NULL ||
-        selected.reference->GetAttributeData(selected.object, 0x40, EdType_Float, &radius, 0) == 0) {
+        selected.reference->GetAttributeData(selected.object, 0x40, radius_type, &radius, 0) == 0) {
         if (selected.ed_class->FindMember(&member, selected.object, 0x40, 1) == 0 ||
-            member.reference->GetAttributeData(member.object, 0x40, EdType_Float, &radius, 0) == 0) {
+            member.reference->GetAttributeData(member.object, 0x40, radius_type, &radius, 0) == 0) {
             radius = 1.0f;
         }
     }
     // The original places this matrix on a 16-byte-aligned stack slot.
     VuMtx transform __attribute__((aligned(16)));
+    i32 matrix_type = EdType_VuMtx;
     if ((selected.reference == NULL ||
-         selected.reference->GetAttributeData(selected.object, 0x10, EdType_VuMtx, &transform, 0) == 0) &&
+         selected.reference->GetAttributeData(selected.object, 0x10, matrix_type, &transform, 0) == 0) &&
         (selected.ed_class->FindMember(&member, selected.object, 0x10, 1) == 0 ||
-         member.reference->GetAttributeData(member.object, 0x10, EdType_VuMtx, &transform, 0) == 0)) {
+         member.reference->GetAttributeData(member.object, 0x10, matrix_type, &transform, 0) == 0)) {
         VuVec position;
+        i32 position_type = EdType_VuVec;
         if ((selected.reference != NULL &&
-             selected.reference->GetAttributeData(selected.object, 8, EdType_VuVec, &position, 0) != 0) ||
+             selected.reference->GetAttributeData(selected.object, 8, position_type, &position, 0) != 0) ||
             (selected.ed_class->FindMember(&member, selected.object, 8, 1) != 0 &&
-             member.reference->GetAttributeData(member.object, 8, EdType_VuVec, &position, 0) != 0)) {
+             member.reference->GetAttributeData(member.object, 8, position_type, &position, 0) != 0)) {
             EdDrawBegin(0);
             EdDrawLineSphere(position, radius, 1.0f, colour);
             EdDrawEnd();

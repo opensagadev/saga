@@ -2492,7 +2492,7 @@ void EdDrawPolyCylinder(VuMtx const &transform, float half_length, float radius,
     if (sides > 0) {
         float previous_sine = NU_SIN_LUT(0) * radius;
         float previous_cosine = NU_COS_LUT(0) * radius;
-        for (i32 segment = 1; segment <= sides; ++segment) {
+        for (i32 segment = 1;; ++segment) {
             const i32 angle = segment * 0x10000 / sides;
             const float sine = NU_SIN_LUT(angle) * radius;
             const float cosine = NU_COS_LUT(angle) * radius;
@@ -2504,13 +2504,13 @@ void EdDrawPolyCylinder(VuMtx const &transform, float half_length, float radius,
             EdDrawPolyTri(previous_top, bottom, previous_bottom, segment_colour);
             previous_sine = sine;
             previous_cosine = cosine;
-            if (segment != sides) {
-                segment_colour = (segment & 1) == 0 ? colour
-                                                    : static_cast<i32>((static_cast<u32>(colour) & 0xff000000) |
-                                                                       (((colour & 0xff) * 0xdc) >> 8) |
-                                                                       ((((colour >> 8) & 0xff) * 0xdc) & 0xff00) |
-                                                                       (((((colour >> 16) & 0xff) * 0xdc) >> 8) << 16));
-            }
+            if (segment == sides)
+                break;
+            segment_colour = (segment & 1) == 0 ? colour
+                                                : static_cast<i32>((static_cast<u32>(colour) & 0xff000000) |
+                                                                   (((colour & 0xff) * 0xdc) >> 8) |
+                                                                   ((((colour >> 8) & 0xff) * 0xdc) & 0xff00) |
+                                                                   (((((colour >> 16) & 0xff) * 0xdc) >> 8) << 16));
         }
     }
     if (cap_start != 0 || cap_end != 0) {

@@ -344,8 +344,10 @@ extern "C" {
                 EdFileWriteInt(node->flags);
                 EdFileWriteFloat(node->base_radius);
                 EdFileWriteFloat(node->base_height);
+                EdFileWriteChar(node->type);
+            } else {
+                EdFileWriteChar(0);
             }
-            EdFileWriteChar(aidata_version > 14 ? node->type : 0);
             EdFileWriteChar(0);
             EdFileWriteChar(0);
             EdFileWriteChar(node->game_flags);
