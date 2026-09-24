@@ -5272,12 +5272,24 @@ void EdMatrixControl::Refresh() {
 }
 
 void EdMatrixControl::SetMenuItemAttr(i32 mask, eduiitem_s *menu_item, eduiiattr_s *selected, eduiiattr_s *unselected) {
-    if (menu_item == components[0] || menu_item == components[1] || menu_item == components[2])
-        memcpy(menu_item->colours, (mask & 8) ? unselected : selected, sizeof(*selected));
-    if (menu_item == components[3] || menu_item == components[4] || menu_item == components[5])
-        memcpy(menu_item->colours, (mask && (mask & 0x10)) ? unselected : selected, sizeof(*selected));
-    if (menu_item == components[6] || menu_item == components[7] || menu_item == components[8])
-        memcpy(menu_item->colours, (mask && (mask & 0x20)) ? unselected : selected, sizeof(*selected));
+    if (menu_item == components[0] || menu_item == components[1] || menu_item == components[2]) {
+        if (mask & 8)
+            memcpy(menu_item->colours, unselected, sizeof(*selected));
+        else
+            memcpy(menu_item->colours, selected, sizeof(*selected));
+    }
+    if (menu_item == components[3] || menu_item == components[4] || menu_item == components[5]) {
+        if (mask && (mask & 0x10))
+            memcpy(menu_item->colours, unselected, sizeof(*selected));
+        else
+            memcpy(menu_item->colours, selected, sizeof(*selected));
+    }
+    if (menu_item == components[6] || menu_item == components[7] || menu_item == components[8]) {
+        if (mask && (mask & 0x20))
+            memcpy(menu_item->colours, unselected, sizeof(*selected));
+        else
+            memcpy(menu_item->colours, selected, sizeof(*selected));
+    }
 }
 
 void EdMatrixControl::cbButton(eduimenu_s *menu, eduiitem_s *item, u32 value) {
