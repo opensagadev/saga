@@ -440,14 +440,15 @@ eduimenu_s *antinodeEditor_Process(nupad_s *pad) {
                                                               : NuLinkedListGetTail(antinode_list()))
                                                    : (forward ? NuLinkedListGetNext(antinode_list(), &candidate->link)
                                                               : NuLinkedListGetPrev(antinode_list(), &candidate->link));
+            aieditor->mode_selection_42e9c = next;
             if (next == nullptr)
                 next = forward ? NuLinkedListGetHead(antinode_list()) : NuLinkedListGetTail(antinode_list());
             candidate = reinterpret_cast<EDANTINODE_s *>(next);
+            aieditor->mode_selection_42e9c = candidate;
             if (candidate == nullptr || (skip_platforms && candidate == first)) {
                 aieditor->mode_selection_42e9c = nullptr;
                 break;
             }
-            aieditor->mode_selection_42e9c = candidate;
             if (first == nullptr) {
                 first = candidate;
             }

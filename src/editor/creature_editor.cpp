@@ -163,7 +163,12 @@ static void creatureEditor_cb_max_n_respawns(eduimenu_s *, eduiitem_s *, u32);
 static void creatureEditor_cb_min_t_respawn(eduimenu_s *, eduiitem_s *, u32);
 static void creatureEditor_cb_max_t_respawn(eduimenu_s *, eduiitem_s *, u32);
 
-static __used__ void *CreateCreature(i32 type, nuvec_s *position, i32 angle) {
+#if defined(__i386__)
+#define CREATURE_EDITOR_REGPARM2 __attribute__((regparm(2)))
+#else
+#define CREATURE_EDITOR_REGPARM2
+#endif
+static __used__ CREATURE_EDITOR_REGPARM2 void *CreateCreature(i32 type, nuvec_s *position, i32 angle) {
     if (type == -1) {
         return nullptr;
     }

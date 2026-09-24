@@ -2065,28 +2065,26 @@ void pathEditor_Enter(void) {
                 if (source->special_route_index < runtime_path->special_route_count) {
                     AIPATHNODELINK_s *link = &runtime_path->special_routes[source->special_route_index];
                     i32 shared_index = link->special_route_index;
-                    if (shared_index >= 0 && shared_index < 64) {
-                        EDAISHAREDPATHNODE_s *shared = shared_nodes[shared_index];
-                        if (shared == nullptr) {
-                            shared = (EDAISHAREDPATHNODE_s *)NuLinkedListGetHead(&aieditor->free_shared_nodes);
-                            if (shared != nullptr) {
-                                NuLinkedListRemove(&aieditor->free_shared_nodes, &shared->link);
-                                NuLinkedListAppend(&aieditor->shared_path_nodes, &shared->link);
-                                shared_nodes[shared_index] = shared;
-                            }
-                        }
+                    EDAISHAREDPATHNODE_s *shared = shared_nodes[shared_index];
+                    if (shared == nullptr) {
+                        shared = (EDAISHAREDPATHNODE_s *)NuLinkedListGetHead(&aieditor->free_shared_nodes);
                         if (shared != nullptr) {
-                            if (node->shared_node != shared) {
-                                if (node->shared_node != nullptr) {
-                                    EDAISHAREDPATHNODE_s *previous = node->shared_node;
-                                    --previous->reference_count;
-                                    if (previous->reference_count <= 1) {
-                                        pathEditor_DestroySharedNode(previous);
-                                    }
+                            NuLinkedListRemove(&aieditor->free_shared_nodes, &shared->link);
+                            NuLinkedListAppend(&aieditor->shared_path_nodes, &shared->link);
+                            shared_nodes[shared_index] = shared;
+                        }
+                    }
+                    if (shared != nullptr) {
+                        if (node->shared_node != shared) {
+                            if (node->shared_node != nullptr) {
+                                EDAISHAREDPATHNODE_s *previous = node->shared_node;
+                                --previous->reference_count;
+                                if (previous->reference_count <= 1) {
+                                    pathEditor_DestroySharedNode(previous);
                                 }
-                                node->shared_node = shared;
-                                ++shared->reference_count;
                             }
+                            node->shared_node = shared;
+                            ++shared->reference_count;
                         }
                     }
                 }

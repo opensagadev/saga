@@ -2579,16 +2579,7 @@ void PropertyTool::BringToFront(PropertyMenu *menu) {
     while (position != NULL && position->order < -1) {
         position = position->next;
     }
-    if (position != NULL) {
-        menu->next = position->next;
-        menu->previous = position;
-        if (position->next != NULL) {
-            position->next->previous = menu;
-        } else {
-            last_menu = menu;
-        }
-        position->next = menu;
-    } else {
+    if (position == NULL) {
         menu->previous = last_menu;
         if (last_menu != NULL) {
             last_menu->next = menu;
@@ -2597,6 +2588,15 @@ void PropertyTool::BringToFront(PropertyMenu *menu) {
         if (active_menu == NULL) {
             active_menu = menu;
         }
+    } else {
+        menu->next = position;
+        menu->previous = position->previous;
+        if (position->previous != NULL) {
+            position->previous->next = menu;
+        } else {
+            active_menu = menu;
+        }
+        position->previous = menu;
     }
     ++menu_count;
 }

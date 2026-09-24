@@ -952,14 +952,22 @@ void edppDrawCursor() {
     };
     auto draw_axis = [&](NUVEC vector) {
         rotate(vector);
-        line[0].position = {edpp_cam_pos.x - vector.x, edpp_cam_pos.y - vector.y, edpp_cam_pos.z - vector.z};
+        line[0].position.x = edpp_cam_pos.x - vector.x;
+        line[0].position.y = edpp_cam_pos.y - vector.y;
+        line[0].position.z = edpp_cam_pos.z - vector.z;
         line[0].colour = 0xffffffff;
-        line[1].position = edpp_cam_pos;
+        line[1].position.x = edpp_cam_pos.x;
+        line[1].position.y = edpp_cam_pos.y;
+        line[1].position.z = edpp_cam_pos.z;
         line[1].colour = 0xffffffff;
         NuRndrLine3d(line, edpp_mtl, NULL);
-        line[0].position = edpp_cam_pos;
+        line[0].position.x = edpp_cam_pos.x;
+        line[0].position.y = edpp_cam_pos.y;
+        line[0].position.z = edpp_cam_pos.z;
         line[0].colour = 0xff00ff00;
-        line[1].position = {edpp_cam_pos.x + vector.x, edpp_cam_pos.y + vector.y, edpp_cam_pos.z + vector.z};
+        line[1].position.x = edpp_cam_pos.x + vector.x;
+        line[1].position.y = edpp_cam_pos.y + vector.y;
+        line[1].position.z = edpp_cam_pos.z + vector.z;
         line[1].colour = 0xff00ff00;
         NuRndrLine3d(line, edpp_mtl, NULL);
     };
@@ -969,8 +977,12 @@ void edppDrawCursor() {
     auto draw_mark = [&](NUVEC start, NUVEC end) {
         rotate(start);
         rotate(end);
-        line[0].position = {edpp_cam_pos.x + start.x, edpp_cam_pos.y + start.y, edpp_cam_pos.z + start.z};
-        line[1].position = {edpp_cam_pos.x + end.x, edpp_cam_pos.y + end.y, edpp_cam_pos.z + end.z};
+        line[0].position.x = edpp_cam_pos.x + start.x;
+        line[0].position.y = edpp_cam_pos.y + start.y;
+        line[0].position.z = edpp_cam_pos.z + start.z;
+        line[1].position.x = edpp_cam_pos.x + end.x;
+        line[1].position.y = edpp_cam_pos.y + end.y;
+        line[1].position.z = edpp_cam_pos.z + end.z;
         line[0].colour = line[1].colour = 0xff00ff00;
         NuRndrLine3d(line, edpp_mtl, NULL);
     };
@@ -986,9 +998,12 @@ void edppDrawCursor() {
     if (edpp_copy_mode == 0) {
         auto draw_direction = [&](NUVEC direction, u32 colour) {
             rotate(direction);
-            line[0].position = edpp_cam_pos;
-            line[1].position = {edpp_cam_pos.x + direction.x, edpp_cam_pos.y + direction.y,
-                                edpp_cam_pos.z + direction.z};
+            line[0].position.x = edpp_cam_pos.x;
+            line[0].position.y = edpp_cam_pos.y;
+            line[0].position.z = edpp_cam_pos.z;
+            line[1].position.x = edpp_cam_pos.x + direction.x;
+            line[1].position.y = edpp_cam_pos.y + direction.y;
+            line[1].position.z = edpp_cam_pos.z + direction.z;
             line[0].colour = line[1].colour = colour;
             NuRndrLine3d(line, edpp_mtl, NULL);
         };
@@ -1002,8 +1017,9 @@ void edppDrawCursor() {
         NuVecRotateY(&emitter_side, &emitter_side, edpp_emitroty);
         NuVecRotateX(&emitter_side, &emitter_side, edpp_emitrotx);
         rotate(emitter_side);
-        line[0].position = {edpp_cam_pos.x + emitter_side.x, edpp_cam_pos.y + emitter_side.y,
-                            edpp_cam_pos.z + emitter_side.z};
+        line[0].position.x = edpp_cam_pos.x + emitter_side.x;
+        line[0].position.y = edpp_cam_pos.y + emitter_side.y;
+        line[0].position.z = edpp_cam_pos.z + emitter_side.z;
         line[0].colour = 0xff0000ff;
         NuRndrLine3d(line, edpp_mtl, NULL);
         if (edpp_dpad_mode == 3) {
@@ -1025,8 +1041,12 @@ void edppDrawCursor() {
             NUVEC facing = {0.0f, 0.0f, 0.25f};
             NuVecRotateX(&facing, &facing, edpp_facrotx);
             NuVecRotateY(&facing, &facing, edpp_facroty);
-            line[0].position = edpp_cam_pos;
-            line[1].position = {edpp_cam_pos.x + facing.x, edpp_cam_pos.y + facing.y, edpp_cam_pos.z + facing.z};
+            line[0].position.x = edpp_cam_pos.x;
+            line[0].position.y = edpp_cam_pos.y;
+            line[0].position.z = edpp_cam_pos.z;
+            line[1].position.x = edpp_cam_pos.x + facing.x;
+            line[1].position.y = edpp_cam_pos.y + facing.y;
+            line[1].position.z = edpp_cam_pos.z + facing.z;
             line[0].colour = line[1].colour = 0xffff0000;
             NuRndrLine3d(line, edpp_mtl, NULL);
             edbitsDrawBasicCube(edpp_cam_pos.x, edpp_cam_pos.y, edpp_cam_pos.z, 0.25f, 0.25f, 0.0f, edpp_facrotx,

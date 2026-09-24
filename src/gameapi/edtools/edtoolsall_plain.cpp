@@ -6282,7 +6282,8 @@ extern "C" {
                                  edui_cursor_y < (property->button_y + property->button_size) * 0.5f &&
                                  !eduiInteractLocked;
         const bool button_highlighted = (property->unknown_property_flags & 8) || over_button;
-        property->unknown_property_flags = (property->unknown_property_flags & ~16u) | (button_highlighted ? 16u : 0u);
+        u8 *property_flags = reinterpret_cast<u8 *>(property) + 0x4c;
+        *property_flags = (*property_flags & ~16u) | (button_highlighted ? 16u : 0u);
         if (!edui_donotdraw) {
             NuQFntSet(edui_font);
             const u32 text_colour = item->unknown_10 == 1   ? 0xff000060

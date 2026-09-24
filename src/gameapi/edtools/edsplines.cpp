@@ -434,9 +434,10 @@ void *SplineHelper::CreateObject(void *, i32, i32) {
     spline->previous = last_object;
     if (last_object != NULL)
         last_object->next = spline;
-    else
-        first_object = spline;
+    const bool had_first = first_object != NULL;
     last_object = spline;
+    if (!had_first)
+        first_object = spline;
     ++object_count;
     return spline;
 }
