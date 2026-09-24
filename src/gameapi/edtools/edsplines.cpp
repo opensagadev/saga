@@ -429,10 +429,12 @@ void SplineHelper::AddMenuItems(eduimenu_s *menu) {
 void SplineHelper::ClearLevel(i32 level) {
     if (level == -1)
         return;
-    for (SplineObject *spline = static_cast<SplineObject *>(GetNextObject(NULL)); spline != NULL;) {
-        SplineObject *next = static_cast<SplineObject *>(GetNextObject(spline));
+    EdClassInterface *interface = reinterpret_cast<EdClassInterface *>(this);
+    for (SplineObject *spline = static_cast<SplineObject *>(interface->vtable->get_next_object(interface, NULL));
+         spline != NULL;) {
+        SplineObject *next = static_cast<SplineObject *>(interface->vtable->get_next_object(interface, spline));
         if (spline->led_file == level)
-            DestroyObject(spline, 0);
+            interface->vtable->destroy_object(interface, spline, 0);
         spline = next;
     }
 }
