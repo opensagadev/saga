@@ -2499,7 +2499,7 @@ route_selected:
     }
     if ((pressed & 0x10) && path->current_node != nullptr) {
         i32 index = path->current_route - path->routes;
-        u16 mask = 1u << index;
+        u32 mask = 1u << index;
         for (i32 slot = 0; slot < 8; ++slot) {
             EDAIPATHCNX_s *connection = &path->current_node->connections[slot];
             if (connection->node != nullptr && (connection->route_mask & mask)) {

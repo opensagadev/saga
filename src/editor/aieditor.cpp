@@ -255,15 +255,17 @@ static void antinodeEditor_cbCancelDeleteAntinodeMenu(eduimenu_s *, eduimenu_s *
     aieditor_ClearMainMenu();
 }
 
-static EDANTINODE_REGPARM1 void antinodeEditor_AntinodeMoved(EDANTINODE_s *node) {
+static __attribute__((force_align_arg_pointer)) EDANTINODE_REGPARM1 void
+antinodeEditor_AntinodeMoved(EDANTINODE_s *node) {
+    nuvec_s forward = {0.0f, 0.0f, 1.0f};
     if (static_cast<i8>(node->game_flags) >= 0 && NuSpecialExistsFn(&aieditor->cursor_platform)) {
         node->special = aieditor->cursor_platform;
         NUMTX *matrix = NuSpecialGetDrawMtx(&aieditor->cursor_platform);
         NuVecInvMtxTransform(&node->special_position, &node->position, matrix);
-        nuvec_s forward = {0.0f, 0.0f, 1.0f};
         nuvec_s rotated;
         NuVecMtxRotate(&rotated, &forward, matrix);
-        node->rotation_offset = NuAngSub(node->flags, NuAtan2D(rotated.x, rotated.z));
+        node->rotation_offset = NuAtan2D(rotated.x, rotated.z);
+        node->rotation_offset = NuAngSub(node->flags, node->rotation_offset);
     } else {
         memset(&node->special, 0, sizeof(node->special));
     }

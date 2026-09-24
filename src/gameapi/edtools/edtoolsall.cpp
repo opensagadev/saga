@@ -4657,15 +4657,22 @@ __attribute__((force_align_arg_pointer)) i32 EdManipulator::SelectAxis(EdInputCo
     VuVec *ray_direction = reinterpret_cast<VuVec *>(input.reserved_00 + 0x30);
     f32 nearest_distance = __FLT_MAX__;
     i32 nearest = 0;
-    for (i32 index = 1; index < 8; ++index) {
-        VuVec closest;
-        f32 distance = LineToPointDistance(*ray_origin, *ray_direction, locators[index], &closest);
-        f32 radius = (index <= 3 ? 0.25f : 0.1f) * Scale;
-        if (distance < radius && distance < nearest_distance) {
-            nearest_distance = distance;
-            nearest = index;
-        }
+#define CHECK_AXIS(index, radius)                                                                                      \
+    {                                                                                                                  \
+        f32 distance = LineToPointDistance(*ray_origin, *ray_direction, locators[index], NULL);                        \
+        if (distance < (radius) * Scale && distance < nearest_distance) {                                              \
+            nearest_distance = distance;                                                                               \
+            nearest = index;                                                                                           \
+        }                                                                                                              \
     }
+    CHECK_AXIS(1, 0.25f);
+    CHECK_AXIS(2, 0.25f);
+    CHECK_AXIS(3, 0.25f);
+    CHECK_AXIS(4, 0.1f);
+    CHECK_AXIS(5, 0.1f);
+    CHECK_AXIS(6, 0.1f);
+    CHECK_AXIS(7, 0.1f);
+#undef CHECK_AXIS
 
     i32 *selected_axis = reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(this) + 0x0c);
 

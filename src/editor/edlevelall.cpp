@@ -427,7 +427,7 @@ void ClassEditor::Process(EdInputContext &input) {
             theRegistry.ClassIFaceProcess(entry->ed_class, entry->object, input);
         if (input.GetPress(39) != 0.0f) {
             ClassObjectListEntry *entry = selected_objects.first;
-            VuVec position;
+            VuVec position __attribute__((aligned(16)));
             get_class_object_attribute(entry->ed_class, entry->object, entry->reference, 8, EdType_VuVec, &position, 0);
             theLevelEditor.background_colour[0] = position.x;
             theLevelEditor.background_colour[1] = position.y;

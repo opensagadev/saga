@@ -1991,7 +1991,9 @@ extern "C" {
             EdFileRead(instance_name, sizeof(instance_name));
             clump->special_index = edbitsLookupInstance(instance_name, static_cast<NUGSCN *>(gscn));
             clump->element_count = EdFileReadInt();
-            EdFileReadNuVec(&clump->position);
+            clump->position.x = EdFileReadFloat();
+            clump->position.y = EdFileReadFloat();
+            clump->position.z = EdFileReadFloat();
             clump->size = EdFileReadFloat();
             clump->field_18 = EdFileReadFloat();
 
@@ -2071,11 +2073,12 @@ extern "C" {
                         clump->element_count = EDGRA_MAX_UNITS_PER_INDIVIDUAL_CLUMP;
                     }
                     for (i32 element = 0; element < clump->element_count; ++element) {
-                        edgra_individual_s *blade = GetIndGrassClump(individual, element);
-                        EdFileReadNuVec(&blade->position);
-                        blade->field_0c = EdFileReadFloat();
-                        blade->field_10 = EdFileReadShort();
-                        blade->field_12 = EdFileReadShort();
+                        GetIndGrassClump(individual, element)->position.x = EdFileReadFloat();
+                        GetIndGrassClump(individual, element)->position.y = EdFileReadFloat();
+                        GetIndGrassClump(individual, element)->position.z = EdFileReadFloat();
+                        GetIndGrassClump(individual, element)->field_0c = EdFileReadFloat();
+                        GetIndGrassClump(individual, element)->field_10 = EdFileReadShort();
+                        GetIndGrassClump(individual, element)->field_12 = EdFileReadShort();
                     }
                 }
                 for (i32 element = 0; element < skipped_individuals; ++element) {
@@ -2093,7 +2096,9 @@ extern "C" {
             if (version >= 8) {
                 NUVEC *vectors = static_cast<NUVEC *>(clump->vector_buffer);
                 for (i32 element = 0; element < clump->element_count; ++element) {
-                    EdFileReadNuVec(&vectors[element]);
+                    vectors[element].x = EdFileReadFloat();
+                    vectors[element].y = EdFileReadFloat();
+                    vectors[element].z = EdFileReadFloat();
                 }
             }
             if (clump->element_count < 4) {

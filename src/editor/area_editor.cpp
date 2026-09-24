@@ -240,7 +240,7 @@ void areaEditor_Render(i32 x, i32 y, f32, f32) {
     } else {
         NuQFntPrintEx(system_qfont, text_x, (y + 30) * 8, 16, "X - Move selected");
         if ((aieditor->pad_buttons & 0x40) != 0) {
-            if (focus->flags & 1) {
+            if (area_hovered()->flags & 1) {
                 NuQFntPrintEx(system_qfont, text_x, (y + 45) * 8, 16, "LRIGHT/LLEFT - Adjust Radius");
             } else {
                 NuQFntPrintEx(system_qfont, text_x, (y + 45) * 8, 16, "LRIGHT/LLEFT - Adjust X size");
@@ -250,7 +250,7 @@ void areaEditor_Render(i32 x, i32 y, f32, f32) {
             i32 next_line = y + 45;
             NuQFntPrintEx(system_qfont, text_x, next_line * 8, 16, "TRI - Delete selected");
             next_line += 15;
-            if ((focus->flags & 1) == 0) {
+            if ((area_hovered()->flags & 1) == 0) {
                 NuQFntPrintEx(system_qfont, text_x, next_line * 8, 16, "LLEFT/LRIGHT - Rotate");
                 next_line += 15;
             }

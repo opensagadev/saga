@@ -260,6 +260,10 @@ void *KnotHelper::CreateObject(void *, i32, i32) {
         ++theSplineHelper.object_count;
     }
     SplineKnot *knot = static_cast<SplineKnot *>(theMemoryManager.AllocPool(sizeof(SplineKnot), 1));
+    if (knot != NULL) {
+        knot->next = NULL;
+        knot->previous = NULL;
+    }
     knot->spline = spline;
     knot->led_file = Placeable::CurrentLedFile;
     if (selected_knot == NULL) {
