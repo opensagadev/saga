@@ -824,27 +824,32 @@ void SplineObject::ReverseKnots() {
     knots.first = NULL;
     knots.count = 0;
     i32 next_count = 1;
-    i32 count = 0;
-    while (knot != NULL) {
-        SplineKnot *prior = knot->previous;
-        SplineKnot *next = knot->next;
-        if (next != NULL)
-            next->previous = prior;
-        if (prior != NULL)
-            prior->next = next;
-        else
-            old_first = next;
-        knot->next = NULL;
-        knot->previous = knots.last;
-        if (knots.last != NULL)
-            knots.last->next = knot;
-        else
-            knots.first = knot;
-        knots.last = knot;
-        count = next_count++;
-        knot = prior;
+    if (knot != NULL) {
+        while (true) {
+            SplineKnot *prior = knot->previous;
+            SplineKnot *next = knot->next;
+            if (next != NULL)
+                next->previous = prior;
+            if (prior != NULL)
+                prior->next = next;
+            else
+                old_first = next;
+            knot->next = NULL;
+            knot->previous = knots.last;
+            if (knots.last != NULL)
+                knots.last->next = knot;
+            bool had_first = knots.first != NULL;
+            knots.last = knot;
+            if (!had_first)
+                knots.first = knot;
+            i32 count = next_count++;
+            if (prior == NULL) {
+                knots.count = count;
+                break;
+            }
+            knot = prior;
+        }
     }
-    knots.count = count;
     while (old_first != NULL) {
         SplineKnot *next = old_first->next;
         if (next != NULL)

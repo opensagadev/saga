@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 58.556744,
+    "fuzzy_match_percent": 58.56837,
     "total_code": "4722419",
-    "matched_code": "487746",
-    "matched_code_percent": 10.328308,
+    "matched_code": "488137",
+    "matched_code_percent": 10.336588,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 5878,
-    "matched_functions_percent": 43.673378,
+    "matched_functions": 5880,
+    "matched_functions_percent": 43.688236,
     "total_units": 1
   },
   "text": {
@@ -21650,7 +21650,7 @@
           "address": 4201504,
           "offset": 3311536,
           "size": 4142,
-          "match_percent": 2.068376
+          "match_percent": 6.329535
         },
         {
           "name": "pathEditorSaveData",
@@ -28021,7 +28021,7 @@
           "address": 5580448,
           "offset": 4690480,
           "size": 324,
-          "match_percent": 46.680412
+          "match_percent": 51.525772
         },
         {
           "name": "_ZN12SplineObject4DrawEiiif",
@@ -28077,7 +28077,7 @@
           "address": 5594160,
           "offset": 4704192,
           "size": 380,
-          "match_percent": 74.64706
+          "match_percent": 78.56863
         },
         {
           "name": "_ZN12SplineObject15GenLinearPointsEv",
@@ -28085,7 +28085,7 @@
           "address": 5594544,
           "offset": 4704576,
           "size": 276,
-          "match_percent": 99.788734
+          "match_percent": 100.0
         },
         {
           "name": "_ZN12SplineObject9GenPointsEv",
@@ -28628,7 +28628,7 @@
           "address": 3706192,
           "offset": 2816224,
           "size": 2393,
-          "match_percent": 14.187931
+          "match_percent": 28.548275
         },
         {
           "name": "_Z26eduiItemFileSelectorCreatejP11eduiiattr_sPFvP10eduimenu_sP10eduiitem_sjEPc",
@@ -29292,7 +29292,7 @@
           "address": 5491264,
           "offset": 4601296,
           "size": 383,
-          "match_percent": 80.5534
+          "match_percent": 80.50485
         },
         {
           "name": "_ZN12EdBitControl12cbSelectItemEP10eduimenu_sP10eduiitem_sj",
@@ -29596,7 +29596,7 @@
           "address": 5502896,
           "offset": 4612928,
           "size": 1716,
-          "match_percent": 19.583872
+          "match_percent": 19.454838
         },
         {
           "name": "_Z18EdDrawPolyCylinderRK5VuVecS1_iiifff",
@@ -30004,7 +30004,7 @@
           "address": 5539152,
           "offset": 4649184,
           "size": 115,
-          "match_percent": 99.65116
+          "match_percent": 100.0
         },
         {
           "name": "_ZN10EdRegistry8GetClassEi",

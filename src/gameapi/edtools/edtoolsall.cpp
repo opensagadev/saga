@@ -427,22 +427,7 @@ void edanimDoInput(nupad_s *pad) {
         edcamMove(pad);
     const auto pressed = pad->digital_buttons_pressed;
 
-    if ((pad->digital_buttons & 0x100) == 0) {
-        if (edanim_nearest_param_id != -1) {
-            auto &param = AnimParams[edanim_nearest_param_id];
-            for (i32 effect = 0; effect < param.effect_count;) {
-                if ((param.effect_ids[effect] == -1 || debtab[param.effect_ids[effect]] == nullptr) &&
-                    param.effect_names[effect][0] != '\0') {
-                    param.effect_ids[effect] = LookupDebrisEffect(param.effect_names[effect]);
-                    if (param.effect_ids[effect] == -1) {
-                        edanimParticleDestroy(edanim_nearest_param_id, effect);
-                        continue;
-                    }
-                }
-                ++effect;
-            }
-        }
-    } else {
+    if ((pad->digital_buttons & 0x100) != 0) {
         bool particle_selection_started = false;
         bool sound_selection_started = false;
         if (edanim_sound_mode == 0 && edanim_particle_mode != 0 && (pressed & 0x80)) {
@@ -540,6 +525,21 @@ void edanimDoInput(nupad_s *pad) {
                     }
                 }
             }
+        }
+    }
+
+    if (edanim_nearest_param_id != -1) {
+        auto &param = AnimParams[edanim_nearest_param_id];
+        for (i32 effect = 0; effect < param.effect_count;) {
+            if ((param.effect_ids[effect] == -1 || debtab[param.effect_ids[effect]] == nullptr) &&
+                param.effect_names[effect][0] != '\0') {
+                param.effect_ids[effect] = LookupDebrisEffect(param.effect_names[effect]);
+                if (param.effect_ids[effect] == -1) {
+                    edanimParticleDestroy(edanim_nearest_param_id, effect);
+                    continue;
+                }
+            }
+            ++effect;
         }
     }
 

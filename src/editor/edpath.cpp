@@ -1504,6 +1504,7 @@ extern "C" {
                     distance_tables = nullptr;
                     return nullptr;
                 }
+                path->special_route_count = 0;
             }
             if (path->node_count != 0) {
                 path->nodes = (AIPATHNODE_s *)AISysBufferAlloc(cursor, end, path->node_count * sizeof(AIPATHNODE_s));
@@ -1597,8 +1598,7 @@ extern "C" {
                 }
                 if (node->shared_node != nullptr && path->special_routes != nullptr) {
                     AIPATHNODELINK_s *link =
-                        &path->special_routes[runtime->special_route_index =
-                                                  (u8)(path->special_route_count - special_count--)];
+                        &path->special_routes[runtime->special_route_index = path->special_route_count++];
                     link->node_index = node->index;
                     link->special_route_index = node->shared_node->runtime_index;
                     AIPATHSPECIALROUTE_s *shared_route = &system->special_routes[node->shared_node->runtime_index];
