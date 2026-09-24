@@ -1368,20 +1368,16 @@ void ClassEditor::cbEdClassSelectObjectMenu(eduimenu_s *parent, eduiitem_s *item
                                       reinterpret_cast<void *>(static_cast<usize>(EdLevelFnt)), cbEdLevelDestroy, NULL);
     if (menu == NULL)
         return;
-    if (ed_class != NULL && ed_class->interface != NULL) {
-        EdClassInterface *interface = ed_class->interface;
-        EdRef *name_ref = ed_class->FindTypeRef(2, 1);
-        if (interface->vtable->get_next_object != NULL) {
-            for (void *object = interface->vtable->get_next_object(interface, NULL); object != NULL;
-                 object = interface->vtable->get_next_object(interface, object)) {
-                char name[128];
-                if (name_ref == NULL || !name_ref->GetAttributeData(object, 2, EdType_String, name, sizeof(name)))
-                    NuStrCpy(name, ed_class->name);
-                if (theClassEditor.Editable(object, ed_class, -1))
-                    eduiMenuAddItem(menu, eduiItemSelCreate(reinterpret_cast<usize>(object), &EdLevelAttr, 0, 0,
-                                                            cbEdClassSelectObject, name));
-            }
-        }
+    EdClassInterface *interface = ed_class->interface;
+    EdRef *name_ref = ed_class->FindTypeRef(2, 1);
+    for (void *object = interface->vtable->get_next_object(interface, NULL); object != NULL;
+         object = interface->vtable->get_next_object(interface, object)) {
+        char name[128];
+        if (name_ref == NULL || !name_ref->GetAttributeData(object, 2, EdType_String, name, sizeof(name)))
+            NuStrCpy(name, ed_class->name);
+        if (theClassEditor.Editable(object, ed_class, -1))
+            eduiMenuAddItem(menu, eduiItemSelCreate(reinterpret_cast<usize>(object), &EdLevelAttr, 0, 0,
+                                                    cbEdClassSelectObject, name));
     }
     if (menu->first == NULL) {
         eduiMenuAddItem(

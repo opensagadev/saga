@@ -1664,17 +1664,17 @@ static void edpartWorldInstanceMenu(eduimenu_s *parent, eduiitem_s *, u32) {
         i32 included = 0;
         for (i32 variant = 0; variant < edpart_nearest_type->variant_count; ++variant) {
             if (edpart_nearest_type->effect_ids[variant] == index) {
-                if (edpart_nearest_type->effect_pages[variant] == 0)
+                if (edpart_nearest_type->effect_pages[variant] == 0) {
                     selected = 1;
-                else
                     included = 1;
+                }
             }
         }
         if (edpart_filter && NuStrNCmp(edpart_filter_string, name, NuStrLen(edpart_filter_string)) != 0 && !included)
             continue;
         eduiitem_s *item = eduiItemToggleCreate(index, edblack, selected, group++, edpartSetInstanceType, name);
         eduiMenuAddItem(edpart_worldinstance_menu, item);
-        if (selected && !selected_first) {
+        if (selected & (selected_first ^ 1)) {
             selected_first = 1;
             edpart_worldinstance_menu->selected = edui_last_item;
         }
@@ -1760,12 +1760,11 @@ static void edpartInstanceOrientMenu(eduimenu_s *menu, eduiitem_s *, u32) {
         return;
 #define EDPART_ORIENT_SLIDER(axis, field, callback, minimum, maximum, label)                                           \
     do {                                                                                                               \
-        edui_slider_s *slider = static_cast<edui_slider_s *>(                                                          \
-            eduiItemSliderCreate(axis, edblack, 0, callback, minimum, maximum,                                         \
-                                 edpart_nearest_type->field[axis] * (360.0f / 65536.0f), label));                      \
-        eduiMenuAddItem(edpart_instorient_menu, slider);                                                               \
-        eduiItemSliderSetFmt(slider, "(%1.01f)");                                                                      \
-        eduiItemSliderSetGranularity(slider, 0.1f);                                                                    \
+        eduiMenuAddItem(edpart_instorient_menu,                                                                        \
+                        eduiItemSliderCreate(axis, edblack, 0, callback, minimum, maximum,                             \
+                                             edpart_nearest_type->field[axis] * (360.0f / 65536.0f), label));          \
+        eduiItemSliderSetFmt(static_cast<edui_slider_s *>(edui_last_item), "(%1.01f)");                                \
+        eduiItemSliderSetGranularity(static_cast<edui_slider_s *>(edui_last_item), 0.1f);                              \
     } while (0)
     EDPART_ORIENT_SLIDER(0, rotation, edpartChangeInstanceRot, edpart_superscale * -180.0f, edpart_superscale * 360.0f,
                          "Base Rotation X");
@@ -1832,17 +1831,17 @@ static void edpartThingsInstanceMenu(eduimenu_s *parent, eduiitem_s *, u32) {
         i32 included = 0;
         for (i32 variant = 0; variant < edpart_nearest_type->variant_count; ++variant) {
             if (edpart_nearest_type->effect_ids[variant] == index) {
-                if (edpart_nearest_type->effect_pages[variant] == 1)
+                if (edpart_nearest_type->effect_pages[variant] == 1) {
                     selected = 1;
-                else
                     included = 1;
+                }
             }
         }
         if (edpart_filter && NuStrNCmp(edpart_filter_string, name, NuStrLen(edpart_filter_string)) != 0 && !included)
             continue;
         eduiitem_s *item = eduiItemToggleCreate(index, edblack, selected, group++, edpartSetInstanceType, name);
         eduiMenuAddItem(edpart_thingsinstance_menu, item);
-        if (selected && !selected_first) {
+        if (selected & (selected_first ^ 1)) {
             selected_first = 1;
             edpart_thingsinstance_menu->selected = edui_last_item;
         }
