@@ -282,10 +282,7 @@ static EDANTINODE_REGPARM1 EDANTINODE_s *antinodeEditor_GetNearestAntinode(i32 r
         if (height > NuFmax(0.2f, node->upper_height) || height < NuFmin(-0.2f, node->lower_height))
             continue;
         if (require_inside) {
-            if (node->type == 0) {
-                if (!(node->radius * node->radius > distance))
-                    continue;
-            } else if (node->type == 1) {
+            if (node->type == 1) {
                 f32 extent = node->base_radius > node->base_height ? node->base_radius : node->base_height;
                 nuvec_s ellipse_offset = {aieditor->camera_position.x - node->position.x, 0.0f,
                                           aieditor->camera_position.z - node->position.z};
@@ -301,6 +298,9 @@ static EDANTINODE_REGPARM1 EDANTINODE_s *antinodeEditor_GetNearestAntinode(i32 r
                 f32 ellipse_x = NuTrigTable[(angle >> 1) & 0x7fff] * node->base_radius;
                 f32 ellipse_z = NuTrigTable[((angle + 0x4000) >> 1) & 0x7fff] * node->base_height;
                 if (!(ellipse_x * ellipse_x + ellipse_z * ellipse_z > ellipse_distance))
+                    continue;
+            } else if (node->type == 0) {
+                if (!(node->radius * node->radius > distance))
                     continue;
             } else if (node->type == 2) {
                 f32 diagonal = NuFsqrt(node->base_radius * node->base_radius + node->base_height * node->base_height);

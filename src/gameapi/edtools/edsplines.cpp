@@ -725,8 +725,8 @@ SplineObject *SplineObject::Clone() {
 }
 
 void SplineObject::Draw(i32, i32 colour_mode, i32 straight, float show_points) {
-    EdDrawBegin(0);
     i32 colour = colour_mode == 0 ? static_cast<i32>(0x80808080) : static_cast<i32>(0x80008080);
+    EdDrawBegin(0);
     for (SplineKnot *knot = knots.first; knot != NULL && knot->next != NULL; knot = knot->next) {
         SplineKnot *next = knot->next;
         if (straight != 0 || step < 0.1f)

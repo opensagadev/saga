@@ -6555,7 +6555,7 @@ extern "C" {
         if (!edui_donotdraw)
             NuRndrRect2di(x << 4, y << 3, item_width << 4, total_height << 3, item->colours[2], uimtls[ui_bgmtl]);
         for (i32 row = 0; row < 4; ++row) {
-            for (i32 column = 0; column < 10; ++column) {
+            auto draw_key = [&](i32 column) {
                 if (!edui_donotdraw) {
                     NuQFntSet(edui_font);
                     NuQFntSetColour(edui_font,
@@ -6563,7 +6563,17 @@ extern "C" {
                 }
                 char letter[2] = {textrow[row][column], '\0'};
                 eduiFntPrintEx(edui_font, (x + height * column) << 4, ((y + row * height) << 3) + baseline, 16, letter);
-            }
+            };
+            draw_key(0);
+            draw_key(1);
+            draw_key(2);
+            draw_key(3);
+            draw_key(4);
+            draw_key(5);
+            draw_key(6);
+            draw_key(7);
+            draw_key(8);
+            draw_key(9);
         }
         if (!edui_donotdraw) {
             NuQFntSet(edui_font);

@@ -1479,57 +1479,266 @@ i32 edppSaveEffects(char *filename, char page) {
         EdFileWrite(effect->name, 16);
         EdFileWriteShort(effect->frequency);
         EdFileWriteShort(effect->max_particles);
-        for (i32 offset = 0x18; offset <= 0x28; offset += 4)
-            WRITE_FLOAT_AT(offset);
+        WRITE_FLOAT_AT(0x18);
+        WRITE_FLOAT_AT(0x1c);
+        WRITE_FLOAT_AT(0x20);
+        WRITE_FLOAT_AT(0x24);
+        WRITE_FLOAT_AT(0x28);
         EdFileWriteChar(effect->generator_type);
         EdFileWriteChar(effect->momentum_adjustment_type);
         EdFileWriteChar(effect->cutscene_only);
         EdFileWriteChar(effect->particle_type);
         EdFileWriteChar(effect->camera_facing);
-        for (i32 offset = 0x30; offset <= 0x48; offset += 4)
-            WRITE_FLOAT_AT(offset);
+        WRITE_FLOAT_AT(0x30);
+        WRITE_FLOAT_AT(0x34);
+        WRITE_FLOAT_AT(0x38);
+        WRITE_FLOAT_AT(0x3c);
+        WRITE_FLOAT_AT(0x40);
+        WRITE_FLOAT_AT(0x44);
+        WRITE_FLOAT_AT(0x48);
         EdFileWriteNuVec(reinterpret_cast<NUVEC *>(bytes + 0x4c));
         EdFileWriteNuVec(reinterpret_cast<NUVEC *>(bytes + 0x58));
         EdFileWriteNuVec(reinterpret_cast<NUVEC *>(bytes + 0x64));
-        for (i32 offset = 0x70; offset <= 0xa4; offset += 4)
-            WRITE_FLOAT_AT(offset);
+        WRITE_FLOAT_AT(0x70);
+        WRITE_FLOAT_AT(0x74);
+        WRITE_FLOAT_AT(0x78);
+        WRITE_FLOAT_AT(0x7c);
+        WRITE_FLOAT_AT(0x80);
+        WRITE_FLOAT_AT(0x84);
+        WRITE_FLOAT_AT(0x88);
+        WRITE_FLOAT_AT(0x8c);
+        WRITE_FLOAT_AT(0x90);
+        WRITE_FLOAT_AT(0x94);
+        WRITE_FLOAT_AT(0x98);
+        WRITE_FLOAT_AT(0x9c);
+        WRITE_FLOAT_AT(0xa0);
+        WRITE_FLOAT_AT(0xa4);
         EdFileWriteShort(effect->field_0a8);
         EdFileWriteChar(effect->field_0aa);
         EdFileWriteChar(effect->field_0ab);
-        for (i32 offset = 0xac; offset <= 0xbc; offset += 4)
-            WRITE_FLOAT_AT(offset);
-        for (i32 key = 0; key < 8; ++key) {
-            EdFileWriteFloat(effect->colour_keys[key].time);
-            EdFileWriteUnsignedChar(effect->colour_keys[key].red);
-            EdFileWriteUnsignedChar(effect->colour_keys[key].green);
-            EdFileWriteUnsignedChar(effect->colour_keys[key].blue);
-            EdFileWriteUnsignedChar(effect->colour_keys[key].alpha);
-        }
-        for (i32 offset = 0x100; offset <= 0x2a4; offset += 4)
-            WRITE_FLOAT_AT(offset);
-        for (i32 offset = 0x2b0; offset <= 0x2ec; offset += 4)
-            WRITE_FLOAT_AT(offset);
+        WRITE_FLOAT_AT(0xac);
+        WRITE_FLOAT_AT(0xb0);
+        WRITE_FLOAT_AT(0xb4);
+        WRITE_FLOAT_AT(0xb8);
+        WRITE_FLOAT_AT(0xbc);
+#define WRITE_COLOUR_KEY(key)                                                                                          \
+    EdFileWriteFloat(effect->colour_keys[key].time);                                                                   \
+    EdFileWriteUnsignedChar(effect->colour_keys[key].red);                                                             \
+    EdFileWriteUnsignedChar(effect->colour_keys[key].green);                                                           \
+    EdFileWriteUnsignedChar(effect->colour_keys[key].blue);                                                            \
+    EdFileWriteUnsignedChar(effect->colour_keys[key].alpha)
+        WRITE_COLOUR_KEY(0);
+        WRITE_COLOUR_KEY(1);
+        WRITE_COLOUR_KEY(2);
+        WRITE_COLOUR_KEY(3);
+        WRITE_COLOUR_KEY(4);
+        WRITE_COLOUR_KEY(5);
+        WRITE_COLOUR_KEY(6);
+        WRITE_COLOUR_KEY(7);
+#undef WRITE_COLOUR_KEY
+        WRITE_FLOAT_AT(0x100);
+        WRITE_FLOAT_AT(0x104);
+        WRITE_FLOAT_AT(0x108);
+        WRITE_FLOAT_AT(0x10c);
+        WRITE_FLOAT_AT(0x110);
+        WRITE_FLOAT_AT(0x114);
+        WRITE_FLOAT_AT(0x118);
+        WRITE_FLOAT_AT(0x11c);
+        WRITE_FLOAT_AT(0x120);
+        WRITE_FLOAT_AT(0x124);
+        WRITE_FLOAT_AT(0x128);
+        WRITE_FLOAT_AT(0x12c);
+        WRITE_FLOAT_AT(0x130);
+        WRITE_FLOAT_AT(0x134);
+        WRITE_FLOAT_AT(0x138);
+        WRITE_FLOAT_AT(0x13c);
+        WRITE_FLOAT_AT(0x140);
+        WRITE_FLOAT_AT(0x144);
+        WRITE_FLOAT_AT(0x148);
+        WRITE_FLOAT_AT(0x14c);
+        WRITE_FLOAT_AT(0x150);
+        WRITE_FLOAT_AT(0x154);
+        WRITE_FLOAT_AT(0x158);
+        WRITE_FLOAT_AT(0x15c);
+        WRITE_FLOAT_AT(0x160);
+        WRITE_FLOAT_AT(0x164);
+        WRITE_FLOAT_AT(0x168);
+        WRITE_FLOAT_AT(0x16c);
+        WRITE_FLOAT_AT(0x170);
+        WRITE_FLOAT_AT(0x174);
+        WRITE_FLOAT_AT(0x178);
+        WRITE_FLOAT_AT(0x17c);
+        WRITE_FLOAT_AT(0x180);
+        WRITE_FLOAT_AT(0x184);
+        WRITE_FLOAT_AT(0x188);
+        WRITE_FLOAT_AT(0x18c);
+        WRITE_FLOAT_AT(0x190);
+        WRITE_FLOAT_AT(0x194);
+        WRITE_FLOAT_AT(0x198);
+        WRITE_FLOAT_AT(0x19c);
+        WRITE_FLOAT_AT(0x1a0);
+        WRITE_FLOAT_AT(0x1a4);
+        WRITE_FLOAT_AT(0x1a8);
+        WRITE_FLOAT_AT(0x1ac);
+        WRITE_FLOAT_AT(0x1b0);
+        WRITE_FLOAT_AT(0x1b4);
+        WRITE_FLOAT_AT(0x1b8);
+        WRITE_FLOAT_AT(0x1bc);
+        WRITE_FLOAT_AT(0x1c0);
+        WRITE_FLOAT_AT(0x1c4);
+        WRITE_FLOAT_AT(0x1c8);
+        WRITE_FLOAT_AT(0x1cc);
+        WRITE_FLOAT_AT(0x1d0);
+        WRITE_FLOAT_AT(0x1d4);
+        WRITE_FLOAT_AT(0x1d8);
+        WRITE_FLOAT_AT(0x1dc);
+        WRITE_FLOAT_AT(0x1e0);
+        WRITE_FLOAT_AT(0x1e4);
+        WRITE_FLOAT_AT(0x1e8);
+        WRITE_FLOAT_AT(0x1ec);
+        WRITE_FLOAT_AT(0x1f0);
+        WRITE_FLOAT_AT(0x1f4);
+        WRITE_FLOAT_AT(0x1f8);
+        WRITE_FLOAT_AT(0x1fc);
+        WRITE_FLOAT_AT(0x200);
+        WRITE_FLOAT_AT(0x204);
+        WRITE_FLOAT_AT(0x208);
+        WRITE_FLOAT_AT(0x20c);
+        WRITE_FLOAT_AT(0x210);
+        WRITE_FLOAT_AT(0x214);
+        WRITE_FLOAT_AT(0x218);
+        WRITE_FLOAT_AT(0x21c);
+        WRITE_FLOAT_AT(0x220);
+        WRITE_FLOAT_AT(0x224);
+        WRITE_FLOAT_AT(0x228);
+        WRITE_FLOAT_AT(0x22c);
+        WRITE_FLOAT_AT(0x230);
+        WRITE_FLOAT_AT(0x234);
+        WRITE_FLOAT_AT(0x238);
+        WRITE_FLOAT_AT(0x23c);
+        WRITE_FLOAT_AT(0x240);
+        WRITE_FLOAT_AT(0x244);
+        WRITE_FLOAT_AT(0x248);
+        WRITE_FLOAT_AT(0x24c);
+        WRITE_FLOAT_AT(0x250);
+        WRITE_FLOAT_AT(0x254);
+        WRITE_FLOAT_AT(0x258);
+        WRITE_FLOAT_AT(0x25c);
+        WRITE_FLOAT_AT(0x260);
+        WRITE_FLOAT_AT(0x264);
+        WRITE_FLOAT_AT(0x268);
+        WRITE_FLOAT_AT(0x26c);
+        WRITE_FLOAT_AT(0x270);
+        WRITE_FLOAT_AT(0x274);
+        WRITE_FLOAT_AT(0x278);
+        WRITE_FLOAT_AT(0x27c);
+        WRITE_FLOAT_AT(0x280);
+        WRITE_FLOAT_AT(0x284);
+        WRITE_FLOAT_AT(0x288);
+        WRITE_FLOAT_AT(0x28c);
+        WRITE_FLOAT_AT(0x290);
+        WRITE_FLOAT_AT(0x294);
+        WRITE_FLOAT_AT(0x298);
+        WRITE_FLOAT_AT(0x29c);
+        WRITE_FLOAT_AT(0x2a0);
+        WRITE_FLOAT_AT(0x2a4);
+        WRITE_FLOAT_AT(0x2b0);
+        WRITE_FLOAT_AT(0x2b4);
+        WRITE_FLOAT_AT(0x2b8);
+        WRITE_FLOAT_AT(0x2bc);
+        WRITE_FLOAT_AT(0x2c0);
+        WRITE_FLOAT_AT(0x2c4);
+        WRITE_FLOAT_AT(0x2c8);
+        WRITE_FLOAT_AT(0x2cc);
+        WRITE_FLOAT_AT(0x2d0);
+        WRITE_FLOAT_AT(0x2d4);
+        WRITE_FLOAT_AT(0x2d8);
+        WRITE_FLOAT_AT(0x2dc);
+        WRITE_FLOAT_AT(0x2e0);
+        WRITE_FLOAT_AT(0x2e4);
+        WRITE_FLOAT_AT(0x2e8);
+        WRITE_FLOAT_AT(0x2ec);
         EdFileWriteChar(effect->process_spheres);
         EdFileWriteChar(effect->time_group);
         EdFileWriteChar(effect->field_2f2);
         EdFileWriteChar(effect->use_explicit_clip_box);
         EdFileWriteNuVec(&effect->repeat_box);
         EdFileWriteFloat(effect->thinning);
-        for (i32 offset = 0x304; offset <= 0x3cc; offset += 4)
-            WRITE_FLOAT_AT(offset);
+        WRITE_FLOAT_AT(0x304);
+        WRITE_FLOAT_AT(0x308);
+        WRITE_FLOAT_AT(0x30c);
+        WRITE_FLOAT_AT(0x310);
+        WRITE_FLOAT_AT(0x314);
+        WRITE_FLOAT_AT(0x318);
+        WRITE_FLOAT_AT(0x31c);
+        WRITE_FLOAT_AT(0x320);
+        WRITE_FLOAT_AT(0x324);
+        WRITE_FLOAT_AT(0x328);
+        WRITE_FLOAT_AT(0x32c);
+        WRITE_FLOAT_AT(0x330);
+        WRITE_FLOAT_AT(0x334);
+        WRITE_FLOAT_AT(0x338);
+        WRITE_FLOAT_AT(0x33c);
+        WRITE_FLOAT_AT(0x340);
+        WRITE_FLOAT_AT(0x344);
+        WRITE_FLOAT_AT(0x348);
+        WRITE_FLOAT_AT(0x34c);
+        WRITE_FLOAT_AT(0x350);
+        WRITE_FLOAT_AT(0x354);
+        WRITE_FLOAT_AT(0x358);
+        WRITE_FLOAT_AT(0x35c);
+        WRITE_FLOAT_AT(0x360);
+        WRITE_FLOAT_AT(0x364);
+        WRITE_FLOAT_AT(0x368);
+        WRITE_FLOAT_AT(0x36c);
+        WRITE_FLOAT_AT(0x370);
+        WRITE_FLOAT_AT(0x374);
+        WRITE_FLOAT_AT(0x378);
+        WRITE_FLOAT_AT(0x37c);
+        WRITE_FLOAT_AT(0x380);
+        WRITE_FLOAT_AT(0x384);
+        WRITE_FLOAT_AT(0x388);
+        WRITE_FLOAT_AT(0x38c);
+        WRITE_FLOAT_AT(0x390);
+        WRITE_FLOAT_AT(0x394);
+        WRITE_FLOAT_AT(0x398);
+        WRITE_FLOAT_AT(0x39c);
+        WRITE_FLOAT_AT(0x3a0);
+        WRITE_FLOAT_AT(0x3a4);
+        WRITE_FLOAT_AT(0x3a8);
+        WRITE_FLOAT_AT(0x3ac);
+        WRITE_FLOAT_AT(0x3b0);
+        WRITE_FLOAT_AT(0x3b4);
+        WRITE_FLOAT_AT(0x3b8);
+        WRITE_FLOAT_AT(0x3bc);
+        WRITE_FLOAT_AT(0x3c0);
+        WRITE_FLOAT_AT(0x3c4);
+        WRITE_FLOAT_AT(0x3c8);
+        WRITE_FLOAT_AT(0x3cc);
 #undef WRITE_FLOAT_AT
 
-        i32 sound_count = 0;
-        for (i32 sound = 0; sound < 4; ++sound)
-            sound_count += effect->sound_data[sound * 3] != -1;
+        i32 sound_count = (effect->sound_data[0] != -1) + (effect->sound_data[3] != -1) +
+                          (effect->sound_data[6] != -1) + (effect->sound_data[9] != -1);
         EdFileWriteInt(sound_count);
-        for (i32 sound = 0; sound < 4; ++sound) {
-            const i32 id = effect->sound_data[sound * 3];
-            if (id == -1)
-                continue;
-            EdFileWrite(const_cast<char *>(g_soundInfo[id].sfx_name), 16);
-            EdFileWriteInt(effect->sound_data[sound * 3 + 1]);
-            EdFileWriteInt(effect->sound_data[sound * 3 + 2]);
+        if (effect->sound_data[0] != -1) {
+            EdFileWrite(const_cast<char *>(g_soundInfo[effect->sound_data[0]].sfx_name), 16);
+            EdFileWriteInt(effect->sound_data[1]);
+            EdFileWriteInt(effect->sound_data[2]);
+        }
+        if (effect->sound_data[3] != -1) {
+            EdFileWrite(const_cast<char *>(g_soundInfo[effect->sound_data[3]].sfx_name), 16);
+            EdFileWriteInt(effect->sound_data[4]);
+            EdFileWriteInt(effect->sound_data[5]);
+        }
+        if (effect->sound_data[6] != -1) {
+            EdFileWrite(const_cast<char *>(g_soundInfo[effect->sound_data[6]].sfx_name), 16);
+            EdFileWriteInt(effect->sound_data[7]);
+            EdFileWriteInt(effect->sound_data[8]);
+        }
+        if (effect->sound_data[9] != -1) {
+            EdFileWrite(const_cast<char *>(g_soundInfo[effect->sound_data[9]].sfx_name), 16);
+            EdFileWriteInt(effect->sound_data[10]);
+            EdFileWriteInt(effect->sound_data[11]);
         }
         EdFileWriteChar(effect->trail_count);
         EdFileWriteFloat(effect->trail_time);

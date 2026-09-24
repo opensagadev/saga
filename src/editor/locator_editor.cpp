@@ -1015,8 +1015,8 @@ process_buttons:
                 break;
             }
         }
-        EDLOCATOR_s *before = aieditor->current_locator != nearest ? aieditor->current_locator : nullptr;
-        if (AddLocatorToSet(set, nearest, before) != 0) {
+        EDLOCATOR_s *before = aieditor->current_locator;
+        if (before != nullptr && before != nearest && AddLocatorToSet(set, nearest, before) != 0) {
             aieditor->current_locator = nearest;
             aieditor->current_path = nearest->path;
             aieditorsettings.area_rotation = nearest->direction;

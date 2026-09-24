@@ -845,8 +845,10 @@ static __used__ void creatureEditor_cbSelectTriggerArea(eduimenu_s *parent, edui
 }
 
 static __used__ void creatureEditor_cbSetTriggerArea(eduimenu_s *, eduiitem_s *item, unsigned int) {
+    if (item == nullptr)
+        return;
     CreatureEditorRecord *creature = creatureEditor_Current();
-    if (item == nullptr || creature == nullptr)
+    if (creature == nullptr)
         return;
     if (item->data == -1) {
         creature->trigger_area = nullptr;
