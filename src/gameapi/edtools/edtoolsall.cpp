@@ -5304,7 +5304,8 @@ void EdMatrixControl::cbChanged(eduimenu_s *, eduiitem_s *item, u32) {
     for (i32 index = 0; index < 3; ++index)
         if (item == control->components[index])
             (&matrix.m30)[index] = changed_value;
-    if (control->components[3]) {
+    if (control->components[3] || control->components[4] || control->components[5] || control->components[6] ||
+        control->components[7] || control->components[8]) {
         NUMTX rebuilt;
         NuMtxSetIdentity(&rebuilt);
         if (control->components[6] && control->components[7] && control->components[8]) {
