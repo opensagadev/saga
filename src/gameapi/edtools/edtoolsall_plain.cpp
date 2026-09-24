@@ -2913,16 +2913,15 @@ extern "C" {
         return 0;
     }
     i32 eduiCheckForPadMenuCancel(eduimenu_s *menu, nupad_s *pad) {
-        i32 result = 0;
-        if (pad && (pad->digital_buttons_pressed & 0x10)) {
-            eduimenu_s *parent = menu->parent;
-            if (!eduiGetUsingMenuFocus() && menu->parent)
-                eduiMenuDetach(menu);
-            if (menu->callback)
-                menu->callback(menu, parent);
-            result = 1;
-        }
-        return result;
+        if (!pad || !(pad->digital_buttons_pressed & 0x10))
+            return 0;
+
+        eduimenu_s *parent = menu->parent;
+        if (!eduiGetUsingMenuFocus() && parent)
+            eduiMenuDetach(menu);
+        if (menu->callback)
+            menu->callback(menu, parent);
+        return 1;
     }
     void eduiCreate3LineMessageMenu(eduimenu_s *parent, char *first, char *second, char *third, i32 first_highlight,
                                     i32 second_highlight, i32 third_highlight) {

@@ -1706,32 +1706,31 @@ extern "C" {
     }
 
     void pathEditorDrawPaths(void) {
-        AIEDITOR_RENDER_STATE *state = aieditor;
-        EDAIPATHWALL_s *wall = (EDAIPATHWALL_s *)NuLinkedListGetHead(&state->path_walls);
+        EDAIPATHWALL_s *wall = (EDAIPATHWALL_s *)NuLinkedListGetHead(&aieditor->path_walls);
         while (wall != nullptr) {
             wall->flags &= ~u8(1);
-            wall = (EDAIPATHWALL_s *)NuLinkedListGetNext(&state->path_walls, &wall->link);
+            wall = (EDAIPATHWALL_s *)NuLinkedListGetNext(&aieditor->path_walls, &wall->link);
         }
 
         if (aieditorsettings.draw_all_paths) {
             i32 index = 0;
-            EDAIPATH_s *path = (EDAIPATH_s *)NuLinkedListGetHead(&state->paths);
+            EDAIPATH_s *path = (EDAIPATH_s *)NuLinkedListGetHead(&aieditor->paths);
             while (path != nullptr) {
                 path->draw_index = index++;
-                path = (EDAIPATH_s *)NuLinkedListGetNext(&state->paths, &path->link);
+                path = (EDAIPATH_s *)NuLinkedListGetNext(&aieditor->paths, &path->link);
             }
-            if (state->current_path != nullptr) {
-                pathEditorDrawPath(state->current_path, state->current_path->draw_index);
+            if (aieditor->current_path != nullptr) {
+                pathEditorDrawPath(aieditor->current_path, aieditor->current_path->draw_index);
             }
-            path = (EDAIPATH_s *)NuLinkedListGetHead(&state->paths);
+            path = (EDAIPATH_s *)NuLinkedListGetHead(&aieditor->paths);
             while (path != nullptr) {
-                if (path != state->current_path) {
+                if (path != aieditor->current_path) {
                     pathEditorDrawPath(path, path->draw_index);
                 }
-                path = (EDAIPATH_s *)NuLinkedListGetNext(&state->paths, &path->link);
+                path = (EDAIPATH_s *)NuLinkedListGetNext(&aieditor->paths, &path->link);
             }
         } else {
-            pathEditorDrawPath(state->current_path, 0);
+            pathEditorDrawPath(aieditor->current_path, 0);
         }
     }
 

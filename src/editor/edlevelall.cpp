@@ -1621,14 +1621,17 @@ void ClassEditor::cbFileSelected(eduimenu_s *, eduiitem_s *item, u32) {
     theLevelEditor.CloseMenu();
 }
 
-void ClassObject::GetName(char *destination, i32 size) {
+__attribute__((force_align_arg_pointer)) void ClassObject::GetName(char *destination, i32 size) {
     if (object == NULL) {
         NuStrNCpy(destination, "None", size);
         return;
     }
 
     char name[128];
-    if (!get_class_object_attribute(ed_class, object, reference, 2, EdType_String, name, 128)) {
+    EdMember member;
+    if ((reference == NULL || !reference->GetAttributeData(object, 2, EdType_String, name, sizeof(name))) &&
+        (!ed_class->FindMember(&member, object, 2, 1) ||
+         !member.reference->GetAttributeData(member.object, 2, EdType_String, name, sizeof(name)))) {
         NuStrCpy(name, "NoName");
     }
     sprintf(destination, "%s.%s", ed_class->name, name);

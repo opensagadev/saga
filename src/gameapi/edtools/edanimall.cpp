@@ -116,8 +116,11 @@ static __attribute__((used)) void edanimcbCancelMCTBMenu(eduimenu_s *, eduimenu_
 }
 static __attribute__((used)) void edanimcbLocalSoundMenu(eduimenu_s *, eduiitem_s *, u32);
 static __attribute__((used)) void edanimcbMCTBCardFormat(eduimenu_s *menu, eduiitem_s *, u32) {
-    const bool formatted = saveloadFormatCard() != 0;
-    eduiCreateMessageMenu(menu, const_cast<char *>(formatted ? "Format OK" : "Format Fail"), formatted);
+    if (saveloadFormatCard()) {
+        eduiCreateMessageMenu(menu, const_cast<char *>("Format OK"), 1);
+    } else {
+        eduiCreateMessageMenu(menu, const_cast<char *>("Format Fail"), 0);
+    }
 }
 static __attribute__((used)) void edanimcbSetSoundTiming(eduimenu_s *, eduiitem_s *item, u32) {
     AnimParams[edanim_nearest_param_id].sound_values[edanim_nearest_sound] = static_cast<edui_slider_s *>(item)->value;
@@ -138,8 +141,11 @@ static __attribute__((used)) void edanimcbCancelSoundMenu(eduimenu_s *, eduimenu
 }
 
 static __attribute__((used)) void edanimcbMCTBCardPresent(eduimenu_s *menu, eduiitem_s *, u32) {
-    const bool present = saveloadCheckCardPresent() != 0;
-    eduiCreateMessageMenu(menu, const_cast<char *>(present ? "Present" : "Not Present"), present);
+    if (saveloadCheckCardPresent()) {
+        eduiCreateMessageMenu(menu, const_cast<char *>("Present"), 1);
+    } else {
+        eduiCreateMessageMenu(menu, const_cast<char *>("Not Present"), 0);
+    }
 }
 
 static __attribute__((used)) void edanimcbSetParticleRate(eduimenu_s *, eduiitem_s *item, u32) {
@@ -196,8 +202,11 @@ static __attribute__((used)) void edanimcbMCTBCardSaveSlot(eduimenu_s *menu, edu
 }
 
 static __attribute__((used)) void edanimcbMCTBCardUnFormat(eduimenu_s *menu, eduiitem_s *, u32) {
-    const bool formatted = saveloadUnFormatCard() != 0;
-    eduiCreateMessageMenu(menu, const_cast<char *>(formatted ? "Unformat OK" : "Unformat Fail"), formatted);
+    if (saveloadUnFormatCard()) {
+        eduiCreateMessageMenu(menu, const_cast<char *>("Unformat OK"), 1);
+    } else {
+        eduiCreateMessageMenu(menu, const_cast<char *>("Unformat Fail"), 0);
+    }
 }
 
 static __attribute__((used)) void edanimcbParticleTypeMenu(eduimenu_s *, eduiitem_s *, u32);
@@ -268,8 +277,11 @@ static __attribute__((used)) void edanimcbCancelSoundTypeMenu(eduimenu_s *, edui
 }
 
 static __attribute__((used)) void edanimcbMCTBCardCheckFormat(eduimenu_s *menu, eduiitem_s *, u32) {
-    const bool formatted = saveloadCheckCardFormatted() != 0;
-    eduiCreateMessageMenu(menu, const_cast<char *>(formatted ? "Formatted" : "Not Formatted"), formatted);
+    if (saveloadCheckCardFormatted()) {
+        eduiCreateMessageMenu(menu, const_cast<char *>("Formatted"), 1);
+    } else {
+        eduiCreateMessageMenu(menu, const_cast<char *>("Not Formatted"), 0);
+    }
 }
 
 static __attribute__((used)) void edanimcbSetBouncyPlayerGrav(eduimenu_s *, eduiitem_s *item, u32) {
@@ -294,20 +306,25 @@ static __attribute__((used)) void edanimcbCancelSwitchTypeMenu(eduimenu_s *, edu
 }
 
 static __attribute__((used)) void edanimcbMCTBCardCheckKeyCard(eduimenu_s *menu, eduiitem_s *, u32) {
-    const bool valid = saveloadCheckKeyCode(id_test, code_test) != 0;
-    eduiCreateMessageMenu(menu, const_cast<char *>(valid ? "KeyCard Check OK" : "KeyCard Check Fail"), valid);
+    if (saveloadCheckKeyCode(id_test, code_test)) {
+        eduiCreateMessageMenu(menu, const_cast<char *>("KeyCard Check OK"), 1);
+    } else {
+        eduiCreateMessageMenu(menu, const_cast<char *>("KeyCard Check Fail"), 0);
+    }
 }
 
 static __attribute__((used)) void edanimcbMCTBCardWriteKeyCard(eduimenu_s *menu, eduiitem_s *, u32) {
-    const bool written = saveloadWriteKeyCode(id_test, code_test) != 0;
-    eduiCreateMessageMenu(menu, const_cast<char *>(written ? "KeyCard Write OK" : "KeyCard Write Fail"), written);
+    if (saveloadWriteKeyCode(id_test, code_test)) {
+        eduiCreateMessageMenu(menu, const_cast<char *>("KeyCard Write OK"), 1);
+    } else {
+        eduiCreateMessageMenu(menu, const_cast<char *>("KeyCard Write Fail"), 0);
+    }
 }
 
 static __attribute__((used)) void edanimcbSetLocalParticleType(eduimenu_s *menu, eduiitem_s *item, u32) {
     edanim_localparticletype_menu = NULL;
-    auto &param = AnimParams[edanim_nearest_param_id];
-    param.effect_ids[edanim_nearest_particle] = item->data;
-    strcpy(param.effect_names[edanim_nearest_particle], debtab[item->data]->name);
+    AnimParams[edanim_nearest_param_id].effect_ids[edanim_nearest_particle] = item->data;
+    strcpy(AnimParams[edanim_nearest_param_id].effect_names[edanim_nearest_particle], debtab[item->data]->name);
     edanim_particle_type = item->data;
     eduiMenuDetach(menu);
     eduiMenuDestroy(menu);
@@ -448,58 +465,58 @@ static __attribute__((used)) void edanimcbSwitchMenu(eduimenu_s *parent, eduiite
 }
 
 static __attribute__((used)) void edanimcbLocalParticleMenu(eduimenu_s *parent, eduiitem_s *, u32) {
-    u32 colours[4] = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
+    u32 colours[4] __attribute__((aligned(16))) = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
     if (edanim_nearest_particle == -1) {
         return;
     }
 
-    auto *menu = eduiMenuCreate(70, 70, 250, 300, ed_fnt, edanimcbCancelLocalParticleMenu,
-                                const_cast<char *>("Highlighted Particle Settings"));
-    edanim_localparticle_menu = menu;
-    if (!menu) {
+    edanim_localparticle_menu = eduiMenuCreate(70, 70, 250, 300, ed_fnt, edanimcbCancelLocalParticleMenu,
+                                               const_cast<char *>("Highlighted Particle Settings"));
+    if (!edanim_localparticle_menu) {
         return;
     }
 
-    auto &param = AnimParams[edanim_nearest_param_id];
-    const auto particle = edanim_nearest_particle;
-    eduiMenuAddItem(menu, eduiItemSelCreate(1, colours, 0, 0, edanimcbLocalParticleTypeMenu,
-                                            const_cast<char *>("Highlighted Particle Type...")));
-    eduiMenuAddItem(menu,
-                    eduiItemSliderCreateInt(0, colours, 0, edanimcbSetParticleRate, 0, 300,
-                                            param.effect_intervals[particle], const_cast<char *>("Particles Per Sec")));
-    eduiMenuAddItem(menu, eduiItemToggleCreate(0, colours, param.effect_flags[particle], 1,
-                                               edanimcbToggleParticleSwitch, const_cast<char *>("Only On Moving")));
+    eduiMenuAddItem(edanim_localparticle_menu, eduiItemSelCreate(1, colours, 0, 0, edanimcbLocalParticleTypeMenu,
+                                                                 const_cast<char *>("Highlighted Particle Type...")));
+    eduiMenuAddItem(
+        edanim_localparticle_menu,
+        eduiItemSliderCreateInt(0, colours, 0, edanimcbSetParticleRate, 0, 300,
+                                AnimParams[edanim_nearest_param_id].effect_intervals[edanim_nearest_particle],
+                                const_cast<char *>("Particles Per Sec")));
+    eduiMenuAddItem(edanim_localparticle_menu,
+                    eduiItemToggleCreate(0, colours,
+                                         AnimParams[edanim_nearest_param_id].effect_flags[edanim_nearest_particle], 1,
+                                         edanimcbToggleParticleSwitch, const_cast<char *>("Only On Moving")));
 
-    eduiMenuAttach(parent, menu);
-    menu->x = parent->x + 10;
-    menu->y = parent->y + 40;
+    eduiMenuAttach(parent, edanim_localparticle_menu);
+    edanim_localparticle_menu->x = parent->x + 10;
+    edanim_localparticle_menu->y = parent->y + 40;
 }
 
 static __attribute__((used)) void edanimcbSoundTypeMenu(eduimenu_s *parent, eduiitem_s *, u32) {
     u32 colours[4] = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
-    auto *menu =
+    edanim_soundtype_menu =
         eduiMenuCreate(70, 70, 250, 250, ed_fnt, edanimcbCancelSoundTypeMenu, const_cast<char *>("Sound Type"));
-    edanim_soundtype_menu = menu;
-    if (!menu) {
+    if (!edanim_soundtype_menu) {
         return;
     }
 
-    eduiMenuAddItem(menu, eduiItemCheckCreate(0x1869f, colours, edanim_sound_type == -1, 0, edanimcbSetSoundType,
-                                              const_cast<char *>("NONE")));
+    eduiMenuAddItem(edanim_soundtype_menu, eduiItemCheckCreate(0x1869f, colours, edanim_sound_type == -1, 0,
+                                                               edanimcbSetSoundType, const_cast<char *>("NONE")));
     for (i32 index = 0; index < edSfxAllCount; ++index) {
         if (edanim_sound_type == index) {
-            eduiMenuAddItem(menu,
+            eduiMenuAddItem(edanim_soundtype_menu,
                             eduiItemCheckCreate(index, colours, 1, 1, edanimcbSetSoundType, edbitsGetSoundName(index)));
-            menu->selected = edui_last_item;
+            edanim_soundtype_menu->selected = edui_last_item;
         } else {
-            eduiMenuAddItem(menu,
+            eduiMenuAddItem(edanim_soundtype_menu,
                             eduiItemCheckCreate(index, colours, 0, 1, edanimcbSetSoundType, edbitsGetSoundName(index)));
         }
     }
 
-    eduiMenuAttach(parent, menu);
-    menu->x = parent->x + 10;
-    menu->y = parent->y + 40;
+    eduiMenuAttach(parent, edanim_soundtype_menu);
+    edanim_soundtype_menu->x = parent->x + 10;
+    edanim_soundtype_menu->y = parent->y + 40;
 }
 
 static __attribute__((used)) void edanimcbLocalSoundTypeMenu(eduimenu_s *parent, eduiitem_s *, u32) {
@@ -530,10 +547,9 @@ static __attribute__((used)) void edanimcbLocalSoundTypeMenu(eduimenu_s *parent,
 
 static __attribute__((used)) void edanimcbLocalParticleTypeMenu(eduimenu_s *parent, eduiitem_s *, u32) {
     u32 colours[4] = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
-    auto *menu = eduiMenuCreate(70, 70, 250, 200, ed_fnt, edanimcbCancelLocalParticleTypeMenu,
-                                const_cast<char *>("Highlighted Particle Type"));
-    edanim_localparticletype_menu = menu;
-    if (!menu) {
+    edanim_localparticletype_menu = eduiMenuCreate(70, 70, 250, 200, ed_fnt, edanimcbCancelLocalParticleTypeMenu,
+                                                   const_cast<char *>("Highlighted Particle Type"));
+    if (!edanim_localparticletype_menu) {
         return;
     }
 
@@ -543,64 +559,64 @@ static __attribute__((used)) void edanimcbLocalParticleTypeMenu(eduimenu_s *pare
         }
         if (AnimParams[edanim_nearest_param_id].effect_ids[edanim_nearest_particle] == index) {
             eduiMenuAddItem(
-                menu, eduiItemCheckCreate(index, colours, 1, 1, edanimcbSetLocalParticleType, debtab[index]->name));
-            menu->selected = edui_last_item;
+                edanim_localparticletype_menu,
+                eduiItemCheckCreate(index, colours, 1, 1, edanimcbSetLocalParticleType, debtab[index]->name));
+            edanim_localparticletype_menu->selected = edui_last_item;
         } else {
             eduiMenuAddItem(
-                menu, eduiItemCheckCreate(index, colours, 0, 1, edanimcbSetLocalParticleType, debtab[index]->name));
+                edanim_localparticletype_menu,
+                eduiItemCheckCreate(index, colours, 0, 1, edanimcbSetLocalParticleType, debtab[index]->name));
         }
     }
 
-    eduiMenuAttach(parent, menu);
-    menu->x = parent->x + 10;
-    menu->y = parent->y + 40;
+    eduiMenuAttach(parent, edanim_localparticletype_menu);
+    edanim_localparticletype_menu->x = parent->x + 10;
+    edanim_localparticletype_menu->y = parent->y + 40;
 }
 
 static __attribute__((used)) void edanimcbParticleTypeMenu(eduimenu_s *parent, eduiitem_s *, u32) {
-    u32 colours[4] __attribute__((aligned(16))) = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
-    auto *menu =
+    u32 colours[4] = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
+    edanim_particletype_menu =
         eduiMenuCreate(70, 70, 250, 250, ed_fnt, edanimcbCancelParticleTypeMenu, const_cast<char *>("Particle Type"));
-    edanim_particletype_menu = menu;
-    if (!menu) {
+    if (!edanim_particletype_menu) {
         return;
     }
 
-    eduiMenuAddItem(menu, eduiItemCheckCreate(0, colours, edanim_particle_type == -1, 0, edanimcbSetParticleType,
-                                              const_cast<char *>("NONE")));
+    eduiMenuAddItem(edanim_particletype_menu, eduiItemCheckCreate(0, colours, edanim_particle_type == -1, 0,
+                                                                  edanimcbSetParticleType, const_cast<char *>("NONE")));
     for (i32 index = 1; index < EDPP_MAX_TYPES; ++index) {
         if (!debtab[index]) {
             continue;
         }
         if (edanim_particle_type == index) {
-            eduiMenuAddItem(menu,
+            eduiMenuAddItem(edanim_particletype_menu,
                             eduiItemCheckCreate(index, colours, 1, 1, edanimcbSetParticleType, debtab[index]->name));
-            menu->selected = edui_last_item;
+            edanim_particletype_menu->selected = edui_last_item;
         } else {
-            eduiMenuAddItem(menu,
+            eduiMenuAddItem(edanim_particletype_menu,
                             eduiItemCheckCreate(index, colours, 0, 1, edanimcbSetParticleType, debtab[index]->name));
         }
     }
 
-    eduiMenuAttach(parent, menu);
-    menu->x = parent->x + 10;
-    menu->y = parent->y + 40;
+    eduiMenuAttach(parent, edanim_particletype_menu);
+    edanim_particletype_menu->x = parent->x + 10;
+    edanim_particletype_menu->y = parent->y + 40;
 }
 
 static __attribute__((used)) void edanimcbSwitchTypeMenu(eduimenu_s *parent, eduiitem_s *, u32) {
     u32 colours[4] = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
-    auto *menu =
+    edanim_switchtype_menu =
         eduiMenuCreate(70, 70, 250, 200, ed_fnt, edanimcbCancelSwitchTypeMenu, const_cast<char *>("Switch Type"));
-    edanim_switchtype_menu = menu;
-    if (!menu) {
+    if (!edanim_switchtype_menu) {
         return;
     }
 
     const auto add_type = [&](u32 type, const char *name) {
         const bool selected = AnimParams[edanim_nearest_param_id].field_00c == type;
-        eduiMenuAddItem(
-            menu, eduiItemCheckCreate(type, colours, selected, 1, edanimcbSetSwitchType, const_cast<char *>(name)));
+        eduiMenuAddItem(edanim_switchtype_menu, eduiItemCheckCreate(type, colours, selected, 1, edanimcbSetSwitchType,
+                                                                    const_cast<char *>(name)));
         if (edui_last_item->highlighted & 1) {
-            menu->selected = edui_last_item;
+            edanim_switchtype_menu->selected = edui_last_item;
         }
     };
     add_type(0, "None");
@@ -617,9 +633,9 @@ static __attribute__((used)) void edanimcbSwitchTypeMenu(eduimenu_s *parent, edu
     add_type(11, "Override Play");
     add_type(12, "Override PlayCont");
 
-    eduiMenuAttach(parent, menu);
-    menu->x = parent->x + 10;
-    menu->y = parent->y + 40;
+    eduiMenuAttach(parent, edanim_switchtype_menu);
+    edanim_switchtype_menu->x = parent->x + 10;
+    edanim_switchtype_menu->y = parent->y + 40;
 }
 
 static __attribute__((used)) void edanimcbMCTBMenu(eduimenu_s *parent, eduiitem_s *, u32) {
@@ -660,24 +676,23 @@ static __attribute__((used)) void edanimcbLocalSoundMenu(eduimenu_s *parent, edu
     if (edanim_nearest_sound == -1) {
         return;
     }
-    auto *menu = eduiMenuCreate(70, 70, 250, 300, ed_fnt, edanimcbCancelLocalSoundMenu,
-                                const_cast<char *>("Highlighted Sound Settings"));
-    edanim_localsound_menu = menu;
-    if (!menu) {
+    edanim_localsound_menu = eduiMenuCreate(70, 70, 250, 300, ed_fnt, edanimcbCancelLocalSoundMenu,
+                                            const_cast<char *>("Highlighted Sound Settings"));
+    if (!edanim_localsound_menu) {
         return;
     }
 
     auto &param = AnimParams[edanim_nearest_param_id];
     const i32 sound = edanim_nearest_sound;
-    eduiMenuAddItem(menu, eduiItemSelCreate(1, colours, 0, 0, edanimcbLocalSoundTypeMenu,
-                                            const_cast<char *>("Highlighted Sound Type...")));
+    eduiMenuAddItem(edanim_localsound_menu, eduiItemSelCreate(1, colours, 0, 0, edanimcbLocalSoundTypeMenu,
+                                                              const_cast<char *>("Highlighted Sound Type...")));
     const bool repeats = param.sound_flags[sound] == 1;
-    eduiMenuAddItem(menu, eduiItemToggleCreate(1, colours, repeats, 1, edanimcbToggleSoundType,
-                                               const_cast<char *>("Repeating Sound")));
+    eduiMenuAddItem(edanim_localsound_menu, eduiItemToggleCreate(1, colours, repeats, 1, edanimcbToggleSoundType,
+                                                                 const_cast<char *>("Repeating Sound")));
     if (repeats) {
-        eduiMenuAddItem(menu, eduiItemSliderCreateInt(0, colours, 0, edanimcbSetSoundTiming, 1, 99,
-                                                      static_cast<i32>(param.sound_values[sound]),
-                                                      const_cast<char *>("Repeat Every")));
+        eduiMenuAddItem(edanim_localsound_menu, eduiItemSliderCreateInt(0, colours, 0, edanimcbSetSoundTiming, 1, 99,
+                                                                        static_cast<i32>(param.sound_values[sound]),
+                                                                        const_cast<char *>("Repeat Every")));
     } else {
         nuhspecial_s special;
         NuGScnGetSpecial(&special, edbits_base_scene, edanim_nearest);
@@ -685,7 +700,7 @@ static __attribute__((used)) void edanimcbLocalSoundMenu(eduimenu_s *parent, edu
             const auto *instance = NuSpecialGetInstAnim(&special);
             const f32 end_frame =
                 *reinterpret_cast<const f32 *>(edbits_base_scene->instance_animation_data[instance->anim_ix]);
-            eduiMenuAddItem(menu,
+            eduiMenuAddItem(edanim_localsound_menu,
                             eduiItemSliderCreate(0, colours, 0, edanimcbSetSoundTiming, 1.0f, end_frame,
                                                  param.sound_values[sound], const_cast<char *>("Sound Trigger Time")));
             eduiItemSliderSetFmt(static_cast<edui_slider_s *>(edui_last_item), const_cast<char *>("(%1.01f)"));
@@ -693,7 +708,7 @@ static __attribute__((used)) void edanimcbLocalSoundMenu(eduimenu_s *parent, edu
         }
     }
 
-    eduiMenuAttach(parent, menu);
-    menu->x = parent->x + 10;
-    menu->y = parent->y + 40;
+    eduiMenuAttach(parent, edanim_localsound_menu);
+    edanim_localsound_menu->x = parent->x + 10;
+    edanim_localsound_menu->y = parent->y + 40;
 }
