@@ -6052,8 +6052,8 @@ extern "C" {
         for (eduimenu_s *ancestor = menu; ancestor; ancestor = ancestor->parent) {
             if (ancestor == eduiGetActiveMenu()) {
                 if (!edui_donotdraw)
-                    NuRndrRect2di(x << 4, y << 3, width << 4, height << 3, item->colours[2 + item->highlighted],
-                                  uimtls[ui_bgmtl]);
+                    NuRndrRect2di(x << 4, y << 3, width << 4, static_cast<i32>(row_height * 8.0f),
+                                  item->colours[2 + item->highlighted], uimtls[ui_bgmtl]);
                 break;
             }
         }
@@ -6066,8 +6066,8 @@ extern "C" {
                               0xff000000, uimtls[0]);
             }
         }
-        const f32 button_x = static_cast<f32>(x) + static_cast<f32>(expander->depth) * button_size + 2.0f;
-        const f32 button_y = static_cast<f32>(y) + 2.0f;
+        const f32 button_x = static_cast<f32>(x) + static_cast<f32>(expander->depth) * button_size + 1.0f;
+        const f32 button_y = static_cast<f32>(y) + 1.0f;
         expander->button_size = button_size;
         expander->button_x = button_x;
         expander->button_y = button_y;
