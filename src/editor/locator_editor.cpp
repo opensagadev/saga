@@ -716,9 +716,8 @@ void locatorEditor_Enter(void) {
         NuLinkedListAppend(&(*state)->free_locator_sets, &(*state)->locator_set_pool[index].link);
     }
     if ((*state)->ai_system != nullptr) {
-        AISYS_s *system = (*state)->ai_system;
-        for (i32 index = 0; index < system->locator_count; ++index) {
-            AILOCATOR *source = &system->locators[index];
+        for (i32 index = 0; index < (*state)->ai_system->locator_count; ++index) {
+            AILOCATOR *source = &(*state)->ai_system->locators[index];
             EDLOCATOR_s *locator = (EDLOCATOR_s *)NuLinkedListGetHead(&(*state)->free_locators);
             if (locator != nullptr) {
                 NuLinkedListRemove(&(*state)->free_locators, &locator->link);
@@ -735,8 +734,8 @@ void locatorEditor_Enter(void) {
             } while (!locator->on_path);
             locator->path_angle = NuAngSub(locator->direction, locator->path_angle);
         }
-        for (i32 index = 0; index < system->locator_set_count; ++index) {
-            AILOCATORSET *source = &system->locator_sets[index];
+        for (i32 index = 0; index < (*state)->ai_system->locator_set_count; ++index) {
+            AILOCATORSET *source = &(*state)->ai_system->locator_sets[index];
             EDLOCATORSET_s *set = (EDLOCATORSET_s *)NuLinkedListGetHead(&(*state)->free_locator_sets);
             if (set == nullptr) {
                 continue;

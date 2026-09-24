@@ -409,9 +409,9 @@ void SceneObjectHelper::PostLoadInitialisation(MemoryBuffer *, MemoryBuffer *) {
 }
 
 void SceneObjectHelper::PreLoadInitialisation(MemoryBuffer *, MemoryBuffer *) {
-    i32 *count_slot = scene_counts;
-    for (i32 level = 0; level < 10; ++level, ++count_slot) {
-        SceneObject **scene_slot = reinterpret_cast<SceneObject **>(count_slot - 10);
+    for (i32 level = 0; level < 10; ++level) {
+        i32 *count_slot = &scene_counts[level];
+        SceneObject **scene_slot = &scenes[level];
         nugscn_s *scene = theLevelEditor.GetScene(level);
         if (scene != NULL && *count_slot == 0) {
             *count_slot = NuGScnNumSpecials(scene);
@@ -433,12 +433,13 @@ void SceneObjectHelper::PreLoadInitialisation(MemoryBuffer *, MemoryBuffer *) {
     }
 
     scene_object_count = 0;
-    count_slot = scene_counts;
+    i32 *count_slot = scene_counts;
     for (i32 level = 0; level < 10; ++level, ++count_slot) {
         SceneObject *object = *reinterpret_cast<SceneObject **>(count_slot - 10);
         nugscn_s *scene = theLevelEditor.GetScene(level);
         if (scene != NULL) {
-            for (i32 index = 0; index < *count_slot; ++index) {
+            const i32 count = *count_slot;
+            for (i32 index = 0; index < count; ++index) {
                 NuGScnGetSpecial(&object->special, scene, index);
                 object->attributes = 0x12400000;
                 object->led_file = level;

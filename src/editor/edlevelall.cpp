@@ -711,7 +711,7 @@ i32 ClassEditor::FindNearestObject(VuVec &point, ClassObject &result, i32 filter
 
 i32 ClassEditor::FindNearestObject(VuVec &origin, VuVec &direction, ClassObject &result, ClassObject &after,
                                    i32 filter) {
-    ClassObject candidates[16];
+    ClassObject candidates[16] __attribute__((aligned(16))) = {};
     i32 candidate_count = 0;
     for (i32 class_index = 0; class_index < theRegistry.class_count; ++class_index) {
         EdClass *ed_class = &theRegistry.classes[class_index];
@@ -2964,11 +2964,12 @@ i32 ClassObjectList::GetAveragePosition(VuVec &average) {
         EdMember member;
         // The original's local vector is 16-byte aligned.
         VuVec position __attribute__((aligned(16)));
+        i32 position_type = EdType_VuVec;
         bool found = entry->reference != NULL &&
-                     entry->reference->GetAttributeData(entry->object, 8, EdType_VuVec, &position, 0) != 0;
+                     entry->reference->GetAttributeData(entry->object, 8, position_type, &position, 0) != 0;
         if (!found) {
             found = entry->ed_class->FindMember(&member, entry->object, 8, 1) != 0 &&
-                    member.reference->GetAttributeData(member.object, 8, EdType_VuVec, &position, 0) != 0;
+                    member.reference->GetAttributeData(member.object, 8, position_type, &position, 0) != 0;
         }
         if (found) {
             average.x += position.x;

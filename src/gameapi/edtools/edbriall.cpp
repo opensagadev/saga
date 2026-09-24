@@ -445,7 +445,7 @@ void edbriDoInput(nupad_s *pad) {
         }
     }
     if (edbri_mode == 0) {
-        edbri_roty += pad->analog_left_pad_right - pad->analog_left_pad_left;
+        edbri_roty = edbri_roty + pad->analog_left_pad_right - pad->analog_left_pad_left;
         i32 rotation = edbri_rotz + pad->analog_left_pad_up;
         if (rotation > 0x4000)
             rotation = 0x2000;
