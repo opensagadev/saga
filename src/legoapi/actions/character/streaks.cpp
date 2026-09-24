@@ -56,9 +56,6 @@ static STREAK_s *streaks_used;
 numtl_s *streakmtl;
 numtl_s *streakmtl_ref;
 
-numtl_s *streakmtl;
-numtl_s *streakmtl_ref;
-
 static void CalculateBezierPoint(NUVEC *result, NUVEC *start, NUVEC *end, NUVEC *start_tangent,
                                  NUVEC *end_tangent, f32 amount) {
     NUVEC control_a;

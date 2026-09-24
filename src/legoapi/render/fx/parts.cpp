@@ -954,7 +954,7 @@ static __used__ void UpdateCustomPieceAnim(CUSTOMPIECEANIM *anim, u16 minimum, u
 extern "C" {
 
     void AddDebrisEffect(i32 *handle, i32 effect_index, f32 x, f32 y, f32 z) {
-        if (static_cast<u32>(effect_index + 1) <= 1 || EDPP_MAX_TYPES <= effect_index ||
+        if (handle == NULL || effect_index < 0 || EDPP_MAX_TYPES <= effect_index || debtab == NULL ||
             debtab[effect_index] == NULL) {
             return;
         }
@@ -985,7 +985,7 @@ extern "C" {
         debkeydata[key_index].emitter_rotation_x = 0;
         debkeydata[key_index].emitter_rotation_y = 0;
         debkeydata[key_index].field_2c8 = 0;
-        for (i32 i = 0; i < static_cast<i8>(effect->process_spheres); ++i) {
+        for (i32 i = 0; i < effect->process_spheres; ++i) {
             debkeydata[key_index].process_spheres[i].time = -1.0f;
         }
         memset(&debkeydata[key_index].emission_position, 0, sizeof(debkeydata[key_index].emission_position));

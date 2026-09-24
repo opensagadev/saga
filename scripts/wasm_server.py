@@ -22,7 +22,7 @@ OBB_NAME = "main.1060.com.wb.lego.tcs.obb"
 
 def default_wasm_directory() -> Path:
     runfiles_output = Path("src")
-    if all((runfiles_output / name).is_file() for name in ("saga.js", "saga.wasm")):
+    if (runfiles_output / "saga.html").is_file():
         return runfiles_output
     workspace = Path(os.environ.get("BUILD_WORKSPACE_DIRECTORY", Path.cwd()))
     return workspace / "bazel-bin/src"
@@ -94,7 +94,11 @@ class WasmRequestHandler(SimpleHTTPRequestHandler):
         ):
             return
         if path == "/":
-            self.path = "/index.html"
+            self.path = (
+                "/index.html"
+                if (Path(self.directory) / "index.html").is_file()
+                else "/saga.html"
+            )
         super().do_GET()
 
     def do_HEAD(self) -> None:
@@ -107,7 +111,11 @@ class WasmRequestHandler(SimpleHTTPRequestHandler):
         ):
             return
         if path == "/":
-            self.path = "/index.html"
+            self.path = (
+                "/index.html"
+                if (Path(self.directory) / "index.html").is_file()
+                else "/saga.html"
+            )
         super().do_HEAD()
 
     def _serve_wasm_asset(self, name: str, *, head_only: bool) -> bool:
@@ -159,11 +167,6 @@ def main() -> None:
         if args.directory is not None
         else default_site_directory(wasm_directory).resolve()
     )
-    if not (directory / "index.html").is_file():
-        parser.error(
-            f"website entry point not found at {directory / 'index.html'}; "
-            "run the server from the repository so doc/pages can be generated"
-        )
     if not directory.is_dir():
         parser.error(f"build output directory does not exist: {directory}")
 

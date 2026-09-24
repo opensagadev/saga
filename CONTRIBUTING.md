@@ -190,10 +190,8 @@ bazel build --config=wasm //src:saga_wasm
 bazel build --config=wasm_release //src:saga_wasm
 ```
 
-The outputs are `bazel-bin/src/saga.js` and `saga.wasm`. Build this variant
-when changing browser support or portable host behavior. Run
-`bazelisk run --config=wasm //scripts:wasm_server` and open
-`http://127.0.0.1:8000/play/` to launch it through the repository website.
+The outputs are `bazel-bin/src/saga.html`, `saga.js`, and `saga.wasm`. Build
+this variant when changing browser support or portable host behavior.
 After loading the OBB, the browser build starts a new game in the cantina.
 Startup overrides live in `src/host/platform/wasm/startup.cpp` and use the
 same host helpers as the native smoke test.

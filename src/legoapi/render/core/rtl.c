@@ -847,8 +847,6 @@ static void rtlApplySetScaleLoop(void *set, rtlidata_s *lighting_data, NUVEC *po
                 InsertLight(light, lighting_data, strength);
             }
         }
-    } else {
-        light = reinterpret_cast<rtl_s *>(NuLstGetNext(rtl_dynamic_pool, NULL));
     }
 }
 
@@ -985,14 +983,7 @@ static __used__ void rtlProcessLight(rtl_s *light, f32 elapsed) {
             }
             if (light->field_64 > 0.0f) {
                 light->parameter_54 += elapsed;
-                f32 blend =
-                    (light->parameter_54 / light->field_64 < 0.0f
-                         ? false
-                         : light->parameter_54 / light->field_64 > 1.0f)
-                        ? 1.0f
-                        : (light->parameter_54 / light->field_64 < 0.0f
-                               ? 0.0f
-                               : light->parameter_54 / light->field_64);
+                f32 blend = MIN(1.0f, MAX(0.0f, light->parameter_54 / light->field_64));
                 light->ambient.x = light->colour.x * blend + light->secondary_colour.x * (1.0f - blend);
                 light->ambient.y = light->colour.y * blend + light->secondary_colour.y * (1.0f - blend);
                 light->ambient.z = light->colour.z * blend + light->secondary_colour.z * (1.0f - blend);
@@ -1002,14 +993,7 @@ static __used__ void rtlProcessLight(rtl_s *light, f32 elapsed) {
                 }
             } else {
                 light->parameter_54 -= elapsed;
-                f32 blend =
-                    (light->parameter_54 / light->field_64 < 0.0f
-                         ? false
-                         : light->parameter_54 / light->field_64 > 1.0f)
-                        ? 1.0f
-                        : (light->parameter_54 / light->field_64 < 0.0f
-                               ? 0.0f
-                               : light->parameter_54 / light->field_64);
+                f32 blend = MIN(1.0f, MAX(0.0f, light->parameter_54 / light->field_64));
                 light->ambient.x = light->secondary_colour.x * blend + light->colour.x * (1.0f - blend);
                 light->ambient.y = light->secondary_colour.y * blend + light->colour.y * (1.0f - blend);
                 light->ambient.z = light->secondary_colour.z * blend + light->colour.z * (1.0f - blend);
@@ -1027,10 +1011,7 @@ static __used__ void rtlProcessLight(rtl_s *light, f32 elapsed) {
             light->ambient.z = light->secondary_colour.z * light->blend +
                                light->colour.z * (1.0f - light->blend);
             light->blend += light->blend_rate * elapsed;
-            light->blend =
-                (light->blend < 0.0f ? false : light->blend > 1.0f)
-                    ? 1.0f
-                    : (light->blend < 0.0f ? 0.0f : light->blend);
+            light->blend = MIN(1.0f, MAX(0.0f, light->blend));
             light->parameter_54 -= elapsed;
             if (light->parameter_54 <= 0.0f) {
                 light->parameter_54 = light->parameters[2];

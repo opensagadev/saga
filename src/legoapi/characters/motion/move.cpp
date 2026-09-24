@@ -621,8 +621,8 @@ static i32 ShootCode(GameObject_s *, i32, i32, i32, i32, i32);
 static void ForcePushed_MoveCode(GameObject_s *);
 static void DeactivatedCode(GameObject_s *);
 static void ZapCode(GameObject_s *, i32, i32);
-static SAGA_REGPARM2_ALIGN void ShootThisFrame(GameObject_s *, i32, i32);
-static SAGA_REGPARM2_ALIGN void FireCode(GameObject_s *, i32, i32, f32, i32);
+static void ShootThisFrame(GameObject_s *, i32, i32);
+static void FireCode(GameObject_s *, i32, i32, f32, i32);
 static void AwkwardShapeCode(GameObject_s *, i32);
 f32 FindGunshipHoverHeight(GameObject_s *);
 f32 GetVehicleHoverHeight(GameObject_s *, f32 *);
@@ -9657,7 +9657,7 @@ start_attack:
     }
 }
 
-static SAGA_REGPARM2_ALIGN __used__ void ShootThisFrame(GameObject_s *object, i32 bolt_id, i32 flags) {
+static __used__ void ShootThisFrame(GameObject_s *object, i32 bolt_id, i32 flags) {
     if (object == Player[0] && nextShootTarget.Get() != NULL) {
         NuMechPtr<MechObjectInterface, 4> empty_target;
         nextShootTarget = empty_target;
