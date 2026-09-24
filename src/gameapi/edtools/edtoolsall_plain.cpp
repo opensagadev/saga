@@ -1942,9 +1942,11 @@ extern "C" {
         }
 
         VARIPTR *buffer = static_cast<VARIPTR *>(buf);
-        usize matrix_base = ALIGN(buffer->addr, 16);
+        usize matrix_base;
         if (edbits_editmode == 1 && edgra_mtxbuffer != NULL) {
             matrix_base = reinterpret_cast<usize>(edgra_mtxbuffer);
+        } else {
+            matrix_base = ALIGN(buffer->addr, 16);
         }
         edgra_page_matrix_stack[page] = reinterpret_cast<NUMTX *>(matrix_base);
 
@@ -2058,14 +2060,14 @@ extern "C" {
 
             i32 skipped_individuals = 0;
             if (clump->kind == 3) {
-                i32 individual = 0;
-                while (individual < EDGRA_MAX_INDIVIDUAL_CLUMPS && IndGrassClumpsUsed[individual] != 0) {
-                    ++individual;
-                }
-                if (individual == EDGRA_MAX_INDIVIDUAL_CLUMPS) {
+                if (edgra_ind_clumps_used == EDGRA_MAX_INDIVIDUAL_CLUMPS) {
                     skipped_individuals = clump->element_count;
                     clump->element_count = 0;
                 } else {
+                    i32 individual = 0;
+                    while (IndGrassClumpsUsed[individual] != 0) {
+                        ++individual;
+                    }
                     clump->individual_index = static_cast<i16>(individual);
                     IndGrassClumpsUsed[individual] = 1;
                     if (clump->element_count > EDGRA_MAX_UNITS_PER_INDIVIDUAL_CLUMP) {
@@ -2130,7 +2132,6 @@ extern "C" {
         edgra_page_used[page] = 1;
         edgra_page_scene[page] = static_cast<NUGSCN *>(gscn);
         edgra_page_terrain[page] = reinterpret_cast<void *>(static_cast<usize>(static_cast<u32>(terrain)));
-        edgra_page_calculate_done[page] = 0;
         if (edbits_editmode != 1 || edgra_vecbuffer == NULL) {
             buffer->addr = vector_cursor;
         }
