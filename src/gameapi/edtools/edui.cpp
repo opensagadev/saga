@@ -28,12 +28,13 @@ extern "C" {
         for (eduiitem_s *item = menu->first; item; item = item->next) {
             if (item->type == EDUI_ITEM_EXPANDER) {
                 edui_expander_s *expander = static_cast<edui_expander_s *>(item);
-                if (expander->first_child && !expander->open) {
+                eduiitem_s *child = expander->first_child;
+                if (child && !expander->open) {
                     expander->last_child->next = expander->next;
                     if (expander->next)
                         expander->next->previous = expander->last_child;
-                    expander->first_child->previous = expander;
-                    expander->next = expander->first_child;
+                    child->previous = expander;
+                    expander->next = child;
                     expander->open = 1;
                 }
             }

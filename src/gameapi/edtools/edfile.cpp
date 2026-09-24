@@ -216,7 +216,7 @@ i32 EdFileClose() {
         return 0;
     }
 
-    if (edfile_write_flag != 0) {
+    if (__builtin_expect(edfile_write_flag != 0, 0)) {
         EdFileFlushBuffer();
     }
 

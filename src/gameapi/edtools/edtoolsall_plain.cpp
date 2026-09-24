@@ -169,6 +169,13 @@ static __used__ void eduiFntPrintEx(void *font, int x, int y, int alignment, cha
     }
 }
 
+static __attribute__((noinline)) void eduiFntPrintEx(void *font, float x, float y, int alignment, char *format, ...) {
+    va_list arguments;
+    va_start(arguments, format);
+    eduiFntPrintEx(font, static_cast<i32>(x * 16.0f), static_cast<i32>(y * 8.0f), alignment, format, arguments);
+    va_end(arguments);
+}
+
 static __used__ void eduiFntPrintClipEx(void *font, float x, float y, int alignment, float clip_x, float clip_width,
                                         char *format, ...) {
     if (!edui_donotdraw) {
@@ -6313,8 +6320,7 @@ extern "C" {
             eduiFntPrintClipEx(edui_font, static_cast<f32>(x) + indentation, static_cast<f32>(y) + baseline, 16,
                                static_cast<f32>(x) - indentation, property->label_width, item->text);
             const f32 text_x = static_cast<f32>(x) + property->label_width + 2.0f;
-            eduiFntPrintEx(edui_font, static_cast<i32>(text_x * 16.0f),
-                           static_cast<i32>((static_cast<f32>(y) + baseline) * 8.0f), 16, eduiPropTextEdit);
+            eduiFntPrintEx(edui_font, text_x, static_cast<f32>(y) + baseline, 16, eduiPropTextEdit);
             char prefix[256];
             NuStrNCpy(prefix, eduiPropTextEdit, eduiPropTextPos + 1);
             prefix[eduiPropTextPos + 1] = '\0';

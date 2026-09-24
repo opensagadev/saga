@@ -1282,7 +1282,13 @@ static void edpartSetInstanceType(eduimenu_s *, eduiitem_s *item, u32) {
 #undef EDPART_FIND_INSTANCE
         return;
     remove_instance:
-        edpartRemoveInstance(edpart_nearest_type, index);
+        for (i32 next = index + 1; next < 8; ++next) {
+            edpart_nearest_type->effect_ids[next - 1] = edpart_nearest_type->effect_ids[next];
+            edpart_nearest_type->effect_pages[next - 1] = edpart_nearest_type->effect_pages[next];
+        }
+        edpart_nearest_type->effect_ids[7] = -1;
+        edpart_nearest_type->effect_pages[7] = -1;
+        --edpart_nearest_type->variant_count;
     }
 }
 static void edpartSetSoundControl(eduimenu_s *menu, eduiitem_s *item, u32) {

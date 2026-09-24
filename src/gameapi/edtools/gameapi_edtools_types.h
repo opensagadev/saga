@@ -560,6 +560,10 @@ DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(EdRef, type_id) == 0xc, "EdRef::ty
 DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(EdRef, member_offset) == 0x14, "EdRef::member_offset 32-bit offset");
 DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(EdRef, attributes) == 0x1c, "EdRef::attributes 32-bit offset");
 struct EdRefKnot : EdRef {
+    EdRefKnot() = default;
+    EdRefKnot(char *type, char *name, i32 offset, i32 size, i32 attributes, EdControl *control, i32 group)
+        : EdRef(type, name, offset, size, attributes, control, group) {
+    }
     void GetMemberData(void *, i32, void *, i32);
     void SetMemberData(void *, i32, void *, i32, i16 *);
 };
@@ -572,6 +576,10 @@ struct EdRefSpecialObject : EdRef {
     void SetMemberData(void *, i32, void *, i32, i16 *);
 };
 struct EdRefSpline : EdRef {
+    EdRefSpline() = default;
+    EdRefSpline(char *type, char *name, i32 offset, i32 size, i32 attributes, EdControl *control, i32 group)
+        : EdRef(type, name, offset, size, attributes, control, group) {
+    }
     void GetMemberData(void *, i32, void *, i32);
     void SetMemberData(void *, i32, void *, i32, i16 *);
 };

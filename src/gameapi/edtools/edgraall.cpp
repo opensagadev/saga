@@ -392,17 +392,17 @@ static void edgracbClumpSizesMenu(eduimenu_s *parent, eduiitem_s *, u32) {
     u32 colours[4] = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
     if (edgra_nearest == -1 || !GrassClumps[edgra_nearest].element_count)
         return;
-    edgra_clump_s &clump = GrassClumps[edgra_nearest];
     edgra_clumpsizes_menu = eduiMenuCreate(70, 70, 250, 250, ed_fnt, edgracbCancelClumpSizesMenu, "Clump Sizes");
     if (!edgra_clumpsizes_menu)
         return;
     eduiMenuAddItem(edgra_clumpsizes_menu, eduiItemSliderCreate(0, colours, 0, edgracbSetClumpMinHeight, 0.0f, 5.0f,
-                                                                clump.field_2c, "Min Model Size"));
+                                                                GrassClumps[edgra_nearest].field_2c, "Min Model Size"));
     eduiMenuAddItem(edgra_clumpsizes_menu, eduiItemSliderCreate(0, colours, 0, edgracbSetClumpMaxHeight, 0.0f, 5.0f,
-                                                                clump.field_30, "Max Model Size"));
-    if (clump.kind == 1)
-        eduiMenuAddItem(edgra_clumpsizes_menu, eduiItemSliderCreate(0, colours, 0, edgracbSetClumpHeight, 0.1f, 9.9f,
-                                                                    clump.field_20, "Bend Height"));
+                                                                GrassClumps[edgra_nearest].field_30, "Max Model Size"));
+    if (GrassClumps[edgra_nearest].kind == 1)
+        eduiMenuAddItem(edgra_clumpsizes_menu,
+                        eduiItemSliderCreate(0, colours, 0, edgracbSetClumpHeight, 0.1f, 9.9f,
+                                             GrassClumps[edgra_nearest].field_20, "Bend Height"));
     edgraAttachMenu(parent, edgra_clumpsizes_menu);
 }
 static void edgracbSetClumpFadeIn(eduimenu_s *, eduiitem_s *item, u32) {
@@ -481,18 +481,20 @@ static void edgracbCancelSScaleMenu(eduimenu_s *, eduimenu_s *) {
 static void edgracbClumpTerrainMenu(eduimenu_s *parent, eduiitem_s *, u32) {
     if (edgra_nearest == -1 || !GrassClumps[edgra_nearest].element_count)
         return;
-    edgra_clump_s &clump = GrassClumps[edgra_nearest];
     edgra_clumpterrain_menu =
         eduiMenuCreate(70, 70, 250, 250, ed_fnt, edgracbCancelClumpTerrainMenu, "Clump Terraining");
     if (!edgra_clumpterrain_menu)
         return;
-    eduiMenuAddItem(edgra_clumpterrain_menu, eduiItemToggleCreate(0, edblack, static_cast<i8>(clump.field_42), 1,
-                                                                  edgracbToggleClumpTerrain, "Clump Terraining"));
-    if (clump.kind != 1)
-        eduiMenuAddItem(edgra_clumpterrain_menu, eduiItemToggleCreate(0, edblack, static_cast<i8>(clump.field_43), 2,
-                                                                      edgracbToggleClumpTilt, "Clump Tilting"));
-    eduiMenuAddItem(edgra_clumpterrain_menu, eduiItemSliderCreate(0, edblack, 0, edgracbSetClumpTerrainOffset, -1.0f,
-                                                                  2.0f, clump.field_44, "Terraining Offset"));
+    eduiMenuAddItem(edgra_clumpterrain_menu,
+                    eduiItemToggleCreate(0, edblack, static_cast<i8>(GrassClumps[edgra_nearest].field_42), 1,
+                                         edgracbToggleClumpTerrain, "Clump Terraining"));
+    if (GrassClumps[edgra_nearest].kind != 1)
+        eduiMenuAddItem(edgra_clumpterrain_menu,
+                        eduiItemToggleCreate(0, edblack, static_cast<i8>(GrassClumps[edgra_nearest].field_43), 2,
+                                             edgracbToggleClumpTilt, "Clump Tilting"));
+    eduiMenuAddItem(edgra_clumpterrain_menu,
+                    eduiItemSliderCreate(0, edblack, 0, edgracbSetClumpTerrainOffset, -1.0f, 2.0f,
+                                         GrassClumps[edgra_nearest].field_44, "Terraining Offset"));
     edgraAttachMenu(parent, edgra_clumpterrain_menu);
 }
 

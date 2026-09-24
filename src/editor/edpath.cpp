@@ -621,13 +621,14 @@ static __used__ void pathEditor_cbSetShareNode(eduimenu_s *, eduiitem_s *item, u
             }
             node->shared_node = shared;
             ++shared->reference_count;
-            node->position = current->position;
-            node->radius = current->radius;
-            node->lower_height = current->lower_height;
-            node->upper_height = current->upper_height;
-            node->special = current->special;
-            node->special_position = current->special_position;
         }
+        EDAIPATHNODE_s *source = aieditor->current_path->current_node;
+        node->radius = source->radius;
+        node->lower_height = source->lower_height;
+        node->upper_height = source->upper_height;
+        node->position = source->position;
+        node->special = source->special;
+        node->special_position = source->special_position;
     }
     if (item->data == 0) {
         aieditor_ClearMainMenu();

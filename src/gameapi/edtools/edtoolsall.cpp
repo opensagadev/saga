@@ -4213,10 +4213,11 @@ i32 EdManipulator::AxisColour[8] = {
 void EdManipulator::DrawAxis(VuVec &origin, VuMtx *matrix) {
     VuVec points[8];
     GetAxisLocators(origin, points, matrix);
-    const i32 active = *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(this) + 8);
     EdDrawBegin(1);
     for (i32 axis = 1; axis <= 3; ++axis) {
-        const i32 colour = active != 0 ? AxisColour[axis] : static_cast<i32>(0xff808080);
+        const i32 colour = *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(this) + 8) != 0
+                               ? AxisColour[axis]
+                               : static_cast<i32>(0xff808080);
         EdDrawLineSphere(points[axis], Scale * 0.25f, 1.0f, colour);
     }
     VuMtx box;
@@ -4226,7 +4227,9 @@ void EdManipulator::DrawAxis(VuVec &origin, VuMtx *matrix) {
         box.matrix.m31 = points[plane].y;
         box.matrix.m32 = points[plane].z;
         box.matrix.m33 = 1.0f;
-        const i32 colour = active != 0 ? AxisColour[plane] : static_cast<i32>(0xff808080);
+        const i32 colour = *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(this) + 8) != 0
+                               ? AxisColour[plane]
+                               : static_cast<i32>(0xff808080);
         EdDrawLineCube(box, Scale * 0.1f, colour);
     }
     EdDrawEnd();
@@ -4240,18 +4243,29 @@ void EdManipulator::DrawAxis(VuVec &origin, VuMtx *matrix) {
                            (point.z - center.z) * arrow_half_size, 0.0f);
         const VuVec start(point.x - offset.x, point.y - offset.y, point.z - offset.z, 0.0f);
         const VuVec end(point.x + offset.x, point.y + offset.y, point.z + offset.z, 0.0f);
-        const i32 colour = active != 0 ? AxisColour[axis] : static_cast<i32>(0xff808080);
+        const i32 colour = *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(this) + 8) != 0
+                               ? AxisColour[axis]
+                               : static_cast<i32>(0xff808080);
         EdDrawPolyArrow(start, end, 8, colour, arrow_radius, arrow_radius, axis == 1 ? 0.5f : 0.2f, 0.0f);
     }
     EdDrawEnd();
 }
 
 void EdManipulator::DrawRotator(VuVec &origin) {
-    i32 active = *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(this) + 8);
+    f32 scale = Scale;
     EdDrawBegin(1);
-    EdDrawLineCircleX(origin, Scale, active != 0 ? AxisColour[1] : static_cast<i32>(0xff808080), 32);
-    EdDrawLineCircleY(origin, Scale, active != 0 ? AxisColour[2] : static_cast<i32>(0xff808080), 32);
-    EdDrawLineCircleZ(origin, Scale, active != 0 ? AxisColour[3] : static_cast<i32>(0xff808080), 32);
+    EdDrawLineCircleX(origin, scale,
+                      *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(this) + 8) != 0 ? AxisColour[1]
+                                                                                      : static_cast<i32>(0xff808080),
+                      32);
+    EdDrawLineCircleY(origin, scale,
+                      *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(this) + 8) != 0 ? AxisColour[2]
+                                                                                      : static_cast<i32>(0xff808080),
+                      32);
+    EdDrawLineCircleZ(origin, scale,
+                      *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(this) + 8) != 0 ? AxisColour[3]
+                                                                                      : static_cast<i32>(0xff808080),
+                      32);
     EdDrawEnd();
     const u8 *data = reinterpret_cast<const u8 *>(this);
     const i32 start_angle = *reinterpret_cast<const i32 *>(data + 0x60);
@@ -4259,7 +4273,7 @@ void EdManipulator::DrawRotator(VuVec &origin) {
     const i32 selected_axis = *reinterpret_cast<const i32 *>(data + 0x0c);
     if (start_angle != end_angle && selected_axis != 0) {
         EdDrawBegin(1);
-        EdDrawPolySector(origin, Scale, selected_axis - 1, start_angle, end_angle, static_cast<i32>(0x80808080), 32);
+        EdDrawPolySector(origin, scale, selected_axis - 1, start_angle, end_angle, static_cast<i32>(0x80808080), 32);
         EdDrawEnd();
     }
 }

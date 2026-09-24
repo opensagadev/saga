@@ -348,11 +348,14 @@ static __used__ void creatureEditor_cbActivationMenu(eduimenu_s *parent, eduiite
     NULISTHDR *list = creatureEditor_AreaList();
     for (NULISTLNK *link = NuLinkedListGetHead(list); link != nullptr;
          link = NuLinkedListGetNext(list, link), ++index) {
-        sprintf(label, "AREA \"%s\"", reinterpret_cast<char *>(link) + 8);
-        bool selected = creatureEditor_Current()->activation_area == link;
-        eduiMenuAddItem(menu, eduiItemCheckCreate(index, attr, selected, 1, creatureEditor_cbSetAreaActivation, label));
-        if (selected)
+        if (creatureEditor_Current()->activation_area == link) {
+            sprintf(label, "AREA \"%s\"", reinterpret_cast<char *>(link) + 8);
+            eduiMenuAddItem(menu, eduiItemCheckCreate(index, attr, 1, 1, creatureEditor_cbSetAreaActivation, label));
             menu->selected = edui_last_item;
+        } else {
+            sprintf(label, "AREA \"%s\"", reinterpret_cast<char *>(link) + 8);
+            eduiMenuAddItem(menu, eduiItemCheckCreate(index, attr, 0, 1, creatureEditor_cbSetAreaActivation, label));
+        }
         eduiMenuAttach(parent, menu);
     }
     eduiMenuAttach(parent, menu);
@@ -717,11 +720,12 @@ static __used__ void creatureEditor_cbSelectLocator(eduimenu_s *parent, eduiitem
         EDLOCATOR_s *locator = reinterpret_cast<EDLOCATOR_s *>(link);
         if (*reinterpret_cast<void **>(reinterpret_cast<u8 *>(locator) + 0x2c) != creature->path)
             continue;
-        bool selected = creatureEditor_Current()->locator == locator;
-        eduiMenuAddItem(menu,
-                        eduiItemCheckCreate(index, attr, selected, 1, creatureEditor_cbSetLocator, locator->name));
-        if (selected)
+        if (creatureEditor_Current()->locator == locator) {
+            eduiMenuAddItem(menu, eduiItemCheckCreate(index, attr, 1, 1, creatureEditor_cbSetLocator, locator->name));
             menu->selected = edui_last_item;
+        } else {
+            eduiMenuAddItem(menu, eduiItemCheckCreate(index, attr, 0, 1, creatureEditor_cbSetLocator, locator->name));
+        }
         eduiMenuAttach(parent, menu);
         ++index;
     }
@@ -1363,30 +1367,31 @@ __attribute__((optimize("O2"))) eduimenu_s *creatureEditor_Process(nupad_s *pad)
         } else {
             NULISTHDR *creatures = &aieditor->creatures;
             CreatureEditorRecord *selected = creatureEditor_Current();
-            CreatureEditorRecord *next = nullptr;
             bool change_selection = false;
             if ((pad->digital_buttons_pressed & 0x1000) != 0 ||
                 ((pad->digital_buttons & 0x100) != 0 && (pad->digital_buttons_pressed & 8) != 0)) {
-                next = selected != nullptr
-                           ? reinterpret_cast<CreatureEditorRecord *>(NuLinkedListGetNext(creatures, &selected->link))
-                           : nullptr;
-                if (next == nullptr)
-                    next = reinterpret_cast<CreatureEditorRecord *>(NuLinkedListGetHead(creatures));
+                if (selected != nullptr)
+                    aieditor->mode_selection_36930 =
+                        reinterpret_cast<EditorNamedEntry *>(NuLinkedListGetNext(creatures, &selected->link));
+                if (creatureEditor_Current() == nullptr)
+                    aieditor->mode_selection_36930 =
+                        reinterpret_cast<EditorNamedEntry *>(NuLinkedListGetHead(creatures));
                 change_selection = true;
             } else if ((pad->digital_buttons & 0x100) != 0 && (pad->digital_buttons_pressed & 2) != 0) {
-                next = selected != nullptr
-                           ? reinterpret_cast<CreatureEditorRecord *>(NuLinkedListGetPrev(creatures, &selected->link))
-                           : nullptr;
-                if (next == nullptr)
-                    next = reinterpret_cast<CreatureEditorRecord *>(NuLinkedListGetTail(creatures));
+                if (selected != nullptr)
+                    aieditor->mode_selection_36930 =
+                        reinterpret_cast<EditorNamedEntry *>(NuLinkedListGetPrev(creatures, &selected->link));
+                if (creatureEditor_Current() == nullptr)
+                    aieditor->mode_selection_36930 =
+                        reinterpret_cast<EditorNamedEntry *>(NuLinkedListGetTail(creatures));
                 change_selection = true;
             } else if (pad->digital_buttons_pressed & 0x100) {
-                next = reinterpret_cast<CreatureEditorRecord *>(creatureEditor_GetNearest(0));
+                aieditor->mode_selection_36930 = reinterpret_cast<EditorNamedEntry *>(creatureEditor_GetNearest(0));
                 change_selection = true;
             }
 
             if (change_selection) {
-                aieditor->mode_selection_36930 = reinterpret_cast<EditorNamedEntry *>(next);
+                CreatureEditorRecord *next = creatureEditor_Current();
                 if (next != nullptr) {
                     aieditor->current_path = reinterpret_cast<EDAIPATH_s *>(next->path);
                     edcamSetPos(&next->position);
@@ -1398,20 +1403,32 @@ __attribute__((optimize("O2"))) eduimenu_s *creatureEditor_Process(nupad_s *pad)
                 EDAIPATHCHECK_s *check = reinterpret_cast<EDAIPATHCHECK_s *>(reinterpret_cast<u8 *>(aieditor) + 0x48);
                 i32 angle = aieditorsettings.area_rotation;
                 bool rotate = false;
-                if (pad->digital_buttons & (0x2000 | 0x8000)) {
+                if (pad->digital_buttons & 0x2000) {
                     rotate = true;
                     CreatureEditorRecord *hover = *reinterpret_cast<CreatureEditorRecord **>(aieditor->unknown_3692c);
                     if (selected != nullptr && selected == hover)
                         angle = selected->angle;
                     i32 &step = *reinterpret_cast<i32 *>(aieditor->unknown_36934);
-                    const u32 direction = (pad->digital_buttons & 0x2000) ? 0x2000 : 0x8000;
-                    if (pad->digital_buttons_pressed & direction)
+                    if (pad->digital_buttons_pressed & 0x2000)
                         step = 0x14;
-                    else if (step < 600)
+                    else
                         step += 0x14;
                     if (step > 600)
                         step = 600;
-                    angle = (pad->digital_buttons & 0x2000) ? NuAngAdd(angle, step) : NuAngSub(angle, step);
+                    angle = NuAngAdd(angle, step);
+                } else if (pad->digital_buttons & 0x8000) {
+                    rotate = true;
+                    CreatureEditorRecord *hover = *reinterpret_cast<CreatureEditorRecord **>(aieditor->unknown_3692c);
+                    if (selected != nullptr && selected == hover)
+                        angle = selected->angle;
+                    i32 &step = *reinterpret_cast<i32 *>(aieditor->unknown_36934);
+                    if (pad->digital_buttons_pressed & 0x8000)
+                        step = 0x14;
+                    else
+                        step += 0x14;
+                    if (step > 600)
+                        step = 600;
+                    angle = NuAngSub(angle, step);
                 } else if (pad->digital_buttons & 0x4000) {
                     rotate = true;
                     const i32 relative = NuAngSub(angle, check->angle);
@@ -1501,6 +1518,7 @@ __attribute__((optimize("O2"))) eduimenu_s *creatureEditor_Process(nupad_s *pad)
                     strcpy(created->script_name, aieditorsettings.current_script_name);
                 memcpy(created->script_params, aieditorsettings.current_script_params, sizeof(created->script_params));
                 created->flags = (created->flags & ~0x1eu) | aieditorsettings.current_script_flags;
+                created->path = aieditor->current_path;
                 memcpy(created->path_check, reinterpret_cast<u8 *>(aieditor) + 0x48, sizeof(created->path_check));
                 reinterpret_cast<EDAIPATHCHECK_s *>(created->path_check)->angle =
                     NuAngSub(created->angle, *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(aieditor) + 0x60));

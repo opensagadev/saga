@@ -280,8 +280,8 @@ static __used__ void locatorEditor_cbRenameLocatorMenu(eduimenu_s *parent, eduii
     edui_textpicker_s *item = (edui_textpicker_s *)eduiItemTextPickCreate(
         0, locator_attr, locatorEditor_cbRenameLocator, (char *)"Locator Name");
     eduiMenuAddItem(menu, item);
-    strcpy(item->value, aieditor->current_locator->name);
-    item->max_length = 15;
+    strcpy(((edui_textpicker_s *)edui_last_item)->value, aieditor->current_locator->name);
+    ((edui_textpicker_s *)edui_last_item)->max_length = 15;
     eduiMenuAttach(parent, menu);
     menu->x = parent->x + 10;
     menu->y = parent->y + 40;
@@ -298,8 +298,8 @@ static __used__ void locatorEditor_cbRenameLocatorSetMenu(eduimenu_s *parent, ed
     edui_textpicker_s *item =
         (edui_textpicker_s *)eduiItemTextPickCreate(0, locator_attr, locatorEditor_cbRenameLocatorSet, (char *)"Name");
     eduiMenuAddItem(menu, item);
-    strcpy(item->value, aieditor->current_locator_set->name);
-    item->max_length = 15;
+    strcpy(((edui_textpicker_s *)edui_last_item)->value, aieditor->current_locator_set->name);
+    ((edui_textpicker_s *)edui_last_item)->max_length = 15;
     eduiMenuAttach(parent, menu);
     menu->x = parent->x + 10;
     menu->y = parent->y + 40;
@@ -321,8 +321,8 @@ static __used__ void locatorEditor_cbAddLocatorsByNameMenu(eduimenu_s *parent, e
     } else {
         strcpy(aieditor->pending_locator_name, aieditor->current_locator_set->name);
     }
-    NuStrCpy(item->value, aieditor->pending_locator_name);
-    item->max_length = 15;
+    NuStrCpy(((edui_textpicker_s *)edui_last_item)->value, aieditor->pending_locator_name);
+    ((edui_textpicker_s *)edui_last_item)->max_length = 15;
     eduiMenuAttach(parent, menu);
     menu->x = parent->x + 10;
     menu->y = parent->y + 40;

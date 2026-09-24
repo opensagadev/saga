@@ -2737,38 +2737,20 @@ i32 PropertyTool::ProcessMenu(EdInputContext &input) {
         }
 
         PropertyMenu *position = rebuilt.first;
-        if (menu->order == -1) {
-            while (position != NULL && position->order < 0) {
-                position = position->next;
+        while (position != NULL && position->order <= menu->order) {
+            position = position->next;
+        }
+        if (position != NULL) {
+            menu->next = position;
+            menu->previous = position->previous;
+            if (position->previous != NULL) {
+                position->previous->next = menu;
+            } else {
+                rebuilt.first = menu;
             }
-            if (position != NULL) {
-                menu->next = position;
-                menu->previous = position->previous;
-                if (position->previous != NULL) {
-                    position->previous->next = menu;
-                } else {
-                    rebuilt.first = menu;
-                }
-                position->previous = menu;
-                ++rebuilt.count;
-                continue;
-            }
-        } else {
-            while (position != NULL && position->order <= menu->order) {
-                position = position->next;
-            }
-            if (position != NULL) {
-                menu->next = position;
-                menu->previous = position->previous;
-                if (position->previous != NULL) {
-                    position->previous->next = menu;
-                } else {
-                    rebuilt.first = menu;
-                }
-                position->previous = menu;
-                ++rebuilt.count;
-                continue;
-            }
+            position->previous = menu;
+            ++rebuilt.count;
+            continue;
         }
         menu->next = NULL;
         menu->previous = rebuilt.last;
@@ -2780,7 +2762,8 @@ i32 PropertyTool::ProcessMenu(EdInputContext &input) {
         rebuilt.last = menu;
         ++rebuilt.count;
     }
-    for (PropertyMenu *menu = active_menu; menu != NULL;) {
+    while (active_menu != NULL) {
+        PropertyMenu *menu = active_menu;
         PropertyMenu *next = menu->next;
         if (next != NULL) {
             next->previous = menu->previous;
@@ -2797,7 +2780,6 @@ i32 PropertyTool::ProcessMenu(EdInputContext &input) {
         --menu_count;
         menu->Destroy();
         theMemoryManager.FreePool(menu, sizeof(PropertyMenu));
-        menu = next;
     }
     active_menu = rebuilt.first;
     last_menu = rebuilt.last;
@@ -2883,8 +2865,8 @@ void PropertyTool::RenderMenu(PropertyMenu *property_menu) {
     if (property_menu->order == -1)
         AutoLocateMenu(property_menu);
     eduimenu_s *menu = property_menu->menu;
-    VuVec start;
-    VuVec end;
+    VuVec start __attribute__((aligned(16)));
+    VuVec end __attribute__((aligned(16)));
     NuCameraCalcRay((static_cast<f32>(menu->x) + static_cast<f32>(menu->width) * 0.5f) / 640.0f,
                     (static_cast<f32>(menu->y) + static_cast<f32>(menu->height) * 0.125f) / 448.0f, &start.xyz,
                     &end.xyz, NULL);
@@ -2897,7 +2879,7 @@ void PropertyTool::RenderMenu(PropertyMenu *property_menu) {
     EdDrawBegin(0);
     EdDrawLineSegment(start, end, static_cast<i32>(reinterpret_cast<usize>(&selected_attr)));
     EdDrawEnd();
-    if (menu != NULL)
+    if (property_menu->menu != NULL)
         eduiMenuRender(menu);
     if (menu->selected != NULL) {
         EdControl *control = static_cast<EdControl *>(menu->selected->data_ptr);

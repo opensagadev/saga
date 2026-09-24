@@ -228,19 +228,20 @@ void creatureEditor_Render(i32 x, i32 y, float xscale, float yscale) {
             NuQFntPrintEx(system_qfont, text_x, y * 8 + 480, 16, "Locator = \"%s\"", locator->name);
     }
     NuQFntPrintEx(system_qfont, text_x, y * 8 + 600, 16, "SQR - Options");
-    if (nearest == nullptr) {
+    u8 *nearest_for_menu = *reinterpret_cast<u8 **>(aieditor->unknown_3692c);
+    if (nearest_for_menu == nullptr) {
         NuQFntPrintEx(system_qfont, text_x, y * 8 + 720, 16, "X - Create creature");
-        if (selected != nullptr)
+        if (aieditor->mode_selection_36930 != nullptr)
             NuQFntPrintEx(system_qfont, text_x, y * 8 + 840, 16, "TRI - Deselect selected");
         NuQFntPrintEx(system_qfont, text_x, y * 8 + 960, 16, "LLEFT/LRight - Rotate");
-    } else if (nearest != selected) {
+    } else if (nearest_for_menu != reinterpret_cast<u8 *>(aieditor->mode_selection_36930)) {
         NuQFntPrintEx(system_qfont, text_x, y * 8 + 720, 16, "X - Select creature");
     } else {
         NuQFntPrintEx(system_qfont, text_x, y * 8 + 720, 16, "X - Move selected");
         NuQFntPrintEx(system_qfont, text_x, y * 8 + 840, 16, "TRI - Delete selected");
         NuQFntPrintEx(system_qfont, text_x, y * 8 + 960, 16, "LLEFT/LRight - Rotate");
     }
-    if (selected != nullptr && aieditor->nearest_locator != nullptr)
+    if (aieditor->mode_selection_36930 != nullptr && aieditor->nearest_locator != nullptr)
         NuQFntPrintEx(system_qfont, text_x, y * 8 + 720, 16, "O - Set locator.");
 
     for (NULISTLNK *link = NuLinkedListGetHead(&aieditor->creatures); link != nullptr;
@@ -249,10 +250,9 @@ void creatureEditor_Render(i32 x, i32 y, float xscale, float yscale) {
         EDCREATURE_s *creature = reinterpret_cast<EDCREATURE_s *>(record);
         i32 render_colour =
             record == selected ? (record == nearest ? 0xff0000ff : 0x800000ff) : (record == nearest ? -1 : 0);
-        i32 group_count = record[0x5b];
-        u32 valid_positions = *reinterpret_cast<u32 *>(record + 0x54);
-        for (i32 group = 0; group < group_count; ++group) {
-            if (group >= 32 || !(valid_positions & (1u << group)) || !creatureEditor_IsSelectable(creature)) {
+        for (i32 group = 0; group < record[0x5b]; ++group) {
+            u32 valid_positions = *reinterpret_cast<u32 *>(record + 0x54);
+            if (!((static_cast<u64>(valid_positions) >> (group & 63)) & 1) || !creatureEditor_IsSelectable(creature)) {
                 continue;
             }
             nuvec_s position;

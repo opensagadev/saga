@@ -168,8 +168,8 @@ i32 BezierLinePos(VuVec &, VuVec &, VuVec &, VuVec &, VuVec &, f32);
 template <typename Ref>
 static Ref *make_spline_reference(EdClass *object_class, char *type, char *name, i32 offset, i32 size, i32 attributes,
                                   EdControl *control, bool add_to_class = true) {
-    Ref *reference = new (theMemoryManager.AllocPool(sizeof(Ref), 1)) Ref();
-    static_cast<EdRef &>(*reference) = EdRef(type, name, offset, size, attributes, control, 0);
+    Ref *reference =
+        new (theMemoryManager.AllocPool(sizeof(Ref), 1)) Ref(type, name, offset, size, attributes, control, 0);
     if (add_to_class)
         object_class->AddType(reference);
     return reference;
@@ -568,6 +568,7 @@ void SplineHelper::SerialiseObject(EdStream &stream, void *object) {
             knot->led_file = Placeable::CurrentLedFile;
             theKnotHelper.object_class->SerialiseObject(stream, knot);
             knot->spline = spline;
+            knot->next = NULL;
             knot->previous = spline->knots.last;
             if (spline->knots.last != NULL)
                 spline->knots.last->next = knot;

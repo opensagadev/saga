@@ -227,11 +227,13 @@ static void antinodeEditor_cbAntiNodeFlagsToggle(eduimenu_s *, eduiitem_s *item,
     if (node == nullptr)
         return;
     u8 previous_flags = node->game_flags;
-    u8 mask = static_cast<u8>(item->data);
-    if ((previous_flags & item->data) == 0)
-        node->game_flags = previous_flags | mask;
-    else
+    u32 mask = item->data;
+    u32 next_flags = previous_flags | mask;
+    if (previous_flags & mask)
         node->game_flags = previous_flags & ~mask;
+    else
+        node->game_flags = next_flags;
+    node = antinode_selected();
     if (static_cast<i8>(node->game_flags) < 0)
         memset(&node->special, 0, sizeof(node->special));
 }
