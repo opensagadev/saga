@@ -2126,12 +2126,12 @@ extern "C" {
         return MenuResult;
     }
 
-    void cbCancelSubMenu(eduimenu_s *, eduimenu_s *) {
-        STUBBED();
+    void cbCancelSubMenu(eduimenu_s *menu, eduimenu_s *) {
+        eduiMenuDetach(menu);
     }
 
-    void cbCancelSubMenuFromItem(eduimenu_s *, eduiitem_s *, u32) {
-        STUBBED();
+    void cbCancelSubMenuFromItem(eduimenu_s *menu, eduiitem_s *, u32) {
+        eduiMenuDetach(menu);
     }
 
     i32 cbCompateDirentByDateAsc(NUFILE_INFO *first, NUFILE_INFO *second) {
@@ -2158,8 +2158,14 @@ extern "C" {
         STUBBED();
     }
 
-    void cbTriggerSubMenu(eduimenu_s *, eduiitem_s *, u32) {
-        STUBBED();
+    void cbTriggerSubMenu(eduimenu_s *menu, eduiitem_s *item, u32) {
+        eduimenu_s *submenu = static_cast<eduimenu_s *>(item->data_ptr);
+        if (submenu != NULL) {
+            eduiMenuAttach(menu, submenu);
+            submenu->x = item->x + 10;
+            submenu->y = MIN(50, PS2_REZ_H * 2 - submenu->height);
+        }
+        item->highlighted = 0;
     }
 
 } // extern "C"

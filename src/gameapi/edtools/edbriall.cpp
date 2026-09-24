@@ -225,8 +225,7 @@ static void edbricbSetRopeColour(eduimenu_s *menu, eduiitem_s *item, u32) {
     bridge.blue = static_cast<u8>(static_cast<i32>(colour->blue * 255.0f));
     edbriBridgeUpdate(edbri_nearest, edbits_base_scene);
     eduimenu_s *parent = menu->parent;
-    if (parent)
-        eduiMenuDetach(menu);
+    eduiMenuDetach(menu);
     if (menu->callback)
         menu->callback(menu, parent);
 }

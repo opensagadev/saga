@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 58.89746,
+    "fuzzy_match_percent": 58.900524,
     "total_code": "4722419",
-    "matched_code": "489130",
-    "matched_code_percent": 10.357615,
+    "matched_code": "489198",
+    "matched_code_percent": 10.3590555,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 5892,
-    "matched_functions_percent": 43.777397,
+    "matched_functions": 5894,
+    "matched_functions_percent": 43.792255,
     "total_units": 1
   },
   "text": {
@@ -25803,7 +25803,7 @@
           "address": 3542352,
           "offset": 2652384,
           "size": 200,
-          "match_percent": 76.74074
+          "match_percent": 73.03704
         },
         {
           "name": "_ZL25edbricbSetBridgeStabilityP10eduimenu_sP10eduiitem_sj",
@@ -35667,7 +35667,7 @@
           "address": 3838304,
           "offset": 2948336,
           "size": 457,
-          "match_percent": 90.237114
+          "match_percent": 93.8866
         },
         {
           "name": "edpartRegisterPointerToGameCharLocation",
@@ -68887,7 +68887,7 @@
           "address": 3803616,
           "offset": 2913648,
           "size": 34,
-          "match_percent": 42.0
+          "match_percent": 100.0
         },
         {
           "name": "CreateTestMenu",
@@ -68975,7 +68975,7 @@
           "address": 3837248,
           "offset": 2947280,
           "size": 111,
-          "match_percent": 13.548388
+          "match_percent": 99.6129
         },
         {
           "name": "cbCancelSubMenuFromItem",
@@ -68983,7 +68983,7 @@
           "address": 3837360,
           "offset": 2947392,
           "size": 34,
-          "match_percent": 42.0
+          "match_percent": 100.0
         },
         {
           "name": "FlushMenuHighlights",

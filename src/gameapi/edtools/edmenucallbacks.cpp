@@ -6,6 +6,7 @@
 extern "C" void eduiItemColourPickSetRGB(edui_colour_pick_s *, f32, f32, f32);
 extern "C" eduiitem_s *eduiItemColourPickCreate(usize, const void *, EdUiItemCallback, char *);
 extern "C" i32 PS2_REZ_H;
+extern "C" void cbCancelSubMenu(eduimenu_s *, eduimenu_s *);
 
 // Editor UI callbacks retained in the original editor's menu code.
 #pragma GCC push_options
@@ -107,7 +108,7 @@ extern "C" void CreateColourPicker(void) {
         return;
 
     initialised = 1;
-    colourmenu = eduiMenuCreate(200, 70, 180, 250, ed_fnt, nullptr, const_cast<char *>("Pick Colour"));
+    colourmenu = eduiMenuCreate(200, 70, 180, 250, nullptr, cbCancelSubMenu, const_cast<char *>("Pick Colour"));
     if (colourmenu == nullptr)
         return;
 
