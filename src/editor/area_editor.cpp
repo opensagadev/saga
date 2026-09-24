@@ -80,10 +80,11 @@ static __used__ void areaEditor_cbDeleteArea(eduimenu_s *menu, eduiitem_s *, uns
              node =
                  NuLinkedListGetNext(reinterpret_cast<NULISTHDR *>(reinterpret_cast<u8 *>(aieditor) + 0x36924), node)) {
             u8 *script = reinterpret_cast<u8 *>(node);
-            if (*reinterpret_cast<EDAIAREA_s **>(script + 0x80) == area_selected()) {
+            EDAIAREA_s *selected = area_selected();
+            if (*reinterpret_cast<EDAIAREA_s **>(script + 0x80) == selected) {
                 *reinterpret_cast<EDAIAREA_s **>(script + 0x80) = NULL;
             }
-            if (*reinterpret_cast<EDAIAREA_s **>(script + 0x6c) == area_selected()) {
+            if (*reinterpret_cast<EDAIAREA_s **>(script + 0x6c) == selected) {
                 *reinterpret_cast<EDAIAREA_s **>(script + 0x6c) = NULL;
             }
         }

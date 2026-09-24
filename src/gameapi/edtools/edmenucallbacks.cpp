@@ -243,7 +243,7 @@ extern "C" {
         if (stage != nullptr) {
             if (item->type == 7)
                 eduiGradStageSetHSV(stage, cliph, clips, clipv);
-            else if (item->type == 8)
+            if (item->type == 8)
                 eduiGradStageSetHSV(stage, 0.0f, 0.0f, clipg);
             if (picker->paste != nullptr)
                 picker->paste(menu, item, value);

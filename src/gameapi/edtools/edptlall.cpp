@@ -696,7 +696,7 @@ static void edptlcbClipboardMenu(eduimenu_s *parent, eduiitem_s *, u32) {
     if (edpp_create_type == -1)
         return;
 
-    const u32 colours[4] = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
+    const u32 colours[4] __attribute__((aligned(16))) = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
     ptlclipmenu = eduiMenuCreate(70, 70, 300, 250, ed_fnt, edptlcbCancelClipboardMenu, "Clipboard Menu");
     if (ptlclipmenu == NULL)
         return;

@@ -471,8 +471,8 @@ static __used__ void creatureEditor_cbRespawnMenu(eduimenu_s *parent, eduiitem_s
         return;
     if (NuLinkedListGetHead(creatureEditor_LocatorList()) != nullptr) {
         char label[64];
-        if (creature->respawn_locator != nullptr) {
-            EDLOCATOR_s *locator = reinterpret_cast<EDLOCATOR_s *>(creature->respawn_locator);
+        if (creatureEditor_Current()->respawn_locator != nullptr) {
+            EDLOCATOR_s *locator = reinterpret_cast<EDLOCATOR_s *>(creatureEditor_Current()->respawn_locator);
             sprintf(label, "Respawn Locator \"%s\"", locator->name);
         } else {
             strcpy(label, "Respawn Locator NONE");
@@ -480,13 +480,15 @@ static __used__ void creatureEditor_cbRespawnMenu(eduimenu_s *parent, eduiitem_s
         eduiMenuAddItem(menu, eduiItemSelCreate(1, attr, 0, 0, creatureEditor_cbSelectRespawnLocator, label));
     }
     eduiMenuAddItem(menu, eduiItemSliderCreateInt(1, attr, 0, creatureEditor_cb_min_n_respawns, -1, 33,
-                                                  static_cast<i8>(creature->min_respawns), "Min Num Respawns"));
+                                                  static_cast<i8>(creatureEditor_Current()->min_respawns),
+                                                  "Min Num Respawns"));
     eduiMenuAddItem(menu, eduiItemSliderCreateInt(1, attr, 0, creatureEditor_cb_max_n_respawns, -1, 33,
-                                                  static_cast<i8>(creature->max_respawns), "Max Num Respawns"));
+                                                  static_cast<i8>(creatureEditor_Current()->max_respawns),
+                                                  "Max Num Respawns"));
     eduiMenuAddItem(menu, eduiItemSliderCreate(1, attr, 0, creatureEditor_cb_min_t_respawn, 0.0f, 60.0f,
-                                               creature->min_respawn_time, "Min Respawn Time"));
+                                               creatureEditor_Current()->min_respawn_time, "Min Respawn Time"));
     eduiMenuAddItem(menu, eduiItemSliderCreate(1, attr, 0, creatureEditor_cb_max_t_respawn, 0.0f, 60.0f,
-                                               creature->max_respawn_time, "Max Respawn Time"));
+                                               creatureEditor_Current()->max_respawn_time, "Max Respawn Time"));
     eduiMenuAttach(parent, menu);
 }
 

@@ -2543,8 +2543,9 @@ void EdDrawPolyCylinder(VuMtx const &transform, float half_length, float radius,
     EdDrawMtx(NULL);
 }
 
-void EdDrawPolyCylinder(VuVec const &start, VuVec const &end, i32 sides, i32 colour, i32 cap_colour, float radius,
-                        float limit, float offset) {
+__attribute__((force_align_arg_pointer)) void EdDrawPolyCylinder(VuVec const &start, VuVec const &end, i32 sides,
+                                                                 i32 colour, i32 cap_colour, float radius, float limit,
+                                                                 float offset) {
     VuVec direction(end.x - start.x, end.y - start.y, end.z - start.z, 0.0f);
     const float length = NuVecMag(&direction.xyz);
     if (length <= 0.0f)

@@ -863,7 +863,7 @@ void ClassEditor::MakeUniqueName(char const *name, char *destination, i32 size) 
     }
 
     if (prefix_length + digit_count >= size) {
-        prefix_length = size - digit_count - 1;
+        prefix_length = size + ~digit_count;
     }
     NuStrNCpy(destination, name, prefix_length + 1);
     char format[16];

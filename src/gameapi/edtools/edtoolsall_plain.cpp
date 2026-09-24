@@ -5870,7 +5870,8 @@ extern "C" {
             pick->changed(menu, item, pad->digital_buttons);
         return 0;
     }
-    static __used__ i32 eduicbRenderCheck(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width) {
+    __attribute__((force_align_arg_pointer)) static __used__ i32 eduicbRenderCheck(eduimenu_s *, eduiitem_s *item,
+                                                                                   i32 x, i32 y, i32 width) {
         i32 height = static_cast<i32>(NuQFntHeight(edui_font) * 1.25f) >> 3;
         i32 baseline = static_cast<i32>(NuQFntHeight(edui_font) * 0.125f + NuQFntBaseline(edui_font));
         item->x = x;
