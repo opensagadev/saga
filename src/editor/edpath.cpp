@@ -1533,9 +1533,9 @@ extern "C" {
                 runtime->radius = node->radius;
                 runtime->radius_squared = node->radius * node->radius;
                 runtime->min_height = node->position.y + node->lower_height;
-                runtime->min_height_offset = node->lower_height;
                 runtime->max_height = node->position.y + node->upper_height;
-                runtime->max_height_offset = node->upper_height;
+                runtime->min_height_offset = runtime->min_height - node->position.y;
+                runtime->max_height_offset = runtime->max_height - node->position.y;
                 runtime->runtime_flags = node->flags;
                 runtime->special_handle = node->special;
                 runtime->special_position = node->special_position;

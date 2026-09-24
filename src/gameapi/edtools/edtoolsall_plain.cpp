@@ -4904,18 +4904,19 @@ extern "C" {
     }
     static __used__ i32 eduicbInteractProp(struct edui_interact_s *interact) {
         edui_prop_s *property = static_cast<edui_prop_s *>(interact->item);
-        if (!(edui_cursor_buttons_db & EDUI_CURSOR_PRIMARY) || (property->unknown_property_flags & 0x0a))
-            return (property->unknown_property_flags & 0x0b) != 0;
+        u8 &property_flags = reinterpret_cast<u8 *>(property)[0x4c];
+        if (!(edui_cursor_buttons_db & EDUI_CURSOR_PRIMARY) || (property_flags & 0x0a))
+            return (property_flags & 0x0b) != 0;
         f32 label_end = interact->x + property->label_width;
         f32 cursor_bottom = interact->y + interact->height;
         bool in_row = edui_cursor_y >= interact->y && edui_cursor_y < cursor_bottom;
-        if (property->unknown_property_flags & 1) {
+        if (property_flags & 1) {
             if (in_row && edui_cursor_x >= label_end + 1.0f && edui_cursor_x < property->button_x) {
-                *(reinterpret_cast<u8 *>(property) + 0x4c) |= 1;
+                property_flags |= 1;
                 eduiPropTextPos = -1;
                 return 1;
             }
-            return (property->unknown_property_flags & 0x0b) != 0;
+            return (property_flags & 0x0b) != 0;
         }
         edui_prop_s *bounds_property = property;
         if (in_row && edui_cursor_x < label_end - 1.0f && property->selected) {
@@ -4924,16 +4925,16 @@ extern "C" {
             label_end = interact->x + bounds_property->label_width;
         }
         if (in_row && edui_cursor_x >= label_end - 1.0f && edui_cursor_x < label_end + 1.0f) {
-            property->unknown_property_flags |= 0x06;
+            property_flags |= 0x06;
             bounds_property = static_cast<edui_prop_s *>(interact->item);
             label_end = interact->x + bounds_property->label_width;
         }
         if (in_row && edui_cursor_x >= label_end + 1.0f && edui_cursor_x < bounds_property->button_x &&
-            !(property->unknown_property_flags & 1)) {
+            !(property_flags & 1)) {
             if (property->selected)
                 property->selected(interact->menu, property, 0);
             NuKeyFlush();
-            property->unknown_property_flags |= 1;
+            property_flags |= 1;
             NuStrCpy(eduiPropTextStore, property->property_text);
             NuStrCpy(eduiPropTextEdit, property->property_text);
             eduiPropTextPos = NuStrLen(property->property_text);
@@ -4944,10 +4945,10 @@ extern "C" {
               edui_cursor_y < (property->button_y + property->button_size) * 0.5f)) &&
             property->button) {
             property->button(interact->menu, property, 0);
-            if (property->unknown_property_flags & 0x20)
+            if (property_flags & 0x20)
                 return 1;
         }
-        return (property->unknown_property_flags & 0x0b) != 0;
+        return (property_flags & 0x0b) != 0;
     }
     static __used__ i32 eduicbInteractFilter(struct edui_interact_s *interact) {
         return eduicbInteractProp(interact);

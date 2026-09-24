@@ -555,11 +555,17 @@ static void edgracbChangeInstanceMenu(eduimenu_s *parent, eduiitem_s *, u32) {
         NuGScnGetSpecial(&special, edbits_base_scene, i);
         if (NuSpecialExistsFn(&special))
             name = NuSpecialGetName(&special);
-        if (edgra_filter && NuStrNCmp(edgra_filter_string, name, NuStrLen(edgra_filter_string)) && !selected)
-            continue;
-        eduiMenuAddItem(edgra_changeinstance_menu,
-                        eduiItemCheckCreate(i, edblack, selected, 1, edgracbChangeInstanceType, name));
-        ++added;
+        if (edgra_filter && NuStrNCmp(edgra_filter_string, name, NuStrLen(edgra_filter_string))) {
+            if (!selected)
+                continue;
+            eduiMenuAddItem(edgra_changeinstance_menu,
+                            eduiItemCheckCreate(i, edblack, selected, 1, edgracbChangeInstanceType, name));
+            ++added;
+        } else {
+            eduiMenuAddItem(edgra_changeinstance_menu,
+                            eduiItemCheckCreate(i, edblack, selected, 1, edgracbChangeInstanceType, name));
+            ++added;
+        }
         if (selected) {
             selected_found = 1;
             edgra_changeinstance_menu->selected = edui_last_item;

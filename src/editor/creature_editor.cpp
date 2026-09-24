@@ -607,11 +607,14 @@ static __used__ void creatureEditor_cbSelectScript(eduimenu_s *parent, eduiitem_
         if (NuStrICmp(name, "Level") == 0)
             continue;
         CreatureEditorRecord *creature = creatureEditor_Current();
-        bool selected = creature != nullptr && NuStrICmp(creature->script_name, name) == 0;
-        eduiMenuAddItem(menu, eduiItemCheckCreate(index, attr, selected, 1, creatureEditor_cbSetScript, name));
-        if (selected)
+        if (creature != nullptr && NuStrICmp(creature->script_name, name) == 0) {
+            eduiMenuAddItem(menu, eduiItemCheckCreate(index, attr, 1, 1, creatureEditor_cbSetScript, name));
             menu->selected = edui_last_item;
-        eduiMenuAttach(parent, menu);
+            eduiMenuAttach(parent, menu);
+        } else {
+            eduiMenuAddItem(menu, eduiItemCheckCreate(index, attr, 0, 1, creatureEditor_cbSetScript, name));
+            eduiMenuAttach(parent, menu);
+        }
     }
 }
 

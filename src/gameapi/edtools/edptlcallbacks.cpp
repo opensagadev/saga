@@ -1063,23 +1063,27 @@ static void cbPtlAddEffect(eduimenu_s *menu, eduiitem_s *, u32) {
     while (index < EDPP_MAX_TYPES && debtab[index] != NULL)
         ++index;
     if (index < EDPP_MAX_TYPES) {
-        debinftype *effect = &effecttypes[index];
-        debtab[index] = effect;
-        *effect = *debtab[0];
-        effect->status = 1;
-        sprintf(effect->name, "New%d", index);
-        effect->category = edpp_effect_list;
-        if (edpp_effect_list == 0)
-            effect->page = static_cast<u8>(edbits_particle_general_page);
-        else if (edpp_effect_list == 5)
-            effect->page = static_cast<u8>(edbits_particle_char_page);
-        else if (edpp_effect_list == 1)
-            effect->page = static_cast<u8>(edbits_particle_level_page);
-        if (edpp_effect_list == 0 || edpp_effect_list == 1 || edpp_effect_list == 5)
-            edpp_page_used[effect->page] = 1;
+        debtab[index] = &effecttypes[index];
+        *debtab[index] = *debtab[0];
+        debtab[index]->status = 1;
+        sprintf(debtab[index]->name, "New%d", index);
+        debtab[index]->category = edpp_effect_list;
+        if (edpp_effect_list == 0) {
+            i32 page = edbits_particle_general_page;
+            debtab[index]->page = static_cast<u8>(page);
+            edpp_page_used[page] = 1;
+        } else if (edpp_effect_list == 5) {
+            i32 page = edbits_particle_char_page;
+            debtab[index]->page = static_cast<u8>(page);
+            edpp_page_used[page] = 1;
+        } else if (edpp_effect_list == 1) {
+            i32 page = edbits_particle_level_page;
+            debtab[index]->page = static_cast<u8>(page);
+            edpp_page_used[page] = 1;
+        }
         edpp_create_type = index;
         ++edpp_types_used;
-        UpdateTotalPtls(effect);
+        UpdateTotalPtls(debtab[index]);
     }
     eduimenu_s *parent = menu->parent;
     if (parent != NULL)
