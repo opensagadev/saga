@@ -4254,7 +4254,7 @@ void EdBitControl::cbButton(eduimenu_s *menu, eduiitem_s *item, u32) {
         eduiMenuCreate(menu->x + item->x, item->y, 180, 250, reinterpret_cast<void *>(static_cast<usize>(EdLevelFnt)),
                        cbEdLevelDestroy, NULL);
     if (choices != NULL) {
-        for (Item *entry = edBitControl->items; entry != NULL && entry->name != NULL; ++entry) {
+        for (Item *entry = edBitControl->items; entry->name != NULL; ++entry) {
             eduiMenuAddItem(choices, eduiItemSelCreate(reinterpret_cast<usize>(entry), item->colours, 0, 0,
                                                        cbSelectItem, entry->name));
         }
