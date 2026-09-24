@@ -4354,7 +4354,7 @@ EdEnumControl::Item EdEnumControl::OnOffItems[] = {{"On", 1}, {"Off", 0}, {NULL,
 EdEnumControl::Item EdEnumControl::YesNoItems[] = {{"Yes", 1}, {"No", 0}, {NULL, 0}};
 
 char *EdEnumControl::GetEnumString(i32 value) {
-    for (Item *entry = items; entry != NULL && entry->name != NULL; ++entry) {
+    for (Item *entry = items; entry->name != NULL; ++entry) {
         if (entry->value == value)
             return entry->name;
     }
@@ -4362,7 +4362,7 @@ char *EdEnumControl::GetEnumString(i32 value) {
 }
 
 i32 EdEnumControl::GetEnumValue(char *name) {
-    for (Item *entry = items; entry != NULL && entry->name != NULL; ++entry) {
+    for (Item *entry = items; entry->name != NULL; ++entry) {
         if (NuStrICmp(entry->name, name) != 0)
             return entry->value;
     }

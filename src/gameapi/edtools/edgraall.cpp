@@ -328,11 +328,14 @@ static void edgracbClumpAreaMenu(eduimenu_s *parent, eduiitem_s *, u32) {
     edgra_clumparea_menu = eduiMenuCreate(70, 70, 180, 250, ed_fnt, edgracbCancelClumpAreaMenu, "Clump Area Type");
     if (!edgra_clumparea_menu)
         return;
-    const char *names[] = {"Legacy", "Circle", "Square", "Rectangle"};
-    for (i32 i = 1; i <= 4; ++i)
-        eduiMenuAddItem(edgra_clumparea_menu,
-                        eduiItemCheckCreate(i, colours, GrassClumps[edgra_nearest].unknown_25 == i, 1,
-                                            edgracbSetClumpArea, const_cast<char *>(names[i - 1])));
+    eduiMenuAddItem(edgra_clumparea_menu, eduiItemCheckCreate(1, colours, GrassClumps[edgra_nearest].unknown_25 == 1, 1,
+                                                              edgracbSetClumpArea, "Legacy"));
+    eduiMenuAddItem(edgra_clumparea_menu, eduiItemCheckCreate(2, colours, GrassClumps[edgra_nearest].unknown_25 == 2, 1,
+                                                              edgracbSetClumpArea, "Circle"));
+    eduiMenuAddItem(edgra_clumparea_menu, eduiItemCheckCreate(3, colours, GrassClumps[edgra_nearest].unknown_25 == 3, 1,
+                                                              edgracbSetClumpArea, "Square"));
+    eduiMenuAddItem(edgra_clumparea_menu, eduiItemCheckCreate(4, colours, GrassClumps[edgra_nearest].unknown_25 == 4, 1,
+                                                              edgracbSetClumpArea, "Rectangle"));
     edgraAttachMenu(parent, edgra_clumparea_menu);
 }
 static void edgracbClumpDistMenu(eduimenu_s *parent, eduiitem_s *, u32) {

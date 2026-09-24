@@ -2945,12 +2945,17 @@ extern "C" {
         edui_messagemenu->y = parent->y + 40;
     }
     void eduiCreateMessageMenu(eduimenu_s *parent, char *message, i32 highlighted) {
-        eduiiattr_s colours{highlighted == 1 ? 0x8000c000u : 0x800000c0u, 0x80ff0000, 0x80808080, 0x80404040};
+        static const u32 initial_colours[4]
+            __attribute__((aligned(16))) = {0x800000c0u, 0x80ff0000, 0x80808080, 0x80404040};
+        u32 colours[4] __attribute__((aligned(16)));
+        memcpy(colours, initial_colours, sizeof(colours));
+        if (highlighted == 1)
+            colours[0] = 0x8000c000u;
         edui_messagemenu =
             eduiMenuCreate(70, 70, 180, 250, parent->font, eduicbCancelMessageMenu, const_cast<char *>("Message"));
         if (!edui_messagemenu)
             return;
-        eduiMenuAddItem(edui_messagemenu, eduiItemSelCreate(1, &colours, 0, 0, NULL, message));
+        eduiMenuAddItem(edui_messagemenu, eduiItemSelCreate(1, colours, 0, 0, NULL, message));
         eduiMenuAttach(parent, edui_messagemenu);
         edui_messagemenu->x = parent->x + 10;
         edui_messagemenu->y = parent->y + 40;

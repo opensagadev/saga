@@ -1410,8 +1410,8 @@ void ClassEditor::cbEdClassSetPinned(eduimenu_s *menu, eduiitem_s *item, u32) {
     } else {
         eduiMenuDetach(menu);
         eduiMenuDestroy(menu);
-        if (edLevelNextMenu == menu) {
-            edLevelNextMenu = NULL;
+        if (edLevelActiveMenu == menu) {
+            edLevelActiveMenu = NULL;
         }
         eduiSetPinnedMenu(NULL);
     }
@@ -1423,21 +1423,15 @@ void ClassEditor::cbEdClassSetSnap(eduimenu_s *menu, eduiitem_s *item, u32) {
 }
 
 void ClassEditor::cbEdClassSetView(eduimenu_s *menu, eduiitem_s *item, u32) {
-    switch (item->data) {
-        case 0:
-            theClassEditor.class_filter = -1;
-            break;
-        case 1:
-            theClassEditor.class_filter = 0;
-            break;
-        case 2:
-            theClassEditor.class_filter = ~theClassEditor.class_filter;
-            break;
-        default:
-            if (item->data - 3 >= 0) {
-                theClassEditor.class_filter ^= 1 << (item->data - 3);
-            }
-            break;
+    i32 index = item->data;
+    if (index == 1) {
+        theClassEditor.class_filter = 0;
+    } else if (static_cast<u32>(index) < 1) {
+        theClassEditor.class_filter = -1;
+    } else if (index == 2) {
+        theClassEditor.class_filter = ~theClassEditor.class_filter;
+    } else if (index - 3 >= 0) {
+        theClassEditor.class_filter ^= 1 << (index - 3);
     }
     SetViewMenuHilight(menu);
 }
@@ -1516,8 +1510,9 @@ void ClassEditor::cbEdClassViewMenu(eduimenu_s *parent, eduiitem_s *item, u32) {
 }
 
 i32 ClassEditor::cbEdCopySelectedObject(EdInputContext &) {
-    if (selected_objects.first != NULL) {
-        return CreateObject(*reinterpret_cast<ClassObject *>(&selected_objects.first->ed_class));
+    if (theClassEditor.selected_objects.first != NULL) {
+        return theClassEditor.CreateObject(
+            *reinterpret_cast<ClassObject *>(&theClassEditor.selected_objects.first->ed_class));
     }
     return 0;
 }

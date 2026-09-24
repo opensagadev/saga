@@ -525,15 +525,14 @@ static void edptlcbSwitchMenu(eduimenu_s *parent, eduiitem_s *, u32) {
     u32 colours[4] = {0xc479c000, 0xc479c000, 0xc479c000, 0xc479c000};
     if (edpp_nearest == -1 || edpp_ptls[edpp_nearest].instance_id == -1)
         return;
-    edpp_particle_s *particle = &edpp_ptls[edpp_nearest];
     edptl_switch_menu = eduiMenuCreate(70, 70, 180, 250, ed_fnt, edptlcbCancelSwitchMenu, "Switch Menu");
     if (edptl_switch_menu == NULL)
         return;
     eduiMenuAddItem(edptl_switch_menu, eduiItemSelCreate(1, colours, 0, 0, edptlcbSwitchTypeMenu, "Switch Type..."));
     eduiMenuAddItem(edptl_switch_menu, eduiItemSliderCreateInt(0, colours, 0, edptlcbSetSwitchId, -1, 129,
-                                                               particle->switch_id, "Switch ID"));
+                                                               edpp_ptls[edpp_nearest].switch_id, "Switch ID"));
     eduiMenuAddItem(edptl_switch_menu, eduiItemSliderCreate(0, colours, 0, edptlcbSetSwitchVar, 0.0f, 20.0f,
-                                                            particle->switch_variable, "Switch Var"));
+                                                            edpp_ptls[edpp_nearest].switch_variable, "Switch Var"));
     eduiMenuAttach(parent, edptl_switch_menu);
     edptl_switch_menu->x = parent->x + 10;
     edptl_switch_menu->y = parent->y + 40;

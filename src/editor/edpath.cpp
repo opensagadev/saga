@@ -892,7 +892,7 @@ static __used__ void pathEditor_cbSetCurrentPath(eduimenu_s *, eduiitem_s *item,
 static __used__ void pathEditor_cbNodeFlagsToggle(eduimenu_s *, eduiitem_s *item, u32) {
     EDAIPATHNODE_s *node = aieditor->current_path->current_node;
     if (node != nullptr) {
-        u32 flags = node->flags;
+        u8 flags = node->flags;
         u32 mask = item->data;
         if ((u8)flags & mask) {
             flags &= ~mask;

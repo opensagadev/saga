@@ -892,16 +892,15 @@ static void edpartLevelTypeMenu(eduimenu_s *menu, eduiitem_s *, u32) {
             eduiMenuAddItem(edpart_leveltype_menu, eduiItemSelCreate(1, edblack, 0, 0, edpartAddLevelType, "Add Type"));
         else
             eduiMenuAddItem(edpart_leveltype_menu, eduiItemSelCreate(1, edgrey, 0, 0, NULL, "Add Type"));
-        part_type_s *type = part_types;
-        for (i32 index = 0; index < 128; ++index, ++type) {
-            if (type->name[0] != '\0' && type->field_b3 == 1) {
+        for (i32 index = 0; index < 128; ++index) {
+            if (part_types[index].name[0] != '\0' && part_types[index].field_b3 == 1) {
                 if (index == edpart_create_type) {
                     eduiMenuAddItem(edpart_leveltype_menu,
-                                    eduiItemCheckCreate(index, edblack, 1, 1, edpartSelType, type->name));
+                                    eduiItemCheckCreate(index, edblack, 1, 1, edpartSelType, part_types[index].name));
                     edpart_leveltype_menu->selected = edui_last_item;
                 } else {
                     eduiMenuAddItem(edpart_leveltype_menu,
-                                    eduiItemCheckCreate(index, edblack, 0, 1, edpartSelType, type->name));
+                                    eduiItemCheckCreate(index, edblack, 0, 1, edpartSelType, part_types[index].name));
                 }
             }
         }
@@ -1208,16 +1207,15 @@ static void edpartGeneralTypeMenu(eduimenu_s *menu, eduiitem_s *, u32) {
                             eduiItemSelCreate(1, edblack, 0, 0, edpartAddGeneralType, "Add Type"));
         else
             eduiMenuAddItem(edpart_generaltype_menu, eduiItemSelCreate(1, edgrey, 0, 0, NULL, "Add Type"));
-        part_type_s *type = part_types;
-        for (i32 index = 0; index < 128; ++index, ++type) {
-            if (type->name[0] != '\0' && type->field_b3 == 0) {
+        for (i32 index = 0; index < 128; ++index) {
+            if (part_types[index].name[0] != '\0' && part_types[index].field_b3 == 0) {
                 if (index == edpart_create_type) {
                     eduiMenuAddItem(edpart_generaltype_menu,
-                                    eduiItemCheckCreate(index, edblack, 1, 1, edpartSelType, type->name));
+                                    eduiItemCheckCreate(index, edblack, 1, 1, edpartSelType, part_types[index].name));
                     edpart_generaltype_menu->selected = edui_last_item;
                 } else {
                     eduiMenuAddItem(edpart_generaltype_menu,
-                                    eduiItemCheckCreate(index, edblack, 0, 1, edpartSelType, type->name));
+                                    eduiItemCheckCreate(index, edblack, 0, 1, edpartSelType, part_types[index].name));
                 }
             }
         }
@@ -1555,50 +1553,58 @@ static void edpartInstanceFlagsMenu(eduimenu_s *menu, eduiitem_s *, u32) {
     edpart_instanceflags_menu =
         eduiMenuCreate(70, 70, 300, 250, ed_fnt, edpartCancelInstanceFlagsMenu, "Instance Flags");
     if (edpart_instanceflags_menu != NULL) {
-        u32 flags = edpart_nearest_type->flags;
         i32 group = 1;
-        eduiMenuAddItem(edpart_instanceflags_menu, eduiItemToggleCreate(1, edblack, (flags & 1) != 0, group++,
-                                                                        edpartChangeInstanceFlag, "Die when stopped"));
         eduiMenuAddItem(edpart_instanceflags_menu,
-                        eduiItemToggleCreate(2, edblack, (flags & 2) != 0, group++, edpartChangeInstanceFlag,
-                                             "Collide with Characters"));
+                        eduiItemToggleCreate(1, edblack, (edpart_nearest_type->flags & 1) != 0, group++,
+                                             edpartChangeInstanceFlag, "Die when stopped"));
         eduiMenuAddItem(edpart_instanceflags_menu,
-                        eduiItemToggleCreate(4, edblack, (flags & 4) != 0, group++, edpartChangeInstanceFlag,
-                                             "Interact only with Active Chars"));
-        eduiMenuAddItem(edpart_instanceflags_menu, eduiItemToggleCreate(8, edblack, (flags & 8) != 0, group++,
-                                                                        edpartChangeInstanceFlag, "Damage Characters"));
+                        eduiItemToggleCreate(2, edblack, (edpart_nearest_type->flags & 2) != 0, group++,
+                                             edpartChangeInstanceFlag, "Collide with Characters"));
+        eduiMenuAddItem(edpart_instanceflags_menu,
+                        eduiItemToggleCreate(4, edblack, (edpart_nearest_type->flags & 4) != 0, group++,
+                                             edpartChangeInstanceFlag, "Interact only with Active Chars"));
+        eduiMenuAddItem(edpart_instanceflags_menu,
+                        eduiItemToggleCreate(8, edblack, (edpart_nearest_type->flags & 8) != 0, group++,
+                                             edpartChangeInstanceFlag, "Damage Characters"));
         if (edpart_nearest_type->effect_ids[0] != 9999)
             eduiMenuAddItem(edpart_instanceflags_menu,
-                            eduiItemToggleCreate(0x10, edblack, (flags & 0x10) != 0, group++, edpartChangeInstanceFlag,
-                                                 "Don't die when off-screen"));
-        eduiMenuAddItem(edpart_instanceflags_menu, eduiItemToggleCreate(0x40, edblack, (flags & 0x40) != 0, group++,
-                                                                        edpartChangeInstanceFlag, "Is a Collectible"));
-        eduiMenuAddItem(edpart_instanceflags_menu, eduiItemToggleCreate(0x80, edblack, (flags & 0x80) != 0, group++,
-                                                                        edpartChangeInstanceFlag, "Rotate Randomly"));
+                            eduiItemToggleCreate(0x10, edblack, (edpart_nearest_type->flags & 0x10) != 0, group++,
+                                                 edpartChangeInstanceFlag, "Don't die when off-screen"));
         eduiMenuAddItem(edpart_instanceflags_menu,
-                        eduiItemToggleCreate(0x100000, edblack, (flags & 0x100000) != 0, group++,
+                        eduiItemToggleCreate(0x40, edblack, (edpart_nearest_type->flags & 0x40) != 0, group++,
+                                             edpartChangeInstanceFlag, "Is a Collectible"));
+        eduiMenuAddItem(edpart_instanceflags_menu,
+                        eduiItemToggleCreate(0x80, edblack, (edpart_nearest_type->flags & 0x80) != 0, group++,
+                                             edpartChangeInstanceFlag, "Rotate Randomly"));
+        eduiMenuAddItem(edpart_instanceflags_menu,
+                        eduiItemToggleCreate(0x100000, edblack, (edpart_nearest_type->flags & 0x100000) != 0, group++,
                                              edpartChangeInstanceFlag, "Ordered Rotate Randomly"));
-        eduiMenuAddItem(edpart_instanceflags_menu, eduiItemToggleCreate(0x100, edblack, (flags & 0x100) != 0, group++,
-                                                                        edpartChangeInstanceFlag, "No Bounce"));
         eduiMenuAddItem(edpart_instanceflags_menu,
-                        eduiItemToggleCreate(0x200, edblack, (flags & 0x200) != 0, group++, edpartChangeInstanceFlag,
-                                             "Slot Cannot be Stolen"));
-        eduiMenuAddItem(edpart_instanceflags_menu, eduiItemToggleCreate(0x400, edblack, (flags & 0x400) != 0, group++,
-                                                                        edpartChangeInstanceFlag, "Ignore Terrain"));
+                        eduiItemToggleCreate(0x100, edblack, (edpart_nearest_type->flags & 0x100) != 0, group++,
+                                             edpartChangeInstanceFlag, "No Bounce"));
         eduiMenuAddItem(edpart_instanceflags_menu,
-                        eduiItemToggleCreate(0x800, edblack, (flags & 0x800) != 0, group++, edpartChangeInstanceFlag,
-                                             "Face Direction of Movement"));
-        eduiMenuAddItem(edpart_instanceflags_menu, eduiItemToggleCreate(0x1000, edblack, (flags & 0x1000) != 0, group++,
-                                                                        edpartChangeInstanceFlag, "Disable Draw"));
+                        eduiItemToggleCreate(0x200, edblack, (edpart_nearest_type->flags & 0x200) != 0, group++,
+                                             edpartChangeInstanceFlag, "Slot Cannot be Stolen"));
         eduiMenuAddItem(edpart_instanceflags_menu,
-                        eduiItemToggleCreate(0x2000, edblack, (flags & 0x2000) != 0, group++, edpartChangeInstanceFlag,
-                                             "Real Time Lighting"));
-        eduiMenuAddItem(edpart_instanceflags_menu, eduiItemToggleCreate(0x4000, edblack, (flags & 0x4000) != 0, group++,
-                                                                        edpartChangeInstanceFlag, "Ignore Creature"));
-        eduiMenuAddItem(edpart_instanceflags_menu, eduiItemToggleCreate(0x8000, edblack, (flags & 0x8000) != 0, group++,
-                                                                        edpartChangeInstanceFlag, "Thrown"));
+                        eduiItemToggleCreate(0x400, edblack, (edpart_nearest_type->flags & 0x400) != 0, group++,
+                                             edpartChangeInstanceFlag, "Ignore Terrain"));
         eduiMenuAddItem(edpart_instanceflags_menu,
-                        eduiItemToggleCreate(0x10000, edblack, (flags & 0x10000) != 0, group++,
+                        eduiItemToggleCreate(0x800, edblack, (edpart_nearest_type->flags & 0x800) != 0, group++,
+                                             edpartChangeInstanceFlag, "Face Direction of Movement"));
+        eduiMenuAddItem(edpart_instanceflags_menu,
+                        eduiItemToggleCreate(0x1000, edblack, (edpart_nearest_type->flags & 0x1000) != 0, group++,
+                                             edpartChangeInstanceFlag, "Disable Draw"));
+        eduiMenuAddItem(edpart_instanceflags_menu,
+                        eduiItemToggleCreate(0x2000, edblack, (edpart_nearest_type->flags & 0x2000) != 0, group++,
+                                             edpartChangeInstanceFlag, "Real Time Lighting"));
+        eduiMenuAddItem(edpart_instanceflags_menu,
+                        eduiItemToggleCreate(0x4000, edblack, (edpart_nearest_type->flags & 0x4000) != 0, group++,
+                                             edpartChangeInstanceFlag, "Ignore Creature"));
+        eduiMenuAddItem(edpart_instanceflags_menu,
+                        eduiItemToggleCreate(0x8000, edblack, (edpart_nearest_type->flags & 0x8000) != 0, group++,
+                                             edpartChangeInstanceFlag, "Thrown"));
+        eduiMenuAddItem(edpart_instanceflags_menu,
+                        eduiItemToggleCreate(0x10000, edblack, (edpart_nearest_type->flags & 0x10000) != 0, group++,
                                              edpartChangeInstanceFlag, "Can Damage Owner"));
         eduiMenuAttach(menu, edpart_instanceflags_menu);
         edpart_instanceflags_menu->x = menu->x + 10;
@@ -1877,14 +1883,18 @@ static void edpartInstanceOrphansMenu(eduimenu_s *parent, eduiitem_s *, u32) {
     EDPART_ORPHAN_ITEM(6)
     EDPART_ORPHAN_ITEM(7)
 #undef EDPART_ORPHAN_ITEM
-    eduiMenuAddItem(edpart_instanceorphans_menu,
-                    eduiItemSelCreate(8, edpart_nearest_orphans ? edblack : edgrey, 0, 0,
-                                      edpart_nearest_orphans ? edpartDeleteAllInstanceOrphans : NULL,
-                                      "Remove All Orphans"));
-    eduiMenuAddItem(edpart_instanceorphans_menu,
-                    eduiItemSelCreate(8, edpart_nearest_duplicates ? edblack : edgrey, 0, 0,
-                                      edpart_nearest_duplicates ? edpartDeleteAllInstanceDuplicates : NULL,
-                                      "Remove Duplicates"));
+    if (edpart_nearest_orphans) {
+        eduiMenuAddItem(edpart_instanceorphans_menu,
+                        eduiItemSelCreate(8, edblack, 0, 0, edpartDeleteAllInstanceOrphans, "Remove All Orphans"));
+    } else {
+        eduiMenuAddItem(edpart_instanceorphans_menu, eduiItemSelCreate(8, edgrey, 0, 0, NULL, "Remove All Orphans"));
+    }
+    if (edpart_nearest_duplicates) {
+        eduiMenuAddItem(edpart_instanceorphans_menu,
+                        eduiItemSelCreate(8, edblack, 0, 0, edpartDeleteAllInstanceDuplicates, "Remove Duplicates"));
+    } else {
+        eduiMenuAddItem(edpart_instanceorphans_menu, eduiItemSelCreate(8, edgrey, 0, 0, NULL, "Remove Duplicates"));
+    }
     eduiMenuAttach(parent, edpart_instanceorphans_menu);
     edpart_instanceorphans_menu->x = parent->x + 10;
     edpart_instanceorphans_menu->y = parent->y + 40;
