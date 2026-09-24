@@ -2461,7 +2461,8 @@ i32 LevelEditor::WriteStream(EdFileOutputStream &stream) {
     settings.Serialise(stream);
     stream.EndBlock();
     stream.BeginBlock("Editors");
-    stream.SerialiseBuffer(&editor_count, sizeof(editor_count), 1);
+    i32 count = editor_count;
+    stream.SerialiseBuffer(&count, sizeof(count), 1);
     for (BaseEditor *editor = first_editor; editor != NULL; editor = editor->next) {
         stream.BeginBlock(editor->GetName());
         editor->Serialise(stream);

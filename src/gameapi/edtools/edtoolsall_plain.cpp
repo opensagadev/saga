@@ -5932,12 +5932,13 @@ extern "C" {
         edui_colour_pick_s *picker = static_cast<edui_colour_pick_s *>(item);
         item->x = x;
         item->y = y;
-        i32 main_height = (width * 3) >> 2;
-        static const u32 hues[7] = {0x800000ffu, 0x8000ffffu, 0x8000ff00u, 0x80ffff00u,
-                                    0x80ff0000u, 0x80ff00ffu, 0x800000ffu};
-        for (i32 band = 0; band < 6; ++band)
-            eduiDrawHueValueBand(x, y, width, main_height, static_cast<f32>(band) / 6.0f,
-                                 static_cast<f32>(band + 1) / 6.0f, hues[band], hues[band + 1]);
+        i32 main_height = (width * 3) / 4;
+        eduiDrawHueValueBand(x, y, width, main_height, 0.0f, 1.0f / 6.0f, 0x800000ffu, 0x8000ffffu);
+        eduiDrawHueValueBand(x, y, width, main_height, 1.0f / 6.0f, 2.0f / 6.0f, 0x8000ffffu, 0x8000ff00u);
+        eduiDrawHueValueBand(x, y, width, main_height, 2.0f / 6.0f, 0.5f, 0x8000ff00u, 0x80ffff00u);
+        eduiDrawHueValueBand(x, y, width, main_height, 0.5f, 4.0f / 6.0f, 0x80ffff00u, 0x80ff0000u);
+        eduiDrawHueValueBand(x, y, width, main_height, 4.0f / 6.0f, 5.0f / 6.0f, 0x80ff0000u, 0x80ff00ffu);
+        eduiDrawHueValueBand(x, y, width, main_height, 5.0f / 6.0f, 1.0f, 0x80ff00ffu, 0x800000ffu);
         if (!edui_donotdraw) {
             i32 value_y = static_cast<i32>(y + main_height * picker->cursor_y) << 3;
             i32 hue_x = static_cast<i32>(x + width * picker->cursor_x) << 4;

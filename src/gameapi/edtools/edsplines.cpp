@@ -208,15 +208,15 @@ f32 SplineLength(nugspline_s *spline, i32 closed) {
     i32 segment_count = closed != 0 ? spline->length : spline->length - 1;
     f32 length = 0.0f;
     NUVEC *previous = spline->pts;
-    i32 segment = 1;
+    i32 segment = 0;
     do {
-        NUVEC *next = &spline->pts[segment == spline->length ? 0 : segment];
+        NUVEC *next = &spline->pts[segment == spline->length - 1 ? 0 : segment + 1];
         NUVEC difference;
         NuVecSub(&difference, next, previous);
         length += NuVecMag(&difference);
         previous = next;
         ++segment;
-    } while (segment <= segment_count);
+    } while (segment < segment_count);
     return length;
 }
 
@@ -247,7 +247,7 @@ void *KnotHelper::CreateObject(void *, i32, i32) {
          selected = selected->next) {
         if (spline == NULL && selected->ed_class == theSplineHelper.object_class)
             spline = static_cast<SplineObject *>(selected->object);
-        if (selected_knot == NULL && selected->ed_class == object_class)
+        if (selected_knot == NULL && selected->ed_class == theKnotHelper.object_class)
             selected_knot = static_cast<SplineKnot *>(selected->object);
         if (spline != NULL && selected_knot != NULL)
             break;
@@ -268,8 +268,8 @@ void *KnotHelper::CreateObject(void *, i32, i32) {
         knot->next = NULL;
         knot->previous = NULL;
     }
-    knot->spline = spline;
     knot->led_file = Placeable::CurrentLedFile;
+    knot->spline = spline;
     if (selected_knot == NULL) {
         knot->next = NULL;
         knot->previous = spline->knots.last;

@@ -441,6 +441,42 @@ static __used__ unsigned int AddLocatorToSet(EDLOCATORSET_s *set, EDLOCATOR_s *l
     return AddLocatorToSetBody(set, locator, before);
 }
 
+#if defined(__i386__)
+static __attribute__((noinline, optimize("no-tree-vectorize"), regparm(2))) unsigned int
+#else
+static __attribute__((noinline, optimize("no-tree-vectorize"))) unsigned int
+#endif
+AddLocatorToSetAtEnd(EDLOCATORSET_s *set, EDLOCATOR_s *locator) __asm__(
+    "_ZL15AddLocatorToSetP14EDLOCATORSET_sP11EDLOCATOR_sS2_.constprop.131");
+
+static unsigned int AddLocatorToSetAtEnd(EDLOCATORSET_s *set, EDLOCATOR_s *locator) {
+    if (locator == nullptr || set == nullptr || set->locators[63] != nullptr) {
+        return 0;
+    }
+    if (set->locators[0] != nullptr && set->locators[0]->path != locator->path) {
+        return 0;
+    }
+    for (i32 index = 0; index < 64 && set->locators[index] != nullptr; ++index) {
+        if (set->locators[index] == locator) {
+            for (i32 move = index; move < 63; ++move) {
+                set->locators[move] = set->locators[move + 1];
+            }
+            set->locators[63] = nullptr;
+            break;
+        }
+    }
+    for (i32 index = 0; index < 64; ++index) {
+        if (set->locators[index] == nullptr) {
+            set->locators[index] = locator;
+            if (index < 63) {
+                set->locators[index + 1] = nullptr;
+            }
+            return 1;
+        }
+    }
+    return 0;
+}
+
 extern "C" {
 
     void locatorEditorDrawLocators(void) {
@@ -655,22 +691,25 @@ extern "C" {
 } // extern "C"
 
 void locatorEditor_Enter(void) {
-    memset(&aieditor->locators, 0, 0x48);
+    AIEDITOR_RENDER_STATE *const *state = &aieditor;
+    // Keep the global pointer slot in a register across the list operations.
+    __asm__ volatile("" : "+r"(state));
+    memset(&(*state)->locators, 0, 0x48);
     for (i32 index = 0; index < 256; ++index) {
-        NuLinkedListAppend(&aieditor->free_locators, &aieditor->locator_pool[index].link);
+        NuLinkedListAppend(&(*state)->free_locators, &(*state)->locator_pool[index].link);
     }
-    memset(&aieditor->locator_sets, 0, 0x118);
+    memset(&(*state)->locator_sets, 0, 0x118);
     for (i32 index = 0; index < 64; ++index) {
-        NuLinkedListAppend(&aieditor->free_locator_sets, &aieditor->locator_set_pool[index].link);
+        NuLinkedListAppend(&(*state)->free_locator_sets, &(*state)->locator_set_pool[index].link);
     }
-    if (aieditor->ai_system != nullptr) {
-        AISYS_s *system = aieditor->ai_system;
+    if ((*state)->ai_system != nullptr) {
+        AISYS_s *system = (*state)->ai_system;
         for (i32 index = 0; index < system->locator_count; ++index) {
             AILOCATOR *source = &system->locators[index];
-            EDLOCATOR_s *locator = (EDLOCATOR_s *)NuLinkedListGetHead(&aieditor->free_locators);
+            EDLOCATOR_s *locator = (EDLOCATOR_s *)NuLinkedListGetHead(&(*state)->free_locators);
             if (locator != nullptr) {
-                NuLinkedListRemove(&aieditor->free_locators, &locator->link);
-                NuLinkedListAppend(&aieditor->locators, &locator->link);
+                NuLinkedListRemove(&(*state)->free_locators, &locator->link);
+                NuLinkedListAppend(&(*state)->locators, &locator->link);
                 locator->position = source->position;
                 locator->direction = source->direction;
             }
@@ -685,31 +724,31 @@ void locatorEditor_Enter(void) {
         }
         for (i32 index = 0; index < system->locator_set_count; ++index) {
             AILOCATORSET *source = &system->locator_sets[index];
-            EDLOCATORSET_s *set = (EDLOCATORSET_s *)NuLinkedListGetHead(&aieditor->free_locator_sets);
+            EDLOCATORSET_s *set = (EDLOCATORSET_s *)NuLinkedListGetHead(&(*state)->free_locator_sets);
             if (set == nullptr) {
-                break;
+                continue;
             }
-            NuLinkedListRemove(&aieditor->free_locator_sets, &set->link);
+            NuLinkedListRemove(&(*state)->free_locator_sets, &set->link);
             memset(set, 0, sizeof(*set));
-            NuLinkedListAppend(&aieditor->locator_sets, &set->link);
+            NuLinkedListAppend(&(*state)->locator_sets, &set->link);
             strcpy(set->name, source->name);
             for (i32 member = 0; member < source->locator_count; ++member) {
-                set->locators[member] = &aieditor->locator_pool[source->locator_entries[member]];
+                set->locators[member] = &(*state)->locator_pool[source->locator_entries[member]];
             }
         }
     }
-    if (aieditor->current_locator_set != nullptr) {
-        strcpy(aieditorsettings.current_route_name, aieditor->current_locator_set->name);
+    if ((*state)->current_locator_set != nullptr) {
+        strcpy(aieditorsettings.current_route_name, (*state)->current_locator_set->name);
     }
     if (aieditorsettings.current_route_name[0] == 0) {
-        aieditor->current_locator_set = nullptr;
+        (*state)->current_locator_set = nullptr;
         return;
     }
-    EDLOCATORSET_s *set = (EDLOCATORSET_s *)NuLinkedListGetHead(&aieditor->locator_sets);
+    EDLOCATORSET_s *set = (EDLOCATORSET_s *)NuLinkedListGetHead(&(*state)->locator_sets);
     while (set != nullptr && NuStrICmp(aieditorsettings.current_route_name, set->name) != 0) {
-        set = (EDLOCATORSET_s *)NuLinkedListGetNext(&aieditor->locator_sets, &set->link);
+        set = (EDLOCATORSET_s *)NuLinkedListGetNext(&(*state)->locator_sets, &set->link);
     }
-    aieditor->current_locator_set = set;
+    (*state)->current_locator_set = set;
 }
 
 void locatorEditor_Render(i32 x, i32 y, float x_scale, float y_scale) {
@@ -1025,7 +1064,13 @@ process_buttons:
             }
         }
         EDLOCATOR_s *before = aieditor->current_locator;
-        if (before != nullptr && before != nearest && AddLocatorToSet(set, nearest, before) != 0) {
+        unsigned int added;
+        if (before != nullptr && before != nearest) {
+            added = AddLocatorToSet(set, nearest, before);
+        } else {
+            added = AddLocatorToSetAtEnd(set, nearest);
+        }
+        if (added != 0) {
             aieditor->current_locator = nearest;
             aieditor->current_path = nearest->path;
             aieditorsettings.area_rotation = nearest->direction;

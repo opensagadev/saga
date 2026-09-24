@@ -375,18 +375,14 @@ static EDAIAREA_s *areaEditorCreateArea() {
     }
 }
 
-static void areaEditorNormalizeCylinder() {
-    EDAIAREA_s *selected = area_selected();
-    if (selected != NULL && (selected->flags & 1) != 0 && selected->size.x != selected->size.z) {
-        selected->size.x = NuFmin(selected->size.x, selected->size.z);
-    }
-}
-
 eduimenu_s *areaEditor_Process(nupad_s *pad) {
     if ((pad->digital_buttons_pressed & 0x80) != 0) {
         return areaEditorOptionsMenu();
     }
     area_hovered() = areaEditorFindHover();
+    EDAIAREA_s *selected;
+    u32 buttons;
+    u32 pressed;
     if ((pad->digital_buttons & 0x40) != 0) {
         bool selected_hover_on_press = false;
         if ((pad->digital_buttons_pressed & 0x40) != 0) {
@@ -418,15 +414,13 @@ eduimenu_s *areaEditor_Process(nupad_s *pad) {
                 selected->size.z *= 0.99f;
             }
         }
-        areaEditorNormalizeCylinder();
-        return NULL;
+        goto process_done;
     }
     if ((pad->digital_buttons_pressed & 0x10) != 0) {
         if (area_selected() != NULL && area_selected() == area_hovered()) {
             return areaEditorDeleteMenu();
         }
-        areaEditorNormalizeCylinder();
-        return NULL;
+        goto process_done;
     }
     if ((pad->digital_buttons_pressed & 0x100) != 0) {
         EDAIAREA_s *nearest = NULL;
@@ -443,12 +437,11 @@ eduimenu_s *areaEditor_Process(nupad_s *pad) {
         if (nearest != NULL) {
             edcamSetPos(&nearest->position);
         }
-        areaEditorNormalizeCylinder();
-        return NULL;
+        goto process_done;
     }
-    u32 buttons = pad->digital_buttons;
-    u32 pressed = pad->digital_buttons_pressed;
-    EDAIAREA_s *selected = area_selected();
+    buttons = pad->digital_buttons;
+    pressed = pad->digital_buttons_pressed;
+    selected = area_selected();
     if (buttons & 0x2000 || buttons & 0x8000) {
         if (selected != NULL && selected == area_hovered()) {
             aieditorsettings.area_rotation = selected->rotation;
@@ -469,15 +462,13 @@ eduimenu_s *areaEditor_Process(nupad_s *pad) {
         if (selected != NULL && selected == area_hovered()) {
             selected->rotation = static_cast<i16>(aieditorsettings.area_rotation);
         }
-        areaEditorNormalizeCylinder();
-        return NULL;
+        goto process_done;
     }
     if (buttons & 0x4000 || buttons & 0x1000) {
         if (selected != NULL && selected == area_hovered()) {
             selected->size.y *= buttons & 0x4000 ? 0.99f : 1.01f;
         }
-        areaEditorNormalizeCylinder();
-        return NULL;
+        goto process_done;
     }
     if ((buttons & 0x100) != 0 && (pressed & 0x0a) != 0) {
         EDAIAREA_s *next = NULL;
@@ -501,6 +492,10 @@ eduimenu_s *areaEditor_Process(nupad_s *pad) {
             edcamSetPos(&next->position);
         }
     }
-    areaEditorNormalizeCylinder();
+process_done:
+    selected = area_selected();
+    if (selected != NULL && (selected->flags & 1) != 0 && selected->size.x != selected->size.z) {
+        selected->size.x = NuFmin(selected->size.x, selected->size.z);
+    }
     return NULL;
 }

@@ -79,8 +79,8 @@ void routeEditor_Render(i32 x, i32 y, float xscale, float yscale) {
 
 template <bool RequireHats, bool RejectFlag40, bool RejectFlag80>
 static __attribute__((always_inline)) inline i32 FindModelListDataFlags(APICHARACTERMODELLIST_s *models,
-                                                                        u32 model_flags, u32 game_flags, i32 first_id) {
-    for (i32 id = first_id; id != -1; ++models, id = models->model_id) {
+                                                                        u32 model_flags, u32 game_flags, i16 first_id) {
+    for (i16 id = first_id; id != -1; ++models, id = models->model_id) {
         if (Collection_Got(id) == 0)
             continue;
         const i32 current_id = models->model_id;

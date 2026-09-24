@@ -247,7 +247,9 @@ static void edgracbDpadModeMenu(eduimenu_s *parent, eduiitem_s *, u32) {
                         eduiItemCheckCreate(0, colours, edgra_dpadmode == 0, 1, edgracbSetDpadMode, "Clump Size"));
         eduiMenuAddItem(edgra_dpadmode_menu,
                         eduiItemCheckCreate(1, colours, edgra_dpadmode == 1, 1, edgracbSetDpadMode, "Clump Tilt"));
-        edgraAttachMenu(parent, edgra_dpadmode_menu);
+        eduiMenuAttach(parent, edgra_dpadmode_menu);
+        edgra_dpadmode_menu->x = parent->x + 10;
+        edgra_dpadmode_menu->y = parent->y + 40;
     }
 }
 static void edgracbInstanceMenu(eduimenu_s *parent, eduiitem_s *, u32) {
@@ -573,7 +575,9 @@ static void edgracbChangeInstanceMenu(eduimenu_s *parent, eduiitem_s *, u32) {
     }
     if (added == 1)
         eduiMenuAddItem(edgra_changeinstance_menu, eduiItemSelCreate(1, edgrey, 0, 0, NULL, "All Instances Filtered"));
-    edgraAttachMenu(parent, edgra_changeinstance_menu);
+    eduiMenuAttach(parent, edgra_changeinstance_menu);
+    edgra_changeinstance_menu->x = parent->x + 10;
+    edgra_changeinstance_menu->y = parent->y + 40;
     if (selected_found)
         edgra_changeinstance_menu->field_0c = edgra_changeinstance_menu->selected;
 }

@@ -3546,41 +3546,65 @@ __attribute__((force_align_arg_pointer)) i32 EdManScale::Process(EdInputContext 
             f32 scale_x = 1.0f;
             f32 scale_y = 1.0f;
             f32 scale_z = 1.0f;
-            if (axis >= 1 && axis <= 6) {
-                NUMTX &matrix = transform.matrix;
-                VuVec projected;
-                projected.x = matrix.m00 * first_axis.x + matrix.m10 * first_axis.y + matrix.m20 * first_axis.z;
-                projected.y = matrix.m01 * first_axis.x + matrix.m11 * first_axis.y + matrix.m21 * first_axis.z;
-                projected.z = matrix.m02 * first_axis.x + matrix.m12 * first_axis.y + matrix.m22 * first_axis.z;
-                projected.w = 0.0f;
-                f32 magnitude = NuVecMag(reinterpret_cast<NUVEC *>(&projected));
-                f32 movement = delta.x * first_axis.x + delta.y * first_axis.y + delta.z * first_axis.z;
-                if (axis >= 4)
-                    movement += delta.x * second_axis.x + delta.y * second_axis.y + delta.z * second_axis.z;
-                if (movement == 0.0f)
-                    continue;
-                VuVec local_axis = first_axis;
-                NuVecInvMtxRotate(reinterpret_cast<NUVEC *>(&local_axis), reinterpret_cast<NUVEC *>(&local_axis),
-                                  &matrix);
-                NuVecNorm(reinterpret_cast<NUVEC *>(&local_axis), reinterpret_cast<NUVEC *>(&local_axis));
-                f32 scaled_magnitude = Scale * magnitude;
-                f32 change = (scaled_magnitude + movement) / scaled_magnitude - 1.0f;
-                if (axis >= 4) {
-                    scale_x = local_axis.x * change + second_axis.x * change + 1.0f;
-                    scale_y = local_axis.y * change + second_axis.y * change + 1.0f;
-                    scale_z = local_axis.z * change + second_axis.z * change + 1.0f;
-                } else {
+            switch (axis) {
+                case 1:
+                case 2:
+                case 3: {
+                    NUMTX &matrix = transform.matrix;
+                    VuVec projected;
+                    projected.x = matrix.m00 * first_axis.x + matrix.m10 * first_axis.y + matrix.m20 * first_axis.z;
+                    projected.y = matrix.m01 * first_axis.x + matrix.m11 * first_axis.y + matrix.m21 * first_axis.z;
+                    projected.z = matrix.m02 * first_axis.x + matrix.m12 * first_axis.y + matrix.m22 * first_axis.z;
+                    projected.w = 0.0f;
+                    f32 magnitude = NuVecMag(reinterpret_cast<NUVEC *>(&projected));
+                    f32 movement = delta.x * first_axis.x + delta.y * first_axis.y + delta.z * first_axis.z;
+                    if (movement == 0.0f)
+                        continue;
+                    VuVec local_axis = first_axis;
+                    NuVecInvMtxRotate(reinterpret_cast<NUVEC *>(&local_axis), reinterpret_cast<NUVEC *>(&local_axis),
+                                      &matrix);
+                    NuVecNorm(reinterpret_cast<NUVEC *>(&local_axis), reinterpret_cast<NUVEC *>(&local_axis));
+                    f32 scaled_magnitude = Scale * magnitude;
+                    f32 change = (scaled_magnitude + movement) / scaled_magnitude - 1.0f;
                     scale_x = local_axis.x * change + 1.0f;
                     scale_y = local_axis.y * change + 1.0f;
                     scale_z = local_axis.z * change + 1.0f;
+                    break;
                 }
-            } else if (axis == 7) {
-                f32 movement = input.Get(1) - input.Get(0) + input.Get(2);
-                if (movement == 0.0f)
+                case 4:
+                case 5:
+                case 6: {
+                    NUMTX &matrix = transform.matrix;
+                    VuVec projected;
+                    projected.x = matrix.m00 * first_axis.x + matrix.m10 * first_axis.y + matrix.m20 * first_axis.z;
+                    projected.y = matrix.m01 * first_axis.x + matrix.m11 * first_axis.y + matrix.m21 * first_axis.z;
+                    projected.z = matrix.m02 * first_axis.x + matrix.m12 * first_axis.y + matrix.m22 * first_axis.z;
+                    projected.w = 0.0f;
+                    f32 magnitude = NuVecMag(reinterpret_cast<NUVEC *>(&projected));
+                    f32 movement = delta.x * first_axis.x + delta.y * first_axis.y + delta.z * first_axis.z;
+                    movement += delta.x * second_axis.x + delta.y * second_axis.y + delta.z * second_axis.z;
+                    if (movement == 0.0f)
+                        continue;
+                    VuVec local_axis = first_axis;
+                    NuVecInvMtxRotate(reinterpret_cast<NUVEC *>(&local_axis), reinterpret_cast<NUVEC *>(&local_axis),
+                                      &matrix);
+                    NuVecNorm(reinterpret_cast<NUVEC *>(&local_axis), reinterpret_cast<NUVEC *>(&local_axis));
+                    f32 scaled_magnitude = Scale * magnitude;
+                    f32 change = (scaled_magnitude + movement) / scaled_magnitude - 1.0f;
+                    scale_x = local_axis.x * change + second_axis.x * change + 1.0f;
+                    scale_y = local_axis.y * change + second_axis.y * change + 1.0f;
+                    scale_z = local_axis.z * change + second_axis.z * change + 1.0f;
+                    break;
+                }
+                case 7: {
+                    f32 movement = input.Get(1) - input.Get(0) + input.Get(2);
+                    if (movement == 0.0f)
+                        continue;
+                    scale_x = scale_y = scale_z = movement * 0.005f + 1.0f;
+                    break;
+                }
+                default:
                     continue;
-                scale_x = scale_y = scale_z = movement * 0.005f + 1.0f;
-            } else {
-                continue;
             }
             NUMTX &matrix = transform.matrix;
             const NUMTX original = matrix;

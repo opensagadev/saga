@@ -1627,20 +1627,20 @@ static void edpartWorldInstanceMenu(eduimenu_s *parent, eduiitem_s *, u32) {
     if (edpart_worldinstance_menu == NULL || edbits_base_scene == NULL || edpart_nearest_type == NULL)
         return;
     i32 group = 1;
-    bool selected_first = false;
+    i32 selected_first = 0;
     i32 count = NuGScnNumSpecials(edbits_base_scene);
     for (i32 index = 0; index < count; ++index) {
         nuhspecial_s special;
         NuGScnGetSpecial(&special, edbits_base_scene, index);
         char *name = NuSpecialExistsFn(&special) ? NuSpecialGetName(&special) : NULL;
-        bool selected = false;
-        bool included = false;
+        i32 selected = 0;
+        i32 included = 0;
         for (i32 variant = 0; variant < edpart_nearest_type->variant_count; ++variant) {
             if (edpart_nearest_type->effect_ids[variant] == index) {
                 if (edpart_nearest_type->effect_pages[variant] == 0)
-                    selected = true;
+                    selected = 1;
                 else
-                    included = true;
+                    included = 1;
             }
         }
         if (edpart_filter && NuStrNCmp(edpart_filter_string, name, NuStrLen(edpart_filter_string)) != 0 && !included)
@@ -1648,8 +1648,8 @@ static void edpartWorldInstanceMenu(eduimenu_s *parent, eduiitem_s *, u32) {
         eduiitem_s *item = eduiItemToggleCreate(index, edblack, selected, group++, edpartSetInstanceType, name);
         eduiMenuAddItem(edpart_worldinstance_menu, item);
         if (selected && !selected_first) {
-            selected_first = true;
-            edpart_worldinstance_menu->selected = item;
+            selected_first = 1;
+            edpart_worldinstance_menu->selected = edui_last_item;
         }
     }
     if (group == 1)
@@ -1795,20 +1795,20 @@ static void edpartThingsInstanceMenu(eduimenu_s *parent, eduiitem_s *, u32) {
     if (edpart_thingsinstance_menu == NULL || edbits_things_scene == NULL || edpart_nearest_type == NULL)
         return;
     i32 group = 1;
-    bool selected_first = false;
+    i32 selected_first = 0;
     i32 count = NuGScnNumSpecials(edbits_things_scene);
     for (i32 index = 0; index < count; ++index) {
         nuhspecial_s special;
         NuGScnGetSpecial(&special, edbits_things_scene, index);
         char *name = NuSpecialExistsFn(&special) ? NuSpecialGetName(&special) : NULL;
-        bool selected = false;
-        bool included = false;
+        i32 selected = 0;
+        i32 included = 0;
         for (i32 variant = 0; variant < edpart_nearest_type->variant_count; ++variant) {
             if (edpart_nearest_type->effect_ids[variant] == index) {
                 if (edpart_nearest_type->effect_pages[variant] == 1)
-                    selected = true;
+                    selected = 1;
                 else
-                    included = true;
+                    included = 1;
             }
         }
         if (edpart_filter && NuStrNCmp(edpart_filter_string, name, NuStrLen(edpart_filter_string)) != 0 && !included)
@@ -1816,8 +1816,8 @@ static void edpartThingsInstanceMenu(eduimenu_s *parent, eduiitem_s *, u32) {
         eduiitem_s *item = eduiItemToggleCreate(index, edblack, selected, group++, edpartSetInstanceType, name);
         eduiMenuAddItem(edpart_thingsinstance_menu, item);
         if (selected && !selected_first) {
-            selected_first = true;
-            edpart_thingsinstance_menu->selected = item;
+            selected_first = 1;
+            edpart_thingsinstance_menu->selected = edui_last_item;
         }
     }
     if (group == 1)

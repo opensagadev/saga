@@ -389,7 +389,7 @@ static void edptlcbStartPage(eduimenu_s *, eduiitem_s *item, u32) {
     edppStartPage(static_cast<i8>(item->data));
 }
 static void edptlcbBounceMenu(eduimenu_s *parent, eduiitem_s *, u32) {
-    u32 colours[4] = {0xc479c000, 0xc479c000, 0xc479c000, 0xc479c000};
+    u32 colours[4] __attribute__((aligned(16))) = {0xc479c000, 0xc479c000, 0xc479c000, 0xc479c000};
     if (edpp_nearest == -1 || edpp_ptls[edpp_nearest].instance_id == -1)
         return;
     debkeydatatype_s *key = &debkeydata[edpp_ptls[edpp_nearest].instance_id];
@@ -573,27 +573,26 @@ static void edptlcbSetSwitchId(eduimenu_s *, eduiitem_s *item, u32) {
     debkeydata[edpp_ptls[edpp_nearest].instance_id].trigger_second = switch_id;
 }
 static void edptlcbSoundIDMenu(eduimenu_s *parent, eduiitem_s *item, u32) {
-    const debinftype *effect = debtab[debkeydata[edpp_ptls[edpp_nearest].instance_id].effect_index];
     const u32 colours[4] = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
+    const debinftype *effect = debtab[debkeydata[edpp_ptls[edpp_nearest].instance_id].effect_index];
     edptl_soundid_menu = eduiMenuCreate(70, 70, 180, 200, ed_fnt, edptlcbCancelSoundIDMenu, "Sound ID");
     if (edptl_soundid_menu == NULL)
         return;
 
-    const i32 slot = item->data;
     eduiMenuAddItem(edptl_soundid_menu,
-                    eduiItemCheckCreate((slot << 16) + 9999, colours, effect->sound_data[slot * 3] == -1, 0,
+                    eduiItemCheckCreate((item->data << 16) + 9999, colours, effect->sound_data[item->data * 3] == -1, 0,
                                         edptlcbSetSoundID, "NONE"));
     for (i32 sound = 0; sound < 1600; ++sound) {
         if (g_soundInfo[sound].sfx_name == NULL)
             continue;
-        if (effect->sound_data[slot * 3] == sound) {
+        if (effect->sound_data[item->data * 3] == sound) {
             eduiMenuAddItem(edptl_soundid_menu,
-                            eduiItemCheckCreate((slot << 16) + sound, colours, 1, 1, edptlcbSetSoundID,
+                            eduiItemCheckCreate((item->data << 16) + sound, colours, 1, 1, edptlcbSetSoundID,
                                                 const_cast<char *>(g_soundInfo[sound].sfx_name)));
             edptl_soundid_menu->selected = edui_last_item;
         } else {
             eduiMenuAddItem(edptl_soundid_menu,
-                            eduiItemCheckCreate((slot << 16) + sound, colours, 0, 1, edptlcbSetSoundID,
+                            eduiItemCheckCreate((item->data << 16) + sound, colours, 0, 1, edptlcbSetSoundID,
                                                 const_cast<char *>(g_soundInfo[sound].sfx_name)));
         }
     }
