@@ -2290,6 +2290,38 @@ void pathEditor_Render(i32 x, i32 y, float x_scale, float y_scale) {
             }
         }
     }
+    if (aieditorsettings.unknown_060_bit0 && aieditor->cached_path_system != nullptr) {
+        AIPATH_s *runtime_path = aieditor->cached_path_system->paths[0];
+        if (runtime_path != nullptr) {
+            i32 current = aieditor->current_path->runtime_start;
+            i32 end = aieditor->current_path->runtime_end;
+            if (current >= 0 && current < runtime_path->node_count && end >= 0 && end < runtime_path->node_count &&
+                current != end) {
+                AIPATHNODE_s *node = &runtime_path->nodes[current];
+                u8 edge = runtime_path->route_matrix[current][end];
+                while (edge != 0xff) {
+                    AIPATHCNX_s *connection = node->connections[edge];
+                    i32 next = connection->node_indices[0] != current ? connection->node_indices[0]
+                                                                      : connection->node_indices[1];
+                    AIPATHNODE_s *next_node = &runtime_path->nodes[next];
+                    NURND_VERTEX3D vertices[2];
+                    vertices[0].position = node->position;
+                    vertices[1].position = next_node->position;
+                    vertices[0].position.y += 0.1f;
+                    vertices[1].position.y += 0.1f;
+                    vertices[0].colour = 0xff0000ff;
+                    vertices[1].colour = 0xff0000ff;
+                    AiRndrLine3d(vertices, nullptr, nullptr);
+                    current = next;
+                    end = aieditor->current_path->runtime_end;
+                    if (current == end)
+                        break;
+                    node = &runtime_path->nodes[current];
+                    edge = runtime_path->route_matrix[current][end];
+                }
+            }
+        }
+    }
     pathEditorDrawPaths();
     if (aieditorsettings.show_creatures_display) {
         creatureEditor_RenderAllCreatures();

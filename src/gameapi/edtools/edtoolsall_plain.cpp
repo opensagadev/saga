@@ -5594,7 +5594,7 @@ extern "C" {
         eduicbProcessPropKeyboard(menu, property);
         eduiSetCameraEnabled(1);
         if ((property->unknown_property_flags & 8) ||
-            (pad && item->type == 17 && (pad->digital_buttons & EDUI_CURSOR_PRIMARY))) {
+            (item->type == 17 && (pad->digital_buttons & EDUI_CURSOR_PRIMARY))) {
             if (property->button) {
                 eduiSetCameraEnabled(0);
                 property->button(menu, item, edui_cursor_buttons);
