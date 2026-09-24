@@ -3245,7 +3245,7 @@ void EdClass::Serialise(EdStream &stream, i32 *class_mapping) {
         return;
     }
     stream.SerialiseString(&name);
-    i32 count;
+    i32 count __attribute__((aligned(16)));
     if (stream.version == 0) {
         stream.SerialiseBuffer(&count, sizeof(count), 1);
     }
@@ -3278,8 +3278,7 @@ void EdClass::Serialise(EdStream &stream, i32 *class_mapping) {
             }
             member->Serialise(stream, class_mapping);
         }
-    }
-    if (stream.mode == 1) {
+    } else if (stream.mode == 1) {
         if (stream.version <= 2) {
             stream.SerialiseBuffer(&count, sizeof(count), 1);
             for (i32 i = 0; i < count; ++i) {

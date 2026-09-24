@@ -6605,7 +6605,9 @@ extern "C" {
             NuRndrLine2di(marker_x, top, marker_x, bottom, item->colours[item->highlighted], uimtls[0]);
         return height * 2;
     }
-    static __used__ i32 eduicbRenderTextPick(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width) {
+    static __used__ __attribute__((optimize("no-omit-frame-pointer"))) i32 eduicbRenderTextPick(eduimenu_s *,
+                                                                                                eduiitem_s *item, i32 x,
+                                                                                                i32 y, i32 width) {
         auto *picker = static_cast<edui_textpicker_s *>(item);
         i32 height = static_cast<i32>(NuQFntHeight(edui_font) * 1.25f) >> 3;
         i32 baseline = static_cast<i32>(NuQFntHeight(edui_font) * 0.125f + NuQFntBaseline(edui_font));

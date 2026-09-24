@@ -2378,11 +2378,10 @@ void edpartDoInput(nupad_s *pad) {
         f32 size = edpart_copy_size + static_cast<f32>(pad->analog_left_pad_up) / 5000.0f -
                    static_cast<f32>(pad->analog_left_pad_down) / 5000.0f;
         if (size < 0.05f)
-            size = 0.05f;
-        if (size > 2.0f)
-            size = 2.0f;
-        edpart_copy_size = size;
-        edpart_copyroty += pad->analog_left_pad_right - pad->analog_left_pad_left;
+            edpart_copy_size = 0.05f;
+        else
+            edpart_copy_size = 2.0f < size ? 2.0f : size;
+        edpart_copyroty = edpart_copyroty + pad->analog_left_pad_right - pad->analog_left_pad_left;
     }
 
     if (edpart_nearest == -1)

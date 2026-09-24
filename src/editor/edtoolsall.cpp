@@ -222,9 +222,9 @@ void creatureEditor_Render(i32 x, i32 y, float xscale, float yscale) {
             NuQFntPrintEx(system_qfont, text_x, y * 8 + 240, 16, "Script = NONE, %s", set_name);
         }
         EDLOCATOR_s *area = *reinterpret_cast<EDLOCATOR_s **>(display + 0x80);
-        EDLOCATOR_s *locator = *reinterpret_cast<EDLOCATOR_s **>(display + 0x84);
         if (area != nullptr)
             NuQFntPrintEx(system_qfont, text_x, y * 8 + 360, 16, "Area = \"%s\"", area->name);
+        EDLOCATOR_s *locator = *reinterpret_cast<EDLOCATOR_s **>(display + 0x84);
         if (locator != nullptr)
             NuQFntPrintEx(system_qfont, text_x, y * 8 + 480, 16, "Locator = \"%s\"", locator->name);
     }

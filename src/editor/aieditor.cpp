@@ -289,9 +289,10 @@ static EDANTINODE_REGPARM1 EDANTINODE_s *antinodeEditor_GetNearestAntinode(i32 r
                 f32 extent = node->base_radius > node->base_height ? node->base_radius : node->base_height;
                 nuvec_s ellipse_offset;
                 ellipse_offset.x = aieditor->camera_position.x - node->position.x;
+                if (ellipse_offset.x > extent || ellipse_offset.x < -extent)
+                    continue;
                 ellipse_offset.z = aieditor->camera_position.z - node->position.z;
-                if (ellipse_offset.x > extent || ellipse_offset.x < -extent || ellipse_offset.z > extent ||
-                    ellipse_offset.z < -extent)
+                if (ellipse_offset.z > extent || ellipse_offset.z < -extent)
                     continue;
                 f32 ellipse_distance = ellipse_offset.x * ellipse_offset.x + ellipse_offset.z * ellipse_offset.z;
                 if (!(extent * extent > ellipse_distance))
@@ -311,9 +312,10 @@ static EDANTINODE_REGPARM1 EDANTINODE_s *antinodeEditor_GetNearestAntinode(i32 r
                 f32 diagonal = NuFsqrt(node->base_radius * node->base_radius + node->base_height * node->base_height);
                 nuvec_s rectangle_offset;
                 rectangle_offset.x = aieditor->camera_position.x - node->position.x;
+                if (rectangle_offset.x > diagonal || rectangle_offset.x < -diagonal)
+                    continue;
                 rectangle_offset.z = aieditor->camera_position.z - node->position.z;
-                if (rectangle_offset.x > diagonal || rectangle_offset.x < -diagonal || rectangle_offset.z > diagonal ||
-                    rectangle_offset.z < -diagonal)
+                if (rectangle_offset.z > diagonal || rectangle_offset.z < -diagonal)
                     continue;
                 rectangle_offset.y = 0.0f;
                 NuVecRotateY(&rectangle_offset, &rectangle_offset, -node->flags);

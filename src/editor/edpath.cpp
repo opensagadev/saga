@@ -674,8 +674,14 @@ static __used__ void pathEditor_cbShareNodeMenu(eduimenu_s *parent, eduiitem_s *
     eduiMenuAttach(parent, menu);
 }
 
-static __used__ void pathEditorCalcRouteIterator(AIPATH_s *path, f32 *distances, u8 *visited, i32 previous, i32 current,
-                                                 f32 distance, i32 route_mask) {
+#if defined(__i386__) && defined(__SSE__)
+#define EDPATH_ROUTE_ITERATOR_CALL __attribute__((regparm(2), sseregparm))
+#else
+#define EDPATH_ROUTE_ITERATOR_CALL
+#endif
+static __used__ EDPATH_ROUTE_ITERATOR_CALL void pathEditorCalcRouteIterator(AIPATH_s *path, f32 *distances, u8 *visited,
+                                                                            i32 previous, i32 current, f32 distance,
+                                                                            i32 route_mask) {
     ++iterator_count;
     if ((visited[current / 8] & (1 << (current % 8))) != 0) {
         return;
