@@ -83,15 +83,16 @@ static __attribute__((always_inline)) inline i32 FindModelListDataFlags(APICHARA
     for (i32 id = first_id; id != -1; ++models, id = models->model_id) {
         if (Collection_Got(id) == 0)
             continue;
-        const GAMECHARACTERDATA &game_data = GCDataList[id];
+        const i32 current_id = models->model_id;
+        const GAMECHARACTERDATA &game_data = GCDataList[current_id];
         if ((game_data.flags_090 & game_flags) != game_flags ||
-            (CDataList[id].model_flags & model_flags) != model_flags)
+            (CDataList[current_id].model_flags & model_flags) != model_flags)
             continue;
         if (RejectFlag40 && (game_data.flags_094[1] & 0x40) != 0)
             continue;
         if (RejectFlag80 && static_cast<i8>(game_data.flags_094[1]) < 0)
             continue;
-        if (RequireHats && CanWearHatsInFreePlay(id) == 0)
+        if (RequireHats && CanWearHatsInFreePlay(current_id) == 0)
             continue;
         return 1;
     }
@@ -102,7 +103,7 @@ i32 InModelListDataFlags(APICHARACTERMODELLIST_s *models, u32 model_flags, u32 g
                          i32 reject_flag_40) {
     if (models == nullptr)
         return 0;
-    const i32 first_id = models->model_id;
+    const i16 first_id = models->model_id;
     if (first_id == -1)
         return 0;
     const u32 reject_flag_80 = model_flags & 8;

@@ -6576,13 +6576,11 @@ extern "C" {
         if (cursor_flash >= 16 && !edui_donotdraw) {
             char prefix[256];
             i32 position = picker->cursor;
-            if (position < 0)
-                position = 0;
-            if (position > 255)
-                position = 255;
-            memcpy(prefix, picker->value, position);
-            prefix[position] = '\0';
-            i32 offset = static_cast<i32>(NuQFntPrintLenU(edui_font, prefix));
+            i32 offset = 0;
+            if (position) {
+                NuStrNCpy(prefix, picker->value, position + 1);
+                offset = static_cast<i32>(NuQFntPrintLenU(edui_font, prefix));
+            }
             char at_cursor[2] = {position < NuStrLen(picker->value) ? picker->value[position] : 'A', '\0'};
             NuRndrRect2di((x << 4) + offset, value_y - static_cast<i32>(NuQFntBaseline(edui_font)),
                           static_cast<i32>(NuQFntPrintLenU(edui_font, at_cursor)),

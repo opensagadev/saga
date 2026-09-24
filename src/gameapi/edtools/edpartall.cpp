@@ -2351,21 +2351,26 @@ void edpartDoInput(nupad_s *pad) {
     edpart_nearest_emit = &part_emits[edpart_nearest];
     if (edpart_nearest_emit->effect_id != -1)
         edpart_nearest_type = &part_types[edpart_nearest_emit->effect_id];
-    edpart_nearest_orphans = 0;
     edpart_nearest_duplicates = 0;
+    i32 orphans = 0;
+    i32 duplicates = 0;
     for (i32 variant = 0; variant < 8; ++variant) {
         i16 effect = edpart_nearest_type->effect_ids[variant];
+        if (effect == 9999 || effect == -1)
+            continue;
         if (effect == 9998)
-            ++edpart_nearest_orphans;
-        else if (effect != 9999 && effect != -1) {
+            ++orphans;
+        else {
             for (i32 previous = 0; previous < variant; ++previous) {
                 if (effect == edpart_nearest_type->effect_ids[previous]) {
-                    ++edpart_nearest_duplicates;
+                    ++duplicates;
                     break;
                 }
             }
         }
     }
+    edpart_nearest_orphans = orphans;
+    edpart_nearest_duplicates = duplicates;
 }
 
 extern "C" {

@@ -3392,7 +3392,7 @@ __attribute__((force_align_arg_pointer)) i32 EdManScale::Process(EdInputContext 
     return axis != 0;
 }
 
-void EdManScale::Render(ClassObjectList &selected) {
+__attribute__((force_align_arg_pointer)) void EdManScale::Render(ClassObjectList &selected) {
     if (selected.count > 2)
         EdManipulator::Render(selected);
     VuVec average;

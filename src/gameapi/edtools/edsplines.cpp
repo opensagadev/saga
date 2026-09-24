@@ -689,16 +689,18 @@ SplineObject *SplineObject::Clone() {
     NuStrCpy(clone->name, name);
     SplineKnot *source = knots.first;
     for (i32 index = 0; index < knots.count; ++index) {
-        SplineKnot *knot = new (theMemoryManager.AllocPool(sizeof(SplineKnot), 1)) SplineKnot();
+        SplineKnot *knot = new (theMemoryManager.AllocPool(sizeof(SplineKnot), 1)) SplineKnot;
         knot->next = NULL;
-        knot->previous = clone->knots.last;
+        knot->previous = NULL;
         knot->spline = clone;
         knot->led_file = Placeable::CurrentLedFile;
+        knot->previous = clone->knots.last;
         if (clone->knots.last != NULL)
             clone->knots.last->next = knot;
-        else
-            clone->knots.first = knot;
+        const bool had_first = clone->knots.first != NULL;
         clone->knots.last = knot;
+        if (!had_first)
+            clone->knots.first = knot;
         ++clone->knots.count;
         knot->position.x = source->position.x;
         knot->position.y = source->position.y;
