@@ -432,9 +432,10 @@ eduimenu_s *antinodeEditor_Process(nupad_s *pad) {
         } else {
             skip_platforms = true;
         }
-        EDANTINODE_s *candidate = selected;
         EDANTINODE_s *first = nullptr;
+        EDANTINODE_s *candidate;
         do {
+            candidate = antinode_selected();
             NULISTLNK *next = candidate == nullptr ? (forward ? NuLinkedListGetHead(antinode_list())
                                                               : NuLinkedListGetTail(antinode_list()))
                                                    : (forward ? NuLinkedListGetNext(antinode_list(), &candidate->link)
@@ -443,14 +444,15 @@ eduimenu_s *antinodeEditor_Process(nupad_s *pad) {
                 next = forward ? NuLinkedListGetHead(antinode_list()) : NuLinkedListGetTail(antinode_list());
             candidate = reinterpret_cast<EDANTINODE_s *>(next);
             if (candidate == nullptr || (skip_platforms && candidate == first)) {
-                candidate = nullptr;
+                aieditor->mode_selection_42e9c = nullptr;
                 break;
             }
+            aieditor->mode_selection_42e9c = candidate;
             if (first == nullptr) {
                 first = candidate;
             }
         } while (skip_platforms && NuSpecialExistsFn(&candidate->special));
-        aieditor->mode_selection_42e9c = candidate;
+        candidate = antinode_selected();
         if (candidate != nullptr)
             edcamSetPos(&candidate->position);
     } else if ((held & 0x100) == 0 && selected != nullptr && selected == nearest) {

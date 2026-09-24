@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 58.400227,
+    "fuzzy_match_percent": 58.40154,
     "total_code": "4722419",
     "matched_code": "487746",
     "matched_code_percent": 10.328308,
@@ -18886,7 +18886,7 @@
           "address": 4039520,
           "offset": 3149552,
           "size": 3155,
-          "match_percent": 39.98
+          "match_percent": 40.62
         },
         {
           "name": "_ZL27antinodeEditor_cbSelectTypeP10eduimenu_sP10eduiitem_sj",
@@ -20867,7 +20867,7 @@
           "address": 5561296,
           "offset": 4671328,
           "size": 791,
-          "match_percent": 51.631866
+          "match_percent": 53.587914
         },
         {
           "name": "_ZN12PropertyTool20RetrievePropertyMenuEP11ClassObjectP16PropertyMenuList",
@@ -21650,7 +21650,7 @@
           "address": 4201504,
           "offset": 3311536,
           "size": 4142,
-          "match_percent": 1.916429
+          "match_percent": 2.068376
         },
         {
           "name": "pathEditorSaveData",
@@ -27925,7 +27925,7 @@
           "address": 5543072,
           "offset": 4653104,
           "size": 395,
-          "match_percent": 53.938595
+          "match_percent": 59.2807
         },
         {
           "name": "_ZN16SplinePointBlockC1Ev",
@@ -28524,7 +28524,7 @@
           "address": 3571568,
           "offset": 2681600,
           "size": 1753,
-          "match_percent": 29.729858
+          "match_percent": 29.63981
         },
         {
           "name": "_Z20edppHighlightNearestv",

@@ -4906,7 +4906,7 @@ extern "C" {
         bool in_row = edui_cursor_y >= interact->y && edui_cursor_y < cursor_bottom;
         if (property->unknown_property_flags & 1) {
             if (in_row && edui_cursor_x >= label_end + 1.0f && edui_cursor_x < property->button_x) {
-                property->unknown_property_flags |= 1;
+                *(reinterpret_cast<u8 *>(property) + 0x4c) |= 1;
                 eduiPropTextPos = -1;
                 return 1;
             }

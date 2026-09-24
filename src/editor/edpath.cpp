@@ -1675,7 +1675,7 @@ extern "C" {
                 for (i32 node_index = 0; node_index < path->node_count; ++node_index) {
                     AIPATHNODE_s *node = &path->nodes[node_index];
                     AISysGetPathPos(aieditor->ai_system, &node->position, &info, first_path, 0xff);
-                    if (!info.on_path || info.connection == nullptr || info.path == nullptr) {
+                    if (!info.on_path) {
                         node->path_flags = -1;
                         node->runtime_flags &= ~u8(1);
                         continue;

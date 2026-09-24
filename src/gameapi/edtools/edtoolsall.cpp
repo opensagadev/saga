@@ -306,7 +306,8 @@ void edppDoInput(nupad_s *pad) {
     const i32 up = pad->analog_left_pad_up;
     const i32 down = pad->analog_left_pad_down;
     if (edpp_copy_mode != 0) {
-        edpp_copy_size += static_cast<f32>(up - down) / 5000.0f;
+        edpp_copy_size += static_cast<f32>(up) / 5000.0f;
+        edpp_copy_size -= static_cast<f32>(down) / 5000.0f;
         if (edpp_copy_size < 0.05f)
             edpp_copy_size = 0.05f;
         if (edpp_copy_size > 2.0f)

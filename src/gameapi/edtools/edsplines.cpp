@@ -572,9 +572,10 @@ void SplineHelper::SerialiseObject(EdStream &stream, void *object) {
             knot->previous = spline->knots.last;
             if (spline->knots.last != NULL)
                 spline->knots.last->next = knot;
-            else
-                spline->knots.first = knot;
+            const bool had_first = spline->knots.first != NULL;
             spline->knots.last = knot;
+            if (!had_first)
+                spline->knots.first = knot;
             ++spline->knots.count;
         }
     }

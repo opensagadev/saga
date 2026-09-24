@@ -2603,7 +2603,7 @@ void PropertyTool::BringToFront(PropertyMenu *menu) {
 
 PropertyMenu *PropertyTool::CreatePropertyMenu(ClassObject &object) {
     PropertyMenu *property_menu = new (theMemoryManager.AllocPool(sizeof(PropertyMenu), 1)) PropertyMenu();
-    PropertyMenuMetrics metrics = ediGetMenuStartMetrics();
+    PropertyMenuMetrics metrics __attribute__((aligned(16))) = ediGetMenuStartMetrics();
     char name[64];
     char title[128];
     if (!get_class_object_attribute(object.ed_class, object.object, object.reference, 2, EdType_String, name,
