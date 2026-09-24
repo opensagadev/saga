@@ -483,11 +483,13 @@ static __attribute__((used)) void edanimcbSoundTypeMenu(eduimenu_s *parent, edui
     eduiMenuAddItem(menu, eduiItemCheckCreate(0x1869f, colours, edanim_sound_type == -1, 0, edanimcbSetSoundType,
                                               const_cast<char *>("NONE")));
     for (i32 index = 0; index < edSfxAllCount; ++index) {
-        const bool selected = edanim_sound_type == index;
-        eduiMenuAddItem(
-            menu, eduiItemCheckCreate(index, colours, selected, 1, edanimcbSetSoundType, edbitsGetSoundName(index)));
-        if (selected) {
+        if (edanim_sound_type == index) {
+            eduiMenuAddItem(menu,
+                            eduiItemCheckCreate(index, colours, 1, 1, edanimcbSetSoundType, edbitsGetSoundName(index)));
             menu->selected = edui_last_item;
+        } else {
+            eduiMenuAddItem(menu,
+                            eduiItemCheckCreate(index, colours, 0, 1, edanimcbSetSoundType, edbitsGetSoundName(index)));
         }
     }
 

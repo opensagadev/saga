@@ -140,7 +140,7 @@ void antinodeEditor_Render(i32 x, i32 y, float xscale, float yscale) {
         NuVecXZDist(&display->position, &aieditor->camera_position, &displacement);
     }
     EDANTINODE_s *nearest = *reinterpret_cast<EDANTINODE_s **>(reinterpret_cast<u8 *>(aieditor) + 0x42ea0);
-    if (selected != nullptr && nearest != nullptr && selected == nearest) {
+    if (nearest != nullptr && nearest == aieditor->mode_selection_42e9c) {
         char *platform_name = NuSpecialGetName(&selected->special);
         if (platform_name != nullptr) {
             NuQFntPrintEx(system_qfont, (x + 10) * 16, y * 8 + 120, 16, "Platform=%s", platform_name);

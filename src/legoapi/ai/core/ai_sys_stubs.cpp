@@ -1726,7 +1726,9 @@ extern "C" {
             return;
         }
 
-        memset(system->storage, 0, system->storage_size);
+        i32 storage_size = system->storage_size;
+        memset(system->storage, 0, storage_size);
+        *reinterpret_cast<volatile i32 *>(&system->storage_size) = storage_size;
         system->storage_cursor.addr = reinterpret_cast<usize>(system->storage);
         system->path_sys =
             pathEditorCreateData(&system->storage_cursor, &system->storage_end, &aieditorsettings.external_display_a,

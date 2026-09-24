@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 58.700615,
+    "fuzzy_match_percent": 58.704773,
     "total_code": "4722419",
     "matched_code": "488394",
     "matched_code_percent": 10.342031,
@@ -21809,7 +21809,7 @@
           "address": 4253984,
           "offset": 3364016,
           "size": 1361,
-          "match_percent": 80.157715
+          "match_percent": 86.54027
         },
         {
           "name": "_Z18routeEditor_Renderiiff",
@@ -33203,7 +33203,7 @@
           "address": 3529152,
           "offset": 2639184,
           "size": 472,
-          "match_percent": 59.948277
+          "match_percent": 81.97414
         },
         {
           "name": "edbitsDrawCircleTilted",
@@ -41140,7 +41140,7 @@
           "address": 4205648,
           "offset": 3315680,
           "size": 3761,
-          "match_percent": 46.329
+          "match_percent": 46.469
         },
         {
           "name": "CalculateLocatorDirection",
