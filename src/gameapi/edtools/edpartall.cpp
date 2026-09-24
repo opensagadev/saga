@@ -1788,14 +1788,14 @@ static void edpartPartIndexMenu(eduimenu_s *menu, eduiitem_s *, u32) {
     edpart_partindex_menu = eduiMenuCreate(70, 70, 250, 250, ed_fnt, edpartCancelPartIndexMenu, "Part Type");
     if (edpart_partindex_menu == NULL || edpart_nearest_type == NULL)
         return;
-    i32 selected = edpart_set_part == 5 ? edpart_nearest_type->impact_part : -1;
+    i32 selected = edpart_set_part == 3 ? edpart_nearest_type->impact_part : -1;
     eduiMenuAddItem(edpart_partindex_menu, eduiItemCheckCreate(static_cast<usize>(-1), edblack, selected == -1, 1,
                                                                edpartChangePartIndex, "None"));
     for (i32 index = 0; index < 128; ++index) {
         part_type_s *type = &part_types[index];
         if (type->name[0] == '\0' || type->field_b3 != edpart_which_scene)
             continue;
-        bool current_type = edpart_nearest_emit != NULL && index == edpart_nearest_emit->effect_id;
+        bool current_type = index == edpart_nearest_emit->effect_id;
         eduiitem_s *item =
             eduiItemCheckCreate(index, current_type ? edgrey : edblack, !current_type && index == selected,
                                 current_type ? 0 : 1, current_type ? NULL : edpartChangePartIndex, type->name);

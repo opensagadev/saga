@@ -1027,24 +1027,32 @@ process_buttons:
             aieditor->current_path = aieditor->current_locator->path;
             edcamSetPos(&aieditor->current_locator->position);
         }
-    } else if ((pad->digital_buttons & (0x2000 | 0x8000)) != 0) {
+    } else if ((pad->digital_buttons & 0x2000) != 0) {
         i32 &step = *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(aieditor) + 0x36934);
         if (aieditor->current_locator != nullptr && aieditor->current_locator == aieditor->nearest_locator) {
             aieditorsettings.area_rotation = aieditor->current_locator->direction;
         }
-        if ((pad->digital_buttons & 0x2000) != 0) {
-            step = (pad->digital_buttons_pressed & 0x8000) != 0 ? 20 : step + 20;
-            if (step > 600) {
-                step = 600;
-            }
-            aieditorsettings.area_rotation = NuAngAdd(aieditorsettings.area_rotation, step);
-        } else {
-            step = (pad->digital_buttons_pressed & 0x2000) != 0 ? 20 : step + 20;
-            if (step > 600) {
-                step = 600;
-            }
-            aieditorsettings.area_rotation = NuAngSub(aieditorsettings.area_rotation, step);
+        step = (pad->digital_buttons_pressed & 0x8000) != 0 ? 20 : step + 20;
+        if (step > 600) {
+            step = 600;
         }
+        aieditorsettings.area_rotation = NuAngAdd(aieditorsettings.area_rotation, step);
+        if (aieditor->current_locator != nullptr && aieditor->current_locator == aieditor->nearest_locator) {
+            aieditor->current_locator->direction = aieditorsettings.area_rotation;
+            aieditor->current_locator->path_angle =
+                NuAngSub(aieditor->current_locator->direction,
+                         *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(aieditor) + 0x60));
+        }
+    } else if ((pad->digital_buttons & 0x8000) != 0) {
+        i32 &step = *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(aieditor) + 0x36934);
+        if (aieditor->current_locator != nullptr && aieditor->current_locator == aieditor->nearest_locator) {
+            aieditorsettings.area_rotation = aieditor->current_locator->direction;
+        }
+        step = (pad->digital_buttons_pressed & 0x2000) != 0 ? 20 : step + 20;
+        if (step > 600) {
+            step = 600;
+        }
+        aieditorsettings.area_rotation = NuAngSub(aieditorsettings.area_rotation, step);
         if (aieditor->current_locator != nullptr && aieditor->current_locator == aieditor->nearest_locator) {
             aieditor->current_locator->direction = aieditorsettings.area_rotation;
             aieditor->current_locator->path_angle =

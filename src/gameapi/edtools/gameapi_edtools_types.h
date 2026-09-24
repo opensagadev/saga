@@ -572,10 +572,18 @@ struct EdRefNosGuid : EdRef {
     void SetMemberData(void *, i32, void *, i32, i16 *);
 };
 struct EdRefPlaceable : EdRef {
+    EdRefPlaceable() = default;
+    EdRefPlaceable(char *type, char *name, i32 offset, i32 size, i32 attributes, EdControl *control, i32 group)
+        : EdRef(type, name, offset, size, attributes, control, group) {
+    }
     void GetMemberData(void *, i32, void *, i32);
     void SetMemberData(void *, i32, void *, i32, i16 *);
 };
 struct EdRefSpecialObject : EdRef {
+    EdRefSpecialObject() = default;
+    EdRefSpecialObject(char *type, char *name, i32 offset, i32 size, i32 attributes, EdControl *control, i32 group)
+        : EdRef(type, name, offset, size, attributes, control, group) {
+    }
     void GetMemberData(void *, i32, void *, i32);
     void SetMemberData(void *, i32, void *, i32, i16 *);
 };

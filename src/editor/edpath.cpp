@@ -1003,6 +1003,7 @@ static __used__ f32 **pathEditorCalculateDistanceTable(AIPATH_s *path, i32 route
 static __used__ EDPATH_SPECIAL_ROUTE_CALL void pathEditorCreateSpecialRouteData(AIPATH_s *path, EDAIPATH_s *editor_path,
                                                                                 VARIPTR *cursor, VARIPTR *end) {
     i32 route_slots[16];
+    u8 route_members[16][32] = {};
     i32 route_count = 0;
     for (i32 slot = 0; slot < 16; ++slot) {
         if (editor_path->routes[slot].flags & 1) {
@@ -1049,7 +1050,14 @@ static __used__ EDPATH_SPECIAL_ROUTE_CALL void pathEditorCreateSpecialRouteData(
                 }
                 for (i32 route_index = 0; route_index < route_count; ++route_index) {
                     if (editor_connection->route_mask & (1u << route_slots[route_index])) {
-                        connection->route_mask |= 1u << route_index;
+                        u16 bit = 1u << route_index;
+                        if ((connection->route_mask & bit) == 0) {
+                            connection->route_mask |= bit;
+                            for (i32 endpoint = 0; endpoint < 2; ++endpoint) {
+                                u8 node_index = connection->node_indices[endpoint];
+                                route_members[route_index][node_index >> 3] |= 1u << (node_index & 7);
+                            }
+                        }
                     }
                 }
                 break;
@@ -1060,15 +1068,6 @@ static __used__ EDPATH_SPECIAL_ROUTE_CALL void pathEditorCreateSpecialRouteData(
     for (i32 route_index = 0; route_index < route_count; ++route_index) {
         AIPATHROUTE_s *route = &path->routes[route_index];
         i32 slot = route_slots[route_index];
-        u8 members[256];
-        memset(members, 0, sizeof(members));
-        for (i32 edge = 0; edge < path->connection_count; ++edge) {
-            AIPATHCNX_s *connection = &path->connections[edge];
-            if (connection->route_mask & (1 << route_index)) {
-                members[connection->node_indices[0]] = 1;
-                members[connection->node_indices[1]] = 1;
-            }
-        }
         i32 exits = 0;
         for (EDAIPATHNODE_s *node = (EDAIPATHNODE_s *)NuLinkedListGetHead(&editor_path->nodes); node != nullptr;
              node = (EDAIPATHNODE_s *)NuLinkedListGetNext(&editor_path->nodes, &node->link)) {
@@ -1077,7 +1076,7 @@ static __used__ EDPATH_SPECIAL_ROUTE_CALL void pathEditorCreateSpecialRouteData(
             }
         }
         for (i32 node = 0; node < path->node_count; ++node) {
-            if (members[node]) {
+            if (route_members[route_index][node >> 3] & (1u << (node & 7))) {
                 ++route->route_count;
                 path->nodes[node].route_membership_mask |= 1 << route_index;
             }
@@ -1114,7 +1113,7 @@ static __used__ EDPATH_SPECIAL_ROUTE_CALL void pathEditorCreateSpecialRouteData(
         i32 member_index = 0;
         i32 exit_index = 0;
         for (i32 node = 0; node < path->node_count; ++node) {
-            if (!members[node]) {
+            if (!(route_members[route_index][node >> 3] & (1u << (node & 7)))) {
                 continue;
             }
             route->node_routes[node] = member_index;
@@ -1123,40 +1122,52 @@ static __used__ EDPATH_SPECIAL_ROUTE_CALL void pathEditorCreateSpecialRouteData(
                 route->exit_nodes[exit_index++] = node;
             }
         }
-        // A route-specific table permits only edges belonging to this route.
-        f32 **distances = pathEditorCalculateDistanceTable(path, 1 << route_index, cursor, end);
+        // The distance and full-node next-hop tables are temporary. Keep their
+        // allocations beyond the persistent route data without advancing it.
+        VARIPTR scratch = *cursor;
+        f32 **distances = pathEditorCalculateDistanceTable(path, 1 << route_index, &scratch, end);
         if (distances == nullptr) {
             continue;
         }
-        for (i32 source = 0; source < route->route_count; ++source) {
-            if (route->route_nodes[source] == nullptr) {
-                continue;
-            }
-            i32 source_node = route->node_directions[source];
-            for (i32 destination = 0; destination < route->route_count; ++destination) {
-                i32 destination_node = route->node_directions[destination];
+        u8 **next_hops = (u8 **)AISysBufferAlloc(&scratch, end, path->node_count * sizeof(u8 *));
+        memset(next_hops, 0, path->node_count * sizeof(u8 *));
+        for (i32 source = 0; source < path->node_count; ++source) {
+            next_hops[source] = (u8 *)AISysBufferAlloc(&scratch, end, path->node_count);
+            memset(next_hops[source], 0, path->node_count);
+        }
+        for (i32 source = 0; source < path->node_count; ++source) {
+            for (i32 destination = 0; destination < path->node_count; ++destination) {
+                next_hops[source][destination] = 0xff;
                 if (source == destination) {
-                    route->route_nodes[source][destination] = 0xff;
                     continue;
                 }
                 f32 best = FLT_MAX;
                 u8 next = 0xff;
-                AIPATHNODE_s *node = &path->nodes[source_node];
+                AIPATHNODE_s *node = &path->nodes[source];
                 for (i32 edge = 0; edge < node->connection_count; ++edge) {
                     AIPATHCNX_s *connection = node->connections[edge];
-                    i32 direction = connection->node_indices[0] != source_node;
+                    i32 direction = connection->node_indices[0] != source;
                     if (!(connection->route_mask & (1 << route_index)) ||
                         (connection->traversal_flags[direction] & 0x40000000)) {
                         continue;
                     }
                     i32 neighbor = connection->node_indices[!direction];
-                    f32 distance = distances[source_node][neighbor] + distances[neighbor][destination_node];
+                    f32 distance = distances[source][neighbor] + distances[neighbor][destination];
                     if (distance < best) {
                         best = distance;
-                        next = route->node_routes[neighbor];
+                        next = edge;
                     }
                 }
-                route->route_nodes[source][destination] = next;
+                next_hops[source][destination] = next;
+            }
+        }
+        for (i32 source = 0; source < route->route_count; ++source) {
+            if (route->route_nodes[source] == nullptr) {
+                continue;
+            }
+            for (i32 destination = 0; destination < route->route_count; ++destination) {
+                route->route_nodes[source][destination] =
+                    next_hops[route->node_directions[source]][route->node_directions[destination]];
             }
         }
     }

@@ -204,8 +204,7 @@ template <typename Ref>
 static void add_scene_reference(EdClass *object_class, char *type, char *name, i32 offset, i32 size, i32 attributes,
                                 EdControl *control = NULL) {
     void *memory = theMemoryManager.AllocPool(sizeof(Ref), 1);
-    Ref *reference = new (memory) Ref();
-    static_cast<EdRef &>(*reference) = EdRef(type, name, offset, size, attributes, control, 0);
+    Ref *reference = new (memory) Ref(type, name, offset, size, attributes, control, 0);
     object_class->AddType(reference);
 }
 
@@ -381,13 +380,13 @@ void SceneObjectHelper::Initialise() {
                                                 0, object_control);
 
         void *visible_memory = theMemoryManager.AllocPool(sizeof(EdEnumControl), 1);
-        EdEnumControl *visible_control = new (visible_memory) EdEnumControl();
+        EdEnumControl *visible_control = new (visible_memory) EdEnumControl;
         visible_control->items = EdEnumControl::YesNoItems;
         add_scene_reference<EdRefSpecialObject>(object_class, "Int", "Visible", static_cast<i32>(0x80000009), 0, 0,
                                                 visible_control);
 
         void *collision_memory = theMemoryManager.AllocPool(sizeof(EdEnumControl), 1);
-        EdEnumControl *collision_control = new (collision_memory) EdEnumControl();
+        EdEnumControl *collision_control = new (collision_memory) EdEnumControl;
         collision_control->items = EdEnumControl::YesNoItems;
         add_scene_reference<EdRefSpecialObject>(object_class, "Int", "Collision", static_cast<i32>(0x8000000a), 0, 0,
                                                 collision_control);

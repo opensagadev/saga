@@ -2372,7 +2372,7 @@ static void cbCancelChangeNameMenu(eduimenu_s *menu, eduimenu_s *) {
     if (edpp_create_type == -1 || debtab[edpp_create_type] == NULL) {
         return;
     }
-    if (debtab[edpp_create_type]->name[0] != '\0') {
+    if (__builtin_expect(debtab[edpp_create_type]->name[0] != '\0', 1)) {
         eduiMenuDestroy(namemenu);
         namemenu = NULL;
         return;

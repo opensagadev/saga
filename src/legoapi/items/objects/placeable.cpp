@@ -15,11 +15,11 @@ void cbEdLevelDestroy(eduimenu_s *, eduimenu_s *);
 static EdStringControl *edObjectNameControl;
 
 template <typename Ref>
-static void add_placeable_reference(EdClass *object_class, char *type, char *name, i32 offset, i32 size, i32 attributes,
-                                    EdControl *control = NULL) {
+static __attribute__((always_inline)) void add_placeable_reference(EdClass *object_class, char *type, char *name,
+                                                                   i32 offset, i32 size, i32 attributes,
+                                                                   EdControl *control = NULL) {
     void *memory = theMemoryManager.AllocPool(sizeof(Ref), 1);
-    Ref *reference = new (memory) Ref();
-    static_cast<EdRef &>(*reference) = EdRef(type, name, offset, size, attributes, control, 0);
+    Ref *reference = new (memory) Ref(type, name, offset, size, attributes, control, 0);
     object_class->AddType(reference);
 }
 
