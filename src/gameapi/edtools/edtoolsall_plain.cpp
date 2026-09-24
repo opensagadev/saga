@@ -6041,7 +6041,9 @@ extern "C" {
         const bool over_button = edui_cursor_x >= expander->button_x && edui_cursor_y >= expander->button_y * 0.5f &&
                                  edui_cursor_x < expander->button_x + expander->button_size &&
                                  edui_cursor_y < (expander->button_y + expander->button_size) * 0.5f;
-        expander->unknown_flags = (expander->unknown_flags & ~1u) | static_cast<u32>(over_button);
+        // The original updates only the byte containing open and hover at offset 0x54.
+        u8 *hover_flags = reinterpret_cast<u8 *>(expander) + 0x54;
+        *hover_flags = (*hover_flags & ~2u) | static_cast<u8>(over_button) << 1;
 
         if (!edui_donotdraw) {
             NuQFntSet(edui_font);

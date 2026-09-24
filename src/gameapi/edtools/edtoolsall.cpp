@@ -36,6 +36,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <new>
+#if defined(__SSE__)
+#include <xmmintrin.h>
+#endif
 #include "nu2api/numath/nurand.h"
 
 EdRegistry theRegistry;
@@ -6595,7 +6598,8 @@ void EdManMove::Render(ClassObjectList &selected) {
         DrawAxis(average, NULL);
 }
 
-void EdRefKnot::GetMemberData(void *object, i32 type, void *data, i32 data_size) {
+__attribute__((force_align_arg_pointer)) void EdRefKnot::GetMemberData(void *object, i32 type, void *data,
+                                                                       i32 data_size) {
     SplineKnot *knot = static_cast<SplineKnot *>(object);
     CheckType(type);
     switch (member_offset) {
@@ -6605,15 +6609,40 @@ void EdRefKnot::GetMemberData(void *object, i32 type, void *data, i32 data_size)
         case static_cast<i32>(0x80000002):
             *static_cast<f32 *>(data) = 0.25f * EdManipulator::Scale;
             break;
-        case static_cast<i32>(0x80000003):
+        // The original copies each 16-byte vector with paired SSE half-loads and stores.
+        case static_cast<i32>(0x80000003): {
+#if defined(__SSE__)
+            const __m64 *source = reinterpret_cast<const __m64 *>(&knot->position);
+            __m128 lanes = _mm_loadh_pi(_mm_loadl_pi(_mm_setzero_ps(), source), source + 1);
+            _mm_storel_pi(reinterpret_cast<__m64 *>(data), lanes);
+            _mm_storeh_pi(reinterpret_cast<__m64 *>(static_cast<f32 *>(data) + 2), lanes);
+#else
             *static_cast<VuVec *>(data) = knot->position;
+#endif
             break;
-        case static_cast<i32>(0x80000004):
+        }
+        case static_cast<i32>(0x80000004): {
+#if defined(__SSE__)
+            const __m64 *source = reinterpret_cast<const __m64 *>(&knot->in_tangent);
+            __m128 lanes = _mm_loadh_pi(_mm_loadl_pi(_mm_setzero_ps(), source), source + 1);
+            _mm_storel_pi(reinterpret_cast<__m64 *>(data), lanes);
+            _mm_storeh_pi(reinterpret_cast<__m64 *>(static_cast<f32 *>(data) + 2), lanes);
+#else
             *static_cast<VuVec *>(data) = knot->in_tangent;
+#endif
             break;
-        case static_cast<i32>(0x80000005):
+        }
+        case static_cast<i32>(0x80000005): {
+#if defined(__SSE__)
+            const __m64 *source = reinterpret_cast<const __m64 *>(&knot->out_tangent);
+            __m128 lanes = _mm_loadh_pi(_mm_loadl_pi(_mm_setzero_ps(), source), source + 1);
+            _mm_storel_pi(reinterpret_cast<__m64 *>(data), lanes);
+            _mm_storeh_pi(reinterpret_cast<__m64 *>(static_cast<f32 *>(data) + 2), lanes);
+#else
             *static_cast<VuVec *>(data) = knot->out_tangent;
+#endif
             break;
+        }
         default:
             EdRef::GetMemberData(object, type, data, data_size);
             break;
