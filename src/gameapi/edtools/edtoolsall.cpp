@@ -6679,12 +6679,28 @@ void EdRefKnot::SetMemberData(void *object, i32 type, void *data, i32 data_size,
             }
             break;
         }
-        case static_cast<i32>(0x80000004):
+        case static_cast<i32>(0x80000004): {
+#if defined(__SSE__)
+            const __m64 *source = reinterpret_cast<const __m64 *>(data);
+            __m128 lanes = _mm_loadh_pi(_mm_loadl_pi(_mm_setzero_ps(), source), source + 1);
+            _mm_storel_pi(reinterpret_cast<__m64 *>(&knot->in_tangent), lanes);
+            _mm_storeh_pi(reinterpret_cast<__m64 *>(&knot->in_tangent) + 1, lanes);
+#else
             knot->in_tangent = *static_cast<VuVec *>(data);
+#endif
             break;
-        case static_cast<i32>(0x80000005):
+        }
+        case static_cast<i32>(0x80000005): {
+#if defined(__SSE__)
+            const __m64 *source = reinterpret_cast<const __m64 *>(data);
+            __m128 lanes = _mm_loadh_pi(_mm_loadl_pi(_mm_setzero_ps(), source), source + 1);
+            _mm_storel_pi(reinterpret_cast<__m64 *>(&knot->out_tangent), lanes);
+            _mm_storeh_pi(reinterpret_cast<__m64 *>(&knot->out_tangent) + 1, lanes);
+#else
             knot->out_tangent = *static_cast<VuVec *>(data);
+#endif
             break;
+        }
         default:
             // The original setter delegates unrecognized members to the getter.
             EdRef::GetMemberData(object, type, data, data_size);

@@ -743,11 +743,11 @@ static __used__ void pathEditor_cbCnxFlagsToggle(eduimenu_s *, eduiitem_s *item,
     AIPATHCNXTYPE_s *type = &aipathcnxtypes[type_index];
     EDAIPATHCNX_s *connection = &node->connections[i];
     u32 mask = type->connection_flag;
-    if (connection->flags & mask) {
-        connection->flags &= ~mask;
-    } else {
-        connection->flags |= mask;
-    }
+    u32 flags = connection->flags;
+    u32 updated_flags = flags | mask;
+    if (flags & mask)
+        updated_flags = flags & ~mask;
+    connection->flags = updated_flags;
     if (type->flags != 0) {
         i32 j;
         if (other->connections[0].node == node)

@@ -6530,10 +6530,11 @@ extern "C" {
     static __used__ i32 eduicbRenderSeparator(eduimenu_s *, eduiitem_s *item, i32 x, i32 y, i32 width) {
         NuQFntHeight(edui_font);
         NuQFntBaseline(edui_font);
-        item->x = x;
+        numtl_s *background_material = uimtls[ui_bgmtl];
         item->y = y;
+        item->x = x;
         if (!edui_donotdraw)
-            NuRndrRect2di(x << 4, y << 3, width << 4, 64, item->colours[2 + item->highlighted], uimtls[ui_bgmtl]);
+            NuRndrRect2di(x << 4, y << 3, width << 4, 64, item->colours[2 + item->highlighted], background_material);
         if (!edui_donotdraw)
             NuRndrLine2di((x + 4) << 4, (y << 3) + 32, ((x + width) << 4) - 64, (y << 3) + 32, 0xff000000,
                           uimtls[ui_bgmtl]);

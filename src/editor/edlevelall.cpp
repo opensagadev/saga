@@ -610,9 +610,10 @@ i32 ClassEditor::Editable(void *object, EdClass *object_class, i32 index) {
     if (object == NULL) {
         return (class_filter >> index) & 1;
     }
-    EdMember member;
+    i32 short_type = EdType_Short;
+    EdMember member __attribute__((aligned(16)));
     if (object_class->FindMember(&member, object, 256, 1)) {
-        member.reference->GetAttributeData(member.object, 256, EdType_Short, &scene, 0);
+        member.reference->GetAttributeData(member.object, 256, short_type, &scene, 0);
     }
     return theLevelEditor.IsEditable(scene) != 0;
 }

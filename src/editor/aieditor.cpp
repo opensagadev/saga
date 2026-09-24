@@ -136,6 +136,7 @@ static __attribute__((noinline,
         node->lower_height = selected->lower_height;
         node->upper_height = selected->upper_height;
         node->type = selected->type;
+        selected = antinode_selected();
         node->base_radius = selected->base_radius;
         node->base_height = selected->base_height;
     } else {
