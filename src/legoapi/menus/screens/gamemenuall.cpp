@@ -130,8 +130,14 @@ void Draw_NODATAAVAILABLE();
 void Draw_NOMEMORYCARD();
 extern "C" void Draw_NOTENOUGHSPACE(void);
 extern "C" void Draw_SPACENEEDED(void);
+extern "C" void Draw_CHECKINGMEMORYCARD(void);
+extern "C" void Draw_DONOTREMOVEMEMORYCARD(void);
+void Draw_OK(MENU_s *menu);
+void RenderFileSel3(i32);
+void ProcessFileSel3(float, nupad_s *);
 
 i32 memcard_cardchanged;
+i32 MenuCardWarningState;
 i32 ButtonScaleMode;
 i32 Menu_InLoadFlow;
 i32 Menu_InWarningFlow;
@@ -249,7 +255,6 @@ void MenuExitSave(MENU_s *) {
 }
 
 void MenuDrawClips(MENU_s *) {
-    STUBBED();
 }
 
 void MenuDrawHints(MENU_s *menu) {
@@ -324,7 +329,6 @@ void MenuEnterSave(MENU_s *menu) {
 }
 
 void MenuInitClips(MENU_s *) {
-    STUBBED();
 }
 
 void MenuStartLoad() {
@@ -342,7 +346,7 @@ void MenuStartSave() {
 }
 
 void RenderFileSel() {
-    STUBBED();
+    RenderFileSel3(1);
 }
 
 void MakeMenuPacket() {
@@ -607,12 +611,11 @@ void MenuExitNewGame(MENU_s *) {
     }
 }
 
-void MenuIsAvailable() {
-    STUBBED();
+i32 MenuIsAvailable() {
+    return GameMenu[GameMenuLevel].menu != -1;
 }
 
 void MenuUpdateClips(MENU_s *) {
-    STUBBED();
 }
 
 void MenuUpdateHints(MENU_s *menu) {
@@ -896,7 +899,8 @@ void MenuDrawFormatting(MENU_s *) {
 }
 
 void MenuDrawInsertCard(MENU_s *) {
-    STUBBED();
+    Draw_NOMEMORYCARD();
+    Draw_SPACENEEDED();
 }
 
 void MenuDrawLoadCancel(MENU_s *menu) {
@@ -1053,7 +1057,6 @@ collected_input:
 }
 
 void MenuDrawCardWarning(MENU_s *) {
-    STUBBED();
 }
 
 void MenuDrawFileCorrupt(MENU_s *) {
@@ -1097,7 +1100,6 @@ void MenuEnterHeaderSave(MENU_s *) {
 }
 
 void MenuEnterInsertCard(MENU_s *) {
-    STUBBED();
 }
 
 void MenuExitCardWarning(MENU_s *) {
@@ -1120,7 +1122,8 @@ void MenuDrawNoMemoryCard(MENU_s *menu) {
 }
 
 void MenuEnterCardWarning(MENU_s *) {
-    STUBBED();
+    MenuCardWarningState = 0;
+    memcard_cardchanged = 0;
 }
 
 void MenuEnterSaveConfirm(MENU_s *) {
@@ -1176,7 +1179,6 @@ void MenuDrawDeleteConfirm(MENU_s *) {
 }
 
 void MenuDrawFormatConfirm(MENU_s *) {
-    STUBBED();
 }
 
 void MenuInitialiseEx(MENUFNINFO *menu_info, i32 menu_id_count, i32 language_count,
@@ -1243,7 +1245,6 @@ void MenuInitialise(MENUFNINFO *menu_info, i32 menu_id_count, i32 language_count
 }
 
 void MenuEnterNoMemoryCard(MENU_s *) {
-    STUBBED();
 }
 
 void MenuEnterStartNewGame(MENU_s *) {
@@ -1328,12 +1329,14 @@ void MenuUpdateNoMemoryCard(MENU_s *) {
     STUBBED();
 }
 
-void MenuDrawAutoSaveWarning(MENU_s *) {
-    STUBBED();
+void MenuDrawAutoSaveWarning(MENU_s *menu) {
+    Draw_AUTOSAVEWARNING();
+    Draw_OK(menu);
 }
 
 void MenuDrawDoNotRemoveCard(MENU_s *) {
-    STUBBED();
+    Draw_CHECKINGMEMORYCARD();
+    Draw_DONOTREMOVEMEMORYCARD();
 }
 
 void MenuEnterAutoSaveCancel(MENU_s *) {
@@ -1349,15 +1352,20 @@ void MenuUpdateFormatConfirm(MENU_s *) {
 }
 
 void MenuEnterAutoSaveWarning(MENU_s *) {
-    STUBBED();
+    memcard_autosaveenabled = 1;
+    memcard_autosavedisabled = 0;
 }
 
 void MenuUpdateAutoSaveCancel(MENU_s *) {
     STUBBED();
 }
 
-void MenuUpdateNotEnoughSpace(MENU_s *) {
-    STUBBED();
+void MenuUpdateNotEnoughSpace(MENU_s *menu) {
+    if (menu->cancel_pressed != 0) {
+        MenuSFX = MENUSFX_MENUSELECT;
+        BackupMenuNoFn();
+        NewMenu(1016, 1, -1);
+    }
 }
 
 void MenuUpdateRestoreNewGame(MENU_s *menu) {
@@ -1720,11 +1728,9 @@ extern "C" {
     }
 
     void Draw_CHECKINGMEMORYCARD(void) {
-        STUBBED();
     }
 
     void Draw_DONOTREMOVEMEMORYCARD(void) {
-        STUBBED();
     }
 
     void Draw_NOTENOUGHSPACE(void) {
@@ -1732,7 +1738,6 @@ extern "C" {
     }
 
     void Draw_SPACENEEDED(void) {
-        STUBBED();
     }
 
     void FileSelKill(void) {
@@ -1858,8 +1863,9 @@ extern "C" {
         menu_pulsate_speed = speed;
     }
 
-    void MenuSetTopBottom(void) {
-        STUBBED();
+    void MenuSetTopBottom(f32 top, f32 bottom) {
+        MENUTOPY = top;
+        MENUBOTY = bottom;
     }
 
     void MenuSetPreDrawFn(void (*draw_fn)(MENU *)) {
@@ -1877,8 +1883,8 @@ extern "C" {
         GameMenuLevel = 0;
     }
 
-    void ProcessFileSel2(void) {
-        STUBBED();
+    void ProcessFileSel2(f32 elapsed, nupad_s *pad) {
+        ProcessFileSel3(elapsed, pad);
     }
 
     void RemapAddr(void *new_base, void *old_base, void **address) {
