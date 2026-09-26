@@ -2911,7 +2911,9 @@ void MenuDrawBonusMode(MENU_s *) {
         Hub_DrawBonusModeMenu(0, menu_alpha * alpha);
     }
 
-    if (MainRenderTime <= 0.0f && bonusmodemode == 0 && alpha == 1.0f) {
+    if (MainRenderTime > 0.0f)
+        return;
+    if (bonusmodemode == 0 && alpha == 1.0f) {
         f32 prompt_alpha = 0.333f;
         if (bonusmodearcade && hub_bonusmode == 2 && *ArcadeLevel[ArcadeItem.level].area != NULL)
             prompt_alpha = alpha;
