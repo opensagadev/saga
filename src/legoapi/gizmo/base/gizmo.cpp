@@ -1258,36 +1258,46 @@ i32 GizmoSysWriteInfo(GIZMOSYS_s *gizmo_sys, char *path, nugscn_s *scene) {
 
     EdFileWriteInt(4);
     EdFileWriteInt(gizmotypes->count);
-    GIZMOTYPE *type = gizmotypes->types;
-    GIZMOSET *set = gizmo_sys->sets;
-    for (i32 type_index = 0; type_index < gizmotypes->count; ++type_index, ++type, ++set) {
-        i32 length = NuStrLen(type->name) + 1;
-        EdFileWriteInt(length);
-        EdFileWrite(type->name, length);
-        length = NuStrLen(type->prefix) + 1;
-        EdFileWriteChar(static_cast<char>(length));
-        EdFileWrite(type->prefix, length);
-        EdFileWriteInt(set->count);
-        for (i32 gizmo_index = 0; gizmo_index < set->count; ++gizmo_index) {
-            GIZMO *gizmo = &set->gizmos[gizmo_index];
-            char *name = GizmoGetName(gizmo);
-            if (name != NULL) {
-                length = NuStrLen(name) + 1;
-                EdFileWriteInt(length);
-                EdFileWrite(name, length);
-            } else {
-                EdFileWriteInt(0);
+    if (gizmotypes->count != 0) {
+        GIZMOTYPE *type = gizmotypes->types;
+        GIZMOSET *set = gizmo_sys->sets;
+        for (i32 type_index = 0; type_index < gizmotypes->count; ++type_index, ++type, ++set) {
+            i32 length = strlen(type->name) + 1;
+            EdFileWriteInt(length);
+            if (length != 0) {
+                EdFileWrite(type->name, length);
             }
-            i32 outputs = GizmoGetNumOutputs(gizmo_sys, gizmo);
-            EdFileWriteInt(outputs);
-            for (i32 output_index = 0; output_index < outputs; ++output_index) {
-                name = GizmoGetOutputName(gizmo_sys, gizmo, output_index);
+            length = NuStrLen(type->prefix) + 1;
+            EdFileWriteChar(static_cast<char>(length));
+            if (length != 0) {
+                EdFileWrite(type->prefix, length);
+            }
+            EdFileWriteInt(set->count);
+            GIZMO *gizmo = set->gizmos;
+            for (i32 gizmo_index = 0; gizmo_index < set->count; ++gizmo_index, ++gizmo) {
+                char *name = GizmoGetName(gizmo);
                 if (name != NULL) {
-                    length = NuStrLen(name) + 1;
+                    length = strlen(name) + 1;
                     EdFileWriteInt(length);
-                    EdFileWrite(name, length);
+                    if (length != 0) {
+                        EdFileWrite(name, length);
+                    }
                 } else {
                     EdFileWriteInt(0);
+                }
+                i32 outputs = GizmoGetNumOutputs(gizmo_sys, gizmo);
+                EdFileWriteInt(outputs);
+                for (i32 output_index = 0; output_index < outputs; ++output_index) {
+                    name = GizmoGetOutputName(gizmo_sys, gizmo, output_index);
+                    if (name != NULL) {
+                        length = strlen(name) + 1;
+                        EdFileWriteInt(length);
+                        if (length != 0) {
+                            EdFileWrite(name, length);
+                        }
+                    } else {
+                        EdFileWriteInt(0);
+                    }
                 }
             }
         }
@@ -1297,7 +1307,9 @@ i32 GizmoSysWriteInfo(GIZMOSYS_s *gizmo_sys, char *path, nugscn_s *scene) {
         GIZMOTYPE *special_type = &gizmotypes->types[gizspecial_gizmotype_id];
         i32 length = NuStrLen(special_type->prefix) + 1;
         EdFileWriteChar(static_cast<char>(length));
-        EdFileWrite(special_type->prefix, length);
+        if (length != 0) {
+            EdFileWrite(special_type->prefix, length);
+        }
         GIZMO gizmo;
         gizmo.type_id = static_cast<u8>(gizspecial_gizmotype_id);
         i32 outputs = GizmoGetNumOutputs(gizmo_sys, &gizmo);
@@ -1307,19 +1319,22 @@ i32 GizmoSysWriteInfo(GIZMOSYS_s *gizmo_sys, char *path, nugscn_s *scene) {
             if (name != NULL) {
                 length = NuStrLen(name) + 1;
                 EdFileWriteInt(length);
-                EdFileWrite(name, length);
+                if (length != 0) {
+                    EdFileWrite(name, length);
+                }
             } else {
                 EdFileWriteInt(0);
             }
         }
     }
 
-    EdFileWriteInt(NuGScnNumSpecials(scene));
-    for (i32 special_index = 0; special_index < NuGScnNumSpecials(scene); ++special_index) {
+    i32 special_count = NuGScnNumSpecials(scene);
+    EdFileWriteInt(special_count);
+    for (i32 special_index = 0; special_index < special_count; ++special_index) {
         nuhspecial_s special;
         NuGScnGetSpecial(&special, scene, special_index);
         char *name = NuSpecialGetName(&special);
-        i32 length = NuStrLen(name) + 1;
+        i32 length = strlen(name) + 1;
         EdFileWriteInt(length);
         EdFileWrite(name, length);
     }

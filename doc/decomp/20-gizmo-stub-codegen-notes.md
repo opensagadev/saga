@@ -121,3 +121,15 @@ The measured follow-up scores use the same GOT-aware CLI and target build:
 59.564705% (1257 local bytes), and `GizAction_SetAIState` 27.522322%
 (857 local bytes). Other entries in the initial table remain at their stated
 scores.
+
+`GizmoSysWriteInfo` has several branch and call details hidden by the file
+format. It uses `strlen` for ordinary type, gizmo, output, and scene special
+names, but `NuStrLen` for type/special prefixes and the extra `GizSpecial`
+outputs. It tests each computed length before `EdFileWrite` except for scene
+special names, even after adding one for the terminator. It calls
+`NuGScnNumSpecials(scene)` once and reuses that count. After writing the gizmo
+type count it skips loading `gizmo_sys->sets` when the count is exactly zero;
+for a negative count it still loads the sets pointer, then exits the type loop.
+Reproducing these details raised the GOT-aware match from 65.423485% to
+69.14235% (1112 local bytes). The remaining large prologue difference is a
+stack realignment in the local build whose trigger is not yet confirmed.
