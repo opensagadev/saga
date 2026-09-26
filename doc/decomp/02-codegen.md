@@ -397,6 +397,16 @@ verified: `g++ -O0/-O3 -c misc.cpp; objdump -d`
   `UnpackCharFromInt` becomes `movzx ecx, ah` on this compiler. Shifting
   the full `u32` instead emits `mov ecx, eax; shr ecx, 8` and missed the
   original two-byte instruction. The narrowed spelling matches 100%.
+- `MatchExtension` was built at `-O0` with a frame pointer, unlike its
+  optimized neighbors in `utilities.cpp`. A function-level
+  `optimize("O0,no-omit-frame-pointer")` reproduces its 111-byte loop and
+  stack layout exactly; `optimize("O0")` alone omits `ebp` and misses.
+- For the eight-digit hexadecimal parser `XToI`, computing both `digit -
+  '0'` and `digit - 'W'` before the selection yields `cmov` rather than
+  branches. Spell the choice as `digit >= ':' ? letter : decimal` to get
+  the target's `cmp 0x3a` / `cmovl` pattern. The opposite ternary sense
+  becomes `cmp 0x39` / `cmovg` and loses matches even though it computes
+  the same value.
 
 ## Cross-checks against real project artifacts
 

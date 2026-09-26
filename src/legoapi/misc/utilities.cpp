@@ -13,6 +13,7 @@
 #include "nu2api/numath/nurand.h"
 
 #include <stdlib.h>
+#include <ctype.h>
 
 struct AIROW_s;
 struct nuqthdr_s;
@@ -608,12 +609,56 @@ i32 SphereSphereOverlapScaleY(nuvec_s *position_a, float radius_a, float y_radiu
     return dx * dx + dy * dy + dz * dz <= radius * radius;
 }
 
-void IToX(char *, i32) {
-    STUBBED();
+char *IToX(char *output, i32 value) {
+    char hex[] = "0123456789abcdef";
+    output[0] = hex[(static_cast<u32>(value) >> 28) & 15];
+    output[1] = hex[(value >> 24) & 15];
+    asm volatile("" ::: "memory");
+    i32 shifted = value << 8;
+    output[2] = hex[(static_cast<u32>(shifted) >> 28) & 15];
+    output[3] = hex[(shifted >> 24) & 15];
+    i8 byte = static_cast<i8>(value >> 8);
+    output[4] = hex[(byte >> 4) & 15];
+    output[5] = hex[byte & 15];
+    output[6] = hex[(static_cast<u32>(value) >> 4) & 15];
+    output[7] = hex[value & 15];
+    return output + 8;
 }
 
-void XToI(char *) {
-    STUBBED();
+i32 XToI(char *input) {
+    char digit = input[0];
+    i32 decimal = digit - '0';
+    i32 letter = digit - 'W';
+    i32 result = digit >= ':' ? letter : decimal;
+    digit = input[1];
+    decimal = digit - '0';
+    letter = digit - 'W';
+    result = (result << 4) | (digit >= ':' ? letter : decimal);
+    digit = input[2];
+    decimal = digit - '0';
+    letter = digit - 'W';
+    result = (result << 4) | (digit >= ':' ? letter : decimal);
+    digit = input[3];
+    decimal = digit - '0';
+    letter = digit - 'W';
+    result = (result << 4) | (digit >= ':' ? letter : decimal);
+    digit = input[4];
+    decimal = digit - '0';
+    letter = digit - 'W';
+    result = (result << 4) | (digit >= ':' ? letter : decimal);
+    digit = input[5];
+    decimal = digit - '0';
+    letter = digit - 'W';
+    result = (result << 4) | (digit >= ':' ? letter : decimal);
+    digit = input[6];
+    decimal = digit - '0';
+    letter = digit - 'W';
+    result = (result << 4) | (digit >= ':' ? letter : decimal);
+    digit = input[7];
+    decimal = digit - '0';
+    letter = digit - 'W';
+    result = (result << 4) | (digit >= ':' ? letter : decimal);
+    return result;
 }
 
 i32 IsTok(char const *text, char const *token) {
@@ -664,9 +709,18 @@ i32 findrange(nugscn_s *scene, i32 first_joint) {
     return end_joint - 1;
 }
 
-static __used__ i32 MatchExtension(char *, char *, i32) {
-    STUBBED();
-    return 0;
+static __used__ __attribute__((optimize("O0,no-omit-frame-pointer"))) i32 MatchExtension(char *candidate, char *extension, i32 remaining) {
+    while (*candidate != 0) {
+        --extension;
+        if (remaining == 0)
+            return 0;
+        char upper = toupper(static_cast<unsigned char>(*extension));
+        if (*candidate != upper)
+            return 0;
+        ++candidate;
+        --remaining;
+    }
+    return 1;
 }
 
 static __used__ int icomp(const void *left, const void *right) {
