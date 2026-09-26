@@ -46,3 +46,15 @@ being tested to retain the target pointer reuse. The reference also
 checks `state <= 5` before the velocity stores, even though the jump
 table dispatch comes afterward; this is GCC's instruction scheduling,
 not a different state machine.
+
+## State-zero branch reachability
+
+At `0x44afd5`, the reference checks `state`. A nonzero state runs the
+velocity stores and dispatches through the switch; each case at
+`0x44b090` through `0x44b110` jumps straight to the common `started`
+update at `0x44b000`. Only `state == 0` reaches the context test at
+`0x44afe6` and the initialization block at `0x44b140`. Placing the
+initialization test after the switch makes every case fall into that
+test, changing both reachability and GCC's block order. The source now
+routes nonzero states directly to the common tail. Its effect on the
+match percentage is pending the next GOT-aware build.
