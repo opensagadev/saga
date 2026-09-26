@@ -19,5 +19,10 @@ fourth comparison when reconstructing code, even though it is a source bug.
 The scissor pass reuses the same local radius and does not check near/far
 planes again.
 
+Write the near radius as `AbsNearPlane.x * extent.x` (and likewise for y/z).
+The mathematically equivalent reversed operand order makes GCC 4.7 load the
+extent pointer into a register before the plane pointer, changing seven
+instructions at the routine's start. The original loads `AbsNearPlane` first.
+
 The matching score for the reconstructed source is pending a target build and
 comparison with the forked GOT-aware `objdiff-cli`.

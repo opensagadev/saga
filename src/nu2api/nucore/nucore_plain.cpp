@@ -340,7 +340,7 @@ extern "C" {
         return &vpsmtx;
     }
     i32 NuCameraIntersectsAABB(NUVEC *center, NUVEC *extent, f32 far_clip, i32 use_scissor) {
-        f32 near_radius = extent->x * AbsNearPlane.x + extent->y * AbsNearPlane.y + extent->z * AbsNearPlane.z;
+        f32 near_radius = AbsNearPlane.x * extent->x + AbsNearPlane.y * extent->y + AbsNearPlane.z * extent->z;
         f32 depth = center->x * NearPlane.x + center->y * NearPlane.y + center->z * NearPlane.z + NearPlane.w;
         f32 far_distance = depth - far_clip;
         f32 near_distance = depth - global_camera.near_clip;
