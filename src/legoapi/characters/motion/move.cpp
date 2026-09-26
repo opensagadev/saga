@@ -11,6 +11,7 @@
 #include "MechInputTouch/MechInputTouch_types.h"
 #include "globals.h"
 #include "nu2api/nu3d/nuspecial.h"
+#include "nu2api/nu3d/nuqfnt.h"
 
 static GameObject_s *ForceBackObj = NULL;
 static NUVEC *ForceBackPos = NULL;
@@ -10568,7 +10569,7 @@ static __used__ void PooCode(GameObject_s *object) {
     }
 
     if ((object->pad_gamepad->buttons_pressed & GAMEPAD_SPECIAL) == 0 ||
-        ((object->apiobj.field_0xf00 & 0x10) == 0 || static_cast<u8>(object->apiobj.field_0x27c) > 1)) {
+        ((object->field_0xf00 & 0x10) == 0 || static_cast<u8>(object->apiobj.field_0x27c) > 1)) {
         object->force_use_volume = 0.0f;
         return;
     }
