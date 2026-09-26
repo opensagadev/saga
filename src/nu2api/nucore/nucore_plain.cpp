@@ -1076,7 +1076,7 @@ extern "C" {
     // ---------------------------------------------------------------------------
 
     void NuIOS_AwardAchievement(void) {
-        STUBBED();
+        // Retail no-op.
     }
     void NuIOS_CheckCurrentFramebuffer(void) {
         if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
@@ -1110,7 +1110,7 @@ extern "C" {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
     void NuIOS_DeallocateSystemRenderbuffer(GLuint) {
-        STUBBED();
+        // Retail no-op.
     }
     // Locale string is owned by the Android/JNI TU; cache only its index here.
     i32 g_languageIndex = -1; // original .data @0x616b80
@@ -1203,7 +1203,7 @@ extern "C" {
         env->functions->DeleteLocalRef(env, event);
     }
     void NuIOS_ShowAchievements(void) {
-        STUBBED();
+        // Retail no-op.
     }
 
     // ---------------------------------------------------------------------------
@@ -1634,7 +1634,7 @@ extern "C" {
         matrix->m32 = -matrix->m32;
     }
     void *NuAnimCurveCreate(void) {
-        STUBBED();
+        // Retail returns null.
         return NULL;
     }
     void NuAnimCurveDestroy(void *curve) {
@@ -2093,15 +2093,21 @@ extern "C" {
         return NuPtrBlockFix(block);
     }
 
-    void NuSysDirClose(void) {
-        STUBBED();
+    static void *dirnames[16];
+    static i32 numdirs;
+
+    i32 NuSysDirClose(i32 index) {
+        NuMemoryGet()->GetThreadMem()->BlockFree(dirnames[index], 0);
+        dirnames[index] = NULL;
+        --numdirs;
+        return 0;
     }
     i32 NuSysDirOpen(void) {
-        STUBBED();
+        // Retail returns zero.
         return 0;
     }
     i32 NuSysDirRead(void) {
-        STUBBED();
+        // Retail returns zero.
         return 0;
     }
 
@@ -2439,23 +2445,23 @@ extern "C" {
         }
     }
     void *NuEffectTexCreate1D(void) {
-        STUBBED();
+        // Retail returns null.
         return NULL;
     }
     void NuEffectTex360Create2D_aliased(void) {
-        STUBBED();
+        // Retail no-op.
     }
     void NuEffectTex360Create3D_aliased(void) {
-        STUBBED();
+        // Retail no-op.
     }
     void NuEffectTexCreateCube(void) {
-        STUBBED();
+        // Retail no-op.
     }
     void NuEffectTexCreateCube_aliased(void) {
-        STUBBED();
+        // Retail no-op.
     }
     void NuEffectTexCreateFromNativeTex(void) {
-        STUBBED();
+        // Retail no-op.
     }
     void NuEffectTexGetDimension(nueffecttex_s *texture, i32 lod, i32 *width, i32 *height) {
         const i16 *dimensions = reinterpret_cast<const i16 *>(texture);
@@ -2485,7 +2491,7 @@ extern "C" {
         return NULL;
     }
     void *NuEffectTexGetLockedVP(void) {
-        STUBBED();
+        // Retail returns null.
         return NULL;
     }
     void NuEffectTexLockVP(void *buffer, void *buffer_end) {
@@ -2493,12 +2499,12 @@ extern "C" {
         (void)buffer_end;
     }
     void NuEffectTexMapNative(nueffecttex_s *texture) {
-        STUBBED();
+        // Retail no-op.
     }
     void NuEffectTexUnlockVP(void) {
     }
     void NuEffectTexUnmapNative(void) {
-        STUBBED();
+        // Retail no-op.
     }
     i32 speedblur_enabled = 1;
     f32 NuLightsx, NuLightsy;
@@ -2906,13 +2912,16 @@ extern "C" {
         NuDynamicLight::destroy(light);
     }
     void NuDynamicLightEndCapture(void) {
-        STUBBED();
+        // Retail no-op.
     }
     i32 NuDynamicLightGetActiveRenderSetCount(NuDynamicLight *light) {
         return light->active_render_set_count;
     }
-    void NuDynamicLightGetDList(void) {
-        STUBBED();
+    NUDISPLAYLIST *NuDynamicLightGetDList(NuDynamicLight *light, i32 render_set, NUMTL *material) {
+        if (material->shader_desc.unknown_1b4 != 0) {
+            return &light->render_sets[render_set].display_lists[1];
+        }
+        return &light->render_sets[render_set].display_lists[0];
     }
     f32 NuDynamicLightGetParameterf(NuDynamicLight *light, i32 parameter) {
         switch (parameter) {
@@ -3064,8 +3073,17 @@ extern "C" {
     void NuDynamicLightSetupCustomCameraFrustum(NuDynamicLight *light, NUCAMERA *camera, const f32 *splits, i32 count) {
         light->setupCustomCameraFrustum(camera, splits, count);
     }
-    void NuDynamicLightTestShadowExtrusionExtent(void) {
-        STUBBED();
+    i32 NuDynamicLightTestShadowExtrusionExtent(NuDynamicLight *light, const NUVEC *center, const NUVEC *extent,
+                                              i32 render_set) {
+        VuVec minimum;
+        VuVec maximum;
+        minimum.x = center->x - extent->x;
+        minimum.y = center->y - extent->y;
+        minimum.z = center->z - extent->z;
+        maximum.x = center->x + extent->x;
+        maximum.y = center->y + extent->y;
+        maximum.z = center->z + extent->z;
+        return light->testShadowExtrusion(minimum, maximum, render_set);
     }
     void NuDynamicLightTestShadowExtrusions(NuDynamicLight *light, const VuVec *first, const VuVec *second) {
         VuVec first_copy;
@@ -3183,7 +3201,7 @@ extern "C" {
         }
     }
     void NuHGobjEvalAnim(void) {
-        STUBBED();
+        // Retail no-op.
     }
     // Original @0x2cd730.
     void NuHGobjEvalAnim2(nuhgobj_s *object, ani3_animheader_s *animation, f32 time, i32 override_count,
@@ -3995,6 +4013,7 @@ extern "C" {
     i32 do_InstTree = 1;
     i32 do_occlusion = 1;
     i32 do_visibility = 1;
+    i32 do_octree;
 
     void NuVisiInstTree(void *, NUGSCN *);
     void NuVisiOcclusion(void *);
@@ -4033,8 +4052,18 @@ extern "C" {
     void NuVisiOcclusion(void *) {
         STUBBED();
     }
-    void NuVisiOctree(void) {
-        STUBBED();
+    extern "C++" void OctreeRndr(u8 *visibility, nuoctreenode_s *root, i32 enabled);
+    void NuVisiOctree(NuVisibilityResult *result) {
+        struct NuOctreeVisibilityData {
+            nuoctreenode_s *root;
+        };
+        NuOctreeVisibilityData *octree = *reinterpret_cast<NuOctreeVisibilityData **>(result->pad_04);
+        if (octree != NULL && do_octree != 0) {
+            OctreeRndr(static_cast<u8 *>(result->visibility_context), octree->root, result->instance_count);
+            result->state |= 4;
+        } else {
+            result->state &= ~4;
+        }
     }
     void NuOcclusionManagerAddOccluderOBB(const NUVEC *minimum, const NUVEC *maximum, const NUMTX *matrix) {
         g_OcclusionManager.AddOccluder(minimum, maximum, matrix);
@@ -4067,7 +4096,7 @@ extern "C" {
         g_OcclusionManager.OnCameraSet();
     }
     void NuOcclusionManagerRenderStats(void) {
-        STUBBED();
+        g_OcclusionManager.RenderStats();
     }
     void NuOcclusionManagerRenderZPass(void) {
         g_OcclusionManager.RenderZPass();
@@ -4124,7 +4153,7 @@ extern "C" {
     // ---------------------------------------------------------------------------
 
     void NuSplineList(void) {
-        STUBBED();
+        // Retail no-op.
     }
     extern void (*nuapi_endframe_callbackfn)(void);
     void NuRegisterEndFrameCallBackFn(void (*callback)(void)) {
@@ -4136,7 +4165,7 @@ extern "C" {
     // ---------------------------------------------------------------------------
 
     i32 NuStreamInit(void) {
-        STUBBED();
+        // Retail returns zero.
         return 0;
     }
 
@@ -4151,8 +4180,14 @@ struct nuframebuffer_s;
 struct nushaderobject_s;
 union variptr_u;
 
-void Nu360ConfigureSMBSharing(char **) {
-    STUBBED();
+static char g_smbPath[256];
+
+void Nu360ConfigureSMBSharing(char **path) {
+    NuFileSetCurrentDirectory("d:\\");
+    if (static_cast<bool>(NuFileLoadBuffer("smbpath.txt", g_smbPath, sizeof(g_smbPath)))) {
+        NuFileSetCurrentDirectory(g_smbPath);
+        *path = g_smbPath;
+    }
 }
 void NuLgtSetArcMatEx(i32 type, numtl_s *material, f32 u0, f32 v0, f32 u1, f32 v1) {
     if (type > 3)

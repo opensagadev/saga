@@ -304,6 +304,20 @@ misleading host diagnostic. Keep their original source order so the text run
 is contiguous, and do not infer missing memory-card behavior from the stub
 marker alone.
 
+The mixed `nucore_plain.cpp` contains nineteen more verified nine-byte retail
+no-ops (plain `ret` or zero/null return with GCC padding). Their `STUBBED()`
+markers were host diagnostics only; removing the markers leaves all nineteen
+at 100% in the target. Several nearby bodies do contain real work, so classify
+each symbol by retail disassembly first. For example, the typed calls in
+`NuDynamicLightGetDList`, `NuDynamicLightTestShadowExtrusionExtent`,
+`NuOcclusionManagerRenderStats`, and `NuVisiOctree` compile to exact retail
+bodies. `NuSysDirClose` has the correct 108-byte instruction shape but three
+local BSS `GOTOFF` displacements still differ after linking (99.86957%).
+`Nu360ConfigureSMBSharing` is a separate 106-byte `-O0` retail function; the
+same logic in the mixed optimized catchall compiles to a different prologue
+and register allocation, so source-level condition changes alone cannot
+explain that mismatch.
+
 **Hot/cold:** NO `.text.hot`/`.text.unlikely` — `__builtin_expect` only feeds branch/if-conversion heuristics: `hot()` at -O3 = `test %eax,%eax; mov $-1,%edx; cmove %edx,%eax; ret`.
 verified: `g++ -O3 -S align.cpp; objdump -d`
 
