@@ -148,7 +148,7 @@ bool MechTouchUI::OnHold(GameObject_s &, TouchHolder &holder) {
                 elements[i]->disabled == 0) {
                 elements[i]->on_hold(*elements[i], holder);
             }
-            holder.field_0x0[7] = 1;
+            holder.consumed = 1;
             return true;
         }
     }

@@ -126,20 +126,35 @@ struct JumpTriggerPacket {
 DECOMP_ASSERT(offsetof(JumpTriggerPacket, velocity) == 0xc, "Jump trigger velocity offset");
 DECOMP_ASSERT(offsetof(JumpTriggerPacket, start) == 0x2c, "Jump trigger start offset");
 DECOMP_ASSERT(offsetof(JumpTriggerPacket, end) == 0x34, "Jump trigger end offset");
+struct TouchSwipeSample {
+    NuVec2 position;
+    f32 time;
+    VuVec object_position;
+    VuVec object_velocity;
+};
+DECOMP_ASSERT(sizeof(TouchSwipeSample) == 0x2c, "Touch swipe sample ABI");
 struct TouchHolder {
     i32 touch_id;
     u8 clicked;
     u8 is_down;
     u8 field_0x6;
     u8 consumed;
-    u8 field_0x8[4];
+    u8 click_candidate;
+    u8 field_0x9[3];
     NuVec2 down_position;
     NuMechPtr<MechObjectInterface, 4> target_object;
     NuMechPtr<MechObjectInterface, 4> previous_target_object;
     NuVec2 touch_position;
-    u8 field_0x34[0x3a4 - 0x34];
+    TouchSwipeSample swipe_samples[20];
     f32 held_time;
+    f32 click_timer;
+    f32 double_click_timer;
+    f32 release_timer;
+    f32 oldest_click_timer;
+    f32 sample_countdown;
 };
+DECOMP_ASSERT(sizeof(TouchHolder) == 0x3bc, "Touch holder ABI");
+DECOMP_ASSERT(offsetof(TouchHolder, swipe_samples) == 0x34, "Touch holder swipe offset");
 DECOMP_ASSERT(offsetof(TouchHolder, is_down) == 5, "Touch holder down flag offset");
 DECOMP_ASSERT(offsetof(TouchHolder, consumed) == 7, "Touch holder consumed flag offset");
 DECOMP_ASSERT(offsetof(TouchHolder, target_object) == 0x14, "Touch holder target offset");
@@ -315,7 +330,11 @@ struct MechInputTouchButtonFaker : MechInputTouchButton {
         return is_pressed;
     }
 };
-struct MechInputTouchGestureTrackingSystem {
+struct GestureTrackerRegistration {
+    MechInputTouchGestureTracker *tracker;
+    i32 priority;
+};
+struct MechInputTouchGestureTrackingSystem : NuTouchInputElement {
     TouchHolder *GetTouch(NuInputTouch const &);
     void LookForClicks(GameObject_s &);
     void LookForDown(GameObject_s &);
@@ -328,9 +347,17 @@ struct MechInputTouchGestureTrackingSystem {
     void ReadData(GameObject_s &, NuInputTouchData const &);
     void RegisterGestureTracker(MechInputTouchGestureTracker &, i32);
     void UnregisterGestureTracker(MechInputTouchGestureTracker &);
-    void Update(NuInputTouchData const *);
-    virtual ~MechInputTouchGestureTrackingSystem();
+    void Update(NuInputTouchData const *) override;
+    void Render() override {
+    }
+    ~MechInputTouchGestureTrackingSystem() override;
+
+    TouchHolder holders[10];
+    GestureTrackerRegistration trackers[10];
 };
+DECOMP_ASSERT(sizeof(MechInputTouchGestureTrackingSystem) == 0x25d8, "Gesture tracking system ABI");
+DECOMP_ASSERT(offsetof(MechInputTouchGestureTrackingSystem, trackers) == 0x2588,
+              "Gesture tracker registration offset");
 struct MechInputTouchMainController : NuTouchInputElement {
     enum eButtonTypes : u32 {};
     f32 stick_values[4];
@@ -921,7 +948,6 @@ struct MechSystems : BaseThing {
     };
     MechInputTouchSystem input_touch_system;
     MechInputTouchGestureTrackingSystem gesture_tracking_system;
-    u8 unknown_0x88[0x265c - 0x88];
     u8 ui_storage[0x84];
     u8 player_button_storage[0x164];
     u8 pause_button_storage[0x44];
