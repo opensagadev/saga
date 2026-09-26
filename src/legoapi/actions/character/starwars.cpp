@@ -13,10 +13,6 @@ typedef i32 (*MIDSPECIALMOVEFN)(AISYS_s *, AIPACKET_s *, APIOBJECT_s *);
 PREPARINGSPECIALMOVEFN PreparingForSpecialMoveFn = NULL;
 MIDSPECIALMOVEFN MidSpecialMoveFn = NULL;
 
-static __used__ void SpecialMove_ConfigParticipant(nufpar_s *, i16 *, i8 *, i16 *) {
-    STUBBED();
-}
-
 extern "C" {
 
     void InitFn_MidSpecialMove(MIDSPECIALMOVEFN function) {
