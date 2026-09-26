@@ -34,9 +34,21 @@ Compiler details to retain when tuning the match:
 
 - `VuVec_Zero` is read from the translation unit's local 16-byte BSS object;
   replacing it with literal zeros can alter the setup block.
+- Copy the four `VuVec_Zero` components as floats. A whole-object copy made
+  NDK r8e GCC use integer `mov` instructions, while the target uses four
+  scalar `movss` loads and stores. Explicit assignments to the remaining
+  offsets also preserve the target's near-to-far table-load order better
+  than an array of constructor expressions.
 - The displacement vector has `w = 1.0f`, while the selected landing point
   has `w = 0.0f`.
 - The original has a 16-byte aligned stack frame and 16-byte offset stride.
+- Keep the mutable ray vector alive outside the probe loop. In the measured
+  target it occupies `esp+0x20`, with `w = 1.0f` written once. The origin is
+  a separate three-component local at `esp+0x30`; writing its unused `w`
+  adds instructions to every probe and can reverse those two stack slots.
+- Put the vertical score factor on the left of the final multiplication:
+  `vertical * (dx*dx + dz*dz)`. NDK r8e GCC otherwise accumulated the score
+  in `xmm0`, while the target accumulated it in `xmm1`.
 - The original places a shared `found` byte and best-score float in the
   frame, and later probes compare against that float.
 - Set `found` after the score check in source. The target duplicates the

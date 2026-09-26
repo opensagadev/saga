@@ -91,17 +91,37 @@ void MechJumpAutoPilotAddon::LookForLandingPoint() {
 }
 
 bool MechJumpAutoPilotAddon::LookForLandingSpotAroundPoint(VuVec const &point) {
-    VuVec offsets[9] = {
-        VuVec_Zero,
-        VuVec(NuTrigTable[0x1000] * 0.2f, 0.0f, NuTrigTable[0x3000] * 0.2f, 1.0f),
-        VuVec(NuTrigTable[0x2000] * 0.5f, 0.0f, NuTrigTable[0x4000] * 0.5f, 1.0f),
-        VuVec(NuTrigTable[0x3000] * 0.2f, 0.0f, NuTrigTable[0x5000] * 0.2f, 1.0f),
-        VuVec(NuTrigTable[0x4000] * 0.5f, 0.0f, NuTrigTable[0x6000] * 0.5f, 1.0f),
-        VuVec(NuTrigTable[0x5000] * 0.2f, 0.0f, NuTrigTable[0x7000] * 0.2f, 1.0f),
-        VuVec(NuTrigTable[0x6000] * 0.5f, 0.0f, NuTrigTable[0x0000] * 0.5f, 1.0f),
-        VuVec(NuTrigTable[0x7000] * 0.2f, 0.0f, NuTrigTable[0x1000] * 0.2f, 1.0f),
-        VuVec(NuTrigTable[0x0000] * 0.5f, 0.0f, NuTrigTable[0x2000] * 0.5f, 1.0f),
-    };
+    // The centre is probed first, followed by eight directions at 45 degree
+    // intervals. The near and far probes alternate between two radii.
+    VuVec offsets[9];
+    offsets[0].x = VuVec_Zero.x;
+    offsets[0].y = VuVec_Zero.y;
+    offsets[0].z = VuVec_Zero.z;
+    offsets[0].w = VuVec_Zero.w;
+    offsets[1].x = NuTrigTable[0x1000] * 0.2f;
+    offsets[1].y = 0.0f;
+    offsets[1].z = NuTrigTable[0x3000] * 0.2f;
+    offsets[2].x = NuTrigTable[0x2000] * 0.5f;
+    offsets[2].y = 0.0f;
+    offsets[2].z = NuTrigTable[0x4000] * 0.5f;
+    offsets[3].x = NuTrigTable[0x3000] * 0.2f;
+    offsets[3].y = 0.0f;
+    offsets[3].z = NuTrigTable[0x5000] * 0.2f;
+    offsets[4].x = NuTrigTable[0x4000] * 0.5f;
+    offsets[4].y = 0.0f;
+    offsets[4].z = NuTrigTable[0x6000] * 0.5f;
+    offsets[5].x = NuTrigTable[0x5000] * 0.2f;
+    offsets[5].y = 0.0f;
+    offsets[5].z = NuTrigTable[0x7000] * 0.2f;
+    offsets[6].x = NuTrigTable[0x6000] * 0.5f;
+    offsets[6].y = 0.0f;
+    offsets[6].z = NuTrigTable[0x0000] * 0.5f;
+    offsets[7].x = NuTrigTable[0x7000] * 0.2f;
+    offsets[7].y = 0.0f;
+    offsets[7].z = NuTrigTable[0x1000] * 0.2f;
+    offsets[8].x = NuTrigTable[0x0000] * 0.5f;
+    offsets[8].y = 0.0f;
+    offsets[8].z = NuTrigTable[0x2000] * 0.5f;
 
     bool found = false;
     f32 best_score = -2000000000.0f;
@@ -109,19 +129,24 @@ bool MechJumpAutoPilotAddon::LookForLandingSpotAroundPoint(VuVec const &point) {
     const f32 ray_height = field_24.y + (sweep_height - 0.5f);
     const f32 ray_length = -sweep_height;
 
+    VuVec ray;
+    ray.w = 1.0f;
     for (i32 i = 0; i < 9; ++i) {
-        VuVec origin(point.x + offsets[i].x, ray_height, point.z + offsets[i].z, 1.0f);
-        VuVec ray(0.0f, ray_length, 0.0f, 1.0f);
+        ray.x = 0.0f;
+        ray.y = ray_length;
+        ray.z = 0.0f;
+        VuVec origin;
+        origin.x = point.x + offsets[i].x;
+        origin.y = ray_height;
+        origin.z = point.z + offsets[i].z;
         if (GameRayCast(&origin.xyz, &ray.xyz, 0.0f, 0)) {
-            const f32 x = origin.x + ray.x;
-            const f32 y = origin.y + ray.y;
-            const f32 z = origin.z + ray.z;
-            const f32 dx = x - field_24.x;
-            const f32 dz = z - field_24.z;
-            const f32 score = (dx * dx + dz * dz) * (y - field_24.y + 0.1f);
+            const VuVec hit(origin.x + ray.x, origin.y + ray.y, origin.z + ray.z, 0.0f);
+            const f32 dx = hit.x - field_24.x;
+            const f32 dz = hit.z - field_24.z;
+            const f32 score = (hit.y - field_24.y + 0.1f) * (dx * dx + dz * dz);
             if (score > best_score) {
                 best_score = score;
-                field_84 = VuVec(x, y, z, 0.0f);
+                field_84 = hit;
             }
             found = true;
         }
