@@ -23,6 +23,8 @@ extern i32 DoubleScore;
 #include "legoapi/characters/core/character.h"
 #include "legoapi/menus/screens/store.h"
 #include "legoapi/menus/screens/gamestructure.h"
+#include "legoapi/menus/screens/gamemenuall.h"
+#include "gameapi/gui/apimenu.h"
 #include "legoapi/menus/core/gamehint.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nufile/nufpar.h"
@@ -549,12 +551,42 @@ i32 Collection_GotAnyOfType(i32 type, u32 flags) {
     return 0;
 }
 
-void CollectAllCharacters(i32) {
-    STUBBED();
+i32 AddToCollection(i32 id);
+void CollectAllCharacters(i32 only_story) {
+    if (CollectCount <= 0)
+        return;
+
+    if (only_story == 0) {
+        for (i32 i = 0; i < CollectCount; ++i) {
+            __asm__ __volatile__("" : "+r"(i));
+            if (CollectList[i].type != 8)
+                AddToCollection(CollectList[i].id);
+        }
+    } else {
+        for (i32 i = 0; i < CollectCount; ++i) {
+            __asm__ __volatile__("" : "+r"(i));
+            if (CollectList[i].type == 1)
+                AddToCollection(CollectList[i].id);
+        }
+    }
 }
 
-static __used__ void Collection_GetSelectingPlayerIDs(i16 *) {
-    STUBBED();
+extern i32 freeplaymode;
+extern i32 freeplay_selected[2];
+static __used__ void Collection_GetSelectingPlayerIDs(i16 *ids) {
+    if (WORLD->area != NULL && WORLD->area == HUB_ADATA && GetMenuID() == 17 &&
+        static_cast<u32>(freeplaymode) <= 3) {
+        i32 offset = 0;
+        if (MenuPacket.active_player[0] != 0 && freeplay_selected[0] <= 2) {
+            ids[0] = MenuPacket.player_model[0];
+            offset = 2;
+        }
+        if (MenuPacket.active_player[1] == 0)
+            return;
+        if (freeplay_selected[1] > 2)
+            return;
+        *reinterpret_cast<i16 *>(reinterpret_cast<u8 *>(ids) + offset) = MenuPacket.player_model[1];
+    }
 }
 
 void ReleaseEat(GameObject_s *object) {
@@ -572,8 +604,29 @@ void ReleaseEat(GameObject_s *object) {
     object->field_0xe24 = flags & ~1;
 }
 
-void ShipDropCoins(starfighter_s *) {
-    STUBBED();
+i32 ShipDropCoins(starfighter_s *fighter) {
+    u8 *space = reinterpret_cast<u8 *>(WORLD->space_level);
+    i32 *count = reinterpret_cast<i32 *>(space + 0x62ef0);
+    struct ShipCoinRecord {
+        i32 id;
+        f32 height;
+        u8 reserved[8];
+    };
+    ShipCoinRecord *records = reinterpret_cast<ShipCoinRecord *>(space + 0x62ef4);
+    u8 *fighter_data = reinterpret_cast<u8 *>(fighter);
+    u8 *object = *reinterpret_cast<u8 **>(fighter_data + 0xd4);
+    i32 id = *reinterpret_cast<i32 *>(object + 0x524);
+    f32 height = *reinterpret_cast<f32 *>(fighter_data + 0xf8);
+    for (i32 i = 0; i < *count; ++i) {
+        if (records[i].id == id && records[i].height == height)
+            return 0;
+    }
+    if (*count > 255)
+        return 0;
+    records[*count].id = id;
+    records[*count].height = height;
+    ++*count;
+    return 1;
 }
 
 i32 AddToCollection(i32 id) {

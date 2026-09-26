@@ -1534,9 +1534,37 @@ static __used__ i32 Bolt_GetShootDirection_Default(GameObject_s *object, nuvec_s
     return angle;
 }
 
-static __used__ unsigned int Batarang_GetTargetPos(BATARANG_s *, int, nuvec_s *) {
-    STUBBED();
-    return {};
+static __used__ unsigned int __attribute__((regparm(2))) Batarang_GetTargetPos(BATARANG_s *batarang, int index,
+                                                                                nuvec_s *position) {
+    if (batarang->field_0x7d != 0 && batarang->active != 0 && batarang->active == index) {
+        GameObject_s *owner = batarang->owner;
+        *position = owner->apiobj.collision_position;
+        if ((owner->field_0xe24 & 8) != 0) {
+            i32 joint = static_cast<i8>(owner->apiobj.character_data->player_config->unknown_112[0]);
+            if (joint != -1 && owner->apiobj.character_model->points_of_interest[joint] != NULL)
+                *position = *NUMTX_GET_ROW_VEC(&owner->joint_matrices[joint], 3);
+        }
+        return 1;
+    }
+    if (index >= batarang->active)
+        return 0;
+    BATARANG_TARGET_s *target = &batarang->targets[index];
+    switch (target->type) {
+        case 0:
+            *position = static_cast<GameObject_s *>(target->object)->apiobj.collision_position;
+            return 1;
+        case 1:
+            *position = static_cast<DETONATOR_s *>(target->object)->field_0x0c;
+            return 1;
+        case 2:
+            *position = static_cast<GIZMOBLOWUP_s *>(target->object)->mid_position;
+            return 1;
+        case 3:
+            *position = *static_cast<NUVEC *>(target->object);
+            return 1;
+        default:
+            return 0;
+    }
 }
 
 static __used__ void CollideBoltStarFighter(BOLT_s *, starfighter_s *, _vuv_s *, _vuv_s *) {
@@ -1560,11 +1588,6 @@ static __used__ void ProcessStarFighter(starfighter_s *, quickboltinfo *) {
 
 static __used__ void StarFighterAlign(starfighter_s *, _vuv_s *, f32, i32) {
     STUBBED();
-}
-
-static __used__ unsigned int BoltInitSfx_LSW(GameObject_s *) {
-    STUBBED();
-    return {};
 }
 
 void BoltTypes_Init(WORLDINFO_s *world) {
