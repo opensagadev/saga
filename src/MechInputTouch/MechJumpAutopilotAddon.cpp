@@ -187,7 +187,8 @@ MechJumpAutoPilotAddon::MechJumpAutoPilotAddon(MechObjectInterface &object)
 void MechJumpAutoPilotAddon::ModifyJump() {
 }
 
-__attribute__((force_align_arg_pointer)) bool MechJumpAutoPilotAddon::OnProcess(MechAddon::ProcessStage, float delta_time) {
+__attribute__((optimize("no-omit-frame-pointer"), force_align_arg_pointer)) bool
+MechJumpAutoPilotAddon::OnProcess(MechAddon::ProcessStage, float delta_time) {
     if (character == NULL) return false;
 
     const bool is_jumping = character->character_context == LEGOCONTEXT_JUMP;
