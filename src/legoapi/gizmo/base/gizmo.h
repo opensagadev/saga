@@ -119,6 +119,7 @@ typedef struct GIZMOTYPES_s {
 extern ADDGIZMOTYPE Default_ADDGIZMOTYPE;
 extern GIZMOTYPES *gizmotypes;
 struct GameObject_s;
+struct nugscn_s;
 i32 GizmoSys_SetBestBoltTarget(GIZMOSYS *, void *, GameObject_s *, NUVEC *, NUVEC *, f32, f32, i32, i32, i32);
 extern i32 gizmoerrorlogsize;
 
@@ -135,6 +136,8 @@ i32 GizmoIsNameUnique(GIZMOSYS *gizmo_sys, char *name);
 i32 GizmoNameUsesPrefix(char *name, char *prefix);
 i32 GizmoGetUniqueName(GIZMOSYS *gizmo_sys, char *prefix, char *name, char *result, i32 result_size);
 i32 GizmoGetTypeIDByName(GIZMOSYS *gizmo_sys, char *name);
+i32 GizmoGetNumOutputs(GIZMOSYS *gizmo_sys, GIZMO *gizmo);
+i32 GizmoSysWriteInfo(GIZMOSYS *gizmo_sys, char *path, nugscn_s *scene);
 void GizmoSetVisibility(GIZMOSYS *gizmo_sys, GIZMO *gizmo, i32 visibility, i32 unknown);
 i32 GizmoGetVisibility(GIZMOSYS *gizmo_sys, GIZMO *gizmo);
 char *GizmoGetName(GIZMO *gizmo);
