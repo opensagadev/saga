@@ -157,25 +157,28 @@ SAVELOAD_TARGET_OPT void SerialiseChar(EdStream &stream, void *data, i32) {
 }
 
 SAVELOAD_TARGET_OPT i32 FS_PrevNameLen(char *name) {
-    if (name == FS_FileList) {
+    if (__builtin_expect(name == FS_FileList, 0)) {
         return 0;
     }
     char *previous = name - 2;
-    if (*previous == '\0') {
+    if (__builtin_expect(*previous == '\0', 0)) {
         return 1;
     }
-    if (previous == FS_FileList) {
+    if (__builtin_expect(previous == FS_FileList, 0)) {
         return 2;
     }
     i32 length = 0;
-    while (previous != FS_FileList) {
+    for (;;) {
         --previous;
         ++length;
+        asm("" : "+a"(length));
         if (*previous == '\0') {
             return length + 1;
         }
+        if (previous == FS_FileList) {
+            return length + 2;
+        }
     }
-    return length + 2;
 }
 
 static inline __attribute__((always_inline)) u32 FS_EncodedDateKey(const char *name) {
