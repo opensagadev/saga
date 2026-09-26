@@ -1180,6 +1180,7 @@ void Draw_LOADING() {
 }
 
 #include "nu2api/nu3d/nuprim.h"
+#include "nu2api/nu3d/nuprim_internal.h"
 #include "nu2api/nu3d/nupostparams.h"
 
 #define ALPHA_GRID_VERTEX(vx, vy)                                                                                      \
@@ -1429,8 +1430,147 @@ void DrawSaveSlots(MENU_s *menu, float y) {
     menu->item_height[4] = text3d_height * 2.0f;
 }
 
-void DrawAlphaImage(i32, i32, numtl_s *, i32, NuBloomParameters *) {
-    STUBBED();
+static u8 cacheValues[256];
+
+void ClearScreen();
+
+void DrawAlphaImage(i32 rows, i32 cols, numtl_s *material, i32 use_pixel_offsets, NuBloomParameters *parameters) {
+    f32 inv_col = 1.0f / (cols - 1);
+    f32 inv_row = 1.0f / (rows - 1);
+    f32 x0 = 0.0f * inv_row * 2.0f - 1.0f;
+    f32 y_start = 0.0f * inv_col * 2.0f - 1.0f;
+    f32 x1 = inv_row * 2.0f - 1.0f;
+    f32 step_x = inv_row * 2.0f;
+    f32 step_y = inv_col * 2.0f;
+    f32 near_scale = parameters->near_scale * 128.0f;
+    f32 far_scale = parameters->far_scale * 128.0f;
+    f32 near_angle = parameters->near_angle / 180.0f;
+    f32 far_angle = parameters->far_angle / 180.0f;
+    f32 angle_delta = far_angle - near_angle;
+    f32 scale_delta = far_scale - near_scale;
+    NUVPREGION saved_region = g_NuVpRegion;
+    NuVpResetRegions();
+
+    NUCAMERA camera;
+    NuCameraGet(&camera);
+    if (*reinterpret_cast<i32 *>(&parameters->unknown_18) != 0)
+        ClearScreen();
+    if (parameters->directional)
+        NuVecNorm(&parameters->direction, &parameters->direction);
+
+    static f32 pixelOffsetX;
+    static f32 pixelOffsetY;
+    if (use_pixel_offsets) {
+        pixelOffsetX = 0.5f / static_cast<f32>(NuTexWidth(material->tex_id));
+        pixelOffsetY = 0.5f / static_cast<f32>(NuTexHeight(material->tex_id));
+    }
+
+    static i32 first = 1;
+    static f32 camFov;
+    static f32 adjacent;
+    static i32 row, col;
+    if (first) {
+        camFov = camera.fov;
+        adjacent = 1.0f / NU_TAN_LUT((i32)(camera.fov * 0.5f * 10430.3779296875f));
+        first = 0;
+    }
+    if (camera.fov != camFov) {
+        adjacent = 1.0f / NU_TAN_LUT((i32)(camera.fov * 0.5f * 10430.3779296875f));
+        camera.fov = camFov;
+    }
+    camera.mtx.m30 = 0.0f;
+    camera.mtx.m31 = 0.0f;
+    camera.mtx.m32 = 0.0f;
+    camera.mtx.m33 = 1.0f;
+
+    ++NuPrimCSPos;
+    NuPrimSetCoordinateSystem(NUPRIM_SCALEMODE_NORMALISED);
+    for (row = 0; row < rows - 1; ++row) {
+        NuPrim2DBegin(1, 7, material);
+        f32 y0 = y_start;
+        for (col = 0; col < cols; ++col) {
+            NUVEC direction;
+            direction.x = x0;
+            direction.y = -y0 * camera.aspect;
+            direction.z = adjacent;
+            NuVecNorm(&direction, &direction);
+            NuVecMtxTransform(&direction, &direction, &camera.mtx);
+            NuVecNorm(&direction, &direction);
+
+            u8 alpha;
+            if (row == 0) {
+                f32 brightness = direction.y * 0.5f + 0.5f;
+                if (brightness <= near_angle)
+                    brightness = near_scale;
+                else if (brightness >= far_angle)
+                    brightness = far_scale;
+                else
+                    brightness = (brightness - near_angle) * scale_delta / angle_delta + near_scale;
+                brightness *= parameters->intensity;
+                if (parameters->directional) {
+                    f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;
+                    if (angle < parameters->direction_near_angle) {
+                        brightness += 128.0f * parameters->direction_far_scale;
+                    } else if (!(angle > parameters->direction_far_angle)) {
+                        f32 blend = NuPowFast((angle - parameters->direction_near_angle) /
+                                                  (parameters->direction_far_angle - parameters->direction_near_angle),
+                                              parameters->direction_bias);
+                        brightness += 128.0f * ((1.0f - blend) *
+                                                    (parameters->direction_far_scale - parameters->direction_near_scale) +
+                                                parameters->direction_near_scale);
+                    }
+                }
+                alpha = static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)));
+            } else {
+                alpha = cacheValues[col];
+            }
+            NuRndrPrimSetColour((static_cast<u32>(alpha) << 24) | 0x808080);
+            NuRndrPrimUV(static_cast<f32>(row) * inv_row + pixelOffsetX,
+                            (static_cast<f32>(col) * inv_col + pixelOffsetY) * 0.9f);
+            NuPrim2DAddXYZ(x0, y0, 0.0f);
+
+            direction.x = x1;
+            direction.y = -y0 * camera.aspect;
+            direction.z = adjacent;
+            NuVecNorm(&direction, &direction);
+            NuVecMtxTransform(&direction, &direction, &camera.mtx);
+            NuVecNorm(&direction, &direction);
+            f32 brightness = direction.y * 0.5f + 0.5f;
+            if (brightness <= near_angle)
+                brightness = near_scale;
+            else if (brightness >= far_angle)
+                brightness = far_scale;
+            else
+                brightness = (brightness - near_angle) * scale_delta / angle_delta + near_scale;
+            brightness *= parameters->intensity;
+            if (parameters->directional) {
+                f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;
+                if (angle < parameters->direction_near_angle) {
+                    brightness += 128.0f * parameters->direction_far_scale;
+                } else if (!(angle > parameters->direction_far_angle)) {
+                    f32 blend = NuPowFast((angle - parameters->direction_near_angle) /
+                                              (parameters->direction_far_angle - parameters->direction_near_angle),
+                                          parameters->direction_bias);
+                    brightness += 128.0f * ((1.0f - blend) *
+                                                (parameters->direction_far_scale - parameters->direction_near_scale) +
+                                            parameters->direction_near_scale);
+                }
+            }
+            alpha = static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)));
+            cacheValues[col] = alpha;
+            NuRndrPrimSetColour((static_cast<u32>(alpha) << 24) | 0x808080);
+            NuRndrPrimUV(static_cast<f32>(row + 1) * inv_row + pixelOffsetX,
+                            (static_cast<f32>(col) * inv_col + pixelOffsetY) * 0.9f);
+            NuPrim2DAddXYZ(x1, y0, 0.0f);
+            y0 += step_y;
+        }
+        NuPrim2DEnd();
+        x0 += step_x;
+        x1 += step_x;
+    }
+    --NuPrimCSPos;
+    NuPrimSetCoordinateSystem(NuPrimCoordSystemStack[NuPrimCSPos]);
+    g_NuVpRegion = saved_region;
 }
 
 void DrawBezierLine(VuVec &start, VuVec &start_control, VuVec &end, VuVec &end_control, numtl_s *material, i32 colour) {
