@@ -271,8 +271,9 @@ void MechInputTouchGestureBasedController::ProcessDragMovement(GameObject_s &obj
 void MechInputTouchGestureBasedController::Render() {
 }
 
-void MechInputTouchGestureBasedController::StartJumpUsingAIPath(JumpTriggerPacket const &, i32) {
+bool MechInputTouchGestureBasedController::StartJumpUsingAIPath(JumpTriggerPacket const &, i32) {
     STUBBED();
+    return false;
 }
 
 void MechInputTouchGestureBasedController::StartNewTask(MechTouchTask *task, TouchHolder &holder, bool clear_touches,
@@ -304,8 +305,9 @@ void MechInputTouchGestureBasedController::StartNewTask(MechTouchTask *task, Tou
     }
 }
 
-void MechInputTouchGestureBasedController::TriggerJumpTask(JumpTriggerPacket const &, bool, bool, bool) {
+bool MechInputTouchGestureBasedController::TriggerJumpTask(JumpTriggerPacket const &, bool, bool, bool) {
     STUBBED();
+    return false;
 }
 
 void MechInputTouchGestureBasedController::Update(NuInputTouchData const *data) {

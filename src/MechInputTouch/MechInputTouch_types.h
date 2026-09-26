@@ -937,9 +937,9 @@ struct MechInputTouchGestureBasedController : MechInputTouchMainController, Mech
     void ProcessAutoJumpWhenStuck(GameObject_s &);
     void ProcessDragMovement(GameObject_s &);
     void Render() override;
-    void StartJumpUsingAIPath(JumpTriggerPacket const &, i32);
+    bool StartJumpUsingAIPath(JumpTriggerPacket const &, i32);
     void StartNewTask(MechTouchTask *, TouchHolder &, bool, bool);
-    void TriggerJumpTask(JumpTriggerPacket const &, bool, bool, bool);
+    bool TriggerJumpTask(JumpTriggerPacket const &, bool, bool, bool);
     void Update(NuInputTouchData const *) override;
     ~MechInputTouchGestureBasedController() override;
 
@@ -1176,19 +1176,60 @@ struct MechTouchTaskPlannedDoubleClickGoTo : MechTouchTask {
     u8 field_4e;
     u8 pad_4f;
 };
-struct MechTouchTaskPlannedGoTo {
+struct MechTouchPlannedWaypoint {
+    u8 active;
+    u8 pad_1[3];
+    VuVec position;
+    i32 field_14;
+    MechTempPosInterface target_position;
+
+    MechTouchPlannedWaypoint() : active(0), position(VuVec_Zero), field_14(0), target_position() {
+    }
+};
+DECOMP_ASSERT(sizeof(MechTouchPlannedWaypoint) == 0x34, "Planned waypoint ABI");
+DECOMP_ASSERT(offsetof(MechTouchPlannedWaypoint, target_position) == 0x18, "Planned waypoint target offset");
+
+struct MechTouchTaskPlannedGoTo : MechTouchTask {
     static HashedKey HashId;
     void AnalysePath();
-    void BackgroundProcess();
+    void BackgroundProcess() override;
     void GenerateWaypoints();
     MechTouchTaskPlannedGoTo(MechInputTouchGestureBasedController &, MechObjectInterface *, bool *);
-    void OnResume();
-    void OnStart();
-    void OnStop();
+    const HashedKey &GetHashId() override {
+        return HashId;
+    }
+    void OnResume() override;
+    void OnStart() override;
+    void OnStop() override;
     void SetupForAnalysis();
-    void Update();
-    virtual ~MechTouchTaskPlannedGoTo();
+    bool Update() override;
+    ~MechTouchTaskPlannedGoTo() override;
+
+    i32 analysis_state;
+    VuVec *path_points;
+    i32 field_20;
+    i32 path_index;
+    i32 path_count;
+    VuVec start_position;
+    f32 step_x;
+    f32 step_z;
+    f32 step_y;
+    i32 last_index;
+    MechTouchTaskGoTo *go_to_task;
+    MechTempPosInterface target_position;
+    NuMechPtr<MechObjectInterface, 4> target;
+    MechTouchPlannedWaypoint waypoints[32];
+    i32 current_waypoint;
+    u8 field_6fc;
+    u8 field_6fd;
+    u8 field_6fe;
+    u8 field_6ff;
+    bool *completion;
+    NuMechPtr<MoveToMarker, 4> move_to_marker;
 };
+DECOMP_ASSERT(sizeof(MechTouchTaskPlannedGoTo) == 0x710, "Planned touch task ABI");
+DECOMP_ASSERT(offsetof(MechTouchTaskPlannedGoTo, target_position) == 0x50, "Planned target position offset");
+DECOMP_ASSERT(offsetof(MechTouchTaskPlannedGoTo, waypoints) == 0x78, "Planned waypoint array offset");
 struct MechTouchTaskPullLever : MechTouchTaskGoTo {
     static HashedKey HashId;
     MechTouchTaskPullLever(MechInputTouchGestureBasedController &, MechObjectInterface *, VuVec const &);

@@ -24,6 +24,7 @@ void SetForcedAttackOpponent(MechObjectInterface *);
 void SetWeaponOut(GameObject_s *);
 bool FireBountyHunterRocket(GameObject_s *);
 void SetBobaRocketTarget(MechObjectInterface *);
+f32 GameShadow(GameObject_s *, NUVEC *, f32, i32);
 extern NuMechPtr<MechObjectInterface, 4> NextThermalTarget;
 
 f32 s_mechTouchMoveToStuckVel = 0.2f;
@@ -655,39 +656,169 @@ void MechTouchTaskPlannedGoTo::AnalysePath() {
 }
 
 void MechTouchTaskPlannedGoTo::BackgroundProcess() {
-    STUBBED();
+    if (player != NULL && move_to_marker.Get() != NULL) {
+        const VuVec &position = waypoints[current_waypoint].position;
+        const f32 dx = player->apiobj.position.x - position.x;
+        const f32 dz = player->apiobj.position.z - position.z;
+        if (dx * dx + dz * dz < 0.25f) {
+            Hint_SetComplete(0x5f1);
+            move_to_marker.Get()->FadeOut();
+            move_to_marker = NuMechPtr<MoveToMarker, 4>();
+        }
+    }
 }
 
 void MechTouchTaskPlannedGoTo::GenerateWaypoints() {
     STUBBED();
 }
 
-MechTouchTaskPlannedGoTo::MechTouchTaskPlannedGoTo(MechInputTouchGestureBasedController &, MechObjectInterface *,
-                                                   bool *) {
-    STUBBED();
+MechTouchTaskPlannedGoTo::MechTouchTaskPlannedGoTo(MechInputTouchGestureBasedController &owner,
+                                                   MechObjectInterface *object, bool *completed)
+    : MechTouchTask(owner), path_points(NULL), go_to_task(NULL), target_position(), target(object), waypoints(),
+      field_6fc(0), field_6fd(0), field_6fe(0), completion(completed), move_to_marker() {
 }
 
 void MechTouchTaskPlannedGoTo::OnResume() {
-    STUBBED();
+    if (player == NULL) {
+        return;
+    }
+    const VuVec &position = waypoints[current_waypoint].position;
+    const f32 dx = player->apiobj.position.x - position.x;
+    const f32 dz = player->apiobj.position.z - position.z;
+    if (dx * dx + dz * dz < 0.01f) {
+        ++current_waypoint;
+        field_6fc = 0;
+    } else if (field_6fc != 0) {
+        current_waypoint = 32;
+    } else {
+        field_6fc = 1;
+        MechTouchTaskGoTo *task = new MechTouchTaskGoTo(*controller, &waypoints[current_waypoint].target_position);
+        task->field_50 = 1;
+        controller->StartNewTask(task, *touch_holder, true, false);
+    }
 }
 
 void MechTouchTaskPlannedGoTo::OnStart() {
-    STUBBED();
+    if (target.Get() != NULL && player != NULL) {
+        go_to_task = new MechTouchTaskGoTo(*controller, target.Get());
+        go_to_task->field_50 = 1;
+        go_to_task->OnStart();
+        SetupForAnalysis();
+    }
+    current_waypoint = 0;
 }
 
 void MechTouchTaskPlannedGoTo::OnStop() {
-    STUBBED();
+    MoveToMarker *marker = move_to_marker.Get();
+    if (marker != NULL) {
+        marker->FadeOut();
+    }
 }
 
 void MechTouchTaskPlannedGoTo::SetupForAnalysis() {
-    STUBBED();
+    const VuVec origin(player->apiobj.position.x, player->apiobj.position.y, player->apiobj.position.z, 1.0f);
+    VuVec destination;
+    target.Get()->GetFloorTargetPos(destination, -1);
+    const f32 dx = destination.x - origin.x;
+    const f32 dz = destination.z - origin.z;
+    const i32 estimated_points = static_cast<i32>(NuCeil((dx * dx + dz * dz) / 1.21f));
+    if (estimated_points <= 4) {
+        path_count = 5;
+    } else if (estimated_points <= 9) {
+        path_count = 10;
+    } else {
+        path_count = estimated_points;
+    }
+    path_points = new VuVec[path_count + 1];
+    for (i32 i = 0; i <= path_count; ++i) {
+        path_points[i] = VuVec_Zero;
+        path_points[i].y = -1000000000.0f;
+    }
+    path_points[0] = origin;
+    start_position = origin;
+    step_x = dx / static_cast<f32>(path_count);
+    step_z = dz / static_cast<f32>(path_count);
+    const GAMECHARACTERDATA *character = player->apiobj.character_data->game_character;
+    step_y = -(character->jump_speed * character->jump_speed) /
+                 (character->gravity + character->gravity) * 1.5f + 0.01f;
+    start_position.y += step_y;
+    last_index = -1;
+    path_index = 1;
+    field_20 = 0;
+    analysis_state = 0;
+    field_6ff = 1;
+    if (completion != NULL) {
+        *completion = true;
+    }
 }
 
-void MechTouchTaskPlannedGoTo::Update() {
-    STUBBED();
+bool MechTouchTaskPlannedGoTo::Update() {
+    if (go_to_task != NULL && analysis_state <= 1) {
+        go_to_task->Update();
+    }
+    if (analysis_state == 0) {
+        AnalysePath();
+        return true;
+    }
+    if (analysis_state == 1) {
+        GenerateWaypoints();
+        return true;
+    }
+    if (analysis_state != 2 || player == NULL || current_waypoint > 31) {
+        return false;
+    }
+
+    MechTouchPlannedWaypoint &waypoint = waypoints[current_waypoint];
+    if (waypoint.active == 0) {
+        return false;
+    }
+    if (waypoint.field_14 == 0) {
+        MechTouchTaskGoTo *task = new MechTouchTaskGoTo(*controller, &waypoint.target_position);
+        task->field_50 = 1;
+        controller->StartNewTask(task, *touch_holder, true, false);
+        return true;
+    }
+    if (!TouchHacks::CanJump(*player)) {
+        return true;
+    }
+
+    const f32 dx = waypoint.position.x - player->apiobj.position.x;
+    const f32 dy = waypoint.position.y - player->apiobj.position.y;
+    const f32 dz = waypoint.position.z - player->apiobj.position.z;
+    VuVec velocity;
+    if (dx * dx + dy * dy + dz * dz <= 1.96f && dy <= player->apiobj.scaled_height) {
+        velocity = TouchHacks::CalculateJumpVelToHitPoint(*player, waypoint.position);
+    } else {
+        velocity = TouchHacks::CalculateJumpVelToHitPointDblJump(*player, waypoint.position);
+        player->jump_input_flags |= 0x10;
+    }
+    const NUVEC previous_velocity = player->apiobj.velocity;
+    const NUVEC previous_target_velocity = player->target_velocity;
+    const i32 angle = NuAtan2D(velocity.x, velocity.z);
+    player->apiobj.movement_facing_angle = angle;
+    player->apiobj.facing_angle = angle;
+    player->apiobj.velocity = velocity.xyz;
+    player->target_velocity = velocity.xyz;
+
+    JumpTriggerPacket packet;
+    packet.type = 2;
+    packet.field_4[0] = reinterpret_cast<u32>(player);
+    packet.field_4[1] = reinterpret_cast<u32>(touch_holder);
+    packet.velocity = velocity;
+    packet.velocity.w = 1.0f;
+    *reinterpret_cast<VuVec *>(packet.field_1c) = waypoint.position;
+    if (!controller->TriggerJumpTask(packet, true, true, true)) {
+        player->apiobj.velocity = previous_velocity;
+        player->target_velocity = previous_target_velocity;
+    }
+    return true;
 }
 
 MechTouchTaskPlannedGoTo::~MechTouchTaskPlannedGoTo() {
+    delete[] path_points;
+    path_points = NULL;
+    delete go_to_task;
+    go_to_task = NULL;
 }
 
 MechTouchTaskUseTeleport::MechTouchTaskUseTeleport(MechInputTouchGestureBasedController &owner, MechObjectInterface *object,
@@ -756,11 +887,93 @@ MechTouchTaskPlannedDoubleClickGoTo::MechTouchTaskPlannedDoubleClickGoTo(MechInp
 }
 
 void MechTouchTaskPlannedDoubleClickGoTo::OnResume() {
-    STUBBED();
+    if (field_4c != 0 || target.Get() == NULL || player == NULL || field_4e == 0) {
+        finished = true;
+        return;
+    }
+    field_4c = 1;
+
+    VuVec position;
+    target.Get()->GetPos(position, -1);
+    const f32 dx = position.x - player->apiobj.position.x;
+    const f32 dy = position.y - player->apiobj.position.y;
+    const f32 dz = position.z - player->apiobj.position.z;
+    const GAMECHARACTERDATA *character = player->apiobj.character_data->game_character;
+    const f32 max_rise = -(character->jump_speed * character->jump_speed) /
+                         (character->gravity + character->gravity) * 2.5f;
+    if (dy > max_rise) {
+        finished = true;
+        return;
+    }
+
+    VuVec velocity;
+    if (dx * dx + dy * dy + dz * dz <= 1.96f && dy <= player->apiobj.scaled_height) {
+        velocity = TouchHacks::CalculateJumpVelToHitPoint(*player, position);
+    } else {
+        velocity = TouchHacks::CalculateJumpVelToHitPointDblJump(*player, position);
+        player->jump_input_flags |= 0x10;
+    }
+
+    const NUVEC previous_velocity = player->apiobj.velocity;
+    const NUVEC previous_target_velocity = player->target_velocity;
+    const i32 angle = NuAtan2D(velocity.x, velocity.z);
+    player->apiobj.movement_facing_angle = angle;
+    player->apiobj.facing_angle = angle;
+    player->apiobj.velocity = velocity.xyz;
+    player->target_velocity = velocity.xyz;
+
+    JumpTriggerPacket packet;
+    packet.type = 2;
+    packet.field_4[0] = reinterpret_cast<u32>(player);
+    packet.field_4[1] = reinterpret_cast<u32>(touch_holder);
+    packet.velocity = velocity;
+    packet.velocity.w = 1.0f;
+    *reinterpret_cast<VuVec *>(packet.field_1c) = position;
+    if (!controller->TriggerJumpTask(packet, true, true, true)) {
+        player->apiobj.velocity = previous_velocity;
+        player->target_velocity = previous_target_velocity;
+    }
 }
 
 void MechTouchTaskPlannedDoubleClickGoTo::OnStart() {
-    STUBBED();
+    if (target.Get() == NULL || player == NULL) {
+        return;
+    }
+
+    VuVec position;
+    target.Get()->GetPos(position, -1);
+    MoveToMarker *marker = MechSystems::Get()->FindMoveToMarkerAtPos(position, true);
+    move_to_marker = NuMechPtr<MoveToMarker, 4>(marker);
+    if (move_to_marker.Get() == NULL) {
+        move_to_marker = NuMechPtr<MoveToMarker, 4>(MechSystems::Get()->NewMoveToMarker(*target.Get()));
+    }
+    marker = move_to_marker.Get();
+    if (marker != NULL) {
+        marker->persistent = true;
+        marker->BlowUp();
+    }
+
+    const f32 dx = position.x - player->apiobj.position.x;
+    const f32 dz = position.z - player->apiobj.position.z;
+    const f32 distance_squared = dx * dx + dz * dz;
+    if (distance_squared < 4.0f) {
+        OnResume();
+        return;
+    }
+
+    const f32 distance = NuFsqrt(distance_squared);
+    const f32 offset_x = dx / distance * 2.0f;
+    const f32 offset_z = dz / distance * 2.0f;
+    target.Get()->GetPos(position, -1);
+    position.x -= offset_x;
+    position.z -= offset_z;
+    position.y = GameShadow(player, &position.xyz, 5.0f, -1);
+    target_position.position = position;
+
+    MechTouchTaskPlannedGoTo *task =
+        new MechTouchTaskPlannedGoTo(*controller, &target_position, reinterpret_cast<bool *>(&field_4e));
+    task->field_6fd = 1;
+    controller->StartNewTask(task, *touch_holder, false, false);
 }
 
 void MechTouchTaskPlannedDoubleClickGoTo::OnStop() {
