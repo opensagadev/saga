@@ -33,7 +33,7 @@ class NuVirtualTouchDevice : public NuInputDeviceTranslator {
         }
     }
 
-    f32 GetAspectRatio();
+    static f32 GetAspectRatio();
     u32 GetCurrentLayoutIndex() const {
         return unknown_04;
     }
