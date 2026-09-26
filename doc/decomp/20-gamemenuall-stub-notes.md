@@ -43,3 +43,18 @@ updates its RGB header fields; formatting does not. The retained source
 matches 99.68595% and 99.669815%, respectively, using the GOT-aware fork.
 Most remaining differences are direct references to static TU storage whose
 addresses move in the rebuilt library, plus a small register choice.
+
+## End-screen timer conversion
+
+`MenuDrawEndMission` and `MenuDrawEndChallenge` share the same flashing timer
+layout. The retail code tests `NuFmod(GameTimer.time_elapsed, 0.3f)` against
+`0.2f`; it reads the first `GameTimer` float, not the similarly named
+`time_elapsed_mod_seconds` field at offset 8. Both convert a `u16` time limit
+with one signed `cvtsi2ss` instruction. In this compiler, casting the `u16`
+directly to `f32` expands into a high-word correction path, so cast through
+`i32` first. Clamp the resulting time with an ordinary `if (remaining < 0)`;
+the compiler folds that into `xorps` plus `maxss`. Calling `fmaxf` instead
+emits a library call. Each callback then calls `Text_MakeTime` and `Text3D`
+with the same layout. The GOT-aware fork reports 99.989130% and 99.990000%
+for the retail-sized callbacks; their only displayed mismatch is the shifted
+rodata address of the `0.2f` literal.
