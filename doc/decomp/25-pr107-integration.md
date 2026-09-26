@@ -101,3 +101,38 @@ increments ESI at `0x108ab3` and compares it with `CHARCOUNT` at `0x108abc`,
 without narrowing it back to 16 bits. Only that verified type correction
 was retained. Attempts to recover the store-pack loop stayed in `/tmp`;
 the function remains at 0% and its existing `-O3` mode was not changed.
+
+## Touch-holder array lifetime
+
+`MechInputTouchGestureTrackingSystem` owns a real `TouchHolder[10]`, not a
+byte buffer with manually invoked destructors. The retail constructor
+(`0x500bc0`) initializes each holder's two managed references, then its
+20 swipe samples, then its flags and timers before advancing by `0x3bc`.
+The destructor (`0x500a40`) walks backwards from `this + 0x2588`, destroying
+the previous-target reference before the target reference in each holder.
+Ordinary member constructors and automatic array destruction now express
+that order; the empty system-destructor body still performs member cleanup.
+
+All accesses in this translation unit now use `holders` and `trackers`.
+The former literal offsets `0x30`, `0x3bc`, and `0x2588` only describe the
+32-bit layout and cannot be used to access the larger 64-bit objects.
+`DECOMP_ASSERT` retains the retail layout checks without imposing those
+offsets on native pointers. No guards or optimization overrides were added.
+
+Linked-binary results for this unit:
+
+- constructor: 38.325% to 53.373%; destructor: 0% to 56.122%
+  (304 bytes versus retail's 312, instead of the old 2,262-byte unrolled body);
+- `LookForDown` and `LookForRelease`: 93.662% / 93.634% to 100%;
+- `LookForHold`: 92.238% to 99.993%;
+- registration, unregistration, and touch lookup also improve;
+- typed accesses change alias analysis and code generation in neighboring
+  functions: clicks moves from 59.556% to 58.262%, swipe from 57.059% to
+  47.770%, and data reading from 49.140% to 49.107%. These remain partial
+  matches; the portable member accesses are retained.
+
+Target, native, and WebAssembly builds pass, as does a Windows x64 syntax
+check. An isolated ASan/UBSan test passes with both 32-bit and 64-bit
+pointers: it checks all ten holders' initialized fields, array destruction
+with twenty live managed references and one surviving reference, and
+target destruction before holder destruction.

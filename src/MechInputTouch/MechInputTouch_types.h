@@ -130,6 +130,12 @@ DECOMP_ASSERT(offsetof(JumpTriggerPacket, velocity) == 0xc, "Jump trigger veloci
 DECOMP_ASSERT(offsetof(JumpTriggerPacket, start) == 0x2c, "Jump trigger start offset");
 DECOMP_ASSERT(offsetof(JumpTriggerPacket, end) == 0x34, "Jump trigger end offset");
 struct TouchSwipeSample {
+    TouchSwipeSample() {
+        position.x = 0.0f;
+        position.y = 0.0f;
+        time = 0.0f;
+    }
+
     NuVec2 position;
     f32 time;
     VuVec object_position;
@@ -137,6 +143,24 @@ struct TouchSwipeSample {
 };
 DECOMP_ASSERT(sizeof(TouchSwipeSample) == 0x2c, "Touch swipe sample ABI");
 struct TouchHolder {
+    TouchHolder() {
+        touch_id = -1;
+        is_down = 0;
+        field_0x6 = 0;
+        consumed = 0;
+        click_candidate = 0;
+        clicked = 0;
+        down_position.x = 0.0f;
+        down_position.y = 0.0f;
+        previous_target_object = NuMechPtr<MechObjectInterface, 4>();
+        sample_countdown = 0.0f;
+        held_time = 0.0f;
+        click_timer = 0.0f;
+        double_click_timer = 0.0f;
+        release_timer = 0.0f;
+        oldest_click_timer = 0.0f;
+    }
+
     i32 touch_id;
     u8 clicked;
     u8 is_down;
@@ -355,10 +379,12 @@ struct MechInputTouchGestureTrackingSystem : NuTouchInputElement {
     }
     ~MechInputTouchGestureTrackingSystem() override;
 
-    u8 holder_storage[sizeof(TouchHolder) * 10];
+    // Retail constructs each holder in order and destroys the array in reverse.
+    TouchHolder holders[10];
     GestureTrackerRegistration trackers[10];
 };
 DECOMP_ASSERT(sizeof(MechInputTouchGestureTrackingSystem) == 0x25d8, "Gesture tracking system ABI");
+DECOMP_ASSERT(offsetof(MechInputTouchGestureTrackingSystem, holders) == 0x30, "Gesture touch holder offset");
 DECOMP_ASSERT(offsetof(MechInputTouchGestureTrackingSystem, trackers) == 0x2588, "Gesture tracker registration offset");
 struct MechInputTouchMainController : NuTouchInputElement {
     enum eButtonTypes : u32 {};
