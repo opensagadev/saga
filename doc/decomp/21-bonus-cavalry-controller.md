@@ -22,7 +22,14 @@ with `NuCameraTransformScreenClip`, then uses the projected screen direction
 to rotate the touch drag into its two stick axes. The gunship B level uses
 a `0.2f` drag scale and snaps the first axis to +/-1 above absolute `0.3f`;
 other levels use `0.5f`. GOT-aware objdiff resolves the level pointer as
-`BONUS_GUNSHIPB_LDATA`.
+`BONUS_GUNSHIPB_LDATA`. The target reloads `WORLD` and the level pointer
+after the camera projection call before the final snap decision. Preserve
+both comparisons; caching the first result across that call changes the
+observable behavior and the compiler's block graph.
+The target also reloads `player` after the second `NuFsqrt` and after
+`NuCameraTransformScreenClip`. Keep those accesses as separate global reads
+across the calls instead of carrying the first object pointer throughout
+`Update`.
 
 The `MechSystems` field read at `0x271c` during `Update` is not named in the
 current type map. The source accesses it by offset pending type recovery.
