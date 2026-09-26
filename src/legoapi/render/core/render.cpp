@@ -283,6 +283,12 @@ extern char *apitxt_LOADING;
 extern char *apitxt_SAVING;
 extern char *apitxt_NODATAAVAILABLE;
 extern char *apitxt_OK;
+extern char *apitxt_GAMELOADED;
+extern char *apitxt_GAMELOADING;
+extern char *apitxt_FAILEDTOLOAD;
+extern char *apitxt_CORRUPTLOAD;
+extern char *ASCII_DOWN;
+extern char *ASCII_UP;
 extern i16 tCURRENTGAME;
 extern i16 tEMPTY;
 extern i16 tGAME;
@@ -965,7 +971,8 @@ void DrawLocator(nuvec_s *position, float radius, i32 rotation, i32 colour) {
 }
 
 void Draw_LOADED() {
-    STUBBED();
+    MenuSmartTextEx(apitxt_GAMELOADED, 0.0f, -0.4f, 1.0f, MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, 0,
+                    MENUNORMALR, MENUNORMALG, MENUNORMALB, 1.5f, 2, NULL, 0, MenuA);
 }
 
 void Draw3DObject(WORLDINFO_s *world, i32 object_index, nuvec_s *position, u16 x_rotation, u16 y_rotation,
@@ -1088,8 +1095,23 @@ void DrawQuestion(nuvec_s *position, float scale_value, float y_push) {
     }
 }
 
-void DrawRectRGBA(float, float, float, float, u32, numtl_s *, i32, float) {
-    STUBBED();
+void DrawRectRGBA(float x, float y, float width, float height, u32 colour, numtl_s *material, i32 alignment,
+                  float scale) {
+    const float scaled_width = width * scale;
+    const float scaled_height = height * scale;
+    const i32 rect_width = static_cast<i32>(scaled_width * 2560.0f * 0.5f);
+    const i32 rect_height = static_cast<i32>(scaled_height * 3584.0f * 0.5f);
+    if ((alignment & 5) == 4)
+        y += scaled_height;
+    else if ((alignment & 5) == 0)
+        y += scaled_height * 0.5f;
+    if ((alignment & 10) == 8)
+        x -= scaled_width;
+    else if ((alignment & 10) == 0)
+        x -= scaled_width * 0.5f;
+    NuRndrRect2di(static_cast<i32>((x + 1.0f) * 0.5f * 2560.0f),
+                   static_cast<i32>((2.0f - (y + 1.0f)) * 0.5f * 3584.0f), rect_width, rect_height, colour,
+                   material);
 }
 
 void DrawItem(nuhspecial_s *special, nuvec_s *position, float scale_value, float unused, float y_push, u16 x_rot,
@@ -1150,7 +1172,8 @@ static inline void ShopRotateZ(NUMTX *m, NUANG a) {
     m->m31 = m30 * sinx + m->m31 * cosx;
 }
 void Draw_LOADING() {
-    STUBBED();
+    MenuSmartTextEx(apitxt_GAMELOADING, 0.0f, -0.4f, 1.0f, MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, 0,
+                    MENUNORMALR, MENUNORMALG, MENUNORMALB, 1.5f, 2, NULL, 0, MenuA);
 }
 
 #include "nu2api/nu3d/nuprim.h"
@@ -1700,7 +1723,8 @@ void DrawTouchPrompt(char *prompt, char *unused_label, bool hovered, bool large)
 }
 
 void Draw_LOADFAILED() {
-    STUBBED();
+    MenuSmartTextEx(apitxt_FAILEDTOLOAD, 0.0f, 0.0f, 1.0f, MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, 0,
+                    MENUNORMALR, MENUNORMALG, MENUNORMALB, 1.5f, 3, NULL, 0, MenuA);
 }
 
 void DrawAreaCylinder(nuvec_s *centre, nuvec_s *size, i32 colour) {
@@ -1909,7 +1933,8 @@ void DrawStatusBG_LSW(STATUSPACKET_s *status) {
 }
 
 void Draw_LOADCORRUPT() {
-    STUBBED();
+    MenuSmartTextEx(apitxt_CORRUPTLOAD, 0.0f, 0.0f, 1.0f, MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, 0,
+                    MENUNORMALR, MENUNORMALG, MENUNORMALB, 1.5f, 3, NULL, 0, MenuA);
 }
 
 void Draw3DObjectAlpha(WORLDINFO_s *world, i32 object_index, nuvec_s *position, u16 x_rotation, u16 y_rotation,
@@ -2636,12 +2661,83 @@ i32 DrawGameObjectsProcess() {
     return 0;
 }
 
-void DrawStatusTextFraction(i32, i32, float, float, u16, float, u32, float, float) {
-    STUBBED();
+void DrawStatusTextFraction(i32 current, i32 total, float x, float y, u16 angle, float scale, u32 colour,
+                            float animation, float animation_duration) {
+    char text[16];
+    u16 encoded[64];
+    NUMTX matrix;
+    NUVEC origin = {0.0f, 0.0f, 800.0f};
+    NUVEC position = {x * 350.0f, y * 300.0f, 0.0f};
+    NuQFntSetJustifiedTolerances(1.2f, 1.2f);
+    NuMtxSetIdentity(&matrix);
+    NuMtxSetRotationX(&matrix, 0);
+    NuMtxRotateY(&matrix, 0);
+    NuMtxRotateZ(&matrix, angle);
+    NuMtxTranslate(&matrix, &origin);
+    NuMtxTranslate(&matrix, &position);
+    NuMtxMul(&matrix, &matrix, NuCameraGetMtx());
+    NuQFntSet(QFont3DZ);
+    NuQFntSetMtx(QFont3DZ, &matrix);
+    NuQFntPushPrintMode(NUQFNT_CSMODE_ABSOLUTE);
+    NuQFntSetCoordinateSystem(NUQFNT_CSMODE_ABSOLUTE);
+    NuQFntSetColour(QFont3DZ, colour);
+    NuQFntSetScale(QFont3DZ, scale, scale);
+    sprintf(text, "%i/%i", current, total);
+    Text3DStringEncode(text, encoded);
+    const f32 full_width = NuQFntPrintLenW(QFont3DZ, encoded);
+    const f32 height = NuQFntHeight(QFont3DZ);
+    NuQFntMove(QFont3DZ, -full_width * 0.5f, -height * 0.5f, 0.0f);
+    if (animation <= 0.0f) {
+        sprintf(text, "%i", current);
+        Text3DStringEncode(text, encoded);
+        NuQFntPrintW(QFont3DZ, encoded);
+        sprintf(text, "/%i", total);
+        Text3DStringEncode(text, encoded);
+        NuQFntPrintW(QFont3DZ, encoded);
+    } else {
+        const i32 wave_angle = static_cast<i32>((animation / animation_duration) * 32768.0f + 16384.0f);
+        const f32 wave = (NuTrigTable[(wave_angle >> 1) & 0x7fff] + 1.0f) * 0.5f;
+        const f32 small_scale = scale - 0.5f + wave * 0.5f;
+        const f32 large_scale = scale + 0.5f - wave * 0.5f;
+        sprintf(text, "/%i", total);
+        Text3DStringEncode(text, encoded);
+        const f32 suffix_width = NuQFntPrintLenW(QFont3DZ, encoded);
+        NuQFntMove(QFont3DZ, full_width * 0.5f - suffix_width, -height * 0.5f, 0.0f);
+        NuQFntPrintW(QFont3DZ, encoded);
+        sprintf(text, "%i", current);
+        Text3DStringEncode(text, encoded);
+        const f32 current_width = NuQFntPrintLenW(QFont3DZ, encoded);
+        NuQFntSetScale(QFont3DZ, large_scale, large_scale);
+        const f32 large_width = NuQFntPrintLenW(QFont3DZ, encoded);
+        const f32 large_height = NuQFntHeight(QFont3DZ);
+        NuQFntMove(QFont3DZ, current_width * 0.5f - full_width * 0.5f - large_width * 0.5f,
+                   -large_height * 0.5f, 0.0f);
+        NuQFntPrintW(QFont3DZ, encoded);
+        NuQFntSetScale(QFont3DZ, small_scale, small_scale);
+        const f32 small_width = NuQFntPrintLenW(QFont3DZ, encoded);
+        const f32 small_height = NuQFntHeight(QFont3DZ);
+        NuQFntMove(QFont3DZ, current_width * 0.5f - full_width * 0.5f - small_width * 0.5f,
+                   -small_height * 0.5f, 0.0f);
+        NuQFntPrintW(QFont3DZ, encoded);
+    }
+    NuQFntPopPrintMode();
+    NuQFntSetCoordinateSystem(NUQFNT_CSMODE_NORMALISED);
 }
 
-void DrawGameMessage_Targets(GAMEMESSAGE_s *, nuvec_s *, float) {
-    STUBBED();
+void DrawGameMessage_Targets(GAMEMESSAGE_s *message, nuvec_s *position, float scale) {
+    const i32 alpha_integer = message->alpha;
+    const f32 base_alpha = static_cast<f32>(alpha_integer);
+    const f32 y_offset = 0.3f * scale;
+    const u16 angle = static_cast<i32>(NuFmod(GameTimer.time_elapsed_mod_seconds, 0.25f) * 4.0f * 65536.0f);
+    const i32 alpha = static_cast<i32>((NuTrigTable[(angle >> 1) & 0x7fff] * 0.2f + 0.8f) * base_alpha) & 0xff;
+    Text3DEx(ASCII_DOWN, position->x, position->y + y_offset, position->z, scale, scale, scale, 0, message->red,
+             message->green, message->blue, alpha);
+    Text3DEx(ASCII_UP, position->x, position->y - y_offset, position->z, scale, scale, scale, 0, message->red,
+             message->green, message->blue, alpha);
+    Text3DEx(const_cast<char *>(">"), position->x - 0.25f * scale, position->y, position->z, scale, scale, scale, 0,
+             message->red, message->green, message->blue, alpha);
+    Text3DEx(const_cast<char *>("<"), position->x + 0.25f * scale, position->y, position->z, scale, scale, scale, 0,
+             message->red, message->green, message->blue, alpha);
 }
 
 i32 DrawPanel3DObjectNoAlpha(float x, float y, float z, float scale_x, float scale_y, float scale_z, u16 rotate_x,
@@ -3403,12 +3499,63 @@ static void DrawParaphernalia(GameObject_s *object) {
     }
 }
 
-static __used__ void DrawFalconSpotLights(GameObject_s *) {
-    STUBBED();
+static f32 spotLightA_yrot[2];
+static f32 spotLightA_zrot[2];
+static f32 spotLightB_yrot[2] = {0.5f, 0.5f};
+static f32 spotLightB_zrot[2] = {0.5f, 0.5f};
+
+static __used__ __attribute__((regparm(1))) void DrawFalconSpotLights(GameObject_s *object) {
+    if (static_cast<u8>(object->apiobj.field_0x27c) > 1 || object->id != id_MILLENNIUMFALCON ||
+        WORLD->lev_objs[0x127].active == 0)
+        return;
+    NUMTX matrix __attribute__((aligned(16)));
+    if (object->apiobj.character_model->points_of_interest[4] != NULL) {
+        matrix = object->joint_matrices[4];
+        NuSpecialDrawAt(&WORLD->lev_objs[0x127].special, &matrix);
+    }
+    spotLightA_yrot[object->apiobj.field_0x27c] += FRAMETIME / 5.0f;
+    if (spotLightA_yrot[object->apiobj.field_0x27c] > 1.0f)
+        spotLightA_yrot[object->apiobj.field_0x27c] -= 1.0f;
+    spotLightA_zrot[object->apiobj.field_0x27c] += FRAMETIME / 5.0f;
+    if (spotLightA_zrot[object->apiobj.field_0x27c] > 1.0f)
+        spotLightA_zrot[object->apiobj.field_0x27c] -= 1.0f;
+    if (object->apiobj.character_model->points_of_interest[5] != NULL) {
+        matrix = object->joint_matrices[5];
+        NuSpecialDrawAt(&WORLD->lev_objs[0x127].special, &matrix);
+    }
+    spotLightB_yrot[object->apiobj.field_0x27c] += FRAMETIME / 5.0f;
+    if (spotLightB_yrot[object->apiobj.field_0x27c] > 1.0f)
+        spotLightB_yrot[object->apiobj.field_0x27c] -= 1.0f;
+    spotLightB_zrot[object->apiobj.field_0x27c] += FRAMETIME / 5.0f;
+    if (spotLightB_zrot[object->apiobj.field_0x27c] > 1.0f)
+        spotLightB_zrot[object->apiobj.field_0x27c] -= 1.0f;
 }
 
-static __used__ void DisplayListMaterialClipUpdate(nudisplayscene_s *) {
-    STUBBED();
+static __used__ void DisplayListMaterialClipUpdate(nudisplayscene_s *scene) {
+    if (scene == NULL || scene->mtls == NULL || scene->mtls[0] == NULL)
+        return;
+    const u8 buffer = static_cast<u8>(scene->render_buffer >> 7);
+    const u8 *current = scene->mtl_used[scene->render_buffer >> 7];
+    const u8 *previous = scene->mtl_used[buffer ^ 1];
+    const u32 count = (scene->nmtls + 7) >> 3;
+    for (u32 byte_index = 0; byte_index < count; ++byte_index) {
+        const u8 bits = current[byte_index];
+        if (previous[byte_index] == bits)
+            continue;
+        for (u32 bit = 0; bit < 8; ++bit) {
+            const i32 index = static_cast<i32>(byte_index * 8 + bit);
+            if (index >= static_cast<i32>(scene->nmtls))
+                return;
+            NUDISPLAYLIST *list = scene->dlist_mtls[index];
+            NUMTL *material = scene->mtls[list->mtl_id];
+            bool enabled = ((bits >> bit) & 1) != 0;
+            if (enabled && material != NULL && *reinterpret_cast<const u32 *>(reinterpret_cast<const u8 *>(material) + 0xb0) != 0 &&
+                *reinterpret_cast<const u8 *>(reinterpret_cast<const u8 *>(material) + 0xf8) == 0xff) {
+                enabled = false;
+            }
+            list->mtl_item->id = enabled ? 0 : 1;
+        }
+    }
 }
 
 #include "legoapi/legoapi_types.h"

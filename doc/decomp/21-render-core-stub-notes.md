@@ -68,3 +68,52 @@ specials. The colour selector is byte 3 of the packet. GCC 4.7 folds
 between two explicit branches preserves both comparisons. The current
 implementation scores 87.02128%; the remaining difference is the
 placement of the first hidden-colour block, which lengthens one jump.
+
+## Loading screens and rectangle drawing
+
+`Draw_LOADED`, `Draw_LOADING`, `Draw_LOADFAILED`, and
+`Draw_LOADCORRUPT` each make one `MenuSmartTextEx` call. The first two
+use Y `-0.4f`, two lines, and their matching `apitxt_GAMELOADED` or
+`apitxt_GAMELOADING` text; the latter two use Y zero, three lines, and
+`apitxt_FAILEDTOLOAD` or `apitxt_CORRUPTLOAD`. All four use
+`MENUTEXTSCALE` on every axis and `MENUNORMALR/G/B` plus `MenuA`.
+Their target sizes are 181/181/180/180 bytes, and all four match 100%.
+
+`DrawRectRGBA` scales width and height, applies the same alignment bit
+tests as `DrawMessageBoxRGBA`, and converts normalized coordinates with
+`2560.0f` and `3584.0f` before calling `NuRndrRect2di`. It scores
+99.92308%; the remaining differences are five constant-pool addresses.
+
+## Internal calling convention and floating-point conversion
+
+The target `DrawFalconSpotLights` receives its pointer in EAX even
+though its C++ symbol has one ordinary pointer parameter. Declaring the
+static function `__attribute__((regparm(1)))` reproduces that calling
+convention. One shared 16-byte-aligned `NUMTX` local lets GCC use the
+target's realigned stack frame for both light draws. It now scores
+99.82667%; remaining differences are local/global displacements and one
+register choice. Four phase arrays advance after the corresponding
+light's optional draw, even when its point of interest is absent.
+
+`DrawGameMessage_Targets` uses `GameTimer.time_elapsed_mod_seconds`
+(offset `+8`) for the arrow pulse. Convert its `u8` message alpha to
+`i32` before converting to float. Converting `u8` directly to float
+made GCC emit unsigned-int float conversion scaffolding that is absent
+in the target. The current 706-byte target scores 92.32353%.
+
+## Material clip and animated status text
+
+`DisplayListMaterialClipUpdate` duplicates the semantics of the
+existing `nudlist.cpp` material clip helper: compare two used-byte
+buffers, inspect the eight materials of each changed byte, and suppress
+items with blend flag at `NUMTL+0xb0` and blend byte `NUMTL+0xf8`
+equal to `0xff`. The current attempt scores 29.64985%. The target
+unrolls all eight bit cases with a different pointer induction pattern,
+so the semantic loop does not reproduce its control flow.
+
+`DrawStatusTextFraction` uses a stack-local matrix, unlike
+`DrawStatusText`'s static matrix. It prints the suffix before two
+animated copies of the current value. The current first pass scores
+73.16456% of its 1,463-byte target; the matrix setup and font API
+sequence are present, with argument and arithmetic ordering still to
+tune.
