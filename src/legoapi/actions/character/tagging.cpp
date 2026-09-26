@@ -44,6 +44,8 @@ extern i32 do_player_tag;
 extern f32 player_tag_timer;
 extern GameObject_s *player_tag_from;
 extern GameObject_s *player_tag_to;
+extern char *ASCII_DOWN;
+extern f32 ICONSIZE;
 
 void ResetForceGlow(PLAYERPACKET_s *packet);
 void AICreatureResumeScript(GameObject_s *object);
@@ -188,8 +190,88 @@ void Tag_ResetTransfers() {
     Tag_Transfer[1].time = Tag_TransferResetTimer;
 }
 
-void Tag_DrawIcon_Batman(GameObject_s *) {
-    STUBBED();
+void Tag_DrawIcon_Batman(GameObject_s *object) {
+    if (VehicleArea != 0 || FadeSys.fade != 0.0f || static_cast<i8>(object->apiobj.field_0x1f8) >= 0 ||
+        !(object->pause_context_state > 0.0f)) {
+        return;
+    }
+
+    ADDGAMEMSG_ALIGNED16 message = AddGameMsg_Default;
+    __asm__ volatile("" : : "m"(message));
+    const f32 pulse_alpha = (game_pulse * 0.2f + 0.8f) * 128.0f;
+    const u8 index = static_cast<u8>(object->apiobj.field_0x27c);
+    const u8 first_color = index < 1 ? 127 : 255;
+    const u8 third_color = index < 1 ? 255 : 0;
+    const u8 alpha = static_cast<u8>(static_cast<i32>(pulse_alpha * object->pause_context_state));
+
+    NUVEC_ALIGNED16 position;
+    position.x = object->apiobj.upper_position.x;
+    position.y = object->character_top * object->apiobj.field_0xa8 + object->apiobj.position.y + 0.05f;
+    position.z = object->apiobj.upper_position.z;
+
+    if ((object->field_0xe24 & GAMEOBJECT_E24_FLAG_JOINT_MATRICES_UPDATED) != 0) {
+        CHARACTERMODEL_s *model = object->apiobj.character_model;
+        f32 x_sum = 0.0f;
+        f32 z_sum = 0.0f;
+        f32 max_y = object->apiobj.collision_position.y;
+        i32 count = 0;
+#define TAG_INCLUDE_POI(index)                                                                                         \
+    if (model->points_of_interest[index] != NULL) {                                                                     \
+        const f32 y = object->joint_matrices[index].m31;                                                                 \
+        ++count;                                                                                                         \
+        x_sum += object->joint_matrices[index].m30;                                                                     \
+        z_sum += object->joint_matrices[index].m32;                                                                     \
+        max_y = y > max_y ? y : max_y;                                                                                   \
+    }
+        TAG_INCLUDE_POI(0)
+        TAG_INCLUDE_POI(1)
+        TAG_INCLUDE_POI(2)
+        TAG_INCLUDE_POI(3)
+        TAG_INCLUDE_POI(4)
+        TAG_INCLUDE_POI(5)
+        TAG_INCLUDE_POI(6)
+        TAG_INCLUDE_POI(7)
+        TAG_INCLUDE_POI(8)
+        TAG_INCLUDE_POI(9)
+        TAG_INCLUDE_POI(10)
+        TAG_INCLUDE_POI(11)
+        TAG_INCLUDE_POI(12)
+        TAG_INCLUDE_POI(13)
+        TAG_INCLUDE_POI(14)
+        TAG_INCLUDE_POI(15)
+#undef TAG_INCLUDE_POI
+        if (count != 0) {
+            const f32 inv_count = 1.0f / static_cast<f32>(count);
+            position.x = (position.x + x_sum * inv_count) * 0.5f;
+            position.y = (position.y + max_y + 0.05f) * 0.5f;
+            position.z = (position.z + z_sum * inv_count) * 0.5f;
+        }
+    }
+
+    message = AddGameMsg_Default;
+    message.position = &position;
+    message.red = first_color;
+    message.green = first_color;
+    message.blue = third_color;
+    message.alpha = alpha;
+    message.field_0x4e = 2;
+    message.field_0x34 = index == 1 ? 0.002f : 0.0f;
+    message.text = ASCII_DOWN;
+    message.flags = 0x1087;
+    message.scale = 2.0f;
+    AddGameMsg(&message);
+
+    position.y += 0.1175f;
+    message.text = NULL;
+    message.flags = 0x11087;
+    message.scale = ICONSIZE + ICONSIZE;
+    message.icon = apicharsys->char_data[object->id].field20_0x42;
+    message.extra_position = reinterpret_cast<NUVEC *>(&WORLD->lev_objs[message.icon]);
+    AddGameMsg(&message);
+
+    message.icon = index < 1 ? 0xa6 : 0xa5;
+    message.extra_position = reinterpret_cast<NUVEC *>(&WORLD->lev_objs[message.icon]);
+    AddGameMsg(&message);
 }
 
 extern "C" void AddVariableShotDebrisEffectTimed1(i32, NUVEC *, i32, f32, i16, i16, NUMTX *);
