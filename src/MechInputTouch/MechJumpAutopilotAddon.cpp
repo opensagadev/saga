@@ -193,18 +193,16 @@ MechJumpAutoPilotAddon::OnProcess(MechAddon::ProcessStage, float delta_time) {
 
     const bool is_jumping = character->character_context == LEGOCONTEXT_JUMP;
     if (!is_jumping && started) return false;
-    if (is_jumping || !started) {
-        if (state != 0) {
-            GameObject_s *jump_character = character;
-            const float x_speed = field_34.x * speed_scale;
-            const float z_speed = field_34.z * speed_scale;
-            jump_character->apiobj.movement_direction.x = x_speed;
-            jump_character->target_velocity.x = x_speed;
-            jump_character->apiobj.velocity.x = x_speed;
-            jump_character->apiobj.movement_direction.z = z_speed;
-            jump_character->target_velocity.z = z_speed;
-            jump_character->apiobj.velocity.z = z_speed;
-        }
+    if (state != 0) {
+        GameObject_s *jump_character = character;
+        const float x_speed = field_34.x * speed_scale;
+        const float z_speed = field_34.z * speed_scale;
+        jump_character->apiobj.movement_direction.x = x_speed;
+        jump_character->target_velocity.x = x_speed;
+        jump_character->apiobj.velocity.x = x_speed;
+        jump_character->apiobj.movement_direction.z = z_speed;
+        jump_character->target_velocity.z = z_speed;
+        jump_character->apiobj.velocity.z = z_speed;
         elapsed_time += delta_time;
 
         switch (state) {
@@ -226,8 +224,10 @@ MechJumpAutoPilotAddon::OnProcess(MechAddon::ProcessStage, float delta_time) {
         default:
             break;
         }
+        goto update_started;
     }
 
+    elapsed_time += delta_time;
     if (__builtin_expect(character->character_context == LEGOCONTEXT_JUMP && !started, 0)) {
         field_24.x = character->apiobj.position.x;
         field_24.y = character->apiobj.position.y;
@@ -252,6 +252,7 @@ MechJumpAutoPilotAddon::OnProcess(MechAddon::ProcessStage, float delta_time) {
         field_94 = character->apiobj.position.y + (-(vy * vy)) / (gravity + gravity);
     }
 
+update_started:
     started = character->character_context == LEGOCONTEXT_JUMP || started;
     return true;
 }
