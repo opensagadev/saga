@@ -1,5 +1,10 @@
 #include "decomp.h"
 #include "MechInputTouch_types.h"
+#include "gameapi/gui/apimenu.h"
+#include "gamelib/util/gamelib_util_types.h"
+#include "globals.h"
+#include "legoapi/items/base/apiobject.h"
+#include "legoapi/world/levels/levels.h"
 #include "nu2api/numath/nutrig.h"
 
 i32 RotDiff(u16, u16);
@@ -22,27 +27,50 @@ void MechInputTouchSpeederChaseController::Deactivate() {
 
 bool MechInputTouchSpeederChaseController::IsDownSwipe(NuVec2 const &start, NuVec2 const &end) {
     i32 diff = RotDiff(static_cast<u16>(NuAtan2D(end.x - start.x, end.y - start.y)), 0x8000);
-    return (diff < 0 ? -diff : diff) <= 0x1c71;
+    i32 sign = diff >> 31;
+    diff ^= sign;
+    diff -= sign;
+    return diff <= 0x1c71;
 }
 
 bool MechInputTouchSpeederChaseController::IsSwipeAgainstDirection(NuVec2 const &start,
                                                                    NuVec2 const &end, bool direction) {
-    return direction ? IsDownSwipe(start, end) : IsUpSwipe(start, end);
+    if (direction) {
+        if (IsDownSwipe(start, end)) {
+            return true;
+        }
+    } else if (IsUpSwipe(start, end)) {
+        return true;
+    }
+    return false;
 }
 
 bool MechInputTouchSpeederChaseController::IsSwipeWithDirection(NuVec2 const &start, NuVec2 const &end,
                                                                 bool direction) {
-    return direction ? IsUpSwipe(start, end) : IsDownSwipe(start, end);
+    if (direction) {
+        if (IsUpSwipe(start, end)) {
+            return true;
+        }
+    } else if (IsDownSwipe(start, end)) {
+        return true;
+    }
+    return false;
 }
 
 bool MechInputTouchSpeederChaseController::IsUpSwipe(NuVec2 const &start, NuVec2 const &end) {
     i32 diff = RotDiff(static_cast<u16>(NuAtan2D(end.x - start.x, end.y - start.y)), 0);
-    return (diff < 0 ? -diff : diff) <= 0x1c71;
+    i32 sign = diff >> 31;
+    diff ^= sign;
+    diff -= sign;
+    return diff <= 0x1c71;
 }
 
 MechInputTouchSpeederChaseController::MechInputTouchSpeederChaseController(i32 player)
-    : MechInputTouchMainController(player), touch_holder(NULL), swipe_y(0.0f), cooldown(0.0f), active(false),
-      swipe_direction(false) {
+    : MechInputTouchMainController(player) {
+    active = false;
+    touch_holder = NULL;
+    swipe_y = 0.0f;
+    cooldown = 0.0f;
 }
 
 bool MechInputTouchSpeederChaseController::OnClick(GameObject_s &, TouchHolder &) {
@@ -81,13 +109,51 @@ bool MechInputTouchSpeederChaseController::OnSwipe(GameObject_s &, TouchHolder &
     } else if (!IsDownSwipe(start, end)) {
         IsUpSwipe(start, end);
     }
-    swipe_y = end.x;
     cooldown = 0.4f;
+    swipe_y = end.x;
     return true;
 }
 
 void MechInputTouchSpeederChaseController::Update(NuInputTouchData const *) {
-    STUBBED();
+    if (player != NULL && NewMode == 0 && NewLData == NULL && FadeSys.fade == 0.0f && CUTSTOPGAME == 0 &&
+        Paused == 0 && GetMenuID() != 12 && GetMenuID() != 16 && TouchHacks::TouchControlsActive &&
+        MiniCutCam != 2) {
+        Activate();
+    } else {
+        Deactivate();
+    }
+
+    cooldown -= FRAMETIME;
+    stick_values[0] = 0.0f;
+    stick_values[1] = 0.0f;
+    if (cooldown > 0.0f && player != NULL) {
+        button_was_pressed[2] = 1;
+        stick_values[0] = swipe_y;
+        if (player->character_context == 0x3a) {
+            cooldown = -1.0f;
+        }
+    } else if (touch_holder != NULL && player != NULL) {
+        if (swipe_direction) {
+            stick_values[1] = -1.0f;
+            if (touch_holder->touch_position.y < -0.5f) {
+                swipe_direction = false;
+            }
+        } else {
+            stick_values[1] = 1.0f;
+            if (touch_holder->touch_position.y > 0.5f) {
+                swipe_direction = true;
+            }
+        }
+        float x = touch_holder->touch_position.x;
+        if (x < -1.0f) {
+            x = -1.0f;
+        } else if (x > 1.0f) {
+            x = 1.0f;
+        }
+        stick_values[0] = x;
+        button_was_pressed[0] = 1;
+    }
+    UpdateButtons();
 }
 
 MechInputTouchSpeederChaseController::~MechInputTouchSpeederChaseController() {

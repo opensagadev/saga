@@ -466,6 +466,9 @@ struct MechInputTouchSpeederChaseController : MechInputTouchMainController, Mech
     bool OnSwipe(GameObject_s &, TouchHolder &, i32) override;
     void Update(NuInputTouchData const *) override;
     ~MechInputTouchSpeederChaseController() override;
+    static void operator delete(void *allocation) {
+        NU_FREE(allocation);
+    }
 
     TouchHolder *touch_holder;
     f32 swipe_y;
