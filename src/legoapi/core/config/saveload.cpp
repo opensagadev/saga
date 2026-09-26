@@ -13,6 +13,7 @@
 #include "nu2api/nucore/nutime.h"
 #include "nu2api/nucore/numemory.h"
 #include "nu2api/nucore/nupad.h"
+#include "nu2api/nu3d/nuspecial.h"
 
 extern i32 MenuLoadStarted;
 extern i32 memcard_slot;
@@ -142,8 +143,21 @@ SAVELOAD_TARGET_OPT i32 FS_GetPadWithRepeat(nupad_s *pad, float repeat, float el
     return LastPad;
 }
 
-void SerialiseNuHSpecial(EdStream &, void *, i32) {
-    STUBBED();
+SAVELOAD_TARGET_OPT void SerialiseNuHSpecial(EdStream &stream, void *data, i32) {
+    nuhspecial_s *special = static_cast<nuhspecial_s *>(data);
+    if (stream.mode == 2)
+        stream.SerialiseString(NuSpecialGetName(special), 0);
+
+    if (stream.mode == 1) {
+        char name[128];
+        stream.SerialiseString(name, 128);
+        NuSpecialFind(NULL, special, name, 0);
+        theLevelEditor.GetScene(0);
+        for (i32 index = 0; index < theLevelEditor.editable_scene_count; ++index) {
+            if (NuSpecialFind(theLevelEditor.GetScene(index), special, name, 0))
+                break;
+        }
+    }
 }
 
 SAVELOAD_TARGET_OPT void SerialiseStringAddr(EdStream &stream, void *data, i32 count) {
