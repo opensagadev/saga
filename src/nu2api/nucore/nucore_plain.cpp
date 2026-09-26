@@ -339,8 +339,62 @@ extern "C" {
     NUMTX *NuCameraGetVPCSMtx(void) {
         return &vpsmtx;
     }
-    void NuCameraIntersectsAABB(void) {
-        STUBBED();
+    i32 NuCameraIntersectsAABB(NUVEC *center, NUVEC *extent, f32 far_clip, i32 use_scissor) {
+        f32 near_radius = extent->x * AbsNearPlane.x + extent->y * AbsNearPlane.y + extent->z * AbsNearPlane.z;
+        f32 depth = center->x * NearPlane.x + center->y * NearPlane.y + center->z * NearPlane.z + NearPlane.w;
+        f32 far_distance = depth - far_clip;
+        f32 near_distance = depth - global_camera.near_clip;
+
+        if (far_distance > near_radius || -near_radius > near_distance) {
+            return 0;
+        }
+
+        NUVEC4 radius;
+        f32 distance0 = center->x * FrustrumPlanes.m00 + center->y * FrustrumPlanes.m10 +
+                        center->z * FrustrumPlanes.m20 + FrustrumPlanes.m30;
+        f32 distance1 = center->x * FrustrumPlanes.m01 + center->y * FrustrumPlanes.m11 +
+                        center->z * FrustrumPlanes.m21 + FrustrumPlanes.m31;
+        f32 distance2 = center->x * FrustrumPlanes.m02 + center->y * FrustrumPlanes.m12 +
+                        center->z * FrustrumPlanes.m22 + FrustrumPlanes.m32;
+        f32 distance3 = center->x * FrustrumPlanes.m03 + center->y * FrustrumPlanes.m13 +
+                        center->z * FrustrumPlanes.m23 + FrustrumPlanes.m33;
+        NuVecMtxTransform(reinterpret_cast<NUVEC *>(&radius), extent, &AbsFrustrumPlanes);
+
+        if (distance0 > radius.x || distance1 > radius.y || distance2 > radius.z || distance3 > radius.w) {
+            return 0;
+        }
+
+        if (distance0 > -radius.x || distance1 > -radius.y || distance2 > -radius.z || distance3 > -radius.w) {
+            if (use_scissor == 0) {
+                return 2;
+            }
+
+            distance0 = center->x * ScissorPlanes.m00 + center->y * ScissorPlanes.m10 +
+                        center->z * ScissorPlanes.m20 + ScissorPlanes.m30;
+            distance1 = center->x * ScissorPlanes.m01 + center->y * ScissorPlanes.m11 +
+                        center->z * ScissorPlanes.m21 + ScissorPlanes.m31;
+            distance2 = center->x * ScissorPlanes.m02 + center->y * ScissorPlanes.m12 +
+                        center->z * ScissorPlanes.m22 + ScissorPlanes.m32;
+            distance3 = center->x * ScissorPlanes.m03 + center->y * ScissorPlanes.m13 +
+                        center->z * ScissorPlanes.m23 + ScissorPlanes.m33;
+            NuVecMtxTransform(reinterpret_cast<NUVEC *>(&radius), extent, &AbsScissorPlanes);
+
+            if (distance0 > radius.x || distance1 > radius.y || distance2 > radius.z || distance3 > radius.w) {
+                return 0;
+            }
+            if (distance0 > -radius.x || distance1 > -radius.y || distance2 > -radius.z || distance3 > -radius.w) {
+                return 2;
+            }
+            return 1;
+        }
+
+        if (use_scissor != 0) {
+            return 1;
+        }
+        if (far_distance > -near_radius || near_radius > near_distance) {
+            return 2;
+        }
+        return 1;
     }
     i32 prev_lock;
     NUCAMERA locked_camera;
