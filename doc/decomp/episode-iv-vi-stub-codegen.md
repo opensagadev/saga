@@ -116,3 +116,29 @@ Writing the cases in that order with the low-end count adjustment and a
 final `for` over `melee.creature_count` gives the exact 470-byte target
 size and 99.75207% match. Its six remaining mismatches are only the
 three wave-name string addresses, each referenced twice.
+
+## Dagobah force paths and Boba rocket movement
+
+`DagobahA_Update` first returns if any of the three force gizmos are
+missing. GCC keeps the inactive path before the much larger active path
+when the active condition uses `__builtin_expect(..., 0)`. The active
+path clears bit 31 on both traversal flags of three connections, selects
+one of six node-position tables, then updates three path nodes. The
+inactive path sets bit 31 on those connections. This layout currently
+matches 84.36684% of the 932-byte target. The remaining gap includes
+register choices for the third force and node pointers; forcing EBP with
+an inline register constraint made the output worse, so prefer source
+order and lifetime changes over a fixed-register declaration.
+
+`BobaRocket_Move` has two control-flow arms selected by the sign bit of
+`part->active`: target seeking on the nonnegative arm and ballistic
+flight plus a debris trail on the negative arm. Load `part->recipient`
+before that branch, and share the spin integer and `NUVEC delta` across
+the arms. In particular, reusing `delta` for negated trail momentum
+produces the target's 0x90-byte stack frame; a separate momentum vector
+increases the frame. The target loads a recipient's collision position
+in z/y/x order before storing x/y/z, which affects SSE instruction and
+register order. These source-order changes raised the GOT-aware linked
+match from 68.04601% to 75.38957%. The current generated size is 1498
+bytes versus 1612 target bytes, so more control-flow and register work
+remains.

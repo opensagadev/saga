@@ -6,6 +6,7 @@
 #include "legoapi/ai/core/legoai.h"
 #include "legoapi/audio/sfx.h"
 #include "legoapi/characters/core/players.h"
+#include "legoapi/characters/motion.h"
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/gizmos/object/newblowup.h"
 #include "legoapi/gizmos/fx/gizmopickups.h"
@@ -22,22 +23,30 @@
 #include "legoapi/render/light/surfaces.h"
 #include "legoapi/render/core/terrain.h"
 #include "legoapi/render/fx/parts.h"
+#include "legoapi/render/fx.h"
 #include "legoapi/world/levels/levels.h"
 #include "legoapi/world/level.h"
 #include "legoapi/world/world.h"
 #include "nu2api/nuandroid/ios_graphics.h"
 #include "nu2api/nucore/nustring.h"
+#include "nu2api/nucore/numechptr.hpp"
+#include "nu2api/nucore/nuvuvec.hpp"
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nu3d/nuspline.h"
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/numath/numtx.h"
 #include "nu2api/numath/nuvec.h"
+#include "nu2api/numath/nufloat.h"
+#include "nu2api/numath/nuang.h"
+#include "nu2api/numath/nutrig.h"
+#include "MechInputTouch/MechInputTouch_types.h"
 
 #include <string.h>
 
 extern i32 dagobah_training;
 extern i32 obstacle_gizmotype_id;
 extern u8 LevFlag[16];
+extern NuMechPtr<MechObjectInterface, 4> BobaRocketTarget;
 extern "C" i16 id_PROBEDROID, id_ATST_LOWRES, id_ATAT;
 GIZPANEL_s *LevGizPanel;
 AILOCATOR_s *locator;
@@ -183,12 +192,223 @@ void BobaRocket_Kill(PART_s *part, i32) {
     }
 }
 
-void BobaRocket_Move(PART_s *, float) {
-    STUBBED();
+void BobaRocket_Move(PART_s *part, f32 elapsed) {
+    NUVEC delta;
+    NUVEC next;
+    NUVEC scale;
+    GameObject_s *recipient = part->recipient;
+    i32 spin;
+    if (static_cast<i8>(part->active) < 0) {
+        NuVecSub(&delta, reinterpret_cast<NUVEC *>(part->pad_0bc), &part->position);
+        i32 yaw = NuAtan2D(delta.x, delta.z);
+        NuVecRotateY(&delta, &delta, -yaw);
+        i32 pitch = -NuAtan2D(delta.y, delta.z);
+        part->rotation_x = SeekRot(part->rotation_x, pitch, 8.0f);
+        part->rotation_y = SeekRot(part->rotation_y, yaw, 8.0f);
+        spin = static_cast<i32>(SeekValF(static_cast<f32>(part->field_124[3]), 0.0f, 1.0f));
+        part->field_124[3] = spin;
+    } else {
+        VuVec target;
+        bool has_target = false;
+        if (recipient != NULL) {
+            target.w = 1.0f;
+            f32 target_z = recipient->apiobj.collision_position.z;
+            f32 target_y = recipient->apiobj.collision_position.y;
+            f32 target_x = recipient->apiobj.collision_position.x;
+            target.x = target_x;
+            target.y = target_y;
+            target.z = target_z;
+            has_target = true;
+        } else if (BobaRocketTarget.Get() != NULL) {
+            BobaRocketTarget.Get()->GetPos(target, -1);
+            has_target = true;
+        }
+        if (has_target) {
+            NuVecSub(&delta, &target.xyz, &part->position);
+            f32 horizontal_squared = delta.x * delta.x + delta.z * delta.z;
+            i32 yaw = NuAtan2D(delta.x, delta.z);
+            NuVecRotateY(&delta, &delta, -yaw);
+            delta.y = target.y + 0.5f - part->position.y;
+            i32 pitch = -NuAtan2D(delta.y, delta.z);
+            part->rotation_x = SeekRot(part->rotation_x, pitch, 1.0f);
+            part->rotation_y = SeekRot(part->rotation_y, yaw, 4.0f);
+            if (horizontal_squared < 1.0f) {
+                part->active |= 0x80;
+                NuVecSub(&delta, &target.xyz, &part->position);
+                NuVecScale(&delta, &delta, 5.0f);
+                NuVecAdd(reinterpret_cast<NUVEC *>(part->pad_0bc), &part->position, &delta);
+                part->recipient = NULL;
+                BobaRocketTarget = NULL;
+                part->field_100 = NuFsqrt(horizontal_squared + delta.y * delta.y) / rocket_speed;
+            }
+        }
+        spin = 60000;
+        part->field_124[3] = spin;
+    }
+
+    part->velocity.x = 0.0f;
+    part->velocity.y = 0.0f;
+    part->velocity.z = rocket_speed;
+    part->field_13c += static_cast<i32>(static_cast<f32>(spin) * FRAMETIME);
+    NuVecRotateX(&part->velocity, &part->velocity, part->rotation_x);
+    NuVecRotateY(&part->velocity, &part->velocity, part->rotation_y);
+    next.x = part->position.x + part->velocity.x * elapsed;
+    next.y = part->position.y + part->velocity.y * elapsed + part->gravity * elapsed;
+    next.z = part->position.z + part->velocity.z * elapsed;
+    NuMtxSetRotationX(&part->transform, NuAngAdd(part->rotation_x, 0x4000));
+    NuMtxRotateY(&part->transform, part->rotation_y);
+    NuMtxPreRotateY(&part->transform, part->field_13c);
+    NuMtxTranslate(&part->transform, &next);
+    if (part->scale_time < 0.2f) {
+        f32 factor = part->scale_time / 0.2f;
+        scale.x = factor;
+        scale.y = factor;
+        scale.z = factor;
+        NuMtxPreScale(&part->transform, &scale);
+    }
+    if (static_cast<i8>(part->active) < 0) {
+        i32 count = ParticlesPerFrame(1.0f, FRAMETIME);
+        delta.x = -part->velocity.x;
+        delta.y = -part->velocity.y;
+        delta.z = -part->velocity.z;
+        AddGameDebrisMom(WORLD->debris_sys, 11, &next, count, &delta);
+    }
 }
 
-void DagobahA_Update(WORLDINFO_s *) {
-    STUBBED();
+void DagobahA_Update(WORLDINFO_s *world) {
+    GIZFORCE_s **forces = LevGizForce;
+    GIZFORCE_s *first = forces[0];
+    if (first == NULL)
+        return;
+    GIZFORCE_s *second = forces[1];
+    if (second == NULL)
+        return;
+    GIZFORCE_s *third = forces[2];
+    if (third == NULL)
+        return;
+
+    GIZFORCEGROUP_s *group = first->group;
+    if (__builtin_expect(group != NULL && (group->field_0x24 & 2) != 0, 0)) {
+        if (dagobahA_nodesNeedUpdating != 0)
+            return;
+        dagobahA_nodesNeedUpdating = 1;
+        AIPATHCNX_s *connection = static_cast<AIPATHCNX_s *>(LevPathCnx[0]);
+        if (connection != NULL) {
+            connection->traversal_flags[0] &= ~0x80000000;
+            connection->traversal_flags[1] &= ~0x80000000;
+        }
+        connection = static_cast<AIPATHCNX_s *>(LevPathCnx[1]);
+        if (connection != NULL) {
+            connection->traversal_flags[0] &= ~0x80000000;
+            connection->traversal_flags[1] &= ~0x80000000;
+        }
+        connection = static_cast<AIPATHCNX_s *>(LevPathCnx[2]);
+        if (connection != NULL) {
+            connection->traversal_flags[0] &= ~0x80000000;
+            connection->traversal_flags[1] &= ~0x80000000;
+        }
+
+        AIPATHNODE_s *node0 = static_cast<AIPATHNODE_s *>(LevAIPathNode[0]);
+        if (node0 == NULL)
+            return;
+        AIPATHNODE_s *node1 = static_cast<AIPATHNODE_s *>(LevAIPathNode[1]);
+        if (node1 == NULL)
+            return;
+        AIPATHNODE_s *node2 = static_cast<AIPATHNODE_s *>(LevAIPathNode[2]);
+        if (node2 == NULL)
+            return;
+
+        GIZFORCE_s *selected = group->forces[0];
+        if (selected == first) {
+            if (group->forces[1] == second) {
+                node0->position.x = -16.25f;
+                node0->position.y = 0.30f;
+                node0->position.z = 15.17f;
+                node1->position.x = -16.21f;
+                node1->position.y = 0.98f;
+                node1->position.z = 14.83f;
+                node2->position.x = -16.19f;
+                node2->position.y = 1.31f;
+                node2->position.z = 14.64f;
+            } else {
+                node0->position.x = -16.93f;
+                node0->position.y = 0.42f;
+                node0->position.z = 14.75f;
+                node1->position.x = -16.52f;
+                node1->position.y = 0.64f;
+                node1->position.z = 14.50f;
+                node2->position.x = -16.32f;
+                node2->position.y = 1.30f;
+                node2->position.z = 14.70f;
+            }
+        } else if (selected == second) {
+            node0->position.x = -16.31f;
+            node0->position.y = 0.31f;
+            node0->position.z = 15.13f;
+            if (group->forces[1] == first) {
+                node1->position.x = -16.31f;
+                node1->position.y = 0.67f;
+                node1->position.z = 14.82f;
+                node2->position.x = -16.17f;
+                node2->position.y = 1.31f;
+                node2->position.z = 14.65f;
+            } else {
+                node1->position.x = -16.31f;
+                node1->position.y = 0.67f;
+                node1->position.z = 14.82f;
+                node2->position.x = -16.36f;
+                node2->position.y = 1.33f;
+                node2->position.z = 14.54f;
+            }
+        } else if (selected == third) {
+            if (group->forces[1] == first) {
+                node0->position.x = -16.73f;
+                node0->position.y = 0.51f;
+                node0->position.z = 14.51f;
+                node1->position.x = -16.49f;
+                node1->position.y = 0.95f;
+                node1->position.z = 14.45f;
+                node2->position.x = -16.31f;
+                node2->position.y = 1.29f;
+                node2->position.z = 14.66f;
+            } else {
+                node0->position.x = -16.20f;
+                node0->position.y = 0.31f;
+                node0->position.z = 15.13f;
+                node1->position.x = -16.30f;
+                node1->position.y = 0.99f;
+                node1->position.z = 14.80f;
+                node2->position.x = -16.38f;
+                node2->position.y = 1.31f;
+                node2->position.z = 14.59f;
+            }
+        }
+        if (world->ai_sys->path_sys != NULL && world->ai_sys->path_sys->active_path != NULL) {
+            AIPathNodeUpdatePos(world->ai_sys, world->ai_sys->path_sys->active_path, node0);
+            AIPathNodeUpdatePos(world->ai_sys, world->ai_sys->path_sys->active_path, node1);
+            AIPathNodeUpdatePos(world->ai_sys, world->ai_sys->path_sys->active_path, node2);
+        }
+        return;
+    }
+
+    if (dagobahA_nodesNeedUpdating == 0)
+        return;
+    dagobahA_nodesNeedUpdating = 0;
+    AIPATHCNX_s *connection = static_cast<AIPATHCNX_s *>(LevPathCnx[0]);
+    if (connection != NULL) {
+        connection->traversal_flags[0] |= 0x80000000;
+        connection->traversal_flags[1] |= 0x80000000;
+    }
+    connection = static_cast<AIPATHCNX_s *>(LevPathCnx[1]);
+    if (connection != NULL) {
+        connection->traversal_flags[0] |= 0x80000000;
+        connection->traversal_flags[1] |= 0x80000000;
+    }
+    connection = static_cast<AIPATHCNX_s *>(LevPathCnx[2]);
+    if (connection != NULL) {
+        connection->traversal_flags[0] |= 0x80000000;
+        connection->traversal_flags[1] |= 0x80000000;
+    }
 }
 
 void HothBattleA_Draw(WORLDINFO_s *world) {
