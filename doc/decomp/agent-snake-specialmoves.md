@@ -1,9 +1,19 @@
 # Character action parser and snake codegen notes
 
 These observations use the pinned Android NDK r8e GCC 4.7 at `-O3` and the
-GOT-aware `objdiff-cli` fork. Scores below compare the original shared object
-against a directly compiled object because the cold Bazel build ran out of
-temporary file space during an unrelated compile. Linked scores can differ.
+GOT-aware `objdiff-cli` fork. Development scores below compare the original
+shared object against a directly compiled object. A subsequent Bazel link gave
+these scores:
+
+| Function | Target bytes | Rebuilt bytes | Linked match |
+| --- | ---: | ---: | ---: |
+| `SpecialMove_ConfigParticipant` | 274 | 274 | 99.97% |
+| `SpecialMoves_Configure` | 794 | 749 | 85.51% |
+| `DrawSnakeBody` | 448 | 445 | 79.76% |
+| `UpdateSnakeBody` | 1117 | 1176 | 47.29% |
+
+The participant helper's only linked differences are two literal string
+addresses; its instruction shape matches the target.
 
 ## Parser block order
 
