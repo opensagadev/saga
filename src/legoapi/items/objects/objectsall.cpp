@@ -185,8 +185,11 @@ i32 FindNextBreak(unsigned char *text, i32 index) {
     u8 ch = text[index];
     if (ch == ' ') {
         u8 next = text[index + 1];
-        if (next != '?' && next != '!' && next != ';' && next != ':')
-            return index;
+        if (next == '?') goto begin_scan;
+        if (next == '!') goto begin_scan;
+        if (next == ';') goto begin_scan;
+        if (next == ':') goto begin_scan;
+        return index;
     } else if (ch == '.') {
         if (text[index + 1] != '.')
             return index;
@@ -194,6 +197,7 @@ i32 FindNextBreak(unsigned char *text, i32 index) {
         return index;
     }
 
+begin_scan:
     i32 count = 20;
     do {
         ++index;
@@ -204,14 +208,18 @@ i32 FindNextBreak(unsigned char *text, i32 index) {
         ch = text[index];
         if (ch == ' ') {
             u8 next = text[index + 1];
-            if (next != '?' && next != '!' && next != ';' && next != ':')
-                return index;
+            if (next == '?') goto continue_scan;
+            if (next == '!') goto continue_scan;
+            if (next == ';') goto continue_scan;
+            if (next == ':') goto continue_scan;
+            return index;
         } else if (ch == '.') {
             if (text[index + 1] != '.')
                 return index;
         } else if (static_cast<u8>(ch - ',') <= 1) {
             return index;
         }
+continue_scan: ;
     } while (--count != 0);
 
     if (text[index] == '~') {
