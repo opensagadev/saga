@@ -64,7 +64,7 @@ static i32 AI_GetOutput(GIZMO *gizmo, i32, i32) {
 }
 
 char *AI_GetOutputName(GIZMO *, i32) {
-    static char name[] = "Processing";
+    static char name[64] = "Processing";
     return name;
 }
 

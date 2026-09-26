@@ -44,13 +44,20 @@ f32 NuFloor(f32 f) {
     return (f32)(i32)f;
 }
 
-static f32 NuTrunc(f32 a) {
-    return (f32)(i32)a;
-}
+// The original helpers are local but have C linkage.
+#ifdef __cplusplus
+extern "C" {
+#endif
+    static f32 NuTrunc(f32 a) {
+        return (f32)(i32)a;
+    }
 
-static f32 NuFsel(f32 a, f32 b, f32 c) {
-    return a >= 0.0f ? b : c;
+    static f32 NuFsel(f32 a, f32 b, f32 c) {
+        return a >= 0.0f ? b : c;
+    }
+#ifdef __cplusplus
 }
+#endif
 
 f32 NUTRIG_SC0 = -0.1666666716337204f;
 f32 NUTRIG_SC1 = 0.008333333767950535f;
@@ -84,9 +91,7 @@ f32 NuPowFast(f32 base, f32 exponent) {
 }
 /* Both exception controls are empty in the original Android binary. */
 void NuFpExceptionMask(void) {
-    STUBBED();
 }
 
 void NuFpException(void) {
-    STUBBED();
 }

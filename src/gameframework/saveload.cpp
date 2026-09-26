@@ -252,8 +252,8 @@ void saveloadASCallEachFrame(void) {
     }
 }
 
-void saveloadGetDirectory() {
-    STUBBED();
+i32 saveloadGetDirectory() {
+    return 0;
 }
 
 extern "C" {
@@ -306,8 +306,8 @@ extern "C" {
         return 1;
     }
 
-    void saveloadLoadIcon(void) {
-        STUBBED();
+    i32 saveloadLoadIcon(void) {
+        return 0;
     }
 
     i32 saveloadUnFormatCard(void) {

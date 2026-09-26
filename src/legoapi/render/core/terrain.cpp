@@ -2288,7 +2288,7 @@ static i32 TerrainKillPlayer(GameObject_s *object, i32 surface, NUVEC *normal) {
         return 0;
     }
     InstantKillParts(object, 1, 0.0f);
-    if ((object->apiobj.field_0x1f8 & 0x80) != 0 && BonusWinner == -1) {
+    if (object->apiobj.player_controlled && BonusWinner == -1) {
         const i32 coins = LoseCoins(object, 1);
         AddPickups(coins, 0, 0, 0, &object->apiobj.collision_position, NULL, 2.0f, -1, 1.0f, 2000000.0f, object, 1, 0,
                    false);
@@ -2373,7 +2373,7 @@ void TerrainPlayer(GameObject_s *object) {
         const f32 lower_bound = object->character_bottom * api.field_0xa8;
         // Original 0x102856..0x10316f consumes the previous edge-stop request
         // and probes the next horizontal position before integrating movement.
-        const bool player_edge_probe = (api.field_0x1f8 & 0x80) != 0 && object->spawn_protection_timer > 1.25f;
+        const bool player_edge_probe = api.player_controlled && object->spawn_protection_timer > 1.25f;
         const bool requested_edge_stop = static_cast<i8>(object->edge_stop_requests) > 0;
         object->field_0xf04 &= static_cast<u8>(~0x40u);
         object->edge_stop_requests = 0;
@@ -2414,7 +2414,7 @@ void TerrainPlayer(GameObject_s *object) {
             (api.velocity.x * api.velocity.x + api.velocity.y * api.velocity.y) + api.velocity.z * api.velocity.z;
         const bool skip_motion =
             (object->field_0xefc & 0x20) == 0 && (object->field_0xf02 & 0x40) != 0 && !special_path_endpoints &&
-            object->ai.field_0x180 == NULL && (api.field_0x1f8 & 0x80) == 0 && (object->field_0xe23 & 0x10) == 0 &&
+            object->ai.field_0x180 == NULL && !api.player_controlled && (object->field_0xe23 & 0x10) == 0 &&
             object->field_0xe31 == 0 && object->character_context != 0 && object->character_context != 0x1c &&
             api.field_0x281 != 8 && (static_cast<u32>(GameTimer.update_count) > 1 || (api.field_0x1f4 & 5) != 0) &&
             (api.field_0x27d & 3) != 0 && api.supporting_platform_id == -1 &&
@@ -2601,7 +2601,7 @@ void TerrainPlayer(GameObject_s *object) {
                 }
                 CHARPLATFORMSYS_s *platforms = WORLD->char_platform_sys;
                 if (platforms != NULL && VehicleArea == 0) {
-                    const bool player = (api.field_0x1f8 & 0x80) != 0;
+                    const bool player = api.player_controlled;
                     if (!player || object->character_context == 0x3d || object->field_0xcc0 != NULL ||
                         object->character_context == 0x3b ||
                         (api.character_data->game_character->flags_090 & 0x8040) != 0) {
@@ -2770,7 +2770,7 @@ void TerrainPlayer(GameObject_s *object) {
 
         // Original 0x102a01..0x102a9a handles a moving character platform
         // above the player before dispatching the normal movement callback.
-        if (VehicleArea == 0 && (api.field_0x1f8 & 0x80) != 0 && api.supporting_platform_id != -1) {
+        if (VehicleArea == 0 && api.player_controlled && api.supporting_platform_id != -1) {
             GameObject_s *platform_owner =
                 CharPlatform_FindObjFromPlatID(WORLD->char_platform_sys, api.supporting_platform_id);
             if (platform_owner != NULL) {
@@ -2808,7 +2808,7 @@ void TerrainPlayer(GameObject_s *object) {
                 }
             }
             if (check_terrain_hazards && CannotKill(object) == 0 && api.field_0x287 == 0 &&
-                (VehicleArea == 0 || (api.field_0x1f8 & 0x80) != 0) && (object->field_0xefe & 4) != 0 &&
+                (VehicleArea == 0 || api.player_controlled) && (object->field_0xefe & 4) != 0 &&
                 (object->field_0xefa & 4) == 0 && object->character_context != 0x5d) {
                 if (object->field_0x1084 != 0) {
                     const i32 count = impact_count == -1 ? 1 : impact_count;
@@ -2824,7 +2824,7 @@ void TerrainPlayer(GameObject_s *object) {
                             NewRumble(object->pad_gamepad->pad, (static_cast<f32>(qrand()) * (1.0f / 65535.0f)) * 0.5f,
                                       0);
                             if (api.model_draw_result == 0 && object->character_context != 0x23) {
-                                if ((api.field_0x1f8 & 0x80) != 0) {
+                                if (api.player_controlled) {
                                     LoseCoins(object, 2);
                                 }
                                 KillPlayer(object, 2, 1, NULL);
@@ -2868,14 +2868,14 @@ void TerrainPlayer(GameObject_s *object) {
                       (api.character_data->game_character->flags_090 & 0x04000000) == 0)) &&
                     NoLayerKill(object) == 0 && object->character_context != 0x5d) {
                     const u32 layer_flags = TerLayer[static_cast<i8>(api.field_0x27f)].flags;
-                    const bool exempt_context = (api.field_0x1f8 & 0x80) == 0 && (object->character_context == 0x46 ||
-                                                                                  object->character_context == 0x47);
+                    const bool exempt_context = !api.player_controlled && (object->character_context == 0x46 ||
+                                                                           object->character_context == 0x47);
                     const bool rescue_below =
                         ((layer_flags & 1) != 0 || tractor_swamp) && api.water_height > api.position.y &&
                         !(VehicleArea != 0 && BonusArea != 0 && api.character_data->game_character->field_0x28 > 0.0f);
                     const bool rescue_above = (layer_flags & 0x20) != 0 && api.collision_max.y > api.water_height;
                     if ((rescue_below || rescue_above) && !exempt_context) {
-                        if (object->doomed_escape_locator != NULL && (api.field_0x1f8 & 0x80) == 0) {
+                        if (object->doomed_escape_locator != NULL && !api.player_controlled) {
                             if ((object->field_0xefd & 8) != 0 || TouchHacks::AiPlayerTakeDamageOnKillRescue(*object)) {
                                 ObjHitObj(NULL, object, 1, 0, 0, 1);
                             }
@@ -2908,8 +2908,8 @@ void TerrainPlayer(GameObject_s *object) {
                             object->turn_braking = 0.0f;
                             PlayDieSfx(object);
                             object->current_hp = 0;
-                            if ((api.field_0x1f8 & 0x80) != 0 && object->coinpacket != NULL &&
-                                object->coinpacket->coins != 0 && BonusWinner == -1) {
+                            if (api.player_controlled && object->coinpacket != NULL && object->coinpacket->coins != 0 &&
+                                BonusWinner == -1) {
                                 const i32 coins = LoseCoins(object, 2);
                                 if (coins > 0) {
                                     f32 height = api.water_height;
@@ -3572,16 +3572,16 @@ void NewTerrStoreAnyInfo() {
     }
 
     if (surface->material[0] != 0) {
-        TerrainHitInfo[0] = surface->material[0];
+        TerrPolyInfo.material[0] = surface->material[0];
     }
     if (surface->material[1] != 0) {
-        TerrainHitInfo[1] = surface->material[1];
+        TerrPolyInfo.material[1] = surface->material[1];
     }
     if (surface->flags != 0) {
-        TerrainHitInfo[2] = surface->flags;
+        TerrPolyInfo.flags = surface->flags;
     }
     if (surface->normal_flags != 0) {
-        TerrainHitInfo[3] = surface->normal_flags;
+        TerrPolyInfo.normal_flags = surface->normal_flags;
     }
 }
 
@@ -5417,13 +5417,20 @@ extern "C" i32 NewTerrainOnAPlatform(void *id) {
     return 0;
 }
 
+extern "C" void NewTerrHitInfo(u8 *info) {
+    info[0] = TerrPolyInfo.material[0];
+    info[1] = TerrPolyInfo.material[1];
+    info[2] = TerrPolyInfo.flags;
+    info[3] = TerrPolyInfo.normal_flags;
+}
+
 extern "C" void NewTerrainScaleYMask(NUVEC *position, NUVEC *movement, u8 *hit_flags, i32 object_index, f32 radius,
                                      f32 collision_radius, f32 object_scale, i32 embedded_retry, i32 scan_flags,
                                      i32 terrain_mask) {
-    TerrainHitInfo[0] = 0;
-    TerrainHitInfo[1] = 0;
-    TerrainHitInfo[2] = 0;
-    TerrainHitInfo[3] = 0;
+    TerrPolyInfo.material[0] = 0;
+    TerrPolyInfo.material[1] = 0;
+    TerrPolyInfo.flags = 0;
+    TerrPolyInfo.normal_flags = 0;
     TerrImpact = 0;
     plathitid = -1;
     TerrPolyObj = -1;

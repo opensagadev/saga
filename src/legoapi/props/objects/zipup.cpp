@@ -517,7 +517,9 @@ void ZipUp_MoveCode(GameObject_s *object, i32 special_pressed) {
                     object->context_animation_timer = 0.0f;
                     object->context_animation = LEGOACT_WHIP_SWING_SWING;
                     f32 duration = AnimDuration(object->id, object->context_animation, 0.0f, 0.0f, 0);
-                    object->airborne_action_duration = duration <= 0.0f ? 1.0f : duration;
+                    object->airborne_action_duration = duration;
+                    if (duration <= 0.0f)
+                        object->airborne_action_duration = 1.0f;
                     GameAudio_PlaySfx(0x4d, &api.collision_position, GameAudio_GetPlrSfxBits(object), 0);
                 }
             } else if (object->field_0x7a3 == 1) {
@@ -530,7 +532,9 @@ void ZipUp_MoveCode(GameObject_s *object, i32 special_pressed) {
                     object->context_animation_timer = 0.0f;
                     object->context_animation = LEGOACT_WHIP_SWING_JUMP;
                     f32 duration = AnimDuration(object->id, object->context_animation, 0.0f, 0.0f, 0);
-                    object->airborne_action_duration = duration <= 0.0f ? 1.0f : duration;
+                    object->airborne_action_duration = duration;
+                    if (duration <= 0.0f)
+                        object->airborne_action_duration = 1.0f;
                     PlayJumpSfx(object, 0);
                 }
             } else if (object->field_0x7a3 == 2) {
@@ -671,7 +675,9 @@ void ZipUp_MoveCode(GameObject_s *object, i32 special_pressed) {
         object->context_animation_timer = 0.0f;
         object->context_animation = LEGOACT_WHIP_SWING_START;
         f32 duration = AnimDuration(object->id, object->context_animation, 0.0f, 0.0f, 0);
-        object->airborne_action_duration = duration <= 0.0f ? 0.5f : duration;
+        object->airborne_action_duration = duration;
+        if (duration <= 0.0f)
+            object->airborne_action_duration = 0.5f;
         object->zipup_entry_position = api.position;
         ZIPUP *current = static_cast<ZIPUP *>(object->field_0x788);
         object->zipup_start_position = endpoint == 0 ? current->lower_position : current->upper_position;

@@ -189,8 +189,8 @@ extern "C" void NuDisplayListDraw(void) {
     STUBBED();
 }
 
-extern "C" void DisplayListDebugPS(void) {
-    STUBBED();
+extern "C" i32 DisplayListDebugPS(void) {
+    return 0;
 }
 
 extern "C" void NuDisplayListAddClut(nudisplaylistitem_s *item, i32) {
@@ -295,11 +295,10 @@ extern "C" void *DisplayListCreateFaceonTransformPS(VARIPTR *buffer, NUMTX *tran
     buffer->addr = ALIGN(buffer->addr, 4);
     void *packet = buffer->void_ptr;
     *static_cast<NUMTX *>(buffer->void_ptr) = *transform;
-    const f32 magnitude =
-        NuFsqrt((NuVecMagSqr(reinterpret_cast<NUVEC *>(buffer->void_ptr)) +
-                 NuVecMagSqr(reinterpret_cast<NUVEC *>(buffer->char_ptr + 0x10)) +
-                 NuVecMagSqr(reinterpret_cast<NUVEC *>(buffer->char_ptr + 0x20))) /
-                3.0f);
+    const f32 magnitude = NuFsqrt((NuVecMagSqr(reinterpret_cast<NUVEC *>(buffer->void_ptr)) +
+                                   NuVecMagSqr(reinterpret_cast<NUVEC *>(buffer->char_ptr + 0x10)) +
+                                   NuVecMagSqr(reinterpret_cast<NUVEC *>(buffer->char_ptr + 0x20))) /
+                                  3.0f);
     buffer->addr += sizeof(NUMTX);
     *buffer->f32_ptr++ = magnitude;
 
@@ -318,8 +317,8 @@ extern "C" void *DisplayListCreateFaceonTransformPS(VARIPTR *buffer, NUMTX *tran
     return packet;
 }
 
-void DisplayListCreateGeomItemPS(variptr_u *, void *, numtl_s *) {
-    STUBBED();
+i32 DisplayListCreateGeomItemPS(variptr_u *, void *, numtl_s *) {
+    return 0;
 }
 
 // Original 0x29b338.  Build the compact skin-palette packet consumed by
@@ -377,16 +376,16 @@ extern "C" void *DisplayListCreateSkinTransformPS(VARIPTR *buffer, NUMTX *skin_m
     return packet;
 }
 
-extern "C" void DisplayListCreateRigidSkinTransformPS(void) {
-    STUBBED();
+extern "C" i32 DisplayListCreateRigidSkinTransformPS(void) {
+    return 0;
 }
 
-extern "C" void DisplayListCreateRigidSkin2TransformPS(void) {
-    STUBBED();
+extern "C" i32 DisplayListCreateRigidSkin2TransformPS(void) {
+    return 0;
 }
 
-void DisplayListCreateInstSurfGeomPS(variptr_u *, numtx_s *) {
-    STUBBED();
+i32 DisplayListCreateInstSurfGeomPS(variptr_u *, numtx_s *) {
+    return 0;
 }
 
 extern "C" void DisplayListPrintItemPS(void) {
@@ -412,8 +411,10 @@ void DisplayListGenerateTransforms(nudisplayscene_s *) {
 }
 
 extern "C" void *NuDisplayListPrepareFaceonPS(VARIPTR *, void *faceon, NUMTX *) {
+    // The original stores the argument to an unused local, then returns the argument itself.
     void *prepared = faceon;
-    return prepared;
+    (void)prepared;
+    return faceon;
 }
 
 // NuDisplaySceneAddPS @ 0x2ab7aa.  The apparently redundant assignment is

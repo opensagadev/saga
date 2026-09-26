@@ -56,7 +56,7 @@ TIMER LevelTimer;
 
 void (*WorldInfo_InitMenuFn)(WORLDINFO *, i32 *, i32 *) = NULL;
 void (*WorldInfo_InitLastFn)(WORLDINFO *) = NULL;
-i32 abort_load = 0;
+volatile i32 abort_load = 0;
 char ConfigBuffer[0x10000];
 i32 numtl_force_mipmode = 0;
 i32 GAMEDEMO = 0;
@@ -334,7 +334,7 @@ f32 g_BgLoadDelayHackTimer;
 
 static i32 EditBufferEndSize = 0;
 
-i32 waiting_for_level;
+volatile i32 waiting_for_level;
 i32 level_already_loaded = -1;
 i32 next_level;
 

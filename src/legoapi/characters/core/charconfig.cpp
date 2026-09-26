@@ -1079,7 +1079,7 @@ static void CC_anim_start(NUFPAR *parser) {
                     } else if (NuStrICmp(parser->word_buf, "frame2") == 0)
                         effect->frame_2 = NuFParGetFloat(parser);
                     else if (NuStrICmp(parser->word_buf, "random") == 0)
-                        effect->random = static_cast<u8>(static_cast<i32>(NuFParGetFloat(parser) * 255.0f));
+                        effect->random = static_cast<u8>(NuFParGetFloat(parser) * 255.0f);
                     else if (NuStrICmp(parser->word_buf, "rumble") == 0)
                         effect->rumble = fabsf(NuFParGetFloat(parser));
                     else if (NuStrICmp(parser->word_buf, "buzz") == 0)

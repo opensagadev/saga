@@ -190,7 +190,7 @@ void PlaceableNameControl::Render() {
 
 void PlaceableNameControl::cbButton(eduimenu_s *parent, eduiitem_s *item, u32) {
     edObjectNameControl = static_cast<EdStringControl *>(item->data_ptr);
-    eduimenu_s *menu = eduiMenuCreate(parent->x + item->x, item->y, 180, 250,
+    eduimenu_s *menu = eduiMenuCreate(item->x + parent->width, item->y, 180, 250,
                                       reinterpret_cast<void *>(static_cast<usize>(EdLevelFnt)), cbEdLevelDestroy, NULL);
     if (menu == NULL)
         return;

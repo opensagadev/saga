@@ -274,7 +274,7 @@ i32 Game_GotAllGoldBricks() {
     if (Game_CompletionSave == NULL) {
         return 0;
     }
-    return (reinterpret_cast<STATUSCOLLECT_s *>(Game_CompletionSave)->flags & SAVE_REWARD_ALL_GOLD_BRICKS) >> 1;
+    return (reinterpret_cast<STATUSCOLLECT_s *>(Game_CompletionSave)->flags & SAVE_REWARD_ALL_GOLD_BRICKS) != 0;
 }
 
 i32 Game_AutoSaving() {

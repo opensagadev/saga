@@ -41,7 +41,7 @@ AILOCATOR_s *getSpawnLocator(float clip_radius, char *name) {
 
 void NewLevelFromMenu(LEVELDATA_s *level, i32 menu_id, i32 menu_y, i32) {
     if (no_more_loads == 0) {
-        i32 *abort = &abort_load;
+        volatile i32 *abort = &abort_load;
         no_more_loads = 1;
         *abort = 1;
     }

@@ -71,7 +71,6 @@ static i32 PlatCodeCallback;
 static TERRAIN_PLATFORM_CALLBACK PlatCallback[8];
 void ScanTerrIDRemovePlat(i32 platform_index);
 
-u8 TerrainHitInfo[4];
 TERRAIN_SPHERE SphereData[16];
 
 void TerrainSkinAllocate(terrsitu_s *terrain_group) {
@@ -704,6 +703,9 @@ void DebrisTimeSlip(i32 group) {
             effect->native_data->last_render_time -= 800.0f;
     }
 }
+
+static const char *errstr[] = {"ERR_UNKNOWN", "ERR_NOTERR",      "ERR_MAXTERLIST", "ERR_MAXTERR",
+                               "ERR_INOUT",   "ERR_PLATSKINMAX", "ERR_NOINSTANCE"};
 
 extern "C" {
 
@@ -1527,13 +1529,6 @@ extern "C" {
         return NewShadowEx(position, 0, height_above, height_below, terrain_mask);
     }
 
-    void NewTerrHitInfo(u8 *info) {
-        info[0] = TerrainHitInfo[0];
-        info[1] = TerrainHitInfo[1];
-        info[2] = TerrainHitInfo[2];
-        info[3] = TerrainHitInfo[3];
-    }
-
     void NewTerrainScaleY(NUVEC *position, NUVEC *movement, u8 *hit_flags, i32 object_index, f32 radius,
                           f32 collision_radius, f32 object_scale, i32 embedded_retry, i32 scan_flags);
 
@@ -1573,7 +1568,7 @@ extern "C" {
 
     i32 PlatInstGetHit(i32 index) {
         if (CurTerr != NULL && index >= 0 && index < CurTerr->max_platforms)
-            return (CurTerr->platforms[index].flags >> 1) & 1;
+            return (CurTerr->platforms[index].flags & 2) != 0;
         return 0;
     }
 
@@ -1815,12 +1810,10 @@ extern "C" {
     }
 
     const char *TerrErrorString(i32 error) {
-        static const char *const errors[] = {"ERR_UNKNOWN", "ERR_NOTERR",      "ERR_MAXTERLIST", "ERR_MAXTERR",
-                                             "ERR_INOUT",   "ERR_PLATSKINMAX", "ERR_NOINSTANCE"};
         i32 index = -error;
         if (index >= 7)
             index = 0;
-        return errors[index];
+        return errstr[index];
     }
 
     extern "C++" TERRAIN_TRACK_SLOT *AllocTerrId() {

@@ -434,9 +434,9 @@ void SpeederChaseA_Reset(WORLDINFO_s *) {
     troopercannons_beenReset = 0;
     InitBikeParts();
     LevAIMessage[0] = CheckGizAIMessage(gizaimessagesys, "SpeedersToKill", NULL);
-    LevAIMessage[1] = CheckGizAIMessage(gizaimessagesys, "BeenKilled", NULL);
+    LevAIMessage[1] = CheckGizAIMessage(gizaimessagesys, "SpeedersKilled", NULL);
     LevAIMessage[2] = CheckGizAIMessage(gizaimessagesys, "Stage", NULL);
-    LevAIMessage[3] = CheckGizAIMessage(gizaimessagesys, "SpeedersKilled", NULL);
+    LevAIMessage[3] = CheckGizAIMessage(gizaimessagesys, "Phase", NULL);
     LevAIMessage[4] = CheckGizAIMessage(gizaimessagesys, "KeepPlayersOnSpeeders", NULL);
     LevAIMessage[5] = CheckGizAIMessage(gizaimessagesys, "SpeederMode", NULL);
     players_going_forward = 1;
@@ -549,11 +549,11 @@ f32 GetVehicleAreaRememberSpeed() {
 
     f32 speed = 0.0f;
     f32 player_count = 0.0f;
-    if (Player[0] != NULL && (Player[0]->apiobj.field_0x1f8 & 0x80) != 0) {
+    if (Player[0] != NULL && Player[0]->apiobj.player_controlled) {
         speed += Player[0]->field_0xdc8;
         player_count = 1.0f;
     }
-    if (Player[1] != NULL && (Player[1]->apiobj.field_0x1f8 & 0x80) != 0) {
+    if (Player[1] != NULL && Player[1]->apiobj.player_controlled) {
         speed += Player[1]->field_0xdc8;
         player_count = 2.0f;
     }

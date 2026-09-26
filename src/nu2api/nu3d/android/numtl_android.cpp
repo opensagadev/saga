@@ -191,30 +191,30 @@ static constexpr char kGlassDebrisMarker = (char)-0x69; // 0x97
 // original 0x29c110 — mirrors GL cull state, flipping front/back when the
 // reflection pass is active.
 void NuIOS_SetCullMode(i32 mode) {
-    static i32 s_prevCullMode = 0;                         // @0x628c50
-    static i32 s_prevReflection = 0;                       // @0x628c60
-    static const u32 kGlCullFace[2] = {GL_BACK, GL_FRONT}; // @0x57bcec
+    static i32 prevCullMode = 0;                           // @0x628c50
+    static i32 prevReflectionMode = 0;                     // @0x628c60
+    static const u32 glCullModes[2] = {GL_BACK, GL_FRONT}; // @0x57bcec
 
-    if (mode == s_prevCullMode && s_prevReflection == g_renderingReflection) {
+    if (mode == prevCullMode && prevReflectionMode == g_renderingReflection) {
         return;
     }
-    s_prevReflection = g_renderingReflection;
+    prevReflectionMode = g_renderingReflection;
 
     // Mode 2 = double-sided: disable culling entirely.
     if (mode == 2) {
         glDisable(GL_CULL_FACE);
-        s_prevCullMode = 2;
+        prevCullMode = 2;
         return;
     }
 
-    if (s_prevCullMode == 2) {
+    if (prevCullMode == 2) {
         glEnable(GL_CULL_FACE);
     }
 
     // Reflection XORs the winding, so the back/front choice is toggled.
     u32 idx = (u32)(mode + g_renderingReflection) & 1;
-    glCullFace(kGlCullFace[idx]);
-    s_prevCullMode = (i32)idx;
+    glCullFace(glCullModes[idx]);
+    prevCullMode = (i32)idx;
 }
 
 #include "nu2api/nu3d/android/nublend_internal.h"

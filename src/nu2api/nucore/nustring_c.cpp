@@ -1757,8 +1757,8 @@ void NuStringTableSaveCharacterList(char *filepath, char *scratch, i32 report_mi
 
 static u16 bad_equiv[][2] = {{'a', '@'}, {'a', '4'}, {'e', '3'}, {'i', '1'},
                              {'l', '1'}, {'o', '0'}, {'t', '7'}, {0, 0}};
-static u16 bad_fluff[] = {'!', 0xffa3, '$', '%', '^', '&', '*', '(', ')', '_', '+', '-', '=', '{',
-                          '}', '[',    ']', '@', '~', '#', '?', '<', '>', ',', '.', ' ', 0};
+static u16 bad_fluff[] = {'!', 0xffa3, '$', '%', '^', '&', '*', '(', ')', '_', '+', '-', '=',
+                          '{', '}',    '[', ']', '@', '~', '#', '?', '<', '>', ',', '.', ' '};
 static NUWCHAR **BadWords;
 static i32 NumBadWords;
 

@@ -673,23 +673,23 @@ void NuIOSDLLightsCallback(void *arg) {
 
     NUVEC4 average_colour;
     average_colour.x =
-        lights->light_intensity[0].r >
-                (lights->light_intensity[1].r > lights->light_intensity[2].r ? lights->light_intensity[1].r
-                                                                            : lights->light_intensity[2].r)
+        lights->light_intensity[0].r > (lights->light_intensity[1].r > lights->light_intensity[2].r
+                                            ? lights->light_intensity[1].r
+                                            : lights->light_intensity[2].r)
             ? lights->light_intensity[0].r
             : (lights->light_intensity[1].r > lights->light_intensity[2].r ? lights->light_intensity[1].r
                                                                            : lights->light_intensity[2].r);
     average_colour.y =
-        lights->light_intensity[0].g >
-                (lights->light_intensity[1].g > lights->light_intensity[2].g ? lights->light_intensity[1].g
-                                                                            : lights->light_intensity[2].g)
+        lights->light_intensity[0].g > (lights->light_intensity[1].g > lights->light_intensity[2].g
+                                            ? lights->light_intensity[1].g
+                                            : lights->light_intensity[2].g)
             ? lights->light_intensity[0].g
             : (lights->light_intensity[1].g > lights->light_intensity[2].g ? lights->light_intensity[1].g
                                                                            : lights->light_intensity[2].g);
     average_colour.z =
-        lights->light_intensity[0].b >
-                (lights->light_intensity[1].b > lights->light_intensity[2].b ? lights->light_intensity[1].b
-                                                                            : lights->light_intensity[2].b)
+        lights->light_intensity[0].b > (lights->light_intensity[1].b > lights->light_intensity[2].b
+                                            ? lights->light_intensity[1].b
+                                            : lights->light_intensity[2].b)
             ? lights->light_intensity[0].b
             : (lights->light_intensity[1].b > lights->light_intensity[2].b ? lights->light_intensity[1].b
                                                                            : lights->light_intensity[2].b);

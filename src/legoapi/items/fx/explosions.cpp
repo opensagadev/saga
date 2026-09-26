@@ -57,7 +57,7 @@ extern f32 FRAMETIME;
 void UpdateExplosion_Generic(EXPLOSION *);
 
 void UpdateExplosions() {
-#define UPDATE_EXPLOSION(index)                                                                                       \
+#define UPDATE_EXPLOSION(index)                                                                                        \
     do {                                                                                                               \
         EXPLOSION *explosion = &Explosion[index];                                                                      \
         if (explosion->field_0x1c < explosion->field_0x20) {                                                           \

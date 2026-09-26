@@ -69,7 +69,7 @@ void InitAlphaList() {
 }
 
 f32 GetAspectRatio() {
-    return static_cast<f32>(g_backingWidth) / static_cast<f32>(g_backingHeight);
+    return static_cast<f32>(g_backingHeight) / static_cast<f32>(g_backingWidth);
 }
 
 static u8 ScreenGrabNeeded;
@@ -90,7 +90,7 @@ extern nuhspecial_s *hackFlashingSpecial;
 
 extern FadeSystem FadeSys;
 extern i32 Paused;
-extern i32 waiting_for_level;
+extern volatile i32 waiting_for_level;
 extern i32 GAMEDEMO;
 extern "C" {
     extern f32 MainRenderTime;

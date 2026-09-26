@@ -41,7 +41,7 @@ static char *GizAIMessage_GetOutputName(GIZMO *gizmo, i32 output_index) {
     }
 
     GIZAIMESSAGE_s *message = (GIZAIMESSAGE_s *)gizmo->object;
-    sprintf(returnstr, "%i", (i32)message->output_values[output_index]);
+    sprintf(returnstr, "%d", (i32)message->output_values[output_index]);
     return returnstr;
 }
 

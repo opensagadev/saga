@@ -198,7 +198,9 @@ void NewGame() {
 
     Cheats_TurnOff(0);
     Hint_ClearHintsAndDoneFlags();
-    LSW_HintConditions &= ~7u;
+    LSW_HintConditions.force_used = 0;
+    LSW_HintConditions.tc14_present = 0;
+    LSW_HintConditions.panel_used = 0;
     GamePad_InitButtons();
     Tag_DoneFirst = 0;
     Tag_DoneAny = 0;

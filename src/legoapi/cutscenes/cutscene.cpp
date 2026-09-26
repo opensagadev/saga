@@ -147,7 +147,8 @@ static void CS_skip_use_goto(NUFPAR *) {
 }
 
 static void CS_in_game(NUFPAR *) {
-    CS_CutInfo->flags = (CS_CutInfo->flags & ~3U) | 0x800;
+    CS_CutInfo->flags &= ~3U;
+    CS_CutInfo->flags |= 0x800;
 }
 
 static void CS_snap_out(NUFPAR *) {

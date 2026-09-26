@@ -355,7 +355,7 @@ NuSoundLoader *NuSoundSystem::CreateFileLoader(FileType type) {
             // nusound.cpp:1233) and placement-news it in place.
             wav_loader =
                 (NuSoundLoaderWAV *)_AllocMemory(NuSoundSystem::MemoryDiscipline::SCRATCH, 0x1c, 4,
-                                                 "i:/SagaTouch-Android_9176564/nu2api.2013/nusound/nusound.cpp:1233");
+                                                 "i:/SagaTouch-Android_9176564/nu2api.2013/nusound/nusound.cpp:1219");
             if (wav_loader != NULL) {
                 new (wav_loader) NuSoundLoaderWAV();
                 return wav_loader;

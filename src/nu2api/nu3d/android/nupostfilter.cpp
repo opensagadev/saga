@@ -105,7 +105,7 @@ static inline void FilterEnd(NuPostFilterGen *filter) {
 // ── Post-effect API ─────────────────────────────────────────────────────────
 
 // original 0x2ab9c0
-extern "C" bool NuPostEffectIsInitialised(u32 mask) {
+extern "C" i32 NuPostEffectIsInitialised(u32 mask) {
     return (g_effectFlags & static_cast<i32>(mask)) != 0;
 }
 
@@ -277,13 +277,15 @@ extern "C" nueffecttex_s *NuPostEffectGetDepthBuffer(i32 frame) {
     static nueffecttex_s *depthBufferCopy;
     if (depthFrameId != frame) {
         depthFrameId = frame;
+        nueffecttex_s *texture;
         if (proxyDepthBuffer.texture == NULL) {
             NuFramebufferResolve(4, false);
-            depthBufferCopy = NuFramebufferGetAttachedTex(NuFramebufferGetBound(), 4, NULL, NULL);
+            texture = NuFramebufferGetAttachedTex(NuFramebufferGetBound(), 4, NULL, NULL);
         } else {
             NuPostResolve(&proxyDepthBuffer);
-            depthBufferCopy = proxyDepthBuffer.texture;
+            texture = proxyDepthBuffer.texture;
         }
+        depthBufferCopy = texture;
     }
     return depthBufferCopy;
 }
@@ -358,7 +360,7 @@ extern "C" void NuPostEffectSpeedBlur(const NuSpeedBlurParameters *parameters) {
         speedBlurFilter->parameters = parameters;
 }
 
-extern "C" void NuPostEffectEnable(u32 mask) {
+extern "C" void NuPostEffectEnable(i32 mask) {
     if ((g_effectFlags & mask) == 0)
         return;
     switch (mask) {

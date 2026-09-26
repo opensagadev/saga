@@ -22,7 +22,7 @@ NuSoundSource::NuSoundSource(const char *name, SourceType source_type, FeedType 
         u16 length = strlen(name) + 1;
         u16 size = (length + 3) & 0xfffc;
         char *mem = (char *)NU_ALLOC(
-            size, 4, 5, "i:/SagaTouch-Android_9176564/nu2api.saga/../nu2api.2013/numemory/NuMemory.h :328", 0);
+            size, 4, 5, "i:/SagaTouch-Android_9176564/nu2api.saga/../nu2api.2013/numemory/NuMemory.h:328", 0);
 
         this->name = mem;
         this->name_length = size;

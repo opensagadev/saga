@@ -308,11 +308,11 @@ static void edptlcbApplyScaleFactor(eduimenu_s *menu, eduiitem_s *, u32) {
         const i32 effect_index = debkeydata[edpp_ptls[edpp_nearest].instance_id].effect_index;
         DebrisReScale(effect_index, edpp_scale_factor);
     }
-    eduimenu_s *child = menu->child;
-    if (child != NULL)
+    eduimenu_s *parent = menu->parent;
+    if (parent != NULL)
         eduiMenuDetach(menu);
     if (menu->callback != NULL)
-        menu->callback(menu, child);
+        menu->callback(menu, parent);
 }
 
 static void edptlcbCancelBounceMenu(eduimenu_s *, eduimenu_s *) {

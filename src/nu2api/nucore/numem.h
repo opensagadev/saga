@@ -29,7 +29,7 @@ typedef struct numemblk_s {
 } NUMEMBLK;
 
 #ifdef __cplusplus
-void numeminit();
+i32 numeminit();
 void NuMemBlkCheckFreeList(NUMEMBLK *pool);
 NUMEMEXTERNAL *NuMemGetExternal(void);
 void NuMemFree(void *ptr);

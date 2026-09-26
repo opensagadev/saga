@@ -339,7 +339,7 @@ bool NuVoiceAndroid::UpdateState() {
 
     u32 state = 2; // SL_OBJECT_STATE_SUSPENDED default
     u32 error = SL_SLOT(this->player_object, ObjectGetStateFn, 8)(this->player_object, &state);
-    if (NuSoundAndroid::ReportErrorCode(error, "Get the object state") != 0) {
+    if (NuSoundAndroid::ReportErrorCode(error, "Get state") != 0) {
         return false;
     }
 
@@ -349,7 +349,7 @@ bool NuVoiceAndroid::UpdateState() {
         }
         // 0x32c260: object vtable slot 0x4 (SLObjectItf::Resume).
         error = SL_SLOT(this->player_object, ObjectResumeFn, 4)(this->player_object, 0);
-        return NuSoundAndroid::ReportErrorCode(error, "resume the player object") == 0;
+        return NuSoundAndroid::ReportErrorCode(error, "resume on suspended") == 0;
     }
 
     // Realized: a looping voice re-realizes and restarts per the voice state;

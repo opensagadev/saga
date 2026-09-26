@@ -7,14 +7,14 @@
 struct nuframebuffer_s;
 struct nueffecttex_s;
 
-extern "C" bool NuPostEffectIsInitialised(u32 mask);
+extern "C" i32 NuPostEffectIsInitialised(u32 mask);
 extern "C" void NuPostEffectReset(void);
 extern "C" void NuPostEffectEnd(void);
 extern "C" void NuPostEffectAddDynamicLight(void *light);
 extern "C" void NuPostEffectInit(u32 flags, void *buffer, void *buffer_end);
 extern "C" void NuPostEffectDestroy();
 extern "C" void NuPostEffectRender(nuframebuffer_s *output);
-extern "C" void NuPostEffectEnable(u32 mask);
+extern "C" void NuPostEffectEnable(i32 mask);
 extern "C" void NuPostEffectDisable(u32 mask);
 extern "C" bool NuPostEffectIsEnabled(u32 mask);
 extern "C" void NuPostEffectBloom(const NuBloomParameters *);

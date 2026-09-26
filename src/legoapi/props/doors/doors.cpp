@@ -101,7 +101,7 @@ static void D_spline(NUFPAR *parser) {
 
 static void D_level(NUFPAR *parser) {
     if (NuFParGetWord(parser) != 0) {
-        i32 index = -1;
+        i32 index;
         Level_FindByName(parser->word_buf, &index);
         if (index != -1) {
             D_door->level = static_cast<i16>(index);
@@ -111,9 +111,9 @@ static void D_level(NUFPAR *parser) {
 
 static void D_level_freeplay(NUFPAR *parser) {
     if (NuFParGetWord(parser) != 0) {
-        i32 index = -1;
-        LEVELDATA_s *level = Level_FindByName(parser->word_buf, &index);
-        if (index != -1 && (level->flags & (LEVEL_INTRO | LEVEL_MIDTRO | LEVEL_OUTRO)) == 0) {
+        i32 index;
+        Level_FindByName(parser->word_buf, &index);
+        if (index != -1 && (LDataList[index].flags & (LEVEL_INTRO | LEVEL_MIDTRO | LEVEL_OUTRO)) == 0) {
             D_door->freeplay_level = static_cast<i16>(index);
         }
     }

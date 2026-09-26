@@ -71,7 +71,7 @@ extern "C" void creatureEditor_RenderAllCreatures();
 extern "C" void antinodeEditorDrawAntinodes();
 extern "C" void locatorEditorDrawLocators();
 
-static eduiiattr_s area_attr = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
+static eduiiattr_s attr = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
 
 static __used__ void areaEditor_cbDeleteArea(eduimenu_s *menu, eduiitem_s *, unsigned int) {
     if (menu != NULL && menu->field_0c != NULL && area_selected() != NULL && area_selected() == area_hovered()) {
@@ -127,8 +127,7 @@ static __used__ void areaEditor_cbRenameAreaMenu(eduimenu_s *parent, eduiitem_s 
     if (menu == NULL) {
         return;
     }
-    eduiMenuAddItem(menu,
-                    eduiItemTextPickCreate(0, &area_attr, areaEditor_cbRenameArea, const_cast<char *>("Area Name")));
+    eduiMenuAddItem(menu, eduiItemTextPickCreate(0, &attr, areaEditor_cbRenameArea, const_cast<char *>("Area Name")));
     strcpy(static_cast<edui_textpicker_s *>(edui_last_item)->value, area_selected()->name);
     static_cast<edui_textpicker_s *>(edui_last_item)->max_length = 15;
     eduiMenuAttach(parent, menu);
@@ -274,26 +273,24 @@ static eduimenu_s *areaEditorOptionsMenu() {
     if (menu == NULL) {
         return NULL;
     }
-    eduiMenuAddItem(menu, eduiItemSelCreate(AIEDITOR_ROUTES, &area_attr, 0, 0, aieditor_cvSelectEditorMode,
+    eduiMenuAddItem(menu, eduiItemSelCreate(AIEDITOR_ROUTES, &attr, 0, 0, aieditor_cvSelectEditorMode,
                                             const_cast<char *>("Select Editor Mode")));
-    eduiMenuAddItem(menu, eduiItemSelCreate(1, &area_attr, 0, 0, aieditor_cbSave, const_cast<char *>("Save AI Data")));
-    eduiMenuAddItem(menu,
-                    eduiItemSelCreate(1, &area_attr, 0, 0, aieditor_cbGoToPlayer, const_cast<char *>("Go To Player")));
-    eduiMenuAddItem(menu,
-                    eduiItemSelCreate(1, &area_attr, 0, 0, aieditor_cbMovePlayer, const_cast<char *>("Move Player")));
+    eduiMenuAddItem(menu, eduiItemSelCreate(1, &attr, 0, 0, aieditor_cbSave, const_cast<char *>("Save AI Data")));
+    eduiMenuAddItem(menu, eduiItemSelCreate(1, &attr, 0, 0, aieditor_cbGoToPlayer, const_cast<char *>("Go To Player")));
+    eduiMenuAddItem(menu, eduiItemSelCreate(1, &attr, 0, 0, aieditor_cbMovePlayer, const_cast<char *>("Move Player")));
     if (area_selected() != NULL && AIScriptNameFromIx(aieditor->ai_system, 0) != NULL) {
-        eduiMenuAddItem(menu, eduiItemSelCreate(1, &area_attr, 0, 0, areaEditor_cbRenameAreaMenu,
-                                                const_cast<char *>("Rename Area")));
+        eduiMenuAddItem(
+            menu, eduiItemSelCreate(1, &attr, 0, 0, areaEditor_cbRenameAreaMenu, const_cast<char *>("Rename Area")));
     }
-    eduiMenuAddItem(menu, eduiItemToggleCreate(1, &area_attr, -i32(aieditorsettings.stop_platforms), 3,
+    eduiMenuAddItem(menu, eduiItemToggleCreate(1, &attr, -i32(aieditorsettings.stop_platforms), 3,
                                                aieditor_cbStopPlatformsToggle, const_cast<char *>("Stop Platforms")));
-    eduiMenuAddItem(menu, eduiItemToggleCreate(1, &area_attr, -i32(aieditorsettings.snap_height_display), 2,
+    eduiMenuAddItem(menu, eduiItemToggleCreate(1, &attr, -i32(aieditorsettings.snap_height_display), 2,
                                                aieditor_cbSnapHeightToggle, const_cast<char *>("Snap Height")));
     if (area_selected() != NULL) {
-        eduiMenuAddItem(menu, eduiItemSelCreate(1, &area_attr, 0, 0, NULL, const_cast<char *>("=================")));
-        eduiMenuAddItem(menu, eduiItemToggleCreate(1, &area_attr, area_selected()->flags & 1, 4,
+        eduiMenuAddItem(menu, eduiItemSelCreate(1, &attr, 0, 0, NULL, const_cast<char *>("=================")));
+        eduiMenuAddItem(menu, eduiItemToggleCreate(1, &attr, area_selected()->flags & 1, 4,
                                                    areaEditor_cbAreaCylinderToggle, const_cast<char *>("Cylinder")));
-        eduiMenuAddItem(menu, eduiItemSelCreate(1, &area_attr, 0, 0, NULL, const_cast<char *>("=================")));
+        eduiMenuAddItem(menu, eduiItemSelCreate(1, &attr, 0, 0, NULL, const_cast<char *>("=================")));
     }
     return menu;
 }
@@ -302,10 +299,8 @@ static eduimenu_s *areaEditorDeleteMenu() {
     eduimenu_s *menu =
         eduiMenuCreate(200, 70, 240, 270, ed_fnt, aieditor_cbCancelMainMenu, const_cast<char *>("Delete area??"));
     if (menu != NULL) {
-        eduiMenuAddItem(menu,
-                        eduiItemSelCreate(0, &area_attr, 0, 0, areaEditor_cbDeleteArea, const_cast<char *>("No")));
-        eduiMenuAddItem(menu,
-                        eduiItemSelCreate(1, &area_attr, 0, 0, areaEditor_cbDeleteArea, const_cast<char *>("Yes")));
+        eduiMenuAddItem(menu, eduiItemSelCreate(0, &attr, 0, 0, areaEditor_cbDeleteArea, const_cast<char *>("No")));
+        eduiMenuAddItem(menu, eduiItemSelCreate(1, &attr, 0, 0, areaEditor_cbDeleteArea, const_cast<char *>("Yes")));
     }
     return menu;
 }

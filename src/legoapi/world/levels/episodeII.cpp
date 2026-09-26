@@ -181,10 +181,9 @@ struct KAMINO_E_s {
 DECOMP_ASSERT(sizeof(KAMINO_E_s) == 120, "Kamino E state ABI");
 static KAMINO_E_s kamino_e;
 
-static void *pursuit_state[0x20]; // bounty-hunter pursuit state
-static i16 gunship_bolts[2];      // gun-ship bolt type ids
-static u8 gunship_flags[0xa];     // gun-ship weapon-select flags
-static void *gunship_weapons[4];  // gun-ship gizmo weapons
+static i16 gunship_bolts[2];     // gun-ship bolt type ids
+static u8 gunship_flags[0xa];    // gun-ship weapon-select flags
+static void *gunship_weapons[4]; // gun-ship gizmo weapons
 
 struct ZAMARROW_s {
     GameObject_s *object;
@@ -240,15 +239,15 @@ void CompleteLevel(WORLDINFO_s *);
 
 void BountyHunterPursuitA_Init(WORLDINFO_s *world) {
     GIZMOBLOWUP_s *b;
-    if ((b = GizmoBlowUp_FindByName(world, "Jango")) != NULL)
+    if ((b = GizmoBlowUp_FindByName(world, "Spire1")) != NULL)
         b->field_0x9f |= 0x20;
-    if ((b = GizmoBlowUp_FindByName(world, "b1")) != NULL)
+    if ((b = GizmoBlowUp_FindByName(world, "Spire2")) != NULL)
         b->field_0x9f |= 0x20;
-    if ((b = GizmoBlowUp_FindByName(world, "b2")) != NULL)
+    if ((b = GizmoBlowUp_FindByName(world, "Spire3")) != NULL)
         b->field_0x9f |= 0x20;
-    if ((b = GizmoBlowUp_FindByName(world, "b3")) != NULL)
+    if ((b = GizmoBlowUp_FindByName(world, "Spire4")) != NULL)
         b->field_0x9f |= 0x20;
-    if ((b = GizmoBlowUp_FindByName(world, "b4")) != NULL)
+    if ((b = GizmoBlowUp_FindByName(world, "Spire5")) != NULL)
         b->field_0x9f |= 0x20;
 }
 
@@ -265,30 +264,32 @@ void BountyHunterPursuitD_Init(WORLDINFO_s *) {
 }
 
 void BountyHunterPursuitA_Reset(WORLDINFO_s *world) {
-    pursuit_state[0] = 0;
-    pursuit_state[1] = 0;
-    pursuit_state[0] = GetNamedGameObject(world->ai_sys, "pursuit_a");
+    zamarrow = {};
+    zamarrow.object = GetNamedGameObject(world->ai_sys, "ai_zam");
     GIZMOBLOWUP_s *b;
-    if ((b = GizmoBlowUp_FindByName(world, "za1")) != NULL)
+    if ((b = GizmoBlowUp_FindByName(world, "Spire1")) != NULL)
         b->field_0x9f |= 0x20;
-    if ((b = GizmoBlowUp_FindByName(world, "za2")) != NULL)
+    if ((b = GizmoBlowUp_FindByName(world, "Spire2")) != NULL)
         b->field_0x9f |= 0x20;
-    if ((b = GizmoBlowUp_FindByName(world, "za3")) != NULL)
+    if ((b = GizmoBlowUp_FindByName(world, "Spire3")) != NULL)
         b->field_0x9f |= 0x20;
-    if ((b = GizmoBlowUp_FindByName(world, "za4")) != NULL)
+    if ((b = GizmoBlowUp_FindByName(world, "Spire4")) != NULL)
         b->field_0x9f |= 0x20;
-    if ((b = GizmoBlowUp_FindByName(world, "za5")) != NULL)
+    if ((b = GizmoBlowUp_FindByName(world, "Spire5")) != NULL)
         b->field_0x9f |= 0x20;
 }
 
 void BountyHunterPursuitB_Reset(WORLDINFO_s *world) {
-    LevGizmo[0] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "pursuitb_1");
-    LevGizmo[1] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "pursuitb_2");
-    LevGizmo[2] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "pursuitb_3");
-    LevGizmo[3] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "pursuitb_4");
-    LevGizmo[4] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "pursuitb_5");
-    LevGizmo[5] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "pursuitb_6");
-    pursuit_state[0] = GetNamedGameObject(world->ai_sys, "pursuitb_exit");
+    LevGizmo[0] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "generator1");
+    LevGizmo[1] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "generator2");
+    LevGizmo[2] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "generator3");
+    LevGizmo[3] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "generator4");
+    LevGizmo[4] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "generator5");
+    LevGizmo[5] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "generator6");
+    LevGameObject[0] = GetNamedGameObject(world->ai_sys, "ai_zam");
+    zamarrow = {};
+    zamarrow.object = GetNamedGameObject(world->ai_sys, "ai_zam");
+    LevAIMessage[0] = CheckGizAIMessage(gizaimessagesys, "CompletedB", NULL);
 }
 
 static void UpdateZamArrow(WORLDINFO_s *world) {
@@ -340,19 +341,19 @@ void BountyHunterPursuitC_Reset(WORLDINFO_s *world) {
 }
 
 void BountyHunterPursuitD_Reset(WORLDINFO_s *world) {
-    pursuit_state[0] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "pursuitd_1");
-    pursuit_state[1] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "pursuitd_2");
-    pursuit_state[2] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "pursuitd_3");
-    pursuit_state[3] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "pursuitd_4");
-    pursuit_state[4] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "pursuitd_5");
-    pursuit_state[5] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "pursuitd_6");
-    pursuit_state[6] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "pursuitd_7");
-    pursuit_state[7] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "pursuitd_8");
-    pursuit_state[8] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "pursuitd_9");
-    pursuit_state[9] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "pursuitd_10");
-    pursuit_state[10] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "pursuitd_11");
-    pursuit_state[11] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "pursuitd_12");
-    pursuit_state[12] = GetNamedGameObject(world->ai_sys, "pursuitd_last");
+    LevGizmo[0] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "generator1");
+    LevGizmo[1] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "generator2");
+    LevGizmo[2] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "generator3");
+    LevGizmo[3] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "generator4");
+    LevGizmo[4] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "generator5");
+    LevGizmo[5] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "generator6");
+    LevGizmo[6] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "generator7");
+    LevGizmo[7] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "generator8");
+    LevGizmo[8] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "generator9");
+    LevGizmo[9] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "generator10");
+    LevGizmo[10] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "generator11");
+    LevGizmo[11] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "generator12");
+    LevGameObject[0] = GetNamedGameObject(world->ai_sys, "ai_zam");
 }
 
 void BountyHunterPursuitA_Update(WORLDINFO_s *world) {
@@ -1140,15 +1141,15 @@ i32 KaminoE_CheckPlatHit(BOLT_s *bolt) {
 
 void KaminoF_Init(WORLDINFO_s *world) {
     GIZMOBLOWUP_s *b;
-    if ((b = GizmoBlowUp_FindByName(world, "f1")) != NULL) {
+    if ((b = GizmoBlowUp_FindByName(world, "target_a11")) != NULL) {
         b->field_0x128 = 0.3f;
         b->field_0x124 = 1;
     }
-    if ((b = GizmoBlowUp_FindByName(world, "f2")) != NULL) {
+    if ((b = GizmoBlowUp_FindByName(world, "target_a21")) != NULL) {
         b->field_0x128 = 0.3f;
         b->field_0x124 = 1;
     }
-    if ((b = GizmoBlowUp_FindByName(world, "f3")) != NULL) {
+    if ((b = GizmoBlowUp_FindByName(world, "target_a31")) != NULL) {
         b->field_0x128 = 0.3f;
         b->field_0x124 = 1;
     }
@@ -1166,11 +1167,11 @@ void KaminoOutro_Init(WORLDINFO_s *) {
 
 void NbKaminoA_Init(WORLDINFO_s *world) {
     GIZMOBLOWUP_s *b;
-    if ((b = GizmoBlowUp_FindByName(world, "nb1")) != NULL) {
+    if ((b = GizmoBlowUp_FindByName(world, "target_a11")) != NULL) {
         b->field_0x128 = 1.0f;
         b->field_0x124 = 1;
     }
-    if ((b = GizmoBlowUp_FindByName(world, "nb2")) != NULL) {
+    if ((b = GizmoBlowUp_FindByName(world, "target_a21")) != NULL) {
         b->field_0x128 = 1.0f;
         b->field_0x124 = 1;
     }
@@ -1271,16 +1272,16 @@ void FactoryB_Draw(WORLDINFO_s *) {
 void FactoryG_Init(WORLDINFO_s *world) {
     if (netclient != 0)
         return;
-    GIZMO *g = GizmoFindByName(world->gizmo_sys, force_gizmotype_id, "force_g1");
+    GIZMO *g = GizmoFindByName(world->gizmo_sys, force_gizmotype_id, "force5");
     if (g != NULL)
         force_array[0] = (GIZFORCE_s *)g->object;
-    g = GizmoFindByName(world->gizmo_sys, force_gizmotype_id, "force_g2");
+    g = GizmoFindByName(world->gizmo_sys, force_gizmotype_id, "force6");
     if (g != NULL)
         force_array[1] = (GIZFORCE_s *)g->object;
-    g = GizmoFindByName(world->gizmo_sys, force_gizmotype_id, "force_g3");
+    g = GizmoFindByName(world->gizmo_sys, force_gizmotype_id, "force7");
     if (g != NULL)
         force_array[2] = (GIZFORCE_s *)g->object;
-    g = GizmoFindByName(world->gizmo_sys, force_gizmotype_id, "force_g4");
+    g = GizmoFindByName(world->gizmo_sys, force_gizmotype_id, "force8");
     if (g != NULL)
         force_array[3] = (GIZFORCE_s *)g->object;
 }
@@ -1303,7 +1304,7 @@ void FactoryG_Update(WORLDINFO_s *world) {
     }
     if (complete == 4) {
         if (FreePlay == 0)
-            NewCutScene(NULL, world->cutscene_sys, "factory_escape", 1);
+            NewCutScene(NULL, world->cutscene_sys, "ep2_factory_outro", 1);
     } else {
         ObiWan->apiobj.position = {79.2f, 0.75f, -10.5f};
     }
@@ -2165,8 +2166,8 @@ void JediB_DrawPanel(WORLDINFO_s *) {
 // ===========================================================================
 
 void GunshipA_Init(WORLDINFO_s *world) {
-    gunship_bolts[1] = (i16)BoltType_FindIDByName("gunbolt2", world);
-    gunship_bolts[0] = (i16)BoltType_FindIDByName("gunbolt1", world);
+    gunship_bolts[1] = (i16)BoltType_FindIDByName("trooper_green", world);
+    gunship_bolts[0] = (i16)BoltType_FindIDByName("trooper_red", world);
     gunship_flags[0] = 0;
     gunship_flags[1] = 0;
     gunship_flags[2] = 0;
@@ -2178,10 +2179,10 @@ void GunshipA_Init(WORLDINFO_s *world) {
     gunship_flags[8] = 1;
     gunship_flags[9] = 1;
     InitMiniSnowTroopers(world, 0xa, 0x20, 0);
-    gunship_weapons[0] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "gunw1");
-    gunship_weapons[1] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "gunw2");
-    gunship_weapons[2] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "gunw3");
-    gunship_weapons[3] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "gunw4");
+    gunship_weapons[0] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "power_a11");
+    gunship_weapons[1] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "power_b11");
+    gunship_weapons[2] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "power_a21");
+    gunship_weapons[3] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "power_b21");
 }
 
 void GunshipA_Update(WORLDINFO_s *world) {
@@ -2190,24 +2191,24 @@ void GunshipA_Update(WORLDINFO_s *world) {
 
 void GunshipA_Draw(WORLDINFO_s *world) {
     if (TimingBarSet == 5) {
-        TBOPENFN("gun_timing", 5);
+        TBOPENFN("mini", 5);
         DrawMiniSnowTroopers(world);
     } else {
         DrawMiniSnowTroopers(world);
         if (TimingBarSet == 5)
-            TBCLOSEFN("gun_timing", 5);
+            TBCLOSEFN("mini", 5);
     }
 }
 
 void GunshipB_Reset(WORLDINFO_s *world) {
-    LevGizmo[0] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "gun1");
-    LevGizmo[1] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "gun2");
-    LevGizmo[2] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "gun3");
-    LevGizmo[3] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "gun4");
-    LevGizmo[4] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "gun5");
-    LevGizmo[5] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "gun6");
-    LevGizmo[6] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "gun7");
-    LevGizmo[7] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "gun8");
+    LevGizmo[0] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "gun_a11");
+    LevGizmo[1] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "gun_a21");
+    LevGizmo[2] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "gun_b11");
+    LevGizmo[3] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "gun_b21");
+    LevGizmo[4] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "gun_c11");
+    LevGizmo[5] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "gun_c21");
+    LevGizmo[6] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "gun_d11");
+    LevGizmo[7] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "gun_d21");
 }
 
 i32 GunshipInLevel(LEVELDATA_s *level) {
@@ -2275,7 +2276,7 @@ void BonusGunshipA_Update(WORLDINFO_s *world) {
             if (netclient != 0) {
                 LevFlag.progress = GUNSHIP_ACTIVE;
             } else {
-                Doors_SetLastDoor((DOOR_s *)Door_FindByName(world, "bonus_door"));
+                Doors_SetLastDoor((DOOR_s *)Door_FindByName(world, "gunshipa_mid"));
                 bonus_gunship_store_progress_flag = 1;
                 StoreLevelProgress(world);
                 bonus_gunship_store_progress_flag = 0;
@@ -2287,14 +2288,14 @@ void BonusGunshipA_Update(WORLDINFO_s *world) {
         if ((Player[0] != NULL && Player[0]->apiobj.field_0x287 != 0) ||
             (Player[1] != NULL && Player[1]->apiobj.field_0x287 != 0)) {
             gunship_player_dead = 1;
-            ResetLevel(world, "bonus", 1);
+            ResetLevel(world, "ep2_bonus_gunshipcavalry_explode", 1);
         }
     }
 }
 
 void BonusGunshipB_Init(WORLDINFO_s *world) {
     bonusgunshipb_netpacket = (struct BONUSGUNSHIP_NETPACKET_s *)SetLevelHack(0xc);
-    LevGizObst[0] = GizObstacle_FindByName(world->giz_obstacle_sys, "obs");
+    LevGizObst[0] = GizObstacle_FindByName(world->giz_obstacle_sys, "obstacle9");
 }
 
 void BonusGunshipB_Reset(WORLDINFO_s *) {
@@ -2357,7 +2358,7 @@ void BonusGunshipB_Update(WORLDINFO_s *world) {
 
 void BonusGunshipB_Panel(WORLDINFO_s *) {
     if (LevFlag.progress == GUNSHIP_ACTIVE) {
-        if (MiscTime > 60.0f)
+        if (MiscTime > 0.0f)
             DrawTimer((i32)MiscTime + 1, 0, 0);
     }
 }
@@ -2367,26 +2368,26 @@ void BonusGunshipB_Panel(WORLDINFO_s *) {
 // ===========================================================================
 
 void DookuC_Init(WORLDINFO_s *world) {
-    LevGizForce[0] = GizForce_FindByName(world->giz_force_sys, "dooku");
-    LevGizForce[1] = GizForce_FindByName(world->giz_force_sys, "dooku1");
-    LevGizForce[2] = GizForce_FindByName(world->giz_force_sys, "dooku2");
-    char *path1_name = "path1";
+    LevGizForce[0] = GizForce_FindByName(world->giz_force_sys, "fptower_1");
+    LevGizForce[1] = GizForce_FindByName(world->giz_force_sys, "fptower_2");
+    LevGizForce[2] = GizForce_FindByName(world->giz_force_sys, "fptower_3");
+    char *path1_name = "fptower_a";
     void *path1 = AIPathFindNode(world->ai_sys, NULL, path1_name);
     LevAIPathNode[0] = path1;
-    char *path2_name = "path2";
+    char *path2_name = "fptower_b";
     void *path2 = AIPathFindNode(world->ai_sys, NULL, path2_name);
     LevAIPathNode[1] = path2;
-    char *path3_name = "path3";
+    char *path3_name = "fptower_c";
     void *path3 = AIPathFindNode(world->ai_sys, NULL, path3_name);
     LevAIPathNode[2] = path3;
-    char *path4_name = "path4";
+    char *path4_name = "fptower_d";
     void *path4 = AIPathFindNode(world->ai_sys, NULL, path4_name);
     LevAIPathNode[3] = path4;
     i32 direction;
     LevPathCnx[0] = AIPAthFindPathCnx(world->ai_sys, NULL, path1_name, path2_name, &direction);
     LevPathCnx[1] = AIPAthFindPathCnx(world->ai_sys, NULL, path2_name, path3_name, &direction);
     LevPathCnx[2] = AIPAthFindPathCnx(world->ai_sys, NULL, path3_name, path4_name, &direction);
-    LevPathCnx[3] = AIPAthFindPathCnx(world->ai_sys, NULL, path4_name, "conn", &direction);
+    LevPathCnx[3] = AIPAthFindPathCnx(world->ai_sys, NULL, path4_name, "fptower_e", &direction);
     dookuC_nodesNeedUpdating = 1;
 }
 

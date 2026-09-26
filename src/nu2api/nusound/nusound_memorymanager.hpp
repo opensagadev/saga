@@ -57,7 +57,14 @@ class NuSoundMemoryManager {
     u32 size2;
     u32 free_bytes;
     pthread_mutex_t mutex;
-    u8 flags;
+    union {
+        u8 flags;
+        struct {
+            u8 debug_enabled : 1;
+            u8 defrag_on_alloc : 1;
+            u8 defrag_on_free : 1;
+        };
+    };
     u32 free_count;
 
   public:

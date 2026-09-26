@@ -88,12 +88,12 @@ static void Attractos_Draw(void *context, void *, float) {
     f32 pulse = 0.2f * NU_SIN_LUT(phase) + 0.8f;
     ATTRACTO *attracto = static_cast<ATTRACTO *>(world->attractos);
     for (i32 i = 0; i < world->attracto_count; ++i, ++attracto) {
-        attracto->state_flags &= ~8;
-        if ((attracto->state_flags & 2) == 0)
+        attracto->drawn = 0;
+        if (!attracto->visible)
             continue;
         NUMTX matrix = attracto->transform;
         i32 drawn = NuSpecialDrawAt(&world->lev_objs[72].special, &matrix);
-        attracto->state_flags = (attracto->state_flags & ~8) | ((drawn & 1) << 3);
+        attracto->drawn = drawn;
         if ((attracto->state_flags & 5) != 1 || world->lev_objs[85].active == 0)
             continue;
         NuMtxSetRotationY(&matrix, spin);
@@ -116,7 +116,7 @@ static char *Attracto_GetGizmoName(GIZMO *gizmo) {
 }
 
 static i32 Attracto_GetOutput(GIZMO *gizmo, i32, i32) {
-    return (static_cast<ATTRACTO *>(gizmo->object)->state_flags >> 2) & 1;
+    return static_cast<ATTRACTO *>(gizmo->object)->filled;
 }
 
 static char *Attracto_GetOutputName(GIZMO *, i32) {
@@ -130,7 +130,7 @@ static i32 Attracto_GetNumOutputs(GIZMO *gizmo) {
 static void Attracto_Activate(GIZMO *gizmo, i32 active) {
     if (gizmo != NULL) {
         ATTRACTO *attracto = static_cast<ATTRACTO *>(gizmo->object);
-        attracto->state_flags = (attracto->state_flags & ~1) | (active != 0);
+        attracto->active = active != 0;
     }
 }
 
@@ -138,8 +138,8 @@ static void Attracto_SetVisibility(GIZMO *gizmo, i32 visible) {
     if (gizmo == NULL || gizmo->object == NULL)
         return;
     ATTRACTO *attracto = static_cast<ATTRACTO *>(gizmo->object);
-    attracto->state_flags = (attracto->state_flags & ~2) | (visible != 0 ? 2 : 0);
-    if ((attracto->state_flags & 2) != 0 && attracto->platform_id == -1) {
+    attracto->visible = visible != 0;
+    if (attracto->visible && attracto->platform_id == -1) {
         FindPlatInst(NuSpecialGetInstanceix(&WORLD->lev_objs[72].special));
         NUMTX matrix;
         NuMtxSetIdentity(&matrix);
@@ -148,7 +148,7 @@ static void Attracto_SetVisibility(GIZMO *gizmo, i32 visible) {
         NuMtxTranslate(&matrix, &attracto->position);
         attracto->transform = matrix;
         attracto->platform_id = NewPlatPickupInst(&attracto->transform, 4);
-    } else if ((attracto->state_flags & 2) == 0 && attracto->platform_id != -1) {
+    } else if (!attracto->visible && attracto->platform_id != -1) {
         DeletePlatinst(attracto->platform_id);
         attracto->platform_id = -1;
     }
@@ -183,11 +183,11 @@ static void Attractos_StoreProgress(void *context, void *, void *data) {
         for (i32 i = 0; i < world->attracto_count && i < 32; ++i, ++attracto) {
             progress->counts[i] = attracto->collected_count;
             u32 mask = 1u << i;
-            if ((attracto->state_flags & 2) == 0)
+            if (!attracto->visible)
                 progress->visible &= ~mask;
-            if ((attracto->state_flags & 1) == 0)
+            if (!attracto->active)
                 progress->active &= ~mask;
-            if ((attracto->state_flags & 4) != 0)
+            if (attracto->filled)
                 progress->filled |= mask;
         }
     }
@@ -219,15 +219,18 @@ static void Attractos_Reset(void *context, void *, void *data) {
             FindAnglesZX(&ShadNorm, &attracto->ground_angle_z, &attracto->ground_angle_x);
         } else
             attracto->active_position.y = 2000000.0f;
-        attracto->state_flags = (attracto->state_flags | 3) & ~12;
+        attracto->active = 1;
+        attracto->visible = 1;
+        attracto->filled = 0;
+        attracto->drawn = 0;
         NuMtxSetRotationY(&attracto->transform, attracto->angle);
         NuMtxTranslate(&attracto->transform, &attracto->position);
         if (i < 32 && progress != NULL) {
             u32 mask = 1u << i;
             attracto->collected_count = progress->counts[i];
-            attracto->state_flags = (attracto->state_flags & ~2) | ((progress->visible & mask) != 0 ? 2 : 0);
-            attracto->state_flags = (attracto->state_flags & ~1) | ((progress->active & mask) != 0);
-            attracto->state_flags = (attracto->state_flags & ~4) | ((progress->filled & mask) != 0 ? 4 : 0);
+            attracto->visible = (progress->visible & mask) != 0;
+            attracto->active = (progress->active & mask) != 0;
+            attracto->filled = (progress->filled & mask) != 0;
         }
     }
 }
@@ -336,7 +339,7 @@ void Attracto_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
                     object->airborne_action_duration = 0.2f;
                     attracto = static_cast<ATTRACTO_s *>(object->field_0x788);
                     if (attracto->collected_count == attracto->capacity)
-                        attracto->state_flags |= 4;
+                        attracto->filled = 1;
                     else if (object->field_0x106e != 0 && object->character_context != -1)
                         return;
                 }

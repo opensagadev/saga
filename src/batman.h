@@ -306,7 +306,7 @@ extern "C" {
     extern GAMEPAD_s GamePad[64];
     extern MENUFNINFO MenuInfo[100];
     extern OPTIONSSAVE TempOptions;
-    extern i32 abort_load;
+    extern volatile i32 abort_load;
     extern f32 AddCoinDelay[2];
     extern i32 adaptivedifficulty[3];
     extern i32 back_rgba[2];
@@ -349,7 +349,7 @@ extern "C" {
     extern i32 NewMode;
     extern i32 nurndr_tritot_this_frame;
     extern void (*NuSoundAppTerminateCallback)(void);
-    extern i32 nuvideo_global_vbcnt;
+    extern volatile i32 nuvideo_global_vbcnt;
     extern i32 PANELOFF;
     extern i32 party_cant_be_under_cover;
     extern i32 peak_poly_count;

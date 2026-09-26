@@ -363,11 +363,11 @@ void StartEndOfJump(GameObject_s *object) {
         object->character_context = LEGOCONTEXT_JUMP;
         object->action_movement_state = 0;
         object->jump_sequence = 2;
-        object->jump_flags &= ~PLAYER_JUMP_FLAG_SPECIAL_TAKEOFF;
         object->context_animation = LEGOACT_FALL;
-        object->context_variant_flags =
-            static_cast<i8>((static_cast<u8>(object->context_variant_flags) | PLAYER_JUMP_VARIANT_FALLING) &
-                            ~PLAYER_JUMP_VARIANT_END_CLEAR);
+        object->jump_flags &= ~PLAYER_JUMP_FLAG_SPECIAL_TAKEOFF;
+        object->jump_falling = 1;
+        object->jump_button_released = 0;
+        object->jump_second_jump = 0;
     }
     object->airborne_collision_target = NULL;
 }

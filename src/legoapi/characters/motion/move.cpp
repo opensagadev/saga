@@ -3021,7 +3021,7 @@ void MovePlayer_DIRECTIONAL(GameObject_s *object) {
                                 break;
                             }
                             case 0x31: {
-                                if ((api.field_0x1f8 & 0x80) == 0)
+                                if (!api.player_controlled)
                                     goto directional_walking;
                                 const u16 angle = api.movement_facing_angle;
                                 object->target_velocity.x =
@@ -3262,7 +3262,7 @@ void MovePlayer_DIRECTIONAL(GameObject_s *object) {
                     if (direct_turn == 0 && ((CInfo[object->character_context].parameter & 2) != 0 ||
                                              (api.character_data->game_character->flags_090 & 0x100) != 0))
                         walking_angle = api.facing_angle;
-                    if (WORLD->current_level == VADERA_LDATA && (api.field_0x1f8 & 0x80) == 0 &&
+                    if (WORLD->current_level == VADERA_LDATA && !api.player_controlled &&
                         GameCam->sock_position.location.sock == 0)
                         walking_speed *= 1.0416666269302368f;
                     object->target_velocity.x =
@@ -3276,7 +3276,7 @@ void MovePlayer_DIRECTIONAL(GameObject_s *object) {
     }
     if ((object->field_0xefd & GAMEOBJECT_MOVEMENT_FLAG_REVERSE_VELOCITY) != 0) {
         NuVecRotateY(&object->target_velocity, &object->target_velocity, 0x8000);
-    } else if ((api.field_0x1f8 & 0x80) != 0 && (api.character_data->game_character->flags_090 & 0x100) != 0)
+    } else if (api.player_controlled && (api.character_data->game_character->flags_090 & 0x100) != 0)
         CharPivot_Check(object, &object->target_velocity);
 
     if (object->character_context == 0x4b) {
@@ -3917,17 +3917,19 @@ i32 GetShootDirection_LSW(GameObject_s *object, nuvec_s *direction) {
         NuVecMtxRotate(direction, direction, &object->joint_matrices[data->weapon_shoot_joints[0]]);
         return NuAtan2D(direction->x, direction->z);
     }
-    i32 angle;
-    if ((model->model_flags & 0x2000) != 0 || (data->flags_090 & 0x80) != 0) {
+    u16 angle;
+    if ((model->model_flags & 0x2000) == 0 && (data->flags_090 & 0x80) == 0) {
+        angle = object->apiobj.movement_facing_angle;
+    } else {
         angle = object->apiobj.facing_angle;
         if (object->character_context == 0x2a &&
-            1.0f - object->context_animation_timer / object->airborne_action_duration >= 0.25f)
+            0.25f <= 1.0f - object->context_animation_timer / object->airborne_action_duration) {
             angle -= 0x8000;
-    } else
-        angle = object->apiobj.movement_facing_angle;
-    direction->x = NuTrigTable[static_cast<u16>(angle) >> 1];
+        }
+    }
+    direction->x = NU_SIN_LUT(angle);
     direction->y = 0.0f;
-    direction->z = NuTrigTable[((static_cast<u16>(angle) + 0x4000) >> 1) & 0x7fff];
+    direction->z = NU_COS_LUT(angle);
     return angle;
 }
 
@@ -5348,7 +5350,7 @@ static void ForceCode(GameObject_s *object, i32 pressed, i32 held, i32) {
                 Hint_SetComplete(0x259);
                 if ((object->gizforce_target->config_flags & 0x10) != 0)
                     Hint_SetComplete(0x623);
-                LSW_HintConditions |= 1;
+                LSW_HintConditions.force_used = 1;
             }
         }
     } else if ((object->apiobj.flags_low & 0x80) != 0)
@@ -7378,7 +7380,7 @@ i32 SnapPosTaken(WORLDINFO_s *world, pushblock_s *, nuvec_s *position, i32 exclu
         const f32 dx = block->position->x - position->x;
         const f32 dy = block->position->y - position->y;
         const f32 dz = block->position->z - position->z;
-        if (dx * dx + dy * dy + dz * dz <= 0.0025f) {
+        if (dx * dx + dy * dy + dz * dz <= 0.05f * 0.05f) {
             return 1;
         }
     }
@@ -7572,7 +7574,9 @@ i32 StartBackFlip(GameObject_s *object) {
     object->context_variant_flags &= ~0x80;
     object->delayed_turn_timer = 0.0f;
     object->airborne_input_timer = 0.0f;
-    object->context_animation_timer = duration <= 0.0f ? 1.0f : duration;
+    object->context_animation_timer = duration;
+    if (object->context_animation_timer <= 0.0f)
+        object->context_animation_timer = 1.0f;
     PlayJumpSfx(object, 2);
     return 1;
 }
@@ -9063,7 +9067,7 @@ void StartHold(GameObject_s *object) {
     if (LEGOCONTEXT_HOLD != -1 && NewBlockAction(object) != 0) {
         object->context_animation_timer = 0.3f;
         object->character_context = LEGOCONTEXT_HOLD;
-        PlaySabreSfx(NULL, object, NULL, 0);
+        PlaySabreSfx(NULL, object, NULL, 1);
         return;
     }
     object->character_context = -1;

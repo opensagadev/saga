@@ -97,7 +97,7 @@ static void BlockadeRunnerD_EjectCreature(i32 eject_index) {
             NuMtxSetTranslation(&matrix, &eject_vec[eject_index]);
             i32 model = models[qrand() / 0x4000];
             LevGameObject[i] =
-                AddDynamicCreature(model, &eject_vec[eject_index], 0, "p", NULL, NULL, 0, NULL, NULL, 0, 0);
+                AddDynamicCreature(model, &eject_vec[eject_index], 0, "UST", NULL, NULL, 0, NULL, NULL, 0, 0);
             if (LevGameObject[i] != NULL) {
                 LevGameObject[i]->ai.animation_override_from = 0xe9;
                 LevGameObject[i]->ai.animation_override_to = 5;
@@ -342,7 +342,7 @@ void DeathStarEscapeC_Init(WORLDINFO_s *world) {
     blowup = GizmoBlowUp_FindByName(world, "cup_built1");
     if (blowup != NULL)
         blowup->draw_flags |= 2;
-    NuSpecialFind(world->scene, &LevHSpecial[2], "door_push", 1);
+    NuSpecialFind(world->current_gscn, &LevHSpecial[2], "door_push", 1);
     LevPathCnx[0] = AIPAthFindPathCnx(world->ai_sys, world->ai_sys->path_sys->active_path, "droid_rescue_a",
                                       "droid_rescue_b", &LevPathCnxDir);
 }

@@ -8,8 +8,6 @@
 #include <string.h>
 
 i32 edGizShadow_gizmotype_id;
-static char shadow_gizmo_name[] = "ShadowDirection";
-static char shadow_output_name[] = "Dont Use Me!";
 
 static void edGizShadow_SetPreset1(EDGIZSHADOW *shadow) {
     shadow->field_0x10 = 2.0f;
@@ -47,7 +45,7 @@ static void edGizShadow_AddGizmos(GIZMOSYS *gizmo_sys, i32 type_id, void *world_
 }
 
 static char *edGizShadow_GetGizmoName(GIZMO *) {
-    return shadow_gizmo_name;
+    return const_cast<char *>("ShadowDirection");
 }
 
 static i32 edGizShadow_GetOutput(GIZMO *gizmo, i32, i32) {
@@ -56,7 +54,7 @@ static i32 edGizShadow_GetOutput(GIZMO *gizmo, i32, i32) {
 }
 
 static char *edGizShadow_GetOutputName(GIZMO *, i32) {
-    return shadow_output_name;
+    return const_cast<char *>("Dont Use Me!");
 }
 
 static i32 edGizShadow_GetNumOutputs(GIZMO *) {

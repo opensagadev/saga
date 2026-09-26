@@ -112,8 +112,8 @@ static __used__ void transposeClipPlanes(NUFRUSTRUM *frustum) {
 
 static void transformFrustrumPlane(NUPLANE *plane) {
     NuVec4MtxTransformH(reinterpret_cast<NUVEC4 *>(plane), reinterpret_cast<NUVEC4 *>(plane), &local_inv_view_mtx);
-    plane->d = -(local_inv_view_mtx.m30 * plane->a + local_inv_view_mtx.m31 * plane->b +
-                 local_inv_view_mtx.m32 * plane->c);
+    plane->d =
+        -(local_inv_view_mtx.m30 * plane->a + local_inv_view_mtx.m31 * plane->b + local_inv_view_mtx.m32 * plane->c);
 }
 
 static __used__ NUFRUSTRUM *buildFrustrum(NUVEC *minimum, NUVEC *maximum, i16 room_id) {

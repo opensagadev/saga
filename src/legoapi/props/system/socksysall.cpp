@@ -876,10 +876,10 @@ extern "C" {
                             midpoint = to;
                         } else {
                             ratio = projection / distance;
-                            angles->x += static_cast<u16>(static_cast<i32>(
-                                static_cast<f32>(RotDiff(angles->x, positions[i].midpoint_rotation.x)) * ratio));
-                            angles->y += static_cast<u16>(static_cast<i32>(
-                                static_cast<f32>(RotDiff(angles->y, positions[i].midpoint_rotation.y)) * ratio));
+                            angles->x += static_cast<u16>(
+                                static_cast<f32>(RotDiff(angles->x, positions[i].midpoint_rotation.x)) * ratio);
+                            angles->y += static_cast<u16>(
+                                static_cast<f32>(RotDiff(angles->y, positions[i].midpoint_rotation.y)) * ratio);
                             midpoint.x += (to.x - midpoint.x) * ratio;
                             midpoint.y += (to.y - midpoint.y) * ratio;
                             midpoint.z += (to.z - midpoint.z) * ratio;
@@ -1040,7 +1040,7 @@ extern "C" {
             position->next_segment = 0;
         position->candidate_count = 1;
         position->flags = 0;
-        position->candidate_mask = 1u << (index & 31);
+        position->candidate_mask = 1u << index;
         FillSockPosition(system, position);
         position->camera_position = temp_sockcampos;
         SockSysPointAlongMID(sock, position, &position->midpoint);
@@ -1935,20 +1935,20 @@ f32 CalculateDistanceToSpecificSideOrEnd(i32 side, NUVEC *position, SOCKPOSITION
     }
 }
 
-static u32 sock_turnoff_mask[2];
+static u32 SocksOnPreviousStatus[2];
 void TurnOffAllSocksExcept(SOCKSYS *system, i32 exception) {
     for (i32 word = 0; word < 2; ++word)
-        sock_turnoff_mask[word] = 0;
+        SocksOnPreviousStatus[word] = 0;
     for (i32 index = 0; index < 64; ++index) {
         if (!(system->sock[index].flags & 0x100))
-            sock_turnoff_mask[index / 32] |= 1 << (index & 31);
+            SocksOnPreviousStatus[index / 32] |= 1 << (index & 31);
         system->sock[index].flags |= 0x100;
     }
     system->sock[exception].flags &= ~0x100;
 }
 void RestoreLastSocksTurnoff(SOCKSYS *system) {
     for (i32 index = 0; index < 64; ++index) {
-        if (sock_turnoff_mask[index / 32] & (1 << (index & 31)))
+        if (SocksOnPreviousStatus[index / 32] & (1 << (index & 31)))
             system->sock[index].flags &= ~0x100;
     }
 }

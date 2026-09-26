@@ -1285,9 +1285,9 @@ void DrawGameState(float x, float y, i32 highlight, i32 slot) {
     u8 blue = MENUNORMALB;
     if (highlight != 0 && TestForController() != 0) {
         if (menu_pulsate > 0.0f) {
-            red = static_cast<u8>(static_cast<i32>(MENUFLASH0R * menu_pulsate + MENUFLASH1R * (1.0f - menu_pulsate)));
-            green = static_cast<u8>(static_cast<i32>(MENUFLASH0G * menu_pulsate + MENUFLASH1G * (1.0f - menu_pulsate)));
-            blue = static_cast<u8>(static_cast<i32>(MENUFLASH0B * menu_pulsate + MENUFLASH1B * (1.0f - menu_pulsate)));
+            red = static_cast<u8>(MENUFLASH0R * menu_pulsate + MENUFLASH1R * (1.0f - menu_pulsate));
+            green = static_cast<u8>(MENUFLASH0G * menu_pulsate + MENUFLASH1G * (1.0f - menu_pulsate));
+            blue = static_cast<u8>(MENUFLASH0B * menu_pulsate + MENUFLASH1B * (1.0f - menu_pulsate));
         } else if (menu_flash != 0) {
             red = MENUFLASH0R;
             green = MENUFLASH0G;
@@ -1298,9 +1298,9 @@ void DrawGameState(float x, float y, i32 highlight, i32 slot) {
             blue = MENUFLASH1B;
         }
     } else if (menu_pulse > 0.0f) {
-        red = static_cast<u8>(static_cast<i32>(MENUFLASH0R * menu_pulse + MENUNORMALR * (1.0f - menu_pulse)));
-        green = static_cast<u8>(static_cast<i32>(MENUFLASH0G * menu_pulse + MENUNORMALG * (1.0f - menu_pulse)));
-        blue = static_cast<u8>(static_cast<i32>(MENUFLASH0B * menu_pulse + MENUNORMALB * (1.0f - menu_pulse)));
+        red = static_cast<u8>(MENUFLASH0R * menu_pulse + MENUNORMALR * (1.0f - menu_pulse));
+        green = static_cast<u8>(MENUFLASH0G * menu_pulse + MENUNORMALG * (1.0f - menu_pulse));
+        blue = static_cast<u8>(MENUFLASH0B * menu_pulse + MENUNORMALB * (1.0f - menu_pulse));
     }
     SmartTextEx(game_name, x, y, 1.0f, MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, 4, red, green, blue, 0.45f, 1, NULL,
                 0, MenuA);
@@ -1821,14 +1821,13 @@ void DrawMiniKitCount(float position, float scale, i32 count, i32 maximum) {
     const f32 y = (KITPOSY - KITPOS2Y) * blend + KITPOS2Y;
     WORLDINFO_s *world = WorldInfo_CurrentlyActive();
     if (world->lev_objs[model].active != 0) {
-        const u16 rotation =
-            static_cast<u16>(static_cast<i32>(NuFmod(GameTimer.time_elapsed, 4.0f) * 0.25f * 65536.0f));
-        const u16 tilt = static_cast<u16>(static_cast<i32>(1820.0f * NuTrigTable[rotation & 0x7fff]));
+        const u16 rotation = static_cast<u16>(NuFmod(GameTimer.time_elapsed, 4.0f) * 0.25f * 65536.0f);
+        const u16 tilt = static_cast<u16>(1820.0f * NuTrigTable[rotation & 0x7fff]);
         const f32 size = scale * PANEL_MINIKITSCALE;
         DrawPanel3DObjectNoAlpha(x, PANEL_MINIKITY + y, 1.0f, size, size, size, tilt, rotation, 0,
                                  &world->lev_objs[model].special, 2);
     }
-    char text[40];
+    char text[32];
     sprintf(text, "%i/%i", count, maximum);
     const f32 size = scale * PANEL_MINIKITCOUNTSCALE;
     Text3D(text, x, y + PANEL_MINIKITCOUNTY, 1.0f, size, size, size, 0, 255, 0, 127);
@@ -3310,7 +3309,7 @@ static void DrawParaphernalia(GameObject_s *object) {
                 NUVEC scaling = {scale, scale, scale};
                 NUMTX matrix;
                 NuMtxSetScale(&matrix, &scaling);
-                NuMtxRotateX(&matrix, static_cast<u16>(static_cast<i32>(-65536.0f * fraction)));
+                NuMtxRotateX(&matrix, static_cast<u16>(-65536.0f * fraction));
                 NuMtxRotateY(&matrix, object->apiobj.field_0x276);
                 NuMtxTranslate(&matrix, reinterpret_cast<NUVEC *>(&joints[0].m30));
                 matrix.m31 += 0.2f * NuTrigTable[(static_cast<i32>(fraction * 32768.0f) >> 1) & 0x7fff];
@@ -3335,7 +3334,7 @@ static __used__ void DisplayListMaterialClipUpdate(nudisplayscene_s *) {
 
 extern i32 qrand(void);
 
-static NUGSCN *s_backdrop_scene = nullptr;
+static NUGSCN *backdrop_scene = nullptr;
 
 static nuhspecial_s s_backdrop_hspecial[4];
 
@@ -3370,10 +3369,10 @@ static __used__ void BackDrop_Alpha(float *alpha) {
 }
 
 void BackDrop_Init(char *path, variptr_u *buf, variptr_u *buf_end) {
-    NUGSCN *scene = s_backdrop_scene;
+    NUGSCN *scene = backdrop_scene;
     if (scene == NULL) {
         scene = NuGScnRead(buf, *buf_end, path);
-        s_backdrop_scene = scene;
+        backdrop_scene = scene;
     }
     memset(s_backdrop_hspecial, 0, sizeof(s_backdrop_hspecial));
     if (scene == NULL) {
@@ -3386,13 +3385,13 @@ void BackDrop_Init(char *path, variptr_u *buf, variptr_u *buf_end) {
 }
 
 void BackDrop_Dump() {
-    s_backdrop_scene = nullptr;
+    backdrop_scene = nullptr;
     memset(s_backdrop_hspecial, 0, sizeof(s_backdrop_hspecial));
 }
 
 void BackDrop_Update(float dt) {
-    if (s_backdrop_scene != NULL) {
-        NuGScnUpdate(s_backdrop_scene, dt * 60.0f);
+    if (backdrop_scene != NULL) {
+        NuGScnUpdate(backdrop_scene, dt * 60.0f);
     }
 }
 
@@ -3433,7 +3432,7 @@ void BackDrop_UpdateColours(i32 instant) {
 }
 
 void BackDrop_Draw(float alpha, i32 flags) {
-    if (s_backdrop_scene == NULL) {
+    if (backdrop_scene == NULL) {
         return;
     }
     if (flags == 0 && BackDrop_AlphaFn != NULL) {

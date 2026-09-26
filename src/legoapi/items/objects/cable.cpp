@@ -282,7 +282,7 @@ void UpdateCables() {
         for (i32 i = 0; i < HIGHGAMEOBJECT; ++i) {
             GameObject_s *object = &Obj[i];
             if ((object->apiobj.field_0x1f8 & 0x1001) != 0x1001 || object->apiobj.field_0x287 != 0 ||
-                (object->field_0xe20 & 0x20) || (object->apiobj.field_0x1f8 & 0x80))
+                (object->field_0xe20 & 0x20) || object->apiobj.player_controlled)
                 continue;
             if (WORLD->area != NULL && WORLD->area == HOTHBATTLE_ADATA && object->id != id_ATAT &&
                 object->id != id_DRAGBOMB && object->id != id_ATST && object->id != id_ATST_LOWRES)

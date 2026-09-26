@@ -214,14 +214,14 @@ void CruiserDUpdate(WORLDINFO_s *) {
 
 void GrievousA_Init(WORLDINFO_s *world) {
     GIZMOBLOWUP_s *b;
-    if ((b = GizmoBlowUp_FindByName(world, "grievous_1")) != NULL) {
+    if ((b = GizmoBlowUp_FindByName(world, "blast_2_blowup1")) != NULL) {
         nuvec_s pos = {5.42f, 2.76f, 1.79f};
         NuSpecialSetDrawPos(&b->type->animated_special, &pos);
         UpdateMidPos(b);
     }
-    if ((b = GizmoBlowUp_FindByName(world, "grievous_2")) != NULL)
+    if ((b = GizmoBlowUp_FindByName(world, "blast_1_blowup1")) != NULL)
         b->field_0x124 = 1;
-    if ((b = GizmoBlowUp_FindByName(world, "grievous_3")) != NULL)
+    if ((b = GizmoBlowUp_FindByName(world, "blast_1_blowup2")) != NULL)
         b->field_0x124 = 1;
 }
 
@@ -282,7 +282,7 @@ void KashyyykB_Init(WORLDINFO_s *) {
 }
 
 void KashyyykC_Init(WORLDINFO_s *world) {
-    GIZFORCE_s *f = GizForces_FindForce(world, "kashyyyk_boss");
+    GIZFORCE_s *f = GizForces_FindForce(world, "force16");
     if (f != NULL) {
         if (f->force_strength == 3.0f)
             f->force_strength = 20.0f;
@@ -405,9 +405,9 @@ void KashyyykD_Update(WORLDINFO_s *) {
 
 void TempleA_Init(WORLDINFO_s *world) {
     GIZMOBLOWUP_s *b;
-    if ((b = GizmoBlowUp_FindByName(world, "temple_statue")) != NULL)
+    if ((b = GizmoBlowUp_FindByName(world, "builditt_blow1")) != NULL)
         b->field_0xa0 |= 2;
-    if ((b = GizmoBlowUp_FindByName(world, "temple_pillar")) != NULL)
+    if ((b = GizmoBlowUp_FindByName(world, "deton_build1")) != NULL)
         b->field_0xa0 |= 2;
 }
 

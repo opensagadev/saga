@@ -208,8 +208,8 @@ struct NuMemoryPool {
     u32 GetFreeBytes();
     u32 GetLargeBlockBytes();
     u32 GetPagedBytes();
-    NuMemoryPool::FreeBlock volatile *InterlockedPop(NuMemoryPool::FreeBlock volatile **);
-    void InterlockedPush(NuMemoryPool::FreeBlock volatile **, void *);
+    static NuMemoryPool::FreeBlock volatile *InterlockedPop(NuMemoryPool::FreeBlock volatile **);
+    static void InterlockedPush(NuMemoryPool::FreeBlock volatile **, void *);
     NuMemoryPool::FreeBlock volatile *Merge(NuMemoryPool::FreeBlock volatile *, NuMemoryPool::FreeBlock volatile *);
     NuMemoryPool::Page *Merge(NuMemoryPool::Page *, NuMemoryPool::Page *);
     NuMemoryPool::FreeBlock volatile *MergeSort(NuMemoryPool::FreeBlock volatile *, u32);

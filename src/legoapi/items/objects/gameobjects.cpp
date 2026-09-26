@@ -912,43 +912,46 @@ static void *Condition_AngleAboutMyLocatorToPlayerInit(AISYS_s *, char *name, AI
 }
 
 static f32 Condition_EitherPlayerUsingHatMachine(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *name, void *) {
-    if (player != NULL && player->character_context == 0x61) {
-        HATMACHINE_s *machine = static_cast<HATMACHINE_s *>(player->field_0x788);
-        if (machine != NULL && (name == NULL || NuStrICmp(machine->name, name) == 0))
-            return 1.0f;
+    HATMACHINE_s *machine;
+    if (player != NULL && player->character_context == 0x61 &&
+        (machine = static_cast<HATMACHINE_s *>(player->field_0x788)) != NULL &&
+        (name == NULL || NuStrICmp(machine->name, name) == 0)) {
+        return 1.0f;
     }
-    if (player2 != NULL && player2->character_context == 0x61) {
-        HATMACHINE_s *machine = static_cast<HATMACHINE_s *>(player2->field_0x788);
-        if (machine != NULL && (name == NULL || NuStrICmp(machine->name, name) == 0))
-            return 1.0f;
+    if (player2 != NULL && player2->character_context == 0x61 &&
+        (machine = static_cast<HATMACHINE_s *>(player2->field_0x788)) != NULL &&
+        (name == NULL || NuStrICmp(machine->name, name) == 0)) {
+        return 1.0f;
     }
     return 0.0f;
 }
 
 static f32 Condition_EitherPlayerPullingLever(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *name, void *) {
-    if (player != NULL && player->character_context == 0x4a) {
-        LEVER_s *lever = static_cast<LEVER_s *>(player->field_0x788);
-        if (lever != NULL && (name == NULL || NuStrICmp(lever->name, name) == 0))
-            return 1.0f;
+    LEVER_s *lever;
+    if (player != NULL && player->character_context == 0x4a &&
+        (lever = static_cast<LEVER_s *>(player->field_0x788)) != NULL &&
+        (name == NULL || NuStrICmp(lever->name, name) == 0)) {
+        return 1.0f;
     }
-    if (player2 != NULL && player2->character_context == 0x4a) {
-        LEVER_s *lever = static_cast<LEVER_s *>(player2->field_0x788);
-        if (lever != NULL && (name == NULL || NuStrICmp(lever->name, name) == 0))
-            return 1.0f;
+    if (player2 != NULL && player2->character_context == 0x4a &&
+        (lever = static_cast<LEVER_s *>(player2->field_0x788)) != NULL &&
+        (name == NULL || NuStrICmp(lever->name, name) == 0)) {
+        return 1.0f;
     }
     return 0.0f;
 }
 
 static f32 Condition_EitherPlayerUsingPanel(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *name, void *) {
-    if (player != NULL && player->character_context == 0x0b) {
-        GIZPANEL_s *panel = static_cast<GIZPANEL_s *>(player->field_0x788);
-        if (panel != NULL && (name == NULL || NuStrICmp(panel->name, name) == 0))
-            return 1.0f;
+    GIZPANEL_s *panel;
+    if (player != NULL && player->character_context == 0x0b &&
+        (panel = static_cast<GIZPANEL_s *>(player->field_0x788)) != NULL &&
+        (name == NULL || NuStrICmp(panel->name, name) == 0)) {
+        return 1.0f;
     }
-    if (player2 != NULL && player2->character_context == 0x0b) {
-        GIZPANEL_s *panel = static_cast<GIZPANEL_s *>(player2->field_0x788);
-        if (panel != NULL && (name == NULL || NuStrICmp(panel->name, name) == 0))
-            return 1.0f;
+    if (player2 != NULL && player2->character_context == 0x0b &&
+        (panel = static_cast<GIZPANEL_s *>(player2->field_0x788)) != NULL &&
+        (name == NULL || NuStrICmp(panel->name, name) == 0)) {
+        return 1.0f;
     }
     return 0.0f;
 }
@@ -2059,14 +2062,14 @@ static u32 AIRespawnOnPath(APIOBJECT *object) {
     }
 
     if (object->respawn_timer > AI_RESPAWN_DELAY) {
-        if ((model_flags & CHARACTER_AI_MODEL_FLAG_SNAP_ON_BIG_JUMP) != 0) {
+        if ((model_flags & CHARACTER_AI_MODEL_FLAG_SNAP_ON_BIG_JUMP) == 0) {
+            StartBigJump(game_object, &object->respawn_position, 0, 0.5f, 1.0f, 0, 0);
+        } else {
             object->start_position = object->respawn_position;
             object->position = object->respawn_position;
             object->velocity = v000;
             ResetPlayerMoves(game_object);
             object->respawn_timer = 0.0f;
-        } else {
-            StartBigJump(game_object, &object->respawn_position, 0, 0.5f, 1.0f, 0, 0);
         }
     }
 
@@ -5027,7 +5030,7 @@ void GameObjectStuffAfterAnimation() {
             part.field_18 = 0.1f;
             part.special = &WORLD->lev_objs[232].special;
             part.field_28 = 232;
-            const bool player = (object->apiobj.field_0x1f8 & 0x80) != 0;
+            const bool player = object->apiobj.player_controlled;
             part.flags = player ? 0xc11b : 0xc31b;
             part.owner = object;
             part.field_90 = static_cast<u8>(object->apiobj.field_0x289);
@@ -5087,7 +5090,7 @@ void GameObjectStuffAfterAnimation() {
                         }
                     }
                 }
-                if ((object->apiobj.field_0x1f8 & 0x80) == 0)
+                if (!object->apiobj.player_controlled)
                     continue;
                 bool hit = false;
                 for (i32 side = 0; side < 2; ++side) {
@@ -5167,7 +5170,7 @@ void GameObjectStuffAfterAnimation() {
         }
         if (VehicleArea != 0 && static_cast<u8>(object->apiobj.field_0x27c) <= 1) {
             i32 *key = &FalconDebKey[static_cast<u8>(object->apiobj.field_0x27c)];
-            if (object->id == id_MILLENNIUMFALCON && (object->apiobj.field_0x1f8 & 0x80) != 0 &&
+            if (object->id == id_MILLENNIUMFALCON && object->apiobj.player_controlled &&
                 (object->field_0xe24 & 8) != 0 && object->apiobj.character_model->points_of_interest[2] != NULL &&
                 object->apiobj.field_0xa8 == 1.0f) {
                 if (*key == -1)
@@ -5806,7 +5809,7 @@ __attribute__((force_align_arg_pointer)) void TakeOverCode(GameObject_s *object,
         object->context_animation_timer += FRAMETIME;
         if (object->context_animation_timer >= object->airborne_action_duration) {
             object->character_context = -1;
-            if ((api.field_0x1f8 & 0x80) != 0) {
+            if (api.player_controlled) {
                 if (target->id == id_GRABCONTROL || target->id == id_GRABR2CONTROL) {
                     Hint_SetComplete(0x28a);
                 } else if (target->apiobj.character_data->move_fn == Move_BEAST) {
@@ -5848,8 +5851,7 @@ __attribute__((force_align_arg_pointer)) void TakeOverCode(GameObject_s *object,
         const u16 start_angle = object->takeover_start_angle;
         const i32 difference = RotDiff(start_angle, target->apiobj.field_0x276);
         const f32 blend = 1.0f - (NU_SIN_LUT(static_cast<i32>(phase + 16384.0f)) + 1.0f) * 0.5f;
-        const u16 angle =
-            static_cast<u16>(static_cast<i32>(static_cast<f32>(start_angle) + static_cast<f32>(difference) * blend));
+        const u16 angle = static_cast<u16>(static_cast<f32>(start_angle) + static_cast<f32>(difference) * blend);
         api.field_0x276 = angle;
         api.movement_facing_angle = angle;
         api.facing_angle = angle;
@@ -5865,7 +5867,7 @@ __attribute__((force_align_arg_pointer)) void TakeOverCode(GameObject_s *object,
                     buttons &= ~GAMEPAD_JUMP;
                 if (target->character_context != 0x2a && (buttons & (GAMEPAD_JUMP | GAMEPAD_TAG)) != 0) {
                     ReleaseTakeOver(object, 1);
-                    if ((api.field_0x1f8 & 0x80) != 0)
+                    if (api.player_controlled)
                         Hint_SetComplete(0x25e);
                     return;
                 }
@@ -5893,7 +5895,7 @@ __attribute__((force_align_arg_pointer)) void TakeOverCode(GameObject_s *object,
         object->takeover_timer -= FRAMETIME;
         return;
     }
-    if (MiniCutCam != 0 || (api.field_0x1f8 & 0x80) == 0 || api.field_0x287 != 0 || !(object->takeover_timer <= 0.0f) ||
+    if (MiniCutCam != 0 || !api.player_controlled || api.field_0x287 != 0 || !(object->takeover_timer <= 0.0f) ||
         (object->character_context != -1 && (object->character_context != 0 || object->action_movement_state == 3 ||
                                              object->action_movement_state == 4)) ||
         api.field_0x27d == 0) {
@@ -7189,7 +7191,7 @@ void ManageGameObjects() {
                         GetTakeOverPos(vehicle, &object->apiobj.position);
                         TakeOverGameObject(object, object->takeover_source, 0, 1);
                     }
-                    if ((object->apiobj.field_0x1f8 & 0x80) != 0 && WORLD->current_level == SPEEDERCHASEA_LDATA &&
+                    if (object->apiobj.player_controlled && WORLD->current_level == SPEEDERCHASEA_LDATA &&
                         disable_narrow_socks == 0)
                         GameCam_Blend(GameCam, 0.5f, 0.0f, 0);
                 } else if (WORLD->current_level == PODSPRINTA_LDATA) {
@@ -7817,11 +7819,11 @@ void UpdateGameObjects(WORLDINFO_s *world) {
                 position.y += 0.21f > height ? 0.21f : height;
                 i32 phase = static_cast<u16>(object->apiobj.field_0x289 << 13);
                 f32 amplitude = 0.05f * object->apiobj.field_0x1dc;
-                i32 angle = static_cast<u16>(static_cast<i32>(NuFmod(GameTimer.time_elapsed, 1.5f) / 1.5f * 65536.0f));
+                i32 angle = static_cast<u16>(NuFmod(GameTimer.time_elapsed, 1.5f) / 1.5f * 65536.0f);
                 position.x += amplitude * NuTrigTable[((angle + phase) >> 1) & 0x7fff];
-                angle = static_cast<u16>(static_cast<i32>(NuFmod(GameTimer.time_elapsed, 1.174f) / 1.174f * 65536.0f));
+                angle = static_cast<u16>(NuFmod(GameTimer.time_elapsed, 1.174f) / 1.174f * 65536.0f);
                 position.y += (0.75f * amplitude) * NuTrigTable[((angle + phase) >> 1) & 0x7fff];
-                angle = static_cast<u16>(static_cast<i32>(NuFmod(GameTimer.time_elapsed, 1.259f) / 1.259f * 65536.0f));
+                angle = static_cast<u16>(NuFmod(GameTimer.time_elapsed, 1.259f) / 1.259f * 65536.0f);
                 position.z += amplitude * NuTrigTable[((angle + phase) >> 1) & 0x7fff];
                 char text[64];
                 NuStrCpy(text, ASCII_DOWN);
@@ -7830,7 +7832,7 @@ void UpdateGameObjects(WORLDINFO_s *world) {
                 message.text = text;
                 message.scale = 1.0f;
                 f32 pulse = NuFmod(GameTimer.time_elapsed_mod_seconds, 0.5f);
-                angle = static_cast<u16>(static_cast<i32>((pulse + pulse) * 65536.0f));
+                angle = static_cast<u16>((pulse + pulse) * 65536.0f);
                 message.alpha = static_cast<u8>(
                     static_cast<i32>((24.0f * NuTrigTable[angle >> 1] + 104.0f) * object->interaction_arrow_blend));
                 message.flags = 0x1083;
@@ -7925,8 +7927,8 @@ void UpdateGameObjects(WORLDINFO_s *world) {
         message.green = PlayerRGB[i][1];
         message.blue = PlayerRGB[i][2];
         f32 pulse = NuFmod(GameTimer.time_elapsed_mod_seconds, 0.5f);
-        u16 angle = static_cast<u16>(static_cast<i32>((pulse + pulse) * 65536.0f));
-        message.alpha = static_cast<u8>(static_cast<i32>(48.0f * NuTrigTable[angle >> 1] + 80.0f));
+        u16 angle = static_cast<u16>((pulse + pulse) * 65536.0f);
+        message.alpha = static_cast<u8>(48.0f * NuTrigTable[angle >> 1] + 80.0f);
         message.flags = 0x83;
         message.field_0x4f = 4;
         AddGameMsg(&message);
@@ -8159,28 +8161,26 @@ void TakeOverGameObject(GameObject_s *rider, GameObject_s *vehicle, i32 blend_ca
 void RegisterTakeOverObject(GameObject_s *object);
 
 void TakeOverGameObject2(GameObject_s *rider, GameObject_s *vehicle, i32 blend_camera) {
-    if (rider == NULL || (static_cast<u8>(rider->apiobj.field_0x1f8) & 1) == 0 || vehicle == NULL ||
-        (vehicle->apiobj.field_0x1f8 & 1) == 0 || rider->field_0xcc0 != NULL || vehicle->field_0xcc0 != NULL) {
+    if (rider == NULL || (rider->apiobj.flags_low & 1) == 0 || vehicle == NULL ||
+        (vehicle->apiobj.flags_low & 1) == 0 || rider->field_0xcc0 != NULL || vehicle->field_0xcc0 != NULL) {
         return;
     }
     if ((rider->field_0xf00 & 2) != 0) {
-        if (TakeOverYoda(rider, vehicle, blend_camera, 1) != 2) {
+        if (TakeOverYoda(rider, vehicle, blend_camera, 1) != 2)
             return;
-        }
     } else {
         if (WORLD->current_level == SPEEDERCHASEA_LDATA && disable_narrow_socks == 0 &&
-            static_cast<i8>(rider->apiobj.field_0x1f8) < 0) {
+            rider->apiobj.player_controlled) {
             blend_camera = 1;
         }
         RegisterTakeOverObject(vehicle);
-        if (TagCode(rider, vehicle, 1, blend_camera, 1) != 2) {
+        if (TagCode(rider, vehicle, 1, blend_camera, 1) != 2)
             return;
-        }
     }
-    u8 tag_flags = rider->tag_flags | 0x0c;
+    rider->tag_pending = 1;
     rider->pending_tag_target = vehicle;
     rider->tag_cooldown = 1.0f;
-    rider->tag_flags = tag_flags;
+    rider->tag_blend_camera = 1;
 }
 
 void DeactivateGameObject(GameObject_s *object) {

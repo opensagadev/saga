@@ -67,7 +67,7 @@ extern "C" {
     i32 saveloadCheckSlotsUsed(void);
     i32 saveloadDeleteSlot(i32 slot);
     i32 saveloadFormatCard(void);
-    void saveloadLoadIcon(void);
+    i32 saveloadLoadIcon(void);
     i32 saveloadUnFormatCard(void);
     i32 saveloadWriteKeyCode(char *id, u8 *code);
 #ifdef __cplusplus
@@ -78,5 +78,5 @@ char *slotfolder(i32 index);
 void createslotfolder(i32 slot);
 char *fullslotname(i32 index);
 char *fullcodename(i32 index);
-void saveloadGetDirectory();
+i32 saveloadGetDirectory();
 #endif

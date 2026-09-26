@@ -139,7 +139,7 @@ static void Pictures_FixUp(WORLDINFO *world) {
     if (world->scene != NULL) {
         Pictures_NumLevels = 0;
         for (i32 episode = 0; episode < EPISODECOUNT; episode++) {
-            char name[72];
+            char name[64];
             sprintf(name, "EP_%i", episode + 1);
             NuSpecialFind(world->scene, &LevHSpecial[10 + episode], name, 1);
 
@@ -163,7 +163,7 @@ static void Pictures_FixUp(WORLDINFO *world) {
 }
 
 static void Titles_Init(WORLDINFO *world) {
-    char title_name[72];
+    char title_name[64];
 
     NewGame();
     switch (Text_Language) {
@@ -755,7 +755,8 @@ void FixUpLevels(LEVELFIXUP *fixup) {
     if (level != NULL) {
         level->update_fn = UpdateStatusScreen;
         level->draw_status_fn = DrawStatusScreen;
-        level->flags = (level->flags & ~(LEVEL_GAMEPLAY | LEVEL_TERRAIN)) | LEVEL_STATUS;
+        level->flags &= ~(LEVEL_GAMEPLAY | LEVEL_TERRAIN);
+        level->flags |= LEVEL_STATUS;
     }
 
     {
@@ -1363,7 +1364,7 @@ void FixUpLevels(LEVELFIXUP *fixup) {
 
     {
         LEVELDATA *level = Level_FindByName("NB_Kamino_a", NULL);
-        NB_KAMINOALDATA_LDATA = level;
+        NB_KAMINOALDATA = level;
         if (level != NULL) {
             level->init_fn = NbKaminoA_Init;
             level->always_update_fn = KaminoA_AlwaysUpdate;
@@ -2349,7 +2350,7 @@ void GoToNewLevel(i32 levelIdx) {
 }
 
 void Level_LoadConfigFile(WORLDINFO *world) {
-    char name[140];
+    char name[128];
 
     ConfigBuffer[0] = '\0';
     sprintf(name, "%s.txt", world->config_file);

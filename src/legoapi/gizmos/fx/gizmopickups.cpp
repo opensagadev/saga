@@ -1004,8 +1004,7 @@ void SpecialMiniKits_Draw(WORLDINFO_s *world) {
     }
 
     NUVEC scale = {AreaPickupScale, AreaPickupScale, AreaPickupScale};
-    const u16 y_rotation = static_cast<u16>(
-        static_cast<i32>(NuFmod(GameTimer.time_elapsed, 4.0f) * 0.25f * 65536.0f));
+    const u16 y_rotation = static_cast<u16>(static_cast<i32>(NuFmod(GameTimer.time_elapsed, 4.0f) * 0.25f * 65536.0f));
     const u16 x_rotation =
         static_cast<u16>(static_cast<i32>(NuTrigTable[static_cast<i32>(y_rotation) & 0x7fff] * 1820.0f));
 
@@ -1055,8 +1054,7 @@ void SpecialMiniKits_Draw(WORLDINFO_s *world) {
         }
         GIZMOPICKUP_s *pickup = static_cast<GIZMOPICKUP_s *>(item->pickup_gizmo->object);
         i32 type_index = pickup->type_index;
-        if ((pickup->state_flags & GIZMOPICKUP_STATE_ALTERNATE_TYPE) != 0 &&
-            GizmoPickupSys->alternate_type != -1) {
+        if ((pickup->state_flags & GIZMOPICKUP_STATE_ALTERNATE_TYPE) != 0 && GizmoPickupSys->alternate_type != -1) {
             type_index = GizmoPickupSys->alternate_type;
         }
         GIZMO_PICKUP_TYPE *type = &GizmoPickupSys->types[type_index];

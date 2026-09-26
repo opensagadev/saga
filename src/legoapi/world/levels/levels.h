@@ -120,7 +120,7 @@ extern "C" {
     extern i32 podrace_section;
     extern i32 max_nsnipers;
     extern i32 PodRace_nsnipers;
-    extern SNIPER_s PodRace_snipers[5];
+    extern SNIPER_s PodRace_snipers[10];
     extern float PodRace_sniper_fire_time;
     extern float PodRace_sniper_start_fire_radius;
     extern float PodRace_sniper_fire_radius;

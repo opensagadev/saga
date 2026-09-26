@@ -87,7 +87,7 @@ void LedgeTerrain_MoveCode(GameObject_s *object) {
                 !(object->context_animation_timer >= 0.1f))
                 return;
         }
-        if (!(object->apiobj.field_0x1f8 & 0x80) && !(object->field_0xf01 & 0x80))
+        if (!object->apiobj.player_controlled && !(object->field_0xf01 & 0x80))
             return;
         if (!(object->pad_gamepad->input_magnitude > 0.0f))
             return;

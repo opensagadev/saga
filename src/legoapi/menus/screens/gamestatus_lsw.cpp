@@ -316,7 +316,7 @@ NEWMINIPIECE_s NewMiniPiece[10];
 
 void InitStatusScreen(WORLDINFO_s *world) {
     STATUSPACKET_s &p = StatusPacket;
-    char event[72];
+    char event[64];
     if (p.lsw_packet == NULL) {
         return;
     }

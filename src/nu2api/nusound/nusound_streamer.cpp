@@ -279,8 +279,12 @@ i32 NuSoundStreamingSample::Open(f32 start_offset, bool loop, bool weak_flag) {
 
     {
         NuSoundBuffer::Context context;
+        context.read_size = 0;
+        context.size2 = 0;
         context.flags &= ~2;
         context.flags |= 1;
+        context.field5_0x20 = 0;
+        context.size3 = 0;
 
         context = this->file_loader->FillStreamBuffer(this->sound_buffer1, loop);
 
@@ -407,8 +411,12 @@ i32 NuSoundStreamingSample::ReCue(f32 start_offset, bool loop) {
     this->file_loader->SeekTime(start_offset);
 
     NuSoundBuffer::Context context;
+    context.read_size = 0;
+    context.size2 = 0;
     context.flags &= ~2;
     context.flags |= 1;
+    context.field5_0x20 = 0;
+    context.size3 = 0;
 
     this->sound_buffer1->Lock();
     context = this->file_loader->FillStreamBuffer(this->sound_buffer1, loop);

@@ -238,7 +238,7 @@ bool MechTouchUI::RemoveUIElement(MechTouchUIElement &element) {
 }
 
 void MechTouchUI::Render() {
-    if (CUTSTOPGAME != 0 && GetMenuID() == -1) {
+    if (PANELOFF != 0 && GetMenuID() == -1) {
         return;
     }
     for (i32 i = 0; i < 32; ++i) {

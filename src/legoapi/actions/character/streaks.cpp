@@ -56,8 +56,8 @@ static STREAK_s *streaks_used;
 numtl_s *streakmtl;
 numtl_s *streakmtl_ref;
 
-static void CalculateBezierPoint(NUVEC *result, NUVEC *start, NUVEC *end, NUVEC *start_tangent,
-                                 NUVEC *end_tangent, f32 amount) {
+static void CalculateBezierPoint(NUVEC *result, NUVEC *start, NUVEC *end, NUVEC *start_tangent, NUVEC *end_tangent,
+                                 f32 amount) {
     NUVEC control_a;
     NUVEC control_b;
     NUVEC negative_tangent;
@@ -70,12 +70,12 @@ static void CalculateBezierPoint(NUVEC *result, NUVEC *start, NUVEC *end, NUVEC 
     const f32 control_a_weight = inverse * 3.0f * amount * inverse;
     const f32 control_b_weight = amount * 3.0f * amount * inverse;
     const f32 end_weight = amount * amount * amount;
-    result->x = start->x * start_weight + control_a.x * control_a_weight +
-                control_b.x * control_b_weight + end->x * end_weight;
-    result->y = start->y * start_weight + control_a.y * control_a_weight +
-                control_b.y * control_b_weight + end->y * end_weight;
-    result->z = start->z * start_weight + control_a.z * control_a_weight +
-                control_b.z * control_b_weight + end->z * end_weight;
+    result->x =
+        start->x * start_weight + control_a.x * control_a_weight + control_b.x * control_b_weight + end->x * end_weight;
+    result->y =
+        start->y * start_weight + control_a.y * control_a_weight + control_b.y * control_b_weight + end->y * end_weight;
+    result->z =
+        start->z * start_weight + control_a.z * control_a_weight + control_b.z * control_b_weight + end->z * end_weight;
 }
 
 static void CalculateStreakSegment(STREAK_s *newer, STREAK_s *segment) {
@@ -83,8 +83,8 @@ static void CalculateStreakSegment(STREAK_s *newer, STREAK_s *segment) {
         const f32 amount = static_cast<f32>(index) / static_cast<f32>(segment->segment_count);
         CalculateBezierPoint(&segment->positions[index - 1], &newer->position, &segment->position,
                              &newer->start_tangent, &segment->start_tangent, amount);
-        CalculateBezierPoint(&segment->tangents[index - 1], &newer->previous_position,
-                             &segment->previous_position, &newer->end_tangent, &segment->end_tangent, amount);
+        CalculateBezierPoint(&segment->tangents[index - 1], &newer->previous_position, &segment->previous_position,
+                             &newer->end_tangent, &segment->end_tangent, amount);
     }
 }
 
@@ -280,12 +280,10 @@ void DrawStreaks() {
 
             for (i32 index = 0; index < segment_count - 1; ++index) {
                 const f32 segment_fade = fade < 0.0f ? 0.0f : fade;
-                i32 segment_alpha =
-                    static_cast<i32>(static_cast<f32>(header->colour >> 24) * segment_fade * 2.0f);
+                i32 segment_alpha = static_cast<i32>(static_cast<f32>(header->colour >> 24) * segment_fade * 2.0f);
                 if (segment_alpha > 255)
                     segment_alpha = 255;
-                const u32 segment_colour =
-                    (header->colour & 0x00ffffff) | (static_cast<u32>(segment_alpha) << 24);
+                const u32 segment_colour = (header->colour & 0x00ffffff) | (static_cast<u32>(segment_alpha) << 24);
 
                 vertices[vertex_count].position = streak->positions[index];
                 vertices[vertex_count].colour = segment_colour;

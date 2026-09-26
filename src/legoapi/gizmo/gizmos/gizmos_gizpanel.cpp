@@ -38,10 +38,11 @@ extern i16 id_DARTHVADER, id_GRANDMOFFTARKIN, id_IMPERIALOFFICER, id_IMPERIALSHU
 void GizPanel_GetAbsTargetPos(GIZPANEL_s *panel, nuvec_s *target_position, i32 player_position);
 
 void GizPanel_Use(GameObject_s &object, GIZPANEL_s &panel) {
+    u16 angle = panel.y_rotation;
     object.field_0x788 = &panel;
     object.field_0x768 = 0.0f;
     object.delayed_turn_timer = 0.0f;
-    object.apiobj.movement_facing_angle = panel.y_rotation;
+    object.apiobj.movement_facing_angle = angle;
     object.field_0xe21 &= ~0x10;
     object.character_context = 0x0b;
     object.field_0x7a3 = 0;
@@ -81,13 +82,13 @@ void GizPanel_Use(GameObject_s &object, GIZPANEL_s &panel) {
             else
                 Hint_SetComplete(0x624);
         }
-        LSW_HintConditions |= 4;
+        LSW_HintConditions.panel_used = 1;
     }
     f32 duration = AnimDuration(object.id, object.context_animation, 0.0f, 0.0f, 1);
     object.field_0xdb0 = 0.0f;
-    if (duration <= 0.0f)
-        duration = 2.0f;
     object.context_animation_timer = duration;
+    if (duration <= 0.0f)
+        object.context_animation_timer = 2.0f;
 }
 
 void GizPanel_Reset(GIZPANEL_s *panel) {
@@ -183,7 +184,7 @@ void GizPanel_MoveCode(WORLDINFO_s *world, GameObject_s *object, i32 use) {
                             Hint_SetComplete(0x2b9);
                         } else {
                             Hint_SetComplete(0x25f);
-                            LSW_HintConditions |= 4;
+                            LSW_HintConditions.panel_used = 1;
                             if (static_cast<GIZPANEL_s *>(object->field_0x788)->model_variant == 0)
                                 Hint_SetComplete(0x625);
                             else
@@ -284,7 +285,7 @@ i32 GizPanel_UpdateHint(HINT_s *hint) {
         if (hint->control_mode_ids[0] == 0x625)
             return droid_type == 0 && FreePlay != 0 && AvailableToPlayer(0x50, -1, 0, 1) == 0;
         if (hint->control_mode_ids[0] == 0x25f)
-            return (LSW_HintConditions & 2) != 0;
+            return LSW_HintConditions.tc14_present;
     }
     return 0;
 }

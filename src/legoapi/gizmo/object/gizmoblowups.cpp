@@ -641,8 +641,7 @@ void GizmoBlowupCreateStuff(GIZMOBLOWUP_s *blowup) {
         if (choice < 50.0f) {
             i32 count = static_cast<i32>(NuFloatRand(reinterpret_cast<NURAND *>(&GAMERAND)) * 3.0f);
             for (i32 i = 0; i <= count; ++i) {
-                i32 angle =
-                    static_cast<u16>(static_cast<i32>(NuFloatRand(reinterpret_cast<NURAND *>(&GAMERAND)) * 65536.0f));
+                i32 angle = static_cast<u16>(NuFloatRand(reinterpret_cast<NURAND *>(&GAMERAND)) * 65536.0f);
                 GameObject_s *object =
                     AddDynamicCreature(model, &blowup->mid_position, angle, script, NULL, NULL, 1, NULL, NULL, 0, -1);
                 if (object != NULL) {

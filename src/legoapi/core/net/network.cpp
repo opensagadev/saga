@@ -248,12 +248,12 @@ TTNetwork::TTNetwork() : field_20(0), field_24(0), field_2140(0), my_address(), 
     has_my_host_address = 0;
     field_213c = 0;
     field_2150 = 0;
-    field_2154 = 1.0f;
-    field_2160 = 1.0f;
+    field_2154 = 0.3f;
+    field_2160 = 0.3f;
 }
 
 char const *TTNetwork::GetName() {
-    return "";
+    return "Network";
 }
 
 void TTNetwork::Update() {

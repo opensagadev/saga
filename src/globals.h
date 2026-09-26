@@ -65,7 +65,13 @@ DECOMP_ASSERT(sizeof(TERRAIN_LAYER_s) == 0x0c, "TERRAIN_LAYER_s ABI");
 typedef i32 (*USING_EXTRA_ACTIONS_FN)(GameObject_s *object);
 
 extern USING_EXTRA_ACTIONS_FN UsingExtraActionsFn;
-extern u32 LSW_HintConditions;
+// Hint preconditions that are only met once the player has done something.
+struct LSW_HINTCONDITIONS_s {
+    u32 force_used : 1;
+    u32 tc14_present : 1;
+    u32 panel_used : 1;
+};
+extern LSW_HINTCONDITIONS_s LSW_HintConditions;
 extern bool (*IsWearingBackPackFn)(GameObject_s *);
 extern i32 (*Jump_PreventJumpFn)(GameObject_s *);
 extern i32 (*CanMagnetClimbFn)(GameObject_s *);
@@ -716,12 +722,12 @@ extern APICHARACTERMODELLIST_s *CurrentCList;
 extern APICHARACTERMODELLIST_s *CurrentStoryCList;
 extern i32 Area_PlayerModelCount;
 extern i32 Area_StoryModelCount;
-extern i16 Area_PlayerModelList[24];
+extern i16 Area_PlayerModelList[18];
 extern i32 Area_FreePlayModelCount;
 extern i16 Area_FreePlayModelList[104];
 extern i32 hub_freeplaysource;
 extern i32 Area_MissionModelCount;
-extern APICHARACTERMODELLIST_s Area_MissionModelList[52];
+extern APICHARACTERMODELLIST_s Area_MissionModelList[49];
 extern APICHARACTERMODELLIST_s Area_StoryModelList[52];
 
 // ------------------------------------------------------------------------
@@ -872,7 +878,7 @@ extern LEVELDATA *MOSEISLEYB_LDATA;
 extern LEVELDATA *MOSEISLEYC_LDATA;
 extern LEVELDATA *MOSEISLEYD_LDATA;
 extern LEVELDATA *MOSEISLEYE_LDATA;
-extern LEVELDATA *NB_KAMINOALDATA_LDATA;
+extern LEVELDATA *NB_KAMINOALDATA;
 extern LEVELDATA *NEGOTIATIONSA_LDATA;
 extern LEVELDATA *NEGOTIATIONSB_LDATA;
 extern LEVELDATA *NEGOTIATIONSC_LDATA;
@@ -1051,6 +1057,7 @@ extern void (*AIPathCnxHelperSysInitFn)(WORLDINFO_s *);
 // ------------------------------------------------------------------------
 // Loading screen (LoadPerm) globals
 // ------------------------------------------------------------------------
+extern char *lsw_memcard_objname;
 extern LEVELOBJECT ObjTab[0x2ee]; // level-object type table (.data @0x618240, 0xff-terminated)
 extern struct LEVELSPLINE SplTab[26];
 extern CHARCATEGORY LSW_CharCategory[10];
@@ -1078,11 +1085,11 @@ extern i32 (*Bolt_HitPlatFn)(BOLT_s *);
 extern i32 (*Bolt_HitCustomFn)(BOLT_s *, nuvec_s *);
 extern void (*GizObstacle_SetDefaultSFXFn)(void *, GIZOBSTACLE_s *);
 
-extern i32 PermDataLoaded;          // original .data init 1
-extern i32 LoadPerm_LanguageSelect; // bss
-extern i32 LoadPerm_StringsLoaded;  // bss
-extern i32 menu_flash;              // bss
-extern i32 noscenespecials;         // disables automatic display-scene specials
+extern i32 PermDataLoaded;                   // original .data init 1
+extern volatile i32 LoadPerm_LanguageSelect; // bss
+extern i32 LoadPerm_StringsLoaded;           // bss
+extern i32 menu_flash;                       // bss
+extern i32 noscenespecials;                  // disables automatic display-scene specials
 extern i32 portals_enabled;
 extern i32 portal_special_objects; // portal visibility also filters display-scene specials
 extern u8 PortalVisiFlags[0x271];  // portal-visibility bitset for up to 5000 scene instances

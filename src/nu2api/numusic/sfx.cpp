@@ -40,9 +40,9 @@ static i32 NumSfx = 0;
 static i32 NumSfxInst = 0;
 static u32 NumSfxNames = 0;
 
-static char sfx_name[1600][32] = {0};
-static char sfx_filename[1600][64];
-static i32 sfx_refcount[1600] = {0};
+static char sfx_name[1601][32] = {0};
+static char sfx_filename[1601][64];
+static i32 sfx_refcount[1601] = {0};
 
 static char cfgfile_name[256] = "Audio/audio.cfg";
 
@@ -180,26 +180,31 @@ static void fnAudioSample(nufpar_s *fpar) {
             g_soundInfo[NumSfxInst].volume_rnd = volume_rnd < -1.0f ? -1.0f : volume_rnd > 0.0f ? 0.0f : volume_rnd;
         } else if (NuStrICmp(fpar->word_buf, "near") == 0) {
             f32 falloff_near = NuFParGetFloat(fpar);
-            g_soundInfo[NumSfxInst].falloff_near =
-                falloff_near < 0.0f ? 0.0f : falloff_near > 250.0f ? 250.0f : falloff_near;
+            g_soundInfo[NumSfxInst].falloff_near = falloff_near < 0.0f     ? 0.0f
+                                                   : falloff_near > 250.0f ? 250.0f
+                                                                           : falloff_near;
         } else if (NuStrICmp(fpar->word_buf, "far") == 0) {
             f32 falloff_far = NuFParGetFloat(fpar);
-            g_soundInfo[NumSfxInst].falloff_far =
-                falloff_far < 0.0f ? 0.0f : falloff_far > 250.0f ? 250.0f : falloff_far;
+            g_soundInfo[NumSfxInst].falloff_far = falloff_far < 0.0f     ? 0.0f
+                                                  : falloff_far > 250.0f ? 250.0f
+                                                                         : falloff_far;
         } else if (NuStrICmp(fpar->word_buf, "global") == 0) {
             g_soundInfo[NumSfxInst].global = 1;
         } else if (NuStrICmp(fpar->word_buf, "rumble") == 0) {
             f32 buzz_timer = NuFParGetFloat(fpar);
             i32 rumble_strength = NuFParGetInt(fpar);
             g_soundInfo[NumSfxInst].buzz_timer = buzz_timer < 0.0f ? 0.0f : buzz_timer > 5.0f ? 5.0f : buzz_timer;
-            g_soundInfo[NumSfxInst].rumble_strength =
-                rumble_strength < 0 ? 0 : rumble_strength > 0xff ? 0xff : rumble_strength;
+            g_soundInfo[NumSfxInst].rumble_strength = rumble_strength < 0      ? 0
+                                                      : rumble_strength > 0xff ? 0xff
+                                                                               : rumble_strength;
             f32 rumble_sustain = NuFParGetFloat(fpar);
-            g_soundInfo[NumSfxInst].rumble_sustain =
-                rumble_sustain < 0.0f ? 0.0f : rumble_sustain > 5.0f ? 5.0f : rumble_sustain;
+            g_soundInfo[NumSfxInst].rumble_sustain = rumble_sustain < 0.0f   ? 0.0f
+                                                     : rumble_sustain > 5.0f ? 5.0f
+                                                                             : rumble_sustain;
             f32 rumble_release = NuFParGetFloat(fpar);
-            g_soundInfo[NumSfxInst].rumble_release =
-                rumble_release < 0.0f ? 0.0f : rumble_release > 5.0f ? 5.0f : rumble_release;
+            g_soundInfo[NumSfxInst].rumble_release = rumble_release < 0.0f   ? 0.0f
+                                                     : rumble_release > 5.0f ? 5.0f
+                                                                             : rumble_release;
         } else if (NuStrICmp(fpar->word_buf, "fcat") == 0) {
             i32 category = NuFParGetInt(fpar);
             g_soundInfo[NumSfxInst].category = category < 0 ? 0 : category > 0xffff ? 0xffff : category;
@@ -503,7 +508,9 @@ bool HandleGroupLimit(i32 group_id) {
     SoundGroup *group = &g_groups[group_id];
     i32 voice_count = 0;
     NuSoundVoice *oldest_voice = NULL;
-    f32 oldest_position = -1.0f;
+    // The original starts from FLT_MAX, so the "oldest" test below never
+    // selects a voice.
+    f32 oldest_position = 3.4028234663852886e+38f;
 
     for (i32 i = 0; i < group->sample_count; i++) {
         i32 sfx_id = g_groupBuffer[group->first_sample + i];

@@ -17,7 +17,16 @@ typedef struct ATTRACTO_s {
             u8 capacity;        // 0x5e
             u8 collected_count; // 0x5f
             i16 platform_id;    // 0x60
-            u8 state_flags;     // 0x62
+            union {
+                u8 state_flags; // 0x62
+                struct {
+                    u8 active : 1;
+                    u8 visible : 1;
+                    u8 filled : 1;
+                    u8 drawn : 1;
+                    u8 : 4;
+                };
+            };
             u8 reserved_63;
             NUVEC active_position; // 0x64
             u16 ground_angle_z;    // 0x70

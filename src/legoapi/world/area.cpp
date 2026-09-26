@@ -47,18 +47,18 @@ struct APICHARACTERMODELLIST_s;
 struct CUSTOMISER;
 struct MISSIONSYS_s;
 
-extern i32 abort_load;
+extern volatile i32 abort_load;
 extern NUGSCN *area_scene;
 extern NUGSCN *vehicle_scene;
 extern NUGSCN *big_icon_scene;
 extern i16 id_ANAKINJEDISCARRED;
 extern i16 id_HANINCARBONITE;
 extern i16 id_DEFAULTCHARACTER[2];
-extern i16 Area_PlayerModelList[24];
-extern APICHARACTERMODELLIST_s Area_MissionModelList[52];
+extern i16 Area_PlayerModelList[18];
+extern APICHARACTERMODELLIST_s Area_MissionModelList[49];
 extern APICHARACTERMODELLIST_s Area_StoryModelList[52];
 extern APICHARACTERMODELLIST_s FreePlayModelList[52];
-extern APICHARACTERMODELLIST_s Hub_ModelList[8];
+extern APICHARACTERMODELLIST_s Hub_ModelList[6];
 extern i32 Area_PlayerModelCount;
 extern CUSTOMISER *CharacterCustomiser;
 extern i32 makefreeplaymodellist;
@@ -493,8 +493,7 @@ load_type_done:
 
     if (load_type == 2 && SuperOptions.music_enabled != 0 && NOSOUND == 0 && NOMUSIC == 0) {
         static const char *crawl_music[] = {
-            "Ep1_TextCrawl", "Ep2_TextCrawl", "Ep3_TextCrawl",  "Ep4_TextCrawl",
-            "Ep5_TextCrawl", "Ep6_TextCrawl", "Ep1_EndCredits", "Ep2_EndCredits",
+            "Ep1_TextCrawl", "Ep2_TextCrawl", "Ep3_TextCrawl", "Ep4_TextCrawl", "Ep5_TextCrawl", "Ep6_TextCrawl",
         };
         const i32 episode = Area == -1 ? -1 : static_cast<i8>(ADataList[Area].episode_index);
         if (Arcade == 0 && episode != -1) {

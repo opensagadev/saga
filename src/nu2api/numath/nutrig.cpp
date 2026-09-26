@@ -165,7 +165,7 @@ f32 NuAtanf(i32 dx, i32 dy) {
     if (dx == 0) {
         return dy < 0 ? 3.1415927410125732f : 0.0f;
     } else if (dy == 0) {
-        return dx < 0 ? -1.5707963705062866f : 1.5707963705062866f;
+        return dx < 0 ? 4.71238899230957f : 1.5707963705062866f;
     } else if (dx < 0) {
         if (dy < 0)
             return fxy(-dx, -dy) + 3.1415927410125732f;

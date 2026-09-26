@@ -242,7 +242,7 @@ void Grabber_Update(WORLDINFO_s *world) {
         if (pitch > 1.0f)
             pitch = 1.0f;
         PlaySfxAndSetPitch("env_hover_box_lp", &next, pitch);
-        next.y = g->initial_position.y + 0.0125f * NU_SIN_LUT((u16)(i32)((NuFmod(GameTimer, 2.0f) * 0.5f) * 65536.0f));
+        next.y = g->initial_position.y + 0.0125f * NU_SIN_LUT((u16)((NuFmod(GameTimer, 2.0f) * 0.5f) * 65536.0f));
         g->target_velocity.y = g->velocity.y = 0.0f;
         if (g->platform_contact_timer > 0.0f)
             next.y -=

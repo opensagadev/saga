@@ -17,7 +17,7 @@ void EndMission(MISSIONSYS *ms, i32 param1, i32 param2) {
     if (netclient == 0 || param2 == 0) {
         ms->field8_0x1d = (u8)param1;
         SetBonusWinner(qrand() / 0x8000);
-        if (Player[BonusWinner] == NULL || (Player[BonusWinner]->apiobj.field_0x1f8 & 0x80) == 0) {
+        if (Player[BonusWinner] == NULL || !Player[BonusWinner]->apiobj.player_controlled) {
             BonusWinner = (BonusWinner == 0);
         }
         BonusWinFlag = 0;
@@ -40,7 +40,7 @@ void EndChallenge(i32 param1, i32 param2) {
     if (netclient == 0 || param2 == 0) {
         ChallengeMode = param1;
         SetBonusWinner(qrand() / 0x8000);
-        if (Player[BonusWinner] == NULL || (Player[BonusWinner]->apiobj.field_0x1f8 & 0x80) == 0) {
+        if (Player[BonusWinner] == NULL || !Player[BonusWinner]->apiobj.player_controlled) {
             BonusWinner = (BonusWinner == 0);
         }
         BonusWinFlag = 0;

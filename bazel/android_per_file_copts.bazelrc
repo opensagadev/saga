@@ -10,6 +10,8 @@ build:target --per_file_copt=^src/batman\.cpp$@-O2
 # The original numaths.c has C++ linkage and constructs per-TU VuVec constants.
 build --per_file_copt=^src/nu2api/numath/numaths\.c$@-x,c++,-std=gnu++11
 build --per_file_copt=^src/nu2api/numath/nufloat_android\.c$@-x,c++,-std=gnu++11
+# The original nufloat unit has C++ linkage for its tolerance static (_ZL5fetol).
+build --per_file_copt=^src/nu2api/numath/nufloat\.c$@-x,c++,-std=gnu++11
 # The original rain unit was named .c but compiled as C++ (VuVec constructors).
 build --per_file_copt=^src/nu2api/nu3d/android/nurain_android\.c$@-x,c++,-std=gnu++11
 # The original Android time unit likewise used a .c filename with C++

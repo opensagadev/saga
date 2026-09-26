@@ -2375,8 +2375,8 @@ enum SHADERSEMANTIC_enum : i32 {};
 struct SHARD_s;
 struct SOCKPOSITION_s;
 
-enum STATUS_FLAGS {
-    STATUS_FLAG_DRAW_BACKDROP = 0x04,
+enum STATUS_MODE_FLAGS {
+    STATUS_MODE_SUPERSTORY = 0x04, // STATUSPACKET_s::mode_flags; also draws the backdrop in NuMain
 };
 // Status / achievements screen packet (332 bytes; fields used by NuMain:
 // model ids at 0x9c/0x9e, per-player bytes at 0xa4/0xa5, flags at 0xb1/0xb2).
@@ -3593,7 +3593,9 @@ struct pushblock_s {
             union {
                 u8 flags_0ca;
                 struct {
-                    u8 fields_0ca_0_3 : 4;
+                    u8 fields_0ca_0_1 : 2;
+                    u8 push_visible : 1;
+                    u8 fields_0ca_3 : 1;
                     u8 config_0ca_4 : 1;
                     u8 config_0ca_5 : 1;
                     u8 config_0ca_6 : 1;
@@ -3899,7 +3901,7 @@ struct ClassEditor : BaseEditor {
     static void cbEdClassToolsMenu(eduimenu_s *, eduiitem_s *, u32);
     static void cbEdClassViewMenu(eduimenu_s *, eduiitem_s *, u32);
     i32 cbEdCopySelectedObject(EdInputContext &);
-    i32 cbEdCreateClassNewObject(i32);
+    static i32 cbEdCreateClassNewObject(i32);
     static void cbEdFilterLED(eduimenu_s *, eduiitem_s *, u32);
     void cbEdLevelDeselectAll(eduimenu_s *, eduiitem_s *, u32);
     void cbEdLevelSelectAll(eduimenu_s *, eduiitem_s *, u32);
@@ -4279,8 +4281,31 @@ struct GIZFORCE_s {
     };
     union {
         struct {
-            u8 progress_flags; // 0xa8, GIZFORCE_PROGRESS_FLAGS
-            u8 runtime_flags;  // 0xa9, GIZFORCE_RUNTIME_FLAGS
+            union {
+                u8 progress_flags; // 0xa8, GIZFORCE_PROGRESS_FLAGS
+                struct {
+                    u8 progress_enabled : 1;
+                    u8 progress_visible : 1;
+                    u8 : 2;
+                    u8 progress_reverse_active : 1;
+                    u8 progress_group_member : 1;
+                    u8 progress_animation_reversed : 1;
+                    u8 progress_draw_active : 1;
+                };
+            };
+            union {
+                u8 runtime_flags; // 0xa9, GIZFORCE_RUNTIME_FLAGS
+                struct {
+                    u8 runtime_has_platform : 1;
+                    u8 runtime_reward_released : 1;
+                    u8 runtime_pending_blowup_type : 1;
+                    u8 runtime_along_socket_hidden : 1;
+                    u8 runtime_offset_applied : 1;
+                    u8 runtime_force_range_complete : 1;
+                    u8 runtime_completion_released : 1;
+                    u8 runtime_pending_completion : 1;
+                };
+            };
             union {
                 u8 field_0xaa;
                 u8 state_flags; // GIZFORCE_STATE_FLAGS
@@ -5504,7 +5529,7 @@ struct PropertyMenu {
     void AddObject(ClassObject &);
     void ClearObjecs();
     bool ContainsObject(ClassObject &);
-    bool ContainsObject(void *);
+    i32 ContainsObject(void *);
     void Destroy();
     void SelectAttr(i32);
 };

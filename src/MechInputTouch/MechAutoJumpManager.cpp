@@ -267,8 +267,7 @@ void MechAutoJumpManager::Process() {
             centre.y += NuTrigTable[(static_cast<i32>(t * 32768.0f) >> 1) & 0x7fff];
             i32 facing = NuAtan2D(end_node->position.x - centre.x, end_node->position.z - centre.z);
             NUVEC cross = {testStreakCrossSize, 0.0f, 0.0f};
-            NuVecRotateZ(&cross, &cross,
-                         static_cast<u16>(static_cast<i32>(LevelTimer.time_elapsed * testStreakRotateSpeed)));
+            NuVecRotateZ(&cross, &cross, static_cast<u16>(LevelTimer.time_elapsed * testStreakRotateSpeed));
             NuVecRotateY(&cross, &cross, static_cast<u16>(facing));
             NuVecAdd(&streak->start, &centre, &cross);
             NuVecSub(&streak->end, &centre, &cross);
@@ -327,8 +326,7 @@ void MechAutoJumpManager::Render() {
         if (jump->cooldown <= 0.0f) {
             AIPATHNODE *node = &jump->path->nodes[jump->connection->node_indices[jump->direction]];
             NUVEC cross = {testStreakCrossSize2, 0.0f, 0.0f};
-            NuVecRotateY(&cross, &cross,
-                         static_cast<u16>(static_cast<i32>(LevelTimer.time_elapsed * testStreakRotateSpeed)));
+            NuVecRotateY(&cross, &cross, static_cast<u16>(LevelTimer.time_elapsed * testStreakRotateSpeed));
             NUVEC first;
             NUVEC second;
             NuVecAdd(&first, &node->position, &cross);

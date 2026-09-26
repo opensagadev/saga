@@ -360,7 +360,7 @@ void CreatureCrate_Stop(PART_s *part) {
     if (type != -1)
         AddFiniteShotPART(type, &part->position, 1);
     object->ai.reset_mode = 2;
-    object->apiobj.field_0x1f8 |= 0x1000;
+    object->apiobj.flags_high |= APIOBJECT_HIGH_FLAG_CHARACTER;
     PlaySfx("Explode1", &part->position);
     GameCam_Judder(GameCam, 0.1f, 0, NULL);
     NewRumbleAllPlayers(0.0f, 0.0f, 2, 0);

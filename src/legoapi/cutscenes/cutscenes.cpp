@@ -52,7 +52,7 @@ extern i32 CUTCAM;
 extern i32 CutSceneWaiting;
 extern i32 CUTCAMONLY;
 extern i32 cut_waiting_for_new_level;
-extern i32 waiting_for_level;
+extern volatile i32 waiting_for_level;
 extern i32 newlevel_resumecutaudio;
 extern CUTSYS *CS_cutsys;
 extern FadeSystem FadeSys;

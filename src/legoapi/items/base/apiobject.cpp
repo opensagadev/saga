@@ -61,7 +61,7 @@ static char RedirectAnimDir[0x40] = "chars\\commonanims\\";
 f32 character_farclip = 0.0f;
 
 static void GameObjectForceApart2D(APIOBJECT *first, APIOBJECT *second) {
-    const u16 angle = static_cast<u16>(static_cast<i32>(NuRandFloat() * 65536.0f));
+    const u16 angle = static_cast<u16>(NuRandFloat() * 65536.0f);
 
     if ((first->flags_low & 2) != 0 && (second->flags_low & 2) == 0) {
         second->velocity.x = NuTrigTable[static_cast<u16>(angle >> 1)] * 4.0f;
@@ -2549,8 +2549,7 @@ extern "C" {
             StoreLocatorCoordinates(model, matrix, output_matrices, locator_positions, locator_matrices);
             drawcharactermodel_locatorsupdated = 1;
 
-            if (locator_matrices != NULL && paused == 0 && character_data != NULL &&
-                character_data->effects != NULL) {
+            if (locator_matrices != NULL && paused == 0 && character_data != NULL && character_data->effects != NULL) {
                 AddAnimEffects(model, character_data, animation, locator_matrices, object,
                                apicharsys->char_data[model->model_id].effects, paused, frame_time, footprint_callback,
                                debris_sys);

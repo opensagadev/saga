@@ -60,9 +60,10 @@ void SetLights(NUCOLOUR3 *colour0, NUVEC *direction0, NUCOLOUR3 *colour1, NUVEC 
     NuRndrSetAmbientLightPS(ambient_colour);
 }
 
-static inline __attribute__((always_inline)) void SetPanelLightsInline(
-    NUCOLOUR3 *colour0, NUVEC *direction0, NUCOLOUR3 *colour1, NUVEC *direction1, NUCOLOUR3 *colour2,
-    NUVEC *direction2, NUVEC *ambient) {
+static inline __attribute__((always_inline)) void SetPanelLightsInline(NUCOLOUR3 *colour0, NUVEC *direction0,
+                                                                       NUCOLOUR3 *colour1, NUVEC *direction1,
+                                                                       NUCOLOUR3 *colour2, NUVEC *direction2,
+                                                                       NUVEC *ambient) {
     NuRndrLightingStateCurrent.direction[0] = *direction0;
     NuRndrLightingStateCurrent.direction[1] = *direction1;
     NuRndrLightingStateCurrent.direction[2] = *direction2;

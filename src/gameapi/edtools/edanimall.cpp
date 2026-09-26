@@ -236,13 +236,13 @@ static __attribute__((used)) void edanimcbSetBouncyTension(eduimenu_s *, eduiite
 static __attribute__((used)) void edanimcbLocalParticleMenu(eduimenu_s *, eduiitem_s *, u32);
 
 static __attribute__((used)) void edanimcbMCTBCardFreeSpace(eduimenu_s *menu, eduiitem_s *, u32) {
-    char message[36];
+    char message[32];
     sprintf(message, "Space = %05d", saveloadCheckCardFreeSpace(0));
     eduiCreateMessageMenu(menu, message, 1);
 }
 
 static __attribute__((used)) void edanimcbMCTBCardSlotsUsed(eduimenu_s *menu, eduiitem_s *, u32) {
-    char message[36];
+    char message[32];
     sprintf(message, "Slots Used = %02d", saveloadCheckSlotsUsed());
     eduiCreateMessageMenu(menu, message, 1);
 }

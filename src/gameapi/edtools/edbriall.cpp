@@ -222,9 +222,9 @@ static void edbricbSetBridgeStability(eduimenu_s *, eduiitem_s *item, u32) {
 static void edbricbSetRopeColour(eduimenu_s *menu, eduiitem_s *item, u32) {
     edui_colour_pick_s *colour = static_cast<edui_colour_pick_s *>(item);
     edbridge_s &bridge = edBridges[edbri_nearest];
-    bridge.red = static_cast<u8>(static_cast<i32>(colour->red * 255.0f));
-    bridge.green = static_cast<u8>(static_cast<i32>(colour->green * 255.0f));
-    bridge.blue = static_cast<u8>(static_cast<i32>(colour->blue * 255.0f));
+    bridge.red = static_cast<u8>(colour->red * 255.0f);
+    bridge.green = static_cast<u8>(colour->green * 255.0f);
+    bridge.blue = static_cast<u8>(colour->blue * 255.0f);
     edbriBridgeUpdate(edbri_nearest, edbits_base_scene);
     eduimenu_s *parent = menu->parent;
     eduiMenuDetach(menu);

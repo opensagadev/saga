@@ -1199,7 +1199,7 @@ void ClassEditor::cbEdClassExportMenu(eduimenu_s *, eduiitem_s *, u32) {
 }
 
 void ClassEditor::cbEdClassFileMenu(eduimenu_s *parent, eduiitem_s *item, u32) {
-    eduimenu_s *menu = eduiMenuCreate(parent->x + item->x, item->y, 180, 250,
+    eduimenu_s *menu = eduiMenuCreate(item->x + parent->width, item->y, 180, 250,
                                       reinterpret_cast<void *>(static_cast<usize>(EdLevelFnt)), cbEdLevelDestroy, NULL);
     if (menu == NULL)
         return;
@@ -1224,7 +1224,7 @@ void ClassEditor::cbEdClassImportMenu(eduimenu_s *, eduiitem_s *, u32) {
 }
 
 void ClassEditor::cbEdClassModeMenu(eduimenu_s *parent, eduiitem_s *item, u32) {
-    eduimenu_s *menu = eduiMenuCreate(parent->x + item->x, item->y, 180, 250,
+    eduimenu_s *menu = eduiMenuCreate(item->x + parent->width, item->y, 180, 250,
                                       reinterpret_cast<void *>(static_cast<usize>(EdLevelFnt)), cbEdLevelDestroy, NULL);
     if (menu == NULL)
         return;
@@ -1246,7 +1246,7 @@ void ClassEditor::cbEdClassModeMenu(eduimenu_s *parent, eduiitem_s *item, u32) {
 }
 
 void ClassEditor::cbEdClassNewMenu(eduimenu_s *parent, eduiitem_s *item, u32) {
-    eduimenu_s *menu = eduiMenuCreate(parent->x + item->x, item->y, 180, 250,
+    eduimenu_s *menu = eduiMenuCreate(item->x + parent->width, item->y, 180, 250,
                                       reinterpret_cast<void *>(static_cast<usize>(EdLevelFnt)), cbEdLevelDestroy, NULL);
     if (menu == NULL)
         return;
@@ -1270,9 +1270,9 @@ void ClassEditor::cbEdClassNewObject(eduimenu_s *parent, eduiitem_s *item, u32) 
         theLevelEditor.CloseMenu();
         return;
     }
-    eduimenu_s *error_menu =
-        eduiMenuCreate(parent->x + item->x, item->y, 180, 250, reinterpret_cast<void *>(static_cast<usize>(EdLevelFnt)),
-                       cbEdLevelDestroy, const_cast<char *>("Error!"));
+    eduimenu_s *error_menu = eduiMenuCreate(item->x + parent->width, item->y, 180, 250,
+                                            reinterpret_cast<void *>(static_cast<usize>(EdLevelFnt)), cbEdLevelDestroy,
+                                            const_cast<char *>("Error!"));
     if (error_menu == NULL)
         return;
     eduiMenuAddItem(error_menu, eduiItemSelCreate(1, &EdLevelAttr, 0, 0, cbEdLevelDestroyOnSelect,
@@ -1337,7 +1337,7 @@ void ClassEditor::cbEdClassRemoveDuplicates(eduimenu_s *, eduiitem_s *, u32) {
 }
 
 void ClassEditor::cbEdClassSelectClassMenu(eduimenu_s *parent, eduiitem_s *item, u32) {
-    eduimenu_s *menu = eduiMenuCreate(parent->x + item->x, item->y, 180, 250,
+    eduimenu_s *menu = eduiMenuCreate(item->x + parent->width, item->y, 180, 250,
                                       reinterpret_cast<void *>(static_cast<usize>(EdLevelFnt)), cbEdLevelDestroy, NULL);
     if (menu == NULL)
         return;
@@ -1379,7 +1379,7 @@ void ClassEditor::cbEdClassSelectObject(eduimenu_s *, eduiitem_s *item, u32) {
 void ClassEditor::cbEdClassSelectObjectMenu(eduimenu_s *parent, eduiitem_s *item, u32) {
     EdClass *ed_class = theRegistry.GetClass(static_cast<i32>(item->data));
     theClassEditor.pending_object.ed_class = ed_class;
-    eduimenu_s *menu = eduiMenuCreate(parent->x + item->x, item->y, 180, 250,
+    eduimenu_s *menu = eduiMenuCreate(item->x + parent->width, item->y, 180, 250,
                                       reinterpret_cast<void *>(static_cast<usize>(EdLevelFnt)), cbEdLevelDestroy, NULL);
     if (menu == NULL)
         return;
@@ -1448,7 +1448,7 @@ void ClassEditor::cbEdClassSetView(eduimenu_s *menu, eduiitem_s *item, u32) {
 }
 
 void ClassEditor::cbEdClassSnapMenu(eduimenu_s *parent, eduiitem_s *item, u32) {
-    eduimenu_s *menu = eduiMenuCreate(parent->x + item->x, item->y, 180, 250,
+    eduimenu_s *menu = eduiMenuCreate(item->x + parent->width, item->y, 180, 250,
                                       reinterpret_cast<void *>(static_cast<usize>(EdLevelFnt)), cbEdLevelDestroy, NULL);
     if (menu == NULL)
         return;
@@ -1464,7 +1464,7 @@ void ClassEditor::cbEdClassSnapMenu(eduimenu_s *parent, eduiitem_s *item, u32) {
 }
 
 void ClassEditor::cbEdClassToolsMenu(eduimenu_s *parent, eduiitem_s *item, u32) {
-    eduimenu_s *menu = eduiMenuCreate(parent->x + item->x, item->y, 180, 250,
+    eduimenu_s *menu = eduiMenuCreate(item->x + parent->width, item->y, 180, 250,
                                       reinterpret_cast<void *>(static_cast<usize>(EdLevelFnt)), cbEdLevelDestroy, NULL);
     if (menu == NULL)
         return;
@@ -1476,7 +1476,7 @@ void ClassEditor::cbEdClassToolsMenu(eduimenu_s *parent, eduiitem_s *item, u32) 
 }
 
 void ClassEditor::cbEdClassViewMenu(eduimenu_s *parent, eduiitem_s *item, u32) {
-    eduimenu_s *menu = eduiMenuCreate(parent->x + item->x, item->y, 180, 250,
+    eduimenu_s *menu = eduiMenuCreate(item->x + parent->width, item->y, 180, 250,
                                       reinterpret_cast<void *>(static_cast<usize>(EdLevelFnt)), cbEdLevelDestroy, NULL);
     if (menu == NULL)
         return;
@@ -1749,9 +1749,9 @@ void LevelEditor::CloseMenu() {
 }
 
 void LevelEditor::CreateEditorList(eduimenu_s *parent, eduiitem_s *item) {
-    eduimenu_s *menu =
-        eduiMenuCreate(parent->x + item->x, item->y, 180, 250, reinterpret_cast<void *>(static_cast<usize>(EdLevelFnt)),
-                       cbEdLevelDestroy, const_cast<char *>("Editor List"));
+    eduimenu_s *menu = eduiMenuCreate(item->x + parent->width, item->y, 180, 250,
+                                      reinterpret_cast<void *>(static_cast<usize>(EdLevelFnt)), cbEdLevelDestroy,
+                                      const_cast<char *>("Editor List"));
     if (menu == NULL)
         return;
     for (BaseEditor *editor = first_editor; editor != NULL; editor = editor->next) {
@@ -1773,9 +1773,9 @@ static void cbEdLevelEditorSelect(eduimenu_s *, eduiitem_s *item, u32) {
 }
 
 static void cbEdLevelSettingsMenu(eduimenu_s *parent, eduiitem_s *item, u32) {
-    eduimenu_s *menu =
-        eduiMenuCreate(parent->x + item->x, item->y, 180, 250, reinterpret_cast<void *>(static_cast<usize>(EdLevelFnt)),
-                       cbEdLevelDestroy, const_cast<char *>("Options"));
+    eduimenu_s *menu = eduiMenuCreate(item->x + parent->width, item->y, 180, 250,
+                                      reinterpret_cast<void *>(static_cast<usize>(EdLevelFnt)), cbEdLevelDestroy,
+                                      const_cast<char *>("Options"));
     if (menu == NULL)
         return;
     eduiMenuAddItem(menu, eduiItemSelCreate(1, &EdLevelAttr, 0, 0, cbEdLevelSave, const_cast<char *>("Save Data")));
@@ -3076,10 +3076,10 @@ void DumpAreaData(i32 mode, i32) {
 
 void cbEdLevelSave(eduimenu_s *parent, eduiitem_s *item, u32) {
     theLevelEditor.Save();
-    eduimenu_s *menu =
-        eduiMenuCreate(parent->x + item->x, item->y, 180, 250, reinterpret_cast<void *>(static_cast<usize>(EdLevelFnt)),
-                       cbEdLevelDestroy, const_cast<char *>("Save File"));
-    char message[136];
+    eduimenu_s *menu = eduiMenuCreate(item->x + parent->width, item->y, 180, 250,
+                                      reinterpret_cast<void *>(static_cast<usize>(EdLevelFnt)), cbEdLevelDestroy,
+                                      const_cast<char *>("Save File"));
+    char message[128];
     if (!theLevelEditor.active) {
         if (menu) {
             strcpy(message, "Saving not allowed in Debug Mode - change to Edit Mode");
@@ -3573,13 +3573,13 @@ void LevelEditor::SetNextMenu(eduimenu_s *menu) {
     edLevelNextMenu = menu;
 }
 
-bool PropertyMenu::ContainsObject(void *object) {
+i32 PropertyMenu::ContainsObject(void *object) {
     for (i32 i = 0; i < object_count; ++i) {
         if (objects[i].object == object) {
-            return true;
+            return 1;
         }
     }
-    return false;
+    return 0;
 }
 
 void PropertyTool::SetMenuControl(eduimenu_s *menu, EdControl *control) {

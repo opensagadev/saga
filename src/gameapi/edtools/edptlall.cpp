@@ -197,14 +197,14 @@ static void cbPtlRepeatBoxMenu(eduimenu_s *parent, eduiitem_s *, u32) {
     eduiMenuAddItem(edptl_repeatbox_menu,
                     eduiItemToggleCreate(0, edblack, edptl_repeatboxxzlock, 1, edptlChangeRepeatBoxXZLock, "XZ Lock"));
     eduiMenuAddItem(edptl_repeatbox_menu,
-                    eduiItemSliderCreate(0, edblack, 0, edptlChangeRepeatBox, 0.1f, 10.0f * edptl_superscale,
+                    eduiItemSliderCreate(0, edblack, 0, edptlChangeRepeatBox, 0.1f, 5.0f * edptl_superscale,
                                          effect->repeat_box.x, "Repeat Box X"));
     repeatbox_x_item = static_cast<edui_slider_s *>(edui_last_item);
     eduiMenuAddItem(edptl_repeatbox_menu,
-                    eduiItemSliderCreate(1, edblack, 0, edptlChangeRepeatBox, 0.1f, 10.0f * edptl_superscale,
+                    eduiItemSliderCreate(1, edblack, 0, edptlChangeRepeatBox, 0.1f, 5.0f * edptl_superscale,
                                          effect->repeat_box.y, "Repeat Box Y"));
     eduiMenuAddItem(edptl_repeatbox_menu,
-                    eduiItemSliderCreate(2, edblack, 0, edptlChangeRepeatBox, 0.1f, 10.0f * edptl_superscale,
+                    eduiItemSliderCreate(2, edblack, 0, edptlChangeRepeatBox, 0.1f, 5.0f * edptl_superscale,
                                          effect->repeat_box.z, "Repeat Box Z"));
     repeatbox_z_item = static_cast<edui_slider_s *>(edui_last_item);
     eduiMenuAttach(parent, edptl_repeatbox_menu);
@@ -791,7 +791,7 @@ static void edptlcbApplyNumGhosts(eduimenu_s *, eduiitem_s *item, u32) {
     }
 
     debinftype *effect = debtab[debkeydata[instance_id].effect_index];
-    effect->trail_count = static_cast<u8>(static_cast<i32>(static_cast<edui_slider_s *>(item)->value));
+    effect->trail_count = static_cast<u8>(static_cast<edui_slider_s *>(item)->value);
     UpdateTotalPtls(effect);
 }
 static void cbPtlChangeIvalOffRan(eduimenu_s *, eduiitem_s *item, u32) {

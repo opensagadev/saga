@@ -378,7 +378,7 @@ i32 FindGameMsgsWithID(i32 id, i32 remove, i32 player, GAMEMESSAGE_s *exclude) {
 void AddGameMsgCount(nuvec_s *position, i32 count, i32 total, unsigned char red, unsigned char green,
                      unsigned char blue, float field_0xd4) {
     char text[32];
-    sprintf(text, "layerTakenOver", count, total);
+    sprintf(text, "%i/%i", count, total);
 
     void *message = position != NULL ? AddGameMessage(text, position, 0.6f, NULL, 0.8f, red, green, blue, 0x4023, 1.0f)
                                      : AddGameMessage(text, &v001, 0.6f, NULL, 0.8f, red, green, blue, 0x4020, 1.0f);

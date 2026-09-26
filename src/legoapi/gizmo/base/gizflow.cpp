@@ -917,12 +917,12 @@ static i32 CheckOutputGizmoFlowBox(GIZFLOW_s *system, FLOWBOX_s *box, u8 output)
 }
 
 static i32 CheckOutputActionFlowBox(GIZFLOW_s *, FLOWBOX_s *box, u8) {
-    return (box->state_flags_low >> 1) & 1;
+    return (box->state_flags_low & 2) != 0;
 }
 
 static i32 CheckOutputConditionFlowBox(GIZFLOW_s *system, FLOWBOX_s *box, u8) {
     if ((box->state_flags_high & 2) == 0)
-        return (box->state_flags_low >> 1) & 1;
+        return (box->state_flags_low & 2) != 0;
     u8 saved = box->state_flags_high & 4;
     box->state_flags_high |= 4;
     i32 result = flowboxtypes[box->type].process(system, box, 0) != 0;

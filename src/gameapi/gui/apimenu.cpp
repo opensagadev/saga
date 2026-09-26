@@ -710,7 +710,9 @@ void MenuUpdateNewGame(MENU *menu) {
         GameSetSoundVolume(&Game.options_save);
         legoSetMusicVolume(SuperOptions.music_enabled != 0 ? GameGetMusicVolume(&TempOptions) : 0.0f);
         Hint_LoadAllGameState();
-        LSW_HintConditions |= 7;
+        LSW_HintConditions.force_used = 1;
+        LSW_HintConditions.tc14_present = 1;
+        LSW_HintConditions.panel_used = 1;
         newgamealpha = 0.0f;
 
         u8 brightness = Game.options_save.field12_0xc;
@@ -1016,9 +1018,9 @@ static __used__ void MenuUpdatePauseCut(MENU *menu) {
         return;
     }
     if (menu->confirm_pressed != 0 && menu->selected_item == 1) {
-          if (CutScenePlayer_Active() != 0) {
-              NewLevelFromMenu(HUB_LDATA, -1, -1, 1);
-              hub_from_cutsceneplayer = 1;
+        if (CutScenePlayer_Active() != 0) {
+            NewLevelFromMenu(HUB_LDATA, -1, -1, 1);
+            hub_from_cutsceneplayer = 1;
         } else if (pausecut_skip_to_level != -1) {
             NewLData = &LDataList[pausecut_skip_to_level];
             cutskip_dontplaylevelintro = 1;

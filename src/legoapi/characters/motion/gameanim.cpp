@@ -1019,7 +1019,7 @@ void Animate_CHARACTER(GameObject_s *object) {
             if ((pad->allocated_5a & GAMEPAD_RUNTIME_SUPPRESS_MOVEMENT) == 0 && pad->input_magnitude > 0.0f) {
                 const GAMECHARACTERDATA *game_character =
                     static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
-                if ((object->apiobj.field_0x1f8 & 0x80) == 0 && game_character->field275_0x116 == 1) {
+                if (!object->apiobj.player_controlled && game_character->field275_0x116 == 1) {
                     MoveAnim_Manage(object, pad->input_magnitude, 0, 1);
                 } else {
                     const i32 allow_tiptoe =

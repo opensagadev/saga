@@ -137,7 +137,7 @@ void MiniKit_Load(MINIKIT *minikit, i32 id, VARIPTR *buf, VARIPTR *buf_end, void
     minikit->field_0x9 = -1;
     minikit->id = static_cast<i16>(id);
     if (id != -1) {
-        char path[268];
+        char path[256];
         NuStrCpy(path, const_cast<char *>("chars\\minikits\\"));
         NuStrCat(path, CDataList[id].file);
         NuStrCat(path, const_cast<char *>("\\"));
@@ -165,8 +165,7 @@ void MiniKit_InitPieces(MINIKIT *minikit, i32 count, VARIPTR *buf, VARIPTR *buf_
     for (i32 index = 0; index < count; ++index) {
         for (u8 direction = 0; direction < 6; ++direction) {
             sprintf(name, "%s_%s_%i", CDataList[minikit->id].file, direction_names[direction], index);
-            HUBMINIKITPIECE_s *piece =
-                &reinterpret_cast<HUBMINIKITPIECE_s *>(minikit->field_0x4)[minikit->field_0x8];
+            HUBMINIKITPIECE_s *piece = &reinterpret_cast<HUBMINIKITPIECE_s *>(minikit->field_0x4)[minikit->field_0x8];
             if (NuSpecialFind(minikit->gscn, &piece->special, name, 1) == 0) {
                 continue;
             }

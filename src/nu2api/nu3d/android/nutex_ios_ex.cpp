@@ -679,7 +679,7 @@ void DecompressTextureToRGBA(unsigned char *ddsData, u32 size, unsigned char *&o
     if (buffer == nullptr) {
         v8 = NuMemoryGet();
         threadMem = v8->GetThreadMem();
-        buffer = (unsigned char *)threadMem->_BlockAlloc(0x6000000, 4, 1, "DecompressBuffer", 0);
+        buffer = (unsigned char *)threadMem->_BlockAlloc(0x6000000, 4, 1, "", 0);
     }
 
     outBuffer = buffer;
@@ -898,7 +898,6 @@ void UnlockTexturePS(u32 texID, void *pixels, i32 width, i32 height, i32 depth, 
                     }
                     EndCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nutex_ios_ex.cpp",
                                          0x5b3);
-
                 }
                 if (hLimit == 1 && mipWidth == 1) {
                     break;

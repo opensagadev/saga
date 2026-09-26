@@ -141,7 +141,7 @@ extern "C" {
     extern NUGSCN *edbits_base_scene;
     extern NUGSCN *edbits_things_scene;
     extern part_type_s part_types[128];
-    extern part_emit_s part_emits[512];
+    extern part_emit_s part_emits[40];
     extern i32 edpart_emitrotx, edpart_emitroty, edpart_emitrotz;
     extern NUVEC edanim_cam_pos;
     i32 edgra_last_clump_in_buffer = -1;
@@ -4243,12 +4243,12 @@ static i32 edBitIndex;
 
 __attribute__((force_align_arg_pointer)) void EdBitControl::AddMenuItem(eduimenu_s *menu, EdRef *member, void *target) {
     void *memory = theMemoryManager.AllocPool(sizeof(EdBitControl), 1);
-    EdBitControl *control = new (memory) EdBitControl();
+    EdBitControl *control = new (memory) EdBitControl;
     control->reference = member;
     control->object = target;
     control->items = items;
     control->bit_mask = bit_mask;
-    i32 value = 0;
+    i32 value;
     member->GetMemberData(target, EdType_Int, &value, 0);
     control->item =
         eduiItemExpanderCreate(reinterpret_cast<usize>(control), &EdLevelAttr, EdControl::cbSelected, member->name);
@@ -4256,9 +4256,9 @@ __attribute__((force_align_arg_pointer)) void EdBitControl::AddMenuItem(eduimenu
     for (i32 bit = 0; bit < 32; ++bit) {
         if ((control->bit_mask & (1u << bit)) == 0)
             continue;
-        char bit_name[0x10];
+        char bit_name[0x20];
         sprintf(bit_name, "%d", bit);
-        char *text = control->GetEnumString((value >> bit) & 1);
+        char *text = GetEnumString((value >> bit) & 1);
         eduiitem_s *child = eduiItemPropCreateEx(reinterpret_cast<usize>(control), &EdLevelAttr, EdControl::cbSelected,
                                                  cbChanged, cbButton, 1, bit_name, text, bit);
         eduiItemExpanderAddChild(reinterpret_cast<edui_expander_s *>(control->item), child);
@@ -4273,8 +4273,8 @@ void EdBitControl::cbButton(eduimenu_s *menu, eduiitem_s *item, u32) {
     edBitControl = static_cast<EdBitControl *>(item->data_ptr);
     edBitIndex = edBitItem->extra_data;
     eduimenu_s *choices =
-        eduiMenuCreate(menu->x + item->x, item->y, 180, 250, reinterpret_cast<void *>(static_cast<usize>(EdLevelFnt)),
-                       cbEdLevelDestroy, NULL);
+        eduiMenuCreate(item->x + menu->width, item->y, 180, 250,
+                       reinterpret_cast<void *>(static_cast<usize>(EdLevelFnt)), cbEdLevelDestroy, NULL);
     if (choices != NULL) {
         for (Item *entry = edBitControl->items; entry->name != NULL; ++entry) {
             eduiMenuAddItem(choices, eduiItemSelCreate(reinterpret_cast<usize>(entry), item->colours, 0, 0,
@@ -4360,14 +4360,14 @@ void EdDefunctList::ReviveAll(i32 flags) {
 
 void EdEnumControl::AddMenuItem(eduimenu_s *menu, EdRef *member, void *target) {
     void *memory = theMemoryManager.AllocPool(sizeof(EdEnumControl), 1);
-    EdEnumControl *control = new (memory) EdEnumControl();
+    EdEnumControl *control = new (memory) EdEnumControl;
     control->reference = member;
     control->object = target;
     control->items = items;
-    i32 value = 0;
+    i32 value;
     member->GetMemberData(target, EdType_Int, &value, 0);
     control->item = eduiItemPropCreate(reinterpret_cast<usize>(control), &EdLevelAttr, EdControl::cbSelected, cbChanged,
-                                       cbButton, 1, member->name, control->GetEnumString(value));
+                                       cbButton, 1, member->name, GetEnumString(value));
     eduiMenuAddItem(menu, control->item);
 }
 
@@ -4403,8 +4403,8 @@ void EdEnumControl::cbButton(eduimenu_s *menu, eduiitem_s *item, u32) {
     EdEnumControl *control = static_cast<EdEnumControl *>(item->data_ptr);
     active_enum_control = control;
     eduimenu_s *choices =
-        eduiMenuCreate(menu->x + item->x, item->y, 180, 250, reinterpret_cast<void *>(static_cast<usize>(EdLevelFnt)),
-                       cbEdLevelDestroy, NULL);
+        eduiMenuCreate(item->x + menu->width, item->y, 180, 250,
+                       reinterpret_cast<void *>(static_cast<usize>(EdLevelFnt)), cbEdLevelDestroy, NULL);
     if (choices == NULL)
         return;
     for (Item *entry = control->items; entry != NULL && entry->name != NULL; ++entry)
@@ -5158,8 +5158,8 @@ void EdColourControl::Refresh() {
 void EdColourControl::cbButton(eduimenu_s *menu, eduiitem_s *item, u32) {
     edColourControl = static_cast<EdColourControl *>(item->data_ptr);
     eduimenu_s *picker_menu =
-        eduiMenuCreate(menu->x + item->x, item->y, 180, 250, reinterpret_cast<void *>(static_cast<usize>(EdLevelFnt)),
-                       cbEdLevelDestroy, NULL);
+        eduiMenuCreate(item->x + menu->width, item->y, 180, 250,
+                       reinterpret_cast<void *>(static_cast<usize>(EdLevelFnt)), cbEdLevelDestroy, NULL);
     if (picker_menu == NULL)
         return;
     NUVEC colour;
@@ -5738,8 +5738,9 @@ f32 EdClassInterface::DistanceToObject(VuVec &origin, VuVec &direction, void *ob
         member.reference->GetAttributeData(member.object, 8, EdType_VuVec, &position, 0);
         if (object_class->FindMember(&member, object, 0x40, 1))
             member.reference->GetAttributeData(member.object, 0x40, EdType_Float, &radius, 0);
-        f32 surface_distance = LineToPointDistance(origin, direction, position, NULL) - radius;
-        distance = surface_distance >= 0.0f ? surface_distance : 0.0f;
+        distance = LineToPointDistance(origin, direction, position, NULL) - radius;
+        if (distance < 0.0f)
+            distance = 0.0f;
     }
     if (reference != NULL)
         *reference = NULL;
@@ -5755,9 +5756,13 @@ f32 EdClassInterface::DistanceToObject(VuVec &point, void *object, EdRef **refer
         member.reference->GetAttributeData(member.object, 8, EdType_VuVec, &position, 0);
         if (object_class->FindMember(&member, object, 0x40, 1))
             member.reference->GetAttributeData(member.object, 0x40, EdType_Float, &radius, 0);
-        NUVEC delta{point.x - position.x, point.y - position.y, point.z - position.z};
-        f32 surface_distance = NuVecMag(&delta) - radius;
-        distance = surface_distance >= 0.0f ? surface_distance : 0.0f;
+        VuVec delta;
+        delta.x = point.x - position.x;
+        delta.y = point.y - position.y;
+        delta.z = point.z - position.z;
+        distance = NuVecMag(&delta.xyz) - radius;
+        if (distance < 0.0f)
+            distance = 0.0f;
     }
     if (reference != NULL)
         *reference = NULL;
@@ -6004,8 +6009,8 @@ void EdSpecialObjectControl::cbButton(eduimenu_s *parent, eduiitem_s *item, u32)
     EdSpecialObjectControl *control = static_cast<EdSpecialObjectControl *>(item->data_ptr);
     active_special_object_control = control;
     eduimenu_s *choices =
-        eduiMenuCreate(parent->x + item->x, item->y, 180, 250, reinterpret_cast<void *>(static_cast<usize>(EdLevelFnt)),
-                       cbEdLevelDestroy, NULL);
+        eduiMenuCreate(item->x + parent->width, item->y, 180, 250,
+                       reinterpret_cast<void *>(static_cast<usize>(EdLevelFnt)), cbEdLevelDestroy, NULL);
     if (choices == NULL)
         return;
     nuhspecial_s selected;
@@ -6066,16 +6071,17 @@ void EdSpecialObjectControl::cbSelectObject(eduimenu_s *, eduiitem_s *item, u32)
 }
 
 void EdSpecialObjectControl::AddMenuItem(eduimenu_s *parent, EdRef *member, void *target) {
-    void *memory = theMemoryManager.AllocPool(sizeof(EdSpecialObjectControl), 1);
-    EdSpecialObjectControl *control = new (memory) EdSpecialObjectControl();
+    EdSpecialObjectControl *control =
+        new (theMemoryManager.AllocPool(sizeof(EdSpecialObjectControl), 1)) EdSpecialObjectControl();
+    if (!control)
+        return;
     control->reference = member;
     control->object = target;
     nuhspecial_s special;
-    memset(&special, 0, sizeof(special));
     member->GetMemberData(target, EdType_NuHSpecial, &special, 0);
     char *name = NuSpecialGetName(&special);
     if (name == NULL)
-        name = const_cast<char *>("None");
+        name = const_cast<char *>("no name");
     control->item = eduiItemPropCreate(reinterpret_cast<usize>(control), &EdLevelAttr, EdControl::cbSelected, cbChanged,
                                        cbButton, 1, member->name, name);
     eduiMenuAddItem(parent, control->item);
@@ -6141,7 +6147,7 @@ void EdClassObjectNameControl::Render() {
 }
 
 void EdClassObjectNameControl::cbButton(eduimenu_s *parent, eduiitem_s *item, u32) {
-    eduimenu_s *menu = eduiMenuCreate(parent->x + item->x, item->y, 180, 250,
+    eduimenu_s *menu = eduiMenuCreate(item->x + parent->width, item->y, 180, 250,
                                       reinterpret_cast<void *>(static_cast<usize>(EdLevelFnt)), cbEdLevelDestroy, NULL);
     edClassObjectNameControl = static_cast<EdClassObjectNameControl *>(item->data_ptr);
     if (menu == NULL)
@@ -6176,7 +6182,7 @@ void EdClassObjectNameControl::cbChanged(eduimenu_s *, eduiitem_s *item, u32) {
 void EdClassObjectNameControl::cbSelectClass(eduimenu_s *parent, eduiitem_s *item, u32) {
     EdClass *ed_class = theRegistry.GetClass(item->data);
     edClassObjectNameControl->selected_class = ed_class;
-    eduimenu_s *menu = eduiMenuCreate(parent->x + item->x, item->y, 180, 250,
+    eduimenu_s *menu = eduiMenuCreate(item->x + parent->width, item->y, 180, 250,
                                       reinterpret_cast<void *>(static_cast<usize>(EdLevelFnt)), cbEdLevelDestroy, NULL);
     if (menu == NULL)
         return;

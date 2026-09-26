@@ -138,7 +138,7 @@ static NUVEC pod_old_pos[2] __used__; // _ZL11pod_old_pos (0x18 bytes of .bss)
 // mushroom_time_* are also mutated by Action_MushroomCollapse).
 static CUTINFO *mushroom0_cut;                             // _ZL13mushroom0_cut
 static i32 mushroom_collapse;                              // _ZL17mushroom_collapse
-static i32 mushroom_nattempts_per_increment __used__ = 1;  // _ZL32mushroom_nattempts_per_increment
+static i32 mushroom_nattempts_per_increment;               // _ZL32mushroom_nattempts_per_increment
 static i32 mushroom_n_attempts;                            // _ZL19mushroom_n_attempts
 static float mushroom_countdown = 15.0f;                   // _ZL18mushroom_countdown
 static float mushroom_time_available = 15.0f;              // _ZL23mushroom_time_available
@@ -289,7 +289,7 @@ static void UpdatePacemakerDisplay(void *lev_objs) {
     if (msg != NULL) {
         i32 idx = ((i32)(16384.0f * pod_pacemaker_alpha) >> 1) & 0x7fff;
         msg->icon = 0x134;
-        msg->alpha = (u8)(i32)(128.0f * pacemaker_alpha_table[idx]);
+        msg->alpha = (u8)(128.0f * pacemaker_alpha_table[idx]);
         PACEMAKERDATA_s *data = *(PACEMAKERDATA_s **)lev_objs;
         if (data->enabled != 0) {
             msg->color1 = data->color1;
@@ -448,7 +448,7 @@ void GunganA_Init(WORLDINFO_s *world) {
         gungan_a.models[2] = id_FALUMPASET;
         gungan_a.models[3] = id_GUNGAN;
         for (i32 i = 0; i < 32; i++) {
-            char buf[16];
+            char buf[32];
             sprintf(buf, "origin_%d", i);
             gungan_a.origins[i] = AIPathFindLocator(world->ai_sys, buf);
             sprintf(buf, "target_%d", i);
@@ -628,9 +628,9 @@ void PodRaceUpdate(WORLDINFO_s *, float) {
         return;
     avg_currentspeed_mul = 0;
     podrace->lap_display = podrace->prev_lap_display;
-    if (Player[0] != NULL && (Player[0]->apiobj.field_0x1f8 & 0x80))
+    if (Player[0] != NULL && Player[0]->apiobj.player_controlled)
         return;
-    if (Player[1] != NULL && !(Player[1]->apiobj.field_0x1f8 & 0x80))
+    if (Player[1] != NULL && !Player[1]->apiobj.player_controlled)
         Player[1]->field_0xc34 = 0;
     i32 n = (i32)podrace->lap_countdown;
     i32 o = (i32)podrace->lap_display;
@@ -660,15 +660,13 @@ void PodRacePanel(WORLDINFO_s *world) {
                 char buf[0x20];
                 sprintf(buf, "%i", (i32)PodRace->lap_display + 1);
                 if (NuFmod(PodRace->lap_display, 1.0f) < 0.7f)
-                    Text3DEx(buf, 0, 0.4f, 1.0f, 0.75f, 0.75f, 0.75f, 0, 0xff, 0x3f, 0,
-                             (u8)(i32)(128.0f * podhurryalpha));
+                    Text3DEx(buf, 0, 0.4f, 1.0f, 0.75f, 0.75f, 0.75f, 0, 0xff, 0x3f, 0, (u8)(128.0f * podhurryalpha));
             }
             if (podstartracealpha > 0.0f && PodRace != NULL && PodRace->lap_countdown > 0.0f) {
                 char buf[0x20];
                 sprintf(buf, "%i", (i32)PodRace->lap_countdown + 1);
                 if (NuFmod(PodRace->lap_countdown, 1.0f) < 0.7f)
-                    Text3DEx(buf, 0, 0.4f, 1.0f, 0.75f, 0.75f, 0.75f, 0, 0, 0, 0,
-                             (u8)(i32)(128.0f * podstartracealpha));
+                    Text3DEx(buf, 0, 0.4f, 1.0f, 0.75f, 0.75f, 0.75f, 0, 0, 0, 0, (u8)(128.0f * podstartracealpha));
             }
         }
     } else {
@@ -677,13 +675,13 @@ void PodRacePanel(WORLDINFO_s *world) {
             char buf[0x20];
             sprintf(buf, "%i", (i32)PodRace->lap_display + 1);
             if (NuFmod(PodRace->lap_display, 1.0f) < 0.7f)
-                Text3DEx(buf, 0, 0.4f, 1.0f, 0.75f, 0.75f, 0.75f, 0, 0xff, 0x3f, 0, (u8)(i32)(128.0f * podhurryalpha));
+                Text3DEx(buf, 0, 0.4f, 1.0f, 0.75f, 0.75f, 0.75f, 0, 0xff, 0x3f, 0, (u8)(128.0f * podhurryalpha));
         }
         if (podstartracealpha > 0.0f && PodRace != NULL && PodRace->lap_countdown > 0.0f) {
             char buf[0x20];
             sprintf(buf, "%i", (i32)PodRace->lap_countdown + 1);
             if (NuFmod(PodRace->lap_countdown, 1.0f) < 0.7f)
-                Text3DEx(buf, 0, 0.4f, 1.0f, 0.75f, 0.75f, 0.75f, 0, 0, 0, 0, (u8)(i32)(128.0f * podstartracealpha));
+                Text3DEx(buf, 0, 0.4f, 1.0f, 0.75f, 0.75f, 0.75f, 0, 0, 0, 0, (u8)(128.0f * podstartracealpha));
         }
     }
 }
@@ -1113,7 +1111,7 @@ void PodRaceInit(WORLDINFO_s *world) {
 void PodRaceCInit(WORLDINFO_s *world) {
     PodRaceInit(world);
     LevFlag.podrace_state = 0;
-    char buf[0x20];
+    char buf[0x100];
     nuhspecial_s *slots = LevHSpecial;
     sprintf(buf, "boost0%i", 1);
     NuSpecialFind(world->current_gscn, &slots[0], buf, 1);
@@ -1318,7 +1316,7 @@ speed_section:
                     if (msg != NULL) {
                         msg->icon = 0x134;
                         i32 idx = ((i32)(16384.0f * ps->field_0x80) >> 1) & 0x7fff;
-                        msg->alpha = (u8)(i32)(128.0f * NuTrigTable[idx]);
+                        msg->alpha = (u8)(128.0f * NuTrigTable[idx]);
                         PACEMAKERDATA_s *pd = *(PACEMAKERDATA_s **)world->lev_objs;
                         if (pd->enabled) {
                             msg->color1 = pd->color1;
@@ -1463,7 +1461,7 @@ void PodSprintA_Panel(WORLDINFO_s *world) {
             else
                 m = (m - 0.7f) / -0.1f + 1.0f;
             Text3DEx(buf, 0, 0.425f, 1.0f, m * 0.75f, m * 0.75f, m * 0.75f, 0, 0xff, 0, 0,
-                     (u8)(i32)(128.0f * podstartracealpha));
+                     (u8)(128.0f * podstartracealpha));
         }
     }
     if (podlapalpha > 0.0f) {

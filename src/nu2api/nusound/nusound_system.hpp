@@ -474,7 +474,7 @@ class NuSoundSystem {
 
     NuSoundSample *AddSample(const char *name, FileType file_type, NuSoundSource::FeedType feed_type);
 
-    const char *GetFileExtension(FileType type);
+    static const char *GetFileExtension(FileType type);
     static FileType DetermineFileType(const char *path);
 
     NuSoundSample *GetSample(const char *path);
@@ -540,7 +540,7 @@ class NuSoundSystem {
     void RemoveListener(NuSoundListener *);
     void ResumeAllVoices();
     void ResumeVoices(int);
-    void SetDefaultRoutingTable(NuSoundRoutingTable *);
+    static void SetDefaultRoutingTable(NuSoundRoutingTable *);
     static void SetGfxMemorySize(u32 size);
     void SetMainThreadID(NuThread *);
     void Shutdown();

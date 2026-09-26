@@ -776,9 +776,11 @@ void PlayerTakeHit(GameObject_s *object, GameObject_s *attacker) {
     Player_ResetContexts(reinterpret_cast<PLAYERPACKET_s *>(object->player_packet));
     object->field_0x7a5 = 0x15;
 
-    const f32 duration = AnimDuration(object->id, object->context_animation, 0.0f, 0.0f, 1);
+    f32 duration = AnimDuration(object->id, object->context_animation, 0.0f, 0.0f, 1);
     object->field_0xe31 = state;
-    object->context_animation_timer = duration <= 0.0f ? 1.0f : duration;
+    object->context_animation_timer = duration;
+    if (duration <= 0.0f)
+        object->context_animation_timer = 1.0f;
     SetFlicker(object, 0.4f);
 
     if (attacker != NULL) {
@@ -1703,7 +1705,7 @@ i32 GetNumLocalPlayers() {
     i32 count = 0;
     if (Player[0] != NULL)
         count = static_cast<i8>(Player[0]->apiobj.field_0x1f8) < 0;
-    if (Player[1] != NULL && (Player[1]->apiobj.field_0x1f8 & 0x80) != 0)
+    if (Player[1] != NULL && Player[1]->apiobj.player_controlled)
         count++;
     return count;
 }

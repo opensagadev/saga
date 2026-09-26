@@ -65,8 +65,7 @@ void SecurityDoor_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
     range *= range;
     f32 distance;
     SECURITYDOOR *door = SecurityDoor_FindNearest(world, &object->apiobj.lower_position, object, &distance);
-    if (door == NULL || !(range > distance) ||
-        (object->pad_gamepad->buttons_pressed & GAMEPAD_SPECIAL) == 0) {
+    if (door == NULL || !(range > distance) || (object->pad_gamepad->buttons_pressed & GAMEPAD_SPECIAL) == 0) {
         return;
     }
     object->field_0x788 = door;
@@ -83,8 +82,7 @@ void SecurityDoor_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
     static_cast<SECURITYDOOR *>(object->field_0x788)->state = 1;
 }
 
-SECURITYDOOR *SecurityDoor_FindNearest(WORLDINFO_s *world, nuvec_s *position, GameObject_s *object,
-                                     float *distance) {
+SECURITYDOOR *SecurityDoor_FindNearest(WORLDINFO_s *world, nuvec_s *position, GameObject_s *object, float *distance) {
     SECURITYDOOR *nearest = NULL;
     f32 nearest_distance = 1000000000.0f;
     SECURITYDOOR *door = world->security_doors;
@@ -168,7 +166,7 @@ static void SecurityDoors_Update(void *world_data, void *, float) {
             right_angle = 0x4000;
         } else {
             f32 phase = NuTrigTable[(static_cast<i32>(door->opening * 32768.0f + 16384.0f) >> 1) & 0x7fff];
-            right_angle = static_cast<u16>(static_cast<i32>((1.0f - (phase + 1.0f) * 0.5f) * 16384.0f));
+            right_angle = static_cast<u16>((1.0f - (phase + 1.0f) * 0.5f) * 16384.0f);
             left_angle = -right_angle;
         }
 

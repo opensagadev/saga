@@ -11,6 +11,6 @@ struct NuCopyFilter : NuPostFilterGen {
 
     void destroyResources();
     void initResources();
-    void render(nuframebuffer_s *);
+    virtual void render(nuframebuffer_s *);
     void reset();
 };

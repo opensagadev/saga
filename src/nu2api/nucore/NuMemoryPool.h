@@ -45,8 +45,8 @@ class NuMemoryPool {
     u32 GetFreeBytes();
     u32 GetLargeBlockBytes();
     u32 GetPagedBytes();
-    FreeBlock volatile *InterlockedPop(FreeBlock volatile **out_head);
-    void InterlockedPush(FreeBlock volatile **head, void *block);
+    static FreeBlock volatile *InterlockedPop(FreeBlock volatile **out_head);
+    static void InterlockedPush(FreeBlock volatile **head, void *block);
     FreeBlock volatile *Merge(FreeBlock volatile *a, FreeBlock volatile *b);
     Page *Merge(Page *a, Page *b);
     FreeBlock volatile *MergeSort(FreeBlock volatile *list, u32 count);

@@ -571,8 +571,8 @@ typedef struct APIOBJECT_s {
         u32 packed_contact_state; // 0x27c
         struct {
             i8 field_0x27c; // player/character slot (-1 = none)
-            u8 field_0x27d;   // terrain/contact flags
-            u8 field_0x27e;   // previous terrain/contact flags
+            u8 field_0x27d; // terrain/contact flags
+            u8 field_0x27e; // previous terrain/contact flags
             u8 field_0x27f;
         };
     };
@@ -904,9 +904,18 @@ typedef struct GameObject_s {
     u8 jump_sequence;         // 0x07a9, 1 for the first jump and 2 for the second
     u8 field_0x7aa;
     i8 hit_variant;
-    u8 context_flags;         // 0x07ac
-    i8 context_variant_flags; // 0x07ad
-    u8 jump_flags;            // 0x07ae
+    u8 context_flags; // 0x07ac
+    union {
+        i8 context_variant_flags; // 0x07ad
+        struct {
+            u8 : 4;
+            u8 jump_button_released : 1;
+            u8 : 1;
+            u8 jump_second_jump : 1;
+            u8 jump_falling : 1;
+        };
+    };
+    u8 jump_flags; // 0x07ae
     u8 pad_7af;
     union {
         f32 tag_cooldown;
@@ -919,6 +928,13 @@ typedef struct GameObject_s {
     union {
         u8 tag_flags;
         u8 tag_context_flags;
+        struct {
+            u8 tag_active : 1;
+            u8 tag_disabled : 1;
+            u8 tag_pending : 1;
+            u8 tag_blend_camera : 1;
+            u8 : 4;
+        };
     }; // 0x07b5
     u8 pad_7b6[2];
     union {
@@ -1261,8 +1277,16 @@ typedef struct GameObject_s {
     f32 pause_context_state; // 0x0ef4, icon timer, also cleared when entering pause
     u8 field_0xef8;          // 0x0ef8
     u8 field_0xef9;          // 0x0ef9
-    u8 field_0xefa;          // 0x0efa
-    u8 field_0xefb;          // 0x0efb, bit 3 requests the two-row hit-point layout
+    union {
+        u8 field_0xefa; // 0x0efa
+        struct {
+            u8 : 4;
+            u8 respawnable : 1;
+            u8 respawn_at_origin : 1;
+            u8 : 2;
+        };
+    };
+    u8 field_0xefb; // 0x0efb, bit 3 requests the two-row hit-point layout
     union {
         u32 field_0xefc_word;
         struct {

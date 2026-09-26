@@ -150,7 +150,7 @@ i32 Action_SetVisibility(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **pa
     nuhspecial_s special = {};
     i32 visible = 1;
     for (i32 index = 0; index < param_count; ++index) {
-        char *value = NuStrIStr(params[index], "name=");
+        char *value = NuStrIStr(params[index], "name");
         if (value != NULL) {
             NuSpecialFind(WORLD->current_gscn, &special, value + 5, 1);
         } else if (NuStrIStr(params[index], "FALSE") != NULL) {

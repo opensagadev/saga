@@ -62,7 +62,7 @@ f32 CurrentHintAlpha() {
     f32 fade_start = duration - 0.5f;
     if (duration > 0.0f && hintsys.display_elapsed >= fade_start) {
         alpha = 1.0f - (hintsys.display_elapsed - fade_start) / (duration - fade_start);
-        if (alpha < 0.0f)
+        if (alpha <= 0.0f)
             alpha = 0.0f;
     }
     return alpha * hintsys.alpha;
@@ -78,7 +78,7 @@ i32 Dodge_UpdateHint(HINT_s *hint) {
         const u32 flags = object->apiobj.character_data->model_flags;
         if ((flags & 0x2000) != 0)
             return 0;
-        if ((object->apiobj.field_0x1f8 & 0x80) == 0 || object->incoming_bolt == NULL)
+        if (!object->apiobj.player_controlled || object->incoming_bolt == NULL)
             continue;
         if (hint->control_mode_ids[0] == 0x265) {
             if ((flags & 8) == 0 && (object->apiobj.character_model->model_data_b[0x4f] != NULL ||
@@ -253,7 +253,9 @@ i32 id_HINT_LSW_AUTOJUMP_FAIL = -1;
 
 void initGameHintSys_LSW() {
     RegisterWithHintSys(DrawHint_LSW, Hints_LSW, Game.hint_completion_bits, 3);
-    reinterpret_cast<u8 *>(&LSW_HintConditions)[0] &= ~7U;
+    LSW_HintConditions.force_used = 0;
+    LSW_HintConditions.tc14_present = 0;
+    LSW_HintConditions.panel_used = 0;
     id_HINT_LSW_AUTOJUMP = 0x620;
     id_HINT_LSW_AUTOJUMP_FAIL = 0x621;
 }

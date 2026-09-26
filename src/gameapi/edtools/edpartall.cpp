@@ -67,7 +67,7 @@ extern "C" {
     extern i32 edpart_nearest;
     extern part_emit_s *edpart_nearest_emit;
     extern part_type_s part_types[128];
-    extern part_emit_s part_emits[512];
+    extern part_emit_s part_emits[40];
     extern debinftype **debtab;
     extern i32 EDPP_MAX_TYPES;
     extern i32 part_types_used;
@@ -323,6 +323,8 @@ static void edpartDeleteAllInstanceDuplicates(eduimenu_s *, eduiitem_s *, u32);
 extern "C" {
     i32 edpart_which_scene = 1;
     i32 edpart_set_debris;
+    i32 edpart_part_list;
+    i32 edpart_particle_list;
 }
 
 static inline void edpartRefreshEmitterSounds() {
@@ -622,7 +624,7 @@ static void edpartSetSoundID(eduimenu_s *menu, eduiitem_s *item, u32) {
 }
 static void edpartSoundXMenu(eduimenu_s *menu, eduiitem_s *item, u32) {
     if (edpart_nearest_type != NULL) {
-        char title[20];
+        char title[16];
         sprintf(title, "Sound %d Menu", item->data + 1);
         edpart_soundx_menu = eduiMenuCreate(70, 70, 250, 300, ed_fnt, edpartCancelSoundXMenu, title);
         if (edpart_soundx_menu != NULL) {
@@ -1680,7 +1682,7 @@ static void edpartWorldInstanceMenu(eduimenu_s *parent, eduiitem_s *, u32) {
         }
     }
     if (group == 1)
-        eduiMenuAddItem(edpart_worldinstance_menu, eduiItemSelCreate(1, edgrey, 0, 0, NULL, "No Things"));
+        eduiMenuAddItem(edpart_worldinstance_menu, eduiItemSelCreate(1, edgrey, 0, 0, NULL, "All Instances Filtered"));
     eduiMenuAttach(parent, edpart_worldinstance_menu);
     edpart_worldinstance_menu->x = parent->x + 10;
     edpart_worldinstance_menu->y = parent->y + 40;
@@ -1793,7 +1795,7 @@ static void edpartPartIndexMenu(eduimenu_s *menu, eduiitem_s *, u32) {
                                                                edpartChangePartIndex, "None"));
     for (i32 index = 0; index < 128; ++index) {
         part_type_s *type = &part_types[index];
-        if (type->name[0] == '\0' || type->field_b3 != edpart_which_scene)
+        if (type->name[0] == '\0' || type->field_b3 != edpart_part_list)
             continue;
         bool current_type = index == edpart_nearest_emit->effect_id;
         eduiitem_s *item =
@@ -1809,7 +1811,7 @@ static void edpartPartIndexMenu(eduimenu_s *menu, eduiitem_s *, u32) {
 }
 
 static void edpartLevelPartIndexMenu(eduimenu_s *menu, eduiitem_s *item, u32 value) {
-    edpart_which_scene = 1;
+    edpart_part_list = 1;
     edpartPartIndexMenu(menu, item, value);
 }
 
@@ -1847,7 +1849,7 @@ static void edpartThingsInstanceMenu(eduimenu_s *parent, eduiitem_s *, u32) {
         }
     }
     if (group == 1)
-        eduiMenuAddItem(edpart_thingsinstance_menu, eduiItemSelCreate(1, edgrey, 0, 0, NULL, "No Things"));
+        eduiMenuAddItem(edpart_thingsinstance_menu, eduiItemSelCreate(1, edgrey, 0, 0, NULL, "All Instances Filtered"));
     eduiMenuAttach(parent, edpart_thingsinstance_menu);
     edpart_thingsinstance_menu->x = parent->x + 10;
     edpart_thingsinstance_menu->y = parent->y + 40;
@@ -1974,7 +1976,7 @@ static void edpartFileSaveEffectsLevel(eduimenu_s *parent, eduiitem_s *, u32) {
 }
 
 static void edpartGeneralPartIndexMenu(eduimenu_s *menu, eduiitem_s *item, u32 value) {
-    edpart_which_scene = 0;
+    edpart_part_list = 0;
     edpartPartIndexMenu(menu, item, value);
 }
 
@@ -2025,7 +2027,7 @@ static void edpartDebrisIndexMenu(eduimenu_s *menu, eduiitem_s *, u32) {
     bool found_selected = false;
     for (i32 index = 1; index < EDPP_MAX_TYPES; ++index) {
         debinftype *type = debtab[index];
-        if (type == NULL || type->category != edpart_which_scene)
+        if (type == NULL || type->category != edpart_particle_list)
             continue;
         eduiitem_s *item =
             eduiItemCheckCreate(index, edblack, index == selected, 1, edpartChangeDebrisIndex, type->name);
@@ -2046,7 +2048,7 @@ static void edpartDebrisIndexMenu(eduimenu_s *menu, eduiitem_s *, u32) {
 }
 
 static void edpartLevelDebrisIndexMenu(eduimenu_s *menu, eduiitem_s *item, u32 value) {
-    edpart_which_scene = 1;
+    edpart_particle_list = 1;
     edpartDebrisIndexMenu(menu, item, value);
 }
 
@@ -2100,7 +2102,7 @@ static void edpartFileSaveEffectsGeneral(eduimenu_s *parent, eduiitem_s *, u32) 
 }
 
 static void edpartGeneralDebrisIndexMenu(eduimenu_s *menu, eduiitem_s *item, u32 value) {
-    edpart_which_scene = 0;
+    edpart_particle_list = 0;
     edpartDebrisIndexMenu(menu, item, value);
 }
 

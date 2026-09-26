@@ -67,6 +67,35 @@ to a different source file.
 Small changes to return expressions, cleanup, or local lifetimes can inhibit a
 tail call. Compare the final source operation with the original control flow.
 
+### Every argument read is off by four bytes
+
+If each `N(%esp)` argument load is four bytes higher than the original, the
+reconstruction has an extra leading parameter. A common cause is a method that
+the original declared `static`: static and non-static members mangle
+identically, but only the latter receives `this`. Callbacks with two same-typed
+parameters can also have the used and ignored parameter swapped.
+
+### Only the scratch register of a load-and-test differs
+
+With Atom tuning, peephole2 rewrites `cmp $0, MEM` as `mov MEM, %reg; test
+%reg, %reg`. GCC 4.7 picks `%reg` with `peep2_find_free_register`, whose
+static `search_ofs` rotates through the allocation order and persists across
+every function compiled in the same translation unit. The chosen register
+therefore depends on how many such rewrites preceded the function in compile
+(output) order, not only on the function itself: the same source compiled
+alone can pick a different register. A tiny function that differs only here
+is usually correct; the mismatch comes from an earlier function in the
+translation unit that differs, is missing, or is emitted in a different order.
+Do not rewrite the function to chase the register.
+
+### Stack realigns with `and $-16, %esp`
+
+Plain `-O2` functions do not realign the stack. A frame pointer plus
+`and $0xfffffff0, %esp` in the original means some local needs 16-byte
+alignment even when it holds no vector data. Give the corresponding local an
+`aligned(16)` type (for example `NUMTX_ALIGNED16`) and check that it lands at
+the same aligned frame offset.
+
 ### Stack size or member offsets differ
 
 Recheck structure layout, packing, field order, pointer width, enum width, and

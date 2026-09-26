@@ -76,8 +76,8 @@ MoveToMarker *MechSystems::FindMoveToMarkerAtPos(VuVec const &position, bool act
 }
 
 i32 MechInputTouchMenuController::AnyTouchesThisFrame = 0;
-i32 MechInputTouchMenuController::PackButtonPressed = 0;
-i32 MechInputTouchMenuController::PackButtonID = 0;
+bool MechInputTouchMenuController::PackButtonPressed = false;
+i32 MechInputTouchMenuController::PackButtonID = -1;
 
 MechSystems *MechSystems::Get() {
     static MechSystems *instance = NULL;

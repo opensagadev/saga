@@ -978,8 +978,8 @@ finish:
     Bolt_End(bolt, 1);
 }
 
-__attribute__((force_align_arg_pointer)) void Bolt_AddDeflectedBolt(BOLT_s *bolt, nuvec_s *direction,
-                                                                    nuvec_s *normal, unsigned char *processed) {
+__attribute__((force_align_arg_pointer)) void Bolt_AddDeflectedBolt(BOLT_s *bolt, nuvec_s *direction, nuvec_s *normal,
+                                                                    unsigned char *processed) {
     BOLTTYPE_s *type = bolt->type;
     if ((type->field_60 & 0x100000) != 0)
         return;
@@ -992,8 +992,7 @@ __attribute__((force_align_arg_pointer)) void Bolt_AddDeflectedBolt(BOLT_s *bolt
 
     if (static_cast<u8>(bolt->field_0x104) > 31 || (TerSurface[bolt->field_0x104].flags & 0x800) == 0) {
         i_temp_xrot += static_cast<i32>((qrand() * (1.0f / 65535.0f)) * 16384.0f - 8192.0f);
-        temp_yrot = static_cast<u16>(temp_yrot) +
-                    static_cast<i32>((qrand() * (1.0f / 65535.0f)) * 16384.0f - 8192.0f);
+        temp_yrot = static_cast<u16>(temp_yrot) + static_cast<i32>((qrand() * (1.0f / 65535.0f)) * 16384.0f - 8192.0f);
     }
 
     NUANGVEC angles;

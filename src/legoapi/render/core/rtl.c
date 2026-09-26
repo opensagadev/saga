@@ -397,7 +397,7 @@ extern "C" {
         return previous;
     }
 
-    void rtlResetDynamic(void) {
+    i32 rtlResetDynamic(void) {
         if (rtl_dynamic_pool != NULL) {
             NULNKHDR *entry = NuLstGetNext(rtl_dynamic_pool, NULL);
             while (entry != NULL) {
@@ -407,6 +407,7 @@ extern "C" {
             }
             rtl_dynamic_cnt = 0;
         }
+        return rtl_dynamic_max;
     }
 
     i32 rtlInitDynamic(VARIPTR *buffer, VARIPTR end, i32 max_lights) {
@@ -1005,12 +1006,9 @@ static __used__ void rtlProcessLight(rtl_s *light, f32 elapsed) {
             }
             break;
         case 8:
-            light->ambient.x = light->secondary_colour.x * light->blend +
-                               light->colour.x * (1.0f - light->blend);
-            light->ambient.y = light->secondary_colour.y * light->blend +
-                               light->colour.y * (1.0f - light->blend);
-            light->ambient.z = light->secondary_colour.z * light->blend +
-                               light->colour.z * (1.0f - light->blend);
+            light->ambient.x = light->secondary_colour.x * light->blend + light->colour.x * (1.0f - light->blend);
+            light->ambient.y = light->secondary_colour.y * light->blend + light->colour.y * (1.0f - light->blend);
+            light->ambient.z = light->secondary_colour.z * light->blend + light->colour.z * (1.0f - light->blend);
             light->blend += light->blend_rate * elapsed;
             light->blend = MIN(1.0f, MAX(0.0f, light->blend));
             light->parameter_54 -= elapsed;
@@ -1553,7 +1551,7 @@ static void cbLoad(eduimenu_s *, eduiitem_s *, u32) {
     RefreshUI();
 }
 static void cbSave(eduimenu_s *, eduiitem_s *, u32) {
-    char path[268];
+    char path[256];
     sprintf(path, "%s%s%s", rtlGetEnvPath(), rtlGetEnvSceneName(), rtl_ext);
     rtlSaveSet(path, curr_set);
 }

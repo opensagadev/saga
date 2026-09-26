@@ -10,7 +10,14 @@ typedef struct LEDGE_s {
     NUVEC position; // 0x08
     u16 y_rotation; // 0x14
     i8 type_code;
-    u8 state_flags; // 0x17, active and visible in bits 0 and 1
+    union {
+        u8 state_flags; // 0x17
+        struct {
+            u8 active : 1;
+            u8 visible : 1;
+            u8 : 6;
+        };
+    };
     u8 type_index;
     u8 flags;
     u8 pad_1a[2];

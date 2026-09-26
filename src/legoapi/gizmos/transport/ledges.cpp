@@ -189,14 +189,14 @@ static i32 Ledge_GetNumOutputs(GIZMO *gizmo) {
 static void Ledge_Activate(GIZMO *gizmo, i32 active) {
     if (gizmo != NULL) {
         LEDGE *ledge = static_cast<LEDGE *>(gizmo->object);
-        ledge->state_flags = (ledge->state_flags & ~1) | (active != 0);
+        ledge->active = active != 0;
     }
 }
 
 static void Ledge_SetVisibility(GIZMO *gizmo, i32 visible) {
     if (gizmo != NULL) {
         LEDGE *ledge = static_cast<LEDGE *>(gizmo->object);
-        ledge->state_flags = (ledge->state_flags & ~2) | ((visible != 0) << 1);
+        ledge->visible = visible != 0;
     }
 }
 
@@ -288,11 +288,12 @@ static void Ledges_Reset(void *world_info, void *, void *progress_data) {
         ledge->bounds_max.z += 0.05f;
         NuVecAdd(&ledge->bounds_min, &ledge->bounds_min, &ledge->position);
         NuVecAdd(&ledge->bounds_max, &ledge->bounds_max, &ledge->position);
-        ledge->state_flags |= 3;
+        ledge->active = 1;
+        ledge->visible = 1;
         if (i < 128 && progress != NULL) {
             u32 mask = 1u << (i & 31);
-            ledge->state_flags = (ledge->state_flags & ~2) | ((progress->state[4 + (i >> 5)] & mask) != 0 ? 2 : 0);
-            ledge->state_flags = (ledge->state_flags & ~1) | ((progress->state[i >> 5] & mask) != 0 ? 1 : 0);
+            ledge->visible = (progress->state[4 + (i >> 5)] & mask) != 0;
+            ledge->active = (progress->state[i >> 5] & mask) != 0;
         }
     }
 }
@@ -380,7 +381,7 @@ void Ledge_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
             if (object->character_context != 0 || !(object->context_animation_timer >= 0.1f))
                 return;
         }
-        if (!(object->apiobj.field_0x1f8 & 0x80) && !(object->field_0xf01 & 0x80))
+        if (!object->apiobj.player_controlled && !(object->field_0xf01 & 0x80))
             return;
         f32 radius = 3.0f * object->apiobj.field_0x1dc;
         NUVEC minimum = {object->apiobj.collision_position.x - radius, object->apiobj.collision_position.y,

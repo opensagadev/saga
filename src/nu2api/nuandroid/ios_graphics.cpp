@@ -113,12 +113,12 @@ SAGA_HOST_WEAK char *NuIOS_GetDocumentsPath(void) {
 }
 
 char *NuIOS_GetAppBundlePath(void) {
-    static char s_bundlePath[4096];
+    static char storedBundlePath[4096];
 
-    if (s_bundlePath[0] == '\0') {
-        strcpy(s_bundlePath, "dummyPath");
+    if (storedBundlePath[0] == '\0') {
+        strcpy(storedBundlePath, "dummyPath");
     }
-    return s_bundlePath;
+    return storedBundlePath;
 }
 
 i32 g_bgloadAsFastAsPossibleHack;

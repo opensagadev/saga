@@ -693,8 +693,8 @@ void NuMtxLookAtD3D(NUMTX *mtx, NUVEC *eye, NUVEC *center, NUVEC *up) {
 }
 
 void NuMtxSetPerspectiveD3D(NUMTX *mtx, f32 fovy, f32 aspect, f32 zNear, f32 zFar) {
-    f32 tanFovy2 = NU_SIN_LUT((i32)((fovy / 2.0f) * (USHRT_MAX / 360.0f))) /
-                   NU_COS_LUT((i32)((fovy / 2.0f) * (USHRT_MAX / 360.0f))); // USHRT_MAX / 360.0f is indices per degree
+    f32 tanFovy2 = NU_SIN_LUT((i32)((fovy / 2.0f) * (65536.0f / 360.0f))) /
+                   NU_COS_LUT((i32)((fovy / 2.0f) * (65536.0f / 360.0f))); // 65536 / 360 angle units per degree
     mtx->m00 = 1.0 / (aspect * tanFovy2);
     mtx->m01 = 0.0;
     mtx->m02 = 0.0;
@@ -714,8 +714,8 @@ void NuMtxSetPerspectiveD3D(NUMTX *mtx, f32 fovy, f32 aspect, f32 zNear, f32 zFa
 }
 
 void NuMtxSetPerspectiveBlend(NUMTX *mtx, f32 fovy, f32 aspect, f32 zNear, f32 zFar) {
-    f32 tanFovy2 = NU_SIN_LUT((i32)((fovy / 2.0f) * (USHRT_MAX / 360.0f))) /
-                   NU_COS_LUT((i32)((fovy / 2.0f) * (USHRT_MAX / 360.0f))); // USHRT_MAX / 360.0f is indices per degree
+    f32 tanFovy2 = NU_SIN_LUT((i32)((fovy / 2.0f) * (65536.0f / 360.0f))) /
+                   NU_COS_LUT((i32)((fovy / 2.0f) * (65536.0f / 360.0f))); // 65536 / 360 angle units per degree
     mtx->m00 = 1.0f / (aspect * tanFovy2);
     mtx->m01 = 0.0f;
     mtx->m02 = 0.0f;

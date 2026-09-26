@@ -70,6 +70,7 @@ extern char *apitxt_DOYOUWANTTOABORT;
 extern char *apitxt_DOYOUWANTTOABORTLOAD;
 extern char *apitxt_RETRY;
 extern char *apitxt_SLOT;
+extern char *apitxt_CANCEL;
 extern char *apitxt_NODATAAVAILABLE;
 extern char *apiGameName;
 extern char *apitxt_YES;
@@ -219,7 +220,7 @@ void MenuDrawSave(MENU_s *menu) {
     header_g = MENUHEADERG;
     header_b = MENUHEADERB;
     if (drawslotsfn != NULL && MenuAlpha > 0.2f && MenuStopDraw == 0) {
-        drawslotsfn(menu, extrasavetext != NULL ? 0.1f : 0.0f);
+        drawslotsfn(menu, extrasavetext != NULL ? 0.25f : 0.0f);
     }
     ++menu->draw_item;
 
@@ -1115,7 +1116,7 @@ void MenuDrawNoMemoryCard(MENU_s *menu) {
     Draw_NOMEMORYCARD();
     menu->draw_y = MENUBOTY - MENUDY;
     DrawMenuEntry(menu, apitxt_RETRY);
-    DrawMenuEntry(menu, apitxt_SLOT);
+    DrawMenuEntry(menu, apitxt_CANCEL);
 }
 
 void MenuEnterCardWarning(MENU_s *) {
@@ -1382,7 +1383,7 @@ void MenuUpdateRestoreNewGame(MENU_s *menu) {
 
     if (menu->selected_item == 0) {
         MenuSFX = GameAudio_GetSfxId(0x30);
-        NuIOS_RecordFlurryEvent("mainmenu_restore");
+        NuIOS_RecordFlurryEvent("menu_restore");
         NuIOS_RestoreInAppPurchases();
         NewMenu(22, -1, -1);
     } else if (menu->selected_item == 1) {
@@ -1714,7 +1715,6 @@ extern "C" {
     }
 
     void Draw_CANCEL(MENU *menu) {
-        extern char *apitxt_CANCEL;
         menu->draw_y = MENUBOTY;
         DrawMenuEntry(menu, apitxt_CANCEL);
     }

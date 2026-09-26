@@ -420,7 +420,7 @@ i32 Batarang_GetObjectFromCharID(i32 character) {
     return 0x32 + (character == id_ROBIN);
 }
 
-i32 GetShootDirection_Batman(GameObject_s *object, nuvec_s *direction) {
+u16 GetShootDirection_Batman(GameObject_s *object, nuvec_s *direction) {
     NUVEC temporary;
     if (direction == NULL) {
         direction = &temporary;
@@ -432,8 +432,8 @@ i32 GetShootDirection_Batman(GameObject_s *object, nuvec_s *direction) {
         NuVecMtxRotate(direction, &v001, &matrix);
         angle = object->apiobj.facing_angle;
     } else {
-        GAMECHARACTERDATA *runtime = object->apiobj.character_data->game_character;
-        if ((object->apiobj.character_data->model_flags & 0x2000) == 0 && (runtime->flags_090 & 0x80000000) == 0) {
+        if ((object->apiobj.character_data->model_flags & 0x2000) == 0 &&
+            (object->apiobj.character_data->game_character->flags_090 & 0x80) == 0) {
             angle = object->apiobj.movement_facing_angle;
         } else {
             angle = object->apiobj.facing_angle;

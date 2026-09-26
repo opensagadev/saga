@@ -914,7 +914,7 @@ static __used__ void pathEditor_cbNodeFlagsToggle(eduimenu_s *, eduiitem_s *item
     }
 }
 
-static __used__ void pathEditor_cbCancelSelectMenu(eduimenu_s *, eduimenu_s *menu) {
+static __used__ void pathEditor_cbCancelSelectMenu(eduimenu_s *menu, eduimenu_s *) {
     eduiMenuDestroy(menu);
 }
 
@@ -1182,11 +1182,11 @@ static __used__ void pathEditor_cbCancelDeleteNodeMenu(eduimenu_s *, eduimenu_s 
     aieditor_ClearMainMenu();
 }
 
-static __used__ void pathEditor_cbCancelRenameNodeMenu(eduimenu_s *, eduimenu_s *menu) {
+static __used__ void pathEditor_cbCancelRenameNodeMenu(eduimenu_s *menu, eduimenu_s *) {
     eduiMenuDestroy(menu);
 }
 
-static __used__ void pathEditor_cbCancelRenamePathMenu(eduimenu_s *, eduimenu_s *menu) {
+static __used__ void pathEditor_cbCancelRenamePathMenu(eduimenu_s *menu, eduimenu_s *) {
     eduiMenuDestroy(menu);
 }
 
@@ -1207,7 +1207,7 @@ static __used__ void routeEditor_cbRouteUsers(eduimenu_s *parent, eduiitem_s *, 
         return;
     }
     eduimenu_s *menu =
-        eduiMenuCreate(0xdc, 0x46, 0xf0, 0xfa, ed_fnt, routeEditor_cbCancelRouteUsers, (char *)"Route Users");
+        eduiMenuCreate(0xdc, 0x46, 0xf0, 0xfa, ed_fnt, routeEditor_cbCancelRouteUsers, (char *)"Select route users");
     if (menu == nullptr) {
         return;
     }
@@ -1223,7 +1223,8 @@ static __used__ void routeEditor_cbRouteUsers(eduimenu_s *parent, eduiitem_s *, 
     }
     if (index < 64) {
         i32 selected = (aieditor->current_path->current_route->user_mask >> 63) & 1;
-        eduiitem_s *item = eduiItemCheckCreate(63, &attr, selected, 64, routeEditor_cbSetRouteUsers, (char *)"Global");
+        eduiitem_s *item =
+            eduiItemCheckCreate(63, &attr, selected, 64, routeEditor_cbSetRouteUsers, (char *)"Everyone");
         eduiMenuAddItem(menu, item);
     }
 }
@@ -1415,11 +1416,11 @@ static __used__ void routeEditor_cbRenameRouteMenu(eduimenu_s *parent, eduiitem_
     menu->y = parent->y + 40;
 }
 
-static __used__ void routeEditor_cbCancelRouteUsers(eduimenu_s *, eduimenu_s *menu) {
+static __used__ void routeEditor_cbCancelRouteUsers(eduimenu_s *menu, eduimenu_s *) {
     eduiMenuDestroy(menu);
 }
 
-static __used__ void routeEditor_cbCancelRenameRouteMenu(eduimenu_s *, eduimenu_s *menu) {
+static __used__ void routeEditor_cbCancelRenameRouteMenu(eduimenu_s *menu, eduimenu_s *) {
     eduiMenuDestroy(menu);
 }
 

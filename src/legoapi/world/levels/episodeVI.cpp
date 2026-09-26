@@ -197,7 +197,7 @@ static u8 prevOnFireTruck;
 static u8 prevOnLifeBoat;
 
 void LegoCity_Init(WORLDINFO_s *world) {
-    char name[0x18];
+    char name[16];
     i32 i = 1;
     for (;;) {
         sprintf(name, "lamp_%d", i);
@@ -246,12 +246,25 @@ void LegoCity_Update(WORLDINFO_s *) {
 }
 
 void SenateA_Init(WORLDINFO_s *world) {
-    char *names[] = {
-        "deton_0110", "deton_0111", "deton_011", "deton_012", "deton_013", "deton_014",
-        "deton_015", "deton_017", "deton_018", "deton_019", "console_btm19", "console_btm110",
-        "console_btm11", "console_btm18", "console_btm13", "console_btm16", "console_btm15",
-        "console_btm14", NULL
-    };
+    char *names[] = {"deton_0110",
+                     "deton_0111",
+                     "deton_011",
+                     "deton_012",
+                     "deton_013",
+                     "deton_014",
+                     "deton_015",
+                     "deton_017",
+                     "deton_018",
+                     "deton_019",
+                     "console_btm19",
+                     "console_btm110",
+                     "console_btm11",
+                     "console_btm18",
+                     "console_btm13",
+                     "console_btm16",
+                     "console_btm15",
+                     "console_btm14",
+                     NULL};
     for (i32 i = 0; names[i] != NULL; ++i) {
         GIZMOBLOWUP_s *blowup = GizmoBlowUp_FindByName(world, names[i]);
         if (blowup != NULL)
@@ -260,11 +273,11 @@ void SenateA_Init(WORLDINFO_s *world) {
 }
 
 void NewTown_Init(WORLDINFO_s *world) {
-    LevGizmo[0] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "newtown");
+    LevGizmo[0] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "dummy_exp8");
     char buf[0x18];
     i32 i = 1;
     for (;;) {
-        sprintf(buf, "%i", i);
+        sprintf(buf, "Pop_%d_House_61", i);
         GIZMOBLOWUP_s *g = GizmoBlowUp_FindByName(world, buf);
         if (g == NULL)
             break;
@@ -535,9 +548,9 @@ void EmperorFightA_Reset(WORLDINFO_s *world) {
     emperorfighta_netpacket->state = 0;
     for (i32 i = 0; i < world->ai_sys->path_sys->active_path->route_count; ++i) {
         if (NuStrICmp(world->ai_sys->path_sys->active_path->routes[i].name, "electric_on") == 0)
-            routemask_efloor_on = static_cast<u64>(1) << (i & 63);
+            routemask_efloor_on = static_cast<u64>(1) << i;
         else if (NuStrICmp(world->ai_sys->path_sys->active_path->routes[i].name, "electric_off") == 0)
-            routemask_efloor_off = static_cast<u64>(1) << (i & 63);
+            routemask_efloor_off = static_cast<u64>(1) << i;
         if (routemask_efloor_on != 0 && routemask_efloor_off != 0)
             break;
     }

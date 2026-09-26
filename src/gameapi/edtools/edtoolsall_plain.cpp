@@ -92,7 +92,7 @@ static f32 edmain_menu_scale = 1.0f;
 static u32 edui_cursor_colour = 0xff000000;
 static char eduiPropTextEdit[256];
 static char eduiPropTextStore[256];
-static char *textrow[8];
+static char *textrow[4];
 static char TextPickCopyBuffer[0x40];
 static i32 cursor_flash;
 static char *edpp_save_names[6];
@@ -944,7 +944,7 @@ extern "C" {
     extern i32 DEBPAGE_GENERAL;
     extern i32 DEBPAGE_CHARACTER;
     extern i32 DEBPAGE_AREA;
-    part_emit_s part_emits[512];
+    part_emit_s part_emits[40];
     i32 part_page_on[8];
     i32 part_page_used[8];
     i32 edpart_instances_used;
@@ -4029,7 +4029,7 @@ extern "C" {
                 case 6: {
                     edui_slider_s *slider = static_cast<edui_slider_s *>(item);
                     char format[512];
-                    char text[520];
+                    char text[512];
                     NuStrCpy(format, item->text);
                     NuStrCat(format, slider->format);
                     sprintf(text, format, 0, 0x80000000);
@@ -4762,7 +4762,7 @@ extern "C" {
 
     static __used__ void cbmcfgCameraSpeed(eduimenu_s *, eduiitem_s *item, u32) {
         f32 divisor = 512.0f / static_cast<edui_slider_s *>(item)->value;
-        f32 speed = 12.0f / divisor;
+        f32 speed = 0.2f / divisor;
         edcamSetSpeed(speed, speed, speed, 1.0f / divisor);
     }
 

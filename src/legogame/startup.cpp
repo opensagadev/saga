@@ -212,9 +212,9 @@ namespace {
 // File-statics — original TU statics (_ZL* in the original ELF).
 // ---------------------------------------------------------------------------
 
-static i32 legal_tid;       // texture id of the loaded legal screen
-static bool loadlegal_done; // legal texture already attempted
-static NUMTL *legal_mtl;    // material wrapping the legal texture
+static i32 legal_tid;      // texture id of the loaded legal screen
+static i32 loadlegal_done; // legal texture already attempted
+static NUMTL *legal_mtl;   // material wrapping the legal texture
 
 // ---------------------------------------------------------------------------
 // Permanent-data initialisation (background thread entry).
@@ -225,10 +225,10 @@ static void LoadPermData(BGPROCINFO *proc) {
 
     // Font path depends on language.  `Text_Language == 0` is Japanese in the
     // original; everything else uses the Latin font.
-    {
-        char *font_path =
-            (Text_Language == 0) ? (char *)"stuff\\text\\starwars_font_j" : (char *)"stuff\\text\\starwars_font";
-        Text_LoadFont(font_path, &permbuffer_ptr, &permbuffer_end);
+    if (Text_Language == 0) {
+        Text_LoadFont((char *)"stuff\\text\\starwars_font_j", &permbuffer_ptr, &permbuffer_end);
+    } else {
+        Text_LoadFont((char *)"stuff\\text\\starwars_font", &permbuffer_ptr, &permbuffer_end);
     }
 
     // PAL builds show the language menu — the loader spins here until the menu
@@ -247,12 +247,18 @@ static void LoadPermData(BGPROCINFO *proc) {
     // Legal-screen texture — carved from the top of the super buffer so it
     // never collides with the permanent bump allocator.  Only attempted once.
     if (proc != nullptr && legal_tid == 0 && !loadlegal_done) {
+        VARIPTR legal_tex_end = superbuffer_end;
         VARIPTR legal_tex_base;
-        legal_tex_base.addr = superbuffer_end.addr - kLegalTextureReserve;
+        legal_tex_base.addr = legal_tex_end.addr - kLegalTextureReserve;
 
-        const char *legal_path = (Text_Language == 2) ? "stuff\\legal\\LEGAL_FRENCH" : "stuff\\legal\\LEGAL_ENGLISH";
-        legal_tid = NuTexRead(const_cast<char *>(legal_path), &legal_tex_base, superbuffer_end);
-        loadlegal_done = true;
+        char legal_path[128];
+        char legal_name[64];
+        NuStrCpy(legal_path, "stuff\\legal\\");
+        NuIOS_GetDeviceLanguage();
+        NuStrCpy(legal_name, Text_Language == 2 ? "LEGAL_FRENCH" : "LEGAL_ENGLISH");
+        NuStrCat(legal_path, legal_name);
+        legal_tid = NuTexRead(legal_path, &legal_tex_base, legal_tex_end);
+        loadlegal_done = 1;
         LOG_INFO("LoadPermData: legal_tid=%d", legal_tid);
     }
 
@@ -282,6 +288,7 @@ static void LoadPermData(BGPROCINFO *proc) {
 
     LevelObjects_InitForGame(reinterpret_cast<LEVELOBJECT *>(ObjTab), &permbuffer_ptr, &permbuffer_end, 0x2ee, 0x1f40);
     LevelSplines_InitForGame(SplTab);
+    ObjTab[0].name = lsw_memcard_objname;
 
     saveicon_scene = NuGScnRead(&permbuffer_ptr, permbuffer_end, (char *)"stuff\\ps2_bits.gsc");
     button_scene = NuGScnRead(&permbuffer_ptr, permbuffer_end, (char *)"stuff\\pc_bits.gsc");
@@ -296,7 +303,7 @@ static void LoadPermData(BGPROCINFO *proc) {
         manager.end = aligned_base + kSmallHeapSize;
         manager.cursor_cell = &manager.cursor;
         manager.end_cell = &manager.end;
-        manager.high_water = aligned_base;
+        manager.high_water = 0;
         manager.allocated = 0;
         manager.remaining = kSmallHeapSize;
         memset(manager.free_lists, 0, sizeof(manager.free_lists));
@@ -361,6 +368,8 @@ static void LoadPermData(BGPROCINFO *proc) {
     SetActionInfo(ActionInfo, ExtraActionData);
 
     gizaimessagesys = CreateGizAIMessageSys(&permbuffer_ptr, &permbuffer_end, kExtraGizAIMessageCount);
+    permbuffer_ptr.addr = ALIGN(permbuffer_ptr.addr, 0x10);
+    BackDrop_Init((char *)"stuff\\starfield.gsc", &permbuffer_ptr, &permbuffer_end);
 
     LOG_INFO("LoadPermData: before LoadPerm1");
     LoadPerm1();
@@ -368,9 +377,7 @@ static void LoadPermData(BGPROCINFO *proc) {
     LoadPerm2();
     LOG_INFO("LoadPermData: after LoadPerm2");
 
-    if (theGameThings != nullptr) {
-        static_cast<GameThingManager *>(theGameThings)->AddOnceOnlyThings();
-    }
+    static_cast<GameThingManager *>(theGameThings)->AddOnceOnlyThings();
 
     LOG_INFO("LoadPermData: before RegisterHelpers");
     RegisterHelpers();

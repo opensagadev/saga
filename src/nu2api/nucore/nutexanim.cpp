@@ -696,10 +696,9 @@ extern "C" nutexanimprog_s *NuTexAnimProgCreate(VARIPTR *buffer, i32 instruction
     nutexanimprog_s *program;
     if (buffer != NULL) {
         program = reinterpret_cast<nutexanimprog_s *>(buffer->addr);
-        buffer->addr += sizeof(nutexanimprog_s) + instruction_count * sizeof(i16);
+        buffer->addr += sizeof(nutexanimprog_s) + instruction_count;
     } else {
-        program = static_cast<nutexanimprog_s *>(
-            NU_ALLOC(sizeof(nutexanimprog_s) + instruction_count * sizeof(i16), 4, 1, "", 0));
+        program = static_cast<nutexanimprog_s *>(NU_ALLOC(sizeof(nutexanimprog_s) + instruction_count, 4, 1, "", 0));
     }
     if (program != NULL) {
         NuTexAnimProgInit(program);

@@ -38,7 +38,7 @@ extern "C" i32 NuRenderThreadIsCurrentThread(void) {
 // Original file-static double buffers (bss 0x119db.. / 0x119fd..).
 static nurenderscene_s sceneParameters_safe[16];
 static i32 sceneParametersCount_safe;
-static void *dynamicLights_safe[64];
+static void *dynamicLights_safe[16];
 static i32 dynamicLightsCount_safe;
 
 // Game-thread scene-parameter queue (defined in nurndr_plain.cpp).
@@ -166,12 +166,12 @@ extern "C" void NuRenderThreadStartRender(void) {
 // optional backbuffer copy-back into a texture. Finishes with Draw2D, the
 // post-effect end and the frame bookkeeping/tail state resets.
 i32 renderThread_processRenderScenes(void) {
-    static f32 times;
+    static f32 times[4];
     bool drew = false;
 
     NuThreadCriticalSectionBegin(renderThreadCS);
     renderThreadIsLocked++;
-    times += nuapi.frametime;
+    times[0] += nuapi.frametime;
     _NuTimeBarSlotBegin(-1, 4, "CPU_QUEUE_DRAW");
 
     for (i32 i = 0; i < sceneParametersCount_safe; i++) {

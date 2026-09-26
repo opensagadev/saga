@@ -71,6 +71,7 @@ static void Shards_UpdateBeforeCharacters(void *world_info, void *, float) {
 static void Shards_UpdateAfterCharacters(void *context, void *, float) {
     WORLDINFO *world = static_cast<WORLDINFO *>(context);
     SHARD *shard = static_cast<SHARD *>(world->shards);
+    NUVEC target, velocity, offset;
     for (i32 i = 0; i < world->shard_count; ++i, ++shard) {
         if (shard->state_flags & 2)
             NuCameraTransformScreenClip(&shard->screen_position, &shard->current_position, 1, NULL);
@@ -80,7 +81,6 @@ static void Shards_UpdateAfterCharacters(void *context, void *, float) {
                 shard->collection_time = 0.0f;
                 continue;
             }
-            NUVEC target, velocity;
             Attracto_GetSuctionPos(shard->collector, &target);
             NuVecSub(&velocity, &target, &shard->current_position);
             NuVecScale(&velocity, &velocity, 3.0f);
@@ -99,12 +99,13 @@ static void Shards_UpdateAfterCharacters(void *context, void *, float) {
             shard->current_position.y += shard->collection_velocity.y * FRAMETIME;
             shard->current_position.z += shard->collection_velocity.z * FRAMETIME;
             if (NuVecDistSqr(&shard->current_position, &target, NULL) < 0.2f * 0.2f) {
-                shard->state_flags = (shard->state_flags | 8) & ~4;
-                ++shard->collector->field_0x106e;
-                NewBuzzFrames(shard->collector->pad_gamepad->pad, 1, 0);
+                shard->collected = 1;
+                shard->collecting = 0;
+                GameObject_s *collector = shard->collector;
+                ++collector->field_0x106e;
+                NewBuzzFrames(collector->pad_gamepad->pad, 1, 0);
             }
         } else if (shard->state_flags & 0x20) {
-            NUVEC offset;
             NuVecRotateZ(&offset, &v010, shard->angle_z);
             NuVecRotateZ(&offset, &offset, shard->angle_x);
             NuVecScale(&offset, &offset, (f32)qrand() * (1.0f / 65535.0f) * 0.0333f);
@@ -121,14 +122,14 @@ static void Shards_Draw(void *context, void *, float) {
     if (shard == NULL)
         return;
     for (i32 i = 0; i < world->shard_count; ++i, ++shard) {
-        shard->state_flags &= ~0x10;
+        shard->drawn = 0;
         if ((shard->state_flags & 0x0a) != 2)
             continue;
         NUMTX_ALIGNED16 matrix;
         if (shard->state_flags & 4) {
-            u16 spin = (u16)(i32)((f32)(i32)shard->spin_angle + 98304.0f * shard->collection_time);
+            u16 spin = (u16)((f32)(i32)shard->spin_angle + 98304.0f * shard->collection_time);
             NuMtxSetRotationY(&matrix, spin);
-            u16 tumble = (u16)(i32)(60620.0f * shard->collection_time);
+            u16 tumble = (u16)(60620.0f * shard->collection_time);
             u16 angle_z = shard->angle_z;
             if ((shard->state_flags & 0x40) == 0)
                 angle_z += tumble;
@@ -150,7 +151,7 @@ static void Shards_Draw(void *context, void *, float) {
         LEVEL_OBJECT_RUNTIME_s *model = &world->lev_objs[shard->model_index];
         if (model->active != 0) {
             i32 drawn = NuSpecialDrawAt(&model->special, &matrix);
-            shard->state_flags = (shard->state_flags & ~0x10) | ((drawn & 1) << 4);
+            shard->drawn = drawn;
         }
     }
 }
@@ -160,7 +161,7 @@ static char *Shard_GetGizmoName(GIZMO *gizmo) {
 }
 
 static i32 Shard_GetOutput(GIZMO *gizmo, i32, i32) {
-    return (static_cast<SHARD *>(gizmo->object)->state_flags >> 3) & 1;
+    return (static_cast<SHARD *>(gizmo->object)->state_flags & 8) != 0;
 }
 
 static char *Shard_GetOutputName(GIZMO *gizmo, i32 output_index) {
@@ -174,14 +175,14 @@ static i32 Shard_GetNumOutputs(GIZMO *gizmo) {
 static void Shard_Activate(GIZMO *gizmo, i32 active) {
     if (gizmo != NULL) {
         SHARD *shard = static_cast<SHARD *>(gizmo->object);
-        shard->state_flags = (shard->state_flags & ~1) | (active != 0);
+        shard->active = active != 0;
     }
 }
 
 static void Shard_SetVisibility(GIZMO *gizmo, i32 visible) {
     if (gizmo != NULL) {
         SHARD *shard = static_cast<SHARD *>(gizmo->object);
-        shard->state_flags = (shard->state_flags & ~2) | ((visible != 0) << 1);
+        shard->visible = visible != 0;
     }
 }
 
@@ -227,7 +228,10 @@ static void Shards_Reset(void *context, void *, void *data) {
     SHARD *shard = static_cast<SHARD *>(world->shards);
     for (i32 i = 0; i < world->shard_count; ++i, ++shard) {
         SHARD *current = &static_cast<SHARD *>(world->shards)[i];
-        current->state_flags = (current->state_flags | 3) & ~0x18;
+        current->active = 1;
+        current->visible = 1;
+        current->collected = 0;
+        current->drawn = 0;
         current->model_index = qrand() / 9363;
         LEVEL_OBJECT_RUNTIME_s *models = world->lev_objs;
         for (i32 attempt = 0; attempt < 7 && models[current->model_index + 65].active == 0; ++attempt) {
@@ -239,14 +243,15 @@ static void Shards_Reset(void *context, void *, void *data) {
         current->spin_angle = qrand();
         current->current_position = current->position;
         current->collector = NULL;
-        current->state_flags &= ~0x24;
+        current->collecting = 0;
+        current->random_offset = 0;
         current->collection_time = 0.0f;
         if (i < 128 && progress != NULL) {
             u32 mask = 1u << (i & 31);
             i32 word = i >> 5;
-            shard->state_flags = (shard->state_flags & ~8) | ((progress->collected[word] & mask) != 0 ? 8 : 0);
-            shard->state_flags = (shard->state_flags & ~2) | ((progress->visible[word] & mask) != 0 ? 2 : 0);
-            shard->state_flags = (shard->state_flags & ~1) | ((progress->active[word] & mask) != 0);
+            shard->collected = (progress->collected[word] & mask) != 0;
+            shard->visible = (progress->visible[word] & mask) != 0;
+            shard->active = (progress->active[word] & mask) != 0;
         }
     }
 }
@@ -341,7 +346,7 @@ void Shards_HandleLostObj(WORLDINFO_s *world, GameObject_s *object) {
         if ((shard->state_flags & 0x0c) == 4 && shard->collector == object) {
             shard->collector = NULL;
             shard->collection_time = 0.0f;
-            shard->state_flags &= ~4;
+            shard->collecting = 0;
         }
     }
 }

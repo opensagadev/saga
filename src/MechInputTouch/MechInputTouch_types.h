@@ -413,8 +413,8 @@ struct MechInputTouchMainDummyStick : NuTouchInputElement {
 };
 struct MechInputTouchMenuController {
     static i32 AnyTouchesThisFrame; // original bss, consumed by startup/menu presentation
-    static i32 PackButtonPressed;   // original bss (read/cleared by NuMain)
-    static i32 PackButtonID;        // original bss (menu id for in-app purchase pack)
+    static bool PackButtonPressed;  // original 1-byte bss (read/cleared by NuMain)
+    static i32 PackButtonID;        // original data, initially -1 (menu id for in-app purchase pack)
     void Activate();
     void Deactivate();
     MechInputTouchMenuController(i32);
@@ -566,7 +566,7 @@ struct MechObjectInterface : NuMechPtr<MechObjectInterface, 4>::ManagedBase {
         return radius + radius;
     }
     virtual const char *GetTargetName() const {
-        return "";
+        return "???";
     }
     virtual i32 GetObjectType() const {
         return 0;
@@ -941,8 +941,10 @@ DECOMP_ASSERT(offsetof(MechInputTouchGestureBasedController, temporary_position)
 DECOMP_ASSERT(offsetof(MechInputTouchGestureBasedController, stick_mode) == 0x8c,
               "Gesture controller stick mode offset");
 DECOMP_ASSERT(offsetof(MechInputTouchGestureBasedController, active) == 0xa4, "Gesture controller active flag offset");
-DECOMP_ASSERT(offsetof(MechInputTouchGestureBasedController, field_90) == 0x90, "Gesture controller first touch offset");
-DECOMP_ASSERT(offsetof(MechInputTouchGestureBasedController, field_94) == 0x94, "Gesture controller second touch offset");
+DECOMP_ASSERT(offsetof(MechInputTouchGestureBasedController, field_90) == 0x90,
+              "Gesture controller first touch offset");
+DECOMP_ASSERT(offsetof(MechInputTouchGestureBasedController, field_94) == 0x94,
+              "Gesture controller second touch offset");
 DECOMP_ASSERT(offsetof(MechInputTouchGestureBasedController, smart_bomb_touch) == 0xa8,
               "Gesture controller smart bomb touch offset");
 DECOMP_ASSERT(offsetof(MechInputTouchGestureBasedController, tag_button) == 0xac,

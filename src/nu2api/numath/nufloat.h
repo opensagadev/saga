@@ -75,6 +75,8 @@ extern "C" {
     f32 NuExp10(float x);
 
     f32 NuPowFast(f32 base, f32 exponent);
+    void NuFpExceptionMask(void);
+    void NuFpException(void);
     i16 NuFloatToHalf(f32 value);
     f32 NuHalfToFloat(i16 value);
 #ifdef __cplusplus

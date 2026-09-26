@@ -96,7 +96,7 @@ static i32 GizTorp_GetOutput(GIZMO *, i32, i32) {
 }
 
 static char *GizTorp_GetOutputName(GIZMO *, i32 output_index) {
-    return output_index == 0 ? const_cast<char *>("Active") : NULL;
+    return output_index == 0 ? const_cast<char *>("Ready") : NULL;
 }
 
 static i32 GizTorp_GetNumOutputs(GIZMO *) {

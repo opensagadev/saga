@@ -628,7 +628,7 @@ void CharScenes_LevelLoad(WORLDINFO *world) {
             u32 flag = (cutscene_flags[i >> 5] >> (i & 0x1f)) & 1;
             if (flag != 0) {
                 // Load the character scene
-                char path[136];
+                char path[128];
                 VARIPTR buf_end = world->unknown_0108;
                 sprintf(path, "chars\\%s\\%s.gsc", CDataList[i].dir, CDataList[i].file);
                 NUGSCN *scene = NuGScnRead(&world->giz_buffer, buf_end, path);

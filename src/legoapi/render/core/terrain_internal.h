@@ -10,7 +10,6 @@ struct TerrainLastImpact_s {
 };
 
 extern TerrainLastImpact_s TerrLastImpact;
-extern u8 TerrainHitInfo[4];
 extern TERRSET *CurTerr;
 extern i32 WallSplinesOnly;
 extern TERRAIN_SPHERE SphereData[16];

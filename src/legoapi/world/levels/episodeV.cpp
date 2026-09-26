@@ -286,7 +286,8 @@ void HothEscapeD_Reset(WORLDINFO_s *) {
 }
 
 void BobaRocket_Deflect(PART_s *part) {
-    part->flags = (part->flags & ~0x4000u) | 0x80;
+    part->flags &= ~0x4000u;
+    part->flags |= 0x80;
     NewPartRotation(part);
 }
 

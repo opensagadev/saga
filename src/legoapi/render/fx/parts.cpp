@@ -424,7 +424,7 @@ static __used__ void TiePart_Kill(PART_s *part, i32) {
 
 static __used__ void TiePart_Move(PART_s *part, f32 time) {
     part->field_124[3] = -32768;
-    part->field_13c = static_cast<i32>(-32768.0f * FRAMETIME);
+    part->field_13c = static_cast<u16>(-32768.0f * FRAMETIME);
     NUVEC position;
     position.x = part->position.x + part->velocity.x * time;
     position.y = part->position.y + part->velocity.y * time;
@@ -1545,7 +1545,7 @@ extern "C" {
         key = &debkeydata[effect->particle_keys[slot]];                                                                \
         if (key->particle_count + particle_count <= maximum_particles) {                                               \
             particle_key_slot = slot;                                                                                  \
-            goto debris_key_found;                                                                                    \
+            goto debris_key_found;                                                                                     \
         }                                                                                                              \
     }
 
@@ -1557,7 +1557,7 @@ extern "C" {
     key = &debkeydata[effect->particle_keys[slot]];                                                                    \
     if (key->particle_count + particle_count <= maximum_particles) {                                                   \
         particle_key_slot = slot;                                                                                      \
-        goto debris_key_found;                                                                                        \
+        goto debris_key_found;                                                                                         \
     }
 
         if (freedebkeyptr >= maxdebkeys) {
@@ -3393,22 +3393,22 @@ void edpartDestroy(i32 index) {
 }
 
 void PartCleanupTypes() {
-    static i32 frame = 0;
-    static i32 index = 0;
-    if (++frame > 5) {
-        frame = 0;
-        if (part_types[index].effect_ids[0] != -1 && partglobaltime > part_types[index].last_used_time + 5.0f &&
-            part_types[index].scale != 1.0f) {
+    static i32 pcount1 = 0;
+    static i32 pcount2 = 0;
+    if (++pcount1 > 5) {
+        pcount1 = 0;
+        if (part_types[pcount2].effect_ids[0] != -1 && partglobaltime > part_types[pcount2].last_used_time + 5.0f &&
+            part_types[pcount2].scale != 1.0f) {
             for (i32 i = 0; i < 40; ++i) {
-                if (part_emits[i].effect_id == index)
+                if (part_emits[i].effect_id == pcount2)
                     edpartDestroy(i);
             }
-            part_types[index].name[0] = 0;
-            part_types[index].effect_ids[0] = -1;
+            part_types[pcount2].name[0] = 0;
+            part_types[pcount2].effect_ids[0] = -1;
             --part_types_used;
         }
-        if (++index >= 128)
-            index = 0;
+        if (++pcount2 >= 128)
+            pcount2 = 0;
     }
 }
 
@@ -3442,8 +3442,18 @@ void Asteroid_PartKill(PART_s *part, i32 reason) {
     AddGameDebris(WORLD->debris_sys, 0x5f, &part->position);
     AddPartDebris(WORLD->part_debris_sys, 4, &part->position);
     if (part->force_player_mask == 1) {
-        if (reason == 4 || reason == 5)
-            AddMiscPickups(&part->position, reason - 4, 1000, 0);
+        i32 type;
+        switch (reason) {
+            case 4:
+                type = 0;
+                break;
+            case 5:
+                type = 1;
+                break;
+            default:
+                return;
+        }
+        AddMiscPickups(&part->position, type, 1000, 0);
     } else {
         AddMiscPickups(&part->position, -1, 0, 1);
     }
@@ -3515,7 +3525,8 @@ void PartImpact_Basketball(PART_s *part) {
 void PartUpdate_Basketball(PART_s *part) {
     if (LevGizmo[0] != NULL) {
         GIZMOBLOWUP_s *blowup = static_cast<GIZMOBLOWUP_s *>(LevGizmo[0]->object);
-        if ((blowup->status_flags & 0x800001) == 0 && NuVecDistSqr(&blowup->position, &part->position, NULL) < 0.01f) {
+        if ((blowup->status_flags & 0x800001) == 0 &&
+            NuVecDistSqr(&blowup->position, &part->position, NULL) < 0.1f * 0.1f) {
             GizmoActivate(WORLD->gizmo_sys, LevGizmo[0], 1, 0);
             GizmoBlowupBlowup(blowup, 1, -1, -1, NULL, 1);
         }
@@ -3603,9 +3614,8 @@ void KillParts(GameObject_s *object, i32 animation, i32 excluded_layer, i32 mode
         random_variant = qrand() / 10923;
     previous_variant = random_variant;
 
-    u32 layers = (game_character->flags_094[0] & 4) != 0
-                     ? object->field_0x1054
-                     : AdjustLayerBits(game_character->layer_mask_dead, object);
+    u32 layers = (game_character->flags_094[0] & 4) != 0 ? object->field_0x1054
+                                                         : AdjustLayerBits(game_character->layer_mask_dead, object);
     if (animation != -1)
         layers = 1u << animation;
     else if (excluded_layer != -1)
@@ -3620,8 +3630,7 @@ void KillParts(GameObject_s *object, i32 animation, i32 excluded_layer, i32 mode
     i32 part_index = 0;
     for (i32 render_index = 0; render_index < render_count; ++render_index) {
         const i32 layer = render_indices[render_index];
-        if (layer == -1 || (animation != -1 && layer != animation) ||
-            (excluded_layer != -1 && layer == excluded_layer))
+        if (layer == -1 || (animation != -1 && layer != animation) || (excluded_layer != -1 && layer == excluded_layer))
             continue;
         nuhgobjrender_s *render = &model->hierarchy->render_parts[layer];
         if (render->rigid_specials == NULL)

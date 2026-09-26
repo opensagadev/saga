@@ -690,22 +690,22 @@ static void GizmoForce_Activate(GIZMO *gizmo, i32 activate) {
         return;
     }
 
-    u8 progress_flags = force->progress_flags;
-    if ((progress_flags & GIZFORCE_PROGRESS_ENABLED) == 0) {
+    if (!force->progress_enabled) {
         GameAnimSet_JumpToStart(force->anim_set);
-        progress_flags = force->progress_flags;
     }
     force->field_0xaa &= static_cast<u8>(~GIZFORCE_STATE_DESTROYED_OR_THROWN);
-    force->progress_flags =
-        static_cast<u8>((progress_flags & ~(GIZFORCE_PROGRESS_REVERSE_ACTIVE | GIZFORCE_PROGRESS_ANIMATION_REVERSED)) |
-                        GIZFORCE_PROGRESS_ENABLED);
+    force->progress_enabled = 1;
+    force->progress_reverse_active = 0;
+    force->progress_animation_reversed = 0;
     force->field_0x48 = 0.0f;
     force->field_0x50 = 0.0f;
-    u8 runtime_flags = force->runtime_flags;
     if ((force->config_flags & GIZFORCE_CONFIG_RESET_STATE_ON_ACTIVATE) != 0) {
-        runtime_flags &= static_cast<u8>(~GIZFORCE_RUNTIME_REWARD_RELEASED);
+        force->runtime_reward_released = 0;
     }
-    force->runtime_flags = static_cast<u8>(runtime_flags & 0x87);
+    force->runtime_along_socket_hidden = 0;
+    force->runtime_offset_applied = 0;
+    force->runtime_force_range_complete = 0;
+    force->runtime_completion_released = 0;
     GameAnimSet_EvaluateState(force->anim_set);
     force->radius = 1.0f;
     force->position = force->file_position;
@@ -718,18 +718,18 @@ static i32 GizmoForce_ActivateRev(GIZMO *gizmo, i32 activate, i32 flags) {
     }
     GIZFORCE_s *force = static_cast<GIZFORCE_s *>(gizmo->object);
     if ((flags & 1) != 0) {
-        const i32 reverse_active = (force->progress_flags & GIZFORCE_PROGRESS_REVERSE_ACTIVE) != 0 ? 1 : 0;
+        i32 reverse_active = force->progress_reverse_active;
         return activate != reverse_active;
     }
-    if (activate == 0) {
+    if (activate != 0) {
+        GizForce_PlayBackwards(force);
+        force->progress_reverse_active = 1;
+        force->progress_enabled = 0;
+    } else {
         GizForce_PlayForwards(force);
-        force->progress_flags =
-            static_cast<u8>((force->progress_flags & ~GIZFORCE_PROGRESS_REVERSE_ACTIVE) | GIZFORCE_PROGRESS_ENABLED);
-        return 1;
+        force->progress_reverse_active = 0;
+        force->progress_enabled = 1;
     }
-    GizForce_PlayBackwards(force);
-    force->progress_flags =
-        static_cast<u8>((force->progress_flags & ~GIZFORCE_PROGRESS_ENABLED) | GIZFORCE_PROGRESS_REVERSE_ACTIVE);
     return 1;
 }
 
@@ -1584,8 +1584,7 @@ void GizForce_PlayBackwards(GIZFORCE_s *force) {
 void GizForce_SetVisibility(GIZFORCE_s *force, i32 visibility) {
     if (force != NULL) {
         GameAnimSet_SetVisibility(force->anim_set, visibility);
-        force->progress_flags =
-            static_cast<u8>((force->progress_flags & ~GIZFORCE_PROGRESS_VISIBLE) | ((visibility != 0) << 1));
+        force->progress_visible = visibility != 0;
     }
 }
 

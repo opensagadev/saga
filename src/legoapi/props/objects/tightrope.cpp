@@ -315,10 +315,10 @@ static void TightRopes_StoreProgress(void *world_info, void *, void *progress_da
 }
 
 TIGHTROPE *TightRope_FindNearest(NUVEC *position, WORLDINFO_s *world, i32 *endpoint, f32 *distance_squared) {
-    TIGHTROPE *nearest = NULL;
     i32 nearest_endpoint = -1;
-    f32 nearest_distance = 1000000000.0f;
     TIGHTROPE *rope = world->tightropes;
+    TIGHTROPE *nearest = NULL;
+    f32 nearest_distance = 1000000000.0f;
     for (i32 index = 0; index < world->tightrope_count; ++index, ++rope) {
         f32 distance = NuVecDistSqr(position, &rope->start, NULL);
         if (nearest_distance > distance) {
@@ -591,7 +591,9 @@ jump:
         object->context_animation = 6;
         object->context_animation_timer = 0.0f;
         f32 duration = AnimDuration(object->id, 6, 0.0f, 0.0f, 0);
-        object->airborne_action_duration = duration <= 0.0f ? 1.0f : duration;
+        object->airborne_action_duration = duration;
+        if (duration <= 0.0f)
+            object->airborne_action_duration = 1.0f;
         ResetAnimPacket(&object->apiobj.anim_packet, -1);
     } else {
         StartJump(object, 0);

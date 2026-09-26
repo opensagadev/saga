@@ -228,7 +228,7 @@ void Cheats_Update() {
             GameAudio_PlaySfx(0x52, NULL, 0, 0);
         } else {
             GameAudio_PlaySfx(0x51, NULL, 0, 0);
-            ConstantRumble(NULL, qrand() * 0.0009765625f * 0.03125f, 0.0f);
+            ConstantRumble(NULL, qrand() * 1.5259021893143654e-05f * 0.5f, 0.0f);
         }
     }
     Cheats_SetFlags();

@@ -322,33 +322,33 @@ typedef struct WORLDINFO_s {
     CLIMBOBJECTSYS_s *climb_object_sys;
     MechAutoJumpManager *mech_auto_jump_manager;
 
-    TELEPORT_s *teleports;                 // 0x4684
-    i32 teleport_count;                    // 0x4688
-    struct ZIPUP_s *zipups;                // 0x468c
-    i32 zipup_count;                       // 0x4690
-    struct TUBE_s *tubes;                  // 0x4694
-    i32 tube_count;                        // 0x4698
-    DOOR_s *doors;                         // 0x469c
-    i32 door_count;                        // 0x46a0
-    DOOR_s *start_door;                    // 0x46a4
-    GIZOBSTACLESYS_s *giz_obstacle_sys;    // 0x46a8
-    GIZBUILDITSYS_s *giz_buildit_sys;      // 0x46ac
-    GIZFORCESYS_s *giz_force_sys;          // 0x46b0
+    TELEPORT_s *teleports;                      // 0x4684
+    i32 teleport_count;                         // 0x4688
+    struct ZIPUP_s *zipups;                     // 0x468c
+    i32 zipup_count;                            // 0x4690
+    struct TUBE_s *tubes;                       // 0x4694
+    i32 tube_count;                             // 0x4698
+    DOOR_s *doors;                              // 0x469c
+    i32 door_count;                             // 0x46a0
+    DOOR_s *start_door;                         // 0x46a4
+    GIZOBSTACLESYS_s *giz_obstacle_sys;         // 0x46a8
+    GIZBUILDITSYS_s *giz_buildit_sys;           // 0x46ac
+    GIZFORCESYS_s *giz_force_sys;               // 0x46b0
     EQUIVALENTOBJECTGROUP_s *equivalent_groups; // 0x46b4
-    i32 equivalent_group_count;               // 0x46b8
-    GIZTURRETSYS_s *giz_turret_sys;        // 0x46bc
-    pushblock_s *push_blocks;              // 0x46c0
-    i32 push_block_count;                  // 0x46c4
-    NUVEC *push_block_positions;            // 0x46c8
-    i32 push_block_position_count;          // 0x46cc
-    i32 special_sfx_count;                 // 0x46d0
-    specialsfx_s *special_sfx;             // 0x46d4
-    i32 special_sfx_event_count;           // 0x46d8
-    SPECIALSFXEVENT_s *special_sfx_events; // 0x46dc
-    char filler7c[0x46e4 - 0x46e0];        // 0x46e0 .. 0x46e4
-    GIZSPINNER_s *spinners;                // 0x46e4
-    i32 spinner_count;                     // 0x46e8
-    GAMEANIMOBJPOOL_s *spinner_anim_pool;  // 0x46ec
+    i32 equivalent_group_count;                 // 0x46b8
+    GIZTURRETSYS_s *giz_turret_sys;             // 0x46bc
+    pushblock_s *push_blocks;                   // 0x46c0
+    i32 push_block_count;                       // 0x46c4
+    NUVEC *push_block_positions;                // 0x46c8
+    i32 push_block_position_count;              // 0x46cc
+    i32 special_sfx_count;                      // 0x46d0
+    specialsfx_s *special_sfx;                  // 0x46d4
+    i32 special_sfx_event_count;                // 0x46d8
+    SPECIALSFXEVENT_s *special_sfx_events;      // 0x46dc
+    char filler7c[0x46e4 - 0x46e0];             // 0x46e0 .. 0x46e4
+    GIZSPINNER_s *spinners;                     // 0x46e4
+    i32 spinner_count;                          // 0x46e8
+    GAMEANIMOBJPOOL_s *spinner_anim_pool;       // 0x46ec
 
     GRABBER_s *grabber; // 0x46f0
 
@@ -546,7 +546,7 @@ extern "C" {
 
     extern f32 g_BgLoadDelayHackTimer;
 
-    extern i32 waiting_for_level;
+    extern volatile i32 waiting_for_level;
     extern i32 level_already_loaded;
     extern i32 next_level;
 #ifdef __cplusplus

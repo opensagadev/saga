@@ -7,8 +7,6 @@
 #include "legoapi/core/input/qrand.h"
 #include "nu2api/nucore/nustring.h"
 
-static char gizrandom_output_name[] = "Random Output";
-
 i32 gizrandom_gizmotype_id = -1;
 
 i32 GizRandom_GetMaxGizmos(void *world_ptr) {
@@ -40,7 +38,7 @@ i32 GizRandom_GetOutput(GIZMO *gizmo, i32 output_index, i32) {
 }
 
 char *GizRandom_GetOutputName(GIZMO *, i32) {
-    return gizrandom_output_name;
+    return const_cast<char *>("Random Output");
 }
 
 i32 GizRandom_GetNumOutputs(GIZMO *gizmo) {

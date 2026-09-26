@@ -147,7 +147,7 @@ i32 NuSoundLoader::OpenForStreaming(const char *path, f64 length, NuSoundStreamD
 }
 
 NuSoundBuffer::Context NuSoundLoader::FillStreamBuffer(NuSoundBuffer *buffer, bool param3) {
-    NuSoundBuffer::Context context;
+    NuSoundBuffer::Context context = NuSoundBuffer::Context();
 
     memset(&context, 0, sizeof(context));
 

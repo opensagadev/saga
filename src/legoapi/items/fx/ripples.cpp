@@ -158,19 +158,19 @@ void UpdateRippleSet(ripple_set_s *set) {
                 if ((node->flags & 1) != 0)
                     node->size = node->initial_size + (node->growth - node->initial_size) * ratio;
                 if ((node->flags & 2) != 0)
-                    node->color.a = static_cast<u8>(static_cast<i32>(
+                    node->color.a = static_cast<u8>(
                         static_cast<f32>(node->start_color.a) +
-                        static_cast<f32>(static_cast<i32>(node->end_color.a) - node->start_color.a) * ratio));
+                        static_cast<f32>(static_cast<i32>(node->end_color.a) - node->start_color.a) * ratio);
                 if ((node->flags & 4) != 0) {
-                    node->color.r = static_cast<u8>(static_cast<i32>(
+                    node->color.r = static_cast<u8>(
                         static_cast<f32>(node->start_color.r) +
-                        static_cast<f32>(static_cast<i32>(node->end_color.r) - node->start_color.r) * ratio));
-                    node->color.g = static_cast<u8>(static_cast<i32>(
+                        static_cast<f32>(static_cast<i32>(node->end_color.r) - node->start_color.r) * ratio);
+                    node->color.g = static_cast<u8>(
                         static_cast<f32>(node->start_color.g) +
-                        static_cast<f32>(static_cast<i32>(node->end_color.g) - node->start_color.g) * ratio));
-                    node->color.b = static_cast<u8>(static_cast<i32>(
+                        static_cast<f32>(static_cast<i32>(node->end_color.g) - node->start_color.g) * ratio);
+                    node->color.b = static_cast<u8>(
                         static_cast<f32>(node->start_color.b) +
-                        static_cast<f32>(static_cast<i32>(node->end_color.b) - node->start_color.b) * ratio));
+                        static_cast<f32>(static_cast<i32>(node->end_color.b) - node->start_color.b) * ratio);
                 }
                 if ((node->flags & 8) != 0) {
                     node->matrix.m30 += node->velocity.x;

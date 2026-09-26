@@ -139,7 +139,7 @@ bool NuSoundAndroid::InitAudioDevice() {
 
     error = SL_SLOT(this->engine_object, ObjectGetInterfaceFn, 0xc)(this->engine_object, SL_IID_ENGINE,
                                                                     &this->audio_engine);
-    if (ReportErrorCode(error, "Get the engine interface") != 0) {
+    if (ReportErrorCode(error, "Get engine interface") != 0) {
         return false;
     }
 

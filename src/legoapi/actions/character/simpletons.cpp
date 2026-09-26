@@ -82,18 +82,16 @@ i32 objInNetWaitContext(GameObject_s *object, i32 context) {
     return false;
 }
 
-namespace {
-    struct AtOnceAttacker {
-        GameObject_s *object;
-        f32 distance;
-    };
+struct AtOnceAttacker {
+    GameObject_s *object;
+    f32 distance;
+};
 
-    AtOnceAttacker AtOnce_attackingPlayer[8][17];
-    i32 AtOnce_attackersPerRow = 32;
-    f32 AtOnce_InitialRowDist = 0.75f;
-    f32 AtOnce_RowDist = 0.75f;
-    i32 AtOnce_maxAttackers = 1;
-} // namespace
+static AtOnceAttacker AtOnce_attackingPlayer[8][17];
+static i32 AtOnce_attackersPerRow = 32;
+static f32 AtOnce_InitialRowDist = 0.75f;
+static f32 AtOnce_RowDist = 0.75f;
+static i32 AtOnce_maxAttackers = 1;
 
 bool oneAtOnce_CanAttack(GameObject_s *object, GameObject_s *opponent) {
     if (object == NULL) {

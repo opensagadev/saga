@@ -143,7 +143,9 @@ struct ReplicatorData {
 DECOMP_ASSERT(sizeof(ReplicatorData) == 0xc, "ReplicatorData ABI");
 DECOMP_ASSERT(offsetof(ReplicatorData, cursor) == 8, "ReplicatorData cursor offset");
 struct WORLDINFO_s;
-struct ePeerLeftReason {};
+struct ePeerLeftReason {
+    i32 value;
+};
 struct eHostVisibility {
     i32 value;
 };
@@ -463,16 +465,24 @@ DECOMP_ASSERT(sizeof(NetListenerBinding) == 0x250, "NetListenerBinding size");
 DECOMP_ASSERT(offsetof(NetListenerBinding, listener) == 8, "NetListenerBinding listener offset");
 DECOMP_ASSERT(offsetof(NetListenerBinding, channel) == 0xc, "NetListenerBinding channel offset");
 DECOMP_ASSERT(offsetof(NetListenerBinding, stats) == 0x30, "NetListenerBinding stats offset");
-struct NetTransporter {
+// Abstract base of NetTransporter; the original emits its inline destructor
+// and a vtable of six pure virtual slots.
+struct NetTransporterInterface {
+    virtual void Send(NetMessage, unsigned char, NetPeer &) = 0;
+    virtual void ReliableSend(NetMessage, unsigned char, NetPeer &, char const *, u32) = 0;
+    virtual void Broadcast(NetMessage, unsigned char) = 0;
+    virtual void ReliableBroadcast(NetMessage, unsigned char) = 0;
+    virtual void AddListener(NetListenerInterface *, unsigned char, char *) = 0;
+    virtual void RemoveListener(NetListenerInterface *, unsigned char) = 0;
+    virtual ~NetTransporterInterface() {
+    }
+};
+struct NetTransporter : NetTransporterInterface {
     NetListenerBinding *first_listener;
     NetListenerBinding *last_listener;
     i32 listener_count;
     NetTransporter() : first_listener(NULL), last_listener(NULL), listener_count(0) {
     }
-    virtual void Send(NetMessage, unsigned char, NetPeer &) = 0;
-    virtual void ReliableSend(NetMessage, unsigned char, NetPeer &, char const *, u32) = 0;
-    virtual void Broadcast(NetMessage, unsigned char) = 0;
-    virtual void ReliableBroadcast(NetMessage, unsigned char) = 0;
     virtual void AddListener(NetListenerInterface *, unsigned char, char *);
     void Distribute(NetMessage const &, unsigned char, NetPeer const &) const;
     void FtpComplete(FtpFile *, i32) const;
@@ -788,7 +798,7 @@ struct V2SessionManager {
     }
     virtual i32 VerifyStrings(char **, char **, i32, char *);
 
-    void Log(char *, ...);
+    static void Log(char *, ...);
     void RemoveAllPeers(ePeerLeftReason);
     void Reset();
     void SetHostGameData(i32 *, i32);

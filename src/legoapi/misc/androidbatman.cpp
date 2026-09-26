@@ -162,7 +162,7 @@ void GamePad_InitButtons() {
 }
 
 extern "C" void NuIOS_FreeMemoryForSuspend(void) {
-    const char *source_path = "i:/SagaTouch-Android_9176564/nu2api.saga/nuandroid/ios_graphics.cpp";
+    const char *source_path = "i:/SagaTouch-Android_9176564/saga/androidbatman.cpp";
     BeginCriticalSectionGL(source_path, 270);
     NuIOS_DeallocateSystemFramebuffers();
     glReleaseShaderCompiler();

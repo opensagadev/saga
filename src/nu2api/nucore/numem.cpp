@@ -198,8 +198,8 @@ void memmove(void *dest, const void *source, i32 size) {
     }
 }
 
-void numeminit() {
-    STUBBED();
+i32 numeminit() {
+    return 0;
 }
 
 NUMEMEXTERNAL *NuMemGetExternal(void) {

@@ -78,7 +78,7 @@ static char *HatMachine_GetGizmoName(GIZMO *gizmo) {
 
 static i32 HatMachine_GetOutput(GIZMO *gizmo, i32, i32) {
     HATMACHINE *machine = static_cast<HATMACHINE *>(gizmo->object);
-    return (static_cast<u8>(machine->flags) >> 1) & 1;
+    return machine->state_bit1;
 }
 
 static char *HatMachine_GetOutputName(GIZMO *, i32 output_index) {
@@ -195,7 +195,7 @@ static void HatMachine_Update(void *world_ptr, void *, float elapsed) {
             if (machine->state_elapsed > machine->state_duration) {
                 ++machine->animation_state;
                 if (machine->animation_state == HATMACHINE_ANIMATION_PLAY_HAT_SFX) {
-                    PlaySfx("HatOn", &machine->position);
+                    PlaySfx("SwLever", &machine->position);
                 }
                 machine->state_elapsed = 0.0f;
 
@@ -620,7 +620,9 @@ HATMACHINE *HatMachine_FindNearest(WORLDINFO_s *world, nuvec_s *position, GameOb
         if (object != NULL) {
             for (i32 index = 0; index < world->hat_machine_sys->count; ++index) {
                 HATMACHINE_s *machine = &world->hat_machine_sys->machines[index];
-                if ((machine->flags & 0xf) != (HATMACHINE_FLAG_VISIBLE | HATMACHINE_FLAG_ENABLED) ||
+                if ((machine->flags & (HATMACHINE_FLAG_ANIMATING | HATMACHINE_FLAG_FINISHED | HATMACHINE_FLAG_VISIBLE |
+                                       HATMACHINE_FLAG_ENABLED)) !=
+                        (HATMACHINE_FLAG_VISIBLE | HATMACHINE_FLAG_ENABLED) ||
                     machine->player_position.y == 2000000.0f) {
                     continue;
                 }
@@ -743,8 +745,7 @@ void HatMachine_MoveCode(WORLDINFO_s *world, GameObject_s *object, i32 special_p
                 ResetAnimPacket(&object->apiobj.anim_packet, -1);
             }
             AlertSurroundingCreatures(object, &object->apiobj.collision_position);
-            object->context_animation_timer =
-                AnimDuration(object->id, object->context_animation, 0.0f, 0.0f, 1);
+            object->context_animation_timer = AnimDuration(object->id, object->context_animation, 0.0f, 0.0f, 1);
             machine->animation_duration = object->context_animation_timer;
             if (object->context_animation_timer <= 0.0f) {
                 object->context_animation_timer = 2.0f;
@@ -753,8 +754,8 @@ void HatMachine_MoveCode(WORLDINFO_s *world, GameObject_s *object, i32 special_p
             return;
         }
 
-        if (static_cast<i8>(object->apiobj.flags_low) < 0 &&
-            (object->apiobj.character_data->model_flags & 0x20) != 0 && object->field_0xdb0 <= 0.0f) {
+        if (static_cast<i8>(object->apiobj.flags_low) < 0 && (object->apiobj.character_data->model_flags & 0x20) != 0 &&
+            object->field_0xdb0 <= 0.0f) {
             PlaySfx(const_cast<char *>("TC14_VLN"), &object->apiobj.collision_position);
             object->field_0xdb0 = 0.5f;
         }
@@ -792,9 +793,8 @@ void HatMachine_MoveCode(WORLDINFO_s *world, GameObject_s *object, i32 special_p
             if (object->context_animation_timer > 0.0f) {
                 return;
             }
-            const bool disguise_blocked =
-                (object->apiobj.character_data->game_character->flags_090 & 0x10) == 0 &&
-                (object->id != id_PRINCESSLEIABOUSHH || FreePlay == 0);
+            const bool disguise_blocked = (object->apiobj.character_data->game_character->flags_090 & 0x10) == 0 &&
+                                          (object->id != id_PRINCESSLEIABOUSHH || FreePlay == 0);
             if (object->apiobj.character_model->model_data_b[0x6d] == NULL || disguise_blocked) {
                 if (object->apiobj.character_model->model_data_b[0x5e] == NULL) {
                     if (machine->animation_state != 2) {
