@@ -93,8 +93,8 @@ lookups. Remaining differences are linked string GOTOFF operands.
 | --- | ---: | ---: | ---: |
 | `MosEisleyD_Init` | 99.820% | 1,798 | 1,798 |
 | `MosEisleyB_Update` | 73.049% | 1,011 | 977 |
-| `DeathStarRescueB_Update` | 83.634% | 1,168 | 1,162 |
-| `KillParts_TIEFIGHTER` | 45.947% | 557 | 605 |
+| `DeathStarRescueB_Update` | 93.714% | 1,168 | 1,170 |
+| `KillParts_TIEFIGHTER` | 73.068% | 557 | 590 |
 | `DeathStarBattleDUpdate` | 67.338% | 1,502 | 1,514 |
 
 `MosEisleyD_Init` confirms the fixed-array pattern: six local gate-name
@@ -114,7 +114,12 @@ expansion preserves the target's six active bodies; a large ordinary loop
 risks leaving one loop body where the target has six. The target checks the
 six flag bytes in order and places the first active body next to that chain,
 then the others out of line. The sound effect uses a 0.25 volume while the
-animation plays and a 0.4 volume when it reaches its end frame.
+animation plays and a 0.4 volume when it reaches its end frame. Using a
+nonvolatile byte pointer for `LevFlag` raises the match from 83.634% to
+93.714%: GCC emits the target's direct memory byte compares and the same
+`0x5c` stack frame. A volatile pointer instead emits byte loads followed by
+tests and chooses a different prologue. Explicit `goto` labels did not alter
+the optimizer's remaining reverse body order.
 
 `KillParts_TIEFIGHTER` uses an unsigned `variant < 1` expression. NDK r8e
 GCC encodes its initial flags assignment as `cmp 1; sbb; and 0x3f0; add
@@ -123,6 +128,15 @@ The spinning path starts with `{velocity.x * 0.75f, velocity.x * 0.75f,
 velocity.z * 0.75f}`. The middle component really repeats x. Five particle
 callbacks in `parts.cpp` were static, so this pass exposes them with hidden
 linkage and their original `_ZL...` assembler names for cross-file pointers.
+Marking the `mode == 1` spin branch unlikely with `__builtin_expect` moves
+it after the other mode branches and raises the match from 45.947% to
+73.068%. A read-only disassembly pass found two remaining source issues:
+the target feeds the second `u16` rotation argument into `NuVecRotateX` and
+the first into `NuVecRotateY`, and it writes spin `params->flags = 0x111`
+before building the velocity vector. These need a measured follow-up.
+The target's out-of-line order is mode 0, low-speed, then spin; a shared
+`AddPart` tail for the first two and the default path may eliminate repeated
+epilogues. Reversing the outer float comparison is another block-order probe.
 
 `DeathStarBattleDUpdate` reads `player->apiobj.collision_position`, which is
 at player offsets `0x80` through `0x88`; `apiobj.position` is a different
@@ -131,3 +145,9 @@ outer two ships exist. Three distinct spawn blocks rebuild the same base
 position before applying offsets `(0,0,2)`, `(0,1,0)`, `(0,0,-2)`. Its trench
 move and kill callbacks also needed hidden cross-file linkage while retaining
 the original `_ZL...` assembler names.
+For a measured follow-up, put the second ship's model ternary directly in
+`AddDynamicCreature` after its offset is constructed; a separate model local
+currently moves that test ahead of the spawn setup and spills it. The target
+also checks flag byte 4 directly (use a nonvolatile pointer), leaves the
+visibility-zero sound path inline, and stores `trenchrun.objects[slot]`
+before the spawned ship's final spline-offset field.

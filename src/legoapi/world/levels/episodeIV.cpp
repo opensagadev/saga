@@ -768,7 +768,7 @@ void DeathStarRescueC_Init(WORLDINFO_s *world) {
 }
 
 void DeathStarRescueB_Update(WORLDINFO_s *world) {
-    volatile u8 *flags = reinterpret_cast<volatile u8 *>(&LevFlag);
+    u8 *flags = reinterpret_cast<u8 *>(&LevFlag);
 #define UPDATE_RESCUE_REACTOR(index)                                                                       \
     do {                                                                                                   \
         if (flags[index] == 0) {                                                                           \
@@ -1014,7 +1014,7 @@ __attribute__((force_align_arg_pointer)) void KillParts_TIEFIGHTER(ADDPART_s *pa
         return;
     }
 
-    if (mode == 1) {
+    if (__builtin_expect(mode == 1, 0)) {
         NUVEC spin_velocity = {object->apiobj.velocity.x * 0.75f, object->apiobj.velocity.x * 0.75f,
                                object->apiobj.velocity.z * 0.75f};
         if (part_index == 5) {
