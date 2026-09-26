@@ -499,7 +499,8 @@ void TextDecodeCodeword(char *source, char *destination) {
 static f32 QFONTSCALEX = 1.0f;
 static f32 QFONTSCALEY = 1.0f;
 static f32 STCOORDSCALE = 1.0f;
-static f32 g_buttonFontScalePulse = 1.0f;
+f32 g_buttonFontScalePulse = 1.0f;
+f32 smarttextex_longestwidth;
 i32 MenuStopDraw;
 i32 smarttext_fwn;
 static i32 followon_line;
@@ -1003,6 +1004,7 @@ extern "C" {
     }
     void SmartTextEx(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment, u8 red,
                      u8 green, u8 blue, f32 max_width, i32 max_lines, void *message_box, i32 suppress_draw, u32 alpha) {
+        smarttextex_longestwidth = 0.0f;
         VUFNT *font = SmartTextFont != nullptr ? SmartTextFont : QFont2D;
         if (font == nullptr || text == nullptr || text[0] == '\0' || MenuStopDraw != 0)
             return;
@@ -1034,6 +1036,9 @@ extern "C" {
             if (!has_explicit_break && (available_width <= 0.0f || width <= available_width || max_lines == 1)) {
                 if (available_width > 0.0f && width > available_width) {
                     draw_x_scale *= available_width / width;
+                    smarttextex_longestwidth = available_width;
+                } else {
+                    smarttextex_longestwidth = width;
                 }
                 Text3DEx(reinterpret_cast<char *>(decoded), x * STCOORDSCALE, y, z, draw_x_scale, draw_y_scale, z_scale,
                          alignment, red, green, blue, alpha & 0xff);
@@ -1102,6 +1107,8 @@ extern "C" {
                 for (i32 line = 0; line < line_count; ++line) {
                     Text3DStringEncodeFont(lines[line], encoded, font);
                     const f32 line_width = NuQFntPrintLenW(font, encoded);
+                    if (line_width > smarttextex_longestwidth)
+                        smarttextex_longestwidth = line_width;
                     f32 line_x_scale = draw_x_scale;
                     if (line_width > available_width) {
                         line_x_scale *= available_width / line_width;

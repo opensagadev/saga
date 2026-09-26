@@ -14,6 +14,7 @@
 #include "legoapi/render/core/render.h"
 #include "legoapi/render/fx.h"
 #include "legoapi/menus/core/text.h"
+#include "legoapi/menus/core/gamehint.h"
 #include "gamelib/util/gamelib_util_types.h"
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nuvec.h"
@@ -31,43 +32,6 @@ f32 ICONXPOS_VIRTUALS = -0.61500001f;
 f32 ICONYPOS_VIRTUALS = 0.47f;
 static NUVEC PercentHint_TriggerPos = {-28.421f, 0.0f, -52.462f};
 
-struct HintScalarTransition {
-    f32 *target;
-    f32 from, to, elapsed, duration, delay, value;
-    HintScalarTransition() : target(&value), elapsed(0.0f), duration(-1.0f), delay(0.0f) {
-    }
-    void Update(f32 dt) {
-        if (!(duration < 0.0f) && !(elapsed >= duration + delay)) {
-            elapsed += dt;
-            if (elapsed > duration + delay)
-                elapsed = duration + delay;
-            if (elapsed >= delay)
-                *target = ((elapsed - delay) / duration) * (to - from) + from;
-        }
-    }
-};
-struct HintVectorTransition {
-    VuVec *target;
-    VuVec from, to;
-    f32 elapsed, duration, delay;
-    VuVec value;
-    HintVectorTransition() : target(&value), elapsed(0.0f), duration(-1.0f), delay(0.0f) {
-    }
-    void Update(f32 dt) {
-        if (!(duration < 0.0f) && !(elapsed >= duration + delay)) {
-            elapsed += dt;
-            if (elapsed > duration + delay)
-                elapsed = duration + delay;
-            if (elapsed >= delay) {
-                const f32 amount = (elapsed - delay) / duration;
-                target->w = 0.0f;
-                target->y = amount * (to.y - from.y) + from.y;
-                target->z = amount * (to.z - from.z) + from.z;
-                target->x = amount * (to.x - from.x) + from.x;
-            }
-        }
-    }
-};
 HintVectorTransition hintIconPos;
 HintScalarTransition hintIconScale;
 HintScalarTransition hintYPop;
