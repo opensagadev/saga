@@ -1143,13 +1143,13 @@ void UpdatePaintPuzzle(WORLDINFO_s *world) {
                 }
             }
             if (used == 2) {
-                if ((paintsused[0] == 0 && paintsused[1] == 1) ||
-                    (paintsused[0] == 1 && paintsused[1] == 0)) {
+                if ((paintsused[1] == 1 && paintsused[0] == 0) ||
+                    (paintsused[1] == 0 && paintsused[0] == 1)) {
                     paintmixed = 3;
-                } else if ((paintsused[0] == 1 && paintsused[1] == 2) ||
-                           (paintsused[0] == 2 && paintsused[1] == 1)) {
+                } else if ((paintsused[0] == 2 && paintsused[1] == 1) ||
+                           (paintsused[1] == 2 && paintsused[0] == 1)) {
                     paintmixed = 4;
-                } else if ((paintsused[0] == 0 && paintsused[1] == 2) ||
+                } else if ((paintsused[1] == 2 && paintsused[0] == 0) ||
                            (paintsused[0] == 2 && paintsused[1] == 0)) {
                     paintmixed = 5;
                 } else {
@@ -1197,12 +1197,19 @@ void UpdatePaintPuzzle(WORLDINFO_s *world) {
             reinterpret_cast<u8 *>(factoryb_netpacket)[2] = 1;
             break;
     }
+    u8 tries = static_cast<u8>(painttry);
+    i32 target = painttarget;
     u8 *packet = reinterpret_cast<u8 *>(factoryb_netpacket);
-    i32 sound_pending = packet[2] == 1;
-    packet[0] = 0;
-    packet[1] = static_cast<u8>(painttry);
-    packet[3] = static_cast<u8>(painttarget);
-    if (sound_pending && played_sound == 0) {
+    if (packet[2] == 1) {
+        packet[0] = 0;
+        packet[1] = tries;
+        packet[3] = static_cast<u8>(target);
+    } else {
+        packet[0] = 0;
+        packet[1] = tries;
+        packet[3] = static_cast<u8>(target);
+    }
+    if (packet[2] == 1 && played_sound == 0) {
         GIZOBSTACLE_s *obstacle = static_cast<GIZOBSTACLE_s *>(forcetube->object);
         NUMTX *matrix = NuSpecialGetMtx(&obstacle->anim_set->objects->special);
         PlaySfx("Fac_BonusCylUp", reinterpret_cast<NUVEC *>(reinterpret_cast<u8 *>(matrix) + 0x30));

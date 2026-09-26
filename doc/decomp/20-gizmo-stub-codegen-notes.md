@@ -173,6 +173,20 @@ second and mixed obstacle only after reaching those branches. The common
 packet tail tests byte 2 before overwriting bytes 0, 1, and 3. Delaying those
 dereferences and capturing the packet test first raised the GOT-aware match
 from 59.564705% to 72.91765% (1273 local bytes versus 1334 target bytes).
-The remaining blend gate caches pair-comparison booleans, and the stage-3
-success transition uses an explicit branch; both remain unmeasured source
-experiments.
+The stage-3 success transition uses an explicit branch in the target, but a
+literal source `if/else` lowered the direct-object score and was reverted.
+
+The blend gate's predicate order matters. For the orange pair, test
+`b == 1 && a == 0` before `b == 0 && a == 1`; for green, test
+`a == 2 && b == 1` before `b == 2 && a == 1`; for purple, test
+`b == 2 && a == 0` before `a == 2 && b == 0`. GCC then caches and reuses
+equality results like the target, rather than generating a separate decision
+tree. In the common packet tail, read `painttry` and `painttarget` before the
+packet pointer. Duplicating the three packet writes in both branches of a
+`packet[2] == 1` test lets GCC merge the stores while retaining the compare
+before them and branching on its flags afterward. Put the sound effect test
+after those branches; moving it inside the first branch changes the block
+layout. These changes raised the direct NDK r8e object comparison from
+72.22647% to 84.16765% (1283 local bytes). The direct object baseline for
+the prior linked 72.91765% version was 72.22647%; the final linked score for
+this follow-up source remains to be measured.
