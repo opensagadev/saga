@@ -137,3 +137,10 @@ virtual slot before calling `NuSpecialGetName`. Storing the name in a
 local first makes it load the virtual slot afterward, as in retail.
 That source expression change raised the direct object match from
 88.81% to 98.30% and recovered the exact 331-byte function size.
+The scene loop reads `LevelEditor+0x2a0`, which this tree names
+`reset_pending`; `editable_scene_count` is at `+0x29c` and was an
+incorrect reconstruction here. Correcting the field preserves the
+331-byte size and raises the direct object score to 98.319%. The
+remaining non-relocation mismatch is the loop comparison operand
+order (`cmp edi, [esi+0x2a0]` in retail versus the equivalent
+`cmp [esi+0x2a0], edi` followed by the inverse branch).

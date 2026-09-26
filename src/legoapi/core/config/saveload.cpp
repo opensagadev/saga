@@ -491,7 +491,7 @@ SAVELOAD_TARGET_OPT void SerialiseNuHSpecial(EdStream &stream, void *data, i32) 
         stream.SerialiseString(name, 128);
         NuSpecialFind(NULL, special, name, 0);
         theLevelEditor.GetScene(0);
-        for (i32 index = 0; index < theLevelEditor.editable_scene_count; ++index) {
+        for (i32 index = 0; index < theLevelEditor.reset_pending; ++index) {
             if (NuSpecialFind(theLevelEditor.GetScene(index), special, name, 0))
                 break;
         }
