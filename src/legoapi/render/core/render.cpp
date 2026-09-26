@@ -1580,9 +1580,9 @@ void DrawGameObjects() {
     NuCameraSet(&global_camera);
 }
 
-nuhspecial_s green_light;
-nuhspecial_s painttargetcolour[3];
-nuhspecial_s paintlights[3];
+extern nuhspecial_s green_light;
+extern nuhspecial_s painttargetcolour[3];
+extern nuhspecial_s paintlights[3];
 
 void DrawPaintLights() {
     for (i32 i = 0; i < static_cast<const i8 *>(factoryb_netpacket)[1]; ++i) {
