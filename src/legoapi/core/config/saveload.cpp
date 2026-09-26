@@ -104,8 +104,10 @@ SAVELOAD_TARGET_OPT void FS_GetDirList(char *path, char *filter, char *filter_ou
             header[2] = static_cast<u8>(entry[9]) + 'A';
             header[1] = static_cast<u8>(entry[8]) + 'A';
             header[5] = static_cast<u8>(entry[12]) + 'A';
-            header[6] = static_cast<u8>(entry[14]) - 123;
-            __builtin_memcpy(next, const_cast<const char *>(header), 7);
+            u8 encoded_year = static_cast<u8>(entry[14]) - 123;
+            header[6] = encoded_year;
+            __builtin_memcpy(next, const_cast<const char *>(header), 6);
+            next[6] = encoded_year;
             char *name_dest = next + 7;
             NuStrCpy(name_dest, name);
             name_dest[name_length] = '\0';
@@ -136,8 +138,10 @@ SAVELOAD_TARGET_OPT void FS_GetDirList(char *path, char *filter, char *filter_ou
             header[2] = static_cast<u8>(entry[17]) + 'A';
             header[1] = static_cast<u8>(entry[16]) + 'A';
             header[5] = static_cast<u8>(entry[20]) + 'A';
-            header[6] = static_cast<u8>(entry[22]) - 123;
-            __builtin_memcpy(next, const_cast<const char *>(header), 7);
+            u8 encoded_year = static_cast<u8>(entry[22]) - 123;
+            header[6] = encoded_year;
+            __builtin_memcpy(next, const_cast<const char *>(header), 6);
+            next[6] = encoded_year;
             char *name_dest = next + 7;
             NuStrCpy(name_dest, name);
             name_dest[name_length] = '\0';
