@@ -824,8 +824,92 @@ void VaderB_Update(WORLDINFO_s *) {
     }
 }
 
-void VaderC_Update(WORLDINFO_s *) {
-    STUBBED();
+void VaderC_Update(WORLDINFO_s *world) {
+    extern TERRSET *CurTerr;
+    extern i32 obstacle_gizmotype_id;
+
+    if (netclient == 0 && vader_c.final_fight_message != NULL && ChallengeMode == 0 &&
+        vader_c.final_fight_message->value == 0.0f && vader_c.big_jump_locator != NULL && player != NULL &&
+        player->apiobj.supporting_platform_id != -1) {
+        vader_c.big_jump_locator->position = player->apiobj.lower_position;
+
+        u8 progress = vader_c.field_0x94;
+        for (i32 i = 0; i < 10; ++i) {
+            i16 platform_id = vader_c.platform_ids[i];
+            if (platform_id == -1)
+                continue;
+
+            if (Player[0] != NULL && Player[0]->apiobj.field_0x27d != 0 &&
+                Player[0]->apiobj.supporting_platform_id == platform_id &&
+                Player[0]->apiobj.position.y >=
+                    static_cast<NUMTX *>(CurTerr->platforms[platform_id].scene_object)->m31) {
+                progress |= 1;
+                vader_c.field_0x94 = progress;
+            }
+            if (Player[1] != NULL && Player[1]->apiobj.field_0x27d != 0 &&
+                Player[1]->apiobj.supporting_platform_id == platform_id &&
+                Player[1]->apiobj.position.y >=
+                    static_cast<NUMTX *>(CurTerr->platforms[platform_id].scene_object)->m31) {
+                progress |= 2;
+                vader_c.field_0x94 = progress;
+            }
+        }
+
+        if (progress == 3) {
+            vader_c.final_fight_message->value = 1.0f;
+            DOOR_s *door = Door_FindByName(world, "door_fight");
+            if (door != NULL)
+                Door_GoThrough(world, door, 1);
+        }
+    }
+
+    if (netclient != 0 && GameTimer.time_elapsed < 5.0f) {
+        GIZMO *gizmo = GizmoFindByName(WORLD->gizmo_sys, obstacle_gizmotype_id, "obstacle20");
+        if (gizmo != NULL && gizmo->object != NULL)
+            static_cast<GIZOBSTACLE_s *>(gizmo->object)->progress_flags &= ~1;
+        gizmo = GizmoFindByName(WORLD->gizmo_sys, obstacle_gizmotype_id, "obstacle21");
+        if (gizmo != NULL && gizmo->object != NULL)
+            static_cast<GIZOBSTACLE_s *>(gizmo->object)->progress_flags &= ~1;
+        gizmo = GizmoFindByName(WORLD->gizmo_sys, obstacle_gizmotype_id, "obstacle22");
+        if (gizmo != NULL && gizmo->object != NULL)
+            static_cast<GIZOBSTACLE_s *>(gizmo->object)->progress_flags &= ~1;
+        gizmo = GizmoFindByName(WORLD->gizmo_sys, obstacle_gizmotype_id, "obstacle23");
+        if (gizmo != NULL && gizmo->object != NULL)
+            static_cast<GIZOBSTACLE_s *>(gizmo->object)->progress_flags &= ~1;
+    }
+
+    if (vader_c.field_0x95 == 0) {
+        bool dead0 = Player[0] != NULL && (Player[0]->apiobj.field_0x1f8 & 0x80) != 0 &&
+                     Player[0]->apiobj.field_0x287 != 0 && (Player[0]->apiobj.field_0x1f4 & 0x40000) == 0;
+        bool dead1 = Player[1] != NULL && (Player[1]->apiobj.field_0x1f8 & 0x80) != 0 &&
+                     Player[1]->apiobj.field_0x287 != 0 && (Player[1]->apiobj.field_0x1f4 & 0x40000) == 0;
+        bool both_controlled = Player[0] != NULL && (Player[0]->apiobj.field_0x1f8 & 0x80) != 0 &&
+                               Player[1] != NULL && (Player[1]->apiobj.field_0x1f8 & 0x80) != 0;
+        if ((dead0 || dead1) && (static_cast<u8 *>(vaderc_netpacket)[0] == 0 || !both_controlled) &&
+            (ChallengeMode == 0 || AreaGlobals.values.field_0x1c <= 9)) {
+            vader_c.field_0x95 = 1;
+            if (vader_c.final_fight_message->value == 0.0f)
+                ResetLevel(NULL, NULL, 1);
+        }
+    }
+
+    if (LevGizObst[0] != NULL && LevGizObst[0]->anim_set != NULL &&
+        LevGizObst[0]->anim_set->objects != NULL &&
+        LevGizObst[0]->anim_set->objects->instance_animation != NULL) {
+        GAMEANIMOBJ_s *object = LevGizObst[0]->anim_set->objects;
+        nuinstanim_s *anim = object->instance_animation;
+        if (object->end_frame > 200.0f) {
+            f32 factor = anim->ltime;
+            if (factor >= 200.0f) {
+                factor = (object->end_frame - factor) / (object->end_frame - 200.0f);
+                factor *= factor;
+            }
+            if (anim->fparam1 == 0.0f)
+                anim->tfactor = 1.0f;
+            else
+                anim->tfactor = factor * anim->fparam1;
+        }
+    }
 }
 
 void VaderA_DrawPanel(WORLDINFO_s *) {
