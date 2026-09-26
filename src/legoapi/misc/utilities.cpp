@@ -398,13 +398,44 @@ void RatioAlongLineXZ(nuvec_s *, nuvec_s *, nuvec_s *) {
     STUBBED();
 }
 
-i32 XZLinesIntersect(nuvec_s *, nuvec_s *, nuvec_s *, nuvec_s *, float *, float *) {
-    STUBBED();
-    return 0;
+i32 XZLinesIntersect(nuvec_s *a, nuvec_s *b, nuvec_s *c, nuvec_s *d, float *first, float *second) {
+    NUVEC ac __attribute__((aligned(16)));
+    NUVEC bc __attribute__((aligned(16)));
+    NUVEC ca __attribute__((aligned(16)));
+    NUVEC da __attribute__((aligned(16)));
+    NUVEC direction;
+    NuVecSub(&direction, b, a);
+    i32 angle = NuAtan2D(direction.x, direction.z);
+    NuVecSub(&ca, c, a);
+    NuVecRotateY(&ca, &ca, -angle);
+    NuVecSub(&da, d, a);
+    NuVecRotateY(&da, &da, -angle);
+    if (NuFsign(ca.x) == NuFsign(da.x))
+        return 0;
+
+    NuVecSub(&direction, d, c);
+    angle = NuAtan2D(direction.x, direction.z);
+    NuVecSub(&ac, a, c);
+    NuVecRotateY(&ac, &ac, -angle);
+    NuVecSub(&bc, b, c);
+    NuVecRotateY(&bc, &bc, -angle);
+    if (NuFsign(ac.x) == NuFsign(bc.x))
+        return 0;
+
+    if (first != NULL)
+        *first = __builtin_fabsf(ac.x) / (__builtin_fabsf(ac.x) + __builtin_fabsf(bc.x));
+    if (second != NULL)
+        *second = __builtin_fabsf(ca.x) / (__builtin_fabsf(ca.x) + __builtin_fabsf(da.x));
+    return 1;
 }
 
-void GetRotationAngles(nuvec_s *, u16 *, u16 *) {
-    STUBBED();
+void GetRotationAngles(nuvec_s *direction, u16 *x_rotation, u16 *y_rotation) {
+    NUVEC rotated;
+    NUVEC copy = *direction;
+    i32 y_angle = -NuAtan2D(copy.z, copy.x);
+    NuVecRotateY(&rotated, &copy, -static_cast<i32>(static_cast<u16>(y_angle)));
+    *x_rotation = -NuAtan2D(rotated.x, rotated.y);
+    *y_rotation = y_angle;
 }
 
 void UnpackCharFromInt(i32 value, char &a, char &b, char &c, char &d) {
@@ -414,17 +445,17 @@ void UnpackCharFromInt(i32 value, char &a, char &b, char &c, char &d) {
     d = value;
 }
 
-void RatioBetweenPlanes(nuvec_s *, nuvec_s *, nuvec_s *, nuvec_s *, nuvec_s *) {
-    STUBBED();
-}
-
 void UnpackShortFromInt(i32 value, i16 &high, i16 &low) {
     high = static_cast<u32>(value) >> 16;
     low = value;
 }
 
-void AnglesBetweenPoints(nuvec_s *, nuvec_s *, u16 *, u16 *) {
-    STUBBED();
+void AnglesBetweenPoints(nuvec_s *from, nuvec_s *to, u16 *vertical, u16 *horizontal) {
+    f32 x = to->x - from->x;
+    f32 z = to->z - from->z;
+    f32 y = to->y - from->y;
+    *vertical = NuAtan2D(y, NuFsqrt(x * x + z * z));
+    *horizontal = NuAtan2D(x, z);
 }
 
 bool LineIntersectCircle(NUVEC *origin, NUVEC *direction, NUVEC *center, f32 radius_squared) {
@@ -484,8 +515,11 @@ f32 LineToPointDistance(VuVec &origin, VuVec &direction, VuVec &point, VuVec *cl
     return distance;
 }
 
-void RatioBetweenEdgesXZ(nuvec_s *, nuvec_s *, nuvec_s *, nuvec_s *, nuvec_s *) {
-    STUBBED();
+f32 RatioBetweenEdgesXZ(nuvec_s *point, nuvec_s *edge_a0, nuvec_s *edge_a1, nuvec_s *edge_b0,
+                        nuvec_s *edge_b1) {
+    f32 distance_a = DistanceToLineXZ(point, edge_a0, edge_a1);
+    f32 distance_b = DistanceToLineXZ(point, edge_b0, edge_b1);
+    return distance_a / (distance_a + distance_b);
 }
 
 bool SphereSphereOverlap(NUVEC *a, f32 radius_a, NUVEC *b, f32 radius_b) {
@@ -665,8 +699,14 @@ i32 IsTok(char const *text, char const *token) {
     return text[0] == token[0] && text[1] == token[1] && text[2] == token[2] && text[3] == token[3];
 }
 
-void CapVec(nuvec_s *, float, nuvec_s *) {
-    STUBBED();
+void CapVec(nuvec_s *input, float maximum, nuvec_s *output) {
+    f32 length_squared = input->x * input->x + input->y * input->y + input->z * input->z;
+    if (length_squared > maximum * maximum) {
+        f32 factor = maximum / NuFsqrt(length_squared);
+        output->x *= factor;
+        output->y *= factor;
+        output->z *= factor;
+    }
 }
 
 void I64ToX(char *, i64) {

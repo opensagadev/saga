@@ -407,6 +407,16 @@ verified: `g++ -O0/-O3 -c misc.cpp; objdump -d`
   the target's `cmp 0x3a` / `cmovl` pattern. The opposite ternary sense
   becomes `cmp 0x39` / `cmovg` and loses matches even though it computes
   the same value.
+- In `XZLinesIntersect`, `NuFabs` resolved to an out-of-line helper in
+  this translation unit. Direct `__builtin_fabsf` emitted the target's
+  `andps` absolute-value mask and raised its match from 90.54% to 98.15%
+  while removing 37 bytes of helper-call setup.
+- A stub with the right global mangled name can mask a correct function
+  living in another source file. `RatioBetweenPlanes` was duplicated as a
+  global placeholder in `utilities.cpp`, while `socksysall.cpp` already
+  had the full body marked `static`. Removing the placeholder and giving
+  the real body external linkage matches the 129-byte target exactly and
+  restores calls to its adjacent local `DistanceToPlane` helper.
 
 ## Cross-checks against real project artifacts
 
