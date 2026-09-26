@@ -34,6 +34,8 @@ extern "C" {
     void *AIPAthFindPathCnx(AISYS_s *, AIPATH_s *, char *, char *, i32 *);
 }
 #include "legoapi/render/core/render.h"
+#include "legoapi/actions/combat/hits.h"
+#include "legoapi/audio/sfx.h"
 #include "nu2api/nu3d/nutex.h"
 
 i32 Players_AveragePos(NUVEC *, SOCKPOSITION_s *);
@@ -91,6 +93,27 @@ extern "C" {
     CRUISERCNETPACKET_s *crusiserc_netpacket = NULL;
 }
 static CRUISERC_s cruiser_c;
+
+struct CRUISERDNETPACKET_s {
+    f32 frame;
+    f32 speed;
+    u32 flags;
+    u8 reserved[0x1c];
+    f32 lift_chase;
+};
+DECOMP_ASSERT(offsetof(CRUISERDNETPACKET_s, lift_chase) == 0x28, "Cruiser D packet chase offset");
+
+extern "C" {
+    CRUISERDNETPACKET_s *cruiserd_netpacket;
+    i32 CruiserD_LiftChase;
+}
+static i32 CruiserE_ix;
+static nuhspecial_s CruiserD_Lift;
+static nuinstanim_s *CruiserD_LiftAnim;
+static i32 CruiserD_Lift_plat_id;
+static GIZAIMESSAGE_s *CruiserD_LiftChase_msg;
+static f32 CruiserD_frame = 1.0f;
+static i32 CruiserD_direction = 1;
 
 // Episode 3 level handlers, in the game's Episode_III progression:
 // dogfight / cruiser / grievous / kashyyyk / temple / vader / a-new-hope.
@@ -248,7 +271,75 @@ void CruiserDReset(WORLDINFO_s *) {
 }
 
 void CruiserDUpdate(WORLDINFO_s *) {
-    STUBBED();
+    CruiserD_LiftChase = 0;
+    if (!NuSpecialExistsFn(&CruiserD_Lift) || CruiserD_LiftAnim == NULL || CruiserD_LiftChase_msg == NULL)
+        return;
+
+    if (netclient != 0) {
+        if (CruiserD_LiftAnim->playing)
+            PlaySfx("Cru_HugeWallMoveLp", NuSpecialGetDrawPos(&CruiserD_Lift));
+        CruiserD_frame = CruiserD_LiftAnim->ltime;
+        CruiserD_LiftAnim->ltime = cruiserd_netpacket->frame;
+        CruiserD_LiftAnim->tfactor = cruiserd_netpacket->speed;
+        CruiserD_LiftAnim->playing = (cruiserd_netpacket->flags & 1) != 0;
+        return;
+    }
+
+    CruiserD_LiftChase_msg->value = 0.0f;
+    if (CruiserD_direction >= 0 && LevGizmo[0] != NULL && LevGizmo[0]->object != NULL &&
+        (((u8 *)LevGizmo[0]->object)[0x68] & 2) != 0) {
+        CruiserD_direction = -1;
+        CruiserD_LiftAnim->playing = 1;
+        CruiserD_LiftAnim->tfactor = -0.1f;
+    }
+
+    if (!CruiserD_LiftAnim->playing) {
+        CruiserD_frame = CruiserD_LiftAnim->ltime;
+        return;
+    }
+
+    if (CruiserD_Lift_plat_id != -1) {
+            if (CruiserD_direction >= 0) {
+                cruiserd_netpacket->lift_chase = 1.0f;
+                CruiserD_LiftChase = 1;
+            }
+            NUVEC *lift_pos = NuSpecialGetDrawPos(&CruiserD_Lift);
+#define CRUISERD_CHECK_PLAYER(index)                                                                                   \
+    {                                                                                                                   \
+        GameObject_s *victim = Player[index];                                                                            \
+        if (victim != NULL && victim->apiobj.field_0x287 == 0 &&                                                       \
+            (victim->apiobj.supporting_platform_id == CruiserD_Lift_plat_id || victim->apiobj.pos_z > lift_pos->z)) { \
+            ObjHitObj(NULL, victim, -1, 0, 0, 1);                                                                        \
+            KillGameObject(victim, 2, 0);                                                                                \
+            if (CruiserD_direction >= 0 && MiscTime == 0.0f)                                                            \
+                MiscTime = 1.0f;                                                                                         \
+        }                                                                                                               \
+    }
+            CRUISERD_CHECK_PLAYER(0);
+            CRUISERD_CHECK_PLAYER(1);
+            CRUISERD_CHECK_PLAYER(2);
+            CRUISERD_CHECK_PLAYER(3);
+            CRUISERD_CHECK_PLAYER(4);
+            CRUISERD_CHECK_PLAYER(5);
+            CRUISERD_CHECK_PLAYER(6);
+            CRUISERD_CHECK_PLAYER(7);
+#undef CRUISERD_CHECK_PLAYER
+        if (MiscTime > 0.0f) {
+            MiscTime -= FRAMETIME;
+            if (MiscTime <= 0.0f) {
+                MiscTime = 0.0f;
+                if (ChallengeMode != 3)
+                    ResetLevel(NULL, NULL, 1);
+            }
+        }
+    }
+
+    if (CruiserD_LiftAnim->playing)
+        PlaySfx("Cru_HugeWallMoveLp", NuSpecialGetDrawPos(&CruiserD_Lift));
+
+    CruiserD_LiftAnim->ltime = cruiserd_netpacket->frame;
+    CruiserD_LiftAnim->tfactor = cruiserd_netpacket->speed;
+    CruiserD_LiftAnim->playing = (cruiserd_netpacket->flags & 1) != 0;
 }
 
 // ===========================================================================
@@ -321,7 +412,6 @@ void KashyyykA_Init(WORLDINFO_s *world) {
 }
 
 void KashyyykB_Init(WORLDINFO_s *) {
-    STUBBED();
 }
 
 void KashyyykC_Init(WORLDINFO_s *world) {
@@ -364,7 +454,6 @@ void KashyyykA_Reset(WORLDINFO_s *) {
 }
 
 void KashyyykB_Reset(WORLDINFO_s *) {
-    STUBBED();
 }
 
 void KashyyykD_Reset(WORLDINFO_s *world) {
@@ -394,15 +483,12 @@ i32 AnakinGreenSabre(GameObject_s *obj) {
 }
 
 void KashyyykA_Update(WORLDINFO_s *) {
-    STUBBED();
 }
 
 void KashyyykB_Update(WORLDINFO_s *) {
-    STUBBED();
 }
 
 void KashyyykC_Update(WORLDINFO_s *) {
-    STUBBED();
 }
 
 void KashyyykD_Update(WORLDINFO_s *) {
@@ -503,7 +589,6 @@ void VaderA_Init(WORLDINFO_s *world) {
 }
 
 void VaderB_Init(WORLDINFO_s *) {
-    STUBBED();
 }
 
 i32 Vader_ObiWanKilledAnakin;
@@ -579,7 +664,6 @@ void VaderA_DrawPanel(WORLDINFO_s *) {
 }
 
 void VaderB_DrawPanel(WORLDINFO_s *) {
-    STUBBED();
 }
 
 void VaderC_DrawPanel(WORLDINFO_s *) {
