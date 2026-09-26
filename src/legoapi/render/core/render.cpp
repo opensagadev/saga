@@ -203,6 +203,7 @@ struct rtl_s;
 struct rtlidata_s;
 
 #include "legoapi/render/core/SwipeDecalRenderer.h"
+#include "nu2api/nu3d/nuprim_internal.h"
 #include "nu2api/nu3d/nudlist.h"
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nu3d/nuqfnt.h"
@@ -230,6 +231,7 @@ struct rtlidata_s;
 #include "nu2api/numath/numtx.h"
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nutrig.h"
+#include "nu2api/numath/nuvec.h"
 
 #include <string.h>
 
@@ -2829,16 +2831,92 @@ void DrawCross(nuvec_s *centre, float radius, numtl_s *material, i32 colour) {
     NuRndrLine3dDbg(centre->x, centre->y, centre->z - radius, centre->x, centre->y, centre->z + radius, colour);
 }
 
-void SwipeDecalRenderer::Process(float) {
-    STUBBED();
+f32 SwipeDecalRenderer_MaxWidth = 0.6f;
+f32 SwipeDecalRenderer_MinWidth = 0.2f;
+
+void SwipeDecalRenderer::Process(float frame_time) {
+    width.Process(frame_time);
+    alpha.Process(frame_time);
+
+    if (alpha.value > 0.5f && !alpha.IsActive() && !width.IsActive()) {
+        alpha.Start(*alpha.target, 0.0f, 0.3f);
+        alpha.delay = 0.2f;
+    }
 }
 
 void SwipeDecalRenderer::Render() {
-    STUBBED();
+    const f32 uv_height = width.value / width.to;
+    NUVEC vertices[4] = {
+        {-0.0375f, 0.0f, 0.0f},
+        {0.0375f, 0.0f, 0.0f},
+        {-0.0375f, -width.value, 0.0f},
+        {0.0375f, -width.value, 0.0f},
+    };
+
+    NuVecRotateZ(&vertices[0], &vertices[0], angle);
+    NuVecRotateZ(&vertices[1], &vertices[1], angle);
+    NuVecRotateZ(&vertices[2], &vertices[2], angle);
+    NuVecRotateZ(&vertices[3], &vertices[3], angle);
+    for (i32 i = 0; i < 4; ++i) {
+        vertices[i].x += x;
+        vertices[i].y += 1.0f - y;
+    }
+
+    NuPrim2DBegin(1, 7, MechSystems::Get()->swipe_material);
+    u32 colour = static_cast<u32>(static_cast<i32>(alpha.value * 128.0f)) << 24;
+    if (style == static_cast<Style>(1)) {
+        colour |= 0x000080;
+    } else if (style == static_cast<Style>(2)) {
+        colour = (static_cast<u32>(static_cast<i32>(alpha.value * 255.0f)) << 24) | 0x0000ff;
+    } else {
+        colour |= 0x808080;
+    }
+
+    NuRndrPrimSetColour(colour);
+    NuRndrPrimUV(0.0f, 0.0f);
+    NuPrim2DAddXYZ(static_cast<f32>(PS2_VREZ_W) * vertices[0].x,
+                   static_cast<f32>(PS2_VREZ_H) * vertices[0].y, 0.0f);
+    NuRndrPrimSetColour(colour);
+    NuRndrPrimUV(1.0f, 0.0f);
+    NuPrim2DAddXYZ(static_cast<f32>(PS2_VREZ_W) * vertices[1].x,
+                   static_cast<f32>(PS2_VREZ_H) * vertices[1].y, 0.0f);
+    NuRndrPrimSetColour(colour);
+    NuRndrPrimUV(0.0f, uv_height);
+    NuPrim2DAddXYZ(static_cast<f32>(PS2_VREZ_W) * vertices[2].x,
+                   static_cast<f32>(PS2_VREZ_H) * vertices[2].y, 0.0f);
+    NuRndrPrimSetColour(colour);
+    NuRndrPrimUV(1.0f, uv_height);
+    NuPrim2DAddXYZ(static_cast<f32>(PS2_VREZ_W) * vertices[3].x,
+                   static_cast<f32>(PS2_VREZ_H) * vertices[3].y, 0.0f);
+    NuPrim2DEnd();
 }
 
-SwipeDecalRenderer::SwipeDecalRenderer(TouchHolder &, i32, SwipeDecalRenderer::Style) {
-    STUBBED();
+SwipeDecalRenderer::SwipeDecalRenderer(TouchHolder &holder, i32 index, SwipeDecalRenderer::Style style) {
+    alpha.Initialize();
+    width.Initialize();
+    this->style = style;
+
+    const NuVec2 &swipe_point =
+        *reinterpret_cast<const NuVec2 *>(holder.field_0x34 + index * 0x2c);
+    const f32 current_x = (holder.touch_position.x + 1.0f) * 0.5f;
+    const f32 current_y = (holder.touch_position.y + 1.0f) * 0.5f;
+    const f32 swipe_x = (swipe_point.x + 1.0f) * 0.5f;
+    const f32 swipe_y = (swipe_point.y + 1.0f) * 0.5f;
+    const f32 dx = current_x - swipe_x;
+    const f32 dy = current_y - swipe_y;
+    f32 target_width = NuFsqrt(dx * dx + dy * dy);
+    if (target_width > SwipeDecalRenderer_MaxWidth)
+        target_width = SwipeDecalRenderer_MaxWidth;
+    if (target_width < SwipeDecalRenderer_MinWidth)
+        target_width = SwipeDecalRenderer_MinWidth;
+
+    width.Start(0.0f, target_width, 0.1f);
+    width.value = 0.0f;
+    x = swipe_x;
+    y = swipe_y;
+    angle = NuAtan2D(dx, dy);
+    alpha.Start(0.02f, 1.0f, 0.1f);
+    alpha.value = 0.02f;
 }
 
 extern i32 GetMenuID(void);
