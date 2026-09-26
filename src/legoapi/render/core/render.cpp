@@ -273,6 +273,8 @@ extern "C" i32 NuRndrBeginScene(i32);
 extern "C" void NuRndrEndScene(void);
 extern "C" void NuRndrGradRect2di(i32, i32, i32, i32, i32 *, numtl_s *);
 extern "C" void NuRndrRect2di(i32, i32, i32, i32, i32, numtl_s *);
+extern "C" void NuCameraUnlock(void);
+extern "C" void NuCameraRelock(void);
 extern char *apiGameName;
 extern char *apitxt_EMPTY;
 extern char *apitxt_PRESENT;
@@ -892,8 +894,33 @@ void DrawRipple(ripple_node_s *node) {
     NuRndrTriStrip3dClip(vertices, 4, &matrix, node->material);
 }
 
-void DrawAreaBox(nuvec_s *, nuvec_s *, i32, i32) {
-    STUBBED();
+void DrawAreaBox(nuvec_s *position, nuvec_s *size, i32 rotation, i32 colour) {
+    f32 local_x[4] __attribute__((aligned(16))) = {-size->x, -size->x, size->x, size->x};
+    f32 rotated_x[4] __attribute__((aligned(16)));
+    f32 local_z[4] __attribute__((aligned(16))) = {-size->z, size->z, size->z, -size->z};
+    f32 rotated_z[4] __attribute__((aligned(16)));
+    const f32 cosine = NU_COS_LUT(rotation);
+    const f32 sine = NU_SIN_LUT(rotation);
+    for (i32 i = 0; i < 4; ++i) {
+        rotated_x[i] = cosine * local_x[i] + sine * local_z[i];
+        rotated_z[i] = cosine * local_z[i] - sine * local_x[i];
+    }
+#define DRAW_AREA_BOX_EDGE(a, b, y0, y1)                                                                                  \
+    AiRndrLine3dDbg(position->x + rotated_x[a], y0, position->z + rotated_z[a], position->x + rotated_x[b], y1,         \
+                    position->z + rotated_z[b], colour)
+    DRAW_AREA_BOX_EDGE(0, 1, position->y, position->y);
+    DRAW_AREA_BOX_EDGE(1, 2, position->y, position->y);
+    DRAW_AREA_BOX_EDGE(2, 3, position->y, position->y);
+    DRAW_AREA_BOX_EDGE(3, 0, position->y, position->y);
+    DRAW_AREA_BOX_EDGE(0, 0, position->y, position->y + size->y);
+    DRAW_AREA_BOX_EDGE(1, 1, position->y, position->y + size->y);
+    DRAW_AREA_BOX_EDGE(2, 2, position->y, position->y + size->y);
+    DRAW_AREA_BOX_EDGE(3, 3, position->y, position->y + size->y);
+    DRAW_AREA_BOX_EDGE(0, 1, position->y + size->y, position->y + size->y);
+    DRAW_AREA_BOX_EDGE(1, 2, position->y + size->y, position->y + size->y);
+    DRAW_AREA_BOX_EDGE(2, 3, position->y + size->y, position->y + size->y);
+    DRAW_AREA_BOX_EDGE(3, 0, position->y + size->y, position->y + size->y);
+#undef DRAW_AREA_BOX_EDGE
 }
 
 void DrawBox_Now(_vuv_s *, _vuv_s *, i32, i32) {
@@ -1553,8 +1580,52 @@ void DrawGameObjects() {
     NuCameraSet(&global_camera);
 }
 
+nuhspecial_s green_light;
+nuhspecial_s painttargetcolour[3];
+nuhspecial_s paintlights[3];
+
 void DrawPaintLights() {
-    STUBBED();
+    for (i32 i = 0; i < static_cast<const i8 *>(factoryb_netpacket)[1]; ++i) {
+        nuhspecial_s *light = &paintlights[i];
+        if (NuSpecialExistsFn(light)) {
+            NuSpecialDrawAt(&green_light, NuSpecialGetDrawMtx(light));
+        }
+    }
+    u8 first_colour = static_cast<const u8 *>(factoryb_netpacket)[3];
+    if (first_colour == 3)
+        goto first_visible;
+    asm volatile("" : "+q"(first_colour));
+    if (first_colour != 0)
+        goto first_hidden;
+first_visible:
+    NuSpecialSetVisibility(&painttargetcolour[0], 1);
+    goto first_done;
+first_hidden:
+    NuSpecialSetVisibility(&painttargetcolour[0], 0);
+first_done:
+    u8 second_colour = static_cast<const u8 *>(factoryb_netpacket)[3];
+    if (second_colour == 4)
+        goto second_visible;
+    asm volatile("" : "+q"(second_colour));
+    if (second_colour != 0)
+        goto second_hidden;
+second_visible:
+    NuSpecialSetVisibility(&painttargetcolour[1], 1);
+    goto second_done;
+second_hidden:
+    NuSpecialSetVisibility(&painttargetcolour[1], 0);
+second_done:
+    u8 third_colour = static_cast<const u8 *>(factoryb_netpacket)[3];
+    if (third_colour == 5)
+        goto third_visible;
+    asm volatile("" : "+q"(third_colour));
+    if (third_colour != 0)
+        goto third_hidden;
+third_visible:
+    NuSpecialSetVisibility(&painttargetcolour[2], 1);
+    return;
+third_hidden:
+    NuSpecialSetVisibility(&painttargetcolour[2], 0);
 }
 
 void DrawStatusIcons(STATUSPACKET_s *status, float y, float alpha) {
@@ -1632,8 +1703,8 @@ void Draw_LOADFAILED() {
     STUBBED();
 }
 
-void DrawAreaCylinder(nuvec_s *, nuvec_s *, i32) {
-    STUBBED();
+void DrawAreaCylinder(nuvec_s *centre, nuvec_s *size, i32 colour) {
+    LocaledbitsDrawSolidCircleXY(centre, NuFmin(size->x, size->z), centre->y, centre->y + size->y, colour, 0, 16);
 }
 
 void DrawCameraTarget(nuvec_s *) {
@@ -2625,8 +2696,20 @@ void DrawItem(nuhspecial_s *special, nuvec_s *position, float scale_value, float
     }
 }
 
-void DrawAABox(_vuv_s *, _vuv_s *, i32) {
-    STUBBED();
+void DrawAABox(_vuv_s *position, _vuv_s *size, i32 colour) {
+    const NUVEC *centre = reinterpret_cast<const NUVEC *>(position);
+    const NUVEC *extent = reinterpret_cast<const NUVEC *>(size);
+    NUVEC minimum __attribute__((aligned(16)));
+    NUVEC maximum __attribute__((aligned(16)));
+    maximum.x = centre->x + extent->x;
+    maximum.y = centre->y + extent->y;
+    maximum.z = centre->z + extent->z;
+    minimum.x = centre->x - extent->x;
+    minimum.y = centre->y - extent->y;
+    minimum.z = centre->z - extent->z;
+    NuCameraUnlock();
+    NuRndrBoundingBox(&minimum, &maximum, &numtx_identity, colour);
+    NuCameraRelock();
 }
 
 void DrawArrow(nuhspecial_s *special, float scale_value) {
