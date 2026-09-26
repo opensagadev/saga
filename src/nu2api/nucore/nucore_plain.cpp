@@ -42,6 +42,8 @@ void NuLgtArcLaserEx(i32 type, NUVEC *start, NUVEC *end, NUVEC *control, f32 wid
 #include "nu2api/nucore/nuhgobj.h"
 #include "nu2api/nucore/nugcutscene.h"
 #include "nu2api/nucore/nupad.h"
+#include "nu2api/nucore/NuInputDevice.h"
+#include "nu2api/nucore/NuInputManager.h"
 #include "nu2api/nucore/nuthread.h"
 #include "nu2api/nucore/bgproc.h"
 #include "nu2api/nucore/nuptrblock.h"
@@ -68,6 +70,9 @@ void NuLgtArcLaserEx(i32 type, NUVEC *start, NUVEC *end, NUVEC *control, f32 wid
 #include "nu2api/nucore/nuvuvec.hpp"
 #include "nu2api/numath/numtx.h"
 #include "globals.h"
+
+extern NuInputManager *inputManager;
+extern bool used_touch_IDs[10];
 
 struct ani3_animheader_s;
 struct nuanimdatachunk_s;
@@ -4026,8 +4031,153 @@ extern "C" {
         }
         return 0;
     }
-    void NuPad_Interface_TouchScreenInput(i32, i32, i32, i32, i32, i32, i32, i32) {
-        STUBBED();
+    static inline __attribute__((always_inline)) void NuPadCopyTouchFields(volatile u8 *source_x) {
+        f32 x = *reinterpret_cast<volatile f32 *>(source_x);
+        u8 active = source_x[-4];
+        *reinterpret_cast<volatile f32 *>(source_x - 24) = x;
+        source_x[-28] = active;
+        f32 y = *reinterpret_cast<volatile f32 *>(source_x + 4);
+        u8 released = source_x[-3];
+        *reinterpret_cast<volatile f32 *>(source_x - 20) = y;
+        source_x[-27] = released;
+        f32 old_x = *reinterpret_cast<volatile f32 *>(source_x + 8);
+        u8 started = source_x[-2];
+        *reinterpret_cast<volatile f32 *>(source_x - 16) = old_x;
+        source_x[-26] = started;
+        f32 old_y = *reinterpret_cast<volatile f32 *>(source_x + 12);
+        u32 id = *reinterpret_cast<volatile u32 *>(source_x + 16);
+        *reinterpret_cast<volatile f32 *>(source_x - 12) = old_y;
+        *reinterpret_cast<volatile u32 *>(source_x - 8) = id;
+    }
+    void NuPad_Interface_TouchScreenInput(i32 x, i32 y, i32 prior_x, i32 prior_y, i32 is_down, i32 is_up,
+                                          i32 is_move, i32 is_cancelled) {
+        NuInputDevice *device = inputManager->GetDevice(0);
+        if (device == NULL) {
+            return;
+        }
+
+        // The retail routine writes directly to the touch data at device+0x198.
+        NuInputTouchData *data = reinterpret_cast<NuInputTouchData *>(reinterpret_cast<u8 *>(device) + 0x198);
+        f32 width = static_cast<f32>(g_backingWidth);
+        f32 height = static_cast<f32>(g_backingHeight);
+        f32 old_x = static_cast<f32>(prior_x) / width;
+        f32 old_y = static_cast<f32>(prior_y) / height;
+
+        if (is_cancelled != 0) {
+            f32 aspect = width / height;
+            i32 count = data->touch_count;
+            if (count > 0) {
+                f32 nearest_distance = FLT_MAX;
+                i32 nearest = 0;
+                for (i32 i = 0; i < count; ++i) {
+                    f32 dx = (data->touch_events[i].unknown_04 - old_x) * aspect;
+                    f32 dy = data->touch_events[i].unknown_08 - old_y;
+                    f32 distance = dx * dx + dy * dy;
+                    if (distance < nearest_distance) {
+                        nearest_distance = distance;
+                        nearest = i;
+                    }
+                }
+                if (!(nearest_distance > 0.04f)) {
+                    used_touch_IDs[data->touch_events[nearest].unknown_14] = false;
+                    volatile u8 *source_x =
+                        reinterpret_cast<volatile u8 *>(&data->touch_events[nearest + 1].unknown_04);
+                    for (i32 i = nearest + 1; i < count; ++i) {
+                        NuPadCopyTouchFields(source_x);
+                        source_x += sizeof(NuInputTouch);
+                    }
+                    NuInputTouch *last = &data->touch_events[--data->touch_count];
+                    last->unknown_00 = 0;
+                    last->unknown_01 = 0;
+                    last->unknown_02 = 0;
+                    last->unknown_04 = 0.0f;
+                    last->unknown_08 = 0.0f;
+                    last->unknown_0c = 0.0f;
+                    last->unknown_10 = 0.0f;
+                    last->unknown_14 = 0;
+                    return;
+                }
+            }
+            memset(data->touch_events, 0, sizeof(data->touch_events));
+            data->touch_count = 0;
+            memset(used_touch_IDs, 0, sizeof(used_touch_IDs));
+            return;
+        }
+
+        f32 new_x = static_cast<f32>(x) / width;
+        f32 new_y = static_cast<f32>(y) / height;
+        if (is_move != 0) {
+            i32 free_id = 0;
+            while (free_id < 10 && used_touch_IDs[free_id]) {
+                ++free_id;
+            }
+            for (i32 i = 0; i < 10; ++i) {
+                NuInputTouch *touch = &data->touch_events[i];
+                if (!touch->unknown_00 && !touch->unknown_01 && !touch->unknown_02) {
+                    touch->unknown_00 = 0;
+                    touch->unknown_01 = 0;
+                    touch->unknown_02 = 1;
+                    touch->unknown_04 = new_x;
+                    touch->unknown_08 = new_y;
+                    touch->unknown_0c = 0.0f;
+                    touch->unknown_10 = 0.0f;
+                    touch->unknown_14 = free_id;
+                    used_touch_IDs[free_id] = true;
+                    ++data->touch_count;
+                    return;
+                }
+            }
+            return;
+        }
+
+        if (is_up != 0) {
+            i32 selected = 10;
+            for (i32 i = 0; i < 10; ++i) {
+                volatile NuInputTouch *touch = &data->touch_events[i];
+                if ((touch->unknown_00 || touch->unknown_02) &&
+                    ((touch->unknown_04 == old_x && touch->unknown_08 == old_y) ||
+                     (touch->unknown_0c == old_x && touch->unknown_10 == old_y))) {
+                    selected = i;
+                    break;
+                }
+            }
+            used_touch_IDs[data->touch_events[selected].unknown_14] = false;
+            volatile u8 *source_x = reinterpret_cast<volatile u8 *>(&data->touch_events[selected + 1].unknown_04);
+            for (i32 i = selected + 1; i < static_cast<i32>(data->touch_count); ++i) {
+                NuPadCopyTouchFields(source_x);
+                source_x += sizeof(NuInputTouch);
+            }
+            NuInputTouch *last = &data->touch_events[--data->touch_count];
+            last->unknown_00 = 0;
+            last->unknown_01 = 0;
+            last->unknown_02 = 0;
+            last->unknown_04 = 0.0f;
+            last->unknown_08 = 0.0f;
+            last->unknown_0c = 0.0f;
+            last->unknown_10 = 0.0f;
+            last->unknown_14 = 0;
+            return;
+        }
+
+        if (is_down != 0) {
+            i32 selected = 10;
+            for (i32 i = 0; i < 10; ++i) {
+                volatile NuInputTouch *touch = &data->touch_events[i];
+                if ((touch->unknown_00 || touch->unknown_02) && touch->unknown_04 == old_x &&
+                    touch->unknown_08 == old_y) {
+                    selected = i;
+                    break;
+                }
+            }
+            NuInputTouch *touch = &data->touch_events[selected];
+            touch->unknown_00 = 1;
+            touch->unknown_01 = 0;
+            touch->unknown_02 = 0;
+            touch->unknown_04 = new_x;
+            touch->unknown_08 = new_y;
+            touch->unknown_0c = old_x;
+            touch->unknown_10 = old_y;
+        }
     }
     i32 NuPs2ApplyDeadZone(i32 raw_value, i32 dead_zone) {
         i32 value = raw_value - 128;
