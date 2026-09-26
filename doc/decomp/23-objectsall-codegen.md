@@ -1,0 +1,25 @@
+# objectsall target reconstruction notes
+
+Reference: Android x86 `res/libTTapp.so`; compile with Android NDK r8e GCC 4.7 and measure with the installed GOT-aware `objdiff-cli` fork. The target symbols below are scattered across the retail binary even though this checkout collects them in `objectsall.cpp`.
+
+| Function | Target address | Target code bytes | Main observation |
+| --- | ---: | ---: | --- |
+| `Boulder_Kill` | `0x20e030` | 191 | Search the two `boulder_part` slots, then clear the matching level animation and special. |
+| `Boulder_Move` | `0x20e0f0` | 463 | Copy part position to `boulder_oldpos`, copy special draw matrix to part, derive velocity when `scale_time > 1.0f`, and stop the animation when it reaches the end. |
+| `FindNextBreak` | `0x42d0c0` | 352 | Search up to 20 UTF-8 characters forward for punctuation/space boundaries. |
+| `FindNearestBreak` | `0x42d220` | 654 | Search up to 20 rounds in both directions, checking forward before backward. |
+| `AddDevice` | `0x258c26` | 297 | Unoptimized whole-struct device copy, three current-directory copies, then increment `numdevices`. |
+
+## Data and ABI findings
+
+- `boulder_oldpos` is a 24-byte BSS symbol at `0x6b0344`, immediately before the two `boulder_part` pointers at `0x6b0360`. It was absent from the source declarations. `Boulder_Move` copies each part's `position` to its slot **before** obtaining and copying the draw matrix; the prior position is later used to compute `velocity` through `NuVecSub` and `NuVecScale`.
+- The apparent global at `Boulder_Move+0x17` is `LevelChange` (`0x1276924`) after resolving its GOT slot, not the nearby `netclient`. That early return must precede the part lookup.
+- Both break functions return `i32` in `eax`; the old placeholder declarations used `void`. GCC's `add $-128; cmp $63` byte sequence recognizes UTF-8 continuation bytes `0x80..0xbf`. Punctuation checks use subtraction by `','` followed by `cmp $1`, thereby grouping comma and hyphen. A space before `?`, `!`, `;`, or `:` is skipped so the break can attach punctuation to the preceding word. A period before another period is also skipped.
+- The break functions adjust a fallback position around `~` after 20 unsuccessful rounds. The emitted `sete/setne` plus subtraction is a boolean decrement of the byte index, not arithmetic on a UTF-8 code point.
+- `AddDevice`'s target has a frame pointer and `rep movsd` with count `0x8d`: 141 dwords = `0x234` bytes, the size of `NUFILE_DEVICE`. It uses an `imul` by `0x234` to index `devices`, then calls `NuStrCpy` for `cur_dir`, `sys_dir`, and `dll_dir` using `default_device` as the source. Source must explicitly return the address of the newly added device even though the placeholder had `void` return type.
+
+## Codegen rules to reuse
+
+1. Resolve each local GOT slot by dumping four bytes at the slot address in `.got` and mapping that value with `nm -S -C`. Nearby globals with similar names can silently produce plausible but incorrect source.
+2. For a large struct assignment at GCC `-O0`, retaining `dest = source` can produce `rep movsd`, while `memcpy` may route through a library call or different inline expansion. This matters for the device table's `0x234` byte records.
+3. In a bidirectional text search, the target's `setl`/`setg` instructions express conditional `+1` and `-1` of offsets without branches. The order of forward and backward punctuation tests controls the chosen break on a tie.

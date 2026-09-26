@@ -19,6 +19,10 @@
 #include "nu2api/nufile/nufpar.h"
 #include "legoapi/characters/motion.h"
 #include "legoapi/characters/motion/gameanim.h"
+#include "legoapi/render/fx/parts.h"
+#include "legoapi/gizmo/object/gizmoblowups.h"
+#include "legoapi/audio/sfx.h"
+#include "nu2api/nufile/nufile.h"
 
 #include <string.h>
 
@@ -111,12 +115,55 @@ pushblock_s *BlockInBlock(WORLDINFO_s *world, pushblock_s *block, i32 excluded, 
     return NULL;
 }
 
-void Boulder_Kill(PART_s *, i32) {
-    STUBBED();
+extern PART_s *boulder_part[2];
+extern i32 boulder_blowup_type;
+NUVEC boulder_oldpos[2];
+extern "C" void KillPart(PART_s *, i32);
+
+void Boulder_Kill(PART_s *part, i32) {
+    i32 i;
+    if (boulder_part[0] == part)
+        i = 0;
+    else if (__builtin_expect(boulder_part[1] == part, 0))
+        i = 1;
+    else
+        return;
+    if (part == NULL)
+        return;
+    if (boulder_blowup_type != -1)
+        GizmoBlowUpTypeBlowUp(WORLD, boulder_blowup_type, &part->position);
+    NuSpecialSetVisibility(&LevHSpecial[i], 0);
+    LevInstAnim[i]->ltime = 0.0f;
+    LevInstAnim[i]->playing = 0;
+    boulder_part[i] = NULL;
 }
 
-void Boulder_Move(PART_s *, float) {
-    STUBBED();
+void Boulder_Move(PART_s *part, float) {
+    if (LevelChange != 0)
+        return;
+    i32 i;
+    if (boulder_part[0] == part)
+        i = 0;
+    else if (boulder_part[1] == part)
+        i = 1;
+    else {
+        KillPart(part, 0);
+        return;
+    }
+    boulder_oldpos[i] = part->position;
+    part->transform = *NuSpecialGetDrawMtx(&LevHSpecial[i]);
+    if (1.0f < part->scale_time) {
+        NuVecSub(&part->velocity, &part->position, &boulder_oldpos[i]);
+        NuVecScale(&part->velocity, &part->velocity, 1.0f / FRAMETIME);
+    } else {
+        part->velocity = v000;
+    }
+    if (LevInstAnim[i]->ltime > 1.0f && !LevInstAnim[i]->playing) {
+        KillPart(part, 0);
+        return;
+    }
+    if (part->active & 1)
+        PlaySfx(const_cast<char *>("Kas_BoulderLoop"), &part->position);
 }
 
 void Buck_MoveCode(GameObject_s *object, i32 start) {
@@ -129,12 +176,113 @@ void Buck_MoveCode(GameObject_s *object, i32 start) {
     }
 }
 
-void FindNextBreak(unsigned char *, i32) {
-    STUBBED();
+// The break index is a byte offset. Never return a UTF-8 continuation byte.
+i32 FindNextBreak(unsigned char *text, i32 index) {
+    i32 length = NuStrLen(reinterpret_cast<char *>(text));
+    while (static_cast<u8>(text[index] - 0x80) <= 0x3f)
+        --index;
+
+    u8 ch = text[index];
+    if (ch == ' ') {
+        u8 next = text[index + 1];
+        if (next != '?' && next != '!' && next != ';' && next != ':')
+            return index;
+    } else if (ch == '.') {
+        if (text[index + 1] != '.')
+            return index;
+    } else if (static_cast<u8>(ch - ',') <= 1) {
+        return index;
+    }
+
+    i32 count = 20;
+    do {
+        ++index;
+        if (index >= length)
+            return length;
+        while (static_cast<u8>(text[index] - 0x80) <= 0x3f)
+            ++index;
+        ch = text[index];
+        if (ch == ' ') {
+            u8 next = text[index + 1];
+            if (next != '?' && next != '!' && next != ';' && next != ':')
+                return index;
+        } else if (ch == '.') {
+            if (text[index + 1] != '.')
+                return index;
+        } else if (static_cast<u8>(ch - ',') <= 1) {
+            return index;
+        }
+    } while (--count != 0);
+
+    if (text[index] == '~') {
+        if (index > 0 && text[index - 1] == '~')
+            index -= 1;
+    } else if (index > 0 && text[index - 1] == '~' && index != 1) {
+        index -= text[index - 2] != '~';
+    }
+    return index;
 }
 
-void FindNearestBreak(unsigned char *, i32) {
-    STUBBED();
+i32 FindNearestBreak(unsigned char *text, i32 index) {
+    while (static_cast<u8>(text[index] - 0x80) <= 0x3f)
+        --index;
+
+    u8 ch = text[index];
+    if (ch == ' ') {
+        u8 next = text[index + 1];
+        if (next != '?' && next != '!' && next != ';' && next != ':')
+            return index;
+    } else if (ch == '.') {
+        if (text[index + 1] != '.')
+            return index;
+    } else if (static_cast<u8>(ch - ',') <= 1) {
+        return index;
+    }
+
+    i32 length = NuStrLen(reinterpret_cast<char *>(text)) - 1;
+    i32 forward = index;
+    i32 backward = index;
+    i32 count = 20;
+    do {
+        forward += forward < length;
+        while (static_cast<u8>(text[forward] - 0x80) <= 0x3f)
+            ++forward;
+        backward -= backward > 0;
+        while (static_cast<u8>(text[backward] - 0x80) <= 0x3f)
+            --backward;
+
+        ch = text[forward];
+        if (ch == ' ') {
+            u8 next = text[forward + 1];
+            if (next != '?' && next != '!' && next != ';' && next != ':')
+                return forward;
+        } else if (ch == '.') {
+            if (text[forward + 1] != '.')
+                return forward;
+        } else if (static_cast<u8>(ch - ',') <= 1) {
+            return forward;
+        }
+
+        ch = text[backward];
+        if (ch == ' ') {
+            u8 next = text[backward + 1];
+            if (next != '?' && next != '!' && next != ';' && next != ':')
+                return backward;
+        } else if (ch == '.') {
+            if (text[backward + 1] != '.')
+                return backward;
+        } else if (static_cast<u8>(ch - ',') <= 1) {
+            return backward;
+        }
+    } while (--count != 0);
+
+    if (text[index] == '~') {
+        if (index > 0 && text[index - 1] == '~')
+            index -= 1;
+    } else if (index > 0 && text[index - 1] == '~' && index != 1) {
+        index -= text[index - 2] != '~';
+    }
+    return index;
 }
 
 void BuckStartExtra_LSW(GameObject_s *object) {
@@ -183,8 +331,16 @@ i32 Conveyor_AdjustSpeed(NUVEC *velocity) {
     return 0;
 }
 
-void AddDevice(nufile_device_s *) {
-    STUBBED();
+extern i32 numdevices;
+extern NUFILE_DEVICE devices[16];
+
+__attribute__((optimize("O0,no-omit-frame-pointer"))) NUFILE_DEVICE *AddDevice(NUFILE_DEVICE *device) {
+    devices[numdevices] = *device;
+    NuStrCpy(devices[numdevices].cur_dir, default_device->cur_dir);
+    NuStrCpy(devices[numdevices].sys_dir, default_device->sys_dir);
+    NuStrCpy(devices[numdevices].dll_dir, default_device->dll_dir);
+    ++numdevices;
+    return &devices[numdevices - 1];
 }
 
 // LevelObjects_InitForLevel @0x475630. Creates the runtime model table and
