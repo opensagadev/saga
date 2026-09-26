@@ -75,8 +75,8 @@ First full target build, measured with the GOT-aware fork:
 | `LineCrossedXZ` | 88.490560% | 100% |
 | `RatioAlongLineXZ` | 86.566666% | 92.316666% |
 | `LineToPlaneDistance` | 78.857140% | 100% |
-| `I64ToX` | 40.303370% | 40.303370% |
-| `XToI64` | 35.805460% | 35.805460% |
+| `I64ToX` | 40.303370% | 61.079% |
+| `XToI64` | 35.805460% | 36.468% |
 | `rawClip` | 22.210192% | 54.720000% |
 
 For `rawClip`, copying the inside endpoint as a whole `VuVec` made GCC
@@ -87,3 +87,14 @@ before the divisions. Those changes raised the score from 22.21% to 54.72%.
 The target also aligns the stack to 16 bytes, but forcing alignment with an
 extra aligned local grew the frame from 16 to 32 bytes and reduced the score;
 do not retain that particular probe.
+
+The 64-bit formatter is sensitive to where the word halves become live. Keep
+the low word extraction after digit 7 and a memory scheduling barrier after
+digit 1. A no-op ESI/EAX constraint for the high word and output pointer,
+followed by a memory clobber before constructing the local digit table, gets
+the target's two saved registers and raises the score. Extracting the halves
+with `__builtin_memcpy` avoids strict aliasing concerns and another ten
+points of compiler mismatch. The parser is harder: forcing the input pointer
+to ECX shrinks its generated body from 1040 to 789 bytes, near the target's
+819, but instruction scheduling still differs heavily. Its first-attempt and
+refined scores are in the table above.

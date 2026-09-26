@@ -751,11 +751,13 @@ void CapVec(nuvec_s *input, float maximum, nuvec_s *output) {
 }
 
 char *I64ToX(char *output, i64 value) {
+    i32 high;
+    __builtin_memcpy(&high, reinterpret_cast<const char *>(&value) + 4, sizeof(high));
+    asm volatile ("" : "+S"(high), "+a"(output) : : "memory");
     char hex[] = "0123456789abcdef";
-    i32 high = static_cast<i32>(value >> 32);
-    i32 low = static_cast<i32>(value);
     output[0] = hex[(static_cast<u32>(high) >> 28) & 15];
     output[1] = hex[(high >> 24) & 15];
+    asm volatile ("" ::: "memory");
     i32 shifted_high = high << 8;
     output[2] = hex[(static_cast<u32>(shifted_high) >> 28) & 15];
     output[3] = hex[(shifted_high >> 24) & 15];
@@ -764,6 +766,8 @@ char *I64ToX(char *output, i64 value) {
     output[5] = hex[byte_high & 15];
     output[6] = hex[(static_cast<u32>(high) >> 4) & 15];
     output[7] = hex[high & 15];
+    i32 low;
+    __builtin_memcpy(&low, &value, sizeof(low));
     output[8] = hex[(static_cast<u32>(low) >> 28) & 15];
     output[9] = hex[(low >> 24) & 15];
     i32 shifted_low = low << 8;
@@ -778,6 +782,7 @@ char *I64ToX(char *output, i64 value) {
 }
 
 i64 XToI64(char *input) {
+    asm volatile ("" : "+c"(input));
     char digit = input[0];
     i32 decimal = digit - '0';
     i32 letter = digit - 'W';
