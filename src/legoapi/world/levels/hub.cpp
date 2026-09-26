@@ -2919,7 +2919,7 @@ void MenuDrawBonusMode(MENU_s *) {
                               MenuPacket.active_player[1], tSELECT, prompt_alpha, -1, tBACK, -1, -1);
     }
 }
-static __used__ void Hub_DrawBonusModeMenu(int selected, float alpha) {
+static void Hub_DrawBonusModeMenu(int selected, float alpha) {
     char text[3][128];
     if (bonusmodearcade) {
         const i32 full_opacity = static_cast<i32>(alpha * 128.0f);
