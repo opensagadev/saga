@@ -82,6 +82,23 @@ Native and WASM builds define `HOST_BUILD` and use the host harness.
 | [utilities-stub-codegen.md](utilities-stub-codegen.md) | utility geometry, clipping, and 64-bit conversion patterns |
 | [22-gcc47-control-flow.md](22-gcc47-control-flow.md) | GCC 4.7 branch prediction, trace layout, and dump workflow |
 | [22-virtual-widgets.md](22-virtual-widgets.md) | virtual touch widget layout, behavior, and compiler patterns |
+| [18-items-collect-codegen.md](18-items-collect-codegen.md) | item collection and minikit callback code generation |
+| [19-nucore-occlusion.md](19-nucore-occlusion.md) | visibility occlusion reconstruction |
+| [20-quaternion-euler.md](20-quaternion-euler.md) | quaternion to Euler wrapper and register choices |
+| [21-camera-aabb-planes.md](21-camera-aabb-planes.md) | camera box intersection plane ordering |
+| [21-mech-gestures.md](21-mech-gestures.md) | touch gesture dispatch and compiler patterns |
+| [22-legacy-hgobj-blend.md](22-legacy-hgobj-blend.md) | legacy hierarchical object animation blending |
+| [23-character-motion-codegen.md](23-character-motion-codegen.md) | character motion callbacks and AT-AT matching |
+| [24-actions-combat-codegen.md](24-actions-combat-codegen.md) | combat action control flow and register allocation |
+| [24-camera-minicut-command-codegen.md](24-camera-minicut-command-codegen.md) | camera mini-cut command reconstruction |
+| [24-core-input-stub-codegen.md](24-core-input-stub-codegen.md) | gamepad and timing callback matching |
+| [24-hub-bonus-menu-control-flow.md](24-hub-bonus-menu-control-flow.md) | bonus menu helper block order |
+| [agent-snake-specialmoves.md](agent-snake-specialmoves.md) | snake special move control flow |
+| [agent-tag-newtransfer-codegen.md](agent-tag-newtransfer-codegen.md) | tag transfer layout and register use |
+| [agent-tagging-codegen.md](agent-tagging-codegen.md) | character tagging and Batman icon matching |
+| [ai-creature-stubs.md](ai-creature-stubs.md) | creature AI callback reconstruction |
+| [legoapi-misc-platform-stub-codegen.md](legoapi-misc-platform-stub-codegen.md) | platform buffer, stream, and status callbacks |
+| [tmclient-ndk-r8e-codegen.md](tmclient-ndk-r8e-codegen.md) | TMClient translation unit and compiler matching |
 
 ## Non-negotiable matching facts
 
