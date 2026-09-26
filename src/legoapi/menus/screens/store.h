@@ -41,6 +41,14 @@ DECOMP_ASSERT(sizeof(storepack_s) == 0x34, "STOREPACK size");
 typedef struct storepack_s STOREPACK;
 extern STOREPACK StorePack[11];
 
+struct STOREBUNDLE {
+    char *name;
+    u32 pack_mask;
+    i32 text_index;
+};
+DECOMP_ASSERT(sizeof(STOREBUNDLE) == 12, "STOREBUNDLE size");
+extern STOREBUNDLE StoreBundle[3];
+
 enum STORE_PACK_INDEX {
     STORE_PACK_EPISODE_II = 0,
     STORE_PACK_EPISODE_III = 1,
@@ -78,7 +86,7 @@ bool Store_IsPackUnlocked(i32 pack);
 bool Store_IsPackAvailable(i32 pack, char *reason);
 void Store_UnlockPack(i32 pack, bool save);
 void Store_RestorePurchases(void);
-void StoreBundle_FindByName(char *name);
+i32 StoreBundle_FindByName(char *name);
 void Store_HubInitFloorTargets(WORLDINFO_s *world);
 void Store_HubDrawFloorTargets(WORLDINFO_s *world);
 void Store_RootPackCustodian(i32 pack, GameObject_s *custodian);

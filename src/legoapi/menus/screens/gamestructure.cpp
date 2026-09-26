@@ -10,6 +10,7 @@
 #include "legoapi/characters/motion.h"
 #include "legoapi/core/input/gamepads.h"
 #include "legoapi/core/input/timer.h"
+#include "legoapi/core/config/cheat.h"
 #include "legoapi/items/base/apiobject.h"
 #include "legoapi/items/base/collection.h"
 #include "legoapi/menus/screens/store.h"
@@ -23,6 +24,7 @@
 #include "legoapi/props/doors/door.h"
 #include "legoapi/render/core/terrain.h"
 #include "legoapi/render/core/render.h"
+#include "legoapi/render/core/screen.h"
 #include "nu2api/nu3d/nuspline.h"
 
 #include "globals.h"
@@ -35,14 +37,32 @@
 #include "nu2api/nusound/nusound.h"
 
 #include <string.h>
+#include <stdio.h>
 
 struct GameObject_s;
 struct LEVEL_PROGRESS_s;
 struct WORLDINFO_s;
 i32 NuIOS_GetPurchaseResult();
+int NuIOS_PurchaseInAppProduct(char *);
 void NuIOS_RestoreInAppPurchases();
 extern "C" void NuIOS_RecordFlurryEvent(char *);
 extern "C" void BackupMenu();
+extern i32 CutInstEndCount;
+i32 LEGOMENU_PAUSESYNC = -1;
+void GameCam_HitRoll();
+
+struct STOREIAP_s {
+    f32 x;
+    f32 y;
+    f32 title_y;
+    f32 bottom_y;
+    f32 width;
+    char text[256];
+};
+DECOMP_ASSERT(sizeof(STOREIAP_s) == 0x114, "STOREIAP_s size");
+static STOREIAP_s StoreIAP[3];
+extern i32 menu_i_pack;
+static char *menu_storepurchase_iap_name;
 
 static void StoreUnlockArcade();
 static void StoreUnlockBonus();
@@ -63,6 +83,11 @@ STOREPACK StorePack[11] = {
     {NULL, 0, 0, 0, 0, {{0, 0}}, 0, 0, StoreUnlockBonus},     {NULL, 0, 0, 0, 0, {{0, 0}}, 0, 0, StoreUnlockBounty},
     {NULL, 0, 0, 0, 0, {{0, 0}}, 0, 0, StoreUnlockChallenge}, {NULL, 0, 0, 0, 0, {{0, 0}}, 0, 0, StoreUnlockJedi},
     {NULL, 0, 0, 0, 0, {{0, 0}}, 0, 0, StoreUnlockSith},
+};
+STOREBUNDLE StoreBundle[3] = {
+    {const_cast<char *>("PREQUELPACK"), 0x103, 0x5fe},
+    {const_cast<char *>("ORGINALPACK"), 0x1c, 0x5ff},
+    {const_cast<char *>("COMPLETEPACK"), 0xffffffffu, 0x600},
 };
 
 static void StoreUnlockArcade() {
@@ -171,7 +196,32 @@ void PauseGame(i32 pad_index) {
 }
 
 void NetworkSyncPause() {
-    STUBBED();
+    if (Paused == 0) {
+        NeedScreenGrab(1);
+    }
+    Paused = 1;
+    CutInstEndCount = 0;
+    NewMenu(LEGOMENU_PAUSESYNC, 0, -1);
+    ResetTimer(&PauseTimer, 0.0f);
+    music_man.SetFader(0.0f, 0.5f);
+    music_man.PauseTrack(0x10);
+    NuSound3StopRumble();
+    DoubleScoreTime = 0.0f;
+    ResetTimer(&JoinInTimer, 0.0f);
+    const f32 hold_time = TOGGLEHOLDTIME;
+    for (i32 i = 0; i < 8; ++i) {
+        GameObject_s *player = Player[i];
+        if (player != NULL) {
+            player->pause_input_state = 0;
+            asm volatile("" ::: "memory");
+            player->pause_context_state = 0;
+            asm volatile("" ::: "memory");
+            player->input_toggle_hold_time = hold_time;
+        }
+    }
+    if (PauseGame_ExtraCodeFn != NULL) {
+        PauseGame_ExtraCodeFn();
+    }
 }
 
 void ResumeGame(i32 play_sound, i32 resume_music) {
@@ -211,8 +261,14 @@ void RestoreOptions() {
     }
 }
 
-void InitSuperStory(i32) {
-    STUBBED();
+void InitSuperStory(i32 episode) {
+    SuperStory = 1;
+    SuperStoryEpisode = episode;
+    ResetTimer(reinterpret_cast<TIMER *>(SuperStoryTimer), 0.0f);
+    SuperStoryScore = 0;
+    FreePlay = 0;
+    NextArea_FreePlay = 0;
+    Cheats_TurnOff(0);
 }
 
 i32 InStory() {
@@ -310,8 +366,28 @@ void Store_RestorePurchases() {
     }
 }
 
-void StoreBundle_FindByName(char *) {
-    STUBBED();
+i32 StoreBundle_FindByName(char *name) {
+    STOREBUNDLE *bundles = StoreBundle;
+    asm volatile("" : "+D"(bundles));
+    i32 result;
+    char *second_name;
+    char *third_name;
+    if (__builtin_expect(NuStrICmp(bundles[0].name, name) == 0, 0)) {
+        result = 0;
+        goto done;
+    }
+    second_name = bundles[1].name;
+    asm volatile("" : "+a"(second_name));
+    if (__builtin_expect(NuStrICmp(second_name, name) == 0, 0)) {
+        result = 1;
+        goto done;
+    }
+    third_name = bundles[2].name;
+    asm volatile("" : "+a"(third_name));
+    result = NuStrICmp(third_name, name) == 0 ? 2 : -1;
+done:
+    asm volatile("" : "+a"(result));
+    return result;
 }
 
 bool Store_IsPackUnlocked(i32) {
@@ -520,7 +596,23 @@ void MenuExitStoreHolding(MENU_s *) {
 }
 
 void MenuInitStore(MENU_s *) {
-    STUBBED();
+    NuIOS_GetPurchaseResult();
+    Store_RestorePurchases();
+    if (static_cast<u32>(menu_i_pack) > 10 || Store_IsPackUnlocked(menu_i_pack)) {
+        GameAudio_PlaySfx(0x32, NULL, 0, 0);
+        GameCam_HitRoll();
+        MenuReset();
+        return;
+    }
+
+    StoreIAP[0].text[0] = 0;
+    StoreIAP[1].text[0] = 0;
+    StoreIAP[2].text[0] = 0;
+    char event[128];
+    char *product_id = *reinterpret_cast<char **>(&StorePack[menu_i_pack].field1_0x4);
+    sprintf(event, "pack_%s_tapped", product_id);
+    NuIOS_RecordFlurryEvent(event);
+    GameCam_Blend(GameCam, 0.5f, 0.0f, 1);
 }
 
 void MenuUpdateStore(MENU_s *) {
@@ -556,7 +648,7 @@ void MenuExitStoreRestoring(MENU_s *) {
 }
 
 void MenuInitStorePurchase(MENU_s *) {
-    STUBBED();
+    NuIOS_PurchaseInAppProduct(menu_storepurchase_iap_name);
 }
 
 void MenuDrawStorePurchase(MENU_s *) {
@@ -581,8 +673,23 @@ void Store_RootPackCustodian(i32, GameObject_s *custodian) {
     custodian->apiobj.field_0x1f4 = object_flags;
 }
 
-void Store_UprootPackCustodian(i32, GameObject_s *) {
-    STUBBED();
+void Store_UprootPackCustodian(i32, GameObject_s *custodian) {
+    CHARACTERDATA **character_list = &CDataList;
+    asm volatile("" : "+c"(character_list));
+    u8 flags = custodian->field_0xefc;
+    custodian->apiobj.flags_low &= ~2u;
+    flags &= ~0x12u;
+    custodian->field_0xefe &= ~0x40u;
+    custodian->field_0xefc = flags;
+    asm volatile("" ::: "memory");
+
+    CHARACTERDATA *characters = *character_list;
+    asm volatile("" : "+c"(characters) :: "memory");
+    if ((reinterpret_cast<u8 *>(characters)[custodian->id * sizeof(CHARACTERDATA) + 5] & 2) == 0 &&
+        (apicharsys->char_data[custodian->id].model_flags & 4) != 0) {
+        custodian->apiobj.field_0x1f4 |= 1;
+    }
+    custodian->apiobj.field_0x1f4 &= 0x7fffffffu;
 }
 
 void MenuUpdateStorePurchase(MENU_s *) {

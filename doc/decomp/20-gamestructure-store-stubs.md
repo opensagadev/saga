@@ -28,3 +28,25 @@ The larger menu callbacks remain under reconstruction. The target uses an
 unrolled sequence for 11 store packs in `MenuDrawDebugStore` and
 `MenuDrawStore`, even though a source loop would be shorter. Preserve that
 structure when matching these functions.
+
+## Second batch
+
+`NetworkSyncPause` matches all 529 target bytes. The eight player updates
+compile as an unrolled sequence, but GCC schedules the three independent
+stores by offset unless empty memory barriers separate them. Loading
+`TOGGLEHOLDTIME` before the loop lets GCC retain its single `movss` load.
+
+`InitSuperStory` is 99.58%, `MenuInitStore` 97.34%, and
+`MenuInitStorePurchase` 99.90%. `Store_UprootPackCustodian` is 99.68%; the
+only remaining difference is the equivalent x86 addressing order in one
+`test` instruction (`[ecx+edx+5]` versus `[edx+ecx+5]`). Keeping an external
+global's GOT-slot address live in `ecx`, then dereferencing it after the flag
+stores, restored all other instruction order.
+
+`StoreBundle_FindByName` was declared `void` despite returning an index in
+the target. It now returns `i32` and has the three target bundle entries,
+including the original `ORGINALPACK` spelling. It matches 93.51%. Marking
+the first two successful comparisons unlikely with `__builtin_expect(..., 0)`
+places their result blocks after the main return path, matching the target's
+branch layout. The remaining differences are callee-save/load scheduling and
+alignment padding.
