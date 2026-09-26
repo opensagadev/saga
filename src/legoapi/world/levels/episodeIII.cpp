@@ -24,6 +24,7 @@
 #include "legoapi/world/world.h"
 #include "gameapi/ai/aisys/aisys.h"
 #include "nu2api/nu3d/nuspecial.h"
+#include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/numath/numtx.h"
 #include "nu2api/numusic/numusic.h"
@@ -629,6 +630,19 @@ void TempleC_AlwaysUpdate(WORLDINFO_s *) {
 
 void *vadera_netpacket;
 
+struct VADERANETPACKET_s {
+    u16 count;
+    i16 subtitle;
+    f32 timer;
+};
+
+static NUVEC vadar_cam_pos = {0.0f, 0.88f, -12.4f};
+static NUVEC vadar_cam_tgt = {0.0f, 2.0f, -17.4f};
+
+void GameCameraMakeMiniCut2(NUVEC *, NUVEC *, i32, f32, f32, f32, f32, i32, i32, i32);
+void TickTockSfx();
+int LoseCoins(GameObject_s *, i32);
+
 void VaderA_Init(WORLDINFO_s *world) {
     memset(&vader_a, 0, sizeof(vader_a));
     vadera_netpacket = SetLevelHack(8);
@@ -689,7 +703,114 @@ void VaderC_Reset(WORLDINFO_s *) {
 }
 
 void VaderA_Update(WORLDINFO_s *) {
-    STUBBED();
+    if (vader_a.timer_message != NULL)
+        vader_a.timer_message->value += FRAMETIME;
+
+    if (netclient == 0) {
+        if (vader_a.collapse_started != 0) {
+            vader_a.collapse_started = 0;
+            if (Player[0] != NULL && (Player[0]->apiobj.field_0x1f8 & 1) != 0)
+                SetObjOnSurface(Player[0], 1);
+            if (Player[1] != NULL && (Player[1]->apiobj.field_0x1f8 & 1) != 0)
+                SetObjOnSurface(Player[1], 1);
+            if (Player[2] != NULL && (Player[2]->apiobj.field_0x1f8 & 1) != 0)
+                SetObjOnSurface(Player[2], 1);
+            if (Player[3] != NULL && (Player[3]->apiobj.field_0x1f8 & 1) != 0)
+                SetObjOnSurface(Player[3], 1);
+            if (Player[4] != NULL && (Player[4]->apiobj.field_0x1f8 & 1) != 0)
+                SetObjOnSurface(Player[4], 1);
+            if (Player[5] != NULL && (Player[5]->apiobj.field_0x1f8 & 1) != 0)
+                SetObjOnSurface(Player[5], 1);
+            if (Player[6] != NULL && (Player[6]->apiobj.field_0x1f8 & 1) != 0)
+                SetObjOnSurface(Player[6], 1);
+            if (Player[7] != NULL && (Player[7]->apiobj.field_0x1f8 & 1) != 0)
+                SetObjOnSurface(Player[7], 1);
+        }
+
+        if (vader_a.big_jump_locator != NULL && player != NULL && player->apiobj.supporting_platform_id != -1)
+            vader_a.big_jump_locator->position = player->apiobj.lower_position;
+    }
+
+    if (vader_a.count != 0) {
+        f32 previous_time = vader_a.timer;
+        vader_a.timer -= FRAMETIME;
+
+        if (vader_a.count <= 2) {
+            if (vader_a.forces[0] != NULL && GizForce_Complete(vader_a.forces[0])) {
+                vader_a.timer += 20.0f;
+                if (TouchHacks::TouchControlsActive)
+                    vader_a.timer += 10.0f;
+                vader_a.subtitle = 1;
+                vader_a.forces[0] = NULL;
+            }
+            if (vader_a.forces[1] != NULL && GizForce_Complete(vader_a.forces[1])) {
+                vader_a.timer += 20.0f;
+                if (TouchHacks::TouchControlsActive)
+                    vader_a.timer += 10.0f;
+                vader_a.subtitle = 1;
+                vader_a.forces[1] = NULL;
+            }
+            if (vader_a.forces[2] != NULL && GizForce_Complete(vader_a.forces[2])) {
+                vader_a.timer += 20.0f;
+                if (TouchHacks::TouchControlsActive)
+                    vader_a.timer += 10.0f;
+                vader_a.subtitle = 1;
+                vader_a.forces[2] = NULL;
+            }
+            if (vader_a.forces[3] != NULL && GizForce_Complete(vader_a.forces[3])) {
+                vader_a.timer += 20.0f;
+                if (TouchHacks::TouchControlsActive)
+                    vader_a.timer += 10.0f;
+                vader_a.subtitle = 1;
+                vader_a.forces[3] = NULL;
+            }
+
+            static const f32 time_limits[3] = {30.0f, 15.0f, 0.0f};
+            if (time_limits[static_cast<i16>(vader_a.count)] > vader_a.timer) {
+                if (vader_a.count == 1) {
+                    SetGizAIMessage(gizaimessagesys, "ceiling_collapse", 2.0f, vader_a.ceiling_collapse_message);
+                } else if (vader_a.count == 2) {
+                    SetGizAIMessage(gizaimessagesys, "ceiling_collapse", 3.0f, vader_a.ceiling_collapse_message);
+                    vader_a.timer = 2.0f;
+                    NuCameraGetMtx();
+                    GameCameraMakeMiniCut2(&vadar_cam_pos, &vadar_cam_tgt, 0, 2.0f, 0.0f, 0.5f, 0.0f, 0, 0, 1);
+                }
+                ++vader_a.count;
+            }
+
+            if (vader_a.subtitle != 0 ||
+                (vader_a.timer > 0.0f && static_cast<i32>(previous_time) != static_cast<i32>(vader_a.timer)))
+                TickTockSfx();
+        } else if (netclient == 0 && vader_a.timer <= 0.0f) {
+            if (Player[0] != NULL && static_cast<i8>(Player[0]->apiobj.field_0x1f8) < 0)
+                LoseCoins(Player[0], 1);
+            if (Player[1] != NULL && static_cast<i8>(Player[1]->apiobj.field_0x1f8) < 0)
+                LoseCoins(Player[1], 1);
+            KillGameObject(player, 2, 0);
+        }
+    }
+
+    if (vader_a.reset_flag == 0 &&
+        ((Player[0] != NULL && Player[0]->apiobj.field_0x287 != 0 &&
+          (Player[0]->apiobj.field_0x1f4 & 0x40000) == 0) ||
+         (Player[1] != NULL && Player[1]->apiobj.field_0x287 != 0 &&
+          (Player[1]->apiobj.field_0x1f4 & 0x40000) == 0))) {
+        if (GameCam->sock_position.location.sock != 0 || player->apiobj.field_0x287 != 0) {
+            vader_a.reset_flag = 1;
+            ResetLevel(NULL, NULL, 1);
+        }
+    }
+
+    VADERANETPACKET_s *packet = static_cast<VADERANETPACKET_s *>(vadera_netpacket);
+    if (netclient == 0) {
+        packet->count = vader_a.count;
+        packet->subtitle = vader_a.subtitle;
+        packet->timer = vader_a.timer;
+    } else {
+        vader_a.count = packet->count;
+        vader_a.subtitle = packet->subtitle;
+        vader_a.timer = packet->timer;
+    }
 }
 
 void VaderB_Update(WORLDINFO_s *) {
