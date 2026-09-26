@@ -10,7 +10,7 @@ The target bodies for `MechInputTouchSystem::AddChangeLayoutButtons`, `CreateGam
 
 The six substantive `CreateGamePlayLayout*` functions have the same sequence after controller construction. They append the controller to the selected device layout, then a `MechInputTouchMainDummyStick` of type `1`, then four `MechInputTouchMainDummyButton` objects with `(id, type)` pairs `(0x80, 0)`, `(0x20, 3)`, `(0x40, 2)`, `(0x10, 1)`. The type `1` stick reads the main controller's right-stick values. Each append writes to `layout.elements[layout.unknown_c8]` and increments the count without a bounds check.
 
-The layout starts at device offset `0xd4 + index * 0xcc`, with count at layout offset `0xc8`. `NuVirtualTouchDevice` currently exposes these fields privately, so `GetTouchLayout` accesses the verified ABI offsets directly. All six builders call the target no-op `AddChangeLayoutButtons` first. GestureBased first calls `GetAspectRatio`; the target call passes no object argument, suggesting this member was originally static. Its current declaration is non-static, so check this when tuning that builder.
+The layout starts at device offset `0xd4 + index * 0xcc`, with count at layout offset `0xc8`. `NuVirtualTouchDevice` currently exposes these fields privately, so `GetTouchLayout` accesses the verified ABI offsets directly. All six builders call the target no-op `AddChangeLayoutButtons` first. GestureBased first calls `GetAspectRatio`; the target call passes no object argument. Declaring that member `static` removes the one extra stack store in the reconstructed GestureBased builder.
 
 | Layout | Allocation | Controller constructor | Additional store |
 | --- | --- | --- | --- |
@@ -22,6 +22,8 @@ The layout starts at device offset `0xd4 + index * 0xcc`, with count at layout o
 | SpeederChase | `NU_ALLOC(0x80, 4, 1, "Main", 0)` | SpeederChase `(0)` | `gesture_controller` |
 
 The `NU_ALLOC` cases check for null before invoking the constructor; plain `new` cases do not. The currently incomplete Podrace, Cavalry, DeathStar, and VirtualConsole class declarations do not express their target main-controller inheritance, so the layout builders preserve target object sizes and cast their base address for the dummy controls. Correcting those declarations and constructors in their owning files will improve runtime behavior and may change codegen here.
+
+For the `NU_ALLOC` cases, preserve the allocator result as a typed controller pointer and use placement construction only when it is non-null. Initializing a separate controller pointer to null before allocation adds `xor edi, edi`, a later register move, and a three-operand `imul` for the layout index. The target holds the allocation result in `edi` directly and uses `imul ebp, 0xcc` for the layout address.
 
 ## Fake button and drawing
 

@@ -312,10 +312,10 @@ void MechInputTouchSystem::CreateGamePlayLayoutBlank(NuVirtualTouchDevice &, i32
 
 void MechInputTouchSystem::CreateGamePlayLayoutConsoleMode(NuVirtualTouchDevice &device, i32 index) {
     AddChangeLayoutButtons(device, index);
-    void *storage = NU_ALLOC(0x98, 4, 1, "Main", 0);
-    MechInputTouchVirtualConsoleController *controller = NULL;
-    if (storage != NULL) {
-        controller = new (storage) MechInputTouchVirtualConsoleController(0);
+    MechInputTouchVirtualConsoleController *controller =
+        reinterpret_cast<MechInputTouchVirtualConsoleController *>(NU_ALLOC(0x98, 4, 1, "Main", 0));
+    if (controller != NULL) {
+        new (controller) MechInputTouchVirtualConsoleController(0);
     }
     NuButtonLayout &layout = GetTouchLayout(device, index);
     AppendTouchElement(layout, reinterpret_cast<NuTouchInputElement *>(controller));
@@ -354,10 +354,10 @@ void MechInputTouchSystem::CreateGamePlayLayoutGestureBased_DeathStarTurret(NuVi
 
 void MechInputTouchSystem::CreateGamePlayLayoutGestureBased_Podrace(NuVirtualTouchDevice &device, i32 index) {
     AddChangeLayoutButtons(device, index);
-    void *storage = NU_ALLOC(0x78, 4, 1, "Main", 0);
-    MechInputTouchPodraceController *controller = NULL;
-    if (storage != NULL) {
-        controller = new (storage) MechInputTouchPodraceController(0);
+    MechInputTouchPodraceController *controller =
+        reinterpret_cast<MechInputTouchPodraceController *>(NU_ALLOC(0x78, 4, 1, "Main", 0));
+    if (controller != NULL) {
+        new (controller) MechInputTouchPodraceController(0);
     }
     MechSystems::Get()->gesture_controller = reinterpret_cast<MechInputTouchGestureBasedController *>(controller);
     NuButtonLayout &layout = GetTouchLayout(device, index);
@@ -367,10 +367,10 @@ void MechInputTouchSystem::CreateGamePlayLayoutGestureBased_Podrace(NuVirtualTou
 
 void MechInputTouchSystem::CreateGamePlayLayoutGestureBased_SpeederChase(NuVirtualTouchDevice &device, i32 index) {
     AddChangeLayoutButtons(device, index);
-    void *storage = NU_ALLOC(0x80, 4, 1, "Main", 0);
-    MechInputTouchSpeederChaseController *controller = NULL;
-    if (storage != NULL) {
-        controller = new (storage) MechInputTouchSpeederChaseController(0);
+    MechInputTouchSpeederChaseController *controller =
+        reinterpret_cast<MechInputTouchSpeederChaseController *>(NU_ALLOC(0x80, 4, 1, "Main", 0));
+    if (controller != NULL) {
+        new (controller) MechInputTouchSpeederChaseController(0);
     }
     MechSystems::Get()->gesture_controller = reinterpret_cast<MechInputTouchGestureBasedController *>(controller);
     NuButtonLayout &layout = GetTouchLayout(device, index);
