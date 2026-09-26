@@ -4061,8 +4061,112 @@ void PodCollisionCode(GameObject_s *object) {
     }
 }
 
-void Move_POD(GameObject_s *) {
-    STUBBED();
+// These pod tuning values are zero-initialized in the original image.
+f32 PosSeekPitch[2];
+f32 PODBOOSTHEIGHT;
+
+f32 FindPodHoverHeight(GameObject_s *object);
+extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
+extern "C" void PlaySfxByIdAndSetPitch(i32 sfx_id, nuvec_s *position, f32 pitch);
+
+void Move_POD(GameObject_s *object) {
+    AREADATA_s *area = WORLD->area;
+    if (area == NULL || (area != PODRACE_ADATA && area != PODSPRINT_ADATA)) {
+        Move_VEHICLE(object);
+        return;
+    }
+
+    ApplyGravity(object, NULL, FindPodHoverHeight(object), 8.0f, NULL);
+
+    GAMECHARACTERDATA *vehicle = object->apiobj.character_data->game_character;
+    GAMEPAD_s *pad = object->pad_gamepad;
+    if (PODSPRINT_ADATA != NULL && WORLD->area == PODSPRINT_ADATA && vehicle->field_0x28 > 0.0f &&
+        PodSprint_InStartCountdown(WORLD) <= 0.0f) {
+        LoopCode(object, pad->buttons_pressed & GAMEPAD_JUMP, pad->buttons_held & GAMEPAD_JUMP, pad, 0);
+    }
+    TakeHitCode(object);
+
+    if ((object->apiobj.flags_low & 4) != 0) {
+        object->camera_shake_strength = 0.0f;
+    } else if (object->apiobj.field_0x27c != -1) {
+        f32 target_speed;
+        f32 rate = 3.0f * FRAMETIME;
+        if (WORLD->area == PODRACE_ADATA) {
+            if ((pad->buttons_held & GAMEPAD_JUMP) != 0) {
+                target_speed = 1.0f + object->camera_shake_strength;
+                rate = 5.0f * FRAMETIME;
+            } else if (FadeSys.fade == 0.0f && MiniCutCam == 0) {
+                target_speed = 0.333f + 1.667f * object->camera_shake_strength;
+            } else if (podrace_section == -1) {
+                target_speed = 0.333f + 1.667f * object->camera_shake_strength;
+            } else {
+                target_speed = 1.0f + object->camera_shake_strength;
+            }
+        } else {
+            target_speed = 1.0f + 0.4f * object->camera_shake_strength;
+        }
+        object->current_speed_mul = SeekLinearF(object->current_speed_mul, target_speed, rate);
+
+        if ((object->field_0xe20 & 0x20) == 0 && object->apiobj.field_0x281 == 0x14 &&
+            object->apiobj.collision_min.y - object->apiobj.field_0x218 < PODBOOSTHEIGHT) {
+            NewBuzz(pad->pad, 0.1f, 0);
+            NewRumble(pad->pad, 0.5f, 0);
+            object->current_speed_mul = WORLD->area == PODRACE_ADATA ? 2.0f : 1.4f;
+            object->camera_shake_strength = 1.0f;
+            if ((object->field_0xe20 & 1) == 0) {
+                PlaySfx("PodX_Booster", &object->apiobj.collision_position);
+                object->field_0xe20 |= 1;
+            }
+        } else {
+            object->field_0xe20 &= ~1;
+            if (object->camera_shake_strength > 0.0f) {
+                object->camera_shake_strength -= FRAMETIME;
+                if (object->camera_shake_strength < 0.0f)
+                    object->camera_shake_strength = 0.0f;
+            }
+        }
+        if (object->current_speed_mul > 1.0f)
+            NewRumble(pad->pad, object->current_speed_mul - 1.0f, 0);
+    }
+
+    if (FreePlay != 0 && (object->apiobj.character_data->model_flags & 0x10) != 0 &&
+        (vehicle->flags_094[0] & 8) == 0) {
+        FireCode(object, pad->buttons_pressed & GAMEPAD_ACTION, pad->buttons_held & GAMEPAD_ACTION, 0.15f, 0);
+    }
+    if (WORLD->area != NULL && (WORLD->area == PODRACE_ADATA || WORLD->area == PODSPRINT_ADATA))
+        CatchUpCode(object, 0.025f, 3.0f, 0);
+    if (static_cast<i8>(object->apiobj.flags_low) < 0)
+        ForceCode(object, 0, 0, 0);
+    PodCollisionCode(object);
+
+    i32 sound = vehicle->sfx_engine;
+    if (vehicle->uses_weapon_action == 0x14) {
+        if (static_cast<i8>(object->apiobj.flags_low) < 0) {
+            i32 player_index = object == Player[0] ? 0 : 1;
+            if (WORLD->area == PODRACE_ADATA) {
+                f32 steering = -fabsf(NuTrigTable[pad->input_angle >> 1]) * (pad->input_magnitude - 6.0f) / 96.0f;
+                f32 speed = avg_currentspeed_mul > 1.1f ? 2.0f + steering : avg_currentspeed_mul + 1.0f + steering;
+                f32 pitch = speed * 0.5f;
+                f32 previous = PosSeekPitch[player_index];
+                PosSeekPitch[player_index] = previous + (pitch - previous) * FRAMETIME * 1.5f;
+                PlaySfxByIdAndSetPitch(sound, &object->apiobj.collision_position, PosSeekPitch[player_index]);
+            } else {
+                PosSeekPitch[player_index] = SeekLinearF(PosSeekPitch[player_index],
+                    object->apiobj.velocity_magnitude / vehicle->run_speed * 0.35f + 0.65f, FRAMETIME);
+                PlaySfxByIdAndSetPitch(sound, &object->apiobj.collision_position, PosSeekPitch[player_index]);
+            }
+        }
+    } else {
+        f32 camera_facing =
+            (object->apiobj.collision_position.x - global_camera.mtx.m30) * global_camera.mtx.m20 +
+            (object->apiobj.collision_position.y - global_camera.mtx.m31) * global_camera.mtx.m21 +
+            (object->apiobj.collision_position.z - global_camera.mtx.m32) * global_camera.mtx.m22;
+        if (camera_facing < 0.0f)
+            PlaySfxByIdAndSetPitch(sound, &object->apiobj.collision_position, 0.7f);
+        else
+            PlaySfxById(sound, &object->apiobj.collision_position);
+    }
+    GizmoBlowupCheckProximity(WORLD, object);
 }
 
 f32 zam_smoke_rate = 10.0f;
