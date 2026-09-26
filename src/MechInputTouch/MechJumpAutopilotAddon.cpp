@@ -74,7 +74,7 @@ void MechJumpAutoPilotAddon::LookForBottomInt(VuVec const &point) {
     if (drop < 1.1920928955078125e-7f) return;
 
     const float t = drop / (point.y - field_44.y);
-    if (t <= 0.0f || t > 1.0f) return;
+    if (!(t > 0.0f || t <= 1.0f)) return;
     field_64.x = field_44.x + (point.x - field_44.x) * t;
     field_64.y = field_24.y;
     field_64.z = field_44.z + (point.z - field_44.z) * t;
@@ -187,21 +187,22 @@ MechJumpAutoPilotAddon::MechJumpAutoPilotAddon(MechObjectInterface &object)
 void MechJumpAutoPilotAddon::ModifyJump() {
 }
 
-bool MechJumpAutoPilotAddon::OnProcess(MechAddon::ProcessStage, float delta_time) {
+__attribute__((force_align_arg_pointer)) bool MechJumpAutoPilotAddon::OnProcess(MechAddon::ProcessStage, float delta_time) {
     if (character == NULL) return false;
 
     const bool is_jumping = character->character_context == LEGOCONTEXT_JUMP;
     if (!is_jumping && started) return false;
     if (is_jumping || !started) {
         if (state != 0) {
+            GameObject_s *jump_character = character;
             const float x_speed = field_34.x * speed_scale;
             const float z_speed = field_34.z * speed_scale;
-            character->apiobj.movement_direction.x = x_speed;
-            character->target_velocity.x = x_speed;
-            character->apiobj.velocity.x = x_speed;
-            character->apiobj.movement_direction.z = z_speed;
-            character->target_velocity.z = z_speed;
-            character->apiobj.velocity.z = z_speed;
+            jump_character->apiobj.movement_direction.x = x_speed;
+            jump_character->target_velocity.x = x_speed;
+            jump_character->apiobj.velocity.x = x_speed;
+            jump_character->apiobj.movement_direction.z = z_speed;
+            jump_character->target_velocity.z = z_speed;
+            jump_character->apiobj.velocity.z = z_speed;
         }
         elapsed_time += delta_time;
 
@@ -226,7 +227,7 @@ bool MechJumpAutoPilotAddon::OnProcess(MechAddon::ProcessStage, float delta_time
         }
     }
 
-    if (character->character_context == LEGOCONTEXT_JUMP && !started) {
+    if (__builtin_expect(character->character_context == LEGOCONTEXT_JUMP && !started, 0)) {
         field_24.x = character->apiobj.position.x;
         field_24.y = character->apiobj.position.y;
         field_24.z = character->apiobj.position.z;
