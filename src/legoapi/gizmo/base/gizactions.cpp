@@ -310,7 +310,11 @@ static void GizActions_PlayObstacle(GIZFLOW_s *flow, FLOWBOX_s *, char **params,
     } else {
         GizObstacle_PlayBackwards(obstacle);
     }
-    obstacle->runtime_flags = (obstacle->runtime_flags & ~0xc) | (stay_open << 2) | (stay_shut << 3);
+    u8 runtime_flags = obstacle->runtime_flags;
+    runtime_flags &= ~0xc;
+    runtime_flags |= (stay_shut & 1) << 3;
+    runtime_flags |= stay_open << 2;
+    obstacle->runtime_flags = runtime_flags;
 }
 
 static void GizActions_GoThroughDoor(GIZFLOW_s *, FLOWBOX_s *, char **params, int param_count) {

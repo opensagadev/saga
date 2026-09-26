@@ -159,3 +159,8 @@ objects use the distance. An empty `+x` output constraint on the computed
 distance keeps the arithmetic before that scan without adding instructions;
 the match rose to 69.4375% with the same 904-byte local size. Forcing the type
 index into `eax` reduced the score and was not retained.
+
+`GizActions_PlayObstacle` clears runtime flag bits `0x0c`, then applies the
+parsed stay-shut bit at position 3 and stay-open bit at position 2. Expressing
+the update through a byte temporary with those operations in sequence raised
+the GOT-aware match from 86.35811% to 86.77027% (523 local bytes).
