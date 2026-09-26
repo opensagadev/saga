@@ -470,7 +470,9 @@ MechObjectInterface *MechInputTouchSystem::FindTargetObject(GameObject_s &object
                                                             MechObjectInterface *required_target,
                                                             MechTempPosInterface *temporary) {
     MechObjectInterface *best = NULL;
-    f32 best_distance = VehicleArea ? 5000.0f : 25.0f;
+    f32 best_distance = 25.0f;
+    if (VehicleArea)
+        best_distance = 5000.0f;
     VuVec start, end, direction;
     NuCameraCalcRay((0.0f + touch.x + 1.0f) * 0.5f, 1.0f - (0.0f + touch.y + 1.0f) * 0.5f, &start.xyz, &end.xyz, NULL);
     direction.x = end.x - start.x;
@@ -505,20 +507,24 @@ MechObjectInterface *MechInputTouchSystem::FindTargetObject(GameObject_s &object
         }
         if ((flags & 4) && world->gizmo_blowups != NULL) {
             GIZMOBLOWUP_s *item = world->gizmo_blowups;
-            for (i32 index = 0; index < world->gizmo_blowup_count; ++index, ++item) {
+            f32 *mid_z = &item->mid_position.z;
+            for (i32 index = 0; index < world->gizmo_blowup_count;
+                 ++index, ++item, mid_z += sizeof(*item) / sizeof(*mid_z)) {
                 nuhspecial_s *special = item->override_special;
                 if (special == NULL || !NuSpecialExistsFn(special))
                     special = &item->type->special;
                 if (item->field_0x125[0] != 0 || (i8)item->state_flags >= 0 || item->type == NULL ||
                     !NuSpecialExistsFn(special))
                     continue;
-                bool sphere = item->field_0x124 != 0 || (world->current_level == MOSEISLEYB_LDATA && index <= 31) ||
+                bool sphere = __builtin_expect(item->field_0x124 != 0, 0) ||
+                              (world->current_level == MOSEISLEYB_LDATA && index <= 31) ||
                               (world->current_level == VADERB_LDATA && index <= 1) ||
                               (world->current_level == CLOUDCITYESCAPEA_LDATA && index == 0) || VehicleArea;
                 f32 distance;
                 bool hit;
-                if (sphere) {
-                    NUVEC *position = item->field_0x120 ? static_cast<NUVEC *>(item->field_0x120) : &item->mid_position;
+                if (__builtin_expect(sphere, 0)) {
+                    NUVEC *position = item->field_0x120 ? static_cast<NUVEC *>(item->field_0x120)
+                                                       : reinterpret_cast<NUVEC *>(mid_z - 2);
                     VuVec center(position->x, position->y, position->z, 1.0f);
                     f32 radius = item->field_0x128 > 0.0f ? item->field_0x128 : item->target_scale;
                     if (VehicleArea)
@@ -529,13 +535,13 @@ MechObjectInterface *MechInputTouchSystem::FindTargetObject(GameObject_s &object
                 } else {
                     // bounds preserve the original special's fourth lanes.
                     VuVec minimum, maximum;
-                    minimum.x = special->display_special->bounds_min.x + item->mid_position.x;
-                    minimum.y = special->display_special->bounds_min.y + item->mid_position.y;
-                    minimum.z = special->display_special->bounds_min.z + item->mid_position.z;
+                    minimum.x = special->display_special->bounds_min.x + mid_z[-2];
+                    minimum.y = special->display_special->bounds_min.y + mid_z[-1];
+                    minimum.z = special->display_special->bounds_min.z + mid_z[0];
                     minimum.w = special->display_special->bounds_min.w;
-                    maximum.x = special->display_special->bounds_max.x + item->mid_position.x;
-                    maximum.y = special->display_special->bounds_max.y + item->mid_position.y;
-                    maximum.z = special->display_special->bounds_max.z + item->mid_position.z;
+                    maximum.x = special->display_special->bounds_max.x + mid_z[-2];
+                    maximum.y = special->display_special->bounds_max.y + mid_z[-1];
+                    maximum.z = special->display_special->bounds_max.z + mid_z[0];
                     maximum.w = special->display_special->bounds_max.w;
                     hit = CalculateRayBoxIntersection(minimum, maximum, start, direction, 30.0f, distance);
                 }
