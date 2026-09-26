@@ -4,6 +4,7 @@
 #include "legoapi/core/input/timer.h"
 #include "legoapi/items/base/collection.h"
 #include "legoapi/menus/screens/store.h"
+#include "globals.h"
 #include "nu2api/numath/nuvec.h"
 #include <math.h>
 
@@ -105,8 +106,134 @@ bool MechInputTouchMenuController::OnHold(GameObject_s &, TouchHolder &holder) {
     return false;
 }
 
-bool MechInputTouchMenuController::OnRelease(GameObject_s &, TouchHolder &) {
-    STUBBED();
+bool MechInputTouchMenuController::OnRelease(GameObject_s &, TouchHolder &holder) {
+    if (field_70 != &holder) {
+        field_70 = NULL;
+        return false;
+    }
+
+    const NuVec2 down = holder.down_position;
+    const NuVec2 touch = holder.touch_position;
+    const f32 dx = touch.x - down.x;
+    const f32 dy = touch.y - down.y;
+    LastTouchTime = GlobalTimer.time_elapsed;
+    LastTouchPos = touch;
+    AnyTouchesThisFrame = 3;
+
+    if (GetMenuID() == 12) {
+        if (field_78 == 0) {
+            field_70 = NULL;
+            return false;
+        }
+        u8 *customiser = reinterpret_cast<u8 *>(CharacterCustomiser);
+        if (dx > 0.1f || dx < -0.1f) {
+            customiser[0xd16] = 1;
+            return true;
+        }
+        if (dy > 0.1f) {
+            customiser[0xd12] = 1;
+            return true;
+        }
+        if (dy < -0.1f) {
+            customiser[0xd13] = 1;
+            return true;
+        }
+
+#define CUSTOMISER_HIT(index, position_offset, width_offset, height_offset)                         \
+        {                                                                                            \
+            const f32 width = *reinterpret_cast<f32 *>(customiser + width_offset);                  \
+            if (width > 0.0f) {                                                                      \
+                const f32 x = down.x - *reinterpret_cast<f32 *>(customiser + position_offset);      \
+                const f32 half_width = fabsf(0.5f * width);                                         \
+                if (x > -half_width && x < half_width) {                                             \
+                    const f32 y = down.y - *reinterpret_cast<f32 *>(customiser + position_offset + 4); \
+                    const f32 half_height = fabsf(0.5f * *reinterpret_cast<f32 *>(customiser + height_offset)); \
+                    if (y > -half_height && y < half_height) {                                      \
+                        customiser[0xd10 + index] = 1;                                               \
+                        return true;                                                                 \
+                    }                                                                                \
+                }                                                                                    \
+            }                                                                                        \
+        }
+        CUSTOMISER_HIT(0, 0xc98, 0xce0, 0xcf8);
+        CUSTOMISER_HIT(1, 0xca4, 0xce4, 0xcfc);
+        CUSTOMISER_HIT(2, 0xcb0, 0xce8, 0xd00);
+        CUSTOMISER_HIT(3, 0xcbc, 0xcec, 0xd04);
+        CUSTOMISER_HIT(4, 0xcc8, 0xcf0, 0xd08);
+        CUSTOMISER_HIT(5, 0xcd4, 0xcf4, 0xd0c);
+#undef CUSTOMISER_HIT
+    }
+
+    MENU &menu = GameMenu[GameMenuLevel];
+    if (GetMenuID() == 17) {
+        GetFreePlayCollection(hub_freeplay_area);
+        NUVEC delta = {touch.x - menu.item_x[0], touch.y - menu.item_y[0], 0.0f};
+        delta.x /= GetAspectRatio();
+        if (NuVecMag(&delta) < menu.item_width[0]) {
+            menu.queued_item = 9999;
+            return true;
+        }
+        return false;
+    }
+
+    if (GameMenuLevel <= 0) {
+        field_70 = NULL;
+        field_74 = NULL;
+        return false;
+    }
+    bool same_menu = field_74 == &menu;
+    field_70 = NULL;
+    field_74 = NULL;
+    if (!same_menu) {
+        return false;
+    }
+
+    if (dx > 0.1f) {
+        menu.horizontal_scroll_distance = dx;
+        menu.move_left = 1;
+        return GetMenuID() != 25;
+    }
+    if (dx < -0.1f) {
+        menu.move_right = 1;
+        menu.horizontal_scroll_distance = -dx;
+        return GetMenuID() != 25;
+    }
+    if (dy > 0.1f) {
+        menu.horizontal_scroll_distance = dy;
+        menu.move_down = 1;
+        return GetMenuID() != 25;
+    }
+    if (dy < -0.1f) {
+        menu.move_up = 1;
+        menu.horizontal_scroll_distance = -dy;
+        return GetMenuID() != 25;
+    }
+
+    for (i32 index = 0; index < 400; ++index) {
+        const f32 width = menu.item_width[index];
+        if (width <= 0.0f) {
+            continue;
+        }
+        const f32 height = menu.item_height[index];
+        const f32 x = down.x - menu.item_x[index];
+        const f32 y = down.y - menu.item_y[index];
+        bool hit;
+        if (height == 0.0f) {
+            NUVEC delta = {x, y, 0.0f};
+            delta.x /= GetAspectRatio();
+            hit = NuVecMag(&delta) < width;
+        } else {
+            const f32 half_width = fabsf(0.5f * width);
+            const f32 half_height = fabsf(0.5f * height);
+            hit = x > -half_width && x < half_width && y > -half_height && y < half_height;
+        }
+        if (hit) {
+            menu.queued_item = index;
+            menu.queued_column = menu.item_column[index];
+            menu.queued_row = menu.item_row[index];
+            return GetMenuID() != 25;
+        }
+    }
     return false;
 }
 
