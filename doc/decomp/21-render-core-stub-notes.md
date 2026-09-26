@@ -117,3 +117,17 @@ animated copies of the current value. The current first pass scores
 73.16456% of its 1,463-byte target; the matrix setup and font API
 sequence are present, with argument and arithmetic ordering still to
 tune.
+
+## Starfighter calling convention and matrix frames
+
+`DrawStarFighter` takes its only pointer in EAX, so its file-local
+definition needs `__attribute__((regparm(1)))`. The target keeps two
+16-byte-aligned `NUMTX` locals in a 0xb0-byte aligned stack frame: one
+for special objects at ESP+0x30 and one for scaled character models at
+ESP+0x70. An unaligned local changes the prologue, and putting the
+locals in exclusive branches lets GCC reuse the same stack slot.
+`NUMTX_ALIGNED16` repairs the prologue, but a first semantic pass still
+only scores 46.30337% against the 778-byte body because GCC reuses the
+matrix slot and schedules the model lookup differently. The fighter
+layout places a NUMTX at +0, scale at +0xf0, draw flags at +0xfc, and
+model ID at +0xfe. The special ID -307 emits debris effect slot 49.

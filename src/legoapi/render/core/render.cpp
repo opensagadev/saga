@@ -18,6 +18,7 @@
 #include "legoapi/menus/screens/arcade.h"
 #include "legoapi/render/light/fade_material.h"
 #include "legoapi/render/fx/edsplines.h"
+#include "legoapi/render/fx.h"
 #include "legoapi/world/levels/levels.h"
 #include "legoapi/world/level.h"
 #include "legoapi/world/world.h"
@@ -2857,8 +2858,51 @@ static __used__ i32 MatrixReflection_CanOverride() {
     return result;
 }
 
-static __used__ void DrawStarFighter(starfighter_s *) {
-    STUBBED();
+static __used__ __attribute__((regparm(1))) void DrawStarFighter(starfighter_s *starfighter) {
+    struct StarFighterLayout {
+        NUMTX matrix;
+        u8 reserved[0xb0];
+        f32 scale;
+        u8 more_reserved[8];
+        i16 draw_flags;
+        i16 model_id;
+    };
+    StarFighterLayout *fighter = reinterpret_cast<StarFighterLayout *>(starfighter);
+    const i16 model_id = fighter->model_id;
+    if (model_id >= 0) {
+        const i16 model_index = apicharsys->playermodelids[model_id];
+        if (model_index == -1)
+            return;
+        NUMTX *matrix = &fighter->matrix;
+        NUMTX_ALIGNED16 scaled_model_matrix;
+        if (fighter->scale != 1.0f) {
+            scaled_model_matrix = fighter->matrix;
+            NuMtxPreScaleUVU0(&scaled_model_matrix, fighter->scale);
+            matrix = &scaled_model_matrix;
+        }
+        GameDrawCharacterModel(&apicharsys->models[model_index], NULL, matrix, NULL, NULL, NULL, NULL,
+                               fighter->draw_flags);
+    } else {
+        NUMTX *matrix = &fighter->matrix;
+        NUMTX_ALIGNED16 scaled_special_matrix;
+        if (model_id == -299 || model_id == -297 || model_id == -298 || model_id == -307) {
+            scaled_special_matrix = fighter->matrix;
+            scaled_special_matrix.m00 *= 1.15f;
+            scaled_special_matrix.m01 *= 1.15f;
+            scaled_special_matrix.m02 *= 1.15f;
+            scaled_special_matrix.m10 *= 1.15f;
+            scaled_special_matrix.m11 *= 1.15f;
+            scaled_special_matrix.m12 *= 1.15f;
+            scaled_special_matrix.m20 *= 1.15f;
+            scaled_special_matrix.m21 *= 1.15f;
+            scaled_special_matrix.m22 *= 1.15f;
+            matrix = &scaled_special_matrix;
+        }
+        NuSpecialDrawAt(&WORLD->lev_objs[-model_id].special, matrix);
+        if (model_id == -307)
+            AddVariableShotDebrisEffect(WORLD->debris_sys->entries[49].effect,
+                                        reinterpret_cast<NUVEC *>(&fighter->matrix.m30), 1, 0, 0);
+    }
 }
 
 static void DrawWeapon_SetSabreObjects(GameObject_s *object, i32 red, i32 green, i32 blue, i32 purple, i32 *models,
