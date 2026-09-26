@@ -69,3 +69,22 @@ frame when `flags_8a & 4` is set, and reset the camera lock afterward. The
 first implementations scored 73.78% and 74.57143%, respectively; both are
 four bytes larger than the target, so their block and store order still need
 work.
+
+`instNuGCutRigidSysEnd` is a static callee of the jump routines. The source
+had `__used__` on this helper, which kept its ordinary stack-argument ABI.
+Removing that annotation let GCC optimize the local calls and raised the
+jump scores to 79.38% and 78.34694%. This is an interprocedural compiler
+effect: a function marker can change its callers even when its body is
+unchanged. The helper itself still matches poorly and needs separate work.
+
+## Cutscene memory display
+
+`DisplayCutSceneMemory` is a debug graph, not a no-op. It uses one `NuPrim2DBegin`
+call, writes a packed color into `g_NuPrim_StreamBufferPtr->u32_ptr[3]` before
+every vertex, and draws cutscene and instance allocation bars. Separate
+instance storage uses two list passes and y ranges 206–208 and 209–211;
+shared storage uses one pass and y range 206–210. The target converts 32-bit
+unsigned byte offsets to `f32` as `high16 * 65536.0f + low16`, which affects
+the SSE instruction sequence. The first reconstruction scored 66.41629%
+against its 2,000-byte target and removed the final `STUBBED()` marker from
+this file. The 2192-byte generated function has further block-order work.

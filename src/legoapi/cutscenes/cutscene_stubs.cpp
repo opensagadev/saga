@@ -3,6 +3,7 @@
 #include "legoapi/legoapi_types.h"
 #include "nu2api/nucore/nugcutscene.h"
 #include "nu2api/nucore/NuDynamicLight.h"
+#include "nu2api/nu3d/nuprim.h"
 #include "nu2api/nu3d/nurndr.h"
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/numath/nufloat.h"
@@ -66,7 +67,105 @@ extern "C" {
     }
 
     void DisplayCutSceneMemory(void) {
-        STUBBED();
+        if (DefragCutSceneEndMem == NULL || DefragCutSceneListSize == 0 || DefragCutSceneBaseMem == NULL) {
+            return;
+        }
+
+#define CUT_MEMORY_FLOAT(value)                                                                                         \
+    (static_cast<f32>((value) >> 16) * 65536.0f + static_cast<f32>(static_cast<u16>(value)))
+#define CUT_MEMORY_VERTEX(x, y, normal_colour, bright_colour)                                                           \
+    do {                                                                                                                \
+        if (g_NuPrim_NeedsOverbrightening == 0) {                                                                        \
+            g_NuPrim_StreamBufferPtr->u32_ptr[3] = (normal_colour);                                                     \
+        } else {                                                                                                        \
+            g_NuPrim_StreamBufferPtr->u32_ptr[3] = (bright_colour);                                                     \
+        }                                                                                                               \
+        NuPrim2DAddXYZ((x), (y), 0.0f);                                                                                  \
+    } while (0)
+
+        ++NuPrimCSPos;
+        NuPrimSetCoordinateSystem(NUPRIM_SCALEMODE_PS2);
+        NuPrim2DBegin(4, 5, NULL);
+
+        if (DefragInstBaseMem != NULL) {
+            const u32 cut_span = static_cast<u32>(reinterpret_cast<usize>(DefragCutSceneEndMem) -
+                                                  reinterpret_cast<usize>(DefragCutSceneBaseMem));
+            const f32 cut_scale = 580.0f / CUT_MEMORY_FLOAT(cut_span);
+            CUT_MEMORY_VERTEX(30.0f, 206.0f, 0x40000040u, 0x40000080u);
+            CUT_MEMORY_VERTEX(610.0f, 208.0f, 0x40000040u, 0x40000080u);
+
+            CutSceneCleanUpEntry *const list_end = DefragCutSceneListBase + DefragCutSceneListSize;
+            for (CutSceneCleanUpEntry *entry = DefragCutSceneListBase; entry < list_end; ++entry) {
+                if ((entry->flags & 4) == 0) {
+                    continue;
+                }
+                instNUGCUTSCENE_s *instance = DefragGetInstFn(entry->handle);
+                NUGCUTSCENE_s *scene = instance->cutscene;
+                const u32 start = static_cast<u32>(reinterpret_cast<usize>(scene) -
+                                                   reinterpret_cast<usize>(DefragCutSceneBaseMem));
+                const u32 end = start + scene->loaded_size;
+                const f32 start_x = CUT_MEMORY_FLOAT(start) * cut_scale + 30.0f;
+                const f32 end_x = CUT_MEMORY_FLOAT(end) * cut_scale + 30.0f;
+                CUT_MEMORY_VERTEX(start_x, 206.0f, 0x40004040u, 0x40008080u);
+                CUT_MEMORY_VERTEX(end_x, 208.0f, 0x40004040u, 0x40008080u);
+            }
+
+            const u32 inst_span = static_cast<u32>(reinterpret_cast<usize>(DefragInstEndMem) -
+                                                   reinterpret_cast<usize>(DefragInstBaseMem));
+            const f32 inst_scale = 580.0f / CUT_MEMORY_FLOAT(inst_span);
+            CUT_MEMORY_VERTEX(30.0f, 209.0f, 0x40000030u, 0x40000060u);
+            CUT_MEMORY_VERTEX(610.0f, 211.0f, 0x40000030u, 0x40000060u);
+
+            for (CutSceneCleanUpEntry *entry = DefragCutSceneListBase; entry < list_end; ++entry) {
+                if ((entry->flags & 4) == 0) {
+                    continue;
+                }
+                instNUGCUTSCENE_s *instance = DefragGetInstFn(entry->handle);
+                const u32 start = static_cast<u32>(reinterpret_cast<usize>(instance) -
+                                                   reinterpret_cast<usize>(DefragInstBaseMem));
+                const u32 end = start + instance->allocation_size;
+                const f32 start_x = CUT_MEMORY_FLOAT(start) * inst_scale + 30.0f;
+                const f32 end_x = CUT_MEMORY_FLOAT(end) * inst_scale + 30.0f;
+                CUT_MEMORY_VERTEX(start_x, 209.0f, 0x40400040u, 0x40800080u);
+                CUT_MEMORY_VERTEX(end_x, 211.0f, 0x40400040u, 0x40800080u);
+            }
+        } else {
+            const u32 cut_span = static_cast<u32>(reinterpret_cast<usize>(DefragCutSceneEndMem) -
+                                                  reinterpret_cast<usize>(DefragCutSceneBaseMem));
+            const f32 cut_scale = 580.0f / CUT_MEMORY_FLOAT(cut_span);
+            CUT_MEMORY_VERTEX(30.0f, 206.0f, 0x40000040u, 0x40000080u);
+            CUT_MEMORY_VERTEX(610.0f, 210.0f, 0x40000040u, 0x40000080u);
+
+            CutSceneCleanUpEntry *const list_end = DefragCutSceneListBase + DefragCutSceneListSize;
+            for (CutSceneCleanUpEntry *entry = DefragCutSceneListBase; entry < list_end; ++entry) {
+                if ((entry->flags & 4) == 0) {
+                    continue;
+                }
+                instNUGCUTSCENE_s *instance = DefragGetInstFn(entry->handle);
+                NUGCUTSCENE_s *scene = instance->cutscene;
+                const u32 scene_start = static_cast<u32>(reinterpret_cast<usize>(scene) -
+                                                         reinterpret_cast<usize>(DefragCutSceneBaseMem));
+                const u32 scene_end = scene_start + scene->loaded_size;
+                const f32 scene_start_x = CUT_MEMORY_FLOAT(scene_start) * cut_scale + 30.0f;
+                const f32 scene_end_x = CUT_MEMORY_FLOAT(scene_end) * cut_scale + 30.0f;
+                CUT_MEMORY_VERTEX(scene_start_x, 206.0f, 0x40004040u, 0x40008080u);
+                CUT_MEMORY_VERTEX(scene_end_x, 210.0f, 0x40004040u, 0x40008080u);
+
+                const u32 inst_start = static_cast<u32>(reinterpret_cast<usize>(instance) -
+                                                        reinterpret_cast<usize>(DefragCutSceneBaseMem));
+                const u32 inst_end = inst_start + instance->allocation_size;
+                const f32 inst_start_x = CUT_MEMORY_FLOAT(inst_start) * cut_scale + 30.0f;
+                const f32 inst_end_x = CUT_MEMORY_FLOAT(inst_end) * cut_scale + 30.0f;
+                CUT_MEMORY_VERTEX(inst_start_x, 206.0f, 0x40400040u, 0x40800080u);
+                CUT_MEMORY_VERTEX(inst_end_x, 210.0f, 0x40400040u, 0x40800080u);
+            }
+        }
+
+        NuPrim2DEnd();
+        NuPrimSetCoordinateSystem(NuPrimCoordSystemStack[--NuPrimCSPos]);
+
+#undef CUT_MEMORY_VERTEX
+#undef CUT_MEMORY_FLOAT
     }
 
     void PauseGameCut(void) {

@@ -1533,7 +1533,7 @@ void instNuGCutSceneEndButNotSystems(instNUGCUTSCENE_s *instance);
 void instNuGCutSceneResetCamLock(instNUGCUTSCENE_s *instance);
 extern "C" void DebFreeInstantly(i32 *handle);
 
-static __used__ void instNuGCutRigidSysEnd(instNUGCUTSCENE_s *instance, float frame) {
+static void instNuGCutRigidSysEnd(instNUGCUTSCENE_s *instance, float frame) {
     NUGCUTRIGIDSYS_s *system = instance->cutscene->rigid_system;
     instNUGCUTRIGID_s *inst_rigids = instance->rigid_instance->rigids;
 
