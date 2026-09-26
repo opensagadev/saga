@@ -64,6 +64,7 @@ void MechInputTouchPodraceController::Update(NuInputTouchData const *) {
         stick_values[1] = -1.0f;
     }
     button_was_pressed[2] = 1;
+    asm volatile("" ::: "memory");
     const f32 steering = steering_touch->touch_position.x * 3.0f;
     stick_values[0] = MAX(-1.0f, (MIN(steering, 1.0f)));
     UpdateButtons();
