@@ -150,18 +150,21 @@ socket_relative: {
 void GamePads_NetClient() {
 }
 
-void GamePads_SkipMovie() {
+i32 GamePads_SkipMovie() {
     WORLDINFO_s *world = WorldInfo_CurrentlyActive();
     ReadPads();
     if ((GamePad[0].buttons_held & GAMEPAD_SKIP) != 0) {
         if (world != NULL && world->current_level == TITLES_LDATA && GAMEDEMO == 0) {
             PlayerProgress[0].active = 1;
         }
+        return 1;
     } else if ((GamePad[1].buttons_held & GAMEPAD_SKIP) != 0) {
         if (world != NULL && world->current_level == TITLES_LDATA && GAMEDEMO == 0) {
             PlayerProgress[1].active = 1;
         }
+        return 1;
     }
+    return 0;
 }
 
 extern "C" {
@@ -335,14 +338,15 @@ void SpaceRumbleProcess() {
     if (nearest < 35.0f) {
         f32 amount = 1.0f - nearest / 35.0f;
         GameCam_NewShake(GameCam, MulDist * amount + MulAdd, 0.2f, SpeedDist * amount + SpeedAdd);
-        NewRumbleAllPlayers(amount * 0.5f < 0.35f ? amount * 0.5f : 0.35f, 0.0f, 0, 0);
-    } else {
-        SpaceRumbleTimer -= FRAMETIME;
-        if (SpaceRumbleTimer < 0.0f) {
-            GameCam_Judder(GameCam, 0.2f, 2, NULL);
-            NewRumbleAllPlayers(0.3f, 0.2f, 0, 0);
-            SpaceRumbleTimer = NuRandFloat() * 10.0f + 3.0f;
-        }
+        f32 scaled_strength = amount * 0.5f;
+        f32 strength = 0.35f < scaled_strength ? 0.35f : scaled_strength;
+        NewRumbleAllPlayers(strength, 0.0f, 0, 0);
+    }
+    SpaceRumbleTimer -= FRAMETIME;
+    if (SpaceRumbleTimer < 0.0f) {
+        GameCam_Judder(GameCam, 0.2f, 2, NULL);
+        NewRumbleAllPlayers(0.3f, 0.0f, 0, 0);
+        SpaceRumbleTimer = NuRandFloat() * 10.0f + 3.0f;
     }
 }
 
@@ -381,7 +385,7 @@ void PerformPauseButtonStuff() {
         }
         return;
     }
-    if (GameMenuLevel == 0) {
+    if (__builtin_expect(GameMenuLevel == 0, 0)) {
         PauseGame(0);
         return;
     }

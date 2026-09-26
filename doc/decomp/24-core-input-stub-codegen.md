@@ -38,6 +38,14 @@ recover the target's EBP/EDI/ESI/EBX frame shape. Plain `NUMTX` or `NUVEC`
 locals produce a frameless function with different register allocation. The
 axis component store order also changes the final code even when every ray
 has the same values.
+The target decrements `SpaceRumbleTimer` after the shake path as well as the
+no-hit path; making the timer code a common tail recovers the target jump and
+raises the direct object score from 88% to 95%. The occasional pulse passes
+zero as the second `NewRumbleAllPlayers` float argument. Spell the strength
+clamp with the constant as the first operand to produce `movss xmm1,[0.35];
+minss xmm1,xmm0`. The remaining structural gap is the Player 1 fallback
+block: target places it after the ray-switch blocks, but GCC puts it beside
+the entry with the current source.
 
 ## Touch callbacks and pause
 
@@ -54,6 +62,19 @@ compares `0xd, 1, 8, 0x11` in that order, folds `0x3f0/0x3f8` with
 `value & ~8`, and folds `0x3f4/0x3f5` with unsigned `value - 0x3f4 <= 1`.
 Equivalent reordered `||` expressions produce different compare sequences
 and basic block placement.
+The target cold trace order after the hot common return is Paused, close menu,
+customizer, then PauseGame. Our current object puts PauseGame first. GCC 4.7
+`bb-reorder.c` connects traces by branch frequency, so moving labels in source
+alone does not correct the order. A `__builtin_expect` hint on
+`GameMenuLevel == 0` raises the direct object score to about 63%, but the
+cold-block order remains unresolved.
+
+`GamePads_SkipMovie` actually returns `i32`, despite its old `void` stub
+declaration. It returns one when either player presses skip and zero
+otherwise. This correction yields the target's 183-byte instruction stream
+in a direct NDK compile, apart from unresolved object relocations. The D-pad
+lock click handler likewise has a target-sized, instruction-identical
+140-byte body before linking.
 
 ## Pickup flicker
 
