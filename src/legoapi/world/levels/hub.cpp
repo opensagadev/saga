@@ -2952,7 +2952,7 @@ void MenuDrawBonusMode(MENU_s *) {
 }
 static void Hub_DrawBonusModeMenu(int selected, float alpha) {
     char text[3][128];
-    if (bonusmodearcade) {
+    if (__builtin_expect(bonusmodearcade, 0)) {
         const i32 full_opacity = static_cast<i32>(alpha * 128.0f);
         f32 y = 0.3062499761581421f;
         MENU *menu = &GameMenu[GameMenuLevel];
@@ -2965,7 +2965,7 @@ static void Hub_DrawBonusModeMenu(int selected, float alpha) {
             else
                 text[0][0] = 0;
             i32 opacity = full_opacity;
-            if (i == 0) {
+            if (i != 1 && i != 2) {
                 if (text[0][0])
                     NuStrCat(text[0], ": ");
                 area = *ArcadeLevel[ArcadeItem.level].area;
