@@ -13,6 +13,8 @@
 #include "nu2api/numath/nufloat.h"
 #include "legoapi/menus/core/gamehint.h"
 #include "gamelib/util/gamelib_util_types.h"
+#include "legoapi/core/input/qrand.h"
+#include "legoapi/render/core/terrain.h"
 
 extern i16 id_YODA;
 extern i16 id_YODAGHOST;
@@ -652,7 +654,62 @@ bool MechTouchTaskHatMachine::Update() {
 }
 
 void MechTouchTaskPlannedGoTo::AnalysePath() {
-    STUBBED();
+    const i32 end = path_index + MIN(2, path_count - path_index);
+    VuVec position = start_position;
+    for (; path_index <= end;) {
+        position.x += step_x;
+        position.z += step_z;
+        const f32 ground_height = GameShadow(player, &position.xyz, 0.0f, -1);
+        if (ground_height > position.y) {
+            break;
+        }
+        path_points[path_index].x = position.x;
+        path_points[path_index].z = position.z;
+        const i32 layer = EShadowInfo();
+        if (static_cast<u32>(layer) <= 16 &&
+            (TerLayer[layer].flags & TERRAIN_LAYER_FLAG_REJECT_CHARACTER_SHADOW) != 0) {
+            path_points[path_index].y = path_points[path_index - 1].y;
+            ++field_20;
+            if (field_20 > 1) {
+                break;
+            }
+        } else {
+            last_index = path_index;
+            path_points[path_index].y = ground_height;
+            if (path_index > 1 && path_index < path_count) {
+                MechTempPosInterface marker_position;
+                marker_position.position = path_points[path_index];
+                marker_position.position.x += static_cast<f32>(qrand()) * 1.5259022e-6f - 0.05f;
+                marker_position.position.z += static_cast<f32>(qrand()) * 1.5259022e-6f - 0.05f;
+                const f32 base_radius = static_cast<f32>(path_index) / static_cast<f32>(path_count) * 0.2f;
+                marker_position.radius = MAX(static_cast<f32>(qrand()) * 1.5259022e-7f + base_radius, 0.05f);
+                if (field_6fe == 0) {
+                    MoveToMarker *marker = MechSystems::Get()->NewMoveToMarker(marker_position);
+                    if (marker != NULL) {
+                        marker->flags |= 3;
+                    }
+                }
+            }
+            field_20 = 0;
+        }
+        start_position = position;
+        position.y = path_points[path_index].y + step_y;
+        ++path_index;
+    }
+    if (path_index <= end) {
+        if (last_index > 0) {
+            for (i32 i = last_index + 1; i <= path_count; ++i) {
+                path_points[i].y = -1000000000.0f;
+            }
+        }
+        field_6ff = 0;
+        analysis_state = 1;
+        if (completion != NULL) {
+            *completion = false;
+        }
+    } else if (path_index >= path_count) {
+        analysis_state = 1;
+    }
 }
 
 void MechTouchTaskPlannedGoTo::BackgroundProcess() {
@@ -669,7 +726,53 @@ void MechTouchTaskPlannedGoTo::BackgroundProcess() {
 }
 
 void MechTouchTaskPlannedGoTo::GenerateWaypoints() {
-    STUBBED();
+    i32 waypoint_index = 0;
+    if (path_count <= 0 || path_points[1].y == -1000000000.0f) {
+        waypoints[0].active = 1;
+        waypoints[0].position = path_points[0];
+        waypoints[0].field_14 = 0;
+        waypoints[0].target_position.position = path_points[0];
+        target_position.position = path_points[0];
+    } else {
+        i32 current = 1;
+        while (true) {
+            if (path_points[current].y <= path_points[current - 1].y + 0.15f) {
+                const i32 next = current + 1;
+                if (next > path_count || waypoint_index > 30 || path_points[next].y == -1000000000.0f) {
+                    waypoints[waypoint_index].active = 1;
+                    waypoints[waypoint_index].position = path_points[current];
+                    waypoints[waypoint_index].field_14 = 0;
+                    waypoints[waypoint_index].target_position.position = path_points[current];
+                    target_position.position = path_points[current];
+                    break;
+                }
+                current = next;
+                continue;
+            }
+
+            waypoints[waypoint_index].active = 1;
+            waypoints[waypoint_index].position = path_points[current - 1];
+            waypoints[waypoint_index].field_14 = 0;
+            waypoints[waypoint_index].target_position.position = path_points[current - 1];
+            waypoints[waypoint_index + 1].active = 1;
+            waypoints[waypoint_index + 1].position = path_points[current];
+            waypoints[waypoint_index + 1].field_14 = 1;
+            waypoints[waypoint_index + 1].target_position.position = path_points[current];
+            if (current == path_count || path_points[current + 1].y == -1000000000.0f) {
+                break;
+            }
+            waypoint_index += 2;
+        }
+    }
+
+    if (field_6fd == 0) {
+        move_to_marker = NuMechPtr<MoveToMarker, 4>(MechSystems::Get()->NewMoveToMarker(target_position));
+    }
+    delete[] path_points;
+    path_points = NULL;
+    delete go_to_task;
+    go_to_task = NULL;
+    analysis_state = 2;
 }
 
 MechTouchTaskPlannedGoTo::MechTouchTaskPlannedGoTo(MechInputTouchGestureBasedController &owner,

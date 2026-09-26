@@ -5,6 +5,9 @@
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/motion/contexts.h"
 #include "legoapi/characters/motion.h"
+#include "legoapi/characters/motion/animation_ids.h"
+#include "legoapi/ai/core/legoai.h"
+#include "gameapi/ai/aisys/aisys.h"
 #include "gamelib/util/gamelib_util_types.h"
 #include "nu2api/nucore/numemory.h"
 #include "legoapi/menus/core/gamehint.h"
@@ -30,6 +33,10 @@ extern i16 id_YODA;
 void ForceNextLungeTarget(MechObjectInterface *);
 bool FireBountyHunterRocket(GameObject_s *);
 void SlowWeaponOut(GameObject_s *);
+extern i32 id_HINT_LSW_AUTOJUMP;
+extern i32 id_HINT_LSW_AUTOJUMP_FAIL;
+MechAutoJumpConnection *MechAutoJumpGetBest(JumpTriggerPacket const &, i32);
+void MechAutoJumpSetIsUsing(GameObject_s &, MechAutoJumpConnection &);
 bool isBucking;
 
 void MechInputTouchGestureBasedController::Activate() {
@@ -476,9 +483,53 @@ void MechInputTouchGestureBasedController::ProcessDragMovement(GameObject_s &obj
 void MechInputTouchGestureBasedController::Render() {
 }
 
-bool MechInputTouchGestureBasedController::StartJumpUsingAIPath(JumpTriggerPacket const &, i32) {
-    STUBBED();
-    return false;
+bool MechInputTouchGestureBasedController::StartJumpUsingAIPath(JumpTriggerPacket const &packet, i32 heading) {
+    MechAutoJumpConnection *jump = MechAutoJumpGetBest(packet, heading);
+    if (jump == NULL) {
+        return false;
+    }
+
+    AIPATHCNX *connection = jump->connection;
+    const i32 direction = jump->direction;
+    AIPATHNODE &node = jump->path->nodes[connection->node_indices[direction == 0]];
+    GameObject_s *object = Player[player_id];
+    const u32 flags = connection->traversal_flags[direction];
+    i32 animation;
+    bool complete_failure_hint;
+    const u32 high_jump = flags & (LEGO_AIPATHCNX_HIGH_JUMP | 0x800000);
+    if (high_jump != 0 && (object->ai.capabilities & high_jump) != 0) {
+        animation = 3;
+        complete_failure_hint = true;
+    } else {
+        const u32 double_jump = flags & (LEGO_AIPATHCNX_DOUBLE_JUMP | 0x400000);
+        if (double_jump != 0) {
+            const bool capable = (object->ai.capabilities & double_jump) != 0;
+            animation = capable ? 2 : 1;
+            complete_failure_hint = capable;
+        } else {
+            animation = 1;
+            complete_failure_hint = false;
+        }
+    }
+
+    if (LEGOACT_FLIP != -1 && object->apiobj.character_model->model_data_b[LEGOACT_FLIP] != NULL) {
+        const u16 desired = connection->route_mask - (direction != 0 ? 0x8000 : 0);
+        const i32 difference = RotDiff(object->apiobj.facing_angle, desired);
+        const i32 absolute_difference = difference < 0 ? -difference : difference;
+        if (absolute_difference >= 0x6aab) {
+            animation = 4;
+        }
+    }
+
+    MechTouchTaskBigJump *task = new MechTouchTaskBigJump(*this, node.position, static_cast<i8>(animation));
+    TouchHolder *holder = reinterpret_cast<TouchHolder *>(packet.field_4[1]);
+    StartNewTask(task, *holder, false, false);
+    MechAutoJumpSetIsUsing(*object, *jump);
+    Hint_SetComplete(id_HINT_LSW_AUTOJUMP);
+    if (complete_failure_hint) {
+        Hint_SetComplete(id_HINT_LSW_AUTOJUMP_FAIL);
+    }
+    return true;
 }
 
 void MechInputTouchGestureBasedController::StartNewTask(MechTouchTask *task, TouchHolder &holder, bool clear_touches,
@@ -510,9 +561,39 @@ void MechInputTouchGestureBasedController::StartNewTask(MechTouchTask *task, Tou
     }
 }
 
-bool MechInputTouchGestureBasedController::TriggerJumpTask(JumpTriggerPacket const &, bool, bool, bool) {
-    STUBBED();
-    return false;
+bool MechInputTouchGestureBasedController::TriggerJumpTask(JumpTriggerPacket const &packet, bool disable_autopilot,
+                                                           bool use_velocity, bool try_ai_path) {
+    GameObject_s *object = reinterpret_cast<GameObject_s *>(packet.field_4[0]);
+    TouchHolder *holder = reinterpret_cast<TouchHolder *>(packet.field_4[1]);
+    const i32 context = object->character_context;
+    if (context == LEGOCONTEXT_JUMP) {
+        return false;
+    }
+    if (object->apiobj.field_0x27d == 0) {
+        if (VehicleArea == 0 && object->field_0xcc0 == NULL) {
+            return false;
+        }
+    } else if (VehicleArea == 0 && object->field_0xcc0 == NULL && !TouchHacks::CanJump(*object)) {
+        return false;
+    }
+    if (context != -1 && context != LEGOCONTEXT_COMBO && context != LEGOCONTEXT_PUNCH &&
+        context != LEGOCONTEXT_BLOCK && context != LEGOCONTEXT_HOLD) {
+        return true;
+    }
+    if (object->apiobj.field_0x27d == 0 && !ObjLandReady(object) && VehicleArea == 0) {
+        return true;
+    }
+
+    const i32 model_flags = object->apiobj.character_data->model_flags;
+    if ((model_flags & 0x40) != 0 || object->id == id_WATTO) {
+        StartNewTask(new MechTouchTaskAstroJetPack(*this), *holder, false, false);
+        return true;
+    }
+    if (try_ai_path && StartJumpUsingAIPath(packet, object->apiobj.facing_angle)) {
+        return true;
+    }
+    StartNewTask(new MechTouchTaskJump(*this, packet, disable_autopilot, use_velocity), *holder, false, false);
+    return true;
 }
 
 void MechInputTouchGestureBasedController::Update(NuInputTouchData const *data) {

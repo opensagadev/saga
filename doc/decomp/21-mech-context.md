@@ -27,6 +27,9 @@ Each waypoint record starts with a byte flag and padding, a `VuVec` at `+4`, an 
 - `MechTouchTaskPlannedGoTo::OnResume` compares horizontal squared distance to `0.01f` with `ucomiss` and a strict `ja` branch. `BackgroundProcess` uses `0.25f` with the same strict comparison. Preserve comparison order to keep equality and NaN behavior.
 - `MechTouchTaskPlannedGoTo::SetupForAnalysis` calls `NuCeil` on horizontal squared distance divided by `1.21f`, converts its float return to integer, then uses at least 5 or 10 samples. Its sample allocation is `(sample_count + 1) * 16` bytes; watch the inclusive initialization loop.
 - `MechTouchTaskPlannedDoubleClickGoTo::OnStart` branches at horizontal squared distance `4.0f`. Its long size includes marker pointer bookkeeping and construction of the `0x710`-byte planned task.
+- `MechInputTouchGestureBasedController::TriggerJumpTask` and `StartJumpUsingAIPath` both return `bool` in the target. Their old `void` declarations hid a branch in planned movement that restores the character velocities when the jump trigger fails. `MechAutoJumpGetBest` similarly returns a `MechAutoJumpConnection *` despite an old `void` stub.
+- `JumpTriggerPacket::field_4[0]` contains the character pointer and `field_4[1]` contains the touch holder pointer. The packet's embedded velocity has `w=1.0f`; its bytes at `+0x1c` contain a full `VuVec` destination.
+- Path samples use `-1000000000.0f` in their Y component as an unvisited sentinel. `AnalysePath` advances through at most three inclusive indices per call, while `GenerateWaypoints` pairs records around gaps larger than `0.15f`. The `0x34`-byte records duplicate position into both the outer `VuVec` and the embedded temporary interface.
 
 ## First implementation scores
 
