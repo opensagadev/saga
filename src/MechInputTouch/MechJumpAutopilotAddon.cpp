@@ -11,29 +11,34 @@
 HashedKey MechJumpAutoPilotAddon::s_hashId("MechJumpAutopilotAddon");
 
 void MechJumpAutoPilotAddon::AnalyseJumpTrajectory() {
-    const float floor = field_24.y - 2.0f;
     float y = field_44.y;
-    if (y < floor || state == 2) {
+    if (y < field_24.y - 2.0f || state == 2) {
         state = 2;
         return;
     }
 
+    float vy = field_54.y;
+    float x = field_44.x;
+    float z = field_44.z;
     for (int count = 50; count != 0; --count) {
         if (state == 2) break;
 
         VuVec next;
-        next.x = field_44.x + field_54.x * 0.1f;
-        next.y = y + field_54.y * 0.1f;
-        next.z = field_44.z + field_54.z * 0.1f;
+        next.x = x + field_54.x * 0.1f;
+        next.y = y + vy * 0.1f;
+        next.z = z + field_54.z * 0.1f;
         LookForBottomInt(next);
         LookForTerrInt(next);
 
         field_44 = next;
-        field_54.y += character->apiobj.character_data->game_character->gravity * 0.1f;
+        vy = field_54.y + character->apiobj.character_data->game_character->gravity * 0.1f;
+        field_54.y = vy;
+        x = next.x;
         y = next.y;
-        if (y < floor) break;
+        z = next.z;
+        if (y < field_24.y - 2.0f) break;
     }
-    if (y < floor || state == 2) state = 2;
+    if (y < field_24.y - 2.0f || state == 2) state = 2;
 }
 
 void MechJumpAutoPilotAddon::CalculateModifiedJumpTrajectory() {
@@ -52,7 +57,7 @@ void MechJumpAutoPilotAddon::CalculateModifiedJumpTrajectory() {
     const float vx = field_34.x * time;
     const float vz = field_34.z * time;
     speed_scale = ((dx * dx + dz * dz) * 0.5f) / (vx * vx + vz * vz);
-    if (speed_scale < 1.0f && !(character->jump_input_flags & 0x10)) {
+    if (__builtin_expect(speed_scale < 1.0f && !(character->jump_input_flags & 0x10), 1)) {
         speed_scale = 1.0f;
         character->jump_input_flags |= 0x10;
         state = 6;
@@ -83,8 +88,12 @@ void MechJumpAutoPilotAddon::LookForLandingPoint() {
         if (LookForLandingSpotAroundPoint(field_74)) state = 3;
     } else if (field_9c) {
         field_9c = false;
-        if (LookForLandingSpotAroundPoint(field_64)) state = 3;
-        else state = 5;
+        if (!LookForLandingSpotAroundPoint(field_64)) {
+            state = 5;
+            return;
+        }
+        state = 3;
+        return;
     } else {
         state = 5;
     }
@@ -156,15 +165,15 @@ bool MechJumpAutoPilotAddon::LookForLandingSpotAroundPoint(VuVec const &point) {
 
 void MechJumpAutoPilotAddon::LookForTerrInt(VuVec const &point) {
     if (field_9d) return;
-    NUVEC displacement = {point.x - field_44.x, point.y - field_44.y, point.z - field_44.z};
-    if (GameRayCast(&field_44.xyz, &displacement, 0.0f, 0) == 0) return;
+    VuVec displacement(point.x - field_44.x, point.y - field_44.y, point.z - field_44.z, 0.0f);
+    if (GameRayCast(&field_44.xyz, &displacement.xyz, 0.0f, 0) == 0) return;
 
-    field_74.x = field_44.x + displacement.x;
-    field_74.y = field_44.y + displacement.y;
-    field_74.z = field_44.z + displacement.z;
     field_74.w = 0.0f;
-    field_9d = true;
     VuVec normal = VuVec_Zero;
+    field_74.z = field_44.z + displacement.z;
+    field_9d = true;
+    field_74.y = field_44.y + displacement.y;
+    field_74.x = field_44.x + displacement.x;
     NewRayCastGetImpactNormal(&normal.xyz);
     state = 2 + (normal.y > 0.8f) * 4;
 }
