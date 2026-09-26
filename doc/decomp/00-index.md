@@ -41,22 +41,45 @@ Native and WASM builds define `HOST_BUILD` and use the host harness.
 | [16-game-object-addons.md](16-game-object-addons.md) | game object extension layouts and behavior |
 | [17-matching-synthesis.md](17-matching-synthesis.md) | cross-file matching observations and next targets |
 | [18-gameaiprocess-codegen-notes.md](18-gameaiprocess-codegen-notes.md) | measured GCC 4.7 control-flow and register-allocation experiments in `GameAIProcess` |
+| [18-nucore-touch-control-flow.md](18-nucore-touch-control-flow.md) | touch input action priority and fixed-size removal loops |
 | [19-apimenu-stub-codegen-notes.md](19-apimenu-stub-codegen-notes.md) | API menu callback reconstruction and match results |
 | [19-nusound-stub-audit.md](19-nusound-stub-audit.md) | verified sound no-ops and OGG callback codegen findings |
 | [20-gamemenuall-stub-notes.md](20-gamemenuall-stub-notes.md) | game menu callbacks and their measured match results |
 | [20-gamestructure-store-stubs.md](20-gamestructure-store-stubs.md) | game structure and store callback control flow |
 | [20-gizmo-stub-codegen-notes.md](20-gizmo-stub-codegen-notes.md) | gizmo action state and GCC matching patterns |
+| [20-deathstar-touch-controller.md](20-deathstar-touch-controller.md) | Death Star touch controller ABI and callback matching |
+| [20-episode1-sebulba-codegen.md](20-episode1-sebulba-codegen.md) | Sebulba action state and movement trace matching |
 | [21-cutscene-stub-codegen.md](21-cutscene-stub-codegen.md) | cutscene instance reconstruction and remaining mismatches |
+| [21-bonus-cavalry-controller.md](21-bonus-cavalry-controller.md) | cavalry controller touch behavior and code generation |
 | [21-dogfight-helper-linkage.md](21-dogfight-helper-linkage.md) | Episode III helper linkage needed for exact calls |
+| [21-editor-test-menu.md](21-editor-test-menu.md) | editor test menu translation-unit placement and callbacks |
 | [21-mech-context.md](21-mech-context.md) | touch context-task ABI and state layout |
+| [21-mech-core.md](21-mech-core.md) | main touch controller structures and constructor matches |
+| [21-mech-jump-autopilot.md](21-mech-jump-autopilot.md) | jump autopilot reconstruction and target branch behavior |
 | [21-mech-menu.md](21-mech-menu.md) | touch menu controller callbacks |
+| [21-mech-podrace-controller.md](21-mech-podrace-controller.md) | podrace touch controller behavior and layout |
 | [21-mech-speeder-codegen.md](21-mech-speeder-codegen.md) | speeder touch controller ABI and gesture handlers |
 | [21-mech-ui.md](21-mech-ui.md) | touch UI callback no-op audit |
 | [21-mech-virtual.md](21-mech-virtual.md) | virtual console controller layout and code generation |
 | [21-nucore-misc-stub-audit.md](21-nucore-misc-stub-audit.md) | core rendering wrappers, frame timing, and camera matching |
 | [21-render-core-stub-notes.md](21-render-core-stub-notes.md) | renderer stub audit and geometry matches |
+| [21-vaderc-codegen.md](21-vaderc-codegen.md) | Vader level control flow and branch layout |
 | [22-episode-i-action-codegen.md](22-episode-i-action-codegen.md) | Episode I action handler and mine-creation findings |
+| [22-episodeIII-lift-codegen.md](22-episodeIII-lift-codegen.md) | Episode III dogfight and lift handler code generation |
+| [22-mech-jump-codegen-notes.md](22-mech-jump-codegen-notes.md) | jump timing branches and NDK frame patterns |
+| [22-numemorymanager-stub-notes.md](22-numemorymanager-stub-notes.md) | memory manager ABI and stranded-block control flow |
+| [23-audio-stub-audit.md](23-audio-stub-audit.md) | duplicate Ogg symbol audit and exact audio no-ops |
+| [23-createpod-codegen.md](23-createpod-codegen.md) | pod creation helper inlining and stack alignment |
+| [23-gameobjects-stub-codegen.md](23-gameobjects-stub-codegen.md) | game object callbacks and pack button rendering |
+| [23-numouse-stub-notes.md](23-numouse-stub-notes.md) | Android mouse constant-return ABI |
+| [23-objectsall-codegen.md](23-objectsall-codegen.md) | boulder and breakable object comparison patterns |
+| [23-world-hub-codegen-notes.md](23-world-hub-codegen-notes.md) | world hub bonus mode and arcade statistics |
 | [episode-iv-vi-stub-codegen.md](episode-iv-vi-stub-codegen.md) | Episode IV–VI handler block-order findings |
+| [episode-iv-followup-codegen.md](episode-iv-followup-codegen.md) | Episode IV level setup and exact-size handlers |
+| [episode-vi-followup-codegen.md](episode-vi-followup-codegen.md) | Episode VI level handler branches and register choices |
+| [mech-input-stub-pass.md](mech-input-stub-pass.md) | measured touch controller stub coverage |
+| [mech-jump-landing-spot.md](mech-jump-landing-spot.md) | jump landing target ABI and scalar codegen |
+| [utilities-stub-codegen.md](utilities-stub-codegen.md) | utility geometry, clipping, and 64-bit conversion patterns |
 
 ## Non-negotiable matching facts
 
