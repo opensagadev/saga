@@ -3275,8 +3275,7 @@ SwipeDecalRenderer::SwipeDecalRenderer(TouchHolder &holder, i32 index, SwipeDeca
     this->style = style;
     asm volatile("" ::: "memory");
 
-    const NuVec2 &swipe_point =
-        *reinterpret_cast<const NuVec2 *>(holder.field_0x34 + index * 0x2c);
+    const NuVec2 &swipe_point = holder.swipe_samples[index].position;
     const f32 swipe_x = (swipe_point.x + 1.0f) * 0.5f;
     const f32 swipe_y = (swipe_point.y + 1.0f) * 0.5f;
     const f32 current_x = (holder.touch_position.x + 1.0f) * 0.5f;
