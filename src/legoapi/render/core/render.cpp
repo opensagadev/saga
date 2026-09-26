@@ -815,9 +815,8 @@ void DrawCables() {
             continue;
         }
 
+        const f32 y_span = cable.points[cable.point_count - 1].y - cable.points[0].y;
         const f32 first_y = cable.points[0].y;
-        const f32 last_y = cable.points[cable.point_count - 1].y;
-        const f32 y_span = last_y - first_y;
         if ((cable.flags_1e9 & 4) != 0) {
             cable.slack += FRAMETIME * cable_slack * slack_factor;
             if (cable.slack > cable_slack) {
@@ -830,9 +829,32 @@ void DrawCables() {
         }
 
         f32 distance_along = 0.0f;
+        if (cable.slack == 0.0f) {
+            for (i32 segment = 0; segment < cable.point_count - 1; ++segment) {
+                const f32 start_fraction = cable.total_length > 0.0f ? distance_along / cable.total_length : 0.0f;
+                distance_along += cable.segment_lengths[segment];
+                const f32 end_fraction = cable.total_length > 0.0f ? distance_along / cable.total_length : 0.0f;
+                NUVEC start = cable.points[segment];
+                NUVEC end = cable.points[segment + 1];
+                start.y = first_y + y_span * start_fraction;
+                end.y = first_y + y_span * end_fraction;
+                if (solid_cable == 0) {
+                    vertices[0].position = start;
+                    vertices[1].position = end;
+                    NuRndrLine3d(vertices, SolidMtl3D, NULL);
+                } else {
+                    DrawRopeSingle(&start, &end, 1.0f, ropemtl, start_fraction, end_fraction, 10.0f, 5.0f);
+                }
+                ++nsegments_drawn;
+            }
+            continue;
+        }
+        const f32 total_subdivisions = cable.total_length * nsegments_per_unit;
         for (i32 segment = 0; segment < cable.point_count - 1; ++segment) {
             const f32 segment_length = cable.segment_lengths[segment];
-            i32 subdivisions = cable.slack == 0.0f ? 1 : static_cast<i32>(ceilf(segment_length * nsegments_per_unit));
+            const f32 desired_subdivisions =
+                cable.total_length > 0.0f ? segment_length / cable.total_length * total_subdivisions : 0.0f;
+            i32 subdivisions = static_cast<i32>(ceil(static_cast<double>(desired_subdivisions)));
             if (subdivisions < 1) {
                 subdivisions = 1;
             }

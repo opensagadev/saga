@@ -953,8 +953,13 @@ static i32 SubItemMenu(MENU_s *menu) {
             moved = MoveSubItemsRight(ids, positions, *count);
             right = moveitems != 0 && previous != moveitems;
         }
-        if (moved && items != NULL && items[ids[3]].type == 0 && items[ids[3]].unlocked == 1)
-            SelectSubItem();
+        if (moved && items != NULL) {
+            shopitem_s *selected = &items[ids[3]];
+            if (selected->type == 0) {
+                if (selected->unlocked == 1)
+                    SelectSubItem();
+            }
+        }
     } else
         movesfxlock = 0;
 

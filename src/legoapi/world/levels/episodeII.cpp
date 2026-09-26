@@ -428,8 +428,7 @@ void BountyHunterPursuitC_Update(WORLDINFO_s *world) {
 }
 
 void BountyHunterPursuitD_Update(WORLDINFO_s *) {
-    GameObject_s *zam = LevGameObject[0];
-    if (zam == NULL || zam->field_0xe37 == 0)
+    if (LevGameObject[0] == NULL || LevGameObject[0]->field_0xe37 == 0)
         return;
 
     GIZMOBLOWUP_s *nearest = NULL;
@@ -439,7 +438,7 @@ void BountyHunterPursuitD_Update(WORLDINFO_s *) {
     if (LevGizmo[index] != NULL) {                                                                                     \
         GIZMOBLOWUP_s *generator = static_cast<GIZMOBLOWUP_s *>(LevGizmo[index]->object);                              \
         if ((generator->output_flags & 1) == 0) {                                                                      \
-            f32 distance_sq = NuVecDistSqr(&generator->position, &zam->apiobj.collision_position, NULL);               \
+            f32 distance_sq = NuVecDistSqr(&generator->position, &LevGameObject[0]->apiobj.collision_position, NULL);  \
             if (distance_sq < nearest_distance_sq) {                                                                   \
                 nearest_distance_sq = distance_sq;                                                                     \
                 nearest = generator;                                                                                   \
@@ -461,13 +460,13 @@ void BountyHunterPursuitD_Update(WORLDINFO_s *) {
 #undef CHECK_PURSUIT_GENERATOR
 
     if (nearest == NULL) {
-        zam->field_0xe37 = 0;
-        DrawBossHitPoints(zam);
+        LevGameObject[0]->field_0xe37 = 0;
+        DrawBossHitPoints(LevGameObject[0]);
         return;
     }
     if (nearest_distance_sq < 1000000.0f) {
         NUVEC delta;
-        f32 distance = NuVecDist(&zam->apiobj.collision_position, &nearest->position, &delta);
+        f32 distance = NuVecDist(&LevGameObject[0]->apiobj.collision_position, &nearest->position, &delta);
         NuLgtLaser(0, 1.0f, 1.0f, 0.01f, &nearest->position, &delta, 0xff808040, 1.5f, distance);
     }
 }

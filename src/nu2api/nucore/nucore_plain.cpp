@@ -3289,11 +3289,12 @@ extern "C" {
         }
 
         for (u8 joint_index = 0; joint_index < object->joint_count; ++joint_index) {
+            NUMTX *output = &matrices[joint_index];
             NUMTX_ALIGNED16 transformed_matrix;
-            NUMTX *local_matrix = &object->bind_matrices[joint_index];
+            NUMTX *local_matrix;
             nuhgobjjointoverride_s *joint_override = override_count != 0 ? override_by_joint[joint_index] : NULL;
             if (joint_override != NULL) {
-                transformed_matrix = *local_matrix;
+                transformed_matrix = object->bind_matrices[joint_index];
                 constexpr f32 kRadiansToNuAngle = 10430.378f;
                 NUANGVEC angles = {
                     static_cast<NUANG>(joint_override->rotation_x * kRadiansToNuAngle),
@@ -3305,13 +3306,15 @@ extern "C" {
                 NuMtxTranslate(&override_matrix, &joint_override->translation);
                 NuMtxMulVU0(&transformed_matrix, &override_matrix, &transformed_matrix);
                 local_matrix = &transformed_matrix;
+            } else {
+                local_matrix = &object->bind_matrices[joint_index];
             }
 
             const u8 parent_index = object->joints[joint_index].parent_index;
             if (parent_index == 0xff) {
-                matrices[joint_index] = *local_matrix;
+                *output = *local_matrix;
             } else {
-                NuMtxMulVU0(&matrices[joint_index], local_matrix, &matrices[parent_index]);
+                NuMtxMulVU0(output, local_matrix, &matrices[parent_index]);
             }
         }
     }

@@ -161,6 +161,7 @@ static GIZMO *hub_minikitviewer_gizmo = NULL;
 NUGSPLINE *hub_minikitviewer_camspl = NULL;
 static f32 freeplaytime = 0.0f;
 static f32 freeplayduration = 0.0f;
+static f32 freeplay_time[2] = {};
 static f32 selectmodeduration = 0.0f;
 static i32 hub_bonusarea;
 static i32 hub_bonusepisode;
@@ -2098,7 +2099,7 @@ void Hub_DrawFreePlaySelect() {
         return;
     }
 
-    if (freeplaymode == 0 && freeplayduration > 0.0f) {
+    if (freeplaymode == 0) {
         const f32 progress = freeplaytime / (freeplayduration * 0.5f);
         const f32 alpha = 1.0f - progress;
         if (progress <= 1.0f && alpha > 0.0f) {
@@ -2122,16 +2123,23 @@ void Hub_DrawFreePlaySelect() {
         }
     }
 
-    static APICHARACTERMODELLIST_s list[341] = {};
-    list[0].model_id = MenuPacket.player_model[0];
-    list[1].model_id = -1;
-    Collection_Draw(collection, 0.0f, COLLECTION_Y_HUB, collection->field_10, list, 1.0f, 0);
-
-    const f32 icon_alpha = (MenuPacket.active_player[0] ? 1.0f : DROPINALPHA);
-    if (FreePlayModelList[0].model_id != -1 && icon_alpha > 0.0f) {
+    f32 icon_alpha = MenuPacket.active_player[0] ? 1.0f : DROPINALPHA;
+    if (freeplay_time[0] > 0.0f) {
+        f32 selection_alpha = freeplay_time[0] / 0.75f;
+        if (freeplay_selected[0] == 0) {
+            selection_alpha = 1.0f - selection_alpha;
+        }
+        icon_alpha *= selection_alpha;
+    }
+    if (icon_alpha > 0.0f) {
         DrawCharIcon(FreePlayModelList[0].model_id, -ICONX, STATSPOSY, 0.0f, ICONSIZE, 0xa6, icon_alpha, icon_alpha, 1,
                      NULL);
     }
+
+    static APICHARACTERMODELLIST_s list[341] = {};
+    list[0].model_id = MenuPacket.player_model[0];
+    list[1].model_id = -1;
+    Collection_Draw(collection, 0.0f, COLLECTION_Y_HUB, collection->field_10, list, 1.0f, 1);
 }
 
 extern f32 PANEL_REDBRICKSCALE;

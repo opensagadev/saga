@@ -1087,10 +1087,14 @@ void InitGameAfterConfig(void) {
     SetSoundFadeDistCallBackFn = SetSoundFadeDistCallBackFn_LSW;
     PlayerItemTypes_Init(PlayerItemType_INDY);
     DisguiseAdjustFn = DisguiseAdjust_LSW;
-    //  SUPERCARRY_THROWSPEED_XZ = 0x40000000;
-    //  SUPERCARRY_THROWSPEED_Y = 0x3fc00000;
-    //  SUPERCARRY_RELEASESPEED_XZ = 0x3f800000;
-    //  SuperCarry_UseActionButton = 1;
+    extern f32 SUPERCARRY_THROWSPEED_XZ;
+    extern f32 SUPERCARRY_THROWSPEED_Y;
+    extern f32 SUPERCARRY_RELEASESPEED_XZ;
+    extern i32 SuperCarry_UseActionButton;
+    SUPERCARRY_THROWSPEED_XZ = 2.0f;
+    SUPERCARRY_THROWSPEED_Y = 1.5f;
+    SUPERCARRY_RELEASESPEED_XZ = 1.0f;
+    SuperCarry_UseActionButton = 1;
     //  CutScene_OverrideConfigFileNameFn = CutScene_OverrideConfigFileName_LSW;
     CharPivot_Init(CharPivot_LSW);
     DIEAIRSPEED = 3.5f;
