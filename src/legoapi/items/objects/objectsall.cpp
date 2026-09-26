@@ -139,12 +139,12 @@ void Boulder_Kill(PART_s *part, i32) {
 }
 
 void Boulder_Move(PART_s *part, float) {
-    if (LevelChange != 0)
+    if (netclient != 0)
         return;
     i32 i;
-    if (boulder_part[0] == part)
+    if (part == boulder_part[0])
         i = 0;
-    else if (boulder_part[1] == part)
+    else if (part == boulder_part[1])
         i = 1;
     else {
         KillPart(part, 0);
@@ -152,7 +152,7 @@ void Boulder_Move(PART_s *part, float) {
     }
     boulder_oldpos[i] = part->position;
     part->transform = *NuSpecialGetDrawMtx(&LevHSpecial[i]);
-    if (1.0f < part->scale_time) {
+    if (!(1.0f >= part->scale_time)) {
         NuVecSub(&part->velocity, &part->position, &boulder_oldpos[i]);
         NuVecScale(&part->velocity, &part->velocity, 1.0f / FRAMETIME);
     } else {
