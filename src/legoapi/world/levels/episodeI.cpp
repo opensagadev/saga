@@ -2,6 +2,7 @@
 #include <string.h>
 
 #include "decomp.h"
+#include "gameapi/ai/aisys/aisys.h"
 #include "legoapi/world/level.h"
 #include "globals.h"
 #include "legoapi/menus/screens/gamestructure.h"
@@ -27,6 +28,7 @@
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nu3d/nuspline.h"
 #include "nu2api/nu3d/nutex.h"
+#include "nu2api/nucore/nustring.h"
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/numtx.h"
 #include "nu2api/numath/nurand.h"
@@ -88,7 +90,10 @@ struct PODRACE_s {
     float mushroom_timer;                 // 0xaf04
     float lap_display;                    // 0xaf08
     float prev_lap_display;               // 0xaf0c
-    char pad_0xaf10[0xaf20 - 0xaf10];
+    float max_lap_time;             // 0xaf10
+    float lap_time_increment;       // 0xaf14
+    i32 lap_attempts_per_increment; // 0xaf18
+    char pad_0xaf1c[0xaf20 - 0xaf1c];
     u8 flags; // 0xaf20 bit1/bit0 cleared by PodRaceReset
     char pad_0xaf21[0xaf24 - 0xaf21];
 };
@@ -538,9 +543,7 @@ void RescueA_Init(WORLDINFO_s *world) {
         g->field_0xa0 |= 2;
 }
 
-void RescueB_Init(WORLDINFO_s *) {
-    STUBBED();
-}
+void RescueB_Init(WORLDINFO_s *) {}
 
 void RescueC_Init(WORLDINFO_s *world) {
     GIZMOBLOWUP_s *g;
@@ -808,8 +811,30 @@ void PodRaceADraw(WORLDINFO_s *world) {
     }
 }
 
-void Action_MushroomCollapse(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float) {
-    STUBBED();
+i32 Action_MushroomCollapse(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
+                            i32 first_time, float) {
+    if (first_time != 0 && mushroom_collapse == 0) {
+        for (i32 i = 0; i < param_count; i++) {
+            char *value = NuStrIStr(params[i], "trigger_crash=");
+            if (value != NULL) {
+                mushroom0_along = AIParamToFloat((AISCRIPTPROCESS *)packet, value + 14);
+            } else if ((value = NuStrIStr(params[i], "trigger_collapse=")) != NULL) {
+                mushroom2_along = AIParamToFloat((AISCRIPTPROCESS *)packet, value + 17);
+            } else if ((value = NuStrIStr(params[i], "max_time_available=")) != NULL) {
+                mushroom_max_time_available = AIParamToFloat((AISCRIPTPROCESS *)packet, value + 19);
+            } else if ((value = NuStrIStr(params[i], "time_available=")) != NULL) {
+                mushroom_time_available = AIParamToFloat((AISCRIPTPROCESS *)packet, value + 15);
+            } else if ((value = NuStrIStr(params[i], "time_increment=")) != NULL) {
+                mushroom_time_increment = AIParamToFloat((AISCRIPTPROCESS *)packet, value + 15);
+            } else if ((value = NuStrIStr(params[i], "nattempts_per_increment=")) != NULL) {
+                mushroom_nattempts_per_increment = (i32)AIParamToFloat((AISCRIPTPROCESS *)packet, value + 24);
+            }
+            if (mushroom_time_available > mushroom_max_time_available)
+                mushroom_max_time_available = mushroom_time_available;
+        }
+        mushroom_collapse = 1;
+    }
+    return 1;
 }
 
 i32 PodSeekMushCutSound() {
@@ -947,8 +972,25 @@ void PodRaceCUpdate(WORLDINFO_s *world) {
     }
 }
 
-void Action_SetLapTime(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float) {
-    STUBBED();
+i32 Action_SetLapTime(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
+                      i32 first_time, float) {
+    if (first_time != 0 && PodRace->prev_lap_display == 0.0f) {
+        for (i32 i = 0; i < param_count; i++) {
+            char *value = NuStrIStr(params[i], "maxlaptime=");
+            if (value != NULL) {
+                PodRace->max_lap_time = AIParamToFloat((AISCRIPTPROCESS *)packet, value + 11);
+            } else if ((value = NuStrIStr(params[i], "laptime=")) != NULL) {
+                PodRace->prev_lap_display = AIParamToFloat((AISCRIPTPROCESS *)packet, value + 8);
+            } else if ((value = NuStrIStr(params[i], "nattempts_per_increment=")) != NULL) {
+                PodRace->lap_attempts_per_increment = (i32)AIParamToFloat((AISCRIPTPROCESS *)packet, value + 24);
+            } else if ((value = NuStrIStr(params[i], "increment=")) != NULL) {
+                PodRace->lap_time_increment = AIParamToFloat((AISCRIPTPROCESS *)packet, value + 10);
+            }
+        }
+        if (PodRace->max_lap_time == 0.0f)
+            PodRace->max_lap_time = PodRace->prev_lap_display;
+    }
+    return 1;
 }
 
 void Action_CreatePod(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float) {
@@ -1644,9 +1686,7 @@ void RetakeG_Init(WORLDINFO_s *world) {
         f->strength_0x6c = 0.85f;
 }
 
-void RetakeG_Reset(WORLDINFO_s *) {
-    STUBBED();
-}
+void RetakeG_Reset(WORLDINFO_s *) {}
 
 void RetakeG_Update(WORLDINFO_s *world) {
     (void)world;
@@ -1722,9 +1762,7 @@ void MaulA_Reset(WORLDINFO_s *world) {
     Maul_obj = FindGameObject(id_DARTHMAUL, 1, 1, 0, 0);
 }
 
-void MaulA_Update(WORLDINFO_s *) {
-    STUBBED();
-}
+void MaulA_Update(WORLDINFO_s *) {}
 
 void MaulA_Panel(WORLDINFO_s *world) {
     if (netclient == 0) {
@@ -1747,21 +1785,13 @@ void MaulB_Init(WORLDINFO_s *world) {
         o->field_a1_0xa1 |= 1;
 }
 
-void MaulD_Init(WORLDINFO_s *) {
-    STUBBED();
-}
+void MaulD_Init(WORLDINFO_s *) {}
 
-void MaulD_Update(WORLDINFO_s *) {
-    STUBBED();
-}
+void MaulD_Update(WORLDINFO_s *) {}
 
-void MaulE_Init(WORLDINFO_s *) {
-    STUBBED();
-}
+void MaulE_Init(WORLDINFO_s *) {}
 
-void MaulE_Update(WORLDINFO_s *) {
-    STUBBED();
-}
+void MaulE_Update(WORLDINFO_s *) {}
 
 void MaulF_Init(WORLDINFO_s *world) {
     MaulA_ai_message = CheckGizAIMessage(gizaimessagesys, "ShowHearts", NULL);
@@ -1775,9 +1805,7 @@ void MaulF_Reset(WORLDINFO_s *world) {
     Maul_obj = FindGameObject(id_DARTHMAUL, 1, 1, 0, 0);
 }
 
-void MaulF_Update(WORLDINFO_s *) {
-    STUBBED();
-}
+void MaulF_Update(WORLDINFO_s *) {}
 
 void MaulF_Panel(WORLDINFO_s *world) {
     if (netclient == 0) {
@@ -1806,9 +1834,7 @@ void AnakinsFlightB_Init(WORLDINFO_s *world) {
         hothtroopers = (nuhspecial_s *)LevHSpecial;
 }
 
-void AnakinsFlightB_Update(WORLDINFO_s *) {
-    STUBBED();
-}
+void AnakinsFlightB_Update(WORLDINFO_s *) {}
 
 void AnakinsFlightB_Draw(WORLDINFO_s *world) {
     if (TimingBarSet == 5) {
