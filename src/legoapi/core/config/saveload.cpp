@@ -1,6 +1,7 @@
 #include "decomp.h"
 #include <string.h>
 
+#include "gameapi/edtools/gameapi_edtools_types.h"
 #include "gameframework/saveload.h"
 #include "globals.h"
 #include "legoapi/cutscenes/cutscenes.h"
@@ -25,23 +26,25 @@ extern f32 memcard_loadmessage_delay;
 extern f32 memcard_loadresult_delay;
 extern i16 (*memcard_hashfn)(void);
 
+#define SAVELOAD_TARGET_OPT __attribute__((optimize("O2", "omit-frame-pointer")))
+
 void InitMemCard() {
 }
 
-void SaveGizmoSys(GIZMOSYS_s *, char *, char *) {
-    STUBBED();
+SAVELOAD_TARGET_OPT i32 SaveGizmoSys(GIZMOSYS_s *, char *, char *) {
+    return 0;
 }
 
-void SerialiseInt(EdStream &, void *, i32) {
-    STUBBED();
+SAVELOAD_TARGET_OPT void SerialiseInt(EdStream &stream, void *data, i32) {
+    stream.SerialiseBuffer(data, 4, 1);
 }
 
 void FS_GetDirList(char *, char *, char *) {
     STUBBED();
 }
 
-void SerialiseChar(EdStream &, void *, i32) {
-    STUBBED();
+SAVELOAD_TARGET_OPT void SerialiseChar(EdStream &stream, void *data, i32) {
+    stream.SerialiseBuffer(data, 1, 1);
 }
 
 void FS_PrevNameLen(char *) {
@@ -52,40 +55,40 @@ void FS_SortStrings(char *, char *, i32) {
     STUBBED();
 }
 
-void SerialiseFloat(EdStream &, void *, i32) {
-    STUBBED();
+SAVELOAD_TARGET_OPT void SerialiseFloat(EdStream &stream, void *data, i32) {
+    stream.SerialiseBuffer(data, 4, 1);
 }
 
-void SerialiseNuMtx(EdStream &, void *, i32) {
-    STUBBED();
+SAVELOAD_TARGET_OPT void SerialiseNuMtx(EdStream &stream, void *data, i32) {
+    stream.SerialiseBuffer(data, 4, 16);
 }
 
-void SerialiseNuVec(EdStream &, void *, i32) {
-    STUBBED();
+SAVELOAD_TARGET_OPT void SerialiseNuVec(EdStream &stream, void *data, i32) {
+    stream.SerialiseBuffer(data, 4, 3);
 }
 
-void SerialiseShort(EdStream &, void *, i32) {
-    STUBBED();
+SAVELOAD_TARGET_OPT void SerialiseShort(EdStream &stream, void *data, i32) {
+    stream.SerialiseBuffer(data, 4, 1);
 }
 
-void SerialiseVuMtx(EdStream &, void *, i32) {
-    STUBBED();
+SAVELOAD_TARGET_OPT void SerialiseVuMtx(EdStream &stream, void *data, i32) {
+    stream.SerialiseBuffer(data, 4, 16);
 }
 
-void SerialiseVuVec(EdStream &, void *, i32) {
-    STUBBED();
+SAVELOAD_TARGET_OPT void SerialiseVuVec(EdStream &stream, void *data, i32) {
+    stream.SerialiseBuffer(data, 4, 3);
 }
 
 void FS_MoveCursorUp(i32) {
     STUBBED();
 }
 
-void SerialiseString(EdStream &, void *, i32) {
-    STUBBED();
+SAVELOAD_TARGET_OPT void SerialiseString(EdStream &stream, void *data, i32 count) {
+    stream.SerialiseString(static_cast<char *>(data), count);
 }
 
-void SerialiseColour3(EdStream &, void *, i32) {
-    STUBBED();
+SAVELOAD_TARGET_OPT void SerialiseColour3(EdStream &stream, void *data, i32) {
+    stream.SerialiseBuffer(data, 4, 3);
 }
 
 void FS_FileNameFilter(char *) {
@@ -112,8 +115,8 @@ void FS_GetFilterString(char *, char *) {
     STUBBED();
 }
 
-void getsaveload_status() {
-    STUBBED();
+SAVELOAD_TARGET_OPT i32 getsaveload_status() {
+    return saveload_status;
 }
 
 void FS_GetPadWithRepeat(nupad_s *, float, float) {
@@ -124,8 +127,8 @@ void SerialiseNuHSpecial(EdStream &, void *, i32) {
     STUBBED();
 }
 
-void SerialiseStringAddr(EdStream &, void *, i32) {
-    STUBBED();
+SAVELOAD_TARGET_OPT void SerialiseStringAddr(EdStream &stream, void *data, i32 count) {
+    stream.SerialiseString(static_cast<char **>(data), count);
 }
 
 void FS_BuildFilterBlocks(char *) {
@@ -144,11 +147,13 @@ void FS_SetCursorToLastFileName() {
     STUBBED();
 }
 
-void LoadState(i32, variptr_u *, variptr_u *, variptr_u *, variptr_u *, variptr_u *, variptr_u *) {
-    STUBBED();
+SAVELOAD_TARGET_OPT i32 LoadState(i32, variptr_u *, variptr_u *, variptr_u *, variptr_u *, variptr_u *, variptr_u *) {
+    return 0;
 }
 
 extern "C" {
+
+    void (*savesuccessfn)(void);
 
     void FS_SetFileSelPathFromName(void) {
         STUBBED();
@@ -158,8 +163,8 @@ extern "C" {
         STUBBED();
     }
 
-    void SetSaveSuccessFn(void) {
-        STUBBED();
+    SAVELOAD_TARGET_OPT void SetSaveSuccessFn(void (*callback)(void)) {
+        savesuccessfn = callback;
     }
 
     void UpdateSaveSlots(void) {
