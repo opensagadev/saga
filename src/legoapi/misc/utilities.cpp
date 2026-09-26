@@ -109,13 +109,20 @@ i32 LineCrossedXZ(f32 ax, f32 az, f32 bx, f32 bz, f32 cx, f32 cz, f32 dx, f32 dz
     if (first >= 0.0f)
         return 0;
     f32 second = (ax - cx) * (dz - cz) + (az - cz) * (cx - dx);
-    if (second < 0.0f)
+    if (!(second >= 0.0f))
         return 0;
     f32 third = (bx - ax) * (cz - az) + (bz - az) * (ax - cx);
-    if (third < 0.0f)
+    if (!(third >= 0.0f))
         return 1;
-    f32 fourth = (bx - dx) * (az - dz) + (bz - dz) * (dx - ax);
-    return fourth < 0.0f ? 1 : 2;
+    f32 az_to_dz = az;
+    asm volatile ("" : "+x"(az_to_dz));
+    i32 result = 2;
+    asm volatile ("" : "+a"(result));
+    az_to_dz -= dz;
+    f32 fourth = (bx - dx) * az_to_dz + (bz - dz) * (dx - ax);
+    if (fourth >= 0.0f)
+        return result;
+    return 1;
 }
 
 __attribute__((optimize("no-omit-frame-pointer"))) i32 ScaleAndClamp(volatile i32 value) {
@@ -408,9 +415,8 @@ f32 RatioAlongLineXZ(nuvec_s *point, nuvec_s *start, nuvec_s *end) {
     f32 dx = end->x - start->x;
     f32 dz = end->z - start->z;
     i32 angle = -NuAtan2D(dx, dz);
-    u16 index = static_cast<u16>(angle);
-    f32 sine = NuTrigTable[index >> 1];
-    f32 cosine = NuTrigTable[((static_cast<u32>(index) + 0x4000) >> 1) & 0x7fff];
+    f32 sine = NuTrigTable[static_cast<u16>(angle) >> 1];
+    f32 cosine = NuTrigTable[((static_cast<u16>(angle) + 0x4000) >> 1) & 0x7fff];
     f32 px = point->x - start->x;
     f32 pz = point->z - start->z;
     f32 along = pz * cosine - px * sine;
@@ -510,10 +516,14 @@ f32 LineToPlaneDistance(VuVec &origin, VuVec &direction, VuVec &plane) {
     f32 first = origin.x * plane.x + origin.y * plane.y + origin.z * plane.z + plane.w;
     f32 second = (origin.x + direction.x) * plane.x + (origin.y + direction.y) * plane.y +
                  (origin.z + direction.z) * plane.z + plane.w;
-    if (first < 0.0f && second < 0.0f)
-        return __builtin_fmaxf(first, second);
-    if (first > 0.0f && second > 0.0f)
-        return __builtin_fminf(first, second);
+    if (first < 0.0f && second < 0.0f) {
+        asm ("maxss %1, %0" : "+x"(first) : "x"(second));
+        return first;
+    }
+    if (first > 0.0f && second > 0.0f) {
+        asm ("minss %1, %0" : "+x"(first) : "x"(second));
+        return first;
+    }
     return 0.0f;
 }
 

@@ -52,3 +52,29 @@ the inside endpoint is copied first, then the interpolated point with `w=0`.
 Copies preserve the source `w`. The emitted vertex count ranges from 0 to 24.
 The table is an original local symbol named `_ZL15cubeEdgeIndices`, so keep
 its name and 32-bit integer layout for matching.
+
+## NDK r8e GCC matching details
+
+For a negative SSE branch, `if (value < 0.0f)` can make GCC swap the
+`ucomiss` operands and use `ja`. In `LineCrossedXZ`, the original uses
+`ucomiss value, zero; jb`; spelling the condition as
+`if (!(value >= 0.0f))` reproduces it. The final branch keeps return value 2
+in EAX while calculating the fourth cross product. Empty `+a` and `+x`
+constraints anchor that register value after the first float load. Together
+these yield a 100% instruction match for the 226-byte routine.
+
+`__builtin_fminf` and `__builtin_fmaxf` emitted external calls with this
+toolchain. The original `LineToPlaneDistance` uses single instructions
+`minss` and `maxss`; inline SSE operations on the scalar accumulator make
+its 203-byte body match exactly.
+
+First full target build, measured with the GOT-aware fork:
+
+| Function | First attempt | Refined |
+| --- | ---: | ---: |
+| `LineCrossedXZ` | 88.490560% | 100% |
+| `RatioAlongLineXZ` | 86.566666% | 92.316666% |
+| `LineToPlaneDistance` | 78.857140% | 100% |
+| `I64ToX` | 40.303370% | 40.303370% |
+| `XToI64` | 35.805460% | 35.805460% |
+| `rawClip` | 22.210192% | 22.210192% |
