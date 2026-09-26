@@ -1499,8 +1499,84 @@ i32 MovePlayer_TWIST(GameObject_s *object) {
     return 1;
 }
 
-void Move_SPEEDERBIKE(GameObject_s *) {
-    STUBBED();
+f32 speeder_smoke_rate = 5.0f;
+f32 speeder_offset_speed = 2.0f;
+extern f32 GetVehicleSpeedMul(GameObject_s *, f32);
+
+void Move_SPEEDERBIKE(GameObject_s *object) {
+    GAMEPAD_s *pad = object->pad_gamepad;
+    PreResetCode(object);
+    KeepWeaponOut(object);
+    DropInOutCode(object);
+    if ((object->field_0xe20 & GAMEOBJECT_E20_FLAG_MOVEMENT_DISABLED) != 0)
+        return;
+
+    ApplyGravity(object, NULL, GetVehicleHoverHeight(object, NULL), 10.0f, NULL);
+    GAMECHARACTERDATA *vehicle = object->apiobj.character_data->game_character;
+    if (vehicle->field_0x28 > 0.0f && (vehicle->flags_090 & 0x10000) == 0 &&
+        (WORLD->current_level != SPEEDERCHASEA_LDATA || disable_narrow_socks == 0)) {
+        LoopCode(object, pad->buttons_pressed & GAMEPAD_JUMP, pad->buttons_held & GAMEPAD_JUMP, pad, 1);
+        TurnCode(object, 0, pad);
+    }
+    DeactivatedCode(object);
+    if ((object->apiobj.character_data->model_flags & 0x10000000) != 0) {
+        FireCode(object, pad->buttons_pressed & GAMEPAD_ACTION, pad->buttons_held & GAMEPAD_ACTION, 0.2f, 0);
+    }
+
+    f32 speed = GetVehicleSpeedMul(object, pad->input_magnitude);
+    f32 target = speed <= 1.0f ? speed * 0.75f + 0.75f : 1.5f;
+    object->thrust_effect_scale =
+        SeekValF(object->thrust_effect_scale, target, object->thrust_effect_scale < target ? 8.0f : 3.0f);
+    object->reserved_e27[0] = static_cast<u8>(qrand() >> 8);
+    object->reserved_e27[1] = static_cast<u8>(qrand() >> 8);
+    object->reserved_e27[2] = static_cast<u8>(qrand() >> 8);
+    object->reserved_e27[3] = static_cast<u8>(qrand() >> 8);
+
+    if (WORLD->area != NULL && (WORLD->area->flags & 1) != 0 && object->id == id_MINISTARDESTROYER &&
+        static_cast<i8>(object->apiobj.flags_low) < 0 &&
+        (Cheat[29].enabled != 0 || object->field_0xdec > 0.0f)) {
+        TractorBeamCode(object);
+    }
+
+    if (object->id == id_SPEEDERBIKE) {
+        AwkwardShapeCode(object, 0);
+        if (object->current_hp <= 2) {
+            const i32 effect = WORLD->debris_sys->entries[134].effect;
+            if (effect != -1) {
+                i32 count = ParticlesPerSecond(speeder_smoke_rate, FRAMETIME) * (3 - object->current_hp);
+                while (count-- > 0) {
+                    f32 random = static_cast<f32>(qrand()) * (1.0f / 65535.0f);
+                    NUVEC position;
+                    position.x = object->apiobj.collision_position.x +
+                                 (object->apiobj.initial_position.x - object->apiobj.collision_position.x) * random;
+                    position.y = object->apiobj.collision_position.y +
+                                 (object->apiobj.initial_position.y - object->apiobj.collision_position.y) * random;
+                    position.z = object->apiobj.collision_position.z +
+                                 (object->apiobj.initial_position.z - object->apiobj.collision_position.z) * random;
+                    AddVariableShotDebrisEffect(effect, &position, 1, 0, 0);
+                }
+            }
+        }
+        if (object->movement_spline != NULL) {
+            for (i32 i = 0; i < 2; ++i) {
+                GameObject_s *player = Player[i];
+                if (player == NULL || static_cast<i8>(player->apiobj.flags_low) >= 0 || player->field_0xcc0 == NULL ||
+                    ((object->apiobj.field_0x1e4 & player->apiobj.field_0x1ec) == 0 &&
+                     (object->apiobj.field_0x1e8 & player->apiobj.field_0x1f0) == 0) ||
+                    object->field_0x1024 > 0.0f)
+                    continue;
+                NUVEC displacement;
+                displacement.x = player->apiobj.position.x - object->apiobj.position.x;
+                displacement.z = player->apiobj.position.z - object->apiobj.position.z;
+                NuVecRotateY(&displacement, &displacement, -object->apiobj.field_0x276);
+                if (displacement.x < 0.0f)
+                    object->movement_spline_lateral_speed += speeder_offset_speed;
+                else
+                    object->movement_spline_lateral_speed -= speeder_offset_speed;
+            }
+        }
+    }
+    EngineNoiseCode(object, 0);
 }
 
 // Original: 1,000 bytes.
