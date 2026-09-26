@@ -6765,7 +6765,50 @@ void MoveToMarker::Process(float frame_time) {
 }
 
 void MoveToMarker::Render() {
-    STUBBED();
+    NUVEC draw_position = {position.x, position.y, position.z};
+    if (temporary_target) {
+        MechSystems *systems = MechSystems::Get();
+        if (systems->location_ping_material != NULL) {
+            NUMTX_ALIGNED16 ping_matrix;
+            NUVEC ping_scale = {radius.value, radius.value, radius.value};
+            NuMtxSetRotationY(&ping_matrix, 0);
+            NuMtxRotateX(&ping_matrix, 0x4000);
+            NuMtxScale(&ping_matrix, &ping_scale);
+            draw_position.y += 0.01f;
+            NuMtxTranslate(&ping_matrix, &draw_position);
+            extern void RndrTexQuad3D(VuMtx const &, i32, numtl_s *);
+            const i32 ping_colour = (static_cast<i32>(alpha.value * 255.0f) << 24) | 0xffffff;
+            RndrTexQuad3D(reinterpret_cast<VuMtx const &>(ping_matrix), ping_colour, systems->location_ping_material);
+        }
+    }
+    if (field_108_0) {
+        return;
+    }
+
+    draw_position.y = position.y + height + NuTrigTable[(static_cast<i32>(rotation.value) >> 1) & 0x7fff] * 0.1f +
+                      NuTrigTable[(field_100 >> 1) & 0x7fff] * 0.005f;
+    const f32 marker_scale =
+        (NuTrigTable[(static_cast<i32>(secondary_rotation.value) >> 1) & 0x7fff] * 0.25f + 1.0f) * 0.1f;
+    NUVEC text_scale = {marker_scale, marker_scale, marker_scale};
+    NUMTX_ALIGNED16 text_matrix;
+    NuMtxSetRotationY(&text_matrix, field_fc);
+    NuMtxScale(&text_matrix, &text_scale);
+    NuMtxTranslate(&text_matrix, &draw_position);
+
+    extern char *ASCII_DOWN;
+    NuQFntPushPrintMode(4);
+    NuQFntSet(QFont3DZ);
+    NuQFntSetMtx(QFont3DZ, &text_matrix);
+    NuQFntSetCoordinateSystem(NUQFNT_CSMODE_ABSOLUTE);
+    const i32 colour = (static_cast<i32>(scale.value * 255.0f) << 24) |
+                       ((static_cast<i32>(this->colour.value.z) & 0xff) << 16) |
+                       ((static_cast<i32>(this->colour.value.y) & 0xff) << 8) |
+                       (static_cast<i32>(this->colour.value.x) & 0xff);
+    NuQFntSetColour(QFont3DZ, colour);
+    NuQFntSetScale(QFont3DZ, 0.0375f, 0.05f);
+    NuQFntMove(QFont3DZ, NuQFntPrintLenU(QFont3DZ, ASCII_DOWN) * -0.5f, 0.0f, 0.0f);
+    NuQFntPrintU(QFont3DZ, ASCII_DOWN);
+    NuQFntPopPrintMode();
 }
 
 extern u8 show_lever_hint;
