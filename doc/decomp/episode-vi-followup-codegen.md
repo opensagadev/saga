@@ -71,3 +71,23 @@ each reset iteration. Simply removing a cached count from this source made
 GCC choose a different register and block schedule and reduced the measured
 match from 87.159% to 75.221%; it was reverted. Further tuning needs a
 loop-shape change, not just an extra count read.
+
+## Death Star II battle gizmo enumeration
+
+`DeathStar2BattleD_Init` is a fully unrolled series of gizmo lookups. It
+places `"reactor1"` in `LevGizmo[0]`, then formats six node names with the
+literal format `"lecnode_%i1"` and six matching obstacle names with
+`"obstacle%d"`. The node lookups use `blowup_gizmotype_id`; the obstacle
+lookups use `obstacle_gizmotype_id` and store the `GIZMO::object` pointer in
+`LevGizObst[1]` through `[6]` only when both pointers are nonnull. It ends
+with `"shield_inner1"` in `LevGizmo[7]` and clears `LevFlag[5]`. The target
+reserves a large stack buffer (`0x12c` local bytes) even though its formatted
+names are short, so a 256-byte name buffer is useful when reproducing its
+prologue. Keep these calls explicit while tuning: GCC's loop optimization
+could produce a different block order and register lifetime.
+
+The direct NDK r8e GCC 4.7 `-O3 -fPIC` object for this handler has the exact
+938-byte target size. A GOT-aware `objdiff-cli` comparison of that object
+against the original shared library reports 98.774%, with 66 address
+argument differences and no inserted, deleted, or replaced instructions.
+This object comparison is provisional until a full linked build is measured.

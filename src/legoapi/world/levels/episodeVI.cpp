@@ -509,8 +509,54 @@ void E1CharacterBonus_Init(WORLDINFO_s *world) {
 // Death Star 2 battle
 // ===========================================================================
 
-void DeathStar2BattleD_Init(WORLDINFO_s *) {
-    STUBBED();
+void DeathStar2BattleD_Init(WORLDINFO_s *world) {
+    char name[256];
+    LevGizmo[0] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "reactor1");
+
+    sprintf(name, "lecnode_%i1", 1);
+    LevGizmo[1] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, name);
+    sprintf(name, "obstacle%d", 1);
+    GIZMO *obstacle = GizmoFindByName(world->gizmo_sys, obstacle_gizmotype_id, name);
+    if (obstacle != NULL && obstacle->object != NULL)
+        LevGizObst[1] = static_cast<GIZOBSTACLE_s *>(obstacle->object);
+
+    sprintf(name, "lecnode_%i1", 2);
+    LevGizmo[2] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, name);
+    sprintf(name, "obstacle%d", 2);
+    obstacle = GizmoFindByName(world->gizmo_sys, obstacle_gizmotype_id, name);
+    if (obstacle != NULL && obstacle->object != NULL)
+        LevGizObst[2] = static_cast<GIZOBSTACLE_s *>(obstacle->object);
+
+    sprintf(name, "lecnode_%i1", 3);
+    LevGizmo[3] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, name);
+    sprintf(name, "obstacle%d", 3);
+    obstacle = GizmoFindByName(world->gizmo_sys, obstacle_gizmotype_id, name);
+    if (obstacle != NULL && obstacle->object != NULL)
+        LevGizObst[3] = static_cast<GIZOBSTACLE_s *>(obstacle->object);
+
+    sprintf(name, "lecnode_%i1", 4);
+    LevGizmo[4] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, name);
+    sprintf(name, "obstacle%d", 4);
+    obstacle = GizmoFindByName(world->gizmo_sys, obstacle_gizmotype_id, name);
+    if (obstacle != NULL && obstacle->object != NULL)
+        LevGizObst[4] = static_cast<GIZOBSTACLE_s *>(obstacle->object);
+
+    sprintf(name, "lecnode_%i1", 5);
+    LevGizmo[5] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, name);
+    sprintf(name, "obstacle%d", 5);
+    obstacle = GizmoFindByName(world->gizmo_sys, obstacle_gizmotype_id, name);
+    if (obstacle != NULL && obstacle->object != NULL)
+        LevGizObst[5] = static_cast<GIZOBSTACLE_s *>(obstacle->object);
+
+    sprintf(name, "lecnode_%i1", 6);
+    LevGizmo[6] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, name);
+    sprintf(name, "obstacle%d", 6);
+    obstacle = GizmoFindByName(world->gizmo_sys, obstacle_gizmotype_id, name);
+    if (obstacle != NULL && obstacle->object != NULL)
+        LevGizObst[6] = static_cast<GIZOBSTACLE_s *>(obstacle->object);
+
+    LevGizmo[7] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "shield_inner1");
+    LevFlag[5] = 0;
 }
 
 void DeathStar2BattleD_Update(WORLDINFO_s *) {
