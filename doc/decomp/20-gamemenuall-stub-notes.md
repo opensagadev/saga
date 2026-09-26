@@ -23,3 +23,23 @@ using the retail signatures is necessary for their exact matches.
 Do not infer behavior from the name or from `STUBBED()` alone. In this file,
 identically marked callbacks range from true no-ops to the 3,429-byte
 `MenuUpdateEpisodes`.
+
+## Shared deleting and formatting draw layout
+
+`MenuDrawDeleting` (599 bytes) and `MenuDrawFormatting` (527 bytes) have the
+same three-phase layout. Each has a function-local static
+`messageswitched`:
+
+1. While work is queued, running, or its message delay is positive, reset
+   `messageswitched`, draw the progress message at `y = 0.2f`, and call the
+   retail no-op `Draw_DONOTREMOVEMEMORYCARD`.
+2. On failure, reset `MenuAlpha` and `MenuA` once, without drawing a result
+   message.
+3. On success, reset those fade values once and draw the completion text at
+   `y = 0.0f`.
+
+The deletion callback first copies `apitxt_DELETEGAME` into `MenuHeader` and
+updates its RGB header fields; formatting does not. The retained source
+matches 99.68595% and 99.669815%, respectively, using the GOT-aware fork.
+Most remaining differences are direct references to static TU storage whose
+addresses move in the rebuilt library, plus a small register choice.

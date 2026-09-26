@@ -72,6 +72,11 @@ extern char *apitxt_RETRY;
 extern char *apitxt_SLOT;
 extern char *apitxt_CANCEL;
 extern char *apitxt_NODATAAVAILABLE;
+extern char *apitxt_DELETEGAME;
+extern char *apitxt_DELETING;
+extern char *apitxt_DELETECOMPLETE;
+extern char *apitxt_FORMATTING;
+extern char *apitxt_FORMATTINGCOMPLETE;
 extern char *apiGameName;
 extern char *apitxt_YES;
 extern char *apitxt_NO;
@@ -156,6 +161,14 @@ i32 memcard_loadneeded;
 i32 memcard_loadstarted;
 i32 memcard_loadfailed;
 i32 memcard_loadcorrupt;
+i32 memcard_deleteneeded;
+i32 memcard_deletestarted;
+i32 memcard_deletefailed;
+f32 memcard_deletemessage_delay;
+i32 memcard_formatting;
+i32 memcard_formatme;
+i32 memcard_formatfailed;
+f32 memcard_formatmessage_delay;
 f32 memcard_savemessage_delay;
 f32 memcard_saveresult_delay;
 f32 memcard_loadmessage_delay;
@@ -630,7 +643,36 @@ void ProcessFileSel3(float, nupad_s *) {
 }
 
 void MenuDrawDeleting(MENU_s *) {
-    STUBBED();
+    static i32 messageswitched;
+    NuStrCpy(MenuHeader, apitxt_DELETEGAME);
+    header_r = MENUHEADERR;
+    header_g = MENUHEADERG;
+    header_b = MENUHEADERB;
+
+    if (memcard_deleteneeded != 0 || memcard_deletestarted != 0 || memcard_deletemessage_delay > 0.0f) {
+        messageswitched = 0;
+        MenuSmartTextEx(apitxt_DELETING, 0.0f, 0.2f, 1.0f, MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, 0,
+                        MENUNORMALR, MENUNORMALG, MENUNORMALB, 1.5f, 2, NULL, 0, MenuA);
+        Draw_DONOTREMOVEMEMORYCARD();
+        return;
+    }
+
+    if (memcard_deletefailed != 0) {
+        if (messageswitched == 0) {
+            messageswitched = 1;
+            MenuAlpha = 0.0f;
+            MenuA = 0;
+        }
+        return;
+    }
+
+    if (messageswitched == 0) {
+        messageswitched = 1;
+        MenuAlpha = 0.0f;
+        MenuA = 0;
+    }
+    MenuSmartTextEx(apitxt_DELETECOMPLETE, 0.0f, 0.0f, 1.0f, MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, 0,
+                    MENUNORMALR, MENUNORMALG, MENUNORMALB, 1.5f, 3, NULL, 0, MenuA);
 }
 
 void MenuDrawEpisodes(MENU_s *) {
@@ -895,7 +937,31 @@ void MenuDrawEndMission(MENU_s *) {
 }
 
 void MenuDrawFormatting(MENU_s *) {
-    STUBBED();
+    static i32 messageswitched;
+    if (memcard_formatting != 0 || memcard_formatme != 0 || memcard_formatmessage_delay > 0.0f) {
+        messageswitched = 0;
+        MenuSmartTextEx(apitxt_FORMATTING, 0.0f, 0.2f, 1.0f, MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, 0,
+                        MENUNORMALR, MENUNORMALG, MENUNORMALB, 1.5f, 2, NULL, 0, MenuA);
+        Draw_DONOTREMOVEMEMORYCARD();
+        return;
+    }
+
+    if (memcard_formatfailed != 0) {
+        if (messageswitched == 0) {
+            messageswitched = 1;
+            MenuAlpha = 0.0f;
+            MenuA = 0;
+        }
+        return;
+    }
+
+    if (messageswitched == 0) {
+        messageswitched = 1;
+        MenuAlpha = 0.0f;
+        MenuA = 0;
+    }
+    MenuSmartTextEx(apitxt_FORMATTINGCOMPLETE, 0.0f, 0.0f, 1.0f, MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, 0,
+                    MENUNORMALR, MENUNORMALG, MENUNORMALB, 1.5f, 3, NULL, 0, MenuA);
 }
 
 void MenuDrawInsertCard(MENU_s *) {
