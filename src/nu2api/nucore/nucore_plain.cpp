@@ -3308,8 +3308,61 @@ extern "C" {
         NuHGobjEvalAnimBlend2Root_3(reinterpret_cast<nugscn_s *>(object), animation_a, time_a, animation_b, time_b,
                                     blend, override_count, overrides, matrices, root_fn, root_data);
     }
-    void NuHGobjEvalDwa(void) {
-        STUBBED();
+    struct NuLegacyDwaChunk {
+        i32 node_count;
+        i32 reserved_04;
+        nuanimcurveset_s **curve_sets;
+    };
+    static inline NuLegacyDwaChunk *NuLegacyDwaGetChunk(void *animation, i32 index) {
+        NuLegacyDwaChunk **chunks = *reinterpret_cast<NuLegacyDwaChunk ***>(static_cast<u8 *>(animation) + 0xc);
+        return chunks[index];
+    }
+    void **NuHGobjEvalDwa(i32 render_count, i16 *render_indices, void *animation, f32 frame) {
+        if (animation == NULL || render_count == 0)
+            return NULL;
+
+        nuanimtime_s time __attribute__((aligned(16)));
+        NuAnimDataCalcTime(animation, frame, &time);
+
+        f32 **weights_by_render;
+        if (render_indices != NULL) {
+            weights_by_render = NuRndrCreateBlendShapeDWAPointers(render_count);
+            memset(weights_by_render, 0, (static_cast<usize>(render_count) * sizeof(void *) + 15) >> 4);
+        } else {
+            weights_by_render = NuRndrCreateBlendShapeDWAPointers(1);
+            memset(weights_by_render, 0, 1);
+            render_count = 1;
+        }
+        if (weights_by_render == NULL)
+            return NULL;
+
+        for (i32 render = 0; render < render_count; ++render) {
+            i32 node = render_indices == NULL ? 0 : render_indices[render];
+            if (node < 0)
+                continue;
+
+            NuLegacyDwaChunk *chunk = NuLegacyDwaGetChunk(animation, time.chunk);
+            nuanimcurveset_s *set = node < chunk->node_count ? chunk->curve_sets[node] : NULL;
+            if (set == NULL) {
+                weights_by_render[render] = NuRndrCreateBlendShapeDeformerWeightsArray(0);
+                continue;
+            }
+
+            i32 curve_count = static_cast<i8>(set->curve_count);
+            f32 *weights = NuRndrCreateBlendShapeDeformerWeightsArray(curve_count);
+            weights_by_render[render] = weights;
+            if (weights == NULL || curve_count <= 0)
+                continue;
+            for (i32 curve = 0; curve < curve_count; ++curve) {
+                nuanimcurveset_s *curve_set = NuLegacyDwaGetChunk(animation, time.chunk)->curve_sets[node];
+                if (curve_set->curves[curve] != NULL) {
+                    weights[curve + 1] = NuAnimCurveCalcVal2(curve_set->curves[curve], &time);
+                } else {
+                    weights[curve + 1] = curve_set->constants[curve];
+                }
+            }
+        }
+        return reinterpret_cast<void **>(weights_by_render);
     }
     void **NuHGobjEvalDwa2(i32 render_count, i16 *render_indices, nuanimdata2_s *animation, f32 frame) {
         if (animation == NULL || render_count == 0) {
@@ -3360,15 +3413,6 @@ extern "C" {
             }
         }
         return reinterpret_cast<void **>(weights_by_render);
-    }
-    struct NuLegacyDwaChunk {
-        i32 node_count;
-        i32 reserved_04;
-        nuanimcurveset_s **curve_sets;
-    };
-    static inline NuLegacyDwaChunk *NuLegacyDwaGetChunk(void *animation, i32 index) {
-        NuLegacyDwaChunk **chunks = *reinterpret_cast<NuLegacyDwaChunk ***>(static_cast<u8 *>(animation) + 0xc);
-        return chunks[index];
     }
     void **NuHGobjEvalDwaBlend(i32 render_count, i16 *render_indices, void *animation_a, f32 frame_a, void *animation_b,
                                f32 frame_b, f32 blend) {

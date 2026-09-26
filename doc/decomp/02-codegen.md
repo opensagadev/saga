@@ -318,6 +318,15 @@ same logic in the mixed optimized catchall compiles to a different prologue
 and register allocation, so source-level condition changes alone cannot
 explain that mismatch.
 
+In the legacy DWA evaluator, retaining a local `nuanimcurveset_s*` across the
+curve loop made GCC keep a different register and emit a shared x87 store for
+both curve and constant values. Reloading the curve set through the animation
+chunk for each curve, then writing separate `if` branches, reproduced the
+retail distinction: `NuAnimCurveCalcVal2` returns on the x87 stack, while a
+constant curve uses `movss`. That source change raised `NuHGobjEvalDwa` from
+43.96% to 59.35% without changing the result. The remaining differences
+include stack slots, register choice, and block layout.
+
 **Hot/cold:** NO `.text.hot`/`.text.unlikely` — `__builtin_expect` only feeds branch/if-conversion heuristics: `hot()` at -O3 = `test %eax,%eax; mov $-1,%edx; cmove %edx,%eax; ret`.
 verified: `g++ -O3 -S align.cpp; objdump -d`
 
