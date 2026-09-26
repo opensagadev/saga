@@ -3,20 +3,18 @@
 
 extern "C" {
 
-    void StreamCache(void) {
-        STUBBED();
+    __attribute__((optimize("O2", "omit-frame-pointer"))) void StreamCache(void) {
     }
 
-    void StreamCacheCheckComplete(void) {
-        STUBBED();
+    __attribute__((optimize("O2", "omit-frame-pointer"))) i32 StreamCacheCheckComplete(void) {
+        return 0;
     }
 
-    void StreamRead(void) {
-        STUBBED();
+    __attribute__((optimize("O2", "omit-frame-pointer"))) i32 StreamRead(void) {
+        return 0;
     }
 
-    void StreamSeek(void) {
-        STUBBED();
+    __attribute__((optimize("O2", "omit-frame-pointer"))) void StreamSeek(void) {
     }
 
 } // extern "C"

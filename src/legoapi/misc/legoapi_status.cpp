@@ -1,6 +1,7 @@
 #include "decomp.h"
 #include "legoapi/legoapi_types.h"
 #include "nu2api/nu3d/nutex.h"
+#include "nu2api/nufile/nufile.h"
 
 struct AIROW_s;
 struct nuqthdr_s;
@@ -9,20 +10,20 @@ struct SHOPINPUT;
 
 extern "C" {
 
-    void DEVCDDVDROM_Interrogate(void) {
-        STUBBED();
+    __attribute__((optimize("O2", "omit-frame-pointer"))) i32 DEVCDDVDROM_Interrogate(NUFILE_DEVICE *device) {
+        device->status = 1;
+        return 1;
     }
 
-    void DEVMEMORYCARD_Interrogate(void) {
-        STUBBED();
+    __attribute__((optimize("O2", "omit-frame-pointer"))) i32 DEVMEMORYCARD_Interrogate(NUFILE_DEVICE *device) {
+        device->status = 1;
+        return 1;
     }
 
-    void DebugLog(void) {
-        STUBBED();
+    __attribute__((optimize("O2", "omit-frame-pointer"))) void DebugLog(void) {
     }
 
-    void Debug_Print(void) {
-        STUBBED();
+    __attribute__((optimize("O2", "omit-frame-pointer"))) void Debug_Print(void) {
     }
 
 } // extern "C"
