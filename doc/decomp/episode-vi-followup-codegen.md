@@ -91,3 +91,34 @@ The direct NDK r8e GCC 4.7 `-O3 -fPIC` object for this handler has the exact
 against the original shared library reports 98.774%, with 66 address
 argument differences and no inserted, deleted, or replaced instructions.
 This object comparison is provisional until a full linked build is measured.
+
+## Sarlacc Pit C shield and cannon pass
+
+`SarlaccPitC_Reset` registers `cannon_1`, two `cover_%d` specials in
+`LevHSpecial[16..17]`, four blowup targets (`cover_%d1` for 1 and 2,
+`spinner%d_null_1` for 1 and 2), and `shot_0%d` / `shot_0%da` special
+pairs in indices 0..15. The two cover blowups have bit 8 set at offset
+`0x9f`; all four targets are passed to `UpdateMidPos`. The handler finds
+`panel2` as a panel gizmo, then sets the sixteen shot visibilities based
+on the persistent `power` counter. GCC leaves all sixteen format/find
+pairs expanded; a source loop would change the object code substantially.
+The direct NDK r8e object is 2,120 bytes against the 2,128-byte target and
+has a 95.979% GOT-aware match.
+
+`SarlaccPitC_Update` temporarily exposes the four targets through the
+world's blowup target candidate fields when the cannon has a linked
+driver. It then handles cannon weapon state, decrements or recharges
+`power`, switches paired shot specials, and plays the two shield sounds.
+Its direct object is exactly 957 bytes, the same as the target, and has an
+87.652% GOT-aware match. Most remaining differences are register choices
+and cold block ordering, rather than missing behavior.
+
+Two small source changes moved the update match from 26.896% to 85.443%
+without changing behavior. Do not cache `LevGameObject[0]` as a
+`GameObject_s *` local; the target keeps the `LevGameObject` array base in
+ESI and reloads its first element after calls. Also write the recharge
+branch with `if (recharging == 0)` first: the target places the panel
+output check on the fallthrough path and the timer work in a later block.
+The power threshold uses unsigned comparison (`ja` after `cmp 7`), so
+cast `power` to `u32` for `<= 7`. Declaring `taken_over` volatile kept its
+read after the two world field stores and improved the match to 87.652%.

@@ -9,6 +9,8 @@
 #include "nu2api/nu3d/nulgtlaser.h"
 #include "legoapi/gizmos/traps/gizforce.h"
 #include "legoapi/gizmos/object/gizobstacles.h"
+#include "legoapi/gizmos/object/gizpanel.h"
+#include "legoapi/gizmo/object/gizmoblowups.h"
 #include "legoapi/gizmos/object/newblowup.h"
 #include "legoapi/gizmos/object/gizbuildits.h"
 #include "legoapi/audio/sfx.h"
@@ -57,6 +59,10 @@ extern i32 obstacle_gizmotype_id, force_gizmotype_id;
 static __used__ i32 power;
 static __used__ i32 recharging;
 static __used__ i32 target_shield[2];
+static __used__ volatile i32 taken_over;
+static __used__ i32 gizmoblowuptargetcount;
+static __used__ GIZMOBLOWUP_s *gizmoblowuptarget[4];
+static __used__ f32 rechargetimer;
 
 // Episode 6 level handlers, in the game's Episode_VI progression:
 // jabbas palace / sarlacc pit / speeder chase / endor battle / death star 2
@@ -313,12 +319,152 @@ void SarlaccPitC_Init(WORLDINFO_s *) {
     target_shield[1] = 0;
 }
 
-void SarlaccPitC_Reset(WORLDINFO_s *) {
-    STUBBED();
+void SarlaccPitC_Reset(WORLDINFO_s *world) {
+    char name[32];
+    taken_over = 0;
+    gizmoblowuptargetcount = 0;
+    LevGameObject[0] = GetNamedGameObject(world->ai_sys, "cannon_1");
+
+    sprintf(name, "cover_%d", 1);
+    NuSpecialFind(world->current_gscn, &LevHSpecial[16], name, 1);
+    sprintf(name, "cover_%d1", 1);
+    GIZMO *gizmo = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, name);
+    if (gizmo != NULL) {
+        GIZMOBLOWUP_s *blowup = static_cast<GIZMOBLOWUP_s *>(gizmo->object);
+        gizmoblowuptarget[gizmoblowuptargetcount] = blowup;
+        blowup->field_0x9f |= 8;
+        ++gizmoblowuptargetcount;
+        UpdateMidPos(blowup);
+    }
+    sprintf(name, "cover_%d", 2);
+    NuSpecialFind(world->current_gscn, &LevHSpecial[17], name, 1);
+    sprintf(name, "cover_%d1", 2);
+    gizmo = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, name);
+    if (gizmo != NULL) {
+        GIZMOBLOWUP_s *blowup = static_cast<GIZMOBLOWUP_s *>(gizmo->object);
+        gizmoblowuptarget[gizmoblowuptargetcount] = blowup;
+        blowup->field_0x9f |= 8;
+        ++gizmoblowuptargetcount;
+        UpdateMidPos(blowup);
+    }
+    sprintf(name, "spinner%d_null_1", 1);
+    gizmo = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, name);
+    if (gizmo != NULL) {
+        GIZMOBLOWUP_s *blowup = static_cast<GIZMOBLOWUP_s *>(gizmo->object);
+        gizmoblowuptarget[gizmoblowuptargetcount] = blowup;
+        ++gizmoblowuptargetcount;
+        UpdateMidPos(blowup);
+    }
+    sprintf(name, "spinner%d_null_1", 2);
+    gizmo = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, name);
+    if (gizmo != NULL) {
+        GIZMOBLOWUP_s *blowup = static_cast<GIZMOBLOWUP_s *>(gizmo->object);
+        gizmoblowuptarget[gizmoblowuptargetcount] = blowup;
+        ++gizmoblowuptargetcount;
+        UpdateMidPos(blowup);
+    }
+
+#define FIND_SHOT(index, format, number) \
+    sprintf(name, format, number); \
+    NuSpecialFind(world->current_gscn, &LevHSpecial[index], name, 1)
+    FIND_SHOT(0, "shot_0%d", 1);
+    FIND_SHOT(1, "shot_0%d", 2);
+    FIND_SHOT(2, "shot_0%d", 3);
+    FIND_SHOT(3, "shot_0%d", 4);
+    FIND_SHOT(4, "shot_0%d", 5);
+    FIND_SHOT(5, "shot_0%d", 6);
+    FIND_SHOT(6, "shot_0%d", 7);
+    FIND_SHOT(7, "shot_0%d", 8);
+    FIND_SHOT(8, "shot_0%da", 1);
+    FIND_SHOT(9, "shot_0%da", 2);
+    FIND_SHOT(10, "shot_0%da", 3);
+    FIND_SHOT(11, "shot_0%da", 4);
+    FIND_SHOT(12, "shot_0%da", 5);
+    FIND_SHOT(13, "shot_0%da", 6);
+    FIND_SHOT(14, "shot_0%da", 7);
+    FIND_SHOT(15, "shot_0%da", 8);
+#undef FIND_SHOT
+
+    LevGizmo[0] = GizmoFindByName(world->gizmo_sys, gizpanel_gizmotype_id, "panel2");
+#define RESET_SHOT(index, level) \
+    NuSpecialSetVisibility(&LevHSpecial[index], power <= level); \
+    NuSpecialSetVisibility(&LevHSpecial[(index) + 8], power > level)
+    RESET_SHOT(0, 0);
+    RESET_SHOT(1, 1);
+    RESET_SHOT(2, 2);
+    RESET_SHOT(3, 3);
+    RESET_SHOT(4, 4);
+    RESET_SHOT(5, 5);
+    RESET_SHOT(6, 6);
+    RESET_SHOT(7, 7);
+#undef RESET_SHOT
 }
 
-void SarlaccPitC_Update(WORLDINFO_s *) {
-    STUBBED();
+void SarlaccPitC_Update(WORLDINFO_s *world) {
+    if (LevGameObject[0] != NULL && gizmoblowuptargetcount == 4) {
+        if (LevGameObject[0]->field_0xcc0 != NULL) {
+            world->field_50d0 = 4;
+            world->blowup_target_candidates = gizmoblowuptarget;
+            if (taken_over == 0)
+                taken_over = 1;
+        } else if (taken_over != 0) {
+            taken_over = 0;
+            world->field_50d0 = 0;
+            world->blowup_target_candidates = NULL;
+        }
+
+        if (power == 0) {
+            if ((LevGameObject[0]->field_0xef8 & 8) != 0)
+                LevGameObject[0]->field_0xef8 &= ~8;
+        } else if (static_cast<i8>(LevGameObject[0]->quick_shoot_bolt_id) >= 0) {
+            --power;
+            NuSpecialSetVisibility(&LevHSpecial[power], 1);
+            NuSpecialSetVisibility(&LevHSpecial[power + 8], 0);
+            GIZPANEL_s *panel = static_cast<GIZPANEL_s *>(LevGizmo[0]->object);
+            if (panel->state)
+                panel->state = 0;
+        }
+
+        if (recharging == 0) {
+            if (static_cast<u32>(power) <= 7 && LevGizmo[0] != NULL &&
+                GizmoGetOutput(world->gizmo_sys, LevGizmo[0], 0, 0) != 0) {
+                recharging = 1;
+                rechargetimer = 0.0f;
+            }
+        } else {
+            rechargetimer -= FRAMETIME;
+            if (rechargetimer <= 0.0f) {
+                LevGameObject[0]->field_0xef8 |= 8;
+                NuSpecialSetVisibility(&LevHSpecial[power], 0);
+                NuSpecialSetVisibility(&LevHSpecial[power + 8], 1);
+                PlaySfx("imp_c3po_magnet_drop", NuSpecialGetDrawPos(&LevHSpecial[power + 8]));
+                ++power;
+                if (power == 8) {
+                    recharging = 0;
+                    PlaySfx("env_magnet_on", NuSpecialGetDrawPos(&LevHSpecial[power + 8]));
+                } else {
+                    rechargetimer = 0.25f;
+                }
+            }
+        }
+    }
+
+    if (target_shield[0] == 0) {
+        if (gizmoblowuptarget[0] != NULL && (gizmoblowuptarget[0]->visibility_flags & 0x40) == 0) {
+            PlaySfx("ffieldoff", NuSpecialGetDrawPos(&LevHSpecial[16]));
+            target_shield[0] = 1;
+        } else {
+            PlaySfx("ffield", NuSpecialGetDrawPos(&LevHSpecial[16]));
+        }
+    }
+    if (target_shield[1] == 0) {
+        if (gizmoblowuptarget[1] != NULL && (gizmoblowuptarget[1]->visibility_flags & 0x40) == 0) {
+            PlaySfx("ffieldoff", NuSpecialGetDrawPos(&LevHSpecial[17]));
+            target_shield[1] = 1;
+        } else {
+            PlaySfx("ffield", NuSpecialGetDrawPos(&LevHSpecial[17]));
+        }
+    }
 }
 
 i32 SarlaccPitDiscoActive(WORLDINFO_s *world) {
