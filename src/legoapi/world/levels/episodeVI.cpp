@@ -39,6 +39,14 @@ struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 extern u8 LevFlag[16];
+struct SarlaccBattlePacket {
+    u8 reserved[0x10];
+    u8 disco_active;
+};
+SarlaccBattlePacket *sarlaccb_netpacket;
+static __used__ i32 power;
+static __used__ i32 recharging;
+static __used__ i32 target_shield[2];
 
 // Episode 6 level handlers, in the game's Episode_VI progression:
 // jabbas palace / sarlacc pit / speeder chase / endor battle / death star 2
@@ -168,7 +176,10 @@ void SarlaccPitB_SpecialUpdate(WORLDINFO_s *) {
 }
 
 void SarlaccPitC_Init(WORLDINFO_s *) {
-    STUBBED();
+    power = 0;
+    recharging = 0;
+    target_shield[0] = 0;
+    target_shield[1] = 0;
 }
 
 void SarlaccPitC_Reset(WORLDINFO_s *) {
@@ -179,10 +190,8 @@ void SarlaccPitC_Update(WORLDINFO_s *) {
     STUBBED();
 }
 
-bool SarlaccPitDiscoActive(WORLDINFO_s *) {
-    STUBBED();
-    // Disco-state behavior remains unreconstructed.
-    return false;
+i32 SarlaccPitDiscoActive(WORLDINFO_s *world) {
+    return world->current_level == SARLACCPITB_LDATA && sarlaccb_netpacket->disco_active != 0;
 }
 
 // ===========================================================================

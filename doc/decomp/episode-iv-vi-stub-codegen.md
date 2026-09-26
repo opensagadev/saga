@@ -30,3 +30,26 @@ The control flow, instruction sizes, and remaining instructions match.
 `HothBattleE_Update` matches exactly at 62 bytes when the low-end-device
 test gates `UpdateMiniSnowTroopers`, then the zero `netclient` test gates
 `HothBattleE_UpdateWave`.
+
+## Integer return hidden by cross-file bool declarations
+
+`SarlaccPitDiscoActive` has a target `setne al; movzx eax, al` ending.
+Declaring its definition `bool` removes the `movzx` and produces an
+83-byte function at 95.83%. Declaring the definition `i32` restores the
+86-byte target and reaches 100%. Other files declare it `bool`, but the
+return type is not encoded in this C++ function's mangled name, and the
+integer result is 0 or 1. Check target return register width before
+assuming that a call site's boolean use determines the original return
+type.
+
+`SarlaccPitC_Init` emits exactly the target's four 32-bit zero stores;
+its remaining differences are local BSS offsets for `power`,
+`recharging`, and the two `target_shield` elements. These are numeric
+GOTOFF operands in the disassembly and differ as the whole game's BSS
+layout changes.
+
+`CloudCityTrapA/B_Init` and `CloudCityTrapC_Reset` can be reproduced with
+ordinary C++ calls and field assignments. Their instruction streams and
+sizes match (173, 241, and 309 bytes); their residual differences are
+string and float literal address operands. Keep exact string values and
+argument order even when these address operands do not match.

@@ -24,6 +24,7 @@
 #include "nu2api/nuandroid/ios_graphics.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nu3d/nuspecial.h"
+#include "nu2api/nu3d/nuspline.h"
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/numath/numtx.h"
 #include "nu2api/numath/nuvec.h"
@@ -31,6 +32,7 @@
 #include <string.h>
 
 extern i32 dagobah_training;
+extern i32 obstacle_gizmotype_id;
 AILOCATOR_s *locator;
 GameObject_s *gameobj;
 extern u8 troopercannons_beenReset;
@@ -44,9 +46,12 @@ void UpdateTrooperCannons(WORLDINFO_s *);
 EXPLOSION *Detonate(NUVEC *, u16);
 extern "C" void NewPartRotation(PART_s *);
 extern "C" void *AIPAthFindPathCnx(AISYS_s *, AIPATH_s *, char *, char *, i32 *);
+nugspline_s *edSpline_SplineFind(nugscn_s *, char *);
 
 static GameObject_s *Vader_obj;
 static GIZAIMESSAGE_s *Vader_ai_message;
+static u8 turretAliveCount;
+nuhspecial_s specialIcon;
 
 struct AIROW_s;
 struct nuqthdr_s;
@@ -339,12 +344,26 @@ void HothEscapeD_Update(WORLDINFO_s *world) {
     UpdateTrooperCannons(world);
 }
 
-void CloudCityTrapA_Init(WORLDINFO_s *) {
-    STUBBED();
+void CloudCityTrapA_Init(WORLDINFO_s *world) {
+    if (netclient == 0)
+        InitTrooperCannons(world);
+    LevAIMessage[0] = CheckGizAIMessage(gizaimessagesys, "ShowHearts", NULL);
+    LevGizmo[0] = GizmoFindByName(world->gizmo_sys, force_gizmotype_id, "force3");
+    GIZMOBLOWUP_s *blowup = GizmoBlowUp_FindByName(world, "blowup_exit1");
+    if (blowup != NULL)
+        blowup->field_0xa0 |= 2;
 }
 
-void CloudCityTrapB_Init(WORLDINFO_s *) {
-    STUBBED();
+void CloudCityTrapB_Init(WORLDINFO_s *world) {
+    LevAIMessage[0] = CheckGizAIMessage(gizaimessagesys, "ShowHearts", NULL);
+    LevAIMessage[1] = CheckGizAIMessage(gizaimessagesys, "TrapBEndFight", NULL);
+    LevGameObject[0] = FindGameObject(id_DARTHVADER, 1, 1, 1, 0);
+    nugspline_s *spline = edSpline_SplineFind(world->current_gscn, "door_window_out");
+    if (spline != NULL) {
+        spline->pts[0].z -= 0.35f;
+        spline->pts[1].z -= 0.35f;
+        spline->pts[2].z -= 0.35f;
+    }
 }
 
 void CloudCityTrapA_Reset(WORLDINFO_s *) {
@@ -362,8 +381,19 @@ void CloudCityTrapC_Panel(WORLDINFO_s *) {
     }
 }
 
-void CloudCityTrapC_Reset(WORLDINFO_s *) {
-    STUBBED();
+void CloudCityTrapC_Reset(WORLDINFO_s *world) {
+    LevGameObject[0] = FindGameObject(id_DARTHVADER, 1, 1, 0, 0);
+    LevAIMessage[0] = CheckGizAIMessage(gizaimessagesys, "ShowHearts", NULL);
+    LevPathCnx[0] = AIPAthFindPathCnx(world->ai_sys, world->ai_sys->path_sys->active_path, "gap1_a", "gap1_b",
+                                      &LevPathCnxDir);
+    GIZMO *gizmo = GizmoFindByName(world->gizmo_sys, obstacle_gizmotype_id, "obstacle3");
+    LevGizmo[0] = gizmo;
+    if (gizmo != NULL && gizmo->object != NULL)
+        LevGizObst[0] = static_cast<GIZOBSTACLE_s *>(gizmo->object);
+    gizmo = GizmoFindByName(world->gizmo_sys, obstacle_gizmotype_id, "???");
+    LevGizmo[1] = gizmo;
+    if (gizmo != NULL && gizmo->object != NULL)
+        LevGizObst[1] = static_cast<GIZOBSTACLE_s *>(gizmo->object);
 }
 
 void CloudCityEscapeA_Init(WORLDINFO_s *) {
@@ -650,7 +680,8 @@ void AsteroidChaseC_Reset(WORLDINFO_s *world) {
 }
 
 void AsteroidChaseD_Panel(WORLDINFO_s *) {
-    STUBBED();
+    i16 targets = -1;
+    DrawMeleeTargetsNumber(&targets, &turretAliveCount, 1, 0, &specialIcon);
 }
 
 void AsteroidChaseA_Update(WORLDINFO_s *) {
