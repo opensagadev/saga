@@ -144,10 +144,12 @@ bool MechInputTouchMenuController::OnRelease(GameObject_s &, TouchHolder &holder
             const f32 width = *reinterpret_cast<f32 *>(customiser + width_offset);                  \
             if (width > 0.0f) {                                                                      \
                 const f32 x = down.x - *reinterpret_cast<f32 *>(customiser + position_offset);      \
+                const f32 centre_y = *reinterpret_cast<f32 *>(customiser + position_offset + 4);   \
+                const f32 height = *reinterpret_cast<f32 *>(customiser + height_offset);            \
                 const f32 half_width = fabsf(0.5f * width);                                         \
                 if (x > -half_width && x < half_width) {                                             \
-                    const f32 y = down.y - *reinterpret_cast<f32 *>(customiser + position_offset + 4); \
-                    const f32 half_height = fabsf(0.5f * *reinterpret_cast<f32 *>(customiser + height_offset)); \
+                    const f32 y = down.y - centre_y;                                                 \
+                    const f32 half_height = fabsf(0.5f * height);                                   \
                     if (y > -half_height && y < half_height) {                                      \
                         customiser[0xd10 + index] = 1;                                               \
                         return true;                                                                 \
