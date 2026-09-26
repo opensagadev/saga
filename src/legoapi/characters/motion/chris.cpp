@@ -6,7 +6,6 @@
 #include "nu2api/numath/nuvec4.h"
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/nu3d/nuhspecial.h"
-#include <emmintrin.h>
 #include <string.h>
 
 struct AIROW_s;
@@ -36,7 +35,7 @@ static __used__ f32 RadialPlayerRadius[2];
 static __used__ f32 MaxRadialCamY;
 
 void ResetSpaceLevel(WORLDINFO_s *, spacelevel_s *) __asm__("_ZL15ResetSpaceLevelP11WORLDINFO_sP12spacelevel_s")
-    __attribute__((visibility("hidden"), regparm(2)));
+    __attribute__((visibility("hidden")));
 void ResetSpaceLevel(WORLDINFO_s *world, spacelevel_s *space) {
     i32 door_index;
     space->unknown_62eb8 = 0;
@@ -352,7 +351,7 @@ void ChrisAnakinDInit(WORLDINFO_s *world) {
 }
 
 void DogFightARestart() {
-    *reinterpret_cast<__m128i *>(DogDebKey) = _mm_set1_epi32(-1);
+    memset(DogDebKey, 0xff, sizeof(DogDebKey));
 }
 
 void ChrisAnakinAPanel(WORLDINFO_s *) {

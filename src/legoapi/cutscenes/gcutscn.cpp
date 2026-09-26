@@ -391,16 +391,13 @@ void instGetLookAtLocatorInfo(instNUGCUTSCENE_s *instance, instNUGCUTLOOKAT_s *o
 }
 
 i32 instNuGCutGetNextRigidInfo(instNUGCUTSCENE_s *instance, float frame, i32 index, numtx_s *matrix,
-                              nuhspecial_s *special) {
+                               nuhspecial_s *special) {
     NUGCUTRIGIDSYS_s *rigid_system = instance->cutscene->rigid_system;
     instNUGCUTRIGIDSYS_s *instance_rigid_system = instance->rigid_instance;
-    asm volatile("" : "+c"(instance_rigid_system), "+d"(rigid_system));
     if (rigid_system == NULL || index >= rigid_system->count)
         return 0;
     NUGCUTRIGID_s *rigid = &rigid_system->rigids[index];
-    asm volatile("" : "+a"(rigid) : : "memory");
     instNUGCUTRIGID_s *instance_rigids = instance_rigid_system->rigids;
-    asm volatile("" : "+r"(instance_rigids));
     if ((rigid->flags & 6) != 0) {
         extern void NuGCutRigidCalcMtx(NUGCUTRIGID_s *, float, numtx_s *);
         NuGCutRigidCalcMtx(rigid, frame, matrix);

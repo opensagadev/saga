@@ -148,13 +148,34 @@ static REGISTERGIZMOTYPEFN GizmoTypesLSW[] = {GizObstacles_RegisterGizmo,
 #define GIZMO_TYPES_LSW_COUNT ((sizeof(GizmoTypesLSW) / sizeof(REGISTERGIZMOTYPEFN)) - 1)
 
 static REGISTERGIZMOTYPEFN GizmoTypesBatman[] = {
-    GizObstacles_RegisterGizmo, GizBuildIts_RegisterGizmo, NewBlowup_RegisterGizmo, GizmoPickups_RegisterGizmo,
-    Shards_RegisterGizmo, Signals_RegisterGizmo, Grapples_RegisterGizmo, TightRopes_RegisterGizmo,
-    Ledges_RegisterGizmo, Levers_RegisterGizmo, Spinner_RegisterGizmo, Technos_RegisterGizmo,
-    SecurityDoors_RegisterGizmo, Attractos_RegisterGizmo, MiniCut_RegisterGizmo, GuideLines_RegisterGizmo,
-    Tubes_RegisterGizmo, ZipUps_RegisterGizmo, GizTurrets_RegisterGizmo, AI_RegisterGizmo,
-    GizTimer_RegisterGizmo, GizRandom_RegisterGizmo, GizSpecial_RegisterGizmo, Door_RegisterGizmo,
-    GizAIMessage_RegisterGizmo, Push_RegisterGizmo, EdGizShadowMachine_RegisterGizmo, Portal_RegisterGizmo,
+    GizObstacles_RegisterGizmo,
+    GizBuildIts_RegisterGizmo,
+    NewBlowup_RegisterGizmo,
+    GizmoPickups_RegisterGizmo,
+    Shards_RegisterGizmo,
+    Signals_RegisterGizmo,
+    Grapples_RegisterGizmo,
+    TightRopes_RegisterGizmo,
+    Ledges_RegisterGizmo,
+    Levers_RegisterGizmo,
+    Spinner_RegisterGizmo,
+    Technos_RegisterGizmo,
+    SecurityDoors_RegisterGizmo,
+    Attractos_RegisterGizmo,
+    MiniCut_RegisterGizmo,
+    GuideLines_RegisterGizmo,
+    Tubes_RegisterGizmo,
+    ZipUps_RegisterGizmo,
+    GizTurrets_RegisterGizmo,
+    AI_RegisterGizmo,
+    GizTimer_RegisterGizmo,
+    GizRandom_RegisterGizmo,
+    GizSpecial_RegisterGizmo,
+    Door_RegisterGizmo,
+    GizAIMessage_RegisterGizmo,
+    Push_RegisterGizmo,
+    EdGizShadowMachine_RegisterGizmo,
+    Portal_RegisterGizmo,
     NULL,
 };
 
@@ -1031,9 +1052,8 @@ void GizmoSysSetGame() {
     GizObstacle_CheckExcludeFlagsFn = GizObstacle_CheckExcludeFlagsFn_LSW;
 }
 
-i32 GizmoSys_BoltHit(GIZMOSYS_s *gizmo_sys, void *world_info, BOLT_s *bolt, nuvec_s *points,
-                     nuvec_s *minimum, nuvec_s *maximum, float radius, unsigned char *hit_flags) {
-    asm volatile("" : "+d"(bolt), "+D"(gizmo_sys));
+i32 GizmoSys_BoltHit(GIZMOSYS_s *gizmo_sys, void *world_info, BOLT_s *bolt, nuvec_s *points, nuvec_s *minimum,
+                     nuvec_s *maximum, float radius, unsigned char *hit_flags) {
     nuvec_s *hit_points;
     i32 hit_mode;
     if ((bolt->flags & 0x200) != 0) {
@@ -1051,8 +1071,8 @@ i32 GizmoSys_BoltHit(GIZMOSYS_s *gizmo_sys, void *world_info, BOLT_s *bolt, nuve
     GIZMOSET *set = gizmo_sys->sets;
     for (i32 index = 0; index < gizmotypes->count; ++index, ++type, ++set) {
         if (type->fns.bolt_hit_fn != NULL &&
-            type->fns.bolt_hit_fn(world_info, set->unknown, bolt->owner, hit_points, hit_mode, radius,
-                                  minimum, maximum, bolt, 1, hit_flags) != 0) {
+            type->fns.bolt_hit_fn(world_info, set->unknown, bolt->owner, hit_points, hit_mode, radius, minimum, maximum,
+                                  bolt, 1, hit_flags) != 0) {
             BoltSys->debris(bolt, points, -1, NULL, 0);
             if (bolt->owner != NULL) {
                 NewRumble(bolt->owner->pad_gamepad->pad, 0.6f, 0);
@@ -1143,14 +1163,11 @@ void UpdatePaintPuzzle(WORLDINFO_s *world) {
                 }
             }
             if (used == 2) {
-                if ((paintsused[1] == 1 && paintsused[0] == 0) ||
-                    (paintsused[1] == 0 && paintsused[0] == 1)) {
+                if ((paintsused[1] == 1 && paintsused[0] == 0) || (paintsused[1] == 0 && paintsused[0] == 1)) {
                     paintmixed = 3;
-                } else if ((paintsused[0] == 2 && paintsused[1] == 1) ||
-                           (paintsused[1] == 2 && paintsused[0] == 1)) {
+                } else if ((paintsused[0] == 2 && paintsused[1] == 1) || (paintsused[1] == 2 && paintsused[0] == 1)) {
                     paintmixed = 4;
-                } else if ((paintsused[1] == 2 && paintsused[0] == 0) ||
-                           (paintsused[0] == 2 && paintsused[1] == 0)) {
+                } else if ((paintsused[1] == 2 && paintsused[0] == 0) || (paintsused[0] == 2 && paintsused[1] == 0)) {
                     paintmixed = 5;
                 } else {
                     paintmixed = -1;

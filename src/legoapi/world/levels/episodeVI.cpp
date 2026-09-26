@@ -197,8 +197,8 @@ void SarlaccPitB_Init(WORLDINFO_s *) {
             sprintf(name, "dot_off_0%d", *disco_index + 1);
         else
             sprintf(name, "dot_off_%d", *disco_index + 1);
-        NuSpecialFind(WORLD->current_gscn, reinterpret_cast<nuhspecial_s *>(&sarlaccdisco[4 + 12 * *disco_index]),
-                      name, 1);
+        NuSpecialFind(WORLD->current_gscn, reinterpret_cast<nuhspecial_s *>(&sarlaccdisco[4 + 12 * *disco_index]), name,
+                      1);
 
         if (*disco_index <= 8)
             sprintf(name, "dot_flash_0%d", *disco_index + 1);
@@ -292,7 +292,7 @@ void SarlaccPitB_Reset(WORLDINFO_s *world) {
     obstMirrorBall = GizmoFindByName(world->gizmo_sys, obstacle_gizmotype_id, "obstacle5");
     LevelBuildits[0] = GizBuildIt_Find(world, "buildit6");
     LevelBuildits[1] = GizBuildIt_Find(world, "buildit4");
-    LevelLocator = reinterpret_cast<i32>(AIPathFindLocator(world->ai_sys, "DiscoHelp"));
+    LevelLocator = AIPathFindLocator(world->ai_sys, "DiscoHelp");
 
     if (NuSpecialExistsFn(&LevSpecial[0]))
         NuSpecialSetVisibility(&LevSpecial[0], 0);
@@ -364,8 +364,8 @@ void SarlaccPitC_Reset(WORLDINFO_s *world) {
         UpdateMidPos(blowup);
     }
 
-#define FIND_SHOT(index, format, number) \
-    sprintf(name, format, number); \
+#define FIND_SHOT(index, format, number)                                                                               \
+    sprintf(name, format, number);                                                                                     \
     NuSpecialFind(world->current_gscn, &LevHSpecial[index], name, 1)
     FIND_SHOT(0, "shot_0%d", 1);
     FIND_SHOT(1, "shot_0%d", 2);
@@ -386,8 +386,8 @@ void SarlaccPitC_Reset(WORLDINFO_s *world) {
 #undef FIND_SHOT
 
     LevGizmo[0] = GizmoFindByName(world->gizmo_sys, gizpanel_gizmotype_id, "panel2");
-#define RESET_SHOT(index, level) \
-    NuSpecialSetVisibility(&LevHSpecial[index], power <= level); \
+#define RESET_SHOT(index, level)                                                                                       \
+    NuSpecialSetVisibility(&LevHSpecial[index], power <= level);                                                       \
     NuSpecialSetVisibility(&LevHSpecial[(index) + 8], power > level)
     RESET_SHOT(0, 0);
     RESET_SHOT(1, 1);
@@ -718,8 +718,8 @@ GIZMOBLOWUP_s *DeathStar2BattleD_InZapRange(GameObject_s *object) {
     GIZMO *first_gizmo = LevGizmo[1];
     if (first_gizmo != NULL) {
         nearest = static_cast<GIZMOBLOWUP_s *>(first_gizmo->object);
-        if (nearest != NULL && (nearest->status_flags & 0x800001) == 0x800000 &&
-            LevGizObst[1] != NULL && LevGizObst[1]->anim_set->state != 0) {
+        if (nearest != NULL && (nearest->status_flags & 0x800001) == 0x800000 && LevGizObst[1] != NULL &&
+            LevGizObst[1]->anim_set->state != 0) {
             f32 distance = NuVecDistSqr(&object->apiobj.collision_position, &nearest->mid_position, NULL);
             if (distance >= nearest_distance)
                 nearest = NULL;
@@ -728,17 +728,17 @@ GIZMOBLOWUP_s *DeathStar2BattleD_InZapRange(GameObject_s *object) {
             nearest = NULL;
     } else
         nearest = NULL;
-#define CHECK_ZAP_RANGE(index) \
-    if (LevGizmo[index] != NULL) { \
-        GIZMOBLOWUP_s *blowup = static_cast<GIZMOBLOWUP_s *>(LevGizmo[index]->object); \
-        if (blowup != NULL && (blowup->status_flags & 0x800001) == 0x800000 && \
-            LevGizObst[index] != NULL && LevGizObst[index]->anim_set->state != 0) { \
-            f32 distance = NuVecDistSqr(&object->apiobj.collision_position, &blowup->mid_position, NULL); \
-            if (distance < nearest_distance) { \
-                nearest = blowup; \
-                nearest_distance = distance; \
-            } \
-        } \
+#define CHECK_ZAP_RANGE(index)                                                                                         \
+    if (LevGizmo[index] != NULL) {                                                                                     \
+        GIZMOBLOWUP_s *blowup = static_cast<GIZMOBLOWUP_s *>(LevGizmo[index]->object);                                 \
+        if (blowup != NULL && (blowup->status_flags & 0x800001) == 0x800000 && LevGizObst[index] != NULL &&            \
+            LevGizObst[index]->anim_set->state != 0) {                                                                 \
+            f32 distance = NuVecDistSqr(&object->apiobj.collision_position, &blowup->mid_position, NULL);              \
+            if (distance < nearest_distance) {                                                                         \
+                nearest = blowup;                                                                                      \
+                nearest_distance = distance;                                                                           \
+            }                                                                                                          \
+        }                                                                                                              \
     }
     CHECK_ZAP_RANGE(2);
     CHECK_ZAP_RANGE(3);
@@ -1293,10 +1293,10 @@ void DeathStar2BattleFire_Draw(WORLDINFO_s *) {
 
 void DeathStar2BattleFire_Init(WORLDINFO_s *world) {
     LEGO_SET_SLOWDOWNFN = DeathStar2BattleFire_SetSlowDownMul;
-    LevelCodeSpline[0] = reinterpret_cast<i32>(NuSplineFind(world->current_gscn, const_cast<char *>("fire")));
+    LevelCodeSpline[0] = NuSplineFind(world->current_gscn, const_cast<char *>("fire"));
     NuSpecialFind(WORLD->current_gscn, &LevHSpecial[0], const_cast<char *>("fire_cube"), 0);
-    InitSplinePosition(&fireSplinePos, reinterpret_cast<NUGSPLINE *>(LevelCodeSpline[0]), 0.0f, 0);
-    InitSplinePosition(&fireBackPos, reinterpret_cast<NUGSPLINE *>(LevelCodeSpline[0]), 0.0f, 0);
+    InitSplinePosition(&fireSplinePos, LevelCodeSpline[0], 0.0f, 0);
+    InitSplinePosition(&fireBackPos, LevelCodeSpline[0], 0.0f, 0);
     runningTotalPos = 0.0f;
     fireSpeedScale = 1.0f;
 }

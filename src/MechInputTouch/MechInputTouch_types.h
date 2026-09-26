@@ -117,12 +117,15 @@ struct NuVec2 {
 };
 struct JumpTriggerPacket {
     i32 type;
-    u32 field_4[2];
+    GameObject_s *player;
+    TouchHolder *touch_holder;
     VuVec velocity;
     u8 field_1c[0x10];
     NuVec2 start;
     NuVec2 end;
 };
+DECOMP_ASSERT(offsetof(JumpTriggerPacket, player) == 0x4, "Jump trigger player offset");
+DECOMP_ASSERT(offsetof(JumpTriggerPacket, touch_holder) == 0x8, "Jump trigger touch holder offset");
 DECOMP_ASSERT(offsetof(JumpTriggerPacket, velocity) == 0xc, "Jump trigger velocity offset");
 DECOMP_ASSERT(offsetof(JumpTriggerPacket, start) == 0x2c, "Jump trigger start offset");
 DECOMP_ASSERT(offsetof(JumpTriggerPacket, end) == 0x34, "Jump trigger end offset");
@@ -356,8 +359,7 @@ struct MechInputTouchGestureTrackingSystem : NuTouchInputElement {
     GestureTrackerRegistration trackers[10];
 };
 DECOMP_ASSERT(sizeof(MechInputTouchGestureTrackingSystem) == 0x25d8, "Gesture tracking system ABI");
-DECOMP_ASSERT(offsetof(MechInputTouchGestureTrackingSystem, trackers) == 0x2588,
-              "Gesture tracker registration offset");
+DECOMP_ASSERT(offsetof(MechInputTouchGestureTrackingSystem, trackers) == 0x2588, "Gesture tracker registration offset");
 struct MechInputTouchMainController : NuTouchInputElement {
     enum eButtonTypes : u32 {};
     f32 stick_values[4];
@@ -413,12 +415,9 @@ struct MechInputTouchDeathStarTurretController : MechInputTouchMainController, M
     GIZTURRET_s *turret;
 };
 DECOMP_ASSERT(sizeof(MechInputTouchDeathStarTurretController) == 0x7c, "Death Star turret touch controller ABI");
-DECOMP_ASSERT(offsetof(MechInputTouchDeathStarTurretController, active) == 0x70,
-              "Death Star turret active offset");
-DECOMP_ASSERT(offsetof(MechInputTouchDeathStarTurretController, aim_touch) == 0x74,
-              "Death Star turret touch offset");
-DECOMP_ASSERT(offsetof(MechInputTouchDeathStarTurretController, turret) == 0x78,
-              "Death Star turret object offset");
+DECOMP_ASSERT(offsetof(MechInputTouchDeathStarTurretController, active) == 0x70, "Death Star turret active offset");
+DECOMP_ASSERT(offsetof(MechInputTouchDeathStarTurretController, aim_touch) == 0x74, "Death Star turret touch offset");
+DECOMP_ASSERT(offsetof(MechInputTouchDeathStarTurretController, turret) == 0x78, "Death Star turret object offset");
 
 struct MechInputTouchBonusCavalryController : MechInputTouchMainController, MechInputTouchGestureTracker {
     void Activate() override;
@@ -434,10 +433,8 @@ struct MechInputTouchBonusCavalryController : MechInputTouchMainController, Mech
     TouchHolder *touch;
 };
 DECOMP_ASSERT(sizeof(MechInputTouchBonusCavalryController) == 0x78, "Bonus cavalry touch controller ABI");
-DECOMP_ASSERT(offsetof(MechInputTouchBonusCavalryController, active) == 0x70,
-              "Bonus cavalry touch active offset");
-DECOMP_ASSERT(offsetof(MechInputTouchBonusCavalryController, touch) == 0x74,
-              "Bonus cavalry touch pointer offset");
+DECOMP_ASSERT(offsetof(MechInputTouchBonusCavalryController, active) == 0x70, "Bonus cavalry touch active offset");
+DECOMP_ASSERT(offsetof(MechInputTouchBonusCavalryController, touch) == 0x74, "Bonus cavalry touch pointer offset");
 
 struct MechInputTouchMainDummyButton : NuTouchInputElement {
     MechInputTouchMainController *controller;
@@ -616,8 +613,7 @@ struct MechInputTouchVirtualConsoleController : MechInputTouchMainController, Me
 DECOMP_ASSERT(sizeof(MechInputTouchVirtualConsoleController) == 0x98, "virtual controller ABI");
 DECOMP_ASSERT(offsetof(MechInputTouchVirtualConsoleController, dpad_touch) == 0x74,
               "virtual controller D-pad touch offset");
-DECOMP_ASSERT(offsetof(MechInputTouchVirtualConsoleController, dpad) == 0x8c,
-              "virtual controller D-pad offset");
+DECOMP_ASSERT(offsetof(MechInputTouchVirtualConsoleController, dpad) == 0x8c, "virtual controller D-pad offset");
 struct MechJumpAutoPilotAddon : MechAddon {
     static HashedKey s_hashId;
     void AnalyseJumpTrajectory();

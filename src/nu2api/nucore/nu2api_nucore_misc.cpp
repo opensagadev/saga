@@ -324,7 +324,6 @@ void NuVpSetSourceRect(float left, float top, float right, float bottom) {
     const float source_height = bottom - top;
     const float scaled_width = (width / source_width) * width;
     float position_scale_x = scaled_width / source_width;
-    asm volatile("" : "+x"(position_scale_x));
     const float scaled_height = (height / source_height) * height;
     const float position_x = -left * position_scale_x * 0.5f;
     const float position_y = -top * (scaled_height / source_height) * 0.5f;
@@ -332,7 +331,7 @@ void NuVpSetSourceRect(float left, float top, float right, float bottom) {
     NuVpSetSize2(scaled_width, scaled_height);
 }
 
-__attribute__((optimize("O0,no-omit-frame-pointer"))) i32 NuFrameEndBgLoadPS(i32 minimum_delay) {
+i32 NuFrameEndBgLoadPS(i32 minimum_delay) {
     i32 delay = 0;
     NUTIME now;
     NUTIME elapsed;
@@ -515,7 +514,7 @@ i32 NuIOS_GetInAppProductByID(char *, NuIOS_InAppProduct *) {
     return 0;
 }
 
-__attribute__((optimize("no-omit-frame-pointer"))) ShaderObjectKey NuIOS_GetShaderProgramKey(ShaderObjectKey const &key) {
+ShaderObjectKey NuIOS_GetShaderProgramKey(ShaderObjectKey const &key) {
     ShaderObjectKey result;
     u32 redirected_key __attribute__((aligned(16)));
     if (LookupHash(key.key, &redirected_key, g_shaderProgramRedirects, 417))

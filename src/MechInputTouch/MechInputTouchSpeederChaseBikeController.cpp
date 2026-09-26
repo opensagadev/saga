@@ -33,44 +33,13 @@ bool MechInputTouchSpeederChaseController::IsDownSwipe(NuVec2 const &start, NuVe
     return diff <= 0x1c71;
 }
 
-i32 MechInputTouchSpeederChaseController::IsSwipeAgainstDirection(NuVec2 const &start,
-                                                                   NuVec2 const &end, bool direction) {
-#if defined(__i386__) && defined(ANDROID)
-    bool result;
-    if (direction) {
-        result = IsDownSwipe(start, end);
-        asm goto("testb %%al, %%al\n\tjne %l[hit]" : : "a"(result) : "cc" : hit);
-        return 0;
-    }
-    result = IsUpSwipe(start, end);
-    asm goto("testb %%al, %%al\n\tje %l[miss]" : : "a"(result) : "cc" : miss);
-hit:
-    return 1;
-miss:
-    return 0;
-#else
+i32 MechInputTouchSpeederChaseController::IsSwipeAgainstDirection(NuVec2 const &start, NuVec2 const &end,
+                                                                  bool direction) {
     return direction ? IsDownSwipe(start, end) : IsUpSwipe(start, end);
-#endif
 }
 
-i32 MechInputTouchSpeederChaseController::IsSwipeWithDirection(NuVec2 const &start, NuVec2 const &end,
-                                                                bool direction) {
-#if defined(__i386__) && defined(ANDROID)
-    bool result;
-    if (!direction) {
-        result = IsDownSwipe(start, end);
-        asm goto("testb %%al, %%al\n\tjne %l[hit]" : : "a"(result) : "cc" : hit);
-        return 0;
-    }
-    result = IsUpSwipe(start, end);
-    asm goto("testb %%al, %%al\n\tje %l[miss]" : : "a"(result) : "cc" : miss);
-hit:
-    return 1;
-miss:
-    return 0;
-#else
+i32 MechInputTouchSpeederChaseController::IsSwipeWithDirection(NuVec2 const &start, NuVec2 const &end, bool direction) {
     return direction ? IsUpSwipe(start, end) : IsDownSwipe(start, end);
-#endif
 }
 
 bool MechInputTouchSpeederChaseController::IsUpSwipe(NuVec2 const &start, NuVec2 const &end) {
@@ -114,8 +83,7 @@ bool MechInputTouchSpeederChaseController::OnRelease(GameObject_s &, TouchHolder
 }
 
 bool MechInputTouchSpeederChaseController::OnSwipe(GameObject_s &, TouchHolder &touch, i32 index) {
-    const NuVec2 &start = *reinterpret_cast<const NuVec2 *>(
-        reinterpret_cast<const u8 *>(&touch) + 0x34 + index * 0x2c);
+    const NuVec2 &start = *reinterpret_cast<const NuVec2 *>(reinterpret_cast<const u8 *>(&touch) + 0x34 + index * 0x2c);
     const NuVec2 &end = touch.touch_position;
     if (IsSwipeAgainstDirection(start, end, swipe_direction)) {
         swipe_direction ^= 1;
@@ -131,9 +99,8 @@ bool MechInputTouchSpeederChaseController::OnSwipe(GameObject_s &, TouchHolder &
 }
 
 void MechInputTouchSpeederChaseController::Update(NuInputTouchData const *) {
-    if (player != NULL && NewMode == 0 && NewLData == NULL && FadeSys.fade == 0.0f && Paused == 0 &&
-        CUTSTOPGAME == 0 && GetMenuID() != 12 && GetMenuID() != 16 && TouchHacks::TouchControlsActive &&
-        MiniCutCam != 2) {
+    if (player != NULL && NewMode == 0 && NewLData == NULL && FadeSys.fade == 0.0f && Paused == 0 && CUTSTOPGAME == 0 &&
+        GetMenuID() != 12 && GetMenuID() != 16 && TouchHacks::TouchControlsActive && MiniCutCam != 2) {
         Activate();
     } else {
         Deactivate();

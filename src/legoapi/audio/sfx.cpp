@@ -83,8 +83,8 @@ i32 Players_AveragePos(nuvec_s *position, SOCKPOSITION_s *socket_position);
 i32 Hub_Outside(void);
 i32 KaminoInside(void);
 i32 KaminoDiscoOn(void);
-bool DeathStarShieldDown(void);
-bool SarlaccPitDiscoActive(WORLDINFO_s *world);
+i32 DeathStarShieldDown(void);
+i32 SarlaccPitDiscoActive(WORLDINFO_s *world);
 
 extern AREADATA *BONUS_GUNSHIP_ADATA;
 extern AREADATA *DAGOBAH_ADATA;

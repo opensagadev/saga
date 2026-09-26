@@ -55,11 +55,15 @@ bool MechInputTouchDeathStarTurretController::OnRelease(GameObject_s &, TouchHol
 }
 
 bool MechInputTouchDeathStarTurretController::OnSwipe(GameObject_s &, TouchHolder &holder, i32 direction) {
-    const f32 *previous_y = reinterpret_cast<const f32 *>(reinterpret_cast<const u8 *>(&holder) + direction * 44 + 0x38);
+    const f32 *previous_y =
+        reinterpret_cast<const f32 *>(reinterpret_cast<const u8 *>(&holder) + direction * 44 + 0x38);
     if (holder.touch_position.y > *previous_y) {
         button_was_pressed[2] = 1;
         return true;
     }
+    // Retail returns the holder address in EAX here; callers test its low byte.
+    // Preserve that result without falling off a non-void function (C++ UB).
+    return (reinterpret_cast<usize>(&holder) & 0xff) != 0;
 }
 
 void MechInputTouchDeathStarTurretController::Update(NuInputTouchData const *) {
@@ -82,10 +86,8 @@ void MechInputTouchDeathStarTurretController::Update(NuInputTouchData const *) {
         const f32 horizontal_offset = touch_x - screen_position.x;
         const f32 vertical_offset = touch_y - screen_position.y;
         const i32 horizontal_angle = static_cast<i32>(horizontal_offset * 8192.0f);
-        i32 camera_angle = NuAtan2D(GameCam->pos.z - GameCam->target.z,
-                                    GameCam->pos.x - GameCam->target.x);
+        i32 camera_angle = NuAtan2D(GameCam->pos.z - GameCam->target.z, GameCam->pos.x - GameCam->target.x);
         camera_angle -= 0x8000;
-        asm volatile("" : "+a"(camera_angle));
         i32 yaw_target = horizontal_angle - camera_angle;
         if (vertical_offset > 0.0f) {
             const u16 pitch_target = static_cast<u16>(static_cast<i32>(vertical_offset * 3641.0f));

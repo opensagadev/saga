@@ -103,7 +103,7 @@ extern "C" {
     i32 NuSpecialGetNumSpecials(NUGSCN *scene);
     i32 NuSpecialGetFirst(NUGSCN *scene, nuhspecial_s *special, i32 flags);
     void NuSpecialGetNext(nuhspecial_s *special);
-    void NuSpecialList(void);
+    void NuSpecialList(NUGSCN *scene);
     i32 NuSpecialFind(NUGSCN *scene, nuhspecial_s *dest, char *name, i32 flags);
     i32 NuSpecialFindMulti(NUGSCN *scene, nuhspecial_s *dest, char *name, i32 capacity, i32 flags);
     i32 NuSpecialFindMultiWC(NUGSCN *scene, nuhspecial_s *dest, char (*wildcards)[20], char *pattern, i32 capacity,

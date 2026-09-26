@@ -106,8 +106,7 @@ void SpecialMove_VictimCode(GameObject_s *object) {
     }
 }
 
-static __attribute__((regparm(2), hot)) void SpecialMove_ConfigParticipant(NUFPAR *parser, i16 *character, i8 *variant,
-                                                                      i16 *animation) {
+static void SpecialMove_ConfigParticipant(NUFPAR *parser, i16 *character, i8 *variant, i16 *animation) {
     while (NuFParGetWord(parser)) {
         if (NuStrICmp(parser->word_buf, "character") == 0) {
             if (NuFParGetWord(parser))
@@ -158,10 +157,8 @@ void SpecialMoves_Configure(char *filename, variptr_u *buffer, variptr_u *) {
         if (!NuFParGetWord(parser))
             goto outer_line;
         if (__builtin_expect(NuStrICmp(parser->word_buf, "specialmove_end") == 0, 1)) {
-            if ((move->attacker_action_type != -1 || move->attacker_id != -1) &&
-                move->attacker_animation != -1 &&
-                (move->victim_action_type != -1 || move->victim_id != -1) &&
-                move->victim_animation != -1) {
+            if ((move->attacker_action_type != -1 || move->attacker_id != -1) && move->attacker_animation != -1 &&
+                (move->victim_action_type != -1 || move->victim_id != -1) && move->victim_animation != -1) {
                 ++SpecialMoveCount;
                 if (!NuFParGetLine(parser))
                     goto done;
@@ -173,8 +170,7 @@ void SpecialMoves_Configure(char *filename, variptr_u *buffer, variptr_u *) {
             SpecialMove_ConfigParticipant(parser, &move->attacker_id, &move->attacker_action_type,
                                           &move->attacker_animation);
         else if (NuStrICmp(parser->word_buf, "victim") == 0)
-            SpecialMove_ConfigParticipant(parser, &move->victim_id, &move->victim_action_type,
-                                          &move->victim_animation);
+            SpecialMove_ConfigParticipant(parser, &move->victim_id, &move->victim_action_type, &move->victim_animation);
         else if (NuStrICmp(parser->word_buf, "distance_apart") == 0)
             move->distance = NuFParGetFloat(parser);
         else if (NuStrICmp(parser->word_buf, "kill_victim_at_end") == 0)

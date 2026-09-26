@@ -44,7 +44,6 @@ EXPLOSION *AddExplosion(nuvec_s *position, float radius, float strength, GameObj
 }
 
 void SetupBlowupSfx(WORLDINFO_s *, specialsfx_s *) {
-    __asm__ __volatile__("nop\n\tnop");
 }
 
 void ResetExplosions() {

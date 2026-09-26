@@ -362,16 +362,15 @@ void Batarangs_CheckLostData(void *data) {
 
 i32 Batarang_StartTargetting(GameObject_s *object) {
     GAMECHARACTERDATA *runtime = object->apiobj.character_data->game_character;
+    if ((runtime->flags_090 & 0x20000000) == 0) {
+        return 0;
+    }
     BATARANG_s *batarang = static_cast<BATARANG_s *>(object->batarang);
-    if (batarang == NULL || (runtime->flags_090 & 0x20000000) == 0) {
+    batarang->cooldown = Batarang_GetObjectFromCharID(object->id);
+    batarang = static_cast<BATARANG_s *>(object->batarang);
+    if (WORLD->lev_objs[batarang->cooldown].active == 0) {
         return 0;
     }
-    WORLDINFO_s *world = WorldInfo_CurrentlyActive();
-    const i32 object_id = Batarang_GetObjectFromCharID(object->id);
-    if (world == NULL || world->lev_objs == NULL || world->lev_objs[object_id].active == 0) {
-        return 0;
-    }
-    batarang->cooldown = object_id;
     object->character_context = 0x4d;
     object->context_animation = 0x90;
     object->context_animation_timer = 0.0f;
@@ -379,33 +378,14 @@ i32 Batarang_StartTargetting(GameObject_s *object) {
     object->jump_flags |= 2;
     object->landing_followup = 0;
     batarang->active = 0;
+    const f32 sight_x = object->camera_screen_position.x;
     batarang->owner = object;
-    batarang->sight_position = object->camera_screen_position;
+    batarang = static_cast<BATARANG_s *>(object->batarang);
+    batarang->sight_position.x = sight_x;
+    batarang->sight_position.y = object->camera_screen_position.y;
     batarang->sight_position.z = 1.0f;
-    batarang->sight_velocity = v000;
+    batarang->sight_velocity.x = batarang->sight_velocity.y = batarang->sight_velocity.z = 0.0f;
     KeepPointOnScreen(&batarang->sight_position, &batarang->sight_velocity);
-
-    GameObject_s *nearest = NULL;
-    f32 best = 1000000000.0f;
-    for (i32 i = 0; i < HIGHGAMEOBJECT; ++i) {
-        GameObject_s *candidate = &Obj[i];
-        if (candidate == object || (candidate->apiobj.field_0x1f8 & 0x1001) != 0x1001 ||
-            candidate->apiobj.field_0x287 != 0) {
-            continue;
-        }
-        const f32 distance =
-            NuVecDistSqr(&object->apiobj.collision_position, &candidate->apiobj.collision_position, NULL);
-        if (distance < best && distance < 225.0f) {
-            best = distance;
-            nearest = candidate;
-        }
-    }
-    if (nearest != NULL) {
-        batarang->targets[0].object = nearest;
-        batarang->targets[0].type = 0;
-        batarang->targets[0].lost = 0;
-        batarang->active = 1;
-    }
     return 1;
 }
 

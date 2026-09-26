@@ -12,7 +12,7 @@ struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
-__attribute__((optimize("O2"))) i32 FindMtlInHGObj(nugscn_s *scene, i32 material_type) {
+i32 FindMtlInHGObj(nugscn_s *scene, i32 material_type) {
     for (i32 index = 0; index < scene->nummtl; ++index) {
         if (scene->mtls[index]->unknown_9a[0] == material_type) {
             return index + 1;

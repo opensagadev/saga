@@ -396,7 +396,8 @@ static void GizAction_SetAIState(GIZFLOW_s *, FLOWBOX_s *, char **params, int co
 
     if (state_name == NULL || (type_count == 0 && !(range_squared > 0.0f))) {
         if (named_object != NULL) {
-            named_object->ai.script_process.next_state = AIStateFind(state_name, named_object->ai.script_process.script);
+            named_object->ai.script_process.next_state =
+                AIStateFind(state_name, named_object->ai.script_process.script);
         }
         return;
     }
@@ -413,7 +414,6 @@ static void GizAction_SetAIState(GIZFLOW_s *, FLOWBOX_s *, char **params, int co
         NUVEC difference;
         NuVecSub(&difference, &origin, &object->apiobj.position);
         f32 distance_squared = difference.x * difference.x + difference.y * difference.y + difference.z * difference.z;
-        asm volatile("" : "+x"(distance_squared));
         i32 matching_type = type_count == 0;
         for (i32 type_index = 0; type_index < type_count; ++type_index) {
             if (object->id == types[type_index]) {

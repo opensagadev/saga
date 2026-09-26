@@ -54,8 +54,8 @@ f32 GetAspectRatio();
 extern "C" void BackupMenu(void);
 extern "C" void BackupMenuNoFn(void);
 extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
-extern "C" void SmartText(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment,
-                           u8 red, u8 green, u8 blue, f32 max_width, i32 max_lines);
+extern "C" void SmartText(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment, u8 red,
+                          u8 green, u8 blue, f32 max_width, i32 max_lines);
 extern "C" void NuIOS_RecordFlurryEvent(char *event_name);
 extern "C" void DrawMenuButtonPrompts(i32 confirm_prompt, i32 cancel_prompt, i32 enabled, u8 red, u8 green, u8 blue,
                                       u8 alpha);
@@ -665,8 +665,8 @@ void MenuDrawDeleting(MENU_s *) {
 
     if (memcard_deleteneeded != 0 || memcard_deletestarted != 0 || memcard_deletemessage_delay > 0.0f) {
         messageswitched = 0;
-        MenuSmartTextEx(apitxt_DELETING, 0.0f, 0.2f, 1.0f, MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, 0,
-                        MENUNORMALR, MENUNORMALG, MENUNORMALB, 1.5f, 2, NULL, 0, MenuA);
+        MenuSmartTextEx(apitxt_DELETING, 0.0f, 0.2f, 1.0f, MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, 0, MENUNORMALR,
+                        MENUNORMALG, MENUNORMALB, 1.5f, 2, NULL, 0, MenuA);
         Draw_DONOTREMOVEMEMORYCARD();
         return;
     }
@@ -951,15 +951,15 @@ void MenuDrawEndMission(MENU_s *) {
         return;
     if (MissionSys->field8_0x1d != 2) {
         SmartText(TTab[tOUTOFTIME], 0.0f, STATSPOSY, 1.0f, 1.0f, 1.0f, 1.0f, 0,
-                  191 + (static_cast<u32>(menu_flash) < 1 ? 64 : 0),
-                  31 + (static_cast<u32>(menu_flash) < 1 ? 32 : 0), 0, 1.7f, 1);
+                  191 + (static_cast<u32>(menu_flash) < 1 ? 64 : 0), 31 + (static_cast<u32>(menu_flash) < 1 ? 32 : 0),
+                  0, 1.7f, 1);
         return;
     }
     if (NuFmod(GameTimer.time_elapsed, 0.3f) < 0.2f) {
         char text[32];
         i32 mission_index = static_cast<i8>(MissionSys->mission->count);
-        f32 remaining = static_cast<f32>(static_cast<i32>(MissionSys->missions[mission_index].time)) -
-                        BonusTimer.time_elapsed;
+        f32 remaining =
+            static_cast<f32>(static_cast<i32>(MissionSys->missions[mission_index].time)) - BonusTimer.time_elapsed;
         if (remaining < 0.0f)
             remaining = 0.0f;
         Text_MakeTime(remaining, 0, 1, 1, text);
@@ -1221,8 +1221,8 @@ void MenuDrawEndChallenge(MENU_s *) {
         return;
     if (ChallengeMode != 2) {
         SmartText(TTab[tOUTOFTIME], 0.0f, STATSPOSY, 1.0f, 1.0f, 1.0f, 1.0f, 0,
-                  191 + (static_cast<u32>(menu_flash) < 1 ? 64 : 0),
-                  31 + (static_cast<u32>(menu_flash) < 1 ? 32 : 0), 0, 1.7f, 1);
+                  191 + (static_cast<u32>(menu_flash) < 1 ? 64 : 0), 31 + (static_cast<u32>(menu_flash) < 1 ? 32 : 0),
+                  0, 1.7f, 1);
     } else if (NuFmod(GameTimer.time_elapsed, 0.3f) < 0.2f) {
         char text[64];
         f32 remaining = static_cast<f32>(static_cast<i32>(ADataList[WORLD->level_sub_id].challenge_trial_time)) -
@@ -1236,8 +1236,8 @@ void MenuDrawEndChallenge(MENU_s *) {
 }
 
 void MenuDrawFormatCancel(MENU_s *menu) {
-    MenuSmartTextEx(apitxt_DOYOUWANTTOABORTFORMAT, 0.0f, -0.3f, 1.0f, MENUTEXTSCALE, MENUTEXTSCALE,
-                    MENUTEXTSCALE, 0, MENUNORMALR, MENUNORMALG, MENUNORMALB, 1.5f, 2, NULL, 0, MenuA);
+    MenuSmartTextEx(apitxt_DOYOUWANTTOABORTFORMAT, 0.0f, -0.3f, 1.0f, MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, 0,
+                    MENUNORMALR, MENUNORMALG, MENUNORMALB, 1.5f, 2, NULL, 0, MenuA);
     menu->draw_y = MENUBOTY - MENUDY;
     DrawMenuEntry(menu, apitxt_YES);
     DrawMenuEntry(menu, apitxt_NO);
@@ -1332,8 +1332,8 @@ void MenuUpdateSaveCancel(MENU_s *menu) {
 }
 
 void MenuDrawDeleteConfirm(MENU_s *menu) {
-    MenuSmartTextEx(apitxt_CONFIRMDELETE, 0.0f, 0.0f, 1.0f, MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, 0,
-                    MENUNORMALR, MENUNORMALG, MENUNORMALB, 1.2f, 2, NULL, 0, MenuA);
+    MenuSmartTextEx(apitxt_CONFIRMDELETE, 0.0f, 0.0f, 1.0f, MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, 0, MENUNORMALR,
+                    MENUNORMALG, MENUNORMALB, 1.2f, 2, NULL, 0, MenuA);
     menu->draw_y = MENUBOTY - MENUDY;
     DrawMenuEntry(menu, apitxt_YES);
     DrawMenuEntry(menu, apitxt_NO);
@@ -1843,8 +1843,8 @@ extern "C" {
     }
 
     void DrawMenuBottomMessage(char *text, u8 red, u8 green, u8 blue) {
-        MenuSmartTextEx(text, 0.0f, -0.3f, 1.0f, MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, 0, red, green, blue,
-                        1.5f, 4, NULL, 0, MenuA);
+        MenuSmartTextEx(text, 0.0f, -0.3f, 1.0f, MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, 0, red, green, blue, 1.5f,
+                        4, NULL, 0, MenuA);
     }
 
     void DrawMenuButtonPrompts(i32 confirm_prompt, i32 cancel_prompt, i32 enabled, u8 red, u8 green, u8 blue,
@@ -1959,13 +1959,13 @@ extern "C" {
     }
 
     void DrawMenuHeaderMessage(char *text, u8 red, u8 green, u8 blue) {
-        MenuSmartTextEx(text, 0.0f, MENUTOPY, 1.0f, MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, 1, red, green,
-                        blue, 1.5f, 3, NULL, 0, MenuA);
+        MenuSmartTextEx(text, 0.0f, MENUTOPY, 1.0f, MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, 1, red, green, blue,
+                        1.5f, 3, NULL, 0, MenuA);
     }
 
     void DrawMenuTopMessage(char *text, u8 red, u8 green, u8 blue) {
-        MenuSmartTextEx(text, 0.0f, 0.15f, 1.0f, MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, 0, red, green, blue,
-                        1.5f, 4, NULL, 0, MenuA);
+        MenuSmartTextEx(text, 0.0f, 0.15f, 1.0f, MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, 0, red, green, blue, 1.5f,
+                        4, NULL, 0, MenuA);
     }
 
     void Draw_CANCEL(MENU *menu) {
@@ -2028,7 +2028,6 @@ extern "C" {
         VARIPTR **stream = &g_NuPrim_StreamBufferPtr;
         char *overbright = &g_NuPrim_NeedsOverbrightening;
         u32 colour = static_cast<u32>(menufadelevel) << 24;
-        asm volatile("" : "+r"(colour));
         MenuFadeVertex *vertex = reinterpret_cast<MenuFadeVertex *>((*stream)->void_ptr);
         if (__builtin_expect(*overbright == 0, 1))
             colour &= 0xff000000u;
@@ -2037,7 +2036,6 @@ extern "C" {
 
         vertex = reinterpret_cast<MenuFadeVertex *>((*stream)->void_ptr);
         colour = static_cast<u32>(menufadelevel) << 24;
-        asm volatile("" : "+r"(colour));
         if (__builtin_expect(*overbright == 0, 1))
             colour &= 0xff000000u;
         vertex->colour = colour;

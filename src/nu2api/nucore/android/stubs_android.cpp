@@ -3,6 +3,7 @@
 #include "nu2api/nu3d/nuwater.h"
 
 struct nugobj_s;
+struct nugscn_s;
 struct numtx_s;
 struct nupad_s;
 struct rndrstream_s;
@@ -95,12 +96,10 @@ void NuRndrSetScissor(i32, i32, i32, i32) {
     STUBBED();
 }
 
-extern "C" void NuGHGPreRelocateFixupPS(void) {
-    STUBBED();
+extern "C" void NuGHGPreRelocateFixupPS(nugscn_s *) {
 }
 
-extern "C" void NuGHGPostRelocateFixupPS(void) {
-    STUBBED();
+extern "C" void NuGHGPostRelocateFixupPS(nugscn_s *, i32) {
 }
 
 extern "C" void NuLightInit(void) {

@@ -198,7 +198,6 @@ void Tag_DrawIcon_Batman(GameObject_s *object) {
     }
 
     ADDGAMEMSG_ALIGNED16 message = AddGameMsg_Default;
-    __asm__ volatile("" : : "m"(message));
     const f32 pulse_alpha = (game_pulse * 0.2f + 0.8f) * 128.0f;
     const u8 index = static_cast<u8>(object->apiobj.field_0x27c);
     const u8 first_color = index < 1 ? 127 : 255;
@@ -227,12 +226,12 @@ void Tag_DrawIcon_Batman(GameObject_s *object) {
             z_sum += object->joint_matrices[0].m32;
         }
 #define TAG_INCLUDE_POI(index)                                                                                         \
-    if (model->points_of_interest[index] != NULL) {                                                                     \
-        const f32 y = object->joint_matrices[index].m31;                                                                 \
-        ++count;                                                                                                         \
-        x_sum += object->joint_matrices[index].m30;                                                                     \
-        z_sum += object->joint_matrices[index].m32;                                                                     \
-        max_y = y > max_y ? y : max_y;                                                                                   \
+    if (model->points_of_interest[index] != NULL) {                                                                    \
+        const f32 y = object->joint_matrices[index].m31;                                                               \
+        ++count;                                                                                                       \
+        x_sum += object->joint_matrices[index].m30;                                                                    \
+        z_sum += object->joint_matrices[index].m32;                                                                    \
+        max_y = y > max_y ? y : max_y;                                                                                 \
     }
         TAG_INCLUDE_POI(1)
         TAG_INCLUDE_POI(2)

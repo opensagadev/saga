@@ -369,14 +369,14 @@ extern "C" {
                 return 2;
             }
 
-            distance0 = center->x * ScissorPlanes.m00 + center->y * ScissorPlanes.m10 +
-                        center->z * ScissorPlanes.m20 + ScissorPlanes.m30;
-            distance1 = center->x * ScissorPlanes.m01 + center->y * ScissorPlanes.m11 +
-                        center->z * ScissorPlanes.m21 + ScissorPlanes.m31;
-            distance2 = center->x * ScissorPlanes.m02 + center->y * ScissorPlanes.m12 +
-                        center->z * ScissorPlanes.m22 + ScissorPlanes.m32;
-            distance3 = center->x * ScissorPlanes.m03 + center->y * ScissorPlanes.m13 +
-                        center->z * ScissorPlanes.m23 + ScissorPlanes.m33;
+            distance0 = center->x * ScissorPlanes.m00 + center->y * ScissorPlanes.m10 + center->z * ScissorPlanes.m20 +
+                        ScissorPlanes.m30;
+            distance1 = center->x * ScissorPlanes.m01 + center->y * ScissorPlanes.m11 + center->z * ScissorPlanes.m21 +
+                        ScissorPlanes.m31;
+            distance2 = center->x * ScissorPlanes.m02 + center->y * ScissorPlanes.m12 + center->z * ScissorPlanes.m22 +
+                        ScissorPlanes.m32;
+            distance3 = center->x * ScissorPlanes.m03 + center->y * ScissorPlanes.m13 + center->z * ScissorPlanes.m23 +
+                        ScissorPlanes.m33;
             NuVecMtxTransform(reinterpret_cast<NUVEC *>(&radius), extent, &AbsScissorPlanes);
 
             if (distance0 > radius.x || distance1 > radius.y || distance2 > radius.z || distance3 > radius.w) {
@@ -3185,7 +3185,7 @@ extern "C" {
         light->setupCustomCameraFrustum(camera, splits, count);
     }
     i32 NuDynamicLightTestShadowExtrusionExtent(NuDynamicLight *light, const NUVEC *center, const NUVEC *extent,
-                                              i32 render_set) {
+                                                i32 render_set) {
         VuVec minimum;
         VuVec maximum;
         minimum.x = center->x - extent->x;
@@ -4135,7 +4135,7 @@ extern "C" {
         }
         return 0;
     }
-    static inline __attribute__((always_inline)) void NuPadCopyTouchFields(volatile u8 *source_x) {
+    static inline void NuPadCopyTouchFields(volatile u8 *source_x) {
         f32 x = *reinterpret_cast<volatile f32 *>(source_x);
         u8 active = source_x[-4];
         *reinterpret_cast<volatile f32 *>(source_x - 24) = x;
@@ -4153,8 +4153,8 @@ extern "C" {
         *reinterpret_cast<volatile f32 *>(source_x - 12) = old_y;
         *reinterpret_cast<volatile u32 *>(source_x - 8) = id;
     }
-    void NuPad_Interface_TouchScreenInput(i32 x, i32 y, i32 prior_x, i32 prior_y, i32 is_down, i32 is_up,
-                                          i32 is_move, i32 is_cancelled) {
+    void NuPad_Interface_TouchScreenInput(i32 x, i32 y, i32 prior_x, i32 prior_y, i32 is_down, i32 is_up, i32 is_move,
+                                          i32 is_cancelled) {
         NuInputDevice *device = inputManager->GetDevice(0);
         if (device == NULL) {
             return;

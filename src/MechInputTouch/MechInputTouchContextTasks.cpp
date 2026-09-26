@@ -143,8 +143,8 @@ bool MechTouchTaskGoTo::Update() {
                 controller->stick_values[0] = movement_x;
                 controller->stick_values[1] = movement_y;
                 if (GetHashId().value == HashId.value || GetHashId().value == MechTouchTaskAttack::HashId.value) {
-                    if (target_y - object_y >= -0.15f &&
-                        (object->apiobj.character_data->model_flags & 0x40) == 0 && object->id != id_WATTO) {
+                    if (target_y - object_y >= -0.15f && (object->apiobj.character_data->model_flags & 0x40) == 0 &&
+                        object->id != id_WATTO) {
                         ++object->edge_stop_requests;
                     }
                 }
@@ -205,7 +205,7 @@ MechTouchTaskGoTo::~MechTouchTaskGoTo() {
 }
 
 MechTouchTaskJump::MechTouchTaskJump(MechInputTouchGestureBasedController &owner, JumpTriggerPacket const &packet,
-                                   bool disable_auto, bool direct_velocity)
+                                     bool disable_auto, bool direct_velocity)
     : MechTouchTask(owner), velocity(packet.velocity), stick(), start(), end() {
     frames = 0;
     started = false;
@@ -338,7 +338,8 @@ bool MechTouchTaskBlock::Update() {
 }
 
 MechTouchTaskPanel::MechTouchTaskPanel(MechInputTouchGestureBasedController &owner, MechObjectInterface *object,
-                                     VuVec const &) : MechTouchTaskGoTo(owner, object) {
+                                       VuVec const &)
+    : MechTouchTaskGoTo(owner, object) {
 }
 
 bool MechTouchTaskPanel::Update() {
@@ -372,7 +373,8 @@ bool MechTouchTaskPanel::Update() {
 }
 
 MechTouchTaskAttack::MechTouchTaskAttack(MechInputTouchGestureBasedController &owner, MechObjectInterface *object,
-                                       VuVec const &) : MechTouchTaskGoTo(owner, object) {
+                                         VuVec const &)
+    : MechTouchTaskGoTo(owner, object) {
 }
 
 void MechTouchTaskAttack::OnStart() {
@@ -409,8 +411,8 @@ bool MechTouchTaskAttack::Update() {
         const f32 radius = opponent->GetRadius();
         bool nearby = false;
         if ((object->apiobj.character_data->model_flags & 8) != 0) {
-            nearby = FindNearestGameObject(&object->apiobj.position, object, 0, 1.0f, 1.0f, -1, -1, 100,
-                                          NULL, 0, NULL, true) != NULL;
+            nearby = FindNearestGameObject(&object->apiobj.position, object, 0, 1.0f, 1.0f, -1, -1, 100, NULL, 0, NULL,
+                                           true) != NULL;
             if ((object->field_0xe22 & 8) != 0) {
                 nearby = true;
             }
@@ -476,14 +478,14 @@ bool MechTouchTaskAttack::Update() {
 }
 
 MechTouchTaskBigJump::MechTouchTaskBigJump(MechInputTouchGestureBasedController &owner, MechObjectInterface &object,
-                                         signed char animation_id)
+                                           signed char animation_id)
     : MechTouchTask(owner), animation(animation_id) {
     object.GetPos(destination, -1);
     started = false;
 }
 
 MechTouchTaskBigJump::MechTouchTaskBigJump(MechInputTouchGestureBasedController &owner, nuvec_s &position,
-                                         signed char animation_id)
+                                           signed char animation_id)
     : MechTouchTask(owner), animation(animation_id) {
     destination = VuVec(position.x, position.y, position.z, 1.0f);
     started = false;
@@ -496,7 +498,6 @@ bool MechTouchTaskBigJump::Update() {
     started |= player->character_context == LEGOCONTEXT_BIGJUMP;
     return started && player->character_context == LEGOCONTEXT_BIGJUMP;
 }
-
 
 MechTouchTaskBuildIt::MechTouchTaskBuildIt(MechInputTouchGestureBasedController &owner, MechObjectInterface *object,
                                            VuVec const &)
@@ -536,7 +537,8 @@ bool MechTouchTaskBuildIt::Update() {
 }
 
 MechTouchTaskUseForce::MechTouchTaskUseForce(MechInputTouchGestureBasedController &owner, MechObjectInterface *object,
-                                             VuVec const &) : MechTouchTaskGoTo(owner, object) {
+                                             VuVec const &)
+    : MechTouchTaskGoTo(owner, object) {
     flags |= 1;
     field_60 = 0;
 }
@@ -613,7 +615,8 @@ bool MechTouchTaskUseZipUp::Update() {
 }
 
 MechTouchTaskPullLever::MechTouchTaskPullLever(MechInputTouchGestureBasedController &owner, MechObjectInterface *object,
-                                            VuVec const &) : MechTouchTaskGoTo(owner, object) {
+                                               VuVec const &)
+    : MechTouchTaskGoTo(owner, object) {
     lever = object->GetGizLever();
 }
 
@@ -639,8 +642,9 @@ bool MechTouchTaskPullLever::Update() {
     return (lever->flags & 0x82) == 0x80;
 }
 
-MechTouchTaskHatMachine::MechTouchTaskHatMachine(MechInputTouchGestureBasedController &owner, MechObjectInterface *object,
-                                             VuVec const &) : MechTouchTaskGoTo(owner, object) {
+MechTouchTaskHatMachine::MechTouchTaskHatMachine(MechInputTouchGestureBasedController &owner,
+                                                 MechObjectInterface *object, VuVec const &)
+    : MechTouchTaskGoTo(owner, object) {
     machine = object->GetHatMachine();
 }
 
@@ -862,8 +866,8 @@ void MechTouchTaskPlannedGoTo::SetupForAnalysis() {
     analysis_state = 0;
     field_6ff = 1;
     const GAMECHARACTERDATA *character = player->apiobj.character_data->game_character;
-    step_y = -(character->jump_speed * character->jump_speed) /
-                 (character->gravity + character->gravity) * 1.5f + 0.01f;
+    step_y =
+        -(character->jump_speed * character->jump_speed) / (character->gravity + character->gravity) * 1.5f + 0.01f;
     start_position.y += step_y;
     if (completion != NULL) {
         *completion = true;
@@ -935,8 +939,8 @@ bool MechTouchTaskPlannedGoTo::Update() {
 
     JumpTriggerPacket packet;
     packet.type = 2;
-    packet.field_4[0] = reinterpret_cast<u32>(player);
-    packet.field_4[1] = reinterpret_cast<u32>(touch_holder);
+    packet.player = player;
+    packet.touch_holder = touch_holder;
     packet.velocity.x = velocity_x;
     packet.velocity.y = velocity_y;
     packet.velocity.z = velocity_z;
@@ -960,8 +964,9 @@ MechTouchTaskPlannedGoTo::~MechTouchTaskPlannedGoTo() {
     go_to_task = NULL;
 }
 
-MechTouchTaskUseTeleport::MechTouchTaskUseTeleport(MechInputTouchGestureBasedController &owner, MechObjectInterface *object,
-                                              VuVec const &) : MechTouchTaskGoTo(owner, object), field_60(NULL) {
+MechTouchTaskUseTeleport::MechTouchTaskUseTeleport(MechInputTouchGestureBasedController &owner,
+                                                   MechObjectInterface *object, VuVec const &)
+    : MechTouchTaskGoTo(owner, object), field_60(NULL) {
 }
 
 bool MechTouchTaskUseTeleport::Update() {
@@ -994,8 +999,7 @@ bool MechTouchTaskAstroJetPack::Update() {
         grounded_time += FRAMETIME;
     }
     if ((started || start_timeout < 0.0f) &&
-        (player->character_context != LEGOCONTEXT_JUMP ||
-         (player->apiobj.field_0x27d != 0 && grounded_time > 0.75f))) {
+        (player->character_context != LEGOCONTEXT_JUMP || (player->apiobj.field_0x27d != 0 && grounded_time > 0.75f))) {
         return false;
     }
     if (next != NULL) {
@@ -1038,8 +1042,8 @@ void MechTouchTaskPlannedDoubleClickGoTo::OnResume() {
     const f32 dy = position.y - player->apiobj.position.y;
     const f32 dz = position.z - player->apiobj.position.z;
     const GAMECHARACTERDATA *character = player->apiobj.character_data->game_character;
-    const f32 max_rise = -(character->jump_speed * character->jump_speed) /
-                         (character->gravity + character->gravity) * 2.5f;
+    const f32 max_rise =
+        -(character->jump_speed * character->jump_speed) / (character->gravity + character->gravity) * 2.5f;
     if (dy > max_rise) {
         finished = true;
         return;
@@ -1077,8 +1081,8 @@ void MechTouchTaskPlannedDoubleClickGoTo::OnResume() {
 
     JumpTriggerPacket packet;
     packet.type = 2;
-    packet.field_4[0] = reinterpret_cast<u32>(player);
-    packet.field_4[1] = reinterpret_cast<u32>(touch_holder);
+    packet.player = player;
+    packet.touch_holder = touch_holder;
     packet.velocity.x = velocity_x;
     packet.velocity.y = velocity_y;
     packet.velocity.z = velocity_z;

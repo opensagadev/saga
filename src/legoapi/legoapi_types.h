@@ -587,7 +587,7 @@ struct BATARANG_s {
     NUVEC sight_position;  // 0x88
     NUVEC sight_velocity;  // 0x94
     NUVEC ricochet_normal; // 0xa0
-    u16 cooldown;          // 0xac, level-object id used to draw the projectile
+    i16 cooldown;          // 0xac, level-object id used to draw the projectile
     i8 ricochet_count;     // 0xae
     u8 ricochet_flags;     // 0xaf
     f32 ricochet_timer;    // 0xb0

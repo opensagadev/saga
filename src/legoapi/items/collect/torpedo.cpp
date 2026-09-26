@@ -572,7 +572,6 @@ void TorpedoHitTarget(BOLT_s *bolt) {
 }
 
 void DrawTorpedoTargetSprite(void *, unsigned char, float) {
-    __asm__ __volatile__("nop\n\tnop");
 }
 
 void DrawTorpedos(GameObject_s *object) {

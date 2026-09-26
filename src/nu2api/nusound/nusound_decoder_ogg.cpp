@@ -72,7 +72,6 @@ int NuSoundDecoderOGG::OGGReadCallbacksDecoder::GetPosition() const {
 // the decoder's streaming ring, blocking on the decode thread when the ring
 // runs dry and looping the stream at EOF when requested.
 // The reference keeps a frame pointer and realigns this callback stack.
-__attribute__((force_align_arg_pointer, optimize("no-omit-frame-pointer")))
 int NuSoundDecoderOGG::OGGReadCallbacksDecoder::Read(void *dest, unsigned int size) {
     memset(dest, 0, size);
     this->decoder->GetEncodedSource();

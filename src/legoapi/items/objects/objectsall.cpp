@@ -185,10 +185,14 @@ i32 FindNextBreak(unsigned char *text, i32 index) {
     u8 ch = text[index];
     if (ch == ' ') {
         u8 next = text[index + 1];
-        if (next == '?') goto begin_scan;
-        if (next == '!') goto begin_scan;
-        if (next == ';') goto begin_scan;
-        if (next == ':') goto begin_scan;
+        if (next == '?')
+            goto begin_scan;
+        if (next == '!')
+            goto begin_scan;
+        if (next == ';')
+            goto begin_scan;
+        if (next == ':')
+            goto begin_scan;
         return index;
     } else if (ch == '.') {
         if (text[index + 1] != '.')
@@ -208,10 +212,14 @@ begin_scan:
         ch = text[index];
         if (ch == ' ') {
             u8 next = text[index + 1];
-            if (next == '?') goto continue_scan;
-            if (next == '!') goto continue_scan;
-            if (next == ';') goto continue_scan;
-            if (next == ':') goto continue_scan;
+            if (next == '?')
+                goto continue_scan;
+            if (next == '!')
+                goto continue_scan;
+            if (next == ';')
+                goto continue_scan;
+            if (next == ':')
+                goto continue_scan;
             return index;
         } else if (ch == '.') {
             if (text[index + 1] != '.')
@@ -219,7 +227,7 @@ begin_scan:
         } else if (static_cast<u8>(ch - ',') <= 1) {
             return index;
         }
-continue_scan: ;
+    continue_scan:;
     } while (--count != 0);
 
     if (text[index] == '~') {
@@ -342,7 +350,7 @@ i32 Conveyor_AdjustSpeed(NUVEC *velocity) {
 extern i32 numdevices;
 extern NUFILE_DEVICE devices[16];
 
-__attribute__((optimize("O0,no-omit-frame-pointer"))) NUFILE_DEVICE *AddDevice(NUFILE_DEVICE *device) {
+NUFILE_DEVICE *AddDevice(NUFILE_DEVICE *device) {
     devices[numdevices] = *device;
     NuStrCpy(devices[numdevices].cur_dir, default_device->cur_dir);
     NuStrCpy(devices[numdevices].sys_dir, default_device->sys_dir);

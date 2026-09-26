@@ -21,7 +21,8 @@ void MechJumpAutoPilotAddon::AnalyseJumpTrajectory() {
     float x = field_44.x;
     float z = field_44.z;
     for (int count = 50; count != 0; --count) {
-        if (state == 2) break;
+        if (state == 2)
+            break;
 
         VuVec next;
         next.x = x + field_54.x * 0.1f;
@@ -36,17 +37,18 @@ void MechJumpAutoPilotAddon::AnalyseJumpTrajectory() {
         x = next.x;
         y = next.y;
         z = next.z;
-        if (y < field_24.y - 2.0f) break;
+        if (y < field_24.y - 2.0f)
+            break;
     }
-    if (y < field_24.y - 2.0f || state == 2) state = 2;
+    if (y < field_24.y - 2.0f || state == 2)
+        state = 2;
 }
 
 void MechJumpAutoPilotAddon::CalculateModifiedJumpTrajectory() {
     float first_time;
     float second_time;
     const float gravity = character->apiobj.character_data->game_character->gravity;
-    if (!TouchHacks::SolveRoot(gravity * 0.5f, field_34.y, -(field_84.y - field_24.y), first_time,
-                               second_time)) {
+    if (!TouchHacks::SolveRoot(gravity * 0.5f, field_34.y, -(field_84.y - field_24.y), first_time, second_time)) {
         state = 6;
         return;
     }
@@ -63,18 +65,23 @@ void MechJumpAutoPilotAddon::CalculateModifiedJumpTrajectory() {
         state = 6;
         return;
     }
-    if (speed_scale < 0.5f) speed_scale = 0.5f;
-    if (speed_scale > 1.5f) speed_scale = 1.5f;
+    if (speed_scale < 0.5f)
+        speed_scale = 0.5f;
+    if (speed_scale > 1.5f)
+        speed_scale = 1.5f;
     state = 4;
 }
 
 void MechJumpAutoPilotAddon::LookForBottomInt(VuVec const &point) {
-    if (field_9c) return;
+    if (field_9c)
+        return;
     const float drop = field_24.y - field_44.y;
-    if (drop < 1.1920928955078125e-7f) return;
+    if (drop < 1.1920928955078125e-7f)
+        return;
 
     const float t = drop / (point.y - field_44.y);
-    if (!(t > 0.0f || t <= 1.0f)) return;
+    if (!(t > 0.0f || t <= 1.0f))
+        return;
     field_64.z = field_44.z + (point.z - field_44.z) * t;
     field_64.w = 0.0f;
     field_64.y = field_24.y;
@@ -85,7 +92,8 @@ void MechJumpAutoPilotAddon::LookForBottomInt(VuVec const &point) {
 void MechJumpAutoPilotAddon::LookForLandingPoint() {
     if (field_9d) {
         field_9d = false;
-        if (LookForLandingSpotAroundPoint(field_74)) state = 3;
+        if (LookForLandingSpotAroundPoint(field_74))
+            state = 3;
     } else if (field_9c) {
         field_9c = false;
         if (!LookForLandingSpotAroundPoint(field_64)) {
@@ -164,9 +172,11 @@ bool MechJumpAutoPilotAddon::LookForLandingSpotAroundPoint(VuVec const &point) {
 }
 
 void MechJumpAutoPilotAddon::LookForTerrInt(VuVec const &point) {
-    if (field_9d) return;
+    if (field_9d)
+        return;
     VuVec displacement(point.x - field_44.x, point.y - field_44.y, point.z - field_44.z, 0.0f);
-    if (GameRayCast(&field_44.xyz, &displacement.xyz, 0.0f, 0) == 0) return;
+    if (GameRayCast(&field_44.xyz, &displacement.xyz, 0.0f, 0) == 0)
+        return;
 
     field_74.w = 0.0f;
     VuVec normal = VuVec_Zero;
@@ -187,12 +197,13 @@ MechJumpAutoPilotAddon::MechJumpAutoPilotAddon(MechObjectInterface &object)
 void MechJumpAutoPilotAddon::ModifyJump() {
 }
 
-__attribute__((optimize("no-omit-frame-pointer"), force_align_arg_pointer)) bool
-MechJumpAutoPilotAddon::OnProcess(MechAddon::ProcessStage, float delta_time) {
-    if (character == NULL) return false;
+bool MechJumpAutoPilotAddon::OnProcess(MechAddon::ProcessStage, float delta_time) {
+    if (character == NULL)
+        return false;
 
     const bool is_jumping = character->character_context == LEGOCONTEXT_JUMP;
-    if (!is_jumping && started) return false;
+    if (!is_jumping && started)
+        return false;
     if (state != 0) {
         GameObject_s *jump_character = character;
         const float x_speed = field_34.x * speed_scale;
@@ -206,23 +217,23 @@ MechJumpAutoPilotAddon::OnProcess(MechAddon::ProcessStage, float delta_time) {
         elapsed_time += delta_time;
 
         switch (state) {
-        case 1:
-            AnalyseJumpTrajectory();
-            break;
-        case 2:
-            LookForLandingPoint();
-            break;
-        case 3:
-            CalculateModifiedJumpTrajectory();
-            break;
-        case 4:
-            ModifyJump();
-            break;
-        case 5:
-            ProcJumpingToCertainDoom();
-            break;
-        default:
-            break;
+            case 1:
+                AnalyseJumpTrajectory();
+                break;
+            case 2:
+                LookForLandingPoint();
+                break;
+            case 3:
+                CalculateModifiedJumpTrajectory();
+                break;
+            case 4:
+                ModifyJump();
+                break;
+            case 5:
+                ProcJumpingToCertainDoom();
+                break;
+            default:
+                break;
         }
         goto update_started;
     }

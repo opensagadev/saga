@@ -128,9 +128,8 @@ void ProcessCurrentSpeed(WORLDINFO_s *, speedup_s *);
 extern AREADATA *DOGFIGHT_ADATA;
 void DogFightARestart();
 void ResetSpaceLevel(WORLDINFO_s *, spacelevel_s *) __asm__("_ZL15ResetSpaceLevelP11WORLDINFO_sP12spacelevel_s")
-    __attribute__((visibility("hidden"), regparm(2)));
-void DrawSpaceLevel(spacelevel_s *) __asm__("_ZL14DrawSpaceLevelP12spacelevel_s")
-    __attribute__((visibility("hidden"), regparm(1)));
+    __attribute__((visibility("hidden")));
+void DrawSpaceLevel(spacelevel_s *) __asm__("_ZL14DrawSpaceLevelP12spacelevel_s") __attribute__((visibility("hidden")));
 
 speedup_s DogFightSpeedList[] = {
     {58.0f, 0.5f},  {72.0f, 1.0f},  {174.0f, 0.5f}, {183.0f, 1.0f}, {207.0f, 0.5f},
@@ -281,10 +280,10 @@ void CruiserDInit(WORLDINFO_s *world) {
     cruiserd_netpacket = static_cast<CRUISERDNETPACKET_s *>(SetLevelHack(12));
 
     char name[16] __attribute__((aligned(16)));
-#define FIND_CRUISER_D_TUBE(NUMBER)                             \
-    sprintf(name, "Tube%d", NUMBER);                            \
-    if (TUBE *tube = Tube_FindByName(world, name))               \
-        tube->flags |= TUBE_FLAG_TOUCH_RADIUS
+#define FIND_CRUISER_D_TUBE(NUMBER)                                                                                    \
+    sprintf(name, "Tube%d", NUMBER);                                                                                   \
+    if (TUBE *tube = Tube_FindByName(world, name))                                                                     \
+    tube->flags |= TUBE_FLAG_TOUCH_RADIUS
     FIND_CRUISER_D_TUBE(1);
     FIND_CRUISER_D_TUBE(2);
     FIND_CRUISER_D_TUBE(3);
@@ -353,30 +352,30 @@ void CruiserDUpdate(WORLDINFO_s *) {
     }
 
     if (CruiserD_Lift_plat_id != -1) {
-            if (CruiserD_direction >= 0) {
-                CruiserD_LiftChase_msg->value = 1.0f;
-                CruiserD_LiftChase = 1;
-            }
-            NUVEC *lift_pos = NuSpecialGetDrawPos(&CruiserD_Lift);
+        if (CruiserD_direction >= 0) {
+            CruiserD_LiftChase_msg->value = 1.0f;
+            CruiserD_LiftChase = 1;
+        }
+        NUVEC *lift_pos = NuSpecialGetDrawPos(&CruiserD_Lift);
 #define CRUISERD_CHECK_PLAYER(index)                                                                                   \
-    {                                                                                                                   \
-        GameObject_s *victim = Player[index];                                                                            \
+    {                                                                                                                  \
+        GameObject_s *victim = Player[index];                                                                          \
         if (victim != NULL && victim->apiobj.field_0x287 == 0 &&                                                       \
-            (victim->apiobj.supporting_platform_id == CruiserD_Lift_plat_id || victim->apiobj.pos_z > lift_pos->z)) { \
-            ObjHitObj(NULL, victim, -1, 0, 0, 1);                                                                        \
-            KillGameObject(victim, 2, 0);                                                                                \
-            if (CruiserD_direction >= 0 && MiscTime == 0.0f)                                                            \
-                MiscTime = 1.0f;                                                                                         \
-        }                                                                                                               \
+            (victim->apiobj.supporting_platform_id == CruiserD_Lift_plat_id || victim->apiobj.pos_z > lift_pos->z)) {  \
+            ObjHitObj(NULL, victim, -1, 0, 0, 1);                                                                      \
+            KillGameObject(victim, 2, 0);                                                                              \
+            if (CruiserD_direction >= 0 && MiscTime == 0.0f)                                                           \
+                MiscTime = 1.0f;                                                                                       \
+        }                                                                                                              \
     }
-            CRUISERD_CHECK_PLAYER(0);
-            CRUISERD_CHECK_PLAYER(1);
-            CRUISERD_CHECK_PLAYER(2);
-            CRUISERD_CHECK_PLAYER(3);
-            CRUISERD_CHECK_PLAYER(4);
-            CRUISERD_CHECK_PLAYER(5);
-            CRUISERD_CHECK_PLAYER(6);
-            CRUISERD_CHECK_PLAYER(7);
+        CRUISERD_CHECK_PLAYER(0);
+        CRUISERD_CHECK_PLAYER(1);
+        CRUISERD_CHECK_PLAYER(2);
+        CRUISERD_CHECK_PLAYER(3);
+        CRUISERD_CHECK_PLAYER(4);
+        CRUISERD_CHECK_PLAYER(5);
+        CRUISERD_CHECK_PLAYER(6);
+        CRUISERD_CHECK_PLAYER(7);
 #undef CRUISERD_CHECK_PLAYER
         if (MiscTime > 0.0f) {
             MiscTime -= FRAMETIME;
@@ -789,10 +788,8 @@ void VaderA_Update(WORLDINFO_s *) {
     }
 
     if (vader_a.reset_flag == 0 &&
-        ((Player[0] != NULL && Player[0]->apiobj.field_0x287 != 0 &&
-          (Player[0]->apiobj.field_0x1f4 & 0x40000) == 0) ||
-         (Player[1] != NULL && Player[1]->apiobj.field_0x287 != 0 &&
-          (Player[1]->apiobj.field_0x1f4 & 0x40000) == 0))) {
+        ((Player[0] != NULL && Player[0]->apiobj.field_0x287 != 0 && (Player[0]->apiobj.field_0x1f4 & 0x40000) == 0) ||
+         (Player[1] != NULL && Player[1]->apiobj.field_0x287 != 0 && (Player[1]->apiobj.field_0x1f4 & 0x40000) == 0))) {
         if (GameCam->sock_position.location.sock != 0 || player->apiobj.field_0x287 != 0) {
             vader_a.reset_flag = 1;
             ResetLevel(NULL, NULL, 1);
@@ -881,8 +878,8 @@ void VaderC_Update(WORLDINFO_s *world) {
                      Player[0]->apiobj.field_0x287 != 0 && (Player[0]->apiobj.field_0x1f4 & 0x40000) == 0;
         bool dead1 = Player[1] != NULL && (Player[1]->apiobj.field_0x1f8 & 0x80) != 0 &&
                      Player[1]->apiobj.field_0x287 != 0 && (Player[1]->apiobj.field_0x1f4 & 0x40000) == 0;
-        bool both_controlled = Player[0] != NULL && (Player[0]->apiobj.field_0x1f8 & 0x80) != 0 &&
-                               Player[1] != NULL && (Player[1]->apiobj.field_0x1f8 & 0x80) != 0;
+        bool both_controlled = Player[0] != NULL && (Player[0]->apiobj.field_0x1f8 & 0x80) != 0 && Player[1] != NULL &&
+                               (Player[1]->apiobj.field_0x1f8 & 0x80) != 0;
         if ((dead0 || dead1) && (static_cast<u8 *>(vaderc_netpacket)[0] == 0 || !both_controlled) &&
             (ChallengeMode == 0 || AreaGlobals.values.field_0x1c <= 9)) {
             vader_c.field_0x95 = 1;
@@ -891,8 +888,7 @@ void VaderC_Update(WORLDINFO_s *world) {
         }
     }
 
-    if (LevGizObst[0] != NULL && LevGizObst[0]->anim_set != NULL &&
-        LevGizObst[0]->anim_set->objects != NULL &&
+    if (LevGizObst[0] != NULL && LevGizObst[0]->anim_set != NULL && LevGizObst[0]->anim_set->objects != NULL &&
         LevGizObst[0]->anim_set->objects->instance_animation != NULL) {
         GAMEANIMOBJ_s *object = LevGizObst[0]->anim_set->objects;
         nuinstanim_s *anim = object->instance_animation;

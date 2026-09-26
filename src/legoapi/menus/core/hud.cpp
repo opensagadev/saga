@@ -124,7 +124,7 @@ void HudRadarPulse::Render() {
 }
 
 void DrawSpaceLevel(spacelevel_s *) __asm__("_ZL14DrawSpaceLevelP12spacelevel_s")
-    __attribute__((used, visibility("hidden"), regparm(1)));
+    __attribute__((used, visibility("hidden")));
 void DrawSpaceLevel(spacelevel_s *) {
     STUBBED();
 }

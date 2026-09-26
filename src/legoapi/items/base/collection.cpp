@@ -558,13 +558,11 @@ void CollectAllCharacters(i32 only_story) {
 
     if (only_story == 0) {
         for (i32 i = 0; i < CollectCount; ++i) {
-            __asm__ __volatile__("" : "+r"(i));
             if (CollectList[i].type != 8)
                 AddToCollection(CollectList[i].id);
         }
     } else {
         for (i32 i = 0; i < CollectCount; ++i) {
-            __asm__ __volatile__("" : "+r"(i));
             if (CollectList[i].type == 1)
                 AddToCollection(CollectList[i].id);
         }
@@ -574,8 +572,7 @@ void CollectAllCharacters(i32 only_story) {
 extern i32 freeplaymode;
 extern i32 freeplay_selected[2];
 static __used__ void Collection_GetSelectingPlayerIDs(i16 *ids) {
-    if (WORLD->area != NULL && WORLD->area == HUB_ADATA && GetMenuID() == 17 &&
-        static_cast<u32>(freeplaymode) <= 3) {
+    if (WORLD->area != NULL && WORLD->area == HUB_ADATA && GetMenuID() == 17 && static_cast<u32>(freeplaymode) <= 3) {
         i32 offset = 0;
         if (MenuPacket.active_player[0] != 0 && freeplay_selected[0] <= 2) {
             ids[0] = MenuPacket.player_model[0];

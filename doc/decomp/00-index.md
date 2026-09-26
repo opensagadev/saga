@@ -22,6 +22,11 @@ Native and WASM builds define `HOST_BUILD` and use the host harness.
 
 ## Documentation map
 
+The [PR #107 integration audit](25-pr107-integration.md) supersedes historical
+experiment notes that recommend inline assembly, register-passing attributes,
+or function-level optimization tricks. Those shortcuts are not permitted by
+the matching skill; the reconstructed behavior is retained in portable C/C++.
+
 | file | use it for |
 |---|---|
 | [01-toolchain.md](01-toolchain.md) | NDK r8e compiler, flags, optimization map, and dependencies |

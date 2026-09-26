@@ -778,9 +778,9 @@ static __used__ void GameMsg_EndDelay_Game(GAMEMESSAGE_s *message) {
 extern char *LEGOASCII_UP, *LEGOASCII_DOWN;
 extern i32 LEGOOBJ_ICON_FRAME_NEUTRAL;
 extern f32 ICONSIZE;
-void GameMsg_Draw_MiniKitDetector(GAMEMESSAGE_s *, nuvec_s *, float)
-    __asm__("_ZL28GameMsg_Draw_MiniKitDetectorP13GAMEMESSAGE_sP7nuvec_sf")
-        __attribute__((visibility("hidden"), force_align_arg_pointer));
+void GameMsg_Draw_MiniKitDetector(GAMEMESSAGE_s *, nuvec_s *,
+                                  float) __asm__("_ZL28GameMsg_Draw_MiniKitDetectorP13GAMEMESSAGE_sP7nuvec_sf")
+    __attribute__((visibility("hidden")));
 void GameMsg_Draw_MiniKitDetector(GAMEMESSAGE_s *message, nuvec_s *position, float scale) {
     NUVEC screen = *position;
     if (message->field_0xfb != 0)
@@ -843,12 +843,12 @@ void GameMsg_Draw_MiniKitDetector(GAMEMESSAGE_s *message, nuvec_s *position, flo
         return;
     }
     if (message->field_0xe4 != 0) {
-        DrawCharIcon(message->field_0xe4, screen.x, screen.y, 0.0f, ICONSIZE, LEGOOBJ_ICON_FRAME_NEUTRAL, 1.0f,
-                     1.0f, 1, NULL);
+        DrawCharIcon(message->field_0xe4, screen.x, screen.y, 0.0f, ICONSIZE, LEGOOBJ_ICON_FRAME_NEUTRAL, 1.0f, 1.0f, 1,
+                     NULL);
         return;
     }
-    Text3DEx(message->text != NULL ? message->text : message->text_buffer, screen.x, screen.y, screen.z, scale,
-             scale, scale, clipped ? 0 : 4, message->red, message->green, message->blue, message->alpha);
+    Text3DEx(message->text != NULL ? message->text : message->text_buffer, screen.x, screen.y, screen.z, scale, scale,
+             scale, clipped ? 0 : 4, message->red, message->green, message->blue, message->alpha);
 }
 
 pushblock_s *NearestPushBlock(WORLDINFO_s *, nuvec_s *, f32);

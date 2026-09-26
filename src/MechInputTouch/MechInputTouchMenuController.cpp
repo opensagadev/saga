@@ -144,24 +144,24 @@ bool MechInputTouchMenuController::OnRelease(GameObject_s &, TouchHolder &holder
             return true;
         }
 
-#define CUSTOMISER_HIT(index, position_offset, width_offset, height_offset)                         \
-        {                                                                                            \
-            const f32 width = *reinterpret_cast<f32 *>(customiser + width_offset);                  \
-            if (width > 0.0f) {                                                                      \
-                const f32 x = down.x - *reinterpret_cast<f32 *>(customiser + position_offset);      \
-                const f32 centre_y = *reinterpret_cast<f32 *>(customiser + position_offset + 4);   \
-                const f32 height = *reinterpret_cast<f32 *>(customiser + height_offset);            \
-                const f32 half_width = fabsf(0.5f * width);                                         \
-                if (x > -half_width && x < half_width) {                                             \
-                    const f32 y = down.y - centre_y;                                                 \
-                    const f32 half_height = fabsf(0.5f * height);                                   \
-                    if (y > -half_height && y < half_height) {                                      \
-                        customiser[0xd10 + index] = 1;                                               \
-                        return true;                                                                 \
-                    }                                                                                \
-                }                                                                                    \
-            }                                                                                        \
-        }
+#define CUSTOMISER_HIT(index, position_offset, width_offset, height_offset)                                            \
+    {                                                                                                                  \
+        const f32 width = *reinterpret_cast<f32 *>(customiser + width_offset);                                         \
+        if (width > 0.0f) {                                                                                            \
+            const f32 x = down.x - *reinterpret_cast<f32 *>(customiser + position_offset);                             \
+            const f32 centre_y = *reinterpret_cast<f32 *>(customiser + position_offset + 4);                           \
+            const f32 height = *reinterpret_cast<f32 *>(customiser + height_offset);                                   \
+            const f32 half_width = fabsf(0.5f * width);                                                                \
+            if (x > -half_width && x < half_width) {                                                                   \
+                const f32 y = down.y - centre_y;                                                                       \
+                const f32 half_height = fabsf(0.5f * height);                                                          \
+                if (y > -half_height && y < half_height) {                                                             \
+                    customiser[0xd10 + index] = 1;                                                                     \
+                    return true;                                                                                       \
+                }                                                                                                      \
+            }                                                                                                          \
+        }                                                                                                              \
+    }
         CUSTOMISER_HIT(0, 0xc98, 0xce0, 0xcf8);
         CUSTOMISER_HIT(1, 0xca4, 0xce4, 0xcfc);
         CUSTOMISER_HIT(2, 0xcb0, 0xce8, 0xd00);
@@ -251,17 +251,14 @@ bool MechInputTouchMenuController::OnSwipe(GameObject_s &, TouchHolder &, i32) {
 void MechInputTouchMenuController::Render() {
 }
 
-__attribute__((optimize("O3"))) void MechInputTouchMenuController::Update(NuInputTouchData const *input) {
+void MechInputTouchMenuController::Update(NuInputTouchData const *input) {
     for (i32 index = 0; index < 4; ++index) {
         stick_values[index] = 0.0f;
     }
     if (input != NULL) {
         i32 *counter = &AnyTouchesThisFrame;
-        asm volatile("" : "+a"(counter) : : "memory");
         i32 zero = 0;
-        asm volatile("" : "+d"(zero) : : "memory");
         i32 remaining = *counter - 1;
-        asm volatile("" : "+c"(remaining) : : "cc");
         *counter = remaining < 0 ? zero : remaining;
     }
 }

@@ -369,8 +369,11 @@ TECHNO *Technos_FindControllingTechno(GameObject_s *object) {
 }
 
 void *Technos_FindTgt(TECHNO_s *techno) {
-    if (techno == NULL || techno->controlled_object != NULL) {
-        return techno != NULL ? techno->controlled_object : NULL;
+    if (techno == NULL) {
+        return NULL;
+    }
+    if (techno->controlled_object != NULL) {
+        return techno->controlled_object;
     }
 
     switch (techno->target_mode) {

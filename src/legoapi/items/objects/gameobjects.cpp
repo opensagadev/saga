@@ -2277,18 +2277,12 @@ void GameAIProcess() {
     AISysProcess(WORLD->ai_sys, reinterpret_cast<APIOBJECT *>(player), reinterpret_cast<APIOBJECT *>(player2));
 
     GameObject_s *object = Obj;
-    asm volatile("" : : "r"(object));
     u8 high_flags;
     i32 object_limit = HIGHGAMEOBJECT;
-    asm volatile("" : : "r"(object_limit));
     // Keep the first-loop counter available in edx at the latch and body entry.
-    for (i32 index = 0; index < object_limit;
-         ++object, index = ({ i32 next = index + 1; asm volatile("" : "+d"(next)); next; })) {
+    for (i32 index = 0; index < object_limit; ++object, ++index) {
         f32 frame_time = FRAMETIME;
-        asm volatile("" : : "x"(frame_time));
-        asm volatile("" : : "d"(index));
         high_flags = object->apiobj.flags_high;
-        asm volatile("" : : "c"(high_flags));
         if (!__builtin_expect((high_flags & 0x10) != 0 && object->apiobj.field_0x287 == 0, 1)) {
             continue;
         }
@@ -2318,11 +2312,9 @@ void GameAIProcess() {
         object->apiobj.visibility_range_extension =
             (object->ai.field_0x1e5 & 0x40) != 0 ? draw_attention_distance : 0.0f;
         i32 mini_cut_cam = MiniCutCam;
-        asm volatile("" : "+r"(mini_cut_cam));
         if (mini_cut_cam != 0 && (high_flags & 1) != 0) {
             i32 gamepad_start = GAMEPAD_START;
             GAMEPAD_s *pad = object->pad_gamepad;
-            asm volatile("" : "+r"(gamepad_start));
             pad->buttons_held &= gamepad_start;
             pad->buttons_pressed &= gamepad_start;
         }
@@ -2335,14 +2327,11 @@ void GameAIProcess() {
         }
     }
     f32 follow_offset = 0.0f;
-    asm volatile("" : : "r"(&VADER_ADATA), "r"(&active_neutral_count), "r"(&FreePlay), "r"(&party_under_cover));
     party_under_cover = 0;
     active_neutral_count = 0;
     i32 cover_result = 0;
-    asm volatile("" : "+m"(cover_result));
     i32 all_under_cover = 1;
     GameObject_s **player_slots = Player;
-    asm volatile("" : "+r"(player_slots));
     for (i32 index = 0; index < 8; ++index) {
         GameObject_s *object = player_slots[index];
         if (object != NULL && (object->apiobj.field_0x1f8 & 0x1001) == 0x1001 &&
@@ -2368,8 +2357,6 @@ void GameAIProcess() {
     f32 drop_timer = drop_back_in_timer;
     APIOBJECT *object_lists[4][64];
     // Keep the original stack frame and pointer-list offsets while scratch slots are identified.
-    char stack_padding_a[32];
-    asm volatile("" : "=m"(stack_padding_a));
     APIOBJECT **neutral_objects = object_lists[0];
     APIOBJECT **interactive_objects = object_lists[1];
     APIOBJECT **goodies = object_lists[2];
@@ -2379,8 +2366,8 @@ void GameAIProcess() {
     i32 goody_count = 0;
     i32 baddy_count = 0;
     GameObject_s *active_player = player;
-    APIOBJECT ** volatile neutral_cursor = neutral_objects;
-    APIOBJECT ** volatile goody_cursor = goodies;
+    APIOBJECT **volatile neutral_cursor = neutral_objects;
+    APIOBJECT **volatile goody_cursor = goodies;
     for (i32 index = 0; index < 8; ++index) {
         GameObject_s *object;
         if (index < 2 && (object = Player[1]) == active_player) {
@@ -2508,11 +2495,8 @@ void GameAIProcess() {
         if ((ai_update_flags & GAME_OBJECT_AI_UPDATE_PROCESS) != 0) {
             object->script_fire_target = NULL;
             shifted_flag = (object->field_0xef9 << 1) & 4;
-            asm volatile("" : "+m"(shifted_flag));
             cleared_flag = object->field_0xef9 & ~4;
-            asm volatile("" : "+m"(cleared_flag));
             cleared_flag |= shifted_flag;
-            asm volatile("" : "+m"(cleared_flag));
             object->field_0xef9 = cleared_flag;
             object->field_0xef8 &= ~0x20;
             if (__builtin_expect((cleared_flag & 0x80) != 0, 1)) {
@@ -2615,8 +2599,7 @@ void GameAIProcess() {
             if (object->character_context == 0x5d)
                 SetBallooningHeight(object, object->ai.movement_destination.y);
             if (__builtin_expect(WORLD->current_level == JEDI_B_LDATA, 0) && object->id == id_JANGOFETT &&
-                (object->field_0xefb & 8) != 0 &&
-                object->hover_height_override != 1.0e9f && object->field_0xe31 == 0)
+                (object->field_0xefb & 8) != 0 && object->hover_height_override != 1.0e9f && object->field_0xe31 == 0)
                 object->field_0xe31 = 1;
             if (object->apiobj.field_0x27c != -1 && object->field_0xe31 != 0 &&
                 (object->ai.capabilities & LEGO_AIPATHCNX_R2D2GLIDE) == 0)
@@ -2628,8 +2611,8 @@ void GameAIProcess() {
             if (connection != NULL && (connection->traversal_flags[object->ai.path_info.direction] &
                                        object->ai.capabilities & LEGO_AIPATHCNX_WALLSHUFFLE) != 0)
                 goto ai_wall_shuffle;
-            if (!(object->apiobj.movement_stuck_time > jump_stuck_time &&
-                  (object->ai.path_info.flags & 1) != 0 && object->ai.path_connection_state == 0))
+            if (!(object->apiobj.movement_stuck_time > jump_stuck_time && (object->ai.path_info.flags & 1) != 0 &&
+                  object->ai.path_connection_state == 0))
                 goto ai_after_wall_shuffle;
             if (object->apiobj.supporting_platform_id != -1 && connection != NULL &&
                 (connection->original_traversal_flags[0] & LEGO_AIPATHCNX_BLOCKAGE) != 0) {
@@ -2927,7 +2910,6 @@ void GameAIProcess() {
                         } else if (second->collision_priority > first->resolved_collision_priority) {
                             first->resolved_collision_priority = second->collision_priority;
                             TestWalkAround(first, second, &difference, radius);
-                            asm volatile("");
                         }
                     } else if (first->collision_priority > second->resolved_collision_priority) {
                         second->resolved_collision_priority = first->collision_priority;
@@ -2966,7 +2948,6 @@ void GameAIProcess() {
     if (TimingBarSet == 4)
         TBCLOSEFN("(Avoid)", 4);
     GameObject_s **cleanup_players = Player;
-    asm volatile("" : "+r"(cleanup_players));
     if (party_under_cover != 0) {
         for (i32 index = 0; index < 8; ++index) {
             GameObject_s *cover_player = cleanup_players[index];
@@ -6873,58 +6854,56 @@ static void DrawPackButton(GAMEMESSAGE_s *message, nuvec_s *position, float scal
     if (!NuIOS_CanMakeInAppPurchases())
         goto purchases_disabled;
     {
-            product.price = 0.0f;
-            NuIOS_GetInAppProductByID(
-                *reinterpret_cast<char **>(&StorePack[static_cast<i8>(message->field_0xfe)].field1_0x4),
-                reinterpret_cast<NuIOS_InAppProduct *>(&product));
-            sprintf(text, "%s ~0%.2f~~", TTab[StorePack[static_cast<i8>(message->field_0xfe)].message_text_index],
-                    static_cast<double>(product.price));
-            Text3DEx(text, position->x, label_y, position->z, scale, scale, scale, 4, message->red,
-                     message->green, message->blue, alpha & 0xff);
+        product.price = 0.0f;
+        NuIOS_GetInAppProductByID(
+            *reinterpret_cast<char **>(&StorePack[static_cast<i8>(message->field_0xfe)].field1_0x4),
+            reinterpret_cast<NuIOS_InAppProduct *>(&product));
+        sprintf(text, "%s ~0%.2f~~", TTab[StorePack[static_cast<i8>(message->field_0xfe)].message_text_index],
+                static_cast<double>(product.price));
+        Text3DEx(text, position->x, label_y, position->z, scale, scale, scale, 4, message->red, message->green,
+                 message->blue, alpha & 0xff);
 
-            const f32 savings_height = text3d_height;
-            for (u32 *bundle_mask = &StoreBundle[0].pack_mask; bundle_mask != &StoreBundle[3].pack_mask;
-                 bundle_mask += 3) {
-                if ((*bundle_mask & (1 << static_cast<i8>(message->field_0xfe))) == 0)
-                    continue;
-                product.price = 0.0f;
-                NuIOS_GetInAppProductByID(*reinterpret_cast<char **>(bundle_mask - 1),
-                                          reinterpret_cast<NuIOS_InAppProduct *>(&product));
-                const f32 bundle_price = product.price;
-                f32 pack_total = 0.0f;
+        const f32 savings_height = text3d_height;
+        for (u32 *bundle_mask = &StoreBundle[0].pack_mask; bundle_mask != &StoreBundle[3].pack_mask; bundle_mask += 3) {
+            if ((*bundle_mask & (1 << static_cast<i8>(message->field_0xfe))) == 0)
+                continue;
+            product.price = 0.0f;
+            NuIOS_GetInAppProductByID(*reinterpret_cast<char **>(bundle_mask - 1),
+                                      reinterpret_cast<NuIOS_InAppProduct *>(&product));
+            const f32 bundle_price = product.price;
+            f32 pack_total = 0.0f;
 #define ADD_PACK_PRICE(index)                                                                                          \
     if (__builtin_expect(Store_IsPackUnlocked(index), 0) == 0) {                                                       \
-        if (__builtin_expect((*bundle_mask & (1u << (index))) != 0, 1)) {                                               \
-            if (NuIOS_GetInAppProductByID(*reinterpret_cast<char **>(&StorePack[index].field1_0x4),                \
+        if (__builtin_expect((*bundle_mask & (1u << (index))) != 0, 1)) {                                              \
+            if (NuIOS_GetInAppProductByID(*reinterpret_cast<char **>(&StorePack[index].field1_0x4),                    \
                                           reinterpret_cast<NuIOS_InAppProduct *>(&product)))                           \
-                pack_total += product.price;                                                                            \
-        }                                                                                                               \
+                pack_total += product.price;                                                                           \
+        }                                                                                                              \
     }
-                ADD_PACK_PRICE(0);
-                ADD_PACK_PRICE(1);
-                ADD_PACK_PRICE(2);
-                ADD_PACK_PRICE(3);
-                ADD_PACK_PRICE(4);
-                ADD_PACK_PRICE(5);
-                ADD_PACK_PRICE(6);
-                ADD_PACK_PRICE(7);
-                ADD_PACK_PRICE(8);
-                ADD_PACK_PRICE(9);
-                ADD_PACK_PRICE(10);
+            ADD_PACK_PRICE(0);
+            ADD_PACK_PRICE(1);
+            ADD_PACK_PRICE(2);
+            ADD_PACK_PRICE(3);
+            ADD_PACK_PRICE(4);
+            ADD_PACK_PRICE(5);
+            ADD_PACK_PRICE(6);
+            ADD_PACK_PRICE(7);
+            ADD_PACK_PRICE(8);
+            ADD_PACK_PRICE(9);
+            ADD_PACK_PRICE(10);
 #undef ADD_PACK_PRICE
-                if (pack_total > bundle_price) {
-                    Text3DEx(TTab[tBUNDLESAVINGSAVAILABLE], position->x, label_y - savings_height, position->z,
-                             scale, scale, scale, 4, 0, 191, 255, alpha & 0xff);
-                    break;
-                }
+            if (pack_total > bundle_price) {
+                Text3DEx(TTab[tBUNDLESAVINGSAVAILABLE], position->x, label_y - savings_height, position->z, scale,
+                         scale, scale, 4, 0, 191, 255, alpha & 0xff);
+                break;
             }
+        }
     }
 
 draw_button:
     DrawPanel3DObject(position->x, position->y, position->z, ICONSIZE, ICONSIZE, ICONSIZE, 0, 0, 0,
                       &WORLD->lev_objs[165].special, 0, pulse);
-    Text3DEx(">", position->x + 0.00625f, position->y, position->z, 0.78f, 0.6f, 0.6f, 0,
-             255, 255, 255, alpha & 0xff);
+    Text3DEx(">", position->x + 0.00625f, position->y, position->z, 0.78f, 0.6f, 0.6f, 0, 255, 255, 255, alpha & 0xff);
 
     MechInputTouchMenuController::PackButtonActive = true;
     MechInputTouchMenuController::PackButtonX = position->x;
@@ -6934,17 +6913,17 @@ draw_button:
     return;
 
 purchases_disabled:
-    Text3DEx(TTab[StorePack[static_cast<i8>(message->field_0xfe)].message_text_index], position->x, label_y, position->z, scale, scale, scale, 4,
-             message->red, message->green, message->blue, alpha & 0xff);
-    Text3DEx(TTab[0x610], position->x, label_y - text3d_height, position->z, scale, scale, scale, 4,
-             255, 31, 0, alpha & 0xff);
+    Text3DEx(TTab[StorePack[static_cast<i8>(message->field_0xfe)].message_text_index], position->x, label_y,
+             position->z, scale, scale, scale, 4, message->red, message->green, message->blue, alpha & 0xff);
+    Text3DEx(TTab[0x610], position->x, label_y - text3d_height, position->z, scale, scale, scale, 4, 255, 31, 0,
+             alpha & 0xff);
     goto draw_button;
 
 purchases_unavailable:
-    Text3DEx(TTab[StorePack[static_cast<i8>(message->field_0xfe)].message_text_index], position->x, label_y, position->z, scale, scale, scale, 4,
-             message->red, message->green, message->blue, alpha & 0xff);
-    Text3DEx(TTab[0x613], position->x, label_y - text3d_height, position->z, scale, scale, scale, 4,
-             255, 31, 0, alpha & 0xff);
+    Text3DEx(TTab[StorePack[static_cast<i8>(message->field_0xfe)].message_text_index], position->x, label_y,
+             position->z, scale, scale, scale, 4, message->red, message->green, message->blue, alpha & 0xff);
+    Text3DEx(TTab[0x613], position->x, label_y - text3d_height, position->z, scale, scale, scale, 4, 255, 31, 0,
+             alpha & 0xff);
     goto draw_button;
 }
 

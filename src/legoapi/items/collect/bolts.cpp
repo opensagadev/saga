@@ -1534,8 +1534,7 @@ static __used__ i32 Bolt_GetShootDirection_Default(GameObject_s *object, nuvec_s
     return angle;
 }
 
-static __used__ unsigned int __attribute__((regparm(2))) Batarang_GetTargetPos(BATARANG_s *batarang, int index,
-                                                                                nuvec_s *position) {
+static __used__ unsigned int Batarang_GetTargetPos(BATARANG_s *batarang, int index, nuvec_s *position) {
     if (batarang->field_0x7d != 0 && batarang->active != 0 && batarang->active == index) {
         GameObject_s *owner = batarang->owner;
         *position = owner->apiobj.collision_position;
@@ -1577,7 +1576,7 @@ static __used__ void EndBolt_EwokTorpedo(BOLT_s *bolt) {
 }
 
 void ProcessSpaceLevel(spacelevel_s *) __asm__("_ZL17ProcessSpaceLevelP12spacelevel_s")
-    __attribute__((visibility("hidden"), regparm(1)));
+    __attribute__((visibility("hidden")));
 void ProcessSpaceLevel(spacelevel_s *) {
     STUBBED();
 }

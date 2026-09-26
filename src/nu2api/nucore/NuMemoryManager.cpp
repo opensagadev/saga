@@ -1251,7 +1251,7 @@ u16 NuMemoryManager::DumpBlock(u32 dump_id, NuSymbolQuery *, Header *header, u32
     char size_text[14];
     char address_text[19];
     u32 block_size = BLOCK_SIZE(header->value);
-    u32 *end_tag = END_TAG(header, block_size);
+    usize *end_tag = END_TAG(header, block_size);
     u32 encoded_index = *end_tag >> 27;
     u32 manager_index = encoded_index == 31 ? *(end_tag - 1) : encoded_index - 1;
     u8 *data = reinterpret_cast<u8 *>(header) + m_headerSize;
@@ -1263,9 +1263,8 @@ u16 NuMemoryManager::DumpBlock(u32 dump_id, NuSymbolQuery *, Header *header, u32
     u16 category = 0;
     if ((m_flags & MEM_MANAGER_DEBUG) == 0) {
         snprintf(line, sizeof(line),
-                 "| %s | %10u | %s |     |           | [%02X %02X %02X %02X %02X %02X %02X %02X ...]\r\n",
-                 address_text, count, size_text, data[0], data[1], data[2], data[3], data[4], data[5], data[6],
-                 data[7]);
+                 "| %s | %10u | %s |     |           | [%02X %02X %02X %02X %02X %02X %02X %02X ...]\r\n", address_text,
+                 count, size_text, data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7]);
     } else {
         DebugHeader *debug = reinterpret_cast<DebugHeader *>(header);
         category = debug->category;
@@ -1287,8 +1286,8 @@ u16 NuMemoryManager::DumpBlock(u32 dump_id, NuSymbolQuery *, Header *header, u32
         const char flag_c = (debug->flags.alloc_flags & 2) != 0 ? 'X' : '-';
 
         if (count > 1 && (flags & 2) == 0) {
-            snprintf(line, sizeof(line), "| %s | %10u | %s | %c%c%c | %s | %s\r\n", address_text, count,
-                     size_text, flag_a, flag_s, flag_c, category_text, debug_name);
+            snprintf(line, sizeof(line), "| %s | %10u | %s | %c%c%c | %s | %s\r\n", address_text, count, size_text,
+                     flag_a, flag_s, flag_c, category_text, debug_name);
         } else if ((debug->flags.alloc_flags & 4) != 0) {
             char value[257];
             u32 length = block_size - m_headerSize - (manager_index >= 30 ? 8 : 4);
@@ -1300,8 +1299,8 @@ u16 NuMemoryManager::DumpBlock(u32 dump_id, NuSymbolQuery *, Header *header, u32
                     value[i] = 0x7f;
             }
             value[length] = '\0';
-            snprintf(line, sizeof(line), "| %s | %10u | %s | %c%c%c | %s | %s [%s]\r\n", address_text,
-                     count, size_text, flag_a, flag_s, flag_c, category_text, debug_name, value);
+            snprintf(line, sizeof(line), "| %s | %10u | %s | %c%c%c | %s | %s [%s]\r\n", address_text, count, size_text,
+                     flag_a, flag_s, flag_c, category_text, debug_name, value);
         } else {
             snprintf(line, sizeof(line),
                      "| %s | %10u | %s | %c%c%c | %s | %s [%02X %02X %02X %02X %02X %02X %02X %02X ...]\r\n",
@@ -1326,15 +1325,18 @@ void NuMemoryManager::DumpBlocksForContext(u32 dump_id, NuSymbolQuery *query, Co
     u32 total_blocks = 0;
 
     error_handler->Dump(this, dump_id,
-                        "+-----------------------------------------------------------------------------------------------------------\r\n");
+                        "+---------------------------------------------------------------------------------------------"
+                        "--------------\r\n");
     snprintf(line, sizeof(line), "| BLOCKS FOR CONTEXT \"%s\"\r\n", context->name);
     error_handler->Dump(this, dump_id, line);
-    error_handler->Dump(this, dump_id,
-                        "+------------+------------+---------------+-----+---------------------------------------------------\r\n");
+    error_handler->Dump(
+        this, dump_id,
+        "+------------+------------+---------------+-----+---------------------------------------------------\r\n");
     error_handler->Dump(this, dump_id,
                         "| ADDRESS    | COUNT      | TOTAL         | ASC | CATEGORY  | DEBUG NAME [DATA]\r\n");
-    error_handler->Dump(this, dump_id,
-                        "+------------+------------+---------------+-----+---------------------------------------------------\r\n");
+    error_handler->Dump(
+        this, dump_id,
+        "+------------+------------+---------------+-----+---------------------------------------------------\r\n");
 
     for (Page *page = pages; page != NULL; page = page->next) {
         Header *end = reinterpret_cast<Header *>(page->end);
@@ -1369,7 +1371,8 @@ void NuMemoryManager::DumpBlocksForContext(u32 dump_id, NuSymbolQuery *query, Co
     if (total_blocks == 0)
         error_handler->Dump(this, dump_id, "| NO BLOCKS LINKED TO THIS CONTEXT\r\n");
     error_handler->Dump(this, dump_id,
-                        "+-----------------------------------------+-----------------------------------------------------------------\r\n");
+                        "+-----------------------------------------+---------------------------------------------------"
+                        "--------------\r\n");
     NuStrFormatSize(size_text, sizeof(size_text), total_bytes, true);
     snprintf(line, sizeof(line), "| TOTAL MEMORY (BYTES) = %13s |\r\n", size_text);
     error_handler->Dump(this, dump_id, line);
@@ -1410,9 +1413,8 @@ u32 NuMemoryManager::FindAndTouchMatchingBlocks(DebugHeader *reference, u32 *tot
                             }
                         }
                     }
-                    if ((options & 2) != 0 &&
-                        strcmp(reinterpret_cast<char *>(candidate) + m_headerSize,
-                               reinterpret_cast<char *>(reference) + m_headerSize) != 0)
+                    if ((options & 2) != 0 && strcmp(reinterpret_cast<char *>(candidate) + m_headerSize,
+                                                     reinterpret_cast<char *>(reference) + m_headerSize) != 0)
                         equal = false;
                     if (equal) {
                         ++match_count;
@@ -1790,8 +1792,8 @@ void NuMemoryManager::VisitPages(NuMemoryManager::IPageVisitor *visitor) {
     pthread_mutex_unlock(&mutex);
 }
 
-i32 NuMemoryManager::_MultiBlockAlloc(u32 size, u32 alignment, u32 count, void **out, u32 flags,
-                                      char const *name, u16 category) {
+i32 NuMemoryManager::_MultiBlockAlloc(u32 size, u32 alignment, u32 count, void **out, u32 flags, char const *name,
+                                      u16 category) {
     if (count == 0)
         return 0;
     alignment = MAX(alignment, 4u);
