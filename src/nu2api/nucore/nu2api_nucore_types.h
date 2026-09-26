@@ -304,7 +304,7 @@ struct NuThreadManager {
     NuThread *GetMainThread();
 };
 struct NuVirtualTouchDevice {
-    f32 GetAspectRatio();
+    static f32 GetAspectRatio();
     void Render();
     void SetCurrentLayoutIndex(u32);
 };
