@@ -867,7 +867,7 @@ static const i32 cubeEdgeIndices[12][2] = {
 };
 
 i32 __attribute__((force_align_arg_pointer)) rawClip(VuVec const *input, VuVec *output, i32, VuVec const &plane) {
-    i32 count = 0;
+    i32 count __attribute__((aligned(16))) = 0;
     for (i32 edge = 0; edge < 12; ++edge) {
         VuVec const &a = input[cubeEdgeIndices[edge][0]];
         VuVec const &b = input[cubeEdgeIndices[edge][1]];
@@ -880,7 +880,18 @@ i32 __attribute__((force_align_arg_pointer)) rawClip(VuVec const *input, VuVec *
             output[count].w = a.w;
             if (db > 0.0f) {
                 count += 2;
+#if defined(__i386__) || defined(__x86_64__)
+                VuVec *dest = &output[count - 1];
+                asm volatile (
+                    "xorps %%xmm0, %%xmm0\n\t"
+                    "movlps (%1), %%xmm0\n\t"
+                    "movhps 8(%1), %%xmm0\n\t"
+                    "movlps %%xmm0, (%0)\n\t"
+                    "movhps %%xmm0, 8(%0)"
+                    : : "r"(dest), "r"(&b) : "xmm0", "memory");
+#else
                 output[count - 1] = b;
+#endif
             } else {
                 count += 2;
                 f32 t = da / (da - db);
