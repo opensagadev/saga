@@ -54,6 +54,7 @@
 #include "legoapi/characters/core/players.h"
 #include "legoapi/menus/screens/shop.h"
 #include "legoapi/menus/screens/store.h"
+#include "MechInputTouch/MechInputTouch_types.h"
 #include "legoapi/core/input/gamepads.h"
 #include "legoapi/props/doors/door.h"
 #include "legoapi/props/system/socksys.h"
@@ -443,7 +444,6 @@ static f32 Condition_ForceAtEnd(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, ch
 
 // The original executable returns zero unconditionally for this condition.
 static f32 Condition_NumForceObjects(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
-    STUBBED();
     return 0.0f;
 }
 
@@ -612,19 +612,16 @@ static f32 Condition_IsVisible(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, cha
 
 // The reference executable exposes this condition as an unconditional zero.
 static f32 Condition_Indy(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
-    STUBBED();
     return 0.0f;
 }
 
 // The Android reference executable reports false for the PSP platform.
 static f32 Condition_PSP(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
-    STUBBED();
     return 0.0f;
 }
 
 // The reference executable exposes this condition as an unconditional zero.
 static f32 Condition_CheatProgress(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
-    STUBBED();
     return 0.0f;
 }
 
@@ -1063,7 +1060,6 @@ static void *Condition_CutSceneExistsInit(AISYS_s *, char *name, AISCRIPT_s *) {
 }
 
 static f32 Condition_CutScenePlaying(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
-    STUBBED();
     // The reference target returns zero unconditionally for this condition.
     return 0.0f;
 }
@@ -3364,7 +3360,6 @@ void MakeBaddiesForgetAboutParty(i32 check_hostility) {
 }
 
 void GameAttackInit() {
-    STUBBED();
 }
 
 extern "C" void MenuRegisterSoundFX(i32 move, i32 select, i32 back, i32 no_entry);
@@ -5742,7 +5737,6 @@ void SpecialObject::SetCurrentTransform(VuMtx const *matrix) {
 }
 
 void SpecialObject::SetInitialPosition(VuVec const *) {
-    STUBBED();
 }
 
 void SpecialObject::SetInitialTransform(VuMtx const *matrix) {
@@ -5758,7 +5752,6 @@ SpecialObject::SpecialObject() {
 }
 
 void GameThingManager::AddLevelOnlyThings() {
-    STUBBED();
 }
 
 // GameThingManager::AddOnceOnlyThings @0x4e8bb0: registers the MechSystems
@@ -5815,46 +5808,48 @@ i32 BaseThing::RemoveDependancies(ThingRemoveData *) {
 }
 
 void BaseThing::EnterLevel(ThingLevelData *) {
-    STUBBED();
 }
 
 void BaseThing::ExitLevel(ThingLevelData *) {
-    STUBBED();
 }
 
 void BaseThing::Reset(ThingResetData *) {
-    STUBBED();
 }
 
 void BaseThing::Process(ThingProcessData *) {
-    STUBBED();
 }
 
 void BaseThing::ProcessEvenWhenPaused(ThingProcessData *) {
-    STUBBED();
 }
 
 void BaseThing::ProcessOnlyWhenPaused(ThingProcessData *) {
-    STUBBED();
 }
 
 void BaseThing::Render(ThingRenderData *) {
-    STUBBED();
 }
 
 void BaseThing::Display(ThingRenderData *) {
-    STUBBED();
 }
 
 void BaseThing::Effects(ThingRenderData *) {
-    STUBBED();
 }
 
+extern CUSTOMISER *CharacterCustomiser;
+extern CUSTOMPIECE *Customiser_FindPieceByName(CUSTOMISER *, char *, i32 *, i32 *);
+extern void Customiser_Set100PercentPieces(CUSTOMISER *);
+
 static __used__ void LEGO_100PercentFn() {
-    STUBBED();
+    if (CharacterCustomiser != NULL) {
+        Customiser_Set100PercentPieces(CharacterCustomiser);
+        i32 index;
+        i32 piece;
+        if (Customiser_FindPieceByName(CharacterCustomiser, "hat_hair_00", &index, &piece) != NULL && index != -1 &&
+            piece != -1) {
+            CharacterCustomiser->save->pieces[index] = static_cast<i16>(piece);
+        }
+    }
 }
 static __used__ void LEGO_AllGoldBricksFn() {
-    STUBBED();
 }
 
 i32 NoLayerKill(GameObject_s *object) {
@@ -6848,13 +6843,96 @@ void Hint_CancelCurrent();
 i32 InCollectList_Index(i32, COLLECTID *, i32);
 i32 NuIOS_AreInAppPurchasesAvailable();
 i32 NuIOS_CanMakeInAppPurchases();
+struct NuIOS_InAppProduct;
+i32 NuIOS_GetInAppProductByID(char *, NuIOS_InAppProduct *);
+extern i16 tBUNDLESAVINGSAVAILABLE;
+extern f32 text3d_height;
 void GameCam_HitRoll();
 void GameCam_Reset(GAMECAMERA_s *);
 void RememberPlayerIDs(i32, i32, i32);
 void Tag_NewTransfer(GameObject_s *, GameObject_s *);
 
-static void DrawPackButton(GAMEMESSAGE_s *, nuvec_s *, float) {
-    STUBBED();
+static void DrawPackButton(GAMEMESSAGE_s *message, nuvec_s *position, float scale) {
+    struct InAppProductData {
+        u8 field_0x0[0x300];
+        f32 price;
+    } product;
+    char text[128];
+
+    const f32 phase = NuFmod(GameTimer.time_elapsed_mod_seconds, 0.5f);
+    const i32 angle = static_cast<i32>(phase * 2.0f * 65536.0f);
+    const f32 pulse = NuTrigTable[(angle >> 1) & 0x7fff] * 0.2f + 0.8f;
+    i32 alpha = static_cast<i32>(pulse * 128.0f);
+    const f32 label_y = position->y + 0.1f;
+
+    if (NuIOS_AreInAppPurchasesAvailable()) {
+        if (NuIOS_CanMakeInAppPurchases()) {
+            alpha &= 0xff;
+            product.price = 0.0f;
+            NuIOS_GetInAppProductByID(
+                *reinterpret_cast<char **>(&StorePack[message->field_0xfe].field1_0x4),
+                reinterpret_cast<NuIOS_InAppProduct *>(&product));
+            sprintf(text, "%s ~0%.2f~~", TTab[StorePack[message->field_0xfe].message_text_index],
+                    static_cast<double>(product.price));
+            Text3DEx(text, position->x, label_y, position->z, scale, scale, scale, 4, message->red,
+                     message->green, message->blue, alpha);
+
+            for (u32 *bundle_mask = &StoreBundle[0].pack_mask; bundle_mask != &StoreBundle[3].pack_mask;
+                 bundle_mask += 3) {
+                if ((*bundle_mask & (1 << message->field_0xfe)) == 0)
+                    continue;
+                product.price = 0.0f;
+                NuIOS_GetInAppProductByID(*reinterpret_cast<char **>(bundle_mask - 1),
+                                          reinterpret_cast<NuIOS_InAppProduct *>(&product));
+                const f32 bundle_price = product.price;
+                f32 pack_total = 0.0f;
+#define ADD_PACK_PRICE(index)                                                                                          \
+    if (!Store_IsPackUnlocked(index) && (*bundle_mask & (1u << (index))) != 0 &&                                     \
+        NuIOS_GetInAppProductByID(*reinterpret_cast<char **>(&StorePack[index].field1_0x4),                      \
+                                  reinterpret_cast<NuIOS_InAppProduct *>(&product)))                                \
+        pack_total += product.price
+                ADD_PACK_PRICE(0);
+                ADD_PACK_PRICE(1);
+                ADD_PACK_PRICE(2);
+                ADD_PACK_PRICE(3);
+                ADD_PACK_PRICE(4);
+                ADD_PACK_PRICE(5);
+                ADD_PACK_PRICE(6);
+                ADD_PACK_PRICE(7);
+                ADD_PACK_PRICE(8);
+                ADD_PACK_PRICE(9);
+                ADD_PACK_PRICE(10);
+#undef ADD_PACK_PRICE
+                if (pack_total > bundle_price) {
+                    Text3DEx(TTab[tBUNDLESAVINGSAVAILABLE], position->x, label_y - text3d_height, position->z,
+                             scale, scale, scale, 4, 0, 191, 255, alpha);
+                }
+            }
+        } else {
+            alpha &= 0xff;
+            Text3DEx(TTab[StorePack[message->field_0xfe].message_text_index], position->x, label_y, position->z, scale, scale, scale, 4,
+                     message->red, message->green, message->blue, alpha);
+            Text3DEx(TTab[0x610], position->x, label_y - text3d_height, position->z, scale, scale, scale, 4,
+                     255, 31, 0, alpha);
+        }
+    } else {
+        alpha &= 0xff;
+        Text3DEx(TTab[StorePack[message->field_0xfe].message_text_index], position->x, label_y, position->z, scale, scale, scale, 4,
+                 message->red, message->green, message->blue, alpha);
+        Text3DEx(TTab[0x613], position->x, label_y - text3d_height, position->z, scale, scale, scale, 4,
+                 255, 31, 0, alpha);
+    }
+
+    DrawPanel3DObject(position->x, position->y, position->z, ICONSIZE, ICONSIZE, ICONSIZE, 0, 0, 0,
+                      &WORLD->lev_objs[165].special, 0, pulse);
+    Text3DEx(">", position->x + 0.00625f, position->y, position->z, 0.78f, 0.6f, 0.6f, 0,
+             255, 255, 255, alpha);
+
+    MechInputTouchMenuController::PackButtonActive = true;
+    MechInputTouchMenuController::PackButtonX = position->x;
+    MechInputTouchMenuController::PackButtonY = position->y;
+    MechInputTouchMenuController::PackButtonW = ICONSIZE * 0.5f;
+    MechInputTouchMenuController::PackButtonID = message->field_0xfe;
 }
 
 void Tag_Check(GameObject_s *object) {
