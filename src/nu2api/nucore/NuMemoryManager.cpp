@@ -1796,7 +1796,9 @@ i32 NuMemoryManager::_MultiBlockAlloc(u32 size, u32 alignment, u32 count, void *
     if (count == 0)
         return 0;
     alignment = MAX(alignment, 4u);
-    const u32 adjusted_size = size + (idx >= 30 ? 4u : 0u);
+    u32 adjusted_size = size;
+    if (idx >= 30)
+        adjusted_size += 4;
     const u32 stride = ALIGN(adjusted_size, alignment) + m_headerSize + 4;
     void *allocation = _TryBlockAlloc(stride * count - (m_headerSize + 4), 4, flags, name, category);
     if (allocation == NULL)
@@ -1806,8 +1808,14 @@ i32 NuMemoryManager::_MultiBlockAlloc(u32 size, u32 alignment, u32 count, void *
     pthread_mutex_lock(&mutex);
     u32 remaining = BLOCK_SIZE(header->value);
     for (u32 i = 0; i < count; ++i) {
-        u32 block_size = i + 1 == count ? remaining : stride;
-        remaining -= block_size;
+        u32 block_size;
+        if (i == count - 1) {
+            block_size = remaining;
+            remaining = 0;
+        } else {
+            block_size = stride;
+            remaining -= stride;
+        }
         header->value = block_size / 4;
         ConvertToUsedBlock(reinterpret_cast<FreeHeader *>(header), alignment, flags, name, category);
         ValidateBlockEndTags(header, __FUNCTION__);

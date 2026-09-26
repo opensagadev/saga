@@ -108,6 +108,18 @@ or forcing `eax` with an empty assembly constraint did not improve that score;
 the constraint actually grew the function to 254 bytes.
 The fully linked GOT-aware diff for the shared-exit version is **78.8%**.
 
+For `_MultiBlockAlloc`, make the last iteration explicit: compare `i` with
+`count - 1`, use the entire remaining byte count for that last block, and
+clear the remainder. A ternary `i + 1 == count ? remaining : stride` causes
+GCC to duplicate the conversion and validation call sequence for the last
+block. The explicit branch shares the call sequence and raises the object
+match from 28.286884% to 67.94262%. Writing the manager-index size adjustment
+as an `if (idx >= 30) adjusted_size += 4` produces the target's conditional
+move instead of an `sbb` sequence; together these changes reach **75.77869%**
+with the exact 426-byte target size. Hoisting `m_headerSize + 4` into a named
+overhead variable lowered the match, so keep the original inline expression.
+The linked GOT-aware diff for this version is **76.14754%**.
+
 The largest remaining difference is block layout. For example,
 `StrandBlocksForContext` validates each block after processing its debug
 fields and has a direct early return that clears all output references when
