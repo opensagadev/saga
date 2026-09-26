@@ -1180,18 +1180,20 @@ void NuMemoryManager::FreeStrandedBlocks() {
 
     pthread_mutex_lock(&mutex);
     for (Page *page = pages; page != NULL;) {
+        Header *first = page->first_header;
+        Header *end = reinterpret_cast<Header *>(page->end);
         FreeHeader *fragment = FindLargestFragment();
         BinUnlink(fragment);
-        u32 fragment_size = BLOCK_SIZE(fragment->block_header.value);
         ConvertToUsedBlock(fragment, 4, 0, "Main", 0);
+        u32 fragment_size = BLOCK_SIZE(fragment->block_header.value);
+        u32 available = fragment_size - m_headerSize;
+        u32 capacity = idx <= 29 ? available - 4 : available - 8;
         stranded_blocks = reinterpret_cast<void **>(ClearUsedBlock(&fragment->block_header, 0));
+        capacity /= sizeof(void *);
         stranded_block_count = 0;
 
-        u32 capacity = (fragment_size - m_headerSize - (idx < 30 ? 4u : 8u)) / sizeof(void *);
         u32 overflow = 0;
-        Header *end = reinterpret_cast<Header *>(page->end);
-        for (Header *header = page->first_header; header != end;) {
-            ValidateBlockEndTags(header, "StrandBlocksForContext");
+        for (Header *header = first; header != end;) {
             u32 block_size = BLOCK_SIZE(header->value);
             if ((header->value & ALLOC_MASK) != 0 &&
                 reinterpret_cast<DebugHeader *>(header)->flags.ctx_id == stranded_ctx.id) {
@@ -1201,7 +1203,8 @@ void NuMemoryManager::FreeStrandedBlocks() {
                     ++overflow;
                 }
             }
-            header = reinterpret_cast<Header *>(reinterpret_cast<u8 *>(header) + block_size);
+            ValidateBlockEndTags(header, "StrandBlocksForContext");
+            header = reinterpret_cast<Header *>(reinterpret_cast<u8 *>(header) + BLOCK_SIZE(header->value));
         }
 
         for (u32 i = 0; i < stranded_block_count; ++i) {

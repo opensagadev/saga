@@ -88,6 +88,17 @@ control-flow tuning, not a claim of exact matches.
 | `DumpBlock` | 1383 / 1314 | 17.546196% |
 | `DumpBlocksForContext` | 1320 / 1600 | 27.779457% |
 
+After aligning its page-load order, validation position, and capacity
+calculation, `FreeStrandedBlocks` reaches **91.7375%** (634 target / 618 current
+bytes) in the direct-object diff. Compute capacity as the available bytes less
+four or eight footer bytes, call `ClearUsedBlock`, then divide the saved
+capacity by pointer size. GCC emits the target's two arithmetic alternatives,
+conditional move, and post-call shift; folding the entire expression before
+the call instead gives a different `sbb` sequence and lowers the match.
+The full target Bazel build succeeds, and the linked-library diff for this
+version is **92.175%**. The remaining 16-byte size difference begins with a
+different `this` register choice and also affects later branch displacements.
+
 The largest remaining difference is block layout. For example,
 `StrandBlocksForContext` validates each block after processing its debug
 fields and has a direct early return that clears all output references when
