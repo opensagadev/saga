@@ -133,3 +133,22 @@ An aligned local `VARIPTR cursor __attribute__((aligned(16)))` in
 realignment prologue. This is more localized than changing the calling
 convention or TU optimization. It raised the score slightly, to 31.379889%;
 the remaining mismatch is loop layout.
+
+`CutScenes_ConfigureList` builds a temporary array of 12-byte records and
+copies it into an aligned arena after parsing. Its target reserves a roughly
+12 KB frame; two filename buffers and a stack-resident duplicate flag affect
+every local offset. Keeping the `cutscene_end` path as fallthrough, indexing
+`entries[CUTCOUNT]` directly, and testing that duplicate flag at the loop top
+raised the first reconstruction from 29.056538% to 56.222614%. The current
+1088-byte body is close to the target's 1101-byte size, but its parser block
+order remains a major source of mismatches.
+
+`RelocateCutScene` returns the new scene pointer. The target writes the
+relocation delta into the source scene before `memmove`, then reloads the
+copied scene's `string_delta` for nested pointer additions instead of
+keeping one register copy of the delta. The target tests only the low byte
+of `version` and uses null-preserving conditional pointer assignments for
+some arrays. Reconstructing those details raised the match from 56.443005%
+to 71.04663% against its 1307-byte target. For repeated relocation loops,
+watch whether GCC emits `cmovne` or a branch and whether the test uses the
+old pointer or the adjusted pointer.
