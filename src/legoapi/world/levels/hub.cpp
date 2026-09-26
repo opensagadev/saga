@@ -2437,14 +2437,15 @@ struct ARCADE_LEVEL_s {
 extern ARCADE_LEVEL_s ArcadeLevel[12];
 static void Hub_DrawArcadeStats(float alpha) {
     const i32 menu_id = GetMenuID();
+    f32 alpha_scaled = alpha * 128.0f;
+    const i32 opacity = static_cast<i32>(alpha_scaled);
     const f32 title_scale = HUB_EPISODESUBTITLESIZE;
-    const i32 opacity = static_cast<i32>(alpha * 128.0f);
     SmartTextEx(TTab[tARCADE_NAME], 0.0f, HUB_EPISODESUBTITLEY, 1.0f, title_scale, title_scale, title_scale, 0,
                 static_cast<u8>(HUB_EPISODER), static_cast<u8>(HUB_EPISODEG), static_cast<u8>(HUB_EPISODEB),
                 1.7f, 1, 0, 0, opacity);
 
-    i32 area_count = 0;
     i32 complete_count = 0;
+    i32 area_count = 0;
     if (Game_AreaSave != NULL) {
         for (i32 i = 0; i < 12; ++i) {
             AREADATA *area = *ArcadeLevel[i].area;
@@ -2459,16 +2460,22 @@ static void Hub_DrawArcadeStats(float alpha) {
     }
     Hub_DrawImportantBrick(211, 0.0f, HUB_EPISODETITLEY, alpha, complete_count, area_count);
 
-    if (GetMenuID() == 16)
+    if (GetMenuID() == 16) {
+        asm volatile("" ::: "memory");
         return;
-    if (menu_id != -1 || Arcade_BothPlayersActive() || tARCADE_NEEDTWOPLAYERS == -1)
+    }
+    if (menu_id != -1 || Arcade_BothPlayersActive())
+        return;
+    i32 text_id = tARCADE_NEEDTWOPLAYERS;
+    asm volatile("" : "+r"(text_id));
+    if (text_id == -1)
         return;
     const f32 pulse = 0.75f +
-                      0.25f * NU_SIN_LUT(static_cast<u16>(static_cast<i32>(NuFmod(GlobalTimer.time_elapsed, 0.5f) *
+                      0.25f * NU_SIN_LUT(static_cast<u16>(static_cast<i32>(NuFmod(GlobalTimer.time_elapsed_mod_seconds, 0.5f) *
                                                                            2.0f * 65536.0f)));
-    SmartTextEx(TTab[tARCADE_NEEDTWOPLAYERS], 0.0f, HUB_EPISODETITLEY, 1.0f, HUB_EPISODETITLESIZE,
+    SmartTextEx(TTab[text_id], 0.0f, HUB_EPISODETITLEY, 1.0f, HUB_EPISODETITLESIZE,
                 HUB_EPISODETITLESIZE, HUB_EPISODETITLESIZE, 0, 255, 0, 0, 1.7f, 1, 0, 0,
-                static_cast<i32>(pulse * alpha * 128.0f));
+                static_cast<i32>(pulse * alpha_scaled));
 }
 
 static void Hub_DrawMiniKitCount(f32 x, f32 y, i32 count, i32 total, f32 alpha) {
