@@ -552,18 +552,21 @@ SAVELOAD_TARGET_OPT __attribute__((aligned(16))) void FS_SetCursorToLastFileName
             if (index == 0 || index + 13 < FS_NumFiles) {
                 return;
             }
-            for (i32 last_visible = index + 12; last_visible >= FS_NumFiles; --last_visible) {
-                i32 previous_length = FS_PrevNameLen(entry);
+            char *current = entry;
+            i32 last_visible = index + 12;
+            do {
+                i32 previous_length = FS_PrevNameLen(current);
                 if (previous_length == 0) {
                     return;
                 }
-                FS_CurrentPos -= previous_length;
+                current = FS_CurrentPos - previous_length;
                 --FS_CurrentPosFileNum;
+                FS_CurrentPos = current;
                 ++FS_CursorLine;
                 if (last_visible == 13) {
                     return;
                 }
-            }
+            } while (last_visible-- >= FS_NumFiles);
             return;
         }
         entry += NuStrLen(entry) + 1;
