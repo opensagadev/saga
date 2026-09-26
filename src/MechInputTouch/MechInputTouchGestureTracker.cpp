@@ -1,14 +1,30 @@
 #include "decomp.h"
 #include "MechInputTouch_types.h"
 #include "globals.h"
+#include "nu2api/nucore/NuInputDevice.h"
 
 struct GestureTrackerRegistration {
     MechInputTouchGestureTracker *tracker;
     i32 priority;
 };
 
-void MechInputTouchGestureTrackingSystem::GetTouch(NuInputTouch const &) {
-    STUBBED();
+TouchHolder *MechInputTouchGestureTrackingSystem::GetTouch(NuInputTouch const &touch) {
+    for (i32 index = 0; index < 10; ++index) {
+        TouchHolder *holder =
+            reinterpret_cast<TouchHolder *>(reinterpret_cast<u8 *>(this) + 0x30 + index * 0x3bc);
+        if (holder->touch_id == static_cast<i32>(touch.unknown_14)) {
+            return holder;
+        }
+    }
+    for (i32 index = 0; index < 10; ++index) {
+        TouchHolder *holder =
+            reinterpret_cast<TouchHolder *>(reinterpret_cast<u8 *>(this) + 0x30 + index * 0x3bc);
+        if (holder->touch_id == -1) {
+            holder->touch_id = touch.unknown_14;
+            return holder;
+        }
+    }
+    return reinterpret_cast<TouchHolder *>(reinterpret_cast<u8 *>(this) + 0x30);
 }
 
 void MechInputTouchGestureTrackingSystem::LookForClicks(GameObject_s &) {

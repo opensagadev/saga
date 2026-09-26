@@ -4,12 +4,14 @@
 #include "legoapi/items/base/apiobject.h"
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/motion/contexts.h"
+#include "legoapi/characters/motion.h"
 #include "gamelib/util/gamelib_util_types.h"
 #include "nu2api/nucore/numemory.h"
 #include "legoapi/menus/core/gamehint.h"
 #include "legoapi/core/input/gamepads.h"
 #include "legoapi/world/levels/levels.h"
 #include "nu2api/numath/nutrig.h"
+#include "nu2api/numath/nuvec.h"
 #include "legoapi/gizmos/transport/teleport.h"
 #include "legoapi/gizmos/door/zipups.h"
 #include "legoapi/gizmos/object/hatmachine.h"
@@ -25,6 +27,9 @@ CABLE_s *GameObjOwnsAnyCables(GameObject_s *);
 void ReleaseCable(CABLE_s *, i32);
 extern "C" i16 id_WATTO;
 extern i16 id_YODA;
+void ForceNextLungeTarget(MechObjectInterface *);
+bool FireBountyHunterRocket(GameObject_s *);
+void SlowWeaponOut(GameObject_s *);
 bool isBucking;
 
 void MechInputTouchGestureBasedController::Activate() {
@@ -95,9 +100,138 @@ bool MechInputTouchGestureBasedController::MenuDisable() {
     return menu_id == 14;
 }
 
-bool MechInputTouchGestureBasedController::OnClick(GameObject_s &, TouchHolder &) {
-    STUBBED();
-    return false;
+bool MechInputTouchGestureBasedController::OnClick(GameObject_s &object, TouchHolder &holder) {
+    if (object.apiobj.character_data == NULL || object.apiobj.character_data->player_config == NULL ||
+        object.id == id_GRABCONTROL || object.character_context == 0x2b) {
+        return false;
+    }
+    holder.clicked = 1;
+    VuVec position(holder.down_position.x, holder.down_position.y, 0.0f, 1.0f);
+    MechObjectInterface *target = holder.target_object.Get();
+    if (target != NULL && (target->GetObjectType() == 5 || target->GetObjectType() == 6)) {
+        i32 flags = 0x1f4f;
+        if (object.field_0xcc0 != NULL && object.field_0xcc0->id != id_YODA) {
+            if (TouchHacks::CanShoot(object)) {
+                flags = 0x5c05;
+            } else if (TouchHacks::CanPoo(object) || object.apiobj.character_data->move_fn == Move_BEAST) {
+                flags = 1;
+            } else {
+                flags = 0;
+            }
+        }
+        target = MechInputTouchSystem::FindTargetObject(object, position, flags, NULL, NULL);
+    }
+    holder.previous_target_object = target;
+    if (target != NULL && target->GetCharacterObject() != NULL && target->GetCharacterObject()->id == id_BIGGUN) {
+        return false;
+    }
+
+    bool dispatch = object.id == id_TRAININGREMOTE || object.character_context == LEGOCONTEXT_JUMP ||
+                    object.character_context == LEGOCONTEXT_BIGJUMP || object.apiobj.field_0x27d != 0 ||
+                    VehicleArea != 0;
+    if (!dispatch) {
+        dispatch = (object.apiobj.character_data->model_flags & 0x2000) != 0 || object.field_0xe31 == 1;
+    }
+    if (!dispatch) {
+        if ((object.apiobj.character_data->model_flags & 0x8000) != 0 && object.id != id_WATTO &&
+            object.field_0xe31 != 1) {
+            object.field_0xf04 |= 0x10;
+            return true;
+        }
+        if (target != NULL && (target->GetObjectType() == 2 || target->GetObjectType() == 4) &&
+            TouchHacks::CanShoot(object)) {
+            ForceNextShootTarget(*target);
+            button_was_pressed[0] = 1;
+            return true;
+        }
+        ForceNextLungeTarget(target);
+        object.field_0xf04 |= 0x20;
+        return true;
+    }
+
+    if (target == NULL) {
+        target = MechInputTouchSystem::FindTargetObject(object, position, 0x80, NULL, &temporary_position);
+    }
+    holder.target_object = target;
+    holder.previous_target_object = target;
+    if (target == NULL) {
+        return false;
+    }
+    target->TargetedFlash();
+    switch (target->GetObjectType()) {
+    case 1:
+    case 5:
+        StartNewTask(new MechTouchTaskPlannedGoTo(*this, target, NULL), holder, false, true);
+        return true;
+    case 2: {
+        GameObject_s *character = target->GetCharacterObject();
+        if (character == Player[0]) {
+            if (object.touch_task != NULL &&
+                object.touch_task->GetHashId().value == MechTouchTaskAttack::HashId.value) {
+                return false;
+            }
+            if (FireBountyHunterRocket(Player[0])) {
+                return false;
+            }
+            if (TouchHacks::CanPoo(object)) {
+                button_was_pressed[3] = 1;
+                return false;
+            }
+            if (PerformCloseMechanic(object, holder)) {
+                return false;
+            }
+            if (object.character_context != LEGOCONTEXT_WEAPONOUT && object.weapon_scale <= 0.0f) {
+                SlowWeaponOut(&object);
+            }
+            return true;
+        }
+        if (character == NULL) {
+            return false;
+        }
+        if (static_cast<i32>(character->apiobj.field_0x1f4) >= 0) {
+            StartNewTask(new MechTouchTaskAttack(*this, target, position), holder, false, true);
+            return true;
+        }
+        VuVec target_position;
+        target->GetPos(target_position, -1);
+        NUVEC direction = {Player[0]->apiobj.position.x - target_position.x, 0.0f,
+                           Player[0]->apiobj.position.z - target_position.z};
+        NuVecNorm(&direction, &direction);
+        f32 scale = target->GetRadius() * 2.5f;
+        temporary_position.position = VuVec(target_position.x + direction.x * scale, target_position.y,
+                                            target_position.z + direction.z * scale, 0.0f);
+        MechTouchTaskPlannedGoTo *task = new MechTouchTaskPlannedGoTo(*this, &temporary_position, NULL);
+        task->field_6fd = 1;
+        task->field_6fe = 1;
+        StartNewTask(task, holder, false, true);
+        return true;
+    }
+    case 3:
+    case 4:
+    case 11: {
+        GIZOBSTACLE_s *obstacle = target->GetGizObstacle();
+        if (obstacle != NULL && reinterpret_cast<u8 *>(obstacle)[0x91] == 2) {
+            StartNewTask(new MechTouchTaskPlannedGoTo(*this, target, NULL), holder, false, true);
+        } else {
+            StartNewTask(new MechTouchTaskAttack(*this, target, position), holder, false, true);
+        }
+        return true;
+    }
+    case 7:
+        StartNewTask(new MechTouchTaskPullLever(*this, target, position), holder, false, true);
+        return true;
+    case 8:
+        StartNewTask(new MechTouchTaskUseTeleport(*this, target, position), holder, false, true);
+        return true;
+    case 9:
+        StartNewTask(new MechTouchTaskHatMachine(*this, target, position), holder, false, true);
+        return true;
+    case 10:
+        StartNewTask(new MechTouchTaskPanel(*this, target, position), holder, false, true);
+        return true;
+    default:
+        return false;
+    }
 }
 
 bool MechInputTouchGestureBasedController::OnDoubleClick(GameObject_s &, TouchHolder &) {

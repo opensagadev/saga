@@ -127,7 +127,8 @@ DECOMP_ASSERT(offsetof(JumpTriggerPacket, velocity) == 0xc, "Jump trigger veloci
 DECOMP_ASSERT(offsetof(JumpTriggerPacket, start) == 0x2c, "Jump trigger start offset");
 DECOMP_ASSERT(offsetof(JumpTriggerPacket, end) == 0x34, "Jump trigger end offset");
 struct TouchHolder {
-    u8 field_0x0[5];
+    i32 touch_id;
+    u8 clicked;
     u8 is_down;
     u8 field_0x6;
     u8 consumed;
@@ -142,6 +143,7 @@ struct TouchHolder {
 DECOMP_ASSERT(offsetof(TouchHolder, is_down) == 5, "Touch holder down flag offset");
 DECOMP_ASSERT(offsetof(TouchHolder, consumed) == 7, "Touch holder consumed flag offset");
 DECOMP_ASSERT(offsetof(TouchHolder, target_object) == 0x14, "Touch holder target offset");
+DECOMP_ASSERT(offsetof(TouchHolder, previous_target_object) == 0x20, "Touch holder previous target offset");
 DECOMP_ASSERT(offsetof(TouchHolder, touch_position) == 0x2c, "Touch holder position offset");
 DECOMP_ASSERT(offsetof(TouchHolder, held_time) == 0x3a4, "Touch holder held time offset");
 struct MechInputTouchGestureTracker {
@@ -314,7 +316,7 @@ struct MechInputTouchButtonFaker : MechInputTouchButton {
     }
 };
 struct MechInputTouchGestureTrackingSystem {
-    void GetTouch(NuInputTouch const &);
+    TouchHolder *GetTouch(NuInputTouch const &);
     void LookForClicks(GameObject_s &);
     void LookForDown(GameObject_s &);
     void LookForGestures(GameObject_s &);
