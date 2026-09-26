@@ -43,6 +43,7 @@ struct MechInputTouchVirtualConsoleController;
 struct MechJumpAutoPilotAddon;
 struct MechObjectInterface;
 struct MechSystems;
+struct MENU_s;
 struct MoveToMarker;
 struct MechTempPosInterface;
 struct MechTouchTask;
@@ -411,24 +412,36 @@ struct MechInputTouchMainDummyStick : NuTouchInputElement {
     }
     MechInputTouchMainDummyStick(MechInputTouchMainController &, NuTouchInputElement::TYPE);
 };
-struct MechInputTouchMenuController {
+struct MechInputTouchMenuController : MechInputTouchMainController, MechInputTouchGestureTracker {
     static i32 AnyTouchesThisFrame; // original bss, consumed by startup/menu presentation
     static bool PackButtonPressed;  // original 1-byte bss (read/cleared by NuMain)
     static i32 PackButtonID;        // original data, initially -1 (menu id for in-app purchase pack)
+    static f32 PackButtonW;
+    static f32 PackButtonX;
+    static f32 PackButtonY;
+    static bool PackButtonActive;
+    static NuVec2 LastTouchPos;
     void Activate();
     void Deactivate();
     MechInputTouchMenuController(i32);
-    void OnClick(GameObject_s &, TouchHolder &);
-    void OnDoubleClick(GameObject_s &, TouchHolder &);
-    void OnDown(GameObject_s &, TouchHolder &);
-    void OnHold(GameObject_s &, TouchHolder &);
-    void OnRelease(GameObject_s &, TouchHolder &);
-    void OnSwipe(GameObject_s &, TouchHolder &, i32);
-    void Render();
-    void Update(NuInputTouchData const *);
+    bool OnClick(GameObject_s &, TouchHolder &) override;
+    bool OnDoubleClick(GameObject_s &, TouchHolder &) override;
+    bool OnDown(GameObject_s &, TouchHolder &) override;
+    bool OnHold(GameObject_s &, TouchHolder &) override;
+    bool OnRelease(GameObject_s &, TouchHolder &) override;
+    bool OnSwipe(GameObject_s &, TouchHolder &, i32) override;
+    void Render() override;
+    void Update(NuInputTouchData const *) override;
     void UpdateButtons(i32);
-    virtual ~MechInputTouchMenuController();
+    ~MechInputTouchMenuController() override;
+
+    TouchHolder *field_70;
+    MENU_s *field_74;
+    u8 field_78;
 };
+DECOMP_ASSERT(offsetof(MechInputTouchMenuController, field_70) == 0x70, "Menu touch controller first state offset");
+DECOMP_ASSERT(offsetof(MechInputTouchMenuController, field_78) == 0x78, "Menu touch controller flag offset");
+DECOMP_ASSERT(sizeof(MechInputTouchMenuController) == 0x7c, "Menu touch controller ABI");
 struct MechInputTouchPodraceController {
     void Activate();
     void Deactivate();
