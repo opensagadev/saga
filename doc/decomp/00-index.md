@@ -38,9 +38,25 @@ Native and WASM builds define `HOST_BUILD` and use the host harness.
 | [13-post-processing-audit.md](13-post-processing-audit.md) | directional-light intensity, retained Android post-effects, and runtime limitations |
 | [14-save-format-audit.md](14-save-format-audit.md) | save layout, serialized enums, original-binary evidence, and unresolved fields |
 | [15-translation-unit-reconstruction.md](15-translation-unit-reconstruction.md) | evidence and staged plan for original TU ownership and optimization |
+| [16-game-object-addons.md](16-game-object-addons.md) | game object extension layouts and behavior |
+| [17-matching-synthesis.md](17-matching-synthesis.md) | cross-file matching observations and next targets |
 | [18-gameaiprocess-codegen-notes.md](18-gameaiprocess-codegen-notes.md) | measured GCC 4.7 control-flow and register-allocation experiments in `GameAIProcess` |
 | [19-apimenu-stub-codegen-notes.md](19-apimenu-stub-codegen-notes.md) | API menu callback reconstruction and match results |
 | [19-nusound-stub-audit.md](19-nusound-stub-audit.md) | verified sound no-ops and OGG callback codegen findings |
+| [20-gamemenuall-stub-notes.md](20-gamemenuall-stub-notes.md) | game menu callbacks and their measured match results |
+| [20-gamestructure-store-stubs.md](20-gamestructure-store-stubs.md) | game structure and store callback control flow |
+| [20-gizmo-stub-codegen-notes.md](20-gizmo-stub-codegen-notes.md) | gizmo action state and GCC matching patterns |
+| [21-cutscene-stub-codegen.md](21-cutscene-stub-codegen.md) | cutscene instance reconstruction and remaining mismatches |
+| [21-dogfight-helper-linkage.md](21-dogfight-helper-linkage.md) | Episode III helper linkage needed for exact calls |
+| [21-mech-context.md](21-mech-context.md) | touch context-task ABI and state layout |
+| [21-mech-menu.md](21-mech-menu.md) | touch menu controller callbacks |
+| [21-mech-speeder-codegen.md](21-mech-speeder-codegen.md) | speeder touch controller ABI and gesture handlers |
+| [21-mech-ui.md](21-mech-ui.md) | touch UI callback no-op audit |
+| [21-mech-virtual.md](21-mech-virtual.md) | virtual console controller layout and code generation |
+| [21-nucore-misc-stub-audit.md](21-nucore-misc-stub-audit.md) | core rendering wrappers, frame timing, and camera matching |
+| [21-render-core-stub-notes.md](21-render-core-stub-notes.md) | renderer stub audit and geometry matches |
+| [22-episode-i-action-codegen.md](22-episode-i-action-codegen.md) | Episode I action handler and mine-creation findings |
+| [episode-iv-vi-stub-codegen.md](episode-iv-vi-stub-codegen.md) | Episode IV–VI handler block-order findings |
 
 ## Non-negotiable matching facts
 
