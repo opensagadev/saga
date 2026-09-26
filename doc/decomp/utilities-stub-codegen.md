@@ -1,0 +1,54 @@
+# Utility stub recovery notes
+
+These notes cover `src/legoapi/misc/utilities.cpp`. Diff scores must come from
+the GOT-aware `objdiff-cli` fork, with the original `res/libTTapp.so` as side
+1 and the NDK r8e target build as side 2.
+
+## Return types hidden by mangling
+
+The C++ mangled names do not encode ordinary return types. Several old stubs
+were declared `void`, yet the original routines return values:
+
+| Symbol | Recovered return | Original size |
+| --- | --- | ---: |
+| `LineCrossedXZ` | `i32` (0, 1, or 2) | 226 bytes |
+| `RatioAlongLineXZ` | `f32` | 253 bytes |
+| `LineToPlaneDistance` | `f32` | 203 bytes |
+| `I64ToX` | `char *` (output + 16) | 302 bytes |
+| `XToI64` | `i64` | 819 bytes |
+| `rawClip` | `i32` (emitted vertex count) | 624 bytes |
+
+Check the return registers and callers before retaining a placeholder return
+type. `CatI64ToX` uses the pointer returned by `I64ToX` to append the NUL.
+
+## Hex conversion codegen
+
+`I64ToX` writes the high 32-bit word followed by the low 32-bit word, eight
+lowercase hex digits each. It writes no terminator. GCC builds a 17-byte local
+`char hex[] = "0123456789abcdef"` array and emits direct stores for all 16
+digits. A loop or a call to `IToX` produces a different body.
+
+`XToI64` is also fully unrolled. For each of exactly 16 signed input chars,
+the original calculates `decimal = digit - '0'` and
+`letter = digit - 'W'`, chooses the latter for `digit >= ':'`, then shifts
+and ORs a signed 64-bit accumulator. This unusual test is what produces the
+target `cmp 0x3a; cmovl` sequence. It does not validate characters or stop
+at a NUL. The first decoded digit sign extends into the 64-bit accumulator.
+
+## Geometry and clipping control flow
+
+`LineCrossedXZ` evaluates four signed 2D cross products in order, with early
+returns. Reordering algebraically equivalent terms changes SSE register
+allocation and float rounding. `RatioAlongLineXZ` rotates the query point and
+line direction by the negated `NuAtan2D` angle through `NuTrigTable`, then
+clamps the projected ratio to 0..1. `LineToPlaneDistance` computes signed
+plane distance at both endpoints and returns the closest distance only when
+both are strictly on the same side; a crossing returns zero.
+
+`rawClip` traverses the fixed, 96-byte `cubeEdgeIndices[12][2]` table. The
+third argument is unused. An endpoint is kept only for strictly positive
+plane distance. Each edge emits either zero vertices or a pair; for a crossing
+the inside endpoint is copied first, then the interpolated point with `w=0`.
+Copies preserve the source `w`. The emitted vertex count ranges from 0 to 24.
+The table is an original local symbol named `_ZL15cubeEdgeIndices`, so keep
+its name and 32-bit integer layout for matching.
