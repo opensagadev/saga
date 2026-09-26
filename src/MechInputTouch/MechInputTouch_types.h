@@ -1275,7 +1275,10 @@ struct MechTouchPlannedWaypoint {
     i32 field_14;
     MechTempPosInterface target_position;
 
-    MechTouchPlannedWaypoint() : active(0), position(VuVec_Zero), field_14(0), target_position() {
+    MechTouchPlannedWaypoint() : target_position() {
+        active = 0;
+        position = VuVec_Zero;
+        field_14 = 0;
     }
 };
 DECOMP_ASSERT(sizeof(MechTouchPlannedWaypoint) == 0x34, "Planned waypoint ABI");
@@ -1297,7 +1300,7 @@ struct MechTouchTaskPlannedGoTo : MechTouchTask {
     bool Update() override;
     ~MechTouchTaskPlannedGoTo() override;
 
-    i32 analysis_state;
+    u32 analysis_state;
     VuVec *path_points;
     i32 field_20;
     i32 path_index;
