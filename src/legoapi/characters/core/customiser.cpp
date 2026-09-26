@@ -473,8 +473,22 @@ void Customiser_Configure(char *, variptr_u *, variptr_u *, i32, i32, i32 (*)(CU
     STUBBED();
 }
 
-void Customiser_FindPieceByName(CUSTOMISER *, char *, i32 *, i32 *) {
-    STUBBED();
+__attribute__((optimize("O3,omit-frame-pointer"))) CUSTOMPIECE *Customiser_FindPieceByName(CUSTOMISER *customiser, char *name,
+                                                                          i32 *category, i32 *index) {
+    if (customiser != NULL) {
+        for (i32 category_index = 0; category_index < 9; ++category_index) {
+            for (i32 piece_index = 0; piece_index < customiser->piece_counts[category_index]; ++piece_index) {
+                if (NuStrICmp(name, customiser->piece_sets[category_index][piece_index].name) == 0) {
+                    if (category != NULL)
+                        *category = category_index;
+                    if (index != NULL)
+                        *index = piece_index;
+                    return &customiser->piece_sets[category_index][piece_index];
+                }
+            }
+        }
+    }
+    return NULL;
 }
 
 i32 Customiser_GetIcon(CUSTOMISER *customiser, CUSTOMISESAVE_s *save, i32) {

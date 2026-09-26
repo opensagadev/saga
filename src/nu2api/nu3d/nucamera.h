@@ -185,6 +185,7 @@ extern "C" {
 
     i32 NuCameraClipTestExtents(NUVEC *min, NUVEC *max, NUMTX *world_mtx, f32 far_clip, i32 should_clip_to_screen);
     i32 NuCameraClipTestExtentsAxisAligned(NUVEC *center, NUVEC *extent, f32 far_clip);
+    i32 NuCameraIntersectsAABB(NUVEC *center, NUVEC *extent, f32 far_clip, i32 use_scissor);
     i32 NuCameraClipTestSphere(NUVEC *pnt, float radius, NUMTX *world_mtx);
     i32 NuCameraClipTestPoints(NUVEC *points, i32 count, NUMTX *world_mtx);
 

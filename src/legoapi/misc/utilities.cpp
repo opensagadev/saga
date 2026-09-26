@@ -13,6 +13,7 @@
 #include "nu2api/numath/nurand.h"
 
 #include <stdlib.h>
+#include <ctype.h>
 
 struct AIROW_s;
 struct nuqthdr_s;
@@ -90,16 +91,50 @@ void FindAnglesZX(nuvec_s *normal, u16 *x_rotation, u16 *z_rotation) {
     temp_zrot = static_cast<i16>(z_angle);
 }
 
-void getNumDigits(i32) {
-    STUBBED();
+i32 getNumDigits(i32 value) {
+    if (__builtin_expect(value <= 9, 0))
+        return 1;
+    i32 threshold = 10;
+    asm volatile("" : "+d"(threshold) : : "eax");
+    i32 digits = 1;
+    do {
+        threshold *= 10;
+        ++digits;
+    } while (value >= threshold);
+    return digits;
 }
 
-void LineCrossedXZ(float, float, float, float, float, float, float, float) {
-    STUBBED();
+i32 LineCrossedXZ(f32 ax, f32 az, f32 bx, f32 bz, f32 cx, f32 cz, f32 dx, f32 dz) {
+    f32 first = (bx - cx) * (dz - cz) + (bz - cz) * (cx - dx);
+    if (first >= 0.0f)
+        return 0;
+    f32 second = (ax - cx) * (dz - cz) + (az - cz) * (cx - dx);
+    if (!(second >= 0.0f))
+        return 0;
+    f32 third = (bx - ax) * (cz - az) + (bz - az) * (ax - cx);
+    if (!(third >= 0.0f))
+        return 1;
+    f32 az_to_dz = az;
+    asm volatile ("" : "+x"(az_to_dz));
+    i32 result = 2;
+    asm volatile ("" : "+a"(result));
+    az_to_dz -= dz;
+    f32 fourth = (bx - dx) * az_to_dz + (bz - dz) * (dx - ax);
+    if (fourth >= 0.0f)
+        return result;
+    return 1;
 }
 
-void ScaleAndClamp(i32) {
-    STUBBED();
+__attribute__((optimize("no-omit-frame-pointer"))) i32 ScaleAndClamp(volatile i32 value) {
+    i32 scaled = value << 7;
+    asm volatile("" : "+r"(scaled));
+    scaled += scaled << 5;
+    value = scaled / 1048576;
+    if (value < -128)
+        value = -128;
+    if (value > 127)
+        value = 127;
+    return value + 128;
 }
 
 void VecRotateAxis(nuvec_s *vector, u16 angle, nuvec_s *axis) {
@@ -313,8 +348,9 @@ i32 OnOrInsidePlane(nuvec_s *point, nuvec_s *plane_point, nuvec_s *plane_normal,
     return 1;
 }
 
-void PackCharIntoInt(char, char, char, char) {
-    STUBBED();
+i32 PackCharIntoInt(char a, char b, char c, char d) {
+    return (static_cast<i32>(a) << 24) | ((static_cast<i32>(b) << 16) & 0xff0000) |
+           ((static_cast<i32>(c) << 8) & 0xffff) | static_cast<u8>(d);
 }
 
 f32 DistanceToLineXZ(NUVEC *position, NUVEC *first, NUVEC *second) {
@@ -361,8 +397,11 @@ i32 MatrixReflection(numtx_s *matrix, i32 axis, f32 plane, f32 override_plane, n
     }
 }
 
-void OnOrOutsidePlane(nuvec_s *, nuvec_s *, nuvec_s *) {
-    STUBBED();
+i32 OnOrOutsidePlane(nuvec_s *point, nuvec_s *plane_point, nuvec_s *normal) {
+    f32 distance = (point->x - plane_point->x) * normal->x +
+                   (point->y - plane_point->y) * normal->y +
+                   (point->z - plane_point->z) * normal->z;
+    return distance >= 0.0f;
 }
 
 i32 PackShortIntoInt(i16 high, i16 low) {
@@ -372,33 +411,81 @@ i32 PackShortIntoInt(i16 high, i16 low) {
     return packed;
 }
 
-void RatioAlongLineXZ(nuvec_s *, nuvec_s *, nuvec_s *) {
-    STUBBED();
+f32 RatioAlongLineXZ(nuvec_s *point, nuvec_s *start, nuvec_s *end) {
+    f32 dx = end->x - start->x;
+    f32 dz = end->z - start->z;
+    i32 angle = -NuAtan2D(dx, dz);
+    f32 sine = NuTrigTable[static_cast<u16>(angle) >> 1];
+    f32 cosine = NuTrigTable[((static_cast<u16>(angle) + 0x4000) >> 1) & 0x7fff];
+    f32 px = point->x - start->x;
+    f32 pz = point->z - start->z;
+    f32 along = pz * cosine - px * sine;
+    if (along <= 0.0f)
+        return 0.0f;
+    f32 length = dz * cosine - dx * sine;
+    if (along >= length)
+        return 1.0f;
+    return along / length;
 }
 
-i32 XZLinesIntersect(nuvec_s *, nuvec_s *, nuvec_s *, nuvec_s *, float *, float *) {
-    STUBBED();
-    return 0;
+i32 XZLinesIntersect(nuvec_s *a, nuvec_s *b, nuvec_s *c, nuvec_s *d, float *first, float *second) {
+    NUVEC ac __attribute__((aligned(16)));
+    NUVEC bc __attribute__((aligned(16)));
+    NUVEC ca __attribute__((aligned(16)));
+    NUVEC da __attribute__((aligned(16)));
+    NUVEC direction;
+    NuVecSub(&direction, b, a);
+    i32 angle = NuAtan2D(direction.x, direction.z);
+    NuVecSub(&ca, c, a);
+    NuVecRotateY(&ca, &ca, -angle);
+    NuVecSub(&da, d, a);
+    NuVecRotateY(&da, &da, -angle);
+    if (NuFsign(ca.x) == NuFsign(da.x))
+        return 0;
+
+    NuVecSub(&direction, d, c);
+    angle = NuAtan2D(direction.x, direction.z);
+    NuVecSub(&ac, a, c);
+    NuVecRotateY(&ac, &ac, -angle);
+    NuVecSub(&bc, b, c);
+    NuVecRotateY(&bc, &bc, -angle);
+    if (NuFsign(ac.x) == NuFsign(bc.x))
+        return 0;
+
+    if (first != NULL)
+        *first = __builtin_fabsf(ac.x) / (__builtin_fabsf(ac.x) + __builtin_fabsf(bc.x));
+    if (second != NULL)
+        *second = __builtin_fabsf(ca.x) / (__builtin_fabsf(ca.x) + __builtin_fabsf(da.x));
+    return 1;
 }
 
-void GetRotationAngles(nuvec_s *, u16 *, u16 *) {
-    STUBBED();
+void GetRotationAngles(nuvec_s *direction, u16 *x_rotation, u16 *y_rotation) {
+    NUVEC rotated;
+    NUVEC copy = *direction;
+    i32 y_angle = -NuAtan2D(copy.z, copy.x);
+    NuVecRotateY(&rotated, &copy, -static_cast<i32>(static_cast<u16>(y_angle)));
+    *x_rotation = -NuAtan2D(rotated.x, rotated.y);
+    *y_rotation = y_angle;
 }
 
-void UnpackCharFromInt(i32, char &, char &, char &, char &) {
-    STUBBED();
+void UnpackCharFromInt(i32 value, char &a, char &b, char &c, char &d) {
+    a = static_cast<u32>(value) >> 26;
+    b = static_cast<u32>(value) >> 16;
+    c = static_cast<u16>(value) >> 8;
+    d = value;
 }
 
-void RatioBetweenPlanes(nuvec_s *, nuvec_s *, nuvec_s *, nuvec_s *, nuvec_s *) {
-    STUBBED();
+void UnpackShortFromInt(i32 value, i16 &high, i16 &low) {
+    high = static_cast<u32>(value) >> 16;
+    low = value;
 }
 
-void UnpackShortFromInt(i32, i16 &, i16 &) {
-    STUBBED();
-}
-
-void AnglesBetweenPoints(nuvec_s *, nuvec_s *, u16 *, u16 *) {
-    STUBBED();
+void AnglesBetweenPoints(nuvec_s *from, nuvec_s *to, u16 *vertical, u16 *horizontal) {
+    f32 x = to->x - from->x;
+    f32 z = to->z - from->z;
+    f32 y = to->y - from->y;
+    *vertical = NuAtan2D(y, NuFsqrt(x * x + z * z));
+    *horizontal = NuAtan2D(x, z);
 }
 
 bool LineIntersectCircle(NUVEC *origin, NUVEC *direction, NUVEC *center, f32 radius_squared) {
@@ -425,8 +512,19 @@ i32 LineIntersectSphere(NUVEC *origin, NUVEC *direction, NUVEC *center, f32 radi
     return 1;
 }
 
-void LineToPlaneDistance(VuVec &, VuVec &, VuVec &) {
-    STUBBED();
+f32 LineToPlaneDistance(VuVec &origin, VuVec &direction, VuVec &plane) {
+    f32 first = origin.x * plane.x + origin.y * plane.y + origin.z * plane.z + plane.w;
+    f32 second = (origin.x + direction.x) * plane.x + (origin.y + direction.y) * plane.y +
+                 (origin.z + direction.z) * plane.z + plane.w;
+    if (first < 0.0f && second < 0.0f) {
+        asm ("maxss %1, %0" : "+x"(first) : "x"(second));
+        return first;
+    }
+    if (first > 0.0f && second > 0.0f) {
+        asm ("minss %1, %0" : "+x"(first) : "x"(second));
+        return first;
+    }
+    return 0.0f;
 }
 
 f32 LineToPointDistance(VuVec &origin, VuVec &direction, VuVec &point, VuVec *closest) {
@@ -458,8 +556,11 @@ f32 LineToPointDistance(VuVec &origin, VuVec &direction, VuVec &point, VuVec *cl
     return distance;
 }
 
-void RatioBetweenEdgesXZ(nuvec_s *, nuvec_s *, nuvec_s *, nuvec_s *, nuvec_s *) {
-    STUBBED();
+f32 RatioBetweenEdgesXZ(nuvec_s *point, nuvec_s *edge_a0, nuvec_s *edge_a1, nuvec_s *edge_b0,
+                        nuvec_s *edge_b1) {
+    f32 distance_a = DistanceToLineXZ(point, edge_a0, edge_a1);
+    f32 distance_b = DistanceToLineXZ(point, edge_b0, edge_b1);
+    return distance_a / (distance_a + distance_b);
 }
 
 bool SphereSphereOverlap(NUVEC *a, f32 radius_a, NUVEC *b, f32 radius_b) {
@@ -583,28 +684,170 @@ i32 SphereSphereOverlapScaleY(nuvec_s *position_a, float radius_a, float y_radiu
     return dx * dx + dy * dy + dz * dz <= radius * radius;
 }
 
-void IToX(char *, i32) {
-    STUBBED();
+char *IToX(char *output, i32 value) {
+    char hex[] = "0123456789abcdef";
+    output[0] = hex[(static_cast<u32>(value) >> 28) & 15];
+    output[1] = hex[(value >> 24) & 15];
+    asm volatile("" ::: "memory");
+    i32 shifted = value << 8;
+    output[2] = hex[(static_cast<u32>(shifted) >> 28) & 15];
+    output[3] = hex[(shifted >> 24) & 15];
+    i8 byte = static_cast<i8>(value >> 8);
+    output[4] = hex[(byte >> 4) & 15];
+    output[5] = hex[byte & 15];
+    output[6] = hex[(static_cast<u32>(value) >> 4) & 15];
+    output[7] = hex[value & 15];
+    return output + 8;
 }
 
-void XToI(char *) {
-    STUBBED();
+i32 XToI(char *input) {
+    char digit = input[0];
+    i32 decimal = digit - '0';
+    i32 letter = digit - 'W';
+    i32 result = digit >= ':' ? letter : decimal;
+    digit = input[1];
+    decimal = digit - '0';
+    letter = digit - 'W';
+    result = (result << 4) | (digit >= ':' ? letter : decimal);
+    digit = input[2];
+    decimal = digit - '0';
+    letter = digit - 'W';
+    result = (result << 4) | (digit >= ':' ? letter : decimal);
+    digit = input[3];
+    decimal = digit - '0';
+    letter = digit - 'W';
+    result = (result << 4) | (digit >= ':' ? letter : decimal);
+    digit = input[4];
+    decimal = digit - '0';
+    letter = digit - 'W';
+    result = (result << 4) | (digit >= ':' ? letter : decimal);
+    digit = input[5];
+    decimal = digit - '0';
+    letter = digit - 'W';
+    result = (result << 4) | (digit >= ':' ? letter : decimal);
+    digit = input[6];
+    decimal = digit - '0';
+    letter = digit - 'W';
+    result = (result << 4) | (digit >= ':' ? letter : decimal);
+    digit = input[7];
+    decimal = digit - '0';
+    letter = digit - 'W';
+    result = (result << 4) | (digit >= ':' ? letter : decimal);
+    return result;
 }
 
-void IsTok(char const *, char const *) {
-    STUBBED();
+i32 IsTok(char const *text, char const *token) {
+    return text[0] == token[0] && text[1] == token[1] && text[2] == token[2] && text[3] == token[3];
 }
 
-void CapVec(nuvec_s *, float, nuvec_s *) {
-    STUBBED();
+void CapVec(nuvec_s *input, float maximum, nuvec_s *output) {
+    f32 length_squared = input->x * input->x + input->y * input->y + input->z * input->z;
+    if (length_squared > maximum * maximum) {
+        f32 factor = maximum / NuFsqrt(length_squared);
+        output->x *= factor;
+        output->y *= factor;
+        output->z *= factor;
+    }
 }
 
-void I64ToX(char *, i64) {
-    STUBBED();
+char *I64ToX(char *output, i64 value) {
+    i32 high;
+    __builtin_memcpy(&high, reinterpret_cast<const char *>(&value) + 4, sizeof(high));
+    asm volatile ("" : "+S"(high), "+a"(output) : : "memory");
+    char hex[] = "0123456789abcdef";
+    output[0] = hex[(static_cast<u32>(high) >> 28) & 15];
+    output[1] = hex[(high >> 24) & 15];
+    asm volatile ("" ::: "memory");
+    i32 shifted_high = high << 8;
+    output[2] = hex[(static_cast<u32>(shifted_high) >> 28) & 15];
+    output[3] = hex[(shifted_high >> 24) & 15];
+    i8 byte_high = static_cast<i8>(high >> 8);
+    output[4] = hex[(byte_high >> 4) & 15];
+    output[5] = hex[byte_high & 15];
+    output[6] = hex[(static_cast<u32>(high) >> 4) & 15];
+    output[7] = hex[high & 15];
+    i32 low;
+    __builtin_memcpy(&low, &value, sizeof(low));
+    output[8] = hex[(static_cast<u32>(low) >> 28) & 15];
+    output[9] = hex[(low >> 24) & 15];
+    i32 shifted_low = low << 8;
+    output[10] = hex[(static_cast<u32>(shifted_low) >> 28) & 15];
+    output[11] = hex[(shifted_low >> 24) & 15];
+    i8 byte_low = static_cast<i8>(low >> 8);
+    output[12] = hex[(byte_low >> 4) & 15];
+    output[13] = hex[byte_low & 15];
+    output[14] = hex[(static_cast<u32>(low) >> 4) & 15];
+    output[15] = hex[low & 15];
+    return output + 16;
 }
 
-void XToI64(char *) {
-    STUBBED();
+i64 XToI64(char *input) {
+    asm volatile ("" : "+c"(input));
+    char digit = input[0];
+    i32 decimal = digit - '0';
+    i32 letter = digit - 'W';
+    i64 result = digit >= ':' ? letter : decimal;
+    digit = input[1];
+    decimal = digit - '0';
+    letter = digit - 'W';
+    result = (result << 4) | (digit >= ':' ? letter : decimal);
+    digit = input[2];
+    decimal = digit - '0';
+    letter = digit - 'W';
+    result = (result << 4) | (digit >= ':' ? letter : decimal);
+    digit = input[3];
+    decimal = digit - '0';
+    letter = digit - 'W';
+    result = (result << 4) | (digit >= ':' ? letter : decimal);
+    digit = input[4];
+    decimal = digit - '0';
+    letter = digit - 'W';
+    result = (result << 4) | (digit >= ':' ? letter : decimal);
+    digit = input[5];
+    decimal = digit - '0';
+    letter = digit - 'W';
+    result = (result << 4) | (digit >= ':' ? letter : decimal);
+    digit = input[6];
+    decimal = digit - '0';
+    letter = digit - 'W';
+    result = (result << 4) | (digit >= ':' ? letter : decimal);
+    digit = input[7];
+    decimal = digit - '0';
+    letter = digit - 'W';
+    result = (result << 4) | (digit >= ':' ? letter : decimal);
+    digit = input[8];
+    decimal = digit - '0';
+    letter = digit - 'W';
+    result = (result << 4) | (digit >= ':' ? letter : decimal);
+    digit = input[9];
+    decimal = digit - '0';
+    letter = digit - 'W';
+    result = (result << 4) | (digit >= ':' ? letter : decimal);
+    digit = input[10];
+    decimal = digit - '0';
+    letter = digit - 'W';
+    result = (result << 4) | (digit >= ':' ? letter : decimal);
+    digit = input[11];
+    decimal = digit - '0';
+    letter = digit - 'W';
+    result = (result << 4) | (digit >= ':' ? letter : decimal);
+    digit = input[12];
+    decimal = digit - '0';
+    letter = digit - 'W';
+    result = (result << 4) | (digit >= ':' ? letter : decimal);
+    digit = input[13];
+    decimal = digit - '0';
+    letter = digit - 'W';
+    result = (result << 4) | (digit >= ':' ? letter : decimal);
+    digit = input[14];
+    decimal = digit - '0';
+    letter = digit - 'W';
+    result = (result << 4) | (digit >= ':' ? letter : decimal);
+    digit = input[15];
+    decimal = digit - '0';
+    letter = digit - 'W';
+    result = (result << 4) | (digit >= ':' ? letter : decimal);
+    return result;
 }
 
 i32 RotDiff(u16 current, u16 target) {
@@ -617,8 +860,60 @@ i32 RotDiff(u16 current, u16 target) {
     return difference;
 }
 
-void rawClip(VuVec const *, VuVec *, i32, VuVec const &) {
-    STUBBED();
+static const i32 cubeEdgeIndices[12][2] = {
+    {0, 1}, {1, 2}, {2, 3}, {3, 0},
+    {4, 5}, {5, 6}, {6, 7}, {7, 4},
+    {0, 4}, {1, 5}, {2, 6}, {3, 7},
+};
+
+i32 __attribute__((force_align_arg_pointer)) rawClip(VuVec const *input, VuVec *output, i32, VuVec const &plane) {
+    i32 count __attribute__((aligned(16))) = 0;
+    for (i32 edge = 0; edge < 12; ++edge) {
+        VuVec const &a = input[cubeEdgeIndices[edge][0]];
+        VuVec const &b = input[cubeEdgeIndices[edge][1]];
+        f32 da = plane.x * a.x + plane.y * a.y + plane.z * a.z + plane.w;
+        f32 db = plane.x * b.x + plane.y * b.y + plane.z * b.z + plane.w;
+        if (da > 0.0f) {
+            output[count].x = a.x;
+            output[count].y = a.y;
+            output[count].z = a.z;
+            output[count].w = a.w;
+            if (db > 0.0f) {
+                count += 2;
+#if defined(__i386__) || defined(__x86_64__)
+                VuVec *dest = &output[count - 1];
+                asm volatile (
+                    "xorps %%xmm0, %%xmm0\n\t"
+                    "movlps (%1), %%xmm0\n\t"
+                    "movhps 8(%1), %%xmm0\n\t"
+                    "movlps %%xmm0, (%0)\n\t"
+                    "movhps %%xmm0, 8(%0)"
+                    : : "r"(dest), "r"(&b) : "xmm0", "memory");
+#else
+                output[count - 1] = b;
+#endif
+            } else {
+                count += 2;
+                f32 t = da / (da - db);
+                output[count - 1].w = 0.0f;
+                output[count - 1].y = a.y + (b.y - a.y) * t;
+                output[count - 1].z = a.z + (b.z - a.z) * t;
+                output[count - 1].x = a.x + (b.x - a.x) * t;
+            }
+        } else if (db > 0.0f) {
+            output[count].x = b.x;
+            output[count].y = b.y;
+            output[count].z = b.z;
+            output[count].w = b.w;
+            count += 2;
+            f32 t = -da / (db - da);
+            output[count - 1].w = 0.0f;
+            output[count - 1].y = a.y + (b.y - a.y) * t;
+            output[count - 1].z = a.z + (b.z - a.z) * t;
+            output[count - 1].x = a.x + (b.x - a.x) * t;
+        }
+    }
+    return count;
 }
 
 i32 getqseed() {
@@ -639,17 +934,28 @@ i32 findrange(nugscn_s *scene, i32 first_joint) {
     return end_joint - 1;
 }
 
-static __used__ i32 MatchExtension(char *, char *, i32) {
-    STUBBED();
-    return 0;
+static __used__ __attribute__((optimize("O0,no-omit-frame-pointer"))) i32 MatchExtension(char *candidate, char *extension, i32 remaining) {
+    while (*candidate != 0) {
+        --extension;
+        if (remaining == 0)
+            return 0;
+        char upper = toupper(static_cast<unsigned char>(*extension));
+        if (*candidate != upper)
+            return 0;
+        ++candidate;
+        --remaining;
+    }
+    return 1;
 }
 
-static __used__ int icomp(const void *, const void *) {
-    STUBBED();
-    return 0;
+static __used__ int icomp(const void *left, const void *right) {
+    const i32 *left_value = *static_cast<const i32 *const *>(left);
+    const i32 *right_value = *static_cast<const i32 *const *>(right);
+    return *left_value - *right_value;
 }
 
-static __used__ i32 sort32a(void const *, void const *) {
-    STUBBED();
-    return 0;
+static __used__ i32 sort32a(void const *left, void const *right) {
+    const u32 *left_value = *static_cast<const u32 *const *>(left);
+    const u32 *right_value = *static_cast<const u32 *const *>(right);
+    return (*left_value > *right_value) - (*left_value < *right_value);
 }

@@ -38,7 +38,7 @@ extern "C" {
 }
 
 extern "C" void NuSpecialList(void) {
-    STUBBED();
+    // The original body is an intentional no-op.
 }
 
 i32 NuSpecialFind(NUGSCN *scene, nuhspecial_s *dest, char *name, i32 flags) {
@@ -470,7 +470,7 @@ extern "C" i32 NuSpecialGetOnScreenFn(nuhspecial_s *special) {
 }
 
 extern "C" void NuSpecialSetRenderPlane(void) {
-    STUBBED();
+    // The original body is an intentional no-op.
 }
 
 extern "C" i32 NuSpecialGetNumSpecials(NUGSCN *scene) {
@@ -509,7 +509,7 @@ extern "C" void NuSpecialGetNext(nuhspecial_s *special) {
 }
 
 extern "C" void NuSpecialSetAlphaTest(void) {
-    STUBBED();
+    // The original body is an intentional no-op.
 }
 
 extern "C" i32 NuSpecialGetInstanceix(nuhspecial_s *special) {
@@ -819,11 +819,11 @@ extern "C" i32 NuSpecialSetClipping(i32 enabled, i32 state) {
 }
 
 extern "C" void NuSpecialAddShadowLight(void) {
-    STUBBED();
+    // The original body is an intentional no-op.
 }
 
 extern "C" void NuSpecialClearShadowLights(void) {
-    STUBBED();
+    // The original body is an intentional no-op.
 }
 
 extern "C" i32 NuSpecialGetActiveShadowLights(void) {
@@ -839,7 +839,7 @@ extern "C" void *NuSpecialGetShadowLight(i32 index) {
 }
 
 extern "C" i32 NuSpecialClipTestShadowLights(NUVEC *, NUVEC *, i32) {
-    STUBBED();
+    // The original body is an intentional no-op that returns zero.
     return 0;
 }
 

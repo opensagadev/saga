@@ -8,6 +8,7 @@
 #include "MechInputTouch/MechInputTouch_types.h"
 #include "gameframework/saveload.h"
 #include "legoapi/cutscenes/cutscenes.h"
+#include "legoapi/audio/sfx.h"
 #include "legoapi/core/input/timer.h"
 #include "legoapi/menus/screens/gamestructure.h"
 #include "legoapi/core/startup/main.h"
@@ -15,6 +16,7 @@
 #include "legoapi/characters/motion.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/menus/core/text.h"
+#include "legoapi/menus/core/panel.h"
 #include "legoapi/menus/screens/gamemenuall.h"
 #include "legoapi/menus/screens/movies.h"
 #include "legoapi/menus/screens/shop.h"
@@ -76,6 +78,7 @@ extern u8 cutskip_dontplaylevelintro;
 void Hint_LoadAllGameState(void);
 void NuIOS_RestoreInAppPurchases(void);
 void NewGame(void);
+void Hub_UpdateKit(void);
 void MenuDrawNewGame(MENU *menu);
 void MenuUpdateNewGame(MENU *menu);
 void MenuDrawLoad(MENU *menu);
@@ -184,6 +187,9 @@ extern i16 tMUSIC;
 extern i16 tHOWTOPLAY;
 extern i16 tON;
 extern i16 tOFF;
+extern i16 tALLSTUDSCOLLECTED;
+extern i16 tEXIT;
+extern i16 tSELECTING;
 extern i16 tCONTROLLER;
 extern f32 PauseMenus_X;
 extern i32 PauseMenus_Align;
@@ -261,6 +267,8 @@ extern "C" bool TestForController();
 extern "C" void SmartTextEx(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment,
                             u8 red, u8 green, u8 blue, f32 max_width, i32 max_lines, void *message_box,
                             i32 suppress_draw, u32 alpha);
+extern "C" void SmartText(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment,
+                          u8 red, u8 green, u8 blue, f32 max_width, i32 max_lines);
 
 MENUFNINFO GameMenuInfo[LEGO_MENU_INFO_COUNT] = {
     {0, MenuEnterTitles, MenuDrawTitles, MenuUpdateTitles, NULL, -1, -1, 0},
@@ -809,15 +817,29 @@ void MenuUpdateNewGame(MENU *menu) {
     }
 }
 static __used__ void MenuDrawMiniKit(MENU *) {
-    STUBBED();
+    if (MenuStopDraw == 0) {
+        const f32 alpha = MenuPacket.active_player[0] != 0 ? 1.0f : DROPINALPHA;
+        DrawCharIcon(MenuPacket.player_model[0], -ICONX, STATSPOSY, 0.0f, ICONSIZE, 0xa6, alpha, alpha, 1, NULL);
+        DrawPlayerIconPrompts(MenuPacket.active_player[0], -1, 1.0f, -1, tEXIT, -1, tSELECTING,
+                              MenuPacket.active_player[1], -1, 1.0f, -1, tEXIT, -1, tSELECTING);
+        NuFmod(GlobalTimer.time_elapsed_mod_seconds, 0.5f);
+        NuFmod(GlobalTimer.time_elapsed_mod_seconds, 0.5f);
+    }
 }
 static __used__ void MenuEnterTitles(MENU *) {
+    // The original callback is empty.
 }
 static __used__ void MenuUpdateMiniKit(MENU *) {
-    STUBBED();
+    Hub_UpdateKit();
 }
 static __used__ void MenuDrawBonusWin(MENU *) {
-    STUBBED();
+    if (MenuStopDraw == 0) {
+        char text[256];
+        Text_MakeScore(1000000, text);
+        const i32 green = 143 + (static_cast<u32>(menu_flash) < 1u ? 48 : 0);
+        const i32 red = 191 + (static_cast<u32>(menu_flash) < 1u ? 64 : 0);
+        Text3D(text, 0.0f, STATSPOSY, 1.0f, 1.0f, 1.0f, 1.0f, 0, red, green, 0);
+    }
 }
 static void MenuRefreshPauseCutTarget() {
     pausecut_skip_to_level = -1;
@@ -979,10 +1001,15 @@ static __used__ void MenuExitHowToPlay(MENU *) {
     TriggerExtraDataSave();
 }
 static __used__ void MenuInitHowToPlay(MENU *) {
-    STUBBED();
+    // The original callback is empty.
 }
-static __used__ void MenuUpdateBonusWin(MENU *) {
-    STUBBED();
+static __used__ void MenuUpdateBonusWin(MENU *menu) {
+    if (menu->menu_time >= 12.0f) {
+        CompleteLevel(WORLD);
+    } else if (menu->menu_time >= 1.5f && BonusWinFlag == 0) {
+        PlaySfx(const_cast<char *>("Victory"), NULL);
+        BonusWinFlag = 1;
+    }
 }
 static __used__ void MenuUpdatePauseCut(MENU *menu) {
     MenuRefreshPauseCutTarget();
@@ -1159,10 +1186,16 @@ static __used__ void MenuDrawPauseRestart(MENU *menu) {
     GameDrawMenuEntry(menu, TTab[tNO]);
 }
 static __used__ void MenuDrawBonusComplete(MENU *) {
-    STUBBED();
+    if (MenuStopDraw == 0) {
+        const i32 green = 143 + (static_cast<u32>(menu_flash) < 1u ? 48 : 0);
+        const i32 red = 191 + (static_cast<u32>(menu_flash) < 1u ? 64 : 0);
+        SmartText(TTab[tALLSTUDSCOLLECTED], 0.0f, STATSPOSY, 1.0f, 1.0f, 1.0f, 1.0f, 0, red, green, 0, 1.7f, 1);
+    }
 }
-static __used__ void MenuDrawSelectLanguage(MENU *) {
-    STUBBED();
+static __used__ void MenuDrawSelectLanguage(MENU *menu) {
+    for (i32 i = 0; i < LANGUAGECOUNT; ++i) {
+        GameDrawMenuEntry(menu, reinterpret_cast<char *>(Text_LanguageList[i].unknown_04));
+    }
 }
 static __used__ void MenuUpdatePauseRestart(MENU *menu) {
     if (menu->confirm_pressed != 0 && menu->selected_item == 0) {
@@ -1177,9 +1210,17 @@ static __used__ void MenuUpdatePauseRestart(MENU *menu) {
         MenuSFX = GameAudio_GetSfxId(0x31);
     }
 }
-static __used__ void MenuUpdateBonusComplete(MENU *) {
-    STUBBED();
+static __used__ void MenuUpdateBonusComplete(MENU *menu) {
+    if (menu->menu_time >= 12.0f) {
+        CompleteLevel(WORLD);
+    } else if (menu->menu_time >= 1.5f && BonusWinFlag == 0) {
+        PlaySfx(const_cast<char *>("Victory"), NULL);
+        BonusWinFlag = 1;
+    }
 }
-static __used__ void MenuUpdateSelectLanguage(MENU *) {
-    STUBBED();
+static __used__ void MenuUpdateSelectLanguage(MENU *menu) {
+    if (menu->confirm_pressed != 0) {
+        Text_SetLanguage(Text_LanguageList[menu->selected_item].language);
+        BackupMenu();
+    }
 }

@@ -15,6 +15,7 @@
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/characters/motion.h"
+#include "legoapi/cutscenes/minicamcut.h"
 #include "legoapi/core/input/gamepads.h"
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/props/objects/techno.h"
@@ -318,13 +319,110 @@ void GameCameraMakeMiniCut(nugspline_s *spline, f32 start, f32 end, f32 blend_in
     ObstacleCamAlwaysSnapAngles = 0;
 }
 
-void GameCameraMakeMiniCut2(nuvec_s *, nuvec_s *, i32, float, float, float, float, i32, i32, i32) {
-    STUBBED();
+extern nugspline_s ObstacleCamCutSpline;
+extern i32 ObstacleCamTargetGuid;
+extern NUVEC ObstacleCamCutPts[2];
+
+void GameCameraMakeMiniCut2(nuvec_s *camera, nuvec_s *target, i32 target_guid, float start, float end,
+                            float blend_in, float blend_out, i32 follow_target, i32 follow_camera, i32 borders) {
+    ObstacleCamCutSpline.length = 2;
+    ObstacleCamCutSpline.pt_size = 12;
+    ObstacleCamCutSpline.pts = ObstacleCamCutPts;
+    ObstacleCamTargetGuid = target_guid;
+    if (camera != NULL) {
+        ObstacleCamCutPts[0] = *camera;
+    }
+    if (target != NULL) {
+        ObstacleCamCutPts[1] = *target;
+    }
+    GameCameraMakeMiniCut(&ObstacleCamCutSpline, start, end, blend_in, blend_out, borders, 0);
+    if (follow_target != 0 && target != NULL) {
+        ObstacleCamCutTgtPtr = target;
+    }
+    if (follow_camera != 0 && camera != NULL) {
+        ObstacleCamCutCamPtr = camera;
+    }
 }
 
-void GameCameraMakeMiniCut3(u32, float, i32, i32, i32, void *, i32, nuvec_s *, float, float, float, float, float, float,
-                            float, i32, nugspline_s *, char, char) {
-    STUBBED();
+void GameCameraMakeMiniCut3(u32 flags, float distance, i32 pitch, i32 yaw, i32 roll, void *focus, i32 target_guid,
+                            nuvec_s *position, float start_time, float blend_in_time, float end_time,
+                            float blend_out_time, float blend_time, float hold_time, float max_time, i32 borders,
+                            nugspline_s *spline, char mode, char easing) {
+    GameCam->blend_time = 0.0f;
+    if (flags & 0x200) {
+        Minicam_ResetForNewCut();
+        Minicam_AddCommand(1, blend_in_time, 0, NULL, v000);
+        MiniCam.duration = max_time;
+        if ((flags & 0x80) && focus != NULL) {
+            MiniCam.focus = static_cast<NUVEC *>(focus);
+            MiniCam.focus_offset = v000;
+            MiniCam.target = *static_cast<NUVEC *>(focus);
+            MiniCam.position = *position;
+            GameCameraMakeMiniCut2(&MiniCam.position, &MiniCam.target, target_guid, start_time, 1000000000.0f,
+                                   blend_in_time, 0.0f, 1, 1, MiniCam.reserved_384);
+        } else {
+            MiniCam.target = v000;
+            MiniCam.focus_offset = v000;
+            MiniCam.focus = &MiniCam.target;
+            MiniCam.position = *position;
+            GameCameraMakeMiniCut2(&MiniCam.position, NULL, target_guid, start_time, 1000000000.0f,
+                                   blend_in_time, 0.0f, 0, 1, MiniCam.reserved_384);
+        }
+    }
+
+    if ((flags & 0x1c00) == 0) {
+        blend_time = 0.0f;
+        flags |= 0x800;
+    }
+    if (flags & 0x80)
+        Minicam_AddCommand(8, 0.0f, 0, focus, v000);
+    if (flags & 0x100)
+        Minicam_AddCommand(16, 0.0f, 0, NULL, *position);
+    if (flags & 0x2000)
+        Minicam_AddCommand(17, 0.0f, 0, spline, v000);
+    if (flags & 1)
+        Minicam_AddCommand(9, distance, 0, NULL, v000);
+    if (flags & 0x10)
+        Minicam_AddCommand(13, 0.0f, pitch, NULL, v000);
+    if (flags & 2)
+        Minicam_AddCommand(10, 0.0f, pitch, NULL, v000);
+    if (flags & 0x20)
+        Minicam_AddCommand(14, 0.0f, yaw, NULL, v000);
+    if (flags & 4)
+        Minicam_AddCommand(11, 0.0f, yaw, NULL, v000);
+    if (flags & 0x40)
+        Minicam_AddCommand(15, 0.0f, roll, NULL, v000);
+    if (flags & 8)
+        Minicam_AddCommand(12, 0.0f, roll, NULL, v000);
+    if (mode != -1)
+        Minicam_AddCommand(6, 0.0f, mode, NULL, v000);
+    if (easing != -1)
+        Minicam_AddCommand(7, 0.0f, easing, NULL, v000);
+
+    if ((flags & 5) == 5 && blend_in_time > 0.0f && blend_time == 0.0f)
+        blend_time = 0.01f;
+    if ((flags & 0x1800) == 0x1800) {
+        Minicam_AddCommand(4, blend_time, 0, NULL, v000);
+        if (hold_time > blend_time)
+            Minicam_AddCommand(5, hold_time - blend_time, 0, NULL, v000);
+    } else if (flags & 0x800) {
+        Minicam_AddCommand(4, blend_time, 0, NULL, v000);
+    } else if (flags & 0x1000) {
+        Minicam_AddCommand(5, hold_time, 0, NULL, v000);
+    }
+    if (flags & 0x400) {
+        float elapsed = 0.0f;
+        if ((flags & 0x1800) == 0x1800)
+            elapsed = hold_time > blend_time ? hold_time : blend_time;
+        else if (flags & 0x800)
+            elapsed = blend_time;
+        else if (flags & 0x1000)
+            elapsed = hold_time;
+        Minicam_AddCommand(3, MAX(0.0f, end_time - elapsed), 0, NULL, v000);
+        ObstacleCamBlendOutTime = blend_out_time;
+    }
+    if (borders != 0)
+        MiniCam.reserved_384 = 1;
 }
 
 u16 GameCam_GetAdjustedYRot(GAMECAMERA_s *camera) {
@@ -376,6 +474,8 @@ NUVEC CustomisePos[2];
 f32 HUB_MINIKITVIEWER_CAMDY = 0.3f;
 f32 PodCamDist = 0.0f;
 NUVEC ObstacleCamCutPts[2];
+nugspline_s ObstacleCamCutSpline;
+i32 ObstacleCamTargetGuid;
 f32 EMPERORFIGHTA_CAMDYHACK = 0.35f;
 i32 movegamecamera_forcesock = -1;
 NUMTX CutCamMtx;
@@ -1869,7 +1969,6 @@ void do_Pad_flymode_camera(edcam_s *camera, float delta_time, nupad_s *pad) {
 }
 
 void InitCameraTargetMaterial() {
-    STUBBED();
 }
 
 i32 GoingForwardsAlongNarrowSock(GameObject_s *object) {
@@ -1902,8 +2001,8 @@ extern "C" {
 
     i32 near_clip_at_cursor;
 
-    void cbNearClipAtCursor(eduimenu_s *, eduiitem_s *, u32) {
-        STUBBED();
+    void cbNearClipAtCursor(eduimenu_s *, eduiitem_s *item, u32) {
+        near_clip_at_cursor = reinterpret_cast<const u8 *>(item)[0x11] & 1;
     }
 
     void do_Pad_Standard_camera(edcam_s *camera, f32 delta_time, nupad_s *pad) {

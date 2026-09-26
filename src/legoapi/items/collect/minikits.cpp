@@ -24,6 +24,7 @@
 #include "legoapi/render/fx.h"
 #include "nu2api/numath/numtx.h"
 #include "nu2api/numath/nutrig.h"
+#include "nu2api/numath/nufloat.h"
 #include "nu2api/nu3d/nugscn.h"
 #include "nu2api/nu3d/nurndr.h"
 #include "nu2api/nu3d/nuspecial.h"
@@ -113,12 +114,46 @@ i32 AllMiniKitsDone(AREASAVE_s *save) {
     return 1;
 }
 
-void MiniKitDetector(nuvec_s *) {
-    STUBBED();
+char *LEGOASCII_BIGARROW = NULL;
+void GameMsg_Draw_MiniKitDetector(GAMEMESSAGE_s *, nuvec_s *, float)
+    __asm__("_ZL28GameMsg_Draw_MiniKitDetectorP13GAMEMESSAGE_sP7nuvec_sf")
+        __attribute__((visibility("hidden")));
+void MiniKitDetector(nuvec_s *position) {
+    ADDGAMEMSG message = AddGameMsg_Default;
+    message.text = LEGOASCII_BIGARROW != NULL ? LEGOASCII_BIGARROW : txt_UNKNOWN;
+    message.position = position;
+    message.flags = 0x40083;
+    message.scale = 0.6f;
+    message.field_0x44 = reinterpret_cast<void *>(GameMsg_Draw_MiniKitDetector);
+    message.field_0x4f = 4;
+    AddGameMsg(&message);
 }
 
-void CharMiniKit_Draw(i32, numtx_s *, i32, float, float) {
-    STUBBED();
+i32 MatrixReflection(NUMTX *, i32, f32, f32, NUMTX *);
+void __attribute__((force_align_arg_pointer)) CharMiniKit_Draw(i32 id, numtx_s *matrix, i32 reflection_axis,
+                                                               float reflection_plane, float reflection_height) {
+    if (Char_MiniKit == NULL)
+        return;
+    HUBMINIKITPIECES_s *kit = Char_MiniKit[id];
+    if (kit == NULL || kit->piece_count == 0)
+        return;
+    bool reflection = reflection_axis != 0 && reflection_plane != 2000000.0f;
+    for (i32 i = 0; i < kit->piece_count; ++i) {
+        HUBMINIKITPIECE_s *piece = &kit->pieces[i];
+        if (NuSpecialExistsFn(&piece->special) == 0)
+            continue;
+        NUMTX draw_matrix = piece->matrix;
+        NuMtxMul(&draw_matrix, &draw_matrix, matrix);
+        NuSpecialDrawAt(&piece->special, &draw_matrix);
+        if (reflection) {
+            NUMTX reflected;
+            if (MatrixReflection(&draw_matrix, reflection_axis, reflection_plane, reflection_height, &reflected) != 0) {
+                NuRndrStartReflectionRender(0);
+                NuSpecialDrawAt(&piece->special, &reflected);
+                NuRndrEndReflectionRender();
+            }
+        }
+    }
 }
 
 extern i32 currentminikit, newminikitcount;
@@ -382,8 +417,28 @@ void MiniKit_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float ela
     }
 }
 
-void MiniKit_GameMsg_End(GAMEMESSAGE_s *) {
-    STUBBED();
+extern i32 LEGOOBJ_MINIKIT, LEGOOBJ_CHARKIT;
+void EndChallenge(i32, i32);
+void GameCam_Judder(GAMECAMERA_s *, f32, i32, NUVEC *);
+void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
+void MiniKit_GameMsg_End(GAMEMESSAGE_s *message) {
+    MiniKitScale = 2.0f;
+    if (WorldInfo_CurrentlyActive()->area != NULL && message->icon != -1) {
+        if (message->icon == LEGOOBJ_MINIKIT) {
+            ++AreaGlobals.values.field_0x14;
+            if (AreaGlobals.values.field_0x14 > AreaGlobals.values.field_0x0c)
+                AreaGlobals.values.field_0x14 = AreaGlobals.values.field_0x0c;
+        } else if (message->icon == LEGOOBJ_CHARKIT &&
+                   AreaGlobals.values.field_0x20 < AreaGlobals.values.field_0x1c) {
+            ++AreaGlobals.values.field_0x20;
+            if (AreaGlobals.values.field_0x20 == AreaGlobals.values.field_0x1c &&
+                AreaGlobals.values.field_0x1c > 9)
+                EndChallenge(2, 1);
+        }
+    }
+    GameAudio_PlaySfx(0x26, NULL, 0, 0);
+    NewRumbleAllPlayers(0.6f, 0.0f, 0, 0);
+    GameCam_Judder(GameCam, -0.2f, 0, NULL);
 }
 
 void ResetMinikitCounter() {
@@ -514,8 +569,10 @@ void CharacterMiniKits_Dump(WORLDINFO_s *world) {
     }
 }
 
-void MiniKit_GameMsg_Update(GAMEMESSAGE_s *) {
-    STUBBED();
+void MiniKit_GameMsg_Update(GAMEMESSAGE_s *message) {
+    i32 angle = static_cast<i32>((NuFmod(GlobalTimer.time_elapsed, 4.0f) * 0.25f) * 65536.0f);
+    message->rotation_y = static_cast<u16>(angle);
+    message->field_0xe0 = static_cast<u16>(NuTrigTable[angle & 0x7fff] * 1820.0f);
 }
 
 void SetEffectVisibility(char *, i32);

@@ -190,7 +190,7 @@ void SpaceResetAudioPoint() {
     SetPreSeekStartPoint(0.0f);
 }
 i32 CheckMusicSwapInstant() {
-    STUBBED();
+    // Original Android build is a platform placeholder returning false.
     return 0;
 }
 void UpdateBackgroundMusic() {

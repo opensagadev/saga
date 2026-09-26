@@ -2,19 +2,23 @@
 #include "gameapi/ai/aisys/aisys.h"
 #include "globals.h"
 #include "legoapi/characters/core/charconfig.h"
+#include "legoapi/characters/core/character.h"
 #include "legoapi/characters/motion/gameanim.h"
+#include "legoapi/characters/motion.h"
 #include "legoapi/cutscenes/cutscenes.h"
 #include "legoapi/gizmo/base/gizactions.h"
 #include "legoapi/gizmo/base/gizmo.h"
 #include "legoapi/gizmos/object/gizbuildits.h"
 #include "legoapi/gizmo/object/gizmoblowups.h"
 #include "legoapi/gizmos/object/gizobstacles.h"
+#include "legoapi/gizmos/fx/gizmopickups.h"
 #include "legoapi/gizmos/traps/gizforce.h"
 #include "legoapi/gizmos/traps/gizturrets.h"
 #include "legoapi/gizmos/trigger/gizspecial.h"
 #include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/props/doors/door.h"
+#include "legoapi/props/objects/techno.h"
 #include "legoapi/props/system/socksys.h"
 #include "legoapi/render/fx.h"
 #include "legoapi/world/level.h"
@@ -67,8 +71,16 @@ static void GizAction_TurnOnFlowBox(GIZFLOW_s *flow, FLOWBOX_s *, char **params,
     }
 }
 
-static void GizActions_ActivateBelt(GIZFLOW_s *, FLOWBOX_s *, char **, int) {
-    STUBBED();
+static void GizActions_ActivateBelt(GIZFLOW_s *, FLOWBOX_s *, char **params, int count) {
+    i32 active = 1;
+    for (i32 index = 0; index < count; ++index) {
+        if (NuStrICmp(params[index], "FALSE") == 0) {
+            active = 0;
+        } else if (NuStrICmp(params[index], "TRUE") == 0) {
+            active = 1;
+        }
+    }
+    WorldInfo_CurrentlyActive()->field_0x5174 = static_cast<i8>(active);
 }
 
 static void GizActions_ChangeObstTriggerType(GIZFLOW_s *flow, FLOWBOX_s *, char **params, int count) {
@@ -140,12 +152,37 @@ static void GizActions_HitBlowup(GIZFLOW_s *, FLOWBOX_s *, char **params, int co
     }
 }
 
-static void GizActions_PlayCutscene(GIZFLOW_s *, FLOWBOX_s *, char **, int) {
-    STUBBED();
+static void GizActions_PlayCutscene(GIZFLOW_s *, FLOWBOX_s *, char **params, int count) {
+    char *name = NULL;
+    for (i32 index = 0; index < count; ++index) {
+        char *value = NuStrIStr(params[index], "name=");
+        if (value != NULL) {
+            name = value + NuStrLen("name=");
+        }
+    }
+    NewCutScene(NULL, WorldInfo_CurrentlyActive()->cutscene_sys, name, 0);
 }
 
-static void GizActions_PlayRadio(GIZFLOW_s *, FLOWBOX_s *, char **, int) {
-    STUBBED();
+static void GizActions_PlayRadio(GIZFLOW_s *, FLOWBOX_s *, char **params, int count) {
+    if (count <= 0) {
+        return;
+    }
+    char *special_name = NULL;
+    char *blowup_name = NULL;
+    i32 play = 1;
+    for (i32 index = 0; index < count; ++index) {
+        char *value = NuStrIStr(params[index], "BlowUp=");
+        if (value != NULL) {
+            blowup_name = value + NuStrLen("BlowUp=");
+        } else if ((value = NuStrIStr(params[index], "Special=")) != NULL) {
+            special_name = value + NuStrLen("Special=");
+        } else if (NuStrICmp(params[index], "FALSE") == 0) {
+            play = 0;
+        }
+    }
+    if (special_name != NULL || blowup_name != NULL) {
+        PlayRadio(special_name, blowup_name, play);
+    }
 }
 
 static void GizActions_PlayForce(GIZFLOW_s *flow, FLOWBOX_s *, char **params, int count) {
@@ -229,8 +266,55 @@ static void GizActions_PlaySpecial(GIZFLOW_s *flow, FLOWBOX_s *, char **params, 
     }
 }
 
-static void GizActions_PlayObstacle(GIZFLOW_s *, FLOWBOX_s *, char **, int) {
-    STUBBED();
+static void GizActions_PlayObstacle(GIZFLOW_s *flow, FLOWBOX_s *, char **params, int count) {
+    if (count <= 0) {
+        return;
+    }
+    char *name = NULL;
+    i32 forwards = 1;
+    i32 snap = 0;
+    i32 stay_open = 0;
+    i32 stay_shut = 0;
+    for (i32 index = 0; index < count; ++index) {
+        char *value = NuStrIStr(params[index], "Name");
+        if (value != NULL) {
+            name = value + NuStrLen("Name") + 1;
+        } else if (NuStrICmp(params[index], "BACKWARD") == 0) {
+            forwards = 0;
+        } else if (NuStrICmp(params[index], "FORWARD") == 0) {
+            forwards = 1;
+        } else if (NuStrICmp(params[index], "SNAP") == 0) {
+            snap = 1;
+        } else if (NuStrICmp(params[index], "STAYOPEN") == 0) {
+            stay_open = 1;
+        } else if (NuStrICmp(params[index], "STAYSHUT") == 0) {
+            stay_shut = 1;
+        }
+    }
+    if (name == NULL) {
+        return;
+    }
+    GIZMO *gizmo = GizmoFindByName(flow->gizmo_sys, obstacle_gizmotype_id, name);
+    GIZOBSTACLE_s *obstacle = gizmo != NULL ? static_cast<GIZOBSTACLE_s *>(gizmo->object) : NULL;
+    if (obstacle == NULL) {
+        return;
+    }
+    if (forwards != 0) {
+        if (snap != 0) {
+            GizObstacle_JumpToEnd(obstacle);
+        } else {
+            GizObstacle_PlayForwards(obstacle);
+        }
+    } else if (snap != 0) {
+        GizObstacle_JumpToStart(obstacle);
+    } else {
+        GizObstacle_PlayBackwards(obstacle);
+    }
+    u8 runtime_flags = obstacle->runtime_flags;
+    runtime_flags &= ~0xc;
+    runtime_flags |= (stay_shut & 1) << 3;
+    runtime_flags |= stay_open << 2;
+    obstacle->runtime_flags = runtime_flags;
 }
 
 static void GizActions_GoThroughDoor(GIZFLOW_s *, FLOWBOX_s *, char **params, int param_count) {
@@ -280,8 +364,66 @@ static void GizActions_GoToNewLevel(GIZFLOW_s *, FLOWBOX_s *, char **params, int
     }
 }
 
-static void GizAction_SetAIState(GIZFLOW_s *, FLOWBOX_s *, char **, int) {
-    STUBBED();
+static void GizAction_SetAIState(GIZFLOW_s *, FLOWBOX_s *, char **params, int count) {
+    NUVEC origin = v000;
+    GameObject_s *named_object = NULL;
+    char *state_name = NULL;
+    i32 types[10];
+    i32 type_count = 0;
+    f32 range_squared = 0.0f;
+    for (i32 index = 0; index < count; ++index) {
+        char *value = NuStrIStr(params[index], "Character");
+        if (value != NULL) {
+            named_object = GetNamedGameObject(WORLD->ai_sys, value + 10);
+        }
+        if ((value = NuStrIStr(params[index], "range")) != NULL) {
+            f32 range = NuAToF(value + 6);
+            range_squared = range * range;
+        } else if ((value = NuStrIStr(params[index], "type")) != NULL) {
+            if (LevelCharacterTypeIDFn != NULL && LevelCharacterGlobalIDFn != NULL) {
+                u8 local_type = LevelCharacterTypeIDFn(value + 5);
+                if (local_type != 0xff) {
+                    i32 global_type = LevelCharacterGlobalIDFn(local_type);
+                    if (global_type != 0xff && type_count < 10) {
+                        types[type_count++] = global_type;
+                    }
+                }
+            }
+        } else if ((value = NuStrIStr(params[index], "State")) != NULL) {
+            state_name = value + 6;
+        }
+    }
+
+    if (state_name == NULL || (type_count == 0 && !(range_squared > 0.0f))) {
+        if (named_object != NULL) {
+            named_object->ai.script_process.next_state = AIStateFind(state_name, named_object->ai.script_process.script);
+        }
+        return;
+    }
+    if (named_object != NULL) {
+        origin = named_object->apiobj.collision_position;
+    }
+    for (i32 object_index = 0; object_index < HIGHGAMEOBJECT; ++object_index) {
+        GameObject_s *object = &Obj[object_index];
+        if ((object->apiobj.field_0x1f8 & (APIOBJECT_FLAG_IN_USE | APIOBJECT_FLAG_CHARACTER)) !=
+                (APIOBJECT_FLAG_IN_USE | APIOBJECT_FLAG_CHARACTER) ||
+            (object->apiobj.field_0x1f4 & 0x400) == 0) {
+            continue;
+        }
+        NUVEC difference;
+        NuVecSub(&difference, &origin, &object->apiobj.position);
+        f32 distance_squared = difference.x * difference.x + difference.y * difference.y + difference.z * difference.z;
+        asm volatile("" : "+x"(distance_squared));
+        i32 matching_type = type_count == 0;
+        for (i32 type_index = 0; type_index < type_count; ++type_index) {
+            if (object->id == types[type_index]) {
+                matching_type = 1;
+            }
+        }
+        if (matching_type != 0 && range_squared > distance_squared) {
+            object->ai.script_process.next_state = AIStateFind(state_name, object->ai.script_process.script);
+        }
+    }
 }
 
 static void GizAction_SetAIMessage(GIZFLOW_s *, FLOWBOX_s *, char **params, int count) {
@@ -316,12 +458,97 @@ static void GizAction_SetAIMessage(GIZFLOW_s *, FLOWBOX_s *, char **params, int 
     }
 }
 
-static void GizAction_ChangeTechnoTgt(GIZFLOW_s *, FLOWBOX_s *, char **, int) {
-    STUBBED();
+static void GizAction_ChangeTechnoTgt(GIZFLOW_s *, FLOWBOX_s *, char **params, int count) {
+    if (count <= 0) {
+        return;
+    }
+    char *techno_name = NULL;
+    char *target_name = NULL;
+    i32 target_kind = 0;
+    u8 movement = 0xff;
+    for (i32 index = 0; index < count; ++index) {
+        char *value = NuStrIStr(params[index], "techno=");
+        if (value != NULL) {
+            techno_name = value + NuStrLen("techno=");
+        } else if ((value = NuStrIStr(params[index], "target=")) != NULL) {
+            target_name = value + NuStrLen("target=");
+        } else if (NuStrICmp(value, "Move_Waggle") == 0) {
+            movement = 1;
+        } else if (NuStrICmp(value, "Move_Spin") == 0) {
+            movement = 2;
+        } else if (NuStrICmp(value, "Move_Horizontal") == 0) {
+            movement = 8;
+        } else if (NuStrICmp(value, "Move_Vertical") == 0) {
+            movement = 4;
+        } else if (NuStrICmp(params[index], "GIZMO") == 0) {
+            target_kind = 3;
+        } else if (NuStrICmp(params[index], "HSPECIAL") == 0) {
+            target_kind = 2;
+        } else if (NuStrICmp(params[index], "CREATURE") == 0) {
+            target_kind = 1;
+        } else if (NuStrICmp(params[index], "NO_TARGET") == 0) {
+            target_kind = -1;
+        }
+    }
+    if (techno_name == NULL || (target_kind != -1 && target_name == NULL)) {
+        return;
+    }
+    i32 type_id = GizmoGetTypeIDByName(WORLD->gizmo_sys, "Techno");
+    GIZMO *gizmo = GizmoFindByName(WORLD->gizmo_sys, type_id, techno_name);
+    TECHNO *techno = gizmo != NULL ? static_cast<TECHNO *>(gizmo->object) : NULL;
+    if (techno == NULL) {
+        return;
+    }
+    if (movement != 0xff) {
+        techno->enabled = movement;
+    }
+    if (target_kind == -1) {
+        GameObject_s *operator_object = NULL;
+        Techno_FindOperator(techno->controlled_object, NULL, &operator_object);
+        techno->controlled_object = NULL;
+        NuStrCpy(techno->target_name, "");
+        techno->flags &= ~TECHNO_FLAG_COMPLETE;
+        techno->target_mode = 0;
+        if (operator_object != NULL) {
+            operator_object->character_context = -1;
+        }
+    }
+    char old_name[16];
+    NuStrCpy(old_name, techno->target_name);
+    void *old_target = techno->controlled_object;
+    i32 old_complete = (techno->flags & TECHNO_FLAG_COMPLETE) != 0;
+    techno->controlled_object = NULL;
+    NuStrNCpy(techno->target_name, target_name, 16);
+    techno->target_mode = static_cast<u8>(target_kind);
+    techno->flags &= ~TECHNO_FLAG_COMPLETE;
+    GameCam_Blend(GameCam, 0.5f, 0.0f, 1);
+    if (Technos_FindTgt(techno) == NULL) {
+        techno->target_mode = 0;
+        if (Technos_FindTgt(techno) == NULL) {
+            NuStrCpy(techno->target_name, old_name);
+            techno->controlled_object = old_target;
+            techno->target_mode = static_cast<u8>(target_kind);
+            techno->flags = (techno->flags & ~TECHNO_FLAG_COMPLETE) | (old_complete << 3);
+        }
+    }
 }
 
-static void GizAction_ActivatePartEffect(GIZFLOW_s *, FLOWBOX_s *, char **, int) {
-    STUBBED();
+static void GizAction_ActivatePartEffect(GIZFLOW_s *, FLOWBOX_s *, char **params, int count) {
+    if (count <= 0) {
+        return;
+    }
+    char *name = NULL;
+    for (i32 index = 0; index < count; ++index) {
+        char *value = NuStrIStr(params[index], "part_effect");
+        if (value != NULL) {
+            name = value + NuStrLen("part_effect") + 1;
+        } else {
+            NuStrICmp(params[index], "FALSE");
+        }
+    }
+    if (name != NULL) {
+        AddFiniteShotPART(PARTLookupType(name), &Player[0]->apiobj.collision_position, 50);
+    }
 }
 
 static void GizAction_ActivateEffect(GIZFLOW_s *, FLOWBOX_s *, char **params, int count) {
@@ -410,8 +637,40 @@ static void GizAction_ActivateGizmo(GIZFLOW_s *flow, FLOWBOX_s *, char **params,
     }
 }
 
-static void GizAction_SetPickupVisibility(GIZFLOW_s *, FLOWBOX_s *, char **, int) {
-    STUBBED();
+static void GizAction_SetPickupVisibility(GIZFLOW_s *, FLOWBOX_s *, char **params, int count) {
+    if (count <= 0) {
+        return;
+    }
+    GIZMOPICKUP_s *pickup = NULL;
+    i32 visible = 1;
+    i32 id = -1;
+    for (i32 index = 0; index < count; ++index) {
+        char *value = NuStrIStr(params[index], "name=");
+        if (value != NULL) {
+            pickup = GizmoPickup_FindByName(WORLD, value + NuStrLen("name="));
+        } else if ((value = NuStrIStr(params[index], "id=")) != NULL) {
+            id = NuAToI(value + NuStrLen("id") + 1);
+        } else if (NuStrIStr(params[index], "FALSE") != NULL) {
+            visible = 0;
+        }
+    }
+    if (pickup != NULL) {
+        pickup->state_enabled = visible;
+        pickup->state_visible = visible;
+        pickup->state_activated = visible;
+        return;
+    }
+    if (id < 0 || WORLD->gizmo_pickup_sys->pickups == NULL) {
+        return;
+    }
+    pickup = WORLD->gizmo_pickup_sys->pickups;
+    for (i32 index = 0; index < WORLD->gizmo_pickup_sys->pickup_count; ++index, ++pickup) {
+        if ((pickup->state_flags & 8) == 0 && pickup->activation_group == id) {
+            pickup->state_enabled = visible;
+            pickup->state_visible = visible;
+            pickup->state_activated = visible;
+        }
+    }
 }
 
 static void GizAction_SetGizmoVisibility(GIZFLOW_s *flow, FLOWBOX_s *, char **params, int count) {
@@ -449,8 +708,28 @@ static void GizAction_SetVisibility(GIZFLOW_s *, FLOWBOX_s *, char **params, int
         NuSpecialSetVisibility(&special, visible);
 }
 
-static void GizActions_CompleteLevel(GIZFLOW_s *, FLOWBOX_s *, char **, int) {
-    STUBBED();
+static void GizActions_CompleteLevel(GIZFLOW_s *, FLOWBOX_s *, char **params, int count) {
+    if (netclient != 0) {
+        return;
+    }
+    char *cutscene_name = NULL;
+    LEVELDATA *level = NULL;
+    for (i32 index = 0; index < count; ++index) {
+        char *value = NuStrIStr(params[index], "cutscene=");
+        if (value != NULL) {
+            cutscene_name = value + NuStrLen("cutscene=");
+        } else if ((value = NuStrIStr(params[index], "newlevel=")) != NULL) {
+            level = Level_FindByName(value + NuStrLen("newlevel="), NULL);
+        }
+    }
+    if (FreePlay == 0 && cutscene_name != NULL && NewCutScene(NULL, WORLD->cutscene_sys, cutscene_name, 1) != NULL) {
+        return;
+    }
+    if (FreePlay == 0 && level != NULL) {
+        GoToNewLevel(level->idx);
+    } else {
+        CompleteLevel(WORLD);
+    }
 }
 
 static GIZACTIONDEFN_s game_gizactiondefs[] = {

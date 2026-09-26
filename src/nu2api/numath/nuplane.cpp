@@ -367,8 +367,3 @@ f32 NuLineToPointDistSqrEx(NUVEC *s, NUVEC *e, NUVEC *pnt, NUVEC *out) {
 
     return dist;
 }
-
-static __used__ bool OnOrOutsidePlane(nuvec_s *, nuvec_s *, nuvec_s *) {
-    STUBBED();
-    return false;
-}

@@ -57,7 +57,6 @@ void NuSoundEffectFader::Process(float frametime) {
 }
 
 void NuSoundEffectFader::ProcessBus(NuSoundBus *, float) {
-    STUBBED();
 }
 
 void NuSoundEffectFader::ProcessVoice(NuSoundVoice *voice, float) {

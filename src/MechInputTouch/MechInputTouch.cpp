@@ -22,6 +22,11 @@
 #include "nu2api/nucore/common.h"
 #include "nu2api/nucore/NuVirtualTouchDevice.h"
 #include "nu2api/numath/nuvec.h"
+#include <new>
+#include "nu2api/numath/nuang.h"
+#include "nu2api/numath/nutrig.h"
+#include "gameapi/ai/aisys/aisys.h"
+#include "legoapi/characters/motion.h"
 
 extern i16 id_RANCOR, id_ANAKINJEDI;
 extern i16 id_YODA;
@@ -43,8 +48,66 @@ char const *MechInputTouchSystem::GetName() {
     return "MechInputTouchSystem";
 }
 
-void MechAutoJumpGetBest(JumpTriggerPacket const &, i32) {
-    STUBBED();
+MechAutoJumpConnection *MechAutoJumpGetBest(JumpTriggerPacket const &packet, i32 heading) {
+    if (!TouchHacks::TouchControlsActive || WORLD == NULL || WORLD->mech_auto_jump_manager == NULL) {
+        return NULL;
+    }
+
+    MechAutoJumpConnection *current =
+        reinterpret_cast<MechAutoJumpConnection *>(NuLinkedListGetHead(&WORLD->mech_auto_jump_manager->jump_connections));
+    MechAutoJumpConnection *best = NULL;
+
+    if (packet.type == 3) {
+        i32 desired = NuAtan2D(packet.end.x - packet.start.x, packet.end.y - packet.start.y);
+        if (current == NULL) {
+            return NULL;
+        }
+        i32 best_difference = 0x4000;
+        do {
+            if (current->allow_streak && current->use_path_direction) {
+                AIPATHNODE *nodes = current->path->nodes;
+                AIPATHCNX *connection = current->connection;
+                i32 direction = current->direction;
+                NUVEC *to_position = &nodes[connection->node_indices[direction == 0]].position;
+                NUVEC *from_position = &nodes[connection->node_indices[direction]].position;
+                NUVEC from_screen;
+                NUVEC to_screen;
+                NuCameraTransformScreenClip(&from_screen, from_position, 1, NULL);
+                NuCameraTransformScreenClip(&to_screen, to_position, 1, NULL);
+                i32 angle = NuAtan2D(to_screen.x - from_screen.x, to_screen.y - from_screen.y);
+                i32 difference = RotDiff(static_cast<u16>(angle), static_cast<u16>(desired));
+                difference = difference < 0 ? -difference : difference;
+                if (difference < best_difference) {
+                    best_difference = difference;
+                    best = current;
+                }
+            }
+            current = reinterpret_cast<MechAutoJumpConnection *>(
+                NuLinkedListGetNext(&WORLD->mech_auto_jump_manager->jump_connections,
+                                    reinterpret_cast<NULISTLNK *>(current)));
+        } while (current != NULL);
+        return best;
+    }
+
+    i32 best_difference = 0x2aab;
+    while (current != NULL) {
+        if (current->allow_streak && current->use_path_direction) {
+            i32 angle = current->connection->rotation;
+            if (current->direction != 0) {
+                angle = NuAngAdd(0x8000, angle);
+            }
+            i32 difference = RotDiff(static_cast<u16>(heading), static_cast<u16>(angle));
+            difference = difference < 0 ? -difference : difference;
+            if (difference < best_difference) {
+                best_difference = difference;
+                best = current;
+            }
+        }
+        current = reinterpret_cast<MechAutoJumpConnection *>(
+            NuLinkedListGetNext(&WORLD->mech_auto_jump_manager->jump_connections,
+                                reinterpret_cast<NULISTLNK *>(current)));
+    }
+    return best;
 }
 
 void MechAutoJumpSetIsUsing(GameObject_s &object, MechAutoJumpConnection &connection) {
@@ -143,7 +206,6 @@ void MechTouchUIPartySelector_OnRelease_Callback(MechTouchUIElement &element, To
 }
 
 void MechInputTouchSystem::AddChangeLayoutButtons(NuVirtualTouchDevice &, i32) {
-    STUBBED();
 }
 
 i32 MechInputTouchSystem::ChooseTouchLayout(bool paused) {
@@ -222,32 +284,98 @@ void MechInputTouchSystem::CreateGamePanels() {
     inputTouchDevice->SetCurrentLayoutIndex(control_mode);
 }
 
+static inline __attribute__((always_inline)) NuButtonLayout &GetTouchLayout(NuVirtualTouchDevice &device, i32 index) {
+    return *reinterpret_cast<NuButtonLayout *>(reinterpret_cast<u8 *>(&device) + 0xd4 + index * 0xcc);
+}
+
+static inline __attribute__((always_inline)) void AppendTouchElement(NuButtonLayout &layout, NuTouchInputElement *element) {
+    u32 index = layout.unknown_c8;
+    layout.elements[index] = element;
+    layout.unknown_c8 = index + 1;
+}
+
+static inline __attribute__((always_inline)) void AppendMainControls(NuButtonLayout &layout,
+                                                                      MechInputTouchMainController &controller) {
+    AppendTouchElement(layout, new MechInputTouchMainDummyStick(controller, NuTouchInputElement::TYPE_RIGHT_STICK));
+    AppendTouchElement(layout, new MechInputTouchMainDummyButton(
+                                   controller, 0x80, static_cast<MechInputTouchMainController::eButtonTypes>(0)));
+    AppendTouchElement(layout, new MechInputTouchMainDummyButton(
+                                   controller, 0x20, static_cast<MechInputTouchMainController::eButtonTypes>(3)));
+    AppendTouchElement(layout, new MechInputTouchMainDummyButton(
+                                   controller, 0x40, static_cast<MechInputTouchMainController::eButtonTypes>(2)));
+    AppendTouchElement(layout, new MechInputTouchMainDummyButton(
+                                   controller, 0x10, static_cast<MechInputTouchMainController::eButtonTypes>(1)));
+}
+
 void MechInputTouchSystem::CreateGamePlayLayoutBlank(NuVirtualTouchDevice &, i32) {
-    STUBBED();
 }
 
-void MechInputTouchSystem::CreateGamePlayLayoutConsoleMode(NuVirtualTouchDevice &, i32) {
-    STUBBED();
+void MechInputTouchSystem::CreateGamePlayLayoutConsoleMode(NuVirtualTouchDevice &device, i32 index) {
+    AddChangeLayoutButtons(device, index);
+    MechInputTouchVirtualConsoleController *controller =
+        reinterpret_cast<MechInputTouchVirtualConsoleController *>(NU_ALLOC(0x98, 4, 1, "Main", 0));
+    if (controller != NULL) {
+        new (controller) MechInputTouchVirtualConsoleController(0);
+    }
+    NuButtonLayout &layout = GetTouchLayout(device, index);
+    AppendTouchElement(layout, reinterpret_cast<NuTouchInputElement *>(controller));
+    AppendMainControls(layout, *reinterpret_cast<MechInputTouchMainController *>(controller));
 }
 
-void MechInputTouchSystem::CreateGamePlayLayoutGestureBased(NuVirtualTouchDevice &, i32) {
-    STUBBED();
+void MechInputTouchSystem::CreateGamePlayLayoutGestureBased(NuVirtualTouchDevice &device, i32 index) {
+    device.GetAspectRatio();
+    AddChangeLayoutButtons(device, index);
+    MechInputTouchGestureBasedController *controller = new MechInputTouchGestureBasedController(0, {0});
+    MechSystems::Get()->gesture_controller = controller;
+    NuButtonLayout &layout = GetTouchLayout(device, index);
+    AppendTouchElement(layout, controller);
+    AppendMainControls(layout, *controller);
 }
 
-void MechInputTouchSystem::CreateGamePlayLayoutGestureBased_Cavalry(NuVirtualTouchDevice &, i32) {
-    STUBBED();
+void MechInputTouchSystem::CreateGamePlayLayoutGestureBased_Cavalry(NuVirtualTouchDevice &device, i32 index) {
+    AddChangeLayoutButtons(device, index);
+    MechInputTouchBonusCavalryController *controller =
+        new (::operator new(0x78)) MechInputTouchBonusCavalryController(0);
+    MechSystems::Get()->gesture_controller = reinterpret_cast<MechInputTouchGestureBasedController *>(controller);
+    NuButtonLayout &layout = GetTouchLayout(device, index);
+    AppendTouchElement(layout, reinterpret_cast<NuTouchInputElement *>(controller));
+    AppendMainControls(layout, *reinterpret_cast<MechInputTouchMainController *>(controller));
 }
 
-void MechInputTouchSystem::CreateGamePlayLayoutGestureBased_DeathStarTurret(NuVirtualTouchDevice &, i32) {
-    STUBBED();
+void MechInputTouchSystem::CreateGamePlayLayoutGestureBased_DeathStarTurret(NuVirtualTouchDevice &device, i32 index) {
+    AddChangeLayoutButtons(device, index);
+    MechInputTouchDeathStarTurretController *controller =
+        new (::operator new(0x7c)) MechInputTouchDeathStarTurretController(0);
+    MechSystems::Get()->gesture_controller = reinterpret_cast<MechInputTouchGestureBasedController *>(controller);
+    NuButtonLayout &layout = GetTouchLayout(device, index);
+    AppendTouchElement(layout, reinterpret_cast<NuTouchInputElement *>(controller));
+    AppendMainControls(layout, *reinterpret_cast<MechInputTouchMainController *>(controller));
 }
 
-void MechInputTouchSystem::CreateGamePlayLayoutGestureBased_Podrace(NuVirtualTouchDevice &, i32) {
-    STUBBED();
+void MechInputTouchSystem::CreateGamePlayLayoutGestureBased_Podrace(NuVirtualTouchDevice &device, i32 index) {
+    AddChangeLayoutButtons(device, index);
+    MechInputTouchPodraceController *controller =
+        reinterpret_cast<MechInputTouchPodraceController *>(NU_ALLOC(0x78, 4, 1, "Main", 0));
+    if (controller != NULL) {
+        new (controller) MechInputTouchPodraceController(0);
+    }
+    MechSystems::Get()->gesture_controller = reinterpret_cast<MechInputTouchGestureBasedController *>(controller);
+    NuButtonLayout &layout = GetTouchLayout(device, index);
+    AppendTouchElement(layout, reinterpret_cast<NuTouchInputElement *>(controller));
+    AppendMainControls(layout, *reinterpret_cast<MechInputTouchMainController *>(controller));
 }
 
-void MechInputTouchSystem::CreateGamePlayLayoutGestureBased_SpeederChase(NuVirtualTouchDevice &, i32) {
-    STUBBED();
+void MechInputTouchSystem::CreateGamePlayLayoutGestureBased_SpeederChase(NuVirtualTouchDevice &device, i32 index) {
+    AddChangeLayoutButtons(device, index);
+    MechInputTouchSpeederChaseController *controller =
+        reinterpret_cast<MechInputTouchSpeederChaseController *>(NU_ALLOC(0x80, 4, 1, "Main", 0));
+    if (controller != NULL) {
+        new (controller) MechInputTouchSpeederChaseController(0);
+    }
+    MechSystems::Get()->gesture_controller = reinterpret_cast<MechInputTouchGestureBasedController *>(controller);
+    NuButtonLayout &layout = GetTouchLayout(device, index);
+    AppendTouchElement(layout, reinterpret_cast<NuTouchInputElement *>(controller));
+    AppendMainControls(layout, *reinterpret_cast<MechInputTouchMainController *>(controller));
 }
 
 f32 MechInputTouchSystem::DetermineMoveDir2D(GameObject_s &object, VuVec const &target, bool flatten,
@@ -342,7 +470,9 @@ MechObjectInterface *MechInputTouchSystem::FindTargetObject(GameObject_s &object
                                                             MechObjectInterface *required_target,
                                                             MechTempPosInterface *temporary) {
     MechObjectInterface *best = NULL;
-    f32 best_distance = VehicleArea ? 5000.0f : 25.0f;
+    f32 best_distance = 25.0f;
+    if (VehicleArea)
+        best_distance = 5000.0f;
     VuVec start, end, direction;
     NuCameraCalcRay((0.0f + touch.x + 1.0f) * 0.5f, 1.0f - (0.0f + touch.y + 1.0f) * 0.5f, &start.xyz, &end.xyz, NULL);
     direction.x = end.x - start.x;
@@ -377,20 +507,24 @@ MechObjectInterface *MechInputTouchSystem::FindTargetObject(GameObject_s &object
         }
         if ((flags & 4) && world->gizmo_blowups != NULL) {
             GIZMOBLOWUP_s *item = world->gizmo_blowups;
-            for (i32 index = 0; index < world->gizmo_blowup_count; ++index, ++item) {
+            f32 *mid_z = &item->mid_position.z;
+            for (i32 index = 0; index < world->gizmo_blowup_count;
+                 ++index, ++item, mid_z += sizeof(*item) / sizeof(*mid_z)) {
                 nuhspecial_s *special = item->override_special;
                 if (special == NULL || !NuSpecialExistsFn(special))
                     special = &item->type->special;
                 if (item->field_0x125[0] != 0 || (i8)item->state_flags >= 0 || item->type == NULL ||
                     !NuSpecialExistsFn(special))
                     continue;
-                bool sphere = item->field_0x124 != 0 || (world->current_level == MOSEISLEYB_LDATA && index <= 31) ||
+                bool sphere = __builtin_expect(item->field_0x124 != 0, 0) ||
+                              (world->current_level == MOSEISLEYB_LDATA && index <= 31) ||
                               (world->current_level == VADERB_LDATA && index <= 1) ||
                               (world->current_level == CLOUDCITYESCAPEA_LDATA && index == 0) || VehicleArea;
                 f32 distance;
                 bool hit;
-                if (sphere) {
-                    NUVEC *position = item->field_0x120 ? static_cast<NUVEC *>(item->field_0x120) : &item->mid_position;
+                if (__builtin_expect(sphere, 0)) {
+                    NUVEC *position = item->field_0x120 ? static_cast<NUVEC *>(item->field_0x120)
+                                                       : reinterpret_cast<NUVEC *>(mid_z - 2);
                     VuVec center(position->x, position->y, position->z, 1.0f);
                     f32 radius = item->field_0x128 > 0.0f ? item->field_0x128 : item->target_scale;
                     if (VehicleArea)
@@ -401,13 +535,13 @@ MechObjectInterface *MechInputTouchSystem::FindTargetObject(GameObject_s &object
                 } else {
                     // bounds preserve the original special's fourth lanes.
                     VuVec minimum, maximum;
-                    minimum.x = special->display_special->bounds_min.x + item->mid_position.x;
-                    minimum.y = special->display_special->bounds_min.y + item->mid_position.y;
-                    minimum.z = special->display_special->bounds_min.z + item->mid_position.z;
+                    minimum.x = special->display_special->bounds_min.x + mid_z[-2];
+                    minimum.y = special->display_special->bounds_min.y + mid_z[-1];
+                    minimum.z = special->display_special->bounds_min.z + mid_z[0];
                     minimum.w = special->display_special->bounds_min.w;
-                    maximum.x = special->display_special->bounds_max.x + item->mid_position.x;
-                    maximum.y = special->display_special->bounds_max.y + item->mid_position.y;
-                    maximum.z = special->display_special->bounds_max.z + item->mid_position.z;
+                    maximum.x = special->display_special->bounds_max.x + mid_z[-2];
+                    maximum.y = special->display_special->bounds_max.y + mid_z[-1];
+                    maximum.z = special->display_special->bounds_max.z + mid_z[0];
                     maximum.w = special->display_special->bounds_max.w;
                     hit = CalculateRayBoxIntersection(minimum, maximum, start, direction, 30.0f, distance);
                 }

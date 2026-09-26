@@ -5,6 +5,7 @@
 #include "globals.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/items/collect/spacelevel.h"
 #include "legoapi/render/core/terrain.h"
 #include "legoapi/render/fx/parts.h"
 #include "legoapi/props/doors/door.h"
@@ -13,6 +14,8 @@
 #include "legoapi/gizmo/base/GizBlowupObjectInterface.h"
 #include "legoapi/gizmo/object/gizmoblowups.h"
 #include "legoapi/gizmo/base/gizmo.h"
+#include "legoapi/gizmos/object/gizpanel.h"
+#include "legoapi/gizmos/transport/tubes.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/menus/core/panel.h"
 #include "legoapi/world/levels/levels.h"
@@ -21,8 +24,12 @@
 #include "legoapi/world/world.h"
 #include "gameapi/ai/aisys/aisys.h"
 #include "nu2api/nu3d/nuspecial.h"
+#include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/numath/numtx.h"
+#include "nu2api/numusic/numusic.h"
+#include "legoapi/characters/motion.h"
+#include "legoapi/render/fx.h"
 
 extern i32 LevFlag[4];
 
@@ -30,6 +37,8 @@ extern "C" {
     void *AIPAthFindPathCnx(AISYS_s *, AIPATH_s *, char *, char *, i32 *);
 }
 #include "legoapi/render/core/render.h"
+#include "legoapi/actions/combat/hits.h"
+#include "legoapi/audio/sfx.h"
 #include "nu2api/nu3d/nutex.h"
 
 i32 Players_AveragePos(NUVEC *, SOCKPOSITION_s *);
@@ -88,6 +97,25 @@ extern "C" {
 }
 static CRUISERC_s cruiser_c;
 
+struct CRUISERDNETPACKET_s {
+    f32 frame;
+    f32 speed;
+    u32 flags;
+};
+DECOMP_ASSERT(sizeof(CRUISERDNETPACKET_s) == 12, "Cruiser D packet size");
+
+extern "C" {
+    CRUISERDNETPACKET_s *cruiserd_netpacket;
+    extern i32 CruiserD_LiftChase;
+}
+static i32 CruiserE_ix;
+static nuhspecial_s CruiserD_Lift;
+static nuinstanim_s *CruiserD_LiftAnim;
+static i32 CruiserD_Lift_plat_id;
+static GIZAIMESSAGE_s *CruiserD_LiftChase_msg;
+static f32 CruiserD_frame = 1.0f;
+static i32 CruiserD_direction = 1;
+
 // Episode 3 level handlers, in the game's Episode_III progression:
 // dogfight / cruiser / grievous / kashyyyk / temple / vader / a-new-hope.
 
@@ -98,18 +126,59 @@ static CRUISERC_s cruiser_c;
 void SpaceResetAudioPoint();
 void ProcessCurrentSpeed(WORLDINFO_s *, speedup_s *);
 extern AREADATA *DOGFIGHT_ADATA;
+void DogFightARestart();
+void ResetSpaceLevel(WORLDINFO_s *, spacelevel_s *) __asm__("_ZL15ResetSpaceLevelP11WORLDINFO_sP12spacelevel_s")
+    __attribute__((visibility("hidden"), regparm(2)));
+void DrawSpaceLevel(spacelevel_s *) __asm__("_ZL14DrawSpaceLevelP12spacelevel_s")
+    __attribute__((visibility("hidden"), regparm(1)));
 
 speedup_s DogFightSpeedList[] = {
     {58.0f, 0.5f},  {72.0f, 1.0f},  {174.0f, 0.5f}, {183.0f, 1.0f}, {207.0f, 0.5f},
     {220.0f, 1.0f}, {313.0f, 0.5f}, {335.0f, 1.0f}, {0.0f, 0.0f},
 };
 
-void ChrisDogFightAInit(WORLDINFO_s *) {
-    STUBBED();
+void ChrisDogFightAInit(WORLDINFO_s *world) {
+    ChrisAllocLevelStuff(world);
+    ResetSpaceLevel(world, world->space_level);
+
+    for (i32 i = 0; i < 256; ++i) {
+        *reinterpret_cast<i32 *>(&world->space_level->large_records[i].unknown_000[0x400]) = 0;
+    }
+
+    if (world->current_level == DOGFIGHTA_LDATA) {
+        FlightSpline_Init(world, reinterpret_cast<flightspline_s *>(world->space_level->large_records), 256);
+    }
+
+    spacelevel_s *current_space = WORLD->space_level;
+    spacelevel_large_record_s *record = current_space->large_records;
+    spacelevel_large_record_s *end = &current_space->large_records[256];
+    for (; record != end; ++record) {
+        record->saved_value = record->reset_value;
+        record->reset_state = record->saved_state;
+    }
+
+    LevBlowUp[0] = GizmoBlowUp_FindByName(world, "Shoot_a11");
+    LevBlowUp[1] = GizmoBlowUp_FindByName(world, "Shoot_a1");
+    LevBlowUp[2] = GizmoBlowUp_FindByName(world, "Shoot_a21");
+    LevBlowUp[3] = GizmoBlowUp_FindByName(world, "Shoot_b1");
+    GIZMOBLOWUP_s *last = GizmoBlowUp_FindByName(world, "Shoot_a31");
+    LevBlowUp[4] = last;
+
+    LevBlowUp[0]->target_scale *= 1.5f;
+    LevBlowUp[1]->target_scale *= 1.5f;
+    LevBlowUp[2]->target_scale *= 1.5f;
+    LevBlowUp[3]->target_scale *= 1.5f;
+    last->target_scale *= 1.5f;
 }
 
-void ChrisDogFightAReset(WORLDINFO_s *) {
-    STUBBED();
+void ChrisDogFightAReset(WORLDINFO_s *world) {
+    SpaceResetAudioPoint();
+    ResetSpaceLevel(world, world->space_level);
+    DogFightARestart();
+    BOLT_OVERRIDE_PLAYERBOLTSPEED = 150.0f;
+    BOLT_OVERRIDE_PLAYERBOLTDURATION = 1.5f;
+    music_man.StopTrack(2, 0);
+    music_man.StopTrack(0x20, 0);
 }
 
 void ChrisDogFightAUpdate(WORLDINFO_s *world) {
@@ -122,12 +191,11 @@ void ChrisDogFightAUpdate(WORLDINFO_s *world) {
     }
 }
 
-void ChrisDogFightADraw(WORLDINFO_s *) {
-    STUBBED();
+void ChrisDogFightADraw(WORLDINFO_s *world) {
+    DrawSpaceLevel(world->space_level);
 }
 
 void ChrisDogFightAPanel(WORLDINFO_s *) {
-    STUBBED();
 }
 
 // ===========================================================================
@@ -196,16 +264,134 @@ void CruiserCPanel(WORLDINFO_s *) {
     }
 }
 
-void CruiserDInit(WORLDINFO_s *) {
-    STUBBED();
+void CruiserDInit(WORLDINFO_s *world) {
+    if (world->area->level_count != 0) {
+        for (i32 i = 0; i < world->area->level_count; i++) {
+            if (static_cast<u16>(world->area->levels[i]) == static_cast<u16>(CRUISERE_LDATA->idx))
+                CruiserE_ix = i;
+        }
+    }
+
+    if (NuSpecialFind(WORLD->current_gscn, &CruiserD_Lift, "lift", 1)) {
+        CruiserD_LiftAnim = NuSpecialGetInstAnim(&CruiserD_Lift);
+        CruiserD_Lift_plat_id = FindPlatInst(NuSpecialGetInstanceix(&CruiserD_Lift));
+    }
+
+    LevGizmo[0] = GizmoFindByName(world->gizmo_sys, gizpanel_gizmotype_id, "panel1");
+    cruiserd_netpacket = static_cast<CRUISERDNETPACKET_s *>(SetLevelHack(12));
+
+    char name[16] __attribute__((aligned(16)));
+#define FIND_CRUISER_D_TUBE(NUMBER)                             \
+    sprintf(name, "Tube%d", NUMBER);                            \
+    if (TUBE *tube = Tube_FindByName(world, name))               \
+        tube->flags |= TUBE_FLAG_TOUCH_RADIUS
+    FIND_CRUISER_D_TUBE(1);
+    FIND_CRUISER_D_TUBE(2);
+    FIND_CRUISER_D_TUBE(3);
+    FIND_CRUISER_D_TUBE(4);
+    FIND_CRUISER_D_TUBE(5);
+    FIND_CRUISER_D_TUBE(6);
+    FIND_CRUISER_D_TUBE(7);
+    FIND_CRUISER_D_TUBE(8);
+    FIND_CRUISER_D_TUBE(9);
+    FIND_CRUISER_D_TUBE(10);
+#undef FIND_CRUISER_D_TUBE
 }
 
 void CruiserDReset(WORLDINFO_s *) {
-    STUBBED();
+    CruiserD_LiftChase_msg = CheckGizAIMessage(gizaimessagesys, "LiftChase", NULL);
+    MiscTime = 0.0f;
+
+    if (NuSpecialExistsFn(&CruiserD_Lift) != 0 && CruiserD_LiftAnim != NULL) {
+        if ((*(u8 *)((u8 *)LevelProgressData + CruiserE_ix * 0x2e24 + 0x2800) & 1) == 0) {
+            CruiserD_frame = 1.0f;
+            CruiserD_direction = 1;
+            CruiserD_LiftAnim->playing = 1;
+            CruiserD_LiftAnim->ltime = 1.0f;
+            CruiserD_LiftAnim->tfactor = 0.1f;
+        } else if (CruiserD_direction < 0) {
+            CruiserD_LiftAnim->ltime = CruiserD_frame;
+            CruiserD_LiftAnim->playing = 1;
+            CruiserD_LiftAnim->tfactor = -0.1f;
+        } else {
+            f32 end_frame = *(f32 *)CruiserD_Lift.scene->instance_animation_data[CruiserD_LiftAnim->anim_ix];
+            CruiserD_LiftAnim->playing = 0;
+            CruiserD_LiftAnim->tfactor = 0.1f;
+            CruiserD_LiftAnim->ltime = end_frame;
+        }
+    }
+
+    CruiserD_LiftChase = 0;
 }
 
 void CruiserDUpdate(WORLDINFO_s *) {
-    STUBBED();
+    CruiserD_LiftChase = 0;
+    if (!NuSpecialExistsFn(&CruiserD_Lift) || CruiserD_LiftAnim == NULL || CruiserD_LiftChase_msg == NULL)
+        return;
+
+    if (__builtin_expect(netclient != 0, 1)) {
+        if (CruiserD_LiftAnim->playing)
+            PlaySfx("Cru_HugeWallMoveLp", NuSpecialGetDrawPos(&CruiserD_Lift));
+        CruiserD_frame = CruiserD_LiftAnim->ltime;
+        CruiserD_LiftAnim->ltime = cruiserd_netpacket->frame;
+        CruiserD_LiftAnim->tfactor = cruiserd_netpacket->speed;
+        CruiserD_LiftAnim->playing = (cruiserd_netpacket->flags & 1) != 0;
+        return;
+    }
+
+    CruiserD_LiftChase_msg->value = 0.0f;
+    if (CruiserD_direction >= 0 && LevGizmo[0] != NULL && LevGizmo[0]->object != NULL &&
+        (((u8 *)LevGizmo[0]->object)[0x68] & 2) != 0) {
+        CruiserD_direction = -1;
+        CruiserD_LiftAnim->playing = 1;
+        CruiserD_LiftAnim->tfactor = -0.1f;
+    }
+
+    if (!CruiserD_LiftAnim->playing) {
+        CruiserD_frame = CruiserD_LiftAnim->ltime;
+        return;
+    }
+
+    if (CruiserD_Lift_plat_id != -1) {
+            if (CruiserD_direction >= 0) {
+                CruiserD_LiftChase_msg->value = 1.0f;
+                CruiserD_LiftChase = 1;
+            }
+            NUVEC *lift_pos = NuSpecialGetDrawPos(&CruiserD_Lift);
+#define CRUISERD_CHECK_PLAYER(index)                                                                                   \
+    {                                                                                                                   \
+        GameObject_s *victim = Player[index];                                                                            \
+        if (victim != NULL && victim->apiobj.field_0x287 == 0 &&                                                       \
+            (victim->apiobj.supporting_platform_id == CruiserD_Lift_plat_id || victim->apiobj.pos_z > lift_pos->z)) { \
+            ObjHitObj(NULL, victim, -1, 0, 0, 1);                                                                        \
+            KillGameObject(victim, 2, 0);                                                                                \
+            if (CruiserD_direction >= 0 && MiscTime == 0.0f)                                                            \
+                MiscTime = 1.0f;                                                                                         \
+        }                                                                                                               \
+    }
+            CRUISERD_CHECK_PLAYER(0);
+            CRUISERD_CHECK_PLAYER(1);
+            CRUISERD_CHECK_PLAYER(2);
+            CRUISERD_CHECK_PLAYER(3);
+            CRUISERD_CHECK_PLAYER(4);
+            CRUISERD_CHECK_PLAYER(5);
+            CRUISERD_CHECK_PLAYER(6);
+            CRUISERD_CHECK_PLAYER(7);
+#undef CRUISERD_CHECK_PLAYER
+        if (MiscTime > 0.0f) {
+            MiscTime -= FRAMETIME;
+            if (MiscTime <= 0.0f) {
+                MiscTime = 0.0f;
+                if (ChallengeMode != 3)
+                    ResetLevel(NULL, NULL, 1);
+            }
+        }
+    }
+
+    if (CruiserD_LiftAnim->playing)
+        PlaySfx("Cru_HugeWallMoveLp", NuSpecialGetDrawPos(&CruiserD_Lift));
+
+    CruiserD_frame = CruiserD_LiftAnim->ltime;
 }
 
 // ===========================================================================
@@ -278,7 +464,6 @@ void KashyyykA_Init(WORLDINFO_s *world) {
 }
 
 void KashyyykB_Init(WORLDINFO_s *) {
-    STUBBED();
 }
 
 void KashyyykC_Init(WORLDINFO_s *world) {
@@ -321,7 +506,6 @@ void KashyyykA_Reset(WORLDINFO_s *) {
 }
 
 void KashyyykB_Reset(WORLDINFO_s *) {
-    STUBBED();
 }
 
 void KashyyykD_Reset(WORLDINFO_s *world) {
@@ -351,15 +535,12 @@ i32 AnakinGreenSabre(GameObject_s *obj) {
 }
 
 void KashyyykA_Update(WORLDINFO_s *) {
-    STUBBED();
 }
 
 void KashyyykB_Update(WORLDINFO_s *) {
-    STUBBED();
 }
 
 void KashyyykC_Update(WORLDINFO_s *) {
-    STUBBED();
 }
 
 void KashyyykD_Update(WORLDINFO_s *) {
@@ -447,6 +628,19 @@ void TempleC_AlwaysUpdate(WORLDINFO_s *) {
 
 void *vadera_netpacket;
 
+struct VADERANETPACKET_s {
+    u16 count;
+    i16 subtitle;
+    f32 timer;
+};
+
+static NUVEC vadar_cam_pos = {0.0f, 0.88f, -12.4f};
+static NUVEC vadar_cam_tgt = {0.0f, 2.0f, -17.4f};
+
+void GameCameraMakeMiniCut2(NUVEC *, NUVEC *, i32, f32, f32, f32, f32, i32, i32, i32);
+void TickTockSfx();
+int LoseCoins(GameObject_s *, i32);
+
 void VaderA_Init(WORLDINFO_s *world) {
     memset(&vader_a, 0, sizeof(vader_a));
     vadera_netpacket = SetLevelHack(8);
@@ -460,7 +654,6 @@ void VaderA_Init(WORLDINFO_s *world) {
 }
 
 void VaderB_Init(WORLDINFO_s *) {
-    STUBBED();
 }
 
 i32 Vader_ObiWanKilledAnakin;
@@ -508,7 +701,114 @@ void VaderC_Reset(WORLDINFO_s *) {
 }
 
 void VaderA_Update(WORLDINFO_s *) {
-    STUBBED();
+    if (vader_a.timer_message != NULL)
+        vader_a.timer_message->value += FRAMETIME;
+
+    if (netclient == 0) {
+        if (vader_a.collapse_started != 0) {
+            vader_a.collapse_started = 0;
+            if (Player[0] != NULL && (Player[0]->apiobj.field_0x1f8 & 1) != 0)
+                SetObjOnSurface(Player[0], 1);
+            if (Player[1] != NULL && (Player[1]->apiobj.field_0x1f8 & 1) != 0)
+                SetObjOnSurface(Player[1], 1);
+            if (Player[2] != NULL && (Player[2]->apiobj.field_0x1f8 & 1) != 0)
+                SetObjOnSurface(Player[2], 1);
+            if (Player[3] != NULL && (Player[3]->apiobj.field_0x1f8 & 1) != 0)
+                SetObjOnSurface(Player[3], 1);
+            if (Player[4] != NULL && (Player[4]->apiobj.field_0x1f8 & 1) != 0)
+                SetObjOnSurface(Player[4], 1);
+            if (Player[5] != NULL && (Player[5]->apiobj.field_0x1f8 & 1) != 0)
+                SetObjOnSurface(Player[5], 1);
+            if (Player[6] != NULL && (Player[6]->apiobj.field_0x1f8 & 1) != 0)
+                SetObjOnSurface(Player[6], 1);
+            if (Player[7] != NULL && (Player[7]->apiobj.field_0x1f8 & 1) != 0)
+                SetObjOnSurface(Player[7], 1);
+        }
+
+        if (vader_a.big_jump_locator != NULL && player != NULL && player->apiobj.supporting_platform_id != -1)
+            vader_a.big_jump_locator->position = player->apiobj.lower_position;
+    }
+
+    if (vader_a.count != 0) {
+        f32 previous_time = vader_a.timer;
+        vader_a.timer -= FRAMETIME;
+
+        if (static_cast<i16>(vader_a.count) <= 2) {
+            if (vader_a.forces[0] != NULL && GizForce_Complete(vader_a.forces[0])) {
+                vader_a.timer += 20.0f;
+                if (TouchHacks::TouchControlsActive)
+                    vader_a.timer += 10.0f;
+                vader_a.subtitle = 1;
+                vader_a.forces[0] = NULL;
+            }
+            if (vader_a.forces[1] != NULL && GizForce_Complete(vader_a.forces[1])) {
+                vader_a.timer += 20.0f;
+                if (TouchHacks::TouchControlsActive)
+                    vader_a.timer += 10.0f;
+                vader_a.subtitle = 1;
+                vader_a.forces[1] = NULL;
+            }
+            if (vader_a.forces[2] != NULL && GizForce_Complete(vader_a.forces[2])) {
+                vader_a.timer += 20.0f;
+                if (TouchHacks::TouchControlsActive)
+                    vader_a.timer += 10.0f;
+                vader_a.subtitle = 1;
+                vader_a.forces[2] = NULL;
+            }
+            if (vader_a.forces[3] != NULL && GizForce_Complete(vader_a.forces[3])) {
+                vader_a.timer += 20.0f;
+                if (TouchHacks::TouchControlsActive)
+                    vader_a.timer += 10.0f;
+                vader_a.subtitle = 1;
+                vader_a.forces[3] = NULL;
+            }
+
+            static const f32 time_limits[3] = {30.0f, 15.0f, 0.0f};
+            if (time_limits[static_cast<i16>(vader_a.count)] > vader_a.timer) {
+                if (vader_a.count == 1) {
+                    SetGizAIMessage(gizaimessagesys, "ceiling_collapse", 2.0f, vader_a.ceiling_collapse_message);
+                } else if (vader_a.count == 2) {
+                    SetGizAIMessage(gizaimessagesys, "ceiling_collapse", 3.0f, vader_a.ceiling_collapse_message);
+                    vader_a.timer = 2.0f;
+                    NuCameraGetMtx();
+                    GameCameraMakeMiniCut2(&vadar_cam_pos, &vadar_cam_tgt, 0, 0.0f, 2.0f, 0.0f, 0.5f, 0, 0, 1);
+                }
+                ++vader_a.count;
+            }
+
+            if (vader_a.subtitle != 0 ||
+                (vader_a.timer > 0.0f && static_cast<i32>(previous_time) != static_cast<i32>(vader_a.timer)))
+                TickTockSfx();
+        } else if (netclient == 0 && vader_a.timer <= 0.0f) {
+            if (Player[0] != NULL && static_cast<i8>(Player[0]->apiobj.field_0x1f8) < 0)
+                LoseCoins(Player[0], 1);
+            if (Player[1] != NULL && static_cast<i8>(Player[1]->apiobj.field_0x1f8) < 0)
+                LoseCoins(Player[1], 1);
+            KillGameObject(player, 2, 0);
+        }
+    }
+
+    if (vader_a.reset_flag == 0 &&
+        ((Player[0] != NULL && Player[0]->apiobj.field_0x287 != 0 &&
+          (Player[0]->apiobj.field_0x1f4 & 0x40000) == 0) ||
+         (Player[1] != NULL && Player[1]->apiobj.field_0x287 != 0 &&
+          (Player[1]->apiobj.field_0x1f4 & 0x40000) == 0))) {
+        if (GameCam->sock_position.location.sock != 0 || player->apiobj.field_0x287 != 0) {
+            vader_a.reset_flag = 1;
+            ResetLevel(NULL, NULL, 1);
+        }
+    }
+
+    VADERANETPACKET_s *packet = static_cast<VADERANETPACKET_s *>(vadera_netpacket);
+    if (netclient == 0) {
+        packet->count = vader_a.count;
+        packet->subtitle = vader_a.subtitle;
+        packet->timer = vader_a.timer;
+    } else {
+        vader_a.count = packet->count;
+        vader_a.subtitle = packet->subtitle;
+        vader_a.timer = packet->timer;
+    }
 }
 
 void VaderB_Update(WORLDINFO_s *) {
@@ -522,8 +822,92 @@ void VaderB_Update(WORLDINFO_s *) {
     }
 }
 
-void VaderC_Update(WORLDINFO_s *) {
-    STUBBED();
+void VaderC_Update(WORLDINFO_s *world) {
+    extern TERRSET *CurTerr;
+    extern i32 obstacle_gizmotype_id;
+
+    if (netclient == 0 && vader_c.final_fight_message != NULL && ChallengeMode == 0 &&
+        vader_c.final_fight_message->value == 0.0f && vader_c.big_jump_locator != NULL && player != NULL &&
+        player->apiobj.supporting_platform_id != -1) {
+        vader_c.big_jump_locator->position = player->apiobj.lower_position;
+
+        u8 progress = vader_c.field_0x94;
+        for (i32 i = 0; i < 10; ++i) {
+            i16 platform_id = vader_c.platform_ids[i];
+            if (platform_id == -1)
+                continue;
+
+            if (Player[0] != NULL && Player[0]->apiobj.field_0x27d != 0 &&
+                Player[0]->apiobj.supporting_platform_id == platform_id &&
+                Player[0]->apiobj.position.y >=
+                    static_cast<NUMTX *>(CurTerr->platforms[platform_id].scene_object)->m31) {
+                progress |= 1;
+                vader_c.field_0x94 = progress;
+            }
+            if (Player[1] != NULL && Player[1]->apiobj.field_0x27d != 0 &&
+                Player[1]->apiobj.supporting_platform_id == platform_id &&
+                Player[1]->apiobj.position.y >=
+                    static_cast<NUMTX *>(CurTerr->platforms[platform_id].scene_object)->m31) {
+                progress |= 2;
+                vader_c.field_0x94 = progress;
+            }
+        }
+
+        if (progress == 3) {
+            vader_c.final_fight_message->value = 1.0f;
+            DOOR_s *door = Door_FindByName(world, "door_fight");
+            if (door != NULL)
+                Door_GoThrough(world, door, 1);
+        }
+    }
+
+    if (netclient != 0 && GameTimer.time_elapsed < 5.0f) {
+        GIZMO *gizmo = GizmoFindByName(WORLD->gizmo_sys, obstacle_gizmotype_id, "obstacle20");
+        if (gizmo != NULL && gizmo->object != NULL)
+            static_cast<GIZOBSTACLE_s *>(gizmo->object)->progress_flags &= ~1;
+        gizmo = GizmoFindByName(WORLD->gizmo_sys, obstacle_gizmotype_id, "obstacle21");
+        if (gizmo != NULL && gizmo->object != NULL)
+            static_cast<GIZOBSTACLE_s *>(gizmo->object)->progress_flags &= ~1;
+        gizmo = GizmoFindByName(WORLD->gizmo_sys, obstacle_gizmotype_id, "obstacle22");
+        if (gizmo != NULL && gizmo->object != NULL)
+            static_cast<GIZOBSTACLE_s *>(gizmo->object)->progress_flags &= ~1;
+        gizmo = GizmoFindByName(WORLD->gizmo_sys, obstacle_gizmotype_id, "obstacle23");
+        if (gizmo != NULL && gizmo->object != NULL)
+            static_cast<GIZOBSTACLE_s *>(gizmo->object)->progress_flags &= ~1;
+    }
+
+    if (vader_c.field_0x95 == 0) {
+        bool dead0 = Player[0] != NULL && (Player[0]->apiobj.field_0x1f8 & 0x80) != 0 &&
+                     Player[0]->apiobj.field_0x287 != 0 && (Player[0]->apiobj.field_0x1f4 & 0x40000) == 0;
+        bool dead1 = Player[1] != NULL && (Player[1]->apiobj.field_0x1f8 & 0x80) != 0 &&
+                     Player[1]->apiobj.field_0x287 != 0 && (Player[1]->apiobj.field_0x1f4 & 0x40000) == 0;
+        bool both_controlled = Player[0] != NULL && (Player[0]->apiobj.field_0x1f8 & 0x80) != 0 &&
+                               Player[1] != NULL && (Player[1]->apiobj.field_0x1f8 & 0x80) != 0;
+        if ((dead0 || dead1) && (static_cast<u8 *>(vaderc_netpacket)[0] == 0 || !both_controlled) &&
+            (ChallengeMode == 0 || AreaGlobals.values.field_0x1c <= 9)) {
+            vader_c.field_0x95 = 1;
+            if (vader_c.final_fight_message->value == 0.0f)
+                ResetLevel(NULL, NULL, 1);
+        }
+    }
+
+    if (LevGizObst[0] != NULL && LevGizObst[0]->anim_set != NULL &&
+        LevGizObst[0]->anim_set->objects != NULL &&
+        LevGizObst[0]->anim_set->objects->instance_animation != NULL) {
+        GAMEANIMOBJ_s *object = LevGizObst[0]->anim_set->objects;
+        nuinstanim_s *anim = object->instance_animation;
+        if (object->end_frame > 200.0f) {
+            f32 factor = anim->ltime;
+            if (factor >= 200.0f) {
+                factor = (object->end_frame - factor) / (object->end_frame - 200.0f);
+                factor *= factor;
+            }
+            if (anim->fparam1 == 0.0f)
+                anim->tfactor = 1.0f;
+            else
+                anim->tfactor = factor * anim->fparam1;
+        }
+    }
 }
 
 void VaderA_DrawPanel(WORLDINFO_s *) {
@@ -536,7 +920,6 @@ void VaderA_DrawPanel(WORLDINFO_s *) {
 }
 
 void VaderB_DrawPanel(WORLDINFO_s *) {
-    STUBBED();
 }
 
 void VaderC_DrawPanel(WORLDINFO_s *) {

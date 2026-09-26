@@ -874,7 +874,23 @@ bool NuMemoryManager::PopContext(NuMemoryManager::PopDebugMode debug_mode) {
 }
 
 void NuMemoryManager::Validate() {
-    STUBBED();
+    pthread_mutex_lock(&mutex);
+    for (Page *page = pages; page != NULL; page = page->next) {
+        Header *end = reinterpret_cast<Header *>(page->end);
+        for (Header *header = page->first_header; header != end;) {
+            ValidateBlockEndTags(header, __FUNCTION__);
+            Header *next = reinterpret_cast<Header *>(reinterpret_cast<u8 *>(header) + BLOCK_SIZE(header->value));
+            if (next != end)
+                ValidateBlockEndTags(next, __FUNCTION__);
+            if ((header->value & ALLOC_MASK) == 0) {
+                FreeHeader *free = reinterpret_cast<FreeHeader *>(header);
+                ValidateAddress(free->next, __FUNCTION__);
+                ValidateAddress(free->prev, __FUNCTION__);
+            }
+            header = next;
+        }
+    }
+    pthread_mutex_unlock(&mutex);
 }
 
 void NuMemoryManager::ValidateAddress(void *ptr, const char *caller) {
@@ -1111,33 +1127,111 @@ done:
 }
 
 void NuMemoryManager::Dump(u32 _unknown, const char *filepath) {
-    STUBBED();
 }
 
 void NuMemoryManager::StrandBlocksForContext(Context *ctx, u32 &stranded_block_count, u32 &_unknown,
                                              Header *&largest_stranded, u32 &stranded_bytes_count) {
-    STUBBED();
+    if ((m_flags & MEM_MANAGER_DEBUG) == 0) {
+        stranded_block_count = 0;
+        _unknown = 0;
+        largest_stranded = NULL;
+        stranded_bytes_count = 0;
+        return;
+    }
+
+    u32 newly_stranded = 0;
+    u32 total_stranded = 0;
+    Header *largest = NULL;
+    u32 stranded_bytes = 0;
+
+    for (Page *page = pages; page != NULL; page = page->next) {
+        Header *end = reinterpret_cast<Header *>(page->end);
+        for (Header *header = page->first_header; header != end;) {
+            if ((header->value & ALLOC_MASK) != 0) {
+                DebugHeader *debug = reinterpret_cast<DebugHeader *>(header);
+                u32 ctx_id = debug->flags.ctx_id;
+                if (ctx_id >= ctx->id && ctx_id != stranded_ctx.id) {
+                    debug->flags.ctx_id = stranded_ctx.id;
+                    ++newly_stranded;
+                    stranded_bytes += BLOCK_SIZE(header->value);
+                    ctx_id = debug->flags.ctx_id;
+                }
+                if (__builtin_expect(ctx_id == stranded_ctx.id, 0)) {
+                    ++total_stranded;
+                    if (largest == NULL || BLOCK_SIZE(largest->value) < BLOCK_SIZE(header->value))
+                        largest = header;
+                }
+            }
+            ValidateBlockEndTags(header, __FUNCTION__);
+            header = reinterpret_cast<Header *>(reinterpret_cast<u8 *>(header) + BLOCK_SIZE(header->value));
+        }
+    }
+
+    stranded_block_count = newly_stranded;
+    _unknown = total_stranded;
+    largest_stranded = largest;
+    stranded_bytes_count = stranded_bytes;
 }
 
 void NuMemoryManager::FreeStrandedBlocks() {
-    STUBBED();
+    if ((m_flags & MEM_MANAGER_DEBUG) == 0)
+        return;
+
+    pthread_mutex_lock(&mutex);
+    for (Page *page = pages; page != NULL;) {
+        Header *first = page->first_header;
+        Header *end = reinterpret_cast<Header *>(page->end);
+        FreeHeader *fragment = FindLargestFragment();
+        BinUnlink(fragment);
+        ConvertToUsedBlock(fragment, 4, 0, "Main", 0);
+        u32 fragment_size = BLOCK_SIZE(fragment->block_header.value);
+        u32 available = fragment_size - m_headerSize;
+        u32 capacity = idx <= 29 ? available - 4 : available - 8;
+        stranded_blocks = reinterpret_cast<void **>(ClearUsedBlock(&fragment->block_header, 0));
+        capacity /= sizeof(void *);
+        stranded_block_count = 0;
+
+        u32 overflow = 0;
+        for (Header *header = first; header != end;) {
+            u32 block_size = BLOCK_SIZE(header->value);
+            if ((header->value & ALLOC_MASK) != 0 &&
+                reinterpret_cast<DebugHeader *>(header)->flags.ctx_id == stranded_ctx.id) {
+                if (stranded_block_count < capacity) {
+                    stranded_blocks[stranded_block_count++] = reinterpret_cast<u8 *>(header) + m_headerSize;
+                } else {
+                    ++overflow;
+                }
+            }
+            ValidateBlockEndTags(header, "StrandBlocksForContext");
+            header = reinterpret_cast<Header *>(reinterpret_cast<u8 *>(header) + BLOCK_SIZE(header->value));
+        }
+
+        for (u32 i = 0; i < stranded_block_count; ++i) {
+            void *ptr = stranded_blocks[i];
+            if (ptr != NULL) {
+                DebugHeader *header = reinterpret_cast<DebugHeader *>(reinterpret_cast<u8 *>(ptr) - m_headerSize);
+                BlockFree(ptr, (header->flags.alloc_flags & 0x7f) | 0x20);
+            }
+        }
+        BlockFree(stranded_blocks, 0x20);
+        stranded_blocks = NULL;
+        if (overflow == 0)
+            page = page->next;
+    }
+    pthread_mutex_unlock(&mutex);
 }
 
 void NuMemoryManager::IErrorHandler::HandleError(NuMemoryManager *manager, ErrorCode code, const char *msg) {
-    STUBBED();
 }
 
 i32 NuMemoryManager::IErrorHandler::OpenDump(NuMemoryManager *manager, const char *filename, u32 &id) {
-    STUBBED();
     return 0;
 }
 
 void NuMemoryManager::IErrorHandler::CloseDump(NuMemoryManager *manager, u32 id) {
-    STUBBED();
 }
 
 void NuMemoryManager::IErrorHandler::Dump(NuMemoryManager *manager, u32 id, const char *msg) {
-    STUBBED();
 }
 
 void NuMemoryManager::ClearBlockDebugContext(void *ptr) {
@@ -1152,16 +1246,186 @@ void NuMemoryManager::ClearBlockDebugContext(void *ptr) {
     header->flags.ctx_id = 0;
 }
 
-void NuMemoryManager::DumpBlock(u32, NuSymbolQuery *, NuMemoryManager::Header *, u32, u32, u32) {
-    STUBBED();
+u16 NuMemoryManager::DumpBlock(u32 dump_id, NuSymbolQuery *, Header *header, u32 count, u32 total_bytes, u32 flags) {
+    char line[512];
+    char size_text[14];
+    char address_text[19];
+    u32 block_size = BLOCK_SIZE(header->value);
+    u32 *end_tag = END_TAG(header, block_size);
+    u32 encoded_index = *end_tag >> 27;
+    u32 manager_index = encoded_index == 31 ? *(end_tag - 1) : encoded_index - 1;
+    u8 *data = reinterpret_cast<u8 *>(header) + m_headerSize;
+
+    NuStrFormatSize(size_text, sizeof(size_text),
+                    total_bytes - (m_headerSize - 4) * count - (manager_index >= 30 ? 8 : 4), false);
+    NuStrFormatAddress(address_text, sizeof(address_text), data);
+
+    u16 category = 0;
+    if ((m_flags & MEM_MANAGER_DEBUG) == 0) {
+        snprintf(line, sizeof(line),
+                 "| %s | %10u | %s |     |           | [%02X %02X %02X %02X %02X %02X %02X %02X ...]\r\n",
+                 address_text, count, size_text, data[0], data[1], data[2], data[3], data[4], data[5], data[6],
+                 data[7]);
+    } else {
+        DebugHeader *debug = reinterpret_cast<DebugHeader *>(header);
+        category = debug->category;
+        const char *debug_name = debug->name != NULL ? NuStrStripPath(debug->name) : "";
+        char category_text[10];
+        if (category < category_count) {
+            const char *name = category_names[category];
+            u32 length = strlen(name);
+            if (length > 9)
+                length = 9;
+            memcpy(category_text, name, length);
+            memset(category_text + length, ' ', 9 - length);
+            category_text[9] = '\0';
+        } else {
+            strcpy(category_text, "        ");
+        }
+        const char flag_a = (debug->flags.alloc_flags & 8) != 0 ? 'X' : '-';
+        const char flag_s = (debug->flags.alloc_flags & 4) != 0 ? 'X' : '-';
+        const char flag_c = (debug->flags.alloc_flags & 2) != 0 ? 'X' : '-';
+
+        if (count > 1 && (flags & 2) == 0) {
+            snprintf(line, sizeof(line), "| %s | %10u | %s | %c%c%c | %s | %s\r\n", address_text, count,
+                     size_text, flag_a, flag_s, flag_c, category_text, debug_name);
+        } else if ((debug->flags.alloc_flags & 4) != 0) {
+            char value[257];
+            u32 length = block_size - m_headerSize - (manager_index >= 30 ? 8 : 4);
+            if (length > 256)
+                length = 256;
+            memcpy(value, data, length);
+            for (u32 i = 0; i < length; ++i) {
+                if (value[i] == '\0' || value[i] == '\n' || value[i] == '\t')
+                    value[i] = 0x7f;
+            }
+            value[length] = '\0';
+            snprintf(line, sizeof(line), "| %s | %10u | %s | %c%c%c | %s | %s [%s]\r\n", address_text,
+                     count, size_text, flag_a, flag_s, flag_c, category_text, debug_name, value);
+        } else {
+            snprintf(line, sizeof(line),
+                     "| %s | %10u | %s | %c%c%c | %s | %s [%02X %02X %02X %02X %02X %02X %02X %02X ...]\r\n",
+                     address_text, count, size_text, flag_a, flag_s, flag_c, category_text, debug_name, data[0],
+                     data[1], data[2], data[3], data[4], data[5], data[6], data[7]);
+        }
+    }
+    error_handler->Dump(this, dump_id, line);
+    if ((m_flags & MEM_MANAGER_EXTENDED_DEBUG) != 0 && (flags & 0x20) != 0 &&
+        reinterpret_cast<ExtendedDebugHeader *>(header)->backtrace_count == 0) {
+        error_handler->Dump(this, dump_id,
+                            "|            |            |               |     |           |   <NO BACKTRACE>\r\n");
+    }
+    return category;
 }
 
-void NuMemoryManager::DumpBlocksForContext(u32, NuSymbolQuery *, NuMemoryManager::Context *, u32) {
-    STUBBED();
+void NuMemoryManager::DumpBlocksForContext(u32 dump_id, NuSymbolQuery *query, Context *context, u32 flags) {
+    char line[512];
+    char size_text[14];
+    u32 category_bytes[128] = {};
+    u32 total_bytes = 0;
+    u32 total_blocks = 0;
+
+    error_handler->Dump(this, dump_id,
+                        "+-----------------------------------------------------------------------------------------------------------\r\n");
+    snprintf(line, sizeof(line), "| BLOCKS FOR CONTEXT \"%s\"\r\n", context->name);
+    error_handler->Dump(this, dump_id, line);
+    error_handler->Dump(this, dump_id,
+                        "+------------+------------+---------------+-----+---------------------------------------------------\r\n");
+    error_handler->Dump(this, dump_id,
+                        "| ADDRESS    | COUNT      | TOTAL         | ASC | CATEGORY  | DEBUG NAME [DATA]\r\n");
+    error_handler->Dump(this, dump_id,
+                        "+------------+------------+---------------+-----+---------------------------------------------------\r\n");
+
+    for (Page *page = pages; page != NULL; page = page->next) {
+        Header *end = reinterpret_cast<Header *>(page->end);
+        for (Header *header = page->first_header; header != end;) {
+            u32 block_size = BLOCK_SIZE(header->value);
+            if ((header->value & ALLOC_MASK) != 0) {
+                if ((m_flags & MEM_MANAGER_DEBUG) == 0) {
+                    u16 category = DumpBlock(dump_id, query, header, 1, block_size, flags);
+                    category_bytes[category] += block_size;
+                    total_bytes += block_size;
+                    ++total_blocks;
+                } else {
+                    DebugHeader *debug = reinterpret_cast<DebugHeader *>(header);
+                    if ((debug->flags.unknown & 1) == 0 && debug->flags.ctx_id == context->id &&
+                        ((flags & 2) == 0 || (debug->flags.alloc_flags & 4) != 0)) {
+                        u32 count = 1;
+                        if ((flags & 0x10) != 0)
+                            count += FindAndTouchMatchingBlocks(debug, &block_size, flags);
+                        debug->flags.unknown |= 1;
+                        u16 category = DumpBlock(dump_id, query, header, count, block_size, flags);
+                        category_bytes[category] += block_size;
+                        total_bytes += block_size;
+                        total_blocks += count;
+                    }
+                }
+            }
+            ValidateBlockEndTags(header, __FUNCTION__);
+            header = reinterpret_cast<Header *>(reinterpret_cast<u8 *>(header) + BLOCK_SIZE(header->value));
+        }
+    }
+
+    if (total_blocks == 0)
+        error_handler->Dump(this, dump_id, "| NO BLOCKS LINKED TO THIS CONTEXT\r\n");
+    error_handler->Dump(this, dump_id,
+                        "+-----------------------------------------+-----------------------------------------------------------------\r\n");
+    NuStrFormatSize(size_text, sizeof(size_text), total_bytes, true);
+    snprintf(line, sizeof(line), "| TOTAL MEMORY (BYTES) = %13s |\r\n", size_text);
+    error_handler->Dump(this, dump_id, line);
+    NuStrFormatSize(size_text, sizeof(size_text), total_blocks, true);
+    snprintf(line, sizeof(line), "| TOTAL BLOCKS = %13s         |\r\n", size_text);
+    error_handler->Dump(this, dump_id, line);
+    error_handler->Dump(this, dump_id, "+--------------------------------------+--------+\r\n");
+    for (u32 i = 0; i < category_count; ++i) {
+        NuStrFormatSize(size_text, sizeof(size_text), category_bytes[i], true);
+        snprintf(line, sizeof(line), "| MEMORY (BYTES) FOR [%8s] = %13s |\r\n", category_names[i], size_text);
+        error_handler->Dump(this, dump_id, line);
+    }
+    error_handler->Dump(this, dump_id, "+-----------------------------------------------+\r\n");
+    error_handler->Dump(this, dump_id, "\r\n");
 }
 
-void NuMemoryManager::FindAndTouchMatchingBlocks(NuMemoryManager::DebugHeader *, u32 *, u32) {
-    STUBBED();
+u32 NuMemoryManager::FindAndTouchMatchingBlocks(DebugHeader *reference, u32 *total_bytes, u32 options) {
+    u32 match_count = 0;
+    for (Page *page = pages; page != NULL; page = page->next) {
+        Header *end = reinterpret_cast<Header *>(page->end);
+        for (Header *header = page->first_header; header != end;) {
+            if (header != &reference->block_header && (header->value & ALLOC_MASK) != 0) {
+                DebugHeader *candidate = reinterpret_cast<DebugHeader *>(header);
+                if (candidate->name != NULL && reference->name != NULL &&
+                    strcmp(candidate->name, reference->name) == 0 &&
+                    candidate->flags.ctx_id == reference->flags.ctx_id &&
+                    candidate->flags.alloc_flags == reference->flags.alloc_flags &&
+                    candidate->category == reference->category) {
+                    bool equal = true;
+                    if ((options & 0x20) != 0 && (m_flags & MEM_MANAGER_EXTENDED_DEBUG) != 0) {
+                        ExtendedDebugHeader *left = reinterpret_cast<ExtendedDebugHeader *>(candidate);
+                        ExtendedDebugHeader *right = reinterpret_cast<ExtendedDebugHeader *>(reference);
+                        equal = left->backtrace_count == right->backtrace_count;
+                        if (equal) {
+                            for (u32 i = 0; i < left->backtrace_count; ++i) {
+                                if (left->extended_info.unknown[i] != right->extended_info.unknown[i])
+                                    equal = false;
+                            }
+                        }
+                    }
+                    if ((options & 2) != 0 &&
+                        strcmp(reinterpret_cast<char *>(candidate) + m_headerSize,
+                               reinterpret_cast<char *>(reference) + m_headerSize) != 0)
+                        equal = false;
+                    if (equal) {
+                        ++match_count;
+                        *total_bytes += BLOCK_SIZE(header->value);
+                        candidate->flags.unknown |= 1;
+                    }
+                }
+            }
+            ValidateBlockEndTags(header, __FUNCTION__);
+            header = reinterpret_cast<Header *>(reinterpret_cast<u8 *>(header) + BLOCK_SIZE(header->value));
+        }
+    }
+    return match_count;
 }
 
 u32 NuMemoryManager::GetAllocatedBytes() {
@@ -1343,8 +1607,33 @@ void NuMemoryManager::PushContext(const char *name) {
     pthread_mutex_unlock(&mutex);
 }
 
-void NuMemoryManager::ReleaseExternalPage(void *) {
-    STUBBED();
+i32 NuMemoryManager::ReleaseExternalPage(void *ptr) {
+    pthread_mutex_lock(&mutex);
+    i32 released = 0;
+    Page *page = pages;
+    while (page != NULL) {
+        Page *next = page->next;
+        Page *prev = page->prev;
+        if (page->original_ptr == ptr && page->is_external) {
+            Header *header = page->first_header;
+            if ((header->value & ALLOC_MASK) != 0 ||
+                reinterpret_cast<u8 *>(header) + BLOCK_SIZE(header->value) != reinterpret_cast<u8 *>(page->end)) {
+                break;
+            }
+            BinUnlink(reinterpret_cast<FreeHeader *>(header));
+            if (next != NULL)
+                next->prev = prev;
+            if (prev != NULL)
+                prev->next = next;
+            else
+                pages = next;
+            released = 1;
+            break;
+        }
+        page = next;
+    }
+    pthread_mutex_unlock(&mutex);
+    return released;
 }
 
 void NuMemoryManager::SetBlockDebugContext(void *ptr, u32 ctx_id) {
@@ -1449,8 +1738,38 @@ void NuMemoryManager::ValidateBlock(void *ptr) {
     }
 }
 
-void NuMemoryManager::ValidateBlockDeferredContent(NuMemoryManager::Header *, char const *) {
-    STUBBED();
+void NuMemoryManager::ValidateBlockDeferredContent(NuMemoryManager::Header *header, char const *caller) {
+    if ((m_flags & MEM_MANAGER_DEBUG) == 0)
+        return;
+    DebugHeader *debug = reinterpret_cast<DebugHeader *>(header);
+    if ((debug->flags.alloc_flags & 0x20) == 0)
+        return;
+
+    u32 block_size = BLOCK_SIZE(header->value);
+    u32 payload_size = block_size - m_headerSize;
+    u8 *data = reinterpret_cast<u8 *>(header) + m_headerSize;
+    u32 *end_tag = reinterpret_cast<u32 *>(reinterpret_cast<u8 *>(header) + block_size - 4);
+    u32 tag = *end_tag >> 27;
+    if (tag == 31)
+        tag = *(end_tag - 1);
+    else
+        --tag;
+    u32 count = tag > 29 ? payload_size - 6 : payload_size - 5;
+    count >>= 2;
+    if (tag == 29)
+        return;
+
+    u32 i = 0;
+    do {
+        if (reinterpret_cast<u32 *>(data)[i + 1] != 0x7fbf7fbf) {
+            pthread_mutex_lock(&error_mutex);
+            m_flags |= MEM_MANAGER_IN_ERROR_STATE;
+            snprintf(error_msg, sizeof(error_msg), "Deferred content changed detected in %s\n", caller);
+            error_handler->HandleError(this, MEM_ERROR_DEFERRED_CONTENT_CHANGED, error_msg);
+            pthread_mutex_unlock(&error_mutex);
+        }
+        ++i;
+    } while (i != count);
 }
 
 void NuMemoryManager::VisitManagers(NuMemoryManager::IVisitor *visitor) {
@@ -1471,6 +1790,37 @@ void NuMemoryManager::VisitPages(NuMemoryManager::IPageVisitor *visitor) {
     pthread_mutex_unlock(&mutex);
 }
 
-void NuMemoryManager::_MultiBlockAlloc(u32, u32, u32, void **, u32, char const *, u16) {
-    STUBBED();
+i32 NuMemoryManager::_MultiBlockAlloc(u32 size, u32 alignment, u32 count, void **out, u32 flags,
+                                      char const *name, u16 category) {
+    if (count == 0)
+        return 0;
+    alignment = MAX(alignment, 4u);
+    u32 adjusted_size = size;
+    if (idx >= 30)
+        adjusted_size += 4;
+    const u32 stride = ALIGN(adjusted_size, alignment) + m_headerSize + 4;
+    void *allocation = _TryBlockAlloc(stride * count - (m_headerSize + 4), 4, flags, name, category);
+    if (allocation == NULL)
+        return 0;
+
+    Header *header = reinterpret_cast<Header *>(reinterpret_cast<u8 *>(allocation) - m_headerSize);
+    pthread_mutex_lock(&mutex);
+    u32 remaining = BLOCK_SIZE(header->value);
+    for (u32 i = 0; i < count; ++i) {
+        u32 block_size;
+        if (i == count - 1) {
+            block_size = remaining;
+            remaining = 0;
+        } else {
+            block_size = stride;
+            remaining -= stride;
+        }
+        header->value = block_size / 4;
+        ConvertToUsedBlock(reinterpret_cast<FreeHeader *>(header), alignment, flags, name, category);
+        ValidateBlockEndTags(header, __FUNCTION__);
+        out[i] = ClearUsedBlock(header, flags);
+        header = reinterpret_cast<Header *>(reinterpret_cast<u8 *>(header) + stride);
+    }
+    pthread_mutex_unlock(&mutex);
+    return 1;
 }

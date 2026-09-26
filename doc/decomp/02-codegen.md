@@ -280,6 +280,53 @@ verified: `g++ -O0/-O3 -c glob.cpp guard.cpp; objdump -dr -s -j .data/.rodata.st
 - `89 f6 mov %esi,%esi` (2B).
 No `int3`/multibyte nops from `-fpatchable-*`; the multi-byte `lea` idioms are the classic GCC-4.7 Atom-safe fills. No dead nops after `ret` beyond alignment; unreachable code after noreturn calls is simply dropped (no warning-only tail).
 
+Some retail Nu3D entry points are **intentional no-ops**, even when their
+reconstructed source still says `STUBBED()`. The original `NuSpecialList`,
+`NuSpecialSetRenderPlane`, `NuSpecialSetAlphaTest`, `NuSpecialAddShadowLight`,
+`NuSpecialClearShadowLights`, `NuTexUnloadHires`, `NuTexRemap`, and
+`NuTextureCreate3D` each consist of eight single-byte `nop`s followed by
+`ret` (nine bytes total). `NuTexSwapHires` and
+`NuSpecialClipTestShadowLights` begin with `xor %eax,%eax`, then six `nop`s
+and `ret`. The NDK r8e target build naturally emits these exact bytes from
+empty bodies or `return 0`; the apparent nops are the compiler's in-function
+padding, not missing work. All ten compare at 100% with the GOT-aware
+`objdiff-cli` fork. Remove `STUBBED()` host diagnostics for these verified
+no-ops, but first inspect the original body before treating any other stub
+as intentional.
+
+The fifteen Android `NuMc*` memory-card entry points in `numc.cpp` are another
+verified retail no-op run, this time compiled at `-O0` and contiguous in the
+original text from `NuMcOpenSize` through `NuMcGetSlotMax`. Integer-returning
+functions use `push %ebp; mov %esp,%ebp; mov $0,%eax; pop %ebp; ret` (10
+bytes); `NuMcCloseDir` omits the `mov` and is five bytes. Plain `return 0`
+or an empty body reproduces all fifteen exactly; `STUBBED()` only adds a
+misleading host diagnostic. Keep their original source order so the text run
+is contiguous, and do not infer missing memory-card behavior from the stub
+marker alone.
+
+The mixed `nucore_plain.cpp` contains nineteen more verified nine-byte retail
+no-ops (plain `ret` or zero/null return with GCC padding). Their `STUBBED()`
+markers were host diagnostics only; removing the markers leaves all nineteen
+at 100% in the target. Several nearby bodies do contain real work, so classify
+each symbol by retail disassembly first. For example, the typed calls in
+`NuDynamicLightGetDList`, `NuDynamicLightTestShadowExtrusionExtent`,
+`NuOcclusionManagerRenderStats`, and `NuVisiOctree` compile to exact retail
+bodies. `NuSysDirClose` has the correct 108-byte instruction shape but three
+local BSS `GOTOFF` displacements still differ after linking (99.86957%).
+`Nu360ConfigureSMBSharing` is a separate 106-byte `-O0` retail function; the
+same logic in the mixed optimized catchall compiles to a different prologue
+and register allocation, so source-level condition changes alone cannot
+explain that mismatch.
+
+In the legacy DWA evaluator, retaining a local `nuanimcurveset_s*` across the
+curve loop made GCC keep a different register and emit a shared x87 store for
+both curve and constant values. Reloading the curve set through the animation
+chunk for each curve, then writing separate `if` branches, reproduced the
+retail distinction: `NuAnimCurveCalcVal2` returns on the x87 stack, while a
+constant curve uses `movss`. That source change raised `NuHGobjEvalDwa` from
+43.96% to 59.35% without changing the result. The remaining differences
+include stack slots, register choice, and block layout.
+
 **Hot/cold:** NO `.text.hot`/`.text.unlikely` — `__builtin_expect` only feeds branch/if-conversion heuristics: `hot()` at -O3 = `test %eax,%eax; mov $-1,%edx; cmove %edx,%eax; ret`.
 verified: `g++ -O3 -S align.cpp; objdump -d`
 
@@ -340,6 +387,36 @@ verified: `g++ -O0/-O3 -c call.cpp; objdump -d`
 - **-O0 register usage:** dominantly `eax/ecx/edx` + stack slots; `ebx` appears only for the PIC base; `esi` only for alloca bookkeeping (`mov %esp,%esi`... actually `mov %esp,%ecx` + `mov %ecx,%esp` restore) and rarely for held values (`shl` example: `mov %edx,%esi; shl %cl,%esi`); `edi` essentially never. Reading -O0 code: expect everything via `%ebp` offsets.
 - **cmov/setcc hygiene at -O3:** `xor %eax,%eax` before `setcc %al` when the value is otherwise untouched (partial-register avoidance); `movzbl` used when the setcc result is combined with other values.
 verified: `g++ -O0/-O3 -c misc.cpp; objdump -d`
+
+- In `getNumDigits`, an unlikely one-digit branch plus an empty `+d`
+  handoff for the threshold (clobbering `eax`) retains the target's two
+  separate return blocks and schedules `mov edx, 10` before `mov eax, 1`.
+  Either change alone leaves those instructions merged or reversed.
+  The GOT-aware function match rose from 28% for the placeholder to 100%.
+- A `u16` narrowing before shifting right eight bits in
+  `UnpackCharFromInt` becomes `movzx ecx, ah` on this compiler. Shifting
+  the full `u32` instead emits `mov ecx, eax; shr ecx, 8` and missed the
+  original two-byte instruction. The narrowed spelling matches 100%.
+- `MatchExtension` was built at `-O0` with a frame pointer, unlike its
+  optimized neighbors in `utilities.cpp`. A function-level
+  `optimize("O0,no-omit-frame-pointer")` reproduces its 111-byte loop and
+  stack layout exactly; `optimize("O0")` alone omits `ebp` and misses.
+- For the eight-digit hexadecimal parser `XToI`, computing both `digit -
+  '0'` and `digit - 'W'` before the selection yields `cmov` rather than
+  branches. Spell the choice as `digit >= ':' ? letter : decimal` to get
+  the target's `cmp 0x3a` / `cmovl` pattern. The opposite ternary sense
+  becomes `cmp 0x39` / `cmovg` and loses matches even though it computes
+  the same value.
+- In `XZLinesIntersect`, `NuFabs` resolved to an out-of-line helper in
+  this translation unit. Direct `__builtin_fabsf` emitted the target's
+  `andps` absolute-value mask and raised its match from 90.54% to 98.15%
+  while removing 37 bytes of helper-call setup.
+- A stub with the right global mangled name can mask a correct function
+  living in another source file. `RatioBetweenPlanes` was duplicated as a
+  global placeholder in `utilities.cpp`, while `socksysall.cpp` already
+  had the full body marked `static`. Removing the placeholder and giving
+  the real body external linkage matches the 129-byte target exactly and
+  restores calls to its adjacent local `DistanceToPlane` helper.
 
 ## Cross-checks against real project artifacts
 

@@ -1,6 +1,8 @@
 #include "decomp.h"
 #include "globals.h"
 #include "legoapi/legoapi_types.h"
+#include "nu2api/nu3d/nugscn.h"
+#include "nu2api/nu3d/numtl.h"
 #include "nu2api/nu3d/nutex.h"
 
 #include <new>
@@ -10,8 +12,13 @@ struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
-void FindMtlInHGObj(nugscn_s *, i32) {
-    STUBBED();
+__attribute__((optimize("O2"))) i32 FindMtlInHGObj(nugscn_s *scene, i32 material_type) {
+    for (i32 index = 0; index < scene->nummtl; ++index) {
+        if (scene->mtls[index]->unknown_9a[0] == material_type) {
+            return index + 1;
+        }
+    }
+    return 0;
 }
 
 // CreateThingManager @0x4e8b50: allocate a 0x24-byte GameThingManager from the

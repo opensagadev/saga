@@ -134,7 +134,11 @@ GameObject_s *AddGameObject(i32 id) {
     }
     return object;
 }
-static __used__ void TrenchMove(GameObject_s *object) {
+void TrenchMove(GameObject_s *) asm("_ZL10TrenchMoveP12GameObject_s") __attribute__((visibility("hidden")));
+void TrenchKilledCallback(GameObject_s *) asm("_ZL20TrenchKilledCallbackP12GameObject_s")
+    __attribute__((visibility("hidden")));
+
+__used__ void TrenchMove(GameObject_s *object) {
     APIOBJECT_s &api = object->apiobj;
     api.field_0x214 = api.field_0x218;
     api.start_position = api.position;
@@ -214,7 +218,7 @@ static __used__ void TrenchMove(GameObject_s *object) {
     GameObjectOrigin(object);
 }
 
-static __used__ void TrenchKilledCallback(GameObject_s *object) {
+__used__ void TrenchKilledCallback(GameObject_s *object) {
     for (i32 i = 0; i < 3; ++i) {
         if (trenchrun.objects[i] == object) {
             trenchrun.objects[i] = NULL;

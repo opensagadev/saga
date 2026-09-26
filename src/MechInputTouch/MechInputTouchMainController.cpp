@@ -1,6 +1,7 @@
 #include "decomp.h"
 #include "MechInputTouch_types.h"
 #include "globals.h"
+#include "nu2api/nucore/NuInputDevice.h"
 
 #include <string.h>
 
@@ -19,12 +20,15 @@ MechInputTouchMainController::MechInputTouchMainController(i32 index)
     ResetButtons();
 }
 
-void MechInputTouchMainController::RemoveUnpressedButtons(NuInputTouchData &, NuInputTouchData const &) {
-    STUBBED();
+void MechInputTouchMainController::RemoveUnpressedButtons(NuInputTouchData &output, NuInputTouchData const &input) {
+    output.touch_count = 0;
+    for (i32 i = 0; i < static_cast<i32>(input.touch_count); ++i) {
+        output.touch_events[i] = input.touch_events[i];
+        output.touch_count = i + 1;
+    }
 }
 
 void MechInputTouchMainController::Render() {
-    STUBBED();
 }
 
 void MechInputTouchMainController::ResetButtons() {
@@ -34,8 +38,14 @@ void MechInputTouchMainController::ResetButtons() {
     memset(buttons_repeat_timers, 0, sizeof(buttons_repeat_timers));
 }
 
-void MechInputTouchMainController::Update(NuInputTouchData const *) {
-    STUBBED();
+void MechInputTouchMainController::Update(NuInputTouchData const *input) {
+    NuInputTouchData filtered;
+    RemoveUnpressedButtons(filtered, *input);
+    stick_values[0] = 0.0f;
+    stick_values[1] = 0.0f;
+    stick_values[2] = 0.0f;
+    stick_values[3] = 0.0f;
+    UpdateButtons();
 }
 
 void MechInputTouchMainController::UpdateButtons() {

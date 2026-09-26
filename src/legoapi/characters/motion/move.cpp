@@ -11,6 +11,7 @@
 #include "MechInputTouch/MechInputTouch_types.h"
 #include "globals.h"
 #include "nu2api/nu3d/nuspecial.h"
+#include "nu2api/nu3d/nuqfnt.h"
 
 static GameObject_s *ForceBackObj = NULL;
 static NUVEC *ForceBackPos = NULL;
@@ -53,6 +54,7 @@ static f32 ForceBackRadius2 = 0.0f;
 #include "legoapi/render/fx/spline_position.h"
 #include "legoapi/render/light/surfaces.h"
 #include "legoapi/gizmos/fx/gizmopickups.h"
+#include "legoapi/gizmo/object/gizmopickup.h"
 #include "legoapi/world/level.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/world.h"
@@ -1499,8 +1501,84 @@ i32 MovePlayer_TWIST(GameObject_s *object) {
     return 1;
 }
 
-void Move_SPEEDERBIKE(GameObject_s *) {
-    STUBBED();
+f32 speeder_smoke_rate = 5.0f;
+f32 speeder_offset_speed = 2.0f;
+extern f32 GetVehicleSpeedMul(GameObject_s *, f32);
+
+void Move_SPEEDERBIKE(GameObject_s *object) {
+    GAMEPAD_s *pad = object->pad_gamepad;
+    PreResetCode(object);
+    KeepWeaponOut(object);
+    DropInOutCode(object);
+    if ((object->field_0xe20 & GAMEOBJECT_E20_FLAG_MOVEMENT_DISABLED) != 0)
+        return;
+
+    ApplyGravity(object, NULL, GetVehicleHoverHeight(object, NULL), 10.0f, NULL);
+    GAMECHARACTERDATA *vehicle = object->apiobj.character_data->game_character;
+    if (vehicle->field_0x28 > 0.0f && (vehicle->flags_090 & 0x10000) == 0 &&
+        (WORLD->current_level != SPEEDERCHASEA_LDATA || disable_narrow_socks == 0)) {
+        LoopCode(object, pad->buttons_pressed & GAMEPAD_JUMP, pad->buttons_held & GAMEPAD_JUMP, pad, 1);
+        TurnCode(object, 0, pad);
+    }
+    DeactivatedCode(object);
+    if ((object->apiobj.character_data->model_flags & 0x10000000) != 0) {
+        FireCode(object, pad->buttons_pressed & GAMEPAD_ACTION, pad->buttons_held & GAMEPAD_ACTION, 0.2f, 0);
+    }
+
+    f32 speed = GetVehicleSpeedMul(object, pad->input_magnitude);
+    f32 target = speed <= 1.0f ? speed * 0.75f + 0.75f : 1.5f;
+    object->thrust_effect_scale =
+        SeekValF(object->thrust_effect_scale, target, object->thrust_effect_scale < target ? 8.0f : 3.0f);
+    object->reserved_e27[0] = static_cast<u8>(qrand() >> 8);
+    object->reserved_e27[1] = static_cast<u8>(qrand() >> 8);
+    object->reserved_e27[2] = static_cast<u8>(qrand() >> 8);
+    object->reserved_e27[3] = static_cast<u8>(qrand() >> 8);
+
+    if (WORLD->area != NULL && (WORLD->area->flags & 1) != 0 && object->id == id_MINISTARDESTROYER &&
+        static_cast<i8>(object->apiobj.flags_low) < 0 &&
+        (Cheat[29].enabled != 0 || object->field_0xdec > 0.0f)) {
+        TractorBeamCode(object);
+    }
+
+    if (object->id == id_SPEEDERBIKE) {
+        AwkwardShapeCode(object, 0);
+        if (object->current_hp <= 2) {
+            const i32 effect = WORLD->debris_sys->entries[134].effect;
+            if (effect != -1) {
+                i32 count = ParticlesPerSecond(speeder_smoke_rate, FRAMETIME) * (3 - object->current_hp);
+                while (count-- > 0) {
+                    f32 random = static_cast<f32>(qrand()) * (1.0f / 65535.0f);
+                    NUVEC position;
+                    position.x = object->apiobj.collision_position.x +
+                                 (object->apiobj.initial_position.x - object->apiobj.collision_position.x) * random;
+                    position.y = object->apiobj.collision_position.y +
+                                 (object->apiobj.initial_position.y - object->apiobj.collision_position.y) * random;
+                    position.z = object->apiobj.collision_position.z +
+                                 (object->apiobj.initial_position.z - object->apiobj.collision_position.z) * random;
+                    AddVariableShotDebrisEffect(effect, &position, 1, 0, 0);
+                }
+            }
+        }
+        if (object->movement_spline != NULL) {
+            for (i32 i = 0; i < 2; ++i) {
+                GameObject_s *player = Player[i];
+                if (player == NULL || static_cast<i8>(player->apiobj.flags_low) >= 0 || player->field_0xcc0 == NULL ||
+                    ((object->apiobj.field_0x1e4 & player->apiobj.field_0x1ec) == 0 &&
+                     (object->apiobj.field_0x1e8 & player->apiobj.field_0x1f0) == 0) ||
+                    object->field_0x1024 > 0.0f)
+                    continue;
+                NUVEC displacement;
+                displacement.x = player->apiobj.position.x - object->apiobj.position.x;
+                displacement.z = player->apiobj.position.z - object->apiobj.position.z;
+                NuVecRotateY(&displacement, &displacement, -object->apiobj.field_0x276);
+                if (displacement.x < 0.0f)
+                    object->movement_spline_lateral_speed += speeder_offset_speed;
+                else
+                    object->movement_spline_lateral_speed -= speeder_offset_speed;
+            }
+        }
+    }
+    EngineNoiseCode(object, 0);
 }
 
 // Original: 1,000 bytes.
@@ -3984,8 +4062,112 @@ void PodCollisionCode(GameObject_s *object) {
     }
 }
 
-void Move_POD(GameObject_s *) {
-    STUBBED();
+// These pod tuning values are zero-initialized in the original image.
+f32 PosSeekPitch[2];
+f32 PODBOOSTHEIGHT;
+
+f32 FindPodHoverHeight(GameObject_s *object);
+extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
+extern "C" void PlaySfxByIdAndSetPitch(i32 sfx_id, nuvec_s *position, f32 pitch);
+
+void Move_POD(GameObject_s *object) {
+    AREADATA_s *area = WORLD->area;
+    if (area == NULL || (area != PODRACE_ADATA && area != PODSPRINT_ADATA)) {
+        Move_VEHICLE(object);
+        return;
+    }
+
+    ApplyGravity(object, NULL, FindPodHoverHeight(object), 8.0f, NULL);
+
+    GAMECHARACTERDATA *vehicle = object->apiobj.character_data->game_character;
+    GAMEPAD_s *pad = object->pad_gamepad;
+    if (PODSPRINT_ADATA != NULL && WORLD->area == PODSPRINT_ADATA && vehicle->field_0x28 > 0.0f &&
+        PodSprint_InStartCountdown(WORLD) <= 0.0f) {
+        LoopCode(object, pad->buttons_pressed & GAMEPAD_JUMP, pad->buttons_held & GAMEPAD_JUMP, pad, 0);
+    }
+    TakeHitCode(object);
+
+    if ((object->apiobj.flags_low & 4) != 0) {
+        object->camera_shake_strength = 0.0f;
+    } else if (object->apiobj.field_0x27c != -1) {
+        f32 target_speed;
+        f32 rate = 3.0f * FRAMETIME;
+        if (WORLD->area == PODRACE_ADATA) {
+            if ((pad->buttons_held & GAMEPAD_JUMP) != 0) {
+                target_speed = 1.0f + object->camera_shake_strength;
+                rate = 5.0f * FRAMETIME;
+            } else if (FadeSys.fade == 0.0f && MiniCutCam == 0) {
+                target_speed = 0.333f + 1.667f * object->camera_shake_strength;
+            } else if (podrace_section == -1) {
+                target_speed = 0.333f + 1.667f * object->camera_shake_strength;
+            } else {
+                target_speed = 1.0f + object->camera_shake_strength;
+            }
+        } else {
+            target_speed = 1.0f + 0.4f * object->camera_shake_strength;
+        }
+        object->current_speed_mul = SeekLinearF(object->current_speed_mul, target_speed, rate);
+
+        if ((object->field_0xe20 & 0x20) == 0 && object->apiobj.field_0x281 == 0x14 &&
+            object->apiobj.collision_min.y - object->apiobj.field_0x218 < PODBOOSTHEIGHT) {
+            NewBuzz(pad->pad, 0.1f, 0);
+            NewRumble(pad->pad, 0.5f, 0);
+            object->current_speed_mul = WORLD->area == PODRACE_ADATA ? 2.0f : 1.4f;
+            object->camera_shake_strength = 1.0f;
+            if ((object->field_0xe20 & 1) == 0) {
+                PlaySfx("PodX_Booster", &object->apiobj.collision_position);
+                object->field_0xe20 |= 1;
+            }
+        } else {
+            object->field_0xe20 &= ~1;
+            if (object->camera_shake_strength > 0.0f) {
+                object->camera_shake_strength -= FRAMETIME;
+                if (object->camera_shake_strength < 0.0f)
+                    object->camera_shake_strength = 0.0f;
+            }
+        }
+        if (object->current_speed_mul > 1.0f)
+            NewRumble(pad->pad, object->current_speed_mul - 1.0f, 0);
+    }
+
+    if (FreePlay != 0 && (object->apiobj.character_data->model_flags & 0x10) != 0 &&
+        (vehicle->flags_094[0] & 8) == 0) {
+        FireCode(object, pad->buttons_pressed & GAMEPAD_ACTION, pad->buttons_held & GAMEPAD_ACTION, 0.15f, 0);
+    }
+    if (WORLD->area != NULL && (WORLD->area == PODRACE_ADATA || WORLD->area == PODSPRINT_ADATA))
+        CatchUpCode(object, 0.025f, 3.0f, 0);
+    if (static_cast<i8>(object->apiobj.flags_low) < 0)
+        ForceCode(object, 0, 0, 0);
+    PodCollisionCode(object);
+
+    i32 sound = vehicle->sfx_engine;
+    if (vehicle->uses_weapon_action == 0x14) {
+        if (static_cast<i8>(object->apiobj.flags_low) < 0) {
+            i32 player_index = object == Player[0] ? 0 : 1;
+            if (WORLD->area == PODRACE_ADATA) {
+                f32 steering = -fabsf(NuTrigTable[pad->input_angle >> 1]) * (pad->input_magnitude - 6.0f) / 96.0f;
+                f32 speed = avg_currentspeed_mul > 1.1f ? 2.0f + steering : avg_currentspeed_mul + 1.0f + steering;
+                f32 pitch = speed * 0.5f;
+                f32 previous = PosSeekPitch[player_index];
+                PosSeekPitch[player_index] = previous + (pitch - previous) * FRAMETIME * 1.5f;
+                PlaySfxByIdAndSetPitch(sound, &object->apiobj.collision_position, PosSeekPitch[player_index]);
+            } else {
+                PosSeekPitch[player_index] = SeekLinearF(PosSeekPitch[player_index],
+                    object->apiobj.velocity_magnitude / vehicle->run_speed * 0.35f + 0.65f, FRAMETIME);
+                PlaySfxByIdAndSetPitch(sound, &object->apiobj.collision_position, PosSeekPitch[player_index]);
+            }
+        }
+    } else {
+        f32 camera_facing =
+            (object->apiobj.collision_position.x - global_camera.mtx.m30) * global_camera.mtx.m20 +
+            (object->apiobj.collision_position.y - global_camera.mtx.m31) * global_camera.mtx.m21 +
+            (object->apiobj.collision_position.z - global_camera.mtx.m32) * global_camera.mtx.m22;
+        if (camera_facing < 0.0f)
+            PlaySfxByIdAndSetPitch(sound, &object->apiobj.collision_position, 0.7f);
+        else
+            PlaySfxById(sound, &object->apiobj.collision_position);
+    }
+    GizmoBlowupCheckProximity(WORLD, object);
 }
 
 f32 zam_smoke_rate = 10.0f;
@@ -6689,7 +6871,50 @@ void MoveToMarker::Process(float frame_time) {
 }
 
 void MoveToMarker::Render() {
-    STUBBED();
+    NUVEC draw_position = {position.x, position.y, position.z};
+    if (temporary_target) {
+        MechSystems *systems = MechSystems::Get();
+        if (systems->location_ping_material != NULL) {
+            NUMTX_ALIGNED16 ping_matrix;
+            NUVEC ping_scale = {radius.value, radius.value, radius.value};
+            NuMtxSetRotationY(&ping_matrix, 0);
+            NuMtxRotateX(&ping_matrix, 0x4000);
+            NuMtxScale(&ping_matrix, &ping_scale);
+            draw_position.y += 0.01f;
+            NuMtxTranslate(&ping_matrix, &draw_position);
+            extern void RndrTexQuad3D(VuMtx const &, i32, numtl_s *);
+            const i32 ping_colour = (static_cast<i32>(alpha.value * 255.0f) << 24) | 0xffffff;
+            RndrTexQuad3D(reinterpret_cast<VuMtx const &>(ping_matrix), ping_colour, systems->location_ping_material);
+        }
+    }
+    if (field_108_0) {
+        return;
+    }
+
+    draw_position.y = position.y + height + NuTrigTable[(static_cast<i32>(rotation.value) >> 1) & 0x7fff] * 0.1f +
+                      NuTrigTable[(field_100 >> 1) & 0x7fff] * 0.005f;
+    const f32 marker_scale =
+        (NuTrigTable[(static_cast<i32>(secondary_rotation.value) >> 1) & 0x7fff] * 0.25f + 1.0f) * 0.1f;
+    NUVEC text_scale = {marker_scale, marker_scale, marker_scale};
+    NUMTX_ALIGNED16 text_matrix;
+    NuMtxSetRotationY(&text_matrix, field_fc);
+    NuMtxScale(&text_matrix, &text_scale);
+    NuMtxTranslate(&text_matrix, &draw_position);
+
+    extern char *ASCII_DOWN;
+    NuQFntPushPrintMode(4);
+    NuQFntSet(QFont3DZ);
+    NuQFntSetMtx(QFont3DZ, &text_matrix);
+    NuQFntSetCoordinateSystem(NUQFNT_CSMODE_ABSOLUTE);
+    const i32 colour = (static_cast<i32>(scale.value * 255.0f) << 24) |
+                       ((static_cast<i32>(this->colour.value.z) & 0xff) << 16) |
+                       ((static_cast<i32>(this->colour.value.y) & 0xff) << 8) |
+                       (static_cast<i32>(this->colour.value.x) & 0xff);
+    NuQFntSetColour(QFont3DZ, colour);
+    NuQFntSetScale(QFont3DZ, 0.0375f, 0.05f);
+    NuQFntMove(QFont3DZ, NuQFntPrintLenU(QFont3DZ, ASCII_DOWN) * -0.5f, 0.0f, 0.0f);
+    NuQFntPrintU(QFont3DZ, ASCII_DOWN);
+    NuQFntPopPrintMode();
 }
 
 extern u8 show_lever_hint;
@@ -6699,12 +6924,15 @@ static __used__ void MakeWingFormation(_vuv_s *, _vuv_s *, f32, i32) {
     STUBBED();
 }
 
-static __used__ void AtatPart_Stop(PART_s *part) {
+void AtatPart_Stop(PART_s *part) __asm__("_ZL13AtatPart_StopP6PART_s") __attribute__((visibility("hidden")));
+void AtatPart_Update(PART_s *part) __asm__("_ZL15AtatPart_UpdateP6PART_s") __attribute__((visibility("hidden")));
+
+void AtatPart_Stop(PART_s *part) {
     PlaySfx("EXPLODE1", &part->position);
     PartStop_Flickerer(part);
 }
 
-static __used__ void AtatPart_Update(PART_s *part) {
+void AtatPart_Update(PART_s *part) {
     f32 choice = NuFloatRand(reinterpret_cast<NURAND *>(&GAMERAND)) * 100.0f + 1.0f;
     if (part->scale_time < 1.0f) {
         AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[118].effect, &part->position,
@@ -10230,8 +10458,127 @@ void Move_CHARACTER(GameObject_s *object) {
     HairMovement(object);
 }
 
-static __used__ void PooCode(GameObject_s *) {
-    STUBBED();
+extern "C" PART_s *FindPart(NUVEC *, i32, GameObject_s *);
+static NUVEC poopos[2];
+
+static __used__ void PooCode(GameObject_s *object) {
+    if (WORLD->lev_objs[0x18].active == 0)
+        return;
+
+    NUVEC position;
+    i32 locator = object->apiobj.character_data->game_character->poo_locator;
+    if (locator != -1 && object->apiobj.character_model->points_of_interest[locator] != NULL) {
+        position.x = object->joint_matrices[locator].m30;
+        position.y = object->joint_matrices[locator].m31;
+        position.z = object->joint_matrices[locator].m32;
+    } else {
+        u16 angle = object->apiobj.field_0x276;
+        position.x = object->apiobj.collision_position.x - NU_SIN_LUT(angle) * object->apiobj.field_0x1dc;
+        position.y = object->apiobj.collision_position.y;
+        position.z = object->apiobj.collision_position.z - NU_COS_LUT(angle) * object->apiobj.field_0x1dc;
+    }
+
+    if (object->character_context == 0x37) {
+        f32 previous = object->context_animation_timer;
+        object->context_animation_timer = previous + FRAMETIME;
+        if (object->context_animation_timer >= object->airborne_action_duration) {
+            object->character_context = -1;
+        } else if (previous < object->airborne_action_duration * 0.5f &&
+                   object->context_animation_timer >= object->airborne_action_duration * 0.5f) {
+            PlaySfx("Lego_Poo", &position);
+            NUVEC velocity;
+            velocity.x = (f32)qrand() * (1.0f / 65536.0f) - 0.5f - NU_SIN_LUT(object->apiobj.field_0x276);
+            velocity.y = (f32)qrand() * (1.0f / 65536.0f) - 0.5f;
+            velocity.z = (f32)qrand() * (1.0f / 65536.0f) - 0.5f - NU_COS_LUT(object->apiobj.field_0x276);
+            if (Cheat_IsOn(9)) {
+                NUVEC direction;
+                NuVecNorm(&direction, &velocity);
+                f32 random = (f32)qrand() * (1.0f / 65536.0f);
+                i32 count = random < 0.2f ? 1000 : random < 0.8f ? 100 : 10;
+                AddPickups(count, 0, 0, 0, &position, &direction, 1.0f, -1, 2000000.0f, 0.0f,
+                           object, 0, 0, true);
+            }
+            if (Cheat_IsOn(1)) {
+                ADDPART_ALIGNED16 params = Default_ADDPART;
+                NUMTX_ALIGNED16 matrix;
+                i32 angle_x = qrand();
+                f32 sinx = NU_SIN_LUT(angle_x);
+                f32 cosx = NU_COS_LUT(angle_x);
+                matrix.m00 = 1.0f; matrix.m01 = 0.0f; matrix.m02 = 0.0f; matrix.m03 = 0.0f;
+                matrix.m10 = 0.0f; matrix.m11 = cosx; matrix.m12 = sinx; matrix.m13 = 0.0f;
+                matrix.m20 = 0.0f; matrix.m21 = -sinx; matrix.m22 = cosx; matrix.m23 = 0.0f;
+                matrix.m30 = 0.0f; matrix.m31 = 0.0f; matrix.m32 = 0.0f; matrix.m33 = 1.0f;
+
+                i32 angle_y = qrand();
+                f32 siny = NU_SIN_LUT(angle_y);
+                f32 cosy = NU_COS_LUT(angle_y);
+                f32 m00 = matrix.m00, m10 = matrix.m10, m20 = matrix.m20, m30 = matrix.m30;
+                matrix.m00 = m00 * cosy + matrix.m02 * siny;
+                matrix.m02 = matrix.m02 * cosy - m00 * siny;
+                matrix.m10 = m10 * cosy + matrix.m12 * siny;
+                matrix.m12 = matrix.m12 * cosy - m10 * siny;
+                matrix.m20 = m20 * cosy + matrix.m22 * siny;
+                matrix.m22 = matrix.m22 * cosy - m20 * siny;
+                matrix.m30 = m30 * cosy + matrix.m32 * siny;
+                matrix.m32 = matrix.m32 * cosy - m30 * siny;
+
+                i32 angle_z = qrand();
+                f32 sinz = NU_SIN_LUT(angle_z);
+                f32 cosz = NU_COS_LUT(angle_z);
+                m00 = matrix.m00; m10 = matrix.m10; m20 = matrix.m20; m30 = matrix.m30;
+                matrix.m00 = m00 * cosz - matrix.m01 * sinz;
+                matrix.m01 = m00 * sinz + matrix.m01 * cosz;
+                matrix.m10 = m10 * cosz - matrix.m11 * sinz;
+                matrix.m11 = m10 * sinz + matrix.m11 * cosz;
+                matrix.m20 = m20 * cosz - matrix.m21 * sinz;
+                matrix.m21 = m20 * sinz + matrix.m21 * cosz;
+                matrix.m30 = m30 * cosz - matrix.m31 * sinz;
+                matrix.m31 = m30 * sinz + matrix.m31 * cosz;
+
+                NuMtxTranslate(&matrix, &position);
+                NUVEC radius_position;
+                NuSpecialGetRadius(&WORLD->lev_objs[0x18].special, &radius_position, &params.field_14);
+                params.matrix = &matrix;
+                params.velocity = &velocity;
+                params.owner = object;
+                params.field_18 = params.field_14;
+                params.gravity = -6.0f;
+                params.special = &WORLD->lev_objs[0x18].special;
+                params.field_28 = 0x18;
+                params.flags = 0x390;
+                params.stop_fn = PartStop_Flickerer;
+                params.draw_fn = PartDraw_Flickerer;
+                params.time_step = FRAMETIME;
+                params.field_a4 = 5.0f;
+                PART_s *part = AddPart(&params);
+                if (part != NULL) {
+                    part->owner = object;
+                    part->force_flags = static_cast<u16>(ObjHitObj_Flags(object));
+                }
+            }
+        }
+    } else if ((object->pad_gamepad->buttons_pressed & GAMEPAD_SPECIAL) != 0 &&
+               static_cast<i8>(object->apiobj.character_data->game_character->flags_094[3]) < 0 &&
+               static_cast<i8>(object->apiobj.flags_low) < 0 && object->character_context == -1 &&
+               object->apiobj.field_0x27d != 0 &&
+               (Cheat[1].enabled != 0 || Cheat[9].enabled != 0)) {
+        object->character_context = 0x37;
+        object->context_animation = 1;
+        object->context_animation_timer = 0.0f;
+        object->airborne_action_duration = 0.6f;
+    }
+
+    if ((object->pad_gamepad->buttons_pressed & GAMEPAD_SPECIAL) == 0 ||
+        ((object->field_0xf00 & 0x10) == 0 || static_cast<u8>(object->apiobj.field_0x27c) > 1)) {
+        object->force_use_volume = 0.0f;
+        return;
+    }
+    PART_s *part = FindPart(NULL, -1, object);
+    object->force_use_volume = SeekLinearF(object->force_use_volume, part != NULL ? 1.0f : 0.0f, FRAMETIME);
+    if (object->force_use_volume > 0.0f) {
+        poopos[object->apiobj.field_0x27c] = position;
+        PlaySfxAndSetVolume("Lego_PLOP", &poopos[object->apiobj.field_0x27c], object->force_use_volume);
+    }
 }
 
 void Buck_MoveCode(GameObject_s *, i32);

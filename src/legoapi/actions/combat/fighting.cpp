@@ -24,6 +24,8 @@
 #include "legoapi/actions/character/speederchase.h"
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numath/nuvec.h"
+#include "legoapi/render/fx/parts.h"
+#include "legoapi/misc/utilities.h"
 
 #include <stdlib.h>
 
@@ -40,6 +42,8 @@ i32 NewBlockAction(GameObject_s *);
 void Player_ClearContext(GameObject_s *, i32);
 void Player_ResetContexts(PLAYERPACKET_s *);
 i32 qrand();
+extern "C" void KillPart(PART_s *, i32);
+void LightSabreDebris(GameObject_s *);
 
 void (*Punch_HitHoldFn)(GameObject_s *, GameObject_s *);
 i32 (*Punch_GetDamageFn)(GameObject_s *, GameObject_s *);
@@ -51,8 +55,62 @@ BLADE_s BladeTab[4] = {
     {107, 227, 4, 62, 67, {200, 0, 255}, {0, 0, 0}},
 };
 
-void DeflectPart(PART_s *, GameObject_s *, float, float, i32, i32) {
-    STUBBED();
+void DeflectPart(PART_s *part, GameObject_s *object, float speed, float gravity, i32 deflect, i32 debris) {
+    NUMTX matrix = part->transform;
+    u32 flags = part->flags;
+    i16 type = part->type_id;
+    GameObject_s *owner = part->owner;
+    nuhspecial_s *special = part->source_special;
+    f32 radius = part->field_0e4;
+    KillPart(part, 0);
+    asm("" : : "m"(matrix));
+    asm("" : "+a"(deflect));
+
+    if (deflect != 0 && owner != NULL) {
+        NUVEC velocity;
+        f32 facing;
+        if (__builtin_expect(static_cast<i8>(object->apiobj.field_0x1f8) < 0, 1)) {
+            if (owner->apiobj.field_0x27c == -1) {
+                MakeThrowVector(&velocity, reinterpret_cast<NUVEC *>(&matrix.m30), &owner->apiobj.collision_position,
+                                &owner->apiobj.velocity, speed, gravity);
+                goto velocity_ready;
+            }
+        }
+        velocity.y = 0.0f;
+        velocity.x = 0.0f;
+        velocity.z = 2.0f;
+        NuVecRotateX(&velocity, &velocity, static_cast<i32>(static_cast<f32>(qrand()) * (1.0f / 65535.0f) * -5461.0f));
+        facing = static_cast<f32>(object->apiobj.movement_facing_angle - 0x1555);
+        NuVecRotateY(&velocity, &velocity,
+                     static_cast<i32>(static_cast<f32>(qrand()) * (1.0f / 65535.0f) * 10922.0f + facing));
+    velocity_ready:
+        ADDPART_s params = Default_ADDPART;
+        params.matrix = &matrix;
+        params.velocity = &velocity;
+        params.special = special;
+        params.field_14 = radius;
+        params.gravity = gravity;
+        params.field_28 = type;
+        params.flags = flags;
+        params.owner = object;
+        params.field_40 = PartCollide_3D;
+        params.time_step = FRAMETIME;
+        PART_s *deflected = AddPart(&params);
+        if (deflected != NULL) {
+            u16 (*hit_flags)(GameObject_s *) = reinterpret_cast<u16 (*)(GameObject_s *)>(ObjHitObj_Flags);
+            deflected->force_flags = hit_flags(object);
+            if (part->update_callback != NULL)
+                part->update_callback(deflected);
+        }
+    }
+    if (object != NULL) {
+        if (object->field_0x7a5 == 0x18)
+            NewBlockAction(object);
+        NewRumble(object->pad_gamepad->pad, 0.75f, 0);
+        GameCam_Judder(GameCam, -0.2f, 0, NULL);
+        if (debris != -1)
+            LightSabreDebris(object);
+    }
 }
 
 bool IsDownSwipe(NuVec2 const &start, NuVec2 const &end) {

@@ -1,9 +1,12 @@
 #include "legoapi/world/world_shared.h"
 #include "decomp.h"
 #include "legoapi/legoapi_types.h"
+#include "legoapi/cutscenes/cutscene_defrag.h"
 #include "nu2api/nucore/nugcutscene.h"
 #include "nu2api/nucore/NuDynamicLight.h"
+#include "nu2api/nu3d/nuprim.h"
 #include "nu2api/nu3d/nurndr.h"
+#include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numusic/numusic.h"
 #include "nu2api/nusound/nusound.h"
@@ -17,6 +20,16 @@ void instNuGCutSceneEndButNotSystems(instNUGCUTSCENE_s *instance);
 void instNuGCutSceneResetCamLock(instNUGCUTSCENE_s *);
 
 extern "C" {
+    CutSceneCleanUpEntry *DefragCutSceneList;
+    CutSceneCleanUpEntry *DefragCutSceneListBase;
+    void *DefragCutSceneBaseMem;
+    void *DefragCutSceneEndMem;
+    void *DefragInstBaseMem;
+    void *DefragInstEndMem;
+    instNUGCUTSCENE_s *(*DefragGetInstFn)(void *);
+    void *(*DefragCreateInstFn)(void *, NUGCUTSCENE_s *, VARIPTR *);
+    void (*DefragInstDestroyedFn)(void *);
+    i32 DefragCutSceneListSize;
     extern debinftype **debtab;
     extern NUGCUTLOCATORFNENTRY_s *locatorfns;
     extern f32 timeincrement;
@@ -26,6 +39,8 @@ extern "C" {
     void NuAnimData2CalcTime(nuanimdata2_s *, f32, nuanimtime_s *);
     void NuMtxPreTranslate(NUMTX *, NUVEC *);
     void NuMtxMul(NUMTX *, NUMTX *, NUMTX *);
+    i32 NuStrICmp(const char *, const char *);
+    void instNuGCutSceneStart(instNUGCUTSCENE_s *);
 
     i32 AddScaledVariableShotDebrisEffect2(i32, NUVEC *, i32, f32, NUMTX *, NUMTX *, f32);
     void AddDebrisEffect(i32 *, i32, f32, f32, f32);
@@ -41,12 +56,109 @@ extern "C" {
 extern "C" {
 
     i32 CheckStreamFileID(void) {
-        STUBBED();
         return 0;
     }
 
     void DisplayCutSceneMemory(void) {
-        STUBBED();
+        if (DefragCutSceneEndMem == NULL || DefragCutSceneListSize == 0 || DefragCutSceneBaseMem == NULL) {
+            return;
+        }
+
+#define CUT_MEMORY_FLOAT(value)                                                                                         \
+    (static_cast<f32>((value) >> 16) * 65536.0f + static_cast<f32>(static_cast<u16>(value)))
+#define CUT_MEMORY_VERTEX(x, y, normal_colour, bright_colour)                                                           \
+    do {                                                                                                                \
+        if (g_NuPrim_NeedsOverbrightening == 0) {                                                                        \
+            g_NuPrim_StreamBufferPtr->u32_ptr[3] = (normal_colour);                                                     \
+        } else {                                                                                                        \
+            g_NuPrim_StreamBufferPtr->u32_ptr[3] = (bright_colour);                                                     \
+        }                                                                                                               \
+        NuPrim2DAddXYZ((x), (y), 0.0f);                                                                                  \
+    } while (0)
+
+        ++NuPrimCSPos;
+        NuPrimSetCoordinateSystem(NUPRIM_SCALEMODE_PS2);
+        NuPrim2DBegin(4, 5, NULL);
+
+        if (DefragInstBaseMem != NULL) {
+            const u32 cut_span = static_cast<u32>(reinterpret_cast<usize>(DefragCutSceneEndMem) -
+                                                  reinterpret_cast<usize>(DefragCutSceneBaseMem));
+            const f32 cut_scale = 580.0f / CUT_MEMORY_FLOAT(cut_span);
+            CUT_MEMORY_VERTEX(30.0f, 206.0f, 0x40000040u, 0x40000080u);
+            CUT_MEMORY_VERTEX(610.0f, 208.0f, 0x40000040u, 0x40000080u);
+
+            CutSceneCleanUpEntry *const list_end = DefragCutSceneListBase + DefragCutSceneListSize;
+            for (CutSceneCleanUpEntry *entry = DefragCutSceneListBase; entry < list_end; ++entry) {
+                if ((entry->flags & 4) == 0) {
+                    continue;
+                }
+                instNUGCUTSCENE_s *instance = DefragGetInstFn(entry->handle);
+                NUGCUTSCENE_s *scene = instance->cutscene;
+                const u32 start = static_cast<u32>(reinterpret_cast<usize>(scene) -
+                                                   reinterpret_cast<usize>(DefragCutSceneBaseMem));
+                const u32 end = start + scene->loaded_size;
+                const f32 start_x = CUT_MEMORY_FLOAT(start) * cut_scale + 30.0f;
+                const f32 end_x = CUT_MEMORY_FLOAT(end) * cut_scale + 30.0f;
+                CUT_MEMORY_VERTEX(start_x, 206.0f, 0x40004040u, 0x40008080u);
+                CUT_MEMORY_VERTEX(end_x, 208.0f, 0x40004040u, 0x40008080u);
+            }
+
+            const u32 inst_span = static_cast<u32>(reinterpret_cast<usize>(DefragInstEndMem) -
+                                                   reinterpret_cast<usize>(DefragInstBaseMem));
+            const f32 inst_scale = 580.0f / CUT_MEMORY_FLOAT(inst_span);
+            CUT_MEMORY_VERTEX(30.0f, 209.0f, 0x40000030u, 0x40000060u);
+            CUT_MEMORY_VERTEX(610.0f, 211.0f, 0x40000030u, 0x40000060u);
+
+            for (CutSceneCleanUpEntry *entry = DefragCutSceneListBase; entry < list_end; ++entry) {
+                if ((entry->flags & 4) == 0) {
+                    continue;
+                }
+                instNUGCUTSCENE_s *instance = DefragGetInstFn(entry->handle);
+                const u32 start = static_cast<u32>(reinterpret_cast<usize>(instance) -
+                                                   reinterpret_cast<usize>(DefragInstBaseMem));
+                const u32 end = start + instance->allocation_size;
+                const f32 start_x = CUT_MEMORY_FLOAT(start) * inst_scale + 30.0f;
+                const f32 end_x = CUT_MEMORY_FLOAT(end) * inst_scale + 30.0f;
+                CUT_MEMORY_VERTEX(start_x, 209.0f, 0x40400040u, 0x40800080u);
+                CUT_MEMORY_VERTEX(end_x, 211.0f, 0x40400040u, 0x40800080u);
+            }
+        } else {
+            const u32 cut_span = static_cast<u32>(reinterpret_cast<usize>(DefragCutSceneEndMem) -
+                                                  reinterpret_cast<usize>(DefragCutSceneBaseMem));
+            const f32 cut_scale = 580.0f / CUT_MEMORY_FLOAT(cut_span);
+            CUT_MEMORY_VERTEX(30.0f, 206.0f, 0x40000040u, 0x40000080u);
+            CUT_MEMORY_VERTEX(610.0f, 210.0f, 0x40000040u, 0x40000080u);
+
+            CutSceneCleanUpEntry *const list_end = DefragCutSceneListBase + DefragCutSceneListSize;
+            for (CutSceneCleanUpEntry *entry = DefragCutSceneListBase; entry < list_end; ++entry) {
+                if ((entry->flags & 4) == 0) {
+                    continue;
+                }
+                instNUGCUTSCENE_s *instance = DefragGetInstFn(entry->handle);
+                NUGCUTSCENE_s *scene = instance->cutscene;
+                const u32 scene_start = static_cast<u32>(reinterpret_cast<usize>(scene) -
+                                                         reinterpret_cast<usize>(DefragCutSceneBaseMem));
+                const u32 scene_end = scene_start + scene->loaded_size;
+                const f32 scene_start_x = CUT_MEMORY_FLOAT(scene_start) * cut_scale + 30.0f;
+                const f32 scene_end_x = CUT_MEMORY_FLOAT(scene_end) * cut_scale + 30.0f;
+                CUT_MEMORY_VERTEX(scene_start_x, 206.0f, 0x40004040u, 0x40008080u);
+                CUT_MEMORY_VERTEX(scene_end_x, 210.0f, 0x40004040u, 0x40008080u);
+
+                const u32 inst_start = static_cast<u32>(reinterpret_cast<usize>(instance) -
+                                                        reinterpret_cast<usize>(DefragCutSceneBaseMem));
+                const u32 inst_end = inst_start + instance->allocation_size;
+                const f32 inst_start_x = CUT_MEMORY_FLOAT(inst_start) * cut_scale + 30.0f;
+                const f32 inst_end_x = CUT_MEMORY_FLOAT(inst_end) * cut_scale + 30.0f;
+                CUT_MEMORY_VERTEX(inst_start_x, 206.0f, 0x40400040u, 0x40800080u);
+                CUT_MEMORY_VERTEX(inst_end_x, 210.0f, 0x40400040u, 0x40800080u);
+            }
+        }
+
+        NuPrim2DEnd();
+        NuPrimSetCoordinateSystem(NuPrimCoordSystemStack[--NuPrimCSPos]);
+
+#undef CUT_MEMORY_VERTEX
+#undef CUT_MEMORY_FLOAT
     }
 
     void PauseGameCut(void) {
@@ -83,8 +195,21 @@ extern "C" {
         ForceScenePlayBack = static_cast<u8>(enabled);
     }
 
-    void instCutSceneTimeElapsed(void) {
-        STUBBED();
+    f32 instCutSceneTimeElapsed(instNUGCUTSCENE_s *instance) {
+        if (instance == NULL || instance->cutscene == NULL) {
+            return 0.0f;
+        }
+        f32 rate = instance->rate;
+        f32 accumulated = instance->accumulated_stream_duration;
+        f32 frame = instance->current_frame;
+        if (rate == 0.0f) {
+            return 0.0f;
+        }
+        f32 elapsed = accumulated + frame - 1.0f;
+        if (elapsed == 0.0f) {
+            return 0.0f;
+        }
+        return elapsed / rate;
     }
 
     i32 instNuGCutSceneAddCamTgt(instNUGCUTSCENE_s *instance, NUVEC *target, f32 start_frame, f32 duration,
@@ -101,20 +226,60 @@ extern "C" {
         return 1;
     }
 
-    void instNuGCutSceneAddCleanUpItem(void) {
-        STUBBED();
+    void instNuGCutSceneAddCleanUpItem(void *handle, i32 enabled) {
+        instNUGCUTSCENE_s *instance = DefragGetInstFn(handle);
+        CutSceneCleanUpEntry *entry = DefragCutSceneList++;
+        entry->handle = handle;
+        entry->cutscene = instance->cutscene;
+        entry->accumulated_duration = instance->accumulated_stream_duration;
+        entry->flags = enabled ? 7 : 0;
+        ++DefragCutSceneListSize;
     }
 
-    void instNuGCutSceneCalculateAverageCentre(void) {
-        STUBBED();
+    void instNuGCutSceneCalculateAverageCentre(instNUGCUTSCENE_s *instance, NUMTX *matrix, NUVEC *out) {
+        out->x = 0.0f;
+        out->y = 0.0f;
+        out->z = 0.0f;
+        if (instance == NULL || instance->cutscene == NULL || instance->cutscene->rigid_system == NULL ||
+            instance->rigid_instance->rigids == NULL) {
+            return;
+        }
+        f32 count = 0.0f;
+        for (i32 i = 0; i < instance->cutscene->rigid_system->count; ++i) {
+            instNUGCUTRIGID_s *rigid = &instance->rigid_instance->rigids[i];
+            if (NuSpecialExistsFn(rigid) != 0) {
+                NUVEC *position = NuSpecialGetPos(rigid);
+                out->x += position->x;
+                out->y += position->y;
+                out->z += position->z;
+                count += 1.0f;
+            }
+        }
+        if (count > 0.0f) {
+            f32 inverse = 1.0f / count;
+            out->x *= inverse;
+            out->y *= inverse;
+            out->z *= inverse;
+        }
+        if (matrix != NULL) {
+            NuVecMtxTransform(&instance->transformed_bounds_center, &instance->transformed_bounds_center, matrix);
+        }
     }
 
     void instNuGCutSceneChain(instNUGCUTSCENE_s *instance, instNUGCUTSCENE_s *next) {
         instance->chained_instance = next;
     }
 
-    void instNuGCutSceneCharGetStartMtx(void) {
-        STUBBED();
+    i32 instNuGCutSceneCharGetStartMtx(instNUGCUTSCENE_s *instance, const char *name, NUMTX *out) {
+        NUGCUTCHARSYS_s *system = instance->cutscene->character_system;
+        for (i32 i = 0; i < system->character_count; ++i) {
+            NUGCUTCHAR_s *character = &system->characters[i];
+            if (NuStrICmp(name, character->name) == 0) {
+                *out = character->base_matrix;
+                return 1;
+            }
+        }
+        return 0;
     }
 
     void instNuGCutSceneCreateCamTgtArray(instNUGCUTSCENE_s *instance, i32 count, VARIPTR *buf) {
@@ -141,24 +306,68 @@ extern "C" {
         return (instance->flags_89 & 0x10) != 0 ? -1 : 0;
     }
 
-    void instNuGCutSceneJumpToEnd(void) {
-        STUBBED();
+    void instNuGCutScenePlay(instNUGCUTSCENE_s *instance, i32 forward) {
+        if ((instance->flags_88 & 2) != 0) {
+            if (forward != 0) {
+                if (instance->rate < 0.0f) {
+                    instance->rate = -instance->rate;
+                }
+            } else if (instance->rate > 0.0f) {
+                instance->rate = -instance->rate;
+            }
+            return;
+        }
+        if ((instance->flags_89 & 0x10) != 0) {
+            if (forward != 0) {
+                return;
+            }
+            instance->flags_88 |= 2;
+            instance->flags_89 &= ~0x10;
+            instance->current_frame = instance->cutscene->duration - 1.0f;
+            if (instance->rate > 0.0f) {
+                instance->rate = -instance->rate;
+            }
+            return;
+        }
+        if (forward != 0) {
+            if (instance->rate < 0.0f) {
+                instance->rate = -instance->rate;
+            }
+            instNuGCutSceneStart(instance);
+        }
     }
 
-    void instNuGCutSceneJumpToLastFrame(void) {
-        STUBBED();
+    void instNuGCutSceneResetCleanUp(void *list_storage, void *cut_base, void *cut_end, void *inst_base,
+                                    void *inst_end, instNUGCUTSCENE_s *(*get_inst)(void *),
+                                    void *(*create_inst)(void *, NUGCUTSCENE_s *, VARIPTR *),
+                                    void (*inst_destroyed)(void *)) {
+        DefragCutSceneList = reinterpret_cast<CutSceneCleanUpEntry *>(ALIGN(reinterpret_cast<usize>(list_storage), 4));
+        DefragCutSceneListBase = DefragCutSceneList;
+        DefragCutSceneBaseMem = cut_base;
+        DefragCutSceneEndMem = cut_end;
+        DefragInstBaseMem = inst_base;
+        DefragInstEndMem = inst_end;
+        DefragGetInstFn = get_inst;
+        DefragCreateInstFn = create_inst;
+        DefragInstDestroyedFn = inst_destroyed;
+        DefragCutSceneListSize = 0;
     }
 
-    void instNuGCutScenePlay(void) {
-        STUBBED();
-    }
-
-    void instNuGCutSceneResetCleanUp(void) {
-        STUBBED();
-    }
-
-    void instNuGCutSceneRotateY(void) {
-        STUBBED();
+    void instNuGCutSceneRotateY(instNUGCUTSCENE_s *instance, NUANG angle) {
+        instance->flags_88 |= 0x80;
+        NuMtxRotateY(&instance->matrix, angle);
+        NUMTX *matrix = &instance->matrix;
+        NUVEC *bounds = static_cast<NUVEC *>(instance->cutscene->bounds);
+        if (bounds != NULL) {
+            instance->transformed_bounds_center.x = (bounds[1].x + bounds[0].x) * 0.5f;
+            instance->transformed_bounds_center.y = (bounds[1].y + bounds[0].y) * 0.5f;
+            instance->transformed_bounds_center.z = (bounds[1].z + bounds[0].z) * 0.5f;
+        } else {
+            instance->transformed_bounds_center.x = 0.0f;
+            instance->transformed_bounds_center.y = 0.0f;
+            instance->transformed_bounds_center.z = 0.0f;
+        }
+        NuVecMtxTransform(&instance->transformed_bounds_center, &instance->transformed_bounds_center, matrix);
     }
 
     void instNuGCutSceneSetEndCallback(instNUGCUTSCENE_s *instance, void (*callback)(instNUGCUTSCENE_s *)) {
@@ -183,12 +392,27 @@ extern "C" {
         NuVecMtxTransform(&instance->transformed_bounds_center, &instance->transformed_bounds_center, instance_matrix);
     }
 
-    void instNuGCutSceneSetPos(void) {
-        STUBBED();
+    void instNuGCutSceneSetPos(instNUGCUTSCENE_s *instance, NUVEC *pos) {
+        instance->flags_88 |= 0x80;
+        NuMtxSetTranslation(&instance->matrix, pos);
+        NUMTX *matrix = &instance->matrix;
+        NUVEC *bounds = static_cast<NUVEC *>(instance->cutscene->bounds);
+        if (bounds != NULL) {
+            instance->transformed_bounds_center.x = (bounds[1].x + bounds[0].x) * 0.5f;
+            instance->transformed_bounds_center.y = (bounds[1].y + bounds[0].y) * 0.5f;
+            instance->transformed_bounds_center.z = (bounds[1].z + bounds[0].z) * 0.5f;
+        } else {
+            instance->transformed_bounds_center.x = 0.0f;
+            instance->transformed_bounds_center.y = 0.0f;
+            instance->transformed_bounds_center.z = 0.0f;
+        }
+        NuVecMtxTransform(&instance->transformed_bounds_center, &instance->transformed_bounds_center, matrix);
     }
 
-    void instNuGCutSceneSetRepeat(void) {
-        STUBBED();
+    void instNuGCutSceneSetRepeat(instNUGCUTSCENE_s *instance, i32 repeat) {
+        i32 capped = repeat <= 31 ? repeat : 31;
+        u32 *flags = reinterpret_cast<u32 *>(&instance->flags_88);
+        *flags = (*flags & ~0x3e000u) | ((capped & 31) << 13);
     }
 
     void instNuGCutSceneStop(instNUGCUTSCENE_s *instance) {
@@ -256,16 +480,31 @@ extern "C" {
         return 0.0f;
     }
 
-    void instNuGCutSceneTranslate(void) {
-        STUBBED();
+    void instNuGCutSceneTranslate(instNUGCUTSCENE_s *instance, NUVEC *translation) {
+        if ((instance->flags_88 & 0x80) == 0) {
+            instance->flags_88 |= 0x80;
+            NuMtxSetIdentity(&instance->matrix);
+        }
+        NuMtxTranslate(&instance->matrix, translation);
+        NUMTX *matrix = &instance->matrix;
+        NUVEC *bounds = static_cast<NUVEC *>(instance->cutscene->bounds);
+        if (bounds != NULL) {
+            instance->transformed_bounds_center.x = (bounds[1].x + bounds[0].x) * 0.5f;
+            instance->transformed_bounds_center.y = (bounds[1].y + bounds[0].y) * 0.5f;
+            instance->transformed_bounds_center.z = (bounds[1].z + bounds[0].z) * 0.5f;
+        } else {
+            instance->transformed_bounds_center.x = 0.0f;
+            instance->transformed_bounds_center.y = 0.0f;
+            instance->transformed_bounds_center.z = 0.0f;
+        }
+        NuVecMtxTransform(&instance->transformed_bounds_center, &instance->transformed_bounds_center, matrix);
     }
 
-    void instNuGCutSceneWaitAtEnd(void) {
-        STUBBED();
+    void instNuGCutSceneWaitAtEnd(instNUGCUTSCENE_s *instance, u8 enabled) {
+        instance->flags_8c = (instance->flags_8c & ~0x40) | ((enabled & 1) << 6);
     }
 
     void instNuGCutSoundStream(void) {
-        STUBBED();
     }
 
     void instNuGCutLocatorUpdate(instNUGCUTSCENE_s *instance, NUGCUTLOCATORSYS_s *system,

@@ -258,11 +258,14 @@ i32 saveloadGetDirectory() {
 
 extern "C" {
     void saveloadASFormat(void) {
-        STUBBED();
+        // The target implementation is empty.
     }
 
-    void saveloadAutoSave(void) {
-        STUBBED();
+    i32 saveloadAutoSave(void *buffer, i32 size, u32 hash) {
+        if (saveload_autosave == -1 || saveload_autosave > 5)
+            return 0;
+        saveloadASSave(saveload_autosave, buffer, size, hash);
+        return 1;
     }
 
     i32 saveloadCheckCardFormatted(void) {

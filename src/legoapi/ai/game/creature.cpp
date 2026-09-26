@@ -4,15 +4,20 @@
 #include "globals.h"
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/core/players.h"
+#include "legoapi/characters/motion.h"
+#include "legoapi/core/input/qrand.h"
 #include "legoapi/items/collect/torpedo.h"
+#include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/gizmos/transport/gizportal.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/world/level.h"
+#include "legoapi/world/levels/levels.h"
 #include "legoapi/world/mission.h"
 #include "legoapi/world/world.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/numath/nuvec.h"
+#include "nu2api/numath/nurand.h"
 #include "nu2api/numath/numtx.h"
 #include "nu2api/nu3d/nuspecial.h"
 #include "legoapi/render/fx.h"
@@ -412,8 +417,89 @@ void SpawnCreatureFromCrate(GameObject_s *object, f32 height, f32 delay) {
     object->apiobj.field_0x1f8 &= ~0x1000;
 }
 
-void SpawnMeleeCreatureType(i32) {
-    STUBBED();
+extern "C" HOTHBATTLE_MELEE_s melee;
+AILOCATOR *getSpawnLocator(f32 clip_radius, char *name);
+i32 OnOrInsidePlane(NUVEC *point, NUVEC *plane_point, NUVEC *plane_normal, NUVEC *corrected_point,
+                    f32 normal_offset, f32 *distance);
+
+i32 SpawnMeleeCreatureType(i32 type) {
+    u8 active_count = melee.waves[type].reserved_1a;
+    f32 radius = apicharsys->char_data[melee.waves[type].character_id].collision_radius;
+
+    for (i32 index = 0; index < active_count; ++index) {
+        if (melee.waves[type].character_id != id_ATAT && melee.waves[type].creatures[index] != NULL &&
+            melee.waves[type].creatures[index]->field_0xf1c > 5.0f) {
+            KillGameObject(melee.waves[type].creatures[index], 4, 0);
+            melee.waves[type].creatures[index] = NULL;
+            active_count = --melee.waves[type].reserved_1a;
+        }
+    }
+
+    while (melee.waves[type].field_0x18 > melee.waves[type].reserved_1a) {
+        if (melee.waves[type].reserved_1a > 3)
+            break;
+
+        i32 slot = -1;
+        i32 index = 0;
+        do {
+            GameObject_s *current = melee.waves[type].creatures[index];
+            slot = current == NULL ? index : -1;
+            ++index;
+        } while (slot == -1 && index <= 3);
+        if (slot == -1)
+            return 0;
+
+        if (melee.waves[type].character_id == id_ATAT && melee.waves[type].reserved_1a == 0) {
+            GameObject_s *named = GetNamedGameObject(WORLD->ai_sys, "ATAT_EDIT");
+            melee.waves[type].creatures[slot] = named;
+            if (named != NULL && named->apiobj.field_0x287 == 0 &&
+                (named->apiobj.field_0x1f8 & 0x1000) != 0) {
+                ++melee.waves[type].reserved_1a;
+                continue;
+            }
+            melee.waves[type].creatures[slot] = NULL;
+        }
+
+        AILOCATOR *locator = NULL;
+        for (i32 attempts = 50; attempts > 0; --attempts) {
+            locator = getSpawnLocator(5.0f, "spawn");
+            if (locator != NULL) {
+                if (OnOrInsidePlane(&locator->position, &PlayPlane[1].point, &PlayPlane[1].normal,
+                                    NULL, 0.5f, NULL) == 0 ||
+                    OnOrInsidePlane(&locator->position, &PlayPlane[2].point, &PlayPlane[2].normal,
+                                    NULL, 0.5f, NULL) == 0) {
+                    if (OnOrInsidePlane(&locator->position, &PlayPlane[1].point, &PlayPlane[1].normal,
+                                        NULL, 2.5f, NULL) != 0 ||
+                        OnOrInsidePlane(&locator->position, &PlayPlane[2].point, &PlayPlane[2].normal,
+                                        NULL, 2.5f, NULL) != 0)
+                        break;
+                }
+                locator = NULL;
+            }
+        }
+        if (locator == NULL)
+            return 0;
+
+        NUVEC offset = {(NuFloatRand(reinterpret_cast<NURAND *>(&GAMERAND)) + 1.0f) * radius * 8.0f,
+                        0.0f, 0.0f};
+        NuVecRotateY(&offset, &offset, qrand());
+        NuVecAdd(&offset, &offset, &locator->position);
+
+        GameObject_s *object;
+        if (melee.waves[type].character_id != id_ATAT) {
+            object = AddDynamicCreature(melee.waves[type].character_id, &offset, locator->direction, melee.waves[type].name,
+                                        &locator->path_info, NULL, 1, NULL, NULL, 0, 0);
+        } else {
+            object = AddDynamicCreature(melee.waves[type].character_id, &locator->position, locator->direction, melee.waves[type].name,
+                                        &locator->path_info, NULL, 1, NULL, NULL, 0, 0);
+        }
+        if (object == NULL)
+            return 0;
+        melee.waves[type].creatures[slot] = object;
+        object->ai.locator = locator;
+        ++melee.waves[type].reserved_1a;
+    }
+    return 1;
 }
 
 GameObject_s *alert_obj;

@@ -1,0 +1,27 @@
+# Menu touch controller matching notes
+
+## ABI and compiler patterns
+
+- `MechInputTouchMenuController` has two polymorphic bases in the target: `MechInputTouchMainController` at offset `0` and `MechInputTouchGestureTracker` at offset `0x6c`. The second vtable emits `this`-adjusting thunks that subtract `0x6c` before entering `OnClick`, `OnDown`, and the other gesture callbacks. A declaration with only a vptr loses those thunks and changes the constructor and destructor bodies.
+- The derived constructor calls the main controller constructor, installs both vptrs, clears fields at `0x70`, `0x74`, and `0x78`, and registers its gesture tracker with priority `50`. `Activate` also registers; `Deactivate` unregisters. The registration target is `MechSystems::Get()->gesture_tracking_system` at offset `0x84`. The first two derived fields are a tracked `TouchHolder*` and `MENU*`; the third is a byte flag.
+- `UpdateButtons(int)` reads `backButtonPressedLastFrame` and calls `PerformPauseButtonStuff()` only when the sign bit of the new button state clears after being set. This global is distinct from `MechInputTouchMenuController::PackButtonPressed` despite the similar name.
+- The target `Render()` contains eight one-byte NOPs and a return. `OnDoubleClick` and `OnSwipe` each zero `eax`, execute six one-byte NOPs, and return false. GCC 4.7 emits these NOPs automatically for empty or constant-return routines at `-O2`; explicit inline NOPs are additive and overshoot the target. This was confirmed with a standalone NDK r8e compile.
+- This translation unit's target functions use optimized PIC code. The NDK r8e GCC 4.7 compiler retains an `-O0` frame pointer policy when `#pragma GCC optimize("O2")` is applied after the command-line `-O0`, despite optimizing much of the body. A per-file Bazel `-O2` option restores frameless code for this translation unit.
+- `OnClick` demonstrates that load placement alone does not determine a match. The target loads touch Y and X before testing `PackButtonActive`; forcing that order with `volatile` local reads moved the combined build from 78.92% to 60.68%. The qualifier also changes alias analysis and register allocation. When revisiting this method, compare the full GOT-aware instruction alignment rather than preserving the eager loads at the cost of the later stack layout.
+- `Update` uses two packed 64-bit zero stores and a saturating decrement through `cmovns`. A function-scoped `optimize("O3")` induces the packed stores with this GCC version. Empty inline assembly constraints can pin the counter pointer in `eax`, zero in `edx`, and decremented value in `ecx`; the combined build then reaches 97.05% for this method. The remaining mismatch still needs an instruction-level review.
+
+## Menu pack touch globals
+
+The target exports `PackButtonW`, `PackButtonX`, `PackButtonY`, `PackButtonActive`, and `LastTouchPos`. `OnClick` checks the active flag, clears it, forms a three-component displacement from the holder's touch position, divides the X displacement by `GetAspectRatio()`, and uses `NuVecMag` to test against `PackButtonW`. A hit sets `PackButtonPressed`.
+
+## Larger gesture paths
+
+`OnDown` and `OnHold` use `GameMenu[GameMenuLevel]` and the free-play collection for menu 17. The collection's selectable count is `count_y` at offset `6`, each `COLLECTID` is `0x1c` bytes, and the selection radius is `fabsf(0.5f * collection->field_14)`. Coordinates come from `TouchHolder::down_position` for `OnDown` and `touch_position` for `OnHold`. Both divide the X displacement by `GetAspectRatio()` before `NuVecMag`. `OnRelease` is about 2 KB and contains several interaction paths. The target GOT-relative references can be resolved by reading the GOT entry and looking up its destination in `nm -n`, since several globals have `R_386_RELATIVE` relocations rather than named dynamic relocations.
+
+## Release gesture control flow
+
+`OnRelease` first requires the same `TouchHolder*` saved by `OnDown`; failure clears that pointer and returns false. After acceptance it updates `LastTouchTime`, `LastTouchPos`, and `AnyTouchesThisFrame = 3` before calling `GetMenuID`. The menu 12 customiser path precedes the menu 17 path and generic menu validation. It checks the displacement between current and down touch for a swipe, but the six customiser rectangle hit tests use the **down** coordinates. The six rectangles are individually laid out at customiser offsets `0xc98 + 12*i` (centres), `0xce0 + 4*i` (widths), and `0xcf8 + 4*i` (heights). GCC emits six expanded hit-test blocks. Each sets byte `0xd10 + i`; the special swipe flags live at `0xd12`, `0xd13`, and `0xd16`.
+
+The menu 17 branch calls `GetFreePlayCollection(hub_freeplay_area)` even though it discards the returned pointer, then tests the **current** touch against `MENU.item_x/y[0]`. The generic path clears both tracked pointers before swipe and item hit testing; circular items have zero height and use an aspect-corrected `NuVecMag`, while rectangular items use strict comparisons against `fabsf(0.5f * width/height)`. For all generic accepted swipes and item hits, the target calls `GetMenuID` again to suppress the true return for menu 25. The target's explicit early returns and repeated menu ID calls matter for matching block order.
+
+The generic item's positive-width guard is `!(width > 0.0f)`, not `width <= 0.0f`: the target `ucomiss width, zero; jbe` skips unordered (NaN) widths too. GCC must use a different branch sequence for `<=` because that relation is false for NaN.

@@ -13,23 +13,28 @@ struct DOOR_s;
 
 struct storepack_s {
     char *name;
-    u8 field1_0x4;
-    u8 field2_0x5;
-    u8 field3_0x6;
-    u8 field4_0x7;
     union {
+        char *product_id;
+        struct {
+            u8 field1_0x4;
+            u8 field2_0x5;
+            u8 field3_0x6;
+            u8 field4_0x7;
+        };
+    };
+    union {
+        i16 message_text_index;
         struct {
             u8 field5_0x8;
             u8 field6_0x9;
         };
-        i16 message_text_index;
     };
     u8 field7_0xa;
     u8 field8_0xb;
     void (*unlock_fn)();
     char *floor_target_door_name; // 0x10
     char *custodian_locator_set;  // 0x14
-    i32 offset_floor_target;      // 0x18
+    f32 offset_floor_target;      // 0x18
     DOOR_s *floor_target_door;    // 0x1c
     i16 *id;                      // 0x20
     NUVEC custodian_position;     // 0x24
@@ -40,6 +45,14 @@ struct storepack_s {
 DECOMP_ASSERT(sizeof(storepack_s) == 0x34, "STOREPACK size");
 typedef struct storepack_s STOREPACK;
 extern STOREPACK StorePack[11];
+
+struct STOREBUNDLE {
+    char *name;
+    u32 pack_mask;
+    i32 text_index;
+};
+DECOMP_ASSERT(sizeof(STOREBUNDLE) == 12, "STOREBUNDLE size");
+extern STOREBUNDLE StoreBundle[3];
 
 enum STORE_PACK_INDEX {
     STORE_PACK_EPISODE_II = 0,
@@ -78,7 +91,7 @@ bool Store_IsPackUnlocked(i32 pack);
 bool Store_IsPackAvailable(i32 pack, char *reason);
 void Store_UnlockPack(i32 pack, bool save);
 void Store_RestorePurchases(void);
-void StoreBundle_FindByName(char *name);
+i32 StoreBundle_FindByName(char *name);
 void Store_HubInitFloorTargets(WORLDINFO_s *world);
 void Store_HubDrawFloorTargets(WORLDINFO_s *world);
 void Store_RootPackCustodian(i32 pack, GameObject_s *custodian);

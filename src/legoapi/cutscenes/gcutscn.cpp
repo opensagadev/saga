@@ -316,16 +316,102 @@ void FindGameCutScenes() {
     game_cutscenes.podsprint_sebulba = CutScene_Find(WORLD->cutscene_sys, "ep1_podsprint_sebulba");
 }
 
-void FindSceneStateObj(nugscn_s *, SCENEPROGRESS_s *, nuhspecial_s *) {
-    STUBBED();
+SCENESPECIALPROGRESS_s *FindSceneStateObj(nugscn_s *scene, SCENEPROGRESS_s *progress, nuhspecial_s *target) {
+    if (progress == NULL || scene == NULL || target == NULL)
+        return NULL;
+    i32 count = NuSpecialGetNumSpecials(scene);
+    if (count == 0)
+        return NULL;
+    nuhspecial_s special;
+    for (i32 i = 0; i < count; ++i) {
+        if (i != 0)
+            NuSpecialGetNext(&special);
+        else
+            NuSpecialGetFirst(scene, &special, 1);
+        if (NuSpecialCompare(&special, target))
+            return &progress->specials[i];
+    }
+    return NULL;
 }
 
-void instGetLookAtLocatorInfo(instNUGCUTSCENE_s *, instNUGCUTLOOKAT_s *) {
-    STUBBED();
+// The instance look-at record is still opaque in legoapi_types.h. Its fields
+// are used here at the offsets written by the original cutscene code.
+struct GCutLookAtState {
+    NUGSCN *scene;
+    u32 field_04;
+    u16 character_index;
+    u16 material_index;
+    u16 texture_animation_index;
+    u16 secondary_material_index;
+    u16 tertiary_material_index;
+    u16 joint_override_index;
+    NUGCUTLOCATOR_s *locator;
+};
+
+i32 FindMtlInHGObj(nugscn_s *, i32);
+i32 FindTexAnimFromMtl(nugscn_s *, numtl_s *);
+
+void instGetLookAtLocatorInfo(instNUGCUTSCENE_s *instance, instNUGCUTLOOKAT_s *opaque_state) {
+    GCutLookAtState *state = reinterpret_cast<GCutLookAtState *>(opaque_state);
+    NUGCUTLOCATOR_s *locator = state->locator;
+    if (locator == NULL || NuCutSceneGetHGObj == NULL)
+        return;
+
+    u8 character_id = locator->field_5b;
+    state->locator = NULL;
+    NUGCUTSCENE_s *cutscene = instance->cutscene;
+    NUGCUTCHARANIM_s *animations = cutscene->character_animations;
+    i32 character_count = cutscene->character_system->character_count;
+    for (i32 i = 0; i < character_count; ++i) {
+        if (static_cast<u8>(animations[i].field_00) == character_id) {
+            state->character_index = i + 1;
+            break;
+        }
+    }
+
+    u16 character_index = state->character_index;
+    if (character_index == 0)
+        return;
+    NUGSCN *scene = NuCutSceneGetHGObj(instance, character_index - 1);
+    state->scene = scene;
+    if (scene == NULL)
+        return;
+
+    nuhgobj_s *object = reinterpret_cast<nuhgobj_s *>(scene);
+    u8 joint_index = locator->pad_5c[0];
+    if (joint_index < object->joint_override_map_count)
+        state->joint_override_index = object->joint_override_map[joint_index] + 1;
+
+    u16 material_index = FindMtlInHGObj(scene, locator->pad_5c[1]);
+    state->material_index = material_index;
+    if (material_index != 0)
+        state->texture_animation_index = FindTexAnimFromMtl(scene, object->materials[material_index - 1]);
+    state->secondary_material_index = FindMtlInHGObj(scene, locator->pad_5c[2]);
+    state->tertiary_material_index = FindMtlInHGObj(scene, locator->pad_5c[3]);
 }
 
-void instNuGCutGetNextRigidInfo(instNUGCUTSCENE_s *, float, i32, numtx_s *, nuhspecial_s *) {
-    STUBBED();
+i32 instNuGCutGetNextRigidInfo(instNUGCUTSCENE_s *instance, float frame, i32 index, numtx_s *matrix,
+                              nuhspecial_s *special) {
+    NUGCUTRIGIDSYS_s *rigid_system = instance->cutscene->rigid_system;
+    instNUGCUTRIGIDSYS_s *instance_rigid_system = instance->rigid_instance;
+    asm volatile("" : "+c"(instance_rigid_system), "+d"(rigid_system));
+    if (rigid_system == NULL || index >= rigid_system->count)
+        return 0;
+    NUGCUTRIGID_s *rigid = &rigid_system->rigids[index];
+    asm volatile("" : "+a"(rigid) : : "memory");
+    instNUGCUTRIGID_s *instance_rigids = instance_rigid_system->rigids;
+    asm volatile("" : "+r"(instance_rigids));
+    if ((rigid->flags & 6) != 0) {
+        extern void NuGCutRigidCalcMtx(NUGCUTRIGID_s *, float, numtx_s *);
+        NuGCutRigidCalcMtx(rigid, frame, matrix);
+        if ((instance->flags_88 & 0x80) != 0)
+            NuMtxMul(matrix, matrix, &instance->matrix);
+        instNUGCUTRIGID_s *instance_rigid = &instance_rigids[index];
+        special->scene = instance_rigid->scene;
+        special->special = instance_rigid->special;
+        special->display_special = reinterpret_cast<NUDISPLAYSPECIAL *>(instance_rigid->display_special);
+    }
+    return index + 1;
 }
 
 i32 instNuGCutSceneSwapBuffers(instNUGCUTSCENE_s *instance, i32 force) {
@@ -362,6 +448,11 @@ void instNuGCutSceneEndButNotSystems(instNUGCUTSCENE_s *instance) {
     instNuGCutSceneResetCamLock(instance);
 }
 
-void instNuGCutContainsInstancedRigids(instNUGCUTSCENE_s *) {
-    STUBBED();
+i32 instNuGCutContainsInstancedRigids(instNUGCUTSCENE_s *instance) {
+    NUGCUTRIGIDSYS_s *rigid_system = instance->cutscene->rigid_system;
+    for (i32 i = 0; i < rigid_system->count; ++i) {
+        if ((rigid_system->rigids[i].flags & 6) == 6)
+            return 1;
+    }
+    return 0;
 }

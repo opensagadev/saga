@@ -45,6 +45,12 @@ void DrawPanel3DObjectMtx(nuhspecial_s *special, numtx_s *matrix, f32 alpha);
 i32 DrawPanel3DObjectNoAlpha(f32 x, f32 y, f32 z, f32 scale_x, f32 scale_y, f32 scale_z, u16 rotate_x, u16 rotate_y,
                              u16 rotate_z, nuhspecial_s *special, i32 rotate_order);
 void DrawMiniKitCount(f32 position, f32 scale, i32 count, i32 maximum);
+struct STATUSMINIKITPART_s {
+    NUMTX matrix;
+    nuhspecial_s *special;
+    i32 enabled;
+};
+extern STATUSMINIKITPART_s KitPart[10];
 void DrawTouchPrompt(char *, char *, bool, bool);
 void DrawCharIcon(i32, float, float, float, float, i32, float, float, i32, nuhspecial_s *);
 void DrawPauseFade(void);

@@ -3822,8 +3822,10 @@ extern "C" {
         AISysCreatureAntinodeInteraction(system, object_count, objects, immovable);
     }
 
-    void QueryLocalMessage(void) {
-        STUBBED();
+    void *QueryLocalMessage(void *context, void *message) {
+        if (message != NULL)
+            return *reinterpret_cast<void **>(static_cast<u8 *>(message) + 0x2c);
+        return *reinterpret_cast<void **>(static_cast<u8 *>(context) + 0xc4);
     }
 
 } // extern "C"

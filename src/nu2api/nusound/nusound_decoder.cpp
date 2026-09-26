@@ -54,7 +54,6 @@ NuSoundDecoder::~NuSoundDecoder() {
 }
 
 __attribute__((weak)) void NuSoundDecoder::Reset() {
-    STUBBED();
 }
 
 // libTTapp.so 0x31ec90: fill the ring buffers upfront. Each buffer is

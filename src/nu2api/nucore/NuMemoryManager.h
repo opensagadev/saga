@@ -209,9 +209,9 @@ class NuMemoryManager {
     };
 
     void ClearBlockDebugContext(void *ptr);
-    void DumpBlock(u32 _a, NuSymbolQuery *query, Header *header, u32 _d, u32 _e, u32 _f);
+    u16 DumpBlock(u32 _a, NuSymbolQuery *query, Header *header, u32 _d, u32 _e, u32 _f);
     void DumpBlocksForContext(u32 _a, NuSymbolQuery *query, Context *context, u32 _d);
-    void FindAndTouchMatchingBlocks(DebugHeader *header, u32 *a, u32 b);
+    u32 FindAndTouchMatchingBlocks(DebugHeader *header, u32 *a, u32 b);
     u32 GetAllocatedBytes();
     u32 GetBlockAlignment(void *ptr);
     u32 GetBlockDebugBackTrace(void *ptr, void **out);
@@ -230,7 +230,7 @@ class NuMemoryManager {
     bool IsZombie();
     FreeHeader *MergeLargeBinSegments(FreeHeader *a, FreeHeader *b);
     void PushContext(const char *name);
-    void ReleaseExternalPage(void *ptr);
+    i32 ReleaseExternalPage(void *ptr);
     void SetBlockDebugContext(void *ptr, u32 ctx_id);
     void SetBlockDebugName(void *ptr, const char *name);
     void SetOverrideCategory(u16 category);
@@ -242,7 +242,7 @@ class NuMemoryManager {
     void ValidateBlockDeferredContent(Header *header, const char *caller);
     static void VisitManagers(IVisitor *visitor);
     void VisitPages(IPageVisitor *visitor);
-    void _MultiBlockAlloc(u32 a, u32 b, u32 c, void **out, u32 e, const char *name, u16 flags);
+    i32 _MultiBlockAlloc(u32 a, u32 b, u32 c, void **out, u32 e, const char *name, u16 flags);
 
   private:
     static u32 GetLargeBinIndex(u32 size);

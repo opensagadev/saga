@@ -550,11 +550,9 @@ void NuSoundVoice::UpdateEffects(f32 frametime, NuSoundEffect::EffectProcessStag
 }
 
 void NuSoundVoice::CheckStarvedBuffers() {
-    STUBBED();
 }
 
 void NuSoundVoice::UpdateHardwareVoice(f32) {
-    STUBBED();
 }
 
 // ---------------------------------------------------------------------------

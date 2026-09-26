@@ -18,6 +18,7 @@
 #include "nu2api/numath/numtx.h"
 #include "nu2api/numath/nuvec.h"
 #include "nu2api/numath/nuvec4.h"
+#include "nu2api/nufile/tmclient.h"
 
 #include "legoapi/items/base/apiobject.h"
 #include "MechInputTouch/MechInputTouch_types.h"
@@ -5750,23 +5751,6 @@ struct TELEPORT_s {
     MechObjectInterface *GetMechObjectInterface();
 };
 DECOMP_ASSERT(sizeof(TELEPORT_s) == 0x100, "TELEPORT_s size");
-struct TMClient {
-    struct TM_MOUSE_AXIS {};
-    void AllocHandle();
-    void Connect();
-    void FClose(i32);
-    void FOpen(char const *, char const *);
-    void FRead(void *, u32, u32, i32);
-    void FSeek(i32, i64, i32);
-    void FTell(i32);
-    void FWrite(void const *, u32, u32, i32);
-    void FlushKeyBuffer();
-    void GetKey(i32 *);
-    void GetMouseAxis(TMClient::TM_MOUSE_AXIS);
-    void GetMouseButtons();
-    void SendTTY(char const *, i32);
-    void TestKey(i32);
-};
 struct TTNetwork : NetTransporter, BaseThing {
   private:
     i32 field_20;
@@ -5864,25 +5848,39 @@ struct GameThingManager : ThingManager {
     GameThingManager(i32);
     virtual ~GameThingManager();
 };
-struct VirtualControlButton {
-    void Process(float);
-    void Render();
+struct VirtualControlButton : MechTouchUITexButton {
+    void Process(float) override;
+    void Render() override;
     VirtualControlButton(NuVec2 const &, float, MechInputTouchMainController::eButtonTypes);
+    MechInputTouchMainController::eButtonTypes button_type;
 };
-struct VirtualControlButtonMover {
-    void Process(float);
+DECOMP_ASSERT(sizeof(VirtualControlButton) == 0x7c, "VirtualControlButton size");
+struct VirtualControlButtonMover : MechTouchUITexButton {
+    void Process(float) override;
     VirtualControlButtonMover(MechInputTouchVirtualConsoleController &);
+    MechInputTouchVirtualConsoleController *controller;
+    NuVec2 drag_offset;
+    i32 pulse_phase;
 };
-struct VirtualControlDPad {
-    void Process(float);
-    void Render();
+DECOMP_ASSERT(sizeof(VirtualControlButtonMover) == 0x88, "VirtualControlButtonMover size");
+struct VirtualControlDPad : MechTouchUITexButton {
+    void Process(float) override;
+    void Render() override;
     VirtualControlDPad(NuVec2 const &, float, MechInputTouchVirtualConsoleController &);
-    virtual ~VirtualControlDPad();
+    ~VirtualControlDPad() override;
+    NuVec2 stick_values;
+    NuVec2 drag_offset;
+    struct numtl_s *arrow_material;
+    MechInputTouchVirtualConsoleController *controller;
+    VirtualControlButtonMover mover;
 };
-struct VirtualControlDPad_LockButton {
-    void Process(float);
-    void Render();
+DECOMP_ASSERT(sizeof(VirtualControlDPad) == 0x118, "VirtualControlDPad size");
+struct VirtualControlDPad_LockButton : MechTouchUITexButton {
+    void Process(float) override;
+    void Render() override;
     VirtualControlDPad_LockButton(VirtualControlDPad &);
+    VirtualControlDPad *dpad;
 };
+DECOMP_ASSERT(sizeof(VirtualControlDPad_LockButton) == 0x7c, "VirtualControlDPad_LockButton size");
 
 #endif // LEGOAPI_TYPES_H

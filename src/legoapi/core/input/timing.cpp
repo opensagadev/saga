@@ -1,6 +1,7 @@
 #include "decomp.h"
 #include "globals.h"
 #include "legoapi/core/input/timing.h"
+#include "legoapi/gizmos/fx/gizmopickups.h"
 #include "legoapi/legoapi_types.h"
 #include "nu2api/nu3d/android/nutimebar_plain.h"
 #include "nu2api/nu3d/nuqfnt.h"
@@ -75,5 +76,29 @@ void UpdateFrameCounters() {
 }
 
 void UpdatePickupFlicker() {
-    STUBBED();
+    i32 frames = static_cast<i32>(31.5f / FRAMETIME);
+    i32 flicker_test;
+
+    if (frames > 30) {
+        i32 flicker_frames = frames / 5;
+        if (flicker_frames % 2 != 0) {
+            asm volatile("");
+            ++flicker_frames;
+        }
+        PickUpFlickerFrames = flicker_frames;
+        flicker_test = flicker_frames / 2;
+    } else {
+        i32 *flicker_frames_ptr = &PickUpFlickerFrames;
+        flicker_test = 3;
+        asm volatile("" : : "a"(flicker_frames_ptr), "c"(flicker_test));
+        *flicker_frames_ptr = 6;
+    }
+
+    PickUpFlickerTest = flicker_test;
+    i32 next_frame = PickupFlickerFrame + 1;
+    if (next_frame < PickUpFlickerFrames) {
+        PickupFlickerFrame = next_frame;
+    } else {
+        PickupFlickerFrame = 0;
+    }
 }

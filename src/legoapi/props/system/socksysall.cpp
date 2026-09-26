@@ -594,7 +594,7 @@ static f32 DistanceToPlane(NUVEC *point, NUVEC *plane_point, NUVEC *normal) {
            normal->z * (point->z - plane_point->z);
 }
 
-static f32 RatioBetweenPlanes(NUVEC *point, NUVEC *point_a, NUVEC *normal_a, NUVEC *point_b, NUVEC *normal_b) {
+f32 RatioBetweenPlanes(NUVEC *point, NUVEC *point_a, NUVEC *normal_a, NUVEC *point_b, NUVEC *normal_b) {
     f32 distance_a = DistanceToPlane(point, point_a, normal_a);
     f32 distance_b = DistanceToPlane(point, point_b, normal_b);
     return distance_a / (distance_a + distance_b);

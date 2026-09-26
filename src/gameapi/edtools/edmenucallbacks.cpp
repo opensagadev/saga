@@ -12,6 +12,9 @@ extern "C" void cbCancelSubMenu(eduimenu_s *, eduimenu_s *);
 #pragma GCC push_options
 #pragma GCC optimize("O2", "omit-frame-pointer")
 
+static eduimenu_s *submenu1;
+static eduimenu_s *submenu0;
+static eduimenu_s *testmenu0;
 static i32 selection_value;
 static f32 cliph;
 static f32 clips;

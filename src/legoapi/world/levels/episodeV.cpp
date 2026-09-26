@@ -1,11 +1,16 @@
 #include "decomp.h"
 #include "globals.h"
+#include "gameapi/ai/aisys/aisys.h"
 #include "gameapi/ai/aisys/aipath.h"
 #include "legoapi/ai/core/ai_sys_stubs.h"
+#include "legoapi/ai/core/legoai.h"
 #include "legoapi/audio/sfx.h"
 #include "legoapi/characters/core/players.h"
+#include "legoapi/characters/motion.h"
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/gizmos/object/newblowup.h"
+#include "legoapi/gizmos/fx/gizmopickups.h"
+#include "legoapi/gizmos/object/gizpanel.h"
 #include "legoapi/gizmos/object/gizbuildits.h"
 #include "legoapi/gizmos/traps/gizbombgen.h"
 #include "legoapi/gizmos/traps/gizforce.h"
@@ -18,33 +23,57 @@
 #include "legoapi/render/light/surfaces.h"
 #include "legoapi/render/core/terrain.h"
 #include "legoapi/render/fx/parts.h"
+#include "legoapi/render/fx.h"
 #include "legoapi/world/levels/levels.h"
 #include "legoapi/world/level.h"
 #include "legoapi/world/world.h"
 #include "nu2api/nuandroid/ios_graphics.h"
 #include "nu2api/nucore/nustring.h"
+#include "nu2api/nucore/numechptr.hpp"
+#include "nu2api/nucore/nuvuvec.hpp"
 #include "nu2api/nu3d/nuspecial.h"
+#include "nu2api/nu3d/nuspline.h"
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/numath/numtx.h"
 #include "nu2api/numath/nuvec.h"
+#include "nu2api/numath/nufloat.h"
+#include "nu2api/numath/nuang.h"
+#include "nu2api/numath/nutrig.h"
+#include "MechInputTouch/MechInputTouch_types.h"
 
 #include <string.h>
 
 extern i32 dagobah_training;
+extern i32 obstacle_gizmotype_id;
+extern u8 LevFlag[16];
+extern NuMechPtr<MechObjectInterface, 4> BobaRocketTarget;
+extern "C" i16 id_PROBEDROID, id_ATST_LOWRES, id_ATAT;
+GIZPANEL_s *LevGizPanel;
 AILOCATOR_s *locator;
 GameObject_s *gameobj;
 extern u8 troopercannons_beenReset;
 void Asteroid_PartKill(PART_s *, i32);
+void AtatPart_Stop(PART_s *) __asm__("_ZL13AtatPart_StopP6PART_s") __attribute__((visibility("hidden")));
+void AtatPart_Update(PART_s *) __asm__("_ZL15AtatPart_UpdateP6PART_s") __attribute__((visibility("hidden")));
 void GizmoBlowupUpdateMatrix(GIZMOBLOWUP_s *);
 void PartCollide_3D(PART_s *);
 void ResetTrooperCannons(WORLDINFO_s *, i32);
+void InitTrooperCannons(WORLDINFO_s *);
+void HothBattleE_UpdateWave();
+void HothBattle_Melee_init(HOTHBATTLE_MELEE_s *);
+void HothBattle_ManageBackgroundCreatures();
+void SpawnMeleeCreatureType(i32);
 void UpdateTrooperCannons(WORLDINFO_s *);
 EXPLOSION *Detonate(NUVEC *, u16);
 extern "C" void NewPartRotation(PART_s *);
 extern "C" void *AIPAthFindPathCnx(AISYS_s *, AIPATH_s *, char *, char *, i32 *);
+nugspline_s *edSpline_SplineFind(nugscn_s *, char *);
+extern i16 BoltType_FindIDByNameWide(char *, WORLDINFO_s *) asm("_Z21BoltType_FindIDByNamePcP11WORLDINFO_s");
 
 static GameObject_s *Vader_obj;
 static GIZAIMESSAGE_s *Vader_ai_message;
+static u8 turretAliveCount;
+nuhspecial_s specialIcon;
 
 struct AIROW_s;
 struct nuqthdr_s;
@@ -56,6 +85,7 @@ extern "C" {
     HOTHBATTLE_MELEE_s melee;
     u8 dagobahA_nodesNeedUpdating = 1;
 }
+void *hothbattlee_netpacket;
 
 void DagobahA_Init(WORLDINFO_s *world) {
     LevGizForce[0] = GizForce_FindByName(world->giz_force_sys, "force3");
@@ -137,8 +167,17 @@ void DagobahC_Panel(WORLDINFO_s *) {
     }
 }
 
-void KillParts_ATAT(ADDPART_s *, i32, i32, GameObject_s *) {
-    STUBBED();
+void KillParts_ATAT(ADDPART_s *params, i32, i32 variant, GameObject_s *) {
+    params->flags = static_cast<u32>(variant) < 1 ? 0x500 : 0x110;
+    params->velocity->z = 0.0f;
+    params->velocity->y = 0.0f;
+    params->velocity->x = 0.0f;
+    params->field_48 = AtatPart_Update;
+    params->stop_fn = AtatPart_Stop;
+    params->draw_fn = PartDraw_Flickerer;
+    PART_s *part = AddPart(params);
+    if (part != NULL)
+        part->field_100 = 10.0f;
 }
 
 f32 rocket_speed = 1.2f;
@@ -153,12 +192,223 @@ void BobaRocket_Kill(PART_s *part, i32) {
     }
 }
 
-void BobaRocket_Move(PART_s *, float) {
-    STUBBED();
+void BobaRocket_Move(PART_s *part, f32 elapsed) {
+    NUVEC delta;
+    NUVEC next;
+    NUVEC scale;
+    GameObject_s *recipient = part->recipient;
+    i32 spin;
+    if (static_cast<i8>(part->active) < 0) {
+        NuVecSub(&delta, reinterpret_cast<NUVEC *>(part->pad_0bc), &part->position);
+        i32 yaw = NuAtan2D(delta.x, delta.z);
+        NuVecRotateY(&delta, &delta, -yaw);
+        i32 pitch = -NuAtan2D(delta.y, delta.z);
+        part->rotation_x = SeekRot(part->rotation_x, pitch, 8.0f);
+        part->rotation_y = SeekRot(part->rotation_y, yaw, 8.0f);
+        spin = static_cast<i32>(SeekValF(static_cast<f32>(part->field_124[3]), 0.0f, 1.0f));
+        part->field_124[3] = spin;
+    } else {
+        VuVec target;
+        bool has_target = false;
+        if (recipient != NULL) {
+            target.w = 1.0f;
+            f32 target_z = recipient->apiobj.collision_position.z;
+            f32 target_y = recipient->apiobj.collision_position.y;
+            f32 target_x = recipient->apiobj.collision_position.x;
+            target.x = target_x;
+            target.y = target_y;
+            target.z = target_z;
+            has_target = true;
+        } else if (BobaRocketTarget.Get() != NULL) {
+            BobaRocketTarget.Get()->GetPos(target, -1);
+            has_target = true;
+        }
+        if (has_target) {
+            NuVecSub(&delta, &target.xyz, &part->position);
+            f32 horizontal_squared = delta.x * delta.x + delta.z * delta.z;
+            i32 yaw = NuAtan2D(delta.x, delta.z);
+            NuVecRotateY(&delta, &delta, -yaw);
+            delta.y = target.y + 0.5f - part->position.y;
+            i32 pitch = -NuAtan2D(delta.y, delta.z);
+            part->rotation_x = SeekRot(part->rotation_x, pitch, 1.0f);
+            part->rotation_y = SeekRot(part->rotation_y, yaw, 4.0f);
+            if (horizontal_squared < 1.0f) {
+                part->active |= 0x80;
+                NuVecSub(&delta, &target.xyz, &part->position);
+                NuVecScale(&delta, &delta, 5.0f);
+                NuVecAdd(reinterpret_cast<NUVEC *>(part->pad_0bc), &part->position, &delta);
+                part->recipient = NULL;
+                BobaRocketTarget = NULL;
+                part->field_100 = NuFsqrt(horizontal_squared + delta.y * delta.y) / rocket_speed;
+            }
+        }
+        spin = 60000;
+        part->field_124[3] = spin;
+    }
+
+    part->velocity.x = 0.0f;
+    part->velocity.y = 0.0f;
+    part->velocity.z = rocket_speed;
+    part->field_13c += static_cast<i32>(static_cast<f32>(spin) * FRAMETIME);
+    NuVecRotateX(&part->velocity, &part->velocity, part->rotation_x);
+    NuVecRotateY(&part->velocity, &part->velocity, part->rotation_y);
+    next.x = part->position.x + part->velocity.x * elapsed;
+    next.y = part->position.y + part->velocity.y * elapsed + part->gravity * elapsed;
+    next.z = part->position.z + part->velocity.z * elapsed;
+    NuMtxSetRotationX(&part->transform, NuAngAdd(part->rotation_x, 0x4000));
+    NuMtxRotateY(&part->transform, part->rotation_y);
+    NuMtxPreRotateY(&part->transform, part->field_13c);
+    NuMtxTranslate(&part->transform, &next);
+    if (part->scale_time < 0.2f) {
+        f32 factor = part->scale_time / 0.2f;
+        scale.x = factor;
+        scale.y = factor;
+        scale.z = factor;
+        NuMtxPreScale(&part->transform, &scale);
+    }
+    if (static_cast<i8>(part->active) < 0) {
+        i32 count = ParticlesPerFrame(1.0f, FRAMETIME);
+        delta.x = -part->velocity.x;
+        delta.y = -part->velocity.y;
+        delta.z = -part->velocity.z;
+        AddGameDebrisMom(WORLD->debris_sys, 11, &next, count, &delta);
+    }
 }
 
-void DagobahA_Update(WORLDINFO_s *) {
-    STUBBED();
+void DagobahA_Update(WORLDINFO_s *world) {
+    GIZFORCE_s **forces = LevGizForce;
+    GIZFORCE_s *first = forces[0];
+    if (first == NULL)
+        return;
+    GIZFORCE_s *second = forces[1];
+    if (second == NULL)
+        return;
+    GIZFORCE_s *third = forces[2];
+    if (third == NULL)
+        return;
+
+    GIZFORCEGROUP_s *group = first->group;
+    if (__builtin_expect(group != NULL && (group->field_0x24 & 2) != 0, 0)) {
+        if (dagobahA_nodesNeedUpdating != 0)
+            return;
+        dagobahA_nodesNeedUpdating = 1;
+        AIPATHCNX_s *connection = static_cast<AIPATHCNX_s *>(LevPathCnx[0]);
+        if (connection != NULL) {
+            connection->traversal_flags[0] &= ~0x80000000;
+            connection->traversal_flags[1] &= ~0x80000000;
+        }
+        connection = static_cast<AIPATHCNX_s *>(LevPathCnx[1]);
+        if (connection != NULL) {
+            connection->traversal_flags[0] &= ~0x80000000;
+            connection->traversal_flags[1] &= ~0x80000000;
+        }
+        connection = static_cast<AIPATHCNX_s *>(LevPathCnx[2]);
+        if (connection != NULL) {
+            connection->traversal_flags[0] &= ~0x80000000;
+            connection->traversal_flags[1] &= ~0x80000000;
+        }
+
+        AIPATHNODE_s *node0 = static_cast<AIPATHNODE_s *>(LevAIPathNode[0]);
+        if (node0 == NULL)
+            return;
+        AIPATHNODE_s *node1 = static_cast<AIPATHNODE_s *>(LevAIPathNode[1]);
+        if (node1 == NULL)
+            return;
+        AIPATHNODE_s *node2 = static_cast<AIPATHNODE_s *>(LevAIPathNode[2]);
+        if (node2 == NULL)
+            return;
+
+        GIZFORCE_s *selected = group->forces[0];
+        if (selected == first) {
+            if (group->forces[1] == second) {
+                node0->position.x = -16.25f;
+                node0->position.y = 0.30f;
+                node0->position.z = 15.17f;
+                node1->position.x = -16.21f;
+                node1->position.y = 0.98f;
+                node1->position.z = 14.83f;
+                node2->position.x = -16.19f;
+                node2->position.y = 1.31f;
+                node2->position.z = 14.64f;
+            } else {
+                node0->position.x = -16.93f;
+                node0->position.y = 0.42f;
+                node0->position.z = 14.75f;
+                node1->position.x = -16.52f;
+                node1->position.y = 0.64f;
+                node1->position.z = 14.50f;
+                node2->position.x = -16.32f;
+                node2->position.y = 1.30f;
+                node2->position.z = 14.70f;
+            }
+        } else if (selected == second) {
+            node0->position.x = -16.31f;
+            node0->position.y = 0.31f;
+            node0->position.z = 15.13f;
+            if (group->forces[1] == first) {
+                node1->position.x = -16.31f;
+                node1->position.y = 0.67f;
+                node1->position.z = 14.82f;
+                node2->position.x = -16.17f;
+                node2->position.y = 1.31f;
+                node2->position.z = 14.65f;
+            } else {
+                node1->position.x = -16.31f;
+                node1->position.y = 0.67f;
+                node1->position.z = 14.82f;
+                node2->position.x = -16.36f;
+                node2->position.y = 1.33f;
+                node2->position.z = 14.54f;
+            }
+        } else if (selected == third) {
+            if (group->forces[1] == first) {
+                node0->position.x = -16.73f;
+                node0->position.y = 0.51f;
+                node0->position.z = 14.51f;
+                node1->position.x = -16.49f;
+                node1->position.y = 0.95f;
+                node1->position.z = 14.45f;
+                node2->position.x = -16.31f;
+                node2->position.y = 1.29f;
+                node2->position.z = 14.66f;
+            } else {
+                node0->position.x = -16.20f;
+                node0->position.y = 0.31f;
+                node0->position.z = 15.13f;
+                node1->position.x = -16.30f;
+                node1->position.y = 0.99f;
+                node1->position.z = 14.80f;
+                node2->position.x = -16.38f;
+                node2->position.y = 1.31f;
+                node2->position.z = 14.59f;
+            }
+        }
+        if (world->ai_sys->path_sys != NULL && world->ai_sys->path_sys->active_path != NULL) {
+            AIPathNodeUpdatePos(world->ai_sys, world->ai_sys->path_sys->active_path, node0);
+            AIPathNodeUpdatePos(world->ai_sys, world->ai_sys->path_sys->active_path, node1);
+            AIPathNodeUpdatePos(world->ai_sys, world->ai_sys->path_sys->active_path, node2);
+        }
+        return;
+    }
+
+    if (dagobahA_nodesNeedUpdating == 0)
+        return;
+    dagobahA_nodesNeedUpdating = 0;
+    AIPATHCNX_s *connection = static_cast<AIPATHCNX_s *>(LevPathCnx[0]);
+    if (connection != NULL) {
+        connection->traversal_flags[0] |= 0x80000000;
+        connection->traversal_flags[1] |= 0x80000000;
+    }
+    connection = static_cast<AIPATHCNX_s *>(LevPathCnx[1]);
+    if (connection != NULL) {
+        connection->traversal_flags[0] |= 0x80000000;
+        connection->traversal_flags[1] |= 0x80000000;
+    }
+    connection = static_cast<AIPATHCNX_s *>(LevPathCnx[2]);
+    if (connection != NULL) {
+        connection->traversal_flags[0] |= 0x80000000;
+        connection->traversal_flags[1] |= 0x80000000;
+    }
 }
 
 void HothBattleA_Draw(WORLDINFO_s *world) {
@@ -171,8 +421,22 @@ void HothBattleA_Draw(WORLDINFO_s *world) {
     }
 }
 
-void HothBattleA_Init(WORLDINFO_s *) {
-    STUBBED();
+void HothBattleA_Init(WORLDINFO_s *world) {
+    LevGizmo[0] = GizmoFindByName(world->gizmo_sys, gizmopickup_typeid, "m_pup3");
+    GizmoSetVisibility(world->gizmo_sys, LevGizmo[0], 0, 1);
+    trooper_boltid[1] = BoltType_FindIDByNameWide("trooper_green", world);
+    trooper_boltid[0] = BoltType_FindIDByNameWide("trooper_red", world);
+    trooper_side[0] = 0;
+    trooper_side[1] = 1;
+    InitMiniSnowTroopers(world, 2, 32, 0);
+    i32 count = NuSpecialFind(world->current_gscn, &LevHSpecial[0], "minifig_1_1", 1);
+    count += NuSpecialFind(world->current_gscn, &LevHSpecial[1], "minifig_1_2", 1);
+    count += NuSpecialFind(world->current_gscn, &LevHSpecial[2], "minifig_1_3", 1);
+    count += NuSpecialFind(world->current_gscn, &LevHSpecial[3], "minifig_2_1", 1);
+    count += NuSpecialFind(world->current_gscn, &LevHSpecial[4], "minifig_2_2", 1);
+    count += NuSpecialFind(world->current_gscn, &LevHSpecial[5], "minifig_2_3", 1);
+    if (count == 6)
+        hothtroopers = LevHSpecial;
 }
 
 void HothBattleB_Init(WORLDINFO_s *world) {
@@ -192,8 +456,27 @@ void HothBattleC_Draw(WORLDINFO_s *world) {
     }
 }
 
-void HothBattleC_Init(WORLDINFO_s *) {
-    STUBBED();
+void HothBattleC_Init(WORLDINFO_s *world) {
+    LevAIMessage[0] = CheckGizAIMessage(gizaimessagesys, "BombGen_ATAT_Killed", NULL);
+    i32 direction;
+    LevPathCnx[0] = AIPAthFindPathCnx(world->ai_sys, world->ai_sys->path_sys->active_path, "ice_a", "ice_b",
+                                      &direction);
+    LevGizmo[0] = GizmoFindByName(world->gizmo_sys, obstacle_gizmotype_id, "obstacle3");
+    LevGizmo[1] = GizmoFindByName(world->gizmo_sys, gizmopickup_typeid, "m_pup7");
+    NuSpecialSetVisibility(&LevHSpecial[10], 0);
+    trooper_boltid[1] = BoltType_FindIDByNameWide("trooper_green", world);
+    trooper_boltid[0] = BoltType_FindIDByNameWide("trooper_red", world);
+    trooper_side[0] = 0;
+    trooper_side[1] = 1;
+    InitMiniSnowTroopers(world, 2, 32, 0);
+    i32 count = NuSpecialFind(world->current_gscn, &LevHSpecial[0], "minifig_1_1", 1);
+    count += NuSpecialFind(world->current_gscn, &LevHSpecial[1], "minifig_1_2", 1);
+    count += NuSpecialFind(world->current_gscn, &LevHSpecial[2], "minifig_1_3", 1);
+    count += NuSpecialFind(world->current_gscn, &LevHSpecial[3], "minifig_2_1", 1);
+    count += NuSpecialFind(world->current_gscn, &LevHSpecial[4], "minifig_2_2", 1);
+    count += NuSpecialFind(world->current_gscn, &LevHSpecial[5], "minifig_2_3", 1);
+    if (count == 6)
+        hothtroopers = LevHSpecial;
 }
 
 void HothBattleE_Draw(WORLDINFO_s *world) {
@@ -209,24 +492,103 @@ void HothBattleE_Draw(WORLDINFO_s *world) {
     }
 }
 
-void HothBattleE_Init(WORLDINFO_s *) {
-    STUBBED();
+void HothBattleE_Init(WORLDINFO_s *world) {
+    trooper_boltid[1] = BoltType_FindIDByNameWide("trooper_green", world);
+    trooper_boltid[0] = BoltType_FindIDByNameWide("trooper_red", world);
+    trooper_side[0] = 0;
+    trooper_side[1] = 0;
+    trooper_side[2] = 0;
+    trooper_side[3] = 0;
+    trooper_side[4] = 0;
+    trooper_side[5] = 1;
+    trooper_side[6] = 1;
+    trooper_side[7] = 1;
+    trooper_side[8] = 1;
+    trooper_side[9] = 1;
+    if (NuIOS_IsLowEndDevice() == 0)
+        InitMiniSnowTroopers(world, 10, 32, 0);
+    memset(reinterpret_cast<u8 *>(&melee) + 0xc, 0, sizeof(melee) - 0xc);
+    HothBattle_Melee_init(&melee);
+    i32 count = NuSpecialFind(world->current_gscn, &LevHSpecial[0], "minifig_1_1", 1);
+    count += NuSpecialFind(world->current_gscn, &LevHSpecial[1], "minifig_1_2", 1);
+    count += NuSpecialFind(world->current_gscn, &LevHSpecial[2], "minifig_1_3", 1);
+    count += NuSpecialFind(world->current_gscn, &LevHSpecial[3], "minifig_2_1", 1);
+    count += NuSpecialFind(world->current_gscn, &LevHSpecial[4], "minifig_2_2", 1);
+    count += NuSpecialFind(world->current_gscn, &LevHSpecial[5], "minifig_2_3", 1);
+    if (count == 6)
+        hothtroopers = LevHSpecial;
+    if (netclient == 0)
+        HothBattle_ManageBackgroundCreatures();
+    hothbattlee_netpacket = SetLevelHack(0x58);
 }
 
-void HothEscapeA_Init(WORLDINFO_s *) {
-    STUBBED();
+void HothEscapeA_Init(WORLDINFO_s *world) {
+    InitTrooperCannons(world);
+    troopercannons_beenReset = 0;
 }
 
-void HothEscapeB_Init(WORLDINFO_s *) {
-    STUBBED();
+void HothEscapeB_Init(WORLDINFO_s *world) {
+    if (netclient == 0) {
+        locator = AIPathFindLocator(world->ai_sys, "snow_mob");
+        gameobj = GetNamedGameObject(world->ai_sys, "snowmob_1");
+    }
+    InitTrooperCannons(world);
+    troopercannons_beenReset = 0;
 }
 
-void HothEscapeC_Init(WORLDINFO_s *) {
-    STUBBED();
+void HothEscapeC_Init(WORLDINFO_s *world) {
+    InitTrooperCannons(world);
+    troopercannons_beenReset = 0;
+    GIZOBSTACLE_s *obstacle = GizObstacle_FindByName(world->giz_obstacle_sys, "Obstacle19");
+    if (obstacle != NULL)
+        obstacle->field_a1_0xa1 |= 1;
+    obstacle = GizObstacle_FindByName(world->giz_obstacle_sys, "Obstacle20");
+    if (obstacle != NULL)
+        obstacle->field_a1_0xa1 |= 1;
+    obstacle = GizObstacle_FindByName(world->giz_obstacle_sys, "Obstacle21");
+    if (obstacle != NULL)
+        obstacle->field_a1_0xa1 |= 1;
+    obstacle = GizObstacle_FindByName(world->giz_obstacle_sys, "Obstacle22");
+    if (obstacle != NULL)
+        obstacle->field_a1_0xa1 |= 1;
+    obstacle = GizObstacle_FindByName(world->giz_obstacle_sys, "Obstacle23");
+    if (obstacle != NULL)
+        obstacle->field_a1_0xa1 |= 1;
+    obstacle = GizObstacle_FindByName(world->giz_obstacle_sys, "Obstacle24");
+    if (obstacle != NULL)
+        obstacle->field_a1_0xa1 |= 1;
+    obstacle = GizObstacle_FindByName(world->giz_obstacle_sys, "Obstacle25");
+    if (obstacle != NULL)
+        obstacle->field_a1_0xa1 |= 1;
+    obstacle = GizObstacle_FindByName(world->giz_obstacle_sys, "Obstacle26");
+    if (obstacle != NULL)
+        obstacle->field_a1_0xa1 |= 1;
+    obstacle = GizObstacle_FindByName(world->giz_obstacle_sys, "Obstacle27");
+    if (obstacle != NULL)
+        obstacle->field_a1_0xa1 |= 1;
+    NuSpecialFind(world->current_gscn, &LevHSpecial[0], "gen_1a", 1);
+    NuSpecialFind(world->current_gscn, &LevHSpecial[1], "gen_2a", 1);
+    GIZMOBLOWUP_s *blowup = GizmoBlowUp_FindByName(world, "gen_1b1");
+    if (blowup != NULL) {
+        blowup->field_0x124 = 1;
+        blowup->override_special = &LevHSpecial[0];
+    }
+    blowup = GizmoBlowUp_FindByName(world, "gen_1a1");
+    if (blowup != NULL)
+        blowup->field_0x124 = 1;
+    blowup = GizmoBlowUp_FindByName(world, "gen_2b1");
+    if (blowup != NULL) {
+        blowup->field_0x124 = 1;
+        blowup->override_special = &LevHSpecial[1];
+    }
+    blowup = GizmoBlowUp_FindByName(world, "gen_2a1");
+    if (blowup != NULL)
+        blowup->field_0x124 = 1;
 }
 
-void HothEscapeD_Init(WORLDINFO_s *) {
-    STUBBED();
+void HothEscapeD_Init(WORLDINFO_s *world) {
+    InitTrooperCannons(world);
+    troopercannons_beenReset = 0;
 }
 
 void HothBattleA_Reset(WORLDINFO_s *world) {
@@ -267,7 +629,6 @@ void HothBattleE_Panel(WORLDINFO_s *) {
 }
 
 void HothEscapeA_Reset(WORLDINFO_s *) {
-    STUBBED();
 }
 
 void HothEscapeB_Reset(WORLDINFO_s *world) {
@@ -278,11 +639,9 @@ void HothEscapeB_Reset(WORLDINFO_s *world) {
 }
 
 void HothEscapeC_Reset(WORLDINFO_s *) {
-    STUBBED();
 }
 
 void HothEscapeD_Reset(WORLDINFO_s *) {
-    STUBBED();
 }
 
 void BobaRocket_Deflect(PART_s *part) {
@@ -303,8 +662,11 @@ void HothBattleC_Update(WORLDINFO_s *world) {
     UpdateMiniSnowTroopers(world);
 }
 
-void HothBattleE_Update(WORLDINFO_s *) {
-    STUBBED();
+void HothBattleE_Update(WORLDINFO_s *world) {
+    if (NuIOS_IsLowEndDevice() == 0)
+        UpdateMiniSnowTroopers(world);
+    if (netclient == 0)
+        HothBattleE_UpdateWave();
 }
 
 void HothEscapeA_Update(WORLDINFO_s *world) {
@@ -330,12 +692,26 @@ void HothEscapeD_Update(WORLDINFO_s *world) {
     UpdateTrooperCannons(world);
 }
 
-void CloudCityTrapA_Init(WORLDINFO_s *) {
-    STUBBED();
+void CloudCityTrapA_Init(WORLDINFO_s *world) {
+    if (netclient == 0)
+        InitTrooperCannons(world);
+    LevAIMessage[0] = CheckGizAIMessage(gizaimessagesys, "ShowHearts", NULL);
+    LevGizmo[0] = GizmoFindByName(world->gizmo_sys, force_gizmotype_id, "force3");
+    GIZMOBLOWUP_s *blowup = GizmoBlowUp_FindByName(world, "blowup_exit1");
+    if (blowup != NULL)
+        blowup->field_0xa0 |= 2;
 }
 
-void CloudCityTrapB_Init(WORLDINFO_s *) {
-    STUBBED();
+void CloudCityTrapB_Init(WORLDINFO_s *world) {
+    LevAIMessage[0] = CheckGizAIMessage(gizaimessagesys, "ShowHearts", NULL);
+    LevAIMessage[1] = CheckGizAIMessage(gizaimessagesys, "TrapBEndFight", NULL);
+    LevGameObject[0] = FindGameObject(id_DARTHVADER, 1, 1, 1, 0);
+    nugspline_s *spline = edSpline_SplineFind(world->current_gscn, "door_window_out");
+    if (spline != NULL) {
+        spline->pts[0].z -= 0.35f;
+        spline->pts[1].z -= 0.35f;
+        spline->pts[2].z -= 0.35f;
+    }
 }
 
 void CloudCityTrapA_Reset(WORLDINFO_s *) {
@@ -353,12 +729,55 @@ void CloudCityTrapC_Panel(WORLDINFO_s *) {
     }
 }
 
-void CloudCityTrapC_Reset(WORLDINFO_s *) {
-    STUBBED();
+void CloudCityTrapC_Reset(WORLDINFO_s *world) {
+    LevGameObject[0] = FindGameObject(id_DARTHVADER, 1, 1, 0, 0);
+    LevAIMessage[0] = CheckGizAIMessage(gizaimessagesys, "ShowHearts", NULL);
+    LevPathCnx[0] = AIPAthFindPathCnx(world->ai_sys, world->ai_sys->path_sys->active_path, "gap1_a", "gap1_b",
+                                      &LevPathCnxDir);
+    GIZMO *gizmo = GizmoFindByName(world->gizmo_sys, obstacle_gizmotype_id, "obstacle3");
+    LevGizmo[0] = gizmo;
+    if (gizmo != NULL && gizmo->object != NULL)
+        LevGizObst[0] = static_cast<GIZOBSTACLE_s *>(gizmo->object);
+    gizmo = GizmoFindByName(world->gizmo_sys, obstacle_gizmotype_id, "???");
+    LevGizmo[1] = gizmo;
+    if (gizmo != NULL && gizmo->object != NULL)
+        LevGizObst[1] = static_cast<GIZOBSTACLE_s *>(gizmo->object);
 }
 
-void CloudCityEscapeA_Init(WORLDINFO_s *) {
-    STUBBED();
+void CloudCityEscapeA_Init(WORLDINFO_s *world) {
+    LevAIMessage[0] = CheckGizAIMessage(gizaimessagesys, "BobaFightStarted", NULL);
+    LevFlag[0] = 0;
+    NuSpecialFind(world->current_gscn, &LevHSpecial[1], "gas_1", 1);
+    NuSpecialFind(world->current_gscn, &LevHSpecial[2], "gas_2", 1);
+    NuSpecialFind(world->current_gscn, &LevHSpecial[3], "gas_3", 1);
+    LevGizPanel = GizPanel_FindByName(world, "panel5");
+    GIZOBSTACLE_s *obstacle = GizObstacle_FindByName(world->giz_obstacle_sys, "obstacle23");
+    if (obstacle != NULL)
+        obstacle->field_a1_0xa1 |= 1;
+    GIZMOBLOWUP_s *blowup = GizmoBlowUp_FindByName(world, "blowup_fruit_1");
+    if (blowup != NULL) {
+        blowup->field_0x128 = 0.5f;
+        blowup->field_0x124 = 1;
+    }
+    blowup = GizmoBlowUp_FindByName(world, "blowup_palm_1");
+    if (blowup != NULL)
+        blowup->field_0x124 = 1;
+    blowup = GizmoBlowUp_FindByName(world, "blowup_fruit_2");
+    if (blowup != NULL) {
+        blowup->field_0x128 = 0.5f;
+        blowup->field_0x124 = 1;
+    }
+    blowup = GizmoBlowUp_FindByName(world, "blowup_palm_2");
+    if (blowup != NULL)
+        blowup->field_0x124 = 1;
+    blowup = GizmoBlowUp_FindByName(world, "blowup_fruit_3");
+    if (blowup != NULL) {
+        blowup->field_0x128 = 0.5f;
+        blowup->field_0x124 = 1;
+    }
+    blowup = GizmoBlowUp_FindByName(world, "blowup_palm_3");
+    if (blowup != NULL)
+        blowup->field_0x124 = 1;
 }
 
 void CloudCityEscapeC_Init(WORLDINFO_s *world) {
@@ -367,16 +786,65 @@ void CloudCityEscapeC_Init(WORLDINFO_s *world) {
     NuSpecialFind(world->current_gscn, &LevHSpecial[2], "gas_3_animin", 1);
 }
 
-void CloudCityTrapA_Update(WORLDINFO_s *) {
-    STUBBED();
+void CloudCityTrapA_Update(WORLDINFO_s *world) {
+    static NUVEC pos = {33.0f, -0.75f, -3.0f};
+    if (netclient == 0) {
+        ResetTrooperCannons(world, id_SNOWTROOPER);
+        UpdateTrooperCannons(world);
+    }
+    if (LevGameObject[0] == NULL)
+        LevGameObject[0] = FindGameObject(id_DARTHVADER, 1, 1, 1, 0);
+    if (netclient == 0) {
+        if (LevAIMessage[0] != NULL && LevAIMessage[0]->value == 1.0f)
+            DrawBossHitPoints(LevGameObject[0]);
+        else
+            DrawBossHitPoints(NULL);
+    }
+    GIZMO *gizmo = LevGizmo[0];
+    if (gizmo != NULL && gizmo->object != NULL &&
+        static_cast<GIZFORCE_s *>(gizmo->object)->anim_set->state == GAMEANIMSET_STATE_AT_END)
+        AIAntinodeCreateSingleFrame(&pos, 0.5f);
 }
 
 void CloudCityTrapB_Update(WORLDINFO_s *) {
-    STUBBED();
+    if (LevGameObject[0] == NULL)
+        LevGameObject[0] = FindGameObject(id_DARTHVADER, 1, 1, 1, 0);
+    if (netclient != 0)
+        return;
+    if (LevAIMessage[0] != NULL && LevAIMessage[0]->value == 1.0f)
+        DrawBossHitPoints(LevGameObject[0]);
+    else
+        DrawBossHitPoints(NULL);
+    if (LevAIMessage[1] == NULL || LevAIMessage[1]->value != 1.0f || LevGameObject[0] == NULL)
+        return;
+    GameObject_s *vader = LevGameObject[0];
+    if (vader->apiobj.field_0x287 != 0 || vader->current_hp == 0) {
+        if (FreePlay != 0)
+            CompleteLevel(WORLD);
+        else if (CLOUDCITYTRAPOUTRO_LDATA != NULL)
+            GoToNewLevel(CLOUDCITYTRAPOUTRO_LDATA->idx);
+    }
 }
 
 void CloudCityTrapC_Update(WORLDINFO_s *) {
-    STUBBED();
+    if (netclient != 0 || LevPathCnx[0] == NULL)
+        return;
+    AIPATHCNX_s *connection = static_cast<AIPATHCNX_s *>(LevPathCnx[0]);
+    i32 direction = LevPathCnxDir;
+    u32 big_jump = LEGO_AIPATHCNX_BIGJUMP;
+    u32 glide = LEGO_AIPATHCNX_R2D2GLIDE;
+    u32 flags = connection->traversal_flags[direction] & ~(big_jump | glide | 0x80000000);
+    u32 active;
+    if (LevGizObst[1] != NULL && LevGizObst[1]->anim_set->state != 0 &&
+        player->apiobj.collision_position.z < -20.0f)
+        active = big_jump;
+    else
+        active = player->apiobj.collision_position.z < -21.0f ? big_jump : 0;
+    if (LevGizObst[0] != NULL && LevGizObst[0]->anim_set->state != 0)
+        active |= glide;
+    if (active == 0)
+        active = 0x80000000;
+    connection->traversal_flags[direction] = flags | active;
 }
 
 void HothBattle_Melee_init(HOTHBATTLE_MELEE_s *melee) {
@@ -411,7 +879,26 @@ void HothBattleE_UpdateWave() {
 }
 
 void CloudCityEscapeA_Update(WORLDINFO_s *) {
-    STUBBED();
+    if (LevFlag[0] == 0 && NuSpecialGetVisibilityFn(&LevHSpecial[0]) != 0) {
+        PlaySfx("env_ctrl_desk_on", NuSpecialGetDrawPos(&LevHSpecial[0]));
+        LevFlag[0] = 1;
+    }
+    TerSurface[14].flags = 0x2002;
+    if (LevGizPanel == NULL || !LevGizPanel->state) {
+        for (i32 index = 1; index < 4; ++index) {
+            if (NuSpecialExistsFn(&LevHSpecial[index])) {
+                nuinstanim_s *animation = NuSpecialGetInstAnim(&LevHSpecial[index]);
+                if (animation != NULL && animation->ltime > 1.0f) {
+                    PlaySfx("env_steam_lp", NuSpecialGetDrawPos(&LevHSpecial[index]));
+                    TerSurface[14].flags |= 0x4042;
+                }
+            }
+        }
+    }
+    GIZMO *gizmo = LevGizmo[0];
+    if (gizmo != NULL && LevAIMessage[1] != NULL && LevAIMessage[1]->value == 0.0f &&
+        gizmo->object != NULL && static_cast<GIZBUILDIT_s *>(gizmo->object)->build_state == 2)
+        LevAIMessage[1]->value = 1.0f;
 }
 
 void CloudCityEscapeC_Update(WORLDINFO_s *) {
@@ -427,8 +914,67 @@ void CloudCityEscapeC_Update(WORLDINFO_s *) {
     }
 }
 
-void HothBattle_StartNewWave() {
-    STUBBED();
+i32 HothBattle_StartNewWave() {
+    if (melee.field_0x2 != 0) {
+        switch (melee.field_0x1) {
+        case 1:
+            melee.waves[0].field_0x18 = 9;
+            melee.waves[0].field_0x19 = 9;
+            melee.waves[0].character_id = id_PROBEDROID;
+            NuStrCpy(melee.waves[0].name, "Probe");
+            melee.creature_count = 1;
+            if (g_lowEndLevelBehaviour != 0) {
+                melee.waves[0].field_0x18 = 5;
+                melee.waves[0].field_0x19 = 5;
+            }
+            break;
+        case 2:
+            melee.waves[0].field_0x18 = 9;
+            melee.waves[0].field_0x19 = 9;
+            melee.waves[0].character_id = id_ATST_LOWRES;
+            NuStrCpy(melee.waves[0].name, "rider");
+            melee.creature_count = 1;
+            if (g_lowEndLevelBehaviour != 0) {
+                melee.waves[0].field_0x18 = 5;
+                melee.waves[0].field_0x19 = 5;
+            }
+            break;
+        case 3:
+            melee.waves[0].field_0x18 = 2;
+            melee.waves[0].field_0x19 = 2;
+            melee.waves[0].character_id = id_ATAT;
+            NuStrCpy(melee.waves[0].name, "ATAT");
+            melee.creature_count = 1;
+            break;
+        case 4:
+            melee.waves[0].field_0x18 = 3;
+            melee.waves[0].field_0x19 = 3;
+            melee.waves[0].character_id = id_PROBEDROID;
+            NuStrCpy(melee.waves[0].name, "Probe");
+            melee.waves[1].field_0x18 = 5;
+            melee.waves[1].field_0x19 = 5;
+            melee.waves[1].character_id = id_ATST_LOWRES;
+            NuStrCpy(melee.waves[1].name, "rider");
+            melee.waves[2].field_0x18 = 1;
+            melee.waves[2].field_0x19 = 1;
+            melee.waves[2].character_id = id_ATAT;
+            NuStrCpy(melee.waves[2].name, "ATAT");
+            melee.creature_count = 3;
+            if (g_lowEndLevelBehaviour != 0) {
+                melee.waves[0].field_0x18 = 2;
+                melee.waves[0].field_0x19 = 2;
+                melee.waves[1].field_0x18 = 2;
+                melee.waves[1].field_0x19 = 2;
+            }
+            break;
+        }
+    }
+    melee.field_0x2 = 0;
+    if (MiniCutCam != 0)
+        return 0;
+    for (i32 type = 0; type < melee.creature_count; ++type)
+        SpawnMeleeCreatureType(type);
+    return 1;
 }
 
 void HothEscapeC_AlwaysUpdate(WORLDINFO_s *world) {
@@ -608,8 +1154,11 @@ static void Asteroids_Reset(WORLDINFO_s *world) {
     }
 }
 
-void AsteroidChaseA_Init(WORLDINFO_s *) {
-    STUBBED();
+void AsteroidChaseA_Init(WORLDINFO_s *world) {
+    NuSpecialFind(world->current_gscn, &LevHSpecial[0], "small_pop_bit1", 1);
+    NuSpecialFind(world->current_gscn, &LevHSpecial[1], "small_pop_bit2", 1);
+    NuSpecialFind(world->current_gscn, &LevHSpecial[2], "small_pop_bit3", 1);
+    NuSpecialFind(world->current_gscn, &LevHSpecial[3], "small_pop_bit4", 1);
 }
 
 void AsteroidChaseB_Init(WORLDINFO_s *) {
@@ -641,7 +1190,8 @@ void AsteroidChaseC_Reset(WORLDINFO_s *world) {
 }
 
 void AsteroidChaseD_Panel(WORLDINFO_s *) {
-    STUBBED();
+    i16 targets = -1;
+    DrawMeleeTargetsNumber(&targets, &turretAliveCount, 1, 0, &specialIcon);
 }
 
 void AsteroidChaseA_Update(WORLDINFO_s *) {

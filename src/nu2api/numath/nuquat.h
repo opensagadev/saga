@@ -14,6 +14,7 @@ typedef struct nuquat_s {
 extern "C" {
 #endif
     void NuQuatFromEulerXYZ(NUQUAT *out, NUANG psi, NUANG theta, NUANG phi);
+    void NuEulerXYZFromQuat(NUANG *x, NUANG *y, NUANG *z, NUQUAT *input);
 
     void NuQuatToMtx(NUQUAT *quat, NUMTX *out);
 

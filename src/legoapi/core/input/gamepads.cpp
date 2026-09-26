@@ -3,11 +3,13 @@
 #include "legoapi/misc/androidbatman.h"
 #include "gameapi/gui/apimenu.h"
 #include "globals.h"
+#include "legoapi/audio/audio.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/characters/motion.h"
 #include "legoapi/menus/screens/gamestructure.h"
 #include "legoapi/cutscenes/cutscenes.h"
 #include "legoapi/legoapi_types.h"
+#include "MechInputTouch/MechInputTouch_types.h"
 #include "legoapi/props/system/socksys.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/level.h"
@@ -18,6 +20,7 @@
 #include <string.h>
 
 extern "C" void NuSound3AddRumble(nupad_s *, f32, i32, i32, f32);
+extern "C" void BackupMenu(void);
 extern GAMECAMERA_s *GameCam;
 extern WORLDINFO_s *WORLD;
 extern i32 (*GamePads_IgnoreInputFn)(void);
@@ -119,11 +122,9 @@ GAMEPAD_s *GamePad_Allocate() {
 }
 
 void GamePads_NetHost() {
-    STUBBED();
 }
 
 void GamePads_NetReset(i32) {
-    STUBBED();
 }
 
 u16 GamePad_InputAngle(GameObject_s *object, GAMEPAD_s *pad) {
@@ -147,33 +148,62 @@ socket_relative: {
 }
 
 void GamePads_NetClient() {
-    STUBBED();
 }
 
-void GamePads_SkipMovie() {
-    STUBBED();
+i32 GamePads_SkipMovie() {
+    WORLDINFO_s *world = WorldInfo_CurrentlyActive();
+    ReadPads();
+    if ((GamePad[0].buttons_held & GAMEPAD_SKIP) != 0) {
+        if (world != NULL && world->current_level == TITLES_LDATA && GAMEDEMO == 0) {
+            PlayerProgress[0].active = 1;
+        }
+        return 1;
+    } else if ((GamePad[1].buttons_held & GAMEPAD_SKIP) != 0) {
+        if (world != NULL && world->current_level == TITLES_LDATA && GAMEDEMO == 0) {
+            PlayerProgress[1].active = 1;
+        }
+        return 1;
+    }
+    return 0;
 }
 
 extern "C" {
 
     void Controller_Exit(void) {
-        STUBBED();
     }
 
     void Controller_Init(void) {
-        STUBBED();
     }
 
     i32 Controller_IsConnected(void) {
         return NuInputDevicePS::IsConnectedPS(1);
     }
 
-    void Controller_Read(void) {
-        STUBBED();
+    i32 Controller_Read(i32, u8 *left_x, u8 *left_y, u8 *right_x, u8 *right_y,
+                        u8 *left_trigger, u8 *right_trigger, u8 *button_a,
+                        u8 *button_b, u32 *buttons, u8 *motion, u32 *status) {
+        if (Controller_IsConnected() == 0) {
+            *left_x = 0x80;
+            *left_y = 0x80;
+            *right_x = 0x80;
+            *right_y = 0x80;
+            *left_trigger = 0;
+            *right_trigger = 0;
+            *button_a = 0;
+            *button_b = 0;
+            *buttons = 0;
+            *status = 0;
+            motion[0] = 0;
+            motion[1] = 0;
+            motion[2] = 0;
+            motion[3] = 0;
+            motion[4] = 0;
+            motion[5] = 0;
+        }
+        return 1;
     }
 
     void Controller_Update(void) {
-        STUBBED();
     }
 
     bool TestForController(void) {
@@ -228,8 +258,96 @@ void TakeHitRumble(GameObject_s *object, float strength) {
     }
 }
 
+extern f32 SpaceRumbleTimer;
+extern "C" f32 NuFsqrt(f32);
+extern "C" f32 NuRandFloat();
+void GameCam_NewShake(GAMECAMERA_s *, f32, f32, f32);
+void GameCam_Judder(GAMECAMERA_s *, f32, i32, NUVEC *);
+i32 GameRayCast(NUVEC *, NUVEC *, f32, i32);
+
+f32 MulDist = 0.5f;
+f32 SpeedAdd = 1.0f;
+f32 SpeedDist = 5.0f;
+f32 MulAdd = 0.0f;
+
 void SpaceRumbleProcess() {
-    STUBBED();
+    NUVEC_ALIGNED16 origin;
+    if (Player[0] != NULL && static_cast<i8>(Player[0]->apiobj.field_0x1f8) < 0) {
+        origin = Player[0]->apiobj.position;
+    } else if (Player[1] != NULL) {
+        origin = Player[1]->apiobj.position;
+    }
+
+    NUMTX_ALIGNED16 matrix;
+    NuMtxSetRotationY(&matrix, 0x2000);
+    NuMtxRotateZ(&matrix, 0x2000);
+
+    NUVEC4 ray;
+    ray.w = 1.0f;
+    f32 nearest = 35.0f;
+    for (i32 i = 0; i < 12; ++i) {
+        switch (i) {
+        case 0:
+        case 6:
+            ray.x = -35.0f;
+            ray.y = 0.0f;
+            ray.z = 0.0f;
+            break;
+        case 1:
+        case 7:
+            ray.x = 35.0f;
+            ray.y = 0.0f;
+            ray.z = 0.0f;
+            break;
+        case 2:
+        case 8:
+            ray.y = -35.0f;
+            ray.x = 0.0f;
+            ray.z = 0.0f;
+            break;
+        case 3:
+        case 9:
+            ray.y = 35.0f;
+            ray.x = 0.0f;
+            ray.z = 0.0f;
+            break;
+        case 4:
+        case 10:
+            ray.z = -35.0f;
+            ray.x = 0.0f;
+            ray.y = 0.0f;
+            break;
+        case 5:
+        case 11:
+            ray.z = 35.0f;
+            ray.x = 0.0f;
+            ray.y = 0.0f;
+            break;
+        }
+        if (i > 5) {
+            NuVec4MtxTransformVU0(&ray, &ray, &matrix);
+        }
+        if (GameRayCast(&origin, reinterpret_cast<NUVEC *>(&ray), 0.5f, 0) != 0) {
+            ray.x = NuFsqrt(ray.x * ray.x + ray.y * ray.y + ray.z * ray.z);
+            if (ray.x < nearest) {
+                nearest = ray.x;
+            }
+        }
+    }
+
+    if (nearest < 35.0f) {
+        f32 amount = 1.0f - nearest / 35.0f;
+        GameCam_NewShake(GameCam, MulDist * amount + MulAdd, 0.2f, SpeedDist * amount + SpeedAdd);
+        f32 scaled_strength = amount * 0.5f;
+        f32 strength = 0.35f < scaled_strength ? 0.35f : scaled_strength;
+        NewRumbleAllPlayers(strength, 0.0f, 0, 0);
+    }
+    SpaceRumbleTimer -= FRAMETIME;
+    if (SpaceRumbleTimer < 0.0f) {
+        GameCam_Judder(GameCam, 0.2f, 2, NULL);
+        NewRumbleAllPlayers(0.3f, 0.0f, 0, 0);
+        SpaceRumbleTimer = NuRandFloat() * 10.0f + 3.0f;
+    }
 }
 
 void NewRumbleAllPlayers(float strength, float duration, i32 frames, i32) {
@@ -256,23 +374,79 @@ i32 ObjLookingWithLeftStick(GameObject_s *object) {
 }
 
 void PerformPauseButtonStuff() {
-    STUBBED();
+    if (WORLD == NULL) {
+        return;
+    }
+    if (Paused != 0) {
+        BackupMenu();
+        GameAudio_PlaySfx(0x31, NULL, 0, 0);
+        if (GameMenuLevel == 0 && Paused != 0) {
+            ResumeGame(0, 1);
+        }
+        return;
+    }
+    if (__builtin_expect(GameMenuLevel == 0, 0)) {
+        PauseGame(0);
+        return;
+    }
+
+    if (GetMenuID() == 12) {
+        reinterpret_cast<u8 *>(CharacterCustomiser)[0xd17] = 1;
+        return;
+    }
+
+    const i32 menu_id = GetMenuID();
+    if (menu_id == 13) goto close_menu;
+    if (menu_id == 1) goto close_menu;
+    if (menu_id == 8) goto close_menu;
+    if (menu_id == 17) goto close_menu;
+    if ((menu_id & ~2) == 16) goto close_menu;
+    if (static_cast<u32>(menu_id - 14) <= 1) goto close_menu;
+    if (static_cast<u32>(menu_id - 20) <= 1) goto close_menu;
+    if (menu_id == 22) goto close_menu;
+    if (menu_id == 1000) goto close_menu;
+    if (menu_id == 33) goto close_menu;
+    if ((menu_id & ~8) == 1008) goto close_menu;
+    if (static_cast<u32>(menu_id - 1012) <= 1) goto close_menu;
+    if (menu_id == 1017) goto close_menu;
+    {
+        MechInputTouchMainController *controller = MechSystems::Get()->active_main_controller;
+        if (controller != NULL) {
+            controller->button_pressed[3] = 1;
+        }
+    }
+    return;
+
+close_menu:
+    GameMenu[GameMenuLevel].close_requested = 1;
 }
 
-void VirtualControlDPad_OnDown_Callback(MechTouchUIElement &, TouchHolder &) {
-    STUBBED();
+void VirtualControlDPad_OnDown_Callback(MechTouchUIElement &element, TouchHolder &touch) {
+    f32 *offset = reinterpret_cast<f32 *>(reinterpret_cast<u8 *>(&element) + 0x80);
+    offset[0] = element.position.x - touch.down_position.x;
+    offset[1] = element.position.y - touch.down_position.y;
 }
 
 void VirtualControlButton_OnDown_Callback(MechTouchUIElement &, TouchHolder &) {
-    STUBBED();
 }
 
-void VirtualControlButtonMover_OnDown_Callback(MechTouchUIElement &, TouchHolder &) {
-    STUBBED();
+void VirtualControlButtonMover_OnDown_Callback(MechTouchUIElement &element, TouchHolder &touch) {
+    f32 *offset = reinterpret_cast<f32 *>(reinterpret_cast<u8 *>(&element) + 0x7c);
+    offset[0] = element.position.x - touch.down_position.x;
+    offset[1] = element.position.y - touch.down_position.y;
 }
 
-void VirtualControlDPad_LockButton_OnClick_Callback(MechTouchUIElement &, TouchHolder &) {
-    STUBBED();
+void VirtualControlDPad_LockButton_OnClick_Callback(MechTouchUIElement &element, TouchHolder &) {
+    GameAudio_PlaySfx(0x30, NULL, 0, 0);
+    if (SuperOptions.dpad_locked == 0) {
+        SuperOptions.dpad_locked = 1;
+        static_cast<MechTouchUITexButton &>(element).UpdateTexture(
+            MechInputTouchVirtualConsoleController::s_textures[7]);
+    } else {
+        SuperOptions.dpad_locked = 0;
+        static_cast<MechTouchUITexButton &>(element).UpdateTexture(
+            MechInputTouchVirtualConsoleController::s_textures[6]);
+    }
 }
 
 i32 NoPad(i32 port, i32 require_game_input) {
