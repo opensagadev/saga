@@ -1,4 +1,5 @@
 #include "decomp.h"
+#include <stdio.h>
 #include <string.h>
 
 #include "gameapi/edtools/gameapi_edtools_types.h"
@@ -10,6 +11,8 @@
 #include "legoapi/world/mission.h"
 #include "legoapi/world/world.h"
 #include "nu2api/nucore/nutime.h"
+#include "nu2api/nucore/numemory.h"
+#include "nu2api/nucore/nupad.h"
 
 extern i32 MenuLoadStarted;
 extern i32 memcard_slot;
@@ -95,12 +98,14 @@ void FS_FileNameFilter(char *) {
     STUBBED();
 }
 
-void FS_MakeDateString(FS_FILEENTRYHDR *, char *) {
-    STUBBED();
+SAVELOAD_TARGET_OPT void FS_MakeDateString(FS_FILEENTRYHDR *entry, char *output) {
+    const u8 *date = reinterpret_cast<const u8 *>(entry);
+    sprintf(output, " %.2d/%.2d/%d", date[4] - 'A', date[5] - 'A', date[6] + 1915);
 }
 
-void FS_MakeTimeString(FS_FILEENTRYHDR *, char *) {
-    STUBBED();
+SAVELOAD_TARGET_OPT void FS_MakeTimeString(FS_FILEENTRYHDR *entry, char *output) {
+    const u8 *date = reinterpret_cast<const u8 *>(entry);
+    sprintf(output, " %.2d:%.2d:%.2d", date[3] - 'A', date[2] - 'A', date[1] - 'A');
 }
 
 void FS_MoveCursorDown(i32) {
@@ -119,8 +124,22 @@ SAVELOAD_TARGET_OPT i32 getsaveload_status() {
     return saveload_status;
 }
 
-void FS_GetPadWithRepeat(nupad_s *, float, float) {
-    STUBBED();
+SAVELOAD_TARGET_OPT i32 FS_GetPadWithRepeat(nupad_s *pad, float repeat, float elapsed) {
+    static i32 LastPad;
+    static float PadRepeat;
+
+    if (pad->digital_buttons != LastPad) {
+        LastPad = pad->digital_buttons;
+        PadRepeat = 0.5f;
+        return LastPad;
+    }
+
+    PadRepeat -= elapsed;
+    if (PadRepeat >= 0.0f) {
+        return 0;
+    }
+    PadRepeat += repeat;
+    return LastPad;
 }
 
 void SerialiseNuHSpecial(EdStream &, void *, i32) {
@@ -135,8 +154,10 @@ void FS_BuildFilterBlocks(char *) {
     STUBBED();
 }
 
-void FS_MakeDateTimeString(FS_FILEENTRYHDR *, char *) {
-    STUBBED();
+SAVELOAD_TARGET_OPT void FS_MakeDateTimeString(FS_FILEENTRYHDR *entry, char *output) {
+    const u8 *date = reinterpret_cast<const u8 *>(entry);
+    sprintf(output, " %.2d/%.2d/%d %.2d:%.2d:%.2d", date[4] - 'A', date[5] - 'A', date[6] + 1915,
+            date[3] - 'A', date[2] - 'A', date[1] - 'A');
 }
 
 void FS_BuildFilterOutBlocks(char *) {
@@ -154,13 +175,41 @@ SAVELOAD_TARGET_OPT i32 LoadState(i32, variptr_u *, variptr_u *, variptr_u *, va
 extern "C" {
 
     void (*savesuccessfn)(void);
+    void *memcard_headerdata;
+    i32 memcard_headerdatasize;
+    void *memcard_headerdatabuffer;
 
     void FS_SetFileSelPathFromName(void) {
         STUBBED();
     }
 
-    void SaveSystemInitialiseEx(void) {
-        STUBBED();
+    SAVELOAD_TARGET_OPT void SaveSystemInitialiseEx(i32 slots, void *makeSaveHash, void *save, i32 saveSize,
+                                                   void *header, i32 headerSize, i32 autosave,
+                                                   void (*drawSaveIcon)(void)) {
+        memcard_hashfn = reinterpret_cast<i16 (*)(void)>(makeSaveHash);
+        memcard_savedata = save;
+        memcard_savedatasize = saveSize;
+        memcard_savedatabuffer = NU_ALLOC(saveSize + 4, 4, 1, "Main", 0);
+
+        memcard_autosave = autosave;
+        memcard_drawasiconfn = drawSaveIcon;
+        memcard_headerdata = header;
+        memcard_headerdatasize = headerSize;
+        memcard_headerdatabuffer = NU_ALLOC(headerSize + 4, 4, 1, "Main", 0);
+
+        i32 saveSlots;
+        if (header == nullptr) {
+            saveSlots = 6;
+            if (slots < 7) {
+                saveSlots = slots;
+            }
+        } else {
+            saveSlots = 5;
+            if (slots < 6) {
+                saveSlots = slots;
+            }
+        }
+        SAVESLOTS = saveSlots;
     }
 
     SAVELOAD_TARGET_OPT void SetSaveSuccessFn(void (*callback)(void)) {
