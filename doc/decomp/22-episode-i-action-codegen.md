@@ -31,4 +31,17 @@ The Episode I handlers `RescueB_Init`, `RetakeG_Reset`, `MaulA_Update`,
 `MaulD_Init`, `MaulD_Update`, `MaulE_Init`, `MaulE_Update`, `MaulF_Update`, and
 `AnakinsFlightB_Update` have genuine empty target bodies. Each target symbol
 is eight `nop` bytes followed by `ret`. Remove `STUBBED()` from these source
-bodies; do not invent behavior to fill the padding.
+bodies; do not invent behavior to fill the padding. The GOT-aware fork reported
+100% for each after removing the markers.
+
+`CreatePodRaceMine` is a file-local function with its pointer argument in
+`eax`, unlike the normal stack argument convention. Mark it `regparm(1)` and
+`noinline` to keep the standalone local symbol and its call shape. The target
+uses a `NUVEC` stack local for the candidate mine position, takes a ground
+height from `GameShadow`, checks ten possible exclusion areas, raycasts from
+the player, and fills the first free entry in the 64-mine array. Its first
+reconstructed build reaches 70.845% instruction similarity. The source also
+needs the C-linkage `mine_max_tile` data symbol initialized to `0x2000`; it
+is placed in this translation unit for now, so its `.data` address differs
+from the original. Register allocation and the free-slot loop are the main
+remaining code differences.

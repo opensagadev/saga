@@ -15,6 +15,7 @@
 #include "legoapi/gizmo/object/gizmoblowups.h"
 #include "legoapi/characters/motion.h"
 #include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/items/base/apiobject.h"
 #include "legoapi/menus/core/gamehint.h"
 #include "legoapi/menus/core/panel.h"
 #include "legoapi/menus/core/gamemessage.h"
@@ -33,6 +34,7 @@
 #include "nu2api/numath/numtx.h"
 #include "nu2api/numath/nurand.h"
 #include "nu2api/numath/nutrig.h"
+#include "nu2api/numath/nuvec.h"
 
 // This level's view of the shared 16-byte LevFlag scratch. byte0 holds the
 // pod-race progress state, byte1 the mushroom-collapse state.
@@ -59,7 +61,10 @@ extern struct LEVFLAGBYTES_s LevFlag;
 
 extern "C" {
     void *AIPAthFindPathCnx(AISYS_s *, AIPATH_s *, char *, char *, i32 *); // original name keeps the typo
+    i32 mine_max_tile = 0x2000;
 }
+
+i32 CheckPosAIArea(AIAREA_s *area, NUVEC *position, float radius);
 
 // --- Cross-file entry points (C++ linkage) ---------------------------------
 
@@ -245,13 +250,50 @@ static __used__ void PodRaceSnipersReset(void) {
     }
 }
 
-// Stub for the original _ZL17CreatePodRaceMineP7nuvec_s (defined in this unit
-// at 0x1faed0). Its current tiny body is inlined into PodRaceAUpdate, so the
-// standalone LOCAL symbol remains an explicitly tracked implementation gap.
-static void *CreatePodRaceMine(nuvec_s *pos) {
-    STUBBED();
-    (void)pos;
-    return NULL;
+static __attribute__((noinline, regparm(1))) void *CreatePodRaceMine(nuvec_s *pos) {
+    float y = GameShadow(NULL, pos, 5.0f, -1);
+    if (y == 2000000.0f)
+        y = pos->y;
+
+    MINESYS_s *mines = &minesys;
+    NUVEC mine_pos = {pos->x, y + mines->mine_radius * 0.5f, pos->z};
+    for (i32 i = 0; i < mines->nomine_count; i++) {
+        if (CheckPosAIArea((AIAREA_s *)mines->nomine_areas[i], &mine_pos, mines->mine_radius))
+            return NULL;
+    }
+
+    NUVEC ray_pos;
+    NUVEC delta;
+    float distance = NuVecXZDist(&mine_pos, &player->apiobj.collision_position, &delta);
+    if (distance > 0.0f) {
+        NuVecScale(&delta, &delta, 1.0f / distance);
+        ray_pos = player->apiobj.collision_position;
+        ray_pos.y += 100.0f;
+        if (QuickNewRayCast(&ray_pos, &delta, 0.0f, 0, distance + mines->mine_radius, 5.0f))
+            return NULL;
+    }
+
+    i32 slot = 0;
+    while (slot < 64 && mines->mines[slot].active != 0)
+        slot++;
+    if (slot == 64)
+        return NULL;
+
+    MINEENTRY_s *entry = &mines->mines[slot];
+    entry->pos = mine_pos;
+    entry->active = 1;
+    entry->grow_alpha = 0.0f;
+    if (mine_max_tile != 0)
+        entry->rotx = (u16)((u32)NuRandInt() % (u32)mine_max_tile);
+    entry->roty = (u16)NuRandInt();
+    mine_count++;
+    i32 bit = (i32)(1u << slot);
+    pod_mines_bitfield[0] |= bit;
+    pod_mines_bitfield[1] |= bit >> 31;
+    i32 clear = ~bit;
+    client_mines[0x300 / 4] &= clear;
+    client_mines[0x304 / 4] &= clear >> 31;
+    return entry;
 }
 
 void Mine_Kill(PART_s *part, i32) {
