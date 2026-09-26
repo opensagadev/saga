@@ -53,9 +53,8 @@ MechAutoJumpConnection *MechAutoJumpGetBest(JumpTriggerPacket const &packet, i32
         return NULL;
     }
 
-    NULISTHDR *connections = &WORLD->mech_auto_jump_manager->jump_connections;
     MechAutoJumpConnection *current =
-        reinterpret_cast<MechAutoJumpConnection *>(NuLinkedListGetHead(connections));
+        reinterpret_cast<MechAutoJumpConnection *>(NuLinkedListGetHead(&WORLD->mech_auto_jump_manager->jump_connections));
     MechAutoJumpConnection *best = NULL;
 
     if (packet.type == 3) {
@@ -69,12 +68,12 @@ MechAutoJumpConnection *MechAutoJumpGetBest(JumpTriggerPacket const &packet, i32
                 AIPATHNODE *nodes = current->path->nodes;
                 AIPATHCNX *connection = current->connection;
                 i32 direction = current->direction;
+                NUVEC *to_position = &nodes[connection->node_indices[direction == 0]].position;
+                NUVEC *from_position = &nodes[connection->node_indices[direction]].position;
                 NUVEC from_screen;
                 NUVEC to_screen;
-                NuCameraTransformScreenClip(&from_screen, &nodes[connection->node_indices[direction]].position, 1,
-                                            NULL);
-                NuCameraTransformScreenClip(&to_screen, &nodes[connection->node_indices[direction == 0]].position, 1,
-                                            NULL);
+                NuCameraTransformScreenClip(&from_screen, from_position, 1, NULL);
+                NuCameraTransformScreenClip(&to_screen, to_position, 1, NULL);
                 i32 angle = NuAtan2D(to_screen.x - from_screen.x, to_screen.y - from_screen.y);
                 i32 difference = RotDiff(static_cast<u16>(angle), static_cast<u16>(desired));
                 difference = difference < 0 ? -difference : difference;
@@ -84,7 +83,8 @@ MechAutoJumpConnection *MechAutoJumpGetBest(JumpTriggerPacket const &packet, i32
                 }
             }
             current = reinterpret_cast<MechAutoJumpConnection *>(
-                NuLinkedListGetNext(connections, reinterpret_cast<NULISTLNK *>(current)));
+                NuLinkedListGetNext(&WORLD->mech_auto_jump_manager->jump_connections,
+                                    reinterpret_cast<NULISTLNK *>(current)));
         } while (current != NULL);
         return best;
     }
@@ -104,7 +104,8 @@ MechAutoJumpConnection *MechAutoJumpGetBest(JumpTriggerPacket const &packet, i32
             }
         }
         current = reinterpret_cast<MechAutoJumpConnection *>(
-            NuLinkedListGetNext(connections, reinterpret_cast<NULISTLNK *>(current)));
+            NuLinkedListGetNext(&WORLD->mech_auto_jump_manager->jump_connections,
+                                reinterpret_cast<NULISTLNK *>(current)));
     }
     return best;
 }

@@ -1,6 +1,6 @@
 # Core touch input reconstruction notes
 
-Target: `res/libTTapp.so`, compared with the GOT-aware `objdiff-cli` fork. These notes cover `MechInputTouch.cpp`, `MechInputTouchButton.cpp`, and `MechSystems.cpp`. Match scores for the new bodies are pending a combined build.
+Target: `res/libTTapp.so`, compared with the GOT-aware `objdiff-cli` fork. These notes cover `MechInputTouch.cpp`, `MechInputTouchButton.cpp`, and `MechSystems.cpp`.
 
 ## Target no-ops
 
@@ -33,6 +33,14 @@ The target `Render` calls `NuRndrCircle` and `NuRndrRect` with zero UVs and `g_n
 
 `MechAutoJumpGetBest` returns `MechAutoJumpConnection*`; the old `void` stub had the wrong return type. It exits unless touch controls are active and `WORLD->mech_auto_jump_manager` exists. Both search paths traverse `jump_connections` and require `allow_streak` and `use_path_direction` on each candidate. For packets other than type `3`, the input angle is the low 16 bits of the second argument, with a strict best-difference threshold of `0x2aab`; candidate rotation adds `0x8000` when connection direction is nonzero. Type `3` derives a swipe angle from packet end minus start, projects both path nodes to screen coordinates, and uses a `0x4000` threshold. The comparison is `abs(RotDiff(candidate, desired)) < best_difference`, so ties keep the first candidate. Node indices are selected by `direction` and `direction == 0`.
 
-## Baseline before reconstruction
+The target reloads `WORLD->mech_auto_jump_manager->jump_connections` for every `NuLinkedListGetNext` call. Caching a `NULISTHDR*` changes the saved register choice, reduces each loop by three instructions, and shifts the stack frame from `0x4c` to `0x5c` after later spills. In the swipe branch, it computes both node-position pointers before either `NuCameraTransformScreenClip` call. Computing the second pointer after the first call spills path, connection, and direction, adding about 16 instructions. Keep the order explicit while tuning.
+
+## Measured match and compiler patterns
 
 The whole-game GOT-aware report before this pass measured AutoJump at 2.56%, six substantive layout builders at 4.04–4.52%, Faker constructor at 14.48%, Faker Render at 2.23%, and Faker Update at 5.12%. The no-ops and MainDummyButton constructor were already exact. Rebuild and rerun the GOT-aware report after integration to capture the actual gains.
+
+The first combined build measured AutoJump at 76.98%; Console at 96.05%, GestureBased at 98.83%, Podrace and SpeederChase at 94.15%, and Cavalry and DeathStarTurret at 100%. Faker constructor and `IsPressed` are 100%; Faker Render is 33.89% and Update is 46.87%. The remaining ordinary no-ops are 100%. These scores precede the control-flow refinements in `b90d96f3` and the AutoJump pointer-order change.
+
+For Faker Update, indexing `touch_events[i]` made GCC recalculate `data + i * 24` and reload the touch count after calls. The target keeps a byte cursor in `esi`, advances it by `0x18` with `lea`, and keeps an integer loop counter in `edi`. It also shares the vanished-lock cleanup between a zero-touch path and the loop exit. A byte cursor rooted at the `NuInputTouchData` address preserves target offsets: the event state is cursor `+6`, coordinates are `+8`/`+0xc`, and touch ID is `+0x18`.
+
+For Faker Render, the target block order is ordinary pressed, ordinary released, then special index `0x800`. Writing the special case as the lexical fallthrough made GCC place it before both ordinary paths and enlarge the function. Both index checks now jump to a shared special block, leaving the ordinary draw calls in target order. The final colored circle uses red as its fallthrough color and branches to black at the end of the function.
