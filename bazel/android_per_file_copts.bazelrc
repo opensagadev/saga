@@ -112,6 +112,7 @@ build:target --per_file_copt=^src/legoapi/actions/movement/climbing\.cpp$@-O2
 # animation-speed selection are folded before the trig-table update.
 build:target --per_file_copt=^src/legoapi/actions/movement/carrying\.cpp$@-O3
 build:target --per_file_copt=^src/MechInputTouch/MechEdgeStopAddon\.cpp$@-O3
+build:target --per_file_copt=^src/MechInputTouch/MechJumpAutopilotAddon\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/render/core/render\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/render/core/screen\.cpp$@-O2
 # Shader material filters use optimized switch lowering and leaf epilogues.
@@ -377,8 +378,11 @@ build:target --per_file_copt=^src/MechInputTouch/MechInputTouchMainController\.c
 build:target --per_file_copt=^src/MechInputTouch/MechInputTouchVirtualConsoleController\.cpp$@-O2
 build:target --per_file_copt=^src/MechInputTouch/MechInputTouchMenuController\.cpp$@-O2
 build:target --per_file_copt=^src/MechInputTouch/MechInputTouchGestureBasedController\.cpp$@-O2
+build:target --per_file_copt=^src/MechInputTouch/MechInputTouchDeathStarTurretController\.cpp$@-O2
+build:target --per_file_copt=^src/MechInputTouch/MechInputTouchPodraceController\.cpp$@-O2
 build:target --per_file_copt=^src/MechInputTouch/MechInputTouchGestureTracker\.cpp$@-O3
 build:target --per_file_copt=^src/MechInputTouch/MechInputTouchSpeederChaseBikeController\.cpp$@-O2
+build:target --per_file_copt=^src/MechInputTouch/MechInputTouchBonusCavalryController\.cpp$@-O2
 build:target --per_file_copt=^src/MechInputTouch/MechSystems\.cpp$@-O2
 build:target --per_file_copt=^src/MechInputTouch/MechAutofireAddon\.cpp$@-O2
 build:target --per_file_copt=^src/MechInputTouch/MechTouchUIElements\.cpp$@-O3

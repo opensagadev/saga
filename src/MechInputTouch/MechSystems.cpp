@@ -355,7 +355,6 @@ void MechSystems::RenderCurrentPlayerHighlight() {
 }
 
 void MechSystems::Reset(ThingResetData *) {
-    STUBBED();
 }
 
 void MechSystems::UnhookClickToPressStart() {

@@ -22,6 +22,11 @@
 #include "nu2api/nucore/common.h"
 #include "nu2api/nucore/NuVirtualTouchDevice.h"
 #include "nu2api/numath/nuvec.h"
+#include <new>
+#include "nu2api/numath/nuang.h"
+#include "nu2api/numath/nutrig.h"
+#include "gameapi/ai/aisys/aisys.h"
+#include "legoapi/characters/motion.h"
 
 extern i16 id_RANCOR, id_ANAKINJEDI;
 extern i16 id_YODA;
@@ -43,8 +48,65 @@ char const *MechInputTouchSystem::GetName() {
     return "MechInputTouchSystem";
 }
 
-void MechAutoJumpGetBest(JumpTriggerPacket const &, i32) {
-    STUBBED();
+MechAutoJumpConnection *MechAutoJumpGetBest(JumpTriggerPacket const &packet, i32 heading) {
+    if (!TouchHacks::TouchControlsActive || WORLD == NULL || WORLD->mech_auto_jump_manager == NULL) {
+        return NULL;
+    }
+
+    NULISTHDR *connections = &WORLD->mech_auto_jump_manager->jump_connections;
+    MechAutoJumpConnection *current =
+        reinterpret_cast<MechAutoJumpConnection *>(NuLinkedListGetHead(connections));
+    MechAutoJumpConnection *best = NULL;
+
+    if (packet.type == 3) {
+        i32 desired = NuAtan2D(packet.end.x - packet.start.x, packet.end.y - packet.start.y);
+        if (current == NULL) {
+            return NULL;
+        }
+        i32 best_difference = 0x4000;
+        do {
+            if (current->allow_streak && current->use_path_direction) {
+                AIPATHNODE *nodes = current->path->nodes;
+                AIPATHCNX *connection = current->connection;
+                i32 direction = current->direction;
+                NUVEC from_screen;
+                NUVEC to_screen;
+                NuCameraTransformScreenClip(&from_screen, &nodes[connection->node_indices[direction]].position, 1,
+                                            NULL);
+                NuCameraTransformScreenClip(&to_screen, &nodes[connection->node_indices[direction == 0]].position, 1,
+                                            NULL);
+                i32 angle = NuAtan2D(to_screen.x - from_screen.x, to_screen.y - from_screen.y);
+                i32 difference = RotDiff(static_cast<u16>(angle), static_cast<u16>(desired));
+                difference = difference < 0 ? -difference : difference;
+                if (difference < best_difference) {
+                    best_difference = difference;
+                    best = current;
+                }
+            }
+            current = reinterpret_cast<MechAutoJumpConnection *>(
+                NuLinkedListGetNext(connections, reinterpret_cast<NULISTLNK *>(current)));
+        } while (current != NULL);
+        return best;
+    }
+
+    i32 best_difference = 0x2aab;
+    while (current != NULL) {
+        if (current->allow_streak && current->use_path_direction) {
+            i32 angle = current->connection->rotation;
+            if (current->direction != 0) {
+                angle = NuAngAdd(0x8000, angle);
+            }
+            i32 difference = RotDiff(static_cast<u16>(heading), static_cast<u16>(angle));
+            difference = difference < 0 ? -difference : difference;
+            if (difference < best_difference) {
+                best_difference = difference;
+                best = current;
+            }
+        }
+        current = reinterpret_cast<MechAutoJumpConnection *>(
+            NuLinkedListGetNext(connections, reinterpret_cast<NULISTLNK *>(current)));
+    }
+    return best;
 }
 
 void MechAutoJumpSetIsUsing(GameObject_s &object, MechAutoJumpConnection &connection) {
@@ -143,7 +205,6 @@ void MechTouchUIPartySelector_OnRelease_Callback(MechTouchUIElement &element, To
 }
 
 void MechInputTouchSystem::AddChangeLayoutButtons(NuVirtualTouchDevice &, i32) {
-    STUBBED();
 }
 
 i32 MechInputTouchSystem::ChooseTouchLayout(bool paused) {
@@ -222,32 +283,98 @@ void MechInputTouchSystem::CreateGamePanels() {
     inputTouchDevice->SetCurrentLayoutIndex(control_mode);
 }
 
+static inline __attribute__((always_inline)) NuButtonLayout &GetTouchLayout(NuVirtualTouchDevice &device, i32 index) {
+    return *reinterpret_cast<NuButtonLayout *>(reinterpret_cast<u8 *>(&device) + 0xd4 + index * 0xcc);
+}
+
+static inline __attribute__((always_inline)) void AppendTouchElement(NuButtonLayout &layout, NuTouchInputElement *element) {
+    u32 index = layout.unknown_c8;
+    layout.elements[index] = element;
+    layout.unknown_c8 = index + 1;
+}
+
+static inline __attribute__((always_inline)) void AppendMainControls(NuButtonLayout &layout,
+                                                                      MechInputTouchMainController &controller) {
+    AppendTouchElement(layout, new MechInputTouchMainDummyStick(controller, NuTouchInputElement::TYPE_RIGHT_STICK));
+    AppendTouchElement(layout, new MechInputTouchMainDummyButton(
+                                   controller, 0x80, static_cast<MechInputTouchMainController::eButtonTypes>(0)));
+    AppendTouchElement(layout, new MechInputTouchMainDummyButton(
+                                   controller, 0x20, static_cast<MechInputTouchMainController::eButtonTypes>(3)));
+    AppendTouchElement(layout, new MechInputTouchMainDummyButton(
+                                   controller, 0x40, static_cast<MechInputTouchMainController::eButtonTypes>(2)));
+    AppendTouchElement(layout, new MechInputTouchMainDummyButton(
+                                   controller, 0x10, static_cast<MechInputTouchMainController::eButtonTypes>(1)));
+}
+
 void MechInputTouchSystem::CreateGamePlayLayoutBlank(NuVirtualTouchDevice &, i32) {
-    STUBBED();
 }
 
-void MechInputTouchSystem::CreateGamePlayLayoutConsoleMode(NuVirtualTouchDevice &, i32) {
-    STUBBED();
+void MechInputTouchSystem::CreateGamePlayLayoutConsoleMode(NuVirtualTouchDevice &device, i32 index) {
+    AddChangeLayoutButtons(device, index);
+    void *storage = NU_ALLOC(0x98, 4, 1, "Main", 0);
+    MechInputTouchVirtualConsoleController *controller = NULL;
+    if (storage != NULL) {
+        controller = new (storage) MechInputTouchVirtualConsoleController(0);
+    }
+    NuButtonLayout &layout = GetTouchLayout(device, index);
+    AppendTouchElement(layout, reinterpret_cast<NuTouchInputElement *>(controller));
+    AppendMainControls(layout, *reinterpret_cast<MechInputTouchMainController *>(controller));
 }
 
-void MechInputTouchSystem::CreateGamePlayLayoutGestureBased(NuVirtualTouchDevice &, i32) {
-    STUBBED();
+void MechInputTouchSystem::CreateGamePlayLayoutGestureBased(NuVirtualTouchDevice &device, i32 index) {
+    device.GetAspectRatio();
+    AddChangeLayoutButtons(device, index);
+    MechInputTouchGestureBasedController *controller = new MechInputTouchGestureBasedController(0, {0});
+    MechSystems::Get()->gesture_controller = controller;
+    NuButtonLayout &layout = GetTouchLayout(device, index);
+    AppendTouchElement(layout, controller);
+    AppendMainControls(layout, *controller);
 }
 
-void MechInputTouchSystem::CreateGamePlayLayoutGestureBased_Cavalry(NuVirtualTouchDevice &, i32) {
-    STUBBED();
+void MechInputTouchSystem::CreateGamePlayLayoutGestureBased_Cavalry(NuVirtualTouchDevice &device, i32 index) {
+    AddChangeLayoutButtons(device, index);
+    MechInputTouchBonusCavalryController *controller =
+        new (::operator new(0x78)) MechInputTouchBonusCavalryController(0);
+    MechSystems::Get()->gesture_controller = reinterpret_cast<MechInputTouchGestureBasedController *>(controller);
+    NuButtonLayout &layout = GetTouchLayout(device, index);
+    AppendTouchElement(layout, reinterpret_cast<NuTouchInputElement *>(controller));
+    AppendMainControls(layout, *reinterpret_cast<MechInputTouchMainController *>(controller));
 }
 
-void MechInputTouchSystem::CreateGamePlayLayoutGestureBased_DeathStarTurret(NuVirtualTouchDevice &, i32) {
-    STUBBED();
+void MechInputTouchSystem::CreateGamePlayLayoutGestureBased_DeathStarTurret(NuVirtualTouchDevice &device, i32 index) {
+    AddChangeLayoutButtons(device, index);
+    MechInputTouchDeathStarTurretController *controller =
+        new (::operator new(0x7c)) MechInputTouchDeathStarTurretController(0);
+    MechSystems::Get()->gesture_controller = reinterpret_cast<MechInputTouchGestureBasedController *>(controller);
+    NuButtonLayout &layout = GetTouchLayout(device, index);
+    AppendTouchElement(layout, reinterpret_cast<NuTouchInputElement *>(controller));
+    AppendMainControls(layout, *reinterpret_cast<MechInputTouchMainController *>(controller));
 }
 
-void MechInputTouchSystem::CreateGamePlayLayoutGestureBased_Podrace(NuVirtualTouchDevice &, i32) {
-    STUBBED();
+void MechInputTouchSystem::CreateGamePlayLayoutGestureBased_Podrace(NuVirtualTouchDevice &device, i32 index) {
+    AddChangeLayoutButtons(device, index);
+    void *storage = NU_ALLOC(0x78, 4, 1, "Main", 0);
+    MechInputTouchPodraceController *controller = NULL;
+    if (storage != NULL) {
+        controller = new (storage) MechInputTouchPodraceController(0);
+    }
+    MechSystems::Get()->gesture_controller = reinterpret_cast<MechInputTouchGestureBasedController *>(controller);
+    NuButtonLayout &layout = GetTouchLayout(device, index);
+    AppendTouchElement(layout, reinterpret_cast<NuTouchInputElement *>(controller));
+    AppendMainControls(layout, *reinterpret_cast<MechInputTouchMainController *>(controller));
 }
 
-void MechInputTouchSystem::CreateGamePlayLayoutGestureBased_SpeederChase(NuVirtualTouchDevice &, i32) {
-    STUBBED();
+void MechInputTouchSystem::CreateGamePlayLayoutGestureBased_SpeederChase(NuVirtualTouchDevice &device, i32 index) {
+    AddChangeLayoutButtons(device, index);
+    void *storage = NU_ALLOC(0x80, 4, 1, "Main", 0);
+    MechInputTouchSpeederChaseController *controller = NULL;
+    if (storage != NULL) {
+        controller = new (storage) MechInputTouchSpeederChaseController(0);
+    }
+    MechSystems::Get()->gesture_controller = reinterpret_cast<MechInputTouchGestureBasedController *>(controller);
+    NuButtonLayout &layout = GetTouchLayout(device, index);
+    AppendTouchElement(layout, reinterpret_cast<NuTouchInputElement *>(controller));
+    AppendMainControls(layout, *reinterpret_cast<MechInputTouchMainController *>(controller));
 }
 
 f32 MechInputTouchSystem::DetermineMoveDir2D(GameObject_s &object, VuVec const &target, bool flatten,

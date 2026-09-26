@@ -17,6 +17,7 @@ struct AIPATHCNX_s;
 struct AIPATH_s;
 struct AISYS_s;
 struct GameObject_s;
+struct GIZTURRET_s;
 struct HudRadarPulse;
 struct JumpTriggerPacket;
 struct MechAddon;
@@ -270,15 +271,6 @@ DECOMP_ASSERT(sizeof(MechEdgeStopAddon) == 0x28, "MechEdgeStopAddon ABI");
 DECOMP_ASSERT(offsetof(MechEdgeStopAddon, character) == 0x18, "MechEdgeStopAddon character offset");
 DECOMP_ASSERT(offsetof(MechEdgeStopAddon, stop_timer) == 0x1c, "MechEdgeStopAddon timer offset");
 DECOMP_ASSERT(offsetof(MechEdgeStopAddon, jump_start_height) == 0x20, "MechEdgeStopAddon height offset");
-struct MechInputTouchBonusCavalryController {
-    void Activate();
-    void Deactivate();
-    MechInputTouchBonusCavalryController(i32);
-    void OnDown(GameObject_s &, TouchHolder &);
-    void OnRelease(GameObject_s &, TouchHolder &);
-    void Update(NuInputTouchData const *);
-    virtual ~MechInputTouchBonusCavalryController();
-};
 struct MechInputTouchButton : NuTouchInputElement {
     void ClearTouchLocked(bool);
     bool CouldTouchBeLockedBy(u32);
@@ -313,20 +305,13 @@ struct MechInputTouchButtonControlled : MechInputTouchButton {
 
     i32 controller_index;
 };
-struct MechInputTouchButtonFaker {
+struct MechInputTouchButtonFaker : MechInputTouchButton {
     MechInputTouchButtonFaker(i32, u32, float, float, float, float);
-    void Render();
-    void Update(NuInputTouchData const *);
-};
-struct MechInputTouchDeathStarTurretController {
-    void Activate();
-    void Deactivate();
-    MechInputTouchDeathStarTurretController(i32);
-    void OnDown(GameObject_s &, TouchHolder &);
-    void OnRelease(GameObject_s &, TouchHolder &);
-    void OnSwipe(GameObject_s &, TouchHolder &, i32);
-    void Update(NuInputTouchData const *);
-    virtual ~MechInputTouchDeathStarTurretController();
+    void Render() override;
+    void Update(NuInputTouchData const *) override;
+    u8 IsPressed() const override {
+        return is_pressed;
+    }
 };
 struct MechInputTouchGestureTrackingSystem {
     void GetTouch(NuInputTouch const &);
@@ -382,6 +367,48 @@ DECOMP_ASSERT(offsetof(MechInputTouchMainController, button_pressed) == 0x40, "C
 DECOMP_ASSERT(offsetof(MechInputTouchMainController, button_was_pressed) == 0x44, "Previous touch buttons offset");
 DECOMP_ASSERT(offsetof(MechInputTouchMainController, button_repeats) == 0x48, "Repeated touch buttons offset");
 DECOMP_ASSERT(offsetof(MechInputTouchMainController, buttons_repeat_timers) == 0x4c, "Touch repeat timers offset");
+
+struct MechInputTouchDeathStarTurretController : MechInputTouchMainController, MechInputTouchGestureTracker {
+    void Activate() override;
+    void Deactivate() override;
+    MechInputTouchDeathStarTurretController(i32);
+    bool OnDown(GameObject_s &, TouchHolder &) override;
+    bool OnRelease(GameObject_s &, TouchHolder &) override;
+    bool OnSwipe(GameObject_s &, TouchHolder &, i32) override;
+    void Update(NuInputTouchData const *) override;
+    ~MechInputTouchDeathStarTurretController() override;
+
+    u8 active;
+    u8 pad_71[3];
+    TouchHolder *aim_touch;
+    GIZTURRET_s *turret;
+};
+DECOMP_ASSERT(sizeof(MechInputTouchDeathStarTurretController) == 0x7c, "Death Star turret touch controller ABI");
+DECOMP_ASSERT(offsetof(MechInputTouchDeathStarTurretController, active) == 0x70,
+              "Death Star turret active offset");
+DECOMP_ASSERT(offsetof(MechInputTouchDeathStarTurretController, aim_touch) == 0x74,
+              "Death Star turret touch offset");
+DECOMP_ASSERT(offsetof(MechInputTouchDeathStarTurretController, turret) == 0x78,
+              "Death Star turret object offset");
+
+struct MechInputTouchBonusCavalryController : MechInputTouchMainController, MechInputTouchGestureTracker {
+    void Activate() override;
+    void Deactivate() override;
+    MechInputTouchBonusCavalryController(i32);
+    bool OnDown(GameObject_s &, TouchHolder &) override;
+    bool OnRelease(GameObject_s &, TouchHolder &) override;
+    void Update(NuInputTouchData const *) override;
+    ~MechInputTouchBonusCavalryController() override;
+
+    u8 active;
+    u8 pad_71[3];
+    TouchHolder *touch;
+};
+DECOMP_ASSERT(sizeof(MechInputTouchBonusCavalryController) == 0x78, "Bonus cavalry touch controller ABI");
+DECOMP_ASSERT(offsetof(MechInputTouchBonusCavalryController, active) == 0x70,
+              "Bonus cavalry touch active offset");
+DECOMP_ASSERT(offsetof(MechInputTouchBonusCavalryController, touch) == 0x74,
+              "Bonus cavalry touch pointer offset");
 
 struct MechInputTouchMainDummyButton : NuTouchInputElement {
     MechInputTouchMainController *controller;
@@ -442,15 +469,22 @@ struct MechInputTouchMenuController : MechInputTouchMainController, MechInputTou
 DECOMP_ASSERT(offsetof(MechInputTouchMenuController, field_70) == 0x70, "Menu touch controller first state offset");
 DECOMP_ASSERT(offsetof(MechInputTouchMenuController, field_78) == 0x78, "Menu touch controller flag offset");
 DECOMP_ASSERT(sizeof(MechInputTouchMenuController) == 0x7c, "Menu touch controller ABI");
-struct MechInputTouchPodraceController {
-    void Activate();
-    void Deactivate();
+struct MechInputTouchPodraceController : MechInputTouchMainController, MechInputTouchGestureTracker {
+    void Activate() override;
+    void Deactivate() override;
     MechInputTouchPodraceController(i32);
-    void OnDown(GameObject_s &, TouchHolder &);
-    void OnRelease(GameObject_s &, TouchHolder &);
-    void Update(NuInputTouchData const *);
-    virtual ~MechInputTouchPodraceController();
+    bool OnDown(GameObject_s &, TouchHolder &) override;
+    bool OnRelease(GameObject_s &, TouchHolder &) override;
+    void Update(NuInputTouchData const *) override;
+    ~MechInputTouchPodraceController() override;
+
+    u8 active;
+    u8 pad_71[3];
+    TouchHolder *steering_touch;
 };
+DECOMP_ASSERT(sizeof(MechInputTouchPodraceController) == 0x78, "Podrace controller ABI");
+DECOMP_ASSERT(offsetof(MechInputTouchPodraceController, steering_touch) == 0x74,
+              "Podrace controller steering touch offset");
 struct MechInputTouchSpeederChaseController : MechInputTouchMainController, MechInputTouchGestureTracker {
     void Activate();
     void Deactivate();
@@ -558,7 +592,7 @@ struct MechJumpAutoPilotAddon : MechAddon {
     void CalculateModifiedJumpTrajectory();
     void LookForBottomInt(VuVec const &);
     void LookForLandingPoint();
-    void LookForLandingSpotAroundPoint(VuVec const &);
+    bool LookForLandingSpotAroundPoint(VuVec const &);
     void LookForTerrInt(VuVec const &);
     MechJumpAutoPilotAddon(MechObjectInterface &);
     void ModifyJump();
@@ -569,7 +603,14 @@ struct MechJumpAutoPilotAddon : MechAddon {
     GameObject_s *character;
     i32 state;
     f32 elapsed_time;
-    u8 field_24[0x74];
+    VuVec field_24;
+    VuVec field_34;
+    VuVec field_44;
+    VuVec field_54;
+    VuVec field_64;
+    VuVec field_74;
+    VuVec field_84;
+    f32 field_94;
     f32 speed_scale;
     bool field_9c;
     bool field_9d;
@@ -577,6 +618,10 @@ struct MechJumpAutoPilotAddon : MechAddon {
 };
 DECOMP_ASSERT(sizeof(MechJumpAutoPilotAddon) == 0xa0, "Jump autopilot addon ABI");
 DECOMP_ASSERT(offsetof(MechJumpAutoPilotAddon, character) == 0x18, "Jump autopilot character offset");
+DECOMP_ASSERT(offsetof(MechJumpAutoPilotAddon, field_24) == 0x24, "Jump autopilot start position offset");
+DECOMP_ASSERT(offsetof(MechJumpAutoPilotAddon, field_44) == 0x44, "Jump autopilot trajectory position offset");
+DECOMP_ASSERT(offsetof(MechJumpAutoPilotAddon, field_64) == 0x64, "Jump autopilot bottom hit offset");
+DECOMP_ASSERT(offsetof(MechJumpAutoPilotAddon, field_84) == 0x84, "Jump autopilot landing position offset");
 DECOMP_ASSERT(offsetof(MechJumpAutoPilotAddon, speed_scale) == 0x98, "Jump autopilot speed scale offset");
 DECOMP_ASSERT(offsetof(MechJumpAutoPilotAddon, started) == 0x9e, "Jump autopilot started offset");
 struct GIZOBSTACLE_s;
@@ -865,7 +910,10 @@ struct MechSystems : BaseThing {
             struct numtl_s *swipe_material;
             struct numtl_s *tag_hold_background_material;
             struct numtl_s *radar_pulse_material;
-            MechInputTouchGestureBasedController *gesture_controller;
+            union {
+                MechInputTouchGestureBasedController *gesture_controller;
+                MechInputTouchMainController *active_main_controller;
+            };
             MechInputTouchMenuController *menu_controller;
         };
     };

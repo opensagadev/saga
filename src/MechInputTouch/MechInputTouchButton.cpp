@@ -2,8 +2,16 @@
 #include <stddef.h>
 
 #include "MechInputTouch_types.h"
+#include "nu2api/nucore/NuInputDevice.h"
+#include "nu2api/nu3d/nurndr.h"
 
 extern u32 colourPurple;
+u32 colourWhite = 0xffffffff;
+u32 colourBlack = 0xff000000;
+u32 colourRed = 0xff0000ff;
+struct numtl_s *g_nuMtlHandleNull;
+
+extern "C" void NuRndrRect(f32, f32, f32, f32, f32, f32, f32, f32, f32, i32, struct numtl_s *);
 
 void MechInputTouchButton::ClearTouchLocked(bool force) {
     if (!force) {
@@ -93,11 +101,9 @@ MechInputTouchButton::MechInputTouchButton(i32 index, u32 id, float x, float y, 
 }
 
 __attribute__((weak)) void MechInputTouchButton::Render() {
-    STUBBED();
 }
 
 __attribute__((weak)) void MechInputTouchButton::Update(NuInputTouchData const *) {
-    STUBBED();
 }
 
 __attribute__((weak)) char const *MechInputTouchButton::GetName() {
@@ -143,16 +149,64 @@ void MechInputTouchButton::SetTouchLocked(u32 touch_id, bool allow_new) {
     MechSystems::Get()->input_touch_system.SetTouchLockedBy(touch_id, this, allow_new);
 }
 
-MechInputTouchButtonFaker::MechInputTouchButtonFaker(i32, u32, float, float, float, float) {
-    STUBBED();
+MechInputTouchButtonFaker::MechInputTouchButtonFaker(i32 index, u32 id, float x, float y, float width, float height)
+    : MechInputTouchButton(index, id, x, y, width, height, 0) {
+    is_pressed = false;
 }
 
 void MechInputTouchButtonFaker::Render() {
-    STUBBED();
+    if (is_pressed) {
+        if (index != 0x800) {
+            NuRndrCircle(x + width * 0.5f, y + height * 0.5f, width, width / height, 0x40,
+                         0.0f, 0.0f, 0.0f, 0.0f, colourWhite, g_nuMtlHandleNull);
+            NuRndrCircle(x + width * 0.5f, y + height * 0.5f, width * 0.8f, width / height, 0x40,
+                         0.0f, 0.0f, 0.0f, 0.0f, colourWhite, g_nuMtlHandleNull);
+            return;
+        }
+    } else if (index != 0x800) {
+        NuRndrCircle(x + width * 0.5f, y + height * 0.5f, width * 0.8f, width / height, 0x40,
+                     0.0f, 0.0f, 0.0f, 0.0f, id, g_nuMtlHandleNull);
+        return;
+    }
+
+    NuRndrCircle(x + width * 0.5f, y + height * 0.5f, width * 0.9f, width / height, 0x40,
+                 0.0f, 0.0f, 0.0f, 0.0f, colourWhite, g_nuMtlHandleNull);
+    NuRndrCircle(x + width * 0.5f, y + height * 0.5f, width * 0.7f, width / height, 0x40,
+                 0.0f, 0.0f, 0.0f, 0.0f, is_pressed ? colourRed : colourBlack, g_nuMtlHandleNull);
+    NuRndrRect(x + width * 0.3f, y + height * 0.25f, 0.0f, width * 0.15f, height * 0.5f,
+               0.0f, 0.0f, 0.0f, 0.0f, colourWhite, g_nuMtlHandleNull);
+    NuRndrRect(x + width * 0.6f, y + height * 0.25f, 0.0f, width * 0.15f, height * 0.5f,
+               0.0f, 0.0f, 0.0f, 0.0f, colourWhite, g_nuMtlHandleNull);
 }
 
-void MechInputTouchButtonFaker::Update(NuInputTouchData const *) {
-    STUBBED();
+void MechInputTouchButtonFaker::Update(NuInputTouchData const *data) {
+    is_pressed = false;
+    if (data->touch_count == 0) {
+        if (touch_locked_by != 0xff) {
+            ClearTouchLocked(false);
+        }
+        return;
+    }
+
+    bool found_locked_touch = false;
+    for (u32 i = 0; i < data->touch_count; ++i) {
+        NuInputTouch const &touch = data->touch_events[i];
+        u32 id = touch.unknown_14;
+        if (!CouldTouchBeLockedBy(id)) {
+            continue;
+        }
+        if (touch.unknown_02 != 0 && touch_locked_by == 0xff && touch.unknown_04 >= x &&
+            touch.unknown_08 >= y && touch.unknown_04 <= x + width && touch.unknown_08 <= y + height) {
+            SetTouchLocked(id, false);
+        }
+        if (id == touch_locked_by) {
+            is_pressed = true;
+            found_locked_touch = true;
+        }
+    }
+    if (touch_locked_by != 0xff && !found_locked_touch) {
+        ClearTouchLocked(false);
+    }
 }
 
 MechInputTouchMainDummyStick::MechInputTouchMainDummyStick(MechInputTouchMainController &main_controller,
@@ -164,7 +218,6 @@ MechInputTouchMainDummyButton::MechInputTouchMainDummyButton(MechInputTouchMainC
                                                              MechInputTouchMainController::eButtonTypes type)
     : NuTouchInputElement(TYPE_BUTTON, colourPurple, id, 0.0f, 0.0f, 0.0f, 0.0f), controller(&main_controller),
       button_type(static_cast<u32>(type)) {
-    STUBBED();
 }
 
 MechInputTouchButtonControlled::MechInputTouchButtonControlled(MechInputTouchMainController &, i32 index)
@@ -176,7 +229,6 @@ __attribute__((weak)) bool MechInputTouchButtonControlled::ControlledUpdate(NuIn
 }
 
 __attribute__((weak)) void MechInputTouchButtonControlled::ControlledRender() {
-    STUBBED();
 }
 
 __attribute__((weak)) void MechInputTouchButtonControlled::Reset() {
