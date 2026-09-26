@@ -393,6 +393,8 @@ build:target --per_file_copt=^src/gameapi/edtools/edtoolsall\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/actions/character/streaks\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/actions/character/tagging\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/ai/core/gameai\.cpp$@-O2
+# Full-TU O2 restores the retail file-selector jump padding and frameless PIC ABI.
+build:target --per_file_copt=^src/legoapi/core/config/saveload\.cpp$@-O2,-fomit-frame-pointer
 build:target --per_file_copt=^src/legoapi/ai/game/lsw_hub_ai\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/cutscenes/minicamcut\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/items/collect/detonator\.cpp$@-O2

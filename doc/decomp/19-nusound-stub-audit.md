@@ -59,8 +59,8 @@ improve this callback and were reverted.
 The same NDK r8e GCC 4.7 source produces different assembly when the
 translation unit is compiled at `-O2` rather than at `-O0` with an
 `optimize("O2", "omit-frame-pointer")` attribute on each function. This
-matters for `src/legoapi/core/config/saveload.cpp`, whose current Bazel
-optimization map leaves the translation unit at `-O0`. Direct NDK r8e
+matters for `src/legoapi/core/config/saveload.cpp`, whose previous Bazel
+optimization map left the translation unit at `-O0`. Direct NDK r8e
 object comparisons against the retail shared object gave:
 
 | Function | TU `-O0`, function `-O2` | TU `-O2` |
@@ -95,6 +95,19 @@ count as argument differences. A linked Bazel build, measured with the
 GOT-aware `objdiff-cli` fork, is required before claiming a function is
 100% matched. A TU-wide `-O2` change also affects every existing
 function in this file; check its whole-game report before accepting it.
+
+The linked GOT-aware report confirmed a net gain after adding
+`-O2,-fomit-frame-pointer` for this translation unit. With identical
+reconstructed source, whole-game fuzzy match rose from **61.227620% to
+61.250072%**, exact functions from **6,139 to 6,145**, and exact code
+bytes from **508,809 to 509,714**. `InitMemCard`,
+`TriggerAutoSave`, `FS_GetDirTextWidth`, `FS_BuildFilterBlocks`,
+`FS_BuildFilterOutBlocks`, and `FS_SetFileSelPathFromName` became exact.
+`SaveSystemInitialiseEx` reached 99.98649%, and `FS_SortStrings` reached
+98.06512%. The same setting lowered `FS_PrevNameLen` from 45.71795% to
+20.97436%, `FS_GetDirList` from 68.71043% to 63.30116%, and two
+filter routines slightly. Those functions need source-level tuning;
+the net whole-game and exact-match gains justify retaining the map entry.
 
 For the pad-repeat body, source comparison direction also matters:
 `if (PadRepeat < 0.0f)` produces the retail
