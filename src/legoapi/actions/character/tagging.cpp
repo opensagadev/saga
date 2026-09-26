@@ -205,16 +205,26 @@ void Tag_DrawIcon_Batman(GameObject_s *object) {
     const u8 alpha = static_cast<u8>(static_cast<i32>(pulse_alpha * object->pause_context_state));
 
     NUVEC_ALIGNED16 position;
+    position.y = object->character_top * object->apiobj.field_0xa8;
     position.x = object->apiobj.upper_position.x;
-    position.y = object->character_top * object->apiobj.field_0xa8 + object->apiobj.position.y + 0.05f;
     position.z = object->apiobj.upper_position.z;
+    position.y += object->apiobj.position.y;
+    position.y += 0.05f;
 
     if ((object->field_0xe24 & GAMEOBJECT_E24_FLAG_JOINT_MATRICES_UPDATED) != 0) {
         CHARACTERMODEL_s *model = object->apiobj.character_model;
+        f32 max_y = object->apiobj.collision_position.y;
         f32 x_sum = 0.0f;
         f32 z_sum = 0.0f;
-        f32 max_y = object->apiobj.collision_position.y;
         i32 count = 0;
+        if (model->points_of_interest[0] != NULL) {
+            const f32 x = object->joint_matrices[0].m30;
+            count = 1;
+            const f32 y = object->joint_matrices[0].m31;
+            x_sum += x;
+            max_y = y > max_y ? y : max_y;
+            z_sum += object->joint_matrices[0].m32;
+        }
 #define TAG_INCLUDE_POI(index)                                                                                         \
     if (model->points_of_interest[index] != NULL) {                                                                     \
         const f32 y = object->joint_matrices[index].m31;                                                                 \
@@ -223,7 +233,6 @@ void Tag_DrawIcon_Batman(GameObject_s *object) {
         z_sum += object->joint_matrices[index].m32;                                                                     \
         max_y = y > max_y ? y : max_y;                                                                                   \
     }
-        TAG_INCLUDE_POI(0)
         TAG_INCLUDE_POI(1)
         TAG_INCLUDE_POI(2)
         TAG_INCLUDE_POI(3)
@@ -242,9 +251,9 @@ void Tag_DrawIcon_Batman(GameObject_s *object) {
 #undef TAG_INCLUDE_POI
         if (count != 0) {
             const f32 inv_count = 1.0f / static_cast<f32>(count);
-            position.x = (position.x + x_sum * inv_count) * 0.5f;
-            position.y = (position.y + max_y + 0.05f) * 0.5f;
-            position.z = (position.z + z_sum * inv_count) * 0.5f;
+            position.x = (x_sum * inv_count + position.x) * 0.5f;
+            position.y = ((max_y + 0.05f) + position.y) * 0.5f;
+            position.z = (z_sum * inv_count + position.z) * 0.5f;
         }
     }
 
