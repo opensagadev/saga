@@ -294,6 +294,16 @@ padding, not missing work. All ten compare at 100% with the GOT-aware
 no-ops, but first inspect the original body before treating any other stub
 as intentional.
 
+The fifteen Android `NuMc*` memory-card entry points in `numc.cpp` are another
+verified retail no-op run, this time compiled at `-O0` and contiguous in the
+original text from `NuMcOpenSize` through `NuMcGetSlotMax`. Integer-returning
+functions use `push %ebp; mov %esp,%ebp; mov $0,%eax; pop %ebp; ret` (10
+bytes); `NuMcCloseDir` omits the `mov` and is five bytes. Plain `return 0`
+or an empty body reproduces all fifteen exactly; `STUBBED()` only adds a
+misleading host diagnostic. Keep their original source order so the text run
+is contiguous, and do not infer missing memory-card behavior from the stub
+marker alone.
+
 **Hot/cold:** NO `.text.hot`/`.text.unlikely` — `__builtin_expect` only feeds branch/if-conversion heuristics: `hot()` at -O3 = `test %eax,%eax; mov $-1,%edx; cmove %edx,%eax; ret`.
 verified: `g++ -O3 -S align.cpp; objdump -d`
 
