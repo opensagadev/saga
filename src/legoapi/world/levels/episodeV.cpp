@@ -1,7 +1,9 @@
 #include "decomp.h"
 #include "globals.h"
+#include "gameapi/ai/aisys/aisys.h"
 #include "gameapi/ai/aisys/aipath.h"
 #include "legoapi/ai/core/ai_sys_stubs.h"
+#include "legoapi/ai/core/legoai.h"
 #include "legoapi/audio/sfx.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/core/input/qrand.h"
@@ -406,16 +408,65 @@ void CloudCityEscapeC_Init(WORLDINFO_s *world) {
     NuSpecialFind(world->current_gscn, &LevHSpecial[2], "gas_3_animin", 1);
 }
 
-void CloudCityTrapA_Update(WORLDINFO_s *) {
-    STUBBED();
+void CloudCityTrapA_Update(WORLDINFO_s *world) {
+    static NUVEC pos = {33.0f, -0.75f, -3.0f};
+    if (netclient == 0) {
+        ResetTrooperCannons(world, id_SNOWTROOPER);
+        UpdateTrooperCannons(world);
+    }
+    if (LevGameObject[0] == NULL)
+        LevGameObject[0] = FindGameObject(id_DARTHVADER, 1, 1, 1, 0);
+    if (netclient == 0) {
+        if (LevAIMessage[0] != NULL && LevAIMessage[0]->value == 1.0f)
+            DrawBossHitPoints(LevGameObject[0]);
+        else
+            DrawBossHitPoints(NULL);
+    }
+    GIZMO *gizmo = LevGizmo[0];
+    if (gizmo != NULL && gizmo->object != NULL &&
+        static_cast<GIZFORCE_s *>(gizmo->object)->anim_set->state == GAMEANIMSET_STATE_AT_END)
+        AIAntinodeCreateSingleFrame(&pos, 0.5f);
 }
 
 void CloudCityTrapB_Update(WORLDINFO_s *) {
-    STUBBED();
+    if (LevGameObject[0] == NULL)
+        LevGameObject[0] = FindGameObject(id_DARTHVADER, 1, 1, 1, 0);
+    if (netclient != 0)
+        return;
+    if (LevAIMessage[0] != NULL && LevAIMessage[0]->value == 1.0f)
+        DrawBossHitPoints(LevGameObject[0]);
+    else
+        DrawBossHitPoints(NULL);
+    if (LevAIMessage[1] == NULL || LevAIMessage[1]->value != 1.0f || LevGameObject[0] == NULL)
+        return;
+    GameObject_s *vader = LevGameObject[0];
+    if (vader->apiobj.field_0x287 != 0 || vader->current_hp == 0) {
+        if (FreePlay != 0)
+            CompleteLevel(WORLD);
+        else if (CLOUDCITYTRAPOUTRO_LDATA != NULL)
+            GoToNewLevel(CLOUDCITYTRAPOUTRO_LDATA->idx);
+    }
 }
 
 void CloudCityTrapC_Update(WORLDINFO_s *) {
-    STUBBED();
+    if (netclient != 0 || LevPathCnx[0] == NULL)
+        return;
+    AIPATHCNX_s *connection = static_cast<AIPATHCNX_s *>(LevPathCnx[0]);
+    i32 direction = LevPathCnxDir;
+    u32 big_jump = LEGO_AIPATHCNX_BIGJUMP;
+    u32 glide = LEGO_AIPATHCNX_R2D2GLIDE;
+    u32 flags = connection->traversal_flags[direction] & ~(big_jump | glide | 0x80000000);
+    u32 active;
+    if (LevGizObst[1] != NULL && LevGizObst[1]->anim_set->state != 0 &&
+        player->apiobj.collision_position.z < -20.0f)
+        active = big_jump;
+    else
+        active = player->apiobj.collision_position.z < -21.0f ? big_jump : 0;
+    if (LevGizObst[0] != NULL && LevGizObst[0]->anim_set->state != 0)
+        active |= glide;
+    if (active == 0)
+        active = 0x80000000;
+    connection->traversal_flags[direction] = flags | active;
 }
 
 void HothBattle_Melee_init(HOTHBATTLE_MELEE_s *melee) {

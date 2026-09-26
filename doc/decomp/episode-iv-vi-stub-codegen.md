@@ -53,3 +53,20 @@ ordinary C++ calls and field assignments. Their instruction streams and
 sizes match (173, 241, and 309 bytes); their residual differences are
 string and float literal address operands. Keep exact string values and
 argument order even when these address operands do not match.
+
+## Block order in Cloud City Trap updates
+
+`CloudCityTrapB_Update` compiled to 296 bytes and 87.975% when the boss
+completion condition was written as an early return. Writing the positive
+condition and nesting the completion calls inside it compiled to the
+target's 312-byte block order and 99.975%. The only two remaining
+differences are the `1.0f` constant address operands.
+
+`CloudCityTrapC_Update` initially matched 0% despite equivalent route
+flag logic. The target first loads the path connection, direction, the
+`BIGJUMP` and `R2D2GLIDE` masks, and the cleared route flags. It then
+computes the active mask from the two obstacles and player position.
+Moving the route-flag calculation before the obstacle tests reproduced
+the complete 258-byte instruction stream at 99.97183%; only the `-20.0f`
+and `-21.0f` constant addresses differ. Preserve this computation order
+when reconstructing nearby level handlers.
