@@ -77,4 +77,13 @@ First full target build, measured with the GOT-aware fork:
 | `LineToPlaneDistance` | 78.857140% | 100% |
 | `I64ToX` | 40.303370% | 40.303370% |
 | `XToI64` | 35.805460% | 35.805460% |
-| `rawClip` | 22.210192% | 22.210192% |
+| `rawClip` | 22.210192% | 54.720000% |
+
+For `rawClip`, copying the inside endpoint as a whole `VuVec` made GCC
+load and store it through general-purpose registers. Explicit x/y/z/w field
+stores reuse the XMM values already loaded for the plane dot product, as in
+the target. The interpolation branches store y, z, x and zero the new w
+before the divisions. Those changes raised the score from 22.21% to 54.72%.
+The target also aligns the stack to 16 bytes, but forcing alignment with an
+extra aligned local grew the frame from 16 to 32 bytes and reduced the score;
+do not retain that particular probe.
