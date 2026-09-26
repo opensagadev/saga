@@ -1644,10 +1644,6 @@ extern "C" {
         }
     }
 
-    void CreateTestMenu(void) {
-        STUBBED();
-    }
-
     void DrawMenu(i32 paused) {
         if (memcard_autosavestarted != 0 || memcard_autosavepostdelay > 0.0f || memcard_autosavepredelay > 0.0f) {
             if (memcard_drawasiconfn != NULL) {
@@ -2015,10 +2011,6 @@ extern "C" {
     }
 
     void StartFileSel(void) {
-        STUBBED();
-    }
-
-    void TestMenu(void) {
         STUBBED();
     }
 
