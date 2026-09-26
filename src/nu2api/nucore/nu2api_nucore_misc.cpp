@@ -36,7 +36,6 @@ extern "C" {
     extern i32 NuPrimCSPos;
     extern NUPRIMSCALEMODE NuPrimCoordSystemStack[];
     extern i32 nurndr_pixel_width;
-    extern i32 nurndr_pixel_height;
 }
 
 #include "nu2api/nu3d/android/nutex_ios_ex.h"
@@ -319,31 +318,34 @@ void NuLgtArcLaserDraw(i32 paused) {
 }
 
 void NuVpSetSourceRect(float left, float top, float right, float bottom) {
-    const float width = static_cast<float>(nurndr_pixel_width);
-    const float height = static_cast<float>(nurndr_pixel_height);
+    const float width = static_cast<float>(PS2_VREZ_W);
+    const float height = static_cast<float>(PS2_VREZ_H);
     const float source_width = right - left;
     const float source_height = bottom - top;
     const float scaled_width = (width / source_width) * width;
+    float position_scale_x = scaled_width / source_width;
+    asm volatile("" : "+x"(position_scale_x));
     const float scaled_height = (height / source_height) * height;
-    NuVpSetPosition2(-left * (scaled_width / source_width) * 0.5f,
-                     -top * (scaled_height / source_height) * 0.5f);
+    const float position_x = -left * position_scale_x * 0.5f;
+    const float position_y = -top * (scaled_height / source_height) * 0.5f;
+    NuVpSetPosition2(position_x, position_y);
     NuVpSetSize2(scaled_width, scaled_height);
 }
 
-i32 NuFrameEndBgLoadPS(i32 minimum_delay) {
+__attribute__((optimize("O0,no-omit-frame-pointer"))) i32 NuFrameEndBgLoadPS(i32 minimum_delay) {
     i32 delay = 0;
     NUTIME now;
     NUTIME elapsed;
     NuTimeGet(&now);
     NuTimeSub(&elapsed, &now, &nuapi.time2);
     const i32 scanlines = static_cast<i32>(NuTimeScanlines(&elapsed));
-    if (currentScene.vp_h == 60.0f) {
+    if (nuapi.fps == 60.0f) {
         delay = 0xff - scanlines;
-    } else if (currentScene.vp_h == 50.0f) {
+    } else if (nuapi.fps == 50.0f) {
         delay = 0x131 - scanlines;
-    } else if (currentScene.vp_h == 30.0f) {
+    } else if (nuapi.fps == 30.0f) {
         delay = 0x1e0 - scanlines;
-    } else if (currentScene.vp_h == 25.0f) {
+    } else if (nuapi.fps == 25.0f) {
         delay = 0x244 - scanlines;
     }
     if (delay >= minimum_delay) {
@@ -513,9 +515,12 @@ i32 NuIOS_GetInAppProductByID(char *, NuIOS_InAppProduct *) {
     return 0;
 }
 
-ShaderObjectKey NuIOS_GetShaderProgramKey(ShaderObjectKey const &key) {
+__attribute__((optimize("no-omit-frame-pointer"))) ShaderObjectKey NuIOS_GetShaderProgramKey(ShaderObjectKey const &key) {
     ShaderObjectKey result;
-    if (!LookupHash(key.key, &result.key, g_shaderProgramRedirects, 417))
+    u32 redirected_key __attribute__((aligned(16)));
+    if (LookupHash(key.key, &redirected_key, g_shaderProgramRedirects, 417))
+        result.key = redirected_key;
+    else
         result.key = key.key;
     return result;
 }
@@ -586,8 +591,8 @@ void NuCameraTransformScissorClip(nuvec_s *screen, nuvec_s *world, i32 count, nu
         transform = vpc_sci_mtx;
     else
         NuMtxMulH(&transform, matrix, &vpc_sci_mtx);
-    for (; world < end; ++world, ++screen)
-        NuVecMtxTransformH(screen, world, &transform);
+    while (world < end)
+        NuVecMtxTransformH(screen++, world++, &transform);
 }
 
 // NuDebrisRendererFlushBuffers is transcribed in android/nuptl_android.c (original 0x296f35).

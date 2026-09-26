@@ -26,6 +26,25 @@ The source is `src/nu2api/nucore/nu2api_nucore_misc.cpp`.
   arguments. The direct member call reaches 100%.
 - `NuGCutRigidForceInstanced` loops over `scene->rigid_system->count` and ORs
   bit 1 into each rigid's `flags` byte. The natural indexed loop reaches 100%.
+- `NuFrameEndBgLoadPS` is one of the target's GCC `-O0` functions. Its regular
+  `-O2` implementation had no aligned instructions; using function-local
+  `optimize("O0,no-omit-frame-pointer")` restores the target frame pointer,
+  stack slots, and block order. It compares `nuapi.fps` at offset `0x1c`
+  against 60, 50, 30, and 25. The remaining 0.09% difference is in literal
+  pool displacements for those float constants.
+- `NuCameraTransformScissorClip` reaches 99.87% when the vector transform loop
+  uses `NuVecMtxTransformH(screen++, world++, &transform)`. A `for` loop with
+  increments after the call used different registers and reached only 83.25%.
+  The two remaining differences are the order of reloading `screen` and
+  `world` after `NuMtxMulH`.
+- `NuIOS_GetShaderProgramKey` uses a 16-byte-aligned local redirect word and
+  keeps a frame pointer. This triggers the target's `and esp, -16` stack
+  realignment and places the lookup output at `[esp+0x10]`. The remaining
+  differences are argument setup instruction order.
+- `NuVpSetSourceRect` uses `PS2_VREZ_W` and `PS2_VREZ_H` as its dimensions,
+  not the current render pixel width and height. It calculates a position
+  scale before the height scale; an empty SSE register constraint preserves
+  that evaluation order in GCC.
 
 ## Initial scores after replacing all 28 markers
 
@@ -35,12 +54,12 @@ The source is `src/nu2api/nucore/nu2api_nucore_misc.cpp`.
 | `NuGCutRigidForceInstanced` | 57 | 100% |
 | `NuDynamicLightingGetParameterfv` | 100 | 100% |
 | `NuDynamicLightTestShadowExtrusions` | 50 | 100% |
-| `NuVpSetSourceRect` | 205 | 82.895836% |
-| `NuCameraTransformScissorClip` | 292 | 83.252630% |
-| `NuIOS_GetShaderProgramKey` | 112 | 53.914288% |
-| `NuFrameEndBgLoadPS` | 333 | 0% |
+| `NuVpSetSourceRect` | 205 | 89.645836% |
+| `NuCameraTransformScissorClip` | 292 | 99.873690% |
+| `NuIOS_GetShaderProgramKey` | 112 | 90.400000% |
+| `NuFrameEndBgLoadPS` | 333 | 99.908040% |
 
 The original `NuHtmlFlush` symbol already has its implementation in
 `src/legoapi/misc/supportall.cpp`. The unused local static stub in this file
-was removed. The remaining functions need instruction-order and ABI work; the
-initial implementations capture their target behavior but are not yet exact.
+was removed. The remaining differences are compiler register and instruction
+order, plus literal-pool displacement.
