@@ -178,19 +178,19 @@ bool MechInputTouchVirtualConsoleController::OnDown(GameObject_s &object, TouchH
         }
     }
 
-    if (drag_touch != NULL || touch.down_position.x >= 0.0f) {
-        return true;
+    if (drag_touch == NULL && touch.down_position.x < 0.0f) {
+        MechTouchUIElement *const pad = dpad;
+        if (s_noInputTimer >= 0.0f) {
+            MechTouchUIAnimation *animations =
+                reinterpret_cast<MechTouchUIAnimation *>(reinterpret_cast<u8 *>(pad) + 0x40);
+            animations[0].Start(*animations[0].target, 1.0f, 0.15f);
+            animations[1].Start(*animations[1].target, 1.0f, 0.15f);
+            pad->position.x = touch.down_position.x;
+            pad->position.y = touch.down_position.y;
+        }
+        pad->owner = &touch;
+        drag_touch = &touch;
     }
-    if (s_noInputTimer >= 0.0f) {
-        MechTouchUIAnimation *animations =
-            reinterpret_cast<MechTouchUIAnimation *>(reinterpret_cast<u8 *>(dpad) + 0x40);
-        animations[0].Start(*animations[0].target, 1.0f, 0.15f);
-        animations[1].Start(*animations[1].target, 1.0f, 0.15f);
-        dpad->position.x = touch.down_position.x;
-        dpad->position.y = touch.down_position.y;
-    }
-    dpad->owner = &touch;
-    drag_touch = &touch;
     return true;
 }
 
@@ -226,9 +226,11 @@ void MechInputTouchVirtualConsoleController::ProcessDragMovement(GameObject_s &)
     if (distance > 0.05f) {
         if (dpad_touch->held_time > 0.2f) {
             const i32 angle = NuAtan2D(dx, dy);
+            const f32 sine = NU_SIN_LUT(angle);
+            const f32 cosine = NU_COS_LUT(angle);
             const f32 strength = MAX(0.0f, MIN((distance - 0.05f) * 4.0f, 1.0f)) * 1.4;
-            const f32 stick_y = strength * NU_COS_LUT(angle);
-            const f32 stick_x = -(strength * NU_SIN_LUT(angle));
+            const f32 stick_y = strength * cosine;
+            const f32 stick_x = -(strength * sine);
             stick_values[2] = MAX(-1.0f, MIN(stick_x, 1.0f));
             stick_values[3] = MAX(-1.0f, MIN(stick_y, 1.0f));
         }

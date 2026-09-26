@@ -90,6 +90,15 @@ cosine for Y before sine for X, then stores X and Y in that order.
 It loads/subtracts the Y displacement before X, but computes the squared
 distance as `dx * dx + dy * dy`; reversing those operands changes the SSE
 addition and register schedule even though the arithmetic is equivalent.
+It also loads the sine and cosine lookup values before comparing the scaled
+distance with `1.0f`. Computing the clamp before reading the table leads to
+a different schedule in the NDK compiler.
+
+`OnDown` enters its drag path only when `down_position.x < 0.0f`. Expressing
+that condition directly preserves the target's ordered SSE comparison and
+NaN behavior. Cache the D-pad pointer before the timer check so the target
+can retain one register through both animation calls, position writes, and
+the owner assignment.
 
 The virtual controller destructor explicitly deletes the four UI buttons and
 the D-pad in that order before calling its main-controller base destructor.
