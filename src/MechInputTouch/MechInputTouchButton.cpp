@@ -156,19 +156,23 @@ MechInputTouchButtonFaker::MechInputTouchButtonFaker(i32 index, u32 id, float x,
 
 void MechInputTouchButtonFaker::Render() {
     if (is_pressed) {
-        if (index != 0x800) {
-            NuRndrCircle(x + width * 0.5f, y + height * 0.5f, width, width / height, 0x40,
-                         0.0f, 0.0f, 0.0f, 0.0f, colourWhite, g_nuMtlHandleNull);
-            NuRndrCircle(x + width * 0.5f, y + height * 0.5f, width * 0.8f, width / height, 0x40,
-                         0.0f, 0.0f, 0.0f, 0.0f, colourWhite, g_nuMtlHandleNull);
-            return;
+        if (index == 0x800) {
+            goto special_button;
         }
-    } else if (index != 0x800) {
+        NuRndrCircle(x + width * 0.5f, y + height * 0.5f, width, width / height, 0x40,
+                     0.0f, 0.0f, 0.0f, 0.0f, colourWhite, g_nuMtlHandleNull);
         NuRndrCircle(x + width * 0.5f, y + height * 0.5f, width * 0.8f, width / height, 0x40,
-                     0.0f, 0.0f, 0.0f, 0.0f, id, g_nuMtlHandleNull);
+                     0.0f, 0.0f, 0.0f, 0.0f, colourWhite, g_nuMtlHandleNull);
         return;
     }
+    if (index == 0x800) {
+        goto special_button;
+    }
+    NuRndrCircle(x + width * 0.5f, y + height * 0.5f, width * 0.8f, width / height, 0x40,
+                 0.0f, 0.0f, 0.0f, 0.0f, id, g_nuMtlHandleNull);
+    return;
 
+special_button:
     NuRndrCircle(x + width * 0.5f, y + height * 0.5f, width * 0.9f, width / height, 0x40,
                  0.0f, 0.0f, 0.0f, 0.0f, colourWhite, g_nuMtlHandleNull);
     NuRndrCircle(x + width * 0.5f, y + height * 0.5f, width * 0.7f, width / height, 0x40,
@@ -181,27 +185,27 @@ void MechInputTouchButtonFaker::Render() {
 
 void MechInputTouchButtonFaker::Update(NuInputTouchData const *data) {
     is_pressed = false;
-    if (data->touch_count == 0) {
-        if (touch_locked_by != 0xff) {
-            ClearTouchLocked(false);
-        }
-        return;
-    }
-
     bool found_locked_touch = false;
-    for (u32 i = 0; i < data->touch_count; ++i) {
-        NuInputTouch const &touch = data->touch_events[i];
-        u32 id = touch.unknown_14;
-        if (!CouldTouchBeLockedBy(id)) {
-            continue;
-        }
-        if (touch.unknown_02 != 0 && touch_locked_by == 0xff && touch.unknown_04 >= x &&
-            touch.unknown_08 >= y && touch.unknown_04 <= x + width && touch.unknown_08 <= y + height) {
-            SetTouchLocked(id, false);
-        }
-        if (id == touch_locked_by) {
-            is_pressed = true;
-            found_locked_touch = true;
+    u32 count = data->touch_count;
+    if (count != 0) {
+        u8 const *cursor = reinterpret_cast<u8 const *>(data);
+        for (u32 i = 0; i < count; ++i, cursor += sizeof(NuInputTouch)) {
+            NuInputTouch const &touch = *reinterpret_cast<NuInputTouch const *>(cursor + 4);
+            u32 id = touch.unknown_14;
+            if (!CouldTouchBeLockedBy(id)) {
+                continue;
+            }
+            f32 touch_x = touch.unknown_04;
+            f32 touch_y = touch.unknown_08;
+            if (touch.unknown_02 != 0 && touch_locked_by == 0xff) {
+                if (touch_x >= x && touch_y >= y && touch_x <= x + width && touch_y <= y + height) {
+                    SetTouchLocked(id, false);
+                }
+            }
+            if (id == touch_locked_by) {
+                is_pressed = true;
+                found_locked_touch = true;
+            }
         }
     }
     if (touch_locked_by != 0xff && !found_locked_touch) {
