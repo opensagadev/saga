@@ -5848,25 +5848,39 @@ struct GameThingManager : ThingManager {
     GameThingManager(i32);
     virtual ~GameThingManager();
 };
-struct VirtualControlButton {
-    void Process(float);
-    void Render();
+struct VirtualControlButton : MechTouchUITexButton {
+    void Process(float) override;
+    void Render() override;
     VirtualControlButton(NuVec2 const &, float, MechInputTouchMainController::eButtonTypes);
+    MechInputTouchMainController::eButtonTypes button_type;
 };
-struct VirtualControlButtonMover {
-    void Process(float);
+DECOMP_ASSERT(sizeof(VirtualControlButton) == 0x7c, "VirtualControlButton size");
+struct VirtualControlButtonMover : MechTouchUITexButton {
+    void Process(float) override;
     VirtualControlButtonMover(MechInputTouchVirtualConsoleController &);
+    MechInputTouchVirtualConsoleController *controller;
+    NuVec2 drag_offset;
+    i32 pulse_phase;
 };
-struct VirtualControlDPad {
-    void Process(float);
-    void Render();
+DECOMP_ASSERT(sizeof(VirtualControlButtonMover) == 0x88, "VirtualControlButtonMover size");
+struct VirtualControlDPad : MechTouchUITexButton {
+    void Process(float) override;
+    void Render() override;
     VirtualControlDPad(NuVec2 const &, float, MechInputTouchVirtualConsoleController &);
-    virtual ~VirtualControlDPad();
+    ~VirtualControlDPad() override;
+    NuVec2 stick_values;
+    NuVec2 drag_offset;
+    struct numtl_s *arrow_material;
+    MechInputTouchVirtualConsoleController *controller;
+    VirtualControlButtonMover mover;
 };
-struct VirtualControlDPad_LockButton {
-    void Process(float);
-    void Render();
+DECOMP_ASSERT(sizeof(VirtualControlDPad) == 0x118, "VirtualControlDPad size");
+struct VirtualControlDPad_LockButton : MechTouchUITexButton {
+    void Process(float) override;
+    void Render() override;
     VirtualControlDPad_LockButton(VirtualControlDPad &);
+    VirtualControlDPad *dpad;
 };
+DECOMP_ASSERT(sizeof(VirtualControlDPad_LockButton) == 0x7c, "VirtualControlDPad_LockButton size");
 
 #endif // LEGOAPI_TYPES_H
