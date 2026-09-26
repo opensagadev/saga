@@ -34,7 +34,10 @@ relocations cannot resolve until linking.
 Target `0x24c8e0`, 2,511 bytes. The retail callback uses a large stack product
 record whose price float lies at byte offset `0x300`, plus a 128-byte format
 buffer. The product ABI is currently absent from `NuIOS_InAppProduct`, so a
-local layout supplies that offset for this one callback.
+local layout supplies that offset for this one callback. A temporary 144-byte
+source buffer currently gives the compiler the target's `0x3f0` stack frame
+and `esp+0xe0` product address, but its own `esp+0x50` address is 16 bytes
+below the target's `esp+0x60`. The missing stack live range is unresolved.
 
 The callback computes a half-second pulse with `NuFmod`, indexes
 `NuTrigTable` using the integer angle's low 15 bits, then scales the result
@@ -58,8 +61,23 @@ corresponding product name from four bytes before the mask. This pointer
 choice is observable in the emitted `test (%edi),%eax` and
 `mov -4(%edi),%eax` instructions.
 
-The first reconstruction preserves this behavior but the direct object still
-has different stack offsets, register allocation, and block order. The raw
-relocatable diff reports 0% for the whole symbol despite many shared
-instructions; compare the linked build and individual regions before
-interpreting that figure as a semantic failure.
+GCC 4.7 gives this large function a particularly consequential block order.
+A normal nested `if` placed the unavailable-purchase path between the bundle
+loop and the common draw tail; the direct object matched 0% even though the
+instructions existed. Marking the eleven lock checks unlikely and the bundle
+mask tests likely with `__builtin_expect` kept each price check in the target
+order and raised the raw match to 53.51%. Explicit `goto` labels then placed
+the shared panel/text/touch tail before the two unavailable-purchase fallbacks,
+as in retail, raising the GOT-aware raw match to **94.99217%** (2,471 vs 2,511
+bytes). This is a reproducible example where source-level CFG block order
+affects a whole-symbol score far more than the individual instructions do.
+
+The remaining differences are mostly stack slot offsets and the bundle loop
+end pointer. Retail computes `&StoreBundle[3].pack_mask` once and stores it at
+`esp+0x4c`; GCC currently reloads the `StoreBundle` GOT entry on each loop
+iteration. An ordinary `bundle_end` local was optimized away, while a
+`volatile` local or inline-assembly memory barrier lowered the match sharply.
+The target has additional alignment `nop`s around some unrolled checks. Raw
+object diffs also report call/GOT/literal relocations that may resolve when
+linked. Use the GOT-aware fork of `objdiff-cli` and the NDK r8e GCC 4.7 for
+further comparison.

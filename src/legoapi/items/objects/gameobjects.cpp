@@ -6857,7 +6857,7 @@ static void DrawPackButton(GAMEMESSAGE_s *message, nuvec_s *position, float scal
         u8 field_0x0[0x300];
         f32 price;
     } product;
-    char text[128];
+    char text[144];
 
     const f32 phase = NuFmod(GameTimer.time_elapsed_mod_seconds, 0.5f);
     const i32 angle = static_cast<i32>(phase * 2.0f * 65536.0f);
@@ -6865,21 +6865,24 @@ static void DrawPackButton(GAMEMESSAGE_s *message, nuvec_s *position, float scal
     i32 alpha = static_cast<i32>(pulse * 128.0f);
     const f32 label_y = position->y + 0.1f;
 
-    if (NuIOS_AreInAppPurchasesAvailable()) {
-        if (NuIOS_CanMakeInAppPurchases()) {
-            alpha &= 0xff;
+    if (!NuIOS_AreInAppPurchasesAvailable())
+        goto purchases_unavailable;
+    if (!NuIOS_CanMakeInAppPurchases())
+        goto purchases_disabled;
+    {
             product.price = 0.0f;
             NuIOS_GetInAppProductByID(
-                *reinterpret_cast<char **>(&StorePack[message->field_0xfe].field1_0x4),
+                *reinterpret_cast<char **>(&StorePack[static_cast<i8>(message->field_0xfe)].field1_0x4),
                 reinterpret_cast<NuIOS_InAppProduct *>(&product));
-            sprintf(text, "%s ~0%.2f~~", TTab[StorePack[message->field_0xfe].message_text_index],
+            sprintf(text, "%s ~0%.2f~~", TTab[StorePack[static_cast<i8>(message->field_0xfe)].message_text_index],
                     static_cast<double>(product.price));
             Text3DEx(text, position->x, label_y, position->z, scale, scale, scale, 4, message->red,
-                     message->green, message->blue, alpha);
+                     message->green, message->blue, alpha & 0xff);
 
+            const f32 savings_height = text3d_height;
             for (u32 *bundle_mask = &StoreBundle[0].pack_mask; bundle_mask != &StoreBundle[3].pack_mask;
                  bundle_mask += 3) {
-                if ((*bundle_mask & (1 << message->field_0xfe)) == 0)
+                if ((*bundle_mask & (1 << static_cast<i8>(message->field_0xfe))) == 0)
                     continue;
                 product.price = 0.0f;
                 NuIOS_GetInAppProductByID(*reinterpret_cast<char **>(bundle_mask - 1),
@@ -6887,10 +6890,13 @@ static void DrawPackButton(GAMEMESSAGE_s *message, nuvec_s *position, float scal
                 const f32 bundle_price = product.price;
                 f32 pack_total = 0.0f;
 #define ADD_PACK_PRICE(index)                                                                                          \
-    if (!Store_IsPackUnlocked(index) && (*bundle_mask & (1u << (index))) != 0 &&                                     \
-        NuIOS_GetInAppProductByID(*reinterpret_cast<char **>(&StorePack[index].field1_0x4),                      \
-                                  reinterpret_cast<NuIOS_InAppProduct *>(&product)))                                \
-        pack_total += product.price
+    if (__builtin_expect(Store_IsPackUnlocked(index), 0) == 0) {                                                       \
+        if (__builtin_expect((*bundle_mask & (1u << (index))) != 0, 1)) {                                               \
+            if (NuIOS_GetInAppProductByID(*reinterpret_cast<char **>(&StorePack[index].field1_0x4),                \
+                                          reinterpret_cast<NuIOS_InAppProduct *>(&product)))                           \
+                pack_total += product.price;                                                                            \
+        }                                                                                                               \
+    }
                 ADD_PACK_PRICE(0);
                 ADD_PACK_PRICE(1);
                 ADD_PACK_PRICE(2);
@@ -6904,35 +6910,38 @@ static void DrawPackButton(GAMEMESSAGE_s *message, nuvec_s *position, float scal
                 ADD_PACK_PRICE(10);
 #undef ADD_PACK_PRICE
                 if (pack_total > bundle_price) {
-                    Text3DEx(TTab[tBUNDLESAVINGSAVAILABLE], position->x, label_y - text3d_height, position->z,
-                             scale, scale, scale, 4, 0, 191, 255, alpha);
+                    Text3DEx(TTab[tBUNDLESAVINGSAVAILABLE], position->x, label_y - savings_height, position->z,
+                             scale, scale, scale, 4, 0, 191, 255, alpha & 0xff);
                 }
             }
-        } else {
-            alpha &= 0xff;
-            Text3DEx(TTab[StorePack[message->field_0xfe].message_text_index], position->x, label_y, position->z, scale, scale, scale, 4,
-                     message->red, message->green, message->blue, alpha);
-            Text3DEx(TTab[0x610], position->x, label_y - text3d_height, position->z, scale, scale, scale, 4,
-                     255, 31, 0, alpha);
-        }
-    } else {
-        alpha &= 0xff;
-        Text3DEx(TTab[StorePack[message->field_0xfe].message_text_index], position->x, label_y, position->z, scale, scale, scale, 4,
-                 message->red, message->green, message->blue, alpha);
-        Text3DEx(TTab[0x613], position->x, label_y - text3d_height, position->z, scale, scale, scale, 4,
-                 255, 31, 0, alpha);
     }
 
+draw_button:
     DrawPanel3DObject(position->x, position->y, position->z, ICONSIZE, ICONSIZE, ICONSIZE, 0, 0, 0,
                       &WORLD->lev_objs[165].special, 0, pulse);
     Text3DEx(">", position->x + 0.00625f, position->y, position->z, 0.78f, 0.6f, 0.6f, 0,
-             255, 255, 255, alpha);
+             255, 255, 255, alpha & 0xff);
 
     MechInputTouchMenuController::PackButtonActive = true;
     MechInputTouchMenuController::PackButtonX = position->x;
     MechInputTouchMenuController::PackButtonY = position->y;
     MechInputTouchMenuController::PackButtonW = ICONSIZE * 0.5f;
-    MechInputTouchMenuController::PackButtonID = message->field_0xfe;
+    MechInputTouchMenuController::PackButtonID = static_cast<i8>(message->field_0xfe);
+    return;
+
+purchases_disabled:
+    Text3DEx(TTab[StorePack[static_cast<i8>(message->field_0xfe)].message_text_index], position->x, label_y, position->z, scale, scale, scale, 4,
+             message->red, message->green, message->blue, alpha & 0xff);
+    Text3DEx(TTab[0x610], position->x, label_y - text3d_height, position->z, scale, scale, scale, 4,
+             255, 31, 0, alpha & 0xff);
+    goto draw_button;
+
+purchases_unavailable:
+    Text3DEx(TTab[StorePack[static_cast<i8>(message->field_0xfe)].message_text_index], position->x, label_y, position->z, scale, scale, scale, 4,
+             message->red, message->green, message->blue, alpha & 0xff);
+    Text3DEx(TTab[0x613], position->x, label_y - text3d_height, position->z, scale, scale, scale, 4,
+             255, 31, 0, alpha & 0xff);
+    goto draw_button;
 }
 
 void Tag_Check(GameObject_s *object) {
