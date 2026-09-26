@@ -727,29 +727,13 @@ void MechTouchTaskPlannedGoTo::BackgroundProcess() {
 
 void MechTouchTaskPlannedGoTo::GenerateWaypoints() {
     i32 waypoint_index = 0;
+    i32 current = 0;
     if (path_count <= 0 || path_points[1].y == -1000000000.0f) {
-        waypoints[0].active = 1;
-        waypoints[0].position = path_points[0];
-        waypoints[0].field_14 = 0;
-        waypoints[0].target_position.position = path_points[0];
-        target_position.position = path_points[0];
-    } else {
-        i32 current = 1;
-        while (true) {
-            if (path_points[current].y <= path_points[current - 1].y + 0.15f) {
-                const i32 next = current + 1;
-                if (next > path_count || waypoint_index > 30 || path_points[next].y == -1000000000.0f) {
-                    waypoints[waypoint_index].active = 1;
-                    waypoints[waypoint_index].position = path_points[current];
-                    waypoints[waypoint_index].field_14 = 0;
-                    waypoints[waypoint_index].target_position.position = path_points[current];
-                    target_position.position = path_points[current];
-                    break;
-                }
-                current = next;
-                continue;
-            }
-
+        goto write_final_waypoint;
+    }
+    current = 1;
+    while (true) {
+        if (path_points[current].y > path_points[current - 1].y + 0.15f) {
             waypoints[waypoint_index].active = 1;
             waypoints[waypoint_index].position = path_points[current - 1];
             waypoints[waypoint_index].field_14 = 0;
@@ -763,8 +747,22 @@ void MechTouchTaskPlannedGoTo::GenerateWaypoints() {
             }
             waypoint_index += 2;
         }
+        const i32 next = current + 1;
+        if (next > path_count || waypoint_index > 30 || path_points[next].y == -1000000000.0f) {
+            goto write_final_waypoint;
+        }
+        current = next;
     }
+    goto cleanup;
 
+write_final_waypoint:
+    waypoints[waypoint_index].active = 1;
+    waypoints[waypoint_index].position = path_points[current];
+    waypoints[waypoint_index].field_14 = 0;
+    waypoints[waypoint_index].target_position.position = path_points[current];
+    target_position.position = path_points[current];
+
+cleanup:
     if (field_6fd == 0) {
         move_to_marker = NuMechPtr<MoveToMarker, 4>(MechSystems::Get()->NewMoveToMarker(target_position));
     }
