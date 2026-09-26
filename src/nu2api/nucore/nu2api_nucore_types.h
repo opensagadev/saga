@@ -235,9 +235,9 @@ struct NuMemoryManager {
     struct IPageVisitor {};
     struct IVisitor {};
     void ClearBlockDebugContext(void *);
-    void DumpBlock(u32, NuSymbolQuery *, NuMemoryManager::Header *, u32, u32, u32);
+    u16 DumpBlock(u32, NuSymbolQuery *, NuMemoryManager::Header *, u32, u32, u32);
     void DumpBlocksForContext(u32, NuSymbolQuery *, NuMemoryManager::Context *, u32);
-    void FindAndTouchMatchingBlocks(NuMemoryManager::DebugHeader *, u32 *, u32);
+    u32 FindAndTouchMatchingBlocks(NuMemoryManager::DebugHeader *, u32 *, u32);
     void GetAllocatedBytes();
     u32 GetBlockAlignment(void *);
     u32 GetBlockDebugBackTrace(void *, void **);
@@ -256,7 +256,7 @@ struct NuMemoryManager {
     bool IsZombie();
     NuMemoryManager::FreeHeader *MergeLargeBinSegments(NuMemoryManager::FreeHeader *, NuMemoryManager::FreeHeader *);
     void PushContext(char const *);
-    void ReleaseExternalPage(void *);
+    i32 ReleaseExternalPage(void *);
     void SetBlockDebugContext(void *, u32);
     void SetBlockDebugName(void *, char const *);
     void SetOverrideCategory(u16);
@@ -269,7 +269,7 @@ struct NuMemoryManager {
     static void VisitManagers(NuMemoryManager::IVisitor *);
     void VisitPages(NuMemoryManager::IPageVisitor *);
     void *_BlockAlloc(u32, u32, u32, char const *, u16);
-    void _MultiBlockAlloc(u32, u32, u32, void **, u32, char const *, u16);
+    i32 _MultiBlockAlloc(u32, u32, u32, void **, u32, char const *, u16);
     void BlockFree(void *, u32);
 };
 struct NuMemory {
