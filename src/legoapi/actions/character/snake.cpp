@@ -157,7 +157,9 @@ void DrawSnakeBody(GameObject_s *object) {
         angles.x = object->snake_body->segments[segment_index].pitch;
         NuMtxSetRotationXYVU0(&matrix, &angles);
         if (object->snake_body->scale != 1.0f) {
-            scale = {object->snake_body->scale, object->snake_body->scale, object->snake_body->scale};
+            scale.z = object->snake_body->scale;
+            scale.y = object->snake_body->scale;
+            scale.x = object->snake_body->scale;
             NuMtxPreScale(&matrix, &scale);
         }
         matrix.m30 += object->snake_body->segments[segment_index].position.x;
