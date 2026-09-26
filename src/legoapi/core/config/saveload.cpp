@@ -83,7 +83,7 @@ SAVELOAD_TARGET_OPT void FS_GetDirList(char *path, char *filter, char *filter_ou
     NuStrCpy(FS_FileList + 7, "..");
     ++FS_NumFiles;
 
-    char *next;
+    char *volatile next;
     char entry[0x118] __attribute__((aligned(16)));
     volatile char header[7];
     if (directory != 0) {
