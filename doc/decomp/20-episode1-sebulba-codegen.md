@@ -40,6 +40,24 @@ uses this to choose the player farther ahead and then to compare Sebulba to
 that player's position. This field is at `SOCK + 0x98`; the `SOCK` stride is
 `0x13c`.
 
+## Signed byte locals and branch layout
+
+In `Action_NewSebulba`, the goal index is stored as a signed byte. Keeping a
+local `i8 index` makes GCC 4.7 emit `cmp al, 3`; widening the local to `i32`
+emits `cmp eax, 3` even though the load is still sign extended. Write the
+in-range arm first (`if (index <= 3)`) to match the target's forward `jle`
+to the indexed array load. The opposite test reverses the two array-load
+blocks. The branch inversion alone raised the GOT-aware match from 68.32% to
+68.64%.
+
+The socket index must remain signed for the `-1` sentinel and the `SOCK`
+array subscript. For comparing its low byte to `player->field_0x661`, cast
+the local to `u8` and compare directly against the field. GCC then emits
+`cmp dl, [eax+0x661]` instead of loading and sign extending the player's
+field into a second register. With the signed goal index, this raised the
+match further to 69.74%. The target uses `cl` for the comparison; that
+remaining register difference is part of broader allocation drift.
+
 ## PIC global lookup
 
 The Android x86 build uses `__x86.get_pc_thunk.bx` and then a fixed add to

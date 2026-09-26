@@ -1874,16 +1874,16 @@ i32 Action_NewSebulba(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *
         object->run_speed_override = 0.0f;
     } else {
         if ((i8)ps->ai_state <= 2) {
-            i32 index = (i8)ps->ai_index;
+            i8 index = (i8)ps->ai_index;
             float goal;
-            if (index > 3)
-                goal = sebulba_goal_ahead_vals[3];
-            else
+            if (index <= 3)
                 goal = sebulba_goal_ahead_vals[index];
+            else
+                goal = sebulba_goal_ahead_vals[3];
             i8 socket_index = (i8)object->field_0x661;
             float base_speed = object->apiobj.character_data->game_character->run_speed;
             float distance = 0.0f;
-            if (socket_index == -1 || socket_index != (i8)player->field_0x661)
+            if (socket_index == -1 || (u8)socket_index != player->field_0x661)
                 goto catchup;
 
             {
