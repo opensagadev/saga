@@ -171,7 +171,10 @@ namespace {
         u32 runtime_flag_6[GIZFORCE_PROGRESS_WORDS];
         u32 runtime_flag_7[GIZFORCE_PROGRESS_WORDS];
         u32 field_aa_flag_0[GIZFORCE_PROGRESS_WORDS];
-        i8 group_members[8][8];
+        union {
+            i8 group_members[8][8];
+            u32 group_member_words[16];
+        };
     };
 
     DECOMP_ASSERT(sizeof(GIZFORCEPROGRESS_s) == 0xb0, "GIZFORCE progress ABI");
@@ -1006,7 +1009,39 @@ static void GizForces_StoreProgress(void *, void *data, void *progress_ptr) {
         return;
     }
 
-    ClearForceProgress(progress);
+    // The stored snapshot initializes whole words in field order before
+    // packing live force and group state.
+#define CLEAR_FORCE_PROGRESS_FIELD(field, value)                                                                       \
+    progress->field[0] = value;                                                                                        \
+    progress->field[1] = value;                                                                                        \
+    progress->field[2] = value;                                                                                        \
+    progress->field[3] = value
+    CLEAR_FORCE_PROGRESS_FIELD(progress_flag_0, 0xffffffff);
+    CLEAR_FORCE_PROGRESS_FIELD(progress_flag_1, 0xffffffff);
+    CLEAR_FORCE_PROGRESS_FIELD(runtime_flag_1, 0);
+    CLEAR_FORCE_PROGRESS_FIELD(runtime_flag_3, 0);
+    CLEAR_FORCE_PROGRESS_FIELD(runtime_flag_6, 0);
+    CLEAR_FORCE_PROGRESS_FIELD(runtime_flag_7, 0);
+    CLEAR_FORCE_PROGRESS_FIELD(field_aa_flag_0, 0);
+#undef CLEAR_FORCE_PROGRESS_FIELD
+#define CLEAR_FORCE_GROUP_WORD(word) progress->group_member_words[word] = 0xffffffff
+    CLEAR_FORCE_GROUP_WORD(0);
+    CLEAR_FORCE_GROUP_WORD(1);
+    CLEAR_FORCE_GROUP_WORD(2);
+    CLEAR_FORCE_GROUP_WORD(3);
+    CLEAR_FORCE_GROUP_WORD(4);
+    CLEAR_FORCE_GROUP_WORD(5);
+    CLEAR_FORCE_GROUP_WORD(6);
+    CLEAR_FORCE_GROUP_WORD(7);
+    CLEAR_FORCE_GROUP_WORD(8);
+    CLEAR_FORCE_GROUP_WORD(9);
+    CLEAR_FORCE_GROUP_WORD(10);
+    CLEAR_FORCE_GROUP_WORD(11);
+    CLEAR_FORCE_GROUP_WORD(12);
+    CLEAR_FORCE_GROUP_WORD(13);
+    CLEAR_FORCE_GROUP_WORD(14);
+    CLEAR_FORCE_GROUP_WORD(15);
+#undef CLEAR_FORCE_GROUP_WORD
     u32 count = force_sys->count;
     if (count > GIZFORCE_PROGRESS_CAPACITY) {
         count = GIZFORCE_PROGRESS_CAPACITY;
@@ -1038,16 +1073,30 @@ static void GizForces_StoreProgress(void *, void *data, void *progress_ptr) {
         }
     }
 
-    for (i32 group_index = 0; group_index < 8; ++group_index) {
-        GIZFORCEGROUP_s &group = force_sys->groups[group_index];
-        for (i32 member = 0; member < 8; ++member) {
-            i8 force_index = -1;
-            if (member < group.count && group.forces[member] != NULL) {
-                force_index = static_cast<i8>(group.forces[member] - force_sys->forces);
-            }
-            progress->group_members[group_index][member] = force_index;
-        }
-    }
+#define STORE_FORCE_GROUP_MEMBER(group_index, member)                                                                  \
+    progress->group_members[group_index][member] =                                                                     \
+        force_sys->groups[group_index].count > member                                                                  \
+            ? static_cast<i8>(force_sys->groups[group_index].forces[member] - force_sys->forces)                       \
+            : -1
+#define STORE_FORCE_GROUP(group_index)                                                                                 \
+    STORE_FORCE_GROUP_MEMBER(group_index, 0);                                                                          \
+    STORE_FORCE_GROUP_MEMBER(group_index, 1);                                                                          \
+    STORE_FORCE_GROUP_MEMBER(group_index, 2);                                                                          \
+    STORE_FORCE_GROUP_MEMBER(group_index, 3);                                                                          \
+    STORE_FORCE_GROUP_MEMBER(group_index, 4);                                                                          \
+    STORE_FORCE_GROUP_MEMBER(group_index, 5);                                                                          \
+    STORE_FORCE_GROUP_MEMBER(group_index, 6);                                                                          \
+    STORE_FORCE_GROUP_MEMBER(group_index, 7)
+    STORE_FORCE_GROUP(0);
+    STORE_FORCE_GROUP(1);
+    STORE_FORCE_GROUP(2);
+    STORE_FORCE_GROUP(3);
+    STORE_FORCE_GROUP(4);
+    STORE_FORCE_GROUP(5);
+    STORE_FORCE_GROUP(6);
+    STORE_FORCE_GROUP(7);
+#undef STORE_FORCE_GROUP
+#undef STORE_FORCE_GROUP_MEMBER
 }
 
 static void GizForces_Reset(void *world_ptr, void *data, void *progress_ptr) {

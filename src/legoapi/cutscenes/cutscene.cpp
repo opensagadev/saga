@@ -2165,8 +2165,9 @@ static __used__ void instNuGCutCamSysUpdate(instNUGCUTSCENE_s *instance, float f
 
     NUGCUTCAMERASYS_s *system = instance->cutscene->camera_system;
     instNUGCUTSCENECAMERA_s *camera_instance = instance->camera_instance;
-    if (system->focus_state_animation != NULL && instance->cutscene->version > 4) {
-        u8 focus_index = 0xff;
+    u8 focus_index;
+    u8 next_camera_index;
+    if (static_cast<u8>(instance->cutscene->version) > 4 && system->focus_state_animation != NULL) {
         if (StateAnimEvaluate(system->focus_state_animation, &camera_instance->focus_state_index, &focus_index,
                               frame) != 0) {
             if (focus_index == 0xff) {
@@ -2178,9 +2179,8 @@ static __used__ void instNuGCutCamSysUpdate(instNUGCUTSCENE_s *instance, float f
     }
 
     if (system->state_animation != NULL) {
-        u8 camera_index = 0xff;
-        if (StateAnimEvaluate(system->state_animation, &camera_instance->state_index, &camera_index, frame) != 0) {
-            camera_instance->camera_index = static_cast<i8>(camera_index);
+        if (StateAnimEvaluate(system->state_animation, &camera_instance->state_index, &next_camera_index, frame) != 0) {
+            camera_instance->camera_index = static_cast<i8>(next_camera_index);
             instance->flags_8d |= 0x10;
             cutscenecamchange = 1;
         }
@@ -2225,12 +2225,11 @@ static __used__ void instNuGCutCamSysUpdate(instNUGCUTSCENE_s *instance, float f
     NUGCUTCAMERA_s *camera = &system->cameras[camera_index];
     instNUGCUTCAMSTATE_s *camera_state = &camera_instance->camera_states[camera_index];
     CutSceneCameraCTRL = 1;
-    if ((camera->flags & 1) == 0 || system->animation == NULL ||
-        NuAnimNumNodes(system->animation) <= camera->animation_node) {
+    if ((camera->flags & 1) == 0 || NuAnimNumNodes(system->animation) <= camera->animation_node) {
         cutscenecammtx = camera->base_matrix;
     } else {
         const u32 focus_magic = system->focus_animation == NULL ? 0 : *reinterpret_cast<u32 *>(system->focus_animation);
-        if (instance->cutscene->version > 4 && system->focus_animation != NULL &&
+        if (static_cast<u8>(instance->cutscene->version) > 4 && system->focus_animation != NULL &&
             focus_magic - ANI3_MAGIC_VERSION_4 < 2) {
             f32 *values =
                 NuAnimCurveExtractAllNodeCurves_3(reinterpret_cast<ani3_animheader_s *>(system->focus_animation),

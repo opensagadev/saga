@@ -306,7 +306,9 @@ i32 LookupRippleEffectIndex(char *name) {
 
 void AddRipple(ripple_set_s *set, numtx_s *matrix, float size, float growth, float lifetime, float delay,
                RGBA start_color, RGBA end_color, i32 flags, numtl_s *material, nuvec_s *velocity) {
-    if (material == NULL || set == NULL)
+    if (material == NULL)
+        return;
+    if (set == NULL)
         return;
     u16 active_count = set->active_count;
     u16 capacity = set->count;
@@ -356,7 +358,10 @@ void AddRipple(ripple_set_s *set, numtx_s *matrix, float size, float growth, flo
     node->color = start_color;
     node->age = 0.0f;
     node->delay = delay;
-    node->velocity = velocity != NULL ? *velocity : v000;
+    if (velocity != NULL)
+        node->velocity = *velocity;
+    else
+        node->velocity = v000;
 }
 
 static void RE_end_radius(NUFPAR *parser) {

@@ -4052,7 +4052,8 @@ i32 TerrainPlatformEmbedded(nuvec_s *movement_delta) {
     }
     header[0] = 0;
     header[1] = 0;
-    u8 flags[2] = {0, 0};
+    u8 flags[2];
+    flags[0] = 0;
     DerotateMovementVector();
     HitTerrain();
     TerrainImpactNorm();

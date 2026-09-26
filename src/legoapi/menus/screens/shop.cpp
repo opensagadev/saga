@@ -889,47 +889,41 @@ static i32 SubItemMenu(MENU_s *menu) {
     i32 *ids = NULL, *count = NULL;
     NUVEC *positions = NULL;
     f32 ypush = 0.0f;
-    switch (picked) {
-        case 0:
-            items = HintItems;
-            ids = HintShelfIds;
-            positions = HintCurPos;
-            count = &SHOPHINTCOUNT;
-            if (hintdrawwait <= 0.0f && (items[ids[3]].unlocked == 1 || items[ids[3]].price == 0)) {
-                Hint_ResetHint(HintTab[static_cast<u16>(items[ids[3]].item_id)], 0);
-                Hint_SetHintFromId(HintTab[static_cast<u16>(items[ids[3]].item_id)], 1, 0);
-            } else
-                Hint_CancelCurrent();
-            ypush = SubNormCharPush;
-            break;
-        case 1:
-            items = CharItems;
-            ids = CharShelfIds;
-            positions = CharCurPos;
-            count = &SHOPCHARCOUNT;
-            ypush = SubNormCharPush;
-            break;
-        case 2:
-            items = ExtraItems;
-            ids = ExtraShelfIds;
-            positions = ExtraCurPos;
-            count = &SHOPEXTRACOUNT;
-            ypush = SubNormCharPush;
-            break;
-        case 4:
-            items = BrickItems;
-            ids = BrickShelfIds;
-            positions = BrickCurPos;
-            count = &SHOPGOLDBRICKS;
-            ypush = SubNormCharPush;
-            break;
-        case 5:
-            items = CutItems;
-            ids = CutShelfIds;
-            positions = CutCurPos;
-            count = &SHOPCUTCOUNT;
-            ypush = SubNormCharPush;
-            break;
+    if (picked == 0) {
+        items = HintItems;
+        ids = HintShelfIds;
+        positions = HintCurPos;
+        count = &SHOPHINTCOUNT;
+        if (hintdrawwait <= 0.0f && (items[ids[3]].unlocked == 1 || items[ids[3]].price == 0)) {
+            Hint_ResetHint(HintTab[static_cast<u16>(items[ids[3]].item_id)], 0);
+            Hint_SetHintFromId(HintTab[static_cast<u16>(items[ids[3]].item_id)], 1, 0);
+        } else
+            Hint_CancelCurrent();
+        ypush = SubNormCharPush;
+    } else if (picked == 1) {
+        items = CharItems;
+        ids = CharShelfIds;
+        positions = CharCurPos;
+        count = &SHOPCHARCOUNT;
+        ypush = SubNormCharPush;
+    } else if (picked == 2) {
+        items = ExtraItems;
+        ids = ExtraShelfIds;
+        positions = ExtraCurPos;
+        count = &SHOPEXTRACOUNT;
+        ypush = SubNormCharPush;
+    } else if (picked == 4) {
+        items = BrickItems;
+        ids = BrickShelfIds;
+        positions = BrickCurPos;
+        count = &SHOPGOLDBRICKS;
+        ypush = SubNormCharPush;
+    } else if (picked == 5) {
+        items = CutItems;
+        ids = CutShelfIds;
+        positions = CutCurPos;
+        count = &SHOPCUTCOUNT;
+        ypush = SubNormCharPush;
     }
     if (slidetimer >= 0.0f) {
         slidetimer -= FRAMETIME;
@@ -937,11 +931,11 @@ static i32 SubItemMenu(MENU_s *menu) {
             ShopNameAlpha = 0.0f;
     }
     if (easesubin != 0) {
-        const f32 t = ShopClamp01(1.0f - ShopSinePhase(1.0f - slidetimer * 8.0f));
+        const f32 factor = 1.0f - ShopSinePhase(1.0f - slidetimer * 8.0f);
         if (easesubin == 1)
-            inoutscale = t;
+            inoutscale = ShopClamp01(factor);
         else if (easesubin == -1)
-            inoutscale = 1.0f - t;
+            inoutscale = 1.0f - ShopClamp01(factor);
     }
 
     i32 left = 0, right = 0;

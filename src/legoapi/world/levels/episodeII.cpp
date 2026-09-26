@@ -26,6 +26,7 @@
 #include "legoapi/world/levels/levels.h"
 #include "legoapi/render/core/render.h"
 #include "nu2api/nu3d/nuspecial.h"
+#include "nu2api/nu3d/nulgtlaser.h"
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/nu3d/nuhspecial.h"
 #include "nu2api/numath/nurand.h"
@@ -427,7 +428,48 @@ void BountyHunterPursuitC_Update(WORLDINFO_s *world) {
 }
 
 void BountyHunterPursuitD_Update(WORLDINFO_s *) {
-    STUBBED();
+    GameObject_s *zam = LevGameObject[0];
+    if (zam == NULL || zam->field_0xe37 == 0)
+        return;
+
+    GIZMOBLOWUP_s *nearest = NULL;
+    f32 nearest_distance_sq = 1000000000.0f;
+
+#define CHECK_PURSUIT_GENERATOR(index)                                                                                 \
+    if (LevGizmo[index] != NULL) {                                                                                     \
+        GIZMOBLOWUP_s *generator = static_cast<GIZMOBLOWUP_s *>(LevGizmo[index]->object);                              \
+        if ((generator->output_flags & 1) == 0) {                                                                      \
+            f32 distance_sq = NuVecDistSqr(&generator->position, &zam->apiobj.collision_position, NULL);               \
+            if (distance_sq < nearest_distance_sq) {                                                                   \
+                nearest_distance_sq = distance_sq;                                                                     \
+                nearest = generator;                                                                                   \
+            }                                                                                                          \
+        }                                                                                                              \
+    }
+    CHECK_PURSUIT_GENERATOR(0)
+    CHECK_PURSUIT_GENERATOR(1)
+    CHECK_PURSUIT_GENERATOR(2)
+    CHECK_PURSUIT_GENERATOR(3)
+    CHECK_PURSUIT_GENERATOR(4)
+    CHECK_PURSUIT_GENERATOR(5)
+    CHECK_PURSUIT_GENERATOR(6)
+    CHECK_PURSUIT_GENERATOR(7)
+    CHECK_PURSUIT_GENERATOR(8)
+    CHECK_PURSUIT_GENERATOR(9)
+    CHECK_PURSUIT_GENERATOR(10)
+    CHECK_PURSUIT_GENERATOR(11)
+#undef CHECK_PURSUIT_GENERATOR
+
+    if (nearest == NULL) {
+        zam->field_0xe37 = 0;
+        DrawBossHitPoints(zam);
+        return;
+    }
+    if (nearest_distance_sq < 1000000.0f) {
+        NUVEC delta;
+        f32 distance = NuVecDist(&zam->apiobj.collision_position, &nearest->position, &delta);
+        NuLgtLaser(0, 1.0f, 1.0f, 0.01f, &nearest->position, &delta, 0xff808040, 1.5f, distance);
+    }
 }
 
 // ===========================================================================

@@ -451,63 +451,62 @@ extern i32 STATUS_R, STATUS_G, STATUS_B;
 
 void AllMiniKits_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current) {
     char text[60];
-    if (current == 0) {
-        if (stage->field_0x12 == 0)
+    if (current != 0) {
+        if (stage->field_0x14 < 1)
             return;
-        const f32 alpha = getFinishedStatusAlpha(packet);
-        const i32 opacity = static_cast<i32>(alpha * 128.0f);
-        i32 angle = 0x2000;
-        if (GameTimer.time_elapsed_mod_seconds <= 0.25f)
-            angle = (static_cast<i32>(GameTimer.time_elapsed_mod_seconds * 32768.0f + 16384.0f) >> 1) & 0x7fff;
-        if (Game.area_save[packet->area->index].field_0x5[0] == 0) {
-            const f32 size = ((1.0f - fabsf(NuTrigTable[angle])) + 1.0f) * 1.2f;
-            Text3DEx("?", -0.6f, -0.6f, 1.1f, size, size, size, 0, 255, 255, 255, opacity);
-        } else {
-            DrawStatusMiniKit(-0.6f, -0.5f, 1.1f,
-                              NuTrigTable[(static_cast<i32>(alpha * 16384.0f) >> 1) & 0x7fff] * 0.15f, 1.0f,
-                              Game.area_save[packet->area->index].field_0x5[0], packet, 0.0f);
+        const f32 time = stage->field_0x18;
+        f32 title_alpha;
+        f32 icon_alpha = 0.0f;
+        f32 y = 0.225f;
+        if (time < 0.5f)
+            title_alpha = time + time;
+        else if (time < 3.5f)
+            title_alpha = 1.0f;
+        else if (time < 4.0f) {
+            icon_alpha = (time - 3.5f) + (time - 3.5f);
+            title_alpha = 1.0f - icon_alpha;
+            y = (1.0f - NuTrigTable[(static_cast<i32>(icon_alpha * 16384.0f) >> 1) & 0x7fff]) * -0.5f + 0.225f;
+        } else if (time < 6.0f) {
+            title_alpha = 0.0f;
+            icon_alpha = 1.0f;
+            y = (1.0f - NuTrigTable[0x2000]) * -0.5f + 0.225f;
+        } else if (time < 6.5f) {
+            title_alpha = 0.0f;
+            icon_alpha = 1.0f - ((time - 6.0f) + (time - 6.0f));
+            if (icon_alpha <= 0.0f)
+                return;
+        } else
+            title_alpha = 0.0f;
+        if (icon_alpha > 0.0f) {
+            DrawCharIcon(id_SLAVE1, 0.0f, y, 0.0f, 0.4f, 0xa7, icon_alpha, icon_alpha, 1, NULL);
+            SmartTextEx(TTab[CDataList[id_SLAVE1].name_id], 0.0f, -0.1f, 1.0f, 0.6f, 0.6f, 0.6f, 0, STATUS_R, STATUS_G,
+                        STATUS_B, 1.7f, 1, NULL, 0, static_cast<i32>(icon_alpha * 128.0f));
         }
-        if (Game.area_save[packet->area->index].field_0x5[0] == packet->minikit_max) {
-            Text3DEx("$", -0.6f, -0.7f, 1.0f, 0.8f, 0.8f, 0.8f, 0, 255, 0, 127, opacity);
-        } else {
-            sprintf(text, "%i/%i", Game.area_save[packet->area->index].field_0x5[0], packet->minikit_max);
-            Text3DEx(text, -0.6f, -0.8f, 1.0f, 0.5f, 0.5f, 0.5f, 0, 255, 0, 127, opacity);
+        if (title_alpha > 0.0f) {
+            Text3DEx(TTab[tALLMINIKITSBUILT], 0.0f, 0.225f, 1.0f, 0.7f, 0.7f, 0.7f, 0, STATUS_R, STATUS_G, STATUS_B,
+                     static_cast<u8>(static_cast<i32>(title_alpha * 128.0f)));
         }
         return;
     }
-    if (stage->field_0x14 < 1)
+    if (stage->field_0x12 == 0)
         return;
-    const f32 time = stage->field_0x18;
-    f32 title_alpha;
-    f32 icon_alpha = 0.0f;
-    f32 y = 0.225f;
-    if (time < 0.5f)
-        title_alpha = time + time;
-    else if (time < 3.5f)
-        title_alpha = 1.0f;
-    else if (time < 4.0f) {
-        icon_alpha = (time - 3.5f) + (time - 3.5f);
-        title_alpha = 1.0f - icon_alpha;
-        y = (1.0f - NuTrigTable[(static_cast<i32>(icon_alpha * 16384.0f) >> 1) & 0x7fff]) * -0.5f + 0.225f;
-    } else if (time < 6.0f) {
-        title_alpha = 0.0f;
-        icon_alpha = 1.0f;
-        y = (1.0f - NuTrigTable[0x2000]) * -0.5f + 0.225f;
-    } else if (time < 6.5f) {
-        title_alpha = 0.0f;
-        icon_alpha = 1.0f - ((time - 6.0f) + (time - 6.0f));
-        if (icon_alpha <= 0.0f)
-            return;
-    } else
-        title_alpha = 0.0f;
-    if (icon_alpha > 0.0f) {
-        DrawCharIcon(id_SLAVE1, 0.0f, y, 0.0f, 0.4f, 0xa7, icon_alpha, icon_alpha, 1, NULL);
-        SmartTextEx(TTab[CDataList[id_SLAVE1].name_id], 0.0f, -0.1f, 1.0f, 0.6f, 0.6f, 0.6f, 0, STATUS_R, STATUS_G,
-                    STATUS_B, 1.7f, 1, NULL, 0, static_cast<i32>(icon_alpha * 128.0f));
+    const f32 alpha = getFinishedStatusAlpha(packet);
+    const i32 opacity = static_cast<i32>(alpha * 128.0f);
+    i32 angle = 0x2000;
+    if (GameTimer.time_elapsed_mod_seconds <= 0.25f)
+        angle = (static_cast<i32>(GameTimer.time_elapsed_mod_seconds * 32768.0f + 16384.0f) >> 1) & 0x7fff;
+    if (Game.area_save[packet->area->index].field_0x5[0] == 0) {
+        const f32 size = ((1.0f - fabsf(NuTrigTable[angle])) + 1.0f) * 1.2f;
+        Text3DEx("?", -0.6f, -0.6f, 1.1f, size, size, size, 0, 255, 255, 255, opacity);
+    } else {
+        DrawStatusMiniKit(-0.6f, -0.5f, 1.1f, NuTrigTable[(static_cast<i32>(alpha * 16384.0f) >> 1) & 0x7fff] * 0.15f,
+                          1.0f, Game.area_save[packet->area->index].field_0x5[0], packet, 0.0f);
     }
-    if (title_alpha > 0.0f) {
-        Text3DEx(TTab[tALLMINIKITSBUILT], 0.0f, 0.225f, 1.0f, 0.7f, 0.7f, 0.7f, 0, STATUS_R, STATUS_G, STATUS_B,
-                 static_cast<i32>(title_alpha * 128.0f));
+    if (Game.area_save[packet->area->index].field_0x5[0] == packet->minikit_max) {
+        Text3DEx("$", -0.6f, -0.7f, 1.0f, 0.8f, 0.8f, 0.8f, 0, 255, 0, 127, opacity);
+    } else {
+        sprintf(text, "%i/%i", Game.area_save[packet->area->index].field_0x5[0], packet->minikit_max);
+        Text3DEx(text, -0.6f, -0.8f, 1.0f, 0.5f, 0.5f, 0.5f, 0, 255, 0, 127, opacity);
     }
 }
 

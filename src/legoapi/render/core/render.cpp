@@ -804,30 +804,20 @@ extern CABLE_s cables[8];
 extern f32 tow_length;
 extern NUMTL *SolidMtl3D;
 
-static void DrawCableSegment(const NUVEC &start, const NUVEC &end, f32 sag) {
-    if (solid_cable == 0) {
-        NURND_VERTEX3D vertices[2] = {};
-        vertices[0].position = start;
-        vertices[1].position = end;
-        vertices[0].colour = 0xff000000;
-        vertices[1].colour = 0xff000000;
-        NuRndrLine3d(vertices, SolidMtl3D, NULL);
-    } else {
-        NUVEC first = start;
-        NUVEC second = end;
-        DrawRopeSingle(&first, &second, 1.0f, ropemtl, sag, sag, 10.0f, 5.0f);
-    }
-    ++nsegments_drawn;
-}
-
 void DrawCables() {
+    NURND_VERTEX3D vertices[2];
+    vertices[0].colour = 0xff000000;
+    vertices[1].colour = 0xff000000;
     nsegments_drawn = 0;
-    for (i32 cable_index = 0; cable_index < 8; ++cable_index) {
-        CABLE_s &cable = cables[cable_index];
-        if ((cable.flags_1e9 & 1) == 0 || cable.point_count < 2) {
+    for (CABLE_s *current = cables; current != cables + 8; ++current) {
+        CABLE_s &cable = *current;
+        if ((cable.flags_1e9 & 1) == 0) {
             continue;
         }
 
+        const f32 first_y = cable.points[0].y;
+        const f32 last_y = cable.points[cable.point_count - 1].y;
+        const f32 y_span = last_y - first_y;
         if ((cable.flags_1e9 & 4) != 0) {
             cable.slack += FRAMETIME * cable_slack * slack_factor;
             if (cable.slack > cable_slack) {
@@ -839,8 +829,6 @@ void DrawCables() {
             cable.slack = 0.0f;
         }
 
-        const f32 first_y = cable.points[0].y;
-        const f32 last_y = cable.points[cable.point_count - 1].y;
         f32 distance_along = 0.0f;
         for (i32 segment = 0; segment < cable.point_count - 1; ++segment) {
             const f32 segment_length = cable.segment_lengths[segment];
@@ -860,11 +848,11 @@ void DrawCables() {
                                            : 0.0f;
                 NUVEC start = {
                     cable.points[segment].x + (cable.points[segment + 1].x - cable.points[segment].x) * local_start,
-                    first_y + (last_y - first_y) * global_start,
+                    first_y + y_span * global_start,
                     cable.points[segment].z + (cable.points[segment + 1].z - cable.points[segment].z) * local_start};
                 NUVEC end = {
                     cable.points[segment].x + (cable.points[segment + 1].x - cable.points[segment].x) * local_end,
-                    first_y + (last_y - first_y) * global_end,
+                    first_y + y_span * global_end,
                     cable.points[segment].z + (cable.points[segment + 1].z - cable.points[segment].z) * local_end};
                 start.y -= cable.slack * NU_SIN_LUT(static_cast<i32>(global_start * 32768.0f));
                 end.y -= cable.slack * NU_SIN_LUT(static_cast<i32>(global_end * 32768.0f));
@@ -876,7 +864,14 @@ void DrawCables() {
                 if (ground != 2000000.0f && end.y < ground + 0.1f) {
                     end.y = ground + 0.1f;
                 }
-                DrawCableSegment(start, end, cable.slack);
+                if (solid_cable == 0) {
+                    vertices[0].position = start;
+                    vertices[1].position = end;
+                    NuRndrLine3d(vertices, SolidMtl3D, NULL);
+                } else {
+                    DrawRopeSingle(&start, &end, 1.0f, ropemtl, cable.slack, cable.slack, 10.0f, 5.0f);
+                }
+                ++nsegments_drawn;
                 previous = end;
             }
             distance_along += segment_length;
@@ -3431,7 +3426,7 @@ static void DrawWeapons(GameObject_s *object, i32 reflection, f32 weapon_scale) 
     if (data->field_0x94 & 0x200000) {
         return;
     }
-    bool sabre = false;
+    i32 sabre = 0;
     u16 rotation = 0;
     for (i32 hand = 0; hand < 4; ++hand) {
         const i32 joint = data->weapon_joints[hand];
@@ -4068,6 +4063,7 @@ static __used__ __attribute__((regparm(1))) void DisplayListMaterialClipUpdate(n
 #include "nu2api/nu3d/nurndr.h"
 
 extern i32 qrand(void);
+extern f32 SeekLinearF(f32, f32, f32);
 
 static NUGSCN *backdrop_scene = nullptr;
 
@@ -4080,14 +4076,14 @@ f32 backdrop_top_g = 0.0f;
 f32 backdrop_top_b = 0.0f;
 f32 backdrop_bot_r = 0.0f;
 f32 backdrop_bot_g = 0.0f;
-f32 backdrop_bot_b = 0.0f;
+f32 backdrop_bot_b = 24.0f;
 
 static f32 backdrop_top_tr = 0.0f;
 static f32 backdrop_top_tg = 0.0f;
 static f32 backdrop_top_tb = 0.0f;
 static f32 backdrop_bot_tr = 0.0f;
 static f32 backdrop_bot_tg = 0.0f;
-static f32 backdrop_bot_tb = 0.0f;
+static f32 backdrop_bot_tb = 24.0f;
 
 i32 backdrop_black = 0;
 
@@ -4147,23 +4143,52 @@ void BackDrop_ResetColours() {
 }
 
 void BackDrop_UpdateColours(i32 instant) {
-    const f32 lerp = (instant != 0) ? 1.0f : 0.05f;
-    auto seek = [&](f32 &cur, f32 tgt) { cur += (tgt - cur) * lerp; };
     if (backdrop_black) {
-        seek(backdrop_top_r, 0.0f);
-        seek(backdrop_top_g, 0.0f);
-        seek(backdrop_top_b, 0.0f);
-        seek(backdrop_bot_r, 0.0f);
-        seek(backdrop_bot_g, 0.0f);
-        seek(backdrop_bot_b, 0.0f);
+        backdrop_top_r = 0.0f;
+        backdrop_top_g = 0.0f;
+        backdrop_top_b = 0.0f;
+        backdrop_bot_r = 0.0f;
+        backdrop_bot_g = 0.0f;
+        backdrop_bot_b = 0.0f;
         return;
     }
-    seek(backdrop_top_r, backdrop_top_tr);
-    seek(backdrop_top_g, backdrop_top_tg);
-    seek(backdrop_top_b, backdrop_top_tb);
-    seek(backdrop_bot_r, backdrop_bot_tr);
-    seek(backdrop_bot_g, backdrop_bot_tg);
-    seek(backdrop_bot_b, backdrop_bot_tb);
+
+    if (backdrop_back_wait > 0.0f) {
+        backdrop_back_wait -= FRAMETIME;
+        if (!(0.0f >= backdrop_back_wait)) {
+            return;
+        }
+        if (instant != 0) {
+            backdrop_top_tb = 0.0f;
+            backdrop_top_tg = 0.0f;
+            backdrop_top_tr = 0.0f;
+            backdrop_bot_tb = 0.0f;
+            backdrop_bot_tg = 0.0f;
+            backdrop_bot_tr = 0.0f;
+        } else {
+            backdrop_top_tr = 0.0f;
+            backdrop_top_tg = 0.0f;
+            backdrop_top_tb = 0.0f;
+            backdrop_bot_tr = 0.0f;
+            backdrop_bot_tg = 0.0f;
+            backdrop_bot_tb = 0.0f;
+        }
+        return;
+    }
+
+    if (backdrop_top_r == backdrop_top_tr && backdrop_top_g == backdrop_top_tg && backdrop_top_b == backdrop_top_tb &&
+        backdrop_bot_r == backdrop_bot_tr && backdrop_bot_g == backdrop_bot_tg && backdrop_bot_b == backdrop_bot_tb) {
+        backdrop_back_wait = static_cast<f32>(qrand()) * (1.0f / 65535.0f) * 2.5f + 2.5f;
+        return;
+    }
+
+    const f32 step = FRAMETIME * 10.0f;
+    backdrop_top_r = SeekLinearF(backdrop_top_r, backdrop_top_tr, step);
+    backdrop_top_g = SeekLinearF(backdrop_top_g, backdrop_top_tg, step);
+    backdrop_top_b = SeekLinearF(backdrop_top_b, backdrop_top_tb, step);
+    backdrop_bot_r = SeekLinearF(backdrop_bot_r, backdrop_bot_tr, step);
+    backdrop_bot_g = SeekLinearF(backdrop_bot_g, backdrop_bot_tg, step);
+    backdrop_bot_b = SeekLinearF(backdrop_bot_b, backdrop_bot_tb, step);
 }
 
 void BackDrop_Draw(float alpha, i32 flags) {

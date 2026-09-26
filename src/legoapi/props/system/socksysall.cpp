@@ -666,13 +666,13 @@ static f32 BestSockPosition(SOCKSYS *sock_sys, NUVEC *point, SOCKPOSITION *resul
         return 0.0f;
     }
 
-    bool within_bounds =
-        sock->min.x <= point->x && point->x <= sock->max.x && sock->min.z <= point->z && point->z <= sock->max.z;
     if ((sock->flags & 1) == 0) {
-        within_bounds = within_bounds && sock->min.y <= point->y && point->y <= sock->max.y;
-    }
-    if (!within_bounds) {
-        return 0.0f;
+        if (sock->min.x > point->x || point->x > sock->max.x || sock->min.y > point->y || point->y > sock->max.y ||
+            sock->min.z > point->z || point->z > sock->max.z)
+            return 0.0f;
+    } else {
+        if (sock->min.x > point->x || point->x > sock->max.x || sock->min.z > point->z || point->z > sock->max.z)
+            return 0.0f;
     }
 
     i32 segment_count = sock->length + (sock->unknown_33 != 0 ? 1 : 0);
@@ -708,7 +708,9 @@ static f32 BestSockPosition(SOCKSYS *sock_sys, NUVEC *point, SOCKPOSITION *resul
             bool inside = false;
 
             if ((sock->flags & 1) == 0) {
-                if (BoundsOverlap(segment_data->min, segment_data->max, *point, *point, false)) {
+                if (point->x >= segment_data->min.x && point->x <= segment_data->max.x &&
+                    point->y >= segment_data->min.y && point->y <= segment_data->max.y &&
+                    point->z >= segment_data->min.z && point->z <= segment_data->max.z) {
                     NUVEC *c1 = &sock->c->pts[next];
                     NUVEC *d1 = &sock->d->pts[next];
                     inside = OnOrOutsidePlane(point, a0, &segment_data->planes[0]) &&

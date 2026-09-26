@@ -3275,22 +3275,25 @@ extern "C" {
     // per-joint rotation/translation overrides before parent concatenation.
     void NuHGobjEval(nuhgobj_s *object, i32 override_count, nuhgobjjointoverride_s *overrides, NUMTX *matrices) {
         nuhgobjjointoverride_s *override_by_joint[256];
-        memset(override_by_joint, 0, static_cast<usize>(object->joint_count) * sizeof(*override_by_joint));
-
-        for (i32 i = 0; i < override_count; ++i) {
-            const u8 override_index = overrides[i].joint_index;
-            if (override_index < object->joint_override_map_count) {
-                const u8 joint_index = object->joint_override_map[override_index];
-                if (joint_index != 0xff) {
-                    override_by_joint[joint_index] = &overrides[i];
+        if (override_count != 0) {
+            memset(override_by_joint, 0, static_cast<usize>(object->joint_count) * sizeof(*override_by_joint));
+            for (u8 i = 0; i < override_count; ++i) {
+                const u8 override_index = overrides[i].joint_index;
+                if (override_index < object->joint_override_map_count) {
+                    const u8 joint_index = object->joint_override_map[override_index];
+                    if (joint_index != 0xff) {
+                        override_by_joint[joint_index] = &overrides[i];
+                    }
                 }
             }
         }
 
-        for (i32 joint_index = 0; joint_index < object->joint_count; ++joint_index) {
-            NUMTX local_matrix = object->bind_matrices[joint_index];
-            nuhgobjjointoverride_s *joint_override = override_by_joint[joint_index];
+        for (u8 joint_index = 0; joint_index < object->joint_count; ++joint_index) {
+            NUMTX_ALIGNED16 transformed_matrix;
+            NUMTX *local_matrix = &object->bind_matrices[joint_index];
+            nuhgobjjointoverride_s *joint_override = override_count != 0 ? override_by_joint[joint_index] : NULL;
             if (joint_override != NULL) {
+                transformed_matrix = *local_matrix;
                 constexpr f32 kRadiansToNuAngle = 10430.378f;
                 NUANGVEC angles = {
                     static_cast<NUANG>(joint_override->rotation_x * kRadiansToNuAngle),
@@ -3300,14 +3303,15 @@ extern "C" {
                 NUMTX override_matrix;
                 NuMtxSetRotateXYZVU0(&override_matrix, &angles);
                 NuMtxTranslate(&override_matrix, &joint_override->translation);
-                NuMtxMulVU0(&local_matrix, &local_matrix, &override_matrix);
+                NuMtxMulVU0(&transformed_matrix, &override_matrix, &transformed_matrix);
+                local_matrix = &transformed_matrix;
             }
 
             const u8 parent_index = object->joints[joint_index].parent_index;
             if (parent_index == 0xff) {
-                matrices[joint_index] = local_matrix;
+                matrices[joint_index] = *local_matrix;
             } else {
-                NuMtxMulVU0(&matrices[joint_index], &local_matrix, &matrices[parent_index]);
+                NuMtxMulVU0(&matrices[joint_index], local_matrix, &matrices[parent_index]);
             }
         }
     }

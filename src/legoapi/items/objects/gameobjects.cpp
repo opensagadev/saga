@@ -3525,40 +3525,43 @@ void GameObjectOrigin(GameObject_s *object) {
     if (object->use_model_origin != 0) {
         PLAYERCHARACTERCONFIG_s *config = api.character_data->player_config;
         const i32 model_origin_joint = config->model_origin_joint;
-        CHARACTERMODEL_s *model = api.character_model;
-        if (model_origin_joint != -1 && model != NULL && model->points_of_interest[model_origin_joint] != NULL) {
-            f32 predicted_x;
-            f32 predicted_z;
-            if ((object->field_0xe24 & GAMEOBJECT_E24_FLAG_JOINT_MATRICES_UPDATED) == 0) {
-                api.collision_position = {0.0f, -object->character_bottom, 0.0f};
-                NuVecMtxRotate(&api.collision_position, &api.collision_position, &api.field_0xb8);
-                NuVecAdd(&api.collision_position, &api.collision_position, &api.position);
-                const f32 frame_time = FRAMETIME;
-                predicted_x = api.previous_velocity.x * frame_time;
-                predicted_vertical_displacement = api.previous_velocity.y * frame_time;
-                predicted_z = api.previous_velocity.z * frame_time;
-            } else {
-                const f32 frame_time = FRAMETIME;
-                predicted_x = api.previous_velocity.x * frame_time;
-                predicted_vertical_displacement = api.previous_velocity.y * frame_time;
-                predicted_z = api.previous_velocity.z * frame_time;
-                const NUVEC &joint_position = *NUMTX_GET_ROW_VEC(&object->joint_matrices[model_origin_joint], 3);
-                api.collision_position.x = joint_position.x + predicted_x;
-                api.collision_position.y = joint_position.y + predicted_vertical_displacement;
-                api.collision_position.y += (object->character_bottom + object->character_top) * api.field_0xa8 * 0.5f;
-                api.collision_position.z = joint_position.z + predicted_z;
+        if (model_origin_joint != -1) {
+            CHARACTERMODEL_s *model = api.character_model;
+            if (model != NULL && model->points_of_interest[model_origin_joint] != NULL) {
+                f32 predicted_x;
+                f32 predicted_z;
+                if ((object->field_0xe24 & GAMEOBJECT_E24_FLAG_JOINT_MATRICES_UPDATED) != 0) {
+                    const f32 frame_time = FRAMETIME;
+                    predicted_x = api.previous_velocity.x * frame_time;
+                    predicted_vertical_displacement = api.previous_velocity.y * frame_time;
+                    predicted_z = api.previous_velocity.z * frame_time;
+                    const NUVEC &joint_position = *NUMTX_GET_ROW_VEC(&object->joint_matrices[model_origin_joint], 3);
+                    api.collision_position.x = joint_position.x + predicted_x;
+                    api.collision_position.y = joint_position.y + predicted_vertical_displacement;
+                    api.collision_position.y +=
+                        (object->character_bottom + object->character_top) * api.field_0xa8 * 0.5f;
+                    api.collision_position.z = joint_position.z + predicted_z;
+                } else {
+                    api.collision_position = {0.0f, -object->character_bottom, 0.0f};
+                    NuVecMtxRotate(&api.collision_position, &api.collision_position, &api.field_0xb8);
+                    NuVecAdd(&api.collision_position, &api.collision_position, &api.position);
+                    const f32 frame_time = FRAMETIME;
+                    predicted_x = api.previous_velocity.x * frame_time;
+                    predicted_vertical_displacement = api.previous_velocity.y * frame_time;
+                    predicted_z = api.previous_velocity.z * frame_time;
+                }
+                api.collision_position.x += predicted_x;
+                api.collision_position.y += predicted_vertical_displacement;
+                api.collision_position.z += predicted_z;
+                origin_x = api.position.x + predicted_x;
+                origin_z = api.position.z + predicted_z;
+                goto update_bounds;
             }
-            api.collision_position.x += predicted_x;
-            api.collision_position.y += predicted_vertical_displacement;
-            api.collision_position.z += predicted_z;
-            origin_x = api.position.x + predicted_x;
-            origin_z = api.position.z + predicted_z;
-            goto update_bounds;
         }
 
         const i32 collision_origin_joint = config->collision_origin_joint;
         if (object->field_0xd24 == 1.0f && collision_origin_joint != -1 &&
-            model->points_of_interest[collision_origin_joint] != NULL && api.field_0x288 != 0) {
+            api.character_model->points_of_interest[collision_origin_joint] != NULL && api.field_0x288 != 0) {
             api.collision_position = *NUMTX_GET_ROW_VEC(&object->joint_matrices[collision_origin_joint], 3);
             const f32 frame_time = FRAMETIME;
             origin_x = api.position.x + api.previous_velocity.x * frame_time;
@@ -3568,7 +3571,7 @@ void GameObjectOrigin(GameObject_s *object) {
         }
     }
 
-    api.field_0x1f4 &= ~0x100u;
+    api.field_0x1f4 ^= 0x100u;
     predicted_vertical_displacement = api.previous_velocity.y * FRAMETIME;
     api.collision_position.x = api.position.x + api.previous_velocity.x * FRAMETIME;
     api.collision_position.y = api.position.y + predicted_vertical_displacement;

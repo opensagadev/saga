@@ -791,6 +791,8 @@ f32 NuQFntPrintJustifiedRSW(RNDRSTREAM *stream, void *font_ptr, u16 *text, f32 x
     i32 line_number = 0;
 
     while (*text != 0) {
+        NuQFntSetICGap(font, saved_ic_gap);
+        NuQFntSetScaleRS(stream, font, sx, sy);
         while (*text == 0x20)
             text++;
 
@@ -1049,14 +1051,14 @@ static inline void NuQFntAdd3DVertex(f32 x, f32 y, f32 z, u32 colour, f32 u, f32
 }
 
 void NuQFntPrintCharW(NUQFNT *font, u16 *text, u32 flags) {
+    VUFNT *vufnt = static_cast<VUFNT *>(font);
+    VUFNT_ANDROID *platform = vufnt->platform_data;
+    f32 y = platform->y;
+    f32 z = platform->z;
+    f32 x = platform->x;
     if (text == NULL)
         return;
 
-    VUFNT *vufnt = static_cast<VUFNT *>(font);
-    VUFNT_ANDROID *platform = vufnt->platform_data;
-    f32 x = platform->x;
-    f32 y = platform->y;
-    f32 z = platform->z;
     f32 inverse_texture_width = 1.0f;
     f32 inverse_texture_height = 1.0f;
     if (vufnt->mtl->tex_id > 0) {

@@ -227,34 +227,31 @@ void Teleport_MoveCode(GameObject_s *object, i32 start_immediately) {
         if (object->field_0x7a3 != 1)
             return;
         object->context_animation_timer -= FRAMETIME;
-        if (object->context_animation_timer > 0.0f) {
-            const f32 progress = 1.0f - object->context_animation_timer * 0.5f;
-            NUVEC *points = teleport->path->pts;
-            NUVEC *start = &points[(object->context_variant_flags & 4) != 0 ? 1 : 2];
-            NUVEC *end = &points[(object->context_variant_flags & 4) != 0 ? 2 : 1];
-            object->apiobj.position.x = start->x + (end->x - start->x) * progress;
-            object->apiobj.position.y = start->y + (end->y - start->y) * progress;
-            object->apiobj.position.z = start->z + (end->z - start->z) * progress;
-            object->apiobj.velocity = v000;
-            return;
+        f32 progress = 1.0f - object->context_animation_timer * 0.5f;
+        f32 shadow_height = 2000000.0f;
+        bool has_surface = false;
+        if (object->context_animation_timer <= 0.0f) {
+            object->field_0x7a3 = 0;
+            NUVEC *segment_start;
+            NUVEC *segment_end;
+            Teleport_GetSegment(object, teleport, &segment_start, &segment_end);
+            object->airborne_action_duration =
+                Teleport_GetSegmentDuration(object, teleport, segment_start, segment_end);
+            object->context_animation_timer = object->airborne_action_duration;
+            Teleport_SetFacing(object, segment_start, segment_end, true);
+
+            shadow_height = GameShadow(NULL, &object->apiobj.position, 5.0f, -1);
+            object->apiobj.field_0x218 = shadow_height;
+            has_surface = shadow_height != 2000000.0f;
+            GetSurfaceInfo(object, has_surface, shadow_height);
+            progress = 1.0f;
         }
-
-        object->field_0x7a3 = 0;
-        NUVEC *segment_start;
-        NUVEC *segment_end;
-        Teleport_GetSegment(object, teleport, &segment_start, &segment_end);
-        object->airborne_action_duration = Teleport_GetSegmentDuration(object, teleport, segment_start, segment_end);
-        object->context_animation_timer = object->airborne_action_duration;
-        Teleport_SetFacing(object, segment_start, segment_end, true);
-
-        const f32 shadow_height = GameShadow(NULL, &object->apiobj.position, 5.0f, -1);
-        object->apiobj.field_0x218 = shadow_height;
-        const bool has_surface = shadow_height != 2000000.0f;
-        GetSurfaceInfo(object, has_surface, shadow_height);
-
         NUVEC *points = teleport->path->pts;
+        NUVEC *start = &points[(object->context_variant_flags & 4) != 0 ? 1 : 2];
         NUVEC *end = &points[(object->context_variant_flags & 4) != 0 ? 2 : 1];
-        object->apiobj.position = *end;
+        object->apiobj.position.x = start->x + (end->x - start->x) * progress;
+        object->apiobj.position.y = start->y + (end->y - start->y) * progress;
+        object->apiobj.position.z = start->z + (end->z - start->z) * progress;
         object->apiobj.velocity = v000;
         if (has_surface)
             object->apiobj.position.y = shadow_height - object->character_bottom * object->apiobj.field_0xa8;

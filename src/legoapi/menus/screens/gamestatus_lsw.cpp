@@ -810,7 +810,8 @@ void Prompt_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elap
         stage->field_0x18 += elapsed;
         const i32 menu_level = GameMenuLevel;
         if (stage->field_0x18 >= 0.5f) {
-            for (i32 player = 0; player < 2; ++player) {
+            GAMEPAD_s *pad = GamePad;
+            for (i32 player = 0; player < 2; ++player, ++pad) {
                 if ((player == 0 ? packet->player0_active : packet->player1_active) == 0) {
                     continue;
                 }
@@ -820,7 +821,7 @@ void Prompt_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elap
                     GameMenu[menu_level].queued_item = -1;
                     selected = true;
                 }
-                const u32 buttons = GamePad[player].buttons_pressed;
+                const u32 buttons = pad->buttons_pressed;
                 if ((buttons & GAMEPAD_MENUSELECT) != 0) {
                     selected = true;
                 }
@@ -829,7 +830,7 @@ void Prompt_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elap
                     (((packet->field_0xb0 & 0x48) == 8 && (packet->next_area == -1 || (packet->area->flags & 2) != 0 ||
                                                            Game.area_save[packet->next_area].complete != 0)) ||
                      (packet->mode_flags & 1) != 0 || packet->challenge_state != 0 || packet->mission_state != 0)) {
-                    const u32 navigation = buttons | GamePad[player].left_directions;
+                    const u32 navigation = buttons | pad->left_directions;
                     if (status_prompt < 1) {
                         if ((navigation & GAMEPAD_DDOWN) != 0) {
                             GameAudio_PlaySfx(0x2f, NULL, 0, 0);

@@ -818,24 +818,18 @@ static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTS
     if (model == NULL) {
         if ((character->flags & 2) == 0) {
             scene_object = static_cast<GameObject_s *>(instance->character_model);
-            if (scene_object != NULL) {
-                model = scene_object->apiobj.character_model;
-            }
+            model = scene_object->apiobj.character_model;
         } else {
             model = static_cast<CHARACTERMODEL_s *>(instance->character_model);
         }
     }
-    if (model == NULL || model->hierarchy == NULL) {
+    if (model->hierarchy == NULL) {
         return;
     }
 
     const i32 character_id = model->model_id;
     CHARACTERDATA *character_data = &apicharsys->char_data[character_id];
     GAMECHARACTERDATA *game_data = static_cast<GAMECHARACTERDATA *>(character_data->field11_0x24);
-    if (game_data == NULL) {
-        return;
-    }
-
     NUMTX world_matrix;
     i32 visible;
     u32 animation_index;
@@ -962,7 +956,8 @@ static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTS
         dwa_animation_a = static_cast<nuanimdata2_s *>(model->model_data_c[animation_a_index - 1]);
     }
 
-    NUMTX joint_matrices[256];
+    // The original draw callback uses a 32-byte aligned stack frame.
+    NUMTX joint_matrices[256] __attribute__((aligned(32)));
     void **dwa = NULL;
     if (!blending) {
         if (animation_a == NULL) {

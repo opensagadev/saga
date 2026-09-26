@@ -725,15 +725,13 @@ void Animate_CRITTER(GameObject_s *object) {
     if (object->character_context != CHARACTER_CONTEXT_DOOMED) {
         bool use_default_idle = object->apiobj.field_0x27d != 0;
         if (!use_default_idle) {
-            if (object->ground_contact_grace_timer > 0.0f) {
-                const GAMECHARACTERDATA *game_character = GetGameCharacterData(object);
-                use_default_idle = game_character->field_0x28 <= 0.0f ||
-                                   object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_FALL] == NULL;
-            } else if (object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_FALL] == NULL) {
-                use_default_idle = true;
-            } else if (object->fall_animation_timer < 0.2f && object->nearby_floor_distance != 2000000.0f &&
-                       object->nearby_floor_distance < 0.25f && object->apiobj.velocity.y < 0.0f) {
-                use_default_idle = true;
+            const bool has_fall = object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_FALL] != NULL;
+            if (object->ground_contact_grace_timer > 0.0f || !has_fall ||
+                (object->fall_animation_timer < 0.2f && object->nearby_floor_distance != 2000000.0f &&
+                 object->nearby_floor_distance < 0.25f && object->apiobj.velocity.y < 0.0f)) {
+                const GAMECHARACTERDATA *game_character =
+                    static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
+                use_default_idle = !(game_character->field_0x28 > 0.0f) || !has_fall;
             }
         }
         if (use_default_idle) {
@@ -749,7 +747,8 @@ void Animate_CRITTER(GameObject_s *object) {
         const bool has_walk = object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_WALK] != NULL;
         const bool has_run = object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_RUN] != NULL;
         if (has_run && has_walk) {
-            const GAMECHARACTERDATA *game_character = GetGameCharacterData(object);
+            const GAMECHARACTERDATA *game_character =
+                static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
             const f32 run_threshold = (game_character->walk_speed + game_character->run_speed) * 0.5f;
             packet.requested_animation = run_threshold < object->pad_gamepad->input_magnitude
                                              ? CHARACTER_ANIMATION_RUN

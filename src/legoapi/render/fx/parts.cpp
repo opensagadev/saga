@@ -289,10 +289,13 @@ void ObjHitShield(GameObject_s *, GameObject_s *, i32, BOLT_s *);
 i32 CannotKill(GameObject_s *);
 
 static void PartCollide(PART_s *part, i32 three_dimensional) {
-    const NUVEC minimum = {part->position.x - part->field_0e4, part->position.y - part->field_0e4,
-                           part->position.z - part->field_0e4};
-    const NUVEC maximum = {part->position.x + part->field_0e4, part->position.y + part->field_0e4,
-                           part->position.z + part->field_0e4};
+    const f32 radius = part->field_0e4;
+    const f32 minimum_x = part->position.x - radius;
+    const f32 maximum_x = part->position.x + radius;
+    const f32 minimum_y = part->position.y - radius;
+    const f32 maximum_y = part->position.y + radius;
+    const f32 minimum_z = part->position.z - radius;
+    const f32 maximum_z = part->position.z + radius;
     GameObject_s *object = Obj;
     for (i32 i = 0; i < HIGHGAMEOBJECT; ++i, ++object) {
         APIOBJECT_s *api = &object->apiobj;
@@ -315,12 +318,12 @@ static void PartCollide(PART_s *part, i32 three_dimensional) {
             continue;
         if ((part->flags & 4) != 0 && (api->flags_low & 0x80) == 0)
             continue;
-        if (minimum.x > api->collision_max.x || api->collision_min.x > maximum.x || minimum.z > api->collision_max.z ||
-            api->collision_min.z > maximum.z)
+        if (minimum_x > api->collision_max.x || api->collision_min.x > maximum_x || minimum_z > api->collision_max.z ||
+            api->collision_min.z > maximum_z)
             continue;
         if (three_dimensional != 0 &&
             !((api->character_data->model_flags & 0x2000) != 0 && (part->flags & 0x40) != 0)) {
-            if (minimum.y > api->collision_max.y || api->collision_min.y > maximum.y)
+            if (minimum_y > api->collision_max.y || api->collision_min.y > maximum_y)
                 continue;
         }
         if ((part->flags & 0x40) != 0) {

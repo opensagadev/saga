@@ -13,6 +13,10 @@
 #include "legoapi/actions/character/transform.h"
 #include "legoapi/actions/combat/fighting.h"
 #include "legoapi/props/objects/signal.h"
+#include "legoapi/actions/character/suit.h"
+#include "legoapi/menus/screens/shop.h"
+#include "legoapi/render/light/surfaces.h"
+#include "legoapi/render/core/terrain_internal.h"
 
 #include <string.h>
 
@@ -32,6 +36,9 @@
 #include "legoapi/render/fx/parts.h"
 #include "legoapi/core/input/gamepads.h"
 #include "nu2api/numath/nuvec.h"
+
+void SurfaceMaskOff(u32 *surface_mask);
+void SurfaceMaskOn(u32 *surface_mask);
 
 void NarrowSockExceptions_Init(NARROWSOCKEXCEPTION *);
 NARROWSOCKEXCEPTION NarrowSockException_LSW[] = {
@@ -848,6 +855,7 @@ void InitGameAfterConfig(void) {
     POINTS_PER_STORY = 6;
     POINTS_PER_CHALLENGE = 2;
     POINTS_PER_MINIKIT = 2;
+    SHOPHINTCOUNT = 0;
     // TopShelf[6].field0_0x0[0] = '\0';
     // TopShelf[6].field0_0x0[1] = '\0';
     // TopShelf[6].field0_0x0[2] = '\0';
@@ -960,8 +968,8 @@ void InitGameAfterConfig(void) {
         i32 i = 0;
         LEVELDATA *level = LDataList;
         do {
-            if (799 < level->unknown_060) {
-                // level->levels = tab;
+            if (static_cast<u16>(level->unknown_060) > 799) {
+                level->unknown_060 = tUNKNOWN;
             }
             level->area_index = 0xff;
             level->area_level_index = 0xff;
@@ -1009,7 +1017,7 @@ void InitGameAfterConfig(void) {
     }
 
     Level_RegisterGameConfigKeywords(LevelConfigKeywords_BeforeLoad, &LevelConfigKeywords_AfterLoad);
-    //  Suits_Init();
+    Suits_Init();
 
     Collection_Configure("chars\\collection.txt", &permbuffer_ptr, &permbuffer_end);
     LOG_INFO("Loaded %d collection items", COLLECTION_COMPLETIONCOUNT);
@@ -1026,20 +1034,21 @@ void InitGameAfterConfig(void) {
     }
 
     Tag_DrawIconFn = Tag_DrawIcon_LSW;
-    //_DAT_006312e8 = 0x5d;
-    //_DAT_006312ea = 0x5e;
-    //_DAT_0063138c = 0x5f;
-    //_DAT_0063138e = 0x60;
-    //_DAT_00631430 = 0x61;
-    //_DAT_00631432 = 0x62;
-    //  DEFAULT_PLAYERHITPOINTS = 8;
-    //  PLAYERHITPOINTS_2HEARTSIN1 = 1;
+    GlobalBoltType[0].object_ids[0] = 0x5d;
+    GlobalBoltType[0].object_ids[1] = 0x5e;
+    GlobalBoltType[1].object_ids[0] = 0x5f;
+    GlobalBoltType[1].object_ids[1] = 0x60;
+    GlobalBoltType[2].object_ids[0] = 0x61;
+    GlobalBoltType[2].object_ids[1] = 0x62;
+    DEFAULT_PLAYERHITPOINTS = 8;
+    PLAYERHITPOINTS_2HEARTSIN1 = 1;
     CutScenes_InitSystem(&CutSceneSys_LSW);
-    //  NuGCutDebFixUp_SearchAllPages = 1;
+    extern i32 NuGCutDebFixUp_SearchAllPages;
+    NuGCutDebFixUp_SearchAllPages = 1;
     NarrowSockExceptions_Init(NarrowSockException_LSW);
     //  APIObjectRegisterAnimRedirect(RedirectAnim, AnimRedirectList_LSW, "chars\\commonanims");
-    //  SurfaceMaskOff(&TERRAINMASK_NONWEAPON);
-    //  SurfaceMaskOn(&TERRAINMASK_NONDROID);
+    SurfaceMaskOff(reinterpret_cast<u32 *>(&TERRAINMASK_NONWEAPON));
+    SurfaceMaskOn(reinterpret_cast<u32 *>(&TERRAINMASK_NONDROID));
     Hub_UsePlayerList = 1;
     BoltSys_Init(&BoltSys_LSW);
     GameAudio_Init(&GameAudio_LSW);
@@ -1057,19 +1066,20 @@ void InitGameAfterConfig(void) {
     LEGOHINT_PUSHBLOCKS = 0x267;
     LEGOHINT_BUILD = 0x25c;
     LEGOHINT_FREEPLAYTOGGLE = 600;
-    //  PUNCHGAP = 0.3;
-    //  PUNCHCHARGAP = 0.3;
+    PUNCHGAP = 0.3f;
+    PUNCHCHARGAP = 0.3f;
     //  f64Jump_AlwaysReachJump2Height = 1;
     //  f64Jump_JediSlam = 1;
-    //  CanPunchGirls = 0;
+    extern i32 CanPunchGirls;
+    CanPunchGirls = 0;
     //  ExtraHurtSfxFn = ExtraHurtSfx_LSW;
     //  ExtraDieSfxFn = ExtraDieSfx_LSW;
     BuckStartExtraFn = BuckStartExtra_LSW;
     BoltInitSfxFn = BoltInitSfx_LSW;
-    //  REDBRICKPOSX = 0.0;
-    //  REDBRICKPOSY = -0.5;
-    //  REDBRICKPOS2X = 1.25;
-    //  REDBRICKPOS2Y = 0.0;
+    REDBRICKPOSX = 0.0f;
+    REDBRICKPOSY = -0.5f;
+    REDBRICKPOS2X = 1.25f;
+    REDBRICKPOS2Y = 0.0f;
     //  GameObjectDimensionsExtraFn = GameObjectDimensionsExtra_LSW;
     Punch_GetDamageFn = Punch_GetDamage_LSW;
     Punch_HitHoldFn = Punch_HitHold;
@@ -1093,8 +1103,8 @@ void InitGameAfterConfig(void) {
     //  AddGameMsg_Default._56_4_ = GameMsg_EndDelay_Game;
     WorldInfo_InitMenuFn = Game_WorldInfo_InitMenu;
     WorldInfo_InitLastFn = Game_WorldInfo_InitLast;
-    //  TerSurface._152_2_ = 0x15;
-    //  TerSurface._164_2_ = 0x16;
+    *reinterpret_cast<u16 *>(&TerSurface[12].field_0x08) = 0x15;
+    *reinterpret_cast<u16 *>(&TerSurface[13].field_0x08) = 0x16;
     LEGOACT_IDLE = 1;
     LEGOACT_WALK = 0;
     LEGOACT_JUMP = 6;
@@ -1243,15 +1253,16 @@ void InitGameAfterConfig(void) {
     LEGOSPL_SPLIT = 5;
     LEGOSPL_START = 0;
     //  LEGOGDEB_SPLASH = 0xd;
-    //  GizBuilditGDeb._0_2_ = 0x4c;
-    //  GizBuilditGDeb._2_2_ = 0x4d;
-    //  GizBuilditGDeb._4_2_ = 0x4e;
-    //  GizBuilditGDeb._6_2_ = 0x4f;
-    //  GizBuilditGDeb._8_2_ = 0x50;
-    //  GizBuilditGDeb._10_2_ = 0x51;
-    //  GizSpinnerGDeb_Fail._0_2_ = 0x57;
-    //  GizSpinnerGDeb_Fail._2_2_ = 1;
-    //  GizSpinnerGDeb_Fail._4_2_ = 0x58;
+    GizBuilditGDeb[0] = 0x4c;
+    GizBuilditGDeb[1] = 0x4d;
+    GizBuilditGDeb[2] = 0x4e;
+    GizBuilditGDeb[3] = 0x4f;
+    GizBuilditGDeb[4] = 0x50;
+    GizBuilditGDeb[5] = 0x51;
+    extern i16 GizSpinnerGDeb_Fail[3];
+    GizSpinnerGDeb_Fail[0] = 0x57;
+    GizSpinnerGDeb_Fail[1] = 1;
+    GizSpinnerGDeb_Fail[2] = 0x58;
     GamePads_IgnoreInputFn = Game_IgnoreInput;
     Door_GoThrough_ExtraCodeFn = GoThroughDoor_ExtraCode;
     GizmoBlowup_TransformDrawFn = GizmoBlowup_TransformDraw_Game;
@@ -1324,10 +1335,11 @@ void InitGameAfterConfig(void) {
 
     CUTSCENEPLAYER_s *clip_player = static_cast<CUTSCENEPLAYER_s *>(CutScenePlayer_Available());
     CutScenePlayCount = clip_player != NULL ? clip_player->clip_count : 0;
-    //  if (g_lowEndLevelBehaviour != 0) {
-    //      Reflections_On = 0;
-    //      CharClipToBlobShadows = 1;
-    //  }
+    if (g_lowEndLevelBehaviour != 0) {
+        reinterpret_cast<u8 *>(&Reflections_On)[0] = 0;
+        extern u8 CharClipToBlobShadows;
+        CharClipToBlobShadows = 1;
+    }
 }
 
 void CompleteLevel(WORLDINFO *world) {

@@ -57,6 +57,18 @@ void FS_SortStrings(char *, char *, i32);
 i32 FS_FileNameFilter(char *);
 void FS_MakeDateTimeString(FS_FILEENTRYHDR *, char *);
 
+f32 memcard_autosavecanceldelay = 1.5f;
+f32 memcard_formatmessage_delay;
+f32 memcard_formatresult_delay;
+f32 memcard_createmessage_delay;
+f32 memcard_createresult_delay;
+f32 memcard_deletemessage_delay;
+f32 memcard_deleteresult_delay;
+f32 memcard_message_delay;
+f32 memcard_result_delay;
+i32 memcard_justformatted;
+i32 saveload_autosavedisabled;
+
 void InitMemCard() {
 }
 
@@ -589,7 +601,6 @@ SAVELOAD_TARGET_OPT i32 LoadState(i32, variptr_u *, variptr_u *, variptr_u *, va
 }
 
 extern "C" {
-
     void (*savesuccessfn)(void);
     void *memcard_headerdata;
     i32 memcard_headerdatasize;
@@ -650,17 +661,67 @@ extern "C" {
 
     void UpdateSaveSlots(void) {
         const f32 elapsed = NuTimeGetFrameTime();
+        if (memcard_autosavecanceldelay > 0.0f) {
+            memcard_autosavecanceldelay -= elapsed;
+        }
         if (memcard_loadmessage_delay > 0.0f) {
             memcard_loadmessage_delay -= elapsed;
-        }
-        if (memcard_loadresult_delay > 0.0f) {
-            memcard_loadresult_delay -= elapsed;
         }
         if (memcard_savemessage_delay > 0.0f) {
             memcard_savemessage_delay -= elapsed;
         }
+        if (memcard_autosavepredelay > 0.0f) {
+            memcard_autosavepredelay -= elapsed;
+        }
+        if (memcard_formatmessage_delay > 0.0f) {
+            memcard_formatmessage_delay -= elapsed;
+        }
+        if (memcard_createmessage_delay > 0.0f) {
+            memcard_createmessage_delay -= elapsed;
+        }
+        if (memcard_deletemessage_delay > 0.0f) {
+            memcard_deletemessage_delay -= elapsed;
+        }
+        if (memcard_message_delay > 0.0f) {
+            memcard_message_delay -= elapsed;
+        }
+        if (memcard_loadresult_delay > 0.0f) {
+            memcard_loadresult_delay -= elapsed;
+        }
         if (memcard_saveresult_delay > 0.0f) {
             memcard_saveresult_delay -= elapsed;
+        }
+        if (memcard_autosavepostdelay > 0.0f) {
+            memcard_autosavepostdelay -= elapsed;
+        }
+        if (memcard_formatresult_delay > 0.0f) {
+            memcard_formatresult_delay -= elapsed;
+        }
+        if (memcard_createresult_delay > 0.0f) {
+            memcard_createresult_delay -= elapsed;
+        }
+        if (memcard_deleteresult_delay > 0.0f) {
+            memcard_deleteresult_delay -= elapsed;
+        }
+        if (memcard_result_delay > 0.0f) {
+            memcard_result_delay -= elapsed;
+        }
+
+        if (saveload_cardtype != 2) {
+            memcard_justformatted = 0;
+        }
+        if (saveload_autosavedisabled != 0) {
+            if (memcard_autosavestarted != 0) {
+                memcard_savefailed = 1;
+                memcard_saveresult_delay = 1.5f;
+            }
+            memcard_autosavestarted = 0;
+            memcard_autosavepredelay = 0.0f;
+            memcard_autosaveinprogress = 0;
+            memcard_autosaveneeded = 0;
+            memcard_autosavepostdelay = 0.0f;
+            memcard_autosavedisabled = 1;
+            saveload_autosavedisabled = 0;
         }
 
         if (memcard_savestarted != 0 && saveload_status == 1) {
