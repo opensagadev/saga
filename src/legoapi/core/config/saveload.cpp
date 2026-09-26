@@ -440,7 +440,7 @@ __attribute__((optimize("O3", "omit-frame-pointer"))) char *FS_GetFilterString(c
     }
 
     char *end = input;
-    if (*end != '\0' && *end != '|') {
+    if (*end != '|' && *end != '\0') {
         do {
             ++end;
         } while (*end != '\0' && *end != '|' && *end != '*');
@@ -449,8 +449,8 @@ __attribute__((optimize("O3", "omit-frame-pointer"))) char *FS_GetFilterString(c
         while (trimmed != input && trimmed[-1] == ' ') {
             --trimmed;
         }
-        for (char *p = input; p < trimmed; ++p) {
-            *output++ = *p;
+        for (; input < trimmed; ++input) {
+            *output++ = *input;
         }
     }
     *output = '\0';
