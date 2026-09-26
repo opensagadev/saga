@@ -559,6 +559,7 @@ SAVELOAD_TARGET_OPT __attribute__((aligned(16))) void FS_SetCursorToLastFileName
             }
             char *current = entry;
             i32 last_visible = index + 12;
+            volatile i32 old_visible;
             do {
                 i32 previous_length = FS_PrevNameLen(current);
                 if (previous_length == 0) {
@@ -571,7 +572,8 @@ SAVELOAD_TARGET_OPT __attribute__((aligned(16))) void FS_SetCursorToLastFileName
                 if (last_visible == 13) {
                     return;
                 }
-            } while (last_visible-- >= FS_NumFiles);
+                old_visible = last_visible--;
+            } while (old_visible >= FS_NumFiles);
             return;
         }
         entry += NuStrLen(entry) + 1;

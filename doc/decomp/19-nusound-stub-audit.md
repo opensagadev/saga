@@ -144,3 +144,10 @@ incorrect reconstruction here. Correcting the field preserves the
 remaining non-relocation mismatch is the loop comparison operand
 order (`cmp edi, [esi+0x2a0]` in retail versus the equivalent
 `cmp [esi+0x2a0], edi` followed by the inverse branch).
+
+In `FS_SetCursorToLastFileName`, NDK r8e GCC reduces the plain
+`last_visible-- >= FS_NumFiles` loop condition to a register comparison
+and reserves 28 stack bytes. Capturing the old value in a volatile
+local before the comparison instead emits a stack store and reload and
+reserves 44 bytes, as the retail function does. This raised the direct
+object match from 75.97% to 80.57% without changing its 249-byte size.
