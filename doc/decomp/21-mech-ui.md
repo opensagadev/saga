@@ -31,3 +31,22 @@ inside qualifying paths through the model loop, so hoisting a cached result
 before the loop changes both behavior and block order. `TriggerTagNext` begins
 with the `FreePlay` test; an early `player == NULL` guard in source also
 changed the whole function's layout.
+
+The target has four static `Cheats_CheckFlags(0x100)` call sites inside
+`SetupTargetIds` and no call before the model loop. A single per-model cached
+check still changes the call graph; each qualifying condition must contain
+its own short-circuit call.
+
+The target's `MechTouchUIPlayerButton::Process` lays out the one-time chooser
+initialization before the periodic update loop. Put the `chooser_mode != 0`
+branch first in source to reproduce that fallthrough. The initialization
+search leaves `field_0x144[index]` unchanged when it finds no player, and the
+periodic search does not prefilter negative target IDs. The target reloads
+`selector` after calling `BlendOut`, so the following `BlendedOut` check
+needs a fresh non-null test. It tests `player` separately inside each chooser
+branch after the common `disabled` test.
+
+`TriggerTagNext` advances an index, wraps 32 to zero, and stops after testing
+the starting index again. Its target loop has no separate offset counter.
+Writing `(current_index + offset) & 31` changes the loop condition and the
+generated blocks.

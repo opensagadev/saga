@@ -657,34 +657,30 @@ void MechTouchUIPlayerButton::Process(float) {
     disabled = GetMenuID() != -1 || Paused != 0 || NewMode != 0 || NewLData != NULL || CUTSTOPGAME != 0 ||
                MiniCutCam != 0 || FadeSys.fade > 0.0f || player == NULL;
 
-    if (selector != NULL) {
-        if (owner == NULL && selector->field_0x88 == 0) {
-            selector->BlendOut();
-        }
-        if (selector->BlendedOut()) {
-            delete selector;
-            selector = NULL;
-        }
+    if (selector != NULL && owner == NULL && selector->field_0x88 == 0) {
+        selector->BlendOut();
     }
-    if (disabled || player == NULL) {
+    if (selector != NULL && selector->BlendedOut()) {
+        delete selector;
+        selector = NULL;
+    }
+    if (disabled) {
         return;
     }
 
-    if (chooser_mode == 0) {
-        const i32 update = procActive++;
-        if (update % 5 != 0) {
+    if (chooser_mode != 0) {
+        if (player == NULL) {
             return;
         }
+        if (procActive++ <= 20) {
+            return;
+        }
+        chooser_mode = 0;
         for (i32 target_index = 0; target_index < 32; ++target_index) {
-            if (field_0x144[target_index] != 0 || target_ids[target_index] < 0) {
-                continue;
-            }
             for (i32 slot = 0; slot < 8; ++slot) {
                 GameObject_s *target = Player[slot];
-                if (target != NULL && target->id == target_ids[target_index] &&
-                    TouchHacks::CanTagTo(*player, *target)) {
-                    field_0x144[target_index] = 1;
-                    MechSystems::Get()->NewRadarPulse(position, false);
+                if (target != NULL && target->id == target_ids[target_index]) {
+                    field_0x144[target_index] = target == player || TouchHacks::CanTagTo(*player, *target);
                     break;
                 }
             }
@@ -692,16 +688,23 @@ void MechTouchUIPlayerButton::Process(float) {
         return;
     }
 
-    if (procActive++ <= 20) {
+    if (player == NULL) {
         return;
     }
-    chooser_mode = 0;
+    const i32 update = procActive++;
+    if (update % 5 != 0) {
+        return;
+    }
     for (i32 target_index = 0; target_index < 32; ++target_index) {
-        field_0x144[target_index] = 0;
+        if (field_0x144[target_index] != 0) {
+            continue;
+        }
         for (i32 slot = 0; slot < 8; ++slot) {
             GameObject_s *target = Player[slot];
-            if (target != NULL && target->id == target_ids[target_index]) {
-                field_0x144[target_index] = target == player || TouchHacks::CanTagTo(*player, *target);
+            if (target != NULL && target->id == target_ids[target_index] &&
+                TouchHacks::CanTagTo(*player, *target)) {
+                field_0x144[target_index] = 1;
+                MechSystems::Get()->NewRadarPulse(position, false);
                 break;
             }
         }
@@ -740,19 +743,20 @@ void MechTouchUIPlayerButton::SetupTargetIds() {
         const i32 id = model.model_id;
         const i32 collected = InCollectList_Index(id, NULL, 0);
         const GAMECHARACTERDATA &game_character = GCDataList[id];
-        const bool bonus_cheat_character =
-            VehicleArea != 0 && BonusArea != 0 && Cheats_CheckFlags(0x100) != 0 &&
-            (game_character.flags_094[3] & 2) != 0;
 
         if (collected == -1 && static_cast<i32>(game_character.flags_090) >= 0 &&
-            (game_character.flags_094[3] & 1) == 0 && !bonus_cheat_character) {
+            (game_character.flags_094[3] & 1) == 0 &&
+            !(VehicleArea != 0 && BonusArea != 0 && Cheats_CheckFlags(0x100) != 0 &&
+              (game_character.flags_094[3] & 2) != 0)) {
             continue;
         }
 
         if (VehicleArea != 0) {
             const u32 model_flags = CDataList[id].model_flags;
             if ((model_flags & 0x2000) == 0 && !(BonusArea != 0 && (model_flags & 0x4000000) != 0) &&
-                static_cast<i32>(game_character.flags_090) >= 0 && !bonus_cheat_character) {
+                static_cast<i32>(game_character.flags_090) >= 0 &&
+                !(VehicleArea != 0 && BonusArea != 0 && Cheats_CheckFlags(0x100) != 0 &&
+                  (game_character.flags_094[3] & 2) != 0)) {
                 continue;
             }
 
@@ -762,7 +766,9 @@ void MechTouchUIPlayerButton::SetupTargetIds() {
                     if (Game_AreaSave == NULL || Game_AreaSave[area].minikit_complete == 0) {
                         continue;
                     }
-                } else if (static_cast<i32>(game_character.flags_090) >= 0 && !bonus_cheat_character) {
+                } else if (static_cast<i32>(game_character.flags_090) >= 0 &&
+                           !(VehicleArea != 0 && BonusArea != 0 && Cheats_CheckFlags(0x100) != 0 &&
+                             (game_character.flags_094[3] & 2) != 0)) {
                     continue;
                 }
             }
@@ -825,25 +831,28 @@ void MechTouchUIPlayerButton::TriggerTagNext() {
     }
 
     i32 index = current_index + 1;
-    for (i32 offset = 1; offset < 32; ++offset, ++index) {
+    for (;;) {
         if (index == 32) {
             index = 0;
         }
-        if (target_ids[index] < 0) {
-            continue;
+        if (target_ids[index] >= 0) {
+            for (i32 slot = 0; slot < 8; ++slot) {
+                GameObject_s *target = Player[slot];
+                if (target == NULL || target->id != target_ids[index] || !TouchHacks::CanTagTo(*player, *target)) {
+                    continue;
+                }
+                GameObject_s *source = player;
+                if (TagCode(source, target, 0, 0, 1) == 1) {
+                    GameAudio_PlaySfx(0x21, NULL, 0, 0);
+                    Tag_NewTransfer(source, target);
+                }
+                return;
+            }
         }
-        for (i32 slot = 0; slot < 8; ++slot) {
-            GameObject_s *target = Player[slot];
-            if (target == NULL || target->id != target_ids[index] || !TouchHacks::CanTagTo(*player, *target)) {
-                continue;
-            }
-            GameObject_s *source = player;
-            if (TagCode(source, target, 0, 0, 1) == 1) {
-                GameAudio_PlaySfx(0x21, NULL, 0, 0);
-                Tag_NewTransfer(source, target);
-            }
+        if (index == current_index) {
             return;
         }
+        ++index;
     }
 }
 
