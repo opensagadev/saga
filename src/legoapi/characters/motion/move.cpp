@@ -6699,12 +6699,15 @@ static __used__ void MakeWingFormation(_vuv_s *, _vuv_s *, f32, i32) {
     STUBBED();
 }
 
-static __used__ void AtatPart_Stop(PART_s *part) {
+void AtatPart_Stop(PART_s *part) __asm__("_ZL13AtatPart_StopP6PART_s") __attribute__((visibility("hidden")));
+void AtatPart_Update(PART_s *part) __asm__("_ZL15AtatPart_UpdateP6PART_s") __attribute__((visibility("hidden")));
+
+void AtatPart_Stop(PART_s *part) {
     PlaySfx("EXPLODE1", &part->position);
     PartStop_Flickerer(part);
 }
 
-static __used__ void AtatPart_Update(PART_s *part) {
+void AtatPart_Update(PART_s *part) {
     f32 choice = NuFloatRand(reinterpret_cast<NURAND *>(&GAMERAND)) * 100.0f + 1.0f;
     if (part->scale_time < 1.0f) {
         AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[118].effect, &part->position,
