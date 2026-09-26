@@ -874,7 +874,23 @@ bool NuMemoryManager::PopContext(NuMemoryManager::PopDebugMode debug_mode) {
 }
 
 void NuMemoryManager::Validate() {
-    STUBBED();
+    pthread_mutex_lock(&mutex);
+    for (Page *page = pages; page != NULL; page = page->next) {
+        Header *end = reinterpret_cast<Header *>(page->end);
+        for (Header *header = page->first_header; header != end;) {
+            ValidateBlockEndTags(header, __FUNCTION__);
+            Header *next = reinterpret_cast<Header *>(reinterpret_cast<u8 *>(header) + BLOCK_SIZE(header->value));
+            if (next != end)
+                ValidateBlockEndTags(next, __FUNCTION__);
+            if ((header->value & ALLOC_MASK) == 0) {
+                FreeHeader *free = reinterpret_cast<FreeHeader *>(header);
+                ValidateAddress(free->next, __FUNCTION__);
+                ValidateAddress(free->prev, __FUNCTION__);
+            }
+            header = next;
+        }
+    }
+    pthread_mutex_unlock(&mutex);
 }
 
 void NuMemoryManager::ValidateAddress(void *ptr, const char *caller) {
@@ -1111,7 +1127,6 @@ done:
 }
 
 void NuMemoryManager::Dump(u32 _unknown, const char *filepath) {
-    STUBBED();
 }
 
 void NuMemoryManager::StrandBlocksForContext(Context *ctx, u32 &stranded_block_count, u32 &_unknown,
@@ -1124,20 +1139,16 @@ void NuMemoryManager::FreeStrandedBlocks() {
 }
 
 void NuMemoryManager::IErrorHandler::HandleError(NuMemoryManager *manager, ErrorCode code, const char *msg) {
-    STUBBED();
 }
 
 i32 NuMemoryManager::IErrorHandler::OpenDump(NuMemoryManager *manager, const char *filename, u32 &id) {
-    STUBBED();
     return 0;
 }
 
 void NuMemoryManager::IErrorHandler::CloseDump(NuMemoryManager *manager, u32 id) {
-    STUBBED();
 }
 
 void NuMemoryManager::IErrorHandler::Dump(NuMemoryManager *manager, u32 id, const char *msg) {
-    STUBBED();
 }
 
 void NuMemoryManager::ClearBlockDebugContext(void *ptr) {
@@ -1449,8 +1460,38 @@ void NuMemoryManager::ValidateBlock(void *ptr) {
     }
 }
 
-void NuMemoryManager::ValidateBlockDeferredContent(NuMemoryManager::Header *, char const *) {
-    STUBBED();
+void NuMemoryManager::ValidateBlockDeferredContent(NuMemoryManager::Header *header, char const *caller) {
+    if ((m_flags & MEM_MANAGER_DEBUG) == 0)
+        return;
+    DebugHeader *debug = reinterpret_cast<DebugHeader *>(header);
+    if ((debug->flags.alloc_flags & 0x20) == 0)
+        return;
+
+    u32 block_size = BLOCK_SIZE(header->value);
+    u32 payload_size = block_size - m_headerSize;
+    u8 *data = reinterpret_cast<u8 *>(header) + m_headerSize;
+    u32 *end_tag = reinterpret_cast<u32 *>(reinterpret_cast<u8 *>(header) + block_size - 4);
+    u32 tag = *end_tag >> 27;
+    if (tag == 31)
+        tag = *(end_tag - 1);
+    else
+        --tag;
+    u32 count = tag > 29 ? payload_size - 6 : payload_size - 5;
+    count >>= 2;
+    if (tag == 29)
+        return;
+
+    u32 i = 0;
+    do {
+        if (reinterpret_cast<u32 *>(data)[i + 1] != 0x7fbf7fbf) {
+            pthread_mutex_lock(&error_mutex);
+            m_flags |= MEM_MANAGER_IN_ERROR_STATE;
+            snprintf(error_msg, sizeof(error_msg), "Deferred content changed detected in %s\n", caller);
+            error_handler->HandleError(this, MEM_ERROR_DEFERRED_CONTENT_CHANGED, error_msg);
+            pthread_mutex_unlock(&error_mutex);
+        }
+        ++i;
+    } while (i != count);
 }
 
 void NuMemoryManager::VisitManagers(NuMemoryManager::IVisitor *visitor) {
