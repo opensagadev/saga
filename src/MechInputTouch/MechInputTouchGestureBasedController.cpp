@@ -794,20 +794,20 @@ bool MechInputTouchGestureBasedController::StartJumpUsingAIPath(JumpTriggerPacke
     GameObject_s *object = Player[player_id];
     const u32 flags = connection->traversal_flags[direction];
     i32 animation;
-    bool complete_failure_hint;
+    bool complete_success_hint;
     const u32 high_jump = flags & (LEGO_AIPATHCNX_HIGH_JUMP | 0x800000);
     if (high_jump != 0 && (object->ai.capabilities & high_jump) != 0) {
         animation = 3;
-        complete_failure_hint = true;
+        complete_success_hint = true;
     } else {
         const u32 double_jump = flags & (LEGO_AIPATHCNX_DOUBLE_JUMP | 0x400000);
         if (double_jump != 0) {
             const bool capable = (object->ai.capabilities & double_jump) != 0;
             animation = capable ? 2 : 1;
-            complete_failure_hint = capable;
+            complete_success_hint = capable;
         } else {
             animation = 1;
-            complete_failure_hint = false;
+            complete_success_hint = false;
         }
     }
 
@@ -824,10 +824,10 @@ bool MechInputTouchGestureBasedController::StartJumpUsingAIPath(JumpTriggerPacke
     TouchHolder *holder = reinterpret_cast<TouchHolder *>(packet.field_4[1]);
     StartNewTask(task, *holder, false, false);
     MechAutoJumpSetIsUsing(*object, *jump);
-    Hint_SetComplete(id_HINT_LSW_AUTOJUMP);
-    if (complete_failure_hint) {
-        Hint_SetComplete(id_HINT_LSW_AUTOJUMP_FAIL);
+    if (complete_success_hint) {
+        Hint_SetComplete(id_HINT_LSW_AUTOJUMP);
     }
+    Hint_SetComplete(id_HINT_LSW_AUTOJUMP_FAIL);
     return true;
 }
 
