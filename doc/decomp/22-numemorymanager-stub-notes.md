@@ -59,6 +59,10 @@ silently give callers the wrong return value.
 - `StrandBlocksForContext` counts newly moved blocks separately from all
   blocks already in the stranded context. The former drives the leak message;
   the latter becomes `stats.unknown_18`.
+- `ReleaseExternalPage` has one shared mutex unlock and return for both success
+  and failure. Returning directly from the successful unlink lowers the
+  direct-object match from 78.46667% to 41.4% because GCC emits a different
+  epilogue and branch layout.
 - The dump routines use the footer's encoded manager index when subtracting
   end-tag overhead: high five bits of the last word are `index+1`, unless
   they are 31, in which case the preceding word contains the index. Indices
@@ -98,6 +102,11 @@ the call instead gives a different `sbb` sequence and lowers the match.
 The full target Bazel build succeeds, and the linked-library diff for this
 version is **92.175%**. The remaining 16-byte size difference begins with a
 different `this` register choice and also affects later branch displacements.
+Giving `ReleaseExternalPage` the shared exit yields **78.46667%** (242 target /
+230 current bytes) in the direct-object diff. Splitting its block-value tests
+or forcing `eax` with an empty assembly constraint did not improve that score;
+the constraint actually grew the function to 254 bytes.
+The fully linked GOT-aware diff for the shared-exit version is **78.8%**.
 
 The largest remaining difference is block layout. For example,
 `StrandBlocksForContext` validates each block after processing its debug

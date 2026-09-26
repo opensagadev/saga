@@ -1610,6 +1610,7 @@ void NuMemoryManager::PushContext(const char *name) {
 
 i32 NuMemoryManager::ReleaseExternalPage(void *ptr) {
     pthread_mutex_lock(&mutex);
+    i32 released = 0;
     Page *page = pages;
     while (page != NULL) {
         Page *next = page->next;
@@ -1627,13 +1628,13 @@ i32 NuMemoryManager::ReleaseExternalPage(void *ptr) {
                 prev->next = next;
             else
                 pages = next;
-            pthread_mutex_unlock(&mutex);
-            return 1;
+            released = 1;
+            break;
         }
         page = next;
     }
     pthread_mutex_unlock(&mutex);
-    return 0;
+    return released;
 }
 
 void NuMemoryManager::SetBlockDebugContext(void *ptr, u32 ctx_id) {
