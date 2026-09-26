@@ -280,11 +280,13 @@ extern char *apitxt_AUTOSAVE_WARNING;
 extern char *apitxt_LOADING;
 extern char *apitxt_SAVING;
 extern char *apitxt_NODATAAVAILABLE;
+extern char *apitxt_OK;
 extern i16 tCURRENTGAME;
 extern i16 tEMPTY;
 extern i16 tGAME;
 extern i16 tNOSPACE;
 extern f32 MENUTEXTSCALE;
+extern f32 MENUBOTY;
 extern f32 AUTOSAVEICONY;
 extern f32 AUTOSAVEICONX;
 extern f32 AUTOSAVEICONSIZE;
@@ -895,7 +897,6 @@ void DrawAreaBox(nuvec_s *, nuvec_s *, i32, i32) {
 }
 
 void DrawBox_Now(_vuv_s *, _vuv_s *, i32, i32) {
-    STUBBED();
 }
 
 extern "C" {
@@ -1026,7 +1027,6 @@ void DrawHint_LSW(HINT_s *, i32) {
 }
 
 void DrawLine_Now(_vuv_s *, _vuv_s *, i32, i32) {
-    STUBBED();
 }
 
 void DrawParallax(nuhspecial_s *special) {
@@ -1235,7 +1235,6 @@ void DrawAlphaGrid(i32 rows, i32 cols, NuBloomParameters *parameters) {
 #undef ALPHA_GRID_VERTEX
 
 void DrawArrow_Now(_vum_s *, float, i32, i32) {
-    STUBBED();
 }
 
 extern i16 tNONEWBESTTIME, tNEWBESTTIME;
@@ -1269,7 +1268,6 @@ void DrawBonusTime(STATUSPACKET_s *packet, float position, i32 alpha) {
 }
 
 void DrawCross_Now(_vuv_s *, float, i32, i32) {
-    STUBBED();
 }
 
 void DrawGameState(float x, float y, i32 highlight, i32 slot) {
@@ -1424,7 +1422,6 @@ void DrawBezierLine(VuVec &start, VuVec &start_control, VuVec &end, VuVec &end_c
 }
 
 void DrawBoxMtx_Now(_vum_s *, _vuv_s *, i32, i32) {
-    STUBBED();
 }
 
 void *AddGameMessage(char *, NUVEC *, f32, NUVEC *, f32, u8, u8, u8, u32, f32);
@@ -1640,7 +1637,6 @@ void DrawAreaCylinder(nuvec_s *, nuvec_s *, i32) {
 }
 
 void DrawCameraTarget(nuvec_s *) {
-    STUBBED();
 }
 
 void DrawGameMessages() {
@@ -1866,7 +1862,6 @@ void Draw3DObjectAlpha(WORLDINFO_s *world, i32 object_index, nuvec_s *position, 
 }
 
 void DrawCameraTarget2(nuvec_s *) {
-    STUBBED();
 }
 
 i32 DrawPanel3DObject(float x, float y, float z, float scale_x, float scale_y, float scale_z, u16 rotate_x,
@@ -2067,7 +2062,6 @@ void DrawSubItemMenu3D() {
 }
 
 void Draw_NOMEMORYCARD() {
-    STUBBED();
 }
 
 void DrawFadeScreenWipe() {
@@ -2247,7 +2241,6 @@ void DrawGameObjectsDraw(i32) {
 }
 
 void Draw_AUTOSAVECANCEL() {
-    STUBBED();
 }
 
 void DrawPanel3DObjectMtx(nuhspecial_s *special, numtx_s *matrix, float alpha) {
@@ -2598,12 +2591,17 @@ i32 DrawPanel3DObjectNoAlpha(float x, float y, float z, float scale_x, float sca
     return 0;
 }
 
-void DrawPanel3DObjectMtxNoAlpha(nuhspecial_s *, numtx_s *) {
-    STUBBED();
+i32 DrawPanel3DObjectMtxNoAlpha(nuhspecial_s *special, numtx_s *matrix) {
+    if (special == NULL || NuSpecialExistsFn(special) == 0)
+        return 0;
+    NuMtxMulVU0(matrix, matrix, NuCameraGetMtx());
+    return NuSpecialDrawAt(special, matrix);
 }
 
-void Draw_OK(MENU_s *) {
-    STUBBED();
+extern void DrawMenuEntry(MENU_s *, char *);
+void Draw_OK(MENU_s *menu) {
+    menu->draw_y = MENUBOTY;
+    DrawMenuEntry(menu, apitxt_OK);
 }
 
 void DrawItem(nuhspecial_s *special, nuvec_s *position, float scale_value, float, float y_push, u16 x_rot, u16 y_rot,
@@ -2663,8 +2661,10 @@ SwipeDecalRenderer::SwipeDecalRenderer(TouchHolder &, i32, SwipeDecalRenderer::S
     STUBBED();
 }
 
-static __used__ void PauseRenderOff() {
-    STUBBED();
+extern i32 GetMenuID(void);
+static __used__ i32 PauseRenderOff() {
+    GetMenuID();
+    return 0;
 }
 
 static __used__ i32 MatrixReflection_CanOverride() {
