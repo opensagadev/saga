@@ -18,6 +18,7 @@
 #include "nu2api/numath/numtx.h"
 #include "nu2api/numath/nuvec.h"
 #include "nu2api/numath/nuvec4.h"
+#include "nu2api/nufile/tmclient.h"
 
 #include "legoapi/items/base/apiobject.h"
 #include "MechInputTouch/MechInputTouch_types.h"
@@ -5750,23 +5751,6 @@ struct TELEPORT_s {
     MechObjectInterface *GetMechObjectInterface();
 };
 DECOMP_ASSERT(sizeof(TELEPORT_s) == 0x100, "TELEPORT_s size");
-struct TMClient {
-    struct TM_MOUSE_AXIS {};
-    void AllocHandle();
-    void Connect();
-    void FClose(i32);
-    void FOpen(char const *, char const *);
-    void FRead(void *, u32, u32, i32);
-    void FSeek(i32, i64, i32);
-    void FTell(i32);
-    void FWrite(void const *, u32, u32, i32);
-    void FlushKeyBuffer();
-    void GetKey(i32 *);
-    void GetMouseAxis(TMClient::TM_MOUSE_AXIS);
-    void GetMouseButtons();
-    void SendTTY(char const *, i32);
-    void TestKey(i32);
-};
 struct TTNetwork : NetTransporter, BaseThing {
   private:
     i32 field_20;
