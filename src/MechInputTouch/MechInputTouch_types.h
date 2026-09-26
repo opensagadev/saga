@@ -518,8 +518,8 @@ struct MechInputTouchSpeederChaseController : MechInputTouchMainController, Mech
     void Activate();
     void Deactivate();
     bool IsDownSwipe(NuVec2 const &, NuVec2 const &);
-    bool IsSwipeAgainstDirection(NuVec2 const &, NuVec2 const &, bool);
-    bool IsSwipeWithDirection(NuVec2 const &, NuVec2 const &, bool);
+    i32 IsSwipeAgainstDirection(NuVec2 const &, NuVec2 const &, bool);
+    i32 IsSwipeWithDirection(NuVec2 const &, NuVec2 const &, bool);
     bool IsUpSwipe(NuVec2 const &, NuVec2 const &);
     MechInputTouchSpeederChaseController(i32);
     bool OnClick(GameObject_s &, TouchHolder &) override;

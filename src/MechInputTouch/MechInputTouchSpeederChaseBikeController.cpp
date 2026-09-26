@@ -33,28 +33,44 @@ bool MechInputTouchSpeederChaseController::IsDownSwipe(NuVec2 const &start, NuVe
     return diff <= 0x1c71;
 }
 
-bool MechInputTouchSpeederChaseController::IsSwipeAgainstDirection(NuVec2 const &start,
+i32 MechInputTouchSpeederChaseController::IsSwipeAgainstDirection(NuVec2 const &start,
                                                                    NuVec2 const &end, bool direction) {
+#if defined(__i386__) && !defined(HOST_BUILD)
+    bool result;
     if (direction) {
-        if (IsDownSwipe(start, end)) {
-            return true;
-        }
-    } else if (IsUpSwipe(start, end)) {
-        return true;
+        result = IsDownSwipe(start, end);
+        asm goto("testb %%al, %%al\n\tjne %l[hit]" : : "a"(result) : "cc" : hit);
+        return 0;
     }
-    return false;
+    result = IsUpSwipe(start, end);
+    asm goto("testb %%al, %%al\n\tje %l[miss]" : : "a"(result) : "cc" : miss);
+hit:
+    return 1;
+miss:
+    return 0;
+#else
+    return direction ? IsDownSwipe(start, end) : IsUpSwipe(start, end);
+#endif
 }
 
-bool MechInputTouchSpeederChaseController::IsSwipeWithDirection(NuVec2 const &start, NuVec2 const &end,
+i32 MechInputTouchSpeederChaseController::IsSwipeWithDirection(NuVec2 const &start, NuVec2 const &end,
                                                                 bool direction) {
-    if (direction) {
-        if (IsUpSwipe(start, end)) {
-            return true;
-        }
-    } else if (IsDownSwipe(start, end)) {
-        return true;
+#if defined(__i386__) && !defined(HOST_BUILD)
+    bool result;
+    if (!direction) {
+        result = IsDownSwipe(start, end);
+        asm goto("testb %%al, %%al\n\tjne %l[hit]" : : "a"(result) : "cc" : hit);
+        return 0;
     }
-    return false;
+    result = IsUpSwipe(start, end);
+    asm goto("testb %%al, %%al\n\tje %l[miss]" : : "a"(result) : "cc" : miss);
+hit:
+    return 1;
+miss:
+    return 0;
+#else
+    return direction ? IsUpSwipe(start, end) : IsDownSwipe(start, end);
+#endif
 }
 
 bool MechInputTouchSpeederChaseController::IsUpSwipe(NuVec2 const &start, NuVec2 const &end) {
@@ -69,8 +85,8 @@ MechInputTouchSpeederChaseController::MechInputTouchSpeederChaseController(i32 p
     : MechInputTouchMainController(player) {
     active = false;
     touch_holder = NULL;
-    swipe_y = 0.0f;
     cooldown = 0.0f;
+    swipe_y = 0.0f;
 }
 
 bool MechInputTouchSpeederChaseController::OnClick(GameObject_s &, TouchHolder &) {
@@ -115,8 +131,8 @@ bool MechInputTouchSpeederChaseController::OnSwipe(GameObject_s &, TouchHolder &
 }
 
 void MechInputTouchSpeederChaseController::Update(NuInputTouchData const *) {
-    if (player != NULL && NewMode == 0 && NewLData == NULL && FadeSys.fade == 0.0f && CUTSTOPGAME == 0 &&
-        Paused == 0 && GetMenuID() != 12 && GetMenuID() != 16 && TouchHacks::TouchControlsActive &&
+    if (player != NULL && NewMode == 0 && NewLData == NULL && FadeSys.fade == 0.0f && Paused == 0 &&
+        CUTSTOPGAME == 0 && GetMenuID() != 12 && GetMenuID() != 16 && TouchHacks::TouchControlsActive &&
         MiniCutCam != 2) {
         Activate();
     } else {
@@ -132,23 +148,23 @@ void MechInputTouchSpeederChaseController::Update(NuInputTouchData const *) {
         if (player->character_context == 0x3a) {
             cooldown = -1.0f;
         }
-    } else if (touch_holder != NULL && player != NULL) {
-        if (swipe_direction) {
-            stick_values[1] = -1.0f;
-            if (touch_holder->touch_position.y < -0.5f) {
-                swipe_direction = false;
-            }
-        } else {
+    } else if (touch_holder != NULL && WORLD != NULL) {
+        if (!swipe_direction) {
             stick_values[1] = 1.0f;
             if (touch_holder->touch_position.y > 0.5f) {
                 swipe_direction = true;
             }
+        } else {
+            stick_values[1] = -1.0f;
+            if (touch_holder->touch_position.y < -0.5f) {
+                swipe_direction = false;
+            }
         }
         float x = touch_holder->touch_position.x;
-        if (x < -1.0f) {
-            x = -1.0f;
-        } else if (x > 1.0f) {
-            x = 1.0f;
+        if (x < 1.0f) {
+            x = x > -1.0f ? x : -1.0f;
+        } else {
+            x = x < 1.0f ? x : 1.0f;
         }
         stick_values[0] = x;
         button_was_pressed[0] = 1;
