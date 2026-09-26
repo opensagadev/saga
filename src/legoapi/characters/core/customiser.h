@@ -3,6 +3,7 @@
 #include "decomp.h"
 
 struct CUSTOMISER;
+struct CUSTOMPIECE;
 struct CUSTOMISESAVE_s;
 struct APICHARACTERMODELLIST_s;
 struct GameObject_s;
@@ -16,5 +17,6 @@ void Customiser_LoadAccessories(CUSTOMISER *customiser, APICHARACTERMODELLIST_s 
 void Customiser_DumpAccessories(CUSTOMISER *customiser);
 void Customiser_RestoreModelTextureIDs(CUSTOMISER *customiser);
 void Customiser_TransformToPanel(CUSTOMISER *customiser);
+CUSTOMPIECE *Customiser_FindPieceByName(CUSTOMISER *customiser, char *name, i32 *category, i32 *index);
 void Customiser_AddPartAccessories(CUSTOMISER *customiser, GameObject_s *object, i32 animation, i32 mode, float scale);
 extern i32 customiser_quit;
