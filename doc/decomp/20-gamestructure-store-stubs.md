@@ -50,3 +50,26 @@ the first two successful comparisons unlikely with `__builtin_expect(..., 0)`
 places their result blocks after the main return path, matching the target's
 branch layout. The remaining differences are callee-save/load scheduling and
 alignment padding.
+
+## Restoring and debug menus
+
+The target inlines each of the 11 pack checks in both the restoring and debug
+menus. A normal loop loses the instruction shape and multiple call sites.
+`MenuDrawDebugStore` reaches 95.33% when the pack body is macro expanded.
+The product query writes a 0x304-byte structure: three 256-byte strings,
+followed by a float price at offset 0x300. In the draw menu, its string at
+offset 0x200 is copied into `StoreIAP[].text` as the selectable product ID.
+
+`MenuUpdateStoreRestoring` needs purchased-product queries before bitset
+tests, and `restoring_wait` resets to 3.0 seconds for each newly found item.
+The list arrays store byte indices; counts and flags use separate globals.
+GCC 4.7 changes the hot block order if the top-level count condition lacks
+`__builtin_expect(..., 1)`. With the hints, this callback reaches 47.40%.
+`MenuExitStoreRestoring` reaches 69.13% after keeping the accumulating flags
+in a 32-bit local and pinning each byte count to `ecx`. The compiler still
+chooses a different branch layout in the count loops.
+
+Current other callbacks: `MenuUpdateDebugStore` 62.59%,
+`MenuDrawStoreRestoring` 64.76%, `MenuUpdateStorePurchase` 62.34%, and
+`MenuDrawStoreHolding` 99.97%. These scores are GOT-aware and use the
+same NDK r8e GCC target build.

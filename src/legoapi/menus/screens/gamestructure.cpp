@@ -14,6 +14,9 @@
 #include "legoapi/items/base/apiobject.h"
 #include "legoapi/items/base/collection.h"
 #include "legoapi/menus/screens/store.h"
+#include "legoapi/menus/core/text.h"
+#include "legoapi/menus/core/gamemessage.h"
+#include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/world/levels/episode.h"
 #include "legoapi/world/world.h"
 #include "legoapi/world/level.h"
@@ -44,12 +47,20 @@ struct LEVEL_PROGRESS_s;
 struct WORLDINFO_s;
 i32 NuIOS_GetPurchaseResult();
 int NuIOS_PurchaseInAppProduct(char *);
+i32 NuIOS_IsProductPurchased(char *);
+struct NuIOS_InAppProduct;
+i32 NuIOS_GetInAppProductByID(char *, NuIOS_InAppProduct *);
 void NuIOS_RestoreInAppPurchases();
 extern "C" void NuIOS_RecordFlurryEvent(char *);
 extern "C" void BackupMenu();
 extern i32 CutInstEndCount;
 i32 LEGOMENU_PAUSESYNC = -1;
 void GameCam_HitRoll();
+void GameDrawMenuEntry(MENU_s *, char *);
+void DrawCharIcon(i32, f32, f32, f32, f32, i32, f32, f32, i32, nuhspecial_s *);
+extern i16 tCONTINUE;
+extern i16 tACCEPT;
+extern u8 RAP_WARNING_R, RAP_WARNING_G, RAP_WARNING_B;
 
 struct STOREIAP_s {
     f32 x;
@@ -60,9 +71,19 @@ struct STOREIAP_s {
     char text[256];
 };
 DECOMP_ASSERT(sizeof(STOREIAP_s) == 0x114, "STOREIAP_s size");
+struct STORE_PRODUCT_s {
+    char name[256];
+    char description[256];
+    char price_text[256];
+    f32 price;
+};
+DECOMP_ASSERT(sizeof(STORE_PRODUCT_s) == 0x304, "STORE_PRODUCT_s size");
 static STOREIAP_s StoreIAP[3];
 extern i32 menu_i_pack;
+i32 menu_i_bundle = -1;
 static char *menu_storepurchase_iap_name;
+i32 TagCharacter(GameObject_s *source, GameObject_s *target, i32 mode);
+extern f32 MENUENTRYEXWIDTH;
 
 static void StoreUnlockArcade();
 static void StoreUnlockBonus();
@@ -158,8 +179,10 @@ void (*Game_100PercentFn)();
 void (*Game_AllGoldBricksFn)();
 u16 restoring_pack_bits;
 u8 restoring_pack_count;
+u8 restoring_pack_list[16];
 u16 restoring_bundle_bits;
 u8 restoring_bundle_count;
+u8 restoring_bundle_list[16];
 f32 restoring_wait = 3.0f;
 
 void PauseGame(i32 pad_index) {
@@ -560,12 +583,78 @@ void Store_HubDrawFloorTargets(WORLDINFO_s *world) {
     }
 }
 
-void MenuUpdateDebugStore(MENU_s *) {
-    STUBBED();
+void MenuUpdateDebugStore(MENU_s *menu) {
+    if (menu->cancel_pressed != 0) {
+        BackupMenu();
+    } else if (menu->confirm_pressed != 0) {
+        if (__builtin_expect(menu->selected_item > 10, 0)) {
+            SuperOptions.store_pack_flags = 0xffff;
+            SuperOptions.store_bundle_flags = 0xff;
+            TriggerExtraDataSave();
+            BackupMenu();
+        } else if (__builtin_expect(Store_IsPackUnlocked(menu->selected_item), 1)) {
+            GameAudio_PlaySfx(0x32, NULL, 0, 0);
+        } else {
+            Store_UnlockPack(menu->selected_item, true);
+            GameAudio_PlaySfx(0x30, NULL, 0, 0);
+            ReCalculateCompletionPoints();
+            BackupMenu();
+        }
+    }
 }
 
-void MenuDrawDebugStore(MENU_s *) {
-    STUBBED();
+void MenuDrawDebugStore(MENU_s *menu) {
+    menu->item_scale = 0.5f;
+    dme_b = 0;
+    menu->centre_offset = static_cast<f32>(menu->last_row - menu->first_row) * MENUDY * 0.5f * 0.5f;
+    menu->draw_y = -menu->centre_offset;
+
+    STORE_PRODUCT_s product;
+    char line[64];
+    f32 total = 0.0f;
+    f32 unlocked_total = 0.0f;
+#define DRAW_DEBUG_PACK(INDEX)                                                                                  \
+    do {                                                                                                       \
+        product.price = 0.0f;                                                                                  \
+        char *product_id = *reinterpret_cast<char **>(&StorePack[INDEX].field1_0x4);                         \
+        if (NuIOS_GetInAppProductByID(product_id, reinterpret_cast<NuIOS_InAppProduct *>(&product)) != 0) {   \
+            total += product.price;                                                                           \
+        }                                                                                                      \
+        if (Store_IsPackUnlocked(INDEX)) {                                                                     \
+            unlocked_total += product.price;                                                                  \
+            dme_g = 255;                                                                                       \
+            dme_r = 31;                                                                                        \
+        } else {                                                                                               \
+            dme_g = 31;                                                                                        \
+            dme_r = 255;                                                                                       \
+        }                                                                                                      \
+        dme_rgb = 1;                                                                                           \
+        sprintf(line, "%s ~0%.2f~~", StorePack[INDEX].name, static_cast<double>(product.price));             \
+        dme_sy = menu->item_scale;                                                                             \
+        GameDrawMenuEntry(menu, line);                                                                         \
+    } while (0)
+    DRAW_DEBUG_PACK(0);
+    DRAW_DEBUG_PACK(1);
+    DRAW_DEBUG_PACK(2);
+    DRAW_DEBUG_PACK(3);
+    DRAW_DEBUG_PACK(4);
+    DRAW_DEBUG_PACK(5);
+    DRAW_DEBUG_PACK(6);
+    DRAW_DEBUG_PACK(7);
+    DRAW_DEBUG_PACK(8);
+    DRAW_DEBUG_PACK(9);
+    DRAW_DEBUG_PACK(10);
+#undef DRAW_DEBUG_PACK
+
+    dme_r = 191;
+    dme_g = 255;
+    dme_b = 0;
+    dme_rgb = 1;
+    GameDrawMenuEntry(menu, const_cast<char *>("Un-buy All"));
+    sprintf(line, "%.2f/%.2f", static_cast<double>(unlocked_total), static_cast<double>(total));
+    const f32 scale = menu->item_scale * MENUTEXTSCALE;
+    MenuSmartTextEx(line, menu->draw_x, menu->draw_y, menu->draw_z, scale, scale, scale, dme_align, 255, 255,
+                    255, MENUENTRYEXWIDTH, 1, NULL, 0, 128);
 }
 
 void MenuInitStoreHolding(MENU_s *) {
@@ -587,8 +676,18 @@ void MenuUpdateStoreHolding(MENU_s *menu) {
     }
 }
 
-void MenuDrawStoreHolding(MENU_s *) {
-    STUBBED();
+void MenuDrawStoreHolding(MENU_s *menu) {
+    menu->draw_y = -0.4f;
+    GameDrawMenuEntry(menu, TTab[tCONTINUE]);
+    if (MenuStopDraw != 0) {
+        return;
+    }
+    DrawCharIcon(*StorePack[menu_i_pack].id, 0.0f, 0.5f, 0.0f, 1.75f * ICONSIZE, 0xa5, MenuAlpha, MenuAlpha, 1,
+                 NULL);
+    if (TTab[1578] != NULL) {
+        SmartTextEx(TTab[1578], 0.0f, 0.0f, 1.0f, 0.5f, 0.5f, 0.5f, 0, RAP_WARNING_R, RAP_WARNING_G,
+                    RAP_WARNING_B, 1.9f, 4, NULL, 0, static_cast<i32>(128.0f * MenuAlpha));
+    }
 }
 
 void MenuExitStoreHolding(MENU_s *) {
@@ -635,16 +734,124 @@ void MenuInitStoreRestoring(MENU_s *) {
     restoring_wait = 3.0f;
 }
 
-void MenuUpdateStoreRestoring(MENU_s *) {
-    STUBBED();
+void MenuUpdateStoreRestoring(MENU_s *menu) {
+    if (restoring_wait > 0.0f) {
+        restoring_wait -= FRAMETIME;
+    }
+
+#define CHECK_RESTORING_PACK(INDEX)                                                                            \
+    do {                                                                                                       \
+        char *product = *reinterpret_cast<char **>(&StorePack[INDEX].field1_0x4);                            \
+        if (NuIOS_IsProductPurchased(product) != 0 && (restoring_pack_bits & (1u << INDEX)) == 0) {           \
+            restoring_wait = 3.0f;                                                                            \
+            restoring_pack_bits |= 1u << INDEX;                                                               \
+            restoring_pack_list[restoring_pack_count] = INDEX;                                                \
+            ++restoring_pack_count;                                                                            \
+        }                                                                                                      \
+    } while (0)
+    if (__builtin_expect(restoring_pack_count <= 10, 1)) {
+        CHECK_RESTORING_PACK(0);
+        CHECK_RESTORING_PACK(1);
+        CHECK_RESTORING_PACK(2);
+        CHECK_RESTORING_PACK(3);
+        CHECK_RESTORING_PACK(4);
+        CHECK_RESTORING_PACK(5);
+        CHECK_RESTORING_PACK(6);
+        CHECK_RESTORING_PACK(7);
+        CHECK_RESTORING_PACK(8);
+        CHECK_RESTORING_PACK(9);
+        CHECK_RESTORING_PACK(10);
+    }
+#undef CHECK_RESTORING_PACK
+
+#define CHECK_RESTORING_BUNDLE(INDEX)                                                                          \
+    do {                                                                                                       \
+        if (NuIOS_IsProductPurchased(StoreBundle[INDEX].name) != 0 &&                                        \
+            (restoring_bundle_bits & (1u << INDEX)) == 0) {                                                    \
+            restoring_bundle_bits |= 1u << INDEX;                                                             \
+            restoring_bundle_list[restoring_bundle_count] = INDEX;                                            \
+            ++restoring_bundle_count;                                                                          \
+            restoring_wait = 3.0f;                                                                            \
+        }                                                                                                      \
+    } while (0)
+    if (__builtin_expect(restoring_bundle_count <= 2, 1)) {
+        CHECK_RESTORING_BUNDLE(0);
+        CHECK_RESTORING_BUNDLE(1);
+        CHECK_RESTORING_BUNDLE(2);
+    }
+#undef CHECK_RESTORING_BUNDLE
+
+    if (menu->confirm_pressed != 0) {
+        if (restoring_wait <= 0.0f) {
+            BackupMenu();
+        }
+    } else if (menu->cancel_pressed != 0) {
+        BackupMenu();
+    }
 }
 
-void MenuDrawStoreRestoring(MENU_s *) {
-    STUBBED();
+void MenuDrawStoreRestoring(MENU_s *menu) {
+    if (restoring_wait <= 0.0f || MenuStopDraw != 0) {
+        menu->draw_y = -0.6f;
+        GameDrawMenuEntry(menu, TTab[tACCEPT]);
+        if (MenuStopDraw != 0) {
+            return;
+        }
+    }
+
+    char *title = TTab[0x626];
+    if (title == NULL) {
+        title = const_cast<char *>("Restoring Purchases");
+    }
+    const f32 pulse_alpha = MenuAlpha * 128.0f;
+    const f32 phase = NuFmod(GlobalTimer.time_elapsed_mod_seconds, 0.5f);
+    const i32 angle = static_cast<i32>((phase + phase) * 65536.0f);
+    const i32 alpha = static_cast<i32>((NuTrigTable[(angle >> 1) & 0x7fff] * 0.2f + 0.8f) * pulse_alpha);
+    SmartTextEx(title, 0.0f, 0.5f, 1.0f, MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, 0, 255, 159, 0, 1.9f, 1,
+                NULL, 0, alpha);
+
+    f32 y = 0.5f + text3d_height;
+    char product[0x300];
+    for (i32 i = 0; i < restoring_pack_count; ++i) {
+        char *product_id = *reinterpret_cast<char **>(&StorePack[restoring_pack_list[i]].field1_0x4);
+        if (NuIOS_GetInAppProductByID(product_id, reinterpret_cast<NuIOS_InAppProduct *>(product)) != 0) {
+            SmartTextEx(product, 0.0f, y, 1.0f, 0.3f, 0.3f, 0.3f, 0, 255, 255, 255, 1.9f, 1, NULL, 0, MenuA);
+            y += text3d_height;
+        }
+    }
+    for (i32 i = 0; i < restoring_bundle_count; ++i) {
+        if (NuIOS_GetInAppProductByID(StoreBundle[restoring_bundle_list[i]].name,
+                                      reinterpret_cast<NuIOS_InAppProduct *>(product)) != 0) {
+            SmartTextEx(product, 0.0f, y, 1.0f, 0.3f, 0.3f, 0.3f, 0, 255, 255, 255, 1.9f, 1, NULL, 0, MenuA);
+            y += text3d_height;
+        }
+    }
 }
 
 void MenuExitStoreRestoring(MENU_s *) {
-    STUBBED();
+    u8 pack_count = restoring_pack_count;
+    asm volatile("" : "+c"(pack_count));
+    if (pack_count != 0) {
+        u8 *item = restoring_pack_list;
+        u8 *end = item + pack_count;
+        i32 flags = SuperOptions.store_pack_flags;
+        do {
+            flags |= 1u << *item++;
+        } while (item != end);
+        SuperOptions.store_pack_flags = flags;
+    }
+    u8 bundle_count = restoring_bundle_count;
+    asm volatile("" : "+c"(bundle_count));
+    if (bundle_count != 0) {
+        u8 *item = restoring_bundle_list;
+        u8 *end = item + bundle_count;
+        i32 flags = SuperOptions.store_bundle_flags;
+        do {
+            flags |= 1u << *item++;
+        } while (item != end);
+        SuperOptions.store_bundle_flags = flags;
+    }
+    Store_RestorePurchases();
 }
 
 void MenuInitStorePurchase(MENU_s *) {
@@ -693,5 +900,58 @@ void Store_UprootPackCustodian(i32, GameObject_s *custodian) {
 }
 
 void MenuUpdateStorePurchase(MENU_s *) {
-    STUBBED();
+    const i32 result = NuIOS_GetPurchaseResult();
+    if (result == 0 || result == 1) {
+        return;
+    }
+    if (result == 2) {
+        GameAudio_PlaySfx(0x26, NULL, 0, 0);
+        if (menu_i_bundle != -1) {
+            SuperOptions.store_bundle_flags |= 1u << menu_i_bundle;
+#define UNLOCK_BUNDLE_PACK(INDEX)                                                                               \
+    if ((StoreBundle[menu_i_bundle].pack_mask & (1u << INDEX)) != 0) {                                         \
+        Store_UnlockPack(INDEX, false);                                                                        \
+    }
+            UNLOCK_BUNDLE_PACK(0);
+            UNLOCK_BUNDLE_PACK(1);
+            UNLOCK_BUNDLE_PACK(2);
+            UNLOCK_BUNDLE_PACK(3);
+            UNLOCK_BUNDLE_PACK(4);
+            UNLOCK_BUNDLE_PACK(5);
+            UNLOCK_BUNDLE_PACK(6);
+            UNLOCK_BUNDLE_PACK(7);
+            UNLOCK_BUNDLE_PACK(8);
+            UNLOCK_BUNDLE_PACK(9);
+            UNLOCK_BUNDLE_PACK(10);
+#undef UNLOCK_BUNDLE_PACK
+        } else {
+            Store_UnlockPack(menu_i_pack, false);
+        }
+
+        GameObject_s *custodian = FindGameObject(*StorePack[menu_i_pack].id, 0, 0, 1, 0);
+        if (custodian != NULL) {
+            if (static_cast<i32>(custodian->apiobj.field_0x1f4) < 0) {
+                Store_UprootPackCustodian(menu_i_pack, custodian);
+            }
+            if (NuVecXZDistSqr(&player->apiobj.position, &custodian->apiobj.position, NULL) < 4.0f) {
+                TagCharacter(player, custodian, 1);
+            }
+        }
+        TriggerExtraDataSave();
+        TriggerAutoSave();
+        MenuReset();
+        return;
+    }
+
+    if (result == 3 && TTab[1551] != NULL) {
+        NUVEC position = {0.0f, -0.6f, 1.0f};
+        GAMEMESSAGE_s *message = static_cast<GAMEMESSAGE_s *>(
+            AddGameMessage(TTab[1551], &position, 0.5f, &position, 0.55f, 255, 31, 31, 0x20, 2.5f));
+        if (message != NULL) {
+            message->field_0xfe = 0xff;
+        }
+    }
+    GameAudio_PlaySfx(0x32, NULL, 0, 0);
+    GameCam_HitRoll();
+    MenuReset();
 }
