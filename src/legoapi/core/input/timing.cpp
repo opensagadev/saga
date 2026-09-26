@@ -88,8 +88,10 @@ void UpdatePickupFlicker() {
         PickUpFlickerFrames = flicker_frames;
         flicker_test = flicker_frames / 2;
     } else {
+        i32 *flicker_frames_ptr = &PickUpFlickerFrames;
         flicker_test = 3;
-        PickUpFlickerFrames = 6;
+        asm volatile("" : : "a"(flicker_frames_ptr), "c"(flicker_test));
+        *flicker_frames_ptr = 6;
     }
 
     PickUpFlickerTest = flicker_test;

@@ -64,6 +64,10 @@ frames, it selects a six-frame cycle and midpoint three. It increments or
 wraps `PickupFlickerFrame` against the current `PickUpFlickerFrames` global.
 The order of the independent constants three and six in the fallback block
 affects whether GCC emits `mov ecx,3; mov edx,6` or the reverse order.
+Empty inline assembly with input constraints `"a"(flicker_frames_ptr)` and
+`"c"(flicker_test)` forces the target's register allocation and immediate
+order without emitting an instruction. This is used only after confirming the
+target's `GOT` load, `mov ecx,3`, `mov edx,6`, store sequence.
 A plain `if (period % 2) ++period` becomes branchless `and/cmp/sbb` at `-O2`.
 A zero-byte `asm volatile("")` in the odd branch preserves the target's
 `test` and cold increment block without adding machine instructions.
