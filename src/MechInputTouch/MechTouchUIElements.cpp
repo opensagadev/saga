@@ -261,7 +261,7 @@ MechTouchUICharIcon::MechTouchUICharIcon(MechTouchUIPartySelector &party, VuVec 
 }
 
 void MechTouchUICharIcon::Process(float) {
-    if (selector->field_0x88 != 0) {
+    if (selector->icon_count == 1) {
         position.z = 10.0f;
     }
 
@@ -272,7 +272,10 @@ void MechTouchUICharIcon::Process(float) {
     field_0x46 = is_hovered;
 
     if (alpha_duration >= 0.0f && alpha_elapsed < alpha_duration + alpha_delay) {
-        alpha_elapsed = MIN(alpha_elapsed + FRAMETIME, alpha_duration + alpha_delay);
+        alpha_elapsed += FRAMETIME;
+        if (alpha_elapsed > alpha_duration + alpha_delay) {
+            alpha_elapsed = alpha_duration + alpha_delay;
+        }
         if (alpha_elapsed >= alpha_delay) {
             *alpha_target = ((alpha_elapsed - alpha_delay) / alpha_duration) * (alpha_end - alpha_start) + alpha_start;
         }
@@ -286,9 +289,9 @@ void MechTouchUICharIcon::Process(float) {
         return;
     }
 
-    const bool was_disabled = disabled != 0;
+    const u8 was_disabled = disabled;
     SetupDisabled();
-    if (field_0x45 == 0 && was_disabled != (disabled != 0)) {
+    if (field_0x45 == 0 && was_disabled != disabled) {
         const f32 destination = disabled != 0 ? 0.3f : 1.0f;
         if (alpha_duration < 0.0f || alpha_elapsed >= alpha_duration + alpha_delay) {
             alpha_start = *alpha_target;
@@ -718,7 +721,7 @@ void MechTouchUIPlayerButton::SetupTargetIds() {
     i32 target_count = 0;
     for (i32 i = 0; i < 8; ++i) {
         GameObject_s *player = Player[i];
-        if (player != NULL && (player->apiobj.object_flags & 0x1001) == 0x1001) {
+        if (player != NULL && (static_cast<u16>(player->apiobj.object_flags) & 0x1001) == 0x1001) {
             target_ids[target_count++] = player->id;
         }
     }
@@ -728,7 +731,6 @@ void MechTouchUIPlayerButton::SetupTargetIds() {
     }
 
     i32 free_play_count = 0;
-    const bool cheat_enabled = Cheats_CheckFlags(0x100) != 0;
     for (i32 i = 0; i < apicharsys->loaded_model_count; ++i) {
         const APICHARACTERMODEL &model = apicharsys->models[i];
         if ((model.flags & 1) == 0) {
@@ -739,7 +741,8 @@ void MechTouchUIPlayerButton::SetupTargetIds() {
         const i32 collected = InCollectList_Index(id, NULL, 0);
         const GAMECHARACTERDATA &game_character = GCDataList[id];
         const bool bonus_cheat_character =
-            VehicleArea != 0 && BonusArea != 0 && cheat_enabled && (game_character.flags_094[3] & 2) != 0;
+            VehicleArea != 0 && BonusArea != 0 && Cheats_CheckFlags(0x100) != 0 &&
+            (game_character.flags_094[3] & 2) != 0;
 
         if (collected == -1 && static_cast<i32>(game_character.flags_090) >= 0 &&
             (game_character.flags_094[3] & 1) == 0 && !bonus_cheat_character) {
@@ -769,7 +772,7 @@ void MechTouchUIPlayerButton::SetupTargetIds() {
 
         if (BonusArea == 0 || VehicleArea == 0) {
             if (static_cast<i32>(game_character.flags_090) < 0) {
-                if (!cheat_enabled) {
+                if (Cheats_CheckFlags(0x100) == 0) {
                     continue;
                 }
             } else if ((game_character.flags_094[3] & 1) == 0 && (collected == -1 || Collection_Got(id) == 0)) {
@@ -797,17 +800,14 @@ void MechTouchUIPlayerButton::ShowChooser() {
 }
 
 void MechTouchUIPlayerButton::TriggerTagNext() {
-    if (player == NULL) {
-        return;
-    }
     if (FreePlay != 0) {
         for (i32 index = 0; index < 32; ++index) {
             target_ids[index] = -1;
         }
         i32 target_count = 0;
-        for (i32 slot = 0; slot < 8 && target_count < 32; ++slot) {
+        for (i32 slot = 0; slot < 8; ++slot) {
             GameObject_s *target = Player[slot];
-            if (target != NULL && (target->apiobj.field_0x1f8 & 0x1001) == 0x1001) {
+            if (target != NULL && (static_cast<u16>(target->apiobj.field_0x1f8) & 0x1001) == 0x1001) {
                 target_ids[target_count++] = target->id;
             }
         }
@@ -815,7 +815,7 @@ void MechTouchUIPlayerButton::TriggerTagNext() {
 
     i32 current_index = -1;
     for (i32 index = 0; index < 32; ++index) {
-        if (target_ids[index] == player->id) {
+        if (target_ids[index] >= 0 && target_ids[index] == player->id) {
             current_index = index;
             break;
         }
@@ -824,8 +824,11 @@ void MechTouchUIPlayerButton::TriggerTagNext() {
         return;
     }
 
-    for (i32 offset = 1; offset < 32; ++offset) {
-        const i32 index = (current_index + offset) & 31;
+    i32 index = current_index + 1;
+    for (i32 offset = 1; offset < 32; ++offset, ++index) {
+        if (index == 32) {
+            index = 0;
+        }
         if (target_ids[index] < 0) {
             continue;
         }
