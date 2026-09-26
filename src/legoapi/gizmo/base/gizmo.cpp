@@ -1158,10 +1158,10 @@ void UpdatePaintPuzzle(WORLDINFO_s *world) {
                 PAINTPUZZLESTAGE = 3;
             } else {
                 for (i32 index = 0; index < 3; ++index) {
-                    GIZOBSTACLE_s *obstacle = static_cast<GIZOBSTACLE_s *>(paintobst[index]->object);
                     if (GizmoGetOutput(world->gizmo_sys, paintpanel[index], 0, 0) &&
-                        obstacle->anim_set->state == GAMEANIMSET_STATE_AT_START) {
-                        GizObstacle_PlayForwards(obstacle);
+                        static_cast<GIZOBSTACLE_s *>(paintobst[index]->object)->anim_set->state ==
+                            GAMEANIMSET_STATE_AT_START) {
+                        GizObstacle_PlayForwards(static_cast<GIZOBSTACLE_s *>(paintobst[index]->object));
                     }
                 }
             }
@@ -1169,14 +1169,14 @@ void UpdatePaintPuzzle(WORLDINFO_s *world) {
         }
         case 3: {
             GIZOBSTACLE_s *first = static_cast<GIZOBSTACLE_s *>(paintobst[paintsused[0]]->object);
-            GIZOBSTACLE_s *second = static_cast<GIZOBSTACLE_s *>(paintobst[paintsused[1]]->object);
-            GIZOBSTACLE_s *mixed = static_cast<GIZOBSTACLE_s *>(paintobst[paintmixed]->object);
             if (first->anim_set->state == GAMEANIMSET_STATE_AT_END &&
-                second->anim_set->state == GAMEANIMSET_STATE_AT_END) {
+                static_cast<GIZOBSTACLE_s *>(paintobst[paintsused[1]]->object)->anim_set->state ==
+                    GAMEANIMSET_STATE_AT_END) {
                 GizObstacle_PlayBackwards(first);
-                GizObstacle_PlayBackwards(second);
-                GizObstacle_PlayForwards(mixed);
-            } else if (mixed->anim_set->state == GAMEANIMSET_STATE_AT_END) {
+                GizObstacle_PlayBackwards(static_cast<GIZOBSTACLE_s *>(paintobst[paintsused[1]]->object));
+                GizObstacle_PlayForwards(static_cast<GIZOBSTACLE_s *>(paintobst[paintmixed]->object));
+            } else if (static_cast<GIZOBSTACLE_s *>(paintobst[paintmixed]->object)->anim_set->state ==
+                       GAMEANIMSET_STATE_AT_END) {
                 if (paintmixed == painttarget) {
                     ++painttry;
                     PAINTPUZZLESTAGE = painttry == 3 ? 4 : 0;
@@ -1198,10 +1198,11 @@ void UpdatePaintPuzzle(WORLDINFO_s *world) {
             break;
     }
     u8 *packet = reinterpret_cast<u8 *>(factoryb_netpacket);
+    i32 sound_pending = packet[2] == 1;
     packet[0] = 0;
     packet[1] = static_cast<u8>(painttry);
     packet[3] = static_cast<u8>(painttarget);
-    if (packet[2] == 1 && played_sound == 0) {
+    if (sound_pending && played_sound == 0) {
         GIZOBSTACLE_s *obstacle = static_cast<GIZOBSTACLE_s *>(forcetube->object);
         NUMTX *matrix = NuSpecialGetMtx(&obstacle->anim_set->objects->special);
         PlaySfx("Fac_BonusCylUp", reinterpret_cast<NUVEC *>(reinterpret_cast<u8 *>(matrix) + 0x30));

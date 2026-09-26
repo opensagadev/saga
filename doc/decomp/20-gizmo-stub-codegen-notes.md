@@ -164,3 +164,15 @@ index into `eax` reduced the score and was not retained.
 parsed stay-shut bit at position 3 and stay-open bit at position 2. Expressing
 the update through a byte temporary with those operations in sequence raised
 the GOT-aware match from 86.35811% to 86.77027% (523 local bytes).
+
+`UpdatePaintPuzzle` already has its five major switch blocks in target order.
+Its state-2 loop over three source paint obstacles also unrolls as in the
+target. The next mismatch was eager pointer loading: panel outputs are checked
+before dereferencing their corresponding obstacles, and state 3 reads the
+second and mixed obstacle only after reaching those branches. The common
+packet tail tests byte 2 before overwriting bytes 0, 1, and 3. Delaying those
+dereferences and capturing the packet test first raised the GOT-aware match
+from 59.564705% to 72.91765% (1273 local bytes versus 1334 target bytes).
+The remaining blend gate caches pair-comparison booleans, and the stage-3
+success transition uses an explicit branch; both remain unmeasured source
+experiments.
