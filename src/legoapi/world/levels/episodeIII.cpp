@@ -267,7 +267,28 @@ void CruiserDInit(WORLDINFO_s *) {
 }
 
 void CruiserDReset(WORLDINFO_s *) {
-    STUBBED();
+    CruiserD_LiftChase_msg = CheckGizAIMessage(gizaimessagesys, "LiftChase", NULL);
+    MiscTime = 0.0f;
+
+    if (NuSpecialExistsFn(&CruiserD_Lift) != 0 && CruiserD_LiftAnim != NULL) {
+        if ((*(u8 *)((u8 *)LevelProgressData + CruiserE_ix * 0x2e24 + 0x2800) & 1) == 0) {
+            CruiserD_frame = 1.0f;
+            CruiserD_direction = 1;
+            CruiserD_LiftAnim->playing = 1;
+            CruiserD_LiftAnim->ltime = 1.0f;
+            CruiserD_LiftAnim->tfactor = 0.1f;
+        } else if (CruiserD_direction < 0) {
+            CruiserD_LiftAnim->ltime = CruiserD_frame;
+            CruiserD_LiftAnim->playing = 1;
+            CruiserD_LiftAnim->tfactor = -0.1f;
+        } else {
+            CruiserD_LiftAnim->playing = 0;
+            CruiserD_LiftAnim->tfactor = 0.1f;
+            CruiserD_LiftAnim->ltime = *(f32 *)CruiserD_Lift.scene->instance_animation_data[CruiserD_LiftAnim->anim_ix];
+        }
+    }
+
+    CruiserD_LiftChase = 0;
 }
 
 void CruiserDUpdate(WORLDINFO_s *) {
