@@ -122,3 +122,17 @@ output check on the fallthrough path and the timer work in a later block.
 The power threshold uses unsigned comparison (`ja` after `cmp 7`), so
 cast `power` to `u32` for `<= 7`. Declaring `taken_over` volatile kept its
 read after the two world field stores and improved the match to 87.652%.
+
+## Death Star II zap target search
+
+`DeathStar2BattleD_InZapRange` returns a `GIZMOBLOWUP_s *` despite its
+previous `void` stub. It scans `LevGizmo[1..6]` in order, accepts only
+blowups with `(status_flags & 0x800001) == 0x800000` and corresponding
+`LevGizObst[i]->anim_set->state != 0`, and picks the closest midpoint to
+the player collision position within 15 units. The player must be
+controlled (`apiobj.field_0x1f8` sign bit) and have controller index 0.
+The source expands the six candidate checks because the target has six
+separate hot eligibility checks and cold distance blocks. The direct NDK
+r8e object is 997 bytes against the 973-byte target, with 80.759% GOT-aware
+match. Its prologue and first candidate's distance selection still need
+codegen tuning.

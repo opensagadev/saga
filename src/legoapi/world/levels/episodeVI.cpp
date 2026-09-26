@@ -709,8 +709,44 @@ void DeathStar2BattleD_Update(WORLDINFO_s *) {
     STUBBED();
 }
 
-void DeathStar2BattleD_InZapRange(GameObject_s *) {
-    STUBBED();
+GIZMOBLOWUP_s *DeathStar2BattleD_InZapRange(GameObject_s *object) {
+    if (object == NULL || static_cast<i8>(object->apiobj.field_0x1f8) >= 0 || object->apiobj.field_0x287 != 0)
+        return NULL;
+
+    GIZMOBLOWUP_s *nearest;
+    f32 nearest_distance = 225.0f;
+    GIZMO *first_gizmo = LevGizmo[1];
+    if (first_gizmo != NULL) {
+        nearest = static_cast<GIZMOBLOWUP_s *>(first_gizmo->object);
+        if (nearest != NULL && (nearest->status_flags & 0x800001) == 0x800000 &&
+            LevGizObst[1] != NULL && LevGizObst[1]->anim_set->state != 0) {
+            f32 distance = NuVecDistSqr(&object->apiobj.collision_position, &nearest->mid_position, NULL);
+            if (distance >= nearest_distance)
+                nearest = NULL;
+            nearest_distance = distance < nearest_distance ? distance : nearest_distance;
+        } else
+            nearest = NULL;
+    } else
+        nearest = NULL;
+#define CHECK_ZAP_RANGE(index) \
+    if (LevGizmo[index] != NULL) { \
+        GIZMOBLOWUP_s *blowup = static_cast<GIZMOBLOWUP_s *>(LevGizmo[index]->object); \
+        if (blowup != NULL && (blowup->status_flags & 0x800001) == 0x800000 && \
+            LevGizObst[index] != NULL && LevGizObst[index]->anim_set->state != 0) { \
+            f32 distance = NuVecDistSqr(&object->apiobj.collision_position, &blowup->mid_position, NULL); \
+            if (distance < nearest_distance) { \
+                nearest = blowup; \
+                nearest_distance = distance; \
+            } \
+        } \
+    }
+    CHECK_ZAP_RANGE(2);
+    CHECK_ZAP_RANGE(3);
+    CHECK_ZAP_RANGE(4);
+    CHECK_ZAP_RANGE(5);
+    CHECK_ZAP_RANGE(6);
+#undef CHECK_ZAP_RANGE
+    return nearest;
 }
 
 void DeathStar2BattleA_AlwaysUpdate(WORLDINFO_s *) {
