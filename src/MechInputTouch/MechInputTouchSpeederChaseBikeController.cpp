@@ -35,7 +35,7 @@ bool MechInputTouchSpeederChaseController::IsDownSwipe(NuVec2 const &start, NuVe
 
 i32 MechInputTouchSpeederChaseController::IsSwipeAgainstDirection(NuVec2 const &start,
                                                                    NuVec2 const &end, bool direction) {
-#if defined(__i386__) && !defined(HOST_BUILD)
+#if defined(__i386__) && defined(ANDROID)
     bool result;
     if (direction) {
         result = IsDownSwipe(start, end);
@@ -55,7 +55,7 @@ miss:
 
 i32 MechInputTouchSpeederChaseController::IsSwipeWithDirection(NuVec2 const &start, NuVec2 const &end,
                                                                 bool direction) {
-#if defined(__i386__) && !defined(HOST_BUILD)
+#if defined(__i386__) && defined(ANDROID)
     bool result;
     if (!direction) {
         result = IsDownSwipe(start, end);
