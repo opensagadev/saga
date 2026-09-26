@@ -93,7 +93,7 @@ struct d3dsamplerstate_u;
 struct nuanimbuff_s;
 struct nuanimdatachunk_s;
 struct nucamera_s;
-struct nudeferredshadingenum_e;
+enum nudeferredshadingenum_e : i32;
 struct nudisplaylistitem_s;
 struct nurenderscene_s;
 struct nudynamiclight_s;
@@ -139,7 +139,11 @@ struct d3dsamplerstate_u {};
 struct nuanimbuff_s;
 struct nuanimdatachunk_s {};
 struct nucamera_s;
-struct nudeferredshadingenum_e {};
+enum nudeferredshadingenum_e : i32 {
+    NU_DEFERRED_SHADING_PARAMETER_0 = 0,
+    NU_DEFERRED_SHADING_PARAMETER_1 = 1,
+    NU_DEFERRED_SHADING_PARAMETER_2 = 2,
+};
 struct nudisplaylistitem_s;
 struct nurenderscene_s;
 struct nudynamiclight_s {};
