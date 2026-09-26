@@ -189,7 +189,7 @@ void MechInputTouchButtonFaker::Update(NuInputTouchData const *data) {
     u32 count = data->touch_count;
     if (count != 0) {
         u8 const *cursor = reinterpret_cast<u8 const *>(data);
-        for (u32 i = 0; i < count; ++i, cursor += sizeof(NuInputTouch)) {
+        for (u32 i = 0; i != count; ++i, cursor += sizeof(NuInputTouch)) {
             NuInputTouch const &touch = *reinterpret_cast<NuInputTouch const *>(cursor + 4);
             u32 id = touch.unknown_14;
             if (!CouldTouchBeLockedBy(id)) {
