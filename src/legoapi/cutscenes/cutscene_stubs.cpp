@@ -4,6 +4,7 @@
 #include "nu2api/nucore/nugcutscene.h"
 #include "nu2api/nucore/NuDynamicLight.h"
 #include "nu2api/nu3d/nurndr.h"
+#include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numusic/numusic.h"
 #include "nu2api/nusound/nusound.h"
@@ -17,6 +18,24 @@ void instNuGCutSceneEndButNotSystems(instNUGCUTSCENE_s *instance);
 void instNuGCutSceneResetCamLock(instNUGCUTSCENE_s *);
 
 extern "C" {
+    struct CutSceneCleanUpEntry {
+        void *handle;
+        NUGCUTSCENE_s *cutscene;
+        f32 accumulated_duration;
+        u8 flags;
+        u8 padding[3];
+    };
+
+    CutSceneCleanUpEntry *DefragCutSceneList;
+    CutSceneCleanUpEntry *DefragCutSceneListBase;
+    void *DefragCutSceneBaseMem;
+    void *DefragCutSceneEndMem;
+    void *DefragInstBaseMem;
+    void *DefragInstEndMem;
+    instNUGCUTSCENE_s *(*DefragGetInstFn)(void *);
+    void *(*DefragCreateInstFn)(void *, NUGCUTSCENE_s *, VARIPTR *);
+    void (*DefragInstDestroyedFn)(void *);
+    i32 DefragCutSceneListSize;
     extern debinftype **debtab;
     extern NUGCUTLOCATORFNENTRY_s *locatorfns;
     extern f32 timeincrement;
@@ -43,7 +62,6 @@ extern "C" {
 extern "C" {
 
     i32 CheckStreamFileID(void) {
-        STUBBED();
         return 0;
     }
 
@@ -112,12 +130,44 @@ extern "C" {
         return 1;
     }
 
-    void instNuGCutSceneAddCleanUpItem(void) {
-        STUBBED();
+    void instNuGCutSceneAddCleanUpItem(void *handle, i32 enabled) {
+        instNUGCUTSCENE_s *instance = DefragGetInstFn(handle);
+        CutSceneCleanUpEntry *entry = DefragCutSceneList++;
+        entry->handle = handle;
+        entry->cutscene = instance->cutscene;
+        entry->accumulated_duration = instance->accumulated_stream_duration;
+        entry->flags = enabled ? 7 : 0;
+        ++DefragCutSceneListSize;
     }
 
-    void instNuGCutSceneCalculateAverageCentre(void) {
-        STUBBED();
+    void instNuGCutSceneCalculateAverageCentre(instNUGCUTSCENE_s *instance, NUMTX *matrix, NUVEC *out) {
+        out->x = 0.0f;
+        out->y = 0.0f;
+        out->z = 0.0f;
+        if (instance == NULL || instance->cutscene == NULL || instance->cutscene->rigid_system == NULL ||
+            instance->rigid_instance->rigids == NULL) {
+            return;
+        }
+        f32 count = 0.0f;
+        for (i32 i = 0; i < instance->cutscene->rigid_system->count; ++i) {
+            instNUGCUTRIGID_s *rigid = &instance->rigid_instance->rigids[i];
+            if (NuSpecialExistsFn(rigid) != 0) {
+                NUVEC *position = NuSpecialGetPos(rigid);
+                out->x += position->x;
+                out->y += position->y;
+                out->z += position->z;
+                count += 1.0f;
+            }
+        }
+        if (count > 0.0f) {
+            f32 inverse = 1.0f / count;
+            out->x *= inverse;
+            out->y *= inverse;
+            out->z *= inverse;
+        }
+        if (matrix != NULL) {
+            NuVecMtxTransform(&instance->transformed_bounds_center, &instance->transformed_bounds_center, matrix);
+        }
     }
 
     void instNuGCutSceneChain(instNUGCUTSCENE_s *instance, instNUGCUTSCENE_s *next) {
@@ -160,14 +210,6 @@ extern "C" {
         return (instance->flags_89 & 0x10) != 0 ? -1 : 0;
     }
 
-    void instNuGCutSceneJumpToEnd(void) {
-        STUBBED();
-    }
-
-    void instNuGCutSceneJumpToLastFrame(void) {
-        STUBBED();
-    }
-
     void instNuGCutScenePlay(instNUGCUTSCENE_s *instance, i32 forward) {
         if ((instance->flags_88 & 2) != 0) {
             if (forward != 0) {
@@ -199,8 +241,20 @@ extern "C" {
         }
     }
 
-    void instNuGCutSceneResetCleanUp(void) {
-        STUBBED();
+    void instNuGCutSceneResetCleanUp(void *list_storage, void *cut_base, void *cut_end, void *inst_base,
+                                    void *inst_end, instNUGCUTSCENE_s *(*get_inst)(void *),
+                                    void *(*create_inst)(void *, NUGCUTSCENE_s *, VARIPTR *),
+                                    void (*inst_destroyed)(void *)) {
+        DefragCutSceneList = reinterpret_cast<CutSceneCleanUpEntry *>(ALIGN(reinterpret_cast<usize>(list_storage), 4));
+        DefragCutSceneListBase = DefragCutSceneList;
+        DefragCutSceneBaseMem = cut_base;
+        DefragCutSceneEndMem = cut_end;
+        DefragInstBaseMem = inst_base;
+        DefragInstEndMem = inst_end;
+        DefragGetInstFn = get_inst;
+        DefragCreateInstFn = create_inst;
+        DefragInstDestroyedFn = inst_destroyed;
+        DefragCutSceneListSize = 0;
     }
 
     void instNuGCutSceneRotateY(instNUGCUTSCENE_s *instance, NUANG angle) {
@@ -355,7 +409,6 @@ extern "C" {
     }
 
     void instNuGCutSoundStream(void) {
-        STUBBED();
     }
 
     void instNuGCutLocatorUpdate(instNUGCUTSCENE_s *instance, NUGCUTLOCATORSYS_s *system,

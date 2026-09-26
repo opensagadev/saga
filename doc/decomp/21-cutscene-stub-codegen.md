@@ -44,3 +44,28 @@ base matrix after a case-insensitive name match and compiled to a 219-byte
 100% match in the first batch. `instNuGCutScenePlay` takes a second direction
 argument; the first implementation matched 94.111115% at the target's
 261-byte size.
+
+## Cleanup and end-state routines
+
+The cleanup list uses 16-byte records containing a handle, a scene pointer,
+the instance's accumulated stream duration, and a flag byte. `ResetCleanUp`
+aligns the supplied list storage to four bytes and stores eight other
+parameters into `Defrag*` globals. `AddCleanUpItem` calls the configured
+`DefragGetInstFn`, appends a record, advances the list pointer, and increments
+its size. Both functions produced 100% GOT-aware matches (134 and 119 bytes).
+
+`CalculateAverageCentre` uses each 16-byte `instNUGCUTRIGID_s` as a special
+handle. It only counts handles for which `NuSpecialExistsFn` succeeds, sums
+positions from `NuSpecialGetPos`, and multiplies the sum by `1.0f / count`.
+An optional matrix transforms the instance's bounds center rather than the
+output average. Null instance, scene, rigid system, or rigid array skips this
+transform. The initial implementation scored 92.09574% at 350 bytes versus
+the target's 354.
+
+`JumpToEnd` and `JumpToLastFrame` need the existing static rigid and locator
+finalization helpers in `cutscene.cpp`, so their definitions live there. They
+set `ForcePlayEndFrame` for the duration of finalization, evaluate a reverse
+frame when `flags_8a & 4` is set, and reset the camera lock afterward. The
+first implementations scored 73.78% and 74.57143%, respectively; both are
+four bytes larger than the target, so their block and store order still need
+work.

@@ -1655,6 +1655,60 @@ void instNuGCutSceneEndFirstFrame(instNUGCUTSCENE_s *instance) {
     instNuGCutSceneResetCamLock(instance);
 }
 
+extern "C" void instNuGCutSceneJumpToEnd(instNUGCUTSCENE_s *instance) {
+    NUGCUTSCENE_s *cutscene = instance->cutscene;
+    f32 duration = cutscene->duration;
+    instance->flags_88 = (instance->flags_88 & ~2) | 1;
+    instance->flags_89 |= 0x10;
+    instance->flags_8c &= ~0x40;
+    instance->current_frame = duration;
+    ForcePlayEndFrame = 1;
+    f32 frame;
+    if ((instance->flags_8a & 4) != 0) {
+        frame = cutscene->duration - instance->current_frame;
+        if (cutscene->rigid_system != NULL) {
+            instNuGCutRigidSysEnd(instance, frame);
+        }
+    } else {
+        frame = instance->current_frame;
+        if (cutscene->rigid_system != NULL) {
+            instNuGCutRigidSysEnd(instance, frame);
+        }
+    }
+    if (instance->locator_instance != NULL) {
+        instNuGCutLocatorSysEnd(instance->locator_instance, cutscene->locator_system, frame);
+    }
+    ForcePlayEndFrame = 0;
+    instNuGCutSceneResetCamLock(instance);
+}
+
+extern "C" void instNuGCutSceneJumpToLastFrame(instNUGCUTSCENE_s *instance) {
+    NUGCUTSCENE_s *cutscene = instance->cutscene;
+    f32 duration = cutscene->duration;
+    instance->flags_88 |= 3;
+    instance->flags_89 |= 0x10;
+    instance->flags_8c |= 0x40;
+    instance->current_frame = duration;
+    ForcePlayEndFrame = 1;
+    f32 frame;
+    if ((instance->flags_8a & 4) != 0) {
+        frame = cutscene->duration - instance->current_frame;
+        if (cutscene->rigid_system != NULL) {
+            instNuGCutRigidSysEnd(instance, frame);
+        }
+    } else {
+        frame = instance->current_frame;
+        if (cutscene->rigid_system != NULL) {
+            instNuGCutRigidSysEnd(instance, frame);
+        }
+    }
+    if (instance->locator_instance != NULL) {
+        instNuGCutLocatorSysEnd(instance->locator_instance, cutscene->locator_system, frame);
+    }
+    ForcePlayEndFrame = 0;
+    instNuGCutSceneResetCamLock(instance);
+}
+
 extern "C" void instNuGCutSceneEnd(instNUGCUTSCENE_s *instance) {
     NUGCUTSCENE_s *cutscene = instance->cutscene;
     instNuGCutSceneEndButNotSystems(instance);
