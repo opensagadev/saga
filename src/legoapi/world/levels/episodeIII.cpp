@@ -101,10 +101,8 @@ struct CRUISERDNETPACKET_s {
     f32 frame;
     f32 speed;
     u32 flags;
-    u8 reserved[0x1c];
-    f32 lift_chase;
 };
-DECOMP_ASSERT(offsetof(CRUISERDNETPACKET_s, lift_chase) == 0x28, "Cruiser D packet chase offset");
+DECOMP_ASSERT(sizeof(CRUISERDNETPACKET_s) == 12, "Cruiser D packet size");
 
 extern "C" {
     CRUISERDNETPACKET_s *cruiserd_netpacket;
@@ -143,19 +141,20 @@ void ChrisDogFightAInit(WORLDINFO_s *world) {
     ChrisAllocLevelStuff(world);
     ResetSpaceLevel(world, world->space_level);
 
-    spacelevel_s *space = world->space_level;
     for (i32 i = 0; i < 256; ++i) {
-        *reinterpret_cast<i32 *>(&space->large_records[i].unknown_000[0x400]) = 0;
+        *reinterpret_cast<i32 *>(&world->space_level->large_records[i].unknown_000[0x400]) = 0;
     }
 
     if (world->current_level == DOGFIGHTA_LDATA) {
-        FlightSpline_Init(world, reinterpret_cast<flightspline_s *>(space->large_records), 256);
+        FlightSpline_Init(world, reinterpret_cast<flightspline_s *>(world->space_level->large_records), 256);
     }
 
     spacelevel_s *current_space = WORLD->space_level;
-    for (i32 i = 0; i < 256; ++i) {
-        current_space->large_records[i].saved_value = current_space->large_records[i].reset_value;
-        current_space->large_records[i].saved_state = current_space->large_records[i].reset_state;
+    spacelevel_large_record_s *record = current_space->large_records;
+    spacelevel_large_record_s *end = &current_space->large_records[256];
+    for (; record != end; ++record) {
+        record->saved_value = record->reset_value;
+        record->reset_state = record->saved_state;
     }
 
     LevBlowUp[0] = GizmoBlowUp_FindByName(world, "Shoot_a11");
@@ -281,7 +280,7 @@ void CruiserDInit(WORLDINFO_s *world) {
     LevGizmo[0] = GizmoFindByName(world->gizmo_sys, gizpanel_gizmotype_id, "panel1");
     cruiserd_netpacket = static_cast<CRUISERDNETPACKET_s *>(SetLevelHack(12));
 
-    char name[16];
+    char name[16] __attribute__((aligned(16)));
 #define FIND_CRUISER_D_TUBE(NUMBER)                             \
     sprintf(name, "Tube%d", NUMBER);                            \
     if (TUBE *tube = Tube_FindByName(world, name))               \
@@ -315,9 +314,10 @@ void CruiserDReset(WORLDINFO_s *) {
             CruiserD_LiftAnim->playing = 1;
             CruiserD_LiftAnim->tfactor = -0.1f;
         } else {
+            f32 end_frame = *(f32 *)CruiserD_Lift.scene->instance_animation_data[CruiserD_LiftAnim->anim_ix];
             CruiserD_LiftAnim->playing = 0;
             CruiserD_LiftAnim->tfactor = 0.1f;
-            CruiserD_LiftAnim->ltime = *(f32 *)CruiserD_Lift.scene->instance_animation_data[CruiserD_LiftAnim->anim_ix];
+            CruiserD_LiftAnim->ltime = end_frame;
         }
     }
 
@@ -329,7 +329,7 @@ void CruiserDUpdate(WORLDINFO_s *) {
     if (!NuSpecialExistsFn(&CruiserD_Lift) || CruiserD_LiftAnim == NULL || CruiserD_LiftChase_msg == NULL)
         return;
 
-    if (netclient != 0) {
+    if (__builtin_expect(netclient != 0, 1)) {
         if (CruiserD_LiftAnim->playing)
             PlaySfx("Cru_HugeWallMoveLp", NuSpecialGetDrawPos(&CruiserD_Lift));
         CruiserD_frame = CruiserD_LiftAnim->ltime;
@@ -354,7 +354,7 @@ void CruiserDUpdate(WORLDINFO_s *) {
 
     if (CruiserD_Lift_plat_id != -1) {
             if (CruiserD_direction >= 0) {
-                cruiserd_netpacket->lift_chase = 1.0f;
+                CruiserD_LiftChase_msg->value = 1.0f;
                 CruiserD_LiftChase = 1;
             }
             NUVEC *lift_pos = NuSpecialGetDrawPos(&CruiserD_Lift);
@@ -391,9 +391,7 @@ void CruiserDUpdate(WORLDINFO_s *) {
     if (CruiserD_LiftAnim->playing)
         PlaySfx("Cru_HugeWallMoveLp", NuSpecialGetDrawPos(&CruiserD_Lift));
 
-    CruiserD_LiftAnim->ltime = cruiserd_netpacket->frame;
-    CruiserD_LiftAnim->tfactor = cruiserd_netpacket->speed;
-    CruiserD_LiftAnim->playing = (cruiserd_netpacket->flags & 1) != 0;
+    CruiserD_frame = CruiserD_LiftAnim->ltime;
 }
 
 // ===========================================================================
@@ -735,7 +733,7 @@ void VaderA_Update(WORLDINFO_s *) {
         f32 previous_time = vader_a.timer;
         vader_a.timer -= FRAMETIME;
 
-        if (vader_a.count <= 2) {
+        if (static_cast<i16>(vader_a.count) <= 2) {
             if (vader_a.forces[0] != NULL && GizForce_Complete(vader_a.forces[0])) {
                 vader_a.timer += 20.0f;
                 if (TouchHacks::TouchControlsActive)
@@ -773,7 +771,7 @@ void VaderA_Update(WORLDINFO_s *) {
                     SetGizAIMessage(gizaimessagesys, "ceiling_collapse", 3.0f, vader_a.ceiling_collapse_message);
                     vader_a.timer = 2.0f;
                     NuCameraGetMtx();
-                    GameCameraMakeMiniCut2(&vadar_cam_pos, &vadar_cam_tgt, 0, 2.0f, 0.0f, 0.5f, 0.0f, 0, 0, 1);
+                    GameCameraMakeMiniCut2(&vadar_cam_pos, &vadar_cam_tgt, 0, 0.0f, 2.0f, 0.0f, 0.5f, 0, 0, 1);
                 }
                 ++vader_a.count;
             }

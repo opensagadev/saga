@@ -9,10 +9,12 @@
 #include "legoapi/ai/core/ai_sys_stubs.h"
 #include "legoapi/audio/sfx.h"
 #include "legoapi/characters/core/players.h"
+#include "legoapi/characters/core/character.h"
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/cutscenes/cutscenes.h"
 #include "legoapi/gizmo/base/GizBlowupObjectInterface.h"
 #include "legoapi/gizmo/object/gizmoblowups.h"
+#include "legoapi/gizmo/object/gizmopickup.h"
 #include "legoapi/characters/motion.h"
 #include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/items/base/apiobject.h"
@@ -20,12 +22,15 @@
 #include "legoapi/menus/core/panel.h"
 #include "legoapi/menus/core/gamemessage.h"
 #include "legoapi/misc.h"
+#include "legoapi/misc/utilities.h"
 #include "legoapi/render/fx.h"
+#include "legoapi/render/fx/parts.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/world/levels/levels.h"
 #include "legoapi/render/core/render.h"
 #include "legoapi/world/world_shared.h"
 #include "legoapi/world/world.h"
+#include "legoapi/props/system/socksys.h"
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nu3d/nuspline.h"
 #include "nu2api/nu3d/nutex.h"
@@ -73,18 +78,55 @@ void ResetPodStuff(void); // below
 extern "C" {
     float boulder_offset_y = 0.0f;
     float boulder_offset_y_seek = 15.0f;
+    float PODRACE_SPLINEINC = 0.001f;
+    float sebulba_goal_ahead_vals[4] = {100.0f, 75.0f, 50.0f, 25.0f};
+    float sebulba_fallback_lerpf = 5.0f;
+    float sebulba_fallback_dist = 150.0f;
+    float sebulba_catchup_lerpf = 5.0f;
+    float sebulba_catchup_speed_mul = 1.5f;
+    float sebulba_catchup_dist = -3.0f;
+    float sebulba_goal_ahead = 10.0f;
+    float sebulba_fallback_speed_mul;
+
+    float min_speed_mul = 0.5f;
+    float max_speed_mul = 1.3f;
+    float test_seek_rate = 0.01f;
+    float test_factor = 10.0f;
+    float sebulba_lerpf = 0.5f;
+    float sockstep = 10.0f;
+    i32 do_mine;
 }
 void UpdatePodRaceLapDisplay(float); // defined below
+void CalcSplinePointFromDist(flightspline_s *, _vuv_s *, float);
 
 // --- File-local layout types -----------------------------------------------
 
-// One lap entry inside the pod race state (0x98-byte stride).
-struct PODRACE_LAPENTRY_s {
-    char pad_0x00[0x80];
-    u32 *data; // 0x80
-    char pad_0x84[0x94 - 0x84];
-    void *next; // 0x94
+struct _vuv_s {
+    float x, y, z, w;
 };
+
+// One pod in the pod race state (0x98-byte stride). The first 0x40 bytes
+// are its current transform; the second position is used by race alignment.
+struct racepod_s {
+    NUMTX matrix;            // 0x00
+    _vuv_s previous_axis;    // 0x40
+    _vuv_s previous_position; // 0x50
+    char pad_0x60[0x10];     // 0x60
+    i32 pitch;               // 0x70
+    i32 yaw;                 // 0x74
+    i32 pad_0x78;            // 0x78
+    float speed;             // 0x7c
+    u32 *data;               // 0x80 (flightspline_s *)
+    float start;             // 0x84
+    i16 model_id;            // 0x88
+    i16 pad_0x8a;            // 0x8a
+    float distance;          // 0x8c
+    GameObject_s *object;    // 0x90
+    void *next;              // 0x94 (active marker)
+};
+using PODRACE_LAPENTRY_s = racepod_s;
+static_assert(sizeof(racepod_s) == 0x98, "racepod layout");
+static __attribute__((noinline)) void RacePodAlign(racepod_s *pod, _vuv_s *direction, float amount, i32 mode);
 
 // Per-level PodRace state block held at WORLDINFO.podrace (0x5120), 0xaf24
 // bytes total (size of the memset in PodRaceInit).
@@ -294,6 +336,44 @@ static __attribute__((noinline, regparm(1))) void *CreatePodRaceMine(nuvec_s *po
     client_mines[0x300 / 4] &= clear;
     client_mines[0x304 / 4] &= clear >> 31;
     return entry;
+}
+
+static __attribute__((noinline)) void RacePodAlign(racepod_s *pod, _vuv_s *direction, float blend, i32) {
+    NUVEC local __attribute__((aligned(16)));
+    NuVecInvMtxRotate(&local, (NUVEC *)direction, &pod->matrix);
+    i32 yaw = (i16)NuAtan2D(local.x, local.z);
+    pod->yaw = yaw;
+    NuVecRotateY(&local, &local, -yaw);
+    i32 pitch = (i16)NuAtan2D(local.y, local.z);
+    pod->pitch = pitch;
+    NuMtxPreRotateY(&pod->matrix, yaw);
+    NuMtxPreRotateX(&pod->matrix, -pitch);
+
+    i32 direction_yaw = (i16)NuAtan2D(direction->x, direction->z);
+    NUVEC rotated_direction __attribute__((aligned(16)));
+    NuVecRotateY(&rotated_direction, (NUVEC *)direction, -direction_yaw);
+    i32 direction_pitch = (i16)NuAtan2D(rotated_direction.y, rotated_direction.z);
+    _vuv_s axis __attribute__((aligned(16))) = {1.0f, 0.0f, 0.0f, 0.0f};
+    NuVecRotateZ((NUVEC *)&axis, (NUVEC *)&axis, (i16)(i32)pod->previous_position.w + 0x4000);
+    NuVecRotateX((NUVEC *)&axis, (NUVEC *)&axis, -direction_pitch);
+    NuVecRotateY((NUVEC *)&axis, (NUVEC *)&axis, direction_yaw);
+    NuVecInvMtxRotate((NUVEC *)&axis, (NUVEC *)&axis, &pod->matrix);
+
+    float roll = (float)(i16)NuAtan2D(axis.x, axis.y);
+    float max_roll = 24000.0f * FRAMETIME;
+    if (roll > max_roll)
+        roll = (float)(i16)(i32)max_roll;
+    float min_roll = -24000.0f * FRAMETIME;
+    if (roll < min_roll)
+        roll = (float)(i16)(i32)min_roll;
+    i32 angle = 0;
+    if (blend <= 2.0f) {
+        if (blend <= 1.0f)
+            angle = -(i16)(i32)roll;
+        else
+            angle = -(i16)(i32)((2.0f - blend) * roll);
+    }
+    NuMtxPreRotateZ(&pod->matrix, angle);
 }
 
 void Mine_Kill(PART_s *part, i32) {
@@ -1035,12 +1115,196 @@ i32 Action_SetLapTime(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *
     return 1;
 }
 
-void Action_CreatePod(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float) {
-    STUBBED();
+i32 Action_CreatePod(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
+                     i32 first_time, float) {
+    if (first_time == 0 || param_count <= 0)
+        return 1;
+
+    i32 spline_id = -1;
+    i16 model_id = -1;
+    float start = 0.0f;
+    float end = 1.0f;
+    float time_factor = 1.0f;
+    i32 pacemaker = 0;
+    i32 damaged = 0;
+    for (i32 i = 0; i != param_count; i++) {
+        char *value = NuStrIStr(params[i], "spline_id=");
+        if (value != NULL) {
+            spline_id = (i32)AIParamToFloat((AISCRIPTPROCESS *)packet, value + 10);
+        } else if ((value = NuStrIStr(params[i], "type=")) != NULL) {
+            if (LevelCharacterTypeIDFn != NULL && LevelCharacterGlobalIDFn != NULL) {
+                u8 type = LevelCharacterTypeIDFn(value + 5);
+                model_id = type;
+                if (type != 0xff)
+                    model_id = LevelCharacterGlobalIDFn(type);
+            }
+        } else if ((value = NuStrIStr(params[i], "spline_start=")) != NULL) {
+            start = AIParamToFloat((AISCRIPTPROCESS *)packet, value + 13);
+        } else if ((value = NuStrIStr(params[i], "spline_end=")) != NULL) {
+            end = AIParamToFloat((AISCRIPTPROCESS *)packet, value + 11);
+        } else if ((value = NuStrIStr(params[i], "time_factor=")) != NULL) {
+            time_factor = AIParamToFloat((AISCRIPTPROCESS *)packet, value + 12);
+        } else if (NuStrICmp(params[i], "pacemaker") == 0) {
+            pacemaker = 1;
+        } else if (NuStrICmp(params[i], "damaged") == 0) {
+            damaged = 1;
+        }
+    }
+    if ((u32)spline_id > 31 || model_id == -1)
+        return 1;
+
+    i32 spline_index = 0;
+    flightspline_s *spline = (flightspline_s *)PodRace;
+    while (spline_index < 31 && *(i32 *)((u8 *)spline + 0x524) != spline_id) {
+        spline_index++;
+        spline = (flightspline_s *)((u8 *)spline + 0x52c);
+    }
+
+    if (start < 0.0f)
+        start = 0.0f;
+    else if (start > 1.0f)
+        start = 1.0f;
+    if (end < 0.0f)
+        end = 0.0f;
+    else if (end > 1.0f)
+        end = 1.0f;
+    if (*(i32 *)((u8 *)spline + 0x400) == 0 || start == end)
+        return 1;
+
+    i32 slot = 0;
+    while (slot < 15 && PodRace->lap_entries[slot].next != NULL)
+        slot++;
+    racepod_s *pod = &PodRace->lap_entries[slot];
+    pod->data = (u32 *)spline;
+    pod->start = start;
+    pod->model_id = model_id;
+    pod->next = (void *)1;
+
+    float spline_length = *(float *)((u8 *)spline + 0x410);
+    float duration = time_factor * PodRace->prev_lap_display;
+    pod->speed = duration > 0.0f ? ((end - start) * spline_length) / duration : 1.0f;
+
+    _vuv_s position __attribute__((aligned(16)));
+    _vuv_s next_position __attribute__((aligned(16)));
+    CalcSplinePointFromDist(spline, &position, start * spline_length);
+    CalcSplinePointFromDist(spline, &next_position, (start + PODRACE_SPLINEINC) * spline_length);
+    NuMtxSetIdentity(&pod->matrix);
+    pod->matrix.m30 = position.x;
+    pod->matrix.m31 = position.y;
+    pod->matrix.m32 = position.z;
+    pod->matrix.m33 = position.w;
+    _vuv_s direction __attribute__((aligned(16))) = {
+        next_position.x - position.x, next_position.y - position.y, next_position.z - position.z, 0.0f};
+    RacePodAlign(pod, &direction, 1.0f, 0);
+    pod->previous_axis = {0.0f, 0.0f, 0.0f, 1.0f};
+    pod->previous_position = position;
+    pod->distance = start;
+
+    GameObject_s *object = AddDynamicCreature((i32)pod->model_id, (NUVEC *)spline, 0, NULL, NULL, NULL, 1, NULL, NULL,
+                                              0, 0);
+    pod->object = object;
+    if (object == NULL)
+        return 1;
+    object->field_0xf03 |= 4;
+    object->field_0x1086 = 5;
+    if (pacemaker != 0) {
+        pod_pacemaker = object;
+        object->field_0xf00 |= 0x20;
+    }
+    if (damaged != 0)
+        object->field_0xf03 |= 8;
+    return 1;
 }
 
-void Action_Sebulba(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float) {
-    STUBBED();
+i32 Action_Sebulba(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **, i32, i32 first_time, float) {
+    if (packet == NULL || packet->owner == NULL || packet->owner->apiobj.objptr == NULL)
+        return 1;
+
+    GameObject_s *object = packet->owner->apiobj.objptr;
+    static nuhspecial_s special;
+    if (first_time != 0) {
+        NuSpecialFind(vehicle_scene, &special, "mine", 1);
+        object->field_0xef9 |= 0x40;
+        object->field_0xf02 |= 0x20;
+        object->ai.movement_stopped = 1;
+        object->current_speed_multiplier = 1.0f;
+    }
+
+    GameObject_s *target = player;
+    if (target != NULL && player2 != NULL) {
+        float x2 = object->apiobj.position.x - player2->apiobj.position.x;
+        float z2 = object->apiobj.position.z - player2->apiobj.position.z;
+        float x1 = object->apiobj.position.x - target->apiobj.position.x;
+        float z1 = object->apiobj.position.z - target->apiobj.position.z;
+        if (x2 * x2 + z2 * z2 <= x1 * x1 + z1 * z1)
+            target = player2;
+    }
+
+    SOCKSYS *sock = WORLD->sock_sys;
+    SOCKPOSITION ahead;
+    MoveSockPosition(sock, &object->sock_position, sockstep, &ahead);
+    NUVEC goal;
+    if (target != NULL) {
+        float target_distance = MidDistanceFromSockStart(sock, &target->sock_position);
+        float object_distance = MidDistanceFromSockStart(sock, &object->sock_position);
+        float difference = target_distance - object_distance;
+        (void)MidDistanceFromSockStart(sock, &object->sock_position);
+        (void)MidDistanceFromSockStart(sock, &target->sock_position);
+        float wanted = ((difference + 25.0f) / test_factor + 1.0f) * avg_currentspeed_mul;
+        float speed = SeekLinearF(object->current_speed_multiplier, wanted, test_seek_rate);
+        object->current_speed_multiplier = speed;
+        if (speed > max_speed_mul)
+            object->current_speed_multiplier = max_speed_mul;
+        else if (speed < min_speed_mul)
+            object->current_speed_multiplier = min_speed_mul;
+
+        NUVEC target_offset, object_offset;
+        NuVecSub(&target_offset, &target->apiobj.position, &target->sock_position.midpoint);
+        NuVecRotateY(&target_offset, &target_offset, -target->yrot);
+        NuVecSub(&object_offset, &object->apiobj.position, &object->sock_position.midpoint);
+        NuVecRotateY(&object_offset, &object_offset, -object->yrot);
+        goal.x = object_offset.x * sebulba_lerpf + target_offset.x * (1.0f - sebulba_lerpf);
+        goal.y = 0.0f;
+        goal.z = 0.0f;
+        NuVecAdd(&goal, &goal, &ahead.midpoint);
+
+        packet->script_process.action_timer += FRAMETIME;
+        if (packet->script_process.action_timer > 1.0f) {
+            if (do_mine != 0) {
+                if (CreatePodRaceMine(&object->apiobj.lower_position) != NULL)
+                    packet->script_process.action_timer = 0.0f;
+            } else if (NuSpecialExistsFn(&special) != 0) {
+                NUVEC origin = object->apiobj.position;
+                origin.y += 1.0f;
+                NUVEC target_delta;
+                NuVecSub(&target_delta, &target->apiobj.velocity, &target->apiobj.collision_position);
+                NUVEC throw_velocity;
+                MakeThrowVector(&throw_velocity, &origin, &target->apiobj.collision_position, &target_delta, 20.0f,
+                                -10.0f);
+                NuVecAdd(&throw_velocity, &throw_velocity, &object->apiobj.velocity);
+                NUMTX matrix;
+                NuMtxSetTranslation(&matrix, &origin);
+                ADDPART_s part = Default_ADDPART;
+                part.matrix = &matrix;
+                part.velocity = &throw_velocity;
+                part.special = &special;
+                part.field_14 = 0.1f;
+                part.field_18 = 0.1f;
+                part.gravity = -10.0f;
+                part.field_28 = 0x29b;
+                part.field_40 = PartCollide_3D;
+                part.time_step = FRAMETIME;
+                AddPart(&part);
+                packet->script_process.action_timer = 0.0f;
+            }
+        }
+    } else {
+        goal = ahead.midpoint;
+        object->current_speed_multiplier = 1.0f;
+    }
+
+    AIMoveInstruction(packet, &goal, 0.0f, NULL, 1, 0.0f);
+    return 0;
 }
 
 void PodRaceReset() {
@@ -1595,8 +1859,112 @@ void PodSprint_GetIAlongVals(nugspline_s *spline, i16 *out1, i16 *out2) {
     }
 }
 
-void Action_NewSebulba(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float) {
-    STUBBED();
+i32 Action_NewSebulba(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **, i32, i32 first_time, float) {
+    if (packet == NULL || packet->owner == NULL || packet->owner->apiobj.objptr == NULL)
+        return 1;
+
+    GameObject_s *object = packet->owner->apiobj.objptr;
+    PODSPRINT_s *ps = &podsprint;
+    if (first_time != 0) {
+        object->run_speed_override = object->apiobj.character_data->game_character->run_speed;
+        object->movement_spline_offset.y = 0.0f;
+    }
+
+    if (ps->speed > 0.0f) {
+        object->run_speed_override = 0.0f;
+    } else {
+        if ((i8)ps->ai_state <= 2) {
+            i32 index = (i8)ps->ai_index;
+            float goal;
+            if (index > 3)
+                goal = sebulba_goal_ahead_vals[3];
+            else
+                goal = sebulba_goal_ahead_vals[index];
+            i8 socket_index = (i8)object->field_0x661;
+            float base_speed = object->apiobj.character_data->game_character->run_speed;
+            float distance = 0.0f;
+            if (socket_index == -1 || socket_index != (i8)player->field_0x661)
+                goto catchup;
+
+            {
+                SOCKSYS *sock_sys = WORLD->sock_sys;
+                SOCK *sock = &sock_sys->sock[socket_index];
+                float sock_length = sock->unknown_98;
+                if (player2 != NULL) {
+                    float second_distance = MidDistanceFromSockStart(sock_sys, &player2->sock_position);
+                    float first_distance = MidDistanceFromSockStart(sock_sys, &player->sock_position);
+                    distance = second_distance - first_distance;
+                    if (distance > sock_length * 0.5f)
+                        distance -= sock_length;
+                    else if (distance < sock_length * -0.5f)
+                        distance += sock_length;
+
+                    GameObject_s *lead_player;
+                    if (0.0f > goal)
+                        lead_player = distance <= 0.0f ? player2 : player;
+                    else
+                        lead_player = distance <= 0.0f ? player : player2;
+
+                    float object_distance = MidDistanceFromSockStart(sock_sys, &object->sock_position);
+                    float lead_distance = MidDistanceFromSockStart(sock_sys, &lead_player->sock_position);
+                    distance = object_distance - lead_distance;
+                } else {
+                    float object_distance = MidDistanceFromSockStart(sock_sys, &object->sock_position);
+                    float player_distance = MidDistanceFromSockStart(sock_sys, &player->sock_position);
+                    distance = object_distance - player_distance;
+                }
+                sock_length = sock->unknown_98;
+                if (distance > sock_length * 0.5f)
+                    distance -= sock_length;
+                else if (distance < sock_length * -0.5f)
+                    distance += sock_length;
+                distance -= goal;
+                if (distance > 0.0f) {
+                    float ratio = distance / (sebulba_fallback_dist - goal);
+                    float base = 0.0f;
+                    if (ratio > 1.0f)
+                        ratio = 1.0f;
+                    else
+                        base = 1.0f - ratio;
+                    float target = (sebulba_fallback_speed_mul * ratio + base) * base_speed;
+                    object->run_speed_override = SeekValF(object->run_speed_override, target, sebulba_fallback_lerpf);
+                    goto done;
+                }
+            }
+
+        catchup:
+            {
+                float ratio = distance / sebulba_catchup_dist;
+                float base = 0.0f;
+                if (ratio > 1.0f)
+                    ratio = 1.0f;
+                else
+                    base = 1.0f - ratio;
+                float target = (sebulba_catchup_speed_mul * ratio + base) * base_speed;
+                object->run_speed_override = SeekValF(object->run_speed_override, target, sebulba_catchup_lerpf);
+            }
+        } else {
+            float base_speed = object->apiobj.character_data->game_character->run_speed;
+            float target = base_speed;
+            if (ps->max_speed_msg != NULL && ps->min_speed_msg != NULL && ps->speed_step_msg != NULL) {
+                float reduced_maximum = ps->max_speed_msg->value -
+                                        (float)*(i16 *)&ps->pad_0x8c[0] * ps->speed_step_msg->value;
+                target = ps->min_speed_msg->value > reduced_maximum ? ps->min_speed_msg->value : reduced_maximum;
+            }
+            object->run_speed_override = SeekValF(object->run_speed_override, target, 5.0f);
+        }
+    }
+done:
+    if (object->movement_spline_finished != 0 && (ps->flags & 4) == 0) {
+        if (Player[0] != NULL && (i8)Player[0]->apiobj.field_0x1f8 < 0)
+            LoseCoins(Player[0], 1);
+        if (Player[1] != NULL && (i8)Player[1]->apiobj.field_0x1f8 < 0)
+            LoseCoins(Player[1], 1);
+        ps->flags |= 4;
+        ResetLevel(WORLD, "Ep1_Podsprint_OutOfTime", 1);
+        ++*(i16 *)&ps->pad_0x8c[0];
+    }
+    return 0;
 }
 
 // ===========================================================================
