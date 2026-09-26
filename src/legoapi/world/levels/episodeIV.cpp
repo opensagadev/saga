@@ -17,6 +17,8 @@
 #include "legoapi/gizmo/base/GizObstacleObjectInterface.h"
 #include "legoapi/gizmo/base/gizmo.h"
 #include "legoapi/gizmos/object/gizobstacles.h"
+#include "legoapi/gizmos/object/gizbuildits.h"
+#include "legoapi/gizmo/object/gizmoblowups.h"
 #include "legoapi/gizmos/traps/gizforce.h"
 #include "legoapi/menus/screens/gamestructure.h"
 #include "legoapi/render/fx/parts.h"
@@ -30,6 +32,10 @@ struct nunativegscene_s;
 struct SHOPINPUT;
 
 extern "C" void *AIPAthFindPathCnx(AISYS_s *, AIPATH_s *, char *, char *, i32 *);
+extern "C" AIPATHNODE_s *AIPathFindNode(AISYS_s *, AIPATH_s *, char *);
+extern "C" void AIPathNodeUpdatePos(AISYS_s *, AIPATH_s *, AIPATHNODE_s *);
+i32 GizBlowup_InitSingleTerrain(GIZMOBLOWUP_s *);
+i32 ObjInNarrowSock(GameObject_s *, SOCKSYS *, i32);
 extern "C" {
     extern i16 id_STORMTROOPER;
     extern i16 id_BEACHTROOPER;
@@ -45,6 +51,7 @@ struct BLOCKADERUNNERD_LEVFLAG_s {
 static_assert(sizeof(BLOCKADERUNNERD_LEVFLAG_s) == 0x10, "LevFlag size");
 extern BLOCKADERUNNERD_LEVFLAG_s LevFlag;
 i32 test_tb = 1;
+void *deathstarescapeb_netpacket;
 
 // Episode 4 level handlers, in the game's Episode_IV progression:
 // blockade runner / tatooine / mos eisley / death star rescue / escape /
@@ -54,8 +61,45 @@ i32 test_tb = 1;
 // Blockade runner (BlockadeRunner_B / BlockadeRunner_C / BlockadeRunner_D)
 // ===========================================================================
 
-void BlockadeRunnerB_Init(WORLDINFO_s *) {
-    STUBBED();
+void BlockadeRunnerB_Init(WORLDINFO_s *world) {
+    LevBlowUp[0] = GizmoBlowUp_FindByName(world, "thermo_041");
+    NuSpecialFind(world->current_gscn, &LevHSpecial[0], "arm_pop_1_2", 1);
+    NuSpecialFind(world->current_gscn, &LevHSpecial[1], "arm_pop_2_2", 1);
+
+    if (NuSpecialExistsFn(&LevHSpecial[0])) {
+        char *names[5] = {"arm_1_null1", "arm_1_null2", "arm_1_null3", "arm_1_null4", "arm_2_null1"};
+        for (i32 i = 0; i < 5; ++i) {
+            GIZMOBLOWUP_s *blowup = GizmoBlowUp_FindByName(world, names[i]);
+            if (blowup != NULL && blowup->type != NULL) {
+                blowup->field_0x124 = 1;
+                blowup->override_special = &LevHSpecial[0];
+                blowup->draw_flags |= 0xc00000;
+                GizBlowup_InitSingleTerrain(blowup);
+            }
+        }
+    }
+    if (NuSpecialExistsFn(&LevHSpecial[1])) {
+        char *names[5] = {"arm_1_null5", "arm_1_null6", "arm_1_null7", "arm_1_null8", "arm_2_null2"};
+        for (i32 i = 0; i < 5; ++i) {
+            GIZMOBLOWUP_s *blowup = GizmoBlowUp_FindByName(world, names[i]);
+            if (blowup != NULL && blowup->type != NULL) {
+                blowup->field_0x124 = 1;
+                blowup->override_special = &LevHSpecial[1];
+                blowup->draw_flags |= 0xc00000;
+                GizBlowup_InitSingleTerrain(blowup);
+            }
+        }
+    }
+
+    GIZBUILDIT_s *buildit = GizBuildIt_Find(world, "buildit5");
+    if (buildit != NULL)
+        buildit->radius_scale = 2.0f;
+    buildit = GizBuildIt_Find(world, "buildit6");
+    if (buildit != NULL)
+        buildit->radius_scale = 2.0f;
+    buildit = GizBuildIt_Find(world, "buildit7");
+    if (buildit != NULL)
+        buildit->radius_scale = 2.0f;
 }
 
 void BlockadeRunnerC_Init(WORLDINFO_s *world) {
@@ -213,16 +257,45 @@ void TatooineC_Init(WORLDINFO_s *world) {
         b->field_0xa0 |= 0x10000;
 }
 
-void TatooineD_Init(WORLDINFO_s *) {
-    STUBBED();
+void TatooineD_Init(WORLDINFO_s *world) {
+    NuSpecialFind(world->current_gscn, &LevHSpecial[0], "final_bpush", 1);
+    LevAIPathNode[0] = AIPathFindNode(world->ai_sys, NULL, "box1_c");
+
+    i32 direction;
+    LevPathCnx[0] = AIPAthFindPathCnx(world->ai_sys, NULL, "box1_c", "box1_a", &direction);
+    if (direction)
+        LevPathCnxDir |= 1;
+
+    LevPathCnx[1] = AIPAthFindPathCnx(world->ai_sys, NULL, "box1_c", "box1_b", &direction);
+    if (direction)
+        LevPathCnxDir |= 2;
 }
 
 void TatooineA_Update(WORLDINFO_s *) {
     STUBBED();
 }
 
-void TatooineD_Update(WORLDINFO_s *) {
-    STUBBED();
+void TatooineD_Update(WORLDINFO_s *world) {
+    AIPATHNODE_s *node = static_cast<AIPATHNODE_s *>(LevAIPathNode[0]);
+    if (node != NULL && NuSpecialExistsFn(&LevHSpecial[0])) {
+        NUVEC *position = NuSpecialGetDrawPos(&LevHSpecial[0]);
+        if (position != NULL) {
+            node->position.x = position->x - 0.75f;
+            node->position.z = position->z;
+            if (world->ai_sys->path_sys != NULL && world->ai_sys->path_sys->active_path != NULL)
+                AIPathNodeUpdatePos(world->ai_sys, world->ai_sys->path_sys->active_path, node);
+        }
+    }
+
+    AIPATHCNX_s *first = static_cast<AIPATHCNX_s *>(LevPathCnx[0]);
+    AIPATHCNX_s *second = static_cast<AIPATHCNX_s *>(LevPathCnx[1]);
+    if (first != NULL && second != NULL) {
+        i32 direction = LevPathCnxDir;
+        if (second->traversal_flags[(direction >> 1) & 1] & 0x08000000)
+            first->traversal_flags[direction & 1] |= 0x80000000;
+        else
+            first->traversal_flags[direction & 1] &= ~0x80000000;
+    }
 }
 
 // ===========================================================================
@@ -300,10 +373,43 @@ void DeathStarRescueC_AlwaysUpdate(WORLDINFO_s *world) {
 // Death Star escape (DeathStarEscape_A / B / C / D)
 // ===========================================================================
 
-bool DeathStarShieldDown() {
-    STUBBED();
-    // Shield-state behavior remains unreconstructed.
-    return false;
+i32 DeathStarShieldDown() {
+    if (LevGizmo[0] == NULL)
+        LevGizmo[0] = GizmoFindByName(WORLD->gizmo_sys, blowup_gizmotype_id, "bigbang1");
+    if (LevGizmo[0] == NULL || LevGizmo[0]->object == NULL)
+        return 0;
+
+    GIZMOBLOWUP_s *blowup = static_cast<GIZMOBLOWUP_s *>(LevGizmo[0]->object);
+    if (blowup->output_flags & 1)
+        return 1;
+    if (__builtin_expect(static_cast<i8>(blowup->state_flags) < 0, 1)) {
+        GameObject_s **players = Player;
+        GameObject_s *player = players[0];
+        if (player != NULL) {
+            if (WORLD->current_level != DEATHSTARBATTLED_LDATA ||
+                !ObjInNarrowSock(player, WORLD->sock_sys, WORLD->level_idx)) {
+                TORPEDOPACKET_s *packet = player->torpedo;
+                if (packet != NULL) {
+                    if (packet->count != 0 || (packet->field_0x1 & 2) != 0)
+                        return 1;
+                }
+            }
+        }
+
+        player = players[1];
+        if (player != NULL) {
+            if (WORLD->current_level != DEATHSTARBATTLED_LDATA ||
+                !ObjInNarrowSock(player, WORLD->sock_sys, WORLD->level_idx)) {
+                TORPEDOPACKET_s *packet = player->torpedo;
+                if (packet != NULL) {
+                    if (packet->count != 0)
+                        return 1;
+                    return (packet->field_0x1 >> 1) & 1;
+                }
+            }
+        }
+    }
+    return 0;
 }
 
 void DeathStarEscapeA_Init(WORLDINFO_s *world) {
@@ -331,8 +437,15 @@ void DeathStarEscapeB_Init(WORLDINFO_s *) {
     STUBBED();
 }
 
-void DeathStarEscapeB_Draw(WORLDINFO_s *) {
-    STUBBED();
+__attribute__((force_align_arg_pointer)) void DeathStarEscapeB_Draw(WORLDINFO_s *) {
+    if (LevGameObject[0] != NULL && *static_cast<u8 *>(deathstarescapeb_netpacket) == 0) {
+        NUMTX matrix = LevGameObject[0]->joint_matrices[1];
+        NuSpecialDrawAt(&LevHSpecial[2], &matrix);
+    }
+    if (LevGameObject[1] != NULL && *static_cast<u8 *>(deathstarescapeb_netpacket) == 0) {
+        NUMTX matrix = LevGameObject[1]->joint_matrices[1];
+        NuSpecialDrawAt(&LevHSpecial[2], &matrix);
+    }
 }
 
 void DeathStarEscapeC_Init(WORLDINFO_s *world) {
