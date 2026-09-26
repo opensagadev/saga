@@ -88,3 +88,33 @@ unsigned byte offsets to `f32` as `high16 * 65536.0f + low16`, which affects
 the SSE instruction sequence. The first reconstruction scored 66.41629%
 against its 2,000-byte target and removed the final `STUBBED()` marker from
 this file. The 2192-byte generated function has further block-order work.
+
+## Remaining cutscene source files
+
+The target's `instNuGCutSceneFind` scans the active intrusive list and calls
+`NuStrICmp(input_name, instance->name)`. `PetesHackOfDeath` only clears that
+active-list head. Their first implementations score 99.97222% and 99.875%;
+the remaining differences are relocation displacements.
+
+`CutScene_OverrideConfigFileName_LSW` checks the active `PODSPRINT_ADATA`
+area, confirms the `episodei\\ep1_podrace_` prefix, then appends `_sprint`
+for eight case-insensitive suffixes. The target has separate return and
+common append blocks; the first version scored 91.416664%.
+
+`instNuGCutSceneCleanUp` uses four passes over the 16-byte defrag records:
+destroy unused scenes, destroy old instances, relocate selected scenes in
+ascending address order, and recreate instances. The target uses the cursor
+returned by `RelocateCutScene` and switches it to `DefragInstBaseMem` when a
+separate instance pool exists. The first implementation scored 30.340782%
+at 501 bytes against a 594-byte target; its loop block order needs work.
+
+For `instCutSceneTimeElapsed`, declaring `rate`, `accumulated_stream_duration`,
+and `current_frame` as locals before the rate test makes GCC load both frame
+values before its `jnp` branch. Reordering the two locals changes the chosen
+SSE registers. That raised its score from 39.142857% to 53.261906%; the
+remaining gap is mostly NaN-aware branch arrangement and zero-return blocks.
+
+`FindMtlInHGObj` lives in an otherwise `-O0` translation unit but the target
+function is optimized. A function-local `optimize("O2")` produced an 85.09091%
+match while leaving neighboring functions at their measured settings. This
+material index is one-based, with zero for no match.

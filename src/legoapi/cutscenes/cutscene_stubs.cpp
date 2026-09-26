@@ -1,6 +1,7 @@
 #include "legoapi/world/world_shared.h"
 #include "decomp.h"
 #include "legoapi/legoapi_types.h"
+#include "legoapi/cutscenes/cutscene_defrag.h"
 #include "nu2api/nucore/nugcutscene.h"
 #include "nu2api/nucore/NuDynamicLight.h"
 #include "nu2api/nu3d/nuprim.h"
@@ -19,14 +20,6 @@ void instNuGCutSceneEndButNotSystems(instNUGCUTSCENE_s *instance);
 void instNuGCutSceneResetCamLock(instNUGCUTSCENE_s *);
 
 extern "C" {
-    struct CutSceneCleanUpEntry {
-        void *handle;
-        NUGCUTSCENE_s *cutscene;
-        f32 accumulated_duration;
-        u8 flags;
-        u8 padding[3];
-    };
-
     CutSceneCleanUpEntry *DefragCutSceneList;
     CutSceneCleanUpEntry *DefragCutSceneListBase;
     void *DefragCutSceneBaseMem;
@@ -206,13 +199,17 @@ extern "C" {
         if (instance == NULL || instance->cutscene == NULL) {
             return 0.0f;
         }
-        if (instance->rate != 0.0f) {
-            f32 elapsed = instance->accumulated_stream_duration + instance->current_frame - 1.0f;
-            if (elapsed != 0.0f) {
-                return elapsed / instance->rate;
-            }
+        f32 rate = instance->rate;
+        f32 accumulated = instance->accumulated_stream_duration;
+        f32 frame = instance->current_frame;
+        if (rate == 0.0f) {
+            return 0.0f;
         }
-        return 0.0f;
+        f32 elapsed = accumulated + frame - 1.0f;
+        if (elapsed == 0.0f) {
+            return 0.0f;
+        }
+        return elapsed / rate;
     }
 
     i32 instNuGCutSceneAddCamTgt(instNUGCUTSCENE_s *instance, NUVEC *target, f32 start_frame, f32 duration,

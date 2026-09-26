@@ -4,6 +4,7 @@
 #include "legoapi/legoapi_types.h"
 #include "legoapi/audio/audio.h"
 #include "legoapi/cutscenes/cutscenes.h"
+#include "legoapi/cutscenes/cutscene_defrag.h"
 #include "nu2api/nucore/nugcutscene.h"
 #include "legoapi/world/world_shared.h"
 
@@ -90,6 +91,8 @@ static void CS_play_sfx(NUFPAR *fp) {
 static void copyAnims(NUGCUTSCENE_s *, NUGCUTSCENE_s *);
 void NewCopyAnims(instNUGCUTSCENE_s *);
 i32 instNuGCutSceneSwapBuffers(instNUGCUTSCENE_s *, i32);
+NUGCUTSCENE_s *RelocateCutScene(NUGCUTSCENE_s *, VARIPTR *);
+extern "C" void instNuGCutSceneDestroy(instNUGCUTSCENE_s *);
 
 static void CS_sfx(NUFPAR *fp) {
     if (NuFParGetWord(fp) != 0) {
@@ -740,12 +743,87 @@ extern "C" {
     instNUGCUTSCENE_s *cutscene_load_instance;
     i32 NumCommonStreamingBuffers = 2;
 
-    void instNuGCutSceneFind(void) {
-        STUBBED();
+    instNUGCUTSCENE_s *instNuGCutSceneFind(const char *name) {
+        for (instNUGCUTSCENE_s *instance = active_cutscene_instances; instance != NULL; instance = instance->next) {
+            if (NuStrICmp(name, instance->name) == 0) {
+                return instance;
+            }
+        }
+        return NULL;
     }
 
-    void instNuGCutSceneCleanUp(void) {
-        STUBBED();
+    void *instNuGCutSceneCleanUp(void) {
+        CutSceneCleanUpEntry *begin = DefragCutSceneListBase;
+        CutSceneCleanUpEntry *end = begin + DefragCutSceneListSize;
+
+        for (CutSceneCleanUpEntry *entry = begin; entry < end; ++entry) {
+            if ((entry->flags & 1) != 0) {
+                continue;
+            }
+            bool shared = false;
+            for (CutSceneCleanUpEntry *other = entry + 1; other < end; ++other) {
+                if ((other->flags & 1) != 0 && other->cutscene == entry->cutscene) {
+                    shared = true;
+                    break;
+                }
+            }
+            if (shared) {
+                for (CutSceneCleanUpEntry *other = entry + 1; other < end; ++other) {
+                    if ((other->flags & 1) != 0 && other->cutscene == entry->cutscene) {
+                        other->flags |= 1;
+                    }
+                }
+            } else if (*reinterpret_cast<u32 *>(entry->cutscene) != 0x44454144u) {
+                NuGCutSceneDestroy(entry->cutscene);
+                *reinterpret_cast<u32 *>(entry->cutscene) = 0x44454144u;
+            }
+        }
+
+        for (CutSceneCleanUpEntry *entry = begin; entry < end; ++entry) {
+            instNuGCutSceneDestroy(DefragGetInstFn(entry->handle));
+        }
+
+        VARIPTR cursor;
+        cursor.void_ptr = DefragCutSceneBaseMem;
+        for (;;) {
+            u32 lowest = 0xffffffffu;
+            CutSceneCleanUpEntry *first = NULL;
+            for (CutSceneCleanUpEntry *entry = begin; entry < end; ++entry) {
+                u32 address = static_cast<u32>(reinterpret_cast<usize>(entry->cutscene));
+                if ((entry->flags & 1) != 0 && address < lowest) {
+                    lowest = address;
+                    first = entry;
+                }
+            }
+            if (lowest == 0xffffffffu) {
+                break;
+            }
+            NUGCUTSCENE_s *old_scene = first->cutscene;
+            NUGCUTSCENE_s *new_scene = RelocateCutScene(old_scene, &cursor);
+            for (CutSceneCleanUpEntry *entry = first; entry < end; ++entry) {
+                if ((entry->flags & 1) != 0 && entry->cutscene == old_scene) {
+                    entry->cutscene = new_scene;
+                    entry->flags ^= 1;
+                }
+            }
+        }
+        if (DefragInstBaseMem != NULL) {
+            cursor.void_ptr = DefragInstBaseMem;
+        }
+        for (CutSceneCleanUpEntry *entry = begin; entry < end; ++entry) {
+            if (entry->flags != 0) {
+                instNUGCUTSCENE_s *instance =
+                    static_cast<instNUGCUTSCENE_s *>(DefragCreateInstFn(entry->handle, entry->cutscene, &cursor));
+                instance->accumulated_stream_duration = entry->accumulated_duration;
+            } else {
+                DefragInstDestroyedFn(entry->handle);
+            }
+        }
+        if (background_cutscene_instances != NULL) {
+            active_cutscene_instances = background_cutscene_instances;
+            background_cutscene_instances = NULL;
+        }
+        return cursor.void_ptr;
     }
 }
 
@@ -1485,7 +1563,7 @@ extern "C" {
     }
 
     void PetesHackOfDeath(void) {
-        STUBBED();
+        active_cutscene_instances = NULL;
     }
 } // extern "C"
 
@@ -2421,8 +2499,21 @@ extern "C" void NuGCutSceneSysRender(i32 paused) {
     }
 }
 
-static __used__ void CutScene_OverrideConfigFileName_LSW(char *, int, int) {
-    STUBBED();
+static __used__ void CutScene_OverrideConfigFileName_LSW(char *filename, int, int) {
+    if (PODSPRINT_ADATA == NULL || WorldInfo_CurrentlyActive()->area != PODSPRINT_ADATA) {
+        return;
+    }
+    char prefix[] = "episodei\\ep1_podrace_";
+    if (NuStrIStr(filename, prefix) != filename) {
+        return;
+    }
+    char *suffix = filename + NuStrLen(prefix);
+    if (NuStrICmp(suffix, "arrival1") == 0 || NuStrICmp(suffix, "arrival2") == 0 ||
+        NuStrICmp(suffix, "arrival3") == 0 || NuStrICmp(suffix, "arrival4") == 0 ||
+        NuStrICmp(suffix, "intro") == 0 || NuStrICmp(suffix, "tuskenraiders") == 0 ||
+        NuStrICmp(suffix, "outro1") == 0 || NuStrICmp(suffix, "outro2") == 0) {
+        NuStrCat(filename, "_sprint");
+    }
 }
 
 void NewCopyAnims(instNUGCUTSCENE_s *instance) {
