@@ -14,6 +14,8 @@
 #include "legoapi/gizmo/base/GizBlowupObjectInterface.h"
 #include "legoapi/gizmo/object/gizmoblowups.h"
 #include "legoapi/gizmo/base/gizmo.h"
+#include "legoapi/gizmos/object/gizpanel.h"
+#include "legoapi/gizmos/transport/tubes.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/menus/core/panel.h"
 #include "legoapi/world/levels/levels.h"
@@ -262,8 +264,38 @@ void CruiserCPanel(WORLDINFO_s *) {
     }
 }
 
-void CruiserDInit(WORLDINFO_s *) {
-    STUBBED();
+void CruiserDInit(WORLDINFO_s *world) {
+    if (world->area->level_count != 0) {
+        for (i32 i = 0; i < world->area->level_count; i++) {
+            if (static_cast<u16>(world->area->levels[i]) == static_cast<u16>(CRUISERE_LDATA->idx))
+                CruiserE_ix = i;
+        }
+    }
+
+    if (NuSpecialFind(WORLD->current_gscn, &CruiserD_Lift, "lift", 1)) {
+        CruiserD_LiftAnim = NuSpecialGetInstAnim(&CruiserD_Lift);
+        CruiserD_Lift_plat_id = FindPlatInst(NuSpecialGetInstanceix(&CruiserD_Lift));
+    }
+
+    LevGizmo[0] = GizmoFindByName(world->gizmo_sys, gizpanel_gizmotype_id, "panel1");
+    cruiserd_netpacket = SetLevelHack(12);
+
+    char name[16];
+#define FIND_CRUISER_D_TUBE(NUMBER)                             \
+    sprintf(name, "Tube%d", NUMBER);                            \
+    if (TUBE *tube = Tube_FindByName(world, name))               \
+        tube->flags |= TUBE_FLAG_TOUCH_RADIUS
+    FIND_CRUISER_D_TUBE(1);
+    FIND_CRUISER_D_TUBE(2);
+    FIND_CRUISER_D_TUBE(3);
+    FIND_CRUISER_D_TUBE(4);
+    FIND_CRUISER_D_TUBE(5);
+    FIND_CRUISER_D_TUBE(6);
+    FIND_CRUISER_D_TUBE(7);
+    FIND_CRUISER_D_TUBE(8);
+    FIND_CRUISER_D_TUBE(9);
+    FIND_CRUISER_D_TUBE(10);
+#undef FIND_CRUISER_D_TUBE
 }
 
 void CruiserDReset(WORLDINFO_s *) {
