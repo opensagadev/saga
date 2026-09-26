@@ -22,6 +22,10 @@ the jump, `4` calls the empty `ModifyJump`, and `5` calls the empty
 32-bit value at that address.
 
 The bottom plane test uses exactly `0x1p-23f` (float bits `0x34000000`) as
-an epsilon, then accepts an intersection ratio in `(0, 1]`. The trajectory
-simulator takes at most 50 steps of `0.1f` and stops when the height falls
-below the initial height minus `2.0f` or a terrain contact changes the state.
+an epsilon. Its ratio condition is surprisingly `t > 0.0f || t <= 1.0f`:
+the target's first comparison jumps to a cold block for `t <= 0`, and that
+block jumps back into the intersection body when `t <= 1`. Thus every finite
+ratio reaches the body; NaN does not. Do not replace this with the usual
+interval test. The trajectory simulator takes at most 50 steps of `0.1f`
+and stops when the height falls below the initial height minus `2.0f` or a
+terrain contact changes the state.
