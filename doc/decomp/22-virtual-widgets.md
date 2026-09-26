@@ -55,3 +55,22 @@ near its lower corner. Its hovered state sets alpha to `1.0f` and scale to
 `1.2f`; otherwise alpha is `0.4f` and scale is `1.0f`. It stores each value in
 both the current and destination animation fields, and sets animation elapsed
 to duration to suppress interpolation.
+
+The D-pad `Process` begins with `MechTouchUITexButton::Process`. A negative
+`s_noInputTimer` forces visibility, sets alpha `0.75f`, and may pulse scale
+using the same integer-angle lookup as the buttons. When menu ID 25 is active,
+it treats touch input as a drag, clamps the D-pad center to
+`x=[radius_x-0.975f, -radius_x]` and `y=[radius_y-0.975f, 0]`, and writes
+`SuperOptions.left_control_x/y`. For ordinary play, it computes a touched
+direction with `NuFsqrt`, `NuAtan2D`, and `NuTrigTable`, clamps both stick axes
+to `[-1,1]`, and writes the active controller's first two stick values. The
+target's short-range strength uses a **double literal `1.4`**, converts the
+product to float, then multiplies by `3.0f`; replacing it with `1.4f` changes
+the SSE conversion sequence and rounding.
+
+The D-pad `Render` calls the texture button render first, then four unrolled
+`RndrTexQuad` calls for bottom, left, top, and right arrows. Their angles are
+`0x8000`, `0xc000`, `0`, `0x4000`. The target has separate highlight checks
+for each arrow. A final menu ID 25 path copies the lock button's radius and
+scale to the embedded mover and renders that mover directly. Keeping the four
+arrow calls unrolled preserves the target's control flow and call order.
