@@ -38,11 +38,14 @@
 extern i32 dagobah_training;
 extern i32 obstacle_gizmotype_id;
 extern u8 LevFlag[16];
+extern "C" i16 id_PROBEDROID, id_ATST_LOWRES, id_ATAT;
 GIZPANEL_s *LevGizPanel;
 AILOCATOR_s *locator;
 GameObject_s *gameobj;
 extern u8 troopercannons_beenReset;
 void Asteroid_PartKill(PART_s *, i32);
+void AtatPart_Stop(PART_s *) __asm__("_ZL13AtatPart_StopP6PART_s") __attribute__((visibility("hidden")));
+void AtatPart_Update(PART_s *) __asm__("_ZL15AtatPart_UpdateP6PART_s") __attribute__((visibility("hidden")));
 void GizmoBlowupUpdateMatrix(GIZMOBLOWUP_s *);
 void PartCollide_3D(PART_s *);
 void ResetTrooperCannons(WORLDINFO_s *, i32);
@@ -50,6 +53,7 @@ void InitTrooperCannons(WORLDINFO_s *);
 void HothBattleE_UpdateWave();
 void HothBattle_Melee_init(HOTHBATTLE_MELEE_s *);
 void HothBattle_ManageBackgroundCreatures();
+void SpawnMeleeCreatureType(i32);
 void UpdateTrooperCannons(WORLDINFO_s *);
 EXPLOSION *Detonate(NUVEC *, u16);
 extern "C" void NewPartRotation(PART_s *);
@@ -154,8 +158,17 @@ void DagobahC_Panel(WORLDINFO_s *) {
     }
 }
 
-void KillParts_ATAT(ADDPART_s *, i32, i32, GameObject_s *) {
-    STUBBED();
+void KillParts_ATAT(ADDPART_s *params, i32, i32 variant, GameObject_s *) {
+    params->flags = static_cast<u32>(variant) < 1 ? 0x500 : 0x110;
+    params->velocity->z = 0.0f;
+    params->velocity->y = 0.0f;
+    params->velocity->x = 0.0f;
+    params->field_48 = AtatPart_Update;
+    params->stop_fn = AtatPart_Stop;
+    params->draw_fn = PartDraw_Flickerer;
+    PART_s *part = AddPart(params);
+    if (part != NULL)
+        part->field_100 = 10.0f;
 }
 
 f32 rocket_speed = 1.2f;
@@ -681,8 +694,67 @@ void CloudCityEscapeC_Update(WORLDINFO_s *) {
     }
 }
 
-void HothBattle_StartNewWave() {
-    STUBBED();
+i32 HothBattle_StartNewWave() {
+    if (melee.field_0x2 != 0) {
+        switch (melee.field_0x1) {
+        case 1:
+            melee.waves[0].field_0x18 = 9;
+            melee.waves[0].field_0x19 = 9;
+            melee.waves[0].character_id = id_PROBEDROID;
+            NuStrCpy(melee.waves[0].name, "Probe");
+            melee.creature_count = 1;
+            if (g_lowEndLevelBehaviour != 0) {
+                melee.waves[0].field_0x18 = 5;
+                melee.waves[0].field_0x19 = 5;
+            }
+            break;
+        case 2:
+            melee.waves[0].field_0x18 = 9;
+            melee.waves[0].field_0x19 = 9;
+            melee.waves[0].character_id = id_ATST_LOWRES;
+            NuStrCpy(melee.waves[0].name, "rider");
+            melee.creature_count = 1;
+            if (g_lowEndLevelBehaviour != 0) {
+                melee.waves[0].field_0x18 = 5;
+                melee.waves[0].field_0x19 = 5;
+            }
+            break;
+        case 3:
+            melee.waves[0].field_0x18 = 2;
+            melee.waves[0].field_0x19 = 2;
+            melee.waves[0].character_id = id_ATAT;
+            NuStrCpy(melee.waves[0].name, "ATAT");
+            melee.creature_count = 1;
+            break;
+        case 4:
+            melee.waves[0].field_0x18 = 3;
+            melee.waves[0].field_0x19 = 3;
+            melee.waves[0].character_id = id_PROBEDROID;
+            NuStrCpy(melee.waves[0].name, "Probe");
+            melee.waves[1].field_0x18 = 5;
+            melee.waves[1].field_0x19 = 5;
+            melee.waves[1].character_id = id_ATST_LOWRES;
+            NuStrCpy(melee.waves[1].name, "rider");
+            melee.waves[2].field_0x18 = 1;
+            melee.waves[2].field_0x19 = 1;
+            melee.waves[2].character_id = id_ATAT;
+            NuStrCpy(melee.waves[2].name, "ATAT");
+            melee.creature_count = 3;
+            if (g_lowEndLevelBehaviour != 0) {
+                melee.waves[0].field_0x18 = 2;
+                melee.waves[0].field_0x19 = 2;
+                melee.waves[1].field_0x18 = 2;
+                melee.waves[1].field_0x19 = 2;
+            }
+            break;
+        }
+    }
+    melee.field_0x2 = 0;
+    if (MiniCutCam != 0)
+        return 0;
+    for (i32 type = 0; type < melee.creature_count; ++type)
+        SpawnMeleeCreatureType(type);
+    return 1;
 }
 
 void HothEscapeC_AlwaysUpdate(WORLDINFO_s *world) {

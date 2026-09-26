@@ -98,3 +98,21 @@ also match their exact target sizes (574, 207, and 471 bytes). Each
 remaining argument mismatch is a string or constant address; none is a
 different instruction or control-flow block. The GOT-aware fork reports
 99.5037%, 99.545456%, and 99.42593% respectively.
+
+## AT-AT particle callbacks and Hoth wave setup
+
+`KillParts_ATAT` stores pointers to `AtatPart_Update` and `AtatPart_Stop`
+in its particle descriptor. Those functions were file-local in `move.cpp`.
+Giving them external linkage with their target `_ZL...` assembler names
+and hidden visibility lets the Episode V handler reference the exact
+callbacks. Setting the velocity components in z/y/x order and using an
+unsigned comparison for `variant < 1` reproduces the entire 120-byte
+target at 100%.
+
+`HothBattle_StartNewWave` has an `i32` result (0 while a mini cut camera
+is active, 1 after it spawns wave types). The target's block order is a
+switch over `melee.field_0x1`: Probe, rider, AT-AT, or a combined wave.
+Writing the cases in that order with the low-end count adjustment and a
+final `for` over `melee.creature_count` gives the exact 470-byte target
+size and 99.75207% match. Its six remaining mismatches are only the
+three wave-name string addresses, each referenced twice.
