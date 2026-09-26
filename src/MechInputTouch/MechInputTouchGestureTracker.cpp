@@ -6,6 +6,8 @@
 #include "legoapi/characters/core/character.h"
 #include "gamelib/util/gamelib_util_types.h"
 
+#include <new>
+
 f32 TimeSampleDelta = 0.05f;
 i32 GetMenuID();
 
@@ -157,18 +159,21 @@ void MechInputTouchGestureTrackingSystem::LookForSwipe(GameObject_s &object) {
 MechInputTouchGestureTrackingSystem::MechInputTouchGestureTrackingSystem()
     : NuTouchInputElement(static_cast<NuTouchInputElement::TYPE>(3), 0xffff00ff, 0) {
     for (i32 index = 0; index < 10; ++index) {
-        TouchHolder &holder = holders[index];
+        TouchHolder &holder = *new (holder_storage + index * sizeof(TouchHolder)) TouchHolder;
+        for (i32 sample = 0; sample < 20; ++sample) {
+            holder.swipe_samples[sample].position.x = 0.0f;
+            holder.swipe_samples[sample].position.y = 0.0f;
+            holder.swipe_samples[sample].time = 0.0f;
+        }
         holder.touch_id = -1;
         holder.clicked = 0;
         holder.is_down = 0;
         holder.field_0x6 = 0;
         holder.consumed = 0;
         holder.click_candidate = 0;
-        for (i32 sample = 0; sample < 20; ++sample) {
-            holder.swipe_samples[sample].position.x = 0.0f;
-            holder.swipe_samples[sample].position.y = 0.0f;
-            holder.swipe_samples[sample].time = 0.0f;
-        }
+        holder.down_position.x = 0.0f;
+        holder.down_position.y = 0.0f;
+        holder.previous_target_object = NuMechPtr<MechObjectInterface, 4>();
         holder.held_time = 0.0f;
         holder.click_timer = 0.0f;
         holder.double_click_timer = 0.0f;
@@ -311,4 +316,8 @@ void MechInputTouchGestureTrackingSystem::Update(NuInputTouchData const *data) {
 }
 
 MechInputTouchGestureTrackingSystem::~MechInputTouchGestureTrackingSystem() {
+    for (i32 index = 10; index > 0; --index) {
+        TouchHolder *holder = reinterpret_cast<TouchHolder *>(holder_storage + (index - 1) * sizeof(TouchHolder));
+        holder->~TouchHolder();
+    }
 }

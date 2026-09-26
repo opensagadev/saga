@@ -352,7 +352,7 @@ struct MechInputTouchGestureTrackingSystem : NuTouchInputElement {
     }
     ~MechInputTouchGestureTrackingSystem() override;
 
-    TouchHolder holders[10];
+    u8 holder_storage[sizeof(TouchHolder) * 10];
     GestureTrackerRegistration trackers[10];
 };
 DECOMP_ASSERT(sizeof(MechInputTouchGestureTrackingSystem) == 0x25d8, "Gesture tracking system ABI");
