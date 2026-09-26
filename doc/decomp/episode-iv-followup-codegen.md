@@ -86,3 +86,48 @@ uses the same five-name local array pattern as `BlockadeRunnerB_Init` for the
 terrain blowups. The target preloads those pointers and unrolls the loop.
 It also reuses one stack `direction` output across four path connection
 lookups. Remaining differences are linked string GOTOFF operands.
+
+## Final Episode IV stub pass
+
+| Handler | Match | Target bytes | Current bytes |
+| --- | ---: | ---: | ---: |
+| `MosEisleyD_Init` | 99.820% | 1,798 | 1,798 |
+| `MosEisleyB_Update` | 73.049% | 1,011 | 977 |
+| `DeathStarRescueB_Update` | 83.634% | 1,168 | 1,162 |
+| `KillParts_TIEFIGHTER` | 45.947% | 557 | 605 |
+| `DeathStarBattleDUpdate` | 67.338% | 1,502 | 1,514 |
+
+`MosEisleyD_Init` confirms the fixed-array pattern: six local gate-name
+pointers are initialized before the first `sprintf`, and GCC unrolls the six
+door blocks. Two eight-iteration bin-lid loops also unroll. The function is
+the target's exact size and only linked string addresses differ.
+
+`MosEisleyB_Update` has the same branch order as `TatooineA_Update`: check
+three force pointers, leave the inactive branch inline, and put the active
+branch after the return. The target checks all four path nodes before
+choosing among six x/z position layouts and calls `AIPathNodeUpdatePos` four
+times with fresh path pointer loads. The current source implements those
+paths, but its float-setting block and register order need further tuning.
+
+`DeathStarRescueB_Update` repeats six reactor checks. Explicit macro
+expansion preserves the target's six active bodies; a large ordinary loop
+risks leaving one loop body where the target has six. The target checks the
+six flag bytes in order and places the first active body next to that chain,
+then the others out of line. The sound effect uses a 0.25 volume while the
+animation plays and a 0.4 volume when it reaches its end frame.
+
+`KillParts_TIEFIGHTER` uses an unsigned `variant < 1` expression. NDK r8e
+GCC encodes its initial flags assignment as `cmp 1; sbb; and 0x3f0; add
+0x10`; signed comparison or equality is a different instruction sequence.
+The spinning path starts with `{velocity.x * 0.75f, velocity.x * 0.75f,
+velocity.z * 0.75f}`. The middle component really repeats x. Five particle
+callbacks in `parts.cpp` were static, so this pass exposes them with hidden
+linkage and their original `_ZL...` assembler names for cross-file pointers.
+
+`DeathStarBattleDUpdate` reads `player->apiobj.collision_position`, which is
+at player offsets `0x80` through `0x88`; `apiobj.position` is a different
+field. It clamps the target z to 60/62 and 70/72 depending on which of the
+outer two ships exist. Three distinct spawn blocks rebuild the same base
+position before applying offsets `(0,0,2)`, `(0,1,0)`, `(0,0,-2)`. Its trench
+move and kill callbacks also needed hidden cross-file linkage while retaining
+the original `_ZL...` assembler names.
