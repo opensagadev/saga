@@ -126,3 +126,18 @@ fields and has a direct early return that clears all output references when
 debug mode is disabled. Putting validation before the debug branch radically
 changes branch destinations and register lifetimes even when the method has
 the same external behavior.
+
+The decisive `StrandBlocksForContext` detail is the five-bit context field.
+After assigning `debug->flags.ctx_id = stranded_ctx.id`, read the field back
+before comparing it with the full 32-bit stranded ID. GCC must account for
+truncation to five bits and generates the target's reload and second compare.
+Assigning the full ID to a local instead suppresses that control flow and
+leaves the match around 8.56%. Keeping `BLOCK_SIZE` expressions in the paths
+that need them, and marking the stranded-count branch unlikely with
+`__builtin_expect(..., 0)`, moves the count block after the no-debug exit like
+the target. Reversing the largest-block comparison to
+`BLOCK_SIZE(largest->value) < BLOCK_SIZE(header->value)` also improves register
+selection. The direct-object result reaches **96.17054%** (497 target / 491
+current bytes); the remaining differences are mostly stack-slot and branch
+operands.
+The linked GOT-aware diff is **96.325584%**.

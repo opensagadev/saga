@@ -1147,19 +1147,18 @@ void NuMemoryManager::StrandBlocksForContext(Context *ctx, u32 &stranded_block_c
     for (Page *page = pages; page != NULL; page = page->next) {
         Header *end = reinterpret_cast<Header *>(page->end);
         for (Header *header = page->first_header; header != end;) {
-            u32 block_size = BLOCK_SIZE(header->value);
             if ((header->value & ALLOC_MASK) != 0) {
                 DebugHeader *debug = reinterpret_cast<DebugHeader *>(header);
                 u32 ctx_id = debug->flags.ctx_id;
                 if (ctx_id >= ctx->id && ctx_id != stranded_ctx.id) {
                     debug->flags.ctx_id = stranded_ctx.id;
                     ++newly_stranded;
-                    stranded_bytes += block_size;
-                    ctx_id = stranded_ctx.id;
+                    stranded_bytes += BLOCK_SIZE(header->value);
+                    ctx_id = debug->flags.ctx_id;
                 }
-                if (ctx_id == stranded_ctx.id) {
+                if (__builtin_expect(ctx_id == stranded_ctx.id, 0)) {
                     ++total_stranded;
-                    if (largest == NULL || block_size > BLOCK_SIZE(largest->value))
+                    if (largest == NULL || BLOCK_SIZE(largest->value) < BLOCK_SIZE(header->value))
                         largest = header;
                 }
             }
