@@ -2724,14 +2724,17 @@ void MenuUpdateBonusMode(MENU_s *) {
     if (FadeSys.fade > 0.0f || MainRenderTime > 0.0f)
         return;
 
-    if (BlipL[0] > 0.0f) BlipL[0] -= FRAMETIME;
-    if (BlipR[0] > 0.0f) BlipR[0] -= FRAMETIME;
-    if (BlipU[0] > 0.0f) BlipU[0] -= FRAMETIME;
-    if (BlipD[0] > 0.0f) BlipD[0] -= FRAMETIME;
-    if (BlipL[1] > 0.0f) BlipL[1] -= FRAMETIME;
-    if (BlipR[1] > 0.0f) BlipR[1] -= FRAMETIME;
-    if (BlipU[1] > 0.0f) BlipU[1] -= FRAMETIME;
-    if (BlipD[1] > 0.0f) BlipD[1] -= FRAMETIME;
+    const f32 blip_frame_time = *reinterpret_cast<volatile const f32 *>(&FRAMETIME);
+    if (BlipL[0] > 0.0f) BlipL[0] -= blip_frame_time;
+    if (BlipR[0] > 0.0f) BlipR[0] -= blip_frame_time;
+    if (BlipU[0] > 0.0f) BlipU[0] -= blip_frame_time;
+    if (BlipD[0] > 0.0f) BlipD[0] -= blip_frame_time;
+    i32 player_up[2] = {}, player_down[2] = {};
+    if (BlipL[1] > 0.0f) BlipL[1] -= blip_frame_time;
+    if (BlipR[1] > 0.0f) BlipR[1] -= blip_frame_time;
+    if (BlipU[1] > 0.0f) BlipU[1] -= blip_frame_time;
+    if (BlipD[1] > 0.0f) BlipD[1] -= blip_frame_time;
+    i32 player_left[2] = {}, player_right[2] = {};
 
     switch (bonusmodemode) {
     case 1:
@@ -2771,24 +2774,27 @@ void MenuUpdateBonusMode(MENU_s *) {
     }
 
     i32 confirm = 0, cancel = 0, up = 0, down = 0, left = 0, right = 0;
-    i32 player_up[2] = {}, player_down[2] = {}, player_left[2] = {}, player_right[2] = {};
     for (i32 i = 0; i < 2; ++i) {
         if (!MenuPacket.active_player[i])
             continue;
         const u32 pressed = GamePad[i].buttons_pressed;
-        const u32 direction = pressed | GamePad[i].buttons_held;
-        if (pressed & GAMEPAD_MENUSELECT)
+        if (pressed & GAMEPAD_MENUSELECT) {
             confirm = 1;
-        else if (pressed & GAMEPAD_MENUCANCEL)
+            break;
+        } else if (pressed & GAMEPAD_MENUCANCEL) {
             cancel = 1;
-        else if (direction & GAMEPAD_DUP)
-            up = player_up[i] = 1;
-        else if (direction & GAMEPAD_DDOWN)
-            down = player_down[i] = 1;
-        else if (direction & GAMEPAD_DLEFT)
-            left = player_left[i] = 1;
-        else if (direction & GAMEPAD_DRIGHT)
-            right = player_right[i] = 1;
+            break;
+        } else {
+            const u32 direction = pressed | GamePad[i].left_directions;
+            if (direction & GAMEPAD_DUP)
+                up = player_up[i] = 1;
+            else if (direction & GAMEPAD_DDOWN)
+                down = player_down[i] = 1;
+            else if (direction & GAMEPAD_DLEFT)
+                left = player_left[i] = 1;
+            else if (direction & GAMEPAD_DRIGHT)
+                right = player_right[i] = 1;
+        }
     }
 
     if (menu->input_activity) {
@@ -2827,16 +2833,10 @@ void MenuUpdateBonusMode(MENU_s *) {
     if (player_left[1]) BlipL[1] = 0.1f;
     if (player_right[1]) BlipR[1] = 0.1f;
 
-    if (cancel) {
-        GameAudio_PlaySfx(0x31, NULL, 0, 0);
-        bonusmodemode = 4;
-        bonusmodetime = 0.0f;
-        bonusmodeduration = 0.6f;
-        return;
-    }
-
     if (bonusmodearcade) {
-        if (confirm && hub_bonusmode == 2) {
+        if (confirm) {
+            if (hub_bonusmode != 2)
+                return;
             AREADATA *area = *ArcadeLevel[ArcadeItem.level].area;
             if (area == NULL) {
                 GameAudio_PlaySfx(0x32, NULL, 0, 0);
@@ -2853,7 +2853,7 @@ void MenuUpdateBonusMode(MENU_s *) {
         GameAudio_PlaySfx(0x30, NULL, 0, 0);
         if (hub_new_level == -1)
             return;
-        const i32 area = LDataList[hub_new_level].area_index;
+        const i8 area = LDataList[hub_new_level].area_index;
         if (area == -1 || (ADataList[area].flags & 0x100) == 0)
             return;
         hub_freeplaysource = 1;
@@ -2862,25 +2862,47 @@ void MenuUpdateBonusMode(MENU_s *) {
         return;
     }
 
-    if (up && hub_bonusepisode != -1 && hub_bonusmode > 0) {
+    if (cancel) {
+        GameAudio_PlaySfx(0x31, NULL, 0, 0);
+        bonusmodemode = 4;
+        bonusmodetime = 0.0f;
+        bonusmodeduration = 0.6f;
+        return;
+    }
+
+    if (!bonusmodearcade) {
+        if (hub_bonusepisode == -1 || !up || hub_bonusmode <= 0)
+            return;
         GameAudio_PlaySfx(0x2f, NULL, 0, 0);
         --hub_bonusmode;
-    } else if (down && hub_bonusepisode != -1 && hub_bonusmode < 2) {
+        return;
+    }
+
+    if (up) {
+        if (hub_bonusmode <= 0)
+            return;
+        GameAudio_PlaySfx(0x2f, NULL, 0, 0);
+        --hub_bonusmode;
+        return;
+    }
+    if (down) {
+        if (hub_bonusmode >= 2)
+            return;
         GameAudio_PlaySfx(0x2f, NULL, 0, 0);
         ++hub_bonusmode;
-    } else if (bonusmodearcade) {
-        i8 *entry = reinterpret_cast<i8 *>(&ArcadeItem) + hub_bonusmode * 8;
-        const i32 count = static_cast<u8>(entry[5]);
-        if (count > 1) {
-            if (left) {
-                GameAudio_PlaySfx(0x2f, NULL, 0, 0);
-                if (--entry[4] < 0)
-                    entry[4] = count - 1;
-            } else if (right) {
-                GameAudio_PlaySfx(0x2f, NULL, 0, 0);
-                if (++entry[4] >= count)
-                    entry[4] = 0;
-            }
+        return;
+    }
+    i8 *entries = reinterpret_cast<i8 *>(&ArcadeItem);
+    const i32 count = static_cast<u8>(entries[hub_bonusmode * 8 + 5]);
+    if (count > 1) {
+        if (left) {
+            GameAudio_PlaySfx(0x2f, NULL, 0, 0);
+            if (--entries[hub_bonusmode * 8 + 4] < 0)
+                entries[hub_bonusmode * 8 + 4] = count - 1;
+        } else if (right) {
+            GameAudio_PlaySfx(0x2f, NULL, 0, 0);
+            if (++entries[hub_bonusmode * 8 + 4] >= count)
+                entries[hub_bonusmode * 8 + 4] = 0;
         }
     }
 }
