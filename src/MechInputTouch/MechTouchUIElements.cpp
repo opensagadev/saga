@@ -54,32 +54,26 @@ i32 TagCode(GameObject_s *, GameObject_s *, i32, i32, i32);
 void Tag_NewTransfer(GameObject_s *, GameObject_s *);
 
 bool MechInputTouchGestureTracker::OnDown(GameObject_s &, TouchHolder &) {
-    STUBBED();
     return false;
 }
 
 bool MechInputTouchGestureTracker::OnRelease(GameObject_s &, TouchHolder &) {
-    STUBBED();
     return false;
 }
 
 bool MechInputTouchGestureTracker::OnClick(GameObject_s &, TouchHolder &) {
-    STUBBED();
     return false;
 }
 
 bool MechInputTouchGestureTracker::OnDoubleClick(GameObject_s &, TouchHolder &) {
-    STUBBED();
     return false;
 }
 
 bool MechInputTouchGestureTracker::OnHold(GameObject_s &, TouchHolder &) {
-    STUBBED();
     return false;
 }
 
 bool MechInputTouchGestureTracker::OnSwipe(GameObject_s &, TouchHolder &, i32) {
-    STUBBED();
     return false;
 }
 
