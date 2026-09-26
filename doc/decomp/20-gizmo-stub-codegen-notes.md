@@ -151,3 +151,11 @@ that chain skipped target calls and reordered most of the parser. The target
 also rejects global type ID `0xff`, rather than `-1`. Correcting both details
 raised its GOT-aware match from 27.522322% to 67.99107% (904 local bytes
 versus 897 target bytes).
+
+In the object scan, the target computes all three squared components of the
+`NuVecSub` result before scanning the type IDs. GCC otherwise delays the
+floating-point arithmetic until after the type scan because only matching
+objects use the distance. An empty `+x` output constraint on the computed
+distance keeps the arithmetic before that scan without adding instructions;
+the match rose to 69.4375% with the same 904-byte local size. Forcing the type
+index into `eax` reduced the score and was not retained.

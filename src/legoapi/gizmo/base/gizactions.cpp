@@ -409,6 +409,7 @@ static void GizAction_SetAIState(GIZFLOW_s *, FLOWBOX_s *, char **params, int co
         NUVEC difference;
         NuVecSub(&difference, &origin, &object->apiobj.position);
         f32 distance_squared = difference.x * difference.x + difference.y * difference.y + difference.z * difference.z;
+        asm volatile("" : "+x"(distance_squared));
         i32 matching_type = type_count == 0;
         for (i32 type_index = 0; type_index < type_count; ++type_index) {
             if (object->id == types[type_index]) {
