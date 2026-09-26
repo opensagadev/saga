@@ -226,9 +226,9 @@ void MechInputTouchVirtualConsoleController::ProcessDragMovement(GameObject_s &)
     if (distance > 0.05f) {
         if (dpad_touch->held_time > 0.2f) {
             const i32 angle = NuAtan2D(dx, dy);
-            const f32 strength = MAX(0.0f, MIN((distance - 0.05f) * 4.0f, 1.0f)) * 1.4f;
-            const f32 stick_x = -(strength * NU_SIN_LUT(angle));
+            const f32 strength = MAX(0.0f, MIN((distance - 0.05f) * 4.0f, 1.0f)) * 1.4;
             const f32 stick_y = strength * NU_COS_LUT(angle);
+            const f32 stick_x = -(strength * NU_SIN_LUT(angle));
             stick_values[2] = MAX(-1.0f, MIN(stick_x, 1.0f));
             stick_values[3] = MAX(-1.0f, MIN(stick_y, 1.0f));
         }

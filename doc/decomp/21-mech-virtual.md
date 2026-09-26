@@ -79,10 +79,14 @@ return value comes from `BlendedOut()`.
 
 `ProcessDragMovement` uses a `0.05f` displacement threshold and requires the
 touch to be held for more than `0.2f`. Its strength is
-`clamp((distance - 0.05f) * 4.0f, 0, 1) * 1.4f`; the target applies sine and
+`clamp((distance - 0.05f) * 4.0f, 0, 1) * 1.4`; the target applies sine and
 cosine lookup values from `NuTrigTable` and clamps the output stick values to
 `[-1, 1]`. The drag values go to inherited `stick_values[2]` and `[3]` at
 offsets `+0x38` and `+0x3c`.
+The unsuffixed `1.4` matters: the unsaturated path converts the float strength
+to double, multiplies by a double constant, then converts back to float. A
+`1.4f` literal removes that target instruction sequence. The target evaluates
+cosine for Y before sine for X, then stores X and Y in that order.
 
 The virtual controller destructor explicitly deletes the four UI buttons and
 the D-pad in that order before calling its main-controller base destructor.
