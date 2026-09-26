@@ -80,6 +80,7 @@ Native and WASM builds define `HOST_BUILD` and use the host harness.
 | [mech-input-stub-pass.md](mech-input-stub-pass.md) | measured touch controller stub coverage |
 | [mech-jump-landing-spot.md](mech-jump-landing-spot.md) | jump landing target ABI and scalar codegen |
 | [utilities-stub-codegen.md](utilities-stub-codegen.md) | utility geometry, clipping, and 64-bit conversion patterns |
+| [22-gcc47-control-flow.md](22-gcc47-control-flow.md) | GCC 4.7 branch prediction, trace layout, and dump workflow |
 
 ## Non-negotiable matching facts
 

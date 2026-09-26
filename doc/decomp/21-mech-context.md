@@ -30,6 +30,12 @@ Each waypoint record starts with a byte flag and padding, a `VuVec` at `+4`, an 
 - `MechInputTouchGestureBasedController::TriggerJumpTask` and `StartJumpUsingAIPath` both return `bool` in the target. Their old `void` declarations hid a branch in planned movement that restores the character velocities when the jump trigger fails. `MechAutoJumpGetBest` similarly returns a `MechAutoJumpConnection *` despite an old `void` stub.
 - `JumpTriggerPacket::field_4[0]` contains the character pointer and `field_4[1]` contains the touch holder pointer. The packet's embedded velocity has `w=1.0f`; its bytes at `+0x1c` contain a full `VuVec` destination.
 - Path samples use `-1000000000.0f` in their Y component as an unvisited sentinel. `AnalysePath` advances through at most three inclusive indices per call, while `GenerateWaypoints` pairs records around gaps larger than `0.15f`. The `0x34`-byte records duplicate position into both the outer `VuVec` and the embedded temporary interface.
+- The target `PlannedGoTo::Update` compares its unsigned analysis state with `1` using `jbe`; a signed field emits `jle` even though current state values are only `0` through `2`. Keep the field unsigned.
+- The target jump paths test `distance_squared > 1.96f || vertical_delta > scaled_height` with `ucomiss distance, threshold` and `ja`. Reversing the condition changes both block order and unordered float behavior. In `Update` and `PlannedDoubleClickGoTo::OnResume`, the two jump helpers write distinct stack return slots, and their components then flow as scalar SSE values through `NuAtan2D`, character velocity stores, and packet construction. A shared `VuVec` return variable produces a large run of integer vector copies instead.
+- A waypoint reference retained across `TouchHacks::CanJump` changes register allocation in `Update`. The target reads the active byte and action before that call, then recomputes the waypoint address afterward.
+- The target planned-task constructor constructs all embedded waypoint interfaces and the marker pointer before it writes several simple fields (`0x6fd`, `0x6fc`, `0x6fe`, `0x1c`, `0x700`, `0x4c`). Put scalar initialization in the constructor body when matching that ordering. Within each waypoint record, the embedded interface is constructed before the outer active flag, position, and action are filled.
+
+For the GCC 4.7 branch prediction and block layout algorithm behind these control-flow mismatches, see [22-gcc47-control-flow.md](22-gcc47-control-flow.md).
 
 ## First implementation scores
 
