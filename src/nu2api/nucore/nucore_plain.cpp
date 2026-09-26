@@ -4340,13 +4340,16 @@ extern "C" {
     }
     i32 VisiSysCameraLock;
     i32 LoadedOcclusionData;
+    i32 UsingOcclusionData;
+    i32 CurrentViewBox = -1;
+    u8 OcclusionBitArray[0x320];
     i32 do_InstTree = 1;
     i32 do_occlusion = 1;
     i32 do_visibility = 1;
     i32 do_octree;
 
     void NuVisiInstTree(void *, NUGSCN *);
-    void NuVisiOcclusion(void *);
+    void NuVisiOcclusion(NuVisibilityResult *);
 
     void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context) {
         void *result = NULL;
@@ -4361,7 +4364,7 @@ extern "C" {
             scene->visibility_state &= 0xea;
             LoadedOcclusionData = result != NULL;
             if (do_occlusion != 0 && scene->occlusion_data != NULL) {
-                NuVisiOcclusion(result);
+                NuVisiOcclusion(static_cast<NuVisibilityResult *>(result));
             }
             if (scene->portal_visibility_marker == NULL || portals_enabled == 0) {
                 if (scene->instance_visibility_tree != NULL && do_InstTree != 0) {
@@ -4379,8 +4382,73 @@ extern "C" {
     void NuVisiInstTree(void *, NUGSCN *) {
         STUBBED();
     }
-    void NuVisiOcclusion(void *) {
-        STUBBED();
+    struct NuVisibilityOcclusionGrid {
+        u32 reserved_00;
+        i32 width;
+        f32 min_x;
+        f32 max_x;
+        f32 min_z;
+        f32 max_z;
+        f32 scale_x;
+        f32 scale_z;
+        i32 mode;
+        u32 output_size;
+        u32 reserved_28;
+        u8 **cells;
+    };
+    void NuVisiOcclusion(NuVisibilityResult *result) {
+        NUMTX *camera = NuCameraGetMtx();
+        NuVisibilityOcclusionGrid *grid = static_cast<NuVisibilityOcclusionGrid *>(result->occlusion_data);
+        f32 x = camera->m30;
+        if (x < grid->min_x || x > grid->max_x) {
+            return;
+        }
+        f32 z = camera->m32;
+        if (z < grid->min_z || z > grid->max_z) {
+            return;
+        }
+
+        f32 grid_x = (x - grid->min_x) * grid->scale_x;
+        f32 grid_z = (z - grid->min_z) * grid->scale_z;
+        i32 column = static_cast<i32>(grid_x);
+        if (static_cast<f32>(column) > grid_x) {
+            --column;
+        }
+        i32 row = static_cast<i32>(grid_z);
+        if (static_cast<f32>(row) > grid_z) {
+            --row;
+        }
+        i32 cell_index = row * grid->width + column;
+        u8 *volatile *cell_slot = grid->cells + cell_index;
+        u8 *cell = *cell_slot;
+        result->instance_tree_bits = cell;
+        UsingOcclusionData = cell != NULL;
+        if (grid->mode != 1 || cell == NULL) {
+            return;
+        }
+
+        i32 *last_view_box = &CurrentViewBox;
+        u8 *output = OcclusionBitArray;
+        result->instance_tree_bits = output;
+        if (cell_index == CurrentViewBox) {
+            return;
+        }
+        *last_view_box = cell_index;
+        u8 *end = OcclusionBitArray + grid->output_size;
+        u8 *input = *cell_slot;
+        while (output < end) {
+            u8 command = *input++;
+            u32 length = command >> 2;
+            u8 kind = command & 3;
+            if (kind > static_cast<u8>(1)) {
+                memmove(output, input, length);
+                input += length;
+            } else {
+                u8 fill = -kind;
+                memset(output, fill, length);
+            }
+            output += length;
+        }
     }
     extern "C++" void OctreeRndr(u8 *visibility, nuoctreenode_s *root, i32 enabled);
     void NuVisiOctree(NuVisibilityResult *result) {
