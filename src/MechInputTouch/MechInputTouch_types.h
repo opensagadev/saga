@@ -133,8 +133,8 @@ struct TouchHolder {
     u8 consumed;
     u8 field_0x8[4];
     NuVec2 down_position;
-    MechObjectInterface *target_object;
-    u8 field_0x18[0x14];
+    NuMechPtr<MechObjectInterface, 4> target_object;
+    NuMechPtr<MechObjectInterface, 4> previous_target_object;
     NuVec2 touch_position;
     u8 field_0x34[0x3a4 - 0x34];
     f32 held_time;
@@ -996,7 +996,7 @@ struct MechInputTouchGestureBasedController : MechInputTouchMainController, Mech
     bool OnHold(GameObject_s &, TouchHolder &) override;
     bool OnRelease(GameObject_s &, TouchHolder &) override;
     bool OnSwipe(GameObject_s &, TouchHolder &, i32) override;
-    void PerformCloseMechanic(GameObject_s &, TouchHolder &);
+    bool PerformCloseMechanic(GameObject_s &, TouchHolder &);
     void ProcessAutoJumpOverGap(GameObject_s *);
     void ProcessAutoJumpWhenStuck(GameObject_s &);
     void ProcessDragMovement(GameObject_s &);

@@ -10,6 +10,12 @@
 #include "legoapi/core/input/gamepads.h"
 #include "legoapi/world/levels/levels.h"
 #include "nu2api/numath/nutrig.h"
+#include "legoapi/gizmos/transport/teleport.h"
+#include "legoapi/gizmos/door/zipups.h"
+#include "legoapi/gizmos/object/hatmachine.h"
+#include "legoapi/gizmos/object/lever.h"
+#include "legoapi/gizmos/object/gizpanel.h"
+#include "legoapi/items/objects/gameobjects.h"
 
 #include <new>
 #include <string.h>
@@ -18,6 +24,7 @@ i32 GetMenuID();
 CABLE_s *GameObjOwnsAnyCables(GameObject_s *);
 void ReleaseCable(CABLE_s *, i32);
 extern "C" i16 id_WATTO;
+extern i16 id_YODA;
 bool isBucking;
 
 void MechInputTouchGestureBasedController::Activate() {
@@ -111,7 +118,7 @@ bool MechInputTouchGestureBasedController::OnDown(GameObject_s &object, TouchHol
         }
         return true;
     }
-    if ((object.incoming_bolt != NULL || (object.field_0xe21 & 0x20) != 0) && holder.target_object != NULL &&
+    if ((object.incoming_bolt != NULL || (object.field_0xe21 & 0x20) != 0) && holder.target_object.Get() != NULL &&
         holder.target_object->GetCharacterObject() == &object) {
         button_was_pressed[0] = 1;
         return true;
@@ -127,7 +134,7 @@ bool MechInputTouchGestureBasedController::OnDown(GameObject_s &object, TouchHol
             field_94 = &holder;
         }
     }
-    if (smart_bomb_touch == NULL && player != NULL && holder.target_object == player->GetMechObjectInterface() &&
+    if (smart_bomb_touch == NULL && player != NULL && holder.target_object.Get() == player->GetMechObjectInterface() &&
         TouchHacks::CanUseVehicleSmartBomb(object)) {
         smart_bomb_touch = &holder;
     }
@@ -179,8 +186,72 @@ bool MechInputTouchGestureBasedController::OnSwipe(GameObject_s &, TouchHolder &
     return false;
 }
 
-void MechInputTouchGestureBasedController::PerformCloseMechanic(GameObject_s &, TouchHolder &) {
-    STUBBED();
+bool MechInputTouchGestureBasedController::PerformCloseMechanic(GameObject_s &object, TouchHolder &holder) {
+    if ((object.field_0xcc0 != NULL && object.field_0xcc0->id != id_YODA) || VehicleArea != 0) {
+        return false;
+    }
+
+    VuVec position(holder.down_position.x, holder.down_position.y, 0.0f, 1.0f);
+    if (TouchHacks::CanUseTeleport(object)) {
+        VuVec teleport_position;
+        if (Teleport_Find(&object, 0.0025f, &teleport_position) != NULL) {
+            f32 dx = teleport_position.x - object.apiobj.position.x;
+            f32 dy = teleport_position.y - object.apiobj.position.y;
+            f32 dz = teleport_position.z - object.apiobj.position.z;
+            if (__builtin_fabsf(dy) < object.apiobj.scaled_height && dx * dx + dz * dz < 0.1225f) {
+                StartNewTask(new MechTouchTaskUseTeleport(*this, NULL, position), holder, true, true);
+                return true;
+            }
+        }
+    }
+
+    if (TouchHacks::CanUseZipup(object) &&
+        ZipUp_FindNearest(WORLD, &object.apiobj.position, object.field_0x1008, NULL, NULL, &object, true) != NULL) {
+        StartNewTask(new MechTouchTaskUseZipUp(*this), holder, true, true);
+        return true;
+    }
+
+    f32 distance = 1000000000.0f;
+    if (TouchHacks::CanUseHatMachine(object)) {
+        HATMACHINE_s *machine = HatMachine_FindNearest(WORLD, &object.apiobj.position, &object, &distance);
+        f32 range = object.field_0x1008 + 0.2f;
+        if (machine != NULL && distance <= range * range) {
+            StartNewTask(new MechTouchTaskHatMachine(*this, machine->GetMechObjectInterface(), position), holder, true,
+                         true);
+            return true;
+        }
+    }
+
+    distance = 1000000000.0f;
+    if (TouchHacks::CanUseLever(object)) {
+        LEVER_s *lever = Lever_FindNearest(WORLD, &object.apiobj.position, &object, &distance);
+        f32 range = object.field_0x1008 + 0.2f;
+        if (lever != NULL && distance <= range * range) {
+            StartNewTask(new MechTouchTaskPullLever(*this, lever->GetMechObjectInterface(), position), holder, true,
+                         true);
+            return true;
+        }
+    }
+
+    distance = 1000000000.0f;
+    GIZPANEL_s *panel = GizPanel_FindNearest(WORLD, &object.apiobj.position, &object, &distance, 0);
+    if (panel != NULL && GizPanel_CanUsePanel(&object, panel)) {
+        f32 range = object.field_0x1008 + 0.2f;
+        if (distance <= range * range) {
+            StartNewTask(new MechTouchTaskPanel(*this, panel->GetMechObjectInterface(), position), holder, true, true);
+            return true;
+        }
+    }
+
+    f32 range = object.field_0x1008 * 4.0f;
+    GameObject_s *candidate = FindNearestGameObject(&object.apiobj.position, &object, 0, range, range, -1, -1, 100,
+                                                     NULL, 0, NULL, false);
+    if (candidate != NULL && static_cast<i32>(candidate->apiobj.field_0x1f4) >= 0) {
+        StartNewTask(new MechTouchTaskAttack(*this, candidate->GetMechObjectInterface(), position), holder, false,
+                     true);
+        return true;
+    }
+    return false;
 }
 
 void MechInputTouchGestureBasedController::ProcessAutoJumpOverGap(GameObject_s *) {
@@ -212,12 +283,12 @@ void MechInputTouchGestureBasedController::ProcessDragMovement(GameObject_s &obj
     bool moving = distance > 0.05f;
     const NuVec2 down_drag = {field_90->down_position.x - field_90->touch_position.x,
                              field_90->down_position.y - field_90->touch_position.y};
-    if (field_90->target_object == NULL && isBucking) {
+    if (field_90->target_object.Get() == NULL && isBucking) {
         moving = true;
     }
     const bool dragged = down_drag.x * down_drag.x + down_drag.y * down_drag.y > 0.0025f;
     if (!dragged) {
-        if (field_90->held_time > 0.2f || field_90->target_object == NULL) {
+        if (field_90->held_time > 0.2f || field_90->target_object.Get() == NULL) {
             if (object.character_context != -1 &&
                 (object.character_context != LEGOCONTEXT_JUMP || !isBucking)) {
                 moving = false;
@@ -357,7 +428,7 @@ void MechInputTouchGestureBasedController::Update(NuInputTouchData const *data) 
             ProcessAutoJumpWhenStuck(*object);
         }
         if (smart_bomb_touch != NULL) {
-            MechObjectInterface *touched_object = smart_bomb_touch->target_object;
+            MechObjectInterface *touched_object = smart_bomb_touch->target_object.Get();
             VuVec position(smart_bomb_touch->down_position.x, smart_bomb_touch->down_position.y, 0.0f, 1.0f);
             if (touched_object == MechInputTouchSystem::FindTargetObject(*object, position, 1, touched_object, NULL)) {
                 if (smart_bomb_touch->held_time >= 1.0f) {

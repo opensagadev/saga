@@ -1,5 +1,6 @@
 #include "decomp.h"
 #include "MechInputTouch_types.h"
+#include "globals.h"
 
 struct GestureTrackerRegistration {
     MechInputTouchGestureTracker *tracker;
@@ -14,20 +15,60 @@ void MechInputTouchGestureTrackingSystem::LookForClicks(GameObject_s &) {
     STUBBED();
 }
 
-void MechInputTouchGestureTrackingSystem::LookForDown(GameObject_s &) {
-    STUBBED();
+void MechInputTouchGestureTrackingSystem::LookForDown(GameObject_s &object) {
+    GestureTrackerRegistration *entries =
+        reinterpret_cast<GestureTrackerRegistration *>(reinterpret_cast<u8 *>(this) + 0x2588);
+    for (i32 index = 0; index < 10; ++index) {
+        TouchHolder &holder = *reinterpret_cast<TouchHolder *>(reinterpret_cast<u8 *>(this) + 0x30 + index * 0x3bc);
+        if (holder.is_down && !holder.field_0x6) {
+            for (i32 priority = 0; priority < 10; ++priority) {
+                MechInputTouchGestureTracker *tracker = entries[priority].tracker;
+                if (tracker != NULL && tracker->OnDown(object, holder)) {
+                    break;
+                }
+            }
+        }
+    }
 }
 
-void MechInputTouchGestureTrackingSystem::LookForGestures(GameObject_s &) {
-    STUBBED();
+void MechInputTouchGestureTrackingSystem::LookForGestures(GameObject_s &object) {
+    LookForDown(object);
+    LookForClicks(object);
+    LookForRelease(object);
+    LookForHold(object);
+    LookForSwipe(object);
 }
 
-void MechInputTouchGestureTrackingSystem::LookForHold(GameObject_s &) {
-    STUBBED();
+void MechInputTouchGestureTrackingSystem::LookForHold(GameObject_s &object) {
+    GestureTrackerRegistration *entries =
+        reinterpret_cast<GestureTrackerRegistration *>(reinterpret_cast<u8 *>(this) + 0x2588);
+    for (i32 index = 0; index < 10; ++index) {
+        TouchHolder &holder = *reinterpret_cast<TouchHolder *>(reinterpret_cast<u8 *>(this) + 0x30 + index * 0x3bc);
+        if (holder.is_down && !holder.consumed && holder.held_time >= 0.2f) {
+            for (i32 priority = 0; priority < 10; ++priority) {
+                MechInputTouchGestureTracker *tracker = entries[priority].tracker;
+                if (tracker != NULL && tracker->OnHold(object, holder)) {
+                    break;
+                }
+            }
+        }
+    }
 }
 
-void MechInputTouchGestureTrackingSystem::LookForRelease(GameObject_s &) {
-    STUBBED();
+void MechInputTouchGestureTrackingSystem::LookForRelease(GameObject_s &object) {
+    GestureTrackerRegistration *entries =
+        reinterpret_cast<GestureTrackerRegistration *>(reinterpret_cast<u8 *>(this) + 0x2588);
+    for (i32 index = 0; index < 10; ++index) {
+        TouchHolder &holder = *reinterpret_cast<TouchHolder *>(reinterpret_cast<u8 *>(this) + 0x30 + index * 0x3bc);
+        if (!holder.is_down && holder.field_0x6) {
+            for (i32 priority = 0; priority < 10; ++priority) {
+                MechInputTouchGestureTracker *tracker = entries[priority].tracker;
+                if (tracker != NULL && tracker->OnRelease(object, holder)) {
+                    break;
+                }
+            }
+        }
+    }
 }
 
 void MechInputTouchGestureTrackingSystem::LookForSwipe(GameObject_s &) {
@@ -37,8 +78,9 @@ void MechInputTouchGestureTrackingSystem::LookForSwipe(GameObject_s &) {
 MechInputTouchGestureTrackingSystem::MechInputTouchGestureTrackingSystem() {
 }
 
-void MechInputTouchGestureTrackingSystem::Process(GameObject_s &, NuInputTouchData const &) {
-    STUBBED();
+void MechInputTouchGestureTrackingSystem::Process(GameObject_s &object, NuInputTouchData const &data) {
+    ReadData(object, data);
+    LookForGestures(object);
 }
 
 void MechInputTouchGestureTrackingSystem::ReadData(GameObject_s &, NuInputTouchData const &) {
@@ -88,8 +130,15 @@ void MechInputTouchGestureTrackingSystem::UnregisterGestureTracker(MechInputTouc
     reinterpret_cast<GestureTrackerRegistration *>(reinterpret_cast<u8 *>(this) + 0x2588)[9].priority = -1;
 }
 
-void MechInputTouchGestureTrackingSystem::Update(NuInputTouchData const *) {
-    STUBBED();
+void MechInputTouchGestureTrackingSystem::Update(NuInputTouchData const *data) {
+    if (data == NULL) {
+        return;
+    }
+    GameObject_s *object = Player[0];
+    if (object == NULL) {
+        object = Obj;
+    }
+    Process(*object, *data);
 }
 
 MechInputTouchGestureTrackingSystem::~MechInputTouchGestureTrackingSystem() {
