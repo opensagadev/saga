@@ -371,7 +371,8 @@ static void GizAction_SetAIState(GIZFLOW_s *, FLOWBOX_s *, char **params, int co
         char *value = NuStrIStr(params[index], "Character");
         if (value != NULL) {
             named_object = GetNamedGameObject(WORLD->ai_sys, value + 10);
-        } else if ((value = NuStrIStr(params[index], "range")) != NULL) {
+        }
+        if ((value = NuStrIStr(params[index], "range")) != NULL) {
             f32 range = NuAToF(value + 6);
             range_squared = range * range;
         } else if ((value = NuStrIStr(params[index], "type")) != NULL) {
@@ -379,7 +380,7 @@ static void GizAction_SetAIState(GIZFLOW_s *, FLOWBOX_s *, char **params, int co
                 u8 local_type = LevelCharacterTypeIDFn(value + 5);
                 if (local_type != 0xff) {
                     i32 global_type = LevelCharacterGlobalIDFn(local_type);
-                    if (global_type != -1 && type_count < 10) {
+                    if (global_type != 0xff && type_count < 10) {
                         types[type_count++] = global_type;
                     }
                 }

@@ -143,3 +143,11 @@ pickup pointer by the 44-byte struct size each loop iteration. Using the
 bitfields and pointer walk raised its GOT-aware score from 51.0% to 81.12%
 (497 local bytes versus 511 target bytes). An explicit null check for each
 loop pointer reduced the score, so that hypothesis was discarded.
+
+`GizAction_SetAIState` checks every parameter for `Character` and then checks
+the same parameter for `range` independently. Only `range`, `type`, and
+`State` form an `else if` chain. Turning the `Character` check into part of
+that chain skipped target calls and reordered most of the parser. The target
+also rejects global type ID `0xff`, rather than `-1`. Correcting both details
+raised its GOT-aware match from 27.522322% to 67.99107% (904 local bytes
+versus 897 target bytes).
