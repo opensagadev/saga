@@ -440,12 +440,12 @@ i32 SpawnMeleeCreatureType(i32 type) {
             break;
 
         i32 slot = -1;
-        for (i32 index = 0; index <= 3; ++index) {
+        i32 index = 0;
+        do {
             GameObject_s *current = melee.waves[type].creatures[index];
             slot = current == NULL ? index : -1;
-            if (current == NULL)
-                break;
-        }
+            ++index;
+        } while (slot == -1 && index <= 3);
         if (slot == -1)
             return 0;
 
