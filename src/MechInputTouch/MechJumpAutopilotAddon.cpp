@@ -75,11 +75,11 @@ void MechJumpAutoPilotAddon::LookForBottomInt(VuVec const &point) {
 
     const float t = drop / (point.y - field_44.y);
     if (!(t > 0.0f || t <= 1.0f)) return;
-    field_64.x = field_44.x + (point.x - field_44.x) * t;
-    field_64.y = field_24.y;
     field_64.z = field_44.z + (point.z - field_44.z) * t;
     field_64.w = 0.0f;
+    field_64.y = field_24.y;
     field_9c = true;
+    field_64.x = field_44.x + (point.x - field_44.x) * t;
 }
 
 void MechJumpAutoPilotAddon::LookForLandingPoint() {
