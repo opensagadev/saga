@@ -62,11 +62,11 @@ void MechInputTouchVirtualConsoleController::Activate() {
             reinterpret_cast<MechTouchUIAnimation *>(reinterpret_cast<u8 *>(dpad) + 0x40);
         animations[0].value = 1.0f;
         animations[0].to = 1.0f;
-        animations[0].elapsed = animations[0].duration;
         animations[1].value = 1.0f;
         animations[1].to = 1.0f;
-        animations[1].elapsed = animations[1].duration;
+        animations[0].elapsed = animations[0].duration;
         dpad->visible = 1;
+        animations[1].elapsed = animations[1].duration;
     }
 
     if (GetMenuID() != -1) {
@@ -286,24 +286,28 @@ void MechInputTouchVirtualConsoleController::Update(NuInputTouchData const *) {
     stick_values[3] = 0.0f;
 
     if (hasDoneLoadPerm != 0 && buttons[0] == NULL) {
+        const f32 radius = NuIOS_IsSmallScreen() ? 0.20f : 0.14f;
+        const f32 aspect = GetAspectRatio();
+        const f32 aspect_radius = aspect * radius;
         const NuVec2 left_position = {SuperOptions.left_control_x, SuperOptions.left_control_y};
         dpad = reinterpret_cast<MechTouchUIElement *>(new VirtualControlDPad(left_position, 0.25f, *this));
 
-        const f32 radius = NuIOS_IsSmallScreen() ? 0.20f : 0.14f;
+        const f32 zero_x = 0.0f * aspect_radius;
         const f32 x = SuperOptions.right_control_x;
         const f32 y = SuperOptions.right_control_y;
-        const f32 dx = GetAspectRatio() * radius * 1.3f;
         const f32 dy = radius * 1.3f;
-        const NuVec2 button_down = {x, y - dy};
+        const NuVec2 button_down = {x + zero_x, y - dy};
         buttons[0] = reinterpret_cast<MechTouchUIElement *>(new VirtualControlButton(
             button_down, radius, static_cast<MechInputTouchMainController::eButtonTypes>(2)));
-        const NuVec2 button_right = {x + dx, y};
+        const f32 dx = aspect_radius * 1.3f;
+        const f32 zero_y = 0.0f * radius;
+        const NuVec2 button_right = {x + dx, y + zero_y};
         buttons[1] = reinterpret_cast<MechTouchUIElement *>(new VirtualControlButton(
             button_right, radius, static_cast<MechInputTouchMainController::eButtonTypes>(3)));
-        const NuVec2 button_up = {x, y + dy};
+        const NuVec2 button_up = {x - zero_x, y + dy};
         buttons[2] = reinterpret_cast<MechTouchUIElement *>(new VirtualControlButton(
             button_up, radius, static_cast<MechInputTouchMainController::eButtonTypes>(1)));
-        const NuVec2 button_left = {x - dx, y};
+        const NuVec2 button_left = {x - dx, y - zero_y};
         buttons[3] = reinterpret_cast<MechTouchUIElement *>(new VirtualControlButton(
             button_left, radius, static_cast<MechInputTouchMainController::eButtonTypes>(0)));
         UpdateButtonPositions();

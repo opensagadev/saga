@@ -51,6 +51,15 @@ The other controller globals have distinct sizes: `lookAtMeBlendDone` is a
 one-byte BSS flag, while `s_noInputTimer` is four-byte `f32`. Declaring either
 flag as `i32` changes load and store instructions throughout `Update`.
 
+In `Update`'s lazy UI creation, the target calls `NuIOS_IsSmallScreen()` and
+`GetAspectRatio()` before allocating the D-pad. It retains
+`aspect_radius = aspect * radius` across that constructor call. The button
+positions are then calculated between their individual allocations. GCC
+retains the source's `0.0f * aspect_radius` and `0.0f * radius` operations;
+replacing those with direct `x` and `y` coordinates removes target floating
+point instructions. Preserve the call and calculation order when tuning this
+large function.
+
 ## Control flow and constants
 
 `UpdateButtonPositions` places four buttons around
