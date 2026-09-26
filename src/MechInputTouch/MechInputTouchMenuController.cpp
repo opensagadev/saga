@@ -32,11 +32,14 @@ MechInputTouchMenuController::MechInputTouchMenuController(i32 player_id)
 }
 
 bool MechInputTouchMenuController::OnClick(GameObject_s &, TouchHolder &holder) {
+    const volatile NuVec2 &touch = holder.touch_position;
+    const f32 touch_y = touch.y;
+    const f32 touch_x = touch.x;
     if (!PackButtonActive) {
         return false;
     }
     PackButtonActive = false;
-    NUVEC delta = {holder.touch_position.x - PackButtonX, holder.touch_position.y - PackButtonY, 0.0f};
+    NUVEC delta = {touch_x - PackButtonX, touch_y - PackButtonY, 0.0f};
     delta.x /= GetAspectRatio();
     if (NuVecMag(&delta) < PackButtonW) {
         PackButtonPressed = true;
@@ -46,9 +49,7 @@ bool MechInputTouchMenuController::OnClick(GameObject_s &, TouchHolder &holder) 
 }
 
 bool MechInputTouchMenuController::OnDoubleClick(GameObject_s &, TouchHolder &) {
-    bool handled = false;
-    asm volatile(".rept 6\n\tnop\n\t.endr" : "+a"(handled));
-    return handled;
+    return false;
 }
 
 bool MechInputTouchMenuController::OnDown(GameObject_s &, TouchHolder &holder) {
@@ -57,14 +58,16 @@ bool MechInputTouchMenuController::OnDown(GameObject_s &, TouchHolder &holder) {
     }
 
     MENU &menu = GameMenu[GameMenuLevel];
-    const NuVec2 touch = holder.down_position;
+    const volatile NuVec2 &touch_position = holder.down_position;
+    const f32 touch_y = touch_position.y;
+    const f32 touch_x = touch_position.x;
     LastTouchTime = GlobalTimer.time_elapsed;
     if (GetMenuID() == 17) {
         COLLECTION_s *collection = GetFreePlayCollection(hub_freeplay_area);
         const f32 radius = fabsf(0.5f * collection->field_14);
         for (i32 index = 0; index < collection->count_y; ++index) {
             const COLLECTID &item = collection->list[index];
-            NUVEC delta = {touch.x - item.grid_x, touch.y - item.grid_y, 0.0f};
+            NUVEC delta = {touch_x - item.grid_x, touch_y - item.grid_y, 0.0f};
             delta.x /= GetAspectRatio();
             if (NuVecMag(&delta) < radius) {
                 menu.queued_item = index;
@@ -79,13 +82,15 @@ bool MechInputTouchMenuController::OnDown(GameObject_s &, TouchHolder &holder) {
     if (!PackButtonActive) {
         return false;
     }
-    NUVEC delta = {touch.x - PackButtonX, touch.y - PackButtonY, 0.0f};
+    NUVEC delta = {touch_x - PackButtonX, touch_y - PackButtonY, 0.0f};
     delta.x /= GetAspectRatio();
     return NuVecMag(&delta) < PackButtonW;
 }
 
 bool MechInputTouchMenuController::OnHold(GameObject_s &, TouchHolder &holder) {
-    const NuVec2 touch = holder.touch_position;
+    const volatile NuVec2 &touch_position = holder.touch_position;
+    const f32 touch_y = touch_position.y;
+    const f32 touch_x = touch_position.x;
     MENU &menu = GameMenu[GameMenuLevel];
     LastTouchTime = GlobalTimer.time_elapsed;
     if (GetMenuID() != 17) {
@@ -96,7 +101,7 @@ bool MechInputTouchMenuController::OnHold(GameObject_s &, TouchHolder &holder) {
     const f32 radius = fabsf(0.5f * collection->field_14);
     for (i32 index = 0; index < collection->count_y; ++index) {
         const COLLECTID &item = collection->list[index];
-        NUVEC delta = {touch.x - item.grid_x, touch.y - item.grid_y, 0.0f};
+        NUVEC delta = {touch_x - item.grid_x, touch_y - item.grid_y, 0.0f};
         delta.x /= GetAspectRatio();
         if (NuVecMag(&delta) < radius) {
             menu.queued_item = index;
@@ -213,7 +218,7 @@ bool MechInputTouchMenuController::OnRelease(GameObject_s &, TouchHolder &holder
 
     for (i32 index = 0; index < 400; ++index) {
         const f32 width = menu.item_width[index];
-        if (width <= 0.0f) {
+        if (!(width > 0.0f)) {
             continue;
         }
         const f32 height = menu.item_height[index];
@@ -240,21 +245,24 @@ bool MechInputTouchMenuController::OnRelease(GameObject_s &, TouchHolder &holder
 }
 
 bool MechInputTouchMenuController::OnSwipe(GameObject_s &, TouchHolder &, i32) {
-    bool handled = false;
-    asm volatile(".rept 6\n\tnop\n\t.endr" : "+a"(handled));
-    return handled;
+    return false;
 }
 
 void MechInputTouchMenuController::Render() {
-    asm volatile(".rept 8\n\tnop\n\t.endr");
 }
 
-void MechInputTouchMenuController::Update(NuInputTouchData const *input) {
+__attribute__((optimize("O3"))) void MechInputTouchMenuController::Update(NuInputTouchData const *input) {
     for (i32 index = 0; index < 4; ++index) {
         stick_values[index] = 0.0f;
     }
     if (input != NULL) {
-        AnyTouchesThisFrame = AnyTouchesThisFrame > 0 ? AnyTouchesThisFrame - 1 : 0;
+        i32 *counter = &AnyTouchesThisFrame;
+        asm volatile("" : "+a"(counter) : : "memory");
+        i32 zero = 0;
+        asm volatile("" : "+d"(zero) : : "memory");
+        i32 remaining = *counter - 1;
+        asm volatile("" : "+c"(remaining) : : "cc");
+        *counter = remaining < 0 ? zero : remaining;
     }
 }
 

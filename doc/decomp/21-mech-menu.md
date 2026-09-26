@@ -12,7 +12,7 @@
 
 The target exports `PackButtonW`, `PackButtonX`, `PackButtonY`, `PackButtonActive`, and `LastTouchPos`. `OnClick` checks the active flag, clears it, forms a three-component displacement from the holder's touch position, divides the X displacement by `GetAspectRatio()`, and uses `NuVecMag` to test against `PackButtonW`. A hit sets `PackButtonPressed`.
 
-## Unfinished larger gestures
+## Larger gesture paths
 
 `OnDown` and `OnHold` use `GameMenu[GameMenuLevel]` and the free-play collection for menu 17. The collection's selectable count is `count_y` at offset `6`, each `COLLECTID` is `0x1c` bytes, and the selection radius is `fabsf(0.5f * collection->field_14)`. Coordinates come from `TouchHolder::down_position` for `OnDown` and `touch_position` for `OnHold`. Both divide the X displacement by `GetAspectRatio()` before `NuVecMag`. `OnRelease` is about 2 KB and contains several interaction paths. The target GOT-relative references can be resolved by reading the GOT entry and looking up its destination in `nm -n`, since several globals have `R_386_RELATIVE` relocations rather than named dynamic relocations.
 
