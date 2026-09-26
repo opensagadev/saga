@@ -26,6 +26,8 @@ extern "C" {
     void NuAnimData2CalcTime(nuanimdata2_s *, f32, nuanimtime_s *);
     void NuMtxPreTranslate(NUMTX *, NUVEC *);
     void NuMtxMul(NUMTX *, NUMTX *, NUMTX *);
+    i32 NuStrICmp(const char *, const char *);
+    void instNuGCutSceneStart(instNUGCUTSCENE_s *);
 
     i32 AddScaledVariableShotDebrisEffect2(i32, NUVEC *, i32, f32, NUMTX *, NUMTX *, f32);
     void AddDebrisEffect(i32 *, i32, f32, f32, f32);
@@ -83,8 +85,17 @@ extern "C" {
         ForceScenePlayBack = static_cast<u8>(enabled);
     }
 
-    void instCutSceneTimeElapsed(void) {
-        STUBBED();
+    f32 instCutSceneTimeElapsed(instNUGCUTSCENE_s *instance) {
+        if (instance == NULL || instance->cutscene == NULL) {
+            return 0.0f;
+        }
+        if (instance->rate != 0.0f) {
+            f32 elapsed = instance->accumulated_stream_duration + instance->current_frame - 1.0f;
+            if (elapsed != 0.0f) {
+                return elapsed / instance->rate;
+            }
+        }
+        return 0.0f;
     }
 
     i32 instNuGCutSceneAddCamTgt(instNUGCUTSCENE_s *instance, NUVEC *target, f32 start_frame, f32 duration,
@@ -113,8 +124,16 @@ extern "C" {
         instance->chained_instance = next;
     }
 
-    void instNuGCutSceneCharGetStartMtx(void) {
-        STUBBED();
+    i32 instNuGCutSceneCharGetStartMtx(instNUGCUTSCENE_s *instance, const char *name, NUMTX *out) {
+        NUGCUTCHARSYS_s *system = instance->cutscene->character_system;
+        for (i32 i = 0; i < system->character_count; ++i) {
+            NUGCUTCHAR_s *character = &system->characters[i];
+            if (NuStrICmp(name, character->name) == 0) {
+                *out = character->base_matrix;
+                return 1;
+            }
+        }
+        return 0;
     }
 
     void instNuGCutSceneCreateCamTgtArray(instNUGCUTSCENE_s *instance, i32 count, VARIPTR *buf) {
@@ -149,16 +168,56 @@ extern "C" {
         STUBBED();
     }
 
-    void instNuGCutScenePlay(void) {
-        STUBBED();
+    void instNuGCutScenePlay(instNUGCUTSCENE_s *instance, i32 forward) {
+        if ((instance->flags_88 & 2) != 0) {
+            if (forward != 0) {
+                if (instance->rate < 0.0f) {
+                    instance->rate = -instance->rate;
+                }
+            } else if (instance->rate > 0.0f) {
+                instance->rate = -instance->rate;
+            }
+            return;
+        }
+        if ((instance->flags_89 & 0x10) != 0) {
+            if (forward != 0) {
+                return;
+            }
+            instance->flags_88 |= 2;
+            instance->flags_89 &= ~0x10;
+            instance->current_frame = instance->cutscene->duration - 1.0f;
+            if (instance->rate > 0.0f) {
+                instance->rate = -instance->rate;
+            }
+            return;
+        }
+        if (forward != 0) {
+            if (instance->rate < 0.0f) {
+                instance->rate = -instance->rate;
+            }
+            instNuGCutSceneStart(instance);
+        }
     }
 
     void instNuGCutSceneResetCleanUp(void) {
         STUBBED();
     }
 
-    void instNuGCutSceneRotateY(void) {
-        STUBBED();
+    void instNuGCutSceneRotateY(instNUGCUTSCENE_s *instance, NUANG angle) {
+        instance->flags_88 |= 0x80;
+        NuMtxRotateY(&instance->matrix, angle);
+        NUMTX *matrix = &instance->matrix;
+        NUVEC *bounds = static_cast<NUVEC *>(instance->cutscene->bounds);
+        if (bounds != NULL) {
+            instance->transformed_bounds_center.x = (bounds[1].x + bounds[0].x) * 0.5f;
+            instance->transformed_bounds_center.y = (bounds[1].y + bounds[0].y) * 0.5f;
+            instance->transformed_bounds_center.z = (bounds[1].z + bounds[0].z) * 0.5f;
+        } else {
+            instance->transformed_bounds_center.x = 0.0f;
+            instance->transformed_bounds_center.y = 0.0f;
+            instance->transformed_bounds_center.z = 0.0f;
+        }
+        NuVecMtxTransform(&instance->transformed_bounds_center, &instance->transformed_bounds_center, matrix);
     }
 
     void instNuGCutSceneSetEndCallback(instNUGCUTSCENE_s *instance, void (*callback)(instNUGCUTSCENE_s *)) {
@@ -183,12 +242,27 @@ extern "C" {
         NuVecMtxTransform(&instance->transformed_bounds_center, &instance->transformed_bounds_center, instance_matrix);
     }
 
-    void instNuGCutSceneSetPos(void) {
-        STUBBED();
+    void instNuGCutSceneSetPos(instNUGCUTSCENE_s *instance, NUVEC *pos) {
+        instance->flags_88 |= 0x80;
+        NuMtxSetTranslation(&instance->matrix, pos);
+        NUMTX *matrix = &instance->matrix;
+        NUVEC *bounds = static_cast<NUVEC *>(instance->cutscene->bounds);
+        if (bounds != NULL) {
+            instance->transformed_bounds_center.x = (bounds[1].x + bounds[0].x) * 0.5f;
+            instance->transformed_bounds_center.y = (bounds[1].y + bounds[0].y) * 0.5f;
+            instance->transformed_bounds_center.z = (bounds[1].z + bounds[0].z) * 0.5f;
+        } else {
+            instance->transformed_bounds_center.x = 0.0f;
+            instance->transformed_bounds_center.y = 0.0f;
+            instance->transformed_bounds_center.z = 0.0f;
+        }
+        NuVecMtxTransform(&instance->transformed_bounds_center, &instance->transformed_bounds_center, matrix);
     }
 
-    void instNuGCutSceneSetRepeat(void) {
-        STUBBED();
+    void instNuGCutSceneSetRepeat(instNUGCUTSCENE_s *instance, i32 repeat) {
+        i32 capped = repeat <= 31 ? repeat : 31;
+        u32 *flags = reinterpret_cast<u32 *>(&instance->flags_88);
+        *flags = (*flags & ~0x3e000u) | ((capped & 31) << 13);
     }
 
     void instNuGCutSceneStop(instNUGCUTSCENE_s *instance) {
@@ -256,12 +330,28 @@ extern "C" {
         return 0.0f;
     }
 
-    void instNuGCutSceneTranslate(void) {
-        STUBBED();
+    void instNuGCutSceneTranslate(instNUGCUTSCENE_s *instance, NUVEC *translation) {
+        if ((instance->flags_88 & 0x80) == 0) {
+            instance->flags_88 |= 0x80;
+            NuMtxSetIdentity(&instance->matrix);
+        }
+        NuMtxTranslate(&instance->matrix, translation);
+        NUMTX *matrix = &instance->matrix;
+        NUVEC *bounds = static_cast<NUVEC *>(instance->cutscene->bounds);
+        if (bounds != NULL) {
+            instance->transformed_bounds_center.x = (bounds[1].x + bounds[0].x) * 0.5f;
+            instance->transformed_bounds_center.y = (bounds[1].y + bounds[0].y) * 0.5f;
+            instance->transformed_bounds_center.z = (bounds[1].z + bounds[0].z) * 0.5f;
+        } else {
+            instance->transformed_bounds_center.x = 0.0f;
+            instance->transformed_bounds_center.y = 0.0f;
+            instance->transformed_bounds_center.z = 0.0f;
+        }
+        NuVecMtxTransform(&instance->transformed_bounds_center, &instance->transformed_bounds_center, matrix);
     }
 
-    void instNuGCutSceneWaitAtEnd(void) {
-        STUBBED();
+    void instNuGCutSceneWaitAtEnd(instNUGCUTSCENE_s *instance, u8 enabled) {
+        instance->flags_8c = (instance->flags_8c & ~0x40) | ((enabled & 1) << 6);
     }
 
     void instNuGCutSoundStream(void) {
