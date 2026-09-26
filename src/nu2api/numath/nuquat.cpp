@@ -41,6 +41,21 @@ void NuQuatFromEulerXYZ(NUQUAT *out, NUANG psi, NUANG theta, NUANG phi) {
     out->z = sin_phi_times_cos_theta * cos_psi_over_2 - cos_phi_times_sin_theta * sin_psi_over_2;
 }
 
+void NuEulerXYZFromQuat(NUANG *x, NUANG *y, NUANG *z, NUQUAT *input) {
+    NUQUAT q = *input;
+    f32 sin_y = -2.0f * (q.x * q.z - q.w * q.y);
+    if (sin_y < -1.0f) {
+        sin_y = -1.0f;
+    }
+    if (sin_y > 1.0f) {
+        sin_y = 1.0f;
+    }
+
+    *y = NuASin(sin_y);
+    *x = NuAtan2D(2.0f * (q.y * q.z + q.w * q.x), q.w * q.w - q.x * q.x - q.y * q.y + q.z * q.z);
+    *z = NuAtan2D(2.0f * (q.x * q.y + q.w * q.z), q.w * q.w + q.x * q.x - q.y * q.y - q.z * q.z);
+}
+
 void NuQuatToMtx(NUQUAT *quat, NUMTX *out) {
     f32 w_sq;
     f32 x_sq;

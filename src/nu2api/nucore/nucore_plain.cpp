@@ -2207,10 +2207,6 @@ extern "C" {
             power += power;
         return power;
     }
-    void NuEulerXYZFromQuat(void) {
-        STUBBED();
-    }
-
     // ---------------------------------------------------------------------------
     // Quick-font platform rendering (the generic font run lives in nuqfnt.cpp)
     // ---------------------------------------------------------------------------
