@@ -118,3 +118,18 @@ remaining gap is mostly NaN-aware branch arrangement and zero-return blocks.
 function is optimized. A function-local `optimize("O2")` produced an 85.09091%
 match while leaving neighboring functions at their measured settings. This
 material index is one-based, with zero for no match.
+
+`instNuGCutGetNextRigidInfo` in `gcutscn.cpp` needs its scene and instance
+rigid-system pointers live in `%edx` and `%ecx` before testing flags. GCC
+otherwise sinks their loads into the final copy block and changes the frame
+size. Empty register constraints on these live variables and the rigid-array
+address raised the match from 80.27869% to 93.2623%. The remaining five
+instruction differences are prologue scheduling. The other reconstructed
+`gcutscn.cpp` routines scored 99.76923% (`FindSceneStateObj`), 99.32743%
+(`instGetLookAtLocatorInfo`), and 100% (`instNuGCutContainsInstancedRigids`).
+
+An aligned local `VARIPTR cursor __attribute__((aligned(16)))` in
+`instNuGCutSceneCleanUp` induces the target's frame-pointer and 16-byte
+realignment prologue. This is more localized than changing the calling
+convention or TU optimization. It raised the score slightly, to 31.379889%;
+the remaining mismatch is loop layout.

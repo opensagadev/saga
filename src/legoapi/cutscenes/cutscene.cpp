@@ -783,7 +783,7 @@ extern "C" {
             instNuGCutSceneDestroy(DefragGetInstFn(entry->handle));
         }
 
-        VARIPTR cursor;
+        VARIPTR cursor __attribute__((aligned(16)));
         cursor.void_ptr = DefragCutSceneBaseMem;
         for (;;) {
             u32 lowest = 0xffffffffu;
