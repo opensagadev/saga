@@ -53,7 +53,7 @@ void NuTexHiresFilename(i32 tex_id, char *filename) {
 }
 
 i32 NuTexSwapHires(i32 tex_id_lo, i32 tex_id_hi) {
-    STUBBED();
+    // The original body is an intentional no-op that returns zero.
     return 0;
 }
 
@@ -67,7 +67,7 @@ void NuTexLoadHires(i32 tex_id) {
 }
 
 void NuTexUnloadHires(i32 tex_id) {
-    STUBBED();
+    // The original body is an intentional no-op.
 }
 
 void NuTexAddReference(i32 tex_id, NUGSCN *) {
@@ -259,7 +259,7 @@ i32 NuTexHeight(i32 tex_id) {
 }
 
 void NuTexRemap(i32, i32) {
-    STUBBED();
+    // The original body is an intentional no-op.
 }
 
 nutexmanager_s *NuTexGetManager() {
@@ -272,7 +272,7 @@ void NuTexManagerInit(VARIPTR *buf, VARIPTR) {
 }
 
 void NuTextureCreate3D(i32, i32, i32, i32, i32, nutextureformat_e) {
-    STUBBED();
+    // The original body is an intentional no-op.
 }
 
 void NuTexManagerStream(nugscn_s *) {

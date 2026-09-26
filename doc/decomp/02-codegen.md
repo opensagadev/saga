@@ -280,6 +280,20 @@ verified: `g++ -O0/-O3 -c glob.cpp guard.cpp; objdump -dr -s -j .data/.rodata.st
 - `89 f6 mov %esi,%esi` (2B).
 No `int3`/multibyte nops from `-fpatchable-*`; the multi-byte `lea` idioms are the classic GCC-4.7 Atom-safe fills. No dead nops after `ret` beyond alignment; unreachable code after noreturn calls is simply dropped (no warning-only tail).
 
+Some retail Nu3D entry points are **intentional no-ops**, even when their
+reconstructed source still says `STUBBED()`. The original `NuSpecialList`,
+`NuSpecialSetRenderPlane`, `NuSpecialSetAlphaTest`, `NuSpecialAddShadowLight`,
+`NuSpecialClearShadowLights`, `NuTexUnloadHires`, `NuTexRemap`, and
+`NuTextureCreate3D` each consist of eight single-byte `nop`s followed by
+`ret` (nine bytes total). `NuTexSwapHires` and
+`NuSpecialClipTestShadowLights` begin with `xor %eax,%eax`, then six `nop`s
+and `ret`. The NDK r8e target build naturally emits these exact bytes from
+empty bodies or `return 0`; the apparent nops are the compiler's in-function
+padding, not missing work. All ten compare at 100% with the GOT-aware
+`objdiff-cli` fork. Remove `STUBBED()` host diagnostics for these verified
+no-ops, but first inspect the original body before treating any other stub
+as intentional.
+
 **Hot/cold:** NO `.text.hot`/`.text.unlikely` — `__builtin_expect` only feeds branch/if-conversion heuristics: `hot()` at -O3 = `test %eax,%eax; mov $-1,%edx; cmove %edx,%eax; ret`.
 verified: `g++ -O3 -S align.cpp; objdump -d`
 
