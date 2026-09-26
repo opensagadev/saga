@@ -1033,11 +1033,14 @@ void GizmoSysSetGame() {
 
 i32 GizmoSys_BoltHit(GIZMOSYS_s *gizmo_sys, void *world_info, BOLT_s *bolt, nuvec_s *points,
                      nuvec_s *minimum, nuvec_s *maximum, float radius, unsigned char *hit_flags) {
+    asm volatile("" : "+d"(bolt), "+D"(gizmo_sys));
+    nuvec_s *hit_points;
     i32 hit_mode;
     if ((bolt->flags & 0x200) != 0) {
-        points += 1;
+        hit_points = points + 1;
         hit_mode = 1;
     } else {
+        hit_points = points;
         hit_mode = 3;
     }
     if (gizmotypes == NULL || gizmo_sys == NULL || (bolt->hit_flags & 0x800) == 0) {
@@ -1048,7 +1051,7 @@ i32 GizmoSys_BoltHit(GIZMOSYS_s *gizmo_sys, void *world_info, BOLT_s *bolt, nuve
     GIZMOSET *set = gizmo_sys->sets;
     for (i32 index = 0; index < gizmotypes->count; ++index, ++type, ++set) {
         if (type->fns.bolt_hit_fn != NULL &&
-            type->fns.bolt_hit_fn(world_info, set->unknown, bolt->owner, points, hit_mode, radius,
+            type->fns.bolt_hit_fn(world_info, set->unknown, bolt->owner, hit_points, hit_mode, radius,
                                   minimum, maximum, bolt, 1, hit_flags) != 0) {
             BoltSys->debris(bolt, points, -1, NULL, 0);
             if (bolt->owner != NULL) {
@@ -1114,7 +1117,6 @@ void InitPaintPuzzle(WORLDINFO_s *world) {
 }
 
 void UpdatePaintPuzzle(WORLDINFO_s *world) {
-    u8 *packet = reinterpret_cast<u8 *>(factoryb_netpacket);
     switch (PAINTPUZZLESTAGE) {
         case 0:
             GizObstacle_PlayBackwards(static_cast<GIZOBSTACLE_s *>(paintobst[paintmixed]->object));
@@ -1136,16 +1138,19 @@ void UpdatePaintPuzzle(WORLDINFO_s *world) {
             i32 used = 0;
             for (i32 index = 0; index < 3; ++index) {
                 GIZOBSTACLE_s *obstacle = static_cast<GIZOBSTACLE_s *>(paintobst[index]->object);
-                if (obstacle->anim_set->state == GAMEANIMSET_STATE_AT_END && used < 2) {
+                if (obstacle->anim_set->state == GAMEANIMSET_STATE_AT_END) {
                     paintsused[used++] = index;
                 }
             }
             if (used == 2) {
-                if (paintsused[0] == 0 && paintsused[1] == 1) {
+                if ((paintsused[0] == 0 && paintsused[1] == 1) ||
+                    (paintsused[0] == 1 && paintsused[1] == 0)) {
                     paintmixed = 3;
-                } else if (paintsused[0] == 1 && paintsused[1] == 2) {
+                } else if ((paintsused[0] == 1 && paintsused[1] == 2) ||
+                           (paintsused[0] == 2 && paintsused[1] == 1)) {
                     paintmixed = 4;
-                } else if (paintsused[0] == 0 && paintsused[1] == 2) {
+                } else if ((paintsused[0] == 0 && paintsused[1] == 2) ||
+                           (paintsused[0] == 2 && paintsused[1] == 0)) {
                     paintmixed = 5;
                 } else {
                     paintmixed = -1;
@@ -1189,9 +1194,10 @@ void UpdatePaintPuzzle(WORLDINFO_s *world) {
         }
         case 4:
             GizObstacle_PlayForwards(static_cast<GIZOBSTACLE_s *>(forcetube->object));
-            packet[2] = 1;
+            reinterpret_cast<u8 *>(factoryb_netpacket)[2] = 1;
             break;
     }
+    u8 *packet = reinterpret_cast<u8 *>(factoryb_netpacket);
     packet[0] = 0;
     packet[1] = static_cast<u8>(painttry);
     packet[3] = static_cast<u8>(painttarget);

@@ -361,6 +361,7 @@ static void GizActions_GoToNewLevel(GIZFLOW_s *, FLOWBOX_s *, char **params, int
 }
 
 static void GizAction_SetAIState(GIZFLOW_s *, FLOWBOX_s *, char **params, int count) {
+    NUVEC origin = v000;
     GameObject_s *named_object = NULL;
     char *state_name = NULL;
     i32 types[10];
@@ -394,7 +395,6 @@ static void GizAction_SetAIState(GIZFLOW_s *, FLOWBOX_s *, char **params, int co
         }
         return;
     }
-    NUVEC origin = v000;
     if (named_object != NULL) {
         origin = named_object->apiobj.collision_position;
     }

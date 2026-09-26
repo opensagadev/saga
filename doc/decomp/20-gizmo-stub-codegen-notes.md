@@ -95,3 +95,29 @@ pass. They give the next agent a concrete starting point for codegen tuning.
 
 The low scores mostly reflect block order and load/register choice after
 functional reconstruction; do not treat them as verified 100% matches.
+
+## Follow-up control-flow findings
+
+- `GizmoSys_BoltHit` passes `points + 1` to a type's `bolt_hit_fn` when flag
+  `0x200` is set, but passes the original `points` to `BoltSys->debris` after a
+  hit. Keep two pointers. Reassigning the parameter produces the wrong debris
+  argument and changes the register lifetime. The target initially keeps the
+  bolt in `edx` and gizmo system in `edi`; an empty output-constrained asm at
+  function entry steers GCC r8e toward these choices, raising the match from
+  26.15% to 27.58% in this source layout.
+- In `UpdatePaintPuzzle`, declare the network packet pointer after the switch
+  and write state 4's byte directly through the global packet pointer. This
+  gives GCC a switch jump table and shared packet tail like the target. The
+  target's state 2 records all three completed paint indexes into a two-slot
+  array without a bounds check. It only chooses a blend when the count is
+  exactly two, and handles both orders of each paint pair. Keeping those
+  details raised the match from 42.59% to 59.56%.
+- `GizAction_SetAIState` copies `v000` into its local origin before parsing
+  parameters, even though early exits do not use it. Moving this initialization
+  ahead of the parser raised the match from 26.96% to 27.52%.
+
+The measured follow-up scores use the same GOT-aware CLI and target build:
+`GizmoSys_BoltHit` 27.580645% (429 local bytes), `UpdatePaintPuzzle`
+59.564705% (1257 local bytes), and `GizAction_SetAIState` 27.522322%
+(857 local bytes). Other entries in the initial table remain at their stated
+scores.
