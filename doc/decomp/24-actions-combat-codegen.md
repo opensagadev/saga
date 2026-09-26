@@ -10,6 +10,10 @@ For a direct GCC 4.7 comparison, `-fomit-frame-pointer -mno-stackrealign` reprod
 
 For the initial deflection velocity, the target stores `y = 0` before `x = 0`, then `z = 2`. GCC preserves that order here; swapping the two zero assignments removes two instruction mismatches.
 
+An empty `asm("" : "+a"(deflect))` immediately after `KillPart` constrains the deflect argument to EAX. This emits no instruction, but changes the subsequent reload and test to match the target's EAX choice. Place the constraint after the call so it does not disturb the saved values or argument setup.
+
+An empty `asm("" : : "m"(matrix))` at the same point forces GCC to materialize the saved matrix before the saved radius and special pointer. Along with the EAX constraint, this aligns every non-relocation instruction in a direct NDK object comparison.
+
 The order of writes into the copied `ADDPART_s` also controls register choice after the `rep movsd`: write matrix, velocity, special, radius, gravity, type ID, flags, owner, collision callback, then frame time. Writing owner earlier makes GCC keep the object pointer in a different stack slot and moves several later stores.
 
 The target tests the deflect argument and old owner before constructing the new part. It calls `MakeThrowVector` only when the deflecting object's low flag byte at API object offset `0x1f8` is signed negative and the old owner's byte at offset `0x27c` is `-1`. Otherwise it starts with `(0, 0, 2)` and applies random X and Y rotations. The new part receives `ObjHitObj_Flags(object)` at offset `0x218`, then the old part's update callback at offset `0x1b4` runs, if present. The rumble/camera/block effects run afterward, even if no new part was created.

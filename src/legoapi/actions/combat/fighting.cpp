@@ -63,6 +63,8 @@ void DeflectPart(PART_s *part, GameObject_s *object, float speed, float gravity,
     nuhspecial_s *special = part->source_special;
     f32 radius = part->field_0e4;
     KillPart(part, 0);
+    asm("" : : "m"(matrix));
+    asm("" : "+a"(deflect));
 
     if (deflect != 0 && owner != NULL) {
         NUVEC velocity;
