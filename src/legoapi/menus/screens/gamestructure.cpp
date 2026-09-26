@@ -7,6 +7,7 @@
 #include "legoapi/menus/screens/gamestructure.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/characters/core/character.h"
+#include "legoapi/characters/motion.h"
 #include "legoapi/core/input/gamepads.h"
 #include "legoapi/core/input/timer.h"
 #include "legoapi/items/base/apiobject.h"
@@ -38,6 +39,10 @@
 struct GameObject_s;
 struct LEVEL_PROGRESS_s;
 struct WORLDINFO_s;
+i32 NuIOS_GetPurchaseResult();
+void NuIOS_RestoreInAppPurchases();
+extern "C" void NuIOS_RecordFlurryEvent(char *);
+extern "C" void BackupMenu();
 
 static void StoreUnlockArcade();
 static void StoreUnlockBonus();
@@ -61,22 +66,17 @@ STOREPACK StorePack[11] = {
 };
 
 static void StoreUnlockArcade() {
-    STUBBED();
 }
 static void StoreUnlockBonus() {
-    STUBBED();
 }
 static void StoreUnlockBounty() {
-    STUBBED();
 }
 static void StoreUnlockChallenge() {
     HUB_AREAPANELX = HUB_AREAPANELX_ONETRUEJEDIGOLDBRICK;
 }
 static void StoreUnlockJedi() {
-    STUBBED();
 }
 static void StoreUnlockSith() {
-    STUBBED();
 }
 static void StoreUnlockEp3() {
     if (Game_AreaSave != NULL) {
@@ -131,6 +131,11 @@ static void StoreUnlockEp4() {
 
 void (*Game_100PercentFn)();
 void (*Game_AllGoldBricksFn)();
+u16 restoring_pack_bits;
+u8 restoring_pack_count;
+u16 restoring_bundle_bits;
+u8 restoring_bundle_count;
+f32 restoring_wait = 3.0f;
 
 void PauseGame(i32 pad_index) {
     Paused = 1;
@@ -488,11 +493,22 @@ void MenuDrawDebugStore(MENU_s *) {
 }
 
 void MenuInitStoreHolding(MENU_s *) {
-    STUBBED();
+    GameCam_Blend(GameCam, 0.5f, 0.0f, 1);
 }
 
-void MenuUpdateStoreHolding(MENU_s *) {
-    STUBBED();
+void MenuUpdateStoreHolding(MENU_s *menu) {
+    if (menu->cancel_pressed != 0) {
+        BackupMenu();
+        GameCam_Blend(GameCam, 0.5f, 0.0f, 1);
+    } else if (menu->confirm_pressed != 0) {
+        if (menu->selected_item == 0) {
+            NewMenu(21, -1, -1);
+        } else if (menu->selected_item == 1) {
+            NuIOS_RecordFlurryEvent(const_cast<char *>("menu_restore"));
+            NuIOS_RestoreInAppPurchases();
+            NewMenu(22, -1, -1);
+        }
+    }
 }
 
 void MenuDrawStoreHolding(MENU_s *) {
@@ -500,7 +516,7 @@ void MenuDrawStoreHolding(MENU_s *) {
 }
 
 void MenuExitStoreHolding(MENU_s *) {
-    STUBBED();
+    GameCam_Blend(GameCam, 0.5f, 0.0f, 1);
 }
 
 void MenuInitStore(MENU_s *) {
@@ -516,11 +532,15 @@ void MenuDrawStore(MENU_s *) {
 }
 
 void MenuExitStore(MENU_s *) {
-    STUBBED();
+    GameCam_Blend(GameCam, 0.5f, 0.0f, 1);
 }
 
 void MenuInitStoreRestoring(MENU_s *) {
-    STUBBED();
+    restoring_pack_bits = 0;
+    restoring_pack_count = 0;
+    restoring_bundle_bits = 0;
+    restoring_bundle_count = 0;
+    restoring_wait = 3.0f;
 }
 
 void MenuUpdateStoreRestoring(MENU_s *) {
@@ -540,15 +560,25 @@ void MenuInitStorePurchase(MENU_s *) {
 }
 
 void MenuDrawStorePurchase(MENU_s *) {
-    STUBBED();
 }
 
 void MenuExitStorePurchase(MENU_s *) {
-    STUBBED();
+    NuIOS_GetPurchaseResult();
+    GameCam_Blend(GameCam, 0.5f, 0.0f, 1);
 }
 
-void Store_RootPackCustodian(i32, GameObject_s *) {
-    STUBBED();
+void Store_RootPackCustodian(i32, GameObject_s *custodian) {
+    u8 flags = custodian->field_0xefc;
+    custodian->apiobj.flags_low |= 2;
+    flags |= 0x12;
+    custodian->field_0xefe |= 0x40;
+    custodian->field_0xefc = flags;
+    asm volatile("" ::: "memory");
+    u32 object_flags = custodian->apiobj.field_0x1f4;
+    object_flags &= ~1u;
+    asm volatile("" : "+r"(object_flags));
+    object_flags |= 0x80000004u;
+    custodian->apiobj.field_0x1f4 = object_flags;
 }
 
 void Store_UprootPackCustodian(i32, GameObject_s *) {
