@@ -3,7 +3,10 @@
 #include "legoapi/legoapi_types.h"
 #include "legoapi/world/world.h"
 #include "nu2api/numath/nurand.h"
+#include "nu2api/numath/nuvec4.h"
 #include "nu2api/nu3d/nutex.h"
+#include "nu2api/nu3d/nuhspecial.h"
+#include <emmintrin.h>
 #include <string.h>
 
 struct AIROW_s;
@@ -20,7 +23,17 @@ extern BOLT_s Bolt[32];
 extern i32 i_bolt;
 extern f32 BOLT_OVERRIDE_PLAYERBOLTSPEED;
 extern f32 BOLT_OVERRIDE_PLAYERBOLTDURATION;
+// Four debug door keys start enabled and are restored by each restart.
+i32 DogDebKey[4] __attribute__((aligned(16))) = {-1, -1, -1, -1};
 struct quickboltinfo;
+extern "C" void NuSpecialList(NUGSCN *);
+extern "C" i32 NuSpecialFind(NUGSCN *, nuhspecial_s *, char *, i32);
+extern "C" i32 NuSpecialExistsFn(void *);
+extern "C" nuvec_s *NuSpecialGetPos(void *);
+void ChrisAnakinCReset();
+static NUVEC4 RadialMoveCentre;
+static __used__ f32 RadialPlayerRadius[2];
+static __used__ f32 MaxRadialCamY;
 
 void ResetSpaceLevel(WORLDINFO_s *, spacelevel_s *) __asm__("_ZL15ResetSpaceLevelP11WORLDINFO_sP12spacelevel_s")
     __attribute__((visibility("hidden"), regparm(2)));
@@ -271,8 +284,41 @@ set_door_timer:
     goto reset_space;
 }
 
-void ChrisRadialCam(nuvec_s *, nuvec_s *) {
-    STUBBED();
+void ChrisRadialCam(nuvec_s *position, nuvec_s *target) {
+    const f32 position_y = position->y;
+    const f32 target_y = target->y;
+    NUVEC position_delta = {position->x - RadialMoveCentre.x, 0.0f, position->z - RadialMoveCentre.z};
+    const f32 position_radius = NuVecMag(&position_delta);
+    NUVEC origin_delta = {-RadialMoveCentre.x, 0.0f, -RadialMoveCentre.z};
+    const f32 origin_radius = NuVecMag(&origin_delta);
+    RadialPlayerRadius[0] = origin_radius;
+
+    f32 base_radius = 120.0f;
+    if (origin_radius >= 120.0f) {
+        base_radius = MIN(150.0f, origin_radius);
+    }
+    const f32 extra_radius = origin_radius - base_radius;
+    f32 target_radius = base_radius + extra_radius;
+    if (position_radius != 0.0f) {
+        const f32 scale = target_radius / position_radius;
+        position_delta.x *= scale;
+        position_delta.z *= scale;
+    }
+    position->x = RadialMoveCentre.x + position_delta.x;
+    position->y = position_y;
+    position->z = RadialMoveCentre.z + position_delta.z;
+
+    if (base_radius <= origin_radius) {
+        target_radius = base_radius + 0.6f * extra_radius;
+    }
+    if (origin_radius != 0.0f) {
+        const f32 scale = target_radius / origin_radius;
+        origin_delta.x *= scale;
+        origin_delta.z *= scale;
+    }
+    target->x = RadialMoveCentre.x + origin_delta.x;
+    target->y = target_y;
+    target->z = RadialMoveCentre.z + origin_delta.z;
 }
 
 void ChrisAnakinAInit(WORLDINFO_s *world) {
@@ -280,15 +326,25 @@ void ChrisAnakinAInit(WORLDINFO_s *world) {
 }
 
 void ChrisAnakinBDraw() {
-    STUBBED();
 }
 
 void ChrisAnakinBInit() {
-    STUBBED();
+    RadialMoveCentre.x = 0.0f;
+    RadialMoveCentre.y = 0.0f;
+    RadialMoveCentre.z = 0.0f;
+    RadialMoveCentre.w = 1.0f;
+    MaxRadialCamY = 8.36f;
+    NuSpecialList(WORLD->current_gscn);
+    nuhspecial_s centre;
+    if (NuSpecialFind(WORLD->current_gscn, &centre, "Centre", 1) != 0 && NuSpecialExistsFn(&centre) != 0) {
+        nuvec_s *position = NuSpecialGetPos(&centre);
+        memcpy(&RadialMoveCentre, position, sizeof(NUVEC));
+    }
 }
 
 void ChrisAnakinCInit() {
-    STUBBED();
+    NuSpecialList(WORLD->current_gscn);
+    ChrisAnakinCReset();
 }
 
 void ChrisAnakinDInit(WORLDINFO_s *world) {
@@ -296,11 +352,10 @@ void ChrisAnakinDInit(WORLDINFO_s *world) {
 }
 
 void DogFightARestart() {
-    STUBBED();
+    *reinterpret_cast<__m128i *>(DogDebKey) = _mm_set1_epi32(-1);
 }
 
 void ChrisAnakinAPanel(WORLDINFO_s *) {
-    STUBBED();
 }
 
 void ChrisAnakinAReset(WORLDINFO_s *world) {
@@ -308,7 +363,6 @@ void ChrisAnakinAReset(WORLDINFO_s *world) {
 }
 
 void ChrisAnakinBReset() {
-    STUBBED();
 }
 
 void ChrisAnakinCReset() {
@@ -320,7 +374,6 @@ void ChrisAnakinDReset(WORLDINFO_s *world) {
 }
 
 void ChrisAnakinBUpdate() {
-    STUBBED();
 }
 
 void ChrisAnakinCUpdate() {
@@ -328,11 +381,10 @@ void ChrisAnakinCUpdate() {
 }
 
 void ChrisAnakinDUpdate(WORLDINFO_s *) {
-    STUBBED();
 }
 
-void ChrisAfterBurnerCam(nuvec_s *, nuvec_s *) {
-    STUBBED();
+void ChrisAfterBurnerCam(nuvec_s *, nuvec_s *camera) {
+    *camera = WORLD->space_level->camera_origin;
 }
 
 void ChrisAllocLevelStuff(WORLDINFO_s *) {

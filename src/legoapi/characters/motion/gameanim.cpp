@@ -15,6 +15,7 @@
 #include "legoapi/items/base/apiobject.h"
 #include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/world/level.h"
+#include "legoapi/world/levels/levels.h"
 #include "legoapi/world/world.h"
 #include "legoapi/world/level.h"
 #include "nu2api/nu3d/nurndr.h"
@@ -46,6 +47,10 @@ static GAMECHARACTERDATA *GetGameCharacterData(GameObject_s *object);
 void UpdateCharacterIdle(GameObject_s *object);
 void AutoWeaponOnOff(GameObject_s *object);
 void AddFootSteps(GameObject_s *object);
+f32 PodSprint_InStartCountdown(WORLDINFO_s *world);
+i32 PodRace_InStartCountdown(WORLDINFO_s *world);
+void SetPodMergeAnims(ANIMPACKET_s *packet, i32 index);
+extern "C" i16 id_ANAKINSPODGREEN;
 extern "C" void PlaySfxByIdAndSetVolume(i32 sfx_id, NUVEC *position, f32 volume);
 i32 MatrixReflection(NUMTX *matrix, i32 axis, f32 plane, f32 height, NUMTX *result);
 
@@ -241,8 +246,49 @@ static void StartAnimation(CHARACTERMODEL_s *model, ANIMPACKET_s *packet, i16 an
     packet->blending = 0;
 }
 
-void Animate_POD(GameObject_s *) {
-    STUBBED();
+void Animate_POD(GameObject_s *object) {
+    ANIMPACKET_s &packet = object->apiobj.anim_packet;
+    packet.requested_animation = 1;
+
+    {
+        if (__builtin_expect(static_cast<i8>(object->apiobj.field_0x1f8) >= 0, 0)) {
+            goto normal_animation;
+        }
+        const i8 index = object->apiobj.field_0x27c;
+        if (index == -1 || (object->id != id_ANAKINSPOD && object->id != id_ANAKINSPODGREEN)) {
+            goto normal_animation;
+        }
+        f32 delta = FRAMETIME * 30.0f;
+        CHARACTERMODEL_s *model = object->apiobj.character_model;
+        if (model->model_data_b[1] != NULL) {
+            CHARACTERANIM_s *info = static_cast<CHARACTERANIM_s *>(model->model_data_a[1]);
+            delta *= info->playback_rate / 30.0f;
+        }
+        pod_animtime[index] += delta;
+        if (pod_animtime[index] >= podanimendframe) {
+            pod_animtime[index] -= podanimendframe - 1.0f;
+        }
+        SetPodMergeAnims(&packet, index);
+        return;
+    }
+
+normal_animation:
+    if (PodSprint_InStartCountdown(WORLD) > 0.0f || PodRace_InStartCountdown(WORLD) != 0) {
+        packet.requested_animation = 1;
+    } else if (object->camera_shake_strength > 0.0f) {
+        packet.requested_animation = 0x17;
+    } else if (__builtin_expect(static_cast<i8>(object->apiobj.field_0x1f8) >= 0, 0)) {
+        packet.requested_animation = 3;
+    } else if (PODSPRINT_ADATA != NULL && WORLD->area == PODSPRINT_ADATA) {
+        if (object->previous_block_animation != -1) {
+            packet.requested_animation = object->previous_block_animation;
+        }
+    } else {
+        packet.requested_animation = 0;
+    }
+    if (object->apiobj.character_model->model_data_b[packet.requested_animation] == NULL) {
+        packet.requested_animation = 1;
+    }
 }
 
 void Animate_ATAT(GameObject_s *object) {

@@ -318,8 +318,29 @@ void GameCameraMakeMiniCut(nugspline_s *spline, f32 start, f32 end, f32 blend_in
     ObstacleCamAlwaysSnapAngles = 0;
 }
 
-void GameCameraMakeMiniCut2(nuvec_s *, nuvec_s *, i32, float, float, float, float, i32, i32, i32) {
-    STUBBED();
+extern nugspline_s ObstacleCamCutSpline;
+extern i32 ObstacleCamTargetGuid;
+extern NUVEC ObstacleCamCutPts[2];
+
+void GameCameraMakeMiniCut2(nuvec_s *camera, nuvec_s *target, i32 target_guid, float start, float end,
+                            float blend_in, float blend_out, i32 follow_target, i32 follow_camera, i32 borders) {
+    ObstacleCamCutSpline.length = 2;
+    ObstacleCamCutSpline.pt_size = 12;
+    ObstacleCamCutSpline.pts = ObstacleCamCutPts;
+    ObstacleCamTargetGuid = target_guid;
+    if (camera != NULL) {
+        ObstacleCamCutPts[0] = *camera;
+    }
+    if (target != NULL) {
+        ObstacleCamCutPts[1] = *target;
+    }
+    GameCameraMakeMiniCut(&ObstacleCamCutSpline, start, end, blend_in, blend_out, borders, 0);
+    if (follow_target != 0 && target != NULL) {
+        ObstacleCamCutTgtPtr = target;
+    }
+    if (follow_camera != 0 && camera != NULL) {
+        ObstacleCamCutCamPtr = camera;
+    }
 }
 
 void GameCameraMakeMiniCut3(u32, float, i32, i32, i32, void *, i32, nuvec_s *, float, float, float, float, float, float,
@@ -376,6 +397,8 @@ NUVEC CustomisePos[2];
 f32 HUB_MINIKITVIEWER_CAMDY = 0.3f;
 f32 PodCamDist = 0.0f;
 NUVEC ObstacleCamCutPts[2];
+nugspline_s ObstacleCamCutSpline;
+i32 ObstacleCamTargetGuid;
 f32 EMPERORFIGHTA_CAMDYHACK = 0.35f;
 i32 movegamecamera_forcesock = -1;
 NUMTX CutCamMtx;
@@ -1869,7 +1892,6 @@ void do_Pad_flymode_camera(edcam_s *camera, float delta_time, nupad_s *pad) {
 }
 
 void InitCameraTargetMaterial() {
-    STUBBED();
 }
 
 i32 GoingForwardsAlongNarrowSock(GameObject_s *object) {
@@ -1902,8 +1924,8 @@ extern "C" {
 
     i32 near_clip_at_cursor;
 
-    void cbNearClipAtCursor(eduimenu_s *, eduiitem_s *, u32) {
-        STUBBED();
+    void cbNearClipAtCursor(eduimenu_s *, eduiitem_s *item, u32) {
+        near_clip_at_cursor = reinterpret_cast<const u8 *>(item)[0x11] & 1;
     }
 
     void do_Pad_Standard_camera(edcam_s *camera, f32 delta_time, nupad_s *pad) {
