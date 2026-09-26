@@ -81,8 +81,10 @@ Their target sizes are 181/181/180/180 bytes, and all four match 100%.
 
 `DrawRectRGBA` scales width and height, applies the same alignment bit
 tests as `DrawMessageBoxRGBA`, and converts normalized coordinates with
-`2560.0f` and `3584.0f` before calling `NuRndrRect2di`. It scores
-99.92308%; the remaining differences are five constant-pool addresses.
+`10240.0f` and `3584.0f` before calling `NuRndrRect2di`. A first pass
+used `2560.0f` for X and appeared to score 99.92308%, but resolving the
+literal-pool relocation showed that this was a real value mismatch. A
+rebuild is needed to score the corrected value.
 
 ## Internal calling convention and floating-point conversion
 
@@ -99,7 +101,8 @@ light's optional draw, even when its point of interest is absent.
 (offset `+8`) for the arrow pulse. Convert its `u8` message alpha to
 `i32` before converting to float. Converting `u8` directly to float
 made GCC emit unsigned-int float conversion scaffolding that is absent
-in the target. The current 706-byte target scores 92.32353%.
+in the target. Moving `y_offset = 0.3f * scale` to after the `NuFmod`
+call raises the 706-byte body's match from 92.32353% to 99.94118%.
 
 ## Material clip and animated status text
 
@@ -107,9 +110,12 @@ in the target. The current 706-byte target scores 92.32353%.
 existing `nudlist.cpp` material clip helper: compare two used-byte
 buffers, inspect the eight materials of each changed byte, and suppress
 items with blend flag at `NUMTL+0xb0` and blend byte `NUMTL+0xf8`
-equal to `0xff`. The current attempt scores 29.64985%. The target
-unrolls all eight bit cases with a different pointer induction pattern,
-so the semantic loop does not reproduce its control flow.
+equal to `0xff`. The initial attempt scored 29.64985%. The target
+passes `scene` in EAX (`regparm(1)`), unrolls all eight bit cases, and
+checks the `nmtls` bound after each item write. Those changes raised the
+match to 53.183975%. Its outer loop also advances a running material
+index by eight; source that recomputes `byte_index * 8` changes registers
+and instructions. A running index is now staged for a later comparison.
 
 `DrawStatusTextFraction` uses a stack-local matrix, unlike
 `DrawStatusText`'s static matrix. It prints the suffix before two
@@ -131,3 +137,40 @@ only scores 46.30337% against the 778-byte body because GCC reuses the
 matrix slot and schedules the model lookup differently. The fighter
 layout places a NUMTX at +0, scale at +0xf0, draw flags at +0xfc, and
 model ID at +0xfe. The special ID -307 emits debris effect slot 49.
+Using one `NUMTX_ALIGNED16 matrices[2]` local forces two distinct 64-byte
+slots without emitted barrier instructions. Promoting the signed model
+ID to `i32` makes GCC load it with one `movsx` instead of `movzx` and a
+later sign extension. An intermediate pass reached 85.74719%; the array
+form awaits GOT-aware scoring.
+
+## Hint, bloom, swipe, and minikit control flow
+
+The target `DrawHint_LSW` consists of a 50-byte public guard and a
+2,087-byte internal `.part.19` body. The public function loads its two
+stack arguments into EAX/EDX, checks `FadeSys.fade`, then tail jumps to
+the internal body. A monolithic source function makes the public symbol
+1,854 bytes and scores 0%. Use a noinline internal function with the
+target asm symbol and `regparm(2)`; keep only the guard in the public
+function. This split is staged and compiled, with score pending.
+
+`DrawAlphaImage` computes the first row's vertex alpha and reuses cached
+alpha for later rows, while still transforming every current vertex.
+The target tests `row > 0` so the cached path falls through. For both
+vertices, directional bias exactly 1.0 uses the linear blend ratio
+directly; other bias values call `NuPowFast`. Leaving out this fast path
+is a real behavior and control-flow mismatch.
+
+`SwipeDecalRenderer` stores color before UVs for every vertex. Its UV
+branch writes float UVs on the fallthrough path and packed half UVs out
+of line; a local inline writer reproduces that order. The strip's half
+width has raw float bits `0x3d199999`, represented in source as
+`0.037499998f`; rounding `0.0375f` produces different bits. The
+constructor's width clamp uses comparisons with specific NaN behavior,
+so ordinary adjacent `if` statements become `minss`/`maxss` and differ
+from the target's branchy sequence.
+
+`DrawStatusMiniKit` builds its two scale vectors before its direction
+dispatch and checks the piece count bounds at the loop tail. Moving
+those operations to the top of the loop made a smaller body with a very
+different instruction order despite similar visible behavior. Its
+piece rotation order is Y, Z, then X, including the translation row.
