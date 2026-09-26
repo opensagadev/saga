@@ -1548,7 +1548,8 @@ static __used__ void EndBolt_EwokTorpedo(BOLT_s *bolt) {
     Detonate(&bolt->position, 0);
 }
 
-void ProcessSpaceLevel(spacelevel_s *) __asm__("_ZL17ProcessSpaceLevelP12spacelevel_s");
+void ProcessSpaceLevel(spacelevel_s *) __asm__("_ZL17ProcessSpaceLevelP12spacelevel_s")
+    __attribute__((visibility("hidden"), regparm(1)));
 void ProcessSpaceLevel(spacelevel_s *) {
     STUBBED();
 }
