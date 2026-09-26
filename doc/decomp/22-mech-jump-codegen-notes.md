@@ -36,3 +36,13 @@ XORs its sign bit, divides by twice gravity, then **adds** position Y.
 Spell the expression `position.y + (-(vy * vy)) / (gravity + gravity)` to
 preserve the target's operation order; `position.y - (vy * vy) / ...`
 selects a later subtraction.
+
+The reference movement block keeps `character` in `edx` while writing X
+speed to movement direction, target velocity, and actual velocity, then
+computes and writes Z speed to the same three destinations. The previous
+build reloaded `character` several times between those stores and
+computed Z before the X stores. A block-local `GameObject_s *` cache is
+being tested to retain the target pointer reuse. The reference also
+checks `state <= 5` before the velocity stores, even though the jump
+table dispatch comes afterward; this is GCC's instruction scheduling,
+not a different state machine.
