@@ -26,7 +26,10 @@ void MechInputTouchPodraceController::Deactivate() {
 }
 
 MechInputTouchPodraceController::MechInputTouchPodraceController(i32 index)
-    : MechInputTouchMainController(index), active(0), steering_touch(NULL) {
+    : MechInputTouchMainController(index) {
+    asm volatile("" ::: "memory");
+    active = 0;
+    steering_touch = NULL;
 }
 
 bool MechInputTouchPodraceController::OnDown(GameObject_s &, TouchHolder &holder) {
