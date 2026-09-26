@@ -496,8 +496,9 @@ struct MechInputTouchSystem {
     MechInputTouchButton *locked_buttons[10];
     u32 locked_touch_ids[10];
 };
-struct MechInputTouchVirtualConsoleController {
+struct MechInputTouchVirtualConsoleController : MechInputTouchMainController, MechInputTouchGestureTracker {
     static i16 s_textures[9];
+    static f32 s_noInputTimer;
     static float s_defaultDPadPosX;
     static float s_defaultDPadPosY;
     static float s_defaultButtonsPosX;
@@ -507,20 +508,34 @@ struct MechInputTouchVirtualConsoleController {
     static float s_defaultButtonsPosX_SmallScreen;
     static float s_defaultButtonsPosY_SmallScreen;
 
-    void Activate();
-    void Deactivate();
+    void Activate() override;
+    void Deactivate() override;
     static void LoadPerm();
     MechInputTouchVirtualConsoleController(i32);
-    void OnDown(GameObject_s &, TouchHolder &);
-    void OnRelease(GameObject_s &, TouchHolder &);
+    bool OnDown(GameObject_s &, TouchHolder &) override;
+    bool OnRelease(GameObject_s &, TouchHolder &) override;
     void ProcessDragMovement(GameObject_s &);
     void ResetButtonPositionsToDefault();
-    void ShouldBeActive();
-    void Update(NuInputTouchData const *);
+    bool ShouldBeActive();
+    void Update(NuInputTouchData const *) override;
     void UpdateButtonPositions();
     void UpdateDPadPos();
-    virtual ~MechInputTouchVirtualConsoleController();
+    ~MechInputTouchVirtualConsoleController() override;
+
+    u8 active;
+    u8 pad_71[3];
+    TouchHolder *dpad_touch;
+    TouchHolder *drag_touch;
+    MechTouchUIElement *buttons[4];
+    MechTouchUIElement *dpad;
+    MechTouchUIElement *lock_button;
+    MechTouchUIElement *button_mover;
 };
+DECOMP_ASSERT(sizeof(MechInputTouchVirtualConsoleController) == 0x98, "virtual controller ABI");
+DECOMP_ASSERT(offsetof(MechInputTouchVirtualConsoleController, dpad_touch) == 0x74,
+              "virtual controller D-pad touch offset");
+DECOMP_ASSERT(offsetof(MechInputTouchVirtualConsoleController, dpad) == 0x8c,
+              "virtual controller D-pad offset");
 struct MechJumpAutoPilotAddon : MechAddon {
     static HashedKey s_hashId;
     void AnalyseJumpTrajectory();
