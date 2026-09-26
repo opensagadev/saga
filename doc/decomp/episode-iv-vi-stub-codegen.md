@@ -70,3 +70,31 @@ Moving the route-flag calculation before the obstacle tests reproduced
 the complete 258-byte instruction stream at 99.97183%; only the `-20.0f`
 and `-21.0f` constant addresses differ. Preserve this computation order
 when reconstructing nearby level handlers.
+
+## Return width in Hoth Battle initializers
+
+The shared declaration of `BoltType_FindIDByName` currently returns `i8`,
+but the three Hoth Battle initializer call sites store its return value as
+`i16` without sign extension. Calling through that declaration makes GCC
+insert `cbw` after each call, shifting the following blocks and reducing
+match. A file-local `i16` declaration with the same assembler symbol
+reproduces the target call sites. With that alias, `HothBattleA_Init`,
+`HothBattleC_Init`, and `HothBattleE_Init` have the exact target sizes
+(466, 631, and 514 bytes) and match 99.76636%, 99.71724%, and 99.837395%.
+All residual differences are string or local literal address operands.
+
+## Unrolled level special updates
+
+GCC unrolls a three-iteration loop over adjacent `LevHSpecial` entries.
+The `CloudCityEscapeA_Update` target has the three gas animation checks
+as separate blocks with shared return logic. Its source needs the desk
+visibility check first, surface flags reset next, the gas loop gated by
+the panel state, and the BuildIt/AI-message completion check last.
+This gives the exact 531-byte target size and 99.912% match. Its seven
+remaining differences are string and `1.0f` literal addresses.
+
+`HothEscapeC_Init`, `AsteroidChaseA_Init`, and `CloudCityEscapeA_Init`
+also match their exact target sizes (574, 207, and 471 bytes). Each
+remaining argument mismatch is a string or constant address; none is a
+different instruction or control-flow block. The GOT-aware fork reports
+99.5037%, 99.545456%, and 99.42593% respectively.

@@ -8,6 +8,8 @@
 #include "legoapi/characters/core/players.h"
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/gizmos/object/newblowup.h"
+#include "legoapi/gizmos/fx/gizmopickups.h"
+#include "legoapi/gizmos/object/gizpanel.h"
 #include "legoapi/gizmos/object/gizbuildits.h"
 #include "legoapi/gizmos/traps/gizbombgen.h"
 #include "legoapi/gizmos/traps/gizforce.h"
@@ -35,6 +37,8 @@
 
 extern i32 dagobah_training;
 extern i32 obstacle_gizmotype_id;
+extern u8 LevFlag[16];
+GIZPANEL_s *LevGizPanel;
 AILOCATOR_s *locator;
 GameObject_s *gameobj;
 extern u8 troopercannons_beenReset;
@@ -44,11 +48,14 @@ void PartCollide_3D(PART_s *);
 void ResetTrooperCannons(WORLDINFO_s *, i32);
 void InitTrooperCannons(WORLDINFO_s *);
 void HothBattleE_UpdateWave();
+void HothBattle_Melee_init(HOTHBATTLE_MELEE_s *);
+void HothBattle_ManageBackgroundCreatures();
 void UpdateTrooperCannons(WORLDINFO_s *);
 EXPLOSION *Detonate(NUVEC *, u16);
 extern "C" void NewPartRotation(PART_s *);
 extern "C" void *AIPAthFindPathCnx(AISYS_s *, AIPATH_s *, char *, char *, i32 *);
 nugspline_s *edSpline_SplineFind(nugscn_s *, char *);
+extern i16 BoltType_FindIDByNameWide(char *, WORLDINFO_s *) asm("_Z21BoltType_FindIDByNamePcP11WORLDINFO_s");
 
 static GameObject_s *Vader_obj;
 static GIZAIMESSAGE_s *Vader_ai_message;
@@ -65,6 +72,7 @@ extern "C" {
     HOTHBATTLE_MELEE_s melee;
     u8 dagobahA_nodesNeedUpdating = 1;
 }
+void *hothbattlee_netpacket;
 
 void DagobahA_Init(WORLDINFO_s *world) {
     LevGizForce[0] = GizForce_FindByName(world->giz_force_sys, "force3");
@@ -180,8 +188,22 @@ void HothBattleA_Draw(WORLDINFO_s *world) {
     }
 }
 
-void HothBattleA_Init(WORLDINFO_s *) {
-    STUBBED();
+void HothBattleA_Init(WORLDINFO_s *world) {
+    LevGizmo[0] = GizmoFindByName(world->gizmo_sys, gizmopickup_typeid, "m_pup3");
+    GizmoSetVisibility(world->gizmo_sys, LevGizmo[0], 0, 1);
+    trooper_boltid[1] = BoltType_FindIDByNameWide("trooper_green", world);
+    trooper_boltid[0] = BoltType_FindIDByNameWide("trooper_red", world);
+    trooper_side[0] = 0;
+    trooper_side[1] = 1;
+    InitMiniSnowTroopers(world, 2, 32, 0);
+    i32 count = NuSpecialFind(world->current_gscn, &LevHSpecial[0], "minifig_1_1", 1);
+    count += NuSpecialFind(world->current_gscn, &LevHSpecial[1], "minifig_1_2", 1);
+    count += NuSpecialFind(world->current_gscn, &LevHSpecial[2], "minifig_1_3", 1);
+    count += NuSpecialFind(world->current_gscn, &LevHSpecial[3], "minifig_2_1", 1);
+    count += NuSpecialFind(world->current_gscn, &LevHSpecial[4], "minifig_2_2", 1);
+    count += NuSpecialFind(world->current_gscn, &LevHSpecial[5], "minifig_2_3", 1);
+    if (count == 6)
+        hothtroopers = LevHSpecial;
 }
 
 void HothBattleB_Init(WORLDINFO_s *world) {
@@ -201,8 +223,27 @@ void HothBattleC_Draw(WORLDINFO_s *world) {
     }
 }
 
-void HothBattleC_Init(WORLDINFO_s *) {
-    STUBBED();
+void HothBattleC_Init(WORLDINFO_s *world) {
+    LevAIMessage[0] = CheckGizAIMessage(gizaimessagesys, "BombGen_ATAT_Killed", NULL);
+    i32 direction;
+    LevPathCnx[0] = AIPAthFindPathCnx(world->ai_sys, world->ai_sys->path_sys->active_path, "ice_a", "ice_b",
+                                      &direction);
+    LevGizmo[0] = GizmoFindByName(world->gizmo_sys, obstacle_gizmotype_id, "obstacle3");
+    LevGizmo[1] = GizmoFindByName(world->gizmo_sys, gizmopickup_typeid, "m_pup7");
+    NuSpecialSetVisibility(&LevHSpecial[10], 0);
+    trooper_boltid[1] = BoltType_FindIDByNameWide("trooper_green", world);
+    trooper_boltid[0] = BoltType_FindIDByNameWide("trooper_red", world);
+    trooper_side[0] = 0;
+    trooper_side[1] = 1;
+    InitMiniSnowTroopers(world, 2, 32, 0);
+    i32 count = NuSpecialFind(world->current_gscn, &LevHSpecial[0], "minifig_1_1", 1);
+    count += NuSpecialFind(world->current_gscn, &LevHSpecial[1], "minifig_1_2", 1);
+    count += NuSpecialFind(world->current_gscn, &LevHSpecial[2], "minifig_1_3", 1);
+    count += NuSpecialFind(world->current_gscn, &LevHSpecial[3], "minifig_2_1", 1);
+    count += NuSpecialFind(world->current_gscn, &LevHSpecial[4], "minifig_2_2", 1);
+    count += NuSpecialFind(world->current_gscn, &LevHSpecial[5], "minifig_2_3", 1);
+    if (count == 6)
+        hothtroopers = LevHSpecial;
 }
 
 void HothBattleE_Draw(WORLDINFO_s *world) {
@@ -218,8 +259,34 @@ void HothBattleE_Draw(WORLDINFO_s *world) {
     }
 }
 
-void HothBattleE_Init(WORLDINFO_s *) {
-    STUBBED();
+void HothBattleE_Init(WORLDINFO_s *world) {
+    trooper_boltid[1] = BoltType_FindIDByNameWide("trooper_green", world);
+    trooper_boltid[0] = BoltType_FindIDByNameWide("trooper_red", world);
+    trooper_side[0] = 0;
+    trooper_side[1] = 0;
+    trooper_side[2] = 0;
+    trooper_side[3] = 0;
+    trooper_side[4] = 0;
+    trooper_side[5] = 1;
+    trooper_side[6] = 1;
+    trooper_side[7] = 1;
+    trooper_side[8] = 1;
+    trooper_side[9] = 1;
+    if (NuIOS_IsLowEndDevice() == 0)
+        InitMiniSnowTroopers(world, 10, 32, 0);
+    memset(reinterpret_cast<u8 *>(&melee) + 0xc, 0, sizeof(melee) - 0xc);
+    HothBattle_Melee_init(&melee);
+    i32 count = NuSpecialFind(world->current_gscn, &LevHSpecial[0], "minifig_1_1", 1);
+    count += NuSpecialFind(world->current_gscn, &LevHSpecial[1], "minifig_1_2", 1);
+    count += NuSpecialFind(world->current_gscn, &LevHSpecial[2], "minifig_1_3", 1);
+    count += NuSpecialFind(world->current_gscn, &LevHSpecial[3], "minifig_2_1", 1);
+    count += NuSpecialFind(world->current_gscn, &LevHSpecial[4], "minifig_2_2", 1);
+    count += NuSpecialFind(world->current_gscn, &LevHSpecial[5], "minifig_2_3", 1);
+    if (count == 6)
+        hothtroopers = LevHSpecial;
+    if (netclient == 0)
+        HothBattle_ManageBackgroundCreatures();
+    hothbattlee_netpacket = SetLevelHack(0x58);
 }
 
 void HothEscapeA_Init(WORLDINFO_s *world) {
@@ -236,8 +303,54 @@ void HothEscapeB_Init(WORLDINFO_s *world) {
     troopercannons_beenReset = 0;
 }
 
-void HothEscapeC_Init(WORLDINFO_s *) {
-    STUBBED();
+void HothEscapeC_Init(WORLDINFO_s *world) {
+    InitTrooperCannons(world);
+    troopercannons_beenReset = 0;
+    GIZOBSTACLE_s *obstacle = GizObstacle_FindByName(world->giz_obstacle_sys, "Obstacle19");
+    if (obstacle != NULL)
+        obstacle->field_a1_0xa1 |= 1;
+    obstacle = GizObstacle_FindByName(world->giz_obstacle_sys, "Obstacle20");
+    if (obstacle != NULL)
+        obstacle->field_a1_0xa1 |= 1;
+    obstacle = GizObstacle_FindByName(world->giz_obstacle_sys, "Obstacle21");
+    if (obstacle != NULL)
+        obstacle->field_a1_0xa1 |= 1;
+    obstacle = GizObstacle_FindByName(world->giz_obstacle_sys, "Obstacle22");
+    if (obstacle != NULL)
+        obstacle->field_a1_0xa1 |= 1;
+    obstacle = GizObstacle_FindByName(world->giz_obstacle_sys, "Obstacle23");
+    if (obstacle != NULL)
+        obstacle->field_a1_0xa1 |= 1;
+    obstacle = GizObstacle_FindByName(world->giz_obstacle_sys, "Obstacle24");
+    if (obstacle != NULL)
+        obstacle->field_a1_0xa1 |= 1;
+    obstacle = GizObstacle_FindByName(world->giz_obstacle_sys, "Obstacle25");
+    if (obstacle != NULL)
+        obstacle->field_a1_0xa1 |= 1;
+    obstacle = GizObstacle_FindByName(world->giz_obstacle_sys, "Obstacle26");
+    if (obstacle != NULL)
+        obstacle->field_a1_0xa1 |= 1;
+    obstacle = GizObstacle_FindByName(world->giz_obstacle_sys, "Obstacle27");
+    if (obstacle != NULL)
+        obstacle->field_a1_0xa1 |= 1;
+    NuSpecialFind(world->current_gscn, &LevHSpecial[0], "gen_1a", 1);
+    NuSpecialFind(world->current_gscn, &LevHSpecial[1], "gen_2a", 1);
+    GIZMOBLOWUP_s *blowup = GizmoBlowUp_FindByName(world, "gen_1b1");
+    if (blowup != NULL) {
+        blowup->field_0x124 = 1;
+        blowup->override_special = &LevHSpecial[0];
+    }
+    blowup = GizmoBlowUp_FindByName(world, "gen_1a1");
+    if (blowup != NULL)
+        blowup->field_0x124 = 1;
+    blowup = GizmoBlowUp_FindByName(world, "gen_2b1");
+    if (blowup != NULL) {
+        blowup->field_0x124 = 1;
+        blowup->override_special = &LevHSpecial[1];
+    }
+    blowup = GizmoBlowUp_FindByName(world, "gen_2a1");
+    if (blowup != NULL)
+        blowup->field_0x124 = 1;
 }
 
 void HothEscapeD_Init(WORLDINFO_s *world) {
@@ -398,8 +511,40 @@ void CloudCityTrapC_Reset(WORLDINFO_s *world) {
         LevGizObst[1] = static_cast<GIZOBSTACLE_s *>(gizmo->object);
 }
 
-void CloudCityEscapeA_Init(WORLDINFO_s *) {
-    STUBBED();
+void CloudCityEscapeA_Init(WORLDINFO_s *world) {
+    LevAIMessage[0] = CheckGizAIMessage(gizaimessagesys, "BobaFightStarted", NULL);
+    LevFlag[0] = 0;
+    NuSpecialFind(world->current_gscn, &LevHSpecial[1], "gas_1", 1);
+    NuSpecialFind(world->current_gscn, &LevHSpecial[2], "gas_2", 1);
+    NuSpecialFind(world->current_gscn, &LevHSpecial[3], "gas_3", 1);
+    LevGizPanel = GizPanel_FindByName(world, "panel5");
+    GIZOBSTACLE_s *obstacle = GizObstacle_FindByName(world->giz_obstacle_sys, "obstacle23");
+    if (obstacle != NULL)
+        obstacle->field_a1_0xa1 |= 1;
+    GIZMOBLOWUP_s *blowup = GizmoBlowUp_FindByName(world, "blowup_fruit_1");
+    if (blowup != NULL) {
+        blowup->field_0x128 = 0.5f;
+        blowup->field_0x124 = 1;
+    }
+    blowup = GizmoBlowUp_FindByName(world, "blowup_palm_1");
+    if (blowup != NULL)
+        blowup->field_0x124 = 1;
+    blowup = GizmoBlowUp_FindByName(world, "blowup_fruit_2");
+    if (blowup != NULL) {
+        blowup->field_0x128 = 0.5f;
+        blowup->field_0x124 = 1;
+    }
+    blowup = GizmoBlowUp_FindByName(world, "blowup_palm_2");
+    if (blowup != NULL)
+        blowup->field_0x124 = 1;
+    blowup = GizmoBlowUp_FindByName(world, "blowup_fruit_3");
+    if (blowup != NULL) {
+        blowup->field_0x128 = 0.5f;
+        blowup->field_0x124 = 1;
+    }
+    blowup = GizmoBlowUp_FindByName(world, "blowup_palm_3");
+    if (blowup != NULL)
+        blowup->field_0x124 = 1;
 }
 
 void CloudCityEscapeC_Init(WORLDINFO_s *world) {
@@ -501,7 +646,26 @@ void HothBattleE_UpdateWave() {
 }
 
 void CloudCityEscapeA_Update(WORLDINFO_s *) {
-    STUBBED();
+    if (LevFlag[0] == 0 && NuSpecialGetVisibilityFn(&LevHSpecial[0]) != 0) {
+        PlaySfx("env_ctrl_desk_on", NuSpecialGetDrawPos(&LevHSpecial[0]));
+        LevFlag[0] = 1;
+    }
+    TerSurface[14].flags = 0x2002;
+    if (LevGizPanel == NULL || !LevGizPanel->state) {
+        for (i32 index = 1; index < 4; ++index) {
+            if (NuSpecialExistsFn(&LevHSpecial[index])) {
+                nuinstanim_s *animation = NuSpecialGetInstAnim(&LevHSpecial[index]);
+                if (animation != NULL && animation->ltime > 1.0f) {
+                    PlaySfx("env_steam_lp", NuSpecialGetDrawPos(&LevHSpecial[index]));
+                    TerSurface[14].flags |= 0x4042;
+                }
+            }
+        }
+    }
+    GIZMO *gizmo = LevGizmo[0];
+    if (gizmo != NULL && LevAIMessage[1] != NULL && LevAIMessage[1]->value == 0.0f &&
+        gizmo->object != NULL && static_cast<GIZBUILDIT_s *>(gizmo->object)->build_state == 2)
+        LevAIMessage[1]->value = 1.0f;
 }
 
 void CloudCityEscapeC_Update(WORLDINFO_s *) {
@@ -698,8 +862,11 @@ static void Asteroids_Reset(WORLDINFO_s *world) {
     }
 }
 
-void AsteroidChaseA_Init(WORLDINFO_s *) {
-    STUBBED();
+void AsteroidChaseA_Init(WORLDINFO_s *world) {
+    NuSpecialFind(world->current_gscn, &LevHSpecial[0], "small_pop_bit1", 1);
+    NuSpecialFind(world->current_gscn, &LevHSpecial[1], "small_pop_bit2", 1);
+    NuSpecialFind(world->current_gscn, &LevHSpecial[2], "small_pop_bit3", 1);
+    NuSpecialFind(world->current_gscn, &LevHSpecial[3], "small_pop_bit4", 1);
 }
 
 void AsteroidChaseB_Init(WORLDINFO_s *) {
