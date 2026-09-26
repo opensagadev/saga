@@ -11,6 +11,9 @@
 #include "legoapi/gizmos/fx/gizmopickups.h"
 #include "legoapi/gizmos/door/zipups.h"
 #include "legoapi/menus/core/text.h"
+#include "legoapi/menus/core/gamehint.h"
+#include "MechInputTouch/MechInputTouch_types.h"
+#include "gamelib/util/gamelib_util_types.h"
 #include "legoapi/menus/core/panel.h"
 #include "legoapi/menus/core/gamemessages.h"
 #include "legoapi/characters/core/players.h"
@@ -1059,8 +1062,82 @@ void DrawCharIcon(i32 character_id, float x, float y, float z, float scale, i32 
     drawcharicon_i_panel = -1;
 }
 
-void DrawHint_LSW(HINT_s *, i32) {
-    STUBBED();
+extern const u8 HintRGB[5][3] = {
+    {255, 0, 0}, {0, 255, 0}, {0, 127, 255}, {127, 0, 255}, {255, 255, 0},
+};
+
+void DrawHint_LSW(HINT_s *hint, i32 max_lines) {
+    if (hint == NULL || FadeSys.fade != 0.0f)
+        return;
+
+    const f32 alpha = CurrentHintAlpha();
+    if (!(alpha > 0.0f))
+        return;
+    if (alpha == 1.0f)
+        hint->flags |= 0x40;
+
+    f32 text_y = 0.0f;
+    if ((WORLD->current_level->flags & LEVEL_STATUS) == 0)
+        text_y = hint->control_mode_ids[0] == 0x164 ? -0.1f : -0.7f;
+
+    const bool purchased = (hint->flags & HINT_SHOP_PURCHASED) != 0;
+    const f32 text_x = purchased ? 0.0f : 0.09f - ICONX;
+    const i32 text_lines = max_lines == -1 ? 3 : max_lines;
+    f32 icon_x = -ICONX;
+
+    const i32 control_mode = MechInputTouchSystem::s_baseControlMode;
+    char *hint_text = TTab[hint->control_mode_ids[control_mode]];
+    if (hint_text != NULL) {
+        char expanded[1024];
+        Text_ExpandAllButtonStrings(hint_text, expanded);
+
+        const u16 pulse_angle = static_cast<u16>(NuFmod(GlobalTimer.time_elapsed_mod_seconds, 0.5f) *
+                                                  2.0f * 65536.0f);
+        const f32 colour_pulse = NU_SIN_LUT(pulse_angle) * 0.5f + 0.5f;
+        i32 colour_index = static_cast<i8>(hint->pad_0x05[0]);
+        if (colour_index == -1)
+            colour_index = hintsys.state;
+        u8 colours[3];
+        for (i32 channel = 0; channel < 3; ++channel) {
+            const f32 base = static_cast<f32>(HintRGB[colour_index][channel]);
+            colours[channel] = static_cast<u8>(static_cast<i32>(
+                ((base + 255.0f) * 0.5f - base) * colour_pulse + base));
+        }
+
+        g_buttonFontScalePulse = CurrentHintButtonScale();
+        const u8 text_alpha = static_cast<u8>(static_cast<i32>(alpha * 128.0f));
+        const f32 max_width = purchased ? 1.4f : 2.0f - (1.0f + text_x) - 0.15f;
+        SmartTextEx(expanded, text_x, text_y, 1.0f, 0.5f, 0.5f, 0.5f, 0, colours[0], colours[1],
+                    colours[2], max_width, text_lines, NULL, 0, text_alpha);
+        if (purchased)
+            icon_x = -0.5f * smarttextex_longestwidth - 0.075f;
+        g_buttonFontScalePulse = 1.0f;
+    }
+
+    LEVEL_OBJECT_RUNTIME *icon = &WORLD->lev_objs[0xd4];
+    if (icon->active == 0)
+        return;
+
+    const i32 slide_angle = static_cast<i32>(alpha * 16384.0f);
+    const f32 wave_x = (icon_x + 1.1f) * NU_SIN_LUT(slide_angle) - 1.1f;
+    if (hintIconPos.duration < 0.0f || hintIconPos.elapsed >= hintIconPos.duration + hintIconPos.delay)
+        hintIconPos.value.x = wave_x;
+
+    const u16 rotation = static_cast<u16>((NuFmod(GameTimer.time_elapsed, 2.5f) / 2.5f) * 65536.0f);
+    if ((hint->flags & HINT_DIRECT_DISPLAY) != 0) {
+        DrawPanel3DObjectNoAlpha(wave_x, text_y, 1.0f, 0.5f, 0.5f, 0.5f, 0, rotation, 0, &icon->special, 2);
+    } else {
+        const f32 bounce = NU_SIN_LUT(static_cast<i32>(hintYPop.value));
+        const f32 bounce_scale = TouchHacks::TouchControlsActive ? 0.2f : 0.8f;
+        const f32 scale = hintIconScale.value;
+        DrawPanel3DObjectNoAlpha(hintIconPos.value.x, hintIconPos.value.y + bounce_scale * bounce,
+                                 hintIconPos.value.z, scale, scale, scale, 0, rotation, 0, &icon->special, 2);
+    }
+    if (purchased) {
+        const u16 mirrored_rotation =
+            static_cast<u16>((NuFmod(GameTimer.time_elapsed, 2.5f) / 2.5f) * 65536.0f);
+        DrawPanel3DObjectNoAlpha(-wave_x, text_y, 1.0f, 0.5f, 0.5f, 0.5f, 0, mirrored_rotation, 0, &icon->special, 2);
+    }
 }
 
 void DrawLine_Now(_vuv_s *, _vuv_s *, i32, i32) {
