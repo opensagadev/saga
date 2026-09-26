@@ -6912,6 +6912,7 @@ static void DrawPackButton(GAMEMESSAGE_s *message, nuvec_s *position, float scal
                 if (pack_total > bundle_price) {
                     Text3DEx(TTab[tBUNDLESAVINGSAVAILABLE], position->x, label_y - savings_height, position->z,
                              scale, scale, scale, 4, 0, 191, 255, alpha & 0xff);
+                    break;
                 }
             }
     }

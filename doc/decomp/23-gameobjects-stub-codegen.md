@@ -48,7 +48,8 @@ locked packs in each bundle. The eleven `Store_IsPackUnlocked` calls in the
 target are unrolled with constant indices, 0 through 10; a normal counted
 loop produces a different control-flow shape. Each conditional purchase-price
 call uses the same stack product record. If the total exceeds the bundle
-price, it draws `tBUNDLESAVINGSAVAILABLE` above the button. The common tail
+price, it draws `tBUNDLESAVINGSAVAILABLE` above the button and exits the
+bundle search. The common tail
 draws the panel object, the `">"` glyph, and updates the touch controller's
 active, position, width, and selected-pack globals.
 
