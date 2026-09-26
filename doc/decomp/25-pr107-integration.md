@@ -59,3 +59,13 @@ also removes null checks absent from the original.
 
 `Technos_FindTgt` tests a missing techno object and an already-controlled
 object separately, matching the original early-return control flow.
+
+The linked results for those two functions are 92.678% and 84.366%,
+respectively (both previously 0%).
+
+`LightSabreDebris` improves from 0% to 66.187%. Its effect selection uses the
+retail default/override flow; it validates the first blade joint before
+loading the second, and declares the start/middle/end points in retail stack
+order. It still emits the same three debris calls in that order, with no
+new guards. The remaining difference is compiler control flow/register
+allocation: 648 bytes versus the original 637. Experiments stayed in `/tmp`.

@@ -1535,8 +1535,7 @@ void Move_SPEEDERBIKE(GameObject_s *object) {
     object->reserved_e27[3] = static_cast<u8>(qrand() >> 8);
 
     if (WORLD->area != NULL && (WORLD->area->flags & 1) != 0 && object->id == id_MINISTARDESTROYER &&
-        static_cast<i8>(object->apiobj.flags_low) < 0 &&
-        (Cheat[29].enabled != 0 || object->field_0xdec > 0.0f)) {
+        static_cast<i8>(object->apiobj.flags_low) < 0 && (Cheat[29].enabled != 0 || object->field_0xdec > 0.0f)) {
         TractorBeamCode(object);
     }
 
@@ -4130,8 +4129,7 @@ void Move_POD(GameObject_s *object) {
             NewRumble(pad->pad, object->current_speed_mul - 1.0f, 0);
     }
 
-    if (FreePlay != 0 && (object->apiobj.character_data->model_flags & 0x10) != 0 &&
-        (vehicle->flags_094[0] & 8) == 0) {
+    if (FreePlay != 0 && (object->apiobj.character_data->model_flags & 0x10) != 0 && (vehicle->flags_094[0] & 8) == 0) {
         FireCode(object, pad->buttons_pressed & GAMEPAD_ACTION, pad->buttons_held & GAMEPAD_ACTION, 0.15f, 0);
     }
     if (WORLD->area != NULL && (WORLD->area == PODRACE_ADATA || WORLD->area == PODSPRINT_ADATA))
@@ -4152,16 +4150,16 @@ void Move_POD(GameObject_s *object) {
                 PosSeekPitch[player_index] = previous + (pitch - previous) * FRAMETIME * 1.5f;
                 PlaySfxByIdAndSetPitch(sound, &object->apiobj.collision_position, PosSeekPitch[player_index]);
             } else {
-                PosSeekPitch[player_index] = SeekLinearF(PosSeekPitch[player_index],
-                    object->apiobj.velocity_magnitude / vehicle->run_speed * 0.35f + 0.65f, FRAMETIME);
+                PosSeekPitch[player_index] =
+                    SeekLinearF(PosSeekPitch[player_index],
+                                object->apiobj.velocity_magnitude / vehicle->run_speed * 0.35f + 0.65f, FRAMETIME);
                 PlaySfxByIdAndSetPitch(sound, &object->apiobj.collision_position, PosSeekPitch[player_index]);
             }
         }
     } else {
-        f32 camera_facing =
-            (object->apiobj.collision_position.x - global_camera.mtx.m30) * global_camera.mtx.m20 +
-            (object->apiobj.collision_position.y - global_camera.mtx.m31) * global_camera.mtx.m21 +
-            (object->apiobj.collision_position.z - global_camera.mtx.m32) * global_camera.mtx.m22;
+        f32 camera_facing = (object->apiobj.collision_position.x - global_camera.mtx.m30) * global_camera.mtx.m20 +
+                            (object->apiobj.collision_position.y - global_camera.mtx.m31) * global_camera.mtx.m21 +
+                            (object->apiobj.collision_position.z - global_camera.mtx.m32) * global_camera.mtx.m22;
         if (camera_facing < 0.0f)
             PlaySfxByIdAndSetPitch(sound, &object->apiobj.collision_position, 0.7f);
         else
@@ -5425,29 +5423,32 @@ i32 LightSabre_ColourFromObj(i32 model, i32 *glow_model) {
 }
 
 void LightSabreDebris(GameObject_s *object) {
-    i32 hit_effect = object->blade_index == -1 ? -1 : BladeTab[object->blade_index].hit_effect;
-    i32 blade_count = object->id == id_GRIEVOUS ? 4 : object->id == id_DARTHMAUL ? 2 : 1;
+    i32 hit_effect = -1;
+    if (object->blade_index != -1)
+        hit_effect = BladeTab[object->blade_index].hit_effect;
+    i32 blade_count = 4;
+    if (object->id != id_GRIEVOUS)
+        blade_count = object->id == id_DARTHMAUL ? 2 : 1;
     for (i32 blade = 0; blade < blade_count; ++blade) {
-        i32 effect;
+        i32 effect = hit_effect;
         if (object->id == id_GRIEVOUS && !(object->apiobj.field_0x27c != -1 && Cheat_IsOn(0x19)) &&
             !(object->apiobj.field_0x27c != -1 && Player_HasPurpleForce(object))) {
-            effect = blade == 0 || blade == 3 ? 3 : 2;
-        } else {
-            if (hit_effect == -1)
-                continue;
-            effect = hit_effect;
+            effect = blade == 3 || blade == 0 ? 3 : 2;
         }
-        if (object->apiobj.field_0x288 == 0 || (object->field_0xe23 & 8) == 0)
+        if (effect == -1 || object->apiobj.field_0x288 == 0 || (object->field_0xe23 & 8) == 0)
             continue;
         GAMECHARACTERDATA *data = object->apiobj.character_data->game_character;
         i32 first = data->streak_joints[blade][0];
-        i32 second = data->streak_joints[blade][1];
-        if (first == -1 || object->apiobj.character_model->points_of_interest[first] == NULL || second == -1 ||
-            object->apiobj.character_model->points_of_interest[second] == NULL)
+        if (first == -1 || object->apiobj.character_model->points_of_interest[first] == NULL)
             continue;
-        NUVEC start = *NUMTX_GET_ROW_VEC(&object->joint_matrices[first], 3);
-        NUVEC end = *NUMTX_GET_ROW_VEC(&object->joint_matrices[second], 3);
+        i32 second = data->streak_joints[blade][1];
+        if (second == -1 || object->apiobj.character_model->points_of_interest[second] == NULL)
+            continue;
+        NUVEC start;
         NUVEC middle;
+        NUVEC end;
+        start = *NUMTX_GET_ROW_VEC(&object->joint_matrices[first], 3);
+        end = *NUMTX_GET_ROW_VEC(&object->joint_matrices[second], 3);
         NuVecAdd(&middle, &start, &end);
         NuVecScale(&middle, &middle, 0.5f);
         AddGameDebris(WORLD->debris_sys, effect, &start);
@@ -6906,10 +6907,9 @@ void MoveToMarker::Render() {
     NuQFntSet(QFont3DZ);
     NuQFntSetMtx(QFont3DZ, &text_matrix);
     NuQFntSetCoordinateSystem(NUQFNT_CSMODE_ABSOLUTE);
-    const i32 colour = (static_cast<i32>(scale.value * 255.0f) << 24) |
-                       ((static_cast<i32>(this->colour.value.z) & 0xff) << 16) |
-                       ((static_cast<i32>(this->colour.value.y) & 0xff) << 8) |
-                       (static_cast<i32>(this->colour.value.x) & 0xff);
+    const i32 colour =
+        (static_cast<i32>(scale.value * 255.0f) << 24) | ((static_cast<i32>(this->colour.value.z) & 0xff) << 16) |
+        ((static_cast<i32>(this->colour.value.y) & 0xff) << 8) | (static_cast<i32>(this->colour.value.x) & 0xff);
     NuQFntSetColour(QFont3DZ, colour);
     NuQFntSetScale(QFont3DZ, 0.0375f, 0.05f);
     NuQFntMove(QFont3DZ, NuQFntPrintLenU(QFont3DZ, ASCII_DOWN) * -0.5f, 0.0f, 0.0f);
@@ -10495,8 +10495,7 @@ static __used__ void PooCode(GameObject_s *object) {
                 NuVecNorm(&direction, &velocity);
                 f32 random = (f32)qrand() * (1.0f / 65536.0f);
                 i32 count = random < 0.2f ? 1000 : random < 0.8f ? 100 : 10;
-                AddPickups(count, 0, 0, 0, &position, &direction, 1.0f, -1, 2000000.0f, 0.0f,
-                           object, 0, 0, true);
+                AddPickups(count, 0, 0, 0, &position, &direction, 1.0f, -1, 2000000.0f, 0.0f, object, 0, 0, true);
             }
             if (Cheat_IsOn(1)) {
                 ADDPART_ALIGNED16 params = Default_ADDPART;
@@ -10504,10 +10503,22 @@ static __used__ void PooCode(GameObject_s *object) {
                 i32 angle_x = qrand();
                 f32 sinx = NU_SIN_LUT(angle_x);
                 f32 cosx = NU_COS_LUT(angle_x);
-                matrix.m00 = 1.0f; matrix.m01 = 0.0f; matrix.m02 = 0.0f; matrix.m03 = 0.0f;
-                matrix.m10 = 0.0f; matrix.m11 = cosx; matrix.m12 = sinx; matrix.m13 = 0.0f;
-                matrix.m20 = 0.0f; matrix.m21 = -sinx; matrix.m22 = cosx; matrix.m23 = 0.0f;
-                matrix.m30 = 0.0f; matrix.m31 = 0.0f; matrix.m32 = 0.0f; matrix.m33 = 1.0f;
+                matrix.m00 = 1.0f;
+                matrix.m01 = 0.0f;
+                matrix.m02 = 0.0f;
+                matrix.m03 = 0.0f;
+                matrix.m10 = 0.0f;
+                matrix.m11 = cosx;
+                matrix.m12 = sinx;
+                matrix.m13 = 0.0f;
+                matrix.m20 = 0.0f;
+                matrix.m21 = -sinx;
+                matrix.m22 = cosx;
+                matrix.m23 = 0.0f;
+                matrix.m30 = 0.0f;
+                matrix.m31 = 0.0f;
+                matrix.m32 = 0.0f;
+                matrix.m33 = 1.0f;
 
                 i32 angle_y = qrand();
                 f32 siny = NU_SIN_LUT(angle_y);
@@ -10525,7 +10536,10 @@ static __used__ void PooCode(GameObject_s *object) {
                 i32 angle_z = qrand();
                 f32 sinz = NU_SIN_LUT(angle_z);
                 f32 cosz = NU_COS_LUT(angle_z);
-                m00 = matrix.m00; m10 = matrix.m10; m20 = matrix.m20; m30 = matrix.m30;
+                m00 = matrix.m00;
+                m10 = matrix.m10;
+                m20 = matrix.m20;
+                m30 = matrix.m30;
                 matrix.m00 = m00 * cosz - matrix.m01 * sinz;
                 matrix.m01 = m00 * sinz + matrix.m01 * cosz;
                 matrix.m10 = m10 * cosz - matrix.m11 * sinz;
@@ -10560,8 +10574,7 @@ static __used__ void PooCode(GameObject_s *object) {
     } else if ((object->pad_gamepad->buttons_pressed & GAMEPAD_SPECIAL) != 0 &&
                static_cast<i8>(object->apiobj.character_data->game_character->flags_094[3]) < 0 &&
                static_cast<i8>(object->apiobj.flags_low) < 0 && object->character_context == -1 &&
-               object->apiobj.field_0x27d != 0 &&
-               (Cheat[1].enabled != 0 || Cheat[9].enabled != 0)) {
+               object->apiobj.field_0x27d != 0 && (Cheat[1].enabled != 0 || Cheat[9].enabled != 0)) {
         object->character_context = 0x37;
         object->context_animation = 1;
         object->context_animation_timer = 0.0f;
