@@ -31,6 +31,13 @@ The target also reloads `player` after the second `NuFsqrt` and after
 across the calls instead of carrying the first object pointer throughout
 `Update`.
 
+The target places a shared `UpdateButtons()` epilogue immediately after the
+first drag-length dead-zone test, before the activation guard's cold blocks
+and the full steering math. Expressing null-touch and dead-zone paths as
+early returns helps GCC place that block there. Nesting all steering math in
+one positive `if` moves the epilogue to the far end of the function and
+changes the block alignment even when the instruction count is similar.
+
 The `MechSystems` field read at `0x271c` during `Update` is not named in the
 current type map. The source accesses it by offset pending type recovery.
 
