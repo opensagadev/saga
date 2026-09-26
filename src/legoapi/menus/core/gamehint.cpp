@@ -811,8 +811,80 @@ static __used__ void GameMsg_EndDelay_Game(GAMEMESSAGE_s *message) {
     }
 }
 
-static __used__ void GameMsg_Draw_MiniKitDetector(GAMEMESSAGE_s *, nuvec_s *, float) {
-    STUBBED();
+extern char *LEGOASCII_UP, *LEGOASCII_DOWN;
+extern i32 LEGOOBJ_ICON_FRAME_NEUTRAL;
+extern f32 ICONSIZE;
+void GameMsg_Draw_MiniKitDetector(GAMEMESSAGE_s *, nuvec_s *, float)
+    __asm__("_ZL28GameMsg_Draw_MiniKitDetectorP13GAMEMESSAGE_sP7nuvec_sf")
+        __attribute__((visibility("hidden"), force_align_arg_pointer));
+void GameMsg_Draw_MiniKitDetector(GAMEMESSAGE_s *message, nuvec_s *position, float scale) {
+    NUVEC screen = *position;
+    if (message->field_0xfb != 0)
+        NuVecNeg(&screen, &screen);
+
+    bool clipped = false;
+    f32 excess = 1.0e9f;
+    if (screen.x >= 0.825f) {
+        excess = screen.x - 0.825f;
+        screen.x = 0.825f;
+        NuStrCpy(message->text_buffer, ">");
+        clipped = true;
+    } else if (screen.x <= -0.825f) {
+        excess = -0.825f - screen.x;
+        screen.x = -0.825f;
+        NuStrCpy(message->text_buffer, "<");
+        clipped = true;
+    }
+    if (screen.y >= 0.825f) {
+        if (!clipped || screen.y - 0.825f > excess)
+            NuStrCpy(message->text_buffer, LEGOASCII_UP != NULL ? LEGOASCII_UP : "?");
+        screen.y = 0.825f;
+        clipped = true;
+    } else if (screen.y <= -0.825f) {
+        if (!clipped || -0.825f - screen.y > excess)
+            NuStrCpy(message->text_buffer, LEGOASCII_DOWN != NULL ? LEGOASCII_DOWN : "?");
+        screen.y = -0.825f;
+        clipped = true;
+    }
+
+    const f32 distance = NuVecDist(&message->position, &GameCam->pos, NULL) /
+                         static_cast<u8>(WorldInfo_CurrentlyActive()->current_level->camera_judder_distance);
+    i32 alpha = 64;
+    if (distance < 0.25f)
+        alpha = 128;
+    else if (distance < 0.75f)
+        alpha = static_cast<i32>((1.0f - 2.0f * (distance - 0.25f)) * 64.0f + 64.0f);
+
+    if (clipped) {
+        message->red = 0xff;
+        message->green = message->field_0xfb == 1 ? 0 : 0xff;
+        message->blue = message->green;
+        message->field_0xfc = 0;
+    } else {
+        message->red = 0;
+        message->green = 0xff;
+        message->blue = 0;
+        message->field_0xfc = 4;
+    }
+    message->alpha = static_cast<u8>(alpha);
+
+    if (message->icon != static_cast<u16>(-1)) {
+        LEVEL_OBJECT_RUNTIME *icon = &WorldInfo_CurrentlyActive()->lev_objs[message->icon];
+        if (icon->active != 0) {
+            f32 opacity = 1.0f;
+            if ((message->flags & 1) != 0)
+                opacity = static_cast<f32>(message->alpha) * (1.0f / 128.0f);
+            DrawPanel3DObject(screen.x, screen.y, screen.z, scale, scale, scale, 0, 0, 0, &icon->special, 2, opacity);
+        }
+        return;
+    }
+    if (message->field_0xe4 != 0) {
+        DrawCharIcon(message->field_0xe4, screen.x, screen.y, 0.0f, ICONSIZE, LEGOOBJ_ICON_FRAME_NEUTRAL, 1.0f,
+                     1.0f, 1, NULL);
+        return;
+    }
+    Text3DEx(message->text != NULL ? message->text : message->text_buffer, screen.x, screen.y, screen.z, scale,
+             scale, scale, clipped ? 0 : 4, message->red, message->green, message->blue, message->alpha);
 }
 
 pushblock_s *NearestPushBlock(WORLDINFO_s *, nuvec_s *, f32);
