@@ -42,3 +42,25 @@ two in `PodRaceUpdate`. The current source only calls it from
 `Action_CreatePod`, so GCC also propagates the action's fixed blend value and
 omits the blend register from the clone call. The target passes blend in
 `xmm0`. Reconstruct the other call sites before tuning this clone's ABI.
+
+## Remaining spline scan and frame mismatch
+
+The current 64.45% build reserves `0xa0` stack bytes after alignment; the
+target reserves `0x90`. All three 16-byte vector locals are consequently
+addressed 16 bytes higher in the rebuild: for example, the first two
+`CalcSplinePointFromDist` output buffers use `esp+0x70` and `esp+0x80`
+instead of target `esp+0x60` and `esp+0x70`. The direction buffer likewise
+uses `esp+0x90` instead of `esp+0x80`. Retain aligned locals while reducing
+the scalar/live-range footprint that precedes them; removing alignment would
+lose the target prologue entirely.
+
+The target spline-ID scan at `0x1fef17–0x1fef43` advances an ID-field pointer
+by `0x52c` while counting indices in `ecx`, then multiplies the final index
+by `0x52c` to form the selected spline pointer. The current source carries a
+`flightspline_s *spline` through the loop and the rebuild at the corresponding
+site advances that pointer directly. A distinct, untested source probe is
+to scan with an integer index into the `PodRace` data, then form `spline`
+after the loop. Preserve the 32-entry limit and target null check when
+reconstructing that scan. This pointer lifetime difference also changes
+`esi`/`eax`/`ecx` allocation throughout the following unrolled pod-slot
+search.
