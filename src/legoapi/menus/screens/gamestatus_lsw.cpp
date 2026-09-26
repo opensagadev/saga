@@ -1016,8 +1016,6 @@ i32 UpdateAchievements(STATUSPACKET_s *) {
 }
 
 void DrawStatusScreen(WORLDINFO_s *) {
-    static u8 KitPart[0x2d0];
-
     iconalphaoverride = -1.0f;
     memset(KitPart, 0, sizeof(KitPart));
 
