@@ -87,6 +87,9 @@ The unsuffixed `1.4` matters: the unsaturated path converts the float strength
 to double, multiplies by a double constant, then converts back to float. A
 `1.4f` literal removes that target instruction sequence. The target evaluates
 cosine for Y before sine for X, then stores X and Y in that order.
+It loads/subtracts the Y displacement before X, but computes the squared
+distance as `dx * dx + dy * dy`; reversing those operands changes the SSE
+addition and register schedule even though the arithmetic is equivalent.
 
 The virtual controller destructor explicitly deletes the four UI buttons and
 the D-pad in that order before calling its main-controller base destructor.
