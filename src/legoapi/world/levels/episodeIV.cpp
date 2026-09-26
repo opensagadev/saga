@@ -1,4 +1,5 @@
 #include <string.h>
+#include <stdio.h>
 
 #include "decomp.h"
 #include "globals.h"
@@ -24,6 +25,7 @@
 #include "legoapi/render/fx/parts.h"
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nu3d/nutex.h"
+#include "nu2api/nucore/nuanim3.h"
 #include "nu2api/numath/numtx.h"
 
 struct AIROW_s;
@@ -34,8 +36,10 @@ struct SHOPINPUT;
 extern "C" void *AIPAthFindPathCnx(AISYS_s *, AIPATH_s *, char *, char *, i32 *);
 extern "C" AIPATHNODE_s *AIPathFindNode(AISYS_s *, AIPATH_s *, char *);
 extern "C" void AIPathNodeUpdatePos(AISYS_s *, AIPATH_s *, AIPATHNODE_s *);
+extern "C" i32 GetSfxId(const char *);
 i32 GizBlowup_InitSingleTerrain(GIZMOBLOWUP_s *);
 i32 ObjInNarrowSock(GameObject_s *, SOCKSYS *, i32);
+NUGSPLINE *edSpline_SplineFind(NUGSCN *, char *);
 extern "C" {
     extern i16 id_STORMTROOPER;
     extern i16 id_BEACHTROOPER;
@@ -52,6 +56,7 @@ static_assert(sizeof(BLOCKADERUNNERD_LEVFLAG_s) == 0x10, "LevFlag size");
 extern BLOCKADERUNNERD_LEVFLAG_s LevFlag;
 i32 test_tb = 1;
 void *deathstarescapeb_netpacket;
+u8 tatooineA_nodesNeedUpdating = 1;
 
 // Episode 4 level handlers, in the game's Episode_IV progression:
 // blockade runner / tatooine / mos eisley / death star rescue / escape /
@@ -223,8 +228,37 @@ void BlockadeRunnerD_Reset(WORLDINFO_s *world) {
 // Tatooine (Tatooine_A / B / C / D)
 // ===========================================================================
 
-void TatooineA_Init(WORLDINFO_s *) {
-    STUBBED();
+void TatooineA_Init(WORLDINFO_s *world) {
+    NUGSPLINE *spline = edSpline_SplineFind(world->current_gscn, "teleport_01");
+    if (spline != NULL)
+        spline->pts[0].x += 0.3f;
+
+    GIZMOBLOWUP_s *blowup = GizmoBlowUp_FindByName(world, "thermaldet_011");
+    if (blowup != NULL)
+        blowup->draw_flags |= 2;
+    blowup = GizmoBlowUp_FindByName(world, "thermaldet_021");
+    if (blowup != NULL)
+        blowup->draw_flags |= 2;
+    blowup = GizmoBlowUp_FindByName(world, "bhblock_011");
+    if (blowup != NULL)
+        blowup->draw_flags |= 2;
+    blowup = GizmoBlowUp_FindByName(world, "bhblock_021");
+    if (blowup != NULL)
+        blowup->draw_flags |= 2;
+
+    LevGizForce[0] = GizForce_FindByName(world->giz_force_sys, "force13");
+    LevGizForce[1] = GizForce_FindByName(world->giz_force_sys, "force14");
+    LevGizForce[2] = GizForce_FindByName(world->giz_force_sys, "force15");
+    LevAIPathNode[0] = AIPathFindNode(world->ai_sys, NULL, "force1_b");
+
+    i32 direction;
+    LevPathCnx[0] = AIPAthFindPathCnx(world->ai_sys, NULL, "force1_b", "force1_a", &direction);
+    LevPathCnx[1] = AIPAthFindPathCnx(world->ai_sys, NULL, "force1_b", "force1_c", &direction);
+
+    GIZFORCE_s *force = GizForce_FindByName(world->giz_force_sys, "force16");
+    if (force != NULL)
+        force->field_0xaa |= 0x80;
+    tatooineA_nodesNeedUpdating = 1;
 }
 
 void TatooineB_Init(WORLDINFO_s *world) {
@@ -271,8 +305,66 @@ void TatooineD_Init(WORLDINFO_s *world) {
         LevPathCnxDir |= 2;
 }
 
-void TatooineA_Update(WORLDINFO_s *) {
-    STUBBED();
+void TatooineA_Update(WORLDINFO_s *world) {
+    GIZFORCE_s **forces = LevGizForce;
+    GIZFORCE_s *first = forces[0];
+    if (first == NULL)
+        return;
+    GIZFORCE_s *second = forces[1];
+    if (second == NULL)
+        return;
+    GIZFORCE_s *third = forces[2];
+    if (third == NULL)
+        return;
+
+    GIZFORCEGROUP_s *group = first->group;
+    if (__builtin_expect(group != NULL && (group->field_0x24 & 2) != 0, 0)) {
+        if (tatooineA_nodesNeedUpdating != 0)
+            return;
+        tatooineA_nodesNeedUpdating = 1;
+        AIPATHCNX_s *connection = static_cast<AIPATHCNX_s *>(LevPathCnx[0]);
+        if (connection != NULL) {
+            connection->traversal_flags[0] &= ~0x80000000;
+            connection->traversal_flags[1] &= ~0x80000000;
+        }
+        connection = static_cast<AIPATHCNX_s *>(LevPathCnx[1]);
+        if (connection != NULL) {
+            connection->traversal_flags[0] &= ~0x80000000;
+            connection->traversal_flags[1] &= ~0x80000000;
+        }
+
+        AIPATHNODE_s *node = static_cast<AIPATHNODE_s *>(LevAIPathNode[0]);
+        if (node == NULL)
+            return;
+        GIZFORCE_s *selected = group->forces[2];
+        if (selected == first) {
+            node->position.x = -16.44f;
+            node->position.z = -0.16f;
+        } else if (selected == second) {
+            node->position.x = -16.58f;
+            node->position.z = -0.21f;
+        } else if (selected == third) {
+            node->position.x = -16.71f;
+            node->position.z = -0.25f;
+        }
+        if (world->ai_sys->path_sys != NULL && world->ai_sys->path_sys->active_path != NULL)
+            AIPathNodeUpdatePos(world->ai_sys, world->ai_sys->path_sys->active_path, node);
+        return;
+    }
+
+    if (tatooineA_nodesNeedUpdating == 0)
+        return;
+    tatooineA_nodesNeedUpdating = 0;
+    AIPATHCNX_s *connection = static_cast<AIPATHCNX_s *>(LevPathCnx[0]);
+    if (connection != NULL) {
+        connection->traversal_flags[0] |= 0x80000000;
+        connection->traversal_flags[1] |= 0x80000000;
+    }
+    connection = static_cast<AIPATHCNX_s *>(LevPathCnx[1]);
+    if (connection != NULL) {
+        connection->traversal_flags[0] |= 0x80000000;
+        connection->traversal_flags[1] |= 0x80000000;
+    }
 }
 
 void TatooineD_Update(WORLDINFO_s *world) {
@@ -302,8 +394,39 @@ void TatooineD_Update(WORLDINFO_s *world) {
 // Mos Eisley (MosEisley_A / B / D / E)
 // ===========================================================================
 
-void MosEisleyA_Init(WORLDINFO_s *) {
-    STUBBED();
+void MosEisleyA_Init(WORLDINFO_s *world) {
+    char name[32];
+    for (i32 i = 1; i <= 5; ++i) {
+        sprintf(name, "big_bin_lid_gr%d", i);
+        GIZMOBLOWUP_s *blowup = GizmoBlowUp_FindByName(world, name);
+        if (blowup != NULL)
+            blowup->field_0x124 = 1;
+    }
+    for (i32 i = 1; i <= 8; ++i) {
+        sprintf(name, "big_bin_lid%d", i);
+        GIZMOBLOWUP_s *blowup = GizmoBlowUp_FindByName(world, name);
+        if (blowup != NULL)
+            blowup->field_0x124 = 1;
+    }
+
+    GIZMOBLOWUP_s *blowup = GizmoBlowUp_FindByName(world, "evap_091");
+    if (blowup != NULL) {
+        blowup->field_0x128 = 0.5f;
+        blowup->field_0x124 = 1;
+    }
+    blowup = GizmoBlowUp_FindByName(world, "evap_061");
+    if (blowup != NULL) {
+        blowup->field_0x128 = 0.5f;
+        blowup->field_0x124 = 1;
+        blowup->draw_flags |= 2;
+    }
+
+    GIZFORCE_s *force = GizForce_FindByName(world->giz_force_sys, "force1");
+    if (force != NULL)
+        force->strength_0x6c = 0.75f;
+    force = GizForce_FindByName(world->giz_force_sys, "obstacle1");
+    if (force != NULL)
+        force->strength_0x6c = 0.75f;
 }
 
 void MosEisleyB_Init(WORLDINFO_s *) {
@@ -349,12 +472,68 @@ i32 MosEisleyC_PastBarrier(GameObject_s *object) {
 // Death Star rescue (DeathStarRescue_B / C)
 // ===========================================================================
 
-void DeathStarRescueB_Init(WORLDINFO_s *) {
-    STUBBED();
+void DeathStarRescueB_Init(WORLDINFO_s *world) {
+    NuSpecialFind(world->current_gscn, &LevHSpecial[0], "reactor_1", 1);
+    NuSpecialFind(world->current_gscn, &LevHSpecial[1], "reactor_2", 1);
+    NuSpecialFind(world->current_gscn, &LevHSpecial[2], "reactor_3", 1);
+    NuSpecialFind(world->current_gscn, &LevHSpecial[3], "reactor_4", 1);
+    NuSpecialFind(world->current_gscn, &LevHSpecial[4], "reactor_5", 1);
+    NuSpecialFind(world->current_gscn, &LevHSpecial[5], "reactor_6", 1);
+
+    volatile u8 *flags = reinterpret_cast<volatile u8 *>(&LevFlag);
+    flags[5] = 0;
+    flags[4] = 0;
+    flags[3] = 0;
+    flags[2] = 0;
+    flags[1] = 0;
+    flags[0] = 0;
+
+    LevSfxId[0] = GetSfxId("env_tractorbeam_lp");
+    LevSfxId[1] = GetSfxId("env_tractorbeam_off");
+
+    GIZMOBLOWUP_s *blowup = GizmoBlowUp_FindByName(world, "dummy_exp2");
+    if (blowup != NULL) {
+        blowup->field_0x128 = 0.2f;
+        blowup->field_0x124 = 1;
+    }
+    blowup = GizmoBlowUp_FindByName(world, "blowup_block_1");
+    if (blowup != NULL)
+        blowup->draw_flags |= 0x10000;
+    blowup = GizmoBlowUp_FindByName(world, "blowup_block_2");
+    if (blowup != NULL)
+        blowup->draw_flags |= 0x10000;
+    blowup = GizmoBlowUp_FindByName(world, "blowup_block_3");
+    if (blowup != NULL)
+        blowup->draw_flags |= 0x10000;
+    blowup = GizmoBlowUp_FindByName(world, "blowup_block_4");
+    if (blowup != NULL)
+        blowup->draw_flags |= 0x10000;
+    blowup = GizmoBlowUp_FindByName(world, "blowup_block_5");
+    if (blowup != NULL)
+        blowup->draw_flags |= 0x10000;
+    blowup = GizmoBlowUp_FindByName(world, "blowup_block_6");
+    if (blowup != NULL)
+        blowup->draw_flags |= 0x10000;
 }
 
-void DeathStarRescueC_Init(WORLDINFO_s *) {
-    STUBBED();
+void DeathStarRescueC_Init(WORLDINFO_s *world) {
+#define SETUP_RESCUE_PANEL(name)                                          \
+    do {                                                                  \
+        GIZMOBLOWUP_s *panel = GizmoBlowUp_FindByName(world, name);       \
+        if (panel != NULL) {                                              \
+            panel->field_0x128 = 0.3f;                                   \
+            panel->field_0x124 = 1;                                      \
+        }                                                                 \
+    } while (0)
+    SETUP_RESCUE_PANEL("panel_11");
+    SETUP_RESCUE_PANEL("panel_21");
+    SETUP_RESCUE_PANEL("panel_31");
+    SETUP_RESCUE_PANEL("panel_41");
+    SETUP_RESCUE_PANEL("panel_51");
+    SETUP_RESCUE_PANEL("panel_61");
+    SETUP_RESCUE_PANEL("panel_71");
+    SETUP_RESCUE_PANEL("panel_81");
+#undef SETUP_RESCUE_PANEL
 }
 
 void DeathStarRescueB_Update(WORLDINFO_s *) {
@@ -433,8 +612,26 @@ void DeathStarEscapeA_Init(WORLDINFO_s *world) {
         obstacle->field_a1_0xa1 |= 1;
 }
 
-void DeathStarEscapeB_Init(WORLDINFO_s *) {
-    STUBBED();
+void DeathStarEscapeB_Init(WORLDINFO_s *world) {
+    deathstarescapeb_netpacket = SetLevelHack(4);
+    LevAIMessage[0] = CheckGizAIMessage(gizaimessagesys, "WindowClean", NULL);
+    NuSpecialFind(world->current_gscn, &LevHSpecial[0], "lift_up", 1);
+    NuSpecialFind(world->current_gscn, &LevHSpecial[1], "lift_down", 1);
+    NuSpecialFind(world->current_gscn, &LevHSpecial[2], "sponge", 1);
+
+    fakeanimendframe[0] = 0.0f;
+    nuinstanim_s *animation = NuSpecialGetInstAnim(&LevHSpecial[0]);
+    if (animation != NULL) {
+        nuanimdata_s *data = LevHSpecial[0].scene->instance_animation_data[animation->anim_ix];
+        if (data != NULL)
+            fakeanimendframe[0] += NuAnimEndFrameOld(data);
+    }
+    animation = NuSpecialGetInstAnim(&LevHSpecial[1]);
+    if (animation != NULL) {
+        nuanimdata_s *data = LevHSpecial[1].scene->instance_animation_data[animation->anim_ix];
+        if (data != NULL)
+            fakeanimendframe[0] += NuAnimEndFrameOld(data);
+    }
 }
 
 __attribute__((force_align_arg_pointer)) void DeathStarEscapeB_Draw(WORLDINFO_s *) {
@@ -469,8 +666,32 @@ void DeathStarEscapeA_Update(WORLDINFO_s *) {
     }
 }
 
-void DeathStarEscapeB_Update(WORLDINFO_s *) {
-    STUBBED();
+__attribute__((force_align_arg_pointer)) void DeathStarEscapeB_Update(WORLDINFO_s *world) {
+    nuanimdata_s *volatile data0 = NULL;
+    nuanimdata_s *volatile data1 = NULL;
+    if (netclient == 0)
+        *static_cast<u8 *>(deathstarescapeb_netpacket) = static_cast<u8>(static_cast<i32>(LevAIMessage[0]->value));
+
+    if (LevGameObject[0] == NULL && *static_cast<u8 *>(deathstarescapeb_netpacket) == 0)
+        LevGameObject[0] = GetNamedGameObject(world->ai_sys, "WASHER_1");
+    if (LevGameObject[1] == NULL && *static_cast<u8 *>(deathstarescapeb_netpacket) == 0)
+        LevGameObject[1] = GetNamedGameObject(world->ai_sys, "WASHER_2");
+    nuinstanim_s *animation0 = NuSpecialGetInstAnim(&LevHSpecial[0]);
+    if (animation0 != NULL)
+        data0 = LevHSpecial[0].scene->instance_animation_data[animation0->anim_ix];
+    nuinstanim_s *animation1 = NuSpecialGetInstAnim(&LevHSpecial[1]);
+    if (animation1 != NULL)
+        data1 = LevHSpecial[1].scene->instance_animation_data[animation1->anim_ix];
+    if (data0 == NULL || data1 == NULL)
+        return;
+
+    if (NuSpecialGetVisibilityFn(&LevHSpecial[0])) {
+        fakeanimframe[0] = animation0->ltime;
+    } else if (NuSpecialGetVisibilityFn(&LevHSpecial[1])) {
+        fakeanimframe[0] = NuAnimEndFrameOld(data0) + animation1->ltime;
+    } else {
+        fakeanimframe[0] = 0.0f;
+    }
 }
 
 void DeathStarEscapeC_Update(WORLDINFO_s *) {

@@ -40,3 +40,41 @@ the target's main block order. An early-return version with a small loop over
 the two players scored 11.062%; explicit first- and second-player checks score
 92.113%. The target obtains the player array through one GOT load and handles
 the second player's torpedo bit as an integer `0` or `1` return.
+
+## Further Episode IV handlers
+
+| Handler | Match | Target bytes | Current bytes |
+| --- | ---: | ---: | ---: |
+| `MosEisleyA_Init` | 99.850% | 762 | 762 |
+| `TatooineA_Init` | 96.800% | 477 | 477 |
+| `TatooineA_Update` | 97.883% | 344 | 338 |
+| `DeathStarRescueB_Init` | 99.468% | 566 | 566 |
+| `DeathStarRescueC_Init` | 99.459% | 340 | 340 |
+| `DeathStarEscapeB_Init` | 99.762% | 336 | 336 |
+| `DeathStarEscapeB_Update` | 97.008% | 438 | 438 |
+
+The two constant-bound loops in `MosEisleyA_Init` (five lid groups and eight
+lids) unroll completely at `-O3`. Their repeated `sprintf`/find/write blocks
+and the single reused 32-byte name buffer reproduce the target's 762-byte
+function; the remaining differences are string addresses.
+
+`TatooineA_Update` initially scored 19% with its active branch inline. The
+target tests the group-active bit and jumps to the active branch after the
+main return, leaving the inactive branch inline. Writing the active case as a
+positive `if (__builtin_expect(condition, 0))` and checking the three force
+pointers sequentially gave 97.883%. The state byte is set to **1** on
+activation and cleared to **0** on deactivation. Reversing this state update
+still looked plausible in source but contradicted the target disassembly.
+
+`DeathStarEscapeB_Update` has the same aligned `ebp` frame pattern as its draw
+partner. `force_align_arg_pointer` repaired its prologue. The target zeroes
+two local animation-data pointers before checking the network state; volatile
+local pointer slots preserve those initial stores. It continues to animation
+handling after attempted object lookups even if a lookup returns null. An
+extra source guard after the lookups added instructions and reduced the match;
+removing it helped reach 97.008% at the exact 438-byte size.
+
+For `DeathStarRescueB_Init`, the target has six `blowup_block_N` lookups.
+Missing the sixth produced a 534-byte function and 93.833%; restoring it
+reached the exact 566-byte size and 99.468%. Check the entire target tail when
+a repeated string sequence seems to end at a round count.
