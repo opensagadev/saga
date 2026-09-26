@@ -365,6 +365,16 @@ verified: `g++ -O0/-O3 -c call.cpp; objdump -d`
 - **cmov/setcc hygiene at -O3:** `xor %eax,%eax` before `setcc %al` when the value is otherwise untouched (partial-register avoidance); `movzbl` used when the setcc result is combined with other values.
 verified: `g++ -O0/-O3 -c misc.cpp; objdump -d`
 
+- In `getNumDigits`, an unlikely one-digit branch plus an empty `+d`
+  handoff for the threshold (clobbering `eax`) retains the target's two
+  separate return blocks and schedules `mov edx, 10` before `mov eax, 1`.
+  Either change alone leaves those instructions merged or reversed.
+  The GOT-aware function match rose from 28% for the placeholder to 100%.
+- A `u16` narrowing before shifting right eight bits in
+  `UnpackCharFromInt` becomes `movzx ecx, ah` on this compiler. Shifting
+  the full `u32` instead emits `mov ecx, eax; shr ecx, 8` and missed the
+  original two-byte instruction. The narrowed spelling matches 100%.
+
 ## Cross-checks against real project artifacts
 
 - Build the current shared object with

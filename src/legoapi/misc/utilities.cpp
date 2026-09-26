@@ -90,16 +90,33 @@ void FindAnglesZX(nuvec_s *normal, u16 *x_rotation, u16 *z_rotation) {
     temp_zrot = static_cast<i16>(z_angle);
 }
 
-void getNumDigits(i32) {
-    STUBBED();
+i32 getNumDigits(i32 value) {
+    if (__builtin_expect(value <= 9, 0))
+        return 1;
+    i32 threshold = 10;
+    asm volatile("" : "+d"(threshold) : : "eax");
+    i32 digits = 1;
+    do {
+        threshold *= 10;
+        ++digits;
+    } while (value >= threshold);
+    return digits;
 }
 
 void LineCrossedXZ(float, float, float, float, float, float, float, float) {
     STUBBED();
 }
 
-void ScaleAndClamp(i32) {
-    STUBBED();
+__attribute__((optimize("no-omit-frame-pointer"))) i32 ScaleAndClamp(volatile i32 value) {
+    i32 scaled = value << 7;
+    asm volatile("" : "+r"(scaled));
+    scaled += scaled << 5;
+    value = scaled / 1048576;
+    if (value < -128)
+        value = -128;
+    if (value > 127)
+        value = 127;
+    return value + 128;
 }
 
 void VecRotateAxis(nuvec_s *vector, u16 angle, nuvec_s *axis) {
@@ -313,8 +330,9 @@ i32 OnOrInsidePlane(nuvec_s *point, nuvec_s *plane_point, nuvec_s *plane_normal,
     return 1;
 }
 
-void PackCharIntoInt(char, char, char, char) {
-    STUBBED();
+i32 PackCharIntoInt(char a, char b, char c, char d) {
+    return (static_cast<i32>(a) << 24) | ((static_cast<i32>(b) << 16) & 0xff0000) |
+           ((static_cast<i32>(c) << 8) & 0xffff) | static_cast<u8>(d);
 }
 
 f32 DistanceToLineXZ(NUVEC *position, NUVEC *first, NUVEC *second) {
@@ -361,8 +379,11 @@ i32 MatrixReflection(numtx_s *matrix, i32 axis, f32 plane, f32 override_plane, n
     }
 }
 
-void OnOrOutsidePlane(nuvec_s *, nuvec_s *, nuvec_s *) {
-    STUBBED();
+i32 OnOrOutsidePlane(nuvec_s *point, nuvec_s *plane_point, nuvec_s *normal) {
+    f32 distance = (point->x - plane_point->x) * normal->x +
+                   (point->y - plane_point->y) * normal->y +
+                   (point->z - plane_point->z) * normal->z;
+    return distance >= 0.0f;
 }
 
 i32 PackShortIntoInt(i16 high, i16 low) {
@@ -385,16 +406,20 @@ void GetRotationAngles(nuvec_s *, u16 *, u16 *) {
     STUBBED();
 }
 
-void UnpackCharFromInt(i32, char &, char &, char &, char &) {
-    STUBBED();
+void UnpackCharFromInt(i32 value, char &a, char &b, char &c, char &d) {
+    a = static_cast<u32>(value) >> 26;
+    b = static_cast<u32>(value) >> 16;
+    c = static_cast<u16>(value) >> 8;
+    d = value;
 }
 
 void RatioBetweenPlanes(nuvec_s *, nuvec_s *, nuvec_s *, nuvec_s *, nuvec_s *) {
     STUBBED();
 }
 
-void UnpackShortFromInt(i32, i16 &, i16 &) {
-    STUBBED();
+void UnpackShortFromInt(i32 value, i16 &high, i16 &low) {
+    high = static_cast<u32>(value) >> 16;
+    low = value;
 }
 
 void AnglesBetweenPoints(nuvec_s *, nuvec_s *, u16 *, u16 *) {
@@ -591,8 +616,8 @@ void XToI(char *) {
     STUBBED();
 }
 
-void IsTok(char const *, char const *) {
-    STUBBED();
+i32 IsTok(char const *text, char const *token) {
+    return text[0] == token[0] && text[1] == token[1] && text[2] == token[2] && text[3] == token[3];
 }
 
 void CapVec(nuvec_s *, float, nuvec_s *) {
@@ -644,12 +669,14 @@ static __used__ i32 MatchExtension(char *, char *, i32) {
     return 0;
 }
 
-static __used__ int icomp(const void *, const void *) {
-    STUBBED();
-    return 0;
+static __used__ int icomp(const void *left, const void *right) {
+    const i32 *left_value = *static_cast<const i32 *const *>(left);
+    const i32 *right_value = *static_cast<const i32 *const *>(right);
+    return *left_value - *right_value;
 }
 
-static __used__ i32 sort32a(void const *, void const *) {
-    STUBBED();
-    return 0;
+static __used__ i32 sort32a(void const *left, void const *right) {
+    const u32 *left_value = *static_cast<const u32 *const *>(left);
+    const u32 *right_value = *static_cast<const u32 *const *>(right);
+    return (*left_value > *right_value) - (*left_value < *right_value);
 }

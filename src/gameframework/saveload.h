@@ -58,7 +58,7 @@ extern "C" {
     void saveloadASDelete(i32 slot);
     void saveloadASCallEachFrame(void);
     void saveloadASFormat(void);
-    void saveloadAutoSave(void);
+    i32 saveloadAutoSave(void *buffer, i32 size, u32 hash);
     i32 saveloadCheckCardFormatted(void);
     i32 saveloadCheckCardFreeSpace(i32 slot);
     i32 saveloadCheckCardPresent(void);

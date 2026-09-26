@@ -38,6 +38,9 @@ Native and WASM builds define `HOST_BUILD` and use the host harness.
 | [13-post-processing-audit.md](13-post-processing-audit.md) | directional-light intensity, retained Android post-effects, and runtime limitations |
 | [14-save-format-audit.md](14-save-format-audit.md) | save layout, serialized enums, original-binary evidence, and unresolved fields |
 | [15-translation-unit-reconstruction.md](15-translation-unit-reconstruction.md) | evidence and staged plan for original TU ownership and optimization |
+| [18-gameaiprocess-codegen-notes.md](18-gameaiprocess-codegen-notes.md) | measured GCC 4.7 control-flow and register-allocation experiments in `GameAIProcess` |
+| [19-apimenu-stub-codegen-notes.md](19-apimenu-stub-codegen-notes.md) | API menu callback reconstruction and match results |
+| [19-nusound-stub-audit.md](19-nusound-stub-audit.md) | verified sound no-ops and OGG callback codegen findings |
 
 ## Non-negotiable matching facts
 
