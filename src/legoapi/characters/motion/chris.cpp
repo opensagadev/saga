@@ -22,7 +22,9 @@ extern f32 BOLT_OVERRIDE_PLAYERBOLTSPEED;
 extern f32 BOLT_OVERRIDE_PLAYERBOLTDURATION;
 struct quickboltinfo;
 
-static void ResetSpaceLevel(WORLDINFO_s *world, spacelevel_s *space) {
+void ResetSpaceLevel(WORLDINFO_s *, spacelevel_s *) __asm__("_ZL15ResetSpaceLevelP11WORLDINFO_sP12spacelevel_s")
+    __attribute__((visibility("hidden"), regparm(2)));
+void ResetSpaceLevel(WORLDINFO_s *world, spacelevel_s *space) {
     i32 door_index;
     space->unknown_62eb8 = 0;
     space->player_origin = {-1456.9f, 326.5f, -394.0f};
