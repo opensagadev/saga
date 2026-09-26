@@ -162,6 +162,8 @@ extern "C" {
                               NUJOINTANIM_s *overrides, NUMTX *matrices, NUHGOBJROOTFN root_fn, void *root_data);
     void NuHGobjEvalAnim2Root_3(nuhgobj_s *object, ani3_animheader_s *animation, f32 time, i32 override_count,
                                 NUJOINTANIM_s *overrides, NUMTX *matrices, NUHGOBJROOTFN root_fn, void *root_data);
+    void NuHGobjEvalAnimBlend(nuhgobj_s *object, void *animation_a, f32 frame_a, void *animation_b, f32 frame_b,
+                              f32 blend, i32 override_count, NUJOINTANIM_s *overrides, NUMTX *matrices);
     void NuHGobjEvalAnimBlend2(nuhgobj_s *object, ani3_animheader_s *animation_a, f32 time_a,
                                ani3_animheader_s *animation_b, f32 time_b, f32 blend, i32 override_count,
                                NUJOINTANIM_s *overrides, NUMTX *matrices);

@@ -3399,8 +3399,64 @@ extern "C" {
         NuAnimBuffEvaluate_3(&buffer, object, matrices, animation, root_fn, &root_translation, root_data);
         NuAnimBuffDestroyScratch(&buffer);
     }
-    void NuHGobjEvalAnimBlend(void) {
-        STUBBED();
+    struct NuLegacyDwaChunk {
+        i32 node_count;
+        i32 reserved_04;
+        nuanimcurveset_s **curve_sets;
+    };
+    static inline NuLegacyDwaChunk *NuLegacyDwaGetChunk(void *animation, i32 index) {
+        NuLegacyDwaChunk **chunks = *reinterpret_cast<NuLegacyDwaChunk ***>(static_cast<u8 *>(animation) + 0xc);
+        return chunks[index];
+    }
+    // Original @0x2ce450. Evaluate and blend two legacy animation chunks
+    // before concatenating the local transforms into the joint hierarchy.
+    void NuHGobjEvalAnimBlend(nuhgobj_s *object, void *animation_a, f32 frame_a, void *animation_b, f32 frame_b,
+                              f32 blend, i32 override_count, NUJOINTANIM_s *overrides, NUMTX *matrices) {
+        if (object->joint_count > ddmaxjoints) {
+            ddmaxjoints = object->joint_count;
+        }
+        NUVEC scales[256];
+        NUJOINTANIM_s *joint_overrides[256];
+        NUMTX local_matrix __attribute__((aligned(16)));
+        nuanimtime_s time_a;
+        nuanimtime_s time_b;
+        scales[255] = {1.0f, 1.0f, 1.0f};
+        NuAnimDataCalcTime(animation_a, frame_a, &time_a);
+        NuLegacyDwaChunk *chunk_a = NuLegacyDwaGetChunk(animation_a, time_a.chunk);
+        NuAnimDataCalcTime(animation_b, frame_b, &time_b);
+        NuLegacyDwaChunk *chunk_b = NuLegacyDwaGetChunk(animation_b, time_b.chunk);
+        if (override_count != 0) {
+            memset(joint_overrides, 0, object->joint_count * sizeof(*joint_overrides));
+            for (u8 index = 0; index < override_count; ++index) {
+                u8 override_index = overrides[index].joint_index;
+                if (override_index < object->joint_override_map_count) {
+                    u8 joint_index = object->joint_override_map[override_index];
+                    if (joint_index != 0xff) {
+                        joint_overrides[joint_index] = &overrides[index];
+                    }
+                }
+            }
+        }
+        for (u8 index = 0; index < object->joint_count; ++index) {
+            NUMTX *output = &matrices[index];
+            NUJOINTANIM_s *joint_override = override_count != 0 ? joint_overrides[index] : NULL;
+            nuanimcurveset_s *first = chunk_a->curve_sets[index];
+            nuanimcurveset_s *second = chunk_b->curve_sets[index];
+            NUMTX *local = &local_matrix;
+            if (first != NULL && second != NULL) {
+                nuhgobjjoint_s *joint = &object->joints[index];
+                NuAnimCurveSetApplyBlendToJoint2(first, &time_a, second, &time_b, blend, joint, &scales[index],
+                                                 &scales[joint->parent_index], &local_matrix, joint_override);
+            } else {
+                local = &object->bind_matrices[index];
+            }
+            u8 parent_index = object->joints[index].parent_index;
+            if (parent_index == 0xff) {
+                *output = *local;
+            } else {
+                NuMtxMulVU0(output, local, &matrices[parent_index]);
+            }
+        }
     }
     // Original @0x2ce980.
     void NuHGobjEvalAnimBlend2(nuhgobj_s *object, ani3_animheader_s *animation_a, f32 time_a,
@@ -3418,15 +3474,6 @@ extern "C" {
         }
         NuHGobjEvalAnimBlend2Root_3(reinterpret_cast<nugscn_s *>(object), animation_a, time_a, animation_b, time_b,
                                     blend, override_count, overrides, matrices, root_fn, root_data);
-    }
-    struct NuLegacyDwaChunk {
-        i32 node_count;
-        i32 reserved_04;
-        nuanimcurveset_s **curve_sets;
-    };
-    static inline NuLegacyDwaChunk *NuLegacyDwaGetChunk(void *animation, i32 index) {
-        NuLegacyDwaChunk **chunks = *reinterpret_cast<NuLegacyDwaChunk ***>(static_cast<u8 *>(animation) + 0xc);
-        return chunks[index];
     }
     void **NuHGobjEvalDwa(i32 render_count, i16 *render_indices, void *animation, f32 frame) {
         if (animation == NULL || render_count == 0)
