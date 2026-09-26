@@ -23,6 +23,7 @@ extern "C" {
 #include "nu2api/nucore/numemory.h"
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/nu3d/nutex.h"
+#include "nu2api/nu3d/nutexanm.h"
 #include "nu2api/nu3d/android/nutex_ios_ex.h"
 #include "nu2api/nu3d/nuqfnt.h"
 
@@ -1050,8 +1051,63 @@ extern "C" {
     // Scene / render-scene
     // ---------------------------------------------------------------------------
 
-    void NuDisplaySceneDebug(void) {
-        STUBBED();
+    void NuDisplaySceneDebug(NUDLDLISTSCENE *scene, i32 flags, i32 depth, i32 *state) {
+        if (scene == NULL) {
+            return;
+        }
+
+        if ((flags & 3) != 0) {
+            for (i32 sort_index = 0; sort_index < scene->nsort_pris; ++sort_index) {
+                NUDISPLAYLISTITEM *item = scene->sort_pris[sort_index].items;
+                if (item == NULL) {
+                    continue;
+                }
+                i32 item_index = 0;
+                if (flags & 1) {
+                    do {
+                        DisplayListPrintItem(item, item_index, depth, state, 0);
+                        if (item->id == 1) {
+                            item = static_cast<NUDISPLAYLISTITEM *>(item->next);
+                        } else {
+                            ++item;
+                        }
+                        ++item_index;
+                    } while (item->type != 0x84);
+                } else {
+                    do {
+                        DisplayListPrintItem(item, item_index, depth, state, 0);
+                        ++item;
+                        ++item_index;
+                    } while (item->type != 0x84);
+                }
+                DisplayListPrintItem(item, item_index, depth, state, 0);
+            }
+        } else {
+            NUDISPLAYLISTITEM *item = scene->items;
+            if (item == NULL) {
+                return;
+            }
+            const i32 terminator = (flags & 2) ? 0x84 : 0x8e;
+            i32 item_index = 0;
+            if (flags & 1) {
+                do {
+                    DisplayListPrintItem(item, item_index, depth, state, 0);
+                    if (item->id == 1) {
+                        item = static_cast<NUDISPLAYLISTITEM *>(item->next);
+                    } else {
+                        ++item;
+                    }
+                    ++item_index;
+                } while (item->type != terminator);
+            } else {
+                do {
+                    DisplayListPrintItem(item, item_index, depth, state, 0);
+                    ++item;
+                    ++item_index;
+                } while (item->type != terminator);
+            }
+            DisplayListPrintItem(item, item_index, depth, state, 0);
+        }
     }
 
     // ---------------------------------------------------------------------------
@@ -3850,8 +3906,88 @@ extern "C" {
     void NuGCutSetCutAudioStream(i32 stream) {
         NuGCutAudioStream = stream;
     }
-    void NuGHGRelocate(void) {
-        STUBBED();
+    void NuTexAnimRemoveList(void *texture_anims);
+    void NuGHGPreRelocateFixupPS(NUGSCN *scene);
+    void NuGHGPostRelocateFixupPS(NUGSCN *scene, i32 delta);
+    NUGSCN *NuGHGRelocate(NUGSCN *scene, VARIPTR *destination) {
+        u8 *old_base = *reinterpret_cast<u8 **>(reinterpret_cast<u8 *>(scene) + 0x1d4);
+        u32 size = *reinterpret_cast<u32 *>(reinterpret_cast<u8 *>(scene) + 0x1d8);
+        u8 *new_base = destination->u8_ptr;
+        i32 delta = new_base - old_base;
+        if (delta == 0) {
+            return scene;
+        }
+        if (old_base == NULL || size == 0) {
+            return NULL;
+        }
+
+        if (scene->display_list != NULL) {
+            NuDisplaySceneDestroy(reinterpret_cast<NUDLDLISTSCENE *>(scene->display_list));
+        }
+        NuTexAnimRemoveList(scene->texture_anims);
+        NuGHGPreRelocateFixupPS(scene);
+
+        u32 remaining = size;
+        if (delta > 0) {
+            u32 count = static_cast<u32>(delta) < remaining ? static_cast<u32>(delta) : remaining;
+            u8 *source = old_base + remaining - count;
+            u8 *target = new_base + remaining - count;
+            do {
+                count = static_cast<u32>(delta) < remaining ? static_cast<u32>(delta) : remaining;
+                memcpy(target, source, count);
+                source -= count;
+                target -= count;
+                remaining -= count;
+            } while (remaining != 0);
+        } else {
+            u32 step = static_cast<u32>(-delta);
+            u8 *source = old_base;
+            u8 *target = new_base;
+            do {
+                u32 count = step < remaining ? step : remaining;
+                memcpy(target, source, count);
+                source += count;
+                target += count;
+                remaining -= count;
+            } while (remaining != 0);
+        }
+
+        NUGSCN *moved_scene = reinterpret_cast<NUGSCN *>(reinterpret_cast<u8 *>(scene) + delta);
+        *reinterpret_cast<u8 **>(reinterpret_cast<u8 *>(moved_scene) + 0x1d4) += delta;
+
+        u8 *table = new_base + 0x18;
+        table += *reinterpret_cast<i32 *>(table);
+        i32 pointer_count = *reinterpret_cast<i32 *>(table);
+        for (i32 i = 0; i < pointer_count; ++i) {
+            u8 *entry = table + 4 + i * 4;
+            u32 *pointer = reinterpret_cast<u32 *>(entry + *reinterpret_cast<i32 *>(entry));
+            if (*pointer != 0) {
+                *pointer += delta;
+            }
+        }
+
+        nutexanim_s *anims = static_cast<nutexanim_s *>(moved_scene->texture_anims);
+        i32 count = moved_scene->num_texture_anims;
+        if (count != 0) {
+            for (i32 i = 0; i < count; ++i) {
+                anims[i].material = reinterpret_cast<numtl_s *>(reinterpret_cast<u8 *>(anims[i].material) + delta);
+                anims[i].env = reinterpret_cast<nutexanimenv_s *>(reinterpret_cast<u8 *>(anims[i].env) + delta);
+            }
+            for (i32 i = 0; i < count - 1; ++i) {
+                anims[i].next = reinterpret_cast<nutexanim_s *>(reinterpret_cast<u8 *>(anims[i].next) + delta);
+                anims[i + 1].previous =
+                    reinterpret_cast<nutexanim_s *>(reinterpret_cast<u8 *>(anims[i + 1].previous) + delta);
+            }
+        }
+
+        NuTexAnimAddList(anims);
+        moved_scene->additional_scenes = NULL;
+        moved_scene->rendered_additional_scene_count = 0;
+        if (moved_scene->display_list != NULL) {
+            NuDisplaySceneAdd(reinterpret_cast<NUDLDLISTSCENE *>(moved_scene->display_list));
+        }
+        NuGHGPostRelocateFixupPS(moved_scene, delta);
+        return moved_scene;
     }
 
     // ---------------------------------------------------------------------------
