@@ -60,22 +60,22 @@ void DeflectPart(PART_s *part, GameObject_s *object, float speed, float gravity,
     u32 flags = part->flags;
     i16 type = part->type_id;
     GameObject_s *owner = part->owner;
-    f32 radius = part->field_0e4;
     nuhspecial_s *special = part->source_special;
+    f32 radius = part->field_0e4;
     KillPart(part, 0);
 
     if (deflect != 0 && owner != NULL) {
         NUVEC velocity;
         f32 facing;
-        if (static_cast<i8>(object->apiobj.field_0x1f8) < 0) {
+        if (__builtin_expect(static_cast<i8>(object->apiobj.field_0x1f8) < 0, 1)) {
             if (owner->apiobj.field_0x27c == -1) {
                 MakeThrowVector(&velocity, reinterpret_cast<NUVEC *>(&matrix.m30), &owner->apiobj.collision_position,
                                 &owner->apiobj.velocity, speed, gravity);
                 goto velocity_ready;
             }
         }
-        velocity.x = 0.0f;
         velocity.y = 0.0f;
+        velocity.x = 0.0f;
         velocity.z = 2.0f;
         NuVecRotateX(&velocity, &velocity, static_cast<i32>(static_cast<f32>(qrand()) * (1.0f / 65535.0f) * -5461.0f));
         facing = static_cast<f32>(object->apiobj.movement_facing_angle - 0x1555);
@@ -85,17 +85,18 @@ void DeflectPart(PART_s *part, GameObject_s *object, float speed, float gravity,
         ADDPART_s params = Default_ADDPART;
         params.matrix = &matrix;
         params.velocity = &velocity;
-        params.owner = object;
+        params.special = special;
         params.field_14 = radius;
         params.gravity = gravity;
-        params.special = special;
         params.field_28 = type;
         params.flags = flags;
+        params.owner = object;
         params.field_40 = PartCollide_3D;
         params.time_step = FRAMETIME;
         PART_s *deflected = AddPart(&params);
         if (deflected != NULL) {
-            deflected->force_flags = static_cast<u16>(ObjHitObj_Flags(object));
+            u16 (*hit_flags)(GameObject_s *) = reinterpret_cast<u16 (*)(GameObject_s *)>(ObjHitObj_Flags);
+            deflected->force_flags = hit_flags(object);
             if (part->update_callback != NULL)
                 part->update_callback(deflected);
         }
