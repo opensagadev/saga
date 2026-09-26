@@ -133,3 +133,13 @@ for a negative count it still loads the sets pointer, then exits the type loop.
 Reproducing these details raised the GOT-aware match from 65.423485% to
 69.14235% (1112 local bytes). The remaining large prologue difference is a
 stack realignment in the local build whose trigger is not yet confirmed.
+
+`GizAction_SetPickupVisibility` writes three fields from the pickup's state
+byte separately: `state_enabled`, `state_visible`, and `state_activated`. GCC
+emits two masks and shifts that do not arise from a single combined `0x86`
+mask expression, despite equivalent ordinary flag behavior. The target also
+dereferences `WORLD->gizmo_pickup_sys` without a null check and advances a
+pickup pointer by the 44-byte struct size each loop iteration. Using the
+bitfields and pointer walk raised its GOT-aware score from 51.0% to 81.12%
+(497 local bytes versus 511 target bytes). An explicit null check for each
+loop pointer reduced the score, so that hypothesis was discarded.

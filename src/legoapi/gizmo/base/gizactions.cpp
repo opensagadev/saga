@@ -649,16 +649,20 @@ static void GizAction_SetPickupVisibility(GIZFLOW_s *, FLOWBOX_s *, char **param
         }
     }
     if (pickup != NULL) {
-        pickup->state_flags = (pickup->state_flags & ~0x86) | (visible != 0 ? 0x86 : 0);
+        pickup->state_enabled = visible;
+        pickup->state_visible = visible;
+        pickup->state_activated = visible;
         return;
     }
-    if (id < 0 || WORLD->gizmo_pickup_sys == NULL || WORLD->gizmo_pickup_sys->pickups == NULL) {
+    if (id < 0 || WORLD->gizmo_pickup_sys->pickups == NULL) {
         return;
     }
-    for (i32 index = 0; index < WORLD->gizmo_pickup_sys->pickup_count; ++index) {
-        pickup = &WORLD->gizmo_pickup_sys->pickups[index];
+    pickup = WORLD->gizmo_pickup_sys->pickups;
+    for (i32 index = 0; index < WORLD->gizmo_pickup_sys->pickup_count; ++index, ++pickup) {
         if ((pickup->state_flags & 8) == 0 && pickup->activation_group == id) {
-            pickup->state_flags = (pickup->state_flags & ~0x86) | (visible != 0 ? 0x86 : 0);
+            pickup->state_enabled = visible;
+            pickup->state_visible = visible;
+            pickup->state_activated = visible;
         }
     }
 }
