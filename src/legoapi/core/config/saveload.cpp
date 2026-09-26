@@ -478,8 +478,10 @@ SAVELOAD_TARGET_OPT i32 FS_GetPadWithRepeat(nupad_s *pad, float repeat, float el
 
 SAVELOAD_TARGET_OPT void SerialiseNuHSpecial(EdStream &stream, void *data, i32) {
     nuhspecial_s *special = static_cast<nuhspecial_s *>(data);
-    if (stream.mode == 2)
-        stream.SerialiseString(NuSpecialGetName(special), 0);
+    if (stream.mode == 2) {
+        char *name = NuSpecialGetName(special);
+        stream.SerialiseString(name, 0);
+    }
 
     if (stream.mode == 1) {
         char name[128];

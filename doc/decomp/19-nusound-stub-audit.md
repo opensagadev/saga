@@ -117,3 +117,10 @@ the latter emits a 64-word `rep stos`. The function attribute
 `force_align_arg_pointer` reproduces its EBP frame and 16-byte stack
 realignment. Together, these changes raised the direct object match
 from 55.45% to 93.91% before TU-level optimization.
+
+In `SerialiseNuHSpecial`, passing `NuSpecialGetName(special)` directly
+to the virtual `EdStream::SerialiseString` call causes GCC to load the
+virtual slot before calling `NuSpecialGetName`. Storing the name in a
+local first makes it load the virtual slot afterward, as in retail.
+That source expression change raised the direct object match from
+88.81% to 98.30% and recovered the exact 331-byte function size.
