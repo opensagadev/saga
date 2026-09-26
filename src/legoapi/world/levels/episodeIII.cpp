@@ -108,7 +108,7 @@ DECOMP_ASSERT(offsetof(CRUISERDNETPACKET_s, lift_chase) == 0x28, "Cruiser D pack
 
 extern "C" {
     CRUISERDNETPACKET_s *cruiserd_netpacket;
-    i32 CruiserD_LiftChase;
+    extern i32 CruiserD_LiftChase;
 }
 static i32 CruiserE_ix;
 static nuhspecial_s CruiserD_Lift;
@@ -279,7 +279,7 @@ void CruiserDInit(WORLDINFO_s *world) {
     }
 
     LevGizmo[0] = GizmoFindByName(world->gizmo_sys, gizpanel_gizmotype_id, "panel1");
-    cruiserd_netpacket = SetLevelHack(12);
+    cruiserd_netpacket = static_cast<CRUISERDNETPACKET_s *>(SetLevelHack(12));
 
     char name[16];
 #define FIND_CRUISER_D_TUBE(NUMBER)                             \
