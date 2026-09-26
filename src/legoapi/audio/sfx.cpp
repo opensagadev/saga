@@ -978,11 +978,11 @@ extern "C" {
     }
 
     void ResumeGameAudio(void) {
-        STUBBED();
+        // Platform placeholder in the Android build.
     }
 
     void SOUND_SFXRequest_Table(void) {
-        STUBBED();
+        // Platform placeholder in the Android build.
     }
 
     void SetAudioFadeLevel(f32 level) {
@@ -1498,7 +1498,7 @@ void SetSfxBitTab_OffEx(SoundTable *table, i32 sound) {
 }
 
 void SfxCheckMusicOnOff(OPTIONSSAVE_s *) {
-    STUBBED();
+    // Platform placeholder in the Android build.
 }
 
 void AddLevelSfxFromName(char *sfx_name, i32 *sfx_ids, i32 *sfx_count, i32 max_sfx_count) {
