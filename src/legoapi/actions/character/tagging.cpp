@@ -145,14 +145,15 @@ void Tag_NewTransfer(GameObject_s *source, GameObject_s *target) {
         third.position[2].y = third.height[2] * (source->apiobj.collision_max.y - source->apiobj.collision_min.y) +
                               source->apiobj.collision_min.y;
     }
-    if (static_cast<i8>(target->apiobj.flags_low) < 0) {
-        if (Tag_DoneFirst == 0) {
-            Tag_DoneFirst = 1;
-        } else if (Tag_DoneFirst == 1) {
-            Tag_DoneFirst = 2;
-        }
-        Tag_DoneAny = 1;
+    if (__builtin_expect(static_cast<i8>(target->apiobj.flags_low) >= 0, 0)) {
+        return;
     }
+    if (Tag_DoneFirst == 0) {
+        Tag_DoneFirst = 1;
+    } else if (__builtin_expect(Tag_DoneFirst == 1, 0)) {
+        Tag_DoneFirst = 2;
+    }
+    Tag_DoneAny = 1;
 }
 
 void Tag_DrawIcon_LSW(GameObject_s *object) {
