@@ -20,11 +20,13 @@
 #include "legoapi/world/mission.h"
 #include "legoapi/world/world.h"
 #include "legoapi/audio/audio.h"
+#include "legoapi/audio/sfx.h"
 #include "legoapi/menus/core/text.h"
 #include "legoapi/render/core/render.h"
 #include "legoapi/menus/core/panel.h"
 #include "nu2api/nu3d/nugscn.h"
 #include "nu2api/nu3d/nuqfnt.h"
+#include "nu2api/nu3d/nuprim.h"
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/nufile/nufile.h"
 #include "nu2api/nucore/nustring.h"
@@ -78,6 +80,7 @@ extern char *apitxt_RETRY;
 extern char *apitxt_SLOT;
 extern char *apitxt_CANCEL;
 extern char *apitxt_NODATAAVAILABLE;
+extern char *apitxt_NOTENOUGHSPACE;
 extern char *apitxt_DELETEGAME;
 extern char *apitxt_DELETING;
 extern char *apitxt_DELETECOMPLETE;
@@ -1262,8 +1265,13 @@ void MenuEnterSaveConfirm(MENU_s *) {
     }
 }
 
-void MenuUpdateEndMission(MENU_s *) {
-    STUBBED();
+void MenuUpdateEndMission(MENU_s *menu) {
+    if (menu->menu_time >= 5.0f) {
+        CompleteLevel(WORLD);
+    } else if (menu->menu_time >= 1.5f && BonusWinFlag == 0) {
+        PlaySfx(const_cast<char *>("Victory"), NULL);
+        BonusWinFlag = 1;
+    }
 }
 
 void MenuUpdateFormatting(MENU_s *) {
@@ -1496,8 +1504,13 @@ void MenuDrawSelectControls(MENU_s *menu) {
     DrawMenuEntry(menu, TTab[tTOUCHSCREEN]);
 }
 
-void MenuUpdateEndChallenge(MENU_s *) {
-    STUBBED();
+void MenuUpdateEndChallenge(MENU_s *menu) {
+    if (menu->menu_time >= 5.0f) {
+        CompleteLevel(WORLD);
+    } else if (menu->menu_time >= 1.5f && BonusWinFlag == 0) {
+        PlaySfx(const_cast<char *>("Victory"), NULL);
+        BonusWinFlag = 1;
+    }
 }
 
 void MenuUpdateFormatCancel(MENU_s *menu) {
@@ -1829,8 +1842,9 @@ extern "C" {
         }
     }
 
-    void DrawMenuBottomMessage(void) {
-        STUBBED();
+    void DrawMenuBottomMessage(char *text, u8 red, u8 green, u8 blue) {
+        MenuSmartTextEx(text, 0.0f, -0.3f, 1.0f, MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, 0, red, green, blue,
+                        1.5f, 4, NULL, 0, MenuA);
     }
 
     void DrawMenuButtonPrompts(i32 confirm_prompt, i32 cancel_prompt, i32 enabled, u8 red, u8 green, u8 blue,
@@ -1944,12 +1958,14 @@ extern "C" {
         }
     }
 
-    void DrawMenuHeaderMessage(void) {
-        STUBBED();
+    void DrawMenuHeaderMessage(char *text, u8 red, u8 green, u8 blue) {
+        MenuSmartTextEx(text, 0.0f, MENUTOPY, 1.0f, MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, 1, red, green,
+                        blue, 1.5f, 3, NULL, 0, MenuA);
     }
 
-    void DrawMenuTopMessage(void) {
-        STUBBED();
+    void DrawMenuTopMessage(char *text, u8 red, u8 green, u8 blue) {
+        MenuSmartTextEx(text, 0.0f, 0.15f, 1.0f, MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, 0, red, green, blue,
+                        1.5f, 4, NULL, 0, MenuA);
     }
 
     void Draw_CANCEL(MENU *menu) {
@@ -1964,7 +1980,8 @@ extern "C" {
     }
 
     void Draw_NOTENOUGHSPACE(void) {
-        STUBBED();
+        MenuSmartTextEx(apitxt_NOTENOUGHSPACE, 0.0f, 0.3f, 1.0f, MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, 0,
+                        MENUNORMALR, MENUNORMALG, MENUNORMALB, 1.5f, 3, NULL, 0, MenuA);
     }
 
     void Draw_SPACENEEDED(void) {
@@ -1983,7 +2000,52 @@ extern "C" {
     }
 
     void MenuDrawBackground(void) {
-        STUBBED();
+        static i32 menufadelevel;
+        if (MenuInCriticalMemoryCard() != 0) {
+            if (__builtin_expect(menufadelevel <= 127, 1)) {
+                menufadelevel += 8;
+                if (menufadelevel <= 0)
+                    return;
+            }
+        } else {
+            if (menufadelevel <= 0)
+                return;
+            menufadelevel -= 5;
+            if (menufadelevel <= 0)
+                return;
+        }
+
+        ++NuPrimCSPos;
+        NuPrimSetCoordinateSystem(NUPRIM_SCALEMODE_ABSOLUTE);
+        NuPrim2DBegin(4, 5, MenuFadeMtl);
+
+        struct MenuFadeVertex {
+            f32 x;
+            f32 y;
+            f32 z;
+            u32 colour;
+        };
+        VARIPTR **stream = &g_NuPrim_StreamBufferPtr;
+        char *overbright = &g_NuPrim_NeedsOverbrightening;
+        u32 colour = static_cast<u32>(menufadelevel) << 24;
+        asm volatile("" : "+r"(colour));
+        MenuFadeVertex *vertex = reinterpret_cast<MenuFadeVertex *>((*stream)->void_ptr);
+        if (__builtin_expect(*overbright == 0, 1))
+            colour &= 0xff000000u;
+        vertex->colour = colour;
+        NuPrim2DAddXYZ(0.0f, 0.0f, 0.0f);
+
+        vertex = reinterpret_cast<MenuFadeVertex *>((*stream)->void_ptr);
+        colour = static_cast<u32>(menufadelevel) << 24;
+        asm volatile("" : "+r"(colour));
+        if (__builtin_expect(*overbright == 0, 1))
+            colour &= 0xff000000u;
+        vertex->colour = colour;
+        NuPrim2DAddXYZ(1.0f, 1.0f, 0.0f);
+
+        NuPrim2DEnd();
+        --NuPrimCSPos;
+        NuPrimSetCoordinateSystem(NuPrimCoordSystemStack[NuPrimCSPos]);
     }
 
     i32 MenuGetSlotNum(void) {

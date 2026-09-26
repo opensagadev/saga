@@ -74,3 +74,16 @@ these input checks. For formatting, a likely-true branch hint on
 `memcard_formatting` moves the shared result-delay block before the timer
 check, closer to retail order. The same state machine uses distinct message
 and result delay floats; both need definitions in this translation unit.
+
+## Menu background primitive
+
+The retail menu fade draws two vertices through `NuPrim2DAddXYZ`, setting
+their color at offset 12 in the current stream buffer. The stream buffer
+global is a pointer to a `VARIPTR`; retain its address and dereference it
+for each vertex, because the primitive call may advance the cursor. GCC
+removes the overbrightening mask when it proves a color shifted left by 24
+has only alpha bits. An empty register constraint makes the value opaque to
+that optimization and preserves the retail branch and mask. A likely-true
+hint on the rising fade branch also keeps the retail block order. The direct
+NDK r8e object reproduces the 327-byte target body; linked GOT-aware scoring
+remains to be verified.
