@@ -38,6 +38,8 @@ void Asteroid_PartKill(PART_s *, i32);
 void GizmoBlowupUpdateMatrix(GIZMOBLOWUP_s *);
 void PartCollide_3D(PART_s *);
 void ResetTrooperCannons(WORLDINFO_s *, i32);
+void InitTrooperCannons(WORLDINFO_s *);
+void HothBattleE_UpdateWave();
 void UpdateTrooperCannons(WORLDINFO_s *);
 EXPLOSION *Detonate(NUVEC *, u16);
 extern "C" void NewPartRotation(PART_s *);
@@ -213,20 +215,27 @@ void HothBattleE_Init(WORLDINFO_s *) {
     STUBBED();
 }
 
-void HothEscapeA_Init(WORLDINFO_s *) {
-    STUBBED();
+void HothEscapeA_Init(WORLDINFO_s *world) {
+    InitTrooperCannons(world);
+    troopercannons_beenReset = 0;
 }
 
-void HothEscapeB_Init(WORLDINFO_s *) {
-    STUBBED();
+void HothEscapeB_Init(WORLDINFO_s *world) {
+    if (netclient == 0) {
+        locator = AIPathFindLocator(world->ai_sys, "snow_mob");
+        gameobj = GetNamedGameObject(world->ai_sys, "snowmob_1");
+    }
+    InitTrooperCannons(world);
+    troopercannons_beenReset = 0;
 }
 
 void HothEscapeC_Init(WORLDINFO_s *) {
     STUBBED();
 }
 
-void HothEscapeD_Init(WORLDINFO_s *) {
-    STUBBED();
+void HothEscapeD_Init(WORLDINFO_s *world) {
+    InitTrooperCannons(world);
+    troopercannons_beenReset = 0;
 }
 
 void HothBattleA_Reset(WORLDINFO_s *world) {
@@ -267,7 +276,6 @@ void HothBattleE_Panel(WORLDINFO_s *) {
 }
 
 void HothEscapeA_Reset(WORLDINFO_s *) {
-    STUBBED();
 }
 
 void HothEscapeB_Reset(WORLDINFO_s *world) {
@@ -278,11 +286,9 @@ void HothEscapeB_Reset(WORLDINFO_s *world) {
 }
 
 void HothEscapeC_Reset(WORLDINFO_s *) {
-    STUBBED();
 }
 
 void HothEscapeD_Reset(WORLDINFO_s *) {
-    STUBBED();
 }
 
 void BobaRocket_Deflect(PART_s *part) {
@@ -303,8 +309,11 @@ void HothBattleC_Update(WORLDINFO_s *world) {
     UpdateMiniSnowTroopers(world);
 }
 
-void HothBattleE_Update(WORLDINFO_s *) {
-    STUBBED();
+void HothBattleE_Update(WORLDINFO_s *world) {
+    if (NuIOS_IsLowEndDevice() == 0)
+        UpdateMiniSnowTroopers(world);
+    if (netclient == 0)
+        HothBattleE_UpdateWave();
 }
 
 void HothEscapeA_Update(WORLDINFO_s *world) {

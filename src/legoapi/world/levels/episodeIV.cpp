@@ -414,11 +414,9 @@ void DeathStarBattleC_AlwaysUpdate(WORLDINFO_s *) {
 }
 
 void DeathStarBattleDDraw(WORLDINFO_s *) {
-    STUBBED();
 }
 
 void DeathStarBattleDInit(WORLDINFO_s *) {
-    STUBBED();
 }
 
 void DeathStarBattleDReset(WORLDINFO_s *) {
