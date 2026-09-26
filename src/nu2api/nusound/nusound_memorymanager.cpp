@@ -405,7 +405,6 @@ NuSoundMemoryBuffer *NuSoundMemoryManager::CheckAndMergeFreeBufferNext(NuSoundMe
 // libTTapp.so 0x321360: the lock-reason getter; the device build compiles it
 // to a constant NULL return.
 const char *NuSoundMemoryBuffer::GetLockReason() {
-    STUBBED();
     return NULL;
 }
 
@@ -581,7 +580,6 @@ void NuSoundMemoryManager::OutputMap() {
 
 // libTTapp.so 0x3227b0 (RenderMap). On-screen debug map; not transcribed yet.
 void NuSoundMemoryManager::RenderMap(f32 x, f32 y, f32 scale) {
-    STUBBED();
     (void)x;
     (void)y;
     (void)scale;

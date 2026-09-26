@@ -11,7 +11,6 @@ bool NuSoundEffect::Initialise() {
 }
 
 void NuSoundEffect::Shutdown() {
-    STUBBED();
 }
 
 void NuSoundEffect::Enable() {
@@ -27,11 +26,9 @@ bool NuSoundEffect::AttachVoice(NuSoundVoice *) {
 }
 
 void NuSoundEffect::DetachVoice(NuSoundVoice *) {
-    STUBBED();
 }
 
 void NuSoundEffect::ProcessVoice(NuSoundVoice *, f32) {
-    STUBBED();
 }
 
 bool NuSoundEffect::AttachBus(NuSoundBus *) {
@@ -39,15 +36,12 @@ bool NuSoundEffect::AttachBus(NuSoundBus *) {
 }
 
 void NuSoundEffect::DetachBus(NuSoundBus *) {
-    STUBBED();
 }
 
 void NuSoundEffect::ProcessBus(NuSoundBus *, f32) {
-    STUBBED();
 }
 
 void NuSoundEffect::Process(f32) {
-    STUBBED();
 }
 
 bool NuSoundEffectAttenuation::AttachBus(NuSoundBus *) {

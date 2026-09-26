@@ -62,29 +62,31 @@ i32 NuSoundDecoderOGG::OGGReadCallbacksDecoder::Seek(i32 offset, u32 origin) {
 }
 
 void NuSoundDecoderOGG::OGGReadCallbacksDecoder::Close() {
-    STUBBED();
 }
 
 int NuSoundDecoderOGG::OGGReadCallbacksDecoder::GetPosition() const {
-    STUBBED();
     return 0;
 }
 
 // libTTapp.so 0x32ec10: serves the vorbisfile reader with encoded bytes from
 // the decoder's streaming ring, blocking on the decode thread when the ring
 // runs dry and looping the stream at EOF when requested.
+// The reference keeps a frame pointer and realigns this callback stack.
+__attribute__((force_align_arg_pointer, optimize("no-omit-frame-pointer")))
 int NuSoundDecoderOGG::OGGReadCallbacksDecoder::Read(void *dest, unsigned int size) {
     memset(dest, 0, size);
     this->decoder->GetEncodedSource();
-    if (size == 0) {
+    if (__builtin_expect(size == 0, 0)) {
         return 0;
     }
 
+    u8 *cursor = (u8 *)dest;
+    u32 remaining = size;
     u32 copied = 0;
-    while (size != 0) {
+    while (remaining != 0) {
         if (this->decoder->locked_buffer == NULL) {
-            memset(dest, 0, size);
-            return (int)size;
+            memset(cursor, 0, remaining);
+            return (int)remaining;
         }
 
         this->decoder->locked_buffer->Lock();
@@ -92,19 +94,19 @@ int NuSoundDecoderOGG::OGGReadCallbacksDecoder::Read(void *dest, unsigned int si
 
         u32 read_available = (u32)context.read_size - this->position;
         u32 boundary_available = context.size3 != 0 ? (u32)context.size3 - this->position : read_available;
-        u32 take = size < read_available ? size : read_available;
+        u32 take = remaining < read_available ? remaining : read_available;
         if (boundary_available < take) {
             take = boundary_available;
         }
 
-        memmove(dest, (u8 *)this->decoder->locked_buffer->GetAddress() + this->position, take);
+        memmove(cursor, (u8 *)this->decoder->locked_buffer->GetAddress() + this->position, take);
         this->position += take;
-        size -= take;
+        remaining -= take;
         copied += take;
-        dest = (u8 *)dest + take;
+        cursor += take;
 
         this->decoder->locked_buffer->Unlock();
-        if (size == 0 || ((context.flags & 2) != 0 && !this->decoder->ogg_loop)) {
+        if (remaining == 0 || ((context.flags & 2) != 0 && !this->decoder->ogg_loop)) {
             return (int)copied;
         }
 
@@ -126,9 +128,7 @@ int NuSoundDecoderOGG::OGGReadCallbacksDecoder::Read(void *dest, unsigned int si
         this->decoder->locked_buffer = this->decoder->encoded_buffers[this->decoder->ring_read_pos % 4];
         __sync_fetch_and_add(&this->decoder->ring_read_pos, 1);
 
-        NuSoundWeakPtr<NuSoundBufferCallback> callback;
-        callback.Set(this->decoder);
-        this->decoder->source->RequestBuffer(false, callback);
+        this->decoder->source->RequestBuffer(false, NuSoundWeakPtr<NuSoundBufferCallback>(this->decoder));
 
         this->decoder->locked_buffer->Lock();
         this->position = 0;
