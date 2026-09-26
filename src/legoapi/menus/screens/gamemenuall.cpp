@@ -174,10 +174,12 @@ i32 memcard_deleteneeded;
 i32 memcard_deletestarted;
 i32 memcard_deletefailed;
 f32 memcard_deletemessage_delay;
+f32 memcard_deleteresult_delay;
 i32 memcard_formatting;
 i32 memcard_formatme;
 i32 memcard_formatfailed;
 f32 memcard_formatmessage_delay;
+f32 memcard_formatresult_delay;
 f32 memcard_savemessage_delay;
 f32 memcard_saveresult_delay;
 f32 memcard_loadmessage_delay;
@@ -1014,7 +1016,20 @@ void MenuDrawSaveCancel(MENU_s *menu) {
 }
 
 void MenuUpdateDeleting(MENU_s *) {
-    STUBBED();
+    if (memcard_deleteneeded == 0) {
+        if (memcard_deletemessage_delay > 0.0f) {
+            memcard_deleteresult_delay = 1.5f;
+            return;
+        }
+        if (memcard_deleteresult_delay <= 0.0f)
+            BackupMenu();
+        return;
+    }
+    memcard_deleteresult_delay = 1.5f;
+    if (memcard_cardchanged != 0) {
+        memcard_deleteneeded = 0;
+        memcard_deletefailed = 1;
+    }
 }
 
 void MenuUpdateEpisodes(MENU_s *) {
@@ -1252,11 +1267,34 @@ void MenuUpdateEndMission(MENU_s *) {
 }
 
 void MenuUpdateFormatting(MENU_s *) {
-    STUBBED();
+    if (memcard_formatme != 0) {
+        memcard_formatmessage_delay = 1.5f;
+        memcard_formatresult_delay = 1.5f;
+        if (memcard_cardchanged != 0) {
+            memcard_formatme = 0;
+            memcard_formatfailed = 1;
+        }
+        return;
+    }
+    if (__builtin_expect(memcard_formatting != 0, 1) || memcard_formatmessage_delay > 0.0f) {
+        memcard_formatresult_delay = 1.5f;
+        return;
+    }
+    if (memcard_formatresult_delay <= 0.0f)
+        BackupMenu();
 }
 
-void MenuUpdateInsertCard(MENU_s *) {
-    STUBBED();
+void MenuUpdateInsertCard(MENU_s *menu) {
+    if (menu->cancel_pressed != 0) {
+        MenuSFX = MENUSFX_MENUSELECT;
+        BackupMenuNoFn();
+        NewMenu(1016, 1, -1);
+    }
+    if (menu->confirm_pressed != 0 && menu->selected_row == menu->last_row) {
+        MenuSFX = MENUSFX_MENUSELECT;
+        BackupMenuNoFn();
+        NewMenu(1016, 1, -1);
+    }
 }
 
 void MenuUpdateLoadCancel(MENU_s *menu) {
@@ -1372,8 +1410,34 @@ void MenuUpdateCardWarning(MENU_s *) {
     STUBBED();
 }
 
-void MenuUpdateFileCorrupt(MENU_s *) {
-    STUBBED();
+void MenuUpdateFileCorrupt(MENU_s *menu) {
+    if (MenuInfo[GameMenu[GameMenuLevel - 1].menu].id != 1019)
+        MenuInfo[menu->menu].wrap = 1;
+    else
+        MenuInfo[menu->menu].wrap = 0;
+    if (menu->confirm_pressed != 0) {
+        MenuSFX = MENUSFX_MENUSELECT;
+        if (MenuInfo[GameMenu[GameMenuLevel - 1].menu].id == 1000) {
+            BackupMenuNoFn();
+            NewMenu(1016, 1, -1);
+        } else if (MenuInfo[GameMenu[GameMenuLevel - 1].menu].id == 1019) {
+            MenuCardWarningState = 3;
+            memcard_cardchanged = 0;
+            BackupMenuNoFn();
+        } else {
+            BackupMenuNoFn();
+            NewMenu(1017, 1, -1);
+        }
+    } else if (menu->cancel_pressed != 0 && MenuInfo[GameMenu[GameMenuLevel - 1].menu].id != 1019) {
+        MenuSFX = MENUSFX_MENUSELECT;
+        if (MenuInfo[GameMenu[GameMenuLevel - 1].menu].id == 1000) {
+            BackupMenuNoFn();
+            NewMenu(1016, 1, -1);
+        } else {
+            BackupMenuNoFn();
+            NewMenu(1017, 1, -1);
+        }
+    }
 }
 
 void MenuUpdateLoadConfirm(MENU_s *menu) {
@@ -1436,12 +1500,46 @@ void MenuUpdateEndChallenge(MENU_s *) {
     STUBBED();
 }
 
-void MenuUpdateFormatCancel(MENU_s *) {
-    STUBBED();
+void MenuUpdateFormatCancel(MENU_s *menu) {
+    if (menu->confirm_pressed != 0) {
+        MenuSFX = MENUSFX_MENUSELECT;
+        if (menu->selected_row == 0) {
+            const i32 previous_id = MenuInfo[GameMenu[GameMenuLevel - 1].menu].id;
+            if (previous_id == 1000) {
+                BackupMenuNoFn();
+                NewMenu(1016, 1, -1);
+            } else if (previous_id == 1012) {
+                BackupMenuNoFn();
+                NewMenu(1017, 1, -1);
+            } else {
+                BackupMenu();
+            }
+        } else {
+            BackupMenuNoFn();
+            NewMenu(1006, 1, -1);
+        }
+    } else if (menu->cancel_pressed != 0) {
+        MenuSFX = MENUSFX_MENUSELECT;
+        BackupMenuNoFn();
+        NewMenu(1006, 1, -1);
+    }
 }
 
-void MenuUpdateNoMemoryCard(MENU_s *) {
-    STUBBED();
+void MenuUpdateNoMemoryCard(MENU_s *menu) {
+    if (menu->confirm_pressed != 0) {
+        MenuSFX = MENUSFX_MENUSELECT;
+        if (menu->selected_row == 0) {
+            BackupMenu();
+        } else {
+            BackupMenuNoFn();
+            NewMenu(1017, 1, -1);
+        }
+    }
+    if (menu->cancel_pressed != 0) {
+        MenuSFX = MENUSFX_MENUSELECT;
+        BackupMenuNoFn();
+        NewMenu(1017, 1, -1);
+    }
 }
 
 void MenuDrawAutoSaveWarning(MENU_s *menu) {
@@ -1458,12 +1556,33 @@ void MenuEnterAutoSaveCancel(MENU_s *) {
     STUBBED();
 }
 
-void MenuUpdateDeleteConfirm(MENU_s *) {
-    STUBBED();
+void MenuUpdateDeleteConfirm(MENU_s *menu) {
+    if (menu->confirm_pressed != 0) {
+        MenuSFX = MENUSFX_MENUSELECT;
+        if (menu->selected_row == 1) {
+            BackupMenu();
+        } else {
+            memcard_slot = -1;
+            memcard_deleteneeded = 1;
+            memcard_deletestarted = 0;
+            BackupMenuNoFn();
+            BackupMenuNoFn();
+            NewMenu(1015, 0, -1);
+        }
+    } else if (menu->cancel_pressed != 0) {
+        MenuSFX = MENUSFX_MENUSELECT;
+        BackupMenu();
+    }
 }
 
-void MenuUpdateFormatConfirm(MENU_s *) {
-    STUBBED();
+void MenuUpdateFormatConfirm(MENU_s *menu) {
+    if (__builtin_expect(menu->confirm_pressed != 0, 1)) {
+        MenuSFX = MENUSFX_MENUSELECT;
+    } else if (menu->cancel_pressed != 0 && MenuInfo[GameMenu[GameMenuLevel - 1].menu].id != 1019) {
+        MenuSFX = MENUSFX_MENUSELECT;
+        BackupMenuNoFn();
+        NewMenu(1018, 1, -1);
+    }
 }
 
 void MenuEnterAutoSaveWarning(MENU_s *) {

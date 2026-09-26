@@ -58,3 +58,19 @@ emits a library call. Each callback then calls `Text_MakeTime` and `Text3D`
 with the same layout. The GOT-aware fork reports 99.989130% and 99.990000%
 for the retail-sized callbacks; their only displayed mismatch is the shifted
 rodata address of the `0.2f` literal.
+
+## Memory-card callback branch layout
+
+The file-corrupt callback reads the preceding menu ID repeatedly. Keeping a
+cached local or selecting the next ID with a ternary makes GCC merge branches
+and drops its match below 25%. Writing the three explicit previous-menu paths
+and assigning `MENUFNINFO.wrap` with separate branches reproduces the retail
+308-byte body, at 99.973335% with the GOT-aware fork.
+
+`MenuUpdateInsertCard` and `MenuUpdateNoMemoryCard` test cancel and confirm as
+two independent `if` statements; the retail code can run both in one call.
+Other confirmation callbacks use `else if`, so do not globally consolidate
+these input checks. For formatting, a likely-true branch hint on
+`memcard_formatting` moves the shared result-delay block before the timer
+check, closer to retail order. The same state machine uses distinct message
+and result delay floats; both need definitions in this translation unit.
