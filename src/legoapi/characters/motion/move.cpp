@@ -53,6 +53,7 @@ static f32 ForceBackRadius2 = 0.0f;
 #include "legoapi/render/fx/spline_position.h"
 #include "legoapi/render/light/surfaces.h"
 #include "legoapi/gizmos/fx/gizmopickups.h"
+#include "legoapi/gizmo/object/gizmopickup.h"
 #include "legoapi/world/level.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/world.h"
@@ -10352,8 +10353,127 @@ void Move_CHARACTER(GameObject_s *object) {
     HairMovement(object);
 }
 
-static __used__ void PooCode(GameObject_s *) {
-    STUBBED();
+extern "C" PART_s *FindPart(NUVEC *, i32, GameObject_s *);
+static NUVEC poopos[2];
+
+static __used__ void PooCode(GameObject_s *object) {
+    if (WORLD->lev_objs[0x18].active == 0)
+        return;
+
+    NUVEC position;
+    i32 locator = object->apiobj.character_data->game_character->poo_locator;
+    if (locator != -1 && object->apiobj.character_model->points_of_interest[locator] != NULL) {
+        position.x = object->joint_matrices[locator].m30;
+        position.y = object->joint_matrices[locator].m31;
+        position.z = object->joint_matrices[locator].m32;
+    } else {
+        u16 angle = object->apiobj.field_0x276;
+        position.x = object->apiobj.collision_position.x - NU_SIN_LUT(angle) * object->apiobj.field_0x1dc;
+        position.y = object->apiobj.collision_position.y;
+        position.z = object->apiobj.collision_position.z - NU_COS_LUT(angle) * object->apiobj.field_0x1dc;
+    }
+
+    if (object->character_context == 0x37) {
+        f32 previous = object->context_animation_timer;
+        object->context_animation_timer = previous + FRAMETIME;
+        if (object->context_animation_timer >= object->airborne_action_duration) {
+            object->character_context = -1;
+        } else if (previous < object->airborne_action_duration * 0.5f &&
+                   object->context_animation_timer >= object->airborne_action_duration * 0.5f) {
+            PlaySfx("Lego_Poo", &position);
+            NUVEC velocity;
+            velocity.x = (f32)qrand() * (1.0f / 65536.0f) - 0.5f - NU_SIN_LUT(object->apiobj.field_0x276);
+            velocity.y = (f32)qrand() * (1.0f / 65536.0f) - 0.5f;
+            velocity.z = (f32)qrand() * (1.0f / 65536.0f) - 0.5f - NU_COS_LUT(object->apiobj.field_0x276);
+            if (Cheat_IsOn(9)) {
+                NUVEC direction;
+                NuVecNorm(&direction, &velocity);
+                f32 random = (f32)qrand() * (1.0f / 65536.0f);
+                i32 count = random < 0.2f ? 1000 : random < 0.8f ? 100 : 10;
+                AddPickups(count, 0, 0, 0, &position, &direction, 1.0f, -1, 2000000.0f, 0.0f,
+                           object, 0, 0, true);
+            }
+            if (Cheat_IsOn(1)) {
+                ADDPART_ALIGNED16 params = Default_ADDPART;
+                NUMTX_ALIGNED16 matrix;
+                i32 angle_x = qrand();
+                f32 sinx = NU_SIN_LUT(angle_x);
+                f32 cosx = NU_COS_LUT(angle_x);
+                matrix.m00 = 1.0f; matrix.m01 = 0.0f; matrix.m02 = 0.0f; matrix.m03 = 0.0f;
+                matrix.m10 = 0.0f; matrix.m11 = cosx; matrix.m12 = sinx; matrix.m13 = 0.0f;
+                matrix.m20 = 0.0f; matrix.m21 = -sinx; matrix.m22 = cosx; matrix.m23 = 0.0f;
+                matrix.m30 = 0.0f; matrix.m31 = 0.0f; matrix.m32 = 0.0f; matrix.m33 = 1.0f;
+
+                i32 angle_y = qrand();
+                f32 siny = NU_SIN_LUT(angle_y);
+                f32 cosy = NU_COS_LUT(angle_y);
+                f32 m00 = matrix.m00, m10 = matrix.m10, m20 = matrix.m20, m30 = matrix.m30;
+                matrix.m00 = m00 * cosy + matrix.m02 * siny;
+                matrix.m02 = matrix.m02 * cosy - m00 * siny;
+                matrix.m10 = m10 * cosy + matrix.m12 * siny;
+                matrix.m12 = matrix.m12 * cosy - m10 * siny;
+                matrix.m20 = m20 * cosy + matrix.m22 * siny;
+                matrix.m22 = matrix.m22 * cosy - m20 * siny;
+                matrix.m30 = m30 * cosy + matrix.m32 * siny;
+                matrix.m32 = matrix.m32 * cosy - m30 * siny;
+
+                i32 angle_z = qrand();
+                f32 sinz = NU_SIN_LUT(angle_z);
+                f32 cosz = NU_COS_LUT(angle_z);
+                m00 = matrix.m00; m10 = matrix.m10; m20 = matrix.m20; m30 = matrix.m30;
+                matrix.m00 = m00 * cosz - matrix.m01 * sinz;
+                matrix.m01 = m00 * sinz + matrix.m01 * cosz;
+                matrix.m10 = m10 * cosz - matrix.m11 * sinz;
+                matrix.m11 = m10 * sinz + matrix.m11 * cosz;
+                matrix.m20 = m20 * cosz - matrix.m21 * sinz;
+                matrix.m21 = m20 * sinz + matrix.m21 * cosz;
+                matrix.m30 = m30 * cosz - matrix.m31 * sinz;
+                matrix.m31 = m30 * sinz + matrix.m31 * cosz;
+
+                NuMtxTranslate(&matrix, &position);
+                NUVEC radius_position;
+                NuSpecialGetRadius(&WORLD->lev_objs[0x18].special, &radius_position, &params.field_14);
+                params.matrix = &matrix;
+                params.velocity = &velocity;
+                params.owner = object;
+                params.field_18 = params.field_14;
+                params.gravity = -6.0f;
+                params.special = &WORLD->lev_objs[0x18].special;
+                params.field_28 = 0x18;
+                params.flags = 0x390;
+                params.stop_fn = PartStop_Flickerer;
+                params.draw_fn = PartDraw_Flickerer;
+                params.time_step = FRAMETIME;
+                params.field_a4 = 5.0f;
+                PART_s *part = AddPart(&params);
+                if (part != NULL) {
+                    part->owner = object;
+                    part->force_flags = static_cast<u16>(ObjHitObj_Flags(object));
+                }
+            }
+        }
+    } else if ((object->pad_gamepad->buttons_pressed & GAMEPAD_SPECIAL) != 0 &&
+               static_cast<i8>(object->apiobj.character_data->game_character->flags_094[3]) < 0 &&
+               static_cast<i8>(object->apiobj.flags_low) < 0 && object->character_context == -1 &&
+               object->apiobj.field_0x27d != 0 &&
+               (Cheat[1].enabled != 0 || Cheat[9].enabled != 0)) {
+        object->character_context = 0x37;
+        object->context_animation = 1;
+        object->context_animation_timer = 0.0f;
+        object->airborne_action_duration = 0.6f;
+    }
+
+    if ((object->pad_gamepad->buttons_pressed & GAMEPAD_SPECIAL) == 0 ||
+        ((object->apiobj.field_0xf00 & 0x10) == 0 || static_cast<u8>(object->apiobj.field_0x27c) > 1)) {
+        object->force_use_volume = 0.0f;
+        return;
+    }
+    PART_s *part = FindPart(NULL, -1, object);
+    object->force_use_volume = SeekLinearF(object->force_use_volume, part != NULL ? 1.0f : 0.0f, FRAMETIME);
+    if (object->force_use_volume > 0.0f) {
+        poopos[object->apiobj.field_0x27c] = position;
+        PlaySfxAndSetVolume("Lego_PLOP", &poopos[object->apiobj.field_0x27c], object->force_use_volume);
+    }
 }
 
 void Buck_MoveCode(GameObject_s *, i32);
