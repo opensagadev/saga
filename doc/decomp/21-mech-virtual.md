@@ -23,11 +23,33 @@ member accesses and destructor code to be wrong.
 | `+0x8c` | D-pad UI element | `UpdateDPadPos`, `OnDown`, `Deactivate` |
 | `+0x90`, `+0x94` | optional UI elements | `Deactivate` removes and deletes them |
 
+The constructor clears the four button pointers, the two touch pointers, the
+active byte, and the optional pointers. It does **not** clear the D-pad pointer
+at `+0x8c`; adding that initializer creates an extra store absent from the
+target. `Update` assigns the D-pad pointer during lazy UI creation.
+
 `MechTouchUIElement::position` starts at `+0x08`; its `owner` pointer is at
 `+0x38`. D-pad animations are two adjacent `MechTouchUIAnimation` records at
 element offsets `+0x40` and `+0x5c`. `OnDown` starts both animations toward
 `1.0f`, and `OnRelease` starts them toward zero. Each uses a duration of
 `0.15f`.
+
+The build initially omitted this translation unit from
+`bazel/android_per_file_copts.bazelrc`. GCC therefore compiled it without
+optimization, producing a frame pointer and zero match for even the simple
+`UpdateDPadPos`. The target uses `-O2`; add the per-file option before
+interpreting instruction-level diffs. With `-O2`,
+`ResetButtonPositionsToDefault` matches 100% in the GOT-aware fork.
+
+`LoadPerm` in the target makes nine separate `NuTexRead` calls in texture
+index order `2, 3, 0, 1, 4, 5, 6, 7, 8`. Replacing them with a loop over a
+temporary descriptor table shrinks the local function and defeats matching;
+retain the individual calls. The `hasDoneLoadPerm` symbol is one byte in the
+target BSS, and its final store uses `movb`.
+
+The other controller globals have distinct sizes: `lookAtMeBlendDone` is a
+one-byte BSS flag, while `s_noInputTimer` is four-byte `f32`. Declaring either
+flag as `i32` changes load and store instructions throughout `Update`.
 
 ## Control flow and constants
 
@@ -45,3 +67,20 @@ menu IDs 12 and 16 are rejected. It checks `(WORLD->current_level->flags &
 0x4e2) == 2`, the `TouchControlsActive` byte, and the player button's party
 selector. If the selector is present and its byte at `+0x88` is clear, the
 return value comes from `BlendedOut()`.
+
+`ProcessDragMovement` uses a `0.05f` displacement threshold and requires the
+touch to be held for more than `0.2f`. Its strength is
+`clamp((distance - 0.05f) * 4.0f, 0, 1) * 1.4f`; the target applies sine and
+cosine lookup values from `NuTrigTable` and clamps the output stick values to
+`[-1, 1]`. The drag values go to inherited `stick_values[2]` and `[3]` at
+offsets `+0x38` and `+0x3c`.
+
+The virtual controller destructor explicitly deletes the four UI buttons and
+the D-pad in that order before calling its main-controller base destructor.
+`Deactivate` only removes those five from the UI; it deletes the two optional
+controls at `+0x90` and `+0x94`. These lifetimes explain why an otherwise
+empty destructor compiled into only the base call and missed most of the
+target function.
+The deleting destructor frees the controller through `NU_FREE`, which calls
+the thread memory manager; default C++ `operator delete` emits a different
+call sequence.

@@ -15,8 +15,9 @@ i32 GetMenuID();
 extern FadeSystem FadeSys;
 i16 MechInputTouchVirtualConsoleController::s_textures[9];
 f32 MechInputTouchVirtualConsoleController::s_noInputTimer;
+bool lookAtMeBlendDone;
 extern "C" {
-    i32 hasDoneLoadPerm;
+    u8 hasDoneLoadPerm;
 }
 
 float MechInputTouchVirtualConsoleController::s_defaultDPadPosX = -0.72f;
@@ -29,7 +30,64 @@ float MechInputTouchVirtualConsoleController::s_defaultButtonsPosX_SmallScreen =
 float MechInputTouchVirtualConsoleController::s_defaultButtonsPosY_SmallScreen = -0.49f;
 
 void MechInputTouchVirtualConsoleController::Activate() {
-    STUBBED();
+    if (active || buttons[0] == NULL || !ShouldBeActive()) {
+        return;
+    }
+    s_noInputTimer = 20.0f;
+    if (dpad_touch != NULL && !dpad_touch->is_down) {
+        dpad_touch = NULL;
+    }
+    active = 1;
+    MechSystems::Get()->gesture_tracking_system.RegisterGestureTracker(*this, 150);
+    dpad_touch = NULL;
+
+    if (buttons[0] != NULL) {
+        MechSystems::Get()->TouchUI().AddUIElement(*buttons[0]);
+    }
+    if (buttons[1] != NULL) {
+        MechSystems::Get()->TouchUI().AddUIElement(*buttons[1]);
+    }
+    if (buttons[2] != NULL) {
+        MechSystems::Get()->TouchUI().AddUIElement(*buttons[2]);
+    }
+    if (buttons[3] != NULL) {
+        MechSystems::Get()->TouchUI().AddUIElement(*buttons[3]);
+    }
+    MechSystems::Get()->TouchUI().AddUIElement(*dpad);
+    dpad->position.x = SuperOptions.left_control_x;
+    dpad->position.y = SuperOptions.left_control_y;
+
+    if (!SuperOptions.dpad_locked || GetMenuID() != -1) {
+        MechTouchUIAnimation *animations =
+            reinterpret_cast<MechTouchUIAnimation *>(reinterpret_cast<u8 *>(dpad) + 0x40);
+        animations[0].value = 1.0f;
+        animations[0].to = 1.0f;
+        animations[0].elapsed = animations[0].duration;
+        animations[1].value = 1.0f;
+        animations[1].to = 1.0f;
+        animations[1].elapsed = animations[1].duration;
+        dpad->visible = 1;
+    }
+
+    if (GetMenuID() != -1) {
+        if (lock_button != NULL) {
+            MechSystems::Get()->TouchUI().RemoveUIElement(*lock_button);
+            delete lock_button;
+            lock_button = NULL;
+        }
+        lock_button = reinterpret_cast<MechTouchUIElement *>(
+            new VirtualControlDPad_LockButton(*reinterpret_cast<VirtualControlDPad *>(dpad)));
+        MechSystems::Get()->TouchUI().AddUIElement(*lock_button);
+
+        if (button_mover != NULL) {
+            MechSystems::Get()->TouchUI().RemoveUIElement(*button_mover);
+            delete button_mover;
+            button_mover = NULL;
+        }
+        button_mover = reinterpret_cast<MechTouchUIElement *>(new VirtualControlButtonMover(*this));
+        MechSystems::Get()->TouchUI().AddUIElement(*button_mover);
+    }
+    MechSystems::Get()->gesture_controller = reinterpret_cast<MechInputTouchGestureBasedController *>(this);
 }
 
 void MechInputTouchVirtualConsoleController::Deactivate() {
@@ -38,10 +96,17 @@ void MechInputTouchVirtualConsoleController::Deactivate() {
     }
     active = 0;
     MechSystems::Get()->gesture_tracking_system.UnregisterGestureTracker(*this);
-    for (i32 i = 0; i < 4; ++i) {
-        if (buttons[i] != NULL) {
-            MechSystems::Get()->TouchUI().RemoveUIElement(*buttons[i]);
-        }
+    if (buttons[0] != NULL) {
+        MechSystems::Get()->TouchUI().RemoveUIElement(*buttons[0]);
+    }
+    if (buttons[1] != NULL) {
+        MechSystems::Get()->TouchUI().RemoveUIElement(*buttons[1]);
+    }
+    if (buttons[2] != NULL) {
+        MechSystems::Get()->TouchUI().RemoveUIElement(*buttons[2]);
+    }
+    if (buttons[3] != NULL) {
+        MechSystems::Get()->TouchUI().RemoveUIElement(*buttons[3]);
     }
 
     MechTouchUIAnimation *animations =
@@ -68,30 +133,29 @@ void MechInputTouchVirtualConsoleController::Deactivate() {
 }
 
 void MechInputTouchVirtualConsoleController::LoadPerm() {
-    struct TextureLoad {
-        i32 index;
-        const char *name;
-    };
-    const TextureLoad textures[] = {
-        {2, "STUFF/UIBUTTONS/UIBUTTONS_INTERACTBUTTON"},
-        {3, "STUFF/UIBUTTONS/UIBUTTONS_TAGBUTTON"},
-        {0, "STUFF/UIBUTTONS/UIBUTTONS_JUMPBUTTON"},
-        {1, "STUFF/UIBUTTONS/UIBUTTONS_FIGHTBUTTON"},
-        {4, "STUFF/UIBUTTONS/UIBUTTONS_MOVEMENTWHEEL"},
-        {5, "STUFF/UIBUTTONS/UIBUTTONS_MOVEARROW"},
-        {6, "STUFF/UIBUTTONS/UIBUTTONS_LOCK_LOCKED"},
-        {7, "STUFF/UIBUTTONS/UIBUTTONS_LOCK_UNLOCKED"},
-        {8, "STUFF/UIBUTTONS/UIBUTTONS_CROSSHAIR"},
-    };
-    for (u32 i = 0; i < sizeof(textures) / sizeof(textures[0]); ++i) {
-        s_textures[textures[i].index] = static_cast<i16>(
-            NuTexRead(const_cast<char *>(textures[i].name), &permbuffer_ptr, permbuffer_end));
-    }
+    s_textures[2] = static_cast<i16>(NuTexRead(const_cast<char *>("STUFF/UIBUTTONS/UIBUTTONS_INTERACTBUTTON"),
+                                             &permbuffer_ptr, permbuffer_end));
+    s_textures[3] = static_cast<i16>(NuTexRead(const_cast<char *>("STUFF/UIBUTTONS/UIBUTTONS_TAGBUTTON"),
+                                             &permbuffer_ptr, permbuffer_end));
+    s_textures[0] = static_cast<i16>(NuTexRead(const_cast<char *>("STUFF/UIBUTTONS/UIBUTTONS_JUMPBUTTON"),
+                                             &permbuffer_ptr, permbuffer_end));
+    s_textures[1] = static_cast<i16>(NuTexRead(const_cast<char *>("STUFF/UIBUTTONS/UIBUTTONS_FIGHTBUTTON"),
+                                             &permbuffer_ptr, permbuffer_end));
+    s_textures[4] = static_cast<i16>(NuTexRead(const_cast<char *>("STUFF/UIBUTTONS/UIBUTTONS_MOVEMENTWHEEL"),
+                                             &permbuffer_ptr, permbuffer_end));
+    s_textures[5] = static_cast<i16>(NuTexRead(const_cast<char *>("STUFF/UIBUTTONS/UIBUTTONS_MOVEARROW"),
+                                             &permbuffer_ptr, permbuffer_end));
+    s_textures[6] = static_cast<i16>(NuTexRead(const_cast<char *>("STUFF/UIBUTTONS/UIBUTTONS_LOCK_LOCKED"),
+                                             &permbuffer_ptr, permbuffer_end));
+    s_textures[7] = static_cast<i16>(NuTexRead(const_cast<char *>("STUFF/UIBUTTONS/UIBUTTONS_LOCK_UNLOCKED"),
+                                             &permbuffer_ptr, permbuffer_end));
+    s_textures[8] = static_cast<i16>(NuTexRead(const_cast<char *>("STUFF/UIBUTTONS/UIBUTTONS_CROSSHAIR"),
+                                             &permbuffer_ptr, permbuffer_end));
     hasDoneLoadPerm = 1;
 }
 
 MechInputTouchVirtualConsoleController::MechInputTouchVirtualConsoleController(i32 player)
-    : MechInputTouchMainController(player), active(0), dpad_touch(NULL), drag_touch(NULL), dpad(NULL),
+    : MechInputTouchMainController(player), active(0), dpad_touch(NULL), drag_touch(NULL),
       lock_button(NULL), button_mover(NULL) {
     for (i32 i = 0; i < 4; ++i) {
         buttons[i] = NULL;
@@ -104,12 +168,12 @@ bool MechInputTouchVirtualConsoleController::OnDown(GameObject_s &object, TouchH
         return false;
     }
 
-    const bool locked = SuperOptions.dpad_locked != 0;
-    if (!locked || touch.down_position.x > 0.0f) {
+    const u8 locked = SuperOptions.dpad_locked;
+    if (locked == 0 || touch.down_position.x > 0.0f) {
         if (dpad_touch == NULL) {
             dpad_touch = &touch;
         }
-        if (!locked) {
+        if (locked == 0) {
             return true;
         }
     }
@@ -151,21 +215,24 @@ void MechInputTouchVirtualConsoleController::ProcessDragMovement(GameObject_s &)
     if (dpad_touch == NULL) {
         return;
     }
-    if (SuperOptions.dpad_locked && dpad_touch->down_position.x < 0.0f) {
+    const f32 down_x = dpad_touch->down_position.x;
+    const f32 down_y = dpad_touch->down_position.y;
+    if (SuperOptions.dpad_locked && down_x < 0.0f) {
         return;
     }
-    const f32 dx = dpad_touch->down_position.x - dpad_touch->touch_position.x;
-    const f32 dy = dpad_touch->down_position.y - dpad_touch->touch_position.y;
-    const f32 distance = NuFsqrt(dx * dx + dy * dy);
-    if (distance <= 0.05f || dpad_touch->held_time <= 0.2f) {
-        return;
+    const f32 dy = down_y - dpad_touch->touch_position.y;
+    const f32 dx = down_x - dpad_touch->touch_position.x;
+    const f32 distance = NuFsqrt(dy * dy + dx * dx);
+    if (distance > 0.05f) {
+        if (dpad_touch->held_time > 0.2f) {
+            const i32 angle = NuAtan2D(dx, dy);
+            const f32 strength = MAX(0.0f, MIN((distance - 0.05f) * 4.0f, 1.0f)) * 1.4f;
+            const f32 stick_x = -(strength * NU_SIN_LUT(angle));
+            const f32 stick_y = strength * NU_COS_LUT(angle);
+            stick_values[2] = MAX(-1.0f, MIN(stick_x, 1.0f));
+            stick_values[3] = MAX(-1.0f, MIN(stick_y, 1.0f));
+        }
     }
-    const i32 angle = NuAtan2D(dx, dy);
-    const f32 strength = MAX(0.0f, MIN((distance - 0.05f) * 4.0f, 1.0f)) * 1.4f;
-    const f32 stick_x = -(strength * NU_SIN_LUT(angle));
-    const f32 stick_y = strength * NU_COS_LUT(angle);
-    stick_values[2] = MAX(-1.0f, MIN(stick_x, 1.0f));
-    stick_values[3] = MAX(-1.0f, MIN(stick_y, 1.0f));
 }
 
 void MechInputTouchVirtualConsoleController::ResetButtonPositionsToDefault() {
@@ -202,43 +269,120 @@ bool MechInputTouchVirtualConsoleController::ShouldBeActive() {
         (WORLD->current_level->flags & 0x4e2) != 2 || !TouchHacks::TouchControlsActive || MiniCutCam == 2) {
         return false;
     }
-    MechTouchUIPartySelector *selector = MechSystems::Get()->PlayerButton().selector;
-    if (selector != NULL && selector->field_0x88 == 0) {
-        return selector->BlendedOut();
+    if (MechSystems::Get()->PlayerButton().selector != NULL &&
+        MechSystems::Get()->PlayerButton().selector->field_0x88 == 0) {
+        return MechSystems::Get()->PlayerButton().selector->BlendedOut();
     }
     return true;
 }
 
 void MechInputTouchVirtualConsoleController::Update(NuInputTouchData const *) {
-    STUBBED();
+    if (ShouldBeActive()) {
+        Activate();
+    } else {
+        Deactivate();
+    }
+    stick_values[2] = 0.0f;
+    stick_values[3] = 0.0f;
+
+    if (hasDoneLoadPerm != 0 && buttons[0] == NULL) {
+        const NuVec2 left_position = {SuperOptions.left_control_x, SuperOptions.left_control_y};
+        dpad = reinterpret_cast<MechTouchUIElement *>(new VirtualControlDPad(left_position, 0.25f, *this));
+
+        const f32 radius = NuIOS_IsSmallScreen() ? 0.20f : 0.14f;
+        const f32 x = SuperOptions.right_control_x;
+        const f32 y = SuperOptions.right_control_y;
+        const f32 dx = GetAspectRatio() * radius * 1.3f;
+        const f32 dy = radius * 1.3f;
+        const NuVec2 button_down = {x, y - dy};
+        buttons[0] = reinterpret_cast<MechTouchUIElement *>(new VirtualControlButton(
+            button_down, radius, static_cast<MechInputTouchMainController::eButtonTypes>(2)));
+        const NuVec2 button_right = {x + dx, y};
+        buttons[1] = reinterpret_cast<MechTouchUIElement *>(new VirtualControlButton(
+            button_right, radius, static_cast<MechInputTouchMainController::eButtonTypes>(3)));
+        const NuVec2 button_up = {x, y + dy};
+        buttons[2] = reinterpret_cast<MechTouchUIElement *>(new VirtualControlButton(
+            button_up, radius, static_cast<MechInputTouchMainController::eButtonTypes>(1)));
+        const NuVec2 button_left = {x - dx, y};
+        buttons[3] = reinterpret_cast<MechTouchUIElement *>(new VirtualControlButton(
+            button_left, radius, static_cast<MechInputTouchMainController::eButtonTypes>(0)));
+        UpdateButtonPositions();
+        Activate();
+    }
+    if (!active) {
+        return;
+    }
+
+    if (s_noInputTimer >= 0.0f) {
+        s_noInputTimer -= FRAMETIME;
+    }
+    if (s_noInputTimer < 0.0f) {
+        if (GetMenuID() == 25) {
+            MechSystems::Get()->NewRadarPulse(dpad->position, false);
+            if (button_mover != NULL) {
+                MechSystems::Get()->NewRadarPulse(button_mover->position, false);
+            }
+            s_noInputTimer = 20.0f;
+        } else {
+            MechTouchUIAnimation *animations =
+                reinterpret_cast<MechTouchUIAnimation *>(reinterpret_cast<u8 *>(dpad) + 0x40);
+            if (!animations[0].IsActive()) {
+                if (lookAtMeBlendDone) {
+                    s_noInputTimer -= FRAMETIME;
+                }
+                if (SuperOptions.dpad_locked && drag_touch == NULL && !lookAtMeBlendDone) {
+                    animations[0].Start(*animations[0].target, 1.0f, 0.3f);
+                    animations[1].Start(*animations[1].target, 1.0f, 0.3f);
+                    lookAtMeBlendDone = true;
+                }
+            }
+            if (s_noInputTimer < -5.0f) {
+                s_noInputTimer = 20.0f;
+                if (SuperOptions.dpad_locked && drag_touch == NULL) {
+                    animations[0].Start(*animations[0].target, 0.0f, 0.3f);
+                    animations[1].Start(*animations[1].target, 0.0f, 0.3f);
+                    lookAtMeBlendDone = false;
+                }
+            }
+        }
+    }
+    GameObject_s *object = Player[player_id];
+    if (object != NULL) {
+        ProcessDragMovement(*object);
+        UpdateButtons();
+    }
 }
 
 void MechInputTouchVirtualConsoleController::UpdateButtonPositions() {
     const f32 radius = NuIOS_IsSmallScreen() ? 0.29f : 0.23f;
     const f32 aspect = GetAspectRatio();
-    const f32 x = SuperOptions.right_control_x;
     const f32 y = SuperOptions.right_control_y;
+    const f32 x = SuperOptions.right_control_x;
     const f32 dx = aspect * radius;
 
-    buttons[0]->position.x = x;
-    buttons[0]->position.y = y - radius;
-    buttons[0]->position.z = 0.0f;
-    buttons[0]->position.w = 1.0f;
+    MechTouchUIElement *button = buttons[0];
+    button->position.z = 0.0f;
+    button->position.w = 1.0f;
+    button->position.y = y - radius;
+    button->position.x = x;
 
-    buttons[1]->position.x = x + dx;
-    buttons[1]->position.y = y;
-    buttons[1]->position.z = 0.0f;
-    buttons[1]->position.w = 1.0f;
+    button = buttons[1];
+    button->position.z = 0.0f;
+    button->position.w = 1.0f;
+    button->position.y = y;
+    button->position.x = x + dx;
 
-    buttons[2]->position.x = x;
-    buttons[2]->position.y = y + radius;
-    buttons[2]->position.z = 0.0f;
-    buttons[2]->position.w = 1.0f;
+    button = buttons[2];
+    button->position.z = 0.0f;
+    button->position.w = 1.0f;
+    button->position.y = y + radius;
+    button->position.x = x;
 
-    buttons[3]->position.x = x - dx;
-    buttons[3]->position.y = y;
-    buttons[3]->position.z = 0.0f;
-    buttons[3]->position.w = 1.0f;
+    button = buttons[3];
+    button->position.z = 0.0f;
+    button->position.w = 1.0f;
+    button->position.y = y;
+    button->position.x = x - dx;
 
     if (button_mover != NULL) {
         button_mover->position.x = x;
@@ -247,9 +391,15 @@ void MechInputTouchVirtualConsoleController::UpdateButtonPositions() {
 }
 
 void MechInputTouchVirtualConsoleController::UpdateDPadPos() {
-    dpad->position.x = SuperOptions.left_control_x;
-    dpad->position.y = SuperOptions.left_control_y;
+    MechTouchUIElement *const element = dpad;
+    element->position.x = SuperOptions.left_control_x;
+    element->position.y = SuperOptions.left_control_y;
 }
 
 MechInputTouchVirtualConsoleController::~MechInputTouchVirtualConsoleController() {
+    delete buttons[0];
+    delete buttons[1];
+    delete buttons[2];
+    delete buttons[3];
+    delete dpad;
 }

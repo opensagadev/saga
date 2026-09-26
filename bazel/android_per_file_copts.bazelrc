@@ -77,6 +77,7 @@ build:target --per_file_copt=^src/legoapi/menus/screens/shop\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/menus/screens/gamestructure\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/core/startup/game\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/core/startup/main\.cpp$@-O2
+build:target --per_file_copt=^src/legoapi/core/startup/virtual\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/cutscenes/cutscenes\.cpp$@-O3
 build:target --per_file_copt=^src/legogame/startup\.cpp$@-O2
 build:target --per_file_copt=^src/legogame/game\.cpp$@-O3

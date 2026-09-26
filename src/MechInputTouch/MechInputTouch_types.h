@@ -600,6 +600,9 @@ struct MechInputTouchVirtualConsoleController : MechInputTouchMainController, Me
     void UpdateButtonPositions();
     void UpdateDPadPos();
     ~MechInputTouchVirtualConsoleController() override;
+    static void operator delete(void *allocation) {
+        NU_FREE(allocation);
+    }
 
     u8 active;
     u8 pad_71[3];
