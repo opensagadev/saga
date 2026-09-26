@@ -3985,29 +3985,32 @@ static __used__ __attribute__((regparm(1))) void DrawFalconSpotLights(GameObject
         spotLightB_zrot[object->apiobj.field_0x27c] -= 1.0f;
 }
 
-static __used__ void DisplayListMaterialClipUpdate(nudisplayscene_s *scene) {
+static __used__ __attribute__((regparm(1))) void DisplayListMaterialClipUpdate(nudisplayscene_s *scene) {
     if (scene == NULL || scene->mtls == NULL || scene->mtls[0] == NULL)
         return;
     const u8 buffer = static_cast<u8>(scene->render_buffer >> 7);
     const u8 *current = scene->mtl_used[scene->render_buffer >> 7];
     const u8 *previous = scene->mtl_used[buffer ^ 1];
     const u32 count = (scene->nmtls + 7) >> 3;
+    NUDISPLAYLIST **lists = scene->dlist_mtls;
     for (u32 byte_index = 0; byte_index < count; ++byte_index) {
         const u8 bits = current[byte_index];
         if (previous[byte_index] == bits)
             continue;
         for (u32 bit = 0; bit < 8; ++bit) {
             const i32 index = static_cast<i32>(byte_index * 8 + bit);
-            if (index >= static_cast<i32>(scene->nmtls))
-                return;
-            NUDISPLAYLIST *list = scene->dlist_mtls[index];
+            NUDISPLAYLIST *list = lists[index];
             NUMTL *material = scene->mtls[list->mtl_id];
-            bool enabled = ((bits >> bit) & 1) != 0;
-            if (enabled && material != NULL && *reinterpret_cast<const u32 *>(reinterpret_cast<const u8 *>(material) + 0xb0) != 0 &&
-                *reinterpret_cast<const u8 *>(reinterpret_cast<const u8 *>(material) + 0xf8) == 0xff) {
-                enabled = false;
-            }
-            list->mtl_item->id = enabled ? 0 : 1;
+            u32 enabled = (bits >> bit) & 1;
+            if (enabled && material != NULL &&
+                *reinterpret_cast<const u32 *>(reinterpret_cast<const u8 *>(material) + 0xb0) != 0)
+                enabled = *reinterpret_cast<const u8 *>(reinterpret_cast<const u8 *>(material) + 0xf8) != 0xff;
+            if (enabled)
+                list->mtl_item->id = 0;
+            else
+                list->mtl_item->id = 1;
+            if (index + 1 >= static_cast<i32>(scene->nmtls))
+                return;
         }
     }
 }
