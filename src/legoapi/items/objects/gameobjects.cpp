@@ -5336,16 +5336,11 @@ void ThingManager::AddThingAfterThis(BaseThing *thing) {
 // bracketed with timebar slot 3 ("Dis"). PanelRender uses this pass for the
 // display-layer things that render on top of the gameplay panel.
 void ThingManager::DisplayThings(ThingRenderData *data) {
-    static const char *name = "Dis"; // timebar slot name @0x5734db
+    const char *name = "Dis"; // timebar slot name @0x5734db
 
-    if (this->count <= 0) {
-        return;
-    }
-    i32 i = 0;
-    do {
+    for (i32 i = 0; i < this->count; ++i) {
         BaseThing *thing = this->things[i];
-        if (thing == NULL || (thing->flags & THING_FLAG_SKIP_DISPLAY)) {
-        } else {
+        if (thing != NULL && (thing->flags & THING_FLAG_SKIP_DISPLAY) == 0) {
             if (thing->profiling_0xc != 0) {
                 _NuTimeBarSlotBegin(this->timebar, 3, name);
                 thing = this->things[i];
@@ -5356,8 +5351,7 @@ void ThingManager::DisplayThings(ThingRenderData *data) {
                 _NuTimeBarSlotEnd(this->timebar, 3);
             }
         }
-        ++i;
-    } while (i < this->count);
+    }
 }
 
 void ThingManager::EffectsThings(ThingRenderData *data) {
@@ -5490,16 +5484,11 @@ void ThingManager::RemoveTemporaryThings() {
 // ThingManager::RenderThings @0x425390. Single pass over Render,
 // bracketed with timebar slot 1 ("Rnd").
 void ThingManager::RenderThings(ThingRenderData *data) {
-    static const char *name = "Rnd"; // timebar slot name @0x5734df
+    const char *name = "Rnd"; // timebar slot name @0x5734df
 
-    if (this->count <= 0) {
-        return;
-    }
-    i32 i = 0;
-    do {
+    for (i32 i = 0; i < this->count; ++i) {
         BaseThing *thing = this->things[i];
-        if (thing == NULL || (thing->flags & THING_FLAG_SKIP_RENDER)) {
-        } else {
+        if (thing != NULL && (thing->flags & THING_FLAG_SKIP_RENDER) == 0) {
             if (thing->profiling_0xc != 0) {
                 _NuTimeBarSlotBegin(this->timebar, 1, name);
                 thing = this->things[i];
@@ -5510,30 +5499,25 @@ void ThingManager::RenderThings(ThingRenderData *data) {
                 _NuTimeBarSlotEnd(this->timebar, 1);
             }
         }
-        ++i;
-    } while (i < this->count);
+    }
 }
 
 void ThingManager::ResetThings(ThingResetData *data) {
     const char *name = "Res";
 
-    i32 i = 0;
-    if (this->count > 0) {
-        do {
-            BaseThing *thing = this->things[i];
-            if (thing != NULL && (thing->flags & 8) == 0) {
-                if (thing->profiling_0xc != 0) {
-                    _NuTimeBarSlotBegin(this->timebar, 4, name);
-                }
+    for (i32 i = 0; i < this->count; ++i) {
+        BaseThing *thing = this->things[i];
+        if (thing != NULL && (thing->flags & 8) == 0) {
+            if (thing->profiling_0xc != 0) {
+                _NuTimeBarSlotBegin(this->timebar, 4, name);
                 thing = this->things[i];
-                thing->Reset(data);
-                thing = this->things[i];
-                if (thing->profiling_0xc != 0) {
-                    _NuTimeBarSlotEnd(this->timebar, 4);
-                }
             }
-            ++i;
-        } while (i < this->count);
+            thing->Reset(data);
+            thing = this->things[i];
+            if (thing->profiling_0xc != 0) {
+                _NuTimeBarSlotEnd(this->timebar, 4);
+            }
+        }
     }
 }
 

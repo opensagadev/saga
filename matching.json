@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 62.91078,
+    "fuzzy_match_percent": 62.935066,
     "total_code": "4722419",
     "matched_code": "513061",
     "matched_code_percent": 10.864368,
@@ -39241,7 +39241,7 @@
           "address": 1559392,
           "offset": 669424,
           "size": 211,
-          "match_percent": 0.0
+          "match_percent": 99.59375
         },
         {
           "name": "_Z25oneAtOnce_SetNumAttackersi",
@@ -47236,7 +47236,7 @@
           "address": 1515072,
           "offset": 625104,
           "size": 529,
-          "match_percent": 0.0
+          "match_percent": 79.0
         },
         {
           "name": "_Z14Animate_BARMANP12GameObject_s",
@@ -58515,7 +58515,7 @@
           "address": 1962192,
           "offset": 1072224,
           "size": 264,
-          "match_percent": 0.0
+          "match_percent": 72.50685
         },
         {
           "name": "_ZL16Ledges_AddGizmosP10GIZMOSYS_siPvS1_",
@@ -58539,7 +58539,7 @@
           "address": 1964368,
           "offset": 1074400,
           "size": 336,
-          "match_percent": 58.68889
+          "match_percent": 58.855556
         },
         {
           "name": "_ZL20Ledges_StoreProgressPvS_S_",
@@ -65734,7 +65734,7 @@
           "address": 4346560,
           "offset": 3456592,
           "size": 193,
-          "match_percent": 0.0
+          "match_percent": 56.396824
         },
         {
           "name": "_ZN12ThingManager12RenderThingsEP15ThingRenderData",
@@ -65742,7 +65742,7 @@
           "address": 4346768,
           "offset": 3456800,
           "size": 193,
-          "match_percent": 0.0
+          "match_percent": 56.396824
         },
         {
           "name": "_ZN12ThingManager13ProcessThingsEP16ThingProcessData",
@@ -65758,7 +65758,7 @@
           "address": 4347504,
           "offset": 3457536,
           "size": 193,
-          "match_percent": 0.0
+          "match_percent": 56.396824
         },
         {
           "name": "_ZN9BaseThingC1Ev",

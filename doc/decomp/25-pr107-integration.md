@@ -69,3 +69,23 @@ loading the second, and declares the start/middle/end points in retail stack
 order. It still emits the same three debris calls in that order, with no
 new guards. The remaining difference is compiler control flow/register
 allocation: 648 bytes versus the original 637. Experiments stayed in `/tmp`.
+
+The next low-match pass restores ordinary C++ control flow in six functions,
+without changing their per-file optimization settings:
+
+- `oneAtOnce_GetHoldRange` (`0x17cb60`): the null-entry and index-limit tests
+  belong to the loop condition, in that order. This keeps the original
+  211-byte loop instead of unrolling it, and improves 0% to 99.594%.
+- `Animate_CRITTER` (`0x171e40`): preserves the fall-model checks after the
+  contact-grace and character-speed tests, and the nested fall/run/walk
+  selection. The run threshold uses `>= ? WALK : RUN`, matching the retail
+  comparison's unordered result too. It improves 0% to 79.000%.
+- `ThingManager::DisplayThings`, `RenderThings`, and `ResetThings`
+  (`0x4252c0`, `0x425390`, `0x425670`): counted loops retain the original
+  null/skip checks, virtual-call slots, and profiling calls. Each improves
+  0% to 56.397%; basic-block layout still differs.
+- `Ledges_Draw` (`0x1df0d0`): restores the 16-byte-aligned local matrix and
+  the count reload after drawing (`0x1df1ad`–`0x1df1b6`). Skipped entries
+  use the cached count. It improves 0% to 72.507%.
+
+These are linked-binary scores, not claims of full instruction matching.

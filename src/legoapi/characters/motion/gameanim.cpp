@@ -640,8 +640,8 @@ void Animate_BEAST(GameObject_s *object) {
             const bool has_run = object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_RUN] != NULL;
             if (has_run && has_walk) {
                 const f32 threshold = (character->walk_speed + character->run_speed) * 0.5f;
-                packet.requested_animation = threshold < pad->input_magnitude ? CHARACTER_ANIMATION_RUN
-                                                                              : CHARACTER_ANIMATION_WALK;
+                packet.requested_animation =
+                    threshold < pad->input_magnitude ? CHARACTER_ANIMATION_RUN : CHARACTER_ANIMATION_WALK;
             } else if (has_run) {
                 packet.requested_animation = CHARACTER_ANIMATION_RUN;
             } else if (has_walk) {
@@ -714,50 +714,48 @@ void Animate_CRITTER(GameObject_s *object) {
     }
 
     if (object->character_context == 30) {
-        packet.requested_animation = CHARACTER_ANIMATION_FALL;
         if (object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_FALL] != NULL) {
+            packet.requested_animation = CHARACTER_ANIMATION_FALL;
             return;
         }
-    } else {
-        packet.requested_animation = CHARACTER_ANIMATION_FALL;
     }
+    packet.requested_animation = CHARACTER_ANIMATION_FALL;
 
     if (object->character_context != CHARACTER_CONTEXT_DOOMED) {
-        bool use_default_idle = object->apiobj.field_0x27d != 0;
-        if (!use_default_idle) {
-            const bool has_fall = object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_FALL] != NULL;
-            if (object->ground_contact_grace_timer > 0.0f || !has_fall ||
-                (object->fall_animation_timer < 0.2f && object->nearby_floor_distance != 2000000.0f &&
-                 object->nearby_floor_distance < 0.25f && object->apiobj.velocity.y < 0.0f)) {
-                const GAMECHARACTERDATA *game_character =
-                    static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
-                use_default_idle = !(game_character->field_0x28 > 0.0f) || !has_fall;
-            }
-        }
-        if (use_default_idle) {
+        if (object->apiobj.field_0x27d != 0 ||
+            ((object->ground_contact_grace_timer > 0.0f ||
+              object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_FALL] == NULL ||
+              (object->fall_animation_timer < 0.2f && object->nearby_floor_distance != 2000000.0f &&
+               object->nearby_floor_distance < 0.25f && object->apiobj.velocity.y < 0.0f)) &&
+             (!(static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24)->field_0x28 > 0.0f) ||
+              object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_FALL] == NULL))) {
             packet.requested_animation = static_cast<i16>(GetDefaultIdle(object));
         }
     }
 
-    if (UseFallAnim(object)) {
-        packet.requested_animation = CHARACTER_ANIMATION_FALL;
-    } else if (packet.requested_animation != CHARACTER_ANIMATION_FALL &&
-               (object->pad_gamepad->allocated_5a & GAMEPAD_RUNTIME_SUPPRESS_MOVEMENT) == 0 &&
-               object->pad_gamepad->input_magnitude > 0.0f) {
-        const bool has_walk = object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_WALK] != NULL;
-        const bool has_run = object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_RUN] != NULL;
-        if (has_run && has_walk) {
-            const GAMECHARACTERDATA *game_character =
-                static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
-            const f32 run_threshold = (game_character->walk_speed + game_character->run_speed) * 0.5f;
-            packet.requested_animation = run_threshold < object->pad_gamepad->input_magnitude
-                                             ? CHARACTER_ANIMATION_RUN
-                                             : CHARACTER_ANIMATION_WALK;
-        } else if (has_run) {
-            packet.requested_animation = CHARACTER_ANIMATION_RUN;
-        } else if (has_walk) {
-            packet.requested_animation = CHARACTER_ANIMATION_WALK;
+    if (!UseFallAnim(object)) {
+        if (packet.requested_animation != CHARACTER_ANIMATION_FALL &&
+            (object->pad_gamepad->allocated_5a & GAMEPAD_RUNTIME_SUPPRESS_MOVEMENT) == 0 &&
+            object->pad_gamepad->input_magnitude > 0.0f) {
+            const bool has_walk = object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_WALK] != NULL;
+            const bool has_run = object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_RUN] != NULL;
+            if (has_run) {
+                if (has_walk) {
+                    const GAMECHARACTERDATA *game_character =
+                        static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
+                    const f32 run_threshold = (game_character->walk_speed + game_character->run_speed) * 0.5f;
+                    packet.requested_animation = run_threshold >= object->pad_gamepad->input_magnitude
+                                                     ? CHARACTER_ANIMATION_WALK
+                                                     : CHARACTER_ANIMATION_RUN;
+                } else {
+                    packet.requested_animation = CHARACTER_ANIMATION_RUN;
+                }
+            } else if (has_walk) {
+                packet.requested_animation = CHARACTER_ANIMATION_WALK;
+            }
         }
+    } else {
+        packet.requested_animation = CHARACTER_ANIMATION_FALL;
     }
     MoveAnim_Check(object);
 }

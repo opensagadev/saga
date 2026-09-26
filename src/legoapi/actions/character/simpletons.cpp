@@ -115,9 +115,7 @@ f32 oneAtOnce_GetHoldRange(GameObject_s *object) {
     i32 unassigned_in_row = 0;
     i32 index = 0;
     GameObject_s *candidate = attackers[index].object;
-    while (candidate != NULL) {
-        if (index > 16)
-            return AtOnce_InitialRowDist;
+    while (candidate != NULL && index < 17) {
         if (candidate == object) {
             return static_cast<f32>(row) * AtOnce_RowDist + AtOnce_InitialRowDist;
         }

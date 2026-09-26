@@ -156,17 +156,17 @@ static void Ledges_AddGizmos(GIZMOSYS *gizmo_sys, i32 type_id, void *world_info,
 static void Ledges_Draw(void *world_info, void *, float) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_info);
     LEDGE *ledge = static_cast<LEDGE *>(world->ledges);
-    if (ledge == NULL)
-        return;
-    for (i32 i = 0; i < world->ledge_count; ++i, ++ledge) {
-        if (!(ledge->state_flags & 2))
-            continue;
-        if (world->lev_objs[LedgePiece[ledge->type_index].field_0x0].active == 0)
-            continue;
-        NUMTX matrix;
-        NuMtxSetRotationY(&matrix, ledge->y_rotation);
-        NuMtxTranslate(&matrix, &ledge->position);
-        NuSpecialDrawAt(&world->lev_objs[LedgePiece[ledge->type_index].field_0x0].special, &matrix);
+    NUMTX matrix __attribute__((aligned(16)));
+    if (ledge != NULL) {
+        i32 count = world->ledge_count;
+        for (i32 i = 0; i < count; ++i, ++ledge) {
+            if ((ledge->state_flags & 2) != 0 && world->lev_objs[LedgePiece[ledge->type_index].field_0x0].active != 0) {
+                NuMtxSetRotationY(&matrix, ledge->y_rotation);
+                NuMtxTranslate(&matrix, &ledge->position);
+                NuSpecialDrawAt(&world->lev_objs[LedgePiece[ledge->type_index].field_0x0].special, &matrix);
+                count = world->ledge_count;
+            }
+        }
     }
 }
 
