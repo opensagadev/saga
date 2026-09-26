@@ -249,7 +249,7 @@ MechJumpAutoPilotAddon::OnProcess(MechAddon::ProcessStage, float delta_time) {
 
         const float gravity = character->apiobj.character_data->game_character->gravity;
         const float vy = character->apiobj.velocity.y;
-        field_94 = character->apiobj.position.y - (vy * vy) / (gravity + gravity);
+        field_94 = character->apiobj.position.y + (-(vy * vy)) / (gravity + gravity);
     }
 
     started = character->character_context == LEGOCONTEXT_JUMP || started;
