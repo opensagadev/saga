@@ -286,7 +286,7 @@ extern "C" f32 AIPathNodeDistanceToPathNode(AIPATH *path, i32 start_node, i32 de
 extern void CurrentStart(GameObject_s *object, i32 mode, i32 start);
 extern "C" void ComplexSockAngles(SOCKROT *angles);
 extern void oneAtOnce_SetInitDistPerRow(f32 distance);
-extern bool oneAtOnce_CanAttack(GameObject_s *object, GameObject_s *opponent);
+extern i32 oneAtOnce_CanAttack(GameObject_s *object, GameObject_s *opponent);
 extern f32 oneAtOnce_GetHoldRange(GameObject_s *object);
 extern void Hint_CancelCurrent();
 extern i32 TagCharacter(GameObject_s *source, GameObject_s *target, i32 mode);

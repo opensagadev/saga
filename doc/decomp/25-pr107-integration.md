@@ -89,3 +89,15 @@ without changing their per-file optimization settings:
   use the cached count. It improves 0% to 72.507%.
 
 These are linked-binary scores, not claims of full instruction matching.
+
+`oneAtOnce_CanAttack` (`0x17cb10`) now matches 100% (previously 53%). Its
+return type is `i32`, not `bool`: retail zero-extends the comparison into
+EAX, and the three callers at `0x18b3d3`, `0x19b7b8`, and `0x19b8bd` test
+the full register. Its unassigned-player case is a separate early return.
+The definition and AI caller declaration now agree.
+
+`UpdateCharacterLoad` also uses a 32-bit character index: the retail loop
+increments ESI at `0x108ab3` and compares it with `CHARCOUNT` at `0x108abc`,
+without narrowing it back to 16 bits. Only that verified type correction
+was retained. Attempts to recover the store-pack loop stayed in `/tmp`;
+the function remains at 0% and its existing `-O3` mode was not changed.

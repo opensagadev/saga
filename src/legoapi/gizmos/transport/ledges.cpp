@@ -156,6 +156,7 @@ static void Ledges_AddGizmos(GIZMOSYS *gizmo_sys, i32 type_id, void *world_info,
 static void Ledges_Draw(void *world_info, void *, float) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_info);
     LEDGE *ledge = static_cast<LEDGE *>(world->ledges);
+    // Retail realigns the stack and places this matrix at the aligned ESP+0x20.
     NUMTX matrix __attribute__((aligned(16)));
     if (ledge != NULL) {
         i32 count = world->ledge_count;

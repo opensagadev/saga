@@ -1408,7 +1408,7 @@ void UpdateCharacterLoad() {
         }
     }
 
-    for (i16 id = 0; id < CHARCOUNT; ++id) {
+    for (i32 id = 0; id < CHARCOUNT; ++id) {
         if (id == id_DROIDEKA || (CDataList[id].model_flags & 0x04002000) != 0 || APICharacterLoaded(id) != NULL) {
             continue;
         }
