@@ -438,22 +438,29 @@ struct MechInputTouchPodraceController {
     void Update(NuInputTouchData const *);
     virtual ~MechInputTouchPodraceController();
 };
-struct MechInputTouchSpeederChaseController {
+struct MechInputTouchSpeederChaseController : MechInputTouchMainController, MechInputTouchGestureTracker {
     void Activate();
     void Deactivate();
-    void IsDownSwipe(NuVec2 const &, NuVec2 const &);
-    void IsSwipeAgainstDirection(NuVec2 const &, NuVec2 const &, bool);
-    void IsSwipeWithDirection(NuVec2 const &, NuVec2 const &, bool);
-    void IsUpSwipe(NuVec2 const &, NuVec2 const &);
+    bool IsDownSwipe(NuVec2 const &, NuVec2 const &);
+    bool IsSwipeAgainstDirection(NuVec2 const &, NuVec2 const &, bool);
+    bool IsSwipeWithDirection(NuVec2 const &, NuVec2 const &, bool);
+    bool IsUpSwipe(NuVec2 const &, NuVec2 const &);
     MechInputTouchSpeederChaseController(i32);
-    void OnClick(GameObject_s &, TouchHolder &);
-    void OnDoubleClick(GameObject_s &, TouchHolder &);
-    void OnDown(GameObject_s &, TouchHolder &);
-    void OnRelease(GameObject_s &, TouchHolder &);
-    void OnSwipe(GameObject_s &, TouchHolder &, i32);
-    void Update(NuInputTouchData const *);
-    virtual ~MechInputTouchSpeederChaseController();
+    bool OnClick(GameObject_s &, TouchHolder &) override;
+    bool OnDoubleClick(GameObject_s &, TouchHolder &) override;
+    bool OnDown(GameObject_s &, TouchHolder &) override;
+    bool OnRelease(GameObject_s &, TouchHolder &) override;
+    bool OnSwipe(GameObject_s &, TouchHolder &, i32) override;
+    void Update(NuInputTouchData const *) override;
+    ~MechInputTouchSpeederChaseController() override;
+
+    TouchHolder *touch_holder;
+    f32 swipe_y;
+    f32 cooldown;
+    bool active;
+    bool swipe_direction;
 };
+DECOMP_ASSERT(sizeof(MechInputTouchSpeederChaseController) == 0x80, "Speeder chase touch controller ABI");
 struct MechInputTouchSystem {
     static i32 s_baseControlMode;
     static i32 s_actualTouchMode;

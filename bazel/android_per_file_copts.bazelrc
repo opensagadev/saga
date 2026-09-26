@@ -376,6 +376,7 @@ build:target --per_file_copt=^src/MechInputTouch/MechInputTouch\.cpp$@-O3
 build:target --per_file_copt=^src/MechInputTouch/MechInputTouchMainController\.cpp$@-O2
 build:target --per_file_copt=^src/MechInputTouch/MechInputTouchGestureBasedController\.cpp$@-O2
 build:target --per_file_copt=^src/MechInputTouch/MechInputTouchGestureTracker\.cpp$@-O3
+build:target --per_file_copt=^src/MechInputTouch/MechInputTouchSpeederChaseBikeController\.cpp$@-O2
 build:target --per_file_copt=^src/MechInputTouch/MechSystems\.cpp$@-O2
 build:target --per_file_copt=^src/MechInputTouch/MechAutofireAddon\.cpp$@-O2
 build:target --per_file_copt=^src/MechInputTouch/MechTouchUIElements\.cpp$@-O3
