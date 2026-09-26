@@ -78,3 +78,11 @@ For `DeathStarRescueB_Init`, the target has six `blowup_block_N` lookups.
 Missing the sixth produced a 534-byte function and 93.833%; restoring it
 reached the exact 566-byte size and 99.468%. Check the entire target tail when
 a repeated string sequence seems to end at a round count.
+
+## Mos Eisley B setup
+
+`MosEisleyB_Init` matches 99.644% at the target's exact 1,661-byte size. It
+uses the same five-name local array pattern as `BlockadeRunnerB_Init` for the
+terrain blowups. The target preloads those pointers and unrolls the loop.
+It also reuses one stack `direction` output across four path connection
+lookups. Remaining differences are linked string GOTOFF operands.

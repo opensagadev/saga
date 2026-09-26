@@ -57,6 +57,7 @@ extern BLOCKADERUNNERD_LEVFLAG_s LevFlag;
 i32 test_tb = 1;
 void *deathstarescapeb_netpacket;
 u8 tatooineA_nodesNeedUpdating = 1;
+u8 mosEisleyB_nodesNeedUpdating = 1;
 
 // Episode 4 level handlers, in the game's Episode_IV progression:
 // blockade runner / tatooine / mos eisley / death star rescue / escape /
@@ -429,8 +430,92 @@ void MosEisleyA_Init(WORLDINFO_s *world) {
         force->strength_0x6c = 0.75f;
 }
 
-void MosEisleyB_Init(WORLDINFO_s *) {
-    STUBBED();
+void MosEisleyB_Init(WORLDINFO_s *world) {
+    NuSpecialFind(world->current_gscn, &LevHSpecial[0], "land_speeder_terrain1", 1);
+    LevGizObst[0] = GizObstacle_FindByName(world->giz_obstacle_sys, "Wash");
+    LevGizForce[0] = GizForce_FindByName(world->giz_force_sys, "force1");
+    LevGizForce[1] = GizForce_FindByName(world->giz_force_sys, "force2");
+    LevGizForce[2] = GizForce_FindByName(world->giz_force_sys, "force3");
+
+    LevAIPathNode[0] = AIPathFindNode(world->ai_sys, NULL, "stack_a");
+    LevAIPathNode[1] = AIPathFindNode(world->ai_sys, NULL, "stack_b");
+    LevAIPathNode[2] = AIPathFindNode(world->ai_sys, NULL, "stack_c");
+    LevAIPathNode[3] = AIPathFindNode(world->ai_sys, NULL, "stack_d");
+    i32 direction;
+    LevPathCnx[0] = AIPAthFindPathCnx(world->ai_sys, NULL, "stack_a", "stack_b", &direction);
+    LevPathCnx[1] = AIPAthFindPathCnx(world->ai_sys, NULL, "stack_b", "stack_c", &direction);
+    LevPathCnx[2] = AIPAthFindPathCnx(world->ai_sys, NULL, "stack_c", "stack_d", &direction);
+    LevPathCnx[3] = AIPAthFindPathCnx(world->ai_sys, NULL, "stack_d", "stack_e", &direction);
+    mosEisleyB_nodesNeedUpdating = 1;
+
+    GIZMOBLOWUP_s *blowup = GizmoBlowUp_FindByName(world, "junk_071");
+    if (blowup != NULL) {
+        blowup->field_0x125[0] = 1;
+        blowup->draw_flags |= 0x10000;
+    }
+    blowup = GizmoBlowUp_FindByName(world, "junk_081");
+    if (blowup != NULL) {
+        blowup->field_0x125[0] = 1;
+        blowup->draw_flags |= 0x10000;
+    }
+    blowup = GizmoBlowUp_FindByName(world, "evap_082");
+    if (blowup != NULL) {
+        blowup->field_0x124 = 1;
+        blowup->draw_flags |= 0x18000;
+    }
+
+    if (NuSpecialExistsFn(&LevHSpecial[0])) {
+        char *names[5] = {"arm_1_null1", "arm_1_null2", "arm_1_null3", "arm_1_null4", "arm_2_null1"};
+        for (i32 i = 0; i < 5; ++i) {
+            blowup = GizmoBlowUp_FindByName(world, names[i]);
+            if (blowup != NULL && blowup->type != NULL) {
+                blowup->field_0x124 = 1;
+                blowup->override_special = &LevHSpecial[0];
+                blowup->draw_flags |= 0xc00000;
+                GizBlowup_InitSingleTerrain(blowup);
+            }
+        }
+    }
+
+    NuSpecialFind(world->current_gscn, &LevHSpecial[1], "heater_3_1_1", 1);
+    NuSpecialFind(world->current_gscn, &LevHSpecial[2], "heater_3_1_2", 1);
+    NuSpecialFind(world->current_gscn, &LevHSpecial[3], "heater_3_1_3", 1);
+    NuSpecialFind(world->current_gscn, &LevHSpecial[4], "heater_3_1_4", 1);
+    NuSpecialFind(world->current_gscn, &LevHSpecial[5], "heater_3_1_5", 1);
+    NuSpecialFind(world->current_gscn, &LevHSpecial[6], "heater_3_1_6", 1);
+
+    blowup = GizmoBlowUp_FindByName(world, "null_pop1");
+    if (blowup != NULL) {
+        blowup->field_0x128 = 0.7f;
+        blowup->field_0x124 = 1;
+        blowup->override_special = &LevHSpecial[3];
+        blowup->draw_flags |= 0xc10000;
+        GizBlowup_InitSingleTerrain(blowup);
+    }
+    blowup = GizmoBlowUp_FindByName(world, "null_pop2");
+    if (blowup != NULL) {
+        blowup->field_0x128 = 0.7f;
+        blowup->field_0x124 = 1;
+        blowup->override_special = &LevHSpecial[4];
+        blowup->draw_flags |= 0xc10000;
+        GizBlowup_InitSingleTerrain(blowup);
+    }
+    blowup = GizmoBlowUp_FindByName(world, "null_pop3");
+    if (blowup != NULL) {
+        blowup->field_0x128 = 0.7f;
+        blowup->field_0x124 = 1;
+        blowup->override_special = &LevHSpecial[5];
+        blowup->draw_flags |= 0xc10000;
+        GizBlowup_InitSingleTerrain(blowup);
+    }
+    blowup = GizmoBlowUp_FindByName(world, "null_pop11");
+    if (blowup != NULL) {
+        blowup->field_0x128 = 0.7f;
+        blowup->field_0x124 = 1;
+        blowup->override_special = &LevHSpecial[6];
+        blowup->draw_flags |= 0xc10000;
+        GizBlowup_InitSingleTerrain(blowup);
+    }
 }
 
 void MosEisleyD_Init(WORLDINFO_s *) {
