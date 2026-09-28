@@ -15,12 +15,20 @@ MIDSPECIALMOVEFN MidSpecialMoveFn = NULL;
 
 extern "C" {
 
-    void InitFn_MidSpecialMove(MIDSPECIALMOVEFN function) {
+#if defined(__GNUC__) && !defined(__clang__)
+#define STARWARS_OMIT_FRAME_POINTER __attribute__((optimize("omit-frame-pointer")))
+#else
+#define STARWARS_OMIT_FRAME_POINTER
+#endif
+
+    STARWARS_OMIT_FRAME_POINTER void InitFn_MidSpecialMove(MIDSPECIALMOVEFN function) {
         MidSpecialMoveFn = function;
     }
 
-    void InitFn_PreparingForSpecialMove(PREPARINGSPECIALMOVEFN function) {
+    STARWARS_OMIT_FRAME_POINTER void InitFn_PreparingForSpecialMove(PREPARINGSPECIALMOVEFN function) {
         PreparingForSpecialMoveFn = function;
     }
+
+#undef STARWARS_OMIT_FRAME_POINTER
 
 } // extern "C"

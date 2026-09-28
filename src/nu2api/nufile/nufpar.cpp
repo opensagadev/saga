@@ -23,6 +23,9 @@ void NuFParSetPos(NUFPAR *parser, NUFPARPOS *position) {
 #include "nu2api/nucore/nurdp.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nufile/nufile.h"
+#include "legoapi/props/system/socksys.h"
+
+extern "C" SOCK *sockpar_sock;
 
 struct SOCK;
 struct SOCKROT;

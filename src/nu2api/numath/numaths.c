@@ -22,7 +22,6 @@ extern "C" {
 }
 
 i32 NuVecClipTestPointVU0(nuvec_s *, numtx_s *) {
-    STUBBED();
     return 0;
 }
 
@@ -37,7 +36,6 @@ extern "C" {
     }
 
     void NuVecConvertToIntVU0(void) {
-        STUBBED();
     }
 
     void NuVec4ScaleXYZVU0(NUVEC4 *out, NUVEC4 *v, f32 scale) {
@@ -66,7 +64,6 @@ extern "C" {
     }
 
     void NuCameraInitClipTestVU0() {
-        STUBBED();
     }
 
     void NuMtxMulnVU0(NUMTX *out, NUMTX *left, NUMTX **right) {
@@ -294,7 +291,6 @@ f32 NuASin_Accurate(f32 value) {
 }
 
 float NuSin_Accurate(float x) {
-    STUBBED();
     (void)x;
 }
 

@@ -1876,10 +1876,9 @@ extern "C" {
         gp_cam.yaw = yaw;
     }
     void edcamSetAutoSpeed(f32 move_base, f32 move_distance_scale, f32 zoom_base, f32 zoom_distance_scale) {
-        gp_cam.auto_move_base = move_base;
-        gp_cam.auto_move_dist_scale = move_distance_scale;
-        gp_cam.auto_zoom_base = zoom_base;
-        gp_cam.auto_zoom_dist_scale = zoom_distance_scale;
+        typedef f32 AutoSpeedVector __attribute__((vector_size(16)));
+        AutoSpeedVector speeds = {move_base, move_distance_scale, zoom_base, zoom_distance_scale};
+        __builtin_memcpy(&gp_cam.auto_move_base, &speeds, sizeof(speeds));
     }
     void edcamSetDist(f32 distance) {
         gp_cam.distance = distance;
@@ -2449,11 +2448,12 @@ extern "C" {
         }
     }
     void edpartParticleReset(void) {
-        part_emit_s *emit = part_emits;
-        part_emit_s *const emit_end = part_emits + 512;
+        i32 *instance = &part_emits[0].instance_id;
+        i32 *const end = &part_emits[512].instance_id;
         do {
-            emit->instance_id = -1;
-        } while (++emit != emit_end);
+            *instance = -1;
+            instance = reinterpret_cast<i32 *>(reinterpret_cast<char *>(instance) + sizeof(part_emit_s));
+        } while (instance != end);
         memset(part_page_used, 0, sizeof(part_page_used));
         memset(part_page_on, 0, sizeof(part_page_on));
         edpart_instances_used = 0;
@@ -2900,7 +2900,7 @@ extern "C" {
         return 0;
     }
     i32 eduiCheckForPadMenuCancel(eduimenu_s *menu, nupad_s *pad) {
-        if (!pad || !(pad->digital_buttons_pressed & 0x10))
+        if (!pad || __builtin_expect(!(pad->digital_buttons_pressed & 0x10), 0))
             return 0;
 
         eduimenu_s *parent = menu->parent;
@@ -2996,6 +2996,9 @@ extern "C" {
         }
         menu->field_10 = menu->selected;
     }
+#if defined(__i386__)
+    __attribute__((force_align_arg_pointer))
+#endif
     void cbInteractMenuKeySelect(eduimenu_s *menu) {
         char text[16];
         u32 modifiers;
@@ -3041,9 +3044,8 @@ extern "C" {
         *y = edui_cursor_dy / 224.0f;
     }
     eduimenu_s *eduiGetTopLevelParent(eduimenu_s *menu) {
-        if (menu)
-            while (menu->parent)
-                menu = menu->parent;
+        while (__builtin_expect(menu != NULL, 1) && menu->parent)
+            menu = menu->parent;
         return menu;
     }
     i32 bUsingMenuFocus;
@@ -3102,15 +3104,14 @@ extern "C" {
         return eduiGradStageAdd(item, time, hue, saturation, value);
     }
     void eduiGradStageDelete(edui_gradient_pick_s *item, edui_gradient_node_s *stage) {
-        edui_gradient_node_s *previous = stage->previous;
-        edui_gradient_node_s *next = stage->next;
-        if (previous)
-            previous->next = next;
+        if (stage->previous)
+            stage->previous->next = stage->next;
         else
-            item->first_stage = next;
+            item->first_stage = stage->next;
+        edui_gradient_node_s *next = stage->next;
         if (next)
-            next->previous = previous;
-        item->selected_stage = next ? next : previous;
+            next->previous = stage->previous;
+        item->selected_stage = next ? next : stage->previous;
         NU_FREE(stage);
     }
     void eduiGradStageSetHSV(edui_gradient_node_s *stage, f32 hue, f32 saturation, f32 value) {
@@ -3828,10 +3829,11 @@ extern "C" {
             menu->first = item;
         item->previous = menu->last;
         item->next = NULL;
-        menu->last = item;
         menu->field_0c = menu->first;
+        eduiitem_s **last_item = &edui_last_item;
+        menu->last = item;
         menu->field_10 = 0;
-        edui_last_item = item;
+        *last_item = item;
         return item;
     }
     void eduiMenuAddItemAfter(eduimenu_s *menu, eduiitem_s *item, eduiitem_s *after) {
@@ -4813,7 +4815,7 @@ extern "C" {
 
     static __used__ void cbMMRegSel(eduimenu_s *, eduiitem_s *selected, u32) {
         ed_curr = static_cast<ed_module_s *>(selected->data_ptr);
-        if (!ed_curr->reserved) {
+        if (__builtin_expect(!ed_curr->reserved, 1)) {
             ed_module_active = 1;
             if (ed_curr->activate)
                 ed_curr->activate();

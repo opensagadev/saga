@@ -7,7 +7,6 @@
 NuScreen *NuScreen::ms_instance = NULL;
 
 bool NuScreen::Exists() {
-    STUBBED();
 }
 
 void NuScreen::Create() {

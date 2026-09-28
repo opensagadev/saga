@@ -9,7 +9,6 @@
 
 i32 NuBridgeAlloc(void);
 void ropesegment(numtl_s *, NUVEC *, i32, i32) {
-    STUBBED();
 }
 
 void NuBrdigeDrawRope(numtl_s *material, NUVEC *first, NUVEC *second, i32, i32 *boundaries, i32 colour) {

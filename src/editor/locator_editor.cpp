@@ -701,8 +701,6 @@ extern "C" {
 
 void locatorEditor_Enter(void) {
     AIEDITOR_RENDER_STATE *const *state = &aieditor;
-    // Keep the global pointer slot in a register across the list operations.
-    __asm__ volatile("" : "+r"(state));
     memset(&(*state)->locators, 0, 0x48);
     for (i32 index = 0; index < 256; ++index) {
         NuLinkedListAppend(&(*state)->free_locators, &(*state)->locator_pool[index].link);

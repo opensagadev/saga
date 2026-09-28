@@ -18,6 +18,8 @@
 #include "legoapi/menus/screens/gamestructure.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/level.h"
+#include "legoapi/world/levels/episode.h"
+#include "legoapi/cutscenes/cutscenes.h"
 #include "legoapi/world/mission.h"
 #include "legoapi/world/world.h"
 #include "legoapi/audio/audio.h"
@@ -28,9 +30,11 @@
 #include "nu2api/nu3d/nugscn.h"
 #include "nu2api/nu3d/nuqfnt.h"
 #include "nu2api/nu3d/nuprim.h"
+#include "nu2api/nu3d/nurndr.h"
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/nufile/nufile.h"
 #include "nu2api/nucore/nustring.h"
+#include "nu2api/nucore/nupad.h"
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numath/nufloat.h"
 
@@ -46,6 +50,18 @@ static f32 MissionIconScale[20];
 static f32 MissionIconTargetX[20];
 static f32 MissionIconX[20];
 extern i32 NextArea_FreePlay;
+extern char FS_LastFileName[64];
+extern char *FS_CurrentCursorPos;
+extern "C" i32 MenuASCancelFinished;
+extern f32 memcard_autosavecanceldelay;
+extern i32 FS_NumFiles;
+extern i32 FS_SortMode;
+void FS_GetDirList(char *, char *, char *);
+i32 FS_GetPadWithRepeat(nupad_s *, f32, f32);
+void FS_MoveCursorDown(i32);
+void FS_MoveCursorUp(i32);
+void FS_SetCursorToLastFileName();
+f32 FS_GetDirTextWidth();
 void InitMission(MISSIONSYS *, i32);
 extern f32 ICONSIZE, ICONX, DROPINALPHA, HUB_EPISODETITLEY;
 extern i16 tSELECT, tSELECTED, tSELECTING, tEXIT, tCANCEL;
@@ -610,8 +626,121 @@ void MenuUpdateSave(MENU_s *menu) {
     }
 }
 
-void RenderFileSel3(i32) {
-    STUBBED();
+extern "C" void NuRndrRect2d(f32, f32, f32, f32, f32, i32, NUMTL *);
+extern char *FS_CurrentPos, *FS_FileListEnd;
+extern i32 FS_CurrentPosFileNum;
+void FS_MakeTimeString(FS_FILEENTRYHDR *, char *);
+void FS_MakeDateString(FS_FILEENTRYHDR *, char *);
+
+static __attribute__((noinline, used)) void RenderFileSel3Part(i32 mode) {
+
+    f32 x = FS_X;
+    f32 y = FS_Y;
+    f32 width = FS_Width;
+    NuQFntPushPrintMode(2);
+    NuQFntPushCoordinateSystem(NUQFNT_CSMODE_PS2);
+    NuQFntSet(system_qfont);
+    NuQFntSetPointSize(system_qfont, 1.0f, 1.0f);
+    f32 font_height = NuQFntHeight(system_qfont);
+    f32 baseline = NuQFntBaseline(system_qfont);
+    f32 list_width = width + (FS_NumFiles > 14 ? 8.0f : 0.0f);
+    f32 height = mode == 0 ? font_height * 16.0f + 4.0f : font_height * 17.0f + 8.0f;
+    NuRndrRect2d(x, y, 0.0f, list_width + 4.0f, height, 0xff808080, NULL);
+    FS_W = list_width + 4.0f;
+    FS_H = height;
+    x += 8.0f;
+    y += 1.0f;
+    if (mode != 0) {
+        NuRndrRect2d(x, y, 0.0f, list_width, font_height + 2.0f, 0xff404040, NULL);
+        NuRndrLine3dDbg(x, y, 0.0f, x + width, y, 0.0f, 0xff808080);
+        NuQFntSetColour(system_qfont, 0x80808080);
+        NuQFntMove(system_qfont, x + 2.0f, y + baseline, 0.0f);
+        NuQFntPrintU(system_qfont, FS_Title);
+        y += font_height + 2.0f;
+    }
+    NuRndrRect2d(x, y, 0.0f, list_width, font_height + 2.0f, 0x20202020, NULL);
+    char display_path[264];
+    if (FS_ShowVolumes != 0)
+        NuStrCpy(display_path, "Volumes:-");
+    else {
+        NuStrCpy(display_path, FS_Path);
+        f32 length = NuQFntPrintLenU(system_qfont, display_path);
+        if (length > list_width - 8.0f) {
+            char *separator = NuStrChr(display_path, '\\');
+            if (separator != NULL) {
+                char *next = NuStrChr(separator + 1, '\\');
+                if (next != NULL) {
+                    char suffix[132];
+                    char *last = NuStrRChr(display_path, '\\');
+                    if (last != NULL && last > next) {
+                        NuStrCpy(suffix, last);
+                        *next = 0;
+                        NuStrCat(display_path, "\\....");
+                        NuStrCat(display_path, suffix);
+                    }
+                }
+            }
+            length = NuQFntPrintLenU(system_qfont, display_path);
+            if (length > list_width - 8.0f)
+                NuQFntSetPointSize(system_qfont, (list_width - 8.0f) / length, 1.0f);
+        }
+    }
+    NuQFntSetColour(system_qfont, 0x80408080);
+    NuQFntMove(system_qfont, x + 2.0f, y + baseline, 0.0f);
+    NuQFntPrintU(system_qfont, display_path);
+    NuQFntSetPointSize(system_qfont, 1.0f, 1.0f);
+    y += font_height + 2.0f;
+
+    NuRndrRect2d(x, y, 0.0f, width, font_height * 14.0f, 0x20202020, NULL);
+    if (FS_NumFiles > 14) {
+        NuRndrRect2d(x + width, y, 0.0f, 8.0f, font_height * 14.0f, 0xff646464, NULL);
+        f32 thumb_height = font_height * 14.0f * 14.0f / FS_NumFiles;
+        if (thumb_height < 4.0f)
+            thumb_height = 4.0f;
+        f32 thumb_y = y + (font_height * 14.0f - thumb_height) * FS_CurrentPosFileNum / (FS_NumFiles - 14);
+        NuRndrRect2d(x + width, thumb_y, 0.0f, 8.0f, thumb_height, 0xffc8c8c8, NULL);
+    }
+    char *entry = FS_CurrentPos;
+    for (i32 row = 0; row < 14 && entry < FS_FileListEnd; ++row) {
+        f32 row_y = y + font_height * row;
+        if (entry == FS_CurrentCursorPos)
+            NuRndrRect2d(x, row_y, 0.0f, width, font_height, 0xff202060, NULL);
+        NuQFntSetColour(system_qfont, *entry == 'V' ? 0x80204080 : *entry == 'D' ? 0x80804020 : 0x80408080);
+        NuQFntMove(system_qfont, x + 2.0f, row_y + baseline, 0.0f);
+        NuQFntPrintU(system_qfont, entry + 7);
+        if (entry[6] != '#') {
+            char date_time[264];
+            NuQFntSetPointSize(system_qfont, 0.8f, 1.0f);
+            FS_MakeTimeString(reinterpret_cast<FS_FILEENTRYHDR *>(entry), date_time);
+            f32 text_x = x + width - NuQFntPrintLenU(system_qfont, date_time);
+            NuQFntSetColour(system_qfont, 0x80208080);
+            NuQFntMove(system_qfont, text_x, row_y + baseline, 0.0f);
+            NuQFntPrintU(system_qfont, date_time);
+            FS_MakeDateString(reinterpret_cast<FS_FILEENTRYHDR *>(entry), date_time);
+            text_x -= NuQFntPrintLenU(system_qfont, date_time);
+            NuQFntSetColour(system_qfont, 0x80808020);
+            NuQFntMove(system_qfont, text_x, row_y + baseline, 0.0f);
+            NuQFntPrintU(system_qfont, date_time);
+            NuQFntSetPointSize(system_qfont, 1.0f, 1.0f);
+        }
+        entry += NuStrLen(entry + 7) + 8;
+    }
+    static char *sort_labels[] = {const_cast<char *>("Name"), const_cast<char *>("Date"), const_cast<char *>("Size"),
+                                  const_cast<char *>("Type")};
+    f32 footer_y = y + font_height * 15.0f + baseline;
+    NuQFntSetColour(system_qfont, 0x80808080);
+    NuQFntMove(system_qfont, x, footer_y, 0.0f);
+    NuQFntPrintU(system_qfont, FS_Filter);
+    i32 sort = FS_SortMode >= 0 && FS_SortMode < 4 ? FS_SortMode : 0;
+    NuQFntMove(system_qfont, x + list_width - NuQFntPrintLenU(system_qfont, sort_labels[sort]), footer_y, 0.0f);
+    NuQFntPrintU(system_qfont, sort_labels[sort]);
+    NuQFntPopCoordinateSystem();
+    NuQFntPopPrintMode();
+}
+
+void RenderFileSel3(i32 mode) {
+    if (FS_Active != 0)
+        RenderFileSel3Part(mode);
 }
 
 void EndMissionsMenu() {
@@ -776,10 +905,6 @@ void MenuDrawDeleting(MENU_s *) {
     }
     MenuSmartTextEx(apitxt_DELETECOMPLETE, 0.0f, 0.0f, 1.0f, MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, 0,
                     MENUNORMALR, MENUNORMALG, MENUNORMALB, 1.5f, 3, NULL, 0, MenuA);
-}
-
-void MenuDrawEpisodes(MENU_s *) {
-    STUBBED();
 }
 
 void MenuDrawFreePlay(MENU_s *) {
@@ -1136,8 +1261,146 @@ void MenuUpdateDeleting(MENU_s *) {
     }
 }
 
-void MenuUpdateEpisodes(MENU_s *) {
-    STUBBED();
+i8 i_clip[6];
+extern f32 episodestime, episodesduration;
+extern i8 episodesmode, lastepisodesmode, i_episodes;
+i32 hub_goto_clipsmenu_episode;
+extern f32 MainRenderTime;
+
+void MenuUpdateEpisodes(MENU_s *menu) {
+    if (FadeSys.fade > 0.0f || MainRenderTime > 0.0f)
+        return;
+    episodestime += FRAMETIME;
+    if (episodesmode == 1) {
+        episodestime += FRAMETIME;
+        if (episodestime >= episodesduration)
+            WipeBackToHub();
+        return;
+    }
+    if (episodesmode < 0 || episodesmode > 3)
+        return;
+
+    u32 pressed = 0;
+    u32 directions = 0;
+    for (i32 index = 0; index < 2; ++index) {
+        if (MenuPacket.active_player[index] == 0)
+            continue;
+        pressed |= GamePad[index].buttons_pressed;
+        directions |= GamePad[index].left_directions;
+    }
+    bool confirm = (pressed & GAMEPAD_MENUSELECT) != 0;
+    bool cancel = (pressed & GAMEPAD_MENUCANCEL) != 0;
+    bool up = ((pressed | directions) & GAMEPAD_DUP) != 0;
+    bool down = ((pressed | directions) & GAMEPAD_DDOWN) != 0;
+    bool left = ((pressed | directions) & GAMEPAD_DLEFT) != 0;
+    bool right = ((pressed | directions) & GAMEPAD_DRIGHT) != 0;
+    if (menu != NULL && menu->input_activity != 0) {
+        confirm |= menu->confirm_pressed != 0;
+        cancel |= menu->cancel_pressed != 0;
+    }
+    if (up && down)
+        up = down = false;
+    if (left && right)
+        left = right = false;
+
+    if (episodesmode == 0) {
+        if (menu != NULL && menu->input_activity != 0 && menu->confirm_pressed != 0)
+            i_episodes = menu->selected_item;
+        if (menu != NULL && menu->input_activity != 0 && menu->cancel_pressed != 0)
+            cancel = true;
+        if (cancel) {
+            GameAudio_PlaySfx(0x31, NULL, 0, 0);
+            lastepisodesmode = episodesmode;
+            episodesmode = 1;
+            episodestime = 0.0f;
+            episodesduration = 0.6f;
+            return;
+        }
+        i8 previous = i_episodes;
+        if (up || down)
+            i_episodes = previous < 3 ? previous + 3 : previous - 3;
+        else if (left && previous % 3 != 0)
+            --i_episodes;
+        else if (right && previous % 3 != 2)
+            ++i_episodes;
+        if (i_episodes != previous) {
+            GameAudio_PlaySfx(0x2f, NULL, 0, 0);
+            return;
+        }
+        if (!confirm)
+            return;
+        if (Game_AreaSave == NULL || Game_AreaSave[EDataList[i_episodes].area_ids[0]].complete == 0) {
+            GameAudio_PlaySfx(0x32, NULL, 0, 0);
+            return;
+        }
+        GameAudio_PlaySfx(0x30, NULL, 0, 0);
+        lastepisodesmode = episodesmode;
+        episodesmode = 2;
+        episodestime = 0.0f;
+        episodesduration = 0.6f;
+        return;
+    }
+
+    i16 clips[128] = {};
+    i32 include_guests = hub_new_level == -1 || LDataList[hub_new_level].episode_index == -1;
+    i32 count = CutScenePlayer_CountEpisodeClips(i_episodes, include_guests, clips);
+    if (count <= 0)
+        return;
+    i32 selected = static_cast<i8>(i_clip[i_episodes]);
+    if (selected < 0 || selected >= count) {
+        selected = count - 1;
+        i_clip[i_episodes] = selected;
+    }
+    if (episodesmode == 2) {
+        i32 next = selected;
+        if (up)
+            next = selected >= 7 ? selected - 7 : (count - 1) / 7 * 7 + selected % 7;
+        else if (down)
+            next = (selected + 7) % count;
+        else if (left)
+            next = selected % 7 == 0 ? selected + 6 : selected - 1;
+        else if (right)
+            next = selected % 7 == 6 ? selected - 6 : selected + 1;
+        if (next >= count)
+            next = count - 1;
+        if (next != selected) {
+            i_clip[i_episodes] = next;
+            GameAudio_PlaySfx(0x2f, NULL, 0, 0);
+        }
+        if (cancel) {
+            GameAudio_PlaySfx(0x31, NULL, 0, 0);
+            lastepisodesmode = episodesmode;
+            episodesmode = hub_new_level != -1 && LDataList[hub_new_level].episode_index != -1 ? 1 : 0;
+            episodestime = 0.0f;
+            episodesduration = 0.6f;
+            return;
+        }
+        if (!confirm)
+            return;
+        if (CutScenePlayer_CanStart(clips[i_clip[i_episodes]]) == 0) {
+            GameAudio_PlaySfx(0x32, NULL, 0, 0);
+            return;
+        }
+        GameAudio_PlaySfx(0x30, NULL, 0, 0);
+        lastepisodesmode = episodesmode;
+        episodesmode = 3;
+        episodestime = 0.0f;
+        episodesduration = 0.6f;
+        return;
+    }
+    if (episodesmode == 3) {
+        if (cancel || (menu != NULL && menu->cancel_pressed != 0)) {
+            GameAudio_PlaySfx(0x31, NULL, 0, 0);
+            lastepisodesmode = episodesmode;
+            episodesmode = 2;
+            episodestime = 0.0f;
+            episodesduration = 0.6f;
+        } else if (confirm) {
+            GameAudio_PlaySfx(0x30, NULL, 0, 0);
+            CutScenePlayer_Start(clips[i_clip[i_episodes]], hub_new_level);
+            hub_goto_clipsmenu_episode = 99;
+        }
+    }
 }
 
 void MenuUpdateFreePlay(MENU_s *) {
@@ -1741,8 +2004,33 @@ void MenuEnterAutoSaveWarning(MENU_s *) {
     memcard_autosavedisabled = 0;
 }
 
-void MenuUpdateAutoSaveCancel(MENU_s *) {
-    STUBBED();
+__attribute__((optimize("no-reorder-blocks"))) void MenuUpdateAutoSaveCancel(MENU_s *menu) {
+    static u8 firstTimeIn = 1;
+    if (MenuASCancelFinished != 0) {
+        MenuASCancelFinished = 0;
+        BackupMenu();
+        return;
+    }
+    if (memcard_savefailed != 0) {
+        if (firstTimeIn != 0) {
+            firstTimeIn = 0;
+            memcard_autosavecanceldelay = 5.0f;
+            g_enableButtonPrompts = 0;
+            return;
+        }
+        if (memcard_autosavecanceldelay > 0.0f) {
+            return;
+        }
+        g_enableButtonPrompts = 1;
+        NewMenu(1000, -1, -1);
+        MenuASCancelFinished = 1;
+        firstTimeIn = 1;
+        memcard_autosavecanceldelay = 5.0f;
+    }
+    if (menu->confirm_pressed != 0 || menu->cancel_pressed != 0) {
+        MenuASCancelFinished = 1;
+        MenuSFX = MENUSFX_MENUSELECT;
+    }
 }
 
 void MenuUpdateNotEnoughSpace(MENU_s *menu) {

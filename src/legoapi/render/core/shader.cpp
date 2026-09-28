@@ -116,10 +116,18 @@ bool ShaderMtlDescFilter::hasDiffuseMap(i32 layer) const {
     if (variant != 0 && desc->unknown_1b4 == 0) {
         return false;
     }
-    if (layer < 0 || layer >= 4) {
-        return false;
+    switch (layer) {
+        case 0:
+            return desc->diffuse_map_tex_id[0] > texture_id_threshold;
+        case 1:
+            return desc->diffuse_map_tex_id[1] > texture_id_threshold;
+        case 2:
+            return desc->diffuse_map_tex_id[2] > texture_id_threshold;
+        case 3:
+            return desc->diffuse_map_tex_id[3] > texture_id_threshold;
+        default:
+            return false;
     }
-    return desc->diffuse_map_tex_id[layer] > texture_id_threshold;
 }
 
 bool ShaderMtlDescFilter::hasLayer(i32 layer) const {
@@ -127,18 +135,21 @@ bool ShaderMtlDescFilter::hasLayer(i32 layer) const {
         return layer == 0 && (desc->unknown_1b4 & 1) != 0;
     }
 
-    switch (layer) {
-        case 0:
-            return true;
-        case 1:
-            return (desc->flagsbits_1b8 & 0x40) != 0 && desc->blend_op2 != 0xff;
-        case 2:
-            return static_cast<i8>(desc->flagsbits_1b8) < 0 && desc->blend_op3 != 0xff;
-        case 3:
-            return (desc->byte4 & 1) != 0 && desc->blend_op4 != 0xff;
-        default:
+    if (layer == 1) {
+        if ((desc->flagsbits_1b8 & 0x40) == 0)
             return false;
+        return desc->blend_op2 != 0xff;
     }
+    if (layer <= 1) {
+        return layer == 0;
+    }
+    if (layer == 2) {
+        return static_cast<i8>(desc->flagsbits_1b8) < 0 && desc->blend_op3 != 0xff;
+    }
+    if (layer == 3) {
+        return (desc->byte4 & 1) != 0 && desc->blend_op4 != 0xff;
+    }
+    return false;
 }
 
 void ShaderMtlDescFilter::internalInit(nushadermtldesc_s const *material_desc, numtl_s const *material, i32 flags,

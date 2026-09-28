@@ -186,7 +186,6 @@ extern "C" void NuDisplayListDrawItems(nudisplaylistitem_s *items) {
 }
 
 extern "C" void NuDisplayListDraw(void) {
-    STUBBED();
 }
 
 extern "C" i32 DisplayListDebugPS(nudisplaylistitem_s *, char *) {
@@ -214,7 +213,6 @@ extern "C" void NuDisplayListAddLightState(nudisplaylistitem_s *item, void *) {
 }
 
 extern "C" void DisplayListCreatePS(void) {
-    STUBBED();
 }
 
 extern "C" void NuDisplayListLinkItem(nudisplaylist_s *list, u8 type, void *call_addr) {
@@ -395,15 +393,12 @@ extern "C" void DisplayListSwapBuffersPS(void) {
 }
 
 extern "C" void DisplayListCreateFxItemPS(void *, i32) {
-    STUBBED();
 }
 
 extern "C" void DisplayListDestroyFxItemPS(void *) {
-    STUBBED();
 }
 
 extern "C" void DisplayListSetFxItemParamPS(void *, i32, f32, i32) {
-    STUBBED();
 }
 
 void DisplayListGenerateTransforms(nudisplayscene_s *) {
@@ -442,7 +437,6 @@ extern "C" void NuDisplaySceneClonePS(NUDLDLISTSCENE *source, NUDLDLISTSCENE *de
 }
 
 extern "C" void DisplayListUpdateSpecialTransformPS(nuhspecial_s *, NUMTX *) {
-    STUBBED();
 }
 
 extern "C" void NuDisplayListSetItemTable(i32 which) {

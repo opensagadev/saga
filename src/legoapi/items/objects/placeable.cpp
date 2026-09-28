@@ -57,9 +57,9 @@ void *PlaceableHelper::GetNextObject(void *object) {
     while (iteration_object_type < object_type_count) {
         EdClassInterface *interface =
             reinterpret_cast<EdClassInterface *>(object_types[iteration_object_type].interface);
-        void *next = interface->vtable->get_next_object(interface, object);
-        if (next != NULL)
-            return next;
+        object = interface->vtable->get_next_object(interface, object);
+        if (object != NULL)
+            return object;
         ++iteration_object_type;
         object = NULL;
     }
@@ -111,9 +111,11 @@ PlaceableHelper::PlaceableHelper() {
 }
 
 void PlaceableHelper::RegisterObjectType(char *name, PlaceableInterface *interface) {
-    i32 index = object_type_count++;
-    object_types[index].name = name;
-    object_types[index].interface = interface;
+    i32 index = object_type_count;
+    ObjectType *entry = object_types + index;
+    object_type_count = index + 1;
+    entry->name = name;
+    entry->interface = interface;
     *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(interface) + 8) = object_type_count;
 }
 

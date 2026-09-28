@@ -253,15 +253,12 @@ void BountyHunterPursuitA_Init(WORLDINFO_s *world) {
 }
 
 void BountyHunterPursuitB_Init(WORLDINFO_s *) {
-    STUBBED();
 }
 
 void BountyHunterPursuitC_Init(WORLDINFO_s *) {
-    STUBBED();
 }
 
 void BountyHunterPursuitD_Init(WORLDINFO_s *) {
-    STUBBED();
 }
 
 void BountyHunterPursuitA_Reset(WORLDINFO_s *world) {

@@ -75,7 +75,10 @@ i32 GetIntCurveVal(ani3_animheader_s *animation, f32 *values, i32 curve) {
         return reinterpret_cast<i32 *>(values)[curve];
     }
     const f32 value = values[curve];
-    return static_cast<i32>(value < 0.0f ? value - 0.5f : value + 0.5f);
+    if (value < 0.0f) {
+        return static_cast<i32>(value - 0.5f);
+    }
+    return static_cast<i32>(value + 0.5f);
 }
 
 extern "C" void NuAnimBuffCreateScratch(nuanimbuff_s *buffer);
@@ -83,17 +86,26 @@ extern "C" void NuAnimBuffDestroyScratch(nuanimbuff_s *buffer);
 extern nurenderscene_s currentScene;
 extern HashRedirect g_shaderProgramRedirects[417];
 
-void NuErrorPrint(char *message) {
+#if defined(__GNUC__) && !defined(__clang__)
+#define NU_PRINT_FRAME_POINTER                                                                                         \
+    __attribute__((optimize("no-omit-frame-pointer", "no-schedule-insns", "no-schedule-insns2")))
+#else
+#define NU_PRINT_FRAME_POINTER
+#endif
+
+NU_PRINT_FRAME_POINTER void NuErrorPrint(char *message) {
     printf("%s", message);
 }
 
-void NuWarningPrint(char *message) {
+NU_PRINT_FRAME_POINTER void NuWarningPrint(char *message) {
     printf("%s", message);
 }
 
-void NuDebugMsgPrint(char *message) {
+NU_PRINT_FRAME_POINTER void NuDebugMsgPrint(char *message) {
     printf("%s", message);
 }
+
+#undef NU_PRINT_FRAME_POINTER
 
 void NuVpSetDestRect(float left, float top, float right, float bottom) {
     NuVpSetPosition2(left, top);

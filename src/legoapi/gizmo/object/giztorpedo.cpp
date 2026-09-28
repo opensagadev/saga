@@ -91,7 +91,6 @@ static char *GizTorp_GetGizmoName(GIZMO *gizmo) {
 }
 
 static i32 GizTorp_GetOutput(GIZMO *, i32, i32) {
-    STUBBED();
     return 0;
 }
 

@@ -47,7 +47,7 @@ extern "C" {
 #endif
     extern i32 g_vaoLifetimeMutex;
     // Placeholder only: the original consumes three stack arguments; their types remain unresolved.
-    void NuGSceneSetCrossFade(void);
+    void NuGSceneSetCrossFade(void *, u16 first, u16 second);
     void NuGSceneSetCrossFadeAlpha(void);
     void NuGSceneProcessCrossFade(void);
 #ifdef __cplusplus

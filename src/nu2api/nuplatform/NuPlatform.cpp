@@ -15,7 +15,7 @@ void NuPlatform::Create(void) {
 }
 
 void NuPlatform::Exists() {
-    STUBBED();
+    // The original implementation performs no work.
 }
 
 void NuPlatform::Destroy() {

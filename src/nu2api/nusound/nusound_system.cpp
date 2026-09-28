@@ -364,13 +364,16 @@ i32 NuSoundSystem::GenerateHash(const char *str) {
     char buf[0x100];
     NuStrUpr(buf, str);
 
-    byte hash = 0x5;
+    if (__builtin_expect(buf[0] == '\0', 0)) {
+        return 0x5;
+    }
 
+    i32 hash = 0x1505;
     for (char *c = buf; *c != '\0'; c++) {
         hash = (hash * 0x21) + *c;
     }
 
-    return hash;
+    return static_cast<byte>(hash);
 }
 
 NuSoundSystem::FileType NuSoundSystem::DetermineFileType(const char *path) {
@@ -579,10 +582,12 @@ u32 NuSoundSystem::GetBufferAlignment() {
 
 i32 NuSoundSystem::GetClosestSupportedConfig(i32 config) {
     // libTTapp.so 0x31bcb0: config > 7 -> 8, config >= 6 -> 6, else 2.
-    if (config > 7) {
-        return 8;
+    i32 value = config;
+    i32 result = 8;
+    if (__builtin_expect(value <= 7, 1)) {
+        result = 2 + (static_cast<i32>(value >= 6) << 2);
     }
-    return (config >= 6) ? 6 : 2;
+    return result;
 }
 
 const NuSoundSystem::CurveData *NuSoundSystem::GetCrossfadeCurve(u32 id) const {
@@ -722,8 +727,9 @@ NuSoundVoice *NuSoundSystem::GetQuietestVoice(NuSoundSample *sample, float &quie
 }
 
 NuSoundRoutingTable *NuSoundSystem::GetRoutingTable(char const *name) {
-    for (NuSoundRoutingTable *table = routing_table_list.Front(); table != routing_table_list.End();
-         table = reinterpret_cast<NuSoundRoutingTable **>(table)[1]) {
+    NuSoundRoutingTable *table = routing_table_list.Front();
+    NuSoundRoutingTable *end = routing_table_list.End();
+    for (; table != end; table = reinterpret_cast<NuSoundRoutingTable **>(table)[1]) {
         if (NuStrICmp(table->GetName(), name) == 0) {
             return table;
         }
@@ -750,16 +756,32 @@ bool NuSoundSystem::LoadSample(NuSoundSample *sample, void *data, i32 size, NuSo
 }
 
 void NuSoundSystem::PauseAllVoices() {
-    for (NuSoundVoice *voice = voice_list.Front(); voice != voice_list.End(); voice = voice->field_0x28) {
+    NuSoundVoice *begin = voice_list.begin;
+    NuSoundVoice *last = voice_list.End();
+    NuSoundVoice *first = *reinterpret_cast<NuSoundVoice **>(reinterpret_cast<u8 *>(begin) + 0x28);
+    u8 *link = first != NULL ? reinterpret_cast<u8 *>(first) + 0x24 : NULL;
+    u8 *end_link = last != NULL ? reinterpret_cast<u8 *>(last) + 0x24 : NULL;
+    while (link != end_link) {
+        NuSoundVoice *voice = reinterpret_cast<NuSoundVoice *>(link - 0x24);
         voice->Pause();
+        NuSoundVoice *next = *reinterpret_cast<NuSoundVoice **>(link + 4);
+        link = next != NULL ? reinterpret_cast<u8 *>(next) + 0x24 : NULL;
     }
 }
 
 void NuSoundSystem::PauseVoices(i32 mask) {
-    for (NuSoundVoice *voice = voice_list.Front(); voice != voice_list.End(); voice = voice->field_0x28) {
+    NuSoundVoice *begin = voice_list.begin;
+    NuSoundVoice *last = voice_list.End();
+    NuSoundVoice *first = *reinterpret_cast<NuSoundVoice **>(reinterpret_cast<u8 *>(begin) + 0x28);
+    u8 *link = first != NULL ? reinterpret_cast<u8 *>(first) + 0x24 : NULL;
+    u8 *end_link = last != NULL ? reinterpret_cast<u8 *>(last) + 0x24 : NULL;
+    while (link != end_link) {
+        NuSoundVoice *voice = reinterpret_cast<NuSoundVoice *>(link - 0x24);
         if ((voice->field131_0x148 & mask) != 0) {
             voice->Pause();
         }
+        NuSoundVoice *next = *reinterpret_cast<NuSoundVoice **>(link + 4);
+        link = next != NULL ? reinterpret_cast<u8 *>(next) + 0x24 : NULL;
     }
 }
 
@@ -858,16 +880,32 @@ void NuSoundSystem::RemoveListener(NuSoundListener *listener) {
 }
 
 void NuSoundSystem::ResumeAllVoices() {
-    for (NuSoundVoice *voice = voice_list.Front(); voice != voice_list.End(); voice = voice->field_0x28) {
+    NuSoundVoice *begin = voice_list.begin;
+    NuSoundVoice *last = voice_list.End();
+    NuSoundVoice *first = *reinterpret_cast<NuSoundVoice **>(reinterpret_cast<u8 *>(begin) + 0x28);
+    u8 *link = first != NULL ? reinterpret_cast<u8 *>(first) + 0x24 : NULL;
+    u8 *end_link = last != NULL ? reinterpret_cast<u8 *>(last) + 0x24 : NULL;
+    while (link != end_link) {
+        NuSoundVoice *voice = reinterpret_cast<NuSoundVoice *>(link - 0x24);
         voice->Resume();
+        NuSoundVoice *next = *reinterpret_cast<NuSoundVoice **>(link + 4);
+        link = next != NULL ? reinterpret_cast<u8 *>(next) + 0x24 : NULL;
     }
 }
 
 void NuSoundSystem::ResumeVoices(i32 mask) {
-    for (NuSoundVoice *voice = voice_list.Front(); voice != voice_list.End(); voice = voice->field_0x28) {
+    NuSoundVoice *begin = voice_list.begin;
+    NuSoundVoice *last = voice_list.End();
+    NuSoundVoice *first = *reinterpret_cast<NuSoundVoice **>(reinterpret_cast<u8 *>(begin) + 0x28);
+    u8 *link = first != NULL ? reinterpret_cast<u8 *>(first) + 0x24 : NULL;
+    u8 *end_link = last != NULL ? reinterpret_cast<u8 *>(last) + 0x24 : NULL;
+    while (link != end_link) {
+        NuSoundVoice *voice = reinterpret_cast<NuSoundVoice *>(link - 0x24);
         if ((voice->field131_0x148 & mask) != 0) {
             voice->Resume();
         }
+        NuSoundVoice *next = *reinterpret_cast<NuSoundVoice **>(link + 4);
+        link = next != NULL ? reinterpret_cast<u8 *>(next) + 0x24 : NULL;
     }
 }
 
@@ -958,32 +996,61 @@ template <typename T> void NuSoundMemory::PushNuListNode(NuList<T> &list, T cons
 template void NuSoundMemory::PushNuListNode<NuSoundEffect *>(NuList<NuSoundEffect *> &, NuSoundEffect *const &);
 
 void NuSoundSystem::StopAllVoices() {
-    for (NuSoundVoice *voice = voice_list.Front(); voice != voice_list.End(); voice = voice->field_0x28) {
+    NuSoundVoice *begin = voice_list.begin;
+    NuSoundVoice *last = voice_list.End();
+    NuSoundVoice *first = *reinterpret_cast<NuSoundVoice **>(reinterpret_cast<u8 *>(begin) + 0x28);
+    u8 *link = first != NULL ? reinterpret_cast<u8 *>(first) + 0x24 : NULL;
+    u8 *end_link = last != NULL ? reinterpret_cast<u8 *>(last) + 0x24 : NULL;
+    while (link != end_link) {
+        NuSoundVoice *voice = reinterpret_cast<NuSoundVoice *>(link - 0x24);
         voice->Stop(true);
+        NuSoundVoice *next = *reinterpret_cast<NuSoundVoice **>(link + 4);
+        link = next != NULL ? reinterpret_cast<u8 *>(next) + 0x24 : NULL;
     }
 }
 
 void NuSoundSystem::StopVoices(NuSoundSource const &source) {
-    for (NuSoundVoice *voice = voice_list.Front(); voice != voice_list.End(); voice = voice->field_0x28) {
+    NuSoundVoice *begin = voice_list.begin;
+    NuSoundVoice *last = voice_list.End();
+    NuSoundVoice *first = *reinterpret_cast<NuSoundVoice **>(reinterpret_cast<u8 *>(begin) + 0x28);
+    u8 *link = first != NULL ? reinterpret_cast<u8 *>(first) + 0x24 : NULL;
+    u8 *end_link = last != NULL ? reinterpret_cast<u8 *>(last) + 0x24 : NULL;
+    while (link != end_link) {
+        NuSoundVoice *voice = reinterpret_cast<NuSoundVoice *>(link - 0x24);
         if (voice->sound_source == &source) {
             voice->Stop(false);
         }
+        NuSoundVoice *next = *reinterpret_cast<NuSoundVoice **>(link + 4);
+        link = next != NULL ? reinterpret_cast<u8 *>(next) + 0x24 : NULL;
     }
 }
 
 void NuSoundSystem::StopVoices(i32 mask) {
-    for (NuSoundVoice *voice = voice_list.Front(); voice != voice_list.End(); voice = voice->field_0x28) {
+    NuSoundVoice *begin = voice_list.begin;
+    NuSoundVoice *last = voice_list.End();
+    NuSoundVoice *first = *reinterpret_cast<NuSoundVoice **>(reinterpret_cast<u8 *>(begin) + 0x28);
+    u8 *link = first != NULL ? reinterpret_cast<u8 *>(first) + 0x24 : NULL;
+    u8 *end_link = last != NULL ? reinterpret_cast<u8 *>(last) + 0x24 : NULL;
+    while (link != end_link) {
+        NuSoundVoice *voice = reinterpret_cast<NuSoundVoice *>(link - 0x24);
         if ((voice->field131_0x148 & mask) != 0) {
             voice->Stop(false);
         }
+        NuSoundVoice *next = *reinterpret_cast<NuSoundVoice **>(link + 4);
+        link = next != NULL ? reinterpret_cast<u8 *>(next) + 0x24 : NULL;
     }
 }
 
 void NuSoundSystem::UnloadAllSamples() {
-    NuSoundDecoder *entry = decoder_list.Front();
-    while (entry != decoder_list.End()) {
-        NuSoundSample *sample = reinterpret_cast<NuSoundSample *>(entry);
-        entry = *reinterpret_cast<NuSoundDecoder **>(reinterpret_cast<u8 *>(entry) + 0x24);
+    NuSoundDecoder *begin = decoder_list.begin;
+    NuSoundDecoder *last = decoder_list.End();
+    NuSoundDecoder *first = *reinterpret_cast<NuSoundDecoder **>(reinterpret_cast<u8 *>(begin) + 0x24);
+    u8 *link = first != NULL ? reinterpret_cast<u8 *>(first) + 0x20 : NULL;
+    u8 *end_link = last != NULL ? reinterpret_cast<u8 *>(last) + 0x20 : NULL;
+    while (link != end_link) {
+        NuSoundSample *sample = reinterpret_cast<NuSoundSample *>(link - 0x20);
+        NuSoundDecoder *next = *reinterpret_cast<NuSoundDecoder **>(link + 4);
+        link = next != NULL ? reinterpret_cast<u8 *>(next) + 0x20 : NULL;
         if (sample->GetLoadState() == NuSoundSample::LoadState::LOADED) {
             UnloadSample(sample);
         }

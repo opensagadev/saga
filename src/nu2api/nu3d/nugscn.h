@@ -357,6 +357,7 @@ typedef struct nugscn_s {
     undefined field471_0x1f5;
     undefined field472_0x1f6;
     undefined field473_0x1f7;
+    undefined pad_1f8[0x14];
 } NUGSCN;
 
 DECOMP_ASSERT(offsetof(NUGSCN, instance_animations) == 0x4c, "NUGSCN instance animation array offset");
@@ -400,6 +401,7 @@ extern "C" {
 
     void NuGScnRndr3(NUGSCN *scene);
     NUGSCN *NuGScnRead(VARIPTR *buf, VARIPTR buf_end, char *path);
+    NUGSCN *NuGScnReadForMultiRender(VARIPTR *buf, VARIPTR buf_end, char *path, i32 render_count);
     void NuGScnRemove(NUGSCN *scene);
     void NuGScnFixupPS(NUGSCN *scene);
     void NuGScnFixupTIDsPS(NUGSCN *scene);

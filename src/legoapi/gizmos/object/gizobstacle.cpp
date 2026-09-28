@@ -422,8 +422,9 @@ static void GizmoObstacle_SetVisibility(GIZMO *gizmo, i32 visibility) {
         return;
     }
     GameAnimSet_SetVisibility(obstacle->anim_set, visibility);
-    obstacle->progress_flags = static_cast<u8>((obstacle->progress_flags & ~GIZOBSTACLE_PROGRESS_FLAG_VISIBLE) |
-                                               (visibility != 0 ? GIZOBSTACLE_PROGRESS_FLAG_VISIBLE : 0));
+    u8 visible = visibility != 0;
+    obstacle->progress_flags =
+        static_cast<u8>((obstacle->progress_flags & ~GIZOBSTACLE_PROGRESS_FLAG_VISIBLE) | (visible << 1));
 }
 
 static NUVEC *GizmoObstacle_GetPos(GIZMO *gizmo) {
@@ -836,9 +837,10 @@ static void Gizobstacle_ReadAnimSetData(GAMEANIMOBJ_s *object, unsigned char ver
         return;
     }
 
-    u16 fallback_data = 0;
+    u16 fallback_data;
     u16 *object_data = static_cast<u16 *>(object->object_data);
     if (object_data == NULL) {
+        fallback_data = 0;
         object_data = &fallback_data;
     }
 
@@ -1020,8 +1022,8 @@ GIZOBSTACLE_s *GizObstacle_FindByName(GIZOBSTACLESYS_s *system, char *name) {
         return NULL;
     }
 
-    for (i32 index = 0; index < system->count; ++index) {
-        GIZOBSTACLE_s *obstacle = &system->obstacles[index];
+    GIZOBSTACLE_s *obstacle = system->obstacles;
+    for (i32 index = 0; index < system->count; ++index, ++obstacle) {
         if (NuStrICmp(obstacle->name, name) == 0) {
             return obstacle;
         }
@@ -1160,13 +1162,12 @@ static void GizObstacleUpdate_AutoStart(GIZOBSTACLE_s *obstacle) {
 }
 
 static void GizObstacleUpdate_NoTrigger(GIZOBSTACLE_s *obstacle) {
-    if ((obstacle->config_flags & GIZOBSTACLE_CONFIG_ALWAYS_RUN_PROXIMITY) == 0 &&
-        (obstacle->runtime_flags & GIZOBSTACLE_RUNTIME_FLAG_AI_ACTIVE) == 0 &&
-        obstacle->anim_set->state == GAMEANIMSET_STATE_AT_START) {
-        return;
+    if ((obstacle->config_flags & GIZOBSTACLE_CONFIG_ALWAYS_RUN_PROXIMITY) != 0 ||
+        (obstacle->runtime_flags & GIZOBSTACLE_RUNTIME_FLAG_AI_ACTIVE) != 0 ||
+        obstacle->anim_set->state != GAMEANIMSET_STATE_AT_START) {
+        obstacle->runtime_flags |= GIZOBSTACLE_RUNTIME_FLAG_BLOCKED;
+        GizObstacleUpdate_Proximity(obstacle);
     }
-    obstacle->runtime_flags |= GIZOBSTACLE_RUNTIME_FLAG_BLOCKED;
-    GizObstacleUpdate_Proximity(obstacle);
 }
 
 static void GizObstacleUpdate_Proximity(GIZOBSTACLE_s *obstacle) {

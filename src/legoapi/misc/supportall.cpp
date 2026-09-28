@@ -329,11 +329,18 @@ void RndrTexQuad(f32 x, f32 y, f32 width, f32 height, i32 colour, numtl_s *mater
 }
 
 i32 SuperWeirdo(GameObject_s *object) {
-    if ((object->apiobj.flags_low & 0x80) != 0 && (Game.field_0x7c26[1] & 1) != 0 && CharacterCustomiser != NULL &&
-        (object->id == CharacterCustomiser->character_ids[0] || object->id == CharacterCustomiser->character_ids[1])) {
-        return 1;
-    }
-    return 0;
+    i32 result = 0;
+    if (__builtin_expect((object->apiobj.flags_low & 0x80) == 0, 0))
+        return result;
+    if ((Game.field_0x7c26[1] & 1) == 0)
+        return result;
+    if (CharacterCustomiser == NULL)
+        return result;
+    if (__builtin_expect(object->id == CharacterCustomiser->character_ids[0], 0))
+        result = 1;
+    else if (__builtin_expect(object->id == CharacterCustomiser->character_ids[1], 0))
+        result = 1;
+    return result;
 }
 
 void bgProcClose() {
@@ -1047,8 +1054,9 @@ extern "C" void NuHtmlBitmap(char *filename, i32 width, i32 height, char *captio
 void NuHtmlGraphArray(char **strings) {
     char *text = *strings++;
     while (text != NULL) {
+        char **next = strings++;
         NuHtmlWrite(text);
-        text = *strings++;
+        text = *next;
     }
 }
 
@@ -1099,13 +1107,11 @@ void AddChunkControlToStack(debris_chunk_control_s *control, debris_chunk_contro
 extern "C" debkeydatatype_s *debris_keystack;
 
 void AddDebrisEffectToStack(debkeydatatype_s *key) {
-    if (key == NULL) {
-        return;
+    debkeydatatype_s *head = debris_keystack;
+    if (head != NULL) {
+        head->next = key;
     }
-    if (debris_keystack != NULL) {
-        debris_keystack->next = key;
-    }
-    key->previous = debris_keystack;
+    key->previous = head;
     debris_keystack = key;
 }
 
@@ -1201,10 +1207,12 @@ void RemoveChunkFromRenderStack(particlechunkrendertype_s *, particlechunkrender
 void DebrisReleaseControlStackLock(void);
 
 void DebrisProcessAllocation() {
-    for (debkeydatatype_s *key = debris_keystack; key != NULL; key = key->previous) {
+    for (debkeydatatype_s *key = debris_keystack; key != NULL;) {
+        debkeydatatype_s *next = key->previous;
         if (key->previous_particle_count != key->particle_count) {
             DebReAlloc2(key);
         }
+        key = next;
     }
 }
 

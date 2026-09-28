@@ -2,7 +2,8 @@
 
 pthread_mutex_t NuSoundHandle::sCriticalSection;
 
-NuSoundHandle::NuSoundHandle() : intrusive_prev(NULL), intrusive_next(NULL), voice(NULL) {
+NuSoundHandle::NuSoundHandle() : intrusive_prev(NULL), intrusive_next(NULL) {
+    voice = NULL;
 }
 
 NuSoundHandle::~NuSoundHandle() {
@@ -171,10 +172,11 @@ NuSoundEffect *NuSoundHandle::GetEffect(NuSoundEffect::EffectType type) {
 }
 
 void NuSoundHandle::ResetFrameCount() {
-    NuListNodeBase *node = effects.Head();
     NuListNodeBase *end = effects.Tail();
-    for (; node != end; node = node->next) {
+    NuListNodeBase *node = effects.Head();
+    while (node != end) {
         static_cast<NuListNode<NuSoundEffect *> *>(node)->value->Enable();
+        node = node->next;
     }
 }
 

@@ -30,7 +30,32 @@ NuSoundClock::NuSoundClock() : previous_ticks(0) {
 }
 
 void NuSoundClock::RemoveCallback(NuSoundClock::Callback *callback) {
-    callbacks.Remove(callback);
+    NuSoundClock *self = this;
+    Callback *next = callback->intrusive_next;
+    Callback *previous;
+    if (next != NULL) {
+        previous = callback->intrusive_prev;
+        self->callbacks.length--;
+        Callback **next_links = reinterpret_cast<Callback **>(reinterpret_cast<usize>(next) + 4);
+        if (previous != NULL) {
+            if (next_links == NULL)
+                goto clear_previous;
+            previous->intrusive_next = next;
+        }
+        if (next_links != NULL)
+            next_links[0] = previous;
+        goto clear_entry;
+    } else {
+        previous = callback->intrusive_prev;
+        if (previous == NULL)
+            return;
+        self->callbacks.length--;
+    }
+clear_previous:
+    previous->intrusive_next = NULL;
+clear_entry:
+    callback->intrusive_next = NULL;
+    callback->intrusive_prev = NULL;
 }
 
 NuSoundClock::~NuSoundClock() {

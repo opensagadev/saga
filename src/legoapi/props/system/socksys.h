@@ -234,6 +234,8 @@ extern "C" {
     SOCKSYS *SockSysInit(VARIPTR *buf, VARIPTR buf_end, NUGSCN *gscn);
     void SockSys_GenerateData(SOCKSYS *sock_sys, VARIPTR *buf, VARIPTR buf_end);
     void SockSysPointAlongSpline(NUVEC *result, NUGSPLINE *spline, i32 segment, i32 next_segment, f32 ratio);
+    void SockSysSetObjectVisibility(SOCKSYS *sock_sys, i32 sock_index, i32 visible);
+    i32 SockSysTrackInSplineInfo(SOCKSYS *sock_sys, SOCKPOSITION *position, NUVEC *track_position, f32 *distance);
     void SockRotationMatrix(SOCKSYS *system, SOCKPOSITION *position, NUMTX *out, i32 stride, i32 mode);
     void SetSockBit(SOCK *sock, i32 index);
     i32 SockBitSet(SOCK *sock, i32 index);

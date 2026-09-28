@@ -373,7 +373,7 @@ extern "C" {
     void NuDisplayListCaptureEnd(void);
     void NuDisplayListDraw2D(void);
     void NuDisplayListDrawAll(void);
-    NUDLDLISTSCENE *NuDisplaySceneClone(NUDLDLISTSCENE *source, VARIPTR *buffer);
+    NUDLDLISTSCENE *NuDisplaySceneClone(NUDLDLISTSCENE *source, VARIPTR *buffer, VARIPTR *buffer_end);
     void NuDisplaySceneClonePS(NUDLDLISTSCENE *source, NUDLDLISTSCENE *destination, VARIPTR *buffer);
     void DisplayListCreateFxList(VARIPTR *buffer, VARIPTR end, i32 count);
     VARIPTR *NuDisplayListLinkItemVP(nudisplaylist_s *dl, u8 type, void *call_addr, VARIPTR *buf);

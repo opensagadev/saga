@@ -3,14 +3,14 @@
 #include "nu2api/nucore/common.h"
 #include "nu2api/nu3d/numtl.h"
 #include "nu2api/nu3d/nucamera.h"
+#include "nu2api/nu3d/nugscn.h"
 #include "nu2api/nu3d/nuprim.h"
 #include "nu2api/nu3d/nuqfnt.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
-struct nuvisiboxtree_s;
-struct nuvisiboxtreenode_s;
+extern "C" i32 NuRndrDoingScreenGrab;
 OcclusionManager g_OcclusionManager;
 NUMTL *OccluderSet::ms_pZOnlyMtl3D;
 NUMTL *OccluderSet::ms_pZOnlyMtl2D;
@@ -445,8 +445,4 @@ void OcclusionManager::SetEnabled(bool value) {
 }
 
 OcclusionManager::~OcclusionManager() {
-}
-
-static __used__ void BoxTreeRndrRec(nuvisiboxtree_s *, unsigned char *, nuvisiboxtreenode_s *, int, float, nugscn_s *) {
-    STUBBED();
 }

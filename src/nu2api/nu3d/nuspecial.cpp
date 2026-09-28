@@ -259,24 +259,24 @@ extern "C" i32 NuSpecialExistsFn(void *special_ptr) {
 }
 
 extern "C" void NuSpecialMtlMap(i32 count, NUMTL **materials) {
-    if (count != 0) {
-        nurndr_nforced_mtls = count;
-        nuspecial_draw_state |= NUSPECIAL_DRAW_MATERIAL_MAP;
-        nurndr_forced_mtl_table = materials;
-        return;
-    } else {
+    if (count == 0) {
         nuspecial_draw_state &= ~NUSPECIAL_DRAW_MATERIAL_MAP;
         nurndr_forced_mtl_table = NULL;
         return;
     }
+    nurndr_nforced_mtls = count;
+    nuspecial_draw_state |= NUSPECIAL_DRAW_MATERIAL_MAP;
+    nurndr_forced_mtl_table = materials;
 }
 
 extern "C" void NuSpecialForceMtl(NUMTL *material) {
-    if (material != NULL) {
-        nuspecial_draw_state |= NUSPECIAL_DRAW_FORCE_MATERIAL;
+    i32 draw_state = nuspecial_draw_state;
+    if (__builtin_expect(material != NULL, 1)) {
+        draw_state |= NUSPECIAL_DRAW_FORCE_MATERIAL;
     } else {
-        nuspecial_draw_state &= ~NUSPECIAL_DRAW_FORCE_MATERIAL;
+        draw_state &= ~NUSPECIAL_DRAW_FORCE_MATERIAL;
     }
+    nuspecial_draw_state = draw_state;
     nurndr_forced_mtl = material;
 }
 

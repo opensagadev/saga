@@ -497,7 +497,6 @@ extern "C" NUSHADEROBJECT *NuShaderObjectUnserialize(VARIPTR *buffer) {
 }
 
 void NuShaderObject360LoadShader(nushaderobject_s *) {
-    STUBBED();
 }
 
 static void *shader_fph;
@@ -507,11 +506,9 @@ void NuShaderObject360LoadPackFile(char *path, variptr_u *buffer, variptr_u buff
 }
 
 void NuShaderObject360UnloadShader(nushaderobject_s *) {
-    STUBBED();
 }
 
 extern "C" void *NuShaderObjectLoadFromFile(void) {
-    STUBBED();
     return NULL;
 }
 

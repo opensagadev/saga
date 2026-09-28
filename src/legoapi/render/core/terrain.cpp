@@ -3393,14 +3393,19 @@ i32 TerrainBlockOnBlock(WORLDINFO_s *world, pushblock_s *block, nuvec_s *points,
     return 1;
 }
 
+#if defined(__GNUC__) && !defined(__clang__)
+__attribute__((optimize("no-tree-loop-optimize")))
+#endif
 void ScanTerrIDRemovePlat(i32 platform_index) {
-    TERRAIN_TRACK_SLOT *slot = CurTerr->track_slots;
+    i16 *platform = &CurTerr->track_slots[0].platform_index;
     i32 remaining = TERRAIN_TRACK_SLOT_COUNT;
     do {
-        if (slot->platform_index == platform_index) {
+        if (*platform == platform_index) {
+            TERRAIN_TRACK_SLOT *slot = reinterpret_cast<TERRAIN_TRACK_SLOT *>(
+                reinterpret_cast<u8 *>(platform) - offsetof(TERRAIN_TRACK_SLOT, platform_index));
             slot->id = NULL;
         }
-        ++slot;
+        platform = reinterpret_cast<i16 *>(reinterpret_cast<u8 *>(platform) + sizeof(TERRAIN_TRACK_SLOT));
         --remaining;
     } while (remaining != 0);
 }

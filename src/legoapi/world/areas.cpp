@@ -472,7 +472,7 @@ void SuperCounters_FixUpGizmos(WORLDINFO_s *world) {
 }
 
 SUPERCOUNTER *SuperCounters_FindPickup(WORLDINFO_s *world, GIZMO_s *gizmo, nuvec_s *position,
-                                     SUPERCOUNTERPICKUP **pickup_dest) {
+                                       SUPERCOUNTERPICKUP **pickup_dest) {
     SUPERCOUNTER *nearest_counter = NULL;
     SUPERCOUNTERPICKUP *nearest_pickup = NULL;
     f32 nearest_distance = 1000000000.0f;
@@ -534,13 +534,12 @@ void SuperCounter_ActivateGizmoPickup(GIZMO_s *gizmo, GIZMOPICKUP_s *gizmo_picku
     } else {
         message_position = &gizmo_pickup->position;
     }
-    AddGameMsgCount(message_position, counter->collected_count, counter->pickup_count,
-                    counter->red, counter->green, counter->blue, 0.75f);
+    AddGameMsgCount(message_position, counter->collected_count, counter->pickup_count, counter->red, counter->green,
+                    counter->blue, 0.75f);
     GameAudio_PlaySfx(0x53, NULL, 0, 0);
 }
 
-SUPERCOUNTER *SuperCounter_FindFromNameAndLevel(char *name, WORLDINFO_s *world,
-                                             SUPERCOUNTERPICKUP **pickup_dest) {
+SUPERCOUNTER *SuperCounter_FindFromNameAndLevel(char *name, WORLDINFO_s *world, SUPERCOUNTERPICKUP **pickup_dest) {
     if (world->area != NULL && world->area->super_counters != NULL) {
         SUPERCOUNTER *counter = world->area->super_counters;
         for (i32 i = 0; i < world->area->super_counter_count; ++i, ++counter) {
@@ -784,23 +783,29 @@ void ClearAreaProgress(i32 a, i32 b) {
 }
 
 void Areas_CompleteAllBuildUps(AREASAVE_s *save) {
+    if (save == NULL) {
+        return;
+    }
     i32 count = AREACOUNT;
     u8 *area;
     u8 *end;
 
-    if (save == NULL || count <= 0) {
+    if (count <= 0) {
         return;
     }
     area = *(u8 **)&ADataList;
     end = area + count * 0x9c;
-    while (area != end) {
+    do {
         if ((*(u16 *)(area + 0x7a) & (AREAFLAG_TRUE_JEDI | AREAFLAG_MINIKIT)) && *((u8 *)save) != 0) {
             ((u8 *)save)[2] = 1;
             ((u8 *)save)[3] = 1;
         }
         area += 0x9c;
         save = (AREASAVE_s *)((u8 *)save + 0xc);
-    }
+        if (area == end) {
+            break;
+        }
+    } while (true);
 }
 
 void NewArea() {

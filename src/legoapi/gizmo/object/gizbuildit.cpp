@@ -146,10 +146,10 @@ static void GizBuildIts_EarlyUpdate(void *, void *data, float) {
         return;
     }
 
-    for (i32 index = 0; index < buildit_sys->count; ++index) {
-        GIZBUILDIT_s &buildit = buildit_sys->buildits[index];
-        buildit.availability_flags &= static_cast<u8>(~GIZBUILDIT_AVAILABILITY_INTERACTING);
-        buildit.builders_active = 0;
+    GIZBUILDIT_s *buildit = buildit_sys->buildits;
+    for (i32 index = 0; index < buildit_sys->count; ++index, ++buildit) {
+        buildit->availability_flags &= static_cast<u8>(~GIZBUILDIT_AVAILABILITY_INTERACTING);
+        buildit->builders_active = 0;
     }
 }
 

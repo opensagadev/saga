@@ -3,6 +3,15 @@
 #include "nu2api/numath/nuvec.h"
 
 #include <float.h>
+#if defined(__SSE__) && (defined(__i386__) || defined(__x86_64__))
+#include <xmmintrin.h>
+#endif
+
+#if defined(__GNUC__) && !defined(__clang__)
+#define NUSOUND_GCC_OPTIMIZE(option) __attribute__((optimize(option)))
+#else
+#define NUSOUND_GCC_OPTIMIZE(option)
+#endif
 
 void NuSoundListener::Disable() {
     enabled = false;
@@ -42,12 +51,14 @@ const VuVec *NuSoundListener::GetAttenuationPosition(VuVec const &position) cons
     return reinterpret_cast<const VuVec *>(reinterpret_cast<const u8 *>(head_matrix) + 0x30);
 }
 
-const VuVec *NuSoundListener::GetFocusPosition() const {
+NUSOUND_GCC_OPTIMIZE("no-if-conversion") const VuVec *NuSoundListener::GetFocusPosition() const {
     if (focus_position != NULL && focus_position_enabled) {
         return focus_position;
     }
-    return head_matrix != NULL ? reinterpret_cast<const VuVec *>(reinterpret_cast<const u8 *>(head_matrix) + 0x30)
-                               : NULL;
+    if (head_matrix != NULL) {
+        return reinterpret_cast<const VuVec *>(reinterpret_cast<const u8 *>(head_matrix) + 0x30);
+    }
+    return NULL;
 }
 
 f32 NuSoundListener::GetHeadDistance(VuVec const &position) const {
@@ -116,8 +127,16 @@ void NuSoundListener::SetSensitivity(float value) {
     }
 }
 
-void NuSoundListener::SetVelocity(VuVec const &value) {
+NUSOUND_GCC_OPTIMIZE("no-tree-sra") void NuSoundListener::SetVelocity(VuVec const &value) {
+#if defined(__SSE__) && (defined(__i386__) || defined(__x86_64__))
+    __m128 components = _mm_setzero_ps();
+    components = _mm_loadl_pi(components, reinterpret_cast<const __m64 *>(&value));
+    components = _mm_loadh_pi(components, reinterpret_cast<const __m64 *>(&value.z));
+    _mm_storel_pi(reinterpret_cast<__m64 *>(&velocity), components);
+    _mm_storeh_pi(reinterpret_cast<__m64 *>(&velocity.z), components);
+#else
     velocity = value;
+#endif
 }
 
 NuSoundListener::~NuSoundListener() {

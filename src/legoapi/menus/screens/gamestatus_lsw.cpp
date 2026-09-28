@@ -33,6 +33,7 @@
 #include "legoapi/characters/core/players.h"
 #include "legoapi/props/doors/door.h"
 #include "nu2api/numath/nufloat.h"
+#include "nu2api/numath/nuvec.h"
 
 struct AIROW_s;
 struct nuqthdr_s;
@@ -200,11 +201,16 @@ void SetBonusWinner(i32 player) {
 }
 
 STATUS_STAGE_s *FindStatusStage(i32 type) {
-    for (STATUS_STAGE_s *stage = StatusStages; stage->type != -1; ++stage) {
+    STATUS_STAGE_s *stage = StatusStages;
+    if (stage->type == -1) {
+        return NULL;
+    }
+    do {
         if (stage->type == type) {
             return stage;
         }
-    }
+        ++stage;
+    } while (stage->type != -1);
     return NULL;
 }
 
@@ -305,7 +311,8 @@ void Save_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapse
 extern i32 from_save_and_exit;
 extern TIMER BonusTimer;
 extern i16 id_SLAVE1;
-extern i16 tSUPERSTORYCOMPLETE, tNEWBESTTIME, tLEVELCOMPLETE, tMISSIONCOMPLETE;
+extern i16 tSUPERSTORYCOMPLETE, tNEWBESTTIME, tNONEWBESTTIME, tLEVELCOMPLETE, tMISSIONCOMPLETE;
+extern i16 tNEWHIGHSCORE, tNONEWHIGHSCORE;
 extern i16 tCHALLENGECOMPLETE, tTRUEHERO, tMINIKIT;
 extern "C" void NuIOS_RecordFlurryEvent(char *);
 extern "C" i32 NuStrCpy(char *, const char *);
@@ -1028,9 +1035,7 @@ void TrueHero_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *packet) {
     NextStatusStage(packet);
 }
 
-i32 UpdateAchievements(STATUSPACKET_s *) {
-    STUBBED();
-    return 0;
+void UpdateAchievements(STATUSPACKET_s *) {
 }
 
 void DrawStatusScreen(WORLDINFO_s *) {
@@ -1241,16 +1246,21 @@ void TrueHero_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float el
 }
 
 i32 InitStatusScreen_LSW(WORLDINFO_s *, STATUSPACKET_s *) {
-    STUBBED();
     return 0;
 }
 
 void RegisterStatusScreen(STATUS_STAGE_s *stages, i32 *, REGISTERSTATUSPACKET_s *registration) {
     StatusStages = stages;
+#if defined(__i386__) && defined(__GNUC__)
+    typedef u32 CallbackVector __attribute__((vector_size(16), aligned(1), may_alias));
+    *reinterpret_cast<CallbackVector *>(&StatusPacket.init_callback) =
+        *reinterpret_cast<const CallbackVector *>(&registration->init_callback);
+#else
     StatusPacket.init_callback = registration->init_callback;
     StatusPacket.finish_callback = registration->finish_callback;
     StatusPacket.reset_callback = registration->reset_callback;
     StatusPacket.draw_background_callback = registration->draw_background_callback;
+#endif
     StatusPacket.lsw_packet = registration->lsw_packet;
     StatusPacket.field_0x68 = registration->stage_delay;
 }
@@ -1375,8 +1385,43 @@ f32 getFinishedStatusAlpha(STATUSPACKET_s *packet) {
     return alpha;
 }
 
-void SuperStoryTime_LSW_Draw(STATUS_STAGE_s *, STATUSPACKET_s *, i32) {
-    STUBBED();
+void SuperStoryTime_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current) {
+    if (current == 0 || stage->field_0x14 <= 0)
+        return;
+
+    const f32 time = stage->field_0x18;
+    f32 alpha;
+    if (time < 0.5f)
+        alpha = time + time;
+    else if (time < 4.5f)
+        alpha = 1.0f;
+    else
+        alpha = 1.0f - (time - 4.5f) * 2.0f;
+
+    const i32 opacity = static_cast<i32>(alpha * 128.0f);
+    const i32 angle = (static_cast<i32>(alpha * 16384.0f) >> 1) & 0x7fff;
+    const f32 coin_y = STATSPOS2Y + (STATSPOSY - STATSPOS2Y) * NuTrigTable[angle];
+    CoinTotal_Draw(*packet->score, coin_y, CoinTotalScale, 1, 1.0f, 255, 191, 0);
+
+    const bool new_best = packet->new_best_time != 0.0f;
+    SmartTextEx(TTab[new_best ? tNEWBESTTIME : tNONEWBESTTIME], 0.0f, 0.2f, 1.0f, 0.7f, 0.7f, 0.7f, 0,
+                new_best ? 0 : 255, new_best ? 255 : 0, 0, 1.7f, 1, NULL, 0, opacity);
+
+    f32 shown_time = packet->superstory_time;
+    if (new_best) {
+        const f32 blend = time < 0.5f ? alpha : time < 4.0f ? (time - 0.5f) / 3.5f : 1.0f;
+        shown_time = packet->previous_best_time + (packet->new_best_time - packet->previous_best_time) * blend;
+    }
+    char time_text[256];
+    Text_MakeTime(shown_time, 1, 1, 1, time_text);
+    Text3DEx(time_text, 0.0f, 0.0f, 1.0f, 0.7f, 0.7f, 0.7f, 0, 255, 255, 255, opacity & 255);
+
+    Text_MakeTime(packet->previous_best_time, 1, 1, 1, time_text);
+    char previous_text[256];
+    NuStrCpy(previous_text, "(");
+    NuStrCat(previous_text, time_text);
+    NuStrCat(previous_text, ")");
+    Text3DEx(previous_text, 0.0f, -0.2f, 1.0f, 0.7f, 0.7f, 0.7f, 0, 255, 255, 255, (opacity / 2) & 255);
 }
 
 void SuperStoryTime_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *packet) {
@@ -1391,8 +1436,45 @@ void LSW_registerStatusScreen() {
     RegisterStatusScreen(StatusStages_LSW, NULL, &registration);
 }
 
-void SuperStoryScore_LSW_Draw(STATUS_STAGE_s *, STATUSPACKET_s *, i32) {
-    STUBBED();
+void SuperStoryScore_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current) {
+    if (current == 0)
+        return;
+
+    f32 alpha = 1.0f;
+    if (stage->field_0x14 > 0) {
+        const f32 time = stage->field_0x18;
+        if (time < 0.5f)
+            alpha = time + time;
+        else if (time >= 4.5f)
+            alpha = 1.0f - (time - 4.5f) * 2.0f;
+
+        const i32 opacity = static_cast<i32>(alpha * 128.0f);
+        const bool new_best = packet->new_best_score != 0;
+        SmartTextEx(TTab[new_best ? tNEWHIGHSCORE : tNONEWHIGHSCORE], 0.0f, 0.2f, 1.0f, 0.7f, 0.7f, 0.7f, 0,
+                    new_best ? 0 : 255, new_best ? 255 : 0, 0, 1.7f, 1, NULL, 0, opacity);
+
+        f32 blend = 0.0f;
+        if (time >= 4.0f)
+            blend = 1.0f;
+        else if (time >= 0.5f)
+            blend = (time - 0.5f) / 3.5f;
+        const u32 score = packet->superstory_score;
+        const f32 score_as_float = static_cast<f32>(score & 0xffff) + static_cast<f32>(score >> 16) * 65536.0f;
+        char score_text[256];
+        Text_MakeScore(static_cast<u32>(score_as_float * blend), score_text);
+        Text3DEx(score_text, 0.0f, 0.0f, 1.0f, 0.7f, 0.7f, 0.7f, 0, 255, 255, 255, opacity & 255);
+
+        Text_MakeScore(packet->previous_best_score, score_text);
+        char previous_text[256];
+        NuStrCpy(previous_text, "(");
+        NuStrCat(previous_text, score_text);
+        NuStrCat(previous_text, ")");
+        Text3DEx(previous_text, 0.0f, -0.2f, 1.0f, 0.7f, 0.7f, 0.7f, 0, 255, 255, 255, (opacity / 2) & 255);
+    }
+
+    const i32 angle = (static_cast<i32>(alpha * 16384.0f) >> 1) & 0x7fff;
+    const f32 coin_y = STATSPOS2Y + (STATSPOSY - STATSPOS2Y) * NuTrigTable[angle];
+    CoinTotal_Draw(*packet->score, coin_y, CoinTotalScale, 1, 1.0f, 255, 191, 0);
 }
 
 void SuperStoryScore_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *packet) {
@@ -1645,7 +1727,6 @@ void BonusWin_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 curren
     }
 }
 void BonusWin_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *) {
-    STUBBED();
 }
 void BonusTime_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current) {
     if (current == 0) {
@@ -1668,7 +1749,6 @@ void BonusTime_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 curre
     }
 }
 void BonusTime_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *) {
-    STUBBED();
 }
 void ChallangeCash_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 draw) {
     NUVEC position = {0.0f, -0.5f, 1.0f};
@@ -1692,7 +1772,6 @@ void ChallangeCash_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 draw)
     }
 }
 void ChallangeCash_Skip(STATUS_STAGE_s *, STATUSPACKET_s *) {
-    STUBBED();
 }
 void BonusWin_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed) {
     if (stage->field_0x14 == 0) {

@@ -362,7 +362,6 @@ void NuRenderDevice::OnLostFocus() {
 }
 
 void NuRenderDevice::OnAppStarted() {
-    STUBBED();
 }
 
 void NuRenderDevice::OnAppRestarted() {
@@ -396,11 +395,9 @@ i32 NuRenderDevice::DetermineNominalAspectRatio(u32 w, u32 h) const {
 }
 
 void NuRenderDevice::PreInitialize() {
-    STUBBED();
 }
 
 void NuRenderDevice::OpenglErrorCallback(u32, u32, u32, u32, i32, char const *, void *) {
-    STUBBED();
 }
 
 // ---------------------------------------------------------------------------

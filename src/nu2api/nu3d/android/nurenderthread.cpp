@@ -52,7 +52,7 @@ static i32 nuspecial_vertex_noffsets_safe;
 extern const f32 nuvec4_one[4] = {1.0f, 1.0f, 1.0f, 1.0f};
 
 extern "C" i32 NuDynamicLightIsEnabled(void *light) {
-    return light != NULL;
+    return *reinterpret_cast<const i32 *>(static_cast<const u8 *>(light) + 0x7bc) != 0;
 }
 extern "C" void NuShaderManagerSetfv(i32 id, const f32 *values);
 NUNATIVETEX *NuTexGetNative(i32 tex_id);

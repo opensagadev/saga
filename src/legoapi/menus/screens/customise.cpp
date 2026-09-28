@@ -10,6 +10,7 @@
 #include "legoapi/menus/screens/gamemenuall.h"
 #include "legoapi/menus/screens/gamestructure.h"
 #include "legoapi/menus/core/text.h"
+#include "legoapi/menus/core/panel.h"
 #include "legoapi/legoapi_types.h"
 #include "globals.h"
 #include "batman.h"
@@ -22,6 +23,9 @@
 #include "legoapi/characters/motion/gameanim.h"
 #include "legoapi/core/input/timer.h"
 #include "legoapi/render/core/rtl.h"
+#include "legoapi/render/core/render.h"
+#include "legoapi/render/fx.h"
+#include "legoapi/audio/sfx.h"
 #include "legoapi/render/light/lighting.h"
 #include "legoapi/world/area.h"
 #include "nu2api/nu3d/nutex.h"
@@ -478,8 +482,88 @@ void CustomiserMenu_End() {
     }
 }
 
+extern char *ASCII_UP, *ASCII_DOWN;
+extern f32 ICONX, ICONSIZE, DROPINALPHA;
+extern i32 menu_flash;
+static i32 CustomiseNameX[2], CustomiseNameY[2];
+static i32 CustomiseMenuY[2];
+void Customiser_GetActiveWeirdoIndex(i32 *, i32 *);
+i32 Customise_GetToggleString(i32);
+extern f32 BlipL[2], BlipR[2], BlipU[2], BlipD[2];
+extern "C" i32 TriggerAutoSave(void);
+void Hub_ClearStats();
+void Text_FillInExtendedSaveInfo();
+void FinishWeirdoNames(i32);
+void GameAudio_PlaySfxById(i32, NUVEC *, i32, i32);
+
 void CustomiserMenu_Draw(MENU_s *) {
-    STUBBED();
+    CUSTOMISER *customiser = CharacterCustomiser;
+    if (MenuStopDraw != 0 || customiser_quit != 0 || customiser == NULL)
+        return;
+
+    i32 side = 0;
+    i32 count = 0;
+    Customiser_GetActiveWeirdoIndex(&side, &count);
+    if (count == 1 && MenuPacket.active_player[side] != 0)
+        side = side == 0 ? 1 : 0;
+
+    if (Customise_NameAlpha > 0.0f && count > 0) {
+        for (i32 item = 0; item < count; ++item, ++side) {
+            if (side >= 2)
+                break;
+            u8 dim = side == 0 ? 0xff : 0x7f;
+            f32 x = CustomiseScreenPos[side].x;
+            if (CustomiseMode[side] == 1) {
+                char name[2] = {0, 0};
+                const char *alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ- 0123456789";
+                char *saved_name = reinterpret_cast<char *>(&Game) + 0x7c44 + side * 0x38;
+                i32 end = 14;
+                while (end > 0 && saved_name[end] == ' ')
+                    --end;
+                f32 step = 0.08f;
+                f32 letter_x = x - 0.6f;
+                for (i32 letter = 0; letter < 15; ++letter) {
+                    if (letter == CustomiseNameX[side]) {
+                        name[0] = alphabet[CustomiseNameY[side] % 38];
+                        u8 arrow = menu_flash == 0 ? 0xff : 0xbf;
+                        Text3D(ASCII_UP, letter_x, -0.75f, 1.0f, 0.6f, 0.6f, 0.6f, 0, arrow, arrow, arrow);
+                        Text3D(ASCII_DOWN, letter_x, -0.95f, 1.0f, 0.6f, 0.6f, 0.6f, 0, arrow, arrow, arrow);
+                    } else {
+                        name[0] = saved_name[letter];
+                        if (letter > CustomiseNameX[side] && letter >= end && name[0] == ' ')
+                            name[0] = '.';
+                    }
+                    Text3D(name, letter_x, -0.85f, 1.0f, 0.6f, 0.6f, 0.5f, 0, dim,
+                           letter == CustomiseNameX[side] && menu_flash == 0 ? 0xff : dim, dim);
+                    letter_x += step;
+                }
+            } else {
+                char name[64];
+                GameObj_GetName(customiser->character_ids[side], NULL, name);
+                SmartTextEx(name, x, -0.85f, 1.0f, 0.5f, 0.5f, 0.5f, 0, dim, 0xff, side == 0 ? 0xff : 0, 0.75f, 2, NULL,
+                            0, static_cast<i32>(255.0f * Customise_NameAlpha));
+            }
+
+            f32 scale = ICONSIZE * 0.75f;
+            f32 alpha = (1.0f - CustomiseNameBoardMul[side]) * Customise_NameAlpha;
+            DrawPanel3DObject(x, -0.6f, 1.0f, scale, scale, scale, 0, 0, 0, &WORLD->lev_objs[0xa7].special, 0, alpha);
+            CUSTOMISESAVE_s *save =
+                side == 0 ? &Game.customizer : reinterpret_cast<CUSTOMISESAVE_s *>(Game.customizer.secondary_pieces);
+            i32 icon = Customiser_GetIcon(customiser, save, item);
+            if (icon != -1)
+                DrawPanel3DObject(x, -0.6f, 1.0f, scale, scale, scale, 0, 0, 0,
+                                  &WORLD->lev_objs[icon + (icon != LEGOOBJ_ICON_WEIRDO)].special, 0, alpha);
+            f32 *screen = reinterpret_cast<f32 *>(reinterpret_cast<u8 *>(customiser) + 0xcc8 + item * 4);
+            *screen = x;
+            reinterpret_cast<f32 *>(reinterpret_cast<u8 *>(customiser) + 0xccc)[item * 3] = -0.6f;
+            Text3D(const_cast<char *>(side == 0 ? ">" : "<"), side == 0 ? x + 0.5f : x - 0.5f, -0.6f, 1.0f, 1.0f, 1.0f,
+                   1.0f, 0, dim, dim, dim);
+        }
+    }
+    f32 icon_alpha = MenuPacket.active_player[0] != 0 ? 1.0f : DROPINALPHA;
+    DrawCharIcon(MenuPacket.player_model[0], -ICONX, STATSPOSY, 0.0f, ICONSIZE, 0xa6, icon_alpha, icon_alpha, 1, NULL);
+    if (GAMEDEMO == 0)
+        Customise_GetToggleString(count == 1 && MenuPacket.active_player[1] != 0);
 }
 
 void Customiser_InitNames(CUSTOMISER *customiser) {
@@ -502,7 +586,163 @@ void Customiser_InitNames(CUSTOMISER *customiser) {
 }
 
 void CustomiserMenu_Update(MENU_s *) {
-    STUBBED();
+    if (customiser_save_done != 0) {
+        CustomiserMenu_End();
+        customiser_save_done = 0;
+        return;
+    }
+    CUSTOMISER *customiser = CharacterCustomiser;
+    if (customiser == NULL)
+        return;
+    i32 active_side = 0;
+    i32 count = 0;
+    Customiser_GetActiveWeirdoIndex(&active_side, &count);
+    for (i32 side = 0; side < 2; ++side) {
+        BlipL[side] = BlipR[side] = BlipU[side] = BlipD[side] = 0.0f;
+        CustomiseNameBoardTMul[side] = CustomiseMode[side] == 1 ? 1.0f : 0.0f;
+        CustomiseNameBoardMul[side] =
+            SeekLinearF(CustomiseNameBoardMul[side], CustomiseNameBoardTMul[side], 2.0f * FRAMETIME);
+        CustomiseNameLetterBlipScale[side] = SeekLinearF(CustomiseNameLetterBlipScale[side], 1.0f, 4.0f * FRAMETIME);
+    }
+
+    bool quit = false;
+    bool toggle_active = false;
+    const char *alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ- 0123456789";
+    for (i32 input = 0; input < 2; ++input) {
+        if (MenuPacket.active_player[input] == 0)
+            continue;
+        GAMEPAD_s *pad = &GamePad[input];
+        u32 pressed = pad->buttons_pressed;
+        i32 side = count == 1 && MenuPacket.reserved_0[input] != 0 ? input ^ 1 : input;
+        if (side < 0 || side > 1)
+            continue;
+        i32 mode = CustomiseMode[side];
+        bool select = (pressed & (GAMEPAD_ACTION | GAMEPAD_MENUSELECT)) != 0;
+        bool cancel = (pressed & GAMEPAD_MENUCANCEL) != 0;
+        if (cancel && mode != 1) {
+            quit = true;
+            continue;
+        }
+        if (select || (pressed & GAMEPAD_SPECIAL) != 0) {
+            if ((pressed & GAMEPAD_SPECIAL) != 0) {
+                u16 *pieces =
+                    reinterpret_cast<u16 *>(side == 0 ? Game.customizer.pieces : Game.customizer.secondary_pieces);
+                for (i32 category = 0; category < 9; ++category) {
+                    if (customiser->piece_counts[category] <= 0)
+                        continue;
+                    i32 piece;
+                    do {
+                        piece = qrand() % customiser->piece_counts[category];
+                    } while (customiser->piece_available != NULL &&
+                             customiser->piece_available(&customiser->piece_sets[category][piece]) == 0);
+                    pieces[category] = piece;
+                }
+                Customiser_SetNameAndIcon(customiser, side);
+                PlaySfx("ToggleChar", &CustomisePos[side]);
+                AddGameDebris(WORLD->debris_sys, 0x7b, &CustomisePos[side]);
+                AddGameDebris(WORLD->debris_sys, 0x5c, &CustomisePos[side]);
+                continue;
+            }
+            i32 next_mode = mode == 1 ? 2 : 1;
+            CustomiseMode[side] = next_mode;
+            char *name = reinterpret_cast<char *>(&Game) + 0x7c44 + side * 0x38;
+            char *backup = name + 0x10;
+            if (next_mode == 1) {
+                NuStrCpy(backup, name);
+                i32 length = NuStrLen(name);
+                if (length < 15)
+                    name[length] = ' ';
+                CustomiseNameX[side] = 0;
+                CustomiseNameY[side] = 0;
+            } else if (cancel) {
+                NuStrCpy(name, backup);
+            } else {
+                name[CustomiseNameX[side]] = alphabet[CustomiseNameY[side]];
+                i32 length = 15;
+                while (length > 0 && name[length - 1] == ' ')
+                    --length;
+                name[length] = 0;
+                if (length == 0)
+                    FinishWeirdoNames(side);
+            }
+            GameAudio_PlaySfxById(0x30, NULL, 0, 0);
+            continue;
+        }
+        i32 up = (pressed & GAMEPAD_DUP) != 0;
+        i32 down = (pressed & GAMEPAD_DDOWN) != 0;
+        i32 left = (pressed & GAMEPAD_DLEFT) != 0;
+        i32 right = (pressed & GAMEPAD_DRIGHT) != 0;
+        if (left && right)
+            left = right = 0;
+        if (up && down)
+            up = down = 0;
+        if (mode == 1) {
+            char *name = reinterpret_cast<char *>(&Game) + 0x7c44 + side * 0x38;
+            if (left && CustomiseNameX[side] > 0) {
+                name[CustomiseNameX[side]] = alphabet[CustomiseNameY[side]];
+                --CustomiseNameX[side];
+            } else if (right && CustomiseNameX[side] < 14) {
+                name[CustomiseNameX[side]] = alphabet[CustomiseNameY[side]];
+                ++CustomiseNameX[side];
+            }
+            if (up)
+                CustomiseNameY[side] = (CustomiseNameY[side] + 1) % 38;
+            else if (down)
+                CustomiseNameY[side] = (CustomiseNameY[side] + 37) % 38;
+            if (left || right || up || down) {
+                i32 letter = 0;
+                while (letter < 38 && alphabet[letter] != name[CustomiseNameX[side]])
+                    ++letter;
+                if (left || right)
+                    CustomiseNameY[side] = letter < 38 ? letter : 0;
+                GameAudio_PlaySfxById(0x2f, NULL, 0, 0);
+                CustomiseNameLetterBlipScale[side] = 1.5f;
+            }
+            continue;
+        }
+        i32 &category = CustomiseMenuY[side];
+        if (up && category > 0) {
+            --category;
+            BlipU[input] = 1.0f;
+        } else if (down && category < 8) {
+            ++category;
+            BlipD[input] = 1.0f;
+        }
+        i16 *pieces = side == 0 ? Game.customizer.pieces : Game.customizer.secondary_pieces;
+        if (left && customiser->piece_counts[category] > 0) {
+            pieces[category] = Customiser_NextPieceLeft(customiser, pieces[category],
+                                                        customiser->piece_counts[category], side, category);
+            BlipL[input] = 1.0f;
+        } else if (right && customiser->piece_counts[category] > 0) {
+            pieces[category] = Customiser_NextPieceRight(customiser, pieces[category],
+                                                         customiser->piece_counts[category], side, category);
+            BlipR[input] = 1.0f;
+        }
+        if (left || right) {
+            CustomiseMenuTime[side] = 0.0f;
+            Customiser_SetNameAndIcon(customiser, side);
+        }
+    }
+
+    if (count == 1 && (GamePad[active_side].buttons_pressed & GAMEPAD_MENUSELECT) != 0)
+        toggle_active = true;
+    if (toggle_active)
+        MenuPacket.reserved_0[active_side] ^= 1;
+    customiser_changed = memcmp(&Game.customizer, &OldCustomiseGame.customizer, sizeof(Game.customizer)) != 0;
+    if (!quit)
+        return;
+    PlaySfx("menuBack", NULL);
+    customiser_quit = 1;
+    if (GAMEDEMO == 0 && customiser_changed != 0) {
+        Hub_ClearStats();
+        Text_FillInExtendedSaveInfo();
+        if (TriggerAutoSave() == 0) {
+            customiser_save_done = 1;
+            NewMenu(1000, -1, -1);
+            return;
+        }
+    }
+    CustomiserMenu_End();
 }
 
 void Customiser_PieceConfig(CUSTOMPIECE *piece, nufpar_s *parser) {

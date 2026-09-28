@@ -3,6 +3,8 @@
 #include "legoapi/actions/movement/jumping.h"
 #include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/items/collect/torpedo.h"
+#include "legoapi/items/collect/spacelevel.h"
+#include "legoapi/world/levels/podrace.h"
 #include "legoapi/actions/combat/hits.h"
 #include "legoapi/gizmos/object/gizbuildits.h"
 #include "legoapi/gizmos/object/hatmachine.h"
@@ -6919,9 +6921,70 @@ void MoveToMarker::Render() {
 
 extern u8 show_lever_hint;
 
-struct _vuv_s;
-static __used__ void MakeWingFormation(_vuv_s *, _vuv_s *, f32, i32) {
-    STUBBED();
+#if defined(__i386__) && defined(__SSE__)
+#define WING_FORMATION_CALL __attribute__((regparm(2), sseregparm, force_align_arg_pointer))
+#else
+#define WING_FORMATION_CALL
+#endif
+WING_FORMATION_CALL void MakeWingFormation(_vuv_s *origin, _vuv_s *target, f32 speed,
+                                           i32 turn_around) __asm__("_ZL17MakeWingFormationP6_vuv_sS0_fi")
+    __attribute__((visibility("hidden")));
+WING_FORMATION_CALL void MakeWingFormation(_vuv_s *origin, _vuv_s *target, f32 speed, i32 turn_around) {
+    spacelevel_s *space = WORLD->space_level;
+    if (space == NULL)
+        return;
+
+    u8 *base = reinterpret_cast<u8 *>(space) + 0xa0;
+    i32 slot = 0;
+    while (slot < 8 && *reinterpret_cast<i32 *>(base + 0x640) != 0) {
+        ++slot;
+        base += 0x658;
+    }
+    if (slot == 8)
+        return;
+
+    *reinterpret_cast<i32 *>(base + 0x640) = 1;
+    *reinterpret_cast<i32 *>(base + 0x64c) = 0;
+    NUMTX *formation_matrix = reinterpret_cast<NUMTX *>(base);
+    NuMtxSetIdentity(formation_matrix);
+    *formation_matrix = GameCam->render_mtx;
+    *reinterpret_cast<_vuv_s *>(base + 0x30) = *origin;
+
+    if (turn_around != 0) {
+        *reinterpret_cast<i32 *>(base + 0x644) = 0;
+        NuMtxPreRotateY(formation_matrix, 0x8000);
+        *reinterpret_cast<f32 *>(base + 0x654) = 35.0f;
+    } else {
+        *reinterpret_cast<i32 *>(base + 0x644) = 1;
+        *reinterpret_cast<f32 *>(base + 0x654) = 200.0f;
+    }
+
+    NUVEC *direction = reinterpret_cast<NUVEC *>(base + 0x608);
+    direction->x = target->x - origin->x;
+    direction->y = target->y - origin->y;
+    direction->z = target->z - origin->z;
+    NuVecNorm(direction, direction);
+    const f32 distance = *reinterpret_cast<f32 *>(base + 0x654);
+    direction->x *= distance;
+    direction->y *= distance;
+    direction->z *= distance;
+    *reinterpret_cast<f32 *>(base + 0x650) = speed;
+
+    NUVEC wing_offset = {-5.0f, 0.0f, 0.0f};
+    const i16 angle = static_cast<i16>(qrand());
+    const i16 spread = static_cast<i16>(qrand() / 21 + 0x2666);
+    for (i32 i = 0; i < 5; ++i) {
+        u8 *fighter = base + 0x110 + i * 0x128;
+        NuVecRotateZ(reinterpret_cast<NUVEC *>(fighter - 0x60), &wing_offset, static_cast<i16>(angle + i * spread));
+        *reinterpret_cast<f32 *>(fighter + 0x20) = 2.0f;
+        *reinterpret_cast<i32 *>(fighter + 0x40) = 1;
+        *reinterpret_cast<u8 **>(fighter) = base;
+        *reinterpret_cast<i32 *>(fighter + 0x3c) = 1;
+        *reinterpret_cast<i32 *>(fighter + 0x48) = 0;
+        *reinterpret_cast<i32 *>(fighter + 0x04) = 0;
+        *reinterpret_cast<i16 *>(fighter + 0x2e) = 54;
+        *reinterpret_cast<i16 *>(fighter + 0x2c) = 1;
+    }
 }
 
 void AtatPart_Stop(PART_s *part) __asm__("_ZL13AtatPart_StopP6PART_s") __attribute__((visibility("hidden")));

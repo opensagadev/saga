@@ -479,7 +479,7 @@ class NuSoundSystem {
 
     NuSoundSample *GetSample(const char *path);
 
-    i32 GenerateHash(const char *str);
+    static i32 GenerateHash(const char *str);
 
     virtual ~NuSoundSystem();
     virtual NuSoundEffect *CreateEffect(NuSoundEffect::EffectType);

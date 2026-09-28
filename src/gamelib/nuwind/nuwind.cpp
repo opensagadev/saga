@@ -10,21 +10,36 @@ void NuWindInitialise(NUWIND *wind) {
         wind->unk3 = 0.0f;
         wind->unk1 = -1;
 
+#if defined(__i386__) && defined(__GNUC__) && !defined(__clang__)
+        typedef i32 Int4 __attribute__((vector_size(16)));
+        const Int4 all_ones = {-1, -1, -1, -1};
+        __builtin_memcpy(&wind->unk0[0], &all_ones, sizeof(all_ones));
+        __builtin_memcpy(&wind->unk0[4], &all_ones, sizeof(all_ones));
+#else
         for (usize i = 0; i < 8; ++i) {
             wind->unk0[i] = -1;
         }
+#endif
     }
 }
 
 void NuWindSetWorldSize(NUWIND *wind, f32 size) {
     if (wind != NULL) {
-        wind->unk2.x = 1.0f <= size ? size : 1.0f;
+        if (size >= 1.0f) {
+            wind->unk2.x = size;
+        } else {
+            wind->unk2.x = 1.0f;
+        }
     }
 }
 
 void NuWindSetSpeed(NUWIND *wind, f32 speed) {
     if (wind != NULL) {
-        wind->unk2.y = 1.0f <= speed ? speed : 1.0f;
+        if (speed >= 1.0f) {
+            wind->unk2.y = speed;
+        } else {
+            wind->unk2.y = 1.0f;
+        }
     }
 }
 

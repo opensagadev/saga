@@ -90,7 +90,6 @@ extern "C" {
 }
 
 static i32 clip_special_objects = 1;
-
 using NUHGOBJVIDEOMEMFN = void (*)(nuhgobj_s *);
 
 NUHGOBJVIDEOMEMFN hgobj_to_video_mem;
@@ -2140,13 +2139,16 @@ extern "C" {
         }
 
         u8 *lod_animation = static_cast<u8 *>(animation);
-        while (lod-- != 0) {
+        if (lod == 0) {
+            return lod_animation;
+        }
+        do {
             const u16 next_lod = *reinterpret_cast<u16 *>(lod_animation + 0x14);
             if (next_lod == 0) {
                 return NULL;
             }
             lod_animation += next_lod;
-        }
+        } while (--lod != 0);
         return lod_animation;
     }
     i32 NuAnimGetUseQuatsFlag(void) {
@@ -2167,11 +2169,14 @@ extern "C" {
         return ForceEulerToQuat;
     }
     i32 NuAnimPushSetUseQuatsFlag(i32 enabled) {
-        const i32 previous = ForceEulerToQuat;
-        if (NumQuatPushes > 3) {
+        i32 *push_count = &NumQuatPushes;
+        i32 previous = ForceEulerToQuat;
+        i32 current_count = *push_count;
+        if (current_count > 3) {
             return 0;
         }
-        QuatPushes[NumQuatPushes++] = ForceEulerToQuat;
+        QuatPushes[current_count] = previous;
+        *push_count = current_count + 1;
         ForceEulerToQuat = static_cast<u8>(enabled);
         return previous;
     }
@@ -2449,18 +2454,32 @@ extern "C" {
     // ---------------------------------------------------------------------------
 
     void NuAccumulationMotionBlurEffect(i32 frames, f32 blend, i32 mode) {
-        currentScene.accumulation_blend = blend;
-        currentScene.unknown_174 = 1;
-        currentScene.unknown_178 = 1;
-        currentScene.accumulation_mode = mode;
-        currentScene.accumulation_frames = frames;
+        volatile nurenderscene_s *scene = &currentScene;
+        scene->accumulation_blend = blend;
+        scene->unknown_174 = 1;
+        scene->unknown_178 = 1;
+#if defined(__i386__) && defined(__GNUC__) && !defined(__clang__)
+        typedef f32 AliasedFloat __attribute__((may_alias));
+        *reinterpret_cast<volatile AliasedFloat *>(&scene->accumulation_mode) =
+            *reinterpret_cast<const AliasedFloat *>(&mode);
+#else
+        scene->accumulation_mode = mode;
+#endif
+        scene->accumulation_frames = frames;
         motionBlurAccumActiveThisFrame = 1;
     }
     void NuAccumulationMotionBlurParams(i32 frames, f32 blend, i32 mode) {
-        currentScene.accumulation_blend = blend;
-        currentScene.unknown_174 = 1;
-        currentScene.accumulation_frames = frames;
-        currentScene.accumulation_mode = mode;
+        volatile nurenderscene_s *scene = &currentScene;
+        scene->accumulation_blend = blend;
+        scene->unknown_174 = 1;
+        scene->accumulation_frames = frames;
+#if defined(__i386__) && defined(__GNUC__) && !defined(__clang__)
+        typedef f32 AliasedFloat __attribute__((may_alias));
+        *reinterpret_cast<volatile AliasedFloat *>(&scene->accumulation_mode) =
+            *reinterpret_cast<const AliasedFloat *>(&mode);
+#else
+        scene->accumulation_mode = mode;
+#endif
     }
     extern nurenderscene_s currentScene;
     void NuBackbufferCopy(i32 texture_id) {
@@ -4268,9 +4287,17 @@ extern "C" {
         return scene != NULL ? static_cast<u16>(scene->num_rooms) : 0;
     }
     void NuPortalResetActive(NUGSCN *scene) {
-        for (u32 i = 0; i < scene->max_portals; ++i) {
-            scene->portals[i].is_active |= NUPORTAL_FLAG_ACTIVE | NUPORTAL_FLAG_DEFAULT_ACTIVE;
-        }
+        const u32 count = scene->max_portals;
+        if (count == 0)
+            return;
+        const u32 portal_bytes = count * sizeof(*scene->portals);
+        u8 *portals = reinterpret_cast<u8 *>(scene->portals);
+        u32 offset = 0;
+        do {
+            reinterpret_cast<decltype(scene->portals)>(portals + offset)->is_active |=
+                NUPORTAL_FLAG_ACTIVE | NUPORTAL_FLAG_DEFAULT_ACTIVE;
+            offset += sizeof(*scene->portals);
+        } while (portal_bytes != offset);
     }
     i32 NuPortalRoomClipTest(NUGSCN *scene, i16 room_id) {
         if (scene == NULL || scene->max_portals == 0) {
@@ -4378,9 +4405,7 @@ extern "C" {
         }
         return -1;
     }
-    void NuVisiBoxTree(void) {
-        STUBBED();
-    }
+    i32 do_boxtree;
     i32 VisiSysCameraLock;
     i32 LoadedOcclusionData;
     i32 UsingOcclusionData;
@@ -4421,9 +4446,6 @@ extern "C" {
             NuCameraUnlock();
         }
         return result;
-    }
-    void NuVisiInstTree(void *, NUGSCN *) {
-        STUBBED();
     }
     struct NuVisibilityOcclusionGrid {
         u32 reserved_00;
@@ -4567,24 +4589,10 @@ extern "C" {
     // Debug / error / profiling
     // ---------------------------------------------------------------------------
 
-    void NuErrorSleep(void) {
-        STUBBED();
-    }
+    i32 NuRndrBeginScene(i32 flags);
+    f32 NuFrameEnd(void);
+    char *NuGetErrN(i32 entry);
 
-    // ---------------------------------------------------------------------------
-    // Thread / misc OS
-    // ---------------------------------------------------------------------------
-
-#ifndef ANDROID
-    void NuGetCurrentThreadId(void) {
-        STUBBED();
-    }
-#endif
-#ifndef ANDROID
-    void NuThreadCreate(void) {
-        STUBBED();
-    }
-#endif
     static f32 nu2api_paused;
     void NuPause(i32 paused) {
         nu2api_paused = (f32)paused;

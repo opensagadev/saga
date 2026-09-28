@@ -49,15 +49,13 @@ i64 NuFileBase::GetSize() const {
 }
 
 void NuFileBase::Flush() {
-    STUBBED();
+    // The original implementation performs no work.
 }
 
 void NuFileBase::Closedown() {
-    STUBBED();
 }
 
 void NuFileBase::Init() {
-    STUBBED();
 }
 
 i32 NuFileNormalise(char *dst, i32 length, const char *src) {

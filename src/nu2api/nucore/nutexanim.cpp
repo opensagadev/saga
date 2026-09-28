@@ -33,9 +33,9 @@ extern "C" void NuTexAnimSetMask(i32 mask) {
 
 extern "C" void NuTexAnimSetSignals(u32 signals) {
     const u32 previous_signals = nta_sig_old;
-    nta_sig_off = (previous_signals | signals) ^ signals;
-    nta_sig_on = ~previous_signals & signals;
-    nta_sig_old = signals;
+    *reinterpret_cast<volatile u32 *>(&nta_sig_off) = (previous_signals | signals) ^ signals;
+    *reinterpret_cast<volatile u32 *>(&nta_sig_on) = ~previous_signals & signals;
+    *reinterpret_cast<volatile u32 *>(&nta_sig_old) = signals;
 }
 
 static i32 NuTexAnimLabelIndex(char *name, char (*table)[21], i32 *count) {

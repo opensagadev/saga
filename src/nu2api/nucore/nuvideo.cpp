@@ -4,7 +4,6 @@
 #include "nu2api/nucore/nuapi.h"
 
 extern "C" void NuSetupVideoModeParams(void) {
-    STUBBED();
 }
 
 i32 NuVideoGetMode(void) {

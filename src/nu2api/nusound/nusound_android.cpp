@@ -19,9 +19,8 @@ i32 NuSoundAndroid::m_workerThreadCount = 0;
 void NuSoundAndroid::AndroidNuSoundClockThread(void *) {
     // 5 ms tick driving the audio clock callbacks (the callback list is
     // empty in practice on the title screen).
-    NuSoundAndroid *system = &NuSound;
     while (NuSoundAndroid::m_workerThreadCount != 0) {
-        system->clock.HandleCallbacks();
+        NuSoundSystem::Get()->clock.HandleCallbacks();
         NuThreadSleep(5);
     }
 }

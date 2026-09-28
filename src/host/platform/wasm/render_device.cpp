@@ -100,10 +100,6 @@ void HostSetMsaaEnabled(bool enabled) {
     host_msaa_enabled = enabled;
 }
 
-void NuRenderInspectEGLConfig(EGLDisplay, EGLConfig) {
-    STUBBED();
-}
-
 void NuRenderDevice::BeginCriticalSection(const char *, i32) {
     pthread_mutex_lock(&this->mutex2);
     const i32 previous_lock_count = this->lock_count++;

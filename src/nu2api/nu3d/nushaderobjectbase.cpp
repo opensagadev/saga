@@ -7,14 +7,23 @@
 #include "nu2api/numath/nutrig.h"
 
 #include <string.h>
+#if defined(__SSE2__)
+#include <emmintrin.h>
+#endif
 
 static f32 water_theta_step = 0.26666668f;
 
 void NuShaderObjectBaseCreate(NUSHADEROBJECTBASE *shader) {
+#if defined(__SSE2__)
+    static const i32 initial[4] __attribute__((aligned(16))) = {-1, 0, 0, 0};
+    const __m128i value = _mm_load_si128(reinterpret_cast<const __m128i *>(initial));
+    _mm_storeu_si128(reinterpret_cast<__m128i *>(shader), value);
+#else
     shader->field0 = -1;
     shader->field1 = 0;
     shader->key = 0;
     shader->field3 = 0;
+#endif
 }
 
 void NuShaderObjectBaseDestroy(NUSHADEROBJECTBASE *shader) {

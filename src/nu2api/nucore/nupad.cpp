@@ -770,15 +770,12 @@ void NuPadRecordEndFrame() {
 extern "C" {
 
     void SavePadRecord(void) {
-        STUBBED();
     }
 
     void SetPadRecPtr(void) {
-        STUBBED();
     }
 
     void InitPadPlayRecord(void) {
-        STUBBED();
     }
 
 } // extern "C"

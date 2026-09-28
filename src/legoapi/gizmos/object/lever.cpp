@@ -475,11 +475,11 @@ static void Lever_Activate(GIZMO *gizmo, i32 enabled) {
     }
 
     LEVER_s *lever = static_cast<LEVER_s *>(gizmo->object);
-    if (enabled != 0) {
-        lever->flags |= LEVER_FLAG_ENABLED;
+    if (__builtin_expect(enabled != 0, 1)) {
+        lever->enabled = 1;
         Lever_Reset(lever);
     } else {
-        lever->flags &= ~LEVER_FLAG_ENABLED;
+        lever->enabled = 0;
     }
 }
 

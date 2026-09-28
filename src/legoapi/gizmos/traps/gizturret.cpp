@@ -14,6 +14,7 @@
 #include "legoapi/menus/core/gamehint.h"
 #include "legoapi/items/collect/bolts.h"
 #include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/core/input/gamepads.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/misc/utilities.h"
 #include "legoapi/render/core/terrain.h"
@@ -421,14 +422,21 @@ static i32 GizmoTurret_GetOutput(GIZMO *gizmo, i32 output_index, i32) {
     GIZTURRET_s *turret = static_cast<GIZTURRET_s *>(gizmo->object);
     switch (output_index) {
         case 0:
-            return (turret->flags & 0x30) != 0;
+            if ((turret->flags & 0x30) != 0)
+                return 1;
+            break;
         case 1:
-            return static_cast<i8>(turret->flags) < 0;
+            if (static_cast<i8>(turret->flags) < 0)
+                return 1;
+            break;
         case 2:
-            return turret->field_0x132[0] >= turret->field_0x131;
+            if (turret->field_0x132[0] >= turret->field_0x131)
+                return 1;
+            break;
         default:
-            return 0;
+            break;
     }
+    return 0;
 }
 
 static char *GizmoTurret_GetOutputName(GIZMO *gizmo, i32 output_index) {
@@ -481,8 +489,9 @@ static i32 GizmoTurret_ActivateRev(GIZMO *gizmo, i32 active, i32 reverse) {
         if ((turret->flags & GIZTURRET_FLAG_ACTIVE) != 0) {
             return 0;
         }
+        const i32 result = active == 0;
         turret->flags &= ~0x10;
-        return active == 0;
+        return result;
     }
     u8 active_flag = active == 0;
     active_flag += active_flag;

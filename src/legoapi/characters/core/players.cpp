@@ -833,7 +833,7 @@ GameObject_s *Player_FindByID(i32 id) {
 
 NUVEC *Player_StartPos(GameObject_s *obj) {
     i32 index = obj->apiobj.field_0x27c;
-    if (index < 0 || index > 7) {
+    if (static_cast<u8>(index) > 7) {
         index = obj->apiobj.field_0x289;
     }
     index &= 7;
@@ -989,9 +989,7 @@ void Player_CopyEssentials(GameObject_s *source, GameObject_s *destination) {
 }
 
 i32 Player_HasDeflectBolts(GameObject_s *object) {
-    if (Cheats_CheckFlags(0x80000) != 0 || (object != NULL && object->field_0xdec > 0.0f))
-        return 1;
-    return 0;
+    return Cheats_CheckFlags(0x80000) != 0 || (object != NULL && object->field_0xdec > 0.0f);
 }
 
 i32 FULLDEBUGTOGGLE;
@@ -1157,15 +1155,11 @@ void Player_ToggleCharacter(GameObject_s *object, i32 direction, i32 sound) {
 }
 
 i32 Player_HasInvincibility(GameObject_s *object) {
-    if (Cheats_CheckFlags(0x80) != 0 || (object != NULL && object->field_0xdec > 0.0f))
-        return 1;
-    return 0;
+    return Cheats_CheckFlags(0x80) != 0 || (object != NULL && object->field_0xdec > 0.0f);
 }
 
 i32 Player_HasDoubleBoltDamage(GameObject_s *object) {
-    if (Cheats_CheckFlags(2) != 0 || (object != NULL && object->field_0xdec > 0.0f))
-        return 1;
-    return 0;
+    return Cheats_CheckFlags(2) != 0 || (object != NULL && object->field_0xdec > 0.0f);
 }
 
 void PlayerButton_OnHold_Callback(MechTouchUIElement &element, TouchHolder &) {
@@ -1178,10 +1172,7 @@ void PlayerButton_OnHold_Callback(MechTouchUIElement &element, TouchHolder &) {
 }
 
 i32 Player_HasDoubleWeaponDamage(GameObject_s *object) {
-    if (Cheats_CheckFlags(0x400) == 0 && (object == NULL || object->field_0xdec <= 0.0f)) {
-        return 0;
-    }
-    return 1;
+    return Cheats_CheckFlags(0x400) != 0 || (object != NULL && object->field_0xdec > 0.0f);
 }
 
 void PlayerButton_OnLeave_Callback(MechTouchUIElement &element, TouchHolder &holder) {
@@ -1711,8 +1702,12 @@ i32 GetNumLocalPlayers() {
 }
 
 i32 UnderPlayerControl(GameObject_s *object) {
-    return static_cast<i8>(object->apiobj.flags_low) < 0 ||
-           (object->field_0xcc0 != NULL && static_cast<i8>(object->field_0xcc0->apiobj.flags_low) < 0);
+    i32 active = 1;
+    if (static_cast<i8>(object->apiobj.flags_low) < 0)
+        return active;
+    if (object->field_0xcc0 != NULL && static_cast<i8>(object->field_0xcc0->apiobj.flags_low) < 0)
+        return active;
+    return 0;
 }
 
 i32 ActivePlayerInRange(nuvec_s *position, float range_squared, float *distance_squared) {
@@ -2017,7 +2012,6 @@ void SetPlayer() {
         player = Player[1];
     } else {
         player = NULL;
-        return;
     }
 
     player2 = NULL;

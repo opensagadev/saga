@@ -797,11 +797,12 @@ i32 edppPtlCreate(NUVEC *position, i32 effect_index) {
 }
 
 void edppPtlShelve(i32 index) {
-    edpp_particle_s *particle = &edpp_ptls[index];
-    if (particle->instance_id != -1 && particle->instance_id != 99999) {
-        DebFreeInstantly(&particle->instance_id);
-        particle->instance_id = 99999;
-    }
+    if (edpp_ptls[index].instance_id == -1)
+        return;
+    if (edpp_ptls[index].instance_id == 99999)
+        return;
+    DebFreeInstantly(&edpp_ptls[index].instance_id);
+    edpp_ptls[index].instance_id = 99999;
 }
 
 void EdDrawLineCube(VuMtx const &transform, float size, i32 colour) {
@@ -1427,10 +1428,12 @@ void edgraDrawCursor() {
 }
 
 void edpartPtlShelve(i32 index) {
-    if (part_emits[index].instance_id != -1 && part_emits[index].instance_id != 99999) {
-        DebFreeInstantly(&part_emits[index].instance_id);
-        part_emits[index].instance_id = 99999;
-    }
+    if (part_emits[index].instance_id == -1)
+        return;
+    if (part_emits[index].instance_id == 99999)
+        return;
+    DebFreeInstantly(&part_emits[index].instance_id);
+    part_emits[index].instance_id = 99999;
 }
 
 void edpartScaleType(i32 index, float scale) {
@@ -4241,6 +4244,14 @@ static EdBitControl *edBitControl;
 static edui_prop_s *edBitItem;
 static i32 edBitIndex;
 
+inline void EdEnumControl::operator delete(void *memory) {
+    theMemoryManager.FreePool(memory, sizeof(EdEnumControl));
+}
+
+inline void EdBitControl::operator delete(void *memory) {
+    theMemoryManager.FreePool(memory, sizeof(EdBitControl));
+}
+
 __attribute__((force_align_arg_pointer)) void EdBitControl::AddMenuItem(eduimenu_s *menu, EdRef *member, void *target) {
     void *memory = theMemoryManager.AllocPool(sizeof(EdBitControl), 1);
     EdBitControl *control = new (memory) EdBitControl;
@@ -5257,6 +5268,17 @@ void EdMatrixControl::Destroy() {
         components[8]->data_ptr = nullptr;
 }
 
+// The target compiler must see these tiny base destructors to inline their vtable writes.
+// Other builds need out-of-line symbols for callers in separate translation units.
+#if defined(__ANDROID__) && defined(__i386__)
+#define EDTOOLS_DTOR_INLINE inline __attribute__((always_inline))
+#else
+#define EDTOOLS_DTOR_INLINE
+#endif
+
+EDTOOLS_DTOR_INLINE EdControl::~EdControl() {
+}
+
 EdMatrixControl::EdMatrixControl() {
 }
 
@@ -5434,7 +5456,7 @@ void EdStringControl::AddMenuItem(eduimenu_s *menu, EdRef *member, void *target)
 EdStringControl::EdStringControl() {
 }
 
-EdStringControl::~EdStringControl() {
+EDTOOLS_DTOR_INLINE EdStringControl::~EdStringControl() {
 }
 
 inline void EdStringControl::operator delete(void *memory) {
@@ -5470,14 +5492,14 @@ void EdStringControl::cbPress(eduimenu_s *menu, eduiitem_s *item, u32) {
 
 template <> f32 EdValueControl<f32>::MouseScale = 100.0f;
 
-template <> EdValueControl<f32>::~EdValueControl() {
+template <> EDTOOLS_DTOR_INLINE EdValueControl<f32>::~EdValueControl() {
 }
 
 template <> inline void EdValueControl<f32>::operator delete(void *memory) {
     theMemoryManager.FreePool(memory, sizeof(EdValueControl<f32>));
 }
 
-EdFloatControl::~EdFloatControl() {
+EDTOOLS_DTOR_INLINE EdFloatControl::~EdFloatControl() {
 }
 
 inline void EdFloatControl::operator delete(void *memory) {
@@ -5721,8 +5743,8 @@ void EdClassInterface::Import() {
 }
 
 void SplineHelper::Flush() {
-    first_object = NULL;
     last_object = NULL;
+    first_object = NULL;
     object_count = 0;
 }
 
@@ -5995,6 +6017,10 @@ void EdRefSpecialObject::SetMemberData(void *object, i32 type, void *data, i32, 
     }
 }
 
+inline void EdSpecialObjectControl::operator delete(void *memory) {
+    theMemoryManager.FreePool(memory, sizeof(EdSpecialObjectControl));
+}
+
 EdSpecialObjectControl::EdSpecialObjectControl() {
     menu = NULL;
 }
@@ -6124,8 +6150,10 @@ EdClassObjectNameControl::EdClassObjectNameControl()
     : selected_class(NULL), selected_object(NULL), selected_reference(NULL) {
 }
 
-EdClassObjectNameControl::~EdClassObjectNameControl() {
+EDTOOLS_DTOR_INLINE EdClassObjectNameControl::~EdClassObjectNameControl() {
 }
+
+#undef EDTOOLS_DTOR_INLINE
 
 inline void EdClassObjectNameControl::operator delete(void *memory) {
     theMemoryManager.FreePool(memory, sizeof(EdClassObjectNameControl));
@@ -6470,9 +6498,6 @@ __attribute__((weak)) void EdSubSystem::SubProcess(float) {
 }
 
 __attribute__((weak)) void EdSubSystem::SubRender() {
-}
-
-EdControl::~EdControl() {
 }
 
 inline void EdControl::operator delete(void *memory) {

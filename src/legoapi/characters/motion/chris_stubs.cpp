@@ -14,7 +14,12 @@ struct SHOPINPUT;
 anakin_door_s *volatile AnakinC = NULL;
 
 void DrawSpaceLevel(spacelevel_s *) __asm__("_ZL14DrawSpaceLevelP12spacelevel_s") __attribute__((visibility("hidden")));
-void ProcessSpaceLevel(spacelevel_s *) __asm__("_ZL17ProcessSpaceLevelP12spacelevel_s")
+#if defined(__i386__) && defined(__SSE__)
+#define SPACE_LEVEL_CALL __attribute__((regparm(1)))
+#else
+#define SPACE_LEVEL_CALL
+#endif
+SPACE_LEVEL_CALL void ProcessSpaceLevel(spacelevel_s *) __asm__("_ZL17ProcessSpaceLevelP12spacelevel_s")
     __attribute__((visibility("hidden")));
 
 void ChrisAnakinADraw() {

@@ -40,9 +40,11 @@ void Cheats_Init(CHEAT *cheats) {
     CheatSystem.cheats = cheats;
     if (cheats != NULL && cheats[0].name != NULL) {
         i32 count = 0;
+        CHEAT *entry = cheats;
         do {
+            entry++;
             count++;
-        } while (cheats[count].name != NULL);
+        } while (entry->name != NULL);
         CheatSystem.cheats_count = count;
     }
 }
@@ -109,7 +111,7 @@ u32 Cheat_CheckFlags(i32 cheat_index, u32 flag_mask) {
 }
 
 void Cheat_SetOn(i32 cheat, i32 on, i32) {
-    if (cheat < 0 || cheat >= CheatSystem.cheats_count) {
+    if (cheat < 0 || __builtin_expect(cheat >= CheatSystem.cheats_count, 0)) {
         return;
     }
     CheatSystem.cheats[cheat].enabled = on != 0;
@@ -122,10 +124,14 @@ i32 Cheat_IsOn(i32 cheat) {
             return 1;
         }
         if (ONEPLAYERPOWERUPS == 0 && Cheat_PowerUpTime > 0.0f) {
-            u8 vehicle_flag = reinterpret_cast<u8 *>(&CheatSystem.cheats[cheat].flag)[2];
-            vehicle_flag &= VehicleArea == 0 ? 1U : 2U;
-            if (vehicle_flag != 0) {
-                return 1;
+            if (VehicleArea != 0) {
+                if (CheatSystem.cheats[cheat].flag & 0x20000) {
+                    return 1;
+                }
+            } else {
+                if (CheatSystem.cheats[cheat].flag & 0x10000) {
+                    return 1;
+                }
             }
         }
     }
@@ -143,7 +149,11 @@ void Cheat_GetOnOffBitfield(i32 *onoffs, i32 count) {
 
 void Cheat_SetOnOffBitfield(i32 *onoffs, i32 count) {
     for (i32 i = 0; i < count; i++) {
-        CheatSystem.cheats[i].enabled = ((onoffs[i >> 5] >> i) & 1) ? 1 : 0;
+        if ((onoffs[i >> 5] >> i) & 1) {
+            CheatSystem.cheats[i].enabled = 1;
+        } else {
+            CheatSystem.cheats[i].enabled = 0;
+        }
     }
 }
 
@@ -205,15 +215,21 @@ i32 Cheat_PowerUpActive(i32 index) {
     if (ONEPLAYERPOWERUPS != 0) {
         if (static_cast<u32>(index) <= 1) {
             if (Player[0] != NULL && Player[0]->field_0xdec > 0.0009765625f && Player[0]->apiobj.field_0x27c == index) {
-                return 1;
+                goto active;
             }
             if (Player[1] != NULL && Player[1]->field_0xdec > 0.0009765625f && Player[1]->apiobj.field_0x27c == index) {
-                return 1;
+                goto active;
             }
         }
-        return 0;
+        goto inactive;
     }
-    return Cheat_PowerUpTime > 0.0009765625f;
+    if (Cheat_PowerUpTime > 0.0009765625f) {
+        goto active;
+    }
+inactive:
+    return 0;
+active:
+    return 1;
 }
 
 void Cheats_Reset() {

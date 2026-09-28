@@ -122,7 +122,6 @@ void NuMemory::InitalizeThreadLocalStorage() {
 
 i32 NuMemory::FixedPoolEventHandler::AllocatePage(NuMemoryPool *pool, u32 _unknown, u32 _unknown2,
                                                   const char *_unknown3) {
-    STUBBED();
     return 0;
 }
 

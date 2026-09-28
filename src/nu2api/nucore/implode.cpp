@@ -16,6 +16,7 @@ usize implode_origsize;
 usize implode_compsize;
 
 static i32 bytes_to_copy;
+static i32 inlen;
 
 static void decode_start() {
     ImplodeHufDecodeStart();
@@ -471,8 +472,33 @@ void ImplodeFillBuf(i32 count) {
     implode_bitbuf |= subbitbuf >> (bitcount -= count);
 }
 
+void *ImplodePutI(void *destination, u32 value, i32 count) {
+    u8 *cursor = static_cast<u8 *>(destination);
+    while (count != 0) {
+        u32 byte = value;
+        *cursor = static_cast<u8>(byte);
+        cursor++;
+        value >>= 8;
+        count--;
+    }
+    return destination;
+}
+
 unsigned char ImplodeGetByteFromMem() {
     return *implode_inbuffer++;
+}
+
+void ImplodePutByteToMem(unsigned char value) {
+    *implode_outbuffer++ = value;
+}
+
+i32 ImplodeFReadMem(unsigned char *destination, i32 count) {
+    i32 bytes_read = count < inlen ? count : inlen;
+    memcpy(destination, implode_inbuffer, bytes_read);
+    implode_inbuffer += bytes_read;
+    implode_origsize += bytes_read;
+    inlen -= bytes_read;
+    return bytes_read;
 }
 
 void ImplodeError(char *msg, ...) {
@@ -484,4 +510,120 @@ void ImplodeError(char *msg, ...) {
     putc('\n', stderr);
 
     exit(1);
+}
+
+static i32 n;
+static i32 heapsize;
+static u16 heap[511];
+static u16 *freq;
+static u16 *sortptr;
+static u16 len_cnt[17];
+static u8 *len;
+
+static __attribute__((noinline, used, optimize("O0"))) void count_len(i32 node) {
+    static i32 depth;
+    if (node < n) {
+        ++len_cnt[MIN(depth, 16)];
+        return;
+    }
+    ++depth;
+    count_len(implode_left[node]);
+    count_len(implode_right[node]);
+    --depth;
+}
+
+static __attribute__((noinline, used, optimize("O0"))) void make_len(i32 root) {
+    for (i32 bits = 0; bits <= 16; ++bits)
+        len_cnt[bits] = 0;
+    count_len(root);
+
+    i32 total = 0;
+    for (i32 bits = 16; bits > 0; --bits)
+        total += static_cast<i32>(len_cnt[bits]) << (16 - bits);
+    while (total != 0x10000) {
+        --len_cnt[16];
+        i32 bits = 15;
+        while (bits > 0 && len_cnt[bits] == 0)
+            --bits;
+        --len_cnt[bits];
+        len_cnt[bits + 1] += 2;
+        --total;
+    }
+
+    for (i32 bits = 16; bits > 0; --bits) {
+        for (i32 count = len_cnt[bits]; count > 0; --count)
+            len[*sortptr++] = static_cast<u8>(bits);
+    }
+}
+
+static __attribute__((noinline, used, optimize("O0"))) void downheap(i32 parent) {
+    const i32 node = static_cast<i16>(heap[parent]);
+    i32 child = parent * 2;
+    while (child <= heapsize) {
+        if (child < heapsize && freq[heap[child]] > freq[heap[child + 1]])
+            ++child;
+        if (freq[node] <= freq[heap[child]])
+            break;
+        heap[parent] = heap[child];
+        parent = child;
+        child = parent * 2;
+    }
+    heap[parent] = static_cast<u16>(node);
+}
+
+static __attribute__((noinline, used, optimize("O0"))) void make_code(i32 count, u8 *lengths, u16 *codes) {
+    u16 next_code[18];
+    next_code[0] = 0;
+    for (i32 bits = 1; bits <= 16; ++bits)
+        next_code[bits + 1] = static_cast<u16>((next_code[bits] + len_cnt[bits]) * 2);
+    for (i32 symbol = 0; symbol < count; ++symbol)
+        codes[symbol] = next_code[lengths[symbol]]++;
+}
+
+i32 __attribute__((optimize("O0"))) ImplodeMakeTree(i32 symbol_count, u16 *frequencies, unsigned char *lengths,
+                                                    u16 *codes) {
+    n = symbol_count;
+    freq = frequencies;
+    len = lengths;
+    i32 root = n;
+    heapsize = 0;
+    heap[1] = 0;
+
+    for (i32 symbol = 0; symbol < n; ++symbol) {
+        len[symbol] = 0;
+        if (freq[symbol] != 0)
+            heap[++heapsize] = static_cast<u16>(symbol);
+    }
+    if (heapsize <= 1) {
+        codes[heap[1]] = 0;
+        return static_cast<i16>(heap[1]);
+    }
+
+    for (i32 parent = heapsize / 2; parent > 0; --parent)
+        downheap(parent);
+
+    sortptr = codes;
+    do {
+        const i32 first = static_cast<i16>(heap[1]);
+        if (first < n)
+            *sortptr++ = static_cast<u16>(first);
+        heap[1] = heap[heapsize--];
+        downheap(1);
+
+        const i32 second = static_cast<i16>(heap[1]);
+        if (second < n)
+            *sortptr++ = static_cast<u16>(second);
+
+        freq[root] = static_cast<u16>(freq[first] + freq[second]);
+        heap[1] = static_cast<u16>(root);
+        downheap(1);
+        implode_left[root] = static_cast<u16>(first);
+        implode_right[root] = static_cast<u16>(second);
+        ++root;
+    } while (heapsize > 1);
+
+    sortptr = codes;
+    make_len(root - 1);
+    make_code(n, len, codes);
+    return root - 1;
 }

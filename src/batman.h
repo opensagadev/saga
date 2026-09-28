@@ -248,7 +248,7 @@ void GameAISysSetGame(void);
 void GizmoSysSetGame(void);
 void LoadAreaCharacters(void);
 void RememberPlayerIDs(i32, i32, i32);
-i32 UpdateAchievements(STATUSPACKET_s *);
+void UpdateAchievements(STATUSPACKET_s *);
 void InitStatusScreen(WORLDINFO_s *);
 
 // ----------------------------------------------------------------------

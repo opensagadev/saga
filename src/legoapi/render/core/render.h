@@ -9,6 +9,8 @@
 extern void (*DisguiseAdjustFn)(i32 character_id, i32 hat, NUVEC *scale, NUVEC *offset);
 
 void DrawPaintLights(void);
+void DrawFalconSpotLightsForChase(GameObject_s *object);
+void ResetFalconSpotLightsForChase(void);
 void Draw3DObject(WORLDINFO_s *world, i32 object_index, NUVEC *position, u16 x_rotation, u16 y_rotation, u16 z_rotation,
                   f32 scale_x, f32 scale_y, f32 scale_z, i32 rotate_order);
 void Draw3DObjectAlpha(WORLDINFO_s *world, i32 object_index, NUVEC *position, u16 x_rotation, u16 y_rotation,
@@ -46,7 +48,7 @@ extern "C" {
 }
 #endif
 i32 DrawPanel3DObject(float, float, float, float, float, float, u16, u16, u16, nuhspecial_s *, i32, float);
-void DrawPanel3DObjectMtx(nuhspecial_s *special, numtx_s *matrix, f32 alpha);
+i32 DrawPanel3DObjectMtx(nuhspecial_s *special, numtx_s *matrix, f32 alpha);
 i32 DrawPanel3DObjectNoAlpha(f32 x, f32 y, f32 z, f32 scale_x, f32 scale_y, f32 scale_z, u16 rotate_x, u16 rotate_y,
                              u16 rotate_z, nuhspecial_s *special, i32 rotate_order);
 void DrawMiniKitCount(f32 position, f32 scale, i32 count, i32 maximum);

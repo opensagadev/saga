@@ -93,12 +93,9 @@ void NuFramebuffer360BeginZPass(i32) {
 void NuFramebuffer360EndZPass(void) {
 }
 
-bool NuFramebuffer360HasZPass(void) {
-    STUBBED();
-    return false;
+void NuFramebuffer360HasZPass(void) {
 }
 
-i32 NuFramebuffer360GetTileCount(nuframebuffer_s *) {
-    STUBBED();
-    return 0;
+i32 NuFramebuffer360GetTileCount(nuframebuffer_s *framebuffer) {
+    return *reinterpret_cast<const i32 *>(reinterpret_cast<const u8 *>(framebuffer) + 0xf4);
 }

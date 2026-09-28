@@ -5866,6 +5866,7 @@ DECOMP_ASSERT(offsetof(TTNetwork, session) == 0x110f0, "TTNetwork session offset
 // through these slots, so the declarations must carry the same order.
 struct ThingManager {
     virtual ~ThingManager();
+    static void operator delete(void *);
     virtual void AddThing(BaseThing *);
     virtual void AddThingAfterThis(BaseThing *);
     virtual void RemoveTemporaryThings();

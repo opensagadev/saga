@@ -135,8 +135,8 @@ static __used__ void SockParCamArenaOffset(nufpar_s *parser, void *) {
     sockpar_sock->camera_rail_offset = NuFParGetFloat(parser);
 }
 static __used__ void SockParOffsetBlendRatio(nufpar_s *parser, void *) {
-    const f32 ratio = NuFParGetFloat(parser);
-    sockpar_sock->camera_arena_blend = {ratio, ratio, ratio};
+    sockpar_sock->camera_arena_blend.x = sockpar_sock->camera_arena_blend.y = sockpar_sock->camera_arena_blend.z =
+        NuFParGetFloat(parser);
 }
 static __used__ void SockParOffsetBlendXRatio(nufpar_s *parser, void *) {
     sockpar_sock->camera_arena_blend.x = NuFParGetFloat(parser);
@@ -242,7 +242,6 @@ static __used__ void SockParBlend(nufpar_s *parser, void *) {
     sockpar_sock->blend_count = index + 1;
 }
 
-// The selected socket is captured before parsing, as in the original callbacks.
 static __used__ void SockCamATSTLIFT(nufpar_s *parser, void *) {
     SOCK *socket = sockpar_sock;
     socket->camera_character_close_lift = NuFParGetFloat(parser);

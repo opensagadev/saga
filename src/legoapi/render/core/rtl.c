@@ -608,11 +608,10 @@ extern "C" {
     }
 
     void rtlSetLights(rtldata_s *data) {
-        const NUVEC *directions = data->direction;
-        const NUCOLOUR3 *colours = data->intensity;
-        NuRndrSetDirectionalLightsPS(&directions[0], &colours[0], &directions[1], &colours[1], &directions[2],
-                                     &colours[2]);
-        NuRndrSetAmbientLightPS(&data->ambient_colour);
+        rtldata_s *record = data;
+        NuRndrSetDirectionalLightsPS(&record->direction[0], &record->intensity[0], &record->direction[1],
+                                     &record->intensity[1], &record->direction[2], &record->intensity[2]);
+        NuRndrSetAmbientLightPS(&record->ambient_colour);
     }
 
     void rtlSetSpecularLight(rtldata_s *data) {
@@ -980,17 +979,25 @@ static __used__ void rtlProcessLight(rtl_s *light, f32 elapsed) {
 
 extern "C" {
 
-    char *rtlGetEnvPath(void) {
+#if defined(__GNUC__) && !defined(__clang__)
+#define RTL_OMIT_FRAME_POINTER __attribute__((optimize("omit-frame-pointer")))
+#else
+#define RTL_OMIT_FRAME_POINTER
+#endif
+
+    RTL_OMIT_FRAME_POINTER char *rtlGetEnvPath(void) {
         return const_cast<char *>("_new");
     }
 
-    char *rtlGetEnvSceneName(void) {
+    RTL_OMIT_FRAME_POINTER char *rtlGetEnvSceneName(void) {
         return WORLD->config_file;
     }
 
-    rtlset *rtlGetEnvSet(void) {
+    RTL_OMIT_FRAME_POINTER rtlset *rtlGetEnvSet(void) {
         return WORLD->rtl_set;
     }
+
+#undef RTL_OMIT_FRAME_POINTER
 
     void rtlProcessLights(void *set, f32 frame_time) {
         rtl_s *light;

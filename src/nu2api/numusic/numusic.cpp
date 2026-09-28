@@ -70,14 +70,17 @@ i32 (*CheckMusicOtherFn)(void) = NULL;
 // GamePlayMusic consults this option byte (original: SuperOptions field 0x14).
 // Non-zero selects the quiet/action attack tracks instead of the plain theme.
 NuMusic::NuMusic() {
-    for (i32 i = 0; i < 6; i++) {
-        this->class_volumes[i] = 1.0f;
-    }
+    this->class_volumes[0] = 1.0f;
+    this->class_volumes[1] = 1.0f;
+    this->class_volumes[2] = 1.0f;
     this->albums = NULL;
     this->album_count = 0;
     this->fileinfo = NULL;
     this->file_count = 0;
+    this->class_volumes[3] = 1.0f;
     this->track_index = 0;
+    this->class_volumes[4] = 1.0f;
+    this->class_volumes[5] = 1.0f;
 }
 
 NuMusic::~NuMusic() {
@@ -88,11 +91,11 @@ i32 NuMusic::ClassToIX(u32 i) {
         return 0;
     if (i == TRACK_CLASS_ACTION)
         return 1;
-    if (i == TRACK_CLASS_4)
+    if (__builtin_expect(i == TRACK_CLASS_4, 0))
         return 2;
-    if (i == TRACK_CLASS_8)
+    if (__builtin_expect(i == TRACK_CLASS_8, 0))
         return 3;
-    if (i == TRACK_CLASS_CUTSCENE)
+    if (__builtin_expect(i == TRACK_CLASS_CUTSCENE, 0))
         return 4;
     if (i == TRACK_CLASS_NOMUSIC)
         return 5;
@@ -402,13 +405,14 @@ NuMusic::Voice *NuMusic::FindVoiceByTrack(Track *track) {
 }
 
 NuMusic::Voice *NuMusic::FindVoiceByClass(TRACK_CLASS clazz) {
+    NuMusic *self = this;
     i32 index;
     Track *track;
 
-    track = this->voices[0].tracks[this->voices[0].track_index];
+    track = self->voices[0].tracks[self->voices[0].track_index];
     if (track == NULL || track->clazz != clazz) {
-        track = this->voices[1].tracks[this->voices[1].track_index];
-        if (track == NULL || track->clazz != clazz) {
+        track = self->voices[1].tracks[self->voices[1].track_index];
+        if (track == NULL || __builtin_expect(track->clazz != clazz, 1)) {
             return NULL;
         }
         index = 1;
@@ -416,23 +420,25 @@ NuMusic::Voice *NuMusic::FindVoiceByClass(TRACK_CLASS clazz) {
         index = 0;
     }
 
-    return &this->voices[index];
+    return &self->voices[index];
 }
 
 NuMusic::Voice *NuMusic::FindIdleVoice() {
-    i32 index;
-    if (voices[0].status == VOICE_STATUS_READY) {
+    NuMusic *self = this;
+    i32 index = -1;
+    if (self->voices[0].status == VOICE_STATUS_READY) {
         index = 0;
-    } else if (voices[1].status == VOICE_STATUS_READY) {
+    } else if (self->voices[1].status == VOICE_STATUS_READY) {
         index = 1;
-    } else if (voices[0].status == VOICE_STATUS_STOPPED) {
+    } else if (self->voices[0].status == VOICE_STATUS_STOPPED) {
         index = 0;
-    } else if (voices[1].status == VOICE_STATUS_STOPPED) {
+    } else if (self->voices[1].status == VOICE_STATUS_STOPPED) {
         index = 1;
-    } else {
+    }
+    if (index < 0) {
         return NULL;
     }
-    return &voices[index];
+    return &self->voices[index];
 }
 
 bool NuMusic::SelectTrackByHandle(TRACK_CLASS clazz, i32 trackHandle) {
@@ -1332,28 +1338,14 @@ void NuMusic::ParseTrack(u32 category, nufpar_s *fpar) {
 }
 
 char *NuMusic::RemovePath(char *str) {
-    char *str_;
-    char c;
-
-    c = *str;
-    if (c != '\0') {
-        char *last_sep = NULL;
-        str_ = str;
-
-        do {
-            if (c == '/' || c == '\\') {
-                last_sep = str_;
-            }
-            str_ = str_ + 1;
-            c = *str_;
-        } while (c != '\0');
-
-        if (last_sep != NULL) {
-            str = last_sep + 1;
+    char *last_sep = NULL;
+    for (char *cursor = str; *cursor != '\0'; cursor++) {
+        char c = *cursor;
+        if ((c == '/') | (c == '\\')) {
+            last_sep = cursor;
         }
     }
-
-    return str;
+    return last_sep != NULL ? last_sep + 1 : str;
 }
 
 void NuMusic::SubstituteString(char *dst, char *src, char *find, char *subst) {
@@ -1465,7 +1457,7 @@ void NuMusic::xPath(nufpar_s *fpar) {
     NuStrCpy(this->current_path, fpar->word_buf);
 }
 void NuMusic::xStrict(nufpar_s *fpar) {
-    fpar->line_buf[28] = '\x01';
+    this->strict_mode = true;
     NuFParSetInterpreterErrorHandler(GlobalParseErrorFn);
 }
 
@@ -1499,8 +1491,10 @@ void NuMusic::xIdent(nufpar_s *fpar) {
     this->current_track->ident = AllocString(fpar->word_buf);
 }
 void NuMusic::xIndex(nufpar_s *fpar) {
-    this->indexes[this->index_count++] = NuFParGetFloatRDP(fpar);
+    f32 *index = &this->indexes[this->index_count];
+    *index = NuFParGetFloatRDP(fpar);
     this->current_track->entry_count++;
+    this->index_count++;
 }
 void NuMusic::xNoMusic(nufpar_s *fpar) {
     NuFParGetWord(fpar);
@@ -1513,13 +1507,12 @@ void NuMusic::xNoDuck(nufpar_s *fpar) {
     ((u8 *)&this->current_track->flags)[0] |= 1;
 }
 void NuMusic::xDuck(nufpar_s *fpar) {
-    Track *track = this->current_track;
-    track->duck_volume = NuFParGetFloatRDP(fpar);
-    if (track->duck_volume < 0.0f) {
+    this->current_track->duck_volume = NuFParGetFloatRDP(fpar);
+    if (this->current_track->duck_volume < 0.0f) {
         // Negative values are decibels.
-        track->duck_volume = NuSound3dBToAmplitude(track->duck_volume);
+        this->current_track->duck_volume = NuSound3dBToAmplitude(this->current_track->duck_volume);
     }
-    track->duck_fade = NuFParGetFloatRDP(fpar);
+    this->current_track->duck_fade = NuFParGetFloatRDP(fpar);
 }
 void NuMusic::xLooping(nufpar_s *fpar) {
     (void)fpar;
@@ -1530,20 +1523,19 @@ void NuMusic::xNonLooping(nufpar_s *fpar) {
     ((u8 *)&this->current_track->flags)[0] &= 0xfd;
 }
 void NuMusic::xAttenuation(nufpar_s *fpar) {
-    Track *track = this->current_track;
-    track->attenuation = NuFParGetFloatRDP(fpar);
-    if (track->attenuation < 0.0f) {
+    this->current_track->attenuation = NuFParGetFloatRDP(fpar);
+    if (this->current_track->attenuation < 0.0f) {
         // Negative values are decibels.
-        track->attenuation = NuSound3dBToAmplitude(track->attenuation);
+        this->current_track->attenuation = NuSound3dBToAmplitude(this->current_track->attenuation);
     }
 }
 
 void NuMusic::GlobalParseErrorFn(nufpar_s *param_1) {
-    STUBBED();
+    (void)param_1;
 }
 
 void NuMusic::TrackParseErrorFn(nufpar_s *param_1) {
-    STUBBED();
+    (void)param_1;
 }
 
 void RegisterMusic(NUSOUND_FILENAME_INFO *files) {

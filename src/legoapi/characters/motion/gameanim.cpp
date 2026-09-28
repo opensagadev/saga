@@ -82,6 +82,7 @@ enum CHARACTER_ANIMATION : i16 {
     CHARACTER_ANIMATION_EXTRA_RUN = 115,
     CHARACTER_ANIMATION_EXTRA_FALL = 116,
     CHARACTER_ANIMATION_EXTRA_IDLE = 117,
+    CHARACTER_ANIMATION_EXTRA_WEAPON_IDLE = 118,
     CHARACTER_ANIMATION_SUIT_TIPTOE = 198,
     CHARACTER_ANIMATION_SUIT_WALK = 199,
     CHARACTER_ANIMATION_SUIT_RUN = 200,
@@ -1075,12 +1076,12 @@ i32 GameAnimSet_Play(GAMEANIMSET_s *set, float speed, i32 evaluate_state) {
 }
 
 i32 GameAnimSet_Stop(GAMEANIMSET_s *set) {
-    if (set == NULL) {
+    if (__builtin_expect(set == NULL, 0)) {
         return 1;
     }
 
     GAMEANIMSET_STATE state = static_cast<GAMEANIMSET_STATE>(set->state & ~GAMEANIMSET_STATE_AT_END);
-    if (state != GAMEANIMSET_STATE_ACTIVE_FORWARD) {
+    if (__builtin_expect(state != GAMEANIMSET_STATE_ACTIVE_FORWARD, 0)) {
         return 1;
     }
 
@@ -2280,10 +2281,13 @@ void SetAnimFrame(nuhspecial_s *special, float frame) {
 }
 
 i32 GetAnimDirection(nuinstanim_s *animation) {
-    if (animation == NULL || animation->tfactor == 0.0f) {
+    if (animation == NULL) {
         return -1;
     }
-    return animation->tfactor < 0.0f ? 1 : 0;
+    f32 factor = animation->tfactor;
+    if (factor < 0.0f)
+        return 1;
+    return (factor > 0.0f) - 1;
 }
 
 i32 FindTexAnimFromMtl(nugscn_s *scene, numtl_s *material) {

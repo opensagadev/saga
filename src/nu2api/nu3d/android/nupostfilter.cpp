@@ -310,20 +310,26 @@ extern "C" void NuPostEffectBloom(const NuBloomParameters *parameters) {
 }
 
 extern "C" void NuPostEffectDepthOfField(const NuDepthOfFieldParameters *parameters) {
-    if (mainFilter == NULL)
+    auto *filter = mainFilter;
+    if (filter == NULL)
         return;
-    mainFilter->dof_strength = parameters->strength;
-    mainFilter->dof_near = parameters->near_distance;
-    mainFilter->dof_far = parameters->far_distance;
-    mainFilter->dof_bias = parameters->bias;
-    mainFilter->dof_mode = parameters->mode;
+    u32 bias_bits;
+    memcpy(&bias_bits, &parameters->bias, sizeof(bias_bits));
+    filter->dof_strength = parameters->strength;
+    filter->dof_near = parameters->near_distance;
+    filter->dof_far = parameters->far_distance;
+    memcpy(&filter->dof_bias, &bias_bits, sizeof(bias_bits));
+    filter->dof_mode = parameters->mode;
 }
 
 extern "C" void NuPostEffectDeferredShading(const f32 *parameters) {
-    if (deferredFilter == NULL)
+    auto *filter = deferredFilter;
+    if (filter == NULL)
         return;
-    for (i32 i = 0; i < 4; ++i)
-        deferredFilter->parameters[i] = parameters[i];
+    memcpy(&filter->parameters[0], &parameters[0], sizeof(f32));
+    memcpy(&filter->parameters[1], &parameters[1], sizeof(f32));
+    memcpy(&filter->parameters[2], &parameters[2], sizeof(f32));
+    memcpy(&filter->parameters[3], &parameters[3], sizeof(f32));
 }
 
 extern "C" void NuPostEffectMotionBlur(const NUMTX *previous, const NUMTX *current, f32 scale, f32 maximum,

@@ -3,6 +3,8 @@
 #include "gameapi/edtools/edstubs.h"
 #include "legoapi/render/core/render.h"
 #include "legoapi/items/collect/torpedo.h"
+#include "legoapi/items/collect/spacelevel.h"
+#include "legoapi/world/levels/podrace.h"
 #include "legoapi/actions/character/transform.h"
 #include "legoapi/actions/movement/carrying.h"
 #include "legoapi/actions/character/snake.h"
@@ -768,6 +770,27 @@ static NUGSCN *NuReadGraphicsData(VARIPTR *buf, VARIPTR *buf_end, char *path, ch
 
 // --- Extern "C": NuGScn functions have C linkage in original ---
 extern "C" {
+    NUGSCN *NuGScnReadForMultiRender(VARIPTR *buf, VARIPTR buf_end, char *path, i32 render_count) {
+        NUGSCN *scene = NuReadGraphicsData(buf, &buf_end, path, NULL, NULL);
+        if (scene == NULL || render_count <= 1) {
+            return scene;
+        }
+
+        buf->addr = ALIGN(buf->addr, 0x20);
+        NUGSCN **additional = reinterpret_cast<NUGSCN **>(buf->void_ptr);
+        buf->addr += render_count * sizeof(NUGSCN *);
+        for (i32 i = 0; i < render_count - 1; ++i) {
+            additional[i] = reinterpret_cast<NUGSCN *>(ALIGN(buf->addr, 0x20));
+            buf->addr = ALIGN(buf->addr, 0x20) + sizeof(NUGSCN);
+            memcpy(additional[i], scene, sizeof(NUGSCN));
+            additional[i]->display_list = NuDisplaySceneClone(scene->display_list, buf, &buf_end);
+            additional[i]->display_list->gscene = additional[i];
+        }
+        additional[render_count - 1] = NULL;
+        scene->additional_scenes = additional;
+        return scene;
+    }
+
     NUGSCN *NuGScnRead(VARIPTR *buf, VARIPTR buf_end, char *path) {
         RemoveDirectionalMaps = 1;
         RemoveNormalMaps = 1;
@@ -1465,14 +1488,16 @@ void DrawPauseFade() {
     if (editor_active != 0 || screendump != 0)
         return;
 
+    i32 paused = Paused;
+    f32 current_fade = pause_fade;
     f32 step = FRAMETIME * 2.0f;
     i32 fade;
-    if (Paused == 0 && NetPaused == 0) {
-        fade = static_cast<i32>(pause_fade - step);
+    if (paused == 0 && NetPaused == 0) {
+        fade = static_cast<i32>(current_fade - step);
         if (fade < 0)
             fade = 0;
     } else {
-        fade = static_cast<i32>(pause_fade + step);
+        fade = static_cast<i32>(current_fade + step);
         if (fade > 0) {
             pause_fade = 1.0f;
             return;
@@ -1808,20 +1833,20 @@ void DrawStatusText(char *text, u16 angle, float x, float y, float scale, u32 co
     NuQFntSetCoordinateSystem(NUQFNT_CSMODE_NORMALISED);
 }
 
-void Draw3DObjectMtx(WORLDINFO_s *world, i32 object_index, numtx_s *mtx) {
-    if (object_index == -1) {
-        return;
-    }
-    if (world == NULL) {
-        world = WorldInfo_CurrentlyActive();
+i32 Draw3DObjectMtx(WORLDINFO_s *world, i32 object_index, numtx_s *mtx) {
+    if (object_index != -1) {
         if (world == NULL) {
-            return;
+            world = WorldInfo_CurrentlyActive();
+        }
+        if (world != NULL) {
+            LEVEL_OBJECT_RUNTIME &object = world->lev_objs[object_index];
+            if (object.active != 0) {
+                return NuSpecialDrawAt(&object.special, mtx);
+            }
+            return 0;
         }
     }
-    LEVEL_OBJECT_RUNTIME &object = world->lev_objs[object_index];
-    if (object.active != 0) {
-        NuSpecialDrawAt(&object.special, mtx);
-    }
+    return 1;
 }
 
 void DrawGameObjects() {
@@ -2721,8 +2746,8 @@ void DrawGameObjectsDraw(i32) {
 void Draw_AUTOSAVECANCEL() {
 }
 
-void DrawPanel3DObjectMtx(nuhspecial_s *special, numtx_s *matrix, float alpha) {
-    if (alpha > 0.0f) {
+i32 DrawPanel3DObjectMtx(nuhspecial_s *special, numtx_s *matrix, float alpha) {
+    if (0.0f < alpha) {
         NUVEC scale = {1.0f / CameraZoom, 1.0f / CameraZoom, 1.0f / CameraZoom};
         NuMtxPreScale(matrix, &scale);
         if (special != NULL && NuSpecialExistsFn(special) != 0) {
@@ -2730,6 +2755,7 @@ void DrawPanel3DObjectMtx(nuhspecial_s *special, numtx_s *matrix, float alpha) {
             NuSpecialDrawAtAlpha(special, matrix, alpha);
         }
     }
+    return 0;
 }
 
 void Draw_AUTOSAVEWARNING() {
@@ -4092,8 +4118,9 @@ void BackDrop_Init(char *path, variptr_u *buf, variptr_u *buf_end) {
 }
 
 void BackDrop_Dump() {
-    backdrop_scene = nullptr;
-    memset(s_backdrop_hspecial, 0, sizeof(s_backdrop_hspecial));
+    if (backdrop_scene != NULL) {
+        NuGScnRemove(backdrop_scene);
+    }
 }
 
 void BackDrop_Update(float dt) {
@@ -4195,5 +4222,51 @@ void BackDrop_Draw(float alpha, i32 flags) {
             NuSpecialDrawAtAlpha(special, &mtx, alpha);
             angle = (u16)(angle + 0x5555);
         }
+    }
+}
+
+void DrawSpaceLevel(spacelevel_s *) __asm__("_ZL14DrawSpaceLevelP12spacelevel_s")
+    __attribute__((used, visibility("hidden")));
+void DrawSpaceLevel(spacelevel_s *space) {
+    if (space->player_matrix_state != 0) {
+        NuVecMtxTransform(reinterpret_cast<NUVEC *>(&space->player_matrix.m30),
+                          reinterpret_cast<NUVEC *>(&space->player_matrix.m10), &GameCam->render_mtx);
+        DrawCross_Now(reinterpret_cast<_vuv_s *>(&space->player_matrix.m30), 1.0f, space->player_colour, 1);
+    }
+    if (space->camera_matrix_state != 0) {
+        NuVecMtxTransform(reinterpret_cast<NUVEC *>(&space->camera_matrix.m30),
+                          reinterpret_cast<NUVEC *>(&space->camera_matrix.m10), &GameCam->render_mtx);
+        DrawCross_Now(reinterpret_cast<_vuv_s *>(&space->camera_matrix.m30), 1.0f, space->camera_colour, 1);
+    }
+
+    for (i32 group_index = 0; group_index < 7; ++group_index) {
+        spacelevel_fighter_group_s &group = space->fighter_groups[group_index];
+        if (group.trooper_team.reset_effect == 0)
+            continue;
+        for (i32 fighter_index = 0; fighter_index < 4; ++fighter_index) {
+            spacelevel_starfighter_s &fighter = group.fighters[fighter_index];
+            if (fighter.reset_timer != 0)
+                DrawStarFighter(reinterpret_cast<starfighter_s *>(&fighter));
+        }
+        if (group.trooper_team.reset_effect_timer != 0) {
+            u8 *team = reinterpret_cast<u8 *>(&group.trooper_team);
+            DrawCross_Now(reinterpret_cast<_vuv_s *>(team + 0x78), 3.0f, 0xffffff, 1);
+        }
+    }
+    if (space->last_starfighter.reset_effect != 0) {
+        for (i32 fighter_index = 0; fighter_index < 4; ++fighter_index) {
+            spacelevel_starfighter_s &fighter = space->final_fighters[fighter_index];
+            if (fighter.reset_timer != 0)
+                DrawStarFighter(reinterpret_cast<starfighter_s *>(&fighter));
+        }
+        if (space->last_starfighter.reset_effect_timer != 0) {
+            u8 *last = reinterpret_cast<u8 *>(&space->last_starfighter);
+            DrawCross_Now(reinterpret_cast<_vuv_s *>(last + 0x78), 3.0f, 0xffffff, 1);
+        }
+    }
+    for (i32 index = 0; index < 96; ++index) {
+        spacelevel_starfighter_s &fighter = space->queued_starfighters[index];
+        if (fighter.reset_state != 0)
+            DrawStarFighter(reinterpret_cast<starfighter_s *>(&fighter));
     }
 }

@@ -50,7 +50,7 @@ extern void Customiser_Update(CUSTOMISER *, WORLDINFO_s *);
 void Hub_ResetPanel();
 extern void InitShop(WORLDINFO_s *);
 extern void DrawShop3D(WORLDINFO_s *);
-extern void Draw3DObjectMtx(WORLDINFO_s *, i32, NUMTX *);
+extern i32 Draw3DObjectMtx(WORLDINFO_s *, i32, NUMTX *);
 extern void CutScenePlayer_Reset();
 extern FadeSystem FadeSys;
 extern GAMESAVE_s TempGame;

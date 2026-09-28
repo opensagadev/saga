@@ -10,6 +10,7 @@
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numath/numtx.h"
+#include "nu2api/numath/nuvec4.h"
 #include "nu2api/numath/nurand.h"
 #include "nu2api/nu3d/numtl.h"
 #include "nu2api/nu3d/nutex.h"
@@ -638,10 +639,10 @@ extern "C" {
         return closest_index;
     }
 
-    void DebFreeAllCreatedEffects(void) {
+    __attribute__((force_align_arg_pointer)) void DebFreeAllCreatedEffects(void) {
         for (i32 i = 0; i < maxdebkeys; ++i) {
             if (debkeydata[i].effect_index != 0 && debkeydata[i].field_2f9 != 0) {
-                i32 handle = i;
+                i32 handle __attribute__((aligned(16))) = i;
                 DebFreeInstantly(&handle);
             }
         }
@@ -657,11 +658,11 @@ extern "C" {
         }
     }
 
-    void DebFreeAllPanelEffects(void) {
+    __attribute__((force_align_arg_pointer)) void DebFreeAllPanelEffects(void) {
         for (i32 i = 0; i < maxdebkeys; ++i) {
             const i16 effect_index = debkeydata[i].effect_index;
             if (effect_index != 0 && debtab[effect_index]->time_group == 4) {
-                i32 handle = i;
+                i32 handle __attribute__((aligned(16))) = i;
                 DebFreeInstantly(&handle);
             }
         }
@@ -1103,24 +1104,16 @@ extern "C" {
     i32 DebrisQueryPriority(i32 effect_index) {
         if (effect_index < 0 || effect_index >= EDPP_MAX_TYPES || debtab[effect_index] == NULL)
             return 0;
-        i16 priority = 0;
-        switch (static_cast<i8>(debtab[effect_index]->particle_type)) {
-            case 0:
-                priority = 20000;
-                break;
-            case 2:
-                priority = -25536;
-                break;
-            case 3:
-                priority = 30000;
-                break;
-            case 7:
-                priority = 10000;
-                break;
-            default:
-                break;
-        }
-        return priority;
+        const u8 particle_type = debtab[effect_index]->particle_type;
+        if (particle_type == 2)
+            return -25536;
+        if (particle_type <= 2)
+            return particle_type == 0 ? 20000 : 0;
+        if (particle_type == 3)
+            return 30000;
+        if (particle_type == 7)
+            return 10000;
+        return 0;
     }
 
     void DebrisReScale(i32 effect_index, f32 scale) {
@@ -1333,9 +1326,7 @@ extern "C" {
     }
 
     void DebrisStartOffset(i32 handle, f32 offset) {
-        if (handle != -1) {
-            DebrisStartOffsetEx(debkeydata + handle, offset);
-        }
+        DebrisStartOffsetEx(debkeydata + handle, offset);
     }
 
     void DebrisStatusAlwaysOff(i32 *handle) {
@@ -1736,11 +1727,12 @@ extern "C" {
     void PlatOnOff(i32 index, i32 enabled) {
         if (CurTerr != NULL && index >= 0 && index < CurTerr->max_platforms) {
             TERRAIN_GROUP &group = CurTerr->groups[CurTerr->platforms[index].terrain_group_index];
+            volatile i32 *chunk_type = &group.chunk_type;
             if (enabled != 0) {
-                group.chunk_type = 1;
+                *chunk_type = 1;
                 return;
             }
-            group.chunk_type = -1;
+            *chunk_type = -1;
         }
     }
 

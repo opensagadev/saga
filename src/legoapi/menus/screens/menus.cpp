@@ -74,13 +74,16 @@ eduimenu_s *GetMenuActiveChild(eduimenu_s *menu) {
     if (menu == NULL) {
         return NULL;
     }
-    while (menu->child != NULL) {
-        menu = menu->child;
+    eduimenu_s *child = menu->child;
+    if (child != NULL) {
+        while (child->child != NULL) {
+            child = child->child;
+        }
+        return child;
     }
     return menu;
 }
 void ResizePauseScreenTexture(i32, i32) {
-    STUBBED();
 }
 
 i32 GetMenuID(void) {

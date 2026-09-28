@@ -174,31 +174,16 @@ void sceneHelperDeletingDestructor(SceneObjectHelper *object) {
         const_cast<void *>(static_cast<void const *>(&edSubSystemVTable.methods));
     object->class_interface.vtable = const_cast<EdClassInterfaceVTable *>(&sceneBaseInterfaceVTable.methods);
 }
-// The original adjustment thunks tail-jump after subtracting the secondary
-// subobject's +0xc offset. A C++ wrapper would add a call frame here.
-#if defined(__i386__)
-asm(".weak _ZThn12_N17SceneObjectHelperD1Ev\n"
-    ".type _ZThn12_N17SceneObjectHelperD1Ev, @function\n"
-    "_ZThn12_N17SceneObjectHelperD1Ev:\n"
-    "subl $12, 4(%esp)\n"
-    "jmp _ZN17SceneObjectHelperD1Ev\n"
-    ".size _ZThn12_N17SceneObjectHelperD1Ev, .-_ZThn12_N17SceneObjectHelperD1Ev\n"
-    ".weak _ZThn12_N17SceneObjectHelperD0Ev\n"
-    ".type _ZThn12_N17SceneObjectHelperD0Ev, @function\n"
-    "_ZThn12_N17SceneObjectHelperD0Ev:\n"
-    "subl $12, 4(%esp)\n"
-    "jmp _ZN17SceneObjectHelperD0Ev\n"
-    ".size _ZThn12_N17SceneObjectHelperD0Ev, .-_ZThn12_N17SceneObjectHelperD0Ev\n");
-#else
-extern "C" void sceneHelperSubDestructor(EdSubSystem *object) asm("_ZThn12_N17SceneObjectHelperD1Ev");
+extern "C" void sceneHelperSubDestructor(EdSubSystem *object) asm("_ZThn12_N17SceneObjectHelperD1Ev")
+    __attribute__((weak));
 void sceneHelperSubDestructor(EdSubSystem *object) {
     sceneHelperDestructor(reinterpret_cast<SceneObjectHelper *>(reinterpret_cast<u8 *>(object) - 12));
 }
-extern "C" void sceneHelperSubDeletingDestructor(EdSubSystem *object) asm("_ZThn12_N17SceneObjectHelperD0Ev");
+extern "C" void sceneHelperSubDeletingDestructor(EdSubSystem *object) asm("_ZThn12_N17SceneObjectHelperD0Ev")
+    __attribute__((weak));
 void sceneHelperSubDeletingDestructor(EdSubSystem *object) {
     sceneHelperDeletingDestructor(reinterpret_cast<SceneObjectHelper *>(reinterpret_cast<u8 *>(object) - 12));
 }
-#endif
 
 template <typename Ref>
 static void add_scene_reference(EdClass *object_class, char *type, char *name, i32 offset, i32 size, i32 attributes,
@@ -211,20 +196,11 @@ static void add_scene_reference(EdClass *object_class, char *type, char *name, i
 void EdDrawBegin(i32 material);
 void EdDrawEnd();
 
-#if defined(__i386__)
-asm(".globl _ZThn12_N17SceneObjectHelper9SubRenderEv\n"
-    ".type _ZThn12_N17SceneObjectHelper9SubRenderEv, @function\n"
-    "_ZThn12_N17SceneObjectHelper9SubRenderEv:\n"
-    "subl $12, 4(%esp)\n"
-    "jmp _ZN17SceneObjectHelper9SubRenderEv\n"
-    ".size _ZThn12_N17SceneObjectHelper9SubRenderEv, .-_ZThn12_N17SceneObjectHelper9SubRenderEv\n");
-#else
 extern "C" void sceneHelperSubRender(EdSubSystem *object) asm("_ZThn12_N17SceneObjectHelper9SubRenderEv");
 void sceneHelperSubRender(EdSubSystem *object) {
     SceneObjectHelper *helper = reinterpret_cast<SceneObjectHelper *>(reinterpret_cast<u8 *>(object) - 12);
     helper->SubRender();
 }
-#endif
 
 Placeable *SceneObject::Clone(i32 attributes) const {
     SceneInstance *copy = static_cast<SceneInstance *>(theSceneObjectHelper.CreateObject(NULL, 0, 0));

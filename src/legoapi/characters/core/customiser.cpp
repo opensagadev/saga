@@ -15,6 +15,7 @@
 #include "legoapi/world/level.h"
 #include "nu2api/nu3d/nurndr.h"
 #include "nu2api/nu3d/nuspecial.h"
+#include "nu2api/nu3d/nurndr.h"
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/nu3d/numtl.h"
 #include "nu2api/nucore/nustring.h"

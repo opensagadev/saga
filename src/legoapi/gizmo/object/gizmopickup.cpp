@@ -13,6 +13,7 @@
 #include "legoapi/render/fx.h"
 #include "legoapi/render/fx/parts.h"
 #include "legoapi/world/area.h"
+#include "legoapi/world/level.h"
 #include "legoapi/world/world.h"
 #include "globals.h"
 

@@ -168,7 +168,6 @@ void NuTexInitExPS(VARIPTR *buf) {
 }
 
 void NuTexDisplayTexturePage(i32 page, f32 depth, i32 alpha) {
-    STUBBED();
 }
 
 i32 NuTexGetReqSize(i32 tex_id, i32 level) {
@@ -183,21 +182,17 @@ void NuTexUnReserve() {
 }
 
 NUTEXBITMAP *NuTexReadBitmap(char *) {
-    STUBBED();
     return NULL;
 }
 
 void NuTexAssignAddr(i32, i32) {
-    STUBBED();
 }
 
 extern "C" i32 NuTexCreateEx(void) {
-    STUBBED();
     return 0;
 }
 
 void NuTexReadTex(void) {
-    STUBBED();
 }
 
 void NuTexSetTextureWithStagePS(NUNATIVETEX *tex, GLuint stage) {

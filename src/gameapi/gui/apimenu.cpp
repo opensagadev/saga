@@ -421,7 +421,7 @@ extern i32 hub_forceshopsave;
 extern "C" i32 TriggerAutoSave(void);
 void Hub_ClearStats();
 void Text_FillInExtendedSaveInfo();
-i32 UpdateAchievements(STATUSPACKET_s *packet);
+void UpdateAchievements(STATUSPACKET_s *packet);
 void ReCalculateCompletionPoints();
 
 void DrawShopPrompts();

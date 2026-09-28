@@ -24,7 +24,7 @@ void NuDeviceSpecs::Create() {
 }
 
 void NuDeviceSpecs::Exists() {
-    STUBBED();
+    // The original implementation performs no work.
 }
 
 void NuDeviceSpecs::Destroy() {

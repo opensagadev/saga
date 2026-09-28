@@ -37,6 +37,14 @@ char g_shaderSaveFolder[256] = "shaders";
 #include <cstdio>
 #include <cstring>
 
+#if defined(__GNUC__) && !defined(__clang__) && defined(__i386__)
+#define NUSHADER_RETRIEVE_ATTR __attribute__((noinline, noclone, regparm(0)))
+#define NUSHADER_WRAPPER_ATTR __attribute__((optimize("no-optimize-sibling-calls")))
+#else
+#define NUSHADER_RETRIEVE_ATTR
+#define NUSHADER_WRAPPER_ATTR
+#endif
+
 #include "nu2api/nufile/nufile.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nuandroid/ios_graphics.h"
@@ -918,8 +926,8 @@ namespace nu2api {
     // shader version 5, whose generated programs deliberately discard material
     // features unsupported by the mobile uber-shader before the key is built.
 
-    static void *RetrieveShader(void *manager, NUSHADERMTLDESC *desc, void *mtl, i32 variant, i32 flagsIn,
-                                bool pixelStage) {
+    NUSHADER_RETRIEVE_ATTR static void *RetrieveShader(void *manager, NUSHADERMTLDESC *desc, void *mtl, i32 variant,
+                                                       i32 flagsIn, bool pixelStage) {
         static_cast<ShaderManagerOpenGL *>(manager)->adaptShaderMaterialForShaderVersion(desc);
         ShaderMtlDescFilterPlain filter{};
         FilterInternalInit(&filter, desc, mtl, variant, flagsIn);
@@ -976,11 +984,12 @@ namespace nu2api {
 // Wrappers used by the engine
 // ---------------------------------------------------------------------------
 
-extern "C" void *NuShaderManagerRetrieveShader(NUSHADERMTLDESC *desc, void *mtl) {
+extern "C" NUSHADER_WRAPPER_ATTR void *NuShaderManagerRetrieveShader(NUSHADERMTLDESC *desc, void *mtl) {
     return nu2api::RetrieveShader(g_shaderManager, desc, mtl, 0, 0, false);
 }
 
-extern "C" void *NuShaderManagerRetrieveShaderVariant(NUSHADERMTLDESC *desc, void *mtl, i32 variant) {
+extern "C" NUSHADER_WRAPPER_ATTR void *NuShaderManagerRetrieveShaderVariant(NUSHADERMTLDESC *desc, void *mtl,
+                                                                            i32 variant) {
     return nu2api::RetrieveShader(g_shaderManager, desc, mtl, variant, 0, false);
 }
 

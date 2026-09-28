@@ -51,8 +51,8 @@ struct CreatureEditorRecord {
     void *locator;
     void *respawn_locator;
     u8 difficulty;
-    u8 min_respawns;
-    u8 max_respawns;
+    i8 min_respawns;
+    i8 max_respawns;
     u8 activation;
     f32 min_respawn_time;
     f32 max_respawn_time;
@@ -455,7 +455,10 @@ static __used__ __attribute__((force_align_arg_pointer)) void creatureEditor_cbR
     CreatureEditorRecord *creature = creatureEditor_Current();
     if (creature != nullptr) {
         creature->flags &= ~0x1e;
-        memcpy(creature->script_params, aieditorsettings.current_script_params, sizeof(creature->script_params));
+        typedef f32 ScriptParamVector __attribute__((vector_size(16)));
+        ScriptParamVector params;
+        __builtin_memcpy(&params, aieditorsettings.current_script_params, sizeof(params));
+        __builtin_memcpy(creature->script_params, &params, sizeof(params));
     }
     eduiMenuDetach(menu);
     eduiMenuDestroy(menu);
@@ -957,7 +960,7 @@ static __used__ void creatureEditor_cb_min_n_respawns(eduimenu_s *, eduiitem_s *
     if (creature != nullptr) {
         edui_slider_s *slider = reinterpret_cast<edui_slider_s *>(item);
         creature->min_respawns = static_cast<i32>(slider->value);
-        if (static_cast<i8>(creature->min_respawns) > creature->max_respawns) {
+        if (*reinterpret_cast<volatile i8 *>(&creature->min_respawns) > creature->max_respawns) {
             creature->min_respawns = creature->max_respawns;
             eduiItemSliderSetVal(slider, static_cast<i8>(creature->min_respawns));
         }
@@ -969,7 +972,7 @@ static __used__ void creatureEditor_cb_max_n_respawns(eduimenu_s *, eduiitem_s *
     if (creature != nullptr) {
         edui_slider_s *slider = reinterpret_cast<edui_slider_s *>(item);
         creature->max_respawns = static_cast<i32>(slider->value);
-        if (static_cast<i8>(creature->max_respawns) < creature->min_respawns) {
+        if (*reinterpret_cast<volatile i8 *>(&creature->max_respawns) < creature->min_respawns) {
             creature->max_respawns = creature->min_respawns;
             eduiItemSliderSetVal(slider, static_cast<i8>(creature->max_respawns));
         }

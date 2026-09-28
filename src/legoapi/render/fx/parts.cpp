@@ -3541,9 +3541,10 @@ void PartUpdate_Basketball(PART_s *part) {
 
 PART_s *Part_FindFromHSpecial(nuhspecial_s *special) {
     if (special != NULL) {
-        for (i32 i = 0; i < MAXPARTS; ++i) {
-            if ((Part[i].active & 1) != 0 && NuSpecialCompare(&Part[i].special, special))
-                return &Part[i];
+        PART_s *part = Part;
+        for (i32 i = 0; i < MAXPARTS; ++i, ++part) {
+            if ((part->active & 1) != 0 && NuSpecialCompare(&part->special, special))
+                return part;
         }
     }
     return NULL;

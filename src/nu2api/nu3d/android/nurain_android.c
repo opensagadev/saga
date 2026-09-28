@@ -16,11 +16,9 @@ extern "C" void NuRainProcess(void) {
 }
 
 void NuRainDrawDrop(i32, i32, f32, f32, i32) {
-    STUBBED();
 }
 
 void NuRainDrawShape(f32) {
-    STUBBED();
 }
 
 extern "C" void NuRainDraw(i32) {

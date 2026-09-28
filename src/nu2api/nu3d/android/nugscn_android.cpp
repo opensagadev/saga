@@ -32,7 +32,6 @@ static void NuIOSBindVAO(u32 vao_handle) {
 }
 
 void *NuGScnBufferAllocAligned(i32, i32) {
-    STUBBED();
     return NULL;
 }
 
@@ -41,7 +40,6 @@ extern "C" void NuGScnRndr3(NUGSCN *scene) {
 }
 
 void NuGScnLoadShadersPS(char *, variptr_u *, variptr_u) {
-    STUBBED();
 }
 
 static u32 UploadDataToGLBuffer(NUFILE file, u32 size, GLenum target, usize *buffer_handle, VARIPTR *buf,
@@ -437,14 +435,11 @@ void NuGScnDestroyPS(nugscn_s *scene) {
     }
 }
 
-extern "C" void NuGSceneSetCrossFade(void) {
-    STUBBED();
+extern "C" void NuGSceneSetCrossFade(void *, u16 first, u16 second) {
 }
 
 extern "C" void NuGSceneSetCrossFadeAlpha(void) {
-    STUBBED();
 }
 
 extern "C" void NuGSceneProcessCrossFade(void) {
-    STUBBED();
 }

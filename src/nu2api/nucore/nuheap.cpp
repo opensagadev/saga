@@ -50,7 +50,6 @@ static void NuHeapBlock_WriteFooter(NUHEAPBLOCK *block) {
 }
 
 static void NuHeapBlock_SetName(NUHEAPBLOCK *block, char *name) {
-    STUBBED();
     // Block names are disabled in the original Android build.
 }
 
@@ -265,7 +264,6 @@ u32 NuHeapGetAllocatedBlockCount(void *heap) {
 }
 
 static void NuHeap_PrintAllocations(void *heap) {
-    STUBBED();
     // Allocation reporting is disabled in the original Android build.
 }
 

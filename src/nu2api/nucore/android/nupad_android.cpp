@@ -37,7 +37,6 @@ i32 NuPadReadPS(i32, u8 *, u8 *, u8 *, u8 *, u8 *, u8 *, u8 *, u8 *, u32 *, u8 *
 }
 
 void NuPadInitPS(NUGENERICPAD *pad) {
-    STUBBED();
 }
 
 i32 NuPadGetNumberOfPortsPS(void) {
@@ -49,15 +48,12 @@ void NuPadOpenPS(NUPAD *pad) {
 }
 
 void NuPadClosePS(NUPAD *pad) {
-    STUBBED();
 }
 
 void NuPadSetMotorsPS(i32 port, i32 motor0, i32 motor1) {
-    STUBBED();
 }
 
 void NuPadGetDeadzonePS(NUPAD *pad) {
-    STUBBED();
 }
 
 i32 NuPadGetDeadzoneByPortPS(i32 port) {

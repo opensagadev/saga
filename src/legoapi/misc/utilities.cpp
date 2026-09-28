@@ -92,10 +92,10 @@ void FindAnglesZX(nuvec_s *normal, u16 *x_rotation, u16 *z_rotation) {
 }
 
 i32 getNumDigits(i32 value) {
-    if (__builtin_expect(value <= 9, 0))
-        return 1;
-    i32 threshold = 10;
     i32 digits = 1;
+    if (__builtin_expect(value <= 9, 0))
+        return digits;
+    i32 threshold = 10;
     do {
         threshold *= 10;
         ++digits;
@@ -122,9 +122,13 @@ i32 LineCrossedXZ(f32 ax, f32 az, f32 bx, f32 bz, f32 cx, f32 cz, f32 dx, f32 dz
     return 1;
 }
 
+#if defined(__GNUC__) && !defined(__clang__)
+__attribute__((optimize("no-omit-frame-pointer")))
+#endif
 i32 ScaleAndClamp(volatile i32 value) {
     i32 scaled = value << 7;
-    scaled += scaled << 5;
+    i32 shifted = scaled << 5;
+    scaled += shifted;
     value = scaled / 1048576;
     if (value < -128)
         value = -128;
@@ -487,9 +491,9 @@ bool LineIntersectCircle(NUVEC *origin, NUVEC *direction, NUVEC *center, f32 rad
     f32 x = center->x - origin->x;
     f32 z = center->z - origin->z;
     f32 projection = direction->x * x + direction->z * z;
-    if (projection >= 0.0f)
-        return x * x + z * z - projection * projection <= radius_squared;
-    return false;
+    if (0.0f > projection)
+        return false;
+    return x * x + z * z - projection * projection <= radius_squared;
 }
 
 i32 LineIntersectSphere(NUVEC *origin, NUVEC *direction, NUVEC *center, f32 radius_squared, f32 *distance_squared) {

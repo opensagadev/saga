@@ -375,7 +375,6 @@ void NuMtlUpdate(NUMTL *mtl) {
 }
 
 void NuMtlAddEx(numtl_s *, i32) {
-    STUBBED();
 }
 
 // original 0x29bc50 — refresh the material's shader desc, (re)acquire its
@@ -443,5 +442,4 @@ void NuMtlSetUVOffsetPS(numtl_s *mtl, u32 layer, float u, float v) {
 }
 
 void NuMtlDisableCulling() {
-    STUBBED();
 }

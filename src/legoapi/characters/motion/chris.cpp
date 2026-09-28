@@ -378,7 +378,13 @@ void ChrisAnakinDInit(WORLDINFO_s *world) {
 }
 
 void DogFightARestart() {
+#if defined(__i386__) && defined(__GNUC__) && !defined(__clang__)
+    typedef i32 Int4 __attribute__((vector_size(16), may_alias));
+    const Int4 all_ones = {-1, -1, -1, -1};
+    *reinterpret_cast<Int4 *>(DogDebKey) = all_ones;
+#else
     memset(DogDebKey, 0xff, sizeof(DogDebKey));
+#endif
 }
 
 void ChrisAnakinAPanel(WORLDINFO_s *) {

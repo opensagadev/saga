@@ -14,6 +14,7 @@
 #include "gamelib/util/gamelib_util_types.h"
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nu3d/numtl.h"
+#include "nu2api/nu3d/nuprim_internal.h"
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/nu3d/nurndr.h"
 #include "nu2api/nu3d/nurndrstat.h"
@@ -23,6 +24,7 @@
 #include "nu2api/nu3d/NuRenderDevice.h"
 #include "nu2api/nu3d/android/nutex_ios_ex.h"
 #include "nu2api/nuandroid/ios_graphics.h"
+#include "nu2api/numath/nufloat.h"
 
 #include <GLES2/gl2.h>
 #include <stdio.h>
@@ -55,7 +57,6 @@ void ClearScreen() {
 }
 
 void RenderQuads(i16 *) {
-    STUBBED();
 }
 
 void InitAlphaList() {

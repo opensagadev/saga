@@ -4,8 +4,8 @@
 #include <atomic>
 #include <cstring>
 
-#include "host/harness/programs/programs.hpp"
 #include "nu2api/nucore/NuInputDevice.h"
+#include "nu2api/nucore/nuapi.h"
 
 namespace {
     constexpr u32 host_touch_device = 0;
@@ -13,9 +13,30 @@ namespace {
     std::atomic<u32> host_pending_buttons[2];
     std::atomic<u32> host_held_buttons[2];
     std::atomic<u32> host_keyboard_buttons[2];
+    std::atomic<u32> host_android_buttons;
     std::atomic<f32> host_left_x[2];
     std::atomic<f32> host_left_y[2];
     u32 host_frame_buttons[2];
+
+    u32 AndroidButtonForKey(i32 key) {
+        switch (key) {
+            case 3:
+            case 108:
+                return 0x800;
+            case 4:
+                return 0x80000000;
+            case 96:
+                return 0x40;
+            case 97:
+                return 0x20;
+            case 99:
+                return 0x80;
+            case 100:
+                return 0x10;
+            default:
+                return 0;
+        }
+    }
 } // namespace
 
 __attribute__((weak)) void HostInputResetPlatform() {
@@ -29,6 +50,7 @@ __attribute__((weak)) void HostInputTouch(i32, i32, i32, i32) {
 }
 
 void HostInputReset() {
+    host_android_buttons.store(0, std::memory_order_relaxed);
     for (i32 port = 0; port < 2; ++port) {
         host_pending_buttons[port].store(0, std::memory_order_relaxed);
         host_held_buttons[port].store(0, std::memory_order_relaxed);
@@ -83,6 +105,32 @@ void HostInputTap(i32 port, u32 buttons) {
 
 namespace NuInputDevicePS {
 
+    void HandleGamepPadStatusConnect(bool) {
+        // The host always exposes its keyboard-backed gamepad.
+    }
+
+    void HandleKeyDown_ANDROID_SPECIFIC(i32 key) {
+        host_android_buttons.fetch_or(AndroidButtonForKey(key), std::memory_order_release);
+    }
+
+    void HandleKeyUp_ANDROID_SPECIFIC(i32 key) {
+        host_android_buttons.fetch_and(~AndroidButtonForKey(key), std::memory_order_release);
+    }
+
+    void HandleSensor_ANDROID_SPECIFIC(i32, f32, f32, f32) {
+    }
+
+    i32 HandleTouch_ANDROID_SPECIFIC(i32 type, i32, i32, f32 x, f32 y) {
+        if (type == 0) {
+            HostInputTouch(static_cast<i32>(x), static_cast<i32>(y), nuapi.screen_width, nuapi.screen_height);
+        }
+        return 0;
+    }
+
+    void HandleGamePadAxis_ANDROID_SPECIFIC(f32 x, f32 y, f32, f32, f32, f32) {
+        HostInputSetAnalog(0, x, y);
+    }
+
     u32 ClassInitPS() {
         HostInputReset();
         // Android exposes a built-in touch device at index 0 and the external
@@ -101,7 +149,8 @@ namespace NuInputDevicePS {
             const u32 held = host_held_buttons[port].load(std::memory_order_acquire);
             const u32 keyboard = host_keyboard_buttons[port].load(std::memory_order_acquire);
             const u32 platform = HostInputConsumePlatform(port);
-            host_frame_buttons[port] = tapped | held | keyboard | platform;
+            host_frame_buttons[port] = tapped | held | keyboard | platform |
+                                       (port == 0 ? host_android_buttons.load(std::memory_order_acquire) : 0);
         }
     }
 
@@ -123,11 +172,9 @@ namespace NuInputDevicePS {
     }
 
     void EnableDPDPS(u32) {
-        STUBBED();
     }
 
     void DisableDPDPS(u32) {
-        STUBBED();
     }
 
     NUPADTYPE GetTypePS(u32 device) {

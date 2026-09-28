@@ -6,10 +6,6 @@ i32 NuInitHardwareFirst(i32, variptr_u *, i32 *, i32) {
     return 0;
 }
 
-void NuDisplayListSetInstSurfGeom(void *) {
-    STUBBED();
-}
-
 void NuTerminateHardware() {
-    STUBBED();
+    // The original Android implementation is an empty function.
 }

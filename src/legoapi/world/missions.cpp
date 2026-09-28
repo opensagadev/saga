@@ -60,15 +60,13 @@ void InitChallenge(i32) {
 }
 
 void Mission_Clear(MISSIONSYS *ms) {
-    if (ms == NULL) {
+    if (ms == NULL)
         ms = MissionSys;
-        if (ms == NULL) {
-            return;
-        }
+    if (ms != NULL) {
+        ms->mission = NULL;
+        ms->field8_0x1d = 0;
+        ResetTimer(&ms->timer, 0.0f);
     }
-    ms->mission = NULL;
-    ms->field8_0x1d = 0;
-    ResetTimer(&ms->timer, 0.0f);
 }
 
 MISSIONDATA *Mission_Active(MISSIONSYS *ms) {

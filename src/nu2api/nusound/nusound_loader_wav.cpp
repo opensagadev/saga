@@ -32,13 +32,13 @@ u32 NuSoundLoaderWAV::MakeFourCC(char *cc) {
 }
 
 void NuSoundLoaderWAV::EndianFlipWAVHeader(FileHeaderWAV *header) {
-    header->format = (header->format << 8) | (header->format >> 8);
-    header->num_channels = (header->num_channels << 8) | (header->num_channels >> 8);
+    header->format = (header->format >> 8) | (header->format << 8);
+    header->num_channels = (header->num_channels >> 8) | (header->num_channels << 8);
     header->sample_rate = __builtin_bswap32(header->sample_rate);
     header->byte_rate = __builtin_bswap32(header->byte_rate);
-    header->block_size = (header->block_size << 8) | (header->block_size >> 8);
-    header->bits_per_channel = (header->bits_per_channel << 8) | (header->bits_per_channel >> 8);
-    header->extended_size = (header->extended_size << 8) | (header->extended_size >> 8);
+    header->block_size = (header->block_size >> 8) | (header->block_size << 8);
+    header->bits_per_channel = (header->bits_per_channel >> 8) | (header->bits_per_channel << 8);
+    header->extended_size = (header->extended_size >> 8) | (header->extended_size << 8);
 }
 
 u32 NuSoundLoaderWAV::ReadRIFFHeaderChunk(i32 file, NuSoundStreamDesc *desc, const ChunkInfo &info,

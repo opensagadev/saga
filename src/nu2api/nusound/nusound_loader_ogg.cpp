@@ -46,17 +46,18 @@ NuSoundStreamDesc *NuSoundLoaderOGG::CreateHeader() {
 }
 
 bool NuSoundLoaderOGG::SeekPCMSample(u64 index) {
-    NuIOS_IsLowEndDevice();
-
     NuSoundHeaderOGG *header = (NuSoundHeaderOGG *)desc;
-    i32 ret = ov_pcm_seek(&header->ogg_file, index);
+    OggVorbis_File *ogg_file = &header->ogg_file;
+    NuIOS_IsLowEndDevice();
+    i32 ret = ov_pcm_seek(ogg_file, index);
     return ret == 0;
 }
 
 bool NuSoundLoaderOGG::SeekTime(f64 seconds) {
-    NuIOS_IsLowEndDevice();
     NuSoundHeaderOGG *header = (NuSoundHeaderOGG *)desc;
-    i32 iVar2 = ov_time_seek(&header->ogg_file, seconds);
+    OggVorbis_File *ogg_file = &header->ogg_file;
+    NuIOS_IsLowEndDevice();
+    i32 iVar2 = ov_time_seek(ogg_file, seconds);
     return iVar2 == 0;
 }
 
@@ -116,9 +117,10 @@ i32 NuSoundLoaderOGG::OpenFileForStreaming(const char *path, bool flag) {
 
 void NuSoundLoaderOGG::Close() {
     if (this->desc != NULL) {
-        NuIOS_IsLowEndDevice();
         NuSoundHeaderOGG *header = (NuSoundHeaderOGG *)this->desc;
-        ov_clear(&header->ogg_file);
+        OggVorbis_File *ogg_file = &header->ogg_file;
+        NuIOS_IsLowEndDevice();
+        ov_clear(ogg_file);
     }
     if (this->file != 0) {
         NuFileClose(this->file);

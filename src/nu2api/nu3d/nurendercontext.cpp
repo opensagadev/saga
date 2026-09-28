@@ -108,7 +108,6 @@ extern "C" {
 }
 
 void NuRenderContextForceSamplerStatePS(i32, const d3dsamplerstate_u *) {
-    STUBBED();
 }
 
 extern "C" {
@@ -147,10 +146,8 @@ extern "C" {
     }
 
     void NuRenderContext360BeginGameTime(void) {
-        STUBBED();
     }
 
     void NuRenderContext360EndGameTime(void) {
-        STUBBED();
     }
 }

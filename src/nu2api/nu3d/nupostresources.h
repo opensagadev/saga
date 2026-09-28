@@ -54,7 +54,7 @@ extern "C" {
 
 void NuFramebuffer360BeginZPass(i32);
 void NuFramebuffer360EndZPass(void);
-bool NuFramebuffer360HasZPass(void);
+void NuFramebuffer360HasZPass(void);
 i32 NuFramebuffer360GetTileCount(nuframebuffer_s *);
 
 inline void NuPostResolve(NuProxyBuffer *proxy) {

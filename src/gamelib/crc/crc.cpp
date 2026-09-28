@@ -80,34 +80,60 @@ u32 CRC_Process(const void *data, u32 size) {
 }
 
 u32 CRC_ProcessString(const char *str) {
+    const char *cursor = str;
+    char c = *cursor;
+    if (__builtin_expect(c == '\0', 0))
+        return 0;
+    ++cursor;
+    const i32 *table = g_crc_table;
     u32 crc = 0;
-    for (char c = *str++; c != '\0'; c = *str++) {
+    do {
         const u32 table_index = static_cast<u32>(static_cast<i32>(c)) ^ (crc >> 24);
-        crc = (crc << 8) ^ g_crc_table[table_index];
-    }
+        ++cursor;
+        c = cursor[-1];
+        crc = (crc << 8) ^ table[table_index];
+    } while (c != '\0');
     return crc;
 }
 
 u32 CRC_ProcessStringN(const char *str, u32 size) {
+    char c = *str;
+    if (__builtin_expect(c == '\0', 0) || size == 0)
+        return 0;
+    const char *cursor = str;
+    const char *end = cursor + size;
+    const i32 *table = g_crc_table;
     u32 crc = 0;
-    for (u32 i = 0; str[i] != '\0' && i < size; ++i) {
-        const u32 table_index = static_cast<u32>(static_cast<i32>(str[i])) ^ (crc >> 24);
-        crc = (crc << 8) ^ g_crc_table[table_index];
-    }
+    do {
+        const u32 table_index = static_cast<u32>(static_cast<i32>(c)) ^ (crc >> 24);
+        crc = (crc << 8) ^ table[table_index];
+        c = cursor[1];
+        if (c == '\0')
+            break;
+        ++cursor;
+    } while (cursor != end);
     return crc;
 }
 
 u32 CRC_ProcessStringIgnoreCase(const char *str) {
+    const char *cursor = str;
+    char c = *cursor;
+    if (__builtin_expect(c == '\0', 0))
+        return 0;
+    ++cursor;
+    const i32 *table = g_crc_table;
     u32 crc = 0;
-    for (char c = *str++; c != '\0'; c = *str++) {
+    do {
         const u32 table_index = static_cast<u32>(static_cast<i32>(CRC_ToUpper(c))) ^ (crc >> 24);
-        crc = (crc << 8) ^ g_crc_table[table_index];
-    }
+        ++cursor;
+        c = cursor[-1];
+        crc = (crc << 8) ^ table[table_index];
+    } while (c != '\0');
     return crc;
 }
 
 u32 CRC_ProcessStringNIgnoreCase(const char *str, u32 size) {
-    u32 crc = 0;
+    volatile u32 crc = 0;
     for (u32 i = 0; str[i] != '\0' && i < size; ++i) {
         const u32 table_index = static_cast<u32>(static_cast<i32>(CRC_ToUpper(str[i]))) ^ (crc >> 24);
         crc = (crc << 8) ^ g_crc_table[table_index];

@@ -151,7 +151,7 @@ extern "C" {
     void NuHGobjDestroy(nuhgobj_s *object);
     nuhgobjpoi_s *NuHGobjGetPOI(nuhgobj_s *object, i32 index);
     void NuHGobjPOILocalMtxFromIX(nuhgobj_s *object, u8 index, NUMTX *joint_matrices, NUMTX *result);
-    void NuHGobjPOIMtxFromIX(void);
+    void NuHGobjPOIMtxFromIX(nuhgobj_s *, u8 index, NUMTX *, NUMTX *);
     void NuHGobjPOIMtx(nuhgobj_s *object, u8 index, NUMTX *world_matrix, NUMTX *joint_matrices, NUMTX *result);
     i32 NuHGobjRndr(nuhgobj_s *object, NUMTX *world_matrix, i32 render_count, i16 *render_indices);
     i32 NuHGobjGetLayerIndex(char *name, nuhgobj_s *object);
@@ -182,7 +182,7 @@ extern "C" {
 #ifdef __cplusplus
 }
 
-void NuHGobjRead(VARIPTR *buffer, char *path);
+nuhgobj_s *NuHGobjRead(VARIPTR *buffer, char *path);
 void NuHGobjEvalAnimBlend2Root_3(nugscn_s *object, ani3_animheader_s *animation_a, f32 time_a,
                                  ani3_animheader_s *animation_b, f32 time_b, f32 blend, i32 override_count,
                                  NUJOINTANIM_s *overrides, NUMTX *matrices, NUHGOBJROOTFN root_fn, void *root_data);

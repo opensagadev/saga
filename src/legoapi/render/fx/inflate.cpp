@@ -16,10 +16,6 @@ u32 HashString(unsigned char *);
 static i32 *HashTable;
 static i32 *LinkArray;
 
-void ImplodePutI(void *, u32, i32) {
-    STUBBED();
-}
-
 void refpack_init() {
     constexpr usize hash_table_size = 0x40000;
     constexpr usize link_array_size = 0x10000;
@@ -45,18 +41,6 @@ void refpack_init() {
         theMemoryManager.remaining -= link_array_size;
         theMemoryManager.high_water = *theMemoryManager.cursor_cell;
     }
-}
-
-void ImplodeFReadMem(unsigned char *, i32) {
-    STUBBED();
-}
-
-void ImplodeMakeTree(i32, u16 *, unsigned char *, u16 *) {
-    STUBBED();
-}
-
-void ImplodePutByteToMem(unsigned char) {
-    STUBBED();
 }
 
 i32 refpack(unsigned char *source, abi_long source_size, unsigned char *destination) {

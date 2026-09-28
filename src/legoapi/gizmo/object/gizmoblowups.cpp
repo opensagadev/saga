@@ -454,7 +454,6 @@ i32 GizmoBlowupBlowup(GIZMOBLOWUP_s *blowup, i32 effects, i32 hit_type, i32 dama
 }
 
 void BlowupObjEmit_Stop(PART_s *) {
-    STUBBED();
 }
 
 GIZMOBLOWUPTYPE_s *GizmoBlowupTypeAdd(WORLDINFO_s *world, nuhspecial_s *special, i32 flags, i32 *result) {
@@ -538,9 +537,9 @@ i32 SetGizmoBlowUpTarget(GameObject_s *object, GIZMOBLOWUP_s *blowup) {
 }
 
 void GizBlowup_InitTerrain() {
-    if (WORLD->gizmo_blowups != NULL) {
-        for (i32 i = 0; i < WORLD->gizmo_blowup_count; ++i) {
-            GIZMOBLOWUP_s *blowup = &WORLD->gizmo_blowups[i];
+    GIZMOBLOWUP_s *blowup = WORLD->gizmo_blowups;
+    if (blowup != NULL) {
+        for (i32 i = 0; i < WORLD->gizmo_blowup_count; ++i, ++blowup) {
             blowup->platform_id = -1;
             blowup->field_0x10c = -1;
             if ((blowup->draw_flags & 4) != 0)
@@ -742,9 +741,10 @@ void GizmoBlowupsFinalSetup(WORLDINFO_s *world) {
 }
 
 void GizBlowup_DeleteTerrain() {
-    if (WORLD->gizmo_blowups != NULL) {
-        for (i32 i = 0; i < WORLD->gizmo_blowup_count; ++i) {
-            GizBlowup_DeleteSingleTerrain(&WORLD->gizmo_blowups[i]);
+    GIZMOBLOWUP_s *blowup = WORLD->gizmo_blowups;
+    if (blowup != NULL) {
+        for (i32 i = 0; i < WORLD->gizmo_blowup_count; ++i, ++blowup) {
+            GizBlowup_DeleteSingleTerrain(blowup);
         }
     }
 }
@@ -1118,8 +1118,9 @@ i32 GizmoBlowupGetTypeFromNameTableId(WORLDINFO_s *world, i32 name_id) {
     }
 
     const char *name = gizmoblowupnametable[name_id];
-    for (i32 type_index = 0; type_index < world->gizmo_blowup_type_count; ++type_index) {
-        if (NuStrICmp(world->gizmo_blowup_types[type_index].name, name) == 0) {
+    GIZMOBLOWUPTYPE_s *type = world->gizmo_blowup_types;
+    for (i32 type_index = 0; type_index < world->gizmo_blowup_type_count; ++type_index, ++type) {
+        if (NuStrICmp(type->name, name) == 0) {
             return type_index;
         }
     }

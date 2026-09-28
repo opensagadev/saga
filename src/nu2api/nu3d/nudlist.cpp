@@ -28,8 +28,10 @@
 #include "nu2api/nufile/nufile.h"
 #include "nu2api/nu3d/nurndrstat.h"
 #include "nu2api/nu3d/numtl.h"
+#include "nu2api/nucore/nustring.h"
 
 #include <cfloat>
+#include <stdio.h>
 
 extern i32 numtl_renderplane;
 
@@ -77,6 +79,10 @@ extern "C" {
 // The original retains reads of this local BSS control despite having no
 // program-side setter. Preserve its externally observable debug accesses.
 static volatile i32 capture_dlist;
+
+// The Android setter retains this BSS write even though the reader is not yet
+// reconstructed in this translation unit.
+static void *volatile CurrentInstSurfGeom;
 
 extern "C" void NuDisplayListCaptureBegin(void) {
     i32 request = capture_dlist;
@@ -316,7 +322,7 @@ template <typename T> static T *CloneSceneAllocate(VARIPTR *buffer, usize count,
     return result;
 }
 
-extern "C" NUDLDLISTSCENE *NuDisplaySceneClone(NUDLDLISTSCENE *source, VARIPTR *buffer) {
+extern "C" NUDLDLISTSCENE *NuDisplaySceneClone(NUDLDLISTSCENE *source, VARIPTR *buffer, VARIPTR *) {
     NuThreadCriticalSectionBegin(global_dlist_manager.loading_critical_section);
     NUDLDLISTSCENE *scene = CloneSceneAllocate<NUDLDLISTSCENE>(buffer, 1);
     *scene = *source;
@@ -750,7 +756,7 @@ static i32 MtlSortKey(const NUMTL *mtl) {
            mtl->sort_pri;
 }
 
-void DisplayListLinkDynamicMtls(void) {
+__attribute__((optimize("no-reorder-blocks"))) void DisplayListLinkDynamicMtls(void) {
     NUDLIST_MANAGER *mgr = &global_dlist_manager;
     if (mgr->nnew_materials == 0 && mgr->ndel_materials == 0)
         return;
@@ -1250,6 +1256,10 @@ void NuDisplayListEndScene(void) {
 
 extern "C" void *DisplayListCreateFaceonTransformPS(VARIPTR *, NUMTX *, NUMTL *, void *);
 extern "C" void *DisplayListCreateGeomTransformPS(VARIPTR *, NUMTX *, NUMTL *, void *, void *);
+
+void NuDisplayListSetInstSurfGeom(void *geometry) {
+    CurrentInstSurfGeom = geometry;
+}
 
 void NuDisplayListCreate(nudisplayscene_s *raw_scene, variptr_u *buffer, variptr_u, i32 item_count, i32 material_count,
                          i32, i32, i32 sort_priority_count, i32, i32 allocate_materials) {

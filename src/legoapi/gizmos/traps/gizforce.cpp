@@ -206,9 +206,10 @@ static void edgizforce_ReadAnimSetData(GAMEANIMOBJ_s *object, unsigned char vers
         return;
     }
 
-    GIZFORCEANIMDATA_s fallback = {};
+    GIZFORCEANIMDATA_s fallback;
     GIZFORCEANIMDATA_s *object_data = static_cast<GIZFORCEANIMDATA_s *>(object->object_data);
     if (object_data == NULL) {
+        fallback = {};
         object_data = &fallback;
     }
     if (version > 8) {
@@ -1397,11 +1398,11 @@ static void GizForces_PostLoad(void *world_ptr, void *data) {
         return;
     }
 
-    for (i32 index = 0; index < force_sys->count; ++index) {
-        GIZFORCE_s &force = force_sys->forces[index];
-        if ((force.runtime_flags & GIZFORCE_RUNTIME_PENDING_BLOWUP_TYPE) != 0) {
-            force.blowup_type = static_cast<i16>(GizmoBlowupGetTypeFromNameTableId(world, force.blowup_type));
-            force.runtime_flags &= ~GIZFORCE_RUNTIME_PENDING_BLOWUP_TYPE;
+    GIZFORCE_s *force = force_sys->forces;
+    for (i32 index = 0; index < force_sys->count; ++index, ++force) {
+        if ((force->runtime_flags & GIZFORCE_RUNTIME_PENDING_BLOWUP_TYPE) != 0) {
+            force->blowup_type = static_cast<i16>(GizmoBlowupGetTypeFromNameTableId(world, force->blowup_type));
+            force->runtime_flags &= ~GIZFORCE_RUNTIME_PENDING_BLOWUP_TYPE;
         }
     }
 }
@@ -1526,18 +1527,20 @@ void GizForce_ResetLOS(GameObject_s *object) {
 
 GIZFORCE_s *GizForce_FindByName(GIZFORCESYS_s *force_sys, char *name) {
     GIZFORCE_s *force = NULL;
-    if (name == NULL || force_sys == NULL) {
-        return force;
-    }
-    force = force_sys->forces;
-    for (i32 index = 0; index < force_sys->count; ++index, ++force) {
-        if (NuStrICmp(force->name, name) == 0) {
-            return force;
+    if (name != NULL && force_sys != NULL) {
+        force = force_sys->forces;
+        for (i32 index = 0; index < force_sys->count; ++index, ++force) {
+            if (NuStrICmp(force->name, name) == 0) {
+                return force;
+            }
         }
     }
     return force;
 }
 
+#if defined(__GNUC__) && !defined(__clang__)
+__attribute__((optimize("no-tree-loop-optimize")))
+#endif
 i32 GizForce_UpdateHint(HINT_s *) {
     for (i32 i = 0; i < 2; ++i) {
         GameObject_s *object = Player[i];
@@ -1554,14 +1557,14 @@ GIZFORCE_s *GizForces_FindForce(WORLDINFO_s *world, char *name) {
 }
 
 i32 GizForce_AnimComplete(GIZFORCE_s *force) {
-    if (force != NULL && force->anim_set != NULL) {
-        if ((force->progress_flags & GIZFORCE_PROGRESS_ANIMATION_REVERSED) == 0) {
-            if (force->anim_set->state == GAMEANIMSET_STATE_AT_END) {
-                return 1;
-            }
-        } else if (force->anim_set->state == GAMEANIMSET_STATE_AT_START) {
-            return 1;
+    if (force == NULL || force->anim_set == NULL) {
+        return 1;
+    }
+    if ((force->progress_flags & GIZFORCE_PROGRESS_ANIMATION_REVERSED) != 0) {
+        if (force->anim_set->state != GAMEANIMSET_STATE_AT_START) {
+            return 0;
         }
+    } else if (force->anim_set->state != GAMEANIMSET_STATE_AT_END) {
         return 0;
     }
     return 1;
@@ -1591,19 +1594,15 @@ void GizForce_PlayForwards(GIZFORCE_s *force) {
 }
 
 i32 GizForce_StoodOnForce(GIZFORCE_s *force, GameObject_s *object) {
-    i32 result = 0;
-    GAMEANIMOBJ_s *anim_object;
-    if ((force->runtime_flags & GIZFORCE_RUNTIME_HAS_PLATFORM) != 0 && object->field_0x1078 != -1 &&
-        (anim_object = force->anim_set->objects) != NULL) {
-        while (object->field_0x1078 != static_cast<GIZFORCEANIMDATA_s *>(anim_object->object_data)->platform_id) {
-            anim_object = anim_object->next;
-            if (anim_object == NULL) {
-                return 0;
-            }
-        }
-        result = 1;
+    if ((force->runtime_flags & GIZFORCE_RUNTIME_HAS_PLATFORM) == 0 || object->field_0x1078 == -1) {
+        return 0;
     }
-    return result;
+    for (GAMEANIMOBJ_s *anim_object = force->anim_set->objects; anim_object != NULL; anim_object = anim_object->next) {
+        if (object->field_0x1078 == static_cast<GIZFORCEANIMDATA_s *>(anim_object->object_data)->platform_id) {
+            return 1;
+        }
+    }
+    return 0;
 }
 
 void GizForce_PlayBackwards(GIZFORCE_s *force) {

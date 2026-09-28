@@ -1291,9 +1291,8 @@ static f32 Condition_InMiniCut(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, cha
 }
 
 static f32 Condition_BigJumpComplete(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
-    if (packet != NULL && packet->owner != NULL) {
-        return packet->owner->apiobj.objptr->character_context != 0x1f ? 1.0f : 0.0f;
-    }
+    if (packet != NULL && packet->owner != NULL && packet->owner->apiobj.objptr->character_context == 0x1f)
+        return 0.0f;
     return 1.0f;
 }
 
@@ -1405,12 +1404,11 @@ static f32 Condition_PartyContainsDroids(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKE
 }
 
 static f32 Condition_OpponentContext(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *argument) {
-    f32 result = 0.0f;
     if (packet != NULL && packet->opponent_object != NULL) {
         if (packet->opponent_object->objptr->character_context == reinterpret_cast<intptr_t>(argument))
-            result = 1.0f;
+            return 1.0f;
     }
-    return result;
+    return 0.0f;
 }
 
 static void *Condition_InContextInit(AISYS_s *, char *name, AISCRIPT_s *) {
@@ -1443,14 +1441,13 @@ static void *Condition_InContextInit(AISYS_s *, char *name, AISCRIPT_s *) {
 }
 
 static f32 Condition_InContext(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *argument) {
-    f32 result = 0.0f;
     if (packet != NULL && packet->owner != NULL) {
         GameObject_s *object = packet->owner->apiobj.objptr;
         if (object != NULL && object->character_context == static_cast<i32>(reinterpret_cast<isize>(argument))) {
-            result = 1.0f;
+            return 1.0f;
         }
     }
-    return result;
+    return 0.0f;
 }
 
 static void *Condition_HitPointsInit(AISYS_s *system, char *name, AISCRIPT_s *) {
@@ -3637,7 +3634,8 @@ void SnapCreaturePos(GameObject_s *object, NUVEC *position, i32 angle, AIPATHINF
 
 i32 Game_IgnoreInput() {
     extern i32 newgamecam;
-    return newgamecam != 0;
+    i32 value = newgamecam;
+    return value != 0;
 }
 
 extern i16 id_GONKDROID;
@@ -4160,18 +4158,31 @@ void GameDisplaySettings(LEVELDATADISPLAY *display, i32 *background_colours) {
 u8 grapple_attach_frames = 5;
 void GameObjectSetCanUse(GameObject_s *object, void *target, unsigned char action, unsigned char, float parameter) {
     object->can_use_object = target;
-    object->use_action_parameter = parameter;
     object->use_action = action;
+    object->use_action_parameter = parameter;
     object->use_action_frames = grapple_attach_frames;
 }
 
 CABLE_s *GameObjOwnsAnyCables(GameObject_s *object) {
-    CABLE_s *cable = cables;
-    for (i32 i = 0; i < 8; ++i, ++cable) {
-        // The original checks the first cable's owner for the entire array.
-        if (cables->source == object && (cable->flags_1e9 & 1) != 0)
-            return cable;
-    }
+    // The original checks the first cable's owner for the entire array.
+    if (cables[0].source != object)
+        return NULL;
+    if ((cables[0].flags_1e9 & 1) != 0)
+        return &cables[0];
+    if ((cables[1].flags_1e9 & 1) != 0)
+        return &cables[1];
+    if ((cables[2].flags_1e9 & 1) != 0)
+        return &cables[2];
+    if ((cables[3].flags_1e9 & 1) != 0)
+        return &cables[3];
+    if ((cables[4].flags_1e9 & 1) != 0)
+        return &cables[4];
+    if ((cables[5].flags_1e9 & 1) != 0)
+        return &cables[5];
+    if ((cables[6].flags_1e9 & 1) != 0)
+        return &cables[6];
+    if ((cables[7].flags_1e9 & 1) != 0)
+        return &cables[7];
     return NULL;
 }
 
@@ -5383,10 +5394,10 @@ void ThingManager::EnableActions(i32 id, i32 flags, i32 invert) {
             continue;
         }
         if (thing->field_0x4 == (u32)id) {
-            if (invert == 0) {
-                thing->flags |= (u32)flags;
-            } else {
+            if (invert != 0) {
                 thing->flags &= ~(u32)flags;
+            } else {
+                thing->flags |= (u32)flags;
             }
             return;
         }
@@ -5547,8 +5558,20 @@ ThingManager::ThingManager(i32 max_things) {
     theThingManager = this;
 }
 
-ThingManager::~ThingManager() {
+#if defined(__ANDROID__) && defined(__i386__)
+#define THING_MANAGER_INLINE inline
+#else
+#define THING_MANAGER_INLINE
+#endif
+
+THING_MANAGER_INLINE ThingManager::~ThingManager() {
 }
+
+THING_MANAGER_INLINE void ThingManager::operator delete(void *memory) {
+    theMemoryManager.FreePool(memory, sizeof(ThingManager));
+}
+
+#undef THING_MANAGER_INLINE
 
 static eduimenu_s *edTimingMenu;
 static u32 EdAttr[] = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};

@@ -111,6 +111,9 @@ i32 GamePad_Waggle(GAMEPAD_s *pad) {
     return (pad->input_magnitude != 0.0f) != (pad->previous_input_magnitude != 0.0f);
 }
 
+#if defined(__GNUC__) && !defined(__clang__)
+__attribute__((optimize("no-ivopts", "no-tree-loop-optimize")))
+#endif
 GAMEPAD_s *GamePad_Allocate() {
     for (i32 i = 0; i < 64; i++) {
         if ((GamePad[i].allocated_5a & 1) == 0) {
@@ -486,10 +489,18 @@ i32 NoPad(i32 port, i32 require_game_input) {
     return 1;
 }
 
-void NewBuzz(nupad_s *pad, float duration, i32) {
+#if defined(__GNUC__) && !defined(__clang__)
+#define GAMEPAD_NO_SCHEDULING __attribute__((optimize("no-schedule-insns2")))
+#else
+#define GAMEPAD_NO_SCHEDULING
+#endif
+
+GAMEPAD_NO_SCHEDULING void NewBuzz(nupad_s *pad, float duration, i32) {
     if (pad != NULL)
         NuSound3AddRumble(pad, duration, 0, 0, 0.0f);
 }
+
+#undef GAMEPAD_NO_SCHEDULING
 
 i32 ReadPad(i32 port) {
     GAMEPAD_s *gamepad = &GamePad[port];

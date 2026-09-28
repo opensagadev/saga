@@ -72,7 +72,7 @@ const char *NuStrStripPath(const char *string) {
     do {
         cursor = string;
 
-        while (*cursor != '/' && *cursor != '\\') {
+        while (*cursor != '\\' && *cursor != '/') {
             if (*cursor == '\0') {
                 return string;
             }
@@ -80,6 +80,9 @@ const char *NuStrStripPath(const char *string) {
             cursor++;
         }
 
+        if (cursor[1] == '\0') {
+            return string;
+        }
         string = cursor + 1;
     } while (*string != '\0');
 

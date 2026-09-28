@@ -25,6 +25,10 @@
 #include "nu2api/numath/nurand.h"
 #include "nu2api/numath/nutrig.h"
 #include "legoapi/core/input/qrand.h"
+#include "legoapi/core/input/gamepads.h"
+#include "legoapi/gizmo/object/gizmopickup.h"
+#include "legoapi/render/core/rtl.h"
+#include "nu2api/numath/nutrig.h"
 i32 Player_HasInvincibility(GameObject_s *);
 void GameAudio_PlaySfxById(i32, NUVEC *, i32, i32);
 extern "C" i32 GetSfxId(const char *);
@@ -119,6 +123,9 @@ GIZMO *forceMirrorBall;
 nuhspecial_s LevSpecial[7];
 void *LevelBuildits[2];
 extern i32 obstacle_gizmotype_id, force_gizmotype_id;
+extern "C" i16 id_RANCOR;
+i32 GizBuildIt_AtEnd(GIZBUILDIT_s *);
+void SarlaccPitB_SpecialUpdate(WORLDINFO_s *);
 static __used__ i32 power;
 static __used__ i32 recharging;
 static __used__ i32 target_shield[2];
@@ -1178,6 +1185,9 @@ void DeathStar2BattleD_Init(WORLDINFO_s *world) {
     LevGizmo[7] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "shield_inner1");
     LevFlag[5] = 0;
 }
+
+GIZMOBLOWUP_s *DeathStar2BattleD_InZapRange(GameObject_s *object);
+void DisorientateCode(GameObject_s *object, NUVEC *target, f32 distance);
 
 void DeathStar2BattleD_Update(WORLDINFO_s *) {
     if (LevFlag[0] != 0 && qrand() < 0x800) {

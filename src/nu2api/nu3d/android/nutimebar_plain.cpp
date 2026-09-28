@@ -259,7 +259,6 @@ extern "C" void NuTimeBarResetPeaks(void) {
 }
 
 extern "C" void NuTimeBarSetScaleY(void) {
-    STUBBED();
 }
 
 extern NUQFNT *system_qfont;

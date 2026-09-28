@@ -2336,14 +2336,14 @@ __used__ static i32 Action_CanDefend(AISYS *sys, AISCRIPTPROCESS *processor, AIP
     (void)sys;
     (void)processor;
     (void)param_6;
-    if (param_5 != 0 && packet != NULL && packet->owner != NULL) {
-        bool enabled = true;
+    GameObject_s *object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
+    if (object != NULL && param_5 != 0) {
+        object->field_0xef8 |= 2;
         for (i32 index = 0; index < param_4; ++index) {
             if (NuStrICmp(params[index], "false") == 0) {
-                enabled = false;
+                object->field_0xef8 &= static_cast<u8>(~2u);
             }
         }
-        packet->owner->field_0xef8 = static_cast<u8>((packet->owner->field_0xef8 & ~2u) | (enabled ? 2u : 0u));
     }
     return 1;
 }
@@ -2641,15 +2641,14 @@ __used__ static i32 Action_DontAttack(AISYS *sys, AISCRIPTPROCESS *processor, AI
     (void)sys;
     (void)processor;
     (void)param_6;
-    if (packet != NULL && packet->owner != NULL) {
-        bool enabled = true;
+    GameObject_s *object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
+    if (object != NULL) {
+        object->field_0xf04 |= 2;
         for (i32 index = 0; index < param_4; ++index) {
             if (NuStrICmp(params[index], "FALSE") == 0) {
-                enabled = false;
+                object->field_0xf04 &= static_cast<u8>(~2u);
             }
         }
-        packet->owner->jump_input_flags =
-            static_cast<u8>((packet->owner->jump_input_flags & ~2u) | (enabled ? 2u : 0u));
     }
     return 1;
 }
@@ -3521,7 +3520,7 @@ __used__ static i32 Action_InitRowDist(AISYS *sys, AISCRIPTPROCESS *processor, A
         for (i32 index = 0; index < param_4; ++index) {
             char *value = NuStrIStr(params[index], "Dist");
             if (value != NULL) {
-                oneAtOnce_SetInitDistPerRow(AIParamToFloat(processor, value + NuStrLen("Dist") + 1));
+                oneAtOnce_SetInitDistPerRow(AIParamToFloat(processor, value + 5));
             }
         }
     }
@@ -4167,10 +4166,10 @@ __used__ static i32 Action_SetAnimation(AISYS *sys, AISCRIPTPROCESS *processor, 
     (void)processor;
     (void)param_6;
     if (packet != NULL && packet->owner != NULL && packet->owner->apiobj.objptr != NULL && param_5 != 0 &&
-        param_4 == 1) {
+        __builtin_expect(param_4 == 1, 0)) {
         GameObject_s *object = packet->owner->apiobj.objptr;
         const i32 animation = FindAnimIX(object->apiobj.character_data, params[0]);
-        if (animation != -1) {
+        if (static_cast<u16>(animation) != 0xffff) {
             ResetAnimPacket(&object->apiobj.anim_packet, animation);
         }
     }
@@ -7430,7 +7429,7 @@ __used__ static i32 Action_PressJumpButton(AISYS *sys, AISCRIPTPROCESS *processo
     (void)param_5;
     (void)param_6;
     GameObject_s *object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
-    if (object != NULL && object->pad_gamepad != NULL) {
+    if (object != NULL) {
         object->pad_gamepad->buttons_pressed |= GAMEPAD_JUMP;
     }
     return 1;
@@ -8509,7 +8508,7 @@ static f32 Condition_InSwamp(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char 
         GameObject_s *object = packet->owner->apiobj.objptr;
         f32 in_swamp = 0.0f;
         if (object != NULL)
-            in_swamp = object->apiobj.field_0x27f == 9 ? 1.0f : 0.0f;
+            in_swamp = __builtin_expect(object->apiobj.field_0x27f == 9, 0) ? 1.0f : 0.0f;
         return in_swamp;
     }
     return 0.0f;
@@ -8617,7 +8616,7 @@ __used__ static f32 Condition_CategoryIs(AISYS *, AISCRIPTPROCESS *, AIPACKET *p
     const i32 category = (i32)(isize)argument;
     f32 result = 0.0f;
     if (category != -1 && packet != NULL && packet->owner != NULL) {
-        if (CharCategory_IsCategory(packet->owner->apiobj.objptr, category))
+        if (__builtin_expect(CharCategory_IsCategory(packet->owner->apiobj.objptr, category), 0))
             result = 1.0f;
     }
     return result;
@@ -8727,7 +8726,8 @@ static f32 Condition_BeenToLevel(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char *,
         return 0.0f;
     }
     const u8 *progress = static_cast<const u8 *>(LevelProgressData) + area_level * LEVEL_PROGRESS_STRIDE;
-    return (progress[LEVEL_PROGRESS_COMPLETION_FLAGS_OFFSET] & LEVEL_PROGRESS_STORY_COMPLETE) != 0 ? 1.0f : 0.0f;
+    u32 completion = progress[LEVEL_PROGRESS_COMPLETION_FLAGS_OFFSET] & LEVEL_PROGRESS_STORY_COMPLETE;
+    return static_cast<f32>(completion);
 }
 
 static f32 Condition_GotOpponent(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *, void *) {
