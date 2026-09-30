@@ -140,7 +140,8 @@ void UpdateSnakeBody(GameObject_s *object) {
         angle += (-0.07500000298023224f * t2) * t3;
         angle += (-0.04464289918541908f * t3) * t4;
         angle += (-0.03038189932703972f * t4) * t5;
-        object->snake_body->segments[segment_index].pitch = static_cast<i16>(static_cast<i32>(angle * 10430.400390625f));
+        object->snake_body->segments[segment_index].pitch =
+            static_cast<i16>(static_cast<i32>(angle * 10430.400390625f));
     } while (object->snake_body->segment_count > ++segment_index);
 }
 
@@ -172,57 +173,61 @@ void DrawSnakeBody(GameObject_s *object) {
     } while (object->snake_body->segment_count > ++segment_index);
 }
 
-static void AddSnakeSegmentDebris(GameObject_s *object, i32 segment_index) {
-    NUMTX matrix;
-    NUANGVEC angles;
-    angles.y = NuAngAdd(object->snake_body->segments[segment_index].yaw, 0x8000);
-    angles.x = object->snake_body->segments[segment_index].pitch;
-    NuMtxSetRotationXYVU0(&matrix, &angles);
-    if (object->snake_body->scale != 1.0f) {
-        NUVEC scale = {object->snake_body->scale, object->snake_body->scale, object->snake_body->scale};
-        NuMtxPreScale(&matrix, &scale);
-    }
-    matrix.m30 += object->snake_body->segments[segment_index].position.x;
-    matrix.m31 += object->snake_body->segments[segment_index].position.y + object->snake_body->scale * 0.02f;
-    matrix.m32 += object->snake_body->segments[segment_index].position.z;
-    i32 special_index = segment_index == object->snake_body->segment_count - 1 ? 2 : segment_index % 2;
-    nuhspecial_s *special = &snake_hspecials[special_index];
-    if (NuSpecialExistsFn(special)) {
-        NUVEC momentum;
-        SetKillPartMom(&momentum);
-        momentum.y += 1.0f;
-        ADDPART_s part = Default_ADDPART;
-        part.matrix = &matrix;
-        part.velocity = &momentum;
-        part.field_14 = 0.1f;
-        part.field_18 = 0.1f;
-        part.gravity = -5.0f;
-        part.special = special;
-        part.flags = 0x90;
-        part.stop_fn = PartStop_Flickerer;
-        part.draw_fn = PartDraw_Flickerer;
-        part.field_3c = PartImpact_Brick;
-        part.time_step = FRAMETIME;
-        part.lighting = reinterpret_cast<PARTLIGHTSOURCE_s *>(&object->light_data);
-        AddPart(&part);
-    }
-}
+#define ADD_SNAKE_SEGMENT_DEBRIS(index)                                                                                \
+    do {                                                                                                               \
+        const i32 segment_index = (index);                                                                             \
+        NUMTX matrix;                                                                                                  \
+        NUANGVEC angles;                                                                                               \
+        angles.y = NuAngAdd(object->snake_body->segments[segment_index].yaw, 0x8000);                                  \
+        angles.x = object->snake_body->segments[segment_index].pitch;                                                  \
+        NuMtxSetRotationXYVU0(&matrix, &angles);                                                                       \
+        if (object->snake_body->scale != 1.0f) {                                                                       \
+            NUVEC scale = {object->snake_body->scale, object->snake_body->scale, object->snake_body->scale};           \
+            NuMtxPreScale(&matrix, &scale);                                                                            \
+        }                                                                                                              \
+        matrix.m30 += object->snake_body->segments[segment_index].position.x;                                          \
+        matrix.m31 += object->snake_body->segments[segment_index].position.y + object->snake_body->scale * 0.02f;      \
+        matrix.m32 += object->snake_body->segments[segment_index].position.z;                                          \
+        i32 special_index = segment_index == object->snake_body->segment_count - 1 ? 2 : segment_index % 2;            \
+        nuhspecial_s *special = &snake_hspecials[special_index];                                                       \
+        if (NuSpecialExistsFn(special)) {                                                                              \
+            NUVEC momentum;                                                                                            \
+            SetKillPartMom(&momentum);                                                                                 \
+            momentum.y += 1.0f;                                                                                        \
+            ADDPART_s part = Default_ADDPART;                                                                          \
+            part.matrix = &matrix;                                                                                     \
+            part.velocity = &momentum;                                                                                 \
+            part.field_14 = 0.1f;                                                                                      \
+            part.field_18 = 0.1f;                                                                                      \
+            part.gravity = -5.0f;                                                                                      \
+            part.special = special;                                                                                    \
+            part.flags = 0x90;                                                                                         \
+            part.stop_fn = PartStop_Flickerer;                                                                         \
+            part.draw_fn = PartDraw_Flickerer;                                                                         \
+            part.field_3c = PartImpact_Brick;                                                                          \
+            part.time_step = FRAMETIME;                                                                                \
+            part.lighting = reinterpret_cast<PARTLIGHTSOURCE_s *>(&object->light_data);                                \
+            AddPart(&part);                                                                                            \
+        }                                                                                                              \
+    } while (0)
 
 void BlowUpSnakeBody(GameObject_s *object) {
     if (object != NULL && object->snake_body != NULL) {
         for (i32 index = 0; index < object->snake_body->segment_count; ++index)
-            AddSnakeSegmentDebris(object, index);
+            ADD_SNAKE_SEGMENT_DEBRIS(index);
         DestroySnakeBody(object);
     }
 }
 
 void SnakeBeenHit(GameObject_s *object) {
     if (object != NULL && object->snake_body != NULL && object->snake_body->segment_count > 2) {
-        AddSnakeSegmentDebris(object, object->snake_body->segment_count - 1);
-        AddSnakeSegmentDebris(object, object->snake_body->segment_count - 2);
+        ADD_SNAKE_SEGMENT_DEBRIS(object->snake_body->segment_count - 1);
+        ADD_SNAKE_SEGMENT_DEBRIS(object->snake_body->segment_count - 2);
         object->snake_body->segment_count -= 2;
     }
 }
+
+#undef ADD_SNAKE_SEGMENT_DEBRIS
 
 void EatVictim(GameObject_s *object) {
     object->character_context = -1;

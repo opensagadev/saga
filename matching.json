@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 66.01879,
+    "fuzzy_match_percent": 66.06521,
     "total_code": "4722419",
-    "matched_code": "522510",
-    "matched_code_percent": 11.064456,
+    "matched_code": "522352",
+    "matched_code_percent": 11.061111,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 6270,
-    "matched_functions_percent": 46.585926,
+    "matched_functions": 6269,
+    "matched_functions_percent": 46.578495,
     "total_units": 1
   },
   "text": {
@@ -39361,7 +39361,7 @@
           "address": 1403920,
           "offset": 513952,
           "size": 158,
-          "match_percent": 100.0
+          "match_percent": 99.53125
         },
         {
           "name": "_Z10InitSnakesP11WORLDINFO_s",
@@ -39409,7 +39409,7 @@
           "address": 5150384,
           "offset": 4260416,
           "size": 699,
-          "match_percent": 17.456375
+          "match_percent": 87.57047
         },
         {
           "name": "_Z12SnakeBeenHitP12GameObject_s",
@@ -39417,7 +39417,7 @@
           "address": 5151088,
           "offset": 4261120,
           "size": 1210,
-          "match_percent": 8.266394
+          "match_percent": 76.03278
         }
       ]
     },
@@ -57475,7 +57475,7 @@
           "address": 4902528,
           "offset": 4012560,
           "size": 1019,
-          "match_percent": 2.041667
+          "match_percent": 20.9
         },
         {
           "name": "_ZL24GizObstacles_BoltHitPlatPvS_P6BOLT_sPh",
@@ -86418,7 +86418,7 @@
           "address": 1733584,
           "offset": 843616,
           "size": 2007,
-          "match_percent": 14.719807
+          "match_percent": 49.115944
         },
         {
           "name": "_Z24Hub_UpdateFreePlaySelectv",

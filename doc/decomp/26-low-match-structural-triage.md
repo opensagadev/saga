@@ -5603,3 +5603,45 @@ all climb stop positions and misses, node selection and byte terrain results;
 all dodge slots, both animation alternatives and short circuits; explosion
 NaNs on every bounding axis, contact boundaries, canonical flags and particle
 call counts. External services are stand-ins, not full engine integration.
+
+## Batch 114: snake caller closures and hub/projectile behavior
+
+Recover the shared snake-debris caller closures with a locally scoped macro,
+preserving segment order, matrix scaling, optional specials, particle fields
+and lighting. `SnakeBeenHit` improves **8.266394% to 76.032780%** and
+`BlowUpSnakeBody` **17.456375% to 87.570470%**. Keep the macro local to the
+two callers rather than adding forced-inline or ABI attributes. The adjacent
+`EatVictim` changes **100% to 99.531250%** after translation-unit codegen
+shifts; its behavior and source are unchanged.
+
+Recover all five hub selection states from the decoded reference jump table,
+including single-vehicle launch, trailer launch, pack eligibility, lost-temple
+rejection, two-player direction/confirmation priority and touch inputs.
+Preserve ordered timer comparisons: NaN launches states 1/2 but does not
+complete states 3/4. Retain the invalid-area safety guard instead of the
+reference's unsafe area-array access. Use the canonical game save and the
+reference-inferred integer selector widths. `Hub_UpdateSelectMode` improves
+**14.719807% to 49.115944%**.
+
+Replace the `GizObstacles_BoltHit` stub with active-obstacle eligibility,
+ordered six-axis bounds, reverse sphere probes and nearest-hit selection.
+The initial distance limit is **1,000,000,000**, verified from this function's
+literal address; its local `.LC4` label must not be confused with another
+translation unit's 1.0 literal. Preserve bolt-type/cheat service calls,
+signed owner index, deflection, attacker rumble and targeting callbacks.
+Matching reaches **20.900000%** from the stub.
+
+Overall matching reaches **66.065210%**, **+0.940730 percentage points**
+from the rebased main baseline, with **6,269** exact functions. All eleven
+GitHub checks passed for batch 113. The approximately two-point goal remains
+unfinished. Owners, optimization modes, public ABI and score normalization
+are unchanged. The font renderer already has its vertex helpers inlined;
+defer further closure experiments there without new structural evidence.
+
+Extracted production bodies pass 64-bit ASan/UBSan and optimized i386 SSE
+fixtures: snake counts 0–11, both scales, special filtering and all particle
+fields; all hub states, fade/render gates, thresholds/NaNs, choice limits,
+eligibility, vehicle counts and controller/touch priority; obstacle reverse
+probe ordering, nearest ties, all bounds' NaNs, flags, signed owners,
+deflection/rumble service sequences and callback changes to active count.
+External services are stand-ins, not full engine integration.

@@ -25,12 +25,15 @@ u32 GizObstacles_TotalScore(void *world) {
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/core/input/gamepads.h"
+#include "legoapi/core/config/cheat.h"
 #include "legoapi/gizmo/base/GizObstacleObjectInterface.h"
 #include "legoapi/gizmo/object/gizmoblowups.h"
 #include "legoapi/gizmos/fx/gizmopickups.h"
 #include "legoapi/gizmo/object/gizmopickup.h"
 #include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/items/base/apiobject.h"
+#include "legoapi/items/collect/bolts.h"
+#include "legoapi/misc/utilities.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/menus/core/gamemessage.h"
 #include "legoapi/render/core/terrain.h"
@@ -570,10 +573,68 @@ static i32 *GizObstacles_GetBestBoltTarget(GIZMOSET *set, float *result_distance
     return reinterpret_cast<i32 *>(previous);
 }
 
-static i32 GizObstacles_BoltHit(void *, void *, void *, NUVEC *, i32, float, NUVEC *, NUVEC *, BOLT *, u32,
-                                unsigned char *) {
-    UNIMPLEMENTED();
-    return {};
+static i32 GizObstacles_BoltHit(void *world, void *data, void *attacker_ptr, NUVEC *points, i32 point_count,
+                                float radius, NUVEC *minimum, NUVEC *maximum, BOLT *bolt, u32 hit_type,
+                                unsigned char *hit_flags) {
+    GIZOBSTACLESYS_s *system = static_cast<GIZOBSTACLESYS_s *>(data);
+    if (system == NULL || system->active_gizmo_count == 0) {
+        return 0;
+    }
+    GameObject_s *attacker = static_cast<GameObject_s *>(attacker_ptr);
+    GIZOBSTACLE_s *nearest = NULL;
+    f32 nearest_distance = 1000000000.0f;
+    for (i32 index = 0; index < system->active_gizmo_count; ++index) {
+        GIZOBSTACLE_s *obstacle = static_cast<GIZOBSTACLE_s *>(system->active_gizmos[index]->object);
+        if ((obstacle->progress_flags & GIZOBSTACLE_PROGRESS_FLAG_VISIBLE) == 0 ||
+            (obstacle->progress_flags & GIZOBSTACLE_PROGRESS_FLAG_ENABLED) == 0 ||
+            (obstacle->runtime_flags & GIZOBSTACLE_RUNTIME_FLAG_DESTROYED) != 0) {
+            continue;
+        }
+        const NUVEC &position = obstacle->evaluated_position;
+        const f32 obstacle_radius = obstacle->field_0x58;
+        if (!(position.x - obstacle_radius <= maximum->x && minimum->x <= position.x + obstacle_radius &&
+              position.z - obstacle_radius <= maximum->z && minimum->z <= position.z + obstacle_radius &&
+              position.y - obstacle_radius <= maximum->y && minimum->y <= position.y + obstacle_radius)) {
+            continue;
+        }
+        for (i32 point_index = point_count - 1; point_index >= 0; --point_index) {
+            NUVEC *point = &points[point_index];
+            if (SphereSphereOverlap(&obstacle->evaluated_position, obstacle->field_0x58, point, radius) == 0) {
+                continue;
+            }
+            if (attacker != NULL) {
+                point = &attacker->apiobj.collision_position;
+            }
+            const f32 distance = NuVecDistSqr(point, &obstacle->evaluated_position, 0);
+            if (distance < nearest_distance) {
+                nearest_distance = distance;
+                nearest = obstacle;
+            }
+            break;
+        }
+    }
+    if (nearest == NULL) {
+        return 0;
+    }
+    if (hit_type != 7 && hit_type != 2 && bolt != NULL) {
+        BoltType_FindByID(bolt->type_id, WORLD);
+        Cheats_CheckFlags(2);
+    }
+    BOLTTYPE_s *type = BoltType_FindByID(bolt->type_id, static_cast<WORLDINFO_s *>(world));
+    const i32 player_index = bolt->owner != NULL ? static_cast<i8>(bolt->owner->apiobj.field_0x27c) : -1;
+    if (GizObstacles_Hit(world, nearest, &bolt->position, player_index, type->field_3c) == 0) {
+        NUVEC normal;
+        NuVecSub(&normal, &nearest->evaluated_position, &bolt->position);
+        NuVecNorm(&normal, &normal);
+        Bolt_AddDeflectedBolt(bolt, &bolt->field_0xac, &normal, hit_flags);
+    } else if (attacker != NULL) {
+        NewRumble(attacker->pad_gamepad->pad, 0.4f, 0);
+        GameCam_HitJudder();
+    }
+    if (BoltSys->stop_targeting != NULL) {
+        BoltSys->stop_targeting(attacker, points);
+    }
+    return 1;
 }
 
 static void *GizObstacles_AllocateProgressData(VARIPTR *buffer, VARIPTR *buffer_end) {

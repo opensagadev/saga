@@ -2998,66 +2998,168 @@ static void Hub_MakeFreePlayList(i32 first_model, i32 second_model) {
     }
 }
 
+extern f32 MainRenderTime;
+
 static __used__ void Hub_UpdateSelectMode() {
+    if (FadeSys.fade > 0.0f || MainRenderTime > 0.0f) {
+        return;
+    }
     MENU *menu = &GameMenu[GameMenuLevel];
-
-    if (selectmodemode == 2 || selectmodemode == 3) {
-        selectmodetime += FRAMETIME;
-        if (selectmodetime < selectmodeduration) {
+    const i32 area = static_cast<i8>(LDataList[hub_new_level].area_index);
+    const i32 lost_temple = LOSTTEMPLE_ADATA != NULL && area == LOSTTEMPLE_ADATA->index;
+    u16 freeplay_unlocked = FreePlayUnlocked();
+    if (freeplay_unlocked != 1 && area != -1) {
+        freeplay_unlocked =
+            static_cast<i8>(ADataList[area].episode_index) == -1 && (ADataList[area].flags & 0x4000) != 0;
+    }
+    switch (selectmodemode) {
+        case 1:
+            selectmodetime += FRAMETIME;
+            if (selectmodetime < selectmodeduration) {
+                return;
+            }
+            MakeFreePlayModelList(MenuPacket.player_model[0], MenuPacket.player_model[1],
+                                  static_cast<i8>(LDataList[hub_new_level].area_index), -1, 1);
+            makeplayerlist_freeplay = 2;
+            NextArea_FreePlay = 1;
+            FreePlay = 1;
+            NewLData = Area_FindNextPlayLevel(hub_new_level);
+            break;
+        case 2:
+            selectmodetime += FRAMETIME;
+            if (selectmodetime < selectmodeduration || NewLData != NULL) {
+                return;
+            }
+            NextArea_FreePlay = 0;
+            FreePlay = 0;
+            NewLData = &LDataList[hub_new_level];
+            break;
+        case 3:
+            selectmodetime += FRAMETIME;
+            if (selectmodeduration <= selectmodetime) {
+                WipeBackToHub();
+            }
+            return;
+        case 4:
+            selectmodetime += FRAMETIME;
+            if (selectmodeduration <= selectmodetime) {
+                NewLData = HUB_LDATA;
+                PlayTrailer = hub_selectmode;
+            }
+            return;
+        case 0: {
+            i32 last_choice = 0;
+            if (!lost_temple && area != -1 && (ADataList[area].flags & AREAFLAG_NO_FREEPLAY) == 0) {
+                last_choice = 1;
+                if ((ADataList[area].flags & 0x10) != 0 && Store_IsPackUnlocked(8)) {
+                    last_choice = 2;
+                }
+            }
+            i32 confirm = 0, cancel = 0, up = 0, down = 0;
+            if (MenuPacket.active_player[0]) {
+                const u32 pressed = GamePad[0].buttons_pressed;
+                if ((pressed & GAMEPAD_MENUSELECT) != 0) {
+                    confirm = true;
+                } else if ((pressed & GAMEPAD_MENUCANCEL) != 0) {
+                    cancel = true;
+                } else {
+                    up = ((pressed | GamePad[0].left_directions) & GAMEPAD_DUP) != 0;
+                    down = !up && ((pressed | GamePad[0].left_directions) & GAMEPAD_DDOWN) != 0;
+                }
+            }
+            if (!confirm && !cancel && MenuPacket.active_player[1]) {
+                const u32 pressed = GamePad[1].buttons_pressed;
+                if ((pressed & GAMEPAD_MENUSELECT) != 0) {
+                    confirm = true;
+                    up = down = false;
+                } else if ((pressed & GAMEPAD_MENUCANCEL) != 0) {
+                    cancel = true;
+                    up = down = false;
+                } else if (((pressed | GamePad[1].left_directions) & GAMEPAD_DUP) != 0) {
+                    up = true;
+                } else if (((pressed | GamePad[1].left_directions) & GAMEPAD_DDOWN) != 0) {
+                    down = true;
+                }
+            }
+            if (menu->input_activity != 0) {
+                if (menu->confirm_pressed != 0) {
+                    menu->confirm_pressed = 0;
+                    hub_selectmode = menu->selected_item;
+                    confirm = true;
+                } else if (menu->cancel_pressed != 0 && !confirm) {
+                    cancel = true;
+                }
+            }
+            if (confirm) {
+                if (!lost_temple) {
+                    GameAudio_PlaySfx(0x30, NULL, 0, 0);
+                    if (hub_selectmode == 0) {
+                        selectmodetime = 0.0f;
+                        selectmodemode = 2;
+                        selectmodeduration = 0.6f;
+                        return;
+                    }
+                    if (hub_selectmode == 1 && area != -1 && Game.area_save[area].area_complete != 0 &&
+                        freeplay_unlocked) {
+                        i32 first = -1, second = -1;
+                        if ((ADataList[area].flags & 1) != 0) {
+                            i16 ids[HUB_VEHICLE_ID_CAPACITY];
+                            const i32 count =
+                                Collection_GetIDList(&VehicleCollection, HUB_VEHICLE_COLLECTION_ALLOWED,
+                                                     HUB_VEHICLE_COLLECTION_REQUIRED, ids, &first, &second, 0);
+                            if (count == 1) {
+                                selectmodetime = 0.0f;
+                                selectmodemode = 1;
+                                selectmodeduration = 0.6f;
+                                MenuPacket.player_model[0] = ids[0];
+                                MenuPacket.player_model[1] = ids[0];
+                                return;
+                            }
+                        }
+                        hub_freeplaysource = 0;
+                        Hub_InitFreePlaySelect(area, first, second);
+                        NewMenu(17, -1, -1);
+                        return;
+                    }
+                    if (hub_selectmode == 2 && area != -1 && Game.area_save[area].area_complete != 0 &&
+                        Store_IsPackUnlocked(8)) {
+                        hub_freeplaysource = 0;
+                        Hub_InitFreePlaySelect(area, -1, -1);
+                        NewMenu(17, -1, -1);
+                        return;
+                    }
+                    if (hub_selectmode != 1 && hub_selectmode != 2) {
+                        return;
+                    }
+                }
+                GameAudio_PlaySfx(0x32, NULL, 0, 0);
+            } else if (cancel) {
+                GameAudio_PlaySfx(0x31, NULL, 0, 0);
+                selectmodetime = 0.0f;
+                selectmodemode = 3;
+                selectmodeduration = 0.6f;
+            } else {
+                const i32 previous = hub_selectmode;
+                if (up) {
+                    if (hub_selectmode > 0) {
+                        --hub_selectmode;
+                    }
+                } else if (down && hub_selectmode < last_choice) {
+                    ++hub_selectmode;
+                }
+                if (hub_selectmode != previous) {
+                    GameAudio_PlaySfx(0x2f, NULL, 0, 0);
+                }
+            }
             return;
         }
-
-        if (selectmodemode == 3) {
-            WipeBackToHub();
+        default:
             return;
-        }
-
-        if (NewLData != NULL) {
-            return;
-        }
-        NextArea_FreePlay = 0;
-        FreePlay = 0;
-        NewLData = &LDataList[hub_new_level];
-        loadareacharacters_no_backdrop_reset = 1;
-        const FADETYPE fade = {FADE_TYPE_STILL};
-        FadeSys.SetFade(fade, 0);
-        FinishLoop_On = 0;
-        return;
     }
-
-    if (menu->cancel_pressed != 0) {
-        MenuSFX = GameAudio_GetSfxId(0x31);
-        selectmodetime = 0.0f;
-        selectmodemode = 3;
-        selectmodeduration = 0.6f;
-        return;
-    }
-    if (menu->confirm_pressed == 0) {
-        hub_selectmode = menu->selected_item;
-        return;
-    }
-
-    const i32 area = LDataList[hub_new_level].area_index;
-    hub_selectmode = menu->selected_item;
-    if (hub_selectmode == 0) {
-        MenuSFX = GameAudio_GetSfxId(0x30);
-        selectmodetime = 0.0f;
-        selectmodemode = 2;
-        selectmodeduration = 0.6f;
-        return;
-    }
-    if (hub_selectmode == 1 && area >= 0 && area < AREACOUNT &&
-        (LOSTTEMPLE_ADATA == NULL || area != LOSTTEMPLE_ADATA->index) && FreePlayUnlocked() &&
-        (ADataList[area].flags & AREAFLAG_NO_FREEPLAY) == 0 && Game_AreaSave != NULL &&
-        Game_AreaSave[area].area_complete != 0) {
-        MenuSFX = GameAudio_GetSfxId(0x30);
-        hub_freeplaysource = 0;
-        Hub_InitFreePlaySelect(area, -1, -1);
-        NewMenu(17, -1, -1);
-        return;
-    }
-
-    MenuSFX = GameAudio_GetSfxId(0x32);
+    loadareacharacters_no_backdrop_reset = 1;
+    const FADETYPE fade = {FADE_TYPE_STILL};
+    FadeSys.SetFade(fade, 0);
+    FinishLoop_On = 0;
 }
 
 // The original private draw helper shares EpisodeNumerals with the hub menus.
