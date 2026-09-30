@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 66.503426,
+    "fuzzy_match_percent": 66.530655,
     "total_code": "4722419",
-    "matched_code": "522403",
-    "matched_code_percent": 11.062191,
+    "matched_code": "522829",
+    "matched_code_percent": 11.071212,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 6270,
-    "matched_functions_percent": 46.585926,
+    "matched_functions": 6273,
+    "matched_functions_percent": 46.60822,
     "total_units": 1
   },
   "text": {
@@ -75730,7 +75730,7 @@
           "address": 3841260,
           "offset": 2951292,
           "size": 228,
-          "match_percent": 28.352112
+          "match_percent": 100.0
         },
         {
           "name": "NuRndrSetSpecularLight",
@@ -75994,7 +75994,7 @@
           "address": 3848671,
           "offset": 2958703,
           "size": 136,
-          "match_percent": 80.72093
+          "match_percent": 100.0
         },
         {
           "name": "rtlSetSpecularLight",
@@ -76010,7 +76010,7 @@
           "address": 3848891,
           "offset": 2958923,
           "size": 2252,
-          "match_percent": 30.31865
+          "match_percent": 58.00147
         },
         {
           "name": "_ZL10GetNextRTLPvP5rtl_sPcPi",
@@ -77210,7 +77210,7 @@
           "address": 3906621,
           "offset": 3016653,
           "size": 2171,
-          "match_percent": 33.99829
+          "match_percent": 54.582905
         },
         {
           "name": "_ZL15edrtlDrawLightsv",
@@ -120572,7 +120572,7 @@
       "address": 2755752,
       "offset": 1865784,
       "size": 62,
-      "match_percent": 58.57143,
+      "match_percent": 100.0,
       "candidate_units": [
         "legoapi/render/core/rtl.c.o",
         "nu2api/nu3d/android/nurndrstat_android.c.o"

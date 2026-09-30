@@ -11,6 +11,7 @@ NUVEC nuvec_zero = {0};
 NUVEC v100 = {1.0f, 0.0f, 0.0f};
 NUVEC nuvec_x = {1.0f, 0.0f, 0.0f};
 NUVEC v010 = {0.0f, 1.0f, 0.0f};
+NUVEC nuvec_y = {0.0f, 1.0f, 0.0f};
 NUVEC v001 = {0.0f, 0.0f, 1.0f};
 NUVEC v111 = {1.0f, 1.0f, 1.0f};
 NUVEC nuvec_one = {1.0f, 1.0f, 1.0f};

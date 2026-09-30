@@ -122,10 +122,17 @@ extern "C" {
 extern "C" {
     static __used__ void NuRndrSetDirectionalLights(NUVEC *dir0, NUCOLOUR3 *colour0, NUVEC *dir1, NUCOLOUR3 *colour1,
                                                     NUVEC *dir2, NUCOLOUR3 *colour2) {
+        NuRndrLightingStateCurrent.direction[0] = *dir0;
+        NuRndrLightingStateCurrent.direction[1] = *dir1;
+        NuRndrLightingStateCurrent.direction[2] = *dir2;
+        NuRndrLightingStateCurrent.intensity[0] = *colour0;
+        NuRndrLightingStateCurrent.intensity[1] = *colour1;
+        NuRndrLightingStateCurrent.intensity[2] = *colour2;
         NuRndrSetDirectionalLightsPS(dir0, colour0, dir1, colour1, dir2, colour2);
     }
 
     static __used__ void NuRndrSetAmbientLight(NUCOLOUR3 *colour) {
+        NuRndrLightingStateCurrent.ambient = *colour;
         NuRndrSetAmbientLightPS(colour);
     }
 
@@ -627,11 +634,10 @@ extern "C" {
     }
 
     void rtlSetLights(rtldata_s *data) {
-        const NUVEC *directions = data->direction;
-        const NUCOLOUR3 *colours = data->intensity;
-        NuRndrSetDirectionalLightsPS(&directions[0], &colours[0], &directions[1], &colours[1], &directions[2],
-                                     &colours[2]);
-        NuRndrSetAmbientLightPS(&data->ambient_colour);
+        rtlidata_s *record = data;
+        NuRndrSetDirectionalLights(&record->direction[0], &record->intensity[0], &record->direction[1],
+                                   &record->intensity[1], &record->direction[2], &record->intensity[2]);
+        NuRndrSetAmbientLight(&record->ambient_colour);
     }
 
     void rtlSetSpecularLight(rtldata_s *data) {
@@ -652,80 +658,83 @@ static f32 ClampUnit(f32 value) {
     return value > 1.0f ? 1.0f : value;
 }
 
-static __used__ i32 rtlCalcLights(nuvec_s *position, numtx_s *rotation, f32 scale, rtlidata_s *lighting_data) {
+static __used__ void rtlCalcLights(nuvec_s *position, numtx_s *rotation, f32 scale, rtlidata_s *lighting_data) {
     for (i32 slot = 0; slot < 3; ++slot) {
-        rtl_s *light = lighting_data->directional_lights[slot];
-        NUVEC *colour = &lighting_data->intensity_vectors[slot];
-        NUVEC *direction = &lighting_data->direction[slot];
-        if (light == NULL) {
-            *colour = {0.0f, 0.0f, 0.0f};
-            *direction = {0.0f, 1.0f, 0.0f};
+        if (lighting_data->directional_lights[slot] == NULL) {
+            lighting_data->intensity_vectors[slot] = {0.0f, 0.0f, 0.0f};
+            lighting_data->direction[slot] = nuvec_y;
         } else {
             bool invalid = false;
-            switch (light->type) {
+            switch (lighting_data->directional_lights[slot]->type) {
                 case 2:
                 case 3:
                 case 6:
                 case 8:
-                    if (position == NULL) {
+                    if (position == NULL)
                         invalid = true;
-                    } else {
-                        NuVecSub(direction, &light->position, position);
-                        NuVecNorm(direction, direction);
+                    else {
+                        NuVecSub(&lighting_data->direction[slot], &lighting_data->directional_lights[slot]->position,
+                                 position);
+                        NuVecNorm(&lighting_data->direction[slot], &lighting_data->direction[slot]);
                     }
                     break;
                 case 4:
-                    *direction = light->direction;
+                    lighting_data->direction[slot] = lighting_data->directional_lights[slot]->direction;
                     break;
                 default:
-                    *direction = {0.0f, 0.0f, 1.0f};
-                    NuVecRotateX(direction, direction, light->pitch);
-                    NuVecRotateY(direction, direction, light->yaw);
-                    NuVecMtxRotate(direction, direction, &global_camera.mtx);
-                    // Directional lights use 2.0 as their selection priority,
-                    // but their shading strength starts at one.
+                    lighting_data->direction[slot] = {0.0f, 0.0f, 1.0f};
+                    NuVecRotateX(&lighting_data->direction[slot], &lighting_data->direction[slot],
+                                 lighting_data->directional_lights[slot]->pitch);
+                    NuVecRotateY(&lighting_data->direction[slot], &lighting_data->direction[slot],
+                                 lighting_data->directional_lights[slot]->yaw);
+                    NuVecMtxRotate(&lighting_data->direction[slot], &lighting_data->direction[slot],
+                                   &global_camera.mtx);
                     lighting_data->directional_strengths[slot] = 1.0f;
                     break;
             }
-
-            if (invalid) {
-                *colour = {0.0f, 0.0f, 0.0f};
-            } else {
-                const f32 strength = static_cast<f32>(ApplyAntilights(
-                    light, lighting_data, lighting_data->directional_strengths[slot] * light->intensity));
-                NuVecScale(colour, &light->ambient, strength);
+            if (invalid)
+                lighting_data->intensity_vectors[slot] = {0.0f, 0.0f, 0.0f};
+            else {
+                f32 strength = ApplyAntilights(lighting_data->directional_lights[slot], lighting_data,
+                                               lighting_data->directional_strengths[slot] *
+                                                   lighting_data->directional_lights[slot]->intensity);
+                // Re-read selected lights after service callbacks, as in the reference.
+                lighting_data->intensity_vectors[slot].x =
+                    lighting_data->directional_lights[slot]->ambient.x * strength;
+                lighting_data->intensity_vectors[slot].y =
+                    lighting_data->directional_lights[slot]->ambient.y * strength;
+                lighting_data->intensity_vectors[slot].z =
+                    lighting_data->directional_lights[slot]->ambient.z * strength;
             }
         }
-        if (rotation != NULL) {
-            NuVecMtxRotate(direction, direction, rotation);
-        }
+        if (rotation != NULL)
+            NuVecMtxRotate(&lighting_data->direction[slot], &lighting_data->direction[slot], rotation);
     }
-
     if (scale != 1.0f) {
-        for (i32 slot = 0; slot < 3; ++slot) {
-            NUVEC *colour = &lighting_data->intensity_vectors[slot];
-            NuVecScale(colour, colour, scale);
-        }
+        NuVecScale(&lighting_data->intensity_vectors[0], &lighting_data->intensity_vectors[0], scale);
+        NuVecScale(&lighting_data->intensity_vectors[1], &lighting_data->intensity_vectors[1], scale);
+        NuVecScale(&lighting_data->intensity_vectors[2], &lighting_data->intensity_vectors[2], scale);
     }
-
-    NUVEC *ambient = &lighting_data->ambient;
-    NuVecClear(ambient);
+    NuVecClear(&lighting_data->ambient);
     for (i32 slot = 0; slot < 3; ++slot) {
-        rtl_s *light = lighting_data->ambient_lights[slot];
-        if (light == NULL) {
-            continue;
+        if (lighting_data->ambient_lights[slot] != NULL) {
+            f32 strength = ApplyAntilights(lighting_data->ambient_lights[slot], lighting_data,
+                                           lighting_data->ambient_lights[slot]->intensity *
+                                               lighting_data->ambient_strengths[slot]);
+#define RTL_AMBIENT_COMPONENT(component)                                                                               \
+    lighting_data->ambient.component =                                                                                 \
+        lighting_data->ambient.component + lighting_data->ambient_lights[slot]->ambient.component * strength <= 1.0f   \
+            ? lighting_data->ambient.component + lighting_data->ambient_lights[slot]->ambient.component * strength     \
+            : 1.0f
+            RTL_AMBIENT_COMPONENT(x);
+            RTL_AMBIENT_COMPONENT(y);
+            RTL_AMBIENT_COMPONENT(z);
+#undef RTL_AMBIENT_COMPONENT
         }
-        const f32 strength = static_cast<f32>(
-            ApplyAntilights(light, lighting_data, lighting_data->ambient_strengths[slot] * light->intensity));
-        ambient->x = MIN(ambient->x + light->ambient.x * strength, 1.0f);
-        ambient->y = MIN(ambient->y + light->ambient.y * strength, 1.0f);
-        ambient->z = MIN(ambient->z + light->ambient.z * strength, 1.0f);
     }
-    if (scale != 1.0f) {
-        NuVecScale(ambient, ambient, scale);
-    }
+    if (scale != 1.0f)
+        NuVecScale(&lighting_data->ambient, &lighting_data->ambient, scale);
     NuVecNorm(&lighting_data->field_134, &lighting_data->field_134);
-    return 0;
 }
 
 static __used__ rtl_s *GetNextRTL(void *set, rtl_s *light, char *indices, int *index) {
@@ -3504,48 +3513,59 @@ extern "C" void edrtlDrawLight(i32 index) {
 }
 
 extern "C" void edrtlDrawLightEx(i32 index, i32 style) {
-    rtl_s *light = &curr_set->lights[index];
-    i32 colour = 0x80000000 | ((static_cast<i32>(light->colour.z * 255.0f) & 0xff) << 16) |
-                 ((static_cast<i32>(light->colour.y * 255.0f) << 8) & 0xffff) |
-                 (static_cast<i32>(light->colour.x * 255.0f) & 0xff);
-    i32 inner_colour = style == 1 ? ~colour : colour;
-    i32 outer_colour = style == 2 ? ~colour : colour;
-    if (light->type == 1 || light->type == 2 || light->type == 4) {
-        if (light->type == 4) {
-            edrtl_line_vertex_s line[2] = {};
-            line[0].position = light->position;
+    u32 colour = (static_cast<i32>(curr_set->lights[index].colour.x * 255.0f) & 0xffu) |
+                 ((static_cast<i32>(curr_set->lights[index].colour.z * 255.0f) & 0xffu) << 16) | 0x80000000u |
+                 ((static_cast<i32>(curr_set->lights[index].colour.y * 255.0f) & 0xffu) << 8);
+    u32 inner_colour = colour, outer_colour = colour;
+    if (style == 1)
+        inner_colour = ~colour;
+    if (style == 2)
+        outer_colour = ~colour;
+    edrtl_line_vertex_s line[2] = {};
+    // Three distinct reference switch arms render the same radius pair.
+#define EDRTL_RADIUS_PAIR()                                                                                            \
+    RndrOSphere(&curr_set->lights[index].position, curr_set->lights[index].inner_radius, inner_colour, numsegs,        \
+                reinterpret_cast<usize>(mtls[rtl_zoff != 0]));                                                         \
+    if (curr_set->lights[index].inner_radius < curr_set->lights[index].outer_radius)                                   \
+        RndrOSphere(&curr_set->lights[index].position, curr_set->lights[index].outer_radius, outer_colour, numsegs,    \
+                    reinterpret_cast<usize>(mtls[rtl_zoff != 0]));                                                     \
+    if (&curr_set->lights[index] == curr_rtl)                                                                          \
+    RndrOSquare(&curr_set->lights[index].position, curr_set->lights[index].outer_radius, -1)
+    switch (curr_set->lights[index].type) {
+        case 1:
+            EDRTL_RADIUS_PAIR();
+            break;
+        case 2:
+        case 3:
+        case 6:
+        case 7:
+        case 8:
+            EDRTL_RADIUS_PAIR();
+            break;
+        case 4:
+            line[0].position = curr_set->lights[index].position;
             line[0].colour = colour;
-            line[1].position = light->position;
             line[1].colour = colour;
-            NUVEC scaled;
-            NuVecScale(&scaled, &light->direction, light->outer_radius);
-            NuVecSub(&line[1].position, &line[0].position, &scaled);
+            NuVecScale(&line[1].position, &curr_set->lights[index].direction, curr_set->lights[index].outer_radius);
+            NuVecSub(&line[1].position, &line[0].position, &line[1].position);
             edrtlRndrLine3d(reinterpret_cast<nuvtx_tc1_s *>(line), NULL, NULL);
-        }
-        RndrOSphere(&light->position, light->inner_radius, inner_colour, numsegs,
-                    reinterpret_cast<usize>(mtls[rtl_zoff != 0]));
-        if (light->outer_radius > light->inner_radius) {
-            RndrOSphere(&light->position, light->outer_radius, outer_colour, numsegs,
+            EDRTL_RADIUS_PAIR();
+            break;
+        case 5:
+            line[0].position = curr_set->lights[index].position;
+            line[0].colour = colour;
+            line[1].colour = colour;
+            NuVecScale(&line[1].position, &curr_set->lights[index].direction, 2.0f);
+            NuVecMtxRotate(&line[1].position, &line[1].position, &global_camera.mtx);
+            NuVecSub(&line[1].position, &line[0].position, &line[1].position);
+            edrtlRndrLine3d(reinterpret_cast<nuvtx_tc1_s *>(line), NULL, NULL);
+            RndrOSphere(&curr_set->lights[index].position, 2.0f, colour, numsegs,
                         reinterpret_cast<usize>(mtls[rtl_zoff != 0]));
-        }
-        if (light == curr_rtl) {
-            RndrOSquare(&light->position, light->outer_radius, -1);
-        }
-    } else if (light->type == 5) {
-        edrtl_line_vertex_s line[2] = {};
-        line[0].position = light->position;
-        line[0].colour = colour;
-        line[1].colour = colour;
-        NUVEC scaled;
-        NuVecScale(&scaled, &light->direction, 2.0f);
-        NuVecMtxRotate(&scaled, &scaled, &global_camera.mtx);
-        NuVecSub(&line[1].position, &line[0].position, &scaled);
-        edrtlRndrLine3d(reinterpret_cast<nuvtx_tc1_s *>(line), NULL, NULL);
-        RndrOSphere(&light->position, 2.0f, colour, numsegs, reinterpret_cast<usize>(mtls[rtl_zoff != 0]));
-        if (light == curr_rtl) {
-            RndrOSquare(&light->position, 2.0f, -1);
-        }
+            if (&curr_set->lights[index] == curr_rtl)
+                RndrOSquare(&curr_set->lights[index].position, 2.0f, -1);
+            break;
     }
+#undef EDRTL_RADIUS_PAIR
 }
 
 static void edrtlDrawLights() {

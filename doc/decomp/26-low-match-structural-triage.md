@@ -6125,3 +6125,43 @@ length mutation. Camera tests include cancellation, zero extents, unordered
 inputs, far overrides, all outcomes and byte-exact global restoration.
 Math/engine callbacks are stand-ins; these are not full gameplay integration
 or an Android device run.
+
+## Batches 127–128: light calculation, editor drawing and state publication
+
+Recover `rtlCalcLights`'s direct callback-sensitive light reads, three fixed
+direction scales, ambient intensity multiplication and ordered saturation.
+Null directional slots use the original shared `nuvec_y` vector; restore that
+verified twelve-byte `(0, 1, 0)` global alongside the existing math vectors.
+The original local routine returns void, and its only caller ignores the
+result. Its score improves **30.318650% to 58.001470%**.
+
+Restore editor light types 3, 6, 7 and 8, separate radius-pair switch arms,
+direct line endpoint math and post-callback set reads. Mask each packed RGB
+component before its unsigned shift, avoiding the previous negative signed
+shift. `edrtlDrawLightEx` improves **33.998290% to 54.582905%**. Do not add a
+fourth `RndrOSquare` parameter: the original caller writes an extra material
+slot, but the callee reads only its existing three arguments.
+
+Restore the two renderer-local lighting wrappers' shared-state writes before
+their platform calls. `rtlSetLights` calls these wrappers rather than bypassing
+them. Both local setters and the public submission routine become exact:
+**three new exact functions**, with no exact function lost. Whole-binary
+matching reaches **66.530655%**, **+1.406175 percentage points** from main,
+with **6,273** exact functions. All eleven GitHub checks passed for batch 126;
+the approximately two-point goal remains unfinished.
+
+Extracted production-body tests pass on 64-bit ASan/UBSan and optimized i386
+SSE: **50,000** lighting cases and **20,000** editor/state-publication cases
+on each ABI. Lighting tests include mutable selected lights during callbacks,
+all supported types, null positions, shared vector reads and unordered ambient
+clamping. Editor tests cover bounded negative/over-one colours, selection,
+radius ordering, geometry and service order; state tests check publication
+before callbacks and callback mutation before ambient submission. Engine and
+math services are stand-ins, not complete renderer integration.
+
+A restored Huffman tree/helper trial regresses overall matching and is fully
+reverted. Live compile actions show that its current `inflate.cpp` owner uses
+O3, while the reference helper family has O0 code shape. That alone does not
+prove source ownership. Do not change options, move the family or force helper
+emission merely to improve the score. Build configuration, normalization and
+ownership maps remain unchanged.

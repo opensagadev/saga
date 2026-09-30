@@ -44,6 +44,7 @@ extern NUVEC nuvec_x;
 /// @relatesalso nuvec_s
 /// @brief The vector `(0, 1, 0)`.
 extern NUVEC v010;
+extern NUVEC nuvec_y;
 
 /// @relatesalso nuvec_s
 /// @brief The vector `(0, 0, 1)`.
