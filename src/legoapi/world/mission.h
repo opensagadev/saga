@@ -52,6 +52,9 @@ GameObject_s *Mission_FindTarget(MISSIONSYS *mission_system, u64 *target);
 void CheckMissionEnd(MISSIONSYS *mission_system);
 void InitChallenge(i32 area);
 i32 Missions_PickupsOff(MISSIONSYS *mission_system);
+i32 Mission_CurrentState(MISSIONSYS *mission_system);
+void EndMission(MISSIONSYS *mission_system, i32 state, i32 show_message);
+void EndChallenge(i32 state, i32 show_message);
 
 extern MISSIONSYS *MissionSys;
 #endif

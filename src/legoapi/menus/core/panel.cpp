@@ -98,7 +98,8 @@ static void DrawCoinTotal(i32 source, i32 hide_super_story_target) {
     i32 blue = 0;
 
     if (source == COIN_TOTAL_SUPER_STORY) {
-        DrawSuperStoryTime(-y, SuperStoryTimer[0], Game.episode_save[SuperStoryEpisode].superstory_time_limit, 0, 1);
+        DrawSuperStoryTime(-y, SuperStoryTimer.time_elapsed, Game.episode_save[SuperStoryEpisode].superstory_time_limit,
+                           0, 1);
         total = static_cast<i32>(SuperStoryScore);
 
         if (Game.episode_save[SuperStoryEpisode].superstory_score_target != 0) {

@@ -5847,3 +5847,37 @@ Hardware bootstrap remains deferred pending its variadic cursor and
 cross-owner initialization prototype audit. The incomplete batarang
 targeting caller requires recovering its natural private target-search
 helper, not directly exposing the compiler's `.isra.0` calling convention.
+
+## Batch 120: gameplay timing and canonical super-story timer
+
+Restore the omitted level-name fade, pause, pickup flicker, join-in,
+gameplay, overall gameplay, bonus, super-story, mission and challenge
+timing paths. Preserve service order, the 36,000-second super-story cap,
+mission expiry's network-client gate, and the reference's unordered
+challenge-time comparison. Capture the double-score step before the menu
+callback. Retain null-world and malformed mission/index guards.
+
+Replace the provisional four-float `SuperStoryTimer` with the canonical
+16-byte `TIMER`; update all four consumers, removing the raw timer cast.
+The exported global name, storage size and section remain unchanged.
+`GameTiming` improves **29.68% to 87.301%**. Overall matching reaches
+**66.296400%**, **+1.171920 percentage points** from main, with **6,269**
+exact functions. All eleven GitHub checks passed for batch 119; the
+approximately two-point goal remains unfinished.
+
+The extracted production body passes **16,384** state, expiry and
+service-order comparisons under 64-bit ASan/UBSan and optimized i386 SSE.
+Fixtures cover pause/screenshot/cutscene gates, missing level/area/save
+data, two-player availability, super-story cap crossings, network-client
+mission gating, NaN challenge limits and optional game-time output.
+Services are stand-ins, not full gameplay integration.
+
+NewCast full candidate, roof-only and alternative structured-selection
+trials all regressed and were fully removed; unresolved callback-visible
+selection updates and ceiling policy remain deferred. The full SmartTextEx
+wrapping/measurement/box trial emitted a natural GCC `.part.1` clone and
+regressed; it and its forward declarations were fully removed. Do not
+force inlining or compiler attributes to hide the discrepancy.
+FindNearestBreak punctuation/capture and Force-gizmo guard/bounds trials
+also regressed and were fully removed. No ownership, optimization, ABI or
+scoring changes are used.

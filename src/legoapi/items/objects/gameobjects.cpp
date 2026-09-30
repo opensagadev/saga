@@ -61,6 +61,7 @@
 #include "legoapi/world/area.h"
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/core/input/timer.h"
+#include "legoapi/core/input/timing.h"
 #include "legoapi/gizmos/transport/grapples.h"
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/nu3d/nurndr.h"
@@ -2185,36 +2186,78 @@ extern CUTSCENEPLAYERCLIP *CutScenePlayer_Active();
 void UpdateGameMessages();
 extern i32 DoubleScore;
 extern FadeSystem FadeSys;
+extern f32 LevelNameTime, LevelNameMul;
+extern i32 pause_rndr_on;
+extern "C" TIMER BonusTimer;
+extern "C" i32 screendump;
 
-void GameTiming(WORLDINFO_s *, float *game_time) {
-    if (Paused == 0) {
-        if (game_time != NULL) {
-            *game_time += FRAMETIME;
+void GameTiming(WORLDINFO_s *world, float *game_time) {
+    f32 level_name_target = 1.0f;
+    if (LevelNameTime <= 0.0f)
+        level_name_target = 0.0f;
+    else
+        LevelNameTime -= FRAMETIME;
+    LevelNameMul = SeekLinearF(LevelNameMul, level_name_target, FRAMETIME + FRAMETIME);
+
+    if (Paused != 0) {
+        if (screendump == 0) {
+            UpdateTimer(&PauseTimer);
+            if (LevelNameTime < 0.5f)
+                LevelNameTime = 0.5f;
         }
+        DoubleScoreTime = 0.0f;
+    } else {
+        if (game_time != NULL)
+            *game_time += FRAMETIME;
         UpdateTimer(&GameTimer);
         UpdateTimer(&LevelTimer);
         UpdateTimer(&AreaTimer);
-        if (CUTSTOPGAME == 0) {
+        UpdatePickupFlicker();
+        UpdateTimer(&JoinInTimer);
+        if (CUTSTOPGAME != 0) {
+            DoubleScoreTime = 0.0f;
+        } else {
+            if (world != NULL && world->current_level != NULL && (world->current_level->flags & LEVEL_GAMEPLAY) != 0 &&
+                pause_rndr_on == 0 && (Player[0] != NULL || Player[1] != NULL)) {
+                UpdateTimer(&GamePlayTimer);
+                UpdateTimer(&OverallGamePlayTimer);
+                if (BonusWinner == -1)
+                    UpdateTimer(&BonusTimer);
+                if ((world->current_level->flags & 0x2000) != 0) {
+                    UpdateTimer(&SuperStoryTimer);
+                    if (SuperStoryTimer.time_elapsed > 36000.0f)
+                        ResetTimer(&SuperStoryTimer, 36000.0f);
+                }
+                if (world->area != NULL && (world->area->flags & 0x10) != 0) {
+                    if (ChallengeMode != 1) {
+                        if (Mission_CurrentState(NULL) == 1 && MissionSys != NULL && MissionSys->mission != NULL) {
+                            const f32 time_limit = static_cast<f32>(MissionSys->mission->time);
+                            UpdateTimer(&MissionSys->timer);
+                            if (time_limit <= MissionSys->timer.time_elapsed && netclient == 0)
+                                EndMission(MissionSys, 3, 1);
+                        }
+                    } else {
+                        UpdateTimer(&ChallengeTimer);
+                        if (Game_AreaSave != NULL && world->level_sub_id >= 0 &&
+                            !(ChallengeTimer.time_elapsed < Game_AreaSave[world->level_sub_id].challenge_trial_time))
+                            EndChallenge(3, 1);
+                    }
+                }
+            }
             UpdateGameMessages();
+            f32 score_step = FRAMETIME;
             f32 target = 0.0f;
             if (DoubleScore != 0 && GetMenuID() == -1)
                 target = 1.0f;
-            DoubleScoreTime = SeekLinearF(DoubleScoreTime, target, FRAMETIME);
-        } else {
-            DoubleScoreTime = 0.0f;
+            DoubleScoreTime = SeekLinearF(DoubleScoreTime, target, score_step);
         }
-    } else {
-        DoubleScoreTime = 0.0f;
     }
-
     UpdateTimer(&GlobalTimer);
     menu_flash = NuFmod(GlobalTimer.time_elapsed_mod_seconds, 0.2f) < 0.1f;
-
     f32 pulse_time = NuFmod(GameTimer.time_elapsed_mod_seconds, 0.5f);
-    game_pulse = NuTrigTable[(i32)(pulse_time * 2.0f * 65536.0f) >> 1 & 0x7fff];
+    game_pulse = NuTrigTable[static_cast<u32>(static_cast<i32>((pulse_time + pulse_time) * 65536.0f)) >> 1 & 0x7fff];
     pulse_time = NuFmod(GlobalTimer.time_elapsed_mod_seconds, 0.5f);
-    global_pulse = NuTrigTable[(i32)(pulse_time * 2.0f * 65536.0f) >> 1 & 0x7fff];
-
+    global_pulse = NuTrigTable[static_cast<u32>(static_cast<i32>((pulse_time + pulse_time) * 65536.0f)) >> 1 & 0x7fff];
     MainRenderTime = SeekLinearF(MainRenderTime, MainRenderTargetTime, FRAMETIME);
     qrand();
 }

@@ -411,7 +411,7 @@ void InitStatusScreen(WORLDINFO_s *world) {
             EPISODESAVE_s &save = Game.episode_save[episode];
             p.previous_best_time = save.superstory_time_limit;
             p.previous_best_score = save.superstory_score_target;
-            p.superstory_time = SuperStoryTimer[0];
+            p.superstory_time = SuperStoryTimer.time_elapsed;
             p.superstory_score = SuperStoryScore;
             i32 gold = 0;
             if (episode == -1) {

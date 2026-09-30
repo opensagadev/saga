@@ -455,7 +455,7 @@ void RestoreOptions() {
 void InitSuperStory(i32 episode) {
     SuperStory = 1;
     SuperStoryEpisode = episode;
-    ResetTimer(reinterpret_cast<TIMER *>(SuperStoryTimer), 0.0f);
+    ResetTimer(&SuperStoryTimer, 0.0f);
     SuperStoryScore = 0;
     FreePlay = 0;
     NextArea_FreePlay = 0;

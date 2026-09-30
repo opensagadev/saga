@@ -157,7 +157,7 @@ f32 CoinTotalScale = 0.0f;
 f32 cointotal_x[2] = {0.0f, 0.0f};
 i32 cointotal_i_obj[2] = {187, 187};
 i32 SuperStoryEpisode = -1;
-f32 SuperStoryTimer[4] = {0.0f, 0.0f, 0.0f, 0.0f};
+TIMER SuperStoryTimer = {};
 u32 SuperStoryScore = 0;
 
 f32 DrawMiniKitTime = 0.0f;

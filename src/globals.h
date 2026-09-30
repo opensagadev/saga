@@ -495,7 +495,7 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
-extern f32 SuperStoryTimer[4];
+extern TIMER SuperStoryTimer;
 extern u32 SuperStoryScore;
 
 extern f32 DrawMiniKitTime;
