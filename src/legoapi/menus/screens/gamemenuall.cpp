@@ -778,10 +778,6 @@ void MenuDrawDeleting(MENU_s *) {
                     MENUNORMALR, MENUNORMALG, MENUNORMALB, 1.5f, 3, NULL, 0, MenuA);
 }
 
-void MenuDrawEpisodes(MENU_s *) {
-    STUBBED();
-}
-
 void MenuDrawFreePlay(MENU_s *) {
     if (MenuStopDraw == 0) {
         Hub_DrawFreePlaySelect();
@@ -1134,10 +1130,6 @@ void MenuUpdateDeleting(MENU_s *) {
         memcard_deleteneeded = 0;
         memcard_deletefailed = 1;
     }
-}
-
-void MenuUpdateEpisodes(MENU_s *) {
-    STUBBED();
 }
 
 void MenuUpdateFreePlay(MENU_s *) {

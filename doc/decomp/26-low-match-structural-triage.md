@@ -4903,3 +4903,29 @@ Further read-only triage confirms that the 146-byte `NuVisiInstTree` needs
 the shared instance-tree layout and its private `ClipInstTree` clone, not
 an isolated wrapper implementation or forced register-passing attributes.
 No source experiment was made for that visibility group.
+
+## Batch 95: episode-selection menus
+
+After rebasing onto main `05429366`, the linked baseline is **65.124480%**.
+Restore the private `DrawEpisodesMenu` and public episode update/draw callbacks
+in `hub.cpp`, next to their initializer and their original private
+`EpisodeNumerals` table. This closes the previously documented ownership split;
+the existing `-O3` configuration is unchanged. Remove the HUD/menu placeholders,
+restore the six-byte signed `i_clip` array and initialized
+`hub_goto_clipsmenu_episode`, and publish the shared clip-grid declaration.
+
+Reference control flow distinguishes the six-episode grid, seven-column clip
+selection, play confirmation and exit animation. Preserve physical-pad versus
+touch input, confirm-before-cancel priority, directional repetition and wrapping,
+unavailable-episode opacity, item hitboxes, and the exit state's two frame-time
+increments. Keep the ordinary static C++ helper: GCC supplies its private
+register convention without calling-convention attributes. Branch source order
+is material: the first grid-before-episode trial produced zero fuzzy matching
+for the helper; recovering the original episode-first control-flow order raises
+it to **69.594666%**. Update/draw reach **32.404540% / 85.771240%**.
+
+Overall linked fuzzy matching reaches **65.240974%** (+0.116494 percentage
+points), with **6,262** exact functions unchanged. The Android target, all five
+repository checks, cross-file declaration check and symbol-surface check pass.
+This is assembly-reviewed reconstruction, not a gameplay integration claim;
+no controller/touch runtime harness has yet been run for this batch.

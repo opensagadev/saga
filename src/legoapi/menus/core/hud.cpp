@@ -129,10 +129,6 @@ void DrawSpaceLevel(spacelevel_s *) {
     STUBBED();
 }
 
-static __used__ void DrawEpisodesMenu(int, float) {
-    STUBBED();
-}
-
 namespace {
     void _NuTimeBarSlotBegin(void) {
         STUBBED();

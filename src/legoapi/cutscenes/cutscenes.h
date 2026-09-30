@@ -31,6 +31,7 @@ extern CUTSCENESYS *CutSceneSys;
 extern "C" i32 (*CutScenePlayer_AcceptFn)(CUTSCENEPLAYERCLIP *);
 void CutScenePlayer_Configure(char *, VARIPTR *, VARIPTR *, i16 *, i16 *, i16 *, i16 *, i16 *);
 i32 CutScenePlayer_CountEpisodeClips(i32, i32, i16 *);
+void CutScenePlayer_DrawGrid(COLLECTION_s *, i16 *, f32, f32, i32, f32);
 void CutScenePlayer_Start(i32, i32);
 void *CutScenePlayer_Available();
 i32 CutScenePlayer_CanStart(i32);

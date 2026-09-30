@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 65.12448,
+    "fuzzy_match_percent": 65.240974,
     "total_code": "4722419",
     "matched_code": "522012",
     "matched_code_percent": 11.053911,
@@ -46485,7 +46485,7 @@
           "address": 1110000,
           "offset": 220032,
           "size": 23545,
-          "match_percent": 45.297882
+          "match_percent": 45.298103
         },
         {
           "name": "_Z24InitCameraTargetMaterialv",
@@ -67834,14 +67834,6 @@
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/hud.o",
       "functions": [
         {
-          "name": "_ZL16DrawEpisodesMenuif",
-          "demangled_name": "DrawEpisodesMenu(int, float)",
-          "address": 1780112,
-          "offset": 890144,
-          "size": 5526,
-          "match_percent": 0.516351
-        },
-        {
           "name": "_ZL14DrawSpaceLevelP12spacelevel_s",
           "demangled_name": "DrawSpaceLevel(spacelevel_s*)",
           "address": 2317520,
@@ -69034,22 +69026,6 @@
           "offset": 284160,
           "size": 520,
           "match_percent": 99.99
-        },
-        {
-          "name": "_Z18MenuUpdateEpisodesP6MENU_s",
-          "demangled_name": "MenuUpdateEpisodes(MENU_s*)",
-          "address": 1785920,
-          "offset": 895952,
-          "size": 3429,
-          "match_percent": 0.560748
-        },
-        {
-          "name": "_Z16MenuDrawEpisodesP6MENU_s",
-          "demangled_name": "MenuDrawEpisodes(MENU_s*)",
-          "address": 1789360,
-          "offset": 899392,
-          "size": 727,
-          "match_percent": 2.745098
         },
         {
           "name": "_Z13MenuInitClipsP6MENU_s",
@@ -86602,7 +86578,7 @@
           "address": 1736304,
           "offset": 846336,
           "size": 4058,
-          "match_percent": 9.708847
+          "match_percent": 9.455767
         },
         {
           "name": "_Z8Hub_LoadP11WORLDINFO_sP9variptr_uS2_",
@@ -86781,12 +86757,36 @@
           "match_percent": 84.28175
         },
         {
+          "name": "_ZL16DrawEpisodesMenuif",
+          "demangled_name": "DrawEpisodesMenu(int, float)",
+          "address": 1780112,
+          "offset": 890144,
+          "size": 5526,
+          "match_percent": 69.594666
+        },
+        {
           "name": "_Z16MenuInitEpisodesP6MENU_s",
           "demangled_name": "MenuInitEpisodes(MENU_s*)",
           "address": 1785648,
           "offset": 895680,
           "size": 264,
           "match_percent": 85.253525
+        },
+        {
+          "name": "_Z18MenuUpdateEpisodesP6MENU_s",
+          "demangled_name": "MenuUpdateEpisodes(MENU_s*)",
+          "address": 1785920,
+          "offset": 895952,
+          "size": 3429,
+          "match_percent": 32.40454
+        },
+        {
+          "name": "_Z16MenuDrawEpisodesP6MENU_s",
+          "demangled_name": "MenuDrawEpisodes(MENU_s*)",
+          "address": 1789360,
+          "offset": 899392,
+          "size": 727,
+          "match_percent": 85.77124
         },
         {
           "name": "_Z18MenuInitSelectModeP6MENU_s",
