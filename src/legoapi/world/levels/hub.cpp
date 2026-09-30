@@ -2961,8 +2961,8 @@ static void Hub_MakeFreePlayList(i32 first_model, i32 second_model) {
     }
 
     MakeFreePlayModelList(first_model, second_model, area, -1, 1);
-    if ((ADataList[area].flags & (AREAFLAG_VEHICLE_AREA | AREAFLAG_BONUS_AREA)) ==
-        (AREAFLAG_VEHICLE_AREA | AREAFLAG_BONUS_AREA)) {
+    if (area != -1 && (ADataList[area].flags & (AREAFLAG_VEHICLE_AREA | AREAFLAG_BONUS_AREA)) ==
+                          (AREAFLAG_VEHICLE_AREA | AREAFLAG_BONUS_AREA)) {
         for (i32 index = 0; index < FreePlayModelCount; ++index) {
             const i32 model = FreePlayModelList[index].model_id;
             if ((CDataList[model].model_flags & HUB_FREEPLAY_MODEL_MINIKIT) == 0 ||
@@ -2974,29 +2974,12 @@ static void Hub_MakeFreePlayList(i32 first_model, i32 second_model) {
         }
     } else {
         const i32 selectable_count = FreePlayResidentCount + FreePlayBonusCount;
-        for (i32 index = 2; index < selectable_count + 2 && FreePlayModelList[index].model_id != -1; ++index) {
+        for (i32 index = 2; index < selectable_count + 2 && index < FreePlayModelCount; ++index) {
             const i32 model = FreePlayModelList[index].model_id;
             const bool is_vehicle = (CDataList[model].model_flags & HUB_FREEPLAY_MODEL_VEHICLE) != 0;
             const bool area_uses_vehicles = area != -1 && (ADataList[area].flags & AREAFLAG_VEHICLE_AREA) != 0;
             if ((area == -1 || is_vehicle == area_uses_vehicles) && Collection_Got(model) != 0) {
                 fplist[fpcount++] = FreePlayModelList[index];
-            }
-        }
-    }
-
-    // MakeFreePlayModelList is still only partially reconstructed. Until it supplies
-    // the resident/bonus tail, use the same area collection the original selector
-    // filters so the UI has the unlocked roster rather than an empty list.
-    if (fpcount == 0) {
-        COLLECTION_s *collection = GetFreePlayCollection(area);
-        if (collection != NULL && collection->list != NULL) {
-            for (i32 index = 0; index < collection->count_y && fpcount < 340; ++index) {
-                const i32 model = collection->list[index].id;
-                if (model >= 0 && model < CHARCOUNT && Collection_Got(model) != 0) {
-                    fplist[fpcount].model_id = static_cast<i16>(model);
-                    fplist[fpcount].count = 1;
-                    ++fpcount;
-                }
             }
         }
     }

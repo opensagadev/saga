@@ -5192,3 +5192,31 @@ timers, confirmations/cancellations, network filtering, launch and malformed
 grid boundaries. Rendering/audio/network services are stand-ins, not gameplay
 integration. LeakSanitizer is disabled for the sandbox; the menu fixture also
 disables vptr checks because its radar service stand-in has no engine object.
+
+## Batch 102: free-play roster producer and selector consumer
+
+Restore the missing resident, capability-category, Imperial-access, vehicle,
+minikit and extra-model portions of `MakeFreePlayModelList`. Preserve duplicate
+checks, the early `PlayerList` writes, the 48-model limit and the reference's
+resident count even when an entry duplicates another model. Recover category
+hat requirements and retry, customiser exclusions, unlocked Imperial selection,
+live area-flag reloads and ordered extra-model dependencies. Keep signatures
+and compiler options unchanged; share the canonical `Move_DEFAULT` declaration.
+
+Initialize an empty roster's terminator, avoid forming `ADataList[-1]`, and bound
+the vehicle scratch list. With the complete producer restored, remove the hub's
+temporary collection fallback, which is absent from the reference. Bound its
+resident/bonus scan by the actual model count so duplicate resident counts
+cannot make it read beyond the roster. Preserve its filtering and shuffle.
+
+The producer improves **9.693764% to 43.912025%**; the selector helper reaches
+**8.046808%**. Overall matching reaches **65.598720%**, or **+0.474240 percentage
+points** from main, with **6,266** exact functions. The approximately two-point
+goal remains in progress.
+
+Extracted producer and consumer bodies pass optimized i386 and 64-bit
+ASan/UBSan fixtures: explicit/fallback players, duplicate writes, residents,
+arcade suppression, category/hat retry, Imperial access and exclusions,
+minikits/vehicles, chained extra models, empty input, capacity and selector
+filtering. Services remain stand-ins, not full gameplay integration;
+LeakSanitizer is disabled for sandbox compatibility.

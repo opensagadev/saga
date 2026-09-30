@@ -708,6 +708,7 @@ extern i32 HINTS_ON;
 // ------------------------------------------------------------------------
 extern i32 FreePlay;
 extern i32 FreePlayModelCount;
+extern "C" i32 makefreeplaymodellist;
 extern i32 FreePlayResidentCount;
 extern i32 FreePlayBonusCount;
 extern CHARCAT_s *CharCategory;

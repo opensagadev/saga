@@ -25,6 +25,8 @@
 #include "legoapi/world/area.h"
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/core/charconfig.h"
+#include "legoapi/characters/motion.h"
+#include "legoapi/core/input/qrand.h"
 #include "legoapi/world/level.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/characters/motion/gameanim.h"
@@ -33,6 +35,7 @@
 #include "legoapi/gizmo/base/gizflow.h"
 #include "legoapi/items/objects/grabber.h"
 #include "legoapi/items/base/collection.h"
+#include "legoapi/menus/screens/store.h"
 #include "legoapi/items/base/apiobject.h"
 #include "legoapi/props/system/socksys.h"
 #include "legoapi/core/input/timer.h"
@@ -1089,70 +1092,144 @@ extern "C" {
 }
 
 i32 InModelListDataFlags(APICHARACTERMODELLIST_s *, u32, u32, i32, i32);
+static inline i32 World_AddFreePlayModel(i32 model) {
+    if (model == -1 || FreePlayModelCount >= 48)
+        return 0;
+    if (FreePlayModelCount < 2)
+        PlayerList[FreePlayModelCount] = static_cast<i16>(model);
+    for (i32 i = 0; i < FreePlayModelCount; ++i) {
+        if (FreePlayModelList[i].model_id == model)
+            return 0;
+    }
+    FreePlayModelList[FreePlayModelCount].model_id = static_cast<i16>(model);
+    FreePlayModelList[FreePlayModelCount].count = 1;
+    ++FreePlayModelCount;
+    FreePlayModelList[FreePlayModelCount].model_id = -1;
+    return 1;
+}
+
+static inline bool World_FreePlayImperial(i32 model) {
+    const i8 action = static_cast<i8>(GCDataList[model].uses_weapon_action);
+    return action == 8 || action == 1 || model == id_DARTHVADER || model == id_THEEMPEROR ||
+           model == id_GRANDMOFFTARKIN || model == id_IMPERIALOFFICER || model == id_IMPERIALSHUTTLEPILOT;
+}
+
 void MakeFreePlayModelList(i32 model1, i32 model2, i32 area, i32 level, i32 param5) {
-    i32 flags = 0;
+    i16 ids[341];
+    i16 imperial_ids[500];
+    u32 flags = 0;
     if (WORLD != NULL && WORLD->area != NULL && WORLD->area == HUB_ADATA && bonusmodearcade != 0)
-        flags = Arcade_Mode[ArcadeItem.field_c_0xc].field8_0x8;
+        flags = Arcade_Mode[static_cast<i8>(ArcadeItem.field_c_0xc)].field8_0x8;
 
     FreePlayModelCount = 0;
     FreePlayResidentCount = 0;
     FreePlayBonusCount = 0;
+    // Empty input must not leave a previous roster visible to category scans.
+    FreePlayModelList[0].model_id = -1;
     if (model1 == -1)
         model2 = -1;
-
-    AREADATA *ad = &ADataList[area];
-
-    if ((ad->flags & (AREAFLAG_VEHICLE_AREA | AREAFLAG_BONUS_AREA)) == (AREAFLAG_VEHICLE_AREA | AREAFLAG_BONUS_AREA)) {
-        i32 count = 0;
-        i32 models[2] = {model1, model2};
-        for (i32 i = 0; i < 2; i++) {
-            i32 m = models[i];
-            if (m == -1)
-                break;
-            if (count > 0x2f)
-                continue;
-            if (count > 1) {
-                if (FreePlayModelList[0].model_id == m)
-                    continue;
-                i32 j;
-                for (j = 1; j < count; j++) {
-                    if (FreePlayModelList[j].model_id == m)
-                        break;
-                }
-                if (j != count)
-                    continue;
-            }
-            FreePlayModelList[count].model_id = m;
-            FreePlayModelList[count].count = 1;
-            count++;
-            FreePlayModelList[count].model_id = -1;
-        }
-        FreePlayModelCount = count;
+    const i32 models[2] = {model1, model2};
+    // Area -1 has no resident/vehicle data; never form ADataList[-1].
+    AREADATA *data = area == -1 ? NULL : &ADataList[area];
+    const u16 area_flags = data == NULL ? 0 : data->flags;
+    if ((area_flags & 5) == 5) {
+        for (i32 i = 0; i < 2; ++i)
+            World_AddFreePlayModel(models[i]);
+        Collection_GetIDList(&MiniKitCollection, 0x4000000, 0x4000000, ids, NULL, NULL, makefreeplaymodellist != 0);
+        for (i16 *id = ids; *id != -1; ++id)
+            World_AddFreePlayModel(*id);
+        if (FreePlayModelCount == 1)
+            PlayerList[1] = PlayerList[0];
+        PlayerList[2] = -1;
     } else {
-        i32 count = 0;
-        i32 models[2] = {model1, model2};
-        for (i32 i = 0; i < 2; i++) {
-            i32 m = models[i];
-            if (m == -1)
-                break;
-            if (count > 0x2f)
-                continue;
-            if (count > 1) {
-                if (FreePlayModelList[0].model_id == m)
-                    continue;
-                i32 j;
-                for (j = 1; j < count; j++) {
-                    if (FreePlayModelList[j].model_id == m)
-                        break;
-                }
-                if (j != count)
-                    continue;
-            }
-            FreePlayModelList[count].model_id = m;
-            FreePlayModelList[count].count = 1;
-            count++;
-            FreePlayModelList[count].model_id = -1;
+        for (i32 i = 0; i < 2; ++i) {
+            i32 model = models[i];
+            if (model == -1 && Player[i] != NULL)
+                model = Player[i]->id;
+            World_AddFreePlayModel(model);
         }
-        FreePlayModelCount = count;
+        if (FreePlayModelCount == 1) {
+            PlayerList[1] = PlayerList[0];
+            PlayerList[2] = -1;
+        } else {
+            PlayerList[FreePlayModelCount] = -1;
+        }
+    }
+
+    if (data != NULL && (flags & 0x10) == 0 && data->hub_player_ids != NULL) {
+        for (i16 *id = data->hub_player_ids; *id != -1; ++id) {
+            World_AddFreePlayModel(*id);
+            // Retail counts resident entries, including a duplicate or one
+            // beyond the roster cap, rather than only successful insertions.
+            ++FreePlayResidentCount;
+        }
+    }
+    if (data == NULL || (data->flags & 1) == 0) {
+        i32 hats = InModelListDataFlags(FreePlayModelList, 0, 0, 1, 0);
+        if (CharCategory != NULL) {
+            for (i32 i = 0; i < CHARCATEGORYCOUNT; ++i) {
+                if (InModelListDataFlags(FreePlayModelList, CharCategory[i].model_flags, CharCategory[i].game_flags, 0,
+                                         1) != 0)
+                    continue;
+                i32 model;
+                if (hats == 0 || (CharCategory[i].model_flags & 0x80) != 0) {
+                    model = RandomIDFromFlags(CharCategory[i].model_flags, CharCategory[i].game_flags, 1, NULL, 1);
+                    if (model != -1) {
+                        hats = 1;
+                    } else {
+                        model = RandomIDFromFlags(CharCategory[i].model_flags, CharCategory[i].game_flags, 0, NULL, 1);
+                    }
+                } else {
+                    model = RandomIDFromFlags(CharCategory[i].model_flags, CharCategory[i].game_flags, 0, NULL, 1);
+                }
+                if (World_AddFreePlayModel(model) != 0)
+                    ++FreePlayBonusCount;
+            }
+            bool imperial = false;
+            for (APICHARACTERMODELLIST_s *model = FreePlayModelList; model->model_id != -1; ++model) {
+                if (Collection_Got(model->model_id) != 0 && World_FreePlayImperial(model->model_id)) {
+                    imperial = true;
+                    break;
+                }
+            }
+            if (!imperial) {
+                i32 count = 0;
+                for (i32 i = 0; i < CHARCOUNT; ++i) {
+                    if (InModelList(FreePlayModelList, i, NULL) == 0 &&
+                        (Game_Customiser == NULL ||
+                         (i != Game_Customiser->character_ids[0] && i != Game_Customiser->character_ids[1])) &&
+                        CDataList[i].move_fn != Move_DEFAULT && Collection_Got(i) != 0 && World_FreePlayImperial(i) &&
+                        count < 500)
+                        imperial_ids[count++] = static_cast<i16>(i);
+                }
+                if (count != 0) {
+                    if (count != 1)
+                        imperial_ids[0] = imperial_ids[qrand() / (0xffff / count + 1)];
+                    if (World_AddFreePlayModel(imperial_ids[0]) != 0)
+                        ++FreePlayBonusCount;
+                }
+            }
+        }
+    } else if ((data->flags & 4) == 0) {
+        const i32 second = PlayerList[1];
+        if (second == -1 || (CDataList[second].model_flags & 0x2000) == 0 || Collection_Got(second) == 0)
+            PlayerList[1] = PlayerList[0];
+        const i32 count = VehicleCollection.count_y < 340 ? VehicleCollection.count_y : 340;
+        for (i32 i = 0; i < count; ++i)
+            ids[i] = VehicleCollection.list[i].id;
+        ids[count] = -1;
+        for (i16 *id = ids; *id != -1; ++id) {
+            if (World_AddFreePlayModel(*id) != 0)
+                ++FreePlayBonusCount;
+        }
+    } else {
+        const i32 second = PlayerList[1];
+        if (second == -1 || (CDataList[second].model_flags & 0x4000000) == 0 || Collection_Got(second) == 0)
+            PlayerList[1] = PlayerList[0];
+    }
+    for (EXTRAMODEL *extra = ExtraModelList; extra->model_list != NULL; ++extra) {
+        const i32 source = *extra->model_list;
+        if (source != -1 && InModelList(FreePlayModelList, source, NULL) != 0 && extra->field_04 != NULL)
+            World_AddFreePlayModel(*static_cast<i16 *>(extra->field_04));
     }
 }
