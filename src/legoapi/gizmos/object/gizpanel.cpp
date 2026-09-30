@@ -89,42 +89,45 @@ static void GizPanel_AddGizmos(GIZMOSYS *gizmo_sys, i32 type_id, void *world_ptr
 static void GizPanel_Update(void *world_ptr, void *, float delta_time) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
     GIZPANELSYS_s *panel_sys = world->giz_panel_sys;
-    if (panel_sys == NULL || panel_sys->count <= 0) {
+    if (panel_sys == NULL) {
         return;
     }
 
     GameObject_s **players = Player;
     GameObject_s *nearest_player = NULL;
-    NUVEC player_direction = {};
+    NUVEC player_direction;
+    NUVEC panel_position;
+    NUVEC direction;
     for (i32 index = 0; index < panel_sys->count; ++index) {
         GIZPANEL &panel = panel_sys->panels[index];
 
         if ((panel.flags & GIZPANEL_FLAG_TRACK_PLAYER) != 0) {
-            nearest_player = NULL;
             const f32 maximum_distance = (panel.flags & GIZPANEL_FLAG_PLAYER_NEAR) != 0 ? 1.1f * 1.1f : 0.9f * 0.9f;
             f32 nearest_distance = 1000000000.0f;
 #define CONSIDER_PANEL_PLAYER(player_index)                                                                            \
     do {                                                                                                               \
         GameObject_s *candidate = players[player_index];                                                               \
-        if (candidate == NULL || (candidate->apiobj.flags_high & 0x10) == 0 || candidate->apiobj.field_0x287 != 0) {   \
-            break;                                                                                                     \
-        }                                                                                                              \
-                                                                                                                       \
-        NUVEC panel_position = panel.position;                                                                         \
-        if (panel.model_variant == 2) {                                                                                \
-            panel_position.y += 0.245f;                                                                                \
-            panel_position.z -= 0.19f;                                                                                 \
-        } else if (panel.model_variant == 3) {                                                                         \
-            panel_position.y += 0.34f;                                                                                 \
-            panel_position.z -= 0.17f;                                                                                 \
-        }                                                                                                              \
-                                                                                                                       \
-        NUVEC direction;                                                                                               \
-        const f32 distance = NuVecDistSqr(&panel_position, &candidate->apiobj.collision_position, &direction);         \
-        if (distance < nearest_distance && distance < maximum_distance) {                                              \
-            nearest_distance = distance;                                                                               \
-            nearest_player = candidate;                                                                                \
-            player_direction = direction;                                                                              \
+        if (candidate != NULL && (candidate->apiobj.flags_high & 0x10) != 0 && candidate->apiobj.field_0x287 == 0) {   \
+            panel_position = panel.position;                                                                           \
+            if (panel.model_variant == 2) {                                                                            \
+                panel_position.y += 0.245f;                                                                            \
+                panel_position.z -= 0.19f;                                                                             \
+            } else if (panel.model_variant == 3) {                                                                     \
+                panel_position.y += 0.34f;                                                                             \
+                panel_position.z -= 0.17f;                                                                             \
+            }                                                                                                          \
+            const f32 distance = NuVecDistSqr(&panel_position, &candidate->apiobj.collision_position, &direction);     \
+            if (distance < nearest_distance && distance < maximum_distance) {                                          \
+                nearest_distance = distance;                                                                           \
+                nearest_player = players[player_index];                                                                \
+                player_direction = direction;                                                                          \
+            } else if (player_index == 0) {                                                                            \
+                nearest_player = NULL;                                                                                 \
+                nearest_distance = 1000000000.0f;                                                                      \
+            }                                                                                                          \
+        } else if (player_index == 0) {                                                                                \
+            nearest_player = NULL;                                                                                     \
+            nearest_distance = 1000000000.0f;                                                                          \
         }                                                                                                              \
     } while (0)
 
@@ -165,24 +168,15 @@ static void GizPanel_Update(void *world_ptr, void *, float delta_time) {
                 if (target_y_rotation > 0x4000 && target_y_rotation < 0xc000) {
                     target_y_rotation = 0x4000;
                 }
-                if (previous_x_rotation <= 0x4000) {
-                    if (target_x_rotation > 0x4000 && target_x_rotation < 0xc000) {
-                        target_x_rotation = static_cast<u16>(panel.y_rotation + 0x4000);
-                    }
-                } else if (previous_x_rotation > 0xbfff && target_x_rotation < 0xc000 && target_x_rotation > 0x4000) {
-                    target_x_rotation = 0xc000;
+            } else if (previous_y_rotation >= 0xc000 && target_y_rotation <= 0xbfff && target_y_rotation >= 0x4001) {
+                target_y_rotation = 0xc000;
+            }
+            if (previous_x_rotation <= 0x4000) {
+                if (target_x_rotation > 0x4000 && target_x_rotation < 0xc000) {
+                    target_x_rotation = static_cast<u16>(panel.y_rotation + 0x4000);
                 }
-            } else {
-                if (previous_y_rotation >= 0xc000 && target_y_rotation <= 0xbfff && target_y_rotation >= 0x4001) {
-                    target_y_rotation = 0xc000;
-                }
-                if (previous_x_rotation <= 0x4000) {
-                    if (target_x_rotation > 0x4000 && target_x_rotation < 0xc000) {
-                        target_x_rotation = static_cast<u16>(panel.y_rotation + 0x4000);
-                    }
-                } else if (previous_x_rotation > 0xbfff && target_x_rotation < 0xc000 && target_x_rotation > 0x4000) {
-                    target_x_rotation = 0xc000;
-                }
+            } else if (previous_x_rotation > 0xbfff && target_x_rotation < 0xc000 && target_x_rotation > 0x4000) {
+                target_x_rotation = 0xc000;
             }
 
             panel.target_x_rotation = SeekRot(panel.target_x_rotation, target_x_rotation, 5.0f);

@@ -998,11 +998,10 @@ void Hub_Update(WORLDINFO_s *world) {
     GIZBUILDIT_s *nearest_buildit = GizBuildIt_FindNearest(WORLD, Player[0], BUILDIT_FIND_ANY, ShadowMode);
     if (FadeSys.fade == 0.0f) {
         i32 selected_buildit = -1;
-        const bool player_can_build =
-            Player[0] != NULL && static_cast<i8>(Player[0]->apiobj.flags_low) < 0 && Player[0]->field_0x7a5 != 0x2d;
         for (i32 i = 0; HubAreaInfo[i].area_name != NULL && selected_buildit == -1; ++i) {
             GIZMO *gizmo = HubAreaInfo[i].bonus_gizmo;
-            if (gizmo != NULL && GizmoGetOutput(world->gizmo_sys, gizmo, 0, 0) == 0 && player_can_build) {
+            if (gizmo != NULL && GizmoGetOutput(world->gizmo_sys, gizmo, 0, 0) == 0 && Player[0] != NULL &&
+                static_cast<i8>(Player[0]->apiobj.flags_low) < 0 && Player[0]->field_0x7a5 != 0x2d) {
                 GIZBUILDIT_s *buildit = static_cast<GIZBUILDIT_s *>(gizmo->object);
                 if ((buildit->availability_flags & GIZBUILDIT_AVAILABILITY_INTERACTING) != 0 ||
                     (nearest_buildit != NULL && nearest_buildit == buildit)) {
@@ -1012,7 +1011,8 @@ void Hub_Update(WORLDINFO_s *world) {
         }
         if (LevGizmo[0] != NULL) {
             if (selected_buildit == -1 && GizmoGetOutput(world->gizmo_sys, LevGizmo[0], 0, 0) == 0) {
-                if (player_can_build &&
+                if (Player[0] != NULL && static_cast<i8>(Player[0]->apiobj.flags_low) < 0 &&
+                    Player[0]->field_0x7a5 != 0x2d &&
                     ((LevBuildIt[0]->availability_flags & GIZBUILDIT_AVAILABILITY_INTERACTING) != 0 ||
                      (nearest_buildit != NULL && nearest_buildit == LevBuildIt[0]))) {
                     selected_buildit = 999;
@@ -1178,11 +1178,11 @@ void Hub_DrawPanel(WORLDINFO_s *) {
                 }
             }
             if (buildup_total) {
-                Hub_DrawImportantBrick(211, -0.201f, HUB_EPISODETITLEY, hub_episode_time, gold_count, gold_total);
-                DrawBuildUpBar(0.201f, HUB_EPISODETITLEY + PANEL_MINIKITY - PANEL_MINIKITCOUNTY, 100, 100,
+                Hub_DrawImportantBrick(211, -0.20100002f, HUB_EPISODETITLEY, hub_episode_time, gold_count, gold_total);
+                DrawBuildUpBar(0.20100002f, HUB_EPISODETITLEY + PANEL_MINIKITY - PANEL_MINIKITCOUNTY, 100, 100,
                                NU_SIN_LUT(static_cast<i32>(16384.0f * hub_episode_time)), 1.0f, 1.0f, 0);
                 sprintf(text, "%i/%i", buildup_count, buildup_total);
-                Text3DEx(text, 0.201f, HUB_EPISODETITLEY, 1.0f, PANEL_MINIKITCOUNTSCALE, PANEL_MINIKITCOUNTSCALE,
+                Text3DEx(text, 0.20100002f, HUB_EPISODETITLEY, 1.0f, PANEL_MINIKITCOUNTSCALE, PANEL_MINIKITCOUNTSCALE,
                          PANEL_MINIKITCOUNTSCALE, 0, 255, 0, 127,
                          static_cast<u8>(static_cast<i32>(128.0f * hub_episode_time)));
             } else {
@@ -1246,15 +1246,15 @@ void Hub_DrawPanel(WORLDINFO_s *) {
         }
     }
     if (hub_area != -1 && hub_area_time > 0.0f) {
-        AREADATA *area = &ADataList[hub_area];
-        if (GameCam->mode == 7 && (area->flags & 5) == 5) {
+        if (GameCam->sock_position.location.sock == 7 && (ADataList[hub_area].flags & 5) == 5) {
             i32 count = 0, total = 0;
             if (Game_AreaSave) {
                 for (i32 i = 0; i < AREACOUNT; ++i) {
                     if ((ADataList[i].flags & 5) == 5) {
                         ++total;
                         if (Game_AreaSave[i].area_complete ||
-                            Game_AreaSave[i].challenge_trial_time > static_cast<f32>(ADataList[i].challenge_trial_time))
+                            static_cast<f32>(static_cast<i32>(ADataList[i].challenge_trial_time)) >
+                                Game_AreaSave[i].challenge_trial_time)
                             ++count;
                     }
                 }
@@ -1263,15 +1263,18 @@ void Hub_DrawPanel(WORLDINFO_s *) {
             SmartTextEx(TTab[tMINIKITS ? tMINIKITS : tMINIKIT], 0.0f, HUB_EPISODESUBTITLEY, 1.0f,
                         HUB_EPISODESUBTITLESIZE, HUB_EPISODESUBTITLESIZE, HUB_EPISODESUBTITLESIZE, 0, HUB_EPISODER,
                         HUB_EPISODEG, HUB_EPISODEB, 1.7f, 1, NULL, 0, static_cast<i32>(128.0f * hub_area_time));
-        } else if (area->flags & 0x100) {
-            Hub_DrawSuperBonusStats(area, hub_area_time);
-        } else if (area->flags & 4) {
-            if (SENATE_ADATA && SENATE_ADATA->index == hub_area)
-                Hub_DrawArcadeStats(hub_area_time);
-            else
-                Hub_DrawBonusStats(hub_area_time, hub_area, -1, -1);
         } else {
-            Hub_DrawAreaStats(hub_area_time, hub_area, -1);
+            AREADATA *area = &ADataList[hub_area];
+            if (area->flags & 0x100) {
+                Hub_DrawSuperBonusStats(area, hub_area_time);
+            } else if (area->flags & 4) {
+                if (SENATE_ADATA && SENATE_ADATA->index == hub_area)
+                    Hub_DrawArcadeStats(hub_area_time);
+                else
+                    Hub_DrawBonusStats(hub_area_time, hub_area, -1, -1);
+            } else {
+                Hub_DrawAreaStats(hub_area_time, hub_area, -1);
+            }
         }
     }
     if (GetMenuID() == 14) {
@@ -1747,6 +1750,7 @@ void Hub_InitMiniKits(WORLDINFO_s *world) {
 }
 
 void Hub_DrawAreaStats(f32 phase, i32 area_index, i32 mode) {
+    AREADATA *areas = ADataList;
     char heading[128];
     char text[128];
     i16 clips[128];
@@ -1786,11 +1790,7 @@ void Hub_DrawAreaStats(f32 phase, i32 area_index, i32 mode) {
         }
         return;
     }
-    if (area_index < 0 || area_index >= AREACOUNT) {
-        return;
-    }
-
-    AREADATA *area = &ADataList[area_index];
+    AREADATA *area = &areas[area_index];
     const i32 alpha = static_cast<i32>(phase * 128.0f);
 
     if (VEHICLES_ADATA != NULL && VEHICLES_ADATA->index == area_index) {
@@ -1804,7 +1804,7 @@ void Hub_DrawAreaStats(f32 phase, i32 area_index, i32 mode) {
     const u16 flags = area->flags;
     if ((flags & 0x10) != 0) {
         if (save->complete != 0 && (flags & 4) == 0) {
-            Episode_CountOpenAreas(area->episode_index, area_index, Game.area_save);
+            Episode_CountOpenAreas(static_cast<i8>(area->episode_index), area_index, Game.area_save);
             const f32 icon_phase = NU_SIN_LUT(static_cast<i32>(16384.0f * phase));
 
             if (BOTHTRUEJEDIGOLDBRICKS == 0) {

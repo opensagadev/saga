@@ -6322,3 +6322,102 @@ Whole-binary matching reaches **66.728470%**, **+1.603990 percentage points**
 from main, with **6,273** exact functions. Native build and repository checks
 pass. All eleven GitHub checks passed for **cd236e31** (batches 137–142).
 The approximately two-point goal remains in progress.
+
+## Batches 151–161: menu state, animation loading and gameplay closures
+
+Recover `UpdateStats`' super-story/challenge dispatch, direct player coin
+accumulation, reference store order and HUD visibility predicates. Matching
+improves **9.948648% to 61.113514%**. Its complete production-body fixture
+passes **10,000** randomized valid states and targeted callback mutation cases
+on host ASan/UBSan and optimized i386 SSE, comparing 23 outputs and service
+order. Reference preconditions are restored: valid world/current level,
+initialized camera in the hub, valid gameplay area index and initialized
+translation table for rewards. Invalid engine initialization is not covered.
+
+Recover `GizPanel_Update`'s eight fixed player probes, reusable vector locals,
+live player reload after distance callbacks and shared pitch clamp. Matching
+improves **0.789630% to 13.106667%**. Both ABI fixtures pass **2,401** angle
+cases plus slot priority, invalid players, callback replacement/count changes
+and NaN-distance/timer cases. Raw unordered timer-clamp behavior is preserved;
+a provisional ordered clamp was rejected before integration.
+
+Recover `Hub_DrawAreaStats`' cached area base, signed episode sentinel and
+reference valid-index contract (**9.691906% to 35.291122%**). Focused i386
+fixtures cover clip transitions, doors, chapter sentinel and completion state.
+`Hub_DrawPanel` now routes on the camera socket byte, uses the reference strict
+challenge-time comparison and exact reward coordinates (**39.473606% to
+39.770596%**). Its extracted sections pass host sanitizers and i386 tests for
+room/mode distinction, below/equal/above/NaN times and reward branches.
+`Hub_Update` reloads player eligibility after each gizmo callback; matching
+reaches **15.747258%**. Its selection/fountain/fade section fixture passes
+activation, deactivation and replacement cases; it is not a full update test.
+
+Recover `UpdateAnimPacket`'s interruption/transition and shared timer dispatch,
+including the live overlay reload after end-frame callbacks. Matching reaches
+**76.789830%**; **100,000** bounded production-body/oracle cases pass per ABI.
+Recover `APILoadCharacterModels`' direct path/flag scans, post-condense list
+reload, byte-width fixup publication and missing character-local BSA fallback,
+including packed-excluded entries. Raw BSA loads do not redirect animation
+paths. Matching reaches **86.448270%**. **20,000** independent oracle cases
+pass per ABI, covering pack/raw failures, redirects, hierarchy reuse/cleanup,
+fixups, metadata byte preservation and callback list replacement. Existing
+512-byte path capacity and deterministic reused-model pack paths are retained.
+
+Recover `InitStatusScreen`'s sequential flag publication, typed completion
+byte, overflow-aware 32-bit coin sum and live mission index after score
+callbacks. Matching reaches **20.167751%**. **10,000** valid-state fixtures
+compare full packet/save bytes and service traces on host and i386; host
+ASan/UBSan uses the same bodies with the unrelated renderer table external.
+
+Restore missing `LightSabreStreakCode` collision push, spark sound/cooldown,
+rumble, NPC gizmo destruction, part hit/deflection and surrounding alerts.
+Preserve callback-sensitive metadata/effect reloads and ordered AABB predicates.
+Matching reaches **44.497646%**. Thirteen focused actual-source cases pass
+under host sanitizers and i386; they are not an exhaustive combat oracle.
+`GameObjectStuffAfterAnimation` restores audio/target callback snapshots,
+reference float operand order and three explicit Landspeeder emission sites,
+reaching **48.345737%**. Callback cases and **3,200** emission combinations
+pass on both fixture ABIs.
+
+Recover `NewScanRot`'s signed cache ages, nested static group/shape scan and
+scratch-vector normal construction, reaching **29.944540%**. **9,217** state,
+cache, call-order and normal fixtures pass on both ABIs. This is ordinary
+source-level helper closure; no forced inlining or optimization change is used.
+
+Recover `GizBuildIts_LateUpdate`'s separate manual/automatic progression,
+eight builder probes, inactive-piece bounds, direct audio position pointers,
+callback-sensitive orbit objects and fixed wobble-axis bodies. Finishing
+callbacks returning to idle correctly reach wobble. Manual NaN timers remain
+pending while automatic NaNs complete, as in retail. Matching reaches
+**22.305555%**. Host sanitizer and i386 fixtures cover these cases, rewards,
+real trig values and callback count/axis/array mutation. Manual unlinked
+completion requires an animation instance; automatic completion permits null.
+
+Recover `ShootCode`'s signed byte context, reference weapon-in branch sharing,
+guarded metadata lookup and immediate-shot tree (**13.116515%**). Remove the
+unnecessary reconstructed `__used__` marker: the unchanged compiler naturally
+infers the original private call ABI. Both objects retain all 190 text symbols
+and 11 direct calls from ten callers; no calling-convention attribute is added.
+Twenty-eight actual-source NDK i386 fixture checks pass for player/NPC gates,
+null metadata/model early exits, weapon transitions and signed contexts.
+
+Recover `DrawParaphernalia`'s normal/flickering shield dispatch, live config
+reload, pre-scale locator and reflection snapshot (**39.311780%**). Its actual
+shield block passes host sanitizers/i386 callback and flicker cases, including
+NaN timers. The original normal shield scale is retained when its flicker
+timer is not positive. Correct `DrawMiniKitCount` to use `GlobalTimer`, not
+`GameTimer`; 10,000 production-body time cases and distinct-clock checks pass
+on both ABIs, with no normalized-score change.
+
+Camera occlusion expansion, directional ladder, broad AI/terrain reorder and
+several particle expansions regressed and were rejected. Placement-only
+rendering improved in isolation, but combining it with the larger shield unit
+regressed; only the verified shield unit is retained. Raw instructions also
+disproved a suspected `NuASin` associativity difference; its header is unchanged.
+
+Whole-binary matching reaches **66.904200%**, **+1.779720 percentage points**
+from main, with **6,275** exact functions. Target/native builds and all five
+repository tests pass. All eleven GitHub checks passed for **acb9f298**.
+Fixtures use mocked engine/math services and do not establish Android gameplay
+integration. The approximately two-point cycle continues; ownership, compiler
+options and matching normalization remain unchanged.

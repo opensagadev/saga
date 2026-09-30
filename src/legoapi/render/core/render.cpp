@@ -2155,7 +2155,7 @@ void DrawMiniKitCount(float position, float scale, i32 count, i32 maximum) {
     const f32 y = (KITPOSY - KITPOS2Y) * blend + KITPOS2Y;
     WORLDINFO_s *world = WorldInfo_CurrentlyActive();
     if (world->lev_objs[model].active != 0) {
-        const u16 rotation = static_cast<u16>(NuFmod(GameTimer.time_elapsed, 4.0f) * 0.25f * 65536.0f);
+        const u16 rotation = static_cast<u16>(NuFmod(GlobalTimer.time_elapsed, 4.0f) * 0.25f * 65536.0f);
         const u16 tilt = static_cast<u16>(1820.0f * NuTrigTable[rotation & 0x7fff]);
         const f32 size = scale * PANEL_MINIKITSCALE;
         DrawPanel3DObjectNoAlpha(x, PANEL_MINIKITY + y, 1.0f, size, size, size, tilt, rotation, 0,
@@ -3700,24 +3700,29 @@ static void DrawParaphernalia(GameObject_s *object) {
     }
     if (object->field_0xd24 > 0.0f || object->timer_d28 > 0.0f) {
         ResetShadowMapRendering();
-        f32 scale = object->field_0xd24;
-        bool show = scale > 0.0f;
-        if (object->field_0xe37 == 0 && config->field_0xf5 != 0) {
+        const u8 render_reflection = object->field_0x1088;
+        GAMECHARACTERDATA_s *shield_config = object->apiobj.character_data->game_character;
+        f32 scale;
+        bool show;
+        if (object->field_0xe37 != 0 || shield_config->field_0xf5 == 0 || object->timer_d28 <= 0.0f) {
+            scale = object->field_0xd24;
+            show = scale > 0.0f;
+        } else {
             scale = 1.0f;
-            show = !(object->timer_d28 > 0.0f && (GameTimer.update_count & 3) > 1);
+            show = (GameTimer.update_count & 3) < 2;
         }
         if (show) {
+            i32 locator = shield_config->shield_locator;
             NUVEC scaling = {scale, scale, scale};
             NUMTX matrix, reflected;
             NuMtxSetScale(&matrix, &scaling);
-            i32 locator = config->shield_locator;
             NUVEC *position = &object->apiobj.collision_position;
             if (locator != -1 && object->apiobj.character_model->points_of_interest[locator] != NULL)
                 position = reinterpret_cast<NUVEC *>(&joints[locator].m30);
             NuMtxTranslate(&matrix, position);
             Draw3DObjectMtx(NULL, 0x6f + (object->timer_d28 > 0.0f), &matrix);
-            if (object->field_0x1088 && MatrixReflection(&matrix, object->field_0x1087, object->field_0x1020,
-                                                         WORLD->current_level->unknown_0cc, &reflected)) {
+            if (render_reflection && MatrixReflection(&matrix, object->field_0x1087, object->field_0x1020,
+                                                      WORLD->current_level->unknown_0cc, &reflected)) {
                 NuRndrStartReflectionRender(0);
                 Draw3DObjectMtx(NULL, 0x92 + (object->timer_d28 > 0.0f), &reflected);
                 NuRndrEndReflectionRender();

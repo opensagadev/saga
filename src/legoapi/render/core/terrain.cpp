@@ -4819,18 +4819,20 @@ void NewScan(nuvec_s *position, i32 scan_platforms, i32 terrain_mask) {
 void NewScanRot(nuvec_s *position, i32 terrain_mask) {
     void *scratch = NuScratchAlloc32(0xd0);
     i32 cache_index = 0;
-    i32 oldest_age = CurTerr->index_levels[0].cache_age;
+    i16 oldest_age = CurTerr->index_levels[0].cache_age;
     bool cache_hit = false;
     for (i32 i = 0; i < 16; ++i) {
         TERRAIN_INDEX_LEVEL &cache = CurTerr->index_levels[i];
-        i32 age = cache.cache_age;
+        i16 age = cache.cache_age;
         if (age > 0) {
             f32 dx = (position->x + 1.0f) - cache.center_x;
-            f32 dz = (position->z + 1.0f) - cache.center_z;
-            if (dx > 0.0f && dx < 2.0f && dz > 0.0f && dz < 2.0f) {
-                cache_index = i;
-                cache_hit = true;
-                break;
+            if (dx > 0.0f && dx < 2.0f) {
+                f32 dz = (position->z + 1.0f) - cache.center_z;
+                if (dz > 0.0f && dz < 2.0f) {
+                    cache_index = i;
+                    cache_hit = true;
+                    break;
+                }
             }
         }
         if (age < oldest_age) {
@@ -4862,7 +4864,38 @@ void NewScanRot(nuvec_s *position, i32 terrain_mask) {
             const i16 *group_indices = CurTerr->group_indices + cell.first_group;
             for (i32 cell_group = 0; cell_group < static_cast<i16>(cell.group_count); ++cell_group) {
                 const i32 group_index = group_indices[cell_group];
-                ShadowScanGroup(group_index, min_x, min_z, max_x, max_z, terrain_mask, false, &writer);
+                TERRAIN_GROUP &group = CurTerr->groups[group_index];
+                if (max_x < group.bounds_min.x || max_z < group.bounds_min.z || group.bounds_max.x < min_x ||
+                    group.bounds_max.z <= min_z || group.chunk_type == -1) {
+                    continue;
+                }
+                const f32 local_max_x = max_x - group.origin.x;
+                const f32 local_min_x = min_x - group.origin.x;
+                const f32 local_max_z = max_z - group.origin.z;
+                const f32 local_min_z = min_z - group.origin.z;
+                if (group.scene_index < 0) {
+                    TerrainSkinAllocate(reinterpret_cast<terrsitu_s *>(&group));
+                }
+                TERRAIN_SHAPE_BATCH *batch = static_cast<TERRAIN_SHAPE_BATCH *>(group.data);
+                while (batch->marker >= 0) {
+                    TERRAIN_SHAPE *shapes = reinterpret_cast<TERRAIN_SHAPE *>(batch + 1);
+                    const i32 count = batch->shape_count;
+                    if (local_max_x >= batch->min_x && batch->max_x > local_min_x && local_max_z >= batch->min_z &&
+                        batch->max_z > local_min_z) {
+                        TERRAIN_SHAPE *shape = shapes;
+                        for (i32 remaining = count; remaining > 0; --remaining, ++shape) {
+                            if (shape->min_x <= local_max_x && local_min_x < shape->max_x &&
+                                shape->min_z <= local_max_z && local_min_z < shape->max_z &&
+                                reinterpret_cast<u8 *>(writer.cursor) < writer.limit &&
+                                (shape->material[1] == 0 || (shape->material[1] & terrain_mask) != 0)) {
+                                *writer.cursor++ = shape;
+                                ++writer.shape_count;
+                            }
+                        }
+                    }
+                    batch = reinterpret_cast<TERRAIN_SHAPE_BATCH *>(shapes + count);
+                }
+                ShadowFinishGroup(&writer, group_index);
             }
         }
         // Skin allocation can invalidate the cache while scanning groups.
@@ -5006,20 +5039,38 @@ void NewScanRot(nuvec_s *position, i32 terrain_mask) {
                             transformed->vectors[v] = {vertices[v].x, vertices[v].y, vertices[v].z};
                         if (!quad)
                             transformed->normals[1].y = 65536.0f;
-                        for (i32 n = quad ? 1 : 0; n >= 0; --n) {
-                            i32 origin = n ? 3 : 0, first = n ? 1 : 2, second = n ? 2 : 1;
-                            NUVEC a = {vertices[first].x - vertices[origin].x, vertices[first].y - vertices[origin].y,
-                                       vertices[first].z - vertices[origin].z};
-                            NUVEC b = {vertices[second].x - vertices[origin].x, vertices[second].y - vertices[origin].y,
-                                       vertices[second].z - vertices[origin].z};
-                            NUVEC &normal = transformed->normals[n];
-                            normal = TerCrossProduct(&a, &b);
-                            f32 length = NuFsqrt((normal.x * normal.x + normal.y * normal.y) + normal.z * normal.z);
+                        if (quad) {
+                            vertices[0].x = transformed->vectors[1].x - transformed->vectors[3].x;
+                            vertices[0].y = transformed->vectors[1].y - transformed->vectors[3].y;
+                            vertices[0].z = transformed->vectors[1].z - transformed->vectors[3].z;
+                            vertices[1].x = transformed->vectors[2].x - transformed->vectors[3].x;
+                            vertices[1].y = transformed->vectors[2].y - transformed->vectors[3].y;
+                            vertices[1].z = transformed->vectors[2].z - transformed->vectors[3].z;
+                            transformed->normals[1] = TerCrossProduct(reinterpret_cast<NUVEC *>(&vertices[0]),
+                                                                      reinterpret_cast<NUVEC *>(&vertices[1]));
+                            f32 length = NuFsqrt((transformed->normals[1].x * transformed->normals[1].x +
+                                                  transformed->normals[1].y * transformed->normals[1].y) +
+                                                 transformed->normals[1].z * transformed->normals[1].z);
                             f32 inverse = length == 0.0f ? 0.0f : 1.0f / length;
-                            normal.x *= inverse;
-                            normal.y *= inverse;
-                            normal.z *= inverse;
+                            transformed->normals[1].x *= inverse;
+                            transformed->normals[1].y *= inverse;
+                            transformed->normals[1].z *= inverse;
                         }
+                        vertices[0].x = transformed->vectors[2].x - transformed->vectors[0].x;
+                        vertices[0].y = transformed->vectors[2].y - transformed->vectors[0].y;
+                        vertices[0].z = transformed->vectors[2].z - transformed->vectors[0].z;
+                        vertices[1].x = transformed->vectors[1].x - transformed->vectors[0].x;
+                        vertices[1].y = transformed->vectors[1].y - transformed->vectors[0].y;
+                        vertices[1].z = transformed->vectors[1].z - transformed->vectors[0].z;
+                        transformed->normals[0] = TerCrossProduct(reinterpret_cast<NUVEC *>(&vertices[0]),
+                                                                  reinterpret_cast<NUVEC *>(&vertices[1]));
+                        f32 length = NuFsqrt((transformed->normals[0].x * transformed->normals[0].x +
+                                              transformed->normals[0].y * transformed->normals[0].y) +
+                                             transformed->normals[0].z * transformed->normals[0].z);
+                        f32 inverse = length == 0.0f ? 0.0f : 1.0f / length;
+                        transformed->normals[0].x *= inverse;
+                        transformed->normals[0].y *= inverse;
+                        transformed->normals[0].z *= inverse;
                         shape = transformed;
                         ++transformed_count;
                     }

@@ -886,22 +886,26 @@ extern "C" {
 
     void APILoadCharacterModels(APICHARACTERMODELLIST_s *list, i32 area_animation, VARIPTR *buf, VARIPTR buf_end,
                                 i32 area_models) {
+        char animation_extension[] = ".an3";
+        char deformation_extension[] = ".bsa";
+        char animation_path[0x200];
+        APICHARACTERMODEL *model;
         if (apiloadcharactermodels_append == 0) {
             APIResetCharacterRemap();
-            for (i32 model_index = 0; model_index < apicharsys->permanent_model_count; ++model_index) {
-                APICHARACTERMODEL &model = apicharsys->models[model_index];
+            model = apicharsys->models;
+            for (i32 model_index = 0; model_index < apicharsys->permanent_model_count; ++model_index, ++model) {
                 for (i32 animation_id = 0; animation_id < apicharsys->model_id_capacity; ++animation_id) {
-                    if ((model.model_data_b[animation_id] != NULL || model.model_data_c[animation_id] != NULL) &&
-                        (static_cast<CHARACTERANIM_s *>(model.model_data_a[animation_id])->flags & 1) == 0) {
-                        model.model_data_a[animation_id] = NULL;
-                        model.model_data_b[animation_id] = NULL;
-                        model.model_data_c[animation_id] = NULL;
+                    if ((model->model_data_b[animation_id] != NULL || model->model_data_c[animation_id] != NULL) &&
+                        (static_cast<CHARACTERANIM_s *>(model->model_data_a[animation_id])->flags & 1) == 0) {
+                        model->model_data_a[animation_id] = NULL;
+                        model->model_data_b[animation_id] = NULL;
+                        model->model_data_c[animation_id] = NULL;
                     }
                 }
             }
             for (i32 model_index = apicharsys->permanent_model_count; model_index < apicharsys->model_capacity;
-                 ++model_index) {
-                apicharsys->models[model_index].hierarchy = NULL;
+                 ++model_index, ++model) {
+                model->hierarchy = NULL;
             }
             apicharsys->loaded_model_count = apicharsys->permanent_model_count;
         }
@@ -925,20 +929,18 @@ extern "C" {
             NuStrCat(model_pack_path, character.file);
             NuStrCat(model_pack_path, ".fpk");
 
-            APICHARACTERMODEL *model;
-            bool model_loaded = false;
+            i32 model_loaded = 0;
             if (apicharsys->playermodelids[model_id] != -1) {
                 model = &apicharsys->models[apicharsys->playermodelids[model_id]];
             } else {
                 model = &apicharsys->models[apicharsys->loaded_model_count];
                 APICharacterModelReset(model);
 
-                char hierarchy_path[0x200];
-                NuStrCpy(hierarchy_path, directory);
-                NuStrCat(hierarchy_path, character.file);
-                NuStrCat(hierarchy_path, ".ghg");
+                NuStrCpy(animation_path, directory);
+                NuStrCat(animation_path, character.file);
+                NuStrCat(animation_path, ".ghg");
 
-                model->hierarchy = NuGHGRead(hierarchy_path, buf, buf_end);
+                model->hierarchy = NuGHGRead(animation_path, buf, buf_end);
                 if (model->hierarchy == NULL) {
                     ++list;
                     continue;
@@ -946,7 +948,7 @@ extern "C" {
                 for (i32 poi = 0; poi < 16; ++poi) {
                     model->points_of_interest[poi] = NuHGobjGetPOI(model->hierarchy, poi);
                 }
-                model_loaded = true;
+                model_loaded = 1;
             }
 
             CHARACTERANIM_s *animations = area_models != 0 && list->count != 0 ? character.animations : NULL;
@@ -959,21 +961,30 @@ extern "C" {
             }
 
             if (pak != NULL) {
-                for (CHARACTERANIM_s *animation = animations; animation != NULL && animation->name != NULL;
-                     ++animation) {
-                    if (!ShouldLoadAnimation(*animation, area_animation)) {
+                for (; animations != NULL && animations->name != NULL; ++animations) {
+                    if ((animations->flags & 0x8000) != 0 || !((area_animation != 0 && (animations->flags & 1) != 0) ||
+                                                               (area_animation == 0 && (animations->flags & 1) == 0))) {
                         continue;
                     }
-                    char animation_path[0x200];
-                    if ((animation->flags & 4) != 0 && model->model_data_b[animation->animation_id] == NULL) {
-                        GetAnimationPath(animation_path, directory, animation, ".an3");
+                    if ((animations->flags & 4) != 0 && model->model_data_b[animations->animation_id] == NULL) {
+                        if (RedirectAnimFn == NULL ||
+                            RedirectAnimFn(RedirectAnimDir, RedirectAnimList, animations, animation_path) == 0) {
+                            NuStrCpy(animation_path, directory);
+                            NuStrCat(animation_path, animations->name);
+                        }
+                        NuStrCat(animation_path, animation_extension);
                         i32 item = NuFilePakGetItem(pak, animation_path);
                         if (item != 0) {
                             NuFilePakSetItemRequired(pak, item, 1);
                         }
                     }
-                    if ((animation->flags & 8) != 0 && model->model_data_c[animation->animation_id] == NULL) {
-                        GetAnimationPath(animation_path, directory, animation, ".bsa");
+                    if ((animations->flags & 8) != 0 && model->model_data_c[animations->animation_id] == NULL) {
+                        if (RedirectAnimFn == NULL ||
+                            RedirectAnimFn(RedirectAnimDir, RedirectAnimList, animations, animation_path) == 0) {
+                            NuStrCpy(animation_path, directory);
+                            NuStrCat(animation_path, animations->name);
+                        }
+                        NuStrCat(animation_path, deformation_extension);
                         i32 item = NuFilePakGetItem(pak, animation_path);
                         if (item != 0) {
                             NuFilePakSetItemRequired(pak, item, 1);
@@ -982,70 +993,97 @@ extern "C" {
                 }
 
                 buf->addr -= NuFilePakCondense(pak);
-                for (CHARACTERANIM_s *animation = animations; animation != NULL && animation->name != NULL;
-                     ++animation) {
-                    if (!ShouldLoadAnimation(*animation, area_animation)) {
-                        continue;
-                    }
-                    char animation_path[0x200];
-                    if ((animation->flags & 4) != 0 && model->model_data_b[animation->animation_id] == NULL) {
-                        GetAnimationPath(animation_path, directory, animation, ".an3");
-                        i32 item = NuFilePakGetItem(pak, animation_path);
-                        void *data;
-                        i32 size;
-                        if (item != 0 && NuFilePakGetItemInfo(pak, item, &data, &size) != 0) {
-                            const bool pointer_block = static_cast<i32 *>(data)[1] > static_cast<i32>(0x414e4934);
-                            ani3_animheader_s *joint_animation = reinterpret_cast<ani3_animheader_s *>(
-                                pointer_block ? static_cast<u8 *>(data) + 4 : data);
-                            if ((joint_animation->field_12 & 0xff) == 0) {
-                                if (pointer_block) {
-                                    NuPtrBlockFix(data);
-                                } else {
-                                    NuAnimData2Fixup(size, &data);
-                                }
-                                joint_animation->field_12 |= 1;
+                animations = area_models != 0 && list->count != 0 ? apicharsys->char_data[model_id].animations : NULL;
+                for (; animations != NULL && animations->name != NULL; ++animations) {
+                    if ((animations->flags & 0x8000) == 0 && ((area_animation != 0 && (animations->flags & 1) != 0) ||
+                                                              (area_animation == 0 && (animations->flags & 1) == 0))) {
+                        if ((animations->flags & 4) != 0 && model->model_data_b[animations->animation_id] == NULL) {
+                            if (RedirectAnimFn == NULL ||
+                                RedirectAnimFn(RedirectAnimDir, RedirectAnimList, animations, animation_path) == 0) {
+                                NuStrCpy(animation_path, directory);
+                                NuStrCat(animation_path, animations->name);
                             }
-                            model->model_data_b[animation->animation_id] = joint_animation;
-                            model->model_data_a[animation->animation_id] = animation;
+                            NuStrCat(animation_path, animation_extension);
+                            i32 item = NuFilePakGetItem(pak, animation_path);
+                            void *data;
+                            i32 size;
+                            if (item != 0 && NuFilePakGetItemInfo(pak, item, &data, &size) != 0) {
+                                const i32 pointer_block = static_cast<i32 *>(data)[1] > static_cast<i32>(0x414e4934);
+                                ani3_animheader_s *joint_animation = reinterpret_cast<ani3_animheader_s *>(
+                                    pointer_block ? static_cast<u8 *>(data) + 4 : data);
+                                if (joint_animation->field_12_low == 0) {
+                                    if (pointer_block) {
+                                        NuPtrBlockFix(data);
+                                    } else {
+                                        NuAnimData2Fixup(size, &data);
+                                    }
+                                    joint_animation->field_12_low = 1;
+                                }
+                                model->model_data_b[animations->animation_id] = joint_animation;
+                                model->model_data_a[animations->animation_id] = animations;
+                            }
+                        }
+                        if ((animations->flags & 8) != 0 && model->model_data_c[animations->animation_id] == NULL) {
+                            if (RedirectAnimFn == NULL ||
+                                RedirectAnimFn(RedirectAnimDir, RedirectAnimList, animations, animation_path) == 0) {
+                                NuStrCpy(animation_path, directory);
+                                NuStrCat(animation_path, animations->name);
+                            }
+                            NuStrCat(animation_path, deformation_extension);
+                            i32 item = NuFilePakGetItem(pak, animation_path);
+                            void *data;
+                            i32 size;
+                            if (item != 0 && NuFilePakGetItemInfo(pak, item, &data, &size) != 0) {
+                                model->model_data_c[animations->animation_id] =
+                                    LoadAnimFromPAK(animation_path, area_animation, static_cast<char *>(data), size);
+                                if (model->model_data_c[animations->animation_id] != NULL) {
+                                    model->model_data_a[animations->animation_id] = animations;
+                                }
+                            }
                         }
                     }
-                    if ((animation->flags & 8) != 0 && model->model_data_c[animation->animation_id] == NULL) {
-                        GetAnimationPath(animation_path, directory, animation, ".bsa");
-                        i32 item = NuFilePakGetItem(pak, animation_path);
-                        void *data;
-                        i32 size;
-                        if (item != 0 && NuFilePakGetItemInfo(pak, item, &data, &size) != 0) {
-                            model->model_data_c[animation->animation_id] =
-                                LoadAnimFromPAK(animation_path, area_animation, static_cast<char *>(data), size);
-                            if (model->model_data_c[animation->animation_id] != NULL) {
-                                model->model_data_a[animation->animation_id] = animation;
-                            }
+                    // Packed BSA failure falls back to the character's own file,
+                    // even for entries excluded from the packed-animation scan.
+                    if ((animations->flags & 8) != 0 && model->model_data_c[animations->animation_id] == NULL) {
+                        NuStrCpy(animation_path, directory);
+                        NuStrCat(animation_path, animations->name);
+                        NuStrCat(animation_path, ".bsa");
+                        model->model_data_c[animations->animation_id] =
+                            LoadAnim(animation_path, area_animation, buf, buf_end);
+                        if (model->model_data_c[animations->animation_id] != NULL) {
+                            model->model_data_a[animations->animation_id] = animations;
                         }
                     }
                 }
             } else {
-                for (CHARACTERANIM_s *animation = animations; animation != NULL && animation->name != NULL;
-                     ++animation) {
-                    if (!ShouldLoadAnimation(*animation, area_animation)) {
+                for (; animations != NULL && animations->name != NULL; ++animations) {
+                    if ((animations->flags & 0x8000) != 0 || !((area_animation != 0 && (animations->flags & 1) != 0) ||
+                                                               (area_animation == 0 && (animations->flags & 1) == 0))) {
                         continue;
                     }
-                    char animation_path[0x200];
-                    if ((animation->flags & 4) != 0 && model->model_data_b[animation->animation_id] == NULL) {
-                        GetAnimationPath(animation_path, directory, animation, ".an3");
+                    if ((animations->flags & 4) != 0 && model->model_data_b[animations->animation_id] == NULL) {
+                        if (RedirectAnimFn == NULL ||
+                            RedirectAnimFn(RedirectAnimDir, RedirectAnimList, animations, animation_path) == 0) {
+                            NuStrCpy(animation_path, directory);
+                            NuStrCat(animation_path, animations->name);
+                        }
+                        NuStrCat(animation_path, animation_extension);
                         if (NuFileExists(animation_path) != 0) {
-                            model->model_data_b[animation->animation_id] =
+                            model->model_data_b[animations->animation_id] =
                                 LoadAnim(animation_path, area_animation, buf, buf_end);
                         }
-                        if (model->model_data_b[animation->animation_id] != NULL) {
-                            model->model_data_a[animation->animation_id] = animation;
+                        if (model->model_data_b[animations->animation_id] != NULL) {
+                            model->model_data_a[animations->animation_id] = animations;
                         }
                     }
-                    if ((animation->flags & 8) != 0 && model->model_data_c[animation->animation_id] == NULL) {
-                        GetAnimationPath(animation_path, directory, animation, ".bsa");
-                        model->model_data_c[animation->animation_id] =
+                    if ((animations->flags & 8) != 0 && model->model_data_c[animations->animation_id] == NULL) {
+                        NuStrCpy(animation_path, directory);
+                        NuStrCat(animation_path, animations->name);
+                        NuStrCat(animation_path, ".bsa");
+                        model->model_data_c[animations->animation_id] =
                             LoadAnim(animation_path, area_animation, buf, buf_end);
-                        if (model->model_data_c[animation->animation_id] != NULL) {
-                            model->model_data_a[animation->animation_id] = animation;
+                        if (model->model_data_c[animations->animation_id] != NULL) {
+                            model->model_data_a[animations->animation_id] = animations;
                         }
                     }
                 }
@@ -1429,26 +1467,30 @@ extern "C" {
         const i32 paused = packet->flags & ANIMPACKET_FLAG_PAUSED;
         const i32 force_restart = packet->flags & ANIMPACKET_FLAG_FORCE_RESTART;
         packet->flags = 0;
-        packet->previous_time = packet->blending == 0 ? packet->current_time : packet->blend_target_time;
+        if (packet->blending != 0) {
+            packet->previous_time = packet->blend_target_time;
+        } else {
+            packet->previous_time = packet->current_time;
+        }
         if (frame_step == 0.0f) {
             packet->flags |= ANIMPACKET_FLAG_ZERO_TIMESTEP;
             return;
         }
 
         if (packet->overlay_animation == -1) {
-            CHARACTERANIM_s *current_info;
             if (packet->blending != 0) {
-                const i16 requested = packet->requested_animation;
-                CHARACTERANIM_s *requested_info =
-                    requested != -1 ? static_cast<CHARACTERANIM_s *>(model->model_data_a[requested]) : NULL;
-                if (requested != -1 && requested != packet->blend_animation_b &&
-                    model->model_data_b[requested] != NULL && requested_info != NULL &&
-                    requested_info->blend_in_time == 0.0f) {
-                    packet->animation_index = requested;
-                    if (backwards != 0 &&
-                        (requested_info->flags & CHARACTER_ANIMATION_FLAG_REVERSE_WITH_MOVEMENT) != 0) {
+                if (packet->requested_animation != -1 && packet->requested_animation != packet->blend_animation_b &&
+                    model->model_data_b[packet->requested_animation] != NULL &&
+                    model->model_data_a[packet->requested_animation] != NULL &&
+                    static_cast<CHARACTERANIM_s *>(model->model_data_a[packet->requested_animation])->blend_in_time ==
+                        0.0f) {
+                    packet->animation_index = packet->requested_animation;
+                    if (backwards != 0 && model->model_data_b[packet->animation_index] != NULL &&
+                        model->model_data_a[packet->animation_index] != NULL &&
+                        (static_cast<CHARACTERANIM_s *>(model->model_data_a[packet->animation_index])->flags &
+                         CHARACTER_ANIMATION_FLAG_REVERSE_WITH_MOVEMENT) != 0) {
                         packet->current_reversed = 1;
-                        packet->current_time = NuAnimEndFrame(model->model_data_b[requested]);
+                        packet->current_time = NuAnimEndFrame(model->model_data_b[packet->animation_index]);
                     } else {
                         packet->current_reversed = 0;
                         packet->current_time = 1.0f;
@@ -1469,8 +1511,8 @@ extern "C" {
                     goto update_timers;
                 }
 
-                if (AnimBlendMode != 1 || requested == packet->blend_animation_b ||
-                    !(requested != -1 && model->model_data_b[requested] != NULL)) {
+                if (AnimBlendMode != 1 || packet->requested_animation == packet->blend_animation_b ||
+                    !(packet->requested_animation != -1 && model->model_data_b[packet->requested_animation] != NULL)) {
                     goto update_timers;
                 }
 
@@ -1484,11 +1526,9 @@ extern "C" {
                     packet->blend_source_time = packet->blend_target_time;
                     interrupted = 1;
                 }
-            }
-
-            // Interrupted blends enter the transition directly (original
-            // 0x3ce858/0x3ce88a), even when returning to their source animation.
-            if (interrupted == 0 && packet->requested_animation == packet->previous_animation) {
+            } else if (packet->requested_animation == packet->previous_animation) {
+                // Interrupted blends enter the transition directly, even when
+                // returning to their source animation (retail 0x3ce858/0x3ce88a).
                 if (force_restart == 0 || packet->requested_animation != packet->animation_index ||
                     !(packet->animation_index != -1 && model->model_data_b[packet->animation_index] != NULL)) {
                     packet->animation_index = packet->requested_animation;
@@ -1498,8 +1538,8 @@ extern "C" {
             }
 
             if (packet->previous_animation != -1 && packet->requested_animation != -1 &&
-                (packet->previous_animation != -1 && model->model_data_b[packet->previous_animation] != NULL) &&
-                (packet->requested_animation != -1 && model->model_data_b[packet->requested_animation] != NULL)) {
+                model->model_data_b[packet->previous_animation] != NULL &&
+                model->model_data_b[packet->requested_animation] != NULL) {
                 CHARACTERANIM_s *source_info =
                     static_cast<CHARACTERANIM_s *>(model->model_data_a[packet->previous_animation]);
                 CHARACTERANIM_s *target_info =
@@ -1545,12 +1585,11 @@ extern "C" {
             }
 
             packet->animation_index = packet->requested_animation;
-            current_info = packet->animation_index != -1
-                               ? static_cast<CHARACTERANIM_s *>(model->model_data_a[packet->animation_index])
-                               : NULL;
             if (backwards != 0 && packet->animation_index != -1 &&
-                model->model_data_b[packet->animation_index] != NULL && current_info != NULL &&
-                (current_info->flags & CHARACTER_ANIMATION_FLAG_REVERSE_WITH_MOVEMENT) != 0) {
+                model->model_data_b[packet->animation_index] != NULL &&
+                model->model_data_a[packet->animation_index] != NULL &&
+                (static_cast<CHARACTERANIM_s *>(model->model_data_a[packet->animation_index])->flags &
+                 CHARACTER_ANIMATION_FLAG_REVERSE_WITH_MOVEMENT) != 0) {
                 packet->current_reversed = 1;
                 packet->current_time = NuAnimEndFrame(model->model_data_b[packet->animation_index]);
             } else {
@@ -1560,23 +1599,23 @@ extern "C" {
             packet->blending = 0;
             packet->previous_time = packet->current_time;
             packet->flags |= ANIMPACKET_FLAG_ANIMATION_CHANGED;
+        }
 
-        update_timers:
-            if (packet->blending == 0) {
-                if (!(packet->animation_index != -1 && model->model_data_b[packet->animation_index] != NULL)) {
-                    const i16 requested_animation = packet->requested_animation;
-                    ResetAnimPacket(packet, -1);
-                    packet->requested_animation = requested_animation;
-                    return;
-                }
-                if (paused != 0) {
-                    frame_step = 0.0f;
-                }
-                packet->current_time = UpdateAnimTimer(
-                    model, packet, packet->animation_index, packet->current_time, frame_step, movement_speed, 1,
-                    reinterpret_cast<char *>(&packet->current_reversed), backwards, backwards_multiplier);
-            } else if ((packet->blend_animation_a != -1 && model->model_data_b[packet->blend_animation_a] != NULL) &&
-                       (packet->blend_animation_b != -1 && model->model_data_b[packet->blend_animation_b] != NULL)) {
+    update_timers:
+        // End-frame services can change overlay state; retail reloads it here.
+        if (packet->overlay_animation != -1) {
+            if ((packet->requested_animation != -1 && model->model_data_b[packet->requested_animation] != NULL) &&
+                model->model_data_b[packet->overlay_animation] != NULL) {
+                packet->blend_source_time = UpdateAnimTimer(
+                    model, packet, packet->requested_animation, packet->blend_source_time, frame_step, movement_speed,
+                    0, reinterpret_cast<char *>(&packet->blend_source_reversed), backwards, backwards_multiplier);
+                packet->blend_target_time = UpdateAnimTimer(
+                    model, packet, packet->overlay_animation, packet->blend_target_time, frame_step, movement_speed, 1,
+                    reinterpret_cast<char *>(&packet->blend_target_reversed), backwards, backwards_multiplier);
+            }
+        } else if (packet->blending != 0) {
+            if ((packet->blend_animation_a != -1 && model->model_data_b[packet->blend_animation_a] != NULL) &&
+                (packet->blend_animation_b != -1 && model->model_data_b[packet->blend_animation_b] != NULL)) {
                 packet->blend_source_time = UpdateAnimTimer(
                     model, packet, packet->blend_animation_a, packet->blend_source_time, frame_step, movement_speed, 0,
                     reinterpret_cast<char *>(&packet->blend_source_reversed), backwards, backwards_multiplier);
@@ -1584,14 +1623,17 @@ extern "C" {
                     model, packet, packet->blend_animation_b, packet->blend_target_time, frame_step, movement_speed, 1,
                     reinterpret_cast<char *>(&packet->blend_target_reversed), backwards, backwards_multiplier);
             }
-        } else if ((packet->requested_animation != -1 && model->model_data_b[packet->requested_animation] != NULL) &&
-                   (packet->overlay_animation != -1 && model->model_data_b[packet->overlay_animation] != NULL)) {
-            packet->blend_source_time = UpdateAnimTimer(
-                model, packet, packet->requested_animation, packet->blend_source_time, frame_step, movement_speed, 0,
-                reinterpret_cast<char *>(&packet->blend_source_reversed), backwards, backwards_multiplier);
-            packet->blend_target_time = UpdateAnimTimer(
-                model, packet, packet->overlay_animation, packet->blend_target_time, frame_step, movement_speed, 1,
-                reinterpret_cast<char *>(&packet->blend_target_reversed), backwards, backwards_multiplier);
+        } else if (packet->animation_index != -1 && model->model_data_b[packet->animation_index] != NULL) {
+            if (paused != 0) {
+                frame_step = 0.0f;
+            }
+            packet->current_time = UpdateAnimTimer(
+                model, packet, packet->animation_index, packet->current_time, frame_step, movement_speed, 1,
+                reinterpret_cast<char *>(&packet->current_reversed), backwards, backwards_multiplier);
+        } else {
+            const i32 requested_animation = packet->requested_animation;
+            ResetAnimPacket(packet, -1);
+            packet->requested_animation = requested_animation;
         }
     }
 

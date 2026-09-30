@@ -10011,8 +10011,8 @@ extern i16 id_GEONOSIAN, id_MINIATST, id_ATST_LOWRES, id_ATAT, id_MINIATAT, id_M
 void Move_CANNON(GameObject_s *);
 void SetWeaponIn(GameObject_s *);
 
-static __used__ i32 ShootCode(GameObject_s *object, i32 pressed, i32 special_pressed, i32 weapon_mode,
-                              i32 allow_airborne, i32 fire_mode) {
+static i32 ShootCode(GameObject_s *object, i32 pressed, i32 special_pressed, i32 weapon_mode, i32 allow_airborne,
+                     i32 fire_mode) {
     GameObject_s *target = NULL;
     GIZMOBLOWUP_s *blowup = NULL;
     if (object == Player[0] && nextShootTarget.Get() != NULL && pressed != 0) {
@@ -10080,11 +10080,9 @@ static __used__ i32 ShootCode(GameObject_s *object, i32 pressed, i32 special_pre
         return 0;
     }
 
-    i32 context = object->character_context;
-    if ((object->field_0xef8 & 8) == 0 || pressed == 0 || (CInfo[context].flags & 0x20) != 0 ||
-        (static_cast<i8>(object->apiobj.flags_low) >= 0 &&
-         (context == 6 || context == 7 ||
-          (context == 1 && (object->context_animation == 0xb3 || object->context_animation == 0x59))))) {
+    i8 context = object->character_context;
+    if ((object->field_0xef8 & 8) == 0 || pressed == 0 || (CInfo[context].flags & 0x20) != 0) {
+    shoot_weapon_in:
         if (weapon_mode == 0 || ((object->pad_gamepad->allocated_5a & 4) == 0 && special_pressed == 0) ||
             (object->field_0xe22 & 1) == 0 || object->weapon_scale_state != 0 || context == 6 || context == 7 ||
             context == 0x47 || context == 0x46 || context == 0x0b || context == 0x2e ||
@@ -10094,11 +10092,12 @@ static __used__ i32 ShootCode(GameObject_s *object, i32 pressed, i32 special_pre
         if (weapon_mode == 2) {
             SetWeaponIn(object);
         } else {
-            CHARACTERDATA *data = object->apiobj.character_data;
-            const i32 animation =
-                data->game_character->uses_weapon_action == 0 && (data->model_flags & 0x80) != 0 ? 0x7e : 0x10;
             if (object->apiobj.field_0x27d != 0 && object->pad_gamepad->input_magnitude == 0.0f &&
-                object->apiobj.character_model->model_data_b[animation] != NULL &&
+                object->apiobj.character_model
+                        ->model_data_b[object->apiobj.character_data->game_character->uses_weapon_action == 0 &&
+                                               (object->apiobj.character_data->model_flags & 0x80) != 0
+                                           ? 0x7e
+                                           : 0x10] != NULL &&
                 (object->character_context == -1 || (CInfo[object->character_context].flags & 4) != 0))
                 SlowWeaponIn(object);
             else
@@ -10106,21 +10105,26 @@ static __used__ i32 ShootCode(GameObject_s *object, i32 pressed, i32 special_pre
         }
         return 0;
     }
-    if (static_cast<i8>(object->apiobj.flags_low) < 0 && (context == 6 || context == 7) &&
-        (object->apiobj.character_data->game_character->flags_094[1] & 0x10) != 0)
-        return 0;
+    if (static_cast<i8>(object->apiobj.flags_low) < 0) {
+        if ((context == 6 || context == 7) && (object->apiobj.character_data->game_character->flags_094[1] & 0x10) != 0)
+            return 0;
+    } else if (context == 6 || context == 7 ||
+               (context == 1 && (object->context_animation == 0xb3 || object->context_animation == 0x59))) {
+        goto shoot_weapon_in;
+    }
     if (BonusWinner != -1)
         return 0;
     if (weapon_mode != 0 && (object->field_0xe22 & 1) == 0) {
         if (weapon_mode == 2) {
             SetWeaponOut(object);
         } else {
-            CHARACTERDATA *data = object->apiobj.character_data;
-            const i32 animation =
-                data->game_character->uses_weapon_action == 0 && (data->model_flags & 0x80) != 0 ? 0x7f : 0x11;
             if (object->weapon_scale_state == 0 && object->apiobj.field_0x27d != 0 &&
                 object->pad_gamepad->input_magnitude == 0.0f &&
-                object->apiobj.character_model->model_data_b[animation] != NULL &&
+                object->apiobj.character_model
+                        ->model_data_b[object->apiobj.character_data->game_character->uses_weapon_action == 0 &&
+                                               (object->apiobj.character_data->model_flags & 0x80) != 0
+                                           ? 0x7f
+                                           : 0x11] != NULL &&
                 (context == -1 || (CInfo[context].flags & 4) != 0))
                 SlowWeaponOut(object);
             else
@@ -10229,15 +10233,20 @@ static __used__ i32 ShootCode(GameObject_s *object, i32 pressed, i32 special_pre
         }
     } else {
         GAMECHARACTERDATA *data = object->apiobj.character_data->game_character;
-        if ((data->flags_098[0] & 4) == 0 &&
-            ((data->uses_weapon_action == 4 && object->apiobj.anim_packet.animation_index == 3) ||
-             (object->apiobj.anim_packet.animation_index == 0x17 &&
-              object->apiobj.character_model->model_data_b[0x17] != NULL) ||
-             (data->uses_weapon_action == 0 && object->apiobj.anim_packet.animation_index == 0x73 &&
-              object->apiobj.character_model->model_data_b[0x73] != NULL) ||
-             (object->apiobj.anim_packet.animation_index == 6 &&
-              object->apiobj.character_model->model_data_b[6] != NULL)))
-            goto immediate_shot;
+        if ((data->flags_098[0] & 4) == 0) {
+            const i16 animation = object->apiobj.anim_packet.animation_index;
+            if (data->uses_weapon_action == 4 && animation == 3)
+                goto immediate_shot;
+            if (animation == 0x17) {
+                if (object->apiobj.character_model->model_data_b[0x17] != NULL)
+                    goto immediate_shot;
+            } else if (data->uses_weapon_action == 0 && animation == 0x73) {
+                if (object->apiobj.character_model->model_data_b[0x73] != NULL)
+                    goto immediate_shot;
+            } else if (animation == 6 && object->apiobj.character_model->model_data_b[6] != NULL) {
+                goto immediate_shot;
+            }
+        }
     }
     {
         const f32 duration = object->quick_shoot_timer - animduration_blendouttime;

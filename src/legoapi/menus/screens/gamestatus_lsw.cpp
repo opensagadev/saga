@@ -357,15 +357,17 @@ void InitStatusScreen(WORLDINFO_s *world) {
         }
     }
     if (p.status_flags == 0) {
-        goldbrickmsgcount = 0;
-        CoinTotalScale = 1.0f;
         return;
     }
     p.stage_count = 0;
+    p.mode_flags = (p.mode_flags & 0xfb) | ((SuperStory & 1) << 2);
     p.field_0xb0 = (p.field_0xb0 & 0xbf) | ((FreePlay & 1) << 6);
-    p.mode_flags = (p.mode_flags & 0xe3) | ((SuperStory & 1) << 2) | ((from_save_and_exit & 1) << 3);
+    p.mode_flags = (p.mode_flags & 0xe7) | ((from_save_and_exit & 1) << 3);
     p.mission = Mission_Active(NULL);
-    p.mission_state = p.mission == NULL ? 0 : Mission_CurrentState(NULL);
+    if (p.mission == NULL)
+        p.mission_state = 0;
+    else
+        p.mission_state = Mission_CurrentState(NULL);
     if (from_save_and_exit != 0) {
         from_save_and_exit = 0;
         level_already_loaded = -1;
@@ -376,12 +378,13 @@ void InitStatusScreen(WORLDINFO_s *world) {
     p.field_0xbd = 0;
     p.challenge_state = ChallengeMode;
     const i32 area = static_cast<i8>(world->level_sub_id);
-    p.field_0xb0 &= 0x77;
+    p.field_0xb0 &= 0xf7;
     p.score = &Game.coins;
     p.previous_completion = Game.completion;
     p.area_id = area;
     p.previous_gold_bricks = Game.field_0x7c26[0];
     p.displayed_gold_bricks = Game.field_0x7c26[0];
+    p.field_0xb0 &= 0x7f;
     p.mode_flags &= 0xfc;
     i32 episode = -1;
     if (area == -1) {
@@ -429,8 +432,8 @@ void InitStatusScreen(WORLDINFO_s *world) {
                     save.superstory_score_target = p.superstory_score;
                 else
                     p.new_best_score = 0;
-                if ((save.flags & 0xff) == 0) {
-                    save.flags = (save.flags & 0xffffff00) | 1;
+                if (save.superstory_complete == 0) {
+                    save.superstory_complete = 1;
                     AddToCompletionPoints(POINTS_PER_SUPERSTORY);
                     if (GOLDBRICKFORSUPERSTORY != 0)
                         gold = AddGoldBrickMessage(&p, tSUPERSTORYCOMPLETE);
@@ -531,7 +534,7 @@ void InitStatusScreen(WORLDINFO_s *world) {
                 reward = 150;
             IncreaseScore(&p.reward_score, reward, 0);
             if (Game_MissionSave != NULL) {
-                f32 &best = reinterpret_cast<f32 *>(Game_MissionSave)[mission];
+                f32 &best = reinterpret_cast<f32 *>(Game_MissionSave)[static_cast<i8>(MissionSys->mission->count)];
                 if (best == 0.0f || p.elapsed_time < best)
                     best = p.elapsed_time;
             }
@@ -595,8 +598,11 @@ void InitStatusScreen(WORLDINFO_s *world) {
         p.true_hero_target = static_cast<u32>((p.field_0xb0 & 0x40) != 0 ? p.area->field38_0x90 : p.area->field37_0x8c);
     }
     p.area_time = AreaTimer.time_elapsed;
-    const u64 total = static_cast<u64>(p.coins_remaining[0]) + p.coins_remaining[1];
-    p.collected_score = total > 4000000000ULL ? 4000000000.0f : static_cast<f32>(static_cast<u32>(total));
+    const u32 total = p.coins_remaining[0] + p.coins_remaining[1];
+    if (total < p.coins_remaining[0] || total >= 4000000000U)
+        p.collected_score = 4000000000.0f;
+    else
+        p.collected_score = static_cast<f32>(total);
     p.newly_completed = 0;
     if ((p.field_0xb0 & 4) != 0)
         p.true_hero_percent = 100.0f;

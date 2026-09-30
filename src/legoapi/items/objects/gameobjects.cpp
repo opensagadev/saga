@@ -4803,6 +4803,8 @@ i32 SphereSphereOverlapScaleY(NUVEC *, f32, f32, NUVEC *, f32, f32);
 GIZMOBLOWUP_s *GizmoBlowUp_Hit(GameObject_s *, NUVEC *, i32, f32, NUVEC *, NUVEC *, BOLT_s *, u32, u8 *);
 void AlertSurroundingCreatures(GameObject_s *, NUVEC *);
 extern "C" i32 AddGameDebrisRot(APIDEBRISSYS_s *, i32, NUVEC *, i32, u16, u16);
+extern f32 ForceThrowSpeed, ForceThrowGravity;
+void DeflectPart(PART_s *, GameObject_s *, f32, f32, i32, i32);
 
 static void LightSabreStreakCode(GameObject_s *object, i32 blade, i32 effect) {
     if (object->weapon_scale < 1.0f)
@@ -4820,9 +4822,10 @@ static void LightSabreStreakCode(GameObject_s *object, i32 blade, i32 effect) {
         return;
     GAMECHARACTERDATA *data = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
     const i32 joint_a = data->streak_joints[blade][0];
+    if (joint_a == -1 || object->apiobj.character_model->points_of_interest[joint_a] == NULL)
+        return;
     const i32 joint_b = data->streak_joints[blade][1];
-    if (joint_a == -1 || object->apiobj.character_model->points_of_interest[joint_a] == NULL || joint_b == -1 ||
-        object->apiobj.character_model->points_of_interest[joint_b] == NULL)
+    if (joint_b == -1 || object->apiobj.character_model->points_of_interest[joint_b] == NULL)
         return;
     object->blade_states[blade] = -1;
     NUVEC points[3];
@@ -4864,8 +4867,9 @@ static void LightSabreStreakCode(GameObject_s *object, i32 blade, i32 effect) {
         effect = 4;
     else if (object->id == id_GRIEVOUS)
         effect = (blade == 3 || blade == 0) ? 3 : 2;
-    if (data->field275_0x116 == 12 && context == 5 && object->combo_stage == 2 && object->context_animation == 52 &&
-        object->apiobj.character_model->points_of_interest[4] != NULL) {
+    data = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
+    if (data->field275_0x116 == 12 && object->character_context == 5 && object->combo_stage == 2 &&
+        object->context_animation == 52 && object->apiobj.character_model->points_of_interest[4] != NULL) {
         points[0] = *NUMTX_GET_ROW_VEC(&object->joint_matrices[4], 3);
         NuVecAdd(&points[1], &points[0], &object->apiobj.collision_position);
         NuVecScale(&points[1], &points[1], 0.5f);
@@ -4881,16 +4885,17 @@ static void LightSabreStreakCode(GameObject_s *object, i32 blade, i32 effect) {
     NUVEC maximum = {points[2].x + extent, points[2].y + extent, points[2].z + extent};
     if ((object->sabre_flags & 4) != 0) {
         NUVEC direction;
-        NuVecRotateY(&direction, &v001, static_cast<u16>(object->apiobj.facing_angle + (context == 16 ? 0x8000 : 0)));
+        NuVecRotateY(&direction, &v001,
+                     static_cast<u16>(object->apiobj.facing_angle + (object->character_context == 16 ? 0x8000 : 0)));
         NuVecScale(&difference, &direction, 0.2f);
         NuVecAdd(&points[0], &object->apiobj.collision_position, &difference);
         NuVecScale(&difference, &direction, 0.5f);
         NuVecAdd(&points[1], &object->apiobj.collision_position, &difference);
         NuVecScale(&difference, &direction, 0.35f);
         NuVecAdd(&points[2], &object->apiobj.collision_position, &difference);
-        if (context == 13) {
-            points[0].y = object->apiobj.collision_min.y +
-                          (object->apiobj.collision_max.y - object->apiobj.collision_min.y) * 0.333f;
+        if (object->character_context == 13) {
+            points[0].y = (object->apiobj.upper_position.y - object->apiobj.lower_position.y) * 0.333f +
+                          object->apiobj.lower_position.y;
             points[1].y = points[2].y = points[0].y;
         }
         length = NuVecDist(&points[0], &points[1], &difference);
@@ -4902,62 +4907,130 @@ static void LightSabreStreakCode(GameObject_s *object, i32 blade, i32 effect) {
         minimum = NUVEC{points[2].x - extent, points[2].y - extent, points[2].z - extent};
         maximum = NUVEC{points[2].x + extent, points[2].y + extent, points[2].z + extent};
     }
-    if ((object->sabre_flags & 5) == 0)
-        return;
-    GameObject_s *nearest = NULL;
-    i32 nearest_point = 0;
-    f32 nearest_distance = 1000000.0f;
-    for (i32 i = 0; i < HIGHGAMEOBJECT; ++i) {
-        GameObject_s *target = &Obj[i];
-        if (target == object || (target->apiobj.field_0x1f8 & 0x1001) != 0x1001 || target->use_model_origin <= 1 ||
-            target->apiobj.field_0x287 != 0 || (target->character_context & 0xfd) == 57 ||
-            target->character_context == 60 || (CInfo[target->character_context].flags & 0x8000) != 0)
-            continue;
-        GAMECHARACTERDATA *target_data = static_cast<GAMECHARACTERDATA *>(target->apiobj.character_data->field11_0x24);
-        if ((target_data->flags_090 & 0x8000) != 0 || target->apiobj.collision_min.x > maximum.x ||
-            target->apiobj.collision_max.x < minimum.x || target->apiobj.collision_min.z > maximum.z ||
-            target->apiobj.collision_max.z < minimum.z || target->apiobj.collision_min.y > maximum.y ||
-            target->apiobj.collision_max.y < minimum.y)
-            continue;
-        for (i32 point = 2; point >= 0; --point) {
-            if (!SphereSphereOverlapScaleY(&target->apiobj.collision_position, target->apiobj.field_0x1dc,
-                                           target->apiobj.field_0x1e0, &points[point], object->sabre_collision_radius,
-                                           object->sabre_collision_radius))
+    // The original rechecks power-up effects after the geometry callbacks.
+    if ((object->sabre_flags & 5) != 0) {
+        if (object->apiobj.field_0x27c != -1 && Cheat_IsOn(25))
+            effect = 1;
+        else if (object->apiobj.field_0x27c != -1 && Player_HasPurpleForce(object))
+            effect = 4;
+        else if (object->id == id_GRIEVOUS)
+            effect = (blade == 3 || blade == 0) ? 3 : 2;
+        GameObject_s *nearest = NULL;
+        i32 nearest_point = 0;
+        f32 nearest_distance = 1000000.0f;
+        GameObject_s *target = Obj;
+        for (i32 i = 0; i < HIGHGAMEOBJECT; ++i, ++target) {
+            if (target == object || (target->apiobj.field_0x1f8 & 0x1001) != 0x1001 || target->use_model_origin <= 1 ||
+                target->apiobj.field_0x287 != 0 || (target->character_context & 0xfd) == 57 ||
+                target->character_context == 60 || (CInfo[target->character_context].flags & 0x8000) != 0)
                 continue;
-            if ((object->sabre_flags & 1) != 0) {
-                AddGameDebrisRot(WORLD->debris_sys, effect, &points[point], ParticlesPerSecond(10.0f, FRAMETIME), 0, 0);
+            GAMECHARACTERDATA *target_data =
+                static_cast<GAMECHARACTERDATA *>(target->apiobj.character_data->field11_0x24);
+            // Ordered comparisons reject an unordered bound in the original SSE tests.
+            if ((target_data->flags_090 & 0x8000) != 0 || !(target->apiobj.collision_min.x <= maximum.x) ||
+                !(minimum.x <= target->apiobj.collision_max.x) || !(target->apiobj.collision_min.z <= maximum.z) ||
+                !(minimum.z <= target->apiobj.collision_max.z) || !(target->apiobj.collision_min.y <= maximum.y) ||
+                !(minimum.y <= target->apiobj.collision_max.y))
+                continue;
+            for (i32 point = 2; point >= 0; --point) {
+                if (!SphereSphereOverlapScaleY(&target->apiobj.collision_position, target->apiobj.field_0x1dc,
+                                               target->apiobj.field_0x1e0, &points[point],
+                                               object->sabre_collision_radius, object->sabre_collision_radius))
+                    continue;
+                if ((object->sabre_flags & 1) != 0) {
+                    target_data = static_cast<GAMECHARACTERDATA *>(target->apiobj.character_data->field11_0x24);
+                    if ((target->apiobj.field_0x1f8 & 2) == 0 && (target_data->flags_090 & 0x1040) == 0) {
+                        NuVecSub(&difference, &target->apiobj.collision_position, &object->apiobj.collision_position);
+                        if (difference.x == 0.0f && difference.z == 0.0f) {
+                            difference.x = static_cast<f32>(qrand()) * (1.0f / 65535.0f) - 0.5f;
+                            difference.z = static_cast<f32>(qrand()) * (1.0f / 65535.0f) - 0.5f;
+                        }
+                        NuVecNorm(&difference, &difference);
+                        target_data = static_cast<GAMECHARACTERDATA *>(target->apiobj.character_data->field11_0x24);
+                        target->apiobj.movement_direction.x =
+                            difference.x * target_data->walk_speed + target->apiobj.velocity.x;
+                        target->apiobj.movement_direction.z =
+                            target_data->walk_speed * difference.z + target->apiobj.velocity.z;
+                        const f32 speed = target_data->run_speed;
+                        const f32 speed_squared =
+                            target->apiobj.movement_direction.x * target->apiobj.movement_direction.x +
+                            target->apiobj.movement_direction.z * target->apiobj.movement_direction.z;
+                        if (speed * speed < speed_squared) {
+                            const f32 scale = speed / NuFsqrt(speed_squared);
+                            target->apiobj.movement_direction.x *= scale;
+                            target->apiobj.movement_direction.z = scale * target->apiobj.movement_direction.z;
+                        }
+                    }
+                    AddGameDebrisRot(WORLD->debris_sys, effect, &points[point], ParticlesPerSecond(10.0f, FRAMETIME), 0,
+                                     0);
+                    if (sabrerubwait <= 0.0f && object->apiobj.anim_packet.blending == 0 &&
+                        object->character_context != 5 && object->character_context != 16 &&
+                        object->character_context != 13 && object->character_context != 14 &&
+                        (CInfo[object->character_context].flags & 0x4000000) == 0 &&
+                        ((CInfo[object->character_context].flags & 0x8000000) == 0 || (object->jump_flags & 2) == 0) &&
+                        target->character_context != 5 && target->character_context != 16 &&
+                        target->character_context != 13 && target->character_context != 14 &&
+                        (CInfo[target->character_context].flags & 0x4000000) == 0 &&
+                        ((CInfo[target->character_context].flags & 0x8000000) == 0 || (target->jump_flags & 2) == 0)) {
+                        PlaySfx("SaberSparks", &points[point]);
+                        sabrerubwait = static_cast<f32>(qrand()) * (1.0f / 65535.0f) * 0.3f + 0.3f;
+                        NewRumble(object->pad_gamepad->pad, static_cast<f32>(qrand()) * (1.0f / 65535.0f) * 0.2f + 0.2f,
+                                  0);
+                        NewRumble(target->pad_gamepad->pad, static_cast<f32>(qrand()) * (1.0f / 65535.0f) * 0.2f + 0.2f,
+                                  0);
+                    }
+                }
+                const f32 distance =
+                    NuVecDistSqr(&object->apiobj.collision_position, &target->apiobj.collision_position, NULL);
+                if (distance < nearest_distance) {
+                    nearest_distance = distance;
+                    nearest_point = point;
+                    nearest = target;
+                }
             }
-            const f32 distance =
-                NuVecDistSqr(&object->apiobj.collision_position, &target->apiobj.collision_position, NULL);
-            if (distance < nearest_distance) {
-                nearest_distance = distance;
-                nearest_point = point;
-                nearest = target;
+        }
+        if (nearest != NULL && (object->sabre_flags & 4) != 0) {
+            AddGameDebris(WORLD->debris_sys, effect, &points[nearest_point]);
+            if (!CannotKill(nearest)) {
+                i32 damage = object->sabre_damage;
+                if (damage != 0 && (nearest->apiobj.flags_low & 0x80) != 0) {
+                    damage = (object->apiobj.flags_low & 0x80) != 0 && Player_HasDoubleWeaponDamage(object) ? 2 : 1;
+                }
+                ObjHitObj(object, nearest, damage, ObjHitObj_Flags(object) | 0x100, 0, 1);
+            } else {
+                NewRumble(object->pad_gamepad->pad, 0.5f, 0);
+                NewRumble(nearest->pad_gamepad->pad, 0.5f, 0);
+            }
+            return;
+        }
+        if ((object->sabre_flags & 4) != 0 &&
+            ((object->apiobj.flags_low & 0x80) != 0 || (object->field_0xef8 & 0x40) != 0 || object->use_action == 5)) {
+            if ((object->apiobj.flags_low & 0x80) == 0 && object->apiobj.model_draw_result == 0) {
+                if (object->blowup_target == NULL)
+                    return;
+                GizmoBlowupBlowup(object->blowup_target, 1, -1, 1, NULL, 1);
+                AlertSurroundingCreatures(object, &points[0]);
+                return;
+            }
+            if (GizmoBlowUp_Hit(object, points, 3, object->sabre_collision_radius, &minimum, &maximum, NULL, 0, NULL)) {
+                AddGameDebris(WORLD->debris_sys, effect, &points[0]);
+                AddGameDebris(WORLD->debris_sys, effect, &points[1]);
+                AddGameDebris(WORLD->debris_sys, effect, &points[2]);
+                NewRumble(object->pad_gamepad->pad, 0.75f, 0);
+                return;
             }
         }
     }
-    if (nearest != NULL && (object->sabre_flags & 4) != 0) {
-        AddGameDebris(WORLD->debris_sys, effect, &points[nearest_point]);
-        if (!CannotKill(nearest)) {
-            i32 damage = object->sabre_damage;
-            if (damage != 0 && (nearest->apiobj.flags_low & 0x80) != 0) {
-                damage = (object->apiobj.flags_low & 0x80) != 0 && Player_HasDoubleWeaponDamage(object) ? 2 : 1;
-            }
-            ObjHitObj(object, nearest, damage, ObjHitObj_Flags(object) | 0x100, 0, 1);
-        } else {
-            NewRumble(object->pad_gamepad->pad, 0.75f, 0);
-            NewRumble(nearest->pad_gamepad->pad, 0.75f, 0);
-        }
+    if ((object->sabre_flags & 6) == 0)
         return;
-    }
-    if ((object->sabre_flags & 4) != 0 && (object->apiobj.flags_low & 0x80) != 0) {
-        if (GizmoBlowUp_Hit(object, points, 3, object->sabre_collision_radius, &minimum, &maximum, NULL, 0, NULL)) {
-            AddGameDebris(WORLD->debris_sys, effect, &points[0]);
-            AddGameDebris(WORLD->debris_sys, effect, &points[1]);
-            AddGameDebris(WORLD->debris_sys, effect, &points[2]);
-            NewRumble(object->pad_gamepad->pad, 0.75f, 0);
-        }
-    }
+    PART_s *part = HitParts(object, points, 3, object->sabre_collision_radius, &minimum, &maximum, 0x8000008);
+    if (part == NULL)
+        return;
+    if ((part->flags & 8) == 0)
+        KillPart(part, 0);
+    else
+        DeflectPart(part, object, ForceThrowSpeed, ForceThrowGravity, 0, effect);
+    AlertSurroundingCreatures(object, &points[0]);
 }
 
 void GameObjectStuffAfterAnimation() {
@@ -4973,11 +5046,13 @@ void GameObjectStuffAfterAnimation() {
                 object->script_fire_target = NULL;
             if (static_cast<i8>(object->quick_shoot_bolt_id) != -1) {
                 if (object->id == id_BASKETCANNON) {
-                    GAMECHARACTERDATA *data =
-                        static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
-                    GameAudio_PlaySfxById(data->sfx_shoot, &object->apiobj.collision_position, 0, 0);
+                    GameAudio_PlaySfxById(
+                        static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24)->sfx_shoot,
+                        &object->apiobj.collision_position, 0, 0);
                     NUMTX matrix;
-                    i32 joint = data->weapon_shoot_joints[0];
+                    // The original reacquires the locator after the audio callback.
+                    i32 joint = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24)
+                                    ->weapon_shoot_joints[0];
                     if (drawn && joint != -1 && object->apiobj.character_model->points_of_interest[joint] != NULL)
                         matrix = object->joint_matrices[joint];
                     else {
@@ -5154,10 +5229,11 @@ void GameObjectStuffAfterAnimation() {
         if ((object->movement_runtime_flags & 0x40) != 0)
             ThermalDetonator_Throw(object);
         if ((object->field_0xe23 & 2) != 0 && object->field_0x780 != NULL) {
+            // The zap origin callback may change the object's current target.
+            GameObject_s *target = static_cast<GameObject_s *>(object->field_0x780);
             NUVEC *origin = GetZapOrigin(object);
             NUVEC delta;
-            f32 distance =
-                NuVecDist(&static_cast<GameObject_s *>(object->field_0x780)->apiobj.collision_position, origin, &delta);
+            f32 distance = NuVecDist(&target->apiobj.collision_position, origin, &delta);
             NuLgtLaser(testlaser_type, testlaser_sizew, testlaser_sizel, testlaser_sizewab, origin, &delta,
                        object->id == id_R2Q5 ? 0xff202080 : 0xff808040, testlaser_endw, distance);
         }
@@ -5168,9 +5244,10 @@ void GameObjectStuffAfterAnimation() {
                 GAMECHARACTERDATA *blade_data =
                     static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
                 i32 joint_a = blade_data->streak_joints[blade][0];
+                if (joint_a == -1 || object->apiobj.character_model->points_of_interest[joint_a] == NULL)
+                    continue;
                 i32 joint_b = blade_data->streak_joints[blade][1];
-                if (joint_a == -1 || object->apiobj.character_model->points_of_interest[joint_a] == NULL ||
-                    joint_b == -1 || object->apiobj.character_model->points_of_interest[joint_b] == NULL)
+                if (joint_b == -1 || object->apiobj.character_model->points_of_interest[joint_b] == NULL)
                     continue;
                 NUVEC points[2];
                 points[0] = *NUMTX_GET_ROW_VEC(&object->joint_matrices[joint_a], 3);
@@ -5184,9 +5261,9 @@ void GameObjectStuffAfterAnimation() {
                         i32 count = ParticlesPerSecond(100.0f, FRAMETIME);
                         if (count > 0) {
                             f32 fraction = static_cast<f32>(qrand()) * (1.0f / 65535.0f);
-                            NUVEC position = {points[0].x + (points[1].x - points[0].x) * fraction,
-                                              points[0].y + (points[1].y - points[0].y) * fraction,
-                                              points[0].z + (points[1].z - points[0].z) * fraction};
+                            NUVEC position = {(points[1].x - points[0].x) * fraction + points[0].x,
+                                              (points[1].y - points[0].y) * fraction + points[0].y,
+                                              (points[1].z - points[0].z) * fraction + points[0].z};
                             AddVariableShotDebrisEffect(effect, &position, count, 0, 0);
                         }
                     }
@@ -5200,9 +5277,9 @@ void GameObjectStuffAfterAnimation() {
                     if (GameRayCast(&points[side], &delta, 0.0f, TERRAINMASK_NONWEAPON | 0x1f) != 0) {
                         hit = true;
                         f32 fraction = NewRayCastGetTOFI();
-                        NUVEC position = {points[side].x + (points[1 - side].x - points[side].x) * fraction,
-                                          points[side].y + (points[1 - side].y - points[side].y) * fraction,
-                                          points[side].z + (points[1 - side].z - points[side].z) * fraction};
+                        NUVEC position = {(points[1 - side].x - points[side].x) * fraction + points[side].x,
+                                          (points[1 - side].y - points[side].y) * fraction + points[side].y,
+                                          (points[1 - side].z - points[side].z) * fraction + points[side].z};
                         i32 index;
                         if (object->id == id_GRIEVOUS && static_cast<u32>(blade - 1) <= 1 &&
                             (object->apiobj.field_0x27c == -1 ||
@@ -5242,28 +5319,57 @@ void GameObjectStuffAfterAnimation() {
                 AddVariableShotDebrisEffectTimed1(effect, &object->apiobj.lower_position, 60, FRAMETIME, 0, 0, NULL);
             effect = WORLD->debris_sys->entries[104].effect;
             if (effect != -1) {
-                for (i32 joint = 2; joint <= 4; ++joint) {
-                    if (object->apiobj.character_model->points_of_interest[joint] != NULL) {
-                        i32 count = static_cast<i32>(60.0f * ratio);
-                        if (count > 0)
-                            AddVariableShotDebrisEffectTimed1(effect,
-                                                              NUMTX_GET_ROW_VEC(&object->joint_matrices[joint], 3),
-                                                              count, FRAMETIME, 0, 0, NULL);
-                    }
-                }
+                if (object->apiobj.character_model->points_of_interest[2] != NULL &&
+                    static_cast<i32>(60.0f * ratio) > 0)
+                    AddVariableShotDebrisEffectTimed1(effect, NUMTX_GET_ROW_VEC(&object->joint_matrices[2], 3),
+                                                      static_cast<i32>(60.0f * ratio), FRAMETIME, 0, 0, NULL);
+                if (object->apiobj.character_model->points_of_interest[3] != NULL &&
+                    static_cast<i32>(60.0f * ratio) > 0)
+                    AddVariableShotDebrisEffectTimed1(effect, NUMTX_GET_ROW_VEC(&object->joint_matrices[3], 3),
+                                                      static_cast<i32>(60.0f * ratio), FRAMETIME, 0, 0, NULL);
+                if (object->apiobj.character_model->points_of_interest[4] != NULL &&
+                    static_cast<i32>(60.0f * ratio) > 0)
+                    AddVariableShotDebrisEffectTimed1(effect, NUMTX_GET_ROW_VEC(&object->joint_matrices[4], 3),
+                                                      static_cast<i32>(60.0f * ratio), FRAMETIME, 0, 0, NULL);
             }
             effect = WORLD->debris_sys->entries[103].effect;
             if (effect != -1 && object->apiobj.field_0x218 != 2000000.0f) {
-                for (i32 joint = 2; joint <= 4; ++joint) {
-                    if (object->apiobj.character_model->points_of_interest[joint] != NULL) {
-                        NUVEC position = *NUMTX_GET_ROW_VEC(&object->joint_matrices[joint], 3);
-                        f32 height = position.y - object->apiobj.field_0x218;
-                        if (height > 0.0f && height <= 0.2f) {
-                            f32 amount = height < 0.1f ? 25.0f : (1.0f - (height - 0.1f) / 0.1f) * 25.0f;
-                            if (static_cast<i32>(amount * ratio) > 0) {
-                                position.y = object->apiobj.field_0x218;
-                                AddVariableShotDebrisEffectTimed1(effect, &position, 60, FRAMETIME, 0, 0, NULL);
-                            }
+                if (object->apiobj.character_model->points_of_interest[2] != NULL) {
+                    f32 height = object->joint_matrices[2].m31 - object->apiobj.field_0x218;
+                    if (height > 0.0f && height <= 0.2f) {
+                        f32 amount = 25.0f;
+                        if (height >= 0.1f)
+                            amount = (1.0f - (height - 0.1f) / 0.1f) * 25.0f;
+                        if (static_cast<i32>(amount * ratio) > 0) {
+                            NUVEC position = {object->joint_matrices[2].m30, object->apiobj.field_0x218,
+                                              object->joint_matrices[2].m32};
+                            AddVariableShotDebrisEffectTimed1(effect, &position, 60, FRAMETIME, 0, 0, NULL);
+                        }
+                    }
+                }
+                if (object->apiobj.character_model->points_of_interest[3] != NULL) {
+                    f32 height = object->joint_matrices[3].m31 - object->apiobj.field_0x218;
+                    if (height > 0.0f && height <= 0.2f) {
+                        f32 amount = 25.0f;
+                        if (height >= 0.1f)
+                            amount = (1.0f - (height - 0.1f) / 0.1f) * 25.0f;
+                        if (static_cast<i32>(amount * ratio) > 0) {
+                            NUVEC position = {object->joint_matrices[3].m30, object->apiobj.field_0x218,
+                                              object->joint_matrices[3].m32};
+                            AddVariableShotDebrisEffectTimed1(effect, &position, 60, FRAMETIME, 0, 0, NULL);
+                        }
+                    }
+                }
+                if (object->apiobj.character_model->points_of_interest[4] != NULL) {
+                    f32 height = object->joint_matrices[4].m31 - object->apiobj.field_0x218;
+                    if (height > 0.0f && height <= 0.2f) {
+                        f32 amount = 25.0f;
+                        if (height >= 0.1f)
+                            amount = (1.0f - (height - 0.1f) / 0.1f) * 25.0f;
+                        if (static_cast<i32>(ratio * amount) > 0) {
+                            NUVEC position = {object->joint_matrices[4].m30, object->apiobj.field_0x218,
+                                              object->joint_matrices[4].m32};
+                            AddVariableShotDebrisEffectTimed1(effect, &position, 60, FRAMETIME, 0, 0, NULL);
                         }
                     }
                 }
