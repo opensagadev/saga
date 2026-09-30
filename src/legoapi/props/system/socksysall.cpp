@@ -559,54 +559,60 @@ static void SockMidpointAt(const SOCK *sock, i32 point, NUVEC *midpoint) {
     }
 }
 
-static void SockRailAngles(SOCK *sock, NUGSPLINE *spline, SOCKROT *rotations) {
-    i32 point_count = sock->cam->length;
-    for (i32 point = 0; point < point_count; ++point) {
+static SOCKROT *SockRailAngles(SOCK *sock, NUGSPLINE *spline, SOCKROT *rotations) {
+    for (i32 point = 0; point < sock->cam->length; ++point, ++rotations) {
         i32 previous = point - 1;
-        if (previous < 0) {
-            previous = point_count - 1;
-        }
+        if (previous < 0)
+            previous = sock->cam->length - 1;
         i32 next = point + 1;
-        if (next >= point_count) {
+        if (next >= sock->cam->length)
             next = 0;
-        }
-
-        NUVEC previous_pos;
-        NUVEC position;
-        NUVEC next_pos;
-        if (spline != NULL) {
+        NUVEC previous_pos, position, next_pos;
+        f32 midpoint_scale;
+        if (spline == NULL) {
+            // These three fixed samples are the reference's corner-average path,
+            // not a lookup of sock->mid (the explicit spline argument selects that).
+#define SOCK_RAIL_CORNER_SAMPLE(out, index)                                                                            \
+    NuVecAdd(&(out), &sock->a->pts[index], &sock->b->pts[index]);                                                      \
+    if ((sock->flags & 1) == 0) {                                                                                      \
+        NuVecAdd(&(out), &(out), &sock->c->pts[index]);                                                                \
+        NuVecAdd(&(out), &(out), &sock->d->pts[index]);                                                                \
+        midpoint_scale = 0.25f;                                                                                        \
+    } else                                                                                                             \
+        midpoint_scale = 0.5f;                                                                                         \
+    NuVecScale(&(out), &(out), midpoint_scale)
+            SOCK_RAIL_CORNER_SAMPLE(previous_pos, previous);
+            SOCK_RAIL_CORNER_SAMPLE(position, point);
+            SOCK_RAIL_CORNER_SAMPLE(next_pos, next);
+#undef SOCK_RAIL_CORNER_SAMPLE
+        } else {
             previous_pos = spline->pts[previous];
             position = spline->pts[point];
             next_pos = spline->pts[next];
-        } else {
-            SockMidpointAt(sock, previous, &previous_pos);
-            SockMidpointAt(sock, point, &position);
-            SockMidpointAt(sock, next, &next_pos);
         }
-
-        u16 x0 = 0;
-        u16 y0 = 0;
-        u16 x1 = 0;
-        u16 y1 = 0;
-        bool average = true;
-        if (point == 0 && sock->unknown_33 == 0) {
-            SockEdgeAnglesXY(&position, &next_pos, &x0, &y0);
-            average = false;
-        } else if (point == point_count - 1 && sock->unknown_33 == 0) {
+        u16 x1 = 0, x0 = 0, y1 = 0, y0 = 0;
+        i32 edge_count = 2;
+        if (point == 0) {
+            if (sock->looping == 0) {
+                SockEdgeAnglesXY(&position, &next_pos, &x0, &y0);
+                edge_count = 1;
+            }
+        } else if (point == sock->cam->length - 1 && sock->looping == 0) {
             SockEdgeAnglesXY(&previous_pos, &position, &x0, &y0);
-            average = false;
-        } else {
+            edge_count = 1;
+        }
+        if (edge_count == 2) {
             SockEdgeAnglesXY(&previous_pos, &position, &x0, &y0);
             SockEdgeAnglesXY(&position, &next_pos, &x1, &y1);
         }
-
-        rotations[point].x = x0;
-        rotations[point].y = y0;
-        if (average) {
-            rotations[point].x = (u16)(x0 + RotDiff(x0, x1) / 2);
-            rotations[point].y = (u16)(y0 + RotDiff(y0, y1) / 2);
+        rotations->x = x0;
+        rotations->y = y0;
+        if (edge_count > 1) {
+            rotations->x += RotDiff(x0, x1) / 2;
+            rotations->y += RotDiff(y0, y1) / 2;
         }
     }
+    return rotations;
 }
 
 static f32 SplineLength(NUGSPLINE *spline, i32 closed) {
@@ -647,14 +653,18 @@ i32 complexsockposition_forcesock = -1;
 static NUVEC temp_sockmidpos;
 static NUVEC temp_sockcampos;
 
-static bool OnOrOutsidePlane(NUVEC *point, NUVEC *plane_point, NUVEC *normal) {
-    return normal->x * (point->x - plane_point->x) + normal->y * (point->y - plane_point->y) +
-               normal->z * (point->z - plane_point->z) >=
-           0.0f;
+static i32 OnOrOutsidePlane(NUVEC *point, NUVEC *plane_point, NUVEC *normal) {
+    if (normal->x * (point->x - plane_point->x) + (point->y - plane_point->y) * normal->y +
+            (point->z - plane_point->z) * normal->z >=
+        0.0f)
+        return 1;
+    return 0;
 }
 
-static bool InsideLineXZ(f32 x, f32 z, f32 x0, f32 z0, f32 x1, f32 z1) {
-    return (x - x0) * (z1 - z0) + (x0 - x1) * (z - z0) >= 0.0f;
+static i32 InsideLineXZ(f32 x, f32 z, f32 x0, f32 z0, f32 x1, f32 z1) {
+    if ((x - x0) * (z1 - z0) + (x0 - x1) * (z - z0) >= 0.0f)
+        return 1;
+    return 0;
 }
 
 static f32 DistanceToPlane(NUVEC *point, NUVEC *plane_point, NUVEC *normal) {
@@ -728,98 +738,110 @@ static void FillSockPosition(SOCKSYS *sock_sys, SOCKPOSITION *position) {
 }
 
 static f32 BestSockPosition(SOCKSYS *sock_sys, NUVEC *point, SOCKPOSITION *result, i32 sock_index, i32 prior_segment) {
-    SOCK *sock = &sock_sys->sock[sock_index];
+    NUVEC *a0 = NULL, *b0 = NULL, *a1 = NULL, *b1 = NULL, *c1 = NULL, *d1 = NULL;
+    i32 segment = 0, next = 0, initial_segment = 0;
+    i32 ascending_segment = 0, descending_segment = 0;
+    i32 direction = 0, exhausted_directions = 0, segment_count = 0;
+    f32 distance_squared = 0.0f;
+    SOCK *sock = NULL;
+    SOCKSEGMENT *segment_data = NULL;
+    sock = &sock_sys->sock[sock_index];
     result->location.sock = -1;
-    if (sock->valid == 0) {
+    if (sock->valid == 0)
         return 0.0f;
-    }
 
     if ((sock->flags & 1) == 0) {
-        if (sock->min.x > point->x || point->x > sock->max.x || sock->min.y > point->y || point->y > sock->max.y ||
-            sock->min.z > point->z || point->z > sock->max.z)
+        if (point->x < sock->min.x || point->x > sock->max.x || point->y < sock->min.y || point->y > sock->max.y ||
+            point->z < sock->min.z || point->z > sock->max.z)
             return 0.0f;
     } else {
-        if (sock->min.x > point->x || point->x > sock->max.x || sock->min.z > point->z || point->z > sock->max.z)
+        if (point->x < sock->min.x || point->x > sock->max.x || point->z < sock->min.z || point->z > sock->max.z)
             return 0.0f;
     }
 
-    i32 segment_count = sock->length + (sock->unknown_33 != 0 ? 1 : 0);
-    i32 initial_segment = prior_segment == -1 ? segment_count / 2 : prior_segment;
-    i32 ascending_segment = initial_segment + 1;
-    i32 descending_segment = initial_segment - 1;
-    i32 direction = 0;
-    i32 exhausted_directions = 0;
+    if (sock->looping != 0)
+        segment_count = sock->length + 1;
+    else
+        segment_count = sock->length;
+    if (prior_segment == -1)
+        initial_segment = segment_count / 2;
+    else
+        initial_segment = prior_segment;
+    ascending_segment = initial_segment + 1;
+    descending_segment = initial_segment - 1;
+    // Valid bounds without an accepted segment use the reference failure distance.
+    distance_squared = 1000000.0f;
+    direction = 0;
+    exhausted_directions = 0;
 
     for (;;) {
-        i32 segment;
-        if (direction == 0) {
+        if (direction == 0)
             segment = initial_segment;
-        } else if (direction == 1) {
-            segment = ascending_segment++;
+        else if (direction == 1) {
+            segment = ascending_segment;
+            ++ascending_segment;
         } else {
-            segment = descending_segment--;
+            segment = descending_segment;
+            --descending_segment;
         }
 
-        if (segment < 0 || segment >= segment_count) {
-            exhausted_directions |= direction;
-        } else {
-            i32 next = segment + 1;
-            if (next == segment_count && sock->unknown_33 != 0) {
+        if (segment >= 0 && segment < segment_count) {
+            next = segment + 1;
+            if (next == segment_count && sock->looping != 0)
                 next = 0;
-            }
-
-            NUVEC *a0 = &sock->a->pts[segment];
-            NUVEC *b0 = &sock->b->pts[segment];
-            NUVEC *a1 = &sock->a->pts[next];
-            NUVEC *b1 = &sock->b->pts[next];
-            SOCKSEGMENT *segment_data = &sock->segments[segment];
-            bool inside = false;
-
+            a0 = &sock->a->pts[segment];
+            b0 = &sock->b->pts[segment];
+            a1 = &sock->a->pts[next];
+            b1 = &sock->b->pts[next];
+            segment_data = &sock->segments[segment];
+            i32 inside = 0;
             if ((sock->flags & 1) == 0) {
+                c1 = &sock->c->pts[next];
+                d1 = &sock->d->pts[next];
                 if (point->x >= segment_data->min.x && point->x <= segment_data->max.x &&
                     point->y >= segment_data->min.y && point->y <= segment_data->max.y &&
                     point->z >= segment_data->min.z && point->z <= segment_data->max.z) {
-                    NUVEC *c1 = &sock->c->pts[next];
-                    NUVEC *d1 = &sock->d->pts[next];
-                    inside = OnOrOutsidePlane(point, a0, &segment_data->planes[0]) &&
-                             OnOrOutsidePlane(point, a1, &segment_data->planes[1]) &&
-                             OnOrOutsidePlane(point, b1, &segment_data->planes[2]) &&
-                             OnOrOutsidePlane(point, c1, &segment_data->planes[3]) &&
-                             OnOrOutsidePlane(point, d1, &segment_data->planes[4]) &&
-                             OnOrOutsidePlane(point, b1, &segment_data->planes[5]);
+                    if (OnOrOutsidePlane(point, a0, &segment_data->planes[0]) &&
+                        OnOrOutsidePlane(point, a1, &segment_data->planes[1]) &&
+                        OnOrOutsidePlane(point, b1, &segment_data->planes[2]) &&
+                        OnOrOutsidePlane(point, c1, &segment_data->planes[3]) &&
+                        OnOrOutsidePlane(point, d1, &segment_data->planes[4]) &&
+                        OnOrOutsidePlane(point, b1, &segment_data->planes[5]))
+                        inside = 1;
                 }
-            } else if (segment_data->min.x <= point->x && point->x <= segment_data->max.x &&
-                       segment_data->min.z <= point->z && point->z <= segment_data->max.z) {
-                inside = InsideLineXZ(point->x, point->z, b0->x, b0->z, a0->x, a0->z) &&
-                         InsideLineXZ(point->x, point->z, a0->x, a0->z, a1->x, a1->z) &&
-                         InsideLineXZ(point->x, point->z, a1->x, a1->z, b1->x, b1->z) &&
-                         InsideLineXZ(point->x, point->z, b1->x, b1->z, b0->x, b0->z);
+            } else if (point->x >= segment_data->min.x && point->x <= segment_data->max.x &&
+                       point->z >= segment_data->min.z && point->z <= segment_data->max.z) {
+                if (InsideLineXZ(point->x, point->z, b0->x, b0->z, a0->x, a0->z) &&
+                    InsideLineXZ(point->x, point->z, a0->x, a0->z, a1->x, a1->z) &&
+                    InsideLineXZ(point->x, point->z, a1->x, a1->z, b1->x, b1->z) &&
+                    InsideLineXZ(point->x, point->z, b1->x, b1->z, b0->x, b0->z))
+                    inside = 1;
             }
-
-            if (inside) {
-                result->location.sock = (i8)sock_index;
-                result->location.segment = (i16)segment;
-                if ((sock->flags & 1) == 0) {
-                    result->ratio = RatioBetweenPlanes(point, a0, &segment_data->planes[0], &sock->c->pts[next],
-                                                       &segment_data->planes[5]);
-                } else {
+            if (inside != 0) {
+                result->location.sock = static_cast<i8>(sock_index);
+                result->location.segment = static_cast<i16>(segment);
+                if ((sock->flags & 1) == 0)
+                    result->ratio =
+                        RatioBetweenPlanes(point, a0, &segment_data->planes[0], c1, &segment_data->planes[5]);
+                else
                     result->ratio = RatioBetweenEdgesXZ(point, b0, a0, b1, a1);
-                }
-                result->next_segment = (i16)next;
+                result->next_segment = static_cast<i16>(next);
                 SockSysPointAlongMID(sock, result, &temp_sockmidpos);
-                f32 distance_squared = NuVecDistSqr(point, &temp_sockmidpos, NULL);
+                distance_squared = NuVecDistSqr(point, &temp_sockmidpos, NULL);
                 FillSockPosition(sock_sys, result);
-                TempSLoc[0] = *(u32 *)&result->location;
-                TempSLoc[1] = *(u32 *)&result->ratio;
-                return distance_squared;
+                memcpy(TempSLoc, result, sizeof(TempSLoc));
+                break;
             }
-        }
-
-        if (exhausted_directions == 3) {
-            return 0.0f;
-        }
-        direction = direction == 1 ? 2 : 1;
+        } else
+            exhausted_directions |= direction;
+        if (exhausted_directions == 3)
+            break;
+        if (direction == 1)
+            direction = 2;
+        else
+            direction = 1;
     }
+    return distance_squared;
 }
 
 extern "C" {

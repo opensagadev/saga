@@ -6081,3 +6081,47 @@ not an Android or full gameplay execution.
 Two reference-informed eight-way `FindPart` filter specializations decline
 from 31.284% to 13.407%/14.013% under the unchanged O2 owner. Revert both;
 do not retain the larger source merely because its semantics resemble retail.
+
+## Batch 126: socket search, rail samples and camera bounds
+
+Recover `BestSockPosition`'s alternating segment search, genuine initialized
+search state and shared successful return path. Invalid/out-of-bounds sockets
+return zero; valid outer bounds without an accepted segment return the original
+1,000,000 failure distance. Keep ordered inner bounds and the reference outer
+rejection tests, including their unordered comparison behavior. Copy the first
+eight resolved bytes after `FillSockPosition` without type-punned word reads.
+The routine improves **0% to 93.943214%**.
+
+Restore `SockRailAngles`'s three fixed corner-average samples when its explicit
+spline argument is null; do not substitute an independently populated
+`sock->mid`. Recover the local helper's returned output cursor, integer
+edge count, live camera-rail length and open/looping endpoint rules. Its score
+improves **37.894497% to 74.100914%**. Restore the socket-local plane/line
+predicates' original integer results; no calling-convention attributes are used.
+
+Restore the camera owner's used plain LOCAL `VuVecMtxMul` at original
+`0x2a3b35`, supported by the query's direct calls and the recovered camera TU
+boundary. Do not move or artificially emit the unused copy in `vumath.c`.
+`NuCameraClipTestExtentsAxisAligned` restores temporary global far-plane
+adjustment, helper calls, six rejection tests and conditional scissor tests.
+Raw SSE instructions establish the fourth/far/near projection grouping:
+translation + (z product + (x product + y product)). Ghidra's flattened
+expression obscures this rounding-sensitive order. Preserve the fourth
+absolute scissor translation and restore the far plane before classification.
+The query improves **23% to 89.820710%**, with unchanged center/extent arguments.
+
+Whole-binary matching reaches **66.503426%**, **+1.378946 percentage points**
+from main, with **6,270** exact functions and no exact function lost.
+All eleven GitHub checks passed for batch 125. The two-point target remains
+unfinished; compiler flags, scoring normalization and source ownership maps
+are unchanged.
+
+Production-body fixtures pass on 64-bit ASan/UBSan and optimized i386 SSE:
+**399,600** bounded socket cases, **90,000** rail geometry/callback cases and
+**65,536** camera cases. Socket services check plane/edge arguments, search
+order, short-circuiting, output bytes and post-fill snapshot timing. Rail tests
+cover explicit versus corner samples, open/looping endpoints and callback
+length mutation. Camera tests include cancellation, zero extents, unordered
+inputs, far overrides, all outcomes and byte-exact global restoration.
+Math/engine callbacks are stand-ins; these are not full gameplay integration
+or an Android device run.

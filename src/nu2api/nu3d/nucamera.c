@@ -9,6 +9,13 @@
 
 NUMTX clip_test_mtx;
 
+extern "C" {
+    // Original LOCAL helper at 0x2a3b35, called by the camera bounds query.
+    static void VuVecMtxMul(NUVEC *out, NUVEC *value, NUMTX *matrix) {
+        NuVecMtxTransform(out, value, matrix);
+    }
+}
+
 void NuCameraSetProjectionMtx(NUMTX *mtx, f32 fov, f32 aspect, f32 near_clip, f32 far_clip) {
     near_clip = near_clip < 0.1f ? 0.1f : near_clip;
     i32 angle = (i32)(fov / 2.0f * 10430.378f);
@@ -162,54 +169,54 @@ SAGA_HOST_WEAK i32 NuCameraClipTestExtents(NUVEC *min, NUVEC *max, NUMTX *world_
 // them as corners makes large bounds (notably the Cantina floor and walls)
 // appear outside the camera even while the camera is inside them.
 SAGA_HOST_WEAK i32 NuCameraClipTestExtentsAxisAligned(NUVEC *center, NUVEC *extent, f32 far_clip) {
-    auto transformPlanes = [](const NUVEC &point, const NUMTX &planes, f32 out[4]) {
-        out[0] = point.x * planes.m00 + point.y * planes.m10 + point.z * planes.m20 + planes.m30;
-        out[1] = point.x * planes.m01 + point.y * planes.m11 + point.z * planes.m21 + planes.m31;
-        out[2] = point.x * planes.m02 + point.y * planes.m12 + point.z * planes.m22 + planes.m32;
-        out[3] = point.x * planes.m03 + point.y * planes.m13 + point.z * planes.m23 + planes.m33;
-    };
-    auto projectExtent = [](const NUVEC &value, const NUMTX &absolute_planes, f32 out[4]) {
-        out[0] = value.x * absolute_planes.m00 + value.y * absolute_planes.m10 + value.z * absolute_planes.m20;
-        out[1] = value.x * absolute_planes.m01 + value.y * absolute_planes.m11 + value.z * absolute_planes.m21;
-        out[2] = value.x * absolute_planes.m02 + value.y * absolute_planes.m12 + value.z * absolute_planes.m22;
-        out[3] = value.x * absolute_planes.m03 + value.y * absolute_planes.m13 + value.z * absolute_planes.m23;
-    };
-
-    f32 distance[6];
-    f32 radius[6];
-    transformPlanes(*center, ClipPlanes.frustum_planes, distance);
-    projectExtent(*extent, ClipPlanes.abs_frustum_planes, radius);
-
-    NUMTX near_far_planes = ClipPlanes.near_far_planes;
+    struct BoundProjection {
+        NUVEC sides;
+        f32 fourth;
+        f32 far;
+        f32 near;
+    } distance, radius;
+    const f32 saved_far = ClipPlanes.near_far_planes.m30;
     if (far_clip != 0.0f) {
-        near_far_planes.m30 += far_clip - global_camera.far_clip;
+        ClipPlanes.near_far_planes.m30 -= global_camera.far_clip;
+        ClipPlanes.near_far_planes.m30 += far_clip;
     }
-    distance[4] = center->x * near_far_planes.m00 + center->y * near_far_planes.m10 + center->z * near_far_planes.m20 +
-                  near_far_planes.m30;
-    distance[5] = center->x * near_far_planes.m01 + center->y * near_far_planes.m11 + center->z * near_far_planes.m21 +
-                  near_far_planes.m31;
-    radius[4] = extent->x * near_far_planes.m02 + extent->y * near_far_planes.m12 + extent->z * near_far_planes.m22;
-    radius[5] = extent->x * near_far_planes.m03 + extent->y * near_far_planes.m13 + extent->z * near_far_planes.m23;
+    VuVecMtxMul(&distance.sides, center, &ClipPlanes.frustum_planes);
+    distance.fourth = ClipPlanes.frustum_planes.m33 +
+                      (center->z * ClipPlanes.frustum_planes.m23 +
+                       (center->x * ClipPlanes.frustum_planes.m03 + center->y * ClipPlanes.frustum_planes.m13));
+    distance.far = ClipPlanes.near_far_planes.m30 +
+                   (center->z * ClipPlanes.near_far_planes.m20 +
+                    (center->x * ClipPlanes.near_far_planes.m00 + center->y * ClipPlanes.near_far_planes.m10));
+    distance.near = ClipPlanes.near_far_planes.m31 +
+                    (center->z * ClipPlanes.near_far_planes.m21 +
+                     (center->x * ClipPlanes.near_far_planes.m01 + center->y * ClipPlanes.near_far_planes.m11));
+    VuVecMtxMul(&radius.sides, extent, &ClipPlanes.abs_frustum_planes);
+    radius.fourth = extent->x * ClipPlanes.abs_frustum_planes.m03 + extent->y * ClipPlanes.abs_frustum_planes.m13 +
+                    extent->z * ClipPlanes.abs_frustum_planes.m23;
+    radius.far = extent->x * ClipPlanes.near_far_planes.m02 + extent->y * ClipPlanes.near_far_planes.m12 +
+                 extent->z * ClipPlanes.near_far_planes.m22;
+    radius.near = extent->x * ClipPlanes.near_far_planes.m03 + extent->y * ClipPlanes.near_far_planes.m13 +
+                  extent->z * ClipPlanes.near_far_planes.m23;
+    ClipPlanes.near_far_planes.m30 = saved_far;
 
-    for (i32 plane = 0; plane < 6; ++plane) {
-        if (distance[plane] < -radius[plane]) {
-            return 0;
-        }
-    }
-
-    for (i32 plane = 0; plane < 4; ++plane) {
-        if (radius[plane] > distance[plane]) {
-            f32 scissor_distance[4];
-            f32 scissor_radius[4];
-            transformPlanes(*center, ClipPlanes.scissor_planes, scissor_distance);
-            projectExtent(*extent, ClipPlanes.abs_scissor_planes, scissor_radius);
-            for (i32 scissor_plane = 0; scissor_plane < 4; ++scissor_plane) {
-                if (scissor_radius[scissor_plane] > scissor_distance[scissor_plane]) {
-                    return 2;
-                }
-            }
-            break;
-        }
+    if (distance.sides.x < -radius.sides.x || distance.sides.y < -radius.sides.y ||
+        distance.sides.z < -radius.sides.z || distance.fourth < -radius.fourth || distance.far < -radius.far ||
+        distance.near < -radius.near)
+        return 0;
+    if (distance.sides.x < radius.sides.x || distance.sides.y < radius.sides.y || distance.sides.z < radius.sides.z ||
+        distance.fourth < radius.fourth) {
+        VuVecMtxMul(&distance.sides, center, &ClipPlanes.scissor_planes);
+        distance.fourth = ClipPlanes.scissor_planes.m33 +
+                          (center->z * ClipPlanes.scissor_planes.m23 +
+                           (center->x * ClipPlanes.scissor_planes.m03 + center->y * ClipPlanes.scissor_planes.m13));
+        VuVecMtxMul(&radius.sides, extent, &ClipPlanes.abs_scissor_planes);
+        radius.fourth =
+            ClipPlanes.abs_scissor_planes.m33 +
+            (extent->z * ClipPlanes.abs_scissor_planes.m23 +
+             (extent->x * ClipPlanes.abs_scissor_planes.m03 + extent->y * ClipPlanes.abs_scissor_planes.m13));
+        if (distance.sides.x < radius.sides.x || distance.sides.y < radius.sides.y ||
+            distance.sides.z < radius.sides.z || distance.fourth < radius.fourth)
+            return 2;
     }
     return 1;
 }

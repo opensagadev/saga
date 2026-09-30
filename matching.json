@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 66.424866,
+    "fuzzy_match_percent": 66.503426,
     "total_code": "4722419",
-    "matched_code": "522352",
-    "matched_code_percent": 11.061111,
+    "matched_code": "522403",
+    "matched_code_percent": 11.062191,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 6269,
-    "matched_functions_percent": 46.578495,
+    "matched_functions": 6270,
+    "matched_functions_percent": 46.585926,
     "total_units": 1
   },
   "text": {
@@ -73871,7 +73871,7 @@
           "address": 3917007,
           "offset": 3027039,
           "size": 174,
-          "match_percent": 64.01961
+          "match_percent": 86.117645
         },
         {
           "name": "_ZL15DistanceToPlaneP7nuvec_sS0_S0_",
@@ -73919,7 +73919,7 @@
           "address": 3920136,
           "offset": 3030168,
           "size": 1326,
-          "match_percent": 37.894497
+          "match_percent": 74.100914
         },
         {
           "name": "_ZL13SockDataErrorv",
@@ -73975,7 +73975,7 @@
           "address": 3926728,
           "offset": 3036760,
           "size": 2164,
-          "match_percent": 0.0
+          "match_percent": 93.943214
         },
         {
           "name": "ComplexSockPosition",
@@ -91570,7 +91570,7 @@
           "address": 2771651,
           "offset": 1881683,
           "size": 1637,
-          "match_percent": 23.0
+          "match_percent": 89.82071
         },
         {
           "name": "_Z21NuIOSDLCameraCallbackPv",
@@ -120728,6 +120728,7 @@
       "size": 51,
       "match_percent": 100.0,
       "candidate_units": [
+        "nu2api/nu3d/nucamera.c.o",
         "nu2api/numath/vumath.c.o"
       ]
     },
@@ -121784,8 +121785,9 @@
       "address": 3841761,
       "offset": 2951793,
       "size": 51,
-      "match_percent": 0.0,
+      "match_percent": 100.0,
       "candidate_units": [
+        "nu2api/nu3d/nucamera.c.o",
         "nu2api/numath/vumath.c.o"
       ]
     },
@@ -121887,7 +121889,7 @@
       "address": 3917181,
       "offset": 3027213,
       "size": 115,
-      "match_percent": 88.22581,
+      "match_percent": 99.83871,
       "candidate_units": [
         "legoapi/props/system/socksysall.cpp.o",
         "legoapi/render/core/rtl.c.o"
