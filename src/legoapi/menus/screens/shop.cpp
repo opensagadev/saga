@@ -1072,19 +1072,19 @@ i32 CodeMenu(MENU_s *) {
         else if (easesubin == -1)
             inoutscale = 1.0f - ShopClamp01(factor);
     }
-    if (slidetimer <= 0.0f) {
+    if (!(slidetimer > 0.0f)) {
         easesubin = 0;
         codevalid = 0;
-        i32 left = 0, right = 0, down = 0, up = 0;
+        bool left = false, right = false, down = false, up = false;
         if (input.left_held)
             left = 1;
         else if (input.right_held)
             right = 1;
         else if (input.down_held) {
-            if (timer <= 0.0f || input.down_pressed)
+            if (!(timer > 0.0f) || input.down_pressed)
                 down = 1;
         } else if (input.up_held) {
-            if (timer <= 0.0f || input.up_pressed)
+            if (!(timer > 0.0f) || input.up_pressed)
                 up = 1;
         }
         i32 confirm = input.confirm != 0;

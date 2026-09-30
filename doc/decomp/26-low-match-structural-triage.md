@@ -5450,3 +5450,42 @@ actual area ownership, packet indirection, opponents, exclusion/dead checks,
 high area-mask bits, parts/debris and respawn flags. Services are stand-ins,
 not a packed-asset or full game-runtime integration test; LeakSanitizer is
 disabled for sandbox compatibility.
+
+## Batch 110: versioned particle effects and callback-sensitive weapons
+
+Restore `FileLoadSingleEffectType`'s legacy formats instead of accepting only
+versions 34 through 41 while its caller accepts versions 5 through 41. Recover
+short-based frequency/timing conversion, discarded legacy fields, emitter
+defaults, float versus byte colour keys, collision/torus gates, old sound
+tables and versioned trail/radial fields. Preserve untouched runtime fields
+and use canonical members after pointer-bearing data, not target byte offsets
+on 64-bit hosts. Consume excess sound records without overflowing the four
+stored slots; clamp negative counts. The first draft passed the count read
+directly into the side-effect-unsafe `MAX` macro; the zero-count fixture caught
+the double read, and the final code reads once before clamping.
+
+Recover `DrawWeapons`'s character-data reloads after cheat/Anakin services and
+between hands. Preserve the explicit-weapon branch decision instead of testing
+possibly replaced character data after subsequent callbacks. Restore ordered
+float distinctions in `CodeMenu`'s slide/repeat gates and `PartCollide`'s age,
+XZ overlap and shield checks. Snapshot the particle player mask per object,
+while allowing callback changes to affect subsequent objects. No compiler
+options, public signatures, attributes or matching normalization are changed.
+
+Effect loading improves **25.140778% to 58.571846%**; weapon drawing improves
+**0% to 45.720722%**. Code-menu and particle-collision matching remain **0%**;
+retain the verified behavior corrections without claiming a per-function gain.
+Overall matching reaches **65.795960%**, **+0.671480 percentage points** from
+main, with **6,270** exact functions. All eleven GitHub checks passed for the
+preceding area/AI commit. The approximately two-point goal continues.
+
+Extracted production-body fixtures pass 64-bit ASan/UBSan and optimized i386
+SSE builds: **1,720** effect-record cases spanning every version 0 through 42,
+signed/zero frequencies, colour widths, defaults, negative/zero/oversized sound
+counts, special names and untouched runtime fields; weapon families, cheats,
+four hands, hilt scaling, trails, two-sided blades, reflections and callbacks
+replacing character data; shop navigation, cancellation, unlock deduplication,
+network input and NaN slides; collision ages/XZ bounds/shields including NaN,
+2D versus 3D, pickups/torpedoes, deflection, impulses and callback mask changes.
+Services are stand-ins, not rendering/gameplay or packed-asset integration;
+LeakSanitizer is disabled for sandbox compatibility.

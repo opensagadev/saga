@@ -3398,21 +3398,31 @@ static void DrawWeapons(GameObject_s *object, i32 reflection, f32 weapon_scale) 
     i32 sabre = 0;
     u16 rotation = 0;
     for (i32 hand = 0; hand < 4; ++hand) {
+        data = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
         const i32 joint = data->weapon_joints[hand];
         if (joint != -1 && object->apiobj.character_model->points_of_interest[joint] != NULL) {
-            if (Cheat_IsOn(15) && (data->field275_0x116 == 8 || data->field275_0x116 == 1)) {
+            const i32 disguise = Cheat_IsOn(15);
+            // Services may replace the character data; the reference reloads it.
+            data = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
+            bool explicit_weapon;
+            if (disguise && (data->field275_0x116 == 8 || data->field275_0x116 == 1)) {
                 models[0] = 0x59;
+                explicit_weapon = true;
             } else {
                 models[0] = data->weapon_model;
+                explicit_weapon = models[0] != -1;
                 if (models[0] == -1) {
                     if ((object->apiobj.character_data->model_flags & 0x90) == 0x80) {
                         models[0] = 0xd;
                     } else {
-                        i32 color = data->field_0x117;
+                        i32 color;
                         if (object->id == id_BOB) {
                             color = (object->field_0xefd & 2) ? 1 : 2;
                         } else if (AnakinGreenSabre(object)) {
                             color = 1;
+                        } else {
+                            color = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24)
+                                        ->field_0x117;
                         }
                         if (color < 4) {
                             if (object->apiobj.field_0x27c != -1 && Cheat_IsOn(25)) {
@@ -3429,7 +3439,7 @@ static void DrawWeapons(GameObject_s *object, i32 reflection, f32 weapon_scale) 
                     }
                 }
             }
-            if (data->weapon_model != -1 || models[0] == 0x59) {
+            if (explicit_weapon) {
                 if (object->id == id_JANGOFETT) {
                     rotation = 0xd1c8;
                 } else if (models[0] == 0x65 || models[0] == 0x67 || models[0] == 0x69 || models[0] == 0x6b) {

@@ -289,19 +289,20 @@ static void PartCollide(PART_s *part, i32 three_dimensional) {
     const f32 maximum_z = part->position.z + radius;
     GameObject_s *object = Obj;
     for (i32 i = 0; i < HIGHGAMEOBJECT; ++i, ++object) {
+        const i8 force_player_mask = part->force_player_mask;
         APIOBJECT_s *api = &object->apiobj;
         if ((api->field_0x1f8 & 0x1001) != 0x1001 || api->field_0x287 != 0)
             continue;
         i8 context = static_cast<i8>(object->character_context);
         if ((CInfo[context].flags & 0x8000) != 0 || (object->field_0xe20 & 0x20) != 0)
             continue;
-        if (part->force_player_mask != 0) {
+        if (force_player_mask != 0) {
             if ((part->flags & 0x8000) == 0 && part->owner == object)
                 continue;
         } else if (part->owner == object) {
-            if (0.5f > part->scale_time)
+            if (!(part->scale_time >= 0.5f))
                 continue;
-        } else if (api->field_0x27c != -1 && 0.25f > part->scale_time)
+        } else if (api->field_0x27c != -1 && !(part->scale_time >= 0.25f))
             continue;
         if (context == 0x39 || context == 0x3b || context == 0x3c)
             continue;
@@ -309,8 +310,8 @@ static void PartCollide(PART_s *part, i32 three_dimensional) {
             continue;
         if ((part->flags & 4) != 0 && (api->flags_low & 0x80) == 0)
             continue;
-        if (minimum_x > api->collision_max.x || api->collision_min.x > maximum_x || minimum_z > api->collision_max.z ||
-            api->collision_min.z > maximum_z)
+        if (!(minimum_x <= api->collision_max.x && api->collision_min.x <= maximum_x &&
+              minimum_z <= api->collision_max.z && api->collision_min.z <= maximum_z))
             continue;
         if (three_dimensional != 0 &&
             !((api->character_data->model_flags & 0x2000) != 0 && (part->flags & 0x40) != 0)) {
@@ -338,7 +339,7 @@ static void PartCollide(PART_s *part, i32 three_dimensional) {
             } else if (part->pickup_type == 0xd0) {
                 CollectPowerUp(object, &part->position, part->rotation_y, 1);
                 KillPart(part, 2);
-            } else if (part->force_player_mask == 3) {
+            } else if (force_player_mask == 3) {
                 if ((api->character_data->model_flags & 0x2000) == 0 || object->torpedo == NULL)
                     continue;
                 if (object->torpedo->count < getMaxTorpedos(object)) {
@@ -381,7 +382,7 @@ static void PartCollide(PART_s *part, i32 three_dimensional) {
                 GameCam_Judder(GameCam, 0.2f, 0, NULL);
                 ReleaseBuildIt(object, 0);
                 ReleasePush(object);
-                if (!(object->field_0xd24 < 1.0f))
+                if (object->field_0xd24 >= 1.0f)
                     ObjHitShield(part->owner, object, object->field_0xe37, NULL);
                 else if (!CannotKill(object)) {
                     ObjHitObj((part->flags & 0x10000) != 0 ? NULL : part->owner, object, part->field_204,
