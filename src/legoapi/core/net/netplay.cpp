@@ -19,6 +19,10 @@ struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
+APICHARACTERMODELLIST_s NetFreePlayModelList[49];
+i8 net_FreePlayModelCount;
+u8 net_recievedFreePlayList;
+
 void GetClientMineInfo(nuvec_s **positions, u64 **present, u64 **exploded) {
     *positions = client_mines.positions;
     *present = &client_mines.present_mask;

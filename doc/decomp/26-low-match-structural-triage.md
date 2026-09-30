@@ -5146,3 +5146,49 @@ relative ship velocity, both escort IDs, pickup amounts and owner credit,
 audio selection, allocation/flag gates, every grouped slot, inactive groups,
 the final queued slot and first-hit termination. Services are fixtures, not
 full flight-gameplay integration; LeakSanitizer is disabled for the sandbox.
+
+## Batch 101: clip-viewer panels and free-play menu lifecycle
+
+Restore the cutscene-viewer branch of `Hub_DrawAreaStats`, including episode
+and clip titles, the signed chapter sentinel, and selection-transition fades.
+Mode 18 does not require a valid area index. Door panels compare the configured
+door's index, rather than pointer identity. Recover the reference's `0.05`
+vertical icon offsets and exact `0.20100002` horizontal constant; preserve
+live area-flag reloads after callbacks. Keep the normal-panel invalid-index
+guard. The function improves **1.486945% to 9.691906%**.
+
+Restore `Hub_DrawFreePlaySelect` and its private cursor closure together with
+`Hub_UpdateFreePlaySelect`. The old updater treated selection state as a roster
+index and launched directly, so simply restoring drawing left its private
+opacity/timer state disconnected. Recover entry, selection, return, team
+assembly and launch states, two-player confirmation/cancellation, touch's
+9999 confirmation sentinel, directional repeats and grid navigation, network
+rosters, challenge/arcade launch state, easing, name prompts, touch hitboxes,
+radar pulses and the final two-row roster. Share the existing icon-wibble
+state through its owning header; add the missing network roster storage in
+`netplay`, with its verified 49-entry allocation. Compiler options and public
+signatures are unchanged; private callers retain natural compiler specialization.
+
+Preserve the reference's exact-zero versus negative transition-timer behavior
+and its pre-update confirmation count. Add narrow malformed-data guards:
+bound a roster while leaving its terminator, cap a network roster at its
+verified allocation, avoid division by zero or endless duplicate-only grid
+navigation, ignore invalid touch indices, and avoid challenge initialization
+through a null next-level pointer. These guards do not change valid data paths.
+
+The renderer improves **11.027806% to 35.422245%**. The complete updater's
+indirect switch table crosses the linked matcher's GOT-proof boundary and
+currently reports **0%**, down from the old partial body's **9.455767%**.
+Do not change compiler options or the scoring contract to conceal that limit.
+Overall matching still reaches **65.572440%** (**+0.447960 percentage points**
+from main), with **6,266** exact functions. The approximately two-point goal
+remains unfinished.
+
+Extracted production bodies pass optimized i386 and 64-bit ASan/UBSan fixtures:
+all clip/title/fade combinations, index-based doors, chapters and completion
+variants; free-play transition geometry, prompts, locked models, radar timing,
+roster capacity, touch/controller priority, opposing directions, exact-zero
+timers, confirmations/cancellations, network filtering, launch and malformed
+grid boundaries. Rendering/audio/network services are stand-ins, not gameplay
+integration. LeakSanitizer is disabled for the sandbox; the menu fixture also
+disables vptr checks because its radar service stand-in has no engine object.

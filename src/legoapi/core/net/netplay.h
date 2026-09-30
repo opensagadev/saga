@@ -24,4 +24,7 @@ DECOMP_ASSERT(offsetof(CLIENTMINES_s, exploded_mask) == 0x308, "client mine expl
 DECOMP_ASSERT(offsetof(CLIENTMINES_s, field_310) == 0x310, "client mine tail offset");
 
 extern CLIENTMINES_s client_mines;
+extern APICHARACTERMODELLIST_s NetFreePlayModelList[49];
+extern i8 net_FreePlayModelCount;
+extern u8 net_recievedFreePlayList;
 void GetClientMineInfo(nuvec_s **positions, u64 **present, u64 **exploded);
