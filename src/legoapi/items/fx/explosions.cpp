@@ -138,7 +138,7 @@ void UpdateExplosion_Generic(EXPLOSION *explosion) {
                 continue;
             if ((CInfo[static_cast<i8>(target->character_context)].flags & 0x20008000) != 0)
                 continue;
-            if ((static_cast<GAMECHARACTERDATA_s *>(object->character_data->field11_0x24)->flags_090 & 0x8000) != 0)
+            if ((object->character_data->game_character->flags_090 & 0x8000) != 0)
                 continue;
             if ((explosion->field_0x24 & 0x80) != 0 && (object->character_data->model_flags & 0x10) != 0)
                 continue;
@@ -148,9 +148,9 @@ void UpdateExplosion_Generic(EXPLOSION *explosion) {
                 (((object->field_0x1e4 & explosion->field_0x00) | (object->field_0x1e8 & explosion->field_0x04)) != 0 ||
                  explosion->object == target))
                 continue;
-            if (object->collision_min.x > maximum.x || minimum.x > object->collision_max.x ||
-                object->collision_min.y > maximum.y || minimum.y > object->collision_max.y ||
-                object->collision_min.z > maximum.z || minimum.z > object->collision_max.z)
+            if (!(object->collision_min.x <= maximum.x && minimum.x <= object->collision_max.x &&
+                  object->collision_min.y <= maximum.y && minimum.y <= object->collision_max.y &&
+                  object->collision_min.z <= maximum.z && minimum.z <= object->collision_max.z))
                 continue;
             if (!SphereSphereOverlapScaleY(&object->collision_position, object->field_0x1dc, object->field_0x1e0,
                                            &explosion->position, radius, radius))

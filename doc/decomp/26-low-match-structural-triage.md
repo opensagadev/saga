@@ -5564,3 +5564,42 @@ signed types, all callback combinations, counts and absent optional data;
 all ten detonator slots, timing thresholds, projection, NaNs and callbacks;
 all eight debris slots, eligibility guards, ordered timer tests, both damage
 checks and callback ordering. Services are stand-ins, not engine integration.
+
+## Batch 113: hub transitions, range checks, climbing and music
+
+Recover the hub door helper's ten area checks, eight player path updates and
+eight table lookups, including short circuits and callback reloads. The
+reference uses the separate current `player` global, not `Player[0]`; reload
+it between area services. Matching improves **15.849056% to 42.490566%**.
+Recover the active-range query's eight probes and shared successful return:
+**20.891891% to 60.124325%**. Recover the climb helper's eight explicit angles
+and shared result stores: **18.038252% to 71.448090%**. Raw instructions
+confirm sign extension of the terrain service's low byte; no calling-
+convention attributes are added to approximate its private optimized ABI.
+
+Recover six fixed music track slots with outer stop/fade dispatch, retaining
+voice state checks, service order and fade flags: **15.105140% to 59.266354%**.
+Recover eight ordered dodge-hint checks, retaining the early model-flag veto
+and both animation alternatives: **16.115625% to 52.243750%**.
+
+Retain two narrow behavior corrections even though their individual matching
+does not improve: reload the tagging source after callbacks and only read
+optional character data when needed (`CheckForPlayersTurnedOff`,
+**5.473088% to 0%**); use ordered six-axis explosion bounds and the canonical
+game-character pointer (`UpdateExplosion_Generic`, **9.010430% to 8.408084%**).
+Explicit tagging fanout and explosion ring expansion scored zero and are
+deferred; do not continue source-layout trials without new evidence.
+
+The net batch reaches **66.018790%**, **+0.894310 percentage points** from
+main, with **6,270** exact functions. All eleven GitHub checks passed for
+batch 112. The approximately two-point goal remains unfinished. Owners,
+compiler options, public signatures and scoring normalization are unchanged.
+
+Extracted production bodies pass 64-bit ASan/UBSan and optimized i386 SSE
+fixtures: **90** hub area/table combinations plus cleanup and callback
+reloads; all player range/tag slots, thresholds, NaNs and lazy optional data;
+all climb stop positions and misses, node selection and byte terrain results;
+**50,000** music stop/fade oracle cases with identical service sequences;
+all dodge slots, both animation alternatives and short circuits; explosion
+NaNs on every bounding axis, contact boundaries, canonical flags and particle
+call counts. External services are stand-ins, not full engine integration.

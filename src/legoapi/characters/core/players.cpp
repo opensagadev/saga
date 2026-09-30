@@ -1760,17 +1760,18 @@ i32 UnderPlayerControl(GameObject_s *object) {
 }
 
 i32 ActivePlayerInRange(nuvec_s *position, float range_squared, float *distance_squared) {
-    for (i32 i = 0; i < 8; ++i) {
-        GameObject_s *object = Player[i];
-        if (object != NULL && static_cast<i8>(object->apiobj.flags_low) < 0) {
-            const f32 distance = NuVecDistSqr(&object->apiobj.collision_position, position, NULL);
-            if (distance < range_squared) {
-                if (distance_squared != NULL)
-                    *distance_squared = distance;
-                return 1;
-            }
+    f32 distance;
+#define PLAYER_IN_RANGE(index)                                                                                         \
+    (Player[index] != NULL && static_cast<i8>(Player[index]->apiobj.flags_low) < 0 &&                                  \
+     (distance = NuVecDistSqr(&Player[index]->apiobj.collision_position, position, NULL)) < range_squared)
+    if (PLAYER_IN_RANGE(0) || PLAYER_IN_RANGE(1) || PLAYER_IN_RANGE(2) || PLAYER_IN_RANGE(3) || PLAYER_IN_RANGE(4) ||
+        PLAYER_IN_RANGE(5) || PLAYER_IN_RANGE(6) || PLAYER_IN_RANGE(7)) {
+        if (distance_squared != NULL) {
+            *distance_squared = distance;
         }
+        return 1;
     }
+#undef PLAYER_IN_RANGE
     return 0;
 }
 
@@ -2014,9 +2015,9 @@ void CheckForPlayersTurnedOff() {
                 continue;
             }
 
-            GAMECHARACTERDATA *character = target->apiobj.character_data->game_character;
-            if (target->apiobj.field_0x27d != 0 || (target->field_0xe31 == 1 && character->field_0x28 > 0.0f)) {
-                TagCharacter(source, target, 1);
+            if (target->apiobj.field_0x27d != 0 ||
+                (target->field_0xe31 == 1 && target->apiobj.character_data->game_character->field_0x28 > 0.0f)) {
+                TagCharacter(Player[source_index], target, 1);
             }
         }
     }

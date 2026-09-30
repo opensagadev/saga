@@ -756,33 +756,48 @@ i32 NuMusic::StopTrack(u32 clazz, i32 fade) {
     }
 
     i32 result = 0;
-    for (i32 i = 0; i < 6; i++) {
-        Track *track = tracks[i];
-        if (track == NULL) {
-            continue;
-        }
-        Voice *voice = FindVoiceByTrack(track);
-        if (voice == NULL) {
-            continue;
-        }
-
-        if ((u32)(voice->status - VOICE_STATUS_PLAYING) <= 1) {
-            if ((fade & 1) != 0) {
-                // Request a fade-out; Process finishes the stop at zero gain.
-                voice->fade_rate = 2.0f;
-                voice->flags |= 1u;
-                result = 1;
-            } else {
-                NuSound3StopStereoStream(voice->stream_index);
-                voice->SetStatusFn(VOICE_STATUS_NONE, 0x464);
-                result = 1;
-            }
-        } else if ((u32)(voice->status - VOICE_STATUS_STOPPING) <= 1) {
-            NuSound3StopStereoStream(voice->stream_index);
-            voice->SetStatusFn(VOICE_STATUS_NONE, 0x46a);
-            result = 1;
-        }
+#define STOP_MUSIC_TRACK(index, fading)                                                                                \
+    do {                                                                                                               \
+        Track *track = tracks[index];                                                                                  \
+        if (track == NULL) {                                                                                           \
+            break;                                                                                                     \
+        }                                                                                                              \
+        Voice *voice = FindVoiceByTrack(track);                                                                        \
+        if (voice == NULL) {                                                                                           \
+            break;                                                                                                     \
+        }                                                                                                              \
+        if (static_cast<u32>(voice->status - VOICE_STATUS_PLAYING) <= 1) {                                             \
+            if (fading) {                                                                                              \
+                voice->fade_rate = 2.0f;                                                                               \
+                voice->flags |= 1u;                                                                                    \
+                result = 1;                                                                                            \
+            } else {                                                                                                   \
+                NuSound3StopStereoStream(voice->stream_index);                                                         \
+                voice->SetStatusFn(VOICE_STATUS_NONE, 0x464);                                                          \
+                result = 1;                                                                                            \
+            }                                                                                                          \
+        } else if (static_cast<u32>(voice->status - VOICE_STATUS_STOPPING) <= 1) {                                     \
+            NuSound3StopStereoStream(voice->stream_index);                                                             \
+            voice->SetStatusFn(VOICE_STATUS_NONE, 0x46a);                                                              \
+            result = 1;                                                                                                \
+        }                                                                                                              \
+    } while (0)
+    if ((fade & 1) == 0) {
+        STOP_MUSIC_TRACK(0, false);
+        STOP_MUSIC_TRACK(1, false);
+        STOP_MUSIC_TRACK(2, false);
+        STOP_MUSIC_TRACK(3, false);
+        STOP_MUSIC_TRACK(4, false);
+        STOP_MUSIC_TRACK(5, false);
+    } else {
+        STOP_MUSIC_TRACK(0, true);
+        STOP_MUSIC_TRACK(1, true);
+        STOP_MUSIC_TRACK(2, true);
+        STOP_MUSIC_TRACK(3, true);
+        STOP_MUSIC_TRACK(4, true);
+        STOP_MUSIC_TRACK(5, true);
     }
+#undef STOP_MUSIC_TRACK
 
     return result;
 }

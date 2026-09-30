@@ -113,37 +113,46 @@ static void Hub_MakeListCharactersAvailable(i16 *characters) {
 }
 
 static void Hub_GoneThroughDoor(WORLDINFO_s *world) {
-    GameObject_s *first_player = Player[0];
-    if (first_player == NULL) {
+    if (player == NULL) {
         return;
     }
 
-    const i32 player_index = static_cast<i8>(first_player->apiobj.field_0x27c);
     i32 new_area = -1;
-    for (i32 area = 0; area < HUB_AREA_COUNT; ++area) {
-        if (CheckPosAIArea(hub_ai.areas[area], PlayerStart[player_index].pos, 0.0f) != 0) {
-            new_area = area;
-            break;
-        }
+#define CHECK_HUB_AREA(index)                                                                                          \
+    if (CheckPosAIArea(hub_ai.areas[index], PlayerStart[static_cast<i8>(player->apiobj.field_0x27c)].pos, 0.0f) !=     \
+        0) {                                                                                                           \
+        new_area = index;                                                                                              \
     }
+    CHECK_HUB_AREA(0)
+    else CHECK_HUB_AREA(1) else CHECK_HUB_AREA(2) else CHECK_HUB_AREA(3) else CHECK_HUB_AREA(4) else CHECK_HUB_AREA(
+        5) else CHECK_HUB_AREA(6) else CHECK_HUB_AREA(7) else CHECK_HUB_AREA(8) else CHECK_HUB_AREA(9)
+#undef CHECK_HUB_AREA
 
-    if (new_area == -1 || new_area == hub_ai.area) {
+        if (new_area == -1 || new_area == hub_ai.area) {
         return;
     }
 
     hub_ai.area = static_cast<i16>(new_area);
     AIPATH *area_path = hub_ai.paths[new_area];
     if (area_path != NULL && AISysSetLevelPath(world->ai_sys, area_path->name) != 0) {
-        for (i32 player_index = 0; player_index < HUB_PLAYER_COUNT; ++player_index) {
-            GameObject_s *player = Player[player_index];
-            if (player == NULL || (player->apiobj.field_0x1f8 & APIOBJECT_FLAG_IN_USE) == 0) {
-                continue;
-            }
-
-            AISysCharacterSetPath(&player->ai, world->ai_sys->path_sys->active_path);
-            AISysGetCharacterPathPos(world->ai_sys, &player->apiobj, &player->ai, 0xff,
-                                     static_cast<i8>(player->apiobj.field_0x27d));
-        }
+#define SET_HUB_PLAYER_PATH(index)                                                                                     \
+    do {                                                                                                               \
+        GameObject_s *path_player = Player[index];                                                                     \
+        if (path_player != NULL && (path_player->apiobj.field_0x1f8 & APIOBJECT_FLAG_IN_USE) != 0) {                   \
+            AISysCharacterSetPath(&path_player->ai, world->ai_sys->path_sys->active_path);                             \
+            AISysGetCharacterPathPos(world->ai_sys, &path_player->apiobj, &path_player->ai, 0xff,                      \
+                                     static_cast<i8>(path_player->apiobj.field_0x27d));                                \
+        }                                                                                                              \
+    } while (0)
+        SET_HUB_PLAYER_PATH(0);
+        SET_HUB_PLAYER_PATH(1);
+        SET_HUB_PLAYER_PATH(2);
+        SET_HUB_PLAYER_PATH(3);
+        SET_HUB_PLAYER_PATH(4);
+        SET_HUB_PLAYER_PATH(5);
+        SET_HUB_PLAYER_PATH(6);
+        SET_HUB_PLAYER_PATH(7);
+#undef SET_HUB_PLAYER_PATH
     }
 
     i16 available_characters[HUB_CHARACTER_CAPACITY];
@@ -171,19 +180,28 @@ static void Hub_GoneThroughDoor(WORLDINFO_s *world) {
 
     hub_ai.table_count = 0;
     char name[32];
-    for (i32 table = 0; table < HUB_TABLE_COUNT; ++table) {
-        if (hub_ai.area == 0) {
-            sprintf(name, "Table_%d", table);
-        } else {
-            sprintf(name, "Table%d_%d", hub_ai.area, table);
-        }
-
-        hub_ai.table_locators[table] = AIPathFindLocator(world->ai_sys, name);
-        if (hub_ai.table_locators[table] == NULL) {
-            return;
-        }
-        ++hub_ai.table_count;
-    }
+#define FIND_HUB_TABLE(index)                                                                                          \
+    do {                                                                                                               \
+        if (hub_ai.area == 0) {                                                                                        \
+            sprintf(name, "Table_%d", index);                                                                          \
+        } else {                                                                                                       \
+            sprintf(name, "Table%d_%d", hub_ai.area, index);                                                           \
+        }                                                                                                              \
+        hub_ai.table_locators[index] = AIPathFindLocator(world->ai_sys, name);                                         \
+        if (hub_ai.table_locators[index] == NULL) {                                                                    \
+            return;                                                                                                    \
+        }                                                                                                              \
+        ++hub_ai.table_count;                                                                                          \
+    } while (0)
+    FIND_HUB_TABLE(0);
+    FIND_HUB_TABLE(1);
+    FIND_HUB_TABLE(2);
+    FIND_HUB_TABLE(3);
+    FIND_HUB_TABLE(4);
+    FIND_HUB_TABLE(5);
+    FIND_HUB_TABLE(6);
+    FIND_HUB_TABLE(7);
+#undef FIND_HUB_TABLE
 }
 
 void LSW_Hub_InitAI(WORLDINFO_s *world) {

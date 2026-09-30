@@ -76,23 +76,36 @@ f32 CurrentHintAlpha() {
 i32 Dodge_UpdateHint(HINT_s *hint) {
     if (WORLD->area != NULL && WORLD->area == HUB_ADATA)
         return 0;
-    for (i32 i = 0; i < 8; ++i) {
-        GameObject *object = Player[i];
-        if (object == NULL)
-            continue;
-        const u32 flags = object->apiobj.character_data->model_flags;
-        if ((flags & 0x2000) != 0)
-            return 0;
-        if (!object->apiobj.player_controlled || object->incoming_bolt == NULL)
-            continue;
-        if (hint->control_mode_ids[0] == 0x265) {
-            if ((flags & 8) == 0 && (object->apiobj.character_model->model_data_b[0x4f] != NULL ||
-                                     object->apiobj.character_model->model_data_b[0x26] != NULL))
-                return 1;
-        } else if (hint->control_mode_ids[0] == 0x5dd && (flags & 8) != 0) {
-            return 1;
-        }
-    }
+#define CHECK_DODGE_HINT_PLAYER(index)                                                                                 \
+    do {                                                                                                               \
+        GameObject *object = Player[index];                                                                            \
+        if (object == NULL) {                                                                                          \
+            break;                                                                                                     \
+        }                                                                                                              \
+        const u32 flags = object->apiobj.character_data->model_flags;                                                  \
+        if ((flags & 0x2000) != 0) {                                                                                   \
+            return 0;                                                                                                  \
+        }                                                                                                              \
+        if (object->apiobj.player_controlled && object->incoming_bolt != NULL) {                                       \
+            if (hint->control_mode_ids[0] == 0x265) {                                                                  \
+                if ((flags & 8) == 0 && (object->apiobj.character_model->model_data_b[0x4f] != NULL ||                 \
+                                         object->apiobj.character_model->model_data_b[0x26] != NULL)) {                \
+                    return 1;                                                                                          \
+                }                                                                                                      \
+            } else if (hint->control_mode_ids[0] == 0x5dd && (flags & 8) != 0) {                                       \
+                return 1;                                                                                              \
+            }                                                                                                          \
+        }                                                                                                              \
+    } while (0)
+    CHECK_DODGE_HINT_PLAYER(0);
+    CHECK_DODGE_HINT_PLAYER(1);
+    CHECK_DODGE_HINT_PLAYER(2);
+    CHECK_DODGE_HINT_PLAYER(3);
+    CHECK_DODGE_HINT_PLAYER(4);
+    CHECK_DODGE_HINT_PLAYER(5);
+    CHECK_DODGE_HINT_PLAYER(6);
+    CHECK_DODGE_HINT_PLAYER(7);
+#undef CHECK_DODGE_HINT_PLAYER
     return 0;
 }
 
