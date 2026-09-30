@@ -206,15 +206,6 @@ extern i16 temp_xrot;
 extern i16 temp_zrot;
 
 // Forward declarations for local (static) part/gizmo helper stubs.
-struct CUSTOMPIECEANIM {
-    f32 duration;
-    f32 elapsed;
-    f32 hold_time;
-    u16 start_angle;
-    u16 target_angle;
-    u16 current_angle;
-};
-DECOMP_ASSERT(offsetof(CUSTOMPIECEANIM, current_angle) == 0x10, "custom piece current angle offset");
 struct spacelevel_s;
 struct quickboltinfo;
 
@@ -929,30 +920,6 @@ static __used__ void PartMove_VehiclePickup(PART_s *part, f32) {
     part->position.x += part->velocity.x * gain * FRAMETIME;
     part->position.y += part->velocity.y * gain * FRAMETIME;
     part->position.z += part->velocity.z * gain * FRAMETIME;
-}
-
-static __used__ void UpdateCustomPieceAnim(CUSTOMPIECEANIM *anim, u16 minimum, u16 maximum) {
-    if (anim->duration > anim->elapsed) {
-        anim->elapsed += FRAMETIME;
-        if (anim->elapsed >= anim->duration) {
-            anim->elapsed = anim->duration;
-            anim->hold_time = static_cast<f32>(qrand()) / 65536.0f * 0.5f + 0.5f;
-        }
-        i32 difference = RotDiff(anim->start_angle, anim->target_angle);
-        f32 blend =
-            1.0f - (NU_SIN_LUT(static_cast<i32>(anim->elapsed / anim->duration * 32768.0f + 16384.0f)) + 1.0f) * 0.5f;
-        anim->current_angle = static_cast<i32>(anim->start_angle + static_cast<f32>(difference) * blend);
-    } else {
-        anim->hold_time -= FRAMETIME;
-        if (anim->hold_time <= 0.0f) {
-            anim->start_angle = anim->current_angle;
-            i32 difference = RotDiff(minimum, maximum);
-            anim->target_angle =
-                static_cast<i32>(minimum + static_cast<f32>(difference) * (static_cast<f32>(qrand()) / 65536.0f));
-            anim->elapsed = 0.0f;
-            anim->duration = static_cast<f32>(qrand()) / 65536.0f + 1.0f;
-        }
-    }
 }
 
 extern "C" {

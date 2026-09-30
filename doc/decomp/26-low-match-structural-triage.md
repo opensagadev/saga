@@ -5337,3 +5337,38 @@ legacy versions and UID wrap; HUD menu/fade/pause gates, timers, challenge,
 Super Story, True Jedi completion/awards, hub gold bricks and power-ups.
 Services are stand-ins, not full gameplay or packed-asset integration;
 LeakSanitizer is disabled for sandbox compatibility.
+
+## Batch 107: customizer previews and status/save drawing
+
+Recover `Customiser_Update`'s preview angles, head/arms/legs animation,
+hat-height interpolation, active/other-player selection, animation availability,
+touch-arrow rendering/hitboxes and texture gates. Correct its reversed use of
+the intro-state and draw-delay fields and restore the 30-frame animation step.
+Move the private `UpdateCustomPieceAnim` into its actual caller's translation
+unit; both source and destination use the effective `-O2` command. Recover the
+binary's random normalization constant. No forced calling convention is used.
+
+Recover `Customiser_Draw3D`'s GC-data owner, cape preview override, hidden hats,
+hat translation, hand-held weapons and lightsaber layers. Its matrix uses the
+existing aligned type because the original frame is verified 16-byte aligned.
+Preserve the reference's touch-hitbox publication order. Fix setup so a replacing
+torso suppresses head model flags but still inherits head gameplay flags.
+
+Restore `DrawStatusScreen`'s demo options and empty-status countdown wobble;
+restore `DrawGameState`'s current-game percentage, entry colours, message-box
+mode and two-line empty/no-space text. Keep public signatures and compiler
+options unchanged; bound save-slot indexing and missing resources.
+
+Customizer update improves **20.133759% to 28.945860%**, drawing **13.484848%
+to 20.353535%** and setup **15.048014% to 15.230132%**. Status drawing improves
+**10.994845% to 21.864262%** and save drawing **4.385246% to 23.893442%**.
+Overall matching reaches **65.693980%**, **+0.569500 percentage points** from
+main, with **6,270** exact functions. The approximately two-point goal continues.
+
+Extracted production-body fixtures pass 64-bit ASan/UBSan and optimized i386
+(SSE arithmetic for the custom-piece random endpoint): intro availability and
+expiry, draw delay, preview-side selection, touch edges/idle pulse, hat offsets,
+texture changes, cape/hats/weapons/lightsabers, inherited flags; status callbacks,
+fade/demo gates, countdown and stage alpha; current/used/empty/no-space saves,
+menu colours and invalid slots. Engine/rendering services are stand-ins, not
+full gameplay integration; LeakSanitizer is disabled for sandbox compatibility.

@@ -311,6 +311,7 @@ extern f32 memcard_loadresult_delay;
 extern u8 MENUNORMALR;
 extern u8 MENUNORMALG;
 extern u8 MENUNORMALB;
+extern u8 MENUENTRYR, MENUENTRYG, MENUENTRYB;
 extern u8 MENUFLASH0R;
 extern u8 MENUFLASH0G;
 extern u8 MENUFLASH0B;
@@ -1414,16 +1415,18 @@ void DrawCross_Now(_vuv_s *, float, i32, i32) {
 }
 
 void DrawGameState(float x, float y, i32 highlight, i32 slot) {
-    char game_name[64];
+    if (slot < -1 || slot >= 6 || TTab == NULL)
+        return;
+    char game_name[256];
     if (slot == -1) {
         NuStrCpy(game_name, TTab[tCURRENTGAME]);
     } else {
-        sprintf(game_name, "%s %i", TTab[tGAME], slot + 1);
+        snprintf(game_name, sizeof(game_name), "%s %i", TTab[tGAME], slot + 1);
     }
 
-    u8 red = MENUNORMALR;
-    u8 green = MENUNORMALG;
-    u8 blue = MENUNORMALB;
+    u8 red = MENUENTRYR;
+    u8 green = MENUENTRYG;
+    u8 blue = MENUENTRYB;
     if (highlight != 0 && TestForController() != 0) {
         if (menu_pulsate > 0.0f) {
             red = static_cast<u8>(MENUFLASH0R * menu_pulsate + MENUFLASH1R * (1.0f - menu_pulsate));
@@ -1443,21 +1446,21 @@ void DrawGameState(float x, float y, i32 highlight, i32 slot) {
         green = static_cast<u8>(MENUFLASH0G * menu_pulse + MENUNORMALG * (1.0f - menu_pulse));
         blue = static_cast<u8>(MENUFLASH0B * menu_pulse + MENUNORMALB * (1.0f - menu_pulse));
     }
+    smarttextex_drawmessagebox = 2;
     SmartTextEx(game_name, x, y, 1.0f, MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, 4, red, green, blue, 0.45f, 1, NULL,
                 0, MenuA);
 
-    if (slot >= 0) {
-        if (saveload_slotused[slot] != 0) {
-            char progress[32];
-            sprintf(progress, "%.1f%%", static_cast<f32>(saveload_slotcode[slot] * 100) / COMPLETIONPOINTS);
-            Text_LocaliseDecimalPoint(progress);
-            Text3DEx(progress, x, y, 1.0f, MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, 1, 255, 191, 0, MenuA);
-        } else {
-            char *state = TTab[saveload_freespace < SAVESIZE_ADDITIONAL ? tNOSPACE : tEMPTY];
-            const u8 state_red = saveload_freespace < SAVESIZE_ADDITIONAL ? 255 : 0;
-            SmartTextEx(state, x, y, 1.0f, MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, 1, state_red, 255 - state_red,
-                        0, 0.45f, 1, NULL, 0, MenuA);
-        }
+    if (slot == -1 || saveload_slotused[slot] != 0) {
+        char progress[32];
+        const u32 completion = slot == -1 ? Game.completion : saveload_slotcode[slot];
+        sprintf(progress, "%.1f%%", static_cast<f32>(static_cast<i32>(completion * 100)) / COMPLETIONPOINTS);
+        Text_LocaliseDecimalPoint(progress);
+        Text3DEx(progress, x, y, 1.0f, MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, 1, 255, 191, 0, MenuA);
+    } else {
+        char *state = TTab[saveload_freespace < SAVESIZE_ADDITIONAL ? tNOSPACE : tEMPTY];
+        const u8 state_red = saveload_freespace < SAVESIZE_ADDITIONAL ? 255 : 0;
+        SmartTextEx(state, x, y, 1.0f, MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, 1, state_red, 255 - state_red, 0,
+                    0.45f, 2, NULL, 0, MenuA);
     }
 }
 

@@ -8,6 +8,7 @@
 #include "legoapi/characters/motion.h"
 #include "legoapi/items/base/collection.h"
 #include "legoapi/core/input/qrand.h"
+#include "legoapi/core/input/timer.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/level.h"
 #include "legoapi/world/world.h"
@@ -1037,12 +1038,51 @@ void DrawStatusScreen(WORLDINFO_s *) {
     iconalphaoverride = -1.0f;
     memset(KitPart, 0, sizeof(KitPart));
 
-    if (GAMEDEMO != 0 || FadeSys.fade > 0.0f) {
+    if (GAMEDEMO != 0) {
+        if (GAMEDEMO != 1 || FadeSys.fade != 0.0f || TTab == NULL)
+            return;
+        f32 y = -0.75f - 0.5f * MENUDY;
+        for (i32 option = 0; option < 2; ++option) {
+            u8 red = MENUENTRYR, green = MENUENTRYG, blue = MENUENTRYB;
+            if (gamedemo_option == option && TestForController() != 0) {
+                if (menu_pulsate > 0.0f) {
+                    red = static_cast<u8>(MENUFLASH0R * menu_pulsate + MENUFLASH1R * (1.0f - menu_pulsate));
+                    green = static_cast<u8>(MENUFLASH0G * menu_pulsate + MENUFLASH1G * (1.0f - menu_pulsate));
+                    blue = static_cast<u8>(MENUFLASH0B * menu_pulsate + MENUFLASH1B * (1.0f - menu_pulsate));
+                } else if (menu_flash != 0) {
+                    red = MENUFLASH0R;
+                    green = MENUFLASH0G;
+                    blue = MENUFLASH0B;
+                } else {
+                    red = MENUFLASH1R;
+                    green = MENUFLASH1G;
+                    blue = MENUFLASH1B;
+                }
+            } else if (menu_pulse > 0.0f) {
+                red = static_cast<u8>(MENUFLASH0R * menu_pulse + MENUNORMALR * (1.0f - menu_pulse));
+                green = static_cast<u8>(MENUFLASH0G * menu_pulse + MENUNORMALG * (1.0f - menu_pulse));
+                blue = static_cast<u8>(MENUFLASH0B * menu_pulse + MENUNORMALB * (1.0f - menu_pulse));
+            }
+            Text3D(TTab[option == 0 ? tFREEPLAY : tEXIT], 0.0f, y, 1.0f, MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, 0,
+                   red, green, blue);
+            y += MENUDY;
+        }
+        return;
+    }
+    if (FadeSys.fade > 0.0f) {
         return;
     }
 
     STATUSPACKET_s *status = &StatusPacket;
     if (status->status_flags == 0) {
+        char time[256];
+        const f32 remaining = MAX(6.0f - GameTimer.time_elapsed, 0.0f);
+        Text_MakeTime(remaining, 0, 0, 0, time);
+        const f32 y_phase = NuFmod(GameTimer.time_elapsed, 0.5f);
+        const f32 y = 0.01f * NU_SIN_LUT(static_cast<i32>((y_phase + y_phase) * 65536.0f));
+        const f32 x_phase = NuFmod(GameTimer.time_elapsed, 0.432f);
+        const f32 x = 0.01f * NU_SIN_LUT(static_cast<i32>(x_phase / 0.432f * 65536.0f));
+        Text3D(time, x, y, 1.0f, 1.0f, 1.0f, 1.0f, 0, 255, 191, 0);
         return;
     }
 
@@ -1050,13 +1090,15 @@ void DrawStatusScreen(WORLDINFO_s *) {
         status->draw_background_callback(status);
     }
 
-    for (STATUS_STAGE_s *stage = StatusStages; stage->type != -1; ++stage) {
+    for (STATUS_STAGE_s *stage = StatusStages; stage != NULL && stage->type != -1; ++stage) {
         if (stage->draw_callback != NULL) {
             stage->draw_callback(stage, status, stage == status->stage);
         }
     }
 
     STATUS_STAGE_s *stage = status->stage;
+    if (stage == NULL)
+        return;
     f32 alpha;
     if (stage->type == 11) {
         return;

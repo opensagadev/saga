@@ -37,6 +37,9 @@
 #include "legoapi/render/core/screen.h"
 #include "legoapi/menus/core/panel.h"
 #include "gameframework/saveload.h"
+#include "legoapi/world/level.h"
+#include "nu2api/numath/nufloat.h"
+#include "nu2api/nu3d/nucamera.h"
 
 f32 CustomiseMenuTime[2];
 GAMESAVE_s OldCustomiseGame = {};
@@ -44,15 +47,32 @@ i32 customiser_save_done = 0;
 i32 customiser_quit = 0;
 i32 customiser_changed = 0;
 
-struct CUSTOMISEMOTION_s {
-    f32 field_00, field_04, delay;
-    i16 angles[3];
+struct CUSTOMPIECEANIM {
+    union {
+        f32 duration;
+        f32 field_00;
+    };
+    union {
+        f32 elapsed;
+        f32 field_04;
+    };
+    union {
+        f32 hold_time;
+        f32 delay;
+    };
+    union {
+        i16 angles[3];
+        struct {
+            u16 start_angle, target_angle, current_angle;
+        };
+    };
     u8 reserved_12[2];
 };
-DECOMP_ASSERT(sizeof(CUSTOMISEMOTION_s) == 0x14, "Customise motion size");
+DECOMP_ASSERT(sizeof(CUSTOMPIECEANIM) == 0x14, "Customise motion size");
 static i32 CustomiseMode[2];
 static u16 CustomiseYRot[2];
-static CUSTOMISEMOTION_s HeadAnim[2], ArmsAnim[2], LegsAnim[2];
+static CUSTOMPIECEANIM HeadAnim[2], ArmsAnim[2], LegsAnim[2];
+static NUVEC NoHatPos[2];
 static u16 CustomiseBob[2];
 static f32 Customise_NameAlpha;
 static f32 CustomiseNameBoardTMul[2], CustomiseNameBoardMul[2], CustomiseNameLetterBlipScale[2];
@@ -64,6 +84,30 @@ void Customiser_SetNameAndIcon(CUSTOMISER *, i32);
 void Hub_ClearStats();
 void Text_FillInExtendedSaveInfo();
 extern i16 tPLAYER1, tPLAYER2;
+
+static void UpdateCustomPieceAnim(CUSTOMPIECEANIM *anim, u16 minimum, u16 maximum) {
+    if (anim->duration > anim->elapsed) {
+        anim->elapsed += FRAMETIME;
+        if (anim->elapsed >= anim->duration) {
+            anim->elapsed = anim->duration;
+            anim->hold_time = static_cast<f32>(qrand()) * 1.5259021893143654e-05f * 0.5f + 0.5f;
+        }
+        i32 difference = RotDiff(anim->start_angle, anim->target_angle);
+        f32 blend =
+            1.0f - (NU_SIN_LUT(static_cast<i32>(anim->elapsed / anim->duration * 32768.0f + 16384.0f)) + 1.0f) * 0.5f;
+        anim->current_angle = static_cast<i32>(anim->start_angle + static_cast<f32>(difference) * blend);
+    } else {
+        anim->hold_time -= FRAMETIME;
+        if (anim->hold_time <= 0.0f) {
+            anim->start_angle = anim->current_angle;
+            i32 difference = RotDiff(minimum, maximum);
+            anim->target_angle = static_cast<i32>(minimum + static_cast<f32>(difference) *
+                                                                (static_cast<f32>(qrand()) * 1.5259021893143654e-05f));
+            anim->elapsed = 0.0f;
+            anim->duration = static_cast<f32>(qrand()) * 1.5259021893143654e-05f + 1.0f;
+        }
+    }
+}
 
 struct CUSTOMISER_GAMESETTING {
     char *name;
@@ -325,10 +369,13 @@ void Customiser_SetUpCharacterData(CUSTOMISER *customiser) {
         const bool torso_replaces_base = torso != NULL && (torso->layer_flags & 1) != 0;
         for (i32 category = 0; category < 9; ++category) {
             CUSTOMPIECE *piece = Customiser_GetSelectedPiece(customiser, selection, category);
-            if (piece == NULL || (category == 0 && torso_replaces_base)) {
+            if (piece == NULL) {
                 continue;
             }
-            character->model_flags |= piece->model_flags;
+            // A replacing torso suppresses the head's model flags, but the
+            // head's gameplay flags are still merged by the reference.
+            if (category != 0 || !torso_replaces_base)
+                character->model_flags |= piece->model_flags;
             if ((character->model_flags & CHARACTER_MODEL_FLAG_ALTERNATE_WEAPON) != 0) {
                 character->model_flags |= 0x10000000;
             }
@@ -349,51 +396,82 @@ void Customiser_SetUpCharacterData(CUSTOMISER *customiser) {
 
 void Customiser_Draw3D(CUSTOMISER *customiser) {
     WORLDINFO_s *world = WorldInfo_CurrentlyActive();
-    if (customiser == NULL || world == NULL || world->camera_splines == NULL || world->camera_splines[18] == NULL) {
+    if (customiser == NULL || world == NULL || world->camera_splines == NULL || world->camera_splines[18] == NULL)
         return;
-    }
-
+    i32 active_side, active_count;
+    Customiser_GetActiveWeirdoIndex(&active_side, &active_count);
+    i32 preview_side = -1;
+    if (active_count == 1 && active_side >= 0 && active_side < 2)
+        preview_side = MenuPacket.customise_other_player[active_side] != 0 ? 1 - active_side : active_side;
     for (i32 side = 0; side < 2; ++side) {
-        CHARACTERMODEL_s *model = APICharacterLoaded(customiser->character_ids[side]);
-        if (model == NULL || customiser->animation_state[side] != 0) {
+        const i32 character_id = customiser->character_ids[side];
+        if (character_id < 0 || character_id >= CHARCOUNT)
             continue;
-        }
-        GAMECHARACTERDATA *runtime = CDataList[customiser->character_ids[side]].game_character;
-        if (runtime == NULL) {
+        CHARACTERMODEL_s *model = APICharacterLoaded(character_id);
+        if (model == NULL || customiser->animation_state[side] != 0)
             continue;
-        }
-
+        if (GCDataList == NULL)
+            continue;
+        GAMECHARACTERDATA *runtime = &GCDataList[character_id];
+        i32 helmet = runtime->helmet_locator;
+        if (helmet < 0 || helmet >= 16 || model->points_of_interest[helmet] == NULL)
+            helmet = -1;
+        const i32 selected = CustomiseMenuY[side];
         rtldata_s light_data;
         rtlResetEx(&light_data, 1);
         rtlApplySetScale(world->rtl_set, &light_data, &CustomisePos[side], NULL, -1, 1.0f);
         SetLights_RTLDATA(&light_data, 1.0f);
-
-        NUMTX matrix;
+        const i16 *selection = Customiser_GetSelection(side);
+        u32 layer_mask = Customiser_GetLayerMask(customiser, runtime, selection);
+        if (runtime->cape_layer != -1 && selected == 5 && GetMenuID() == 12 && customiser_quit == 0)
+            layer_mask |= 1u << (static_cast<u8>(runtime->cape_layer) & 31);
+        // The reference's preview matrix lives in a 16-byte-aligned frame.
+        NUMTX_ALIGNED16 matrix;
         NuMtxSetRotationY(&matrix, CustomiseYRot[side] + 0x8000);
         NuMtxTranslate(&matrix, &CustomisePos[side]);
-        const i16 *selection = Customiser_GetSelection(side);
-        const u32 layer_mask = Customiser_GetLayerMask(customiser, runtime, selection);
         if (GameDrawCharacterModel(model, &customiser->animation_packets[side], &matrix, NULL, NULL,
-                                   customiser->joint_matrices[side], NULL, layer_mask) == 0) {
+                                   customiser->joint_matrices[side], NULL, layer_mask) == 0)
             continue;
-        }
-
-        const i32 locator = runtime->helmet_locator;
-        if (locator < 0 || locator >= 16 || model->points_of_interest[locator] == NULL) {
-            continue;
-        }
-        for (i32 category = 0; category < 9; ++category) {
-            if (customiser->categories[category] == NULL || customiser->categories[category]->uses_special == 0 ||
-                world->customiser_resources[category] == NULL) {
-                continue;
+        if (helmet != -1) {
+            for (i32 category = 0; category < 9; ++category) {
+                if (customiser->categories[category] == NULL || customiser->categories[category]->uses_special == 0 ||
+                    world->customiser_resources[category] == NULL || customiser->piece_counts[category] <= 0)
+                    continue;
+                const i32 piece_index = selection[category];
+                if (piece_index < 0 || piece_index >= customiser->piece_counts[category])
+                    continue;
+                CUSTOMPIECERESOURCE *resource = &world->customiser_resources[category][piece_index];
+                if (NuSpecialExistsFn(&resource->special) == 0)
+                    continue;
+                const bool preview = GetMenuID() == 12 && customiser_quit == 0 && category == selected &&
+                                     (active_count == 2 || side == preview_side);
+                if (preview)
+                    NuFmod(CustomiseMenuTime[side], 0.3f);
+                if (category == 0 && !preview) {
+                    CUSTOMPIECE *piece = Customiser_GetSelectedPiece(customiser, selection, category);
+                    if (piece != NULL && (piece->layer_flags & 0x20) != 0)
+                        continue;
+                }
+                matrix = customiser->joint_matrices[side][helmet];
+                if (category == 0)
+                    NuMtxPreTranslate(&matrix, &NoHatPos[side]);
+                NuSpecialDrawAt(&resource->special, &matrix);
             }
-            i32 piece_index = selection[category];
-            if (piece_index < 0 || piece_index >= customiser->piece_counts[category]) {
-                continue;
-            }
-            CUSTOMPIECERESOURCE *resource = &world->customiser_resources[category][piece_index];
-            if (NuSpecialExistsFn(&resource->special) != 0) {
-                NuSpecialDrawAt(&resource->special, &customiser->joint_matrices[side][locator]);
+        }
+        const i32 hand = runtime->weapon_joints[0];
+        CUSTOMPIECE *weapon = Customiser_GetSelectedPiece(customiser, selection, 2);
+        if (weapon != NULL && hand >= 0 && hand < 16 && model->points_of_interest[hand] != NULL &&
+            weapon->weapon_model >= 0 && world->lev_objs != NULL) {
+            LEVEL_OBJECT_RUNTIME_s *object = &world->lev_objs[weapon->weapon_model];
+            if (object->active != 0) {
+                matrix = customiser->joint_matrices[side][hand];
+                NuSpecialDrawAt(&object->special, &matrix);
+                i32 blade = -1;
+                if (LightSabre_ColourFromObj(weapon->weapon_model, &blade) != -1) {
+                    if (blade >= 0)
+                        NuSpecialDrawAt(&world->lev_objs[blade].special, &matrix);
+                    NuSpecialDrawAt(&world->lev_objs[17].special, &matrix);
+                }
             }
         }
     }
@@ -401,76 +479,145 @@ void Customiser_Draw3D(CUSTOMISER *customiser) {
 }
 
 void Customiser_Update(CUSTOMISER *customiser, WORLDINFO_s *world) {
-    if (customiser == NULL) {
+    if (customiser == NULL)
         return;
-    }
-
+    i32 active_side, active_count;
+    Customiser_GetActiveWeirdoIndex(&active_side, &active_count);
+    i32 preview_side = -1;
+    if (active_count == 1 && active_side >= 0 && active_side < 2)
+        preview_side = MenuPacket.customise_other_player[active_side] != 0 ? 1 - active_side : active_side;
+    const u8 colour = menu_flash != 0 ? 255 : 191;
     for (i32 side = 0; side < 2; ++side) {
-        CustomiseRotY[side] += static_cast<u16>(4096.0f * FRAMETIME);
-        CustomiseTiltX[side] += static_cast<u16>(2048.0f * FRAMETIME);
-        CustomiseTiltZ[side] += static_cast<u16>(3072.0f * FRAMETIME);
-        CustomiseBob[side] += static_cast<u16>(4096.0f * FRAMETIME);
-        CustomiseMenuTime[side] += FRAMETIME;
-
-        CHARACTERMODEL_s *model = APICharacterLoaded(customiser->character_ids[side]);
-        if (model == NULL) {
-            continue;
-        }
+        const i32 control_side = active_count == 2                  ? side
+                                 : MenuPacket.active_player[0] != 0 ? 0
+                                 : MenuPacket.active_player[1] != 0 ? 1
+                                                                    : -1;
+        CustomiseRotY[side] += static_cast<u16>(static_cast<i32>(10922.0f * FRAMETIME));
+        CustomiseTiltX[side] += static_cast<u16>(static_cast<i32>(12379.0f * FRAMETIME));
+        CustomiseTiltZ[side] += static_cast<u16>(static_cast<i32>(10376.0f * FRAMETIME));
+        CustomiseBob[side] += static_cast<u16>(static_cast<i32>(20206.0f * FRAMETIME));
+        UpdateCustomPieceAnim(&HeadAnim[side], 0xd556, 0x2aaa);
+        UpdateCustomPieceAnim(&ArmsAnim[side], 0x1555, 0x4000);
+        UpdateCustomPieceAnim(&LegsAnim[side], 0xe000, 0x4000);
         const i16 *selection = Customiser_GetSelection(side);
-        CUSTOMPIECE *weapon = Customiser_GetSelectedPiece(customiser, selection, 2);
-        const i32 saber_colour =
-            weapon == NULL ? -1 : LightSabre_ColourFromObj(static_cast<i32>(weapon->weapon_model), NULL);
-
-        if (customiser->animation_active[side] != 0) {
-            --customiser->animation_active[side];
+        CUSTOMPIECE *head = Customiser_GetSelectedPiece(customiser, selection, 0);
+        CUSTOMPIECE *torso = Customiser_GetSelectedPiece(customiser, selection, 1);
+        f32 no_hat = 0.0f;
+        if (torso != NULL && (torso->layer_flags & 1) != 0) {
+            if ((torso->layer_flags & 4) != 0)
+                no_hat = head != NULL && (head->layer_flags & 8) != 0 ? 0.21f : 0.168f;
+            else
+                no_hat = head != NULL && (head->layer_flags & 8) != 0 ? 0.168f : 0.126f;
         }
+        NoHatPos[side].y = SeekValF(NoHatPos[side].y, no_hat, 10.0f);
+        CustomiseMenuTime[side] += FRAMETIME;
+        CHARACTERMODEL_s *model = APICharacterLoaded(customiser->character_ids[side]);
+        if (model == NULL)
+            continue;
+        CUSTOMPIECE *weapon = Customiser_GetSelectedPiece(customiser, selection, 2);
+        const i32 saber_colour = weapon == NULL ? -1 : LightSabre_ColourFromObj(weapon->weapon_model, NULL);
+        if (customiser->animation_state[side] != 0)
+            --customiser->animation_state[side];
         ANIMPACKET_s *packet = &customiser->animation_packets[side];
-        if (customiser->animation_state[side] == 0) {
-            const i16 intro_animation = saber_colour == -1 ? 0x62 : 0x61;
+        const i16 intro = saber_colour == -1 ? 0x62 : 0x61;
+        if (customiser->animation_active[side] == 0 && model->model_data_b != NULL &&
+            model->model_data_b[intro] != NULL) {
             if (customiser->animation_values[side] == 0.0f) {
-                customiser->animation_values[side] =
-                    AnimDuration(customiser->character_ids[side], intro_animation, 0.0f, 0.0f, 1);
+                customiser->animation_values[side] = AnimDuration(model->model_id, intro, 0.0f, 0.0f, 1);
             } else {
                 customiser->animation_values[side] -= FRAMETIME;
-                if (customiser->animation_values[side] <= 0.0f) {
-                    customiser->animation_state[side] = 1;
+                if (customiser->animation_values[side] <= 0.0f)
+                    customiser->animation_active[side] = 1;
+            }
+        } else {
+            customiser->animation_active[side] = 1;
+        }
+        packet->previous_animation = packet->animation_index;
+        packet->requested_animation =
+            customiser->animation_active[side] == 0 ? intro : static_cast<i16>(saber_colour == -1 ? 99 : 0xbe);
+        UpdateAnimPacket(model, packet, FRAMETIME * 30.0f, 0.0f, FRAMETIME, 0.0f);
+        const u16 angle = CustomiseYRot[side] + 0xc000;
+        for (i32 category = 0; category < 9; ++category) {
+            const i32 selected = CustomiseMenuY[side];
+            const i32 locator = customiser->locator_indices[category];
+            if (selected == category && GetMenuID() == 12 && customiser_quit == 0 &&
+                (active_count == 2 || side == preview_side) && control_side != -1 && locator >= 0 && locator < 16 &&
+                model->points_of_interest[locator] != NULL) {
+                const NUMTX &joint = customiser->joint_matrices[side][locator];
+                NUVEC position = {joint.m30, joint.m31, joint.m32};
+                const f32 offset = customiser->locator_x_offsets[category];
+                if (offset != 0.0f) {
+                    position.x += offset * NU_SIN_LUT(angle);
+                    position.z += offset * NU_COS_LUT(angle);
+                }
+                position.y += customiser->locator_y_offsets[category];
+                f32 scale = 1.0f;
+                if (TestForController() == 0) {
+                    const f32 idle = GlobalTimer.time_elapsed - (LastTouchTime + 1.0f);
+                    if (idle > 4.0f) {
+                        const i32 phase = static_cast<i32>(NuFmod(idle, 4.0f) * 0.25f * 65536.0f);
+                        const f32 pulse = NU_SIN_LUT(phase) - 0.8f;
+                        if (pulse >= 0.0f)
+                            scale += pulse;
+                    }
+                }
+                scale *= 1.5f;
+                const f32 width = 0.125f * scale;
+                const f32 height = width / GetAspectRatio();
+                NUVEC screen;
+                NuCameraTransformScreenClip(&screen, &position, 1, NULL);
+                Text3D("<", screen.x - width, screen.y, 1.0f, scale, scale, scale, 0, colour, colour, colour);
+                customiser->touch_widths[0] = width;
+                customiser->touch_heights[0] = height;
+                customiser->touch_positions[0].x = screen.x - width;
+                customiser->touch_positions[0].y = screen.y;
+                Text3D(">", screen.x + width, screen.y, 1.0f, scale, scale, scale, 0, colour, colour, colour);
+                customiser->touch_widths[1] = width;
+                customiser->touch_heights[1] = height;
+                customiser->touch_positions[1].x = screen.x + width;
+                customiser->touch_positions[1].y = screen.y;
+                if (category > 0) {
+                    Text3D(ASCII_UP, screen.x, screen.y + height, 1.0f, scale, scale, scale, 0, colour, colour, colour);
+                    customiser->touch_positions[2].x = screen.x;
+                    customiser->touch_positions[2].y = screen.y + height;
+                    customiser->touch_widths[2] = width;
+                    customiser->touch_heights[2] = height;
+                } else {
+                    customiser->touch_widths[2] = 0.0f;
+                }
+                if (category < 8) {
+                    Text3D(ASCII_DOWN, screen.x, screen.y - height, 1.0f, scale, scale, scale, 0, colour, colour,
+                           colour);
+                    customiser->touch_positions[3].x = screen.x;
+                    customiser->touch_positions[3].y = screen.y - height;
+                    customiser->touch_widths[3] = width;
+                    customiser->touch_heights[3] = height;
+                } else {
+                    customiser->touch_widths[3] = 0.0f;
                 }
             }
-            packet->previous_animation = packet->animation_index;
-            packet->requested_animation = customiser->animation_state[side] == 0
-                                              ? intro_animation
-                                              : static_cast<i16>(saber_colour == -1 ? 99 : 0xbe);
-        } else {
-            customiser->animation_state[side] = 1;
-            packet->previous_animation = packet->animation_index;
-            packet->requested_animation = saber_colour == -1 ? 99 : 0xbe;
-        }
-        UpdateAnimPacket(model, packet, FRAMETIME, 0.0f, FRAMETIME, 0.0f);
-
-        if (world == NULL || model->hierarchy == NULL) {
-            continue;
-        }
-        for (i32 category = 0; category < 9; ++category) {
+            if (world == NULL || model->hierarchy == NULL)
+                continue;
             CUSTOMPIECECATEGORY *category_data = customiser->categories[category];
             CUSTOMPIECERESOURCE *resources = world->customiser_resources[category];
-            if (category_data == NULL || category_data->uses_special != 0 || resources == NULL) {
+            if (category_data == NULL || category_data->uses_special != 0 || category_data->material_tag == -1 ||
+                resources == NULL || customiser->piece_counts[category] <= 0)
                 continue;
-            }
-            i32 piece_index = selection[category];
-            if (piece_index < 0 || piece_index >= customiser->piece_counts[category]) {
+            const i32 piece_index = selection[category];
+            if (piece_index < 0 || piece_index >= customiser->piece_counts[category] ||
+                resources[piece_index].texture_id == 0)
                 continue;
-            }
-            const i32 texture_id = resources[piece_index].texture_id;
             for (i32 material = 0; material < model->hierarchy->material_count; ++material) {
                 NUMTL *entry = model->hierarchy->materials[material];
                 if (entry != NULL && entry->unknown_9a[0] == static_cast<u8>(category_data->material_tag)) {
-                    entry->tex_id = texture_id;
+                    entry->tex_id = resources[piece_index].texture_id;
                     NuMtlUpdate(entry);
                 }
             }
         }
     }
-    Customise_NameAlpha = SeekLinearF(Customise_NameAlpha, customiser_quit == 0 ? 1.0f : 0.0f, 2.0f * FRAMETIME);
+    const f32 target = GetMenuID() == 12 && customiser_quit == 0 ? 1.0f : 0.0f;
+    Customise_NameAlpha = SeekLinearF(Customise_NameAlpha, target, 1.5f * FRAMETIME);
 }
 
 void CustomiserMenu_End() {
