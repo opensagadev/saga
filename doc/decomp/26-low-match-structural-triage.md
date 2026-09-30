@@ -5295,7 +5295,7 @@ preset escapes rather than indexing outside the tables.
 
 `PodRaceUpdate` improves **4.656635% to 10.575923%** and `PodRacePanel` reaches
 **81.398735%**. Text's restored body scores **6.461642%**, below its incomplete
-**11.332756%** baseline; its source/compiler layout remains debt. The combined
+**11.325707%** baseline; its source/compiler layout remains debt. The combined
 unit improves overall matching to **65.642480%**, **+0.518000 percentage points**
 from main. The approximately two-point goal continues.
 
@@ -5305,4 +5305,35 @@ close/medium/far mine throws and resets; panel object/numeric rendering;
 text/button segmentation, three scale modes, presets, half colours, alignment,
 follow-on state, empty/hidden input and long/multibyte boundaries. Rendering,
 math and engine services are stand-ins, not full gameplay integration.
+LeakSanitizer is disabled for sandbox compatibility.
+
+## Batch 106: indexed lighting and HUD timer states
+
+Recover the complete `rtlApplySetScaleLoop` producer/consumer closure: indexed
+or dynamic traversal, identity masks, inner/outer falloff, modifiers, ambient
+and directional priorities, anti-lights, cached shadows and specular wobble.
+Use the canonical pointer-width index representation in `IndexLights` and
+recover version-two through version-four conversion/defaults and UID/chain
+initialization in `rtlLoadSet`. Bound full scans and fall back to them when a
+cell would exceed the original signed-char count. Packed 32-bit asset decoding
+on 64-bit hosts remains separate preexisting debt; typed fixtures do not prove
+real asset loading there.
+
+Restore `UpdateStats`' missing minikit, red-brick, True Jedi, gold-brick and
+power-up states. Preserve ordered menu queries, challenge and Super Story
+differences, network red-brick gates, per-player coin aggregation and one-shot
+awards. Share the existing canonical message declaration. Public signatures,
+compiler options and calling conventions are unchanged.
+
+The lighting scan improves **9.961600% to 43.038400%**; the HUD update improves
+**9.256757% to 9.948648%**. Loader/index helper scores regress with the restored
+versions and safe producer/consumer representation, but the combined unit
+raises overall matching to **65.671646%**, **+0.547166 percentage points** from
+main, with **6,270** exact functions. The approximately two-point goal continues.
+
+Extracted production-body fixtures pass optimized i386 and 64-bit ASan/UBSan:
+lighting masks, falloff, shadows, wobble, dynamic/indexed sets, full cells,
+legacy versions and UID wrap; HUD menu/fade/pause gates, timers, challenge,
+Super Story, True Jedi completion/awards, hub gold bricks and power-ups.
+Services are stand-ins, not full gameplay or packed-asset integration;
 LeakSanitizer is disabled for sandbox compatibility.

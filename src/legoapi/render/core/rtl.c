@@ -54,8 +54,11 @@ static i32 rtl_dynamic_max;
 static i32 rtl_dynamic_cnt;
 static f32 rtl_frametime;
 static i16 rtl_uid = 1;
+static i32 curr_version = 5;
+static rtlindex_s *dbg_rtlindex;
 i32 rtl_error = 0;
 u16 rtltimer1 = 0;
+f32 rtlwob = 0.05f;
 f32 edrtl_text_scale = 1.0f;
 static f32 default_modifiers = 1.0f;
 f32 *modifiers = &default_modifiers;
@@ -398,21 +401,8 @@ void rtlSwapSetEndianess(rtlset *) {
 
 extern "C" {
     void IndexLights(rtlset *set, VARIPTR *buffer, i32 buffer_end) {
-        struct RTLGRID {
-            u32 valid;
-            u32 reserved_04;
-            u32 reserved_08;
-            i32 columns;
-            i32 rows;
-            f32 scale;
-            f32 x_offset;
-            f32 z_offset;
-            u32 cells;
-            u32 reserved_24;
-        };
-
-        RTLGRID *grid = static_cast<RTLGRID *>(buffer->void_ptr);
-        buffer->addr += sizeof(RTLGRID);
+        rtlindex_s *grid = static_cast<rtlindex_s *>(buffer->void_ptr);
+        buffer->addr += sizeof(rtlindex_s);
         memset(grid, 0, sizeof(*grid));
 
         f32 minimum_x = FLT_MAX;
@@ -433,31 +423,31 @@ extern "C" {
             return;
         }
 
-        grid->x_offset = -minimum_x;
-        grid->z_offset = -minimum_z;
+        grid->offset_x = -minimum_x;
+        grid->offset_z = -minimum_z;
         if (width <= depth) {
-            grid->rows = 16;
-            grid->columns = MIN(static_cast<i32>(width * 16.0f / depth) + 1, 16);
+            grid->depth = 16;
+            grid->width = MIN(static_cast<i32>(width * 16.0f / depth) + 1, 16);
             grid->scale = 16.0f / depth;
         } else {
-            grid->columns = 16;
-            grid->rows = MIN(static_cast<i32>(depth * 16.0f / width) + 1, 16);
+            grid->width = 16;
+            grid->depth = MIN(static_cast<i32>(depth * 16.0f / width) + 1, 16);
             grid->scale = 16.0f / width;
         }
 
-        buffer->addr = ALIGN(buffer->addr, 4);
-        grid->cells = static_cast<u32>(buffer->addr);
-        u32 *cells = buffer->u32_ptr;
-        buffer->addr += grid->columns * grid->rows * sizeof(u32);
+        buffer->addr = ALIGN(buffer->addr, alignof(char *));
+        grid->cells = static_cast<char **>(buffer->void_ptr);
+        char **cells = grid->cells;
+        buffer->addr += grid->width * grid->depth * sizeof(char *);
 
-        for (i32 row = 0; row < grid->rows; ++row) {
-            const f32 minimum_cell_z = static_cast<f32>(row) / grid->scale - grid->z_offset;
-            const f32 maximum_cell_z = static_cast<f32>(row + 1) / grid->scale - grid->z_offset;
-            for (i32 column = 0; column < grid->columns; ++column) {
-                const f32 minimum_cell_x = static_cast<f32>(column) / grid->scale - grid->x_offset;
-                const f32 maximum_cell_x = static_cast<f32>(column + 1) / grid->scale - grid->x_offset;
+        for (i32 row = 0; row < grid->depth; ++row) {
+            const f32 minimum_cell_z = static_cast<f32>(row) / grid->scale - grid->offset_z;
+            const f32 maximum_cell_z = static_cast<f32>(row + 1) / grid->scale - grid->offset_z;
+            for (i32 column = 0; column < grid->width; ++column) {
+                const f32 minimum_cell_x = static_cast<f32>(column) / grid->scale - grid->offset_x;
+                const f32 maximum_cell_x = static_cast<f32>(column + 1) / grid->scale - grid->offset_x;
                 u8 *indices = buffer->u8_ptr;
-                cells[row * grid->columns + column] = static_cast<u32>(buffer->addr);
+                cells[row * grid->width + column] = reinterpret_cast<char *>(indices);
                 *indices = 0;
                 ++buffer->addr;
 
@@ -469,6 +459,10 @@ extern "C" {
                                           light->position.z + light->outer_radius >= minimum_cell_z &&
                                           light->position.z - light->outer_radius <= maximum_cell_z;
                     if (directional || overlaps) {
+                        // GetNextRTL's original char count cannot represent 128.
+                        // Fall back to the bounded full scan for a full cell.
+                        if (indices[0] == 127)
+                            return;
                         ++indices[0];
                         indices[indices[0]] = static_cast<u8>(index);
                         ++buffer->addr;
@@ -477,26 +471,51 @@ extern "C" {
             }
         }
         (void)buffer_end;
-        grid->valid = 1;
+        grid->enabled = 1;
     }
 
     rtlset *rtlLoadSet(char *path, VARIPTR *buffer, i32 buffer_end) {
-        buffer->addr = ALIGN(buffer->addr, 4);
+        buffer->addr = ALIGN(buffer->addr, alignof(rtlset));
         rtlset *set = static_cast<rtlset *>(buffer->void_ptr);
-        memset(set, 0, 0x4f84);
+        memset(set, 0, sizeof(*set));
 
         if (NuFileLoadBuffer(path, set, buffer_end - buffer->addr) > 0) {
             rtlSwapSetEndianess(set);
         }
 
-        u8 *bytes = reinterpret_cast<u8 *>(set);
-        for (i32 i = 0; i < 0x80; ++i) {
-            *reinterpret_cast<i16 *>(bytes + i * 0x8c + 0x6e) = static_cast<i16>(i + 1);
-            *reinterpret_cast<rtlset **>(bytes + i * 0x8c + 0x80) = set;
-            *reinterpret_cast<f32 *>(bytes + i * 0x8c + 0x70) = 1.0f;
+        const u32 version = set->header;
+        if (version == 2) {
+            rtlfog_s *old_fog = reinterpret_cast<rtlfog_s *>(&set->lights[64]);
+            old_fog[0].type = 1;
+            old_fog[0].radius = 10.0f;
+            old_fog[0].position = {0.0f, 0.0f, 0.0f};
+            for (i32 i = 1; i < 32; ++i)
+                old_fog[i].type = 0;
         }
-        *reinterpret_cast<u32 *>(bytes) = 5;
-        buffer->addr += 0x4f84;
+        if (version == 2 || version == 3) {
+            rtlfog_s *old_fog = reinterpret_cast<rtlfog_s *>(&set->lights[64]);
+            memmove(set->fog, old_fog, sizeof(set->fog));
+            for (i32 i = 64; i < 128; ++i)
+                set->lights[i].type = 0;
+        }
+        if (version >= 2 && version <= 4) {
+            for (i32 i = 0; i < 128; ++i) {
+                set->lights[i].field_79 = -1;
+                set->lights[i].field_7a = -1;
+                set->lights[i].field_7b = 0;
+                set->lights[i].intensity = 1.0f;
+            }
+        }
+        if (version != 1) {
+            for (i32 i = 0; i < 128; ++i) {
+                set->lights[i].uid = rtl_uid++;
+                if (rtl_uid == 0)
+                    ++rtl_uid;
+                set->lights[i].field_7c = set->lights;
+            }
+        }
+        set->header = curr_version;
+        buffer->addr += sizeof(*set);
         IndexLights(set, buffer, buffer_end);
         return set;
     }
@@ -714,7 +733,8 @@ static __used__ rtl_s *GetNextRTL(void *set, rtl_s *light, char *indices, int *i
         if (indices != NULL && index != NULL) {
             if (*index < static_cast<i32>(*indices)) {
                 ++*index;
-                light = &static_cast<rtlset *>(set)->lights[indices[*index]];
+                const i32 light_index = indices[*index];
+                light = light_index < 0 ? NULL : &static_cast<rtlset *>(set)->lights[light_index];
             } else {
                 light = NULL;
             }
@@ -738,67 +758,140 @@ extern "C" {
     }
 }
 
-extern "C" {
-    static f32 rtlDistanceStrength(const u8 *light, const NUVEC *position) {
-        const NUVEC *light_position = reinterpret_cast<const NUVEC *>(light);
-        const f32 dx = position->x - light_position->x;
-        const f32 dy = position->y - light_position->y;
-        const f32 dz = position->z - light_position->z;
-        const f32 inner = *reinterpret_cast<const f32 *>(light + 0x34);
-        const f32 outer = *reinterpret_cast<const f32 *>(light + 0x40);
-        const f32 distance_sq = dx * dx + dy * dy + dz * dz;
-        if (distance_sq >= outer * outer) {
-            return 0.0f;
-        }
-        if (inner >= outer) {
-            return 1.0f;
-        }
-        const f32 distance = sqrtf(distance_sq);
-        return ClampUnit(1.0f - (distance - inner) / (outer - inner));
-    }
-
-} // extern "C"
-
 static void rtlApplySetScaleLoop(void *set, rtlidata_s *lighting_data, NUVEC *position, NUMTX *rotation, i32 identity,
                                  f32 scale) {
     (void)rotation;
-    (void)identity;
     (void)scale;
-    if (set != NULL) {
-        rtl_s *light = static_cast<rtlset *>(set)->lights;
-        for (i32 i = 0; i < 0x80 && light[i].type != 0; ++i) {
-            if (light[i].disabled != 0) {
-                continue;
-            }
-            const f32 strength =
-                light[i].type == 5 ? 2.0f : rtlDistanceStrength(reinterpret_cast<u8 *>(&light[i]), position);
-            if (strength == 0.0f) {
-                continue;
-            }
-            if (light[i].type == 7) {
-                InsertAntiLight(&light[i], lighting_data, strength);
-            } else {
-                InsertLight(&light[i], lighting_data, strength);
-            }
-        }
-    } else if (rtl_dynamic_pool != NULL) {
-        for (NULNKHDR *entry = NuLstGetNext(rtl_dynamic_pool, NULL); entry != NULL;
-             entry = NuLstGetNext(rtl_dynamic_pool, entry)) {
-            rtl_s *light = reinterpret_cast<rtl_s *>(entry);
-            if (light->disabled != 0) {
-                continue;
-            }
-            const f32 strength = light->type == 5 ? 2.0f : rtlDistanceStrength(reinterpret_cast<u8 *>(light), position);
-            if (strength == 0.0f) {
-                continue;
-            }
-            if (light->type == 7) {
-                InsertAntiLight(light, lighting_data, strength);
-            } else {
-                InsertLight(light, lighting_data, strength);
+    char *indices = NULL;
+    i32 index = 0;
+    rtl_s *light;
+    lighting_data->specular_value = 0.0f;
+    if (set == NULL) {
+        light = reinterpret_cast<rtl_s *>(NuLstGetNext(rtl_dynamic_pool, NULL));
+    } else {
+        rtlset *lights = static_cast<rtlset *>(set);
+        light = lights->lights;
+        rtlindex_s *grid = reinterpret_cast<rtlindex_s *>(lights + 1);
+        dbg_rtlindex = grid;
+        if (grid->enabled != 0 && position != NULL) {
+            i32 x = static_cast<i32>(grid->scale * (position->x + grid->offset_x));
+            i32 z = static_cast<i32>(grid->scale * (position->z + grid->offset_z));
+            if (x >= 0 && x < grid->width && z >= 0 && z < grid->depth && grid->cells != NULL) {
+                indices = grid->cells[x + grid->width * z];
+                light = GetNextRTL(set, light, indices, &index);
             }
         }
     }
+    bool restricted = false;
+    if (identity >= 0) {
+        restricted = (identity & 0x10) != 0;
+        identity &= 15;
+    }
+    while (light != NULL) {
+        if (set != NULL &&
+            (light < static_cast<rtlset *>(set)->lights || light >= static_cast<rtlset *>(set)->lights + 128))
+            break;
+        if (light->type == 0)
+            break;
+        bool selected = light->field_7a == -1;
+        if (selected && identity >= 0 && light->type != 7) {
+            const u32 mask = 1u << identity;
+            if ((static_cast<u16>(light->field_60) & mask) != 0 ||
+                (light->type == 5 && light->field_5e != 0 && (static_cast<u16>(light->field_5e) & mask) == 0) ||
+                (restricted && light->field_5e == 0))
+                selected = false;
+        }
+        if (selected && !light->disabled) {
+            f32 distance_sq = 0.0f;
+            if (position != NULL) {
+                const f32 x = position->x - light->position.x;
+                const f32 y = position->y - light->position.y;
+                const f32 z = position->z - light->position.z;
+                distance_sq = x * x + y * y + z * z;
+            }
+            switch (light->type) {
+                case 1:
+                case 2:
+                case 3:
+                case 4:
+                case 6:
+                case 8: {
+                    if (distance_sq < light->outer_radius * light->outer_radius) {
+                        f32 strength = 1.0f;
+                        if (light->inner_radius < light->outer_radius) {
+                            const f32 distance = NuFsqrt(distance_sq);
+                            strength = ClampUnit(1.0f - (distance - light->inner_radius) /
+                                                            (light->outer_radius - light->inner_radius));
+                        }
+                        if (light->field_79 == -1 && light->field_7a == -1 && light->field_7b >= 0 &&
+                            light->field_7b < modifier_cnt)
+                            strength *= modifiers[light->field_7b];
+                        if (light->type == 1) {
+                            if (strength != 0.0f && lighting_data->ambient_strengths[2] <= strength)
+                                InsertLight(light, lighting_data, strength);
+                            break;
+                        }
+                        if (strength != 0.0f && lighting_data->directional_strengths[2] <= strength &&
+                            (light->ambient.x != 0.0f || light->ambient.y != 0.0f || light->ambient.z != 0.0f))
+                            InsertLight(light, lighting_data, strength);
+                        if (position != NULL && light->has_specular) {
+                            lighting_data->field_134.x += light->direction.x * strength;
+                            lighting_data->field_134.y += light->direction.y * strength;
+                            lighting_data->field_134.z += light->direction.z * strength;
+                            lighting_data->specular_value += strength;
+                            if (light->intensity > 16.0f) {
+                                const i32 packed = static_cast<i32>(light->intensity);
+                                const i32 angle = (packed >> 4) * rtltimer1;
+                                const f32 amplitude = static_cast<f32>(packed & 15);
+                                lighting_data->field_134.x += amplitude * NU_SIN_LUT(angle) * strength * rtlwob;
+                                lighting_data->field_134.y += amplitude * NU_COS_LUT(angle) * strength * rtlwob;
+                                lighting_data->field_134.z += amplitude * NU_COS_LUT(angle) * strength * rtlwob;
+                            }
+                        }
+                        if (position != NULL && light->cast_shadow) {
+                            if (lighting_data->cached_light == light ||
+                                (strength != 0.0f && lighting_data->cached_value < strength)) {
+                                if (lighting_data->cached_light != light) {
+                                    lighting_data->cached_light = light;
+                                    lighting_data->cached_light_uid = light->uid;
+                                    lighting_data->shadow_blend = 1.0f;
+                                }
+                                lighting_data->cached_value = strength;
+                                if (light->type == 4)
+                                    NuVecScale(&lighting_data->shadow_direction, &light->direction, -1.0f);
+                                else
+                                    NuVecSub(&lighting_data->shadow_direction, position, &light->position);
+                            }
+                        }
+                    } else if (light->type != 1 && lighting_data->cached_light == light) {
+                        lighting_data->cached_value = 0.0000001f;
+                    }
+                    break;
+                }
+                case 5:
+                    InsertLight(light, lighting_data, 2.0f);
+                    break;
+                case 7:
+                    if (position != NULL && distance_sq < light->outer_radius * light->outer_radius) {
+                        f32 strength = 1.0f;
+                        if (light->inner_radius < light->outer_radius) {
+                            const f32 distance = NuFsqrt(distance_sq);
+                            strength = ClampUnit(1.0f - (distance - light->inner_radius) /
+                                                            (light->outer_radius - light->inner_radius));
+                        }
+                        if (light->field_79 == -1 && light->field_7a == -1 && light->field_7b >= 0 &&
+                            light->field_7b < modifier_cnt)
+                            strength *= modifiers[light->field_7b];
+                        if (strength != 0.0f)
+                            InsertAntiLight(light, lighting_data, strength);
+                    }
+                    break;
+            }
+        }
+        light = GetNextRTL(set, light, indices, &index);
+    }
+    if (lighting_data->specular_value != 0.0f)
+        NuVecNorm(&lighting_data->field_134, &lighting_data->field_134);
 }
 
 static __used__ void rtlCalcShadow(rtlidata_s *data) {

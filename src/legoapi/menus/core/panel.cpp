@@ -73,9 +73,9 @@ namespace {
             return false;
         }
 
-        const i32 menu = GetMenuID();
-        return menu != PANEL_MENU_EPISODE_I && menu != PANEL_MENU_EPISODE_II && menu != PANEL_MENU_EPISODE_III &&
-               menu != PANEL_MENU_EPISODE_IV && menu != PANEL_MENU_SAVE && menu != PANEL_MENU_LOAD;
+        return GetMenuID() != PANEL_MENU_SAVE && GetMenuID() != PANEL_MENU_LOAD &&
+               GetMenuID() != PANEL_MENU_EPISODE_I && GetMenuID() != PANEL_MENU_EPISODE_II &&
+               GetMenuID() != PANEL_MENU_EPISODE_III && GetMenuID() != PANEL_MENU_EPISODE_IV;
     }
 } // namespace
 
@@ -406,31 +406,124 @@ void DrawAutoSaveIcon(void) {
 }
 
 void UpdateStats() {
-    LEVELDATA *level = WORLD->current_level;
-    if ((level->flags & LEVEL_GAMEPLAY) == 0) {
+    if (WORLD == NULL || WORLD->current_level == NULL || (WORLD->current_level->flags & LEVEL_GAMEPLAY) == 0)
         return;
-    }
-
     f32 stats_target = 0.0f;
     if (FadeSys.fade == 0.0f && CUTSTOPGAME == 0 && newgamecam == 0) {
-        const bool hub_camera_hidden = HUB_ADATA != NULL && WORLD->area == HUB_ADATA && GameCam->mode == 4;
-        const i32 menu = GetMenuID();
-        if (!hub_camera_hidden && (menu < PANEL_MENU_EPISODE_I || menu > PANEL_MENU_EPISODE_IV)) {
+        const bool hub_hidden = HUB_ADATA != NULL && WORLD->area == HUB_ADATA && GameCam != NULL && GameCam->mode == 4;
+        if (!hub_hidden && GetMenuID() != PANEL_MENU_EPISODE_I && GetMenuID() != PANEL_MENU_EPISODE_II &&
+            GetMenuID() != PANEL_MENU_EPISODE_III && GetMenuID() != PANEL_MENU_EPISODE_IV)
             stats_target = 1.0f;
-        }
     }
     statstime = SeekLinearF(statstime, stats_target, FRAMETIME);
-
-    if ((level->flags & LEVEL_SHOW_COIN_TOTAL) != 0) {
+    if (SuperStory == 0) {
+        if (ChallengeMode != 0)
+            DrawMiniKitTime = 2.0f;
+        if (DrawMiniKitTime > 0.0f)
+            DrawMiniKitTime -= FRAMETIME;
+        f32 target = 1.0f;
+        if (FadeSys.fade != 0.0f || CUTSTOPGAME != 0 || (Paused == 0 && NetPaused == 0 && DrawMiniKitTime <= 0.0f) ||
+            screendump != 0 || GetMenuID() == PANEL_MENU_SAVE || GetMenuID() == PANEL_MENU_LOAD ||
+            GetMenuID() == PANEL_MENU_EPISODE_I || GetMenuID() == PANEL_MENU_EPISODE_II ||
+            GetMenuID() == PANEL_MENU_EPISODE_III || GetMenuID() == PANEL_MENU_EPISODE_IV)
+            target = 0.0f;
+        if (ChallengeMode != 0) {
+            f32 hint_alpha = CurrentHintAlpha();
+            if (hint_alpha > 0.0f)
+                target *= 1.0f - hint_alpha;
+        }
+        minikittime = SeekLinearF(minikittime, target, FRAMETIME);
+        MiniKitScale = SeekLinearF(MiniKitScale, 1.0f, 5.0f * FRAMETIME);
+        if (ChallengeMode == 0) {
+            if (DrawRedBrickTime > 0.0f)
+                DrawRedBrickTime -= FRAMETIME;
+            const i32 area = WORLD->level_sub_id;
+            const bool red_brick = area >= 0 && area < 72 && Game.area_save[area].red_brick_collected != 0;
+            const bool network_red = NetPaused != 0 && (AreaGlobals.values.field_0x08 != 0 || red_brick);
+            target = 1.0f;
+            if (FadeSys.fade != 0.0f || CUTSTOPGAME != 0 || (Paused == 0 && !network_red && DrawRedBrickTime <= 0.0f) ||
+                screendump != 0 || GetMenuID() == PANEL_MENU_SAVE || GetMenuID() == PANEL_MENU_LOAD ||
+                GetMenuID() == PANEL_MENU_EPISODE_I || GetMenuID() == PANEL_MENU_EPISODE_II ||
+                GetMenuID() == PANEL_MENU_EPISODE_III || GetMenuID() == PANEL_MENU_EPISODE_IV)
+                target = 0.0f;
+            redbrickslidetime = SeekLinearF(redbrickslidetime, target, FRAMETIME);
+            RedBrickScale = SeekLinearF(RedBrickScale, 1.0f, 5.0f * FRAMETIME);
+            if (DrawBuildUpTime > 0.0f)
+                DrawBuildUpTime -= FRAMETIME;
+            target = 1.0f;
+            if (FadeSys.fade != 0.0f || CUTSTOPGAME != 0 ||
+                (Paused == 0 && NetPaused == 0 && DrawBuildUpTime <= 0.0f) || screendump != 0 ||
+                GetMenuID() == PANEL_MENU_SAVE || GetMenuID() == PANEL_MENU_LOAD ||
+                GetMenuID() == PANEL_MENU_EPISODE_I || GetMenuID() == PANEL_MENU_EPISODE_II ||
+                GetMenuID() == PANEL_MENU_EPISODE_III || GetMenuID() == PANEL_MENU_EPISODE_IV)
+                target = 0.0f;
+            builduptime = SeekLinearF(builduptime, target, FRAMETIME);
+            const i32 freeplay = GAMEDEMO != 0 ? 0 : FreePlay;
+            if (WORLD->area != NULL && (WORLD->area->flags & 0x4010) != 0 && area >= 0 && area < 72) {
+                AREASAVE_s &save = Game.area_save[area];
+                const bool complete = BOTHTRUEJEDIGOLDBRICKS == 0
+                                          ? save.story_buildup_complete != 0 || save.freeplay_buildup_complete != 0
+                                      : freeplay != 0 ? save.freeplay_buildup_complete != 0
+                                                      : save.story_buildup_complete != 0;
+                if (!complete) {
+                    const u32 maximum =
+                        static_cast<u32>(freeplay != 0 ? WORLD->area->field38_0x90 : WORLD->area->field37_0x8c);
+                    if (maximum != 0) {
+                        if (BuildUpDone == 0) {
+                            u32 total = 0;
+                            if (Player[0] != NULL && Player[0]->coinpacket != NULL)
+                                total = Player[0]->coinpacket->coins;
+                            BuildUpTotal = static_cast<i32>(total);
+                            if (Player[1] != NULL && Player[1]->coinpacket != NULL)
+                                total += Player[1]->coinpacket->coins;
+                            BuildUpTotal = static_cast<i32>(total);
+                            if (maximum <= total) {
+                                BuildUpScale = 2.5f;
+                                BuildUpDone = 1;
+                                if (TTab != NULL)
+                                    AddFancyMessage(TTab[tTRUEHERO], 0.0f, 0.0f, 1.0f, 1.0f, 1, 0);
+                            }
+                        }
+                        BuildUpScale = SeekLinearF(BuildUpScale, 1.0f, 3.0f * FRAMETIME);
+                    }
+                }
+            }
+        } else {
+            redbrickslidetime = DrawRedBrickTime = DrawBuildUpTime = builduptime = 0.0f;
+            RedBrickScale = BuildUpScale = 1.0f;
+        }
+    } else {
+        DrawMiniKitTime = DrawRedBrickTime = DrawBuildUpTime = redbrickslidetime = builduptime = 0.0f;
+        MiniKitScale = RedBrickScale = BuildUpScale = 1.0f;
+    }
+    if (SuperStory != 0 && (WORLD->current_level->flags & LEVEL_SHOW_COIN_TOTAL) != 0)
         DrawCoinTotalTime = 1.0f;
-    }
-    if (DrawCoinTotalTime > 0.0f) {
+    if (DrawCoinTotalTime > 0.0f)
         DrawCoinTotalTime -= FRAMETIME;
-    }
-
-    const f32 coin_total_target = CoinTotalCanOpen() ? 1.0f : 0.0f;
-    cointotaltime = SeekLinearF(cointotaltime, coin_total_target, FRAMETIME);
+    const f32 coin_target = CoinTotalCanOpen() ? 1.0f : 0.0f;
+    cointotaltime = SeekLinearF(cointotaltime, coin_target, FRAMETIME);
     CoinTotalScale = SeekLinearF(CoinTotalScale, 1.0f, 3.0f * FRAMETIME);
+    if (HUB_ADATA == NULL || WORLD->area != HUB_ADATA) {
+        goldbricktime = 0.0f;
+    } else {
+        f32 target = 1.0f;
+        if ((Paused == 0 && NetPaused == 0) || MenuInMemoryCard() != 0 || GetMenuID() == PANEL_MENU_SAVE ||
+            GetMenuID() == PANEL_MENU_LOAD || GetMenuID() == PANEL_MENU_EPISODE_I ||
+            GetMenuID() == PANEL_MENU_EPISODE_II || GetMenuID() == PANEL_MENU_EPISODE_III ||
+            GetMenuID() == PANEL_MENU_EPISODE_IV)
+            target = 0.0f;
+        goldbricktime = SeekLinearF(goldbricktime, target, FRAMETIME);
+    }
+    Arcade_UpdatePanel(Paused != 0 || NetPaused != 0);
+    if (Paused == 0 && NetPaused == 0) {
+        const f32 rotation = 16384.0f * FRAMETIME;
+        PowerUp_PanelYRot[0] = static_cast<u16>(static_cast<i32>(static_cast<f32>(PowerUp_PanelYRot[0]) + rotation));
+        PowerUp_PanelYRot[1] = static_cast<u16>(static_cast<i32>(static_cast<f32>(PowerUp_PanelYRot[1]) + rotation));
+    }
+    f32 target = Paused == 0 && Player[0] != NULL && Player[0]->timer_d5c <= 0.0f ? 1.0f : 0.0f;
+    PowerUp_PanelPosMul[0] = SeekLinearF(PowerUp_PanelPosMul[0], target, FRAMETIME + FRAMETIME);
+    target = Paused == 0 && Player[1] != NULL && Player[1]->timer_d5c <= 0.0f ? 1.0f : 0.0f;
+    PowerUp_PanelPosMul[1] = SeekLinearF(PowerUp_PanelPosMul[1], target, FRAMETIME + FRAMETIME);
 }
 
 void DrawPlayerIconPrompts(i32, i32, float, i32, i32, i32, i32, i32, i32, float, i32, i32, i32, i32) {
