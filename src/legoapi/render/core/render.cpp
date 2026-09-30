@@ -3323,55 +3323,6 @@ static __used__ i32 MatrixReflection_CanOverride() {
     return result;
 }
 
-static __used__ void DrawStarFighter(starfighter_s *starfighter) {
-    struct StarFighterLayout {
-        NUMTX matrix;
-        u8 reserved[0xb0];
-        f32 scale;
-        u8 more_reserved[8];
-        i16 draw_flags;
-        i16 model_id;
-    };
-    StarFighterLayout *fighter = reinterpret_cast<StarFighterLayout *>(starfighter);
-    const i32 model_id = fighter->model_id;
-    NUMTX_ALIGNED16 matrices[2];
-    NUMTX &scaled_special_matrix = matrices[0];
-    NUMTX &scaled_model_matrix = matrices[1];
-    if (model_id >= 0) {
-        const f32 scale = fighter->scale;
-        const i16 draw_flags = fighter->draw_flags;
-        const i16 model_index = apicharsys->playermodelids[model_id];
-        if (model_index == -1)
-            return;
-        NUMTX *matrix = &fighter->matrix;
-        if (scale != 1.0f) {
-            scaled_model_matrix = fighter->matrix;
-            NuMtxPreScaleUVU0(&scaled_model_matrix, scale);
-            matrix = &scaled_model_matrix;
-        }
-        GameDrawCharacterModel(&apicharsys->models[model_index], NULL, matrix, NULL, NULL, NULL, NULL, draw_flags);
-    } else {
-        NUMTX *matrix = &fighter->matrix;
-        if (model_id == -299 || model_id == -297 || model_id == -298 || model_id == -307) {
-            scaled_special_matrix = fighter->matrix;
-            scaled_special_matrix.m00 *= 1.15f;
-            scaled_special_matrix.m01 *= 1.15f;
-            scaled_special_matrix.m02 *= 1.15f;
-            scaled_special_matrix.m10 *= 1.15f;
-            scaled_special_matrix.m11 *= 1.15f;
-            scaled_special_matrix.m12 *= 1.15f;
-            scaled_special_matrix.m20 *= 1.15f;
-            scaled_special_matrix.m21 *= 1.15f;
-            scaled_special_matrix.m22 *= 1.15f;
-            matrix = &scaled_special_matrix;
-        }
-        NuSpecialDrawAt(&WORLD->lev_objs[-model_id].special, matrix);
-        if (model_id == -307)
-            AddVariableShotDebrisEffect(WORLD->debris_sys->entries[49].effect,
-                                        reinterpret_cast<NUVEC *>(&fighter->matrix.m30), 1, 0, 0);
-    }
-}
-
 static void DrawWeapon_SetSabreObjects(GameObject_s *object, i32 red, i32 green, i32 blue, i32 purple, i32 *models,
                                        i32 *hilt) {
     if (!(red || green || blue || purple))

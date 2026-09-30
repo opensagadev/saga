@@ -20,6 +20,9 @@ struct APIDEBRISSYS_s {
 
 #ifdef __cplusplus
 extern "C" {
+    void AddDebrisEffect(i32 *handle, i32 effect, f32 x, f32 y, f32 z);
+    void DebrisPosOrientationMtx(i32 handle, NUMTX *matrix);
+    void DebFreeInstantly(i32 *handle);
 #endif
     i32 FindGameDebris(APIDEBRISSYS_s *debris_sys, char *name);
     i32 AddGameDebris(APIDEBRISSYS_s *debris_sys, i32 type, NUVEC *pos);

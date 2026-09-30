@@ -129,7 +129,6 @@ extern AREADATA *DOGFIGHT_ADATA;
 void DogFightARestart();
 void ResetSpaceLevel(WORLDINFO_s *, spacelevel_s *) __asm__("_ZL15ResetSpaceLevelP11WORLDINFO_sP12spacelevel_s")
     __attribute__((visibility("hidden")));
-void DrawSpaceLevel(spacelevel_s *) __asm__("_ZL14DrawSpaceLevelP12spacelevel_s") __attribute__((visibility("hidden")));
 
 speedup_s DogFightSpeedList[] = {
     {58.0f, 0.5f},  {72.0f, 1.0f},  {174.0f, 0.5f}, {183.0f, 1.0f}, {207.0f, 0.5f},
@@ -188,10 +187,6 @@ void ChrisDogFightAUpdate(WORLDINFO_s *world) {
         Game.area_save[DOGFIGHT_ADATA->index].area_complete == 0 && GamePlayTimer.time_elapsed >= 3.0f) {
         *((u8 *)LevFlag) = 1;
     }
-}
-
-void ChrisDogFightADraw(WORLDINFO_s *world) {
-    DrawSpaceLevel(world->space_level);
 }
 
 void ChrisDogFightAPanel(WORLDINFO_s *) {

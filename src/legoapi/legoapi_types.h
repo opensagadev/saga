@@ -3786,7 +3786,6 @@ struct speedup_s {
     f32 distance;
     f32 speed;
 };
-struct starfighter_s {};
 struct terrsitu_s {};
 struct uv1deb {};
 struct uv1debdata;

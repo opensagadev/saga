@@ -5010,3 +5010,41 @@ Such functions retain raw GOT offsets while straightforward functions receive
 symbolic GOT normalization. This is a deliberate control-flow proof boundary,
 not evidence that their C++ should be distorted. The matcher, metric and
 baseline are unchanged in this batch.
+
+## Batch 98: private space-flight drawing closure
+
+The reference's contiguous Chris level-function cluster contains
+`DrawStarFighter`, `DrawSpaceLevel` and all three level draw callbacks, together
+with the existing reset/spline/radial callbacks and `DogDebKey`. Recover this
+private closure in `chris.cpp` at its unchanged effective `-O2`: move the fighter
+renderer out of `render.cpp`, remove the empty HUD space-draw placeholder and
+move its three direct draw callers from `chris_stubs.cpp`/`episodeIII.cpp`.
+Keep exact local symbol spelling and ordinary static linkage. The restored
+callers make synthetic retention annotations unnecessary; removing those
+annotations lets GCC infer private register passing. No register-passing
+attribute, optimization override or manual assembly is used.
+
+Add asserted runtime views for the eight five-fighter groups, their markers,
+96 queued fighters, two cross controls and quick-bolt records. Preserve the
+old reset views and allocation size: their addresses cover suffixes of fighter
+records, not the matrix origins used by drawing. Recover `Jetpos`'s verified
+12-byte initialized data and the original private quick-bolt model tables.
+Restore active/group gates, marker transforms, queue/bolt rendering, twin
+exhaust creation/update/free and player reloads after service calls.
+
+`DrawSpaceLevel` improves **0.429338% to 53.974560%**, and `DrawStarFighter`
+improves **84.398880% to 85.747290%**. The linked report reaches
+**65.379440%**, or **+0.254960 percentage points** from main. The three draw
+wrappers become exact, increasing exact functions **6,262 to 6,265**. The
+stack matrices retain the reference's 16-byte alignment; this does not change
+the score, and remaining instruction-layout differences are deferred.
+
+Extracted production drawing bodies pass native i386 and 64-bit ASan/UBSan
+fixtures covering all 40 grouped fighters, inactive-group gates, the final
+queued slot, both marker transforms, all four bolt model pairs, zero-duration
+bolts, both players' twin exhausts, cleanup, null-player preservation and a
+callback that clears a player between exhaust updates. The special missile
+draw checks its scaling/debris branch. Graphics/debris/model services are
+fixtures; this is not real rendering or flight-gameplay integration. Ordinary
+global sanitizer instrumentation is enabled; LeakSanitizer remains disabled
+for sandbox compatibility.

@@ -14,6 +14,9 @@
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/nu3d/nuhspecial.h"
 #include "nu2api/nu3d/nuspecial.h"
+#include "legoapi/render/core/render.h"
+#include "legoapi/render/fx.h"
+#include "legoapi/characters/core/character.h"
 #include <string.h>
 
 struct AIROW_s;
@@ -23,6 +26,8 @@ struct SHOPINPUT;
 
 extern f32 SpaceRumbleTimer;
 extern spacelevel_scale_s STARFIGHTERDRAWSCALE;
+NUVEC Jetpos = {0.15f, 0.08f, 0.32f};
+void DrawCross_Now(_vuv_s *position, f32 size, i32 colour, i32 mode);
 extern GameObject_s *Player[8];
 extern f32 FRAMETIME;
 extern LEVELDATA_s *DOGFIGHTA_LDATA;
@@ -60,6 +65,154 @@ anakin_door_setup_s DoorSetupList[15] = {
     // The retail table stores an empty string here, not a null name.
     {"", NULL, 0.0f, 0.0f, 0, {}, {0.0f, 0.0f, 0.0f}, 0.0f, 0.0f},
 };
+
+static void DrawStarFighter(starfighter_s *starfighter) {
+    const i32 model_id = starfighter->model_id;
+    NUMTX_ALIGNED16 matrices[2];
+    NUMTX &scaled_special_matrix = matrices[0];
+    NUMTX &scaled_model_matrix = matrices[1];
+    if (model_id >= 0) {
+        const f32 scale = starfighter->scale;
+        const i16 draw_flags = starfighter->draw_flags;
+        const i16 model_index = apicharsys->playermodelids[model_id];
+        if (model_index == -1)
+            return;
+        NUMTX *matrix = &starfighter->matrix;
+        if (scale != 1.0f) {
+            scaled_model_matrix = starfighter->matrix;
+            NuMtxPreScaleUVU0(&scaled_model_matrix, scale);
+            matrix = &scaled_model_matrix;
+        }
+        GameDrawCharacterModel(&apicharsys->models[model_index], NULL, matrix, NULL, NULL, NULL, NULL, draw_flags);
+    } else {
+        NUMTX *matrix = &starfighter->matrix;
+        if (model_id == -299 || model_id == -297 || model_id == -298 || model_id == -307) {
+            scaled_special_matrix = starfighter->matrix;
+            scaled_special_matrix.m00 *= 1.15f;
+            scaled_special_matrix.m01 *= 1.15f;
+            scaled_special_matrix.m02 *= 1.15f;
+            scaled_special_matrix.m10 *= 1.15f;
+            scaled_special_matrix.m11 *= 1.15f;
+            scaled_special_matrix.m12 *= 1.15f;
+            scaled_special_matrix.m20 *= 1.15f;
+            scaled_special_matrix.m21 *= 1.15f;
+            scaled_special_matrix.m22 *= 1.15f;
+            matrix = &scaled_special_matrix;
+        }
+        NuSpecialDrawAt(&WORLD->lev_objs[-model_id].special, matrix);
+        if (model_id == -307)
+            AddVariableShotDebrisEffect(WORLD->debris_sys->entries[49].effect,
+                                        reinterpret_cast<NUVEC *>(&starfighter->matrix.m30), 1, 0, 0);
+    }
+}
+
+static inline void QuickBolt_Draw(quickboltinfo *info) {
+    static const i32 BoltObjA[4] = {303, 305, 301, 301};
+    static const i32 BoltObjB[4] = {304, 306, 302, 302};
+    if (info->count != 0) {
+        quickbolt_s *bolt = info->bolts;
+        quickbolt_s *end = bolt + info->count;
+        for (; bolt < end; ++bolt) {
+            if (bolt->duration != 0.0f) {
+                Draw3DObjectMtx(WORLD, BoltObjA[bolt->type], &bolt->matrix);
+                Draw3DObjectMtx(WORLD, BoltObjB[bolt->type], &bolt->matrix);
+            }
+        }
+    }
+}
+
+static void DrawSpaceLevel(spacelevel_s *space) {
+    if (space->crosses[0].enabled != 0) {
+        NuVecMtxTransform(reinterpret_cast<NUVEC *>(&space->crosses[0].world_position),
+                          reinterpret_cast<NUVEC *>(&space->crosses[0].local_position), &GameCam->render_mtx);
+        DrawCross_Now(reinterpret_cast<_vuv_s *>(&space->crosses[0].world_position), space->crosses[0].scale,
+                      space->crosses[0].colour, 1);
+    }
+    if (space->crosses[1].enabled != 0) {
+        NuVecMtxTransform(reinterpret_cast<NUVEC *>(&space->crosses[1].world_position),
+                          reinterpret_cast<NUVEC *>(&space->crosses[1].local_position), &GameCam->render_mtx);
+        DrawCross_Now(reinterpret_cast<_vuv_s *>(&space->crosses[1].world_position), space->crosses[1].scale,
+                      space->crosses[1].colour, 1);
+    }
+#define DRAW_SPACE_FIGHTER(group_index, fighter_index)                                                                 \
+    if (space->flight_groups[group_index].fighters[fighter_index].active != 0)                                         \
+    DrawStarFighter(&space->flight_groups[group_index].fighters[fighter_index])
+#define DRAW_SPACE_GROUP(group_index)                                                                                  \
+    do {                                                                                                               \
+        if (space->flight_groups[group_index].active != 0) {                                                           \
+            DRAW_SPACE_FIGHTER(group_index, 0);                                                                        \
+            DRAW_SPACE_FIGHTER(group_index, 1);                                                                        \
+            DRAW_SPACE_FIGHTER(group_index, 2);                                                                        \
+            DRAW_SPACE_FIGHTER(group_index, 3);                                                                        \
+            DRAW_SPACE_FIGHTER(group_index, 4);                                                                        \
+            if (space->flight_groups[group_index].draw_target != 0)                                                    \
+                DrawCross_Now(reinterpret_cast<_vuv_s *>(&space->flight_groups[group_index].target), 3.0f, 0xffffff,   \
+                              1);                                                                                      \
+        }                                                                                                              \
+    } while (0)
+    DRAW_SPACE_GROUP(0);
+    DRAW_SPACE_GROUP(1);
+    DRAW_SPACE_GROUP(2);
+    DRAW_SPACE_GROUP(3);
+    DRAW_SPACE_GROUP(4);
+    DRAW_SPACE_GROUP(5);
+    DRAW_SPACE_GROUP(6);
+    DRAW_SPACE_GROUP(7);
+#undef DRAW_SPACE_GROUP
+#undef DRAW_SPACE_FIGHTER
+    for (i32 i = 0; i != 96; ++i) {
+        if (space->queued_fighters[i].active != 0)
+            DrawStarFighter(&space->queued_fighters[i]);
+    }
+    QuickBolt_Draw(&space->quick_bolts);
+
+#define DRAW_SPACE_JET(player_index, key_index, left)                                                                  \
+    do {                                                                                                               \
+        GameObject_s *player = Player[player_index];                                                                   \
+        if (player != NULL) {                                                                                          \
+            if (player->id == id_JEDISTARFIGHTERYELLOWEP3 || player->id == id_JEDISTARFIGHTERREDEP3) {                 \
+                if (DogDebKey[key_index] == -1) {                                                                      \
+                    AddDebrisEffect(&DogDebKey[key_index], WORLD->debris_sys->entries[47].effect, 0.0f, 0.0f, 0.0f);   \
+                } else {                                                                                               \
+                    NUMTX_ALIGNED16 matrix = player->apiobj.field_0xb8;                                                \
+                    matrix.m10 = -matrix.m10;                                                                          \
+                    matrix.m11 = -matrix.m11;                                                                          \
+                    matrix.m12 = -matrix.m12;                                                                          \
+                    matrix.m13 = -matrix.m13;                                                                          \
+                    if (left) {                                                                                        \
+                        matrix.m30 += (matrix.m10 * Jetpos.y - matrix.m00 * Jetpos.x) + matrix.m20 * Jetpos.z;         \
+                        matrix.m31 += (matrix.m11 * Jetpos.y - matrix.m01 * Jetpos.x) + matrix.m21 * Jetpos.z;         \
+                        matrix.m32 += (matrix.m12 * Jetpos.y - matrix.m02 * Jetpos.x) + matrix.m22 * Jetpos.z;         \
+                    } else {                                                                                           \
+                        matrix.m30 += matrix.m00 * Jetpos.x + matrix.m10 * Jetpos.y + matrix.m20 * Jetpos.z;           \
+                        matrix.m31 += matrix.m01 * Jetpos.x + matrix.m11 * Jetpos.y + matrix.m21 * Jetpos.z;           \
+                        matrix.m32 += matrix.m02 * Jetpos.x + matrix.m12 * Jetpos.y + matrix.m22 * Jetpos.z;           \
+                    }                                                                                                  \
+                    DebrisPosOrientationMtx(DogDebKey[key_index], &matrix);                                            \
+                }                                                                                                      \
+            } else if (DogDebKey[key_index] != -1) {                                                                   \
+                DebFreeInstantly(&DogDebKey[key_index]);                                                               \
+            }                                                                                                          \
+        }                                                                                                              \
+    } while (0)
+    DRAW_SPACE_JET(0, 0, false);
+    DRAW_SPACE_JET(0, 1, true);
+    DRAW_SPACE_JET(1, 2, false);
+    DRAW_SPACE_JET(1, 3, true);
+#undef DRAW_SPACE_JET
+}
+
+void ChrisAnakinADraw() {
+    DrawSpaceLevel(WORLD->space_level);
+}
+
+void ChrisAnakinDDraw() {
+    DrawSpaceLevel(WORLD->space_level);
+}
+
+void ChrisDogFightADraw(WORLDINFO_s *world) {
+    DrawSpaceLevel(world->space_level);
+}
 
 void ResetSpaceLevel(WORLDINFO_s *, spacelevel_s *) __asm__("_ZL15ResetSpaceLevelP11WORLDINFO_sP12spacelevel_s")
     __attribute__((visibility("hidden")));

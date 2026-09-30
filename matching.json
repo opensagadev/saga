@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 65.31516,
+    "fuzzy_match_percent": 65.37944,
     "total_code": "4722419",
-    "matched_code": "522012",
-    "matched_code_percent": 11.053911,
+    "matched_code": "522087",
+    "matched_code_percent": 11.055499,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 6262,
-    "matched_functions_percent": 46.52649,
+    "matched_functions": 6265,
+    "matched_functions_percent": 46.54878,
     "total_units": 1
   },
   "text": {
@@ -46873,7 +46873,7 @@
           "address": 2309392,
           "offset": 1419424,
           "size": 2796,
-          "match_percent": 24.796915
+          "match_percent": 24.958868
         },
         {
           "name": "_Z18ChrisAnakinCUpdatev",
@@ -46924,6 +46924,22 @@
           "match_percent": 100.0
         },
         {
+          "name": "_ZL15DrawStarFighterP13starfighter_s",
+          "demangled_name": "DrawStarFighter(starfighter_s*)",
+          "address": 2316736,
+          "offset": 1426768,
+          "size": 778,
+          "match_percent": 85.74719
+        },
+        {
+          "name": "_ZL14DrawSpaceLevelP12spacelevel_s",
+          "demangled_name": "DrawSpaceLevel(spacelevel_s*)",
+          "address": 2317520,
+          "offset": 1427552,
+          "size": 5520,
+          "match_percent": 53.974957
+        },
+        {
           "name": "_Z19ChrisAfterBurnerCamP7nuvec_sS0_",
           "demangled_name": "ChrisAfterBurnerCam(nuvec_s*, nuvec_s*)",
           "address": 2332112,
@@ -46954,6 +46970,14 @@
           "offset": 1448624,
           "size": 15,
           "match_percent": 0.0
+        },
+        {
+          "name": "_Z16ChrisAnakinADrawv",
+          "demangled_name": "ChrisAnakinADraw()",
+          "address": 2338640,
+          "offset": 1448672,
+          "size": 30,
+          "match_percent": 100.0
         },
         {
           "name": "_Z17ChrisAnakinAResetP11WORLDINFO_s",
@@ -46996,6 +47020,14 @@
           "match_percent": 100.0
         },
         {
+          "name": "_Z16ChrisAnakinDDrawv",
+          "demangled_name": "ChrisAnakinDDraw()",
+          "address": 2338960,
+          "offset": 1448992,
+          "size": 30,
+          "match_percent": 100.0
+        },
+        {
           "name": "_Z17ChrisAnakinDResetP11WORLDINFO_s",
           "demangled_name": "ChrisAnakinDReset(WORLDINFO_s*)",
           "address": 2338992,
@@ -47017,6 +47049,14 @@
           "address": 2339024,
           "offset": 1449056,
           "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z18ChrisDogFightADrawP11WORLDINFO_s",
+          "demangled_name": "ChrisDogFightADraw(WORLDINFO_s*)",
+          "address": 2339200,
+          "offset": 1449232,
+          "size": 15,
           "match_percent": 100.0
         },
         {
@@ -47055,22 +47095,6 @@
           "demangled_name": "ChrisAnakinAUpdate(WORLDINFO_s*)",
           "address": 2338608,
           "offset": 1448640,
-          "size": 30,
-          "match_percent": 0.0
-        },
-        {
-          "name": "_Z16ChrisAnakinADrawv",
-          "demangled_name": "ChrisAnakinADraw()",
-          "address": 2338640,
-          "offset": 1448672,
-          "size": 30,
-          "match_percent": 0.0
-        },
-        {
-          "name": "_Z16ChrisAnakinDDrawv",
-          "demangled_name": "ChrisAnakinDDraw()",
-          "address": 2338960,
-          "offset": 1448992,
           "size": 30,
           "match_percent": 0.0
         },
@@ -67834,14 +67858,6 @@
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/hud.o",
       "functions": [
         {
-          "name": "_ZL14DrawSpaceLevelP12spacelevel_s",
-          "demangled_name": "DrawSpaceLevel(spacelevel_s*)",
-          "address": 2317520,
-          "offset": 1427552,
-          "size": 5520,
-          "match_percent": 0.429338
-        },
-        {
           "name": "_ZN13HudRadarPulseC1ERK5VuVec",
           "demangled_name": "HudRadarPulse::HudRadarPulse(VuVec const&)",
           "address": 4566688,
@@ -75053,14 +75069,6 @@
           "offset": 1422288,
           "size": 9,
           "match_percent": 100.0
-        },
-        {
-          "name": "_ZL15DrawStarFighterP13starfighter_s",
-          "demangled_name": "DrawStarFighter(starfighter_s*)",
-          "address": 2316736,
-          "offset": 1426768,
-          "size": 778,
-          "match_percent": 84.39888
         },
         {
           "name": "_Z14DrawItemMenu2Dv",
@@ -85095,14 +85103,6 @@
           "offset": 1449072,
           "size": 157,
           "match_percent": 71.2
-        },
-        {
-          "name": "_Z18ChrisDogFightADrawP11WORLDINFO_s",
-          "demangled_name": "ChrisDogFightADraw(WORLDINFO_s*)",
-          "address": 2339200,
-          "offset": 1449232,
-          "size": 15,
-          "match_percent": 66.666664
         },
         {
           "name": "_Z19ChrisDogFightAResetP11WORLDINFO_s",
