@@ -6165,3 +6165,36 @@ O3, while the reference helper family has O0 code shape. That alone does not
 prove source ownership. Do not change options, move the family or force helper
 emission merely to improve the score. Build configuration, normalization and
 ownership maps remain unchanged.
+
+## Batches 129–130: grapple transitions and light-set selection
+
+Recover `Grapple_MoveCode`'s activation gates, ledge release, jump services,
+animation-rate floors, rope-depth limits and phase-boundary amplitude changes.
+Restore the verified `LEGOHINT_GRAPPLE` global initialized to -1. Preserve
+existing null/context safeguards and reload the current grapple after services.
+The function improves **19.468004% to 20.639%**; this is a modest matching gain,
+despite substantial recovered behavior. Production-body fixtures pass on
+64-bit ASan/UBSan and optimized i386 SSE: twenty focused scenarios and a
+multi-frame ledge acquisition/release transition per ABI. Mock engine services
+check callback order, hint/jump parameters and state transitions; these are not
+full gameplay integration tests.
+
+Restore `rtlApplySetScaleLoop`'s distinct ambient, directional and anti-light
+paths, direct distance expressions, nested upper/lower falloff clamp, integer
+restriction state and short-circuit grid coordinates. Keep the existing light
+array and modifier-index safeguards. The raw reference confirms the nested
+clamp's repeated expression, rather than a call to `ClampUnit`. New shadow
+selection publishes its blend after the vector callback; refreshing an already
+selected shadow does not restart its blend. The score improves
+**43.038400% to 82.144000%**, without optimization or ownership changes.
+
+The extracted lighting-loop fixture passes **20,000** bounded cases on each of
+64-bit ASan/UBSan and optimized i386 SSE. It checks all light types, identity
+and restriction masks, null positions, dynamic versus indexed iteration,
+radius/falloff and modifier selection, specular wobble and shadow callback
+mutation/order. Math and renderer services are stand-ins.
+
+Whole-binary matching reaches **66.569060%**, **+1.444580 percentage points**
+from main, with **6,273** exact functions and no exact function lost. All eleven
+GitHub checks passed for batches 127–128. The approximately two-point goal
+remains unfinished; build flags and scoring normalization are unchanged.

@@ -771,136 +771,176 @@ static void rtlApplySetScaleLoop(void *set, rtlidata_s *lighting_data, NUVEC *po
                                  f32 scale) {
     (void)rotation;
     (void)scale;
-    char *indices = NULL;
-    i32 index = 0;
+    i32 restricted;
     rtl_s *light;
+    f32 distance_sq;
+    f32 strength;
+    char *indices = NULL;
+    rtlset *lights;
+    rtlindex_s *grid;
+    i32 x, z;
+    f32 distance;
+    i32 index;
     lighting_data->specular_value = 0.0f;
-    if (set == NULL) {
-        light = reinterpret_cast<rtl_s *>(NuLstGetNext(rtl_dynamic_pool, NULL));
-    } else {
-        rtlset *lights = static_cast<rtlset *>(set);
+    if (set != NULL) {
+        lights = static_cast<rtlset *>(set);
         light = lights->lights;
-        rtlindex_s *grid = reinterpret_cast<rtlindex_s *>(lights + 1);
+        grid = reinterpret_cast<rtlindex_s *>(lights + 1);
         dbg_rtlindex = grid;
-        if (grid->enabled != 0 && position != NULL) {
-            i32 x = static_cast<i32>(grid->scale * (position->x + grid->offset_x));
-            i32 z = static_cast<i32>(grid->scale * (position->z + grid->offset_z));
-            if (x >= 0 && x < grid->width && z >= 0 && z < grid->depth && grid->cells != NULL) {
-                indices = grid->cells[x + grid->width * z];
-                light = GetNextRTL(set, light, indices, &index);
-            }
+        if (grid->enabled != 0 && position != NULL &&
+            (x = static_cast<i32>(grid->scale * (position->x + grid->offset_x))) < grid->width && x >= 0 &&
+            (z = static_cast<i32>(grid->scale * (position->z + grid->offset_z))) < grid->depth && z >= 0 &&
+            grid->cells != NULL) {
+            indices = grid->cells[x + grid->width * z];
+            index = 0;
+            light = GetNextRTL(set, light, indices, &index);
         }
+    } else {
+        light = reinterpret_cast<rtl_s *>(NuLstGetNext(rtl_dynamic_pool, NULL));
     }
-    bool restricted = false;
-    if (identity >= 0) {
-        restricted = (identity & 0x10) != 0;
+    if (identity < 0)
+        restricted = 0;
+    else {
+        restricted = (identity & 0x10) ? 1 : 0;
         identity &= 15;
     }
-    while (light != NULL) {
-        if (set != NULL &&
-            (light < static_cast<rtlset *>(set)->lights || light >= static_cast<rtlset *>(set)->lights + 128))
-            break;
-        if (light->type == 0)
-            break;
-        bool selected = light->field_7a == -1;
-        if (selected && identity >= 0 && light->type != 7) {
-            const u32 mask = 1u << identity;
-            if ((static_cast<u16>(light->field_60) & mask) != 0 ||
-                (light->type == 5 && light->field_5e != 0 && (static_cast<u16>(light->field_5e) & mask) == 0) ||
-                (restricted && light->field_5e == 0))
-                selected = false;
-        }
-        if (selected && !light->disabled) {
-            f32 distance_sq = 0.0f;
-            if (position != NULL) {
-                const f32 x = position->x - light->position.x;
-                const f32 y = position->y - light->position.y;
-                const f32 z = position->z - light->position.z;
-                distance_sq = x * x + y * y + z * z;
+    // These three fixed paths and their falloff expressions are distinct in the reference.
+#define RTL_DISTANCE_SQ                                                                                                \
+    ((position->x - light->position.x) * (position->x - light->position.x) +                                           \
+     (position->y - light->position.y) * (position->y - light->position.y) +                                           \
+     (position->z - light->position.z) * (position->z - light->position.z))
+#define RTL_RADIUS_FRACTION ((distance - light->inner_radius) / (light->outer_radius - light->inner_radius))
+#define RTL_FALLOFF                                                                                                    \
+    do {                                                                                                               \
+        if (light->inner_radius < light->outer_radius) {                                                               \
+            distance = NuFsqrt(distance_sq);                                                                           \
+            strength = 1.0f - ((RTL_RADIUS_FRACTION > 1.0f ? 1.0f : RTL_RADIUS_FRACTION) < 0.0f                        \
+                                   ? 0.0f                                                                              \
+                                   : (RTL_RADIUS_FRACTION > 1.0f ? 1.0f : RTL_RADIUS_FRACTION));                       \
+        } else                                                                                                         \
+            strength = 1.0f;                                                                                           \
+        if (light->field_79 == -1 && light->field_7a == -1 && light->field_7b >= 0 && light->field_7b < modifier_cnt)  \
+            strength *= modifiers[light->field_7b];                                                                    \
+    } while (0)
+    if (light != NULL) {
+        while (light != NULL) {
+            if (set != NULL &&
+                (light < static_cast<rtlset *>(set)->lights || light >= static_cast<rtlset *>(set)->lights + 128))
+                break;
+            if (light->type == 0)
+                break;
+            if (light->field_7a != -1) {
+                light = GetNextRTL(set, light, indices, &index);
+                continue;
             }
-            switch (light->type) {
-                case 1:
-                case 2:
-                case 3:
-                case 4:
-                case 6:
-                case 8: {
-                    if (distance_sq < light->outer_radius * light->outer_radius) {
-                        f32 strength = 1.0f;
-                        if (light->inner_radius < light->outer_radius) {
-                            const f32 distance = NuFsqrt(distance_sq);
-                            strength = ClampUnit(1.0f - (distance - light->inner_radius) /
-                                                            (light->outer_radius - light->inner_radius));
-                        }
-                        if (light->field_79 == -1 && light->field_7a == -1 && light->field_7b >= 0 &&
-                            light->field_7b < modifier_cnt)
-                            strength *= modifiers[light->field_7b];
-                        if (light->type == 1) {
+            if (identity >= 0 && light->type != 7) {
+                if ((static_cast<u16>(light->field_60) >> identity) & 1) {
+                    light = GetNextRTL(set, light, indices, &index);
+                    continue;
+                }
+                if (light->field_5e != 0 && light->type == 5 &&
+                    (identity == -1 || !((static_cast<u16>(light->field_5e) >> identity) & 1))) {
+                    light = GetNextRTL(set, light, indices, &index);
+                    continue;
+                }
+                if (restricted != 0 && light->field_5e == 0) {
+                    light = GetNextRTL(set, light, indices, &index);
+                    continue;
+                }
+            }
+            if (light == NULL || light->type == 0)
+                break;
+            if (!light->disabled) {
+                switch (light->type) {
+                    case 1:
+                        if (position != NULL)
+                            distance_sq = RTL_DISTANCE_SQ;
+                        else
+                            distance_sq = 0.0f;
+                        if (distance_sq < light->outer_radius * light->outer_radius) {
+                            RTL_FALLOFF;
                             if (strength != 0.0f && lighting_data->ambient_strengths[2] <= strength)
                                 InsertLight(light, lighting_data, strength);
-                            break;
                         }
-                        if (strength != 0.0f && lighting_data->directional_strengths[2] <= strength &&
-                            (light->ambient.x != 0.0f || light->ambient.y != 0.0f || light->ambient.z != 0.0f))
-                            InsertLight(light, lighting_data, strength);
-                        if (position != NULL && light->has_specular) {
-                            lighting_data->field_134.x += light->direction.x * strength;
-                            lighting_data->field_134.y += light->direction.y * strength;
-                            lighting_data->field_134.z += light->direction.z * strength;
-                            lighting_data->specular_value += strength;
-                            if (light->intensity > 16.0f) {
-                                const i32 packed = static_cast<i32>(light->intensity);
-                                const i32 angle = (packed >> 4) * rtltimer1;
-                                const f32 amplitude = static_cast<f32>(packed & 15);
-                                lighting_data->field_134.x += amplitude * NU_SIN_LUT(angle) * strength * rtlwob;
-                                lighting_data->field_134.y += amplitude * NU_COS_LUT(angle) * strength * rtlwob;
-                                lighting_data->field_134.z += amplitude * NU_COS_LUT(angle) * strength * rtlwob;
+                        break;
+                    case 2:
+                    case 3:
+                    case 4:
+                    case 6:
+                    case 8:
+                        if (position != NULL)
+                            distance_sq = RTL_DISTANCE_SQ;
+                        else
+                            distance_sq = 0.0f;
+                        if (light->outer_radius * light->outer_radius <= distance_sq) {
+                            if (lighting_data->cached_light == light)
+                                lighting_data->cached_value = 0.0000001f;
+                        } else {
+                            RTL_FALLOFF;
+                            if (strength != 0.0f && lighting_data->directional_strengths[2] <= strength &&
+                                (light->ambient.x != 0.0f || light->ambient.y != 0.0f || light->ambient.z != 0.0f))
+                                InsertLight(light, lighting_data, strength);
+                            if (position != NULL && light->has_specular) {
+                                lighting_data->field_134.x += light->direction.x * strength;
+                                lighting_data->field_134.y += light->direction.y * strength;
+                                lighting_data->field_134.z += light->direction.z * strength;
+                                lighting_data->specular_value += strength;
+                                if (light->intensity > 16.0f) {
+                                    lighting_data->field_134.x +=
+                                        static_cast<f32>(static_cast<i32>(light->intensity) & 15) *
+                                        NU_SIN_LUT((static_cast<i32>(light->intensity) >> 4) * rtltimer1) * strength *
+                                        rtlwob;
+                                    lighting_data->field_134.y +=
+                                        static_cast<f32>(static_cast<i32>(light->intensity) & 15) *
+                                        NU_COS_LUT((static_cast<i32>(light->intensity) >> 4) * rtltimer1) * strength *
+                                        rtlwob;
+                                    lighting_data->field_134.z +=
+                                        static_cast<f32>(static_cast<i32>(light->intensity) & 15) *
+                                        NU_COS_LUT((static_cast<i32>(light->intensity) >> 4) * rtltimer1) * strength *
+                                        rtlwob;
+                                }
                             }
-                        }
-                        if (position != NULL && light->cast_shadow) {
-                            if (lighting_data->cached_light == light ||
-                                (strength != 0.0f && lighting_data->cached_value < strength)) {
-                                if (lighting_data->cached_light != light) {
+                            if (position != NULL && light->cast_shadow) {
+                                if (lighting_data->cached_light == light) {
+                                    lighting_data->cached_value = strength;
+                                    if (light->type == 4)
+                                        NuVecScale(&lighting_data->shadow_direction, &light->direction, -1.0f);
+                                    else
+                                        NuVecSub(&lighting_data->shadow_direction, position, &light->position);
+                                } else if (strength != 0.0f && lighting_data->cached_value < strength) {
                                     lighting_data->cached_light = light;
                                     lighting_data->cached_light_uid = light->uid;
+                                    lighting_data->cached_value = strength;
+                                    if (light->type == 4)
+                                        NuVecScale(&lighting_data->shadow_direction, &light->direction, -1.0f);
+                                    else
+                                        NuVecSub(&lighting_data->shadow_direction, position, &light->position);
                                     lighting_data->shadow_blend = 1.0f;
                                 }
-                                lighting_data->cached_value = strength;
-                                if (light->type == 4)
-                                    NuVecScale(&lighting_data->shadow_direction, &light->direction, -1.0f);
-                                else
-                                    NuVecSub(&lighting_data->shadow_direction, position, &light->position);
                             }
                         }
-                    } else if (light->type != 1 && lighting_data->cached_light == light) {
-                        lighting_data->cached_value = 0.0000001f;
-                    }
-                    break;
-                }
-                case 5:
-                    InsertLight(light, lighting_data, 2.0f);
-                    break;
-                case 7:
-                    if (position != NULL && distance_sq < light->outer_radius * light->outer_radius) {
-                        f32 strength = 1.0f;
-                        if (light->inner_radius < light->outer_radius) {
-                            const f32 distance = NuFsqrt(distance_sq);
-                            strength = ClampUnit(1.0f - (distance - light->inner_radius) /
-                                                            (light->outer_radius - light->inner_radius));
+                        break;
+                    case 5:
+                        InsertLight(light, lighting_data, 2.0f);
+                        break;
+                    case 7:
+                        if (position != NULL &&
+                            (distance_sq = RTL_DISTANCE_SQ) < light->outer_radius * light->outer_radius) {
+                            RTL_FALLOFF;
+                            if (strength != 0.0f)
+                                InsertAntiLight(light, lighting_data, strength);
                         }
-                        if (light->field_79 == -1 && light->field_7a == -1 && light->field_7b >= 0 &&
-                            light->field_7b < modifier_cnt)
-                            strength *= modifiers[light->field_7b];
-                        if (strength != 0.0f)
-                            InsertAntiLight(light, lighting_data, strength);
-                    }
-                    break;
+                        break;
+                }
             }
+            light = GetNextRTL(set, light, indices, &index);
         }
-        light = GetNextRTL(set, light, indices, &index);
+        if (lighting_data->specular_value != 0.0f)
+            NuVecNorm(&lighting_data->field_134, &lighting_data->field_134);
     }
-    if (lighting_data->specular_value != 0.0f)
-        NuVecNorm(&lighting_data->field_134, &lighting_data->field_134);
+#undef RTL_FALLOFF
+#undef RTL_RADIUS_FRACTION
+#undef RTL_DISTANCE_SQ
 }
 
 static __used__ void rtlCalcShadow(rtlidata_s *data) {

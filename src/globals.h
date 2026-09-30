@@ -641,6 +641,7 @@ extern u64 _0xffffffffffffffff;
 extern f32 engagefiretime;
 extern f32 idealgoalrange;
 extern i32 LEGOHINT_BUILD;
+extern i32 LEGOHINT_GRAPPLE;
 extern i32 LEGOHINT_SHOOTCAMERAS;
 extern i32 WeaponInOut_NoAIJediSfx;
 extern i32 Lap;
