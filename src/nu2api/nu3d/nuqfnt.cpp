@@ -787,71 +787,93 @@ f32 NuQFntPrintJustifiedRSW(RNDRSTREAM *stream, void *font_ptr, u16 *text, f32 x
     if (mtx != NULL)
         NuQFntSetMtx(font, mtx);
     f32 line_height = NuQFntHeight(font);
-    u16 break_character = NuQFntEncodeUnicodeChar(font, '-');
+    const u16 hyphen = NuQFntEncodeUnicodeChar(font, '-');
     i32 line_number = 0;
-
-    while (*text != 0) {
+    do {
         NuQFntSetICGap(font, saved_ic_gap);
         NuQFntSetScaleRS(stream, font, sx, sy);
-        while (*text == 0x20)
-            text++;
-
         u16 line[256];
-        i32 length = 0;
-        i32 last_space = -1;
-        u16 *line_start = text;
-        bool forced_break = false;
-
-        while (*text != 0 && length < 254) {
-            if (*text == break_character) {
-                text++;
-                forced_break = true;
+        u16 *next = text;
+        i32 words = 0, punctuation_spaces = 0;
+        f32 words_width = 0.0f;
+        for (;;) {
+            u16 *word_start = next;
+            i32 length = 0, extra_spaces = 0;
+            while (*next != 0 && *next != hyphen) {
+                if (*next == 0x20) {
+                    const u16 following = next[1];
+                    if (following != '?' && following != '!' && following != '.' && following != ',')
+                        break;
+                    ++extra_spaces;
+                } else {
+                    line[length] = *next;
+                    line[length + 1] = 0;
+                    if (NuQFntPrintLenW(font, line) > width) {
+                        line[length] = 0;
+                        break;
+                    }
+                    ++length;
+                }
+                ++next;
+            }
+            // A hyphen terminates a word segment but belongs to that segment.
+            if (*next == hyphen)
+                line[length++] = *next++;
+            while (*next == 0x20)
+                ++next;
+            line[length] = 0;
+            const f32 word_width = NuQFntPrintLenW(font, line);
+            if (words != 0 &&
+                width * justify_squash <
+                    (words + punctuation_spaces + extra_spaces) * printed_space_width + word_width + words_width) {
+                next = word_start;
                 break;
             }
-            line[length++] = *text++;
-            line[length] = 0;
-            if (line[length - 1] == 0x20)
-                last_space = length - 1;
-            if (NuQFntPrintLenW(font, line) > width) {
-                if (last_space >= 0) {
-                    text = line_start + last_space + 1;
-                    length = last_space;
-                } else if (length > 1) {
-                    text--;
-                    length--;
-                }
+            words_width = word_width + words_width;
+            ++words;
+            punctuation_spaces += extra_spaces;
+            if (*next == 0)
                 break;
+        }
+
+        i32 length = 0;
+        while (text < next) {
+            if (*text == 0x20) {
+                line[length++] = 0x20;
+                do {
+                    ++text;
+                } while (*text == 0x20);
+            } else {
+                line[length++] = *text++;
             }
         }
-        while (length > 0 && line[length - 1] == 0x20)
-            length--;
         line[length] = 0;
-
-        f32 line_width = NuQFntPrintLenW(font, line);
-        i32 spaces = 0;
-        for (i32 i = 0; i < length; i++)
-            if (line[i] == 0x20)
-                spaces++;
-
-        bool final_line = *text == 0;
-        f32 scale = line_width == 0.0f ? 1.0f : width / line_width;
-        f32 limit = final_line || forced_break ? justify_squash : justify_stretch;
-        if (scale > limit)
-            scale = limit;
+        const f32 spaces = words - 1 + punctuation_spaces;
+        f32 scale;
+        if (*next == 0) {
+            const f32 ratio = width / (printed_space_width * spaces + words_width);
+            scale = ratio <= 1.0f ? ratio : 1.0f;
+        } else if (words == 1) {
+            scale = width / words_width;
+        } else {
+            const f32 ratio = width / (printed_space_width * spaces + words_width);
+            scale = ratio <= justify_stretch ? ratio : justify_stretch;
+        }
         NuQFntSetScaleRS(stream, font, sx * scale, sy);
-
-        if (!final_line && !forced_break && spaces > 0) {
-            f32 non_space_width = line_width - spaces * printed_space_width;
-            NuQFntSetSpaceWidth(font, (space_width * (width - non_space_width * scale)) /
-                                          (scale * printed_space_width * spaces));
+        if (*next != 0) {
+            if (words == 1)
+                NuQFntSetSpaceWidth(font, space_width);
+            else
+                NuQFntSetSpaceWidth(font, (space_width * (width - words_width * scale)) /
+                                              (scale * printed_space_width * spaces));
         } else {
             NuQFntSetSpaceWidth(font, space_width * scale);
         }
-
         NuQFntMoveRS(stream, font, x, y + line_number * line_height * line_spacing, z);
         NuQFntPrintRSW(stream, font, line, mtx == NULL ? 0 : 4);
-        line_number++;
-    }
+        ++line_number;
+        text = next;
+    } while (*text != 0);
 
     NuQFntSetSpaceWidth(font, saved_space_width);
     NuQFntSetICGap(font, saved_ic_gap);
@@ -1028,8 +1050,11 @@ static inline u16 NuQFntFloatToHalf(f32 value) {
            half_exponent;
 }
 
-static inline void NuQFntSetVertexAttributes(NuQFntVertex *vertex, u32 colour, f32 u, f32 v) {
-    vertex->colour = g_NuPrim_NeedsOverbrightening == 0 ? ((colour >> 1) & 0x7f7f7f) | (colour & 0xff000000) : colour;
+static inline void NuQFntSetVertexAttributes(NuQFntVertex *vertex, u32 colour, u32 half_colour, f32 u, f32 v) {
+    if (g_NuPrim_NeedsOverbrightening == 0)
+        vertex->colour = half_colour;
+    else
+        vertex->colour = colour;
     if (g_NuPrim_NeedsHalfUVs != 0) {
         u16 *uv = reinterpret_cast<u16 *>(&vertex->u);
         uv[0] = NuQFntFloatToHalf(u);
@@ -1040,13 +1065,13 @@ static inline void NuQFntSetVertexAttributes(NuQFntVertex *vertex, u32 colour, f
     }
 }
 
-static inline void NuQFntAdd3DVertex(f32 x, f32 y, f32 z, u32 colour, f32 u, f32 v) {
+static inline void NuQFntAdd3DVertex(f32 x, f32 y, f32 z, u32 colour, u32 half_colour, f32 u, f32 v) {
     NuQFntVertex *vertex = reinterpret_cast<NuQFntVertex *>(g_NuPrim_StreamBufferPtr->void_ptr);
-    NuQFntSetVertexAttributes(vertex, colour, u, v);
+    NuQFntSetVertexAttributes(vertex, colour, half_colour, u, v);
     vertex->x = x;
     vertex->y = y;
     vertex->z = z;
-    g_NuPrim_StreamBufferPtr->addr += sizeof(NuQFntVertex);
+    g_NuPrim_StreamBufferPtr->void_ptr = vertex + 1;
     g_NuPrim_VertexCount++;
 }
 
@@ -1068,52 +1093,60 @@ void NuQFntPrintCharW(NUQFNT *font, u16 *text, u32 flags) {
 
     f32 height = vufnt->height * *vufnt->y_scale;
     f32 space_width = (nuqfnt_space_width == 0.0f ? vufnt->space_width : nuqfnt_space_width) * *vufnt->x_scale;
-    bool is_3d = (flags & 4) != 0;
-
     NuPrimCSPos++;
     NuPrimSetCoordinateSystem(NUPRIM_SCALEMODE_PS2);
+    const u32 is_3d = flags & 4;
     if (is_3d)
         NuPrim3DBegin(0, 7, vufnt->mtl, &platform->mtx);
     else
         NuPrim2DBegin(4, 7, vufnt->mtl);
 
     u32 colour = platform->colour;
-    for (; *text != 0; text++) {
-        u16 character = *text;
+    const u32 half_colour = ((static_cast<i32>(colour) >> 1) & 0x7f7f7f) | (colour & 0xff000000);
+    for (u16 character = *text++; character != 0; character = *text++) {
         VUFNTCHAR *glyph = &vufnt->glyphs[character];
-        f32 advance = character == 0x20 ? space_width : glyph->width * *vufnt->x_scale;
+        f32 glyph_width = character == 0x20 ? space_width : glyph->width * *vufnt->x_scale;
+        f32 advance = glyph_width;
+        f32 top = y, bottom = y + height;
+        if (is_3d) {
+            top = y - height;
+            bottom = y;
+        }
         f32 left = x;
-        if ((flags & 1) != 0 && character >= 0x30 && character < 0x3a) {
-            VUFNTCHAR *zero = &vufnt->glyphs[NuQFntEncodeUnicodeChar(font, 0x30)];
+        if ((flags & 1) != 0 && static_cast<u16>(character - 0x30) <= 9) {
+            VUFNTCHAR *zero = &vufnt->glyphs[static_cast<i16>(NuQFntEncodeUnicodeChar(font, 0x30))];
             f32 digit_width = zero->width * *vufnt->x_scale;
-            left += digit_width - advance;
+            left = (digit_width - glyph_width) + x;
             advance = digit_width;
         }
 
         if (character != 0x20) {
-            f32 right = left + glyph->width * *vufnt->x_scale;
-            f32 u0 = glyph->x * inverse_texture_width;
-            f32 v0 = glyph->y * inverse_texture_height;
-            f32 u1 = (glyph->x + glyph->width) * inverse_texture_width;
-            f32 v1 = (glyph->y + vufnt->height) * inverse_texture_height;
-            if (is_3d) {
-                f32 top = y - height;
-                NuQFntAdd3DVertex(left, top, z, colour, u0, v1);
-                NuQFntAdd3DVertex(right, top, z, colour, u1, v1);
-                NuQFntAdd3DVertex(right, y, z, colour, u1, v0);
-                NuQFntAdd3DVertex(right, y, z, colour, u1, v0);
-                NuQFntAdd3DVertex(left, y, z, colour, u0, v0);
-                NuQFntAdd3DVertex(left, top, z, colour, u0, v1);
-            } else {
+            f32 right = left + glyph_width;
+            if (!is_3d) {
                 NuQFntVertex *vertex = reinterpret_cast<NuQFntVertex *>(g_NuPrim_StreamBufferPtr->void_ptr);
-                NuQFntSetVertexAttributes(vertex, colour, u0, v0);
-                NuPrim2DAddXYZ(left, y, 0.0f);
+                const f32 u0 = inverse_texture_width * glyph->x;
+                const f32 v0 = inverse_texture_height * glyph->y;
+                NuQFntSetVertexAttributes(vertex, colour, half_colour, u0, v0);
+                NuPrim2DAddXYZ(left, top, 0.0f);
                 vertex = reinterpret_cast<NuQFntVertex *>(g_NuPrim_StreamBufferPtr->void_ptr);
-                NuQFntSetVertexAttributes(vertex, colour, u1, v1);
-                NuPrim2DAddXYZ(right, y + height, 0.0f);
+                const f32 u1 = (glyph->x + glyph->width) * inverse_texture_width;
+                const f32 v1 = (glyph->y + vufnt->height) * inverse_texture_height;
+                NuQFntSetVertexAttributes(vertex, colour, half_colour, u1, v1);
+                NuPrim2DAddXYZ(right, bottom, 0.0f);
+            } else {
+                const f32 u0 = inverse_texture_width * glyph->x;
+                const f32 v0 = inverse_texture_height * glyph->y;
+                const f32 v1 = (glyph->y + vufnt->height) * inverse_texture_height;
+                const f32 u1 = (glyph->width + glyph->x) * inverse_texture_width;
+                NuQFntAdd3DVertex(left, top, z, colour, half_colour, u0, v1);
+                NuQFntAdd3DVertex(right, top, z, colour, half_colour, u1, v1);
+                NuQFntAdd3DVertex(right, bottom, z, colour, half_colour, u1, v0);
+                NuQFntAdd3DVertex(right, bottom, z, colour, half_colour, u1, v0);
+                NuQFntAdd3DVertex(left, bottom, z, colour, half_colour, u0, v0);
+                NuQFntAdd3DVertex(left, top, z, colour, half_colour, u0, v1);
             }
         }
-        x += advance + vufnt->ic_gap * *vufnt->x_scale;
+        x = x + vufnt->ic_gap * *vufnt->x_scale + advance;
     }
 
     if (is_3d)

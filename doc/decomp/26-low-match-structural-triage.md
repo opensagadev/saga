@@ -4929,3 +4929,38 @@ points), with **6,262** exact functions unchanged. The Android target, all five
 repository checks, cross-file declaration check and symbol-surface check pass.
 This is assembly-reviewed reconstruction, not a gameplay integration claim;
 no controller/touch runtime harness has yet been run for this batch.
+
+## Batch 96: word-based font justification and glyph submission
+
+Recover `NuQFntPrintJustifiedRSW` from its complete reference control flow.
+The old line-by-line approximation treated encoded hyphens as forced line
+breaks, dropped them, and used the wrong width/stretch decisions. Restore
+word-segment accumulation, punctuation-adjacent spacing, collapsed spaces,
+single-word stretching, final-line scale limiting and the mandatory initial
+line (including empty strings). Keep saved spacing/gap restoration and matrix
+mode forwarding. It improves **0% to 22.646488%** at the unchanged `-O2`.
+
+Also recover glyph-width caching across Unicode callbacks, signed digit-glyph
+indices, left-associated advance arithmetic, and stream advancement from the
+captured vertex pointer. Keep half-colour calculation outside the glyph loop
+and refresh second 2D UVs after primitive submission. These correctness changes
+do not yet improve the zero-scoring `NuQFntPrintCharW`; its remaining stack,
+register and block-layout gaps are not forced with attributes or flags.
+
+Overall linked fuzzy matching rises **65.240974% to 65.249770%**, with no other
+function-score changes or exact-match loss. Extracted production bodies pass
+**10,009** wrapping boundary/property cases and **960** vertex/state cases on
+32-bit native and 64-bit ASan/UBSan. Wrapping checks preserve collapsed input
+across random word/hyphen/punctuation sequences, line positions, height and
+spacing restoration. Vertex checks cover 2D/3D flags, mono-width digits, spaces,
+texture/no-texture dimensions, half UVs, overbrightening, scales, complete
+coordinates/colours and cursor/count/coordinate-stack state. Rendering/font
+services are fixtures, not real graphics or a retail execution oracle; callback
+mutation and invalid/out-of-capacity text are outside these tests. LeakSanitizer
+is disabled because sandbox tracing prevents it from running; ASan/UBSan remain
+enabled with ordinary global instrumentation.
+
+Three bounded force-progress loop trials remain at zero matching despite
+recovering reference-style signed indices, a separate 128-entry exit and
+ordinary nested group loops. All are reverted. The progress layout is already
+correct; do not repeat these control-flow-only trials without new evidence.
