@@ -104,12 +104,15 @@ static void GizTurrets_Update(void *context, void *system_ptr, float frame_time)
     if (system == NULL)
         return;
     GIZTURRET_s *turret = system->turrets;
-    for (i32 index = 0; index < static_cast<u16>(system->count); ++index, ++turret) {
+    if (system->count == 0)
+        return;
+    i32 index = 0;
+    do {
         u8 old_flags = turret->flags;
-        u8 rotation_sound_playing = (turret->runtime_flags >> 3) & 1;
         turret->flags &= 0x7f;
+        u8 rotation_sound_playing = (turret->runtime_flags >> 3) & 1;
         turret->runtime_flags &= ~8;
-        if ((old_flags & 6) != 6 || (old_flags & 0x20))
+        if (!(old_flags & 4) || !(old_flags & 2) || (old_flags & 0x20))
             continue;
         BOLTTYPE_s *bolt_type =
             BoltType_FindByID(static_cast<i8>(turret->bolt_type_id), static_cast<WORLDINFO_s *>(context));
@@ -384,7 +387,7 @@ static void GizTurrets_Update(void *context, void *system_ptr, float frame_time)
             if (bolt != NULL && (turret->behavior_flags & 0x8000))
                 bolt->flags |= 0x10;
         }
-    }
+    } while (++index, ++turret, index < static_cast<u16>(system->count));
 }
 
 static void GizTurrets_Draw(void *world_ptr, void *system_ptr, float) {

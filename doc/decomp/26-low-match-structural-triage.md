@@ -6198,3 +6198,57 @@ Whole-binary matching reaches **66.569060%**, **+1.444580 percentage points**
 from main, with **6,273** exact functions and no exact function lost. All eleven
 GitHub checks passed for batches 127–128. The approximately two-point goal
 remains unfinished; build flags and scoring normalization are unchanged.
+
+## Batches 131–136: Euler quaternion sampling, turret traversal and wind loops
+
+Recover the two V4 Euler-quaternion players' endpoint decoding and quaternion
+interpolation rather than interpolating Euler angles before conversion. Restore
+fixed three-axis skip groups, the reference's count-before-first-joint clamp,
+single-key nonblend sampling, and the blend player's distinct upper-key test.
+Constant nonblend rotations need only one Euler conversion; animated blend
+rotations always convert both endpoints before harmonizing and normalizing.
+The blend path preserves root-translation publication before blending, including
+aliasing with the output joint, and normalizes the absent-rotation identity blend.
+The nonblend player improves **23.303432% to 30.146180%**, and the blend player
+**23.958164% to 35.286736%**. Public signatures and compiler options are unchanged.
+
+Production-body fixtures pass **20,000** bounded animation cases per ABI on
+64-bit ASan/UBSan and optimized i386 SSE: mixed packed/constant rotations,
+quarter-three packet transitions, skipped joints, count clamping, single keys,
+default groups, flags, frame limits, conversion/normalization calls, blend state,
+and null/separate/aliased root outputs. Math services are stand-ins, not an
+Android animation integration test. Generic unsigned-conversion and branchless
+frame-selection trials regressed or failed to improve matching and were reverted.
+
+Recover the turret update's initial count check and do-loop, live count reloads,
+flag-clearing order, and three separate eligibility gates. Matching improves
+**1.011% to 4.347758%**. A focused fixture extracts the edited outer loop and
+gates, replacing the unchanged inner engine body with a callback. **50,000**
+cases pass on both ABIs, including early continues, all flag combinations,
+rotation-sound state, zero counts and callback count shrink/extension. It does
+not test turret firing or the complete update body. Matrix/controller branch
+reordering regressed matching and was reverted.
+
+Recover `NuWindUpdateArray`'s separate wind-only and contact loops, shared
+interaction latch, reusable scalar state, direct distance expressions and
+reference Z-wave arithmetic grouping. Raw instructions, not flattened Ghidra
+conditions, determine the ordered visibility and contact comparisons. Retain
+the existing wrapping counter increments. Matching improves **68.013% to
+91.000%**. **20,000** bounded three-group/matrix oracle cases pass on both ABIs,
+including null/all-null positions, all eight candidate slots, nearest selection,
+wind-only/contact paths, clamp limits, inactive/undrawn/zero-scale groups,
+multi-group latch behavior and square-root call counts. Additional checks cover
+NaN visibility bounds and an empty update. The oracle independently uses the
+previous combined-loop body with the verified Z-wave grouping; math services
+are stand-ins. An initial split-loop trial with incorrect branch grouping and
+duplicate square roots was replaced before retention.
+
+Terrain persistent-state types/evaluation-order trials did not improve matching
+and were reverted. Fixed push-hint fanout also scored worse and was reverted;
+the earlier rejected experiment remains applicable. The unresolved variadic
+contract of `NuErrorSleep` remains deferred, not reconstructed speculatively.
+
+Whole-binary matching reaches **66.614655%**, **+1.490175 percentage points**
+from main, with **6,273** exact functions and no exact function lost. All eleven
+GitHub checks passed for commit **65a78f4f** (batches 129–130). The approximately
+two-point goal continues. No optimization, ownership or scoring changes are made.
