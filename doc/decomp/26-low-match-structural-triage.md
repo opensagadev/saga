@@ -5803,3 +5803,47 @@ An `Action_Kill` expansion trial produced 11,114 bytes instead of the
 reference's 4,428 and scored zero. It was fully removed, including its
 behavior changes. Do not repeat the sixteen specialized-loop expansion
 without new compiler/structural evidence.
+
+## Batch 119: fixed customizer previews, music tracks and emulator conversions
+
+Recover the customizer's two explicit character previews and fixed layer /
+piece categories, including head suppression by replacing torsos, gameplay
+flag merging and cape layer exclusion. Preserve the existing null, count
+and selection-index guards: absent/empty torso, cape and weapon tables are
+not dereferenced merely because the original assumes configured arrays.
+Matching improves **15.230132% to 23.089403%**.
+
+Restore six fixed pause and resume track closures, retaining track order,
+voice/status filtering and pause-bit writes after the stream callbacks.
+Pause improves **27.575580% to 73.744190%**, resume
+**27.343023% to 73.831400%**. Recover the network emulator's reference-proven
+unsigned conversion closure: signed casts of bounded high/low sixteen-bit
+components, multiply by 65,536, then add. This is equivalent over the full
+`u32` domain and follows the existing profiler conversion audit, not a
+compiler-option workaround. Retain send/queue/statistics ordering and the
+post-statistics floating-point ratio test. `NuNetEmu::Update` improves
+**6.453039% to 77.375694%**.
+
+Overall matching reaches **66.280270%**, **+1.155790 percentage points**
+from main, with **6,269** exact functions. All eleven GitHub checks passed
+for batch 118. The approximately two-point goal remains unfinished.
+Ownership, optimization, ABI and score normalization remain unchanged.
+
+Extracted production bodies pass 64-bit ASan/UBSan and optimized i386 SSE
+fixtures: **20,000** customizer state/guard comparisons; **50,000** six-track
+pause/resume state and service-order cases; **1,000,008** unsigned conversion
+comparisons and **20,000** emulator queue/timing/statistics cases, including
+counter replacement by callbacks, unsigned timestamp wrap and linked-list
+removal. Emulator deadline conversions are tested within the existing
+defined numeric range; zero bandwidth / out-of-range float-to-int policy
+remains deferred. Services are stand-ins, not full gameplay/audio/network
+integration.
+
+Three eight-slot push-hint expansions scored zero and were removed.
+Clipping shared-edge capture and per-corner arithmetic-order trials also
+regressed and were fully removed. Structured emulator flow alone emitted
+the same bytes; its gain comes from the evidenced conversion closure.
+Hardware bootstrap remains deferred pending its variadic cursor and
+cross-owner initialization prototype audit. The incomplete batarang
+targeting caller requires recovering its natural private target-search
+helper, not directly exposing the compiler's `.isra.0` calling convention.

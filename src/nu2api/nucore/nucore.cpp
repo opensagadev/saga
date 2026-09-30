@@ -2242,13 +2242,48 @@ i32 NuNetEmu::SplitSendPacket(NuNetEmu::EmuPacket *packet) {
     return sent;
 }
 
+// The retained emulator uses this sixteen-bit unsigned conversion closure.
+static inline f32 NetEmuUnsignedFloat(u32 value) {
+    return static_cast<f32>(static_cast<i32>(value >> 16)) * 65536.0f +
+           static_cast<f32>(static_cast<i32>(value & 0xffff));
+}
+
 void NuNetEmu::Update() {
     u32 now = UtilGetFrameStartTime();
     if (now > static_cast<u32>(field_17bc)) {
-        goto send_packets;
-    }
+        u32 bandwidth = field_0c > 2 ? field_17c4 : field_17c0;
+        u32 budget = bandwidth / 30;
+        u32 sent = 0;
+        EmuPacket *packet = field_04;
+        while (sent < budget && packet != NULL) {
+            if (now >= packet->send_time && (now >= packet->flush_time || packet->payload_size >= field_38)) {
+                EmuPacket *next = packet->next;
+                raw_stats.total.values[0] += packet->payload_size;
+                raw_stats.total.values[2]++;
+                sent += SplitSendPacket(packet);
 
-update_stats:
+                if (packet->next != NULL) {
+                    packet->next->previous = packet->previous;
+                } else {
+                    field_08 = packet->previous;
+                }
+                if (packet->previous != NULL) {
+                    packet->previous->next = packet->next;
+                } else {
+                    field_04 = packet->next;
+                }
+                packet->next = NULL;
+                packet->previous = NULL;
+                field_0c--;
+                packet->~EmuPacket();
+                MemoryManagerFreePool(&theMemoryManager, packet, sizeof(EmuPacket));
+                packet = next;
+            } else {
+                packet = packet->next;
+            }
+        }
+        field_17bc = now + static_cast<i32>(NetEmuUnsignedFloat(sent) / (NetEmuUnsignedFloat(bandwidth) / 1000.0f));
+    }
     field_1c = 0;
     for (EmuPacket *packet = field_04; packet != NULL; packet = packet->next) {
         if (packet->flush_time >= packet->send_time || now <= packet->flush_time) {
@@ -2260,55 +2295,20 @@ update_stats:
     packet_stats.Update();
     {
         f32 ratio = 0.0f;
-        if (raw_stats.total.values[0] > 0) {
-            ratio = static_cast<f32>(packet_stats.total.values[0]) / static_cast<f32>(raw_stats.total.values[0]);
+        f32 raw_size = NetEmuUnsignedFloat(raw_stats.total.values[0]);
+        if (raw_size > 0.0f) {
+            ratio = NetEmuUnsignedFloat(packet_stats.total.values[0]) / raw_size;
         }
         packet_stats.pack_ratio = ratio;
 
         f32 average = 0.0f;
         if (packet_stats.total.values[2] > 0) {
-            average = static_cast<f32>(packet_stats.total.values[0]) / static_cast<f32>(packet_stats.total.values[2]);
+            average =
+                NetEmuUnsignedFloat(packet_stats.total.values[0]) / NetEmuUnsignedFloat(packet_stats.total.values[2]);
         }
         packet_stats.average_packet_size = average;
     }
     packet_stats.held_packets = field_0c;
-    return;
-
-send_packets: {
-    u32 bandwidth = field_0c > 2 ? field_17c4 : field_17c0;
-    u32 budget = bandwidth / 30;
-    u32 sent = 0;
-    EmuPacket *packet = field_04;
-    while (sent < budget && packet != NULL) {
-        if (now >= packet->send_time && (now >= packet->flush_time || packet->payload_size >= field_38)) {
-            EmuPacket *next = packet->next;
-            raw_stats.total.values[0] += packet->payload_size;
-            raw_stats.total.values[2]++;
-            sent += SplitSendPacket(packet);
-
-            if (packet->next != NULL) {
-                packet->next->previous = packet->previous;
-            } else {
-                field_08 = packet->previous;
-            }
-            if (packet->previous != NULL) {
-                packet->previous->next = packet->next;
-            } else {
-                field_04 = packet->next;
-            }
-            packet->next = NULL;
-            packet->previous = NULL;
-            field_0c--;
-            packet->~EmuPacket();
-            MemoryManagerFreePool(&theMemoryManager, packet, sizeof(EmuPacket));
-            packet = next;
-        } else {
-            packet = packet->next;
-        }
-    }
-    field_17bc = now + static_cast<i32>(static_cast<f32>(sent) / (static_cast<f32>(bandwidth) / 1000.0f));
-}
-    goto update_stats;
 }
 
 NUMTX NuDynamicLight::cacheCameraView;

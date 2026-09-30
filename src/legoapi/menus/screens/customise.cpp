@@ -339,60 +339,94 @@ static u32 Customiser_GetLayerMask(CUSTOMISER *customiser, GAMECHARACTERDATA *ru
     return layer_mask;
 }
 
+#define CUSTOM_SETUP_LAYER(category)                                                                                   \
+    if (customiser->layer_indices[category] != -1)                                                                     \
+        layer_mask |= 1u << (static_cast<u8>(customiser->layer_indices[category]) & 31);
+
+#define CUSTOM_SETUP_PIECE(category)                                                                                   \
+    {                                                                                                                  \
+        CUSTOMPIECE *piece = Customiser_GetSelectedPiece(customiser, selection, category);                             \
+        if (piece != NULL) {                                                                                           \
+            character->model_flags |= piece->model_flags;                                                              \
+            if ((character->model_flags & CHARACTER_MODEL_FLAG_ALTERNATE_WEAPON) != 0)                                 \
+                character->model_flags |= 0x10000000;                                                                  \
+            runtime->flags_090 |= piece->gameplay_flags;                                                               \
+        }                                                                                                              \
+    }
+
+#define CUSTOM_SETUP_SIDE(side, saved_selection)                                                                       \
+    do {                                                                                                               \
+        const i32 character_id = customiser->character_ids[side];                                                      \
+        if (character_id < 0 || character_id >= CHARCOUNT)                                                             \
+            break;                                                                                                     \
+        CHARACTERDATA *character = &CDataList[character_id];                                                           \
+        GAMECHARACTERDATA *runtime = character->game_character;                                                        \
+        if (runtime == NULL)                                                                                           \
+            break;                                                                                                     \
+        runtime->flags_090 = 0;                                                                                        \
+        const i16 *selection = saved_selection;                                                                        \
+        u32 layer_mask = 0;                                                                                            \
+        CUSTOM_SETUP_LAYER(0)                                                                                          \
+        CUSTOM_SETUP_LAYER(1)                                                                                          \
+        CUSTOM_SETUP_LAYER(2)                                                                                          \
+        CUSTOM_SETUP_LAYER(3)                                                                                          \
+        CUSTOM_SETUP_LAYER(4)                                                                                          \
+        CUSTOM_SETUP_LAYER(6)                                                                                          \
+        CUSTOM_SETUP_LAYER(7)                                                                                          \
+        CUSTOM_SETUP_LAYER(8)                                                                                          \
+        if (layer_mask == 0)                                                                                           \
+            layer_mask = 1;                                                                                            \
+        if (runtime->cape_layer != -1) {                                                                               \
+            const u32 cape_mask = 1u << (static_cast<u8>(runtime->cape_layer) & 31);                                   \
+            layer_mask |= cape_mask;                                                                                   \
+            CUSTOMPIECE *cape = Customiser_GetSelectedPiece(customiser, selection, 5);                                 \
+            if (cape != NULL && (cape->layer_flags & 0x40) != 0)                                                       \
+                layer_mask &= ~cape_mask;                                                                              \
+        }                                                                                                              \
+        runtime->layer_mask_special = layer_mask;                                                                      \
+        runtime->layer_mask = layer_mask;                                                                              \
+        runtime->layer_mask_medium = layer_mask;                                                                       \
+        runtime->layer_mask_low = layer_mask;                                                                          \
+        runtime->layer_mask_dead = layer_mask;                                                                         \
+        character->model_flags &= 3;                                                                                   \
+        CUSTOMPIECE *torso = Customiser_GetSelectedPiece(customiser, selection, 1);                                    \
+        const bool torso_replaces_base = torso != NULL && (torso->layer_flags & 1) != 0;                               \
+        CUSTOMPIECE *head = Customiser_GetSelectedPiece(customiser, selection, 0);                                     \
+        if (head != NULL) {                                                                                            \
+            if (!torso_replaces_base)                                                                                  \
+                character->model_flags |= head->model_flags;                                                           \
+            if ((character->model_flags & CHARACTER_MODEL_FLAG_ALTERNATE_WEAPON) != 0)                                 \
+                character->model_flags |= 0x10000000;                                                                  \
+            runtime->flags_090 = head->gameplay_flags;                                                                 \
+        }                                                                                                              \
+        CUSTOM_SETUP_PIECE(1)                                                                                          \
+        CUSTOM_SETUP_PIECE(2)                                                                                          \
+        CUSTOM_SETUP_PIECE(3)                                                                                          \
+        CUSTOM_SETUP_PIECE(4)                                                                                          \
+        CUSTOM_SETUP_PIECE(5)                                                                                          \
+        CUSTOM_SETUP_PIECE(6)                                                                                          \
+        CUSTOM_SETUP_PIECE(7)                                                                                          \
+        CUSTOM_SETUP_PIECE(8)                                                                                          \
+        if (torso_replaces_base)                                                                                       \
+            runtime->flags_090 |= 0x10;                                                                                \
+        CUSTOMPIECE *weapon = Customiser_GetSelectedPiece(customiser, selection, 2);                                   \
+        if (weapon != NULL) {                                                                                          \
+            runtime->weapon_model = weapon->weapon_model;                                                              \
+            runtime->field_0x117 = static_cast<u8>(LightSabre_ColourFromObj(runtime->weapon_model, NULL));             \
+        }                                                                                                              \
+    } while (0)
+
 void Customiser_SetUpCharacterData(CUSTOMISER *customiser) {
-    if (customiser == NULL) {
+    if (customiser == NULL)
         return;
-    }
-
-    for (i32 side = 0; side < 2; ++side) {
-        const i32 character_id = customiser->character_ids[side];
-        if (character_id < 0 || character_id >= CHARCOUNT) {
-            continue;
-        }
-        CHARACTERDATA *character = &CDataList[character_id];
-        GAMECHARACTERDATA *runtime = character->game_character;
-        if (runtime == NULL) {
-            continue;
-        }
-
-        const i16 *selection = Customiser_GetSelection(side);
-        const u32 layer_mask = Customiser_GetLayerMask(customiser, runtime, selection);
-        runtime->layer_mask_special = layer_mask;
-        runtime->layer_mask = layer_mask;
-        runtime->layer_mask_medium = layer_mask;
-        runtime->layer_mask_low = layer_mask;
-        runtime->layer_mask_dead = layer_mask;
-
-        character->model_flags &= 3;
-        runtime->flags_090 = 0;
-        CUSTOMPIECE *torso = Customiser_GetSelectedPiece(customiser, selection, 1);
-        const bool torso_replaces_base = torso != NULL && (torso->layer_flags & 1) != 0;
-        for (i32 category = 0; category < 9; ++category) {
-            CUSTOMPIECE *piece = Customiser_GetSelectedPiece(customiser, selection, category);
-            if (piece == NULL) {
-                continue;
-            }
-            // A replacing torso suppresses the head's model flags, but the
-            // head's gameplay flags are still merged by the reference.
-            if (category != 0 || !torso_replaces_base)
-                character->model_flags |= piece->model_flags;
-            if ((character->model_flags & CHARACTER_MODEL_FLAG_ALTERNATE_WEAPON) != 0) {
-                character->model_flags |= 0x10000000;
-            }
-            runtime->flags_090 |= piece->gameplay_flags;
-        }
-        if (torso_replaces_base) {
-            runtime->flags_090 |= 0x10;
-        }
-
-        CUSTOMPIECE *weapon = Customiser_GetSelectedPiece(customiser, selection, 2);
-        if (weapon != NULL) {
-            runtime->weapon_model = weapon->weapon_model;
-            runtime->field_0x117 = static_cast<u8>(LightSabre_ColourFromObj(runtime->weapon_model, NULL));
-        }
-    }
+    // The reference has two fixed previews and nine fixed piece categories.
+    CUSTOM_SETUP_SIDE(0, Game.customizer.pieces);
+    CUSTOM_SETUP_SIDE(1, Game.customizer.secondary_pieces);
     Customiser_SetNameAndIcon(customiser, -1);
 }
+#undef CUSTOM_SETUP_SIDE
+#undef CUSTOM_SETUP_PIECE
+#undef CUSTOM_SETUP_LAYER
 
 void Customiser_Draw3D(CUSTOMISER *customiser) {
     WORLDINFO_s *world = WorldInfo_CurrentlyActive();

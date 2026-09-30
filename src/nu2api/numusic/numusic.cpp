@@ -813,21 +813,27 @@ i32 NuMusic::PauseTrack(u32 clazz) {
     }
 
     i32 result = 0;
-    for (i32 i = 0; i < 6; i++) {
-        Track *track = tracks[i];
-        if (track == NULL) {
-            continue;
-        }
-        Voice *voice = FindVoiceByTrack(track);
-        if (voice == NULL || (u32)(voice->status - VOICE_STATUS_PLAYING) > 1) {
-            continue;
-        }
-        if ((voice->flags & 2) == 0) {
-            NuSound3PauseStereoStream(voice->stream_index);
-            voice->flags |= 2u;
-            result = 1;
-        }
-    }
+#define PAUSE_MUSIC_TRACK(index)                                                                                       \
+    do {                                                                                                               \
+        Track *track = tracks[index];                                                                                  \
+        if (track == NULL)                                                                                             \
+            break;                                                                                                     \
+        Voice *voice = FindVoiceByTrack(track);                                                                        \
+        if (voice == NULL || static_cast<u32>(voice->status - VOICE_STATUS_PLAYING) > 1)                               \
+            break;                                                                                                     \
+        if ((voice->flags & 2) == 0) {                                                                                 \
+            NuSound3PauseStereoStream(voice->stream_index);                                                            \
+            voice->flags |= 2u;                                                                                        \
+            result = 1;                                                                                                \
+        }                                                                                                              \
+    } while (0)
+    PAUSE_MUSIC_TRACK(0);
+    PAUSE_MUSIC_TRACK(1);
+    PAUSE_MUSIC_TRACK(2);
+    PAUSE_MUSIC_TRACK(3);
+    PAUSE_MUSIC_TRACK(4);
+    PAUSE_MUSIC_TRACK(5);
+#undef PAUSE_MUSIC_TRACK
 
     return result;
 }
@@ -843,21 +849,27 @@ i32 NuMusic::ResumeTrack(u32 clazz) {
     }
 
     i32 result = 0;
-    for (i32 i = 0; i < 6; i++) {
-        Track *track = tracks[i];
-        if (track == NULL) {
-            continue;
-        }
-        Voice *voice = FindVoiceByTrack(track);
-        if (voice == NULL || (u32)(voice->status - VOICE_STATUS_PLAYING) > 1) {
-            continue;
-        }
-        if ((voice->flags & 2) != 0) {
-            NuSound3ResumeStereoStream(voice->stream_index);
-            voice->flags &= ~2u;
-            result = 1;
-        }
-    }
+#define RESUME_MUSIC_TRACK(index)                                                                                      \
+    do {                                                                                                               \
+        Track *track = tracks[index];                                                                                  \
+        if (track == NULL)                                                                                             \
+            break;                                                                                                     \
+        Voice *voice = FindVoiceByTrack(track);                                                                        \
+        if (voice == NULL || static_cast<u32>(voice->status - VOICE_STATUS_PLAYING) > 1)                               \
+            break;                                                                                                     \
+        if ((voice->flags & 2) != 0) {                                                                                 \
+            NuSound3ResumeStereoStream(voice->stream_index);                                                           \
+            voice->flags &= ~2u;                                                                                       \
+            result = 1;                                                                                                \
+        }                                                                                                              \
+    } while (0)
+    RESUME_MUSIC_TRACK(0);
+    RESUME_MUSIC_TRACK(1);
+    RESUME_MUSIC_TRACK(2);
+    RESUME_MUSIC_TRACK(3);
+    RESUME_MUSIC_TRACK(4);
+    RESUME_MUSIC_TRACK(5);
+#undef RESUME_MUSIC_TRACK
 
     return result;
 }
