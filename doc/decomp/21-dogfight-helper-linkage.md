@@ -2,16 +2,17 @@
 
 The original `libTTapp.so` places `ChrisDogFightAInit`, `ChrisDogFightAReset`,
 `ChrisDogFightADraw`, `ResetSpaceLevel`, and `DrawSpaceLevel` together. The
-reconstruction splits the last two helpers into `chris.cpp` and `hud.cpp`.
+reconstruction now keeps both helpers and their callers in `chris.cpp`.
 Both target helper symbols have local ELF binding and names beginning `_ZL`.
 
 The NDK r8e GCC build passes `ResetSpaceLevel`'s `WORLDINFO_s *` in `eax` and
 `spacelevel_s *` in `edx`. It passes `DrawSpaceLevel`'s sole pointer in `eax`.
 Ordinary cross-file declarations use the stack and cannot reproduce these
-call sites. The declarations therefore preserve the target `_ZL` symbol names
-with GNU `__asm__` labels, use hidden visibility, and specify `regparm(2)` or
-`regparm(1)` respectively. Check both sides when moving a former static helper
-to another translation unit: the source name alone does not preserve the ABI.
+call sites. The former cross-file asm-label/regparm workaround was removed in
+low-match recovery batches 98–100. Keeping the original private helper/caller
+closure together lets GCC recover its internal register argument convention
+without a calling-convention attribute. Do not restore those attributes as a
+matching shortcut; check both sides and the original source ownership.
 
 In the target, `ChrisDogFightAPanel` is an empty body (eight alignment NOPs
 and `ret`). `ChrisDogFightADraw` is a tail jump to `DrawSpaceLevel` after

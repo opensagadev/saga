@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 65.61619,
+    "fuzzy_match_percent": 65.62459,
     "total_code": "4722419",
     "matched_code": "522117",
     "matched_code_percent": 11.056135,
@@ -77935,7 +77935,7 @@
           "address": 3652576,
           "offset": 2762608,
           "size": 306,
-          "match_percent": 99.77049
+          "match_percent": 99.52459
         },
         {
           "name": "_Z13CheckCylinderiiPii",
@@ -77983,7 +77983,7 @@
           "address": 3661776,
           "offset": 2771808,
           "size": 1337,
-          "match_percent": 79.97203
+          "match_percent": 78.55595
         },
         {
           "name": "_Z11HitTerrPolyP7tertypei",
@@ -77999,7 +77999,7 @@
           "address": 3663952,
           "offset": 2773984,
           "size": 1371,
-          "match_percent": 6.088525
+          "match_percent": 5.813115
         },
         {
           "name": "_Z11ScanTerrainiii",
@@ -78007,7 +78007,7 @@
           "address": 3665328,
           "offset": 2775360,
           "size": 8732,
-          "match_percent": 14.083885
+          "match_percent": 12.396799
         },
         {
           "name": "TerrainScanWallSpline",
@@ -78151,7 +78151,7 @@
           "address": 3679568,
           "offset": 2789600,
           "size": 850,
-          "match_percent": 84.64103
+          "match_percent": 84.79487
         },
         {
           "name": "_Z23TerrainPlatformEmbeddedP7nuvec_s",
@@ -78519,7 +78519,7 @@
           "address": 3710864,
           "offset": 2820896,
           "size": 4872,
-          "match_percent": 0.934839
+          "match_percent": 0.0
         },
         {
           "name": "_Z19NewScanHandelSubsetPsP7nuvec_sS1_fi",
@@ -78527,7 +78527,7 @@
           "address": 3715744,
           "offset": 2825776,
           "size": 2404,
-          "match_percent": 2.65913
+          "match_percent": 16.00174
         },
         {
           "name": "NewScanHandel",
@@ -78535,7 +78535,7 @@
           "address": 3718176,
           "offset": 2828208,
           "size": 372,
-          "match_percent": 99.965515
+          "match_percent": 95.735634
         },
         {
           "name": "NewRaySetDisablePalt",
@@ -78567,7 +78567,7 @@
           "address": 3721840,
           "offset": 2831872,
           "size": 478,
-          "match_percent": 99.84536
+          "match_percent": 99.69072
         },
         {
           "name": "TerrainPlatId",
@@ -78591,7 +78591,7 @@
           "address": 3723024,
           "offset": 2833056,
           "size": 4392,
-          "match_percent": 5.650155
+          "match_percent": 12.652219
         },
         {
           "name": "NewRayCastPlatForm",
