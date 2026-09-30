@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdarg.h>
+
 #include "gamelib/nuwind/nuwind.h"
 #include "nu2api/nucore/common.h"
 #include "nu2api/nucore/nupad.h"
@@ -72,6 +74,8 @@ enum {
 
 extern i32 nuapi_use_target_manager;
 extern char *nuapi_target_manager_mac_address;
+extern i32 nuapi_deferspotfxload;
+extern i32 nuapi_use_target_manager_for_sound;
 
 #ifdef __cplusplus
 void NuAPIInit(void);
@@ -98,4 +102,4 @@ extern "C" {
 
 i32 NuInitHardwarePS(VARIPTR *buf, VARIPTR *buf_end, i32 heap_size);
 
-i32 NuInitHardwareParseArgsPS(i32 setup_tok, char **args);
+i32 NuInitHardwareParseArgsPS(i32 setup_tok, va_list *args);

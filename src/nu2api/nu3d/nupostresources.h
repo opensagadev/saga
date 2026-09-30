@@ -20,7 +20,7 @@ struct NuProxyBuffer {
 DECOMP_ASSERT(sizeof(NuProxyBuffer) == 12, "NuProxyBuffer size");
 
 extern "C" {
-    void NuFramebufferInitEx(void);
+    void NuFramebufferInitEx(u32 flags, u32 format, VARIPTR *buffer, VARIPTR buffer_end);
     nuframebuffer_s *NuFramebufferCreate(void);
     void NuFramebufferDestroy(nuframebuffer_s *);
     void NuFramebufferAttachTex2D(nuframebuffer_s *, i32, nueffecttex_s *, i32);

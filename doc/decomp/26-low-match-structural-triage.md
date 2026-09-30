@@ -6042,3 +6042,42 @@ state and multi-frame protocol cases, and **2,000,001** valid-domain arcsine
 comparisons against the retained standalone polynomial. Animation handlers,
 storage services and square root are stand-ins, not complete gameplay or
 filesystem integration. All eleven GitHub checks passed for batch 122.
+
+## Batch 125: hardware bootstrap and variadic setup cursor
+
+Restore `NuInitHardware`'s token widths, four pad output pointers, setup
+options and complete initialization order. The platform parser now receives
+the address of the actual variadic cursor rather than consuming a pointer
+argument unconditionally; END does not consume another argument. Publish the
+recovered deferred-FX and sound-target-manager globals. Preserve the legacy
+mode token's consumed-but-unused behavior: this bootstrap selects mode 2.
+
+Use canonical public initialization declarations, including the framebuffer
+setup arguments and occlusion manager. `va_list *` expresses the platform
+parser's cursor contract portably and retains the original `(i32, char **)`
+mangled name on i386. Do not add a third renderer-init argument merely because
+the original caller writes an unused extra stack slot: its callee reads only
+the existing two arguments. No calling-convention, optimization or alignment
+shortcuts are introduced.
+
+Capture the arena end after platform initialization and retain that snapshot
+through geometry, font and occlusion initialization. Material override receives
+the snapshot's address, not the caller's live end pointer. Recover aspect,
+brightness, host filesystem, persistent DFS selection, pads/online, initial
+clear/swap and the successful return value.
+
+`NuInitHardware` improves **19.691824% to 79.919815%**. Whole-binary matching
+reaches **66.424866%**, **+1.300386 percentage points** from main; all **6,269**
+exact functions are retained. All eleven GitHub checks passed for batch 124.
+The approximately two-point goal is still unfinished.
+
+Extracted production-body fixtures pass **8,193 cases on each ABI**:
+64-bit ASan/UBSan and optimized i386 SSE. They cover every flag combination,
+all sixteen pad-output masks, mixed option widths, platform cursor consumption,
+END-only calls, invalid format retention, persistent/empty DFS names, cached
+arena-end semantics and complete service order. Engine services are stand-ins,
+not an Android or full gameplay execution.
+
+Two reference-informed eight-way `FindPart` filter specializations decline
+from 31.284% to 13.407%/14.013% under the unchanged O2 owner. Revert both;
+do not retain the larger source merely because its semantics resemble retail.
