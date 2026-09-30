@@ -5927,3 +5927,58 @@ fully reverted. Its original private path helper passes arguments through
 registers and SSE as a compiler optimization; the current source retains
 ordinary portable calls. Do not add calling-convention attributes or infer
 an extra public argument from the decompiler's undefined stack temporary.
+
+## Batch 122: batarang targeting closure and throw transitions
+
+Restore the private search called by both `Batarang_MoveCode` (screen-space)
+and `Batarang_Release` (forward automatic targeting). Recover object, ten
+detonator and gizmo filters, duplicate selection rejection, first-match versus
+nearest-match ordering, ray/platform acceptance and five-slot FIFO rollover.
+Object screen selection intentionally retains its 64-unit-squared comparison
+limit for the subsequent detonator scan; it is not an ordinary closest-of-all
+selection. Automatic candidates use the reference's 16-unit-squared limit.
+Null-world handling lives at both callers. The ordinary three-argument private
+helper naturally becomes GCC's `.isra.0` clone, without ABI annotations or
+explicit clone calls, and matches **37.038322%**.
+
+Restore aim ramp, held-action release, animation event/duration gates, buffered
+jump, input cancellation, HUD sight/target markers and message colours. Raw
+disassembly at `0x1d9313`–`0x1d9355` establishes the three colour writes that
+the decompiler omitted. Grouping the returned RGB components as a three-element
+array recovers the non-realigned stack frame naturally. `Batarang_MoveCode`
+improves **18.244944% to 34.422470%**.
+
+Release uses the reference's four-unit horizontal velocity, keeps ricochet
+state, obtains position after the rumble callback, and uses the configured
+joint when available. Automatic release searches before creating the inline
+type-three fallback two units ahead. Recover the fallback's three-float payload
+at target `+0x08` in `BATARANG_TARGET_s` and signed `batarang_joint` at config
+`+0x112`, with layout assertions and retained compatibility views.
+`Batarang_Release` improves **16.741072% to 58.080357%**.
+
+Keep existing null/flight guards. New marker calls reject negative or out-of-
+storage target indices inside the position helper, while retaining the
+in-flight return-to-owner case at index equal to the active count. Its old
+temporary `__used__` marker is retired now that both real callers exist.
+The helper regresses **71.9802% to 32.72277%** with these guard/caller changes;
+seek-to-target improves **93.26887% to 95.49056%**. The full batch is positive
+and loses no exact functions. Do not undo bounds safety merely for its score.
+
+Overall matching reaches **66.355930%**, **+1.231450 percentage points**
+from main, with **6,269** exact functions. All eleven GitHub checks passed
+for batch 121. The approximately two-point goal remains unfinished.
+Compiler options, ownership, public ABI and score normalization stay unchanged.
+
+Extracted production bodies pass 64-bit ASan/UBSan and optimized i386 SSE:
+**20,000** target-selection/raycast/FIFO cases, **30,000** throw transitions and
+**10,000** release cases, including null worlds, callback replacement of the
+batarang, post-callback position, joint origins, inline fallback pointers,
+HUD colours and bounded marker access. Selection and caller state machines
+are isolated with service stand-ins, not full gameplay integration. Existing
+out-of-range joint metadata and unbounded timer-to-integer inputs remain
+separate policy audits.
+
+Batch 121 follow-up: typed trigger-state update lowered its own score from
+83.916664% to 82.766670%, and two animation evaluator scores declined slightly;
+these are documented semantic/layout fixes in a net-positive batch, not
+hidden by changing the comparison settings.

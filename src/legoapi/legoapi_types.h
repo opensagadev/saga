@@ -569,9 +569,14 @@ struct BATARANG_TARGET_s {
     void *object;
     u8 type;
     u8 lost;
-    u8 reserved_06[0x14 - 0x06];
+    u16 reserved_06_word;
+    union {
+        u8 reserved_08[0x14 - 0x08];
+        NUVEC fallback_position;
+    };
 };
 DECOMP_ASSERT(sizeof(BATARANG_TARGET_s) == 0x14, "Batarang target size");
+DECOMP_ASSERT(offsetof(BATARANG_TARGET_s, fallback_position) == 8, "Batarang inline fallback position offset");
 struct BATARANG_s {
     BATARANG_TARGET_s targets[5]; // 0x00
     NUVEC position;               // 0x64

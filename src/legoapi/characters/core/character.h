@@ -470,7 +470,13 @@ struct PLAYERCHARACTERCONFIG_s {
     i8 model_origin_joint; // 0x10f; primary animated model-origin joint
     u8 unknown_110;
     i8 helmet_locator; // 0x111
-    u8 unknown_112[0x117 - 0x112];
+    union {
+        u8 unknown_112[0x117 - 0x112];
+        struct {
+            i8 batarang_joint; // 0x112; release/return position, -1 for the model origin
+            u8 unknown_113[4];
+        };
+    };
     u8 variant;
 };
 
@@ -482,6 +488,8 @@ DECOMP_ASSERT(offsetof(PLAYERCHARACTERCONFIG_s, hand_joints) == 0x108, "PLAYERCH
 DECOMP_ASSERT(sizeof(PLAYERCHARACTERCONFIG_s) == 0x118, "PLAYERCHARACTERCONFIG size");
 DECOMP_ASSERT(offsetof(PLAYERCHARACTERCONFIG_s, collision_origin_radius) == 0x4c,
               "PLAYERCHARACTERCONFIG collision-origin radius offset");
+DECOMP_ASSERT(offsetof(PLAYERCHARACTERCONFIG_s, batarang_joint) == 0x112,
+              "PLAYERCHARACTERCONFIG batarang joint offset");
 DECOMP_ASSERT(offsetof(PLAYERCHARACTERCONFIG_s, shadow_joint_mask) == 0xf0,
               "PLAYERCHARACTERCONFIG shadow-joint-mask offset");
 DECOMP_ASSERT(offsetof(PLAYERCHARACTERCONFIG_s, blob_shadow_alpha) == 0xf6,

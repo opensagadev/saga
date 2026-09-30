@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 66.32704,
+    "fuzzy_match_percent": 66.35593,
     "total_code": "4722419",
     "matched_code": "522352",
     "matched_code_percent": 11.061111,
@@ -62020,7 +62020,15 @@
           "address": 1928384,
           "offset": 1038416,
           "size": 325,
-          "match_percent": 71.9802
+          "match_percent": 32.72277
+        },
+        {
+          "name": "_ZL19Batarang_FindTargetP11WORLDINFO_sP12GameObject_si.isra.0",
+          "demangled_name": "Batarang_FindTarget(WORLDINFO_s*, GameObject_s*, int) [clone .isra.0]",
+          "address": 1928720,
+          "offset": 1038752,
+          "size": 2439,
+          "match_percent": 37.038322
         },
         {
           "name": "_Z16Batarang_ReleaseP12GameObject_si",
@@ -62028,7 +62036,7 @@
           "address": 1931168,
           "offset": 1041200,
           "size": 486,
-          "match_percent": 16.741072
+          "match_percent": 58.080357
         },
         {
           "name": "_Z24Batarang_StartThrowQuickP12GameObject_s",
@@ -62068,7 +62076,7 @@
           "address": 1933344,
           "offset": 1043376,
           "size": 914,
-          "match_percent": 93.26887
+          "match_percent": 95.49056
         },
         {
           "name": "_Z14Batarangs_Drawv",
@@ -62124,7 +62132,7 @@
           "address": 1937088,
           "offset": 1047120,
           "size": 2265,
-          "match_percent": 18.244944
+          "match_percent": 34.42247
         }
       ]
     },
@@ -124255,14 +124263,6 @@
       "match_percent": 0.0
     },
     {
-      "name": "_ZL19Batarang_FindTargetP11WORLDINFO_sP12GameObject_si.isra.0",
-      "demangled_name": "Batarang_FindTarget(WORLDINFO_s*, GameObject_s*, int) [clone .isra.0]",
-      "address": 1928720,
-      "offset": 1038752,
-      "size": 2439,
-      "match_percent": 0.0
-    },
-    {
       "name": "_Z24SuperStoryScore_LSW_DrawP14STATUS_STAGE_sP14STATUSPACKET_si.part.8",
       "demangled_name": "SuperStoryScore_LSW_Draw(STATUS_STAGE_s*, STATUSPACKET_s*, int) [clone .part.8]",
       "address": 2028752,
@@ -127602,8 +127602,8 @@
   "summary": {
     "bazel_units": 452,
     "functions": 13454,
-    "assigned_functions": 12644,
+    "assigned_functions": 12645,
     "ambiguous_functions": 257,
-    "unassigned_functions": 553
+    "unassigned_functions": 552
   }
 }
