@@ -1,10 +1,16 @@
 #include "decomp.h"
+#include "batman.h"
 #include "gamelib/crc/crc.h"
 #include <string.h>
 
 #include "gameapi/gui/apimenu.h"
 #include "globals.h"
 #include "legoapi/characters/core/players.h"
+#include "legoapi/audio/audio.h"
+#include "legoapi/core/input/gamepads.h"
+#include "legoapi/menus/screens/gamestructure.h"
+#include "legoapi/props/doors/door.h"
+#include "legoapi/render/light/fade.h"
 #include "legoapi/menus/core/text.h"
 #include "legoapi/menus/screens/shop.h"
 #include "legoapi/menus/screens/gamemenuall.h"
@@ -37,38 +43,101 @@ extern u32 GAMEPAD_MENUCANCEL;
 extern u32 GAMEPAD_TOGGLELEFT;
 extern u32 GAMEPAD_TOGGLERIGHT;
 extern GAMEPAD_s GamePad[64];
+extern i32 readpads_always;
+extern i32 reset_area;
+extern i32 MenuSFX;
+static u32 buttons_store[15];
 
 void UpdateGameMenu(GAMEPAD_s *pad, i32 a2) {
-    (void)a2;
-    if (pad == nullptr || GameMenuLevel < 0)
+    if (pad == NULL || GameMenuLevel < 0 || GameMenuLevel >= 10)
         return;
-
-    // Original UpdateGameMenu (0x1192b0) skips menu callbacks while a level
-    // change is pending. Re-entering the title menu here starts NewGame and
-    // erases the save that the preceding frame just loaded.
-    if (NewLData != NULL) {
+    const i32 menu_id = GetMenuID();
+    if (a2 != 0 && WORLD != NULL) {
+        if (Paused != 0 || GetMenuID() != -1) {
+            memset(buttons_store, 0, sizeof(buttons_store));
+        } else if (GamePad[0].buttons_down_08 != 0) {
+            for (i32 index = 14; index > 0; --index)
+                buttons_store[index] = buttons_store[index - 1];
+            buttons_store[0] = GamePad[0].buttons_down_08;
+        }
+    }
+    MENU *menu = &GameMenu[GameMenuLevel];
+    const i16 previous_menu = menu->menu;
+    bool both_pads = false;
+    if ((Paused != 0 || NetPaused != 0) && pause_i_pad >= 0 && pause_i_pad < 64) {
+        pad = &GamePad[pause_i_pad];
+    } else if (WORLD == NULL) {
+        both_pads = true;
+    } else if (menu_id != -1 && WORLD->current_level == TITLES_LDATA) {
+        both_pads = false;
+    } else if (menu_id == 0x1e && PlayerProgress[0].active != 0 && PlayerProgress[1].active != 0) {
+        both_pads = true;
+    } else if (Player[0] != NULL && static_cast<i8>(Player[0]->apiobj.field_0x1f8) < 0 && Player[1] != NULL &&
+               static_cast<i8>(Player[1]->apiobj.field_0x1f8) < 0) {
+        both_pads = true;
+    } else if (pad == &GamePad[0]) {
+        if (WORLD->current_level == CREDITS_LDATA) {
+            if (PlayerProgress[1].active != 0) {
+                if (PlayerProgress[0].active != 0)
+                    both_pads = true;
+                else
+                    pad = &GamePad[1];
+            } else if (PlayerProgress[0].active == 0) {
+                readpads_always = 1;
+                both_pads = true;
+            }
+        } else if (Player[0] != NULL && Player[1] != NULL) {
+            const bool first_active =
+                (Player[0]->apiobj.field_0x1f4 & 0x40000) == 0 && static_cast<i8>(Player[0]->apiobj.field_0x1f8) < 0;
+            const bool second_active =
+                (Player[1]->apiobj.field_0x1f4 & 0x40000) == 0 && static_cast<i8>(Player[1]->apiobj.field_0x1f8) < 0;
+            if (second_active && !first_active && Player[1]->pad_gamepad != NULL)
+                pad = Player[1]->pad_gamepad;
+            else if (!first_active && !second_active) {
+                readpads_always = 1;
+                both_pads = true;
+            }
+        } else {
+            readpads_always = 1;
+            both_pads = true;
+        }
+    }
+    if (editor_active == 0) {
+        const u8 widescreen = Game.options_save.widescreen;
         loadsaveCallEachFrame();
-        return;
+        Game.options_save.widescreen = widescreen;
     }
-
-    const u32 held = GamePad[0].unknown_04 | GamePad[1].unknown_04;
-    const u32 pressed = GamePad[0].buttons_down_08 | GamePad[1].buttons_down_08;
-    const u32 alternate_held = GamePad[0].unknown_0c | GamePad[1].unknown_0c;
-    const u32 alternate_pressed = GamePad[0].unknown_10 | GamePad[1].unknown_10;
-    UpdateMenu(held, pressed, alternate_held, alternate_pressed, FRAMETIME, GAMEPAD_MENUSELECT, GAMEPAD_MENUCANCEL,
-               GAMEPAD_START, GAMEPAD_SELECT);
-    loadsaveCallEachFrame();
-}
-i32 GetParentMenuID() {
-    if (GameMenuLevel <= 1) {
-        return -1;
+    // Pending transitions must not re-enter menu callbacks (e.g. NewGame)
+    // after the save loader has selected the destination level.
+    if (FadeSys.fade <= 0.0f && NewMode == 0 && NewLData == NULL && editor_active == 0) {
+        u32 held = 0, pressed = 0, alternate_held = 0, alternate_pressed = 0;
+        if (menu_id != 1 || GameTimer.time_elapsed >= 4.0f) {
+            if (both_pads) {
+                held = GamePad[0].unknown_04 | GamePad[1].unknown_04;
+                pressed = GamePad[0].buttons_down_08 | GamePad[1].buttons_down_08;
+                alternate_held = GamePad[0].unknown_0c | GamePad[1].unknown_0c;
+                alternate_pressed = GamePad[0].unknown_10 | GamePad[1].unknown_10;
+            } else {
+                held = pad->unknown_04;
+                pressed = pad->buttons_down_08;
+                alternate_held = pad->unknown_0c;
+                alternate_pressed = pad->unknown_10;
+            }
+        }
+        const i32 previous_item = menu->selected_item;
+        const i32 previous_column = menu->selected_item_column;
+        const i32 result = UpdateMenu(held, pressed, alternate_held, alternate_pressed, FRAMETIME, GAMEPAD_MENUSELECT,
+                                      GAMEPAD_MENUCANCEL, GAMEPAD_START, GAMEPAD_SELECT);
+        if (MenuSFX == -1 && menu->selected_item != -1 && menu->selected_item_column != -1 && previous_item != -1 &&
+            previous_column != -1 &&
+            (previous_item != menu->selected_item || previous_column != menu->selected_item_column) &&
+            GetMenuID() == menu_id)
+            GameAudio_PlaySfx(0x2f, NULL, 0, 0);
+        if (result == 1 && Paused != 0)
+            ResumeGame(1, 1);
     }
-
-    const i16 parent_menu = GameMenu[GameMenuLevel - 1].menu;
-    if (parent_menu == -1) {
-        return -1;
-    }
-    return MenuInfo[parent_menu].id;
+    if (previous_menu != -1 && NewLData != NULL && menu_id != 0x1b && gone_through_door_to_new_level == 0)
+        reset_area = 1;
 }
 eduimenu_s *GetMenuActiveChild(eduimenu_s *menu) {
     if (menu == NULL) {
@@ -83,12 +152,6 @@ void ResizePauseScreenTexture(i32, i32) {
     STUBBED();
 }
 
-i32 GetMenuID(void) {
-    if (GameMenu[GameMenuLevel].menu != -1) {
-        return MenuInfo[GameMenu[GameMenuLevel].menu].id;
-    }
-    return -1;
-}
 extern "C" void NewMenu(i32 menu_id, i32 menu_y, i32 param3) {
     (void)param3;
 

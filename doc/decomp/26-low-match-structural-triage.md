@@ -5372,3 +5372,48 @@ texture changes, cape/hats/weapons/lightsabers, inherited flags; status callback
 fade/demo gates, countdown and stage alpha; current/used/empty/no-space saves,
 menu colours and invalid slots. Engine/rendering services are stand-ins, not
 full gameplay integration; LeakSanitizer is disabled for sandbox compatibility.
+
+## Batch 108: spinner outputs, aimed detonators and menu input routing
+
+Recover `GizSpinners_Update`'s animation visibility, failure debris, disabled
+input release, timed output pauses and output-marker return motion. Name the
+pause float at the verified 0x2d4 offset without changing the record layout.
+Bound arms and outputs to their canonical arrays. Cap the arm count before
+traversal: putting a constant bound in the loop caused GCC to expand eight
+matrix-copy bodies (5,696 bytes); the capped runtime traversal avoids that
+duplication with unchanged `-O3`. The retail owner-release path incorrectly
+indexes Player by spinner index; release actual matching owners instead of
+copying the unrelated/OOB access. Preserve the binary's animation rate field,
+pause timer source and rotation constants.
+
+Restore `ThermalDetonator_Throw`'s hint updates, throw locator, Jango randomized
+orientation, normalized joint basis and obstruction ray. Recover managed-target
+arc aiming, target release and the reference's X-only clamp, fixed vertical
+velocity and blocked-origin correction. Restore radius-derived part dimensions,
+the collision callback, position pointer and active marker. Remove the extra
+movement-flag clear absent from the reference. Missing resources and locator
+indices are guarded; no compile-option or calling-convention changes.
+
+Restore `UpdateGameMenu`'s controller ownership, pause/network pad selection,
+credits player state, 15-entry button history, startup input delay, fade/editor/
+level-transition gates, loader-preserved widescreen setting, navigation sounds,
+resume and area-reset behavior. Its ID queries belong with the text/menu-entry
+helpers evidenced by reference symbol neighbors; move them to `text.cpp`,
+preserving that file's existing `-O2` and the input updater's existing `-O3`.
+Both queries remain exact. The fuller updater currently scores **0%**, down
+from **10.994350%**; retain the recovered behavior and record the unresolved
+control-flow/register-layout mismatch, not a claimed per-function gain.
+
+Spinner matching improves **16.920895% to 27.322388%**; throwing improves
+**4.619512% to 46.248780%**. Overall matching is **65.714170%**, **+0.589690
+percentage points** from main, with **6,270** exact functions. Target remains
+approximately **67.124480%**. All eleven checks passed for the preceding commit.
+
+Extracted production-body fixtures pass 64-bit ASan/UBSan and optimized i386
+SSE builds: throw defaults, hints, managed target lifetime and X clamps, valid/
+missing locators, normalized and Jango transforms, blocked throws, allocation
+failure and part callbacks; spinner output entry/expiry, owners in slot seven,
+visibility/debris, positive/negative return motion, exact marker snap and array
+bounds; combined/single/pause/network/credits controllers, startup threshold,
+loader transitions, editor/fade gates, sound/resume, history and invalid input.
+Service calls are mocks, not a full game-runtime test; LeakSanitizer is disabled.

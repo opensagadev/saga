@@ -1,14 +1,17 @@
 #include "decomp.h"
 #include "globals.h"
 #include "MechInputTouch/MechInputTouch_types.h"
+#include "gamelib/util/gamelib_util_types.h"
 #include "legoapi/audio/sfx.h"
 #include "legoapi/core/config/cheat.h"
 #include "legoapi/core/input/gamepads.h"
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/characters/motion.h"
+#include "legoapi/characters/core/character.h"
 #include "legoapi/characters/motion/gameanim.h"
 #include "legoapi/actions/combat/hits.h"
 #include "legoapi/legoapi_types.h"
+#include "legoapi/menus/core/gamehint.h"
 #include "legoapi/render/fx.h"
 #include "legoapi/render/fx/parts.h"
 #include "legoapi/world/world.h"
@@ -41,27 +44,87 @@ void PartUpdate_ThermalDetonator(PART_s *part);
 void PartImpact_ThermalDetonator(PART_s *part);
 void PartKill_ThermalDetonator(PART_s *part, i32 reason);
 i32 PartDraw_ThermalDetonator(PART_s *part);
+i32 GameRayCast(NUVEC *position, NUVEC *movement, f32 radius, i32 mask);
+extern i32 TERRAINMASK_NONWEAPON;
 
 void ThermalDetonator_Throw(GameObject_s *object) {
+    ADDPART_s params = Default_ADDPART;
     if (object == NULL || WORLD == NULL || WORLD->lev_objs == NULL || WORLD->lev_objs[0xea].active == 0) {
         return;
     }
 
+    if (static_cast<i8>(object->apiobj.field_0x1f8) < 0) {
+        Hint_SetComplete(0x2b8);
+        Hint_SetComplete(0x283);
+        Hint_SetComplete(0x61d);
+    }
     NUMTX matrix;
-    NuMtxSetTranslation(&matrix, &object->apiobj.collision_position);
+    bool blocked = false;
+    const i32 locator = object->apiobj.character_data != NULL && object->apiobj.character_data->game_character != NULL
+                            ? object->apiobj.character_data->game_character->throw_locator
+                            : -1;
+    if (locator < 0 || locator >= 16 || object->apiobj.character_model == NULL ||
+        object->apiobj.character_model->points_of_interest[locator] == NULL) {
+        NuMtxSetTranslation(&matrix, &object->apiobj.collision_position);
+    } else {
+        if (object->id == id_JANGOFETT && object->context_animation == 0x6e) {
+            NuMtxSetRotationY(&matrix, qrand());
+            NuMtxRotateZ(&matrix, qrand());
+            NuMtxRotateX(&matrix, qrand());
+            NuMtxTranslate(&matrix, NUMTX_GET_ROW_VEC(&object->joint_matrices[locator], 3));
+        } else {
+            matrix = object->joint_matrices[locator];
+            NuVecNorm(NUMTX_GET_ROW_VEC(&matrix, 0), NUMTX_GET_ROW_VEC(&matrix, 0));
+            NuVecNorm(NUMTX_GET_ROW_VEC(&matrix, 1), NUMTX_GET_ROW_VEC(&matrix, 1));
+            NuVecNorm(NUMTX_GET_ROW_VEC(&matrix, 2), NUMTX_GET_ROW_VEC(&matrix, 2));
+        }
+        NUVEC origin = {
+            object->apiobj.collision_position.x,
+            (object->apiobj.collision_max.y - object->apiobj.collision_min.y) * 0.75f + object->apiobj.collision_min.y,
+            object->apiobj.collision_position.z,
+        };
+        NUVEC movement;
+        NuVecSub(&movement, NUMTX_GET_ROW_VEC(&matrix, 3), &origin);
+        blocked = GameRayCast(&origin, &movement, 0.0f, TERRAINMASK_NONWEAPON | 0x1f) != 0;
+    }
     NUVEC velocity;
-    ThermalDetonator_ThrowMom(object, &velocity);
+    if (NextThermalTarget.Get() == NULL) {
+        const u16 angle = object->apiobj.movement_facing_angle;
+        velocity.x = NU_SIN_LUT(angle) + NU_SIN_LUT(angle) + object->apiobj.velocity.x;
+        velocity.z = NU_COS_LUT(angle) + NU_COS_LUT(angle) + object->apiobj.velocity.z;
+    } else {
+        VuVec target;
+        NextThermalTarget->GetPos(target, -1);
+        const VuVec origin(object->apiobj.position.x, object->apiobj.position.y, object->apiobj.position.z, 1.0f);
+        const VuVec arc = TouchHacks::CalculateXZVelForArcToHitPoint(origin, target, 2.0f, -5.0f);
+        NextThermalTarget.Reset();
+        // The retail path clamps only X; Z retains the calculated arc velocity.
+        velocity.x = arc.x < -3.0f ? -3.0f : arc.x >= 3.0f ? 3.0f : arc.x;
+        velocity.z = arc.z;
+    }
+    velocity.y = 2.0f;
+    if (blocked) {
+        const u16 angle = NuAtan2D(object->apiobj.collision_position.x - matrix.m30,
+                                   object->apiobj.collision_position.z - matrix.m32);
+        velocity.x = NU_SIN_LUT(angle) + NU_SIN_LUT(angle);
+        velocity.z = NU_COS_LUT(angle) + NU_COS_LUT(angle);
+        matrix.m30 = object->apiobj.collision_position.x;
+        matrix.m32 = object->apiobj.collision_position.z;
+    }
 
-    ADDPART_s params = Default_ADDPART;
     params.matrix = &matrix;
+    params.position = &object->apiobj.collision_position;
     params.velocity = &velocity;
     params.owner = object;
-    params.field_14 = 0.1f;
-    params.field_18 = 0.1f;
+    NUVEC centre;
+    NuSpecialGetRadius(&WORLD->lev_objs[0xea].special, &centre, &params.field_14);
+    params.field_18 = params.field_14;
+    params.field_14 *= 0.75f;
+    params.field_c4 = 1;
     params.gravity = -5.0f;
     params.special = &WORLD->lev_objs[0xea].special;
     params.flags = 0x08000292;
-    params.update_fn = PartUpdate_ThermalDetonator;
+    params.update_fn = PartCollide_3D;
     params.field_40 = PartImpact_ThermalDetonator;
     params.field_44 = PartKill_ThermalDetonator;
     params.stop_fn = PartStop_Flickerer;
@@ -78,7 +141,6 @@ void ThermalDetonator_Throw(GameObject_s *object) {
         part->render_flags &= ~0x80;
         part->reflection_flags &= ~3;
     }
-    object->movement_runtime_flags &= ~0x40;
     PlaySfx(const_cast<char *>("ThrowDet"), &object->apiobj.collision_position);
     if (object->pad_gamepad != NULL) {
         NewBuzzFrames(object->pad_gamepad->pad, 2, 0);

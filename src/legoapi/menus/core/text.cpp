@@ -1626,3 +1626,23 @@ void IntroText_Draw(float alpha) {
     NuQFntPrintJustifiedW(QFont2D, encoded, -0.85f, INTROTEXT_Y, 1.0f, INTROTEXT_SCALE, INTROTEXT_SCALE, 1.7f, 1.0f,
                           colour, 0);
 }
+
+// These queries follow GameDrawMenuEntry in the reference text/menu helpers,
+// separate from UpdateGameMenu's input-routing translation unit.
+i32 GetMenuID(void) {
+    if (GameMenu[GameMenuLevel].menu != -1) {
+        return MenuInfo[GameMenu[GameMenuLevel].menu].id;
+    }
+    return -1;
+}
+
+i32 GetParentMenuID() {
+    if (GameMenuLevel <= 1) {
+        return -1;
+    }
+    const i16 parent_menu = GameMenu[GameMenuLevel - 1].menu;
+    if (parent_menu == -1) {
+        return -1;
+    }
+    return MenuInfo[parent_menu].id;
+}

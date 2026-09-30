@@ -1948,7 +1948,10 @@ struct GIZSPINNER_s {
     i16 platform_id; // 0x0ae
     u8 field_0x0b0[4];
     GIZSPINNERARM_s arms[8]; // 0x0b4
-    u8 field_0x2d4[4];
+    union {
+        u8 field_0x2d4[4];
+        f32 output_pause_time;
+    };
     f32 field_0x2d8;
     f32 animation_points[9];   // 0x2dc
     GAMEANTINODE_s *anti_node; // 0x300
@@ -1961,6 +1964,7 @@ DECOMP_ASSERT(offsetof(GIZSPINNER_s, anim_set) == 0x68, "GIZSPINNER anim-set off
 DECOMP_ASSERT(offsetof(GIZSPINNER_s, flags) == 0xac, "GIZSPINNER flags offset");
 DECOMP_ASSERT(offsetof(GIZSPINNER_s, platform_id) == 0xae, "GIZSPINNER platform offset");
 DECOMP_ASSERT(offsetof(GIZSPINNER_s, arms) == 0xb4, "GIZSPINNER arms offset");
+DECOMP_ASSERT(offsetof(GIZSPINNER_s, output_pause_time) == 0x2d4, "GIZSPINNER output pause offset");
 DECOMP_ASSERT(offsetof(GIZSPINNER_s, animation_points) == 0x2dc, "GIZSPINNER animation-points offset");
 DECOMP_ASSERT(offsetof(GIZSPINNER_s, anti_node) == 0x300, "GIZSPINNER antinode offset");
 struct GIZTURRETSYS_s;
