@@ -5489,3 +5489,42 @@ network input and NaN slides; collision ages/XZ bounds/shields including NaN,
 2D versus 3D, pickups/torpedoes, deflection, impulses and callback mask changes.
 Services are stand-ins, not rendering/gameplay or packed-asset integration;
 LeakSanitizer is disabled for sandbox compatibility.
+
+## Batch 111: fixed-roster selectors and canonical grapple fields
+
+Recover `AvailableToPlayer`'s selector dispatch and eight explicit player slots
+from the reference. Keep the predicate in locally scoped macros, following the
+existing fixed-slot `UpdateExplosions` convention; do not add optimizer flags
+or forced-inlining attributes. Separate-loop and private-helper experiments
+did not recover the reference's specialized flag/weapon/context branches.
+The final dispatch improves matching **9.245283% to 42.385933%** without
+changing results or cheat-service calls. The free-play roster path remains
+unchanged.
+
+Correct `Grapple_MoveCode`'s canonical movement-facing angle (offset `0x5a`,
+not the distinct facing angle at `0x58`), byte-sized `use_action` check and
+half-body-height rope limit. Matching improves **18.462273% to 19.468004%**.
+A complete grapple movement candidate recovered automatic entry, hanging,
+jump ascent and swing-cycle damping and passed isolated fixtures, but scored
+0% or near zero under several ordinary source structures. It is deferred in
+temporary files rather than committed as a matching gain. Substantial
+grapple behavior is therefore still incomplete in the committed function.
+
+Recover `GizPanel_Update`'s fixed player probes, retained tracking state across
+untracked panels, radius-squared threshold and yaw-relative pitch clamp.
+Its matching falls **4.762963% to 0.789630%** despite the verified corrections;
+do not claim a per-function improvement. Raw instructions confirm one
+`0.245f` vertical offset for every model-2 probe, including player zero; a
+provisional double-offset interpretation was rejected before committing.
+
+The net batch raises overall matching **65.795960% to 65.824610%**,
+**+0.700130 percentage points** from the rebased main baseline, with **6,270**
+exact functions. The approximately two-point goal is not complete. All eleven
+GitHub checks passed for the preceding effects/weapon commit.
+
+Extracted committed production bodies pass 64-bit ASan/UBSan and optimized
+i386 SSE fixtures: **100,000** availability/oracle cases, identical cheat
+call counts and explicit coverage of all eight slots; **2,401** panel angle
+combinations, every player probe, retained state, timers, invalid players and
+NaN distances; grapple field separation, nonzero action-frame bytes and rope
+limits. External services are stand-ins, not full gameplay integration.

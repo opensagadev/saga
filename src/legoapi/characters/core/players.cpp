@@ -1658,26 +1658,70 @@ void SetToLastSafePos(GameObject_s *object) {
 }
 
 i32 AvailableToPlayer(u32 character_flags, i32 weapon_action, i32 context, i32 require_all) {
-    for (i32 index = 0; index < 8; ++index) {
-        GameObject_s *object = Player[index];
-        if (object == NULL || object->apiobj.character_data == NULL)
-            continue;
-        if (require_all != 0) {
-            if ((character_flags == 0 ||
-                 (object->apiobj.character_data->model_flags & character_flags) == character_flags) &&
-                (weapon_action == -1 ||
-                 static_cast<i8>(object->apiobj.character_data->game_character->uses_weapon_action) == weapon_action) &&
-                (context == 0 || object->field_0x108e == context))
-                return 1;
+#define CHECK_AVAILABLE_PLAYER(index, predicate)                                                                       \
+    do {                                                                                                               \
+        GameObject_s *object = Player[index];                                                                          \
+        if (object != NULL && object->apiobj.character_data != NULL && (predicate))                                    \
+            return 1;                                                                                                  \
+    } while (0)
+#define CHECK_AVAILABLE_PLAYERS(predicate)                                                                             \
+    CHECK_AVAILABLE_PLAYER(0, predicate);                                                                              \
+    CHECK_AVAILABLE_PLAYER(1, predicate);                                                                              \
+    CHECK_AVAILABLE_PLAYER(2, predicate);                                                                              \
+    CHECK_AVAILABLE_PLAYER(3, predicate);                                                                              \
+    CHECK_AVAILABLE_PLAYER(4, predicate);                                                                              \
+    CHECK_AVAILABLE_PLAYER(5, predicate);                                                                              \
+    CHECK_AVAILABLE_PLAYER(6, predicate);                                                                              \
+    CHECK_AVAILABLE_PLAYER(7, predicate)
+#define PLAYER_HAS_FLAGS ((object->apiobj.character_data->model_flags & character_flags) == character_flags)
+#define PLAYER_HAS_WEAPON                                                                                              \
+    (static_cast<i8>(object->apiobj.character_data->game_character->uses_weapon_action) == weapon_action)
+#define PLAYER_HAS_CONTEXT (object->field_0x108e == context)
+
+    if (require_all == 0) {
+        if (character_flags == 0) {
+            if (context == 0) {
+                CHECK_AVAILABLE_PLAYERS(true);
+            } else if (weapon_action == -1) {
+                CHECK_AVAILABLE_PLAYERS(PLAYER_HAS_CONTEXT);
+            } else {
+                CHECK_AVAILABLE_PLAYERS(PLAYER_HAS_WEAPON || PLAYER_HAS_CONTEXT);
+            }
+        } else if (weapon_action == -1) {
+            if (context == 0) {
+                CHECK_AVAILABLE_PLAYERS(true);
+            } else {
+                CHECK_AVAILABLE_PLAYERS(PLAYER_HAS_FLAGS || PLAYER_HAS_CONTEXT);
+            }
         } else {
-            if ((character_flags != 0 &&
-                 (object->apiobj.character_data->model_flags & character_flags) == character_flags) ||
-                (weapon_action != -1 &&
-                 static_cast<i8>(object->apiobj.character_data->game_character->uses_weapon_action) == weapon_action) ||
-                context == 0 || object->field_0x108e == context)
-                return 1;
+            CHECK_AVAILABLE_PLAYERS(PLAYER_HAS_FLAGS || PLAYER_HAS_WEAPON || context == 0 || PLAYER_HAS_CONTEXT);
+        }
+    } else {
+        if (character_flags == 0) {
+            if (weapon_action == -1) {
+                if (context == 0) {
+                    CHECK_AVAILABLE_PLAYERS(true);
+                } else {
+                    CHECK_AVAILABLE_PLAYERS(PLAYER_HAS_CONTEXT);
+                }
+            } else if (context == 0) {
+                CHECK_AVAILABLE_PLAYERS(PLAYER_HAS_WEAPON);
+            } else {
+                CHECK_AVAILABLE_PLAYERS(PLAYER_HAS_WEAPON && PLAYER_HAS_CONTEXT);
+            }
+        } else if (weapon_action != -1) {
+            CHECK_AVAILABLE_PLAYERS(PLAYER_HAS_FLAGS && PLAYER_HAS_WEAPON && (context == 0 || PLAYER_HAS_CONTEXT));
+        } else {
+            CHECK_AVAILABLE_PLAYERS(PLAYER_HAS_FLAGS && (context == 0 || PLAYER_HAS_CONTEXT));
         }
     }
+
+#undef PLAYER_HAS_CONTEXT
+#undef PLAYER_HAS_WEAPON
+#undef PLAYER_HAS_FLAGS
+#undef CHECK_AVAILABLE_PLAYERS
+#undef CHECK_AVAILABLE_PLAYER
+
     if (FreePlay != 0) {
         for (i32 index = 0; index < apicharsys->character_count; ++index) {
             i32 model = apicharsys->playermodelids[index];

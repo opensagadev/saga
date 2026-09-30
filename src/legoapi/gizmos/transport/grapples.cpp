@@ -774,7 +774,7 @@ void Grapple_MoveCode(GameObject_s *object) {
     object->field_0xe24 &= ~0x80;
 
     if (object->character_context != LEGOCONTEXT_GRAPPLE) {
-        if (Grapples_Available == 0 || (static_cast<i8>(object->apiobj.flags_low) >= 0 && object->field_0xf0c != 1)) {
+        if (Grapples_Available == 0 || (static_cast<i8>(object->apiobj.flags_low) >= 0 && object->use_action != 1)) {
             return;
         }
         const bool ready = ObjLandReady(object) != 0 || object->character_context == LEGOCONTEXT_JUMP ||
@@ -808,10 +808,10 @@ void Grapple_MoveCode(GameObject_s *object) {
         object->field_0x768 = 0.0f;
         object->grapple_swing_degrees = 0;
         object->grapple_swing_phase = 0x2000;
-        object->takeover_start_angle = object->apiobj.facing_angle;
+        object->takeover_start_angle = object->apiobj.movement_facing_angle;
         if ((grapple->flags & GRAPPLE_FLAG_DISABLED) == 0) {
             object->context_variant_flags |= 1;
-            object->apiobj.facing_angle = static_cast<u16>(grapple->y_rotation + 0x8000);
+            object->apiobj.movement_facing_angle = static_cast<u16>(grapple->y_rotation + 0x8000);
         } else {
             object->context_variant_flags &= ~1;
             SetWeaponIn(object);
@@ -877,7 +877,7 @@ void Grapple_MoveCode(GameObject_s *object) {
     const f32 body_height = object->apiobj.upper_position.y - object->apiobj.lower_position.y;
     f32 maximum_length = grapple->shadow_probe_position.y - (grapple->ground_position.y + body_height + 0.1f);
     if ((grapple->flags & GRAPPLE_FLAG_DISABLED) != 0) {
-        const f32 rope_limit = grapple->rope_length - (body_height * 2.0f + 0.1f);
+        const f32 rope_limit = grapple->rope_length - (body_height * 0.5f + 0.1f);
         if (rope_limit < maximum_length) {
             maximum_length = rope_limit;
         }
@@ -895,10 +895,10 @@ void Grapple_MoveCode(GameObject_s *object) {
         if (absolute_difference < 0x4000) {
             climb_down = true;
             climb_up = false;
-            object->apiobj.facing_angle = grapple->y_rotation;
+            object->apiobj.movement_facing_angle = grapple->y_rotation;
         } else {
             climb_up = true;
-            object->apiobj.facing_angle = static_cast<u16>(grapple->y_rotation + 0x8000);
+            object->apiobj.movement_facing_angle = static_cast<u16>(grapple->y_rotation + 0x8000);
         }
     }
 
@@ -925,8 +925,8 @@ void Grapple_MoveCode(GameObject_s *object) {
     }
 
     if (Grapple_RopeSwingRotate != 0 && (grapple->flags & GRAPPLE_FLAG_DISABLED) != 0) {
-        object->apiobj.facing_angle =
-            static_cast<u16>(object->apiobj.facing_angle + Grapple_RopeSwingRotate * FRAMETIME);
+        object->apiobj.movement_facing_angle =
+            static_cast<u16>(object->apiobj.movement_facing_angle + Grapple_RopeSwingRotate * FRAMETIME);
     }
     object->grapple_swing_phase = static_cast<u16>(
         object->grapple_swing_phase + static_cast<i32>(0x4000 * FRAMETIME / (object->field_0x768 * 2.0f + 0.5f)));
@@ -951,7 +951,7 @@ void Grapple_MoveCode(GameObject_s *object) {
             offset.z += object->apiobj.field_0x1dc;
             NuVecRotateY(&offset, &offset, grapple->y_rotation);
             NuVecAdd(&object->external_force, &grapple->position, &offset);
-            object->apiobj.facing_angle = static_cast<u16>(grapple->y_rotation + 0x8000);
+            object->apiobj.movement_facing_angle = static_cast<u16>(grapple->y_rotation + 0x8000);
         }
     } else {
         object->airborne_action_duration = 0.0f;
