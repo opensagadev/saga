@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 66.09885,
+    "fuzzy_match_percent": 66.13715,
     "total_code": "4722419",
     "matched_code": "522352",
     "matched_code_percent": 11.061111,
@@ -77666,14 +77666,6 @@
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/terrain.o",
       "functions": [
         {
-          "name": "_ZL17TerrainKillPlayerP12GameObject_siP7nuvec_s.isra.4",
-          "demangled_name": "TerrainKillPlayer(GameObject_s*, int, nuvec_s*) [clone .isra.4]",
-          "address": 1030560,
-          "offset": 140592,
-          "size": 339,
-          "match_percent": 19.92941
-        },
-        {
           "name": "_Z13TerrainPlayerP12GameObject_s",
           "demangled_name": "TerrainPlayer(GameObject_s*)",
           "address": 1058464,
@@ -77943,7 +77935,7 @@
           "address": 3652576,
           "offset": 2762608,
           "size": 306,
-          "match_percent": 99.52459
+          "match_percent": 99.77049
         },
         {
           "name": "_Z13CheckCylinderiiPii",
@@ -77991,7 +77983,7 @@
           "address": 3661776,
           "offset": 2771808,
           "size": 1337,
-          "match_percent": 78.55595
+          "match_percent": 79.97203
         },
         {
           "name": "_Z11HitTerrPolyP7tertypei",
@@ -78007,7 +77999,7 @@
           "address": 3663952,
           "offset": 2773984,
           "size": 1371,
-          "match_percent": 5.813115
+          "match_percent": 22.331148
         },
         {
           "name": "_Z11ScanTerrainiii",
@@ -78015,7 +78007,7 @@
           "address": 3665328,
           "offset": 2775360,
           "size": 8732,
-          "match_percent": 12.396799
+          "match_percent": 24.492273
         },
         {
           "name": "TerrainScanWallSpline",
@@ -78159,7 +78151,7 @@
           "address": 3679568,
           "offset": 2789600,
           "size": 850,
-          "match_percent": 84.79487
+          "match_percent": 84.64103
         },
         {
           "name": "_Z23TerrainPlatformEmbeddedP7nuvec_s",
@@ -78415,7 +78407,7 @@
           "address": 3697936,
           "offset": 2807968,
           "size": 631,
-          "match_percent": 69.49624
+          "match_percent": 69.38346
         },
         {
           "name": "TerrainPolyEdge",
@@ -78431,7 +78423,7 @@
           "address": 3699296,
           "offset": 2809328,
           "size": 495,
-          "match_percent": 87.00961
+          "match_percent": 86.86539
         },
         {
           "name": "NewRayCastSet",
@@ -78439,7 +78431,7 @@
           "address": 3699792,
           "offset": 2809824,
           "size": 503,
-          "match_percent": 84.396225
+          "match_percent": 84.254715
         },
         {
           "name": "NewRayCastSetMask",
@@ -78447,7 +78439,7 @@
           "address": 3700304,
           "offset": 2810336,
           "size": 487,
-          "match_percent": 86.89524
+          "match_percent": 86.75238
         },
         {
           "name": "NewTerrAxisFreedom",
@@ -78527,7 +78519,7 @@
           "address": 3710864,
           "offset": 2820896,
           "size": 4872,
-          "match_percent": 0.0
+          "match_percent": 11.876629
         },
         {
           "name": "_Z19NewScanHandelSubsetPsP7nuvec_sS1_fi",
@@ -124103,6 +124095,14 @@
       "match_percent": 0.0
     },
     {
+      "name": "_ZL17TerrainKillPlayerP12GameObject_siP7nuvec_s.isra.4",
+      "demangled_name": "TerrainKillPlayer(GameObject_s*, int, nuvec_s*) [clone .isra.4]",
+      "address": 1030560,
+      "offset": 140592,
+      "size": 339,
+      "match_percent": 0.0
+    },
+    {
       "name": "_ZL19UpdateTitleSequenceP6MENU_s.isra.14",
       "demangled_name": "UpdateTitleSequence(MENU_s*) [clone .isra.14]",
       "address": 1145312,
@@ -127602,8 +127602,8 @@
   "summary": {
     "bazel_units": 452,
     "functions": 13454,
-    "assigned_functions": 12645,
+    "assigned_functions": 12644,
     "ambiguous_functions": 257,
-    "unassigned_functions": 552
+    "unassigned_functions": 553
   }
 }

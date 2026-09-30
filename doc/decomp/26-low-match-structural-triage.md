@@ -5693,3 +5693,44 @@ combinations, matrix normalization, particle fields and unchanged input;
 3,136 boulder nearest/category combinations, ties, processor identities,
 ordered timer/NaN cases and absent follow-player data. External services are
 stand-ins, not full engine integration.
+
+## Batch 116: terrain bounds, scan order and caller closures
+
+Recover the shared bound, wall-list and scaled-shape closures inside their
+retail scan callers using local macros, without forced-inline attributes.
+Preserve the bound expressions' separate padding/radius operations and their
+caller-specific addition order. Recover the sweep-diagonal `NuFsqrt` call,
+including the wall-only caller where its result is unused, and the main
+scan's object-scale radius adjustment and rotating-platform range rejection.
+Retain guards for disabled groups and absent rotating matrices.
+
+Recover static terrain, pickup, then platform group ordering. Raw reference
+stores and the `TerrainPlatformMoveCheck`/`PlatformChecks` consumers confirm
+the saved `scan_list` points to the start of the platform section, not the
+start of all scan records. Store that boundary after fixed/pickup groups and
+before platform traversal. Clear `TerrOverRideScan` even when the one-shot
+`IgnoreWallSplines` flag suppresses wall collection.
+
+`ScanTerrain` improves **12.396799% to 24.492273%**; wall-only scanning
+**5.813115% to 22.331148%**; `NewScanHandelFull` **0% to 11.876629%**.
+The unchanged `HitTerrain` shifts **78.555950% to 79.972030%** from
+translation-unit codegen. Overall matching reaches **66.137150%**,
+**+1.012670 percentage points** from main, with **6,269** exact functions.
+All eleven GitHub checks passed for batch 115. The approximately two-point
+goal remains unfinished; owners, compiler options, ABI and score
+normalization are unchanged.
+
+The large shared platform closure alone regressed net matching. Expanding
+its triangle normal loop also scored zero in both main scan entry points;
+both experiments were removed. Do not repeat them without new evidence.
+Sanitizer tests caught a macro-local radius name collision before commit;
+the corrected macro uses a distinct local and evaluates its outputs once.
+
+Extracted production bodies pass 64-bit ASan/UBSan and optimized i386 SSE
+fixtures: **4,116** bitwise bound/radius cases; scaled triangle/quad parity,
+zero normals and NaN scale; static/pickup/platform ordering and the saved
+platform boundary; override suppression cleanup, disabled platform groups
+and absent rotating matrices; both scan modes and four masks with 160 wall
+segments capped safely at 64 records. Existing handle spatial filtering,
+subsets, copied walls, platforms and arena-boundary tests also pass. External
+services are stand-ins, not full engine integration.
