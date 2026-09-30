@@ -3,6 +3,10 @@
 #include "decomp.h"
 #include "nu2api/nu3d/nuspline.h"
 
+struct flightspline_s;
+struct _vuv_s;
+void CalcSplinePoint(flightspline_s *spline, _vuv_s *position, f32 along);
+
 struct SPLINEPOS_s {
     NUGSPLINE *spline; // 0x00
     i16 segment;       // 0x04

@@ -5,6 +5,7 @@
 #include "nu2api/numath/nuvec.h"
 #include "nu2api/numath/nuvec4.h"
 #include "nu2api/nu3d/nuhspecial.h"
+#include "legoapi/world/levels/podrace.h"
 
 struct anakin_door_setup_s {
     char *name;
@@ -90,21 +91,45 @@ extern spacelevel_action_config_s Actions_DogFightA;
 extern anakin_action_config_s Actions_AnakinA;
 extern dogfight_doors_s DogFightDoors;
 
+struct spacelevel_action_s {
+    i32 command;
+    f32 value;
+};
+DECOMP_ASSERT(sizeof(spacelevel_action_s) == 8, "space action pair stride");
+
+struct spacelevel_flight_group_s;
+struct flightspline_s;
+
 struct starfighter_s {
     NUMTX matrix;
-    u8 reserved_040[0xf0 - 0x40];
+    NUVEC4 previous_axis, previous_position;
+    NUVEC4 velocity, parent_offset, target_position, movement;
+    NUVEC4 reserved_0a0;
+    NUVEC4 aim_direction;
+    i32 pitch, yaw;
+    i32 reserved_0c8;
+    f32 aim_bias;
+    spacelevel_flight_group_s *parent;
+    flightspline_s *spline;
+    f32 spline_progress, initial_delay, shoot_timer, death_timer;
+    f32 death_rotate_x, death_rotate_z;
     f32 scale;
-    u8 reserved_0f4[8];
+    f32 speed, spawn_time;
     i16 draw_flags;
     i16 model_id;
-    u8 reserved_100[0x110 - 0x100];
+    i16 target_id, target_ready;
+    starfighter_s *target;
+    i32 object_id, health;
     i32 active;
-    u8 reserved_114[0x128 - 0x114];
+    i32 reserved_114, hit_count, fired, delete_when_done, missile_count;
 };
 DECOMP_ASSERT(sizeof(starfighter_s) == 0x128, "starfighter runtime stride");
 DECOMP_ASSERT(offsetof(starfighter_s, scale) == 0xf0, "starfighter draw scale");
 DECOMP_ASSERT(offsetof(starfighter_s, model_id) == 0xfe, "starfighter model ID");
 DECOMP_ASSERT(offsetof(starfighter_s, active) == 0x110, "starfighter active flag");
+DECOMP_ASSERT(offsetof(starfighter_s, parent) == 0xd0, "starfighter parent group");
+DECOMP_ASSERT(offsetof(starfighter_s, spline) == 0xd4, "starfighter flight spline");
+DECOMP_ASSERT(offsetof(starfighter_s, target) == 0x104, "starfighter firing target");
 
 struct spacelevel_cross_s {
     u8 reserved_00[0x10];
@@ -121,22 +146,22 @@ DECOMP_ASSERT(offsetof(spacelevel_cross_s, enabled) == 0x42, "space cross enable
 DECOMP_ASSERT(offsetof(spacelevel_cross_s, scale) == 0x4c, "space cross scale offset");
 
 struct spacelevel_flight_group_s {
-    NUVEC4 position;
+    NUMTX matrix;
     starfighter_s fighters[5];
     NUVEC4 velocity;
     NUVEC4 camera_position;
     NUVEC4 target;
-    u8 reserved_608[8];
+    u8 reserved_638[8];
     i32 active, state;
-    u8 reserved_618[4];
+    u32 reset_colour;
     i32 draw_target;
     f32 duration, speed;
-    u8 reserved_628[0x658 - 0x628];
 };
 DECOMP_ASSERT(sizeof(spacelevel_flight_group_s) == 0x658, "space flight group stride");
-DECOMP_ASSERT(offsetof(spacelevel_flight_group_s, fighters) == 0x10, "space group fighters");
-DECOMP_ASSERT(offsetof(spacelevel_flight_group_s, active) == 0x610, "space group active");
-DECOMP_ASSERT(offsetof(spacelevel_flight_group_s, draw_target) == 0x61c, "space group target marker");
+DECOMP_ASSERT(offsetof(spacelevel_flight_group_s, fighters) == 0x40, "space group fighters");
+DECOMP_ASSERT(offsetof(spacelevel_flight_group_s, velocity) == 0x608, "space group velocity");
+DECOMP_ASSERT(offsetof(spacelevel_flight_group_s, active) == 0x640, "space group active");
+DECOMP_ASSERT(offsetof(spacelevel_flight_group_s, draw_target) == 0x64c, "space group target marker");
 
 struct quickbolt_s {
     NUMTX matrix;
@@ -154,54 +179,6 @@ struct quickboltinfo {
     i32 count, used;
 };
 DECOMP_ASSERT(sizeof(quickboltinfo) == 0xc, "quick bolt info size");
-
-struct spacelevel_starfighter_s {
-    i32 reset_state;
-    i32 reset_target;
-    u8 unknown_008[0x40 - 0x08];
-    i32 reset_timer;
-    u8 unknown_044[0x90 - 0x44];
-    i32 reset_effect;
-    u8 unknown_094[0x98 - 0x94];
-    u32 reset_colour;
-    i32 reset_effect_timer;
-    u8 unknown_0a0[0x128 - 0x0a0];
-};
-DECOMP_ASSERT(sizeof(spacelevel_starfighter_s) == 0x128, "spacelevel_starfighter_s size");
-
-struct spacelevel_last_starfighter_s {
-    i32 reset_state;
-    i32 reset_target;
-    u8 unknown_008[0x40 - 0x08];
-    i32 reset_timer;
-    u8 unknown_044[0x90 - 0x44];
-    i32 reset_effect;
-    u8 unknown_094[0x98 - 0x94];
-    u32 reset_colour;
-    i32 reset_effect_timer;
-    u8 unknown_0a0[0x0a8 - 0x0a0];
-};
-DECOMP_ASSERT(sizeof(spacelevel_last_starfighter_s) == 0x0a8, "spacelevel_last_starfighter_s size");
-
-struct spacelevel_trooper_team_s {
-    i32 reset_state;
-    i32 reset_target;
-    u8 unknown_008[0x40 - 0x08];
-    i32 reset_timer;
-    u8 unknown_044[0x90 - 0x44];
-    i32 reset_effect;
-    u8 unknown_094[0x98 - 0x94];
-    u32 reset_colour;
-    i32 reset_effect_timer;
-    u8 unknown_0a0[0x1b8 - 0x0a0];
-};
-DECOMP_ASSERT(sizeof(spacelevel_trooper_team_s) == 0x1b8, "spacelevel_trooper_team_s size");
-
-struct spacelevel_fighter_group_s {
-    spacelevel_starfighter_s fighters[4];
-    spacelevel_trooper_team_s trooper_team;
-};
-DECOMP_ASSERT(sizeof(spacelevel_fighter_group_s) == 0x658, "spacelevel_fighter_group_s size");
 
 struct spacelevel_large_record_s {
     u8 unknown_000[0x404];
@@ -240,30 +217,32 @@ struct spacelevel_s {
         };
         spacelevel_cross_s crosses[2];
     };
+    spacelevel_flight_group_s flight_groups[8];
+    spacelevel_scale_s draw_scale;
     union {
+        anakin_action_config_s *unknown_3370;
+        spacelevel_action_s *actions;
+    };
+    union {
+        i32 unknown_3374;
+        spacelevel_action_s *current_action;
+    };
+    i32 unknown_3378;
+    i32 unknown_337c;
+    union {
+        u8 unknown_3380[0x338c - 0x3380];
         struct {
-            u8 unknown_0a0[0x1b0 - 0x0a0];
-            spacelevel_fighter_group_s fighter_groups[7];
-            spacelevel_starfighter_s final_fighters[4];
-            spacelevel_last_starfighter_s last_starfighter;
-            spacelevel_scale_s draw_scale;
-            anakin_action_config_s *unknown_3370;
-            i32 unknown_3374;
-            i32 unknown_3378;
-            i32 unknown_337c;
-            u8 unknown_3380[0x338c - 0x3380];
-            void *unknown_338c;
-        };
-        struct {
-            u8 reserved_0a0[0xd0 - 0xa0];
-            spacelevel_flight_group_s flight_groups[8];
+            i32 reserved_3380;
+            f32 action_timer;
+            i32 reserved_3388;
         };
     };
-    spacelevel_large_record_s large_records[256];
+    void *unknown_338c;
     union {
-        spacelevel_starfighter_s queued_starfighters[96];
-        starfighter_s queued_fighters[96];
+        spacelevel_large_record_s large_records[256];
+        flightspline_s flight_splines[256];
     };
+    starfighter_s queued_fighters[96];
     u8 unknown_5ce90[0x62e90 - 0x5ce90];
     union {
         struct {
@@ -292,10 +271,11 @@ struct spacelevel_s {
     // The allocator reserves a further 4 KiB; its contents are not recovered.
     u8 unknown_62ef4[0x1000];
 };
-DECOMP_ASSERT(offsetof(spacelevel_s, fighter_groups) == 0x1b0, "fighter group array offset");
-DECOMP_ASSERT(offsetof(spacelevel_s, flight_groups) == 0xd0, "space flight group array offset");
+DECOMP_ASSERT(offsetof(spacelevel_s, flight_groups) == 0xa0, "space flight group array offset");
+DECOMP_ASSERT(offsetof(spacelevel_s, actions) == 0x3370, "space action list offset");
+DECOMP_ASSERT(offsetof(spacelevel_s, current_action) == 0x3374, "space current action offset");
 DECOMP_ASSERT(offsetof(spacelevel_s, large_records) == 0x3390, "large record array offset");
-DECOMP_ASSERT(offsetof(spacelevel_s, queued_starfighters) == 0x55f90, "queued fighter array offset");
+DECOMP_ASSERT(offsetof(spacelevel_s, queued_fighters) == 0x55f90, "queued fighter array offset");
 DECOMP_ASSERT(offsetof(spacelevel_s, reset_buffer) == 0x62e90, "reset buffer offset");
 DECOMP_ASSERT(offsetof(spacelevel_s, direction) == 0x62ebc, "direction offset");
 DECOMP_ASSERT(offsetof(spacelevel_s, normalized_speed) == 0x62ee4, "space normalized speed offset");

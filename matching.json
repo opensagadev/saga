@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 65.37944,
+    "fuzzy_match_percent": 65.49292,
     "total_code": "4722419",
-    "matched_code": "522087",
-    "matched_code_percent": 11.055499,
+    "matched_code": "522117",
+    "matched_code_percent": 11.056135,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 6265,
-    "matched_functions_percent": 46.54878,
+    "matched_functions": 6266,
+    "matched_functions_percent": 46.556206,
     "total_units": 1
   },
   "text": {
@@ -42575,7 +42575,7 @@
           "address": 1333968,
           "offset": 444000,
           "size": 12082,
-          "match_percent": 80.28742
+          "match_percent": 80.30093
         },
         {
           "name": "SOUND_SFXRequest_Table",
@@ -46868,12 +46868,28 @@
           "match_percent": 0.0
         },
         {
+          "name": "_ZL17MakeWingFormationP6_vuv_sS0_fi",
+          "demangled_name": "MakeWingFormation(_vuv_s*, _vuv_s*, float, int)",
+          "address": 2307376,
+          "offset": 1417408,
+          "size": 1370,
+          "match_percent": 64.132576
+        },
+        {
+          "name": "_ZL16StarFighterAlignP13starfighter_sP6_vuv_sfi",
+          "demangled_name": "StarFighterAlign(starfighter_s*, _vuv_s*, float, int)",
+          "address": 2308752,
+          "offset": 1418784,
+          "size": 625,
+          "match_percent": 84.9625
+        },
+        {
           "name": "_ZL15ResetSpaceLevelP11WORLDINFO_sP12spacelevel_s",
           "demangled_name": "ResetSpaceLevel(WORLDINFO_s*, spacelevel_s*)",
           "address": 2309392,
           "offset": 1419424,
           "size": 2796,
-          "match_percent": 24.958868
+          "match_percent": 54.866325
         },
         {
           "name": "_Z18ChrisAnakinCUpdatev",
@@ -46940,6 +46956,14 @@
           "match_percent": 53.974957
         },
         {
+          "name": "_ZL18ProcessStarFighterP13starfighter_sP13quickboltinfo",
+          "demangled_name": "ProcessStarFighter(starfighter_s*, quickboltinfo*)",
+          "address": 2323040,
+          "offset": 1433072,
+          "size": 5805,
+          "match_percent": 37.05263
+        },
+        {
           "name": "_Z19ChrisAfterBurnerCamP7nuvec_sS0_",
           "demangled_name": "ChrisAfterBurnerCam(nuvec_s*, nuvec_s*)",
           "address": 2332112,
@@ -46956,6 +46980,14 @@
           "match_percent": 59.266666
         },
         {
+          "name": "_ZL17ProcessSpaceLevelP12spacelevel_s",
+          "demangled_name": "ProcessSpaceLevel(spacelevel_s*)",
+          "address": 2334272,
+          "offset": 1444304,
+          "size": 3813,
+          "match_percent": 26.112532
+        },
+        {
           "name": "_Z16DogFightARestartv",
           "demangled_name": "DogFightARestart()",
           "address": 2338096,
@@ -46970,6 +47002,14 @@
           "offset": 1448624,
           "size": 15,
           "match_percent": 0.0
+        },
+        {
+          "name": "_Z18ChrisAnakinAUpdateP11WORLDINFO_s",
+          "demangled_name": "ChrisAnakinAUpdate(WORLDINFO_s*)",
+          "address": 2338608,
+          "offset": 1448640,
+          "size": 30,
+          "match_percent": 100.0
         },
         {
           "name": "_Z16ChrisAnakinADrawv",
@@ -47052,6 +47092,14 @@
           "match_percent": 100.0
         },
         {
+          "name": "_Z20ChrisDogFightAUpdateP11WORLDINFO_s",
+          "demangled_name": "ChrisDogFightAUpdate(WORLDINFO_s*)",
+          "address": 2339040,
+          "offset": 1449072,
+          "size": 157,
+          "match_percent": 99.975
+        },
+        {
           "name": "_Z18ChrisDogFightADrawP11WORLDINFO_s",
           "demangled_name": "ChrisDogFightADraw(WORLDINFO_s*)",
           "address": 2339200,
@@ -47090,14 +47138,6 @@
       "source": "src/legoapi/characters/motion/chris_stubs.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/chris_stubs.o",
       "functions": [
-        {
-          "name": "_Z18ChrisAnakinAUpdateP11WORLDINFO_s",
-          "demangled_name": "ChrisAnakinAUpdate(WORLDINFO_s*)",
-          "address": 2338608,
-          "offset": 1448640,
-          "size": 30,
-          "match_percent": 0.0
-        },
         {
           "name": "_Z22ChrisUnallocLevelStuffP11WORLDINFO_s",
           "demangled_name": "ChrisUnallocLevelStuff(WORLDINFO_s*)",
@@ -48509,14 +48549,6 @@
           "offset": 638304,
           "size": 1627,
           "match_percent": 69.99419
-        },
-        {
-          "name": "_ZL17MakeWingFormationP6_vuv_sS0_fi",
-          "demangled_name": "MakeWingFormation(_vuv_s*, _vuv_s*, float, int)",
-          "address": 2307376,
-          "offset": 1417408,
-          "size": 1370,
-          "match_percent": 2.045454
         },
         {
           "name": "_ZN12MoveToMarkerC1ER19MechObjectInterface",
@@ -62219,30 +62251,6 @@
           "offset": 939616,
           "size": 240,
           "match_percent": 96.95652
-        },
-        {
-          "name": "_ZL16StarFighterAlignP13starfighter_sP6_vuv_sfi",
-          "demangled_name": "StarFighterAlign(starfighter_s*, _vuv_s*, float, int)",
-          "address": 2308752,
-          "offset": 1418784,
-          "size": 625,
-          "match_percent": 2.625
-        },
-        {
-          "name": "_ZL18ProcessStarFighterP13starfighter_sP13quickboltinfo",
-          "demangled_name": "ProcessStarFighter(starfighter_s*, quickboltinfo*)",
-          "address": 2323040,
-          "offset": 1433072,
-          "size": 5805,
-          "match_percent": 0.401002
-        },
-        {
-          "name": "_ZL17ProcessSpaceLevelP12spacelevel_s",
-          "demangled_name": "ProcessSpaceLevel(spacelevel_s*)",
-          "address": 2334272,
-          "offset": 1444304,
-          "size": 3813,
-          "match_percent": 1.150895
         },
         {
           "name": "_ZL22CollideBoltStarFighterP6BOLT_sP13starfighter_sP6_vuv_sS4_",
@@ -84806,7 +84814,7 @@
           "address": 2155600,
           "offset": 1265632,
           "size": 499,
-          "match_percent": 99.07143
+          "match_percent": 99.20536
         },
         {
           "name": "_Z13CruiserCPanelP11WORLDINFO_s",
@@ -85095,14 +85103,6 @@
           "offset": 1293024,
           "size": 308,
           "match_percent": 99.60811
-        },
-        {
-          "name": "_Z20ChrisDogFightAUpdateP11WORLDINFO_s",
-          "demangled_name": "ChrisDogFightAUpdate(WORLDINFO_s*)",
-          "address": 2339040,
-          "offset": 1449072,
-          "size": 157,
-          "match_percent": 71.2
         },
         {
           "name": "_Z19ChrisDogFightAResetP11WORLDINFO_s",

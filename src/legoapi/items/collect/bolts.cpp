@@ -1543,20 +1543,6 @@ static __used__ void EndBolt_EwokTorpedo(BOLT_s *bolt) {
     Detonate(&bolt->position, 0);
 }
 
-void ProcessSpaceLevel(spacelevel_s *) __asm__("_ZL17ProcessSpaceLevelP12spacelevel_s")
-    __attribute__((visibility("hidden")));
-void ProcessSpaceLevel(spacelevel_s *) {
-    STUBBED();
-}
-
-static __used__ void ProcessStarFighter(starfighter_s *, quickboltinfo *) {
-    STUBBED();
-}
-
-static __used__ void StarFighterAlign(starfighter_s *, _vuv_s *, f32, i32) {
-    STUBBED();
-}
-
 void BoltTypes_Init(WORLDINFO_s *world) {
     BOLTTYPE_s *type = BoltSys->types;
     for (i32 index = 0; index < BoltSys->count; ++index, ++type) {

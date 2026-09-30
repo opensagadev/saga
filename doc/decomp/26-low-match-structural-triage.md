@@ -5032,8 +5032,8 @@ records, not the matrix origins used by drawing. Recover `Jetpos`'s verified
 Restore active/group gates, marker transforms, queue/bolt rendering, twin
 exhaust creation/update/free and player reloads after service calls.
 
-`DrawSpaceLevel` improves **0.429338% to 53.974560%**, and `DrawStarFighter`
-improves **84.398880% to 85.747290%**. The linked report reaches
+`DrawSpaceLevel` improves **0.429338% to 53.974957%**, and `DrawStarFighter`
+improves **84.398880% to 85.747190%**. The linked report reaches
 **65.379440%**, or **+0.254960 percentage points** from main. The three draw
 wrappers become exact, increasing exact functions **6,262 to 6,265**. The
 stack matrices retain the reference's 16-byte alignment; this does not change
@@ -5048,3 +5048,59 @@ draw checks its scaling/debris branch. Graphics/debris/model services are
 fixtures; this is not real rendering or flight-gameplay integration. Ordinary
 global sanitizer instrumentation is enabled; LeakSanitizer remains disabled
 for sandbox compatibility.
+
+## Batch 99: space-flight formation, update and reset closure
+
+Continue the original `chris` symbol neighborhood with the nearly empty
+`MakeWingFormation`, `StarFighterAlign`, `ProcessStarFighter` and
+`ProcessSpaceLevel`. Move their original callers into the same existing
+`-O2` owner. The original `ChrisDogFightAUpdate` explicitly calls
+`ProcessSpaceLevel` at `0x23b118`; the former reconstruction omitted that
+call. Without this second caller, GCC inlines the updater into
+`ChrisAnakinAUpdate` and its original local symbol disappears. Restoring
+the caller retains the ordinary private function and makes the Anakin
+wrapper exact, without a calling-convention or retention attribute.
+
+Recover the whole group beginning at level offset `0xa0`, including its
+leader matrix; the drawing-only suffix previously began at `0xd0`.
+The five fighters still begin at `0xe0`, and all drawing addresses are
+unchanged. Add verified pointer-bearing starfighter fields, spline records
+and action-pair views. Preserve the target's `0x128` fighter stride,
+`0x658` group stride and `0x63ef4` allocation with assertions; host arrays
+and allocations follow their native pointer-bearing types.
+
+The private alignment calls pass distance/duration in XMM0 and a separate
+integer mode on the stack. Ghidra misidentifies those stack words as float
+parameters. Check the call instructions directly before reconstructing
+formation modes, death banking and spline-spawn alignment. Recover literal
+values from the original pool instead of interpreting decompiler bitcasts.
+The reference's aligned stack vectors use the existing aligned vector and
+matrix types; effective build options are unchanged.
+
+Restore formation-slot selection, five-ship initialization, death/escort
+paths, spline lookahead, targeting/interception, circular bolt allocation,
+missile spawning, action timing, player hits, spawn/repeat schedules and
+checkpoint doors. Integrate reset with these canonical fields: the old
+queued view cleared unrelated vector words, copied the repeat count in the
+wrong direction, and omitted draw-scale/checkpoint/rumble constants. Reset
+now clears the actual active and parent/spline fields, also on 64-bit hosts.
+
+The linked report reaches **65.492920%**, or **+0.368440 percentage points**
+from main. `MakeWingFormation` reaches **64.132576%**, `StarFighterAlign`
+**84.962500%**, `ProcessStarFighter` **37.052630%**, `ProcessSpaceLevel`
+**26.112532%**, and `ResetSpaceLevel` **54.866325%**. Exact functions increase
+**6,265 to 6,266**. Drawing scores are unchanged. The roughly two-point PR
+target remains unfinished; instruction-layout differences are deferred.
+
+Extracted production code passes 64-bit ASan/UBSan and optimized native
+i386 fixtures for all eight formation slots, full-slot refusal, alignment
+distance/mode gates, death and parent following, spline completion and
+audio pitch, last-slot target acquisition, bolt wraparound/full/NaN slots,
+action rewind/wait/formation commands, callback-sensitive player hits,
+seven spawn-model classes, repeat counters, checkpoint selection and all
+group/queued reset fields. The prior drawing fixtures also pass on both
+ABIs. Math services are compiled separately to preserve the production
+translation-unit boundary; matrix pre-rotation services record calls,
+rather than validate actual rotation rendering. These are focused fixtures,
+not full flight-gameplay integration. LeakSanitizer remains disabled for
+sandbox compatibility.

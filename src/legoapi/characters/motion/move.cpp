@@ -6919,11 +6919,6 @@ void MoveToMarker::Render() {
 
 extern u8 show_lever_hint;
 
-struct _vuv_s;
-static __used__ void MakeWingFormation(_vuv_s *, _vuv_s *, f32, i32) {
-    STUBBED();
-}
-
 void AtatPart_Stop(PART_s *part) __asm__("_ZL13AtatPart_StopP6PART_s") __attribute__((visibility("hidden")));
 void AtatPart_Update(PART_s *part) __asm__("_ZL15AtatPart_UpdateP6PART_s") __attribute__((visibility("hidden")));
 

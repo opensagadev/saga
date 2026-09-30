@@ -45,6 +45,7 @@ void NewBuzz(nupad_s *pad, f32 duration, i32 mode);
 void NewBuzzFrames(nupad_s *pad, i32 frames, i32 mode);
 void NewRumbleAllPlayers(f32 strength, f32 duration, i32 frames, i32 player_index);
 void DieRumble(GameObject_s *object);
+void SpaceRumbleProcess();
 
 extern "C" i32 Controller_IsConnected();
 extern "C" bool TestForController();

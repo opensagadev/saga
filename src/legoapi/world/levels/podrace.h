@@ -14,13 +14,19 @@ struct _vuv_s {
 struct flightspline_s {
     _vuv_s points[64];
     i32 point_count; // 0x400
-    u8 unknown_404[4];
+    union {
+        u8 unknown_404[4];
+        f32 spawn_time;
+    };
     f32 field_0x408;
     f32 field_0x40c;
     f32 length;                   // 0x410
     f32 cumulative_distances[64]; // 0x414
     i32 field_0x514;
-    u8 unknown_518[4];
+    union {
+        u8 unknown_518[4];
+        i32 repeat_count;
+    };
     i32 field_0x51c;
     i32 field_0x520;
     i32 id; // 0x524

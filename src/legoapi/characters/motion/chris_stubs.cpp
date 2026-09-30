@@ -13,13 +13,6 @@ struct SHOPINPUT;
 
 anakin_door_s *volatile AnakinC = NULL;
 
-void ProcessSpaceLevel(spacelevel_s *) __asm__("_ZL17ProcessSpaceLevelP12spacelevel_s")
-    __attribute__((visibility("hidden")));
-
-void ChrisAnakinAUpdate(WORLDINFO_s *) {
-    ProcessSpaceLevel(WORLD->space_level);
-}
-
 void ChrisUnallocLevelStuff(WORLDINFO_s *world) {
     world->level_specific_data = NULL;
     if (AnakinC != NULL) {
