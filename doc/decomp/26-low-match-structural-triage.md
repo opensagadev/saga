@@ -5220,3 +5220,34 @@ arcade suppression, category/hat retry, Imperial access and exclusions,
 minikits/vehicles, chained extra models, empty input, capacity and selector
 filtering. Services remain stand-ins, not full gameplay integration;
 LeakSanitizer is disabled for sandbox compatibility.
+
+## Batch 103: AI loader stream alignment and legacy versions
+
+Remove the version-20-only gate from `AISysLoadEx` after recovering the
+reference's section and field gates. Path connection indices change from bytes
+to shorts to integers; version 1 has its extra byte; old nodes use the default
+height tolerance and lack route masks/special-route IDs. Gate areas, locators,
+locator sets, antinodes and the game-specific loader at their actual versions.
+
+Fix creature stream alignment for shipped assets too: always read its type name,
+including an empty/default script name, and read spawn counts and path state in
+older versions. Recover legacy respawn/stagger/range defaults. Read vectors as
+three float fields as in the reference, and pass the actual caller's buffer end
+to script loading instead of the temporary pak cursor. Keep the locator-entry
+allocation multiplier despite its unusual appearance: the reference confirms
+it. Public signatures, ABI declarations and compiler options are unchanged.
+
+The function improves **13.837194% to 26.910553%**. A bounded single-function
+parser/shared-scratch reconstruction passed fixtures but reported zero matching
+and was not retained; keep the corrected sectioned parser and document this
+source-structure debt rather than changing flags or calling conventions.
+Overall matching reaches **65.616190%**, **+0.491710 percentage points** from
+main, with **6,266** exact functions. The approximately two-point goal continues.
+
+Extracted production-body fixtures pass 64-bit ASan/UBSan and optimized i386:
+versions 1 through 20, empty/nonempty paths, all connection-index widths, node
+heights, route-mask and special-route gates, default/explicit scripts, creature
+fields and callbacks, nonempty areas/locators/sets, references, activation areas,
+antinodes and special handles, route character masks, pak success/fallback and
+missing files. Services are stand-ins, not full asset/gameplay integration;
+LeakSanitizer is disabled for sandbox compatibility.

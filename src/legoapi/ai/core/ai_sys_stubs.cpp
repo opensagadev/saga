@@ -581,6 +581,12 @@ extern "C" {
     AISCRIPTPROCESS *pSetStateDebugee;
     SCRIPTPROCESSFIRSTTIMEACTION *ScriptProcessFirstTimeActionFn;
     extern f32 default_path_heighttol;
+    extern u8 default_activate_difficulty;
+    extern u8 default_min_n_respawns;
+    extern u8 default_max_n_respawns;
+    extern f32 default_min_t_respawn;
+    extern f32 default_max_t_respawn;
+    extern f32 default_stagger_start;
     extern void (*checkantinodefns[3])(APIOBJECT_s *, AIANTINODE_s *, NUVEC *, f32);
 }
 
@@ -618,7 +624,7 @@ static char *AISysLoadString(AISYS *system, i32 length) {
     return text;
 }
 
-static void AISysLoadPathRoutes(AISYS *system, AIPATH *path) {
+static void AISysLoadPathRoutes(AISYS *system, AIPATH *path, i32 version) {
     if (path->node_count != 0) {
         path->route_matrix = static_cast<u8 **>(AISysLoadAlloc(system, path->node_count * sizeof(u8 *)));
         for (i32 i = 0; i < path->node_count; ++i) {
@@ -627,6 +633,8 @@ static void AISysLoadPathRoutes(AISYS *system, AIPATH *path) {
         }
     }
 
+    if (version <= 4)
+        return;
     path->route_count = static_cast<u8>(EdFileReadChar());
     if (path->route_count != 0) {
         path->routes = static_cast<AIPATHROUTE *>(AISysLoadAlloc(system, path->route_count * sizeof(AIPATHROUTE)));
@@ -677,6 +685,8 @@ static void AISysLoadPathRoutes(AISYS *system, AIPATH *path) {
         }
     }
 
+    if (version <= 18)
+        return;
     path->special_route_count = static_cast<u8>(EdFileReadChar());
     if (path->special_route_count != 0) {
         path->special_routes =
@@ -708,7 +718,7 @@ static AIPATHSYS *AISysLoadPaths(AISYS *system, i32 version, NUGSCN *scene) {
         path->node_count = static_cast<u8>(EdFileReadChar());
         path->flags = static_cast<u8>(EdFileReadChar());
         path->index = static_cast<u8>(path_index);
-        path->connection_count = EdFileReadShort();
+        path->connection_count = version == 1 ? static_cast<i16>(EdFileReadChar()) : EdFileReadShort();
 
         if (path->connection_count != 0) {
             path->connections =
@@ -717,8 +727,16 @@ static AIPATHSYS *AISysLoadPaths(AISYS *system, i32 version, NUGSCN *scene) {
                 AIPATHCNX *connection = &path->connections[connection_index];
                 connection->direction_a = static_cast<u8>(EdFileReadChar());
                 connection->direction_b = static_cast<u8>(EdFileReadChar());
-                connection->node_a = EdFileReadInt();
-                connection->node_b = EdFileReadInt();
+                if (version < 9) {
+                    connection->node_a = EdFileReadChar();
+                    connection->node_b = EdFileReadChar();
+                } else if (version < 12) {
+                    connection->node_a = EdFileReadShort();
+                    connection->node_b = EdFileReadShort();
+                } else {
+                    connection->node_a = EdFileReadInt();
+                    connection->node_b = EdFileReadInt();
+                }
                 connection->previous_node_a = connection->node_a;
                 connection->previous_node_b = connection->node_b;
                 connection->flags = EdFileReadShort();
@@ -730,16 +748,25 @@ static AIPATHSYS *AISysLoadPaths(AISYS *system, i32 version, NUGSCN *scene) {
             }
         }
 
+        if (version == 1)
+            EdFileReadChar();
         if (path->node_count != 0) {
             path->nodes = static_cast<AIPATHNODE *>(AISysLoadAlloc(system, path->node_count * sizeof(AIPATHNODE)));
             for (i32 node_index = 0; node_index < path->node_count; ++node_index) {
                 AIPATHNODE *node = &path->nodes[node_index];
                 node->name = AISysLoadString(system, EdFileReadInt());
-                EdFileReadNuVec(&node->position);
+                node->position.x = EdFileReadFloat();
+                node->position.y = EdFileReadFloat();
+                node->position.z = EdFileReadFloat();
                 node->radius = EdFileReadFloat();
                 node->radius_squared = node->radius * node->radius;
-                node->min_height = EdFileReadFloat();
-                node->max_height = EdFileReadFloat();
+                if (version < 8) {
+                    node->min_height = node->position.y - default_path_heighttol;
+                    node->max_height = node->position.y + default_path_heighttol;
+                } else {
+                    node->min_height = EdFileReadFloat();
+                    node->max_height = EdFileReadFloat();
+                }
                 node->min_height_offset = node->min_height - node->position.y;
                 node->max_height_offset = node->max_height - node->position.y;
                 node->connection_count = static_cast<u8>(EdFileReadChar());
@@ -750,6 +777,8 @@ static AIPATHSYS *AISysLoadPaths(AISYS *system, i32 version, NUGSCN *scene) {
                 node->distance_cache_nodes[0] = 0xff;
                 node->distance_cache_nodes[1] = 0xff;
                 node->special_route_index = static_cast<u8>(EdFileReadChar());
+                if (version < 19)
+                    node->special_route_index = 0xff;
 
                 char special_name[256];
                 i32 special_name_length = EdFileReadChar();
@@ -757,7 +786,9 @@ static AIPATHSYS *AISysLoadPaths(AISYS *system, i32 version, NUGSCN *scene) {
                     EdFileRead(special_name, special_name_length);
                     node->has_special =
                         static_cast<u8>(NuSpecialFind(scene, &node->special_handle, special_name, 1) != 0);
-                    EdFileReadNuVec(&node->special_position);
+                    node->special_position.x = EdFileReadFloat();
+                    node->special_position.y = EdFileReadFloat();
+                    node->special_position.z = EdFileReadFloat();
                 }
 
                 if (path->connections != NULL && node->connection_count != 0) {
@@ -772,15 +803,19 @@ static AIPATHSYS *AISysLoadPaths(AISYS *system, i32 version, NUGSCN *scene) {
                     }
                 }
 
-                node->route_membership_mask = EdFileReadShort();
-                node->route_boundary_mask = EdFileReadShort();
+                if (version > 4) {
+                    node->route_membership_mask = EdFileReadShort();
+                    node->route_boundary_mask = EdFileReadShort();
+                }
             }
             AIPathCalcExtents(path);
         }
 
-        AISysLoadPathRoutes(system, path);
+        AISysLoadPathRoutes(system, path, version);
     }
 
+    if (version < 19)
+        return path_system;
     path_system->special_route_count = EdFileReadShort();
     if (path_system->special_route_count != 0) {
         path_system->special_routes = static_cast<AIPATHSPECIALROUTE *>(
@@ -1296,7 +1331,9 @@ static void AISysLoadLocators(AISYS *system, i32 version) {
     for (i32 index = 0; index < system->locator_count; ++index) {
         AILOCATOR *locator = &system->locators[index];
         EdFileRead(locator->name, sizeof(locator->name));
-        EdFileReadNuVec(&locator->position);
+        locator->position.x = EdFileReadFloat();
+        locator->position.y = EdFileReadFloat();
+        locator->position.z = EdFileReadFloat();
         locator->flags = EdFileReadShort();
         u8 path_index = static_cast<u8>(EdFileReadChar());
         locator->path_info.path = system->path_sys->paths[path_index];
@@ -1351,31 +1388,31 @@ static void AISysLoadCreatures(AISYS *system, i32 version) {
 
         if (creature->script_name[0] == '\0') {
             strcpy(creature->script_name, "default");
-        } else if (version > 13) {
-            char character_name[32];
-            EdFileRead(character_name, sizeof(character_name));
-            if (GlobalCharacterTypeIDFn != NULL) {
-                creature->type = static_cast<i16>(GlobalCharacterTypeIDFn(character_name));
-            }
         }
+        char character_name[32];
+        EdFileRead(character_name, version < 14 ? 16 : 32);
+        if (GlobalCharacterTypeIDFn != NULL)
+            creature->type = static_cast<i16>(GlobalCharacterTypeIDFn(character_name));
 
-        EdFileReadNuVec(&creature->pos);
+        creature->pos.x = EdFileReadFloat();
+        creature->pos.y = EdFileReadFloat();
+        creature->pos.z = EdFileReadFloat();
         creature->y_rot = static_cast<NUANG>(EdFileReadShort());
 
         if (version > 15) {
             creature->set = static_cast<u8>(EdFileReadChar());
-            creature->count = static_cast<u8>(EdFileReadChar());
-            creature->count_across = static_cast<u8>(EdFileReadChar());
-            creature->active_mask = EdFileReadUnsignedInt();
-            creature->x_spacing = EdFileReadFloat();
-            creature->z_spacing = EdFileReadFloat();
-            creature->flags = EdFileReadInt();
-            u8 path_index = static_cast<u8>(EdFileReadChar());
-            creature->path_info.path = system->path_sys->paths[path_index];
-            creature->path_info.direction = static_cast<u8>(EdFileReadChar());
-            u16 connection_index = static_cast<u16>(EdFileReadShort());
-            creature->path_info.connection = &creature->path_info.path->connections[connection_index];
         }
+        creature->count = static_cast<u8>(EdFileReadChar());
+        creature->count_across = static_cast<u8>(EdFileReadChar());
+        creature->active_mask = EdFileReadUnsignedInt();
+        creature->x_spacing = EdFileReadFloat();
+        creature->z_spacing = EdFileReadFloat();
+        creature->flags = EdFileReadInt();
+        u8 path_index = static_cast<u8>(EdFileReadChar());
+        creature->path_info.path = system->path_sys->paths[path_index];
+        creature->path_info.direction = static_cast<u8>(EdFileReadChar());
+        u16 connection_index = static_cast<u16>(EdFileReadShort());
+        creature->path_info.connection = &creature->path_info.path->connections[connection_index];
 
         if (version > 2) {
             for (i32 param = 0; param < 4; ++param) {
@@ -1383,7 +1420,7 @@ static void AISysLoadCreatures(AISYS *system, i32 version) {
             }
         }
 
-        if (version != 3) {
+        if (version > 3) {
             creature->area = AISysLoadAreaReference(system);
         }
         if (version > 5) {
@@ -1400,9 +1437,17 @@ static void AISysLoadCreatures(AISYS *system, i32 version) {
             creature->activate_type = static_cast<u8>(EdFileReadChar());
             creature->min_respawn_time = EdFileReadFloat();
             creature->max_respawn_time = EdFileReadFloat();
+        } else {
+            creature->activation_difficulty = default_activate_difficulty;
+            creature->min_respawn_count = static_cast<i8>(default_min_n_respawns);
+            creature->max_respawn_count = static_cast<i8>(default_max_n_respawns);
+            creature->min_respawn_time = default_min_t_respawn;
+            creature->max_respawn_time = default_max_t_respawn;
         }
         if (version > 9) {
             creature->start_stagger = EdFileReadFloat();
+        } else {
+            creature->start_stagger = default_stagger_start;
         }
         if (creature->activate_type == 1) {
             char area_name[16];
@@ -1415,18 +1460,23 @@ static void AISysLoadCreatures(AISYS *system, i32 version) {
             creature->max_view_height = EdFileReadFloat();
             creature->min_view_height = EdFileReadFloat();
             EdFileReadInt();
+        } else {
+            creature->view_distance = GetViewRangeFn == NULL ? 1.0f : GetViewRangeFn(creature->type);
+            creature->hear_distance = GetHearDistanceFn == NULL ? 1.0f : GetHearDistanceFn(creature->type);
+            creature->max_view_height = GetMaxViewHeightFn == NULL ? 1.0f : GetMaxViewHeightFn(creature->type);
+            creature->min_view_height = GetMinViewHeightFn == NULL ? 1.0f : GetMinViewHeightFn(creature->type);
         }
 
-        if (creature->view_distance == 0.0f && GetViewRangeFn != NULL) {
+        if (version > 10 && creature->view_distance == 0.0f && GetViewRangeFn != NULL) {
             creature->view_distance = GetViewRangeFn(creature->type);
         }
-        if (creature->hear_distance == 0.0f && GetHearDistanceFn != NULL) {
+        if (version > 10 && creature->hear_distance == 0.0f && GetHearDistanceFn != NULL) {
             creature->hear_distance = GetHearDistanceFn(creature->type);
         }
-        if (creature->max_view_height == 0.0f && GetMaxViewHeightFn != NULL) {
+        if (version > 10 && creature->max_view_height == 0.0f && GetMaxViewHeightFn != NULL) {
             creature->max_view_height = GetMaxViewHeightFn(creature->type);
         }
-        if (creature->min_view_height == 0.0f && GetMinViewHeightFn != NULL) {
+        if (version > 10 && creature->min_view_height == 0.0f && GetMinViewHeightFn != NULL) {
             creature->min_view_height = GetMinViewHeightFn(creature->type);
         }
     }
@@ -2952,9 +3002,10 @@ extern "C" {
         NUGSCN *gscene = static_cast<NUGSCN *>(scene);
         VARIPTR pak_start = *end;
         void *pak = NULL;
-        char ai2_path[256];
-        char pak_path[256];
-        char script_path[256];
+        char pak_path[128];
+        char ai2_path[128];
+        char script_path[128];
+        char packed_name[256];
 
         if (ai_usepackfile != 0) {
             sprintf(pak_path, "%sLevels\\%s\\%s\\ai.pak", AiLevelPathName, directory, parameter);
@@ -2982,9 +3033,9 @@ extern "C" {
         EdFileSetMedia(1);
         i32 is_open = 0;
         if (pak != NULL) {
-            sprintf(pak_path, "%s.ai2", name);
+            sprintf(packed_name, "%s.ai2", name);
             EdFileSetPakFile(pak);
-            is_open = EdFileOpen(pak_path, NUFILE_READ);
+            is_open = EdFileOpen(packed_name, NUFILE_READ);
         }
         if (is_open == 0) {
             EdFileSetPakFile(NULL);
@@ -2995,17 +3046,18 @@ extern "C" {
             i32 version = EdFileReadInt();
             system->scene = gscene;
 
-            // The shipped TCS assets use version 20. These section readers
-            // follow the original version-20 branches and retain the original
-            // gates that affect the current layout.
-            if (version == 20) {
-                system->path_sys = AISysLoadPaths(system, version, gscene);
+            system->path_sys = AISysLoadPaths(system, version, gscene);
+            if (version > 3)
                 AISysLoadAreas(system, version);
-                AISysLoadLocators(system, version);
-                AISysLoadLocatorSets(system, version);
+            if (system->path_sys != NULL) {
+                if (version > 5) {
+                    AISysLoadLocators(system, version);
+                    AISysLoadLocatorSets(system, version);
+                }
                 AISysLoadCreatures(system, version);
-                AISysLoadAntinodes(system, version, gscene);
-                if (GameAILoadFn != NULL) {
+                if (version > 12)
+                    AISysLoadAntinodes(system, version, gscene);
+                if (version > 6 && GameAILoadFn != NULL) {
                     GameAILoadFn(system, version, gscene, cursor, end);
                 }
             }
@@ -3013,7 +3065,7 @@ extern "C" {
         }
 
         sprintf(script_path, "%sLevels\\%s\\%s", AiLevelPathName, directory, parameter);
-        AIScriptLoadAllPakFile(pak, script_path, cursor, &pak_start, system);
+        AIScriptLoadAllPakFile(pak, script_path, cursor, end, system);
         AISysSetLevelPath(system, NULL);
         return system;
     }
