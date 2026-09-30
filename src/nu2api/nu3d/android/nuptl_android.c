@@ -533,122 +533,133 @@ extern "C" void GenericDebinfoDmaTypeUpdate(debinftype *effect) {
         effect->native_data = DmaDebTypes[freeDmaDebType++];
     }
 
-    if (NuStrCmp(effect->name, "FLY") == 0 && static_cast<u32>(effect->texture_u0) == 0x8003c &&
-        static_cast<u32>(effect->texture_v0) == 0x80100 && static_cast<u32>(effect->texture_u1) == 0x8005e &&
-        static_cast<u32>(effect->texture_v1) == 0x80082) {
+    const bool fly = effect != NULL && effect->name != NULL && NuStrCmp(effect->name, "FLY") == 0 &&
+                     static_cast<u32>(effect->texture_u0) == 0x8003c &&
+                     static_cast<u32>(effect->texture_v0) == 0x80100 &&
+                     static_cast<u32>(effect->texture_u1) == 0x8005e && static_cast<u32>(effect->texture_v1) == 0x80082;
+    if (fly) {
         for (u32 i = 0; i < 8; ++i) {
             effect->width_keys[i].value = effect->height_keys[i].value;
             effect->height_keys[i].value += effect->height_keys[i].value;
             effect->alpha_keys[i].value *= 1.5f;
             effect->rotation_keys[i].value *= 1.5f;
         }
-        effect->texture_u0 = static_cast<f32>(static_cast<u32>(effect->texture_u0) & ~0x1ffU) + 63.75f;
-        effect->texture_v0 = static_cast<f32>(static_cast<u32>(effect->texture_v0) & ~0x1ffU) + 127.5f;
-        effect->texture_u1 = static_cast<f32>(static_cast<u32>(effect->texture_u1) & ~0x1ffU) + 95.625f;
-        effect->texture_v1 = static_cast<f32>(static_cast<u32>(effect->texture_v1) & ~0x1ffU) + 191.25f;
+        effect->texture_u0 = static_cast<f32>(static_cast<u32>(effect->texture_u0) & ~0x1ffU);
+        effect->texture_u0 += 63.75f;
+        effect->texture_v0 = static_cast<f32>(static_cast<u32>(effect->texture_v0) & ~0x1ffU);
+        effect->texture_v0 += 127.5f;
+        effect->texture_u1 = static_cast<f32>(static_cast<u32>(effect->texture_u1) & ~0x1ffU);
+        effect->texture_u1 += 95.625f;
+        effect->texture_v1 = static_cast<f32>(static_cast<u32>(effect->texture_v1) & ~0x1ffU);
+        effect->texture_v1 += 191.25f;
     }
     PartHeader *header = effect->native_data;
     header->gravity = effect->field_0a0;
-    header->texture_u0 = static_cast<f32>(static_cast<i32>(effect->texture_u0) & 0x1ff) / 255.0f;
-    header->texture_v0 = static_cast<f32>(static_cast<i32>(effect->texture_v0) & 0x1ff) / 255.0f;
-    header->texture_u1 = static_cast<f32>(static_cast<i32>(effect->texture_u1) & 0x1ff) / 255.0f;
-    header->texture_v1 = static_cast<f32>(static_cast<i32>(effect->texture_v1) & 0x1ff) / 255.0f;
+    header->texture_u0 = static_cast<f32>(static_cast<u32>(effect->texture_u0) & 0x1ffU) * (1.0f / 255.0f);
+    header->texture_v0 = static_cast<f32>(static_cast<u32>(effect->texture_v0) & 0x1ffU) * (1.0f / 255.0f);
+    header->texture_u1 = static_cast<f32>(static_cast<u32>(effect->texture_u1) & 0x1ffU) * (1.0f / 255.0f);
+    header->texture_v1 = static_cast<f32>(static_cast<u32>(effect->texture_v1) & 0x1ffU) * (1.0f / 255.0f);
 
+    f32 width, height, rotation, alpha, red, green, blue;
+    f32 time, duration, elapsed, wave_x, wave_y, texture_x_numerator, texture_y_numerator;
+    i32 i;
     for (i32 frame_index = 0; frame_index < 64; ++frame_index) {
-        f32 width = 0.0f;
-        f32 height = 0.0f;
-        f32 rotation = 0.0f;
-        f32 red = 0.0f;
-        f32 green = 0.0f;
-        f32 blue = 0.0f;
-        f32 alpha = 0.0f;
-        const f32 time = static_cast<f32>(frame_index) / 64.0f;
-        for (i32 i = 0; i < 7; ++i) {
-            const debris_float_key_s &first = effect->width_keys[i];
-            const debris_float_key_s &second = effect->width_keys[i + 1];
-            if (first.time <= time && time <= second.time) {
-                const f32 duration = second.time - first.time;
-                const f32 elapsed = time - first.time;
-                width =
-                    elapsed == 0.0f ? first.value : first.value + (second.value - first.value) * (elapsed / duration);
+        width = height = rotation = 0.0f;
+        red = green = blue = alpha = 0.0f;
+        time = static_cast<f32>(frame_index) / 64.0f;
+        for (i = 0; i < 7; ++i) {
+            if (effect->width_keys[i].time <= time && time <= effect->width_keys[i + 1].time) {
+                duration = effect->width_keys[i + 1].time - effect->width_keys[i].time;
+                elapsed = time - effect->width_keys[i].time;
+                width = elapsed == 0.0f ? effect->width_keys[i].value
+                                        : effect->width_keys[i].value +
+                                              (effect->width_keys[i + 1].value - effect->width_keys[i].value) *
+                                                  (elapsed / duration);
                 break;
             }
         }
-        for (i32 i = 0; i < 7; ++i) {
-            const debris_float_key_s &first = effect->height_keys[i];
-            const debris_float_key_s &second = effect->height_keys[i + 1];
-            if (first.time <= time && time <= second.time) {
-                const f32 duration = second.time - first.time;
-                const f32 elapsed = time - first.time;
-                height =
-                    elapsed == 0.0f ? first.value : first.value + (second.value - first.value) * (elapsed / duration);
+        for (i = 0; i < 7; ++i) {
+            if (effect->height_keys[i].time <= time && time <= effect->height_keys[i + 1].time) {
+                duration = effect->height_keys[i + 1].time - effect->height_keys[i].time;
+                elapsed = time - effect->height_keys[i].time;
+                height = elapsed == 0.0f ? effect->height_keys[i].value
+                                         : effect->height_keys[i].value +
+                                               (effect->height_keys[i + 1].value - effect->height_keys[i].value) *
+                                                   (elapsed / duration);
                 break;
             }
         }
-        for (i32 i = 0; i < 7; ++i) {
-            const debris_float_key_s &first = effect->rotation_keys[i];
-            const debris_float_key_s &second = effect->rotation_keys[i + 1];
-            if (first.time <= time && time <= second.time) {
-                const f32 duration = second.time - first.time;
-                const f32 elapsed = time - first.time;
-                rotation =
-                    elapsed == 0.0f ? first.value : first.value + (second.value - first.value) * (elapsed / duration);
+        for (i = 0; i < 7; ++i) {
+            if (effect->rotation_keys[i].time <= time && time <= effect->rotation_keys[i + 1].time) {
+                duration = effect->rotation_keys[i + 1].time - effect->rotation_keys[i].time;
+                elapsed = time - effect->rotation_keys[i].time;
+                rotation = elapsed == 0.0f ? effect->rotation_keys[i].value
+                                           : effect->rotation_keys[i].value +
+                                                 (effect->rotation_keys[i + 1].value - effect->rotation_keys[i].value) *
+                                                     (elapsed / duration);
                 break;
             }
         }
-        const f32 sine = NU_SIN_LUT(rotation);
-        const f32 cosine = NU_SIN_LUT(rotation + 16384.0f);
-        const f32 wave_x = effect->jib_x_amplitude * NU_SIN_LUT(effect->jib_x_frequency * time * 65536.0f);
-        const f32 wave_y = effect->jib_y_amplitude * NU_SIN_LUT(effect->jib_y_frequency * time * 65536.0f);
-        const f32 texture_x_numerator = cosine * (width * 0.25f) - sine * (height * 0.25f) + wave_x;
-        const f32 texture_y_numerator = -sine * (width * 0.25f) - cosine * (height * 0.25f) + wave_y;
+        wave_x = effect->jib_x_amplitude * NU_SIN_LUT(65536.0f * effect->jib_x_frequency * time);
+        wave_y = effect->jib_y_amplitude * NU_SIN_LUT(65536.0f * effect->jib_y_frequency * time);
+        texture_x_numerator =
+            NU_SIN_LUT(rotation + 16384.0f) * (width / 4.0f) - (height / 4.0f) * NU_SIN_LUT(rotation) + wave_x;
+        texture_y_numerator =
+            NU_SIN_LUT(rotation) * (-width / 4.0f) - (height / 4.0f) * NU_SIN_LUT(rotation + 16384.0f) + wave_y;
 
         debris_particle_frame_s &frame = header->frames[frame_index];
-        frame.position.x = (-cosine * (width * 0.25f) - sine * (height * 0.25f) + wave_x) / 2048.0f;
-        frame.position.y = (sine * (width * 0.25f) - cosine * (height * 0.25f) + wave_y) / 2048.0f;
+        frame.position.x =
+            (NU_SIN_LUT(rotation + 16384.0f) * (-width / 4.0f) - (height / 4.0f) * NU_SIN_LUT(rotation) + wave_x) /
+            2048.0f;
+        frame.position.y =
+            (NU_SIN_LUT(rotation) * (width / 4.0f) - (height / 4.0f) * NU_SIN_LUT(rotation + 16384.0f) + wave_y) /
+            2048.0f;
         frame.position.z = 0.0f;
         frame.texture_offset.x = texture_x_numerator / 2048.0f;
         frame.texture_offset.y = texture_y_numerator / 2048.0f;
         frame.texture_offset.z = 0.0f;
-        frame.extent.x = (texture_x_numerator + sine * (height * 0.5f)) / 2048.0f;
-        frame.extent.y = (texture_y_numerator + cosine * (height * 0.5f)) / 2048.0f;
+        frame.extent.x = (texture_x_numerator + NU_SIN_LUT(rotation) * (height / 2.0f)) / 2048.0f;
+        frame.extent.y = (texture_y_numerator + NU_SIN_LUT(rotation + 16384.0f) * (height / 2.0f)) / 2048.0f;
         frame.extent.z = 0.0f;
-        for (i32 i = 0; i < 7; ++i) {
-            const debris_colour_key_s &first = effect->colour_keys[i];
-            const debris_colour_key_s &second = effect->colour_keys[i + 1];
-            if (first.time <= time && time <= second.time) {
-                const f32 duration = second.time - first.time;
-                const f32 elapsed = time - first.time;
+        for (i = 0; i < 7; ++i) {
+            if (effect->colour_keys[i].time <= time && time <= effect->colour_keys[i + 1].time) {
+                duration = effect->colour_keys[i + 1].time - effect->colour_keys[i].time;
+                elapsed = time - effect->colour_keys[i].time;
                 if (elapsed == 0.0f) {
-                    red = first.red;
-                    green = first.green;
-                    blue = first.blue;
+                    red = effect->colour_keys[i].red;
+                    green = effect->colour_keys[i].green;
+                    blue = effect->colour_keys[i].blue;
                 } else {
-                    const f32 fraction = elapsed / duration;
-                    red = first.red + static_cast<i32>(second.red - first.red) * fraction;
-                    green = first.green + static_cast<i32>(second.green - first.green) * fraction;
-                    blue = first.blue + static_cast<i32>(second.blue - first.blue) * fraction;
+                    red = effect->colour_keys[i].red +
+                          static_cast<i32>(effect->colour_keys[i + 1].red - effect->colour_keys[i].red) *
+                              (elapsed / duration);
+                    green = effect->colour_keys[i].green +
+                            static_cast<i32>(effect->colour_keys[i + 1].green - effect->colour_keys[i].green) *
+                                (elapsed / duration);
+                    blue = effect->colour_keys[i].blue +
+                           static_cast<i32>(effect->colour_keys[i + 1].blue - effect->colour_keys[i].blue) *
+                               (elapsed / duration);
                 }
                 break;
             }
         }
         red += red;
-        green += green;
-        blue += blue;
         if (red > 255.0f)
             red = 255.0f;
+        green += green;
         if (green > 255.0f)
             green = 255.0f;
+        blue += blue;
         if (blue > 255.0f)
             blue = 255.0f;
-        for (i32 i = 0; i < 7; ++i) {
-            const debris_float_key_s &first = effect->alpha_keys[i];
-            const debris_float_key_s &second = effect->alpha_keys[i + 1];
-            if (first.time <= time && time <= second.time) {
-                const f32 duration = second.time - first.time;
-                const f32 elapsed = time - first.time;
-                alpha =
-                    elapsed == 0.0f ? first.value : first.value + (second.value - first.value) * (elapsed / duration);
+        for (i = 0; i < 7; ++i) {
+            if (effect->alpha_keys[i].time <= time && time <= effect->alpha_keys[i + 1].time) {
+                duration = effect->alpha_keys[i + 1].time - effect->alpha_keys[i].time;
+                elapsed = time - effect->alpha_keys[i].time;
+                alpha = elapsed == 0.0f ? effect->alpha_keys[i].value
+                                        : effect->alpha_keys[i].value +
+                                              (effect->alpha_keys[i + 1].value - effect->alpha_keys[i].value) *
+                                                  (elapsed / duration);
                 break;
             }
         }

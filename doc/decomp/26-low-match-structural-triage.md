@@ -6252,3 +6252,37 @@ Whole-binary matching reaches **66.614655%**, **+1.490175 percentage points**
 from main, with **6,273** exact functions and no exact function lost. All eleven
 GitHub checks passed for commit **65a78f4f** (batches 129–130). The approximately
 two-point goal continues. No optimization, ownership or scoring changes are made.
+
+## Batches 137–142: object traversal and debris-frame tables
+
+Restore `UpdateGameObjects`' four cached object-pointer walks. Each pass captures
+`Obj` once and retains a live `HIGHGAMEOBJECT` limit across callbacks; the lighting
+pass captures its array before `FindGameObject`. Restore the missing AI, player
+terrain/animation, lighting and collision timing callbacks. Raw instructions
+confirm that the lighting tail calls `TBOPENFN`, not `TBCLOSEFN`; preserve that
+reference behavior and recheck `TimingBarSet` before opening collision timing.
+Recover the cadence miss's early continue, aggregate saved-position copies, and
+two fixed player-indicator/message blocks. Ordinary fixed-expansion macros share
+the two message bodies without forcing inlining or changing compiler options.
+Matching improves **29.453% to 43.470867%**.
+
+A focused production traversal/cadence fixture passes **20,000** cases on each
+of 64-bit ASan/UBSan and optimized i386 SSE, including callback array replacement,
+count shrink/extension, empty passes, cadence flags and saved-position restoration.
+The unchanged engine bodies are replaced with callbacks; this does not verify
+the complete object update, message rendering or timing-service implementation.
+
+Recover `GenericDebinfoDmaTypeUpdate`'s shared key index and scalar interpolation
+state, direct key-array accesses, repeated trigonometric expressions, unsigned
+texture-coordinate extraction and reference reciprocal scaling. Preserve the
+FLY effect's ordered coordinate stores and per-colour clamp sequence. Matching
+improves **60.059% to 87.231770%**. Production-body fixtures pass **20,000** bounded
+cases per ABI, checking all 64 frames, geometry, colour packing, allocation and
+exhaustion, FLY repair, gaps and repeated keys. The independent previous-loop
+oracle uses the reference-verified unsigned/reciprocal texture extraction; its
+trigonometric table and string service are test stand-ins.
+
+Whole-binary matching reaches **66.677536%**, **+1.553056 percentage points**
+from main. All eleven GitHub checks passed for commit **8c1ccb6c** (batches
+131–136). The approximately two-point goal remains in progress. No optimization,
+ownership, ABI-attribute or scoring changes are made.

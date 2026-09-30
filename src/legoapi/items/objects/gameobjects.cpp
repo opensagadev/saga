@@ -7582,21 +7582,24 @@ void UpdateGameObjects(WORLDINFO_s *world) {
     SetPlayer();
     AIFireIntervalMul = 1.0f;
     CarWashHack = 0;
-    if (adtab[adaptivedifficulty[0]][3] == 1)
+    const i32 difficulty = static_cast<i8>(adtab[adaptivedifficulty[0]][3]);
+    if (difficulty == 1)
         AIFireIntervalMul = 0.5f;
-    else if (adtab[adaptivedifficulty[0]][3] == -1)
+    else if (difficulty == -1)
         AIFireIntervalMul = 2.0f;
     GhostLightMul = SeekLinearF(GhostLightMul, (static_cast<f32>(qrand()) * (1.0f / 65535.0f)) * 0.5f + 0.75f,
                                 FRAMETIME + FRAMETIME);
     if (GhostLightMul == GhostLightTargetMul) {
         GhostLightTargetMul = (static_cast<f32>(qrand()) * (1.0f / 65535.0f)) * 0.5f + 0.75f;
     }
+    if (TimingBarSet == 2)
+        TBOPENFN("AI", 2);
 
     // AI updates are scheduled before the object/player movement passes. The
     // elapsed value is accumulated until an object becomes eligible for its
     // next script and path update.
-    for (i32 i = 0; i < HIGHGAMEOBJECT; ++i) {
-        GameObject_s *object = &Obj[i];
+    GameObject_s *object = Obj;
+    for (i32 i = 0; i < HIGHGAMEOBJECT; ++i, ++object) {
         const u16 character_flags = APIOBJECT_FLAG_IN_USE | APIOBJECT_FLAG_CHARACTER;
         if ((object->apiobj.field_0x1f8 & character_flags) != character_flags) {
             continue;
@@ -7621,17 +7624,17 @@ void UpdateGameObjects(WORLDINFO_s *world) {
         const i32 interval = force_update ? 1 : GameObjectAIUpdateInterval(world, object);
 
         if (interval <= 1) {
-            object->field_0xf00 |= GAME_OBJECT_AI_UPDATE_FORCED | GAME_OBJECT_AI_UPDATE_PROCESS;
+            object->field_0xf00 |= GAME_OBJECT_AI_UPDATE_FORCED;
         } else {
             object->field_0xf00 &= ~GAME_OBJECT_AI_UPDATE_FORCED;
             const u32 update_phase =
                 static_cast<u32>(object->apiobj.field_0x289) + static_cast<u32>(GameTimer.update_count);
-            if (update_phase % static_cast<u32>(interval) == 0) {
-                object->field_0xf00 |= GAME_OBJECT_AI_UPDATE_PROCESS;
-            } else {
+            if (update_phase % static_cast<u32>(interval) != 0) {
                 object->field_0xf00 &= ~GAME_OBJECT_AI_UPDATE_PROCESS;
+                continue;
             }
         }
+        object->field_0xf00 |= GAME_OBJECT_AI_UPDATE_PROCESS;
 
         // AI positions between scheduled updates are render extrapolations.
         // The target restores the last terrain-resolved position here before
@@ -7640,11 +7643,8 @@ void UpdateGameObjects(WORLDINFO_s *world) {
         // query's starting point.
         const u32 authoritative_position_flags =
             APIOBJECT_MOTION_FLAG_AI_CONTROLLED | APIOBJECT_STATE_FLAG_IGNORE_DOORS;
-        if ((object->field_0xf00 & GAME_OBJECT_AI_UPDATE_PROCESS) != 0 &&
-            (object->apiobj.field_0x1f4 & authoritative_position_flags) == APIOBJECT_MOTION_FLAG_AI_CONTROLLED) {
-            object->apiobj.position.x = object->field_0x10c8;
-            object->apiobj.position.y = object->field_0x10cc;
-            object->apiobj.position.z = object->field_0x10d0;
+        if ((object->apiobj.field_0x1f4 & authoritative_position_flags) == APIOBJECT_MOTION_FLAG_AI_CONTROLLED) {
+            object->apiobj.position = object->ai_update_position;
         }
     }
 
@@ -7656,8 +7656,8 @@ void UpdateGameObjects(WORLDINFO_s *world) {
         TBCLOSEFN("AIProc", 4);
 
     // AI movement precedes the separate player movement pass.
-    for (i32 i = 0; i < HIGHGAMEOBJECT; ++i) {
-        GameObject_s *object = &Obj[i];
+    object = Obj;
+    for (i32 i = 0; i < HIGHGAMEOBJECT; ++i, ++object) {
         if ((object->apiobj.field_0x1f8 & 0x1001) != 0x1001 ||
             (object->apiobj.field_0x1f4 & APIOBJECT_MOTION_FLAG_AI_CONTROLLED) == 0)
             continue;
@@ -7712,6 +7712,9 @@ void UpdateGameObjects(WORLDINFO_s *world) {
             }
         }
     }
+
+    if (TimingBarSet == 2)
+        TBCLOSEFN("AI", 2);
 
     // Player movement has its own timers, power-up and controller processing.
     for (i32 i = 0; i < 8; ++i) {
@@ -7785,8 +7788,8 @@ void UpdateGameObjects(WORLDINFO_s *world) {
     // terrain update when their script was processed. Between those updates,
     // the original advances the last resolved velocity and still animates the
     // object every frame.
-    for (i32 i = 0; i < HIGHGAMEOBJECT; ++i) {
-        GameObject_s *object = &Obj[i];
+    object = Obj;
+    for (i32 i = 0; i < HIGHGAMEOBJECT; ++i, ++object) {
         const u16 character_flags = APIOBJECT_FLAG_IN_USE | APIOBJECT_FLAG_CHARACTER;
         if ((object->apiobj.field_0x1f8 & character_flags) != character_flags ||
             (object->apiobj.field_0x1f4 & APIOBJECT_MOTION_FLAG_AI_CONTROLLED) == 0) {
@@ -7802,9 +7805,7 @@ void UpdateGameObjects(WORLDINFO_s *world) {
             FRAMETIME = object->ai_elapsed_time;
             TerrainPlayer(object);
 
-            object->field_0x10c8 = object->apiobj.position.x;
-            object->field_0x10cc = object->apiobj.position.y;
-            object->field_0x10d0 = object->apiobj.position.z;
+            object->ai_update_position = object->apiobj.position;
 
             const f32 vertical_displacement = object->apiobj.position.y - object->apiobj.start_position.y;
             if (vertical_displacement == 0.0f || object->ai_elapsed_time == 0.0f) {
@@ -7878,16 +7879,18 @@ void UpdateGameObjects(WORLDINFO_s *world) {
                                                 object->reset_velocity.y * object->reset_velocity.y +
                                                 object->reset_velocity.z * object->reset_velocity.z);
         }
+        if (TimingBarSet == 2)
+            TBOPENFN("TA", 2);
         TerrainPlayer(object);
-        object->field_0x10c8 = object->apiobj.position.x;
-        object->field_0x10cc = object->apiobj.position.y;
-        object->field_0x10d0 = object->apiobj.position.z;
+        object->ai_update_position = object->apiobj.position;
         const f32 vertical_displacement = object->apiobj.position.y - object->apiobj.start_position.y;
         object->vertical_velocity = vertical_displacement == 0.0f || object->ai_elapsed_time == 0.0f
                                         ? 0.0f
                                         : vertical_displacement / object->ai_elapsed_time;
         AnimatePlayer(object);
         object->context_target_position = NULL;
+        if (TimingBarSet == 2)
+            TBCLOSEFN("TA", 2);
         if (VehicleArea != 0 || (object->apiobj.character_data->model_flags & 0x2000) != 0) {
             object->post_terrain_speed = NuFsqrt(object->apiobj.velocity.x * object->apiobj.velocity.x +
                                                  object->apiobj.velocity.y * object->apiobj.velocity.y +
@@ -7963,9 +7966,11 @@ void UpdateGameObjects(WORLDINFO_s *world) {
     const i32 lighting_phase = static_cast<i8>(MainFrameCounters.third_frame);
     if (lighting_phase != -1)
         lighting_start = (lighting_phase * HIGHGAMEOBJECT) / 3;
+    if (TimingBarSet == 2)
+        TBOPENFN("rtl", 2);
+    object = Obj;
     GameObject_s *dagobah_luke = FindGameObject(id_LUKESKYWALKERDAGOBAH, 0, 1, 1, 0);
-    for (i32 i = 0; i < HIGHGAMEOBJECT; ++i) {
-        GameObject_s *object = &Obj[i];
+    for (i32 i = 0; i < HIGHGAMEOBJECT; ++i, ++object) {
         const u16 character_flags = APIOBJECT_FLAG_IN_USE | APIOBJECT_FLAG_CHARACTER;
         if (world->rooms_visible_ptr[object->room_id] != 0 &&
             (object->apiobj.field_0x1f8 & character_flags) == character_flags) {
@@ -8018,7 +8023,13 @@ void UpdateGameObjects(WORLDINFO_s *world) {
         }
     }
 
+    if (TimingBarSet == 2)
+        TBOPENFN("rtl", 2);
+    if (TimingBarSet == 2)
+        TBOPENFN("Coll", 2);
     CollideGameObjects(world);
+    if (TimingBarSet == 2)
+        TBCLOSEFN("Coll", 2);
     if (do_player_tag != 0) {
         i32 result = 0;
         if (player_tag_to != NULL && player_tag_from != NULL && player_tag_to != player_tag_from &&
@@ -8059,56 +8070,66 @@ void UpdateGameObjects(WORLDINFO_s *world) {
         player_indicator[0] = 1;
         player_indicator[1] = 1;
     } else {
-        for (i32 i = 0; i < 2; ++i) {
-            GameObject_s *object = Player[i];
-            if (object != NULL && (object->apiobj.flags_low & 0x80) != 0 && (object->field_0xe24 & 8) != 0 &&
-                object->field_0xcc0 != NULL &&
-                (object->id == id_ATST || object->id == id_ATST_LOWRES || object->id == id_ATAT)) {
-                player_indicator[i] = 2;
-            }
-        }
+        // The reference has two fixed player gates, not a dynamic player loop.
+#define CHECK_PLAYER_VEHICLE_INDICATOR(i)                                                                              \
+    {                                                                                                                  \
+        GameObject_s *object = Player[i];                                                                              \
+        if (object != NULL && (object->apiobj.flags_low & 0x80) != 0 && (object->field_0xe24 & 8) != 0 &&              \
+            object->field_0xcc0 != NULL &&                                                                             \
+            (object->id == id_ATST || object->id == id_ATST_LOWRES || object->id == id_ATAT)) {                        \
+            player_indicator[i] = 2;                                                                                   \
+        }                                                                                                              \
     }
-    for (i32 i = 0; i < 2; ++i) {
-        GameObject_s *object = Player[i];
-        if (object == NULL || player_indicator[i] == 0 || object->apiobj.field_0x287 != 0 ||
-            (object->hud_icon_timer > 0.0f && VehicleArea == 0))
-            continue;
-        NUVEC position;
-        if (player_indicator[i] == 2) {
-            GAMECHARACTERDATA *data = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
-            i32 locator = data->ride_locator;
-            if (locator != -1 && object->apiobj.character_model->points_of_interest[locator] != NULL) {
-                position.x = object->joint_matrices[locator].m30;
-                position.y = object->joint_matrices[locator].m31;
-                position.z = object->joint_matrices[locator].m32;
-            } else {
-                position = object->apiobj.upper_position;
-            }
-            position.y += 0.5f * object->apiobj.field_0x1e0;
-        } else if (world->current_level == DOGFIGHTA_LDATA) {
-            position.x = 0.0f;
-            position.y = object->field_0x1000 * object->apiobj.field_0xa8;
-            position.z = 0.0f;
-            NuVecMtxRotate(&position, &position, &object->vehicle_orientation);
-            NuVecAdd(&position, &position, &object->apiobj.position);
-        } else {
-            position = object->apiobj.collision_position;
-            position.y += 1.5f * object->apiobj.field_0x1e0;
-        }
-        ADDGAMEMSG message = AddGameMsg_Default;
-        message.text = ASCII_DOWN;
-        message.position = &position;
-        message.scale = 0.666f;
-        message.red = PlayerRGB[i][0];
-        message.green = PlayerRGB[i][1];
-        message.blue = PlayerRGB[i][2];
-        f32 pulse = NuFmod(GameTimer.time_elapsed_mod_seconds, 0.5f);
-        u16 angle = static_cast<u16>((pulse + pulse) * 65536.0f);
-        message.alpha = static_cast<u8>(48.0f * NuTrigTable[angle >> 1] + 80.0f);
-        message.flags = 0x83;
-        message.field_0x4f = 4;
-        AddGameMsg(&message);
+        CHECK_PLAYER_VEHICLE_INDICATOR(0)
+        CHECK_PLAYER_VEHICLE_INDICATOR(1)
+#undef CHECK_PLAYER_VEHICLE_INDICATOR
     }
+    // Keep the two reference message blocks while sharing their source body.
+#define ADD_PLAYER_VEHICLE_INDICATOR(i)                                                                                \
+    do {                                                                                                               \
+        GameObject_s *object = Player[i];                                                                              \
+        if (object == NULL || player_indicator[i] == 0 || object->apiobj.field_0x287 != 0 ||                           \
+            (object->hud_icon_timer > 0.0f && VehicleArea == 0))                                                       \
+            break;                                                                                                     \
+        NUVEC position;                                                                                                \
+        if (player_indicator[i] == 2) {                                                                                \
+            GAMECHARACTERDATA *data = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);   \
+            i32 locator = data->ride_locator;                                                                          \
+            if (locator != -1 && object->apiobj.character_model->points_of_interest[locator] != NULL) {                \
+                position.x = object->joint_matrices[locator].m30;                                                      \
+                position.y = object->joint_matrices[locator].m31;                                                      \
+                position.z = object->joint_matrices[locator].m32;                                                      \
+            } else {                                                                                                   \
+                position = object->apiobj.upper_position;                                                              \
+            }                                                                                                          \
+            position.y += 0.5f * object->apiobj.field_0x1e0;                                                           \
+        } else if (world->current_level == DOGFIGHTA_LDATA) {                                                          \
+            position.x = 0.0f;                                                                                         \
+            position.y = object->field_0x1000 * object->apiobj.field_0xa8;                                             \
+            position.z = 0.0f;                                                                                         \
+            NuVecMtxRotate(&position, &position, &object->vehicle_orientation);                                        \
+            NuVecAdd(&position, &position, &object->apiobj.position);                                                  \
+        } else {                                                                                                       \
+            position = object->apiobj.collision_position;                                                              \
+            position.y += 1.5f * object->apiobj.field_0x1e0;                                                           \
+        }                                                                                                              \
+        ADDGAMEMSG message = AddGameMsg_Default;                                                                       \
+        message.text = ASCII_DOWN;                                                                                     \
+        message.position = &position;                                                                                  \
+        message.scale = 0.666f;                                                                                        \
+        message.red = PlayerRGB[i][0];                                                                                 \
+        message.green = PlayerRGB[i][1];                                                                               \
+        message.blue = PlayerRGB[i][2];                                                                                \
+        f32 pulse = NuFmod(GameTimer.time_elapsed_mod_seconds, 0.5f);                                                  \
+        u16 angle = static_cast<u16>((pulse + pulse) * 65536.0f);                                                      \
+        message.alpha = static_cast<u8>(48.0f * NuTrigTable[angle >> 1] + 80.0f);                                      \
+        message.flags = 0x83;                                                                                          \
+        message.field_0x4f = 4;                                                                                        \
+        AddGameMsg(&message);                                                                                          \
+    } while (0)
+    ADD_PLAYER_VEHICLE_INDICATOR(0);
+    ADD_PLAYER_VEHICLE_INDICATOR(1);
+#undef ADD_PLAYER_VEHICLE_INDICATOR
     if (MissionSys != NULL && Mission_Active(MissionSys) != NULL && MissionSys->mission != NULL) {
         CheckMissionEnd(MissionSys);
     }
