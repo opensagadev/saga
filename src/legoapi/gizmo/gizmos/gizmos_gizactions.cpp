@@ -27,6 +27,7 @@
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nu3d/nuspline.h"
 #include "legoapi/render/fx/spline_position.h"
+#include "legoapi/render/fx/parts.h"
 
 i32 Action_SetState(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_s *, char **params, i32 param_count,
                     i32 is_first_time, float) {
@@ -441,8 +442,66 @@ i32 Action_UseTriggerSet(AISYS_s *system, AISCRIPTPROCESS_s *processor, AIPACKET
     return 0;
 }
 
-void Action_BoulderSection(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float) {
-    STUBBED();
+extern PART_s *boulder_part[2];
+
+i32 Action_BoulderSection(AISYS_s *system, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params,
+                          i32 param_count, i32 first_time, f32) {
+    if (packet == NULL || packet->owner == NULL || packet->owner->apiobj.objptr == NULL)
+        return 1;
+    GameObject_s *object = packet->owner->apiobj.objptr;
+    if (first_time != 0) {
+        processor->action_data_4 = 1.0f;
+        processor->action_data_5 = 1.0f;
+        for (i32 index = 0; index < param_count; ++index) {
+            char *value = NuStrIStr(params[index], "boulder_range=");
+            if (value != NULL) {
+                processor->action_data_4 = AIParamToFloat(&packet->script_process, value + 14);
+            } else if ((value = NuStrIStr(params[index], "attack_time=")) != NULL) {
+                processor->action_data_5 = AIParamToFloat(&packet->script_process, value + 12);
+            } else {
+                packet->movement_instruction_parameter = AIParamToFloat(processor, params[index]);
+            }
+        }
+    }
+    const bool can_attack = FreePlay == 0 || CharCategory_IsCategory(object, 0) != 0 ||
+                            CharCategory_IsCategory(object, 1) != 0 || CharCategory_IsCategory(object, 8) != 0;
+    if (!can_attack) {
+        processor->action_timer -= FRAMETIME;
+        if (processor->action_timer < 0.0f) {
+            processor->action_timer = 0.5f;
+            object->pad_gamepad->buttons_pressed |= GAMEPAD_TOGGLELEFT;
+        }
+    }
+    object->field_0xef8 |= GAMEOBJECT_EF8_FLAG_KEEP_WEAPON_OUT;
+    PART_s *nearest = NULL;
+    f32 nearest_distance = processor->action_data_4 * processor->action_data_4;
+    NUVEC difference;
+    if (boulder_part[0] != NULL) {
+        const f32 distance = NuVecDistSqr(&object->apiobj.collision_position, &boulder_part[0]->position, &difference);
+        if (distance < nearest_distance) {
+            nearest = boulder_part[0];
+            nearest_distance = distance;
+        }
+    }
+    if (boulder_part[1] != NULL) {
+        const f32 distance = NuVecDistSqr(&object->apiobj.collision_position, &boulder_part[1]->position, &difference);
+        if (distance < nearest_distance)
+            nearest = boulder_part[1];
+    }
+    // The retail third probe reads padding past this two-entry array. Do not
+    // reproduce that out-of-bounds access or enlarge the recovered global.
+    if (nearest == NULL) {
+        if (system != NULL && system->player_1 != NULL && system->player_1->ai != NULL) {
+            AIPACKET_s *player_packet = system->player_1->ai;
+            AIMoveInstruction(packet, &player_packet->last_path_position, player_packet->mover_height,
+                              &player_packet->path_info, 1, packet->movement_instruction_parameter);
+        }
+    } else {
+        packet->movement_look_target = &nearest->position;
+        if (can_attack)
+            object->pad_gamepad->buttons_pressed |= GAMEPAD_ACTION;
+    }
+    return 0;
 }
 
 i32 Action_ReleaseLocator(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,

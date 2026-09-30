@@ -5645,3 +5645,51 @@ eligibility, vehicle counts and controller/touch priority; obstacle reverse
 probe ordering, nearest ties, all bounds' NaNs, flags, signed owners,
 deflection/rumble service sequences and callback changes to active count.
 External services are stand-ins, not full engine integration.
+
+## Batch 115: level paths, thermal throws, minikits and boulder AI
+
+Restore Dooku's four path-connection flag transitions and six coordinate
+arrangements, with live node/path-system reloads after callbacks. Retain
+boss-kill/outro guards and force effects. `DookuC_Update` improves
+**10.920000% to 23.516363%**.
+
+Recover `ThermalDetonator_ThrowMom` as a particle-creation operation rather
+than a caller-velocity calculation. Preserve the supplied velocity, default
+position, locator normalization, Jango random rotations, ignored ray result,
+particle fields, sound and rumble. Matching improves **6.336283% to
+61.176990%**. The ordinary throw implementation is unchanged.
+
+Restore both Hoth minikit counters, pickup guards, completion camera angles,
+gizmo activation and messages. Reload the gizmo after the camera callback.
+`IncrementMinikitCounter` improves **2.641510% to 40.735847%**. Deliberately
+use the valid averaged-player position for every message: the retail
+completion branch passes an uninitialized local, which is not reproduced.
+
+Replace `Action_BoulderSection`'s stub with parameter parsing, category
+short circuits, ordered nearest selection, toggle timing, weapon retention,
+look-target assignment and player-path following. Raw assembly verifies the
+integer return channel; repair the stub's incorrect void return without
+changing its mangled symbol or argument ABI. Parameter parsing uses the
+packet's embedded script processor for named values and the separate
+processor for the movement argument, matching the actual pointer identities.
+The reference symbol table confirms `boulder_part` is only two pointers
+(eight bytes), although the action also probes padding after it. Preserve
+the recovered two-entry global and omit that out-of-bounds third probe;
+also guard missing follow-player data. Matching improves **2.297872% to
+57.314890%**.
+
+Overall matching reaches **66.098850%**, **+0.974370 percentage points**
+from the rebased main baseline, with **6,269** exact functions. All eleven
+GitHub checks passed for batch 114. The approximately two-point goal remains
+unfinished. Source owners, optimization modes and scoring normalization are
+unchanged; the only signature correction is the reference-proven action
+return type described above.
+
+Extracted production bodies pass 64-bit ASan/UBSan and optimized i386 SSE
+fixtures: all six Dooku coordinate arrangements bit-for-bit, traversal flags,
+missing data and callback replacements; 72 thermal locator/Jango/allocation
+combinations, matrix normalization, particle fields and unchanged input;
+6,144 minikit count/flag cases, camera parameters and completion messaging;
+3,136 boulder nearest/category combinations, ties, processor identities,
+ordered timer/NaN cases and absent follow-player data. External services are
+stand-ins, not full engine integration.

@@ -2450,6 +2450,91 @@ void DookuC_Update(WORLDINFO_s *world) {
         }
     }
     DrawForceBackEffect(&dooku_c.node);
+    GIZFORCE_s *first = LevGizForce[0];
+    GIZFORCE_s *second = LevGizForce[1];
+    GIZFORCE_s *third = LevGizForce[2];
+    if (first == NULL || second == NULL || third == NULL) {
+        return;
+    }
+    GIZFORCEGROUP_s *group = first->group;
+#define SET_DOOKU_CONNECTION(index, operation)                                                                         \
+    do {                                                                                                               \
+        AIPATHCNX_s *connection = static_cast<AIPATHCNX_s *>(LevPathCnx[index]);                                       \
+        if (connection != NULL) {                                                                                      \
+            connection->traversal_flags[0] operation;                                                                  \
+            connection->traversal_flags[1] operation;                                                                  \
+        }                                                                                                              \
+    } while (0)
+    if (group == NULL || (group->field_0x24 & 2) == 0) {
+        if (dookuC_nodesNeedUpdating != 0) {
+            dookuC_nodesNeedUpdating = 0;
+            SET_DOOKU_CONNECTION(0, |= 0x80000000);
+            SET_DOOKU_CONNECTION(1, |= 0x80000000);
+            SET_DOOKU_CONNECTION(2, |= 0x80000000);
+            SET_DOOKU_CONNECTION(3, |= 0x80000000);
+        }
+        return;
+    }
+    if (dookuC_nodesNeedUpdating != 0) {
+        return;
+    }
+    dookuC_nodesNeedUpdating = 1;
+    SET_DOOKU_CONNECTION(0, &= 0x7fffffff);
+    SET_DOOKU_CONNECTION(1, &= 0x7fffffff);
+    SET_DOOKU_CONNECTION(2, &= 0x7fffffff);
+    SET_DOOKU_CONNECTION(3, &= 0x7fffffff);
+#undef SET_DOOKU_CONNECTION
+    AIPATHNODE_s *node0 = static_cast<AIPATHNODE_s *>(LevAIPathNode[0]);
+    AIPATHNODE_s *node1 = static_cast<AIPATHNODE_s *>(LevAIPathNode[1]);
+    AIPATHNODE_s *node2 = static_cast<AIPATHNODE_s *>(LevAIPathNode[2]);
+    AIPATHNODE_s *node3 = static_cast<AIPATHNODE_s *>(LevAIPathNode[3]);
+    if (node0 == NULL || node1 == NULL || node2 == NULL || node3 == NULL) {
+        return;
+    }
+    if (group->forces[0] == first) {
+        node0->position = {3.76f, 0.01f, -1.59f};
+        if (group->forces[1] == second) {
+            node1->position = {4.29f, 0.56f, -1.50f};
+            node2->position = {4.05f, 1.12f, -1.12f};
+            node3->position = {4.46f, 1.69f, -0.97f};
+        } else {
+            node1->position = {4.42f, 0.56f, -1.46f};
+            node2->position = {4.66f, 1.12f, -1.08f};
+            node3->position = {4.41f, 1.69f, -1.04f};
+        }
+    } else if (group->forces[0] == second) {
+        node0->position = {3.60f, 0.01f, -0.96f};
+        if (group->forces[1] == first) {
+            node1->position = {4.06f, 0.56f, -0.98f};
+            node2->position = {4.20f, 1.12f, -1.28f};
+            node3->position = {4.41f, 1.69f, -1.04f};
+        } else {
+            node1->position = {4.06f, 0.56f, -0.98f};
+            node2->position = {4.37f, 1.12f, -0.81f};
+            node3->position = {4.30f, 1.69f, -1.30f};
+        }
+    } else if (group->forces[0] == third) {
+        node0->position = {4.28f, 0.01f, -0.41f};
+        if (group->forces[1] == first) {
+            node1->position = {4.66f, 0.56f, -0.98f};
+            node2->position = {4.50f, 1.12f, -1.35f};
+            node3->position = {4.38f, 1.69f, -1.08f};
+        } else {
+            node1->position = {4.53f, 0.56f, -0.77f};
+            node2->position = {4.20f, 1.12f, -0.91f};
+            node3->position = {4.43f, 1.69f, -1.28f};
+        }
+    }
+    if (world->ai_sys->path_sys != NULL && world->ai_sys->path_sys->active_path != NULL) {
+        AIPathNodeUpdatePos(world->ai_sys, world->ai_sys->path_sys->active_path,
+                            static_cast<AIPATHNODE_s *>(LevAIPathNode[0]));
+        AIPathNodeUpdatePos(world->ai_sys, world->ai_sys->path_sys->active_path,
+                            static_cast<AIPATHNODE_s *>(LevAIPathNode[1]));
+        AIPathNodeUpdatePos(world->ai_sys, world->ai_sys->path_sys->active_path,
+                            static_cast<AIPATHNODE_s *>(LevAIPathNode[2]));
+        AIPathNodeUpdatePos(world->ai_sys, world->ai_sys->path_sys->active_path,
+                            static_cast<AIPATHNODE_s *>(LevAIPathNode[3]));
+    }
 }
 
 void DookuC_DrawPanel(WORLDINFO_s *) {

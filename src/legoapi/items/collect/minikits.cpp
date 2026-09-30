@@ -688,7 +688,48 @@ void EffectOffProgress_Reset(LEVEL_PROGRESS_s *progress) {
 }
 
 void IncrementMinikitCounter(GameObject_s *) {
-    STUBBED();
+    WORLDINFO_s *world = WorldInfo_CurrentlyActive();
+    NUVEC average;
+    Players_AveragePos(&average, NULL);
+    u8 *counter;
+    i32 gizmo_index;
+    NUVEC camera;
+    if (world->current_level == HOTHBATTLEA_LDATA) {
+        gizmo_index = 0;
+        counter = &minikitCounter_A;
+        camera = {0.0f, 0.0f, 10.0f};
+    } else if (world->current_level == HOTHBATTLEC_LDATA) {
+        gizmo_index = 1;
+        counter = &minikitCounter_C;
+        camera = {0.0f, 0.0f, 25.0f};
+    } else {
+        return;
+    }
+    GIZMO *gizmo = LevGizmo[gizmo_index];
+    if (gizmo == NULL || gizmo->object == NULL) {
+        return;
+    }
+    GIZMOPICKUP_s *pickup = static_cast<GIZMOPICKUP_s *>(gizmo->object);
+    if ((pickup->state_flags & (GIZMOPICKUP_STATE_COLLECTED | GIZMOPICKUP_STATE_ALTERNATE_TYPE)) != 0 ||
+        *counter >= 10) {
+        return;
+    }
+    ++*counter;
+    if (*counter == 10) {
+        if (gizmo_index == 0) {
+            NuVecRotateX(&camera, &camera, 0xf1c8);
+            NuVecRotateY(&camera, &camera, 0xe000);
+        } else {
+            NuVecRotateX(&camera, &camera, 0xeaab);
+            NuVecRotateY(&camera, &camera, 0x78e4);
+        }
+        NuVecAdd(&camera, &camera, &pickup->position);
+        GameCameraMakeMiniCut2(&camera, &pickup->position, 0, 0.0f, 4.0f, 0.0f, 0.0f, 0, 0, 0);
+        GizmoActivate(world->gizmo_sys, LevGizmo[gizmo_index], 1, 1);
+    }
+    // The reference's completion branch passes an uninitialized temporary.
+    // Keep the message at the same valid averaged position as earlier counts.
+    AddGameMsgCount(&average, *counter, 10, 200, 100, 30, 0.75f);
 }
 
 i32 EffectOffProgress_Update(LEVEL_PROGRESS_s *progress, char *name, i32 visible) {

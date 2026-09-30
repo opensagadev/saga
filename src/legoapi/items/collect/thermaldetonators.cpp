@@ -269,13 +269,72 @@ i32 ThermalDetonator_MoveCode(GameObject_s *object) {
 }
 
 void ThermalDetonator_ThrowMom(GameObject_s *object, nuvec_s *velocity) {
-    if (object == NULL || velocity == NULL) {
+    ADDPART_s params = Default_ADDPART;
+    if (object == NULL || WORLD == NULL || WORLD->lev_objs == NULL || WORLD->lev_objs[0xea].active == 0) {
         return;
     }
-    const u16 angle = object->apiobj.movement_facing_angle;
-    velocity->x = object->apiobj.velocity.x + NU_SIN_LUT(angle) * 2.0f;
-    velocity->y = object->apiobj.velocity.y + 2.0f;
-    velocity->z = object->apiobj.velocity.z + NU_COS_LUT(angle) * 2.0f;
+    // This entry point creates the thrown part with supplied momentum; it
+    // does not calculate or modify the caller's vector.
+    NUMTX matrix;
+    const i32 locator = object->apiobj.character_data != NULL && object->apiobj.character_data->game_character != NULL
+                            ? object->apiobj.character_data->game_character->throw_locator
+                            : -1;
+    if (locator < 0 || locator >= 16 || object->apiobj.character_model == NULL ||
+        object->apiobj.character_model->points_of_interest[locator] == NULL) {
+        NuMtxSetTranslation(&matrix, &object->apiobj.collision_position);
+    } else {
+        if (object->id == id_JANGOFETT && object->context_animation == 0x6e) {
+            NuMtxSetRotationY(&matrix, qrand());
+            NuMtxRotateZ(&matrix, qrand());
+            NuMtxRotateX(&matrix, qrand());
+            NuMtxTranslate(&matrix, NUMTX_GET_ROW_VEC(&object->joint_matrices[locator], 3));
+        } else {
+            matrix = object->joint_matrices[locator];
+            NuVecNorm(NUMTX_GET_ROW_VEC(&matrix, 0), NUMTX_GET_ROW_VEC(&matrix, 0));
+            NuVecNorm(NUMTX_GET_ROW_VEC(&matrix, 1), NUMTX_GET_ROW_VEC(&matrix, 1));
+            NuVecNorm(NUMTX_GET_ROW_VEC(&matrix, 2), NUMTX_GET_ROW_VEC(&matrix, 2));
+        }
+        NUVEC origin = {
+            object->apiobj.collision_position.x,
+            (object->apiobj.collision_max.y - object->apiobj.collision_min.y) * 0.75f + object->apiobj.collision_min.y,
+            object->apiobj.collision_position.z,
+        };
+        NUVEC movement;
+        NuVecSub(&movement, NUMTX_GET_ROW_VEC(&matrix, 3), &origin);
+        GameRayCast(&origin, &movement, 0.0f, TERRAINMASK_NONWEAPON | 0x1f);
+    }
+    params.matrix = &matrix;
+    params.velocity = velocity;
+    params.owner = object;
+    NUVEC centre;
+    NuSpecialGetRadius(&WORLD->lev_objs[0xea].special, &centre, &params.field_14);
+    params.field_18 = params.field_14;
+    params.field_14 *= 0.75f;
+    params.field_c4 = 1;
+    params.gravity = -5.0f;
+    params.special = &WORLD->lev_objs[0xea].special;
+    params.flags = 0x08000292;
+    params.update_fn = PartCollide_3D;
+    params.field_40 = PartImpact_ThermalDetonator;
+    params.field_44 = PartKill_ThermalDetonator;
+    params.stop_fn = PartStop_Flickerer;
+    params.draw_fn = PartDraw_ThermalDetonator;
+    params.time_step = FRAMETIME;
+    params.field_a4 = 10.0f;
+
+    PART_s *part = AddPart(&params);
+    if (part != NULL) {
+        part->force_flags = ObjHitObj_Flags(object) & 0xffff;
+        part->force_player_mask = 0;
+        part->update_callback = PartUpdate_ThermalDetonator;
+        part->reflection_height = 2000000.0f;
+        part->render_flags &= ~0x80;
+        part->reflection_flags &= ~3;
+    }
+    PlaySfx(const_cast<char *>("ThrowDet"), &object->apiobj.collision_position);
+    if (object->pad_gamepad != NULL) {
+        NewBuzzFrames(object->pad_gamepad->pad, 2, 0);
+    }
 }
 
 void PartImpact_ThermalDetonator(PART_s *part) {
