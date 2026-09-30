@@ -656,27 +656,38 @@ static void cbPtlRotMenu(eduimenu_s *parent, eduiitem_s *, u32) {
 
     eduiMenuAddItem(ptlrotmenu, eduiItemGreyGradPickCreate(0, colours, cbPtlApplyRot, "Rotation Envelope"));
     grad_rot_item = edui_last_item;
-    for (i32 index = 0; index < 8; ++index) {
-        const debris_float_key_s &key = effect->rotation_keys[index];
-        const f32 rotation = key.value * (360.0f / 65536.0f);
-        const f32 value = effect->min_rotation == effect->max_rotation
-                              ? 1.0f
-                              : (rotation - effect->min_rotation) / (effect->max_rotation - effect->min_rotation);
-        eduiGradStageAddRGB(static_cast<edui_gradient_pick_s *>(grad_rot_item), key.time, value, value, value);
-        if (key.time == 1.0f)
-            break;
+#define ROT_STAGE(index)                                                                                               \
+    {                                                                                                                  \
+        const debris_float_key_s &key = effect->rotation_keys[index];                                                  \
+        const f32 rotation = key.value * (360.0f / 65536.0f);                                                          \
+        const f32 value = effect->min_rotation == effect->max_rotation                                                 \
+                              ? 1.0f                                                                                   \
+                              : (rotation - effect->min_rotation) / (effect->max_rotation - effect->min_rotation);     \
+        eduiGradStageAddRGB(static_cast<edui_gradient_pick_s *>(grad_rot_item), key.time, value, value, value);        \
+        if (key.time == 1.0f)                                                                                          \
+            goto rot_stages_done;                                                                                      \
     }
+    ROT_STAGE(0)
+    ROT_STAGE(1)
+    ROT_STAGE(2)
+    ROT_STAGE(3)
+    ROT_STAGE(4)
+    ROT_STAGE(5)
+    ROT_STAGE(6)
+    ROT_STAGE(7)
+#undef ROT_STAGE
+rot_stages_done:
 
     eduiMenuAddItem(ptlrotmenu, eduiItemSliderCreate(0, colours, 0, cbPtlApplyRot, -720.0f, 1440.0f,
                                                      effect->min_rotation, "Min Rotation"));
     grad_rot_min_item = static_cast<edui_slider_s *>(edui_last_item);
     eduiItemSliderSetFmt(grad_rot_min_item, "(%1.01f)");
-    eduiItemSliderSetGranularity(grad_rot_min_item, 0.1f);
+    eduiItemSliderSetGranularity(static_cast<edui_slider_s *>(edui_last_item), 0.1f);
     eduiMenuAddItem(ptlrotmenu, eduiItemSliderCreate(0, colours, 0, cbPtlApplyRot, -720.0f, 1440.0f,
                                                      effect->max_rotation, "Max Rotation"));
     grad_rot_max_item = static_cast<edui_slider_s *>(edui_last_item);
     eduiItemSliderSetFmt(grad_rot_max_item, "(%1.01f)");
-    eduiItemSliderSetGranularity(grad_rot_max_item, 0.1f);
+    eduiItemSliderSetGranularity(static_cast<edui_slider_s *>(edui_last_item), 0.1f);
     eduiMenuAttach(parent, ptlrotmenu);
     ptlrotmenu->x = parent->x + 10;
     ptlrotmenu->y = parent->y + 40;
@@ -974,38 +985,60 @@ static void cbPtlSizeMenu(eduimenu_s *parent, eduiitem_s *, u32) {
 
     eduiMenuAddItem(ptlsizemenu, eduiItemGreyGradPickCreate(0, colours, cbPtlApplySize, "Width Envelope"));
     grad_size_w_item = edui_last_item;
-    for (i32 index = 0; index < 8; ++index) {
-        const debris_float_key_s &key = effect->width_keys[index];
-        const f32 value = effect->min_size == effect->max_size
-                              ? 1.0f
-                              : (key.value - effect->min_size) / (effect->max_size - effect->min_size);
-        eduiGradStageAddRGB(static_cast<edui_gradient_pick_s *>(grad_size_w_item), key.time, value, value, value);
-        if (key.time == 1.0f)
-            break;
+#define WIDTH_STAGE(index)                                                                                             \
+    {                                                                                                                  \
+        const debris_float_key_s &key = effect->width_keys[index];                                                     \
+        const f32 value = effect->min_size == effect->max_size                                                         \
+                              ? 1.0f                                                                                   \
+                              : (key.value - effect->min_size) / (effect->max_size - effect->min_size);                \
+        eduiGradStageAddRGB(static_cast<edui_gradient_pick_s *>(grad_size_w_item), key.time, value, value, value);     \
+        if (key.time == 1.0f)                                                                                          \
+            goto width_stages_done;                                                                                    \
     }
+    WIDTH_STAGE(0)
+    WIDTH_STAGE(1)
+    WIDTH_STAGE(2)
+    WIDTH_STAGE(3)
+    WIDTH_STAGE(4)
+    WIDTH_STAGE(5)
+    WIDTH_STAGE(6)
+    WIDTH_STAGE(7)
+#undef WIDTH_STAGE
+width_stages_done:
 
     eduiMenuAddItem(ptlsizemenu, eduiItemGreyGradPickCreate(0, colours, cbPtlApplySize, "Height Envelope"));
     grad_size_h_item = edui_last_item;
-    for (i32 index = 0; index < 8; ++index) {
-        const debris_float_key_s &key = effect->height_keys[index];
-        const f32 value = effect->min_size == effect->max_size
-                              ? 1.0f
-                              : (key.value - effect->min_size) / (effect->max_size - effect->min_size);
-        eduiGradStageAddRGB(static_cast<edui_gradient_pick_s *>(grad_size_h_item), key.time, value, value, value);
-        if (key.time == 1.0f)
-            break;
+#define HEIGHT_STAGE(index)                                                                                            \
+    {                                                                                                                  \
+        const debris_float_key_s &key = effect->height_keys[index];                                                    \
+        const f32 value = effect->min_size == effect->max_size                                                         \
+                              ? 1.0f                                                                                   \
+                              : (key.value - effect->min_size) / (effect->max_size - effect->min_size);                \
+        eduiGradStageAddRGB(static_cast<edui_gradient_pick_s *>(grad_size_h_item), key.time, value, value, value);     \
+        if (key.time == 1.0f)                                                                                          \
+            goto height_stages_done;                                                                                   \
     }
+    HEIGHT_STAGE(0)
+    HEIGHT_STAGE(1)
+    HEIGHT_STAGE(2)
+    HEIGHT_STAGE(3)
+    HEIGHT_STAGE(4)
+    HEIGHT_STAGE(5)
+    HEIGHT_STAGE(6)
+    HEIGHT_STAGE(7)
+#undef HEIGHT_STAGE
+height_stages_done:
 
     eduiMenuAddItem(ptlsizemenu, eduiItemSliderCreate(0, colours, 0, cbPtlApplySize, 0.0f, 5000.0f * edptl_superscale,
                                                       effect->min_size, "Min Size"));
     grad_size_min_item = static_cast<edui_slider_s *>(edui_last_item);
     eduiItemSliderSetFmt(grad_size_min_item, "(%1.01f)");
-    eduiItemSliderSetGranularity(grad_size_min_item, 0.1f);
+    eduiItemSliderSetGranularity(static_cast<edui_slider_s *>(edui_last_item), 0.1f);
     eduiMenuAddItem(ptlsizemenu, eduiItemSliderCreate(0, colours, 0, cbPtlApplySize, 0.0f, 5000.0f * edptl_superscale,
                                                       effect->max_size, "Max Size"));
     grad_size_max_item = static_cast<edui_slider_s *>(edui_last_item);
     eduiItemSliderSetFmt(grad_size_max_item, "(%1.01f)");
-    eduiItemSliderSetGranularity(grad_size_max_item, 0.1f);
+    eduiItemSliderSetGranularity(static_cast<edui_slider_s *>(edui_last_item), 0.1f);
     eduiMenuAddItem(ptlsizemenu, eduiItemSelCreate(1, colours, 0, 0, cbPtlCopySize, "Copy Width to Height"));
     eduiMenuAddItem(ptlsizemenu, eduiItemSelCreate(2, colours, 0, 0, cbPtlCopySize, "Copy Height to Width"));
     eduiMenuAttach(parent, ptlsizemenu);
@@ -1249,35 +1282,68 @@ static void cbPtlTorusMenu(eduimenu_s *parent, eduiitem_s *, u32) {
     eduiMenuAddItem(edptl_torus_menu,
                     eduiItemGreyGradPickCreate(0, colours, cbPtlApplyTorusEnv1, "Major Radius Envelope"));
     torus_env1_item = edui_last_item;
-    for (i32 index = 0; index < 8; ++index) {
-        const debris_float_key_s &key = effect->torus_keys1[index];
-        eduiGradStageAddRGB(static_cast<edui_gradient_pick_s *>(torus_env1_item), key.time, key.value, key.value,
-                            key.value);
-        if (key.time == 1.0f)
-            break;
+#define TORUS_MAJOR_STAGE(index)                                                                                       \
+    {                                                                                                                  \
+        const debris_float_key_s &key = effect->torus_keys1[index];                                                    \
+        eduiGradStageAddRGB(static_cast<edui_gradient_pick_s *>(torus_env1_item), key.time, key.value, key.value,      \
+                            key.value);                                                                                \
+        if (key.time == 1.0f)                                                                                          \
+            goto torus_major_stages_done;                                                                              \
     }
+    TORUS_MAJOR_STAGE(0)
+    TORUS_MAJOR_STAGE(1)
+    TORUS_MAJOR_STAGE(2)
+    TORUS_MAJOR_STAGE(3)
+    TORUS_MAJOR_STAGE(4)
+    TORUS_MAJOR_STAGE(5)
+    TORUS_MAJOR_STAGE(6)
+    TORUS_MAJOR_STAGE(7)
+#undef TORUS_MAJOR_STAGE
+torus_major_stages_done:
 
     eduiMenuAddItem(edptl_torus_menu,
                     eduiItemGreyGradPickCreate(0, colours, cbPtlApplyTorusEnv2, "Minor Radius Envelope 1"));
     torus_env2_item = edui_last_item;
-    for (i32 index = 0; index < 8; ++index) {
-        const debris_float_key_s &key = effect->torus_keys2[index];
-        eduiGradStageAddRGB(static_cast<edui_gradient_pick_s *>(torus_env2_item), key.time, key.value, key.value,
-                            key.value);
-        if (key.time == 1.0f)
-            break;
+#define TORUS_MINOR1_STAGE(index)                                                                                      \
+    {                                                                                                                  \
+        const debris_float_key_s &key = effect->torus_keys2[index];                                                    \
+        eduiGradStageAddRGB(static_cast<edui_gradient_pick_s *>(torus_env2_item), key.time, key.value, key.value,      \
+                            key.value);                                                                                \
+        if (key.time == 1.0f)                                                                                          \
+            goto torus_minor1_stages_done;                                                                             \
     }
+    TORUS_MINOR1_STAGE(0)
+    TORUS_MINOR1_STAGE(1)
+    TORUS_MINOR1_STAGE(2)
+    TORUS_MINOR1_STAGE(3)
+    TORUS_MINOR1_STAGE(4)
+    TORUS_MINOR1_STAGE(5)
+    TORUS_MINOR1_STAGE(6)
+    TORUS_MINOR1_STAGE(7)
+#undef TORUS_MINOR1_STAGE
+torus_minor1_stages_done:
 
     eduiMenuAddItem(edptl_torus_menu,
                     eduiItemGreyGradPickCreate(0, colours, cbPtlApplyTorusEnv3, "Minor Radius Envelope 2"));
     torus_env3_item = edui_last_item;
-    for (i32 index = 0; index < 8; ++index) {
-        const debris_float_key_s &key = effect->torus_keys3[index];
-        eduiGradStageAddRGB(static_cast<edui_gradient_pick_s *>(torus_env3_item), key.time, key.value, key.value,
-                            key.value);
-        if (key.time == 1.0f)
-            break;
+#define TORUS_MINOR2_STAGE(index)                                                                                      \
+    {                                                                                                                  \
+        const debris_float_key_s &key = effect->torus_keys3[index];                                                    \
+        eduiGradStageAddRGB(static_cast<edui_gradient_pick_s *>(torus_env3_item), key.time, key.value, key.value,      \
+                            key.value);                                                                                \
+        if (key.time == 1.0f)                                                                                          \
+            goto torus_minor2_stages_done;                                                                             \
     }
+    TORUS_MINOR2_STAGE(0)
+    TORUS_MINOR2_STAGE(1)
+    TORUS_MINOR2_STAGE(2)
+    TORUS_MINOR2_STAGE(3)
+    TORUS_MINOR2_STAGE(4)
+    TORUS_MINOR2_STAGE(5)
+    TORUS_MINOR2_STAGE(6)
+    TORUS_MINOR2_STAGE(7)
+#undef TORUS_MINOR2_STAGE
+torus_minor2_stages_done:
     eduiMenuAttach(parent, edptl_torus_menu);
     edptl_torus_menu->x = parent->x + 10;
     edptl_torus_menu->y = parent->y + 40;

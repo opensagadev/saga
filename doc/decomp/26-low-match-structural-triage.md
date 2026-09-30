@@ -5734,3 +5734,36 @@ and absent rotating matrices; both scan modes and four masks with 160 wall
 segments capped safely at 64 records. Existing handle spatial filtering,
 subsets, copied walls, platforms and arena-boundary tests also pass. External
 services are stand-ins, not full engine integration.
+
+## Batch 117: particle envelopes and opponent-selection behavior
+
+Recover the reference's explicit eight-stage rotation and size envelopes,
+including post-stage termination checks and the live `edui_last_item` reload
+after slider formatting. Rotation improves **34.047092% to 63.155%** and
+size **22.137032% to 34.256%**. Color and torus expansion trials regressed
+and were removed. A separate NDK experiment confirms the reference's
+unsigned-byte-to-float intermediate, but the color trial still scored zero;
+do not repeat it without resolving the surrounding structural difference.
+
+Restore `Action_SetOpponent`'s droid roster filtering and persistent cycling,
+named and last-attacker selections, nearest-enemy clear, and type callbacks
+plus first matching object lookup. Preserve the reference's slot-seven
+unordered-timer behavior, candidate accumulation across parameters and
+parameter precedence. Remove the extra packet-opponent write: the reference
+only stores the game object's opponent. Retain guards for absent character
+data and cap the original ten-entry array when malformed scripts repeat the
+droid parameter. Matching improves **16.536873% to 60.67%**.
+
+Overall matching reaches **66.151820%**, **+1.027340 percentage points**
+from main, with **6,269** exact functions. All eleven GitHub checks passed
+for batch 116. The two-point goal remains unfinished. Owners, optimization,
+ABI and scoring are unchanged.
+
+Extracted production bodies pass 64-bit ASan/UBSan and optimized i386 SSE
+fixtures: **1,944** envelope numeric/termination/reload combinations, equal
+and reversed ranges, NaNs, infinities, post-callback termination changes,
+menu allocation failure, widget arguments and callback-driven last-item
+replacement; **344** opponent roster/type combinations, round-robin state,
+signed-byte type translation, script priority, nearest clear visibility,
+missing callbacks, repeated-parameter capacity and packet preservation.
+External services are stand-ins, not full engine integration.

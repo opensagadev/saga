@@ -3621,16 +3621,67 @@ __used__ static i32 Action_SetOpponent(AISYS *sys, AISCRIPTPROCESS *processor, A
 
     GameObject_s *object = packet->owner->apiobj.objptr;
     GameObject_s *opponent = NULL;
+    GameObject_s *droids[10];
+    i32 droid_count = 0;
+    static i32 prev_droid_ix;
     for (i32 index = 0; index < param_4; ++index) {
-        char *value = NuStrIStr(params[index], "opponent=");
-        if (value != NULL && NuStrICmp(value + NuStrLen("opponent="), "nearest_enemy") != 0) {
-            opponent = GetNamedGameObject(sys, value + NuStrLen("opponent="));
+        char *value;
+        if (NuStrIStr(params[index], "opponent=droid") != NULL) {
+            // The retail script action checks eight player slots explicitly.
+            // Keep its ordered float comparisons, including slot seven's
+            // inverted rejection test (which admits an unordered death timer).
+#define OPPONENT_DROID(slot)                                                                                           \
+    {                                                                                                                  \
+        GameObject_s *candidate = Player[slot];                                                                        \
+        if (candidate != NULL && (candidate->apiobj.field_0x1f8 & 0x1001) == 0x1001 &&                                 \
+            (candidate->apiobj.field_0x287 == 0 || candidate->field_0x101c > 0.0f) &&                                  \
+            (candidate->field_0xeff & 1) == 0 && candidate->apiobj.character_data != NULL &&                           \
+            (candidate->apiobj.character_data->model_flags & 0x10) != 0 && droid_count < 10)                           \
+            droids[droid_count++] = candidate;                                                                         \
+    }
+            OPPONENT_DROID(0)
+            OPPONENT_DROID(1)
+            OPPONENT_DROID(2)
+            OPPONENT_DROID(3)
+            OPPONENT_DROID(4)
+            OPPONENT_DROID(5)
+            OPPONENT_DROID(6)
+#undef OPPONENT_DROID
+            GameObject_s *candidate = Player[7];
+            if (candidate != NULL && (candidate->apiobj.field_0x1f8 & 0x1001) == 0x1001 &&
+                !(candidate->apiobj.field_0x287 != 0 && candidate->field_0x101c <= 0.0f) &&
+                (candidate->field_0xeff & 1) == 0 && candidate->apiobj.character_data != NULL &&
+                (candidate->apiobj.character_data->model_flags & 0x10) != 0 && droid_count < 10) {
+                droids[droid_count++] = candidate;
+            }
+            // Retail accumulates candidates across parameters. Bound the
+            // original ten-entry array when malformed scripts repeat droid.
+            if (droid_count != 0) {
+                prev_droid_ix = (prev_droid_ix + 1) % droid_count;
+                opponent = droids[prev_droid_ix];
+            }
+        } else if (NuStrIStr(params[index], "opponent=nearest_enemy") != NULL) {
+            object->opponent = NULL;
+        } else if ((value = NuStrIStr(params[index], "opponent=")) != NULL) {
+            opponent = GetNamedGameObject(sys, value + 9);
         } else if (NuStrICmp(params[index], "last_attacker") == 0) {
             opponent = static_cast<GameObject_s *>(object->last_attacker);
+        } else if ((value = NuStrIStr(params[index], "opponentType")) != NULL) {
+            i32 type = 0xff;
+            if (LevelCharacterTypeIDFn != NULL && LevelCharacterGlobalIDFn != NULL) {
+                const i8 local_type = static_cast<i8>(LevelCharacterTypeIDFn(value + 13));
+                if (local_type != -1)
+                    type = LevelCharacterGlobalIDFn(static_cast<u8>(local_type));
+            }
+            for (i32 object_index = 0; object_index < HIGHGAMEOBJECT; ++object_index) {
+                if (Obj[object_index].id == type) {
+                    opponent = &Obj[object_index];
+                    break;
+                }
+            }
         }
     }
     object->opponent = opponent;
-    packet->opponent = opponent != NULL ? &opponent->apiobj : NULL;
     return 1;
 }
 
