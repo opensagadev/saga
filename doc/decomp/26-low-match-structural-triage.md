@@ -5881,3 +5881,49 @@ force inlining or compiler attributes to hide the discrepancy.
 FindNearestBreak punctuation/capture and Force-gizmo guard/bounds trials
 also regressed and were fully removed. No ownership, optimization, ABI or
 scoring changes are used.
+
+## Batch 121: portal debug visibility and cutscene reset subsystems
+
+Restore the four camera rays, scaled world-space corners, eight alternating
+white/red debug lines, camera unlock/relock and subsequent room traversal.
+Capture the near clip before the room-query callback. Recover the reference's
+exported `nuvec_one` / `nuvec_minus_one` three-float initialized objects;
+the frustum builder receives these canonical objects rather than local copies.
+`NuPortalVisibility` improves **28.79558% to 85.572%**.
+
+Restore cutscene chaining/callback clearing, rigid special visibility and
+matrix resets, locator reset callbacks and VFX handles, trigger first-frame
+state evaluation, character reset and camera-lock reset. Promote the locator
+entry's target `+0x08` reset callback to its proven four-argument function
+pointer type. Describe the external trigger owner's known state pointer and
+four-byte records with canonical provisional structures; use these members
+in both reset and the existing update, avoiding fixed pointer offsets in
+host execution. Keep the existing missing-system guards. The external owner's
+first twelve bytes remain unknown, not an invented complete runtime layout.
+`instNuGCutSceneReset` improves **22.56% to 61.859%**.
+
+Four packed quaternion evaluators use the reference's ordered lower frame
+clamp, mapping NaN to the first key while retaining negative zero, and the
+first evaluator uses signed division by four. Their aggregate improves
+slightly; two individual scores regress by about 0.14 and 0.01 points.
+Do not restore undefined NaN-to-integer conversions just to recover those
+small differences.
+
+Overall matching reaches **66.327040%**, **+1.202560 percentage points**
+from main, with **6,269** exact functions. All eleven GitHub checks passed
+for batch 120. The approximately two-point goal remains unfinished.
+Ownership, optimization settings, public ABI and scoring stay unchanged.
+
+Extracted production bodies pass 64-bit ASan/UBSan and optimized i386 SSE
+fixtures: **8,000** portal state/service/geometry cases, **10,000** cutscene
+reset cases and **12,000** four-format animation cases. Tests include
+camera and locator metadata changes during callbacks, missing systems,
+first-frame trigger visibility, preserved state-word upper bytes, NaNs,
+infinities, negative zero and key boundaries. Animation interpolation and
+external services use stand-ins; this is not full engine integration.
+
+The eight-slot quick-path expansion regressed from 19.57% to zero and was
+fully reverted. Its original private path helper passes arguments through
+registers and SSE as a compiler optimization; the current source retains
+ordinary portable calls. Do not add calling-convention attributes or infer
+an extra public argument from the decompiler's undefined stack temporary.

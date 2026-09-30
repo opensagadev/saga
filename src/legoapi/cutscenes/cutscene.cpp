@@ -724,6 +724,7 @@ void *CutScenes_Load(char *config, NUGSCN *gscn1, NUGSCN *gscn2, i32 param1, VAR
 extern "C" void *NuAnimData2FixPtrs(void *, isize, isize, i32);
 extern "C" StateAnim *StateAnimFixPtrs(StateAnim *, isize);
 extern "C" i32 StateAnimEvaluate(StateAnim *, u8 *, u8 *, f32);
+void instNuGCutSceneResetCamLock(instNUGCUTSCENE_s *instance);
 extern "C" void NuAnimCurve2SetApplyToMatrix_3(ani3_animheader_s *, i32, f32, NUMTX *);
 extern "C" {
     extern i32 NuGCutDebFixUp_SearchAllPages;
@@ -1408,6 +1409,8 @@ extern "C" {
         instance->flags_89 &= 0xef;
         instance->flags_8c &= 0xbf;
         instance->flags_8d &= 0xef;
+        instance->chained_instance = NULL;
+        instance->end_callback = NULL;
         if (instance->rate < 0.0f) {
             instance->rate = -instance->rate;
         }
@@ -1417,11 +1420,55 @@ extern "C" {
                 NUGCUTRIGID_s *rigid = &instance->cutscene->rigid_system->rigids[i];
                 instNUGCUTRIGID_s *inst_rigid = &instance->rigid_instance->rigids[i];
                 inst_rigid->state_index = 0;
-                if ((rigid->flags & 6) == 6) {
-                    inst_rigid->visible = rigid->flags & 1;
+                if ((rigid->flags & 4) != 0) {
+                    if ((rigid->flags & 2) != 0) {
+                        inst_rigid->visible = rigid->flags & 1;
+                    } else {
+                        NuSpecialSetVisibility(inst_rigid, (rigid->flags & 1) != 0);
+                        NuSpecialSetDrawMtx(inst_rigid, &rigid->base_matrix);
+                    }
                 }
             }
         }
+        if (instance->locator_instance != NULL && instance->cutscene->locator_system != NULL) {
+            instNUGCUTLOCATORSYS_s *inst_system = instance->locator_instance;
+            NUGCUTLOCATORSYS_s *system = instance->cutscene->locator_system;
+            for (u32 i = 0; i < system->locator_count; ++i) {
+                instNUGCUTLOCATOR_s *inst_locator = &inst_system->locators[i];
+                NUGCUTLOCATOR_s *locator = &system->locators[i];
+                NUGCUTLOCATORTYPE_s *type = &system->types[locator->type_index];
+                if ((type->flags & 2) != 0 && type->function_index != 0xffff &&
+                    locatorfns[type->function_index].reset != NULL) {
+                    locatorfns[type->function_index].reset(instance, system, inst_locator, locator);
+                }
+                if ((type->flags & 0x10) != 0 && type->function_index != 0xffff) {
+                    inst_locator->effect_handle = -1;
+                }
+            }
+        }
+        if (instance->trigger_instance != NULL && instance->cutscene->trigger_system != NULL) {
+            instNUGCUTTRIGGERSYS_s *inst_system = instance->trigger_instance;
+            NUGCUTTRIGGERSYS_s *system = instance->cutscene->trigger_system;
+            for (i32 i = 0; i < system->event_count; ++i) {
+                NUGCUTTRIGGEREVENT_s *event = &system->events[i];
+                u8 *state_index = reinterpret_cast<u8 *>(&inst_system->event_states[i]);
+                *state_index = 0;
+                u8 value[12];
+                if (StateAnimEvaluate(event->state_animation, state_index, value, 1.0f) != 0) {
+                    NUGCUTTRIGGEROWNER_s *owner = static_cast<NUGCUTTRIGGEROWNER_s *>(inst_system->owner);
+                    NUGCUTTRIGGERSTATE_s *state = &owner->states[static_cast<i16>(event->field_00)];
+                    if (value[0] != 0) {
+                        state->flags |= 1;
+                    } else {
+                        state->flags &= ~1U;
+                    }
+                }
+            }
+        }
+        if (instance->character_instance != NULL && NuCutSceneResetCharactersFn != NULL) {
+            NuCutSceneResetCharactersFn(instance);
+        }
+        instNuGCutSceneResetCamLock(instance);
     }
 
     void instNuGCutSceneStart(instNUGCUTSCENE_s *instance) {
@@ -2423,13 +2470,12 @@ static __used__ void instNuGCutTriggerSysUpdate(instNUGCUTSCENE_s *instance, flo
                               &value, frame) == 0) {
             continue;
         }
-        u8 *trigger_owner = static_cast<u8 *>(trigger_instance->owner);
-        u8 *trigger_states = *reinterpret_cast<u8 **>(trigger_owner + 0xc);
+        NUGCUTTRIGGEROWNER_s *trigger_owner = static_cast<NUGCUTTRIGGEROWNER_s *>(trigger_instance->owner);
         const i32 trigger_index = static_cast<i16>(event->field_00);
         if (value != 0) {
-            trigger_states[trigger_index * 4 + 2] |= 1;
+            trigger_owner->states[trigger_index].flags |= 1;
         } else {
-            trigger_states[trigger_index * 4 + 2] &= ~1U;
+            trigger_owner->states[trigger_index].flags &= ~1U;
         }
     }
 }
@@ -2508,9 +2554,9 @@ static __used__ void CutScene_OverrideConfigFileName_LSW(char *filename, int, in
     }
     char *suffix = filename + NuStrLen(prefix);
     if (NuStrICmp(suffix, "arrival1") == 0 || NuStrICmp(suffix, "arrival2") == 0 ||
-        NuStrICmp(suffix, "arrival3") == 0 || NuStrICmp(suffix, "arrival4") == 0 ||
-        NuStrICmp(suffix, "intro") == 0 || NuStrICmp(suffix, "tuskenraiders") == 0 ||
-        NuStrICmp(suffix, "outro1") == 0 || NuStrICmp(suffix, "outro2") == 0) {
+        NuStrICmp(suffix, "arrival3") == 0 || NuStrICmp(suffix, "arrival4") == 0 || NuStrICmp(suffix, "intro") == 0 ||
+        NuStrICmp(suffix, "tuskenraiders") == 0 || NuStrICmp(suffix, "outro1") == 0 ||
+        NuStrICmp(suffix, "outro2") == 0) {
         NuStrCat(filename, "_sprint");
     }
 }

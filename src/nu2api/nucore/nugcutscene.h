@@ -66,11 +66,13 @@ struct instNUGCUTLOCATOR_s {
 
 typedef void (*NUGCUTLOCATORFN)(instNUGCUTSCENE_s *, NUGCUTLOCATORSYS_s *, instNUGCUTLOCATOR_s *, NUGCUTLOCATOR_s *,
                                 f32, NUMTX *, i32);
+typedef void (*NUGCUTLOCATORRESETFN)(instNUGCUTSCENE_s *, NUGCUTLOCATORSYS_s *, instNUGCUTLOCATOR_s *,
+                                     NUGCUTLOCATOR_s *);
 
 struct NUGCUTLOCATORFNENTRY_s {
     const char *name;
     i32 field_04;
-    i32 field_08;
+    NUGCUTLOCATORRESETFN reset;
     i32 field_0c;
     NUGCUTLOCATORFN function;
 };
@@ -203,6 +205,19 @@ struct instNUGCUTTRIGGERSYS_s {
     void *owner;
     u32 *event_states;
 };
+
+// The external trigger owner exposes four-byte state records at target +0x0c.
+struct NUGCUTTRIGGERSTATE_s {
+    u16 field_00;
+    u8 flags;
+    u8 field_03;
+};
+struct NUGCUTTRIGGEROWNER_s {
+    u32 unknown_00[3];
+    NUGCUTTRIGGERSTATE_s *states;
+};
+DECOMP_ASSERT(sizeof(NUGCUTTRIGGERSTATE_s) == 4, "cutscene trigger state stride");
+DECOMP_ASSERT(offsetof(NUGCUTTRIGGEROWNER_s, states) == 0x0c, "cutscene trigger owner state pointer offset");
 
 struct NUGCUTSCENE_s {
     i32 version;

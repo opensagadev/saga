@@ -52,6 +52,8 @@ extern NUVEC v001;
 /// @relatesalso nuvec_s
 /// @brief The vector `(1, 1, 1)`.
 extern NUVEC v111;
+extern NUVEC nuvec_one;
+extern NUVEC nuvec_minus_one;
 
 #ifdef __cplusplus
 extern "C" {

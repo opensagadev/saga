@@ -13,6 +13,8 @@ NUVEC nuvec_x = {1.0f, 0.0f, 0.0f};
 NUVEC v010 = {0.0f, 1.0f, 0.0f};
 NUVEC v001 = {0.0f, 0.0f, 1.0f};
 NUVEC v111 = {1.0f, 1.0f, 1.0f};
+NUVEC nuvec_one = {1.0f, 1.0f, 1.0f};
+NUVEC nuvec_minus_one = {-1.0f, -1.0f, -1.0f};
 
 void NuVecNeg(NUVEC *v, NUVEC *v0) {
     v->x = -v0->x;

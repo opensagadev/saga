@@ -446,8 +446,7 @@ i32 ANI_SimpleAni3PlayerV4Joint_Quat3(ani3_animheader_s *anim, f32 frame, nuanim
     } else {
         const i32 last = anim->key_count - 1;
         f32 key = (frame - anim->first_frame) * static_cast<f32>(last) / static_cast<f32>(anim->frame_count - 1);
-        if (key < 0.0f)
-            key = 0.0f;
+        key = key >= 0.0f ? key : 0.0f;
         i32 whole;
         if (static_cast<f32>(last) <= key) {
             whole = last;
@@ -457,7 +456,7 @@ i32 ANI_SimpleAni3PlayerV4Joint_Quat3(ani3_animheader_s *anim, f32 frame, nuanim
             fraction = key - static_cast<f32>(whole);
         }
         quarter = static_cast<u32>(whole) & 3;
-        key_offset = (whole >> 2) * anim->key_stride;
+        key_offset = (whole / 4) * anim->key_stride;
     }
     u8 *keys = anim->keys + key_offset;
     i32 key_stride = anim->key_stride;
@@ -558,8 +557,7 @@ i32 ANI_SimpleAni3PlayerV4Joint_Quat3W(ani3_animheader_s *anim, f32 frame, nuani
     } else {
         const i32 last = anim->key_count - 1;
         f32 key = (frame - anim->first_frame) * static_cast<f32>(last) / static_cast<f32>(anim->frame_count - 1);
-        if (key < 0.0f)
-            key = 0.0f;
+        key = key >= 0.0f ? key : 0.0f;
         i32 whole;
         if (static_cast<f32>(last) <= key) {
             whole = last;
@@ -804,8 +802,7 @@ i32 ANI_SimpleAni3PlayerV4Joint_Blend_Quat3(ani3_animheader_s *anim, f32 frame, 
     const f32 inverse_blend = 1.0f - blend;
     f32 key =
         (frame - anim->first_frame) * static_cast<f32>(anim->key_count - 1) / static_cast<f32>(anim->frame_count - 1);
-    if (key < 0.0f)
-        key = 0.0f;
+    key = key >= 0.0f ? key : 0.0f;
     if (static_cast<f32>(anim->key_count) <= key)
         key = static_cast<f32>(anim->key_count - 1);
     const i32 whole = static_cast<i32>(key);
@@ -928,8 +925,7 @@ i32 ANI_SimpleAni3PlayerV4Joint_Blend_Quat3W(ani3_animheader_s *anim, f32 frame,
     const f32 inverse_blend = 1.0f - blend;
     f32 key =
         (frame - anim->first_frame) * static_cast<f32>(anim->key_count - 1) / static_cast<f32>(anim->frame_count - 1);
-    if (key < 0.0f)
-        key = 0.0f;
+    key = key >= 0.0f ? key : 0.0f;
     // Preserve the fractional interval after the last integer key.
     if (static_cast<f32>(anim->key_count) <= key)
         key = static_cast<f32>(anim->key_count - 1);

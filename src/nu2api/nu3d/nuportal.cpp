@@ -2,6 +2,7 @@
 #include "nu2api/nu3d/android/nuportal_android.h"
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nu3d/nugscn.h"
+#include "nu2api/nu3d/nurndr.h"
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nutrig.h"
 
@@ -19,6 +20,8 @@ static i16 camera_roomid;
 static NUFRUSTRUM **frustra;
 static i32 *nfrustra;
 static i32 draw_portals;
+extern "C" void NuCameraUnlock(void);
+extern "C" void NuCameraRelock(void);
 
 NUPLANE cam_plane;
 i16 rooms_visited[18];
@@ -370,6 +373,7 @@ extern "C" i32 NuPortalVisibility(NUGSCN *scene) {
         global_camera.mtx.m32,
     };
 
+    const f32 near_clip = cam->near_clip;
     camera_roomid = static_cast<i16>(NuPortalWhichRoom(scene, camera_position));
     scene->camera_room = camera_roomid;
     if (camera_roomid == -1) {
@@ -382,18 +386,44 @@ extern "C" i32 NuPortalVisibility(NUGSCN *scene) {
     cam_plane.a = forward_x;
     cam_plane.b = forward_y;
     cam_plane.c = forward_z;
-    cam_plane.d = -(world_campos.x * forward_x + world_campos.y * forward_y + world_campos.z * forward_z);
+    cam_plane.d = -(forward_x * world_campos.x + forward_y * world_campos.y + forward_z * world_campos.z);
 
     near_clip_plane.a = forward_x;
     near_clip_plane.b = forward_y;
     near_clip_plane.c = forward_z;
-    near_clip_plane.d = -((world_campos.x + cam->near_clip * forward_x) * forward_x +
-                          (world_campos.y + cam->near_clip * forward_y) * forward_y +
-                          (world_campos.z + cam->near_clip * forward_z) * forward_z);
+    near_clip_plane.d =
+        -((near_clip * forward_x + world_campos.x) * forward_x + (near_clip * forward_y + world_campos.y) * forward_y +
+          (near_clip * forward_z + world_campos.z) * forward_z);
 
-    NUVEC minimum = {-1.0f, -1.0f, -1.0f};
-    NUVEC maximum = {1.0f, 1.0f, 1.0f};
-    NUFRUSTRUM *frustum = buildFrustrum(&minimum, &maximum, -2);
+    NUFRUSTRUM *frustum = buildFrustrum(&nuvec_minus_one, &nuvec_one, -2);
+    if (draw_portals != 0) {
+        NUVEC rays[4];
+        NUVEC corners[4];
+        NuCameraRayCast(&rays[0], -1.0f, -1.0f);
+        NuCameraRayCast(&rays[1], -1.0f, 1.0f);
+        NuCameraRayCast(&rays[2], 1.0f, 1.0f);
+        NuCameraRayCast(&rays[3], 1.0f, -1.0f);
+        NuVecScale(&corners[0], &rays[0], 0.2f);
+        NuVecAdd(&corners[0], &corners[0], &world_campos);
+        NuVecScale(&corners[1], &rays[1], 0.2f);
+        NuVecAdd(&corners[1], &corners[1], &world_campos);
+        NuVecScale(&corners[2], &rays[2], 0.2f);
+        NuVecAdd(&corners[2], &corners[2], &world_campos);
+        NuVecScale(&corners[3], &rays[3], 0.2f);
+        NuVecAdd(&corners[3], &corners[3], &world_campos);
+        NuCameraUnlock();
+#define DRAW_PORTAL_CORNER(index, next)                                                                                \
+    NuRndrLine3dDbg(world_campos.x, world_campos.y, world_campos.z, corners[index].x, corners[index].y,                \
+                    corners[index].z, -1);                                                                             \
+    NuRndrLine3dDbg(corners[index].x, corners[index].y, corners[index].z, corners[next].x, corners[next].y,            \
+                    corners[next].z, static_cast<i32>(0xffff0000U))
+        DRAW_PORTAL_CORNER(0, 1);
+        DRAW_PORTAL_CORNER(1, 2);
+        DRAW_PORTAL_CORNER(2, 3);
+        DRAW_PORTAL_CORNER(3, 0);
+#undef DRAW_PORTAL_CORNER
+        NuCameraRelock();
+    }
     for (i32 i = 0; i < scene->num_rooms; ++i) {
         scene->rooms[i].flags &= ~NUROOM_FLAG_VISITED;
     }
