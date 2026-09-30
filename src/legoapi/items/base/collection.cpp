@@ -601,31 +601,6 @@ void ReleaseEat(GameObject_s *object) {
     object->field_0xe24 = flags & ~1;
 }
 
-i32 ShipDropCoins(starfighter_s *fighter) {
-    u8 *space = reinterpret_cast<u8 *>(WORLD->space_level);
-    i32 *count = reinterpret_cast<i32 *>(space + 0x62ef0);
-    struct ShipCoinRecord {
-        i32 id;
-        f32 height;
-        u8 reserved[8];
-    };
-    ShipCoinRecord *records = reinterpret_cast<ShipCoinRecord *>(space + 0x62ef4);
-    u8 *fighter_data = reinterpret_cast<u8 *>(fighter);
-    u8 *object = *reinterpret_cast<u8 **>(fighter_data + 0xd4);
-    i32 id = *reinterpret_cast<i32 *>(object + 0x524);
-    f32 height = *reinterpret_cast<f32 *>(fighter_data + 0xf8);
-    for (i32 i = 0; i < *count; ++i) {
-        if (records[i].id == id && records[i].height == height)
-            return 0;
-    }
-    if (*count > 255)
-        return 0;
-    records[*count].id = id;
-    records[*count].height = height;
-    ++*count;
-    return 1;
-}
-
 i32 AddToCollection(i32 id) {
     if (id > 0 && id < CHARCOUNT && InCollectList_Index(id, NULL, 0) != -1 && Collection_Got(id) == 0) {
         if (Game_CharacterSave != NULL)

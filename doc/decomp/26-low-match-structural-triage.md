@@ -5104,3 +5104,45 @@ translation-unit boundary; matrix pre-rotation services record calls,
 rather than validate actual rotation rendering. These are focused fixtures,
 not full flight-gameplay integration. LeakSanitizer remains disabled for
 sandbox compatibility.
+
+## Batch 100: swept space-bolt collisions and coin history
+
+Restore the remaining private collision closure in the evidenced `chris`
+owner, with unchanged compiler options. `ChrisExtraBoltCollision` checks
+the level-allocation flag, space-state pointer and bolt flags, then checks
+five fighters in each of eight enabled groups and all 96 queued fighters.
+Stop on the first hit. Move the empty private `CollideBoltStarFighter` out
+of `bolts.cpp`; its real caller now retains it without `__used__` or an
+explicit calling-convention attribute.
+
+Recover relative-velocity swept-sphere intersection over `[-FRAMETIME, 0]`,
+including stationary, tangent and ordered-float rejection paths. Restore
+escort exceptions, debris callbacks, projectile deactivation, pickup/heart
+effects, owner credit, hit audio and the fighter hit counter. The allocator's
+final 4 KiB is a 256-entry coin-history table keyed by spline ID and spawn
+time; assert the `0x10` record stride and `0x62ef4` table offset. Move
+`ShipDropCoins` from its byte-offset implementation in `collection.cpp`
+into the original owner and use the shared pointer-bearing fields.
+
+Two guards cover invalid states without altering valid retail paths:
+formation ships have no spline identity, so skip coin-history insertion
+instead of dereferencing null; reject a corrupted history count above 256
+before scanning its fixed array. History duplicate/cap handling remains
+unchanged for valid counts. A bounded-loop first draft scored zero for this
+small function; placing the capacity guard before the ordinary counted scan
+retains safety and raises it to **70.711860%**. Do not remove the guards to
+chase reference crashes.
+
+`CollideBoltStarFighter` reaches **73.729256%**, and
+`ChrisExtraBoltCollision` improves **0.597826% to 58.501358%**. Overall
+matching reaches **65.546680%**, or **+0.422200 percentage points** from main,
+with **6,266** exact functions unchanged. The approximately two-point PR
+goal is still in progress.
+
+Production-body fixtures pass 64-bit ASan/UBSan and optimized native i386:
+coin-history duplicate/new identities, slot 255 and full/corrupt capacities,
+null spline, stationary/swept/future/past/tangent/miss/NaN intersections,
+relative ship velocity, both escort IDs, pickup amounts and owner credit,
+audio selection, allocation/flag gates, every grouped slot, inactive groups,
+the final queued slot and first-hit termination. Services are fixtures, not
+full flight-gameplay integration; LeakSanitizer is disabled for the sandbox.

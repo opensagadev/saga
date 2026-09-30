@@ -16,6 +16,7 @@
 #include "legoapi/items/collect/bolts.h"
 #include "legoapi/items/collect/torpedo.h"
 #include "decomp.h"
+#include "legoapi/characters/motion/chris.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nufile/nufpar.h"
 #include "legoapi/core/input/qrand.h"
@@ -783,8 +784,6 @@ i32 Bolt_HitGameObjects(BOLT_s *bolt, NUVEC *points, NUVEC *minimum, NUVEC *maxi
     return 0;
 }
 
-i32 ChrisExtraBoltCollision(BOLT_s *, nuvec_s *);
-
 i32 Bolt_HitCustomFn_LSW(BOLT_s *bolt, nuvec_s *points) {
     if (WORLD->current_level == DOGFIGHTA_LDATA)
         return ChrisExtraBoltCollision(bolt, points);
@@ -1532,10 +1531,6 @@ static __used__ i32 Bolt_GetShootDirection_Default(GameObject_s *object, nuvec_s
         direction->z = NuTrigTable[((angle + 0x4000) >> 1) & 0x7fff];
     }
     return angle;
-}
-
-static __used__ void CollideBoltStarFighter(BOLT_s *, starfighter_s *, _vuv_s *, _vuv_s *) {
-    STUBBED();
 }
 
 EXPLOSION *Detonate(NUVEC *, u16);

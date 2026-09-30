@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 65.49292,
+    "fuzzy_match_percent": 65.54668,
     "total_code": "4722419",
     "matched_code": "522117",
     "matched_code_percent": 11.056135,
@@ -42575,7 +42575,7 @@
           "address": 1333968,
           "offset": 444000,
           "size": 12082,
-          "match_percent": 80.30093
+          "match_percent": 80.30671
         },
         {
           "name": "SOUND_SFXRequest_Table",
@@ -47124,12 +47124,28 @@
           "match_percent": 99.970146
         },
         {
+          "name": "_Z13ShipDropCoinsP13starfighter_s",
+          "demangled_name": "ShipDropCoins(starfighter_s*)",
+          "address": 2340224,
+          "offset": 1450256,
+          "size": 200,
+          "match_percent": 70.71186
+        },
+        {
+          "name": "_ZL22CollideBoltStarFighterP6BOLT_sP13starfighter_sP6_vuv_sS4_",
+          "demangled_name": "CollideBoltStarFighter(BOLT_s*, starfighter_s*, _vuv_s*, _vuv_s*)",
+          "address": 2340432,
+          "offset": 1450464,
+          "size": 1015,
+          "match_percent": 73.729256
+        },
+        {
           "name": "_Z23ChrisExtraBoltCollisionP6BOLT_sP7nuvec_s",
           "demangled_name": "ChrisExtraBoltCollision(BOLT_s*, nuvec_s*)",
           "address": 2341456,
           "offset": 1451488,
           "size": 3106,
-          "match_percent": 0.597826
+          "match_percent": 58.501358
         }
       ]
     },
@@ -61403,14 +61419,6 @@
           "match_percent": 88.5
         },
         {
-          "name": "_Z13ShipDropCoinsP13starfighter_s",
-          "demangled_name": "ShipDropCoins(starfighter_s*)",
-          "address": 2340224,
-          "offset": 1450256,
-          "size": 200,
-          "match_percent": 66.05085
-        },
-        {
           "name": "_Z15ResetCoinPacketP12COINPACKET_s",
           "demangled_name": "ResetCoinPacket(COINPACKET_s*)",
           "address": 4988336,
@@ -62251,14 +62259,6 @@
           "offset": 939616,
           "size": 240,
           "match_percent": 96.95652
-        },
-        {
-          "name": "_ZL22CollideBoltStarFighterP6BOLT_sP13starfighter_sP6_vuv_sS4_",
-          "demangled_name": "CollideBoltStarFighter(BOLT_s*, starfighter_s*, _vuv_s*, _vuv_s*)",
-          "address": 2340432,
-          "offset": 1450464,
-          "size": 1015,
-          "match_percent": 1.834061
         },
         {
           "name": "_ZL12BT_nodeflectP8nufpar_s",

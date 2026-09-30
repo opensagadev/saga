@@ -26,6 +26,8 @@
 #include "legoapi/core/input/gamepads.h"
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/world/area.h"
+#include "legoapi/characters/core/playeritems.h"
+#include "legoapi/gizmo/object/gizmopickup.h"
 #include <string.h>
 
 struct AIROW_s;
@@ -1315,8 +1317,123 @@ i32 DidBoltHitChrisJobby(WORLDINFO_s *, BOLT_s *) {
     return 0;
 }
 
-i32 ChrisExtraBoltCollision(BOLT_s *, nuvec_s *) {
-    STUBBED();
+i32 ShipDropCoins(starfighter_s *fighter) {
+    spacelevel_s *space = WORLD->space_level;
+    // Formation ships have no spline identity to record. The retail lookup
+    // dereferences that null pointer; do not create an invalid history entry.
+    if (fighter->spline == NULL || space->coin_history_count > 256)
+        return 0;
+    i32 index = 0;
+    if (space->coin_history_count > 0) {
+        for (; index < space->coin_history_count; ++index) {
+            if (space->coin_history[index].spline_id == fighter->spline->id &&
+                space->coin_history[index].spawn_time == fighter->spawn_time)
+                return 0;
+        }
+        if (index > 255)
+            return 0;
+    }
+    space->coin_history[index].spline_id = fighter->spline->id;
+    WORLD->space_level->coin_history[index].spawn_time = fighter->spawn_time;
+    ++WORLD->space_level->coin_history_count;
+    return 1;
+}
+
+static i32 CollideBoltStarFighter(BOLT_s *bolt, starfighter_s *fighter, _vuv_s *position, _vuv_s *velocity) {
+    const f32 vx = velocity->x - fighter->velocity.x;
+    const f32 vy = velocity->y - fighter->velocity.y;
+    const f32 vz = velocity->z - fighter->velocity.z;
+    const f32 dx = position->x - fighter->matrix.m30;
+    const f32 dy = position->y - fighter->matrix.m31;
+    const f32 dz = position->z - fighter->matrix.m32;
+    const f32 a = vx * vx + vy * vy + vz * vz;
+    const f32 c = dx * dx + dy * dy + dz * dz - 2.0f;
+    if (a <= 0.0f) {
+        if (!(c <= 0.0f))
+            return 0;
+    } else {
+        const f32 b = 2.0f * (dx * vx + dy * vy + dz * vz);
+        const f32 discriminant = b * b - 4.0f * a * c;
+        if (!(discriminant >= 0.0f))
+            return 0;
+        const f32 root = NuFsqrt(discriminant);
+        f32 time = -FRAMETIME;
+        if (!(time <= (root - b) / (a + a)))
+            return 0;
+        const f32 enter = (-b - root) / (a + a);
+        if (!(enter <= 0.0f))
+            return 0;
+        if (time <= enter)
+            time = enter;
+        position->x += vx * time;
+        position->y += vy * time;
+        position->z += vz * time;
+    }
+    if (fighter->spline == NULL || static_cast<u32>(fighter->spline->id - 84) > 1) {
+        BoltSys->debris(bolt, reinterpret_cast<NUVEC *>(position), 0, reinterpret_cast<NUVEC *>(&fighter->velocity), 0);
+        bolt->active = 0;
+        i32 coins = 0;
+        if (ShipDropCoins(fighter) != 0)
+            coins = fighter->model_id == -299 ? 500 : 1000;
+        const i32 player = bolt->owner == NULL ? -1 : static_cast<i8>(bolt->owner->apiobj.field_0x27c);
+        NUVEC *ship_position = reinterpret_cast<NUVEC *>(&fighter->matrix.m30);
+        const i32 hearts = ReleaseHearts();
+        AddPickups(coins, hearts, 0, 0, ship_position, NULL, 2.0f, player, 1.0f, 2000000.0f, NULL, 1, 1, true);
+        const i32 part_type = PARTLookupType("DogBits");
+        AddFiniteShotPART(part_type, ship_position, 1);
+        const f32 dx = fighter->matrix.m30 - global_camera.mtx.m30;
+        const f32 dy = fighter->matrix.m31 - global_camera.mtx.m31;
+        const f32 dz = fighter->matrix.m32 - global_camera.mtx.m32;
+        if (dx * dx + dy * dy + dz * dz < 40000.0f) {
+            if (fighter->health < 1)
+                PlaySfx("Ep3_1_ExplosionXXL", ship_position);
+            else if (fighter->model_id == -299)
+                PlaySfx("Dog_TriFighterHit", ship_position);
+            else if (fighter->model_id == -298 || fighter->model_id == -297)
+                PlaySfx("Dog_DroidFighterHit", ship_position);
+        }
+    }
+    ++fighter->hit_count;
+    return 1;
+}
+
+i32 ChrisExtraBoltCollision(BOLT_s *bolt, nuvec_s *points) {
+    if (WORLD->has_level_specific_data == 0 || WORLD->space_level == NULL || (bolt->flags & 3) == 0)
+        return 0;
+    spacelevel_s *space = WORLD->space_level;
+    NUVEC4_ALIGNED16 velocity = {bolt->velocity.x, bolt->velocity.y, bolt->velocity.z, 0.0f};
+    NUVEC4_ALIGNED16 position = {points[1].x, points[1].y, points[1].z, 0.0f};
+#define COLLIDE_SPACE_FIGHTER(group_index, fighter_index)                                                              \
+    if (space->flight_groups[group_index].fighters[fighter_index].active != 0 &&                                       \
+        CollideBoltStarFighter(bolt, &space->flight_groups[group_index].fighters[fighter_index],                       \
+                               reinterpret_cast<_vuv_s *>(&position), reinterpret_cast<_vuv_s *>(&velocity)) != 0)     \
+    return 1
+#define COLLIDE_SPACE_GROUP(group_index)                                                                               \
+    do {                                                                                                               \
+        if (space->flight_groups[group_index].active != 0) {                                                           \
+            COLLIDE_SPACE_FIGHTER(group_index, 0);                                                                     \
+            COLLIDE_SPACE_FIGHTER(group_index, 1);                                                                     \
+            COLLIDE_SPACE_FIGHTER(group_index, 2);                                                                     \
+            COLLIDE_SPACE_FIGHTER(group_index, 3);                                                                     \
+            COLLIDE_SPACE_FIGHTER(group_index, 4);                                                                     \
+        }                                                                                                              \
+    } while (0)
+    COLLIDE_SPACE_GROUP(0);
+    COLLIDE_SPACE_GROUP(1);
+    COLLIDE_SPACE_GROUP(2);
+    COLLIDE_SPACE_GROUP(3);
+    COLLIDE_SPACE_GROUP(4);
+    COLLIDE_SPACE_GROUP(5);
+    COLLIDE_SPACE_GROUP(6);
+    COLLIDE_SPACE_GROUP(7);
+#undef COLLIDE_SPACE_GROUP
+#undef COLLIDE_SPACE_FIGHTER
+    for (i32 i = 0; i != 96; ++i) {
+        if (space->queued_fighters[i].active != 0 &&
+            CollideBoltStarFighter(bolt, &space->queued_fighters[i], reinterpret_cast<_vuv_s *>(&position),
+                                   reinterpret_cast<_vuv_s *>(&velocity)) != 0)
+            return 1;
+    }
     return 0;
 }
 

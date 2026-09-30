@@ -199,6 +199,13 @@ struct spacelevel_scale_s {
 };
 DECOMP_ASSERT(sizeof(spacelevel_scale_s) == 0x10, "spacelevel_scale_s size");
 
+struct spacelevel_coin_history_s {
+    i32 spline_id;
+    f32 spawn_time;
+    u8 reserved_08[8];
+};
+DECOMP_ASSERT(sizeof(spacelevel_coin_history_s) == 0x10, "space coin-history stride");
+
 struct spacelevel_s {
     union {
         struct {
@@ -267,9 +274,14 @@ struct spacelevel_s {
     f32 normalized_speed;
     f32 value_one_a;
     f32 value_one_b;
-    i32 unknown_62ef0;
-    // The allocator reserves a further 4 KiB; its contents are not recovered.
-    u8 unknown_62ef4[0x1000];
+    union {
+        i32 unknown_62ef0;
+        i32 coin_history_count;
+    };
+    union {
+        u8 unknown_62ef4[0x1000];
+        spacelevel_coin_history_s coin_history[256];
+    };
 };
 DECOMP_ASSERT(offsetof(spacelevel_s, flight_groups) == 0xa0, "space flight group array offset");
 DECOMP_ASSERT(offsetof(spacelevel_s, actions) == 0x3370, "space action list offset");
@@ -280,4 +292,5 @@ DECOMP_ASSERT(offsetof(spacelevel_s, reset_buffer) == 0x62e90, "reset buffer off
 DECOMP_ASSERT(offsetof(spacelevel_s, direction) == 0x62ebc, "direction offset");
 DECOMP_ASSERT(offsetof(spacelevel_s, normalized_speed) == 0x62ee4, "space normalized speed offset");
 DECOMP_ASSERT(offsetof(spacelevel_s, unknown_62ef0) == 0x62ef0, "space allocator state offset");
+DECOMP_ASSERT(offsetof(spacelevel_s, coin_history) == 0x62ef4, "space coin-history offset");
 DECOMP_ASSERT(sizeof(spacelevel_s) == 0x63ef4, "spacelevel_s allocation size");
