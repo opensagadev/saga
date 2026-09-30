@@ -70,6 +70,7 @@ u32 NuPostFilter::m_fullscreenGridIndexBuffer;
 i32 NuPostFilter::m_quadGridPrimCount;
 extern u32 g_lastBoundVAO;
 extern void *g_nuFullscreenVertexFormat;
+static inline void PostBlurSetVertexParam(nushaderprogram_s *, u32, const f32 *, i32);
 
 static void PostBindProgram(nushaderprogram_s *program) {
     g_boundShader = program != NULL ? program->program : 0;
@@ -79,17 +80,15 @@ static void PostBindProgram(nushaderprogram_s *program) {
 
 // These draw sequences are inlined into the original generic filters.
 // NuPostFilterGen::renderQuad/Grid themselves are Android no-ops.
+static inline void PostBlurDrawQuad();
+static inline void PostMainDrawGrid();
 static void PostDrawQuad(bool grid = false) {
-    g_lastBoundVAO = 0;
-    glBindBuffer(GL_ARRAY_BUFFER,
-                 grid ? NuPostFilter::m_fullscreenGridVertexBuffer : NuPostFilter::m_fullscreenVertexBuffer);
-    NuIOS_SetVertexFormat(reinterpret_cast<usize>(g_nuFullscreenVertexFormat));
-    if (grid) {
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, NuPostFilter::m_fullscreenGridIndexBuffer);
-        glDrawElements(GL_TRIANGLES, NuPostFilter::m_quadGridPrimCount * 3, GL_UNSIGNED_SHORT, NULL);
-    } else {
-        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-    }
+    // Setting the declaration alone does not bind its attributes. Reuse the
+    // full reference draw closures, including attribute enable/disable state.
+    if (grid)
+        PostMainDrawGrid();
+    else
+        PostBlurDrawQuad();
 }
 
 NuDataPortManager NuPostFilterGen::resourceManager;
@@ -1194,7 +1193,7 @@ void NuMainFilterGen::preprocessDofMotionBlur(nueffecttex_s *) {
         f32 denominator = near_z * projection_scale * span;
         f32 values[4] = {product / denominator, strength_near / span - (projection_scale * product) / denominator,
                          dof_blur, 0};
-        NuShaderProgramSetVertexParamfv(program, 0x83, values, 4);
+        PostBlurSetVertexParam(program, 0x83, values, 4);
     }
     if (motion_blur_enabled) {
         NUMTX bias = {0.5f, 0, 0, 0, 0, -0.5f, 0, 0, 0, 0, 1, 0, 0.5f, 0.5f, 0, 1};
@@ -1205,7 +1204,7 @@ void NuMainFilterGen::preprocessDofMotionBlur(nueffecttex_s *) {
         NuMtxMulH(&transform, &transform, &motion_current);
         NuMtxMulH(&transform, &transform, &bias);
         NuMtxTranspose(&transform, &transform);
-        NuShaderProgramSetFragmentParamfv(program, 0x84, reinterpret_cast<f32 *>(&transform), 16);
+        PostBlurSetVertexParam(program, 0x8084, reinterpret_cast<f32 *>(&transform), 16);
     }
     if (dof_enabled || motion_blur_enabled) {
         i32 width, height;
@@ -1311,17 +1310,24 @@ void NuMainFilterGen::reset() {
 }
 
 void NuPostFilterGen::GetSampleOffsets_GaussBlur5x5(i32 width, i32 height, VuVec *samples, float scale) {
-    const i32 offsets[13][2] = {{-2, 0}, {-1, -1}, {-1, 0}, {-1, 1}, {0, -2}, {0, -1}, {0, 0},
-                                {0, 1},  {0, 2},   {1, -1}, {1, 0},  {1, 1},  {2, 0}};
-    const f32 weights[13] = {0.053990968f, 0.14676267f, 0.24197073f, 0.14676267f,  0.053990968f,
-                             0.24197073f,  0.3989423f,  0.24197073f, 0.053990968f, 0.14676267f,
-                             0.24197073f,  0.14676267f, 0.053990968f};
     f32 dx = 1.0f / width, dy = 1.0f / height;
+    // Retail assigns the thirteen diamond taps before its weight-scale loop.
+    // Preserve zero products and the positive two-step additions as written.
+    samples[0] = {-2.0f * dx, dy * 0.0f, 0.053990968f, 0.0f};
+    samples[1] = {-dx, -dy, 0.14676267f, 0.0f};
+    samples[2] = {-dx, dy * 0.0f, 0.24197073f, 0.0f};
+    samples[3] = {-dx, dy, 0.14676267f, 0.0f};
+    samples[4] = {dx * 0.0f, -2.0f * dy, 0.053990968f, 0.0f};
+    samples[5] = {dx * 0.0f, -dy, 0.24197073f, 0.0f};
+    samples[6] = {dx * 0.0f, dy * 0.0f, 0.3989423f, 0.0f};
+    samples[7] = {dx * 0.0f, dy, 0.24197073f, 0.0f};
+    samples[8] = {dx * 0.0f, dy + dy, 0.053990968f, 0.0f};
+    samples[9] = {dx, -dy, 0.14676267f, 0.0f};
+    samples[10] = {dx, dy * 0.0f, 0.24197073f, 0.0f};
+    samples[11] = {dx, dy, 0.14676267f, 0.0f};
+    samples[12] = {dx + dx, dy * 0.0f, 0.053990968f, 0.0f};
     for (i32 i = 0; i < 13; ++i) {
-        samples[i].x = offsets[i][0] * dx;
-        samples[i].y = offsets[i][1] * dy;
-        samples[i].z = weights[i] / 2.1698399f * scale;
-        samples[i].w = 0.0f;
+        samples[i].z = (samples[i].z / 2.1698399f) * scale;
     }
 }
 
@@ -1349,8 +1355,8 @@ void NuPostFilterGen::blur5x5(nueffecttex_s *source, i32 source_lod, nueffecttex
             NuFramebufferAttachTex2D(blurFbo, 0, output, output_lod);
             NuFramebufferBind(blurFbo);
             NuRenderContextSetViewport(0, 0, out_width, out_height);
-            NuShaderProgramSetVertexParamfv(blur5x5Program, 0xa0, &samples[0].x, 52);
-            NuShaderProgramSetVertexParamfv(blur5x5Program, 0xad, scale_bias, 4);
+            PostBlurSetVertexParam(blur5x5Program, 0xa0, &samples[0].x, 52);
+            PostBlurSetVertexParam(blur5x5Program, 0xad, scale_bias, 4);
             PostDrawQuad();
             NuFramebufferResolve(0, true);
             input = output;
@@ -1687,13 +1693,20 @@ void NuMotionFilterGen::render() {
     f32 ratio = maximum / scale;
     f32 params[4] = {ratio, 0.5f, 0, 0};
     f32 weights[7][4];
-    for (i32 i = 0; i < 7; ++i) {
-        weights[i][0] = (NuPow(static_cast<f32>(i + 1) / 7.0f, falloff) - 0.5f) * ratio;
-        weights[i][1] = weights[i][0];
-        weights[i][2] = weights[i][3] = 0.0f;
-    }
-    NuShaderProgramSetFragmentParamfv(programs[0], 0x8a, params, 4);
-    NuShaderProgramSetFragmentParamfv(programs[0], 0x8b, &weights[0][0], 28);
+#define MOTION_SAMPLE(index)                                                                                           \
+    weights[index][0] = (NuPow(static_cast<f32>(index + 1) / 7.0f, falloff) - 0.5f) * ratio;                           \
+    weights[index][1] = weights[index][0];                                                                             \
+    weights[index][2] = weights[index][3] = 0.0f;
+    MOTION_SAMPLE(0)
+    MOTION_SAMPLE(1)
+    MOTION_SAMPLE(2)
+    MOTION_SAMPLE(3)
+    MOTION_SAMPLE(4)
+    MOTION_SAMPLE(5)
+    MOTION_SAMPLE(6)
+#undef MOTION_SAMPLE
+    PostBlurSetVertexParam(programs[0], 0x808a, params, 4);
+    PostBlurSetVertexParam(programs[0], 0x808b, &weights[0][0], 28);
     NuFramebufferBind(output);
     PostDrawQuad();
     color->texture = destination;
@@ -1895,7 +1908,7 @@ void NuSpeedBlurFilterGen::render() {
     if (texture != NULL)
         copy(texture, 0, color->texture, 0, copyTexProgram, NULL);
     PostBindProgram(programs[0]);
-    NuShaderProgramSetVertexParamfv(programs[0], 0x80, values.depth, 8);
+    PostBlurSetVertexParam(programs[0], 0x80, values.depth, 8);
     NuFramebufferBind(output);
     PostDrawQuad(true);
     color->texture = destination;
@@ -1968,7 +1981,7 @@ void NuMotionAccumFilterGen::render() {
     current_frame = current_frame + 1 == frames ? 0 : current_frame + 1;
     PostBindProgram(program);
     f32 params[4] = {weights[current_frame], 0, 0, 0};
-    NuShaderProgramSetFragmentParamfv(program, 0x8a, params, 4);
+    PostBlurSetVertexParam(program, 0x808a, params, 4);
     i32 width, height;
     NuEffectTexGetDimension(accumulation_texture, 0, &width, &height);
     NuFramebufferBind(accumulation_fbo);
@@ -1976,7 +1989,7 @@ void NuMotionAccumFilterGen::render() {
     PostDrawQuad();
     NuFramebufferResolve(0, true);
     PostBindProgram(program);
-    NuShaderProgramSetFragmentParamfv(program, 0x8a, params, 4);
+    PostBlurSetVertexParam(program, 0x808a, params, 4);
     NuFramebufferBind(output);
     PostDrawQuad();
     color->texture = destination;

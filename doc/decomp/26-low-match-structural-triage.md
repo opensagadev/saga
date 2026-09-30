@@ -5767,3 +5767,39 @@ replacement; **344** opponent roster/type combinations, round-robin state,
 signed-byte type translation, script priority, nearest clear visibility,
 missing callbacks, repeated-parameter capacity and packet preservation.
 External services are stand-ins, not full engine integration.
+
+## Batch 118: retained post-filter draw and parameter closures
+
+Restore quad/grid draws through the existing private full vertex-binding
+helpers, including attribute enable/disable masks, pointers, buffer state
+and indexed grid drawing. The public vertex-format setter remains unchanged.
+Recover the seven fixed motion samples and thirteen Gaussian taps, retaining
+the reference's float operations and normalization. Reuse the private
+register-search/constant-setter closure at motion, accumulation, blur,
+speed and depth-of-field call sites; preserve first-register-match behavior
+and callback-driven program reloads. Do not enable the retained filter graph
+or change Android no-op/null-return entry points.
+
+Motion improves **21.480713% to 75.827896%**, accumulation
+**23.276102% to 65.953600%**, the three copy overloads to **85.535090%**,
+**85.895164%** and **87.417270%**, blend to **85.535090%**, blur 5x5 to
+**83.940200%**, speed to **69.088980%**, depth-of-field to **81.749%** and
+Gaussian offsets **17.247313% to 81.634410%**. Overall matching reaches
+**66.251830%**, **+1.127350 percentage points** from main, with **6,269**
+exact functions. All eleven GitHub checks passed for batch 117. The
+approximately two-point goal remains unfinished. Ownership, compiler
+options, ABI and scoring normalization are unchanged.
+
+Extracted production bodies pass 64-bit ASan/UBSan and optimized i386 SSE
+fixtures: **8,192** quad/grid transitions over six active attribute bits;
+**864** motion numeric/proxy combinations including NaNs, infinities and
+program replacement during a setter; **3,840** accumulation frame/weight
+combinations; **512** Gaussian dimension/scale combinations; **112** shader
+register/first-match/setter cases. These use service stand-ins, not a real
+GL context or full engine integration. Invalid accumulation frame counts
+outside 1..256 remain deferred rather than introducing unrelated policy.
+
+An `Action_Kill` expansion trial produced 11,114 bytes instead of the
+reference's 4,428 and scored zero. It was fully removed, including its
+behavior changes. Do not repeat the sixteen specialized-loop expansion
+without new compiler/structural evidence.
