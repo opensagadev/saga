@@ -521,7 +521,7 @@ extern i32 LevMusicAction;
 extern i32 LevMusicAmbient;
 extern i32 LevMusicOtherAction;
 extern i32 LevMusicOtherAmbient;
-extern i16 AreaMusic;
+extern i32 AreaMusic;
 extern i32 radios_playing;
 extern i32 last_chatter_sfx;
 

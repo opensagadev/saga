@@ -5417,3 +5417,36 @@ visibility/debris, positive/negative return motion, exact marker snap and array
 bounds; combined/single/pause/network/credits controllers, startup threshold,
 loader transitions, editor/fade gates, sound/resume, history and invalid input.
 Service calls are mocks, not a full game-runtime test; LeakSanitizer is disabled.
+
+## Batch 109: area configuration and AI kill selectors
+
+Restore `Area_Configure`'s mission roster shuffle and mission target, streamed
+level options, supercounter blocks, music propagation and story/freeplay coin
+and challenge settings. Preserve the reference's lone `story_only` token
+behavior and initial `AreaMusic` value. Correct `AreaMusic` from 16-bit to
+32-bit: its reference BSS symbol is four bytes and its stores are 32-bit.
+Publish counters through the character arena with target-compatible alignment
+and capacity checks; bound model, level, pickup and counter arrays. Initialize
+counter runtime fields rather than copying uninitialized scratch bytes.
+
+Correct `Action_Kill`'s AI-controlled flag, selection precedence (all AI before
+creature set before area), area-system ownership and packet-owner object
+indirection. Explicitly selected objects do not need the group traversal's
+in-use/character flags. Preserve dead checks, debris/parts and respawn modes.
+Separate the group traversals and debris call branches to recover natural
+compiler specialization, without changing optimization or calling convention.
+
+Area configuration improves **17.381910% to 17.859297%** and AI kill improves
+**22.329342% to 26.444110%**. Overall matching reaches **65.718450%**,
+**+0.593970 percentage points** from main, with **6,270** exact functions.
+All eleven GitHub checks passed for the preceding commit; the approximately
+two-point goal continues.
+
+Extracted production-body fixtures pass 64-bit ASan/UBSan and optimized i386
+SSE builds: missing-file defaults, model deduplication, mission shuffle, music
+flags/tracks, AI messages, coin/time settings, streaming options and duplicates,
+counter locations/colours/capacity/arena exhaustion; AI selection precedence,
+actual area ownership, packet indirection, opponents, exclusion/dead checks,
+high area-mask bits, parts/debris and respawn flags. Services are stand-ins,
+not a packed-asset or full game-runtime integration test; LeakSanitizer is
+disabled for sandbox compatibility.
