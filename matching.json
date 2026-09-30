@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 65.82461,
+    "fuzzy_match_percent": 65.95488,
     "total_code": "4722419",
     "matched_code": "522510",
     "matched_code_percent": 11.064456,
@@ -46264,7 +46264,7 @@
           "address": 4634576,
           "offset": 3744608,
           "size": 1943,
-          "match_percent": 10.457627
+          "match_percent": 63.364407
         },
         {
           "name": "_Z25FindFurthestPlayerFromVecP7nuvec_sPP12GameObject_sRfbj",
@@ -46272,7 +46272,7 @@
           "address": 4636528,
           "offset": 3746560,
           "size": 1978,
-          "match_percent": 9.867392
+          "match_percent": 49.756523
         },
         {
           "name": "_Z22Player_ToggleCharacterP12GameObject_sii",
@@ -48444,7 +48444,7 @@
           "address": 1509024,
           "offset": 619056,
           "size": 628,
-          "match_percent": 73.64138
+          "match_percent": 73.675865
         },
         {
           "name": "_Z13PeriscodeCodeP12GameObject_s",
@@ -48668,7 +48668,7 @@
           "address": 4591040,
           "offset": 3701072,
           "size": 2469,
-          "match_percent": 3.94387
+          "match_percent": 35.453472
         },
         {
           "name": "_Z22UpdateLastSafePositionP12GameObject_s",
@@ -62737,7 +62737,7 @@
           "address": 1922320,
           "offset": 1032352,
           "size": 2405,
-          "match_percent": 8.665255
+          "match_percent": 82.58263
         },
         {
           "name": "_Z15Detonators_Drawv",
@@ -71700,7 +71700,7 @@
           "address": 1530736,
           "offset": 640768,
           "size": 2689,
-          "match_percent": 14.922028
+          "match_percent": 81.07213
         },
         {
           "name": "_Z16AddSurfaceDebrisP12GameObject_s",

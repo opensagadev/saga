@@ -9008,26 +9008,134 @@ void SetMoveAndAnimateFunctions(u32 model_flag_mask, u32 model_flag_value, u32 g
     const CHARACTERUPDATEFN animate = reinterpret_cast<CHARACTERUPDATEFN>(animate_function);
     const CHARACTERUPDATEFN draw = reinterpret_cast<CHARACTERUPDATEFN>(draw_function);
 
-    for (i32 character_index = 0; character_index < CHARCOUNT; ++character_index) {
-        CHARACTERDATA &character = CDataList[character_index];
-        GAMECHARACTERDATA &game_character = GCDataList[character_index];
-
-        if ((character.model_flags & model_flag_mask) != model_flag_value ||
-            (game_character.flags_090 & game_flag_mask) != game_flag_value ||
-            (movement_type != -1 && static_cast<i8>(game_character.field275_0x116) != movement_type)) {
-            continue;
-        }
-
-        if (move != NULL) {
-            character.move_fn = move;
-        }
-        if (animate != NULL) {
-            character.animate_fn = animate;
-        }
-        if (draw != NULL) {
-            character.draw_fn = draw;
-        }
+    const i32 count = CHARCOUNT;
+    if (count <= 0) {
+        return;
     }
+#define UPDATE_MATCHING_CHARACTERS(predicate, assignments)                                                             \
+    do {                                                                                                               \
+        for (i32 character_index = 0; character_index < count; ++character_index) {                                    \
+            CHARACTERDATA &character = CDataList[character_index];                                                     \
+            if (predicate) {                                                                                           \
+                assignments;                                                                                           \
+            }                                                                                                          \
+        }                                                                                                              \
+    } while (0)
+#define MODEL_MATCH ((character.model_flags & model_flag_mask) == model_flag_value)
+#define GAME_MATCH ((GCDataList[character_index].flags_090 & game_flag_mask) == game_flag_value)
+#define TYPE_MATCH (static_cast<i8>(GCDataList[character_index].uses_weapon_action) == movement_type)
+#define OPTIONAL_TYPE_MATCH (movement_type == -1 || TYPE_MATCH)
+#define OPTIONAL_MOVE                                                                                                  \
+    if (move != NULL)                                                                                                  \
+    character.move_fn = move
+#define OPTIONAL_ANIMATE                                                                                               \
+    if (animate != NULL)                                                                                               \
+    character.animate_fn = animate
+
+    if (model_flag_mask == 0) {
+        if (draw == NULL) {
+            if (animate == NULL) {
+                if (game_flag_mask == 0) {
+                    if (movement_type == -1) {
+                        if (move != NULL) {
+                            UPDATE_MATCHING_CHARACTERS(true, character.move_fn = move);
+                        }
+                    } else {
+                        UPDATE_MATCHING_CHARACTERS(TYPE_MATCH, OPTIONAL_MOVE);
+                    }
+                } else {
+                    UPDATE_MATCHING_CHARACTERS(GAME_MATCH && OPTIONAL_TYPE_MATCH, OPTIONAL_MOVE);
+                }
+            } else if (move == NULL) {
+                if (game_flag_mask == 0) {
+                    if (movement_type == -1) {
+                        UPDATE_MATCHING_CHARACTERS(true, character.animate_fn = animate);
+                    } else {
+                        UPDATE_MATCHING_CHARACTERS(TYPE_MATCH, character.animate_fn = animate);
+                    }
+                } else {
+                    UPDATE_MATCHING_CHARACTERS(GAME_MATCH && OPTIONAL_TYPE_MATCH, character.animate_fn = animate);
+                }
+            } else {
+                if (game_flag_mask == 0) {
+                    if (movement_type == -1) {
+                        UPDATE_MATCHING_CHARACTERS(true, character.move_fn = move; character.animate_fn = animate);
+                    } else {
+                        UPDATE_MATCHING_CHARACTERS(TYPE_MATCH, character.move_fn = move;
+                                                   character.animate_fn = animate);
+                    }
+                } else {
+                    UPDATE_MATCHING_CHARACTERS(GAME_MATCH && OPTIONAL_TYPE_MATCH, character.move_fn = move;
+                                               character.animate_fn = animate);
+                }
+            }
+        } else if (game_flag_mask == 0) {
+            if (animate == NULL) {
+                if (movement_type == -1) {
+                    if (move == NULL) {
+                        UPDATE_MATCHING_CHARACTERS(true, character.draw_fn = draw);
+                    } else {
+                        UPDATE_MATCHING_CHARACTERS(true, character.move_fn = move; character.draw_fn = draw);
+                    }
+                } else {
+                    UPDATE_MATCHING_CHARACTERS(TYPE_MATCH, OPTIONAL_MOVE; character.draw_fn = draw);
+                }
+            } else {
+                if (movement_type == -1) {
+                    if (move == NULL) {
+                        UPDATE_MATCHING_CHARACTERS(true, character.animate_fn = animate; character.draw_fn = draw);
+                    } else {
+                        UPDATE_MATCHING_CHARACTERS(true, character.move_fn = move; character.animate_fn = animate;
+                                                   character.draw_fn = draw);
+                    }
+                } else {
+                    UPDATE_MATCHING_CHARACTERS(TYPE_MATCH, OPTIONAL_MOVE; character.animate_fn = animate;
+                                               character.draw_fn = draw);
+                }
+            }
+        } else if (movement_type == -1) {
+            UPDATE_MATCHING_CHARACTERS(GAME_MATCH, OPTIONAL_MOVE; OPTIONAL_ANIMATE; character.draw_fn = draw);
+        } else {
+            UPDATE_MATCHING_CHARACTERS(GAME_MATCH && TYPE_MATCH, OPTIONAL_MOVE; OPTIONAL_ANIMATE;
+                                       character.draw_fn = draw);
+        }
+    } else if (draw == NULL) {
+        if (game_flag_mask == 0) {
+            if (animate == NULL) {
+                UPDATE_MATCHING_CHARACTERS(MODEL_MATCH && OPTIONAL_TYPE_MATCH, OPTIONAL_MOVE);
+            } else {
+                UPDATE_MATCHING_CHARACTERS(MODEL_MATCH && OPTIONAL_TYPE_MATCH, OPTIONAL_MOVE;
+                                           character.animate_fn = animate);
+            }
+        } else if (movement_type == -1) {
+            UPDATE_MATCHING_CHARACTERS(MODEL_MATCH && GAME_MATCH, OPTIONAL_MOVE; OPTIONAL_ANIMATE);
+        } else {
+            UPDATE_MATCHING_CHARACTERS(MODEL_MATCH && GAME_MATCH && TYPE_MATCH, OPTIONAL_MOVE; OPTIONAL_ANIMATE);
+        }
+    } else if (animate == NULL) {
+        if (game_flag_mask == 0) {
+            UPDATE_MATCHING_CHARACTERS(MODEL_MATCH && OPTIONAL_TYPE_MATCH, OPTIONAL_MOVE; character.draw_fn = draw);
+        } else {
+            UPDATE_MATCHING_CHARACTERS(MODEL_MATCH && GAME_MATCH && OPTIONAL_TYPE_MATCH, OPTIONAL_MOVE;
+                                       character.draw_fn = draw);
+        }
+    } else if (move == NULL) {
+        UPDATE_MATCHING_CHARACTERS(MODEL_MATCH && (game_flag_mask == 0 || GAME_MATCH) && OPTIONAL_TYPE_MATCH,
+                                   character.animate_fn = animate;
+                                   character.draw_fn = draw);
+    } else {
+        UPDATE_MATCHING_CHARACTERS(MODEL_MATCH && (game_flag_mask == 0 || GAME_MATCH) && OPTIONAL_TYPE_MATCH,
+                                   character.move_fn = move;
+                                   character.animate_fn = animate; character.draw_fn = draw);
+    }
+
+#undef OPTIONAL_ANIMATE
+#undef OPTIONAL_MOVE
+#undef OPTIONAL_TYPE_MATCH
+#undef TYPE_MATCH
+#undef GAME_MATCH
+#undef MODEL_MATCH
+#undef UPDATE_MATCHING_CHARACTERS
 }
 
 u16 SeekRot(u16 current, u16 target, f32 rate) {

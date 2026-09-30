@@ -5528,3 +5528,39 @@ call counts and explicit coverage of all eight slots; **2,401** panel angle
 combinations, every player probe, retained state, timers, invalid players and
 NaN distances; grapple field separation, nonzero action-frame bytes and rope
 limits. External services are stand-ins, not full gameplay integration.
+
+## Batch 112: distance selectors, callbacks and fixed collision slots
+
+Recover the eight explicit player slots in both distance selectors and debris
+collision handling, and the ten explicit detonator slots. Use local macros
+with unchanged public signatures, owners and optimization modes. Preserve
+callback reloads, first-player ties and ordered floating comparisons: later
+NaN distances must not replace an existing selection, and NaN protection
+timers must not admit a player to debris damage. Detonator instruction checks
+confirm the ordinary ordered thresholds, including NaN owner charge.
+
+Recover `SetMoveAndAnimateFunctions`'s outer mask/callback dispatch instead of
+testing every optional condition within one generic loop. A zero mask disables
+its filter even with a nonzero requested value; absent callbacks leave their
+fields untouched. Do not access game-character data when both its mask and
+movement-type filter are disabled. Preserve signed byte movement types.
+
+Raw reference instructions for `FindFurthestPlayerFromVec` write to absolute
+address zero rather than its output argument; no dynamic text relocation
+repairs those stores. Do not reproduce that unsafe reference defect. Retain
+the valid output-parameter behavior already provided by the reconstruction.
+
+Matching improves: nearest **10.457627% to 63.364407%**, furthest
+**9.867392% to 49.756523%**, callback assignment **3.943870% to 35.453472%**,
+detonators **8.665255% to 82.582630%**, and debris/player collisions
+**14.922028% to 81.072130%**. Overall reaches **65.954880%**, **+0.830400
+percentage points** from main, with **6,270** exact functions. All eleven
+GitHub checks passed for batch 111. The two-point goal remains unfinished.
+
+Extracted production bodies pass 64-bit ASan/UBSan and optimized i386 SSE
+fixtures: **100,000** distance/oracle queries, ties, NaNs, all eight slots and
+callback replacements; **100,000** callback-selector cases covering masks,
+signed types, all callback combinations, counts and absent optional data;
+all ten detonator slots, timing thresholds, projection, NaNs and callbacks;
+all eight debris slots, eligibility guards, ordered timer tests, both damage
+checks and callback ordering. Services are stand-ins, not engine integration.
