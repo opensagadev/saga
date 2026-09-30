@@ -20,6 +20,7 @@ void Customiser_RestoreModelTextureIDs(CUSTOMISER *customiser);
 void Customiser_TransformToPanel(CUSTOMISER *customiser);
 void Customiser_InitNames(CUSTOMISER *customiser);
 void CustomiserMenu_End();
+void Customiser_GetActiveWeirdoIndex(i32 *index, i32 *count);
 i32 Customise_GetToggleString(i32 index);
 void Customiser_PieceConfig(CUSTOMPIECE *piece, nufpar_s *parser);
 i32 Customiser_PieceAvailable(CUSTOMPIECE *piece);

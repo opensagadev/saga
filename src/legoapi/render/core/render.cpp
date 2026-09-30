@@ -2262,34 +2262,39 @@ void DrawStatusMiniKit(float x, float y, float z, float built_scale, float new_s
     do {
         HUBMINIKITPIECE_s &piece = pieces[i];
         NUMTX_ALIGNED16 matrix = piece.matrix;
-        NuMtxScale(&matrix, i < currentminikit ? &built_size : &new_size);
-
-        i32 piece_angle = 0x2000;
-        if (i == currentminikit) {
-            const f32 phase = slideseek * 16384.0f + 49152.0f + 16384.0f;
-            piece_angle = (static_cast<i32>(phase) >> 1) & 0x7fff;
-        }
-        if (piece.direction <= 5) {
-            const f32 oscillation = NuTrigTable[piece_angle];
-            switch (piece.direction) {
-                case 0:
-                    matrix.m30 -= (static_cast<f32>(piece.direction_index) * 0.025f + 0.25f) * oscillation;
-                    break;
-                case 1:
-                    matrix.m30 += (static_cast<f32>(piece.direction_index) * 0.025f + 0.25f) * oscillation;
-                    break;
-                case 2:
-                    matrix.m31 -= (static_cast<f32>(piece.direction_index) * 0.025f + 0.25f) * oscillation;
-                    break;
-                case 3:
-                    matrix.m31 += (static_cast<f32>(piece.direction_index) * 0.025f + 0.25f) * oscillation;
-                    break;
-                case 4:
-                    matrix.m32 += (static_cast<f32>(piece.direction_index) * 0.025f + 0.25f) * oscillation;
-                    break;
-                case 5:
-                    matrix.m32 -= (static_cast<f32>(piece.direction_index) * 0.025f + 0.25f) * oscillation;
-                    break;
+        if (i < currentminikit) {
+            NuMtxScale(&matrix, &built_size);
+        } else {
+            NuMtxScale(&matrix, &new_size);
+            i32 piece_angle = 0x2000;
+            if (i == currentminikit) {
+                const f32 phase = slideseek * 16384.0f + 49152.0f + 16384.0f;
+                piece_angle = (static_cast<i32>(phase) >> 1) & 0x7fff;
+            }
+            const HUBMINIKITPIECE_s *animated_pieces = static_cast<HUBMINIKITPIECE_s *>(WORLD->minikit.field_0x4);
+            const HUBMINIKITPIECE_s &animated_piece = animated_pieces[i];
+            if (animated_piece.direction <= 5) {
+                const f32 oscillation = NuTrigTable[piece_angle];
+                switch (animated_piece.direction) {
+                    case 0:
+                        matrix.m30 -= (static_cast<f32>(animated_piece.direction_index) * 0.025f + 0.25f) * oscillation;
+                        break;
+                    case 1:
+                        matrix.m30 += (static_cast<f32>(animated_piece.direction_index) * 0.025f + 0.25f) * oscillation;
+                        break;
+                    case 2:
+                        matrix.m31 -= (static_cast<f32>(animated_piece.direction_index) * 0.025f + 0.25f) * oscillation;
+                        break;
+                    case 3:
+                        matrix.m31 += (static_cast<f32>(animated_piece.direction_index) * 0.025f + 0.25f) * oscillation;
+                        break;
+                    case 4:
+                        matrix.m32 += (static_cast<f32>(animated_piece.direction_index) * 0.025f + 0.25f) * oscillation;
+                        break;
+                    case 5:
+                        matrix.m32 -= (static_cast<f32>(animated_piece.direction_index) * 0.025f + 0.25f) * oscillation;
+                        break;
+                }
             }
         }
         if (i <= currentminikit) {
@@ -2354,12 +2359,14 @@ void DrawStatusMiniKit(float x, float y, float z, float built_scale, float new_s
 
         if (i < 10) {
             KitPart[i].matrix = matrix;
-            KitPart[i].special = &piece.special;
+            KitPart[i].special = &static_cast<HUBMINIKITPIECE_s *>(WORLD->minikit.field_0x4)[i].special;
             KitPart[i].enabled = 1;
         }
         if (WORLD->lev_objs[206].active != 0)
-            DrawPanel3DObjectMtxNoAlpha(&piece.special, &matrix);
+            DrawPanel3DObjectMtxNoAlpha(&static_cast<HUBMINIKITPIECE_s *>(WORLD->minikit.field_0x4)[i].special,
+                                        &matrix);
         ++i;
+        pieces = static_cast<HUBMINIKITPIECE_s *>(WORLD->minikit.field_0x4);
     } while (i < packet->minikit_max && i < WORLD->minikit.field_0x8 && i != count);
 }
 

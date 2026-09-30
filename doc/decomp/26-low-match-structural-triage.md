@@ -4964,3 +4964,49 @@ Three bounded force-progress loop trials remain at zero matching despite
 recovering reference-style signed indices, a separate 128-entry exit and
 ordinary nested group loops. All are reverted. The progress layout is already
 correct; do not repeat these control-flow-only trials without new evidence.
+
+## Batch 97: customizer menu and minikit animation
+
+Replace the empty `CustomiserMenu_Update` and `CustomiserMenu_Draw` bodies in
+their existing `customise.cpp` owner, retaining the effective `-O2`. Recover
+the private category/name cursors and 38-character alphabet from the original
+symbols/data, and give the two reserved menu-packet byte arrays semantic
+aliases without changing their layout. Restore player swapping, physical and
+touch input, repeat/conflict handling, piece randomisation and availability,
+name-edit backups/commit/cancel/filtering, two-player demo exit agreement,
+save-change detection and the auto-save completion handoff.
+
+Restore name/glyph rendering, preview icons, idle pulses, touch hitboxes and
+drop-in opacity. Constants are read from the original literal pool, not
+approximated. The update improves **0.423654% to 46.128860%**; its two-player
+setup is unrolled as in the reference. The draw improves **0.784314% to
+19.261438%**. One fixed-width name-trimming expansion lowers the draw score
+and is reverted; keep the bounded loop. The blank-name trim in the updater
+checks the lower bound before reading, unlike the original's underflowing
+all-space loop, and reaches its intended localized default-name path.
+
+Also correct `DrawStatusMiniKit`: only current/new pieces receive the sliding
+oscillation, whereas completed pieces take the built-scale branch directly.
+Reload piece-array state after callbacks as in the reference. This function
+still scores zero; no compiler or calling-convention workaround is introduced.
+
+Overall linked fuzzy matching rises **65.249770% to 65.315160%**, or
+**+0.190680 percentage points** from this branch's main baseline. Exact
+functions remain **6,262**. There are tiny linked-layout score variations in
+the camera/material-clip functions; do not attribute those to behavior fixes.
+Extracted production bodies pass fixed customizer input/save/drawing fixtures
+and minikit completed/new-piece, bounds and callback-array replacement cases
+on native i386 and 64-bit ASan/UBSan. Tests include name cancellation, bad-word
+rollback, all-space localized fallback, side swapping, directional conflicts,
+demo agreement, save success/deferred completion and preview hitboxes.
+Rendering, audio, pad, save and random services are fixtures, not a gameplay
+integration test or a retail runtime oracle. LeakSanitizer is disabled for
+the sandbox; normal address/undefined-behavior instrumentation remains on.
+
+Read-only matcher triage finds another reason not to chase zero scores blindly:
+the linked x86 GOT recovery in the installed objdiff fork conservatively skips
+entire functions containing indirect branches (including switch tables).
+Such functions retain raw GOT offsets while straightforward functions receive
+symbolic GOT normalization. This is a deliberate control-flow proof boundary,
+not evidence that their C++ should be distorted. The matcher, metric and
+baseline are unchanged in this batch.
