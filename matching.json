@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 66.9042,
+    "fuzzy_match_percent": 67.07633,
     "total_code": "4722419",
-    "matched_code": "523565",
-    "matched_code_percent": 11.086797,
+    "matched_code": "523729",
+    "matched_code_percent": 11.09027,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 6275,
-    "matched_functions_percent": 46.623077,
+    "matched_functions": 6276,
+    "matched_functions_percent": 46.63051,
     "total_units": 1
   },
   "text": {
@@ -48004,7 +48004,7 @@
           "address": 1393456,
           "offset": 503488,
           "size": 2011,
-          "match_percent": 44.99739
+          "match_percent": 76.43603
         },
         {
           "name": "_Z14MovePlayer_PODP12GameObject_s",
@@ -57363,7 +57363,7 @@
           "address": 4896608,
           "offset": 4006640,
           "size": 1556,
-          "match_percent": 5.870968
+          "match_percent": 47.526882
         },
         {
           "name": "_Z25GizObstacle_PlayBackwardsP13GIZOBSTACLE_s",
@@ -60721,7 +60721,7 @@
           "address": 2946096,
           "offset": 2056128,
           "size": 667,
-          "match_percent": 2.101911
+          "match_percent": 0.0
         },
         {
           "name": "AnimEndFrame",
@@ -63428,7 +63428,7 @@
           "address": 5126704,
           "offset": 4236736,
           "size": 3728,
-          "match_percent": 8.408084
+          "match_percent": 13.610169
         },
         {
           "name": "_Z16UpdateExplosionsv",
@@ -63697,7 +63697,7 @@
           "address": 2292528,
           "offset": 1402560,
           "size": 5336,
-          "match_percent": 19.173445
+          "match_percent": 19.421577
         },
         {
           "name": "_Z21CableTargetGameObjectP12GameObject_sP7nuvec_sf",
@@ -68110,7 +68110,7 @@
           "address": 1316752,
           "offset": 426784,
           "size": 12845,
-          "match_percent": 43.765343
+          "match_percent": 45.216286
         },
         {
           "name": "_Z11PanelRenderP11WORLDINFO_s",
@@ -70496,7 +70496,7 @@
           "address": 2444672,
           "offset": 1554704,
           "size": 2554,
-          "match_percent": 21.890034
+          "match_percent": 51.86426
         },
         {
           "name": "_Z18UpdateStatusScreenP11WORLDINFO_s",
@@ -70504,7 +70504,7 @@
           "address": 2447968,
           "offset": 1558000,
           "size": 879,
-          "match_percent": 55.80102
+          "match_percent": 56.030613
         },
         {
           "name": "_Z18UpdateAchievementsP14STATUSPACKET_s",
@@ -74972,7 +74972,7 @@
           "address": 1148576,
           "offset": 258608,
           "size": 1716,
-          "match_percent": 23.893442
+          "match_percent": 22.505465
         },
         {
           "name": "_Z13DrawSaveSlotsP6MENU_sf",
@@ -75052,7 +75052,7 @@
           "address": 2297872,
           "offset": 1407904,
           "size": 2656,
-          "match_percent": 8.205556
+          "match_percent": 68.6
         },
         {
           "name": "_Z12DrawLine_NowP6_vuv_sS0_ii",
@@ -75212,7 +75212,7 @@
           "address": 3033344,
           "offset": 2143376,
           "size": 9601,
-          "match_percent": 58.674873
+          "match_percent": 58.68241
         },
         {
           "name": "NuDisplaySceneRndr",
@@ -75548,7 +75548,7 @@
           "address": 4771408,
           "offset": 3881440,
           "size": 138,
-          "match_percent": 70.0
+          "match_percent": 70.35714
         },
         {
           "name": "_Z18DrawFadeScreenWipev",
@@ -83505,7 +83505,7 @@
           "address": 5152304,
           "offset": 4262336,
           "size": 1181,
-          "match_percent": 21.86411
+          "match_percent": 21.721254
         },
         {
           "name": "_ZL23TrooperTeamSetStateCodeP17minitrooperteam_s",
@@ -83537,7 +83537,7 @@
           "address": 5157904,
           "offset": 4267936,
           "size": 4569,
-          "match_percent": 24.15576
+          "match_percent": 25.581568
         },
         {
           "name": "_Z20DrawMiniSnowTroopersP11WORLDINFO_s",
@@ -84191,7 +84191,7 @@
           "address": 2120640,
           "offset": 1230672,
           "size": 7214,
-          "match_percent": 45.921864
+          "match_percent": 46.79206
         },
         {
           "name": "_Z15JediB_DrawPanelP11WORLDINFO_s",
@@ -86514,7 +86514,7 @@
           "address": 1754544,
           "offset": 864576,
           "size": 5242,
-          "match_percent": 35.422245
+          "match_percent": 37.61174
         },
         {
           "name": "_Z13Hub_UpdateKitv",
@@ -97992,7 +97992,7 @@
           "address": 4424288,
           "offset": 3534320,
           "size": 937,
-          "match_percent": 44.898438
+          "match_percent": 71.48828
         },
         {
           "name": "_Z7NuATanff",
@@ -98309,7 +98309,7 @@
           "address": 2889680,
           "offset": 1999712,
           "size": 2126,
-          "match_percent": 18.765038
+          "match_percent": 36.280075
         },
         {
           "name": "_Z39ANI_SimpleAni3PlayerV4Joint_Blend_Quat3P17ani3_animheader_sfP12nuanimbuff_sfiiP7nuvec_s",
@@ -98333,7 +98333,7 @@
           "address": 2902096,
           "offset": 2012128,
           "size": 4732,
-          "match_percent": 35.286736
+          "match_percent": 35.271427
         },
         {
           "name": "ANI_SimpleAni3PlayerV4Joint_Blend",
@@ -100560,7 +100560,7 @@
           "address": 2953200,
           "offset": 2063232,
           "size": 7574,
-          "match_percent": 44.893864
+          "match_percent": 64.24195
         },
         {
           "name": "NuCameraForceFarclip",
@@ -100800,7 +100800,7 @@
           "address": 2981872,
           "offset": 2091904,
           "size": 1627,
-          "match_percent": 98.83681
+          "match_percent": 98.888885
         },
         {
           "name": "NuVisiInstTree",
@@ -101240,7 +101240,7 @@
           "address": 3093312,
           "offset": 2203344,
           "size": 3273,
-          "match_percent": 16.78125
+          "match_percent": 21.759115
         },
         {
           "name": "NuDynamicLightAddShadowCasterScene",
@@ -101256,7 +101256,7 @@
           "address": 3101904,
           "offset": 2211936,
           "size": 164,
-          "match_percent": 99.37209
+          "match_percent": 100.0
         },
         {
           "name": "NuSpecialDrawSmoothSkinDwa",
@@ -101512,7 +101512,7 @@
           "address": 3240592,
           "offset": 2350624,
           "size": 291,
-          "match_percent": 99.10448
+          "match_percent": 99.32836
         },
         {
           "name": "NuKeyToAscii",
@@ -101544,7 +101544,7 @@
           "address": 4425232,
           "offset": 3535264,
           "size": 1918,
-          "match_percent": 4.475191
+          "match_percent": 89.30534
         },
         {
           "name": "NuMemAllocFn",

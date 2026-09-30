@@ -807,6 +807,8 @@ extern NUMTL *SolidMtl3D;
 
 void DrawCables() {
     NURND_VERTEX3D vertices[2];
+    NUVEC &start = vertices[0].position;
+    NUVEC &end = vertices[1].position;
     vertices[0].colour = 0xff000000;
     vertices[1].colour = 0xff000000;
     nsegments_drawn = 0;
@@ -817,87 +819,94 @@ void DrawCables() {
         }
 
         const f32 y_span = cable.points[cable.point_count - 1].y - cable.points[0].y;
-        const f32 first_y = cable.points[0].y;
         if ((cable.flags_1e9 & 4) != 0) {
             cable.slack += FRAMETIME * cable_slack * slack_factor;
             if (cable.slack > cable_slack) {
                 cable.slack = cable_slack;
             }
-        } else if (tow_length > 0.0f && cable.total_length < tow_length) {
-            cable.slack = (1.0f - cable.total_length / tow_length) * cable_slack;
+        } else if (cable.total_length < tow_length) {
+            f32 fraction = cable.total_length / tow_length;
+            fraction = fraction <= 1.0f ? 1.0f - fraction : 0.0f;
+            cable.slack = fraction * cable_slack;
         } else {
             cable.slack = 0.0f;
         }
 
         f32 distance_along = 0.0f;
-        if (cable.slack == 0.0f) {
+        if (cable.slack != 0.0f) {
+            const f32 total_length = cable.total_length;
+            const f32 density = nsegments_per_unit;
+            NUVEC endpoint = cable.points[0];
+            endpoint.y = y_span * 0.0f + cable.points[0].y;
+            f32 ground_start = GameShadow(NULL, &endpoint, 5.0f, -1);
+            if (ground_start == 2000000.0f) {
+                ground_start = endpoint.y;
+            }
             for (i32 segment = 0; segment < cable.point_count - 1; ++segment) {
-                const f32 start_fraction = cable.total_length > 0.0f ? distance_along / cable.total_length : 0.0f;
+                NUVEC previous = endpoint;
+                endpoint = cable.points[segment + 1];
+                endpoint.y = NuFdiv(distance_along + cable.segment_lengths[segment], cable.total_length) * y_span +
+                             cable.points[0].y;
+                f32 ground_end = GameShadow(NULL, &endpoint, 5.0f, -1);
+                if (ground_end == 2000000.0f) {
+                    ground_end = endpoint.y;
+                }
+                NUVEC step;
+                NuVecSub(&step, &endpoint, &previous);
+                const f32 segment_length = cable.segment_lengths[segment];
+                const f32 subdivisions = static_cast<f32>(
+                    ceil(static_cast<double>(NuFdiv(segment_length, cable.total_length) * total_length * density)));
+                const f32 step_length = NuFdiv(segment_length, subdivisions);
+                NuVecScale(&step, &step, NuFdiv(step_length, segment_length));
+                const f32 half_step = 0.5f * step_length;
+                NUVEC cursor = previous;
+                f32 local_distance = 0.0f;
+                while (local_distance + half_step < cable.segment_lengths[segment]) {
+                    start = cursor;
+                    const f32 global_distance = distance_along + local_distance;
+                    start.y -= cable.slack *
+                               NU_SIN_LUT(static_cast<i32>(NuFdiv(global_distance, cable.total_length) * 32768.0f));
+                    const f32 start_fraction = NuFdiv(local_distance, cable.segment_lengths[segment]);
+                    const f32 start_floor =
+                        start_fraction * ground_end + (1.0f - start_fraction) * ground_start + 0.05f;
+                    start.y = start_floor > start.y ? start_floor : start.y;
+                    NuVecAdd(&cursor, &cursor, &step);
+                    end = cursor;
+                    const f32 phase = NuFdiv(global_distance + step_length, cable.total_length);
+                    const i32 angle = phase <= 1.0f ? static_cast<i32>(phase * 32768.0f) : 32768;
+                    local_distance += step_length;
+                    const f32 end_sag = cable.slack * NU_SIN_LUT(angle);
+                    const f32 end_fraction = NuFdiv(local_distance, cable.segment_lengths[segment]);
+                    const f32 end_floor = end_fraction * ground_end + (1.0f - end_fraction) * ground_start + 0.05f;
+                    end.y -= end_sag;
+                    if (end.y < end_floor) {
+                        end.y = end_floor;
+                    }
+                    if (solid_cable == 0) {
+                        NuRndrLine3d(vertices, SolidMtl3D, NULL);
+                    } else {
+                        DrawRopeSingle(&start, &end, 1.0f, ropemtl, end_sag, end_sag, 10.0f, 5.0f);
+                    }
+                    ++nsegments_drawn;
+                }
                 distance_along += cable.segment_lengths[segment];
-                const f32 end_fraction = cable.total_length > 0.0f ? distance_along / cable.total_length : 0.0f;
-                NUVEC start = cable.points[segment];
-                NUVEC end = cable.points[segment + 1];
-                start.y = first_y + y_span * start_fraction;
-                end.y = first_y + y_span * end_fraction;
+                ground_start = ground_end;
+            }
+        } else {
+            for (i32 segment = 0; segment < cable.point_count - 1; ++segment) {
+                const f32 start_fraction = NuFdiv(distance_along, cable.total_length);
+                distance_along += cable.segment_lengths[segment];
+                const f32 end_fraction = NuFdiv(distance_along, cable.total_length);
+                start = cable.points[segment];
+                end = cable.points[segment + 1];
+                start.y = y_span * start_fraction + cable.points[0].y;
+                end.y = y_span * end_fraction + cable.points[0].y;
                 if (solid_cable == 0) {
-                    vertices[0].position = start;
-                    vertices[1].position = end;
                     NuRndrLine3d(vertices, SolidMtl3D, NULL);
                 } else {
-                    DrawRopeSingle(&start, &end, 1.0f, ropemtl, start_fraction, end_fraction, 10.0f, 5.0f);
+                    DrawRopeSingle(&start, &end, 1.0f, ropemtl, end_fraction, end_fraction, 10.0f, 5.0f);
                 }
-                ++nsegments_drawn;
             }
-            continue;
-        }
-        const f32 total_subdivisions = cable.total_length * nsegments_per_unit;
-        for (i32 segment = 0; segment < cable.point_count - 1; ++segment) {
-            const f32 segment_length = cable.segment_lengths[segment];
-            const f32 desired_subdivisions =
-                cable.total_length > 0.0f ? segment_length / cable.total_length * total_subdivisions : 0.0f;
-            i32 subdivisions = static_cast<i32>(ceil(static_cast<double>(desired_subdivisions)));
-            if (subdivisions < 1) {
-                subdivisions = 1;
-            }
-            NUVEC previous = cable.points[segment];
-            for (i32 subdivision = 0; subdivision < subdivisions; ++subdivision) {
-                const f32 local_start = static_cast<f32>(subdivision) / static_cast<f32>(subdivisions);
-                const f32 local_end = static_cast<f32>(subdivision + 1) / static_cast<f32>(subdivisions);
-                const f32 global_start = cable.total_length > 0.0f
-                                             ? (distance_along + segment_length * local_start) / cable.total_length
-                                             : 0.0f;
-                const f32 global_end = cable.total_length > 0.0f
-                                           ? (distance_along + segment_length * local_end) / cable.total_length
-                                           : 0.0f;
-                NUVEC start = {
-                    cable.points[segment].x + (cable.points[segment + 1].x - cable.points[segment].x) * local_start,
-                    first_y + y_span * global_start,
-                    cable.points[segment].z + (cable.points[segment + 1].z - cable.points[segment].z) * local_start};
-                NUVEC end = {
-                    cable.points[segment].x + (cable.points[segment + 1].x - cable.points[segment].x) * local_end,
-                    first_y + y_span * global_end,
-                    cable.points[segment].z + (cable.points[segment + 1].z - cable.points[segment].z) * local_end};
-                start.y -= cable.slack * NU_SIN_LUT(static_cast<i32>(global_start * 32768.0f));
-                end.y -= cable.slack * NU_SIN_LUT(static_cast<i32>(global_end * 32768.0f));
-                f32 ground = GameShadow(NULL, &start, 5.0f, -1);
-                if (ground != 2000000.0f && start.y < ground + 0.1f) {
-                    start.y = ground + 0.1f;
-                }
-                ground = GameShadow(NULL, &end, 5.0f, -1);
-                if (ground != 2000000.0f && end.y < ground + 0.1f) {
-                    end.y = ground + 0.1f;
-                }
-                if (solid_cable == 0) {
-                    vertices[0].position = start;
-                    vertices[1].position = end;
-                    NuRndrLine3d(vertices, SolidMtl3D, NULL);
-                } else {
-                    DrawRopeSingle(&start, &end, 1.0f, ropemtl, cable.slack, cable.slack, 10.0f, 5.0f);
-                }
-                ++nsegments_drawn;
-                previous = end;
-            }
-            distance_along += segment_length;
         }
     }
 }

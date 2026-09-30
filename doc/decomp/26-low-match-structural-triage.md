@@ -6421,3 +6421,93 @@ repository tests pass. All eleven GitHub checks passed for **acb9f298**.
 Fixtures use mocked engine/math services and do not establish Android gameplay
 integration. The approximately two-point cycle continues; ownership, compiler
 options and matching normalization remain unchanged.
+
+## Batches 162–175: cutscene branches, clipping and render closures
+
+Recover `MovePlayer_ROLLING`'s local Y/X/Y rotation closure, including all
+matrix rows, without changing shared math helpers. Matching improves
+**44.997390% to 76.436030%**. The production NDK i386 body and previous-body
+oracle pass 156 cases, including callback matrix mutation and Euler publication.
+`Hub_DrawFreePlaySelect` restores complete valid-capacity list traversal
+(**35.422245% to 37.611740%**). Focused host/sanitizer fixtures cover duplicate
+selection, boundary capacity and terminator/canary preservation. Original valid
+inputs require at most 339 selected entries in mode 2, and 340 including seed
+entries in modes 3/4; arbitrary overflowing inputs are not supported.
+
+Recover generic `ANI_SimpleAni3PlayerV4Joint`'s fixed nine-curve skip closure,
+node/type cursors, clamp branches and signed division (**18.765038% to
+36.280075%**). Host ASan/UBSan and i386 fixtures pass 100,000 differential cases
+per ABI, including dispatch/default groups. Valid joint/sample bounds remain
+required; NaN-to-integer conversion is not defined or claimed.
+`NuCameraClipTestExtentsGeneric` initializes each outcode in its classification
+loop rather than clearing the complete array first, allowing the original
+register-packed closure (**44.893864% to 64.241950%**). No geometry math changes.
+Both ABI fixtures pass 32,768 differential cases and five boundary probes,
+including nonfinite coordinates, flags, transforms and aliased depth output.
+
+Recover explicit optional-output/count branches in legacy and modern cutscene
+character processing. `NuGCutCharAnimProcess` improves **4.475191% to
+89.305340%**; `NuGCutCharAnimProcess_3` improves **44.898438% to 71.488280%**.
+Signed legacy counts, modern rounding, sentinel order and callback-sensitive
+count reloads remain unchanged. Each ABI passes 90,112 legacy, 8,192
+no-animation and 81,920 modern/direct output cases against independent oracles.
+
+Recover `DrawPanel`'s 512-byte text buffer, controller-two green tint, paused
+player alpha branches and distinct owned/borrowed icon submissions
+(**43.765343% to 45.216286%**). Modified-section fixtures pass 10,000 randomized
+cases plus targeted host sanitizer/i386 probes. Raw instructions disprove two
+provisional changes: bonus-score shifts are logical 0/1, not signed masks;
+challenge/mission NaN timers remain NaN. Neither rejected change is integrated.
+`DrawStatusScreen` restores stage-array rebasing after callbacks, cached demo
+labels, two explicit option closures and live fallback color reads
+(**21.890034% to 51.864260%**). Its complete-body fixture passes 10,000 bounded
+oracle cases and callback mutations on both ABIs. Menu pulse inputs are finite
+and initialized stage arrays must remain valid for the current iteration index.
+
+Recover `GizObstacles_Update`'s mode-7 start-or-stop dispatch, live animation/SFX
+reloads, stable traversal/count snapshot, reward-gated resets and unsigned pickup
+angles (**5.870968% to 47.526882%**). Both ABI fixtures pass 64 eligibility and
+640 dispatch cases plus traversal, reward and callback probes. Recover
+`UpdateExplosion_Generic`'s cached object walker and post-arcade owner reload
+(**8.408084% to 13.610169%**); complete production-source fixtures cover owner
+replacement, 12 live traversal cases and 66 emission angles. `JediB_Update`
+restores its second-plane live object lookup and stay/remove branches
+(**45.921864% to 46.792060%**); focused culling fixtures pass both ABIs. Callback
+replacement must preserve the reference's required non-null object when a
+second plane or explosion owner is actually dereferenced.
+
+Recover `NuDisplayListRndrSpecial`'s wind matrix, forced LOD/material selection,
+owning-list usage flags, transform-packet reuse, shadow-only draws, per-light
+render sets and clip-result cleanup (**16.781250% to 21.759115%**). Its actual
+function and unchanged helper bodies pass 2,048 instrumented scenarios plus
+sentinel, NaN and null-guard cases on host sanitizers/i386. The existing empty
+`WindShear` is recovered with its verified four-argument C ABI, seeded random,
+unsigned frame conversion and complete matrix shear. Raw SSE proves the
+pre-callback frequency product and quarter+(half+base) waveform grouping;
+1,040 separate/in-place calls match all 16 fields bit-exactly on both ABIs after
+correction. WindShear itself remains 0% in its unchanged owner/optimization
+mode; caller-plus-helper restoration gives a positive whole-binary result.
+
+Recover `DrawCables`'s per-control-point terrain sampling/interpolation,
+chained subdivision cursor, half-step termination, phase clamp and shared
+line/rope vertex packet. Preserve the original start-floor NaN selection,
+flat-path counter behavior and duplicated rope arguments. Both actual-body
+fixtures pass terrain/callback, zero-span, sentinel, phase and rope/flat cases;
+the previous body fails the terrain-query probe. `UpdateCables` separately
+restores target and locator snapshots across geometry callbacks; 19 cases pass
+per ABI for both wrapping directions and counts 0/1/2/3/14/15.
+
+Recover miniature snow-trooper team reloads, post-turn stop-bit rechecks,
+normal/nonzero-droid formation selection and exact random/movement constants.
+Formation 4 intentionally copies the unrotated source after an out-of-place
+rotation, as in retail. Actual update/shape fixtures pass host sanitizers and
+i386, including settling/NaN, callback replacement and random endpoints.
+Correct the timed particle routine's emission cap to 99; full routine fixtures
+pass regular/glass and allocation limits on both ABIs, with no score change.
+
+Whole-binary matching reaches **67.076330%**, **+1.951850 percentage points**
+from main, with **6,276** exact functions. All eleven GitHub checks passed for
+**00434e77**. Fixtures use mocked engine/math services and do not establish
+Android gameplay integration. Ownership, compiler options and scoring remain
+unchanged; explicit particle expansion and several curve/force layout trials
+regressed and were rejected. The approximately two-point cycle continues.

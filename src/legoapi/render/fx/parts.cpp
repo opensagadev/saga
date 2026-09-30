@@ -1636,7 +1636,7 @@ extern "C" {
         DebrisEmitterOrientationMtx(effect->particle_keys[particle_key_slot], emitter_orientation);
         key->emission_epoch = elapsed_intervals * emission_interval;
 
-        for (i32 i = 0; i != 100 && emission_time <= end_time; ++i) {
+        for (i32 i = 0; i != 99 && emission_time <= end_time; ++i) {
             if (position_delta == NULL) {
                 key->emission_position = *position;
             } else {

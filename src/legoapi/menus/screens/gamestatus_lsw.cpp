@@ -1047,14 +1047,21 @@ void DrawStatusScreen(WORLDINFO_s *) {
     if (GAMEDEMO != 0) {
         if (GAMEDEMO != 1 || FadeSys.fade != 0.0f || TTab == NULL)
             return;
+        char *freeplay_text = TTab[tFREEPLAY];
+        char *exit_text = TTab[tEXIT];
         f32 y = -0.75f - 0.5f * MENUDY;
-        for (i32 option = 0; option < 2; ++option) {
-            u8 red = MENUENTRYR, green = MENUENTRYG, blue = MENUENTRYB;
+        {
+            const i32 option = 0;
+            char *text = freeplay_text;
+            i32 red, green, blue;
             if (gamedemo_option == option && TestForController() != 0) {
                 if (menu_pulsate > 0.0f) {
-                    red = static_cast<u8>(MENUFLASH0R * menu_pulsate + MENUFLASH1R * (1.0f - menu_pulsate));
-                    green = static_cast<u8>(MENUFLASH0G * menu_pulsate + MENUFLASH1G * (1.0f - menu_pulsate));
-                    blue = static_cast<u8>(MENUFLASH0B * menu_pulsate + MENUFLASH1B * (1.0f - menu_pulsate));
+                    red = static_cast<i32>(static_cast<u32>(MENUFLASH0R) * menu_pulsate +
+                                           static_cast<u32>(MENUFLASH1R) * (1.0f - menu_pulsate));
+                    green = static_cast<i32>(static_cast<u32>(MENUFLASH0G) * menu_pulsate +
+                                             static_cast<u32>(MENUFLASH1G) * (1.0f - menu_pulsate));
+                    blue = static_cast<i32>(static_cast<u32>(MENUFLASH0B) * menu_pulsate +
+                                            static_cast<u32>(MENUFLASH1B) * (1.0f - menu_pulsate));
                 } else if (menu_flash != 0) {
                     red = MENUFLASH0R;
                     green = MENUFLASH0G;
@@ -1065,13 +1072,54 @@ void DrawStatusScreen(WORLDINFO_s *) {
                     blue = MENUFLASH1B;
                 }
             } else if (menu_pulse > 0.0f) {
-                red = static_cast<u8>(MENUFLASH0R * menu_pulse + MENUNORMALR * (1.0f - menu_pulse));
-                green = static_cast<u8>(MENUFLASH0G * menu_pulse + MENUNORMALG * (1.0f - menu_pulse));
-                blue = static_cast<u8>(MENUFLASH0B * menu_pulse + MENUNORMALB * (1.0f - menu_pulse));
+                red = static_cast<i32>(static_cast<u32>(MENUFLASH0R) * menu_pulse +
+                                       static_cast<u32>(MENUNORMALR) * (1.0f - menu_pulse));
+                green = static_cast<i32>(static_cast<u32>(MENUFLASH0G) * menu_pulse +
+                                         static_cast<u32>(MENUNORMALG) * (1.0f - menu_pulse));
+                blue = static_cast<i32>(static_cast<u32>(MENUFLASH0B) * menu_pulse +
+                                        static_cast<u32>(MENUNORMALB) * (1.0f - menu_pulse));
+            } else {
+                red = MENUENTRYR;
+                green = MENUENTRYG;
+                blue = MENUENTRYB;
             }
-            Text3D(TTab[option == 0 ? tFREEPLAY : tEXIT], 0.0f, y, 1.0f, MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, 0,
-                   red, green, blue);
-            y += MENUDY;
+            Text3D(text, 0.0f, y, 1.0f, MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, 0, red, green, blue);
+        }
+        y += MENUDY;
+        {
+            const i32 option = 1;
+            char *text = exit_text;
+            i32 red, green, blue;
+            if (gamedemo_option == option && TestForController() != 0) {
+                if (menu_pulsate > 0.0f) {
+                    red = static_cast<i32>(static_cast<u32>(MENUFLASH0R) * menu_pulsate +
+                                           static_cast<u32>(MENUFLASH1R) * (1.0f - menu_pulsate));
+                    green = static_cast<i32>(static_cast<u32>(MENUFLASH0G) * menu_pulsate +
+                                             static_cast<u32>(MENUFLASH1G) * (1.0f - menu_pulsate));
+                    blue = static_cast<i32>(static_cast<u32>(MENUFLASH0B) * menu_pulsate +
+                                            static_cast<u32>(MENUFLASH1B) * (1.0f - menu_pulsate));
+                } else if (menu_flash != 0) {
+                    red = MENUFLASH0R;
+                    green = MENUFLASH0G;
+                    blue = MENUFLASH0B;
+                } else {
+                    red = MENUFLASH1R;
+                    green = MENUFLASH1G;
+                    blue = MENUFLASH1B;
+                }
+            } else if (menu_pulse > 0.0f) {
+                red = static_cast<i32>(static_cast<u32>(MENUFLASH0R) * menu_pulse +
+                                       static_cast<u32>(MENUNORMALR) * (1.0f - menu_pulse));
+                green = static_cast<i32>(static_cast<u32>(MENUFLASH0G) * menu_pulse +
+                                         static_cast<u32>(MENUNORMALG) * (1.0f - menu_pulse));
+                blue = static_cast<i32>(static_cast<u32>(MENUFLASH0B) * menu_pulse +
+                                        static_cast<u32>(MENUNORMALB) * (1.0f - menu_pulse));
+            } else {
+                red = MENUENTRYR;
+                green = MENUENTRYG;
+                blue = MENUENTRYB;
+            }
+            Text3D(text, 0.0f, y, 1.0f, MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, 0, red, green, blue);
         }
         return;
     }
@@ -1096,7 +1144,9 @@ void DrawStatusScreen(WORLDINFO_s *) {
         status->draw_background_callback(status);
     }
 
-    for (STATUS_STAGE_s *stage = StatusStages; stage != NULL && stage->type != -1; ++stage) {
+    i32 stage_index = 1;
+    for (STATUS_STAGE_s *stage = StatusStages; stage != NULL && stage->type != -1;
+         stage = StatusStages + stage_index++) {
         if (stage->draw_callback != NULL) {
             stage->draw_callback(stage, status, stage == status->stage);
         }

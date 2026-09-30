@@ -2008,22 +2008,14 @@ void JediB_Update(WORLDINFO_s *world) {
                     }
                 }
             } else {
-                // Evaluated into a flag before the locator checks so the
-                // locator test is the fall-through path, as in the original.
-                i32 object_in_play = OnOrInsidePlane(&object->apiobj.position, &PlayPlane[1].point,
-                                                     &PlayPlane[1].normal, NULL, 2.0f, NULL) != 0 ||
-                                     OnOrInsidePlane(&object->apiobj.position, &PlayPlane[2].point,
-                                                     &PlayPlane[2].normal, NULL, 2.0f, NULL) != 0;
-                if (object_in_play && (OnOrInsidePlane(&baddie->locator.position, &PlayPlane[1].point,
-                                                       &PlayPlane[1].normal, NULL, 2.0f, NULL) != 0 ||
-                                       OnOrInsidePlane(&baddie->locator.position, &PlayPlane[2].point,
-                                                       &PlayPlane[2].normal, NULL, 2.0f, NULL) != 0)) {
-                    baddie->position = baddie->object->apiobj.position;
-                    baddie->angle = baddie->object->apiobj.field_0x276;
-                    RemoveGameObject(baddie->object, 1);
-                    baddie->object = NULL;
-                    continue;
-                } else {
+                if ((OnOrInsidePlane(&object->apiobj.position, &PlayPlane[1].point, &PlayPlane[1].normal, NULL, 2.0f,
+                                     NULL) == 0 &&
+                     OnOrInsidePlane(&baddie->object->apiobj.position, &PlayPlane[2].point, &PlayPlane[2].normal, NULL,
+                                     2.0f, NULL) == 0) ||
+                    (OnOrInsidePlane(&baddie->locator.position, &PlayPlane[1].point, &PlayPlane[1].normal, NULL, 2.0f,
+                                     NULL) == 0 &&
+                     OnOrInsidePlane(&baddie->locator.position, &PlayPlane[2].point, &PlayPlane[2].normal, NULL, 2.0f,
+                                     NULL) == 0)) {
                     object = baddie->object;
                     if (object == NULL) {
                         continue;
@@ -2032,6 +2024,12 @@ void JediB_Update(WORLDINFO_s *world) {
                         baddie->partner->object != NULL) {
                         object->apiobj.ai->opponent = baddie->partner->object;
                     }
+                } else {
+                    baddie->position = baddie->object->apiobj.position;
+                    baddie->angle = baddie->object->apiobj.field_0x276;
+                    RemoveGameObject(baddie->object, 1);
+                    baddie->object = NULL;
+                    continue;
                 }
             }
         } else if ((baddie->flags & JEDIB_CREATURE_RELEASED) == 0 &&

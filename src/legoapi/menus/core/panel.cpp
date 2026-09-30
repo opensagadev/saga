@@ -882,7 +882,7 @@ void DrawPanel() {
     const i32 paused = screendump ? save_paused : Paused;
     // The original loading shortcut reads this before initialization. Give that path a stable result.
     i32 removed_controller = -1;
-    char text[128], auxiliary[128], loading_text[128];
+    char text[512], auxiliary[128], loading_text[128];
     // Original debug coordinates were never initialized by this port.
     NUVEC coordinate_positions[8] = {};
     f32 status_y = 0.0f;
@@ -918,7 +918,7 @@ void DrawPanel() {
                 removed_controller = GamePad[i].pad->port;
                 sprintf(text, apitxt_CONTROLLERREMOVED, removed_controller + 1, removed_controller + 1);
                 i32 alpha = static_cast<u8>(static_cast<i32>((i == 0 ? 0.75f + pulse : 0.75f - pulse) * 128.0f));
-                SmartTextEx(text, 0.0f, i == 0 ? 0.5f : -0.5f, 1.0f, 0.4f, 0.4f, 0.4f, 0, 63, 127, 255, 1.5f, 4, 0, 0,
+                SmartTextEx(text, 0.0f, i == 0 ? 0.5f : -0.5f, 1.0f, 0.4f, 0.4f, 0.4f, 0, 0, 255, 0, 1.5f, 4, 0, 0,
                             alpha);
             }
         }
@@ -960,11 +960,23 @@ void DrawPanel() {
                     NU_SIN_LUT(static_cast<u16>(NuFmod(GlobalTimer.time_elapsed_mod_seconds, 0.5f) * 2.0f * 65536.0f));
                 GameObject_s *object = Player[0];
                 if (object != NULL) {
-                    f32 base_alpha = 1.0f;
-                    if (paused && pause_i_pad != 0 && static_cast<i8>(object->apiobj.flags_low) < 0)
+                    f32 base_alpha;
+                    f32 dropin_alpha = 1.0f;
+                    f32 icon_x;
+                    if (!paused || pause_i_pad == 0) {
+                        icon_x = -ICONX;
+                        base_alpha = 1.0f;
+                        if (static_cast<i8>(object->apiobj.flags_low) >= 0)
+                            dropin_alpha = DROPINALPHA;
+                    } else if (static_cast<i8>(object->apiobj.flags_low) < 0) {
                         base_alpha = 0.5f;
-                    f32 alpha = base_alpha * (static_cast<i8>(object->apiobj.flags_low) < 0 ? 1.0f : DROPINALPHA);
-                    f32 icon_x = -ICONX;
+                        icon_x = -ICONX;
+                    } else {
+                        icon_x = -ICONX;
+                        base_alpha = 1.0f;
+                        dropin_alpha = DROPINALPHA;
+                    }
+                    f32 alpha = dropin_alpha * base_alpha;
                     drawcharicon_i_panel = 0;
                     i32 alpha_byte = static_cast<i32>(alpha * 128.0f);
                     f32 icon_size = ICONSIZE;
@@ -972,10 +984,16 @@ void DrawPanel() {
                         icon_size *= 1.2f;
                     bool own_icon = WORLD->current_level == DAGOBAHE_LDATA && object->field_0xcc0 != NULL &&
                                     object->field_0xcc0->id == id_YODA;
-                    f32 icon_time = object->hud_icon_timer;
-                    i32 visible = icon_time <= 0.0f || (icon_time < 2.0f && NuFmod(icon_time, 0.4f) < 0.2f);
-                    i32 id = own_icon || object->field_0xcc0 == NULL ? object->id : object->field_0xcc0->id;
-                    DrawCharIcon(id, icon_x, status_y, 0.0f, icon_size, 0xa6, alpha, alpha, visible, NULL);
+                    if (own_icon) {
+                        f32 icon_time = object->hud_icon_timer;
+                        i32 visible = icon_time <= 0.0f || (icon_time < 2.0f && NuFmod(icon_time, 0.4f) < 0.2f);
+                        DrawCharIcon(object->id, icon_x, status_y, 0.0f, icon_size, 0xa6, alpha, alpha, visible, NULL);
+                    } else {
+                        f32 icon_time = object->hud_icon_timer;
+                        i32 visible = icon_time <= 0.0f || (icon_time < 2.0f && NuFmod(icon_time, 0.4f) < 0.2f);
+                        i32 id = object->field_0xcc0 == NULL ? object->id : object->field_0xcc0->id;
+                        DrawCharIcon(id, icon_x, status_y, 0.0f, icon_size, 0xa6, alpha, alpha, visible, NULL);
+                    }
                     f32 name_x = -(ICONX + 0.075f);
                     if (static_cast<i8>(object->apiobj.flags_low) < 0 && object->apiobj.character_data->name_id != -1) {
                         bool draw_name = paused != 0;

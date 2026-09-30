@@ -416,30 +416,52 @@ void NuGCutCharAnimProcess_3(NUGCUTCHAR_s *character, f32 frame, NUMTX *matrix, 
 
     if (curve_count > 6) {
         const f32 value = values[6];
-        *visible = static_cast<i32>(value < 0.0f ? value - 0.5f : value + 0.5f);
+        if (value < 0.0f) {
+            *visible = static_cast<i32>(value - 0.5f);
+        } else {
+            *visible = static_cast<i32>(value + 0.5f);
+        }
     } else {
         *visible = character->flags & 1;
     }
-    if (animation_index != NULL) {
+    if (animation_index == NULL) {
+        if (animation_start_frame != NULL) {
+            *animation_start_frame = 0.0f;
+        }
+    } else {
         if (curve_count > 7) {
             const f32 value = values[7];
-            *animation_index = static_cast<i32>(value < 0.0f ? value - 0.5f : value + 0.5f);
+            if (value < 0.0f) {
+                *animation_index = static_cast<i32>(value - 0.5f);
+            } else {
+                *animation_index = static_cast<i32>(value + 0.5f);
+            }
         } else {
             *animation_index = character->animation_index;
         }
-    }
-    if (animation_start_frame != NULL) {
-        if (animation_index != NULL && *animation_index != 0 && *animation_index != 0xff) {
-            *animation_start_frame = curve_count < 11 ? static_cast<f32>(character->animation_start_frame) : values[10];
-        } else {
-            *animation_start_frame = 0.0f;
+        if (animation_start_frame != NULL) {
+            if (*animation_index == 0) {
+                *animation_start_frame = 0.0f;
+            } else if (*animation_index == 0xff) {
+                *animation_start_frame = 0.0f;
+            } else {
+                if (curve_count > 10) {
+                    *animation_start_frame = values[10];
+                } else {
+                    *animation_start_frame = static_cast<f32>(character->animation_start_frame);
+                }
+            }
         }
     }
     if (*visible == 0) {
         return;
     }
     if (layer_mask != NULL) {
-        *layer_mask = curve_count < 12 ? -1 : GetIntCurveVal(animation, values, 11);
+        if (curve_count > 11) {
+            *layer_mask = GetIntCurveVal(animation, values, 11);
+        } else {
+            *layer_mask = -1;
+        }
     }
 
     if ((node_flags & NUANIM_NODE_HAS_ROTATION) != 0) {
@@ -464,10 +486,18 @@ void NuGCutCharAnimProcess_3(NUGCUTCHAR_s *character, f32 frame, NUMTX *matrix, 
     scale = NuMtxGetScale(&character->base_matrix);
     NuMtxPreScale(matrix, &scale);
     if (animation_rate != NULL) {
-        *animation_rate = animation->curve_count < 10 ? character->animation_rate : values[9];
+        if (animation->curve_count > 9) {
+            *animation_rate = values[9];
+        } else {
+            *animation_rate = character->animation_rate;
+        }
     }
     if (blend_time != NULL) {
-        *blend_time = animation->curve_count < 9 ? static_cast<f32>(character->blend_time) : values[8];
+        if (animation->curve_count > 8) {
+            *blend_time = values[8];
+        } else {
+            *blend_time = static_cast<f32>(character->blend_time);
+        }
     }
 }
 

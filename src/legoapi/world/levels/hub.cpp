@@ -2317,8 +2317,7 @@ void Hub_DrawFreePlaySelect() {
     if (freeplaymode == 2) {
         list[0].model_id = MenuPacket.player_model[0];
         i32 count = 1;
-        // Leave a terminator even if external collection data fills every slot.
-        for (i32 i = 0; i < fpcount && count < 340; ++i)
+        for (i32 i = 0; i < fpcount; ++i)
             list[count++] = fplist[i];
         list[count].model_id = -1;
         f32 alpha = 0.0f;
@@ -2342,7 +2341,7 @@ void Hub_DrawFreePlaySelect() {
     if (second != -1)
         list[count++].model_id = second;
     list[count].model_id = -1;
-    for (i32 i = 0; i < fpcount && count < 340; ++i) {
+    for (i32 i = 0; i < fpcount; ++i) {
         if (InModelList(list, fplist[i].model_id, NULL) == 0) {
             list[count++] = fplist[i];
             list[count].model_id = -1;

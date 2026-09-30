@@ -195,10 +195,12 @@ void UpdateCables() {
                         selected = i;
                     }
                 }
+                // Distance callbacks can replace the target; geometry uses the resulting target snapshot.
                 cable->wrap_indices[cable->wrap_count++] = static_cast<u8>(selected);
+                target = cable->target;
             }
             i32 last = cable->wrap_indices[cable->wrap_count - 1];
-            NUVEC *last_position = locator(last);
+            NUVEC *last_position = reinterpret_cast<NUVEC *>(&target->joint_matrices[atat_locators[last]].m30);
             if (cable->wrap_count > 1) {
                 i32 previous = cable->wrap_indices[cable->wrap_count - 2];
                 i32 next = (last + 1) & 3;
@@ -207,9 +209,11 @@ void UpdateCables() {
                     next = (last + 3) & 3;
                     direction = -1;
                 }
+                i32 next_locator = atat_locators[next];
+                i32 previous_locator = atat_locators[previous];
                 NuVecSub(&delta, &path[0], last_position);
                 i32 angle = NuAtan2D(delta.x, delta.z);
-                NuVecSub(&delta, locator(next), last_position);
+                NuVecSub(&delta, reinterpret_cast<NUVEC *>(&target->joint_matrices[next_locator].m30), last_position);
                 i32 next_angle = NuAtan2D(delta.x, delta.z);
                 i32 turn = NuAngSub(next_angle, angle);
                 if (cable->wrap_count < 15 && turn * direction > 0) {
@@ -221,7 +225,8 @@ void UpdateCables() {
                         lost_target = true;
                     }
                 } else {
-                    NuVecSub(&delta, last_position, locator(previous));
+                    NuVecSub(&delta, last_position,
+                             reinterpret_cast<NUVEC *>(&target->joint_matrices[previous_locator].m30));
                     i32 previous_angle = NuAtan2D(delta.x, delta.z);
                     if (NuAngSub(previous_angle, angle) * direction < 0) {
                         // The original clears the slot at the old count, which overlaps point_count at 15.
@@ -236,10 +241,18 @@ void UpdateCables() {
                 f32 along0, along1;
                 i32 next = (last + 1) & 3;
                 i32 previous = (last + 3) & 3;
-                if (XZLinesIntersect(&path[0], last_position, locator(next), locator((last + 2) & 3), &along0,
-                                     &along1)) {
+                // Preserve the reverse-edge locators across the first intersection callback.
+                i32 previous_locator = atat_locators[previous];
+                i32 opposite_locator = atat_locators[(previous + 3) & 3];
+                if (XZLinesIntersect(
+                        &path[0], last_position,
+                        reinterpret_cast<NUVEC *>(&target->joint_matrices[atat_locators[next]].m30),
+                        reinterpret_cast<NUVEC *>(&target->joint_matrices[atat_locators[(last + 2) & 3]].m30), &along0,
+                        &along1)) {
                     cable->wrap_indices[cable->wrap_count++] = static_cast<u8>(next);
-                } else if (XZLinesIntersect(&path[0], last_position, locator(previous), locator((previous + 3) & 3),
+                } else if (XZLinesIntersect(&path[0], last_position,
+                                            reinterpret_cast<NUVEC *>(&target->joint_matrices[previous_locator].m30),
+                                            reinterpret_cast<NUVEC *>(&target->joint_matrices[opposite_locator].m30),
                                             &along0, &along1)) {
                     cable->wrap_indices[cable->wrap_count++] = static_cast<u8>(previous);
                 }

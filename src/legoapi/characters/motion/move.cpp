@@ -2176,10 +2176,58 @@ void MovePlayer_ROLLING(GameObject_s *object) {
     i32 heading = NuAtan2D(object->apiobj.velocity.x, object->apiobj.velocity.z);
     NUVEC local_velocity;
     NuVecRotateY(&local_velocity, &object->apiobj.velocity, -heading);
-    NuMtxRotateY(&matrix, -heading);
-    NuMtxRotateX(&matrix, static_cast<i32>(((local_velocity.z * FRAMETIME) / object->apiobj.collision_radius) *
-                                           10430.3779296875f));
-    NuMtxRotateY(&matrix, heading);
+    // Retail 0x154547..0x1548c2 rotates all four rows in this routine.
+    // Keep the original components until both components of each row are written.
+    {
+        const f32 cosine = NU_COS_LUT(-heading);
+        const f32 sine = NU_SIN_LUT(-heading);
+        const f32 m00 = matrix.m00;
+        const f32 m10 = matrix.m10;
+        const f32 m20 = matrix.m20;
+        const f32 m30 = matrix.m30;
+        matrix.m00 = m00 * cosine + matrix.m02 * sine;
+        matrix.m02 = matrix.m02 * cosine - m00 * sine;
+        matrix.m10 = m10 * cosine + matrix.m12 * sine;
+        matrix.m12 = matrix.m12 * cosine - m10 * sine;
+        matrix.m20 = m20 * cosine + matrix.m22 * sine;
+        matrix.m22 = matrix.m22 * cosine - m20 * sine;
+        matrix.m30 = m30 * cosine + matrix.m32 * sine;
+        matrix.m32 = matrix.m32 * cosine - m30 * sine;
+    }
+    {
+        const i32 rotation =
+            static_cast<i32>(((local_velocity.z * FRAMETIME) / object->apiobj.collision_radius) * 10430.3779296875f);
+        const f32 cosine = NU_COS_LUT(rotation);
+        const f32 sine = NU_SIN_LUT(rotation);
+        const f32 m01 = matrix.m01;
+        const f32 m11 = matrix.m11;
+        const f32 m21 = matrix.m21;
+        const f32 m31 = matrix.m31;
+        matrix.m01 = m01 * cosine - matrix.m02 * sine;
+        matrix.m02 = m01 * sine + matrix.m02 * cosine;
+        matrix.m11 = m11 * cosine - matrix.m12 * sine;
+        matrix.m12 = m11 * sine + matrix.m12 * cosine;
+        matrix.m21 = m21 * cosine - matrix.m22 * sine;
+        matrix.m22 = m21 * sine + matrix.m22 * cosine;
+        matrix.m31 = m31 * cosine - matrix.m32 * sine;
+        matrix.m32 = m31 * sine + matrix.m32 * cosine;
+    }
+    {
+        const f32 cosine = NU_COS_LUT(heading);
+        const f32 sine = NU_SIN_LUT(heading);
+        const f32 m00 = matrix.m00;
+        const f32 m10 = matrix.m10;
+        const f32 m20 = matrix.m20;
+        const f32 m30 = matrix.m30;
+        matrix.m00 = m00 * cosine + matrix.m02 * sine;
+        matrix.m02 = matrix.m02 * cosine - m00 * sine;
+        matrix.m10 = m10 * cosine + matrix.m12 * sine;
+        matrix.m12 = matrix.m12 * cosine - m10 * sine;
+        matrix.m20 = m20 * cosine + matrix.m22 * sine;
+        matrix.m22 = matrix.m22 * cosine - m20 * sine;
+        matrix.m30 = m30 * cosine + matrix.m32 * sine;
+        matrix.m32 = matrix.m32 * cosine - m30 * sine;
+    }
     i32 pitch, yaw, roll;
     NuMtxGetEulerXYZ(&matrix, &pitch, &yaw, &roll);
     object->apiobj.pitch_angle = pitch;

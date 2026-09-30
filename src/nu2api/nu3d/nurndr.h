@@ -115,6 +115,10 @@ extern "C" {
     extern i32 global_GobjWasDrawnUnreflected;
     extern f32 global_windspeed;
     extern f32 global_windscale;
+    i32 NuRndrGlobalFrameCount(void);
+    // Retail wind deformation takes a matrix pair and two signed 16-bit scene
+    // values promoted to int by its display-list caller.
+    void WindShear(NUMTX *output, NUMTX *input, i32 wind_scale, i32 wind_speed);
     i32 NuRndrWasDrawnUnreflectedGobj(void);
     void NuRndrStartShadowReceiveRender(void);
     void NuRndrEndShadowReceiveRender(void);

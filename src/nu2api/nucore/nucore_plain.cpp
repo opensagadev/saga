@@ -211,9 +211,9 @@ extern "C" {
         corners[7].z = max->z;
         for (i32 i = 0; i < 8; ++i)
             NuVecMtxTransform(&view[i], &corners[i], &transform);
-        memset(results, 0, sizeof(results));
         *min_depth = 3.4028234663852886e+38f;
         for (i32 i = 0; i < 8; ++i) {
+            results[i] = 0;
             *min_depth = view[i].z < *min_depth ? view[i].z : *min_depth;
             if ((flags & NUCAMERA_EXTENTS_SKIP_NEAR) == 0 && view[i].z < global_camera.near_clip)
                 results[i] |= NUCAMERA_OUT_NEAR;
@@ -236,8 +236,8 @@ extern "C" {
             return 1;
         if ((flags & NUCAMERA_EXTENTS_SKIP_SCISSOR) != 0)
             return 2;
-        memset(results, 0, sizeof(results));
         for (i32 i = 0; i < 8; ++i) {
+            results[i] = 0;
             if ((flags & NUCAMERA_EXTENTS_SKIP_NEAR) == 0 && view[i].z < global_camera.near_clip)
                 results[i] |= NUCAMERA_OUT_NEAR;
             if (view[i].z > far_clip)
@@ -965,44 +965,58 @@ extern "C" {
         DisplayListSetAlphaPS(first_and_last[1], first_and_last[2], alpha);
     }
 
+    i32 NuDynamicLightGetActiveRenderSetCount(NuDynamicLight *light);
+    NUDISPLAYLIST *NuDynamicLightGetDList(NuDynamicLight *light, i32 render_set, NUMTL *material);
+    void WindShear(NUMTX *out, NUMTX *in, i32 wind_scale, i32 wind_speed);
+
     i32 NuDisplayListRndrSpecial(nuhspecial_s *special_handle, NUMTX *mtx, i32 skinned, NUMTX *skin_matrices,
                                  DEFORMERWEIGHTSARRAY *blend_values) {
         (void)skinned;
-
-        if (special_handle == NULL || mtx == NULL) {
+        if (special_handle == NULL || mtx == NULL)
             return 0;
-        }
-
         NuSpecialHandleLayout *handle = reinterpret_cast<NuSpecialHandleLayout *>(special_handle);
         NuSpecialBoundsDisplayLayout *special = static_cast<NuSpecialBoundsDisplayLayout *>(handle->display_special);
-        if (handle->scene == NULL || special == NULL) {
+        if (handle->scene == NULL || special == NULL)
             return 0;
+        NUMTX wind_matrix;
+        if (special->wind_scale != 0) {
+            WindShear(&wind_matrix, mtx, special->wind_scale, special->wind_speed);
+            mtx = &wind_matrix;
         }
-
         NUDLDLISTSCENE *scene = reinterpret_cast<NUDLDLISTSCENE *>(handle->scene->display_list);
         i32 clip_state = nuspecial_clip_state;
-        if (clip_state == -1) {
+        if (clip_state == -1)
             clip_state = NuCameraClipTestExtents(&special->min, &special->max, mtx, 0.0f, 0);
+
+        i32 shadow_clip = 0;
+        i32 previous_shadow_results = 0;
+        if ((scene->visibility_flags[special->instance_ix] & 0x20) != 0 && NuSpecialHasActiveShadowLights() != 0) {
+            previous_shadow_results = NuSpecialHaveShadowClipTestResults();
+            NUVEC minimum, maximum;
+            NuVecMtxTransform(&minimum, &special->min, mtx);
+            NuVecMtxTransform(&maximum, &special->max, mtx);
+            shadow_clip = NuSpecialClipTestShadowLights(&minimum, &maximum, 0);
         }
-        if (clip_state == 0) {
+        if (shadow_clip == 0 && clip_state == 0)
             return 0;
-        }
 
         NUVEC center;
-        center.x = (special->min.x + special->max.x) * 0.5f;
-        center.y = (special->min.y + special->max.y) * 0.5f;
-        center.z = (special->min.z + special->max.z) * 0.5f;
+        NuVecAdd(&center, &special->min, &special->max);
+        NuVecScale(&center, &center, 0.5f);
         NuVecMtxTransform(&center, &center, mtx);
         f32 distance_sqr = NuCameraDistSqr(&center);
-        if (distance_sqr < 0.0f) {
-            distance_sqr = 0.0f;
-        }
+        distance_sqr = distance_sqr >= 0.0f ? distance_sqr : 0.0f;
 
         NUCLIPOBJECT *clip_object = special->clip_objects;
         if (special->clip_range != NULL && special->clip_range[0] != 0.0f) {
             i32 lod = 0;
-            while (distance_sqr < special->clip_range[lod]) {
-                ++lod;
+            if (nurndr_force_lod == 0) {
+                while (distance_sqr < special->clip_range[lod])
+                    ++lod;
+            } else {
+                do {
+                    ++lod;
+                } while (special->clip_range[lod] != 0.0f && lod != nurndr_force_lod);
             }
             clip_object += lod;
         }
@@ -1012,92 +1026,166 @@ extern "C" {
             const f32 fade_start = scene->fade_ranges[special->instance_ix * 2];
             const f32 fade_end = scene->fade_ranges[special->instance_ix * 2 + 1];
             if (fade_end <= fade_start) {
-                if (distance_sqr <= fade_end * fade_end) {
+                if (distance_sqr <= fade_end * fade_end)
                     return 0;
-                }
                 distance_alpha = (NuFsqrt(distance_sqr) - fade_end) / (fade_start - fade_end);
-                if (distance_alpha > 1.0f) {
+                if (distance_alpha > 1.0f)
                     distance_alpha = 1.0f;
-                }
-            } else if (fade_start * fade_start < distance_sqr) {
+            } else if (!(distance_sqr <= fade_start * fade_start)) {
                 distance_alpha = (fade_end - NuFsqrt(distance_sqr)) / (fade_end - fade_start);
-                if (distance_alpha < 0.0f) {
-                    distance_alpha = 0.0f;
-                }
-                if (distance_alpha == 0.0f) {
-                    return 0;
-                }
+                distance_alpha = distance_alpha >= 0.0f ? distance_alpha : 0.0f;
             }
+            if (distance_alpha == 0.0f)
+                return 0;
         }
 
         void *transform_packet = NULL;
-        for (u32 i = 0; i < *reinterpret_cast<u32 *>(clip_object); ++i) {
-            u32 *material_indices = *reinterpret_cast<u32 **>(reinterpret_cast<u8 *>(clip_object) + 4);
-            i32 *item_indices = *reinterpret_cast<i32 **>(reinterpret_cast<u8 *>(clip_object) + 8);
-            u32 material_index = material_indices[i];
-            NUDISPLAYLISTITEM *geometry = scene->items + item_indices[i];
-
-            // A clip entry names the head of a material-variant chain. The
-            // original submits every material linked through NUMTL::next.
-            for (NUMTL *material = scene->mtls[material_index]; material != NULL; material = material->next) {
+        for (u32 i = 0; i < static_cast<u32>(clip_object->nmaterials); ++i) {
+            NUMTL *material = scene->mtls[clip_object->material_ids[i]];
+            NUMTL *replacement = NULL;
+            if (nurndr_forced_mtl_table != NULL && material->unknown_9a[0] != 0)
+                replacement = nurndr_forced_mtl_table[material->unknown_9a[0]];
+            else
+                replacement = nurndr_forced_mtl;
+            if (replacement != NULL) {
+                if (material->shader_desc.vtx_desc.flags != replacement->shader_desc.vtx_desc.flags)
+                    material = NuMtlFindVariantMtl(material, replacement);
+                else
+                    material = replacement;
+            }
+            for (; material != NULL; material = material->next) {
                 NUDISPLAYLIST *list = material->display_list;
-                if (list == NULL) {
+                if (list == NULL)
                     continue;
-                }
-
-                scene->flags |= NUDL_SCENE_FLAG_CLIP_MATERIALS;
-                const i32 used_material = list->mtl_id;
-                u8 *used = scene->mtl_used[scene->render_buffer >> 7];
-                used[used_material >> 3] |= static_cast<u8>(1U << (used_material & 7));
-
-                RndrStateSetConstAlphaTint(nuspecial_const_alpha_enabled, nuspecial_const_tint_enabled,
-                                           nuspecial_const_alpha, &nuspecial_const_tint, material);
-                DisplayListUpdateRenderState(list, &render_state);
-
-                if (geometry->type == 0x8f) {
-                    VARIPTR *buffer = NuDisplayListLinkItems(list, 2);
-                    NUDISPLAYLISTITEM *items = list->items;
-                    items[0].type = 0x90;
-                    items[0].id = 3;
-                    items[0].next = DisplayListCreateFaceonTransformPS(buffer, mtx, material, geometry->next);
-                    items[1].type = 0x8f;
-                    items[1].id = 3;
-                    items[1].next = NuDisplayListPrepareFaceonPS(buffer, geometry->next, mtx);
-                    list->items = items + 2;
-                    DisplayListSetAlphaPS(items, items + 1, distance_alpha);
-                } else if (skin_matrices != NULL) {
-                    NUDISPLAYLISTITEM *first_and_last[2];
-                    i32 shadow_caster = 0;
-                    if ((scene->visibility_flags[special->instance_ix] & 0x20) != 0 && nuspecial_reflection == 0) {
-                        shadow_caster = 1;
-                    }
-                    DisplayListProcessSkin(material, list, geometry, first_and_last, mtx, &transform_packet,
-                                           skin_matrices, blend_values, shadow_caster);
-                } else {
-                    const isize geometry_index = geometry - scene->items;
-                    const bool has_lightmap_command =
-                        geometry_index > 1 &&
-                        (geometry[-2].type == 0xae || geometry[-2].type == 0xaf || geometry[-2].type == 0xb0);
-                    if (static_cast<i32>(material->shader_desc.flags) < 0 && has_lightmap_command) {
+                NUDISPLAYLISTITEM *geometry = scene->items + clip_object->indices[i];
+                if (clip_state != 0) {
+                    NUDLDLISTSCENE *material_scene = list->dlist;
+                    material_scene->flags |= NUDL_SCENE_FLAG_CLIP_MATERIALS;
+                    const i32 used_material = list->mtl_id;
+                    u8 *used = material_scene->mtl_used[material_scene->render_buffer >> 7];
+                    used[used_material >> 3] |= static_cast<u8>(1U << (used_material & 7));
+                    RndrStateSetConstAlphaTint(nuspecial_const_alpha_enabled, nuspecial_const_tint_enabled,
+                                               nuspecial_const_alpha, &nuspecial_const_tint, material);
+                    DisplayListUpdateRenderState(list, &render_state);
+                    const i32 shadow_caster =
+                        (scene->visibility_flags[special->instance_ix] & 0x20) != 0 && nuspecial_reflection == 0;
+                    if (geometry->type == 0x8f) {
+                        VARIPTR *buffer = NuDisplayListLinkItems(list, 2);
+                        void *faceon = DisplayListCreateFaceonTransformPS(buffer, mtx, list->dlist->mtls[list->mtl_id],
+                                                                          geometry->next);
+                        NUDISPLAYLISTITEM *first = list->items;
+                        first->type = 0x90;
+                        first->id = 3;
+                        first->next = faceon;
+                        list->items = first + 1;
+                        void *packet = NuDisplayListPrepareFaceonPS(buffer, geometry->next, mtx);
+                        NUDISPLAYLISTITEM *last = list->items;
+                        last->type = 0x8f;
+                        last->id = 3;
+                        last->next = packet;
+                        list->items = last + 1;
+                        DisplayListSetAlphaPS(first, last, distance_alpha);
+                    } else if (skin_matrices != NULL) {
+                        NUDISPLAYLISTITEM *first_and_last[2];
+                        DisplayListProcessSkin(material, list, geometry, first_and_last, mtx, &transform_packet,
+                                               skin_matrices, blend_values, shadow_caster);
+                    } else if (static_cast<i32>(material->shader_desc.flags) < 0 && clip_object->indices[i] > 1 &&
+                               (geometry[-2].type == 0xae || geometry[-2].type == 0xb0 || geometry[-2].type == 0xaf)) {
                         NUDISPLAYLISTITEM *first_and_last[3];
                         DisplayListProcessLightmapped(material, list, geometry, first_and_last, mtx, &transform_packet,
                                                       distance_alpha);
                     } else {
                         VARIPTR *buffer = NuDisplayListLinkItems(list, 2);
-                        NUDISPLAYLISTITEM *items = list->items;
-                        items[0].type = 0x8c;
-                        items[0].id = 3;
-                        items[0].next = DisplayListCreateGeomTransformPS(buffer, mtx, material, geometry->next, NULL);
-                        items[1].type = 0x82;
-                        items[1].id = 3;
-                        items[1].next = geometry->next;
-                        list->items = items + 2;
-                        DisplayListSetAlphaPS(items, items + 1, distance_alpha);
+                        void *packet = DisplayListCreateGeomTransformPS(buffer, mtx, list->dlist->mtls[list->mtl_id],
+                                                                        geometry->next, transform_packet);
+                        NUDISPLAYLISTITEM *first = list->items;
+                        first->type = 0x8c;
+                        first->id = 3;
+                        first->next = packet;
+                        list->items = first + 1;
+                        NUDISPLAYLISTITEM *last = list->items;
+                        last->type = 0x82;
+                        last->id = 3;
+                        last->next = geometry->next;
+                        list->items = last + 1;
+                        transform_packet = packet;
+                        DisplayListSetAlphaPS(first, last, distance_alpha);
+                        DisplayListSetShadowCasterFlagPS(first, last, shadow_caster);
+                    }
+                }
+
+                if (shadow_clip != 0 && nuspecial_reflection == 0) {
+                    for (i32 light_index = 0; light_index < NuSpecialGetActiveShadowLights(); ++light_index) {
+                        NuDynamicLight *light = static_cast<NuDynamicLight *>(NuSpecialGetShadowLight(light_index));
+                        const i32 render_set_count = NuDynamicLightGetActiveRenderSetCount(light);
+                        const u32 visible_sets = static_cast<u32>(NuSpecialGetShadowClipTestResult(light_index));
+                        for (i32 render_set = 0; render_set < render_set_count; ++render_set) {
+                            if ((visible_sets & (1u << (render_set & 31))) == 0)
+                                continue;
+                            NUDISPLAYLIST *shadow_list = NuDynamicLightGetDList(light, render_set, material);
+                            shadow_list->dlist = scene;
+                            NuDisplayListLinkItems(shadow_list, 1);
+                            NUDISPLAYLISTITEM *item = shadow_list->items;
+                            item->type = 0x80;
+                            item->id = 3;
+                            item->next = material;
+                            shadow_list->items = item + 1;
+                            DisplayListUpdateRenderStateShadow(shadow_list, &render_state.state);
+                            geometry = scene->items + clip_object->indices[i];
+                            if (geometry->type == 0x8f) {
+                                VARIPTR *buffer = NuDisplayListLinkItems(shadow_list, 2);
+                                void *faceon = DisplayListCreateFaceonTransformPS(
+                                    buffer, mtx, shadow_list->dlist->mtls[shadow_list->mtl_id], geometry->next);
+                                NUDISPLAYLISTITEM *first = shadow_list->items;
+                                first->type = 0x90;
+                                first->id = 3;
+                                first->next = faceon;
+                                shadow_list->items = first + 1;
+                                void *packet = NuDisplayListPrepareFaceonPS(buffer, geometry->next, mtx);
+                                NUDISPLAYLISTITEM *last = shadow_list->items;
+                                last->type = 0x8f;
+                                last->id = 3;
+                                last->next = packet;
+                                shadow_list->items = last + 1;
+                                DisplayListSetAlphaPS(first, last, distance_alpha);
+                            } else if (skin_matrices != NULL) {
+                                NUDISPLAYLISTITEM *first_and_last[2];
+                                DisplayListProcessSkin(material, shadow_list, geometry, first_and_last, mtx,
+                                                       &transform_packet, skin_matrices, blend_values, 1);
+                            } else if (static_cast<i32>(material->shader_desc.flags) < 0 &&
+                                       clip_object->indices[i] > 1 &&
+                                       (geometry[-2].type == 0xae || geometry[-2].type == 0xb0 ||
+                                        geometry[-2].type == 0xaf)) {
+                                NUDISPLAYLISTITEM *first_and_last[3];
+                                DisplayListProcessLightmapped(material, shadow_list, geometry, first_and_last, mtx,
+                                                              &transform_packet, distance_alpha);
+                            } else {
+                                VARIPTR *buffer = NuDisplayListLinkItems(shadow_list, 2);
+                                void *packet = DisplayListCreateGeomTransformPS(
+                                    buffer, mtx, shadow_list->dlist->mtls[shadow_list->mtl_id], geometry->next,
+                                    transform_packet);
+                                NUDISPLAYLISTITEM *first = shadow_list->items;
+                                first->type = 0x8c;
+                                first->id = 3;
+                                first->next = packet;
+                                shadow_list->items = first + 1;
+                                NUDISPLAYLISTITEM *last = shadow_list->items;
+                                last->type = 0x82;
+                                last->id = 3;
+                                last->next = geometry->next;
+                                shadow_list->items = last + 1;
+                                transform_packet = packet;
+                                DisplayListSetAlphaPS(first, last, distance_alpha);
+                                DisplayListSetShadowCasterFlagPS(first, last, 1);
+                            }
+                        }
                     }
                 }
             }
         }
         RndrStateSetConstAlphaTint(0, 0, 0.0f, NULL, NULL);
+        if (previous_shadow_results == 0)
+            NuSpecialClearShadowClipTestResults();
         return clip_state;
     }
     void DisplayListSetFxItemParamPS(void *item, i32 parameter, f32 value, i32 mode);
@@ -3889,33 +3977,45 @@ extern "C" {
 #define NUGCUT_CURVE_VALUE(curve)                                                                                      \
     (types[curve] == 0 ? curves[curve].data.constant : NuAnimCurve2CalcValEx(&curves[curve], &time, types[curve]))
 
-            *visible = static_cast<i16>(character->animation->curve_count) < 7
-                           ? character->flags & 1
-                           : static_cast<i32>(NUGCUT_CURVE_VALUE(6));
-            if (animation_index != NULL) {
-                if (static_cast<i16>(character->animation->curve_count) < 8) {
-                    *animation_index = character->animation_index;
-                } else {
-                    const f32 value = NUGCUT_CURVE_VALUE(7);
-                    *animation_index = value < 0.0f ? 0xff : static_cast<i32>(value);
-                }
+            if (static_cast<i16>(character->animation->curve_count) > 6) {
+                *visible = static_cast<i32>(NUGCUT_CURVE_VALUE(6));
+            } else {
+                *visible = character->flags & 1;
             }
-            if (animation_start_frame != NULL) {
-                if (animation_index != NULL && *animation_index != 0 && *animation_index != 0xff) {
-                    *animation_start_frame = static_cast<i16>(character->animation->curve_count) < 11
-                                                 ? static_cast<f32>(character->animation_start_frame)
-                                                 : NUGCUT_CURVE_VALUE(10);
+            if (animation_index != NULL) {
+                if (static_cast<i16>(character->animation->curve_count) > 7) {
+                    const f32 value = NUGCUT_CURVE_VALUE(7);
+                    if (value < 0.0f) {
+                        *animation_index = 0xff;
+                    } else {
+                        *animation_index = static_cast<i32>(value);
+                    }
                 } else {
-                    *animation_start_frame = 0.0f;
+                    *animation_index = character->animation_index;
                 }
+                if (animation_start_frame != NULL) {
+                    if (*animation_index != 0 && *animation_index != 0xff) {
+                        if (static_cast<i16>(character->animation->curve_count) > 10) {
+                            *animation_start_frame = NUGCUT_CURVE_VALUE(10);
+                        } else {
+                            *animation_start_frame = static_cast<f32>(character->animation_start_frame);
+                        }
+                    } else {
+                        *animation_start_frame = 0.0f;
+                    }
+                }
+            } else if (animation_start_frame != NULL) {
+                *animation_start_frame = 0.0f;
             }
             if (*visible == 0) {
                 return;
             }
             if (layer_mask != NULL) {
-                *layer_mask = static_cast<i16>(character->animation->curve_count) < 12
-                                  ? -1
-                                  : static_cast<i32>(NUGCUT_CURVE_VALUE(11));
+                if (static_cast<i16>(character->animation->curve_count) > 11) {
+                    *layer_mask = static_cast<i32>(NUGCUT_CURVE_VALUE(11));
+                } else {
+                    *layer_mask = -1;
+                }
             }
 
             if ((node_flags & NUANIM_NODE_HAS_ROTATION) != 0) {
@@ -3943,13 +4043,18 @@ extern "C" {
             scale = NuMtxGetScale(&character->base_matrix);
             NuMtxPreScale(matrix, &scale);
             if (animation_rate != NULL) {
-                *animation_rate = static_cast<i16>(character->animation->curve_count) < 10 ? character->animation_rate
-                                                                                           : NUGCUT_CURVE_VALUE(9);
+                if (static_cast<i16>(character->animation->curve_count) > 9) {
+                    *animation_rate = NUGCUT_CURVE_VALUE(9);
+                } else {
+                    *animation_rate = character->animation_rate;
+                }
             }
             if (blend_time != NULL) {
-                *blend_time = static_cast<i16>(character->animation->curve_count) < 9
-                                  ? static_cast<f32>(character->blend_time)
-                                  : NUGCUT_CURVE_VALUE(8);
+                if (static_cast<i16>(character->animation->curve_count) > 8) {
+                    *blend_time = NUGCUT_CURVE_VALUE(8);
+                } else {
+                    *blend_time = static_cast<f32>(character->blend_time);
+                }
             }
         } else {
             *visible = character->flags & 1;

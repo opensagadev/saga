@@ -131,8 +131,8 @@ void UpdateExplosion_Generic(EXPLOSION *explosion) {
     NUVEC maximum = {explosion->position.x + radius, explosion->position.y + radius, explosion->position.z + radius};
     bool hit_character = false;
     if ((explosion->field_0x24 & 0x100) == 0) {
-        for (i32 i = 0; i < HIGHGAMEOBJECT; ++i) {
-            GameObject_s *target = &Obj[i];
+        GameObject_s *target = Obj;
+        for (i32 i = 0; i < HIGHGAMEOBJECT; ++i, ++target) {
             APIOBJECT_s *object = &target->apiobj;
             if ((object->field_0x1f8 & 0x1001) != 0x1001 || object->field_0x287 != 0)
                 continue;
@@ -174,8 +174,9 @@ void UpdateExplosion_Generic(EXPLOSION *explosion) {
                 continue;
             if (object->field_0x27c != -1 && target->field_0x1024 > 0.0f && (explosion->field_0x24 & 0x2000) == 0)
                 continue;
-            GameObject_s *source = explosion->object;
-            if (source != NULL && !(Arcade_GetMode(NULL) == 99 && (explosion->field_0x24 & 0x10010) != 0)) {
+            GameObject_s *source;
+            if (explosion->object != NULL && !(Arcade_GetMode(NULL) == 99 && (explosion->field_0x24 & 0x10010) != 0)) {
+                source = explosion->object;
                 const bool target_player = object->field_0x27c != -1;
                 const bool source_player = source->apiobj.field_0x27c != -1;
                 if (target_player == source_player && (!target_player || target->field_0xd24 != 1.0f) &&

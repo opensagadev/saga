@@ -792,16 +792,17 @@ extern "C" i32 ANI_SimpleAni3PlayerV4Joint_EulerQuat(ani3_animheader_s *anim, f3
 extern "C" i32 ANI_SimpleAni3PlayerV4Joint(ani3_animheader_s *anim, f32 frame, nuanimbuff_s *buffer, i32 joint_count,
                                            i32 first_joint) {
     if ((anim->format_flags & ANI3_FORMAT_QUATERNION_ROTATION) != 0) {
-        if ((anim->format_flags & ANI3_FORMAT_QUATERNION_STORES_W) != 0) {
-            return ANI_SimpleAni3PlayerV4Joint_Quat3W(anim, frame, buffer, joint_count, first_joint);
+        if ((anim->format_flags & ANI3_FORMAT_QUATERNION_STORES_W) == 0) {
+            return ANI_SimpleAni3PlayerV4Joint_Quat3(anim, frame, buffer, joint_count, first_joint);
         }
-        return ANI_SimpleAni3PlayerV4Joint_Quat3(anim, frame, buffer, joint_count, first_joint);
+        return ANI_SimpleAni3PlayerV4Joint_Quat3W(anim, frame, buffer, joint_count, first_joint);
     }
     if (ForceEulerToQuat != 0) {
         return ANI_SimpleAni3PlayerV4Joint_EulerQuat(anim, frame, buffer, joint_count, first_joint);
     }
 
     buffer->use_quaternions = 0;
+    const u8 *node_flags = anim->node_flags;
 
     u32 quarter;
     f32 fraction;
@@ -816,50 +817,92 @@ extern "C" i32 ANI_SimpleAni3PlayerV4Joint(ani3_animheader_s *anim, f32 frame, n
         if (key < 0.0f) {
             key = 0.0f;
         }
+        i32 whole_key;
         if (last_key <= key) {
-            key = last_key;
+            whole_key = static_cast<i32>(last_key);
+            fraction = last_key - static_cast<f32>(whole_key);
+        } else {
+            whole_key = static_cast<i32>(key);
+            fraction = key - static_cast<f32>(whole_key);
         }
-
-        const i32 whole_key = static_cast<i32>(key);
-        fraction = key - static_cast<f32>(whole_key);
         quarter = static_cast<u32>(whole_key) & 3;
-        key_offset = (whole_key >> 2) * anim->key_stride;
+        key_offset = (whole_key / 4) * anim->key_stride;
     }
 
     u8 *keys = anim->keys + key_offset;
     ani3_scalemin_s *scale_min = anim->scale_min;
     const u16 *curve_types = anim->curve_types;
 
-    // Bring all three packed-data cursors to the requested first joint.
-    for (i32 joint = 0; joint < first_joint; ++joint) {
-        const u8 flags = anim->node_flags[joint];
-        for (i32 group = 0; group < 3; ++group) {
-            if ((flags & CurveGroupMasks[group]) == 0) {
-                continue;
+    const i32 decode_count = joint_count <= anim->node_count ? joint_count : anim->node_count;
+    const u8 *first_flags = node_flags + first_joint;
+    const u16 *skip_types = curve_types;
+    ani3_scalemin_s *skip_scale_min = scale_min;
+    nuanimbuffjoint_s *joint = buffer->joints;
+    for (const u8 *skip_flags = node_flags; skip_flags < first_flags; ++skip_flags) {
+        const u8 flags = *skip_flags;
+        if (flags & 2) {
+            if (skip_types[0] < 16) {
+                keys += 4;
+                ++skip_scale_min;
             }
-            for (i32 component = 0; component < 3; ++component) {
-                if (curve_types[group * 3 + component] < 16) {
-                    keys += 4;
-                    ++scale_min;
-                }
+            if (skip_types[1] < 16) {
+                keys += 4;
+                ++skip_scale_min;
+            }
+            if (skip_types[2] < 16) {
+                keys += 4;
+                ++skip_scale_min;
             }
         }
-        curve_types += 9;
+        if (flags & 1) {
+            if (skip_types[3] < 16) {
+                keys += 4;
+                ++skip_scale_min;
+            }
+            if (skip_types[4] < 16) {
+                keys += 4;
+                ++skip_scale_min;
+            }
+            if (skip_types[5] < 16) {
+                keys += 4;
+                ++skip_scale_min;
+            }
+        }
+        if (flags & 8) {
+            if (skip_types[6] < 16) {
+                keys += 4;
+                ++skip_scale_min;
+            }
+            if (skip_types[7] < 16) {
+                keys += 4;
+                ++skip_scale_min;
+            }
+            if (skip_types[8] < 16) {
+                keys += 4;
+                ++skip_scale_min;
+            }
+        }
+        skip_types += 9;
     }
+    curve_types += first_joint * 9;
+    joint += first_joint;
+    node_flags += first_joint;
+    scale_min = skip_scale_min;
 
-    const i32 decode_count = joint_count <= anim->node_count ? joint_count : anim->node_count;
-    const i32 end_joint = first_joint + decode_count;
-    for (i32 joint_index = first_joint; joint_index < end_joint; ++joint_index) {
-        const u8 flags = anim->node_flags[joint_index];
-        buffer->joint_flags[joint_index] = flags;
-        f32 *group_values = reinterpret_cast<f32 *>(&buffer->joints[joint_index]);
+    const u8 *end_flags = first_flags + decode_count;
+    u8 *joint_flags = buffer->joint_flags + first_joint;
+    for (; node_flags < end_flags; ++node_flags, ++joint) {
+        const u8 flags = *node_flags;
+        *joint_flags++ = flags;
+        f32 *group_values = &joint->translation.x;
 
         for (i32 group = 0; group < 3; ++group) {
             if ((flags & CurveGroupMasks[group]) == 0) {
-                const f32 default_value = group == 2 ? 1.0f : 0.0f;
-                group_values[0] = default_value;
-                group_values[1] = default_value;
-                group_values[2] = default_value;
+                if (group == 2) {
+                    group_values[0] = group_values[1] = group_values[2] = 1.0f;
+                } else {
+                    group_values[0] = group_values[1] = group_values[2] = 0.0f;
+                }
             } else {
                 group_values[0] = DecodeAni4V4Curve(anim, curve_types[0], quarter, fraction, keys, scale_min);
                 group_values[1] = DecodeAni4V4Curve(anim, curve_types[1], quarter, fraction, keys, scale_min);
