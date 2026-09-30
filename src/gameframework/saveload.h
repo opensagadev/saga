@@ -8,6 +8,7 @@
 extern "C" {
 #endif
     extern i32 saveload_status;
+    extern i32 saveload_error;
     extern i32 saveload_autosave;
     extern i32 saveload_savepresent;
     extern i32 saveload_slotid;

@@ -32,6 +32,8 @@ extern f32 memcard_savemessage_delay;
 extern f32 memcard_saveresult_delay;
 extern f32 memcard_loadmessage_delay;
 extern f32 memcard_loadresult_delay;
+extern i32 memcard_deleteneeded, memcard_deletestarted, memcard_deletefailed;
+extern i32 memcard_formatme, memcard_formatting, memcard_formatfailed;
 extern i16 (*memcard_hashfn)(void);
 i32 numfilteroutblocks;
 char filteroutblocks[8][12];
@@ -796,55 +798,31 @@ extern "C" {
 
     void UpdateSaveSlots(void) {
         const f32 elapsed = NuTimeGetFrameTime();
-        if (memcard_autosavecanceldelay > 0.0f) {
+        if (memcard_autosavecanceldelay > 0.0f)
             memcard_autosavecanceldelay -= elapsed;
-        }
-        if (memcard_loadmessage_delay > 0.0f) {
-            memcard_loadmessage_delay -= elapsed;
-        }
-        if (memcard_savemessage_delay > 0.0f) {
-            memcard_savemessage_delay -= elapsed;
-        }
+#define ADVANCE_SAVE_DELAY(message, result)                                                                            \
+    if (message > 0.0f) {                                                                                              \
+        message -= elapsed;                                                                                            \
+    } else if (result > 0.0f) {                                                                                        \
+        result -= elapsed;                                                                                             \
+    }
+        ADVANCE_SAVE_DELAY(memcard_loadmessage_delay, memcard_loadresult_delay);
+        ADVANCE_SAVE_DELAY(memcard_savemessage_delay, memcard_saveresult_delay);
         if (memcard_autosavepredelay > 0.0f) {
             memcard_autosavepredelay -= elapsed;
-        }
-        if (memcard_formatmessage_delay > 0.0f) {
-            memcard_formatmessage_delay -= elapsed;
-        }
-        if (memcard_createmessage_delay > 0.0f) {
-            memcard_createmessage_delay -= elapsed;
-        }
-        if (memcard_deletemessage_delay > 0.0f) {
-            memcard_deletemessage_delay -= elapsed;
-        }
-        if (memcard_message_delay > 0.0f) {
-            memcard_message_delay -= elapsed;
-        }
-        if (memcard_loadresult_delay > 0.0f) {
-            memcard_loadresult_delay -= elapsed;
-        }
-        if (memcard_saveresult_delay > 0.0f) {
-            memcard_saveresult_delay -= elapsed;
-        }
-        if (memcard_autosavepostdelay > 0.0f) {
+        } else if (memcard_autosavepostdelay > 0.0f) {
             memcard_autosavepostdelay -= elapsed;
+            if (memcard_autosavepostdelay <= 0.0f)
+                memcard_autosaveinprogress = 0;
         }
-        if (memcard_formatresult_delay > 0.0f) {
-            memcard_formatresult_delay -= elapsed;
-        }
-        if (memcard_createresult_delay > 0.0f) {
-            memcard_createresult_delay -= elapsed;
-        }
-        if (memcard_deleteresult_delay > 0.0f) {
-            memcard_deleteresult_delay -= elapsed;
-        }
-        if (memcard_result_delay > 0.0f) {
-            memcard_result_delay -= elapsed;
-        }
+        ADVANCE_SAVE_DELAY(memcard_formatmessage_delay, memcard_formatresult_delay);
+        ADVANCE_SAVE_DELAY(memcard_createmessage_delay, memcard_createresult_delay);
+        ADVANCE_SAVE_DELAY(memcard_deletemessage_delay, memcard_deleteresult_delay);
+        ADVANCE_SAVE_DELAY(memcard_message_delay, memcard_result_delay);
+#undef ADVANCE_SAVE_DELAY
 
-        if (saveload_cardtype != 2) {
+        if (saveload_cardtype != 2)
             memcard_justformatted = 0;
-        }
         if (saveload_autosavedisabled != 0) {
             if (memcard_autosavestarted != 0) {
                 memcard_savefailed = 1;
@@ -859,80 +837,156 @@ extern "C" {
             saveload_autosavedisabled = 0;
         }
 
-        if (memcard_savestarted != 0 && saveload_status == 1) {
-            memcard_savestarted = 0;
-            MenuSaveOccurred = 1;
-        }
-
-        if (memcard_saveneeded != 0 && saveload_status == 1 && saveload_cardtype == 2 && saveload_cardformatted != 0 &&
-            memcard_savedata != NULL && memcard_savedatabuffer != NULL) {
-            const i32 save_hash = memcard_hashfn != NULL ? memcard_hashfn() : -1;
-
-            if (memcard_extra_savedata != NULL && memcard_extra_savedatabuffer != NULL) {
-                memmove(memcard_extra_savedatabuffer, memcard_extra_savedata, memcard_extra_savedatasize);
-                const i32 checksum = ChecksumSaveData(memcard_extra_savedatabuffer, memcard_extra_savedatasize);
-                static_cast<i32 *>(memcard_extra_savedatabuffer)[memcard_extra_savedatasize / sizeof(i32)] = checksum;
-                saveloadASSave(SAVESLOTS, memcard_extra_savedatabuffer, memcard_extra_savedatasize + 4, -1);
+        if (memcard_loadneeded != 0) {
+            if (saveload_status == 1 && saveload_cardtype == 2 && saveload_cardformatted != 0) {
+                memcard_loadmessage_delay = 1.5f;
+                if (memcard_savedatabuffer == NULL || memcard_savedatasize <= 0) {
+                    memcard_loadneeded = 0;
+                    memcard_loadstarted = 0;
+                    memcard_loadfailed = 1;
+                    return;
+                }
+                if (memcard_extra_savedata != NULL && memcard_extra_savedatabuffer != NULL)
+                    saveloadASLoad(SAVESLOTS, memcard_extra_savedatabuffer, memcard_extra_savedatasize + 4);
+                saveloadASLoad(memcard_slot, memcard_savedatabuffer, memcard_savedatasize + 4);
+                memcard_loadneeded = 0;
+                memcard_loadcorrupt = 0;
+                if (saveload_status == 1) {
+                    memcard_loadstarted = 0;
+                    memcard_loadfailed = 1;
+                } else {
+                    memcard_loadstarted = 1;
+                    memcard_loadfailed = 0;
+                }
             }
-
-            memmove(memcard_savedatabuffer, memcard_savedata, memcard_savedatasize);
-            const i32 checksum = ChecksumSaveData(memcard_savedatabuffer, memcard_savedatasize);
-            static_cast<i32 *>(memcard_savedatabuffer)[memcard_savedatasize / sizeof(i32)] = checksum;
-            saveloadASSave(memcard_slot, memcard_savedatabuffer, memcard_savedatasize + 4, save_hash);
-
-            memcard_saveneeded = 0;
-            memcard_savestarted = 1;
-            memcard_savefailed = 0;
-        }
-
-        if (memcard_loadstarted != 0 && saveload_status == 1) {
+        } else if (memcard_loadstarted != 0 && saveload_status == 1) {
             memcard_loadstarted = 0;
-            memcard_loadcorrupt = 0;
-
-            const i32 stored_checksum = static_cast<i32 *>(memcard_savedatabuffer)[memcard_savedatasize / sizeof(i32)];
-            const i32 computed_checksum = ChecksumSaveData(memcard_savedatabuffer, memcard_savedatasize);
-            if (computed_checksum != stored_checksum) {
-                memcard_loadcorrupt = 1;
-                saveload_autosave = -1;
-            }
-
-            if (memcard_extra_savedata != NULL && memcard_extra_savedatabuffer != NULL) {
-                const i32 stored_extra_checksum =
-                    static_cast<i32 *>(memcard_extra_savedatabuffer)[memcard_extra_savedatasize / sizeof(i32)];
-                const i32 computed_extra_checksum =
-                    ChecksumSaveData(memcard_extra_savedatabuffer, memcard_extra_savedatasize);
-                if (computed_extra_checksum != stored_extra_checksum) {
+            if (saveload_error == 0 && memcard_savedatabuffer != NULL && memcard_savedatasize >= 0) {
+                i32 stored_checksum;
+                memcpy(&stored_checksum, static_cast<u8 *>(memcard_savedatabuffer) + memcard_savedatasize, 4);
+                if (ChecksumSaveData(memcard_savedatabuffer, memcard_savedatasize) != stored_checksum) {
                     memcard_loadcorrupt = 1;
                     saveload_autosave = -1;
                 }
-            }
-
-            if (memcard_loadcorrupt == 0) {
-                memmove(memcard_savedata, memcard_savedatabuffer, memcard_savedatasize);
-                if (memcard_extra_savedata != NULL && memcard_extra_savedatabuffer != NULL) {
-                    memmove(memcard_extra_savedata, memcard_extra_savedatabuffer, memcard_extra_savedatasize);
+                if (memcard_extra_savedata != NULL && memcard_extra_savedatabuffer != NULL &&
+                    memcard_extra_savedatasize >= 0) {
+                    i32 stored_extra_checksum;
+                    memcpy(&stored_extra_checksum,
+                           static_cast<u8 *>(memcard_extra_savedatabuffer) + memcard_extra_savedatasize, 4);
+                    if (ChecksumSaveData(memcard_extra_savedatabuffer, memcard_extra_savedatasize) !=
+                        stored_extra_checksum) {
+                        memcard_loadcorrupt = 1;
+                        saveload_autosave = -1;
+                    }
                 }
-                MenuLoadOccurred = 1;
+                if (memcard_loadcorrupt == 0 && memcard_savedata != NULL) {
+                    memmove(memcard_savedata, memcard_savedatabuffer, memcard_savedatasize);
+                    if (memcard_extra_savedata != NULL && memcard_extra_savedatabuffer != NULL &&
+                        memcard_extra_savedatasize >= 0)
+                        memmove(memcard_extra_savedata, memcard_extra_savedatabuffer, memcard_extra_savedatasize);
+                    MenuLoadOccurred = 1;
+                }
+            } else if (saveload_error == 0x80) {
+                memcard_loadcorrupt = 1;
+                saveload_autosave = -1;
+            } else {
+                memcard_loadfailed = 1;
+                saveload_autosave = -1;
             }
         }
 
-        if (memcard_loadneeded == 0 || saveload_status != 1 || saveload_cardtype != 2 || saveload_cardformatted == 0 ||
-            memcard_savedata == NULL || memcard_savedatabuffer == NULL) {
-            return;
+        if (memcard_autosaveneeded != 0) {
+            memcard_autosaveneeded = 0;
+            if (saveload_autosave != -1) {
+                memcard_autosavepredelay = 1.0f;
+                memcard_autosavestarted = 1;
+                memcard_autosaveinprogress = 1;
+            }
+        } else if (memcard_autosavestarted != 0 && memcard_saveneeded == 0 && memcard_savestarted == 0 &&
+                   !(memcard_autosavepredelay > 0.0f)) {
+            memcard_saveneeded = 1;
+            memcard_slot = saveload_autosave;
         }
 
-        if (memcard_extra_savedata != NULL && memcard_extra_savedatabuffer != NULL) {
-            saveloadASLoad(SAVESLOTS, memcard_extra_savedatabuffer, memcard_extra_savedatasize + 4);
+        if (memcard_saveneeded != 0) {
+            if (saveload_status == 1 && saveload_cardtype == 2 && saveload_cardformatted != 0) {
+                memcard_savemessage_delay = 1.5f;
+                if (memcard_savedatabuffer == NULL || memcard_savedata == NULL || memcard_savedatasize <= 0) {
+                    memcard_saveneeded = 0;
+                    memcard_savestarted = 0;
+                    memcard_savefailed = 1;
+                    return;
+                }
+                i32 save_hash = memcard_hashfn != NULL ? memcard_hashfn() : -1;
+                if (memcard_slot != -1) {
+                    if (memcard_extra_savedata != NULL && memcard_extra_savedatabuffer != NULL &&
+                        memcard_extra_savedatasize >= 0) {
+                        memmove(memcard_extra_savedatabuffer, memcard_extra_savedata, memcard_extra_savedatasize);
+                        i32 checksum = ChecksumSaveData(memcard_extra_savedatabuffer, memcard_extra_savedatasize);
+                        memcpy(static_cast<u8 *>(memcard_extra_savedatabuffer) + memcard_extra_savedatasize, &checksum,
+                               4);
+                        saveloadASSave(SAVESLOTS, memcard_extra_savedatabuffer, memcard_extra_savedatasize + 4, -1);
+                    }
+                    memmove(memcard_savedatabuffer, memcard_savedata, memcard_savedatasize);
+                    i32 checksum = ChecksumSaveData(memcard_savedatabuffer, memcard_savedatasize);
+                    memcpy(static_cast<u8 *>(memcard_savedatabuffer) + memcard_savedatasize, &checksum, 4);
+                    saveloadASSave(memcard_slot, memcard_savedatabuffer, memcard_savedatasize + 4, save_hash);
+                }
+                memcard_saveneeded = 0;
+                memcard_savestarted = 1;
+                memcard_savefailed = 0;
+                memcard_justformatted = 0;
+            }
+        } else if (memcard_savestarted != 0 && saveload_status == 1) {
+            memcard_savestarted = 0;
+            if (saveload_error == 0) {
+                MenuSaveOccurred = 1;
+                if (savesuccessfn != NULL)
+                    savesuccessfn();
+                if (memcard_autosavestarted != 0) {
+                    memcard_autosavestarted = 0;
+                    memcard_autosavepostdelay = 1.0f;
+                }
+            } else {
+                memcard_savefailed = 1;
+                if (saveload_autosave != -1) {
+                    saveload_autosave = -1;
+                    memcard_saveresult_delay = 1.5f;
+                    saveload_autosavedisabled = 1;
+                    memcard_autosavedisabled = 1;
+                }
+                memcard_autosavestarted = 0;
+                memcard_autosaveinprogress = 0;
+            }
         }
-        saveloadASLoad(memcard_slot, memcard_savedatabuffer, memcard_savedatasize + 4);
-        memcard_loadneeded = 0;
-        memcard_loadcorrupt = 0;
-        if (saveload_status == 1) {
-            memcard_loadstarted = 0;
-            memcard_loadfailed = 1;
-        } else {
-            memcard_loadstarted = 1;
-            memcard_loadfailed = 0;
+
+        if (memcard_deleteneeded != 0) {
+            if (saveload_status == 1 && saveload_cardtype == 2 && saveload_cardformatted != 0) {
+                saveloadASDelete(memcard_slot);
+                memcard_deleteneeded = 0;
+                memcard_deletemessage_delay = 1.5f;
+                memcard_deletestarted = 1;
+                memcard_deletefailed = 0;
+            }
+        } else if (memcard_deletestarted != 0 && saveload_status == 1) {
+            memcard_deletefailed = saveload_error != 0;
+            memcard_deletestarted = 0;
+        }
+        if (memcard_formatme != 0) {
+            if (saveload_status == 1 && saveload_cardtype == 2) {
+                saveloadASFormat();
+                memcard_formatme = 0;
+                memcard_formatmessage_delay = 1.5f;
+                memcard_formatting = 1;
+                memcard_formatfailed = 0;
+                memcard_justformatted = 0;
+            }
+        } else if (memcard_formatting != 0 && saveload_status == 3) {
+            memcard_formatting = 0;
+            if (saveload_error == 0)
+                memcard_justformatted = 1;
+            else
+                memcard_formatfailed = 1;
         }
     }
 

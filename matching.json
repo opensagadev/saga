@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 66.35593,
+    "fuzzy_match_percent": 66.39257,
     "total_code": "4722419",
     "matched_code": "522352",
     "matched_code_percent": 11.061111,
@@ -21802,7 +21802,7 @@
           "address": 4185440,
           "offset": 3295472,
           "size": 5632,
-          "match_percent": 25.327837
+          "match_percent": 24.320078
         },
         {
           "name": "pathEditorDrawPaths",
@@ -47221,7 +47221,7 @@
           "address": 1486432,
           "offset": 596464,
           "size": 1535,
-          "match_percent": 32.48949
+          "match_percent": 66.88589
         },
         {
           "name": "_Z15Animate_VEHICLEP12GameObject_s",
@@ -47373,7 +47373,7 @@
           "address": 1519872,
           "offset": 629904,
           "size": 501,
-          "match_percent": 54.31746
+          "match_percent": 54.198414
         },
         {
           "name": "_Z11Animate_PODP12GameObject_s",
@@ -47629,7 +47629,7 @@
           "address": 4885536,
           "offset": 3995568,
           "size": 850,
-          "match_percent": 84.29612
+          "match_percent": 84.02913
         },
         {
           "name": "_Z28GameAnimSet_IsAnimationResetP13GAMEANIMSET_s",
@@ -47948,7 +47948,7 @@
           "address": 1377264,
           "offset": 487296,
           "size": 1218,
-          "match_percent": 80.016464
+          "match_percent": 83.51852
         },
         {
           "name": "_Z16NeedsPretendAnimP12GameObject_s",
@@ -49234,7 +49234,7 @@
           "address": 4365072,
           "offset": 3475104,
           "size": 2782,
-          "match_percent": 34.6256
+          "match_percent": 67.0992
         },
         {
           "name": "loadsaveCallEachFrame",
@@ -62060,7 +62060,7 @@
           "address": 1932096,
           "offset": 1042128,
           "size": 1101,
-          "match_percent": 85.604744
+          "match_percent": 89.865616
         },
         {
           "name": "_Z17Batarang_RicochetP10BATARANG_s",
@@ -71252,7 +71252,7 @@
           "address": 2400800,
           "offset": 1510832,
           "size": 6077,
-          "match_percent": 26.210917
+          "match_percent": 26.209991
         },
         {
           "name": "_Z10DrawShop3DP11WORLDINFO_s",
@@ -75212,7 +75212,7 @@
           "address": 3033344,
           "offset": 2143376,
           "size": 9601,
-          "match_percent": 55.843216
+          "match_percent": 58.674873
         },
         {
           "name": "NuDisplaySceneRndr",
@@ -75228,7 +75228,7 @@
           "address": 3105712,
           "offset": 2215744,
           "size": 4540,
-          "match_percent": 28.190092
+          "match_percent": 28.12212
         },
         {
           "name": "NuGHGFixup",
@@ -86418,7 +86418,7 @@
           "address": 1733584,
           "offset": 843616,
           "size": 2007,
-          "match_percent": 49.101448
+          "match_percent": 49.09662
         },
         {
           "name": "_Z24Hub_UpdateFreePlaySelectv",
@@ -86674,7 +86674,7 @@
           "address": 1791440,
           "offset": 901472,
           "size": 2720,
-          "match_percent": 51.875458
+          "match_percent": 51.873627
         },
         {
           "name": "_Z17MenuDrawBonusModeP6MENU_s",

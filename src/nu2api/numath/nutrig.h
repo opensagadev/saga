@@ -28,11 +28,11 @@ static inline i16 NuASin(f32 sin) {
 
     unknown_d = unknown_b * unknown_c + unknown_c;
 
-    return (unknown_d * 0.785398f - (unknown_b * unknown_c * unknown_a) +
-            -0.166667f * (unknown_b * unknown_c * unknown_a) *
-                ((unknown_b * unknown_c * unknown_a) * (unknown_b * unknown_c * unknown_a)) +
-            -0.075f * ((unknown_b * unknown_c * unknown_a) * (unknown_b * unknown_c * unknown_a)) *
+    return (-0.075f * ((unknown_b * unknown_c * unknown_a) * (unknown_b * unknown_c * unknown_a)) *
                 ((unknown_b * unknown_c * unknown_a) *
+                 ((unknown_b * unknown_c * unknown_a) * (unknown_b * unknown_c * unknown_a))) +
+            (unknown_d * 0.785398f - (unknown_b * unknown_c * unknown_a) +
+             -0.166667f * (unknown_b * unknown_c * unknown_a) *
                  ((unknown_b * unknown_c * unknown_a) * (unknown_b * unknown_c * unknown_a))) +
             -0.0446429f *
                 ((unknown_b * unknown_c * unknown_a) *

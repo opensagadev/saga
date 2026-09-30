@@ -20,6 +20,7 @@
 #endif
 
 i32 saveload_status;
+i32 saveload_error;
 i32 saveload_autosave = -1;
 i32 saveload_savepresent;
 i32 saveload_cardtype = 2;

@@ -5982,3 +5982,63 @@ Batch 121 follow-up: typed trigger-state update lowered its own score from
 83.916664% to 82.766670%, and two animation evaluator scores declined slightly;
 these are documented semantic/layout fixes in a net-positive batch, not
 hidden by changing the comparison settings.
+
+## Batch 123: rejected editor/player source-shape trials
+
+The reference's player checks and particle colour stages contain fixed-slot
+closures. Unrolling them under their live `-O2` owners did not improve
+matching: the player routine stayed at zero, and the colour routine fell
+from 21.344992% to zero, including a reference-proven bounded high/low
+sixteen-bit colour conversion. These trials were reverted completely.
+
+The path renderer has separate equal-radius and solid-wall geometry branches;
+restoring their direct perpendicular sides reduced matching from 25.327837%
+to 2.336%. The path editor's two fixed first-free connection-pair searches
+passed 131,072 exhaustive canonical-record cases under both host sanitizers
+and optimized i386, but reduced its score from 28.321720% to 22.997%.
+Restoring its forward/backward traversal closures and fixed menu slot lookup
+reduced it further to 14.019%. All editor trials were reverted. No source
+ownership, optimization or scoring changes were made to accommodate them.
+
+## Batch 124: character attachment animation and save-state protocol
+
+Restore `Animate_CHARACTER`'s Jabba hub override, held special-action choices,
+uncontrolled-context jetpack idle/run choices, Penguin umbrella packet and
+glidepack context variants. Correct the pending-target fallback to inspect
+the model's fall-animation entry, not unrelated target bytes. Restore the
+game-character fall gating and use canonical suit and mini-packet fields.
+Keep guards for missing worlds, attachment IDs and character-system arenas.
+The routine improves **32.489490% to 66.885890%**.
+
+Restore `UpdateSaveSlots`'s mutually exclusive message/result delay pairs,
+autosave pre/post timing, load failure distinctions, save completion callback,
+deletion and formatting state transitions. A request and its completion are
+mutually exclusive within one update. Missing save/load buffers fail before
+later operations. Recover the original four-byte `saveload_error` BSS global
+in the framework save module and publish its declaration. The routine improves
+**34.625600% to 67.099200%**.
+
+Checksum trailers use their exact byte offset with `memcpy`, including sizes
+not divisible by four. Keep the existing extra-buffer checksum validation:
+retail's raw instructions at `0x42a4ae` call the extra-data checksum but
+`0x42a4b3` compares the earlier main-data checksum in EDI against the main
+trailer again. This integrity safeguard deliberately differs from that
+reference bug; it is not hidden by comparison normalization. Buffer capacity,
+very large sizes and callback mutation of allocation metadata remain separate
+audits; fixtures use allocated, bounded buffers and service stand-ins.
+
+Make inline `NuASin` use the polynomial addition grouping already recovered
+by the 99.921210%-matching standalone implementation. Preserve multiplication
+grouping, coefficients and the defined input domain. This improves retained
+render-grid and batarang ricochet callers. The path renderer declines slightly
+to 24.320078%; animation-neighbor/register changes are below 0.27 points.
+No exact function is lost. Overall matching reaches **66.392570%**,
+**+1.268090 percentage points** from main, with **6,269** exact functions;
+the approximately two-point goal remains unfinished.
+
+Extracted production-body fixtures pass 64-bit ASan/UBSan and optimized
+i386 SSE: **60,000** character selection/attachment cases, **20,000** save
+state and multi-frame protocol cases, and **2,000,001** valid-domain arcsine
+comparisons against the retained standalone polynomial. Animation handlers,
+storage services and square root are stand-ins, not complete gameplay or
+filesystem integration. All eleven GitHub checks passed for batch 122.
