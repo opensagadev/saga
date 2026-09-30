@@ -25,6 +25,7 @@
 #include "legoapi/misc/utilities.h"
 #include "legoapi/render/fx.h"
 #include "legoapi/render/fx/parts.h"
+#include "legoapi/render/fx/edsplines.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/world/levels/levels.h"
 #include "legoapi/world/levels/podrace.h"
@@ -95,8 +96,11 @@ extern "C" {
     float test_factor = 10.0f;
     float sebulba_lerpf = 0.5f;
     float sockstep = 10.0f;
+    float dthrow_time = 1.0f;
+    float throw_time = 2.0f;
     i32 do_mine;
 }
+extern f32 CurrentSpeed;
 void UpdatePodRaceLapDisplay(float); // defined below
 void CalcSplinePointFromDist(flightspline_s *, _vuv_s *, float);
 
@@ -705,69 +709,220 @@ void PodRace_IncreaseLap() {
     Lap++;
 }
 
-void PodRaceUpdate(WORLDINFO_s *, float) {
-    if (netclient != 0)
+void PodRaceUpdate(WORLDINFO_s *world, float dt) {
+    if (PodRace == NULL || world == NULL)
         return;
-    PODRACE_s *podrace = PodRace;
-    if (podrace->lap_countdown <= 0.0f)
-        return;
-    avg_currentspeed_mul = 0;
-    podrace->lap_display = podrace->prev_lap_display;
-    if (Player[0] != NULL && Player[0]->apiobj.player_controlled)
-        return;
-    if (Player[1] != NULL && !Player[1]->apiobj.player_controlled)
-        Player[1]->field_0xc34 = 0;
-    i32 n = (i32)podrace->lap_countdown;
-    i32 o = (i32)podrace->lap_display;
-    if (n != o)
-        PlaySfx("Pod_Race_Light", NULL);
-    for (i32 i = 0; i < 0x10; i++) {
-        PODRACE_LAPENTRY_s *entry = &podrace->lap_entries[i];
-        if (entry->next == NULL)
-            continue;
-        u32 *p = entry->data;
-        if (p != NULL) {
-            // Body optimized out in the original binary.
+    float old_countdown = PodRace->lap_countdown;
+    if (netclient != 0) {
+        if (podrace_netpacket == NULL)
+            return;
+        PodRace->lap_countdown = podrace_netpacket->start_countdown;
+        PodRace->lap_display = podrace_netpacket->remaining_time;
+        PodRace->prev_lap_display = podrace_netpacket->available_time;
+        Lap = podrace_netpacket->lap;
+        old_countdown = PodRace->lap_countdown;
+    } else if (old_countdown <= 0.0f) {
+        PodRace->mushroom_timer += dt;
+        if (PodRace->prev_lap_display > 0.0f) {
+            PodRace->lap_display = PodRace->prev_lap_display - PodRace->mushroom_timer;
+            if (PodRace->lap_display < 0.0f && FadeSys.fade == 0.0f) {
+                PodRace->lap_display = 0.0f;
+                if (Player[0] != NULL && Player[0]->apiobj.player_controlled)
+                    LoseCoins(Player[0], 1);
+                if (Player[1] != NULL && Player[1]->apiobj.player_controlled)
+                    LoseCoins(Player[1], 1);
+                PodRace->flags |= 2;
+                KillPlayer(player, 2, 1, NULL);
+                ++PodRace->lap_attempts;
+                if (PodRace->prev_lap_display < PodRace->max_lap_time && PodRace->lap_attempts_per_increment != 0 &&
+                    PodRace->lap_attempts % PodRace->lap_attempts_per_increment == 0) {
+                    float time = PodRace->prev_lap_display + PodRace->lap_time_increment;
+                    PodRace->prev_lap_display = time <= PodRace->max_lap_time ? time : PodRace->max_lap_time;
+                }
+            }
         }
+    }
+    if (old_countdown > 0.0f) {
+        avg_currentspeed_mul = 0.0f;
+        PodRace->lap_display = PodRace->prev_lap_display;
+        if (Player[0] != NULL && Player[0]->apiobj.player_controlled)
+            Player[0]->current_speed_mul = 0.0f;
+        if (Player[1] != NULL && Player[1]->apiobj.player_controlled)
+            Player[1]->current_speed_mul = 0.0f;
+        if (netclient == 0 && FadeSys.fade == 0.0f)
+            PodRace->lap_countdown -= dt;
+        if (PodRace->lap_countdown < 2.9f && old_countdown >= 2.9f)
+            PlaySfx("PodX_EngStartup1", NULL);
+        if (PodRace->lap_countdown < 1.5f && old_countdown >= 1.5f)
+            PlaySfx("PodX_EngStartup2", NULL);
+        if (PodRace->lap_countdown <= 0.0f)
+            PlaySfx("Pod_Race_Go", NULL);
+        else if ((i32)PodRace->lap_countdown != (i32)old_countdown)
+            PlaySfx("Pod_Race_Light", NULL);
+    }
+    for (i32 i = 0; i < 0x10; i++) {
+        racepod_s *pod = &PodRace->lap_entries[i];
+        if (pod->next == NULL || pod->spline == NULL)
+            continue;
+        GameObject_s *object = pod->object;
+        if (object == NULL || !object->apiobj.in_use || object->apiobj.field_0x287 != 0) {
+            memset(pod, 0, sizeof(*pod));
+            continue;
+        }
+        if (PodRace->lap_countdown <= 0.0f) {
+            _vuv_s direction = {pod->previous_position.x - pod->matrix.m30, pod->previous_position.y - pod->matrix.m31,
+                                pod->previous_position.z - pod->matrix.m32, 0.0f};
+            float length_sq = direction.x * direction.x + direction.y * direction.y + direction.z * direction.z;
+            if (pod->start < 1.0f) {
+                float dot =
+                    direction.x * pod->matrix.m20 + direction.y * pod->matrix.m21 + direction.z * pod->matrix.m22;
+                while (length_sq < 1.0f || dot < 0.0f) {
+                    pod->start += PODRACE_SPLINEINC;
+                    if (pod->start > 1.0f) {
+                        pod->start = 1.0f;
+                        break;
+                    }
+                    CalcSplinePoint(pod->spline, &pod->previous_position, pod->start);
+                    direction.x = pod->previous_position.x - pod->matrix.m30;
+                    direction.y = pod->previous_position.y - pod->matrix.m31;
+                    direction.z = pod->previous_position.z - pod->matrix.m32;
+                    length_sq = direction.x * direction.x + direction.y * direction.y + direction.z * direction.z;
+                    dot = direction.x * pod->matrix.m20 + direction.y * pod->matrix.m21 + direction.z * pod->matrix.m22;
+                }
+            }
+            float length = NuFsqrt(length_sq);
+            if (pod->start >= 1.0f || length != 0.0f) {
+                if (pod->start < 1.0f) {
+                    float ratio = PodRace->mushroom_timer / PodRace->prev_lap_display;
+                    if (ratio > 1.0f)
+                        ratio = 1.0f;
+                    float speed = pod->speed;
+                    if (WORLD->current_level == PODRACEB_LDATA && Lap == 1) {
+                        speed /= 0.995f;
+                        if (ratio >= 0.01f)
+                            speed = speed * 1.5f - (ratio - 0.01f) * speed;
+                        else
+                            speed = speed * ratio / 0.01f;
+                    } else {
+                        speed = 1.5f * speed - ratio * speed;
+                    }
+                    speed /= length;
+                    pod->previous_axis.x = direction.x * speed;
+                    pod->previous_axis.y = direction.y * speed;
+                    pod->previous_axis.z = direction.z * speed;
+                }
+                direction.x = pod->previous_axis.x * FRAMETIME;
+                direction.y = pod->previous_axis.y * FRAMETIME;
+                direction.z = pod->previous_axis.z * FRAMETIME;
+                pod->matrix.m30 += direction.x;
+                pod->matrix.m31 += direction.y;
+                pod->matrix.m32 += direction.z;
+                RacePodAlign(pod, &direction, length / 5.0f, 0);
+                pod->previous_displacement = direction;
+            }
+            object = pod->object;
+            if (world->current_level == PODRACEA_LDATA && object != NULL && pod->model_id == id_SEBULBASPOD &&
+                NuSpecialExistsFn(&minesys.mine_special) != 0) {
+                object->special_move_timer -= FRAMETIME;
+                if (object->special_move_timer < 0.0f && player != NULL) {
+                    NUVEC origin = object->apiobj.position;
+                    origin.y += 1.0f;
+                    // The reference leaves the close-range velocity uninitialized.
+                    // A stationary mine keeps that path deterministic and safe.
+                    NUVEC velocity = {0.0f, 0.0f, 0.0f};
+                    NUVEC difference;
+                    float distance_sq = NuVecDistSqr(&player->apiobj.collision_position,
+                                                     &object->apiobj.collision_position, &difference);
+                    if (distance_sq > 36.0f) {
+                        NUVEC target = {3.0f - NuRandFloat() * 3.0f, 0.0f, 3.0f};
+                        NuVecRotateY(&target, &target, player->yrot);
+                        NuVecAdd(&target, &target, &player->apiobj.collision_position);
+                        NUVEC target_velocity = {0.0f, 0.0f, CurrentSpeed};
+                        NuVecRotateY(&target_velocity, &target_velocity, player->yrot);
+                        MakeThrowVector(&velocity, &origin, &target, &target_velocity, 20.0f, -10.0f);
+                        if (distance_sq > 100.0f) {
+                            velocity.y = 0.0f;
+                            NuVecNorm(&velocity, &velocity);
+                            NuVecScale(&velocity, &velocity, 10.0f);
+                            NuVecAdd(&target, &origin, &velocity);
+                            target_velocity = {0.0f, 0.0f, 0.0f};
+                            MakeThrowVector(&velocity, &origin, &target, &target_velocity, 20.0f, -10.0f);
+                        }
+                    }
+                    NUMTX matrix;
+                    NuMtxSetTranslation(&matrix, &origin);
+                    ADDPART_s part = Default_ADDPART;
+                    part.matrix = &matrix;
+                    part.velocity = &velocity;
+                    part.field_14 = part.field_18 = NuSpecialGetOriginRadius(&minesys.mine_special);
+                    part.special = &minesys.mine_special;
+                    part.field_28 = 0x29a;
+                    part.gravity = -10.0f;
+                    part.field_40 = PartCollide_3D;
+                    part.field_44 = Mine_Kill;
+                    part.time_step = FRAMETIME;
+                    part.field_a4 = 5.0f;
+                    AddPart(&part);
+                    GameObject_s *thrower = pod->object;
+                    float interval = throw_time - dthrow_time;
+                    float range = dthrow_time + dthrow_time;
+                    thrower->special_move_timer = range * NuRandFloat() + interval;
+                }
+            }
+        }
+        pod->matrix.m33 = 1.0f;
+        object = pod->object;
+        if (object != NULL) {
+            object->vehicle_orientation = pod->matrix;
+            object->apiobj.position = {pod->matrix.m30, pod->matrix.m31, pod->matrix.m32};
+            object->saved_position = object->apiobj.position;
+        }
+    }
+    if ((PodRace->flags & 1) == 0 && ((Player[0] != NULL && Player[0]->apiobj.field_0x287 != 0) ||
+                                      (Player[1] != NULL && Player[1]->apiobj.field_0x287 != 0))) {
+        PodRace->flags |= 1;
+        char reason[0xc8];
+        NuStrCpy(reason, (PodRace->flags & 2) == 0 ? "EP1_PODRACE_PODEXPLODE" : "Ep1_PodRace_OutOfTime");
+        ResetLevel(world, reason, 1);
+    }
+    if (netclient == 0 && podrace_netpacket != NULL) {
+        podrace_netpacket->start_countdown = PodRace->lap_countdown;
+        podrace_netpacket->remaining_time = PodRace->lap_display;
+        podrace_netpacket->available_time = PodRace->prev_lap_display;
+        podrace_netpacket->lap = Lap;
     }
 }
 
 void PodRacePanel(WORLDINFO_s *world) {
-    if (netclient != 0) {
-        podlapalpha = podrace_netpacket->countdown;
-        if (podlapalpha > 0.0f) {
-            WORLDLEVOBJ_s *entry = &((WORLDLEVOBJ_s *)world->lev_objs)[Lap + 0x135];
-            if (entry->enabled != 0)
-                return;
-            Text3DEx(NULL, 0, 1.0f, 0.16f, 0.16f, 0.16f, (u16)0, (u16)0, (u16)0, 0, 0x3f, 0);
-        } else {
-            if (podhurryalpha > 0.0f && PodRace != NULL && PodRace->lap_display > 0.0f) {
-                char buf[0x20];
-                sprintf(buf, "%i", (i32)PodRace->lap_display + 1);
-                if (NuFmod(PodRace->lap_display, 1.0f) < 0.7f)
-                    Text3DEx(buf, 0, 0.4f, 1.0f, 0.75f, 0.75f, 0.75f, 0, 0xff, 0x3f, 0, (u8)(128.0f * podhurryalpha));
-            }
-            if (podstartracealpha > 0.0f && PodRace != NULL && PodRace->lap_countdown > 0.0f) {
-                char buf[0x20];
-                sprintf(buf, "%i", (i32)PodRace->lap_countdown + 1);
-                if (NuFmod(PodRace->lap_countdown, 1.0f) < 0.7f)
-                    Text3DEx(buf, 0, 0.4f, 1.0f, 0.75f, 0.75f, 0.75f, 0, 0, 0, 0, (u8)(128.0f * podstartracealpha));
-            }
-        }
-    } else {
+    if (world == NULL || PodRace == NULL || podrace_netpacket == NULL)
+        return;
+    if (netclient == 0)
         podrace_netpacket->countdown = podlapalpha;
-        if (podhurryalpha > 0.0f && PodRace != NULL && PodRace->lap_display > 0.0f) {
-            char buf[0x20];
-            sprintf(buf, "%i", (i32)PodRace->lap_display + 1);
-            if (NuFmod(PodRace->lap_display, 1.0f) < 0.7f)
-                Text3DEx(buf, 0, 0.4f, 1.0f, 0.75f, 0.75f, 0.75f, 0, 0xff, 0x3f, 0, (u8)(128.0f * podhurryalpha));
-        }
-        if (podstartracealpha > 0.0f && PodRace != NULL && PodRace->lap_countdown > 0.0f) {
-            char buf[0x20];
-            sprintf(buf, "%i", (i32)PodRace->lap_countdown + 1);
-            if (NuFmod(PodRace->lap_countdown, 1.0f) < 0.7f)
-                Text3DEx(buf, 0, 0.4f, 1.0f, 0.75f, 0.75f, 0.75f, 0, 0, 0, 0, (u8)(128.0f * podstartracealpha));
-        }
+    else
+        podlapalpha = podrace_netpacket->countdown;
+    if (podlapalpha > 0.0f && world->lev_objs != NULL && Lap >= 0 && Lap <= 3) {
+        LEVEL_OBJECT_RUNTIME_s *entry = &world->lev_objs[Lap + 0x135];
+        if (entry->active != 0)
+            DrawPanel3DObject(0.0f, BOSSICONY, 1.0f, 0.16f, 0.16f, 0.16f, 0, 0, 0, &entry->special, 0, podlapalpha);
+    }
+    char text[256];
+    if (podhurryalpha > 0.0f && PodRace->lap_display > 0.0f) {
+        sprintf(text, "%i", (i32)PodRace->lap_display + 1);
+        float fraction = NuFmod(PodRace->lap_display, 1.0f);
+        float scale = 1.0f;
+        if (fraction >= 0.7f)
+            scale = (fraction - 0.7f) / 0.3f + 1.0f;
+        scale *= 0.75f;
+        Text3DEx(text, 0.0f, 0.425f, 1.0f, scale, scale, scale, 0, 255, 63, 0, (u8)(i32)(128.0f * podhurryalpha));
+    }
+    if (podstartracealpha != 0.0f && PodRace->lap_countdown > 0.0f) {
+        sprintf(text, "%i", (i32)PodRace->lap_countdown + 1);
+        float fraction = NuFmod(PodRace->lap_countdown, 1.0f);
+        float scale = 1.0f;
+        if (fraction >= 0.7f)
+            scale = (fraction - 0.7f) / 0.3f + 1.0f;
+        scale *= 0.75f;
+        Text3DEx(text, 0.0f, 0.425f, 1.0f, scale, scale, scale, 0, 0, 255, 0, (u8)(i32)(128.0f * podstartracealpha));
     }
 }
 

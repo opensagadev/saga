@@ -5251,3 +5251,58 @@ fields and callbacks, nonempty areas/locators/sets, references, activation areas
 antinodes and special handles, route character masks, pak success/fallback and
 missing files. Services are stand-ins, not full asset/gameplay integration;
 LeakSanitizer is disabled for sandbox compatibility.
+
+## Batch 104: terrain query handles and platform reach
+
+Restore the explicit position/movement/radius arguments of `NewScanHandelFull`
+and `NewScanHandelSubset`, instead of serializing an unrelated global query.
+Recover cell/group bounds, skin allocation, masks, platform motion expansion,
+rotating-platform radial/vertex tests and subset wall filtering. Preserve the
+full handle's override state and copy wall pairs into its arena so subsequent
+queries do not overwrite them. Bound allocation; retain pointer-width headers
+for native consumers. Remove the unused serialization helper.
+
+Recover `ScanTerrainPlatform`'s broad-phase formulas, including the non-mode-one
+squared movement reach and exact 0.05 expansion. Keep existing transformation
+helpers and compiler options: a single-function reconstruction scored worse.
+The subset improves **2.659130% to 16.001740%** and platform scan **5.650155%
+to 12.652219%**. The restored full body reports zero; its helper/source layout
+remains unresolved. Overall matching is **65.624590%**, **+0.500110 percentage
+points** from main, with **6,266** exact functions.
+
+Extracted bodies pass optimized i386 and 64-bit ASan/UBSan fixtures: explicit
+query arguments, static/platform/rotating geometry, motion expansion, masks,
+visibility, subsets, triangle normals, vertical scaling, wall-copy lifetime,
+invalid inputs and repeated arena allocation. Services are stand-ins, not
+full gameplay integration; LeakSanitizer is disabled for the sandbox.
+
+## Batch 105: pod-race update, panel and mixed-font text
+
+Replace the incomplete `PodRaceUpdate` body with countdown/startup sounds,
+elapsed-time failure and adaptive lap allowance, host/client synchronization,
+spline-driven racers, Sebulba's mine throws, transform/position publication,
+and one-shot level resets. Recover the 20-byte network packet, attempt counter
+and pod displacement/spline views. Keep private `RacePodAlign` and its natural
+caller closure; no calling-convention or compiler-option changes. Initialize
+the close-range mine velocity: the reference leaves it indeterminate.
+
+Restore the pod panel's actual lap object drawing, numeric pulse scaling and
+start-countdown colour. Remove the null-text draw and erroneous early return.
+`Text3DEx` now resets empty-result metrics, handles separate button-font runs,
+nonuniform button scaling, inline colour presets/reset, half-intensity RGB and
+follow-on colour state. Recover preset tables from the binary; bound invalid
+preset escapes rather than indexing outside the tables.
+
+`PodRaceUpdate` improves **4.656635% to 10.575923%** and `PodRacePanel` reaches
+**81.398735%**. Text's restored body scores **6.461642%**, below its incomplete
+**11.332756%** baseline; its source/compiler layout remains debt. The combined
+unit improves overall matching to **65.642480%**, **+0.518000 percentage points**
+from main. The approximately two-point goal continues.
+
+Extracted bodies pass optimized i386 and 64-bit ASan/UBSan fixtures for race
+timers, fading, network state, spline advancement/end motion, transforms,
+close/medium/far mine throws and resets; panel object/numeric rendering;
+text/button segmentation, three scale modes, presets, half colours, alignment,
+follow-on state, empty/hidden input and long/multibyte boundaries. Rendering,
+math and engine services are stand-ins, not full gameplay integration.
+LeakSanitizer is disabled for sandbox compatibility.

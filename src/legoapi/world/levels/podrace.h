@@ -49,12 +49,15 @@ struct racepod_s {
     NUMTX matrix;
     _vuv_s previous_axis;
     _vuv_s previous_position;
-    char pad_0x60[0x10];
+    _vuv_s previous_displacement; // 0x60
     i32 pitch;
     i32 yaw;
     i32 pad_0x78;
     float speed;
-    u32 *data;
+    union {
+        u32 *data;
+        flightspline_s *spline;
+    };
     float start;
     i16 model_id;
     i16 pad_0x8a;
@@ -75,7 +78,7 @@ struct PODRACE_s {
     float max_lap_time;
     float lap_time_increment;
     i32 lap_attempts_per_increment;
-    char pad_0xaf1c[0xaf20 - 0xaf1c];
+    i32 lap_attempts; // 0xaf1c
     u8 flags;
     char pad_0xaf21[0xaf24 - 0xaf21];
 };

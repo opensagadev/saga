@@ -5536,9 +5536,13 @@ struct PlaceableNameControl : EdStringControl {
 DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(PlaceableNameControl) == 0x14, "PlaceableNameControl size");
 // Pod race net packet (podrace_netpacket).
 struct PODRACENETPACKET_s {
-    char pad_0x00[0xc];
-    float countdown; // 0x0c
+    float start_countdown; // 0x00
+    float remaining_time;  // 0x04
+    float available_time;  // 0x08
+    float countdown;       // 0x0c
+    i32 lap;               // 0x10
 };
+DECOMP_ASSERT(sizeof(PODRACENETPACKET_s) == 0x14, "pod race network packet size");
 
 // One AI spline slot inside the pod sprint state. Type name from the original
 // local symbol _ZL22PodSprint_InitAISplineP11WORLDINFO_sP20PODSPRINT_AISPLINE_sPc.
