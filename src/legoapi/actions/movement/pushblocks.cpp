@@ -4,6 +4,7 @@
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/numath/numath.h"
 #include "decomp.h"
+#include "nu2api/nucore/nuanim3.h"
 #include "globals.h"
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/characters/core/players.h"
@@ -366,13 +367,16 @@ __attribute__((optimize("O2"))) void GizmoPushBlockInitAndReset(WORLDINFO_s *wor
     world->push_block_positions = reinterpret_cast<NUVEC *>(world->giz_buffer.void_ptr);
     world->giz_buffer.addr =
         ALIGN(world->giz_buffer.addr + world->current_level->max_push_block_end_pos * sizeof(NUVEC), 4);
+    pushblock_s *block = world->push_blocks;
     ResetPushProgress(world, progress);
 
-    for (i32 index = 0; index < world->push_block_count; ++index) {
-        pushblock_s *block = &world->push_blocks[index];
+    for (i32 index = 0; index < world->push_block_count; ++index, ++block) {
         block->runtime_flags_0c9 &= 0x8f;
-        if (NuSpecialGetInstAnim(&block->special) != NULL) {
-            i32 positions = static_cast<i32>(NuSpecialGetAnimEndFrame(&block->special)) & 7;
+        nuinstanim_s *animation = NuSpecialGetInstAnim(&block->special);
+        if (animation != NULL) {
+            i32 positions =
+                static_cast<i32>(NuAnimEndFrameOld(block->special.scene->instance_animation_data[animation->anim_ix])) &
+                7;
             block->output_count = positions;
             block->runtime_flags_0c9 = (block->runtime_flags_0c9 & 0x8f) | ((positions & 7) << 4);
             const i32 required = world->push_block_position_count + positions;
@@ -382,13 +386,14 @@ __attribute__((optimize("O2"))) void GizmoPushBlockInitAndReset(WORLDINFO_s *wor
                 runoutofpostabspace = 1;
             } else if (positions != 0 && runoutofpostabspace == 0) {
                 block->snap_positions = &world->push_block_positions[world->push_block_position_count];
-                for (i32 position = 0; position < positions; ++position) {
+                for (i32 position = 0; position < ((block->runtime_flags_0c9 >> 4) & 7); ++position) {
                     NUMTX evaluated;
                     EvalAnim(&block->special, static_cast<f32>(position + 1), &evaluated, 0);
                     block->snap_positions[position] = *reinterpret_cast<NUVEC *>(&evaluated.m30);
-                    block->snap_positions[position].x += NuSpecialGetMtx(&block->special)->m30;
-                    block->snap_positions[position].y += NuSpecialGetMtx(&block->special)->m31;
-                    block->snap_positions[position].z += NuSpecialGetMtx(&block->special)->m32;
+                    evaluated = *NuSpecialGetMtx(&block->special);
+                    block->snap_positions[position].x += evaluated.m30;
+                    block->snap_positions[position].y += evaluated.m31;
+                    block->snap_positions[position].z += evaluated.m32;
                     ++world->push_block_position_count;
                 }
             }
@@ -396,43 +401,54 @@ __attribute__((optimize("O2"))) void GizmoPushBlockInitAndReset(WORLDINFO_s *wor
         ResetSinglePushBlock(world, block, index);
     }
 
-    for (i32 index = 0; index < world->push_block_count; ++index) {
-        pushblock_s *block = &world->push_blocks[index];
+    block = world->push_blocks;
+    for (i32 index = 0; index < world->push_block_count; ++index, ++block) {
+        NUVEC centre = *block->position;
         block->velocity = v000;
         block->target_velocity = v000;
-        block->snap_origin = *block->position;
+        block->snap_origin = centre;
 
         const f32 left = fabsf(block->bounds_min.x) - 0.006f;
         const f32 right = fabsf(block->bounds_max.x) - 0.006f;
         const f32 back = fabsf(block->bounds_min.z) - 0.006f;
         const f32 front = fabsf(block->bounds_max.z) - 0.006f;
-        const f32 y = block->position->y - fabsf(block->bounds_min.y) + 0.026f;
+        const f32 y = centre.y - fabsf(block->bounds_min.y) + 0.001f + 0.025f;
         NUVEC corners[4] = {
-            {block->position->x - left, y, block->position->z - back},
-            {block->position->x + right, y, block->position->z - back},
-            {block->position->x + right, y, block->position->z + front},
-            {block->position->x - left, y, block->position->z + front},
+            {centre.x - left, y, centre.z - back},
+            {centre.x + right, y, centre.z - back},
+            {centre.x + right, y, centre.z + front},
+            {centre.x - left, y, centre.z + front},
         };
-        f32 heights[4];
         PlatOnOff(block->platform_id, 0);
-        for (i32 corner = 0; corner < 4; ++corner) {
-            NewTerrPlatformsOff();
-            heights[corner] = GameShadow(NULL, &corners[corner], 0.1f, -1);
-            block->terrain_info[corner] = static_cast<i8>(ShadowInfo());
-            block->extra_terrain_info[corner] = static_cast<i8>(EShadowInfo());
-        }
+        NewTerrPlatformsOff();
+        const f32 height0 = GameShadow(NULL, &corners[0], 0.1f, -1);
+        block->terrain_info[0] = static_cast<i8>(ShadowInfo());
+        block->extra_terrain_info[0] = static_cast<i8>(EShadowInfo());
+        NewTerrPlatformsOff();
+        const f32 height1 = GameShadow(NULL, &corners[1], 0.1f, -1);
+        block->terrain_info[1] = static_cast<i8>(ShadowInfo());
+        block->extra_terrain_info[1] = static_cast<i8>(EShadowInfo());
+        NewTerrPlatformsOff();
+        const f32 height2 = GameShadow(NULL, &corners[2], 0.1f, -1);
+        block->terrain_info[2] = static_cast<i8>(ShadowInfo());
+        block->extra_terrain_info[2] = static_cast<i8>(EShadowInfo());
+        NewTerrPlatformsOff();
+        const f32 height3 = GameShadow(NULL, &corners[3], 0.1f, -1);
+        block->terrain_info[3] = static_cast<i8>(ShadowInfo());
+        block->extra_terrain_info[3] = static_cast<i8>(EShadowInfo());
         PlatOnOff(block->platform_id, 1);
 
-        if (heights[0] == heights[1] && heights[1] == heights[2] && heights[2] == heights[3]) {
+        if (height1 == height2 && height0 == height1 && height2 == height3) {
             NewTerrPlatformsOff();
-            block->ground_height = GameShadow(NULL, block->position, 5.0f, -1);
+            block->ground_height = GameShadow(NULL, &centre, 5.0f, -1);
             if (block->ground_height == 2000000.0f) {
                 block->ground_height = 0.0f;
             }
         } else {
-            block->ground_height = (heights[0] + heights[1] + heights[2] + heights[3]) * 0.25f;
+            block->ground_height = (height1 + height0 + height2 + height3) * 0.25f;
         }
-        TerrainBlockOnBlock(world, block, corners, heights);
+        f32 support_heights[4];
+        TerrainBlockOnBlock(world, block, corners, support_heights);
         block->previous_extra_terrain_info = *reinterpret_cast<i32 *>(block->extra_terrain_info);
     }
 

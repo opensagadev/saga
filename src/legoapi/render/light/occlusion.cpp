@@ -136,40 +136,58 @@ bool OccluderSet::IsOccludedSphere(nuvec_s const *center, float radius) {
         return false;
     NUVEC4 projected;
     NuVec4MtxTransform(&projected, const_cast<NUVEC *>(center), &projection_matrix);
-    if (radius > projected.w)
+    if (!(radius <= projected.w))
         return false;
     projected.x /= projected.w;
+    i32 limit = static_cast<i32>(count) < 101 ? static_cast<i32>(count) : 100;
     projected.y /= projected.w;
     projected.z /= projected.w;
     float screen_radius = radius / projected.w;
-    i32 limit = static_cast<i32>(count) < 100 ? static_cast<i32>(count) : 100;
+    NUVEC4 normal;
     for (i32 i = 0; i != limit; ++i) {
         if (indices[i] == 0xffffffffu)
             continue;
         OccluderRecord &record = occluders[indices[i]];
-        if (record.depth > projected.w - radius - 2.0f)
+        if (projected.w - radius - 2.0f < record.depth)
             return false;
-        if (projected.x - screen_radius > record.max_x || projected.y - screen_radius > record.max_y ||
-            record.min_x > projected.x + screen_radius || record.min_y > projected.y + screen_radius)
+        if (!(projected.x - screen_radius <= record.max_x && projected.y - screen_radius <= record.max_y &&
+              record.min_x <= projected.x + screen_radius && record.min_y <= projected.y + screen_radius))
             continue;
         NUVEC4 *v = record.transformed;
         float winding = (v[1].y - v[0].y) * (v[2].x - v[0].x) - (v[1].x - v[0].x) * (v[2].y - v[0].y);
-        bool inside = true;
-        for (i32 edge = 0; edge < 4; ++edge) {
-            i32 start = winding > 0.0f ? edge : 3 - edge;
-            i32 end = winding > 0.0f ? (edge + 1) & 3 : (6 - edge) & 3;
-            NUVEC4 normal = {v[end].y - v[start].y, -(v[end].x - v[start].x), 0.0f, 0.0f};
-            NuVecNorm(reinterpret_cast<NUVEC *>(&normal), reinterpret_cast<NUVEC *>(&normal));
-            normal.z = normal.w = 0.0f;
-            float distance =
-                (projected.x - v[start].x) * normal.x + (projected.y - v[start].y) * normal.y + 0.0f - screen_radius;
-            if (distance < 0.0f) {
-                inside = false;
-                break;
-            }
-        }
-        if (inside)
-            return true;
+        NUVEC4 *start = &v[(winding <= 0.0f) * 3];
+        NUVEC4 *end = &v[(winding <= 0.0f) + 1];
+        normal.y = -(end->x - start->x);
+        normal.x = end->y - start->y;
+        normal.z = normal.w = 0.0f;
+        NuVecNorm(reinterpret_cast<NUVEC *>(&normal), reinterpret_cast<NUVEC *>(&normal));
+        if (!(0.0f <= (projected.x - start->x) * normal.x + (projected.y - start->y) * normal.y + 0.0f - screen_radius))
+            continue;
+        start = &v[(winding <= 0.0f) + 1];
+        end = &v[(winding > 0.0f) + 1];
+        normal.y = -(end->x - start->x);
+        normal.x = end->y - start->y;
+        normal.z = normal.w = 0.0f;
+        NuVecNorm(reinterpret_cast<NUVEC *>(&normal), reinterpret_cast<NUVEC *>(&normal));
+        if (!(0.0f <= (projected.x - start->x) * normal.x + (projected.y - start->y) * normal.y + 0.0f - screen_radius))
+            continue;
+        start = &v[(winding > 0.0f) + 1];
+        end = &v[(winding > 0.0f) * 3];
+        normal.y = -(end->x - start->x);
+        normal.x = end->y - start->y;
+        normal.z = normal.w = 0.0f;
+        NuVecNorm(reinterpret_cast<NUVEC *>(&normal), reinterpret_cast<NUVEC *>(&normal));
+        if (!(0.0f <= (projected.x - start->x) * normal.x + (projected.y - start->y) * normal.y + 0.0f - screen_radius))
+            continue;
+        start = &v[(winding > 0.0f) * 3];
+        end = &v[(winding <= 0.0f) * 3];
+        normal.y = -(end->x - start->x);
+        normal.x = end->y - start->y;
+        normal.z = normal.w = 0.0f;
+        NuVecNorm(reinterpret_cast<NUVEC *>(&normal), reinterpret_cast<NUVEC *>(&normal));
+        if (!(0.0f <= (projected.x - start->x) * normal.x + (projected.y - start->y) * normal.y + 0.0f - screen_radius))
+            continue;
+        return true;
     }
     return false;
 }
@@ -217,42 +235,125 @@ void OccluderSet::PrepareForQueries(numtx_s const *query, numtx_s const *project
 }
 
 void OccluderSet::RenderOccluders(bool depth_only) const {
-    const u32 triangle_indices[6] = {0, 1, 2, 2, 3, 0};
+    NUMTL *material = NULL;
+    if (depth_only)
+        material = queries_prepared ? ms_pZOnlyMtl2D : ms_pZOnlyMtl3D;
     if (queries_prepared) {
         ++NuPrimCSPos;
         NuPrimSetCoordinateSystem(NUPRIM_SCALEMODE_NORMALISED);
-        NuPrim2DBegin(0, 5, depth_only ? ms_pZOnlyMtl2D : NULL);
-        for (u32 i = 0; i < count; ++i) {
+        NuPrim2DBegin(0, 5, material);
+        for (u32 i = 0; i != count; ++i) {
             if (indices[i] == 0xffffffffu)
                 continue;
             const OccluderRecord &record = occluders[indices[i]];
             if (record.min_depth < 0.0f || record.depth < 0.0f)
                 continue;
-            u32 colour = static_cast<u32>(record.vertices[0].x * record.vertices[0].z) | 0xff000000u;
-            for (u32 vertex = 0; vertex < 6; ++vertex) {
-                u32 packed = g_NuPrim_NeedsOverbrightening ? colour : ((colour >> 1) & 0x007f7f7fu) | 0xff000000u;
-                *reinterpret_cast<u32 *>(g_NuPrim_StreamBufferPtr->addr + 12) = packed;
-                const NUVEC4 &v = record.transformed[triangle_indices[vertex]];
-                NuPrim2DAddXYZ(v.x, -v.y, v.z);
-            }
+            i32 colour = static_cast<u32>(record.vertices[0].x * record.vertices[0].z) | 0xff000000u;
+            if (g_NuPrim_NeedsOverbrightening)
+                *reinterpret_cast<i32 *>(g_NuPrim_StreamBufferPtr->addr + 12) = colour;
+            else
+                *reinterpret_cast<i32 *>(g_NuPrim_StreamBufferPtr->addr + 12) =
+                    ((colour >> 1) & 0x007f7f7f) | 0xff000000u;
+            NuPrim2DAddXYZ(record.transformed[0].x, -record.transformed[0].y, record.transformed[0].z);
+            if (g_NuPrim_NeedsOverbrightening)
+                *reinterpret_cast<i32 *>(g_NuPrim_StreamBufferPtr->addr + 12) = colour;
+            else
+                *reinterpret_cast<i32 *>(g_NuPrim_StreamBufferPtr->addr + 12) =
+                    ((colour >> 1) & 0x007f7f7f) | 0xff000000u;
+            NuPrim2DAddXYZ(record.transformed[1].x, -record.transformed[1].y, record.transformed[1].z);
+            if (g_NuPrim_NeedsOverbrightening)
+                *reinterpret_cast<i32 *>(g_NuPrim_StreamBufferPtr->addr + 12) = colour;
+            else
+                *reinterpret_cast<i32 *>(g_NuPrim_StreamBufferPtr->addr + 12) =
+                    ((colour >> 1) & 0x007f7f7f) | 0xff000000u;
+            NuPrim2DAddXYZ(record.transformed[2].x, -record.transformed[2].y, record.transformed[2].z);
+            if (g_NuPrim_NeedsOverbrightening)
+                *reinterpret_cast<i32 *>(g_NuPrim_StreamBufferPtr->addr + 12) = colour;
+            else
+                *reinterpret_cast<i32 *>(g_NuPrim_StreamBufferPtr->addr + 12) =
+                    ((colour >> 1) & 0x007f7f7f) | 0xff000000u;
+            NuPrim2DAddXYZ(record.transformed[2].x, -record.transformed[2].y, record.transformed[2].z);
+            if (g_NuPrim_NeedsOverbrightening)
+                *reinterpret_cast<i32 *>(g_NuPrim_StreamBufferPtr->addr + 12) = colour;
+            else
+                *reinterpret_cast<i32 *>(g_NuPrim_StreamBufferPtr->addr + 12) =
+                    ((colour >> 1) & 0x007f7f7f) | 0xff000000u;
+            NuPrim2DAddXYZ(record.transformed[3].x, -record.transformed[3].y, record.transformed[3].z);
+            if (g_NuPrim_NeedsOverbrightening)
+                *reinterpret_cast<i32 *>(g_NuPrim_StreamBufferPtr->addr + 12) = colour;
+            else
+                *reinterpret_cast<i32 *>(g_NuPrim_StreamBufferPtr->addr + 12) =
+                    ((colour >> 1) & 0x007f7f7f) | 0xff000000u;
+            NuPrim2DAddXYZ(record.transformed[0].x, -record.transformed[0].y, record.transformed[0].z);
         }
         NuPrim2DEnd();
         --NuPrimCSPos;
         NuPrimSetCoordinateSystem(NuPrimCoordSystemStack[NuPrimCSPos]);
     } else {
-        NuPrim3DBegin(0, 5, depth_only ? ms_pZOnlyMtl3D : NULL, NULL);
-        for (u32 i = 0; i < count; ++i) {
-            const OccluderRecord &record = occluders[i];
-            u32 colour = static_cast<u32>(record.vertices[0].x * record.vertices[0].z) | 0xff000000u;
-            for (u32 vertex = 0; vertex < 6; ++vertex) {
-                u32 packed = g_NuPrim_NeedsOverbrightening ? colour : ((colour >> 1) & 0x007f7f7fu) | 0xff000000u;
-                *reinterpret_cast<u32 *>(g_NuPrim_StreamBufferPtr->addr + 12) = packed;
-                const NUVEC4 &v = record.vertices[triangle_indices[vertex]];
-                *reinterpret_cast<NUVEC *>(g_NuPrim_StreamBufferPtr->addr) = NUVEC{v.x, v.y, v.z};
+        NuPrim3DBegin(0, 5, material, NULL);
+        u32 total = count;
+        if (total != 0) {
+            i32 previous_vertices = g_NuPrim_VertexCount;
+            const OccluderRecord *record = occluders;
+            for (u32 i = 0; i != total; ++i, ++record) {
+                i32 colour = static_cast<u32>(record->vertices[0].x * record->vertices[0].z) | 0xff000000u;
+                if (g_NuPrim_NeedsOverbrightening)
+                    *reinterpret_cast<i32 *>(g_NuPrim_StreamBufferPtr->addr + 12) = colour;
+                else
+                    *reinterpret_cast<i32 *>(g_NuPrim_StreamBufferPtr->addr + 12) =
+                        ((colour >> 1) & 0x007f7f7f) | 0xff000000u;
+                reinterpret_cast<NUVEC *>(g_NuPrim_StreamBufferPtr->addr)->x = record->vertices[0].x;
+                reinterpret_cast<NUVEC *>(g_NuPrim_StreamBufferPtr->addr)->y = record->vertices[0].y;
+                reinterpret_cast<NUVEC *>(g_NuPrim_StreamBufferPtr->addr)->z = record->vertices[0].z;
+                g_NuPrim_StreamBufferPtr->addr += 24;
+                if (g_NuPrim_NeedsOverbrightening)
+                    *reinterpret_cast<i32 *>(g_NuPrim_StreamBufferPtr->addr + 12) = colour;
+                else
+                    *reinterpret_cast<i32 *>(g_NuPrim_StreamBufferPtr->addr + 12) =
+                        ((colour >> 1) & 0x007f7f7f) | 0xff000000u;
+                reinterpret_cast<NUVEC *>(g_NuPrim_StreamBufferPtr->addr)->x = record->vertices[1].x;
+                reinterpret_cast<NUVEC *>(g_NuPrim_StreamBufferPtr->addr)->y = record->vertices[1].y;
+                reinterpret_cast<NUVEC *>(g_NuPrim_StreamBufferPtr->addr)->z = record->vertices[1].z;
+                g_NuPrim_StreamBufferPtr->addr += 24;
+                if (g_NuPrim_NeedsOverbrightening)
+                    *reinterpret_cast<i32 *>(g_NuPrim_StreamBufferPtr->addr + 12) = colour;
+                else
+                    *reinterpret_cast<i32 *>(g_NuPrim_StreamBufferPtr->addr + 12) =
+                        ((colour >> 1) & 0x007f7f7f) | 0xff000000u;
+                reinterpret_cast<NUVEC *>(g_NuPrim_StreamBufferPtr->addr)->x = record->vertices[2].x;
+                reinterpret_cast<NUVEC *>(g_NuPrim_StreamBufferPtr->addr)->y = record->vertices[2].y;
+                reinterpret_cast<NUVEC *>(g_NuPrim_StreamBufferPtr->addr)->z = record->vertices[2].z;
+                g_NuPrim_StreamBufferPtr->addr += 24;
+                if (g_NuPrim_NeedsOverbrightening)
+                    *reinterpret_cast<i32 *>(g_NuPrim_StreamBufferPtr->addr + 12) = colour;
+                else
+                    *reinterpret_cast<i32 *>(g_NuPrim_StreamBufferPtr->addr + 12) =
+                        ((colour >> 1) & 0x007f7f7f) | 0xff000000u;
+                reinterpret_cast<NUVEC *>(g_NuPrim_StreamBufferPtr->addr)->x = record->vertices[2].x;
+                reinterpret_cast<NUVEC *>(g_NuPrim_StreamBufferPtr->addr)->y = record->vertices[2].y;
+                reinterpret_cast<NUVEC *>(g_NuPrim_StreamBufferPtr->addr)->z = record->vertices[2].z;
+                g_NuPrim_StreamBufferPtr->addr += 24;
+                if (g_NuPrim_NeedsOverbrightening)
+                    *reinterpret_cast<i32 *>(g_NuPrim_StreamBufferPtr->addr + 12) = colour;
+                else
+                    *reinterpret_cast<i32 *>(g_NuPrim_StreamBufferPtr->addr + 12) =
+                        ((colour >> 1) & 0x007f7f7f) | 0xff000000u;
+                reinterpret_cast<NUVEC *>(g_NuPrim_StreamBufferPtr->addr)->x = record->vertices[3].x;
+                reinterpret_cast<NUVEC *>(g_NuPrim_StreamBufferPtr->addr)->y = record->vertices[3].y;
+                reinterpret_cast<NUVEC *>(g_NuPrim_StreamBufferPtr->addr)->z = record->vertices[3].z;
+                g_NuPrim_StreamBufferPtr->addr += 24;
+                if (g_NuPrim_NeedsOverbrightening)
+                    *reinterpret_cast<i32 *>(g_NuPrim_StreamBufferPtr->addr + 12) = colour;
+                else
+                    *reinterpret_cast<i32 *>(g_NuPrim_StreamBufferPtr->addr + 12) =
+                        ((colour >> 1) & 0x007f7f7f) | 0xff000000u;
+                reinterpret_cast<NUVEC *>(g_NuPrim_StreamBufferPtr->addr)->x = record->vertices[0].x;
+                reinterpret_cast<NUVEC *>(g_NuPrim_StreamBufferPtr->addr)->y = record->vertices[0].y;
+                reinterpret_cast<NUVEC *>(g_NuPrim_StreamBufferPtr->addr)->z = record->vertices[0].z;
                 g_NuPrim_StreamBufferPtr->addr += 24;
             }
+            g_NuPrim_VertexCount = previous_vertices + total * 6;
         }
-        g_NuPrim_VertexCount += count * 6;
         NuPrim3DEnd();
     }
 }

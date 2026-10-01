@@ -1835,7 +1835,7 @@ static __used__ void ZapCode(GameObject_s *object, i32 pressed, i32 retract_weap
     }
 }
 
-static __used__ void FireCode(GameObject_s *object, i32 pressed, i32 held, f32 fire_delay, i32 delay_pressed) {
+static void FireCode(GameObject_s *object, i32 pressed, i32 held, f32 fire_delay, i32 delay_pressed) {
     f32 timer = object->quick_shoot_timer;
     if (timer > 0.0f) {
         timer -= FRAMETIME;
@@ -1847,7 +1847,11 @@ static __used__ void FireCode(GameObject_s *object, i32 pressed, i32 held, f32 f
     }
 
     const i8 context = object->character_context;
-    if (context == 0x36) {
+    if (context == 0x2a || context == -1) {
+        if (object->apiobj.field_0x287 != 0) {
+            return;
+        }
+    } else if (context == 0x36) {
         if (object->apiobj.field_0x287 != 0) {
             return;
         }
@@ -1855,7 +1859,7 @@ static __used__ void FireCode(GameObject_s *object, i32 pressed, i32 held, f32 f
         if (turn_progress > 0.2f && turn_progress < 0.666f) {
             return;
         }
-    } else if (context == 0x2a || context == -1 || context == 0x3a) {
+    } else if (context == 0x3a) {
         if (object->apiobj.field_0x287 != 0) {
             return;
         }
@@ -1863,7 +1867,7 @@ static __used__ void FireCode(GameObject_s *object, i32 pressed, i32 held, f32 f
         return;
     }
 
-    if (fire_delay != 0.0f && timer > 0.0f) {
+    if (delay_pressed != 0 && timer > 0.0f) {
         return;
     }
     if (pressed == 0) {
@@ -1873,8 +1877,9 @@ static __used__ void FireCode(GameObject_s *object, i32 pressed, i32 held, f32 f
     }
 
     const i32 bolt_id =
-        BoltType_FindIDByCreature(object, (object->apiobj.character_data->model_flags & 0x10000000) == 0 ? 5 : 0x15);
+        BoltType_FindIDByCreature(object, (object->apiobj.character_data->model_flags & 0x04000000) == 0 ? 5 : 0x15);
     BOLTTYPE_s *bolt_type = BoltType_FindByID(bolt_id, WORLD);
+    const u32 target_flags = bolt_type->field_60;
 
     if (static_cast<i8>(object->apiobj.flags_low) < 0) {
         NUVEC direction;
@@ -1892,12 +1897,12 @@ static __used__ void FireCode(GameObject_s *object, i32 pressed, i32 held, f32 f
         NUVEC origin;
         BoltSys->shoot_origin(object, &origin);
 
-        const i32 target_mode = ((bolt_type->field_60 >> 14) ^ 1) & 1;
+        const i32 target_mode = ((target_flags >> 14) ^ 1) & 1;
         const f32 range_squared = range * range;
         const bool target_bolts = (bolt_type->field_60 & 0x800) == 0;
         const AREADATA_s *area = WORLD->area;
 
-        if (area == BONUS_GUNSHIP_ADATA) {
+        if (area != NULL && area == BONUS_GUNSHIP_ADATA) {
             if (object->id == id_REPUBLICGUNSHIP || object->id == id_REPUBLICGUNSHIP_GREEN) {
                 i32 angle;
                 if (player2 == NULL) {
@@ -4251,34 +4256,30 @@ void Move_VEHICLE(GameObject_s *object) {
         return;
     }
 
-    CHARACTERDATA *character = object->apiobj.character_data;
-    GAMECHARACTERDATA *vehicle = character->game_character;
-
     KeepWeaponOut(object);
     DropInOutCode(object);
     if ((object->field_0xe20 & GAMEOBJECT_E20_FLAG_MOVEMENT_DISABLED) != 0) {
         return;
     }
 
-    if ((vehicle->flags_094[0] & 0x20) == 0) {
-        if (vehicle->uses_weapon_action == 0x15) {
+    if ((object->apiobj.character_data->game_character->flags_094[0] & 0x20) == 0) {
+        if (object->apiobj.character_data->game_character->uses_weapon_action == 0x15) {
             ApplyGravity(object, NULL, FindGunshipHoverHeight(object), 8.0f, NULL);
         } else {
-            f32 hover_height = 0.0f;
-            if (vehicle->field_0x28 > 0.0f) {
-                hover_height = GetVehicleHoverHeight(object, NULL);
-            }
-            if (hover_height != 0.0f || getvehiclehoverheight_hothbattlehack != 0) {
-                ApplyGravity(object, NULL, hover_height, 10.0f, NULL);
-            } else {
-                if (object->character_context != 0x17) {
-                    hover_height = vehicle->field_0x28;
+            if (object->apiobj.character_data->game_character->field_0x28 > 0.0f) {
+                const f32 hover_height = GetVehicleHoverHeight(object, NULL);
+                if (hover_height != 0.0f || getvehiclehoverheight_hothbattlehack != 0) {
+                    ApplyGravity(object, NULL, hover_height, 10.0f, NULL);
+                    goto vehicle_gravity_done;
                 }
-                ApplyGravity(object, NULL, hover_height, 8.0f, NULL);
             }
+            const f32 hover_height =
+                object->character_context != 0x17 ? object->apiobj.character_data->game_character->field_0x28 : 0.0f;
+            ApplyGravity(object, NULL, hover_height, 8.0f, NULL);
         }
     }
 
+vehicle_gravity_done:
     DeactivatedCode(object);
 
     if (object->id == id_SNOWMOB) {
@@ -4307,13 +4308,15 @@ void Move_VEHICLE(GameObject_s *object) {
         }
     }
 
-    if (vehicle->field_0x28 > 0.0f && (vehicle->flags_090 & 0x10000) == 0) {
+    if (object->apiobj.character_data->game_character->field_0x28 > 0.0f &&
+        (object->apiobj.character_data->game_character->flags_090 & 0x10000) == 0) {
         LoopCode(object, pad->buttons_pressed & GAMEPAD_JUMP, pad->buttons_held & GAMEPAD_JUMP, pad, 1);
         TurnCode(object, 0, pad);
         DisorientateCode(object, NULL, 225.0f);
     }
 
-    if ((character->model_flags & 0x10000000) != 0 && (vehicle->flags_094[0] & 8) == 0) {
+    if ((object->apiobj.character_data->model_flags & 0x10000000) != 0 &&
+        (object->apiobj.character_data->game_character->flags_094[0] & 8) == 0) {
         if (object->id == id_STAP || object->id == id_STAP2) {
             if (object->apiobj.character_model->model_data_b[0x16] == NULL) {
                 FireCode(object, pad->buttons_pressed & GAMEPAD_ACTION, pad->buttons_held & GAMEPAD_ACTION, 0.25f, 1);
@@ -4327,7 +4330,7 @@ void Move_VEHICLE(GameObject_s *object) {
     if (WORLD->current_level == DOGFIGHTA_LDATA) {
         CatchUpCode(object, 0.01f, 2.0f, 0);
     }
-    if ((vehicle->flags_090 & 0x400) != 0) {
+    if ((object->apiobj.character_data->game_character->flags_090 & 0x400) != 0) {
         CableCode(object, pad->buttons_pressed & GAMEPAD_SPECIAL, 0.5f);
     }
     if (WORLD->area != NULL && (WORLD->area->flags & 1) != 0 && static_cast<i8>(object->apiobj.flags_low) < 0 &&
@@ -4367,7 +4370,7 @@ void Move_VEHICLE(GameObject_s *object) {
                 object->apiobj.roll_angle = 0;
                 object->apiobj.velocity.x = 0.0f;
                 object->apiobj.velocity.y = 0.0f;
-                object->apiobj.velocity.z = 2.0f * vehicle->run_speed;
+                object->apiobj.velocity.z = 2.0f * object->apiobj.character_data->game_character->run_speed;
                 x_rotation = 0xc000;
                 goto rotate_flight_velocity;
             }
@@ -4377,7 +4380,7 @@ void Move_VEHICLE(GameObject_s *object) {
             object->apiobj.roll_angle = 0;
             object->apiobj.velocity.x = 0.0f;
             object->apiobj.velocity.y = 0.0f;
-            object->apiobj.velocity.z = 2.0f * vehicle->run_speed;
+            object->apiobj.velocity.z = 2.0f * object->apiobj.character_data->game_character->run_speed;
             x_rotation = object->apiobj.pitch_angle;
             if (object->apiobj.pitch_angle == 0) {
                 object->field_0x7a3 = 2;
@@ -4402,7 +4405,8 @@ void Move_VEHICLE(GameObject_s *object) {
             object->apiobj.velocity.x = 0.0f;
             object->apiobj.velocity.y = 0.0f;
             object->apiobj.velocity.z =
-                object->context_animation_timer * vehicle->run_speed + vehicle->run_speed * 2.0f * remaining;
+                object->context_animation_timer * object->apiobj.character_data->game_character->run_speed +
+                object->apiobj.character_data->game_character->run_speed * 2.0f * remaining;
             x_rotation = 0;
             const f32 blend = 1.0f - (1.0f + NuTrigTable[phase]) * 2.0f;
             object->apiobj.position.y = hover_height * blend + (1.0f - blend) * object->context_destination.y;
@@ -4444,7 +4448,8 @@ void Move_VEHICLE(GameObject_s *object) {
 
     if (((static_cast<i8>(object->apiobj.flags_low) < 0 && object->current_hp == 1) ||
          (static_cast<i8>(object->apiobj.flags_low) >= 0 && object->current_hp <= 1)) &&
-        vehicle->uses_weapon_action == 10 && (character->model_flags & 0x04000000) == 0) {
+        object->apiobj.character_data->game_character->uses_weapon_action == 10 &&
+        (object->apiobj.character_data->model_flags & 0x04000000) == 0) {
         const i32 effect = WORLD->debris_sys->entries[96].effect;
         if (effect != -1) {
             i32 count = ParticlesPerSecond(50.0f, FRAMETIME);
@@ -4466,7 +4471,7 @@ void Move_VEHICLE(GameObject_s *object) {
         }
     }
 
-    if ((vehicle->flags_090 & 0x100000) != 0) {
+    if ((object->apiobj.character_data->game_character->flags_090 & 0x100000) != 0) {
         if (Cheat_IsOn(7) != 0 && (pad->buttons_pressed & (GAMEPAD_ACTION | GAMEPAD_SPECIAL)) != 0) {
             GameAudio_PlaySfx(0x4b, &object->apiobj.collision_position, 0, 0);
         }
@@ -4483,8 +4488,9 @@ void Move_VEHICLE(GameObject_s *object) {
         object->field_0x1089 = 2;
     }
 
-    if (object->apiobj.field_0x27c == -1 && (vehicle->flags_090 & 0x40) != 0 &&
-        object->apiobj.character_model->model_data_b[0x2a] != NULL && (vehicle->flags_094[3] & 8) != 0) {
+    if (object->apiobj.field_0x27c == -1 && (object->apiobj.character_data->game_character->flags_090 & 0x40) != 0 &&
+        object->apiobj.character_model->model_data_b[0x2a] != NULL &&
+        (object->apiobj.character_data->game_character->flags_094[3] & 8) != 0) {
         Grapple_AddDynamic(object, 0);
     }
 

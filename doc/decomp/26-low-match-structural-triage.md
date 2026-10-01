@@ -6511,3 +6511,54 @@ from main, with **6,276** exact functions. All eleven GitHub checks passed for
 Android gameplay integration. Ownership, compiler options and scoring remain
 unchanged; explicit particle expansion and several curve/force layout trials
 regressed and were rejected. The approximately two-point cycle continues.
+
+## Batches 176–179: complete the two-point cycle
+
+Recover `FireCode`'s context ladder, delayed-press gate, bolt-class flag and
+pre-callback target-mode snapshot. The delayed-press parameter, not the float
+cooldown duration, controls timed rejection; the original class bit is
+`0x04000000`. A null area must not select the bonus-gunship branch when its
+area identity is also null. Isolated matching improves **44.231% to 56.947%**.
+The complete-body host sanitizer and production i386 fixtures pass 384 cases.
+Removing the existing `__used__` marker only after restoring the missing
+parameter behavior naturally retains the exact private symbol and all callers:
+all 181 translation-unit text symbols survive. A removal-only experiment that
+lost the exact symbol was rejected. No calling-convention attribute is added.
+
+Recover `GizmoPushBlockInitAndReset`'s traversal snapshots, canonical instance
+animation end-frame lookup, post-evaluation snap count and single matrix
+snapshot. Restore four explicit terrain probes, callback-sensitive metadata
+writes and original support-height summation order. Isolated matching improves
+**7.586449% to 50.175232%**. Actual-body sanitizer and optimized i386 fixtures
+cover counts 0–4, animation endpoints, capacity/exhaustion, array replacement
+in all three passes, terrain sentinels, equal/unequal/NaN support heights and
+callback mutation. Its pre-existing function-level `optimize("O2")` is unchanged;
+this batch neither introduces nor relies on a new optimization override.
+
+Recover `RenderOccluders`'s six explicit vertex submissions, material snapshot,
+signed masked colors and count publication. Restore `IsOccludedSphere`'s ordered
+radius/bounds rejection and four explicit edge closures, including normal
+initialization before normalization. Renderer negative-depth tests deliberately
+retain their original unordered behavior. Isolated scores improve
+**20.402325% to 58.855812%** and **42.135048% to 44.717040%**, respectively.
+The neighboring `RenderStats` decreases **98.701035% to 84.257730%** through
+ordinary translation-unit code generation; the net weighted gain remains
+positive. Separate-TU mocked-service fixtures pass 2,048 renderer and 32,768
+sphere cases on sanitizer/i386 builds. Geometry/color-conversion inputs obey
+the valid reference contract; the fixtures do not claim arbitrary nonfinite
+color conversion is defined.
+
+Recover `Move_VEHICLE`'s metadata reads after weapon/drop-in-out callbacks and
+the movement-disabled gate, then reload metadata after later callbacks.
+The Hoth hover hack is tested only inside the positive hover-height branch;
+the fallback height is read after the hover query. Isolated matching improves
+**18.205% to 26.926%**, or **28.699%** together with the corrected `FireCode`.
+Both actual-body fixtures pass five focused callback/gate cases, including
+null metadata on the early disabled path. Flight, smoke and combat services
+are mostly skipped or mocked: this is not a complete vehicle gameplay oracle.
+
+The combined target builds and reaches **67.128075%**, **+2.003595 percentage
+points** from main baseline `05429366`, with **6,276** exact functions. Ownership,
+compiler options and scoring remain unchanged. Merge requires all GitHub checks
+to pass on the final PR head, not merely a previous passing commit. All fixtures
+remain diagnostics with mocked services, not Android gameplay validation.
