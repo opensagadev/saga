@@ -3789,13 +3789,15 @@ i32 EdRegistry::GetClassId(EdClass *object_class) {
 
 void EdRegistry::GetStreamClassMapping(EdStream &stream, i32 *mapping, i32 &count, i32) {
     i32 used_classes[64] = {};
-    for (i32 index = 0; index < class_count; ++index) {
+    i32 loop_limit = class_count;
+    for (i32 index = 0; index < loop_limit; ++index) {
         EdClass *object_class = &classes[index];
+        i32 object_flags = object_class->flags;
         if (stream.flags & 0x400000) {
-            if (object_class->flags & 0x400000) {
+            if (object_flags & 0x400000) {
                 continue;
             }
-        } else if (object_class->flags & 0x10000000) {
+        } else if (object_flags & 0x10000000) {
             continue;
         }
         i32 stream_classes[64];
@@ -3804,6 +3806,7 @@ void EdRegistry::GetStreamClassMapping(EdStream &stream, i32 *mapping, i32 &coun
         for (i32 stream_class = 0; stream_class < stream_class_count; ++stream_class) {
             used_classes[stream_classes[stream_class]] = 1;
         }
+        loop_limit = class_count;
     }
     count = 0;
     for (i32 index = 0; index < class_count; ++index) {
@@ -3850,14 +3853,17 @@ void EdRegistry::Initialise(variptr_u &buffer, variptr_u &, i32 max_classes, i32
     class_count = 0;
     object_count = 0;
     notifier_count = 0;
-    types = static_cast<EdType *>(BUFFER_ALLOC(&buffer, sizeof(EdType) * max_types, 16));
+    types = reinterpret_cast<EdType *>(ALIGN(buffer.addr, 16));
+    buffer.addr = reinterpret_cast<usize>(types) + sizeof(EdType) * max_types;
     memset(types, 0, sizeof(EdType) * max_types);
-    classes = static_cast<EdClass *>(BUFFER_ALLOC(&buffer, sizeof(EdClass) * class_capacity, 16));
+    classes = reinterpret_cast<EdClass *>(ALIGN(buffer.addr, 16));
+    buffer.addr = reinterpret_cast<usize>(classes) + sizeof(EdClass) * class_capacity;
     memset(classes, 0, sizeof(EdClass) * class_capacity);
-    mappings = static_cast<NameMapping *>(BUFFER_ALLOC(&buffer, sizeof(NameMapping) * mapping_capacity, 16));
+    mappings = reinterpret_cast<NameMapping *>(ALIGN(buffer.addr, 16));
+    buffer.addr = reinterpret_cast<usize>(mappings) + sizeof(NameMapping) * mapping_capacity;
     memset(mappings, 0, sizeof(NameMapping) * mapping_capacity);
-    notifiers =
-        static_cast<EdObjectNotifier **>(BUFFER_ALLOC(&buffer, sizeof(EdObjectNotifier *) * notifier_capacity, 16));
+    notifiers = reinterpret_cast<EdObjectNotifier **>(ALIGN(buffer.addr, 16));
+    buffer.addr = reinterpret_cast<usize>(notifiers) + sizeof(EdObjectNotifier *) * notifier_capacity;
     memset(notifiers, 0, sizeof(EdObjectNotifier *) * notifier_capacity);
     initialised = 1;
 }
@@ -4751,17 +4757,22 @@ __attribute__((force_align_arg_pointer)) i32 EdManipulator::SelectAxis(EdInputCo
     }
     if (matrix != NULL) {
         const NUMTX &transform = matrix->matrix;
-        VuVec *axes[2] = {&first_axis, &second_axis};
-        for (i32 index = 0; index < 2; ++index) {
-            VuVec &axis = *axes[index];
-            f32 x = axis.x;
-            f32 y = axis.y;
-            f32 z = axis.z;
-            axis.x = x * transform.m00 + y * transform.m10 + z * transform.m20;
-            axis.y = x * transform.m01 + y * transform.m11 + z * transform.m21;
-            axis.z = x * transform.m02 + y * transform.m12 + z * transform.m22;
-            NuVecNorm(reinterpret_cast<NUVEC *>(&axis), reinterpret_cast<NUVEC *>(&axis));
-        }
+        f32 first_x = first_axis.x;
+        f32 first_y = first_axis.y;
+        f32 first_z = first_axis.z;
+        first_axis.y = first_x * transform.m01 + first_y * transform.m11 + first_z * transform.m21;
+        first_axis.z = first_x * transform.m02 + first_y * transform.m12 + first_z * transform.m22;
+        first_axis.x = first_x * transform.m00 + first_y * transform.m10 + first_z * transform.m20;
+
+        f32 second_x = second_axis.x;
+        f32 second_y = second_axis.y;
+        f32 second_z = second_axis.z;
+        second_axis.y = second_x * transform.m01 + second_y * transform.m11 + second_z * transform.m21;
+        second_axis.z = second_x * transform.m02 + second_y * transform.m12 + second_z * transform.m22;
+        second_axis.x = second_x * transform.m00 + second_y * transform.m10 + second_z * transform.m20;
+
+        NuVecNorm(reinterpret_cast<NUVEC *>(&first_axis), reinterpret_cast<NUVEC *>(&first_axis));
+        NuVecNorm(reinterpret_cast<NUVEC *>(&second_axis), reinterpret_cast<NUVEC *>(&second_axis));
     }
     if (input.GetPress(3) != 0.0f) {
         *selected_axis = nearest;
@@ -5119,9 +5130,10 @@ void EdRefPlaceable::SetMemberData(void *object, i32 type, void *data, i32, i16 
 static EdColourControl *edColourControl;
 
 static inline void set_colour_preview(eduiitem_s *item, const NUVEC &colour) {
-    u32 value = 0xff000000 | (static_cast<i32>(colour.x * 255.0f) & 0xff) |
-                ((static_cast<i32>(colour.y * 255.0f) & 0xff) << 8) |
-                ((static_cast<i32>(colour.z * 255.0f) & 0xff) << 16);
+    u32 red_alpha = 0xff000000 | (static_cast<i32>(colour.x * 255.0f) & 0xff);
+    u32 green_blue = ((static_cast<u32>(static_cast<i32>(colour.y * 255.0f)) << 8) & 0xffff) |
+                     ((static_cast<i32>(colour.z * 255.0f) & 0xff) << 16);
+    u32 value = red_alpha | green_blue;
     *reinterpret_cast<u32 *>(reinterpret_cast<u8 *>(item) + 0x50) = value;
 }
 
@@ -5148,11 +5160,12 @@ EdColourControl::EdColourControl() {
 
 void EdColourControl::Refresh() {
     NUVEC colour;
+    eduiitem_s *preview_item = item;
     reference->GetMemberData(object, EdType_Colour3, &colour, 0);
     char value[128];
     sprintf(value, "%.2f %.2f %.2f", colour.x, colour.y, colour.z);
     eduiItemPropSetText(static_cast<edui_prop_s *>(item), value);
-    set_colour_preview(item, colour);
+    set_colour_preview(preview_item, colour);
 }
 
 void EdColourControl::cbButton(eduimenu_s *menu, eduiitem_s *item, u32) {
@@ -5186,11 +5199,12 @@ void EdColourControl::cbChanged(eduimenu_s *, eduiitem_s *item, u32) {
 void EdColourControl::cbColourSelected(eduimenu_s *menu, eduiitem_s *item, u32 flags) {
     edui_colour_pick_s *picker = static_cast<edui_colour_pick_s *>(item);
     NUVEC colour = {picker->red, picker->green, picker->blue};
+    eduiitem_s *preview_item = edColourControl->item;
     edColourControl->reference->SetMemberData(edColourControl->object, EdType_Colour3, &colour, 0, NULL);
     char value[128];
     sprintf(value, "%.2f %.2f %.2f", colour.x, colour.y, colour.z);
     eduiItemPropSetText(static_cast<edui_prop_s *>(edColourControl->item), value);
-    set_colour_preview(edColourControl->item, colour);
+    set_colour_preview(preview_item, colour);
     cbEdLevelDestroyOnSelect(menu, item, flags);
 }
 
@@ -5571,15 +5585,21 @@ void EdVectorControl::AddMenuItem(eduimenu_s *menu, EdRef *member, void *target)
     control->item = eduiItemExpanderCreate(reinterpret_cast<usize>(control), &EdLevelAttr, cbSelected, member->name);
     eduiMenuAddItem(menu, control->item);
     char value[128];
-    f32 *values = &vector.x;
-    static char *names[3] = {const_cast<char *>("tx"), const_cast<char *>("ty"), const_cast<char *>("tz")};
-    for (i32 index = 0; index < 3; ++index) {
-        sprintf(value, "%.2f", values[index]);
-        control->components[index] = eduiItemPropCreate(reinterpret_cast<usize>(control), &EdLevelAttr, cbSelected,
-                                                        cbChanged, cbButton, 2, names[index], value);
-        control->components[index]->unknown_10 = index + 1;
-        eduiItemExpanderAddChild(static_cast<edui_expander_s *>(control->item), control->components[index]);
-    }
+    sprintf(value, "%.2f", vector.x);
+    control->components[0] = eduiItemPropCreate(reinterpret_cast<usize>(control), &EdLevelAttr, cbSelected, cbChanged,
+                                                cbButton, 2, const_cast<char *>("tx"), value);
+    control->components[0]->unknown_10 = 1;
+    eduiItemExpanderAddChild(static_cast<edui_expander_s *>(control->item), control->components[0]);
+    sprintf(value, "%.2f", vector.y);
+    control->components[1] = eduiItemPropCreate(reinterpret_cast<usize>(control), &EdLevelAttr, cbSelected, cbChanged,
+                                                cbButton, 2, const_cast<char *>("ty"), value);
+    control->components[1]->unknown_10 = 2;
+    eduiItemExpanderAddChild(static_cast<edui_expander_s *>(control->item), control->components[1]);
+    sprintf(value, "%.2f", vector.z);
+    control->components[2] = eduiItemPropCreate(reinterpret_cast<usize>(control), &EdLevelAttr, cbSelected, cbChanged,
+                                                cbButton, 2, const_cast<char *>("tz"), value);
+    control->components[2]->unknown_10 = 3;
+    eduiItemExpanderAddChild(static_cast<edui_expander_s *>(control->item), control->components[2]);
 }
 
 void EdVectorControl::Destroy() {
@@ -5633,11 +5653,18 @@ void EdVectorControl::cbChanged(eduimenu_s *, eduiitem_s *item, u32) {
     VuVec vector;
     control->reference->GetMemberData(control->object, EdType_VuVec, &vector, 0);
     f32 value = 0.0f;
-    for (i32 index = 0; index < 3; ++index)
-        if (item == control->components[index]) {
-            value = NuAToF(static_cast<edui_prop_s *>(item)->property_text);
-            (&vector.x)[index] = value;
-        }
+    if (item == control->components[0]) {
+        value = NuAToF(static_cast<edui_prop_s *>(item)->property_text);
+        vector.x = value;
+    }
+    if (item == control->components[1]) {
+        value = NuAToF(static_cast<edui_prop_s *>(item)->property_text);
+        vector.y = value;
+    }
+    if (item == control->components[2]) {
+        value = NuAToF(static_cast<edui_prop_s *>(item)->property_text);
+        vector.z = value;
+    }
     vector.w = 1.0f;
     control->reference->SetMemberData(control->object, EdType_VuVec, &vector, 0, nullptr);
     char text[128];
@@ -6018,19 +6045,21 @@ void EdSpecialObjectControl::cbButton(eduimenu_s *parent, eduiitem_s *item, u32)
     eduiMenuAddItem(choices, eduiItemSelCreate(static_cast<usize>(-1), item->colours, 0, 0, cbSelectObject,
                                                const_cast<char *>("None")));
     for (Placeable *object = static_cast<Placeable *>(thePlaceableHelper.GetNextObject(NULL, SpecialObjectFilter));
-         object != NULL;
-         object = static_cast<Placeable *>(thePlaceableHelper.GetNextObject(object, SpecialObjectFilter))) {
+         object != NULL;) {
         eduiMenuAddItem(choices, eduiItemSelCreate(reinterpret_cast<usize>(object), item->colours, 0, 0, cbSelectObject,
                                                    const_cast<char *>(object->GetName())));
+        Placeable *next_object =
+            static_cast<Placeable *>(thePlaceableHelper.GetNextObject(object, SpecialObjectFilter));
         if (NuSpecialCompare(&static_cast<SpecialObject *>(object)->special, &selected) != 0)
-            choices->selected = choices->last;
+            choices->selected = edui_last_item;
+        object = next_object;
     }
     eduiMenuSortItemsByTxt(choices);
     choices->flags |= 1;
     eduiMenuAttach(parent, choices);
     eduiMenuFitWidth(choices, 5);
     eduiMenuFitOnScreen(choices, 30);
-    item->flags &= ~8;
+    static_cast<edui_prop_s *>(item)->unknown_property_flags &= ~8;
 }
 
 void EdSpecialObjectControl::cbChanged(eduimenu_s *, eduiitem_s *item, u32) {
@@ -6120,8 +6149,7 @@ void EdClassObjectNameControl::AddMenuItem(eduimenu_s *menu, EdRef *member, void
     eduiMenuAddItem(menu, control->item);
 }
 
-EdClassObjectNameControl::EdClassObjectNameControl()
-    : selected_class(NULL), selected_object(NULL), selected_reference(NULL) {
+EdClassObjectNameControl::EdClassObjectNameControl() : selected{NULL, NULL, NULL} {
 }
 
 EdClassObjectNameControl::~EdClassObjectNameControl() {
@@ -6166,7 +6194,7 @@ void EdClassObjectNameControl::cbButton(eduimenu_s *parent, eduiitem_s *item, u3
     eduiMenuAttach(parent, menu);
     eduiMenuFitWidth(menu, 5);
     eduiMenuFitOnScreen(menu, 5);
-    item->flags &= ~8;
+    static_cast<edui_prop_s *>(item)->unknown_property_flags &= ~8;
 }
 
 void EdClassObjectNameControl::cbChanged(eduimenu_s *, eduiitem_s *item, u32) {
@@ -6181,16 +6209,15 @@ void EdClassObjectNameControl::cbChanged(eduimenu_s *, eduiitem_s *item, u32) {
 
 void EdClassObjectNameControl::cbSelectClass(eduimenu_s *parent, eduiitem_s *item, u32) {
     EdClass *ed_class = theRegistry.GetClass(item->data);
-    edClassObjectNameControl->selected_class = ed_class;
+    edClassObjectNameControl->selected.ed_class = ed_class;
     eduimenu_s *menu = eduiMenuCreate(item->x + parent->width, item->y, 180, 250,
                                       reinterpret_cast<void *>(static_cast<usize>(EdLevelFnt)), cbEdLevelDestroy, NULL);
     if (menu == NULL)
         return;
     EdRef *name_reference = ed_class->FindTypeRef(2, 1);
     if (name_reference != NULL) {
-        EdClassInterface *interface = ed_class->interface;
-        for (void *object = interface->vtable->get_next_object(interface, NULL); object != NULL;
-             object = interface->vtable->get_next_object(interface, object)) {
+        for (void *object = ed_class->interface->vtable->get_next_object(ed_class->interface, NULL); object != NULL;
+             object = ed_class->interface->vtable->get_next_object(ed_class->interface, object)) {
             char name[128];
             if (name_reference->GetAttributeData(object, 2, EdType_String, name, sizeof(name))) {
                 eduiMenuAddItem(
@@ -6212,16 +6239,15 @@ void EdClassObjectNameControl::cbSelectClass(eduimenu_s *parent, eduiitem_s *ite
 void EdClassObjectNameControl::cbSelectObject(eduimenu_s *menu, eduiitem_s *item, u32) {
     EdClassObjectNameControl *control = edClassObjectNameControl;
     if (control != NULL) {
-        control->selected_object = item->data_ptr;
+        control->selected.object = item->data_ptr;
         char name[128];
         const char *value = "None";
-        if (control->selected_object != NULL) {
-            ClassObject selected = {control->selected_class, control->selected_object, control->selected_reference};
-            selected.GetName(name, sizeof(name));
+        if (control->selected.object != NULL) {
+            control->selected.GetName(name, sizeof(name));
             value = name;
         }
-        eduiItemPropSetText(static_cast<edui_prop_s *>(control->item), const_cast<char *>(value));
-        control->SetVal(value);
+        eduiItemPropSetText(static_cast<edui_prop_s *>(edClassObjectNameControl->item), const_cast<char *>(value));
+        edClassObjectNameControl->SetVal(value);
     }
     edLevelDestroyThisMenu = menu;
     edLevelDestroyThisMenu2 = menu->parent;

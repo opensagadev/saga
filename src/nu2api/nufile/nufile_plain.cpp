@@ -296,32 +296,34 @@ extern "C" {
         }
 
         const i32 index = NuDatFileFindTree(header, name);
-        if (index < 0) {
-            return -1;
-        }
-
-        const NUDATFINFO *file = &header->file_info[index];
-        const i64 file_position = NuDatCalcPos(header, file->file_offset);
-        if (position != NULL) {
+        if (index >= 0) {
+            const i64 file_position = NuDatCalcPos(header, header->file_info[index].file_offset);
             if (nufile_lsn_allowed != 0 && header->unknown2 != 0) {
-                *position = header->unknown2 + file_position / 0x800;
-            } else {
+                if (position != NULL) {
+                    *position = header->unknown2 + static_cast<i32>(file_position / 0x800);
+                }
+                if (length != NULL) {
+                    *length = header->file_info[index].file_len;
+                }
+                return index;
+            }
+            if (position != NULL) {
                 *position = file_position;
             }
+            if (length != NULL) {
+                *length = header->file_info[index].file_len;
+            }
+            return index;
         }
-        if (length != NULL) {
-            *length = file->file_len;
-        }
-        return index;
+        return -1;
     }
     void NuDatClose(NUDATHDR *header) {
         for (i32 index = 0; index < 20; ++index) {
-            NUDATOPENFILEINFO *open_file = &header->open_files[index];
-            if (open_file->dat_file != 0) {
-                NuFileClose(open_file->dat_file);
+            if (header->open_files[index].dat_file != 0) {
+                NuFileClose(header->open_files[index].dat_file);
             }
-            if (open_file->info_idx >= 0) {
-                dat_file_infos[open_file->info_idx].is_used = 0;
+            if (header->open_files[index].info_idx >= 0) {
+                dat_file_infos[header->open_files[index].info_idx].is_used = 0;
             }
         }
         if (header->unknown != 0) {

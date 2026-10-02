@@ -739,21 +739,19 @@ void MechTouchUIPlayerButton::SetupTargetIds() {
 
         const i32 id = model.model_id;
         const i32 collected = InCollectList_Index(id, NULL, 0);
-        const GAMECHARACTERDATA &game_character = GCDataList[id];
-
-        if (collected == -1 && static_cast<i32>(game_character.flags_090) >= 0 &&
-            (game_character.flags_094[3] & 1) == 0 &&
+        if (collected == -1 && static_cast<i32>(GCDataList[id].flags_090) >= 0 &&
+            (GCDataList[id].flags_094[3] & 1) == 0 &&
             !(VehicleArea != 0 && BonusArea != 0 && Cheats_CheckFlags(0x100) != 0 &&
-              (game_character.flags_094[3] & 2) != 0)) {
+              (GCDataList[id].flags_094[3] & 2) != 0)) {
             continue;
         }
 
         if (VehicleArea != 0) {
             const u32 model_flags = CDataList[id].model_flags;
             if ((model_flags & 0x2000) == 0 && !(BonusArea != 0 && (model_flags & 0x4000000) != 0) &&
-                static_cast<i32>(game_character.flags_090) >= 0 &&
+                static_cast<i32>(GCDataList[id].flags_090) >= 0 &&
                 !(VehicleArea != 0 && BonusArea != 0 && Cheats_CheckFlags(0x100) != 0 &&
-                  (game_character.flags_094[3] & 2) != 0)) {
+                  (GCDataList[id].flags_094[3] & 2) != 0)) {
                 continue;
             }
 
@@ -763,22 +761,22 @@ void MechTouchUIPlayerButton::SetupTargetIds() {
                     if (Game_AreaSave == NULL || Game_AreaSave[area].minikit_complete == 0) {
                         continue;
                     }
-                } else if (static_cast<i32>(game_character.flags_090) >= 0 &&
+                } else if (static_cast<i32>(GCDataList[id].flags_090) >= 0 &&
                            !(VehicleArea != 0 && BonusArea != 0 && Cheats_CheckFlags(0x100) != 0 &&
-                             (game_character.flags_094[3] & 2) != 0)) {
+                             (GCDataList[id].flags_094[3] & 2) != 0)) {
                     continue;
                 }
             }
-        } else if ((CDataList[id].model_flags & 0x2000) != 0 || (game_character.flags_090 & 0x40) != 0) {
+        } else if ((CDataList[id].model_flags & 0x2000) != 0 || (GCDataList[id].flags_090 & 0x40) != 0) {
             continue;
         }
 
         if (BonusArea == 0 || VehicleArea == 0) {
-            if (static_cast<i32>(game_character.flags_090) < 0) {
+            if (static_cast<i32>(GCDataList[id].flags_090) < 0) {
                 if (Cheats_CheckFlags(0x100) == 0) {
                     continue;
                 }
-            } else if ((game_character.flags_094[3] & 1) == 0 && (collected == -1 || Collection_Got(id) == 0)) {
+            } else if ((GCDataList[id].flags_094[3] & 1) == 0 && (collected == -1 || Collection_Got(id) == 0)) {
                 continue;
             }
         }

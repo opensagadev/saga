@@ -846,7 +846,8 @@ static i32 *GizForces_GetBestBoltTarget(GIZMOSET *set, float *result_distance, N
         aim.y = 0.0f;
         NuVecNorm(&aim, &aim);
     }
-    if (system->hit_test_gizmo_count == 0) {
+    u16 hit_test_gizmo_count = system->hit_test_gizmo_count;
+    if (hit_test_gizmo_count == 0) {
         return NULL;
     }
 
@@ -854,7 +855,7 @@ static i32 *GizForces_GetBestBoltTarget(GIZMOSET *set, float *result_distance, N
     GIZMO *best = NULL, *previous = NULL;
     NUVEC *best_position = NULL, *previous_position = NULL;
     float nearest_distance = 100000000.0f;
-    for (i32 i = 0; i < system->hit_test_gizmo_count; ++i) {
+    for (i32 i = 0; i < hit_test_gizmo_count; ++i) {
         GIZMO *gizmo = system->hit_test_gizmos[i];
         GIZFORCE_s *force = static_cast<GIZFORCE_s *>(gizmo->object);
         if ((force->progress_flags & GIZFORCE_PROGRESS_VISIBLE) == 0 ||

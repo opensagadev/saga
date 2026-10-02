@@ -51,9 +51,9 @@ static i32 NuTexAnimLabelIndex(char *name, char (*table)[21], i32 *count) {
 
 static void pftaRepeat(nufpar_s *parser) {
     i32 value0 = NuFParGetInt(parser);
-    i32 value1 = NuFParGetInt(parser);
     if (value0 == 0)
         value0 = -1;
+    i32 value1 = NuFParGetInt(parser);
     i16 index = parprog->instruction_count;
     parprog->instructions[index] = 13;
     parprog->instructions[static_cast<i16>(index + 1)] = static_cast<i16>(value0);
@@ -96,13 +96,29 @@ static void pftaTexAdjR(nufpar_s *parser) {
 static void pftaUntiltex(nufpar_s *parser) {
     NuFParGetWord(parser);
     char *comparison = parser->word_buf;
-    i16 condition = 0;
-    if (comparison[0] == '<') {
-        condition = comparison[1] == '=' ? 3 : (comparison[1] == '>' ? 5 : 1);
-    } else if (comparison[0] == '>') {
-        condition = comparison[1] == '=' ? 4 : 2;
-    } else if (comparison[0] == '!') {
-        condition = 5;
+    i32 condition = 0;
+    switch (comparison[0]) {
+        case '<':
+            switch (comparison[1]) {
+                case '=':
+                    condition = 3;
+                    break;
+                case '>':
+                    condition = 5;
+                    break;
+                default:
+                    condition = 1;
+                    break;
+            }
+            break;
+        case '>':
+            condition = comparison[1] == '=' ? 4 : 2;
+            break;
+        case '!':
+            condition = 5;
+            break;
+        default:
+            break;
     }
     i32 value = NuFParGetInt(parser);
     i16 index = parprog->instruction_count;
@@ -157,13 +173,29 @@ static void pftaTex(nufpar_s *parser) {
 static void pftaBtex(nufpar_s *parser) {
     NuFParGetWord(parser);
     char *comparison = parser->word_buf;
-    i16 condition = 0;
-    if (comparison[0] == '<') {
-        condition = comparison[1] == '=' ? 3 : (comparison[1] == '>' ? 5 : 1);
-    } else if (comparison[0] == '>') {
-        condition = comparison[1] == '=' ? 4 : 2;
-    } else if (comparison[0] == '!') {
-        condition = 5;
+    i32 condition = 0;
+    switch (comparison[0]) {
+        case '<':
+            switch (comparison[1]) {
+                case '=':
+                    condition = 3;
+                    break;
+                case '>':
+                    condition = 5;
+                    break;
+                default:
+                    condition = 1;
+                    break;
+            }
+            break;
+        case '>':
+            condition = comparison[1] == '=' ? 4 : 2;
+            break;
+        case '!':
+            condition = 5;
+            break;
+        default:
+            break;
     }
     i32 value = NuFParGetInt(parser);
     NuFParGetWord(parser);

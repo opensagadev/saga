@@ -7,6 +7,7 @@
 #include "nu2api/nucore/NuMemoryManager.h"
 #include "nu2api/nucore/common.h"
 #include "nu2api/nucore/nucore.hpp"
+#include "nu2api/nucore/nuvuvec.hpp"
 #include "nu2api/nucore/nuthread.h"
 
 static NuMemory *g_memory = NULL;

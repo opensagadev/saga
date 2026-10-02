@@ -1822,22 +1822,30 @@ static NUVEC *GetAICreatureOrigin(AISYS *system, AIPACKET *packet) {
 }
 
 static APIOBJECT *GetNamedAPIObject(AISYS *system, char *name) {
-    if (system != NULL && Obj != NULL) {
+    if (system != NULL) {
         for (i32 index = 0; index < HIGHGAMEOBJECT; ++index) {
-            GameObject_s *object = &Obj[index];
-            if ((object->apiobj.field_0x1f8 & APIOBJECT_FLAG_IN_USE) == 0) {
+            if ((Obj[index].apiobj.field_0x1f8 & APIOBJECT_FLAG_IN_USE) == 0) {
                 continue;
             }
 
-            char *object_name = NULL;
-            if ((object->apiobj.field_0x1f4 & 0x400) != 0 && object->ai.field_0x134 != 0xff &&
-                system->creatures != NULL) {
-                object_name = system->creatures[object->ai.field_0x134].name;
-            } else if (object->apiobj.character_data != NULL) {
-                object_name = object->apiobj.character_data->file;
+            if ((Obj[index].apiobj.field_0x1f4 & 0x400) != 0 && Obj[index].ai.field_0x134 != 0xff) {
+                usize creature_address =
+                    reinterpret_cast<usize>(system->creatures) + Obj[index].ai.field_0x134 * sizeof(*system->creatures);
+                auto *creature = reinterpret_cast<decltype(system->creatures)>(creature_address);
+                if (creature != NULL && NuStrICmp(creature->name, name) == 0) {
+                    usize result_address = reinterpret_cast<usize>(Obj) + index * sizeof(*Obj);
+                    if (result_address == 0) {
+                        break;
+                    }
+                    return reinterpret_cast<APIOBJECT *>(result_address);
+                }
             }
-            if (object_name != NULL && NuStrICmp(object_name, name) == 0) {
-                return &object->apiobj;
+            if (NuStrICmp(Obj[index].apiobj.character_data->file, name) == 0) {
+                usize result_address = reinterpret_cast<usize>(Obj) + index * sizeof(*Obj);
+                if (result_address == 0) {
+                    break;
+                }
+                return reinterpret_cast<APIOBJECT *>(result_address);
             }
         }
     }
@@ -3505,14 +3513,16 @@ void GameFog_Update(WORLDINFO_s *world) {
 }
 
 void *GameBufferAlloc(variptr_u *buf, variptr_u *buf_end, i32 size) {
-    void *ptr = NULL;
-    if (buf_end != NULL && buf != NULL && buf->addr + size < buf_end->addr) {
-        buf->addr = (buf->addr + 3) & ~usize(3);
-        ptr = buf->void_ptr;
-        buf->addr += size;
+    if (buf_end == NULL || buf == NULL || buf_end->addr <= buf->addr + size) {
+        return NULL;
     }
-    if (ptr != NULL)
-        memset(ptr, 0, size);
+    buf->addr = (buf->addr + 3) & ~usize(3);
+    void *ptr = buf->void_ptr;
+    buf->addr += size;
+    if (ptr == NULL) {
+        return NULL;
+    }
+    memset(ptr, 0, size);
     return ptr;
 }
 
@@ -5623,9 +5633,13 @@ i32 ThingManager::RemoveDependanciesThings(ThingRemoveData *data) {
 }
 
 void ThingManager::RemoveTemporaryThings() {
-    for (i32 i = this->count - 1; this->permanent_count <= i; --i) {
-        delete this->things[i];
-        this->things[i] = NULL;
+    i32 i = this->count - 1;
+    if (i >= this->permanent_count) {
+        do {
+            delete this->things[i];
+            this->things[i] = NULL;
+            --i;
+        } while (i >= this->permanent_count);
     }
     this->count = this->permanent_count;
 }

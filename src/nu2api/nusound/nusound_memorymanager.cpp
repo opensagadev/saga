@@ -144,9 +144,10 @@ u32 NuSoundMemoryManager::Init(const char *name, void *memory, u32 size, u32 ali
 
         buffer->SetSize(this->free_bytes);
         this->free_list_head->SetAddress(this->memory2);
+        return 1;
     }
 
-    return 1;
+    return 0;
 }
 
 void NuSoundMemoryManager::EnableDefragOnAlloc(bool value) {
@@ -472,13 +473,11 @@ bool NuSoundMemoryManager::CheckList() {
 // libTTapp.so 0x321f40.
 u32 NuSoundMemoryManager::CountAdjacentFreeBuffers(NuSoundMemoryBuffer *buffer) {
     u32 count = 0;
-    NuSoundMemoryBuffer *prev = buffer->GetPrev();
-    if (prev != NULL && !prev->IsAlloced()) {
+    if (buffer->GetPrev() != NULL && !buffer->GetPrev()->IsAlloced()) {
         count++;
     }
 
-    NuSoundMemoryBuffer *next = buffer->GetNext();
-    if (next != NULL && !next->IsAlloced()) {
+    if (buffer->GetNext() != NULL && !buffer->GetNext()->IsAlloced()) {
         count++;
     }
     return count;

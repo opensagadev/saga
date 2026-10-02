@@ -558,6 +558,11 @@ static i32 *GizTurrets_GetBestBoltTarget(GIZMOSET *set, float *result_distance, 
                                          NUVEC *result_velocity, void *object_ptr, NUVEC *position, NUVEC *direction,
                                          float radius, float range_squared, i32 directional, i32 planar, i32 bolt_id) {
     BOLTTYPE_s *bolt_type = BoltType_FindByID(bolt_id, WORLD);
+    const u16 target_deg_near = TargetDeg_Near;
+    const u16 target_deg_mid = TargetDeg_Mid;
+    const u16 target_deg_far = TargetDeg_Far;
+    const f32 target_dist_near2 = TargetDist_Near2;
+    const f32 target_dist_mid2 = TargetDist_Mid2;
     if (set == NULL || bolt_type == NULL) {
         return NULL;
     }
@@ -608,12 +613,12 @@ static i32 *GizTurrets_GetBestBoltTarget(GIZMOSET *set, float *result_distance, 
         NuVecNorm(&delta, &delta);
         const float dot = NuVecDot(&delta, &aim);
         u16 angle;
-        if (TargetDist_Near2 > distance && directional != 0) {
-            angle = TargetDeg_Near;
-        } else if (TargetDist_Mid2 > distance) {
-            angle = TargetDeg_Mid;
+        if (target_dist_near2 > distance && directional != 0) {
+            angle = target_deg_near;
+        } else if (target_dist_mid2 > distance) {
+            angle = target_deg_mid;
         } else {
-            angle = TargetDeg_Far;
+            angle = target_deg_far;
         }
         if (!(dot > NuTrigTable[((angle + 0x4000) >> 1) & 0x7fff]) || !(nearest_distance > distance)) {
             continue;
@@ -1210,12 +1215,14 @@ GIZTURRET_s *GizTurret_FindNearest(GIZTURRETSYS_s *system, nuvec_s *position, Ga
     f32 nearest_distance = 1000000000.0f;
     GIZTURRET_s *turret = system->turrets;
     for (i32 i = 0; i < system->count; ++i, ++turret) {
-        if ((turret->flags & 4) != 0 && (turret->flags & 2) != 0) {
-            const f32 current_distance = NuVecDistSqr(position, &turret->position, NULL);
-            if (current_distance < nearest_distance) {
-                nearest = turret;
-                nearest_distance = current_distance;
-            }
+        if ((turret->flags & 4) == 0)
+            continue;
+        if ((turret->flags & 2) == 0)
+            continue;
+        const f32 current_distance = NuVecDistSqr(position, &turret->position, NULL);
+        if (current_distance < nearest_distance) {
+            nearest = turret;
+            nearest_distance = current_distance;
         }
     }
     if (distance != NULL) {

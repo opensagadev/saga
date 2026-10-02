@@ -265,17 +265,19 @@ NUMEMBLK *NuMemBlkCreateVari(u32 element_size, i32 count, u32 alignment_mask, VA
 NUMEMBLK *NuMemBlkCreateEx(u32 element_size, i32 count, u32 alignment_mask, void *storage) {
     NUMEMBLKLINK *link;
     i32 i;
+    u32 header_size;
     u32 stride;
     NUMEMBLK *pool;
-    u8 *data;
+    usize data;
     u32 stride_words;
 
     if (element_size < sizeof(NUMEMBLKLINK)) {
         element_size = sizeof(NUMEMBLKLINK);
     }
+    header_size = (sizeof(NUMEMBLK) + alignment_mask) & ~alignment_mask;
     stride = (element_size + alignment_mask) & ~alignment_mask;
     pool = (NUMEMBLK *)storage;
-    data = (u8 *)pool;
+    data = (usize)pool;
     data += (sizeof(NUMEMBLK) + alignment_mask) & ~alignment_mask;
     pool->stride = stride;
     pool->capacity = count;

@@ -433,7 +433,10 @@ static __used__ void pathEditor_cbCreatePath(eduimenu_s *, eduiitem_s *, u32) {
     do {
         sprintf(name, "NewPath%d", ++number);
         existing = (EDAIPATH_s *)NuLinkedListGetHead(&aieditor->paths);
-        while (existing != nullptr && NuStrICmp(name, existing->name) != 0) {
+        while (existing != nullptr) {
+            if (NuStrICmp(name, existing->name) == 0) {
+                break;
+            }
             existing = (EDAIPATH_s *)NuLinkedListGetNext(&aieditor->paths, &existing->link);
         }
     } while (existing != nullptr);
@@ -810,9 +813,8 @@ static __used__ void pathEditor_cbRenameNodeMenu(eduimenu_s *parent, eduiitem_s 
     }
     eduiitem_s *item = eduiItemTextPickCreate(0, &attr, pathEditor_cbRenameNode, (char *)"Node Name");
     eduiMenuAddItem(menu, item);
-    EdUiNameInputItem *input = static_cast<EdUiNameInputItem *>(edui_last_item);
-    strcpy(input->name, aieditor->current_path->current_node->name);
-    input->max_name_length = 15;
+    strcpy(static_cast<EdUiNameInputItem *>(edui_last_item)->name, aieditor->current_path->current_node->name);
+    static_cast<EdUiNameInputItem *>(edui_last_item)->max_name_length = 15;
     eduiMenuAttach(parent, menu);
     menu->x = parent->x + 10;
     menu->y = parent->y + 40;
@@ -830,9 +832,8 @@ static __used__ void pathEditor_cbRenamePathMenu(eduimenu_s *parent, eduiitem_s 
     }
     eduiitem_s *item = eduiItemTextPickCreate(0, &attr, pathEditor_cbRenamePath, (char *)"Path Name");
     eduiMenuAddItem(menu, item);
-    EdUiNameInputItem *input = static_cast<EdUiNameInputItem *>(edui_last_item);
-    strcpy(input->name, aieditor->current_path->name);
-    input->max_name_length = 15;
+    strcpy(static_cast<EdUiNameInputItem *>(edui_last_item)->name, aieditor->current_path->name);
+    static_cast<EdUiNameInputItem *>(edui_last_item)->max_name_length = 15;
     eduiMenuAttach(parent, menu);
     menu->x = parent->x + 10;
     menu->y = parent->y + 40;
@@ -1405,9 +1406,8 @@ static __used__ void routeEditor_cbRenameRouteMenu(eduimenu_s *parent, eduiitem_
     }
     eduiitem_s *item = eduiItemTextPickCreate(0, &attr, routeEditor_cbRenameRoute, (char *)"Route Name");
     eduiMenuAddItem(menu, item);
-    EdUiNameInputItem *input = static_cast<EdUiNameInputItem *>(edui_last_item);
-    strcpy(input->name, aieditor->current_path->current_route->name);
-    input->max_name_length = 15;
+    strcpy(static_cast<EdUiNameInputItem *>(edui_last_item)->name, aieditor->current_path->current_route->name);
+    static_cast<EdUiNameInputItem *>(edui_last_item)->max_name_length = 15;
     eduiMenuAttach(parent, menu);
     menu->x = parent->x + 10;
     menu->y = parent->y + 40;

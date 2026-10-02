@@ -115,9 +115,9 @@ i32 NuSoundLoaderOGG::OpenFileForStreaming(const char *path, bool flag) {
 }
 
 void NuSoundLoaderOGG::Close() {
-    if (this->desc != NULL) {
+    NuSoundHeaderOGG *header = (NuSoundHeaderOGG *)this->desc;
+    if (header != NULL) {
         NuIOS_IsLowEndDevice();
-        NuSoundHeaderOGG *header = (NuSoundHeaderOGG *)this->desc;
         ov_clear(&header->ogg_file);
     }
     if (this->file != 0) {
@@ -137,6 +137,12 @@ i32 NuSoundLoaderOGG::ReadHeader(NuSoundStreamDesc *desc) {
     NuSoundHeaderOGG *header = (NuSoundHeaderOGG *)desc;
     OggVorbis_File *ogg_file = &header->ogg_file;
 
+    ov_callbacks callbacks = {
+        .read_func = OggCallbackRead,
+        .seek_func = OggCallbackSeek,
+        .close_func = NULL,
+        .tell_func = OggCallbackTell,
+    };
     file_callbacks.SetFile(file);
 
     i32 result = ov_open_callbacks( //
@@ -144,12 +150,7 @@ i32 NuSoundLoaderOGG::ReadHeader(NuSoundStreamDesc *desc) {
         ogg_file,                   //
         NULL,                       //
         0,                          //
-        (ov_callbacks){
-            .read_func = OggCallbackRead,
-            .seek_func = OggCallbackSeek,
-            .close_func = OggCallbackClose,
-            .tell_func = OggCallbackTell,
-        } //
+        callbacks                   //
     );
 
     if (result >= 0) {

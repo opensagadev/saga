@@ -113,27 +113,29 @@ void UpdateCables() {
             if (cable->flags_1e9 & 4) {
                 cable->total_length = 0.0f;
                 bool grounded = true;
-                for (i32 i = 0; i < cable->point_count; ++i) {
-                    f32 ground = GameShadow(NULL, &cable->points[i], 5.0f, -1);
+                NUVEC *point = cable->points;
+                NUVEC *velocity = cable->velocities;
+                f32 *segment_length = cable->segment_lengths;
+                for (i32 i = 0; i < cable->point_count; ++i, ++point, ++velocity) {
+                    f32 ground = GameShadow(NULL, point, 5.0f, -1);
                     if (ground == 2000000.0f)
-                        ground = cable->points[i].y;
-                    NUVEC *velocity = &cable->velocities[i];
+                        ground = point->y;
                     velocity->x -= (velocity->x * cable_damping) * FRAMETIME;
                     velocity->y -= FRAMETIME * cable_gravity;
                     velocity->z -= (cable_damping * velocity->z) * FRAMETIME;
-                    cable->points[i].x += FRAMETIME * velocity->x;
-                    cable->points[i].y += velocity->y * FRAMETIME;
-                    cable->points[i].z += FRAMETIME * velocity->z;
-                    if (ground > cable->points[i].y) {
-                        cable->points[i].y = ground;
+                    point->x += FRAMETIME * velocity->x;
+                    point->y += velocity->y * FRAMETIME;
+                    point->z += FRAMETIME * velocity->z;
+                    if (ground > point->y) {
+                        point->y = ground;
                         velocity->x -= (velocity->x * cable_ground_damping) * FRAMETIME;
                         velocity->z -= (cable_ground_damping * velocity->z) * FRAMETIME;
                     } else {
                         grounded = false;
                     }
                     if (i < cable->point_count - 1) {
-                        f32 length = NuVecDist(&cable->points[i + 1], &cable->points[i], &delta);
-                        cable->segment_lengths[i] = length;
+                        f32 length = NuVecDist(point + 1, point, &delta);
+                        *segment_length++ = length;
                         cable->total_length = length + cable->total_length;
                     }
                 }

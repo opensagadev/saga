@@ -257,9 +257,8 @@ void BackFlipCode(GameObject_s *object) {
         object->field_0xe22 &= static_cast<u8>(~0x10u);
     }
 
-    const i32 animation = object->context_animation;
-    if (object->apiobj.character_model->model_data_b[animation] != NULL &&
-        CurrentAnim(&object->apiobj.anim_packet) != animation) {
+    if (object->apiobj.character_model->model_data_b[object->context_animation] != NULL &&
+        CurrentAnim(&object->apiobj.anim_packet) != object->context_animation) {
         return;
     }
 

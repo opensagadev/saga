@@ -744,12 +744,14 @@ static __used__ void creatureEditor_cbSelectLocator(eduimenu_s *parent, eduiitem
     eduiMenuAddItem(
         menu, eduiItemCheckCreate(-1, attr, creature->locator == nullptr, 1, creatureEditor_cbSetLocator, "NONE"));
     i32 index = 0;
-    NULISTHDR *list = creatureEditor_LocatorList();
-    for (NULISTLNK *link = NuLinkedListGetHead(list); link != nullptr; link = NuLinkedListGetNext(list, link)) {
+    for (NULISTLNK *link = NuLinkedListGetHead(creatureEditor_LocatorList()); link != nullptr;
+         link = NuLinkedListGetNext(creatureEditor_LocatorList(), link)) {
         EDLOCATOR_s *locator = reinterpret_cast<EDLOCATOR_s *>(link);
-        if (*reinterpret_cast<void **>(reinterpret_cast<u8 *>(locator) + 0x2c) != creature->path)
+        void *locator_path = *reinterpret_cast<void **>(reinterpret_cast<u8 *>(locator) + 0x2c);
+        CreatureEditorRecord *current = creatureEditor_Current();
+        if (locator_path != current->path)
             continue;
-        if (creatureEditor_Current()->locator == locator) {
+        if (current->locator == locator) {
             eduiMenuAddItem(menu, eduiItemCheckCreate(index, attr, 1, 1, creatureEditor_cbSetLocator, locator->name));
             menu->selected = edui_last_item;
         } else {
@@ -1022,16 +1024,17 @@ extern "C" {
             return;
         }
 
-        NULISTHDR *list = &aieditor->creatures;
         i32 count = 0;
-        for (NULISTLNK *link = NuLinkedListGetHead(list); link != nullptr; link = NuLinkedListGetNext(list, link)) {
+        for (NULISTLNK *link = NuLinkedListGetHead(&aieditor->creatures); link != nullptr;
+             link = NuLinkedListGetNext(&aieditor->creatures, link)) {
             CreatureEditorRecord *creature = reinterpret_cast<CreatureEditorRecord *>(link);
             if (creature->path != nullptr && GlobalCharacterNameFn(creature->character_type) != nullptr)
                 ++count;
         }
         EdFileWriteInt(count);
 
-        for (NULISTLNK *link = NuLinkedListGetHead(list); link != nullptr; link = NuLinkedListGetNext(list, link)) {
+        for (NULISTLNK *link = NuLinkedListGetHead(&aieditor->creatures); link != nullptr;
+             link = NuLinkedListGetNext(&aieditor->creatures, link)) {
             CreatureEditorRecord *creature = reinterpret_cast<CreatureEditorRecord *>(link);
             char *character_name = GlobalCharacterNameFn(creature->character_type);
             if (creature->path == nullptr || character_name == nullptr)
@@ -1053,9 +1056,8 @@ extern "C" {
             EdFileWriteFloat(creature->z_spacing);
             EdFileWriteInt(creature->flags);
 
-            EDAIPATH_s *editor_path = reinterpret_cast<EDAIPATH_s *>(creature->path);
-            EdFileWriteChar(editor_path->draw_index);
-            AIPATH *runtime_path = system->paths[editor_path->draw_index];
+            EdFileWriteChar(reinterpret_cast<EDAIPATH_s *>(creature->path)->draw_index);
+            AIPATH *runtime_path = system->paths[reinterpret_cast<EDAIPATH_s *>(creature->path)->draw_index];
             EDAIPATHCHECK_s *check = reinterpret_cast<EDAIPATHCHECK_s *>(reinterpret_cast<u8 *>(creature) + 0x38);
             i16 connection_index = 0;
             bool connection_found = false;
@@ -1076,9 +1078,19 @@ extern "C" {
                     break;
                 }
             }
-            i32 path_angle = check->angle;
-            const bool turned_around = (path_angle < 0 ? -path_angle : path_angle) >= 0x4000;
-            EdFileWriteChar(connection_found && (turned_around != reversed));
+            i32 direction = 0;
+            if (connection_found) {
+                i32 path_angle = check->angle;
+                i32 magnitude = path_angle < 0 ? -path_angle : path_angle;
+                if (reversed) {
+                    if (magnitude <= 0x3fff) {
+                        direction = 1;
+                    }
+                } else if (magnitude > 0x3fff) {
+                    direction = 1;
+                }
+            }
+            EdFileWriteChar(direction);
             EdFileWriteShort(connection_index);
 
             EdFileWriteFloat(creature->script_params[0]);
@@ -1207,18 +1219,16 @@ extern "C" {
     }
 
     __attribute__((optimize("O2", "omit-frame-pointer"))) void creatureEditor_PathNodeDeleted(EDAIPATHNODE_s *node) {
-        NULISTHDR *list = &aieditor->creatures;
-        NULISTHDR *free_list = reinterpret_cast<NULISTHDR *>(reinterpret_cast<u8 *>(aieditor) + 0x3691c);
-        for (NULISTLNK *link = NuLinkedListGetHead(list); link != nullptr;) {
-            NULISTLNK *next = NuLinkedListGetNext(list, link);
+        for (NULISTLNK *link = NuLinkedListGetHead(&aieditor->creatures); link != nullptr;) {
+            NULISTLNK *next = NuLinkedListGetNext(&aieditor->creatures, link);
             CreatureEditorRecord *record = reinterpret_cast<CreatureEditorRecord *>(link);
             EDAIPATHCHECK_s *check = reinterpret_cast<EDAIPATHCHECK_s *>(reinterpret_cast<u8 *>(record) + 0x38);
             if (check->first == node || check->second == node) {
                 pathEditor_OnPathCheck(&record->position, check, aieditor->current_path, 0.0f);
                 if (check->on_path == 0) {
-                    NuLinkedListRemove(list, link);
+                    NuLinkedListRemove(&aieditor->creatures, link);
                     memset(record, 0, sizeof(*record));
-                    NuLinkedListAppend(free_list, link);
+                    NuLinkedListAppend(reinterpret_cast<NULISTHDR *>(reinterpret_cast<u8 *>(aieditor) + 0x3691c), link);
                     if (aieditor->mode_selection_36930 == reinterpret_cast<EditorNamedEntry *>(record)) {
                         aieditor->mode_selection_36930 = nullptr;
                     }

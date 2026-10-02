@@ -904,15 +904,19 @@ __attribute__((force_align_arg_pointer)) i32 SplineKnotList::GetPoint(i32 index,
 
 void SplinePointList::AddPoint(VuVec &point) {
     SplinePointBlock *block = first;
-    while (block != NULL && block->point_count >= block->capacity)
+    while (block != NULL) {
+        if (block->point_count < block->capacity) {
+            break;
+        }
         block = block->next;
+    }
     if (block == NULL) {
         block = new (theMemoryManager.AllocPool(sizeof(SplinePointBlock), 1)) SplinePointBlock();
         if (block == NULL)
             return;
         i32 index = block->point_count;
-        block->point_count = index + 1;
         VuVec &destination = block->points[index];
+        block->point_count = index + 1;
         destination.x = point.x;
         destination.y = point.y;
         destination.z = point.z;
@@ -928,8 +932,8 @@ void SplinePointList::AddPoint(VuVec &point) {
         return;
     }
     i32 index = block->point_count;
-    block->point_count = index + 1;
     VuVec &destination = block->points[index];
+    block->point_count = index + 1;
     destination.x = point.x;
     destination.y = point.y;
     destination.z = point.z;

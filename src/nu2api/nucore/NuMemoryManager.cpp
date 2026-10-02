@@ -301,7 +301,7 @@ void NuMemoryManager::ConvertToUsedBlock(FreeHeader *header, u32 alignment, u32 
     end_tag = END_TAG(header, header_value * 4);
     if ((align_mask & ALLOC_MASK) == 0) {
         *end_tag = aligned & BLOCK_SIZE_MASK;
-    } else if (manager_idx >= 0x1d) {
+    } else if (manager_idx > 0x1d) {
         *end_tag = aligned | HEADER_MGR_HI_MASK;
         *(u32 *)((usize)header + BLOCK_SIZE(header->block_header.value) - 8) = manager_idx;
     } else {
@@ -816,7 +816,7 @@ bool NuMemoryManager::PopContext(NuMemoryManager::PopDebugMode debug_mode) {
                 for (i = 0; i != value_len; i++) {
                     char byte;
 
-                    if ((unsigned char)largest_leak[i] - 0x30 < 10 || (unsigned char)largest_leak[i] - 0x41 < 0x1a) {
+                    if ((u8)((u8)largest_leak[i] - 0x41) < 0x1a || (u8)((u8)largest_leak[i] - 0x30) < 10) {
                         byte = *(char *)((usize)largest_stranded + m_headerSize + i);
                     } else {
                         byte = '_';
@@ -1484,7 +1484,11 @@ SAGA_HOST_WEAK u32 NuMemoryManager::GetBlockSize(void *ptr) {
         manager_index--;
     }
 
-    return payload_size - (manager_index > 0x1d ? 8 : 4);
+    u32 block_size = payload_size - 4;
+    if (manager_index > 0x1d) {
+        block_size = payload_size - 8;
+    }
+    return block_size;
 }
 
 u32 NuMemoryManager::GetCategoryAllocatedBytes(u16 category) {

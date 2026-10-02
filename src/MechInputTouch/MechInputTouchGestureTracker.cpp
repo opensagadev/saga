@@ -169,7 +169,7 @@ void MechInputTouchGestureTrackingSystem::ReadData(GameObject_s &object, NuInput
         holder.is_down = 0;
     }
 
-    for (i32 index = 0; index < static_cast<i32>(data.touch_count); ++index) {
+    for (u32 index = 0; index < data.touch_count; ++index) {
         NuInputTouch const &touch = data.touch_events[index];
         f32 x, y;
         MechInputTouchSystem::ConvertToScreenCoords(touch.unknown_08, touch.unknown_0c, x, y);

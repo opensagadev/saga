@@ -695,7 +695,7 @@ void edgraDoInput(nupad_s *pad) {
         if ((pressed & 0x20) && edgra_nearest != -1)
             edgraClumpReseed(edgra_nearest);
 
-        if ((pressed & 0x40) && edgra_nearest != -1) {
+        if ((pad->digital_buttons_pressed & 0x40) && edgra_nearest != -1) {
             if (edgra_editormode == 1) {
                 edgra_editormode = 0;
             } else if (edgra_mode == 3) {
@@ -705,7 +705,7 @@ void edgraDoInput(nupad_s *pad) {
 
         if (edgra_editormode != 1) {
             if (edgra_nearest != -1) {
-                if (pressed & 8) {
+                if (pad->digital_buttons_pressed & 8) {
                     do {
                         ++edgra_nearest;
                         if (edgra_nearest == EDGRA_MAX_CLUMPS)
@@ -713,7 +713,7 @@ void edgraDoInput(nupad_s *pad) {
                     } while (!GrassClumps[edgra_nearest].element_count);
                     edgraSortVectorBuffer(edgra_nearest);
                 }
-                if (pressed & 2) {
+                if (pad->digital_buttons_pressed & 2) {
                     do {
                         --edgra_nearest;
                         if (edgra_nearest == -1)
@@ -808,7 +808,7 @@ void edgraDoInput(nupad_s *pad) {
             }
             edgra_active_menu = edgra_options_menu;
         }
-        if (pressed & 0x40) {
+        if (pad->digital_buttons_pressed & 0x40) {
             if (edgra_editormode == 1)
                 edgraInstanceCreate(&edgra_cam_pos);
             else if (edgra_instance_type != -1)
@@ -822,7 +822,7 @@ void edgraDoInput(nupad_s *pad) {
                 edgraClumpPlace(edgra_nearest, &edgra_cam_pos);
             }
         }
-        if (pressed & 0x10) {
+        if (pad->digital_buttons_pressed & 0x10) {
             if (edgra_editormode != 1) {
                 if (edgra_nearest != -1)
                     edgraClumpDestroy(edgra_nearest);

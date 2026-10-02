@@ -150,7 +150,12 @@ void NuSoundStreamer::ThreadFunc(void *self) {
     do {
         streamer->semaphore.Wait();
 
-        QueueElement element = streamer->queue2.Empty() ? streamer->queue1.Pop() : streamer->queue2.Pop();
+        QueueElement element{};
+        if (streamer->queue2.Empty()) {
+            element = streamer->queue1.Pop();
+        } else {
+            element = streamer->queue2.Pop();
+        }
 
         switch (element.message) {
             case QueueElement::Message::OPEN_SAMPLE:

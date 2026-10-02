@@ -17,27 +17,27 @@ CRC16::CRC16() {
 }
 
 u32 CRC16::hash(unsigned char const *data, i32 length) {
+    u32 result = 0xffffffffu;
     if (length > 0) {
         unsigned char const *end = data + length;
-        u32 crc = 0xffff;
+        result = 0xffff;
         do {
-            crc = ((crc << 8) ^ crcTable[((crc >> 8) ^ *data) & 0xff]) & 0xffff;
+            result = ((result << 8) ^ crcTable[((result >> 8) ^ *data) & 0xff]) & 0xffff;
             ++data;
         } while (data != end);
-        return crc;
     }
-    return 0xffffffffu;
+    return result;
 }
 
 u32 CRC16::hashInverse(unsigned char const *data, i32 length) {
+    u32 result = 0xffffffffu;
     unsigned char const *cursor = data + length;
     if (length > 0) {
-        u32 crc = 0xffff;
+        result = 0xffff;
         do {
             --cursor;
-            crc = ((crc << 8) ^ crcTable[((crc >> 8) ^ *cursor) & 0xff]) & 0xffff;
+            result = ((result << 8) ^ crcTable[((result >> 8) ^ *cursor) & 0xff]) & 0xffff;
         } while (cursor != data);
-        return crc;
     }
-    return 0xffffffffu;
+    return result;
 }

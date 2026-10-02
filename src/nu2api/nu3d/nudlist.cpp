@@ -323,8 +323,10 @@ extern "C" NUDLDLISTSCENE *NuDisplaySceneClone(NUDLDLISTSCENE *source, VARIPTR *
     scene->items = CloneSceneAllocate<NUDISPLAYLISTITEM>(buffer, source->nitems);
     memcpy(scene->items, source->items, sizeof(NUDISPLAYLISTITEM) * source->nitems);
     i32 clip_bytes = ClipUsedBlockCount(source->nclip_objects) * 16;
-    scene->clip_used[0] = CloneSceneAllocate<u8>(buffer, clip_bytes, 16);
-    scene->clip_used[1] = CloneSceneAllocate<u8>(buffer, clip_bytes, 1);
+    const usize clip_base = (buffer->addr + 15) & ~static_cast<usize>(15);
+    scene->clip_used[0] = reinterpret_cast<u8 *>(clip_base);
+    scene->clip_used[1] = reinterpret_cast<u8 *>(clip_base + static_cast<usize>(clip_bytes));
+    buffer->addr = clip_base + static_cast<usize>(clip_bytes) * 2;
     memset(scene->clip_used[0], 0, clip_bytes);
     memset(scene->clip_used[1], 0, clip_bytes);
     u32 mtl_bytes = (((source->nmtls + 7) >> 7) + 1) * 16;
@@ -348,10 +350,12 @@ extern "C" NUDLDLISTSCENE *NuDisplaySceneClone(NUDLDLISTSCENE *source, VARIPTR *
         scene->dlist_mtls[i]->dyn_geom = scene->items + (source->dlist_mtls[i]->dyn_geom - source->items);
         scene->dlist_mtls[i]->first = heads;
         scene->dlist_mtls[i]->mtl_last = scene->dlist_mtls[i]->first;
-        scene->dlist_mtls[i]->scene_first[0] =
-            CloneSceneAllocate<NUDISPLAYLISTITEM>(buffer, source->dlist_mtls[i]->nscene_items, 16);
-        scene->dlist_mtls[i]->scene_first[1] =
-            CloneSceneAllocate<NUDISPLAYLISTITEM>(buffer, source->dlist_mtls[i]->nscene_items, 1);
+        const usize scene_first_base = (buffer->addr + 15) & ~static_cast<usize>(15);
+        scene->dlist_mtls[i]->scene_first[0] = reinterpret_cast<NUDISPLAYLISTITEM *>(scene_first_base);
+        buffer->addr = scene_first_base;
+        buffer->addr += sizeof(NUDISPLAYLISTITEM) * static_cast<usize>(source->dlist_mtls[i]->nscene_items);
+        scene->dlist_mtls[i]->scene_first[1] = reinterpret_cast<NUDISPLAYLISTITEM *>(buffer->addr);
+        buffer->addr += sizeof(NUDISPLAYLISTITEM) * static_cast<usize>(source->dlist_mtls[i]->nscene_items);
         scene->dlist_mtls[i]->first->type = 0x8d;
         scene->dlist_mtls[i]->first->next = NULL;
         scene->dlist_mtls[i]->first->id = 1;

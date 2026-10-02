@@ -669,16 +669,17 @@ i32 NuStringTok(char *str, ...) {
 }
 
 NUWCHAR8 *NuUnicodeCharFromUTF8(NUWCHAR16 *dst, NUWCHAR8 *src) {
-    NUWCHAR16 c0 = *src++;
-    if (c0 <= 0x7f) {
-        *dst = c0;
-    } else if ((c0 & 0xe0) == 0xc0) {
-        NUWCHAR16 c1 = *src++;
-        *dst = ((c0 & 0x1f) << 6) | (c1 & 0x3f);
-    } else if ((c0 & 0xf0) == 0xe0) {
-        NUWCHAR16 c1 = *src++;
-        NUWCHAR16 c2 = *src++;
-        *dst = (c0 << 12) | ((c1 & 0x3f) << 6) | (c2 & 0x3f);
+    NUWCHAR16 c[3];
+    c[0] = *src++;
+    if (c[0] <= 0x7f) {
+        *dst = c[0];
+    } else if ((c[0] & 0xe0) == 0xc0) {
+        c[1] = *src++;
+        *dst = ((c[0] & 0x1f) << 6) | (c[1] & 0x3f);
+    } else if ((c[0] & 0xf0) == 0xe0) {
+        c[1] = *src++;
+        c[2] = *src++;
+        *dst = (c[0] << 12) | ((c[1] & 0x3f) << 6) | (c[2] & 0x3f);
     }
     return src;
 }

@@ -382,7 +382,7 @@ void Tube_MoveCode(GameObject_s *object, WORLDINFO_s *world) {
             object->character_context = -1;
         return;
     }
-    if ((CInfo[object->character_context].flags & 0x4000) != 0 || world->tubes == NULL)
+    if ((CInfo[object->character_context].flags & 0x400000) != 0 || world->tubes == NULL)
         return;
 
     for (i32 index = 0; index < world->tube_count; ++index) {

@@ -1774,8 +1774,13 @@ speed_section:
                 float t = ps->field_0x80 + FRAMETIME * 2.0f;
                 ps->field_0x80 = t < 1.0f ? t : 1.0f;
                 if (NuFmod(GameTimer.time_elapsed_mod_seconds, 0.2f) < 0.1f) {
-                    GAMEMESSAGE_s *msg = (GAMEMESSAGE_s *)AddGameMessage(
-                        " ", (NUVEC *)((u8 *)ps->field_0x78 + 0x190), 0.08f, NULL, 0.0f, 0xff, 0x3f, 0x3f, 0x10083, 0);
+                    NUVEC message_position;
+                    message_position.x = *(float *)((u8 *)ps->field_0x78 + 0x190);
+                    message_position.y = *(float *)((u8 *)ps->field_0x78 + 0x194);
+                    message_position.z = *(float *)((u8 *)ps->field_0x78 + 0x198);
+                    message_position.y += 0.75f;
+                    GAMEMESSAGE_s *msg = (GAMEMESSAGE_s *)AddGameMessage(" ", &message_position, 0.05f, NULL, 0.0f,
+                                                                         0xff, 0x3f, 0x3f, 0x10083, 0);
                     if (msg != NULL) {
                         msg->icon = 0x134;
                         i32 idx = ((i32)(16384.0f * ps->field_0x80) >> 1) & 0x7fff;

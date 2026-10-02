@@ -182,7 +182,8 @@ void Pulses_Configure(WORLDINFO_s *world, char *config) {
 
     world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 4);
 
-    PULSESYS_s pulse_sys = {};
+    PULSESYS_s pulse_sys;
+    memset(&pulse_sys, 0, sizeof(pulse_sys));
     PULSE_s *pulse = reinterpret_cast<PULSE_s *>(world->giz_buffer.addr);
     pulse_sys.pulses = pulse;
     pulse_sys.sfx_turn_on = -1;

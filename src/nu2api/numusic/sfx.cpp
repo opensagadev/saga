@@ -264,15 +264,19 @@ void InitSfx(variptr_u *buffer_start, variptr_u buffer_end, const char *file) {
     // g_soundInfo = sound_info;
     // buffer_start->voidptr = sound_info + 0x640;
     // memset(sound_info, 0, 0x1a900);
-    g_soundInfo = static_cast<NUSOUNDINFO *>(BUFFER_ALLOC(buffer_start, 1600 * sizeof(NUSOUNDINFO), 4));
-    memset(g_soundInfo, 0, 1600 * sizeof(NUSOUNDINFO));
+    NUSOUNDINFO *sound_info = reinterpret_cast<NUSOUNDINFO *>(ALIGN(buffer_start->addr, 4));
+    g_soundInfo = sound_info;
+    buffer_start->addr = reinterpret_cast<usize>(sound_info + 1600);
+    memset(sound_info, 0, 1600 * sizeof(NUSOUNDINFO));
 
     //__s = (void *)((i32)buffer_start->voidptr + 3U & 0xfffffffc);
     // g_revertSoundInfo = __s;
     // buffer_start->voidptr = (void *)((i32)__s + 0x1a900);
     // memset(__s, 0, 0x1a900);
-    g_revertSoundInfo = static_cast<NUSOUNDINFO *>(BUFFER_ALLOC(buffer_start, 1600 * sizeof(NUSOUNDINFO), 4));
-    memset(g_revertSoundInfo, 0, 1600 * sizeof(NUSOUNDINFO));
+    NUSOUNDINFO *revert_sound_info = reinterpret_cast<NUSOUNDINFO *>(ALIGN(buffer_start->addr, 4));
+    g_revertSoundInfo = revert_sound_info;
+    buffer_start->addr = reinterpret_cast<usize>(revert_sound_info + 1600);
+    memset(revert_sound_info, 0, 1600 * sizeof(NUSOUNDINFO));
 
     CRC_Init(buffer_start);
 

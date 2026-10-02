@@ -825,6 +825,8 @@ static i32 ProcessConditionFlowBox(GIZFLOW_s *flow, FLOWBOX_s *box, u8) {
         }
         return 1;
     }
+    i32 required;
+    i32 count;
     switch (condition[0]) {
         case 0: {
             FLOWBOX_s **parents = box->parents;
@@ -849,16 +851,29 @@ static i32 ProcessConditionFlowBox(GIZFLOW_s *flow, FLOWBOX_s *box, u8) {
             break;
         }
         case 1:
+            if (box->parent_count == 0) {
+                return 0;
+            }
+            required = 1;
+            goto count_conditions;
         case 3:
-        case 5: {
-            const i32 required = condition[0] == 1 ? 1 : condition[1];
+        case 5:
+            required = condition[1];
+            if (box->parent_count == 0) {
+                count = 0;
+                goto count_done;
+            }
+            goto count_conditions;
+        count_conditions: {
             FLOWBOX_s **parents = box->parents;
             u8 *outputs = box->output_indices;
-            i32 count = 0;
+            count = 0;
             for (i32 i = 0; i < box->parent_count; ++i) {
                 FLOWBOX_s *parent = parents[i];
                 count += flowboxtypes[parent->type].check_output(flow, parent, outputs[i]) != 0;
             }
+        }
+        count_done:
             if (condition[0] == 5) {
                 return count == required;
             }
@@ -866,7 +881,6 @@ static i32 ProcessConditionFlowBox(GIZFLOW_s *flow, FLOWBOX_s *box, u8) {
                 return 0;
             }
             break;
-        }
         case 4: {
             i32 required = box->parent_count;
             if ((box->state_flags_high & 4) != 0) {
@@ -1006,9 +1020,12 @@ void ResetGizFlow(GIZFLOW_s *system, GIZFLOWPROGRESS_s *progress) {
             i32 word = i >> 5;
             u32 bit = 1u << (i & 31);
             box->state_flags_low = (box->state_flags_low & ~1) | ((progress->active[word] & bit) != 0);
-            box->state_flags_low = (box->state_flags_low & ~2) | (((progress->completed[word] & bit) != 0) << 1);
-            box->state_flags_low |= ((progress->latched[word] & bit) != 0) << 5;
-            box->state_flags_high = (box->state_flags_high & ~4) | (((progress->output_state[word] & bit) != 0) << 2);
+            const u8 completed = static_cast<u8>((progress->completed[word] & bit) != 0);
+            box->state_flags_low = (box->state_flags_low & ~2) | (completed << 1);
+            const u8 latched = static_cast<u8>((progress->latched[word] & bit) != 0);
+            box->state_flags_low |= latched << 5;
+            const u8 output_state = static_cast<u8>((progress->output_state[word] & bit) != 0);
+            box->state_flags_high = (box->state_flags_high & ~4) | (output_state << 2);
             if (box->type == 1 && box->condition_data[0] == 4) {
                 u8 checksum = getNextLoopChecksum();
                 i32 count = 0;

@@ -246,9 +246,11 @@ struct NetMessage {
             }
         }
     }
-    NetMessage(NetMessage const &other)
-        : swap_endianness(other.swap_endianness), data(other.data), read_offset(other.read_offset),
-          write_offset(other.write_offset) {
+    NetMessage(NetMessage const &other) {
+        data = other.data;
+        read_offset = other.read_offset;
+        write_offset = other.write_offset;
+        swap_endianness = other.swap_endianness;
         if (data != NULL) {
             ++data->references;
         } else {

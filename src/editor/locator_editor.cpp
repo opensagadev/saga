@@ -373,14 +373,20 @@ static __used__ __attribute__((optimize("no-tree-vectorize"))) void DestroyLocat
     }
     EDLOCATORSET_s *set = (EDLOCATORSET_s *)NuLinkedListGetHead(&aieditor->locator_sets);
     while (set != nullptr) {
-        for (i32 index = 0; index < 64 && set->locators[index] != nullptr; ++index) {
-            if (set->locators[index] == locator) {
+        i32 index = 0;
+        while (index < 64) {
+            EDLOCATOR_s *current = set->locators[index];
+            if (current == nullptr) {
+                break;
+            }
+            if (current == locator) {
                 for (i32 move = index; move < 63; ++move) {
                     set->locators[move] = set->locators[move + 1];
                 }
                 set->locators[63] = nullptr;
                 break;
             }
+            ++index;
         }
         set = (EDLOCATORSET_s *)NuLinkedListGetNext(&aieditor->locator_sets, &set->link);
     }
@@ -542,11 +548,10 @@ extern "C" {
                 EdFileWriteFloat(locator->position.y);
                 EdFileWriteFloat(locator->position.z);
                 EdFileWriteShort(locator->direction);
-                i32 path_index = locator->path->draw_index;
-                EdFileWriteChar(path_index);
+                EdFileWriteChar(locator->path->draw_index);
                 i32 connection_index = 0;
                 i32 connection_direction = 0;
-                AIPATH_s *path = path_system->paths[path_index];
+                AIPATH_s *path = path_system->paths[locator->path->draw_index];
                 for (i32 index = 0; index < path->connection_count; ++index) {
                     AIPATHCNX_s *connection = &path->connections[index];
                     i32 first = locator->first_node->index;
@@ -555,24 +560,31 @@ extern "C" {
                         connection_index = index;
                         i32 angle = locator->path_angle;
                         i32 magnitude = angle < 0 ? -angle : angle;
-                        connection_direction = magnitude > 0x3fff;
+                        if (magnitude > 0x3fff) {
+                            connection_direction = 1;
+                        } else {
+                            connection_direction = 0;
+                        }
                         break;
                     }
                     if (connection->node_indices[0] == second && connection->node_indices[1] == first) {
                         connection_index = index;
                         i32 angle = locator->path_angle;
                         i32 magnitude = angle < 0 ? -angle : angle;
-                        connection_direction = magnitude <= 0x3fff;
+                        if (magnitude > 0x3fff) {
+                            connection_direction = 0;
+                        } else {
+                            connection_direction = 1;
+                        }
                         break;
                     }
                 }
-                i32 angle = locator->path_angle;
                 EdFileWriteChar(connection_direction);
                 EdFileWriteShort(connection_index);
                 EdFileWriteFloat(locator->path_fraction);
                 EdFileWriteFloat(locator->path_width);
                 if (aidata_version > 14) {
-                    EdFileWriteInt(angle);
+                    EdFileWriteInt(locator->path_angle);
                 }
             }
             locator = (EDLOCATOR_s *)NuLinkedListGetNext(&aieditor->locators, &locator->link);
@@ -588,17 +600,35 @@ extern "C" {
             set = (EDLOCATORSET_s *)NuLinkedListGetHead(&aieditor->locator_sets);
             while (set != nullptr) {
                 i32 member_count = 0;
-                for (i32 index = 0; index < 64 && set->locators[index] != nullptr; ++index) {
-                    if (set->locators[index]->runtime_index != 0xff) {
+                i32 index = 0;
+                while (true) {
+                    EDLOCATOR_s *member = set->locators[index];
+                    if (member == nullptr) {
+                        break;
+                    }
+                    if (member->runtime_index != 0xff) {
                         ++member_count;
+                    }
+                    ++index;
+                    if (index == 64) {
+                        break;
                     }
                 }
                 EdFileWrite(set->name, 16);
                 EdFileWriteInt(member_count);
                 if (member_count != 0) {
-                    for (i32 index = 0; index < 64 && set->locators[index] != nullptr; ++index) {
-                        if (set->locators[index]->runtime_index != 0xff) {
-                            EdFileWriteChar(set->locators[index]->runtime_index);
+                    index = 0;
+                    while (true) {
+                        EDLOCATOR_s *member = set->locators[index];
+                        if (member == nullptr) {
+                            break;
+                        }
+                        if (member->runtime_index != 0xff) {
+                            EdFileWriteChar(member->runtime_index);
+                        }
+                        ++index;
+                        if (index == 64) {
+                            break;
                         }
                     }
                 }

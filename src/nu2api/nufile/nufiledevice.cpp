@@ -186,10 +186,10 @@ NuFileDevice *NuFileDevice::GetDeviceFromPath(char const *path) {
     if (sm_NumRules > 0) {
         char normalized[512];
         NuFileNormalise(normalized, sizeof(normalized), path);
-        for (i32 i = 0; i < sm_NumRules; ++i) {
-            PathRule &rule = sm_Rules[i];
-            if (NuStrNICmp(normalized, rule.path, rule.path_length) == 0)
-                device = GetDeviceByType(rule.device_type);
+        PathRule *rule = sm_Rules;
+        for (i32 i = 0; i < sm_NumRules; ++i, ++rule) {
+            if (NuStrNICmp(normalized, rule->path, rule->path_length) == 0)
+                device = GetDeviceByType(rule->device_type);
         }
     }
     return device;

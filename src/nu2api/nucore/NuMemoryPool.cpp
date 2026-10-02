@@ -1,11 +1,13 @@
 #include "decomp.h"
 #include "nu2api/nucore/NuMemoryPool.h"
 #include "nu2api/nucore/numemory.h"
+#include "nu2api/nucore/nuthread.h"
+#include "nu2api/nucore/nuvuvec.hpp"
 
 #include <string.h>
 
 NuMemoryPool *NuMemoryPool::m_firstPool;
-pthread_mutex_t NuMemoryPool::m_globalCriticalSection;
+NuCriticalSection NuMemoryPool::m_globalCriticalSection("NuMemoryPool");
 
 void NuMemoryPool::AddPage(void *ptr, u32 size) {
     Page *page = NU_ALLOC_T(Page, NuMemoryManager::MEM_ALLOC_SET_TO_ZERO, "", NUMEMORY_CATEGORY_NONE);
@@ -153,12 +155,15 @@ NuMemoryPool::FreeBlock volatile *NuMemoryPool::MergeSort(FreeBlock volatile *he
     u32 right_count = count - left_count;
     FreeBlock volatile *left_end = head;
     FreeBlock volatile *right = NULL;
-    for (u32 i = 0; i < left_count; ++i) {
+    u32 i = 0;
+    do {
+        ++i;
         right = left_end->next;
-        if (i + 1 < left_count) {
-            left_end = right;
+        if (i >= left_count) {
+            break;
         }
-    }
+        left_end = right;
+    } while (true);
     left_end->next = NULL;
     FreeBlock volatile *sorted_left = MergeSort(head, left_count);
     FreeBlock volatile *sorted_right = MergeSort(right, right_count);
@@ -174,12 +179,15 @@ NuMemoryPool::Page *NuMemoryPool::MergeSort(Page *head, u32 count) {
     u32 right_count = count - left_count;
     Page *left_end = head;
     Page *right = NULL;
-    for (u32 i = 0; i < left_count; ++i) {
+    u32 i = 0;
+    do {
+        ++i;
         right = left_end->next;
-        if (i + 1 < left_count) {
-            left_end = right;
+        if (i >= left_count) {
+            break;
         }
-    }
+        left_end = right;
+    } while (true);
     left_end->next = NULL;
     Page *sorted_left = MergeSort(head, left_count);
     Page *sorted_right = MergeSort(right, right_count);
@@ -202,10 +210,10 @@ NuMemoryPool::NuMemoryPool(IEventHandler *handler, u32 size, const char *debug_n
     page_list_stable = true;
     memset(free_lists, 0, sizeof(free_lists));
 
-    pthread_mutex_lock(&m_globalCriticalSection);
+    m_globalCriticalSection.Lock();
     next = m_firstPool;
     m_firstPool = this;
-    pthread_mutex_unlock(&m_globalCriticalSection);
+    m_globalCriticalSection.Unlock();
 }
 
 void *NuMemoryPool::PageAlloc(u32 size, const char *name) {
@@ -296,14 +304,18 @@ void NuMemoryPool::ReleaseUnreferencedPages() {
     u32 recycled_count = 0;
     for (Page *page = pages; page != NULL;) {
         ++visited_count;
-        usize page_begin = reinterpret_cast<usize>(page->ptr);
-        usize page_end = page_begin + page->size;
         u32 free_block_count = 0;
         for (u32 i = 0; i < 256; ++i) {
             FreeBlock volatile *block = cursors[i];
-            while (block != NULL && reinterpret_cast<usize>(block) < page_end) {
-                block = block->next;
-                ++free_block_count;
+            if (block != NULL) {
+                const usize cursor_page_end = reinterpret_cast<usize>(page->ptr) + page->size;
+                while (reinterpret_cast<usize>(block) < cursor_page_end) {
+                    block = block->next;
+                    ++free_block_count;
+                    if (block == NULL) {
+                        break;
+                    }
+                }
             }
             cursors[i] = block;
         }
@@ -314,21 +326,27 @@ void NuMemoryPool::ReleaseUnreferencedPages() {
             continue;
         }
 
+        const usize page_begin = reinterpret_cast<usize>(page->ptr);
         for (u32 i = 0; i < 256; ++i) {
             FreeBlock volatile *block = free_lists[i];
             FreeBlock volatile *previous_block = NULL;
-            while (block != NULL && reinterpret_cast<usize>(block) < page_end) {
-                FreeBlock volatile *next_block = block->next;
-                if (reinterpret_cast<usize>(block) >= page_begin) {
-                    if (previous_block != NULL) {
-                        previous_block->next = next_block;
+            if (block != NULL) {
+                const usize list_page_end = page_begin + page->size;
+                while (reinterpret_cast<usize>(block) < list_page_end) {
+                    if (reinterpret_cast<usize>(block) >= page_begin) {
+                        if (previous_block != NULL) {
+                            previous_block->next = block->next;
+                        } else {
+                            free_lists[i] = block->next;
+                        }
                     } else {
-                        free_lists[i] = next_block;
+                        previous_block = block;
                     }
-                } else {
-                    previous_block = block;
+                    block = block->next;
+                    if (block == NULL) {
+                        break;
+                    }
                 }
-                block = next_block;
             }
         }
 
@@ -443,17 +461,17 @@ void NuMemoryPool::ReleaseUnreferencedPages_OLD() {
 }
 
 void NuMemoryPool::VisitPools(IVisitor *visitor) {
-    pthread_mutex_lock(&m_globalCriticalSection);
+    m_globalCriticalSection.Lock();
     for (NuMemoryPool *pool = m_firstPool; pool != NULL; pool = pool->next) {
         visitor->Visit(pool);
     }
-    pthread_mutex_unlock(&m_globalCriticalSection);
+    m_globalCriticalSection.Unlock();
 }
 
 NuMemoryPool::~NuMemoryPool() {
     ReleaseUnreferencedPages();
 
-    pthread_mutex_lock(&m_globalCriticalSection);
+    m_globalCriticalSection.Lock();
     if (m_firstPool == this) {
         m_firstPool = next;
     } else {
@@ -465,7 +483,7 @@ NuMemoryPool::~NuMemoryPool() {
             previous->next = next;
         }
     }
-    pthread_mutex_unlock(&m_globalCriticalSection);
+    m_globalCriticalSection.Unlock();
 
     pthread_mutex_destroy(&mutex);
 }

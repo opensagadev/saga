@@ -82,8 +82,15 @@ f32 NuCosf(f32 angle) {
 }
 
 i32 NuPower2(i32 value) {
-    i32 power = value > 127 ? 128 : 1;
-    while (power < value)
+    register i32 power;
+    register i32 input;
+    if (value > 127) {
+        power = 128;
+    } else {
+        power = 1;
+    }
+    input = value;
+    while (power < input)
         power += power;
     return power;
 }

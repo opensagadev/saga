@@ -288,21 +288,24 @@ void MechAutoJumpManager::ProcessJumpConnections() {
             NuLinkedListGetNext(&jump_connections, reinterpret_cast<NULISTLNK *>(jump)));
         if (jump->active == 0 && jump->is_using == 0 && jump->cooldown <= 0.005f) {
             DeleteJumpConnection(jump);
-        } else if (jump->colour != jump->base_colour) {
-            jump->base_colour_components.x = SeekLinearF(
-                jump->base_colour_components.x, static_cast<f32>(jump->colour & 0xff), FRAMETIME * testColourSecF);
-            jump->base_colour_components.y =
-                SeekLinearF(jump->base_colour_components.y, static_cast<f32>((jump->colour >> 8) & 0xff),
-                            FRAMETIME * testColourSecF);
-            jump->base_colour_components.z =
-                SeekLinearF(jump->base_colour_components.z, static_cast<f32>((jump->colour >> 16) & 0xff),
-                            FRAMETIME * testColourSecF);
-            jump->streak_alpha = SeekLinearF(jump->streak_alpha, static_cast<f32>(static_cast<i32>(jump->colour >> 24)),
-                                             FRAMETIME * testColourSecF);
-            jump->base_colour = (static_cast<u32>(static_cast<i32>(jump->base_colour_components.x)) & 0xff) |
-                                ((static_cast<u32>(static_cast<i32>(jump->base_colour_components.y)) << 8) & 0xffff) |
-                                ((static_cast<u32>(static_cast<i32>(jump->base_colour_components.z)) & 0xff) << 16) |
-                                (static_cast<u32>(static_cast<i32>(jump->streak_alpha)) << 24);
+        } else {
+            const u32 colour = jump->colour;
+            if (colour != jump->base_colour) {
+                jump->base_colour_components.x = SeekLinearF(
+                    jump->base_colour_components.x, static_cast<f32>(colour & 0xff), FRAMETIME * testColourSecF);
+                jump->base_colour_components.y = SeekLinearF(
+                    jump->base_colour_components.y, static_cast<f32>((colour >> 8) & 0xff), FRAMETIME * testColourSecF);
+                jump->base_colour_components.z =
+                    SeekLinearF(jump->base_colour_components.z, static_cast<f32>((colour >> 16) & 0xff),
+                                FRAMETIME * testColourSecF);
+                jump->streak_alpha = SeekLinearF(jump->streak_alpha, static_cast<f32>(static_cast<i32>(colour >> 24)),
+                                                 FRAMETIME * testColourSecF);
+                jump->base_colour =
+                    (static_cast<u32>(static_cast<i32>(jump->base_colour_components.x)) & 0xff) |
+                    ((static_cast<u32>(static_cast<i32>(jump->base_colour_components.y)) << 8) & 0xffff) |
+                    ((static_cast<u32>(static_cast<i32>(jump->base_colour_components.z)) & 0xff) << 16) |
+                    (static_cast<u32>(static_cast<i32>(jump->streak_alpha)) << 24);
+            }
         }
         jump = next;
     }

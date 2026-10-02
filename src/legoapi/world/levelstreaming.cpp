@@ -17,17 +17,17 @@ extern i32 Players_AveragePos(struct nuvec_s *, struct SOCKPOSITION_s *);
 extern i16 InsideLineXZ(f32, f32, f32, f32, f32, f32);
 
 void LevelStreaming_Update(WORLDINFO_s *world) {
-    if (LOADEROFF != 0 || BGLOAD == 0 || world->area == NULL || (world->area->flags & 8) != 0 ||
-        NewLData != NULL || Mission_Active(NULL) != NULL) {
+    if (LOADEROFF != 0 || BGLOAD == 0 || world->area == NULL || (world->area->flags & 8) != 0 || NewLData != NULL ||
+        Mission_Active(NULL) != NULL) {
         return;
     }
 
     other_level = -1;
     if (no_more_loads == 0) {
-        CUTINFO *cut = static_cast<CUTINFO *>(CutStopInfo);
+        CUTINFO *cut;
         if (other_level_override != -1) {
             other_level = other_level_override;
-        } else if (CUTSTOPGAME != 0 && cut != NULL && cut->skip_level != -1 &&
+        } else if (CUTSTOPGAME != 0 && (cut = static_cast<CUTINFO *>(CutStopInfo)) != NULL && cut->skip_level != -1 &&
                    LDataList[cut->skip_level].area_index == LDataList[world->level_idx].area_index) {
             other_level = cut->skip_level;
         } else if ((world->current_level->flags & (LEVEL_INTRO | LEVEL_MIDTRO | LEVEL_OUTRO)) == 0) {
@@ -36,9 +36,8 @@ void LevelStreaming_Update(WORLDINFO_s *world) {
                 other_level = -1;
                 f32 best_distance = 1000000000.0f;
                 for (i32 i = 0; i < world->door_count; ++i) {
-                    i32 level = InStory() != 0 || world->doors[i].freeplay_level == -1
-                                    ? world->doors[i].level
-                                    : world->doors[i].freeplay_level;
+                    i32 level = InStory() != 0 || world->doors[i].freeplay_level == -1 ? world->doors[i].level
+                                                                                       : world->doors[i].freeplay_level;
                     if (level != world->level_idx) {
                         f32 distance = NuVecDistSqr(&world->doors[i].pos, &position, NULL);
                         if (distance < best_distance) {
@@ -50,9 +49,8 @@ void LevelStreaming_Update(WORLDINFO_s *world) {
 
                 i32 i;
                 for (i = 0; i < LevelLoadCount; ++i) {
-                    if (LevelLoad[i].level == world->level_idx &&
-                        (((LevelLoad[i].flags & 1) != 0 && InStory() != 0) ||
-                         ((LevelLoad[i].flags & 2) != 0 && InStory() == 0))) {
+                    if (LevelLoad[i].level == world->level_idx && (((LevelLoad[i].flags & 1) != 0 && InStory() != 0) ||
+                                                                   ((LevelLoad[i].flags & 2) != 0 && InStory() == 0))) {
                         break;
                     }
                 }
@@ -61,8 +59,8 @@ void LevelStreaming_Update(WORLDINFO_s *world) {
                         other_level = LevelLoad[i].first_level;
                     } else if (LEGOSPL_SPLIT != -1 && world->camera_splines[LEGOSPL_SPLIT] != NULL) {
                         NUVEC *points = world->camera_splines[LEGOSPL_SPLIT]->pts;
-                        if (InsideLineXZ(position.x, position.z, points[0].x, points[0].z, points[1].x,
-                                         points[1].z) != 0) {
+                        if (InsideLineXZ(position.x, position.z, points[0].x, points[0].z, points[1].x, points[1].z) !=
+                            0) {
                             other_level = LevelLoad[i].first_level;
                         } else {
                             other_level = LevelLoad[i].second_level;

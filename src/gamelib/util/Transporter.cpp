@@ -59,7 +59,8 @@ void NetTransporter::AddListener(NetListenerInterface *listener, unsigned char c
 void NetTransporter::Distribute(NetMessage const &message, unsigned char channel, NetPeer const &peer) const {
     for (NetListenerBinding *binding = first_listener; binding != NULL; binding = binding->next) {
         if (binding->channel == channel) {
-            binding->stats.total.values[1] += message.data != NULL ? message.write_offset - message.read_offset : 0;
+            u32 byte_count = message.data != NULL ? message.write_offset - message.read_offset : 0;
+            binding->stats.total.values[1] += byte_count;
             ++binding->stats.total.values[3];
             binding->listener->Receive(message, channel, peer);
         }
@@ -151,25 +152,25 @@ void NetTransporter::RemoveListener(NetListenerInterface *listener, unsigned cha
     theMemoryManager.FreePool(binding, sizeof(NetListenerBinding));
 }
 
-void NetTransporter::StatsReceiveMessage(NetMessage message, unsigned char channel) {
-    NetListenerBinding *binding = first_listener;
-    while (binding != NULL && binding->channel != channel) {
-        binding = binding->next;
-    }
-    if (binding != NULL) {
-        binding->stats.total.values[1] += message.data != NULL ? message.write_offset - message.read_offset : 0;
-        ++binding->stats.total.values[3];
+void NetTransporter::StatsSendMessage(NetMessage message, unsigned char channel) {
+    for (NetListenerBinding *binding = first_listener; binding != NULL; binding = binding->next) {
+        if (binding->channel == channel) {
+            u32 byte_count = message.data != NULL ? message.write_offset - message.read_offset : 0;
+            binding->stats.total.values[0] += byte_count;
+            ++binding->stats.total.values[2];
+            return;
+        }
     }
 }
 
-void NetTransporter::StatsSendMessage(NetMessage message, unsigned char channel) {
-    NetListenerBinding *binding = first_listener;
-    while (binding != NULL && binding->channel != channel) {
-        binding = binding->next;
-    }
-    if (binding != NULL) {
-        binding->stats.total.values[0] += message.data != NULL ? message.write_offset - message.read_offset : 0;
-        ++binding->stats.total.values[2];
+void NetTransporter::StatsReceiveMessage(NetMessage message, unsigned char channel) {
+    for (NetListenerBinding *binding = first_listener; binding != NULL; binding = binding->next) {
+        if (binding->channel == channel) {
+            u32 byte_count = message.data != NULL ? message.write_offset - message.read_offset : 0;
+            binding->stats.total.values[1] += byte_count;
+            ++binding->stats.total.values[3];
+            return;
+        }
     }
 }
 

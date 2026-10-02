@@ -238,12 +238,13 @@ i32 NuFilePakSetItemRequired(void *hdr_ptr, i32 item_handle, i32 required) {
 
     NUFILEPAKHDR *hdr = static_cast<NUFILEPAKHDR *>(hdr_ptr);
     --item_handle;
-    if (item_handle < 0 || item_handle >= static_cast<i32>(hdr->item_count)) {
-        return 0;
+    if (item_handle >= 0 && item_handle < hdr->item_count) {
+        NUFILEPAKITEM *items = GetItems(hdr);
+        items = &items[item_handle];
+        if (!items->attr.removed) {
+            items->attr.required = required;
+        }
+        return 1;
     }
-    NUFILEPAKITEM &item = GetItems(hdr)[item_handle];
-    if (!item.attr.removed) {
-        item.attr.required = required;
-    }
-    return 1;
+    return 0;
 }

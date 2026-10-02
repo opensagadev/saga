@@ -133,7 +133,7 @@ f32 oneAtOnce_GetHoldRange(GameObject_s *object) {
 }
 
 void oneAtOnce_MaintainArray() {
-    GameObject_s *previous_attackers[8][4] = {};
+    GameObject_s *previous_attackers[8][4];
     i32 previous_count[8] = {};
     i32 attacker_count[8] = {};
 

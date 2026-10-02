@@ -154,8 +154,9 @@ i32 NuGScnUploadGfxDataFromFilePS(VARIPTR *buf, VARIPTR buf_end, i32 file) {
     bytes_read += NuGScnReadTexturesPS(file, buf, buf_end);
 
     bytes_read += NuFileRead(file, &g_VideoResHeader.nvertex_buffers, sizeof(g_VideoResHeader.nvertex_buffers));
-    g_VideoResHeader.vertex_buffers = BUFFER_ALLOC_ARRAY(buf, g_VideoResHeader.nvertex_buffers, usize);
-    for (u32 i = 0; i < g_VideoResHeader.nvertex_buffers; ++i) {
+    g_VideoResHeader.vertex_buffers = reinterpret_cast<usize *>(buf->addr);
+    buf->addr += g_VideoResHeader.nvertex_buffers * sizeof(usize);
+    for (u32 i = 0; i != g_VideoResHeader.nvertex_buffers; ++i) {
         u32 size = 0;
         bytes_read += NuFileRead(file, &size, sizeof(size));
         if (size == 0) {
@@ -178,8 +179,9 @@ i32 NuGScnUploadGfxDataFromFilePS(VARIPTR *buf, VARIPTR buf_end, i32 file) {
     }
 
     bytes_read += NuFileRead(file, &g_VideoResHeader.nindex_buffers, sizeof(g_VideoResHeader.nindex_buffers));
-    g_VideoResHeader.index_buffers = BUFFER_ALLOC_ARRAY(buf, g_VideoResHeader.nindex_buffers, usize);
-    for (u32 i = 0; i < g_VideoResHeader.nindex_buffers; ++i) {
+    g_VideoResHeader.index_buffers = reinterpret_cast<usize *>(buf->addr);
+    buf->addr += g_VideoResHeader.nindex_buffers * sizeof(usize);
+    for (u32 i = 0; i != g_VideoResHeader.nindex_buffers; ++i) {
         u32 size = 0;
         bytes_read += NuFileRead(file, &size, sizeof(size));
         if (size == 0) {
@@ -194,10 +196,14 @@ i32 NuGScnUploadGfxDataFromFilePS(VARIPTR *buf, VARIPTR buf_end, i32 file) {
 
     i32 total_size = section_size + 4;
     u8 padding;
-    while (bytes_read < total_size) {
-        bytes_read += NuFileRead(file, &padding, 1);
+    if (bytes_read < total_size) {
+        i32 padding_read_count = 0;
+        while (padding_read_count != total_size - bytes_read) {
+            NuFileRead(file, &padding, 1);
+            ++padding_read_count;
+        }
     }
-    if (buf->addr < max_buf.addr) {
+    if (max_buf.addr > buf->addr) {
         memset(buf->void_ptr, 0, max_buf.addr - buf->addr);
     }
     return total_size;

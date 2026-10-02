@@ -325,12 +325,12 @@ void SetSoundFadeDist(WORLDINFO_s *world, OPTIONSSAVE_s *options) {
         GameSetMusicVolume(options);
         return;
     }
-    if (VehicleArea != 0) {
-        nusound_fade_start = 10.0f;
-        nusound_fade_end = 80.0f;
-    } else {
+    if (VehicleArea == 0) {
         nusound_fade_start = 2.0f;
         nusound_fade_end = 15.0f;
+    } else {
+        nusound_fade_start = 10.0f;
+        nusound_fade_end = 80.0f;
     }
     GameSetSoundVolume(options);
     GameSetMusicVolume(options);
@@ -357,12 +357,14 @@ i32 GamePlayMusic(LEVELDATA_s *level, i32 check, OPTIONSSAVE_s *options) {
         music_other = CheckMusicOtherFn();
     }
 
-    if (check == 0) {
+    if (check != 0) {
+        if (music_other == other) {
+            MusicOther = music_other;
+            return music_other;
+        }
+    } else {
         sticky_attack_time = 0;
         sticky_attack = PlayersUnderAttack;
-    } else if (music_other == other) {
-        MusicOther = music_other;
-        return music_other;
     }
 
     MusicOther = music_other;

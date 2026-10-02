@@ -73,7 +73,7 @@ class NuSoundMemoryManager {
 
     u32 Init(const char *name, void *memory, u32 size, u32 align, u32 param_5);
 
-    static NuSoundMemoryBuffer *PopFreeBuffer();
+    NuSoundMemoryBuffer *PopFreeBuffer();
     void PushFreeBuffer(NuSoundMemoryBuffer *buffer);
 
     void EnableDefragOnAlloc(bool value);

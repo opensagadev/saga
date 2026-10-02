@@ -289,8 +289,7 @@ void SerialiseVuVec(EdStream &stream, void *data, i32) {
 }
 
 void FS_MoveCursorUp(i32 steps) {
-    i32 remaining = steps;
-    while (remaining > 0) {
+    while (steps > 0) {
         i32 currentPosLength = FS_PrevNameLen(FS_CurrentPos);
         i32 cursorLength = FS_PrevNameLen(FS_CurrentCursorPos);
         char *cursor = FS_CurrentCursorPos;
@@ -305,7 +304,7 @@ void FS_MoveCursorUp(i32 steps) {
         }
 
         FS_CurrentCursorPos = cursor - cursorLength;
-        --remaining;
+        --steps;
     }
 }
 
@@ -414,8 +413,7 @@ void FS_MakeTimeString(FS_FILEENTRYHDR *entry, char *output) {
 void FS_MoveCursorDown(i32 steps) {
     char **currentPos = &FS_CurrentPos;
     char **cursorPos = &FS_CurrentCursorPos;
-    i32 remaining = steps;
-    while (remaining > 0) {
+    while (steps > 0) {
         i32 currentPosLength = NuStrLen(*currentPos);
         i32 cursorLength = NuStrLen(*cursorPos);
         char *next = *cursorPos + cursorLength + 1;
@@ -435,7 +433,7 @@ void FS_MoveCursorDown(i32 steps) {
             }
             *cursorPos = next;
         }
-        --remaining;
+        --steps;
     }
 }
 

@@ -70,6 +70,14 @@ struct part_typedesc_s;
 union variptr_u;
 
 struct ClassObjectList;
+struct ClassObject {
+    EdClass *ed_class;
+    void *object;
+    EdRef *reference;
+
+    void GetName(char *, i32);
+    void Set(char *);
+};
 struct EdMember {
     void *object;
     EdRef *reference;
@@ -685,9 +693,7 @@ struct EdSfxNameControl : EdStringControl {
 };
 DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(EdSfxNameControl) == 0x10, "EdSfxNameControl ABI");
 struct EdClassObjectNameControl : EdStringControl {
-    EdClass *selected_class;
-    void *selected_object;
-    EdRef *selected_reference;
+    ClassObject selected;
 
     EdClassObjectNameControl();
     ~EdClassObjectNameControl() override;

@@ -1041,6 +1041,9 @@ void NewTown_Update(WORLDINFO_s *world) {
     if (world == NULL || world->pickup_sys == NULL) {
         return;
     }
+    const u8 previousTaunTaun = prevOnTaunTaun;
+    const u8 previousFireTruck = prevOnFireTruck;
+    const u8 previousLifeBoat = prevOnLifeBoat;
     u8 onTaunTaun = 0;
     u8 onFireTruck = 0;
     u8 onLifeBoat = 0;
@@ -1057,7 +1060,7 @@ void NewTown_Update(WORLDINFO_s *world) {
             }
         }
     }
-    u8 changed = (onTaunTaun ^ prevOnTaunTaun) | (onFireTruck ^ prevOnFireTruck) | (onLifeBoat ^ prevOnLifeBoat);
+    u8 changed = (onTaunTaun ^ previousTaunTaun) | (onFireTruck ^ previousFireTruck) | (onLifeBoat ^ previousLifeBoat);
     prevOnTaunTaun = onTaunTaun;
     prevOnFireTruck = onFireTruck;
     prevOnLifeBoat = onLifeBoat;

@@ -109,22 +109,22 @@ void CharPlatforms_Reset(CHARPLATFORMSYS_s *system) {
         return;
     }
 
-    for (i32 i = 0; i < HIGHGAMEOBJECT; ++i) {
-        if ((Obj[i].apiobj.field_0x1f8 & 1) != 0) {
-            Obj[i].field_0x107c = -1;
+    GameObject_s *object_cursor = Obj;
+    for (i32 i = 0; i < HIGHGAMEOBJECT; ++i, ++object_cursor) {
+        if ((object_cursor->apiobj.field_0x1f8 & 1) != 0) {
+            object_cursor->field_0x107c = -1;
         }
     }
 
     for (i32 i = 0; i < system->platform_count; ++i) {
-        CHARPLATFORM_s *platform = &system->platforms[i];
-        NuSpecialSetVisibility(&platform->special, 0);
-        platform->platform_id = FindPlatInst(NuSpecialGetInstanceix(&platform->special));
-        platform->object = NULL;
-        if (platform->platform_id != -1) {
-            GameObject_s *object = FindGameObject(platform->object_id, 0, 1, 0, 1);
+        NuSpecialSetVisibility(&system->platforms[i].special, 0);
+        system->platforms[i].platform_id = FindPlatInst(NuSpecialGetInstanceix(&system->platforms[i].special));
+        system->platforms[i].object = NULL;
+        if (system->platforms[i].platform_id != -1) {
+            GameObject_s *object = FindGameObject(system->platforms[i].object_id, 0, 1, 0, 1);
             if (object != NULL) {
-                object->field_0x107c = platform->platform_id;
-                platform->object = object;
+                object->field_0x107c = system->platforms[i].platform_id;
+                system->platforms[i].object = object;
             }
         }
     }
@@ -180,15 +180,14 @@ void CharPlatforms_Configure(WORLDINFO_s *world, char *config) {
 void CharPlatforms_Update(CHARPLATFORMSYS_s *system) {
     if (system == NULL)
         return;
-    CHARPLATFORM_s *platform = system->platforms;
-    for (i32 i = 0; i < system->platform_count; ++i, ++platform) {
-        if (platform->object_id == -1)
+    for (i32 i = 0; i < system->platform_count; ++i) {
+        if (system->platforms[i].object_id == -1)
             continue;
         i32 visible = 0;
         GameObject_s *object = Obj;
         for (i32 j = 0; j < HIGHGAMEOBJECT; ++j, ++object) {
             if ((object->apiobj.field_0x1f8 & 0x1001) != 0x1001 || object->apiobj.field_0x287 != 0 ||
-                object->field_0x107c != platform->platform_id)
+                object->field_0x107c != system->platforms[i].platform_id)
                 continue;
             nuhspecial_s *special = &system->platforms[i].special;
             NUMTX *matrix = NuSpecialGetDrawMtx(special);
@@ -219,11 +218,12 @@ f32 FindReflectionNoPlatforms(nuvec_s *position) {
 }
 
 GameObject_s *CharPlatform_FindObjFromPlatID(CHARPLATFORMSYS_s *system, i32 platform_id) {
-    if (system != NULL) {
-        CHARPLATFORM_s *platform = system->platforms;
-        for (i32 i = 0; i < system->platform_count; ++i, ++platform) {
-            if (platform->object != NULL && platform->platform_id == platform_id)
-                return platform->object;
+    if (system == NULL) {
+        return NULL;
+    }
+    for (i32 i = 0; i < system->platform_count; ++i) {
+        if (system->platforms[i].object != NULL && system->platforms[i].platform_id == platform_id) {
+            return system->platforms[i].object;
         }
     }
     return NULL;

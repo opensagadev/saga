@@ -2121,10 +2121,8 @@ void TerrainImpact(NUVEC *position, NUVEC *movement, u8 *hit_flags) {
         }
 
         // A non-negative group index on a hit always comes with a surface.
-        const bool wall_override_surface =
-            query->terrain_group_index >= 0 &&
-            (surface->normal_flags & TERRAIN_SURFACE_CLASS_MASK) == TERRAIN_SURFACE_CLASS_WALL_OVERRIDE;
-        if (wall_override_surface) {
+        if (query->terrain_group_index >= 0 &&
+            (surface->normal_flags & TERRAIN_SURFACE_CLASS_MASK) == TERRAIN_SURFACE_CLASS_WALL_OVERRIDE) {
             // Original 0x382168 uses the scaled movement normal (+0xa8).
             query->position.x += query->movement_normal.x * 0.0015f;
             query->position.z += query->movement_normal.z * 0.0015f;
@@ -2138,7 +2136,8 @@ void TerrainImpact(NUVEC *position, NUVEC *movement, u8 *hit_flags) {
             case TERRAIN_HIT_TYPE_CYLINDER:
             case TERRAIN_HIT_TYPE_VERTEX:
             case TERRAIN_HIT_TYPE_SPHERE:
-                if (!wall_override_surface)
+                if (!(query->terrain_group_index >= 0 &&
+                      (surface->normal_flags & TERRAIN_SURFACE_CLASS_MASK) == TERRAIN_SURFACE_CLASS_WALL_OVERRIDE))
                     walkable_normal_y = 0.707f;
                 // Fall through to the shared first-normal response.
             case TERRAIN_HIT_TYPE_FACE: {

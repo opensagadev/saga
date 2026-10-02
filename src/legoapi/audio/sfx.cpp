@@ -1143,12 +1143,17 @@ extra:
 
 void PlayHurtSfx(GameObject_s *object) {
     CHARACTERDATA *character = object->apiobj.character_data;
-    i32 sfx = character->game_character->sfx_hurt;
-    if (sfx == -1) {
+    i16 configured_sfx = character->game_character->sfx_hurt;
+    i32 sfx = configured_sfx;
+    if (configured_sfx == -1) {
         if ((character->model_flags & 0x44002010) != 0) {
             goto extra;
         }
-        sfx = GameAudio->sfx_ids[(object->field_0xf01 & 8) != 0 ? 0x16 : 0x17];
+        if ((object->field_0xf01 & 8) == 0) {
+            sfx = GameAudio->sfx_ids[0x17];
+        } else {
+            sfx = GameAudio->sfx_ids[0x16];
+        }
         if (sfx == -1) {
             goto extra;
         }
@@ -1272,13 +1277,19 @@ void AddFootSteps(GameObject_s *object) {
 
 void PlayGruntSfx(GameObject_s *object) {
     CHARACTERDATA *character = object->apiobj.character_data;
-    i32 sfx = character->game_character->sfx_grunt;
-    if (sfx == -1) {
-        if ((character->model_flags & 0x44002010) != 0) {
-            return;
-        }
-        sfx = GameAudio->sfx_ids[(object->field_0xf01 & 8) != 0 ? 0x14 : 0x15];
-        if (sfx == -1) {
+    i16 configured_sfx = character->game_character->sfx_grunt;
+    i32 sfx = configured_sfx;
+    if (configured_sfx == -1) {
+        if ((character->model_flags & 0x44002010) == 0) {
+            if ((object->field_0xf01 & 8) == 0) {
+                sfx = GameAudio->sfx_ids[0x15];
+            } else {
+                sfx = GameAudio->sfx_ids[0x14];
+            }
+            if (sfx == -1) {
+                return;
+            }
+        } else {
             return;
         }
     }

@@ -3855,14 +3855,6 @@ struct CantPickupBombTimerAddon : MechAddon {
 DECOMP_ASSERT(sizeof(CantPickupBombTimerAddon) == 0x1c, "CantPickupBombTimerAddon ABI");
 DECOMP_ASSERT(offsetof(CantPickupBombTimerAddon, remaining_time) == 0x18, "Bomb pickup timer offset");
 
-struct ClassObject {
-    EdClass *ed_class;
-    void *object;
-    EdRef *reference;
-
-    void GetName(char *, i32);
-    void Set(char *);
-};
 struct ClassObjectListEntry {
     ClassObjectListEntry *next;
     ClassObjectListEntry *previous;

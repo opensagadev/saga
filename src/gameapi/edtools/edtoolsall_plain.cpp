@@ -3041,9 +3041,15 @@ extern "C" {
         *y = edui_cursor_dy / 224.0f;
     }
     eduimenu_s *eduiGetTopLevelParent(eduimenu_s *menu) {
-        if (menu)
-            while (menu->parent)
-                menu = menu->parent;
+        if (menu == NULL) {
+            return NULL;
+        }
+        if (menu->parent == NULL) {
+            return menu;
+        }
+        do {
+            menu = menu->parent;
+        } while (menu->parent != NULL);
         return menu;
     }
     i32 bUsingMenuFocus;

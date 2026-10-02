@@ -390,20 +390,32 @@ void Customiser_LoadAll(CUSTOMISER *customiser, WORLDINFO_s *world) {
 
     Customiser_AccessoriesLoaded = 2;
     world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 4);
-    for (i32 category_index = 0; category_index < 9; ++category_index) {
-        CUSTOMPIECECATEGORY *category = customiser->categories[category_index];
+    const auto allocate_category = [customiser, world](i32 category_index) {
         const i32 piece_count = customiser->piece_counts[category_index];
-        if (piece_count < 1 || category == NULL || category->name == NULL || category->name[0] == '\0') {
+        if (piece_count < 1) {
             world->customiser_resources[category_index] = NULL;
-            continue;
+        } else {
+            CUSTOMPIECECATEGORY *category = customiser->categories[category_index];
+            if (category->name == NULL) {
+                world->customiser_resources[category_index] = NULL;
+            } else {
+                const usize bytes = piece_count * sizeof(CUSTOMPIECERESOURCE);
+                CUSTOMPIECERESOURCE *resources = reinterpret_cast<CUSTOMPIECERESOURCE *>(world->giz_buffer.void_ptr);
+                world->customiser_resources[category_index] = resources;
+                memset(resources, 0, bytes);
+                world->giz_buffer.addr += bytes;
+            }
         }
-
-        const usize bytes = piece_count * sizeof(CUSTOMPIECERESOURCE);
-        CUSTOMPIECERESOURCE *resources = reinterpret_cast<CUSTOMPIECERESOURCE *>(world->giz_buffer.void_ptr);
-        world->customiser_resources[category_index] = resources;
-        memset(resources, 0, bytes);
-        world->giz_buffer.addr += bytes;
-    }
+    };
+    allocate_category(0);
+    allocate_category(1);
+    allocate_category(2);
+    allocate_category(3);
+    allocate_category(4);
+    allocate_category(5);
+    allocate_category(6);
+    allocate_category(7);
+    allocate_category(8);
 
     void *texture_pack = NULL;
     extern i32 CHARPAK;

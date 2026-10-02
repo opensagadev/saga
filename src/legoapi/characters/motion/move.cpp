@@ -5687,11 +5687,19 @@ i32 ForcePushed_SetTargetMom(GameObject_s *object, float *seek_rate) {
         float push_z = object->apiobj.position.z - source->apiobj.position.z;
         float nearest_distance_squared = 2.25f;
         GameObject_s *candidate = Obj;
-        for (i32 index = 0; index < HIGHGAMEOBJECT; ++index, ++candidate) {
+        i32 loop_limit = HIGHGAMEOBJECT;
+        for (i32 index = 0; index < loop_limit; ++index, ++candidate) {
             if ((candidate->apiobj.field_0x1f8 & 0x1001) != 0x1001 || candidate->apiobj.field_0x287 != 0 ||
                 candidate == source || candidate == object || candidate->apiobj.field_0x27c != -1 ||
-                (candidate->field_0xefb & 8) != 0 || CannotKill(candidate) != 0 ||
-                (candidate->apiobj.character_data->model_flags & 0x4002010) != 0x10) {
+                (candidate->field_0xefb & 8) != 0) {
+                continue;
+            }
+            if (CannotKill(candidate) != 0) {
+                loop_limit = HIGHGAMEOBJECT;
+                continue;
+            }
+            if ((candidate->apiobj.character_data->model_flags & 0x4002010) != 0x10) {
+                loop_limit = HIGHGAMEOBJECT;
                 continue;
             }
             GAMECHARACTERDATA *character =
@@ -5699,16 +5707,20 @@ i32 ForcePushed_SetTargetMom(GameObject_s *object, float *seek_rate) {
             if ((character->flags_090 & 0x40) != 0 || (character->flags_094[1] & 2) != 0 ||
                 candidate->id == id_GONKDROID || candidate->apiobj.collision_min.y > object->apiobj.collision_max.y ||
                 object->apiobj.collision_min.y > candidate->apiobj.collision_max.y) {
+                loop_limit = HIGHGAMEOBJECT;
                 continue;
             }
             float dx = candidate->apiobj.position.x - object->apiobj.position.x;
             float dz = candidate->apiobj.position.z - object->apiobj.position.z;
             if (!(0.0f > push_x * dx + push_z * dz)) {
+                loop_limit = HIGHGAMEOBJECT;
                 float distance_squared = dx * dx + dz * dz;
                 if (distance_squared < nearest_distance_squared) {
                     nearest_distance_squared = distance_squared;
                     nearest = candidate;
                 }
+            } else {
+                loop_limit = HIGHGAMEOBJECT;
             }
         }
     }
@@ -7871,10 +7883,10 @@ void UpdateLastSafePosition(GameObject_s *object) {
     if (api.field_0x287 == 0 && (LEGOCONTEXT_DOOMED == -1 || object->character_context != LEGOCONTEXT_DOOMED) &&
         (api.flags_low & 4) == 0) {
         api.field_0x1c0 = api.position;
-        GameObject_s *terrain_object = object;
-        if (object->field_0xcc0 != NULL && LEGOCONTEXT_BEENTAKENOVER != -1 &&
-            object->character_context == LEGOCONTEXT_BEENTAKENOVER)
-            terrain_object = object->field_0xcc0;
+        GameObject_s *terrain_object = object->field_0xcc0 != NULL && LEGOCONTEXT_BEENTAKENOVER != -1 &&
+                                               object->character_context == LEGOCONTEXT_BEENTAKENOVER
+                                           ? object->field_0xcc0
+                                           : object;
         const i32 surface = static_cast<i8>(terrain_object->apiobj.field_0x281);
         i32 unsafe;
         if (surface != -1 && (TerSurface[surface].flags & 0xc041) != 0) {
