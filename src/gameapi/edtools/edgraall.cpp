@@ -611,8 +611,8 @@ static void edgracbCancelClumpDistMenu(eduimenu_s *, eduimenu_s *) {
 static void edgracbCancelClumpFadeMenu(eduimenu_s *, eduimenu_s *) {
     eduiMenuDestroy(edgra_clumpfade_menu);
     edgra_clumpfade_menu = NULL;
-    fadeinitem = NULL;
     fadeoutitem = NULL;
+    fadeinitem = NULL;
 }
 
 static void edgracbCancelClumpModeMenu(eduimenu_s *, eduimenu_s *) {

@@ -304,17 +304,40 @@ struct instNUGCUTSCENE_s {
     NUVEC bounds_max;
     f32 max_camera_distance_squared;
     union {
-        u8 flags_88;
         struct {
-            u8 flags_88_low : 2;
-            u8 paused : 1;
-            u8 flags_88_high : 5;
+            union {
+                u8 flags_88;
+                struct {
+                    u8 flags_88_low : 2;
+                    u8 paused : 1;
+                    u8 flags_88_high : 5;
+                };
+            };
+            union {
+                u8 flags_89;
+                struct {
+                    u8 flags_89_low : 4;
+                    i8 finished : 1; // signed: reads as 0 or -1
+                    u8 flags_89_high : 3;
+                };
+            };
+            u8 flags_8a;
+            u8 flags_8b;
+        };
+        struct {
+            u32 flags_88_word_low : 13;
+            u32 repeat_count : 5; // the original stores this as one 32-bit field
+            u32 flags_88_word_high : 14;
         };
     };
-    u8 flags_89;
-    u8 flags_8a;
-    u8 flags_8b;
-    u8 flags_8c;
+    union {
+        u8 flags_8c;
+        struct {
+            u8 flags_8c_low : 6;
+            u8 wait_at_end : 1;
+            u8 flags_8c_high : 1;
+        };
+    };
     u8 flags_8d;
     u8 pad_8e[2];
     f32 current_frame;

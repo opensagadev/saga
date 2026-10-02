@@ -73,12 +73,12 @@ eduimenu_s *antinodeEditor_Process(nupad_s *);
 void antinodeEditor_Render(i32, i32, f32, f32);
 
 extern "C" {
-    i32 AIEDITOR_PATHS;
+    i32 AIEDITOR_PATHS = -1;
     i32 AIEDITOR_ROUTES = -1;
-    i32 AIEDITOR_AREAS;
-    i32 AIEDITOR_LOCATORS;
-    i32 AIEDITOR_CREATURES;
-    i32 AIEDITOR_ANTINODES;
+    i32 AIEDITOR_AREAS = -1;
+    i32 AIEDITOR_LOCATORS = -1;
+    i32 AIEDITOR_CREATURES = -1;
+    i32 AIEDITOR_ANTINODES = -1;
 }
 
 aieditor_settings_s aieditorsettings;

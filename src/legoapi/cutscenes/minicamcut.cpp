@@ -388,7 +388,8 @@ void Minicam_AddCommand(i32 type, f32 duration, i32 argument, void *target, nuve
 
 void Minicam_CalcCamPos() {
     if (MiniCam.mode == 0) {
-        MiniCam.position.x = MiniCam.position.y = 0.0f;
+        MiniCam.position.x = 0.0f;
+        MiniCam.position.y = 0.0f;
         MiniCam.position.z = MiniCam.distance;
         NuVecRotateX(&MiniCam.position, &MiniCam.position, MiniCam.pitch);
         NuVecRotateY(&MiniCam.position, &MiniCam.position, MiniCam.yaw);

@@ -39,7 +39,7 @@ extern NUMTL *SolidMtl3D;
 
 i32 grapple_gizmotype_id = -1;
 i32 Grapple_RopeSwingsAvailable;
-i16 Grapple_RopeSwingRotate;
+i16 Grapple_RopeSwingRotate = 0x5555;
 extern i32 GrappleSwingMode;
 
 struct GRAPPLEPROGRESS {
@@ -708,18 +708,12 @@ ADDGIZMOTYPE *Grapples_RegisterGizmo(i32 type_id) {
     addtype.name = "Grapple";
     addtype.prefix = "";
     addtype.fns.unknown1 = 8;
-    addtype.fns.early_update_fn = NULL;
-    addtype.fns.panel_draw_fn = NULL;
-    addtype.fns.get_visibility_fn = NULL;
     addtype.fns.get_max_gizmos_fn = Grapples_GetMaxGizmos;
-    addtype.fns.get_pos_fn = NULL;
-    addtype.fns.using_special_fn = NULL;
     addtype.fns.add_gizmos_fn = Grapples_AddGizmos;
-    addtype.fns.bolt_hit_plat_fn = NULL;
-    addtype.fns.get_best_bolt_target_fn = NULL;
+    addtype.fns.early_update_fn = NULL;
     addtype.fns.late_update_fn = Grapples_Update;
-    addtype.fns.bolt_hit_fn = NULL;
     addtype.fns.draw_fn = Grapples_Draw;
+    addtype.fns.panel_draw_fn = NULL;
     addtype.fns.get_gizmo_name_fn = Grapple_GetGizmoName;
     addtype.fns.get_output_fn = Grapple_GetOutput;
     addtype.fns.get_output_name_fn = Grapple_GetOutputName;
@@ -727,6 +721,12 @@ ADDGIZMOTYPE *Grapples_RegisterGizmo(i32 type_id) {
     addtype.fns.activate_fn = Grapple_Activate;
     addtype.fns.activate_rev_fn = NULL;
     addtype.fns.set_visibility_fn = Grapple_SetVisibility;
+    addtype.fns.get_visibility_fn = NULL;
+    addtype.fns.get_pos_fn = NULL;
+    addtype.fns.using_special_fn = NULL;
+    addtype.fns.bolt_hit_plat_fn = NULL;
+    addtype.fns.get_best_bolt_target_fn = NULL;
+    addtype.fns.bolt_hit_fn = NULL;
     addtype.fns.allocate_progress_data_fn = Grapples_AllocateProgressData;
     addtype.fns.clear_progress_fn = Grapples_ClearProgress;
     addtype.fns.store_progress_fn = Grapples_StoreProgress;

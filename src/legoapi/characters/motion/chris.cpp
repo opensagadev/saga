@@ -28,6 +28,8 @@
 #include "legoapi/world/area.h"
 #include "legoapi/characters/core/playeritems.h"
 #include "legoapi/gizmo/object/gizmopickup.h"
+#include "legoapi/gizmo/object/gizmoblowups.h"
+#include "nu2api/numusic/numusic.h"
 #include <string.h>
 
 struct AIROW_s;
@@ -916,9 +918,7 @@ void ChrisDogFightADraw(WORLDINFO_s *world) {
     DrawSpaceLevel(world->space_level);
 }
 
-void ResetSpaceLevel(WORLDINFO_s *, spacelevel_s *) __asm__("_ZL15ResetSpaceLevelP11WORLDINFO_sP12spacelevel_s")
-    __attribute__((visibility("hidden")));
-void ResetSpaceLevel(WORLDINFO_s *world, spacelevel_s *space) {
+static void ResetSpaceLevel(WORLDINFO_s *world, spacelevel_s *space) {
     i32 door_index;
     space->unknown_62eb8 = 0;
     space->player_origin = {-1456.9f, 326.5f, -394.0f};
@@ -1203,6 +1203,19 @@ void DogFightARestart() {
     memset(DogDebKey, 0xff, sizeof(DogDebKey));
 }
 
+void ChrisDogFightAReset(WORLDINFO_s *world) {
+    SpaceResetAudioPoint();
+    ResetSpaceLevel(world, world->space_level);
+    DogFightARestart();
+    BOLT_OVERRIDE_PLAYERBOLTSPEED = 150.0f;
+    BOLT_OVERRIDE_PLAYERBOLTDURATION = 1.5f;
+    music_man.StopTrack(2, 0);
+    music_man.StopTrack(0x20, 0);
+}
+
+void ChrisDogFightAPanel(WORLDINFO_s *) {
+}
+
 void ChrisAnakinAPanel(WORLDINFO_s *) {
 }
 
@@ -1310,6 +1323,40 @@ void ChrisAllocLevelStuff(WORLDINFO_s *world) {
     } else {
         world->has_level_specific_data = 0;
     }
+}
+
+void ChrisDogFightAInit(WORLDINFO_s *world) {
+    ChrisAllocLevelStuff(world);
+    ResetSpaceLevel(world, world->space_level);
+
+    for (i32 i = 0; i < 256; ++i) {
+        *reinterpret_cast<i32 *>(&world->space_level->large_records[i].unknown_000[0x400]) = 0;
+    }
+
+    if (world->current_level == DOGFIGHTA_LDATA) {
+        FlightSpline_Init(world, reinterpret_cast<flightspline_s *>(world->space_level->large_records), 256);
+    }
+
+    spacelevel_s *current_space = WORLD->space_level;
+    spacelevel_large_record_s *record = current_space->large_records;
+    spacelevel_large_record_s *end = &current_space->large_records[256];
+    for (; record != end; ++record) {
+        record->saved_value = record->reset_value;
+        record->reset_state = record->saved_state;
+    }
+
+    LevBlowUp[0] = GizmoBlowUp_FindByName(world, "Shoot_a11");
+    LevBlowUp[1] = GizmoBlowUp_FindByName(world, "Shoot_a1");
+    LevBlowUp[2] = GizmoBlowUp_FindByName(world, "Shoot_a21");
+    LevBlowUp[3] = GizmoBlowUp_FindByName(world, "Shoot_b1");
+    GIZMOBLOWUP_s *last = GizmoBlowUp_FindByName(world, "Shoot_a31");
+    LevBlowUp[4] = last;
+
+    LevBlowUp[0]->target_scale *= 1.5f;
+    LevBlowUp[1]->target_scale *= 1.5f;
+    LevBlowUp[2]->target_scale *= 1.5f;
+    LevBlowUp[3]->target_scale *= 1.5f;
+    last->target_scale *= 1.5f;
 }
 
 i32 DidBoltHitChrisJobby(WORLDINFO_s *, BOLT_s *) {

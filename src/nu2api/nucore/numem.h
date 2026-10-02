@@ -39,7 +39,7 @@ void NuMemFlushFn(void);
 void NuMemDumpFn(i32 mode);
 extern "C" {
 #endif
-    void NuMemSet128(void *ptr, u32 value, isize size);
+    void NuMemSet128(void *ptr, u8 value, isize size);
     void NuMemCopy128(void *dest, const void *source, i32 count);
     void *NuMemAllocFn(u32 size);
     void *NuMemReAllocFn(void *ptr, u32 size);

@@ -202,7 +202,7 @@ extern "C" void areaEditorDrawAreas() {
     SetAiRndrCullDistance(0.0f);
     for (EDAIAREA_s *area = area_head(); area != NULL; area = area_next(area)) {
         i32 colour;
-        if (area_selected() == area) {
+        if (area == area_selected()) {
             colour = 0xff0000ff;
             if (area != area_hovered()) {
                 colour = 0x800000ff;

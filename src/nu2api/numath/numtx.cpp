@@ -858,16 +858,16 @@ void NuMtxGetFrustumBlend(NUMTX *mtx, f32 *l, f32 *r, f32 *b, f32 *t, f32 *n, f3
         *f = (Q * zNear) / (Q - 1.0f);
     }
     if (l != NULL) {
-        *l = ((0.5f - mtx->m20) * zNear) / mtx->m00;
+        *l = ((-1.0f - mtx->m20) * zNear) / mtx->m00;
     }
     if (r != NULL) {
-        *r = ((-1.0f - mtx->m20) * zNear) / mtx->m00;
+        *r = ((1.0f - mtx->m20) * zNear) / mtx->m00;
     }
     if (b != NULL) {
-        *b = ((0.5f - mtx->m21) * zNear) / mtx->m11;
+        *b = ((-1.0f - mtx->m21) * zNear) / mtx->m11;
     }
     if (t != NULL) {
-        *t = ((-1.0f - mtx->m21) * zNear) / mtx->m11;
+        *t = ((1.0f - mtx->m21) * zNear) / mtx->m11;
     }
     if (n != NULL) {
         *n = zNear;

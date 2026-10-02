@@ -226,15 +226,12 @@ ADDGIZMOTYPE *Teleport_RegisterGizmo(i32 type_id) {
     addtype.name = "Teleport";
     addtype.prefix = "TLT_";
     addtype.fns.unknown1 = 0;
-    addtype.fns.early_update_fn = NULL;
-    addtype.fns.panel_draw_fn = NULL;
-    addtype.fns.get_visibility_fn = NULL;
     addtype.fns.get_max_gizmos_fn = Teleport_GetMaxGizmos;
-    addtype.fns.get_pos_fn = NULL;
-    addtype.fns.using_special_fn = NULL;
     addtype.fns.add_gizmos_fn = Teleport_AddGizmos;
+    addtype.fns.early_update_fn = NULL;
     addtype.fns.late_update_fn = NULL;
     addtype.fns.draw_fn = NULL;
+    addtype.fns.panel_draw_fn = NULL;
     addtype.fns.get_gizmo_name_fn = Teleport_GetGizmoName;
     addtype.fns.get_output_fn = Teleport_GetOutput;
     addtype.fns.get_output_name_fn = Teleport_GetOutputName;
@@ -242,6 +239,9 @@ ADDGIZMOTYPE *Teleport_RegisterGizmo(i32 type_id) {
     addtype.fns.activate_fn = Teleport_Activate;
     addtype.fns.activate_rev_fn = Teleport_ActivateRev;
     addtype.fns.set_visibility_fn = NULL;
+    addtype.fns.get_visibility_fn = NULL;
+    addtype.fns.get_pos_fn = NULL;
+    addtype.fns.using_special_fn = NULL;
     addtype.fns.allocate_progress_data_fn = NULL;
     addtype.fns.clear_progress_fn = NULL;
     addtype.fns.store_progress_fn = NULL;

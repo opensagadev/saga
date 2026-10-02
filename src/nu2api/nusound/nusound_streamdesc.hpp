@@ -6,9 +6,14 @@
 // data position. Concrete loaders (WAV, OGG) subclass it.
 
 #include "nu2api/nucore/common.h"
+#include "nu2api/nucore/numemory.h"
 
 class NuSoundStreamDesc {
   public:
+    static void operator delete(void *allocation) {
+        NU_FREE(allocation);
+    }
+
     enum class DataFormat {
         ZERO = 0,
         THREE = 3,

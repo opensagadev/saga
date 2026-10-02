@@ -36,8 +36,8 @@ void NuVec4MtxTransformH(NUVEC4 *v, NUVEC4 *v0, NUMTX *m0) {
     f32 z = v0->x * m0->m02 + v0->y * m0->m12 + v0->z * m0->m22 + v0->w * m0->m32;
     f32 w = v0->x * m0->m03 + v0->y * m0->m13 + v0->z * m0->m23 + v0->w * m0->m33;
 
-    v->x = x / w;
-    v->y = y / w;
-    v->z = z / w;
+    v->x = x;
+    v->y = y;
+    v->z = z;
     v->w = w;
 }

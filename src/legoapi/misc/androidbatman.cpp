@@ -116,15 +116,15 @@ i32 Text_ExpandButtonString(char *input, char *output) {
         strcpy(output, "[[y]]");
         return 1;
     }
-    if (NuStrICmp(input, "[SQUARE]") == 0 || NuStrICmp(input, "[S]") == 0 || NuStrICmp(input, "[ACTION]") == 0) {
+    if (NuStrICmp(input, "[ACTION]") == 0 || NuStrICmp(input, "[SQUARE]") == 0 || NuStrICmp(input, "[S]") == 0) {
         strcpy(output, "[[x]]");
         return 1;
     }
-    if (NuStrICmp(input, "[CIRCLE]") == 0 || NuStrICmp(input, "[O]") == 0 || NuStrICmp(input, "[SPECIAL]") == 0) {
+    if (NuStrICmp(input, "[SPECIAL]") == 0 || NuStrICmp(input, "[CIRCLE]") == 0 || NuStrICmp(input, "[O]") == 0) {
         strcpy(output, "[[b]]");
         return 1;
     }
-    if (NuStrICmp(input, "[CROSS]") == 0 || NuStrICmp(input, "[X]") == 0 || NuStrICmp(input, "[JUMP]") == 0) {
+    if (NuStrICmp(input, "[JUMP]") == 0 || NuStrICmp(input, "[CROSS]") == 0 || NuStrICmp(input, "[X]") == 0) {
         strcpy(output, "[[a]]");
         return 1;
     }

@@ -19,11 +19,9 @@ i32 GizRandom_GetMaxGizmos(void *world_ptr) {
 
 void GizRandom_AddGizmos(GIZMOSYS *gizmo_sys, i32 type_id, void *world_ptr, void *) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
-    GIZRANDOMSYS *random_system = world->giz_randoms;
-    for (i32 index = 0; index < random_system->count; ++index) {
-        GIZRANDOM *random = &random_system->randoms[index];
-        if (NuStrLen(random->name) != 0) {
-            AddGizmo(gizmo_sys, type_id, NULL, random);
+    for (i32 index = 0; index < world->giz_randoms->count; ++index) {
+        if (NuStrLen(world->giz_randoms->randoms[index].name) != 0) {
+            AddGizmo(gizmo_sys, type_id, NULL, &world->giz_randoms->randoms[index]);
         }
     }
 }
@@ -89,18 +87,12 @@ ADDGIZMOTYPE *GizRandom_RegisterGizmo(i32 type_id) {
     addtype.name = "GizRandom";
     addtype.prefix = "rnd_";
     addtype.fns.unknown1 = 0;
-    addtype.fns.early_update_fn = NULL;
-    addtype.fns.panel_draw_fn = NULL;
-    addtype.fns.get_visibility_fn = NULL;
     addtype.fns.get_max_gizmos_fn = GizRandom_GetMaxGizmos;
-    addtype.fns.get_pos_fn = NULL;
-    addtype.fns.using_special_fn = NULL;
     addtype.fns.add_gizmos_fn = GizRandom_AddGizmos;
-    addtype.fns.bolt_hit_plat_fn = NULL;
-    addtype.fns.get_best_bolt_target_fn = NULL;
+    addtype.fns.early_update_fn = NULL;
     addtype.fns.late_update_fn = NULL;
-    addtype.fns.bolt_hit_fn = NULL;
     addtype.fns.draw_fn = NULL;
+    addtype.fns.panel_draw_fn = NULL;
     addtype.fns.get_gizmo_name_fn = GizRandom_GetGizmoName;
     addtype.fns.get_output_fn = GizRandom_GetOutput;
     addtype.fns.get_output_name_fn = GizRandom_GetOutputName;
@@ -108,14 +100,18 @@ ADDGIZMOTYPE *GizRandom_RegisterGizmo(i32 type_id) {
     addtype.fns.activate_fn = GizRandom_Activate;
     addtype.fns.activate_rev_fn = NULL;
     addtype.fns.set_visibility_fn = NULL;
+    addtype.fns.get_visibility_fn = NULL;
+    addtype.fns.get_pos_fn = NULL;
+    addtype.fns.using_special_fn = NULL;
+    addtype.fns.bolt_hit_plat_fn = NULL;
+    addtype.fns.get_best_bolt_target_fn = NULL;
+    addtype.fns.bolt_hit_fn = NULL;
     addtype.fns.allocate_progress_data_fn = NULL;
     addtype.fns.clear_progress_fn = NULL;
     addtype.fns.store_progress_fn = NULL;
     addtype.fns.reset_fn = NULL;
     addtype.fns.reserve_buffer_space_fn = GizRandom_ReserveBufferSpace;
     addtype.fns.load_fn = NULL;
-    addtype.fns.post_load_fn = NULL;
-    addtype.fns.add_level_sfx_fn = NULL;
     gizrandom_gizmotype_id = type_id;
 
     return &addtype;

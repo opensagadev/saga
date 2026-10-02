@@ -75,7 +75,8 @@ static void Credits_Init_Game(WORLDINFO *world) {
         music_man.GetTrackHandle(TRACK_CLASS_NOMUSIC, music_name);
     Credits_Init(world);
     Pictures_FixUp(world);
-    NUVEC scale = {2.5f, 2.5f, 2.5f};
+    NUVEC scale;
+    scale.x = scale.y = scale.z = 2.5f;
     NuMtxSetScale(&LevMtx, &scale);
     LevMtx.m31 = 0.0f;
     LevMtx.m32 = 1.0f;

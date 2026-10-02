@@ -2,6 +2,15 @@
 #include "nu2api/nucore/nupad.h"
 #include "nu2api/numath/nufloat.h"
 
+i32 ScaleAndClamp(i32 value) {
+    value = value * 4224 / 1048576;
+    if (value < -128)
+        value = -128;
+    if (value > 127)
+        value = 127;
+    return value + 128;
+}
+
 void UCStretchToCorners(i16 *horizontal, i16 *vertical) {
     f32 x = *horizontal;
     f32 y = *vertical;

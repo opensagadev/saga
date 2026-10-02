@@ -854,9 +854,9 @@ static void xInclude(NUFPAR *parser) {
 
     NuFParResume(parser);
 
+    load_buff = tmp_buf;
     load_endbuff = tmp_buf_end;
     load_aiscript = tmp_script;
-    load_buff = tmp_buf;
 }
 
 static NUFPCOMJMP cfgtab_Script[] = {

@@ -20,6 +20,8 @@ f32 NuPrim_YBias;
 
 static u16 *g_NuPrim_VertexCountPtr;
 static u16 g_NuPrim_CurrentPrimType = 10000;
+static NUMTX g_identity_mtx = {1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+                               0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f};
 
 extern "C" {
     static void NuPrimPushCoordSystem(NUPRIMSCALEMODE scale_mode) {
@@ -71,10 +73,8 @@ extern "C" void NuPrim2DBegin(u32 prim_type, u32, NUMTL *mtl) {
     NUDISPLAYLIST *list;
     if (mtl->display_list != nullptr) {
         list = mtl->display_list;
-        NUDLDLISTSCENE *scene = list->dlist;
-        scene->flags |= NUDL_SCENE_FLAG_CLIP_MATERIALS;
-        u8 *used = scene->mtl_used[(scene->render_buffer >> 7) & 1];
-        used[list->mtl_id >> 3] |= static_cast<u8>(1 << (list->mtl_id & 7));
+        list->dlist->clip_materials = 1;
+        list->dlist->mtl_used[list->dlist->current_buffer][list->mtl_id / 8] |= 1 << (list->mtl_id % 8);
     } else {
         list = NuDisplayListGet2dList();
         NuDisplayListLinkMtl(list, mtl);
@@ -85,10 +85,9 @@ extern "C" void NuPrim2DBegin(u32 prim_type, u32, NUMTL *mtl) {
     NuDisplayListLinkItems(list, 1);
     g_NuPrim_StreamBufferPtr = buf;
 
-    PrimStreamHeader *header = reinterpret_cast<PrimStreamHeader *>(buf->addr);
+    PrimStreamHeader *header = static_cast<PrimStreamHeader *>(g_NuPrim_StreamBufferPtr->void_ptr);
     header->prim_type = prim_type;
-    header->vertex_count = 0;
-    buf->addr += sizeof(PrimStreamHeader);
+    g_NuPrim_StreamBufferPtr->addr += sizeof(PrimStreamHeader);
     g_NuPrim_VertexCountPtr = &header->vertex_count;
     g_NuPrim_CurrentPrimType = static_cast<u16>(prim_type);
     g_NuPrim_VertexCount = 0;
@@ -107,10 +106,8 @@ extern "C" void NuPrim3DBegin(u32 prim_type, u32, NUMTL *mtl, NUMTX *world_mtx) 
     NUDISPLAYLIST *list;
     if (mtl->display_list != nullptr) {
         list = mtl->display_list;
-        NUDLDLISTSCENE *scene = list->dlist;
-        scene->flags |= NUDL_SCENE_FLAG_CLIP_MATERIALS;
-        u8 *used = scene->mtl_used[(scene->render_buffer >> 7) & 1];
-        used[list->mtl_id >> 3] |= static_cast<u8>(1 << (list->mtl_id & 7));
+        list->dlist->clip_materials = 1;
+        list->dlist->mtl_used[list->dlist->current_buffer][list->mtl_id / 8] |= 1 << (list->mtl_id % 8);
     } else {
         list = numtl_defaultmtl3d->display_list;
     }
@@ -120,12 +117,12 @@ extern "C" void NuPrim3DBegin(u32 prim_type, u32, NUMTL *mtl, NUMTX *world_mtx) 
     g_NuPrim_StreamBufferPtr = buf;
 
     NUMTX *transform = static_cast<NUMTX *>(DisplayListCreateGeomTransformPS(
-        buf, world_mtx != nullptr ? world_mtx : &numtx_identity, nullptr, nullptr, nullptr));
+        g_NuPrim_StreamBufferPtr, world_mtx != nullptr ? world_mtx : &g_identity_mtx, nullptr, nullptr, nullptr));
 
-    NUDISPLAYLISTGEOM *geometry = reinterpret_cast<NUDISPLAYLISTGEOM *>(buf->addr);
-    geometry->primitive_type = static_cast<i32>(prim_type);
+    NUDISPLAYLISTGEOM *geometry = static_cast<NUDISPLAYLISTGEOM *>(g_NuPrim_StreamBufferPtr->void_ptr);
+    geometry->primitive_type = prim_type;
     geometry->vertex_count = 0;
-    buf->addr += sizeof(NUDISPLAYLISTGEOM);
+    g_NuPrim_StreamBufferPtr->addr += sizeof(NUDISPLAYLISTGEOM);
 
     g_NuPrim_VertexCountPtr = reinterpret_cast<u16 *>(&geometry->vertex_count);
     g_NuPrim_CurrentPrimType = static_cast<u16>(prim_type);
@@ -145,33 +142,33 @@ extern "C" void NuPrim3DEnd(void) {
 }
 
 extern "C" void NuPrim2DAddXYZ(float x, float y, float z) {
-    PrimVertexRaw *vtx = (PrimVertexRaw *)g_NuPrim_StreamBufferPtr->addr;
-    vtx->x = NuPrim_XBias + NuPrim_XScale * x;
-    vtx->y = NuPrim_YBias + NuPrim_YScale * y;
-    vtx->z = z;
+    ((PrimVertexRaw *)g_NuPrim_StreamBufferPtr->void_ptr)->x = NuPrim_XBias + NuPrim_XScale * x;
+    ((PrimVertexRaw *)g_NuPrim_StreamBufferPtr->void_ptr)->y = NuPrim_YBias + NuPrim_YScale * y;
+    ((PrimVertexRaw *)g_NuPrim_StreamBufferPtr->void_ptr)->z = z;
     g_NuPrim_StreamBufferPtr->addr += sizeof(PrimVertexRaw);
     g_NuPrim_VertexCount++;
 
     if (g_NuPrim_CurrentPrimType == 4 && (g_NuPrim_VertexCount & 1) == 0) {
-        u32 *words = (u32 *)(usize)(g_NuPrim_StreamBufferPtr->addr - 0x30);
-        g_NuPrim_StreamBufferPtr->addr += 0x60;
+        // Expand the last two quad vertices into two triangles.
+        PrimVertexRaw *v = (PrimVertexRaw *)(g_NuPrim_StreamBufferPtr->addr - 2 * sizeof(PrimVertexRaw));
+        g_NuPrim_StreamBufferPtr->addr += 4 * sizeof(PrimVertexRaw);
         g_NuPrim_VertexCount += 4;
 
-        memcpy(&words[12], &words[6], 0x18);
-        memcpy(&words[18], &words[12], 0x18);
-        words[24] = words[0];
-        words[25] = words[7];
-        words[26] = words[8];
-        words[27] = words[9];
-        words[28] = words[4];
-        words[29] = words[11];
-        words[6] = words[12];
-        words[7] = words[1];
-        words[8] = words[2];
-        words[9] = words[3];
-        words[10] = words[16];
-        words[11] = words[5];
-        memcpy(&words[30], &words[0], 0x18);
+        v[2] = v[1];
+        v[3] = v[2];
+        v[4].x = v[0].x;
+        v[4].y = v[1].y;
+        v[4].z = v[1].z;
+        v[4].uv[0] = v[0].uv[0];
+        v[4].uv[1] = v[1].uv[1];
+        v[4].color = v[1].color;
+        v[1].x = v[2].x;
+        v[1].y = v[0].y;
+        v[1].z = v[0].z;
+        v[1].uv[0] = v[2].uv[0];
+        v[1].uv[1] = v[0].uv[1];
+        v[1].color = v[0].color;
+        v[5] = v[0];
     }
 }
 

@@ -33,6 +33,10 @@ class NuSoundEffect {
     friend class NuSoundVoice;
 
   public:
+    static void operator delete(void *allocation) {
+        NU_FREE(allocation);
+    }
+
     enum class EffectType : u32 {
         ATTENUATION = 0,
         PITCH = 1,
@@ -340,6 +344,10 @@ class NuSoundVoiceFactoryList {
 
 class NuSoundSystem {
   public:
+    static void operator delete(void *allocation) {
+        NU_FREE(allocation);
+    }
+
     enum class MemoryDiscipline : u32 {
         SCRATCH = 0,
         SAMPLE = 1,

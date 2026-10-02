@@ -28,6 +28,9 @@ void NuSoundAndroid::AndroidNuSoundClockThread(void *) {
 
 // libTTapp.so 0x32b0c0: the android system registers the PCM voice factory
 // for DataFormat::ZERO right after the base constructor.
+NuSoundAndroid::~NuSoundAndroid() {
+}
+
 NuSoundAndroid::NuSoundAndroid() : NuSoundSystem() {
     NuSoundVoiceFactoryAndroid_PCM *factory = new NuSoundVoiceFactoryAndroid_PCM();
     this->factory_list.RegisterFactory(factory, NuSoundStreamDesc::DataFormat::ZERO);

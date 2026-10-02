@@ -105,9 +105,9 @@ extern "C" {
     }
 
     void NuWindInit(void) {
-        NuWindWave = 0;
         NuWindDir = 0;
         NuWindDir2 = 0;
+        NuWindWave = 0;
         for (i32 index = 0; index < maxgroups; ++index) {
             NuWindGroup[index].in_use = 0;
         }

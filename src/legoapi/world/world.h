@@ -435,9 +435,7 @@ typedef struct WORLDINFO_s {
     };
     GIZMOBLOWUP_s **blowup_target_candidates; // 0x50d4
 
-    GIZRANDOMSYS_s *giz_randoms;
-
-    char filler12a[0x50ec - 0x50dc];
+    char filler12a[0x50ec - 0x50d8];
     NUMTX *gizmo_blowup_mtx_buffer;            // 0x50ec, aligned 0x8000-byte animation matrix arena
     MINICUT_s *minicuts;                       // 0x50f0
     MINICUTPART_s *minicut_parts;              // 0x50f4
@@ -445,12 +443,12 @@ typedef struct WORLDINFO_s {
     struct GIZTIMER_s *giz_timers;             // 0x50fc
     i32 giz_timers_count;                      // 0x5100
     GIZTORPMACHINESYS_s *giz_torp_machine_sys; // 0x5104
-    char filler13b[0x510c - 0x5108];
-    GIZSPECIALSYS_s *giz_special_sys;     // 0x510c
-    GAMEANTINODESYS_s *game_antinode_sys; // 0x5110
-    EDGIZSHADOW_s *shadow_editor;         // 0x5114
-    GIZBOMBGENSYS_s *giz_bombgen_sys;     // 0x5118
-    i32 has_level_specific_data;          // 0x511c
+    GIZRANDOMSYS_s *giz_randoms;               // 0x5108
+    GIZSPECIALSYS_s *giz_special_sys;          // 0x510c
+    GAMEANTINODESYS_s *game_antinode_sys;      // 0x5110
+    EDGIZSHADOW_s *shadow_editor;              // 0x5114
+    GIZBOMBGENSYS_s *giz_bombgen_sys;          // 0x5118
+    i32 has_level_specific_data;               // 0x511c
 
     union {
         void *level_specific_data;
@@ -528,6 +526,7 @@ DECOMP_ASSERT(offsetof(WORLDINFO, push_blocks) == 0x46c0, "WORLDINFO push-block 
 DECOMP_ASSERT(offsetof(WORLDINFO, push_block_count) == 0x46c4, "WORLDINFO push-block count offset");
 DECOMP_ASSERT(offsetof(WORLDINFO, gizmo_pickup_sys) == 0x50bc, "WORLDINFO pickup system offset");
 DECOMP_ASSERT(offsetof(WORLDINFO, giz_torp_machine_sys) == 0x5104, "WORLDINFO torpedo-machine system offset");
+DECOMP_ASSERT(offsetof(WORLDINFO, giz_randoms) == 0x5108, "WORLDINFO random-gizmo system offset");
 DECOMP_ASSERT(offsetof(WORLDINFO, giz_bombgen_sys) == 0x5118, "WORLDINFO bomb-generator system offset");
 DECOMP_ASSERT(offsetof(WORLDINFO, has_level_specific_data) == 0x511c, "WORLDINFO level allocation flag offset");
 DECOMP_ASSERT(offsetof(WORLDINFO, current_gscn) == 0x13c, "WORLDINFO current scene offset");

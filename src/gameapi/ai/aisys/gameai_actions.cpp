@@ -45,7 +45,7 @@ extern void PodSprint_GetIAlongVals(nugspline_s *spline, i16 *first_point, i16 *
 extern void TakeOverGameObject(GameObject_s *rider, GameObject_s *mount, i32 seat, i32 immediate);
 extern NUVEC plr_lastpos;
 
-NUVEC test_launch = {0.0f, 0.0f, 0.0f};
+NUVEC test_launch = {0.0f, 0.0f, 1.0f};
 f32 test_missile_scale = 8.0f;
 i32 guided_rotate_speed = 240000;
 f32 guided_start_time = 0.5f;

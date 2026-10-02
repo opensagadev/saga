@@ -34,7 +34,7 @@ const char *NuSoundSystem::sFileExtensions[12] = {"wav", "adp", "ima", "caf", "x
 NuSoundSystem *NuSoundSystem::s_staticInstance = NULL;
 NuSoundRoutingTable *NuSoundSystem::sDefaultRoutingTable = NULL;
 i32 NuSoundSystem::sNumAvailableOutputDevices = 0;
-i32 NuSoundSystem::sOutputConfig = 0;
+i32 NuSoundSystem::sOutputConfig = 2;
 
 NuMemoryManager *NuSoundSystem::sScratchMemMgr = NULL;
 

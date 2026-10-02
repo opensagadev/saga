@@ -19,97 +19,41 @@ i32 edfile_lock[2];
 i32 edfile_readwrongendianess;
 i32 edfile_mcresult;
 
-i32 EdFileBackup(char *source, char *destination) {
-    i64 remaining = NuFileSize(source);
-    if (remaining > 0) {
-        NUFILE output = NuFileOpen(destination, NUFILE_WRITE);
-        NUFILE input = NuFileOpen(source, NUFILE_READ);
-        if (output > 0 && input > 0) {
-            while (remaining > 0) {
-                i32 size = MIN(static_cast<i32>(remaining), 0x1000);
-                NuFileRead(input, edfile_buffer, size);
-                NuFileWrite(output, edfile_buffer, size);
-                remaining -= 0x1000;
-            }
-            NuFileClose(input);
-            NuFileClose(output);
-            return 1;
-        }
-        if (output > 0)
-            NuFileClose(output);
-        if (input > 0)
-            NuFileClose(input);
-    }
-    return 0;
+void EdFileSwapEndianess16(void *data) {
+    char *bytes;
+    char tmp;
+
+    bytes = (char *)data;
+
+    tmp = bytes[0];
+    bytes[0] = bytes[1];
+    bytes[1] = tmp;
 }
 
-i32 EdFileReadMemCard(char *filename, i32 size, void *data) {
-    EdFileSetMedia(2);
-    if (EdFileOpen(filename, static_cast<NUFILEMODE>(0))) {
-        EdFileRead(data, size);
-        return EdFileClose();
-    }
-    return 0;
+void EdFileSwapEndianess32(void *data) {
+    char *bytes;
+    char tmp;
+
+    bytes = (char *)data;
+
+    tmp = bytes[0];
+    bytes[0] = bytes[3];
+    bytes[3] = tmp;
+
+    tmp = bytes[1];
+    bytes[1] = bytes[2];
+    bytes[2] = tmp;
 }
 
-i32 EdFileWriteMemCard(char *filename, i32 size, void *data) {
-    EdFileSetMedia(2);
-    if (EdFileOpen(filename, static_cast<NUFILEMODE>(1))) {
-        EdFileWrite(data, size);
-        return EdFileClose();
-    }
-    return 0;
+void EdFileSetReadWrongEndianess(i32 value) {
 }
 
-void EdFileWriteUnsignedShort(u16 value) {
-    u16 data = value;
-    if (edfile_readwrongendianess)
-        EdFileSwapEndianess16(&data);
-    EdFileWrite(&data, 2);
+void EdFileSetMedia(i32 media) {
+    edfile_media = media;
 }
 
-void EdFileWriteUnsignedInt(u32 value) {
-    u32 data = value;
-    if (edfile_readwrongendianess)
-        EdFileSwapEndianess32(&data);
-    EdFileWrite(&data, 4);
-}
-
-void EdFileWriteShort(i16 value) {
-    i16 data = value;
-    if (edfile_readwrongendianess)
-        EdFileSwapEndianess16(&data);
-    EdFileWrite(&data, 2);
-}
-
-void EdFileWriteChar(char value) {
-    char data = value;
-    EdFileWrite(&data, 1);
-}
-
-void EdFileWriteUnsignedChar(u8 value) {
-    u8 data = value;
-    EdFileWrite(&data, 1);
-}
-
-void EdFileWriteFloat(f32 value) {
-    f32 data = value;
-    if (edfile_readwrongendianess)
-        EdFileSwapEndianess32(&data);
-    EdFileWrite(&data, 4);
-}
-
-void EdFileWriteInt(i32 value) {
-    i32 data = value;
-    if (edfile_readwrongendianess)
-        EdFileSwapEndianess32(&data);
-    EdFileWrite(&data, 4);
-}
-
-void EdFileWriteNuVec(NUVEC *value) {
-    EdFileWriteFloat(value->x);
-    EdFileWriteFloat(value->y);
-    EdFileWriteFloat(value->z);
+void EdFileSetPakFile(void *pak) {
+    edfile_pakfile = pak;
 }
 
 void EdFileResetBuffers() {
@@ -128,19 +72,6 @@ void EdFileFillBuffer() {
             edfile_buffer_pointer = 0;
         }
     }
-}
-
-void EdFileFlushBuffer() {
-    if (edfile_handle == -1) {
-        return;
-    }
-
-    if (edfile_buffer_pointer == 0 || edfile_media != 1) {
-        return;
-    }
-
-    NuFileWrite(edfile_handle, edfile_buffer, edfile_buffer_pointer);
-    edfile_buffer_pointer = 0;
 }
 
 i32 EdFileOpen(char *filepath, NUFILEMODE mode) {
@@ -209,6 +140,19 @@ i32 EdFileOpen(char *filepath, NUFILEMODE mode) {
     return 0;
 }
 
+void EdFileFlushBuffer() {
+    if (edfile_handle == -1) {
+        return;
+    }
+
+    if (edfile_buffer_pointer == 0 || edfile_media != 1) {
+        return;
+    }
+
+    NuFileWrite(edfile_handle, edfile_buffer, edfile_buffer_pointer);
+    edfile_buffer_pointer = 0;
+}
+
 i32 EdFileClose() {
     edfile_pakfile = NULL;
 
@@ -231,15 +175,71 @@ i32 EdFileClose() {
     return 1;
 }
 
-void EdFileSetMedia(i32 media) {
-    edfile_media = media;
+void EdFileWrite(void *data, i32 len) {
+    i32 to_write;
+
+    while (len > 0) {
+        to_write = MIN(0x1000 - edfile_buffer_pointer, len);
+
+        memcpy(edfile_buffer + edfile_buffer_pointer, data, to_write);
+
+        edfile_buffer_pointer += to_write;
+        len -= to_write;
+        data = (void *)((usize)data + to_write);
+
+        if (edfile_buffer_pointer == 0x1000) {
+            EdFileFlushBuffer();
+        }
+    }
 }
 
-void EdFileSetPakFile(void *pak) {
-    edfile_pakfile = pak;
+void EdFileWriteFloat(f32 value) {
+    f32 data = value;
+    if (edfile_readwrongendianess)
+        EdFileSwapEndianess32(&data);
+    EdFileWrite(&data, 4);
 }
 
-void EdFileSetReadWrongEndianess(i32 value) {
+void EdFileWriteInt(i32 value) {
+    i32 data = value;
+    if (edfile_readwrongendianess)
+        EdFileSwapEndianess32(&data);
+    EdFileWrite(&data, 4);
+}
+
+void EdFileWriteUnsignedInt(u32 value) {
+    u32 data = value;
+    if (edfile_readwrongendianess)
+        EdFileSwapEndianess32(&data);
+    EdFileWrite(&data, 4);
+}
+
+void EdFileWriteShort(i16 value) {
+    i16 data = value;
+    if (edfile_readwrongendianess)
+        EdFileSwapEndianess16(&data);
+    EdFileWrite(&data, 2);
+}
+
+void EdFileWriteUnsignedShort(u16 value) {
+    u16 data = value;
+    if (edfile_readwrongendianess)
+        EdFileSwapEndianess16(&data);
+    EdFileWrite(&data, 2);
+}
+
+void EdFileWriteChar(char value) {
+    EdFileWrite(&value, 1);
+}
+
+void EdFileWriteUnsignedChar(u8 value) {
+    EdFileWrite(&value, 1);
+}
+
+void EdFileWriteNuVec(NUVEC *value) {
+    EdFileWriteFloat(value->x);
+    EdFileWriteFloat(value->y);
+    EdFileWriteFloat(value->z);
 }
 
 void EdFileRead(void *buf, i32 len) {
@@ -257,22 +257,6 @@ void EdFileRead(void *buf, i32 len) {
             EdFileFillBuffer();
         }
     }
-}
-
-char EdFileReadChar() {
-    char data;
-
-    EdFileRead(&data, 1);
-
-    return data;
-}
-
-unsigned char EdFileReadUnsignedChar() {
-    unsigned char data;
-
-    EdFileRead(&data, 1);
-
-    return data;
 }
 
 f32 EdFileReadFloat() {
@@ -335,52 +319,66 @@ u16 EdFileReadUnsignedShort() {
     return data;
 }
 
+char EdFileReadChar() {
+    char data;
+
+    EdFileRead(&data, 1);
+
+    return data;
+}
+
+unsigned char EdFileReadUnsignedChar() {
+    unsigned char data;
+
+    EdFileRead(&data, 1);
+
+    return data;
+}
+
 void EdFileReadNuVec(NUVEC *out) {
     out->x = EdFileReadFloat();
     out->y = EdFileReadFloat();
     out->z = EdFileReadFloat();
 }
 
-void EdFileWrite(void *data, i32 len) {
-    i32 to_write;
-
-    while (len > 0) {
-        to_write = MIN(0x1000 - edfile_buffer_pointer, len);
-
-        memcpy(edfile_buffer + edfile_buffer_pointer, data, to_write);
-
-        edfile_buffer_pointer += to_write;
-        len -= to_write;
-        data = (void *)((usize)data + to_write);
-
-        if (edfile_buffer_pointer == 0x1000) {
-            EdFileFlushBuffer();
-        }
+i32 EdFileWriteMemCard(char *filename, i32 size, void *data) {
+    EdFileSetMedia(2);
+    if (EdFileOpen(filename, static_cast<NUFILEMODE>(1))) {
+        EdFileWrite(data, size);
+        return EdFileClose();
     }
+    return 0;
 }
 
-void EdFileSwapEndianess16(void *data) {
-    char *bytes;
-    char tmp;
-
-    bytes = (char *)data;
-
-    tmp = bytes[0];
-    bytes[0] = bytes[1];
-    bytes[1] = tmp;
+i32 EdFileReadMemCard(char *filename, i32 size, void *data) {
+    EdFileSetMedia(2);
+    if (EdFileOpen(filename, static_cast<NUFILEMODE>(0))) {
+        EdFileRead(data, size);
+        return EdFileClose();
+    }
+    return 0;
 }
 
-void EdFileSwapEndianess32(void *data) {
-    char *bytes;
-    char tmp;
-
-    bytes = (char *)data;
-
-    tmp = bytes[0];
-    bytes[0] = bytes[3];
-    bytes[3] = tmp;
-
-    tmp = bytes[1];
-    bytes[1] = bytes[2];
-    bytes[2] = tmp;
+i32 EdFileBackup(char *source, char *destination) {
+    i64 remaining = NuFileSize(source);
+    if (remaining > 0) {
+        NUFILE output = NuFileOpen(destination, NUFILE_WRITE);
+        NUFILE input = NuFileOpen(source, NUFILE_READ);
+        if (output > 0 && input > 0) {
+            while (remaining > 0) {
+                i32 size = MIN(static_cast<i32>(remaining), 0x1000);
+                NuFileRead(input, edfile_buffer, size);
+                NuFileWrite(output, edfile_buffer, size);
+                remaining -= 0x1000;
+            }
+            NuFileClose(input);
+            NuFileClose(output);
+            return 1;
+        }
+        if (output > 0)
+            NuFileClose(output);
+        if (input > 0)
+            NuFileClose(input);
+    }
+    return 0;
 }

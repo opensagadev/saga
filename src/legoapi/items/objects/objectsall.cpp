@@ -347,18 +347,6 @@ i32 Conveyor_AdjustSpeed(NUVEC *velocity) {
     return 0;
 }
 
-extern i32 numdevices;
-extern NUFILE_DEVICE devices[16];
-
-NUFILE_DEVICE *AddDevice(NUFILE_DEVICE *device) {
-    devices[numdevices] = *device;
-    NuStrCpy(devices[numdevices].cur_dir, default_device->cur_dir);
-    NuStrCpy(devices[numdevices].sys_dir, default_device->sys_dir);
-    NuStrCpy(devices[numdevices].dll_dir, default_device->dll_dir);
-    ++numdevices;
-    return &devices[numdevices - 1];
-}
-
 // LevelObjects_InitForLevel @0x475630. Creates the runtime model table and
 // resolves each registered model from the scene selected by its table kind.
 // Found models are hidden in their source scene: their runtime handle is the

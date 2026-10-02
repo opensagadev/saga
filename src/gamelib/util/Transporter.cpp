@@ -56,78 +56,6 @@ void NetTransporter::AddListener(NetListenerInterface *listener, unsigned char c
     ++listener_count;
 }
 
-void NetTransporter::Distribute(NetMessage const &message, unsigned char channel, NetPeer const &peer) const {
-    for (NetListenerBinding *binding = first_listener; binding != NULL; binding = binding->next) {
-        if (binding->channel == channel) {
-            binding->stats.total.values[1] += message.data != NULL ? message.write_offset - message.read_offset : 0;
-            ++binding->stats.total.values[3];
-            binding->listener->Receive(message, channel, peer);
-        }
-    }
-}
-
-void NetTransporter::FtpComplete(FtpFile *file, i32 result) const {
-    for (NetListenerBinding *binding = first_listener; binding != NULL; binding = binding->next) {
-        binding->listener->FtpComplete(file, result);
-    }
-}
-
-void NetTransporter::FtpDownload(FtpFile *file) const {
-    for (NetListenerBinding *binding = first_listener; binding != NULL; binding = binding->next) {
-        binding->listener->FtpDownload(file);
-    }
-}
-
-void NetTransporter::FtpUpload(FtpFile *file) const {
-    for (NetListenerBinding *binding = first_listener; binding != NULL; binding = binding->next) {
-        binding->listener->FtpUpload(file);
-    }
-}
-
-i32 NetTransporter::NosAcquire(NetworkObject *object, NetPeer const &peer) const {
-    i32 result = 1;
-    for (NetListenerBinding *binding = first_listener; binding != NULL; binding = binding->next) {
-        if (binding->listener->NosAcquire(object, peer) == 0) {
-            result = 0;
-        }
-    }
-    return result;
-}
-
-void NetTransporter::NosAdopted(NetworkObject *object, NetPeer const &peer) const {
-    for (NetListenerBinding *binding = first_listener; binding != NULL; binding = binding->next) {
-        binding->listener->NosAdopted(object, peer);
-    }
-}
-
-void NetTransporter::PeerDead(NetPeer const &peer) const {
-    for (NetListenerBinding *binding = first_listener; binding != NULL; binding = binding->next) {
-        binding->listener->PeerDead(peer);
-    }
-}
-
-void NetTransporter::PeerJoined(NetPeer const &peer) const {
-    for (NetListenerBinding *binding = first_listener; binding != NULL; binding = binding->next) {
-        binding->listener->PeerJoined(peer);
-    }
-}
-
-void NetTransporter::PeerLeft(NetPeer const &peer, ePeerLeftReason reason) const {
-    for (NetListenerBinding *binding = first_listener; binding != NULL; binding = binding->next) {
-        binding->listener->PeerLeft(peer, reason);
-    }
-}
-
-i32 NetTransporter::PeerRequest(NetPeer const &peer) const {
-    i32 result = 1;
-    for (NetListenerBinding *binding = first_listener; binding != NULL; binding = binding->next) {
-        if (binding->listener->PeerRequest(peer) == 0) {
-            result = 0;
-        }
-    }
-    return result;
-}
-
 void NetTransporter::RemoveListener(NetListenerInterface *listener, unsigned char channel) {
     NetListenerBinding key(listener, channel, NULL);
     NetListenerBinding *binding = reinterpret_cast<NetListenerList *>(&first_listener)->Find(&key);
@@ -151,14 +79,81 @@ void NetTransporter::RemoveListener(NetListenerInterface *listener, unsigned cha
     theMemoryManager.FreePool(binding, sizeof(NetListenerBinding));
 }
 
-void NetTransporter::StatsReceiveMessage(NetMessage message, unsigned char channel) {
-    NetListenerBinding *binding = first_listener;
-    while (binding != NULL && binding->channel != channel) {
-        binding = binding->next;
+void NetTransporter::Distribute(NetMessage const &message, unsigned char channel, NetPeer const &peer) const {
+    for (NetListenerBinding *binding = first_listener; binding != NULL; binding = binding->next) {
+        if (binding->channel == channel) {
+            binding->stats.total.values[1] += message.data != NULL ? message.write_offset - message.read_offset : 0;
+            ++binding->stats.total.values[3];
+            binding->listener->Receive(message, channel, peer);
+        }
     }
-    if (binding != NULL) {
-        binding->stats.total.values[1] += message.data != NULL ? message.write_offset - message.read_offset : 0;
-        ++binding->stats.total.values[3];
+}
+
+i32 NetTransporter::PeerRequest(NetPeer const &peer) const {
+    i32 result = 1;
+    for (NetListenerBinding *binding = first_listener; binding != NULL; binding = binding->next) {
+        if (binding->listener->PeerRequest(peer) == 0) {
+            result = 0;
+        }
+    }
+    return result;
+}
+
+void NetTransporter::PeerJoined(NetPeer const &peer) const {
+    for (NetListenerBinding *binding = first_listener; binding != NULL; binding = binding->next) {
+        binding->listener->PeerJoined(peer);
+    }
+}
+
+void NetTransporter::PeerLeft(NetPeer const &peer, ePeerLeftReason reason) const {
+    for (NetListenerBinding *binding = first_listener; binding != NULL; binding = binding->next) {
+        binding->listener->PeerLeft(peer, reason);
+    }
+}
+
+void NetTransporter::PeerDead(NetPeer const &peer) const {
+    for (NetListenerBinding *binding = first_listener; binding != NULL; binding = binding->next) {
+        binding->listener->PeerDead(peer);
+    }
+}
+
+void NetTransporter::FtpUpload(FtpFile *file) const {
+    for (NetListenerBinding *binding = first_listener; binding != NULL; binding = binding->next) {
+        binding->listener->FtpUpload(file);
+    }
+}
+
+void NetTransporter::FtpDownload(FtpFile *file) const {
+    for (NetListenerBinding *binding = first_listener; binding != NULL; binding = binding->next) {
+        binding->listener->FtpDownload(file);
+    }
+}
+
+void NetTransporter::FtpComplete(FtpFile *file, i32 result) const {
+    for (NetListenerBinding *binding = first_listener; binding != NULL; binding = binding->next) {
+        binding->listener->FtpComplete(file, result);
+    }
+}
+
+i32 NetTransporter::NosAcquire(NetworkObject *object, NetPeer const &peer) const {
+    i32 result = 1;
+    for (NetListenerBinding *binding = first_listener; binding != NULL; binding = binding->next) {
+        if (binding->listener->NosAcquire(object, peer) == 0) {
+            result = 0;
+        }
+    }
+    return result;
+}
+
+void NetTransporter::NosAdopted(NetworkObject *object, NetPeer const &peer) const {
+    for (NetListenerBinding *binding = first_listener; binding != NULL; binding = binding->next) {
+        binding->listener->NosAdopted(object, peer);
+    }
+}
+
+void NetTransporter::StatsUpdate() {
+    for (NetListenerBinding *binding = first_listener; binding != NULL; binding = binding->next) {
+        binding->stats.Update();
     }
 }
 
@@ -173,8 +168,13 @@ void NetTransporter::StatsSendMessage(NetMessage message, unsigned char channel)
     }
 }
 
-void NetTransporter::StatsUpdate() {
-    for (NetListenerBinding *binding = first_listener; binding != NULL; binding = binding->next) {
-        binding->stats.Update();
+void NetTransporter::StatsReceiveMessage(NetMessage message, unsigned char channel) {
+    NetListenerBinding *binding = first_listener;
+    while (binding != NULL && binding->channel != channel) {
+        binding = binding->next;
+    }
+    if (binding != NULL) {
+        binding->stats.total.values[1] += message.data != NULL ? message.write_offset - message.read_offset : 0;
+        ++binding->stats.total.values[3];
     }
 }

@@ -35,8 +35,7 @@ static constexpr u32 kNuClear_Stencil = 0x800;
 // Original 0x317070. The packed colour has RGBA bytes from least to most
 // significant; clearing depth also restores writable GL depth state.
 extern "C" void Nu360_dxClear(u32 clear_flags, u32 colour) {
-    // Original local BSS: _ZZ13Nu360_dxClearE10lastColour.
-    static u32 lastColour;
+    static u32 lastColour = 0xff00ff00;
     GLbitfield glMask = 0;
 
     if ((clear_flags & kNuClear_Color) != 0) {

@@ -33,13 +33,29 @@ i32 GizForce_StoodOnForce(GIZFORCE_s *, GameObject_s *);
 EXPLOSION *AddExplosion(NUVEC *, f32, f32, GameObject_s *, i32, i32);
 extern "C" void PlaySfxAndSetVolume(char *, NUVEC *, f32);
 
-TouchHacks::TintStack::TintStack() {
-    ambient = NuRndrLightingStateCurrent.ambient;
+i32 TouchHacks::GetLoseStudsDieValue() {
+    return BonusArea != 0 ? 10000 : 1000;
 }
 
-TouchHacks::TintStack::~TintStack() {
-    NuRndrLightingStateCurrent.ambient = ambient;
-    NuRndrSetAmbientLightPS(&ambient);
+i32 TouchHacks::GetLoseStudsFallValue() {
+    return 0;
+}
+
+bool TouchHacks::ShouldAutoGrabDragBomb(GameObject_s &object) {
+    if (object.id == id_ATST || object.id == id_ATST_LOWRES)
+        return false;
+    return TouchControlsActive;
+}
+
+f32 TouchHacks::GetIncomingPartRange() {
+    return 16.0f;
+}
+
+bool TouchHacks::ShouldBlock(GameObject_s &object) {
+    if (TouchControlsActive && object.incoming_melee != NULL && object.apiobj.field_0x27c == -1) {
+        return qrand() > 14999;
+    }
+    return true;
 }
 
 NUCOLOUR3 flashCol = {2.0f, 2.0f, 2.0f};
@@ -51,6 +67,132 @@ extern "C" i16 id_WATTO, id_GONKDROID;
 
 bool TouchHacks::AiPlayerTakeDamageOnKillRescue(GameObject_s &) {
     return TouchControlsActive;
+}
+
+bool TouchHacks::CanPoo(GameObject_s &object) {
+    return (object.apiobj.character_data->game_character->flags_094[3] & 0x80) != 0 && object.character_context == -1 &&
+           object.apiobj.field_0x27d != 0 && object.apiobj.player_controlled &&
+           (Cheat[1].enabled != 0 || Cheat[9].enabled != 0);
+}
+
+bool TouchHacks::CanUseVehicleSmartBomb(GameObject_s &object) {
+    return Cheat_IsOn(20) && object.apiobj.player_controlled &&
+           (object.apiobj.character_data->model_flags & 0x2000) != 0 && InCollectList_Index(object.id, NULL, 0) != -1;
+}
+
+void TouchHacks::TriggerVehicleSmartBomb(GameObject_s &object) {
+    AddExplosion(&object.apiobj.collision_position, 7.5f * AreaPickupScale, 1.0f, NULL, -1, 0x4021);
+    NewRumbleAllPlayers(1.0f, 0.1f, 0, 0);
+    GameCam_Judder(GameCam, qrand() > 0x7fff ? 1.5f : -1.5f, 2, NULL);
+    GameCam_NewShake(GameCam, 2.0f, 1.0f, 1.0f);
+    PlaySfx("Explode1", NULL);
+    Hint_SetComplete(0x5e1);
+}
+
+void TouchHacks::PlaySmartBombBuildupEffects(GameObject_s &, float elapsed, float duration) {
+    PlaySfxAndSetVolume("JForceUse", NULL, 3.0f * elapsed / duration);
+}
+
+bool TouchHacks::CanThrowBountyBomb(GameObject_s &object) {
+    if (WORLD->lev_objs[0xe9].active == 0 || !object.apiobj.player_controlled) {
+        return false;
+    }
+    if ((object.apiobj.character_data->model_flags & 0x01000000) == 0 && object.field_0x108e != 6 &&
+        SuperWeirdo(&object) == 0) {
+        return false;
+    }
+    if (object.apiobj.field_0x27d == 0 && object.field_0xe31 != 1) {
+        return false;
+    }
+
+    const i8 context = object.character_context;
+    return context == 6 || context == -1 || context == 7 || (CInfo[context].flags & 4) != 0;
+}
+
+bool TouchHacks::CheckJumpForLandingSpot(GameObject_s &object, float maximum_drop) {
+    VuVec position(object.apiobj.position.x, object.apiobj.position.y, object.apiobj.position.z, 1.0f);
+    const f32 minimum_height = object.apiobj.position.y - maximum_drop;
+    const GAMECHARACTERDATA *character = object.apiobj.character_data->game_character;
+    const f32 step_x = object.apiobj.velocity.x * 0.2f;
+    const f32 step_z = object.apiobj.velocity.z * 0.2f;
+    f32 vertical_velocity = character->jump_speed + object.apiobj.velocity.y;
+
+    while (position.y >= minimum_height) {
+        const VuVec next(position.x + step_x, position.y + vertical_velocity * 0.2f, position.z + step_z, 1.0f);
+        VuVec displacement(next.x - position.x, next.y - position.y, next.z - position.z, 1.0f);
+        if (GameRayCast(&position.xyz, &displacement.xyz, 0.0f, 0) != 0) {
+            VuVec normal = VuVec_Zero;
+            NewRayCastGetImpactNormal(&normal.xyz);
+            if (!(normal.y <= 0.8f) && GameShadow(&object, &position.xyz, 5.0f, -1) != 2000000.0f) {
+                const u32 layer = EShadowInfo();
+                if (layer <= 16 && (TerLayer[layer].flags & 1) == 0) {
+                    return true;
+                }
+            }
+        }
+        position = next;
+        vertical_velocity += character->gravity * 0.2f;
+    }
+    return false;
+}
+
+bool TouchHacks::CheckForAboutToRunIntoKillTerrain(GameObject_s &object, float time) {
+    if (WORLD->current_level != SPEEDERCHASEA_LDATA) {
+        const f32 dx = object.apiobj.velocity.x * time;
+        const f32 dz = time * object.apiobj.velocity.z;
+        VuVec position(object.apiobj.position.x, object.apiobj.position.y, object.apiobj.position.z, 1.0f);
+        position.x = dx + position.x;
+        position.z = dz + position.z;
+        position.y += 0.3f;
+        if (GameShadow(&object, reinterpret_cast<NUVEC *>(&position), 5.0f, -1) == 2000000.0f)
+            return false;
+        u32 layer = EShadowInfo();
+        if (layer > 16 || (TerLayer[layer].flags & 1) == 0)
+            return false;
+        VuVec direction(object.apiobj.velocity.x, 0.0f, object.apiobj.velocity.z, 1.0f);
+        NuVecNorm(reinterpret_cast<NUVEC *>(&direction), reinterpret_cast<NUVEC *>(&direction));
+        const f32 radius = object.apiobj.collision_radius * 0.8f;
+        position.x += direction.x * radius;
+        position.z += radius * direction.z;
+        if (GameShadow(&object, reinterpret_cast<NUVEC *>(&position), 5.0f, -1) == 0.0f)
+            return true;
+        layer = EShadowInfo();
+        return layer > 16 || (TerLayer[layer].flags & 1) != 0;
+    }
+    return false;
+}
+
+bool TouchHacks::CheckForAboutToRunOffAnEdge(GameObject_s &object, float time) {
+    VuVec position(object.apiobj.position.x + object.apiobj.velocity.x * time, object.apiobj.position.y + 0.3f,
+                   object.apiobj.position.z + object.apiobj.velocity.z * time, 1.0f);
+    const f32 minimum_height = object.apiobj.position.y - 0.3f;
+    if (minimum_height <= GameShadow(&object, &position.xyz, 5.0f, -1)) {
+        return false;
+    }
+
+    VuVec direction(object.apiobj.velocity.x, 0.0f, object.apiobj.velocity.z, 1.0f);
+    NuVecNorm(&direction.xyz, &direction.xyz);
+    const f32 radius = object.apiobj.collision_radius * 0.8f;
+    position.x += direction.x * radius;
+    position.z += direction.z * radius;
+    return GameShadow(&object, &position.xyz, 5.0f, -1) < minimum_height;
+}
+
+bool TouchHacks::SolveRoot(float a, float b, float c, float &root1, float &root2) {
+    if (a == 0.0f) {
+        return false;
+    }
+
+    const f32 discriminant = b * b - 4.0f * a * c;
+    if (discriminant < 0.0f) {
+        return false;
+    }
+
+    const f32 square_root = NuFsqrt(discriminant);
+    const f32 denominator = a + a;
+    root1 = (-b - square_root) / denominator;
+    root2 = (square_root - b) / denominator;
+    return true;
 }
 
 VuVec TouchHacks::CalculateJumpVelToHitPoint(GameObject_s &object, VuVec const &target) {
@@ -80,45 +222,6 @@ VuVec TouchHacks::CalculateJumpVelToHitPointDblJump(GameObject_s &object, VuVec 
     const f32 total_time = first_time + second_time;
     return VuVec((target.x - object.apiobj.position.x) / total_time, 0.0f,
                  (target.z - object.apiobj.position.z) / total_time, 1.0f);
-}
-
-VuVec TouchHacks::CalculateXZVelForArcToHitPoint(VuVec const &position, VuVec const &target, float jump_speed,
-                                                 float gravity) {
-    f32 vertical_distance;
-    if (position.y > target.y) {
-        vertical_distance = target.y - position.y;
-    } else {
-        vertical_distance = position.y - target.y;
-    }
-    vertical_distance = -vertical_distance;
-
-    f32 first_time;
-    f32 second_time;
-    VuVec velocity = VuVec_Zero;
-    if (SolveRoot(gravity * 0.5f, jump_speed, vertical_distance, first_time, second_time)) {
-        velocity.x = (target.x - position.x) / first_time;
-        velocity.z = (target.z - position.z) / first_time;
-    }
-    return velocity;
-}
-
-i32 TouchHacks::CanBlowupBeBlownUp(GIZMOBLOWUP_s &blowup, i32 hit_type) {
-    if (hit_type != 1) {
-        return 1;
-    }
-    return (blowup.draw_flags >> 7) & 1;
-}
-
-bool TouchHacks::CanForceTargetObj(GameObject_s &source, GameObject_s &target) {
-    return !TouchControlsActive || !CanTagTo(source, target);
-}
-
-bool TouchHacks::CanJump(GameObject_s &object) {
-    return (object.apiobj.field_0x27d != 0 || object.ground_contact_grace_timer > 0.0f) &&
-           object.apiobj.character_model != NULL && ObjLandReady(&object) &&
-           (object.apiobj.character_model->model_data_b[6] != NULL ||
-            (object.apiobj.character_data->model_flags & 0x40) != 0 || object.id == id_WATTO ||
-            (object.id == id_GONKDROID && Cheat_IsOn(8)));
 }
 
 bool TouchHacks::CanJumpToPoint(GameObject_s &object, AIPATHNODE_s const &node) {
@@ -153,10 +256,8 @@ bool TouchHacks::CanLunge(GameObject_s &object) {
            LEGOACT_LUNGE != -1 && object.apiobj.character_model->model_data_b[LEGOACT_LUNGE] != NULL;
 }
 
-bool TouchHacks::CanPoo(GameObject_s &object) {
-    return (object.apiobj.character_data->game_character->flags_094[3] & 0x80) != 0 && object.character_context == -1 &&
-           object.apiobj.field_0x27d != 0 && object.apiobj.player_controlled &&
-           (Cheat[1].enabled != 0 || Cheat[9].enabled != 0);
+bool TouchHacks::CanSlam(GameObject_s &object) {
+    return LEGOACT_SLAM != -1 && object.apiobj.character_model->model_data_b[LEGOACT_SLAM] != NULL;
 }
 
 bool TouchHacks::CanShoot(GameObject_s &object) {
@@ -164,8 +265,11 @@ bool TouchHacks::CanShoot(GameObject_s &object) {
     return (character->model_flags & 0x10000000) != 0 && (character->game_character->flags_094[0] & 8) == 0;
 }
 
-bool TouchHacks::CanSlam(GameObject_s &object) {
-    return LEGOACT_SLAM != -1 && object.apiobj.character_model->model_data_b[LEGOACT_SLAM] != NULL;
+bool TouchHacks::InParty(GameObject_s &object) {
+    return (Player[0] != NULL && Player[0] == &object) || (Player[1] != NULL && Player[1] == &object) ||
+           (Player[2] != NULL && Player[2] == &object) || (Player[3] != NULL && Player[3] == &object) ||
+           (Player[4] != NULL && Player[4] == &object) || (Player[5] != NULL && Player[5] == &object) ||
+           (Player[6] != NULL && Player[6] == &object) || (Player[7] != NULL && Player[7] == &object);
 }
 
 bool TouchHacks::CanTagTo(GameObject_s &source, GameObject_s &target) {
@@ -203,6 +307,24 @@ bool TouchHacks::CanTagTo(GameObject_s &source, GameObject_s &target) {
     return dx * dx + dy * dy + dz * dz <= 4.0f;
 }
 
+void Move_DEFAULT(GameObject_s *);
+
+bool TouchHacks::CanToggleTo(GameObject_s &object, i32 id) {
+    if (object.id == id)
+        return false;
+    if ((CInfo[object.character_context].flags & 0x100) != 0)
+        return false;
+    if (object.apiobj.field_0x27f <= 16 && (TerLayer[static_cast<i8>(object.apiobj.field_0x27f)].flags & 1) != 0 &&
+        GCDataList[id].field_0x28 <= 0.0f)
+        return false;
+    if (object.apiobj.field_0x218 != 2000000.0f && object.apiobj.field_0x220 != 2000000.0f &&
+        object.apiobj.character_data->move_fn != Move_DEFAULT &&
+        CDataList[id].bounds_max_y - CDataList[id].bounds_min_y >=
+            object.apiobj.field_0x220 - object.apiobj.field_0x218)
+        return false;
+    return true;
+}
+
 void Move_CHARACTER(GameObject_s *);
 void Move_WEIRDO(GameObject_s *);
 void Move_JEDI(GameObject_s *);
@@ -237,38 +359,40 @@ bool TouchHacks::CanTagVehicle(GameObject_s &object, GameObject_s &vehicle) {
     return !(x * x + y * y + z * z > 4.0f);
 }
 
-bool TouchHacks::CanThrowBountyBomb(GameObject_s &object) {
-    if (WORLD->lev_objs[0xe9].active == 0 || !object.apiobj.player_controlled) {
-        return false;
-    }
-    if ((object.apiobj.character_data->model_flags & 0x01000000) == 0 && object.field_0x108e != 6 &&
-        SuperWeirdo(&object) == 0) {
-        return false;
-    }
-    if (object.apiobj.field_0x27d == 0 && object.field_0xe31 != 1) {
-        return false;
-    }
-
-    const i8 context = object.character_context;
-    return context == 6 || context == -1 || context == 7 || (CInfo[context].flags & 4) != 0;
+bool TouchHacks::CanUseTeleport(GameObject_s &object) {
+    return object.apiobj.character_data != NULL &&
+           ((object.apiobj.character_data->model_flags & 0x40000) != 0 || SuperWeirdo(&object));
 }
 
-void Move_DEFAULT(GameObject_s *);
+bool TouchHacks::CanUseZipup(GameObject_s &object) {
+    extern i32 ObjLandReady(GameObject_s *);
+    extern i32 SuperWeirdo(GameObject_s *);
+    extern i32 Cheat_IsOn(i32);
+    if (object.apiobj.character_data == NULL || !ObjLandReady(&object))
+        return false;
+    if ((object.apiobj.character_data->model_flags & 0x100000) != 0 || SuperWeirdo(&object))
+        return true;
+    return (object.apiobj.character_data->model_flags & 8) != 0 &&
+           (object.apiobj.character_data->game_character->flags_094[1] & 0x80) == 0 && Cheat_IsOn(13) != 0;
+}
 
-bool TouchHacks::CanToggleTo(GameObject_s &object, i32 id) {
-    if (object.id == id)
-        return false;
-    if ((CInfo[object.character_context].flags & 0x100) != 0)
-        return false;
-    if (object.apiobj.field_0x27f <= 16 && (TerLayer[static_cast<i8>(object.apiobj.field_0x27f)].flags & 1) != 0 &&
-        GCDataList[id].field_0x28 <= 0.0f)
-        return false;
-    if (object.apiobj.field_0x218 != 2000000.0f && object.apiobj.field_0x220 != 2000000.0f &&
-        object.apiobj.character_data->move_fn != Move_DEFAULT &&
-        CDataList[id].bounds_max_y - CDataList[id].bounds_min_y >=
-            object.apiobj.field_0x220 - object.apiobj.field_0x218)
-        return false;
-    return true;
+bool TouchHacks::ShouldKeepWeaponOut(GameObject_s &object) {
+    return TouchControlsActive && object.id != id_GRABCONTROL && object.apiobj.player_controlled &&
+           object.ai.opponent != NULL && object.character_context == -1;
+}
+
+bool TouchHacks::ShouldPutWeaponAway(GameObject_s &object) {
+    return TouchControlsActive && object.id != id_GRABCONTROL && object.id != id_WICKET && object.id != id_EWOK &&
+           object.apiobj.player_controlled && object.ai.opponent == NULL && object.weapon_out_timer > 5.0f &&
+           object.character_context == -1 && object.field_0xe31 != 1;
+}
+
+bool TouchHacks::CanJump(GameObject_s &object) {
+    return (object.apiobj.field_0x27d != 0 || object.ground_contact_grace_timer > 0.0f) &&
+           object.apiobj.character_model != NULL && ObjLandReady(&object) &&
+           (object.apiobj.character_model->model_data_b[6] != NULL ||
+            (object.apiobj.character_data->model_flags & 0x40) != 0 || object.id == id_WATTO ||
+            (object.id == id_GONKDROID && Cheat_IsOn(8)));
 }
 
 bool TouchHacks::CanUseBuildIt(GameObject_s &object) {
@@ -323,104 +447,104 @@ bool TouchHacks::CanUseGizForce(GameObject_s &object, GIZFORCE_s &force) {
     return GizForce_StoodOnForce(&force, &object) == 0;
 }
 
-bool TouchHacks::CanUseHatMachine(GameObject_s &object) {
-    return object.apiobj.character_model->model_data_b[93] != NULL && object.apiobj.field_0x27d != 0 &&
-           ObjLandReady(&object) != 0;
+MechObjectInterface *TouchHacks::FindBombTarget(GameObject_s &object) {
+    const VuVec forward(NU_SIN_LUT(object.apiobj.facing_angle), 0.0f, NU_COS_LUT(object.apiobj.facing_angle), 1.0f);
+    MechObjectInterface *result = NULL;
+    f32 best_alignment = 0.5f;
+    GIZMOBLOWUP_s *blowup = WORLD->gizmo_blowups;
+    if (blowup != NULL) {
+        for (i32 i = 0; i < WORLD->gizmo_blowup_count; ++i, ++blowup) {
+            if ((blowup->state_flags & 0x80) == 0 || blowup->type == NULL || (blowup->output_flags & 1) != 0 ||
+                (blowup->type->type_flags & 0x02000000) == 0) {
+                continue;
+            }
+            VuVec direction(blowup->mid_position.x - object.apiobj.position.x,
+                            blowup->mid_position.y - object.apiobj.position.y,
+                            blowup->mid_position.z - object.apiobj.position.z, 1.0f);
+            const f32 squared_distance =
+                direction.x * direction.x + direction.y * direction.y + direction.z * direction.z;
+            if (squared_distance < 90000.0f) {
+                NuVecNorm(&direction.xyz, &direction.xyz);
+                const f32 alignment = direction.x * forward.x + direction.y * forward.y + direction.z * forward.z;
+                if (alignment > best_alignment) {
+                    result = blowup->GetMechObjectInterface();
+                    best_alignment = alignment;
+                }
+            }
+        }
+    }
+    return result;
+}
+
+TouchHacks::TintStack::TintStack() {
+    ambient = NuRndrLightingStateCurrent.ambient;
+}
+
+TouchHacks::TintStack::~TintStack() {
+    NuRndrLightingStateCurrent.ambient = ambient;
+    NuRndrSetAmbientLightPS(&ambient);
+}
+
+bool TouchHacks::ShouldFlash(float timer) {
+    return timer > 0.0f && NuFmod(timer, 0.3f) < 0.15f;
+}
+
+nucolour3_s *TouchHacks::GetFlashColour() {
+    return &flashCol;
+}
+
+CABLE_s *GameObjIsCableTied(GameObject_s *);
+i32 TouchHacks::ShouldDeflectBolt(GameObject_s &object, BOLT_s &bolt) {
+    if (!TouchControlsActive || VehicleArea == 0)
+        return 0;
+    if (object.id != id_ATST && object.id != id_ATST_LOWRES)
+        return 0;
+    if (bolt.owner == NULL || !bolt.owner->apiobj.player_controlled)
+        return 0;
+    CABLE_s *cable = GameObjIsCableTied(&object);
+    if (cable == NULL)
+        return 0;
+    return cable->source == bolt.owner;
+}
+
+bool TouchHacks::CanForceTargetObj(GameObject_s &source, GameObject_s &target) {
+    return !TouchControlsActive || !CanTagTo(source, target);
+}
+
+VuVec TouchHacks::CalculateXZVelForArcToHitPoint(VuVec const &position, VuVec const &target, float jump_speed,
+                                                 float gravity) {
+    f32 vertical_distance;
+    if (position.y > target.y) {
+        vertical_distance = target.y - position.y;
+    } else {
+        vertical_distance = position.y - target.y;
+    }
+    vertical_distance = -vertical_distance;
+
+    f32 first_time;
+    f32 second_time;
+    VuVec velocity = VuVec_Zero;
+    if (SolveRoot(gravity * 0.5f, jump_speed, vertical_distance, first_time, second_time)) {
+        velocity.x = (target.x - position.x) / first_time;
+        velocity.z = (target.z - position.z) / first_time;
+    }
+    return velocity;
+}
+
+i32 TouchHacks::CanBlowupBeBlownUp(GIZMOBLOWUP_s &blowup, i32 hit_type) {
+    if (hit_type != 1) {
+        return 1;
+    }
+    return (blowup.draw_flags >> 7) & 1;
 }
 
 bool TouchHacks::CanUseLever(GameObject_s &object) {
     return object.apiobj.character_model->model_data_b[93] != NULL && object.apiobj.field_0x27d != 0;
 }
 
-bool TouchHacks::CanUseTeleport(GameObject_s &object) {
-    return object.apiobj.character_data != NULL &&
-           ((object.apiobj.character_data->model_flags & 0x40000) != 0 || SuperWeirdo(&object));
-}
-
-bool TouchHacks::CanUseVehicleSmartBomb(GameObject_s &object) {
-    return Cheat_IsOn(20) && object.apiobj.player_controlled &&
-           (object.apiobj.character_data->model_flags & 0x2000) != 0 && InCollectList_Index(object.id, NULL, 0) != -1;
-}
-
-bool TouchHacks::CanUseZipup(GameObject_s &object) {
-    extern i32 ObjLandReady(GameObject_s *);
-    extern i32 SuperWeirdo(GameObject_s *);
-    extern i32 Cheat_IsOn(i32);
-    if (object.apiobj.character_data == NULL || !ObjLandReady(&object))
-        return false;
-    if ((object.apiobj.character_data->model_flags & 0x100000) != 0 || SuperWeirdo(&object))
-        return true;
-    return (object.apiobj.character_data->model_flags & 8) != 0 &&
-           (object.apiobj.character_data->game_character->flags_094[1] & 0x80) == 0 && Cheat_IsOn(13) != 0;
-}
-
-bool TouchHacks::CheckForAboutToRunIntoKillTerrain(GameObject_s &object, float time) {
-    if (WORLD->current_level != SPEEDERCHASEA_LDATA) {
-        const f32 dx = object.apiobj.velocity.x * time;
-        const f32 dz = time * object.apiobj.velocity.z;
-        VuVec position(object.apiobj.position.x, object.apiobj.position.y, object.apiobj.position.z, 1.0f);
-        position.x = dx + position.x;
-        position.z = dz + position.z;
-        position.y += 0.3f;
-        if (GameShadow(&object, reinterpret_cast<NUVEC *>(&position), 5.0f, -1) == 2000000.0f)
-            return false;
-        u32 layer = EShadowInfo();
-        if (layer > 16 || (TerLayer[layer].flags & 1) == 0)
-            return false;
-        VuVec direction(object.apiobj.velocity.x, 0.0f, object.apiobj.velocity.z, 1.0f);
-        NuVecNorm(reinterpret_cast<NUVEC *>(&direction), reinterpret_cast<NUVEC *>(&direction));
-        const f32 radius = object.apiobj.collision_radius * 0.8f;
-        position.x += direction.x * radius;
-        position.z += radius * direction.z;
-        if (GameShadow(&object, reinterpret_cast<NUVEC *>(&position), 5.0f, -1) == 0.0f)
-            return true;
-        layer = EShadowInfo();
-        return layer > 16 || (TerLayer[layer].flags & 1) != 0;
-    }
-    return false;
-}
-
-bool TouchHacks::CheckForAboutToRunOffAnEdge(GameObject_s &object, float time) {
-    VuVec position(object.apiobj.position.x + object.apiobj.velocity.x * time, object.apiobj.position.y + 0.3f,
-                   object.apiobj.position.z + object.apiobj.velocity.z * time, 1.0f);
-    const f32 minimum_height = object.apiobj.position.y - 0.3f;
-    if (minimum_height <= GameShadow(&object, &position.xyz, 5.0f, -1)) {
-        return false;
-    }
-
-    VuVec direction(object.apiobj.velocity.x, 0.0f, object.apiobj.velocity.z, 1.0f);
-    NuVecNorm(&direction.xyz, &direction.xyz);
-    const f32 radius = object.apiobj.collision_radius * 0.8f;
-    position.x += direction.x * radius;
-    position.z += direction.z * radius;
-    return GameShadow(&object, &position.xyz, 5.0f, -1) < minimum_height;
-}
-
-bool TouchHacks::CheckJumpForLandingSpot(GameObject_s &object, float maximum_drop) {
-    VuVec position(object.apiobj.position.x, object.apiobj.position.y, object.apiobj.position.z, 1.0f);
-    const f32 minimum_height = object.apiobj.position.y - maximum_drop;
-    const GAMECHARACTERDATA *character = object.apiobj.character_data->game_character;
-    const f32 step_x = object.apiobj.velocity.x * 0.2f;
-    const f32 step_z = object.apiobj.velocity.z * 0.2f;
-    f32 vertical_velocity = character->jump_speed + object.apiobj.velocity.y;
-
-    while (position.y >= minimum_height) {
-        const VuVec next(position.x + step_x, position.y + vertical_velocity * 0.2f, position.z + step_z, 1.0f);
-        VuVec displacement(next.x - position.x, next.y - position.y, next.z - position.z, 1.0f);
-        if (GameRayCast(&position.xyz, &displacement.xyz, 0.0f, 0) != 0) {
-            VuVec normal = VuVec_Zero;
-            NewRayCastGetImpactNormal(&normal.xyz);
-            if (!(normal.y <= 0.8f) && GameShadow(&object, &position.xyz, 5.0f, -1) != 2000000.0f) {
-                const u32 layer = EShadowInfo();
-                if (layer <= 16 && (TerLayer[layer].flags & 1) == 0) {
-                    return true;
-                }
-            }
-        }
-        position = next;
-        vertical_velocity += character->gravity * 0.2f;
-    }
-    return false;
+bool TouchHacks::CanUseHatMachine(GameObject_s &object) {
+    return object.apiobj.character_model->model_data_b[93] != NULL && object.apiobj.field_0x27d != 0 &&
+           ObjLandReady(&object) != 0;
 }
 
 void TouchHacks::CleanupAllMechObjectInterfaces(WORLDINFO_s *world) {
@@ -472,128 +596,4 @@ void TouchHacks::CleanupAllMechObjectInterfaces(WORLDINFO_s *world) {
             Part[i].ClearMechObjectInterface();
         }
     }
-}
-
-MechObjectInterface *TouchHacks::FindBombTarget(GameObject_s &object) {
-    const VuVec forward(NU_SIN_LUT(object.apiobj.facing_angle), 0.0f, NU_COS_LUT(object.apiobj.facing_angle), 1.0f);
-    MechObjectInterface *result = NULL;
-    f32 best_alignment = 0.5f;
-    GIZMOBLOWUP_s *blowup = WORLD->gizmo_blowups;
-    if (blowup != NULL) {
-        for (i32 i = 0; i < WORLD->gizmo_blowup_count; ++i, ++blowup) {
-            if ((blowup->state_flags & 0x80) == 0 || blowup->type == NULL || (blowup->output_flags & 1) != 0 ||
-                (blowup->type->type_flags & 0x02000000) == 0) {
-                continue;
-            }
-            VuVec direction(blowup->mid_position.x - object.apiobj.position.x,
-                            blowup->mid_position.y - object.apiobj.position.y,
-                            blowup->mid_position.z - object.apiobj.position.z, 1.0f);
-            const f32 squared_distance =
-                direction.x * direction.x + direction.y * direction.y + direction.z * direction.z;
-            if (squared_distance < 90000.0f) {
-                NuVecNorm(&direction.xyz, &direction.xyz);
-                const f32 alignment = direction.x * forward.x + direction.y * forward.y + direction.z * forward.z;
-                if (alignment > best_alignment) {
-                    result = blowup->GetMechObjectInterface();
-                    best_alignment = alignment;
-                }
-            }
-        }
-    }
-    return result;
-}
-
-nucolour3_s *TouchHacks::GetFlashColour() {
-    return &flashCol;
-}
-
-f32 TouchHacks::GetIncomingPartRange() {
-    return 16.0f;
-}
-
-i32 TouchHacks::GetLoseStudsDieValue() {
-    return BonusArea != 0 ? 10000 : 1000;
-}
-
-i32 TouchHacks::GetLoseStudsFallValue() {
-    return 0;
-}
-
-bool TouchHacks::InParty(GameObject_s &object) {
-    return (Player[0] != NULL && Player[0] == &object) || (Player[1] != NULL && Player[1] == &object) ||
-           (Player[2] != NULL && Player[2] == &object) || (Player[3] != NULL && Player[3] == &object) ||
-           (Player[4] != NULL && Player[4] == &object) || (Player[5] != NULL && Player[5] == &object) ||
-           (Player[6] != NULL && Player[6] == &object) || (Player[7] != NULL && Player[7] == &object);
-}
-
-void TouchHacks::PlaySmartBombBuildupEffects(GameObject_s &, float elapsed, float duration) {
-    PlaySfxAndSetVolume("JForceUse", NULL, 3.0f * elapsed / duration);
-}
-
-bool TouchHacks::ShouldAutoGrabDragBomb(GameObject_s &object) {
-    if (object.id == id_ATST || object.id == id_ATST_LOWRES)
-        return false;
-    return TouchControlsActive;
-}
-
-bool TouchHacks::ShouldBlock(GameObject_s &object) {
-    if (TouchControlsActive && object.incoming_melee != NULL && object.apiobj.field_0x27c == -1) {
-        return qrand() > 14999;
-    }
-    return true;
-}
-
-CABLE_s *GameObjIsCableTied(GameObject_s *);
-i32 TouchHacks::ShouldDeflectBolt(GameObject_s &object, BOLT_s &bolt) {
-    if (!TouchControlsActive || VehicleArea == 0)
-        return 0;
-    if (object.id != id_ATST && object.id != id_ATST_LOWRES)
-        return 0;
-    if (bolt.owner == NULL || !bolt.owner->apiobj.player_controlled)
-        return 0;
-    CABLE_s *cable = GameObjIsCableTied(&object);
-    if (cable == NULL)
-        return 0;
-    return cable->source == bolt.owner;
-}
-
-bool TouchHacks::ShouldFlash(float timer) {
-    return timer > 0.0f && NuFmod(timer, 0.3f) < 0.15f;
-}
-
-bool TouchHacks::ShouldKeepWeaponOut(GameObject_s &object) {
-    return TouchControlsActive && object.id != id_GRABCONTROL && object.apiobj.player_controlled &&
-           object.ai.opponent != NULL && object.character_context == -1;
-}
-
-bool TouchHacks::ShouldPutWeaponAway(GameObject_s &object) {
-    return TouchControlsActive && object.id != id_GRABCONTROL && object.id != id_WICKET && object.id != id_EWOK &&
-           object.apiobj.player_controlled && object.ai.opponent == NULL && object.weapon_out_timer > 5.0f &&
-           object.character_context == -1 && object.field_0xe31 != 1;
-}
-
-bool TouchHacks::SolveRoot(float a, float b, float c, float &root1, float &root2) {
-    if (a == 0.0f) {
-        return false;
-    }
-
-    const f32 discriminant = b * b - 4.0f * a * c;
-    if (discriminant < 0.0f) {
-        return false;
-    }
-
-    const f32 square_root = NuFsqrt(discriminant);
-    const f32 denominator = a + a;
-    root1 = (-b - square_root) / denominator;
-    root2 = (square_root - b) / denominator;
-    return true;
-}
-
-void TouchHacks::TriggerVehicleSmartBomb(GameObject_s &object) {
-    AddExplosion(&object.apiobj.collision_position, 7.5f * AreaPickupScale, 1.0f, NULL, -1, 0x4021);
-    NewRumbleAllPlayers(1.0f, 0.1f, 0, 0);
-    GameCam_Judder(GameCam, qrand() > 0x7fff ? 1.5f : -1.5f, 2, NULL);
-    GameCam_NewShake(GameCam, 2.0f, 1.0f, 1.0f);
-    PlaySfx("Explode1", NULL);
-    Hint_SetComplete(0x5e1);
 }

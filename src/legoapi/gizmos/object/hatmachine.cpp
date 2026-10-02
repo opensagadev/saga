@@ -241,14 +241,13 @@ static void HatMachine_SetVisibility(GIZMO *gizmo, i32 visible) {
 
 static void HatMachine_AddGizmos(GIZMOSYS *gizmo_sys, i32 type_id, void *world_ptr, void *) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
-    if (world == NULL || world->hat_machine_sys == NULL || world->hat_machine_sys->count <= 0) {
+    if (world == NULL || world->hat_machine_sys == NULL) {
         return;
     }
 
     for (i32 index = 0; index < world->hat_machine_sys->count; ++index) {
-        HATMACHINE *machine = &world->hat_machine_sys->machines[index];
-        if (NuStrLen(machine->name) != 0) {
-            AddGizmo(gizmo_sys, type_id, NULL, machine);
+        if (NuStrLen(world->hat_machine_sys->machines[index].name) != 0) {
+            AddGizmo(gizmo_sys, type_id, NULL, &world->hat_machine_sys->machines[index]);
         }
     }
 }
@@ -664,18 +663,12 @@ ADDGIZMOTYPE *HatMachine_RegisterGizmo(i32 type_id) {
     addtype.name = "HatMachine";
     addtype.prefix = "";
     addtype.fns.unknown1 = 0xc;
-    addtype.fns.early_update_fn = NULL;
-    addtype.fns.panel_draw_fn = NULL;
-    addtype.fns.get_visibility_fn = NULL;
     addtype.fns.get_max_gizmos_fn = HatMachine_GetMaxGizmos;
-    addtype.fns.get_pos_fn = NULL;
-    addtype.fns.using_special_fn = NULL;
     addtype.fns.add_gizmos_fn = HatMachine_AddGizmos;
-    addtype.fns.bolt_hit_plat_fn = NULL;
-    addtype.fns.get_best_bolt_target_fn = NULL;
+    addtype.fns.early_update_fn = NULL;
     addtype.fns.late_update_fn = HatMachine_Update;
-    addtype.fns.bolt_hit_fn = NULL;
     addtype.fns.draw_fn = HatMachine_Draw;
+    addtype.fns.panel_draw_fn = NULL;
     addtype.fns.get_gizmo_name_fn = HatMachine_GetGizmoName;
     addtype.fns.get_output_fn = HatMachine_GetOutput;
     addtype.fns.get_output_name_fn = HatMachine_GetOutputName;
@@ -683,6 +676,12 @@ ADDGIZMOTYPE *HatMachine_RegisterGizmo(i32 type_id) {
     addtype.fns.activate_fn = HatMachine_Activate;
     addtype.fns.activate_rev_fn = NULL;
     addtype.fns.set_visibility_fn = HatMachine_SetVisibility;
+    addtype.fns.get_visibility_fn = NULL;
+    addtype.fns.get_pos_fn = NULL;
+    addtype.fns.using_special_fn = NULL;
+    addtype.fns.bolt_hit_plat_fn = NULL;
+    addtype.fns.get_best_bolt_target_fn = NULL;
+    addtype.fns.bolt_hit_fn = NULL;
     addtype.fns.allocate_progress_data_fn = HatMachines_AllocateProgressData;
     addtype.fns.clear_progress_fn = HatMachines_ClearProgress;
     addtype.fns.store_progress_fn = HatMachines_StoreProgress;

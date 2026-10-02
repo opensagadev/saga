@@ -191,8 +191,8 @@ static constexpr char kGlassDebrisMarker = (char)-0x69; // 0x97
 // original 0x29c110 — mirrors GL cull state, flipping front/back when the
 // reflection pass is active.
 void NuIOS_SetCullMode(i32 mode) {
-    static i32 prevCullMode = 0;                           // @0x628c50
-    static i32 prevReflectionMode = 0;                     // @0x628c60
+    static i32 prevCullMode = -1;                          // @0x628c50
+    static i32 prevReflectionMode = -1;                    // @0x628c60
     static const u32 glCullModes[2] = {GL_BACK, GL_FRONT}; // @0x57bcec
 
     if (mode == prevCullMode && prevReflectionMode == g_renderingReflection) {

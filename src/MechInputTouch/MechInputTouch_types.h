@@ -522,6 +522,9 @@ DECOMP_ASSERT(offsetof(MechInputTouchMenuController, field_70) == 0x70, "Menu to
 DECOMP_ASSERT(offsetof(MechInputTouchMenuController, field_78) == 0x78, "Menu touch controller flag offset");
 DECOMP_ASSERT(sizeof(MechInputTouchMenuController) == 0x7c, "Menu touch controller ABI");
 struct MechInputTouchPodraceController : MechInputTouchMainController, MechInputTouchGestureTracker {
+    static void operator delete(void *allocation) {
+        NU_FREE(allocation);
+    }
     void Activate() override;
     void Deactivate() override;
     MechInputTouchPodraceController(i32);

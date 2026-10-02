@@ -76,6 +76,16 @@ enum AREA_FLAGS {
 #define SAGA_HOST_HOOK static inline
 #endif
 
+// Key-function destructors that the original emits as weak inline copies.
+// Other units link against them, so host builds need a strong out-of-line
+// definition; keeping them inline in the matching target preserves the
+// original's inlining and vague-linkage vtables.
+#ifdef HOST_BUILD
+#define SAGA_HOST_LINKABLE_DTOR
+#else
+#define SAGA_HOST_LINKABLE_DTOR inline
+#endif
+
 #ifdef HOST_BUILD
 #define SAGA_HOST_STATIC static
 #define SAGA_HOST_SAFE_MEMSET(dest, value, size)                                                                       \

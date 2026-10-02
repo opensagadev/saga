@@ -145,7 +145,7 @@ void ParseCommandLine() {
 }
 
 i32 NuInitHardware(VARIPTR *buf, VARIPTR *buf_end, i32 heap_size, ...) {
-    static char *dfs_name = NULL;
+    static char *dfs_name = "";
     static char *sfxdfs_name = NULL;
     i32 texture_count = 3000;
     i32 material_count = 512;

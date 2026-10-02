@@ -47,379 +47,6 @@ __attribute__((weak)) bool NuIOS_TextureFormatSupported(i32 format) {
     return g_renderDevice.enabled_extensions[format];
 }
 
-GLuint NuIOS_CreateGLTexFromPlatfomSpecificFile(const char *filename) {
-    static u8 buffer[0x600081];
-    NUFILE file = NuFileOpen((char *)filename, NUFILE_READ);
-    g_textureName = filename;
-    if (file == 0) {
-        return 0;
-    }
-
-    i32 remaining = NuFileOpenSize(file);
-    g_fileSize = remaining;
-    NuThreadCriticalSectionBegin(g_textureLoadBufferCriticalSection);
-    const i32 chunk_limit = g_loadingCharacterInHub != 0 ? 0x4000 : static_cast<i32>(sizeof(buffer));
-    u8 *dst = buffer;
-    do {
-        i32 chunk;
-        if (bgProcIsBgThread() != 0) {
-            chunk = remaining > chunk_limit ? chunk_limit : remaining;
-            remaining -= chunk;
-        } else {
-            chunk = remaining;
-            remaining = 0;
-        }
-        NuFileRead(file, dst, chunk);
-        dst += chunk;
-        if (g_loadingCharacterInHub != 0 && bgProcIsBgThread() != 0) {
-            NuIOS_YieldThread();
-        }
-    } while (remaining != 0);
-    NuFileOpenSize(file);
-    NuFileClose(file);
-
-    i32 width = 0;
-    i32 height = 0;
-    GLuint texture = NuIOS_CreateGLTexFromPlatformInMemory(buffer, &width, &height, false);
-    NuThreadCriticalSectionEnd(g_textureLoadBufferCriticalSection);
-    return texture;
-}
-
-GLuint NuIOS_CreateGLTexFromPlatfomSpecificForecPVR(const char *filename) {
-    static u8 buffer[0x20004c];
-    NUFILE file = NuFileOpen((char *)filename, NUFILE_READ);
-    if (file == 0) {
-        return 0;
-    }
-
-    i32 remaining = NuFileOpenSize(file);
-    NuThreadCriticalSectionBegin(g_textureLoadBufferCriticalSection);
-    const i32 chunk_limit = g_loadingCharacterInHub != 0 ? 0x4000 : static_cast<i32>(sizeof(buffer));
-    u8 *dst = buffer;
-    do {
-        i32 chunk;
-        if (bgProcIsBgThread() != 0) {
-            chunk = remaining > chunk_limit ? chunk_limit : remaining;
-            remaining -= chunk;
-        } else {
-            chunk = remaining;
-            remaining = 0;
-        }
-        NuFileRead(file, dst, chunk);
-        dst += chunk;
-        if (g_loadingCharacterInHub != 0 && bgProcIsBgThread() != 0) {
-            NuIOS_YieldThread();
-        }
-    } while (remaining != 0);
-    NuFileOpenSize(file);
-    NuFileClose(file);
-
-    GLuint texture = NuIOS_CreateGLTexFromPlatformInMemory(buffer, nullptr, nullptr, true);
-    NuThreadCriticalSectionEnd(g_textureLoadBufferCriticalSection);
-    return texture;
-}
-
-GLuint NuIOS_CreateGLTexFromHash(u32 hash) {
-    char filename[0x10c];
-    GLuint texture = 0;
-
-    g_textureHash = hash;
-    comeFromHash = 1;
-    if (hash == 0x280145f0) {
-        g_logoTexture = 1;
-    }
-
-    switch (NuPlatform::Get()->GetCurrentPlatform()) {
-        case IOS_PLATFORM:
-        case ANDROID_PVRTC_PLATFORM:
-            snprintf(filename, sizeof(filename), "SHAREDTEXTURES/0X%08X.PVR", hash);
-            texture = NuIOS_CreateGLTexFromPlatfomSpecificFile(filename);
-            break;
-        case ANDROID_ATITC_PLATFORM:
-            snprintf(filename, sizeof(filename), "SHAREDTEXTURES/0x%08x.atitc", hash);
-            texture = NuIOS_CreateGLTexFromPlatfomSpecificFile(filename);
-            if (texture == 0) {
-                snprintf(filename, sizeof(filename), "SHAREDTEXTURES/0X%08X.PVRNC", hash);
-                texture = NuIOS_CreateGLTexFromPlatfomSpecificForecPVR(filename);
-            }
-            break;
-        case ANDROID_S3TC_PLATFORM:
-        case ANDROID_ETC1_PLATFORM: {
-            const char *extension = NuPlatform::Get()->GetCurrentPlatform() == ANDROID_S3TC_PLATFORM ? "S3TC" : "ETC1";
-            snprintf(filename, sizeof(filename), "SHAREDTEXTURES/0X%08X.%s", hash, extension);
-            texture = NuIOS_CreateGLTexFromPlatfomSpecificFile(filename);
-            if (texture == 0) {
-                snprintf(filename, sizeof(filename), "SHAREDTEXTURES/0X%08X.PVRNC", hash);
-                texture = NuIOS_CreateGLTexFromPlatfomSpecificForecPVR(filename);
-            }
-            break;
-        }
-        default:
-            snprintf(filename, sizeof(filename), "SHAREDTEXTURES/0X%08X.PVR", hash);
-            texture = NuIOS_CreateGLTexFromPlatfomSpecificFile(filename);
-            if (texture == 0) {
-                snprintf(filename, sizeof(filename), "SHAREDTEXTURES/0X%08X.PVRNC", hash);
-                texture = NuIOS_CreateGLTexFromPlatfomSpecificForecPVR(filename);
-            }
-            break;
-    }
-
-    g_textureHash = 0;
-    g_logoTexture = 0;
-    return texture;
-}
-
-GLuint NuIOS_CreateGLTexFromFile(const char *filename) {
-    const i32 platform = NuPlatform::Get()->GetCurrentPlatform();
-    if (platform == ANDROID_ATITC_PLATFORM) {
-        goto load_android_texture;
-    }
-    if (platform >= ANDROID_ATITC_PLATFORM) {
-        if (platform == ANDROID_PVRTC_PLATFORM) {
-            return NuIOS_CreateGLTexFromPlatfomSpecificFile(filename);
-        }
-        if (platform <= ANDROID_ETC1_PLATFORM) {
-            goto load_android_texture;
-        }
-    }
-    return 0;
-
-load_android_texture:
-    char fixed_filename[0x200];
-    char extension[0x200];
-    NuStrCpy(extension, NuPlatform::Get()->GetCurrentTextureExtension());
-    NuStrFixExtPlatform(fixed_filename, const_cast<char *>(filename), extension, sizeof(fixed_filename),
-                        const_cast<char *>("MOB"));
-
-    if (g_datfileMode == 0) {
-        char external_filename[0x200] = "mnt/sdcard/TTGames/com.tt.LegoStarWarsSaga/files/androidTextures/";
-        const usize path_length = strlen(external_filename);
-        strcpy(&external_filename[path_length], fixed_filename);
-        for (usize index = path_length; index < strlen(external_filename); ++index) {
-            i32 character = external_filename[index];
-            SAGA_UPPERCASE_CHAR(character, _toupper_tab_);
-            external_filename[index] = static_cast<char>(character);
-            if (external_filename[index] == '\\') {
-                external_filename[index] = '/';
-            }
-        }
-        NuStrCpy(fixed_filename, external_filename);
-    }
-
-    GLuint texture = NuIOS_CreateGLTexFromPlatfomSpecificFile(fixed_filename);
-    if (texture != 0) {
-        return texture;
-    }
-    return NuIOS_CreateGLTexFromPlatfomSpecificForecPVR(filename);
-}
-
-GLuint NuIOS_CreateGLTexFromPlatformInMemory(void *data, i32 *width, i32 *height, bool is_pvrtc) {
-    const PLATFORMS_SUPPORTED platform = NuPlatform::Get()->GetCurrentPlatform();
-    GLuint texture = 0;
-    if (is_pvrtc) {
-        texture = NuIOS_CreateGLTexFromPVRInMemory(data, width, height);
-    } else {
-        switch (platform) {
-            case IOS_PLATFORM:
-            case ANDROID_PVRTC_PLATFORM:
-                texture = NuIOS_CreateGLTexFromPVRInMemory(data, width, height);
-                break;
-            case ANDROID_ATITC_PLATFORM:
-            case ANDROID_S3TC_PLATFORM:
-            case ANDROID_ETC1_PLATFORM:
-                texture = NuIOS_CreateGLTexFromMemoryDDS(data, width, height);
-                break;
-            default:
-                break;
-        }
-    }
-    if (texture != 0) {
-        return texture;
-    }
-    return loadDefaultTexture(0, 0, 0x20, GL_TEXTURE_2D, GL_TEXTURE_2D);
-}
-
-GLuint loadDefaultTexture(GLuint texture, GLint level, GLsizei size, GLenum texture_type, GLenum target) {
-    isize pixel_count = size * size;
-    u8 *pixels = (u8 *)malloc(pixel_count * 4);
-    u8 *p1 = pixels + 8;
-    u8 *p2 = pixels + 4;
-    for (i32 i = 0; i < pixel_count; i += 2) {
-        i32 row = i / size;
-
-        if (row & 1) {
-            p1[-8] = 0x52;
-            p1[-7] = 0x52;
-            p1[-6] = 0x99;
-            p1[-5] = 0xFF;
-            p2[3] = 0xFF;
-            p2[0] = 0x7A;
-            p2[1] = 0x7A;
-            p2[2] = 0x7A;
-        } else {
-            p1[-8] = 0x7A;
-            p1[-7] = 0x7A;
-            p1[-6] = 0x7A;
-            p1[-5] = 0xFF;
-            p2[3] = 0xFF;
-            p2[0] = 0x52;
-            p2[1] = 0x52;
-            p2[2] = 0x99;
-        }
-        p1 += 8;
-        p2 += 8;
-    }
-
-    BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nutex_ios_ex.cpp", 552);
-
-    GLuint textures[3];
-    textures[0] = texture;
-    if (texture == 0) {
-        glGenTextures(1, textures);
-    }
-
-    if (texture_type == GL_TEXTURE_2D) {
-        glActiveTexture(GL_TEXTURE0);
-        g_currentTexUnit = 0;
-        glBindTexture(GL_TEXTURE_2D, textures[0]);
-    } else {
-        if (g_currentTexUnit != 0) {
-            glActiveTexture(GL_TEXTURE0);
-            g_currentTexUnit = 0;
-        }
-        if (g_lastBoundCubeTexIds[0] != textures[0]) {
-            glBindTexture(GL_TEXTURE_CUBE_MAP, textures[0]);
-            g_lastBoundCubeTexIds[0] = textures[0];
-        }
-    }
-
-    glTexImage2D(target, level, GL_RGBA, size, size, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
-    NuCheckGLErrorsFL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nutex_ios_ex.cpp", 574);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    NuCheckGLErrorsFL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nutex_ios_ex.cpp", 583);
-    EndCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nutex_ios_ex.cpp", 585);
-    free(pixels);
-
-    return textures[0];
-}
-
-GLuint NuIOS_CreateGLTexFromMemoryDDS(void *ddsPointer, i32 *out_width, i32 *out_height) {
-    GLuint texID = 0;
-    unsigned char *decompressedBuffer = nullptr;
-    unsigned char *pixelData = nullptr;
-
-    NUTEXFORMAT format;
-    i32 depth = 0;
-    i32 mipCount = 0;
-    bool isCubemap = false;
-    bool hasFourCC = false;
-
-    bool success = NuDDSGetTextureDescription((char *)ddsPointer, format, *out_width, *out_height, depth, mipCount,
-                                              isCubemap, &hasFourCC);
-
-    if (success && (*out_width != 0 || *out_height != 0 || mipCount > 1)) {
-        texID = CreateTexturePS();
-        i32 bpp;
-        u32 glInternalFormat;
-        u32 glType;
-        u32 glFormat;
-        bool isCompressed;
-        NUTEXFORMAT nativeFormat;
-
-        GetNativeTextureFormat(format, bpp, glInternalFormat, glType, glFormat, isCompressed, nativeFormat);
-
-        pixelData = (unsigned char *)ddsPointer + sizeof(dds_header_s);
-
-        if (format == NUTEX_DXT5) {
-            decompressedBuffer = nullptr;
-            DecompressTextureToRGBA((unsigned char *)ddsPointer, 0, decompressedBuffer);
-
-            format = NUTEX_RGBA32;
-            isCompressed = false;
-            glInternalFormat = GL_RGBA;
-            glFormat = GL_RGBA;
-
-            pixelData = decompressedBuffer;
-        }
-        UnlockTexturePS(texID, pixelData, *out_width, *out_height, depth, isCubemap, mipCount, format, glFormat,
-                        glInternalFormat, glType, isCompressed);
-    }
-
-    return texID;
-}
-
-GLuint CreateTexturePS(void) {
-    GLuint tex;
-
-    tex = 0;
-    BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nutex_ios_ex.cpp", 0x1ad);
-    glGenTextures(1, &tex);
-    EndCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nutex_ios_ex.cpp", 0x1b1);
-    return tex;
-}
-
-char const *GetNativeTextureFormatName(NUTEXFORMAT format) {
-    switch (format) {
-        case NUTEX_DXT1:
-            return "NUTEX_FMT_DXT1";
-        case NUTEX_DX1A:
-            return "NUTEX_FMT_DXT1A";
-        case NUTEX_DXT5:
-            return "NUTEX_FMT_DXT5";
-        case NUTEX_RGBA32:
-            return "NUTEX_FMT_8888";
-        case NUTEX_FLOAT16:
-            return "NUTEX_FMT_A16B16G16R16F";
-        case NUTEX_FLOAT32:
-            return "NUTEX_FMT_A32B32G32R32F";
-        case NUTEX_L8:
-            return "NUTEX_FMT_L8";
-        case NUTEX_ETC1:
-            return "NUTEX_FMT_ETC1";
-        case NUTEX_PVRTC2:
-            return "NUTEX_FMT_PVRTC1_2_RGB";
-        case NUTEX_PVRTC2A:
-            return "NUTEX_FMT_PVRTC1_2";
-        case NUTEX_PVRTC4:
-            return "NUTEX_FMT_PVRTC1_4_RGB";
-        case NUTEX_PVRTC4A:
-            return "NUTEX_FMT_PVRTC1_4";
-        case NUTEX_ATCA:
-            return "NUTEX_FMT_ATITC_RGBA";
-        case NUTEX_ATC:
-            return "NUTEX_FMT_ATITC_RGB";
-        case NUTEX_RT_RGBX32:
-            return "NUTEX_FMT_RT_RGBX32";
-        case NUTEX_RT_RGBA32:
-            return "NUTEX_FMT_RT_RGBA32";
-        case NUTEX_RT_D24S8:
-            return "NUTEX_FMT_RT_D24S8";
-        case NUTEX_RT_A16B16G16R16:
-            return "NUTEX_FMT_RT_A16B16G16R16";
-        case NUTEX_RT_R32F:
-            return "NUTEX_FMT_RT_R32F";
-        case NUTEX_RT_ZBUFFER:
-            return "NUTEX_FMT_RT_ZBUFFER";
-        case NUTEX_RT_SHADOWMAP_COLOR:
-            return "NUTEX_FMT_RT_SHADOWMAP_COLOR";
-        case NUTEX_RT_SHADOWMAP_DEPTH:
-            return "NUTEX_FMT_RT_SHADOWMAP_DEPTH";
-        case NUTEX_RT_G16R16F:
-            return "NUTEX_FMT_RT_G16R16F";
-        case NUTEX_RT_HDR:
-            return "NUTEX_FMT_RT_HDR";
-        case NUTEX_RT_A16B16G16R16F:
-            return "NUTEX_FMT_RT_A16B16G16R16F";
-        case NUTEX_RT_A2R10G10B10:
-            return "NUTEX_FMT_RT_A2R10G10B10";
-        default:
-            return "Not defined";
-    }
-}
-
 void GetNativeTextureFormat(NUTEXFORMAT inFormat, i32 &outBpp, u32 &outInternalFormat, u32 &outType, u32 &outFormat,
                             bool &outIsCompressed, NUTEXFORMAT &outFormatEnum) {
     i32 formatToCheck = inFormat;
@@ -755,6 +382,379 @@ void DecompressTextureToRGBA(unsigned char *ddsData, u32 size, unsigned char *&o
             }
         }
     }
+}
+
+GLuint CreateTexturePS(void) {
+    GLuint tex;
+
+    tex = 0;
+    BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nutex_ios_ex.cpp", 0x1ad);
+    glGenTextures(1, &tex);
+    EndCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nutex_ios_ex.cpp", 0x1b1);
+    return tex;
+}
+
+GLuint loadDefaultTexture(GLuint texture, GLint level, GLsizei size, GLenum texture_type, GLenum target) {
+    isize pixel_count = size * size;
+    u8 *pixels = (u8 *)malloc(pixel_count * 4);
+    u8 *p1 = pixels + 8;
+    u8 *p2 = pixels + 4;
+    for (i32 i = 0; i < pixel_count; i += 2) {
+        i32 row = i / size;
+
+        if (row & 1) {
+            p1[-8] = 0x52;
+            p1[-7] = 0x52;
+            p1[-6] = 0x99;
+            p1[-5] = 0xFF;
+            p2[3] = 0xFF;
+            p2[0] = 0x7A;
+            p2[1] = 0x7A;
+            p2[2] = 0x7A;
+        } else {
+            p1[-8] = 0x7A;
+            p1[-7] = 0x7A;
+            p1[-6] = 0x7A;
+            p1[-5] = 0xFF;
+            p2[3] = 0xFF;
+            p2[0] = 0x52;
+            p2[1] = 0x52;
+            p2[2] = 0x99;
+        }
+        p1 += 8;
+        p2 += 8;
+    }
+
+    BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nutex_ios_ex.cpp", 552);
+
+    GLuint textures[3];
+    textures[0] = texture;
+    if (texture == 0) {
+        glGenTextures(1, textures);
+    }
+
+    if (texture_type == GL_TEXTURE_2D) {
+        glActiveTexture(GL_TEXTURE0);
+        g_currentTexUnit = 0;
+        glBindTexture(GL_TEXTURE_2D, textures[0]);
+    } else {
+        if (g_currentTexUnit != 0) {
+            glActiveTexture(GL_TEXTURE0);
+            g_currentTexUnit = 0;
+        }
+        if (g_lastBoundCubeTexIds[0] != textures[0]) {
+            glBindTexture(GL_TEXTURE_CUBE_MAP, textures[0]);
+            g_lastBoundCubeTexIds[0] = textures[0];
+        }
+    }
+
+    glTexImage2D(target, level, GL_RGBA, size, size, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+    NuCheckGLErrorsFL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nutex_ios_ex.cpp", 574);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    NuCheckGLErrorsFL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nutex_ios_ex.cpp", 583);
+    EndCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nutex_ios_ex.cpp", 585);
+    free(pixels);
+
+    return textures[0];
+}
+
+char const *GetNativeTextureFormatName(NUTEXFORMAT format) {
+    switch (format) {
+        case NUTEX_DXT1:
+            return "NUTEX_FMT_DXT1";
+        case NUTEX_DX1A:
+            return "NUTEX_FMT_DXT1A";
+        case NUTEX_DXT5:
+            return "NUTEX_FMT_DXT5";
+        case NUTEX_RGBA32:
+            return "NUTEX_FMT_8888";
+        case NUTEX_FLOAT16:
+            return "NUTEX_FMT_A16B16G16R16F";
+        case NUTEX_FLOAT32:
+            return "NUTEX_FMT_A32B32G32R32F";
+        case NUTEX_L8:
+            return "NUTEX_FMT_L8";
+        case NUTEX_ETC1:
+            return "NUTEX_FMT_ETC1";
+        case NUTEX_PVRTC2:
+            return "NUTEX_FMT_PVRTC1_2_RGB";
+        case NUTEX_PVRTC2A:
+            return "NUTEX_FMT_PVRTC1_2";
+        case NUTEX_PVRTC4:
+            return "NUTEX_FMT_PVRTC1_4_RGB";
+        case NUTEX_PVRTC4A:
+            return "NUTEX_FMT_PVRTC1_4";
+        case NUTEX_ATCA:
+            return "NUTEX_FMT_ATITC_RGBA";
+        case NUTEX_ATC:
+            return "NUTEX_FMT_ATITC_RGB";
+        case NUTEX_RT_RGBX32:
+            return "NUTEX_FMT_RT_RGBX32";
+        case NUTEX_RT_RGBA32:
+            return "NUTEX_FMT_RT_RGBA32";
+        case NUTEX_RT_D24S8:
+            return "NUTEX_FMT_RT_D24S8";
+        case NUTEX_RT_A16B16G16R16:
+            return "NUTEX_FMT_RT_A16B16G16R16";
+        case NUTEX_RT_R32F:
+            return "NUTEX_FMT_RT_R32F";
+        case NUTEX_RT_ZBUFFER:
+            return "NUTEX_FMT_RT_ZBUFFER";
+        case NUTEX_RT_SHADOWMAP_COLOR:
+            return "NUTEX_FMT_RT_SHADOWMAP_COLOR";
+        case NUTEX_RT_SHADOWMAP_DEPTH:
+            return "NUTEX_FMT_RT_SHADOWMAP_DEPTH";
+        case NUTEX_RT_G16R16F:
+            return "NUTEX_FMT_RT_G16R16F";
+        case NUTEX_RT_HDR:
+            return "NUTEX_FMT_RT_HDR";
+        case NUTEX_RT_A16B16G16R16F:
+            return "NUTEX_FMT_RT_A16B16G16R16F";
+        case NUTEX_RT_A2R10G10B10:
+            return "NUTEX_FMT_RT_A2R10G10B10";
+        default:
+            return "Not defined";
+    }
+}
+
+GLuint NuIOS_CreateGLTexFromMemoryDDS(void *ddsPointer, i32 *out_width, i32 *out_height) {
+    GLuint texID = 0;
+    unsigned char *decompressedBuffer = nullptr;
+    unsigned char *pixelData = nullptr;
+
+    NUTEXFORMAT format;
+    i32 depth = 0;
+    i32 mipCount = 0;
+    bool isCubemap = false;
+    bool hasFourCC = false;
+
+    bool success = NuDDSGetTextureDescription((char *)ddsPointer, format, *out_width, *out_height, depth, mipCount,
+                                              isCubemap, &hasFourCC);
+
+    if (success && (*out_width != 0 || *out_height != 0 || mipCount > 1)) {
+        texID = CreateTexturePS();
+        i32 bpp;
+        u32 glInternalFormat;
+        u32 glType;
+        u32 glFormat;
+        bool isCompressed;
+        NUTEXFORMAT nativeFormat;
+
+        GetNativeTextureFormat(format, bpp, glInternalFormat, glType, glFormat, isCompressed, nativeFormat);
+
+        pixelData = (unsigned char *)ddsPointer + sizeof(dds_header_s);
+
+        if (format == NUTEX_DXT5) {
+            decompressedBuffer = nullptr;
+            DecompressTextureToRGBA((unsigned char *)ddsPointer, 0, decompressedBuffer);
+
+            format = NUTEX_RGBA32;
+            isCompressed = false;
+            glInternalFormat = GL_RGBA;
+            glFormat = GL_RGBA;
+
+            pixelData = decompressedBuffer;
+        }
+        UnlockTexturePS(texID, pixelData, *out_width, *out_height, depth, isCubemap, mipCount, format, glFormat,
+                        glInternalFormat, glType, isCompressed);
+    }
+
+    return texID;
+}
+
+GLuint NuIOS_CreateGLTexFromPlatformInMemory(void *data, i32 *width, i32 *height, bool is_pvrtc) {
+    const PLATFORMS_SUPPORTED platform = NuPlatform::Get()->GetCurrentPlatform();
+    GLuint texture = 0;
+    if (is_pvrtc) {
+        texture = NuIOS_CreateGLTexFromPVRInMemory(data, width, height);
+    } else {
+        switch (platform) {
+            case IOS_PLATFORM:
+            case ANDROID_PVRTC_PLATFORM:
+                texture = NuIOS_CreateGLTexFromPVRInMemory(data, width, height);
+                break;
+            case ANDROID_ATITC_PLATFORM:
+            case ANDROID_S3TC_PLATFORM:
+            case ANDROID_ETC1_PLATFORM:
+                texture = NuIOS_CreateGLTexFromMemoryDDS(data, width, height);
+                break;
+            default:
+                break;
+        }
+    }
+    if (texture != 0) {
+        return texture;
+    }
+    return loadDefaultTexture(0, 0, 0x20, GL_TEXTURE_2D, GL_TEXTURE_2D);
+}
+
+GLuint NuIOS_CreateGLTexFromPlatfomSpecificFile(const char *filename) {
+    static u8 buffer[0x600081];
+    NUFILE file = NuFileOpen((char *)filename, NUFILE_READ);
+    g_textureName = filename;
+    if (file == 0) {
+        return 0;
+    }
+
+    i32 remaining = NuFileOpenSize(file);
+    g_fileSize = remaining;
+    NuThreadCriticalSectionBegin(g_textureLoadBufferCriticalSection);
+    const i32 chunk_limit = g_loadingCharacterInHub != 0 ? 0x4000 : static_cast<i32>(sizeof(buffer));
+    u8 *dst = buffer;
+    do {
+        i32 chunk;
+        if (bgProcIsBgThread() != 0) {
+            chunk = remaining > chunk_limit ? chunk_limit : remaining;
+            remaining -= chunk;
+        } else {
+            chunk = remaining;
+            remaining = 0;
+        }
+        NuFileRead(file, dst, chunk);
+        dst += chunk;
+        if (g_loadingCharacterInHub != 0 && bgProcIsBgThread() != 0) {
+            NuIOS_YieldThread();
+        }
+    } while (remaining != 0);
+    NuFileOpenSize(file);
+    NuFileClose(file);
+
+    i32 width = 0;
+    i32 height = 0;
+    GLuint texture = NuIOS_CreateGLTexFromPlatformInMemory(buffer, &width, &height, false);
+    NuThreadCriticalSectionEnd(g_textureLoadBufferCriticalSection);
+    return texture;
+}
+
+GLuint NuIOS_CreateGLTexFromPlatfomSpecificForecPVR(const char *filename) {
+    static u8 buffer[0x20004c];
+    NUFILE file = NuFileOpen((char *)filename, NUFILE_READ);
+    if (file == 0) {
+        return 0;
+    }
+
+    i32 remaining = NuFileOpenSize(file);
+    NuThreadCriticalSectionBegin(g_textureLoadBufferCriticalSection);
+    const i32 chunk_limit = g_loadingCharacterInHub != 0 ? 0x4000 : static_cast<i32>(sizeof(buffer));
+    u8 *dst = buffer;
+    do {
+        i32 chunk;
+        if (bgProcIsBgThread() != 0) {
+            chunk = remaining > chunk_limit ? chunk_limit : remaining;
+            remaining -= chunk;
+        } else {
+            chunk = remaining;
+            remaining = 0;
+        }
+        NuFileRead(file, dst, chunk);
+        dst += chunk;
+        if (g_loadingCharacterInHub != 0 && bgProcIsBgThread() != 0) {
+            NuIOS_YieldThread();
+        }
+    } while (remaining != 0);
+    NuFileOpenSize(file);
+    NuFileClose(file);
+
+    GLuint texture = NuIOS_CreateGLTexFromPlatformInMemory(buffer, nullptr, nullptr, true);
+    NuThreadCriticalSectionEnd(g_textureLoadBufferCriticalSection);
+    return texture;
+}
+
+GLuint NuIOS_CreateGLTexFromFile(const char *filename) {
+    const i32 platform = NuPlatform::Get()->GetCurrentPlatform();
+    if (platform == ANDROID_ATITC_PLATFORM) {
+        goto load_android_texture;
+    }
+    if (platform >= ANDROID_ATITC_PLATFORM) {
+        if (platform == ANDROID_PVRTC_PLATFORM) {
+            return NuIOS_CreateGLTexFromPlatfomSpecificFile(filename);
+        }
+        if (platform <= ANDROID_ETC1_PLATFORM) {
+            goto load_android_texture;
+        }
+    }
+    return 0;
+
+load_android_texture:
+    char fixed_filename[0x200];
+    char extension[0x200];
+    NuStrCpy(extension, NuPlatform::Get()->GetCurrentTextureExtension());
+    NuStrFixExtPlatform(fixed_filename, const_cast<char *>(filename), extension, sizeof(fixed_filename),
+                        const_cast<char *>("MOB"));
+
+    if (g_datfileMode == 0) {
+        char external_filename[0x200] = "mnt/sdcard/TTGames/com.tt.LegoStarWarsSaga/files/androidTextures/";
+        const usize path_length = strlen(external_filename);
+        strcpy(&external_filename[path_length], fixed_filename);
+        for (usize index = path_length; index < strlen(external_filename); ++index) {
+            i32 character = external_filename[index];
+            SAGA_UPPERCASE_CHAR(character, _toupper_tab_);
+            external_filename[index] = static_cast<char>(character);
+            if (external_filename[index] == '\\') {
+                external_filename[index] = '/';
+            }
+        }
+        NuStrCpy(fixed_filename, external_filename);
+    }
+
+    GLuint texture = NuIOS_CreateGLTexFromPlatfomSpecificFile(fixed_filename);
+    if (texture != 0) {
+        return texture;
+    }
+    return NuIOS_CreateGLTexFromPlatfomSpecificForecPVR(filename);
+}
+
+GLuint NuIOS_CreateGLTexFromHash(u32 hash) {
+    char filename[0x10c];
+    GLuint texture = 0;
+
+    g_textureHash = hash;
+    comeFromHash = 1;
+    if (hash == 0x280145f0) {
+        g_logoTexture = 1;
+    }
+
+    switch (NuPlatform::Get()->GetCurrentPlatform()) {
+        case IOS_PLATFORM:
+        case ANDROID_PVRTC_PLATFORM:
+            snprintf(filename, sizeof(filename), "SHAREDTEXTURES/0X%08X.PVR", hash);
+            texture = NuIOS_CreateGLTexFromPlatfomSpecificFile(filename);
+            break;
+        case ANDROID_ATITC_PLATFORM:
+            snprintf(filename, sizeof(filename), "SHAREDTEXTURES/0x%08x.atitc", hash);
+            texture = NuIOS_CreateGLTexFromPlatfomSpecificFile(filename);
+            if (texture == 0) {
+                snprintf(filename, sizeof(filename), "SHAREDTEXTURES/0X%08X.PVRNC", hash);
+                texture = NuIOS_CreateGLTexFromPlatfomSpecificForecPVR(filename);
+            }
+            break;
+        case ANDROID_S3TC_PLATFORM:
+        case ANDROID_ETC1_PLATFORM: {
+            const char *extension = NuPlatform::Get()->GetCurrentPlatform() == ANDROID_S3TC_PLATFORM ? "S3TC" : "ETC1";
+            snprintf(filename, sizeof(filename), "SHAREDTEXTURES/0X%08X.%s", hash, extension);
+            texture = NuIOS_CreateGLTexFromPlatfomSpecificFile(filename);
+            if (texture == 0) {
+                snprintf(filename, sizeof(filename), "SHAREDTEXTURES/0X%08X.PVRNC", hash);
+                texture = NuIOS_CreateGLTexFromPlatfomSpecificForecPVR(filename);
+            }
+            break;
+        }
+        default:
+            snprintf(filename, sizeof(filename), "SHAREDTEXTURES/0X%08X.PVR", hash);
+            texture = NuIOS_CreateGLTexFromPlatfomSpecificFile(filename);
+            if (texture == 0) {
+                snprintf(filename, sizeof(filename), "SHAREDTEXTURES/0X%08X.PVRNC", hash);
+                texture = NuIOS_CreateGLTexFromPlatfomSpecificForecPVR(filename);
+            }
+            break;
+    }
+
+    g_textureHash = 0;
+    g_logoTexture = 0;
+    return texture;
 }
 
 i32 GetMipOffset(i32 width, i32 height, NUTEXFORMAT format, i32 depth, bool isCubemap, i32 mips, i32 targetMip,

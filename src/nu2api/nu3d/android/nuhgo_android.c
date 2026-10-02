@@ -16,7 +16,7 @@ extern "C" void NuHGobjPOILocalMtxFromIX(nuhgobj_s *object, u8 index, NUMTX *joi
     }
 }
 
-extern "C" void NuHGobjPOIMtxFromIX(void) {
+extern "C" void NuHGobjPOIMtxFromIX(nuhgobj_s *, u8) {
     STUBBED();
 }
 

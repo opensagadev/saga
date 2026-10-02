@@ -10,7 +10,7 @@
 #include <new>
 NetSession *theSession;
 NetworkObjectManager *theNos;
-i16 NetReplicator::smNextId;
+i16 NetReplicator::smNextId = 1;
 i16 NetChangedReplicator::mTableInited;
 i16 NetChangedReplicator::mCrc32Table[256];
 static i32 ForceDummySerialise;

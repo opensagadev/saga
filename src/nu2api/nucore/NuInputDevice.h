@@ -221,7 +221,7 @@ namespace NuInputDevicePS {
 
     void DisableDPDPS(u32);
     void EnableDPDPS(u32);
-    void GetIdentifierPS(u32);
+    i32 GetIdentifierPS(u32);
     void HandleGamePadAxis_ANDROID_SPECIFIC(float, float, float, float, float, float);
     void HandleSensor_ANDROID_SPECIFIC(i32, float, float, float);
     i32 HandleTouch_ANDROID_SPECIFIC(i32, i32, i32, float, float);

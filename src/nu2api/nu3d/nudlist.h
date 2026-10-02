@@ -43,7 +43,7 @@ typedef struct nudisplaylistitem_s {
 // skins reuse the ordinary geometry packet, optionally replacing
 // dynamic_vertex_data with a deformed copy before the packet is submitted.
 typedef struct nudisplaylistgeom_s {
-    i32 primitive_type;              // 0x00
+    u32 primitive_type;              // 0x00
     i32 index_count;                 // 0x04
     u16 vertex_stride;               // 0x08
     u8 joint_indices[8];             // 0x0a, 0xff-terminated skin palette
@@ -195,6 +195,12 @@ extern "C" {
                 u16 update_flags : 5;
                 u16 material_layer_mask : 8;
                 u16 buffer_flags : 3;
+            };
+            struct {
+                u16 : 1;
+                u16 clip_materials : 1; // NUDL_SCENE_FLAG_CLIP_MATERIALS
+                u16 : 13;
+                u16 current_buffer : 1; // 0x75 bit7, the double-buffer index
             };
         };
         u8 instance_visibility_enabled; // 0x76 bit0: per-instance visibility buffer is active

@@ -71,12 +71,6 @@ void NetFtpManager::Init() {
 }
 
 NetFtpManager::NetFtpManager() {
-    void **transfer = &files[0].transfer;
-    void **end = reinterpret_cast<void **>(reinterpret_cast<u8 *>(transfer) + sizeof(files));
-    do {
-        *transfer = NULL;
-        transfer = reinterpret_cast<void **>(reinterpret_cast<u8 *>(transfer) + sizeof(FtpFile));
-    } while (transfer != end);
     field_1604 = 0;
 }
 

@@ -48,6 +48,30 @@ static u16 ang[ANG_COUNT] = {
 #define NU_ATAN2_LUT(y, x) ang[(y << 9) / x]
 #define NU_ATAN2F_LUT(y, x) ang[(i32)((y * 512.0f) / x)]
 
+static f32 NuSinApprox3(i32 angle) {
+    f32 x;
+    angle &= 0xffff;
+    if (angle > 0xc000)
+        angle -= 0xc000;
+    else if (angle > 0x4000)
+        angle = 0xc000 - angle;
+    else
+        angle += 0x4000;
+    x = angle * 9.58738019107841e-05f;
+    x -= 1.5707963705062866f;
+    return x + -0.16666656732559204f * (x * x * x) + (x * x * x) * (x * x) * 0.008333025500178337f +
+           (x * x * x) * (x * x) * (x * x) * -0.00019807413627859205f +
+           (x * x * x) * (x * x) * (x * x) * (x * x) * 2.601886990305502e-06f;
+}
+
+float NuSinApprox2(i32 ang) {
+    return NuSinApprox3(ang);
+}
+
+float NuCosApprox2(i32 ang) {
+    return NuSinApprox3(ang + 0x4000);
+}
+
 static u16 xy(u32 dx, u32 dy) {
     if (dx > dy) {
         return NUANG_90DEG - NU_ATAN2_LUT(dy, dx);
@@ -198,30 +222,4 @@ i32 NuAtan2D(f32 dx, f32 dy) {
 
 f32 NuAtan2(f32 dx, f32 dy) {
     return NuAtan2D(dx, dy) * 0.000095873802492f;
-}
-
-static f32 NuSinApprox3(i32 angle);
-
-float NuSinApprox2(i32 ang) {
-    return NuSinApprox3(ang);
-}
-
-float NuCosApprox2(i32 ang) {
-    return NuSinApprox3(ang + 0x4000);
-}
-
-static f32 NuSinApprox3(i32 angle) {
-    f32 x;
-    angle &= 0xffff;
-    if (angle > 0xc000)
-        angle -= 0xc000;
-    else if (angle > 0x4000)
-        angle = 0xc000 - angle;
-    else
-        angle += 0x4000;
-    x = angle * 9.58738019107841e-05f;
-    x -= 1.5707963705062866f;
-    return x + -0.16666656732559204f * (x * x * x) + (x * x * x) * (x * x) * 0.008333025500178337f +
-           (x * x * x) * (x * x) * (x * x) * -0.00019807413627859205f +
-           (x * x * x) * (x * x) * (x * x) * (x * x) * 2.601886990305502e-06f;
 }

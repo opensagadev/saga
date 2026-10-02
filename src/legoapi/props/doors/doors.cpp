@@ -62,14 +62,12 @@ static i32 door_cutscenesnap;
 
 static void Door_AddGizmos(GIZMOSYS *gizmo_sys, i32 type_id, void *world_ptr, void *) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
-    if (world != NULL && world->doors != NULL && world->door_count > 0) {
-        i32 i = 0;
-        do {
+    if (world != NULL && world->doors != NULL) {
+        for (i32 i = 0; i < world->door_count; ++i) {
             GizmoGetUniqueName(world->gizmo_sys, const_cast<char *>("Door_"), world->doors[i].name,
                                world->doors[i].gizmo_name, sizeof(world->doors[i].gizmo_name));
             AddGizmo(gizmo_sys, type_id, NULL, &world->doors[i]);
-            ++i;
-        } while (world->door_count > i);
+        }
     }
 }
 
@@ -680,18 +678,12 @@ ADDGIZMOTYPE *Door_RegisterGizmo(i32 type_id) {
     addtype.name = "Door";
     addtype.prefix = "";
     addtype.fns.unknown1 = 0;
-    addtype.fns.early_update_fn = NULL;
-    addtype.fns.panel_draw_fn = NULL;
-    addtype.fns.get_visibility_fn = NULL;
     addtype.fns.get_max_gizmos_fn = Door_GetMaxGizmos;
-    addtype.fns.get_pos_fn = NULL;
-    addtype.fns.using_special_fn = NULL;
     addtype.fns.add_gizmos_fn = Door_AddGizmos;
-    addtype.fns.bolt_hit_plat_fn = NULL;
-    addtype.fns.get_best_bolt_target_fn = NULL;
+    addtype.fns.early_update_fn = NULL;
     addtype.fns.late_update_fn = NULL;
-    addtype.fns.bolt_hit_fn = NULL;
     addtype.fns.draw_fn = NULL;
+    addtype.fns.panel_draw_fn = NULL;
     addtype.fns.get_gizmo_name_fn = Door_GetGizmoName;
     addtype.fns.get_output_fn = Door_GetOutput;
     addtype.fns.get_output_name_fn = Door_GetOutputName;
@@ -699,6 +691,12 @@ ADDGIZMOTYPE *Door_RegisterGizmo(i32 type_id) {
     addtype.fns.activate_fn = Door_Activate;
     addtype.fns.activate_rev_fn = NULL;
     addtype.fns.set_visibility_fn = NULL;
+    addtype.fns.get_visibility_fn = NULL;
+    addtype.fns.get_pos_fn = NULL;
+    addtype.fns.using_special_fn = NULL;
+    addtype.fns.bolt_hit_plat_fn = NULL;
+    addtype.fns.get_best_bolt_target_fn = NULL;
+    addtype.fns.bolt_hit_fn = NULL;
     addtype.fns.allocate_progress_data_fn = NULL;
     addtype.fns.clear_progress_fn = NULL;
     addtype.fns.store_progress_fn = NULL;

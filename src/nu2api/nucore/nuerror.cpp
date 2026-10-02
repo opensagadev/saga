@@ -9,7 +9,8 @@ extern "C" {
     typedef void (*NuErrorFunctionPtr)(char *, ...);
     typedef void (*NuDebugTTYFunctionPtr)(i32, char *, ...);
     static i32 bHaveErr;
-    static i32 nuerror_status;
+    // Volatile in the original: NuErrorCheck keeps the otherwise unused load and test.
+    static volatile i32 nuerror_status;
     static char ErrMsg[1024];
     static char *nufile;
     static i32 nuline;
@@ -24,7 +25,6 @@ extern "C" {
     void NuErrorCheck(void) {
         if (nuerror_status) {
             // The original Android build has no error-reporting body here.
-            return;
         }
     }
 
@@ -134,7 +134,7 @@ extern "C" {
         i32 offset = 0;
         i32 current = 0;
         while (current < entry && offset < bHaveErr) {
-            if (ErrMsg[offset++] == '\0') {
+            if (*(ErrMsg + offset++) == '\0') {
                 ++current;
             }
         }

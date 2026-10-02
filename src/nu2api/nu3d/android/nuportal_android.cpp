@@ -11,7 +11,7 @@ extern "C" void Initialise_PS(NUGSCN *scene) {
 extern "C" void FlagRoomInstancesAsVisible(NUROOM *room, NUGSCN *) {
     for (i32 i = 0; i < room->instance_count; ++i) {
         PortalVisiFlags[room->instance_indices[i] >> 3] =
-            PortalVisiFlags[room->instance_indices[i] >> 3] | static_cast<u8>(1 << (room->instance_indices[i] & 7));
+            PortalVisiFlags[room->instance_indices[i] >> 3] | 1 << (room->instance_indices[i] & 7);
     }
 }
 

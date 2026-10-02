@@ -182,6 +182,8 @@ extern "C" void NuDisplayListInit(VARIPTR *buf, VARIPTR buf_end) {
 }
 
 extern "C" void NuDisplayListDrawItems(nudisplaylistitem_s *items) {
+    // The original copies the list into a local it never reads.
+    nudisplaylistitem_s *item = items;
     NuDisplayListExecute(items, CurrentItemTable);
 }
 

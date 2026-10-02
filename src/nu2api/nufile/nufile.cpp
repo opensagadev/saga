@@ -141,6 +141,15 @@ i32 NuFileRefreshDevices(NUFILE_DEVICE **result) {
     return numdevices;
 }
 
+NUFILE_DEVICE *AddDevice(NUFILE_DEVICE *device) {
+    devices[numdevices] = *device;
+    NuStrCpy(devices[numdevices].cur_dir, default_device->cur_dir);
+    NuStrCpy(devices[numdevices].sys_dir, default_device->sys_dir);
+    NuStrCpy(devices[numdevices].dll_dir, default_device->dll_dir);
+    ++numdevices;
+    return &devices[numdevices - 1];
+}
+
 NUFILE_DEVICE *NuFileFindDevice(i32 id, i32 unit) {
     if (id == -3) {
         return default_device;
@@ -888,8 +897,9 @@ static i32 decode_buffer_left;
 static char decode_buffer[0x40000];
 static i32 decode_buffer_pos;
 static char read_buffer[0x40000];
-static i32 read_buffer_size;
-static i32 read_buffer_decoded_size;
+// Volatile in the original: -O0 comparisons of these emit setcc/test/jcc.
+static volatile i32 read_buffer_size;
+static volatile i32 read_buffer_decoded_size;
 
 static void NuDatFileDecodeInit() {
     unpack_file_info = NULL;
@@ -1298,7 +1308,6 @@ i32 NuDatFileRead(NUFILE file, void *buf, i32 size) {
     i32 inflated_size;
     i32 total_read;
     i32 bytes_read;
-    i32 to_read;
 
     file -= 0x800;
     info = &dat_file_infos[file];
@@ -1342,9 +1351,9 @@ i32 NuDatFileRead(NUFILE file, void *buf, i32 size) {
         open_file->pos = info->pos;
     }
 
-    to_read = MIN(size, MAX(info->file_len + info->start - info->pos, 0));
-    if (to_read != 0) {
-        total_read = NuFileRead(open_file->dat_file, buf, to_read);
+    bytes_read = MIN(size, MAX(info->file_len + info->start - info->pos, 0));
+    if (bytes_read != 0) {
+        total_read = NuFileRead(open_file->dat_file, buf, bytes_read);
         if (total_read > -1) {
             info->pos += total_read;
             open_file->pos = info->pos;
@@ -2193,9 +2202,10 @@ static FILEEXTINFO *NuFileExtGetInfo(char *path, i32 path_len) {
         path_len = NuStrLen(path);
     }
 
+    char *end = path + path_len;
     FILEEXTINFO *info = extensions;
     while (info->extension[0] != '\0') {
-        if (MatchExtension(info->extension, path + path_len, path_len) != 0) {
+        if (MatchExtension(info->extension, end, path_len) != 0) {
             return info;
         }
         ++info;
@@ -2221,17 +2231,22 @@ i32 NuFileExtRemove(char *dest, char *path) {
 }
 
 i32 NuFileExtGetExt(char *dest, i32 dest_size, NUFILETYPE type) {
-    for (FILEEXTINFO *info = extensions; info->extension[0] != '\0'; ++info) {
-        if (!(info->platform != PC_PLATFORM || info->type != type)) {
+    FILEEXTINFO *info;
+    i32 i;
+    char *source;
+
+    for (info = extensions; info->extension != NULL; ++info) {
+        if (info->platform == PC_PLATFORM && info->type == type) {
             if (info->len > dest_size) {
                 return 0;
             }
 
-            const char *source = info->extension + info->len;
-            for (i32 i = 0; i < info->len; ++i) {
-                dest[i] = *--source;
+            source = info->extension + info->len;
+            for (i = 0; i < info->len; ++i) {
+                --source;
+                dest[i] = *source;
             }
-            dest[info->len] = '\0';
+            dest[i] = '\0';
             return 1;
         }
     }
@@ -2239,23 +2254,32 @@ i32 NuFileExtGetExt(char *dest, i32 dest_size, NUFILETYPE type) {
 }
 
 i32 NuFileExtConvert(char *dest, char *path) {
-    i32 path_len = NuStrCpy(dest, path);
-    FILEEXTINFO *source = NuFileExtGetInfo(path, path_len);
-    if (source == NULL) {
-        return 0;
-    }
-    if (source->platform == PC_PLATFORM) {
-        return 1;
-    }
+    char *extension;
+    char *out;
+    FILEEXTINFO *target;
+    i32 path_len;
+    FILEEXTINFO *source;
+    i32 type;
 
-    for (FILEEXTINFO *target = extensions; target->extension[0] != '\0'; ++target) {
-        if (target->platform == PC_PLATFORM && target->type == source->type) {
-            char *out = dest + path_len - source->len + target->len;
-            *out = '\0';
-            for (char *extension = target->extension; *extension != '\0'; ++extension) {
-                *--out = *extension;
-            }
+    path_len = NuStrCpy(dest, path);
+    source = NuFileExtGetInfo(path, path_len);
+    if (source != NULL) {
+        type = source->type;
+        if (source->platform == PC_PLATFORM) {
             return 1;
+        }
+
+        for (target = extensions; target->extension != NULL; ++target) {
+            if (target->platform == PC_PLATFORM && target->type == type) {
+                out = &dest[(u32)path_len - source->len + target->len];
+                extension = target->extension;
+                *out = '\0';
+                while (*extension != '\0') {
+                    *--out = *extension;
+                    ++extension;
+                }
+                return 1;
+            }
         }
     }
     return 0;

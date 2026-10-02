@@ -47,9 +47,15 @@ static i32 GizMiniCut_GetOutput(GIZMO *gizmo, i32 output_index, i32) {
     if (gizmo == NULL || gizmo->object == NULL)
         return 0;
     MINICUT *minicut = static_cast<MINICUT *>(gizmo->object);
-    if ((output_index == 0 && MiniCutCam != 0) || (output_index != 0 && output_index != 1))
-        return 0;
-    return minicut->played;
+    switch (output_index) {
+        case 0:
+            if (MiniCutCam == 0)
+                return minicut->played;
+            break;
+        case 1:
+            return minicut->played;
+    }
+    return 0;
 }
 
 static char *GizMiniCut_GetOutputName(GIZMO *gizmo, i32 output_index) {
@@ -235,18 +241,12 @@ ADDGIZMOTYPE *MiniCut_RegisterGizmo(i32 type_id) {
     addtype.name = "MiniCut";
     addtype.prefix = "";
     addtype.fns.unknown1 = 0;
-    addtype.fns.early_update_fn = NULL;
-    addtype.fns.panel_draw_fn = NULL;
-    addtype.fns.get_visibility_fn = NULL;
     addtype.fns.get_max_gizmos_fn = GizMiniCut_GetMaxGizmos;
-    addtype.fns.get_pos_fn = GizMiniCut_GetPos;
-    addtype.fns.using_special_fn = GizMiniCut_UsingSpecial;
     addtype.fns.add_gizmos_fn = GizMiniCut_AddGizmos;
-    addtype.fns.bolt_hit_plat_fn = NULL;
-    addtype.fns.get_best_bolt_target_fn = NULL;
+    addtype.fns.early_update_fn = NULL;
     addtype.fns.late_update_fn = NULL;
-    addtype.fns.bolt_hit_fn = NULL;
     addtype.fns.draw_fn = NULL;
+    addtype.fns.panel_draw_fn = NULL;
     addtype.fns.get_gizmo_name_fn = GizMiniCut_GetGizmoName;
     addtype.fns.get_output_fn = GizMiniCut_GetOutput;
     addtype.fns.get_output_name_fn = GizMiniCut_GetOutputName;
@@ -254,6 +254,12 @@ ADDGIZMOTYPE *MiniCut_RegisterGizmo(i32 type_id) {
     addtype.fns.activate_fn = GizMiniCut_Activate;
     addtype.fns.activate_rev_fn = NULL;
     addtype.fns.set_visibility_fn = NULL;
+    addtype.fns.get_visibility_fn = NULL;
+    addtype.fns.get_pos_fn = GizMiniCut_GetPos;
+    addtype.fns.using_special_fn = GizMiniCut_UsingSpecial;
+    addtype.fns.bolt_hit_plat_fn = NULL;
+    addtype.fns.get_best_bolt_target_fn = NULL;
+    addtype.fns.bolt_hit_fn = NULL;
     addtype.fns.allocate_progress_data_fn = NULL;
     addtype.fns.clear_progress_fn = NULL;
     addtype.fns.store_progress_fn = NULL;

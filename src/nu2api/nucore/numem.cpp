@@ -297,8 +297,8 @@ NUMEMBLK *NuMemBlkCreateEx(u32 element_size, i32 count, u32 alignment_mask, void
 }
 
 void *NuMemBlkAlloc(NUMEMBLK *pool) {
-    NUMEMBLKLINK *block = pool->free_list;
-    if (block != NULL) {
+    NUMEMBLKLINK *block;
+    if ((block = pool->free_list) != NULL) {
         pool->free_list = pool->free_list->next;
         pool->free_count--;
         memset(block, -1, pool->stride);

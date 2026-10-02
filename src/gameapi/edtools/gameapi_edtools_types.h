@@ -676,6 +676,8 @@ struct EdStringControl : EdControl {
     static void cbChanged(eduimenu_s *, eduiitem_s *, u32);
     static void cbPress(eduimenu_s *, eduiitem_s *, u32);
 };
+inline EdStringControl::~EdStringControl() {
+}
 struct EdSfxNameControl : EdStringControl {
     EdSfxNameControl();
     void AddMenuItem(eduimenu_s *, EdRef *, void *) override;

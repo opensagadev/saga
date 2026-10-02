@@ -88,6 +88,105 @@ is usually correct; the mismatch comes from an earlier function in the
 translation unit that differs, is missing, or is emitted in a different order.
 Do not rewrite the function to chase the register.
 
+The usual cause of that mismatch is function order. This compiler emits a
+translation unit's definitions in source order, including at `-O2`/`-O3`, so
+the original binary's address order within a unit is the original source
+order. Reordering definitions to that order (with no body changes) has
+repaired many single-register mismatches, for example in `edfile.cpp` and
+`ledges.cpp`. Measure the whole unit afterwards: some Bazel units combine
+functions from more than one original unit and get worse when reordered.
+
+### Only PIC-relative displacements differ
+
+When every remaining difference is a `GOTOFF` displacement (`[ebx-0x9b2c0]`
+versus `[ebx-0xb4648]`, a renumbered `.LC` label, or a `.data`/`.bss` static
+at `[ecx+0x86a0]`), the function body is already correct. Those displacements
+encode the distance from the GOT to the referenced `.rodata`/`.data`/`.bss`
+item, so they only match when the data layout of the whole binary matches.
+No per-function source change can fix them; move on to another function.
+
+### `setcc; test %al, %al; jcc` in a plain `-O0` condition
+
+A straight-line `-O0` `if` normally compiles to a fused `cmp`/`jcc`. The
+`setcc`/`test` form appears when the condition is gimplified into a temporary:
+
+- an assignment inside the condition, `if ((p = f()) != NULL)`; or
+- a `volatile` operand, `if (shared_size == decoded_size)`. A `volatile`
+  object that is tested with an empty body also keeps its otherwise dead
+  load and `test`.
+
+Check the variable's other uses before declaring it `volatile`; data shared
+with another thread (for example the file decode buffers) is the expected case.
+
+### `-O0` call frame is 16 bytes larger than the original
+
+At `-O0`, a call to a `static` function that is already defined earlier in
+the unit does not reserve the usual 16-byte-aligned outgoing area: a
+one-argument wrapper uses `lea -0x8(%esp),%esp` instead of `-0x28`. If the
+original frame is smaller, define the static callee before its callers rather
+than forward-declaring it (`NuSinApprox3` in `nutrig.cpp`).
+
+### Two `-O0` locals share one stack slot in the original
+
+If two of the reconstruction's locals live in one slot in the original, the
+original source reused a single variable for both purposes. Merge them;
+renaming alone does not change the slot.
+
+### Two or three stores appear in reverse order
+
+A chained assignment `v.x = v.y = v.z = k` stores `z` first, while an
+aggregate initializer or separate statements store `x` first. Choose the form
+that reproduces the original store order.
+
+### A deleting destructor calls a different deallocator
+
+If the original `D0` destructor calls `BlockFree` (through
+`NuMemoryGet()->GetThreadMem()`) or `MemoryManager::FreePool` where the
+reconstruction calls the global `operator delete`, the class (or a base
+class) declares its own `static void operator delete(void *)`. Use the
+existing `NU_FREE` form or a pooled `FreePool(pointer, sizeof(Class))`; every
+derived class that does not declare its own delete inherits it.
+
+### A derived destructor calls a base destructor that the original inlines
+
+Compare symbol bindings with `nm`: a base destructor that is weak (`W`) in the
+original but strong (`T`) in the reconstruction was defined inline, so the
+original inlines it into derived destructors. Marking the existing definition
+`inline` (or moving it into the class) reproduces that. The reverse also
+happens: a class with only an implicit destructor gets an inline one, while
+the original defines it out of line and its `D0` calls `D1`.
+
+An `inline` definition in a `.cpp` file is only visible to that unit. If
+another unit calls the destructor out of line (a derived class, or an
+explicit destructor call), host builds fail to link with an undefined
+reference. Move the definition into the header so every user can inline it,
+as the original's weak copies imply. This is only safe when the destructor
+is not the class's key function: when it is the first declared virtual,
+making it inline turns the vtable and typeinfo into vague-linkage symbols
+that GCC 4.7 emits in unrelated units, which the `-fno-rtti` target cannot
+link. Such a destructor keeps its `inline` definition in its unit (or takes
+`SAGA_HOST_LINKABLE_DTOR` from `decomp.h`) so the matching target preserves
+the original's inlining while host builds get a strong, linkable definition.
+
+### Only the static initializer shape differs between `-O2` and `-O3`
+
+`_GLOBAL__sub_I_*` functions are a useful witness for a unit's optimization
+level. When a unit's static initializer only reproduces the original at the
+other level, and the unit's other functions are equal or closer there,
+change the level in `bazel/android_per_file_copts.bazelrc`. Check the whole
+binary afterwards: compiler-generated `-O0` helpers such as
+`__static_initialization_and_destruction_0` are paired by name, so removing
+one can unpair an unrelated original copy without any real regression.
+
+### A static callee uses register arguments in the original
+
+GCC gives a `static` function a local register calling convention (arguments
+in `eax`/`edx`, tail calls as `jmp`) when every caller is in the same unit.
+If the original passes arguments in registers but the reconstruction uses
+the stack, look for a caller in another file reaching the helper through an
+`__asm__` symbol name. Moving those callers back into the helper's unit and
+making the helper `static` again restores the convention.
+
 ### Stack realigns with `and $-16, %esp`
 
 Plain `-O2` functions do not realign the stack. A frame pointer plus

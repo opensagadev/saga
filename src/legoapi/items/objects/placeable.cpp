@@ -165,7 +165,7 @@ void PlaceableNameControl::AddMenuItem(eduimenu_s *menu, EdRef *reference, void 
 PlaceableNameControl::PlaceableNameControl() : reserved_10(0) {
 }
 
-PlaceableNameControl::~PlaceableNameControl() {
+inline PlaceableNameControl::~PlaceableNameControl() {
 }
 
 inline void PlaceableNameControl::operator delete(void *memory) {

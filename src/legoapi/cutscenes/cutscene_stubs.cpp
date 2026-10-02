@@ -64,16 +64,15 @@ extern "C" {
             return;
         }
 
-#define CUT_MEMORY_FLOAT(value)                                                                                         \
-    (static_cast<f32>((value) >> 16) * 65536.0f + static_cast<f32>(static_cast<u16>(value)))
-#define CUT_MEMORY_VERTEX(x, y, normal_colour, bright_colour)                                                           \
-    do {                                                                                                                \
-        if (g_NuPrim_NeedsOverbrightening == 0) {                                                                        \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] = (normal_colour);                                                     \
-        } else {                                                                                                        \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] = (bright_colour);                                                     \
-        }                                                                                                               \
-        NuPrim2DAddXYZ((x), (y), 0.0f);                                                                                  \
+#define CUT_MEMORY_FLOAT(value) (static_cast<f32>((value) >> 16) * 65536.0f + static_cast<f32>(static_cast<u16>(value)))
+#define CUT_MEMORY_VERTEX(x, y, normal_colour, bright_colour)                                                          \
+    do {                                                                                                               \
+        if (g_NuPrim_NeedsOverbrightening == 0) {                                                                      \
+            g_NuPrim_StreamBufferPtr->u32_ptr[3] = (normal_colour);                                                    \
+        } else {                                                                                                       \
+            g_NuPrim_StreamBufferPtr->u32_ptr[3] = (bright_colour);                                                    \
+        }                                                                                                              \
+        NuPrim2DAddXYZ((x), (y), 0.0f);                                                                                \
     } while (0)
 
         ++NuPrimCSPos;
@@ -94,8 +93,8 @@ extern "C" {
                 }
                 instNUGCUTSCENE_s *instance = DefragGetInstFn(entry->handle);
                 NUGCUTSCENE_s *scene = instance->cutscene;
-                const u32 start = static_cast<u32>(reinterpret_cast<usize>(scene) -
-                                                   reinterpret_cast<usize>(DefragCutSceneBaseMem));
+                const u32 start =
+                    static_cast<u32>(reinterpret_cast<usize>(scene) - reinterpret_cast<usize>(DefragCutSceneBaseMem));
                 const u32 end = start + scene->loaded_size;
                 const f32 start_x = CUT_MEMORY_FLOAT(start) * cut_scale + 30.0f;
                 const f32 end_x = CUT_MEMORY_FLOAT(end) * cut_scale + 30.0f;
@@ -114,8 +113,8 @@ extern "C" {
                     continue;
                 }
                 instNUGCUTSCENE_s *instance = DefragGetInstFn(entry->handle);
-                const u32 start = static_cast<u32>(reinterpret_cast<usize>(instance) -
-                                                   reinterpret_cast<usize>(DefragInstBaseMem));
+                const u32 start =
+                    static_cast<u32>(reinterpret_cast<usize>(instance) - reinterpret_cast<usize>(DefragInstBaseMem));
                 const u32 end = start + instance->allocation_size;
                 const f32 start_x = CUT_MEMORY_FLOAT(start) * inst_scale + 30.0f;
                 const f32 end_x = CUT_MEMORY_FLOAT(end) * inst_scale + 30.0f;
@@ -136,8 +135,8 @@ extern "C" {
                 }
                 instNUGCUTSCENE_s *instance = DefragGetInstFn(entry->handle);
                 NUGCUTSCENE_s *scene = instance->cutscene;
-                const u32 scene_start = static_cast<u32>(reinterpret_cast<usize>(scene) -
-                                                         reinterpret_cast<usize>(DefragCutSceneBaseMem));
+                const u32 scene_start =
+                    static_cast<u32>(reinterpret_cast<usize>(scene) - reinterpret_cast<usize>(DefragCutSceneBaseMem));
                 const u32 scene_end = scene_start + scene->loaded_size;
                 const f32 scene_start_x = CUT_MEMORY_FLOAT(scene_start) * cut_scale + 30.0f;
                 const f32 scene_end_x = CUT_MEMORY_FLOAT(scene_end) * cut_scale + 30.0f;
@@ -303,7 +302,7 @@ extern "C" {
     }
 
     i32 instNuGCutSceneIsFinished(instNUGCUTSCENE_s *instance) {
-        return (instance->flags_89 & 0x10) != 0 ? -1 : 0;
+        return instance->finished;
     }
 
     void instNuGCutScenePlay(instNUGCUTSCENE_s *instance, i32 forward) {
@@ -337,10 +336,10 @@ extern "C" {
         }
     }
 
-    void instNuGCutSceneResetCleanUp(void *list_storage, void *cut_base, void *cut_end, void *inst_base,
-                                    void *inst_end, instNUGCUTSCENE_s *(*get_inst)(void *),
-                                    void *(*create_inst)(void *, NUGCUTSCENE_s *, VARIPTR *),
-                                    void (*inst_destroyed)(void *)) {
+    void instNuGCutSceneResetCleanUp(void *list_storage, void *cut_base, void *cut_end, void *inst_base, void *inst_end,
+                                     instNUGCUTSCENE_s *(*get_inst)(void *),
+                                     void *(*create_inst)(void *, NUGCUTSCENE_s *, VARIPTR *),
+                                     void (*inst_destroyed)(void *)) {
         DefragCutSceneList = reinterpret_cast<CutSceneCleanUpEntry *>(ALIGN(reinterpret_cast<usize>(list_storage), 4));
         DefragCutSceneListBase = DefragCutSceneList;
         DefragCutSceneBaseMem = cut_base;
@@ -410,9 +409,7 @@ extern "C" {
     }
 
     void instNuGCutSceneSetRepeat(instNUGCUTSCENE_s *instance, i32 repeat) {
-        i32 capped = repeat <= 31 ? repeat : 31;
-        u32 *flags = reinterpret_cast<u32 *>(&instance->flags_88);
-        *flags = (*flags & ~0x3e000u) | ((capped & 31) << 13);
+        instance->repeat_count = repeat <= 31 ? repeat : 31;
     }
 
     void instNuGCutSceneStop(instNUGCUTSCENE_s *instance) {
@@ -501,7 +498,7 @@ extern "C" {
     }
 
     void instNuGCutSceneWaitAtEnd(instNUGCUTSCENE_s *instance, u8 enabled) {
-        instance->flags_8c = (instance->flags_8c & ~0x40) | ((enabled & 1) << 6);
+        instance->wait_at_end = enabled;
     }
 
     void instNuGCutSoundStream(void) {

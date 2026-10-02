@@ -38,26 +38,6 @@ static inline void CloneMessageData(NetMessage &message) {
     message.data = new_data;
 }
 
-void TTNetwork::Broadcast(NetMessage message, unsigned char channel) {
-    if (message.data == NULL || static_cast<i32>(message.write_offset - message.read_offset) <= 0) {
-        return;
-    }
-
-    message.data->bytes[--message.read_offset] = channel;
-    StatsSendMessage(message, channel);
-
-    NetPeer *peer = V2SessionManager::mpSessionManager->first_peer;
-    while (peer != NULL) {
-        CloneMessageData(message);
-        peer->vtable->send(peer, message);
-        peer = peer->next;
-    }
-}
-
-void TTNetwork::ClearMyHostAddress() {
-    has_my_host_address = false;
-}
-
 void TTNetwork::Display(ThingRenderData *) {
     if (field_2150 == 0) {
         return;
@@ -117,12 +97,69 @@ void TTNetwork::Display(ThingRenderData *) {
     stats->Draw(field_2154, field_2158, field_215c, field_2160, static_cast<NetSmallStats::eInfo>(0));
 }
 
-const NetAddress &TTNetwork::GetMyAddress() const {
-    return my_address;
+TTNetwork::~TTNetwork() {
 }
 
-const NetAddress *TTNetwork::GetMyHostAddress() const {
-    return has_my_host_address ? &my_host_address : NULL;
+void TTNetwork::Send(NetMessage message, unsigned char channel, NetPeer &peer) {
+    if (message.data == NULL || static_cast<i32>(message.write_offset - message.read_offset) <= 0) {
+        return;
+    }
+
+    message.data->bytes[--message.read_offset] = channel;
+    StatsSendMessage(message, channel);
+    peer.vtable->send(&peer, message);
+}
+
+void TTNetwork::ReliableBroadcast(NetMessage message, unsigned char channel) {
+    if (message.data == NULL || static_cast<i32>(message.write_offset - message.read_offset) <= 0) {
+        return;
+    }
+
+    message.data->bytes[--message.read_offset] = channel;
+    StatsSendMessage(message, channel);
+
+    NetPeer *peer = V2SessionManager::mpSessionManager->first_peer;
+    while (peer != NULL) {
+        CloneMessageData(message);
+        peer->vtable->reliable_send(peer, message, NULL, 0);
+        peer = peer->next;
+    }
+}
+
+void TTNetwork::Broadcast(NetMessage message, unsigned char channel) {
+    if (message.data == NULL || static_cast<i32>(message.write_offset - message.read_offset) <= 0) {
+        return;
+    }
+
+    message.data->bytes[--message.read_offset] = channel;
+    StatsSendMessage(message, channel);
+
+    NetPeer *peer = V2SessionManager::mpSessionManager->first_peer;
+    while (peer != NULL) {
+        CloneMessageData(message);
+        peer->vtable->send(peer, message);
+        peer = peer->next;
+    }
+}
+
+void TTNetwork::ReliableSend(NetMessage message, unsigned char channel, NetPeer &peer, char const *name, u32 value) {
+    if (message.data == NULL || static_cast<i32>(message.write_offset - message.read_offset) <= 0) {
+        return;
+    }
+
+    message.data->bytes[--message.read_offset] = channel;
+    StatsSendMessage(message, channel);
+    peer.vtable->reliable_send(&peer, message, name, value);
+}
+
+TTNetwork::TTNetwork() : field_20(0), field_24(0), field_2140(0), my_address(), my_host_address() {
+    field_2158 = -0.3f;
+    field_215c = 0.5f;
+    has_my_host_address = 0;
+    field_213c = 0;
+    field_2150 = 0;
+    field_2154 = 0.3f;
+    field_2160 = 0.3f;
 }
 
 void TTNetwork::Initialise() {
@@ -151,6 +188,56 @@ void TTNetwork::Initialise() {
     theNuNetEmu.field_10 = 1;
     theNuNetEmu.SetConditions(NuNetEmu::CONDITIONS_NORMAL);
     refpack_init();
+}
+
+void TTNetwork::Resume() {
+}
+
+bool TTNetwork::Suspend() {
+    return true;
+}
+
+void TTNetwork::Shutdown() {
+    if (field_2140 != 0) {
+        Suspend();
+        network_objects.Term();
+        ftp_manager.Term();
+        void **vtable = *reinterpret_cast<void ***>(session);
+        typedef void (*SessionCloseFn)(NetSession *);
+        reinterpret_cast<SessionCloseFn>(vtable[4])(session);
+        field_2140 = 0;
+    }
+}
+
+const NetAddress &TTNetwork::GetMyAddress() const {
+    return my_address;
+}
+
+const NetAddress *TTNetwork::GetMyHostAddress() const {
+    return has_my_host_address ? &my_host_address : NULL;
+}
+
+void TTNetwork::SetMyHostAddress(NetAddress const &address) {
+    has_my_host_address = true;
+    my_host_address = address;
+}
+
+void TTNetwork::ClearMyHostAddress() {
+    has_my_host_address = false;
+}
+
+void TTNetwork::Update() {
+    if (field_2140 != 0) {
+        ++field_2134;
+        UtilFrameStart();
+        void **vtable = *reinterpret_cast<void ***>(session);
+        typedef void (*SessionUpdateFn)(NetSession *);
+        reinterpret_cast<SessionUpdateFn>(vtable[2])(session);
+        ftp_manager.Update();
+        network_objects.Update();
+        theNuNetEmu.Update();
+        StatsUpdate();
+    }
 }
 
 void TTNetwork::ProcessEvenWhenPaused(ThingProcessData *data) {
@@ -182,93 +269,6 @@ void TTNetwork::ProcessEvenWhenPaused(ThingProcessData *data) {
     }
 }
 
-void TTNetwork::ReliableBroadcast(NetMessage message, unsigned char channel) {
-    if (message.data == NULL || static_cast<i32>(message.write_offset - message.read_offset) <= 0) {
-        return;
-    }
-
-    message.data->bytes[--message.read_offset] = channel;
-    StatsSendMessage(message, channel);
-
-    NetPeer *peer = V2SessionManager::mpSessionManager->first_peer;
-    while (peer != NULL) {
-        CloneMessageData(message);
-        peer->vtable->reliable_send(peer, message, NULL, 0);
-        peer = peer->next;
-    }
-}
-
-void TTNetwork::ReliableSend(NetMessage message, unsigned char channel, NetPeer &peer, char const *name, u32 value) {
-    if (message.data == NULL || static_cast<i32>(message.write_offset - message.read_offset) <= 0) {
-        return;
-    }
-
-    message.data->bytes[--message.read_offset] = channel;
-    StatsSendMessage(message, channel);
-    peer.vtable->reliable_send(&peer, message, name, value);
-}
-
-void TTNetwork::Resume() {
-}
-
-void TTNetwork::Send(NetMessage message, unsigned char channel, NetPeer &peer) {
-    if (message.data == NULL || static_cast<i32>(message.write_offset - message.read_offset) <= 0) {
-        return;
-    }
-
-    message.data->bytes[--message.read_offset] = channel;
-    StatsSendMessage(message, channel);
-    peer.vtable->send(&peer, message);
-}
-
-void TTNetwork::SetMyHostAddress(NetAddress const &address) {
-    has_my_host_address = true;
-    my_host_address = address;
-}
-
-void TTNetwork::Shutdown() {
-    if (field_2140 != 0) {
-        Suspend();
-        network_objects.Term();
-        ftp_manager.Term();
-        void **vtable = *reinterpret_cast<void ***>(session);
-        typedef void (*SessionCloseFn)(NetSession *);
-        reinterpret_cast<SessionCloseFn>(vtable[4])(session);
-        field_2140 = 0;
-    }
-}
-
-bool TTNetwork::Suspend() {
-    return true;
-}
-
-TTNetwork::TTNetwork() : field_20(0), field_24(0), field_2140(0), my_address(), my_host_address() {
-    field_2158 = -0.3f;
-    field_215c = 0.5f;
-    has_my_host_address = 0;
-    field_213c = 0;
-    field_2150 = 0;
-    field_2154 = 0.3f;
-    field_2160 = 0.3f;
-}
-
 char const *TTNetwork::GetName() {
     return "Network";
-}
-
-void TTNetwork::Update() {
-    if (field_2140 != 0) {
-        ++field_2134;
-        UtilFrameStart();
-        void **vtable = *reinterpret_cast<void ***>(session);
-        typedef void (*SessionUpdateFn)(NetSession *);
-        reinterpret_cast<SessionUpdateFn>(vtable[2])(session);
-        ftp_manager.Update();
-        network_objects.Update();
-        theNuNetEmu.Update();
-        StatsUpdate();
-    }
-}
-
-TTNetwork::~TTNetwork() {
 }

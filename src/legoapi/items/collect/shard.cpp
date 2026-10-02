@@ -22,22 +22,37 @@ struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
-SHARD *Shard_FindNearest(WORLDINFO_s *world, nuvec_s *position, GameObject_s *object, float *distance_squared) {
-    SHARD *nearest = NULL;
-    f32 best_distance = 1000000000.0f;
-    SHARD *shard = static_cast<SHARD *>(world->shards);
-    for (i32 i = 0; i < world->shard_count; ++i, ++shard) {
-        if (object != NULL && (shard->state_flags & 0x0f) != 3)
-            continue;
-        f32 distance = NuVecDistSqr(position, &shard->current_position, NULL);
-        if (distance < best_distance) {
-            best_distance = distance;
-            nearest = shard;
-        }
+static void *Shards_ReserveBufferSpace(void *context) {
+    WORLDINFO *world = static_cast<WORLDINFO *>(context);
+    world->shards = NULL;
+    world->shard_count = 0;
+    if (world->current_level->max_shards != 0) {
+        world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 4);
+        world->shards = world->giz_buffer.void_ptr;
+        world->giz_buffer.addr += world->current_level->max_shards * sizeof(SHARD);
     }
-    if (distance_squared != NULL)
-        *distance_squared = best_distance;
-    return nearest;
+    return world->shards;
+}
+
+static void Shard_Activate(GIZMO *gizmo, i32 active) {
+    if (gizmo != NULL) {
+        SHARD *shard = static_cast<SHARD *>(gizmo->object);
+        shard->active = active != 0;
+    }
+}
+
+static void Shard_SetVisibility(GIZMO *gizmo, i32 visible) {
+    if (gizmo != NULL) {
+        SHARD *shard = static_cast<SHARD *>(gizmo->object);
+        shard->visible = visible != 0;
+    }
+}
+
+static void Shards_UpdateBeforeCharacters(void *world_info, void *, float) {
+    WORLDINFO *world = static_cast<WORLDINFO *>(world_info);
+    for (i32 i = 0; i < world->shard_count; ++i) {
+        static_cast<SHARD *>(world->shards)[i].state_flags &= ~0x20;
+    }
 }
 
 struct SHARDPROGRESS_s {
@@ -52,19 +67,72 @@ static i32 Shards_GetMaxGizmos(void *world_info) {
     return world != NULL ? world->current_level->max_shards : 0;
 }
 
-static void Shards_AddGizmos(GIZMOSYS *gizmo_sys, i32 type, void *context, void *) {
-    WORLDINFO *world = static_cast<WORLDINFO *>(context);
-    for (i32 i = 0; i < world->shard_count; ++i) {
-        SHARD *shard = &static_cast<SHARD *>(world->shards)[i];
-        if (NuStrLen(shard->name) != 0)
-            AddGizmo(gizmo_sys, type, NULL, &static_cast<SHARD *>(world->shards)[i]);
+static char *Shard_GetGizmoName(GIZMO *gizmo) {
+    return gizmo != NULL ? static_cast<SHARD *>(gizmo->object)->name : NULL;
+}
+
+static i32 Shard_GetOutput(GIZMO *gizmo, i32, i32) {
+    return (static_cast<SHARD *>(gizmo->object)->state_flags & 8) != 0;
+}
+
+static char *Shard_GetOutputName(GIZMO *gizmo, i32 output_index) {
+    return "Got";
+}
+
+static i32 Shard_GetNumOutputs(GIZMO *gizmo) {
+    return 1;
+}
+
+static void Shards_ClearProgress(void *, void *data) {
+    if (data != NULL) {
+        SHARDPROGRESS_s *progress = static_cast<SHARDPROGRESS_s *>(data);
+        memset(progress->collected, 0, sizeof(progress->collected));
+        memset(progress->active, 0xff, sizeof(progress->active));
+        memset(progress->visible, 0xff, sizeof(progress->visible));
     }
 }
 
-static void Shards_UpdateBeforeCharacters(void *world_info, void *, float) {
-    WORLDINFO *world = static_cast<WORLDINFO *>(world_info);
-    for (i32 i = 0; i < world->shard_count; ++i) {
-        static_cast<SHARD *>(world->shards)[i].state_flags &= ~0x20;
+static void *Shards_AllocateProgressData(VARIPTR *start, VARIPTR *end) {
+    return GizmoBufferAlloc(start, end, sizeof(SHARDPROGRESS_s));
+}
+
+static void Shards_Draw(void *context, void *, float) {
+    WORLDINFO *world = static_cast<WORLDINFO *>(context);
+    SHARD *shard = static_cast<SHARD *>(world->shards);
+    if (shard == NULL)
+        return;
+    for (i32 i = 0; i < world->shard_count; ++i, ++shard) {
+        shard->drawn = 0;
+        if ((shard->state_flags & 0x0a) != 2)
+            continue;
+        NUMTX_ALIGNED16 matrix;
+        if (shard->state_flags & 4) {
+            u16 spin = (u16)((f32)(i32)shard->spin_angle + 98304.0f * shard->collection_time);
+            NuMtxSetRotationY(&matrix, spin);
+            u16 tumble = (u16)(60620.0f * shard->collection_time);
+            u16 angle_z = shard->angle_z;
+            if ((shard->state_flags & 0x40) == 0)
+                angle_z += tumble;
+            if (angle_z != 0)
+                NuMtxRotateZ(&matrix, angle_z);
+            u16 angle_x = shard->angle_x;
+            if (shard->state_flags & 0x40)
+                angle_x += tumble;
+            if (angle_x != 0)
+                NuMtxRotateX(&matrix, angle_x);
+        } else {
+            NuMtxSetRotationY(&matrix, shard->spin_angle);
+            if (shard->angle_z != 0)
+                NuMtxRotateZ(&matrix, shard->angle_z);
+            if (shard->angle_x != 0)
+                NuMtxRotateX(&matrix, shard->angle_x);
+        }
+        NuMtxTranslate(&matrix, &shard->current_position);
+        LEVEL_OBJECT_RUNTIME_s *model = &world->lev_objs[shard->model_index];
+        if (model->active != 0) {
+            i32 drawn = NuSpecialDrawAt(&model->special, &matrix);
+            shard->drawn = drawn;
+        }
     }
 }
 
@@ -116,107 +184,12 @@ static void Shards_UpdateAfterCharacters(void *context, void *, float) {
     }
 }
 
-static void Shards_Draw(void *context, void *, float) {
+static void Shards_AddGizmos(GIZMOSYS *gizmo_sys, i32 type, void *context, void *) {
     WORLDINFO *world = static_cast<WORLDINFO *>(context);
-    SHARD *shard = static_cast<SHARD *>(world->shards);
-    if (shard == NULL)
-        return;
-    for (i32 i = 0; i < world->shard_count; ++i, ++shard) {
-        shard->drawn = 0;
-        if ((shard->state_flags & 0x0a) != 2)
-            continue;
-        NUMTX_ALIGNED16 matrix;
-        if (shard->state_flags & 4) {
-            u16 spin = (u16)((f32)(i32)shard->spin_angle + 98304.0f * shard->collection_time);
-            NuMtxSetRotationY(&matrix, spin);
-            u16 tumble = (u16)(60620.0f * shard->collection_time);
-            u16 angle_z = shard->angle_z;
-            if ((shard->state_flags & 0x40) == 0)
-                angle_z += tumble;
-            if (angle_z != 0)
-                NuMtxRotateZ(&matrix, angle_z);
-            u16 angle_x = shard->angle_x;
-            if (shard->state_flags & 0x40)
-                angle_x += tumble;
-            if (angle_x != 0)
-                NuMtxRotateX(&matrix, angle_x);
-        } else {
-            NuMtxSetRotationY(&matrix, shard->spin_angle);
-            if (shard->angle_z != 0)
-                NuMtxRotateZ(&matrix, shard->angle_z);
-            if (shard->angle_x != 0)
-                NuMtxRotateX(&matrix, shard->angle_x);
-        }
-        NuMtxTranslate(&matrix, &shard->current_position);
-        LEVEL_OBJECT_RUNTIME_s *model = &world->lev_objs[shard->model_index];
-        if (model->active != 0) {
-            i32 drawn = NuSpecialDrawAt(&model->special, &matrix);
-            shard->drawn = drawn;
-        }
-    }
-}
-
-static char *Shard_GetGizmoName(GIZMO *gizmo) {
-    return gizmo != NULL ? static_cast<SHARD *>(gizmo->object)->name : NULL;
-}
-
-static i32 Shard_GetOutput(GIZMO *gizmo, i32, i32) {
-    return (static_cast<SHARD *>(gizmo->object)->state_flags & 8) != 0;
-}
-
-static char *Shard_GetOutputName(GIZMO *gizmo, i32 output_index) {
-    return "Got";
-}
-
-static i32 Shard_GetNumOutputs(GIZMO *gizmo) {
-    return 1;
-}
-
-static void Shard_Activate(GIZMO *gizmo, i32 active) {
-    if (gizmo != NULL) {
-        SHARD *shard = static_cast<SHARD *>(gizmo->object);
-        shard->active = active != 0;
-    }
-}
-
-static void Shard_SetVisibility(GIZMO *gizmo, i32 visible) {
-    if (gizmo != NULL) {
-        SHARD *shard = static_cast<SHARD *>(gizmo->object);
-        shard->visible = visible != 0;
-    }
-}
-
-static void *Shards_AllocateProgressData(VARIPTR *start, VARIPTR *end) {
-    return GizmoBufferAlloc(start, end, sizeof(SHARDPROGRESS_s));
-}
-
-static void Shards_ClearProgress(void *, void *data) {
-    if (data != NULL) {
-        SHARDPROGRESS_s *progress = static_cast<SHARDPROGRESS_s *>(data);
-        memset(progress->collected, 0, sizeof(progress->collected));
-        memset(progress->active, 0xff, sizeof(progress->active));
-        memset(progress->visible, 0xff, sizeof(progress->visible));
-    }
-}
-
-static void Shards_StoreProgress(void *context, void *, void *data) {
-    if (data == NULL)
-        return;
-    SHARDPROGRESS_s *progress = static_cast<SHARDPROGRESS_s *>(data);
-    Shards_ClearProgress(NULL, progress);
-    WORLDINFO *world = static_cast<WORLDINFO *>(context);
-    if (world != NULL && world->shards != NULL) {
-        SHARD *shard = static_cast<SHARD *>(world->shards);
-        for (i32 i = 0; i < world->shard_count && i < 128; ++i, ++shard) {
-            i32 word = i >> 5;
-            u32 mask = 1u << (i & 31);
-            if (shard->state_flags & 8)
-                progress->collected[word] |= mask;
-            if (!(shard->state_flags & 2))
-                progress->visible[word] &= ~mask;
-            if (!(shard->state_flags & 1))
-                progress->active[word] &= ~mask;
-        }
+    for (i32 i = 0; i < world->shard_count; ++i) {
+        SHARD *shard = &static_cast<SHARD *>(world->shards)[i];
+        if (NuStrLen(shard->name) != 0)
+            AddGizmo(gizmo_sys, type, NULL, &static_cast<SHARD *>(world->shards)[i]);
     }
 }
 
@@ -256,18 +229,6 @@ static void Shards_Reset(void *context, void *, void *data) {
     }
 }
 
-static void *Shards_ReserveBufferSpace(void *context) {
-    WORLDINFO *world = static_cast<WORLDINFO *>(context);
-    world->shards = NULL;
-    world->shard_count = 0;
-    if (world->current_level->max_shards != 0) {
-        world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 4);
-        world->shards = world->giz_buffer.void_ptr;
-        world->giz_buffer.addr += world->current_level->max_shards * sizeof(SHARD);
-    }
-    return world->shards;
-}
-
 static i32 Shards_Load(void *world_info, void *) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_info);
     if (world->shard_count != 0) {
@@ -291,6 +252,45 @@ static i32 Shards_Load(void *world_info, void *) {
     return 1;
 }
 
+static void Shards_StoreProgress(void *context, void *, void *data) {
+    if (data == NULL)
+        return;
+    SHARDPROGRESS_s *progress = static_cast<SHARDPROGRESS_s *>(data);
+    Shards_ClearProgress(NULL, progress);
+    WORLDINFO *world = static_cast<WORLDINFO *>(context);
+    if (world != NULL && world->shards != NULL) {
+        SHARD *shard = static_cast<SHARD *>(world->shards);
+        for (i32 i = 0; i < world->shard_count && i < 128; ++i, ++shard) {
+            i32 word = i >> 5;
+            u32 mask = 1u << (i & 31);
+            if (shard->state_flags & 8)
+                progress->collected[word] |= mask;
+            if (!(shard->state_flags & 2))
+                progress->visible[word] &= ~mask;
+            if (!(shard->state_flags & 1))
+                progress->active[word] &= ~mask;
+        }
+    }
+}
+
+SHARD *Shard_FindNearest(WORLDINFO_s *world, nuvec_s *position, GameObject_s *object, float *distance_squared) {
+    SHARD *nearest = NULL;
+    f32 best_distance = 1000000000.0f;
+    SHARD *shard = static_cast<SHARD *>(world->shards);
+    for (i32 i = 0; i < world->shard_count; ++i, ++shard) {
+        if (object != NULL && (shard->state_flags & 0x0f) != 3)
+            continue;
+        f32 distance = NuVecDistSqr(position, &shard->current_position, NULL);
+        if (distance < best_distance) {
+            best_distance = distance;
+            nearest = shard;
+        }
+    }
+    if (distance_squared != NULL)
+        *distance_squared = best_distance;
+    return nearest;
+}
+
 ADDGIZMOTYPE *Shards_RegisterGizmo(i32 type_id) {
     static ADDGIZMOTYPE addtype;
 
@@ -298,18 +298,12 @@ ADDGIZMOTYPE *Shards_RegisterGizmo(i32 type_id) {
     addtype.name = "Shard";
     addtype.prefix = "";
     addtype.fns.unknown1 = 0x30;
-    addtype.fns.early_update_fn = Shards_UpdateBeforeCharacters;
-    addtype.fns.panel_draw_fn = NULL;
-    addtype.fns.get_visibility_fn = NULL;
     addtype.fns.get_max_gizmos_fn = Shards_GetMaxGizmos;
-    addtype.fns.get_pos_fn = NULL;
-    addtype.fns.using_special_fn = NULL;
     addtype.fns.add_gizmos_fn = Shards_AddGizmos;
-    addtype.fns.bolt_hit_plat_fn = NULL;
-    addtype.fns.get_best_bolt_target_fn = NULL;
+    addtype.fns.early_update_fn = Shards_UpdateBeforeCharacters;
     addtype.fns.late_update_fn = Shards_UpdateAfterCharacters;
-    addtype.fns.bolt_hit_fn = NULL;
     addtype.fns.draw_fn = Shards_Draw;
+    addtype.fns.panel_draw_fn = NULL;
     addtype.fns.get_gizmo_name_fn = Shard_GetGizmoName;
     addtype.fns.get_output_fn = Shard_GetOutput;
     addtype.fns.get_output_name_fn = Shard_GetOutputName;
@@ -317,6 +311,12 @@ ADDGIZMOTYPE *Shards_RegisterGizmo(i32 type_id) {
     addtype.fns.activate_fn = Shard_Activate;
     addtype.fns.activate_rev_fn = NULL;
     addtype.fns.set_visibility_fn = Shard_SetVisibility;
+    addtype.fns.get_visibility_fn = NULL;
+    addtype.fns.get_pos_fn = NULL;
+    addtype.fns.using_special_fn = NULL;
+    addtype.fns.bolt_hit_plat_fn = NULL;
+    addtype.fns.get_best_bolt_target_fn = NULL;
+    addtype.fns.bolt_hit_fn = NULL;
     addtype.fns.allocate_progress_data_fn = Shards_AllocateProgressData;
     addtype.fns.clear_progress_fn = Shards_ClearProgress;
     addtype.fns.store_progress_fn = Shards_StoreProgress;

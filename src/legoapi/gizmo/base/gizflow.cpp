@@ -277,7 +277,7 @@ struct FLOWCONDITIONTYPE {
     char *name;
     nufpcomfn *load;
 };
-static FLOWCONDITIONTYPE ConditionTypes[] = {
+static const FLOWCONDITIONTYPE ConditionTypes[] = {
     {0, "All", NULL},  {1, "Any", NULL},           {2, "None", NULL}, {3, "Sum", loadSumBox},
     {4, "loop", NULL}, {5, "exactly", loadSumBox}, {-1, NULL, NULL},
 };
@@ -286,7 +286,7 @@ DECOMP_ASSERT(sizeof(FLOWCONDITIONTYPE) == 12, "Flow condition type ABI");
 static void xConditionType(nufpar_s *parser) {
     NuFParGetWord(parser);
     i32 index = 0;
-    FLOWCONDITIONTYPE *type = ConditionTypes;
+    const FLOWCONDITIONTYPE *type = ConditionTypes;
     while (load_conditiontype == -1) {
         if (NuStrICmp(type->name, parser->word_buf) == 0) {
             load_conditiontype = index;

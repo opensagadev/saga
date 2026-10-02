@@ -51,9 +51,8 @@ static i32 ZipUps_GetMaxGizmos(void *world_ptr) {
 static void ZipUps_AddGizmos(GIZMOSYS *gizmo_sys, i32 type_id, void *world_ptr, void *) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
     for (i32 index = 0; index < world->zipup_count; ++index) {
-        ZIPUP *zipup = &world->zipups[index];
-        if (NuStrLen(zipup->name) != 0) {
-            AddGizmo(gizmo_sys, type_id, NULL, zipup);
+        if (NuStrLen(world->zipups[index].name) != 0) {
+            AddGizmo(gizmo_sys, type_id, NULL, &world->zipups[index]);
         }
     }
 }
@@ -433,18 +432,12 @@ ADDGIZMOTYPE *ZipUps_RegisterGizmo(i32 type_id) {
     addtype.name = "ZipUp";
     addtype.prefix = "";
     addtype.fns.unknown1 = 8;
-    addtype.fns.early_update_fn = NULL;
-    addtype.fns.panel_draw_fn = NULL;
-    addtype.fns.get_visibility_fn = NULL;
     addtype.fns.get_max_gizmos_fn = ZipUps_GetMaxGizmos;
-    addtype.fns.get_pos_fn = NULL;
-    addtype.fns.using_special_fn = NULL;
     addtype.fns.add_gizmos_fn = ZipUps_AddGizmos;
-    addtype.fns.bolt_hit_plat_fn = NULL;
-    addtype.fns.get_best_bolt_target_fn = NULL;
+    addtype.fns.early_update_fn = NULL;
     addtype.fns.late_update_fn = ZipUps_Update;
-    addtype.fns.bolt_hit_fn = NULL;
     addtype.fns.draw_fn = ZipUps_Draw;
+    addtype.fns.panel_draw_fn = NULL;
     addtype.fns.get_gizmo_name_fn = ZipUp_GetGizmoName;
     addtype.fns.get_output_fn = ZipUp_GetOutput;
     addtype.fns.get_output_name_fn = ZipUp_GetOutputName;
@@ -452,6 +445,12 @@ ADDGIZMOTYPE *ZipUps_RegisterGizmo(i32 type_id) {
     addtype.fns.activate_fn = ZipUp_Activate;
     addtype.fns.activate_rev_fn = ZipUp_ActivateRev;
     addtype.fns.set_visibility_fn = ZipUp_SetVisibility;
+    addtype.fns.get_visibility_fn = NULL;
+    addtype.fns.get_pos_fn = NULL;
+    addtype.fns.using_special_fn = NULL;
+    addtype.fns.bolt_hit_plat_fn = NULL;
+    addtype.fns.get_best_bolt_target_fn = NULL;
+    addtype.fns.bolt_hit_fn = NULL;
     addtype.fns.allocate_progress_data_fn = ZipUps_AllocateProgressData;
     addtype.fns.clear_progress_fn = ZipUps_ClearProgress;
     addtype.fns.store_progress_fn = ZipUps_StoreProgress;

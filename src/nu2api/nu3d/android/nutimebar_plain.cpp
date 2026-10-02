@@ -44,7 +44,7 @@ static i32 NuTimeBar_PeakReset;
 static i32 NuTimeBar_GpuFrameOutEnabled;
 static i32 NuTimeBar_EngineEnabled;
 static i32 NuTimeBar_RenderPeakReset = 30;
-static const u32 NuTimeBar_DefaultColours[kMaxTimeBarSets] = {
+static u32 NuTimeBar_DefaultColours[kMaxTimeBarSets] = {
     0x00000040, 0x22222240, 0x00004440, 0x00008840, 0x44000040, 0x88000040, 0x44004440, 0x88008840,
     0x00440040, 0x00880040, 0x00444440, 0x00888840, 0x44440040, 0x88880040, 0x44444440, 0x88888840,
 };

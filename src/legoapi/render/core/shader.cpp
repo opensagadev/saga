@@ -7,7 +7,7 @@
 
 u32 g_cachedUniformMask[4];
 u32 g_textureSemanticMask[4];
-i32 g_shaderBufferCriticalSection;
+i32 g_shaderBufferCriticalSection = -1;
 
 ShaderManagerOpenGL::ShaderManagerOpenGL(VirtualStackAllocator &) {
     g_cachedUniformMask[0] = 0;

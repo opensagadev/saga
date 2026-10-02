@@ -25,7 +25,7 @@ static TRAFFICANIM_s reference_trafficanim;
 static TRAFFICANIM_s *parse_trafficanim;
 static TRAFFICANIMSYS_s *parse_trafficanimsys;
 static WORLDINFO_s *parse_worldinfo;
-i32 traffic_portalling;
+i32 traffic_portalling = 1;
 
 static void Traffic_tfactor(NUFPAR *parser) {
     reference_trafficanim.tfactor = NuFParGetFloat(parser);

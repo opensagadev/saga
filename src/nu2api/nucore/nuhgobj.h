@@ -151,7 +151,7 @@ extern "C" {
     void NuHGobjDestroy(nuhgobj_s *object);
     nuhgobjpoi_s *NuHGobjGetPOI(nuhgobj_s *object, i32 index);
     void NuHGobjPOILocalMtxFromIX(nuhgobj_s *object, u8 index, NUMTX *joint_matrices, NUMTX *result);
-    void NuHGobjPOIMtxFromIX(void);
+    void NuHGobjPOIMtxFromIX(nuhgobj_s *object, u8 index);
     void NuHGobjPOIMtx(nuhgobj_s *object, u8 index, NUMTX *world_matrix, NUMTX *joint_matrices, NUMTX *result);
     i32 NuHGobjRndr(nuhgobj_s *object, NUMTX *world_matrix, i32 render_count, i16 *render_indices);
     i32 NuHGobjGetLayerIndex(char *name, nuhgobj_s *object);

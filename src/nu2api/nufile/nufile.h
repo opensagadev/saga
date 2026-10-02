@@ -161,7 +161,7 @@ typedef struct nudatfileinfo_s {
     i32 file_len;
     i32 decompressed_len;
     i32 open_file_idx;
-    i32 is_used;
+    volatile i32 is_used; // volatile in the original (-O0 tests emit setcc/test)
     i32 compression_mode;
 } NUDATFILEINFO;
 
