@@ -48,6 +48,7 @@ deployed proxy or API.
 | `generate_objdiff_gui_config.py` | `bazel run //scripts:generate_objdiff_gui_config` | Generates the ignored root `objdiff.json` for the completely optional visual objdiff GUI, with one source/object unit per Bazel compile action. Builds the target and configures GUI rebuilds through Bazel; it is not part of reports, hooks, or CI. |
 | `plot_binary_match_map.py` | `bazel run //scripts:plot_binary_match_map` | Generates the homepage, progress explorer, and player from `matching.json` and the site templates. Standard library only. |
 | `objdiff-cli.py` | `bazel run //scripts:objdiff_cli -- SYMBOL` | Primary compact diff for one symbol. Calls external `objdiff-cli` and resolves the target-config library through Bazel. |
+| `resolved_match_report.py` | `bazel run //scripts:resolved_match_report` | Experimental: re-compares functions by what their PIC-relative operands refer to (symbol, GOT target, constant bytes, string, jump table) instead of raw displacements, and lists near-exact functions whose referenced data differs. Reads `matching.json`, both libraries and GNU `objdump`; writes nothing unless `--json` is given. See [03-matching.md](../doc/decomp/03-matching.md#resolved-comparison-experimental). |
 | `wasm_server.py` | `bazel run --config=wasm //scripts:wasm_server` | Serves only the generated static landing page, WASM build, and optional web-root OBB with local isolation headers. Standard library only. |
 
 ## Checks and launchers

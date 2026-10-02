@@ -86,3 +86,10 @@ py_binary(
     env = _PYTHON_ENV,
     main = "pre_commit.py",
 )
+
+py_binary(
+    name = "resolved_match_report",
+    srcs = ["resolved_match_report.py"],
+    env = _PYTHON_ENV,
+    main = "resolved_match_report.py",
+)
