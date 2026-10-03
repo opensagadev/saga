@@ -663,7 +663,9 @@ void NuSound3Update(void) {
 
     // The listener focus follows the player (NULL on the title screen).
     if (player != NULL) {
-        g_NuSoundFocusPosition = player->apiobj.position;
+        g_NuSoundFocusPosition.x = player->apiobj.position.x;
+        g_NuSoundFocusPosition.y = player->apiobj.position.y;
+        g_NuSoundFocusPosition.z = player->apiobj.position.z;
         g_NuSoundListener.SetFocusPosition((const VuVec *)&g_NuSoundFocusPosition);
         g_NuSoundListener.EnableFocusPosition();
     } else {

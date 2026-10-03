@@ -1658,6 +1658,7 @@ void DrawSubItems() {
             return;
     }
     const f32 item_scale = picked == 1 ? 0.28f : (picked == 4 ? 0.8f : base_scale);
+    const f32 normal_push = SubNormCharPush;
     MENU *menu = &GameMenu[GameMenuLevel];
     for (i32 index = 0; index < 7; ++index) {
         i32 slot = index;
@@ -1673,7 +1674,7 @@ void DrawSubItems() {
         shopitem_s *item = &items[item_id];
         NUVEC position = positions[slot];
         f32 scale = item_scale * inoutscale;
-        f32 ypush = SubNormCharPush;
+        f32 ypush = normal_push;
         u16 rotation = 0;
         if (slot == 0 || (slot == 1 && moveitems > 0)) {
             scale = item_scale * inoutscale * scaleoverride[0];

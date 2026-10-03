@@ -220,7 +220,7 @@ i32 ThermalDetonator_MoveCode(GameObject_s *object) {
 
         PART_s *part = FindPart(NULL, 0, object);
         if (part != NULL) {
-            if ((part->active & 2) != 0 && !(part->elapsed > 1.0f)) {
+            if ((part->active & 2) != 0 && !(part->field_100 > 1.0f)) {
                 return 0;
             }
             KillPart(part, 0);

@@ -308,9 +308,10 @@ void FindForcePushTarget(GameObject_s *object, i32 activate, i32 target_filter) 
             choke_style = second_style == 0;
         }
 
+        i32 object_count = HIGHGAMEOBJECT;
         f32 best_distance = 1.5625f;
         GameObject_s *candidate = Obj;
-        for (i32 index = 0; index < HIGHGAMEOBJECT; ++index, ++candidate) {
+        for (i32 index = 0; index < object_count; ++index, ++candidate) {
             if (candidate == object || (candidate->apiobj.field_0x1f8 & 0x1001) != 0x1001 ||
                 candidate->apiobj.field_0x287 != 0 || candidate->apiobj.model_draw_result == 0 ||
                 candidate->character_context == 0x3c || candidate->character_context == 0x39 ||
@@ -320,61 +321,74 @@ void FindForcePushTarget(GameObject_s *object, i32 activate, i32 target_filter) 
                 (candidate->apiobj.character_data->game_character->flags_090 & 0x8000) != 0 ||
                 (CInfo[candidate->character_context].flags & 0x8000) != 0 ||
                 (candidate->apiobj.character_data->game_character->flags_094[1] & 2) != 0 ||
-                (candidate->field_0xefc_word & 0x400010) != 0 || !TouchHacks::CanForceTargetObj(*object, *candidate)) {
+                (candidate->field_0xefc_word & 0x400010) != 0) {
                 continue;
             }
 
-            const bool candidate_is_player = candidate->apiobj.field_0x27c != -1;
-            if (!(WORLD->area != NULL && WORLD->area == EMPERORFIGHT_ADATA &&
-                  ((candidate->field_0xefb & 8) != 0 || candidate_is_player))) {
-                if (candidate->id == id_BODYGUARD) {
-                    continue;
+            {
+                if (!TouchHacks::CanForceTargetObj(*object, *candidate)) {
+                    goto reload_object_count;
                 }
 
-                if (target_filter == 1) {
-                    if (candidate_is_player) {
+                const bool candidate_is_player = candidate->apiobj.field_0x27c != -1;
+                if (!(WORLD->area != NULL && WORLD->area == EMPERORFIGHT_ADATA &&
+                      ((candidate->field_0xefb & 8) != 0 || candidate_is_player))) {
+                    if (candidate->id == id_BODYGUARD) {
+                        goto reload_object_count;
+                    }
+
+                    if (target_filter == 1) {
+                        if (candidate_is_player) {
+                            goto reload_object_count;
+                        }
+                        if ((candidate->apiobj.field_0x1f4 & 5) != 0) {
+                            const u8 source_index = object->apiobj.field_0x289;
+                            const u8 target_index = candidate->apiobj.field_0x289;
+                            const u32 hostility =
+                                WORLD->api_object_sys->hostility_masks[source_index][target_index >> 5];
+                            if ((hostility & (1u << (target_index & 31))) == 0) {
+                                goto reload_object_count;
+                            }
+                        }
+                    } else if (target_filter == 2 && !candidate_is_player) {
+                        goto reload_object_count;
+                    }
+                    if ((candidate->field_0xefb & 8) != 0) {
+                        goto reload_object_count;
+                    }
+
+                    i32 candidate_choke;
+                    i32 candidate_second;
+                    i32 candidate_direct;
+                    if (!target_animation_style(candidate, choke_style, second_style, super_weirdo, &candidate_choke,
+                                                &candidate_second, &candidate_direct)) {
+                        goto reload_object_count;
+                    }
+
+                    NUVEC delta;
+                    f32 distance =
+                        NuVecDistSqr(&object->apiobj.collision_position, &candidate->apiobj.collision_position, &delta);
+                    if (candidate->id == id_ATST) {
+                        distance *= 1.0f / 3.0f;
+                    }
+                    if (!(distance < best_distance)) {
+                        goto reload_object_count;
+                    }
+                    object_count = HIGHGAMEOBJECT;
+                    if (!(delta.x * object->facing_direction.x + delta.z * object->facing_direction.z < 0.0f)) {
                         continue;
                     }
-                    if ((candidate->apiobj.field_0x1f4 & 5) != 0) {
-                        const u8 source_index = object->apiobj.field_0x289;
-                        const u8 target_index = candidate->apiobj.field_0x289;
-                        const u32 hostility = WORLD->api_object_sys->hostility_masks[source_index][target_index >> 5];
-                        if ((hostility & (1u << (target_index & 31))) == 0) {
-                            continue;
-                        }
-                    }
-                } else if (target_filter == 2 && !candidate_is_player) {
-                    continue;
-                }
-                if ((candidate->field_0xefb & 8) != 0) {
-                    continue;
-                }
 
-                i32 candidate_choke;
-                i32 candidate_second;
-                i32 candidate_direct;
-                if (!target_animation_style(candidate, choke_style, second_style, super_weirdo, &candidate_choke,
-                                            &candidate_second, &candidate_direct)) {
+                    best = candidate;
+                    best_distance = distance;
+                    selected_choke = candidate_choke;
+                    selected_second = candidate_second;
+                    selected_direct = candidate_direct;
                     continue;
                 }
-
-                NUVEC delta;
-                f32 distance =
-                    NuVecDistSqr(&object->apiobj.collision_position, &candidate->apiobj.collision_position, &delta);
-                if (candidate->id == id_ATST) {
-                    distance *= 1.0f / 3.0f;
-                }
-                if (!(distance < best_distance) ||
-                    !(delta.x * object->facing_direction.x + delta.z * object->facing_direction.z < 0.0f)) {
-                    continue;
-                }
-
-                best = candidate;
-                best_distance = distance;
-                selected_choke = candidate_choke;
-                selected_second = candidate_second;
-                selected_direct = candidate_direct;
             }
+        reload_object_count:
+            object_count = HIGHGAMEOBJECT;
         }
     }
     if (best == NULL || best->character_context == 0x0f) {
