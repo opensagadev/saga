@@ -109,6 +109,9 @@ static void UpdateCustomPieceAnim(CUSTOMPIECEANIM *anim, u16 minimum, u16 maximu
     }
 }
 
+// Animations the customiser cycles through on the game's character preview, terminated by -1.
+i16 CustomiserActionList_Game[] = {97, 190, 98, 99, -1};
+
 struct CUSTOMISER_GAMESETTING {
     char *name;
     u32 model_flags;

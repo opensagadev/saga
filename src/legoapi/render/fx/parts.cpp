@@ -31,6 +31,7 @@
 #include "legoapi/core/config/cheat.h"
 #include "legoapi/characters/motion/gameanim.h"
 #include "nu2api/nu3d/nuportal.h"
+#include "nu2api/numath/numtx_inline.h"
 #include "nu2api/nu3d/android/nuptl_android.h"
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/motion.h"
@@ -1374,10 +1375,10 @@ extern "C" {
 
     void AddVariableShotDebrisEffectMtx(i32 effect, NUVEC *position, i32 count, i16 z_rotation, i16 y_rotation,
                                         NUMTX *particle_orientation) {
-        NUMTX orientation;
+        NUMTX_ALIGNED16 orientation;
         NuMtxSetIdentity(&orientation);
-        NuMtxRotateZ(&orientation, z_rotation);
-        NuMtxRotateY(&orientation, y_rotation);
+        NuMtxRotateZInline(&orientation, z_rotation);
+        NuMtxRotateYInline(&orientation, y_rotation);
         AddVariableShotDebrisEffectMtx3(effect, position, &nuvec_zero, count, &orientation, particle_orientation);
     }
 
@@ -1412,10 +1413,10 @@ extern "C" {
 
     void AddVariableShotDebrisEffectTimed1(i32 effect, NUVEC *position, i32 count, f32 time, i16 z_rotation,
                                            i16 y_rotation, NUMTX *particle_orientation) {
-        NUMTX orientation;
+        NUMTX_ALIGNED16 orientation;
         NuMtxSetIdentity(&orientation);
-        NuMtxRotateZ(&orientation, z_rotation);
-        NuMtxRotateY(&orientation, y_rotation);
+        NuMtxRotateZInline(&orientation, z_rotation);
+        NuMtxRotateYInline(&orientation, y_rotation);
         AddVariableShotDebrisEffectTimed3(effect, position, &nuvec_zero, count, time, &orientation,
                                           particle_orientation);
     }
@@ -3104,6 +3105,17 @@ void AddCoinsAsParts(i32 type_id, nuvec_s *position, nuvec_s *velocity, float li
     }
 }
 
+// The original repeats the per-sound emitter checks for each of the four sound slots.
+#define PART_EMIT_SOUND_ON(slot)                                                                                       \
+    if (type->sounds[slot] != -1) {                                                                                    \
+        SetSfxBit_On(type->sounds[slot]);                                                                              \
+        if (type->sound_modes[slot] == 4)                                                                              \
+            PlaySfxById(type->sounds[slot], &emitter->position);                                                       \
+    }
+#define PART_EMIT_SOUND(slot, mode)                                                                                    \
+    if (type->sounds[slot] != -1 && type->sound_modes[slot] == (mode))                                                 \
+        PlaySfxById(type->sounds[slot], &emitter->position);
+
 void UpdatePartEmits(f32 time) {
     i32 switch_changes[32][2];
     i32 last_switch_change = -1;
@@ -3147,13 +3159,10 @@ void UpdatePartEmits(f32 time) {
         f32 previous_distance = emitter->camera_distance;
         emitter->camera_distance = CameraEmitterDistance(&emitter->position);
         if (emitter->field_3c != 0) {
-            for (i32 sound = 0; sound < 4; ++sound) {
-                if (type->sounds[sound] != -1) {
-                    SetSfxBit_On(type->sounds[sound]);
-                    if (type->sound_modes[sound] == 4)
-                        PlaySfxById(type->sounds[sound], &emitter->position);
-                }
-            }
+            PART_EMIT_SOUND_ON(0);
+            PART_EMIT_SOUND_ON(1);
+            PART_EMIT_SOUND_ON(2);
+            PART_EMIT_SOUND_ON(3);
         }
         if ((type->flags & 0x400000) != 0) {
             if (type->maximum_distance > emitter->camera_distance && previous_distance >= type->maximum_distance) {
@@ -3175,10 +3184,10 @@ void UpdatePartEmits(f32 time) {
                     f32 end = emitter->time_24 + type->emission_period;
                     emitter->time_28 = end + NuRandFloatSeeded(&partseed) * type->emission_period_random;
                     if (emitter->field_3c != 0 && emitter->field_3d != 0) {
-                        for (i32 sound = 0; sound < 4; ++sound) {
-                            if (type->sounds[sound] != -1 && type->sound_modes[sound] == 1)
-                                PlaySfxById(type->sounds[sound], &emitter->position);
-                        }
+                        PART_EMIT_SOUND(0, 1);
+                        PART_EMIT_SOUND(1, 1);
+                        PART_EMIT_SOUND(2, 1);
+                        PART_EMIT_SOUND(3, 1);
                     }
                     if (emitter->shots_remaining != 0 && --emitter->shots_remaining == 0) {
                         RemovePARTEffect(i);
@@ -3193,10 +3202,10 @@ void UpdatePartEmits(f32 time) {
                     if (emitter->field_3d == 2)
                         emitter->field_3d = 0;
                     if (emitter->field_3c != 0 && emitter->field_3d != 0) {
-                        for (i32 sound = 0; sound < 4; ++sound) {
-                            if (type->sounds[sound] != -1 && type->sound_modes[sound] == 2)
-                                PlaySfxById(type->sounds[sound], &emitter->position);
-                        }
+                        PART_EMIT_SOUND(0, 2);
+                        PART_EMIT_SOUND(1, 2);
+                        PART_EMIT_SOUND(2, 2);
+                        PART_EMIT_SOUND(3, 2);
                     }
                 }
             }
@@ -3303,10 +3312,10 @@ void UpdatePartEmits(f32 time) {
                 params.field_78 = type->kill_effect;
                 AddPart(&params);
                 if (emitter->field_3c != 0) {
-                    for (i32 sound = 0; sound < 4; ++sound) {
-                        if (type->sounds[sound] != -1 && type->sound_modes[sound] == 3)
-                            PlaySfxById(type->sounds[sound], &emitter->position);
-                    }
+                    PART_EMIT_SOUND(0, 3);
+                    PART_EMIT_SOUND(1, 3);
+                    PART_EMIT_SOUND(2, 3);
+                    PART_EMIT_SOUND(3, 3);
                 }
                 type->last_used_time = emission_time;
             }
@@ -3317,6 +3326,8 @@ void UpdatePartEmits(f32 time) {
     for (i32 i = 0; i <= last_switch_change; ++i)
         object_switches[switch_changes[i][0]] = switch_changes[i][1];
 }
+#undef PART_EMIT_SOUND_ON
+#undef PART_EMIT_SOUND
 
 i32 LineIntersectSphere(NUVEC *, NUVEC *, NUVEC *, f32, f32 *);
 

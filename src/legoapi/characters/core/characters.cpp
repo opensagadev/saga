@@ -64,6 +64,10 @@
 #include <stdio.h>
 #include <math.h>
 #include "legoapi/menus/core/text.h"
+#include "legoapi/actions/character/specialmoves.h"
+#include "legoapi/audio/audio.h"
+#include "legoapi/characters/core/customiser.h"
+#include "nu2api/numusic/numusic.h"
 #include "nu2api/numath/nutrig.h"
 
 static CHARSCENE_s *CharScene_Area;
@@ -1977,6 +1981,7 @@ void LoadPerm1() {
 }
 
 void LoadPerm2() {
+    extern i16 CustomiserActionList_Game[];
     extern i16 tALL;
     extern i16 tJEDI;
     extern i16 tBLASTER;
@@ -2003,4 +2008,23 @@ void LoadPerm2() {
     Collection_CreateCustom(const_cast<char *>("BountyHunters"), &tBOUNTYHUNTERCHARACTERS, &BountyHunterCollection,
                             0x01000000, 0, 0, 0, 4, &permbuffer_ptr, &permbuffer_end, 0, COLLECTION_DEFAULTSCALE);
     Areas_ConfigureResidents(&permbuffer_ptr, &permbuffer_end);
+    CharacterCustomiser =
+        Customiser_Configure(const_cast<char *>("chars\\customiser.txt"), &permbuffer_ptr, &permbuffer_end, id_WEIRDO1,
+                             id_WEIRDO2, Customiser_PieceAvailable, Customiser_PieceConfig,
+                             LevelObject_FindIndexFromName, &Game.customizer, CustomiserActionList_Game);
+    SpecialMoves_Configure(const_cast<char *>("chars\\specialmoves.txt"), &permbuffer_ptr, &permbuffer_end);
+
+    // Every status-screen level plays the status screen music in all three track slots.
+    for (i32 i = 0; i < LEVELCOUNT; ++i) {
+        if ((LDataList[i].flags & LEVEL_STATUS) != 0) {
+            LDataList[i].music_index = GetMusicIndex(const_cast<char *>("statusscreen"), MusicInfo, -1);
+            LDataList[i].music_tracks[0][0] = LDataList[i].music_tracks[0][1] =
+                music_man.GetTrackHandle(TRACK_CLASS_QUIET, "statusscreen");
+            LDataList[i].music_tracks[1][0] = LDataList[i].music_tracks[1][1] =
+                music_man.GetTrackHandle(TRACK_CLASS_ACTION, "statusscreen");
+            LDataList[i].music_tracks[2][0] = LDataList[i].music_tracks[2][1] =
+                music_man.GetTrackHandle(TRACK_CLASS_NOMUSIC, "statusscreen");
+        }
+    }
+    Store_RestorePurchases();
 }

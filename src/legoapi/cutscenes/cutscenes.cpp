@@ -792,6 +792,8 @@ extern CHARACTERMODEL_s *dco_cmodel;
 
 static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTSCENE_s *cutscene,
                                    instNUGCUTCHAR_s *instance, NUGCUTCHAR_s *character, f32 frame, i32 paused) {
+    i32 visible;
+    i32 layer_mask = -1;
     WORLDINFO_s *world = WorldInfo_CurrentlyActive();
     CUTSYS *cutscene_system = world->cutscene_sys;
     if (cutscene_system == NULL) {
@@ -799,11 +801,10 @@ static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTS
     }
 
     CUTINFO *cut = NULL;
-    for (i32 i = 0; i < cutscene_system->count; ++i) {
-        CUTINFO *candidate = cutscene_system->cuts[i];
-        if (candidate->instance == cutscene_instance) {
-            cut = candidate;
-            break;
+    i32 i;
+    for (i = 0; i < cutscene_system->count && cut == NULL; i++) {
+        if (cutscene_system->cuts[i]->instance == cutscene_instance) {
+            cut = cutscene_system->cuts[i];
         }
     }
 
@@ -816,11 +817,11 @@ static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTS
         }
     }
     if (model == NULL) {
-        if ((character->flags & 2) == 0) {
+        if ((character->flags & 2) != 0) {
+            model = static_cast<CHARACTERMODEL_s *>(instance->character_model);
+        } else {
             scene_object = static_cast<GameObject_s *>(instance->character_model);
             model = scene_object->apiobj.character_model;
-        } else {
-            model = static_cast<CHARACTERMODEL_s *>(instance->character_model);
         }
     }
     if (model->hierarchy == NULL) {
@@ -831,22 +832,27 @@ static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTS
     CHARACTERDATA *character_data = &apicharsys->char_data[character_id];
     GAMECHARACTERDATA *game_data = static_cast<GAMECHARACTERDATA *>(character_data->field11_0x24);
     NUMTX world_matrix;
-    i32 visible;
     u32 animation_index;
     f32 animation_rate;
     f32 blend_time;
     f32 animation_start_frame;
-    i32 layer_mask = -1;
-    NuGCutCharAnimProcess(character, frame, &world_matrix, &visible, &animation_index, &animation_rate, &blend_time,
-                          &animation_start_frame, &layer_mask);
-    bool use_low_detail = false;
+    i32 use_low_detail;
     if (cut != NULL) {
-        use_low_detail = (cut->flags & 0x10000) != 0 && g_isLowEndDevice != 0;
+        use_low_detail = 0;
+        if ((cut->flags & 0x10000) != 0) {
+            use_low_detail = g_isLowEndDevice != 0;
+        }
+        NuGCutCharAnimProcess(character, frame, &world_matrix, &visible, &animation_index, &animation_rate, &blend_time,
+                              &animation_start_frame, &layer_mask);
         if (cut->low_end_distance > 0.0f && g_isLowEndDevice != 0 &&
             NuVecDistSqr(reinterpret_cast<NUVEC *>(&world_matrix.m30), reinterpret_cast<NUVEC *>(&pNuCam->mtx.m30),
                          NULL) > cut->low_end_distance * cut->low_end_distance) {
             return;
         }
+    } else {
+        NuGCutCharAnimProcess(character, frame, &world_matrix, &visible, &animation_index, &animation_rate, &blend_time,
+                              &animation_start_frame, &layer_mask);
+        use_low_detail = 0;
     }
     if (paused != 0) {
         animation_rate = 0.0f;
@@ -891,84 +897,69 @@ static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTS
     }
 
     if (instance->field_15 != animation_index) {
-        const u8 requested_animation = static_cast<u8>(animation_index);
-        if (!(blend_time > 0.0f) || instance->field_15 == 0xff) {
-            instance->field_16 = requested_animation;
-            instance->animation_frame_a = !(animation_start_frame > 1.0f) ? 1.0f : animation_start_frame;
-        } else {
-            if ((instance->field_14 & 1) == 0) {
-                if (instance->field_15 == 0) {
-                    instance->animation_frame_a = frame;
-                    instance->field_16 = requested_animation;
-                } else {
-                    instance->field_16 = instance->field_15;
-                    animation_index = instance->field_15;
-                }
-            } else {
+        if (blend_time > 0.0f && instance->field_15 != 0xff) {
+            u32 current_index;
+            if ((instance->field_14 & 1) != 0) {
+                current_index = instance->field_17;
                 instance->field_16 = instance->field_17;
                 instance->animation_frame_a = instance->animation_frame_b;
-                animation_index = instance->field_17;
+            } else if (instance->field_15 != 0) {
+                current_index = instance->field_15;
+                instance->field_16 = instance->field_15;
+            } else {
+                instance->animation_frame_a = frame;
+                instance->field_16 = animation_index;
+                current_index = animation_index;
             }
-            if (!(animation_start_frame > 1.0f)) {
-                animation_start_frame = 1.0f;
-            }
-            instance->field_17 = requested_animation;
-            instance->animation_frame_b = animation_start_frame;
-            if (requested_animation != static_cast<u8>(animation_index)) {
+            instance->field_17 = animation_index;
+            instance->animation_frame_b = animation_start_frame > 1.0f ? animation_start_frame : 1.0f;
+            if (static_cast<u8>(animation_index) != static_cast<u8>(current_index)) {
                 instance->blend_progress = 0;
                 instance->field_14 |= 1;
             }
+            instance->field_15 = animation_index;
+        } else {
+            instance->field_16 = animation_index;
+            if (animation_start_frame > 1.0f) {
+                instance->animation_frame_a = animation_start_frame;
+            } else {
+                instance->animation_frame_a = 1.0f;
+            }
+            instance->field_15 = animation_index;
         }
-        instance->field_15 = requested_animation;
     }
 
-    bool blending = (instance->field_14 & 1) != 0;
-    u32 animation_a_index = instance->field_16;
-    if (blending) {
-        if (blend_time <= 0.0f) {
+    if ((instance->field_14 & 1) != 0) {
+        if (blend_time > 0.0f) {
+            instance->blend_progress += (1.0f / blend_time) * (60.0f * FRAMETIME);
+            if (instance->blend_progress >= 1.0f) {
+                goto finish_blend;
+            }
+        } else {
+        finish_blend:
             instance->blend_progress = 0;
-            animation_a_index = instance->field_17;
             instance->field_14 ^= 1;
             instance->field_16 = instance->field_17;
             instance->animation_frame_a = instance->animation_frame_b;
-            blending = false;
-        } else {
-            instance->blend_progress += (1.0f / blend_time) * (FRAMETIME * 60.0f);
-            if (instance->blend_progress >= 1.0f) {
-                instance->blend_progress = 0;
-                animation_a_index = instance->field_17;
-                instance->field_14 ^= 1;
-                instance->field_16 = instance->field_17;
-                instance->animation_frame_a = instance->animation_frame_b;
-                blending = false;
-            }
         }
     }
+    const i32 blending = instance->field_14 & 1;
 
     ani3_animheader_s *animation_a;
     nuanimdata2_s *dwa_animation_a;
-    if (animation_a_index == 0) {
+    if (instance->field_16 == 0) {
         instance->animation_frame_a = frame;
         animation_a = reinterpret_cast<ani3_animheader_s *>(character->face_animation);
         dwa_animation_a = character->extra_animation;
     } else {
-        animation_a = static_cast<ani3_animheader_s *>(model->model_data_b[animation_a_index - 1]);
-        dwa_animation_a = static_cast<nuanimdata2_s *>(model->model_data_c[animation_a_index - 1]);
+        animation_a = static_cast<ani3_animheader_s *>(model->model_data_b[instance->field_16 - 1]);
+        dwa_animation_a = static_cast<nuanimdata2_s *>(model->model_data_c[instance->field_16 - 1]);
     }
 
     // The original draw callback uses a 32-byte aligned stack frame.
     NUMTX joint_matrices[256] __attribute__((aligned(32)));
-    void **dwa = NULL;
-    if (!blending) {
-        if (animation_a == NULL) {
-            NuHGobjEval(model->hierarchy, 0, NULL, joint_matrices);
-        } else {
-            NuHGobjEvalAnim2(model->hierarchy, animation_a, instance->animation_frame_a, 0, NULL, joint_matrices);
-        }
-        if (dwa_animation_a != NULL) {
-            dwa = NuHGobjEvalDwa2(render_count, render_indices, dwa_animation_a, instance->animation_frame_a);
-        }
-    } else {
+    void **dwa;
+    if (blending) {
         ani3_animheader_s *animation_b;
         nuanimdata2_s *dwa_animation_b;
         if (instance->field_17 == 0) {
@@ -990,6 +981,7 @@ static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTS
             NuHGobjEval(model->hierarchy, 0, NULL, joint_matrices);
         }
 
+        dwa = NULL;
         if (dwa_animation_a != NULL && dwa_animation_b != NULL) {
             dwa = NuHGobjEvalDwaBlend2(render_count, render_indices, dwa_animation_a, instance->animation_frame_a,
                                        dwa_animation_b, instance->animation_frame_b, instance->blend_progress);
@@ -997,17 +989,27 @@ static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTS
 
         if (animation_b != NULL && instance->field_17 != 0xff && instance->field_17 != 0 &&
             (cut == NULL || cut != CutStopInfo || CutSceneWaiting == 0)) {
-            const f32 end_frame = AnimEndFrame(model, static_cast<u8>(instance->field_17) - 1);
-            instance->animation_frame_b += FRAMETIME * 60.0f * animation_rate;
+            const i32 animation = instance->field_17 - 1;
+            const f32 end_frame = AnimEndFrame(model, animation);
+            instance->animation_frame_b += 60.0f * FRAMETIME * animation_rate;
             if (instance->animation_frame_b > end_frame) {
-                CHARACTERANIM_s *animation_info =
-                    static_cast<CHARACTERANIM_s *>(model->model_data_a[static_cast<u8>(instance->field_17) - 1]);
-                if ((animation_info->flags & 2) == 0) {
-                    instance->animation_frame_b = end_frame;
+                CHARACTERANIM_s *animation_info = static_cast<CHARACTERANIM_s *>(model->model_data_a[animation]);
+                if ((animation_info->flags & 2) != 0) {
+                    instance->animation_frame_b = (instance->animation_frame_b - end_frame) + 1.0f;
                 } else {
-                    instance->animation_frame_b = instance->animation_frame_b - end_frame + 1.0f;
+                    instance->animation_frame_b = end_frame;
                 }
             }
+        }
+    } else {
+        if (animation_a == NULL) {
+            NuHGobjEval(model->hierarchy, 0, NULL, joint_matrices);
+        } else {
+            NuHGobjEvalAnim2(model->hierarchy, animation_a, instance->animation_frame_a, 0, NULL, joint_matrices);
+        }
+        dwa = NULL;
+        if (dwa_animation_a != NULL) {
+            dwa = NuHGobjEvalDwa2(render_count, render_indices, dwa_animation_a, instance->animation_frame_a);
         }
     }
 
@@ -1015,26 +1017,26 @@ static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTS
     NUMTX locator_matrices[16];
     StoreLocatorCoordinates(model, &world_matrix, joint_matrices, locator_positions, locator_matrices);
 
-    if (animation_a != NULL && animation_a_index != 0 && animation_a_index != 0xff &&
+    if (animation_a != NULL && instance->field_16 != 0xff && instance->field_16 != 0 &&
         (cut == NULL || cut != CutStopInfo || CutSceneWaiting == 0)) {
-        const f32 end_frame = AnimEndFrame(model, animation_a_index - 1);
-        instance->animation_frame_a += FRAMETIME * 60.0f * animation_rate;
+        const i32 animation = instance->field_16 - 1;
+        const f32 end_frame = AnimEndFrame(model, animation);
+        instance->animation_frame_a += 60.0f * FRAMETIME * animation_rate;
         if (instance->animation_frame_a > end_frame) {
-            CHARACTERANIM_s *animation_info =
-                static_cast<CHARACTERANIM_s *>(model->model_data_a[animation_a_index - 1]);
-            if ((animation_info->flags & 2) == 0) {
-                instance->animation_frame_a = end_frame;
+            CHARACTERANIM_s *animation_info = static_cast<CHARACTERANIM_s *>(model->model_data_a[animation]);
+            if ((animation_info->flags & 2) != 0) {
+                instance->animation_frame_a = (instance->animation_frame_a - end_frame) + 1.0f;
             } else {
-                instance->animation_frame_a = instance->animation_frame_a - end_frame + 1.0f;
+                instance->animation_frame_a = end_frame;
             }
         }
     }
 
     EnableShadowMapRendering(0);
-    if (Cheats_CheckFlags(1) == 0) {
-        FindAndSetLights(reinterpret_cast<NUVEC *>(&world_matrix.m30), 1.0f, world->rtl_set);
-    } else {
+    if (Cheats_CheckFlags(1) != 0) {
         SetZeroLights();
+    } else {
+        FindAndSetLights(reinterpret_cast<NUVEC *>(&world_matrix.m30), 1.0f, world->rtl_set);
     }
 
     u8 render_character = 1;
@@ -1054,8 +1056,12 @@ static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTS
     if ((character_data->flags & 1) != 0) {
         attachment_matrix = &world_matrix;
         i32 locator = game_data->thingy_locator;
-        if (locator != -1 && model->points_of_interest[locator] != NULL) {
-            attachment_matrix = &locator_matrices[locator];
+        if (locator != -1) {
+            if (model->points_of_interest[locator] != NULL) {
+                attachment_matrix = &locator_matrices[locator];
+            } else {
+                attachment_matrix = &world_matrix;
+            }
         }
         CharScene_Draw(world, character_id, attachment_matrix, NULL);
     }
@@ -1067,13 +1073,41 @@ static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTS
     bool shadow_sampled = false;
     if ((character->flags & 0x10) != 0 && CutBlobShadowAlpha != 0 && (character_data->model_flags & 0x10000) == 0 &&
         g_isLowEndDevice == 0) {
-        u8 shadow_alpha = CutBlobShadowAlpha;
-        if (game_data->field_0xf6 != 0xff) {
-            shadow_alpha = game_data->field_0xf6;
+        i32 shadow_alpha = CutBlobShadowAlpha;
+        if (static_cast<u8>(game_data->field_0xf6) != 0xff) {
+            shadow_alpha = static_cast<u8>(game_data->field_0xf6);
         }
-        if (shadow_alpha != 0) {
-            f32 shadow_radius = game_data->field_0x8c;
-            if (game_data->shadow_locators == 0) {
+        if (shadow_alpha > 0) {
+            if (game_data->shadow_locators != 0) {
+                f32 shadow_radius = game_data->field_0x8c;
+                if (!(shadow_radius < 99.0f)) {
+                    shadow_radius = character_data->collision_radius * character_data->model_scale;
+                }
+                if (shadow_radius > 0.0f) {
+                    f32 alpha = BlobShadowFade(reinterpret_cast<NUVEC *>(&world_matrix.m30), CutBlobShadowFadeNear,
+                                               CutBlobShadowFadeFar, 1.0f);
+                    if (alpha > 0.0f) {
+                        for (i = 0; i < 16; i++) {
+                            if ((game_data->shadow_locators & (1 << i)) != 0 && model->points_of_interest[i] != NULL) {
+                                NUVEC shadow_position;
+                                shadow_position.x = locator_positions[i].x;
+                                shadow_position.y = GameShadow(NULL, &locator_positions[i], 5.0f, -1);
+                                shadow_position.z = locator_positions[i].z;
+                                if (shadow_position.y != 2000000.0f && ShadNorm.y > 0.0f) {
+                                    shadow_position.y += 0.005f;
+                                    u16 x_rotation;
+                                    u16 z_rotation;
+                                    FindAnglesZX(&ShadNorm, &x_rotation, &z_rotation);
+                                    NuRndrAddShadow(&shadow_position, shadow_radius,
+                                                    static_cast<i32>(alpha * shadow_alpha * ShadNorm.y), x_rotation, 0,
+                                                    z_rotation);
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                f32 shadow_radius = game_data->field_0x8c;
                 if (!(shadow_radius < 99.0f)) {
                     shadow_radius = character_data->collision_radius * character_data->model_scale * 2.0f;
                 }
@@ -1083,8 +1117,10 @@ static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTS
                         platform = NewShadowOnPlatform();
                         surface = ShadowInfo();
                         if (ShadNorm.y > 0.0f) {
-                            NUVEC shadow_position = *reinterpret_cast<NUVEC *>(&world_matrix.m30);
+                            NUVEC shadow_position;
+                            shadow_position.x = world_matrix.m30;
                             shadow_position.y = ground_height + 0.005f;
+                            shadow_position.z = world_matrix.m32;
                             f32 alpha = BlobShadowFade(&shadow_position, CutBlobShadowFadeNear, CutBlobShadowFadeFar,
                                                        ShadNorm.y);
                             if (alpha > 0.0f) {
@@ -1092,42 +1128,13 @@ static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTS
                                 u16 z_rotation;
                                 FindAnglesZX(&ShadNorm, &x_rotation, &z_rotation);
                                 NuRndrAddShadow(&shadow_position, shadow_radius,
-                                                static_cast<i32>(static_cast<f32>(shadow_alpha) * alpha * ShadNorm.y),
-                                                x_rotation, 0, z_rotation);
+                                                static_cast<i32>(shadow_alpha * alpha * ShadNorm.y), x_rotation, 0,
+                                                z_rotation);
                             }
                         }
                     }
                     shadow_sampled = true;
                 }
-            } else {
-                if (!(shadow_radius < 99.0f)) {
-                    shadow_radius = character_data->collision_radius * character_data->model_scale;
-                }
-                if (shadow_radius > 0.0f) {
-                    f32 alpha = BlobShadowFade(reinterpret_cast<NUVEC *>(&world_matrix.m30), CutBlobShadowFadeNear,
-                                               CutBlobShadowFadeFar, 1.0f);
-                    if (alpha > 0.0f) {
-                        for (i32 i = 0; i < 16; ++i) {
-                            if ((game_data->shadow_locators & (1 << i)) != 0 && model->points_of_interest[i] != NULL) {
-                                NUVEC shadow_position = locator_positions[i];
-                                f32 locator_ground = GameShadow(NULL, &shadow_position, 5.0f, -1);
-                                if (locator_ground != 2000000.0f && ShadNorm.y > 0.0f) {
-                                    shadow_position.y = locator_ground + 0.005f;
-                                    u16 x_rotation;
-                                    u16 z_rotation;
-                                    FindAnglesZX(&ShadNorm, &x_rotation, &z_rotation);
-                                    NuRndrAddShadow(
-                                        &shadow_position, shadow_radius,
-                                        static_cast<i32>(alpha * static_cast<f32>(shadow_alpha) * ShadNorm.y),
-                                        x_rotation, 0, z_rotation);
-                                }
-                            }
-                        }
-                    }
-                }
-                ground_height = 2000000.0f;
-                platform = -1;
-                shadow_sampled = false;
             }
         }
     }
@@ -1181,21 +1188,19 @@ static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTS
     }
 
     if (character->locator_index != 0xff) {
+        instNUGCUTLOCATORSYS_s *locator_instance = cutscene_instance->locator_instance;
         NUGCUTLOCATORSYS_s *locator_system = cutscene->locator_system;
-        for (i32 i = 0; i < character->locator_count; ++i) {
+        for (i = 0; i < character->locator_count; i++) {
             i32 locator_index = character->locator_index + i;
             NUGCUTLOCATOR_s *locator = &locator_system->locators[locator_index];
-            NUMTX *parent_matrix = &world_matrix;
             if (locator->field_5a != 0xff) {
                 NUMTX locator_parent;
                 NuMtxMulVU0(&locator_parent, &joint_matrices[locator->field_5a], &world_matrix);
-                instNuGCutLocatorUpdate(cutscene_instance, locator_system,
-                                        &cutscene_instance->locator_instance->locators[locator_index], locator, frame,
-                                        &locator_parent, paused);
+                instNuGCutLocatorUpdate(cutscene_instance, locator_system, &locator_instance->locators[locator_index],
+                                        locator, frame, &locator_parent, paused);
             } else {
-                instNuGCutLocatorUpdate(cutscene_instance, locator_system,
-                                        &cutscene_instance->locator_instance->locators[locator_index], locator, frame,
-                                        parent_matrix, paused);
+                instNuGCutLocatorUpdate(cutscene_instance, locator_system, &locator_instance->locators[locator_index],
+                                        locator, frame, &world_matrix, paused);
             }
         }
     }
@@ -1445,13 +1450,11 @@ void CutScenes_ConfigureList(char *filename, variptr_u *buffer, variptr_u) {
                 if (NuFParGetWord(parser) != 0 && NuStrLen(parser->word_buf) <= 127) {
                     NuStrCpy(directory, parser->word_buf);
                 }
-            } else if (NuStrICmp(parser->word_buf, "file") == 0 ||
-                       NuStrICmp(parser->word_buf, "filename") == 0) {
+            } else if (NuStrICmp(parser->word_buf, "file") == 0 || NuStrICmp(parser->word_buf, "filename") == 0) {
                 if (NuFParGetWord(parser) != 0 && NuStrLen(parser->word_buf) <= 63) {
                     NuStrCpy(file, parser->word_buf);
                 }
-            } else if (NuStrICmp(parser->word_buf, "level") == 0 ||
-                       NuStrICmp(parser->word_buf, "in_level") == 0) {
+            } else if (NuStrICmp(parser->word_buf, "level") == 0 || NuStrICmp(parser->word_buf, "in_level") == 0) {
                 if (NuFParGetWord(parser) != 0) {
                     i32 level;
                     Level_FindByName(parser->word_buf, &level);
@@ -1677,21 +1680,23 @@ NUGCUTSCENE_s *RelocateCutScene(NUGCUTSCENE_s *source, variptr_u *buffer) {
     source->relocation_delta = delta;
     memmove(cutscene, source, source->loaded_size);
 
-    cutscene->strings = cutscene->strings != NULL
-                            ? reinterpret_cast<char *>(reinterpret_cast<isize>(cutscene->strings) + cutscene->string_delta)
-                            : NULL;
+    cutscene->strings =
+        cutscene->strings != NULL
+            ? reinterpret_cast<char *>(reinterpret_cast<isize>(cutscene->strings) + cutscene->string_delta)
+            : NULL;
     if (cutscene->camera_system != NULL) {
         isize data_delta = cutscene->string_delta;
-        cutscene->camera_system = reinterpret_cast<NUGCUTCAMERASYS_s *>(
-            reinterpret_cast<isize>(cutscene->camera_system) + data_delta);
+        cutscene->camera_system =
+            reinterpret_cast<NUGCUTCAMERASYS_s *>(reinterpret_cast<isize>(cutscene->camera_system) + data_delta);
         NUGCUTCAMERASYS_s *system = cutscene->camera_system;
-        system->cameras = system->cameras != NULL
-                              ? reinterpret_cast<NUGCUTCAMERA_s *>(reinterpret_cast<isize>(system->cameras) + data_delta)
-                              : NULL;
+        system->cameras =
+            system->cameras != NULL
+                ? reinterpret_cast<NUGCUTCAMERA_s *>(reinterpret_cast<isize>(system->cameras) + data_delta)
+                : NULL;
         if (__builtin_expect(static_cast<u8>(cutscene->version) > 4, 1)) {
             if (system->focus_animation != NULL) {
-                system->focus_animation = static_cast<nuanimdata2_s *>(
-                    NuAnimData2FixPtrs(system->focus_animation, delta, 1, 0));
+                system->focus_animation =
+                    static_cast<nuanimdata2_s *>(NuAnimData2FixPtrs(system->focus_animation, delta, 1, 0));
             }
             system->focus_state_animation = StateAnimFixPtrs(system->focus_state_animation, delta);
         }
@@ -1703,24 +1708,26 @@ NUGCUTSCENE_s *RelocateCutScene(NUGCUTSCENE_s *source, variptr_u *buffer) {
 
     if (cutscene->locator_system != NULL) {
         isize data_delta = cutscene->string_delta;
-        cutscene->locator_system = reinterpret_cast<NUGCUTLOCATORSYS_s *>(
-            reinterpret_cast<isize>(cutscene->locator_system) + data_delta);
+        cutscene->locator_system =
+            reinterpret_cast<NUGCUTLOCATORSYS_s *>(reinterpret_cast<isize>(cutscene->locator_system) + data_delta);
         NUGCUTLOCATORSYS_s *system = cutscene->locator_system;
-        system->locators = system->locators != NULL
-                               ? reinterpret_cast<NUGCUTLOCATOR_s *>(reinterpret_cast<isize>(system->locators) + data_delta)
-                               : NULL;
+        system->locators =
+            system->locators != NULL
+                ? reinterpret_cast<NUGCUTLOCATOR_s *>(reinterpret_cast<isize>(system->locators) + data_delta)
+                : NULL;
         if (system->locators != NULL) {
             for (i32 i = 0; i < system->locator_count; ++i) {
                 NUGCUTLOCATOR_s *locator = &system->locators[i];
                 if (locator->animation != NULL) {
-                    locator->animation = static_cast<nuanimdata2_s *>(
-                        NuAnimData2FixPtrs(locator->animation, delta, 1, 0));
+                    locator->animation =
+                        static_cast<nuanimdata2_s *>(NuAnimData2FixPtrs(locator->animation, delta, 1, 0));
                 }
             }
         }
-        system->types = system->types != NULL
-                            ? reinterpret_cast<NUGCUTLOCATORTYPE_s *>(reinterpret_cast<isize>(system->types) + data_delta)
-                            : NULL;
+        system->types =
+            system->types != NULL
+                ? reinterpret_cast<NUGCUTLOCATORTYPE_s *>(reinterpret_cast<isize>(system->types) + data_delta)
+                : NULL;
         if (system->types != NULL) {
             for (i32 i = 0; i < system->type_count; ++i) {
                 if (system->types[i].name != NULL) {
@@ -1746,8 +1753,7 @@ NUGCUTSCENE_s *RelocateCutScene(NUGCUTSCENE_s *source, variptr_u *buffer) {
                     rigid->name = reinterpret_cast<char *>(reinterpret_cast<isize>(rigid->name) + data_delta);
                 }
                 if (rigid->animation != NULL) {
-                    rigid->animation = static_cast<nuanimdata2_s *>(
-                        NuAnimData2FixPtrs(rigid->animation, delta, 1, 0));
+                    rigid->animation = static_cast<nuanimdata2_s *>(NuAnimData2FixPtrs(rigid->animation, delta, 1, 0));
                 }
                 rigid->state_animation = StateAnimFixPtrs(rigid->state_animation, delta);
             }
@@ -1759,9 +1765,10 @@ NUGCUTSCENE_s *RelocateCutScene(NUGCUTSCENE_s *source, variptr_u *buffer) {
         cutscene->character_system =
             reinterpret_cast<NUGCUTCHARSYS_s *>(reinterpret_cast<isize>(cutscene->character_system) + data_delta);
         NUGCUTCHARSYS_s *system = cutscene->character_system;
-        system->characters = system->characters != NULL
-                                 ? reinterpret_cast<NUGCUTCHAR_s *>(reinterpret_cast<isize>(system->characters) + data_delta)
-                                 : NULL;
+        system->characters =
+            system->characters != NULL
+                ? reinterpret_cast<NUGCUTCHAR_s *>(reinterpret_cast<isize>(system->characters) + data_delta)
+                : NULL;
         if (system->characters != NULL) {
             for (i32 i = 0; i < system->character_count; ++i) {
                 NUGCUTCHAR_s *character = &system->characters[i];
@@ -1769,16 +1776,16 @@ NUGCUTSCENE_s *RelocateCutScene(NUGCUTSCENE_s *source, variptr_u *buffer) {
                     character->name = reinterpret_cast<char *>(reinterpret_cast<isize>(character->name) + data_delta);
                 }
                 if (character->animation != NULL) {
-                    character->animation = static_cast<nuanimdata2_s *>(
-                        NuAnimData2FixPtrs(character->animation, delta, 1, 0));
+                    character->animation =
+                        static_cast<nuanimdata2_s *>(NuAnimData2FixPtrs(character->animation, delta, 1, 0));
                 }
                 if (character->face_animation != NULL) {
-                    character->face_animation = static_cast<nuanimdata2_s *>(
-                        NuAnimData2FixPtrs(character->face_animation, delta, 1, 0));
+                    character->face_animation =
+                        static_cast<nuanimdata2_s *>(NuAnimData2FixPtrs(character->face_animation, delta, 1, 0));
                 }
                 if (character->extra_animation != NULL) {
-                    character->extra_animation = static_cast<nuanimdata2_s *>(
-                        NuAnimData2FixPtrs(character->extra_animation, delta, 1, 0));
+                    character->extra_animation =
+                        static_cast<nuanimdata2_s *>(NuAnimData2FixPtrs(character->extra_animation, delta, 1, 0));
                 }
             }
         }
@@ -1789,8 +1796,8 @@ NUGCUTSCENE_s *RelocateCutScene(NUGCUTSCENE_s *source, variptr_u *buffer) {
                 for (i32 i = 0; i < system->character_count; ++i) {
                     NUGCUTCHARANIM_s *animation = &cutscene->character_animations[i];
                     if (animation->animation != NULL) {
-                        animation->animation = static_cast<nuanimdata2_s *>(
-                            NuAnimData2FixPtrs(animation->animation, delta, 1, 0));
+                        animation->animation =
+                            static_cast<nuanimdata2_s *>(NuAnimData2FixPtrs(animation->animation, delta, 1, 0));
                     }
                 }
             }
@@ -1799,12 +1806,13 @@ NUGCUTSCENE_s *RelocateCutScene(NUGCUTSCENE_s *source, variptr_u *buffer) {
 
     if (cutscene->trigger_system != NULL) {
         isize data_delta = cutscene->string_delta;
-        cutscene->trigger_system = reinterpret_cast<NUGCUTTRIGGERSYS_s *>(
-            reinterpret_cast<isize>(cutscene->trigger_system) + data_delta);
+        cutscene->trigger_system =
+            reinterpret_cast<NUGCUTTRIGGERSYS_s *>(reinterpret_cast<isize>(cutscene->trigger_system) + data_delta);
         NUGCUTTRIGGERSYS_s *system = cutscene->trigger_system;
-        system->events = system->events != NULL
-                             ? reinterpret_cast<NUGCUTTRIGGEREVENT_s *>(reinterpret_cast<isize>(system->events) + data_delta)
-                             : NULL;
+        system->events =
+            system->events != NULL
+                ? reinterpret_cast<NUGCUTTRIGGEREVENT_s *>(reinterpret_cast<isize>(system->events) + data_delta)
+                : NULL;
         if (system->events != NULL) {
             for (i32 i = 0; i < system->event_count; ++i) {
                 NUGCUTTRIGGEREVENT_s *event = &system->events[i];
@@ -1815,9 +1823,10 @@ NUGCUTSCENE_s *RelocateCutScene(NUGCUTSCENE_s *source, variptr_u *buffer) {
             }
         }
     }
-    cutscene->bounds = cutscene->bounds != NULL
-                           ? reinterpret_cast<void *>(reinterpret_cast<isize>(cutscene->bounds) + cutscene->string_delta)
-                           : NULL;
+    cutscene->bounds =
+        cutscene->bounds != NULL
+            ? reinterpret_cast<void *>(reinterpret_cast<isize>(cutscene->bounds) + cutscene->string_delta)
+            : NULL;
 
     buffer->addr = reinterpret_cast<usize>(cutscene) + cutscene->loaded_size;
     return cutscene;

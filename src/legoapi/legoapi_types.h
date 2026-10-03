@@ -1267,7 +1267,15 @@ struct GAMEANIMSET_s {
     NULISTLNK links;          // 0x00
     u8 object_count;          // 0x08
     u8 animated_object_count; // 0x09
-    u8 flags;                 // 0x0a, GAMEANIMSET_FLAGS
+    union {
+        u8 flags; // 0x0a, GAMEANIMSET_FLAGS
+        struct {
+            u8 flag_no_visibility_test : 1;
+            u8 flag_stop_requested : 1;
+            u8 flag_in_system_list : 1;
+            u8 : 5;
+        };
+    };
     u8 field_0x0b;
     GAMEANIMSET_STATE state;        // 0x0c
     GAMEANIMOBJPOOL_s *object_pool; // 0x10
@@ -4379,6 +4387,13 @@ struct GIZFORCE_s {
             union {
                 u8 field_0xaa;
                 u8 state_flags; // GIZFORCE_STATE_FLAGS
+                struct {
+                    u8 state_destroyed_or_thrown : 1;
+                    u8 state_debris_active : 1;
+                    u8 : 3;
+                    u8 state_being_used : 1;
+                    u8 : 2;
+                };
             };
             u8 field_0xab;
         };

@@ -23,6 +23,7 @@
 #include "nu2api/numath/nurand.h"
 #include "nu2api/numath/nuvec.h"
 #include "nu2api/numath/numtx.h"
+#include "nu2api/numath/numtx_inline.h"
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numath/nufloat.h"
 
@@ -1003,7 +1004,7 @@ extern "C" {
         }
 
         NuMtxSetIdentity(&xzfacingmtx);
-        NuMtxRotateX(&xzfacingmtx, -0x4000);
+        NuMtxRotateXInline(&xzfacingmtx, -0x4000);
     }
 
     // DebrisSetup @0x34c7d0 is only the argument-shuffling wrapper around the
