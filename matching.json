@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 69.03475,
+    "fuzzy_match_percent": 69.03754,
     "total_code": "4722419",
-    "matched_code": "526280",
-    "matched_code_percent": 11.144289,
+    "matched_code": "526508",
+    "matched_code_percent": 11.1491165,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 6293,
-    "matched_functions_percent": 46.756817,
+    "matched_functions": 6295,
+    "matched_functions_percent": 46.77168,
     "total_units": 1
   },
   "text": {
@@ -34299,7 +34299,7 @@
           "address": 3747168,
           "offset": 2857200,
           "size": 4706,
-          "match_percent": 36.991703
+          "match_percent": 36.992737
         },
         {
           "name": "eduicbRenderFilePick",
@@ -112310,7 +112310,7 @@
           "address": 3205168,
           "offset": 2315200,
           "size": 621,
-          "match_percent": 66.825584
+          "match_percent": 66.91279
         },
         {
           "name": "_Z17PS2VolumeToScalari",
@@ -112342,7 +112342,7 @@
           "address": 3214256,
           "offset": 2324288,
           "size": 580,
-          "match_percent": 43.967106
+          "match_percent": 38.55263
         },
         {
           "name": "NuSound3SetRequestTable",
@@ -112550,7 +112550,7 @@
           "address": 3232032,
           "offset": 2342064,
           "size": 114,
-          "match_percent": 28.857143
+          "match_percent": 100.0
         },
         {
           "name": "_ZN8NuVectorI23nusound_filename_info_sED2Ev",
@@ -112558,7 +112558,7 @@
           "address": 3232032,
           "offset": 2342064,
           "size": 114,
-          "match_percent": 28.857143
+          "match_percent": 100.0
         },
         {
           "name": "_ZN14NuSoundWeakPtrI12NuSoundVoiceED1Ev",
@@ -112925,22 +112925,6 @@
           "offset": 2380016,
           "size": 253,
           "match_percent": 45.014706
-        },
-        {
-          "name": "_ZN22NuSoundCriticalSectionD1Ev",
-          "demangled_name": "NuSoundCriticalSection::~NuSoundCriticalSection()",
-          "address": 3270240,
-          "offset": 2380272,
-          "size": 34,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN22NuSoundCriticalSectionD2Ev",
-          "demangled_name": "NuSoundCriticalSection::~NuSoundCriticalSection()",
-          "address": 3270240,
-          "offset": 2380272,
-          "size": 34,
-          "match_percent": 100.0
         }
       ]
     },
@@ -117889,6 +117873,22 @@
           "match_percent": 99.55932
         },
         {
+          "name": "_ZN17NuCriticalSectionC1EPKc",
+          "demangled_name": "NuCriticalSection::NuCriticalSection(char const*)",
+          "address": 3270288,
+          "offset": 2380320,
+          "size": 88,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN17NuCriticalSectionC2EPKc",
+          "demangled_name": "NuCriticalSection::NuCriticalSection(char const*)",
+          "address": 3270288,
+          "offset": 2380320,
+          "size": 88,
+          "match_percent": 100.0
+        },
+        {
           "name": "_ZN12NuSoundVoiceD1Ev",
           "demangled_name": "NuSoundVoice::~NuSoundVoice()",
           "address": 3305408,
@@ -119018,8 +119018,7 @@
         "nu2api/nusound/nusound_handle.cpp.o",
         "nu2api/nusound/nusound_memorymanager.cpp.o",
         "nu2api/nusound/nusound_sample.cpp.o",
-        "nu2api/nusound/nusound_voice.cpp.o",
-        "nu2api/nusound/nusound_weakptr.cpp.o"
+        "nu2api/nusound/nusound_voice.cpp.o"
       ]
     },
     {
@@ -119036,8 +119035,7 @@
         "nu2api/nusound/nusound_handle.cpp.o",
         "nu2api/nusound/nusound_memorymanager.cpp.o",
         "nu2api/nusound/nusound_sample.cpp.o",
-        "nu2api/nusound/nusound_voice.cpp.o",
-        "nu2api/nusound/nusound_weakptr.cpp.o"
+        "nu2api/nusound/nusound_voice.cpp.o"
       ]
     },
     {
@@ -121733,26 +121731,26 @@
       ]
     },
     {
-      "name": "_ZN17NuCriticalSectionC1EPKc",
-      "demangled_name": "NuCriticalSection::NuCriticalSection(char const*)",
-      "address": 3270288,
-      "offset": 2380320,
-      "size": 88,
+      "name": "_ZN22NuSoundCriticalSectionD1Ev",
+      "demangled_name": "NuSoundCriticalSection::~NuSoundCriticalSection()",
+      "address": 3270240,
+      "offset": 2380272,
+      "size": 34,
       "match_percent": 100.0,
       "candidate_units": [
-        "nu2api/nusound/nusound_voice.cpp.o",
+        "nu2api/nusound/nusound_buffer.cpp.o",
         "nu2api/nusound/nusound_weakptr.cpp.o"
       ]
     },
     {
-      "name": "_ZN17NuCriticalSectionC2EPKc",
-      "demangled_name": "NuCriticalSection::NuCriticalSection(char const*)",
-      "address": 3270288,
-      "offset": 2380320,
-      "size": 88,
+      "name": "_ZN22NuSoundCriticalSectionD2Ev",
+      "demangled_name": "NuSoundCriticalSection::~NuSoundCriticalSection()",
+      "address": 3270240,
+      "offset": 2380272,
+      "size": 34,
       "match_percent": 100.0,
       "candidate_units": [
-        "nu2api/nusound/nusound_voice.cpp.o",
+        "nu2api/nusound/nusound_buffer.cpp.o",
         "nu2api/nusound/nusound_weakptr.cpp.o"
       ]
     },

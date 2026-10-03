@@ -13397,3 +13397,139 @@ complete for those 55 assigned bodies, not a universal fidelity claim. A new
 complete Hub_Update census finds no finite-domain omission; focused historical
 mock replacement tests are not evidence of actual helper mutations. Separate
 RenderGraph six-word callback-contract recovery is still source-only review.
+
+### Batch499 — recover the stored six-word editor render callback contract
+
+The original LOCAL C `eduicbRenderGraph` (raw0x392d60/4706B) reads selection
+from fixed-frame argument6 at0x3934b0, separately from argument5 width.
+The complete original GLOBAL dispatcher670B and actual menu call pass six
+words; the graph creator stores this callback at item+0x40. The canonical
+stored type previously had only five arguments and required an incompatible
+cast at dispatch. A valid unselected positive-width graph therefore selected
+the bright cursor colour incorrectly.
+
+One coherent unit adds the sixth argument to the shared stored type and all19
+providers, calls it directly, forwards it through Filter->Prop, and makes Graph
+use `selected`. The17 other providers accept an unnamed ignored argument:
+this reconstructs the uniform stored contract, not proof of their original
+unused formal arities. Existing LOCAL linkage, attributes, allocation/layout,
+scalar1.25f, signed division, query order and safety policy remain unchanged.
+The earlier scalar/signed-half negative recipe remains closed.
+
+Fresh actual O2 action921cba72e06aa98ad31d3ec3c36d706817b080a3381ec44eaaec4926f28a9331
+pins162 consumed inputs before the patch; only CPP/HPP change and the complete
+dependency paths retain. Baseline/candidate338252B ELF objects differ in
+exactly one byte: Graph's CMP displacement18->1c (physical0x29f16). All1800
+symbol rows,578 FUNC identities/extents,7986 REL records,577 other bodies,
+complete storage/literals/groups/gaps/startup/CFI are byte-identical. Filter
+retains its5B tail jump and dispatcher its643B six-word call.
+
+Raw whole report2f2d778a6d01e17b109e425652529a4be2c3191df848948d48ea29804dc5ad89
+changes only Graph36.991703%->36.992737%, +0.04866004 weightedB; all original
+rows and6293 exacts retain, whole69.034750% rounded. Android/native/WASM
+builds and all five repository checks pass; restored target object retains
+candidate SHA919e73ac458080cf68a26f5f8bf07939883913c23254238b6ab2bfe430ea311f.
+These are diagnostic builds, not executed graph rendering or engine-wide
+runtime certification. Source/owner receipts:
+`/tmp/saga-rendergraph-callback-cp55.P8hzHx/audit.md` and
+`/tmp/saga-rendergraph499-owner.hw5QtO/audit.md`.
+
+Checkpoint56 commit40aa5327eaf0fb767283cc4ba2e10a12d9f9ad8b now has all11
+exact-head PR checks SUCCESS. It remains below the70.002460% merge threshold.
+The bounded remaining named-mutex screen finds five objects with original
+manual/lazy/per-slot lifetimes already present, not more static-RAII omissions.
+DisplaySceneRndrSpecials432B has all finite-domain operations; original source
+owner/optimization is still unproved, so no optimization override is made.
+
+### Batches500–503 — sound lock identity and canonical vector contracts
+
+500 changes only the two weak-pointer static declarations/default definitions
+to the already-existing NuSoundCriticalSection, adding its canonical header.
+The original callback startup319B registers that class's D1/D2 at31e660/34B,
+not NuCriticalSection's eed50. Independent complete Buffer startup313B and
+System constructor515B corroborate the existing one-mutex wrapper. Both old
+classes already supplied recursive services; this is a score-neutral registered
+class-identity repair, not a new behavior or runtime/concurrency fix. The original
+out-of-line NuCriticalSection constructor boundary remains unrecovered.
+
+Fresh500 O3 actionb6709e226b357d6612e2e0edb6cdb5025363017adf91ab6c2e4207c589e8a218
+pins48 old consumed inputs. The new sync-header dependency is explicitly
+post-build discovery, not retroactive baseline admission. Complete owner
+qualification retains18 ordinary physical text sections/25 common alias rows,
+12 U rows,8B lock BSS,three vtables,19 ordinary COMDATs and18 ordinary FDEs.
+Natural lifetime deltas are fully inventoried: old88B constructor aliases become
+the existing94B LOCAL recursive helper, destructor class identity changes with
+identical34B code/REL/CFI, startup114->98B, ignored41B name literal disappears.
+All linked scores/original rows/6293 exacts retain. Raw neutral report
+6b625eaa835f15e46a51bd1bc13ac622b2840e9e2414301aaca1d994aae72652;
+receipt `/tmp/saga-batch500-owner-qualification.Kix51E/README.md`.
+
+501 restores canonical NuVector data/capacity/length order, constructor order,
+clear-length/free-buffer/clear-capacity-and-data destruction, and four-record
+rounded growth. Entire original SetSampleTable580B and actual worker621B prove
+capacity+4/length+8, not the previous reversed fields. Both original114B
+destructors share that clear/free/clear contract. Scalar delete already reaches
+the same BlockFree heap: no wrong-heap or different-free-flags claim is made.
+Current instantiation is only the trivial32B filename record. Actual flag0x41
+preserves old storage on successful relocation, qualifying the existing copy/free
+sequence without changing allocator flags or fabricating callback mutations.
+
+Fresh501 O3 action0c4ab84409c5e2e00f1a36e67bf055e6e96c4edb8b2fd64c4a8dd75098751de0
+pins171 consumed inputs. Both D1/D2 identities28.857143%->100% share ONE
+physical114B body; worker66.825584%->66.912790%. SetSampleTable regresses
+43.967106%->21.519737%; this collateral is retained explicitly, not hidden.
+Whole net +32.55252302 weightedB,69.035446%,6295 exact identities; all previous
+6293 retain. Raw reportef400c3c5045e9dd9ed412aaf3c48b2390c87c58e860e7c0908ed2612cd9875a.
+
+502's sole five-cast MoveGameCamera unit explicitly signed-truncates before
+u16 wrapping, supported by real negative look/judder producers and original
+CVTTSS2SI/MOVZX instructions. It regresses45.297882%->44.898552%,
+-94.02224850 weightedB, with exacts retained; all five edits are reverted
+byte-for-byte and the original canonical object hash restored. This genuine
+signed-conversion source defect remains unresolved, not a fidelity certificate.
+No subset/alternate conversion recipe follows. Immutable negative report
+06bb57a0c35006e7c0105d23683daf63bc66616c77fa938601b084a3ba4430e8.
+
+503 is a separate ordinary typed record-copy reconstruction, not a501 layout/
+growth subset retry. The complete original580B producer copies records in an
+ascending typed loop. One generic assignment loop replaces only memmove, with
+the same real successful/disjoint allocation and sole trivial-record admission;
+no eight-field manual expansion, forced unroll, flags or attributes. Native
+member values are preserved, not a promise to preserve host padding bytes.
+SetSampleTable21.519737%->38.552630%, +98.79077940 weightedB. It remains
+below its pre501 score; the overall retained result is positive. All original
+rows/6295 exact identities retain, whole69.037540%, +1.035080 pp over main.
+Raw reporte3c975a050891874cc23d035990ca19b7010209ebf6c5c68bd6b83241aeb48a9;
+source receipt `/tmp/saga-nuvector-typed-copy.wgUFEl/audit.md`.
+
+New bounded UpdateGameObjects full raw/current audit finds no finite omission;
+GameAIProcess complete current/reference plus focused raw/helper review also
+finds none, but does not certify every original instruction or transitive helper.
+All admission/safety/allocator-lifetime limits remain explicit. These receipts
+do not convert low fuzzy scores into missing engine functionality claims.
+
+Checkpoint57 final qualification includes both complete immutable owner censuses:
+501 `/tmp/saga-nuvector501-owner-qualification.1bNUYQ/audit.md`
+(SHA1e5eac5cf66fc98be36010bca40175153eaf0c6e50ef02323ddaa88463a4e74b),
+503 `/tmp/saga-nuvector-copy503-objects.IX4Dl5/audit.md`
+(SHAe0e2dcb22494ac272d064dc806e8709e7d533095344c1e21c617d3eef0450a0f).
+ROOT independently checks both actual ELF inventories: 56 sections,224 symbols,
+51 named FUNC rows each. 501 changes five named bodies (D1/D2 one physical
+body),635->637 REL; 503 changes only SetSampleTable524->545B,637->634 REL.
+The latter's50 other named bodies/relative REL, all85 U names and all storage
+retain; memmove remains an owner U because another unchanged function uses it.
+Its following alignment/function coordinate and target unwind changes are
+explicitly accounted, not ignored. 501's worker scratch rotations have finite
+ordinary-cdecl def/use accounting; no private register ABI is asserted.
+
+Final Android/native/WASM builds and all five repository checks pass. After
+the host configuration round trip, all three retained Android objects match
+their frozen candidates; the rejected camera object's exact baseline hash also
+retains. These checks do not certify running audio, rendering, concurrency,
+overflow/allocation-failure handling or a general nontrivial-T container.
+Metadata-only final map SHA
+dd7a7918693a67ee146ade2c2f2f568cec7a4a500b96b28f6fa7f94db8e506d6:
+452 units,12,663 assigned/260 ambiguous/531 unassigned rows,13,454 mapped
+and13,459 raw rows,6295 exact identities,4,722,419 B denominator.
+Retained69.037540% is +1.035080 pp over main;70.002460% remains the merge
+threshold. This checkpoint's commit/new-head CI checks remain pending.

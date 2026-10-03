@@ -8,23 +8,27 @@
 template <typename T> class NuVector {
   public:
     T *data;
-    usize length;
     usize capacity;
+    usize length;
 
   public:
-    NuVector() : data(nullptr), length(0), capacity(0) {
+    NuVector() : data(nullptr), capacity(0), length(0) {
     }
 
     ~NuVector() {
+        if (length != 0) {
+            length = 0;
+        }
         if (data != nullptr) {
-            // not delete[] for some reason
-            delete data;
+            NU_FREE(data);
+            capacity = 0;
+            data = nullptr;
         }
     }
 
     void PushBack(const T &value) {
         if (length >= capacity) {
-            resize(length + 1);
+            resize((length + 4) & ~usize(3));
         }
         data[length++] = value;
     }
@@ -36,7 +40,9 @@ template <typename T> class NuVector {
 
         if (new_data != data) {
             if (length != 0) {
-                memmove(new_data, data, length * sizeof(T));
+                for (usize i = 0; i < length; ++i) {
+                    new_data[i] = data[i];
+                }
             }
             NU_FREE(data);
         }

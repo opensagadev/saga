@@ -2,6 +2,7 @@
 
 #include "nu2api/nucore/common.h"
 #include "nu2api/nucore/nuthread.h"
+#include "nu2api/nusound/nusound_sync.hpp"
 
 #include <pthread.h>
 
@@ -9,8 +10,8 @@
 
 struct NuSoundWeakPtrListNode {
   public:
-    static NuCriticalSection sPtrListLock;
-    static NuCriticalSection sPtrAccessLock;
+    static NuSoundCriticalSection sPtrListLock;
+    static NuSoundCriticalSection sPtrAccessLock;
 
   public:
     // struct Payload {
