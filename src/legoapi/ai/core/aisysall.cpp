@@ -797,7 +797,7 @@ void AIRetreatFromDestination(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *
         }
 
         f32 best_distance = 0.0f;
-        i32 direction = 0;
+        u8 direction = 0;
         if ((connection->traversal_flags[1] & 0x40000000u) == 0) {
             f32 partial_distance = fabsf(parameter * length);
             f32 candidate =
