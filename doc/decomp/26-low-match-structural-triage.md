@@ -13533,3 +13533,96 @@ dd7a7918693a67ee146ade2c2f2f568cec7a4a500b96b28f6fa7f94db8e506d6:
 and13,459 raw rows,6295 exact identities,4,722,419 B denominator.
 Retained69.037540% is +1.035080 pp over main;70.002460% remains the merge
 threshold. This checkpoint's commit/new-head CI checks remain pending.
+
+### Batch504 — restore two evidenced empty shader-table lifetimes
+
+Checkpoint57 commit64fc052d7fcb55af8f843c5f25a5dec3b081b0ec is pushed;
+all11 exact-head PR checks SUCCESS. Main remains
+a496c28beece66a24ccdf7336571b6836f45e6aa; no merge below70.002460%.
+The hook-generated checkpoint57 map exactly matches the separately reviewed
+dd7a7918...506d6 map. Its ordinary editor formatting changes no object bytes.
+
+The complete original shader startup377B constructs/registers named LOCAL
+vertexShaders119db00/12B and pixelShaders119db0c/12B. Both registrations resolve
+to the original114B NuVector<Pair<const unsigned char*,unsigned int>> D1/D2.
+Its complete destructor clears length+8, conditionally frees data through the
+real memory services, then clears capacity+4/data+0; no Pair element access.
+The now-canonical shared NuVector supplies that lifecycle. One minimal unit
+includes it, forward-declares the verified global two-type Pair template, and
+adds exactly those two genuine default objects to the existing shader owner.
+No guessed Pair fields/stride, fake vector prefix, source fusion, explicit
+initializer or emission attribute. Unused dependent insertion/resize members
+are not instantiated. Unknown original table consumers are not certified;
+future element insertion requires independent canonical Pair reconstruction.
+
+Fresh O3 action655d68a078ee62eec84bce1c37b5b9fb42421ce153cbdf0c1f0f3ef1bcd32c03
+pins45 actual inputs BEFORE patch/build; only the owner changes. Added28
+header/toolchain dependencies are explicitly AFTER-build discovery, not
+retroactive pins. Baseline objectd8413805bd29089a3c1a1ae84b506d7e4e5b7946262dd4bc6580d8a3d70e6334;
+candidate1c71fb6606fe3363a89b079a8114dc2875c685ac0a8c7ce9231a340bce59c400.
+ROOT independently checks all six prior physical bodies and relative REL:
+exact bytes retain. Natural helper identities map oldconstprop.0->new.1
+(344B), oldconstprop.1->new.2 (394B), not a same-name/size blanket exemption.
+The added D1/D2 names represent ONE physical114B body; new startup142B.
+
+Whole report88421f72f962c23ebab5eac23f67b576c21e3ee93d9b9131b01343c2ade066d6
+changes only startup0%->44.655174% and both original destructor identities
+0%->100%; alias-inclusive +396.35000598 weightedB. All original rows/6295
+exacts retain; now6297 exact identities and69.045920%, +1.043460 pp over main.
+Metadata-only mape1967414a1e53bae23b84629227241eee5f1049b36da06b41155e3e3bd64b899
+has452 units,12,666 assigned/260 ambiguous/528 unassigned rows, unchanged
+13,454 mapped/13,459 raw rows and4,722,419 B denominator. Android/native/WASM
+and all five repository tests pass; restored target candidate hash retains.
+Source prerequisite `/tmp/saga-shader-pair-lifetime-prerequisite.PnPozg/audit.md`
+SHA65cc5c6c3d66980e19958c064147de23194c50c92016763e4110902f2fc0e023.
+Complete owner collateral receipt
+`/tmp/saga-shader-pair504-objects.mSqaaB/audit.md`
+SHAb11e7207644409a8e1371d8a3f91c10c272f84d13684f1d900892d3772a2f4b4
+is read/accepted: all2193B ordinary text/padding and94 REL roles retain;
+five old storage objects,30 old U identities, all six old FDEs/CIE, literals
+and bx COMDAT retain. Exactly24B named vector BSS,142B startup,114B aliased
+destructor, five grounded U names and their initialization/CFI metadata enter.
+No GPU/Pair element/runtime claim.
+
+The distinct seven-body history reconciliation and final52 small-low rows
+use their existing immutable selections, not reranked scores. The latter
+selection is CP52, not CP55/56; all first160 identities reconcile exactly.
+GameCreatureOpponentSelection now has a complete bounded raw/current/helper
+primary, with no new finite omission. Its integrated timer<=0 stays unchanged;
+historical replacement diagnostics remain distinct from actual helper effects.
+
+### Batch505 — correct the real 2D line-strip topology (score-neutral)
+
+Full531B NuIOSDLGeom2DCallback original293ad6 and its signed jump table57b800
+prove mode mapping[4,5,1,3,4], not current[4,5,1,2,4]. Real LineRect2di
+requests type3 and emits four corners plus a repeated first vertex. One token
+GL_LINE_LOOP->GL_LINE_STRIP restores the original four-segment topology; no
+visible-pixel/GPU runtime difference is asserted. Producer header16/count+a,
+vertex24, callback ABI and signed shader ID are already canonical. Existing
+safe guards, helpers, packet storage and defaultO0 remain unchanged.
+Source receipt `/tmp/saga-geom2d-cp57.K3kasZ/audit.md`
+SHA47bd8cdb32a7a6fd5fe01da6c40c0cf5ea3fe5697585ce7d4770f3492e99afc3;
+ROOT reads the complete raw target/table, current callback, actual primitive
+producer and rectangle caller plus actual NDK enum definitions independently.
+
+Fresh actual action61a791571d1139d74ed42a233466c645ed7fccce22b39726bd5c605a681c6fc5
+pins130 consumed dependencies BEFORE patch/build,129 unchanged; dependency
+paths retain exactly. Entire27956B owner ELF differs ONLY at physical12620:
+02->03 in .rodata+748, actual kPrimModes+12. All188 symbol rows,595 REL
+records, complete code/CFI/groups/literals/storage/gaps remain identical apart
+from that approved20B table member. Baseline object
+912b6941155fb8398fa4f080a6f6448a70ac3d8e8b705590317840599f2358b1;
+candidate0e17220acb90a34af4aef06698e2f41f19ece188e52f80af08f92e118e241736.
+Whole505 report is BYTE-IDENTICAL to504, SHA88421f72...de066d6: no score
+change, all6297 exacts/original rows retain,69.045920%. Retained expressly as
+a genuine original-backed topology correction, not numerical matching progress
+or a neutral source-form retry. Android/native/WASM and all five repository
+checks pass; target round trip preserves both504/505 candidate hashes.
+
+Checkpoint58 retains only504's positive empty-table lifetime and505's neutral
+original topology correction. Matching69.045920%, +0.008380 pp over57 and
++1.043460 pp over main; all6297 exacts and original identities retain. Final
+reviewed metadata map remains e1967414...b64b899. Commit/new-head checks
+pending; no merge below70.002460%. CRC_ProcessStringNIgnoreCase and
+AILocatorSet_AssignFurthestLocator full bounded original/current reviews find
+no new finite correction, preserving their explicit caller/asset-domain limits.

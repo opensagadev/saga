@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 69.03754,
+    "fuzzy_match_percent": 69.04592,
     "total_code": "4722419",
-    "matched_code": "526508",
-    "matched_code_percent": 11.1491165,
+    "matched_code": "526736",
+    "matched_code_percent": 11.153945,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 6295,
-    "matched_functions_percent": 46.77168,
+    "matched_functions": 6297,
+    "matched_functions_percent": 46.786537,
     "total_units": 1
   },
   "text": {
@@ -90704,6 +90704,14 @@
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nushaderprogram_android.o",
       "functions": [
         {
+          "name": "_GLOBAL__sub_I_nushaderprogram_android.cpp",
+          "demangled_name": "_GLOBAL__sub_I_nushaderprogram_android.cpp",
+          "address": 903232,
+          "offset": 13264,
+          "size": 377,
+          "match_percent": 44.655174
+        },
+        {
           "name": "_Z17LinkShaderProgramj",
           "demangled_name": "LinkShaderProgram(unsigned int)",
           "address": 2774688,
@@ -90726,6 +90734,22 @@
           "offset": 1884992,
           "size": 1326,
           "match_percent": 62.0
+        },
+        {
+          "name": "_ZN8NuVectorI4PairIPKhjEED1Ev",
+          "demangled_name": "NuVector<Pair<unsigned char const*, unsigned int> >::~NuVector()",
+          "address": 2776288,
+          "offset": 1886320,
+          "size": 114,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN8NuVectorI4PairIPKhjEED2Ev",
+          "demangled_name": "NuVector<Pair<unsigned char const*, unsigned int> >::~NuVector()",
+          "address": 2776288,
+          "offset": 1886320,
+          "size": 114,
+          "match_percent": 100.0
         }
       ]
     },
@@ -123538,14 +123562,6 @@
       "match_percent": 0.0
     },
     {
-      "name": "_GLOBAL__sub_I_nushaderprogram_android.cpp",
-      "demangled_name": "_GLOBAL__sub_I_nushaderprogram_android.cpp",
-      "address": 903232,
-      "offset": 13264,
-      "size": 377,
-      "match_percent": 0.0
-    },
-    {
       "name": "_GLOBAL__sub_I_nuwater.cpp",
       "demangled_name": "_GLOBAL__sub_I_nuwater.cpp",
       "address": 903616,
@@ -124551,22 +124567,6 @@
       "address": 2774272,
       "offset": 1884304,
       "size": 412,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN8NuVectorI4PairIPKhjEED1Ev",
-      "demangled_name": "NuVector<Pair<unsigned char const*, unsigned int> >::~NuVector()",
-      "address": 2776288,
-      "offset": 1886320,
-      "size": 114,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZN8NuVectorI4PairIPKhjEED2Ev",
-      "demangled_name": "NuVector<Pair<unsigned char const*, unsigned int> >::~NuVector()",
-      "address": 2776288,
-      "offset": 1886320,
-      "size": 114,
       "match_percent": 0.0
     },
     {
@@ -127589,8 +127589,8 @@
   "summary": {
     "bazel_units": 452,
     "functions": 13454,
-    "assigned_functions": 12663,
+    "assigned_functions": 12666,
     "ambiguous_functions": 260,
-    "unassigned_functions": 531
+    "unassigned_functions": 528
   }
 }

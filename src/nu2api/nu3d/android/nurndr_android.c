@@ -332,7 +332,7 @@ void NuIOSDLGeom2DCallback(void *arg) {
         GL_TRIANGLES,      // 0
         GL_TRIANGLE_STRIP, // 1
         GL_LINES,          // 2
-        GL_LINE_LOOP,      // 3
+        GL_LINE_STRIP,     // 3
         GL_TRIANGLES,      // 4 — quads expanded to triangles by NuPrim2DAddXYZ
     };
 
