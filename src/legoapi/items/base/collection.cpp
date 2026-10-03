@@ -768,7 +768,7 @@ void ReCalculateCompletionPoints() {
 
         if ((flags & AREAFLAG_MINIKIT) == 0) {
             if ((flags & AREAFLAG_TRUE_JEDI) != 0 &&
-                (save->story_buildup_complete != 0 || save->freeplay_buildup_complete != 0)) {
+                (save->true_hero_complete[0] != 0 || save->true_hero_complete[1] != 0)) {
                 AddToCompletionPoints(POINTS_PER_TRUEJEDI);
                 AddToGoldBricks();
             }
@@ -782,17 +782,17 @@ void ReCalculateCompletionPoints() {
         }
 
         CompletionPointInfo_ReCalculate[1] += POINTS_PER_TRUEJEDI;
-        if (save->story_buildup_complete != 0) {
+        if (save->true_hero_complete[0] != 0) {
             AddToCompletionPoints(POINTS_PER_TRUEJEDI);
             AddToGoldBricks();
         }
         if (BOTHTRUEJEDIGOLDBRICKS != 0) {
             CompletionPointInfo_ReCalculate[1] += POINTS_PER_TRUEJEDI;
-            if (save->freeplay_buildup_complete != 0) {
+            if (save->true_hero_complete[1] != 0) {
                 AddToCompletionPoints(POINTS_PER_TRUEJEDI);
                 AddToGoldBricks();
             }
-        } else if (save->story_buildup_complete == 0 && save->freeplay_buildup_complete != 0) {
+        } else if (save->true_hero_complete[0] == 0 && save->true_hero_complete[1] != 0) {
             AddToCompletionPoints(POINTS_PER_TRUEJEDI);
             AddToGoldBricks();
         }

@@ -550,8 +550,7 @@ struct AREADATA_s;
 struct AREASAVE_s {
     u8 complete;
     u8 area_complete;
-    u8 story_buildup_complete;
-    u8 freeplay_buildup_complete;
+    u8 true_hero_complete[2]; // Story and free-play completion.
     u8 minikit_complete;
     union {
         u8 field_0x5[3];
@@ -562,6 +561,9 @@ struct AREASAVE_s {
     f32 challenge_trial_time;
 };
 DECOMP_ASSERT(sizeof(AREASAVE_s) == 0xc, "AREASAVE_s size");
+DECOMP_ASSERT(offsetof(AREASAVE_s, true_hero_complete[0]) == 0x2, "AREASAVE story true hero offset");
+DECOMP_ASSERT(offsetof(AREASAVE_s, true_hero_complete[1]) == 0x3, "AREASAVE free-play true hero offset");
+DECOMP_ASSERT(sizeof(((AREASAVE_s *)0)->true_hero_complete) == 0x2, "AREASAVE true hero completion extent");
 DECOMP_ASSERT(offsetof(AREASAVE_s, area_complete) == 0x1, "AREASAVE area completion offset");
 DECOMP_ASSERT(offsetof(AREASAVE_s, challenge_trial_time) == 0x8, "AREASAVE challenge time offset");
 struct ATTRACTO_s;

@@ -247,8 +247,8 @@ static const NUVEC Hub_PercentPos = {-26.713f, 0.7f, -48.777f};
 static const NUVEC ClipsSignOffset = {-0.114f, -0.0385f, -0.045f};
 
 static inline void Hub_SetStatsTextMtx(NUMTX *mtx, i32 angle) {
-    const f32 sine = NU_SIN_LUT(angle);
     const f32 cosine = NU_COS_LUT(angle);
+    const f32 sine = NU_SIN_LUT(angle);
     mtx->m00 = cosine;
     mtx->m01 = 0.0f;
     mtx->m02 = -sine;
@@ -398,27 +398,23 @@ static f32 HUB_AREAPANELX_TWOTRUEJEDIGOLDBRICKS[6] = {-0.15f, -0.45f, 0.75f, -0.
 static f32 HUB_AREAPANELX_1TRUEJEDIGB_NOCHALLENGE[6] = {-0.201f, 0.201f, 0.6f, -0.6f, 0.0f, 0.0f};
 f32 *HUB_AREAPANELX = HUB_AREAPANELX_ONETRUEJEDIGOLDBRICK;
 
-static inline void Hub_DrawEpisodeCompletionSign(WORLDINFO_s *world, i32 episode) {
-    nuhspecial_s *special = &HubAreaInfo[episode * 7 + 6].lock;
-    if (NuSpecialExistsFn(special) == 0) {
-        return;
-    }
-
-    NUMTX draw_mtx = *NuSpecialGetDrawMtx(special);
-    const f32 direction_x = draw_mtx.m20;
-    const f32 direction_z = draw_mtx.m22;
-    NuMtxSetTranslation(&draw_mtx, const_cast<NUVEC *>(&ClipsSignOffset));
-    NuMtxRotateY(&draw_mtx, NuAtan2D(direction_x, direction_z) + NUANG_90DEG);
-    NuMtxTranslate(&draw_mtx, NuSpecialGetDrawPos(special));
-    Draw3DObjectMtx(world, 316, &draw_mtx);
-    Draw3DObjectMtx(world, Episode_IsComplete(&EDataList[episode], NULL) != 0 ? 320 : 319, &draw_mtx);
-}
-
 void Hub_Draw3D(WORLDINFO_s *world) {
     Store_HubDrawFloorTargets(world);
 
+    NUMTX sign_mtx;
     for (i32 episode = 0; episode < 6; episode++) {
-        Hub_DrawEpisodeCompletionSign(world, episode);
+        nuhspecial_s *special = &HubAreaInfo[episode * 7 + 6].lock;
+        if (NuSpecialExistsFn(special) == 0) {
+            continue;
+        }
+        sign_mtx = *NuSpecialGetDrawMtx(special);
+        NUVEC direction;
+        memcpy(&direction, reinterpret_cast<const byte *>(&sign_mtx) + offsetof(NUMTX, m20), sizeof(direction));
+        NuMtxSetTranslation(&sign_mtx, const_cast<NUVEC *>(&ClipsSignOffset));
+        NuMtxRotateY(&sign_mtx, NuAtan2D(direction.x, direction.z) + NUANG_90DEG);
+        NuMtxTranslate(&sign_mtx, NuSpecialGetDrawPos(special));
+        Draw3DObjectMtx(world, 316, &sign_mtx);
+        Draw3DObjectMtx(world, Episode_IsComplete(&EDataList[episode], NULL) != 0 ? 320 : 319, &sign_mtx);
     }
 
     Customiser_Draw3D(CharacterCustomiser);
@@ -441,11 +437,10 @@ void Hub_Draw3D(WORLDINFO_s *world) {
 
     if (QFont3DZ != NULL) {
         const i32 spin = static_cast<i32>(NuFmod(GameTimer.time_elapsed, 5.0f) / 5.0f * 65536.0f);
-        const i32 angle = static_cast<i32>(NU_SIN_LUT(spin) * 2730.0f + 8192.0f);
+        const u16 angle = static_cast<u16>(NU_SIN_LUT(spin) * 2730.0f + 8192.0f);
         const i32 pulse = static_cast<i32>(NuFmod(GameTimer.time_elapsed, 3.21f) / 3.21f * 65536.0f);
         const f32 bob = NU_SIN_LUT(pulse) * 0.01f;
         const i32 alpha = static_cast<i32>(Hub_HologramAlpha * 15.0f + 56.0f);
-        const u32 colour = (static_cast<u32>(alpha) << 24) | 0xff7f00;
 
         char text[128];
         sprintf(text, "%.1f%%", static_cast<f32>(Game.completion * 100) / COMPLETIONPOINTS);
@@ -460,9 +455,10 @@ void Hub_Draw3D(WORLDINFO_s *world) {
         NuQFntSet(QFont3DZ);
         NuQFntSetMtx(QFont3DZ, &text_mtx);
         NuQFntSetCoordinateSystem(NUQFNT_CSMODE_ABSOLUTE);
+        const u32 colour = (static_cast<u32>(alpha) << 24) | 0xff7f00;
         NuQFntSetColour(QFont3DZ, colour);
         NuQFntSetScale(QFont3DZ, 0.00375f, 0.005f);
-        NuQFntMove(QFont3DZ, NuQFntPrintLenU(QFont3DZ, text) * -0.5f, 0.0f, 0.0f);
+        NuQFntMove(QFont3DZ, -NuQFntPrintLenU(QFont3DZ, text) * 0.5f, 0.0f, 0.0f);
         NuQFntPrintU(QFont3DZ, text);
         NuQFntPopPrintMode();
 
@@ -470,7 +466,8 @@ void Hub_Draw3D(WORLDINFO_s *world) {
         Text_LocaliseDecimalPoint(text);
         Hub_SetStatsTextMtx(&text_mtx, angle);
         NuMtxTranslate(&text_mtx, const_cast<NUVEC *>(&Hub_PercentPos));
-        text_mtx.m31 += bob + 0.16f;
+        text_mtx.m31 += bob;
+        text_mtx.m31 += 0.16f;
 
         NuQFntPushPrintMode(NUQFNT_CSMODE_ABSOLUTE);
         NuQFntSet(QFont3DZ);
@@ -478,13 +475,14 @@ void Hub_Draw3D(WORLDINFO_s *world) {
         NuQFntSetCoordinateSystem(NUQFNT_CSMODE_ABSOLUTE);
         NuQFntSetColour(QFont3DZ, colour);
         NuQFntSetScale(QFont3DZ, 0.0028124998f, 0.00375f);
-        NuQFntMove(QFont3DZ, NuQFntPrintLenU(QFont3DZ, text) * -0.5f, 0.0f, 0.0f);
+        NuQFntMove(QFont3DZ, -NuQFntPrintLenU(QFont3DZ, text) * 0.5f, 0.0f, 0.0f);
         NuQFntPrintU(QFont3DZ, text);
         NuQFntPopPrintMode();
 
         if (NuSpecialExistsFn(&LevHSpecial[15]) != 0) {
+            NUVEC position = *NuSpecialGetDrawPos(&LevHSpecial[15]);
             Hub_SetStatsTextMtx(&text_mtx, angle);
-            NuMtxTranslate(&text_mtx, NuSpecialGetDrawPos(&LevHSpecial[15]));
+            NuMtxTranslate(&text_mtx, &position);
             NuSpecialDrawAtAlpha(&LevHSpecial[15], &text_mtx, Hub_HologramAlpha * 0.2f + 0.8f);
         }
     }
@@ -510,6 +508,21 @@ i32 Hub_InMenu() {
         return 1;
     }
     return 0;
+}
+
+static void Hub_UpdatePackObstacle(i32 pack) {
+    if (LevGizObst[12 - pack] == NULL) {
+        return;
+    }
+    if (Store_IsPackUnlocked(pack)) {
+        GIZOBSTACLE_s *obstacle = LevGizObst[12 - pack];
+        obstacle->progress_flags |= 1;
+        obstacle->runtime_flags &= static_cast<u8>(~8);
+    } else {
+        GIZOBSTACLE_s *obstacle = LevGizObst[12 - pack];
+        obstacle->progress_flags &= static_cast<u8>(~1);
+        obstacle->runtime_flags |= 8;
+    }
 }
 
 void Hub_Update(WORLDINFO_s *world) {
@@ -582,7 +595,7 @@ void Hub_Update(WORLDINFO_s *world) {
                     }
                 }
                 GameObject_s *custodian =
-                    AddDynamicCreature(id, &store_pack.custodian_position, store_pack.custodian_angle,
+                    AddDynamicCreature(id, &StorePack[pack].custodian_position, store_pack.custodian_angle,
                                        const_cast<char *>("party"), path_info, NULL, 1, NULL, NULL, 0, 1);
                 if (custodian != NULL) {
                     custodian->field_0xee8 = store_pack.custodian_position.x;
@@ -619,7 +632,8 @@ void Hub_Update(WORLDINFO_s *world) {
     }
 
     const f32 pulse_time = NuFmod(GlobalTimer.time_elapsed_mod_seconds, 0.5f);
-    TJTYPEA = static_cast<i32>(NU_SIN_LUT(static_cast<u16>((pulse_time + pulse_time) * 65536.0f)) * 16.0f + 80.0f);
+    TJTYPEA = static_cast<i32>(
+        NU_SIN_LUT(static_cast<u16>(static_cast<i32>((pulse_time + pulse_time) * 65536.0f))) * 16.0f + 80.0f);
     if (menu == 8) {
         hub_jabbaawake = 1.0f;
     } else if (hub_jabbaawake > 0.0f) {
@@ -746,18 +760,8 @@ void Hub_Update(WORLDINFO_s *world) {
         NewMenu(8, -1, -1);
         Hint_CancelCurrent();
     }
-    for (i32 pack = 5; pack <= 6; ++pack) {
-        GIZOBSTACLE_s *obstacle = LevGizObst[12 - pack];
-        if (obstacle != NULL) {
-            if (Store_IsPackUnlocked(pack) != 0) {
-                obstacle->progress_flags |= 1;
-                obstacle->runtime_flags &= static_cast<u8>(~8);
-            } else {
-                obstacle->progress_flags &= static_cast<u8>(~1);
-                obstacle->runtime_flags |= 8;
-            }
-        }
-    }
+    Hub_UpdatePackObstacle(5);
+    Hub_UpdatePackObstacle(6);
     if (FadeSys.fade == 0.0f) {
         i32 selected_episode = -1;
         for (i32 i = 0; static_cast<u16>(HubEpisodeInfo[i].episode) <= 8; ++i) {
@@ -773,12 +777,11 @@ void Hub_Update(WORLDINFO_s *world) {
             if (episode.door == NULL) {
                 continue;
             }
-            GIZOBSTACLE_s *door = static_cast<GIZOBSTACLE_s *>(episode.door->object);
             if (selected_episode != -1 && selected_episode != episode.episode) {
-                door->runtime_flags |= 8;
+                static_cast<GIZOBSTACLE_s *>(episode.door->object)->runtime_flags |= 8;
             } else if (static_cast<u8>(episode.force_open) != 0 ||
                        Episode_CountOpenAreas(episode.episode, -1, Game_AreaSave) != 0) {
-                door->runtime_flags &= static_cast<u8>(~8);
+                static_cast<GIZOBSTACLE_s *>(episode.door->object)->runtime_flags &= static_cast<u8>(~8);
             }
         }
         if (missions_available != 0) {
@@ -792,7 +795,9 @@ void Hub_Update(WORLDINFO_s *world) {
             if (gizmo == NULL) {
                 continue;
             }
-            if (GizmoGetOutput(world->gizmo_sys, gizmo, 0, 0) == 0) {
+            const i32 output = GizmoGetOutput(world->gizmo_sys, gizmo, 0, 0);
+            gizmo = HubAreaInfo[i].bonus_gizmo;
+            if (output == 0) {
                 GIZBUILDIT_s *buildit = static_cast<GIZBUILDIT_s *>(gizmo->object);
                 if (gold_bricks < buildit->anim_object_count) {
                     GizmoSetVisibility(world->gizmo_sys, gizmo, 0, 0);
@@ -808,7 +813,7 @@ void Hub_Update(WORLDINFO_s *world) {
                     GizmoActivate(world->gizmo_sys, gizmo, 1, 0);
                 }
             }
-            if (GizmoGetOutput(world->gizmo_sys, gizmo, 0, 0) != 0) {
+            if (GizmoGetOutput(world->gizmo_sys, HubAreaInfo[i].bonus_gizmo, 0, 0) != 0) {
                 const u32 bit = 1U << (buildit_index & 31);
                 if ((Game.field_0x7c26[2] & bit) == 0) {
                     Game.field_0x7c26[2] = static_cast<u8>(Game.field_0x7c26[2] | bit);
@@ -943,9 +948,11 @@ void Hub_Update(WORLDINFO_s *world) {
         }
     }
     i32 minikit_candidate = -1;
-    if (hub_minikitviewer_gizmo != NULL && GizmoGetOutput(world->gizmo_sys, hub_minikitviewer_gizmo, 1, 0) != 0 &&
-        hub_minikitviewer_area != -1 && FreePlayUnlocked()) {
-        minikit_candidate = hub_minikitviewer_area;
+    if (hub_minikitviewer_gizmo != NULL && GizmoGetOutput(world->gizmo_sys, hub_minikitviewer_gizmo, 1, 0) != 0) {
+        const i32 viewer_area = hub_minikitviewer_area;
+        if (viewer_area != -1 && FreePlayUnlocked()) {
+            minikit_candidate = viewer_area;
+        }
     }
     if (LevLock[4] != 0) {
         if (minikit_candidate == -1) {
@@ -964,11 +971,12 @@ void Hub_Update(WORLDINFO_s *world) {
             !(hub_area != -1 && hub_area_time > 0.0f &&
               (E1VEHICLE_ADATA == NULL || hub_area != E1VEHICLE_ADATA->index)) &&
             minikit_candidate != -1) {
-            for (i32 i = 0; i < 2; ++i) {
-                if (Player[i] != NULL && static_cast<i8>(Player[i]->apiobj.flags_low) < 0 &&
-                    Player[i]->pad_gamepad->input_magnitude == 0.0f) {
-                    selected_minikit = hub_minikitviewer_area;
-                }
+            const auto player_ready = [](GameObject_s *object) {
+                return object != NULL && static_cast<i8>(object->apiobj.flags_low) < 0 &&
+                       object->pad_gamepad->input_magnitude == 0.0f;
+            };
+            if (player_ready(Player[0]) || player_ready(Player[1])) {
+                selected_minikit = hub_minikitviewer_area;
             }
         }
         if (hub_minikitarea_time == 0.0f) {
@@ -1086,10 +1094,12 @@ void Hub_DrawPanel(WORLDINFO_s *) {
     if (hub_episode != -1 && hub_episode_time > 0.0f) {
         const i32 alpha = static_cast<i32>(128.0f * hub_episode_time);
         if (hub_episode == 6) {
-            i32 mini_count = 0, mini_total = 0, char_count = 0, char_total = 0;
-            i32 buildup_count = 0, buildup_total = 0, story_count = 0, story_total = 0;
-            i32 free_count = 0, free_total = 0, red_count = 0, red_total = 0;
-            for (i32 i = 0; i < EPISODECOUNT; ++i) {
+            i32 red_total = 0, red_count = 0, free_total = 0, free_count = 0;
+            i32 story_total = 0, story_count = 0, buildup_total = 0, buildup_count = 0;
+            i32 char_total = 0, char_count = 0, mini_total = 0, mini_count = 0;
+            i32 both_true_jedi_bricks;
+            i32 i = 0;
+            for (; i < EPISODECOUNT; ++i) {
                 Episode_CountOpenAreas(i, -1, Game.area_save);
                 mini_count += EpMiniKitCount;
                 mini_total += EpMiniKitTotal;
@@ -1097,7 +1107,8 @@ void Hub_DrawPanel(WORLDINFO_s *) {
                 char_total += EpCharKitTotal;
                 buildup_count += EpBuildUpCount;
                 buildup_total += EpBuildUpTotal;
-                if (BOTHTRUEJEDIGOLDBRICKS) {
+                both_true_jedi_bricks = BOTHTRUEJEDIGOLDBRICKS;
+                if (both_true_jedi_bricks) {
                     story_count += EpStoryBuildUpCount;
                     story_total += EpStoryBuildUpTotal;
                     free_count += EpFreePlayBuildUpCount;
@@ -1106,8 +1117,10 @@ void Hub_DrawPanel(WORLDINFO_s *) {
                 red_count += EpRedBrickCount;
                 red_total += EpRedBrickTotal;
             }
+            if (i == 0)
+                both_true_jedi_bricks = BOTHTRUEJEDIGOLDBRICKS;
             stats_xscale = 0.8f;
-            if (BOTHTRUEJEDIGOLDBRICKS) {
+            if (both_true_jedi_bricks) {
                 DrawBuildUpBar(HUB_AREAPANELX[1], HUB_EPISODESUBTITLEY + PANEL_MINIKITY - PANEL_MINIKITCOUNTY, 100, 100,
                                NU_SIN_LUT(static_cast<i32>(16384.0f * hub_episode_time)), 1.0f, 1.0f, 0);
                 sprintf(text, "%i/%i", story_count, story_total);
@@ -1151,14 +1164,15 @@ void Hub_DrawPanel(WORLDINFO_s *) {
             }
         } else if (hub_episode == 8) {
             i32 gold_count = 0, gold_total = 0, buildup_count = 0, buildup_total = 0;
-            for (i32 i = 0; i < AREACOUNT; ++i) {
-                AREADATA *area = &ADataList[i];
+            AREADATA *area = ADataList;
+            AREASAVE_s *save = Game.area_save;
+            for (i32 i = 0; i < AREACOUNT; ++i, ++area, ++save) {
                 if (area == HUB_ADATA || (area->flags & 0x22) || area->episode_index != 0xff || (area->flags & 0x2010))
                     continue;
                 if (area->flags & 0x100) {
                     if (GOLDBRICKFORSUPERBONUS) {
                         ++gold_total;
-                        if (Game.area_save[i].area_complete)
+                        if (save->area_complete)
                             ++gold_count;
                     }
                     continue;
@@ -1166,12 +1180,12 @@ void Hub_DrawPanel(WORLDINFO_s *) {
                 if (area->flags & 4 || area->flags & 0x800)
                     continue;
                 ++gold_total;
-                if (Game.area_save[i].area_complete)
+                if (save->area_complete)
                     ++gold_count;
                 if (area->flags & 0x4000) {
                     ++gold_total;
                     ++buildup_total;
-                    if (Game.area_save[i].story_buildup_complete || Game.area_save[i].freeplay_buildup_complete) {
+                    if (save->true_hero_complete[0] || save->true_hero_complete[1]) {
                         ++gold_count;
                         ++buildup_count;
                     }
@@ -1347,34 +1361,23 @@ void Hub_DrawPanel(WORLDINFO_s *) {
                             green = menu_flash ? MENUFLASH0G : MENUFLASH1G;
                             blue = menu_flash ? MENUFLASH0B : MENUFLASH1B;
                         }
-                    } else {
-                        if (menu_pulse > 0.0f) {
-                            red = static_cast<i32>(static_cast<u32>(MENUFLASH0R) * menu_pulse +
-                                                   static_cast<u32>(MENUNORMALR) * (1.0f - menu_pulse));
-                            green = static_cast<i32>(static_cast<u32>(MENUFLASH0G) * menu_pulse +
-                                                     static_cast<u32>(MENUNORMALG) * (1.0f - menu_pulse));
-                            blue = static_cast<i32>(static_cast<u32>(MENUFLASH0B) * menu_pulse +
-                                                    static_cast<u32>(MENUNORMALB) * (1.0f - menu_pulse));
-                        } else {
-                            red = MENUENTRYR;
-                            green = MENUENTRYG;
-                            blue = MENUENTRYB;
-                        }
-                    }
-                } else {
-                    if (menu_pulse > 0.0f) {
-                        red = static_cast<i32>(static_cast<u32>(MENUFLASH0R) * menu_pulse +
-                                               static_cast<u32>(MENUNORMALR) * (1.0f - menu_pulse));
-                        green = static_cast<i32>(static_cast<u32>(MENUFLASH0G) * menu_pulse +
-                                                 static_cast<u32>(MENUNORMALG) * (1.0f - menu_pulse));
-                        blue = static_cast<i32>(static_cast<u32>(MENUFLASH0B) * menu_pulse +
-                                                static_cast<u32>(MENUNORMALB) * (1.0f - menu_pulse));
-                    } else {
-                        red = MENUENTRYR;
-                        green = MENUENTRYG;
-                        blue = MENUENTRYB;
+                        goto hub_episode_colour_ready;
                     }
                 }
+                // Touch selection and the other entries share the normal menu pulse.
+                if (menu_pulse > 0.0f) {
+                    red = static_cast<i32>(static_cast<u32>(MENUFLASH0R) * menu_pulse +
+                                           static_cast<u32>(MENUNORMALR) * (1.0f - menu_pulse));
+                    green = static_cast<i32>(static_cast<u32>(MENUFLASH0G) * menu_pulse +
+                                             static_cast<u32>(MENUNORMALG) * (1.0f - menu_pulse));
+                    blue = static_cast<i32>(static_cast<u32>(MENUFLASH0B) * menu_pulse +
+                                            static_cast<u32>(MENUNORMALB) * (1.0f - menu_pulse));
+                } else {
+                    red = MENUENTRYR;
+                    green = MENUENTRYG;
+                    blue = MENUENTRYB;
+                }
+            hub_episode_colour_ready:
                 size *= grow;
                 f32 opacity = phase;
                 if (!Episode_CountOpenAreas(i, -1, Game_AreaSave))
@@ -1384,8 +1387,9 @@ void Hub_DrawPanel(WORLDINFO_s *) {
                 const i32 bonus = Episode_FindAreaFromFlags(&EDataList[i], 5, 5);
                 i32 object = 167;
                 if (bonus != -1 && Game_AreaSave &&
-                    (Game_AreaSave[bonus].area_complete || static_cast<f32>(ADataList[bonus].challenge_trial_time) >
-                                                               Game_AreaSave[bonus].challenge_trial_time))
+                    (Game_AreaSave[bonus].area_complete ||
+                     static_cast<f32>(static_cast<i32>(ADataList[bonus].challenge_trial_time)) >
+                         Game_AreaSave[bonus].challenge_trial_time))
                     object = 168;
                 const f32 scale = icon_size * size;
                 DrawPanel3DObject(x, y, 1.0f, scale, scale, scale, 0, 0, 0, &WORLD->lev_objs[object].special, 0,
@@ -1622,6 +1626,14 @@ static inline void MiniKitRotateZ(NUMTX *m, NUANG a) {
     m->m31 = m30 * sinx + m->m31 * cosx;
 }
 
+static inline HUBAREAINFO_s *Hub_FindAreaInfoByIndex(i32 area) {
+    for (HUBAREAINFO_s *info = HubAreaInfo; info->area_name != NULL; ++info) {
+        if (info->area != NULL && area == info->area->index)
+            return info;
+    }
+    return NULL;
+}
+
 void Hub_DrawMiniKits(WORLDINFO_s *world) {
     if (world->minikit_pieces_buf == NULL || world->hub_minikits == NULL)
         return;
@@ -1637,21 +1649,16 @@ void Hub_DrawMiniKits(WORLDINFO_s *world) {
         }
     }
     for (i32 index = 0; index < count; ++index) {
+        HUBMINIKIT_s *kit = world->hub_minikits;
         const i32 area = areas[index];
         HUBMINIKITPIECES_s *pieces = world->minikit_pieces_buf[area];
         if (pieces == NULL || ADataList[area].minikit_id == -1)
             continue;
-        HUBAREAINFO_s *info;
-        for (info = HubAreaInfo; info->area_name != NULL; ++info) {
-            if (info->area != NULL && area == info->area->index)
-                break;
-        }
-        if (info->area_name == NULL)
-            info = NULL;
+        HUBAREAINFO_s *info = Hub_FindAreaInfoByIndex(area);
         f32 x;
-        if (area == areas[(selected + count - 2) % count])
+        if (area == areas[(selected + (count - 2)) % count])
             x = -4.0f;
-        else if (area == areas[(selected + count - 1) % count])
+        else if (area == areas[(selected + (count - 1)) % count])
             x = -2.0f;
         else if (area == areas[selected])
             x = 0.0f;
@@ -1666,31 +1673,31 @@ void Hub_DrawMiniKits(WORLDINFO_s *world) {
             x += (1.0f - (1.0f + NU_SIN_LUT((i32)(hub_minikitviewer_movewait * 32768.0f + 16384.0f))) * 0.5f) * 2.0f *
                  hub_minikitviewer_move;
         }
-        HUBMINIKIT_s *kit = &world->hub_minikits[area];
+        kit += area;
         const f32 scale = kit->scale;
-        const f32 lift = (1.0f - (1.0f + NU_SIN_LUT((i32)(scale * 32768.0f + 16384.0f))) * 0.5f) * 0.333f;
+        f32 lift = 1.0f - (1.0f + NU_SIN_LUT((i32)(scale * 32768.0f + 16384.0f))) * 0.5f;
         const u16 phase_x = (i32)(NU_SIN_LUT(kit->phase_x) * 910.0f);
         const u16 phase_z = (i32)(NU_SIN_LUT(kit->phase_z) * 910.0f);
         const u16 phase_y = (i32)(NU_SIN_LUT(kit->phase_y) * 910.0f);
+        lift *= 0.333f;
         const u16 rotation = (i32)(RotDiff(0, phase_y) * scale) + kit->rotation;
         const f32 bob = NU_SIN_LUT(kit->phase_rotation) * 0.025f * scale;
         const f32 tilt_scale = (info ? info->panel_scale : 1.0f) * scale;
-        NUMTX matrix, piece_matrix, reflected;
+        NUMTX matrix;
         MiniKitSetRotationX(&matrix, (i32)(RotDiff(0, kit->tilt) * tilt_scale));
         MiniKitRotateX(&matrix, (i32)(RotDiff(0, phase_x) * scale));
         MiniKitRotateZ(&matrix, (i32)(RotDiff(0, phase_z) * scale));
         MiniKitRotateY(&matrix, rotation);
         matrix.m30 = x + kit->offset_x;
-        matrix.m31 = hub_minikitviewer_pos.y;
-        matrix.m32 = hub_minikitviewer_pos.z;
-        matrix.m31 += lift + bob + (info ? info->panel_offset : 0.0f);
-        matrix.m32 += kit->offset_z;
+        matrix.m31 = hub_minikitviewer_pos.y + (lift + bob + (info ? info->panel_offset : 0.0f));
+        matrix.m32 = hub_minikitviewer_pos.z + kit->offset_z;
         NuMtxPreRotateZ(&matrix, (i32)(RotDiff(0, kit->rotation_velocity) * scale));
         for (i32 piece = 0; piece < pieces->piece_count; ++piece) {
             if (pieces->pieces[piece].enabled && NuSpecialExistsFn(&pieces->pieces[piece].special) &&
                 piece < kit->displayed_piece_count) {
-                piece_matrix = pieces->pieces[piece].matrix;
+                NUMTX piece_matrix = pieces->pieces[piece].matrix;
                 NuMtxMulVU0(&piece_matrix, &piece_matrix, &matrix);
+                NUMTX reflected;
                 const i32 drawn = NuSpecialDrawAt(&pieces->pieces[piece].special, &piece_matrix);
                 if (HUB_MINIKITVIEWER_REFLECTY != 2000000.0f &&
                     MatrixReflection(&piece_matrix, 2, HUB_MINIKITVIEWER_REFLECTY, 2000000.0f, &reflected)) {
@@ -1701,11 +1708,12 @@ void Hub_DrawMiniKits(WORLDINFO_s *world) {
             }
         }
         if (NuSpecialExistsFn(&pieces->base.special)) {
-            NuMtxSetRotationY(&piece_matrix, rotation);
-            piece_matrix.m30 = x;
-            piece_matrix.m31 = 0.143f;
-            piece_matrix.m32 = hub_minikitviewer_pos.z;
-            NuSpecialDrawAtAlpha(&pieces->base.special, &piece_matrix, 1.0f - 0.5f * kit->scale);
+            NUMTX base_matrix;
+            NuMtxSetRotationY(&base_matrix, rotation);
+            base_matrix.m30 = x;
+            base_matrix.m31 = 0.143f;
+            base_matrix.m32 = hub_minikitviewer_pos.z;
+            NuSpecialDrawAtAlpha(&pieces->base.special, &base_matrix, 1.0f - 0.5f * kit->scale);
         }
     }
     SetLevelLights(world->rtl_set, 1.0f);
@@ -1810,13 +1818,13 @@ void Hub_DrawAreaStats(f32 phase, i32 area_index, i32 mode) {
             if (BOTHTRUEJEDIGOLDBRICKS == 0) {
                 DrawBuildUpBar(HUB_AREAPANELX[1], HUB_EPISODETITLEY + PANEL_MINIKITY - PANEL_MINIKITCOUNTY, 100, 100,
                                icon_phase, 1.0f, 1.0f, 0);
-                NuStrCpy(text, (save->story_buildup_complete || save->freeplay_buildup_complete) ? "$" : "X");
+                NuStrCpy(text, (save->true_hero_complete[0] || save->true_hero_complete[1]) ? "$" : "X");
                 Text3DEx(text, HUB_AREAPANELX[1], HUB_EPISODETITLEY, 1.0f, PANEL_MINIKITCOUNTSCALE,
                          PANEL_MINIKITCOUNTSCALE, PANEL_MINIKITCOUNTSCALE, 0, 255, 0, 127, static_cast<u8>(alpha));
             } else {
                 DrawBuildUpBar(HUB_AREAPANELX[1], HUB_EPISODETITLEY + PANEL_MINIKITY - PANEL_MINIKITCOUNTY, 100, 100,
                                icon_phase, 1.0f, 1.0f, 0);
-                NuStrCpy(text, save->story_buildup_complete ? "$" : "X");
+                NuStrCpy(text, save->true_hero_complete[0] ? "$" : "X");
                 Text3DEx(text, HUB_AREAPANELX[1], HUB_EPISODETITLEY, 1.0f, PANEL_MINIKITCOUNTSCALE,
                          PANEL_MINIKITCOUNTSCALE, PANEL_MINIKITCOUNTSCALE, 0, 255, 0, 127, static_cast<u8>(alpha));
                 SmartTextEx(TTab[tSTORY], HUB_AREAPANELX[1], HUB_EPISODETITLEY + 0.235f, 1.0f, 0.45f, 0.45f, 0.45f, 0,
@@ -1824,7 +1832,7 @@ void Hub_DrawAreaStats(f32 phase, i32 area_index, i32 mode) {
 
                 DrawBuildUpBar(HUB_AREAPANELX[4], HUB_EPISODETITLEY + PANEL_MINIKITY - PANEL_MINIKITCOUNTY, 100, 100,
                                icon_phase, 1.0f, 1.0f, 0);
-                NuStrCpy(text, save->freeplay_buildup_complete ? "$" : "X");
+                NuStrCpy(text, save->true_hero_complete[1] ? "$" : "X");
                 Text3DEx(text, HUB_AREAPANELX[4], HUB_EPISODETITLEY, 1.0f, PANEL_MINIKITCOUNTSCALE,
                          PANEL_MINIKITCOUNTSCALE, PANEL_MINIKITCOUNTSCALE, 0, 255, 0, 127, static_cast<u8>(alpha));
                 SmartTextEx(TTab[tFREEPLAY], HUB_AREAPANELX[4], HUB_EPISODETITLEY + 0.235f, 1.0f, 0.45f, 0.45f, 0.45f,
@@ -1860,7 +1868,7 @@ void Hub_DrawAreaStats(f32 phase, i32 area_index, i32 mode) {
     if ((flags & 0x4000) != 0) {
         build_x = 0.20100002f;
         if ((flags & 0x800) == 0) {
-            const i32 gold_count = 1 + (save->story_buildup_complete || save->freeplay_buildup_complete);
+            const i32 gold_count = 1 + (save->true_hero_complete[0] || save->true_hero_complete[1]);
             Hub_DrawImportantBrick(211, -0.20100002f, HUB_EPISODETITLEY, phase, gold_count, 2);
         }
     } else if ((flags & 0x800) == 0) {
@@ -1873,7 +1881,7 @@ void Hub_DrawAreaStats(f32 phase, i32 area_index, i32 mode) {
     if ((area->flags & 0x4000) != 0) {
         DrawBuildUpBar(build_x, HUB_EPISODETITLEY + PANEL_MINIKITY - PANEL_MINIKITCOUNTY, 100, 100,
                        NU_SIN_LUT(static_cast<i32>(16384.0f * phase)), 1.0f, 1.0f, 0);
-        NuStrCpy(text, (save->story_buildup_complete || save->freeplay_buildup_complete) ? "$" : "X");
+        NuStrCpy(text, (save->true_hero_complete[0] || save->true_hero_complete[1]) ? "$" : "X");
         Text3DEx(text, build_x, HUB_EPISODETITLEY, 1.0f, PANEL_MINIKITCOUNTSCALE, PANEL_MINIKITCOUNTSCALE,
                  PANEL_MINIKITCOUNTSCALE, 0, 255, 0, 127, static_cast<u8>(alpha));
     }
@@ -2036,13 +2044,7 @@ void Hub_UpdateMiniKits(WORLDINFO_s *world) {
         i32 model = ADataList[i].minikit_id;
         if (model != -1 && world->hub_minikits != NULL) {
             HUBMINIKIT_s *current = &world->hub_minikits[i];
-            HUBAREAINFO_s *info = HubAreaInfo;
-            for (; info->area_name != NULL; ++info) {
-                if (info->area != NULL && info->area->index == i)
-                    break;
-            }
-            if (info->area_name == NULL)
-                info = NULL;
+            HUBAREAINFO_s *info = Hub_FindAreaInfoByIndex(i);
             CHARACTERDATA *data = &CDataList[model];
             current->radius = data->collision_radius;
             current->height_ratio = (data->bounds_max_y - data->bounds_min_y) / (data->collision_radius * 2.0f);
@@ -2942,7 +2944,7 @@ static void Hub_DrawMiniKitCount(f32 x, f32 y, i32 count, i32 total, f32 alpha) 
              0, 255, 0, 127, static_cast<u8>(static_cast<i32>(128.0f * alpha)));
     const u16 rotation = (NuFmod(GlobalTimer.time_elapsed, 4.0f) * 0.25f) * 65536.0f;
     const f32 scale = NU_SIN_LUT(static_cast<i32>(alpha * 16384.0f)) * PANEL_MINIKITSCALE;
-    const u16 tilt = 1820.0f * NuTrigTable[rotation & 0x7fff];
+    const i16 tilt = 1820.0f * NuTrigTable[rotation & 0x7fff];
     DrawPanel3DObjectNoAlpha(x, y + PANEL_MINIKITY - PANEL_MINIKITCOUNTY, 1.0f, scale, scale, scale, tilt, rotation, 0,
                              &WORLD->lev_objs[object].special, 2);
 }

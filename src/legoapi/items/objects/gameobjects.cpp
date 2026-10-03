@@ -2454,14 +2454,13 @@ void GameAIProcess() {
     }
     u64 awareness = 0;
     NUVEC wall_direction;
-    NUVEC direction, forward;
-    NUVEC lateral, ray, movement;
     u8 shifted_flag;
     u8 cleared_flag;
     object = Obj;
     APIOBJECT **interactive_cursor = interactive_objects;
     APIOBJECT **baddy_cursor = baddies + baddy_count;
     for (i32 index = 0; index < HIGHGAMEOBJECT; ++index, ++object) {
+        NUVEC direction;
         i32 ground_checks;
         u8 ai_update_flags;
         GAMEPAD_s *pad;
@@ -2477,7 +2476,6 @@ void GameAIProcess() {
             ground_checks = (object->apiobj.character_data->model_flags >> 13) & 1;
         }
 
-        ai_update_flags = object->field_0xf00;
         if ((object->apiobj.field_0x1f4 & 0x400) != 0) {
             if ((object->apiobj.field_0x1f4 & 0x10000) != 0) {
                 ++baddy_count;
@@ -2535,6 +2533,9 @@ void GameAIProcess() {
             pad->unknown_20 = 0;
         }
         awareness |= object->apiobj.ai_awareness_mask;
+        // Network-controlled objects use the direct field test above. The
+        // scripted path snapshots its update flags after resetting the pad.
+        ai_update_flags = object->field_0xf00;
         if ((ai_update_flags & GAME_OBJECT_AI_UPDATE_PROCESS) != 0) {
             object->script_fire_target = NULL;
             shifted_flag = (object->field_0xef9 << 1) & 4;
@@ -2562,6 +2563,7 @@ void GameAIProcess() {
             if ((object->field_0xef8 & 0x80) != 0 && object->ai.opponent_object != NULL) {
                 BOLTTYPE_s *bolt = BoltType_FindByID(0, WORLD);
                 if (bolt->field_10 * bolt->field_14 > object->ai.opponent_metric) {
+                    NUVEC forward;
                     NuVecSub(&direction, &object->ai.opponent_object->collision_position,
                              &object->apiobj.collision_position);
                     f32 scale = object->ai.opponent_metric == 0.0f ? 0.0f : 1.0f / object->ai.opponent_metric;
@@ -2654,9 +2656,9 @@ void GameAIProcess() {
             if (connection != NULL && (connection->traversal_flags[object->ai.path_info.direction] &
                                        object->ai.capabilities & LEGO_AIPATHCNX_WALLSHUFFLE) != 0)
                 goto ai_wall_shuffle;
-            if (!(object->apiobj.movement_stuck_time > jump_stuck_time && (object->ai.path_info.flags & 1) != 0 &&
-                  object->ai.path_connection_state == 0))
-                goto ai_after_wall_shuffle;
+            if (!(object->ai.path_connection_state == 0 && (object->ai.path_info.flags & 1) != 0 &&
+                  object->apiobj.movement_stuck_time > jump_stuck_time))
+                goto ai_route;
             if (object->apiobj.supporting_platform_id != -1 && connection != NULL &&
                 (connection->original_traversal_flags[0] & LEGO_AIPATHCNX_BLOCKAGE) != 0) {
                 if ((object->apiobj.character_data->model_flags & 0x88) != 0) {
@@ -2682,8 +2684,9 @@ void GameAIProcess() {
             } else {
                 object->ai.field_0x1e6 |= AIPACKET_RUNTIME_USING_PATH_WAYPOINT;
             }
-            goto ai_after_wall_shuffle;
+            goto ai_route;
         ai_wall_shuffle: {
+            NUVEC lateral, ray, movement;
             object->field_0xf02 |= 1;
             AIPATHNODE *nodes = object->ai.path_info.path->nodes;
             i32 direction = object->ai.path_info.direction;
@@ -2752,8 +2755,8 @@ void GameAIProcess() {
             object->ai.movement_position.y = object->apiobj.position.y;
             object->ai.movement_position.z = object->apiobj.position.z + movement.z;
         }
-        ai_after_wall_shuffle:;
         }
+    ai_route:
         if (FreePlay != 0 && (object->apiobj.field_0x1f4 & 0x400) == 0) {
             if ((object->apiobj.flags_low & 0x80) == 0 && object->character_context != 0x0b) {
                 if (drop_in_teleport == 1 && VehicleArea == 0 && (Arcade != 0 || teleport_all_freeplay_modes != 0) &&
@@ -2807,18 +2810,20 @@ void GameAIProcess() {
                             if (object->id == id_DROIDEKA)
                                 Player_ToggleCharacter(object, 1, 0);
                             object->input_toggle_hold_time = object->apiobj.model_draw_result != 0 ? 0.25f : 0.0f;
-                            if (object->id == object->route_character_id &&
-                                Suit_GetIndex(static_cast<SUIT_s *>(object->suit)) == object->route_suit_index) {
-                                Player_ToggleCharacter(object, -1, 0);
-                                if (object->id == id_DROIDEKA)
+                            if (object->id == object->route_character_id) {
+                                const i32 route_suit_index = object->route_suit_index;
+                                if (Suit_GetIndex(static_cast<SUIT_s *>(object->suit)) == route_suit_index) {
                                     Player_ToggleCharacter(object, -1, 0);
-                                object->route_character_id = object->id;
-                                object->route_suit_index = Suit_GetIndex(static_cast<SUIT_s *>(object->suit));
-                                object->ai.next_route = object->route_search_index;
-                                AISysFindRoute(&object->ai);
-                                object->route_search_index = object->ai.next_route;
-                                if (object->route_search_index == object->route_start_index)
-                                    object->field_0xefc |= 0x40;
+                                    if (object->id == id_DROIDEKA)
+                                        Player_ToggleCharacter(object, -1, 0);
+                                    object->route_character_id = object->id;
+                                    object->route_suit_index = Suit_GetIndex(static_cast<SUIT_s *>(object->suit));
+                                    object->ai.next_route = object->route_search_index;
+                                    AISysFindRoute(&object->ai);
+                                    object->route_search_index = object->ai.next_route;
+                                    if (object->route_search_index == object->route_start_index)
+                                        object->field_0xefc |= 0x40;
+                                }
                             }
                         }
                     }
@@ -2856,10 +2861,12 @@ void GameAIProcess() {
                 if ((object->ai.path_info.flags & 1) == 0 || object->ai.path_info.connection == NULL)
                     object->apiobj.collision_priority |= 0x400;
                 if (object->ai.movement_parameter == 0.0f) {
-                    f32 x = object->ai.fallback_destination.x - object->apiobj.position.x;
-                    f32 z = object->ai.fallback_destination.z - object->apiobj.position.z;
-                    f32 radius = object->ai.mover_height + 1.0f;
-                    if (x * x + z * z < radius * radius)
+                    const f32 delta_x = object->ai.fallback_destination.x - object->apiobj.position.x;
+                    const f32 delta_z = object->ai.fallback_destination.z - object->apiobj.position.z;
+                    const f32 radius = object->ai.mover_height + 1.0f;
+                    direction.x = delta_x;
+                    direction.z = delta_z;
+                    if (direction.x * direction.x + direction.z * direction.z < radius * radius)
                         object->apiobj.collision_priority |= 0x200;
                 }
             }
@@ -2910,10 +2917,10 @@ void GameAIProcess() {
         LEGO_AISysCreatureInteraction2D(WORLD->ai_sys, interactive_count, interactive_objects, NULL, FRAMETIME);
     } else {
         for (i32 index = 0; index < interactive_count; ++index) {
-            f32 timer = interactive_objects[index]->ai->antinode_timer - FRAMETIME;
-            if (timer < 0.0f)
-                timer = 0.0f;
-            interactive_objects[index]->ai->antinode_timer = timer;
+            AIPACKET *packet = interactive_objects[index]->ai;
+            packet->antinode_timer -= FRAMETIME;
+            if (packet->antinode_timer < 0.0f)
+                packet->antinode_timer = 0.0f;
         }
         for (i32 first_index = 0; first_index < interactive_count - 1; ++first_index) {
             APIOBJECT *first = interactive_objects[first_index];
@@ -4546,22 +4553,23 @@ void GameCreatureOpponentSelection(AISYS_s *system, i32 count, APIOBJECT_s **obj
                             distance = difference.x * difference.x + difference.z * difference.z;
                             if (!(object->heardistance * object->heardistance > distance))
                                 continue;
-                            const f32 dx = alert_obj->apiobj.collision_position.x - object->collision_position.x;
-                            const f32 dz = alert_obj->apiobj.collision_position.z - object->collision_position.z;
-                            if ((WORLD->api_object_sys->line_of_sight[object->field_0x289] & alert_mask) != 0 ||
-                                dx * dx + dz * dz > object->viewdistance * object->viewdistance) {
-                                object->objptr->alert_target = &alert_obj->apiobj;
-                                object->ai_awareness_mask |= alert_mask;
-                                awareness |= object->ai_awareness_mask;
-                                object->objptr->alert_target_timer = 5.0f;
+                            if ((WORLD->api_object_sys->line_of_sight[object->field_0x289] & alert_mask) == 0) {
+                                const f32 dx = alert_obj->apiobj.collision_position.x - object->collision_position.x;
+                                const f32 dz = alert_obj->apiobj.collision_position.z - object->collision_position.z;
+                                if (!(dx * dx + dz * dz > object->viewdistance * object->viewdistance))
+                                    continue;
                             }
+                            object->objptr->alert_target = &alert_obj->apiobj;
+                            object->ai_awareness_mask |= alert_mask;
+                            awareness |= object->ai_awareness_mask;
+                            object->objptr->alert_target_timer = 5.0f;
                         }
                     }
                 }
             }
         }
         alert_timer -= FRAMETIME;
-        if (!(alert_timer > 0.0f))
+        if (alert_timer <= 0.0f)
             alert_obj = NULL;
     }
     if (system->goody_idx >= goody_count)
@@ -4829,7 +4837,10 @@ static void LightSabreStreakCode(GameObject_s *object, i32 blade, i32 effect) {
         return;
     object->blade_states[blade] = -1;
     NUVEC points[3];
-    points[0] = *NUMTX_GET_ROW_VEC(&object->joint_matrices[joint_a], 3);
+    memcpy(&points[0],
+           reinterpret_cast<const u8 *>(object) + offsetof(GameObject_s, joint_matrices) + joint_a * sizeof(NUMTX) +
+               offsetof(NUMTX, m30),
+           sizeof(points[0]));
     points[1] = *NUMTX_GET_ROW_VEC(&object->joint_matrices[joint_b], 3);
     if ((object->sabre_flags & 2) != 0) {
         i32 colour;
@@ -4844,17 +4855,17 @@ static void LightSabreStreakCode(GameObject_s *object, i32 blade, i32 effect) {
         else
             colour = static_cast<i8>(GCDataList[object->id].field_0x117);
         object->blade_states[blade] = colour;
+        const u8 *rgb = BladeTab[colour].colour;
+        const u32 red = rgb[0], green = rgb[1], blue = rgb[2];
         if (object->apiobj.model_draw_result != 0) {
-            const u8 *rgb = BladeTab[colour].colour;
-            const u32 packed = 0xff000000u | rgb[0] | (rgb[1] << 8) | (rgb[2] << 16);
+            const u32 packed = 0xff000000u | red | (green << 8) | (blue << 16);
             AddStreakPoints(points, 0.25f, packed, &object->sabre_streaks[blade][0], 0, object);
             if (object->field_0x1087 != 0 && object->field_0x1020 != 2000000.0f) {
                 f32 plane = object->field_0x1020;
                 if (WORLD->current_level->unknown_0cc != 2000000.0f)
                     plane = WORLD->current_level->unknown_0cc;
-                NUVEC reflected[2] = {points[0], points[1]};
-                reflected[0].y = plane - (reflected[0].y - plane);
-                reflected[1].y = plane - (reflected[1].y - plane);
+                NUVEC reflected[2] = {{points[0].x, plane - (points[0].y - plane), points[0].z},
+                                      {points[1].x, plane - (points[1].y - plane), points[1].z}};
                 AddStreakPoints(reflected, 0.25f, packed, &object->sabre_streaks[blade][1], 1, object);
             }
         }
@@ -4885,8 +4896,12 @@ static void LightSabreStreakCode(GameObject_s *object, i32 blade, i32 effect) {
     NUVEC maximum = {points[2].x + extent, points[2].y + extent, points[2].z + extent};
     if ((object->sabre_flags & 4) != 0) {
         NUVEC direction;
-        NuVecRotateY(&direction, &v001,
-                     static_cast<u16>(object->apiobj.facing_angle + (object->character_context == 16 ? 0x8000 : 0)));
+        u16 angle;
+        if (object->character_context == 16)
+            angle = object->apiobj.field_0x276 + 0x8000;
+        else
+            angle = object->apiobj.field_0x276;
+        NuVecRotateY(&direction, &v001, angle);
         NuVecScale(&difference, &direction, 0.2f);
         NuVecAdd(&points[0], &object->apiobj.collision_position, &difference);
         NuVecScale(&difference, &direction, 0.5f);
@@ -4926,11 +4941,10 @@ static void LightSabreStreakCode(GameObject_s *object, i32 blade, i32 effect) {
                 continue;
             GAMECHARACTERDATA *target_data =
                 static_cast<GAMECHARACTERDATA *>(target->apiobj.character_data->field11_0x24);
-            // Ordered comparisons reject an unordered bound in the original SSE tests.
-            if ((target_data->flags_090 & 0x8000) != 0 || !(target->apiobj.collision_min.x <= maximum.x) ||
-                !(minimum.x <= target->apiobj.collision_max.x) || !(target->apiobj.collision_min.z <= maximum.z) ||
-                !(minimum.z <= target->apiobj.collision_max.z) || !(target->apiobj.collision_min.y <= maximum.y) ||
-                !(minimum.y <= target->apiobj.collision_max.y))
+            if ((target_data->flags_090 & 0x8000) != 0 || target->apiobj.collision_min.x > maximum.x ||
+                minimum.x > target->apiobj.collision_max.x || target->apiobj.collision_min.z > maximum.z ||
+                minimum.z > target->apiobj.collision_max.z || target->apiobj.collision_min.y > maximum.y ||
+                minimum.y > target->apiobj.collision_max.y)
                 continue;
             for (i32 point = 2; point >= 0; --point) {
                 if (!SphereSphereOverlapScaleY(&target->apiobj.collision_position, target->apiobj.field_0x1dc,
@@ -4947,10 +4961,9 @@ static void LightSabreStreakCode(GameObject_s *object, i32 blade, i32 effect) {
                         }
                         NuVecNorm(&difference, &difference);
                         target_data = static_cast<GAMECHARACTERDATA *>(target->apiobj.character_data->field11_0x24);
-                        target->apiobj.movement_direction.x =
-                            difference.x * target_data->walk_speed + target->apiobj.velocity.x;
-                        target->apiobj.movement_direction.z =
-                            target_data->walk_speed * difference.z + target->apiobj.velocity.z;
+                        const f32 walk_speed = target_data->walk_speed;
+                        target->apiobj.movement_direction.x = difference.x * walk_speed + target->apiobj.velocity.x;
+                        target->apiobj.movement_direction.z = walk_speed * difference.z + target->apiobj.velocity.z;
                         const f32 speed = target_data->run_speed;
                         const f32 speed_squared =
                             target->apiobj.movement_direction.x * target->apiobj.movement_direction.x +
@@ -5003,8 +5016,8 @@ static void LightSabreStreakCode(GameObject_s *object, i32 blade, i32 effect) {
             }
             return;
         }
-        if ((object->sabre_flags & 4) != 0 &&
-            ((object->apiobj.flags_low & 0x80) != 0 || (object->field_0xef8 & 0x40) != 0 || object->use_action == 5)) {
+        if (((object->apiobj.flags_low & 0x80) != 0 || (object->field_0xef8 & 0x40) != 0 || object->use_action == 5) &&
+            (object->sabre_flags & 4) != 0) {
             if ((object->apiobj.flags_low & 0x80) == 0 && object->apiobj.model_draw_result == 0) {
                 if (object->blowup_target == NULL)
                     return;
@@ -5040,8 +5053,16 @@ void GameObjectStuffAfterAnimation() {
         if ((object->apiobj.field_0x1f8 & 0x1001) != 0x1001 || object->apiobj.field_0x287 != 0 ||
             object->apiobj.field_0x288 == 0)
             continue;
-        const bool drawn = object->apiobj.model_draw_result != 0;
-        if (drawn || (object->field_0x1050 & 4) != 0) {
+        ADDPART_s part;
+        NUMTX matrix;
+        NUVEC points[2];
+        bool drawn = true;
+        if (object->apiobj.model_draw_result == 0) {
+            drawn = false;
+            if ((object->field_0x1050 & 4) == 0)
+                goto after_shooting_and_streaks;
+        }
+        {
             if (object->script_fire_target != NULL && (object->script_fire_target->apiobj.field_0x1f8 & 1) == 0)
                 object->script_fire_target = NULL;
             if (static_cast<i8>(object->quick_shoot_bolt_id) != -1) {
@@ -5049,10 +5070,10 @@ void GameObjectStuffAfterAnimation() {
                     GameAudio_PlaySfxById(
                         static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24)->sfx_shoot,
                         &object->apiobj.collision_position, 0, 0);
-                    NUMTX matrix;
                     // The original reacquires the locator after the audio callback.
-                    i32 joint = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24)
-                                    ->weapon_shoot_joints[0];
+                    i32 joint = drawn ? static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24)
+                                            ->weapon_shoot_joints[0]
+                                      : -1;
                     if (drawn && joint != -1 && object->apiobj.character_model->points_of_interest[joint] != NULL)
                         matrix = object->joint_matrices[joint];
                     else {
@@ -5062,7 +5083,7 @@ void GameObjectStuffAfterAnimation() {
                     NUVEC velocity = {0.0f, 2.0f * (static_cast<f32>(qrand()) * (1.0f / 65535.0f)),
                                       -(3.0f + 2.0f * (static_cast<f32>(qrand()) * (1.0f / 65535.0f)))};
                     NuVecMtxRotate(&velocity, &velocity, &matrix);
-                    ADDPART_s part = Default_ADDPART;
+                    part = Default_ADDPART;
                     part.matrix = &matrix;
                     part.velocity = &velocity;
                     part.field_28 = 90;
@@ -5088,8 +5109,8 @@ void GameObjectStuffAfterAnimation() {
         }
         if (drawn && ((object->apiobj.character_data->model_flags & 8) != 0 || object->id == id_BODYGUARD ||
                       object->id == id_IMPERIALGUARD)) {
-            GAMECHARACTERDATA *data = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
             const i32 effect = object->blade_index == -1 ? -1 : BladeTab[object->blade_index].hit_effect;
+            GAMECHARACTERDATA *data = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
             if ((data->field275_0x116 == 3 || object->id == id_GRIEVOUS || object->id == id_COUNTDOOKU) &&
                 object->character_context == 0 && object->action_movement_state == 3)
                 object->sabre_flags |= 2;
@@ -5162,6 +5183,7 @@ void GameObjectStuffAfterAnimation() {
             } else
                 LightSabreStreakCode(object, 0, effect);
         }
+    after_shooting_and_streaks:
         const i32 debris_joint = static_cast<i8>(object->pad_e3c[1]);
         if (debris_joint != -1)
             AddGameDebris(WORLD->debris_sys, (object->movement_runtime_flags & 1) != 0 ? 139 : 138,
@@ -5170,8 +5192,7 @@ void GameObjectStuffAfterAnimation() {
             CHARACTERANIM_s *animation =
                 static_cast<CHARACTERANIM_s *>(object->apiobj.character_model->model_data_a[object->context_animation]);
             if (animation != NULL && static_cast<i8>(animation->locator) != -1 &&
-                ((object->context_flags & 0x40) == 0 || debris_joint != -1)) {
-                NUVEC points[2];
+                ((object->context_flags & 0x40) == 0 || static_cast<i8>(object->pad_e3c[1]) != -1)) {
                 points[0] = points[1] =
                     *NUMTX_GET_ROW_VEC(&object->joint_matrices[static_cast<i8>(animation->locator)], 3);
                 points[0].y += 0.075f;
@@ -5186,7 +5207,6 @@ void GameObjectStuffAfterAnimation() {
         if (static_cast<i8>(object->field_0xe22) < 0)
             SuperCarry_Throw(object, 0);
         if ((object->field_0xe20 & 0x10) != 0) {
-            NUMTX matrix;
             i32 joint =
                 drawn ? static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24)->rocket_locator
                       : -1;
@@ -5199,7 +5219,7 @@ void GameObjectStuffAfterAnimation() {
             }
             NUVEC velocity = {0.0f, 0.0f, -1.0f};
             NuVecMtxRotate(&velocity, &velocity, &matrix);
-            ADDPART_s part = Default_ADDPART;
+            part = Default_ADDPART;
             part.matrix = &matrix;
             part.velocity = &velocity;
             part.field_14 = 0.1f;
@@ -5249,7 +5269,6 @@ void GameObjectStuffAfterAnimation() {
                 i32 joint_b = blade_data->streak_joints[blade][1];
                 if (joint_b == -1 || object->apiobj.character_model->points_of_interest[joint_b] == NULL)
                     continue;
-                NUVEC points[2];
                 points[0] = *NUMTX_GET_ROW_VEC(&object->joint_matrices[joint_a], 3);
                 points[1] = *NUMTX_GET_ROW_VEC(&object->joint_matrices[joint_b], 3);
                 i32 colour = object->blade_states[blade];
@@ -5383,7 +5402,7 @@ void GameObjectStuffAfterAnimation() {
                 if (*key == -1)
                     AddDebrisEffect(key, WORLD->debris_sys->entries[136].effect, 0.0f, 0.0f, 0.0f);
                 else {
-                    NUMTX matrix = object->joint_matrices[2];
+                    matrix = object->joint_matrices[2];
                     NuMtxPreRotateX(&matrix, 0x4000);
                     DebrisPosOrientationMtx(*key, &matrix);
                 }
@@ -6974,7 +6993,7 @@ static void DrawPackButton(GAMEMESSAGE_s *message, nuvec_s *position, float scal
         u8 field_0x0[0x300];
         f32 price;
     } product;
-    char text[144];
+    char text[128];
 
     const f32 phase = NuFmod(GameTimer.time_elapsed_mod_seconds, 0.5f);
     const i32 angle = static_cast<i32>(phase * 2.0f * 65536.0f);
@@ -6988,48 +7007,36 @@ static void DrawPackButton(GAMEMESSAGE_s *message, nuvec_s *position, float scal
         goto purchases_disabled;
     {
         product.price = 0.0f;
-        NuIOS_GetInAppProductByID(
-            *reinterpret_cast<char **>(&StorePack[static_cast<i8>(message->field_0xfe)].field1_0x4),
-            reinterpret_cast<NuIOS_InAppProduct *>(&product));
+        NuIOS_GetInAppProductByID(StorePack[static_cast<i8>(message->field_0xfe)].product_id,
+                                  reinterpret_cast<NuIOS_InAppProduct *>(&product));
         sprintf(text, "%s ~0%.2f~~", TTab[StorePack[static_cast<i8>(message->field_0xfe)].message_text_index],
                 static_cast<double>(product.price));
         Text3DEx(text, position->x, label_y, position->z, scale, scale, scale, 4, message->red, message->green,
                  message->blue, alpha & 0xff);
 
         const f32 savings_height = text3d_height;
-        for (u32 *bundle_mask = &StoreBundle[0].pack_mask; bundle_mask != &StoreBundle[3].pack_mask; bundle_mask += 3) {
+        uintptr_t cursor = reinterpret_cast<uintptr_t>(&StoreBundle[0].pack_mask);
+        for (i32 count = 3; count != 0; --count, cursor += sizeof(STOREBUNDLE)) {
+            u32 *bundle_mask = reinterpret_cast<u32 *>(cursor);
             if ((*bundle_mask & (1 << static_cast<i8>(message->field_0xfe))) == 0)
                 continue;
             product.price = 0.0f;
-            NuIOS_GetInAppProductByID(*reinterpret_cast<char **>(bundle_mask - 1),
+            NuIOS_GetInAppProductByID(reinterpret_cast<STOREBUNDLE *>(cursor - offsetof(STOREBUNDLE, pack_mask))->name,
                                       reinterpret_cast<NuIOS_InAppProduct *>(&product));
             const f32 bundle_price = product.price;
             f32 pack_total = 0.0f;
-#define ADD_PACK_PRICE(index)                                                                                          \
-    if (__builtin_expect(Store_IsPackUnlocked(index), 0) == 0) {                                                       \
-        if (__builtin_expect((*bundle_mask & (1u << (index))) != 0, 1)) {                                              \
-            if (NuIOS_GetInAppProductByID(*reinterpret_cast<char **>(&StorePack[index].field1_0x4),                    \
-                                          reinterpret_cast<NuIOS_InAppProduct *>(&product)))                           \
-                pack_total += product.price;                                                                           \
-        }                                                                                                              \
-    }
-            ADD_PACK_PRICE(0);
-            ADD_PACK_PRICE(1);
-            ADD_PACK_PRICE(2);
-            ADD_PACK_PRICE(3);
-            ADD_PACK_PRICE(4);
-            ADD_PACK_PRICE(5);
-            ADD_PACK_PRICE(6);
-            ADD_PACK_PRICE(7);
-            ADD_PACK_PRICE(8);
-            ADD_PACK_PRICE(9);
-            ADD_PACK_PRICE(10);
-#undef ADD_PACK_PRICE
-            if (pack_total > bundle_price) {
-                Text3DEx(TTab[tBUNDLESAVINGSAVAILABLE], position->x, label_y - savings_height, position->z, scale,
-                         scale, scale, 4, 0, 191, 255, alpha & 0xff);
-                break;
+            for (i32 index = 0; index < 11; ++index) {
+                if (__builtin_expect(Store_IsPackUnlocked(index), 0) == 0 &&
+                    __builtin_expect((*bundle_mask & (1u << index)) != 0, 1) &&
+                    NuIOS_GetInAppProductByID(StorePack[index].product_id,
+                                              reinterpret_cast<NuIOS_InAppProduct *>(&product)))
+                    pack_total += product.price;
             }
+            if (!(pack_total > bundle_price))
+                continue;
+            Text3DEx(TTab[tBUNDLESAVINGSAVAILABLE], position->x, label_y - savings_height, position->z, scale, scale,
+                     scale, 4, 0, 191, 255, alpha & 0xff);
+            break;
         }
     }
 
@@ -7683,6 +7690,10 @@ void AddSurfaceDebris(GameObject_s *);
 void GameAntinode_Update(GAMEANTINODESYS_s *system);
 
 void UpdateGameObjects(WORLDINFO_s *world) {
+    // The three message paths reuse the same record in the original. Its
+    // text scratch starts at esp+0xd0 in the 0x150-byte reference frame.
+    char text[128];
+    ADDGAMEMSG message;
     Hub_PadSpeed[1] = 0.0f;
     Hub_PadSpeed[0] = 0.0f;
     SetPlayer();
@@ -8087,7 +8098,7 @@ void UpdateGameObjects(WORLDINFO_s *world) {
                 SeekLinearF(object->interaction_arrow_blend, target, FRAMETIME + FRAMETIME);
             if (object->apiobj.model_draw_result == 0)
                 continue;
-            if (i >= lighting_start)
+            if (i >= lighting_start && i < HIGHGAMEOBJECT)
                 LightGameObject(object, world->rtl_set);
             if (object->interaction_arrow_blend > 0.0f) {
                 GAMECHARACTERDATA *data = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
@@ -8112,9 +8123,8 @@ void UpdateGameObjects(WORLDINFO_s *world) {
                 position.y += (0.75f * amplitude) * NuTrigTable[((angle + phase) >> 1) & 0x7fff];
                 angle = static_cast<u16>(NuFmod(GameTimer.time_elapsed, 1.259f) / 1.259f * 65536.0f);
                 position.z += amplitude * NuTrigTable[((angle + phase) >> 1) & 0x7fff];
-                char text[64];
                 NuStrCpy(text, ASCII_DOWN);
-                ADDGAMEMSG message = AddGameMsg_Default;
+                message = AddGameMsg_Default;
                 message.position = &position;
                 message.text = text;
                 message.scale = 1.0f;
@@ -8219,7 +8229,7 @@ void UpdateGameObjects(WORLDINFO_s *world) {
             position = object->apiobj.collision_position;                                                              \
             position.y += 1.5f * object->apiobj.field_0x1e0;                                                           \
         }                                                                                                              \
-        ADDGAMEMSG message = AddGameMsg_Default;                                                                       \
+        message = AddGameMsg_Default;                                                                                  \
         message.text = ASCII_DOWN;                                                                                     \
         message.position = &position;                                                                                  \
         message.scale = 0.666f;                                                                                        \

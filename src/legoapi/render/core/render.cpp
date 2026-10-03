@@ -35,6 +35,7 @@
 #include "legoapi/cutscenes/cutscenes.h"
 #include <stdio.h>
 #include <math.h>
+#include <string.h>
 
 void DrawSubItems();
 
@@ -119,14 +120,26 @@ extern "C" void LocaledbitsDrawSolidCircleXY(NUVEC *centre, f32 radius, f32 lowe
 }
 
 extern "C" void RndrOSquare(NUVEC *centre, f32 radius, i32 colour) {
-    NUMTX matrix = global_camera.mtx;
     f32 corners[4][2] = {{-1.0f, -1.0f}, {1.0f, -1.0f}, {1.0f, 1.0f}, {-1.0f, 1.0f}};
+    NUMTX matrix = global_camera.mtx;
     matrix.m30 = centre->x;
     matrix.m31 = centre->y;
     matrix.m32 = centre->z;
-    for (i32 i = 0; i < 4; ++i) {
-        NUVEC start = {corners[i][0] * radius, corners[i][1] * radius, 0.0f};
-        NUVEC end = {corners[(i + 1) & 3][0] * radius, corners[(i + 1) & 3][1] * radius, 0.0f};
+    for (i32 remaining = 4; remaining > 0; --remaining) {
+        const i32 i = 4 - remaining;
+        NUVEC start;
+        NUVEC end;
+        if (i == 0) {
+            start = NUVEC{-radius, -radius, 0.0f};
+            end = NUVEC{radius, -radius, 0.0f};
+        } else {
+            const f32 start_y = corners[i][1] * radius;
+            const f32 end_x = corners[(i + 1) & 3][0] * radius;
+            const f32 end_y = corners[(i + 1) & 3][1] * radius;
+            const f32 start_x = corners[i][0] * radius;
+            start = NUVEC{start_x, start_y, 0.0f};
+            end = NUVEC{end_x, end_y, 0.0f};
+        }
         NuVecMtxTransform(&start, &start, &matrix);
         NuVecMtxTransform(&end, &end, &matrix);
         NuRndrLine3dDbg(start.x, start.y, start.z, end.x, end.y, end.z, colour);
@@ -274,7 +287,7 @@ struct VuVec;
 
 nuhspecial_s *(*GameMsg_GetExtraObjFn)(GAMEMESSAGE_s *);
 
-extern "C" bool StateAnimEvaluate2(StateAnim *state, u8 *index, char *value, f32 frame);
+extern "C" i32 StateAnimEvaluate2(StateAnim *state, u8 *index, char *value, f32 frame);
 extern "C" i32 NuRndrBeginScene(i32);
 extern "C" void NuRndrEndScene(void);
 extern "C" void NuRndrGradRect2di(i32, i32, i32, i32, i32 *, numtl_s *);
@@ -550,9 +563,13 @@ void SetCameraZoom(f32 zoom) {
 }
 
 extern "C" void NuGScnUpdate(NUGSCN *gscn, f32 frame_delta) {
+    NUDLDLISTSCENE *display_list = gscn->display_list;
+    NUMTX *animation_matrix = gscn->instance_animation_matrices;
     if (gscn->instance_animation_data == NULL) {
         return;
     }
+
+    nuinstanim_s *instance_animation = gscn->instance_animations;
 
     // The lookup array is reference-counted by the allocation word immediately
     // before its first entry.  A sole owner means the optional table was not
@@ -561,80 +578,76 @@ extern "C" void NuGScnUpdate(NUGSCN *gscn, f32 frame_delta) {
         gscn->animation_end_frames = NULL;
     }
 
-    if (gscn->num_instance_animations <= 0) {
+    i16 animation_count = gscn->num_instance_animations;
+    if (animation_count <= 0) {
         return;
     }
 
-    NUDISPLAYSPECIAL *display_specials = static_cast<NUDISPLAYSPECIAL *>(gscn->display_list->specials);
-    nuinstanim_s *instance_animation = gscn->instance_animations;
-    NUMTX *animation_matrix = gscn->instance_animation_matrices;
+    // A waiting animation retains the previous evaluation frame.
+    f32 frame = 0.0f;
+    i32 i = 0;
+    do {
+        if (instance_animation->anim_ix < gscn->num_instance_animation_data) {
+            NUDISPLAYSPECIAL *display_special =
+                &static_cast<NUDISPLAYSPECIAL *>(display_list->specials)[instance_animation->instance_ix];
+            const u32 display_flags = display_special->flags;
+            nuanimendlookup_s *state_animation = NULL;
+            nuanimdata_s *animation = NULL;
 
-    for (i32 i = 0; i < gscn->num_instance_animations; ++i, ++instance_animation, ++animation_matrix) {
-        if (instance_animation->anim_ix >= gscn->num_instance_animation_data) {
-            continue;
-        }
-
-        NUDISPLAYSPECIAL *display_special = &display_specials[instance_animation->instance_ix];
-        nuanimendlookup_s *state_animation = NULL;
-        nuanimdata_s *animation = NULL;
-
-        if ((instance_animation->end_frame_lookup_bits & NUINSTANIM_END_FRAME_LOOKUP_MASK) != 0 &&
-            gscn->animation_end_frames != NULL) {
-            const u16 lookup_index = instance_animation->end_frame_lookup_index;
-            state_animation = &gscn->animation_end_frames[lookup_index - 1];
-            animation = gscn->instance_animation_data[instance_animation->anim_ix];
-        } else {
-            if ((display_special->flags & NUDISPLAYSPECIAL_FLAG_VISIBLE) == 0) {
-                continue;
-            }
-            animation = gscn->instance_animation_data[instance_animation->anim_ix];
-            if (animation == NULL) {
-                continue;
-            }
-        }
-
-        f32 end_frame;
-        if (animation != NULL) {
-            end_frame = NuAnimEndFrameOld(animation);
-        } else if (state_animation != NULL) {
-            end_frame = static_cast<f32>(state_animation->end_frame);
-        } else {
-            continue;
-        }
-
-        if (end_frame == 0.0f) {
-            continue;
-        }
-
-        f32 frame;
-        u32 flags = static_cast<u32>(instance_animation->flags);
-        if ((flags & NUINSTANIM_FLAG_PLAYING) != 0) {
-            instance_animation->ltime += frame_delta * instance_animation->tfactor;
-            frame = instance_animation->ltime;
-            bool waiting_for_start = false;
-
-            if ((flags & NUINSTANIM_FLAG_WAITING) != 0) {
-                if (frame < instance_animation->tfirst) {
-                    waiting_for_start = true;
-                } else {
-                    flags &= ~NUINSTANIM_FLAG_WAITING;
-                    instance_animation->flags = static_cast<NUINSTANIM_FLAGS>(flags);
-                    instance_animation->ltime -= instance_animation->tfirst - 1.0f;
-                    frame = instance_animation->ltime;
+            if ((instance_animation->end_frame_lookup_bits & NUINSTANIM_END_FRAME_LOOKUP_MASK) != 0 &&
+                gscn->animation_end_frames != NULL) {
+                const u16 lookup_index = instance_animation->end_frame_lookup_index;
+                state_animation = &gscn->animation_end_frames[lookup_index - 1];
+                animation = gscn->instance_animation_data[instance_animation->anim_ix];
+            } else {
+                if ((display_flags & NUDISPLAYSPECIAL_FLAG_VISIBLE) == 0) {
+                    goto next_animation;
+                }
+                animation = gscn->instance_animation_data[instance_animation->anim_ix];
+                if (animation == NULL) {
+                    goto next_animation;
                 }
             }
 
-            if (!waiting_for_start) {
+            f32 end_frame;
+            if (animation != NULL) {
+                end_frame = NuAnimEndFrameOld(animation);
+            } else if (state_animation != NULL) {
+                end_frame = static_cast<f32>(static_cast<u32>(state_animation->end_frame));
+            } else {
+                goto next_animation;
+            }
+
+            if (end_frame == 0.0f) {
+                animation_count = gscn->num_instance_animations;
+                goto next_animation;
+            }
+
+            u8 flags = static_cast<u8>(instance_animation->flags);
+            if ((flags & NUINSTANIM_FLAG_PLAYING) != 0) {
+                instance_animation->ltime += frame_delta * instance_animation->tfactor;
+                if ((flags & NUINSTANIM_FLAG_WAITING) != 0) {
+                    if (!(instance_animation->ltime >= instance_animation->tfirst)) {
+                        goto evaluate_animation;
+                    }
+                    flags &= ~NUINSTANIM_FLAG_WAITING;
+                    instance_animation->waiting = 0;
+                    instance_animation->ltime -= instance_animation->tfirst - 1.0f;
+                }
+
+                frame = instance_animation->ltime;
                 const f32 interval_end = instance_animation->tinterval + end_frame;
                 if (frame >= interval_end) {
                     if ((flags & NUINSTANIM_FLAG_REPEATING) != 0) {
                         const f32 repeat_length = interval_end - 1.0f;
-                        instance_animation->ltime -=
-                            NuFloor((instance_animation->ltime - 1.0f) / repeat_length) * repeat_length;
+                        const f32 repeats = NuFloor((instance_animation->ltime - 1.0f) / repeat_length);
+                        const f32 live_repeat_length = instance_animation->tinterval + end_frame - 1.0f;
+                        instance_animation->ltime -= live_repeat_length * repeats;
                         frame = instance_animation->ltime;
+                        flags = static_cast<u8>(instance_animation->flags);
                     } else {
                         flags &= ~NUINSTANIM_FLAG_PLAYING;
-                        instance_animation->flags = static_cast<NUINSTANIM_FLAGS>(flags);
+                        instance_animation->playing = 0;
                         instance_animation->ltime = end_frame;
                         frame = end_frame;
                     }
@@ -642,7 +655,7 @@ extern "C" void NuGScnUpdate(NUGSCN *gscn, f32 frame_delta) {
                     frame = end_frame;
                 } else if (frame < 1.0f) {
                     flags &= ~NUINSTANIM_FLAG_PLAYING;
-                    instance_animation->flags = static_cast<NUINSTANIM_FLAGS>(flags);
+                    instance_animation->playing = 0;
                     instance_animation->ltime = 1.0f;
                     frame = 1.0f;
                 }
@@ -650,48 +663,59 @@ extern "C" void NuGScnUpdate(NUGSCN *gscn, f32 frame_delta) {
                 if ((flags & NUINSTANIM_FLAG_BACKWARDS) != 0) {
                     frame = end_frame + 1.0f - frame;
                 }
+            } else {
+                frame = instance_animation->ltime;
             }
-        } else {
-            frame = instance_animation->ltime;
-        }
 
-        if (frame != instance_animation->prev_eval_time) {
-            if (state_animation != NULL) {
-                u8 state_index =
-                    static_cast<u8>((static_cast<u32>(instance_animation->flags) & NUINSTANIM_STATE_INDEX_MASK) >>
-                                    NUINSTANIM_STATE_INDEX_SHIFT);
-                char state_value;
-                const bool state_changed = StateAnimEvaluate2(reinterpret_cast<StateAnim *>(state_animation),
-                                                              &state_index, &state_value, frame);
-                const u32 state_flags = (static_cast<u32>(instance_animation->flags) & ~NUINSTANIM_STATE_INDEX_MASK) |
-                                        (static_cast<u32>(state_index) << NUINSTANIM_STATE_INDEX_SHIFT);
-                instance_animation->flags = static_cast<NUINSTANIM_FLAGS>(state_flags);
+        evaluate_animation:
+            if (frame != instance_animation->prev_eval_time) {
+                if (state_animation != NULL) {
+                    u8 state_index =
+                        static_cast<u8>((static_cast<u32>(instance_animation->flags) & NUINSTANIM_STATE_INDEX_MASK) >>
+                                        NUINSTANIM_STATE_INDEX_SHIFT);
+                    char state_value;
+                    const i32 state_changed = StateAnimEvaluate2(reinterpret_cast<StateAnim *>(state_animation),
+                                                                 &state_index, &state_value, frame);
+                    const u32 state_flags =
+                        (static_cast<u32>(instance_animation->flags) & ~NUINSTANIM_STATE_INDEX_MASK) |
+                        (static_cast<u32>(state_index) << NUINSTANIM_STATE_INDEX_SHIFT);
+                    instance_animation->flags = static_cast<NUINSTANIM_FLAGS>(state_flags);
 
-                if (state_changed) {
-                    if (instance_animation->instance_ix != 0xffff && state_value != 0) {
-                        display_special->flags |= NUDISPLAYSPECIAL_FLAG_VISIBLE;
-                    } else if (state_value == 0) {
+                    if (state_changed) {
                         if (instance_animation->instance_ix != 0xffff) {
-                            display_special->flags &= ~NUDISPLAYSPECIAL_FLAG_VISIBLE;
+                            display_special = &static_cast<NUDISPLAYSPECIAL *>(
+                                display_list->specials)[instance_animation->instance_ix];
+                            if (state_value != 0) {
+                                display_special->flags |= NUDISPLAYSPECIAL_FLAG_VISIBLE;
+                            } else {
+                                display_special->flags &= ~NUDISPLAYSPECIAL_FLAG_VISIBLE;
+                                animation = NULL;
+                            }
+                        } else if (state_value == 0) {
+                            animation = NULL;
                         }
-                        animation = NULL;
                     }
                 }
+
+                if (animation != NULL) {
+                    NuAnimData2CalcMatrix(animation, 0, frame, animation_matrix);
+                }
+                instance_animation->prev_eval_time = frame;
             }
 
             if (animation != NULL) {
-                NuAnimData2CalcMatrix(animation, 0, frame, animation_matrix);
+                instance_animation->mtx = *animation_matrix;
+                instance_animation->mtx.m30 += display_special->draw_mtx.m30;
+                instance_animation->mtx.m31 += display_special->draw_mtx.m31;
+                instance_animation->mtx.m32 += display_special->draw_mtx.m32;
             }
-            instance_animation->prev_eval_time = frame;
+            animation_count = gscn->num_instance_animations;
         }
-
-        if (animation != NULL) {
-            instance_animation->mtx = *animation_matrix;
-            instance_animation->mtx.m30 += display_special->draw_mtx.m30;
-            instance_animation->mtx.m31 += display_special->draw_mtx.m31;
-            instance_animation->mtx.m32 += display_special->draw_mtx.m32;
-        }
-    }
+    next_animation:
+        ++i;
+        ++instance_animation;
+        ++animation_matrix;
+    } while (i < animation_count);
 }
 
 // --- NuGScn graphics-data reader ---
@@ -824,9 +848,13 @@ void DrawCables() {
             if (cable.slack > cable_slack) {
                 cable.slack = cable_slack;
             }
-        } else if (cable.total_length < tow_length) {
+        } else if (!(cable.total_length >= tow_length)) {
             f32 fraction = cable.total_length / tow_length;
-            fraction = fraction <= 1.0f ? 1.0f - fraction : 0.0f;
+            if (fraction > 1.0f) {
+                fraction = 0.0f;
+            } else {
+                fraction = 1.0f - fraction;
+            }
             cable.slack = fraction * cable_slack;
         } else {
             cable.slack = 0.0f;
@@ -834,8 +862,7 @@ void DrawCables() {
 
         f32 distance_along = 0.0f;
         if (cable.slack != 0.0f) {
-            const f32 total_length = cable.total_length;
-            const f32 density = nsegments_per_unit;
+            const f32 subdivision_scale = cable.total_length * nsegments_per_unit;
             NUVEC endpoint = cable.points[0];
             endpoint.y = y_span * 0.0f + cable.points[0].y;
             f32 ground_start = GameShadow(NULL, &endpoint, 5.0f, -1);
@@ -855,7 +882,7 @@ void DrawCables() {
                 NuVecSub(&step, &endpoint, &previous);
                 const f32 segment_length = cable.segment_lengths[segment];
                 const f32 subdivisions = static_cast<f32>(
-                    ceil(static_cast<double>(NuFdiv(segment_length, cable.total_length) * total_length * density)));
+                    ceil(static_cast<double>(NuFdiv(segment_length, cable.total_length) * subdivision_scale)));
                 const f32 step_length = NuFdiv(segment_length, subdivisions);
                 NuVecScale(&step, &step, NuFdiv(step_length, segment_length));
                 const f32 half_step = 0.5f * step_length;
@@ -876,9 +903,9 @@ void DrawCables() {
                     const i32 angle = phase <= 1.0f ? static_cast<i32>(phase * 32768.0f) : 32768;
                     local_distance += step_length;
                     const f32 end_sag = cable.slack * NU_SIN_LUT(angle);
+                    end.y -= end_sag;
                     const f32 end_fraction = NuFdiv(local_distance, cable.segment_lengths[segment]);
                     const f32 end_floor = end_fraction * ground_end + (1.0f - end_fraction) * ground_start + 0.05f;
-                    end.y -= end_sag;
                     if (end.y < end_floor) {
                         end.y = end_floor;
                     }
@@ -895,11 +922,11 @@ void DrawCables() {
         } else {
             for (i32 segment = 0; segment < cable.point_count - 1; ++segment) {
                 const f32 start_fraction = NuFdiv(distance_along, cable.total_length);
+                start = cable.points[segment];
+                start.y = start_fraction * y_span + cable.points[0].y;
                 distance_along += cable.segment_lengths[segment];
                 const f32 end_fraction = NuFdiv(distance_along, cable.total_length);
-                start = cable.points[segment];
                 end = cable.points[segment + 1];
-                start.y = y_span * start_fraction + cable.points[0].y;
                 end.y = y_span * end_fraction + cable.points[0].y;
                 if (solid_cable == 0) {
                     NuRndrLine3d(vertices, SolidMtl3D, NULL);
@@ -1292,12 +1319,11 @@ void Draw_LOADING() {
         NuVecNorm(&direction, &direction);                                                                             \
         brightness = direction.y * 0.5f + 0.5f;                                                                        \
         if (brightness <= near_angle)                                                                                  \
-            brightness = near_scale;                                                                                   \
+            brightness = near_scale * parameters->intensity;                                                           \
         else if (brightness >= far_angle)                                                                              \
-            brightness = far_scale;                                                                                    \
+            brightness = far_scale * parameters->intensity;                                                            \
         else                                                                                                           \
-            brightness = (brightness - near_angle) * scale_delta / angle_delta + near_scale;                           \
-        brightness *= parameters->intensity;                                                                           \
+            brightness = ((brightness - near_angle) * scale_delta / angle_delta + near_scale) * parameters->intensity; \
         if (parameters->directional) {                                                                                 \
             f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;       \
             if (angle < parameters->direction_near_angle) {                                                            \
@@ -1311,11 +1337,13 @@ void Draw_LOADING() {
                               parameters->direction_near_scale);                                                       \
             }                                                                                                          \
         }                                                                                                              \
-        i32 colour =                                                                                                   \
-            RGBA_TO_NUCOLOUR32((MIN(255.0f, (MAX(0.0f, brightness)))), (MIN(255.0f, (MAX(0.0f, brightness)))),         \
-                               (MIN(255.0f, (MAX(0.0f, brightness)))), 128);                                           \
+        u32 colour = (static_cast<u32>(static_cast<u8>(128)) << 24) |                                                  \
+                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 16) |                   \
+                     (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 8) |                    \
+                     static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness))));                            \
         if (!g_NuPrim_NeedsOverbrightening)                                                                            \
-            g_NuPrim_StreamBufferPtr->u32_ptr[3] = ((colour >> 1) & 0x7f7f7f) | (colour & 0xff000000);                 \
+            g_NuPrim_StreamBufferPtr->u32_ptr[3] =                                                                     \
+                ((static_cast<i32>(colour) >> 1) & 0x7f7f7f) | (colour & 0xff000000);                                  \
         else                                                                                                           \
             g_NuPrim_StreamBufferPtr->u32_ptr[3] = colour;                                                             \
         NuPrim2DAddXYZ((vx), (vy), 0.0f);                                                                              \
@@ -1337,7 +1365,6 @@ void DrawAlphaGrid(i32 rows, i32 cols, NuBloomParameters *parameters) {
     f32 angle_delta = far_angle - near_angle;
     f32 scale_delta = far_scale - near_scale;
     NUCAMERA camera;
-    NUVEC direction;
     f32 brightness;
     NuCameraGet(&camera);
     static i32 first = 1;
@@ -1365,6 +1392,7 @@ void DrawAlphaGrid(i32 rows, i32 cols, NuBloomParameters *parameters) {
         f32 y0 = y_start;
         f32 y1 = y_next;
         for (col = 0; col < cols; ++col) {
+            NUVEC direction;
             ALPHA_GRID_VERTEX(x0, y0);
             ALPHA_GRID_VERTEX(x1, y0);
             if (col != cols - 1) {
@@ -1424,52 +1452,81 @@ void DrawCross_Now(_vuv_s *, float, i32, i32) {
 }
 
 void DrawGameState(float x, float y, i32 highlight, i32 slot) {
-    if (slot < -1 || slot >= 6 || TTab == NULL)
-        return;
+    const f32 text_scale = MENUTEXTSCALE;
     char game_name[256];
     if (slot == -1) {
         NuStrCpy(game_name, TTab[tCURRENTGAME]);
     } else {
-        snprintf(game_name, sizeof(game_name), "%s %i", TTab[tGAME], slot + 1);
+        sprintf(game_name, "%s %i", TTab[tGAME], slot + 1);
     }
 
-    u8 red = MENUENTRYR;
-    u8 green = MENUENTRYG;
-    u8 blue = MENUENTRYB;
-    if (highlight != 0 && TestForController() != 0) {
-        if (menu_pulsate > 0.0f) {
-            red = static_cast<u8>(MENUFLASH0R * menu_pulsate + MENUFLASH1R * (1.0f - menu_pulsate));
-            green = static_cast<u8>(MENUFLASH0G * menu_pulsate + MENUFLASH1G * (1.0f - menu_pulsate));
-            blue = static_cast<u8>(MENUFLASH0B * menu_pulsate + MENUFLASH1B * (1.0f - menu_pulsate));
-        } else if (menu_flash != 0) {
-            red = MENUFLASH0R;
-            green = MENUFLASH0G;
-            blue = MENUFLASH0B;
+    u8 red;
+    u8 green;
+    u8 blue;
+    if (highlight != 0) {
+        if (TestForController() == 0) {
+            if (menu_pulse > 0.0f) {
+                red = static_cast<u8>(static_cast<i32>(static_cast<u32>(MENUFLASH0R) * menu_pulse +
+                                                       static_cast<u32>(MENUNORMALR) * (1.0f - menu_pulse)));
+                green = static_cast<u8>(static_cast<i32>(static_cast<u32>(MENUFLASH0G) * menu_pulse +
+                                                         static_cast<u32>(MENUNORMALG) * (1.0f - menu_pulse)));
+                blue = static_cast<u8>(static_cast<i32>(static_cast<u32>(MENUFLASH0B) * menu_pulse +
+                                                        static_cast<u32>(MENUNORMALB) * (1.0f - menu_pulse)));
+            } else {
+                red = MENUENTRYR;
+                green = MENUENTRYG;
+                blue = MENUENTRYB;
+            }
         } else {
-            red = MENUFLASH1R;
-            green = MENUFLASH1G;
-            blue = MENUFLASH1B;
+            if (menu_pulsate > 0.0f) {
+                red = static_cast<u8>(static_cast<i32>(static_cast<u32>(MENUFLASH0R) * menu_pulsate +
+                                                       static_cast<u32>(MENUFLASH1R) * (1.0f - menu_pulsate)));
+                green = static_cast<u8>(static_cast<i32>(static_cast<u32>(MENUFLASH0G) * menu_pulsate +
+                                                         static_cast<u32>(MENUFLASH1G) * (1.0f - menu_pulsate)));
+                blue = static_cast<u8>(static_cast<i32>(static_cast<u32>(MENUFLASH0B) * menu_pulsate +
+                                                        static_cast<u32>(MENUFLASH1B) * (1.0f - menu_pulsate)));
+            } else if (menu_flash != 0) {
+                red = MENUFLASH0R;
+                green = MENUFLASH0G;
+                blue = MENUFLASH0B;
+            } else {
+                red = MENUFLASH1R;
+                green = MENUFLASH1G;
+                blue = MENUFLASH1B;
+            }
         }
-    } else if (menu_pulse > 0.0f) {
-        red = static_cast<u8>(MENUFLASH0R * menu_pulse + MENUNORMALR * (1.0f - menu_pulse));
-        green = static_cast<u8>(MENUFLASH0G * menu_pulse + MENUNORMALG * (1.0f - menu_pulse));
-        blue = static_cast<u8>(MENUFLASH0B * menu_pulse + MENUNORMALB * (1.0f - menu_pulse));
+    } else {
+        if (menu_pulse > 0.0f) {
+            red = static_cast<u8>(static_cast<i32>(static_cast<u32>(MENUFLASH0R) * menu_pulse +
+                                                   static_cast<u32>(MENUNORMALR) * (1.0f - menu_pulse)));
+            green = static_cast<u8>(static_cast<i32>(static_cast<u32>(MENUFLASH0G) * menu_pulse +
+                                                     static_cast<u32>(MENUNORMALG) * (1.0f - menu_pulse)));
+            blue = static_cast<u8>(static_cast<i32>(static_cast<u32>(MENUFLASH0B) * menu_pulse +
+                                                    static_cast<u32>(MENUNORMALB) * (1.0f - menu_pulse)));
+        } else {
+            red = MENUENTRYR;
+            green = MENUENTRYG;
+            blue = MENUENTRYB;
+        }
     }
     smarttextex_drawmessagebox = 2;
-    SmartTextEx(game_name, x, y, 1.0f, MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, 4, red, green, blue, 0.45f, 1, NULL,
-                0, MenuA);
+    SmartTextEx(game_name, x, y, 1.0f, text_scale, text_scale, text_scale, 4, red, green, blue, 0.45f, 1, NULL, 0,
+                MenuA);
 
     if (slot == -1 || saveload_slotused[slot] != 0) {
         char progress[32];
         const u32 completion = slot == -1 ? Game.completion : saveload_slotcode[slot];
         sprintf(progress, "%.1f%%", static_cast<f32>(static_cast<i32>(completion * 100)) / COMPLETIONPOINTS);
         Text_LocaliseDecimalPoint(progress);
-        Text3DEx(progress, x, y, 1.0f, MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, 1, 255, 191, 0, MenuA);
+        Text3DEx(progress, x, y, 1.0f, text_scale, text_scale, text_scale, 1, 255, 191, 0, static_cast<u8>(MenuA));
     } else {
-        char *state = TTab[saveload_freespace < SAVESIZE_ADDITIONAL ? tNOSPACE : tEMPTY];
-        const u8 state_red = saveload_freespace < SAVESIZE_ADDITIONAL ? 255 : 0;
-        SmartTextEx(state, x, y, 1.0f, MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, 1, state_red, 255 - state_red, 0,
-                    0.45f, 2, NULL, 0, MenuA);
+        if (saveload_freespace >= SAVESIZE_ADDITIONAL) {
+            SmartTextEx(TTab[tEMPTY], x, y, 1.0f, text_scale, text_scale, text_scale, 1, 0, 255, 0, 0.45f, 2, NULL, 0,
+                        MenuA);
+        } else {
+            SmartTextEx(TTab[tNOSPACE], x, y, 1.0f, text_scale, text_scale, text_scale, 1, 255, 0, 0, 0.45f, 2, NULL, 0,
+                        MenuA);
+        }
     }
 }
 
@@ -1513,6 +1570,7 @@ void DrawSaveSlots(MENU_s *menu, float y) {
     menu->item_x[2] = -0.5f;
     menu->item_height[2] = text3d_height * 2.0f;
     menu->item_row[2] = 0;
+    y += 0.0f;
 
     DrawGameState(0.0f, y, menu->selected_row == menu->first_row && menu->selected_column == 1, 1);
     menu->item_width[3] = text3d_width;
@@ -1521,6 +1579,7 @@ void DrawSaveSlots(MENU_s *menu, float y) {
     menu->item_x[3] = 0.0f;
     menu->item_height[3] = text3d_height * 2.0f;
     menu->item_row[3] = 0;
+    y = 0.0f + y;
 
     DrawGameState(0.5f, y, menu->selected_row == menu->first_row && menu->selected_column == 2, 2);
     menu->item_column[4] = 2;
@@ -1534,6 +1593,33 @@ void DrawSaveSlots(MENU_s *menu, float y) {
 static u8 cacheValues[256];
 
 void ClearScreen();
+
+static inline u16 AlphaImageFloatToHalf(f32 value) {
+    u32 bits;
+    memcpy(&bits, &value, sizeof(bits));
+    i32 mantissa = bits & 0x7fffff;
+    i32 sign = bits >> 31;
+    i32 exponent = static_cast<i32>((bits >> 23) & 0xff) - 0x70;
+    i32 half_exponent = 0;
+    if (exponent >= 0) {
+        half_exponent = 0x7c00;
+        if (exponent < 0x20) {
+            half_exponent = exponent * 0x400;
+        }
+    }
+    return static_cast<u16>((mantissa >> 13) | (sign << 15) | half_exponent);
+}
+
+static inline void AlphaImagePrimUV(f32 u, f32 v) {
+    PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);
+    if (!g_NuPrim_NeedsHalfUVs) {
+        vertex->float_uv[0] = u;
+        vertex->float_uv[1] = v;
+    } else {
+        vertex->half_uv[0] = AlphaImageFloatToHalf(u);
+        vertex->half_uv[1] = AlphaImageFloatToHalf(v);
+    }
+}
 
 void DrawAlphaImage(i32 rows, i32 cols, numtl_s *material, i32 use_pixel_offsets, NuBloomParameters *parameters) {
     f32 inv_col = 1.0f / (cols - 1);
@@ -1554,7 +1640,9 @@ void DrawAlphaImage(i32 rows, i32 cols, numtl_s *material, i32 use_pixel_offsets
 
     NUCAMERA camera;
     NuCameraGet(&camera);
-    if (*reinterpret_cast<i32 *>(&parameters->unknown_18) != 0)
+    u32 clear_screen;
+    memcpy(&clear_screen, &parameters->unknown_18, sizeof(clear_screen));
+    if (clear_screen != 0)
         ClearScreen();
     if (parameters->directional)
         NuVecNorm(&parameters->direction, &parameters->direction);
@@ -1587,84 +1675,98 @@ void DrawAlphaImage(i32 rows, i32 cols, numtl_s *material, i32 use_pixel_offsets
     ++NuPrimCSPos;
     NuPrimSetCoordinateSystem(NUPRIM_SCALEMODE_NORMALISED);
     for (row = 0; row < rows - 1; ++row) {
+        const i32 cache_row = row;
         NuPrim2DBegin(1, 7, material);
         f32 y0 = y_start;
         for (col = 0; col < cols; ++col) {
             NUVEC direction;
-            direction.x = x0;
-            direction.y = -y0 * camera.aspect;
+            const f32 direction_y = ((y0 + 1.0f) - 1.0f) * -camera.aspect;
+            direction.x = (x0 + 1.0f) - 1.0f;
+            direction.y = direction_y;
             direction.z = adjacent;
             NuVecNorm(&direction, &direction);
             NuVecMtxTransform(&direction, &direction, &camera.mtx);
             NuVecNorm(&direction, &direction);
 
-            u8 alpha;
-            if (row > 0) {
-                alpha = cacheValues[col];
+            f32 brightness = direction.y;
+            u32 colour;
+            if (cache_row > 0) {
+                colour = (static_cast<u32>(cacheValues[col]) << 24) | 0x808080;
+                NuRndrPrimSetColour(colour);
             } else {
-                f32 brightness = direction.y * 0.5f + 0.5f;
+                brightness = brightness * 0.5f + 0.5f;
                 if (brightness <= near_angle)
-                    brightness = near_scale;
+                    brightness = near_scale * parameters->intensity;
                 else if (brightness >= far_angle)
-                    brightness = far_scale;
+                    brightness = far_scale * parameters->intensity;
                 else
-                    brightness = (brightness - near_angle) * scale_delta / angle_delta + near_scale;
-                brightness *= parameters->intensity;
+                    brightness =
+                        ((brightness - near_angle) * scale_delta / angle_delta + near_scale) * parameters->intensity;
                 if (parameters->directional) {
                     f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;
                     if (angle < parameters->direction_near_angle) {
                         brightness += 128.0f * parameters->direction_far_scale;
                     } else if (!(angle > parameters->direction_far_angle)) {
-                        f32 blend = (angle - parameters->direction_near_angle) /
-                                    (parameters->direction_far_angle - parameters->direction_near_angle);
-                        if (parameters->direction_bias != 1.0f)
-                            blend = NuPowFast(blend, parameters->direction_bias);
+                        f32 blend;
+                        if (parameters->direction_bias == 1.0f)
+                            blend = 1.0f - (angle - parameters->direction_near_angle) /
+                                               (parameters->direction_far_angle - parameters->direction_near_angle);
+                        else
+                            blend = 1.0f -
+                                    NuPowFast((angle - parameters->direction_near_angle) /
+                                                  (parameters->direction_far_angle - parameters->direction_near_angle),
+                                              parameters->direction_bias);
                         brightness +=
-                            128.0f *
-                            ((1.0f - blend) * (parameters->direction_far_scale - parameters->direction_near_scale) +
-                             parameters->direction_near_scale);
+                            128.0f * (blend * (parameters->direction_far_scale - parameters->direction_near_scale) +
+                                      parameters->direction_near_scale);
                     }
                 }
-                alpha = static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)));
+                colour = (static_cast<u32>(static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)))) << 24) | 0x808080;
+                NuRndrPrimSetColour(colour);
             }
-            NuRndrPrimSetColour((static_cast<u32>(alpha) << 24) | 0x808080);
-            NuRndrPrimUV(static_cast<f32>(row) * inv_row + pixelOffsetX,
-                         (static_cast<f32>(col) * inv_col + pixelOffsetY) * 0.9f);
+            AlphaImagePrimUV(static_cast<f32>(row) * inv_row + pixelOffsetX,
+                             (static_cast<f32>(col) * inv_col + pixelOffsetY) * 0.9f);
             NuPrim2DAddXYZ(x0, y0, 0.0f);
 
-            direction.x = x1;
-            direction.y = -y0 * camera.aspect;
+            direction.x = (x1 + 1.0f) - 1.0f;
+            direction.y = direction_y;
             direction.z = adjacent;
             NuVecNorm(&direction, &direction);
             NuVecMtxTransform(&direction, &direction, &camera.mtx);
             NuVecNorm(&direction, &direction);
-            f32 brightness = direction.y * 0.5f + 0.5f;
+            brightness = direction.y * 0.5f + 0.5f;
             if (brightness <= near_angle)
-                brightness = near_scale;
+                brightness = near_scale * parameters->intensity;
             else if (brightness >= far_angle)
-                brightness = far_scale;
+                brightness = far_scale * parameters->intensity;
             else
-                brightness = (brightness - near_angle) * scale_delta / angle_delta + near_scale;
-            brightness *= parameters->intensity;
+                brightness =
+                    ((brightness - near_angle) * scale_delta / angle_delta + near_scale) * parameters->intensity;
             if (parameters->directional) {
                 f32 angle = (i16)(0x4000 - NuASin(NuVecDot(&parameters->direction, &direction))) * 0.0054931640625f;
                 if (angle < parameters->direction_near_angle) {
                     brightness += 128.0f * parameters->direction_far_scale;
                 } else if (!(angle > parameters->direction_far_angle)) {
-                    f32 blend = (angle - parameters->direction_near_angle) /
-                                (parameters->direction_far_angle - parameters->direction_near_angle);
-                    if (parameters->direction_bias != 1.0f)
-                        blend = NuPowFast(blend, parameters->direction_bias);
-                    brightness += 128.0f * ((1.0f - blend) *
-                                                (parameters->direction_far_scale - parameters->direction_near_scale) +
-                                            parameters->direction_near_scale);
+                    f32 blend;
+                    if (parameters->direction_bias == 1.0f)
+                        blend = 1.0f - (angle - parameters->direction_near_angle) /
+                                           (parameters->direction_far_angle - parameters->direction_near_angle);
+                    else
+                        blend =
+                            1.0f - NuPowFast((angle - parameters->direction_near_angle) /
+                                                 (parameters->direction_far_angle - parameters->direction_near_angle),
+                                             parameters->direction_bias);
+                    brightness +=
+                        128.0f * (blend * (parameters->direction_far_scale - parameters->direction_near_scale) +
+                                  parameters->direction_near_scale);
                 }
             }
-            alpha = static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)));
+            const u8 alpha = static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)));
             cacheValues[col] = alpha;
-            NuRndrPrimSetColour((static_cast<u32>(alpha) << 24) | 0x808080);
-            NuRndrPrimUV(static_cast<f32>(row + 1) * inv_row + pixelOffsetX,
-                         (static_cast<f32>(col) * inv_col + pixelOffsetY) * 0.9f);
+            colour = (static_cast<u32>(alpha) << 24) | 0x808080;
+            NuRndrPrimSetColour(colour);
+            AlphaImagePrimUV(static_cast<f32>(row + 1) * inv_row + pixelOffsetX,
+                             (static_cast<f32>(col) * inv_col + pixelOffsetY) * 0.9f);
             NuPrim2DAddXYZ(x1, y0, 0.0f);
             y0 += step_y;
         }
@@ -1686,32 +1788,36 @@ void DrawBezierLine(VuVec &start, VuVec &start_control, VuVec &end, VuVec &end_c
     const f32 start_x = start.x - camera_x;
     const f32 start_y = start.y - camera_y;
     const f32 start_z = start.z - camera_z;
+    const f32 start_distance = start_x * start_x + start_y * start_y + start_z * start_z;
     const f32 end_x = end.x - camera_x;
     const f32 end_y = end.y - camera_y;
     const f32 end_z = end.z - camera_z;
-    const f32 start_distance = start_x * start_x + start_y * start_y + start_z * start_z;
     const f32 end_distance = end_x * end_x + end_y * end_y + end_z * end_z;
     const f32 distance = end_distance < start_distance ? end_distance : start_distance;
-    const f32 threshold = distance < 5.5f ? 0.0055f : distance * 0.001f;
+    const f32 threshold = distance < 5.5f ? 5.5f * 0.001f : distance * 0.001f;
 
     const f32 chord_x = end.x - start.x;
     const f32 chord_y = end.y - start.y;
     const f32 chord_z = end.z - start.z;
-    if (chord_x * chord_x + chord_y * chord_y + chord_z * chord_z <= threshold || bezier_draw_depth > 15) {
+    if (!(chord_x * chord_x + chord_y * chord_y + chord_z * chord_z > threshold) || bezier_draw_depth > 15) {
         EdDrawLineSegment(start, end, colour);
         return;
     }
 
     ++bezier_draw_depth;
-    VuVec first = {(start.x + start_control.x) * 0.5f, (start.y + start_control.y) * 0.5f,
-                   (start.z + start_control.z) * 0.5f, 0.0f};
-    VuVec second = {(start_control.x + end_control.x) * 0.5f, (start_control.y + end_control.y) * 0.5f,
-                    (start_control.z + end_control.z) * 0.5f, 0.0f};
-    VuVec third = {(end_control.x + end.x) * 0.5f, (end_control.y + end.y) * 0.5f, (end_control.z + end.z) * 0.5f,
+    const f32 control_x = start_control.x;
+    const f32 end_control_x = end_control.x;
+    const f32 end_control_y = end_control.y;
+    const f32 end_control_z = end_control.z;
+    VuVec second = {(control_x + end_control_x) * 0.5f, (end_control_y + start_control.y) * 0.5f,
+                    (end_control_z + start_control.z) * 0.5f, 0.0f};
+    VuVec first = {(start.x + control_x) * 0.5f, (start.y + start_control.y) * 0.5f, (start_control.z + start.z) * 0.5f,
+                   0.0f};
+    VuVec third = {(end.x + end_control_x) * 0.5f, (end.y + end_control_y) * 0.5f, (end.z + end_control_z) * 0.5f,
                    0.0f};
     VuVec fourth = {(first.x + second.x) * 0.5f, (first.y + second.y) * 0.5f, (first.z + second.z) * 0.5f, 0.0f};
-    VuVec fifth = {(second.x + third.x) * 0.5f, (second.y + third.y) * 0.5f, (second.z + third.z) * 0.5f, 0.0f};
-    VuVec midpoint = {(fourth.x + fifth.x) * 0.5f, (fourth.y + fifth.y) * 0.5f, (fourth.z + fifth.z) * 0.5f, 0.0f};
+    VuVec fifth = {(third.x + second.x) * 0.5f, (third.y + second.y) * 0.5f, (third.z + second.z) * 0.5f, 0.0f};
+    VuVec midpoint = {(fifth.x + fourth.x) * 0.5f, (fifth.y + fourth.y) * 0.5f, (fifth.z + fourth.z) * 0.5f, 0.0f};
 
     DrawBezierLine(start, first, midpoint, fourth, material, colour);
     DrawBezierLine(midpoint, fifth, end, third, material, colour);
@@ -1724,20 +1830,20 @@ void DrawBoxMtx_Now(_vum_s *, _vuv_s *, i32, i32) {
 void *AddGameMessage(char *, NUVEC *, f32, NUVEC *, f32, u8, u8, u8, u32, f32);
 
 void DrawCutBorders(i32 widescreen) {
-    if (CutBorderScale <= 0.0f) {
+    if (!(CutBorderScale > 0.0f)) {
         return;
     }
 
     NuRndrBeginScene(-1);
     f32 border_scale = 0.1f;
     const CUTINFO *cut = static_cast<CUTINFO *>(CutStopInfo);
-    const bool active_cut_wide = cut != NULL && (cut->flags & 0x4000) != 0;
-    bool single_cut_wide = false;
-    if (WORLD->cutscene_sys != NULL && WORLD->cutscene_sys->count == 1 && WORLD->cutscene_sys->cuts[0] != NULL) {
-        single_cut_wide = (WORLD->cutscene_sys->cuts[0]->flags & 0x4000) != 0;
-    }
-    if (active_cut_wide || single_cut_wide) {
+    if (cut != NULL && (cut->flags & 0x4000) != 0) {
         border_scale = 0.21276596f;
+    } else {
+        const CUTSYS *system = WORLD->cutscene_sys;
+        if (system != NULL && system->count == 1 && (system->cuts[0]->flags & 0x4000) != 0) {
+            border_scale = 0.21276596f;
+        }
     }
     if (widescreen != 0) {
         border_scale = (border_scale * 4.0f - 0.5f) / 3.0f;
@@ -1803,17 +1909,24 @@ void DrawStatusText(char *text, u16 angle, float x, float y, float scale, u32 co
     NuQFntSetScale(QFont3DZ, scale, scale);
     Text3DStringEncode(text, encoded);
 
-    if (alignment == 2) {
-        const f32 height = NuQFntHeight(QFont3DZ);
-        NuQFntMove(QFont3DZ, 0.0f, -height * 0.5f, 0.0f);
-    } else if (alignment == 8) {
-        const f32 height = NuQFntHeight(QFont3DZ);
-        const f32 width = NuQFntPrintLenW(QFont3DZ, encoded);
-        NuQFntMove(QFont3DZ, -width, -height * 0.5f, 0.0f);
-    } else {
-        const f32 height = NuQFntHeight(QFont3DZ);
-        const f32 width = NuQFntPrintLenW(QFont3DZ, encoded);
-        NuQFntMove(QFont3DZ, -width * 0.5f, -height * 0.5f, 0.0f);
+    switch (alignment) {
+        case 2: {
+            const f32 height = NuQFntHeight(QFont3DZ);
+            NuQFntMove(QFont3DZ, 0.0f, -height * 0.5f, 0.0f);
+            break;
+        }
+        case 8: {
+            const f32 height = NuQFntHeight(QFont3DZ);
+            const f32 width = NuQFntPrintLenW(QFont3DZ, encoded);
+            NuQFntMove(QFont3DZ, -width, -height * 0.5f, 0.0f);
+            break;
+        }
+        default: {
+            const f32 height = NuQFntHeight(QFont3DZ);
+            const f32 width = NuQFntPrintLenW(QFont3DZ, encoded);
+            NuQFntMove(QFont3DZ, -width * 0.5f, -height * 0.5f, 0.0f);
+            break;
+        }
     }
     NuQFntPrintW(QFont3DZ, encoded);
     NuQFntPopPrintMode();
@@ -1942,27 +2055,29 @@ void DrawTouchPrompt(char *prompt, char *unused_label, bool hovered, bool large)
             const float phase = NuFmod(elapsed_since_touch, 4.0f);
             const i32 angle = static_cast<i32>(phase * 0.25f * 65536.0f);
             const float wave = NuTrigTable[(angle >> 1) & 0x7fff] - 0.8f;
-            if (zero <= wave) {
+            if (!(wave < zero)) {
                 pulse = wave + 1.0f;
             }
         }
     }
 
     float icon_scale = ICONSIZE;
-    if (hovered) {
+    if (!hovered) {
+        if (!large) {
+            DrawPanel3DObject(ICONX, STATSPOSY, 1.0f, icon_scale, icon_scale, icon_scale, 0, 0, 0,
+                              &WORLD->lev_objs[0xa5].special, 0, 0.75f);
+            pulse = 0.6f;
+        } else {
+            icon_scale *= pulse;
+            DrawPanel3DObject(ICONX, STATSPOSY, 1.0f, icon_scale, icon_scale, icon_scale, 0, 0, 0,
+                              &WORLD->lev_objs[0xa5].special, 0, 0.75f);
+            pulse *= 0.6f;
+        }
+    } else {
         icon_scale *= 1.25f;
         DrawPanel3DObject(ICONX, STATSPOSY, 1.0f, icon_scale, icon_scale, icon_scale, 0, 0, 0,
                           &WORLD->lev_objs[0xa5].special, 0, 0.75f);
         pulse = 0.75f;
-    } else if (large) {
-        icon_scale *= 1.25f;
-        DrawPanel3DObject(ICONX, STATSPOSY, 1.0f, icon_scale, icon_scale, icon_scale, 0, 0, 0,
-                          &WORLD->lev_objs[0xa5].special, 0, 0.75f);
-        pulse *= 0.6f;
-    } else {
-        DrawPanel3DObject(ICONX, STATSPOSY, 1.0f, icon_scale, icon_scale, icon_scale, 0, 0, 0,
-                          &WORLD->lev_objs[0xa5].special, 0, 0.75f);
-        pulse = 0.6f;
     }
 
     if (prompt != NULL) {
@@ -1984,71 +2099,11 @@ void DrawCameraTarget(nuvec_s *) {
 }
 
 void DrawGameMessages() {
-    struct RENDER_MESSAGE {
-        char *text;
-        char text_buffer[0x78];
-        NUVEC position_a;
-        NUVEC target_position;
-        NUVEC position;
-        NUVEC start_position;
-        f32 field_0xac;
-        f32 target_scale;
-        f32 field_0xb4;
-        f32 field_0xb8;
-        f32 elapsed;
-        f32 duration;
-        f32 field_0xc4;
-        f32 field_0xc8;
-        u32 field_0xcc;
-        f32 field_0xd0;
-        f32 field_0xd4;
-        u32 flags;
-        u32 score;
-        u16 field_0xe0;
-        u16 field_0xe2;
-        u16 field_0xe4;
-        u16 icon;
-        nuhspecial_s extra_special;
-        u8 red;
-        u8 green;
-        u8 blue;
-        u8 alpha;
-        u8 active;
-        u8 field_0xf9;
-        u8 field_0xfa;
-        u8 field_0xfb;
-        u8 field_0xfc;
-        u8 field_0xfd;
-        u8 field_0xfe;
-        u8 field_0xff;
-        void (*delay_fn)(GAMEMESSAGE_s *);
-        void (*tick_fn)(GAMEMESSAGE_s *);
-        void (*update_fn)(GAMEMESSAGE_s *);
-        void (*draw_fn)(GAMEMESSAGE_s *, NUVEC *, f32);
-        void (*end_fn)(GAMEMESSAGE_s *);
-    };
-    static_assert(sizeof(RENDER_MESSAGE) == sizeof(GAMEMESSAGE_s), "render message backing layout");
-    static_assert(offsetof(RENDER_MESSAGE, draw_fn) == offsetof(GAMEMESSAGE_s, draw_callback),
-                  "render message callback offset");
     extern GAMEMESSAGE_s GameMessage[128];
     extern i32 DrawPanel3DObjectNoAlpha(float, float, float, float, float, float, u16, u16, u16, nuhspecial_s *, i32);
 
-    auto draw_special = [](nuhspecial_s *special, RENDER_MESSAGE *message, f32 x, f32 y, f32 z, f32 scale, f32 alpha) {
-        if (NuSpecialExistsFn(special) == 0) {
-            return;
-        }
-        const u32 flags = message->flags;
-        if ((flags & 0x20000) != 0) {
-            DrawPanel3DObjectNoAlpha(x, y, z, scale, scale, scale, message->field_0xe0, message->field_0xe2,
-                                     message->field_0xe4, special, 2);
-        } else {
-            DrawPanel3DObject(x, y, z, scale, scale, scale, message->field_0xe0, message->field_0xe2,
-                              message->field_0xe4, special, 2, alpha);
-        }
-    };
-
-    RENDER_MESSAGE *message = reinterpret_cast<RENDER_MESSAGE *>(GameMessage);
-    RENDER_MESSAGE *end = message + 128;
+    GAMEMESSAGE_s *message = GameMessage;
+    GAMEMESSAGE_s *end = message + 128;
     for (; message != end; ++message) {
         if (message->active == 0) {
             continue;
@@ -2059,21 +2114,23 @@ void DrawGameMessages() {
         if (message->field_0xd0 > 0.0f) {
             continue;
         }
-        if (message->elapsed >= message->duration && message->field_0xfa == 0) {
+        if (!(message->duration > message->elapsed) && message->field_0xfa == 0) {
             continue;
         }
 
+        u32 flags = message->flags;
         f32 progress = message->elapsed / message->duration;
-        if ((message->flags & 0x100) != 0) {
+        if ((flags & 0x100) != 0) {
             progress = 1.0f - NU_SIN_LUT(static_cast<i32>(progress * 16384.0f + 16384.0f));
-        } else if ((message->flags & 0x200) != 0) {
+        } else if ((flags & 0x200) != 0) {
             progress = NU_SIN_LUT(static_cast<i32>(progress * 16384.0f));
-        } else if ((message->flags & 0x400) != 0) {
+        } else if ((flags & 0x400) != 0) {
             progress = NU_SIN_LUT(static_cast<i32>(progress * 32768.0f));
-        } else if ((message->flags & 0x800) != 0) {
+        } else if ((flags & 0x800) != 0) {
             progress = 1.0f - NU_SIN_LUT(static_cast<i32>(progress * 32768.0f));
         }
 
+        f32 scale = (flags & 5) == 5 ? message->field_0xb8 : message->field_0xb4;
         NUVEC position = message->start_position;
         if (message->field_0xd4 != 0.0f && message->field_0xfb == 0) {
             const f32 limit = message->field_0xd4;
@@ -2089,40 +2146,56 @@ void DrawGameMessages() {
             }
         }
 
-        f32 scale = (message->flags & 5) == 5 ? message->field_0xb8 : message->field_0xb4;
-        if ((message->flags & 8) != 0) {
+        if ((flags & 8) != 0) {
             if (message->update_fn != NULL) {
-                message->update_fn(reinterpret_cast<GAMEMESSAGE_s *>(message));
+                message->update_fn(message);
+                flags = message->flags;
             }
             position.x = position.x + (message->target_position.x - position.x) * progress;
             position.y = position.y + (message->target_position.y - position.y) * progress;
             position.z = position.z + (message->target_position.z - position.z) * progress;
         }
-        if ((message->flags & 0x20) != 0) {
+        if ((flags & 0x20) != 0) {
             scale += (message->target_scale - scale) * progress;
         }
         position.x += message->field_0xc4;
         position.z += message->field_0xc8;
 
-        if (message->draw_fn != NULL) {
-            message->draw_fn(reinterpret_cast<GAMEMESSAGE_s *>(message), &position, scale);
+        if (message->draw_callback != NULL) {
+            message->draw_callback(message, &position, scale);
             continue;
         }
 
-        if (NuSpecialExistsFn(&message->extra_special) == 0) {
+        if (NuSpecialExistsFn(&message->special) != 0) {
+            const u32 draw_flags = message->flags;
+            if ((draw_flags & 0x20000) != 0) {
+                DrawPanel3DObjectNoAlpha(position.x, position.y, position.z, scale, scale, scale, message->field_0xe0,
+                                         message->rotation_y, message->field_0xe4, &message->special, 2);
+            } else {
+                const f32 alpha = (draw_flags & 0x10000) != 0 ? static_cast<f32>(message->alpha) / 128.0f : 1.0f;
+                DrawPanel3DObject(position.x, position.y, position.z, scale, scale, scale, message->field_0xe0,
+                                  message->rotation_y, message->field_0xe4, &message->special, 2, alpha);
+            }
+            if (GameMsg_GetExtraObjFn != NULL) {
+                nuhspecial_s *extra = GameMsg_GetExtraObjFn(message);
+                if (extra != NULL && NuSpecialExistsFn(extra) != 0) {
+                    const u32 draw_flags = message->flags;
+                    if ((draw_flags & 0x20000) != 0) {
+                        DrawPanel3DObjectNoAlpha(position.x, position.y, position.z, scale, scale, scale,
+                                                 message->field_0xe0, message->rotation_y, message->field_0xe4, extra,
+                                                 2);
+                    } else {
+                        const f32 alpha =
+                            (draw_flags & 0x10000) != 0 ? static_cast<f32>(message->alpha) / 128.0f : 1.0f;
+                        DrawPanel3DObject(position.x, position.y, position.z, scale, scale, scale, message->field_0xe0,
+                                          message->rotation_y, message->field_0xe4, extra, 2, alpha);
+                    }
+                }
+            }
+        } else {
             char *text = message->text != NULL ? message->text : message->text_buffer;
             Text3DEx(text, position.x, position.y, position.z, scale, scale, scale, message->field_0xfc, message->red,
                      message->green, message->blue, message->alpha);
-            continue;
-        }
-        draw_special(&message->extra_special, message, position.x, position.y, position.z, scale,
-                     (message->flags & 0x10000) != 0 ? static_cast<f32>(message->alpha) / 128.0f : 1.0f);
-        if (GameMsg_GetExtraObjFn != NULL) {
-            nuhspecial_s *extra = GameMsg_GetExtraObjFn(reinterpret_cast<GAMEMESSAGE_s *>(message));
-            if (extra != NULL) {
-                draw_special(extra, message, position.x, position.y, position.z, scale,
-                             (message->flags & 0x10000) != 0 ? static_cast<f32>(message->alpha) / 128.0f : 1.0f);
-            }
         }
     }
 }
@@ -2164,8 +2237,9 @@ void DrawMiniKitCount(float position, float scale, i32 count, i32 maximum) {
     const f32 y = (KITPOSY - KITPOS2Y) * blend + KITPOS2Y;
     WORLDINFO_s *world = WorldInfo_CurrentlyActive();
     if (world->lev_objs[model].active != 0) {
-        const u16 rotation = static_cast<u16>(NuFmod(GlobalTimer.time_elapsed, 4.0f) * 0.25f * 65536.0f);
-        const u16 tilt = static_cast<u16>(1820.0f * NuTrigTable[rotation & 0x7fff]);
+        const u16 rotation =
+            static_cast<u16>(static_cast<i32>(NuFmod(GlobalTimer.time_elapsed, 4.0f) * 0.25f * 65536.0f));
+        const i16 tilt = static_cast<i16>(1820.0f * NuTrigTable[rotation & 0x7fff]);
         const f32 size = scale * PANEL_MINIKITSCALE;
         DrawPanel3DObjectNoAlpha(x, PANEL_MINIKITY + y, 1.0f, size, size, size, tilt, rotation, 0,
                                  &world->lev_objs[model].special, 2);
@@ -2267,119 +2341,135 @@ void DrawStatusMiniKit(float x, float y, float z, float built_scale, float new_s
         }
     }
 
-    if (packet->minikit_max == 0 || WORLD->minikit.field_0x8 == 0 || count <= 0)
-        return;
-
-    i32 i = 0;
-    do {
-        HUBMINIKITPIECE_s &piece = pieces[i];
-        NUMTX_ALIGNED16 matrix = piece.matrix;
-        if (i < currentminikit) {
-            NuMtxScale(&matrix, &built_size);
-        } else {
-            NuMtxScale(&matrix, &new_size);
-            i32 piece_angle = 0x2000;
-            if (i == currentminikit) {
-                const f32 phase = slideseek * 16384.0f + 49152.0f + 16384.0f;
-                piece_angle = (static_cast<i32>(phase) >> 1) & 0x7fff;
-            }
-            const HUBMINIKITPIECE_s *animated_pieces = static_cast<HUBMINIKITPIECE_s *>(WORLD->minikit.field_0x4);
-            const HUBMINIKITPIECE_s &animated_piece = animated_pieces[i];
-            if (animated_piece.direction <= 5) {
-                const f32 oscillation = NuTrigTable[piece_angle];
-                switch (animated_piece.direction) {
-                    case 0:
-                        matrix.m30 -= (static_cast<f32>(animated_piece.direction_index) * 0.025f + 0.25f) * oscillation;
-                        break;
-                    case 1:
-                        matrix.m30 += (static_cast<f32>(animated_piece.direction_index) * 0.025f + 0.25f) * oscillation;
-                        break;
-                    case 2:
-                        matrix.m31 -= (static_cast<f32>(animated_piece.direction_index) * 0.025f + 0.25f) * oscillation;
-                        break;
-                    case 3:
-                        matrix.m31 += (static_cast<f32>(animated_piece.direction_index) * 0.025f + 0.25f) * oscillation;
-                        break;
-                    case 4:
-                        matrix.m32 += (static_cast<f32>(animated_piece.direction_index) * 0.025f + 0.25f) * oscillation;
-                        break;
-                    case 5:
-                        matrix.m32 -= (static_cast<f32>(animated_piece.direction_index) * 0.025f + 0.25f) * oscillation;
-                        break;
+    if (packet->minikit_max != 0 && WORLD->minikit.field_0x8 != 0 && count > 0) {
+        i32 i = 0;
+        do {
+            HUBMINIKITPIECE_s &piece = pieces[i];
+            NUMTX_ALIGNED16 matrix = piece.matrix;
+            if (i >= currentminikit) {
+                NuMtxScale(&matrix, &new_size);
+                i32 piece_angle = 0x2000;
+                if (i == currentminikit) {
+                    const f32 phase = slideseek * 16384.0f + 49152.0f + 16384.0f;
+                    piece_angle = (static_cast<i32>(phase) >> 1) & 0x7fff;
                 }
+                const f32 oscillation = NuTrigTable[piece_angle];
+                const HUBMINIKITPIECE_s *animated_pieces = static_cast<HUBMINIKITPIECE_s *>(WORLD->minikit.field_0x4);
+                const HUBMINIKITPIECE_s &animated_piece = animated_pieces[i];
+                if (animated_piece.direction <= 5) {
+                    switch (animated_piece.direction) {
+                        case 0:
+                            matrix.m30 -=
+                                (static_cast<f32>(static_cast<i32>(animated_piece.direction_index)) * 0.025f + 0.25f) *
+                                oscillation;
+                            break;
+                        case 1:
+                            matrix.m30 +=
+                                (static_cast<f32>(static_cast<i32>(animated_piece.direction_index)) * 0.025f + 0.25f) *
+                                oscillation;
+                            break;
+                        case 2:
+                            matrix.m31 -=
+                                (static_cast<f32>(static_cast<i32>(animated_piece.direction_index)) * 0.025f + 0.25f) *
+                                oscillation;
+                            break;
+                        case 3:
+                            matrix.m31 +=
+                                (static_cast<f32>(static_cast<i32>(animated_piece.direction_index)) * 0.025f + 0.25f) *
+                                oscillation;
+                            break;
+                        case 4:
+                            matrix.m32 +=
+                                (static_cast<f32>(static_cast<i32>(animated_piece.direction_index)) * 0.025f + 0.25f) *
+                                oscillation;
+                            break;
+                        case 5:
+                            matrix.m32 -=
+                                (static_cast<f32>(static_cast<i32>(animated_piece.direction_index)) * 0.025f + 0.25f) *
+                                oscillation;
+                            break;
+                    }
+                }
+            } else {
+                NuMtxScale(&matrix, &built_size);
             }
-        }
-        if (i <= currentminikit) {
-            matrix.m30 += offset.x;
-            matrix.m31 += offset.y;
-            matrix.m32 += offset.z;
-        }
+            if (i <= currentminikit) {
+                matrix.m30 += offset.x;
+                matrix.m31 += offset.y;
+                matrix.m32 += offset.z;
+            }
 
-        const u16 rotation_y =
-            static_cast<u16>(static_cast<i32>(NuFmod(GameTimer.time_elapsed, 2.0f) * 0.5f * 65536.0f));
-        const f32 cy = NU_COS_LUT(rotation_y);
-        const f32 sy = NU_SIN_LUT(rotation_y);
-#define STATUS_MINIKIT_ROTATE_Y(row)                                                                                   \
-    do {                                                                                                               \
-        const f32 first = matrix.m##row##0;                                                                            \
-        matrix.m##row##0 = first * cy + matrix.m##row##2 * sy;                                                         \
-        matrix.m##row##2 = matrix.m##row##2 * cy - first * sy;                                                         \
-    } while (0)
-        STATUS_MINIKIT_ROTATE_Y(0);
-        STATUS_MINIKIT_ROTATE_Y(1);
-        STATUS_MINIKIT_ROTATE_Y(2);
-        STATUS_MINIKIT_ROTATE_Y(3);
-#undef STATUS_MINIKIT_ROTATE_Y
+            const NUANG rotation_y =
+                static_cast<u16>(static_cast<i32>(NuFmod(GameTimer.time_elapsed, 2.0f) * 0.5f * 65536.0f));
+            const f32 y0 = matrix.m00;
+            const f32 y1 = matrix.m10;
+            const f32 y2 = matrix.m20;
+            const f32 y3 = matrix.m30;
+            const f32 cy = NU_COS_LUT(rotation_y);
+            const f32 sy = NU_SIN_LUT(rotation_y);
+            matrix.m00 = y0 * cy + matrix.m02 * sy;
+            matrix.m02 = matrix.m02 * cy - y0 * sy;
+            matrix.m10 = y1 * cy + matrix.m12 * sy;
+            matrix.m12 = matrix.m12 * cy - y1 * sy;
+            matrix.m20 = y2 * cy + matrix.m22 * sy;
+            matrix.m22 = matrix.m22 * cy - y2 * sy;
+            matrix.m30 = y3 * cy + matrix.m32 * sy;
+            matrix.m32 = matrix.m32 * cy - y3 * sy;
 
-        const u16 z_phase =
-            static_cast<u16>(static_cast<i32>(NuFmod(GameTimer.time_elapsed, 2.24f) / 2.24f * 65536.0f));
-        const u16 rotation_z = static_cast<u16>(static_cast<i32>(2730.0f * NU_SIN_LUT(z_phase)));
-        const f32 cz = NU_COS_LUT(rotation_z);
-        const f32 sz = NU_SIN_LUT(rotation_z);
-#define STATUS_MINIKIT_ROTATE_Z(row)                                                                                   \
-    do {                                                                                                               \
-        const f32 first = matrix.m##row##0;                                                                            \
-        matrix.m##row##0 = first * cz - matrix.m##row##1 * sz;                                                         \
-        matrix.m##row##1 = first * sz + matrix.m##row##1 * cz;                                                         \
-    } while (0)
-        STATUS_MINIKIT_ROTATE_Z(0);
-        STATUS_MINIKIT_ROTATE_Z(1);
-        STATUS_MINIKIT_ROTATE_Z(2);
-        STATUS_MINIKIT_ROTATE_Z(3);
-#undef STATUS_MINIKIT_ROTATE_Z
+            const u16 z_phase =
+                static_cast<u16>(static_cast<i32>(NuFmod(GameTimer.time_elapsed, 2.24f) / 2.24f * 65536.0f));
+            const NUANG rotation_z = static_cast<u16>(static_cast<i32>(2730.0f * NU_SIN_LUT(z_phase)));
+            const f32 z0 = matrix.m00;
+            const f32 z1 = matrix.m10;
+            const f32 z2 = matrix.m20;
+            const f32 z3 = matrix.m30;
+            const f32 cz = NU_COS_LUT(rotation_z);
+            const f32 sz = NU_SIN_LUT(rotation_z);
+            matrix.m00 = z0 * cz - matrix.m01 * sz;
+            matrix.m01 = z0 * sz + matrix.m01 * cz;
+            matrix.m10 = z1 * cz - matrix.m11 * sz;
+            matrix.m11 = z1 * sz + matrix.m11 * cz;
+            matrix.m20 = z2 * cz - matrix.m21 * sz;
+            matrix.m21 = z2 * sz + matrix.m21 * cz;
+            matrix.m30 = z3 * cz - matrix.m31 * sz;
+            matrix.m31 = z3 * sz + matrix.m31 * cz;
 
-        const u16 x_phase =
-            static_cast<u16>(static_cast<i32>(NuFmod(GameTimer.time_elapsed, 1.87f) / 1.87f * 65536.0f));
-        const u16 rotation_x = static_cast<u16>(static_cast<i32>(2730.0f * NU_SIN_LUT(x_phase) - 5461.0f));
-        const f32 cx = NU_COS_LUT(rotation_x);
-        const f32 sx = NU_SIN_LUT(rotation_x);
-#define STATUS_MINIKIT_ROTATE_X(row)                                                                                   \
-    do {                                                                                                               \
-        const f32 first = matrix.m##row##1;                                                                            \
-        matrix.m##row##1 = first * cx - matrix.m##row##2 * sx;                                                         \
-        matrix.m##row##2 = first * sx + matrix.m##row##2 * cx;                                                         \
-    } while (0)
-        STATUS_MINIKIT_ROTATE_X(0);
-        STATUS_MINIKIT_ROTATE_X(1);
-        STATUS_MINIKIT_ROTATE_X(2);
-        STATUS_MINIKIT_ROTATE_X(3);
-#undef STATUS_MINIKIT_ROTATE_X
+            const u16 x_phase =
+                static_cast<u16>(static_cast<i32>(NuFmod(GameTimer.time_elapsed, 1.87f) / 1.87f * 65536.0f));
+            const NUANG rotation_x = static_cast<u16>(static_cast<i32>(2730.0f * NU_SIN_LUT(x_phase) - 5461.0f));
+            const f32 x0 = matrix.m01;
+            const f32 x1 = matrix.m11;
+            const f32 x2 = matrix.m21;
+            const f32 x3 = matrix.m31;
+            const f32 cx = NU_COS_LUT(rotation_x);
+            const f32 sx = NU_SIN_LUT(rotation_x);
+            matrix.m01 = x0 * cx - matrix.m02 * sx;
+            matrix.m02 = x0 * sx + matrix.m02 * cx;
+            matrix.m11 = x1 * cx - matrix.m12 * sx;
+            matrix.m12 = x1 * sx + matrix.m12 * cx;
+            matrix.m21 = x2 * cx - matrix.m22 * sx;
+            matrix.m22 = x2 * sx + matrix.m22 * cx;
+            matrix.m31 = x3 * cx - matrix.m32 * sx;
+            matrix.m32 = x3 * sx + matrix.m32 * cx;
 
-        matrix.m30 += x * PANEL3DMULX;
-        matrix.m31 += y * PANEL3DMULY;
-        matrix.m32 += z;
+            matrix.m30 += x * PANEL3DMULX;
+            matrix.m31 += y * PANEL3DMULY;
+            matrix.m32 += z;
 
-        if (i < 10) {
-            KitPart[i].matrix = matrix;
-            KitPart[i].special = &static_cast<HUBMINIKITPIECE_s *>(WORLD->minikit.field_0x4)[i].special;
-            KitPart[i].enabled = 1;
-        }
-        if (WORLD->lev_objs[206].active != 0)
-            DrawPanel3DObjectMtxNoAlpha(&static_cast<HUBMINIKITPIECE_s *>(WORLD->minikit.field_0x4)[i].special,
-                                        &matrix);
-        ++i;
-        pieces = static_cast<HUBMINIKITPIECE_s *>(WORLD->minikit.field_0x4);
-    } while (i < packet->minikit_max && i < WORLD->minikit.field_0x8 && i != count);
+            if (i < 10) {
+                KitPart[i].matrix = matrix;
+                KitPart[i].special = &static_cast<HUBMINIKITPIECE_s *>(WORLD->minikit.field_0x4)[i].special;
+                KitPart[i].enabled = 1;
+            }
+            if (WORLD->lev_objs[206].active != 0)
+                DrawPanel3DObjectMtxNoAlpha(&static_cast<HUBMINIKITPIECE_s *>(WORLD->minikit.field_0x4)[i].special,
+                                            &matrix);
+            ++i;
+            if (i >= packet->minikit_max || i >= WORLD->minikit.field_0x8 || i == count)
+                break;
+            pieces = static_cast<HUBMINIKITPIECE_s *>(WORLD->minikit.field_0x4);
+        } while (true);
+    }
 }
 
 extern i16 tUNKNOWN, tPOWERBRICK, tLOCKED, tGOLDBRICK;
@@ -2413,75 +2503,66 @@ void DrawSubItemMenu2D() {
     char *name = items[ids[3]].name;
     i32 buyable = 0;
     i32 show_name = 0;
-    const u16 id = items[ids[3]].item_id;
-    switch (items[ids[3]].type) {
-        case 1: {
-            if (items[ids[3]].unlocked == 1)
-                show_name = 1;
-            else if (CollectIDUnlocked(id))
-                buyable = show_name = 1;
-            else {
-                f32 scale = 0.7f * ShopLockedScale;
-                SmartTextEx(TTab[tLOCKED], 0.0f, (HUB_EPISODETITLEY + HUB_EPISODESUBTITLEY) * 0.5f, 1.0f, scale, scale,
-                            scale, 0, 255, 0, 0, 1.7f, 1, NULL, 0, static_cast<i32>(128.0f * ShopNameAlpha));
-            }
-            break;
+    if (items[ids[3]].type == 1) {
+        if (items[ids[3]].unlocked == 1)
+            show_name = 1;
+        else if (CollectIDUnlocked(static_cast<u16>(items[ids[3]].item_id)))
+            buyable = show_name = 1;
+        else {
+            f32 scale = 0.7f * ShopLockedScale;
+            SmartTextEx(TTab[tLOCKED], 0.0f, (HUB_EPISODETITLEY + HUB_EPISODESUBTITLEY) * 0.5f, 1.0f, scale, scale,
+                        scale, 0, 255, 0, 0, 1.7f, 1, NULL, 0, static_cast<i32>(128.0f * ShopNameAlpha));
         }
-        case 0: {
-            buyable = items[ids[3]].unlocked != 1 && items[ids[3]].price != 0;
-            break;
-        }
-        case 2: {
-            NuStrCpy(subtitle, TTab[Cheat[id].text_id ? *Cheat[id].text_id : tUNKNOWN]);
-            name = subtitle;
-            i8 area = static_cast<i8>(Cheat[id].area);
-            if (items[ids[3]].unlocked == 1)
-                show_name = 1;
-            else if (id <= 7 || area == -1 || Game.area_save[area].red_brick_collected)
-                buyable = show_name = 1;
-            else {
-                sprintf(title, "%s %i", TTab[tPOWERBRICK], id - 7);
-                f32 scale = 0.6f * ShopLockedScale;
-                SmartTextEx(title, 0.0f, HUB_EPISODETITLEY, 1.0f, 0.6f, 0.6f, 0.6f, 0, 255, 255, 255, 1.7f, 1, NULL, 0,
-                            static_cast<i32>(128.0f * ShopNameAlpha));
-                SmartTextEx(TTab[tLOCKED], 0.0f, HUB_EPISODESUBTITLEY, 1.0f, scale, scale, scale, 0, 255, 0, 0, 1.7f, 1,
-                            NULL, 0, static_cast<i32>(128.0f * ShopNameAlpha));
-            }
-            break;
-        }
-        case 4: {
-            sprintf(title, "%s %i", TTab[tGOLDBRICK], id + 1);
-            name = title;
-            if (items[ids[3]].unlocked == 1)
-                show_name = 1;
-            else if (!(static_cast<f32>(id * 3600) > Game.field30_0x7c2c))
-                buyable = show_name = 1;
-            else {
-                SmartTextEx(title, 0.0f, HUB_EPISODETITLEY, 1.0f, 0.6f, 0.6f, 0.6f, 0, 255, 255, 255, 1.7f, 1, NULL, 0,
-                            static_cast<i32>(128.0f * ShopNameAlpha));
-                f32 scale = 0.6f * ShopLockedScale;
-                SmartTextEx(TTab[tLOCKED], 0.0f, HUB_EPISODESUBTITLEY, 1.0f, scale, scale, scale, 0, 255, 0, 0, 1.7f, 1,
-                            NULL, 0, static_cast<i32>(128.0f * ShopNameAlpha));
-            }
-            break;
-        }
-        case 5: {
-            i32 available = CutScenePlayer_CanStart(id);
-            CutScenePlayer_GetText(id, title, subtitle, available);
+    } else if (items[ids[3]].type == 0) {
+        buyable = items[ids[3]].unlocked != 1 && items[ids[3]].price != 0;
+    } else if (items[ids[3]].type == 2) {
+        const i32 id = static_cast<u16>(items[ids[3]].item_id);
+        NuStrCpy(subtitle, TTab[Cheat[id].text_id ? *Cheat[id].text_id : tUNKNOWN]);
+        name = subtitle;
+        i8 area = static_cast<i8>(Cheat[id].area);
+        if (items[ids[3]].unlocked == 1)
+            show_name = 1;
+        else if (id <= 7 || area == -1 || Game.area_save[area].red_brick_collected)
+            buyable = show_name = 1;
+        else {
+            sprintf(title, "%s %i", TTab[tPOWERBRICK], id - 7);
+            f32 scale = 0.6f * ShopLockedScale;
             SmartTextEx(title, 0.0f, HUB_EPISODETITLEY, 1.0f, 0.6f, 0.6f, 0.6f, 0, 255, 255, 255, 1.7f, 1, NULL, 0,
                         static_cast<i32>(128.0f * ShopNameAlpha));
-            if (available && shopcutsceneplayer)
-                SmartTextEx(subtitle, 0.0f, HUB_EPISODESUBTITLEY, 1.0f, 0.6f, 0.6f, 0.6f, 0, 255, 191, 0, 1.7f, 1, NULL,
-                            0, static_cast<i32>(128.0f * ShopNameAlpha));
-            else {
-                f32 scale = 0.6f * ShopLockedScale;
-                SmartTextEx(TTab[tLOCKED], 0.0f, HUB_EPISODESUBTITLEY, 1.0f, scale, scale, scale, 0, 255, 0, 0, 1.7f, 1,
-                            NULL, 0, static_cast<i32>(128.0f * ShopNameAlpha));
-            }
-            break;
+            SmartTextEx(TTab[tLOCKED], 0.0f, HUB_EPISODESUBTITLEY, 1.0f, scale, scale, scale, 0, 255, 0, 0, 1.7f, 1,
+                        NULL, 0, static_cast<i32>(128.0f * ShopNameAlpha));
+        }
+    } else if (items[ids[3]].type == 4) {
+        const i32 id = static_cast<u16>(items[ids[3]].item_id);
+        sprintf(title, "%s %i", TTab[tGOLDBRICK], id + 1);
+        name = title;
+        if (items[ids[3]].unlocked == 1)
+            show_name = 1;
+        else if (!(static_cast<f32>(id * 3600) > Game.field30_0x7c2c))
+            buyable = show_name = 1;
+        else {
+            SmartTextEx(title, 0.0f, HUB_EPISODETITLEY, 1.0f, 0.6f, 0.6f, 0.6f, 0, 255, 255, 255, 1.7f, 1, NULL, 0,
+                        static_cast<i32>(128.0f * ShopNameAlpha));
+            f32 scale = 0.6f * ShopLockedScale;
+            SmartTextEx(TTab[tLOCKED], 0.0f, HUB_EPISODESUBTITLEY, 1.0f, scale, scale, scale, 0, 255, 0, 0, 1.7f, 1,
+                        NULL, 0, static_cast<i32>(128.0f * ShopNameAlpha));
+        }
+    } else if (items[ids[3]].type == 5) {
+        const i32 id = static_cast<u16>(items[ids[3]].item_id);
+        i32 available = CutScenePlayer_CanStart(id);
+        CutScenePlayer_GetText(id, title, subtitle, available);
+        SmartTextEx(title, 0.0f, HUB_EPISODETITLEY, 1.0f, 0.6f, 0.6f, 0.6f, 0, 255, 255, 255, 1.7f, 1, NULL, 0,
+                    static_cast<i32>(128.0f * ShopNameAlpha));
+        if (available && shopcutsceneplayer)
+            SmartTextEx(subtitle, 0.0f, HUB_EPISODESUBTITLEY, 1.0f, 0.6f, 0.6f, 0.6f, 0, 255, 191, 0, 1.7f, 1, NULL, 0,
+                        static_cast<i32>(128.0f * ShopNameAlpha));
+        else {
+            f32 scale = 0.6f * ShopLockedScale;
+            SmartTextEx(TTab[tLOCKED], 0.0f, HUB_EPISODESUBTITLEY, 1.0f, scale, scale, scale, 0, 255, 0, 0, 1.7f, 1,
+                        NULL, 0, static_cast<i32>(128.0f * ShopNameAlpha));
         }
     }
-    u32 price;
+    i32 price;
     switch (items[ids[3]].type) {
         case 0:
             price = items[HintShelfIds[3]].price;
@@ -2565,11 +2646,7 @@ void DrawFadeScreenWipe() {
     NuRndrBeginScene(-1);
     extern numtl_s *SolidMtl;
 
-    // The original routine unconditionally dereferences the shared fade
-    // pointer after beginning a scene.  `pFadeInfo` is installed by
-    // LoadPermData and points at FadeSys; retaining that indirection keeps
-    // this call ABI-identical to the original.
-    FadeSystem &fade_info = *pFadeInfo;
+    FadeSystem &fade_info = FadeSys;
     const f32 fade_amount = fade_info.fade;
     const u32 direction = fade_info.direction;
     i32 gradient[4];
@@ -2579,48 +2656,52 @@ void DrawFadeScreenWipe() {
     i32 solid_height = 3584;
 
     if ((direction & 3) != 0) {
+        i32 gradient_x;
         const bool positive = (direction & 1) != 0;
-        if ((positive && fade_info.rate > 0.0f) || (!positive && fade_info.rate <= 0.0f)) {
+        if ((positive && fade_info.rate > 0.0f) || (!positive && !(fade_info.rate > 0.0f))) {
             gradient[0] = static_cast<i32>(0x80000000u);
             gradient[1] = 0;
             gradient[2] = static_cast<i32>(0x80000000u);
             gradient[3] = 0;
             solid_width = static_cast<i32>(fade_amount * 10240.0f);
-            NuRndrGradRect2di(solid_width, 0, 1024, 3584, gradient, FadeMtl2);
+            gradient_x = solid_width;
         } else {
             gradient[0] = 0;
             gradient[1] = static_cast<i32>(0x80000000u);
             gradient[2] = 0;
             gradient[3] = static_cast<i32>(0x80000000u);
-            const i32 edge = static_cast<i32>((1.0f - fade_amount) * 10240.0f);
-            NuRndrGradRect2di(edge - 1024, 0, 1024, 3584, gradient, FadeMtl2);
-            solid_x = edge;
-            solid_width = 10240 - edge;
+            const f32 edge = (1.0f - fade_amount) * 10240.0f;
+            solid_x = static_cast<i32>(edge);
+            solid_width = 10240 - solid_x;
+            gradient_x = static_cast<i32>(edge - 1024.0f);
         }
+        NuRndrGradRect2di(gradient_x, 0, 1024, 3584, gradient, FadeMtl2);
     } else if ((direction & 0xc) != 0) {
         // The vertical sign test is the same two-way rate/direction test as
         // the horizontal one, with bit 2 selecting the opposite side.
-        const bool edge_first = (direction & 4) != 0 ? fade_info.rate <= 0.0f : fade_info.rate > 0.0f;
-        if (edge_first) {
-            gradient[0] = static_cast<i32>(0x80000000u);
-            gradient[1] = static_cast<i32>(0x80000000u);
-            gradient[2] = 0;
-            gradient[3] = 0;
-            const i32 edge = static_cast<i32>((1.0f - fade_amount) * 3584.0f);
-            NuRndrGradRect2di(0, edge - 358, 10240, 358, gradient, FadeMtl2);
-            solid_y = edge;
-            solid_height = 3584 - edge;
-        } else {
+        i32 gradient_y;
+        const bool positive = (direction & 4) == 0;
+        if ((positive && fade_info.rate > 0.0f) || (!positive && !(fade_info.rate > 0.0f))) {
             gradient[0] = 0;
             gradient[1] = 0;
             gradient[2] = static_cast<i32>(0x80000000u);
             gradient[3] = static_cast<i32>(0x80000000u);
+            const f32 edge = (1.0f - fade_amount) * 3584.0f;
+            solid_y = static_cast<i32>(edge);
+            solid_height = 3584 - solid_y;
+            gradient_y = static_cast<i32>(edge - 358.0f);
+        } else {
+            gradient[0] = static_cast<i32>(0x80000000u);
+            gradient[1] = static_cast<i32>(0x80000000u);
+            gradient[2] = 0;
+            gradient[3] = 0;
             solid_height = static_cast<i32>(fade_amount * 3584.0f);
-            NuRndrGradRect2di(0, solid_height, 10240, 358, gradient, FadeMtl2);
+            gradient_y = solid_height;
         }
+        NuRndrGradRect2di(0, gradient_y, 10240, 358, gradient, FadeMtl2);
     }
 
-    if (fade_amount >= 0.0f) {
+    if (!(fade_amount < 0.0f)) {
         NuRndrRect2di(solid_x, solid_y, solid_width, solid_height, 0, SolidMtl);
     }
     NuRndrEndScene();
@@ -2691,8 +2772,8 @@ void DrawGameObjectsDraw(i32) {
     extern f32 FORCEGLOWTIME;
     EnableShadowMapRendering(0);
 
-    for (i32 index = 0; index < HIGHGAMEOBJECT; ++index) {
-        GameObject_s *object = &Obj[index];
+    GameObject_s *object = Obj;
+    for (i32 index = 0; index < HIGHGAMEOBJECT; ++index, ++object) {
 
         if ((object->apiobj.field_0x1f4 & 0x800) != 0) {
             if (object->field_0xcc0 != NULL && object->field_0x7a5 == 0x3b) {
@@ -2701,11 +2782,12 @@ void DrawGameObjectsDraw(i32) {
             continue;
         }
 
-        NUMTX *secondary_matrix = (object->field_0xefe & 2) != 0 ? &object->apiobj.field_0xf8 : NULL;
+        CHARACTERMODEL_s *model = object->apiobj.character_model;
         NUMTX *tertiary_matrix = object->field_0x1088 != 0 ? &object->apiobj.field_0x138 : NULL;
-        const i32 drawn = GameDrawCharacterModel(object->apiobj.character_model, &object->apiobj.anim_packet,
-                                                 &object->apiobj.field_0xb8, secondary_matrix, tertiary_matrix,
-                                                 &object->field_0x7f4, object, object->field_0x1054);
+        NUMTX *secondary_matrix = (object->field_0xefe & 2) != 0 ? &object->apiobj.field_0xf8 : NULL;
+        const u8 drawn = static_cast<u8>(
+            GameDrawCharacterModel(model, &object->apiobj.anim_packet, &object->apiobj.field_0xb8, secondary_matrix,
+                                   tertiary_matrix, &object->field_0x7f4, object, object->field_0x1054));
 
         object->apiobj.model_draw_result = static_cast<u8>(drawn);
         object->field_0xe24 =
@@ -2729,7 +2811,7 @@ void DrawGameObjectsDraw(i32) {
             object->field_0xefe |= 4;
         }
 
-        if (Paused == 0 && object->apiobj.character_data != NULL && object->apiobj.character_data->draw_fn != NULL) {
+        if (Paused == 0 && object->apiobj.character_data->draw_fn != NULL) {
             object->apiobj.character_data->draw_fn(object);
         }
     }
@@ -2752,19 +2834,20 @@ void DrawPanel3DObjectMtx(nuhspecial_s *special, numtx_s *matrix, float alpha) {
 }
 
 void Draw_AUTOSAVEWARNING() {
-    const f32 scale = MENUTEXTSCALE * 0.8f;
+    f32 scale = MENUTEXTSCALE;
 
     if (memcard_drawasiconfn != NULL) {
         memcard_drawasiconfn();
     }
+    scale *= 0.8f;
 
-    const char *message = apitxt_SAVING;
     if (memcard_loadmessage_delay > 0.0f || memcard_loadresult_delay > 0.0f) {
-        message = apitxt_LOADING;
+        MenuSmartTextEx(apitxt_LOADING, AUTOSAVEICONX - AUTOSAVEICONSIZE * 1.8f, AUTOSAVEICONY, 1.0f, scale, scale,
+                        scale, 8, MENUNORMALR, MENUNORMALG, MENUNORMALB, 1.2f, 1, NULL, 0, MenuA);
+    } else {
+        MenuSmartTextEx(apitxt_SAVING, AUTOSAVEICONX - AUTOSAVEICONSIZE * 1.8f, AUTOSAVEICONY, 1.0f, scale, scale,
+                        scale, 8, MENUNORMALR, MENUNORMALG, MENUNORMALB, 1.2f, 1, NULL, 0, MenuA);
     }
-
-    MenuSmartTextEx(const_cast<char *>(message), AUTOSAVEICONX - AUTOSAVEICONSIZE * 1.8f, AUTOSAVEICONY, 1.0f, scale,
-                    scale, scale, 8, MENUNORMALR, MENUNORMALG, MENUNORMALB, 1.2f, 1, NULL, 0, MenuA);
 }
 
 void Draw_NODATAAVAILABLE() {
@@ -2797,8 +2880,8 @@ void DrawObjectOnCharacter(WORLDINFO_s *world, GameObject_s *object, i32 object_
         id = object->id;
         model = object->apiobj.character_model;
         axis = object->field_0x1087;
-        plane = object->field_0x1020;
         hat = object->field_0x108e;
+        plane = object->field_0x1020;
     } else {
         id = dco_id;
         if (id == -1 || dco_gcdata == NULL || dco_cmodel == NULL)
@@ -2824,7 +2907,7 @@ void DrawObjectOnCharacter(WORLDINFO_s *world, GameObject_s *object, i32 object_
     }
     if (locator == -1 || model->points_of_interest[locator] == NULL)
         return;
-    NUMTX matrix;
+    NUMTX matrix, reflected, first, second;
     if (position_only)
         NuMtxSetTranslation(&matrix, reinterpret_cast<NUVEC *>(&joints[locator].m30));
     else
@@ -2832,9 +2915,9 @@ void DrawObjectOnCharacter(WORLDINFO_s *world, GameObject_s *object, i32 object_
     if (second_locator != -1 && model->points_of_interest[second_locator] != NULL) {
         NUVEC position = {matrix.m30, matrix.m31, matrix.m32};
         if (!position_only) {
-            NUMTX first = matrix;
-            NUMTX second = joints[second_locator];
+            first = matrix;
             first.m30 = first.m31 = first.m32 = 0.0f;
+            second = joints[second_locator];
             second.m30 = second.m31 = second.m32 = 0.0f;
             QuatInterpolateRotationMatrix(&matrix, &first, &second, 0.5f);
         }
@@ -2869,11 +2952,10 @@ void DrawObjectOnCharacter(WORLDINFO_s *world, GameObject_s *object, i32 object_
     }
     if (scale != 1.0f)
         NuMtxPreScaleU(&matrix, scale);
-    if (use_alpha)
-        NuSpecialDrawAtAlpha(special, &matrix, alpha);
-    else
+    if (!use_alpha)
         NuSpecialDrawAt(special, &matrix);
-    NUMTX reflected;
+    else
+        NuSpecialDrawAtAlpha(special, &matrix, alpha);
     if (reflect && MatrixReflection(&matrix, axis, plane, world->current_level->unknown_0cc, &reflected)) {
         NuRndrStartReflectionRender(0);
         if (use_alpha)
@@ -3068,7 +3150,7 @@ void DrawStatusTextFraction(i32 current, i32 total, float x, float y, u16 angle,
     u16 encoded[64];
     NUMTX matrix;
     NUVEC origin = {0.0f, 0.0f, 800.0f};
-    NUVEC position = {x * 350.0f, y * 300.0f, 0.0f};
+    NUVEC position = {x * 400.0f, y * 250.0f, 0.0f};
     NuQFntSetJustifiedTolerances(1.2f, 1.2f);
     NuMtxSetIdentity(&matrix);
     NuMtxSetRotationX(&matrix, 0);
@@ -3088,35 +3170,43 @@ void DrawStatusTextFraction(i32 current, i32 total, float x, float y, u16 angle,
     const f32 full_width = NuQFntPrintLenW(QFont3DZ, encoded);
     const f32 height = NuQFntHeight(QFont3DZ);
     NuQFntMove(QFont3DZ, -full_width * 0.5f, -height * 0.5f, 0.0f);
-    if (animation <= 0.0f) {
-        sprintf(text, "%i", current);
-        Text3DStringEncode(text, encoded);
-        NuQFntPrintW(QFont3DZ, encoded);
-        sprintf(text, "/%i", total);
-        Text3DStringEncode(text, encoded);
-        NuQFntPrintW(QFont3DZ, encoded);
-    } else {
+    if (animation > 0.0f) {
         const i32 wave_angle = static_cast<i32>((animation / animation_duration) * 32768.0f + 16384.0f);
-        const f32 wave = (NuTrigTable[(wave_angle >> 1) & 0x7fff] + 1.0f) * 0.5f;
+        const f32 blend = 1.0f - (NuTrigTable[(wave_angle >> 1) & 0x7fff] + 1.0f) * 0.5f;
+        const f32 wave = 1.0f - blend;
         const f32 small_scale = scale - 0.5f + wave * 0.5f;
-        const f32 large_scale = scale + 0.5f - wave * 0.5f;
+        const f32 large_scale = 0.5f + scale - wave * 0.5f;
         sprintf(text, "/%i", total);
         Text3DStringEncode(text, encoded);
         const f32 suffix_width = NuQFntPrintLenW(QFont3DZ, encoded);
-        NuQFntMove(QFont3DZ, full_width * 0.5f - suffix_width, -height * 0.5f, 0.0f);
+        const f32 suffix_offset = full_width - suffix_width;
+        const f32 half_full_width = 0.5f * full_width;
+        const f32 suffix_x = suffix_offset - half_full_width;
+        const f32 suffix_height = NuQFntHeight(QFont3DZ);
+        NuQFntMove(QFont3DZ, suffix_x, -suffix_height * 0.5f, 0.0f);
         NuQFntPrintW(QFont3DZ, encoded);
         sprintf(text, "%i", current);
         Text3DStringEncode(text, encoded);
         const f32 current_width = NuQFntPrintLenW(QFont3DZ, encoded);
         NuQFntSetScale(QFont3DZ, large_scale, large_scale);
         const f32 large_width = NuQFntPrintLenW(QFont3DZ, encoded);
+        const f32 current_center = current_width * 0.5f - half_full_width;
+        const f32 large_x = current_center - large_width * 0.5f;
         const f32 large_height = NuQFntHeight(QFont3DZ);
-        NuQFntMove(QFont3DZ, current_width * 0.5f - full_width * 0.5f - large_width * 0.5f, -large_height * 0.5f, 0.0f);
+        NuQFntMove(QFont3DZ, large_x, -large_height * 0.5f, 0.0f);
         NuQFntPrintW(QFont3DZ, encoded);
         NuQFntSetScale(QFont3DZ, small_scale, small_scale);
         const f32 small_width = NuQFntPrintLenW(QFont3DZ, encoded);
+        const f32 small_x = current_center - small_width * 0.5f;
         const f32 small_height = NuQFntHeight(QFont3DZ);
-        NuQFntMove(QFont3DZ, current_width * 0.5f - full_width * 0.5f - small_width * 0.5f, -small_height * 0.5f, 0.0f);
+        NuQFntMove(QFont3DZ, small_x, -small_height * 0.5f, 0.0f);
+        NuQFntPrintW(QFont3DZ, encoded);
+    } else {
+        sprintf(text, "%i", current);
+        Text3DStringEncode(text, encoded);
+        NuQFntPrintW(QFont3DZ, encoded);
+        sprintf(text, "/%i", total);
+        Text3DStringEncode(text, encoded);
         NuQFntPrintW(QFont3DZ, encoded);
     }
     NuQFntPopPrintMode();
@@ -3230,17 +3320,6 @@ void DrawCross(nuvec_s *centre, float radius, numtl_s *material, i32 colour) {
 f32 SwipeDecalRenderer_MaxWidth = 0.6f;
 f32 SwipeDecalRenderer_MinWidth = 0.2f;
 
-static inline void SwipePrimUV(f32 u, f32 v) {
-    PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);
-    if (!g_NuPrim_NeedsHalfUVs) {
-        vertex->float_uv[0] = u;
-        vertex->float_uv[1] = v;
-    } else {
-        vertex->half_uv[0] = NuRndrFloatToHalf(u);
-        vertex->half_uv[1] = NuRndrFloatToHalf(v);
-    }
-}
-
 void SwipeDecalRenderer::Process(float frame_time) {
     width.Process(frame_time);
     alpha.Process(frame_time);
@@ -3250,6 +3329,18 @@ void SwipeDecalRenderer::Process(float frame_time) {
         alpha.delay = 0.2f;
     }
 }
+
+#define SWIPE_PRIM_UV(U, V)                                                                                            \
+    do {                                                                                                               \
+        PrimVertexRaw *vertex = static_cast<PrimVertexRaw *>(g_NuPrim_StreamBufferPtr->void_ptr);                      \
+        if (!g_NuPrim_NeedsHalfUVs) {                                                                                  \
+            vertex->float_uv[0] = (U);                                                                                 \
+            vertex->float_uv[1] = (V);                                                                                 \
+        } else {                                                                                                       \
+            vertex->half_uv[0] = NuRndrFloatToHalf(U);                                                                 \
+            vertex->half_uv[1] = NuRndrFloatToHalf(V);                                                                 \
+        }                                                                                                              \
+    } while (false)
 
 void SwipeDecalRenderer::Render() {
     NUVEC vertices[4] = {
@@ -3279,19 +3370,21 @@ void SwipeDecalRenderer::Render() {
     }
 
     NuRndrPrimSetColour(colour);
-    SwipePrimUV(0.0f, 0.0f);
+    SWIPE_PRIM_UV(0.0f, 0.0f);
     NuPrim2DAddXYZ(static_cast<f32>(PS2_VREZ_W) * vertices[0].x, static_cast<f32>(PS2_VREZ_H) * vertices[0].y, 0.0f);
     NuRndrPrimSetColour(colour);
-    SwipePrimUV(1.0f, 0.0f);
+    SWIPE_PRIM_UV(1.0f, 0.0f);
     NuPrim2DAddXYZ(static_cast<f32>(PS2_VREZ_W) * vertices[1].x, static_cast<f32>(PS2_VREZ_H) * vertices[1].y, 0.0f);
     NuRndrPrimSetColour(colour);
-    SwipePrimUV(0.0f, uv_height);
+    SWIPE_PRIM_UV(0.0f, uv_height);
     NuPrim2DAddXYZ(static_cast<f32>(PS2_VREZ_W) * vertices[2].x, static_cast<f32>(PS2_VREZ_H) * vertices[2].y, 0.0f);
     NuRndrPrimSetColour(colour);
-    SwipePrimUV(1.0f, uv_height);
+    SWIPE_PRIM_UV(1.0f, uv_height);
     NuPrim2DAddXYZ(static_cast<f32>(PS2_VREZ_W) * vertices[3].x, static_cast<f32>(PS2_VREZ_H) * vertices[3].y, 0.0f);
     NuPrim2DEnd();
 }
+
+#undef SWIPE_PRIM_UV
 
 SwipeDecalRenderer::SwipeDecalRenderer(TouchHolder &holder, i32 index, SwipeDecalRenderer::Style style) {
     alpha.Initialize();
@@ -3337,26 +3430,26 @@ static __used__ i32 MatrixReflection_CanOverride() {
 
 static void DrawWeapon_SetSabreObjects(GameObject_s *object, i32 red, i32 green, i32 blue, i32 purple, i32 *models,
                                        i32 *hilt) {
-    if (!(red || green || blue || purple))
-        goto blue_or_purple;
-
-    if (object->id == id_DARTHMAUL) {
-        *hilt = models[0] = 0x12;
-    } else if (object->id == id_COUNTDOOKU && WORLD->lev_objs[0x13].active) {
-        *hilt = models[0] = 0x13;
-    } else {
-        *hilt = models[0] = 0x11;
-    }
-
-    if (red) {
-        if (object->apiobj.field_0x287 != 0)
-            return;
+    if (red || green || blue || purple) {
         if (object->id == id_DARTHMAUL) {
+            models[0] = *hilt = 0x12;
+        } else if (object->id == id_COUNTDOOKU && WORLD->lev_objs[0x13].active) {
+            models[0] = *hilt = 0x13;
+        } else {
+            models[0] = *hilt = 0x11;
+        }
+    }
+    if (red) {
+        if (object->id == id_DARTHMAUL) {
+            if (object->apiobj.field_0x287 != 0)
+                return;
             models[1] = 0x6d;
             models[2] = 0x6e;
             if (object->field_0xe22 & 8)
                 models[3] = 0x6e;
         } else {
+            if (object->apiobj.field_0x287 != 0)
+                return;
             models[1] = 0x65;
             models[2] = 0x66;
             if (object->field_0xe22 & 8)
@@ -3375,7 +3468,6 @@ static void DrawWeapon_SetSabreObjects(GameObject_s *object, i32 red, i32 green,
         return;
     }
 
-blue_or_purple:
     if (blue) {
         if (object->apiobj.field_0x287 == 0) {
             models[1] = 0x69;
@@ -3413,62 +3505,78 @@ static void DrawWeapons(GameObject_s *object, i32 reflection, f32 weapon_scale) 
             const i32 disguise = Cheat_IsOn(15);
             // Services may replace the character data; the reference reloads it.
             data = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
-            bool explicit_weapon;
             if (disguise && (data->field275_0x116 == 8 || data->field275_0x116 == 1)) {
                 models[0] = 0x59;
-                explicit_weapon = true;
             } else {
                 models[0] = data->weapon_model;
-                explicit_weapon = models[0] != -1;
-                if (models[0] == -1) {
-                    if ((object->apiobj.character_data->model_flags & 0x90) == 0x80) {
-                        models[0] = 0xd;
-                    } else {
-                        i32 color;
-                        if (object->id == id_BOB) {
-                            color = (object->field_0xefd & 2) ? 1 : 2;
-                        } else if (AnakinGreenSabre(object)) {
-                            color = 1;
-                        } else {
-                            color = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24)
-                                        ->field_0x117;
-                        }
-                        if (color < 4) {
-                            if (object->apiobj.field_0x27c != -1 && Cheat_IsOn(25)) {
-                                color = 0;
-                            } else if (object->apiobj.field_0x27c != -1 && Player_HasPurpleForce(object)) {
-                                color = 3;
-                            } else if (color == 1 && object->id == id_GRIEVOUS && (hand == 0 || hand == 3)) {
-                                color = 2;
-                            }
-                            DrawWeapon_SetSabreObjects(object, color == 0, color == 1, color == 2, color == 3, models,
-                                                       &hilt);
-                            sabre = true;
-                        }
-                    }
-                }
             }
-            if (explicit_weapon) {
+            if (models[0] != -1) {
                 if (object->id == id_JANGOFETT) {
                     rotation = 0xd1c8;
                 } else if (models[0] == 0x65 || models[0] == 0x67 || models[0] == 0x69 || models[0] == 0x6b) {
-                    i32 color = (models[0] - 0x65) / 2;
+                    i32 red, green, blue, purple;
                     if (object->apiobj.field_0x27c != -1 && Cheat_IsOn(25)) {
-                        color = 0;
+                        red = 1;
+                        green = blue = purple = 0;
                     } else if (object->apiobj.field_0x27c != -1 && Player_HasPurpleForce(object)) {
-                        color = 3;
+                        purple = 1;
+                        red = green = blue = 0;
+                    } else {
+                        red = models[0] == 0x65;
+                        green = models[0] == 0x67;
+                        blue = models[0] == 0x69;
+                        purple = models[0] == 0x6b;
                     }
-                    DrawWeapon_SetSabreObjects(object, color == 0, color == 1, color == 2, color == 3, models, &hilt);
+                    DrawWeapon_SetSabreObjects(object, red, green, blue, purple, models, &hilt);
                     sabre = true;
+                }
+            } else {
+                if ((object->apiobj.character_data->model_flags & 0x90) == 0x80) {
+                    models[0] = 0xd;
+                } else {
+                    i32 red = 0, green = 0, blue = 0, purple = 0;
+                    if (object->id == id_BOB) {
+                        if (object->field_0xefd & 2)
+                            green = 1;
+                        else
+                            blue = 1;
+                    } else if (AnakinGreenSabre(object)) {
+                        green = 1;
+                    } else {
+                        const u8 color =
+                            static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24)->field_0x117;
+                        if (color == 0)
+                            red = 1;
+                        else if (color == 1)
+                            green = 1;
+                        else if (color == 2)
+                            blue = 1;
+                        else if (color == 3)
+                            purple = 1;
+                    }
+                    if (red || green || blue || purple) {
+                        if (object->apiobj.field_0x27c != -1 && Cheat_IsOn(25)) {
+                            red = 1;
+                            green = blue = purple = 0;
+                        } else if (object->apiobj.field_0x27c != -1 && Player_HasPurpleForce(object)) {
+                            purple = 1;
+                            red = green = blue = 0;
+                        } else if (green && object->id == id_GRIEVOUS && (hand == 0 || hand == 3)) {
+                            blue = 1;
+                            green = 0;
+                        }
+                        DrawWeapon_SetSabreObjects(object, red, green, blue, purple, models, &hilt);
+                        sabre = true;
+                    }
                 }
             }
             i32 count = 0;
             for (i32 part = 0; part < 4; ++part) {
                 if (models[part] != -1) {
-                    reflected_models[part] = LevelObject_GetReflection(models[part]);
                     if (part != 3) {
                         ++count;
                     }
+                    reflected_models[part] = LevelObject_GetReflection(models[part]);
                 }
             }
             if (count != 0) {
@@ -3476,22 +3584,25 @@ static void DrawWeapons(GameObject_s *object, i32 reflection, f32 weapon_scale) 
                 NUMTX hilt_matrix;
                 NUVEC scale = {weapon_scale, weapon_scale, weapon_scale};
                 if (hilt != -1) {
-                    f32 hilt_scale = weapon_scale + weapon_scale;
-                    if (hilt_scale > 1.0f) {
-                        hilt_scale = 1.0f;
-                    }
-                    NUVEC hilt_scale_vec = {hilt_scale, hilt_scale, hilt_scale};
+                    NUVEC hilt_scale_vec;
+                    hilt_scale_vec.x = weapon_scale + weapon_scale;
                     hilt_matrix = blade_matrix;
+                    if (hilt_scale_vec.x > 1.0f) {
+                        hilt_scale_vec.x = 1.0f;
+                    }
+                    hilt_scale_vec.z = hilt_scale_vec.x;
+                    hilt_scale_vec.y = hilt_scale_vec.x;
                     NuMtxPreScale(&hilt_matrix, &hilt_scale_vec);
                 }
                 if (rotation != 0) {
                     NuMtxPreRotateX(&blade_matrix, rotation);
                 }
                 NuMtxPreScale(&blade_matrix, &scale);
-                const NUMTX saved_matrix = blade_matrix;
+                u8 saved_matrix[sizeof(NUMTX)];
+                memcpy(saved_matrix, &blade_matrix, sizeof(blade_matrix));
                 for (i32 side = 0;; ++side) {
                     for (i32 part = 0; part < 4; ++part) {
-                        if (models[part] == -1 || (side && models[part] == hilt)) {
+                        if ((side && models[part] == hilt) || models[part] == -1) {
                             continue;
                         }
                         if (part == 3) {
@@ -3516,10 +3627,10 @@ static void DrawWeapons(GameObject_s *object, i32 reflection, f32 weapon_scale) 
                         }
                     }
                     if (side || object->id != id_DARTHMAUL || object->apiobj.field_0x27c == -1 ||
-                        (!Cheat_IsOn(25) && !Player_HasPurpleForce(object))) {
+                        (!Cheat_IsOn(25) && (object->apiobj.field_0x27c == -1 || !Player_HasPurpleForce(object)))) {
                         break;
                     }
-                    blade_matrix = saved_matrix;
+                    memcpy(&blade_matrix, saved_matrix, sizeof(blade_matrix));
                     NUVEC reverse = {1.0f, -1.0f, 1.0f};
                     NuMtxPreScale(&blade_matrix, &reverse);
                 }
@@ -3569,6 +3680,7 @@ static void DrawCharacterAttachments(GameObject_s *object, NUMTX *joint_matrices
     i16 model_index = apicharsys->playermodelids[character_id];
     if (model_index == -1)
         return;
+    CHARACTERMODEL_s *attachment_model = &apicharsys->models[model_index];
     NUMTX matrix = joint_matrices[locator];
     NUMTX reflected;
     NUMTX *reflection = NULL;
@@ -3577,8 +3689,7 @@ static void DrawCharacterAttachments(GameObject_s *object, NUMTX *joint_matrices
                          &reflected)) {
         reflection = &reflected;
     }
-    GameDrawCharacterModel(&apicharsys->models[model_index], &animation, &matrix, NULL, reflection, NULL, NULL,
-                           0xffffffff);
+    GameDrawCharacterModel(attachment_model, &animation, &matrix, NULL, reflection, NULL, NULL, 0xffffffff);
 }
 
 void CharScene_Draw(WORLDINFO_s *, i32, NUMTX *, NUMTX *);
@@ -3593,14 +3704,22 @@ extern i32 PickUpFlickerTest, PickUpFlickerFrames, PickupFlickerFrame;
 static void DrawParaphernalia(GameObject_s *object) {
     if (draw_para == 0)
         return;
-    GAMECHARACTERDATA_s *config = object->apiobj.character_data->game_character;
+    // Keep the effect matrices alive throughout the rendering callbacks.
+    NUMTX matrix, reflected, special_reflected;
+    NUMTX communicate_matrix, communicate_reflected;
+    NUMTX thrust_matrix, thrust_reflected;
+    NUMTX placement_matrix, placement_reflected;
+    NUMTX removal_matrix, removal_reflected;
+    NUMTX shield_matrix, shield_reflected;
+    NUMTX hand_matrix, hand_reflected;
+    NUMTX attachment_matrices[16];
     GameObject_s *carried = object->field_0xcc0;
-    if (carried != NULL && object->field_0x7a5 != 0x3b && (config->flags_098[0] & 0x40) == 0) {
+    if (carried != NULL && object->field_0x7a5 != 0x3b &&
+        (object->apiobj.character_data->game_character->flags_098[0] & 0x40) == 0) {
         carried->field_0x1088 = object->field_0x1088;
         carried->field_0x1020 = object->field_0x1020;
         carried->field_0x1087 = object->field_0x1087;
-        i32 locator = config->ride_locator;
-        NUMTX matrix, reflected, attachment_matrices[16];
+        i32 locator = object->apiobj.character_data->game_character->ride_locator;
         if (locator != -1 && object->apiobj.character_model->points_of_interest[locator] != NULL) {
             matrix = object->joint_matrices[locator];
         } else {
@@ -3616,7 +3735,7 @@ static void DrawParaphernalia(GameObject_s *object) {
         }
         NUMTX *reflection = NULL;
         if (carried->field_0x1087 && carried->field_0x1020 != 2000000.0f &&
-            static_cast<u8>(WORLD->current_level->reflection_range) > object->ai_update_distance &&
+            static_cast<u32>(static_cast<u8>(WORLD->current_level->reflection_range)) > object->ai_update_distance &&
             MatrixReflection(&matrix, carried->field_0x1087, carried->field_0x1020, WORLD->current_level->unknown_0cc,
                              &reflected))
             reflection = &reflected;
@@ -3628,19 +3747,19 @@ static void DrawParaphernalia(GameObject_s *object) {
                                    reflection, attachment_matrices, NULL, layers)) {
             if (carried->field_0x108e)
                 DrawObjectOnCharacter(WORLD, carried, carried->field_0x108e + 0xf9, NULL,
-                                      carried_config->helmet_locator, -1, attachment_matrices, carried->field_0x1088,
-                                      layers, NULL, NULL, 1.0f, 1.0f);
+                                      carried->apiobj.character_data->game_character->helmet_locator, -1,
+                                      attachment_matrices, carried->field_0x1088, layers, NULL, NULL, 1.0f, 1.0f);
             if (Cheat_IsOn(2))
-                DrawObjectOnCharacter(WORLD, carried, 0xe7, NULL, carried_config->head_locator, -1, attachment_matrices,
-                                      carried->field_0x1088, layers, NULL, NULL, 1.0f, 1.0f);
+                DrawObjectOnCharacter(WORLD, carried, 0xe7, NULL,
+                                      carried->apiobj.character_data->game_character->head_locator, -1,
+                                      attachment_matrices, carried->field_0x1088, layers, NULL, NULL, 1.0f, 1.0f);
             DrawCharacterAttachments(carried, attachment_matrices);
             if (carried->id == id_WEIRDO1 || carried->id == id_WEIRDO2)
                 Customiser_DrawAccessories(CharacterCustomiser, carried, attachment_matrices);
         }
     } else if ((object->field_0xe24 & 1) && object->field_0x780 != NULL) {
         GameObject_s *passenger = static_cast<GameObject_s *>(object->field_0x780);
-        i32 locator = config->weapon_joints[0];
-        NUMTX matrix;
+        i32 locator = object->apiobj.character_data->game_character->weapon_joints[0];
         if (locator != -1 && object->apiobj.character_model->points_of_interest[locator] != NULL) {
             matrix = object->joint_matrices[locator];
         } else {
@@ -3657,43 +3776,46 @@ static void DrawParaphernalia(GameObject_s *object) {
         GameDrawCharacterModel(passenger->apiobj.character_model, &passenger->apiobj.anim_packet, &matrix, NULL, NULL,
                                NULL, NULL, passenger->apiobj.character_data->game_character->layer_mask_medium);
     }
-    config = object->apiobj.character_data->game_character;
+    GAMECHARACTERDATA_s *config = object->apiobj.character_data->game_character;
     NUMTX *joints = object->joint_matrices;
     if ((config->flags_094[0] & 1) == 0) {
         if (object->apiobj.character_data->flags & 1) {
             i32 locator = config->thingy_locator;
-            NUMTX matrix = object->apiobj.field_0xb8;
-            if (locator != -1 && object->apiobj.character_model->points_of_interest[locator] != NULL &&
-                object->apiobj.model_draw_result)
-                matrix = joints[locator];
-            NUMTX reflected = object->apiobj.field_0x138;
+            matrix = locator != -1 && object->apiobj.character_model->points_of_interest[locator] != NULL &&
+                             object->apiobj.model_draw_result
+                         ? joints[locator]
+                         : object->apiobj.field_0xb8;
+            reflected = object->apiobj.field_0x138;
             CharScene_Draw(WORLD, object->id, &matrix, object->field_0x1088 ? &reflected : NULL);
         } else if (object->id == id_CATAPULT && (object->field_0x7a5 != 0x0a || (object->context_flags & 0x40) == 0 ||
                                                  object->quick_shoot_bolt_id != -1 ||
                                                  (object->context_animation_timer < 0.5f &&
                                                   PickupFlickerFrame % PickUpFlickerFrames < PickUpFlickerTest))) {
             dco_prerotatez = 0xc000;
-            DrawObjectOnCharacter(WORLD, object, 0xf0, NULL, config->weapon_shoot_joints[0], -1, joints, 0,
+            DrawObjectOnCharacter(WORLD, object, 0xf0, NULL,
+                                  object->apiobj.character_data->game_character->weapon_shoot_joints[0], -1, joints, 0,
                                   object->field_0x1054, NULL, NULL, 1.0f, 1.0f);
         }
     } else if (BonusArea && VehicleArea) {
         CharMiniKit_Draw(object->id, &object->apiobj.field_0xb8, object->field_0x1087, object->field_0x1020,
                          WORLD->current_level->unknown_0cc);
     }
+    config = object->apiobj.character_data->game_character;
     if (config->uses_weapon_action == 1 && AnimPlaying(&object->apiobj.anim_packet, 0x60, 1, 1)) {
-        DrawObjectOnCharacter(WORLD, object, 9, NULL, config->weapon_joints[0], -1, joints, object->field_0x1088,
-                              object->field_0x1054, NULL, NULL, 1.0f, 1.0f);
+        DrawObjectOnCharacter(WORLD, object, 9, NULL, object->apiobj.character_data->game_character->weapon_joints[0],
+                              -1, joints, object->field_0x1088, object->field_0x1054, NULL, NULL, 1.0f, 1.0f);
     } else if (object->weapon_scale > 0.0f) {
         DrawWeapons(object, object->field_0x1088, object->weapon_scale);
         if (object->timer_d50 > 0.0f) {
             dco_locatorposonly = 1;
-            DrawObjectOnCharacter(WORLD, object, 0x35, NULL, config->weapon_shoot_joints[0], -1, joints,
+            DrawObjectOnCharacter(WORLD, object, 0x35, NULL,
+                                  object->apiobj.character_data->game_character->weapon_shoot_joints[0], -1, joints,
                                   object->field_0x1088, object->field_0x1054, NULL, NULL, 1.0f, 1.0f);
         }
     } else {
         f32 scale = 0.0f;
         f32 *weapon_time = NULL;
-        if (config->uses_weapon_action == 9 &&
+        if (object->apiobj.character_data->game_character->uses_weapon_action == 9 &&
             (weapon_time = AnimPlaying(&object->apiobj.anim_packet, 0x5e, 1, 0)) != NULL) {
             f32 frame = *weapon_time;
             if (frame >= 18.0f && frame <= 65.0f) {
@@ -3713,9 +3835,9 @@ static void DrawParaphernalia(GameObject_s *object) {
         GAMECHARACTERDATA_s *shield_config = object->apiobj.character_data->game_character;
         f32 scale;
         bool show;
-        if (object->field_0xe37 != 0 || shield_config->field_0xf5 == 0 || object->timer_d28 <= 0.0f) {
+        if (object->field_0xe37 != 0 || shield_config->field_0xf5 == 0 || !(object->timer_d28 > 0.0f)) {
             scale = object->field_0xd24;
-            show = scale > 0.0f;
+            show = !(scale <= 0.0f);
         } else {
             scale = 1.0f;
             show = (GameTimer.update_count & 3) < 2;
@@ -3723,54 +3845,56 @@ static void DrawParaphernalia(GameObject_s *object) {
         if (show) {
             i32 locator = shield_config->shield_locator;
             NUVEC scaling = {scale, scale, scale};
-            NUMTX matrix, reflected;
-            NuMtxSetScale(&matrix, &scaling);
-            NUVEC *position = &object->apiobj.collision_position;
+            NuMtxSetScale(&shield_matrix, &scaling);
             if (locator != -1 && object->apiobj.character_model->points_of_interest[locator] != NULL)
-                position = reinterpret_cast<NUVEC *>(&joints[locator].m30);
-            NuMtxTranslate(&matrix, position);
-            Draw3DObjectMtx(NULL, 0x6f + (object->timer_d28 > 0.0f), &matrix);
-            if (render_reflection && MatrixReflection(&matrix, object->field_0x1087, object->field_0x1020,
-                                                      WORLD->current_level->unknown_0cc, &reflected)) {
+                NuMtxTranslate(&shield_matrix, reinterpret_cast<NUVEC *>(&joints[locator].m30));
+            else
+                NuMtxTranslate(&shield_matrix, &object->apiobj.collision_position);
+            Draw3DObjectMtx(NULL, 0x6f + (object->timer_d28 > 0.0f), &shield_matrix);
+            if (render_reflection && MatrixReflection(&shield_matrix, object->field_0x1087, object->field_0x1020,
+                                                      WORLD->current_level->unknown_0cc, &shield_reflected)) {
                 NuRndrStartReflectionRender(0);
-                Draw3DObjectMtx(NULL, 0x92 + (object->timer_d28 > 0.0f), &reflected);
+                Draw3DObjectMtx(NULL, 0x92 + (object->timer_d28 > 0.0f), &shield_reflected);
                 NuRndrEndReflectionRender();
             }
         }
         EnableShadowMapRendering(0);
     }
-    if (object->communicate_blend > 0.0f && config->thingy_locator != -1 &&
-        object->apiobj.character_model->points_of_interest[config->thingy_locator] != NULL) {
-        i32 model_id;
-        NUMTX matrix, reflected;
-        if (object->apiobj.character_data->model_flags & 0x40) {
-            f32 scale = object->communicate_blend * object->apiobj.field_0xa8;
-            NUVEC scaling = {scale, scale, scale};
-            NuMtxSetScale(&matrix, &scaling);
-            NuMtxRotateY(&matrix, static_cast<u16>(object->apiobj.field_0x276 + 0x8000));
-            matrix.m30 = joints[config->thingy_locator].m30;
-            matrix.m31 = joints[config->thingy_locator].m31;
-            matrix.m32 = joints[config->thingy_locator].m32;
-            if (object->apiobj.field_0x27f == 9 && object->apiobj.water_height > matrix.m31)
-                matrix.m31 = object->apiobj.water_height;
-            model_id = 0x19;
-        } else {
-            model_id = (config->flags_094[0] & 0x80) ? 0x0e : -1;
-            matrix = joints[config->thingy_locator];
-            if (object->communicate_blend != 1.0f) {
-                NUVEC scaling = {object->communicate_blend, object->communicate_blend, object->communicate_blend};
-                NuMtxPreScale(&matrix, &scaling);
+    if (object->communicate_blend > 0.0f) {
+        const u8 render_reflection = object->field_0x1088;
+        GAMECHARACTERDATA_s *communicate_config = object->apiobj.character_data->game_character;
+        const i32 locator = communicate_config->thingy_locator;
+        if (locator != -1 && object->apiobj.character_model->points_of_interest[locator] != NULL) {
+            i32 model_id;
+            if (object->apiobj.character_data->model_flags & 0x40) {
+                f32 scale = object->communicate_blend * object->apiobj.field_0xa8;
+                NUVEC scaling = {scale, scale, scale};
+                NuMtxSetScale(&communicate_matrix, &scaling);
+                NuMtxRotateY(&communicate_matrix, static_cast<u16>(object->apiobj.field_0x276 + 0x8000));
+                communicate_matrix.m30 = joints[locator].m30;
+                communicate_matrix.m31 = joints[locator].m31;
+                communicate_matrix.m32 = joints[locator].m32;
+                if (object->apiobj.field_0x27f == 9 && object->apiobj.water_height > communicate_matrix.m31)
+                    communicate_matrix.m31 = object->apiobj.water_height;
+                model_id = 0x19;
+            } else {
+                model_id = (communicate_config->flags_094[0] & 0x80) ? 0x0e : -1;
+                communicate_matrix = joints[locator];
+                if (object->communicate_blend != 1.0f) {
+                    NUVEC scaling = {object->communicate_blend, object->communicate_blend, object->communicate_blend};
+                    NuMtxPreScale(&communicate_matrix, &scaling);
+                }
             }
-        }
-        if (model_id != -1 && WORLD->lev_objs[model_id].active) {
-            NuSpecialDrawAt(&WORLD->lev_objs[model_id].special, &matrix);
-            i32 reflection_id = LevelObject_GetReflection(model_id);
-            if (reflection_id != -1 && WORLD->lev_objs[reflection_id].active && object->field_0x1088 &&
-                MatrixReflection(&matrix, object->field_0x1087, object->field_0x1020, WORLD->current_level->unknown_0cc,
-                                 &reflected)) {
-                NuRndrStartReflectionRender(0);
-                NuSpecialDrawAt(&WORLD->lev_objs[reflection_id].special, &reflected);
-                NuRndrEndReflectionRender();
+            if (model_id != -1 && WORLD->lev_objs[model_id].active) {
+                NuSpecialDrawAt(&WORLD->lev_objs[model_id].special, &communicate_matrix);
+                i32 reflection_id = LevelObject_GetReflection(model_id);
+                if (reflection_id != -1 && WORLD->lev_objs[reflection_id].active && render_reflection &&
+                    MatrixReflection(&communicate_matrix, object->field_0x1087, object->field_0x1020,
+                                     WORLD->current_level->unknown_0cc, &communicate_reflected)) {
+                    NuRndrStartReflectionRender(0);
+                    NuSpecialDrawAt(&WORLD->lev_objs[reflection_id].special, &communicate_reflected);
+                    NuRndrEndReflectionRender();
+                }
             }
         }
     }
@@ -3800,100 +3924,144 @@ static void DrawParaphernalia(GameObject_s *object) {
                             object->field_0xd80 / FORCEGLOWTIME, object);
     }
     if (Cheat_IsOn(2))
-        DrawObjectOnCharacter(WORLD, object, 0xe7, NULL, config->head_locator, -1, joints, object->field_0x1088,
-                              object->field_0x1054, NULL, NULL, 1.0f, 1.0f);
+        DrawObjectOnCharacter(WORLD, object, 0xe7, NULL, object->apiobj.character_data->game_character->head_locator,
+                              -1, joints, object->field_0x1088, object->field_0x1054, NULL, NULL, 1.0f, 1.0f);
     if (object->field_0x108e) {
-        i32 locator = config->helmet_locator;
+        i32 locator = object->apiobj.character_data->game_character->helmet_locator;
         if ((object->id == id_CHEWBACCA || object->id == id_WOOKIEE) && object->field_0x108e != 5 &&
             object->field_0x108e != 6)
             locator = 9;
         DrawObjectOnCharacter(WORLD, object, object->field_0x108e + 0xf9, NULL, locator, -1, joints,
                               object->field_0x1088, object->field_0x1054, NULL, NULL, 1.0f, 1.0f);
     }
-    if (object->apiobj.model_draw_result && config->thrust_locators && object->thrust_effect_scale > 0.0f &&
-        WORLD->lev_objs[0x77].active && WORLD->lev_objs[0x78].active) {
-        i32 effect_index = 0;
-        for (i32 locator = 0; locator < 16; ++locator) {
-            if ((config->thrust_locators & (1 << locator)) == 0 ||
-                object->apiobj.character_model->points_of_interest[locator] == NULL)
-                continue;
-            f32 scale = object->thrust_effect_scale +
-                        ((object->reserved_e27[effect_index++] / 255.0f - 0.5f) * 0.5f) * object->thrust_effect_scale;
-            if (scale > 0.0f) {
-                NUMTX matrix = joints[locator], reflected;
-                NUVEC scaling = {scale, scale, scale};
-                NuMtxPreScale(&matrix, &scaling);
-                Draw3DObjectMtx(NULL, 0x77, &matrix);
-                Draw3DObjectMtx(NULL, 0x78, &matrix);
-                if (object->field_0x1088 && MatrixReflection(&matrix, object->field_0x1087, object->field_0x1020,
-                                                             WORLD->current_level->unknown_0cc, &reflected)) {
-                    i32 first = LevelObject_GetReflection(0x77);
-                    if (!WORLD->lev_objs[first].active)
-                        first = 0x77;
-                    i32 second = LevelObject_GetReflection(0x78);
-                    if (!WORLD->lev_objs[second].active)
-                        second = 0x77;
-                    NuRndrStartReflectionRender(0);
-                    Draw3DObjectMtx(NULL, first, &matrix);
-                    Draw3DObjectMtx(NULL, second, &matrix);
-                    NuRndrEndReflectionRender();
+    if (object->apiobj.model_draw_result && object->apiobj.character_data->game_character->thrust_locators &&
+        object->thrust_effect_scale > 0.0f) {
+        const u8 render_reflection = object->field_0x1088;
+        if (WORLD->lev_objs[0x77].active && WORLD->lev_objs[0x78].active) {
+            i32 effect_index = 0;
+            for (i32 locator = 0; locator < 16; ++locator) {
+                if ((object->apiobj.character_data->game_character->thrust_locators & (1 << locator)) == 0 ||
+                    object->apiobj.character_model->points_of_interest[locator] == NULL)
+                    continue;
+                NUVEC scaling;
+                scaling.x =
+                    object->thrust_effect_scale +
+                    ((object->reserved_e27[effect_index++] / 255.0f - 0.5f) * 0.5f) * object->thrust_effect_scale;
+                if (!(scaling.x <= 0.0f)) {
+                    scaling.y = scaling.z = scaling.x;
+                    thrust_matrix = joints[locator];
+                    NuMtxPreScale(&thrust_matrix, &scaling);
+                    Draw3DObjectMtx(NULL, 0x77, &thrust_matrix);
+                    Draw3DObjectMtx(NULL, 0x78, &thrust_matrix);
+                    if (render_reflection &&
+                        MatrixReflection(&thrust_matrix, object->field_0x1087, object->field_0x1020,
+                                         WORLD->current_level->unknown_0cc, &thrust_reflected)) {
+                        i32 first = LevelObject_GetReflection(0x77);
+                        if (!WORLD->lev_objs[first].active)
+                            first = 0x77;
+                        i32 second = LevelObject_GetReflection(0x78);
+                        if (!WORLD->lev_objs[second].active)
+                            second = 0x77;
+                        NuRndrStartReflectionRender(0);
+                        Draw3DObjectMtx(NULL, first, &thrust_matrix);
+                        Draw3DObjectMtx(NULL, second, &thrust_matrix);
+                        NuRndrEndReflectionRender();
+                    }
                 }
             }
         }
     }
     if (object->field_0x7a5 == 0x2d)
         GizDrawBuildItPiece(object, object->field_0x1088);
-    f32 *placement_time = NULL;
-    if ((object->field_0x7a5 == 0x48 || object->field_0x7a5 == 0x49) &&
-        object->apiobj.character_model->model_data_b[object->context_animation] != NULL &&
-        ((object->field_0x7a5 == 0x48 && object->field_0x7a3 == 0) ||
-         (object->field_0x7a5 == 0x49 && object->field_0x7a3 != 0)) &&
-        WORLD->lev_objs[0xec].active && config->place_locator != -1 &&
-        object->apiobj.character_model->points_of_interest[config->place_locator] != NULL &&
-        (placement_time = AnimPlaying(&object->apiobj.anim_packet, object->context_animation, 1, 0)) != NULL) {
-        f32 animation_end = NuAnimEndFrame(object->apiobj.character_model->model_data_b[object->context_animation]);
-        f32 start = AnimListFrame(object->apiobj.character_model, object->context_animation, 0);
-        if (start < animation_end) {
-            if (start < 1.0f)
-                start = 1.0f;
-            f32 frame = *placement_time;
-            if (frame >= start) {
-                f32 finish = AnimListFrame(object->apiobj.character_model, object->context_animation, 1);
-                if (start < finish) {
-                    f32 scale = 1.0f;
-                    bool show = true;
-                    if (object->field_0x7a5 == 0x48) {
-                        if (finish < animation_end)
-                            animation_end = finish;
-                        if (frame < animation_end)
-                            scale = (frame - start) / (animation_end - start);
-                    } else {
-                        f32 last = AnimListFrame(object->apiobj.character_model, object->context_animation, 2);
-                        f32 decay_start = finish < animation_end ? finish : animation_end;
-                        if (last < finish)
-                            last = finish;
-                        f32 decay_end = last < animation_end ? last : animation_end;
-                        if (frame > decay_start) {
-                            if (decay_end > frame && decay_end > decay_start)
-                                scale = 1.0f - (frame - decay_start) / (decay_end - decay_start);
-                            else
-                                show = false;
+    if (object->field_0x7a5 == 0x48) {
+        if (object->apiobj.character_model->model_data_b[object->context_animation] != NULL &&
+            object->field_0x7a3 == 0) {
+            const u8 render_reflection = object->field_0x1088;
+            const i32 locator = object->apiobj.character_data->game_character->place_locator;
+            f32 *placement_time;
+            if (WORLD->lev_objs[0xec].active && locator != -1 &&
+                object->apiobj.character_model->points_of_interest[locator] != NULL &&
+                (placement_time = AnimPlaying(&object->apiobj.anim_packet, object->context_animation, 1, 0)) != NULL) {
+                f32 animation_end =
+                    NuAnimEndFrame(object->apiobj.character_model->model_data_b[object->context_animation]);
+                f32 start = AnimListFrame(object->apiobj.character_model, object->context_animation, 0);
+                if (!(start >= animation_end)) {
+                    if (start < 1.0f)
+                        start = 1.0f;
+                    if (!(start > *placement_time)) {
+                        f32 finish = AnimListFrame(object->apiobj.character_model, object->context_animation, 1);
+                        if (!(start >= finish)) {
+                            f32 scale = 1.0f;
+                            if (!(animation_end < finish))
+                                animation_end = finish;
+                            if (animation_end > *placement_time)
+                                scale = (*placement_time - start) / (animation_end - start);
+                            NUVEC scaling = {scale, scale, scale};
+                            placement_matrix = joints[locator];
+                            NuMtxPreRotateY(&placement_matrix, object->takeover_start_angle);
+                            NuMtxPreScale(&placement_matrix, &scaling);
+                            NuSpecialDrawAt(&WORLD->lev_objs[0xec].special, &placement_matrix);
+                            if (WORLD->lev_objs[0xed].active)
+                                NuSpecialDrawAt(&WORLD->lev_objs[0xed].special, &placement_matrix);
+                            if (render_reflection &&
+                                MatrixReflection(&placement_matrix, object->field_0x1087, object->field_0x1020,
+                                                 WORLD->current_level->unknown_0cc, &placement_reflected)) {
+                                NuSpecialDrawAt(&WORLD->lev_objs[0xec].special, &placement_reflected);
+                                if (WORLD->lev_objs[0xed].active)
+                                    NuSpecialDrawAt(&WORLD->lev_objs[0xed].special, &placement_matrix);
+                            }
                         }
                     }
-                    if (show) {
-                        NUMTX matrix = joints[config->place_locator], reflected;
-                        NuMtxPreRotateY(&matrix, object->takeover_start_angle);
-                        NUVEC scaling = {scale, scale, scale};
-                        NuMtxPreScale(&matrix, &scaling);
-                        NuSpecialDrawAt(&WORLD->lev_objs[0xec].special, &matrix);
-                        if (WORLD->lev_objs[0xed].active)
-                            NuSpecialDrawAt(&WORLD->lev_objs[0xed].special, &matrix);
-                        if (object->field_0x1088 &&
-                            MatrixReflection(&matrix, object->field_0x1087, object->field_0x1020,
-                                             WORLD->current_level->unknown_0cc, &reflected)) {
-                            NuSpecialDrawAt(&WORLD->lev_objs[0xec].special, &reflected);
-                            if (WORLD->lev_objs[0xed].active)
-                                NuSpecialDrawAt(&WORLD->lev_objs[0xed].special, &matrix);
+                }
+            }
+        }
+    } else if (object->field_0x7a5 == 0x49) {
+        if (object->apiobj.character_model->model_data_b[object->context_animation] != NULL &&
+            object->field_0x7a3 != 0) {
+            const u8 render_reflection = object->field_0x1088;
+            const i32 locator = object->apiobj.character_data->game_character->place_locator;
+            f32 *placement_time;
+            if (WORLD->lev_objs[0xec].active && locator != -1 &&
+                object->apiobj.character_model->points_of_interest[locator] != NULL &&
+                (placement_time = AnimPlaying(&object->apiobj.anim_packet, object->context_animation, 1, 0)) != NULL) {
+                f32 animation_end =
+                    NuAnimEndFrame(object->apiobj.character_model->model_data_b[object->context_animation]);
+                f32 start = AnimListFrame(object->apiobj.character_model, object->context_animation, 0);
+                if (!(start >= animation_end)) {
+                    if (start < 1.0f)
+                        start = 1.0f;
+                    if (!(start > *placement_time)) {
+                        f32 finish = AnimListFrame(object->apiobj.character_model, object->context_animation, 1);
+                        if (!(start >= finish)) {
+                            f32 scale = 1.0f;
+                            f32 last = AnimListFrame(object->apiobj.character_model, object->context_animation, 2);
+                            if (last < finish)
+                                last = finish;
+                            f32 decay_start = animation_end < finish ? animation_end : finish;
+                            f32 decay_end = animation_end < last ? animation_end : last;
+                            bool show = true;
+                            if (!(decay_start >= *placement_time)) {
+                                if (decay_end > *placement_time && decay_end > decay_start)
+                                    scale = 1.0f - (*placement_time - decay_start) / (decay_end - decay_start);
+                                else
+                                    show = false;
+                            }
+                            if (show) {
+                                NUVEC scaling = {scale, scale, scale};
+                                removal_matrix = joints[locator];
+                                NuMtxPreRotateY(&removal_matrix, object->takeover_start_angle);
+                                NuMtxPreScale(&removal_matrix, &scaling);
+                                NuSpecialDrawAt(&WORLD->lev_objs[0xec].special, &removal_matrix);
+                                if (WORLD->lev_objs[0xed].active)
+                                    NuSpecialDrawAt(&WORLD->lev_objs[0xed].special, &removal_matrix);
+                                if (render_reflection &&
+                                    MatrixReflection(&removal_matrix, object->field_0x1087, object->field_0x1020,
+                                                     WORLD->current_level->unknown_0cc, &removal_reflected)) {
+                                    NuSpecialDrawAt(&WORLD->lev_objs[0xec].special, &removal_reflected);
+                                    if (WORLD->lev_objs[0xed].active)
+                                        NuSpecialDrawAt(&WORLD->lev_objs[0xed].special, &removal_matrix);
+                                }
+                            }
                         }
                     }
                 }
@@ -3902,34 +4070,46 @@ static void DrawParaphernalia(GameObject_s *object) {
     }
     if (object->field_0xe22 & 0x40) {
         dco_prerotatez = 0x4000;
-        DrawObjectOnCharacter(WORLD, object, Batarang_GetObjectFromCharID(object->id), NULL, config->throw_locator, -1,
-                              joints, object->field_0x1088, object->field_0x1054, NULL, NULL, 1.0f, 1.0f);
+        const u8 render_reflection = object->field_0x1088;
+        const u32 layers = object->field_0x1054;
+        const i32 locator = object->apiobj.character_data->game_character->throw_locator;
+        const i32 model_id = Batarang_GetObjectFromCharID(object->id);
+        DrawObjectOnCharacter(WORLD, object, model_id, NULL, locator, -1, joints, render_reflection, layers, NULL, NULL,
+                              1.0f, 1.0f);
     }
     if (object->field_0x7a5 == 0x46)
         Grapple_DrawLine(object);
     if ((object->field_0xe22 & 0x80) || object->field_0x7a5 == 0x58)
         SuperCarry_DrawObject(object);
     DrawCharacterAttachments(object, joints);
-    if (object->field_0x7a5 == 0x5d && WORLD->lev_objs[0xf7].active && config->hand_locators[0] != -1 &&
-        object->apiobj.character_model->points_of_interest[config->hand_locators[0]] != NULL) {
-        NUMTX matrix, reflected;
-        NuMtxSetTranslation(&matrix, reinterpret_cast<NUVEC *>(&joints[config->hand_locators[0]].m30));
-        Draw3DObjectMtx(NULL, 0xf7, &matrix);
-        if (object->field_0x1088 && MatrixReflection(&matrix, object->field_0x1087, object->field_0x1020,
-                                                     WORLD->current_level->unknown_0cc, &reflected)) {
-            NuRndrStartReflectionRender(0);
-            Draw3DObjectMtx(NULL, 0xf7, &reflected);
-            NuRndrEndReflectionRender();
+    if (object->field_0x7a5 == 0x5d) {
+        const u8 render_reflection = object->field_0x1088;
+        if (WORLD->lev_objs[0xf7].active) {
+            const i32 locator = object->apiobj.character_data->game_character->hand_locators[0];
+            if (locator != -1 && object->apiobj.character_model->points_of_interest[locator] != NULL) {
+                NuMtxSetTranslation(&hand_matrix, reinterpret_cast<NUVEC *>(&joints[locator].m30));
+                Draw3DObjectMtx(NULL, 0xf7, &hand_matrix);
+                if (render_reflection && MatrixReflection(&hand_matrix, object->field_0x1087, object->field_0x1020,
+                                                          WORLD->current_level->unknown_0cc, &hand_reflected)) {
+                    NuRndrStartReflectionRender(0);
+                    Draw3DObjectMtx(NULL, 0xf7, &hand_reflected);
+                    NuRndrEndReflectionRender();
+                }
+            }
         }
     }
     if (object->torpedo != NULL && object->torpedo->count != 0)
         DrawTorpedos(object);
-    if (config->uses_weapon_action == 0)
+    config = object->apiobj.character_data->game_character;
+    if (config->uses_weapon_action == 0) {
         Customiser_DrawAccessories(CharacterCustomiser, object, NULL);
+        config = object->apiobj.character_data->game_character;
+    }
     if ((config->flags_090 & 0x01000000) && object->field_0xd80 > 0.0f && object->field_0xd8c > 0.0f)
         Transform_DrawTarget(&object->force_glow_position,
                              (1.4f + 0.20000004768371582f * object->field_0xd80) * object->field_0xd8c,
                              0.4f + 0.6f * object->field_0xd80);
+    config = object->apiobj.character_data->game_character;
     f32 *special_time = NULL;
     if (config->uses_weapon_action == 1) {
         i32 locator = config->thingy_locator;
@@ -3938,12 +4118,12 @@ static void DrawParaphernalia(GameObject_s *object) {
             return;
         f32 frame = *special_time;
         if ((frame >= 70.0f && frame <= 210.0f) || (frame >= 310.0f && frame <= 433.0f)) {
-            NUMTX matrix = joints[locator], reflected;
-            NuMtxPreRotateZ(&matrix, 0xc000);
+            matrix = joints[locator];
+            NuMtxPreRotateZ(&matrix, -0x4000);
             NuSpecialDrawAt(&WORLD->lev_objs[0x0a].special, &matrix);
             if (object->field_0x1088 && MatrixReflection(&matrix, object->field_0x1087, object->field_0x1020,
-                                                         WORLD->current_level->unknown_0cc, &reflected))
-                NuSpecialDrawAt(&WORLD->lev_objs[0x0a].special, &reflected);
+                                                         WORLD->current_level->unknown_0cc, &special_reflected))
+                NuSpecialDrawAt(&WORLD->lev_objs[0x0a].special, &special_reflected);
         } else {
             f32 distance = 1.0f;
             i32 chosen = -1;
@@ -3975,9 +4155,8 @@ static void DrawParaphernalia(GameObject_s *object) {
                 else
                     scale = 1.0f - (fraction - 0.9f) / 0.1f;
                 NUVEC scaling = {scale, scale, scale};
-                NUMTX matrix;
                 NuMtxSetScale(&matrix, &scaling);
-                NuMtxRotateX(&matrix, static_cast<u16>(-65536.0f * fraction));
+                NuMtxRotateX(&matrix, static_cast<u16>(static_cast<i32>(-65536.0f * fraction)));
                 NuMtxRotateY(&matrix, object->apiobj.field_0x276);
                 NuMtxTranslate(&matrix, reinterpret_cast<NUVEC *>(&joints[0].m30));
                 matrix.m31 += 0.2f * NuTrigTable[(static_cast<i32>(fraction * 32768.0f) >> 1) & 0x7fff];
@@ -4159,7 +4338,7 @@ void BackDrop_Draw(float alpha, i32 flags) {
     if (flags == 0 && BackDrop_AlphaFn != NULL) {
         BackDrop_AlphaFn(&alpha);
     }
-    if (alpha <= 0.0f) {
+    if (!(alpha > 0.0f)) {
         return;
     }
 
@@ -4169,6 +4348,7 @@ void BackDrop_Draw(float alpha, i32 flags) {
             continue;
         }
         NUMTX mtx = *NuSpecialGetDrawMtx(special);
+        NuSpecialDrawAtAlpha(special, &mtx, alpha);
         f32 x = mtx.m30;
         f32 y = mtx.m31;
         f32 z = mtx.m32;

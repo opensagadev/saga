@@ -110,27 +110,56 @@ NuMusic::Track *NuMusic::Album::GetTrack(u32 clazz) {
 
 i32 NuMusic::Album::GetTracks(u32 class_mask, Track **out_tracks) {
     i32 count = 0;
-    for (i32 i = 0; i < 6; i++) {
-        if ((class_mask & (1u << i)) != 0) {
-            out_tracks[i] = this->tracks[i];
-            count++;
-        } else {
-            out_tracks[i] = NULL;
-        }
+    if ((class_mask & TRACK_CLASS_QUIET) == 0) {
+        out_tracks[0] = NULL;
+    } else {
+        out_tracks[0] = tracks[0];
+        ++count;
+    }
+    if ((class_mask & TRACK_CLASS_ACTION) == 0) {
+        out_tracks[1] = NULL;
+    } else {
+        out_tracks[1] = tracks[1];
+        ++count;
+    }
+    if ((class_mask & TRACK_CLASS_4) == 0) {
+        out_tracks[2] = NULL;
+    } else {
+        out_tracks[2] = tracks[2];
+        ++count;
+    }
+    if ((class_mask & TRACK_CLASS_8) == 0) {
+        out_tracks[3] = NULL;
+    } else {
+        out_tracks[3] = tracks[3];
+        ++count;
+    }
+    if ((class_mask & TRACK_CLASS_CUTSCENE) == 0) {
+        out_tracks[4] = NULL;
+    } else {
+        out_tracks[4] = tracks[4];
+        ++count;
+    }
+    if ((class_mask & TRACK_CLASS_NOMUSIC) == 0) {
+        out_tracks[5] = NULL;
+    } else {
+        out_tracks[5] = tracks[5];
+        ++count;
     }
     return count;
 }
 
 void NuMusic::Album::Initialise() {
     i32 count = tracks_count;
-    for (i32 i = 0; i < 6; i++) {
-        tracks[i] = NULL;
+    for (i32 index = 0; index < 6; ++index) {
+        tracks[index] = NULL;
         if (count > 0) {
-            Track *track = tracks_source;
-            TRACK_CLASS clazz = 1 << i;
-            for (i32 j = 0; j < count; j++, track++) {
+            Track *next = tracks_source;
+            TRACK_CLASS clazz = 1 << index;
+            for (u32 scanned = 0; scanned < static_cast<u32>(count); ++scanned) {
+                Track *track = next++;
                 if (track->clazz == clazz) {
-                    tracks[i] = track;
+                    tracks[index] = &tracks_source[scanned];
                     break;
                 }
             }
@@ -372,67 +401,40 @@ i32 NuMusic::FindOrCreateSoundFile(nusound_filename_info_s *files, i32 *count, c
 }
 
 NuMusic::Voice *NuMusic::FindVoiceByClassAndStatus(TRACK_CLASS clazz, VOICE_STATUS status) {
-    Track *track = this->voices[0].tracks[this->voices[0].track_index];
-
-    if (track == NULL || track->clazz != clazz || this->voices[0].status != status) {
-        track = this->voices[1].tracks[this->voices[1].track_index];
-        if (track == NULL || track->clazz != clazz || this->voices[1].status != status) {
-            return NULL;
-        }
-        return &this->voices[1];
-    } else {
-        return &this->voices[0];
+    for (i32 index = 0; index < 2; ++index) {
+        Track *track = voices[index].tracks[voices[index].track_index];
+        if (track != NULL && track->clazz == clazz && voices[index].status == status)
+            return &voices[index];
     }
+    return NULL;
 }
 
 NuMusic::Voice *NuMusic::FindVoiceByTrack(Track *track) {
-    if (track == NULL) {
+    if (track == NULL)
         return NULL;
-    }
-
-    i32 index = 0;
-    if (this->voices[0].tracks[this->voices[0].track_index] != track) {
-        if (this->voices[1].tracks[this->voices[1].track_index] != track) {
-            return NULL;
-        }
-        index = 1;
-    }
-
-    return &this->voices[index];
+    for (i32 index = 0; index < 2; ++index)
+        if (voices[index].tracks[voices[index].track_index] == track)
+            return &voices[index];
+    return NULL;
 }
 
 NuMusic::Voice *NuMusic::FindVoiceByClass(TRACK_CLASS clazz) {
-    i32 index;
-    Track *track;
-
-    track = this->voices[0].tracks[this->voices[0].track_index];
-    if (track == NULL || track->clazz != clazz) {
-        track = this->voices[1].tracks[this->voices[1].track_index];
-        if (track == NULL || track->clazz != clazz) {
-            return NULL;
-        }
-        index = 1;
-    } else {
-        index = 0;
+    for (i32 index = 0; index < 2; ++index) {
+        Track *track = voices[index].tracks[voices[index].track_index];
+        if (track != NULL && track->clazz == clazz)
+            return &voices[index];
     }
-
-    return &this->voices[index];
+    return NULL;
 }
 
 NuMusic::Voice *NuMusic::FindIdleVoice() {
-    i32 index;
-    if (voices[0].status == VOICE_STATUS_READY) {
-        index = 0;
-    } else if (voices[1].status == VOICE_STATUS_READY) {
-        index = 1;
-    } else if (voices[0].status == VOICE_STATUS_STOPPED) {
-        index = 0;
-    } else if (voices[1].status == VOICE_STATUS_STOPPED) {
-        index = 1;
-    } else {
-        return NULL;
-    }
-    return &voices[index];
+    for (i32 index = 0; index < 2; ++index)
+        if (voices[index].status == VOICE_STATUS_READY)
+            return &voices[index];
+    for (i32 index = 0; index < 2; ++index)
+        if (voices[index].status == VOICE_STATUS_STOPPED)
+            return &voices[index];
+    return NULL;
 }
 
 bool NuMusic::SelectTrackByHandle(TRACK_CLASS clazz, i32 trackHandle) {
@@ -1368,7 +1370,8 @@ char *NuMusic::RemovePath(char *str) {
         str_ = str;
 
         do {
-            if (c == '/' || c == '\\') {
+            u8 separator_count = (c == '\\') + (c == '/');
+            if (separator_count != 0) {
                 last_sep = str_;
             }
             str_ = str_ + 1;

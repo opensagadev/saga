@@ -385,19 +385,19 @@ i32 Episode_CountOpenAreas(i32 episode_index, i32 area_index, AREASAVE_s *saves)
         if (BOTHTRUEJEDIGOLDBRICKS == 0) {
             ++EpBuildUpTotal;
             EpGoldBrickTotal += 2;
-            if (save->story_buildup_complete != 0 || save->freeplay_buildup_complete != 0) {
+            if (save->true_hero_complete[0] != 0 || save->true_hero_complete[1] != 0) {
                 ++EpGoldBrickCount;
                 ++EpBuildUpCount;
             }
         } else {
-            if (save->story_buildup_complete != 0) {
+            if (save->true_hero_complete[0] != 0) {
                 ++EpBuildUpCount;
                 ++EpGoldBrickCount;
                 ++EpStoryBuildUpCount;
             }
             EpBuildUpTotal += 2;
             EpGoldBrickTotal += 3;
-            if (save->freeplay_buildup_complete != 0) {
+            if (save->true_hero_complete[1] != 0) {
                 ++EpBuildUpCount;
                 ++EpGoldBrickCount;
                 ++EpFreePlayBuildUpCount;

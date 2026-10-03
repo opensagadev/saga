@@ -20,7 +20,7 @@ extern "C" {
     i32 gcutSoundVol = 100;
 
     MusicPlayback Music = {
-        MUSIC_PLAYBACK_STOPPED, -1, 0, -1, 0, -1, 0, 0, false, false, false, false, 0.0f, 0.0f, 0, -1, NULL,
+        MUSIC_PLAYBACK_STOPPED, -1, 0, -1, 0, -1, 0, 0, false, false, {0, 0}, 0.0f, 0.0f, 0, -1, NULL,
     };
 
     void NuSound3FlushLoops(void);
@@ -83,8 +83,8 @@ extern "C" {
             Music.transition_frames = 0;
             Music.pause_requested = false;
             Music.resume_frames = 0;
-            Music.field_0x12 = false;
-            Music.field_0x13 = false;
+            Music.stream_status_delay[0] = 0;
+            Music.stream_status_delay[1] = 0;
             Music.update_delay = 0;
             Music.restore_requested = false;
             Music.resume_track = -1;

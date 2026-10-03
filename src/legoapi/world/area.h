@@ -36,13 +36,15 @@ typedef struct AREADATA_s {
     byte area_index;
     i16 area_music;
     i16 minikit_id;
-    i32 field37_0x8c;
-    i32 field38_0x90;
+    i32 true_hero_targets[2]; // story and free-play coin thresholds
     i16 text_id;
     byte text_id_value;
     byte field41_0x97;
     i16 *hub_player_ids; // 0x98, optional extra hub characters terminated by -1
 } AREADATA;
+DECOMP_ASSERT(offsetof(AREADATA, true_hero_targets[0]) == 0x8c, "AREADATA story target offset");
+DECOMP_ASSERT(offsetof(AREADATA, true_hero_targets[1]) == 0x90, "AREADATA free-play target offset");
+DECOMP_ASSERT(sizeof(((AREADATA *)0)->true_hero_targets) == 8, "AREADATA target array size");
 DECOMP_ASSERT(sizeof(AREADATA) == 0x9c, "AREADATA ABI");
 DECOMP_ASSERT(offsetof(AREADATA, index) == 0x7c, "AREADATA index offset");
 DECOMP_ASSERT(offsetof(AREADATA, episode_index) == 0x86, "AREADATA episode index offset");

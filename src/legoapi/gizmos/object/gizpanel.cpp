@@ -267,7 +267,7 @@ static void GizPanel_Draw(void *world_ptr, void *, float) {
                 models.state_on = 0x110;
                 models.target = 0x113;
                 models.arm = 0x112;
-                models.arm_offset = {0.0f, 0.245f, 0.19f};
+                models.arm_offset = {0.0f, 0.245f, -0.19f};
                 break;
             case 3:
                 models.base = 0x114;
@@ -277,7 +277,7 @@ static void GizPanel_Draw(void *world_ptr, void *, float) {
                 models.state_on = 0x117;
                 models.target = 0x11a;
                 models.arm = 0x119;
-                models.arm_offset = {0.0f, 0.34f, 0.17f};
+                models.arm_offset = {0.0f, 0.34f, -0.17f};
                 break;
             default:
                 break;
@@ -304,9 +304,8 @@ static void GizPanel_Draw(void *world_ptr, void *, float) {
             NuVecRotateY(&picture_offset, &picture_offset, panel.y_rotation);
             NuVecRotateY(&transition_offset, &transition_offset, panel.y_rotation);
 
-            NUMTX animation_base = base_matrix;
             NUMTX transition_base = base_matrix;
-            NuMtxTranslate(&animation_base, &picture_offset);
+            NuMtxTranslate(&base_matrix, &picture_offset);
             NuMtxTranslate(&transition_base, &transition_offset);
 
             NUMTX animated_matrix;
@@ -327,7 +326,7 @@ static void GizPanel_Draw(void *world_ptr, void *, float) {
             animated_matrix.m30 = 0.0f;
             animated_matrix.m31 = 0.0f;
             animated_matrix.m32 = 0.0f;
-            NuMtxMulVU0(&animated_matrix, &animated_matrix, &animation_base);
+            NuMtxMulVU0(&animated_matrix, &animated_matrix, &base_matrix);
             NuSpecialDrawAtAlpha(&world->lev_objs[models.animated].special, &animated_matrix, 1.0f);
         }
 
@@ -335,17 +334,16 @@ static void GizPanel_Draw(void *world_ptr, void *, float) {
             panel.target_offset.y != 2000000.0f && models.target != -1 && world->lev_objs[models.target].active != 0) {
             NUVEC target_position;
             GizPanel_GetAbsTargetPos(&panel, &target_position, 0);
-            NUMTX target_matrix;
-            NuMtxSetRotationY(&target_matrix, target_spin);
+            NuMtxSetRotationY(&base_matrix, target_spin);
             if (panel.target_roll != 0) {
-                NuMtxRotateZ(&target_matrix, panel.target_roll);
+                NuMtxRotateZ(&base_matrix, panel.target_roll);
             }
             if (panel.target_pitch != 0) {
-                NuMtxRotateX(&target_matrix, panel.target_pitch);
+                NuMtxRotateX(&base_matrix, panel.target_pitch);
             }
-            NuMtxTranslate(&target_matrix, &target_position);
-            NuMtxPreScaleU(&target_matrix, panel.target_scale);
-            NuSpecialDrawAtAlpha(&world->lev_objs[models.target].special, &target_matrix,
+            NuMtxTranslate(&base_matrix, &target_position);
+            NuMtxPreScaleU(&base_matrix, panel.target_scale);
+            NuSpecialDrawAtAlpha(&world->lev_objs[models.target].special, &base_matrix,
                                  (panel.flags & 1) != 0 ? 0.0f : target_alpha);
         }
 
@@ -354,14 +352,13 @@ static void GizPanel_Draw(void *world_ptr, void *, float) {
             NUVEC arm_offset = models.arm_offset;
             NuVecRotateX(&arm_offset, &arm_offset, panel.arm_x_rotation);
             NuVecRotateY(&arm_offset, &arm_offset, panel.y_rotation);
-            NUMTX arm_matrix;
-            NuMtxSetRotationX(&arm_matrix, panel.arm_x_rotation);
-            NuMtxRotateY(&arm_matrix, panel.y_rotation);
-            NuMtxPreRotateX(&arm_matrix, panel.target_x_rotation);
-            NuMtxRotateY(&arm_matrix, panel.target_y_rotation);
-            NuMtxTranslate(&arm_matrix, &panel.position);
-            NuMtxTranslate(&arm_matrix, &arm_offset);
-            NuSpecialDrawAt(&world->lev_objs[models.arm].special, &arm_matrix);
+            NuMtxSetRotationX(&base_matrix, panel.arm_x_rotation);
+            NuMtxRotateY(&base_matrix, panel.y_rotation);
+            NuMtxPreRotateX(&base_matrix, panel.target_x_rotation);
+            NuMtxRotateY(&base_matrix, panel.target_y_rotation);
+            NuMtxTranslate(&base_matrix, &panel.position);
+            NuMtxTranslate(&base_matrix, &arm_offset);
+            NuSpecialDrawAt(&world->lev_objs[models.arm].special, &base_matrix);
         }
         if (flashing) {
             NuSpecialConstTint(0, NULL);
@@ -555,8 +552,10 @@ static i32 GizPanel_Load(void *world_ptr, void *) {
         const i32 name_length = EdFileReadInt();
         EdFileRead(panel_sys->panels[index].name, name_length);
         EdFileReadNuVec(&panel_sys->panels[index].position);
-        panel_sys->panels[index].y_rotation = EdFileReadUnsignedShort();
-        panel_sys->panels[index].model_variant = EdFileReadChar();
+        GIZPANEL &yaw_panel = panel_sys->panels[index];
+        yaw_panel.y_rotation = EdFileReadUnsignedShort();
+        GIZPANEL &variant_panel = panel_sys->panels[index];
+        variant_panel.model_variant = EdFileReadChar();
 
         if (version <= 2) {
             GIZPANEL *panel = &panel_sys->panels[index];
@@ -565,37 +564,39 @@ static i32 GizPanel_Load(void *world_ptr, void *) {
             panel->target_offset.z = -0.4f;
             panel->target_scale = 1.0f;
         } else {
-            const u8 hide_base = static_cast<u8>(EdFileReadChar()) & 1;
             GIZPANEL &panel = panel_sys->panels[index];
+            const u8 hide_base = static_cast<u8>(EdFileReadChar()) & 1;
             panel.flags = static_cast<GIZPANEL_FLAGS>((panel.flags & ~GIZPANEL_FLAG_HIDE_BASE) | (hide_base << 5));
             if (version != 3) {
                 EdFileReadNuVec(&panel_sys->panels[index].target_offset);
-                panel_sys->panels[index].target_scale = EdFileReadFloat();
+                GIZPANEL &scale_panel = panel_sys->panels[index];
+                scale_panel.target_scale = EdFileReadFloat();
                 if (version != 4) {
-                    const u8 hide_target = static_cast<u8>(EdFileReadChar()) & 1;
                     GIZPANEL &current_panel = panel_sys->panels[index];
+                    const u8 hide_target = static_cast<u8>(EdFileReadChar()) & 1;
                     current_panel.flags = static_cast<GIZPANEL_FLAGS>(
                         (current_panel.flags & ~GIZPANEL_FLAG_HIDE_TARGET) | (hide_target << 6));
                     if (version != 5) {
-                        const i8 baddie = EdFileReadChar();
                         GIZPANEL &baddie_panel = panel_sys->panels[index];
-                        baddie_panel.flags =
-                            static_cast<GIZPANEL_FLAGS>((baddie_panel.flags & ~GIZPANEL_FLAG_BADDIE) | (baddie << 7));
-                        const u8 alt_model = static_cast<u8>(EdFileReadChar()) & 1;
+                        const i8 baddie = EdFileReadChar();
+                        baddie_panel.flags = static_cast<GIZPANEL_FLAGS>((baddie_panel.flags & ~GIZPANEL_FLAG_BADDIE) |
+                                                                         (static_cast<u32>(baddie) << 7));
                         GIZPANEL &model_panel = panel_sys->panels[index];
+                        const u8 alt_model = static_cast<u8>(EdFileReadChar()) & 1;
                         model_panel.draw_flags = static_cast<GIZPANEL_DRAW_FLAGS>(
                             (model_panel.draw_flags & ~GIZPANEL_DRAW_FLAG_ALT_MODEL) | alt_model);
                         if (version != 6) {
-                            const u8 no_shadow_reset = static_cast<u8>(EdFileReadChar()) & 1;
                             GIZPANEL &shadow_panel = panel_sys->panels[index];
+                            const u8 no_shadow_reset = static_cast<u8>(EdFileReadChar()) & 1;
                             shadow_panel.draw_flags = static_cast<GIZPANEL_DRAW_FLAGS>(
                                 (shadow_panel.draw_flags & ~GIZPANEL_DRAW_FLAG_NO_SHADOW_RESET) |
                                 (no_shadow_reset << 1));
                             if (version != 7) {
                                 GIZPANEL &legacy_panel = panel_sys->panels[index];
+                                const bool legacy = EdFileReadChar() != 0;
                                 legacy_panel.draw_flags = static_cast<GIZPANEL_DRAW_FLAGS>(
                                     (legacy_panel.draw_flags & ~GIZPANEL_DRAW_FLAG_LEGACY) |
-                                    ((EdFileReadChar() != 0) ? GIZPANEL_DRAW_FLAG_LEGACY : 0));
+                                    (legacy ? GIZPANEL_DRAW_FLAG_LEGACY : 0));
                             }
                         }
                     }
@@ -609,7 +610,9 @@ static i32 GizPanel_Load(void *world_ptr, void *) {
             }
         }
         GIZPANEL &panel = panel_sys->panels[index];
-        panel.draw_flags = static_cast<GIZPANEL_DRAW_FLAGS>(panel.draw_flags & ~GIZPANEL_DRAW_FLAG_LEGACY);
+        if (version <= 7) {
+            panel.draw_flags = static_cast<GIZPANEL_DRAW_FLAGS>(panel.draw_flags & ~GIZPANEL_DRAW_FLAG_LEGACY);
+        }
         ++index;
     } while (index < panel_sys->count);
     return 1;

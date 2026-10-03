@@ -64,8 +64,7 @@ struct MusicPlayback {
     i16 resume_frames;
     bool pause_requested;
     bool restore_requested;
-    bool field_0x12;
-    bool field_0x13;
+    u8 stream_status_delay[2];
     f32 seek_offset;
     f32 transition;
     u16 update_delay;
@@ -74,6 +73,9 @@ struct MusicPlayback {
 };
 
 DECOMP_ASSERT(sizeof(MusicPlayback) == 0x24, "MusicPlayback size");
+DECOMP_ASSERT(offsetof(MusicPlayback, stream_status_delay[0]) == 0x12, "MusicPlayback stream zero delay offset");
+DECOMP_ASSERT(offsetof(MusicPlayback, stream_status_delay[1]) == 0x13, "MusicPlayback stream one delay offset");
+DECOMP_ASSERT(sizeof(((MusicPlayback *)0)->stream_status_delay) == 2, "MusicPlayback stream delay array size");
 #endif
 
 #ifdef __cplusplus

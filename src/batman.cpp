@@ -68,6 +68,7 @@ extern "C" i32 NuMain(i32 argc, char **argv) {
     nupad_s *rumblePad1;
     GameObject_s *pausePlayer;
     u32 pauseFlag;
+    i32 renderPaused;
     LEVELDATA_s *level;
     i32 currentEpisodeIndex;
     i32 previousEpisodeIndex;
@@ -499,11 +500,11 @@ giz_freeplay:
                     UpdateGameMenu(GamePad, 1);
                     if (Player[0] != NULL) {
                         UpdateCoinPacket(Player[0]->coinpacket, Player[0]->apiobj.player_controlled,
-                                         (i32)(char)Player[0]->apiobj.field_0x27c);
+                                         Player[0]->apiobj.field_0x27c);
                     }
                     if (Player[1] != NULL) {
                         UpdateCoinPacket(Player[1]->coinpacket, Player[1]->apiobj.player_controlled,
-                                         (i32)(char)Player[1]->apiobj.field_0x27c);
+                                         Player[1]->apiobj.field_0x27c);
                     }
                     Debris(1);
                 } else {
@@ -515,8 +516,7 @@ giz_freeplay:
                     CutScenes_Start(world);
 
                     if (Paused != 0) {
-                        pauseFlag = IsGrabbingScreen();
-                        pauseFlag ^= 1;
+                        pauseFlag = (byte)(IsGrabbingScreen() ^ 1);
                     } else {
                         pauseFlag = 0;
                     }
@@ -814,9 +814,9 @@ giz_freeplay:
                 TBOPENFN("DrwCd", 5);
             }
 
-            world = WORLD;
             if ((pause_rndr_on == 0) || (FadeSys.pending_type == FADE_TYPE_WIPE)) {
                 if (MainRenderTime > 0.0f) {
+                    world = WORLD;
                     GameFog_Update(WORLD);
                     GameFog_Set();
                     SetLevelLights(world->rtl_set, 1.0f);
@@ -869,13 +869,13 @@ giz_freeplay:
                     if (CUTSTOPGAME == 0) {
                         CharShadows_Draw();
                     }
-                    if (screendump == 0) {
-                        pauseFlag = Paused;
+                    if (screendump != 0) {
+                        renderPaused = save_paused;
                     } else {
-                        pauseFlag = save_paused;
+                        renderPaused = Paused;
                     }
                     c = IsGrabbingScreen();
-                    pauseFlag = (c == 0) ? pauseFlag : 0;
+                    renderPaused = (c == 0) ? renderPaused : 0;
 
                     if ((world->lev_objs[1].active != 0) && ((CUTSTOPGAME == 0) || (CUTDRAWWORLD != 0))) {
                         DrawParallax(&world->lev_objs[1].special);
@@ -911,7 +911,7 @@ giz_freeplay:
                     ((ThingManager *)theGameThings)->RenderThings((ThingRenderData *)0);
                     CutScenes_Draw(world);
                     NuRndrShadPolys(ShadowMat);
-                    NuLgtLaserDraw(pauseFlag);
+                    NuLgtLaserDraw(renderPaused);
 
                     level = world->current_level;
                     if ((((level == TITLES_LDATA) || ((level->flags & LEVEL_STATUS) != 0)) ||
@@ -929,7 +929,7 @@ giz_freeplay:
                     }
                     NuRndrLine3dDbgFlush();
                     DebrisSetCutSceneMode(CUTCAM);
-                    DebrisDraw(pauseFlag ^ editor_active, 1);
+                    DebrisDraw(renderPaused ^ editor_active, 1);
                     if ((TimingBarSet == 5) && (TBCLOSEFN("Deb", 5), TimingBarSet == 5)) {
                         TBOPENFN("Ripples", 5);
                     }
@@ -945,19 +945,19 @@ giz_freeplay:
                     SetDepthOfField();
 
                     if (BURNOUTON != 0) {
-                        BurnoutApply(pauseFlag);
+                        BurnoutApply(renderPaused);
                     }
 
                     UpdateDebrisRenderStackPriority();
                     SortDebrisRenderStack();
-                    DebrisDraw(pauseFlag ^ editor_active, 1);
-                    DebrisDraw(pauseFlag ^ editor_active, 0);
+                    DebrisDraw(renderPaused ^ editor_active, 1);
+                    DebrisDraw(renderPaused ^ editor_active, 0);
                     NuRndrEndScene();
 
                     if (TimingBarSet == 5) {
                         TBOPENFN("RndrFx", 5);
                     }
-                    NuRndrFx(pauseFlag, &plr_lastpos);
+                    NuRndrFx(renderPaused, &plr_lastpos);
                     if ((TimingBarSet == 5) && (TBCLOSEFN("RndrFx", 5), TimingBarSet == 5)) {
                         TBOPENFN("Deb", 5);
                     }
@@ -965,8 +965,8 @@ giz_freeplay:
                     NuRndrBeginScene(-1);
                     UpdateDebrisRenderStackPriority();
                     SortDebrisRenderStack();
-                    DebrisDraw(pauseFlag ^ editor_active, 1);
-                    DebrisDraw(pauseFlag ^ editor_active, 0);
+                    DebrisDraw(renderPaused ^ editor_active, 1);
+                    DebrisDraw(renderPaused ^ editor_active, 0);
                     NuRndrEndSceneEx(0);
                     DebrisDrawGlass();
 
@@ -1041,7 +1041,6 @@ giz_freeplay:
             shortestFrameIndex = -1;
             frameTimeAccumulator = -1.0f;
             shortestFrameTime = 999.0f;
-
             if (frameTimeAccumulator < pastFrameTimes[0]) {
                 longestFrameIndex = 0;
             }
@@ -1076,26 +1075,24 @@ giz_freeplay:
                 shortestFrameIndex = 3;
             }
             frameTimeAccumulator = MAX(pastFrameTimes[3], frameTimeAccumulator);
-            shortestFrameTime = MIN(pastFrameTimes[3], shortestFrameTime);
-
             if (frameTimeAccumulator < pastFrameTimes[4]) {
                 longestFrameIndex = 4;
             }
+            shortestFrameTime = MIN(pastFrameTimes[3], shortestFrameTime);
             if (pastFrameTimes[4] < shortestFrameTime) {
                 shortestFrameIndex = 4;
             }
             frameTimeAccumulator = MAX(pastFrameTimes[4], frameTimeAccumulator);
             shortestFrameTime = MIN(pastFrameTimes[4], shortestFrameTime);
 
-            frameTimeAccumulator = 0.0f;
-            averagedFrameCount = 0;
-            if (shortestFrameIndex != 0) {
-                if (longestFrameIndex != 0) {
-                    if (0.0f <= pastFrameTimes[0]) {
-                        frameTimeAccumulator = pastFrameTimes[0];
-                        averagedFrameCount = 1;
-                    }
-                }
+            if ((shortestFrameIndex != 0) && (longestFrameIndex != 0) && (0.0f <= pastFrameTimes[0])) {
+                // The original adds +0.0f to the first accepted sample,
+                // preserving signed-zero behavior after rejecting NaNs.
+                frameTimeAccumulator = 0.0f + pastFrameTimes[0];
+                averagedFrameCount = 1;
+            } else {
+                frameTimeAccumulator = 0.0f;
+                averagedFrameCount = 0;
             }
 
             if (shortestFrameIndex != 1) {
@@ -1200,11 +1197,12 @@ giz_freeplay:
     }
 
     LastLData = WORLD->current_level;
-    last_area = -1;
+    i = -1;
     if (PlayTrailer == -1) {
         LastAData = &ADataList[Area];
-        last_area = Area;
+        i = Area;
     }
+    last_area = i;
 
     if (LastLData == CREDITS_LDATA) {
         savedFrametime = 1.0f;
@@ -1214,48 +1212,45 @@ giz_freeplay:
         legoSetMusicVolume(savedFrametime);
     }
 
-    Area = (i32)(char)NewLData->area_index;
+    Area = NewLData->area_index;
     i = NewLData->idx;
     Level = i;
 
     if (Area != last_area) {
-        LevelChange = (u32)(NewLData->idx != LastLData->idx);
+        const i32 didLevelChange = NewLData->idx != LastLData->idx;
         LevelChangesInArea = 0;
+        LevelChange = didLevelChange;
     } else {
         i = 0;
         if (last_area != -1) {
             i = LevelChangesInArea + 1;
         }
-        LevelChange = (u32)(NewLData->idx != LastLData->idx);
+        const i32 didLevelChange = NewLData->idx != LastLData->idx;
         LevelChangesInArea = i;
+        LevelChange = didLevelChange;
         if (new_level_from_menu == 0) {
             goto after_sound;
         }
     }
 
-    if (NOSOUND != 0) {
-        if ((HUB_ADATA == NULL) || (Arcade == 0)) {
-            goto after_sound;
-        }
-        if ((u32)(byte)HUB_ADATA->index == (u32)last_area) {
-            goto after_sound;
-        }
-        if ((u32)(byte)HUB_ADATA->index == (u32)Area) {
-            hub_from_arcade = last_area;
-        }
-    } else {
+    if (NOSOUND == 0) {
         music_man.StopAll(0);
         MusicClearAll();
         SoundKillAll();
-        if (HUB_ADATA != NULL) {
-            if (((u32)(byte)HUB_ADATA->index != (u32)last_area) && (Arcade != 0)) {
-                if ((u32)(byte)HUB_ADATA->index == (u32)Area) {
-                    hub_from_arcade = last_area;
-                }
-            }
-        } else if (Arcade != 0) {
-            // falls through to Arcade = 0
+    }
+    if (HUB_ADATA != NULL) {
+        i = (u32)(byte)HUB_ADATA->index;
+        if (i == last_area) {
+            goto after_sound;
         }
+        if (Arcade == 0) {
+            goto after_sound;
+        }
+        if (i == Area) {
+            hub_from_arcade = last_area;
+        }
+    } else if (Arcade == 0) {
+        goto after_sound;
     }
     Arcade = 0;
 
@@ -1322,9 +1317,11 @@ after_sound:
         FreePlay = 0;
     }
 
-    if ((StatusPacket.status_flags == 0) ||
-        ((((STATUS_LDATA == NULL) || (STATUS_LDATA != LastLData)) && ((LastLData->flags & LEVEL_STATUS) == 0)) &&
-         ((CREDITS_LDATA == NULL) || (CREDITS_LDATA != LastLData)))) {
+    c = StatusPacket.status_flags;
+    // Keep the outgoing level snapshot through the player-progress writes.
+    level = LastLData;
+    if ((c == 0) || ((((STATUS_LDATA == NULL) || (STATUS_LDATA != level)) && ((level->flags & LEVEL_STATUS) == 0)) &&
+                     ((CREDITS_LDATA == NULL) || (CREDITS_LDATA != level)))) {
     status_players:
         if (afterArea == NULL) {
             goto after_status;
@@ -1363,7 +1360,7 @@ after_sound:
         PlayerProgress[7].field_0x7 = 0;
         PlayerProgress[7].coins = 0;
 
-        if ((afterArea == NULL) || ((i != (u32)(byte)afterArea->index) || (TITLES_LDATA == LastLData))) {
+        if ((afterArea == NULL) || ((i != (u32)(byte)afterArea->index) || (TITLES_LDATA == level))) {
             UsePlayerList = 2;
             goto status_players;
         }
@@ -1371,7 +1368,7 @@ after_sound:
     }
 
     if ((i == (u32)(byte)afterArea->index) && (i != last_area)) {
-        if ((CREDITS_LDATA != NULL) && ((CREDITS_LDATA == LastLData) && (StatusPacket.status_flags != 0))) {
+        if ((CREDITS_LDATA != NULL) && ((CREDITS_LDATA == LastLData) && (c != 0))) {
             RememberPlayerIDs(1, (i32)(i16)StatusPacket.player0_model, (i32)(i16)StatusPacket.player1_model);
         }
         Hub_MakeModelList();

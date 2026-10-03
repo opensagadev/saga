@@ -2235,7 +2235,7 @@ extern "C" {
         return 1;
     }
 
-    bool StateAnimEvaluate2(StateAnim *state, u8 *index, char *value, f32 frame) {
+    i32 StateAnimEvaluate2(StateAnim *state, u8 *index, char *value, f32 frame) {
         i32 current = *index;
         i32 count = state->count;
         if (current >= count) {
@@ -2245,13 +2245,28 @@ extern "C" {
             current = 0;
         }
         char old_value = state->values[current];
-        if (frame < state->times[current]) {
-            while (current != 0 && frame < state->times[current - 1]) {
-                --current;
+        if (!(frame >= state->times[current])) {
+            if (current != 0) {
+                i32 previous = current - 1;
+                current = previous;
+                while (!(frame >= state->times[previous])) {
+                    if (previous == 0) {
+                        break;
+                    }
+                    --previous;
+                    current = previous;
+                }
             }
         } else {
-            while (current < count - 1 && state->times[current + 1] <= frame) {
-                ++current;
+            while (true) {
+                if (current >= count - 1) {
+                    break;
+                }
+                const i32 next = current + 1;
+                if (state->times[next] > frame) {
+                    break;
+                }
+                current = next;
             }
         }
         char new_value = state->values[current];

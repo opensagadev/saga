@@ -29,7 +29,9 @@ struct MINICAM_s {
     union {
         i32 command_state[27];
         struct {
-            u32 reserved_384;
+            // Retail camera cut setup reads and writes this border flag as a byte.
+            u8 reserved_384;
+            u8 reserved_385[3];
             f32 distance;
             u16 pitch, yaw, roll, reserved_392;
             f32 target_distance;
@@ -61,6 +63,8 @@ struct MINICAM_s {
 DECOMP_ASSERT(sizeof(MINICAM_s) == 0x3fc, "MINICAM_s size");
 DECOMP_ASSERT(offsetof(MINICAM_s, command_count) == 0x380, "MINICAM command count offset");
 DECOMP_ASSERT(offsetof(MINICAM_s, current_command) == 0x381, "MINICAM command index offset");
+DECOMP_ASSERT(offsetof(MINICAM_s, reserved_384) == 0x384, "MINICAM border flag offset");
+DECOMP_ASSERT(offsetof(MINICAM_s, distance) == 0x388, "MINICAM distance offset");
 DECOMP_ASSERT(offsetof(MINICAM_s, delta_time) == 0x3f0, "MINICAM delta time offset");
 DECOMP_ASSERT(offsetof(MINICAM_s, focus) == 0x3c4, "MINICAM focus offset");
 DECOMP_ASSERT(offsetof(MINICAM_s, position) == 0x3e0, "MINICAM position offset");

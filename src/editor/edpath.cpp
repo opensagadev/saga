@@ -2657,6 +2657,47 @@ static void DestroyAIPathNode(EDAIPATHNODE_s *node, EDAIPATH_s *path) {
     NuLinkedListAppend(&aieditor->free_path_nodes, &node->link);
 }
 
+static inline i32 pathEditor_FirstFreeConnection(EDAIPATHNODE_s *node) {
+    if (node->connections[0].node == NULL)
+        return 0;
+    if (node->connections[1].node == NULL)
+        return 1;
+    if (node->connections[2].node == NULL)
+        return 2;
+    if (node->connections[3].node == NULL)
+        return 3;
+    if (node->connections[4].node == NULL)
+        return 4;
+    if (node->connections[5].node == NULL)
+        return 5;
+    if (node->connections[6].node == NULL)
+        return 6;
+    if (node->connections[7].node == NULL)
+        return 7;
+    return -1;
+}
+
+static inline bool pathEditor_ConnectNodes(EDAIPATHNODE_s *node, EDAIPATHNODE_s *other) {
+    const i32 node_slot = pathEditor_FirstFreeConnection(node);
+    if (node_slot == -1)
+        return false;
+    const i32 other_slot = pathEditor_FirstFreeConnection(other);
+    if (other_slot == -1)
+        return false;
+    node->connections[node_slot].node = other;
+    node->connections[node_slot].flags = 0;
+    other->connections[other_slot].node = node;
+    other->connections[other_slot].flags = 0;
+    return true;
+}
+
+static inline bool pathEditor_HasConnection(EDAIPATHNODE_s *node, EDAIPATHNODE_s *other) {
+    return node->connections[0].node == other || node->connections[1].node == other ||
+           node->connections[2].node == other || node->connections[3].node == other ||
+           node->connections[4].node == other || node->connections[5].node == other ||
+           node->connections[6].node == other || node->connections[7].node == other;
+}
+
 eduimenu_s *pathEditor_Process(nupad_s *pad) {
     if (pad->digital_buttons_pressed & 0x80) {
         eduimenu_s *menu = eduiMenuCreate(200, 70, 240, 270, ed_fnt, aieditor_cbCancelMainMenu, "Options");
@@ -2797,19 +2838,7 @@ eduimenu_s *pathEditor_Process(nupad_s *pad) {
                         node->radius = previous->radius;
                         node->height_max = previous->height_max;
                         node->height_min = previous->height_min;
-                        bool connected = false;
-                        for (i32 i = 0; i < 8 && !connected; ++i)
-                            if (!node->connections[i].node) {
-                                for (i32 j = 0; j < 8; ++j)
-                                    if (!previous->connections[j].node) {
-                                        node->connections[i].node = previous;
-                                        node->connections[i].flags = 0;
-                                        previous->connections[j].node = node;
-                                        previous->connections[j].flags = 0;
-                                        connected = true;
-                                        break;
-                                    }
-                            }
+                        bool connected = pathEditor_ConnectNodes(node, previous);
                         if (!connected) {
                             DestroyAIPathNode(node, path);
                             aieditor->current_path->current_node = previous;
@@ -2850,12 +2879,7 @@ eduimenu_s *pathEditor_Process(nupad_s *pad) {
         path = aieditor->current_path;
         EDAIPATHNODE_s *node = path->current_node, *nearest = path->nearest_node;
         if (node && nearest && node != nearest) {
-            bool connected = false;
-            for (i32 i = 0; i < 8; ++i)
-                if (node->connections[i].node == nearest) {
-                    connected = true;
-                    break;
-                }
+            bool connected = pathEditor_HasConnection(node, nearest);
             if (connected) {
                 eduimenu_s *menu = eduiMenuCreate(200, 70, 240, 270, ed_fnt, pathEditor_cbCancelDisconnectNodeMenu,
                                                   "Disconnect current path node??");
@@ -2865,18 +2889,7 @@ eduimenu_s *pathEditor_Process(nupad_s *pad) {
                 }
                 return menu;
             }
-            for (i32 i = 0; i < 8 && !connected; ++i)
-                if (!node->connections[i].node) {
-                    for (i32 j = 0; j < 8; ++j)
-                        if (!nearest->connections[j].node) {
-                            node->connections[i].node = nearest;
-                            node->connections[i].flags = 0;
-                            nearest->connections[j].node = node;
-                            nearest->connections[j].flags = 0;
-                            connected = true;
-                            break;
-                        }
-                }
+            connected = pathEditor_ConnectNodes(node, nearest);
             NUVEC position = {nearest->position.x, aieditor->cursor_position.y, nearest->position.z};
             edcamSetPos(&position);
         }
@@ -3002,6 +3015,7 @@ eduimenu_s *pathEditor_Process(nupad_s *pad) {
                                                                                   : NuLinkedListGetTail(&path->nodes));
         path = aieditor->current_path;
         if (named_only && path->current_node && NuStrLen(path->current_node->name) == 0) {
+            path = aieditor->current_path;
             EDAIPATHNODE_s *start = path->current_node;
             do {
                 path = aieditor->current_path;
@@ -3017,6 +3031,7 @@ eduimenu_s *pathEditor_Process(nupad_s *pad) {
                     break;
             } while (NuStrLen(path->current_node->name) == 0);
         }
+        path = aieditor->current_path;
         if (path->current_node)
             edcamSetPos(&path->current_node->position);
     }
