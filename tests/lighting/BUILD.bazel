@@ -1,6 +1,7 @@
 load("@rules_cc//cc:cc_test.bzl", "cc_test")
 
 # Isolated host regression: no engine archives, assets, display, or startup.
+# Requires a 32-bit C++ toolchain and GLES2 development headers.
 # Run with: bazel test //tests/lighting:light_game_object_test
 cc_test(
     name = "light_game_object_test",
