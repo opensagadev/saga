@@ -846,7 +846,7 @@ interaction_timer_expired: {
         }
     }
     {
-        u16 facing = object->apiobj.facing_angle;
+        u16 facing = object->apiobj.movement_facing_angle;
         facing += 0x8000;
         object->apiobj.facing_angle = facing;
         object->apiobj.movement_facing_angle = facing;
@@ -862,7 +862,7 @@ start_jump_nine: {
     StartJump(object, 9);
     object->airborne_action_timer = 1.2f;
     {
-        u16 facing = object->apiobj.facing_angle;
+        u16 facing = object->apiobj.movement_facing_angle;
         facing += 0x8000;
         object->apiobj.facing_angle = facing;
         object->apiobj.movement_facing_angle = facing;

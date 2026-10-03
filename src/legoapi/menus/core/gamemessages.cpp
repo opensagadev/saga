@@ -189,11 +189,10 @@ GAMEMESSAGE_s *AddGameMsg(ADDGAMEMSG *message) {
     slot->blue = message->blue;
     slot->flags = message->flags;
 
-    if (message->target_position != NULL) {
-        slot->target_position = *message->target_position;
-    } else {
-        slot->target_position = slot->position;
-    }
+    nuvec_s *target_position = message->target_position;
+    if (target_position == NULL)
+        target_position = message->position;
+    slot->target_position = *target_position;
     slot->target_scale = message->target_scale;
     if ((message->flags & 1) == 0) {
         slot->field_0xb8 = message->scale;

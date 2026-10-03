@@ -256,7 +256,7 @@ static __used__ void roomRecursive(NUGSCN *scene, NUFRUSTRUM *frustum, i16 room_
         for (i32 plane_index = 0; plane_index < frustum->plane_count; ++plane_index) {
             i32 outside_vertices = 0;
             for (i32 vertex_index = 0; vertex_index < portal->vertex_count; ++vertex_index) {
-                if (planeDistance(frustum->planes[plane_index], portal->vertices[vertex_index]) < 0.0f) {
+                if (!(planeDistance(frustum->planes[plane_index], portal->vertices[vertex_index]) >= 0.0f)) {
                     ++outside_vertices;
                 } else {
                     ++inside_tests;
