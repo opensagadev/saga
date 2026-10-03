@@ -452,7 +452,7 @@ extern "C" i32 NuPortalVisibility(NUGSCN *scene) {
 #undef DRAW_PORTAL_CORNER
         NuCameraRelock();
     }
-    for (i32 i = 0; i < scene->num_rooms; ++i) {
+    for (u32 i = 0; i < static_cast<u32>(scene->num_rooms); ++i) {
         scene->rooms[i].flags &= ~NUROOM_FLAG_VISITED;
     }
     roomRecursive(scene, frustum, camera_roomid, -1, 0);

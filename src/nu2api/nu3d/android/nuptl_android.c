@@ -615,8 +615,8 @@ extern "C" void GenericDebinfoDmaTypeUpdate(debinftype *effect) {
                 break;
             }
         }
-        wave_x = effect->jib_x_amplitude * NU_SIN_LUT(65536.0f * effect->jib_x_frequency * time);
-        wave_y = effect->jib_y_amplitude * NU_SIN_LUT(65536.0f * effect->jib_y_frequency * time);
+        wave_x = effect->jib_x_amplitude * NU_SIN_LUT(65536.0f * (effect->jib_x_frequency * time));
+        wave_y = effect->jib_y_amplitude * NU_SIN_LUT(65536.0f * (effect->jib_y_frequency * time));
         texture_x_numerator =
             NU_SIN_LUT(rotation + 16384.0f) * (width / 4.0f) - (height / 4.0f) * NU_SIN_LUT(rotation) + wave_x;
         texture_y_numerator =

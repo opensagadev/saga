@@ -279,14 +279,16 @@ __attribute__((force_align_arg_pointer)) void SetCreatureLights(APIOBJECT_s *obj
         return;
     }
 
-    OBJECTLIGHTINGSTATE_s lights;
-    lights.ambient = owner->lighting_state.ambient;
-    lights.intensity[0] = owner->lighting_state.intensity[0];
-    lights.direction[0] = owner->lighting_state.direction[0];
-    lights.intensity[1] = owner->lighting_state.intensity[1];
-    lights.direction[1] = owner->lighting_state.direction[1];
-    lights.intensity[2] = owner->lighting_state.intensity[2];
-    lights.direction[2] = owner->lighting_state.direction[2];
+    NUVEC ambient;
+    NUCOLOUR3 intensity[3];
+    NUVEC direction[3];
+    ambient = owner->lighting_state.ambient;
+    intensity[0] = owner->lighting_state.intensity[0];
+    direction[0] = owner->lighting_state.direction[0];
+    intensity[1] = owner->lighting_state.intensity[1];
+    direction[1] = owner->lighting_state.direction[1];
+    intensity[2] = owner->lighting_state.intensity[2];
+    direction[2] = owner->lighting_state.direction[2];
     f32 red = 1.0f, green = 1.0f, blue = 1.0f;
     GAMECHARACTERDATA *character = static_cast<GAMECHARACTERDATA *>(owner->apiobj.character_data->field11_0x24);
     if (owner->field_0x1024 > 0.0f) {
@@ -356,22 +358,21 @@ __attribute__((force_align_arg_pointer)) void SetCreatureLights(APIOBJECT_s *obj
             blue = 2.0f;
     }
     if (red != 1.0f) {
-        lights.ambient.x *= red;
+        ambient.x *= red;
         for (i32 i = 0; i < 3; ++i)
-            lights.intensity[i].r *= red;
+            intensity[i].r *= red;
     }
     if (green != 1.0f) {
-        lights.ambient.y *= green;
+        ambient.y *= green;
         for (i32 i = 0; i < 3; ++i)
-            lights.intensity[i].g *= green;
+            intensity[i].g *= green;
     }
     if (blue != 1.0f) {
-        lights.ambient.z *= blue;
+        ambient.z *= blue;
         for (i32 i = 0; i < 3; ++i)
-            lights.intensity[i].b *= blue;
+            intensity[i].b *= blue;
     }
-    SetLights(&lights.intensity[0], &lights.direction[0], &lights.intensity[1], &lights.direction[1],
-              &lights.intensity[2], &lights.direction[2], &lights.ambient);
+    SetLights(&intensity[0], &direction[0], &intensity[1], &direction[1], &intensity[2], &direction[2], &ambient);
     owner->targeted_flash -= FRAMETIME;
     if (TouchHacks::ShouldFlash(owner->targeted_flash)) {
         NUCOLOUR3 *colour = TouchHacks::GetFlashColour();
