@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 69.05348,
+    "fuzzy_match_percent": 69.06155,
     "total_code": "4722419",
     "matched_code": "526736",
     "matched_code_percent": 11.153945,
@@ -82011,7 +82011,7 @@
           "address": 1204608,
           "offset": 314640,
           "size": 1778,
-          "match_percent": 83.13395
+          "match_percent": 83.13626
         },
         {
           "name": "_Z18LoadAreaCharactersv",
@@ -87533,7 +87533,7 @@
           "address": 5415520,
           "offset": 4525552,
           "size": 809,
-          "match_percent": 82.12626
+          "match_percent": 85.18687
         },
         {
           "name": "_Z26NuDDSSetTextureDescriptionPc11NUTEXFORMATiiii15nutexturetype_e",
@@ -89430,7 +89430,7 @@
           "address": 2722264,
           "offset": 1832296,
           "size": 2092,
-          "match_percent": 75.42383
+          "match_percent": 92.45703
         },
         {
           "name": "GenericDebinfoDmaTypeUpdate",

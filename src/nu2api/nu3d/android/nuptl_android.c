@@ -476,6 +476,7 @@ void NuRndrParticleSetRepeat(NUVEC *position) {
 void NuRndrParticleDraw(variptr_u *, PartHeader *header, uv1debdata *data, float time, numtx_s *matrix, i32 *,
                         float clip_distance, i32 mode, numtl_s *, float, float) {
     dma_particle_s *particle = reinterpret_cast<dma_particle_chunk_s *>(data)->particles;
+    f32 half_gravity = header->gravity / 2.0f;
     for (i32 index = 0; index != 32; ++index, ++particle) {
         f32 age = time - particle->start_time;
         u32 frame = static_cast<u32>(particle->inverse_lifetime * age);
@@ -521,8 +522,10 @@ void NuRndrParticleDraw(variptr_u *, PartHeader *header, uv1debdata *data, float
         NuVecMtxTransform(&offset, &offset, &NuRndr_DebrisMtx);
         NuVecMtxTransform(&extent, &extent, &NuRndr_DebrisMtx);
         NuVecMtxTransform(&texture_offset, &texture_offset, &NuRndr_DebrisMtx);
-        // The original ends here without submitting geometry. Its subsequent
-        // colour conversions only write dead stack locals.
+        f32 red = static_cast<f32>(reinterpret_cast<const u8 *>(&first->colour)[0]) / 255.0f;
+        f32 green = static_cast<f32>(reinterpret_cast<const u8 *>(&first->colour)[1]) / 255.0f;
+        f32 blue = static_cast<f32>(reinterpret_cast<const u8 *>(&first->colour)[2]) / 255.0f;
+        f32 alpha = static_cast<f32>(reinterpret_cast<const u8 *>(&first->colour)[3]) / 255.0f;
     }
 }
 

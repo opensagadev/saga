@@ -378,8 +378,7 @@ icon_scenes:
     else
         Customiser_SetAnimsToLoad(CharacterCustomiser, 0);
 
-    if (area != -1 &&
-        (ADataList[area].flags & (AREAFLAG_ENDING_AREA | AREAFLAG_TEST_AREA | AREAFLAG_NO_CHARACTER_COLLISION)) == 0) {
+    if (area != -1 && (ADataList[area].flags & (AREAFLAG_ENDING_AREA | AREAFLAG_TEST_AREA | AREAFLAG_HUB_AREA)) == 0) {
         if (ADataList[area].episode_index <= 2 || (ANEWHOPE_ADATA != NULL && ANEWHOPE_ADATA->index == area) ||
             (PODSPRINT_ADATA != NULL && PODSPRINT_ADATA->index == area) ||
             (BONUS_GUNSHIP_ADATA != NULL && BONUS_GUNSHIP_ADATA->index == area)) {

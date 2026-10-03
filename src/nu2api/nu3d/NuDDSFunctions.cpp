@@ -33,7 +33,7 @@ i32 NuDDSGetTextureDescription(const char *dds_data, NUTEXFORMAT &out_format, i3
     u32 flags = header->ddspf.dw_flags;
 
     if ((flags & 0x40) != 0) {
-        out_format = (NUTEXFORMAT)((header->ddspf.dw_four_cc == 0x18) * 8 + 7);
+        out_format = (NUTEXFORMAT)((header->ddspf.dw_rgb_bit_count == 0x18) * 8 + 7);
     } else if ((flags & 0x20) != 0) {
         out_format = NUTEX_PAL8;
     } else if ((flags & 0x8) != 0) {
@@ -157,8 +157,8 @@ i32 NuDDSGetSize(char const *dds_data) {
     i32 mip_width;
     i32 mip_height;
     i32 mip_size;
-    NuDDSGetMipLevel(width, height, depth, format, mip_count, is_cube_map, mip_count, is_cube_map ? 6 : 0,
-                     mip_width, mip_height, mip_size);
+    NuDDSGetMipLevel(width, height, depth, format, mip_count, is_cube_map, mip_count, is_cube_map ? 6 : 0, mip_width,
+                     mip_height, mip_size);
 
     i32 palette_size = 0;
     if (format == NUTEX_PAL8) {
@@ -169,8 +169,8 @@ i32 NuDDSGetSize(char const *dds_data) {
     return sizeof(dds_header_s) + palette_size + mip_width + mip_height;
 }
 
-void NuDDSGetMipLevel(i32 width, i32 height, i32 depth, NUTEXFORMAT format, i32 mip_count, bool is_cube_map,
-                      i32 level, i32 face, i32 &out_width, i32 &out_height, i32 &out_size) {
+void NuDDSGetMipLevel(i32 width, i32 height, i32 depth, NUTEXFORMAT format, i32 mip_count, bool is_cube_map, i32 level,
+                      i32 face, i32 &out_width, i32 &out_height, i32 &out_size) {
     if (width == 0 && height == 0 && mip_count == 1) {
         out_width = out_height = out_size = 0;
         return;
