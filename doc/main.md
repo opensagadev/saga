@@ -8,7 +8,6 @@ implementation details and investigation knowledge for agents and maintainers.
 |---|---|
 | [Bazel internals](build-bazel.md) | Toolchains, dependency versions, flags, and platform behavior |
 | [Source structure](source-structure.md) | Translation-unit ownership, optimization mapping, and safe file moves |
-| [Decompilation knowledge base](decomp/00-index.md) | GCC 4.7 code generation, ABI, matching, diagnostics, and assembly review |
 | [Host utilities](host-utilities.md) | Automated native captures and host-boundary rules |
 | [Matching report](pages/README.md) | `matching.json` schema, generation, and Pages rendering |
 | [Script inventory](../scripts/README.md) | Script call graph and executable versus library boundaries |

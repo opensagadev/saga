@@ -12,7 +12,7 @@ work.
 ## Start from live state
 
 1. Run `git status --short` and note existing changes.
-2. Read `doc/decomp/00-index.md`, then only the chapters relevant to the task.
+2. Consult the live source, reference binary, and relevant build configuration.
 3. Read `doc/source-structure.md` before moving a function or file.
 4. Use live Bazel authorities instead of copied generated data:
    - source membership and outputs: `src/BUILD.bazel`
@@ -55,9 +55,6 @@ bazel aquery --config=target \
   force an instruction pattern. Explain the necessity near its use.
 - Do not add `regparm`, `fastcall`, `thiscall`, or similar calling-convention
   attributes as matching shortcuts. Record unresolved ABI discrepancies.
-
-Read `doc/decomp/02-codegen.md`, `04-types-abi.md`, and
-`07-diagnostics.md` before changing source to chase an assembly shape.
 
 ## Working boundaries
 

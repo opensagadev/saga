@@ -43,7 +43,7 @@ void CharShadows_Draw() {
         PLAYERCHARACTERCONFIG_s *config = object->apiobj.character_data->player_config;
         i32 alpha = config->blob_shadow_alpha;
         if (alpha == 0xff) {
-            alpha = WORLD->current_level->blob_shadow_alpha;
+            alpha = static_cast<u8>(WORLD->current_level->blob_shadow_alpha);
         }
         if (alpha <= 0 || !(object->shadow_radius > 0.0f)) {
             continue;
@@ -61,7 +61,7 @@ void CharShadows_Draw() {
             }
 
             CHARACTER_SHADOW_s &shadow = object->character_shadows[shadow_index];
-            if (shadow.position.y != kInvalidShadowHeight && !(shadow.opacity <= 0.0f) &&
+            if (shadow.position.y != kInvalidShadowHeight && shadow.opacity > 0.0f &&
                 shadow.position.y <= joint_matrix->m31 + 0.025f) {
                 NUVEC position = shadow.position;
                 position.y += 0.005f;

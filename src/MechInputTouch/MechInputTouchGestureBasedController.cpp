@@ -22,6 +22,10 @@
 #include "legoapi/gizmos/object/gizpanel.h"
 #include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/core/input/qrand.h"
+#include "legoapi/audio/audio.h"
+#include "legoapi/items/base/collection.h"
+#include "legoapi/world/area.h"
+#include "legoapi/world/world.h"
 
 #include <new>
 #include <string.h>
@@ -31,6 +35,8 @@ CABLE_s *GameObjOwnsAnyCables(GameObject_s *);
 void ReleaseCable(CABLE_s *, i32);
 extern "C" i16 id_WATTO;
 extern i16 id_YODA;
+extern i32 dagobah_training;
+extern AREADATA *DAGOBAH_ADATA;
 void ForceNextLungeTarget(MechObjectInterface *);
 bool FireBountyHunterRocket(GameObject_s *);
 void SlowWeaponOut(GameObject_s *);
@@ -429,13 +435,34 @@ bool MechInputTouchGestureBasedController::OnHold(GameObject_s &object, TouchHol
         TouchHacks::CanTagVehicle(object, *character)) {
         StartNewTask(new MechTouchTaskTag(*this, *character), holder, true, true);
     } else if (VehicleArea == 0 && TouchHacks::CanTagTo(object, *character)) {
-        tag_button = MechSystems::Get()->NewTagButton(*character, holder);
+        if (InCollectList_Index(character->id, NULL, 0) != -1 &&
+            ((WORLD != NULL && WORLD->area == HUB_ADATA) || TouchHacks::InParty(*character))) {
+            tag_button = MechSystems::Get()->NewTagButton(*character, holder);
+        } else {
+            GameAudio_PlaySfx(0x32, &object.apiobj.collision_position, 0, 0);
+            if (object.pad_gamepad != NULL) {
+                NewRumble(object.pad_gamepad->pad, 0.5f, 0);
+            }
+            if (character->ai.script_process.base_script != NULL &&
+                AIScriptSetBaseScriptStateByName(&character->ai.script_process, const_cast<char *>("MapRunAway")) !=
+                    0) {
+                const f32 elapsed = FRAMETIME;
+                WORLDINFO_s *world = WORLD;
+                if (world != NULL && world->ai_sys != NULL) {
+                    AIScriptProcess(world->ai_sys, &character->apiobj, &character->ai, &character->ai.script_process,
+                                    elapsed);
+                }
+            }
+        }
     } else if (character == object.force_glow_candidate) {
         StartNewTask(new MechTouchTaskUseForce(*this, target, position), holder, true, true);
     } else if (character->apiobj.field_0x27c == -1 && static_cast<i32>(character->apiobj.field_0x1f4) >= 0) {
         StartNewTask(new MechTouchTaskAttack(*this, target, position), holder, true, true);
     } else if (character == &object) {
         StartNewTask(new MechTouchTaskBlock(*this), holder, false, true);
+    } else if (dagobah_training != 0 && character->id == id_YODA && WORLD != NULL && WORLD->area == DAGOBAH_ADATA &&
+               character->apiobj.character_data->player_config != NULL) {
+        StartNewTask(new MechTouchTaskTag(*this, *character), holder, true, true);
     }
     holder.consumed = 1;
     return true;

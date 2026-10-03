@@ -40,8 +40,7 @@ cases, 100 public RangeFit cases, 138 residue classification/storage cases,
 and 7,000 exact ATH/noise arithmetic cases per ABI and revision. These finite
 diagnostics do not certify audio/gameplay equivalence, the entire codecs,
 private target ABI, or unchanged pre-existing psychoacoustic bounds/shift
-issues. Detailed receipts and linked integration results are recorded in
-doc/decomp/26-low-match-structural-triage.md.
+issues.
 
 The linked scalar follow-up increases overall fuzzy matching from68.827390%
 to68.989170% (+0.161780 percentage points). Only the six expected codec rows
