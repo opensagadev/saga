@@ -13626,3 +13626,85 @@ reviewed metadata map remains e1967414...b64b899. Commit/new-head checks
 pending; no merge below70.002460%. CRC_ProcessStringNIgnoreCase and
 AILocatorSet_AssignFurthestLocator full bounded original/current reviews find
 no new finite correction, preserving their explicit caller/asset-domain limits.
+
+### Batch506 — canonical VuVec type-only recipe rejected whole
+
+Checkpoint58 commit6df5e2a92be15cb3b1ca6088c73e692e5024af69 is pushed;
+all11 exact-head checks SUCCESS, verified07:58 UTC. No merge below70.002460%.
+The existing canonical VuVec and nucore.cpp's separate four-scalar definition
+disagree. One fixed three-file recipe moved the existing class/asserts verbatim
+into a type-only header, retained every existing header-static constant with
+its old provider, and replaced only the private definition. No invented base,
+alignment, static objects, body edits, flags or initializer ownership.
+Source packet `/tmp/saga-dynamiclight-canonical-type-cp58.MiuX5R/type-only-review.md`
+SHA84d1fdc7a642e852b5afff07238e375dd76b31d5808e63b4b1ad4d72b39d5b6b.
+
+Fresh O2 action0b2ca32aa0c35be7dbde1638f4feade3d4e1484bd1e93e5612ac07dbfab71d64
+pins125 actual dependencies BEFORE patch. Baseline owner object5350097c...13917;
+candidate de9ba581...ce36. Separately frozen ordinary section/storage/CFI,
+named-symbol, relocation and group fingerprints for all374 actual old-header
+consumers remain identical; debug information is outside that fingerprint.
+Whole506 SHA5d581ce5f4c80269958d1a9f9167d866b50c867e62f1a4acab6e518a8e27db08
+retains all original identities/6297 exacts but changes seven scores, net
+−228.34393652 weightedB:69.041100% versus69.045920%. Two blur gains do not
+offset clipping/tap losses. FULL recipe reverted, including deleting the newly
+created type-only header; exact old source/header and owner object hashes
+restore. No positive subset, alternate class shape or scheduling retry retained.
+The canonical type disagreement remains source debt, not a new missing block.
+
+### Batch507 — real Message pool lifetime rejected whole
+
+Original177B Message startup and registered47B D1/D2 prove global
+TPool<TData<1200>,512>,512 records of1200-byte payload plus a u32 reference,
+reference-only construction and forward conditional final reference clear.
+The current nested MessageData array lacks that registered terminal lifecycle.
+One complete bounded recipe reconstructs ONLY these explicit specializations,
+the actual indexing interface, and the existing MessageData alias/global name.
+No unused generic family, fake prefix, helper fanout, forced emission or second
+element teardown. Real NetMessage/Ftp/CloneMessageData consumers were reviewed;
+exhausted-pool, cursor, concurrency and shutdown-order safety are not certified.
+Source receipt `/tmp/saga-startup-lifetimes-cp58.sI7yDC/proposal.md`
+SHA851272c195a16eb1dd0dbb61ddafe18e038c06125884f46b0852b409c93f0cea.
+
+Fresh O3 action56ef495f6a9a2458bffe238c5877b070fb76ff3259f5e55aee292ebda80a2778
+pins23 owner inputs BEFORE patch; all321 actual header consumers have separately
+captured ordinary-surface fingerprints. Baseline Message9d075746...e96d;
+candidate0adfb07f...6bd9. Five provider surfaces change: Message,Ftp,Network,
+game network and bolts. Whole507 SHA599c0d6e1cf6f0c11705cd8b36d0e17ac7031c771233a51af4e62abd74460e2a
+retains all original identities/6297 exacts;22 scores change, net−110.56836756
+weightedB:69.043620%. Startup0%->57.444443% and D1/D2 0%->78.333336%
+do not offset consumer losses. FULL recipe reverted, no indexing/template
+variant or positive subset. Exact old source/header/Message object restore;
+all321 ordinary provider fingerprints independently return to baseline.
+
+### Batch508 — canonical typed blowup midpoint link (score-neutral)
+
+Original complete473B GunganA_Init publishes parent+0x50 into child+0x120;
+complete95B GizBlowupObjectInterface::GetPos and the target finder consume
+exactly three f32 coordinates. Canonical mid_position is already NUVEC; the
+two real producers and both readers establish a borrowed midpoint pointer.
+One three-line unit changes void* to NUVEC* and publishes &mid_position instead
+of the compatibility byte-array view. No layout, lifetime, ABI, callback,
+reader body, guard or numeric expression changes. Original nominal source
+spelling is not inferred from machine code; no gameplay bug or gain claimed.
+Source receipt `/tmp/saga-mech-record-cp58.eQn4PO/audit.md`
+SHA387e7ea699b93a6d65a7e7193904db53cc253221c1c4c17a2185c2f2344b9e99.
+
+Fresh O3 action8349346021402a2464c9099fc7c40494eab95d6c0bdf303294e7de3f5d921801
+pins167 actual inputs BEFORE patch; only owner/header source changes. The
+entire episode owner object remains byte-identical, SHA
+c7acf2bab2b50b9ad395a51eea157e15cac13b00f5d3f67f303cbae0177304ed.
+All306 actual header consumers' ordinary ELF/CFI/group/symbol/REL fingerprints
+retain. Whole508 is BYTE-IDENTICAL to505, SHA88421f72...de066d6;
+69.045920%, all6297 exacts/original identities retain. This is expressly a
+neutral canonical type improvement, not numerical matching progress.
+Native/WASM builds and all five repository checks PASS; restored target owner
+hash and all306 ordinary provider fingerprints retain. Both rejected owners'
+exact baseline hashes also retain after this configuration round trip.
+Checkpoint59 keeps ONLY508's neutral canonical pointer declaration; no score
+gain over58 and no rejected source variant retained. Commit/new-head checks
+pending; main+2pp threshold unchanged. Shared editor cursor/creature storage,
+cutscene trigger definitions and safe Ogg allocator wiring remain qualified
+prerequisites, not local-overlay or allocation-failure shortcuts. In particular,
+OggAllocMem's existing80B exact match prevents its needed safe null guard in
+this retained-exacts pass; no unsafe header redirection is attempted.

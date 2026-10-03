@@ -4503,7 +4503,7 @@ struct GIZMOBLOWUP_s {
     u8 initial_state_1; // 0x119
     undefined field_0x11a[2];
     nuhspecial_s *override_special; // 0x11c, optional per-instance special
-    void *field_0x120;              // 0x120
+    NUVEC *field_0x120;             // 0x120
     u8 field_0x124;                 // 0x124
     undefined field_0x125[3];
     float field_0x128; // 0x128
