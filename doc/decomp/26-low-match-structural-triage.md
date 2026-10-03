@@ -13708,3 +13708,92 @@ cutscene trigger definitions and safe Ogg allocator wiring remain qualified
 prerequisites, not local-overlay or allocation-failure shortcuts. In particular,
 OggAllocMem's existing80B exact match prevents its needed safe null guard in
 this retained-exacts pass; no unsafe header redirection is attempted.
+
+## Checkpoint60: subsystem deletion and texture-lock lifetime
+
+Checkpoint59 head455655473dc21971883c76112ff365a6ae91ee17 has all11
+GitHub checks COMPLETED/SUCCESS, verified before batch509. No merge below
+70.002460%. The following fixed units preserve compiler options and ownership;
+no calling-convention attribute, forced clone or source-form search is used.
+
+### Batch509 — externally owned editor subsystem storage
+
+The complete original29B EdSubSystem D0 at55a610 resets its vptr and returns
+without freeing storage. D1/D2 at55a5f0 physically alias another29B body.
+Original global delete f0510/59B genuinely calls BlockFree, so the absence of
+deallocation is a class storage contract, not an empty global allocator.
+The real176B static SceneObjectHelper embeds the subsystem at+c; its original
+startup registers D1 for finalization. RegisterSubSystem borrows the embedded
+links. No production D0 call or valid delete-static-object witness is claimed.
+One ordinary class-local no-op operator delete restores that callable policy;
+the existing out-of-line destructor, virtual slots and binding remain intact.
+Source receipt `/tmp/saga-edsubsystem-deleting-lifetime-cp58.HiDmlK/audit.md`
+SHA9b4bb87673db9bd03ee7deebff358d3e41a2fcff24956a100dfe934ad7f6fc7e.
+
+Fresh O2 action40f27c5281276cceefc0ea04d8be816191b4eb8d55220e14046019271b1ccca6
+pins149 actual consumed inputs BEFORE patch. Baseline owner8614971c...89806;
+candidatefe01a087...702bed. Of375 existing emitted functions,374 retain exact
+body bytes, relative relocations and binding; only D0 changes56B->34B and
+removes its global delete call. All274 other actual header-provider ordinary
+ELF/storage/CFI/group/symbol/REL surfaces retain. The275 baseline objects were
+also archived and byte-verified before mutation. Whole509 report
+53ee373b73942d45bbb965a461268c74ed7d0398ecf442aa89e54633a54621a1
+changes ONLY D0:0%->50%, +14.5 original-weightedB. All6297 exacts and original
+identities retain. Remaining strong/weak and inlining differences are unforced.
+
+### Batch510 — complete arcade-row migration rejected
+
+One seven-file recipe replaces three named pointer/state groups with the
+canonical pointer/i8/u8/u16 rows[3] and migrates EVERY real consumer. Target
+ArcadeItem remains24B with8B rows, choice+4/count+5 and the same three static
+labels/counts12/3/1. Native typed rows naturally grow to16B; current fixed
+8-byte traversal is a genuine host-width defect. No invalid-pointer runtime
+witness, corrupt queued-index safety or target gain is assumed. Frozen450
+input/blip behavior and historical branch/ABI variants stay untouched.
+Source receipt `/tmp/saga-arcade-shared-rows-cp58.2DvCOU/audit.md`
+SHAe243302eae32cb6dac103048c0a6213960ea625c1620a59907219a2e1414323e.
+
+Fresh six-action closure captures actual inputs and objects BEFORE mutation:
+globals implicitO0, arcadeO2 and the four other ownersO3. All233 actual header
+provider objects are byte-verified in a recoverable pretrial archive. Only
+hub's ordinary provider surface changes. Whole510 report
+6d5c349a57cf49b2b7d9c30820c989b893cac66e425d26c0e73e19fc98829810
+retains6297 exacts and all original identities, but MenuUpdateBonusMode falls
+51.873627%->51.653847%, net−5.978016B; every other score retains. FULL seven-file
+recipe reverted to its exact source pins. Target restoration independently
+returns all233 ordinary provider fingerprints to baseline. No subset or
+alternate access recipe; the host-width prerequisite remains a negative reserve.
+
+### Batch511 — restore the original texture mutex lifetime (neutral)
+
+The previously frozen Nu3D startup census supplies the actual criticalSection
+fragment: recursive mutexattr init/settype1/init/destroy and canonical
+NuCriticalSection destruction registered against the real global. One exact
+two-file recipe uses that existing class instead of PTHREAD_MUTEX_INITIALIZER;
+the three existing direct lock/unlock calls address its mutex member. C-linkage
+global name, target4B storage and every texture operation/guard remain intact.
+No full1967B startup reassembly, private pairing or shutdown-thread witness.
+Source receipt `/tmp/saga-nu3d-startup-full.ILAZ0y/audit.md`
+SHA4e55c6821159f32519860054a5c0ad0125781cccbf16daa032a4ed240d383989.
+
+Fresh actual actione083e7cd676485bba2d1c83089275e1a49ce6f8979cc9c1e0df9bf7c7e59c8c5
+establishes O3 despite an older nomination's unresolved option observation;
+all71 consumed old inputs pin BEFORE patch. Baseline942a2ff6...afa2;
+candidatee2ebf262...86e9. All28 existing functions retain exact body bytes,
+relative relocations and binding; only natural108B startup and canonical
+34B weak D1/D2 aliases appear. Existing data/BSS/literal sections retain;
+criticalSection remains GLOBAL4B BSS. All121 other actual header-provider
+ordinary surfaces retain. Whole511 SHA
+f3ef1629e8478c9a898d3f4b842c4ed77661982669b0f8f4e59c35810aca85f3
+preserves EVERY original function score/identity and6297 exacts. Retained
+expressly for original lifecycle fidelity, not numerical matching progress.
+
+Combined matching69.046234%, +0.000314pp over59 and +1.043774pp over main.
+Metadata-only mapb15b22e6d62bd52619cc29e4856009b3a0a3034ac03a9b70b994417d0e901925
+retains452 units,12666 assigned/260 ambiguous/528 unassigned and4722419B
+denominator. Native/WASM/Android builds and all five repository checks PASS;
+both retained owner hashes and ordinary provider observations survive the
+configuration round trip. Normal commit hook and exact new-head CI follow.
+Full bounded hint and3196B shader-custom-setter audits locate all retail dataflow
+without a new qualified correction; compiler-private pairing and host material
+layout debt remain explicit. No neutral hint rename or forced ABI split is tried.

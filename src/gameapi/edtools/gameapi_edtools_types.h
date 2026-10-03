@@ -81,6 +81,10 @@ struct EdSubSystem {
     virtual void SubProcess(float);
     virtual void SubRender();
 
+    // Subsystem storage is externally owned; the retail deleting destructor does not free it.
+    static void operator delete(void *) {
+    }
+
     EdSubSystem *next;
     EdSubSystem *previous;
 };
