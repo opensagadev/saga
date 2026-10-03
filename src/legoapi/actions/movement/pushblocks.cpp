@@ -439,10 +439,11 @@ void GizmoPushBlockInitAndReset(WORLDINFO_s *world, void *progress) {
 
         if (height1 == height2 && height0 == height1 && height2 == height3) {
             NewTerrPlatformsOff();
-            block->ground_height = GameShadow(NULL, &centre, 5.0f, -1);
-            if (block->ground_height == 2000000.0f) {
-                block->ground_height = 0.0f;
+            centre.y = GameShadow(NULL, &centre, 5.0f, -1);
+            if (centre.y == 2000000.0f) {
+                centre.y = 0.0f;
             }
+            block->ground_height = centre.y;
         } else {
             block->ground_height = (height1 + height0 + height2 + height3) * 0.25f;
         }
