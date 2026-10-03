@@ -659,6 +659,7 @@ void InitShop(WORLDINFO_s *world) {
         } else {
             NuStrCpy(item->name, TTab[CDataList[character_id].name_id]);
         }
+        item = &CharItems[SHOPCHARCOUNT];
         memset(&item->special, 0, sizeof(item->special));
 
         if (code_count <= 143) {
