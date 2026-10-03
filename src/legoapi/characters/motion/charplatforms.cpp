@@ -157,6 +157,7 @@ void CharPlatforms_Configure(WORLDINFO_s *world, char *config) {
             continue;
         }
 
+        system = world->char_platform_sys;
         CHARPLATFORM_s *platform = &system->platforms[system->platform_count];
         platform->object_id = CharIDFromName(parser->word_buf);
         if (platform->object_id == -1 || NuFParGetWord(parser) == 0) {
@@ -166,12 +167,14 @@ void CharPlatforms_Configure(WORLDINFO_s *world, char *config) {
             continue;
         }
 
+        system = world->char_platform_sys;
         platform->platform_id = -1;
         platform->object = NULL;
         ++system->platform_count;
     }
 
     NuFParDestroy(parser);
+    system = world->char_platform_sys;
     if (system->platform_count > 0) {
         world->giz_buffer.addr = ALIGN(reinterpret_cast<usize>(&system->platforms[system->platform_count]), 4);
     } else {
