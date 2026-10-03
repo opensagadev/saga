@@ -164,10 +164,11 @@ void oneAtOnce_MaintainArray() {
             continue;
         }
 
-        const i32 slot = attacker_count[player_index]++;
+        const i32 slot = attacker_count[player_index];
         AtOnce_attackingPlayer[player_index][slot].object = object;
         AtOnce_attackingPlayer[player_index][slot].distance =
             NuVecDistSqr(&opponent->apiobj.collision_position, &object->apiobj.collision_position, NULL);
+        ++attacker_count[player_index];
     }
 
     for (i32 player = 0; player < 8; ++player) {

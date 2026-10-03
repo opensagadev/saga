@@ -52,6 +52,7 @@ void CharShadows_Draw() {
         const f32 opacity_scale = object->shadow_opacity * static_cast<f32>(alpha);
         const f32 radius = object->shadow_radius * object->apiobj.field_0xa8 * DropInOutScale(object);
         i32 shadow_index = 0;
+        CHARACTER_SHADOW_s *shadow_cursor = object->character_shadows;
         NUMTX *joint_matrix = object->joint_matrices;
         for (i32 joint_index = 0; joint_index < kMaxShadowJoints && shadow_index < kMaxCharacterShadows;
              ++joint_index, ++joint_matrix) {
@@ -60,7 +61,7 @@ void CharShadows_Draw() {
                 continue;
             }
 
-            CHARACTER_SHADOW_s &shadow = object->character_shadows[shadow_index];
+            CHARACTER_SHADOW_s &shadow = *shadow_cursor;
             if (shadow.position.y != kInvalidShadowHeight && shadow.opacity > 0.0f &&
                 shadow.position.y <= joint_matrix->m31 + 0.025f) {
                 NUVEC position = shadow.position;
@@ -69,6 +70,7 @@ void CharShadows_Draw() {
                                 0, shadow.z_rotation);
             }
             ++shadow_index;
+            ++shadow_cursor;
         }
     }
 }

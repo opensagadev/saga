@@ -385,13 +385,17 @@ i32 OutSideSplineArea(nuvec_s *position, nugspline_s *spline, nuvec_s *edge_end,
         return 0;
     NUVEC ray_start = {position->x, -position->z, position->y};
     NUVEC ray_end = {position->x, 100000.0f, position->y};
-    NUVEC end = {spline->pts[0].x, -spline->pts[0].z, spline->pts[0].y};
+    NUVEC end = spline->pts[0];
+    f32 end_y = end.y;
+    end.y = -end.z;
+    end.z = end_y;
     i32 intersections = 0;
     for (i32 i = 1; i < spline->length; ++i) {
         NUVEC start = end;
-        end.x = spline->pts[i].x;
-        end.y = -spline->pts[i].z;
-        end.z = spline->pts[i].y;
+        end = spline->pts[i];
+        end_y = end.y;
+        end.y = -end.z;
+        end.z = end_y;
         intersections += LineIntersectXY(&ray_start, &ray_end, &start, &end, NULL, NULL);
     }
     if ((intersections & 1) != 0 ? inside == 0 : inside != 0)

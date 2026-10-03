@@ -183,10 +183,10 @@ GAMEMESSAGE_s *AddGameMsg(ADDGAMEMSG *message) {
         slot->duration = 0.0f;
     }
 
-    slot->alpha = message->alpha;
     slot->red = message->red;
     slot->green = message->green;
     slot->blue = message->blue;
+    slot->alpha = message->alpha;
     slot->flags = message->flags;
 
     nuvec_s *target_position = message->target_position;
