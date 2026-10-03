@@ -217,10 +217,10 @@ void AddPickups(i32 coins, i32 hearts, i32 torpedoes, i32 powerups, nuvec_s *pos
         AddCoinsToPanel(coins, position, player_id, speed, owner, 0);
     }
     if (hearts > 0) {
-        bool both_players = false;
+        i32 both_players = 0;
         if (VehicleArea != 0 && Player[0] != NULL && Player[0]->apiobj.player_controlled && Player[1] != NULL &&
             Player[1]->apiobj.player_controlled) {
-            both_players = true;
+            both_players = 1;
             hearts = 2;
         }
         for (i32 i = 0; i < hearts; ++i) {

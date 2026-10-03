@@ -1071,6 +1071,6 @@ void SpecialMiniKits_Draw(WORLDINFO_s *world) {
             NuMtxRotateX(&matrix, x_rotation);
             NuMtxTranslate(&matrix, position);
         }
-        NuSpecialDrawAt(&world->lev_objs[type->first_model_id].special, &matrix);
+        NuSpecialDrawAt(&world->lev_objs[static_cast<i16>(type->first_model_id)].special, &matrix);
     }
 }

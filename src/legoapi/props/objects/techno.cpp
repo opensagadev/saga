@@ -203,11 +203,11 @@ static void Technos_Draw(void *world_ptr, void *, float) {
         return;
     }
 
+    TECHNO *techno = world->technos;
     const u16 spin_angle = static_cast<u16>(NuFmod(GameTimer.time_elapsed, 5.0f) / 5.0f * 65536.0f);
     const f32 pulse_phase = NuFmod(GameTimer.time_elapsed_mod_seconds, 0.5f) * 2.0f * 65536.0f;
     const f32 pulse = NuTrigTable[(static_cast<i32>(pulse_phase) >> 1) & 0x7fff] * 0.2f + 0.8f;
 
-    TECHNO *techno = world->technos;
     for (i32 index = 0; index < world->ntechnos; ++index, ++techno) {
         if ((techno->flags & TECHNO_FLAG_VISIBLE) == 0) {
             continue;

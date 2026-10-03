@@ -227,7 +227,9 @@ void SuperCarry_Throw(GameObject_s *object, i32 mode) {
     GIZMOBLOWUP_s *blowup = static_cast<GIZMOBLOWUP_s *>(object->field_0x788);
     params.field_14 = params.field_18 = 0.5f * blowup->target_scale;
     params.special = &blowup->type->special;
-    params.flags = (blowup->secondary_flags & 4) != 0 ? 0x8011 : 0x8111;
+    params.flags = 0x8011;
+    if ((blowup->secondary_flags & 4) == 0)
+        params.flags = 0x8111;
     params.owner = object;
     params.time_step = FRAMETIME;
     params.gravity = SUPERCARRY_OBJGRAVITY;

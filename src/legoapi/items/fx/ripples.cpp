@@ -251,39 +251,36 @@ void AddSurfaceRipples(GameObject_s *object) {
             }
             return;
         }
-        if (static_cast<u8>(object->field_0x6b0 - 12) > 1) {
-            if (!(object->sabre_contact_sfx_timer <= 0.0f))
-                object->sabre_contact_sfx_timer -= FRAMETIME;
-            return;
-        }
-        GAMECHARACTERDATA *data = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
-        f32 rate = (object->pad_gamepad->input_magnitude / data->run_speed) * 100.0f;
-        if (rate < 0.5f)
-            rate = 0.5f;
-        i32 count = ParticlesPerSecond(rate, FRAMETIME);
-        NUVEC position;
-        if (count > 0) {
-            position = object->contact_position;
-            NUVEC normal = object->contact_normal;
-            NUMTX matrix;
-            BuildRippleMtx(&matrix, &normal, &position, 0, 0);
-            const NUVEC seed = {normal.y * FRAMETIME, -(normal.z * FRAMETIME), -(normal.x * FRAMETIME)};
-            for (i32 i = 0; i < count; ++i) {
-                u16 angle = static_cast<u16>(qrand());
-                NUVEC velocity = seed;
-                VecRotateAxis(&velocity, angle, &normal);
-                RIPPLEEFFECT_s *effect = &WORLD->ripple_effects[WORLD->sabre_ripple_effect];
-                AddRipple(ripples, &matrix, effect->initial_size, effect->end_size, effect->lifetime, 0.0f,
-                          effect->start_color, effect->end_color, 15, effect->material, &velocity);
+        if (static_cast<u8>(object->field_0x6b0 - 12) <= 1) {
+            GAMECHARACTERDATA *data = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
+            f32 rate = (object->pad_gamepad->input_magnitude / data->run_speed) * 100.0f;
+            if (rate < 0.5f)
+                rate = 0.5f;
+            i32 count = ParticlesPerSecond(rate, FRAMETIME);
+            NUVEC position;
+            if (count > 0) {
+                position = object->contact_position;
+                NUVEC normal = object->contact_normal;
+                NUMTX matrix;
+                BuildRippleMtx(&matrix, &normal, &position, 0, 0);
+                const NUVEC seed = {normal.y * FRAMETIME, -(normal.z * FRAMETIME), -(normal.x * FRAMETIME)};
+                for (i32 i = 0; i < count; ++i) {
+                    u16 angle = static_cast<u16>(qrand());
+                    NUVEC velocity = seed;
+                    VecRotateAxis(&velocity, angle, &normal);
+                    RIPPLEEFFECT_s *effect = &WORLD->ripple_effects[WORLD->sabre_ripple_effect];
+                    AddRipple(ripples, &matrix, effect->initial_size, effect->end_size, effect->lifetime, 0.0f,
+                              effect->start_color, effect->end_color, 15, effect->material, &velocity);
+                }
+            }
+            // The original only initializes the sound position when particles are emitted.
+            if (object->sabre_contact_sfx_timer <= 0.0f) {
+                PlaySfx("SabFField", &position);
+                object->sabre_contact_sfx_timer = 0.5f;
             }
         }
-        // The original only initializes the sound position when particles are emitted.
-        if (object->sabre_contact_sfx_timer <= 0.0f) {
-            PlaySfx("SabFField", &position);
-            object->sabre_contact_sfx_timer = 0.5f - FRAMETIME;
-        } else if (object->sabre_contact_sfx_timer > 0.0f) {
+        if (object->sabre_contact_sfx_timer > 0.0f)
             object->sabre_contact_sfx_timer -= FRAMETIME;
-        }
     }
 }
 
