@@ -132,7 +132,7 @@ extern "C" void __wrap__Z7EndPermv() {
         }
     } else {
         for (i32 i = 0; i < LEVELCOUNT; ++i)
-            if (SDL_strcasecmp(LDataList[i].name, level_name) == 0)
+            if (SDL_strcasecmp(LDataList[i].name, level_name) == 0 && playable(LDataList[i]))
                 destination = &LDataList[i];
     }
     if (destination == nullptr)

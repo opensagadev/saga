@@ -269,13 +269,15 @@ static void GizBuildIts_Draw(void *world_ptr, void *data, float) {
 
         while (object != NULL) {
             GIZBUILDITANIMDATA_s *object_data = static_cast<GIZBUILDITANIMDATA_s *>(object->object_data);
-            object_data->was_drawn = static_cast<u8>(NuSpecialDrawAt(&object->special, &object_data->draw_mtx));
+            NUMTX draw_mtx = object_data->draw_mtx;
+            object_data->was_drawn = static_cast<u8>(NuSpecialDrawAt(&object->special, &draw_mtx));
 
             if ((buildit.state_flags & GIZBUILDIT_STATE_DRAW_REFLECTION) != 0 && (object->flags & 2) == 0) {
-                NUMTX reflection_mtx;
-                if (MatrixReflection(&object_data->draw_mtx, 2, reflection_plane, world->current_level->unknown_0cc,
-                                     &reflection_mtx) != 0) {
-                    NuSpecialDrawAt(&object->special, &reflection_mtx);
+                const f32 override_plane = WORLD != NULL && WORLD->current_level != NULL
+                                               ? WORLD->current_level->unknown_0cc
+                                               : world->current_level->unknown_0cc;
+                if (MatrixReflection(&object_data->draw_mtx, 2, reflection_plane, override_plane, &draw_mtx) != 0) {
+                    NuSpecialDrawAt(&object->special, &draw_mtx);
                 }
             }
             object = object->next;
@@ -368,8 +370,10 @@ GIZBUILDIT_s *GizBuildIt_FindNearest(WORLDINFO_s *world, GameObject_s *player, B
                 i32 occupied = 0;
                 for (i32 p = 0; p < 8; ++p) {
                     if (Player[p] != NULL && Player[p]->build_context == LEGOCONTEXT_BUILDIT &&
-                        Player[p]->field_0x788 == buildit)
+                        Player[p]->field_0x788 == buildit) {
                         occupied = 1;
+                        break;
+                    }
                 }
                 if (occupied != 0)
                     continue;
@@ -794,6 +798,7 @@ static void GizBuildIts_LateUpdate(void *world_ptr, void *data, float) {
         gizhopsfxwait -= FRAMETIME;
     }
 
+    NUVEC finish_position;
     GIZBUILDIT_s *current = buildit_sys->buildits;
     for (i32 index = 0; index < buildit_sys->count; ++index, ++current) {
         GIZBUILDIT_s &buildit = *current;
@@ -808,9 +813,8 @@ static void GizBuildIts_LateUpdate(void *world_ptr, void *data, float) {
             if (buildit.step_timer >= BUILDIT_FINISH_DURATION) {
                 Hint_SetComplete(LEGOHINT_BUILD);
                 GizBuildIt_Finish(&buildit);
-                NUVEC effect_position;
-                NuVecAdd(&effect_position, &buildit.position, &buildit.effect_position);
-                GameAudio_PlaySfx(BUILDIT_SFX_COMPLETE, &effect_position, 0, 0);
+                NuVecAdd(&finish_position, &buildit.position, &buildit.effect_position);
+                GameAudio_PlaySfx(BUILDIT_SFX_COMPLETE, &finish_position, 0, 0);
                 NewRumbleAllPlayers(0.75f, 0.1f, 0, 0);
                 GameCam_Judder(GameCam, -0.4f, 0, NULL);
                 if ((buildit.field_0x83 & GIZBUILDIT_RUNTIME_REWARD_RELEASED) == 0) {
@@ -820,7 +824,7 @@ static void GizBuildIts_LateUpdate(void *world_ptr, void *data, float) {
                         NUVEC direction;
                         NuVecRotateX(&direction, &v010, static_cast<u16>(buildit.field_0x60));
                         NuVecRotateY(&direction, &direction, static_cast<u16>(buildit.field_0x62));
-                        AddPickups(static_cast<u16>(buildit.field_0x5e), hearts, 0, 0, &effect_position, &direction,
+                        AddPickups(static_cast<u16>(buildit.field_0x5e), hearts, 0, 0, &finish_position, &direction,
                                    2.0f, -1, 1.75f, 2000000.0f, NULL, 1, 0, true);
                     }
                 }
@@ -835,8 +839,8 @@ static void GizBuildIts_LateUpdate(void *world_ptr, void *data, float) {
             for (i32 piece_index = 0; piece_index < buildit.anim_object_count; ++piece_index) {
                 GAMEANIMOBJ_s *piece = buildit.anim_objects[piece_index];
                 GIZBUILDITANIMDATA_s *piece_data = static_cast<GIZBUILDITANIMDATA_s *>(piece->object_data);
-                NUVEC position = buildit.linked_buildit != NULL ? *NUMTX_GET_ROW_VEC(&piece_data->end_mtx, 3)
-                                                                : *NuSpecialGetPos(&piece->special);
+                finish_position = buildit.linked_buildit != NULL ? *NUMTX_GET_ROW_VEC(&piece_data->end_mtx, 3)
+                                                                 : *NuSpecialGetPos(&piece->special);
                 const f32 offset = 0.2f * NU_SIN_LUT(32768.0f * finish_progress);
                 NUVEC displacement;
                 if ((buildit.state_flags & GIZBUILDIT_STATE_ROTATING_WOBBLE) != 0) {
@@ -851,11 +855,11 @@ static void GizBuildIts_LateUpdate(void *world_ptr, void *data, float) {
                     displacement.y = offset;
                     displacement.z = 0.0f;
                 }
-                NuVecAdd(&position, &position, &displacement);
+                NuVecAdd(&finish_position, &finish_position, &displacement);
                 if (buildit.linked_buildit != NULL) {
-                    *NUMTX_GET_ROW_VEC(&piece_data->draw_mtx, 3) = position;
+                    *NUMTX_GET_ROW_VEC(&piece_data->draw_mtx, 3) = finish_position;
                 } else {
-                    NuSpecialSetDrawPos(&piece->special, &position);
+                    NuSpecialSetDrawPos(&piece->special, &finish_position);
                 }
             }
         } else if (buildit.build_state == GIZBUILDIT_BUILD_IDLE) {

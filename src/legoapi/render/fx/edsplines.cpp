@@ -13,6 +13,9 @@
 #include "legoapi/world/area.h"
 #include "legoapi/world/levels/podrace.h"
 #include "legoapi/world/levels/levels.h"
+#include "legoapi/world/area.h"
+#include "legoapi/world/mission.h"
+#include "legoapi/cutscenes/cutscenes.h"
 #include "nu2api/nu3d/nuspline.h"
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/nucore/nustring.h"
@@ -516,8 +519,6 @@ static i32 levspl_i_startcam = -1;
 void LevelSplines_InitForGame(LEVELSPLINE *splines) {
     LevSplList = splines;
     LEVELSPLINECOUNT = 0;
-    levspl_i_start = -1;
-    levspl_i_startcam = -1;
 
     if (splines == NULL) {
         return;
@@ -613,7 +614,11 @@ void LevelSplines_InitForLevel(WORLDINFO_s *world) {
             }
         }
 
-        if (levspl_i_start != -1) {
+        if (scene == NULL) {
+            continue;
+        }
+
+        if (levspl_i_start >= 0 && levspl_i_start < LEVELSPLINECOUNT) {
             char name[64];
             name[0] = '\0';
             if (Mission_Active(NULL) != NULL) {
@@ -621,7 +626,8 @@ void LevelSplines_InitForLevel(WORLDINFO_s *world) {
             } else if (world->level_sub_id != -1 && (ADataList[world->level_sub_id].flags & 0x40) != 0 &&
                        hub_from_cutsceneplayer != 0) {
                 NuStrCpy(name, "shop_start");
-                if (CutScenePlayer_Available() != NULL && static_cast<i16 *>(CutScenePlayer_Available())[5] != -1) {
+                if (CutScenePlayer_Available() != NULL &&
+                    static_cast<CUTSCENEPLAYER_s *>(CutScenePlayer_Available())->return_door != -1) {
                     name[0] = '\0';
                 }
             }
@@ -629,7 +635,7 @@ void LevelSplines_InitForLevel(WORLDINFO_s *world) {
                 NUGSPLINE *start = NuSplineFind(scene, name);
                 if (start != NULL && start->length > 1) {
                     world->portal_places[levspl_i_start] = reinterpret_cast<PORTALPOS *>(start);
-                    if (levspl_i_startcam != -1) {
+                    if (levspl_i_startcam >= 0 && levspl_i_startcam < LEVELSPLINECOUNT) {
                         world->portal_places[levspl_i_startcam] = NULL;
                     }
                 }

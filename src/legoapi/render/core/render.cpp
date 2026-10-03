@@ -1587,20 +1587,23 @@ void DrawAlphaImage(i32 rows, i32 cols, numtl_s *material, i32 use_pixel_offsets
     ++NuPrimCSPos;
     NuPrimSetCoordinateSystem(NUPRIM_SCALEMODE_NORMALISED);
     for (row = 0; row < rows - 1; ++row) {
+        const i32 strip_row = row;
         NuPrim2DBegin(1, 7, material);
+        const f32 direction_x = (1.0f + x0) - 1.0f;
         f32 y0 = y_start;
         for (col = 0; col < cols; ++col) {
             NUVEC direction;
-            direction.x = x0;
-            direction.y = -y0 * camera.aspect;
+            const f32 direction_y = ((1.0f + y0) - 1.0f) * -camera.aspect;
+            direction.x = direction_x;
+            direction.y = direction_y;
             direction.z = adjacent;
             NuVecNorm(&direction, &direction);
             NuVecMtxTransform(&direction, &direction, &camera.mtx);
             NuVecNorm(&direction, &direction);
 
-            u8 alpha;
-            if (row > 0) {
-                alpha = cacheValues[col];
+            u32 colour;
+            if (strip_row > 0) {
+                colour = (static_cast<u32>(cacheValues[col]) << 24) | 0x808080;
             } else {
                 f32 brightness = direction.y * 0.5f + 0.5f;
                 if (brightness <= near_angle)
@@ -1625,15 +1628,16 @@ void DrawAlphaImage(i32 rows, i32 cols, numtl_s *material, i32 use_pixel_offsets
                              parameters->direction_near_scale);
                     }
                 }
-                alpha = static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)));
+                i32 alpha = static_cast<i32>(MIN(255.0f, MAX(0.0f, brightness)));
+                colour = (static_cast<u32>(alpha) << 24) | 0x808080;
             }
-            NuRndrPrimSetColour((static_cast<u32>(alpha) << 24) | 0x808080);
+            NuRndrPrimSetColour(colour);
             NuRndrPrimUV(static_cast<f32>(row) * inv_row + pixelOffsetX,
                          (static_cast<f32>(col) * inv_col + pixelOffsetY) * 0.9f);
             NuPrim2DAddXYZ(x0, y0, 0.0f);
 
-            direction.x = x1;
-            direction.y = -y0 * camera.aspect;
+            direction.x = (1.0f + x1) - 1.0f;
+            direction.y = direction_y;
             direction.z = adjacent;
             NuVecNorm(&direction, &direction);
             NuVecMtxTransform(&direction, &direction, &camera.mtx);
@@ -1660,7 +1664,7 @@ void DrawAlphaImage(i32 rows, i32 cols, numtl_s *material, i32 use_pixel_offsets
                                             parameters->direction_near_scale);
                 }
             }
-            alpha = static_cast<u8>(MIN(255.0f, MAX(0.0f, brightness)));
+            i32 alpha = static_cast<i32>(MIN(255.0f, MAX(0.0f, brightness)));
             cacheValues[col] = alpha;
             NuRndrPrimSetColour((static_cast<u32>(alpha) << 24) | 0x808080);
             NuRndrPrimUV(static_cast<f32>(row + 1) * inv_row + pixelOffsetX,
@@ -2565,11 +2569,7 @@ void DrawFadeScreenWipe() {
     NuRndrBeginScene(-1);
     extern numtl_s *SolidMtl;
 
-    // The original routine unconditionally dereferences the shared fade
-    // pointer after beginning a scene.  `pFadeInfo` is installed by
-    // LoadPermData and points at FadeSys; retaining that indirection keeps
-    // this call ABI-identical to the original.
-    FadeSystem &fade_info = *pFadeInfo;
+    FadeSystem &fade_info = FadeSys;
     const f32 fade_amount = fade_info.fade;
     const u32 direction = fade_info.direction;
     i32 gradient[4];
@@ -2580,7 +2580,7 @@ void DrawFadeScreenWipe() {
 
     if ((direction & 3) != 0) {
         const bool positive = (direction & 1) != 0;
-        if ((positive && fade_info.rate > 0.0f) || (!positive && fade_info.rate <= 0.0f)) {
+        if ((positive && fade_info.rate > 0.0f) || (!positive && !(fade_info.rate > 0.0f))) {
             gradient[0] = static_cast<i32>(0x80000000u);
             gradient[1] = 0;
             gradient[2] = static_cast<i32>(0x80000000u);
@@ -2592,22 +2592,24 @@ void DrawFadeScreenWipe() {
             gradient[1] = static_cast<i32>(0x80000000u);
             gradient[2] = 0;
             gradient[3] = static_cast<i32>(0x80000000u);
-            const i32 edge = static_cast<i32>((1.0f - fade_amount) * 10240.0f);
-            NuRndrGradRect2di(edge - 1024, 0, 1024, 3584, gradient, FadeMtl2);
+            const f32 edge_position = (1.0f - fade_amount) * 10240.0f;
+            const i32 edge = static_cast<i32>(edge_position);
+            NuRndrGradRect2di(static_cast<i32>(edge_position - 1024.0f), 0, 1024, 3584, gradient, FadeMtl2);
             solid_x = edge;
             solid_width = 10240 - edge;
         }
     } else if ((direction & 0xc) != 0) {
         // The vertical sign test is the same two-way rate/direction test as
         // the horizontal one, with bit 2 selecting the opposite side.
-        const bool edge_first = (direction & 4) != 0 ? fade_info.rate <= 0.0f : fade_info.rate > 0.0f;
+        const bool edge_first = (direction & 4) != 0 ? !(fade_info.rate > 0.0f) : fade_info.rate > 0.0f;
         if (edge_first) {
             gradient[0] = static_cast<i32>(0x80000000u);
             gradient[1] = static_cast<i32>(0x80000000u);
             gradient[2] = 0;
             gradient[3] = 0;
-            const i32 edge = static_cast<i32>((1.0f - fade_amount) * 3584.0f);
-            NuRndrGradRect2di(0, edge - 358, 10240, 358, gradient, FadeMtl2);
+            const f32 edge_position = (1.0f - fade_amount) * 3584.0f;
+            const i32 edge = static_cast<i32>(edge_position);
+            NuRndrGradRect2di(0, static_cast<i32>(edge_position - 358.0f), 10240, 358, gradient, FadeMtl2);
             solid_y = edge;
             solid_height = 3584 - edge;
         } else {
@@ -2620,7 +2622,7 @@ void DrawFadeScreenWipe() {
         }
     }
 
-    if (fade_amount >= 0.0f) {
+    if (!(fade_amount < 0.0f)) {
         NuRndrRect2di(solid_x, solid_y, solid_width, solid_height, 0, SolidMtl);
     }
     NuRndrEndScene();
@@ -4051,12 +4053,31 @@ i32 backdrop_black = 0;
 void (*BackDrop_AlphaFn)(float *) = nullptr;
 
 static __used__ void BackDrop_Alpha(float *alpha) {
+    extern STATUSPACKET_s StatusPacket;
+    extern i32 selectmodemode;
+    extern f32 selectmodetime;
     if (alpha == nullptr)
         return;
-    if (backdrop_black) {
-        *alpha *= 0.0f;
-    } else if (backdrop_back_wait > 0.0f) {
-        *alpha *= 0.5f;
+    if (WORLD != NULL && WORLD->current_level != NULL) {
+        LEVELDATA *level = WORLD->current_level;
+        if (level == TITLES_LDATA) {
+            *alpha *= newgamealpha;
+            return;
+        }
+        if (level == CREDITS_LDATA && CreditsFlag == 3) {
+            *alpha *= CreditsAlpha;
+            return;
+        }
+        if ((level->flags & 0x400) != 0 && StatusPacket.status_flags != 0 && StatusPacket.stage != NULL &&
+            StatusPacket.stage->type == 12 && (StatusPacket.mode_flags & 0x10) == 0) {
+            const f32 time = StatusPacket.stage->field_0x18;
+            *alpha = time < 0.5f ? 1.0f - (time + time) : 0.0f;
+            return;
+        }
+    }
+    if (GetMenuID() == 15 && selectmodemode == 4) {
+        const f32 time = selectmodetime;
+        *alpha = time < 0.5f ? 1.0f - (time + time) : 0.0f;
     }
 }
 

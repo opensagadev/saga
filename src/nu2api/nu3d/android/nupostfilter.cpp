@@ -238,29 +238,40 @@ extern "C" void NuPostEffectRender(nuframebuffer_s *output) {
     if (output == NULL)
         output = NuFramebufferGetObject(1);
     NuFramebufferGetObject(0);
-    NuProxyBuffer *proxies[] = {&proxyColorBuffer, &proxyNormalBuffer, &proxyVelocityBuffer, &proxyDepthRTBuffer,
-                                &proxyDepthBuffer};
-    const i32 attachments[] = {0, 1, 2, 2, 4};
-    for (i32 i = 0; i < 5; ++i) {
-        proxies[i]->texture = NuFramebufferGetAttachedTex(bound, attachments[i], NULL, NULL);
-        proxies[i]->kind = attachments[i];
-        proxies[i]->enabled = proxies[i]->resolved = true;
-    }
+    nueffecttex_s *colour = NuFramebufferGetAttachedTex(bound, 0, NULL, NULL);
+    nueffecttex_s *normal = NuFramebufferGetAttachedTex(bound, 1, NULL, NULL);
+    nueffecttex_s *velocity = NuFramebufferGetAttachedTex(bound, 2, NULL, NULL);
+    nueffecttex_s *depth_rt = NuFramebufferGetAttachedTex(bound, 2, NULL, NULL);
+    nueffecttex_s *depth = NuFramebufferGetAttachedTex(bound, 4, NULL, NULL);
     NuFramebufferResolveMultisample(0);
-    NuPostFilterGen::portColorBuffer.set(proxies[0]);
-    NuPostFilterGen::portNormalBuffer.set(proxies[1]);
-    NuPostFilterGen::portVelocityBuffer.set(proxies[2]);
-    NuPostFilterGen::portDepthRTBuffer.set(proxies[3]);
-    NuPostFilterGen::portDepthBuffer.set(proxies[4]);
-    NuPostFilterGen *candidates[] = {speedBlurFilter, deferredFilter, mainFilter, motionFilter, motionAccumFilter};
+#define SET_RESOLVED_PROXY(proxy, attachment, value)                                                                   \
+    proxy.texture = value;                                                                                             \
+    proxy.kind = attachment;                                                                                           \
+    proxy.enabled = proxy.resolved = true
+    SET_RESOLVED_PROXY(proxyColorBuffer, 0, colour);
+    SET_RESOLVED_PROXY(proxyNormalBuffer, 1, normal);
+    SET_RESOLVED_PROXY(proxyVelocityBuffer, 2, velocity);
+    SET_RESOLVED_PROXY(proxyDepthRTBuffer, 2, depth_rt);
+    SET_RESOLVED_PROXY(proxyDepthBuffer, 4, depth);
+#undef SET_RESOLVED_PROXY
+    NuPostFilterGen::portColorBuffer.set(&proxyColorBuffer);
+    NuPostFilterGen::portNormalBuffer.set(&proxyNormalBuffer);
+    NuPostFilterGen::portVelocityBuffer.set(&proxyVelocityBuffer);
+    NuPostFilterGen::portDepthRTBuffer.set(&proxyDepthRTBuffer);
+    NuPostFilterGen::portDepthBuffer.set(&proxyDepthBuffer);
     NuPostFilterGen *filters[5];
     i32 count = 0;
-    for (i32 i = 0; i < 5; ++i) {
-        if (candidates[i] != NULL && candidates[i]->isEnabled()) {
-            filters[count++] = candidates[i];
-            NuFramebufferAttachTex2D(candidates[i]->getInputFbo(), 0, proxies[0]->texture, 0);
-        }
+#define APPEND_POST_FILTER(filter)                                                                                     \
+    if (filter != NULL && filter->isEnabled()) {                                                                       \
+        filters[count++] = filter;                                                                                     \
+        NuFramebufferAttachTex2D(filter->getInputFbo(), 0, colour, 0);                                                 \
     }
+    APPEND_POST_FILTER(speedBlurFilter);
+    APPEND_POST_FILTER(deferredFilter);
+    APPEND_POST_FILTER(mainFilter);
+    APPEND_POST_FILTER(motionFilter);
+    APPEND_POST_FILTER(motionAccumFilter);
+#undef APPEND_POST_FILTER
     g_boundShader = 0;
     glUseProgram(0);
     g_currentShaderProgram = NULL;

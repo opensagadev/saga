@@ -81,6 +81,10 @@ struct EdSubSystem {
     virtual void SubProcess(float);
     virtual void SubRender();
 
+    // Subsystem storage is externally owned; the retail deleting destructor does not free it.
+    static void operator delete(void *) {
+    }
+
     EdSubSystem *next;
     EdSubSystem *previous;
 };
@@ -312,6 +316,7 @@ struct EdEnumControl : EdControl {
     };
     Item *items;
 
+    static void operator delete(void *);
     void AddMenuItem(eduimenu_s *, EdRef *, void *) override;
     char *GetEnumString(i32);
     i32 GetEnumValue(char *);
@@ -326,6 +331,7 @@ struct EdEnumControl : EdControl {
 struct EdBitControl : EdEnumControl {
     u32 bit_mask;
 
+    static void operator delete(void *);
     void AddMenuItem(eduimenu_s *, EdRef *, void *) override;
     void Refresh() override;
     static void cbButton(eduimenu_s *, eduiitem_s *, u32);

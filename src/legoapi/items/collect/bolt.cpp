@@ -41,8 +41,9 @@ BOLT_s *FindIncomingBolt(GameObject_s *object, i32 exclude_players, i32 mark_dir
             owner->apiobj.field_0x287 == 0 && owner->apiobj.field_0x27c != -1)
             continue;
         f32 time = TouchHacks::TouchControlsActive ? 1.5f : 0.5f;
+        f32 travel_distance = time * bolt->speed;
         f32 distance = NuVecDistSqr(&bolt->position, &object->apiobj.collision_position, NULL);
-        if (distance < time * bolt->speed * time * bolt->speed &&
+        if (distance < travel_distance * travel_distance &&
             LineIntersectSphere(&bolt->position, &bolt->field_0xac, &object->apiobj.collision_position, radius * radius,
                                 NULL) &&
             distance < nearest_distance) {

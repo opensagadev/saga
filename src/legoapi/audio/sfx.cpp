@@ -1771,11 +1771,8 @@ active_music:
     }
     if (Music.transition_frames <= 0x7f) {
         ++Music.transition_frames;
-        if (Music.transition_frames <= 0x40) {
-            return;
-        }
     }
-    if (Music.pause_requested) {
+    if (Music.transition_frames > 0x40 && Music.pause_requested) {
         MusicPreSeek(Music.requested_track);
     }
     if (Music.transition_frames <= 0x18) {

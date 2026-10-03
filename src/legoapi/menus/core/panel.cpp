@@ -918,7 +918,7 @@ void DrawPanel() {
                 removed_controller = GamePad[i].pad->port;
                 sprintf(text, apitxt_CONTROLLERREMOVED, removed_controller + 1, removed_controller + 1);
                 i32 alpha = static_cast<u8>(static_cast<i32>((i == 0 ? 0.75f + pulse : 0.75f - pulse) * 128.0f));
-                SmartTextEx(text, 0.0f, i == 0 ? 0.5f : -0.5f, 1.0f, 0.4f, 0.4f, 0.4f, 0, 0, 255, 0, 1.5f, 4, 0, 0,
+                SmartTextEx(text, 0.0f, i == 0 ? 0.5f : -0.5f, 1.0f, 0.4f, 0.4f, 0.4f, 0, 63, 127, 255, 1.5f, 4, 0, 0,
                             alpha);
             }
         }
@@ -930,7 +930,7 @@ void DrawPanel() {
                 removed_controller = GamePad[i].pad->port;
                 sprintf(text, apitxt_CONTROLLERREMOVED, removed_controller + 1, removed_controller + 1);
                 i32 alpha = static_cast<u8>(static_cast<i32>((i == 0 ? 0.75f + pulse : 0.75f - pulse) * 128.0f));
-                SmartTextEx(text, 0.0f, i == 0 ? 0.5f : -0.5f, 1.0f, 0.4f, 0.4f, 0.4f, 0, 63, 127, 255, 1.5f, 4, 0, 0,
+                SmartTextEx(text, 0.0f, i == 0 ? 0.5f : -0.5f, 1.0f, 0.4f, 0.4f, 0.4f, 0, 0, 255, 0, 1.5f, 4, 0, 0,
                             alpha);
             }
         }

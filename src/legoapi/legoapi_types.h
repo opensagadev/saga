@@ -1018,7 +1018,6 @@ struct CUTINFO {
         i32 music_track_handle;
     };
     f32 low_end_distance;
-    f32 field_194;
 };
 DECOMP_ASSERT(offsetof(CUTINFO, burnout_threshold) == 0x60, "CUTINFO burnout threshold offset");
 DECOMP_ASSERT(offsetof(CUTINFO, texture_animations) == 0x144, "CUTINFO texture animations offset");
@@ -1033,7 +1032,7 @@ DECOMP_ASSERT(offsetof(CUTINFO, debris_render_group) == 0xf3, "CUTINFO debris re
 DECOMP_ASSERT(offsetof(CUTINFO, next_cutscene) == 0x104, "CUTINFO chained-cutscene offset");
 DECOMP_ASSERT(offsetof(CUTINFO, end_flags) == 0x18a, "CUTINFO end-flags offset");
 DECOMP_ASSERT(offsetof(CUTINFO, music_handle) == 0x18c, "CUTINFO music-handle offset");
-DECOMP_ASSERT(sizeof(CUTINFO) == 0x198, "CUTINFO size");
+DECOMP_ASSERT(sizeof(CUTINFO) == 0x194, "CUTINFO size");
 DECOMP_ASSERT(offsetof(CUTINFO, music_track_handle) == 0x18c, "CUTINFO music offset");
 DECOMP_ASSERT(offsetof(CUTINFO, texture_animations) + offsetof(CUTSCENETEXANIM, index) == 0x148,
               "CUTINFO texture signals offset");
@@ -4504,7 +4503,7 @@ struct GIZMOBLOWUP_s {
     u8 initial_state_1; // 0x119
     undefined field_0x11a[2];
     nuhspecial_s *override_special; // 0x11c, optional per-instance special
-    void *field_0x120;              // 0x120
+    NUVEC *field_0x120;             // 0x120
     u8 field_0x124;                 // 0x124
     undefined field_0x125[3];
     float field_0x128; // 0x128

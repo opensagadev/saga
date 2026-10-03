@@ -145,8 +145,7 @@ void AddPickups(i32 coins, i32 hearts, i32 torpedoes, i32 powerups, nuvec_s *pos
     } else {
         to_panel = player_id == -1 ? 0 : panel;
     }
-    if (ChallengeMode != 0 || Mission_Active(NULL) != NULL)
-        coins = 0;
+    coins = ChallengeMode != 0 || Mission_Active(NULL) != NULL ? 0 : coins;
     if (speed == 1.0f)
         speed = scale;
     u8 counts[10] = {};

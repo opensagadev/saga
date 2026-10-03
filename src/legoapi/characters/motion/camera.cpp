@@ -236,7 +236,7 @@ static bool GameCam_AddPlayerLookRot(GAMECAMERA_s *camera, GameObject_s *object)
     constexpr f32 kLookPitch = 1820.0f;
     constexpr f32 kLookYaw = 2730.0f;
 
-    if (gamepad->input_mode == 1) {
+    if (look_source == 2 && gamepad->input_mode == 1) {
         const u32 horizontal = gamepad->buttons_held & (GAMEPAD_DLEFT | GAMEPAD_DRIGHT);
         const u32 vertical = gamepad->buttons_held & (GAMEPAD_DUP | GAMEPAD_DDOWN);
         if (horizontal == GAMEPAD_DLEFT) {
@@ -284,8 +284,10 @@ void GameCam_UpdateLookRot(GAMECAMERA_s *camera) {
         camera->field_0x208 *= inverse_count;
     }
 
-    camera->field_0x20c = SeekLinearF(camera->field_0x20c, camera->field_0x204, FRAMETIME * 2.0f);
-    camera->field_0x210 = SeekLinearF(camera->field_0x210, camera->field_0x208, FRAMETIME * 2.0f);
+    const f32 pitch_step = 1820.0f * FRAMETIME;
+    camera->field_0x20c = SeekLinearF(camera->field_0x20c, camera->field_0x204, pitch_step + pitch_step);
+    const f32 yaw_step = 2730.0f * FRAMETIME;
+    camera->field_0x210 = SeekLinearF(camera->field_0x210, camera->field_0x208, yaw_step + yaw_step);
     camera->field_0x214 = SeekValF(camera->field_0x214, camera->field_0x20c, 3.0f);
     camera->field_0x218 = SeekValF(camera->field_0x218, camera->field_0x210, 3.0f);
 }
@@ -323,8 +325,8 @@ extern nugspline_s ObstacleCamCutSpline;
 extern i32 ObstacleCamTargetGuid;
 extern NUVEC ObstacleCamCutPts[2];
 
-void GameCameraMakeMiniCut2(nuvec_s *camera, nuvec_s *target, i32 target_guid, float start, float end,
-                            float blend_in, float blend_out, i32 follow_target, i32 follow_camera, i32 borders) {
+void GameCameraMakeMiniCut2(nuvec_s *camera, nuvec_s *target, i32 target_guid, float start, float end, float blend_in,
+                            float blend_out, i32 follow_target, i32 follow_camera, i32 borders) {
     ObstacleCamCutSpline.length = 2;
     ObstacleCamCutSpline.pt_size = 12;
     ObstacleCamCutSpline.pts = ObstacleCamCutPts;
@@ -365,8 +367,8 @@ void GameCameraMakeMiniCut3(u32 flags, float distance, i32 pitch, i32 yaw, i32 r
             MiniCam.focus_offset = v000;
             MiniCam.focus = &MiniCam.target;
             MiniCam.position = *position;
-            GameCameraMakeMiniCut2(&MiniCam.position, NULL, target_guid, start_time, 1000000000.0f,
-                                   blend_in_time, 0.0f, 0, 1, MiniCam.reserved_384);
+            GameCameraMakeMiniCut2(&MiniCam.position, NULL, target_guid, start_time, 1000000000.0f, blend_in_time, 0.0f,
+                                   0, 1, MiniCam.reserved_384);
         }
     }
 
@@ -402,9 +404,11 @@ void GameCameraMakeMiniCut3(u32 flags, float distance, i32 pitch, i32 yaw, i32 r
     if ((flags & 5) == 5 && blend_in_time > 0.0f && blend_time == 0.0f)
         blend_time = 0.01f;
     if ((flags & 0x1800) == 0x1800) {
+        const bool have_remaining_hold = hold_time > blend_time;
+        const float remaining_hold = have_remaining_hold ? hold_time - blend_time : 0.0f;
         Minicam_AddCommand(4, blend_time, 0, NULL, v000);
-        if (hold_time > blend_time)
-            Minicam_AddCommand(5, hold_time - blend_time, 0, NULL, v000);
+        if (have_remaining_hold)
+            Minicam_AddCommand(5, remaining_hold, 0, NULL, v000);
     } else if (flags & 0x800) {
         Minicam_AddCommand(4, blend_time, 0, NULL, v000);
     } else if (flags & 0x1000) {
@@ -2096,15 +2100,16 @@ extern "C" {
                 i16 angle = TargetAng;
                 if (difference >= -20000 && difference <= 20000)
                     angle = static_cast<i16>(MouseOldAng + difference / 4);
-                MouseOldAng = TargetAng;
+                MouseOldAng = angle;
 
                 f32 sine = NU_SIN_LUT(static_cast<u16>(angle) + 0x2000);
                 if (NuFabs(sine) > 0.1f) {
                     sine += sine <= 0.0f ? 0.1f : -0.1f;
                     f32 distance = camera->distance + NuFsqrt(mouse_x * mouse_x + mouse_y * mouse_y) * sine *
-                                                          zoom_scale * camera->mouse_move_speed;
+                                                          (zoom_scale * camera->distance_speed) *
+                                                          camera->mouse_move_speed;
                     const f32 minimum = -camera->minimum_distance;
-                    camera->distance = distance <= minimum ? distance : minimum;
+                    camera->distance = minimum < distance ? minimum : distance;
                 }
             }
         } else if (buttons == 1) {
@@ -2124,7 +2129,7 @@ extern "C" {
 
         const f32 minimum = -camera->minimum_distance;
         const f32 distance = camera->distance - zoom_scale * camera->distance_speed * mouse_z;
-        camera->distance = distance <= minimum ? distance : minimum;
+        camera->distance = minimum < distance ? minimum : distance;
 
         NUMTX rotation = numtx_identity;
         NuMtxRotateX(&rotation, camera->pitch);

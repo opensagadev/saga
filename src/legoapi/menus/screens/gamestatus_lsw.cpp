@@ -307,6 +307,8 @@ extern i32 from_save_and_exit;
 extern TIMER BonusTimer;
 extern i16 id_SLAVE1;
 extern i16 tSUPERSTORYCOMPLETE, tNEWBESTTIME, tLEVELCOMPLETE, tMISSIONCOMPLETE;
+extern i16 tNONEWBESTTIME;
+extern i16 tNEWHIGHSCORE, tNONEWHIGHSCORE;
 extern i16 tCHALLENGECOMPLETE, tTRUEHERO, tMINIKIT;
 extern "C" void NuIOS_RecordFlurryEvent(char *);
 extern "C" i32 NuStrCpy(char *, const char *);
@@ -526,7 +528,7 @@ void InitStatusScreen(WORLDINFO_s *world) {
                     reinterpret_cast<u8 *>(Game_MissionSave)[0x50 + mission] = 1;
                 AddToCompletionPoints(POINTS_PER_MISSION);
                 gold = AddGoldBrickMessage(&p, tMISSIONCOMPLETE);
-                sprintf(event, "bounty_mission_%i_complete", mission + 1);
+                sprintf(event, "bounty_mission_%i_complete", static_cast<i8>(MissionSys->mission->count) + 1);
                 NuIOS_RecordFlurryEvent(event);
             }
             u64 reward = static_cast<i64>(static_cast<i32>(static_cast<u16>(p.mission->time) - p.elapsed_time) * 150);
@@ -1414,7 +1416,7 @@ void Status_DrawPromptMenu(STATUSPACKET_s *packet, i32 selected, float alpha) {
         y += 0.075f;
     }
     for (i32 i = 0; i < count; ++i) {
-        u32 red, green, blue;
+        i32 red, green, blue;
         if (selected != 0 && status_prompt == i && TestForController()) {
             if (menu_pulsate > 0.0f) {
                 const f32 inverse = 1.0f - menu_pulsate;
@@ -1473,8 +1475,46 @@ f32 getFinishedStatusAlpha(STATUSPACKET_s *packet) {
     return alpha;
 }
 
-void SuperStoryTime_LSW_Draw(STATUS_STAGE_s *, STATUSPACKET_s *, i32) {
-    STUBBED();
+void SuperStoryTime_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current) {
+    if (current == 0 || stage->field_0x14 < 1)
+        return;
+    char text[256], previous[256];
+    const f32 time = stage->field_0x18;
+    f32 alpha, coin_progress;
+    if (time >= 0.5f) {
+        alpha = coin_progress = 1.0f;
+        if (time >= 4.5f)
+            alpha = 1.0f - ((time - 4.5f) + (time - 4.5f));
+    } else {
+        alpha = coin_progress = time + time;
+    }
+    const i32 opacity = static_cast<i32>(alpha * 128.0f);
+    CoinTotal_Draw(*packet->score,
+                   (STATSPOSY - STATSPOS2Y) * NuTrigTable[(static_cast<i32>(coin_progress * 16384.0f) >> 1) & 0x7fff] +
+                       STATSPOS2Y,
+                   CoinTotalScale, 1, 1.0f, 255, 191, 0);
+    const bool new_best = packet->new_best_time != 0.0f;
+    SmartTextEx(TTab[new_best ? tNEWBESTTIME : tNONEWBESTTIME], 0.0f, 0.2f, 1.0f, 0.7f, 0.7f, 0.7f, 0,
+                new_best ? 0 : 255, new_best ? 255 : 0, 0, 1.7f, 1, NULL, 0, opacity);
+    f32 displayed_time;
+    if (packet->new_best_time == 0.0f) {
+        displayed_time = packet->superstory_time;
+    } else {
+        const f32 draw_time = stage->field_0x18;
+        f32 blend = 0.0f;
+        if (draw_time < 0.5f)
+            blend = 0.0f;
+        else
+            blend = draw_time < 4.0f ? (draw_time - 0.5f) / 3.5f : 1.0f;
+        displayed_time = (packet->new_best_time - packet->previous_best_time) * blend + packet->previous_best_time;
+    }
+    Text_MakeTime(displayed_time, 1, 1, 1, text);
+    Text3DEx(text, 0.0f, 0.0f, 1.0f, 0.7f, 0.7f, 0.7f, 0, 255, 255, 255, static_cast<u8>(opacity));
+    Text_MakeTime(packet->previous_best_time, 1, 1, 1, text);
+    NuStrCpy(previous, "(");
+    NuStrCat(previous, text);
+    NuStrCat(previous, ")");
+    Text3DEx(previous, 0.0f, -0.2f, 1.0f, 0.7f, 0.7f, 0.7f, 0, 255, 255, 255, static_cast<u8>(opacity / 2));
 }
 
 void SuperStoryTime_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *packet) {
@@ -1489,8 +1529,47 @@ void LSW_registerStatusScreen() {
     RegisterStatusScreen(StatusStages_LSW, NULL, &registration);
 }
 
-void SuperStoryScore_LSW_Draw(STATUS_STAGE_s *, STATUSPACKET_s *, i32) {
-    STUBBED();
+void SuperStoryScore_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current) {
+    if (current == 0)
+        return;
+    f32 coin_progress = 1.0f;
+    if (stage->field_0x14 > 0) {
+        char text[256], previous[256];
+        const f32 time = stage->field_0x18;
+        f32 alpha;
+        if (time >= 0.5f) {
+            alpha = 1.0f;
+            if (time >= 4.5f)
+                alpha = coin_progress = 1.0f - ((time - 4.5f) + (time - 4.5f));
+        } else {
+            alpha = time + time;
+        }
+        const i32 opacity = static_cast<i32>(alpha * 128.0f);
+        const bool new_best = packet->new_best_score != 0;
+        SmartTextEx(TTab[new_best ? tNEWHIGHSCORE : tNONEWHIGHSCORE], 0.0f, 0.2f, 1.0f, 0.7f, 0.7f, 0.7f, 0,
+                    new_best ? 0 : 255, new_best ? 255 : 0, 0, 1.7f, 1, NULL, 0, opacity);
+        const f32 draw_time = stage->field_0x18;
+        f32 blend = 0.0f;
+        if (draw_time >= 0.5f)
+            blend = draw_time < 4.0f ? (draw_time - 0.5f) / 3.5f : 1.0f;
+        const u32 score = packet->superstory_score;
+        const f32 interpolated_score =
+            (static_cast<f32>(score >> 16) * 65536.0f + static_cast<f32>(score & 0xffff)) * blend;
+        // The reference's unsigned SSE conversion wraps the f32-rounded 2^32
+        // endpoint to zero. Avoid an out-of-range float-to-integer conversion.
+        const u32 displayed_score = interpolated_score < 4294967296.0f ? static_cast<u32>(interpolated_score) : 0;
+        Text_MakeScore(displayed_score, text);
+        Text3DEx(text, 0.0f, 0.0f, 1.0f, 0.7f, 0.7f, 0.7f, 0, 255, 255, 255, static_cast<u8>(opacity));
+        Text_MakeScore(packet->previous_best_score, text);
+        NuStrCpy(previous, "(");
+        NuStrCat(previous, text);
+        NuStrCat(previous, ")");
+        Text3DEx(previous, 0.0f, -0.2f, 1.0f, 0.7f, 0.7f, 0.7f, 0, 255, 255, 255, static_cast<u8>(opacity / 2));
+    }
+    CoinTotal_Draw(*packet->score,
+                   (STATSPOSY - STATSPOS2Y) * NuTrigTable[(static_cast<i32>(coin_progress * 16384.0f) >> 1) & 0x7fff] +
+                       STATSPOS2Y,
+                   CoinTotalScale, 1, 1.0f, 255, 191, 0);
 }
 
 void SuperStoryScore_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *packet) {
@@ -1633,6 +1712,7 @@ void Coins_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active) {
     if (stage->field_0x14 >= 1) {
         const f32 player_alpha = packet->player0_active == 0 ? DROPINALPHA : 1.0f;
         const u32 coins = packet->coins_remaining[0];
+        const f32 score_x = -PANEL_SCOREX;
         const i32 object_index = coins < 100 ? 0xb3 : coins < 1000 ? 0xbb : 0xc3;
         if (WORLD->lev_objs[object_index].active != 0) {
             DrawPanel3DObject(-PANEL_COINX, coin_y, 1.0f, PANEL_COINSCALE_END, PANEL_COINSCALE_END, PANEL_COINSCALE_END,
@@ -1640,13 +1720,13 @@ void Coins_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active) {
         }
         char text[256];
         Text_MakeScore(packet->coins_remaining[0], text);
-        Text3DEx(text, -PANEL_SCOREX, coin_y, 1.0f, PANEL_SCORESCALE, PANEL_SCORESCALE, PANEL_SCORESCALE, 2, 255, 191,
-                 0, static_cast<u8>(player_alpha * 128.0f));
+        Text3DEx(text, score_x, coin_y, 1.0f, PANEL_SCORESCALE, PANEL_SCORESCALE, PANEL_SCORESCALE, 2, 255, 191, 0,
+                 static_cast<u8>(static_cast<i32>(player_alpha * 128.0f)));
         CoinTotal_Draw(*packet->score, total_y, scale, 1, 1.0f, 255, 191, 0);
     }
     alpha = alpha < 0.0f ? 0.0f : alpha > 1.0f ? 1.0f : alpha;
     Text3DEx(TTab[tCOINTOTAL], 0.0f, STATUS_TITLE_Y, 1.0f, 0.5f, 0.5f, 0.5f, 0, 255, 255, 255,
-             static_cast<u8>(alpha * 128.0f));
+             static_cast<u8>(static_cast<i32>(alpha * 128.0f)));
 }
 void Coins_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *packet) {
     icon_y = StatusIconsOnOff(1.0f);

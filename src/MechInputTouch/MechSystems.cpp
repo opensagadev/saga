@@ -30,6 +30,18 @@ char const *MechSystems::GetName() {
 
 void MechSystems::Display(ThingRenderData *) {
     TouchUI().Render();
+    if (initialized != 0) {
+        for (i32 i = 0; i < 4; ++i) {
+            if (swipe_markers[i] != NULL) {
+                swipe_markers[i]->Render();
+            }
+        }
+        for (i32 i = 0; i < 4; ++i) {
+            if (radar_pulses[i] != NULL) {
+                radar_pulses[i]->Render();
+            }
+        }
+    }
 }
 
 void MechSystems::EnterLevel(WORLDINFO_s *) {

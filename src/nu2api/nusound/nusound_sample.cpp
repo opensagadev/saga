@@ -3,7 +3,7 @@
 
 #include "nu2api/nusound/nusound_loader.hpp"
 
-pthread_mutex_t NuSoundSample::sCriticalSection = PTHREAD_MUTEX_INITIALIZER;
+NuCriticalSection NuSoundSample::sCriticalSection(NULL);
 
 NuSoundSample::NuSoundSample(const char *path, FeedType feed_type)
     : NuSoundSource(path, SourceType::ZERO, feed_type), buffer{} {
@@ -18,17 +18,17 @@ NuSoundSample::NuSoundSample(const char *path, FeedType feed_type)
 }
 
 NuSoundSample::LoadState NuSoundSample::GetLoadState() const {
-    pthread_mutex_lock(&sCriticalSection);
+    sCriticalSection.Lock();
     LoadState ls = this->load_state;
-    pthread_mutex_unlock(&sCriticalSection);
+    sCriticalSection.Unlock();
 
     return ls;
 }
 
 NuSoundSample::ErrorState NuSoundSample::GetLastErrorState() const {
-    pthread_mutex_lock(&sCriticalSection);
+    sCriticalSection.Lock();
     ErrorState es = this->last_error;
-    pthread_mutex_unlock(&sCriticalSection);
+    sCriticalSection.Unlock();
 
     return es;
 }
@@ -97,9 +97,9 @@ void NuSoundSample::RemovedFromThreadQueue() {
 }
 
 void NuSoundSample::SetLoadState(LoadState state) {
-    pthread_mutex_lock(&sCriticalSection);
+    sCriticalSection.Lock();
     this->load_state = state;
-    pthread_mutex_unlock(&sCriticalSection);
+    sCriticalSection.Unlock();
 }
 
 NuSoundSample::~NuSoundSample() {
@@ -114,9 +114,9 @@ NuSoundSample::~NuSoundSample() {
 }
 
 void NuSoundSample::SetLastErrorState(ErrorState state) {
-    pthread_mutex_lock(&sCriticalSection);
+    sCriticalSection.Lock();
     this->last_error = state;
-    pthread_mutex_unlock(&sCriticalSection);
+    sCriticalSection.Unlock();
 }
 
 void *NuSoundSample::GetSourceBuffer() {

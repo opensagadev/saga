@@ -4,6 +4,7 @@
 #include "decomp.h"
 #include "gameapi/ai/aisys/aisys.h"
 #include "legoapi/world/level.h"
+#include "legoapi/world/area.h"
 #include "globals.h"
 #include "legoapi/menus/screens/gamestructure.h"
 #include "legoapi/ai/core/ai_sys_stubs.h"
@@ -37,6 +38,7 @@
 #include "nu2api/nu3d/nuspline.h"
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/nucore/nustring.h"
+#include "nu2api/nucore/nugcutscene.h"
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/numtx.h"
 #include "nu2api/numath/nurand.h"
@@ -189,47 +191,68 @@ static struct {
 // ===========================================================================
 
 static __used__ void PodRaceSnipersUpdate(void) {
+    static i32 player_ix;
     i32 bolttype = (WORLD->current_level == PODSPRINTA_LDATA) ? 0x29 : 0x28;
+    BOLTTYPE_s *type = BoltType_FindByID(bolttype, WORLD);
     i32 n = PodRace_nsnipers;
     if (n <= 0 || max_nsnipers <= 0)
         return;
     for (i32 i = 0; i < n && i < max_nsnipers; i++) {
         SNIPER_s *s = &PodRace_snipers[i];
-        GameObject_s *target = NULL;
-        GameObject_s *p0 = Player[0];
-        if (p0 != NULL && (p0->apiobj.field_0x1f8 & 0x1001) == 0x1001) {
-            target = p0;
-        } else {
-            GameObject_s *p1 = Player[1];
-            if (p1 != NULL && (p1->apiobj.field_0x1f8 & 0x1001) == 0x1001)
-                target = p1;
-        }
-        if (target != NULL) {
-            float dx = target->apiobj.pos_x - s->pos.x;
-            float dy = target->apiobj.pos_z - s->pos.z;
-            float dist2 = dx * dx + dy * dy;
-            if (dist2 > PodRace_sniper_start_fire_radius * PodRace_sniper_start_fire_radius) {
-                if (dist2 <= PodRace_sniper_fire_radius * PodRace_sniper_fire_radius) {
-                    s->state = PodRace_sniper_fire_range_time;
-                } else {
-                    s->fire_timer += FRAMETIME;
-                    if (s->fire_timer >= PodRace_sniper_fire_time) {
-                        s->fire_timer = 0.0f;
-                        if (s->state > 0.0f) {
-                            // fire
-                            float height = target->apiobj.pos_y - s->pos.y;
-                            temp_yrot = NuAtan2D(dx, -dy);
-                            temp_xrot = NuAtan2D(-height, dx);
-                            NUMTX mtx;
-                            NuMtxSetRotationX(&mtx, (u16)temp_xrot);
-                            NuMtxRotateY(&mtx, (u16)temp_yrot);
-                            Bolt_Add(NULL, &s->pos, &mtx, bolttype, 0);
-                        }
-                    }
+        bool in_range = false;
+        for (i32 j = 0; j < 2; ++j) {
+            GameObject_s *target = Player[j];
+            if (target != NULL && (target->apiobj.field_0x1f8 & 0x1001) == 0x1001) {
+                float dx = target->apiobj.collision_position.x - s->pos.x;
+                float dz = target->apiobj.collision_position.z - s->pos.z;
+                float dist2 = dx * dx + dz * dz;
+                if (dist2 < PodRace_sniper_start_fire_radius * PodRace_sniper_start_fire_radius) {
+                    in_range = true;
+                    if (dist2 < PodRace_sniper_fire_radius * PodRace_sniper_fire_radius)
+                        s->state = PodRace_sniper_fire_range_time;
                 }
             }
-        } else {
-            s->fire_timer += FRAMETIME;
+        }
+        s->fire_timer += FRAMETIME;
+        if (in_range) {
+            if (s->fire_timer >= PodRace_sniper_fire_time) {
+                s->fire_timer = 0.0f;
+                NUVEC aim;
+                if (s->state > 0.0f) {
+                    GameObject_s *target = player2;
+                    if (target == NULL) {
+                        player_ix = 0;
+                    } else {
+                        player_ix = player_ix == 0;
+                    }
+                    if (player_ix == 0)
+                        target = player;
+                    if (target == NULL || type == NULL)
+                        continue;
+                    CalculateInterceptVector(&s->prev, &target->apiobj.collision_position, &target->apiobj.velocity,
+                                             type->field_10, &aim, NULL);
+                    NuVecAdd(&aim, &aim, &s->prev);
+                    s->state -= FRAMETIME;
+                    if (s->state < 0.0f)
+                        s->state = 0.0f;
+                } else {
+                    aim.x = 0.0f;
+                    aim.y = 0.0f;
+                    aim.z = NuRandFloat() * PodRace_sniper_fire_radius;
+                    NuVecRotateY(&aim, &aim, NuRandInt());
+                    NuVecAdd(&aim, &aim, &s->pos);
+                }
+                NUVEC direction;
+                float distance = NuVecDist(&aim, &s->prev, &direction);
+                temp_yrot = NuAtan2D(direction.x, direction.z);
+                temp_xrot = NuAtan2D(-direction.y, distance);
+                // Retail uses an aligned matrix local in its realigned stack frame.
+                NUMTX_ALIGNED16 mtx;
+                NuMtxSetRotationX(&mtx, (u16)temp_xrot);
+                NuMtxRotateY(&mtx, (u16)temp_yrot);
+                Bolt_Add(NULL, &s->prev, &mtx, bolttype, 0);
+            }
+            n = PodRace_nsnipers;
         }
     }
 }
@@ -391,14 +414,14 @@ static void UpdatePacemakerDisplay(void *lev_objs) {
 
 // Mine update — mirrors _ZL18UpdatePodRaceMinesv. Host: mines behind the
 // camera despawn, mines touched by a vehicle explode (players die instead).
-// Client: mines flagged in client_mines by the host explode on contact.
+// Client: present, unacknowledged mines report every overlapping vehicle.
 static __used__ void UpdatePodRaceMines(void) {
     GameObject_s *minesarr[64];
     i32 minecount = 0;
 
-    // Collect active vehicles from the shared object pool (Obj, stride
-    // 0x10e4); the pool end is Obj + 0x43900 (= 64 objects).
-    for (GameObject_s *obj = (GameObject_s *)Obj; obj != (GameObject_s *)((u8 *)Obj + 0x43900); obj++) {
+    // The shared pool contains 64 canonical GameObject records.
+    GameObject_s *objects = Obj;
+    for (GameObject_s *obj = objects; obj != objects + 64; obj++) {
         if (obj != NULL && (obj->apiobj.field_0x1f8 & 0x1001) == 0x1001 && obj != pod_pacemaker)
             minesarr[minecount++] = obj;
     }
@@ -408,13 +431,13 @@ static __used__ void UpdatePodRaceMines(void) {
     // Host path runs inline first in the original; the client mirror sits at
     // the end of the function behind this early-out.
     if (netclient == 0) {
-        GAMECAMERA_s *cam = GameCam;
         for (MINEENTRY_s *entry = &mines->mines[0]; entry != &mines->mines[64]; entry++) {
             if (entry->active == 0)
                 continue;
 
             NUVEC delta;
-            NuVecSub(&delta, &entry->pos, &cam->pos);
+            NuVecSub(&delta, &entry->pos, &GameCam->pos);
+            GAMECAMERA_s *cam = GameCam;
             float along = delta.x * cam->dir.x + delta.y * cam->dir.y + delta.z * cam->dir.z;
             if (along < 0.0f) {
                 // Behind the camera: drop the mine again.
@@ -443,8 +466,8 @@ static __used__ void UpdatePodRaceMines(void) {
                     continue;
                 float dx = obj->apiobj.pos_x - entry->pos.x;
                 float dz = obj->apiobj.pos_z - entry->pos.z;
-                float rr = *(float *)((u8 *)obj + 0x1dc) + r;
-                if (rr * rr <= dx * dx + dz * dz)
+                float rr = obj->apiobj.field_0x1dc + r;
+                if (!(rr * rr > dx * dx + dz * dz))
                     continue;
 
                 if ((u8)obj->apiobj.field_0x27c == 0xff) {
@@ -460,7 +483,7 @@ static __used__ void UpdatePodRaceMines(void) {
                     AddFiniteShotPART(mines->mine_part, &entry->pos, 1);
                 GameCam_HitJudder();
                 GameCam_NewShake(NULL, 0.75f, 1.0f, 1.0f);
-                PlaySfx("Explode1", (NUVEC *)((u8 *)obj + 0x80));
+                PlaySfx("Explode1", &obj->apiobj.collision_position);
                 PodLoseSpeed(obj, 1, 1);
 
                 i32 slot = (i32)(entry - &mines->mines[0]);
@@ -477,13 +500,15 @@ static __used__ void UpdatePodRaceMines(void) {
     }
 
     {
-        float radius = mines->mine_radius;
         CLIENTMINES_s *client = &client_mines;
         for (u32 idx = 0; idx < 0x40; idx++) {
             u32 mask = 1u << (idx & 0x1f);
-            // Words 0xc0/0xc1: host mine-present flags; 0xc2/0xc3: exploded ack.
-            if (((client->present_words[idx >> 5] | client->exploded_words[idx >> 5]) & mask) == 0)
+            // Retail widens the signed 32-bit mask, including its bit-31 quirk.
+            u32 high_mask = 0u - (mask >> 31);
+            if (((client->present_words[0] & mask) | (client->present_words[1] & high_mask)) == 0 ||
+                ((client->exploded_words[0] & mask) | (client->exploded_words[1] & high_mask)) != 0)
                 continue;
+            float radius = mines->mine_radius;
             NUVEC *mine_pos = &client->positions[idx];
             for (i32 i = 0; i < minecount; i++) {
                 GameObject_s *obj = minesarr[i];
@@ -491,8 +516,8 @@ static __used__ void UpdatePodRaceMines(void) {
                     continue;
                 float dx = obj->apiobj.pos_x - mine_pos->x;
                 float dz = obj->apiobj.pos_z - mine_pos->z;
-                float rr = *(float *)((u8 *)obj + 0x1dc) + radius;
-                if (rr * rr <= dx * dx + dz * dz)
+                float rr = obj->apiobj.field_0x1dc + radius;
+                if (!(rr * rr > dx * dx + dz * dz))
                     continue;
                 if (mines->mine_debris != -1)
                     AddGameDebris(WORLD->debris_sys, mines->mine_debris, mine_pos);
@@ -500,9 +525,9 @@ static __used__ void UpdatePodRaceMines(void) {
                     AddFiniteShotPART(mines->mine_part, mine_pos, 1);
                 GameCam_HitJudder();
                 GameCam_NewShake(NULL, 0.75f, 1.0f, 1.0f);
-                PlaySfx("Explode1", mine_pos);
-                client->exploded_words[idx >> 5] |= mask;
-                break;
+                PlaySfx("Explode1", &obj->apiobj.collision_position);
+                client->exploded_words[0] |= mask;
+                client->exploded_words[1] |= high_mask;
             }
         }
     }
@@ -556,13 +581,13 @@ void GunganA_Init(WORLDINFO_s *world) {
         GIZMOBLOWUP_s *b2 = GizmoBlowUp_FindByName(world, "leaves_exp11");
         if (b2 != NULL) {
             b2->field_0x124 = 1;
-            b2->field_0x120 = (void *)&b->field_0x50;
+            b2->field_0x120 = &b->mid_position;
             b2->field_0x128 = b->target_scale;
         }
         GIZMOBLOWUP_s *b3 = GizmoBlowUp_FindByName(world, "branch3_exp11");
         if (b3 != NULL) {
             b3->field_0x124 = 1;
-            b3->field_0x120 = (void *)&b->field_0x50;
+            b3->field_0x120 = &b->mid_position;
             b3->field_0x128 = b->target_scale;
         }
     }
@@ -1115,7 +1140,8 @@ void PodRaceBUpdate(WORLDINFO_s *world) {
                     }
                     break;
                 case 1:
-                    if (cut != NULL && (((CUTSCENEDATA_s *)cut->scene)->flags & 0x10)) {
+                    if (cut != NULL && cut->instance != NULL &&
+                        (static_cast<instNUGCUTSCENE_s *>(cut->instance)->flags_89 & 0x10)) {
                         NewCutScene(NULL, world->cutscene_sys, "EP1_PODRACE_MUSHROOM1", 1);
                         mushroom_countdown = mushroom_time_available;
                         LevFlag.mushroom_state = 2;
@@ -1123,20 +1149,18 @@ void PodRaceBUpdate(WORLDINFO_s *world) {
                     break;
                 case 2:
                     mushroom_countdown -= FRAMETIME;
-                    if (mushroom_countdown > 0.0f) {
-                        if (gamcam->sock_position.distance > mushroom2_along)
-                            LevFlag.mushroom_state = 3;
-                    } else {
+                    if (mushroom_countdown < 0.0f) {
                         NewCutScene(NULL, world->cutscene_sys, "EP1_PODRACE_MUSHROOM2", 1);
                         mushroom_n_attempts++;
                         if (mushroom_nattempts_per_increment > 0 &&
                             mushroom_n_attempts % mushroom_nattempts_per_increment == 0) {
-                            mushroom_time_available =
-                                mushroom_time_available + mushroom_time_increment < mushroom_max_time_available
-                                    ? mushroom_time_available + mushroom_time_increment
-                                    : mushroom_max_time_available;
+                            mushroom_time_available += mushroom_time_increment;
+                            if (mushroom_time_available > mushroom_max_time_available)
+                                mushroom_time_available = mushroom_max_time_available;
                         }
                         LevFlag.mushroom_state = 4;
+                    } else if (gamcam->sock_position.distance > mushroom2_along) {
+                        LevFlag.mushroom_state = 3;
                     }
                     break;
                 case 3:
@@ -1148,11 +1172,10 @@ void PodRaceBUpdate(WORLDINFO_s *world) {
         }
     }
     if (pod_pacemaker != 0) {
-        if (FadeSys.fade != 0.0f && pause_rndr_on == 0) {
-            float t = GameTimer.time_elapsed_mod_seconds;
-            pod_pacemaker_alpha =
-                pod_pacemaker_alpha + FRAMETIME * 2.0f < 1.0f ? pod_pacemaker_alpha + FRAMETIME * 2.0f : 1.0f;
-            if (NuFmod(t, 0.2f) > 0.1f)
+        if (FadeSys.fade == 0.0f && pause_rndr_on == 0) {
+            float t = FRAMETIME + FRAMETIME + pod_pacemaker_alpha;
+            pod_pacemaker_alpha = 1.0f < t ? 1.0f : t;
+            if (NuFmod(GameTimer.time_elapsed_mod_seconds, 0.2f) < 0.1f)
                 UpdatePacemakerDisplay(world->lev_objs);
         } else {
             pod_pacemaker_alpha = 0.0f;
@@ -1161,8 +1184,8 @@ void PodRaceBUpdate(WORLDINFO_s *world) {
     UpdatePodRaceLapDisplay(FRAMETIME);
     PodRaceUpdate(world, FRAMETIME);
     if (Lap == 1) {
-        if (LevFlag.podrace_state == 0) {
-            if (GameTimer.time_elapsed > 10.0f) {
+        if (LevFlag.podrace_state == 0 && PODRACE_ADATA != NULL) {
+            if (Game.area_save[PODRACE_ADATA->index].area_complete == 0 && GameTimer.time_elapsed >= 3.0f) {
                 Hint_SetComplete(0x27e);
                 LevFlag.podrace_state = 1;
             }
@@ -1172,10 +1195,10 @@ void PodRaceBUpdate(WORLDINFO_s *world) {
 
 void PodRaceCUpdate(WORLDINFO_s *world) {
     if (pod_pacemaker != 0) {
-        if (FadeSys.fade != 0.0f && pause_rndr_on == 0) {
-            float t = pod_pacemaker_alpha + FRAMETIME * 2.0f;
-            pod_pacemaker_alpha = t < 1.0f ? t : 1.0f;
-            if (NuFmod(GameTimer.time_elapsed_mod_seconds, 0.2f) > 0.1f)
+        if (FadeSys.fade == 0.0f && pause_rndr_on == 0) {
+            float t = FRAMETIME + FRAMETIME + pod_pacemaker_alpha;
+            pod_pacemaker_alpha = 1.0f < t ? 1.0f : t;
+            if (NuFmod(GameTimer.time_elapsed_mod_seconds, 0.2f) < 0.1f)
                 UpdatePacemakerDisplay(world->lev_objs);
         } else {
             pod_pacemaker_alpha = 0.0f;
@@ -1184,28 +1207,19 @@ void PodRaceCUpdate(WORLDINFO_s *world) {
     UpdatePodRaceLapDisplay(FRAMETIME);
     PodRaceUpdate(world, FRAMETIME);
     PodRaceSnipersUpdate();
-    switch (LevFlag.podrace_state) {
-        case 0: {
-            CUTINFO *cs = CutScene_Find(world->cutscene_sys, "Ep1_Podrace_TuskenRaiders");
-            if (cs != NULL && (((CUTSCENEDATA_s *)((CUTINFO *)cs)->scene)->flags & 0x10))
-                LevFlag.podrace_state = 1;
-            break;
+    if (LevFlag.podrace_state == 0) {
+        CUTINFO *cs = CutScene_Find(world->cutscene_sys, "Ep1_Podrace_TuskenRaiders");
+        if (cs != NULL && cs->instance != NULL &&
+            (static_cast<instNUGCUTSCENE_s *>(cs->instance)->flags_89 & 0x10) != 0)
+            LevFlag.podrace_state = 1;
+    }
+    if (LevFlag.podrace_state == 1) {
+        nuhspecial_s *slots = LevHSpecial;
+        for (i32 i = 0; i < 10; i++) {
+            if (NuSpecialExistsFn(&slots[i]) != 0)
+                NuSpecialSetVisibility(&slots[i], 1);
         }
-        case 1: {
-            i32 none = 1;
-            nuhspecial_s *slots = LevHSpecial;
-            for (i32 i = 1; i <= 9; i++) {
-                if (NuSpecialExistsFn(&slots[i]) != 0) {
-                    NuSpecialSetVisibility(&slots[i], 1);
-                    none = 0;
-                }
-            }
-            if (none)
-                LevFlag.podrace_state = 2;
-            break;
-        }
-        default:
-            break;
+        LevFlag.podrace_state = 2;
     }
 }
 
@@ -1877,16 +1891,18 @@ speed_section:
     }
     // Object pool loop: ease each active pod vehicle's boulder offset.
     i32 count = HIGHGAMEOBJECT;
-    for (GameObject_s *obj = (GameObject_s *)Obj; count > 0; count--, obj = (GameObject_s *)((u8 *)obj + 0x10e4)) {
+    for (GameObject_s *obj = Obj; count > 0; count--, ++obj) {
         if ((obj->apiobj.field_0x1f8 & 0x1001) == 0x1001 && (u8)obj->apiobj.field_0x27c == 0xff) {
             float seek_src = 0.0f;
             if (ps->boulders != NULL && WORLD->ai_sys != NULL && ps->ai_state > 1) {
-                i32 slot = (u8)((size_t)ps->boulders * 0xeeeeeeef);
+                i32 slot = static_cast<AIAREA_s *>(ps->boulders) - WORLD->ai_sys->areas;
                 u32 bit = 1u << (slot & 0x1f);
-                if (((*(u32 *)((u8 *)obj + 0x2ac) & bit) | (*(u32 *)((u8 *)obj + 0x2a8) & bit)) != 0)
+                // Retail sign-extends the low mask: bit 31 enables every high-word bit.
+                u32 high_mask = static_cast<i32>(bit) >> 31;
+                if (((obj->apiobj.ai_area_mask_high & high_mask) | (obj->apiobj.ai_area_mask_low & bit)) != 0)
                     seek_src = boulder_offset_y;
             }
-            *(float *)((u8 *)obj + 0xe94) = SeekValF(*(float *)((u8 *)obj + 0xe94), seek_src, boulder_offset_y_seek);
+            obj->movement_spline_offset.y = SeekValF(obj->movement_spline_offset.y, seek_src, boulder_offset_y_seek);
         }
     }
 }

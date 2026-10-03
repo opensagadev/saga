@@ -623,7 +623,7 @@ class NuSoundHandle {
     NuList<NuSoundEffect *> effects;
 
   public:
-    static pthread_mutex_t sCriticalSection;
+    static NuCriticalSection sCriticalSection;
 
     NuSoundHandle();
     NuSoundHandle(NuSoundHandle &other);

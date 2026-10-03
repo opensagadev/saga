@@ -22,6 +22,10 @@
 #include "legoapi/gizmos/object/gizpanel.h"
 #include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/core/input/qrand.h"
+#include "legoapi/audio/audio.h"
+#include "legoapi/items/base/collection.h"
+#include "legoapi/world/area.h"
+#include "legoapi/world/world.h"
 
 #include <new>
 #include <string.h>
@@ -31,6 +35,8 @@ CABLE_s *GameObjOwnsAnyCables(GameObject_s *);
 void ReleaseCable(CABLE_s *, i32);
 extern "C" i16 id_WATTO;
 extern i16 id_YODA;
+extern i32 dagobah_training;
+extern AREADATA *DAGOBAH_ADATA;
 void ForceNextLungeTarget(MechObjectInterface *);
 bool FireBountyHunterRocket(GameObject_s *);
 void SlowWeaponOut(GameObject_s *);
@@ -221,8 +227,7 @@ bool MechInputTouchGestureBasedController::OnClick(GameObject_s &object, TouchHo
         case 3:
         case 4:
         case 11: {
-            GIZOBSTACLE_s *obstacle = target->GetGizObstacle();
-            if (obstacle != NULL && reinterpret_cast<u8 *>(obstacle)[0x91] == 2) {
+            if (target->GetGizObstacle() != NULL && target->GetGizObstacle()->mode == 2) {
                 StartNewTask(new MechTouchTaskPlannedGoTo(*this, target, NULL), holder, false, true);
             } else {
                 StartNewTask(new MechTouchTaskAttack(*this, target, position), holder, false, true);
@@ -430,13 +435,34 @@ bool MechInputTouchGestureBasedController::OnHold(GameObject_s &object, TouchHol
         TouchHacks::CanTagVehicle(object, *character)) {
         StartNewTask(new MechTouchTaskTag(*this, *character), holder, true, true);
     } else if (VehicleArea == 0 && TouchHacks::CanTagTo(object, *character)) {
-        tag_button = MechSystems::Get()->NewTagButton(*character, holder);
+        if (InCollectList_Index(character->id, NULL, 0) != -1 &&
+            ((WORLD != NULL && WORLD->area == HUB_ADATA) || TouchHacks::InParty(*character))) {
+            tag_button = MechSystems::Get()->NewTagButton(*character, holder);
+        } else {
+            GameAudio_PlaySfx(0x32, &object.apiobj.collision_position, 0, 0);
+            if (object.pad_gamepad != NULL) {
+                NewRumble(object.pad_gamepad->pad, 0.5f, 0);
+            }
+            if (character->ai.script_process.base_script != NULL &&
+                AIScriptSetBaseScriptStateByName(&character->ai.script_process, const_cast<char *>("MapRunAway")) !=
+                    0) {
+                const f32 elapsed = FRAMETIME;
+                WORLDINFO_s *world = WORLD;
+                if (world != NULL && world->ai_sys != NULL) {
+                    AIScriptProcess(world->ai_sys, &character->apiobj, &character->ai, &character->ai.script_process,
+                                    elapsed);
+                }
+            }
+        }
     } else if (character == object.force_glow_candidate) {
         StartNewTask(new MechTouchTaskUseForce(*this, target, position), holder, true, true);
     } else if (character->apiobj.field_0x27c == -1 && static_cast<i32>(character->apiobj.field_0x1f4) >= 0) {
         StartNewTask(new MechTouchTaskAttack(*this, target, position), holder, true, true);
     } else if (character == &object) {
         StartNewTask(new MechTouchTaskBlock(*this), holder, false, true);
+    } else if (dagobah_training != 0 && character->id == id_YODA && WORLD != NULL && WORLD->area == DAGOBAH_ADATA &&
+               character->apiobj.character_data->player_config != NULL) {
+        StartNewTask(new MechTouchTaskTag(*this, *character), holder, true, true);
     }
     holder.consumed = 1;
     return true;
@@ -612,6 +638,11 @@ void MechInputTouchGestureBasedController::ProcessAutoJumpOverGap(GameObject_s *
     if (holder == NULL) {
         return;
     }
+    JumpTriggerPacket packet = {};
+    packet.type = 1;
+    packet.player = object;
+    packet.touch_holder = holder;
+    packet.velocity = VuVec(object->apiobj.velocity.x, object->apiobj.velocity.y, object->apiobj.velocity.z, 1.0f);
     if (object->apiobj.field_0x27d == 0 && !ObjLandReady(object)) {
         return;
     }
@@ -623,18 +654,11 @@ void MechInputTouchGestureBasedController::ProcessAutoJumpOverGap(GameObject_s *
     if (!danger && !TouchHacks::CheckForAboutToRunOffAnEdge(*object, 0.3f)) {
         return;
     }
-    JumpTriggerPacket packet = {};
-    packet.type = 1;
-    packet.player = object;
-    packet.touch_holder = holder;
-    packet.velocity = VuVec(object->apiobj.velocity.x, object->apiobj.velocity.y, object->apiobj.velocity.z, 1.0f);
     if ((object->apiobj.character_data->model_flags & 0x40) == 0 && object->id != id_WATTO &&
         MechAutoJumpGetBest(packet, object->apiobj.facing_angle) == NULL &&
         !TouchHacks::CheckJumpForLandingSpot(*object, danger ? 2.0f : 0.05f)) {
         return;
     }
-    NUVEC previous_velocity = object->apiobj.velocity;
-    NUVEC previous_target_velocity = object->target_velocity;
     f32 speed =
         object->apiobj.character_data->player_config != NULL
             ? *reinterpret_cast<f32 *>(reinterpret_cast<u8 *>(object->apiobj.character_data->player_config) + 0x1c)
@@ -644,15 +668,23 @@ void MechInputTouchGestureBasedController::ProcessAutoJumpOverGap(GameObject_s *
                        boosted_velocity.z * boosted_velocity.z;
     if (magnitude_sq < speed * speed) {
         NuVecNorm(&boosted_velocity, &boosted_velocity);
+        speed =
+            object->apiobj.character_data->player_config != NULL
+                ? *reinterpret_cast<f32 *>(reinterpret_cast<u8 *>(object->apiobj.character_data->player_config) + 0x1c)
+                : 0.0f;
         boosted_velocity.x *= speed;
         boosted_velocity.y *= speed;
         boosted_velocity.z *= speed;
     }
+    GameObject_s *backup_recipient = player != NULL ? player : object;
+    NUVEC previous_velocity = backup_recipient->apiobj.velocity;
+    NUVEC previous_target_velocity = backup_recipient->target_velocity;
     object->apiobj.velocity = boosted_velocity;
     object->target_velocity = boosted_velocity;
     if (!TriggerJumpTask(packet, false, true, true)) {
-        object->apiobj.velocity = previous_velocity;
-        object->target_velocity = previous_target_velocity;
+        GameObject_s *restore_recipient = player != NULL ? player : object;
+        restore_recipient->apiobj.velocity = previous_velocity;
+        restore_recipient->target_velocity = previous_target_velocity;
     }
 }
 

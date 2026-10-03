@@ -297,7 +297,7 @@ void AITriggerSetSysProcess(AITRIGGERSETSYS_s *system) {
                     } else if (gizmo->type_id == force_gizmotype_id) {
                         GIZFORCE_s *force = static_cast<GIZFORCE_s *>(gizmo->object);
                         available =
-                            (force->progress_flags & 1) && force->using_object == NULL && force->field_0x3c == 0;
+                            (force->progress_flags & 1) && force->using_object == NULL && force->field_0x3c_bits == 0;
                     } else if (gizmo->type_id == grapple_gizmotype_id) {
                         available = Grapple_Occupied(static_cast<GRAPPLE_s *>(gizmo->object), NULL, NULL) == NULL;
                     }

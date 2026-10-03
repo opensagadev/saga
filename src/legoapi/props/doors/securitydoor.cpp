@@ -209,25 +209,25 @@ static void SecurityDoors_Draw(void *world_data, void *, float) {
                     door->flags |= 8;
                 }
             }
-        }
 
-        if (door->active && !door->opened && world->lev_objs[85].active != 0) {
-            NUMTX matrix;
-            NuMtxSetRotationY(&matrix, rotation);
-            if (door->terrain_angle_x != 0) {
-                NuMtxRotateZ(&matrix, door->terrain_angle_x);
-            }
-            if (door->terrain_angle_z != 0) {
-                NuMtxRotateX(&matrix, door->terrain_angle_z);
-            }
-            NuMtxTranslate(&matrix, &door->player_position);
+            if (door->active && !door->opened && world->lev_objs[85].active != 0) {
+                NUMTX matrix;
+                NuMtxSetRotationY(&matrix, rotation);
+                if (door->terrain_angle_x != 0) {
+                    NuMtxRotateZ(&matrix, door->terrain_angle_x);
+                }
+                if (door->terrain_angle_z != 0) {
+                    NuMtxRotateX(&matrix, door->terrain_angle_z);
+                }
+                NuMtxTranslate(&matrix, &door->player_position);
 
-            GameObject_s *nearest_player;
-            f32 distance_squared;
-            if (FindNearestPlayerToVec(&door->position, &nearest_player, distance_squared, true, 0x2000000)) {
-                const f32 distance_phase = NuFmin(distance_squared / 51.0f, 1.0f) * 2.0f - 3640.0f + 16384.0f;
-                const f32 alpha = pulse - NU_SIN_LUT(static_cast<i32>(distance_phase));
-                NuSpecialDrawAtAlpha(&world->lev_objs[85].special, &matrix, alpha);
+                GameObject_s *nearest_player;
+                f32 distance_squared;
+                if (FindNearestPlayerToVec(&door->position, &nearest_player, distance_squared, true, 0x2000000)) {
+                    const f32 distance_phase = NuFmin(distance_squared / 6.0f, 1.0f) * 16384.0f + 49152.0f + 16384.0f;
+                    const f32 alpha = pulse - NU_SIN_LUT(static_cast<i32>(distance_phase));
+                    NuSpecialDrawAtAlpha(&world->lev_objs[85].special, &matrix, alpha);
+                }
             }
         }
     }

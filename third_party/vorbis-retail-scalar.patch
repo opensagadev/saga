@@ -1,0 +1,42 @@
+diff --git a/lib/res0.c b/lib/res0.c
+--- a/lib/res0.c
++++ b/lib/res0.c
+@@ -424,7 +424,7 @@
+ 
+   int partvals=n/samples_per_partition;
+   long **partword=_vorbis_block_alloc(vb,ch*sizeof(*partword));
+-  float scale=100./samples_per_partition;
++  float scale=100.0f/samples_per_partition;
+ 
+   /* we find the partition type for each partition of each
+      channel.  We'll go back and do the interleaved encoding in a
+@@ -444,7 +444,7 @@
+         if(abs(in[j][offset+k])>max)max=abs(in[j][offset+k]);
+         ent+=abs(in[j][offset+k]);
+       }
+-      ent*=scale;
++      ent*=(int)scale;
+ 
+       for(k=0;k<possible_partitions-1;k++)
+         if(max<=info->classmetric1[k] &&
+diff --git a/lib/psy.c b/lib/psy.c
+--- a/lib/psy.c
++++ b/lib/psy.c
+@@ -298,7 +298,7 @@
+     if(j<endpos){
+       float delta=(ATH[i+1]-base)/(endpos-j);
+       for(;j<endpos && j<n;j++){
+-        p->ath[j]=base+100.;
++        p->ath[j]=base+100.0f;
+         base+=delta;
+       }
+     }
+@@ -344,7 +344,7 @@
+ 
+     for(j=0;j<P_NOISECURVES;j++)
+       p->noiseoffset[j][i]=
+-        p->vi->noiseoff[j][inthalfoc]*(1.-del) +
++        p->vi->noiseoff[j][inthalfoc]*(1.0f-del) +
+         p->vi->noiseoff[j][inthalfoc+1]*del;
+ 
+   }

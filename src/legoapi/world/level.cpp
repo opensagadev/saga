@@ -243,9 +243,9 @@ static void Titles_Update(WORLDINFO *) {
 
 static void Titles_Draw(WORLDINFO *) {
     NUMTX draw_mtx;
-    if (NuSpecialExistsFn(&LevHSpecial[0]) != 0 && !(LevAlpha <= 0.0f)) {
+    if (NuSpecialExistsFn(&LevHSpecial[0]) != 0 && LevAlpha > 0.0f) {
         draw_mtx = LevMtx;
-        if (!(GameTimer.time_elapsed >= 4.0f)) {
+        if (GameTimer.time_elapsed < 4.0f) {
             f32 t = NuTrigTable[(i32)(GameTimer.time_elapsed * 0.25f * 16384.0f) >> 1 & 0x7fff];
             draw_mtx.m30 = titlesstartpos.x + (LevMtx.m30 - titlesstartpos.x) * t;
             draw_mtx.m31 = titlesstartpos.y + (LevMtx.m31 - titlesstartpos.y) * t;
@@ -263,14 +263,14 @@ static void Titles_Draw(WORLDINFO *) {
     }
 
     f32 time = GameTimer.time_elapsed;
-    if (!(time <= 30.0f)) {
+    if (time > 30.0f) {
         time = NuFmod(time - 4.0f, 26.0f) + 4.0f;
     }
     draw_mtx = LevMtx;
 
     f32 alpha;
-    if (!(time <= 4.0f)) {
-        if (!(time >= 5.0f))
+    if (time > 4.0f) {
+        if (time < 5.0f)
             alpha = time - 4.0f;
         else if (time < 8.166666f)
             alpha = 1.0f;
@@ -278,13 +278,13 @@ static void Titles_Draw(WORLDINFO *) {
             alpha = 1.0f - (time - 8.166666f);
         else
             alpha = 0.0f;
-        if (!(alpha <= 0.0f) && NuSpecialExistsFn(&LevHSpecial[10]) != 0) {
+        if (alpha > 0.0f && NuSpecialExistsFn(&LevHSpecial[10]) != 0) {
             draw_mtx.m31 = -0.15f;
             NuSpecialDrawAtAlpha(&LevHSpecial[10], &draw_mtx, newgamealpha * 0.5f * alpha * LevTime[0]);
         }
     }
-    if (!(time <= 8.166666f)) {
-        if (!(time >= 9.166666f))
+    if (time > 8.166666f) {
+        if (time < 9.166666f)
             alpha = time - 8.166666f;
         else if (time < 12.333332f)
             alpha = 1.0f;
@@ -292,13 +292,13 @@ static void Titles_Draw(WORLDINFO *) {
             alpha = 1.0f - (time - 12.333332f);
         else
             alpha = 0.0f;
-        if (!(alpha <= 0.0f) && NuSpecialExistsFn(&LevHSpecial[11]) != 0) {
+        if (alpha > 0.0f && NuSpecialExistsFn(&LevHSpecial[11]) != 0) {
             draw_mtx.m31 = -0.15f;
             NuSpecialDrawAtAlpha(&LevHSpecial[11], &draw_mtx, newgamealpha * 0.5f * alpha * LevTime[0]);
         }
     }
-    if (!(time <= 12.333333f)) {
-        if (!(time >= 13.333333f))
+    if (time > 12.333333f) {
+        if (time < 13.333333f)
             alpha = time - 12.333333f;
         else if (time < 16.5f)
             alpha = 1.0f;
@@ -306,13 +306,13 @@ static void Titles_Draw(WORLDINFO *) {
             alpha = 1.0f - (time - 16.5f);
         else
             alpha = 0.0f;
-        if (!(alpha <= 0.0f) && NuSpecialExistsFn(&LevHSpecial[12]) != 0) {
+        if (alpha > 0.0f && NuSpecialExistsFn(&LevHSpecial[12]) != 0) {
             draw_mtx.m31 = -0.15f;
             NuSpecialDrawAtAlpha(&LevHSpecial[12], &draw_mtx, newgamealpha * 0.5f * alpha * LevTime[0]);
         }
     }
-    if (!(time <= 16.5f)) {
-        if (!(time >= 17.5f))
+    if (time > 16.5f) {
+        if (time < 17.5f)
             alpha = time - 16.5f;
         else if (time < 20.666666f)
             alpha = 1.0f;
@@ -320,13 +320,13 @@ static void Titles_Draw(WORLDINFO *) {
             alpha = 1.0f - (time - 20.666666f);
         else
             alpha = 0.0f;
-        if (!(alpha <= 0.0f) && NuSpecialExistsFn(&LevHSpecial[13]) != 0) {
+        if (alpha > 0.0f && NuSpecialExistsFn(&LevHSpecial[13]) != 0) {
             draw_mtx.m31 = -0.15f;
             NuSpecialDrawAtAlpha(&LevHSpecial[13], &draw_mtx, newgamealpha * 0.5f * alpha * LevTime[0]);
         }
     }
-    if (!(time <= 20.666666f)) {
-        if (!(time >= 21.666666f))
+    if (time > 20.666666f) {
+        if (time < 21.666666f)
             alpha = time - 20.666666f;
         else if (time < 24.833332f)
             alpha = 1.0f;
@@ -334,13 +334,13 @@ static void Titles_Draw(WORLDINFO *) {
             alpha = 1.0f - (time - 24.833332f);
         else
             alpha = 0.0f;
-        if (!(alpha <= 0.0f) && NuSpecialExistsFn(&LevHSpecial[14]) != 0) {
+        if (alpha > 0.0f && NuSpecialExistsFn(&LevHSpecial[14]) != 0) {
             draw_mtx.m31 = -0.15f;
             NuSpecialDrawAtAlpha(&LevHSpecial[14], &draw_mtx, newgamealpha * 0.5f * alpha * LevTime[0]);
         }
     }
-    if (!(time <= 24.833332f)) {
-        if (!(time >= 25.833332f))
+    if (time > 24.833332f) {
+        if (time < 25.833332f)
             alpha = time - 24.833332f;
         else if (time < 28.999998f)
             alpha = 1.0f;
@@ -348,13 +348,13 @@ static void Titles_Draw(WORLDINFO *) {
             alpha = 1.0f - (time - 28.999998f);
         else
             alpha = 0.0f;
-        if (!(alpha <= 0.0f) && NuSpecialExistsFn(&LevHSpecial[15]) != 0) {
+        if (alpha > 0.0f && NuSpecialExistsFn(&LevHSpecial[15]) != 0) {
             draw_mtx.m31 = -0.15f;
             NuSpecialDrawAtAlpha(&LevHSpecial[15], &draw_mtx, newgamealpha * 0.5f * alpha * LevTime[0]);
         }
     }
-    if (!(time <= 29.0f)) {
-        if (!(time >= 30.0f))
+    if (time > 29.0f) {
+        if (time < 30.0f)
             alpha = time - 29.0f;
         else if (time < 33.166668f)
             alpha = 1.0f;
@@ -362,13 +362,13 @@ static void Titles_Draw(WORLDINFO *) {
             alpha = 1.0f - (time - 33.166668f);
         else
             alpha = 0.0f;
-        if (!(alpha <= 0.0f) && NuSpecialExistsFn(&LevHSpecial[16]) != 0) {
+        if (alpha > 0.0f && NuSpecialExistsFn(&LevHSpecial[16]) != 0) {
             draw_mtx.m31 = -0.15f;
             NuSpecialDrawAtAlpha(&LevHSpecial[16], &draw_mtx, newgamealpha * 0.5f * alpha * LevTime[0]);
         }
     }
-    if (!(time <= 33.166664f)) {
-        if (!(time >= 34.166664f))
+    if (time > 33.166664f) {
+        if (time < 34.166664f)
             alpha = time - 33.166664f;
         else if (time < 37.333332f)
             alpha = 1.0f;
@@ -376,7 +376,7 @@ static void Titles_Draw(WORLDINFO *) {
             alpha = 1.0f - (time - 37.333332f);
         else
             alpha = 0.0f;
-        if (!(alpha <= 0.0f) && NuSpecialExistsFn(&LevHSpecial[17]) != 0) {
+        if (alpha > 0.0f && NuSpecialExistsFn(&LevHSpecial[17]) != 0) {
             draw_mtx.m31 = -0.15f;
             NuSpecialDrawAtAlpha(&LevHSpecial[17], &draw_mtx, newgamealpha * 0.5f * alpha * LevTime[0]);
         }

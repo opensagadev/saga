@@ -585,15 +585,15 @@ void InitMiniSnowTroopers(WORLDINFO_s *world, i32 team_count, i32 trooper_count,
     for (i32 i = 0; i < team_count; ++i)
         *reinterpret_cast<u16 *>(&teams[i].waypoint_state) &= 0xfe3f;
 
-    for (i32 team_index = 0; team_index < team_count; ++team_index) {
-        minitrooperteam_s *team = &teams[team_index];
+    for (i32 team_index = 0; team_index < trooperteamcount; ++team_index) {
+        minitrooperteam_s *team = &static_cast<minitrooperteam_s *>(world->mini_trooper_teams)[team_index];
         team->reserved_02c = 2000000.0f;
         team->trooper_count = static_cast<u8>(trooper_count);
 
         const i32 side = trooper_side[team_index] & 1;
         team->team_flags = (team->team_flags & ~2) | (side << 1);
         team->bolt_type = trooper_boltid[side];
-        team->debris_timer = static_cast<f32>(qrand()) * (10.0f / 65536.0f) + 4.0f;
+        team->debris_timer = static_cast<f32>(qrand()) * (10.0f / 65535.0f) + 4.0f;
 
         char group_name[128];
         sprintf(group_name, "group%d", team_index + 1);
@@ -611,7 +611,7 @@ void InitMiniSnowTroopers(WORLDINFO_s *world, i32 team_count, i32 trooper_count,
         team->route_point = &team->path->pts[0];
         team->origin_x = team->route_point->x;
         team->origin_z = team->route_point->z;
-        team->formation_width = static_cast<f32>(trooper_count >> 2) * 0.875f;
+        team->formation_width = static_cast<f32>(team->trooper_count >> 2) * 0.875f;
         team->formation_depth = 3.5f;
 
         if (droid_hack != 0) {
@@ -627,7 +627,7 @@ void InitMiniSnowTroopers(WORLDINFO_s *world, i32 team_count, i32 trooper_count,
         GenerateTrooperTeamShape(team, 1);
         if ((team->formation_state & 0xf) == 1) {
             team->formation_state &= 0xf;
-            team->state_timer = static_cast<f32>(qrand()) * (10.0f / 65536.0f);
+            team->state_timer = static_cast<f32>(qrand()) * (10.0f / 65535.0f);
         } else {
             team->formation_state = (team->formation_state & 0xf) | 0x30;
         }
@@ -638,19 +638,22 @@ void InitMiniSnowTroopers(WORLDINFO_s *world, i32 team_count, i32 trooper_count,
             team->reserved_02c = 0.0f;
             for (i32 i = 0; i < team->path->length; ++i)
                 team->reserved_02c += team->path->pts[i].y;
-            if (team->path->length != 0)
-                team->reserved_02c /= static_cast<f32>(team->path->length);
+            team->reserved_02c /= static_cast<f32>(team->path->length);
+        } else {
+            team->reserved_02c = 2000000.0f;
         }
 
-        for (i32 i = 0; i < trooper_count; ++i) {
+        for (i32 i = 0; i < team->trooper_count; ++i) {
             minisnowtrooper_s *trooper = &team->troopers[i];
-            trooper->formation_index = static_cast<u8>(i);
             trooper->state_flags = (trooper->state_flags & 0xcf) | (((qrand() / (0xffff / 3 + 1) + 1) & 3) << 4);
             trooper->state_flags &= ~0xc;
             trooper->speed_divisor = 6;
-            trooper->timer =
-                (team->formation_state & 0xf) == 1 ? 0.0f : static_cast<f32>(i) / static_cast<f32>(trooper_count);
-            trooper->rotation = team->facing_angle;
+            if ((team->formation_state & 0xf) == 1) {
+                trooper->timer = 0.0f;
+            } else {
+                trooper->timer = static_cast<f32>(i) * (1.0f / static_cast<f32>(team->trooper_count));
+                trooper->rotation = team->facing_angle;
+            }
             trooper->shot_position.x = trooper->formation_x + team->route_point->x;
             trooper->shot_position.z = trooper->formation_z + team->route_point->z;
 
@@ -660,10 +663,16 @@ void InitMiniSnowTroopers(WORLDINFO_s *world, i32 team_count, i32 trooper_count,
             } else {
                 trooper->shot_position.y = team->reserved_02c;
             }
+        }
 
-            trooper->target_rotation =
-                NuAtan2D(trooper->shot_position.x - (team->route_point->x + trooper->formation_x),
-                         trooper->shot_position.z - (team->route_point->z + trooper->formation_z));
+        minisnowtrooper_s *trooper = team->troopers;
+        for (i32 i = 0; i < team->trooper_count; ++i, ++trooper) {
+            trooper->formation_index = static_cast<u8>(i);
+            minisnowtrooper_s *rotation_destination = team->troopers;
+            const minisnowtrooper_s *slot = &rotation_destination[i];
+            rotation_destination->target_rotation =
+                NuAtan2D(trooper->shot_position.x - (team->route_point->x + slot->formation_x),
+                         trooper->shot_position.z - (team->route_point->z + slot->formation_z));
         }
     }
 
@@ -868,28 +877,29 @@ void UpdateTrooperCannons(WORLDINFO_s *) {
     for (i32 i = 0; i < 4; ++i) {
         TROOPERCANNON_s &cannon = troopercannons[i];
 
-        if (cannon.buildit != NULL && netclient == 0 && GizBuildIt_AtEnd(cannon.buildit)) {
+        if (cannon.buildit != NULL && netclient == 0) {
             if (cannon.object != NULL) {
-                if (cannon.rebuilding != 0) {
+                if (GizBuildIt_AtEnd(cannon.buildit) && cannon.rebuilding != 0) {
                     ActivateCharacter(cannon.character_name, NULL, 0);
                     GizBuildit_SetVisibility(cannon.buildit, 0);
                     cannon.rebuilding = 0;
                     WORLD->level_progress->destroyed_trooper_cannon_mask &= ~(1u << i);
                 }
-            } else {
+            } else if (GizBuildIt_AtEnd(cannon.buildit)) {
                 GizBuildIt_KillParts(cannon.buildit);
                 GizBuildIt_SetToStart(cannon.buildit, 0, 0);
                 GizBuildit_SetVisibility(cannon.buildit, 0);
             }
         }
 
-        if (cannon.object != NULL && netclient == 0) {
-            GameObject_s *callback_object = cannon.object->field_0xcc0;
-            if (callback_object == NULL)
-                callback_object = cannon.object;
-            if (callback_object->field_0xeb4 == NULL)
-                callback_object->field_0xeb4 = KilledTrooperCannon;
-        }
+        if (cannon.object == NULL || netclient != 0)
+            break;
+
+        GameObject_s *callback_object = cannon.object->field_0xcc0;
+        if (callback_object == NULL)
+            callback_object = cannon.object;
+        if (callback_object->field_0xeb4 == NULL)
+            callback_object->field_0xeb4 = KilledTrooperCannon;
     }
 }
 

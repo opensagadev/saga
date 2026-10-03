@@ -8,6 +8,7 @@
 
 struct NuFileAndroidAPK;
 struct NuFileBase;
+class NuCriticalSection;
 struct NuFileDevice;
 struct NuFileDeviceAndroidAPK;
 enum NuFileDeviceType { NUFILE_DEVICE_UNKNOWN = 1, NUFILE_DEVICE_ANDROID_APK = 3 };
@@ -96,7 +97,7 @@ struct NuFileDevice {
         char *path;
     };
     static DirectoryHandle sm_DirectoryHandles[16];
-    static pthread_mutex_t sm_CriticalSection;
+    static NuCriticalSection sm_CriticalSection;
 
   protected:
     i32 device_id;

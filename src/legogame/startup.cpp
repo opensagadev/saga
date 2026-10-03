@@ -336,7 +336,7 @@ static void LoadPermData(BGPROCINFO *proc) {
 
     // Characters, levels, areas, episodes — each carves from the perm buffer.
     CDataList = ConfigureCharacterList((char *)"chars\\chars.txt", &permbuffer_ptr, &permbuffer_end, 0x154, &CHARCOUNT,
-                                       0x120, &GCDataList);
+                                       static_cast<i32>(sizeof(GAMECHARACTERDATA)), &GCDataList);
     CharScenes_Init(&permbuffer_ptr, &permbuffer_end);
     IconScenes_Init((char *)"stuff\\icons\\", &permbuffer_ptr, &permbuffer_end);
     FixUpCharacters(CharFixUp);
@@ -444,6 +444,9 @@ void LoadPerm(void) {
         } else {
             NuLanguageSet(device_language);
             Text_Language = static_cast<u32>(device_language);
+            if (language_index >= LANGUAGECOUNT) {
+                LoadPerm_LanguageSelect = 0;
+            }
         }
     }
 

@@ -2364,9 +2364,9 @@ i32 __attribute__((optimize("no-partial-inlining"))) LevelEditor::Save() {
         theClassEditor.PreSaveInitialisation();                                                                        \
         sprintf(save_filename, "%s/%s.led", scene.directory, scene.name);                                              \
         if (scene.editable) {                                                                                          \
-            editor_buffer_cursor = editor_buffer_begin;                                                                \
-            NUFILE memory_file = NuMemFileOpen(editor_buffer_begin.void_ptr,                                           \
-                                               editor_buffer_end.addr - editor_buffer_begin.addr, NUFILE_WRITE);       \
+            variptr_u buffer = editor_buffer_begin;                                                                    \
+            editor_buffer_cursor = buffer;                                                                             \
+            NUFILE memory_file = NuMemFileOpen(buffer.void_ptr, editor_buffer_end.addr - buffer.addr, NUFILE_WRITE);   \
             if (memory_file) {                                                                                         \
                 EdFileOutputStream stream;                                                                             \
                 stream.Open(memory_file, 4);                                                                           \
@@ -2379,7 +2379,7 @@ i32 __attribute__((optimize("no-partial-inlining"))) LevelEditor::Save() {
                 if (!output_file) {                                                                                    \
                     scene.saved = 0;                                                                                   \
                 } else {                                                                                               \
-                    NuFileWrite(output_file, editor_buffer_begin.void_ptr, size);                                      \
+                    NuFileWrite(output_file, buffer.void_ptr, size);                                                   \
                     NuFileClose(output_file);                                                                          \
                     scene.saved = 1;                                                                                   \
                     saved_any = 1;                                                                                     \

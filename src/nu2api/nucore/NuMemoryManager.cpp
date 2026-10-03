@@ -498,14 +498,35 @@ void *NuMemoryManager::_BlockReAlloc(void *ptr, u32 size, u32 alignment, u32 fla
         return NULL;
     }
 
-    const u32 old_size = GetBlockSize(ptr);
-    if (size <= old_size) {
+    ValidateAddress(ptr, __FUNCTION__);
+    Header *header = (Header *)((usize)ptr - m_headerSize);
+    ValidateBlockIsAllocated(header, __FUNCTION__);
+    ValidateBlockEndTags(header, __FUNCTION__);
+
+    u32 *end_tag = (u32 *)((usize)header + BLOCK_SIZE(header->value) - 4);
+    u32 manager_index = *end_tag >> 27;
+    if (manager_index == 31) {
+        manager_index = *(end_tag - 1);
+    } else {
+        --manager_index;
+    }
+    if (this->idx != manager_index) {
+        return m_memoryManagers[manager_index]->_BlockReAlloc(ptr, size, alignment, flags, name, category);
+    }
+
+    const u32 calculated_size = CalculateBlockSize(size);
+    const u32 footer_size = this->idx < 30 ? 4 : 8;
+    const u32 new_size = calculated_size - m_headerSize - footer_size;
+    const u32 header_value = header->value;
+    const u32 old_size = BLOCK_SIZE(header_value) - m_headerSize - footer_size;
+    if (new_size == old_size) {
         return ptr;
     }
 
-    void *replacement = _TryBlockAlloc(size, alignment, flags, name, category);
+    const u32 old_alignment = 2U << ((header_value & ALLOC_MASK) >> 27);
+    void *replacement = _BlockAlloc(new_size, old_alignment, flags, name, category);
     if (replacement != NULL && (flags & 0x40) == 0) {
-        memcpy(replacement, ptr, old_size);
+        memcpy(replacement, ptr, MIN(old_size, new_size));
         BlockFree(ptr, flags);
     }
     return replacement;
@@ -596,11 +617,30 @@ void NuMemoryManager::SetBlockDebugCategory(void *ptr, u16 category) {
 }
 
 void NuMemoryManager::ReleaseUnreferencedPages() {
-    Page *page;
-
     pthread_mutex_lock(&this->mutex);
 
-    for (page = this->pages; page != NULL; page = page->next) {
+    Page *page = this->pages;
+    while (page != NULL) {
+        Header *header = page->first_header;
+        Page *next = page->next;
+        Page *prev = page->prev;
+        if ((header->value & ALLOC_MASK) == 0 &&
+            reinterpret_cast<u8 *>(header) + BLOCK_SIZE(header->value) == reinterpret_cast<u8 *>(page->end) &&
+            !page->is_external) {
+            FreeHeader *free_header = reinterpret_cast<FreeHeader *>(header);
+            BinUnlink(free_header);
+            if (event_handler->ReleasePage(this, page->original_ptr, page->size)) {
+                if (next != NULL)
+                    next->prev = prev;
+                if (prev != NULL)
+                    prev->next = next;
+                else
+                    this->pages = next;
+            } else {
+                BinLink(free_header, true);
+            }
+        }
+        page = next;
     }
 
     pthread_mutex_unlock(&this->mutex);

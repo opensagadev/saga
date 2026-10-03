@@ -25,9 +25,6 @@ void GizmoPickup_CollectCoin(WORLDINFO_s *world, nuvec_s *position, i32 type_ind
     i32 player_index;
     if (object != NULL) {
         player_index = object->apiobj.field_0x27c;
-        if (player_index > 1) {
-            return;
-        }
     } else {
         i32 player0_active = Player[0] == NULL ? 0 : static_cast<i8>(Player[0]->apiobj.flags_low) < 0;
         if (Player[1] == NULL || static_cast<i8>(Player[1]->apiobj.flags_low) >= 0) {
@@ -41,6 +38,9 @@ void GizmoPickup_CollectCoin(WORLDINFO_s *world, nuvec_s *position, i32 type_ind
             player_index = qrand() / 0x8000;
         }
     }
+    if (static_cast<u32>(player_index) > 1) {
+        return;
+    }
 
     if (static_cast<u32>(type_index - 2) < 2 && object != NULL) {
         if (world->area == NULL || (world->area->flags & AREAFLAG_SUPER_BONUS_AREA) != AREAFLAG_BONUS_AREA) {
@@ -50,32 +50,34 @@ void GizmoPickup_CollectCoin(WORLDINFO_s *world, nuvec_s *position, i32 type_ind
         }
     }
 
-    PlaySfx(BonusTimer.time_elapsed > 0.0f || static_cast<u32>(type_index - 2) < 2 ? const_cast<char *>("PickupCoinB")
-                                                                                   : const_cast<char *>("PickupCoin"),
+    PlaySfx(DoubleScoreTime > 0.0f || static_cast<u32>(type_index - 2) < 2 ? const_cast<char *>("PickupCoinB")
+                                                                           : const_cast<char *>("PickupCoin"),
             position);
 
     const bool main_total = CoinsGoToMainTotal() != 0;
     NUVEC target_position;
-    ADDGAMEMSG message = AddGameMsg_Default;
+    f32 target_scale;
     if (main_total) {
         target_position.x = cointotal_x[player_index];
         target_position.y = STATSPOSY;
-        DrawCoinTotalTime = COINMSGTIME + FRAMETIME;
-        message.target_scale = COINTOTAL_COINSIZE;
+        DrawCoinTotalTime = 1.0f + COINMSGTIME;
+        target_scale = COINTOTAL_COINSIZE;
     } else {
         target_position.x = player_index == 1 ? PANEL_COINX : -PANEL_COINX;
         target_position.y = STATSPOSY + PANEL_COINY;
-        DrawBuildUpTime = COINMSGTIME + FRAMETIME;
-        message.target_scale = PANEL_COINSCALE_END;
+        DrawBuildUpTime = 1.0f + COINMSGTIME;
+        target_scale = PANEL_COINSCALE_END;
     }
     target_position.z = 1.0f;
 
-    GIZMO_PICKUP_TYPE *type = &GizmoPickupSys_Game.types[type_index];
-    const i32 model_id = type->first_model_id + model_variant;
+    GIZMO_PICKUP_TYPE *type = &GizmoPickupType[type_index];
+    const i32 model_id = static_cast<i16>(type->first_model_id) + model_variant;
     if (model_id == -1 || world->lev_objs[model_id].active == 0) {
         return;
     }
 
+    ADDGAMEMSG message = AddGameMsg_Default;
+    message.target_scale = target_scale;
     u32 score = type->score;
     if (object != NULL && object->coinpacket != NULL) {
         if (((DoubleScore >> player_index) & 1) != 0) {

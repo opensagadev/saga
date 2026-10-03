@@ -332,8 +332,11 @@ AIPATHCNXCONTROLLER_s *AIPathCnxControllerCreate(AIPATHCNXCONTROLSYS_s *control_
     NuLinkedListAppend(&control_system->active_controllers, node);
 
     AIPATHCNXCONTROLLER_s *controller = reinterpret_cast<AIPATHCNXCONTROLLER_s *>(node);
-    for (u8 index = 0; index < ai_system->path_sys->path_count; ++index) {
-        if (ai_system->path_sys->paths[index] == path) {
+    AIPATHSYS *path_system = ai_system->path_sys;
+    const u8 path_count = path_system->path_count;
+    AIPATH **path_cursor = path_system->paths;
+    for (u8 index = 0; index < path_count; ++index, ++path_cursor) {
+        if (*path_cursor == path) {
             controller->path_index = index;
             break;
         }

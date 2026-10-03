@@ -348,7 +348,7 @@ NuSoundLoader *NuSoundSystem::CreateFileLoader(FileType type) {
             // libTTapp.so allocates the WAV loader from SCRATCH (0x1c bytes,
             // nusound.cpp:1233) and placement-news it in place.
             wav_loader =
-                (NuSoundLoaderWAV *)_AllocMemory(NuSoundSystem::MemoryDiscipline::SCRATCH, 0x1c, 4,
+                (NuSoundLoaderWAV *)_AllocMemory(NuSoundSystem::MemoryDiscipline::SCRATCH, sizeof(NuSoundLoaderWAV), 4,
                                                  "i:/SagaTouch-Android_9176564/nu2api.2013/nusound/nusound.cpp:1219");
             if (wav_loader != NULL) {
                 new (wav_loader) NuSoundLoaderWAV();
@@ -663,7 +663,9 @@ void NuSound3Update(void) {
 
     // The listener focus follows the player (NULL on the title screen).
     if (player != NULL) {
-        g_NuSoundFocusPosition = player->apiobj.position;
+        g_NuSoundFocusPosition.x = player->apiobj.position.x;
+        g_NuSoundFocusPosition.y = player->apiobj.position.y;
+        g_NuSoundFocusPosition.z = player->apiobj.position.z;
         g_NuSoundListener.SetFocusPosition((const VuVec *)&g_NuSoundFocusPosition);
         g_NuSoundListener.EnableFocusPosition();
     } else {

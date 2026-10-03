@@ -106,8 +106,11 @@ static void Hub_MakeListCharactersAvailable(i16 *characters) {
 
     for (i32 pack = 0; pack < 11; ++pack) {
         i16 *character = StorePack[pack].id;
-        if (character != NULL && *character != -1 && Store_IsPackUnlocked(pack) == 0) {
-            characters[*character] = -1;
+        if (character != NULL) {
+            i16 character_id = *character;
+            if (character_id != -1 && Store_IsPackUnlocked(pack) == 0) {
+                characters[character_id] = -1;
+            }
         }
     }
 }
@@ -158,8 +161,8 @@ static void Hub_GoneThroughDoor(WORLDINFO_s *world) {
     i16 available_characters[HUB_CHARACTER_CAPACITY];
     Hub_MakeListCharactersAvailable(available_characters);
 
-    for (i32 object_index = 0; object_index < HIGHGAMEOBJECT; ++object_index) {
-        GameObject_s *object = &Obj[object_index];
+    GameObject_s *object = Obj;
+    for (i32 object_index = 0; object_index < HIGHGAMEOBJECT; ++object_index, ++object) {
         if ((object->apiobj.field_0x1f8 & APIOBJECT_FLAG_IN_USE) == 0 || object->apiobj.field_0x27c != -1 ||
             object->ai.field_0x134 != 0xff) {
             continue;
@@ -219,8 +222,8 @@ void LSW_Hub_InitAI(WORLDINFO_s *world) {
     }
 
     hub_ai.area = -1;
-    hub_ai.serving_customer_message = SetGizAIMessage(gizaimessagesys, "ServingCustomer", 0.0f, NULL);
     hub_ai.area_message = SetGizAIMessage(gizaimessagesys, "Area", 0.0f, NULL);
+    hub_ai.serving_customer_message = SetGizAIMessage(gizaimessagesys, "ServingCustomer", 0.0f, NULL);
     hub_ai.counter_count = 0;
 
     for (i32 counter = 0; counter < 4; ++counter) {
@@ -228,9 +231,10 @@ void LSW_Hub_InitAI(WORLDINFO_s *world) {
         hub_ai.counter_a[counter] = AIPathFindLocator(world->ai_sys, name);
         sprintf(name, "CounterB_%d", counter);
         hub_ai.counter_b[counter] = AIPathFindLocator(world->ai_sys, name);
-        if (hub_ai.counter_a[counter] != NULL && hub_ai.counter_b[counter] != NULL) {
-            hub_ai.counter_count++;
+        if (hub_ai.counter_a[counter] == NULL || hub_ai.counter_b[counter] == NULL) {
+            break;
         }
+        hub_ai.counter_count++;
     }
 
     hub_ai.serve_player = AIPathFindLocator(world->ai_sys, "ServePlayer");

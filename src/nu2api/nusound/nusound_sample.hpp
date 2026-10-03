@@ -41,7 +41,7 @@ class NuSoundSample : public NuSoundSource {
   public:
     // The original's global sample lock: the decoder's RequestBuffer hands
     // ring buffers to voice callbacks under it (libTTapp.so -0x18e4).
-    static pthread_mutex_t sCriticalSection;
+    static NuCriticalSection sCriticalSection;
 
   public:
     NuSoundSample(const char *path, FeedType feed_type);

@@ -175,6 +175,7 @@ void CutScenePlayer_DrawGrid(COLLECTION_s *collection, i16 *ids, float x, float 
     const f32 dy = -(maximum.y - minimum.y) * scale / PANEL3DMULY;
     y -= rows * dy * 0.5f;
     const f32 first_x = x - (collection->count_x - 1) * dx * 0.5f;
+    CUTSCENEPLAYER_s *player = static_cast<CUTSCENEPLAYER_s *>(CutScenePlayer_Available());
     MENU *menu = &GameMenu[GameMenuLevel];
     i32 previous_area = -1, colour = -1;
     static const u8 colours[8][3] = {{255, 63, 0},  {255, 127, 0},  {255, 223, 0},  {0, 255, 63},
@@ -198,7 +199,7 @@ void CutScenePlayer_DrawGrid(COLLECTION_s *collection, i16 *ids, float x, float 
             menu->item_height[i] = 0.0f;
             char text[32];
             sprintf(text, "%i", i + 1);
-            i32 area = LDataList[CutScenePlayer->clips[ids[i]].level_id].area_index;
+            i32 area = LDataList[player->clips[ids[i]].level_id].area_index;
             if (area != previous_area) {
                 previous_area = area;
                 if (++colour > 7)
@@ -206,7 +207,7 @@ void CutScenePlayer_DrawGrid(COLLECTION_s *collection, i16 *ids, float x, float 
             }
             const f32 text_scale = scale * 3.5f;
             Text3DEx(text, x, y, 1.0f, text_scale * 0.925f, text_scale, text_scale, 0, colours[colour][0],
-                     colours[colour][1], colours[colour][2], static_cast<u8>(opacity * 255.0f));
+                     colours[colour][1], colours[colour][2], static_cast<u8>(static_cast<i32>(opacity * 128.0f)));
         }
     }
 }
@@ -288,14 +289,22 @@ void CutScenePlayer_SetObjects(CUTINFO *cut) {
 
 i32 CutScenePlayer_CountEpisodeClips(i32 episode, i32 include_guests, i16 *ids) {
     i32 count = 0;
-    if (CutScenePlayer != NULL) {
-        for (i32 i = 0; i < CutScenePlayer->clip_count; ++i) {
-            CUTSCENEPLAYERCLIP *clip = &CutScenePlayer->clips[i];
-            if (LDataList[clip->level_id].episode_index == episode ||
-                (include_guests != 0 && clip->guest_episode == episode)) {
-                if (ids != NULL)
-                    ids[count] = i;
-                ++count;
+    CUTSCENEPLAYER_s *player = CutScenePlayer;
+    if (player != NULL) {
+        i32 clip_count = player->clip_count;
+        if (clip_count != 0) {
+            LEVELDATA *levels = LDataList;
+            CUTSCENEPLAYERCLIP *clip = player->clips;
+            for (i32 i = 0; i < clip_count; ++i, ++clip) {
+                if (levels[clip->level_id].episode_index == episode ||
+                    (include_guests != 0 && clip->guest_episode == episode)) {
+                    if (ids != NULL) {
+                        ids[count++] = i;
+                        clip_count = player->clip_count;
+                    } else {
+                        ++count;
+                    }
+                }
             }
         }
     }

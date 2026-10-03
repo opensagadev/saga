@@ -1877,13 +1877,17 @@ static i32 GameFindAlternativeSpecialObject(AISYS *, nuhspecial_s *special) {
 
 static void GameAILoad(AISYS *system, i32 version, NUGSCN *, VARIPTR *buffer, VARIPTR *buffer_end) {
     if (version < 12 && system->path_sys != NULL && system->path_sys->path_count != 0) {
-        for (i32 path_index = 0; path_index < system->path_sys->path_count; ++path_index) {
-            AIPATH *path = system->path_sys->paths[path_index];
-            for (i32 connection = 0; connection < path->connection_count; ++connection) {
-                path->connections[connection].traversal_flags[0] = 0;
-                path->connections[connection].traversal_flags[1] = 0;
-                path->connections[connection].original_traversal_flags[0] = 0;
-                path->connections[connection].original_traversal_flags[1] = 0;
+        AIPATHSYS *path_system = system->path_sys;
+        AIPATH **paths = path_system->paths;
+        for (i32 path_index = 0; path_index < path_system->path_count; ++path_index) {
+            AIPATH *path = paths[path_index];
+            const i32 connection_count = path->connection_count;
+            AIPATHCNX *entry = path->connections;
+            for (i32 connection = 0; connection < connection_count; ++connection, ++entry) {
+                entry->traversal_flags[0] = 0;
+                entry->traversal_flags[1] = 0;
+                entry->original_traversal_flags[0] = 0;
+                entry->original_traversal_flags[1] = 0;
             }
         }
     }
@@ -4086,6 +4090,10 @@ void GameAISysStartFrame(AISYS_s *system) {
         AIAREA *area = &system->areas[system->next_area_check];
         const i32 area_index = static_cast<i32>(area - WORLD->ai_sys->areas);
         const u64 area_bit = 1ULL << area_index;
+        // Inside occupancy uses the signed, wrapping 32-bit area bit; outside
+        // removal still addresses the corresponding full 64-bit bit.
+        const u32 inside_area_low = 1u << (area_index & 31);
+        const u32 inside_area_high = static_cast<u32>(static_cast<i64>(static_cast<i32>(inside_area_low)) >> 32);
         area->runtime_flags &= static_cast<u8>(
             ~(AIAREA_RUNTIME_PLAYER_PRESENT | AIAREA_RUNTIME_OBJECT_STATE_CLEAR | AIAREA_RUNTIME_OBJECT_STATE_SET));
 
@@ -4112,8 +4120,8 @@ void GameAISysStartFrame(AISYS_s *system) {
                 continue;
             }
 
-            object->apiobj.ai_area_mask_low |= static_cast<u32>(area_bit);
-            object->apiobj.ai_area_mask_high |= static_cast<u32>(area_bit >> 32);
+            object->apiobj.ai_area_mask_low |= inside_area_low;
+            object->apiobj.ai_area_mask_high |= inside_area_high;
             if ((object->apiobj.flags_low & APIOBJECT_FLAG_PLAYER_ACTIVE) != 0) {
                 area->runtime_flags |= AIAREA_RUNTIME_PLAYER_PRESENT;
             }
@@ -4561,7 +4569,7 @@ void GameCreatureOpponentSelection(AISYS_s *system, i32 count, APIOBJECT_s **obj
             }
         }
         alert_timer -= FRAMETIME;
-        if (!(alert_timer > 0.0f))
+        if (alert_timer <= 0.0f)
             alert_obj = NULL;
     }
     if (system->goody_idx >= goody_count)

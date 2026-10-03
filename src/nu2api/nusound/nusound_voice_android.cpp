@@ -548,7 +548,7 @@ void NuVoiceAndroid::UpdateSamplePlaybackCount() {
     NuSoundSource *source = this->sound_source;
     NuSoundStreamDesc *desc = source->GetStreamDesc();
     i32 rate = (i32)desc->GetSampleRate();
-    i32 position = (rate / 1000) * (i32)millisec;
+    u32 position = (u32)(rate / 1000) * millisec;
 
     if (source->feed_type != NuSoundSource::FeedType::STREAMING) {
         this->field11_0x174 = position;

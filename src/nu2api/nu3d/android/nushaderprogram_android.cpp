@@ -2,11 +2,19 @@
 #include "nu2api/nu3d/nushader_internal.h"
 #include "nu2api/nu3d/android/nurndr_android.h"
 #include "nu2api/nucore/nustring.h"
+#include "nu2api/nucore/nuvector.hpp"
 
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+// Original Pair type identity only; its element layout is not used here.
+// These two named empty vectors require only the canonical scalar lifetime.
+template <typename First, typename Second> struct Pair;
+
+static NuVector<Pair<const u8 *, u32>> vertexShaders;
+static NuVector<Pair<const u8 *, u32>> pixelShaders;
 
 // Original 0x2a56a0, 81 bytes.
 bool LinkShaderProgram(u32 program) {

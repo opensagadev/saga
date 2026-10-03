@@ -180,7 +180,7 @@ void EngineNoiseCode(GameObject_s *object, i32 silent) {
     if (silent == 0) {
         f32 speed;
         if (object->apiobj.player_controlled) {
-            speed = *reinterpret_cast<f32 *>(reinterpret_cast<u8 *>(&object->player_packet) + 0x714);
+            speed = object->field_0xdc8;
             if (speed < 0.0f) {
                 speed = -speed;
             }
@@ -190,7 +190,7 @@ void EngineNoiseCode(GameObject_s *object, i32 silent) {
         target = speed <= 1.0f ? speed : 1.0f;
     }
 
-    f32 &engine_level = *reinterpret_cast<f32 *>(reinterpret_cast<u8 *>(&object->player_packet) + 0x6e0);
+    f32 &engine_level = object->force_use_volume;
     engine_level = SeekLinearF(engine_level, target, FRAMETIME * 0.5f);
     f32 volume = engine_level * 0.5f + 0.5f;
     if (!object->apiobj.player_controlled) {

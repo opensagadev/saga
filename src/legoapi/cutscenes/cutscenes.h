@@ -28,6 +28,7 @@ DECOMP_ASSERT(sizeof(CUTSCENEPLAYERCLIP) == 0x44, "Cutscene clip ABI");
 DECOMP_ASSERT(sizeof(CUTSCENEPLAYER_s) == 0x20, "Cutscene player ABI");
 extern CUTSCENEPLAYER_s *CutScenePlayer;
 extern CUTSCENESYS *CutSceneSys;
+extern void (*CutScene_OverrideConfigFileNameFn)(char *, i32, i32);
 extern "C" i32 (*CutScenePlayer_AcceptFn)(CUTSCENEPLAYERCLIP *);
 void CutScenePlayer_Configure(char *, VARIPTR *, VARIPTR *, i16 *, i16 *, i16 *, i16 *, i16 *);
 i32 CutScenePlayer_CountEpisodeClips(i32, i32, i16 *);

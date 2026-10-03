@@ -43,37 +43,40 @@ extern "C" {
     }
 
     SAGA_HOST_WEAK void NuRenderContextSetViewProj(NUMTX *view, NUMTX *projection) {
-        NUVEC scale = {
+        // Retail retains these three function-local scratch matrices in BSS.
+        static NUMTX scale;
+        static NUMTX translate;
+        static NUMTX proj;
+        NUVEC scale_vector = {
             g_NuVpRegion.projection_x_scale,
             g_NuVpRegion.projection_y_scale,
             1.0f,
         };
+        NuMtxSetScale(&scale, &scale_vector);
         NUVEC translation = {
             g_NuVpRegion.projection_x_offset,
             g_NuVpRegion.projection_y_offset,
             0.0f,
         };
-        NUMTX scale_mtx;
-        NUMTX translation_mtx;
-        NUMTX adjusted_projection;
-        NuMtxSetScale(&scale_mtx, &scale);
-        NuMtxSetTranslation(&translation_mtx, &translation);
-        NuMtxMulH(&adjusted_projection, projection, &scale_mtx);
-        NuMtxMulH(&adjusted_projection, &adjusted_projection, &translation_mtx);
+        NuMtxSetTranslation(&translate, &translation);
+        NuMtxMulH(&proj, projection, &scale);
+        NuMtxMulH(&proj, &proj, &translate);
 
         memcpy(g_renderContext_view, view, sizeof(NUMTX));
-        memcpy(g_renderContext_projection, &adjusted_projection, sizeof(NUMTX));
+        memcpy(g_renderContext_projection, &proj, sizeof(NUMTX));
 
         NUMTX inverse_view;
-        NuMtxInv(&inverse_view, view);
+        NuMtxInv(&inverse_view, reinterpret_cast<NUMTX *>(g_renderContext_view));
+        g_renderContext_position[3] = 1.0f;
         g_renderContext_position[0] = inverse_view.m30 / inverse_view.m33;
         g_renderContext_position[1] = inverse_view.m31 / inverse_view.m33;
         g_renderContext_position[2] = inverse_view.m32 / inverse_view.m33;
-        g_renderContext_position[3] = 1.0f;
-
-        NuMtxMulH(reinterpret_cast<NUMTX *>(g_renderContext_viewProj), view, &adjusted_projection);
+        NuMtxMulH(reinterpret_cast<NUMTX *>(g_renderContext_viewProj), reinterpret_cast<NUMTX *>(g_renderContext_view),
+                  reinterpret_cast<NUMTX *>(g_renderContext_projection));
         NuMtxInvH(reinterpret_cast<NUMTX *>(g_renderContext_viewProjInverse),
                   reinterpret_cast<NUMTX *>(g_renderContext_viewProj));
+
+        NuShaderManagerSetfv(0x3d, g_renderContext_view);
 
         // OpenGL's clip-space depth is [-w,+w], while the engine camera
         // packet contains the original D3D-style [0,+w] projection.
@@ -83,7 +86,6 @@ extern "C" {
         NuMtxMulH(reinterpret_cast<NUMTX *>(g_renderContext_viewProj),
                   reinterpret_cast<NUMTX *>(g_renderContext_viewProj), &depth_remap);
 
-        NuShaderManagerSetfv(0x3d, g_renderContext_view);
         NuShaderManagerSetfv(0x3e, g_renderContext_viewProj);
         NuShaderManagerSetfv(0x56, g_renderContext_position);
 

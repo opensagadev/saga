@@ -811,13 +811,15 @@ static i32 GizObstacles_Load(void *world_ptr, void *data) {
 
         obstacle.auto_return_delay = EdFileReadFloat();
         obstacle.trigger_radius = EdFileReadFloat();
-        if (version != 2) {
+        if (version > 2) {
             EdFileReadNuVec(&obstacle.trigger_box_half_extents);
             obstacle.trigger_box_yaw = EdFileReadShort();
-            obstacle.config_flags = static_cast<u32>(EdFileReadInt());
-            if (version > 11) {
-                obstacle.field_0x6c = static_cast<u32>(EdFileReadInt());
-            }
+        } else {
+            obstacle.trigger_box_half_extents = {0.25f, 0.25f, 0.25f};
+        }
+        obstacle.config_flags = static_cast<u32>(EdFileReadInt());
+        if (version > 11) {
+            obstacle.field_0x6c = static_cast<u32>(EdFileReadInt());
         }
 
         if (version == 6) {
@@ -832,8 +834,8 @@ static i32 GizObstacles_Load(void *world_ptr, void *data) {
             obstacle.trigger_mode = static_cast<u8>(EdFileReadChar());
         }
 
-        GizmoFileReadGameAnimSet(obstacle.anim_set, world, Gizobstacle_ReadAnimSetData, version, const_cast<char *>(""),
-                                 obstacle.name);
+        GizmoFileReadGameAnimSet(obstacle.anim_set, world, Gizobstacle_ReadAnimSetData, version,
+                                 const_cast<char *>("GizObstacle"), obstacle.name);
 
         if (version <= 3) {
             obstacle.field_0x4c = 1.0f;
@@ -876,7 +878,7 @@ static i32 GizObstacles_Load(void *world_ptr, void *data) {
         }
 
         if (version <= 9 || version == 10) {
-            obstacle.pickup_scatter_height = world->area != NULL && (world->area->flags & 1) != 0 ? -105.0f : -999.0f;
+            obstacle.pickup_scatter_height = world->area != NULL && (world->area->flags & 1) != 0 ? 12.0f : 1.75f;
             obstacle.start_sfx_id = -1;
             obstacle.stop_sfx_id = -1;
         } else {
@@ -894,7 +896,7 @@ static i32 GizObstacles_Load(void *world_ptr, void *data) {
             }
         }
 
-        if (GizObstacle_SetDefaultSFXFn != NULL) {
+        if (version <= 12 && GizObstacle_SetDefaultSFXFn != NULL) {
             GizObstacle_SetDefaultSFXFn(world, &obstacle);
         }
     }

@@ -6,6 +6,7 @@
 #include "decomp.h"
 #include "nu2api/nu3d/android/nutex_android.h"
 #include "nu2api/nucore/common.h"
+#include "nu2api/nucore/nuthread.h"
 #include "nu2api/nucore/nustring.h"
 #include <pthread.h>
 #include <string.h>
@@ -149,7 +150,7 @@ void NuTexInitEx(VARIPTR *buf, i32 max_tex_count) {
     gTextureLoadCount = 0;
 }
 
-pthread_mutex_t criticalSection = PTHREAD_MUTEX_INITIALIZER;
+NuCriticalSection criticalSection(NULL);
 
 i32 NuTexCreateNative(NUNATIVETEX *tex, bool is_pvrtc) {
     i32 i;
@@ -158,14 +159,14 @@ i32 NuTexCreateNative(NUNATIVETEX *tex, bool is_pvrtc) {
         return 0;
     }
 
-    pthread_mutex_lock(&criticalSection);
+    pthread_mutex_lock(&criticalSection.mutex);
 
     for (i32 i = 0; i < max_textures; i++) {
         if (texture_list[i] == NULL) {
             texture_list[i] = tex;
             texture_order[i] = gTextureLoadCount++;
 
-            pthread_mutex_unlock(&criticalSection);
+            pthread_mutex_unlock(&criticalSection.mutex);
 
             NuTexCreatePS(tex, is_pvrtc);
 
@@ -173,7 +174,7 @@ i32 NuTexCreateNative(NUNATIVETEX *tex, bool is_pvrtc) {
         }
     }
 
-    pthread_mutex_unlock(&criticalSection);
+    pthread_mutex_unlock(&criticalSection.mutex);
 
     return 0;
 }

@@ -1027,14 +1027,17 @@ have_jump:
     } else {
         area_ep = *(u8 *)((char *)&Game + 0x7831 + Area * 12);
     }
-    AreaGlobals.bytes[0x0c] = area_ep;
-    AreaGlobals.bytes[0x14] = area_ep;
+    AreaGlobals.values.field_0x0c = area_ep;
+    AreaGlobals.values.field_0x14 = area_ep;
     Door_UseCutCam = 0;
     AreaGlobals.values.field_0x00 = 0;
     AreaGlobals.values.field_0x1c = 0;
     AreaGlobals.values.field_0x08 = 0;
     AreaGlobals.values.field_0x18 = 0;
-    AreaGlobals.values.field_0x24 = 0;
+    AreaGlobals.values.arcade_player_kills[0] = 0;
+    AreaGlobals.values.arcade_player_kills[1] = 0;
+    AreaGlobals.values.arcade_ai_kills[0] = 0;
+    AreaGlobals.values.arcade_ai_kills[1] = 0;
     BuildUpTotal = 0;
     BuildUpDone = 0;
     if (*(void **)((char *)WORLD + 0x12c) == HOTHBATTLE_ADATA) {

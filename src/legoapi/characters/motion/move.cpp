@@ -647,6 +647,7 @@ extern i16 id_NAFFDROID1, id_NAFFDROID2, id_NAFFDROID4, id_MOUSEDROID;
 static void DodgeCode(GameObject_s *, i32, i32);
 void Grapple_MoveCode(GameObject_s *);
 void SpecialMove_VictimCode(GameObject_s *);
+void Tag_Check(GameObject_s *);
 i32 ObjInNarrowSock(GameObject_s *, SOCKSYS *, i32);
 i32 PodLevel(AREADATA_s *);
 void KeepOnScreen(GameObject_s *);
@@ -2250,10 +2251,10 @@ void MoveSplinePosition(SPLINEPOS_s *position, f32 distance) {
         return;
     NUVEC offset;
     if (distance > 0.0f) {
-        while (distance > 0.0f) {
+        do {
             position->segment_distance += distance;
             if (!(position->segment_distance >= position->segment_length))
-                break;
+                goto interpolate;
             distance = position->segment_distance - position->segment_length;
             i16 previous = position->segment;
             position->segment++;
@@ -2276,9 +2277,8 @@ void MoveSplinePosition(SPLINEPOS_s *position, f32 distance) {
             if (distance == 0.0f)
                 position->position = *current;
             spline = position->spline;
-        }
-        if (!(distance > 0.0f))
-            goto update_along;
+        } while (distance > 0.0f);
+        goto update_along;
     } else if (distance < 0.0f && position->segment >= 0) {
         for (;;) {
             position->segment_distance += distance;
@@ -2309,16 +2309,16 @@ void MoveSplinePosition(SPLINEPOS_s *position, f32 distance) {
         }
     } else
         goto update_along;
-    {
-        NUVEC *current = (NUVEC *)((u8 *)spline->pts + position->segment * (i16)spline->pt_size);
-        NUVEC *next = (NUVEC *)((u8 *)spline->pts + ((position->segment + 1) % spline->length) * (i16)spline->pt_size);
-        NuVecSub(&offset, next, current);
-        f32 fraction = 0.0f;
-        if (position->segment_length != 0.0f)
-            fraction = position->segment_distance / position->segment_length;
-        NuVecScale(&offset, &offset, fraction);
-        NuVecAdd(&position->position, current, &offset);
-    }
+interpolate: {
+    NUVEC *current = (NUVEC *)((u8 *)spline->pts + position->segment * (i16)spline->pt_size);
+    NUVEC *next = (NUVEC *)((u8 *)spline->pts + ((position->segment + 1) % spline->length) * (i16)spline->pt_size);
+    NuVecSub(&offset, next, current);
+    f32 fraction = 0.0f;
+    if (position->segment_length != 0.0f)
+        fraction = position->segment_distance / position->segment_length;
+    NuVecScale(&offset, &offset, fraction);
+    NuVecAdd(&position->position, current, &offset);
+}
 update_along:
     position->along = (position->segment_distance / position->segment_length + position->segment) / segments;
 }
@@ -4139,7 +4139,7 @@ void Move_POD(GameObject_s *object) {
     }
     TakeHitCode(object);
 
-    if ((object->apiobj.flags_low & 4) != 0) {
+    if ((object->apiobj.field_0x1f4 & 0x40000) != 0) {
         object->camera_shake_strength = 0.0f;
     } else if (object->apiobj.field_0x27c != -1) {
         f32 target_speed;
@@ -4156,7 +4156,7 @@ void Move_POD(GameObject_s *object) {
                 target_speed = 1.0f + object->camera_shake_strength;
             }
         } else {
-            target_speed = 1.0f + 0.4f * object->camera_shake_strength;
+            target_speed = 1.0f + (1.4f - 1.0f) * object->camera_shake_strength;
         }
         object->current_speed_mul = SeekLinearF(object->current_speed_mul, target_speed, rate);
 
@@ -4182,7 +4182,8 @@ void Move_POD(GameObject_s *object) {
             NewRumble(pad->pad, object->current_speed_mul - 1.0f, 0);
     }
 
-    if (FreePlay != 0 && (object->apiobj.character_data->model_flags & 0x10) != 0 && (vehicle->flags_094[0] & 8) == 0) {
+    if (FreePlay != 0 && (object->apiobj.character_data->model_flags & 0x10000000) != 0 &&
+        (vehicle->flags_094[0] & 8) == 0) {
         FireCode(object, pad->buttons_pressed & GAMEPAD_ACTION, pad->buttons_held & GAMEPAD_ACTION, 0.15f, 0);
     }
     if (WORLD->area != NULL && (WORLD->area == PODRACE_ADATA || WORLD->area == PODSPRINT_ADATA))
@@ -4197,7 +4198,7 @@ void Move_POD(GameObject_s *object) {
             i32 player_index = object == Player[0] ? 0 : 1;
             if (WORLD->area == PODRACE_ADATA) {
                 f32 steering = -fabsf(NuTrigTable[pad->input_angle >> 1]) * (pad->input_magnitude - 6.0f) / 96.0f;
-                f32 speed = avg_currentspeed_mul > 1.1f ? 2.0f + steering : avg_currentspeed_mul + 1.0f + steering;
+                f32 speed = avg_currentspeed_mul < 1.1f ? avg_currentspeed_mul + 1.0f + steering : 2.0f + steering;
                 f32 pitch = speed * 0.5f;
                 f32 previous = PosSeekPitch[player_index];
                 PosSeekPitch[player_index] = previous + (pitch - previous) * FRAMETIME * 1.5f;
@@ -5035,7 +5036,9 @@ static void LightSabreComboCode(GameObject_s *object, i32 action_pressed, i32 ac
                 }
                 object->sabre_flags |= 2;
                 if ((object->context_flags & 0x40) == 0 &&
-                    (((object->context_flags & 8) != 0 && frames[0] == 0.0f) || (object->context_flags & 2) != 0)) {
+                    (((object->context_flags & 8) != 0 &&
+                      AnimListFrame(object->apiobj.character_model, object->context_animation, 0) == 0.0f) ||
+                     (object->context_flags & 2) != 0)) {
                     ComboHitFrame(object, object->combo_branch == 6 ? 3 : 1);
                 }
                 if (object->character_context == CHARACTER_CONTEXT_NONE && action_held != 0 &&
@@ -5069,9 +5072,11 @@ static void LightSabreComboCode(GameObject_s *object, i32 action_pressed, i32 ac
         }
         bool can_queue = false;
         if (time != NULL) {
-            const f32 frame = AnimListFrame(object->apiobj.character_model, object->context_animation, 1);
-            if (frame > 0.0f && *time >= frame)
-                object->context_flags |= 0x10;
+            if ((object->context_flags & 0x10) == 0) {
+                const f32 frame = AnimListFrame(object->apiobj.character_model, object->context_animation, 1);
+                if (frame > 0.0f && *time >= frame)
+                    object->context_flags |= 0x10;
+            }
             can_queue = AnimDuration(object->id, object->context_animation, *time, 0.0f, 0) < 0.1f;
             if (can_queue)
                 object->field_0xe22 |= 8;
@@ -5687,29 +5692,32 @@ i32 ForcePushed_SetTargetMom(GameObject_s *object, float *seek_rate) {
         float push_z = object->apiobj.position.z - source->apiobj.position.z;
         float nearest_distance_squared = 2.25f;
         GameObject_s *candidate = Obj;
-        for (i32 index = 0; index < HIGHGAMEOBJECT; ++index, ++candidate) {
+        i32 object_count = HIGHGAMEOBJECT;
+        for (i32 index = 0; index < object_count; ++index, ++candidate) {
             if ((candidate->apiobj.field_0x1f8 & 0x1001) != 0x1001 || candidate->apiobj.field_0x287 != 0 ||
                 candidate == source || candidate == object || candidate->apiobj.field_0x27c != -1 ||
-                (candidate->field_0xefb & 8) != 0 || CannotKill(candidate) != 0 ||
-                (candidate->apiobj.character_data->model_flags & 0x4002010) != 0x10) {
+                (candidate->field_0xefb & 8) != 0) {
                 continue;
             }
-            GAMECHARACTERDATA *character =
-                static_cast<GAMECHARACTERDATA *>(candidate->apiobj.character_data->field11_0x24);
-            if ((character->flags_090 & 0x40) != 0 || (character->flags_094[1] & 2) != 0 ||
-                candidate->id == id_GONKDROID || candidate->apiobj.collision_min.y > object->apiobj.collision_max.y ||
-                object->apiobj.collision_min.y > candidate->apiobj.collision_max.y) {
-                continue;
-            }
-            float dx = candidate->apiobj.position.x - object->apiobj.position.x;
-            float dz = candidate->apiobj.position.z - object->apiobj.position.z;
-            if (!(0.0f > push_x * dx + push_z * dz)) {
-                float distance_squared = dx * dx + dz * dz;
-                if (distance_squared < nearest_distance_squared) {
-                    nearest_distance_squared = distance_squared;
-                    nearest = candidate;
+            if (CannotKill(candidate) == 0 && (candidate->apiobj.character_data->model_flags & 0x4002010) == 0x10) {
+                GAMECHARACTERDATA *character =
+                    static_cast<GAMECHARACTERDATA *>(candidate->apiobj.character_data->field11_0x24);
+                if (!((character->flags_090 & 0x40) != 0 || (character->flags_094[1] & 2) != 0 ||
+                      candidate->id == id_GONKDROID ||
+                      candidate->apiobj.collision_min.y > object->apiobj.collision_max.y ||
+                      object->apiobj.collision_min.y > candidate->apiobj.collision_max.y)) {
+                    float dx = candidate->apiobj.position.x - object->apiobj.position.x;
+                    float dz = candidate->apiobj.position.z - object->apiobj.position.z;
+                    if (!(0.0f > push_x * dx + push_z * dz)) {
+                        float distance_squared = dx * dx + dz * dz;
+                        if (distance_squared < nearest_distance_squared) {
+                            nearest_distance_squared = distance_squared;
+                            nearest = candidate;
+                        }
+                    }
                 }
             }
+            object_count = HIGHGAMEOBJECT;
         }
     }
     float dx;
@@ -6779,6 +6787,7 @@ void MovePlayer_NETWORK(GameObject_s *object) {
         if (glow_model == -1)
             glow_model = 0xdf;
     }
+    Tag_Check(object);
     ForcePushCode(object, 0, 0);
     object->field_0xd8c = 1.0f;
     if (api.field_0x287 == 0 && FadeSys.fade == 0.0f) {
@@ -7823,9 +7832,10 @@ void SetHeadTarget(GameObject_s *object, NUVEC *position, i8 priority, f32 time,
         if (object->head_target == NULL ||
             (position != object->head_target && object->head_target_priority <= priority)) {
             i32 random = qrand();
+            f32 fraction = static_cast<f32>(random) * 1.5259022e-05f;
             object->head_target = position;
             object->head_target_priority = priority;
-            f32 delay = maximum_delay * random * 1.5259022e-05f + (1.0f - random * 1.5259022e-05f) * minimum_delay;
+            f32 delay = maximum_delay * fraction + (1.0f - fraction) * minimum_delay;
             object->head_target_delay = delay;
             object->head_target_timer = time + delay;
         }
@@ -9405,8 +9415,8 @@ void TurnCode(GameObject_s *object, i32 mode, GAMEPAD_s *pad) {
     }
 
     if (timer >= half_duration + quarter_duration) {
-        object->secondary_lean_angle = static_cast<i16>(
-            (1.0f - (1.0f / quarter_duration) * (timer - (half_duration + quarter_duration))) * 16384.0f);
+        object->secondary_lean_angle = static_cast<i16>(static_cast<i32>(
+            (1.0f - (1.0f / quarter_duration) * (timer - (half_duration + quarter_duration))) * 16384.0f));
         return;
     }
     if (!(timer >= half_duration)) {
@@ -9416,7 +9426,7 @@ void TurnCode(GameObject_s *object, i32 mode, GAMEPAD_s *pad) {
                                         49152.0f + 16384.0f) >>
                        1) &
                       0x7fff;
-    object->secondary_lean_angle = static_cast<i16>(20024.0f * NuTrigTable[index] + 16384.0f);
+    object->secondary_lean_angle = static_cast<i16>(static_cast<i32>(20024.0f * NuTrigTable[index] + 16384.0f));
 }
 
 void FloatCode(GameObject_s *) {
@@ -10363,7 +10373,7 @@ static void DodgeCode(GameObject_s *object, i32 action_pressed, i32 jump_pressed
             return;
         }
         object->context_animation_timer -= FRAMETIME;
-        if (object->context_animation_timer > 0.0f) {
+        if (!(object->context_animation_timer <= 0.0f)) {
             return;
         }
 
@@ -10399,7 +10409,7 @@ static void DodgeCode(GameObject_s *object, i32 action_pressed, i32 jump_pressed
     }
 
     GAMECHARACTERDATA *data = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
-    if ((data->walk_speed + data->movement_speed) * 0.5f < object->pad_gamepad->input_magnitude) {
+    if (!((data->walk_speed + data->movement_speed) * 0.5f >= object->pad_gamepad->input_magnitude)) {
         return;
     }
 
@@ -10419,7 +10429,7 @@ static void DodgeCode(GameObject_s *object, i32 action_pressed, i32 jump_pressed
     } else {
         const f32 side = (object->apiobj.collision_position.x - bolt->position.x) * dodge_direction.x +
                          (object->apiobj.collision_position.z - bolt->position.z) * dodge_direction.z;
-        animation = side >= 0.0f ? 0x26 : 0x4f;
+        animation = side < 0.0f ? 0x4f : 0x26;
     }
     object->context_animation = animation;
     object->field_0xe12 = animation;
