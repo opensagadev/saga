@@ -1173,8 +1173,10 @@ i32 GizSpinner_Push(GIZSPINNER_s *spinner, i32 context) {
 
     stop_at_endpoint:
         flags &= ~0x40u;
-        if ((flags & 2) == 0) {
-            flags |= 0x300;
+        if (context == 0x1e) {
+            flags |= (flags & 2) != 0 ? 0x100u : 0x200u;
+        } else {
+            flags |= (flags & 2) != 0 ? 0x200u : 0x100u;
         }
         spinner->state_flags = flags;
         if (clear_context != 0) {
