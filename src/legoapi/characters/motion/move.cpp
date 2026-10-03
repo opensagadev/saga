@@ -5272,7 +5272,7 @@ static void JediLightCode(GameObject_s *object) {
         rtlDynamicSetPos(object->dynamic_light_id, &position);
         return;
     }
-    if (object->weapon_scale <= 0.0f || object->sabre_flags == 0)
+    if (!(object->weapon_scale > 0.0f) || object->sabre_flags == 0)
         return;
     position = v000;
     if (object->apiobj.field_0x288 == 0)

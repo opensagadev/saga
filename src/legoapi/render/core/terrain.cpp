@@ -5255,15 +5255,16 @@ void NewScanRot(nuvec_s *position, i32 terrain_mask) {
     if (!cache_hit) {
         for (i32 cell_index = 0; cell_index < CurTerr->used_cell_count; ++cell_index) {
             const TERRAIN_CELL &cell = CurTerr->cells[cell_index];
-            if (max_x < cell.min_x || cell.max_x < min_x || max_z < cell.min_z || cell.max_z < min_z) {
+            if (!(max_x >= cell.min_x && cell.max_x >= min_x && max_z >= cell.min_z && cell.max_z >= min_z)) {
                 continue;
             }
             const i16 *group_indices = CurTerr->group_indices + cell.first_group;
             for (i32 cell_group = 0; cell_group < static_cast<i16>(cell.group_count); ++cell_group) {
                 const i32 group_index = group_indices[cell_group];
                 TERRAIN_GROUP &group = CurTerr->groups[group_index];
-                if (max_x < group.bounds_min.x || max_z < group.bounds_min.z || group.bounds_max.x < min_x ||
-                    group.bounds_max.z <= min_z || group.chunk_type == -1) {
+                if (!(max_x >= group.bounds_min.x && max_z >= group.bounds_min.z && group.bounds_max.x >= min_x &&
+                      group.bounds_max.z > min_z) ||
+                    group.chunk_type == -1) {
                     continue;
                 }
                 const f32 local_max_x = max_x - group.origin.x;
@@ -5421,14 +5422,17 @@ void NewScanRot(nuvec_s *position, i32 terrain_mask) {
                             NuVec4MtxTransformVU0(&vertices[3], &vertices[3], matrix);
                         } else
                             vertices[3] = vertices[2];
-                        bool above_x = false, below_x = false, above_z = false, below_z = false;
-                        for (i32 v = 0; v < 4; ++v) {
-                            above_x |= vertices[v].x > local_min_x;
-                            below_x |= local_max_x > vertices[v].x;
-                            above_z |= vertices[v].z > local_min_z;
-                            below_z |= local_max_z > vertices[v].z;
-                        }
-                        if (!above_x || !below_x || !above_z || !below_z)
+                        if (!(vertices[0].x > local_min_x || vertices[1].x > local_min_x ||
+                              vertices[2].x > local_min_x || vertices[3].x > local_min_x))
+                            continue;
+                        if (!(local_max_x > vertices[0].x || local_max_x > vertices[1].x ||
+                              local_max_x > vertices[2].x || local_max_x > vertices[3].x))
+                            continue;
+                        if (!(vertices[0].z > local_min_z || vertices[1].z > local_min_z ||
+                              vertices[2].z > local_min_z || vertices[3].z > local_min_z))
+                            continue;
+                        if (!(local_max_z > vertices[0].z || local_max_z > vertices[1].z ||
+                              local_max_z > vertices[2].z || local_max_z > vertices[3].z))
                             continue;
                         TERRAIN_SHAPE *transformed = &ScaleTerrain[transformed_count];
                         *reinterpret_cast<u32 *>(transformed->material) = *reinterpret_cast<u32 *>(shape->material);

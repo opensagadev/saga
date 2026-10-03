@@ -123,14 +123,15 @@ i32 NuMusic::Album::GetTracks(u32 class_mask, Track **out_tracks) {
 
 void NuMusic::Album::Initialise() {
     i32 count = tracks_count;
-    for (i32 i = 0; i < 6; i++) {
-        tracks[i] = NULL;
+    for (i32 index = 0; index < 6; ++index) {
+        tracks[index] = NULL;
         if (count > 0) {
-            Track *track = tracks_source;
-            TRACK_CLASS clazz = 1 << i;
-            for (i32 j = 0; j < count; j++, track++) {
+            Track *next = tracks_source;
+            TRACK_CLASS clazz = 1 << index;
+            for (u32 scanned = 0; scanned < static_cast<u32>(count); ++scanned) {
+                Track *track = next++;
                 if (track->clazz == clazz) {
-                    tracks[i] = track;
+                    tracks[index] = &tracks_source[scanned];
                     break;
                 }
             }
@@ -1341,7 +1342,8 @@ char *NuMusic::RemovePath(char *str) {
         str_ = str;
 
         do {
-            if (c == '/' || c == '\\') {
+            u8 separator_count = (c == '\\') + (c == '/');
+            if (separator_count != 0) {
                 last_sep = str_;
             }
             str_ = str_ + 1;

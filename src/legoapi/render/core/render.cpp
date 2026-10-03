@@ -3430,26 +3430,26 @@ static __used__ i32 MatrixReflection_CanOverride() {
 
 static void DrawWeapon_SetSabreObjects(GameObject_s *object, i32 red, i32 green, i32 blue, i32 purple, i32 *models,
                                        i32 *hilt) {
-    if (!(red || green || blue || purple))
-        goto blue_or_purple;
-
-    if (object->id == id_DARTHMAUL) {
-        *hilt = models[0] = 0x12;
-    } else if (object->id == id_COUNTDOOKU && WORLD->lev_objs[0x13].active) {
-        *hilt = models[0] = 0x13;
-    } else {
-        *hilt = models[0] = 0x11;
-    }
-
-    if (red) {
-        if (object->apiobj.field_0x287 != 0)
-            return;
+    if (red || green || blue || purple) {
         if (object->id == id_DARTHMAUL) {
+            models[0] = *hilt = 0x12;
+        } else if (object->id == id_COUNTDOOKU && WORLD->lev_objs[0x13].active) {
+            models[0] = *hilt = 0x13;
+        } else {
+            models[0] = *hilt = 0x11;
+        }
+    }
+    if (red) {
+        if (object->id == id_DARTHMAUL) {
+            if (object->apiobj.field_0x287 != 0)
+                return;
             models[1] = 0x6d;
             models[2] = 0x6e;
             if (object->field_0xe22 & 8)
                 models[3] = 0x6e;
         } else {
+            if (object->apiobj.field_0x287 != 0)
+                return;
             models[1] = 0x65;
             models[2] = 0x66;
             if (object->field_0xe22 & 8)
@@ -3468,7 +3468,6 @@ static void DrawWeapon_SetSabreObjects(GameObject_s *object, i32 red, i32 green,
         return;
     }
 
-blue_or_purple:
     if (blue) {
         if (object->apiobj.field_0x287 == 0) {
             models[1] = 0x69;

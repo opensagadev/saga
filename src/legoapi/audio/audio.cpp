@@ -37,13 +37,6 @@ static i32 MusicPlrsHoldAttack;
 extern "C" void PlaySfxByIdAndSetVolume(i32 sfx_id, nuvec_s *position, f32 volume);
 extern "C" void SetPreSeekStartPoint(f32 start_point);
 
-struct MUSIC_CUT_STOP_INFO {
-    u8 pad_00[0xec];
-    i16 level_index;
-};
-
-DECOMP_ASSERT(offsetof(MUSIC_CUT_STOP_INFO, level_index) == 0xec, "MUSIC_CUT_STOP_INFO level offset");
-
 void PlayAMusic(i32 a, i32 b, i32 c, i32 d) {
     if (NOSOUND != 0 || NOMUSIC != 0) {
         return;
@@ -132,9 +125,9 @@ void ProcessMusicChanges(LEVELDATA_s *level, OPTIONSSAVE_s *opts) {
     }
 
     LEVELDATA_s *music_level = level;
-    MUSIC_CUT_STOP_INFO *cut_stop = (MUSIC_CUT_STOP_INFO *)CutStopInfo;
-    if (cut_stop != NULL && cut_stop->level_index != -1) {
-        LEVELDATA_s *cut_level = &LDataList[cut_stop->level_index];
+    CUTINFO *cut_stop = static_cast<CUTINFO *>(CutStopInfo);
+    if (cut_stop != NULL && cut_stop->skip_level != -1) {
+        LEVELDATA_s *cut_level = &LDataList[cut_stop->skip_level];
         if ((cut_level->flags & LEVEL_CONFIG_LOADED) != 0) {
             music_level = cut_level;
         }
