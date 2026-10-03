@@ -195,11 +195,11 @@ f32 BezierLineLength(VuVec &start, VuVec &first_control, VuVec &end, VuVec &seco
 
 f32 BezierLineLength(VuVec &start, VuVec &first_control, VuVec &end, VuVec &second_control, f32 t) {
     f32 complement = 1.0f - t;
-    VuVec first{first_control.x * complement + start.x * t, first_control.y * complement + start.y * t,
-                first_control.z * complement + start.z * t, 0.0f};
     VuVec middle{second_control.x * complement + first_control.x * t,
                  second_control.y * complement + first_control.y * t,
                  second_control.z * complement + first_control.z * t, 0.0f};
+    VuVec first{first_control.x * complement + start.x * t, first_control.y * complement + start.y * t,
+                first_control.z * complement + start.z * t, 0.0f};
     VuVec last{end.x * complement + second_control.x * t, end.y * complement + second_control.y * t,
                end.z * complement + second_control.z * t, 0.0f};
     VuVec first_middle{middle.x * complement + first.x * t, middle.y * complement + first.y * t,

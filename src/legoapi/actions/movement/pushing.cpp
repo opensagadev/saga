@@ -137,14 +137,14 @@ f32 ForceTowardsMid(GameObject_s *object) {
 }
 
 void ResetPushProgress(WORLDINFO_s *world, void *progress_data) {
-    if (world->push_blocks == NULL || world->push_block_count <= 0) {
+    pushblock_s *block = world->push_blocks;
+    if (block == NULL || world->push_block_count <= 0) {
         return;
     }
 
     PUSHPROGRESS *progress = static_cast<PUSHPROGRESS *>(progress_data);
-    for (i32 index = 0; index < world->push_block_count; ++index) {
+    for (i32 index = 0; index < world->push_block_count; ++index, ++block) {
         if (index < 16 && progress != NULL) {
-            pushblock_s *block = &world->push_blocks[index];
             const u32 bit = 1u << index;
             block->flags_0cb = (block->flags_0cb & ~2u) | (((progress->state_mask & bit) != 0) << 1);
             block->flags_0ca = (block->flags_0ca & ~4u) | (((progress->visible_mask & bit) != 0) << 2);

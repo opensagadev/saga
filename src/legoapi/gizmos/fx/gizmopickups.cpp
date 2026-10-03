@@ -719,7 +719,7 @@ static void GizmoPickups_Reset(void *world_ptr, void *, void *progress_ptr) {
 
         NewTerrPlatformsOff();
         pickup.floor_height = GameShadow(NULL, &pickup.position, 5.0f, -1);
-        if (pickup.floor_height != -1.0f) {
+        if (pickup.floor_height != 2000000.0f) {
             if (pickup.floor_height < pickup.position.y) {
                 FindAnglesZX(&ShadNorm, &pickup.shadow_x_rotation, &pickup.shadow_z_rotation);
             } else {
@@ -727,8 +727,9 @@ static void GizmoPickups_Reset(void *world_ptr, void *, void *progress_ptr) {
             }
         }
 
-        pickup.state_flags = GIZMOPICKUP_STATE_ACTIVE | GIZMOPICKUP_STATE_ENABLED | GIZMOPICKUP_STATE_VISIBLE |
-                             GIZMOPICKUP_STATE_DRAW_VISIBLE;
+        pickup.state_flags = static_cast<u8>(
+            (pickup.state_flags | GIZMOPICKUP_STATE_ACTIVE | GIZMOPICKUP_STATE_ENABLED | GIZMOPICKUP_STATE_VISIBLE) &
+            ~(GIZMOPICKUP_STATE_COLLECTED | GIZMOPICKUP_STATE_DRAWN));
         GIZMO_PICKUP_TYPE &type = GizmoPickupSys->types[pickup.type_index];
         pickup.model_variant = 0;
         if (type.random_model_count != 0) {
@@ -738,6 +739,8 @@ static void GizmoPickups_Reset(void *world_ptr, void *, void *progress_ptr) {
                                 ? static_cast<i8>(NuPortalWhichRoom(world->current_gscn, &pickup.position))
                                 : -1;
         pickup.draw_rotation = static_cast<u16>(qrand());
+        pickup.state_flags |= GIZMOPICKUP_STATE_DRAW_VISIBLE;
+        pickup.state_flags &= static_cast<u8>(~GIZMOPICKUP_STATE_ALTERNATE_TYPE);
         pickup.remaining_visible_time = 0.0f;
 
         if (progress != NULL && index < GIZMOPICKUP_PROGRESS_CAPACITY) {
@@ -752,8 +755,23 @@ static void GizmoPickups_Reset(void *world_ptr, void *, void *progress_ptr) {
                                 ((progress->activated[word] & bit) != 0 ? GIZMOPICKUP_STATE_ACTIVATED : 0));
         }
         if ((pickup.config_flags & GIZMOPICKUP_CONFIG_REQUIRES_ACTIVATION) != 0 &&
-            (pickup.state_flags & GIZMOPICKUP_STATE_ACTIVATED) == 0) {
+            (progress == NULL || index >= GIZMOPICKUP_PROGRESS_CAPACITY ||
+             (pickup.state_flags & GIZMOPICKUP_STATE_ACTIVATED) == 0)) {
             pickup.state_flags &= static_cast<u8>(~(GIZMOPICKUP_STATE_ENABLED | GIZMOPICKUP_STATE_VISIBLE));
+        }
+        if (GizmoPickupSys->gizmo_type_id != -1 && pickup.type_index == GizmoPickupSys->gizmo_type_id &&
+            Game_LevelSave != NULL) {
+            if (SuperStory != 0) {
+                pickup.state_flags |= GIZMOPICKUP_STATE_ALTERNATE_TYPE;
+            } else {
+                const LEVELSAVE_s *save = &reinterpret_cast<LEVELSAVE_s *>(Game_LevelSave)[world->level_idx];
+                for (i32 saved_index = 0; saved_index < save->minikit_count; ++saved_index) {
+                    if (NuStrICmp(pickup.name, save->minikit_names[saved_index]) == 0) {
+                        pickup.state_flags |= GIZMOPICKUP_STATE_ALTERNATE_TYPE;
+                        break;
+                    }
+                }
+            }
         }
     }
 
