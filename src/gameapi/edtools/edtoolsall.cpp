@@ -6501,6 +6501,15 @@ inline void EdControl::operator delete(void *memory) {
     theMemoryManager.FreePool(memory, sizeof(EdControl));
 }
 
+// Match each control's allocation type, rather than inheriting the base size.
+inline void EdEnumControl::operator delete(void *memory) {
+    theMemoryManager.FreePool(memory, sizeof(EdEnumControl));
+}
+
+inline void EdBitControl::operator delete(void *memory) {
+    theMemoryManager.FreePool(memory, sizeof(EdBitControl));
+}
+
 void EdControl::AddMenuItem(eduimenu_s *menu, EdRef *member, void *target) {
     EdControl *control = new (theMemoryManager.AllocPool(sizeof(EdControl), 1)) EdControl;
     control->reference = member;

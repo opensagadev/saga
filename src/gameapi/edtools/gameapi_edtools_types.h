@@ -316,6 +316,7 @@ struct EdEnumControl : EdControl {
     };
     Item *items;
 
+    static void operator delete(void *);
     void AddMenuItem(eduimenu_s *, EdRef *, void *) override;
     char *GetEnumString(i32);
     i32 GetEnumValue(char *);
@@ -330,6 +331,7 @@ struct EdEnumControl : EdControl {
 struct EdBitControl : EdEnumControl {
     u32 bit_mask;
 
+    static void operator delete(void *);
     void AddMenuItem(eduimenu_s *, EdRef *, void *) override;
     void Refresh() override;
     static void cbButton(eduimenu_s *, eduiitem_s *, u32);

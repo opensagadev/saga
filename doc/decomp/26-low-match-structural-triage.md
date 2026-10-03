@@ -13797,3 +13797,66 @@ configuration round trip. Normal commit hook and exact new-head CI follow.
 Full bounded hint and3196B shader-custom-setter audits locate all retail dataflow
 without a new qualified correction; compiler-private pairing and host material
 layout debt remain explicit. No neutral hint rename or forced ABI split is tried.
+
+## Checkpoint61 — concrete editor free sizes and trigger storage predicate
+
+Checkpoint60 head c6fd46bd7708efbd6f5e3a089cc27af80555933a passes all11
+GitHub checks; the build workflow's exact head/status/conclusion independently
+confirms COMPLETED/SUCCESS. Main remains a496c28beece66a24ccdf7336571b6836f45e6aa.
+Neither this checkpoint nor60 reaches the70.002460% merge threshold.
+Historical named /tmp primaries from earlier checkpoints are currently
+unlocated; durable accepted/negative receipts remain authority. This does not
+establish that their functions were never audited, or exhaust source forms.
+
+### Batch512 — derived editor-control deallocation policies
+
+Complete original Enum/Bit D0 bodies at55ac60/55aca0 pass20/24 to FreePool;
+real placement-new producers allocate sizeof their concrete classes and
+PropertyMenu::Destroy dispatches through EdControl*. Current derived deletes
+instead inherit the base16-byte policy. All three sizes occupy target bucket0,
+so this is not evidence of target corruption. Restore the two concrete-size
+policies using sizeof, with the same inline-definition convention as the seven
+existing sibling policies. No destructor body, weak attribute, virtual slot,
+layout, source owner, optimization or emission variant is changed.
+Source audit SHA076d4374bde16ee3a731814a238a9d1089f61df3c57d1af616aeb3be0d2db2a4
+is preserved in the byte-verified ignored cp61-source-audits.tar.gz archive.
+
+Fresh canonical O2 action pins149 consumed inputs before mutation and archives
+all275 actual header-consuming objects, verified byte-for-byte. Of375 emitted
+function identities, only Enum/Bit D0 bodies change; the other373 bodies,
+extents, bindings and sections retain. All274 other consuming objects retain
+their complete bytes. All59 ordinary non-CFI relocation sections normalize
+identically; compiler CFI ordering/relocations change and are not represented
+as raw-identical. Candidate owner SHA
+d08be4d52258ddb4b33b390ad06f2375964e1997127c96e1c951d99ece595178.
+Whole report50213f975229f6e9ecaeae98440829077bbfcfe814fa238241ef96f0e01ca979
+changes ONLY the two63B D0 scores38.875%->38.9375%, net+0.07875B.
+All13459 original rows and6297 exacts retain. This tiny positive is not a
+meaningful overall percentage increase. Symbol coverage passes without an
+ignore/baseline change; no production destruction fixture is claimed.
+
+### Batch513 — AI trigger force-availability bit test
+
+The complete3163B AITriggerSetSysProcess source-only audit identifies the raw
+DWORD load/test at1e2cba..1e2cc5, whereas the current predicate uses floating
+equality. Use the already canonical field_0x3c_bits union member. Actual typed
+allocation/zeroing and reset produce +0.0; three real consumers already use
+bit-zero. No actual negative-zero producer or gameplay failure is asserted.
+All other branches, admission conditions, helpers and allocation remain intact.
+Audit SHAc81ca5eefc06583d7a1d0fff5dbae8615fd3093770a8eee527c8554f2ded13e5,
+full original raw SHAe6fbe550a7bdaa3041088a991fcf5b824f489dba8e499a508a15340298b3e959,
+and the sole one-line recipe are preserved in the same verified source archive.
+Fresh canonical O3 action pins147 consumed inputs before mutation. Existing
+ten-function emitted inventory retains; only the nominated body changes.
+Candidate owner SHAbf1b5fbaec865d50c0e86358b99b5f97964f84f8e02030aafe1832076cf1ada9.
+Whole reported50a8d3d84eab27e8c9b608f0d5fc3ca5fa51c2a65bac6466de8b4c2f941d5e
+changes ONLY this score40.538666%->41.057335%, net+16.40550047B;
+all13459 rows and6297 exacts retain.
+
+Combined matching69.046585%, +1.044125pp versus main. Metadata-only mapping
+SHA18e7e6ac62f9584556fe3be4bd7bc330460f6de97ccd459460514ccd042405bb
+retains452 units and the4722419B denominator. Android/native/WebAssembly
+builds and all five repository checks pass; both candidate objects survive
+the target configuration round trip. Normal commit hook and new exact-head
+GitHub checks follow. No score is claimed for history-only screens or the
+separate bounded Minicam_Update no-gap source audit.
