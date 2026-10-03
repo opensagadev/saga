@@ -454,11 +454,17 @@ i32 Shop_UpdateHint(HINT_s *hint) {
                 return 1;
         }
     } else if (hint->control_mode_ids[0] == 0x5ec) {
-        for (i32 i = 0; i < SHOPGOLDBRICKS; ++i) {
-            if (!(static_cast<u64>((&Game.shop_gold_brick_purchased_bits)[i >> 5]) >> (i & 31) & 1) &&
-                static_cast<f32>(i * 3600) <= Game.field30_0x7c2c &&
-                Game.coins >= static_cast<u32>(BrickItems[i].price))
-                return 1;
+        const i32 count = SHOPGOLDBRICKS;
+        if (count > 0) {
+            const u32 coins = Game.coins;
+            shopitem_s *item = BrickItems;
+            const f32 elapsed = Game.field30_0x7c2c;
+            i32 time_required = 0;
+            for (i32 i = 0; i != count; ++i, time_required += 3600, ++item) {
+                if (!(static_cast<u64>((&Game.shop_gold_brick_purchased_bits)[i >> 5]) >> (i & 31) & 1) &&
+                    static_cast<f32>(time_required) <= elapsed && coins >= static_cast<u32>(item->price))
+                    return 1;
+            }
         }
     }
     return 0;

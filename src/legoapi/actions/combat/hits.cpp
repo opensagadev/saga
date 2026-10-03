@@ -93,9 +93,11 @@ extern LEVELDATA_s *SPEEDERCHASEA_LDATA;
 extern LEVELDATA_s *VADERC_LDATA;
 
 i32 CannotKill(GameObject_s *object) {
+    if ((CInfo[object->character_context].flags & 0x2000000) != 0) {
+        return 1;
+    }
     GAMECHARACTERDATA *data = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
-    return (CInfo[object->character_context].flags & 0x2000000) != 0 ||
-           ((data->field_0x94 & 0x800) != 0 && object->apiobj.field_0x27c == -1);
+    return (data->field_0x94 & 0x800) != 0 && object->apiobj.field_0x27c == -1;
 }
 
 static i32 Collide2Objects(APIOBJECT *first, APIOBJECT *second) {
