@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 69.100555,
+    "fuzzy_match_percent": 69.10513,
     "total_code": "4722419",
     "matched_code": "526773",
     "matched_code_percent": 11.154728,
@@ -40848,7 +40848,7 @@
           "address": 5210704,
           "offset": 4320736,
           "size": 2169,
-          "match_percent": 53.537384
+          "match_percent": 55.25
         },
         {
           "name": "_Z17OtherBlockInRangeP11WORLDINFO_sP11pushblock_sP7nuvec_si",
@@ -56195,7 +56195,7 @@
           "address": 5013232,
           "offset": 4123264,
           "size": 1615,
-          "match_percent": 60.114204
+          "match_percent": 60.713093
         },
         {
           "name": "_ZL15GizSpinner_DrawPvS_f",
@@ -63248,7 +63248,7 @@
           "address": 1841056,
           "offset": 951088,
           "size": 2052,
-          "match_percent": 57.39268
+          "match_percent": 58.42683
         },
         {
           "name": "_Z25ThermalDetonator_ThrowMomP12GameObject_sP7nuvec_s",
@@ -92726,7 +92726,7 @@
           "address": 3119040,
           "offset": 2229072,
           "size": 1833,
-          "match_percent": 36.002422
+          "match_percent": 44.08959
         },
         {
           "name": "NuQFntPrintJustifiedW",

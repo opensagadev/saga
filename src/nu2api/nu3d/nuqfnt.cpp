@@ -850,14 +850,15 @@ f32 NuQFntPrintJustifiedRSW(RNDRSTREAM *stream, void *font_ptr, u16 *text, f32 x
         }
 
         i32 length = 0;
-        while (text < next) {
-            if (*text != 0x20) {
-                line[length++] = *text++;
+        u16 *copy_cursor = text;
+        while (copy_cursor < next) {
+            if (*copy_cursor != 0x20) {
+                line[length++] = *copy_cursor++;
             } else {
                 line[length++] = 0x20;
                 do {
-                    ++text;
-                } while (*text == 0x20);
+                    ++copy_cursor;
+                } while (*copy_cursor == 0x20);
             }
         }
         line[length] = 0;

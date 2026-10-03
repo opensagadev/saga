@@ -102,7 +102,7 @@ void ThermalDetonator_Throw(GameObject_s *object) {
             const VuVec arc = TouchHacks::CalculateXZVelForArcToHitPoint(origin, target, 2.0f, -5.0f);
             NextThermalTarget.Reset();
             // The retail path clamps only X; Z retains the calculated arc velocity.
-            velocity.x = arc.x < -3.0f ? -3.0f : arc.x >= 3.0f ? 3.0f : arc.x;
+            velocity.x = arc.x < 3.0f ? (arc.x < -3.0f ? -3.0f : arc.x) : 3.0f;
             velocity.z = arc.z;
         }
         velocity.y = 2.0f;

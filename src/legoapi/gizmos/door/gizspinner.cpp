@@ -222,6 +222,7 @@ static i32 *GizSpinner_GetBestBoltTarget(GIZMOSET *, float *, NUVEC *result_posi
                                          i32 directional, i32, i32) {
     WORLDINFO_s *world = WorldInfo_CurrentlyActive();
     NUVEC aim = *direction;
+    NUVEC target_position = v000;
     if (world->spinners == NULL) {
         return NULL;
     }
@@ -245,8 +246,7 @@ static i32 *GizSpinner_GetBestBoltTarget(GIZMOSET *, float *, NUVEC *result_posi
             continue;
         }
 
-        NUVEC target_position = spinner->position;
-        target_position.y += spinner->field_0x098;
+        target_position.y = spinner->position.y + spinner->field_0x098;
         if (spinner->type == 0) {
             continue;
         }
