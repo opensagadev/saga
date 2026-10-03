@@ -932,7 +932,7 @@ static i32 SubItemMenu(MENU_s *menu) {
     if (easesubin != 0) {
         const f32 factor = 1.0f - ShopSinePhase(1.0f - slidetimer * 8.0f);
         if (easesubin == 1)
-            inoutscale = ShopClamp01(factor);
+            inoutscale = 0.0f + ShopClamp01(factor);
         else if (easesubin == -1)
             inoutscale = 1.0f - ShopClamp01(factor);
     }

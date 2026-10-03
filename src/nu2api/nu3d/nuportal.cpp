@@ -128,21 +128,21 @@ static __used__ NUFRUSTRUM *buildFrustrum(NUVEC *minimum, NUVEC *maximum, i16 ro
     const f32 tangent = NU_TAN_LUT(cam->fov * 0.5f * 10430.378f);
     const f32 horizontal_tangent = tangent / cam->aspect;
 
-    f32 edge = maximum->x * horizontal_tangent;
+    f32 edge = minimum->y * tangent;
     f32 inverse_length = 1.0f / NuFsqrt(edge * edge + 1.0f);
-    frustum->planes[0] = {-inverse_length, 0.0f, edge * inverse_length, 0.0f};
-
-    edge = minimum->x * horizontal_tangent;
-    inverse_length = 1.0f / NuFsqrt(edge * edge + 1.0f);
-    frustum->planes[1] = {inverse_length, 0.0f, -edge * inverse_length, 0.0f};
-
-    edge = minimum->y * tangent;
-    inverse_length = 1.0f / NuFsqrt(edge * edge + 1.0f);
     frustum->planes[2] = {0.0f, inverse_length, -edge * inverse_length, 0.0f};
 
     edge = maximum->y * tangent;
     inverse_length = 1.0f / NuFsqrt(edge * edge + 1.0f);
     frustum->planes[3] = {0.0f, -inverse_length, edge * inverse_length, 0.0f};
+
+    edge = maximum->x * horizontal_tangent;
+    inverse_length = 1.0f / NuFsqrt(edge * edge + 1.0f);
+    frustum->planes[0] = {-inverse_length, 0.0f, edge * inverse_length, 0.0f};
+
+    edge = minimum->x * horizontal_tangent;
+    inverse_length = 1.0f / NuFsqrt(edge * edge + 1.0f);
+    frustum->planes[1] = {inverse_length, 0.0f, -edge * inverse_length, 0.0f};
 
     for (i32 i = 0; i < 4; ++i) {
         transformFrustrumPlane(&frustum->planes[i]);

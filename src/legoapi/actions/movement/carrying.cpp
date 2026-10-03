@@ -357,8 +357,7 @@ void SuperCarry_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
                 NUVEC delta;
                 f32 distance = NuVecDistSqr(&blowup->mid_position, &object->apiobj.collision_position, &delta);
                 f32 radius = object->apiobj.field_0x1dc + blowup->target_scale + 0.2f;
-                if (distance < best && distance < radius * radius &&
-                    delta.x * forward.x + delta.z * !(forward.z <= 0.0f)) {
+                if (distance < best && distance < radius * radius && delta.x * forward.x + delta.z * forward.z > 0.0f) {
                     nearest = blowup;
                     best = distance;
                 }

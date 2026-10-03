@@ -479,7 +479,7 @@ char *GizSpinner_GetOutputName(GIZMO *gizmo, i32 output_index) {
 }
 
 static i32 GizSpinner_Load(void *world_ptr, void *) {
-    static i32 version = -1;
+    i32 version = -1;
 
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
     if (world->spinners == NULL) {
