@@ -121,8 +121,8 @@ AIPATHCNXHELPER_s *AIPathCnxHelperSys_Find(AIPATHCNXHELPERSYS_s *system, GameObj
         return NULL;
     }
 
-    for (i32 index = 0; index < system->helper_count; ++index) {
-        AIPATHCNXHELPER_s *helper = &system->helpers[index];
+    AIPATHCNXHELPER_s *helper = system->helpers;
+    for (i32 index = 0; index < system->helper_count; ++index, ++helper) {
         if (helper->connection == connection && (helper->direction == 0xff || helper->direction == direction) &&
             helper->type == type && (filter == NULL || filter(helper, object, connection, direction, type) == 0)) {
             return helper;

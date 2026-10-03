@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 69.124664,
+    "fuzzy_match_percent": 69.12683,
     "total_code": "4722419",
     "matched_code": "526773",
     "matched_code_percent": 11.154728,
@@ -41681,7 +41681,7 @@
           "address": 1555920,
           "offset": 665952,
           "size": 150,
-          "match_percent": 62.943398
+          "match_percent": 63.226414
         },
         {
           "name": "_Z25AIPathCnxControllerCreateP21AIPATHCNXCONTROLSYS_sP7AISYS_sP8AIPATH_sPcS5_iS5_ii",
@@ -41689,7 +41689,7 @@
           "address": 1557008,
           "offset": 667040,
           "size": 824,
-          "match_percent": 35.036366
+          "match_percent": 32.868183
         },
         {
           "name": "_Z26AIPathCnxControllerDestroyP21AIPATHCNXCONTROLSYS_sP21AIPATHCNXCONTROLLER_s",
@@ -41769,7 +41769,7 @@
           "address": 5244496,
           "offset": 4354528,
           "size": 335,
-          "match_percent": 36.71552
+          "match_percent": 63.017242
         }
       ]
     },
@@ -56179,7 +56179,7 @@
           "address": 5012880,
           "offset": 4122912,
           "size": 274,
-          "match_percent": 28.013334
+          "match_percent": 51.24
         },
         {
           "name": "_ZL31GizSpinner_AllocateProgressDataP9variptr_uS0_",
@@ -81551,7 +81551,7 @@
           "address": 4877824,
           "offset": 3987856,
           "size": 2053,
-          "match_percent": 77.51136
+          "match_percent": 75.94602
         },
         {
           "name": "_Z17SetCreatureLightsP11APIOBJECT_s",

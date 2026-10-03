@@ -202,10 +202,13 @@ static void GizSpinner_StoreProgressData(void *world_ptr, void *, void *progress
                             (((spinner->flags & GIZSPINNER_FLAG_HIDE_BASE) == 0) ? SPINNER_PROGRESS_BASE_VISIBLE : 0));
         if (GameAnimSet_IsAnimationReset(spinner->anim_set) != 0) {
             entry->animation_position = 0.0f;
-        } else if (spinner->anim_set->state == GAMEANIMSET_STATE_AT_END) {
-            entry->animation_position = 1.0f;
-        } else {
-            entry->animation_position = GameAnimSet_GetAnimPos(spinner->primary_anim_obj);
+        }
+        if (spinner->anim_set != NULL) {
+            if (spinner->anim_set->state == GAMEANIMSET_STATE_AT_END) {
+                entry->animation_position = 1.0f;
+            } else {
+                entry->animation_position = GameAnimSet_GetAnimPos(spinner->primary_anim_obj);
+            }
         }
     }
 }

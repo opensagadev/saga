@@ -217,8 +217,11 @@ void LightGameObject(GameObject_s *object, void *set) {
         current.direction[0].y = SeekValF(current.direction[0].y, target.direction[0].y, 5.0f);
         current.direction[0].z = SeekValF(current.direction[0].z, target.direction[0].z, 5.0f);
     }
-    if (current.direction[0].x != 0.0f || current.direction[0].y != 0.0f || current.direction[0].z != 0.0f)
+    if (current.direction[0].x != 0.0f || current.direction[0].y != 0.0f || current.direction[0].z != 0.0f) {
         NuVecNorm(&current.direction[0], &current.direction[0]);
+    } else {
+        current.direction[0] = target.direction[0];
+    }
 
     if (reset) {
         current.intensity[1] = target.intensity[1];
@@ -231,8 +234,11 @@ void LightGameObject(GameObject_s *object, void *set) {
         current.direction[1].y = SeekValF(current.direction[1].y, target.direction[1].y, 5.0f);
         current.direction[1].z = SeekValF(current.direction[1].z, target.direction[1].z, 5.0f);
     }
-    if (current.direction[1].x != 0.0f || current.direction[1].y != 0.0f || current.direction[1].z != 0.0f)
+    if (current.direction[1].x != 0.0f || current.direction[1].y != 0.0f || current.direction[1].z != 0.0f) {
         NuVecNorm(&current.direction[1], &current.direction[1]);
+    } else {
+        current.direction[1] = target.direction[1];
+    }
 
     if (reset) {
         current.intensity[2] = target.intensity[2];
@@ -245,8 +251,11 @@ void LightGameObject(GameObject_s *object, void *set) {
         current.direction[2].y = SeekValF(current.direction[2].y, target.direction[2].y, 5.0f);
         current.direction[2].z = SeekValF(current.direction[2].z, target.direction[2].z, 5.0f);
     }
-    if (current.direction[2].x != 0.0f || current.direction[2].y != 0.0f || current.direction[2].z != 0.0f)
+    if (current.direction[2].x != 0.0f || current.direction[2].y != 0.0f || current.direction[2].z != 0.0f) {
         NuVecNorm(&current.direction[2], &current.direction[2]);
+    } else {
+        current.direction[2] = target.direction[2];
+    }
 
     object->field_0xefc &= 0x7f;
 }
