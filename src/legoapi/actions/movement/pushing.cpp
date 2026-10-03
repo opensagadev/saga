@@ -309,8 +309,8 @@ void FindForcePushTarget(GameObject_s *object, i32 activate, i32 target_filter) 
         }
 
         f32 best_distance = 1.5625f;
-        for (i32 index = 0; index < HIGHGAMEOBJECT; ++index) {
-            GameObject_s *candidate = &Obj[index];
+        GameObject_s *candidate = Obj;
+        for (i32 index = 0; index < HIGHGAMEOBJECT; ++index, ++candidate) {
             if (candidate == object || (candidate->apiobj.field_0x1f8 & 0x1001) != 0x1001 ||
                 candidate->apiobj.field_0x287 != 0 || candidate->apiobj.model_draw_result == 0 ||
                 candidate->character_context == 0x3c || candidate->character_context == 0x39 ||
