@@ -106,6 +106,8 @@ void NuSoundBus::RemoveEffect(NuSoundEffect *effect) {
         }
         node = next;
     }
+    NuSoundSystem::sAllocdMemory[static_cast<i32>(NuSoundSystem::MemoryDiscipline::SCRATCH)] -=
+        sizeof(NuListNode<NuSoundEffect *>);
 }
 
 void NuSoundBus::ApplyFinalMix(float *mix) {

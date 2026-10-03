@@ -310,7 +310,6 @@ static i32 Technos_Load(void *world_ptr, void *) {
         techno.y_rotation = static_cast<i16>(EdFileReadShort());
 
         if (version <= 1) {
-            techno.enabled = 1;
             techno.scale = 1.0f;
             techno.output = 0;
             continue;
