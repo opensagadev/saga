@@ -67,10 +67,7 @@ void SkinPlatform(terrsitu_s *terrain_group, unsigned char *buffer, PLATSKININFO
             destination->max_x = maximum.x + 0.05f;
             destination->max_y = maximum.y + 0.05f;
             destination->max_z = maximum.z + 0.05f;
-            for (i32 normal = source->normals[1].y < 65535.0f ? 1 : 0; normal >= 0; --normal) {
-                i32 origin = normal != 0 ? 3 : 0;
-                i32 first = normal != 0 ? 1 : 2;
-                i32 second = normal != 0 ? 2 : 1;
+            auto update_normal = [destination](i32 normal, i32 origin, i32 first, i32 second) {
                 NUVEC a, b;
                 a.x = destination->vectors[first].x - destination->vectors[origin].x;
                 a.y = destination->vectors[first].y - destination->vectors[origin].y;
@@ -85,7 +82,11 @@ void SkinPlatform(terrsitu_s *terrain_group, unsigned char *buffer, PLATSKININFO
                 n.x *= inverse;
                 n.y *= inverse;
                 n.z *= inverse;
+            };
+            if (source->normals[1].y < 65535.0f) {
+                update_normal(1, 3, 1, 2);
             }
+            update_normal(0, 0, 2, 1);
         }
         if (shape_count > 0) {
             min_x -= 0.05f;
