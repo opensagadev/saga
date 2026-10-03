@@ -5285,9 +5285,10 @@ static void JediLightCode(GameObject_s *object) {
             continue;
         GAMECHARACTERDATA *data = GetGameCharacterData(object);
         i32 first = data->streak_joints[blade][0];
+        if (first == -1 || object->apiobj.character_model->points_of_interest[first] == NULL)
+            continue;
         i32 second = data->streak_joints[blade][1];
-        if (first == -1 || object->apiobj.character_model->points_of_interest[first] == NULL || second == -1 ||
-            object->apiobj.character_model->points_of_interest[second] == NULL)
+        if (second == -1 || object->apiobj.character_model->points_of_interest[second] == NULL)
             continue;
         NuVecAdd(&position, &position, reinterpret_cast<NUVEC *>(&object->joint_matrices[first].m30));
         NuVecAdd(&position, &position, reinterpret_cast<NUVEC *>(&object->joint_matrices[second].m30));

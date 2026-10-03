@@ -266,7 +266,7 @@ extern "C" {
         Music.queued_track = static_cast<i16>(track);
         Music.requested_track = static_cast<i16>(track);
         Music.pause_requested = false;
-        reinterpret_cast<u8 *>(&Music)[primary_stream + 0x12] = 0;
+        Music.stream_status_delay[primary_stream] = 0;
         if (NOSOUND == 0 && NOMUSIC == 0) {
             const i32 stream = 1 - primary_stream;
             NuSound3StopStereoStream(stream);

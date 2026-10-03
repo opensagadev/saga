@@ -110,13 +110,41 @@ NuMusic::Track *NuMusic::Album::GetTrack(u32 clazz) {
 
 i32 NuMusic::Album::GetTracks(u32 class_mask, Track **out_tracks) {
     i32 count = 0;
-    for (i32 i = 0; i < 6; i++) {
-        if ((class_mask & (1u << i)) != 0) {
-            out_tracks[i] = this->tracks[i];
-            count++;
-        } else {
-            out_tracks[i] = NULL;
-        }
+    if ((class_mask & TRACK_CLASS_QUIET) == 0) {
+        out_tracks[0] = NULL;
+    } else {
+        out_tracks[0] = tracks[0];
+        ++count;
+    }
+    if ((class_mask & TRACK_CLASS_ACTION) == 0) {
+        out_tracks[1] = NULL;
+    } else {
+        out_tracks[1] = tracks[1];
+        ++count;
+    }
+    if ((class_mask & TRACK_CLASS_4) == 0) {
+        out_tracks[2] = NULL;
+    } else {
+        out_tracks[2] = tracks[2];
+        ++count;
+    }
+    if ((class_mask & TRACK_CLASS_8) == 0) {
+        out_tracks[3] = NULL;
+    } else {
+        out_tracks[3] = tracks[3];
+        ++count;
+    }
+    if ((class_mask & TRACK_CLASS_CUTSCENE) == 0) {
+        out_tracks[4] = NULL;
+    } else {
+        out_tracks[4] = tracks[4];
+        ++count;
+    }
+    if ((class_mask & TRACK_CLASS_NOMUSIC) == 0) {
+        out_tracks[5] = NULL;
+    } else {
+        out_tracks[5] = tracks[5];
+        ++count;
     }
     return count;
 }

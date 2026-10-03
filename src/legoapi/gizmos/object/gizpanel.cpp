@@ -552,8 +552,10 @@ static i32 GizPanel_Load(void *world_ptr, void *) {
         const i32 name_length = EdFileReadInt();
         EdFileRead(panel_sys->panels[index].name, name_length);
         EdFileReadNuVec(&panel_sys->panels[index].position);
-        panel_sys->panels[index].y_rotation = EdFileReadUnsignedShort();
-        panel_sys->panels[index].model_variant = EdFileReadChar();
+        GIZPANEL &yaw_panel = panel_sys->panels[index];
+        yaw_panel.y_rotation = EdFileReadUnsignedShort();
+        GIZPANEL &variant_panel = panel_sys->panels[index];
+        variant_panel.model_variant = EdFileReadChar();
 
         if (version <= 2) {
             GIZPANEL *panel = &panel_sys->panels[index];
@@ -562,37 +564,39 @@ static i32 GizPanel_Load(void *world_ptr, void *) {
             panel->target_offset.z = -0.4f;
             panel->target_scale = 1.0f;
         } else {
-            const u8 hide_base = static_cast<u8>(EdFileReadChar()) & 1;
             GIZPANEL &panel = panel_sys->panels[index];
+            const u8 hide_base = static_cast<u8>(EdFileReadChar()) & 1;
             panel.flags = static_cast<GIZPANEL_FLAGS>((panel.flags & ~GIZPANEL_FLAG_HIDE_BASE) | (hide_base << 5));
             if (version != 3) {
                 EdFileReadNuVec(&panel_sys->panels[index].target_offset);
-                panel_sys->panels[index].target_scale = EdFileReadFloat();
+                GIZPANEL &scale_panel = panel_sys->panels[index];
+                scale_panel.target_scale = EdFileReadFloat();
                 if (version != 4) {
-                    const u8 hide_target = static_cast<u8>(EdFileReadChar()) & 1;
                     GIZPANEL &current_panel = panel_sys->panels[index];
+                    const u8 hide_target = static_cast<u8>(EdFileReadChar()) & 1;
                     current_panel.flags = static_cast<GIZPANEL_FLAGS>(
                         (current_panel.flags & ~GIZPANEL_FLAG_HIDE_TARGET) | (hide_target << 6));
                     if (version != 5) {
-                        const i8 baddie = EdFileReadChar();
                         GIZPANEL &baddie_panel = panel_sys->panels[index];
-                        baddie_panel.flags =
-                            static_cast<GIZPANEL_FLAGS>((baddie_panel.flags & ~GIZPANEL_FLAG_BADDIE) | (baddie << 7));
-                        const u8 alt_model = static_cast<u8>(EdFileReadChar()) & 1;
+                        const i8 baddie = EdFileReadChar();
+                        baddie_panel.flags = static_cast<GIZPANEL_FLAGS>((baddie_panel.flags & ~GIZPANEL_FLAG_BADDIE) |
+                                                                         (static_cast<u32>(baddie) << 7));
                         GIZPANEL &model_panel = panel_sys->panels[index];
+                        const u8 alt_model = static_cast<u8>(EdFileReadChar()) & 1;
                         model_panel.draw_flags = static_cast<GIZPANEL_DRAW_FLAGS>(
                             (model_panel.draw_flags & ~GIZPANEL_DRAW_FLAG_ALT_MODEL) | alt_model);
                         if (version != 6) {
-                            const u8 no_shadow_reset = static_cast<u8>(EdFileReadChar()) & 1;
                             GIZPANEL &shadow_panel = panel_sys->panels[index];
+                            const u8 no_shadow_reset = static_cast<u8>(EdFileReadChar()) & 1;
                             shadow_panel.draw_flags = static_cast<GIZPANEL_DRAW_FLAGS>(
                                 (shadow_panel.draw_flags & ~GIZPANEL_DRAW_FLAG_NO_SHADOW_RESET) |
                                 (no_shadow_reset << 1));
                             if (version != 7) {
                                 GIZPANEL &legacy_panel = panel_sys->panels[index];
+                                const bool legacy = EdFileReadChar() != 0;
                                 legacy_panel.draw_flags = static_cast<GIZPANEL_DRAW_FLAGS>(
                                     (legacy_panel.draw_flags & ~GIZPANEL_DRAW_FLAG_LEGACY) |
-                                    ((EdFileReadChar() != 0) ? GIZPANEL_DRAW_FLAG_LEGACY : 0));
+                                    (legacy ? GIZPANEL_DRAW_FLAG_LEGACY : 0));
                             }
                         }
                     }
@@ -606,7 +610,9 @@ static i32 GizPanel_Load(void *world_ptr, void *) {
             }
         }
         GIZPANEL &panel = panel_sys->panels[index];
-        panel.draw_flags = static_cast<GIZPANEL_DRAW_FLAGS>(panel.draw_flags & ~GIZPANEL_DRAW_FLAG_LEGACY);
+        if (version <= 7) {
+            panel.draw_flags = static_cast<GIZPANEL_DRAW_FLAGS>(panel.draw_flags & ~GIZPANEL_DRAW_FLAG_LEGACY);
+        }
         ++index;
     } while (index < panel_sys->count);
     return 1;
