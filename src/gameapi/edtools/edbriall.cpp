@@ -328,7 +328,7 @@ extern "C" i32 edbriLoadPage(char *path, void *gscn) {
         count = 64 - edbri_bridges_used;
     i32 index = 0;
     i32 i = 0;
-    while (i < count) {
+    while (count > 0 && i != count) {
         while (index < 64 && edBridges[index].connection_index != 0xff)
             ++index;
         if (index >= 64) {

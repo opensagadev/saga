@@ -76,7 +76,8 @@ void GuidedMissile_Move(PART_s *part, float time) {
         NuVecSub(&direction, &part->recipient->apiobj.collision_position, &part->position);
         i32 yaw = NuAtan2D(direction.x, direction.z);
         NuVecRotateY(&direction, &direction, -yaw);
-        i32 pitch = -NuAtan2D(part->recipient->apiobj.collision_position.y + 0.5f - part->position.y, direction.z);
+        direction.y = part->recipient->apiobj.collision_position.y + 0.5f - part->position.y;
+        i32 pitch = -NuAtan2D(direction.y, direction.z);
         part->rotation_x = SeekRot(part->rotation_x, static_cast<u16>(pitch), 1.0f);
         part->rotation_y = SeekRot(part->rotation_y, static_cast<u16>(yaw), 3.0f);
         part->field_124[3] = guided_rotate_speed;

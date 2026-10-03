@@ -117,13 +117,13 @@ i32 InModelListDataFlags(APICHARACTERMODELLIST_s *models, u32 model_flags, u32 g
             return FindModelListDataFlags<true, true, false>(models, model_flags, game_flags, first_id);
         return FindModelListDataFlags<true, false, false>(models, model_flags, game_flags, first_id);
     }
-    if (reject_flag_80 != 0) {
-        if (reject_flag_40 != 0)
+    if (reject_flag_40 != 0) {
+        if (reject_flag_80 != 0)
             return FindModelListDataFlags<false, true, true>(models, model_flags, game_flags, first_id);
-        return FindModelListDataFlags<false, false, true>(models, model_flags, game_flags, first_id);
-    }
-    if (reject_flag_40 != 0)
         return FindModelListDataFlags<false, true, false>(models, model_flags, game_flags, first_id);
+    }
+    if (reject_flag_80 != 0)
+        return FindModelListDataFlags<false, false, true>(models, model_flags, game_flags, first_id);
     return FindModelListDataFlags<false, false, false>(models, model_flags, game_flags, first_id);
 }
 

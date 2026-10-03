@@ -75,7 +75,7 @@ void AddCoinsToPanel(i32 coins, nuvec_s *position, i32 player, float, GameObject
             player = -1;
         NUVEC target;
         target.x = player == 1 ? PANEL_COINX : -PANEL_COINX;
-        bool main_total = CoinsGoToMainTotal() != 0;
+        i32 main_total = CoinsGoToMainTotal() != 0;
         f32 target_scale;
         if (main_total) {
             target.y = STATSPOSY;
