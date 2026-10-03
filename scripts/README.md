@@ -34,7 +34,8 @@ table in `README.md`. Unsupported clang-tidy modes are omitted: macOS has no
 native mode, and Apple Silicon has no direct target mode.
 `.github/workflows/pages.yaml` builds the WASM target, runs
 `//scripts:plot_binary_match_map` against that committed report, assembles the
-browser assets, and deploys the homepage, progress explorer, and player as
+browser assets, and deploys the homepage, progress explorer, player, and unlisted
+nudat unpacker as
 static files. The player loads game data after selecting an OBB or opening an
 OBB URL and starts when the data is ready. The browser loads remote OBB
 URLs directly, so those origins must permit cross-origin requests; there is no

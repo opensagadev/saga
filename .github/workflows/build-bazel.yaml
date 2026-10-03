@@ -33,6 +33,17 @@ jobs:
           npm run build
           git diff --exit-code -- site.css
 
+  unpacker:
+    name: DAT unpacker
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Test browser unpacker
+        run: node --check scripts/site/unpack.js
+
   checks:
     name: Repository checks
     runs-on: ubuntu-latest

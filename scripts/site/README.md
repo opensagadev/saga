@@ -1,12 +1,17 @@
 # Site templates
 
 `home.html` is the homepage. `head.html`, `header.html`, and `footer.html` are shared by the
-homepage, progress explorer, and player. `head.html` owns the favicon and stylesheet links.
+homepage, progress explorer, player, and unlisted `/unpack/` page. `head.html` owns the favicon and stylesheet links.
 The Python generator fills their markers and copies the
 styles into the generated site. Internal links are relative so custom domains
 and GitHub project URLs both work.
 
-All three pages use the same compiled Tailwind CSS 4.3.3 stylesheet. With Node.js 24 and npm installed:
+`unpack.html` and `unpack.js` are the unpacker's two files. Its styles are
+inline in the HTML; the JavaScript includes the nudat WASM decoder and also runs
+as the decoder and download workers. The page has no navigation link and asks
+crawlers not to index it; anyone with its URL can still open it.
+
+All four pages use the same compiled Tailwind CSS 4.3.3 stylesheet. With Node.js 24 and npm installed:
 
 ```sh
 npm --prefix scripts/site ci

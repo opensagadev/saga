@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Unpack archives | opensaga</title>
+  <!--__HEAD__-->
+  <style>
+[hidden] { display: none !important; }
+#drop-area { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 16px 24px; margin-top: 24px; }
+#drop-area.dragging { outline: 2px solid var(--accent); outline-offset: 10px; }
+.picker-option { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
+.picker-option p { color: var(--muted); font-size: 13px; margin: 0; }
+#summary, .help { color: var(--muted); font-size: 14px; }
+#activity { margin-top: 20px; }
+.progress-heading { display: flex; align-items: baseline; gap: 16px; justify-content: space-between; }
+#status { margin: 0; min-height: 24px; overflow-wrap: anywhere; }
+#progress-percent { font-weight: 600; font-variant-numeric: tabular-nums; flex-shrink: 0; }
+#status.error, #errors { color: var(--danger); }
+#archive { margin-top: 24px; }
+#filename { overflow-wrap: anywhere; }
+#summary { margin: 6px 0 16px; }
+.file-browser { border: 1px solid var(--ui-border-strong); border-radius: 6px; overflow: hidden; background: var(--surface); }
+.browser-search { padding: 12px 14px 4px; }
+#search { width: 100%; min-height: 40px; font-size: 14px; padding: 8px 12px; }
+.selection { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; padding: 12px 14px; font-size: 14px; }
+#count { color: var(--muted); }
+input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--accent); vertical-align: middle; margin-right: 8px; flex-shrink: 0; cursor: pointer; }
+.browser-columns, .browser-row { display: grid; grid-template-columns: minmax(0,1fr) 86px; align-items: center; gap: 12px; padding: 0 14px; }
+.browser-columns { min-height: 34px; background: var(--surface-alt); border-block: 1px solid var(--ui-border); font-size: 12px; font-weight: 600; color: var(--muted); }
+.browser-columns > :last-child { text-align: right; }
+#files { height: clamp(420px, 60vh, 680px); overflow: auto; }
+.browser-row { height: 44px; font-size: 14px; }
+.browser-row:hover, .browser-row:has(input:checked) { background: var(--surface-alt); }
+.browser-row:has(input:checked) { box-shadow: inset 3px 0 var(--accent); }
+.browser-name { display: flex; align-items: center; gap: 0; min-width: 0; height: 100%; }
+.archive-tree-indent { width: calc(var(--depth) * 20px); flex-shrink: 0; }
+.archive-tree-toggle, .archive-tree-spacer { width: 20px; height: 100%; flex-shrink: 0; display: grid; place-items: center; }
+.archive-tree-toggle { position: relative; cursor: pointer; color: var(--muted); }
+.archive-tree-toggle::before { content: ''; width: 6px; height: 6px; border-right: 1.5px solid; border-bottom: 1.5px solid; transform: rotate(-45deg); z-index: 1; }
+.archive-tree-toggle[aria-expanded="true"]::before { transform: rotate(45deg); }
+.archive-tree-toggle:hover { color: var(--accent); }
+.browser-name input { margin: 0 10px 0 8px; }
+.entry-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left; color: var(--text); }
+button.entry-name { cursor: pointer; font-weight: 500; padding: 0; height: 100%; flex: 1; }
+button.entry-name:hover { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+.browser-icon { width: 20px; height: 20px; margin-right: 10px; color: var(--muted); flex-shrink: 0; }
+.browser-icon.folder { color: var(--accent); }
+.browser-icon svg { display: block; width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.file-size { color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; text-align: right; }
+.browser-bottom { border-top: 1px solid var(--ui-border); display: flex; align-items: center; justify-content: space-between; min-height: 36px; padding: 5px 14px; font-size: 12px; color: var(--muted); }
+#more { cursor: pointer; color: var(--accent); }
+.help { margin-top: 12px; }
+#errors { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 160px; overflow: auto; }
+#cancel { margin-top: 12px; }
+#progress { margin-top: 12px; }
+.site-actions { gap: 10px; margin-top: 18px; }
+.empty { padding: 20px 14px; color: var(--muted); font-size: 14px; }
+.browser-notice { margin-top: 24px; padding: 16px; border: 1px solid var(--ui-border-strong); border-radius: 4px; font-size: 16px; }
+@media (max-width: 520px) {
+  .browser-columns, .browser-row { grid-template-columns: minmax(0,1fr) 75px; gap: 8px; padding-inline: 10px; }
+  #files { height: 308px; }
+}
+</style>
+</head>
+<body>
+  <div id="site-shell">
+    <!--__HEADER__-->
+    <main class="site-content">
+      <div class="site-container">
+        <h1 class="site-title">Unpack DAT &amp; OBB files</h1>
+        <p id="unsupported" class="browser-notice" role="alert" hidden>Use a current Chrome, Edge, or Firefox over HTTPS or localhost.</p>
+        <div id="controls" hidden>
+          <div id="drop-area">
+            <div class="picker-option">
+              <label class="primary-button file-picker">Open DAT/OBB files<input id="file" type="file" accept=".dat,.DAT,.obb" multiple aria-label="Choose DAT or OBB files"></label>
+              <p>Select one or more DAT or OBB archives.</p>
+            </div>
+            <div id="folder-option" class="picker-option">
+              <label class="secondary-button file-picker">Open game folder<input id="folder" type="file" webkitdirectory multiple aria-label="Choose a game folder"></label>
+              <p>Find DAT and OBB archives in the folder and its subfolders.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <section id="archive" hidden aria-label="Archive contents">
+        <div class="site-container">
+          <h2 id="filename" class="site-subtitle"></h2>
+          <p id="summary"></p>
+        </div>
+        <div class="site-container"><div class="file-browser">
+          <div class="browser-search"><input id="search" class="text-input" type="search" aria-label="Search files" placeholder="Search files…" autocomplete="off"></div>
+          <div class="selection"><label><input id="select-all" type="checkbox"> Select all</label><span id="count"></span></div>
+          <div role="table" aria-label="Archive files"><div class="browser-columns" role="row"><span role="columnheader">Name</span><span role="columnheader">Size</span></div><div id="files" role="rowgroup"></div></div>
+          <div class="browser-bottom"><span id="listing-count"></span><button id="more" type="button" hidden>Show more</button></div>
+        </div></div>
+        <div class="site-container">
+          <div class="site-actions"><button id="extract" class="primary-button" type="button" disabled>Download ZIP</button></div>
+        </div>
+      </section>
+      <section id="activity" class="site-container" aria-label="Progress and messages" hidden>
+        <div class="progress-heading"><p id="status" role="status" aria-live="polite"></p><output id="progress-percent" hidden aria-label="Progress">0%</output></div>
+        <progress id="progress" class="site-progress" hidden max="1" value="0" aria-label="Progress"></progress>
+        <p id="errors" class="help" role="alert" hidden></p>
+        <button id="cancel" class="secondary-button" type="button" hidden>Cancel</button>
+      </section>
+    </main>
+    <!--__FOOTER__-->
+  </div>
+  <script src="./unpack.js" defer></script>
+</body>
+</html>

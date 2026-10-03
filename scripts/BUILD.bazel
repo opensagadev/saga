@@ -12,6 +12,8 @@ filegroup(
         "site/header.html",
         "site/site.css",
         "site/home.html",
+        "site/unpack.html",
+        "site/unpack.js",
     ] + glob(["site/assets/*.svg", "site/assets/*.png"]),
 )
 

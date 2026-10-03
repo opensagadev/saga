@@ -6,3 +6,4 @@ favicon.svg
 coi-serviceworker.js
 saga.js
 saga.wasm
+unpack/
