@@ -335,8 +335,6 @@ WORLDINFO *WORLD = &WorldInfo[0];
 
 f32 g_BgLoadDelayHackTimer;
 
-static i32 EditBufferEndSize = 0;
-
 volatile i32 waiting_for_level;
 i32 level_already_loaded = -1;
 i32 next_level;
@@ -1067,20 +1065,21 @@ void WorldInfo_ReArrangeBuffers(i32 area1, i32 area2) {
     } else if ((ADataList[area1].flags & AREAFLAG_SINGLE_BUFFER) != 0) {
         LWORLD = &WorldInfo[0];
         WORLD = &WorldInfo[0];
-        if (WorldInfo[0].unknown_0108.addr < bufferEnd->addr) {
+        if (WorldInfo[0].unknown_0108.addr >= bufferEnd->addr) {
             return;
         }
+        usize end = bufferEnd->addr;
         bufferEnd->addr = WorldInfo[0].unknown_0108.addr;
-        WorldInfo[0].unknown_0108.addr = bufferEnd->addr - EditBufferEndSize;
+        WorldInfo[0].unknown_0108.addr = end - EDITBUFFERENDSIZE;
         return;
     }
 
-    if (WorldInfo[0].unknown_0108.addr < bufferEnd->addr) {
+    if (WorldInfo[0].unknown_0108.addr <= bufferEnd->addr) {
         return;
     }
     usize end = WorldInfo[0].unknown_0108.addr;
     WorldInfo[0].unknown_0108.addr = bufferEnd->addr;
-    bufferEnd->addr = end + EditBufferEndSize;
+    bufferEnd->addr = end + EDITBUFFERENDSIZE;
 }
 
 extern "C" {

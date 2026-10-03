@@ -519,8 +519,6 @@ static i32 levspl_i_startcam = -1;
 void LevelSplines_InitForGame(LEVELSPLINE *splines) {
     LevSplList = splines;
     LEVELSPLINECOUNT = 0;
-    levspl_i_start = -1;
-    levspl_i_startcam = -1;
 
     if (splines == NULL) {
         return;
