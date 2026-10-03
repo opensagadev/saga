@@ -6,6 +6,7 @@
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nutrig.h"
 
+#include <float.h>
 #include <string.h>
 
 static VARIPTR fstack;
@@ -272,6 +273,35 @@ static __used__ void roomRecursive(NUGSCN *scene, NUFRUSTRUM *frustum, i16 room_
 
         NUFRUSTRUM *next_frustum = NULL;
         if (inside_tests == frustum->plane_count * portal->vertex_count) {
+            if (draw_portals != 0) {
+                NuCameraUnlock();
+                NUVEC direction;
+                for (i32 i = 0; i < portal->vertex_count; ++i) {
+                    NUVEC *first = &portal->vertices[i];
+                    NUVEC *second = &portal->vertices[(i + 1) % portal->vertex_count];
+                    NuVecSub(&direction, first, second);
+                    NuRndrLine3dDbg(first->x, first->y, first->z, second->x, second->y, second->z,
+                                    static_cast<i32>(0xffff00ffU));
+                }
+                NUVEC nearest_point = {0.0f, 0.0f, 0.0f};
+                for (i32 i = 0; i < portal->vertex_count; ++i) {
+                    NUVEC *vertex = &portal->vertices[i];
+                    NuVecSub(&direction, vertex, &world_campos);
+                    NuVecNorm(&direction, &direction);
+                    f32 nearest_distance = FLT_MAX;
+                    for (i32 plane_index = 0; plane_index < next->plane_count; ++plane_index) {
+                        NUVEC point;
+                        const f32 distance = NuPlnLine3(&next->planes[plane_index], vertex, &direction, &point);
+                        if (distance > 0.0f && distance < nearest_distance) {
+                            nearest_point = point;
+                            nearest_distance = distance;
+                        }
+                    }
+                    NuRndrLine3dDbg(nearest_point.x, nearest_point.y, nearest_point.z, vertex->x, vertex->y, vertex->z,
+                                    static_cast<i32>(0xffff00ffU));
+                }
+                NuCameraRelock();
+            }
             next_frustum = buildPortalFrustrum(portal, next_room);
         } else {
             i32 in_front = 0;

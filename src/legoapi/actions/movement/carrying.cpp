@@ -199,7 +199,7 @@ void SuperCarry_Throw(GameObject_s *object, i32 mode) {
     }
     if (SuperCarry_KeepObjectLevel == 0) {
         NUVEC position = *NUMTX_GET_ROW_VEC(&matrix, 3);
-        NUMTX basis = numtx_identity;
+        NUMTX basis;
         *NUMTX_GET_ROW_VEC(&basis, 0) = object->carried_object_basis[0];
         *NUMTX_GET_ROW_VEC(&basis, 1) = object->carried_object_basis[1];
         *NUMTX_GET_ROW_VEC(&basis, 2) = object->carried_object_basis[2];
