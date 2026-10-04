@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 69.138756,
+    "fuzzy_match_percent": 69.13984,
     "total_code": "4722419",
-    "matched_code": "527029",
-    "matched_code_percent": 11.16015,
+    "matched_code": "527124",
+    "matched_code_percent": 11.162161,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 6300,
-    "matched_functions_percent": 46.808826,
+    "matched_functions": 6301,
+    "matched_functions_percent": 46.816257,
     "total_units": 1
   },
   "text": {
@@ -98392,7 +98392,7 @@
           "address": 2868432,
           "offset": 1978464,
           "size": 95,
-          "match_percent": 46.125
+          "match_percent": 100.0
         },
         {
           "name": "NuAnimEndFrame",
