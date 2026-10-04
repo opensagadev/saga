@@ -179,7 +179,7 @@ extern "C" {
             return static_cast<f32>((*key_mask >> ((frame - 1) & 0x1f)) & 1);
         }
 
-        u32 key = 0;
+        i32 key = 0;
         switch (time->time_byte) {
             case 0:
                 key = BitCountTable[reinterpret_cast<u8 *>(key_mask)[0] & time->time_mask];
@@ -201,7 +201,7 @@ extern "C" {
                 break;
         }
         f32 result = 0.0f;
-        u32 key_offset = data->key_offsets[time->chunk];
+        i32 key_offset = data->key_offsets[time->chunk];
 
         switch (type) {
             case 1: {

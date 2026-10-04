@@ -347,8 +347,9 @@ i32 DecompressHuffmanTrees(DEFLATECONTEXT *ctx) {
         return false;
     }
 
-    // A final repeat can extend 137 entries beyond the 286 literal/length and 32 distance codes.
-    u8 allCodeLengths[286 + 32 + 137];
+    // The five-bit counts can describe 288 literal/length and 32 distance codes,
+    // including reserved literal counts; a final repeat can extend another 137 entries.
+    u8 allCodeLengths[288 + 32 + 137];
 
     i32 i = 0;
     while (i < hlit + hdist) {
