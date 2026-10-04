@@ -47,7 +47,7 @@ extern i32 TwistLevel(LEVELDATA_s *level);
 
 void CurrentStart(GameObject_s *object, i32 require_twist_level, i32 use_socket_rotation) {
     WORLDINFO_s *world = WorldInfo_CurrentlyActive();
-    object->field_0xc3c = 0;
+    *reinterpret_cast<f32 *>(&object->field_0xc3c) = 0.0f;
     if (object->field_0x661 == 0xff || world->sock_sys == NULL)
         return;
 
@@ -61,7 +61,7 @@ void CurrentStart(GameObject_s *object, i32 require_twist_level, i32 use_socket_
         (object->field_0xf02 & 0x20) == 0 ? object->current_speed_mul : object->current_speed_multiplier;
     current.z *= multiplier;
     if (use_socket_rotation == 0) {
-        NuVecRotateY(&object->apiobj.velocity, &object->apiobj.velocity, object->apiobj.movement_facing_angle);
+        NuVecRotateY(&object->apiobj.velocity, &object->apiobj.velocity, object->apiobj.field_0x276);
     } else {
         NuVecRotateX(&object->apiobj.velocity, &current, object->sock_position.midpoint_rotation.x);
         NuVecRotateY(&object->apiobj.velocity, &object->apiobj.velocity, object->sock_position.midpoint_rotation.y);

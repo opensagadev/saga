@@ -145,7 +145,7 @@ i32 IntersectWater(GameObject_s *object) {
     if (water_height > object->apiobj.collision_max.y) {
         return 0;
     }
-    return object->apiobj.collision_min.y <= water_height;
+    return !(object->apiobj.collision_min.y > water_height);
 }
 
 void SurfaceMaskOff(u32 *surface_mask) {

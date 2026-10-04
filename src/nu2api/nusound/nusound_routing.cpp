@@ -30,28 +30,30 @@ const char *NuSoundRoutingTable::GetName() const {
 }
 
 NuSoundRoutingTable::NuSoundRoutingTable(char const *table_name) {
-    intrusive_prev = NULL;
     intrusive_next = NULL;
+    intrusive_prev = NULL;
     name_capacity = sizeof(name_storage);
     name_length = 1;
     name = name_storage;
     name_storage[0] = '\0';
 
-    name_length = static_cast<u16>(strlen(table_name) + 1);
-    memcpy(name, table_name, name_length);
+    const u16 copy_length = static_cast<u16>(strlen(table_name) + 1);
+    memcpy(name, table_name, copy_length);
+    name_length = copy_length;
     memset(matrices, 0, sizeof(matrices));
 }
 
 NuSoundRoutingTable::NuSoundRoutingTable(char const *table_name, NuSoundRoutingTable const *parent) {
-    intrusive_prev = NULL;
     intrusive_next = NULL;
+    intrusive_prev = NULL;
     name_capacity = sizeof(name_storage);
     name_length = 1;
     name = name_storage;
     name_storage[0] = '\0';
 
-    name_length = static_cast<u16>(strlen(table_name) + 1);
-    memcpy(name, table_name, name_length);
+    const u16 copy_length = static_cast<u16>(strlen(table_name) + 1);
+    memcpy(name, table_name, copy_length);
+    name_length = copy_length;
     memset(matrices, 0, sizeof(matrices));
 
     for (i32 from = 0; from < 6; ++from) {
