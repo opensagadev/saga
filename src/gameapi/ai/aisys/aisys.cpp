@@ -555,11 +555,11 @@ __used__ static i32 Action_Kill(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET
     GameObject_s *excluded = NULL;
     AIAREA *area = NULL;
     i32 creature_set = 0;
-    bool all_ai = false;
-    bool check_if_dead = false;
-    bool debris = false;
-    bool parts_on = false;
-    bool respawn = false;
+    i32 all_ai = 0;
+    i32 check_if_dead = 0;
+    i32 debris = 0;
+    i32 parts_on = 0;
+    i32 respawn = 0;
     bool respawn_at_origin = false;
 
     for (i32 index = 0; index < param_4; ++index) {
@@ -575,34 +575,34 @@ __used__ static i32 Action_Kill(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET
             continue;
         }
         if (NuStrICmp(params[index], "respawn") == 0) {
-            respawn = true;
+            respawn = 1;
             continue;
         }
         if (NuStrICmp(params[index], "respawn_at_origin") == 0) {
-            respawn = true;
+            respawn = 1;
             respawn_at_origin = true;
             continue;
         }
         value = NuStrIStr(params[index], "all_ai_except");
         if (value != NULL) {
             excluded = GetNamedGameObject(sys, value + 14);
-            all_ai = true;
+            all_ai = 1;
             continue;
         }
         if (NuStrICmp(params[index], "all_ai") == 0) {
-            all_ai = true;
+            all_ai = 1;
             continue;
         }
         if (NuStrICmp(params[index], "check_if_dead") == 0) {
-            check_if_dead = true;
+            check_if_dead = 1;
             continue;
         }
         if (NuStrICmp(params[index], "debris") == 0) {
-            debris = true;
+            debris = 1;
             continue;
         }
         if (NuStrICmp(params[index], "parts_on") == 0) {
-            parts_on = true;
+            parts_on = 1;
             continue;
         }
         value = NuStrIStr(params[index], "set=");
@@ -617,15 +617,13 @@ __used__ static i32 Action_Kill(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET
         }
     }
 
-    const auto may_kill = [check_if_dead](GameObject_s *candidate) {
-        return candidate != NULL &&
-               (candidate->apiobj.field_0x1f8 & (APIOBJECT_FLAG_IN_USE | APIOBJECT_FLAG_CHARACTER)) ==
-                   (APIOBJECT_FLAG_IN_USE | APIOBJECT_FLAG_CHARACTER) &&
-               (!check_if_dead || (candidate->apiobj.field_0x287 == 0 && candidate->field_0x101c <= 0.0f));
+    const auto has_group_flags = [](GameObject_s *candidate) {
+        return (candidate->apiobj.field_0x1f8 & (APIOBJECT_FLAG_IN_USE | APIOBJECT_FLAG_CHARACTER)) ==
+               (APIOBJECT_FLAG_IN_USE | APIOBJECT_FLAG_CHARACTER);
     };
     const auto kill = [respawn, respawn_at_origin, debris, parts_on](GameObject_s *candidate) {
-        candidate->field_0xefa = static_cast<u8>((candidate->field_0xefa & 0xcfu) | (respawn ? 0x10u : 0u) |
-                                                 (respawn_at_origin ? 0x20u : 0u));
+        candidate->field_0xefa = static_cast<u8>((candidate->field_0xefa & 0xcfu) | (static_cast<u8>(respawn) << 4) |
+                                                 (static_cast<u8>(respawn_at_origin) << 5));
         if (parts_on) {
             KillParts(candidate, -1, -1, 1, 0.0f, 0, NULL);
         }
@@ -635,12 +633,15 @@ __used__ static i32 Action_Kill(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET
             KillGameObject(candidate, 4, 0);
     };
 
+    // Group scans require the object array; the reference checks group
+    // membership before applying the optional dead-state filter.
     if (Obj == NULL && (all_ai || creature_set != 0 || area != NULL))
         return 1;
     if (all_ai) {
         GameObject_s *candidate = Obj;
         for (i32 index = 0; index < HIGHGAMEOBJECT; ++index, ++candidate) {
-            if (may_kill(candidate) && (candidate->apiobj.field_0x1f4 & 0x400u) != 0 && candidate != excluded)
+            if (has_group_flags(candidate) && (candidate->apiobj.field_0x1f4 & 0x400u) != 0 && candidate != excluded &&
+                (!check_if_dead || (candidate->apiobj.field_0x287 == 0 && candidate->field_0x101c <= 0.0f)))
                 kill(candidate);
         }
         return 1;
@@ -648,7 +649,8 @@ __used__ static i32 Action_Kill(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET
     if (creature_set != 0) {
         GameObject_s *candidate = Obj;
         for (i32 index = 0; index < HIGHGAMEOBJECT; ++index, ++candidate) {
-            if (may_kill(candidate) && candidate->ai.creature_set == creature_set)
+            if (has_group_flags(candidate) && candidate->ai.creature_set == creature_set &&
+                (!check_if_dead || (candidate->apiobj.field_0x287 == 0 && candidate->field_0x101c <= 0.0f)))
                 kill(candidate);
         }
         return 1;
@@ -656,7 +658,7 @@ __used__ static i32 Action_Kill(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET
     if (area != NULL) {
         GameObject_s *candidate = Obj;
         for (i32 index = 0; index < HIGHGAMEOBJECT; ++index, ++candidate) {
-            if (!may_kill(candidate)) {
+            if (candidate == NULL || !has_group_flags(candidate)) {
                 continue;
             }
             if (area->system != NULL && area->system->areas != NULL) {
@@ -669,7 +671,8 @@ __used__ static i32 Action_Kill(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET
             } else {
                 continue;
             }
-            kill(candidate);
+            if (!check_if_dead || (candidate->apiobj.field_0x287 == 0 && candidate->field_0x101c <= 0.0f))
+                kill(candidate);
         }
         return 1;
     }
