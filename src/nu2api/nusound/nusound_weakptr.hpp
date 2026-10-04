@@ -29,8 +29,8 @@ struct NuSoundWeakPtrListNode {
 template <typename T> class NuSoundWeakPtrObj {
   public:
     // The original object is also the list's head sentinel.  The second
-    // sentinel begins eight bytes into the object; the two cached pointers
-    // at +0x14/+0x18 address those sentinels.
+    // sentinel begins two pointer widths into the object (eight bytes on
+    // Android x86); the cached pointers address those biased sentinels.
     NuSoundWeakPtrListNode *head_sentinel_prev;
     NuSoundWeakPtrListNode *head_sentinel_next;
     NuSoundWeakPtrListNode *tail_sentinel_prev;
@@ -42,11 +42,11 @@ template <typename T> class NuSoundWeakPtrObj {
   public:
     NuSoundWeakPtrObj() {
         this->head_sentinel_prev = NULL;
-        this->head_sentinel_next = (NuSoundWeakPtrListNode *)((u8 *)this + 8);
+        this->head_sentinel_next = (NuSoundWeakPtrListNode *)((u8 *)this + 2 * sizeof(NuSoundWeakPtrListNode *));
         this->tail_sentinel_prev = (NuSoundWeakPtrListNode *)this;
         this->tail_sentinel_next = NULL;
         this->head = (NuSoundWeakPtrListNode *)this;
-        this->tail = (NuSoundWeakPtrListNode *)((u8 *)this + 8);
+        this->tail = (NuSoundWeakPtrListNode *)((u8 *)this + 2 * sizeof(NuSoundWeakPtrListNode *));
         this->weak_count = 0;
     }
 
