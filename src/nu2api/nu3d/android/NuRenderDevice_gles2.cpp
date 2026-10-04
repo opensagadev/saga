@@ -57,9 +57,10 @@ void BeginCriticalSectionGL(const char *file, i32 line) {
 void SAGA_HOST_WEAK NuRenderDevice::EndCriticalSection(const char * /*file*/, i32 /*line*/) {
     if (--this->lock_count == 0) {
         const i32 context_index = gt_glContextIndex;
+        const bool context_requires_detach = !this->field54_0x54;
         const bool render_state_requires_detach = static_cast<u32>(this->field50_0x50 - 2) <= 1;
         const i32 application_status = NuCore::GetApplicationState()->GetStatus();
-        if (render_state_requires_detach || !this->field54_0x54 || context_index != 0 || application_status == 1) {
+        if (render_state_requires_detach || context_requires_detach || context_index != 0 || application_status == 1) {
             eglMakeCurrent(this->egl_display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
         }
     }

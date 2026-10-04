@@ -115,6 +115,7 @@ void Hub_LoadAndFixUpMiniKits(WORLDINFO *world, VARIPTR *buf, VARIPTR *buf_end) 
     buf->addr += static_cast<usize>(AREACOUNT) * sizeof(*world->minikit_pieces_buf);
 
     for (i32 i = 0; i < AREACOUNT; ++i) {
+        world->minikit_pieces_buf[i] = NULL;
         if ((ADataList[i].flags & AREAFLAG_MINIKIT) == 0 || ADataList[i].minikit_id == -1) {
             continue;
         }

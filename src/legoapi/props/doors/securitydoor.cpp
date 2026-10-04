@@ -328,9 +328,9 @@ static void SecurityDoors_Reset(void *world_data, void *, void *progress_data) {
 
     SECURITYDOORPROGRESS *progress = static_cast<SECURITYDOORPROGRESS *>(progress_data);
     for (i32 i = 0; i < world->security_door_count; ++i, ++door) {
+        door->player_position.y = 0.0f;
         door->player_position.x = 0.0f;
-        door->player_position.z = 0.0f;
-        door->player_position.y = 0.4f;
+        door->player_position.z = 0.4f;
         NuVecRotateY(&door->player_position, &door->player_position, door->yaw);
         NuVecAdd(&door->player_position, &door->player_position, &door->position);
 
