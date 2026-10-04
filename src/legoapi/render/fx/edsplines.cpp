@@ -45,11 +45,11 @@ i32 BezierLinePos(VuVec &result, VuVec &start, VuVec &first_control, VuVec &end,
     f32 t = 0.5f;
     for (i32 count = 256; count != 0; --count) {
         f32 complement = 1.0f - t;
-        VuVec first{first_control.x * complement + start.x * t, first_control.y * complement + start.y * t,
-                    first_control.z * complement + start.z * t, 0.0f};
         VuVec middle{second_control.x * complement + first_control.x * t,
                      second_control.y * complement + first_control.y * t,
                      second_control.z * complement + first_control.z * t, 0.0f};
+        VuVec first{first_control.x * complement + start.x * t, first_control.y * complement + start.y * t,
+                    first_control.z * complement + start.z * t, 0.0f};
         VuVec last{end.x * complement + second_control.x * t, end.y * complement + second_control.y * t,
                    end.z * complement + second_control.z * t, 0.0f};
         VuVec first_middle{middle.x * complement + first.x * t, middle.y * complement + first.y * t,
@@ -60,7 +60,7 @@ i32 BezierLinePos(VuVec &result, VuVec &start, VuVec &first_control, VuVec &end,
                     middle_last.z * complement + first_middle.z * t, 1.0f};
         f32 length = BezierLineLength(start, first, point, first_middle);
         f32 difference = distance - length;
-        if (!(difference >= 0.0f))
+        if (difference < 0.0f)
             difference = -difference;
         if (!(difference > 0.01f)) {
             result = point;
