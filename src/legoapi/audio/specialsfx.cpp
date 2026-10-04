@@ -180,14 +180,11 @@ void EngineNoiseCode(GameObject_s *object, i32 silent) {
     if (silent == 0) {
         f32 speed;
         if (object->apiobj.player_controlled) {
-            speed = object->field_0xdc8;
-            if (speed < 0.0f) {
-                speed = -speed;
-            }
+            speed = __builtin_fabsf(object->field_0xdc8);
         } else {
             speed = object->apiobj.velocity_magnitude / character->movement_speed;
         }
-        target = speed <= 1.0f ? speed : 1.0f;
+        target = 1.0f < speed ? 1.0f : speed;
     }
 
     f32 &engine_level = object->force_use_volume;
@@ -196,9 +193,10 @@ void EngineNoiseCode(GameObject_s *object, i32 silent) {
     if (!object->apiobj.player_controlled) {
         volume *= 0.6f;
     }
+    f32 pitch = engine_level * 0.4f + 0.6f;
+    pitch += (static_cast<f32>(static_cast<i32>(object->apiobj.field_0x289)) / 63.0f) * 0.05f - 0.025f;
     f32 variation = static_cast<f32>(qrand()) * 1.5259022e-5f * 0.03f + 0.985f;
-    f32 pitch = variation *
-                ((static_cast<f32>(object->apiobj.field_0x289) / 63.0f) * 0.05f - 0.025f + engine_level * 0.4f + 0.6f);
+    pitch *= variation;
     PlaySfxByIdAndSetVolumeAndPitch(sfx_id, &object->apiobj.collision_position, volume, pitch);
 }
 
