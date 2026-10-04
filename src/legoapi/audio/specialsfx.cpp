@@ -282,12 +282,10 @@ void UpdateSpecialSfx(WORLDINFO_s *world) {
             f32 previous = event->previous_frame;
             f32 trigger = event->trigger_frame;
             if ((flags & 2) != 0) {
-                if (direction == 0) {
-                    if ((flags & 4) != 0 && trigger <= frame && frame <= previous) {
+                if ((direction == 0 && (flags & 4) != 0) || (flags & 0xc) == 0xc) {
+                    if (trigger <= frame && frame <= previous) {
                         play = true;
                     }
-                } else if ((flags & 0xc) == 0xc && trigger <= frame && frame <= previous) {
-                    play = true;
                 } else if (direction == 1 && (flags & 8) != 0 && frame <= trigger && trigger <= previous) {
                     play = true;
                 }
@@ -312,7 +310,9 @@ void UpdateSpecialSfx(WORLDINFO_s *world) {
                     continue;
                 }
             }
-            event->previous_frame = frame;
+            if ((event->flags & 2) == 0) {
+                event->previous_frame = frame;
+            }
             event = event->next;
         }
         entry->animation_playing = (animation->flags & NUINSTANIM_FLAG_PLAYING) != 0;

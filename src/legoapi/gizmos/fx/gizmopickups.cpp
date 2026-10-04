@@ -536,7 +536,7 @@ static void GizmoPickup_Activate(GIZMO *gizmo, i32 activate) {
                 if (type->debris_id != -1) {
                     i32 debris_id = type->debris_id;
                     if ((pickup->state_flags & GIZMOPICKUP_STATE_ALTERNATE_TYPE) != 0) {
-                        debris_id = GizmoPickupSys->types[GizmoPickupSys->alternate_type].debris_id;
+                        debris_id = GizmoPickupSys->types[GizmoPickupSys->gizmo_type_id].debris_id;
                     }
                     AddGameDebris(world->debris_sys, debris_id, &pickup->position);
                 }

@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 69.14558,
+    "fuzzy_match_percent": 69.14909,
     "total_code": "4722419",
-    "matched_code": "527124",
-    "matched_code_percent": 11.162161,
+    "matched_code": "527368",
+    "matched_code_percent": 11.167327,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 6301,
-    "matched_functions_percent": 46.816257,
+    "matched_functions": 6302,
+    "matched_functions_percent": 46.823685,
     "total_units": 1
   },
   "text": {
@@ -43350,7 +43350,7 @@
           "address": 5010992,
           "offset": 4121024,
           "size": 882,
-          "match_percent": 61.101265
+          "match_percent": 68.535866
         },
         {
           "name": "_Z17SetSpecialSfxBitsPiS_P11WORLDINFO_s",
@@ -56871,7 +56871,7 @@
           "address": 4979200,
           "offset": 4089232,
           "size": 493,
-          "match_percent": 55.37226
+          "match_percent": 55.379562
         },
         {
           "name": "_ZL22GizmoPickups_AddGizmosP10GIZMOSYS_siPvS1_",
@@ -81932,7 +81932,7 @@
           "address": 3455296,
           "offset": 2565328,
           "size": 244,
-          "match_percent": 57.984848
+          "match_percent": 100.0
         },
         {
           "name": "_Z21CreateUsefulMaterialsv",
@@ -81972,7 +81972,7 @@
           "address": 5120432,
           "offset": 4230464,
           "size": 699,
-          "match_percent": 74.42105
+          "match_percent": 74.22369
         },
         {
           "name": "_Z14IntersectWaterP12GameObject_s",
