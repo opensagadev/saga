@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 69.13984,
+    "fuzzy_match_percent": 69.142075,
     "total_code": "4722419",
     "matched_code": "527124",
     "matched_code_percent": 11.162161,
@@ -56323,7 +56323,7 @@
           "address": 5029712,
           "offset": 4139744,
           "size": 444,
-          "match_percent": 55.01852
+          "match_percent": 79.18519
         },
         {
           "name": "_Z26GizSpinner_GetTargetPointsP12GIZSPINNER_sP7nuvec_sS2_",
@@ -56339,7 +56339,7 @@
           "address": 5030880,
           "offset": 4140912,
           "size": 690,
-          "match_percent": 70.8606
+          "match_percent": 70.67879
         },
         {
           "name": "_Z24GizSpinner_GetSpinnerPosP12GIZSPINNER_sP7nuvec_s",
@@ -56355,7 +56355,7 @@
           "address": 5031632,
           "offset": 4141664,
           "size": 313,
-          "match_percent": 57.910255
+          "match_percent": 57.71795
         },
         {
           "name": "_Z15GizSpinner_FindP11WORLDINFO_sP7nuvec_si",

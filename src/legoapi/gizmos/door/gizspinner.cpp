@@ -1281,13 +1281,14 @@ static i32 GizSpinner_BoltHitPlat(void *, void *spinner_ptr, BOLT *bolt, unsigne
 
     bool active = (spinner->flags & (GIZSPINNER_FLAG_HIDE_ARM | SPINNER_RUNTIME_ANIMATION_HIDDEN)) == 0;
     if (spinner->platform_id != bolt->hit_platform) {
+        const i32 arm_count = spinner->type;
         i32 arm;
-        for (arm = 0; arm < spinner->type; ++arm) {
+        for (arm = 0; arm != arm_count; ++arm) {
             if (spinner->arms[arm].platform_id == bolt->hit_platform) {
                 break;
             }
         }
-        if (arm == spinner->type) {
+        if (arm == arm_count) {
             return 0;
         }
     } else if (!active) {
