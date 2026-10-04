@@ -1383,26 +1383,29 @@ extern "C" {
     void Text3DEx(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32, u32 alignment, u8 red, u8 green,
                   u8 blue, i32 alpha) {
         text3d_width = text3d_height = 0.0f;
-        VUFNT *font = SmartTextFont != NULL ? SmartTextFont : QFont2D;
-        if (font == NULL || text == NULL || text[0] == '\0' || MenuStopDraw != 0 || x < -2.0f || x > 2.0f ||
-            y < -2.0f || y > 2.0f)
+        if ((SmartTextFont == NULL && QFont2D == NULL) || text == NULL || text[0] == '\0' || MenuStopDraw != 0)
             return;
-        f32 draw_x_scale = APITEXTSCALEX * x_scale;
-        f32 draw_y_scale = APITEXTSCALEY * y_scale;
+        // The reference captures API scales before callbacks and reloads the active font for each operation.
+        f32 draw_x_scale = APITEXTSCALEX;
+        f32 draw_y_scale = APITEXTSCALEY;
+        if (x < -2.0f || x > 2.0f || y < -2.0f || y > 2.0f)
+            return;
         NuQFntPushPrintMode(smarttext_fwn == 0 ? 2 : 3);
         unsigned char decoded[512];
         TextDecode(text, decoded);
-        font = SmartTextFont != NULL ? SmartTextFont : QFont2D;
         if (followon_line == 0)
-            NuQFntSet(font);
+            NuQFntSet(SmartTextFont != NULL ? SmartTextFont : QFont2D);
+        draw_x_scale *= x_scale;
+        draw_y_scale *= y_scale;
         u16 encoded[512];
         Text3DStringEncode(reinterpret_cast<char *>(decoded), encoded);
-        NuQFntSetScale(font, draw_x_scale * QFONTSCALEX, draw_y_scale * QFONTSCALEY);
-        f32 width = NuQFntPrintLenW(font, encoded);
+        NuQFntSetScale(SmartTextFont != NULL ? SmartTextFont : QFont2D, draw_x_scale * QFONTSCALEX,
+                       draw_y_scale * QFONTSCALEY);
+        f32 width = NuQFntPrintLenW(SmartTextFont != NULL ? SmartTextFont : QFont2D, encoded);
         text3d_width = width;
-        f32 height = NuQFntHeight(font);
+        f32 height = NuQFntHeight(SmartTextFont != NULL ? SmartTextFont : QFont2D);
         text3d_height = height;
-        f32 draw_y = y + NuQFntBaseline(font) - height * 0.5f;
+        f32 draw_y = y + NuQFntBaseline(SmartTextFont != NULL ? SmartTextFont : QFont2D) - height * 0.5f;
         f32 button_scale = draw_x_scale;
         if (draw_x_scale != draw_y_scale) {
             if (ButtonScaleMode == 1)
@@ -1426,13 +1429,15 @@ extern "C" {
             u16 button_encoded[512], normal_encoded[512];
             if (button_count != 0) {
                 Text3DStringEncode(reinterpret_cast<char *>(buttons), button_encoded);
-                NuQFntSetScale(font, button_scale * QFONTSCALEX, button_scale * QFONTSCALEY);
-                button_width = NuQFntPrintLenW(font, button_encoded);
+                NuQFntSetScale(SmartTextFont != NULL ? SmartTextFont : QFont2D, button_scale * QFONTSCALEX,
+                               button_scale * QFONTSCALEY);
+                button_width = NuQFntPrintLenW(SmartTextFont != NULL ? SmartTextFont : QFont2D, button_encoded);
             }
             if (normal_count != 0) {
                 Text3DStringEncode(reinterpret_cast<char *>(normal), normal_encoded);
-                NuQFntSetScale(font, draw_x_scale * QFONTSCALEX, draw_y_scale * QFONTSCALEY);
-                normal_width = NuQFntPrintLenW(font, normal_encoded);
+                NuQFntSetScale(SmartTextFont != NULL ? SmartTextFont : QFont2D, draw_x_scale * QFONTSCALEX,
+                               draw_y_scale * QFONTSCALEY);
+                normal_width = NuQFntPrintLenW(SmartTextFont != NULL ? SmartTextFont : QFont2D, normal_encoded);
             }
             if (normal_width != 0.0f) {
                 draw_x_scale = (width - button_width) / normal_width * draw_x_scale;
@@ -1451,19 +1456,25 @@ extern "C" {
         if ((alignment & 2) == 0)
             x -= (alignment & 8) != 0 ? width : width * 0.5f;
         const u32 opacity = static_cast<u32>(alpha) << 24;
-        u32 base_colour = opacity | red | (static_cast<u32>(green) << 8) | (static_cast<u32>(blue) << 16);
-        if (apitext_half_rgb != 0)
-            base_colour =
-                opacity | (red >> 1) | (static_cast<u32>(green >> 1) << 8) | (static_cast<u32>(blue >> 1) << 16);
-        if (followon_line == 0)
-            current_rgba = base_colour;
+        if (followon_line == 0) {
+            if (apitext_half_rgb == 0)
+                current_rgba = opacity | red | (static_cast<u32>(green) << 8) | (static_cast<u32>(blue) << 16);
+            else
+                current_rgba =
+                    opacity | (red >> 1) | (static_cast<u32>(green >> 1) << 8) | (static_cast<u32>(blue >> 1) << 16);
+        }
         unsigned char fragment[1024];
         i32 count = 0;
         bool button_font = false;
         for (i32 i = 0; decoded[i] != 0 && count < 509;) {
             if (decoded[i] == '~' && (decoded[i + 1] == '~' || (decoded[i + 1] >= '0' && decoded[i + 1] <= '9'))) {
-                u32 colour = base_colour;
-                if (decoded[i + 1] != '~') {
+                u32 colour;
+                if (decoded[i + 1] == '~') {
+                    colour = opacity | red | (static_cast<u32>(green) << 8) | (static_cast<u32>(blue) << 16);
+                    if (apitext_half_rgb != 0)
+                        colour = opacity | (red >> 1) | (static_cast<u32>(green >> 1) << 8) |
+                                 (static_cast<u32>(blue >> 1) << 16);
+                } else {
                     colour = opacity;
                     if (red != 0 || green != 0 || blue != 0) {
                         const i32 preset = decoded[i + 1] - '0';
@@ -1487,13 +1498,21 @@ extern "C" {
                 continue;
             }
             const bool next_button = decoded[i] == 0xd4 && decoded[i + 1] >= 0xb1 && decoded[i + 1] <= 0xbf;
-            if (count != 0 && next_button != button_font) {
-                fragment[count] = 0;
-                x += TextPrintSubstring(fragment, x, draw_y, z, button_font ? button_scale : draw_x_scale,
-                                        button_font ? button_scale : draw_y_scale, current_rgba, button_font);
-                count = 0;
+            if (next_button) {
+                if (!button_font && count != 0) {
+                    fragment[count] = 0;
+                    x += TextPrintSubstring(fragment, x, draw_y, z, draw_x_scale, draw_y_scale, current_rgba, 0);
+                    count = 0;
+                }
+                button_font = true;
+            } else {
+                if (button_font && count != 0) {
+                    fragment[count] = 0;
+                    x += TextPrintSubstring(fragment, x, draw_y, z, button_scale, button_scale, current_rgba, 1);
+                    count = 0;
+                }
+                button_font = false;
             }
-            button_font = next_button;
             fragment[count++] = decoded[i++];
             while ((decoded[i] & 0xc0) == 0x80)
                 fragment[count++] = decoded[i++];
