@@ -1,0 +1,41 @@
+---
+name: Animation loader formats
+
+# GitHub Actions requires this key even though YAML 1.1 treats it as truthy.
+# yamllint disable-line rule:truthy
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+permissions:
+  contents: read
+
+jobs:
+  animation:
+    name: Animation loader formats / Linux i686
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install 32-bit C++ runtime and GLES headers
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y g++-multilib libgles-dev
+
+      - name: Setup Bazel
+        uses: bazel-contrib/setup-bazel@0.19.0
+        with:
+          bazelisk-cache: true
+          disk-cache: bazel-${{ github.workflow }}-animation
+          repository-cache: true
+          external-cache: true
+          cache-save: ${{ github.event_name != 'pull_request' }}
+
+      - name: Run bounded actual-provider loader tests
+        run: bazel test //tests/animation:pak_loader_test
+
+      - name: Run optimized actual-provider loader tests
+        run: >-
+          bazel test --config=native_release //tests/animation:pak_loader_test
