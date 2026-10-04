@@ -205,27 +205,30 @@ i32 NuFilePakGetItemInfo(void *hdr_ptr, i32 item_handle, void **addr, i32 *size)
 }
 
 i32 NuFilePakCondense(void *hdr_ptr) {
+    // This operation uses the engine's signed-size C++ move provider.
+    extern void memmove(void *dest, const void *source, i32 size);
     fpk_err = NUFILEPAK_ERROR_NONE;
 
     NUFILEPAKHDR *hdr = static_cast<NUFILEPAKHDR *>(hdr_ptr);
     NUFILEPAKITEM *items = GetItems(hdr);
+    char *data = static_cast<char *>(hdr_ptr);
     i32 removed_size = 0;
     for (u32 i = 0; i < hdr->item_count; ++i) {
-        NUFILEPAKITEM &item = items[i];
-        if (!item.attr.removed) {
-            if (item.attr.required) {
-                if (removed_size != 0 && item.alignment != 0) {
-                    removed_size &= -item.alignment;
-                }
+        if (!items[i].attr.removed) {
+            if (items[i].attr.required) {
                 if (removed_size != 0) {
-                    memmove(static_cast<char *>(hdr_ptr) + item.data_offset - removed_size,
-                            static_cast<char *>(hdr_ptr) + item.data_offset, item.size);
-                    item.data_offset -= removed_size;
+                    if (items[i].alignment != 0) {
+                        removed_size &= -items[i].alignment;
+                    }
+                    if (removed_size != 0) {
+                        memmove(data + items[i].data_offset - removed_size, data + items[i].data_offset, items[i].size);
+                        items[i].data_offset -= removed_size;
+                    }
                 }
             } else {
-                item.attr.removed = 1;
-                removed_size += item.size;
-                removed_size = (removed_size + item.alignment - 1) & -item.alignment;
+                items[i].attr.removed = 1;
+                removed_size += items[i].size;
+                removed_size = (removed_size + items[i].alignment - 1) & -items[i].alignment;
             }
         }
     }

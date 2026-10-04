@@ -291,12 +291,16 @@ static void SecurityDoors_StoreProgress(void *world_data, void *, void *progress
     progress->activated = 0;
 
     WORLDINFO *world = static_cast<WORLDINFO *>(world_data);
-    if (world == NULL || world->security_doors == NULL || world->security_door_count <= 0) {
+    if (world == NULL || world->security_doors == NULL) {
+        return;
+    }
+    const i32 count = world->security_door_count;
+    if (count <= 0) {
         return;
     }
 
     SECURITYDOOR *door = world->security_doors;
-    for (i32 i = 0; i < world->security_door_count && i < 32; ++i, ++door) {
+    for (i32 i = 0; i != count && i != 32; ++i, ++door) {
         const u32 mask = 1U << i;
         const i32 word = i >> 5;
         if (!door->visible) {

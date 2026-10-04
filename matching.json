@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 69.128456,
+    "fuzzy_match_percent": 69.138756,
     "total_code": "4722419",
-    "matched_code": "526773",
-    "matched_code_percent": 11.154728,
+    "matched_code": "527029",
+    "matched_code_percent": 11.16015,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 6298,
-    "matched_functions_percent": 46.79397,
+    "matched_functions": 6300,
+    "matched_functions_percent": 46.808826,
     "total_units": 1
   },
   "text": {
@@ -41729,7 +41729,7 @@
           "address": 4098464,
           "offset": 3208496,
           "size": 97,
-          "match_percent": 34.166668
+          "match_percent": 100.0
         },
         {
           "name": "_Z26AIPathCnxSetTemporaryBlockP8AIPATH_sPcS1_i",
@@ -72920,7 +72920,7 @@
           "address": 1968976,
           "offset": 1079008,
           "size": 159,
-          "match_percent": 99.680855
+          "match_percent": 100.0
         },
         {
           "name": "_ZL20SecurityDoors_UpdatePvS_f",
@@ -72944,7 +72944,7 @@
           "address": 1970592,
           "offset": 1080624,
           "size": 174,
-          "match_percent": 45.88889
+          "match_percent": 84.888885
         },
         {
           "name": "_Z25SecurityDoors_InitTerrainP11WORLDINFO_s",
@@ -102031,7 +102031,7 @@
           "address": 4415056,
           "offset": 3525088,
           "size": 845,
-          "match_percent": 55.627193
+          "match_percent": 72.17105
         },
         {
           "name": "_Z23NuGCutLocatorIsVisble_3P15NUGCUTLOCATOR_sfPfS1_",
@@ -107934,7 +107934,7 @@
           "address": 2486024,
           "offset": 1596056,
           "size": 530,
-          "match_percent": 52.022346
+          "match_percent": 92.50279
         },
         {
           "name": "NuFilePakRelocate",

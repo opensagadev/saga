@@ -80,7 +80,7 @@ i32 AIPathCheckExtents(AIPATH *path, NUVEC *position) {
         position->x > path->bounds_max.x || position->y > path->bounds_max.y) {
         return 0;
     }
-    return position->z <= path->bounds_max.z;
+    return !(position->z > path->bounds_max.z);
 }
 
 __attribute__((force_align_arg_pointer)) void pathEditorDrawNode(nuvec_s *position, float radius, float lower_height,
