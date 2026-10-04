@@ -1049,19 +1049,21 @@ struct NuQFntVertex {
 };
 
 static inline u16 NuQFntFloatToHalf(f32 value) {
+    // The reference packs signed intermediates into a 16-bit result.
     union {
         f32 value;
         u32 bits;
     } conversion = {value};
-    i32 exponent = static_cast<i32>((conversion.bits >> 23) & 0xff) - 0x70;
-    u16 half_exponent = 0;
+    i32 sign = conversion.bits >> 31;
+    i32 exponent = ((conversion.bits >> 23) & 0xff) - 112;
+    i32 mantissa = conversion.bits & 0x7fffff;
+    i16 half_exponent = 0;
     if (exponent >= 0) {
-        half_exponent = 0x7c00;
-        if (exponent < 0x20)
-            half_exponent = static_cast<u16>(exponent << 10);
+        i16 candidate = static_cast<i16>(exponent << 10);
+        half_exponent = exponent > 31 ? static_cast<i16>(0x7c00) : candidate;
     }
-    return static_cast<u16>((conversion.bits & 0x7fffff) >> 13) | static_cast<u16>((conversion.bits >> 31) << 15) |
-           half_exponent;
+    i16 result = (sign << 15) | (mantissa >> 13) | half_exponent;
+    return *reinterpret_cast<const u16 *>(&result);
 }
 
 static inline void NuQFntSetVertexAttributes(NuQFntVertex *vertex, u32 colour, u32 half_colour, f32 u, f32 v) {
