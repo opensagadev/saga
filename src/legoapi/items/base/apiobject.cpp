@@ -719,8 +719,8 @@ extern "C" {
                              i32 extra_capacity, CHARACTERDATA *cdata_list, APICHARACTERLIGHTFN set_creature_lights) {
         (void)buf_end;
 
+        apicharsys = reinterpret_cast<APICHARACTERSYS *>(ALIGN(buf->addr, 0x10));
         buf->addr = ALIGN(buf->addr, 0x10);
-        apicharsys = (APICHARACTERSYS *)buf->void_ptr;
         buf->addr += sizeof(*apicharsys);
         memset(apicharsys, 0, sizeof(*apicharsys));
 
@@ -729,45 +729,44 @@ extern "C" {
         apicharsys->model_id_capacity = model_id_capacity;
         apicharsys->animation_capacity = extra_capacity;
 
-        if (model_capacity != 0) {
+        if (apicharsys->model_capacity != 0) {
+            apicharsys->models = reinterpret_cast<APICHARACTERMODEL *>(ALIGN(buf->addr, 4));
             buf->addr = ALIGN(buf->addr, 4);
-            apicharsys->models = (APICHARACTERMODEL *)buf->void_ptr;
-            buf->addr += (usize)model_capacity * sizeof(*apicharsys->models);
-            memset(apicharsys->models, 0, (usize)model_capacity * sizeof(*apicharsys->models));
+            buf->addr += (usize)apicharsys->model_capacity * sizeof(*apicharsys->models);
+            memset(apicharsys->models, 0, (usize)apicharsys->model_capacity * sizeof(*apicharsys->models));
 
-            for (i32 i = 0; i < model_capacity; i++) {
+            for (i32 i = 0; i < apicharsys->model_capacity; i++) {
                 APICHARACTERMODEL *model = &apicharsys->models[i];
-                if (model_id_capacity != 0) {
-                    usize table_size = (usize)model_id_capacity * sizeof(void *);
-
+                if (apicharsys->model_id_capacity != 0) {
+                    model->model_data_a = reinterpret_cast<void **>(ALIGN(buf->addr, 4));
                     buf->addr = ALIGN(buf->addr, 4);
-                    model->model_data_a = (void **)buf->void_ptr;
-                    buf->addr += table_size;
+                    buf->addr += static_cast<usize>(apicharsys->model_id_capacity) * sizeof(void *);
 
+                    model->model_data_b = reinterpret_cast<void **>(ALIGN(buf->addr, 4));
                     buf->addr = ALIGN(buf->addr, 4);
-                    model->model_data_b = (void **)buf->void_ptr;
-                    buf->addr += table_size;
+                    buf->addr += static_cast<usize>(apicharsys->model_id_capacity) * sizeof(void *);
 
+                    model->model_data_c = reinterpret_cast<void **>(ALIGN(buf->addr, 4));
                     buf->addr = ALIGN(buf->addr, 4);
-                    model->model_data_c = (void **)buf->void_ptr;
-                    buf->addr += table_size;
+                    buf->addr += static_cast<usize>(apicharsys->model_id_capacity) * sizeof(void *);
                 }
                 APICharacterModelReset(model);
             }
         }
 
-        if (char_count != 0) {
+        if (apicharsys->character_count != 0) {
+            apicharsys->playermodelids = reinterpret_cast<i16 *>(ALIGN(buf->addr, 4));
             buf->addr = ALIGN(buf->addr, 4);
-            apicharsys->playermodelids = buf->i16_ptr;
-            buf->addr += (usize)char_count * sizeof(*apicharsys->playermodelids);
-            memset(apicharsys->playermodelids, 0, (usize)char_count * sizeof(*apicharsys->playermodelids));
+            buf->addr += (usize)apicharsys->character_count * sizeof(*apicharsys->playermodelids);
+            memset(apicharsys->playermodelids, 0,
+                   (usize)apicharsys->character_count * sizeof(*apicharsys->playermodelids));
         }
 
-        if (extra_capacity != 0) {
+        if (apicharsys->animation_capacity != 0) {
+            apicharsys->animations = reinterpret_cast<ANIMLIST_s *>(ALIGN(buf->addr, 4));
             buf->addr = ALIGN(buf->addr, 4);
-            apicharsys->animations = (ANIMLIST_s *)buf->void_ptr;
-            buf->addr += (usize)extra_capacity * sizeof(*apicharsys->animations);
-            memset(apicharsys->animations, 0, (usize)extra_capacity * sizeof(*apicharsys->animations));
+            buf->addr += (usize)apicharsys->animation_capacity * sizeof(*apicharsys->animations);
+            memset(apicharsys->animations, 0, (usize)apicharsys->animation_capacity * sizeof(*apicharsys->animations));
         }
 
         apicharsys->char_data = cdata_list;
@@ -2024,46 +2023,51 @@ extern "C" {
         return -1;
     }
 
+    extern i32 EDPP_MAX_TYPES;
+
     APIDEBRISSYS_s *InitGameDebris(VARIPTR *cursor, VARIPTR end, i32 count, i32 flags, char **names, char page) {
         (void)end;
         if (cursor->addr == 0) {
             return NULL;
         }
 
-        APIDEBRISSYS_s *sys = BUFFER_ALLOC_T(cursor, APIDEBRISSYS_s);
-        sys->named_count = flags;
-        sys->capacity = count;
-        sys->entries = BUFFER_ALLOC_ARRAY(cursor, count, GAMEDEBRISENTRY_s);
+        APIDEBRISSYS_s *sys = reinterpret_cast<APIDEBRISSYS_s *>(ALIGN(cursor->addr, 0x10));
+        cursor->addr = ALIGN(cursor->addr, 0x10);
+        cursor->addr += sizeof(*sys);
+        if (sys != NULL) {
+            memset(sys, 0, sizeof(*sys));
+            sys->capacity = count;
+            sys->named_count = flags;
+            sys->entries = reinterpret_cast<GAMEDEBRISENTRY_s *>(ALIGN(cursor->addr, 0x10));
+            cursor->addr = ALIGN(cursor->addr, 0x10);
+            cursor->addr += static_cast<usize>(count) * sizeof(*sys->entries);
+            if (sys->entries != NULL) {
+                memset(sys->entries, 0xff, static_cast<usize>(count) * sizeof(*sys->entries));
 
-        memset(sys->entries, 0xff, static_cast<usize>(count) * sizeof(*sys->entries));
-
-        // Seed the named entries from the debris_name table.
-        for (i32 i = 0; i < sys->named_count; i++) {
-            GAMEDEBRISENTRY_s &entry = sys->entries[i];
-            NuStrCpy(entry.name, names[i]);
-            entry.effect = LookupDebrisEffectPage(entry.name, page);
-        }
-
-        // The original appends the currently registered page effects after
-        // the fixed debris_name set.  effecttypes[0] is reserved, and the
-        // pointer table is append-only while pages are loaded.
-        i32 i = sys->named_count;
-        for (i32 j = 1; i < sys->capacity && j < edpp_types_used; j++) {
-            debinftype *effect = debtab != NULL ? debtab[j] : NULL;
-            if (effect == NULL) {
-                break;
+                i32 i;
+                for (i = 0; i < sys->named_count; i++) {
+                    NuStrCpy(sys->entries[i].name, names[i]);
+                    sys->entries[i].effect = -1;
+                    sys->entries[i].effect = LookupDebrisEffectPage(sys->entries[i].name, page);
+                }
+                for (i32 j = 1; i < sys->capacity && j < EDPP_MAX_TYPES; j++) {
+                    if (debtab == NULL) {
+                        break;
+                    }
+                    sys->entries[i].effect = -1;
+                    if (debtab[j] != NULL) {
+                        NuStrCpy(sys->entries[i].name, debtab[j]->name);
+                        sys->entries[i].effect = LookupDebrisEffectPageOnly(sys->entries[i].name, page);
+                        i++;
+                    }
+                }
+                for (; i < sys->capacity; i++) {
+                    sys->entries[i].effect = -1;
+                }
+                return sys;
             }
-            GAMEDEBRISENTRY_s &entry = sys->entries[i];
-            NuStrCpy(entry.name, effect->name);
-            entry.effect = LookupDebrisEffectPageOnly(entry.name, page);
-            i++;
         }
-
-        for (; i < sys->capacity; i++) {
-            sys->entries[i].effect = -1;
-        }
-
-        return sys;
+        return NULL;
     }
 
     i32 AddGameDebris(APIDEBRISSYS_s *system, i32 type, NUVEC *position) {

@@ -1434,7 +1434,7 @@ extern "C" {
                 displacement.z = scratch.z - candidate->midpoint.z;
                 half_width =
                     (half_width + NuFsqrt(displacement.x * displacement.x + displacement.z * displacement.z)) * 0.5f;
-                lateral_ratio = half_width <= 0.0f ? 0.0f : magnitude / half_width * working_scale;
+                lateral_ratio = half_width > 0.0f ? magnitude / half_width * working_scale : 0.0f;
             }
 
             if (lateral_ratio != 0.0f && (sock->flags & SOCK_FLAG_PROJECT_CAMERA_FROM_PLAYER) == 0) {
@@ -1476,23 +1476,23 @@ extern "C" {
                 candidate_camera.y += sock->camera_vertical_ratio * (average_camera_position.y - candidate->midpoint.y);
             }
 
-            if (!((sock->camera_arena_blend.x <= 0.0f && sock->camera_arena_blend.y <= 0.0f &&
-                   sock->camera_arena_blend.z <= 0.0f) ||
-                  (sock->camera_arena_offset.x == 0.0f && sock->camera_arena_offset.y == 0.0f &&
-                   sock->camera_arena_offset.z == 0.0f))) {
+            if ((sock->camera_arena_blend.x > 0.0f || sock->camera_arena_blend.y > 0.0f ||
+                 sock->camera_arena_blend.z > 0.0f) &&
+                (sock->camera_arena_offset.x != 0.0f || sock->camera_arena_offset.y != 0.0f ||
+                 sock->camera_arena_offset.z != 0.0f)) {
                 NuVecAdd(&scratch, &average_player_position, &sock->camera_arena_offset);
-                if (sock->camera_arena_blend.x >= 1.0f)
-                    candidate_camera.x = scratch.x;
-                else
+                if (1.0f > sock->camera_arena_blend.x)
                     candidate_camera.x += (scratch.x - candidate_camera.x) * sock->camera_arena_blend.x;
-                if (sock->camera_arena_blend.y >= 1.0f)
-                    candidate_camera.y = scratch.y;
                 else
+                    candidate_camera.x = scratch.x;
+                if (1.0f > sock->camera_arena_blend.y)
                     candidate_camera.y += (scratch.y - candidate_camera.y) * sock->camera_arena_blend.y;
-                if (sock->camera_arena_blend.z >= 1.0f)
-                    candidate_camera.z = scratch.z;
                 else
+                    candidate_camera.y = scratch.y;
+                if (1.0f > sock->camera_arena_blend.z)
                     candidate_camera.z += (scratch.z - candidate_camera.z) * sock->camera_arena_blend.z;
+                else
+                    candidate_camera.z = scratch.z;
                 if ((sock->flags & SOCK_FLAG_CLAMP_TARGET_Y) != 0) {
                     candidate_camera.y = EnforceSockYLimits(candidate_camera.y, candidate, sock_sys);
                 }

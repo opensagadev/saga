@@ -416,56 +416,75 @@ extern "C" {
         f32 maximum_x = -FLT_MAX;
         f32 minimum_z = FLT_MAX;
         f32 maximum_z = -FLT_MAX;
-        for (i32 index = 0; index < 128 && set->lights[index].type != 0; ++index) {
-            rtl_s *light = &set->lights[index];
+        rtl_s *light;
+        for (light = set->lights; light < set->lights + 128 && light->type != 0; ++light) {
             minimum_x = MIN(minimum_x, light->position.x - light->outer_radius);
             maximum_x = MAX(maximum_x, light->position.x + light->outer_radius);
             minimum_z = MIN(minimum_z, light->position.z - light->outer_radius);
             maximum_z = MAX(maximum_z, light->position.z + light->outer_radius);
         }
 
-        const f32 width = maximum_x - minimum_x;
-        const f32 depth = maximum_z - minimum_z;
-        if (minimum_x > maximum_x || minimum_z > maximum_z || width <= 0.0f || depth <= 0.0f) {
+        if (minimum_x > maximum_x || minimum_z > maximum_z)
             return;
-        }
-
+        // The reference writes offsets before checking the derived extents.
         grid->offset_x = -minimum_x;
         grid->offset_z = -minimum_z;
-        if (width <= depth) {
+        maximum_x -= minimum_x;
+        maximum_z -= minimum_z;
+        if (maximum_x <= 0.0f || maximum_z <= 0.0f)
+            return;
+        if (maximum_x <= maximum_z) {
             grid->depth = 16;
-            grid->width = MIN(static_cast<i32>(width * 16.0f / depth) + 1, 16);
-            grid->scale = 16.0f / depth;
+            grid->width = MIN(static_cast<i32>(maximum_x * 16.0f / maximum_z) + 1, 16);
+            grid->scale = 16.0f / maximum_z;
         } else {
             grid->width = 16;
-            grid->depth = MIN(static_cast<i32>(depth * 16.0f / width) + 1, 16);
-            grid->scale = 16.0f / width;
+            grid->depth = MIN(static_cast<i32>(maximum_z * 16.0f / maximum_x) + 1, 16);
+            grid->scale = 16.0f / maximum_x;
         }
 
         buffer->addr = ALIGN(buffer->addr, alignof(char *));
         grid->cells = static_cast<char **>(buffer->void_ptr);
-        char **cells = grid->cells;
         buffer->addr += grid->width * grid->depth * sizeof(char *);
 
         for (i32 row = 0; row < grid->depth; ++row) {
             const f32 minimum_cell_z = static_cast<f32>(row) / grid->scale - grid->offset_z;
             const f32 maximum_cell_z = static_cast<f32>(row + 1) / grid->scale - grid->offset_z;
             for (i32 column = 0; column < grid->width; ++column) {
+                grid->cells[row * grid->width + column] = buffer->char_ptr;
+                ++buffer->addr;
+                u8 *indices = reinterpret_cast<u8 *>(grid->cells[row * grid->width + column]);
+                *indices = 0;
                 const f32 minimum_cell_x = static_cast<f32>(column) / grid->scale - grid->offset_x;
                 const f32 maximum_cell_x = static_cast<f32>(column + 1) / grid->scale - grid->offset_x;
-                u8 *indices = buffer->u8_ptr;
-                cells[row * grid->width + column] = reinterpret_cast<char *>(indices);
-                *indices = 0;
-                ++buffer->addr;
 
-                for (i32 index = 0; index < 128 && set->lights[index].type != 0; ++index) {
-                    rtl_s *light = &set->lights[index];
-                    const bool directional = light->type == 5;
-                    const bool overlaps = light->position.x + light->outer_radius >= minimum_cell_x &&
-                                          light->position.x - light->outer_radius <= maximum_cell_x &&
-                                          light->position.z + light->outer_radius >= minimum_cell_z &&
-                                          light->position.z - light->outer_radius <= maximum_cell_z;
-                    if (directional || overlaps) {
+                i32 index = 0;
+                light = set->lights;
+                while (light < set->lights + 128 && light->type != 0) {
+                    // Original JBE overlap branches accept unordered comparisons.
+                    if (light->type != 5) {
+                        if (minimum_cell_x > light->position.x + light->outer_radius) {
+                            ++index;
+                            ++light;
+                            continue;
+                        }
+                        if (light->position.x - light->outer_radius > maximum_cell_x) {
+                            ++index;
+                            ++light;
+                            continue;
+                        }
+                        if (minimum_cell_z > light->position.z + light->outer_radius) {
+                            ++index;
+                            ++light;
+                            continue;
+                        }
+                        if (light->position.z - light->outer_radius > maximum_cell_z) {
+                            ++index;
+                            ++light;
+                            continue;
+                        }
+                    }
+                    {
                         // GetNextRTL's original char count cannot represent 128.
                         // Fall back to the bounded full scan for a full cell.
                         if (indices[0] == 127)
@@ -474,6 +493,8 @@ extern "C" {
                         indices[indices[0]] = static_cast<u8>(index);
                         ++buffer->addr;
                     }
+                    ++index;
+                    ++light;
                 }
             }
         }
@@ -3387,6 +3408,9 @@ static i32 edrtlProcBurn(float delta_time, nupad_s *pad) {
 
 extern "C" void edrtlCalculateBurnout(burnset_s *set, f32 *threshold, f32 *intensity, f32 *dispersion,
                                       NUVEC *camera_position, f32 frame_time) {
+    i32 i;
+    f32 nearest_distance = -1.0f;
+    i32 nearest_index = -1;
     if (set == NULL)
         set = edrtl_edit_burnset;
     if (set == NULL) {
@@ -3396,17 +3420,14 @@ extern "C" void edrtlCalculateBurnout(burnset_s *set, f32 *threshold, f32 *inten
         return;
     }
 
-    f32 nearest_distance = -1.0f;
-    i32 nearest_index = -1;
-    for (i32 i = 0; i < 32; ++i) {
-        burnout_s &burnout = set->burnouts[i];
-        if (!burnout.active)
-            continue;
-        f32 distance = NuVecDist(camera_position, &burnout.position, NULL);
-        if (distance < burnout.field_1c + burnout.field_20 &&
-            (nearest_distance < 0.0f || distance < nearest_distance)) {
-            nearest_index = i;
-            nearest_distance = distance;
+    for (i = 0; i < 32; ++i) {
+        if (set->burnouts[i].active) {
+            f32 distance = NuVecDist(camera_position, &set->burnouts[i].position, NULL);
+            if (distance < set->burnouts[i].field_1c + set->burnouts[i].field_20 &&
+                (nearest_distance < 0.0f || distance < nearest_distance)) {
+                nearest_index = i;
+                nearest_distance = distance;
+            }
         }
     }
 
@@ -3418,39 +3439,51 @@ extern "C" void edrtlCalculateBurnout(burnset_s *set, f32 *threshold, f32 *inten
         desired_intensity = set->parameters.field_14;
         desired_dispersion = set->parameters.field_1c;
     } else {
-        burnout_s &burnout = set->burnouts[nearest_index];
-        if (nearest_distance <= burnout.field_1c) {
-            desired_threshold = burnout.field_10;
-            desired_intensity = burnout.field_14;
-            desired_dispersion = burnout.field_18;
+        if (nearest_distance <= set->burnouts[nearest_index].field_1c) {
+            desired_threshold = set->burnouts[nearest_index].field_10;
+            desired_intensity = set->burnouts[nearest_index].field_14;
+            desired_dispersion = set->burnouts[nearest_index].field_18;
         } else {
-            f32 fraction = (nearest_distance - burnout.field_1c) / burnout.field_20;
-            desired_threshold = burnout.field_10 * (1.0f - fraction) + set->parameters.field_24 * fraction;
-            desired_intensity = burnout.field_14 * (1.0f - fraction) + set->parameters.field_14 * fraction;
-            desired_dispersion = burnout.field_18 * (1.0f - fraction) + set->parameters.field_1c * fraction;
+            f32 fraction =
+                (nearest_distance - set->burnouts[nearest_index].field_1c) / set->burnouts[nearest_index].field_20;
+            desired_threshold =
+                set->burnouts[nearest_index].field_10 * (1.0f - fraction) + set->parameters.field_24 * fraction;
+            desired_intensity =
+                set->burnouts[nearest_index].field_14 * (1.0f - fraction) + set->parameters.field_14 * fraction;
+            desired_dispersion =
+                set->burnouts[nearest_index].field_18 * (1.0f - fraction) + set->parameters.field_1c * fraction;
         }
     }
 
     if (set->field_b4) {
+        // The reference interleaves internal state and output stores, preserving output aliases.
         set->parameters_copy.field_24 = desired_threshold;
+        *threshold = set->parameters_copy.field_24;
         set->parameters_copy.field_14 = desired_intensity;
+        *intensity = set->parameters_copy.field_14;
         set->parameters_copy.field_1c = desired_dispersion;
+        *dispersion = set->parameters_copy.field_1c;
         set->field_b4 = 0;
+        return;
     } else {
         f32 step = set->field_b8 * frame_time;
         if (desired_threshold > set->parameters_copy.field_24) {
-            f32 moved = set->parameters_copy.field_24 + step;
-            set->parameters_copy.field_24 = moved > desired_threshold ? desired_threshold : moved;
+            set->parameters_copy.field_24 = (set->parameters_copy.field_24 + step) > desired_threshold
+                                                ? desired_threshold
+                                                : (set->parameters_copy.field_24 + step);
         } else if (desired_threshold < set->parameters_copy.field_24) {
-            f32 moved = set->parameters_copy.field_24 - step;
-            set->parameters_copy.field_24 = desired_threshold > moved ? desired_threshold : moved;
+            set->parameters_copy.field_24 = desired_threshold > (set->parameters_copy.field_24 - step)
+                                                ? desired_threshold
+                                                : (set->parameters_copy.field_24 - step);
         }
         if (desired_dispersion > set->parameters_copy.field_1c) {
-            f32 moved = set->parameters_copy.field_1c + step;
-            set->parameters_copy.field_1c = desired_dispersion > moved ? desired_dispersion : moved;
+            set->parameters_copy.field_1c = desired_dispersion > (set->parameters_copy.field_1c + step)
+                                                ? desired_dispersion
+                                                : (set->parameters_copy.field_1c + step);
         } else if (desired_dispersion < set->parameters_copy.field_1c) {
-            f32 moved = set->parameters_copy.field_1c - step;
-            set->parameters_copy.field_1c = moved > desired_dispersion ? desired_dispersion : moved;
+            set->parameters_copy.field_1c = (set->parameters_copy.field_1c - step) > desired_dispersion
+                                                ? desired_dispersion
+                                                : (set->parameters_copy.field_1c - step);
         }
 
         if (!set->field_b0 && !set->field_a8 && !set->field_ac) {
@@ -3460,8 +3493,8 @@ extern "C" void edrtlCalculateBurnout(burnset_s *set, f32 *threshold, f32 *inten
                 set->field_ac = 1;
         }
 
-        f32 intensity_target = desired_intensity;
         if (set->field_a8 || set->field_ac) {
+            f32 intensity_target;
             step = set->field_bc * frame_time;
             if (set->field_a8) {
                 intensity_target = desired_intensity + set->field_c4;
@@ -3472,17 +3505,20 @@ extern "C" void edrtlCalculateBurnout(burnset_s *set, f32 *threshold, f32 *inten
                 if (intensity_target < set->field_cc)
                     intensity_target = set->field_cc > desired_intensity ? desired_intensity : set->field_cc;
             }
+            desired_intensity = intensity_target;
         }
-        if (intensity_target > set->parameters_copy.field_14) {
-            f32 moved = set->parameters_copy.field_14 + step;
-            set->parameters_copy.field_14 = moved > intensity_target ? intensity_target : moved;
-        } else if (intensity_target < set->parameters_copy.field_14) {
-            f32 moved = set->parameters_copy.field_14 - step;
-            set->parameters_copy.field_14 = intensity_target > moved ? intensity_target : moved;
+        if (desired_intensity > set->parameters_copy.field_14) {
+            set->parameters_copy.field_14 = (set->parameters_copy.field_14 + step) > desired_intensity
+                                                ? desired_intensity
+                                                : (set->parameters_copy.field_14 + step);
+        } else if (desired_intensity < set->parameters_copy.field_14) {
+            set->parameters_copy.field_14 = desired_intensity > (set->parameters_copy.field_14 - step)
+                                                ? desired_intensity
+                                                : (set->parameters_copy.field_14 - step);
         }
-        if (set->field_b0 && set->parameters_copy.field_14 == intensity_target)
+        if (set->field_b0 && set->parameters_copy.field_14 == desired_intensity)
             set->field_b0 = 0;
-        if ((set->field_a8 || set->field_ac) && set->parameters_copy.field_14 == intensity_target) {
+        if ((set->field_a8 || set->field_ac) && set->parameters_copy.field_14 == desired_intensity) {
             set->field_a8 = 0;
             set->field_ac = 0;
             set->field_b0 = 1;

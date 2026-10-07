@@ -240,11 +240,12 @@ void *NuMemoryManager::_TryBlockAlloc(u32 size, u32 alignment, u32 flags, const 
     }
 
     if (allocated == NULL) {
+        bool page_allocated =
+            this->event_handler != NULL &&
+            this->event_handler->AllocatePage(this, requested_size + minimum_fragment_size + 0x4000, 0x1fffffff);
         pthread_mutex_unlock(&this->mutex);
-        if (this->event_handler == NULL ||
-            !this->event_handler->AllocatePage(this, requested_size + 0x4000, 0x1fffffff)) {
+        if (!page_allocated)
             return NULL;
-        }
         return _TryBlockAlloc(size, alignment, flags, name, category);
     }
 
@@ -454,10 +455,7 @@ void NuMemoryManager::BlockFree(void *ptr, u32 flags) {
 
             right = (Header *)((usize)header + BLOCK_SIZE(header->value));
             if ((right->value & ALLOC_MASK) == 0) {
-                manager->ValidateBlockEndTags(right, "BlockFree[R]");
-                manager->BinUnlink((FreeHeader *)right);
-                header->value = (BLOCK_SIZE(header->value) + BLOCK_SIZE(right->value)) / 4;
-                *END_TAG(header, BLOCK_SIZE(header->value)) = header->value;
+                manager->MergeBlocks(header, right, "BlockFree[R]");
             }
 
             final = (FreeHeader *)header;
@@ -546,14 +544,14 @@ inline void NuMemoryManager::MergeBlocks(Header *left, Header *right, const char
     combined_values = (left->value & BLOCK_SIZE_MASK) + (right->value & BLOCK_SIZE_MASK);
     alloc_value = left->value & ALLOC_MASK;
     new_value = combined_values & 0x3fffffff | alloc_value;
-    combined_no_hi_bit = combined_values & BLOCK_SIZE_MASK;
+    combined_no_hi_bit = new_value & BLOCK_SIZE_MASK;
 
     left->value = new_value;
 
     u32 manager_idx = this->idx;
 
     end_tag = END_TAG(left, combined_no_hi_bit * 4);
-    if ((combined_values & ALLOC_MASK) == 0 && alloc_value == 0) {
+    if ((new_value & ALLOC_MASK) == 0) {
         *end_tag = combined_no_hi_bit;
     } else if (manager_idx < 0x1e) {
         *end_tag = ((manager_idx + 1) << 0x1b) | combined_no_hi_bit;
@@ -1011,11 +1009,14 @@ void NuMemoryManager::ValidateBlockFlags(Header *header, u32 flags, const char *
         return;
 
     char address[19];
-    char requested[64] = "";
-    char allocated[64] = "";
+    char requested[64];
+    char allocated[64];
     u8 *data = reinterpret_cast<u8 *>(header) + m_headerSize;
     const u32 block_size = BLOCK_SIZE(header->value);
+    const u32 allocation_size = block_size - m_headerSize - 4;
     NuStrFormatAddress(address, sizeof(address), data);
+
+    requested[0] = '\0';
 
     if ((requested_flags & MEM_ALLOC_ARRAY) != 0)
         strcat(requested, "[ARRAY]");
@@ -1024,6 +1025,7 @@ void NuMemoryManager::ValidateBlockFlags(Header *header, u32 flags, const char *
     if ((requested_flags & 8) != 0)
         strcat(requested, "[CONST]");
 
+    allocated[0] = '\0';
     if ((allocated_flags & MEM_ALLOC_ARRAY) != 0)
         strcat(allocated, "[ARRAY]");
     if ((allocated_flags & MEM_ALLOC_UNKNOWN_4) != 0)
@@ -1036,8 +1038,8 @@ void NuMemoryManager::ValidateBlockFlags(Header *header, u32 flags, const char *
     snprintf(this->error_msg, sizeof(this->error_msg),
              "Mismatching alloc flags detected in %s\n(%s != %s)\nAllocation: %s, Size: %u\nBlockSize: "
              "%u\n[%02X %02X %02X %02X %02X %02X %02X %02X ...]\n",
-             caller, requested, allocated, address, block_size - m_headerSize - 4, block_size, data[0], data[1],
-             data[2], data[3], data[4], data[5], data[6], data[7]);
+             caller, requested, allocated, address, allocation_size, block_size, data[0], data[1], data[2], data[3],
+             data[4], data[5], data[6], data[7]);
     this->error_handler->HandleError(this, MEM_ERROR_ALLOC_FLAG_MISMATCH, this->error_msg);
     pthread_mutex_unlock(&this->error_mutex);
 }
@@ -1371,9 +1373,6 @@ u16 NuMemoryManager::DumpBlock(u32 dump_id, NuSymbolQuery *, Header *header, u32
 void NuMemoryManager::DumpBlocksForContext(u32 dump_id, NuSymbolQuery *query, Context *context, u32 flags) {
     char line[512];
     char size_text[14];
-    u32 category_bytes[128] = {};
-    u32 total_bytes = 0;
-    u32 total_blocks = 0;
 
     error_handler->Dump(this, dump_id,
                         "+---------------------------------------------------------------------------------------------"
@@ -1389,6 +1388,10 @@ void NuMemoryManager::DumpBlocksForContext(u32 dump_id, NuSymbolQuery *query, Co
         this, dump_id,
         "+------------+------------+---------------+-----+---------------------------------------------------\r\n");
 
+    u32 category_bytes[128] = {};
+    u32 total_bytes = 0;
+    u32 total_blocks = 0;
+
     for (Page *page = pages; page != NULL; page = page->next) {
         Header *end = reinterpret_cast<Header *>(page->end);
         for (Header *header = page->first_header; header != end;) {
@@ -1396,6 +1399,7 @@ void NuMemoryManager::DumpBlocksForContext(u32 dump_id, NuSymbolQuery *query, Co
             if ((header->value & ALLOC_MASK) != 0) {
                 if ((m_flags & MEM_MANAGER_DEBUG) == 0) {
                     u16 category = DumpBlock(dump_id, query, header, 1, block_size, flags);
+                    block_size = BLOCK_SIZE(header->value);
                     category_bytes[category] += block_size;
                     total_bytes += block_size;
                     ++total_blocks;
@@ -1447,11 +1451,16 @@ u32 NuMemoryManager::FindAndTouchMatchingBlocks(DebugHeader *reference, u32 *tot
         for (Header *header = page->first_header; header != end;) {
             if (header != &reference->block_header && (header->value & ALLOC_MASK) != 0) {
                 DebugHeader *candidate = reinterpret_cast<DebugHeader *>(header);
+                u32 block_size = BLOCK_SIZE(header->value);
+                u32 candidate_context = candidate->flags.ctx_id;
+                u32 reference_context = reference->flags.ctx_id;
+                u32 candidate_flags = candidate->flags.alloc_flags;
+                u32 reference_flags = reference->flags.alloc_flags;
+                u16 candidate_category = candidate->category;
+                u16 reference_category = reference->category;
                 if (candidate->name != NULL && reference->name != NULL &&
-                    strcmp(candidate->name, reference->name) == 0 &&
-                    candidate->flags.ctx_id == reference->flags.ctx_id &&
-                    candidate->flags.alloc_flags == reference->flags.alloc_flags &&
-                    candidate->category == reference->category) {
+                    strcmp(candidate->name, reference->name) == 0 && candidate_context == reference_context &&
+                    candidate_flags == reference_flags && candidate_category == reference_category) {
                     bool equal = true;
                     if ((options & 0x20) != 0 && (m_flags & MEM_MANAGER_EXTENDED_DEBUG) != 0) {
                         ExtendedDebugHeader *left = reinterpret_cast<ExtendedDebugHeader *>(candidate);
@@ -1464,12 +1473,12 @@ u32 NuMemoryManager::FindAndTouchMatchingBlocks(DebugHeader *reference, u32 *tot
                             }
                         }
                     }
-                    if ((options & 2) != 0 && strcmp(reinterpret_cast<char *>(candidate) + m_headerSize,
-                                                     reinterpret_cast<char *>(reference) + m_headerSize) != 0)
+                    if ((options & 2) != 0 && strcmp(reinterpret_cast<char *>(reference) + m_headerSize,
+                                                     reinterpret_cast<char *>(candidate) + m_headerSize) != 0)
                         equal = false;
                     if (equal) {
                         ++match_count;
-                        *total_bytes += BLOCK_SIZE(header->value);
+                        *total_bytes += block_size;
                         candidate->flags.unknown |= 1;
                     }
                 }

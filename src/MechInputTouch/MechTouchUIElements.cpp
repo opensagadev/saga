@@ -488,25 +488,24 @@ void MechTouchUITagButton::Render() {
         return;
     }
 
-    f32 circle_radius = radius_x * RadMult;
-    f32 icon_radius = TagButtonSize;
-    if (hovered != 0) {
-        circle_radius *= 1.3f;
-        icon_radius *= 1.3f;
-    } else {
-        f32 pulse = (1.0f + NuTrigTable[(static_cast<i32>(timer_animation.value) >> 1) & 0x7fff]) * 0.5f;
-        pulse = pulse * (tag_state > 0 ? 0.7f : 0.35f) + 0.9f;
-        circle_radius *= pulse;
-        icon_radius *= pulse;
+    const f32 circle_x = (position.x + 1.0f) * 0.5f;
+    const f32 circle_y = (1.0f - position.y) * 0.5f;
+    f32 pulse = 1.3f;
+    if (hovered == 0) {
+        pulse = (1.0f + NuTrigTable[(static_cast<i32>(timer_animation.value) >> 1) & 0x7fff]) * 0.5f;
+        pulse = pulse * (static_cast<i8>(tag_state) > 0 ? 0.7f : 0.35f) + 0.9f;
     }
-
-    DrawCharIcon(target->id, position.x, position.y, position.z, icon_radius, 0xa6, first_fade.value,
+    const f32 circle_radius = radius_x * RadMult * pulse;
+    DrawCharIcon(target->id, position.x, position.y, position.z, TagButtonSize * pulse, 0xa6, first_fade.value,
                  hover_animation.value * first_fade.value, 1, NULL);
 
-    const i32 colour = (static_cast<i32>(first_fade.value * size_animation.value * 128.0f) << 24) | 0x808080;
-    RndrUnfilledCircle((position.x + 1.0f) * 0.5f, (1.0f - position.y) * 0.5f, circle_radius, BorderWidth,
-                       GetAspectRatio(), colour, second_fade.value, position.z + 0.002f,
-                       MechSystems::Get()->tag_hold_background_material);
+    numtl_s *material = MechSystems::Get()->tag_hold_background_material;
+    const f32 circle_alpha = second_fade.value;
+    const f32 depth = 0.002f + position.z;
+    const f32 colour_alpha = first_fade.value * size_animation.value * 128.0f;
+    const f32 aspect = GetAspectRatio();
+    const i32 colour = (static_cast<i32>(colour_alpha) << 24) | 0x808080;
+    RndrUnfilledCircle(circle_x, circle_y, circle_radius, BorderWidth, aspect, colour, circle_alpha, depth, material);
 }
 
 MechTouchUITagButton::~MechTouchUITagButton() {
@@ -814,6 +813,7 @@ void MechTouchUIPlayerButton::TriggerTagNext() {
         }
     }
 
+    GameObject_s *source = player;
     i32 current_index = -1;
     for (i32 index = 0; index < 32; ++index) {
         if (target_ids[index] >= 0 && target_ids[index] == player->id) {
@@ -836,8 +836,7 @@ void MechTouchUIPlayerButton::TriggerTagNext() {
                 if (target == NULL || target->id != target_ids[index] || !TouchHacks::CanTagTo(*player, *target)) {
                     continue;
                 }
-                GameObject_s *source = player;
-                if (TagCode(source, target, 0, 0, 1) == 1) {
+                if (TagCode(player, target, 0, 0, 1) == 1) {
                     GameAudio_PlaySfx(0x21, NULL, 0, 0);
                     Tag_NewTransfer(source, target);
                 }
@@ -848,6 +847,9 @@ void MechTouchUIPlayerButton::TriggerTagNext() {
             return;
         }
         ++index;
+        if (index == current_index) {
+            return;
+        }
     }
 }
 

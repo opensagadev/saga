@@ -1036,14 +1036,16 @@ void NuSoundSystem::Update(f32 frametime) {
     this->mutex.Lock();
 
     // Pass 1: drive every platform voice's device state.
-    for (NuListNodeBase *node = effect_update_list.Head(); node != effect_update_list.Tail(); node = node->GetNext()) {
+    for (NuListNodeBase *node = effect_update_list.Head(), *end = effect_update_list.Tail(); node != end;
+         node = node->GetNext()) {
         static_cast<NuListNode<NuSoundEffect *> *>(node)->value->Process(frametime);
     }
 
     // Pass 2: update the engine-side mix of every playing voice; stopped
     // auto-delete voices are released.
     NuSoundVoice *voice = voice_list.Front();
-    while (voice != voice_list.End()) {
+    NuSoundVoice *end = voice_list.End();
+    while (voice != end) {
         NuSoundVoice *next = voice->field_0x28;
 
         NuSoundVoice::PlayState state = voice->GetState();

@@ -1199,49 +1199,55 @@ void DebrisProcessGeneration() {
         const f32 emission_interval = frequency > 0.0f ? 1.0f / (frequency / thinning) : 0.0f;
         f32 emission_time = key->emission_epoch + emission_interval;
         f32 pause = 0.0f;
-        for (i32 emission = 1; emission != 100 && emission_time < now + timeincrement; ++emission) {
-            i32 transitions = 100;
-            while (emission_time >= key->field_1e4 && emission_time >= key->emission_time && --transitions != 0) {
-                if (!(key->emission_time < key->field_1e4)) {
-                    key->field_1e4 = key->emission_time + effect->emission_period_random +
-                                     NuRandFloatSeeded(&debrisseed) * effect->emission_pause;
-                    if (key->field_1d4 > 0) {
-                        if (--key->field_1d4 == 0) {
-                            DebFreeWithoutKey(key);
-                            emission_time += 99999.0f;
-                            key->process_collision_sound = 0;
+        i32 emission = 1;
+        if (emission_time < now + timeincrement)
+            do {
+                i32 transitions = 100;
+                while (emission_time >= key->field_1e4 && emission_time >= key->emission_time && --transitions != 0) {
+                    if (!(key->emission_time < key->field_1e4)) {
+                        key->field_1e4 = key->emission_time + effect->emission_period_random +
+                                         NuRandFloatSeeded(&debrisseed) * effect->emission_pause;
+                        if (key->field_1d4 > 0) {
+                            if (--key->field_1d4 == 0) {
+                                DebFreeWithoutKey(key);
+                                emission_time += 99999.0f;
+                                key->process_collision_sound = 0;
+                            }
                         }
+                        if (key->field_1d4 < 0 && ++key->field_1d4 == 0) {
+                            key->field_2f4 = 0;
+                            key->field_184 = 0;
+                        }
+                        if (key->process_collision_sound != 0 && key->field_184 != 0 &&
+                            sound_range > key->cutoff_distance)
+                            DebrisEmissionSound(key, effect, 1, volume);
+                        pause = 0.0f;
+                    } else {
+                        key->previous_emission_time = key->emission_time;
+                        pause = effect->emission_pause_random +
+                                NuRandFloatSeeded(&debrisseed) * effect->start_offset_random;
+                        key->emission_time = key->field_1e4 + pause;
+                        if (key->field_184 == 2)
+                            key->field_184 = 0;
+                        if (key->process_collision_sound != 0 && key->field_184 != 0 &&
+                            sound_range > key->cutoff_distance)
+                            DebrisEmissionSound(key, effect, 2, volume);
                     }
-                    if (key->field_1d4 < 0 && ++key->field_1d4 == 0) {
-                        key->field_2f4 = 0;
-                        key->field_184 = 0;
-                    }
-                    if (key->process_collision_sound != 0 && key->field_184 != 0 && sound_range > key->cutoff_distance)
-                        DebrisEmissionSound(key, effect, 1, volume);
-                    pause = 0.0f;
-                } else {
-                    key->previous_emission_time = key->emission_time;
-                    pause =
-                        effect->emission_pause_random + NuRandFloatSeeded(&debrisseed) * effect->start_offset_random;
-                    key->emission_time = key->field_1e4 + pause;
-                    if (key->field_184 == 2)
-                        key->field_184 = 0;
-                    if (key->process_collision_sound != 0 && key->field_184 != 0 && sound_range > key->cutoff_distance)
-                        DebrisEmissionSound(key, effect, 2, volume);
                 }
-            }
-            if (pause > 0.0f) {
-                emission_time = key->emission_time - emission_interval;
-            } else if (key->allocated_chunk_count > 0 && key->field_184 != 0) {
-                uv1deb *particle = key->generator(key, effect, emission_time);
-                if (effect->process_spheres != 0 && particle != NULL && emission == 1)
-                    DebrisProcessSpheres(particle, emission_time, effect, key, 0);
-                if (key->process_collision_sound != 0 && sound_range > key->cutoff_distance)
-                    DebrisEmissionSound(key, effect, 3, volume);
-            }
-            key->emission_epoch = emission_time;
-            emission_time += emission_interval;
-        }
+                if (pause > 0.0f) {
+                    emission_time = key->emission_time - emission_interval;
+                } else if (key->allocated_chunk_count > 0 && key->field_184 != 0) {
+                    uv1deb *particle = key->generator(key, effect, emission_time);
+                    if (effect->process_spheres != 0 && particle != NULL && emission == 1)
+                        DebrisProcessSpheres(particle, emission_time, effect, key, 0);
+                    if (key->process_collision_sound != 0 && sound_range > key->cutoff_distance)
+                        DebrisEmissionSound(key, effect, 3, volume);
+                }
+                key->emission_epoch = emission_time;
+                emission_time += emission_interval;
+                if (!(emission_time < now + timeincrement))
+                    break;
+            } while (++emission != 100);
         if (key->field_184 == 0) {
             const f32 near_distance = *reinterpret_cast<f32 *>(&effect->fields_030[4]);
             const i16 render_group = *reinterpret_cast<i16 *>(key->fields_2f0);

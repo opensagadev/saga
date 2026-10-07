@@ -120,8 +120,9 @@ static void CC_cannon(NUFPAR *parser) {
 
 static void CC_cape_layer_index(NUFPAR *parser) {
     if (NuFParGetWord(parser) != 0) {
+        GAMECHARACTERDATA_s *data = charconfig.runtime;
         const i32 locator = NuAToI(parser->word_buf);
-        charconfig.runtime->cape_layer = static_cast<i8>(locator);
+        data->cape_layer = static_cast<i8>(locator);
     }
 }
 
@@ -145,10 +146,11 @@ static void CC_cloak_up_angle(NUFPAR *parser) {
 }
 
 static void CC_collision_locator(NUFPAR *parser) {
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
     if (NuFParGetWord(parser) != 0) {
         const i32 locator = NuAToI(parser->word_buf);
         if (static_cast<u32>(locator + 1) < 17) {
-            charconfig.runtime->collision_locator = static_cast<i8>(locator);
+            data->collision_locator = static_cast<i8>(locator);
         }
     }
 }
@@ -207,10 +209,11 @@ static void CC_droid(NUFPAR *parser) {
 }
 
 static void CC_extra_character_locator(NUFPAR *parser) {
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
     if (NuFParGetWord(parser) != 0) {
         const i32 locator = NuAToI(parser->word_buf);
         if (static_cast<u32>(locator + 1) < 17) {
-            charconfig.runtime->extra_character_locator = static_cast<i8>(locator);
+            data->extra_character_locator = static_cast<i8>(locator);
         }
     }
 }
@@ -223,24 +226,27 @@ static void CC_ghost(NUFPAR *parser) {
 }
 
 static void CC_grapple_locator(NUFPAR *parser) {
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
     if (NuFParGetWord(parser) != 0) {
         const i32 locator = NuAToI(parser->word_buf);
         if (static_cast<u32>(locator + 1) < 17) {
-            charconfig.runtime->grapple_locators[0] = static_cast<i8>(locator);
+            data->grapple_locators[0] = static_cast<i8>(locator);
         }
     }
+    data = charconfig.runtime;
     if (NuFParGetWord(parser) != 0) {
         const i32 locator = NuAToI(parser->word_buf);
         if (static_cast<u32>(locator + 1) < 17) {
-            charconfig.runtime->grapple_locators[1] = static_cast<i8>(locator);
+            data->grapple_locators[1] = static_cast<i8>(locator);
         }
     }
 }
 
 static void CC_hair_layer_index(NUFPAR *parser) {
     if (NuFParGetWord(parser) != 0) {
+        GAMECHARACTERDATA_s *data = charconfig.runtime;
         const i32 locator = NuAToI(parser->word_buf);
-        charconfig.runtime->hair_layer = static_cast<i8>(locator);
+        data->hair_layer = static_cast<i8>(locator);
     }
 }
 
@@ -256,10 +262,11 @@ static void CC_hazard_protection(NUFPAR *parser) {
 }
 
 static void CC_helmet_locator(NUFPAR *parser) {
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
     if (NuFParGetWord(parser) != 0) {
         const i32 locator = NuAToI(parser->word_buf);
         if (static_cast<u32>(locator + 1) < 17) {
-            charconfig.runtime->helmet_locator = static_cast<i8>(locator);
+            data->helmet_locator = static_cast<i8>(locator);
         }
     }
 }
@@ -313,20 +320,20 @@ static void CC_jump_move_speed_scale(NUFPAR *parser) {
 }
 
 static void CC_layer(NUFPAR *parser) {
-    GAMECHARACTERDATA_s *data = charconfig.runtime;
-    if ((charconfig.flags & 2) == 0 || data->layer_count >= 32)
+    if ((charconfig.flags & 2) == 0 || charconfig.runtime->layer_count >= 32)
         return;
     if (NuFParGetWord(parser) == 0 || NuStrLen(parser->word_buf) >= 24)
         return;
-    GAMECHARACTERLAYER_s *layer = &data->layers[data->layer_count];
-    NuStrCpy(layer->name, parser->word_buf);
+    NuStrCpy(charconfig.runtime->layers[charconfig.runtime->layer_count].name, parser->word_buf);
     const u32 bit = NuFParGetInt(parser);
     if (bit >= 32)
         return;
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
     for (i32 i = 0; i < data->layer_count; ++i) {
         if (data->layers[i].mask_bit == static_cast<i32>(bit))
             return;
     }
+    GAMECHARACTERLAYER_s *layer = &data->layers[data->layer_count];
     charconfig.named_layers = 1;
     layer->mask_bit = static_cast<i16>(bit);
     layer->hierarchy_layer_index = -1;
@@ -496,10 +503,11 @@ static void CC_ride_layersoff(NUFPAR *parser) {
 }
 
 static void CC_rocket_locator(NUFPAR *parser) {
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
     if (NuFParGetWord(parser) != 0) {
         const i32 locator = NuAToI(parser->word_buf);
         if (static_cast<u32>(locator + 1) < 17) {
-            charconfig.runtime->rocket_locator = static_cast<i8>(locator);
+            data->rocket_locator = static_cast<i8>(locator);
         }
     }
 }
@@ -586,10 +594,11 @@ static void CC_shield_hit_points(NUFPAR *parser) {
 }
 
 static void CC_shield_locator(NUFPAR *parser) {
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
     if (NuFParGetWord(parser) != 0) {
         const i32 locator = NuAToI(parser->word_buf);
         if (static_cast<u32>(locator + 1) < 17) {
-            charconfig.runtime->shield_locator = static_cast<i8>(locator);
+            data->shield_locator = static_cast<i8>(locator);
         }
     }
 }
@@ -703,10 +712,11 @@ static void CC_super_strength(NUFPAR *parser) {
 }
 
 static void CC_thingy_locator(NUFPAR *parser) {
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
     if (NuFParGetWord(parser) != 0) {
         const i32 locator = NuAToI(parser->word_buf);
         if (static_cast<u32>(locator + 1) < 17) {
-            charconfig.runtime->thingy_locator = static_cast<i8>(locator);
+            data->thingy_locator = static_cast<i8>(locator);
         }
     }
 }
@@ -780,73 +790,81 @@ static void CC_weapon(NUFPAR *parser) {
 }
 
 static void CC_weapon_locator_1(NUFPAR *parser) {
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
     if (NuFParGetWord(parser) != 0) {
         const i32 locator = NuAToI(parser->word_buf);
         if (static_cast<u32>(locator + 1) < 17) {
-            charconfig.runtime->weapon_joints[0] = static_cast<i8>(locator);
+            data->weapon_joints[0] = static_cast<i8>(locator);
         }
     }
 }
 
 static void CC_weapon_locator_2(NUFPAR *parser) {
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
     if (NuFParGetWord(parser) != 0) {
         const i32 locator = NuAToI(parser->word_buf);
         if (static_cast<u32>(locator + 1) < 17) {
-            charconfig.runtime->weapon_joints[1] = static_cast<i8>(locator);
+            data->weapon_joints[1] = static_cast<i8>(locator);
         }
     }
 }
 
 static void CC_weapon_locator_3(NUFPAR *parser) {
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
     if (NuFParGetWord(parser) != 0) {
         const i32 locator = NuAToI(parser->word_buf);
         if (static_cast<u32>(locator + 1) < 17) {
-            charconfig.runtime->weapon_joints[2] = static_cast<i8>(locator);
+            data->weapon_joints[2] = static_cast<i8>(locator);
         }
     }
 }
 
 static void CC_weapon_locator_4(NUFPAR *parser) {
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
     if (NuFParGetWord(parser) != 0) {
         const i32 locator = NuAToI(parser->word_buf);
         if (static_cast<u32>(locator + 1) < 17) {
-            charconfig.runtime->weapon_joints[3] = static_cast<i8>(locator);
+            data->weapon_joints[3] = static_cast<i8>(locator);
         }
     }
 }
 
 static void CC_weapon_shoot_locator_1(NUFPAR *parser) {
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
     if (NuFParGetWord(parser) != 0) {
         const i32 locator = NuAToI(parser->word_buf);
         if (static_cast<u32>(locator + 1) < 17) {
-            charconfig.runtime->weapon_shoot_joints[0] = static_cast<i8>(locator);
+            data->weapon_shoot_joints[0] = static_cast<i8>(locator);
         }
     }
 }
 
 static void CC_weapon_shoot_locator_2(NUFPAR *parser) {
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
     if (NuFParGetWord(parser) != 0) {
         const i32 locator = NuAToI(parser->word_buf);
         if (static_cast<u32>(locator + 1) < 17) {
-            charconfig.runtime->weapon_shoot_joints[1] = static_cast<i8>(locator);
+            data->weapon_shoot_joints[1] = static_cast<i8>(locator);
         }
     }
 }
 
 static void CC_weapon_shoot_locator_3(NUFPAR *parser) {
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
     if (NuFParGetWord(parser) != 0) {
         const i32 locator = NuAToI(parser->word_buf);
         if (static_cast<u32>(locator + 1) < 17) {
-            charconfig.runtime->weapon_shoot_joints[2] = static_cast<i8>(locator);
+            data->weapon_shoot_joints[2] = static_cast<i8>(locator);
         }
     }
 }
 
 static void CC_weapon_shoot_locator_4(NUFPAR *parser) {
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
     if (NuFParGetWord(parser) != 0) {
         const i32 locator = NuAToI(parser->word_buf);
         if (static_cast<u32>(locator + 1) < 17) {
-            charconfig.runtime->weapon_shoot_joints[3] = static_cast<i8>(locator);
+            data->weapon_shoot_joints[3] = static_cast<i8>(locator);
         }
     }
 }
@@ -1327,19 +1345,21 @@ static void CC_chatter_delay(NUFPAR *parser) {
 }
 
 static void CC_cloak_joint(NUFPAR *parser) {
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
     if (NuFParGetWord(parser) != 0) {
         const i32 locator = NuAToI(parser->word_buf);
         if (locator >= 0) {
-            charconfig.runtime->cloak_joint = static_cast<i8>(locator);
+            data->cloak_joint = static_cast<i8>(locator);
         }
     }
 }
 
 static void CC_cloak_joint2(NUFPAR *parser) {
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
     if (NuFParGetWord(parser) != 0) {
         const i32 locator = NuAToI(parser->word_buf);
         if (locator >= 0) {
-            charconfig.runtime->cloak_joint_2 = static_cast<i8>(locator);
+            data->cloak_joint_2 = static_cast<i8>(locator);
         }
     }
 }
@@ -1466,19 +1486,21 @@ static void CC_has_whip(NUFPAR *parser) {
 }
 
 static void CC_head_joint(NUFPAR *parser) {
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
     if (NuFParGetWord(parser) != 0) {
         const i32 locator = NuAToI(parser->word_buf);
         if (locator >= 0) {
-            charconfig.runtime->head_joint = static_cast<i8>(locator);
+            data->head_joint = static_cast<i8>(locator);
         }
     }
 }
 
 static void CC_head_locator(NUFPAR *parser) {
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
     if (NuFParGetWord(parser) != 0) {
         const i32 locator = NuAToI(parser->word_buf);
         if (static_cast<u32>(locator + 1) < 17) {
-            charconfig.runtime->head_locator = static_cast<i8>(locator);
+            data->head_locator = static_cast<i8>(locator);
         }
     }
 }
@@ -1762,19 +1784,21 @@ static void CC_orientate(NUFPAR *parser) {
 }
 
 static void CC_place_locator(NUFPAR *parser) {
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
     if (NuFParGetWord(parser) != 0) {
         const i32 locator = NuAToI(parser->word_buf);
         if (static_cast<u32>(locator + 1) < 17) {
-            charconfig.runtime->place_locator = static_cast<i8>(locator);
+            data->place_locator = static_cast<i8>(locator);
         }
     }
 }
 
 static void CC_poo_locator(NUFPAR *parser) {
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
     if (NuFParGetWord(parser) != 0) {
         const i32 locator = NuAToI(parser->word_buf);
         if (static_cast<u32>(locator + 1) < 17) {
-            charconfig.runtime->poo_locator = static_cast<i8>(locator);
+            data->poo_locator = static_cast<i8>(locator);
         }
     }
 }
@@ -1801,10 +1825,11 @@ static void CC_respawn(NUFPAR *parser) {
 }
 
 static void CC_ride_locator(NUFPAR *parser) {
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
     if (NuFParGetWord(parser) != 0) {
         const i32 locator = NuAToI(parser->word_buf);
         if (static_cast<u32>(locator + 1) < 17) {
-            charconfig.runtime->ride_locator = static_cast<i8>(locator);
+            data->ride_locator = static_cast<i8>(locator);
         }
     }
 }
@@ -1902,10 +1927,11 @@ static void CC_teleport(NUFPAR *parser) {
 }
 
 static void CC_throw_locator(NUFPAR *parser) {
+    GAMECHARACTERDATA_s *data = charconfig.runtime;
     if (NuFParGetWord(parser) != 0) {
         const i32 locator = NuAToI(parser->word_buf);
         if (static_cast<u32>(locator + 1) < 17) {
-            charconfig.runtime->throw_locator = static_cast<i8>(locator);
+            data->throw_locator = static_cast<i8>(locator);
         }
     }
 }

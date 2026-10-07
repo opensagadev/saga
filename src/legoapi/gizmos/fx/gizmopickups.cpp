@@ -2,6 +2,9 @@
 #include "legoapi/gizmo/object/gizmopickup.h"
 #include "legoapi/items/collect/minikits.h"
 #include "legoapi/world/areas.h"
+#include "legoapi/gizmos/traps/gizturrets.h"
+#include "legoapi/gizmos/object/gizbuildits.h"
+#include "legoapi/gizmo/object/gizmoblowups.h"
 #include "nu2api/nucore/nustring.h"
 
 #include "batman.h"
@@ -363,72 +366,104 @@ namespace {
         }
     }
 
-    void UpdatePickupList(WORLDINFO *world, GIZMOPICKUP_s *pickups, i32 count, bool play_nearby_sfx) {
-        if (world == NULL || pickups == NULL) {
-            return;
+} // namespace
+
+static void GizmoPickups_UpdateList(WORLDINFO *world, GIZMOPICKUP_s *pickups, i32 count, i32 play_nearby_sfx) {
+    if (world == NULL || pickups == NULL) {
+        return;
+    }
+
+    const bool detector_phase =
+        play_nearby_sfx && FadeSys.fade == 0.0f && NuFmod(GameTimer.time_elapsed_mod_seconds, 0.2f) < 0.1f;
+    const bool minikit_detector = detector_phase && Cheats_CheckFlags(0x200) != 0;
+    const bool red_brick_detector = detector_phase && Cheats_CheckFlags(0x40000) != 0;
+    NUVEC *nearby_pickup = NULL;
+    f32 nearest_distance_squared = 1.0f;
+
+    SuperCounters_ResetProcessed(world);
+    for (i32 index = 0; index < count; ++index) {
+        GIZMOPICKUP_s &pickup = pickups[index];
+        if ((pickup.state_flags & GIZMOPICKUP_STATE_ACTIVE) == 0) {
+            continue;
         }
 
-        const bool detector_phase =
-            play_nearby_sfx && FadeSys.fade == 0.0f && NuFmod(GameTimer.time_elapsed_mod_seconds, 0.2f) < 0.1f;
-        const bool minikit_detector = detector_phase && Cheats_CheckFlags(0x200) != 0;
-        const bool red_brick_detector = detector_phase && Cheats_CheckFlags(0x40000) != 0;
-        NUVEC *nearby_pickup = NULL;
-        f32 nearest_distance_squared = 1.0f;
+        pickup.state_flags |= GIZMOPICKUP_STATE_DRAW_VISIBLE;
+        pickup.draw_rotation = static_cast<u16>(pickup.draw_rotation + 16384.0f * FRAMETIME);
+        GIZMO_PICKUP_TYPE *type = GetPickupType(pickup);
 
-        SuperCounters_ResetProcessed(world);
-        for (i32 index = 0; index < count; ++index) {
-            GIZMOPICKUP_s &pickup = pickups[index];
-            if ((pickup.state_flags & GIZMOPICKUP_STATE_ACTIVE) == 0) {
-                continue;
-            }
-
-            pickup.draw_rotation = static_cast<u16>(pickup.draw_rotation + 8192.0f * FRAMETIME);
-            GIZMO_PICKUP_TYPE *type = GetPickupType(pickup);
-
-            if ((pickup.state_flags & GIZMOPICKUP_STATE_COLLECTED) == 0) {
-                if ((minikit_detector && (type->flags & GIZMOPICKUP_TYPE_MINIKIT_DETECTOR) != 0) ||
-                    (red_brick_detector && (type->flags & GIZMOPICKUP_TYPE_RED_BRICK_DETECTOR) != 0)) {
-                    NUVEC detector_position = pickup.position;
-                    detector_position.y += 0.5f;
-                    MiniKitDetector(&detector_position);
-                }
-
-                if (play_nearby_sfx && GameCam != NULL) {
-                    const f32 distance_squared = NuVecDistSqr(&pickup.position, &GameCam->pos, NULL);
-                    if (distance_squared < nearest_distance_squared) {
-                        nearest_distance_squared = distance_squared;
-                        nearby_pickup = &pickup.position;
+        const u8 effect_flags = type->flags;
+        bool show_pickup_effects = false;
+        if ((pickup.state_flags & GIZMOPICKUP_STATE_COLLECTED) == 0 && type->field_0x0f == 0 &&
+            (effect_flags & 0x2c) != 0) {
+            SUPERCOUNTERPICKUP *counter_pickup = NULL;
+            SUPERCOUNTER *counter = SuperCounter_FindFromNameAndLevel(pickup.name, world, &counter_pickup);
+            if (counter == NULL) {
+                show_pickup_effects = true;
+            } else {
+                bool gizmo_complete = false;
+                if ((pickup.state_flags & 6) != 6 && (counter->processed_flags & 1) == 0 &&
+                    counter_pickup->position_gizmo != NULL) {
+                    GIZMO *gizmo = counter_pickup->position_gizmo;
+                    if (gizmo->type_id == turret_gizmotype_id) {
+                        gizmo_complete = (static_cast<GIZTURRET_s *>(gizmo->object)->flags & 0x20) != 0;
+                    } else if (gizmo->type_id == blowup_gizmotype_id) {
+                        gizmo_complete = (static_cast<GIZMOBLOWUP_s *>(gizmo->object)->output_flags & 1) != 0;
+                    } else if (gizmo->type_id == gizbuildit_gizmotype_id) {
+                        gizmo_complete = static_cast<GIZBUILDIT_s *>(gizmo->object)->build_state == 2;
                     }
                 }
-            }
-
-            if (pickup.remaining_visible_time > 0.0f) {
-                if (pickup.remaining_visible_time <= 0.5f && PickUpFlickerFrames > 0 &&
-                    PickUpFlickerTest <= PickupFlickerFrame % PickUpFlickerFrames) {
-                    pickup.state_flags &= static_cast<u8>(~GIZMOPICKUP_STATE_DRAW_VISIBLE);
+                if (!gizmo_complete && SuperCounter_AnyCollected(counter, world) == 0) {
+                    const u8 previous_flags = counter->processed_flags;
+                    counter->processed_flags = previous_flags | 2;
+                    show_pickup_effects = (previous_flags & 3) != 3;
+                } else {
+                    counter->processed_flags |= 2;
                 }
-                if (MiniCutCam != 2) {
-                    pickup.remaining_visible_time -= FRAMETIME;
-                    if (pickup.remaining_visible_time < 0.0f) {
-                        pickup.state_flags &= static_cast<u8>(~GIZMOPICKUP_STATE_ACTIVE);
-                    }
-                }
-            }
-
-            if ((pickup.state_flags &
-                 (GIZMOPICKUP_STATE_ENABLED | GIZMOPICKUP_STATE_VISIBLE | GIZMOPICKUP_STATE_COLLECTED)) ==
-                    (GIZMOPICKUP_STATE_ENABLED | GIZMOPICKUP_STATE_VISIBLE) &&
-                type->field_0x0f == 0 && type->update_fn != NULL) {
-                type->update_fn(world, &pickup);
             }
         }
 
-        if (nearby_pickup != NULL) {
-            GameAudio_PlaySfx(0x25, nearby_pickup, 0, 0);
+        if (show_pickup_effects) {
+            if ((minikit_detector && (effect_flags & GIZMOPICKUP_TYPE_MINIKIT_DETECTOR) != 0) ||
+                (red_brick_detector && (effect_flags & GIZMOPICKUP_TYPE_RED_BRICK_DETECTOR) != 0)) {
+                NUVEC detector_position = pickup.position;
+                detector_position.y += 0.5f;
+                MiniKitDetector(&detector_position);
+            }
+
+            if (play_nearby_sfx && GameCam != NULL) {
+                const f32 distance_squared = NuVecDistSqr(&pickup.position, &GameCam->pos, NULL);
+                if (distance_squared < nearest_distance_squared) {
+                    nearest_distance_squared = distance_squared;
+                    nearby_pickup = &pickup.position;
+                }
+            }
+        }
+
+        if (pickup.remaining_visible_time > 0.0f) {
+            if (pickup.remaining_visible_time <= 0.5f && PickUpFlickerFrames > 0 &&
+                PickUpFlickerTest <= PickupFlickerFrame % PickUpFlickerFrames) {
+                pickup.state_flags &= static_cast<u8>(~GIZMOPICKUP_STATE_DRAW_VISIBLE);
+            }
+            if (MiniCutCam != 2) {
+                pickup.remaining_visible_time -= FRAMETIME;
+                if (pickup.remaining_visible_time < 0.0f) {
+                    pickup.state_flags &= static_cast<u8>(~GIZMOPICKUP_STATE_ACTIVE);
+                }
+            }
+        }
+
+        if ((pickup.state_flags &
+             (GIZMOPICKUP_STATE_ENABLED | GIZMOPICKUP_STATE_VISIBLE | GIZMOPICKUP_STATE_COLLECTED)) ==
+                (GIZMOPICKUP_STATE_ENABLED | GIZMOPICKUP_STATE_VISIBLE) &&
+            type->field_0x0f == 0 && type->update_fn != NULL) {
+            type->update_fn(world, &pickup);
         }
     }
 
-} // namespace
+    if (nearby_pickup != NULL) {
+        GameAudio_PlaySfx(0x25, nearby_pickup, 0, 0);
+    }
+}
 
 i32 gizmopickup_typeid = -1;
 f32 AreaPickupScale;
@@ -459,11 +494,11 @@ static void GizmoPickups_Update(void *world_ptr, void *, float) {
 
     GIZMOPICKUPRUNTIMESYS_s *pickup_sys = world->gizmo_pickup_sys;
     if (pickup_sys->pickups != NULL && Missions_PickupsOff(MissionSys) == 0) {
-        UpdatePickupList(world, pickup_sys->pickups, pickup_sys->pickup_count, true);
+        GizmoPickups_UpdateList(world, pickup_sys->pickups, pickup_sys->pickup_count, 1);
     }
     if (!(pickup_sys->temporary_pickups != NULL && Missions_PickupsOff(MissionSys) == 0))
         return;
-    UpdatePickupList(world, pickup_sys->temporary_pickups, GIZMOPICKUP_TEMPORARY_CAPACITY, false);
+    GizmoPickups_UpdateList(world, pickup_sys->temporary_pickups, GIZMOPICKUP_TEMPORARY_CAPACITY, 0);
 }
 
 static void GizmoPickups_Draw(void *world_ptr, void *, float) {

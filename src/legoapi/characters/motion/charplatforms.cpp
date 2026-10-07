@@ -66,24 +66,37 @@ void SkinPlatform(terrsitu_s *terrain_group, unsigned char *buffer, PLATSKININFO
             destination->max_x = maximum.x + 0.05f;
             destination->max_y = maximum.y + 0.05f;
             destination->max_z = maximum.z + 0.05f;
-            for (i32 normal = source->normals[1].y < 65535.0f ? 1 : 0; normal >= 0; --normal) {
-                i32 origin = normal != 0 ? 3 : 0;
-                i32 first = normal != 0 ? 1 : 2;
-                i32 second = normal != 0 ? 2 : 1;
+            if (source->normals[1].y < 65535.0f) {
                 NUVEC a, b;
-                a.x = destination->vectors[first].x - destination->vectors[origin].x;
-                a.y = destination->vectors[first].y - destination->vectors[origin].y;
-                a.z = destination->vectors[first].z - destination->vectors[origin].z;
-                b.x = destination->vectors[second].x - destination->vectors[origin].x;
-                b.y = destination->vectors[second].y - destination->vectors[origin].y;
-                b.z = destination->vectors[second].z - destination->vectors[origin].z;
-                NUVEC &n = destination->normals[normal];
+                a.x = destination->vectors[1].x - destination->vectors[3].x;
+                a.y = destination->vectors[1].y - destination->vectors[3].y;
+                a.z = destination->vectors[1].z - destination->vectors[3].z;
+                b.x = destination->vectors[2].x - destination->vectors[3].x;
+                b.y = destination->vectors[2].y - destination->vectors[3].y;
+                b.z = destination->vectors[2].z - destination->vectors[3].z;
+                NUVEC &n = destination->normals[1];
                 n = TerCrossProduct(&a, &b);
                 f32 length = NuFsqrt((n.x * n.x + n.y * n.y) + n.z * n.z);
                 f32 inverse = length == 0.0f ? 0.0f : 1.0f / length;
                 n.x *= inverse;
                 n.y *= inverse;
-                n.z *= inverse;
+                n.z = inverse * n.z;
+            }
+            {
+                NUVEC a, b;
+                a.x = destination->vectors[2].x - destination->vectors[0].x;
+                a.y = destination->vectors[2].y - destination->vectors[0].y;
+                a.z = destination->vectors[2].z - destination->vectors[0].z;
+                b.x = destination->vectors[1].x - destination->vectors[0].x;
+                b.y = destination->vectors[1].y - destination->vectors[0].y;
+                b.z = destination->vectors[1].z - destination->vectors[0].z;
+                NUVEC &n = destination->normals[0];
+                n = TerCrossProduct(&a, &b);
+                f32 length = NuFsqrt((n.x * n.x + n.y * n.y) + n.z * n.z);
+                f32 inverse = length == 0.0f ? 0.0f : 1.0f / length;
+                n.x *= inverse;
+                n.y *= inverse;
+                n.z = inverse * n.z;
             }
         }
         if (input->shape_count > 0) {
