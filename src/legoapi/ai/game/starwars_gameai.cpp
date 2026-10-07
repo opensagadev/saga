@@ -471,11 +471,11 @@ i32 StarWars_PrepareJump(AIPACKET_s *packet, APIOBJECT_s *object, i32 checks) {
         return 0;
     }
     AIPATHNODE *nodes = packet->path_info.path->nodes;
-    i32 source_index = packet->path_info.connection->node_indices[packet->path_info.direction];
+    u8 source_index = packet->path_info.connection->node_indices[packet->path_info.direction];
     i32 destination_index = packet->path_info.connection->node_indices[packet->path_info.direction == 0];
     AIPATHNODE *destination = &nodes[destination_index];
     NUVEC offset;
-    if (destination->radius_squared > NuVecXZDistSqr(&object->position, &destination->position, &offset)) {
+    if (NuVecXZDistSqr(&object->position, &destination->position, &offset) < destination->radius_squared) {
         packet->path_connection_state = 0;
         return 0;
     }
@@ -493,8 +493,12 @@ i32 StarWars_PrepareJump(AIPACKET_s *packet, APIOBJECT_s *object, i32 checks) {
     } else if (packet->path_connection_state == 0) {
         f32 distance = connection->horizontal_distance * packet->path_info.dist;
         packet->path_connection_state = 1;
-        if ((packet->path_info.direction != 0 && source->radius > distance) ||
-            (packet->path_info.direction == 0 && distance > connection->horizontal_distance - destination->radius)) {
+        if (packet->path_info.direction != 0) {
+            if (source->radius > distance) {
+                packet->path_connection_state = 0;
+                return 0;
+            }
+        } else if (distance > connection->horizontal_distance - destination->radius) {
             packet->path_connection_state = 0;
             return 0;
         }
@@ -526,15 +530,17 @@ i32 StarWars_PrepareJump(AIPACKET_s *packet, APIOBJECT_s *object, i32 checks) {
     switch (packet->path_connection_state) {
         case 1:
             if (ready != 0) {
-                if ((flags & 0x200) == 0 && packet->inside_path_node != destination_index &&
+                if ((packet->path_info.connection->traversal_flags[packet->path_info.direction] & 0x200) == 0 &&
+                    packet->inside_path_node != destination_index &&
                     ((packet->path_info.path->previous_inside_node_bits[destination_index >> 3] >>
                       (destination_index & 7)) &
                      1) != 0) {
                     if (TryToTeleportToNextNode(owner, destination, 0) != 0) {
                         return 1;
                     }
-                } else if ((flags & 0x800) == 0) {
-                    if ((flags & 0x400) != 0 || ((destination->runtime_flags | source->runtime_flags) & 2) == 0 ||
+                } else if ((packet->path_info.connection->traversal_flags[packet->path_info.direction] & 0x800) == 0) {
+                    if ((packet->path_info.connection->traversal_flags[packet->path_info.direction] & 0x400) != 0 ||
+                        ((destination->runtime_flags | source->runtime_flags) & 2) == 0 ||
                         NuSpecialCompare(&source->special_handle, &destination->special_handle) != 0) {
                         packet->path_connection_state = 4;
                     } else {
@@ -593,22 +599,19 @@ i32 StarWars_PrepareJump(AIPACKET_s *packet, APIOBJECT_s *object, i32 checks) {
             }
             connection = packet->path_info.connection;
             if ((connection->traversal_flags[packet->path_info.direction] & 0x200) == 0) {
-                i32 object_count = HIGHGAMEOBJECT;
                 GameObject_s *other = Obj;
-                GameObject_s *current_player = player;
-                f32 mover_radius = ai_moveradius;
-                for (i32 index = 0; index < object_count; ++index, ++other) {
+                for (i32 index = 0; index < HIGHGAMEOBJECT; ++index, ++other) {
                     if ((other->apiobj.object_flags & 1) == 0 || other == owner ||
                         (other->apiobj.object_flags & 0x1000) == 0 || other->apiobj.field_0x287 != 0) {
                         continue;
                     }
-                    if (other != current_player && other->ai.path_info.connection == connection &&
+                    if (other != player && other->ai.path_info.connection == packet->path_info.connection &&
                         other->ai.special_move_node == NULL &&
                         other->ai.path_connection_state < packet->path_connection_state) {
                         continue;
                     }
                     f32 height = destination->position.y;
-                    f32 tolerance = 0.5f * mover_radius;
+                    f32 tolerance = 0.5f * ai_moveradius;
                     if (owner->apiobj.collision_min.y > height + tolerance) {
                         if (other->apiobj.collision_min.y > height + tolerance) {
                             continue;

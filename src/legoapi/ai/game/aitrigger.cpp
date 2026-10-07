@@ -204,7 +204,8 @@ void AITriggerSetSysProcess(AITRIGGERSETSYS_s *system) {
                 release = true;
             } else if (gizmo->type_id == lever_gizmotype_id) {
                 LEVER_s *lever = static_cast<LEVER_s *>(gizmo->object);
-                if (GameObjectUsingLever(player, lever) || (player2 != NULL && GameObjectUsingLever(player2, lever))) {
+                if (GameObjectUsingLever(player, lever) ||
+                    (player2 != NULL && player2->character_context == 0x4a && player2->field_0x788 == lever)) {
                     set->field_0x20e |= 1u << index;
                 } else if (((set->field_0x20e >> index) & 1) && !Lever_BeingPulled(lever)) {
                     set->field_0x20e &= ~(1u << index);

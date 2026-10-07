@@ -252,38 +252,33 @@ bool MechInputTouchGestureBasedController::OnClick(GameObject_s &object, TouchHo
 }
 
 bool MechInputTouchGestureBasedController::OnDoubleClick(GameObject_s &object, TouchHolder &holder) {
-    if (VehicleArea != 0) {
+    if (VehicleArea != 0)
         return OnClick(object, holder);
-    }
-    if (object.character_context == LEGOCONTEXT_JUMP) {
+    if (object.character_context == LEGOCONTEXT_JUMP || object.character_context == LEGOCONTEXT_BIGJUMP ||
+        object.apiobj.field_0x27d == 0)
         return true;
-    }
-    if (object.character_context == LEGOCONTEXT_BIGJUMP || object.apiobj.field_0x27d == 0) {
-        return true;
-    }
     if (object.apiobj.character_data == NULL || object.apiobj.character_data->player_config == NULL ||
-        object.id == id_GRABCONTROL || object.character_context == 0x2b) {
+        object.id == id_GRABCONTROL || object.character_context == 0x2b)
         return false;
-    }
+
     VuVec touch_position(holder.down_position.x, holder.down_position.y, 0.0f, 1.0f);
     MechObjectInterface *target = holder.target_object.Get();
-    if (target == NULL) {
+    if (target == NULL)
         target = holder.previous_target_object.Get();
-    }
-    if (target == NULL) {
+    if (target == NULL)
         target = MechInputTouchSystem::FindTargetObject(object, touch_position, 0x80, NULL, &temporary_position);
-    }
-    if (target == NULL) {
+    if (target == NULL)
         return false;
-    }
+
     VuVec target_position;
     target->GetPos(target_position, -1);
-    const f32 dx = target_position.x - object.apiobj.position.x;
-    const f32 dy = target_position.y - object.apiobj.position.y;
-    const f32 dz = target_position.z - object.apiobj.position.z;
-    const f32 distance_sq = dx * dx + dy * dy + dz * dz;
-    const i32 type = target->GetObjectType();
-    if (type == 2) {
+    target_position.x -= object.apiobj.position.x;
+    target_position.y -= object.apiobj.position.y;
+    target_position.z -= object.apiobj.position.z;
+    const f32 distance_sq = target_position.x * target_position.x + target_position.y * target_position.y +
+                            target_position.z * target_position.z;
+    bool attack_jump = false;
+    if (target->GetObjectType() == 2) {
         GameObject_s *character = target->GetCharacterObject();
         if (character == &object) {
             GameObject_s *nearby = FindNearestGameObject(&object.apiobj.position, &object, 0, 1.5f, 1.5f, -1, -1, 100,
@@ -298,59 +293,60 @@ bool MechInputTouchGestureBasedController::OnDoubleClick(GameObject_s &object, T
                 packet.touch_holder = &holder;
                 packet.velocity =
                     VuVec(object.apiobj.velocity.x, object.apiobj.velocity.y, object.apiobj.velocity.z, 1.0f);
+                VuVec position(object.apiobj.position.x, object.apiobj.position.y, object.apiobj.position.z, 1.0f);
+                memcpy(packet.field_1c, &position, sizeof(position));
+                Hint_SetComplete(0x629);
                 object.field_0xf04 |= 0x10;
                 TriggerJumpTask(packet, false, false, false);
             }
             return true;
         }
-        if (character != NULL && distance_sq < 1.96f && static_cast<i32>(character->apiobj.field_0x1f4) >= 0 &&
-            character->apiobj.character_data != NULL &&
+        if (character == NULL || !(distance_sq < 1.4f * 1.4f) || static_cast<i32>(character->apiobj.field_0x1f4) < 0)
+            return OnClick(object, holder);
+        if (character->apiobj.character_data != NULL &&
             ((character->apiobj.character_data->model_flags & 0x10) != 0 ||
-             ((character->apiobj.character_data->model_flags & 8) != 0 && qrand() <= 0x3a97)) &&
-            (object.apiobj.character_data->model_flags & 8) != 0) {
-            object.field_0xf04 |= 0x10;
-            VuVec velocity = TouchHacks::CalculateJumpVelToHitPoint(object, target_position);
-            object.apiobj.velocity.x = object.target_velocity.x = velocity.x;
-            object.apiobj.velocity.y = object.target_velocity.y = velocity.y;
-            object.apiobj.velocity.z = object.target_velocity.z = velocity.z;
-            JumpTriggerPacket packet = {};
-            packet.type = 2;
-            packet.player = &object;
-            packet.touch_holder = &holder;
-            packet.velocity = velocity;
-            packet.start = holder.down_position;
-            packet.end = holder.touch_position;
-            ForceNextLungeTarget(target);
-            SetForcedAttackOpponent(target);
-            TriggerJumpTask(packet, true, true, true);
-            return true;
+             ((character->apiobj.character_data->model_flags & 8) != 0 && qrand() <= 0x3a97)))
+            attack_jump = true;
+    } else if (target->GetObjectType() == 4) {
+        if (!(distance_sq < 1.4f * 1.4f))
+            return OnClick(object, holder);
+    } else {
+        GameObject_s *nearby =
+            FindNearestGameObject(&object.apiobj.position, &object, 0, 0.5f, 0.5f, -1, -1, 100, NULL, 0, NULL, false);
+        if (nearby != NULL) {
+            StartNewTask(new MechTouchTaskAttack(*this, nearby->GetMechObjectInterface(), touch_position), holder,
+                         false, true);
+            return OnClick(object, holder);
         }
-    }
-    if (type == 4 && distance_sq < 1.96f && (object.apiobj.character_data->model_flags & 8) != 0) {
-        object.field_0xf04 |= 0x20;
-        VuVec velocity = TouchHacks::CalculateJumpVelToHitPoint(object, target_position);
-        object.apiobj.velocity.x = object.target_velocity.x = velocity.x;
-        object.apiobj.velocity.y = object.target_velocity.y = velocity.y;
-        object.apiobj.velocity.z = object.target_velocity.z = velocity.z;
-        JumpTriggerPacket packet = {};
-        packet.type = 2;
-        packet.player = &object;
-        packet.touch_holder = &holder;
-        packet.velocity = velocity;
-        packet.start = holder.down_position;
-        packet.end = holder.touch_position;
-        ForceNextLungeTarget(target);
-        SetForcedAttackOpponent(target);
-        TriggerJumpTask(packet, true, true, true);
+        StartNewTask(new MechTouchTaskPlannedDoubleClickGoTo(*this, target), holder, false, true);
         return true;
     }
-    GameObject_s *nearby =
-        FindNearestGameObject(&object.apiobj.position, &object, 0, 0.5f, 0.5f, -1, -1, 100, NULL, 0, NULL, false);
-    if (nearby != NULL) {
-        StartNewTask(new MechTouchTaskAttack(*this, nearby->GetMechObjectInterface(), touch_position), holder, false,
-                     true);
-    } else {
-        StartNewTask(new MechTouchTaskPlannedDoubleClickGoTo(*this, target), holder, false, true);
+    if ((object.apiobj.character_data->model_flags & 8) == 0)
+        return OnClick(object, holder);
+
+    if (attack_jump)
+        object.field_0xf04 |= 0x10;
+    object.field_0xf04 |= 0x20;
+    target->GetPos(target_position, -1);
+    GameObject_s *backup_recipient = player != NULL ? player : &object;
+    NUVEC previous_velocity = backup_recipient->apiobj.velocity;
+    NUVEC previous_target_velocity = backup_recipient->target_velocity;
+    VuVec velocity = TouchHacks::CalculateJumpVelToHitPoint(object, target_position);
+    object.apiobj.velocity.x = object.target_velocity.x = velocity.x;
+    object.apiobj.velocity.y = object.target_velocity.y = velocity.y;
+    object.apiobj.velocity.z = object.target_velocity.z = velocity.z;
+    JumpTriggerPacket packet = {};
+    packet.type = 2;
+    packet.player = &object;
+    packet.touch_holder = &holder;
+    packet.velocity = VuVec(object.apiobj.velocity.x, object.apiobj.velocity.y, object.apiobj.velocity.z, 1.0f);
+    memcpy(packet.field_1c, &target_position, sizeof(target_position));
+    ForceNextLungeTarget(target);
+    SetForcedAttackOpponent(target);
+    if (!TriggerJumpTask(packet, true, true, true)) {
+        GameObject_s *restore_recipient = player != NULL ? player : &object;
+        restore_recipient->apiobj.velocity = previous_velocity;
+        restore_recipient->target_velocity = previous_target_velocity;
     }
     return true;
 }

@@ -629,12 +629,12 @@ load_type_done:
         if (load_type != 2) {
             NuRndrGradClear(0xf00, static_cast<i32>(0x80000000u), static_cast<i32>(0x80000000u), 1.0f);
         } else {
-            const u32 top_colour = 0x80000000u | (static_cast<u32>(backdrop_top_b) & 0xff) << 16 |
-                                   (static_cast<u32>(backdrop_top_g) & 0xff) << 8 |
-                                   (static_cast<u32>(backdrop_top_r) & 0xff);
-            const u32 bottom_colour = 0x80000000u | (static_cast<u32>(backdrop_bot_b) & 0xff) << 16 |
-                                      (static_cast<u32>(backdrop_bot_g) & 0xff) << 8 |
-                                      (static_cast<u32>(backdrop_bot_r) & 0xff);
+            const u32 top_colour = 0x80000000u | (static_cast<i32>(backdrop_top_b) & 0xff) << 16 |
+                                   (static_cast<i32>(backdrop_top_g) & 0xff) << 8 |
+                                   (static_cast<i32>(backdrop_top_r) & 0xff);
+            const u32 bottom_colour = 0x80000000u | (static_cast<i32>(backdrop_bot_b) & 0xff) << 16 |
+                                      (static_cast<i32>(backdrop_bot_g) & 0xff) << 8 |
+                                      (static_cast<i32>(backdrop_bot_r) & 0xff);
             NuRndrGradClear(0xf00, static_cast<i32>(top_colour), static_cast<i32>(bottom_colour), 1.0f);
         }
         if (load_type == 2) {

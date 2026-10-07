@@ -1703,7 +1703,7 @@ i32 DebrisSingleTorusCollisionCheckScaleYFlag(i32 key_index, NUVEC *position, f3
 
     f32 age =
         globaltime > key->emission_time ? globaltime - key->emission_time : globaltime - key->previous_emission_time;
-    if (age <= 0.0f || age >= effect->torus_lifetime)
+    if (!(age > 0.0f && age < effect->torus_lifetime))
         return 0;
     f32 normalised_time = age / effect->torus_lifetime;
     f32 ring_radius = DebrisInterpolateFloatKeys(effect->torus_keys1, normalised_time) * effect->torus_radius1;
@@ -1715,6 +1715,7 @@ i32 DebrisSingleTorusCollisionCheckScaleYFlag(i32 key_index, NUVEC *position, f3
     debris_collide_pt.z = position->z - key->position.z;
     NuVecNorm(&debris_collide_pt, &debris_collide_pt);
     NuVecScale(&debris_collide_pt, &debris_collide_pt, ring_radius);
+    key = &debkeydata[key_index];
     debris_collide_pt.x += key->position.x;
     debris_collide_pt.y += key->position.y;
     debris_collide_pt.z += key->position.z;

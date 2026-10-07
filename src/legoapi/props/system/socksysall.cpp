@@ -1445,11 +1445,19 @@ extern "C" {
                     local_right = {1.0f, 0.0f, 0.0f};
                     NuVecRotateY(&local_right, &local_right, candidate->midpoint_rotation.y);
                     side = local_right.x * displacement.x + local_right.z * displacement.z;
-                    NUGSPLINE *limit = side < 0.0f ? sock->left : sock->right;
-                    if (limit != NULL) {
-
-                        SockSysPointAlongSpline(&scratch, limit, candidate->location.segment, candidate->next_segment,
-                                                candidate->ratio);
+                    bool have_limit = false;
+                    if (side < 0.0f) {
+                        if (sock->left != NULL) {
+                            SockSysPointAlongSpline(&scratch, sock->left, candidate->location.segment,
+                                                    candidate->next_segment, candidate->ratio);
+                            have_limit = true;
+                        }
+                    } else if (sock->right != NULL) {
+                        SockSysPointAlongSpline(&scratch, sock->right, candidate->location.segment,
+                                                candidate->next_segment, candidate->ratio);
+                        have_limit = true;
+                    }
+                    if (have_limit) {
                         local_x.x = scratch.x - candidate->camera_position.x;
                         local_x.z = scratch.z - candidate->camera_position.z;
                         half_width = NuFsqrt(local_x.x * local_x.x + local_x.z * local_x.z);
@@ -1729,12 +1737,12 @@ extern "C" {
 
     struct SOCKPAR_CONTEXT {
         u32 reserved[2];
-        SOCKSYS **sock_sys;
+        SOCKSYS *sock_sys;
         SOCK *sock;
     };
 
     void SockSysConfigureNuFPar(NUFPAR *parser, SOCKPAR_CONTEXT *context) {
-        if (context == NULL || context->sock_sys == NULL || *context->sock_sys == NULL || parser == NULL) {
+        if (context == NULL || context->sock_sys == NULL || context->sock_sys->sock == NULL || parser == NULL) {
             return;
         }
 
@@ -1746,9 +1754,19 @@ extern "C" {
             return;
         }
 
-        context->sock = &(*context->sock_sys)->sock[sock_index];
+        context->sock = &context->sock_sys->sock[sock_index];
         sockpar_sock = context->sock;
-        memset(&sockpar_sock->unknown_110, 0, sizeof(sockpar_sock->unknown_110) + sizeof(sockpar_sock->unknown_114));
+        sockpar_sock->blend_count = 0;
+        sockpar_sock->camera_character_close_lift = -1.0f;
+        sockpar_sock->camera_min_distance = -1.0f;
+        sockpar_sock->camera_range_of_effect = -1.0f;
+        sockpar_sock->camera_tilt_angle_change = -1.0f;
+        sockpar_sock->camera_tilt_angle_rate = -1.0f;
+        sockpar_sock->camera_tilt_distance = -1.0f;
+        sockpar_sock->camera_tilt_height = -1.0f;
+        sockpar_sock->manual_camera_max_x = 0.0f;
+        sockpar_sock->manual_camera_max_y = 0.0f;
+        sockpar_sock->terrain_camera_inactive = 0;
 
         NuFParPushComCTX(parser, SockSys_ConfigKeywords);
         do {

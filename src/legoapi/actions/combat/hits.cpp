@@ -374,6 +374,9 @@ void CollideGameObjects(WORLDINFO_s *world) {
     APIOBJECT *collision_objects[64];
     NUVEC collision_minimums[64];
     NUVEC collision_maximums[64];
+    APIOBJECT **object_cursor = collision_objects;
+    NUVEC *minimum_cursor = collision_minimums;
+    NUVEC *maximum_cursor = collision_maximums;
     i32 collision_count = 0;
     object = objects;
     for (i32 index = 0; index < object_count; ++index, ++object) {
@@ -401,10 +404,10 @@ void CollideGameObjects(WORLDINFO_s *world) {
             continue;
         }
 
-        collision_objects[collision_count] = &object->apiobj;
-        collision_minimums[collision_count] = object->apiobj.collision_min;
-        collision_maximums[collision_count] = object->apiobj.collision_max;
         ++collision_count;
+        *minimum_cursor++ = object->apiobj.collision_min;
+        *maximum_cursor++ = object->apiobj.collision_max;
+        *object_cursor++ = &object->apiobj;
 
         object->apiobj.collision_mask_low = 0;
         object->apiobj.collision_mask_high = 0;

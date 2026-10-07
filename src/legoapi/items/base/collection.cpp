@@ -463,19 +463,19 @@ void Collection_CreateCustom(char *name, i16 *id_list, COLLECTION_s *collection,
         }
     } else {
         for (i32 id = 0; id < CHARCOUNT; ++id) {
-            if (required_model_flags != 0 &&
-                (CDataList[id].model_flags & required_model_flags) != required_model_flags) {
-                continue;
-            }
             if (excluded_model_flags != 0 && (apicharsys->char_data[id].model_flags & excluded_model_flags) != 0) {
                 continue;
             }
             if (required_game_flags != 0 && (GCDataList[id].flags_090 & required_game_flags) != required_game_flags) {
                 continue;
             }
+            if (required_model_flags != 0 &&
+                (CDataList[id].model_flags & required_model_flags) != required_model_flags) {
+                continue;
+            }
             COLLECTID &entry = collection->list[collection->count_y];
             memset(&entry, 0, sizeof(entry));
-            entry.id = static_cast<i16>(id);
+            collection->list[collection->count_y].id = static_cast<i16>(id);
             ++collection->count_y;
         }
     }

@@ -260,8 +260,8 @@ void TextCrawl_Draw(float dt, i32 paragraphs, float alpha, char *text) {
     if (paragraphs == 0 && QFont3DTime >= 55.0f) {
         colour_scale = 1.0f - (QFont3DTime - 55.0f) / 5.0f;
     }
-    const u32 colour =
-        (static_cast<u32>(128.0f * colour_scale * alpha) << 24) | (static_cast<u32>(111.0f * colour_scale) << 8) | 0xff;
+    const u32 colour = (static_cast<u32>(static_cast<i32>(128.0f * colour_scale * alpha)) << 24) |
+                       ((static_cast<u32>(static_cast<i32>(111.0f * colour_scale)) & 0xff) << 8) | 0xff;
     NuQFntSetColour(QFont3DZ, colour);
 
     f32 y = QFont3DTime * 0.4f - 4.5f;
@@ -316,9 +316,9 @@ void TextCrawl_Draw(float dt, i32 paragraphs, float alpha, char *text) {
                 break;
             }
             Text3DStringEncode(paragraph, encoded);
-            y += NuQFntPrintJustifiedW(QFont3DZ, encoded, -3.5f, y, 0.0f, x_scale, y_scale, 7.0f, 1.3f, colour,
-                                       &matrix) +
-                 NuQFntHeight(QFont3DZ);
+            y +=
+                NuQFntPrintJustifiedW(QFont3DZ, encoded, -3.5f, y, 0.0f, x_scale, y_scale, 7.0f, 1.3f, colour, &matrix);
+            y += NuQFntHeight(QFont3DZ);
         }
     }
     NuQFntPopPrintMode();

@@ -1173,23 +1173,36 @@ static void AISysLoadAreas(AISYS *system, i32 version) {
     }
 
     system->areas = static_cast<AIAREA *>(AISysLoadAlloc(system, system->area_count * sizeof(AIAREA)));
-    for (i32 index = 0; index < system->area_count; ++index) {
-        AIAREA *area = &system->areas[index];
-        EdFileRead(area->name, sizeof(area->name));
-        area->min_x = EdFileReadFloat();
-        area->min_y = EdFileReadFloat();
-        area->min_z = EdFileReadFloat();
-        area->max_x = EdFileReadFloat();
-        area->max_y = EdFileReadFloat();
-        area->max_z = EdFileReadFloat();
-        area->flags = EdFileReadShort();
-        area->system = system;
-        if (version > 19) {
+    if (version > 19) {
+        for (i32 index = 0; index < system->area_count; ++index) {
+            AIAREA *area = &system->areas[index];
+            EdFileRead(area->name, sizeof(area->name));
+            area->min_x = EdFileReadFloat();
+            area->min_y = EdFileReadFloat();
+            area->min_z = EdFileReadFloat();
+            area->max_x = EdFileReadFloat();
+            area->max_y = EdFileReadFloat();
+            area->max_z = EdFileReadFloat();
+            area->flags = EdFileReadShort();
+            area->system = system;
             area->game_flags = static_cast<u8>(EdFileReadChar());
-        } else {
             EdFileReadChar();
         }
-        EdFileReadChar();
+    } else {
+        for (i32 index = 0; index < system->area_count; ++index) {
+            AIAREA *area = &system->areas[index];
+            EdFileRead(area->name, sizeof(area->name));
+            area->min_x = EdFileReadFloat();
+            area->min_y = EdFileReadFloat();
+            area->min_z = EdFileReadFloat();
+            area->max_x = EdFileReadFloat();
+            area->max_y = EdFileReadFloat();
+            area->max_z = EdFileReadFloat();
+            area->flags = EdFileReadShort();
+            area->system = system;
+            EdFileReadChar();
+            EdFileReadChar();
+        }
     }
 }
 

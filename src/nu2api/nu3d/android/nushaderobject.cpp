@@ -995,91 +995,20 @@ extern "C" void NuShaderObjectGLSLSetupTextureStates(NUSHADEROBJECT *shader, num
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);                                                 \
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
         switch (semantic) {
-            case 0: {
-                BIND_STATE_TEXTURE(mtl->shader_desc.diffuse_map_tex_id[0]);
-                const u32 wrap_s = mtl->attribs.unknown_1_1_2;
-                const u32 wrap_t = mtl->attribs.unknown_1_4_8;
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap_modes[wrap_s]);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap_modes[wrap_t]);
-                NuCheckGLErrorsFL(source, 0x491);
-                break;
-            }
-            case 1: {
-                BIND_STATE_TEXTURE(mtl->shader_desc.diffuse_map_tex_id[1]);
-                const u32 wrap_s = mtl->attribs.unknown_1_1_2;
-                const u32 wrap_t = mtl->attribs.unknown_1_4_8;
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap_modes[wrap_s]);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap_modes[wrap_t]);
-                NuCheckGLErrorsFL(source, 0x49a);
-                break;
-            }
-            case 2: {
-                BIND_STATE_TEXTURE(mtl->shader_desc.diffuse_map_tex_id[2]);
-                const u32 wrap_s = mtl->attribs.unknown_1_1_2;
-                const u32 wrap_t = mtl->attribs.unknown_1_4_8;
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap_modes[wrap_s]);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap_modes[wrap_t]);
-                break;
-            }
-            case 3: {
-                BIND_STATE_TEXTURE(mtl->shader_desc.diffuse_map_tex_id[3]);
-                const u32 wrap_s = mtl->attribs.unknown_1_1_2;
-                const u32 wrap_t = mtl->attribs.unknown_1_4_8;
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap_modes[wrap_s]);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap_modes[wrap_t]);
-                NuCheckGLErrorsFL(source, 0x4ab);
-                break;
-            }
             case 4:
                 BIND_STATE_TEXTURE(mtl->shader_desc.specular_map_tid);
                 REPEAT_STATE();
                 NuCheckGLErrorsFL(source, 0x4b5);
                 break;
-            case 5:
-                BIND_STATE_TEXTURE(mtl->shader_desc.lightmap_tex_id[0]);
-                REPEAT_STATE();
-                NuCheckGLErrorsFL(source, 0x4bf);
-                break;
-            case 6:
-                BIND_STATE_TEXTURE(mtl->shader_desc.normal_map_tid);
-                REPEAT_STATE();
-                NuCheckGLErrorsFL(source, 0x4c9);
-                break;
-            case 7:
-                BIND_STATE_TEXTURE(mtl->shader_desc.lightmap_tex_id[1]);
-                REPEAT_STATE();
-                NuCheckGLErrorsFL(source, 0x4d3);
-                break;
-            case 9:
-                BIND_STATE_TEXTURE(mtl->shader_desc.vtf_height_map_tid);
-                REPEAT_STATE();
-                NEAREST_STATE();
-                NuCheckGLErrorsFL(source, 0x4e6);
-                break;
-            case 12:
-                BIND_STATE_TEXTURE(mtl->shader_desc.vtf_normal_map_tid);
-                REPEAT_STATE();
-                NuCheckGLErrorsFL(source, 0x4f8);
-                break;
-            case 13: {
-                if (g_currentTexUnit != (static_cast<u16>(parameter.location) & 0x7ff)) {
-                    glActiveTexture(GL_TEXTURE0 + (static_cast<u16>(parameter.location) & 0x7ff));
-                    g_currentTexUnit = static_cast<u16>(parameter.location) & 0x7ff;
-                }
-#define STATE_CUBE_NAME()                                                                                              \
-    (mtl->shader_desc.unknown_198 != 0 ? NuTexGetNative(mtl->shader_desc.unknown_198)->platform.gl_tex : 0)
-                const GLuint previous = g_lastBoundCubeTexIds[static_cast<u16>(parameter.location) & 0x7ff];
-                if (previous != STATE_CUBE_NAME()) {
-                    glBindTexture(GL_TEXTURE_CUBE_MAP, STATE_CUBE_NAME());
+            case 18:
+                if (NuWindCurrent(nuapi.wind) >= 0) {
                     const u32 unit = static_cast<u16>(parameter.location) & 0x7ff;
-                    g_lastBoundCubeTexIds[unit] = STATE_CUBE_NAME();
+                    NuTexSetTextureWithStagePS(NuTexGetNative(NuWindCurrent(nuapi.wind)), unit);
+                    REPEAT_STATE();
+                    NEAREST_STATE();
+                    NuCheckGLErrorsFL(source, 0x549);
                 }
-#undef STATE_CUBE_NAME
-                glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-                glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-                NuCheckGLErrorsFL(source, 0x502);
                 break;
-            }
             case 14: {
                 const u32 unit = static_cast<u16>(parameter.location) & 0x7ff;
                 glGetError();
@@ -1099,21 +1028,29 @@ extern "C" void NuShaderObjectGLSLSetupTextureStates(NUSHADEROBJECT *shader, num
                 NuCheckGLErrorsFL(source, 0x522);
                 break;
             }
-            case 16:
-                BIND_STATE_TEXTURE(mtl->shader_desc.shine_map_ps2_tid);
-                NEAREST_STATE();
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-                NuCheckGLErrorsFL(source, 0x52e);
-                break;
-            case 18:
-                if (NuWindCurrent(nuapi.wind) >= 0) {
-                    const u32 unit = static_cast<u16>(parameter.location) & 0x7ff;
-                    NuTexSetTextureWithStagePS(NuTexGetNative(NuWindCurrent(nuapi.wind)), unit);
-                    REPEAT_STATE();
-                    NEAREST_STATE();
-                    NuCheckGLErrorsFL(source, 0x549);
+            case 13: {
+                if (g_currentTexUnit != (static_cast<u16>(parameter.location) & 0x7ff)) {
+                    glActiveTexture(GL_TEXTURE0 + (static_cast<u16>(parameter.location) & 0x7ff));
+                    g_currentTexUnit = static_cast<u16>(parameter.location) & 0x7ff;
                 }
+#define STATE_CUBE_NAME()                                                                                              \
+    (mtl->shader_desc.unknown_198 != 0 ? NuTexGetNative(mtl->shader_desc.unknown_198)->platform.gl_tex : 0)
+                const GLuint previous = g_lastBoundCubeTexIds[static_cast<u16>(parameter.location) & 0x7ff];
+                if (previous != STATE_CUBE_NAME()) {
+                    glBindTexture(GL_TEXTURE_CUBE_MAP, STATE_CUBE_NAME());
+                    const u32 unit = static_cast<u16>(parameter.location) & 0x7ff;
+                    g_lastBoundCubeTexIds[unit] = STATE_CUBE_NAME();
+                }
+#undef STATE_CUBE_NAME
+                glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+                glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+                NuCheckGLErrorsFL(source, 0x502);
+                break;
+            }
+            case 12:
+                BIND_STATE_TEXTURE(mtl->shader_desc.vtf_normal_map_tid);
+                REPEAT_STATE();
+                NuCheckGLErrorsFL(source, 0x4f8);
                 break;
             case 19:
                 BIND_STATE_TEXTURE(mtl->shader_desc.field_1e4);
@@ -1126,6 +1063,69 @@ extern "C" void NuShaderObjectGLSLSetupTextureStates(NUSHADEROBJECT *shader, num
                 REPEAT_STATE();
                 NEAREST_STATE();
                 NuCheckGLErrorsFL(source, 0x560);
+                break;
+            case 9:
+                BIND_STATE_TEXTURE(mtl->shader_desc.vtf_height_map_tid);
+                REPEAT_STATE();
+                NEAREST_STATE();
+                NuCheckGLErrorsFL(source, 0x4e6);
+                break;
+            case 7:
+                BIND_STATE_TEXTURE(mtl->shader_desc.lightmap_tex_id[1]);
+                REPEAT_STATE();
+                NuCheckGLErrorsFL(source, 0x4d3);
+                break;
+            case 6:
+                BIND_STATE_TEXTURE(mtl->shader_desc.normal_map_tid);
+                REPEAT_STATE();
+                NuCheckGLErrorsFL(source, 0x4c9);
+                break;
+            case 5:
+                BIND_STATE_TEXTURE(mtl->shader_desc.lightmap_tex_id[0]);
+                REPEAT_STATE();
+                NuCheckGLErrorsFL(source, 0x4bf);
+                break;
+            case 3: {
+                BIND_STATE_TEXTURE(mtl->shader_desc.diffuse_map_tex_id[3]);
+                const u32 wrap_s = mtl->attribs.unknown_1_1_2;
+                const u32 wrap_t = mtl->attribs.unknown_1_4_8;
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap_modes[wrap_s]);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap_modes[wrap_t]);
+                NuCheckGLErrorsFL(source, 0x4ab);
+                break;
+            }
+            case 2: {
+                BIND_STATE_TEXTURE(mtl->shader_desc.diffuse_map_tex_id[2]);
+                const u32 wrap_s = mtl->attribs.unknown_1_1_2;
+                const u32 wrap_t = mtl->attribs.unknown_1_4_8;
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap_modes[wrap_s]);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap_modes[wrap_t]);
+                break;
+            }
+            case 1: {
+                BIND_STATE_TEXTURE(mtl->shader_desc.diffuse_map_tex_id[1]);
+                const u32 wrap_s = mtl->attribs.unknown_1_1_2;
+                const u32 wrap_t = mtl->attribs.unknown_1_4_8;
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap_modes[wrap_s]);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap_modes[wrap_t]);
+                NuCheckGLErrorsFL(source, 0x49a);
+                break;
+            }
+            case 0: {
+                BIND_STATE_TEXTURE(mtl->shader_desc.diffuse_map_tex_id[0]);
+                const u32 wrap_s = mtl->attribs.unknown_1_1_2;
+                const u32 wrap_t = mtl->attribs.unknown_1_4_8;
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap_modes[wrap_s]);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap_modes[wrap_t]);
+                NuCheckGLErrorsFL(source, 0x491);
+                break;
+            }
+            case 16:
+                BIND_STATE_TEXTURE(mtl->shader_desc.shine_map_ps2_tid);
+                NEAREST_STATE();
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+                NuCheckGLErrorsFL(source, 0x52e);
                 break;
         }
 #undef BIND_STATE_TEXTURE
