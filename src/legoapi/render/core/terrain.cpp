@@ -5557,8 +5557,9 @@ void NewScan(nuvec_s *position, i32 terrain_mask, i32 scan_platforms) {
             const f32 local_max_x = max_x - group.origin.x;
             const f32 local_min_z = min_z - group.origin.z;
             const f32 local_max_z = max_z - group.origin.z;
-            for (i32 i = 0; i < count; ++i) {
-                TERRAIN_SHAPE *shape = shapes[i];
+            TERRAIN_SHAPE **shape_entry = shapes;
+            for (i32 remaining = count; remaining > 0; --remaining, ++shape_entry) {
+                TERRAIN_SHAPE *shape = *shape_entry;
                 if (local_max_x < shape->min_x || shape->max_x <= local_min_x || local_max_z < shape->min_z ||
                     shape->max_z <= local_min_z) {
                     continue;
@@ -5623,8 +5624,8 @@ void NewScan(nuvec_s *position, i32 terrain_mask, i32 scan_platforms) {
                 TERRAIN_SHAPE *shapes = reinterpret_cast<TERRAIN_SHAPE *>(batch + 1);
                 if (local_max_x >= batch->min_x && batch->max_x > local_min_x && local_max_z >= batch->min_z &&
                     batch->max_z > local_min_z) {
-                    for (i32 shape_index = 0; shape_index < batch->shape_count; ++shape_index) {
-                        TERRAIN_SHAPE *shape = &shapes[shape_index];
+                    TERRAIN_SHAPE *shape = shapes;
+                    for (i32 remaining = batch->shape_count; remaining > 0; --remaining, ++shape) {
                         if (local_max_x < shape->min_x || shape->max_x <= local_min_x || local_max_z < shape->min_z ||
                             shape->max_z <= local_min_z) {
                             continue;

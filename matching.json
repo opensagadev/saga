@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 72.58798,
+    "fuzzy_match_percent": 72.589615,
     "total_code": "4722419",
     "matched_code": "567505",
     "matched_code_percent": 12.017252,
@@ -77984,7 +77984,7 @@
           "address": 3636048,
           "offset": 2746080,
           "size": 5207,
-          "match_percent": 21.581802
+          "match_percent": 23.064339
         },
         {
           "name": "_Z10NewScanRotP7nuvec_si",
