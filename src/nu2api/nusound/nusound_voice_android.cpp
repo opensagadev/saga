@@ -548,7 +548,7 @@ void NuVoiceAndroid::UpdateSamplePlaybackCount() {
     NuSoundSource *source = this->sound_source;
     NuSoundStreamDesc *desc = source->GetStreamDesc();
     i32 rate = (i32)desc->GetSampleRate();
-    i32 position = (rate / 1000) * (i32)millisec;
+    u32 position = (u32)(rate / 1000) * millisec;
 
     if (source->feed_type != NuSoundSource::FeedType::STREAMING) {
         this->field11_0x174 = position;
@@ -617,9 +617,18 @@ NuSoundVoiceFactoryList::NuSoundVoiceFactoryList() {
     factories = NULL;
     length = 0;
     capacity = 0;
-    factories = static_cast<NuSoundVoiceFactory **>(NuMemoryGet()->GetThreadMem()->_BlockReAlloc(
-        factories, 16 * sizeof(NuSoundVoiceFactory *), 4, 0x41, "", NUMEMORY_CATEGORY_NONE));
+    NuSoundVoiceFactory **replacement =
+        static_cast<NuSoundVoiceFactory **>(NuMemoryGet()->GetThreadMem()->_BlockReAlloc(
+            factories, 16 * sizeof(NuSoundVoiceFactory *), 4, 0x41, "", NUMEMORY_CATEGORY_NONE));
+    if (replacement != factories) {
+        u32 previous_capacity = capacity;
+        for (u32 i = 0; i < previous_capacity; ++i) {
+            replacement[i] = factories[i];
+        }
+        NuMemoryGet()->GetThreadMem()->BlockFree(factories, 0);
+    }
     length = 16;
+    factories = replacement;
     capacity = 16;
 }
 

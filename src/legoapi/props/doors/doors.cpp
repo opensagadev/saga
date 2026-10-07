@@ -591,63 +591,65 @@ void Doors_Check(WORLDINFO_s *world, GameObject_s *object) {
         return;
     }
 
+    DOOR_s *door = doors;
+    i32 door_count = WORLD->door_count;
     const f32 centre_height = (object->character_bottom + object->character_top) * object->apiobj.field_0xa8 * 0.5f;
     NUVEC previous_position = object->apiobj.start_position;
     previous_position.y += centre_height;
     NUVEC current_position = object->apiobj.position;
     current_position.y += centre_height;
 
-    for (i32 index = 0; index < WORLD->door_count; ++index) {
-        DOOR_s *door = &doors[index];
-        if ((door->flags & DOOR_FLAG_DO_NOT_USE) != 0 || door->active != 0 ||
-            (Mission_Active(NULL) != NULL && door->level != world->level_idx)) {
-            continue;
+    for (i32 index = 0; index < door_count; ++index, ++door) {
+        if ((door->flags & DOOR_FLAG_DO_NOT_USE) == 0 && door->active == 0) {
+            if (Mission_Active(NULL) == NULL || door->level == world->level_idx) {
+                NUVEC previous_offset;
+                NUVEC current_offset;
+                NuVecSub(&previous_offset, &previous_position, &door->pos);
+                NuVecSub(&current_offset, &current_position, &door->pos);
+                const f32 previous_distance = NuVecDot(&door->normal, &previous_offset);
+                const f32 current_distance = NuVecDot(&door->normal, &current_offset);
+
+                i32 crossing_direction = 0;
+                if (previous_distance < 0.0f && current_distance >= 0.0f) {
+                    crossing_direction = 1;
+                } else if ((door->flags & DOOR_FLAG_ONE_WAY) == 0 && previous_distance >= 0.0f &&
+                           current_distance < 0.0f) {
+                    crossing_direction = 2;
+                }
+
+                if (crossing_direction != 0) {
+                    const f32 interpolation =
+                        NuFabs(previous_distance) / (NuFabs(current_distance) + NuFabs(previous_distance));
+                    NUVEC intersection;
+                    intersection.x = previous_position.x + (current_position.x - previous_position.x) * interpolation;
+                    intersection.y = previous_position.y + (current_position.y - previous_position.y) * interpolation;
+                    intersection.z = previous_position.z + (current_position.z - previous_position.z) * interpolation;
+
+                    if (NuPtInPoly(&intersection, &door->point0, &door->point1, &door->point3, &door->plane) != 0 ||
+                        NuPtInPoly(&intersection, &door->point1, &door->opposite_midpoint, &door->point3,
+                                   &door->plane) != 0) {
+                        if ((object->apiobj.flags_low & APIOBJECT_FLAG_PLAYER_ACTIVE) != 0) {
+                            Door_GoThrough(world, door, 1);
+                            return;
+                        }
+
+                        if (NuFabs(door->normal.y) >= NuTrigTable[0xaaa]) {
+                            return;
+                        }
+
+                        object->apiobj.position = object->apiobj.start_position;
+                        NUVEC block_normal = door->normal;
+                        if (crossing_direction == 2) {
+                            NuVecRotateY(&block_normal, &block_normal, 0x8000);
+                        }
+                        object->apiobj.field_0x1fc -= block_normal.x * DOOR_BLOCK_VELOCITY;
+                        object->apiobj.field_0x204 -= block_normal.z * DOOR_BLOCK_VELOCITY;
+                        return;
+                    }
+                }
+            }
+            door_count = WORLD->door_count;
         }
-
-        NUVEC previous_offset;
-        NUVEC current_offset;
-        NuVecSub(&previous_offset, &previous_position, &door->pos);
-        NuVecSub(&current_offset, &current_position, &door->pos);
-        const f32 previous_distance = NuVecDot(&door->normal, &previous_offset);
-        const f32 current_distance = NuVecDot(&door->normal, &current_offset);
-
-        i32 crossing_direction = 0;
-        if (previous_distance < 0.0f && current_distance >= 0.0f) {
-            crossing_direction = 1;
-        } else if ((door->flags & DOOR_FLAG_ONE_WAY) == 0 && previous_distance >= 0.0f && current_distance < 0.0f) {
-            crossing_direction = 2;
-        } else {
-            continue;
-        }
-
-        const f32 interpolation = NuFabs(previous_distance) / (NuFabs(current_distance) + NuFabs(previous_distance));
-        NUVEC intersection;
-        intersection.x = previous_position.x + (current_position.x - previous_position.x) * interpolation;
-        intersection.y = previous_position.y + (current_position.y - previous_position.y) * interpolation;
-        intersection.z = previous_position.z + (current_position.z - previous_position.z) * interpolation;
-
-        if (NuPtInPoly(&intersection, &door->point0, &door->point1, &door->point3, &door->plane) == 0 &&
-            NuPtInPoly(&intersection, &door->point1, &door->opposite_midpoint, &door->point3, &door->plane) == 0) {
-            continue;
-        }
-
-        if ((object->apiobj.flags_low & APIOBJECT_FLAG_PLAYER_ACTIVE) != 0) {
-            Door_GoThrough(world, door, 1);
-            return;
-        }
-
-        if (NuFabs(door->normal.y) >= NuTrigTable[0xaaa]) {
-            return;
-        }
-
-        object->apiobj.position = object->apiobj.start_position;
-        NUVEC block_normal = door->normal;
-        if (crossing_direction == 2) {
-            NuVecRotateY(&block_normal, &block_normal, 0x8000);
-        }
-        object->apiobj.field_0x1fc -= block_normal.x * DOOR_BLOCK_VELOCITY;
-        object->apiobj.field_0x204 -= block_normal.z * DOOR_BLOCK_VELOCITY;
-        return;
     }
 }
 

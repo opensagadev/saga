@@ -1,0 +1,35 @@
+load("@rules_cc//cc:cc_test.bzl", "cc_test")
+
+# Isolated host regression: no engine archives, assets, display, or startup.
+# Requires a 32-bit C++ toolchain and GLES2 development headers.
+# Run with: bazel test //tests/lighting:light_game_object_test
+cc_test(
+    name = "light_game_object_test",
+    size = "small",
+    srcs = [
+        "light_game_object_test.cpp",
+        "//src:legoapi/characters/motion/move.cpp",
+        "//src:legoapi/render/light/lighting.cpp",
+        "//src:nu2api/numath/nufloat_android.c",
+        "//src:nu2api/numath/nuvec.cpp",
+    ],
+    additional_compiler_inputs = ["//src:all_source_files"],
+    defines = ["ANDROID"],
+    copts = [
+        "-Isrc",
+        "-x",
+        "c++",
+        "-std=gnu++17",
+        "-m32",
+        "-march=i686",
+        "-msse2",
+        "-mfpmath=sse",
+        "-ffunction-sections",
+        "-fdata-sections",
+    ],
+    linkopts = [
+        "-m32",
+        "-Wl,--gc-sections",
+    ],
+    target_compatible_with = ["@platforms//os:linux"],
+)

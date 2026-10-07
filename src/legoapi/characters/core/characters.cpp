@@ -85,6 +85,7 @@ extern "C" {
     void NuTexAnimProgSysInit(void);
     void terrainpickupinit(char *, void **);
 
+    extern f32 animduration_blendouttime;
     extern i32 Grass_Available;
     extern i32 DEBPAGE_GENERAL;
     extern i32 DEBPAGE_CHARACTER;
@@ -861,7 +862,7 @@ i32 InitCreature(GameObject_s *obj, i32 id, i32 param) {
     }
 
     obj->pad_gamepad = GamePad_Allocate();
-    obj->pad_gamepad->unknown_24 |= 0x100;
+    obj->pad_gamepad->input_mode = 1;
     obj->hitpoints = game_character_data->hitpoints;
     obj->current_hp = game_character_data->hitpoints;
     ResetPlayerPacket(reinterpret_cast<PLAYERPACKET_s *>(obj->player_packet),
@@ -892,9 +893,8 @@ i32 InitCreature(GameObject_s *obj, i32 id, i32 param) {
 
     i32 reset_animation = 1;
     if (obj->apiobj.character_model != NULL) {
-        void **animation_table = *reinterpret_cast<void ***>(reinterpret_cast<u8 *>(obj->apiobj.character_model) + 0xc);
+        void **animation_table = obj->apiobj.character_model->model_data_b;
         if (animation_table != NULL && animation_table[1] == NULL) {
-            reset_animation = 0;
             for (i32 i = 0; i < 0xe9; i++) {
                 if (animation_table[i] != NULL) {
                     obj->apiobj.anim_packet.animation_index = static_cast<u16>(i);
@@ -1185,18 +1185,19 @@ static void NewCharacterIdle(GameObject_s *object, i32 default_idle) {
     CHARACTERANIM_s *info = static_cast<CHARACTERANIM_s *>(model->model_data_a[animation]);
     i32 repetitions = static_cast<u8>(info->minimum_repetitions);
     const u8 maximum = static_cast<u8>(info->maximum_repetitions);
-    object->previous_idle_animation = static_cast<i16>(animation);
-    if (repetitions > 1 && (info->flags & 2) == 0) {
-        repetitions = 1;
-    }
     if (repetitions == 0) {
         repetitions = 1;
     } else if (maximum > repetitions) {
         repetitions = IdleRepetitionCount(static_cast<u8>(repetitions), maximum);
     }
+    object->previous_idle_animation = static_cast<i16>(animation);
+    if (repetitions > 1 && (info->flags & 2) == 0) {
+        repetitions = 1;
+    }
 
     object->idle_animation_time = 0.0f;
-    object->idle_animation_limit = AnimDuration(object->id, animation, 0.0f, 0.0f, 0) * repetitions - FRAMETIME;
+    const f32 duration = AnimDuration(object->id, animation, 0.0f, 0.0f, 0);
+    object->idle_animation_limit = duration * repetitions - animduration_blendouttime;
 }
 
 void UpdateCharacterIdle(GameObject_s *object) {

@@ -1,0 +1,74 @@
+diff --git a/simd_float.h b/simd_float.h
+--- a/simd_float.h
++++ b/simd_float.h
+@@ -138,4 +138,4 @@
+-			std::min( left.m_x, right.m_x ), 
+-			std::min( left.m_y, right.m_y ), 
+-			std::min( left.m_z, right.m_z ), 
+-			std::min( left.m_w, right.m_w ) 
++			(left.m_x - right.m_x) >= 0.0f ? right.m_x : left.m_x,
++			(left.m_y - right.m_y) >= 0.0f ? right.m_y : left.m_y,
++			(left.m_z - right.m_z) >= 0.0f ? right.m_z : left.m_z,
++			(left.m_w - right.m_w) >= 0.0f ? right.m_w : left.m_w
+@@ -148,4 +148,4 @@
+-			std::max( left.m_x, right.m_x ), 
+-			std::max( left.m_y, right.m_y ), 
+-			std::max( left.m_z, right.m_z ), 
+-			std::max( left.m_w, right.m_w ) 
++			(left.m_x - right.m_x) >= 0.0f ? left.m_x : right.m_x,
++			(left.m_y - right.m_y) >= 0.0f ? left.m_y : right.m_y,
++			(left.m_z - right.m_z) >= 0.0f ? left.m_z : right.m_z,
++			(left.m_w - right.m_w) >= 0.0f ? left.m_w : right.m_w
+@@ -158,4 +158,4 @@
+-			v.m_x > 0.0f ? std::floor( v.m_x ) : std::ceil( v.m_x ), 
+-			v.m_y > 0.0f ? std::floor( v.m_y ) : std::ceil( v.m_y ), 
+-			v.m_z > 0.0f ? std::floor( v.m_z ) : std::ceil( v.m_z ),
+-			v.m_w > 0.0f ? std::floor( v.m_w ) : std::ceil( v.m_w )
++			v.m_x > 0.0f ? std::floor( static_cast<double>(v.m_x) ) : std::ceil( static_cast<double>(v.m_x) ),
++			v.m_y > 0.0f ? std::floor( static_cast<double>(v.m_y) ) : std::ceil( static_cast<double>(v.m_y) ),
++			v.m_z > 0.0f ? std::floor( static_cast<double>(v.m_z) ) : std::ceil( static_cast<double>(v.m_z) ),
++			v.m_w > 0.0f ? std::floor( static_cast<double>(v.m_w) ) : std::ceil( static_cast<double>(v.m_w) )
+diff --git a/maths.h b/maths.h
+--- a/maths.h
++++ b/maths.h
+@@ -166,3 +166,3 @@
+-			std::min( left.m_x, right.m_x ), 
+-			std::min( left.m_y, right.m_y ), 
+-			std::min( left.m_z, right.m_z )
++			(left.m_x - right.m_x) >= 0.0f ? right.m_x : left.m_x,
++			(left.m_y - right.m_y) >= 0.0f ? right.m_y : left.m_y,
++			(left.m_z - right.m_z) >= 0.0f ? right.m_z : left.m_z
+@@ -175,3 +175,3 @@
+-			std::max( left.m_x, right.m_x ), 
+-			std::max( left.m_y, right.m_y ), 
+-			std::max( left.m_z, right.m_z )
++			(left.m_x - right.m_x) >= 0.0f ? left.m_x : right.m_x,
++			(left.m_y - right.m_y) >= 0.0f ? left.m_y : right.m_y,
++			(left.m_z - right.m_z) >= 0.0f ? left.m_z : right.m_z
+diff --git a/maths.cpp b/maths.cpp
+--- a/maths.cpp
++++ b/maths.cpp
+@@ -187,2 +187,2 @@
+-		float theta = std::atan2( std::sqrt( -Q ), -0.5f*b );
+-		float rho = std::sqrt( 0.25f*b*b - Q );
++		float theta = std::atan2( std::sqrt( static_cast<double>( -Q ) ), static_cast<double>( -0.5f*b ) );
++		float rho = std::sqrt( static_cast<double>( 0.25f*b*b - Q ) );
+@@ -190,3 +190,3 @@
+-		float rt = std::pow( rho, 1.0f/3.0f );
+-		float ct = std::cos( theta/3.0f );
+-		float st = std::sin( theta/3.0f );
++		float rt = std::pow( static_cast<double>( rho ), static_cast<double>( 1.0f/3.0f ) );
++		float ct = std::cos( static_cast<double>( theta/3.0f ) );
++		float st = std::sin( static_cast<double>( theta/3.0f ) );
+@@ -212,1 +212,1 @@
+-			rt = -std::pow( -0.5f*b, 1.0f/3.0f );
++			rt = -std::pow( static_cast<double>( -0.5f*b ), static_cast<double>( 1.0f/3.0f ) );
+@@ -214,1 +214,1 @@
+-			rt = std::pow( 0.5f*b, 1.0f/3.0f );
++			rt = std::pow( static_cast<double>( 0.5f*b ), static_cast<double>( 1.0f/3.0f ) );
+diff --git a/colourset.cpp b/colourset.cpp
+--- a/colourset.cpp
++++ b/colourset.cpp
+@@ -106,1 +106,1 @@
+-		m_weights[i] = std::sqrt( m_weights[i] );
++		m_weights[i] = std::sqrt( static_cast<double>( m_weights[i] ) );

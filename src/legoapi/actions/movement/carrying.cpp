@@ -199,7 +199,7 @@ void SuperCarry_Throw(GameObject_s *object, i32 mode) {
     }
     if (SuperCarry_KeepObjectLevel == 0) {
         NUVEC position = *NUMTX_GET_ROW_VEC(&matrix, 3);
-        NUMTX basis = numtx_identity;
+        NUMTX basis;
         *NUMTX_GET_ROW_VEC(&basis, 0) = object->carried_object_basis[0];
         *NUMTX_GET_ROW_VEC(&basis, 1) = object->carried_object_basis[1];
         *NUMTX_GET_ROW_VEC(&basis, 2) = object->carried_object_basis[2];
@@ -227,7 +227,9 @@ void SuperCarry_Throw(GameObject_s *object, i32 mode) {
     GIZMOBLOWUP_s *blowup = static_cast<GIZMOBLOWUP_s *>(object->field_0x788);
     params.field_14 = params.field_18 = 0.5f * blowup->target_scale;
     params.special = &blowup->type->special;
-    params.flags = (blowup->secondary_flags & 4) != 0 ? 0x8011 : 0x8111;
+    params.flags = 0x8011;
+    if ((blowup->secondary_flags & 4) == 0)
+        params.flags = 0x8111;
     params.owner = object;
     params.time_step = FRAMETIME;
     params.gravity = SUPERCARRY_OBJGRAVITY;
@@ -357,8 +359,7 @@ void SuperCarry_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
                 NUVEC delta;
                 f32 distance = NuVecDistSqr(&blowup->mid_position, &object->apiobj.collision_position, &delta);
                 f32 radius = object->apiobj.field_0x1dc + blowup->target_scale + 0.2f;
-                if (distance < best && distance < radius * radius &&
-                    delta.x * forward.x + delta.z * !(forward.z <= 0.0f)) {
+                if (distance < best && distance < radius * radius && delta.x * forward.x + delta.z * forward.z > 0.0f) {
                     nearest = blowup;
                     best = distance;
                 }

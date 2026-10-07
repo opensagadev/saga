@@ -6,6 +6,7 @@
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nutrig.h"
 
+#include <float.h>
 #include <string.h>
 
 static VARIPTR fstack;
@@ -127,21 +128,21 @@ static __used__ NUFRUSTRUM *buildFrustrum(NUVEC *minimum, NUVEC *maximum, i16 ro
     const f32 tangent = NU_TAN_LUT(cam->fov * 0.5f * 10430.378f);
     const f32 horizontal_tangent = tangent / cam->aspect;
 
-    f32 edge = maximum->x * horizontal_tangent;
+    f32 edge = minimum->y * tangent;
     f32 inverse_length = 1.0f / NuFsqrt(edge * edge + 1.0f);
-    frustum->planes[0] = {-inverse_length, 0.0f, edge * inverse_length, 0.0f};
-
-    edge = minimum->x * horizontal_tangent;
-    inverse_length = 1.0f / NuFsqrt(edge * edge + 1.0f);
-    frustum->planes[1] = {inverse_length, 0.0f, -edge * inverse_length, 0.0f};
-
-    edge = minimum->y * tangent;
-    inverse_length = 1.0f / NuFsqrt(edge * edge + 1.0f);
     frustum->planes[2] = {0.0f, inverse_length, -edge * inverse_length, 0.0f};
 
     edge = maximum->y * tangent;
     inverse_length = 1.0f / NuFsqrt(edge * edge + 1.0f);
     frustum->planes[3] = {0.0f, -inverse_length, edge * inverse_length, 0.0f};
+
+    edge = maximum->x * horizontal_tangent;
+    inverse_length = 1.0f / NuFsqrt(edge * edge + 1.0f);
+    frustum->planes[0] = {-inverse_length, 0.0f, edge * inverse_length, 0.0f};
+
+    edge = minimum->x * horizontal_tangent;
+    inverse_length = 1.0f / NuFsqrt(edge * edge + 1.0f);
+    frustum->planes[1] = {inverse_length, 0.0f, -edge * inverse_length, 0.0f};
 
     for (i32 i = 0; i < 4; ++i) {
         transformFrustrumPlane(&frustum->planes[i]);
@@ -207,10 +208,8 @@ static NUFRUSTRUM *buildPortalFrustrum(NUPORTAL *portal, i16 room_id) {
 
 static NUFRUSTRUM *copyFrustrum(NUFRUSTRUM *source, i16 room_id) {
     NUFRUSTRUM *copy = allocateFrustrum(source->plane_count, room_id);
-    memcpy(copy->transposed_planes, source->transposed_planes, sizeof(copy->transposed_planes));
-    copy->minimum = source->minimum;
-    copy->maximum = source->maximum;
-    memcpy(copy->planes, source->planes, sizeof(NUPLANE) * source->plane_count);
+    *copy = *source;
+    copy->room_id = room_id;
     return copy;
 }
 
@@ -257,7 +256,7 @@ static __used__ void roomRecursive(NUGSCN *scene, NUFRUSTRUM *frustum, i16 room_
         for (i32 plane_index = 0; plane_index < frustum->plane_count; ++plane_index) {
             i32 outside_vertices = 0;
             for (i32 vertex_index = 0; vertex_index < portal->vertex_count; ++vertex_index) {
-                if (planeDistance(frustum->planes[plane_index], portal->vertices[vertex_index]) < 0.0f) {
+                if (!(planeDistance(frustum->planes[plane_index], portal->vertices[vertex_index]) >= 0.0f)) {
                     ++outside_vertices;
                 } else {
                     ++inside_tests;
@@ -274,6 +273,35 @@ static __used__ void roomRecursive(NUGSCN *scene, NUFRUSTRUM *frustum, i16 room_
 
         NUFRUSTRUM *next_frustum = NULL;
         if (inside_tests == frustum->plane_count * portal->vertex_count) {
+            if (draw_portals != 0) {
+                NuCameraUnlock();
+                NUVEC direction;
+                for (i32 i = 0; i < portal->vertex_count; ++i) {
+                    NUVEC *first = &portal->vertices[i];
+                    NUVEC *second = &portal->vertices[(i + 1) % portal->vertex_count];
+                    NuVecSub(&direction, first, second);
+                    NuRndrLine3dDbg(first->x, first->y, first->z, second->x, second->y, second->z,
+                                    static_cast<i32>(0xffff00ffU));
+                }
+                NUVEC nearest_point = {0.0f, 0.0f, 0.0f};
+                for (i32 i = 0; i < portal->vertex_count; ++i) {
+                    NUVEC *vertex = &portal->vertices[i];
+                    NuVecSub(&direction, vertex, &world_campos);
+                    NuVecNorm(&direction, &direction);
+                    f32 nearest_distance = FLT_MAX;
+                    for (i32 plane_index = 0; plane_index < next->plane_count; ++plane_index) {
+                        NUVEC point;
+                        const f32 distance = NuPlnLine3(&next->planes[plane_index], vertex, &direction, &point);
+                        if (distance > 0.0f && distance < nearest_distance) {
+                            nearest_point = point;
+                            nearest_distance = distance;
+                        }
+                    }
+                    NuRndrLine3dDbg(nearest_point.x, nearest_point.y, nearest_point.z, vertex->x, vertex->y, vertex->z,
+                                    static_cast<i32>(0xffff00ffU));
+                }
+                NuCameraRelock();
+            }
             next_frustum = buildPortalFrustrum(portal, next_room);
         } else {
             i32 in_front = 0;
@@ -424,7 +452,7 @@ extern "C" i32 NuPortalVisibility(NUGSCN *scene) {
 #undef DRAW_PORTAL_CORNER
         NuCameraRelock();
     }
-    for (i32 i = 0; i < scene->num_rooms; ++i) {
+    for (u32 i = 0; i < static_cast<u32>(scene->num_rooms); ++i) {
         scene->rooms[i].flags &= ~NUROOM_FLAG_VISITED;
     }
     roomRecursive(scene, frustum, camera_roomid, -1, 0);

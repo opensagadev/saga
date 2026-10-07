@@ -52,6 +52,7 @@ extern "C" {
 #include "nu2api/nucore/nuanim3.h"
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nuquat.h"
+#include "nu2api/nuplatform/nuplatform.h"
 
 #include <GLES2/gl2.h>
 #include <string.h>
@@ -657,7 +658,7 @@ GLuint NuIOS_CreateGLTexFromPVRInMemory(void *data, i32 *out_width, i32 *out_hei
     extern i32 g_loadDefaultTexture;
     extern i32 g_loadingCharacterInHub;
 
-    static const GLenum cube_faces[6] = {
+    GLenum cube_faces[6] = {
         GL_TEXTURE_CUBE_MAP_POSITIVE_X, GL_TEXTURE_CUBE_MAP_NEGATIVE_X, GL_TEXTURE_CUBE_MAP_POSITIVE_Y,
         GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, GL_TEXTURE_CUBE_MAP_POSITIVE_Z, GL_TEXTURE_CUBE_MAP_NEGATIVE_Z,
     };
@@ -674,6 +675,51 @@ GLuint NuIOS_CreateGLTexFromPVRInMemory(void *data, i32 *out_width, i32 *out_hei
     const u32 surfaces = *(u32 *)(header + 0x24);
     const u32 faces = *(u32 *)(header + 0x28);
     const u32 mip_count = *(u32 *)(header + 0x2c);
+
+    if (faces == 6) {
+        struct PVRMetadataHeader {
+            u32 fourcc;
+            u32 key;
+            u32 data_size;
+        };
+        const u8 *metadata = header + 0x34;
+        usize remaining = *(u32 *)(header + 0x30);
+        while (remaining >= sizeof(PVRMetadataHeader)) {
+            PVRMetadataHeader record;
+            memcpy(&record, metadata, sizeof(record));
+            metadata += sizeof(record);
+            remaining -= sizeof(record);
+            if (record.data_size > remaining) {
+                break;
+            }
+            if (record.fourcc == 0x03525650 && record.key == 2 && record.data_size == 6) {
+                for (u32 face = 0; face < 6; ++face) {
+                    switch (metadata[face]) {
+                        case 'X':
+                            cube_faces[face] = GL_TEXTURE_CUBE_MAP_POSITIVE_X;
+                            break;
+                        case 'x':
+                            cube_faces[face] = GL_TEXTURE_CUBE_MAP_NEGATIVE_X;
+                            break;
+                        case 'Y':
+                            cube_faces[face] = GL_TEXTURE_CUBE_MAP_POSITIVE_Y;
+                            break;
+                        case 'y':
+                            cube_faces[face] = GL_TEXTURE_CUBE_MAP_NEGATIVE_Y;
+                            break;
+                        case 'Z':
+                            cube_faces[face] = GL_TEXTURE_CUBE_MAP_POSITIVE_Z;
+                            break;
+                        case 'z':
+                            cube_faces[face] = GL_TEXTURE_CUBE_MAP_NEGATIVE_Z;
+                            break;
+                    }
+                }
+            }
+            metadata += record.data_size;
+            remaining -= record.data_size;
+        }
+    }
 
     GLenum internal_format = 0;
     GLenum format = 0;
@@ -719,11 +765,19 @@ GLuint NuIOS_CreateGLTexFromPVRInMemory(void *data, i32 *out_width, i32 *out_hei
     GLuint texture = 0;
     BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nutex_ios_ex.cpp", 0x2e7);
     glGenTextures(1, &texture);
-    glActiveTexture(GL_TEXTURE0);
-    g_currentTexUnit = 0;
-    glBindTexture(texture_target, texture);
-    if (faces > 1) {
-        g_lastBoundCubeTexIds[0] = texture;
+    if (faces <= 1) {
+        glActiveTexture(GL_TEXTURE0);
+        g_currentTexUnit = 0;
+        glBindTexture(GL_TEXTURE_2D, texture);
+    } else {
+        if (g_currentTexUnit != 0) {
+            glActiveTexture(GL_TEXTURE0);
+            g_currentTexUnit = 0;
+        }
+        if (g_lastBoundCubeTexIds[0] != texture) {
+            glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
+            g_lastBoundCubeTexIds[0] = texture;
+        }
     }
     glTexParameteri(texture_target, GL_TEXTURE_MIN_FILTER, mip_count < 2 ? GL_LINEAR : GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(texture_target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -752,20 +806,33 @@ GLuint NuIOS_CreateGLTexFromPVRInMemory(void *data, i32 *out_width, i32 *out_hei
                 for (u32 z = 0; z < depth; ++z) {
                     BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nutex_ios_ex.cpp",
                                            0x31d);
-                    glActiveTexture(GL_TEXTURE0);
-                    g_currentTexUnit = 0;
-                    glBindTexture(texture_target, texture);
+                    if (faces <= 1) {
+                        glActiveTexture(GL_TEXTURE0);
+                        g_currentTexUnit = 0;
+                        glBindTexture(GL_TEXTURE_2D, texture);
+                    } else {
+                        if (g_currentTexUnit != 0) {
+                            glActiveTexture(GL_TEXTURE0);
+                            g_currentTexUnit = 0;
+                        }
+                        if (g_lastBoundCubeTexIds[0] != texture) {
+                            glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
+                            g_lastBoundCubeTexIds[0] = texture;
+                        }
+                    }
 
-                    if (g_loadDefaultTexture == 0) {
-                        if (compressed) {
+                    if (compressed) {
+                        if ((NuPlatform::Get()->GetCurrentPlatform() == IOS_PLATFORM ||
+                             NuPlatform::Get()->GetCurrentPlatform() == ANDROID_PVRTC_PLATFORM) &&
+                            g_loadDefaultTexture == 0) {
                             glCompressedTexImage2D(target, mip, internal_format, mip_width, mip_height, 0, mip_size,
                                                    pixels + offset);
                         } else {
-                            glTexImage2D(target, mip, internal_format, mip_width, mip_height, 0, format, type,
-                                         pixels + offset);
+                            loadDefaultTexture(texture, mip, mip_width, target, target);
                         }
                     } else {
-                        loadDefaultTexture(texture, mip, mip_width, texture_target, target);
+                        glTexImage2D(target, mip, internal_format, mip_width, mip_height, 0, format, type,
+                                     pixels + offset);
                     }
                     EndCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nutex_ios_ex.cpp",
                                          0x341);

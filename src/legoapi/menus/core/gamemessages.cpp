@@ -98,8 +98,10 @@ ADDGAMEMSG AddGameMsg_Default = {
 
 GAMEMESSAGE_s *AddGameMsg(ADDGAMEMSG *message) {
     GAME_MESSAGE_DATA *slot;
+    GAME_MESSAGE_DATA fallback;
+    i32 temporary = 0;
     i32 slot_index = -1;
-    f32 best = 0.0f;
+    f32 best = 1000000.0f;
     i32 index = GameMessageIndex;
 
     for (i32 count = 128; count != 0; --count) {
@@ -109,11 +111,11 @@ GAMEMESSAGE_s *AddGameMsg(ADDGAMEMSG *message) {
             break;
         }
 
-        if ((slot->flags & 0x10) == 0) {
+        if ((slot->flags & 0x1000) == 0) {
             f32 value;
             if (slot->field_0xfa != 0) {
                 value = 1.0f;
-            } else if (slot->duration == 0.0f) {
+            } else if (slot->duration == 0.0f || slot->elapsed == 0.0f) {
                 value = 0.0f;
             } else {
                 value = slot->elapsed / slot->duration;
@@ -131,13 +133,17 @@ GAMEMESSAGE_s *AddGameMsg(ADDGAMEMSG *message) {
     }
 
     if (slot_index == -1) {
-        return NULL;
-    }
-
-    GameMessageIndex = slot_index;
-    slot = reinterpret_cast<GAME_MESSAGE_DATA *>(&GameMessage[slot_index]);
-    if (slot->active != 0 && slot->score != 0 && slot->field_0xfd <= 1 && slot->end_fn != NULL) {
-        slot->end_fn(reinterpret_cast<GAMEMESSAGE_s *>(slot));
+        if (message->field_0x4d == 0)
+            return NULL;
+        memset(&fallback, 0, sizeof(fallback));
+        slot = &fallback;
+        temporary = 1;
+    } else {
+        GameMessageIndex = slot_index;
+        slot = reinterpret_cast<GAME_MESSAGE_DATA *>(&GameMessage[slot_index]);
+        if (slot->active != 0 && slot->score != 0 && slot->field_0xfd <= 1 && slot->end_fn != NULL) {
+            slot->end_fn(reinterpret_cast<GAMEMESSAGE_s *>(slot));
+        }
     }
 
     slot->text = NULL;
@@ -177,18 +183,26 @@ GAMEMESSAGE_s *AddGameMsg(ADDGAMEMSG *message) {
         slot->duration = 0.0f;
     }
 
-    slot->alpha = message->alpha;
     slot->red = message->red;
     slot->green = message->green;
     slot->blue = message->blue;
+    slot->alpha = message->alpha;
     slot->flags = message->flags;
 
-    if (message->target_position != NULL) {
-        slot->target_position = *message->target_position;
-    } else {
-        slot->target_position = slot->position;
-    }
+    nuvec_s *target_position = message->target_position;
+    if (target_position == NULL)
+        target_position = message->position;
+    slot->target_position = *target_position;
     slot->target_scale = message->target_scale;
+    if ((message->flags & 1) == 0) {
+        slot->field_0xb8 = message->scale;
+        slot->start_position = slot->position;
+        slot->field_0xfb = 0;
+    }
+    slot->field_0xf9 = static_cast<u8>((message->flags & 1) == 0);
+    slot->field_0xfa = 0;
+    slot->active = 1;
+    slot->field_0xfc = message->field_0x4f;
     slot->icon = static_cast<u16>(message->icon);
     if (message->special != NULL) {
         slot->special = *message->special;
@@ -198,30 +212,27 @@ GAMEMESSAGE_s *AddGameMsg(ADDGAMEMSG *message) {
 
     slot->field_0xfd = static_cast<u8>(message->player_index);
     slot->score = message->score;
-    slot->field_0xc4 = *reinterpret_cast<f32 *>(&message->field_0x30);
-    slot->field_0xc8 = *reinterpret_cast<f32 *>(&message->field_0x34);
-    slot->field_0xe0 = 0;
-    slot->field_0xe2 = 0;
-    slot->field_0xe4 = 0;
+    slot->field_0xc4 = message->field_0x30;
     slot->delay_fn = message->delay_fn;
+    void (*end_fn)(GAMEMESSAGE_s *) = message->end_fn;
+    slot->field_0xe0 = 0;
     slot->tick_fn = message->tick_fn;
     slot->update_fn = message->update_fn;
+    slot->field_0xc8 = message->field_0x34;
+    slot->field_0xe2 = 0;
+    slot->field_0xe4 = 0;
     slot->field_0x10c = message->field_0x44;
-    slot->end_fn = message->end_fn;
+    slot->end_fn = end_fn;
     slot->field_0xff = message->field_0x4d;
     slot->field_0xfe = message->field_0x4e;
-    slot->field_0xfc = message->field_0x4f;
     slot->field_0xd0 = message->field_0x20;
     slot->field_0xcc = 1.0f;
 
-    if ((message->flags & 1) == 0) {
-        slot->field_0xb8 = message->scale;
-        slot->start_position = slot->position;
-        slot->field_0xfb = 0;
+    if (temporary != 0) {
+        if (end_fn != NULL)
+            end_fn(reinterpret_cast<GAMEMESSAGE_s *>(slot));
+        return NULL;
     }
-    slot->field_0xf9 = static_cast<u8>((message->flags & 1) == 0);
-    slot->field_0xfa = 0;
-    slot->active = 1;
     return reinterpret_cast<GAMEMESSAGE_s *>(slot);
 }
 

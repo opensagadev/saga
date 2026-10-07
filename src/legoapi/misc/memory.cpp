@@ -297,14 +297,15 @@ extern "C" {
                 return;
             }
 
-            const bool panel_time = effect->time_group == 4;
             DebrisGetControlStackLock();
             for (i32 i = 0; i < removed_chunk_count; ++i) {
                 debris_chunk_control_s *control = freechunkcontrols[freechunkcontrolsptr++];
                 control->particle_chunk = key->particle_chunks[requested_chunk_count + i];
-                control->active = glass ? 7 : 0;
-                control->expiry_time = effect->particle_lifetime + (panel_time ? panelglobaltime : globaltime) +
-                                       static_cast<i8>(effect->trail_count) * effect->trail_time;
+                control->active = effect->particle_type == 7 ? 7 : 0;
+                const bool panel_time = effect->time_group == 4;
+                debinftype *current_effect = debtab[key->effect_index];
+                control->expiry_time = current_effect->particle_lifetime + (panel_time ? panelglobaltime : globaltime) +
+                                       static_cast<i8>(current_effect->trail_count) * current_effect->trail_time;
                 AddChunkControlToStack(control, &debris_chunk_control_stack[panel_time]);
             }
             DebrisReleaseControlStackLock();
@@ -328,20 +329,21 @@ extern "C" {
                 }
                 if (render_chunk != NULL) {
                     render_chunk->particle_chunk = key->particle_chunks[requested_chunk_count];
-                    render_chunk->effect = effect;
+                    render_chunk->effect = debtab[key->effect_index];
                     render_chunk->key = NULL;
                     render_chunk->effect_orientation = key->effect_orientation;
                     render_chunk->position = key->position;
                     render_chunk->render_priority = key->render_priority;
                     if (key->field_2f6 != 0) {
-                        AddChunkToRenderStack(render_chunk, &ParticleChunkRenderStack[effect->time_group]);
+                        AddChunkToRenderStack(render_chunk,
+                                              &ParticleChunkRenderStack[render_chunk->effect->time_group]);
                     }
                 }
                 render_chunk = NULL;
             }
 
             if (render_chunk != NULL) {
-                render_chunk->effect = effect;
+                render_chunk->effect = debtab[key->effect_index];
                 render_chunk->key = NULL;
                 render_chunk->effect_orientation = key->effect_orientation;
                 render_chunk->position = key->position;

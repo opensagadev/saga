@@ -172,7 +172,7 @@ void MechInputTouchGestureTrackingSystem::ReadData(GameObject_s &object, NuInput
     for (i32 index = 0; index < static_cast<i32>(data.touch_count); ++index) {
         NuInputTouch const &touch = data.touch_events[index];
         f32 x, y;
-        MechInputTouchSystem::ConvertToScreenCoords(touch.unknown_08, touch.unknown_0c, x, y);
+        MechInputTouchSystem::ConvertToScreenCoords(touch.unknown_04, touch.unknown_08, x, y);
         TouchHolder *holder = GetTouch(touch);
         if (!holder->field_0x6) {
             holder->click_candidate = 0;
@@ -180,12 +180,12 @@ void MechInputTouchGestureTrackingSystem::ReadData(GameObject_s &object, NuInput
             holder->down_position.y = y;
             holder->sample_countdown = TimeSampleDelta;
             VuVec screen_position(x, y, 1.0f, 1.0f);
-            MechObjectInterface *target = NULL;
             if (player != NULL && NewMode == 0 && NewLData == NULL && GetMenuID() == -1 && Paused == 0 &&
                 TouchHacks::TouchControlsActive) {
-                target = MechInputTouchSystem::FindTargetObject(object, screen_position, 0x77f, NULL, NULL);
+                MechObjectInterface *target =
+                    MechInputTouchSystem::FindTargetObject(object, screen_position, 0x77f, NULL, NULL);
+                holder->target_object = target;
             }
-            holder->target_object = target;
             holder->oldest_click_timer = holder->release_timer;
             holder->release_timer = holder->double_click_timer;
             holder->double_click_timer = holder->click_timer;
@@ -232,16 +232,18 @@ void MechInputTouchGestureTrackingSystem::ReadData(GameObject_s &object, NuInput
 void MechInputTouchGestureTrackingSystem::RegisterGestureTracker(MechInputTouchGestureTracker &tracker, i32 priority) {
     GestureTrackerRegistration *entries = trackers;
 
-    bool has_vacancy = (entries[0].tracker == NULL) | (entries[1].tracker == NULL) | (entries[2].tracker == NULL) |
-                       (entries[3].tracker == NULL) | (entries[4].tracker == NULL) | (entries[5].tracker == NULL) |
-                       (entries[6].tracker == NULL) | (entries[7].tracker == NULL) | (entries[8].tracker == NULL);
+    bool vacancies[9];
+    bool has_vacancy = false;
+    for (i32 index = 0; index < 9; ++index) {
+        vacancies[index] = entries[index].tracker == NULL;
+        has_vacancy |= vacancies[index];
+    }
     if (entries[9].tracker != NULL && !has_vacancy) {
         return;
     }
 
     i32 insertion_index = 0;
-    while (insertion_index < 9 && entries[insertion_index].tracker != NULL &&
-           entries[insertion_index].priority <= priority) {
+    while (insertion_index < 9 && !vacancies[insertion_index] && entries[insertion_index].priority <= priority) {
         ++insertion_index;
     }
     if (insertion_index == 9) {

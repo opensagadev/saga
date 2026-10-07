@@ -244,17 +244,20 @@ void StoreLevelProgressFn(WORLDINFO_s *world, LEVEL_PROGRESS_s *progress, i32 ar
     }
     GameAnimSys_StoreProgress(world->game_anim_sys, index);
     for (i32 i = 0; i < world->processor_count; ++i) {
-        if (progress == NULL || NuStrLen(world->processors[i].name) == 0)
+        if (progress == NULL)
+            continue;
+        LEVELSCRIPTPROCESS &processor = world->processors[i];
+        if (NuStrLen(processor.name) == 0)
             continue;
         for (i32 j = 0; j < 32; ++j) {
             if (NuStrLen(progress->scripts[j].name) == 0) {
-                NuStrCpy(world->level_progress->scripts[j].name, world->processors[i].name);
+                NuStrCpy(world->level_progress->scripts[j].name, processor.name);
                 for (i32 k = 0; k < 4; ++k)
-                    progress->scripts[j].params[k] = world->processors[i].processor.params[k];
+                    progress->scripts[j].params[k] = processor.processor.params[k];
                 break;
             }
-            if (NuStrICmp(progress->scripts[j].name, world->processors[i].name) == 0) {
-                memcpy(progress->scripts[j].params, world->processors[i].processor.params, 16);
+            if (NuStrICmp(progress->scripts[j].name, processor.name) == 0) {
+                memcpy(progress->scripts[j].params, processor.processor.params, 16);
                 break;
             }
         }
@@ -334,8 +337,6 @@ WORLDINFO WorldInfo[2];
 WORLDINFO *WORLD = &WorldInfo[0];
 
 f32 g_BgLoadDelayHackTimer;
-
-static i32 EditBufferEndSize = 0;
 
 volatile i32 waiting_for_level;
 i32 level_already_loaded = -1;
@@ -1067,20 +1068,21 @@ void WorldInfo_ReArrangeBuffers(i32 area1, i32 area2) {
     } else if ((ADataList[area1].flags & AREAFLAG_SINGLE_BUFFER) != 0) {
         LWORLD = &WorldInfo[0];
         WORLD = &WorldInfo[0];
-        if (WorldInfo[0].unknown_0108.addr < bufferEnd->addr) {
+        if (WorldInfo[0].unknown_0108.addr >= bufferEnd->addr) {
             return;
         }
+        usize end = bufferEnd->addr;
         bufferEnd->addr = WorldInfo[0].unknown_0108.addr;
-        WorldInfo[0].unknown_0108.addr = bufferEnd->addr - EditBufferEndSize;
+        WorldInfo[0].unknown_0108.addr = end - EDITBUFFERENDSIZE;
         return;
     }
 
-    if (WorldInfo[0].unknown_0108.addr < bufferEnd->addr) {
+    if (WorldInfo[0].unknown_0108.addr <= bufferEnd->addr) {
         return;
     }
     usize end = WorldInfo[0].unknown_0108.addr;
     WorldInfo[0].unknown_0108.addr = bufferEnd->addr;
-    bufferEnd->addr = end + EditBufferEndSize;
+    bufferEnd->addr = end + EDITBUFFERENDSIZE;
 }
 
 extern "C" {

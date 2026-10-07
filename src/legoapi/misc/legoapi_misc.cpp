@@ -15,6 +15,7 @@
 #include "legoapi/world/levels/episode.h"
 #include "legoapi/world/world.h"
 #include "nu2api/nu3d/nutex.h"
+#include "nu2api/nucore/nupad.h"
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numath/nuvec.h"
@@ -46,7 +47,7 @@ extern i32 TwistLevel(LEVELDATA_s *level);
 
 void CurrentStart(GameObject_s *object, i32 require_twist_level, i32 use_socket_rotation) {
     WORLDINFO_s *world = WorldInfo_CurrentlyActive();
-    object->field_0xc3c = 0;
+    *reinterpret_cast<f32 *>(&object->field_0xc3c) = 0.0f;
     if (object->field_0x661 == 0xff || world->sock_sys == NULL)
         return;
 
@@ -60,7 +61,7 @@ void CurrentStart(GameObject_s *object, i32 require_twist_level, i32 use_socket_
         (object->field_0xf02 & 0x20) == 0 ? object->current_speed_mul : object->current_speed_multiplier;
     current.z *= multiplier;
     if (use_socket_rotation == 0) {
-        NuVecRotateY(&object->apiobj.velocity, &object->apiobj.velocity, object->apiobj.movement_facing_angle);
+        NuVecRotateY(&object->apiobj.velocity, &object->apiobj.velocity, object->apiobj.field_0x276);
     } else {
         NuVecRotateX(&object->apiobj.velocity, &current, object->sock_position.midpoint_rotation.x);
         NuVecRotateY(&object->apiobj.velocity, &object->apiobj.velocity, object->sock_position.midpoint_rotation.y);
@@ -112,21 +113,29 @@ void DoInput(WORLDINFO_s *world) {
 
     const i32 player_0_input = ReadPad(0);
     const i32 player_1_input = ReadPad(1);
-    const i32 player_state_changed = PlayersDropInOut();
+    i32 player_state_changed = PlayersDropInOut();
 
     for (i32 player_index = 0; player_index < 2; ++player_index) {
+        GameObject_s *player = Player[player_index];
+        nupad_s *pad = GamePad[player_index].pad;
         const i32 input_result = player_index == 0 ? player_0_input : player_1_input;
         if (GamePads_IgnoreInputFn != NULL && GamePads_IgnoreInputFn() != 0) {
             continue;
         }
-        if (input_result <= 1 || player_state_changed != 0) {
+        if (static_cast<u32>(input_result) <= 1) {
+            if (player != NULL && player->apiobj.player_controlled && pad != NULL && MiniCutCam == 0 && world != NULL &&
+                world->current_level != NULL) {
+                PadOutPause(player_index, world);
+            }
+            continue;
+        }
+        if (player_state_changed != 0) {
             continue;
         }
 
-        GameObject_s *player = Player[player_index];
         if (player == NULL || !player->apiobj.player_controlled ||
-            (LEGOCONTEXT_DROPIN != -1 && static_cast<i8>(player->field_0x7a5) == LEGOCONTEXT_DROPIN) ||
-            (GamePad[player_index].buttons_pressed & GAMEPAD_START) == 0) {
+            (LEGOCONTEXT_DROPIN != -1 && static_cast<i8>(player->field_0x7a5) == LEGOCONTEXT_DROPIN) || pad == NULL ||
+            (pad->digital_buttons_pressed & GAMEPAD_START) == 0) {
             continue;
         }
         if (NewMode != 0 || NewLData != NULL || FadeSys.fade != 0.0f || editor_active != 0 ||
@@ -135,24 +144,28 @@ void DoInput(WORLDINFO_s *world) {
             continue;
         }
 
-        const bool player_can_resume = pause_i_pad == -1 || pause_i_pad == player_index;
-        if (Paused != 0 || (GameMenu[GameMenuLevel].menu != -1 && NetPaused != 0)) {
-            if (player_can_resume) {
-                ResumeGame(1, 1);
-                RestoreOptions();
+        if (Paused == 0) {
+            if (GameMenu[GameMenuLevel].menu == -1 && CutSceneWaiting == 0) {
+                if ((CUTSTOPGAME == 0 || CutScene_IsSkippable(static_cast<CUTINFO *>(CutStopInfo))) &&
+                    MiniCutCam == 0 && memcard_autosavestarted == 0 && memcard_autosavepostdelay <= 0.0f &&
+                    memcard_autosavepredelay <= 0.0f && GameTimer.update_count != 0) {
+                    PauseGame(static_cast<i32>(player->pad_gamepad - GamePad));
+                    player_state_changed = 1;
+                    continue;
+                }
+                if (Paused != 0) {
+                    goto resume;
+                }
             }
-            continue;
+            if (NetPaused == 0) {
+                continue;
+            }
         }
-        if (GameMenu[GameMenuLevel].menu != -1 || CutSceneWaiting != 0 || MiniCutCam != 0 ||
-            memcard_autosavestarted != 0 || !(memcard_autosavepostdelay <= 0.0f) ||
-            !(memcard_autosavepredelay <= 0.0f) || GameTimer.update_count == 0) {
-            continue;
+    resume:
+        if (pause_i_pad == -1 || pause_i_pad == player_index) {
+            ResumeGame(1, 1);
+            RestoreOptions();
         }
-        if (CUTSTOPGAME != 0 && !CutScene_IsSkippable(static_cast<CUTINFO *>(CutStopInfo))) {
-            continue;
-        }
-
-        PauseGame(static_cast<i32>(player->pad_gamepad - GamePad));
     }
 }
 

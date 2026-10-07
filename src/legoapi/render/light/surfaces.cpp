@@ -57,7 +57,9 @@ NUMTL *CreateCopyMat(NUMTL *source, i32 enable_uv_mode, i32 alpha_mode, i32 dept
     material->attribs.filter_mode = static_cast<u32>(filter_mode) & 3;
     material->attribs.alpha_mode = static_cast<u32>(alpha_mode) & 0xf;
     material->opacity = 0.999f;
-    material->attribs.uv_mode = enable_uv_mode != 0;
+    if (enable_uv_mode != 0) {
+        material->attribs.uv_mode = 1;
+    }
     material->attribs.unknown_1_1_2 = 1;
     material->attribs.unknown_1_4_8 = 1;
     material->tex_id = source->tex_id;
@@ -143,7 +145,7 @@ i32 IntersectWater(GameObject_s *object) {
     if (water_height > object->apiobj.collision_max.y) {
         return 0;
     }
-    return object->apiobj.collision_min.y <= water_height;
+    return !(object->apiobj.collision_min.y > water_height);
 }
 
 void SurfaceMaskOff(u32 *surface_mask) {

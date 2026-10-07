@@ -5,7 +5,9 @@ exports_files([
     "ogg.BUILD.bazel",
     "ogg_crc_table.bzl",
     "squish.BUILD.bazel",
+    "squish-retail-scalar.patch",
     "vorbis.BUILD.bazel",
     "vorbis-android-cpp.patch",
+    "vorbis-retail-scalar.patch",
     "vorbis_wasm.BUILD.bazel",
 ])

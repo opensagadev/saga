@@ -21,6 +21,8 @@
 
 extern i32 MenuLoadStarted;
 extern i32 memcard_slot;
+extern i32 memcard_cardchanged;
+extern i32 memcard_slotsused;
 extern i32 memcard_saveneeded;
 extern i32 memcard_savestarted;
 extern i32 memcard_savefailed;
@@ -992,7 +994,26 @@ extern "C" {
 
     void loadsaveCallEachFrame(void) {
         saveloadASCallEachFrame();
+        if (saveload_cardchanged != 0) {
+            memcard_cardchanged = 1;
+        }
         UpdateSaveSlots();
+
+        memcard_slotsused = 0;
+        if (saveload_savepresent != 0) {
+            i32 slots = SAVESLOTS;
+            const i32 slot_capacity = sizeof(saveload_slotused) / sizeof(saveload_slotused[0]);
+            if (slots > slot_capacity) {
+                slots = slot_capacity;
+            }
+            i32 used = 0;
+            for (i32 slot = 0; slot < slots; ++slot) {
+                if (saveload_slotused[slot] != 0) {
+                    ++used;
+                }
+            }
+            memcard_slotsused = used;
+        }
     }
 
     i32 TriggerAutoSave(void) {

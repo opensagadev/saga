@@ -344,6 +344,8 @@ i32 StunGameObject(GameObject_s *object, GameObject_s *attacker, float duration,
         object->apiobj.facing_angle = angle;
     }
 
+    animation = object->context_animation;
+    animations = object->apiobj.character_model->model_data_b;
     CHARACTERANIM_s *animation_data =
         static_cast<CHARACTERANIM_s *>(object->apiobj.character_model->model_data_a[animation]);
     if (animations[animation] != NULL && (animation_data->flags & 2) != 0) {
@@ -356,12 +358,12 @@ i32 StunGameObject(GameObject_s *object, GameObject_s *attacker, float duration,
 
     if (attacker != NULL) {
         object->apiobj.movement_facing_angle =
-            NuAtan2D(attacker->apiobj.collision_position.x - object->apiobj.collision_position.x,
-                     attacker->apiobj.collision_position.z - object->apiobj.collision_position.z);
+            NuAtan2D(-(object->apiobj.collision_position.x - attacker->apiobj.collision_position.x),
+                     -(object->apiobj.collision_position.z - attacker->apiobj.collision_position.z));
     }
 
     object->field_0xe31 = saved_variant;
-    return (animation == 0xb9) + 1;
+    return (object->context_animation == 0xb9) + 1;
 }
 
 void ComboRotateCode(GameObject_s *object, i32 action_held) {

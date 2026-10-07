@@ -2125,7 +2125,8 @@ extern "C" {
                     active = animation_time >= effect->frame_1 || animation_time <= effect->frame_2;
                 } else {
                     active = animation_time >= effect->frame_1 &&
-                             (effect->frame_2 <= 1.0f || animation_time <= effect->frame_2);
+                             (effect->frame_2 <= 1.0f ||
+                              (effect->frame_2 > effect->frame_1 && animation_time <= effect->frame_2));
                 }
             } else {
                 for (i32 event = 0; event <= 1; ++event) {
@@ -2186,22 +2187,21 @@ extern "C" {
             }
             if (object != NULL) {
                 if (position_count == 0) {
-                    position = object->apiobj.position;
+                    locator_positions[0] = object->apiobj.position;
+                    position = locator_positions[0];
                     position_count = 1;
-                }
-                if ((flags & 0x2000) != 0 && object->apiobj.field_0x218 != 2000000.0f) {
-                    position.y = object->apiobj.field_0x218;
-                    if (locator_count != 0) {
-                        for (i32 i = 0; i < locator_count; ++i) {
-                            locator_positions[i].y = object->apiobj.field_0x218;
-                        }
+                    if ((flags & 0x2000) != 0 && object->apiobj.field_0x218 != 2000000.0f) {
+                        position.y = object->apiobj.field_0x218;
+                    } else if ((flags & 0x4000) != 0 && object->apiobj.water_height != 2000000.0f) {
+                        position.y = object->apiobj.water_height;
+                    }
+                } else if ((flags & 0x2000) != 0 && object->apiobj.field_0x218 != 2000000.0f) {
+                    for (i32 i = 0; i < locator_count; ++i) {
+                        locator_positions[i].y = object->apiobj.field_0x218;
                     }
                 } else if ((flags & 0x4000) != 0 && object->apiobj.water_height != 2000000.0f) {
-                    position.y = object->apiobj.water_height;
-                    if (locator_count != 0) {
-                        for (i32 i = 0; i < locator_count; ++i) {
-                            locator_positions[i].y = object->apiobj.water_height;
-                        }
+                    for (i32 i = 0; i < locator_count; ++i) {
+                        locator_positions[i].y = object->apiobj.water_height;
                     }
                 }
             }

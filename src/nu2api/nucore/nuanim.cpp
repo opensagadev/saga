@@ -120,259 +120,260 @@ u32 NuAnimGetAnimDataSizeANI3(ani3_animheader_s *animation) {
 u8 BitCountTable[256] = {};
 
 extern "C" {
-static i32 isBitCountTable;
-void buildBitCountTable(void) {
-    for (u32 value = 0; value < 256; ++value) {
-        BitCountTable[value] = 0;
-        for (u32 bit = 0; bit < 8; ++bit) {
-            if ((value >> bit) & 1)
-                ++BitCountTable[value];
-        }
-    }
-    isBitCountTable = 1;
-}
-
-f32 NuAnimCurveCalcVal2(nuanimcurve_s *curve, nuanimtime_s *time) {
-    i32 key = 0;
-    switch (time->time_byte) {
-        case 0:
-            key = BitCountTable[curve->key_mask[0] & time->time_mask];
-            break;
-        case 1:
-            key = BitCountTable[curve->key_mask[0]] + BitCountTable[curve->key_mask[1] & time->time_mask];
-            break;
-        case 2:
-            key = BitCountTable[curve->key_mask[0]];
-            key += BitCountTable[curve->key_mask[1]];
-            key += BitCountTable[curve->key_mask[2] & time->time_mask];
-            break;
-        case 3:
-            key = BitCountTable[curve->key_mask[0]];
-            key += BitCountTable[curve->key_mask[1]];
-            key += BitCountTable[curve->key_mask[2]];
-            key += BitCountTable[curve->key_mask[3] & time->time_mask];
-            break;
-    }
-    nuanimkey_s *first = &curve->keys[key - 1];
-    if (curve->flags & 1) {
-        if ((curve->flags & 2) && key <= curve->key_count && time->time - first->time > first[1].time - time->time)
-            return first[1].value;
-        return first->value;
-    }
-    f32 value = first->value;
-    f32 span = first[1].time - first->time;
-    f32 delta = value - first[1].value;
-    f32 t = (time->time - first->time) * first->reciprocal_span;
-    f32 tangent0 = first->tangent * span;
-    f32 tangent1 = first[1].tangent * span;
-    return (((((delta + delta + tangent0 + tangent1) * t + delta * -3.0f) - (tangent0 + tangent0) - tangent1) * t +
-             tangent0) *
-            t) +
-           value;
-}
-
-f32 NuAnimCurve2CalcValEx(nuanimcurve2_s *curve, nuanimtime_s *time, u32 type) {
-    nuanimcurvedata_s *data = curve->data.curvedata;
-    u32 *key_mask = data->key_mask + time->chunk;
-    if (type == 4) {
-        i32 frame = static_cast<i32>(NuFloor(time->time_offset));
-        return static_cast<f32>((*key_mask >> ((frame - 1) & 0x1f)) & 1);
-    }
-
-    u32 key = 0;
-    switch (time->time_byte) {
-        case 0:
-            key = BitCountTable[reinterpret_cast<u8 *>(key_mask)[0] & time->time_mask];
-            break;
-        case 1:
-            key = BitCountTable[reinterpret_cast<u8 *>(key_mask)[0]] +
-                  BitCountTable[reinterpret_cast<u8 *>(key_mask)[1] & time->time_mask];
-            break;
-        case 2:
-            key = BitCountTable[reinterpret_cast<u8 *>(key_mask)[0]] +
-                  BitCountTable[reinterpret_cast<u8 *>(key_mask)[1]] +
-                  BitCountTable[reinterpret_cast<u8 *>(key_mask)[2] & time->time_mask];
-            break;
-        case 3:
-            key = (BitCountTable[reinterpret_cast<u8 *>(key_mask)[1]] +
-                   BitCountTable[reinterpret_cast<u8 *>(key_mask)[0]]) +
-                  (BitCountTable[reinterpret_cast<u8 *>(key_mask)[3] & time->time_mask] +
-                   BitCountTable[reinterpret_cast<u8 *>(key_mask)[2]]);
-            break;
-    }
-    f32 result = 0.0f;
-    u32 key_offset = data->key_offsets[time->chunk];
-
-    switch (type) {
-        case 1: {
-            u8 *key_data = static_cast<u8 *>(data->key_data);
-            f32 *first = reinterpret_cast<f32 *>(key_data + (key + key_offset - 1) * 0x10);
-            f32 span = first[4] - first[0];
-            f32 value_delta = first[2] - first[6];
-            f32 t = (time->time - first[0]) * first[1];
-            f32 tangent0 = first[3] * span;
-            f32 tangent1 = first[7] * span;
-            result = (((((value_delta * 2.0f + tangent0 + tangent1) * t + value_delta * -3.0f) - tangent0 * 2.0f) -
-                     tangent1) *
-                        t +
-                    tangent0) *
-                       t +
-                   first[2];
-            break;
-        }
-        case 2: {
-            u8 *key_data = static_cast<u8 *>(data->key_data);
-            f32 *header = reinterpret_cast<f32 *>(key_data);
-            u8 *first = key_data + (key + key_offset + 1) * 4;
-            f32 first_time = static_cast<f32>(static_cast<u32>(first[3]));
-            f32 span = static_cast<f32>(static_cast<u32>(first[7])) - first_time;
-            f32 inverse_span = span == 0.0f ? 0.0f : 1.0f / span;
-            f32 tangent0 = static_cast<f32>(*reinterpret_cast<i8 *>(first + 2)) * header[0] * span;
-            f32 tangent1 = static_cast<f32>(*reinterpret_cast<i8 *>(first + 6)) * header[0] * span;
-            f32 value0 = static_cast<f32>(*reinterpret_cast<i16 *>(first)) * header[1];
-            f32 value_delta = value0 - static_cast<f32>(*reinterpret_cast<i16 *>(first + 4)) * header[1];
-            f32 t = ((time->time - 1.0f) - first_time) * inverse_span;
-            result = (((((value_delta * 2.0f + tangent0 + tangent1) * t - value_delta * 3.0f) - tangent0 * 2.0f) -
-                     tangent1) *
-                        t +
-                    tangent0) *
-                       t +
-                   value0;
-            break;
-        }
-        case 3:
-            result = *reinterpret_cast<f32 *>(static_cast<u8 *>(data->key_data) + (key + key_offset - 1) * 8);
-            break;
-        case 6: {
-            u8 *key_data = static_cast<u8 *>(data->key_data);
-            f32 *header = reinterpret_cast<f32 *>(key_data);
-            f32 header_3 = header[3];
-            f32 header_2 = header[2];
-            f32 header_0 = header[0];
-            f32 header_1 = header[1];
-            u8 *first = key_data + (key + key_offset + 3) * 4;
-            f32 first_time = static_cast<f32>(static_cast<u32>(first[3])) * header_3;
-            f32 next_time = static_cast<f32>(static_cast<u32>(first[7])) * header_3;
-            if (next_time == first_time) {
-                next_time = first_time + 1.0f;
+    static i32 isBitCountTable;
+    void buildBitCountTable(void) {
+        for (u32 value = 0; value < 256; ++value) {
+            BitCountTable[value] = 0;
+            for (u32 bit = 0; bit < 8; ++bit) {
+                if ((value >> bit) & 1)
+                    ++BitCountTable[value];
             }
-            f32 span = next_time - first_time;
-            f32 tangent0 = static_cast<f32>(*reinterpret_cast<i8 *>(first + 2)) * header_0 * span;
-            f32 tangent1 = static_cast<f32>(*reinterpret_cast<i8 *>(first + 6)) * header_0 * span;
-            f32 value0 = static_cast<f32>(*reinterpret_cast<i16 *>(first)) * header_1 + header_2;
-            f32 value_delta =
-                value0 - (static_cast<f32>(*reinterpret_cast<i16 *>(first + 4)) * header_1 + header_2);
-            f32 inverse_span = 1.0f / span;
-            f32 t = ((time->time - 1.0f) - first_time) * inverse_span;
-            result = (((((value_delta * 2.0f + tangent0 + tangent1) * t - value_delta * 3.0f) - tangent0 * 2.0f) -
-                     tangent1) *
-                        t +
-                    tangent0) *
-                       t +
-                   value0;
-            break;
         }
-        case 5: {
-            u8 *key_data = static_cast<u8 *>(data->key_data);
-            f32 *header = reinterpret_cast<f32 *>(key_data);
-            f32 header_0 = header[0];
-            f32 header_1 = header[1];
-            f32 header_2 = header[2];
-            i16 *first = reinterpret_cast<i16 *>(key_data + (key + key_offset) * 6 + 0x0c);
-            f32 first_time = static_cast<f32>(static_cast<u32>(static_cast<u16>(first[2])));
-            f32 span = static_cast<f32>(static_cast<u32>(static_cast<u16>(first[5]))) - first_time;
-            f32 tangent0 = static_cast<f32>(static_cast<i8>(first[1])) * header_0 * span;
-            f32 tangent1 = static_cast<f32>(static_cast<i8>(first[4])) * header_0 * span;
-            f32 value0 = static_cast<f32>(first[0]) * header_1 + header_2;
-            f32 value_delta = value0 - (static_cast<f32>(first[3]) * header_1 + header_2);
-            f32 inverse_span = 1.0f / span;
-            f32 t = ((time->time - 1.0f) - first_time) * inverse_span;
-            result = (((((value_delta * 2.0f + tangent0 + tangent1) * t - value_delta * 3.0f) - tangent0 * 2.0f) -
-                     tangent1) *
-                        t +
-                    tangent0) *
-                       t +
-                   value0;
-            break;
-        }
-        default:
-            break;
+        isBitCountTable = 1;
     }
-    return result;
-}
 
-static inline void *NuLegacyRelocatePointer(void *pointer, isize delta) {
-    return pointer == NULL ? NULL : reinterpret_cast<void *>(reinterpret_cast<usize>(pointer) + delta);
-}
+    f32 NuAnimCurveCalcVal2(nuanimcurve_s *curve, nuanimtime_s *time) {
+        i32 key = 0;
+        switch (time->time_byte) {
+            case 0:
+                key = BitCountTable[curve->key_mask[0] & time->time_mask];
+                break;
+            case 1:
+                key = BitCountTable[curve->key_mask[0]] + BitCountTable[curve->key_mask[1] & time->time_mask];
+                break;
+            case 2:
+                key = BitCountTable[curve->key_mask[0]];
+                key += BitCountTable[curve->key_mask[1]];
+                key += BitCountTable[curve->key_mask[2] & time->time_mask];
+                break;
+            case 3:
+                key = BitCountTable[curve->key_mask[0]];
+                key += BitCountTable[curve->key_mask[1]];
+                key += BitCountTable[curve->key_mask[2]];
+                key += BitCountTable[curve->key_mask[3] & time->time_mask];
+                break;
+        }
+        nuanimkey_s *first = &curve->keys[key - 1];
+        if (curve->flags & 1) {
+            if ((curve->flags & 2) && key <= curve->key_count && time->time - first->time > first[1].time - time->time)
+                return first[1].value;
+            return first->value;
+        }
+        f32 value = first->value;
+        f32 span = first[1].time - first->time;
+        f32 delta = value - first[1].value;
+        f32 t = (time->time - first->time) * first->reciprocal_span;
+        f32 tangent0 = first->tangent * span;
+        f32 tangent1 = first[1].tangent * span;
+        return (((((delta + delta + tangent0 + tangent1) * t + delta * -3.0f) - (tangent0 + tangent0) - tangent1) * t +
+                 tangent0) *
+                t) +
+               value;
+    }
 
-void *NuAnimData2FixPtrs(void *data, isize delta, isize external_delta, i32 flags) {
-    if (isBitCountTable == 0)
-        buildBitCountTable();
+    f32 NuAnimCurve2CalcValEx(nuanimcurve2_s *curve, nuanimtime_s *time, u32 type) {
+        nuanimcurvedata_s *data = curve->data.curvedata;
+        u32 *key_mask = data->key_mask + time->chunk;
+        if (type == 4) {
+            i32 frame = static_cast<i32>(NuFloor(time->time_offset));
+            return static_cast<f32>((*key_mask >> ((frame - 1) & 0x1f)) & 1);
+        }
 
-    nuanimdata2_s *anim = static_cast<nuanimdata2_s *>(NuLegacyRelocatePointer(data, delta));
-    if (anim != NULL) {
-        if (*reinterpret_cast<u32 *>(&anim->duration) + 0xbeb1b6ccU < 2) {
-            if (external_delta != 0) {
-                ANI_FixUpAddrs(reinterpret_cast<ani3_animheader_s *>(anim), delta, flags);
+        i32 key = 0;
+        switch (time->time_byte) {
+            case 0:
+                key = BitCountTable[reinterpret_cast<u8 *>(key_mask)[0] & time->time_mask];
+                break;
+            case 1:
+                key = BitCountTable[reinterpret_cast<u8 *>(key_mask)[0]] +
+                      BitCountTable[reinterpret_cast<u8 *>(key_mask)[1] & time->time_mask];
+                break;
+            case 2:
+                key = BitCountTable[reinterpret_cast<u8 *>(key_mask)[0]] +
+                      BitCountTable[reinterpret_cast<u8 *>(key_mask)[1]] +
+                      BitCountTable[reinterpret_cast<u8 *>(key_mask)[2] & time->time_mask];
+                break;
+            case 3:
+                key = (BitCountTable[reinterpret_cast<u8 *>(key_mask)[1]] +
+                       BitCountTable[reinterpret_cast<u8 *>(key_mask)[0]]) +
+                      (BitCountTable[reinterpret_cast<u8 *>(key_mask)[3] & time->time_mask] +
+                       BitCountTable[reinterpret_cast<u8 *>(key_mask)[2]]);
+                break;
+        }
+        f32 result = 0.0f;
+        i32 key_offset = data->key_offsets[time->chunk];
+
+        switch (type) {
+            case 1: {
+                u8 *key_data = static_cast<u8 *>(data->key_data);
+                f32 *first = reinterpret_cast<f32 *>(key_data + (key + key_offset - 1) * 0x10);
+                f32 span = first[4] - first[0];
+                f32 value_delta = first[2] - first[6];
+                f32 t = (time->time - first[0]) * first[1];
+                f32 tangent0 = first[3] * span;
+                f32 tangent1 = first[7] * span;
+                result = (((((value_delta * 2.0f + tangent0 + tangent1) * t + value_delta * -3.0f) - tangent0 * 2.0f) -
+                           tangent1) *
+                              t +
+                          tangent0) *
+                             t +
+                         first[2];
+                break;
+            }
+            case 2: {
+                u8 *key_data = static_cast<u8 *>(data->key_data);
+                f32 *header = reinterpret_cast<f32 *>(key_data);
+                u8 *first = key_data + (key + key_offset + 1) * 4;
+                f32 first_time = static_cast<f32>(static_cast<u32>(first[3]));
+                f32 span = static_cast<f32>(static_cast<u32>(first[7])) - first_time;
+                f32 inverse_span = span == 0.0f ? 0.0f : 1.0f / span;
+                f32 tangent0 = static_cast<f32>(*reinterpret_cast<i8 *>(first + 2)) * header[0] * span;
+                f32 tangent1 = static_cast<f32>(*reinterpret_cast<i8 *>(first + 6)) * header[0] * span;
+                f32 value0 = static_cast<f32>(*reinterpret_cast<i16 *>(first)) * header[1];
+                f32 value_delta = value0 - static_cast<f32>(*reinterpret_cast<i16 *>(first + 4)) * header[1];
+                f32 t = ((time->time - 1.0f) - first_time) * inverse_span;
+                result = (((((value_delta * 2.0f + tangent0 + tangent1) * t - value_delta * 3.0f) - tangent0 * 2.0f) -
+                           tangent1) *
+                              t +
+                          tangent0) *
+                             t +
+                         value0;
+                break;
+            }
+            case 3:
+                result = *reinterpret_cast<f32 *>(static_cast<u8 *>(data->key_data) + (key + key_offset - 1) * 8);
+                break;
+            case 6: {
+                u8 *key_data = static_cast<u8 *>(data->key_data);
+                f32 *header = reinterpret_cast<f32 *>(key_data);
+                f32 header_3 = header[3];
+                f32 header_2 = header[2];
+                f32 header_0 = header[0];
+                f32 header_1 = header[1];
+                u8 *first = key_data + (key + key_offset + 3) * 4;
+                f32 first_time = static_cast<f32>(static_cast<u32>(first[3])) * header_3;
+                f32 next_time = static_cast<f32>(static_cast<u32>(first[7])) * header_3;
+                if (next_time == first_time) {
+                    next_time = first_time + 1.0f;
+                }
+                f32 span = next_time - first_time;
+                f32 tangent0 = static_cast<f32>(*reinterpret_cast<i8 *>(first + 2)) * header_0 * span;
+                f32 tangent1 = static_cast<f32>(*reinterpret_cast<i8 *>(first + 6)) * header_0 * span;
+                f32 value0 = static_cast<f32>(*reinterpret_cast<i16 *>(first)) * header_1 + header_2;
+                f32 value_delta =
+                    value0 - (static_cast<f32>(*reinterpret_cast<i16 *>(first + 4)) * header_1 + header_2);
+                f32 inverse_span = 1.0f / span;
+                f32 t = ((time->time - 1.0f) - first_time) * inverse_span;
+                result = (((((value_delta * 2.0f + tangent0 + tangent1) * t - value_delta * 3.0f) - tangent0 * 2.0f) -
+                           tangent1) *
+                              t +
+                          tangent0) *
+                             t +
+                         value0;
+                break;
+            }
+            case 5: {
+                u8 *key_data = static_cast<u8 *>(data->key_data);
+                f32 *header = reinterpret_cast<f32 *>(key_data);
+                f32 header_0 = header[0];
+                f32 header_1 = header[1];
+                f32 header_2 = header[2];
+                i16 *first = reinterpret_cast<i16 *>(key_data + (key + key_offset) * 6 + 0x0c);
+                f32 first_time = static_cast<f32>(static_cast<u32>(static_cast<u16>(first[2])));
+                f32 span = static_cast<f32>(static_cast<u32>(static_cast<u16>(first[5]))) - first_time;
+                f32 tangent0 = static_cast<f32>(static_cast<i8>(first[1])) * header_0 * span;
+                f32 tangent1 = static_cast<f32>(static_cast<i8>(first[4])) * header_0 * span;
+                f32 value0 = static_cast<f32>(first[0]) * header_1 + header_2;
+                f32 value_delta = value0 - (static_cast<f32>(first[3]) * header_1 + header_2);
+                f32 inverse_span = 1.0f / span;
+                f32 t = ((time->time - 1.0f) - first_time) * inverse_span;
+                result = (((((value_delta * 2.0f + tangent0 + tangent1) * t - value_delta * 3.0f) - tangent0 * 2.0f) -
+                           tangent1) *
+                              t +
+                          tangent0) *
+                             t +
+                         value0;
+                break;
+            }
+            default:
+                break;
+        }
+        return result;
+    }
+
+    static inline void *NuLegacyRelocatePointer(void *pointer, isize delta) {
+        return pointer == NULL ? NULL : reinterpret_cast<void *>(reinterpret_cast<usize>(pointer) + delta);
+    }
+
+    void *NuAnimData2FixPtrs(void *data, isize delta, isize external_delta, i32 flags) {
+        if (isBitCountTable == 0)
+            buildBitCountTable();
+
+        nuanimdata2_s *anim = static_cast<nuanimdata2_s *>(NuLegacyRelocatePointer(data, delta));
+        if (anim != NULL) {
+            if (*reinterpret_cast<u32 *>(&anim->duration) + 0xbeb1b6ccU < 2) {
+                if (external_delta != 0) {
+                    ANI_FixUpAddrs(reinterpret_cast<ani3_animheader_s *>(anim), delta, flags);
+                } else {
+                    ANI_FixUpAddrs(reinterpret_cast<ani3_animheader_s *>(anim),
+                                   static_cast<isize>(reinterpret_cast<usize>(anim)), flags);
+                }
             } else {
-                ANI_FixUpAddrs(reinterpret_cast<ani3_animheader_s *>(anim),
-                               static_cast<isize>(reinterpret_cast<usize>(anim)), flags);
-            }
-        } else {
-            anim->curves = static_cast<nuanimcurve2_s *>(NuLegacyRelocatePointer(anim->curves, delta));
-            anim->curve_types = static_cast<u8 *>(NuLegacyRelocatePointer(anim->curve_types, delta));
-            anim->node_flags = static_cast<u8 *>(NuLegacyRelocatePointer(anim->node_flags, delta));
-            i32 curve_count = static_cast<i32>(anim->node_count) * static_cast<i32>(anim->curve_count);
-            for (i32 i = 0; i < curve_count; ++i) {
-                if (anim->curve_types[i] != 0) {
-                    nuanimcurvedata_s *curve = anim->curves[i].data.curvedata;
-                    curve = static_cast<nuanimcurvedata_s *>(NuLegacyRelocatePointer(curve, delta));
-                    anim->curves[i].data.curvedata = curve;
-                    curve->key_mask = static_cast<u32 *>(NuLegacyRelocatePointer(curve->key_mask, delta));
-                    curve->key_offsets = static_cast<u16 *>(NuLegacyRelocatePointer(curve->key_offsets, delta));
-                    curve->key_data = NuLegacyRelocatePointer(curve->key_data, delta);
+                anim->curves = static_cast<nuanimcurve2_s *>(NuLegacyRelocatePointer(anim->curves, delta));
+                anim->curve_types = static_cast<u8 *>(NuLegacyRelocatePointer(anim->curve_types, delta));
+                anim->node_flags = static_cast<u8 *>(NuLegacyRelocatePointer(anim->node_flags, delta));
+                i32 curve_count = static_cast<i32>(anim->node_count) * static_cast<i32>(anim->curve_count);
+                for (i32 i = 0; i < curve_count; ++i) {
+                    if (anim->curve_types[i] != 0) {
+                        nuanimcurvedata_s *curve = anim->curves[i].data.curvedata;
+                        curve = static_cast<nuanimcurvedata_s *>(NuLegacyRelocatePointer(curve, delta));
+                        anim->curves[i].data.curvedata = curve;
+                        curve->key_mask = static_cast<u32 *>(NuLegacyRelocatePointer(curve->key_mask, delta));
+                        curve->key_offsets = static_cast<u16 *>(NuLegacyRelocatePointer(curve->key_offsets, delta));
+                        curve->key_data = NuLegacyRelocatePointer(curve->key_data, delta);
+                    }
                 }
             }
         }
+        return anim;
     }
-    return anim;
-}
 
-void *NuAnimDataFixPtrs(void *animation, isize delta) {
+    void *NuAnimDataFixPtrs(void *animation, isize delta) {
 
-    if (isBitCountTable == 0)
-        buildBitCountTable();
-    animation = NuLegacyRelocatePointer(animation, delta);
-    u8 *data = static_cast<u8 *>(animation);
-    void *&name = *reinterpret_cast<void **>(data + 4);
-    name = NuLegacyRelocatePointer(name, delta);
-    void **&chunks = *reinterpret_cast<void ***>(data + 0xc);
-    chunks = static_cast<void **>(NuLegacyRelocatePointer(chunks, delta));
-    if (chunks != NULL) {
-        i32 chunk_count = *reinterpret_cast<i32 *>(data + 8);
-        for (i32 i = 0; i < chunk_count; ++i) {
-            chunks[i] = NuLegacyRelocatePointer(chunks[i], delta);
-            u8 *chunk = static_cast<u8 *>(chunks[i]);
-            if (chunk != NULL) {
-                void **&sets = *reinterpret_cast<void ***>(chunk + 8);
-                sets = static_cast<void **>(NuLegacyRelocatePointer(sets, delta));
-                if (sets != NULL) {
-                    i32 set_count = *reinterpret_cast<i32 *>(chunk);
-                    for (i32 j = 0; j < set_count; ++j) {
-                        sets[j] = NuLegacyRelocatePointer(sets[j], delta);
-                        u8 *set = static_cast<u8 *>(sets[j]);
-                        if (set != NULL) {
-                            void *&constants = *reinterpret_cast<void **>(set + 4);
-                            constants = NuLegacyRelocatePointer(constants, delta);
-                            void **&curves = *reinterpret_cast<void ***>(set + 8);
-                            curves = static_cast<void **>(NuLegacyRelocatePointer(curves, delta));
-                            if (curves != NULL) {
-                                for (i32 k = 0; k < *reinterpret_cast<i8 *>(set + 0xc); ++k) {
-                                    curves[k] = NuLegacyRelocatePointer(curves[k], delta);
-                                    u8 *curve = static_cast<u8 *>(curves[k]);
-                                    if (curve != NULL) {
-                                        void *&keys = *reinterpret_cast<void **>(curve + 4);
-                                        keys = NuLegacyRelocatePointer(keys, delta);
+        if (isBitCountTable == 0)
+            buildBitCountTable();
+        animation = NuLegacyRelocatePointer(animation, delta);
+        u8 *data = static_cast<u8 *>(animation);
+        void *&name = *reinterpret_cast<void **>(data + 4);
+        name = NuLegacyRelocatePointer(name, delta);
+        void **&chunks = *reinterpret_cast<void ***>(data + 0xc);
+        chunks = static_cast<void **>(NuLegacyRelocatePointer(chunks, delta));
+        if (chunks != NULL) {
+            i32 chunk_count = *reinterpret_cast<i32 *>(data + 8);
+            for (i32 i = 0; i < chunk_count; ++i) {
+                chunks[i] = NuLegacyRelocatePointer(chunks[i], delta);
+                u8 *chunk = static_cast<u8 *>(chunks[i]);
+                if (chunk != NULL) {
+                    void **&sets = *reinterpret_cast<void ***>(chunk + 8);
+                    sets = static_cast<void **>(NuLegacyRelocatePointer(sets, delta));
+                    if (sets != NULL) {
+                        i32 set_count = *reinterpret_cast<i32 *>(chunk);
+                        for (i32 j = 0; j < set_count; ++j) {
+                            sets[j] = NuLegacyRelocatePointer(sets[j], delta);
+                            u8 *set = static_cast<u8 *>(sets[j]);
+                            if (set != NULL) {
+                                void *&constants = *reinterpret_cast<void **>(set + 4);
+                                constants = NuLegacyRelocatePointer(constants, delta);
+                                void **&curves = *reinterpret_cast<void ***>(set + 8);
+                                curves = static_cast<void **>(NuLegacyRelocatePointer(curves, delta));
+                                if (curves != NULL) {
+                                    for (i32 k = 0; k < *reinterpret_cast<i8 *>(set + 0xc); ++k) {
+                                        curves[k] = NuLegacyRelocatePointer(curves[k], delta);
+                                        u8 *curve = static_cast<u8 *>(curves[k]);
+                                        if (curve != NULL) {
+                                            void *&keys = *reinterpret_cast<void **>(curve + 4);
+                                            keys = NuLegacyRelocatePointer(keys, delta);
+                                        }
                                     }
                                 }
                             }
@@ -381,109 +382,110 @@ void *NuAnimDataFixPtrs(void *animation, isize delta) {
                 }
             }
         }
-    }
-    return animation;
-}
-
-void *NuAnimDataRead(NUFILE file) {
-
-    if (isBitCountTable == 0) {
-        buildBitCountTable();
+        return animation;
     }
 
-    char *name = NULL;
-    const i32 name_size = NuFileReadInt(file);
-    if (name_size != 0) {
-        name = static_cast<char *>(NuMemoryGet()->GetThreadMem()->_BlockAlloc(name_size, 4, 1, "", 0));
-        NuFileRead(file, name, name_size);
-    }
+    void *NuAnimDataRead(NUFILE file) {
 
-    const f32 duration = NuFileReadFloat(file);
-    const i32 chunk_count = NuFileReadInt(file);
-    u8 *animation = static_cast<u8 *>(NuAnimDataCreate(chunk_count));
-    *reinterpret_cast<f32 *>(animation) = duration;
-    *reinterpret_cast<char **>(animation + 4) = name;
-
-    for (i32 chunk_index = 0; chunk_index < *reinterpret_cast<i32 *>(animation + 8); ++chunk_index) {
-        const i32 curve_set_count = NuFileReadInt(file);
-        void **chunk_slot = *reinterpret_cast<void ***>(animation + 0xc) + chunk_index;
-        u8 *chunk = reinterpret_cast<u8 *>(NuAnimDataChunkCreate(curve_set_count));
-        *chunk_slot = chunk;
-        *reinterpret_cast<i32 *>(chunk) = curve_set_count;
-
-        u8 *curve_data = NULL;
-        const i32 curve_data_count = NuFileReadInt(file);
-        if (curve_data_count != 0) {
-            const u32 curve_data_size = static_cast<u32>(curve_data_count) * 0x10;
-            curve_data = static_cast<u8 *>(NuMemoryGet()->GetThreadMem()->_BlockAlloc(curve_data_size, 4, 1, "", 0));
-            *reinterpret_cast<void **>(chunk + 0xc) = curve_data;
-            NuFileRead(file, curve_data, curve_data_size);
-            curve_data = *reinterpret_cast<u8 **>(chunk + 0xc);
-        } else {
-            *reinterpret_cast<void **>(chunk + 0xc) = NULL;
+        if (isBitCountTable == 0) {
+            buildBitCountTable();
         }
 
-        u8 *shared_curves = NULL;
-        const i32 shared_curve_count = NuFileReadInt(file);
-        if (shared_curve_count != 0) {
-            const u32 shared_curve_size = static_cast<u32>(shared_curve_count) * 0x10;
-            shared_curves = static_cast<u8 *>(NuMemoryGet()->GetThreadMem()->_BlockAlloc(shared_curve_size, 4, 1, "", 0));
-            *reinterpret_cast<void **>(chunk + 0x10) = shared_curves;
-            NuFileRead(file, shared_curves, shared_curve_size);
-        } else {
-            *reinterpret_cast<void **>(chunk + 0x10) = NULL;
+        char *name = NULL;
+        const i32 name_size = NuFileReadInt(file);
+        if (name_size != 0) {
+            name = static_cast<char *>(NuMemoryGet()->GetThreadMem()->_BlockAlloc(name_size, 4, 1, "", 0));
+            NuFileRead(file, name, name_size);
         }
 
-        for (i32 set_index = 0; set_index < curve_set_count; ++set_index) {
-            const i32 curve_count = NuFileReadChar(file);
-            if (curve_count == 0) {
-                continue;
+        const f32 duration = NuFileReadFloat(file);
+        const i32 chunk_count = NuFileReadInt(file);
+        u8 *animation = static_cast<u8 *>(NuAnimDataCreate(chunk_count));
+        *reinterpret_cast<f32 *>(animation) = duration;
+        *reinterpret_cast<char **>(animation + 4) = name;
+
+        for (i32 chunk_index = 0; chunk_index < *reinterpret_cast<i32 *>(animation + 8); ++chunk_index) {
+            const i32 curve_set_count = NuFileReadInt(file);
+            void **chunk_slot = *reinterpret_cast<void ***>(animation + 0xc) + chunk_index;
+            u8 *chunk = reinterpret_cast<u8 *>(NuAnimDataChunkCreate(curve_set_count));
+            *chunk_slot = chunk;
+            *reinterpret_cast<i32 *>(chunk) = curve_set_count;
+
+            u8 *curve_data = NULL;
+            const i32 curve_data_count = NuFileReadInt(file);
+            if (curve_data_count != 0) {
+                const u32 curve_data_size = static_cast<u32>(curve_data_count) * 0x10;
+                curve_data =
+                    static_cast<u8 *>(NuMemoryGet()->GetThreadMem()->_BlockAlloc(curve_data_size, 4, 1, "", 0));
+                *reinterpret_cast<void **>(chunk + 0xc) = curve_data;
+                NuFileRead(file, curve_data, curve_data_size);
+                curve_data = *reinterpret_cast<u8 **>(chunk + 0xc);
+            } else {
+                *reinterpret_cast<void **>(chunk + 0xc) = NULL;
             }
 
-            void **set_slot = *reinterpret_cast<void ***>(chunk + 8) + set_index;
-            *set_slot = NuAnimCurveSetCreate(curve_count);
-            u8 *curve_set = static_cast<u8 *>((*reinterpret_cast<void ***>(chunk + 8))[set_index]);
-            *reinterpret_cast<i32 *>(curve_set) = NuFileReadInt(file);
-            for (i32 curve_index = 0;
-                 curve_index < *reinterpret_cast<i8 *>(
-                                   static_cast<u8 *>((*reinterpret_cast<void ***>(chunk + 8))[set_index]) + 0xc);
-                 ++curve_index) {
-                curve_set = static_cast<u8 *>((*reinterpret_cast<void ***>(chunk + 8))[set_index]);
-                f32 *value = *reinterpret_cast<f32 **>(curve_set + 4) + curve_index;
-                *value = NuFileReadFloat(file);
+            u8 *shared_curves = NULL;
+            const i32 shared_curve_count = NuFileReadInt(file);
+            if (shared_curve_count != 0) {
+                const u32 shared_curve_size = static_cast<u32>(shared_curve_count) * 0x10;
+                shared_curves =
+                    static_cast<u8 *>(NuMemoryGet()->GetThreadMem()->_BlockAlloc(shared_curve_size, 4, 1, "", 0));
+                *reinterpret_cast<void **>(chunk + 0x10) = shared_curves;
+                NuFileRead(file, shared_curves, shared_curve_size);
+            } else {
+                *reinterpret_cast<void **>(chunk + 0x10) = NULL;
             }
-        }
 
-        u8 *shared_cursor = *reinterpret_cast<u8 **>(chunk + 0x10);
-        u8 *curve_data_cursor = curve_data;
-        for (i32 set_index = 0; set_index < *reinterpret_cast<i32 *>(chunk); ++set_index) {
-            u8 *curve_set = static_cast<u8 *>((*reinterpret_cast<void ***>(chunk + 8))[set_index]);
-            if (curve_set == NULL) {
-                continue;
+            for (i32 set_index = 0; set_index < curve_set_count; ++set_index) {
+                const i32 curve_count = NuFileReadChar(file);
+                if (curve_count == 0) {
+                    continue;
+                }
+
+                void **set_slot = *reinterpret_cast<void ***>(chunk + 8) + set_index;
+                *set_slot = NuAnimCurveSetCreate(curve_count);
+                u8 *curve_set = static_cast<u8 *>((*reinterpret_cast<void ***>(chunk + 8))[set_index]);
+                *reinterpret_cast<i32 *>(curve_set) = NuFileReadInt(file);
+                for (i32 curve_index = 0;
+                     curve_index < *reinterpret_cast<i8 *>(
+                                       static_cast<u8 *>((*reinterpret_cast<void ***>(chunk + 8))[set_index]) + 0xc);
+                     ++curve_index) {
+                    curve_set = static_cast<u8 *>((*reinterpret_cast<void ***>(chunk + 8))[set_index]);
+                    f32 *value = *reinterpret_cast<f32 **>(curve_set + 4) + curve_index;
+                    *value = NuFileReadFloat(file);
+                }
             }
-            for (i32 curve_index = 0;
-                 curve_index < *reinterpret_cast<i8 *>(
-                                   static_cast<u8 *>((*reinterpret_cast<void ***>(chunk + 8))[set_index]) + 0xc);
-                 ++curve_index) {
-                curve_set = static_cast<u8 *>((*reinterpret_cast<void ***>(chunk + 8))[set_index]);
-                if ((*reinterpret_cast<f32 **>(curve_set + 4))[curve_index] == FLT_MAX) {
-                    (*reinterpret_cast<void ***>(curve_set + 8))[curve_index] = shared_cursor;
-                    ++*reinterpret_cast<i32 *>(chunk + 4);
-                    *reinterpret_cast<void **>(shared_cursor + 4) = curve_data_cursor;
-                    curve_data_cursor += *reinterpret_cast<i32 *>(shared_cursor + 8) << 4;
-                    shared_cursor += 0x10;
+
+            u8 *shared_cursor = *reinterpret_cast<u8 **>(chunk + 0x10);
+            u8 *curve_data_cursor = curve_data;
+            for (i32 set_index = 0; set_index < *reinterpret_cast<i32 *>(chunk); ++set_index) {
+                u8 *curve_set = static_cast<u8 *>((*reinterpret_cast<void ***>(chunk + 8))[set_index]);
+                if (curve_set == NULL) {
+                    continue;
+                }
+                for (i32 curve_index = 0;
+                     curve_index < *reinterpret_cast<i8 *>(
+                                       static_cast<u8 *>((*reinterpret_cast<void ***>(chunk + 8))[set_index]) + 0xc);
+                     ++curve_index) {
+                    curve_set = static_cast<u8 *>((*reinterpret_cast<void ***>(chunk + 8))[set_index]);
+                    if ((*reinterpret_cast<f32 **>(curve_set + 4))[curve_index] == FLT_MAX) {
+                        (*reinterpret_cast<void ***>(curve_set + 8))[curve_index] = shared_cursor;
+                        ++*reinterpret_cast<i32 *>(chunk + 4);
+                        *reinterpret_cast<void **>(shared_cursor + 4) = curve_data_cursor;
+                        curve_data_cursor += *reinterpret_cast<i32 *>(shared_cursor + 8) << 4;
+                        shared_cursor += 0x10;
+                    }
                 }
             }
         }
+        return animation;
     }
-    return animation;
-}
 
-void NuAnimInit(i32 max_joints, VARIPTR *buf, VARIPTR buf_end) {
+    void NuAnimInit(i32 max_joints, VARIPTR *buf, VARIPTR buf_end) {
 
-    buildBitCountTable();
-    NuAnimBuffInit(max_joints, buf, buf_end);
-}
+        buildBitCountTable();
+        NuAnimBuffInit(max_joints, buf, buf_end);
+    }
 }
 
 extern "C" void *NuAnimData2Relocate(void **data, VARIPTR *buf) {
@@ -507,9 +509,9 @@ extern "C" void *NuAnimData2Relocate(void **data, VARIPTR *buf) {
     *data = buf->void_ptr;
     buf->addr += *static_cast<u32 *>(*data);
     header = static_cast<u32 *>(*data);
-    header[2] = reinterpret_cast<usize>(NuAnimData2FixPtrs(
-        reinterpret_cast<void *>(static_cast<usize>(header[2])),
-        reinterpret_cast<usize>(header) - static_cast<usize>(header[1]), 0, 0));
+    header[2] = reinterpret_cast<usize>(
+        NuAnimData2FixPtrs(reinterpret_cast<void *>(static_cast<usize>(header[2])),
+                           reinterpret_cast<usize>(header) - static_cast<usize>(header[1]), 0, 0));
     header[1] = reinterpret_cast<usize>(*data);
     return reinterpret_cast<void *>(static_cast<usize>(header[2]));
 }
@@ -569,7 +571,8 @@ extern "C" void *NuAnimData2LoadBuffFromPAK(void *data, i32 file_size) {
     if (static_cast<i32>(static_cast<u32 *>(data)[1]) > static_cast<i32>(0x414e4934)) {
         return NuPtrBlockFix(data);
     }
-    return NuAnimData2Fixup(file_size, &data);
+    void *result = data;
+    return NuAnimData2Fixup(file_size, &result);
 }
 
 void NuAnimBuffEvaluate_3_QuatB(numtx_s *base, nuanimbuff_s *buffer, nugscn_s *scene, numtx_s *matrices,

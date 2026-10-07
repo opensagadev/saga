@@ -13,6 +13,9 @@
 #include "legoapi/world/area.h"
 #include "legoapi/world/levels/podrace.h"
 #include "legoapi/world/levels/levels.h"
+#include "legoapi/world/area.h"
+#include "legoapi/world/mission.h"
+#include "legoapi/cutscenes/cutscenes.h"
 #include "nu2api/nu3d/nuspline.h"
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/nucore/nustring.h"
@@ -42,11 +45,11 @@ i32 BezierLinePos(VuVec &result, VuVec &start, VuVec &first_control, VuVec &end,
     f32 t = 0.5f;
     for (i32 count = 256; count != 0; --count) {
         f32 complement = 1.0f - t;
-        VuVec first{first_control.x * complement + start.x * t, first_control.y * complement + start.y * t,
-                    first_control.z * complement + start.z * t, 0.0f};
         VuVec middle{second_control.x * complement + first_control.x * t,
                      second_control.y * complement + first_control.y * t,
                      second_control.z * complement + first_control.z * t, 0.0f};
+        VuVec first{first_control.x * complement + start.x * t, first_control.y * complement + start.y * t,
+                    first_control.z * complement + start.z * t, 0.0f};
         VuVec last{end.x * complement + second_control.x * t, end.y * complement + second_control.y * t,
                    end.z * complement + second_control.z * t, 0.0f};
         VuVec first_middle{middle.x * complement + first.x * t, middle.y * complement + first.y * t,
@@ -57,7 +60,7 @@ i32 BezierLinePos(VuVec &result, VuVec &start, VuVec &first_control, VuVec &end,
                     middle_last.z * complement + first_middle.z * t, 1.0f};
         f32 length = BezierLineLength(start, first, point, first_middle);
         f32 difference = distance - length;
-        if (!(difference >= 0.0f))
+        if (difference < 0.0f)
             difference = -difference;
         if (!(difference > 0.01f)) {
             result = point;
@@ -192,11 +195,11 @@ f32 BezierLineLength(VuVec &start, VuVec &first_control, VuVec &end, VuVec &seco
 
 f32 BezierLineLength(VuVec &start, VuVec &first_control, VuVec &end, VuVec &second_control, f32 t) {
     f32 complement = 1.0f - t;
-    VuVec first{first_control.x * complement + start.x * t, first_control.y * complement + start.y * t,
-                first_control.z * complement + start.z * t, 0.0f};
     VuVec middle{second_control.x * complement + first_control.x * t,
                  second_control.y * complement + first_control.y * t,
                  second_control.z * complement + first_control.z * t, 0.0f};
+    VuVec first{first_control.x * complement + start.x * t, first_control.y * complement + start.y * t,
+                first_control.z * complement + start.z * t, 0.0f};
     VuVec last{end.x * complement + second_control.x * t, end.y * complement + second_control.y * t,
                end.z * complement + second_control.z * t, 0.0f};
     VuVec first_middle{middle.x * complement + first.x * t, middle.y * complement + first.y * t,
@@ -382,13 +385,17 @@ i32 OutSideSplineArea(nuvec_s *position, nugspline_s *spline, nuvec_s *edge_end,
         return 0;
     NUVEC ray_start = {position->x, -position->z, position->y};
     NUVEC ray_end = {position->x, 100000.0f, position->y};
-    NUVEC end = {spline->pts[0].x, -spline->pts[0].z, spline->pts[0].y};
+    NUVEC end = spline->pts[0];
+    f32 end_y = end.y;
+    end.y = -end.z;
+    end.z = end_y;
     i32 intersections = 0;
     for (i32 i = 1; i < spline->length; ++i) {
         NUVEC start = end;
-        end.x = spline->pts[i].x;
-        end.y = -spline->pts[i].z;
-        end.z = spline->pts[i].y;
+        end = spline->pts[i];
+        end_y = end.y;
+        end.y = -end.z;
+        end.z = end_y;
         intersections += LineIntersectXY(&ray_start, &ray_end, &start, &end, NULL, NULL);
     }
     if ((intersections & 1) != 0 ? inside == 0 : inside != 0)
@@ -516,8 +523,6 @@ static i32 levspl_i_startcam = -1;
 void LevelSplines_InitForGame(LEVELSPLINE *splines) {
     LevSplList = splines;
     LEVELSPLINECOUNT = 0;
-    levspl_i_start = -1;
-    levspl_i_startcam = -1;
 
     if (splines == NULL) {
         return;
@@ -613,7 +618,11 @@ void LevelSplines_InitForLevel(WORLDINFO_s *world) {
             }
         }
 
-        if (levspl_i_start != -1) {
+        if (scene == NULL) {
+            continue;
+        }
+
+        if (levspl_i_start >= 0 && levspl_i_start < LEVELSPLINECOUNT) {
             char name[64];
             name[0] = '\0';
             if (Mission_Active(NULL) != NULL) {
@@ -621,7 +630,8 @@ void LevelSplines_InitForLevel(WORLDINFO_s *world) {
             } else if (world->level_sub_id != -1 && (ADataList[world->level_sub_id].flags & 0x40) != 0 &&
                        hub_from_cutsceneplayer != 0) {
                 NuStrCpy(name, "shop_start");
-                if (CutScenePlayer_Available() != NULL && static_cast<i16 *>(CutScenePlayer_Available())[5] != -1) {
+                if (CutScenePlayer_Available() != NULL &&
+                    static_cast<CUTSCENEPLAYER_s *>(CutScenePlayer_Available())->return_door != -1) {
                     name[0] = '\0';
                 }
             }
@@ -629,7 +639,7 @@ void LevelSplines_InitForLevel(WORLDINFO_s *world) {
                 NUGSPLINE *start = NuSplineFind(scene, name);
                 if (start != NULL && start->length > 1) {
                     world->portal_places[levspl_i_start] = reinterpret_cast<PORTALPOS *>(start);
-                    if (levspl_i_startcam != -1) {
+                    if (levspl_i_startcam >= 0 && levspl_i_startcam < LEVELSPLINECOUNT) {
                         world->portal_places[levspl_i_startcam] = NULL;
                     }
                 }

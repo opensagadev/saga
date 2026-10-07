@@ -69,9 +69,8 @@ void VirtualControlDPad::Process(float elapsed) {
         const f32 distance = NuFsqrt(dx * dx + dy * dy);
         const i32 angle = NuAtan2D(dx, dy);
         const f32 ratio = distance / radius_y;
-        const f32 strength = ratio >= 1.0f || ratio < 0.0f
-                                 ? 1.5f
-                                 : static_cast<f32>(static_cast<double>(ratio) * 1.4) * 3.0f;
+        const f32 strength =
+            ratio >= 1.0f || ratio < 0.0f ? 1.5f : static_cast<f32>(static_cast<double>(ratio) * 1.4) * 3.0f;
         stick_values.x = MAX(-1.0f, MIN(NU_SIN_LUT(angle) * strength, 1.0f));
         stick_values.y = MAX(-1.0f, MIN(NU_COS_LUT(angle) * strength, 1.0f));
         MechInputTouchVirtualConsoleController::s_noInputTimer = 20.0f;
@@ -88,33 +87,46 @@ void VirtualControlDPad::Render() {
     const f32 centre_y = (1.0f - position.y) * 0.5f;
     const f32 scaled_x = radius_x * scale;
     const f32 scaled_y = radius_y * scale;
-    const f32 arrow_radius = scale * (NuIOS_IsSmallScreen() ? 0.07f : 0.035f);
-    const f32 arrow_width = GetAspectRatio() * arrow_radius;
-    const bool all_active = MechInputTouchVirtualConsoleController::s_noInputTimer < 0.0f ||
-                            (GetMenuID() == 25 && owner != NULL);
+    const bool all_active =
+        (GetMenuID() == 25 && owner != NULL) || MechInputTouchVirtualConsoleController::s_noInputTimer < 0.0f;
 
     const f32 bottom_factor = stick_values.y > 0.2f || all_active ? 0.75f : 0.5f;
-    RndrTexQuad(centre_x, centre_y + 0.4f * scaled_y, arrow_width, arrow_radius,
-                (static_cast<i32>(128.0f * alpha * bottom_factor) << 24) | 0x808080, arrow_material, 0x8000);
+    const f32 arrow_radius = NuIOS_IsSmallScreen() ? 0.07f : 0.035f;
+    numtl_s *arrow = arrow_material;
+    i32 colour = (static_cast<i32>(128.0f * alpha * bottom_factor) << 24) | 0x808080;
+    f32 arrow_height = arrow_radius * scale;
+    f32 aspect = GetAspectRatio();
+    const f32 vertical_offset = 0.4f * scaled_y;
+    RndrTexQuad(centre_x, centre_y + vertical_offset, aspect * arrow_height, arrow_height, colour, arrow, 0x8000);
 
     const f32 left_factor = stick_values.x < -0.2f || all_active ? 1.0f : 0.5f;
-    RndrTexQuad(centre_x - 0.2f * scaled_x, centre_y, arrow_width, arrow_radius,
-                (static_cast<i32>(128.0f * alpha * left_factor) << 24) | 0x808080, arrow_material, 0xc000);
+    arrow = arrow_material;
+    colour = (static_cast<i32>(128.0f * alpha * left_factor) << 24) | 0x808080;
+    arrow_height = arrow_radius * scale;
+    aspect = GetAspectRatio();
+    const f32 horizontal_offset = scaled_x * 0.4f;
+    RndrTexQuad(centre_x - horizontal_offset, centre_y, aspect * arrow_height, arrow_height, colour, arrow, 0xc000);
 
     const f32 top_factor = stick_values.y < -0.2f || all_active ? 1.0f : 0.5f;
-    RndrTexQuad(centre_x, centre_y - 0.4f * scaled_y, arrow_width, arrow_radius,
-                (static_cast<i32>(128.0f * alpha * top_factor) << 24) | 0x808080, arrow_material, 0);
+    arrow = arrow_material;
+    colour = (static_cast<i32>(128.0f * alpha * top_factor) << 24) | 0x808080;
+    arrow_height = arrow_radius * scale;
+    aspect = GetAspectRatio();
+    RndrTexQuad(centre_x, centre_y - vertical_offset, aspect * arrow_height, arrow_height, colour, arrow, 0);
 
     const f32 right_factor = stick_values.x > 0.2f || all_active ? 1.0f : 0.5f;
-    RndrTexQuad(centre_x + 0.2f * scaled_x, centre_y, arrow_width, arrow_radius,
-                (static_cast<i32>(128.0f * alpha * right_factor) << 24) | 0x808080, arrow_material, 0x4000);
+    arrow = arrow_material;
+    colour = (static_cast<i32>(128.0f * alpha * right_factor) << 24) | 0x808080;
+    arrow_height = arrow_radius * scale;
+    aspect = GetAspectRatio();
+    RndrTexQuad(centre_x + horizontal_offset, centre_y, aspect * arrow_height, arrow_height, colour, arrow, 0x4000);
 
-    if (GetMenuID() == 25 && controller->lock_button != NULL) {
-        MechTouchUITexButton *lock = static_cast<MechTouchUITexButton *>(controller->lock_button);
+    if (GetMenuID() == 25 && controller->button_mover != NULL) {
+        MechTouchUITexButton *button_mover = static_cast<MechTouchUITexButton *>(controller->button_mover);
         mover.position = position;
-        mover.radius_x = lock->radius_x;
-        mover.radius_y = lock->radius_y;
-        mover.scale = mover.scale_to = lock->scale;
+        mover.radius_x = button_mover->radius_x;
+        mover.radius_y = button_mover->radius_y;
+        mover.scale = mover.scale_to = button_mover->scale;
         mover.scale_elapsed = mover.scale_duration;
         if (owner != NULL) {
             mover.scale = mover.scale_to = 1.1f;
@@ -123,8 +135,7 @@ void VirtualControlDPad::Render() {
     }
 }
 
-VirtualControlDPad::VirtualControlDPad(NuVec2 const &pos, float radius,
-                                       MechInputTouchVirtualConsoleController &console)
+VirtualControlDPad::VirtualControlDPad(NuVec2 const &pos, float radius, MechInputTouchVirtualConsoleController &console)
     : MechTouchUITexButton(VuVec(pos.x, pos.y, 0.0f, 1.0f), radius), controller(&console), mover(console) {
     on_down = VirtualControlDPad_OnDown_Callback;
     scale = scale_to = 0.0f;
@@ -158,15 +169,14 @@ void VirtualControlButton::Process(float) {
         MechInputTouchVirtualConsoleController::s_noInputTimer = 20.0f;
     }
 
-    alpha = alpha_to = hovered != 0 || MechInputTouchVirtualConsoleController::s_noInputTimer < 0.0f
-                             ? 1.0f
-                             : 0.4f;
+    alpha = alpha_to = hovered != 0 || MechInputTouchVirtualConsoleController::s_noInputTimer < 0.0f ? 1.0f : 0.4f;
     alpha_elapsed = alpha_duration;
     scale = scale_to = hovered != 0 ? 1.2f : 1.0f;
     scale_elapsed = scale_duration;
     if (MechInputTouchVirtualConsoleController::s_noInputTimer < 0.0f) {
         const f32 pulse =
-            1.0f + 0.05f * NU_SIN_LUT(static_cast<i32>(MechInputTouchVirtualConsoleController::s_noInputTimer * 65536.0f));
+            1.0f +
+            0.05f * NU_SIN_LUT(static_cast<i32>(MechInputTouchVirtualConsoleController::s_noInputTimer * 65536.0f));
         scale = scale_to = scale * pulse;
     }
 }
@@ -180,20 +190,20 @@ VirtualControlButton::VirtualControlButton(NuVec2 const &pos, float radius,
     : MechTouchUITexButton(VuVec(pos.x, pos.y, 0.0f, 1.0f), radius), button_type(type) {
     on_down = VirtualControlButton_OnDown_Callback;
     switch (type) {
-    case 0:
-        UpdateTexture(MechInputTouchVirtualConsoleController::s_textures[1]);
-        break;
-    case 1:
-        UpdateTexture(MechInputTouchVirtualConsoleController::s_textures[3]);
-        break;
-    case 2:
-        UpdateTexture(MechInputTouchVirtualConsoleController::s_textures[0]);
-        break;
-    case 3:
-        UpdateTexture(MechInputTouchVirtualConsoleController::s_textures[2]);
-        break;
-    default:
-        break;
+        case 0:
+            UpdateTexture(MechInputTouchVirtualConsoleController::s_textures[1]);
+            break;
+        case 1:
+            UpdateTexture(MechInputTouchVirtualConsoleController::s_textures[3]);
+            break;
+        case 2:
+            UpdateTexture(MechInputTouchVirtualConsoleController::s_textures[0]);
+            break;
+        case 3:
+            UpdateTexture(MechInputTouchVirtualConsoleController::s_textures[2]);
+            break;
+        default:
+            break;
     }
 }
 

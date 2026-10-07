@@ -1140,15 +1140,13 @@ void DebrisProcessGeneration() {
             continue;
         }
         key->cutoff_distance = CameraEmitterDistance(&key->position);
-        const f32 near_distance = *reinterpret_cast<f32 *>(&effect->fields_030[4]);
-        const i16 render_group = *reinterpret_cast<i16 *>(key->fields_2f0);
         if (key->field_184 != 0) {
-            if (key->cutoff_distance < near_distance ||
+            if (key->cutoff_distance < effect->cut_on ||
                 (effect->clip_extent > 0.0f && key->cutoff_distance > effect->clip_extent)) {
                 if (effect->use_explicit_clip_box == 0 && effect->time_group != 4)
                     key->field_184 = 0;
             }
-            if (debris_render_group != 0 && render_group != 0 && debris_render_group != render_group)
+            if (debris_render_group != 0 && key->render_group != 0 && debris_render_group != key->render_group)
                 key->field_184 = 0;
             if ((static_cast<i8>(key->field_1da) & debris_detail_level) == 0)
                 key->field_184 = 0;
@@ -1196,8 +1194,8 @@ void DebrisProcessGeneration() {
                 : (effect->thinning < debris_thinning_level ? effect->thinning : debris_thinning_level);
         const f32 emission_interval = frequency > 0.0f ? 1.0f / (frequency / thinning) : 0.0f;
         f32 emission_time = key->emission_epoch + emission_interval;
+        f32 pause = 0.0f;
         for (i32 emission = 1; emission != 100 && emission_time < now + timeincrement; ++emission) {
-            f32 pause = 0.0f;
             i32 transitions = 100;
             while (emission_time >= key->field_1e4 && emission_time >= key->emission_time && --transitions != 0) {
                 if (!(key->emission_time < key->field_1e4)) {
@@ -1230,7 +1228,6 @@ void DebrisProcessGeneration() {
             }
             if (pause > 0.0f) {
                 emission_time = key->emission_time - emission_interval;
-                key->emission_epoch = emission_time;
             } else if (key->allocated_chunk_count > 0 && key->field_184 != 0) {
                 uv1deb *particle = key->generator(key, effect, emission_time);
                 if (effect->process_spheres != 0 && particle != NULL && emission == 1)
@@ -1238,12 +1235,13 @@ void DebrisProcessGeneration() {
                 if (key->process_collision_sound != 0 && sound_range > key->cutoff_distance)
                     DebrisEmissionSound(key, effect, 3, volume);
             }
+            key->emission_epoch = emission_time;
             emission_time += emission_interval;
         }
         if (key->field_184 == 0) {
-            if (key->field_2f4 != 0 && key->trigger_second == -1 && key->cutoff_distance >= near_distance &&
+            if (key->field_2f4 != 0 && key->trigger_second == -1 && key->cutoff_distance >= effect->cut_on &&
                 (effect->clip_extent == 0.0f || key->cutoff_distance <= effect->clip_extent) &&
-                (debris_render_group == 0 || render_group == 0 || debris_render_group == render_group) &&
+                (debris_render_group == 0 || key->render_group == 0 || debris_render_group == key->render_group) &&
                 (static_cast<i8>(key->field_1da) & debris_detail_level) != 0)
                 key->field_184 = 1;
             else if (key->previous_allocated_chunk_count != 0)

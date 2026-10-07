@@ -444,7 +444,7 @@ void Animate_JEDI(GameObject_s *object) {
         object->fall_animation_timer = 0.0f;
     }
 
-    if (object->id == id_IMPERIALGUARD || object->weapon_scale <= 0.0f) {
+    if (object->id == id_IMPERIALGUARD || !(object->weapon_scale > 0.0f)) {
         return;
     }
 
@@ -614,7 +614,6 @@ void AnimatePlayer(GameObject_s *object) {
 void Animate_BEAST(GameObject_s *object) {
     ANIMPACKET_s &packet = object->apiobj.anim_packet;
     GAMEPAD_s *pad = object->pad_gamepad;
-    const GAMECHARACTERDATA *character = GetGameCharacterData(object);
 
     if ((CInfo[object->character_context].flags & CHARACTER_CONTEXT_INFO_FLAG_OWNS_ANIMATION) != 0) {
         packet.requested_animation = object->context_animation;
@@ -627,7 +626,10 @@ void Animate_BEAST(GameObject_s *object) {
                 if (object->ground_contact_grace_timer > 0.0f || !has_fall ||
                     (object->fall_animation_timer < 0.2f && object->nearby_floor_distance != 2000000.0f &&
                      object->nearby_floor_distance < 0.25f && object->apiobj.velocity.y < 0.0f)) {
-                    use_default_idle = character->field_0x28 <= 0.0f || !has_fall;
+                    use_default_idle =
+                        !(static_cast<const GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24)
+                              ->field_0x28 > 0.0f) ||
+                        !has_fall;
                 }
             }
             if (use_default_idle) {
@@ -638,13 +640,17 @@ void Animate_BEAST(GameObject_s *object) {
         if (UseFallAnim(object)) {
             packet.requested_animation = CHARACTER_ANIMATION_FALL;
         } else if (packet.requested_animation != CHARACTER_ANIMATION_FALL &&
-                   (pad->allocated_5a & GAMEPAD_RUNTIME_SUPPRESS_MOVEMENT) == 0 && pad->input_magnitude > 0.0f) {
+                   (object->pad_gamepad->allocated_5a & GAMEPAD_RUNTIME_SUPPRESS_MOVEMENT) == 0 &&
+                   pad->input_magnitude > 0.0f) {
             const bool has_walk = object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_WALK] != NULL;
             const bool has_run = object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_RUN] != NULL;
             if (has_run && has_walk) {
+                const GAMECHARACTERDATA *character =
+                    static_cast<const GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
                 const f32 threshold = (character->walk_speed + character->run_speed) * 0.5f;
-                packet.requested_animation =
-                    threshold < pad->input_magnitude ? CHARACTER_ANIMATION_RUN : CHARACTER_ANIMATION_WALK;
+                packet.requested_animation = threshold >= object->pad_gamepad->input_magnitude
+                                                 ? CHARACTER_ANIMATION_WALK
+                                                 : CHARACTER_ANIMATION_RUN;
             } else if (has_run) {
                 packet.requested_animation = CHARACTER_ANIMATION_RUN;
             } else if (has_walk) {
@@ -655,6 +661,8 @@ void Animate_BEAST(GameObject_s *object) {
             }
         }
 
+        const GAMECHARACTERDATA *character =
+            static_cast<const GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
         if (character->run_speed != character->walk_speed && character->run_speed != character->tiptoe_speed) {
             MoveAnim_Check(object);
         }
@@ -1103,9 +1111,10 @@ void Animate_ASTROMECH(GameObject_s *object) {
             if (object->apiobj.character_model->model_data_b[43] != NULL) {
                 packet.requested_animation = 43;
             } else {
-                const i32 target_state =
-                    *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(object->context_target_position) + 0x14);
-                packet.requested_animation = target_state == 0 ? CHARACTER_ANIMATION_IDLE : CHARACTER_ANIMATION_FALL;
+                packet.requested_animation =
+                    object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_FALL] == NULL
+                        ? CHARACTER_ANIMATION_IDLE
+                        : CHARACTER_ANIMATION_FALL;
             }
         } else {
             packet.requested_animation = CHARACTER_ANIMATION_FALL;
@@ -1115,7 +1124,7 @@ void Animate_ASTROMECH(GameObject_s *object) {
                 } else if (object->ground_contact_grace_timer > 0.0f) {
                     const GAMECHARACTERDATA *game_character =
                         static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
-                    if (game_character->field_0x28 <= 0.0f ||
+                    if (!(game_character->field_0x28 > 0.0f) ||
                         object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_FALL] == NULL) {
                         packet.requested_animation = static_cast<i16>(GetDefaultIdle(object));
                     }
@@ -1124,7 +1133,7 @@ void Animate_ASTROMECH(GameObject_s *object) {
                             object->nearby_floor_distance < 0.25f && object->apiobj.velocity.y < 0.0f)) {
                     const GAMECHARACTERDATA *game_character =
                         static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
-                    if (game_character->field_0x28 <= 0.0f ||
+                    if (!(game_character->field_0x28 > 0.0f) ||
                         object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_FALL] == NULL) {
                         packet.requested_animation = static_cast<i16>(GetDefaultIdle(object));
                     }
@@ -2134,9 +2143,8 @@ extern "C" {
 
     i32 ANI_SimpleAni3PlayerV4Joint_EulerQuat(ani3_animheader_s *anim, f32 frame, nuanimbuff_s *buffer, i32 joint_count,
                                               i32 first_joint);
-    void ANI_SimpleAni3PlayerV4Joint_Blend_EulerQuat(ani3_animheader_s *anim, f32 frame, nuanimbuff_s *buffer,
-                                                     f32 blend, i32 joint_count, i32 first_joint,
-                                                     NUVEC *root_translation);
+    i32 ANI_SimpleAni3PlayerV4Joint_Blend_EulerQuat(ani3_animheader_s *anim, f32 frame, nuanimbuff_s *buffer, f32 blend,
+                                                    i32 joint_count, i32 first_joint, NUVEC *root_translation);
 
     void ANI_FixUpAddrs(ani3_animheader_s *anim, isize delta, i32) {
         if (anim->magic != 0x414e4934) {

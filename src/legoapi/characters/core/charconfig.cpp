@@ -2530,21 +2530,22 @@ void CharConfig_ConfigureAll(i32 permanent, NUFPCOMJMP *game_keywords) {
         cursor.addr = superbuffer_end.addr - 0x100000;
         pak = NuFilePakLoad("chars\\charstxt.fpk", &cursor, superbuffer_end, 4);
     }
-    for (i32 id = 0; id < CHARCOUNT; ++id) {
+    CHARACTERDATA *character = CDataList;
+    for (i32 id = 0; id < CHARCOUNT; ++id, ++character) {
         if (permanent == 0 && apicharsys->playermodelids[id] == -1)
             continue;
-        CHARACTERDATA *character = &CDataList[id];
         char directory[256];
         char filename[256];
         char path[256];
         char original_path[256];
-        NuStrCpy(directory, "chars\\");
-        NuStrCat(directory, character->dir);
-        NuStrCat(directory, "\\");
+        NuStrCpy(path, "chars\\");
+        NuStrCat(path, character->dir);
+        NuStrCat(path, "\\");
+        NuStrCpy(directory, path);
+        NuStrCat(path, character->file);
+        NuStrCat(path, ".txt");
         NuStrCpy(filename, character->file);
         NuStrCat(filename, ".txt");
-        NuStrCpy(path, directory);
-        NuStrCat(path, filename);
         NuStrCpy(original_path, path);
         if (pak == NULL) {
             VARIPTR *arena = permanent != 0 ? &permbuffer_ptr : NULL;

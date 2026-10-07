@@ -368,9 +368,8 @@ i32 MatrixReflection(numtx_s *matrix, i32 axis, f32 plane, f32 override_plane, n
             return 1;
 
         case 2:
-            if (override_plane != 2000000.0f) {
-                if (MatrixReflection_CanOverrideFn != NULL && MatrixReflection_CanOverrideFn(plane) == 0)
-                    return 0;
+            if (override_plane != 2000000.0f &&
+                (MatrixReflection_CanOverrideFn == NULL || MatrixReflection_CanOverrideFn(plane) != 0)) {
                 plane = override_plane;
             }
             *result = *matrix;
@@ -622,28 +621,36 @@ void CalculateInterceptVector(NUVEC *origin, NUVEC *target, NUVEC *velocity, f32
 
 i32 LineToSphereIntersection(VuVec &origin, VuVec &direction, VuVec &center, f32 radius, VuVec *far_intersection,
                              VuVec *near_intersection) {
-    f32 a = direction.x * direction.x + direction.y * direction.y + direction.z * direction.z;
-    if (a < 1.1920928955078125e-7f)
+    f32 qx = (origin.x + direction.x) - origin.x;
+    f32 qy = (origin.y + direction.y) - origin.y;
+    f32 qz = (origin.z + direction.z) - origin.z;
+    f32 a = (qx * qx + qy * qy) + qz * qz;
+    if (NuFabs(a) < 1.1920928955078125e-7f)
         return 0;
     f32 dx = origin.x - center.x;
     f32 dy = origin.y - center.y;
     f32 dz = origin.z - center.z;
-    f32 b = 2.0f * (dx * direction.x + dy * direction.y + dz * direction.z);
-    f32 c = dx * dx + dy * dy + dz * dz - radius * radius;
-    f32 discriminant = b * b - 4.0f * a * c;
+    f32 projection = (dx * qx + dy * qy) + dz * qz;
+    f32 b = projection + projection;
+    f32 center_squared = (center.x * center.x + center.y * center.y) + center.z * center.z;
+    f32 origin_squared = (origin.x * origin.x + origin.y * origin.y) + origin.z * origin.z;
+    f32 origin_center = (origin.x * center.x + origin.y * center.y) + origin.z * center.z;
+    f32 c = ((center_squared + origin_squared) - (origin_center + origin_center)) - radius * radius;
+    f32 discriminant = b * b - (4.0f * a) * c;
     if (discriminant < 0.0f)
         return 0;
-    f32 root = NuFsqrt(discriminant);
+    f32 far_root = NuFsqrt(discriminant);
     f32 denominator = a + a;
+    f32 far_t = (far_root - b) / denominator;
+    f32 near_root = NuFsqrt(discriminant);
+    f32 near_t = (-b - near_root) / denominator;
     if (far_intersection != NULL) {
-        f32 t = (root - b) / denominator;
         *far_intersection =
-            VuVec(origin.x + direction.x * t, origin.y + direction.y * t, origin.z + direction.z * t, 0.0f);
+            VuVec(origin.x + direction.x * far_t, origin.y + direction.y * far_t, origin.z + direction.z * far_t, 0.0f);
     }
     if (near_intersection != NULL) {
-        f32 t = (-b - root) / denominator;
-        *near_intersection =
-            VuVec(origin.x + direction.x * t, origin.y + direction.y * t, origin.z + direction.z * t, 0.0f);
+        *near_intersection = VuVec(origin.x + direction.x * near_t, origin.y + direction.y * near_t,
+                                   origin.z + direction.z * near_t, 0.0f);
     }
     return 1;
 }

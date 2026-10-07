@@ -428,43 +428,52 @@ void TouchHacks::CleanupAllMechObjectInterfaces(WORLDINFO_s *world) {
         return;
     }
 
-    for (i32 i = 0; i < world->gizmo_blowup_count; ++i) {
-        world->gizmo_blowups[i].ClearMechObjectInterface();
+    GIZMOBLOWUP_s *blowup = world->gizmo_blowups;
+    for (i32 i = 0; i < world->gizmo_blowup_count; ++i, ++blowup) {
+        blowup->ClearMechObjectInterface();
     }
     if (world->giz_buildit_sys != NULL) {
-        for (i32 i = 0; i < world->giz_buildit_sys->count; ++i) {
-            world->giz_buildit_sys->buildits[i].ClearMechObjectInterface();
+        GIZBUILDIT_s *buildit = world->giz_buildit_sys->buildits;
+        for (i32 i = 0; i < world->giz_buildit_sys->count; ++i, ++buildit) {
+            buildit->ClearMechObjectInterface();
         }
     }
-    for (i32 i = 0; i < world->nlevers; ++i) {
-        world->levers[i].ClearMechObjectInterface();
+    LEVER_s *lever = world->levers;
+    for (i32 i = 0; i < world->nlevers; ++i, ++lever) {
+        lever->ClearMechObjectInterface();
     }
     if (world->hat_machine_sys != NULL) {
-        for (i32 i = 0; i < world->hat_machine_sys->count; ++i) {
-            world->hat_machine_sys->machines[i].ClearMechObjectInterface();
+        HATMACHINE_s *machine = world->hat_machine_sys->machines;
+        for (i32 i = 0; i < world->hat_machine_sys->count; ++i, ++machine) {
+            machine->ClearMechObjectInterface();
         }
     }
-    for (i32 i = 0; i < world->teleport_count; ++i) {
-        world->teleports[i].ClearMechObjectInterface();
+    TELEPORT_s *teleport = world->teleports;
+    for (i32 i = 0; i < world->teleport_count; ++i, ++teleport) {
+        teleport->ClearMechObjectInterface();
     }
     if (world->giz_panel_sys != NULL) {
-        for (i32 i = 0; i < world->giz_panel_sys->count; ++i) {
-            world->giz_panel_sys->panels[i].ClearMechObjectInterface();
+        GIZPANEL_s *panel = world->giz_panel_sys->panels;
+        for (i32 i = 0; i < world->giz_panel_sys->count; ++i, ++panel) {
+            panel->ClearMechObjectInterface();
         }
     }
     if (world->giz_turret_sys != NULL) {
-        for (i32 i = 0; i < world->giz_turret_sys->count; ++i) {
-            world->giz_turret_sys->turrets[i].ClearMechObjectInterface();
+        GIZTURRET_s *turret = world->giz_turret_sys->turrets;
+        for (i32 i = 0; i < world->giz_turret_sys->count; ++i, ++turret) {
+            turret->ClearMechObjectInterface();
         }
     }
     if (WORLD != NULL && WORLD->giz_obstacle_sys != NULL) {
-        for (i32 i = 0; i < WORLD->giz_obstacle_sys->count; ++i) {
-            WORLD->giz_obstacle_sys->obstacles[i].ClearMechObjectInterface();
+        GIZOBSTACLE_s *obstacle = WORLD->giz_obstacle_sys->obstacles;
+        for (i32 i = 0; i < WORLD->giz_obstacle_sys->count; ++i, ++obstacle) {
+            obstacle->ClearMechObjectInterface();
         }
     }
     if (world->giz_force_sys != NULL) {
-        for (i32 i = 0; i < world->giz_force_sys->count; ++i) {
-            world->giz_force_sys->forces[i].ClearMechObjectInterface();
+        GIZFORCE_s *force = world->giz_force_sys->forces;
+        for (i32 i = 0; i < world->giz_force_sys->count; ++i, ++force) {
+            force->ClearMechObjectInterface();
         }
     }
     if (Part != NULL) {

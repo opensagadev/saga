@@ -75,7 +75,7 @@ void AddCoinsToPanel(i32 coins, nuvec_s *position, i32 player, float, GameObject
             player = -1;
         NUVEC target;
         target.x = player == 1 ? PANEL_COINX : -PANEL_COINX;
-        bool main_total = CoinsGoToMainTotal() != 0;
+        i32 main_total = CoinsGoToMainTotal() != 0;
         f32 target_scale;
         if (main_total) {
             target.y = STATSPOSY;
@@ -145,8 +145,7 @@ void AddPickups(i32 coins, i32 hearts, i32 torpedoes, i32 powerups, nuvec_s *pos
     } else {
         to_panel = player_id == -1 ? 0 : panel;
     }
-    if (ChallengeMode != 0 || Mission_Active(NULL) != NULL)
-        coins = 0;
+    coins = ChallengeMode != 0 || Mission_Active(NULL) != NULL ? 0 : coins;
     if (speed == 1.0f)
         speed = scale;
     u8 counts[10] = {};
@@ -218,10 +217,10 @@ void AddPickups(i32 coins, i32 hearts, i32 torpedoes, i32 powerups, nuvec_s *pos
         AddCoinsToPanel(coins, position, player_id, speed, owner, 0);
     }
     if (hearts > 0) {
-        bool both_players = false;
+        i32 both_players = 0;
         if (VehicleArea != 0 && Player[0] != NULL && Player[0]->apiobj.player_controlled && Player[1] != NULL &&
             Player[1]->apiobj.player_controlled) {
-            both_players = true;
+            both_players = 1;
             hearts = 2;
         }
         for (i32 i = 0; i < hearts; ++i) {

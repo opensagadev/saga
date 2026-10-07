@@ -385,9 +385,11 @@ void GizmoPushBlockInitAndReset(WORLDINFO_s *world, void *progress) {
                 runoutofpostabspace = 1;
             } else if (positions != 0 && runoutofpostabspace == 0) {
                 block->snap_positions = &world->push_block_positions[world->push_block_position_count];
-                for (i32 position = 0; position < ((block->runtime_flags_0c9 >> 4) & 7); ++position) {
+                f32 animation_frame = 1.0f;
+                for (i32 position = 0; position < ((block->runtime_flags_0c9 >> 4) & 7);
+                     ++position, animation_frame += 1.0f) {
                     NUMTX evaluated;
-                    EvalAnim(&block->special, static_cast<f32>(position + 1), &evaluated, 0);
+                    EvalAnim(&block->special, animation_frame, &evaluated, 0);
                     block->snap_positions[position] = *reinterpret_cast<NUVEC *>(&evaluated.m30);
                     evaluated = *NuSpecialGetMtx(&block->special);
                     block->snap_positions[position].x += evaluated.m30;
@@ -439,10 +441,11 @@ void GizmoPushBlockInitAndReset(WORLDINFO_s *world, void *progress) {
 
         if (height1 == height2 && height0 == height1 && height2 == height3) {
             NewTerrPlatformsOff();
-            block->ground_height = GameShadow(NULL, &centre, 5.0f, -1);
-            if (block->ground_height == 2000000.0f) {
-                block->ground_height = 0.0f;
+            centre.y = GameShadow(NULL, &centre, 5.0f, -1);
+            if (centre.y == 2000000.0f) {
+                centre.y = 0.0f;
             }
+            block->ground_height = centre.y;
         } else {
             block->ground_height = (height1 + height0 + height2 + height3) * 0.25f;
         }

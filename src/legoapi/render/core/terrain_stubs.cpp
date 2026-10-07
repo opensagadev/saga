@@ -297,15 +297,18 @@ extern "C" void TerrSetPlatScanDist(f32 dist) {
 
 extern "C" void TerrainPlatformNewUpdate(void) {
     if (CurTerr != NULL) {
-        for (i32 i = 0; i < 64; ++i) {
-            TERRAIN_TRACK_SLOT &slot = CurTerr->track_slots[i];
-            if (slot.id != NULL) {
-                if (slot.platform_contact_state > 0)
-                    --slot.platform_contact_state;
-                if (slot.wall_contact_state > 0)
-                    --slot.wall_contact_state;
+        TERRAIN_TRACK_SLOT *slot = CurTerr->track_slots;
+        i32 remaining = TERRAIN_TRACK_SLOT_COUNT;
+        do {
+            if (slot->id != NULL) {
+                if (slot->platform_contact_state > 0)
+                    --slot->platform_contact_state;
+                if (slot->wall_contact_state > 0)
+                    --slot->wall_contact_state;
             }
-        }
+            ++slot;
+            --remaining;
+        } while (remaining != 0);
         for (i32 i = 0; i < 16; ++i) {
             if (static_cast<i16>(CurTerr->index_levels[i].entry_count) > 0)
                 --CurTerr->index_levels[i].entry_count;

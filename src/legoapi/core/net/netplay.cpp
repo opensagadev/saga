@@ -165,11 +165,12 @@ destination_selected:
         StatusPacket.mission_state != 0 && MissionSys->mission != NULL) {
         hub_from_mission = static_cast<i8>(MissionSys->mission->count);
     }
-    OldBonusScore[0] = BonusScore[0];
-    OldBonusScore[1] = BonusScore[1];
     if (NewLData == HUB_LDATA) {
         OldBonusScore[0] = 0;
         OldBonusScore[1] = 0;
+    } else {
+        OldBonusScore[0] = BonusScore[0];
+        OldBonusScore[1] = BonusScore[1];
     }
     NuSound3StopRumble();
 }

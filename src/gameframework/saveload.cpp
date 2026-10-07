@@ -27,6 +27,8 @@ i32 saveload_cardtype = 2;
 i32 saveload_cardformatted = 1;
 i32 saveload_freespace = 0x800;
 i32 saveload_filecorrupt;
+// Original platform save flag; the menu wrapper latches nonzero card changes.
+i32 saveload_cardchanged;
 i32 SAVESIZE_ADDITIONAL = 3;
 
 extern "C" {

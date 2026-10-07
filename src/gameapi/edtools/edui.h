@@ -71,7 +71,7 @@ struct eduiitem_s {
     u32 colours[4];
     i32 (*input)(eduimenu_s *, eduiitem_s *, u32, u32);
     i32 (*process)(eduimenu_s *, eduiitem_s *, f32, nupad_s *);
-    i32 (*render)(eduimenu_s *, eduiitem_s *, i32, i32, i32);
+    i32 (*render)(eduimenu_s *, eduiitem_s *, i32, i32, i32, i32);
     void (*destroy)(eduimenu_s *, eduiitem_s *);
 };
 

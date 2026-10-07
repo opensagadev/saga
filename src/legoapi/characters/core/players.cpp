@@ -55,6 +55,14 @@ void CheckForPlayersTurnedOff();
 extern NUVEC plr_lastpos;
 
 extern void GetTopBot(GameObject_s *obj);
+extern f32 FindGunshipHoverHeight(GameObject_s *obj);
+extern f32 GetVehicleSpeedMul(GameObject_s *obj, f32 input);
+extern i32 ObjInNarrowSock(GameObject_s *obj, SOCKSYS *socks, i32 level);
+extern i32 complexsockposition_forcesock;
+extern i32 movegamecamera_forcesock;
+extern AREADATA *BONUS_GUNSHIP_ADATA;
+extern AREADATA *BATTLEOVERCORUSCANT_ADATA;
+extern i32 LevFlag[4];
 extern void GameObjectDimensions(GameObject_s *obj);
 extern void GameObjectOrigin(GameObject_s *obj);
 extern void ResetRumble(RUMBLEPACKET *packet);
@@ -229,8 +237,8 @@ void Players_Init(void) {
 
 // --- Helpers moved from world.cpp ---
 
-static char sMissionStartDoor[] = "MissionStartDoor";
-static char sArcadeStartDoor[] = "ArcadeStartDoor";
+static char sMissionStartDoor[] = "mission_door";
+static char sArcadeStartDoor[] = "door_to_network";
 
 static NUVEC HubVehiclesDoorPos[2] = {{-24.21f, 0.0f, -25.36f}, {-23.63f, 0.0f, -25.68f}};
 static NUVEC HubMinikitDoorPos[2] = {{-27.14f, 0.0f, -24.92f}, {-26.77f, 0.0f, -24.94f}};
@@ -276,7 +284,7 @@ void Players_InitPositions(WORLDINFO *world) {
             NuVecSub(&tmp, (NUVEC *)&ps[12 * r + 3], (NUVEC *)&ps[12 * r]);
             PlayerStart[0].angle = NuAtan2D(tmp.x, tmp.z);
             PlayerStart[1].pos = (NUVEC *)&ps[12 * r + 6];
-            tmp.z = ps[12 * r + 9] - ps[12 * r + 6];
+            tmp.z = ps[12 * r + 11] - ps[12 * r + 8];
             tmp.x = ps[12 * r + 9] - PlayerStart[0].pos->x;
             PlayerStart[1].angle = NuAtan2D(tmp.x, tmp.z);
         }
@@ -419,86 +427,84 @@ GameObject_s *AddCreature(i32 id, i32 param) {
     return g;
 }
 
-static f32 sPreResetMulA = 0.0f;
-static f32 sPreResetMulB = 0.0f;
-static f32 sPreResetSubC = 0.0f;
-static f32 sPreResetD18Scale = 0.0f;
-static f32 sPreReset1048Scale = 0.0f;
-static f32 sPreResetDivF = 0.0f;
-static f32 sPreResetMulG = 0.0f;
+static f32 sPreResetMulA = 1.0f / 65535.0f;
+static f32 sPreResetMulB = 0.03f;
+static f32 sPreResetSubC = 0.015f;
+static f32 sPreResetD18Scale = 0.25f;
+static f32 sPreReset1048Scale = 0.5f;
+static f32 sPreResetDivF = 0.21f;
+static f32 sPreResetMulG = 0.035f;
 
 void PreResetCode(GameObject_s *obj) {
-    u8 *b = (u8 *)obj;
-
-    u8 t23 = (u8)(b[0xe23] & 0xf8);
-    b[0xe20] &= 0xef;
-    u8 t22 = (u8)(b[0xe22] & 0x3f);
-    u8 t25 = (u8)(b[0xe25] & 0xaf);
-    b[0xe24] &= 0xcf;
-    b[0xf03] &= 0xdf;
-    b[0xe3e] = 0xff;
-    b[0xe3f] = 0xff;
-    b[0xe3c] = 0x00;
-    b[0xe3d] = 0xff;
-    b[0xe25] = t25;
-    b[0xe22] = t22;
-    b[0xe23] = t23;
+    u8 t23 = (u8)(obj->field_0xe23 & 0xf8);
+    obj->field_0xe20 &= 0xef;
+    u8 t22 = (u8)(obj->field_0xe22 & 0x3f);
+    u8 t25 = (u8)(obj->movement_runtime_flags & 0xaf);
+    obj->field_0xe24 &= 0xcf;
+    obj->field_0xf03 &= 0xdf;
+    obj->quick_shoot_bolt_id = 0xff;
+    obj->slam_debris_effect = 0xff;
+    obj->reserved_e3c = 0x00;
+    obj->attack_locator = 0xff;
+    obj->movement_runtime_flags = t25;
+    obj->field_0xe22 = t22;
+    obj->field_0xe23 = t23;
 
     DrawOffsetCode(obj, 0);
 
-    if ((*(u32 *)&b[0xf00] & 8) != 0) {
-        b[0xe22] &= 0xf7;
-        *(f32 *)&b[0xc40] = (f32)qrand() * sPreResetMulA * sPreResetMulB - sPreResetSubC;
-        *(f32 *)&b[0xc44] = (f32)qrand() * sPreResetMulA * sPreResetMulB - sPreResetSubC;
-        b[0xe20] &= 0xfb;
-        *(f32 *)&b[0xc48] = (f32)qrand() * sPreResetMulA * sPreResetMulB - sPreResetSubC;
-        *(u32 *)&b[0xcf4] = 0;
-        *(u32 *)&b[0xcec] = 0;
-        *(u32 *)&b[0xcf0] = 0;
-        *(u32 *)&b[0xca0] = 0;
-        if (b[0x7a5] == 0xa) {
-            b[0xe21] &= 0xf7;
+    if ((obj->field_0xf00 & 8) != 0) {
+        obj->field_0xe22 &= 0xf7;
+        obj->weapon_trail_offset.x = (f32)qrand() * sPreResetMulA * sPreResetMulB - sPreResetSubC;
+        obj->weapon_trail_offset.y = (f32)qrand() * sPreResetMulA * sPreResetMulB - sPreResetSubC;
+        obj->field_0xe20 &= 0xfb;
+        obj->weapon_trail_offset.z = (f32)qrand() * sPreResetMulA * sPreResetMulB - sPreResetSubC;
+        obj->incoming_bolt = NULL;
+        obj->incoming_melee = NULL;
+        obj->incoming_special = NULL;
+        obj->incoming_part = NULL;
+        if (obj->field_0x7a5 != 0xa) {
+            obj->field_0xe21 &= 0xf7;
         }
-        b[0xe21] &= 0xdf;
-        b[0xe33] = 0x01;
-        b[0xe22] &= 0xfd;
-        b[0xe46] = 0xff;
-        b[0xe45] = 0xff;
-        b[0xe44] = 0xff;
-        b[0xe43] = 0xff;
-        *(u32 *)&b[0xd0c] = 0;
-        *(u16 *)&b[0x4a] = 0xffff;
-        *(u32 *)&b[0xd7c] = 0;
+        obj->field_0xe21 &= 0xdf;
+        obj->sabre_flags = 0x01;
+        obj->field_0xe22 &= 0xfd;
+        obj->blade_states[3] = 0xff;
+        obj->blade_states[2] = 0xff;
+        obj->blade_states[1] = 0xff;
+        obj->blade_states[0] = 0xff;
+        obj->force_glow_candidate = NULL;
+        obj->apiobj.anim_packet.overlay_animation = -1;
+        obj->terrain_origin_floor_offset = 0.0f;
         if ((obj->apiobj.character_data->model_flags & 0x8040) == 0) {
-            b[0xe31] = 0;
+            obj->field_0xe31 = 0;
         }
 
         {
-            i32 e04 = *(i32 *)&b[0xe04];
-            b[0xe23] &= 0x7f;
+            i32 e04 = obj->dynamic_light_id;
+            obj->field_0xe23 &= 0x7f;
             if (e04 != -1) {
                 rtlDynamicEnable(e04, 0);
             }
         }
 
         {
-            u8 al = b[0x27d];
-            b[0xe25] &= 0xfd;
-            b[0xe24] &= 0xbf;
-            b[0x1089] = 0;
+            u8 al = obj->apiobj.field_0x27d;
+            obj->movement_runtime_flags &= 0xfd;
+            obj->field_0xe24 &= 0xbf;
+            obj->field_0x1089 = 0;
 
             if (al != 0) {
-                *(u32 *)&b[0xd18] = 0x3e4ccccd; /* 0.2f */
-            } else if (*(f32 *)&b[0xd18] > 0.0f) {
-                *(f32 *)&b[0xd18] -= FRAMETIME;
+                obj->ground_contact_grace_timer = 0.2f;
+            } else if (obj->ground_contact_grace_timer > 0.0f) {
+                obj->ground_contact_grace_timer -= FRAMETIME;
             }
 
-            if ((i8)b[0x1f8] >= 0 || VehicleArea != 0) {
+            if ((i8) static_cast<u8>(obj->apiobj.field_0x1f8) >= 0 || VehicleArea != 0) {
                 goto finish_dfd;
             }
 
-            if (b[0x7a5] == 0 &&
-                sPreReset1048Scale * obj->apiobj.character_data->player_config->reset_scale > *(f32 *)&b[0x76c]) {
+            if (obj->field_0x7a5 == 0 && sPreReset1048Scale * obj->apiobj.character_data->player_config->reset_scale >
+                                             obj->context_animation_timer) {
                 goto finish_dfd;
             }
 
@@ -508,23 +514,23 @@ void PreResetCode(GameObject_s *obj) {
                     if ((al & 2) != 0) {
                         goto finish_dfd;
                     }
-                    if (b[0x1084] == 0) {
+                    if (obj->field_0x1084 == 0) {
                         goto finish_dfd;
                     }
                 } else {
-                    if (*(f32 *)&b[0x68] == 0.0f && *(f32 *)&b[0x70] == 0.0f) {
+                    if (obj->apiobj.velocity.x == 0.0f && obj->apiobj.velocity.z == 0.0f) {
                         goto finish_dfd;
                     }
                     if ((al & 2) != 0) {
                         goto finish_dfd;
                     }
-                    if (b[0x1084] == 0) {
+                    if (obj->field_0x1084 == 0) {
                         goto finish_dfd;
                     }
                 }
 
                 {
-                    f32 t1 = *(f32 *)&b[0x6a8];
+                    f32 t1 = obj->contact_normal.y;
                     if (t1 <= NuTrigTable[0x4000]) {
                         goto finish_dfd;
                     }
@@ -532,78 +538,79 @@ void PreResetCode(GameObject_s *obj) {
                     if (t2 <= t1) {
                         goto finish_dfd;
                     }
-                    t1 = *(f32 *)&b[0x1e0] / sPreResetDivF;
-                    f32 diff = *(f32 *)&b[0x17c] - *(f32 *)&b[0x218];
+                    t1 = obj->apiobj.field_0x1e0 / sPreResetDivF;
+                    f32 diff = obj->apiobj.collision_min.y - obj->apiobj.field_0x218;
                     t1 *= sPreResetMulG;
                     if (diff <= t1) {
                         goto finish_dfd;
                     }
                     if (f28v <= 0.0f) {
-                        NUVEC dir;
-                        dir.x = *(f32 *)&b[0x68];
+                        NUVEC_ALIGNED16 dir;
+                        dir.x = obj->apiobj.velocity.x;
                         dir.y = 0.0f;
-                        dir.z = *(f32 *)&b[0x70];
+                        dir.z = obj->apiobj.velocity.z;
                         NuVecNorm(&dir, &dir);
-                        if ((*(f32 *)&b[0x698] - *(f32 *)&b[0x5c]) * dir.x +
-                                (*(f32 *)&b[0x6a0] - *(f32 *)&b[0x64]) * dir.z <=
+                        if ((obj->contact_position.x - obj->apiobj.position.x) * dir.x +
+                                (obj->contact_position.z - obj->apiobj.position.z) * dir.z <=
                             0.0f) {
                             goto finish_dfd;
                         }
                     } else {
-                        NUVEC dir;
-                        NuVecRotateY(&dir, &v001, *(u16 *)&b[0x5a]);
-                        if ((*(f32 *)&b[0x698] - *(f32 *)&b[0x5c]) * dir.x +
-                                (*(f32 *)&b[0x6a0] - *(f32 *)&b[0x64]) * dir.z <=
+                        NUVEC_ALIGNED16 dir;
+                        NuVecRotateY(&dir, &v001, obj->apiobj.movement_facing_angle);
+                        if ((obj->contact_position.x - obj->apiobj.position.x) * dir.x +
+                                (obj->contact_position.z - obj->apiobj.position.z) * dir.z <=
                             0.0f) {
                             goto finish_dfd;
                         }
                     }
-                    *(u32 *)&b[0x1048] = 0x3dcccccd; /* 0.1f */
+                    obj->fall_acceleration_timer = 0.1f;
                 }
             }
             goto finish_e1e;
 
         finish_dfd:
-            if (*(f32 *)&b[0x1048] > 0.0f) {
-                *(f32 *)&b[0x1048] -= FRAMETIME;
+            if (obj->fall_acceleration_timer > 0.0f) {
+                obj->fall_acceleration_timer -= FRAMETIME;
             }
             goto finish_e1e;
 
         finish_e1e:
-            GameObjectNearFloor(obj, 1.0f, (f32 *)&b[0xda0]);
-            *(f32 *)&b[0xdb8] = GetHoverPosY(obj);
+            GameObjectNearFloor(obj, 1.0f, &obj->nearby_floor_distance);
+            obj->pre_reset_hover_height = GetHoverPosY(obj);
             {
                 u8 v = obj->apiobj.character_data->player_config->variant;
                 if (v != 0xff) {
-                    if (b[0x27c] == 0xff) {
-                        b[0xe42] = v;
+                    if (static_cast<u8>(obj->apiobj.field_0x27c) == 0xff) {
+                        obj->blade_index = v;
                     } else {
                         if (Cheat_IsOn(0x19) != 0) {
-                            b[0xe42] = 0x00;
-                        } else if (b[0x27c] != 0xff && Player_HasPurpleForce(obj) != 0) {
-                            b[0xe42] = 0x03;
+                            obj->blade_index = 0x00;
+                        } else if (static_cast<u8>(obj->apiobj.field_0x27c) != 0xff &&
+                                   Player_HasPurpleForce(obj) != 0) {
+                            obj->blade_index = 0x03;
                         } else {
-                            b[0xe42] = obj->apiobj.character_data->player_config->variant;
+                            obj->blade_index = obj->apiobj.character_data->player_config->variant;
                         }
                     }
                 } else {
-                    b[0xe42] = 0xff;
+                    obj->blade_index = 0xff;
                 }
 
                 {
                     u32 mask = GAMEPAD_ACTION;
-                    f32 xmm0 = *(f32 *)&b[0xde4];
+                    f32 xmm0 = obj->hold_timer;
                     if ((obj->pad_gamepad->buttons_held & mask) != 0) {
-                        *(f32 *)&b[0xde4] = xmm0 + FRAMETIME;
+                        obj->hold_timer = xmm0 + FRAMETIME;
                     } else {
                         if (xmm0 > 0.0f && sPreResetD18Scale > xmm0) {
-                            b[0xe24] |= 0x40;
+                            obj->field_0xe24 |= 0x40;
                         }
-                        *(f32 *)&b[0xde4] = 0.0f;
+                        obj->hold_timer = 0.0f;
                     }
                 }
             }
-            b[0xe25] &= 0x5f;
+            obj->movement_runtime_flags &= 0x5f;
         }
     }
 
@@ -1298,9 +1305,39 @@ void ResetPlayer(GameObject_s *obj, i32 reset_moves, nuvec_s *position, i32 snap
 
         obj->sock_position.location.sock = -1;
         obj->sock_position.location.segment = -1;
+        f32 surface_y = kInvalidSurfaceHeight;
         if (WORLD->sock_sys != NULL) {
+            if (Door_NextSock != -1 && WORLD->sock_sys->sock[Door_NextSock].valid != 0) {
+                complexsockposition_forcesock = Door_NextSock;
+                movegamecamera_forcesock = Door_NextSock;
+            }
             ComplexSockPosition(WORLD->sock_sys, &obj->apiobj.position, -1, -1, &obj->sock_position);
             ComplexSockAngles(&obj->sock_angles);
+            if (obj->apiobj.field_0x27c < 2 && obj->sock_position.location.sock != -1) {
+                if (BONUS_GUNSHIP_ADATA != NULL && BONUS_GUNSHIP_ADATA == WORLD->area) {
+                    obj->apiobj.position = obj->sock_position.midpoint;
+                    surface_y = FindGunshipHoverHeight(obj);
+                    if (WORLD->current_level == BONUS_GUNSHIPA_LDATA && reinterpret_cast<u8 *>(LevFlag)[0] != 0) {
+                        obj->apiobj.position.x = 12.0f + obj->apiobj.position.x;
+                    }
+                    snap_to_surface = 0;
+                } else if (BATTLEOVERCORUSCANT_ADATA != NULL && BATTLEOVERCORUSCANT_ADATA == WORLD->area) {
+                    SOCK *sock = &WORLD->sock_sys->sock[obj->sock_position.location.sock];
+                    if ((sock->flags & SOCK_FLAG_MISSING_C_OR_D) == 0) {
+                        obj->apiobj.position = obj->sock_position.midpoint;
+                        if (Player[0] != NULL && (Player[0]->apiobj.field_0x1f8 & 0x80) != 0 && Player[1] != NULL &&
+                            (Player[1]->apiobj.field_0x1f8 & 0x80) != 0) {
+                            NUVEC offset;
+                            f32 side = obj == Player[0] ? 1.0f : -1.0f;
+                            NuVecNorm(&offset, &sock->segments[obj->sock_position.location.segment].planes[4]);
+                            NuVecScale(&offset, &offset, side);
+                            NuVecAdd(&obj->apiobj.position, &obj->apiobj.position, &offset);
+                        }
+                        SyncPlayerSpawnPosition(obj);
+                    }
+                    snap_to_surface = 0;
+                }
+            }
         }
 
         u8 player_index = static_cast<u8>(obj->apiobj.field_0x27c);
@@ -1315,7 +1352,7 @@ void ResetPlayer(GameObject_s *obj, i32 reset_moves, nuvec_s *position, i32 snap
         obj->apiobj.facing_angle = facing;
         obj->apiobj.movement_facing_angle = facing;
         obj->apiobj.field_0x276 = facing;
-        NuVecRotateY(&obj->facing_direction, &v001, facing);
+        NuVecRotateYValZ(&obj->facing_direction, 1.0f, facing);
 
         obj->field_0xc34 = 0x3f800000;
         obj->field_0xc38 = 0.0f;
@@ -1329,7 +1366,9 @@ void ResetPlayer(GameObject_s *obj, i32 reset_moves, nuvec_s *position, i32 snap
         obj->field_0x1084 = 0;
 
         InitSurfaceInfo(obj);
-        f32 surface_y = GetHoverPosY(obj);
+        if (surface_y == kInvalidSurfaceHeight) {
+            surface_y = GetHoverPosY(obj);
+        }
         if (snap_to_surface == 0 || (obj->apiobj.character_data->model_flags & 0x2000) != 0) {
             if (surface_y != kInvalidSurfaceHeight) {
                 obj->apiobj.position.y = surface_y;
@@ -1363,7 +1402,17 @@ void ResetPlayer(GameObject_s *obj, i32 reset_moves, nuvec_s *position, i32 snap
         obj->field_0x10c8 = obj->apiobj.position.x;
         obj->field_0x10cc = obj->apiobj.position.y;
         obj->field_0x10d0 = obj->apiobj.position.z;
-        obj->field_0xdc8 = 0.0f;
+        if ((obj->apiobj.character_data->model_flags & 0x2000) != 0) {
+            obj->in_narrow_socket = ObjInNarrowSock(obj, WORLD->sock_sys, WORLD->level_idx);
+            f32 speed = GetVehicleSpeedMul(obj, 0.0f);
+            obj->field_0xdc8 = speed;
+            if (speed > 0.0f) {
+                obj->apiobj.velocity.x = NU_SIN_LUT(obj->apiobj.facing_angle) * speed;
+                obj->apiobj.velocity.z = speed * NU_COS_LUT(obj->apiobj.facing_angle);
+            }
+        } else {
+            obj->field_0xdc8 = 0.0f;
+        }
     } else {
         obj->field_0xdc8 = 0.0f;
     }
@@ -1405,14 +1454,13 @@ void InitPlayerAI(GameObject_s *object) {
     object->ai.character_type_mask_low = 0;
     object->ai.character_type_mask_high = 0;
     if (FreePlay && !(object->apiobj.field_0x1f4 & 0x400)) {
-        object->ai.character_type_mask_low = ~u32(0);
-        object->ai.character_type_mask_high = ~u32(0);
+        object->ai.character_type_mask = _0xffffffffffffffff;
     } else if (SpecialRouteCharacterTypeIDFn) {
         u8 *row = *reinterpret_cast<u8 **>(b + 0xcac);
         char *name = row ? *reinterpret_cast<char **>(row + 4) : object->apiobj.character_data->file;
         u8 type = SpecialRouteCharacterTypeIDFn(name);
         if (type != 0xff) {
-            u64 mask = type <= 63 ? u64(1) << type : ~u64(0);
+            u64 mask = type <= 63 ? u64(1) << type : _0xffffffffffffffff;
             object->ai.character_type_mask_low = static_cast<u32>(mask);
             object->ai.character_type_mask_high = static_cast<u32>(mask >> 32);
         }

@@ -837,18 +837,22 @@ static inline NUVEC WarpTransformPoint(const NUVEC4 &point, const NUMTX &matrix)
     NuVecMtxTransformH(&output, (NUVEC *)&point, &copy);
     return output;
 }
-static inline void WarpAccumulatePoint(const NUVEC4 &point, const NUMTX &matrix, NUVEC &output, f32 &min_z, f32 &min_y,
+static inline void WarpAccumulatePoint(const NUVEC4 &point, const NUMTX &matrix, NUVEC4 &output, f32 &min_z, f32 &min_y,
                                        f32 &max_z, f32 &max_y) {
-    output = WarpTransformPoint(point, matrix);
+    NUVEC transformed = WarpTransformPoint(point, matrix);
+    output.x = transformed.x;
+    output.y = transformed.y;
+    output.z = transformed.z;
     min_z = output.z < min_z ? output.z : min_z;
     min_y = output.y < min_y ? output.y : min_y;
     max_z = max_z < output.z ? output.z : max_z;
     max_y = max_y < output.y ? output.y : max_y;
 }
-static inline void WarpProjectBounds(NUVEC &point, NUVEC &translation, f32 near_plane, f32 &left, f32 &bottom,
+static inline void WarpProjectBounds(NUVEC4 &point, NUVEC &translation, f32 near_plane, f32 &left, f32 &bottom,
                                      f32 &right, f32 &top) {
+    NUVEC xyz = {point.x, point.y, point.z};
     NUVEC shifted;
-    NuVecAdd(&shifted, &point, &translation);
+    NuVecAdd(&shifted, &xyz, &translation);
     f32 x = shifted.x * near_plane / shifted.z;
     f32 y = shifted.y * near_plane / shifted.z;
     if (left > x)
@@ -883,7 +887,8 @@ void NuDynamicLight::computeWarpEffect(NuDynamicLight::RenderSet &set) {
     points[9].y = points[0].y - direction.y * 200.0f;
     points[9].z = points[0].z - direction.z * 200.0f;
     points[9].w = 0.0f;
-    NUVEC transformed[10];
+    // Retail transformed records have a 16-byte stride; only XYZ is consumed.
+    NUVEC4 transformed[10];
     f32 min_z = FLT_MAX, min_y = FLT_MAX, max_z = -FLT_MAX, max_y = -FLT_MAX;
     WarpAccumulatePoint(points[0], light_space, transformed[0], min_z, min_y, max_z, max_y);
     WarpAccumulatePoint(points[1], light_space, transformed[1], min_z, min_y, max_z, max_y);

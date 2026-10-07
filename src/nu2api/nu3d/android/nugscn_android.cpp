@@ -129,7 +129,7 @@ SAGA_HOST_WEAK i32 NuGScnReadTexturesPS(i32 file, variptr_u *buf, variptr_u buf_
 
         NudxFw_D3DBeginCriticalSection();
         bool is_pvrtc = texture_header[0] < 0;
-        NuTexCreatePS(&texture, is_pvrtc);
+        NuTexCreatePS(&texture, true);
         g_VideoResHeader.textures[i] = texture.platform.gl_tex;
         NudxFw_D3DEndCriticalSection();
         buf->addr -= size;

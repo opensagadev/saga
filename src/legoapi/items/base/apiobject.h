@@ -1079,7 +1079,10 @@ typedef struct GameObject_s {
     f32 fall_animation_timer;   // 0x0dac
     f32 field_0xdb0;
     f32 fall_hover_height; // 0x0db4
-    u8 pad_db8[4];
+    union {
+        u8 pad_db8[4];
+        f32 pre_reset_hover_height; // 0x0db8, hover height sampled by PreResetCode
+    };
     f32 field_0xdbc; // 0x0dbc
     union {
         u8 pad_dc0[0xdc8 - 0xdc0];
@@ -1738,6 +1741,7 @@ DECOMP_ASSERT(offsetof(GameObject_s, input_toggle_hold_time) == 0xda4, "GameObje
 DECOMP_ASSERT(offsetof(GameObject_s, flicker_flags) == 0xe26, "GameObject flicker flags offset");
 DECOMP_ASSERT(offsetof(GameObject_s, flicker_time) == 0x1024, "GameObject flicker time offset");
 DECOMP_ASSERT(offsetof(GameObject_s, nearby_floor_distance) == 0xda0, "GameObject nearby-floor offset");
+DECOMP_ASSERT(offsetof(GameObject_s, pre_reset_hover_height) == 0xdb8, "GameObject pre-reset hover offset");
 DECOMP_ASSERT(offsetof(GameObject_s, fall_animation_timer) == 0xdac, "GameObject fall animation timer offset");
 DECOMP_ASSERT(offsetof(GameObject_s, movement_animation_hold_timer) == 0xd70,
               "GameObject movement animation hold timer offset");

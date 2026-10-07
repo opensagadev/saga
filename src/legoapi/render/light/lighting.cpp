@@ -217,8 +217,11 @@ void LightGameObject(GameObject_s *object, void *set) {
         current.direction[0].y = SeekValF(current.direction[0].y, target.direction[0].y, 5.0f);
         current.direction[0].z = SeekValF(current.direction[0].z, target.direction[0].z, 5.0f);
     }
-    if (current.direction[0].x != 0.0f || current.direction[0].y != 0.0f || current.direction[0].z != 0.0f)
+    if (current.direction[0].x != 0.0f || current.direction[0].y != 0.0f || current.direction[0].z != 0.0f) {
         NuVecNorm(&current.direction[0], &current.direction[0]);
+    } else {
+        current.direction[0] = target.direction[0];
+    }
 
     if (reset) {
         current.intensity[1] = target.intensity[1];
@@ -231,8 +234,11 @@ void LightGameObject(GameObject_s *object, void *set) {
         current.direction[1].y = SeekValF(current.direction[1].y, target.direction[1].y, 5.0f);
         current.direction[1].z = SeekValF(current.direction[1].z, target.direction[1].z, 5.0f);
     }
-    if (current.direction[1].x != 0.0f || current.direction[1].y != 0.0f || current.direction[1].z != 0.0f)
+    if (current.direction[1].x != 0.0f || current.direction[1].y != 0.0f || current.direction[1].z != 0.0f) {
         NuVecNorm(&current.direction[1], &current.direction[1]);
+    } else {
+        current.direction[1] = target.direction[1];
+    }
 
     if (reset) {
         current.intensity[2] = target.intensity[2];
@@ -245,8 +251,11 @@ void LightGameObject(GameObject_s *object, void *set) {
         current.direction[2].y = SeekValF(current.direction[2].y, target.direction[2].y, 5.0f);
         current.direction[2].z = SeekValF(current.direction[2].z, target.direction[2].z, 5.0f);
     }
-    if (current.direction[2].x != 0.0f || current.direction[2].y != 0.0f || current.direction[2].z != 0.0f)
+    if (current.direction[2].x != 0.0f || current.direction[2].y != 0.0f || current.direction[2].z != 0.0f) {
         NuVecNorm(&current.direction[2], &current.direction[2]);
+    } else {
+        current.direction[2] = target.direction[2];
+    }
 
     object->field_0xefc &= 0x7f;
 }
@@ -279,14 +288,16 @@ __attribute__((force_align_arg_pointer)) void SetCreatureLights(APIOBJECT_s *obj
         return;
     }
 
-    OBJECTLIGHTINGSTATE_s lights;
-    lights.ambient = owner->lighting_state.ambient;
-    lights.intensity[0] = owner->lighting_state.intensity[0];
-    lights.direction[0] = owner->lighting_state.direction[0];
-    lights.intensity[1] = owner->lighting_state.intensity[1];
-    lights.direction[1] = owner->lighting_state.direction[1];
-    lights.intensity[2] = owner->lighting_state.intensity[2];
-    lights.direction[2] = owner->lighting_state.direction[2];
+    NUVEC ambient;
+    NUCOLOUR3 intensity[3];
+    NUVEC direction[3];
+    ambient = owner->lighting_state.ambient;
+    intensity[0] = owner->lighting_state.intensity[0];
+    direction[0] = owner->lighting_state.direction[0];
+    intensity[1] = owner->lighting_state.intensity[1];
+    direction[1] = owner->lighting_state.direction[1];
+    intensity[2] = owner->lighting_state.intensity[2];
+    direction[2] = owner->lighting_state.direction[2];
     f32 red = 1.0f, green = 1.0f, blue = 1.0f;
     GAMECHARACTERDATA *character = static_cast<GAMECHARACTERDATA *>(owner->apiobj.character_data->field11_0x24);
     if (owner->field_0x1024 > 0.0f) {
@@ -356,22 +367,21 @@ __attribute__((force_align_arg_pointer)) void SetCreatureLights(APIOBJECT_s *obj
             blue = 2.0f;
     }
     if (red != 1.0f) {
-        lights.ambient.x *= red;
+        ambient.x *= red;
         for (i32 i = 0; i < 3; ++i)
-            lights.intensity[i].r *= red;
+            intensity[i].r *= red;
     }
     if (green != 1.0f) {
-        lights.ambient.y *= green;
+        ambient.y *= green;
         for (i32 i = 0; i < 3; ++i)
-            lights.intensity[i].g *= green;
+            intensity[i].g *= green;
     }
     if (blue != 1.0f) {
-        lights.ambient.z *= blue;
+        ambient.z *= blue;
         for (i32 i = 0; i < 3; ++i)
-            lights.intensity[i].b *= blue;
+            intensity[i].b *= blue;
     }
-    SetLights(&lights.intensity[0], &lights.direction[0], &lights.intensity[1], &lights.direction[1],
-              &lights.intensity[2], &lights.direction[2], &lights.ambient);
+    SetLights(&intensity[0], &direction[0], &intensity[1], &direction[1], &intensity[2], &direction[2], &ambient);
     owner->targeted_flash -= FRAMETIME;
     if (TouchHacks::ShouldFlash(owner->targeted_flash)) {
         NUCOLOUR3 *colour = TouchHacks::GetFlashColour();

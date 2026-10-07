@@ -86,26 +86,16 @@ bool NuSoundBus::AddEffect(NuSoundEffect *effect) {
 void NuSoundBus::RemoveEffect(NuSoundEffect *effect) {
     NuList<NuSoundEffect *> &effects = *reinterpret_cast<NuList<NuSoundEffect *> *>(&this->effect_begin_prev);
 
-    bool found = false;
-    for (NuListNodeBase *node = effects.Head(); node != effects.Tail(); node = node->GetNext()) {
-        if (static_cast<NuListNode<NuSoundEffect *> *>(node)->value == effect) {
-            found = true;
-            break;
-        }
-    }
-    if (!found) {
+    if (!effects.Contains(effect)) {
         return;
     }
 
     effect->DetachBus(this);
-    NuListNodeBase *node = effects.Head();
-    while (node != effects.Tail()) {
-        NuListNodeBase *next = node->GetNext();
-        if (static_cast<NuListNode<NuSoundEffect *> *>(node)->value == effect) {
-            effects.Remove(node);
-        }
-        node = next;
+    if (effects.Length() != 0) {
+        effects.RemoveValue(effect);
     }
+    NuSoundSystem::sAllocdMemory[static_cast<i32>(NuSoundSystem::MemoryDiscipline::SCRATCH)] -=
+        sizeof(NuListNode<NuSoundEffect *>);
 }
 
 void NuSoundBus::ApplyFinalMix(float *mix) {

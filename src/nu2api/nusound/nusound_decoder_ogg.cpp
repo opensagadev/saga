@@ -144,9 +144,7 @@ u64 NuSoundDecoderOGG::Decode(NuSoundSource &source, NuSoundBuffer &buffer, bool
 
     if (this->locked_buffer == NULL) {
         for (i32 i = 0; i < source.GetNumInitialBuffers(); i++) {
-            NuSoundWeakPtr<NuSoundBufferCallback> callback;
-            callback.Set(this);
-            source.RequestBuffer(loop, callback);
+            source.RequestBuffer(loop, NuSoundWeakPtr<NuSoundBufferCallback>(this));
         }
         this->locked_buffer = this->encoded_buffers[this->ring_read_pos % 4];
         __sync_fetch_and_add(&this->ring_read_pos, 1);
@@ -221,6 +219,7 @@ u32 NuSoundDecoderOGG::DecodeOggChunk(char *dest, unsigned int size) {
     void *saved_datasource = ogg->datasource;
     ogg->datasource = &this->read_callbacks;
 
+    int bitstream = 0;
     u32 decoded = 0;
     u32 block_size = desc->GetBlockSize();
 
@@ -233,7 +232,6 @@ u32 NuSoundDecoderOGG::DecodeOggChunk(char *dest, unsigned int size) {
         char *cursor = dest;
 
         do {
-            int bitstream = 0;
             NuIOS_IsLowEndDevice();
             int ret = ov_read(ogg, cursor, (int)(size - decoded), 0, bytes_per_sample, 1, &bitstream);
 
@@ -297,11 +295,9 @@ u32 NuSoundDecoderOGG::DecodeOggChunk(char *dest, unsigned int size) {
 
             tmp = *(u16 *)&dest[6 + i * 2];
             *(u16 *)&dest[6 + i * 2] = *(u16 *)&dest[10 + i * 2];
-            *(u16 *)&dest[10 + i * 2] = tmp;
-
-            tmp = *(u16 *)&dest[8 + i * 2];
-            *(u16 *)&dest[8 + i * 2] = *(u16 *)&dest[10 + i * 2];
-            *(u16 *)&dest[10 + i * 2] = tmp;
+            u16 tmp2 = *(u16 *)&dest[8 + i * 2];
+            *(u16 *)&dest[8 + i * 2] = tmp;
+            *(u16 *)&dest[10 + i * 2] = tmp2;
             i += desc->GetNumChannels();
         }
         return decoded;

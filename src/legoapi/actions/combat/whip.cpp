@@ -85,7 +85,7 @@ void Whip_MoveCode(GameObject_s *object) {
         }
 
         object->context_animation_timer += FRAMETIME;
-        if (object->context_animation_timer < object->airborne_action_duration) {
+        if (!(object->context_animation_timer >= object->airborne_action_duration)) {
             return;
         }
 

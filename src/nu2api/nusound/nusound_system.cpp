@@ -1,6 +1,8 @@
 #include "nu2api/nusound/nusound_system.hpp"
 
 #include "nu2api/nucore/nustring.h"
+#include "nu2api/nucore/numemory.h"
+#include "globals.h"
 #include "nu2api/nufile/nufile.h"
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nuvec.h"
@@ -439,35 +441,59 @@ NuSoundSystem::CurveData *NuSoundSystem::CreateCrossfadeCurve(u32 id) {
     return &crossfade_curves.InsertNode(id)->value;
 }
 
-// libTTapp.so 0x31a810: builds the "<name>_decoder" name from the source's
-// name, then constructs the format-specific decoder. Only OGG streams
-// (encoded format 3) get a decoder; anything else returns NULL and plays
-// through the plain sample path.
+// libTTapp.so 0x31a810: the temporary name uses the engine string
+// allocation discipline and is released after the decoder copies it.
 NuSoundDecoder *NuSoundSystem::CreateDecoder(NuSoundSource *source) {
+    char *decoded_name = const_cast<char *>(theEmptyString);
+    u16 name_length = 1;
+    u16 name_capacity = 1;
     const char *name = source->GetName();
-
-    char decoded_name[256];
-    u32 name_len = (u32)strlen(name);
-    if (name_len >= sizeof(decoded_name) - 9) {
-        name_len = sizeof(decoded_name) - 9;
+    if (name != NULL) {
+        const u16 length = static_cast<u16>(strlen(name) + 1);
+        if (length > name_capacity || decoded_name == theEmptyString) {
+            name_capacity = static_cast<u16>((length + 3) & 0xfffc);
+            if (decoded_name == theEmptyString) {
+                decoded_name = static_cast<char *>(
+                    NU_ALLOC(name_capacity, 4, 5,
+                             "i:/SagaTouch-Android_9176564/nu2api.saga/../nu2api.2013/numemory/NuMemory.h:328", 0));
+            } else {
+                decoded_name = static_cast<char *>(NuMemoryGet()->GetThreadMem()->_BlockReAlloc(
+                    decoded_name, name_capacity, 4, 5,
+                    "i:/SagaTouch-Android_9176564/nu2api.saga/../nu2api.2013/numemory/NuMemory.h:333", 0));
+            }
+        }
+        memcpy(decoded_name, name, length);
+        name_length = length;
     }
-    memcpy(decoded_name, name, name_len);
-    memcpy(decoded_name + name_len, "_decoder", 9);
 
-    NuSoundStreamDesc *desc = source->GetStreamDesc();
-    if (desc != NULL && desc->GetEncodedDataFormat() == NuSoundStreamDesc::DataFormat::THREE) {
-        NuSoundDecoderOGG *decoder = (NuSoundDecoderOGG *)NuSoundSystem::_AllocMemory(
-            NuSoundSystem::MemoryDiscipline::SCRATCH, sizeof(NuSoundDecoderOGG), 4,
-            "i:/SagaTouch-Android_9176564/nu2api.2013/nusound/nusound_system.cpp:436");
+    const u16 appended_length = static_cast<u16>(name_length + 8);
+    if (appended_length > name_capacity || decoded_name == theEmptyString) {
+        name_capacity = static_cast<u16>((appended_length + 3) & 0xfffc);
+        if (decoded_name == theEmptyString) {
+            decoded_name = static_cast<char *>(
+                NU_ALLOC(name_capacity, 4, 5,
+                         "i:/SagaTouch-Android_9176564/nu2api.saga/../nu2api.2013/numemory/NuMemory.h:328", 0));
+        } else {
+            decoded_name = static_cast<char *>(NuMemoryGet()->GetThreadMem()->_BlockReAlloc(
+                decoded_name, name_capacity, 4, 5,
+                "i:/SagaTouch-Android_9176564/nu2api.saga/../nu2api.2013/numemory/NuMemory.h:333", 0));
+        }
+    }
+    memcpy(decoded_name + name_length - 1, "_decoder", 9);
 
+    NuSoundDecoder *decoder = NULL;
+    if (source->GetStreamDesc()->GetEncodedDataFormat() == NuSoundStreamDesc::DataFormat::THREE) {
+        decoder = static_cast<NuSoundDecoderOGG *>(
+            NuSoundSystem::_AllocMemory(NuSoundSystem::MemoryDiscipline::SCRATCH, sizeof(NuSoundDecoderOGG), 4,
+                                        "i:/SagaTouch-Android_9176564/nu2api.2013/nusound/nusound.cpp:1335"));
         if (decoder != NULL) {
             new (decoder) NuSoundDecoderOGG(decoded_name, source);
         }
-
-        return decoder;
     }
-
-    return NULL;
+    if (decoded_name != theEmptyString) {
+        NuMemoryGet()->GetThreadMem()->BlockFree(decoded_name, 4);
+    }
+    return decoder;
 }
 
 NuSoundEffect *NuSoundSystem::CreateEffect(NuSoundEffect::EffectType type) {
@@ -958,7 +984,8 @@ template <typename T> void NuSoundMemory::PushNuListNode(NuList<T> &list, T cons
 template void NuSoundMemory::PushNuListNode<NuSoundEffect *>(NuList<NuSoundEffect *> &, NuSoundEffect *const &);
 
 void NuSoundSystem::StopAllVoices() {
-    for (NuSoundVoice *voice = voice_list.Front(); voice != voice_list.End(); voice = voice->field_0x28) {
+    NuSoundVoice *end = voice_list.End();
+    for (NuSoundVoice *voice = voice_list.Front(); voice != end; voice = voice->field_0x28) {
         voice->Stop(true);
     }
 }
@@ -1045,39 +1072,39 @@ f32 NuSoundSystem::dBToAmplitude(f32 db) {
 }
 
 NuSoundVoice *NuSoundSystem::CreateVoice(NuSoundSource *source, bool loop) {
-    NuSoundDecoder *decoder = NULL;
-    NuSoundSource *voice_source = source;
-    if (this->SourceRequiresDecoder(source)) {
-        decoder = this->CreateDecoder(source);
+    NuSoundVoice *voice;
+    if (SourceRequiresDecoder(source)) {
+        NuSoundDecoder *decoder = CreateDecoder(source);
         decoder->OpenStream(loop);
-        if (decoder->IsStreamOpen() == false) {
-            this->ReleaseDecoder(decoder);
+        if (!decoder->IsStreamOpen()) {
+            ReleaseDecoder(decoder);
             return NULL;
         }
-        voice_source = decoder;
-    } else {
-        if (source->IsStreamOpen() == false) {
-            return NULL;
-        }
-    }
-
-    NuSoundStreamDesc *desc = voice_source->GetStreamDesc();
-    NuSoundVoiceFactory *factory = this->factory_list.GetFactory(desc->GetDecodedDataFormat());
-    NuSoundVoice *voice = factory->CreateVoice(voice_source, loop);
-    if (voice == NULL) {
-        if (decoder != NULL) {
+        NuSoundStreamDesc *desc = decoder->GetStreamDesc();
+        NuSoundVoiceFactory *factory = factory_list.GetFactory(desc->GetDecodedDataFormat());
+        voice = factory->CreateVoice(decoder, loop);
+        if (voice == NULL) {
             decoder->CloseStream();
-            this->ReleaseDecoder(decoder);
+            ReleaseDecoder(decoder);
+            return NULL;
         }
-        return NULL;
+    } else {
+        if (!source->IsStreamOpen()) {
+            return NULL;
+        }
+        NuSoundStreamDesc *desc = source->GetStreamDesc();
+        NuSoundVoiceFactory *factory = factory_list.GetFactory(desc->GetDecodedDataFormat());
+        voice = factory->CreateVoice(source, loop);
+        if (voice == NULL) {
+            return NULL;
+        }
     }
 
-    this->mutex.Lock();
+    mutex.Lock();
     NuSoundWeakPtrListNode::sPtrAccessLock.Lock();
     voice_list.PushBack(voice);
     NuSoundWeakPtrListNode::sPtrAccessLock.Unlock();
-    this->mutex.Unlock();
-
+    mutex.Unlock();
     return voice;
 }
 

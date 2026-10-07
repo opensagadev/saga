@@ -35,12 +35,8 @@ NuSoundStreamer::NuSoundStreamer() : queue1(), queue2(), semaphore(32) {
 NuSoundStreamer::~NuSoundStreamer() {
     this->running = false;
 
-    for (NuListNodeBase *node = sStreamers.Head(); node != sStreamers.Tail();) {
-        NuListNodeBase *next = node->GetNext();
-        if (static_cast<NuListNode<NuSoundStreamer *> *>(node)->value == this) {
-            sStreamers.Remove(node);
-        }
-        node = next;
+    if (sStreamers.Length() != 0) {
+        sStreamers.RemoveValue(this);
     }
 }
 
@@ -226,19 +222,21 @@ i32 NuSoundStreamingSample::Open(f32 start_offset, bool loop, bool weak_flag) {
     if (this->sound_buffer1 == NULL) {
         u32 stream_buffer_size = NuSoundSystem::GetStreamBufferSize();
 
-        this->sound_buffer1 = NU_ALLOC_T(NuSoundBuffer, 1, "", NUMEMORY_CATEGORY_NUSOUND);
-        if (this->sound_buffer1 != NULL) {
-            new (this->sound_buffer1) NuSoundBuffer();
+        NuSoundBuffer *buffer = NU_ALLOC_T(NuSoundBuffer, 1, "", NUMEMORY_CATEGORY_NUSOUND);
+        if (buffer != NULL) {
+            new (buffer) NuSoundBuffer();
         }
+        this->sound_buffer1 = buffer;
 
         if (this->sound_buffer1->Allocate(stream_buffer_size / 2, NuSoundSystem::MemoryDiscipline::SAMPLE) != 1) {
             goto alloc_error;
         }
 
-        this->sound_buffer2 = NU_ALLOC_T(NuSoundBuffer, 1, "", NUMEMORY_CATEGORY_NUSOUND);
-        if (this->sound_buffer2 != NULL) {
-            new (this->sound_buffer2) NuSoundBuffer();
+        buffer = NU_ALLOC_T(NuSoundBuffer, 1, "", NUMEMORY_CATEGORY_NUSOUND);
+        if (buffer != NULL) {
+            new (buffer) NuSoundBuffer();
         }
+        this->sound_buffer2 = buffer;
 
         if (this->sound_buffer2->Allocate(stream_buffer_size / 2, NuSoundSystem::MemoryDiscipline::SAMPLE) != 1) {
             goto alloc_error;

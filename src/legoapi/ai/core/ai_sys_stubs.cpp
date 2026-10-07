@@ -625,8 +625,8 @@ static char *AISysLoadString(AISYS *system, i32 length) {
 }
 
 static void AISysLoadPathRoutes(AISYS *system, AIPATH *path, i32 version) {
+    path->route_matrix = static_cast<u8 **>(AISysLoadAlloc(system, path->node_count * sizeof(u8 *)));
     if (path->node_count != 0) {
-        path->route_matrix = static_cast<u8 **>(AISysLoadAlloc(system, path->node_count * sizeof(u8 *)));
         for (i32 i = 0; i < path->node_count; ++i) {
             path->route_matrix[i] = static_cast<u8 *>(AISysLoadAlloc(system, path->node_count));
             EdFileRead(path->route_matrix[i], path->node_count);
@@ -641,8 +641,9 @@ static void AISysLoadPathRoutes(AISYS *system, AIPATH *path, i32 version) {
         for (i32 i = 0; i < path->route_count; ++i) {
             AIPATHROUTE *route = &path->routes[i];
             i32 name_length = EdFileReadChar();
-            route->name = AISysLoadString(system, name_length);
             if (name_length != 0) {
+                route->name = static_cast<char *>(AISysLoadAlloc(system, name_length));
+                EdFileRead(route->name, name_length);
                 route->route_count = static_cast<u8>(EdFileReadChar());
                 route->exit_node_count = static_cast<u8>(EdFileReadChar());
                 EdFileReadChar();
@@ -774,8 +775,6 @@ static AIPATHSYS *AISysLoadPaths(AISYS *system, i32 version, NUGSCN *scene) {
                 EdFileReadChar();
                 node->runtime_flags = static_cast<u8>(EdFileReadChar()) & ~6u;
                 node->path_flags = EdFileReadShort();
-                node->distance_cache_nodes[0] = 0xff;
-                node->distance_cache_nodes[1] = 0xff;
                 node->special_route_index = static_cast<u8>(EdFileReadChar());
                 if (version < 19)
                     node->special_route_index = 0xff;
@@ -807,6 +806,8 @@ static AIPATHSYS *AISysLoadPaths(AISYS *system, i32 version, NUGSCN *scene) {
                     node->route_membership_mask = EdFileReadShort();
                     node->route_boundary_mask = EdFileReadShort();
                 }
+                node->distance_cache_nodes[0] = 0xff;
+                node->distance_cache_nodes[1] = 0xff;
             }
             AIPathCalcExtents(path);
         }
@@ -1863,30 +1864,33 @@ extern "C" {
                 // The original reserves 0x3c bytes per set, but indexes records at the 0x1c-byte stride.
                 system->locator_sets = static_cast<AILOCATORSET *>(
                     AISysBufferAlloc(&system->storage_cursor, &system->storage_end, system->locator_set_count * 0x3c));
-                i32 index = 0;
-                for (EDLOCATORSET_s *set =
-                         reinterpret_cast<EDLOCATORSET_s *>(NuLinkedListGetHead(&aieditor->locator_sets));
-                     set != NULL; set = reinterpret_cast<EDLOCATORSET_s *>(
-                                      NuLinkedListGetNext(&aieditor->locator_sets, &set->link))) {
-                    AILOCATORSET *runtime = &system->locator_sets[index++];
-                    strcpy(runtime->name, set->name);
-                    runtime->locator_count = 0;
-                    for (i32 member = 0; member < 64 && set->locators[member] != NULL; ++member) {
-                        if (set->locators[member]->runtime_index != 0xff) {
-                            ++runtime->locator_count;
-                        }
-                    }
-                    if (runtime->locator_count != 0) {
-                        runtime->locator_entries = static_cast<u8 *>(
-                            AISysBufferAlloc(&system->storage_cursor, &system->storage_end, runtime->locator_count));
-                        for (i32 member = 0; member < runtime->locator_count; ++member) {
+                // Retail skips locator-set population when the buffer allocation fails.
+                if (system->locator_sets != NULL) {
+                    i32 index = 0;
+                    for (EDLOCATORSET_s *set =
+                             reinterpret_cast<EDLOCATORSET_s *>(NuLinkedListGetHead(&aieditor->locator_sets));
+                         set != NULL; set = reinterpret_cast<EDLOCATORSET_s *>(
+                                          NuLinkedListGetNext(&aieditor->locator_sets, &set->link))) {
+                        AILOCATORSET *runtime = &system->locator_sets[index++];
+                        strcpy(runtime->name, set->name);
+                        runtime->locator_count = 0;
+                        for (i32 member = 0; member < 64 && set->locators[member] != NULL; ++member) {
                             if (set->locators[member]->runtime_index != 0xff) {
-                                runtime->locator_entries[member] = set->locators[member]->runtime_index;
+                                ++runtime->locator_count;
                             }
                         }
-                        runtime->assigned = static_cast<u8 *>(
-                            AISysBufferAlloc(&system->storage_cursor, &system->storage_end, runtime->locator_count));
-                        memset(runtime->assigned, 0, runtime->locator_count);
+                        if (runtime->locator_count != 0) {
+                            runtime->locator_entries = static_cast<u8 *>(AISysBufferAlloc(
+                                &system->storage_cursor, &system->storage_end, runtime->locator_count));
+                            for (i32 member = 0; member < runtime->locator_count; ++member) {
+                                if (set->locators[member]->runtime_index != 0xff) {
+                                    runtime->locator_entries[member] = set->locators[member]->runtime_index;
+                                }
+                            }
+                            runtime->assigned = static_cast<u8 *>(AISysBufferAlloc(
+                                &system->storage_cursor, &system->storage_end, runtime->locator_count));
+                            memset(runtime->assigned, 0, runtime->locator_count);
+                        }
                     }
                 }
             }
@@ -3104,7 +3108,8 @@ extern "C" {
                 NUVEC forward = {0.0f, 0.0f, 1.0f};
                 NUVEC rotated;
                 NuVecMtxRotate(&rotated, &forward, draw_matrix);
-                antinode->flags = NuAngAdd(NuAtan2D(rotated.x, rotated.z), antinode->rotation_offset);
+                antinode->flags = NuAtan2D(rotated.x, rotated.z);
+                antinode->flags = NuAngAdd(antinode->flags, antinode->rotation_offset);
             }
         }
 
@@ -3600,55 +3605,59 @@ extern "C" {
         f32 along = (position->x - start->position.x) * dx + (position->z - start->position.z) * dz + distance;
         if (along > length || along < 0.0f) {
             AIPATHNODE *junction = along < 0.0f ? start : end;
-            i32 best_index = -1;
-            f32 best_dot = -FLT_MAX;
-            for (i32 index = 0; index < junction->connection_count; ++index) {
-                AIPATHCNX *candidate = junction->connections[index];
-                if (candidate == connection) {
-                    continue;
-                }
-                AIPATHNODE *candidate_start = &nodes[candidate->direction_a];
-                AIPATHNODE *candidate_end = &nodes[candidate->direction_b];
-                dx = candidate_end->position.x - candidate_start->position.x;
-                dz = candidate_end->position.z - candidate_start->position.z;
-                i32 reverse = 0;
-                if (direction_x * dx + direction_z * dz < 0.0f) {
-                    dx = candidate_start->position.x - candidate_end->position.x;
-                    dz = candidate_start->position.z - candidate_end->position.z;
-                    reverse = 1;
-                }
-                dx /= candidate->horizontal_distance;
-                dz /= candidate->horizontal_distance;
-                if ((candidate->traversal_flags[reverse] & 0xc0000000u) == 0) {
-                    f32 dot = direction_x * dx + direction_z * dz;
-                    if (dot > best_dot) {
-                        best_dot = dot;
-                        best_index = index;
+            const i32 connection_end = static_cast<i32>(junction->connection_count) + 1;
+            if (connection_end != 1) {
+                AIPATHCNX **connections = junction->connections;
+                i32 best_index = -1;
+                f32 best_dot = -FLT_MAX;
+                for (i32 index = 1; index != connection_end; ++index) {
+                    AIPATHCNX *candidate = connections[index - 1];
+                    if (candidate == connection) {
+                        continue;
+                    }
+                    AIPATHNODE *candidate_start = &nodes[candidate->direction_a];
+                    AIPATHNODE *candidate_end = &nodes[candidate->direction_b];
+                    dx = candidate_end->position.x - candidate_start->position.x;
+                    dz = candidate_end->position.z - candidate_start->position.z;
+                    i32 reverse = 0;
+                    if (direction_x * dx + direction_z * dz < 0.0f) {
+                        dx = candidate_start->position.x - candidate_end->position.x;
+                        dz = candidate_start->position.z - candidate_end->position.z;
+                        reverse = 1;
+                    }
+                    dx /= candidate->horizontal_distance;
+                    dz /= candidate->horizontal_distance;
+                    if ((candidate->traversal_flags[reverse] & 0xc0000000u) == 0) {
+                        f32 dot = direction_x * dx + direction_z * dz;
+                        if (dot > best_dot) {
+                            best_dot = dot;
+                            best_index = index - 1;
+                        }
                     }
                 }
-            }
-            if (best_index != -1) {
-                connection = junction->connections[best_index];
-                if (along < 0.0f) {
-                    length = connection->horizontal_distance;
-                    along += length;
-                } else {
-                    along -= length;
-                    length = connection->horizontal_distance;
+                if (best_index != -1) {
+                    connection = connections[best_index];
+                    if (along < 0.0f) {
+                        length = connection->horizontal_distance;
+                        along += length;
+                    } else {
+                        along -= length;
+                        length = connection->horizontal_distance;
+                    }
+                    start = &nodes[connection->direction_a];
+                    end = &nodes[connection->direction_b];
+                    dx = end->position.x - start->position.x;
+                    dz = end->position.z - start->position.z;
+                    if (direction_x * dx + direction_z * dz < 0.0f) {
+                        dx = start->position.x - end->position.x;
+                        dz = start->position.z - end->position.z;
+                        AIPATHNODE *swap = start;
+                        start = end;
+                        end = swap;
+                    }
+                    dx /= length;
+                    dz /= length;
                 }
-                start = &nodes[connection->direction_a];
-                end = &nodes[connection->direction_b];
-                dx = end->position.x - start->position.x;
-                dz = end->position.z - start->position.z;
-                if (direction_x * dx + direction_z * dz < 0.0f) {
-                    dx = start->position.x - end->position.x;
-                    dz = start->position.z - end->position.z;
-                    AIPATHNODE *swap = start;
-                    start = end;
-                    end = swap;
-                }
-                dx /= length;
-                dz /= length;
             }
         }
         f32 fraction = NuFmin(NuFmax(along / length, 0.0f), 1.0f);

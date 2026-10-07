@@ -328,7 +328,7 @@ extern "C" i32 edbriLoadPage(char *path, void *gscn) {
         count = 64 - edbri_bridges_used;
     i32 index = 0;
     i32 i = 0;
-    while (i < count) {
+    while (count > 0 && i != count) {
         while (index < 64 && edBridges[index].connection_index != 0xff)
             ++index;
         if (index >= 64) {
@@ -461,13 +461,13 @@ void edbriDoInput(nupad_s *pad) {
         edbri_length -= pad->analog_left_pad_down / 2500.0f;
         if (edbri_length < 0.1f)
             edbri_length = 0.1f;
-        if (edbri_length > 5.0f)
-            edbri_length = 5.0f;
+        if (edbri_length > 20.0f)
+            edbri_length = 20.0f;
         edbri_width += pad->analog_left_pad_right / 5000.0f;
         edbri_width -= pad->analog_left_pad_left / 5000.0f;
         if (edbri_width < 0.1f)
             edbri_width = 0.1f;
-        if (!(edbri_width <= 5.0f))
+        if (edbri_width > 20.0f)
             edbri_width = 5.0f;
     }
 }

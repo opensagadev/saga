@@ -19,6 +19,7 @@ DECOMP_ASSERT(offsetof(PrimVertexRaw, float_uv) == 0x10, "PrimVertexRaw float UV
 DECOMP_ASSERT(offsetof(PrimVertexRaw, half_uv) == 0x10, "PrimVertexRaw half UV offset");
 
 static inline u16 NuRndrFloatToHalf(f32 value) {
+    // Preserve the reference's signed intermediates and packed result bits.
     union {
         f32 value;
         u32 bits;
@@ -26,14 +27,12 @@ static inline u16 NuRndrFloatToHalf(f32 value) {
     i32 mantissa = conversion.bits & 0x7fffff;
     i32 sign = conversion.bits >> 31;
     i32 exponent = static_cast<i32>((conversion.bits >> 23) & 0xff) - 0x70;
-    u16 half_exponent = 0;
+    i16 result = (mantissa >> 13) | (sign << 15);
     if (exponent >= 0) {
-        half_exponent = 0x7c00;
-        if (exponent < 0x20) {
-            half_exponent = static_cast<u16>(exponent * 0x400);
-        }
+        const i16 candidate = static_cast<i16>(exponent * 0x400);
+        result |= exponent > 31 ? static_cast<i16>(0x7c00) : candidate;
     }
-    return static_cast<u16>(mantissa >> 13) | static_cast<u16>(sign << 15) | half_exponent;
+    return *reinterpret_cast<const u16 *>(&result);
 }
 
 static inline void NuRndrPrimSetColour(i32 colour) {

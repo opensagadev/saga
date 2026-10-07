@@ -357,7 +357,7 @@ void WeaponOutCode(GameObject_s *object) {
             packet.requested_animation != object->context_animation)
             return;
         const f32 time = packet.blending ? packet.blend_target_time : packet.current_time;
-        if (time < start)
+        if (!(time >= start))
             return;
     }
     const f32 end = AnimListFrame(object->apiobj.character_model, object->context_animation, 1);

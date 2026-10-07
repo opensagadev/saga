@@ -979,14 +979,15 @@ void edppDrawCursor() {
     draw_axis({0.0f, 0.0f, 0.5f});
     auto draw_mark = [&](NUVEC start, NUVEC end) {
         rotate(start);
-        rotate(end);
         line[0].position.x = edpp_cam_pos.x + start.x;
         line[0].position.y = edpp_cam_pos.y + start.y;
         line[0].position.z = edpp_cam_pos.z + start.z;
+        line[0].colour = 0xff00ff00;
+        rotate(end);
         line[1].position.x = edpp_cam_pos.x + end.x;
         line[1].position.y = edpp_cam_pos.y + end.y;
         line[1].position.z = edpp_cam_pos.z + end.z;
-        line[0].colour = line[1].colour = 0xff00ff00;
+        line[1].colour = 0xff00ff00;
         NuRndrLine3d(line, edpp_mtl, NULL);
     };
     draw_mark({0.55f, 0.05f, 0.0f}, {0.6f, -0.05f, 0.0f});
@@ -1090,10 +1091,12 @@ void edppDrawCursor() {
             NuQFntPrintEx(system_qfont, 0x1720, 0xa50, 0x10, "Highlight: %s", debtab[key.effect_index]->name);
             NuQFntPrintEx(system_qfont, 0x1720, 0xaf0, 0x10, "XYZ: %0.2f %0.2f %0.2f", key.position.x, key.position.y,
                           key.position.z);
-            NuQFntPrintEx(system_qfont, 0x1720, 0xb90, 0x10, "RotZ: %d", particle.rotation_z);
-            NuQFntPrintEx(system_qfont, 0x1720, 0xc30, 0x10, "RotY: %d", particle.rotation_y);
-            NuQFntPrintEx(system_qfont, 0x1720, 0xcd0, 0x10, "EmitRotZ: %d", particle.emitter_rotation_z);
-            NuQFntPrintEx(system_qfont, 0x1720, 0xd70, 0x10, "EmitRotY: %d", particle.emitter_rotation_y);
+            NuQFntPrintEx(system_qfont, 0x1720, 0xb90, 0x10, "RotZ: %d", edpp_ptls[edpp_nearest].rotation_z);
+            NuQFntPrintEx(system_qfont, 0x1720, 0xc30, 0x10, "RotY: %d", edpp_ptls[edpp_nearest].rotation_y);
+            NuQFntPrintEx(system_qfont, 0x1720, 0xcd0, 0x10, "EmitRotZ: %d",
+                          edpp_ptls[edpp_nearest].emitter_rotation_z);
+            NuQFntPrintEx(system_qfont, 0x1720, 0xd70, 0x10, "EmitRotY: %d",
+                          edpp_ptls[edpp_nearest].emitter_rotation_y);
         }
     } else if (edpp_readout == 0) {
         if (edpp_copy_mode == 0) {
@@ -1107,40 +1110,49 @@ void edppDrawCursor() {
                 NuQFntPrintEx(system_qfont, 0x1720, 0xaf0, 0x10, "Current Type: <none>");
             else
                 NuQFntPrintEx(system_qfont, 0x1720, 0xaf0, 0x10, "Current Type: %s", debtab[edpp_create_type]->name);
+        }
+        if (edpp_copy_mode == 0) {
             if (edptl_clipboard_entry == -1)
                 NuQFntPrintEx(system_qfont, 0x1720, 0xb90, 0x10, "Clipboard: <none>");
             else
                 NuQFntPrintEx(system_qfont, 0x1720, 0xb90, 0x10, "Clipboard: %s", debtab[edptl_clipboard_entry]->name);
+        } else {
+            if (edpp_copy_source_count == 0)
+                NuQFntPrintEx(system_qfont, 0x1720, 0xb90, 0x10, "Clipboard: <none>");
+            else
+                NuQFntPrintEx(system_qfont, 0x1720, 0xb90, 0x10, "Clipboard: %d items", edpp_copy_source_count);
+        }
+        if (edpp_copy_mode == 0) {
             if (edpp_nearest == -1) {
                 NuQFntPrintEx(system_qfont, 0x1720, 0xc30, 0x10, "Highlight: <none>");
             } else {
                 edpp_particle_s &particle = edpp_ptls[edpp_nearest];
                 debkeydatatype_s &key = debkeydata[particle.instance_id];
                 debinftype *effect = debtab[key.effect_index];
+                i32 instance_id = particle.instance_id;
                 if (effect->generator_type == 0) {
                     edbitsDrawCube(edpp_cam_pos.x, edpp_cam_pos.y, edpp_cam_pos.z, effect->field_058, effect->field_05c,
                                    effect->field_060, edpp_emitrotz, edpp_emitroty, edpp_emitrotx, rotation_z,
                                    rotation_y, 0xff0000ff, edpp_mtl);
-                    edppDrawSpheres(effect, particle.instance_id);
+                    edppDrawSpheres(effect, edpp_ptls[edpp_nearest].instance_id);
+                    instance_id = edpp_ptls[edpp_nearest].instance_id;
                 }
-                edppDrawTorus(effect, particle.instance_id);
+                edppDrawTorus(effect, instance_id);
                 NuQFntSet(system_qfont);
                 NuQFntPrintEx(system_qfont, 0x1720, 0xc30, 0x10, "Highlight: %s", effect->name);
                 NuQFntPrintEx(system_qfont, 0x1720, 0xcd0, 0x10, "Particles:");
                 const i32 group = effect->particle_type == 7 ? 12 : 32;
                 const i32 limit = effect->particle_type == 7 ? 384 : 1024;
-                const i32 count = effect->max_particles;
-                if (count > limit)
+                i32 count = effect->max_particles;
+                if (count > limit) {
                     NuQFntSetColour(system_qfont, 0x80000080);
+                    count = effect->max_particles;
+                }
                 const i32 rounded = ((count - 1) / group + 1) * group;
                 NuQFntPrintEx(system_qfont, 0x1cc0, 0xcd0, 0x10, "%d (%d)", count, rounded);
                 NuQFntSetColour(system_qfont, 0x80000000);
             }
         } else {
-            if (edpp_copy_source_count == 0)
-                NuQFntPrintEx(system_qfont, 0x1720, 0xb90, 0x10, "Clipboard: <none>");
-            else
-                NuQFntPrintEx(system_qfont, 0x1720, 0xb90, 0x10, "Clipboard: %d items", edpp_copy_source_count);
             if (edpp_copy_enclosed > 8)
                 NuQFntSetColour(system_qfont, 0x80000080);
             NuQFntPrintEx(system_qfont, 0x1720, 0xc30, 0x10, "Enclosed: %d", edpp_copy_enclosed);
@@ -1468,30 +1480,31 @@ i32 edppSaveEffects(char *filename, char page) {
     EdFileWriteInt(0x29);
     EdFileWriteInt(effect_count);
 
-    for (i32 index = 1; index < EDPP_MAX_TYPES; ++index) {
+    i32 writer_limit = EDPP_MAX_TYPES;
+    for (i32 index = 1; index < writer_limit; ++index) {
         if (debtab[index] == NULL)
             continue;
-        debinftype *effect = &effecttypes[index];
         if (category != 2 &&
-            !(category == 1 && effect->category == 1 && static_cast<i8>(effect->page) == edbits_particle_level_page) &&
-            !(category != 1 && effect->category == category))
+            !(category == 1 && effecttypes[index].category == 1 &&
+              static_cast<i8>(effecttypes[index].page) == edbits_particle_level_page) &&
+            !(category != 1 && effecttypes[index].category == category))
             continue;
 
-        u8 *bytes = reinterpret_cast<u8 *>(effect);
-#define WRITE_FLOAT_AT(offset) EdFileWriteFloat(*reinterpret_cast<f32 *>(bytes + (offset)))
-        EdFileWrite(effect->name, 16);
-        EdFileWriteShort(effect->frequency);
-        EdFileWriteShort(effect->max_particles);
+#define WRITE_FLOAT_AT(offset)                                                                                         \
+    EdFileWriteFloat(*reinterpret_cast<f32 *>(reinterpret_cast<u8 *>(&effecttypes[index]) + (offset)))
+        EdFileWrite(effecttypes[index].name, 16);
+        EdFileWriteShort(effecttypes[index].frequency);
+        EdFileWriteShort(effecttypes[index].max_particles);
         WRITE_FLOAT_AT(0x18);
         WRITE_FLOAT_AT(0x1c);
         WRITE_FLOAT_AT(0x20);
         WRITE_FLOAT_AT(0x24);
         WRITE_FLOAT_AT(0x28);
-        EdFileWriteChar(effect->generator_type);
-        EdFileWriteChar(effect->momentum_adjustment_type);
-        EdFileWriteChar(effect->cutscene_only);
-        EdFileWriteChar(effect->particle_type);
-        EdFileWriteChar(effect->camera_facing);
+        EdFileWriteChar(effecttypes[index].generator_type);
+        EdFileWriteChar(effecttypes[index].momentum_adjustment_type);
+        EdFileWriteChar(effecttypes[index].cutscene_only);
+        EdFileWriteChar(effecttypes[index].particle_type);
+        EdFileWriteChar(effecttypes[index].camera_facing);
         WRITE_FLOAT_AT(0x30);
         WRITE_FLOAT_AT(0x34);
         WRITE_FLOAT_AT(0x38);
@@ -1499,9 +1512,9 @@ i32 edppSaveEffects(char *filename, char page) {
         WRITE_FLOAT_AT(0x40);
         WRITE_FLOAT_AT(0x44);
         WRITE_FLOAT_AT(0x48);
-        EdFileWriteNuVec(reinterpret_cast<NUVEC *>(bytes + 0x4c));
-        EdFileWriteNuVec(reinterpret_cast<NUVEC *>(bytes + 0x58));
-        EdFileWriteNuVec(reinterpret_cast<NUVEC *>(bytes + 0x64));
+        EdFileWriteNuVec(reinterpret_cast<NUVEC *>(reinterpret_cast<u8 *>(&effecttypes[index]) + 0x4c));
+        EdFileWriteNuVec(reinterpret_cast<NUVEC *>(reinterpret_cast<u8 *>(&effecttypes[index]) + 0x58));
+        EdFileWriteNuVec(reinterpret_cast<NUVEC *>(reinterpret_cast<u8 *>(&effecttypes[index]) + 0x64));
         WRITE_FLOAT_AT(0x70);
         WRITE_FLOAT_AT(0x74);
         WRITE_FLOAT_AT(0x78);
@@ -1516,20 +1529,20 @@ i32 edppSaveEffects(char *filename, char page) {
         WRITE_FLOAT_AT(0x9c);
         WRITE_FLOAT_AT(0xa0);
         WRITE_FLOAT_AT(0xa4);
-        EdFileWriteShort(effect->field_0a8);
-        EdFileWriteChar(effect->field_0aa);
-        EdFileWriteChar(effect->field_0ab);
+        EdFileWriteShort(effecttypes[index].field_0a8);
+        EdFileWriteChar(effecttypes[index].field_0aa);
+        EdFileWriteChar(effecttypes[index].field_0ab);
         WRITE_FLOAT_AT(0xac);
         WRITE_FLOAT_AT(0xb0);
         WRITE_FLOAT_AT(0xb4);
         WRITE_FLOAT_AT(0xb8);
         WRITE_FLOAT_AT(0xbc);
 #define WRITE_COLOUR_KEY(key)                                                                                          \
-    EdFileWriteFloat(effect->colour_keys[key].time);                                                                   \
-    EdFileWriteUnsignedChar(effect->colour_keys[key].red);                                                             \
-    EdFileWriteUnsignedChar(effect->colour_keys[key].green);                                                           \
-    EdFileWriteUnsignedChar(effect->colour_keys[key].blue);                                                            \
-    EdFileWriteUnsignedChar(effect->colour_keys[key].alpha)
+    EdFileWriteFloat(effecttypes[index].colour_keys[key].time);                                                        \
+    EdFileWriteUnsignedChar(effecttypes[index].colour_keys[key].red);                                                  \
+    EdFileWriteUnsignedChar(effecttypes[index].colour_keys[key].green);                                                \
+    EdFileWriteUnsignedChar(effecttypes[index].colour_keys[key].blue);                                                 \
+    EdFileWriteUnsignedChar(effecttypes[index].colour_keys[key].alpha)
         WRITE_COLOUR_KEY(0);
         WRITE_COLOUR_KEY(1);
         WRITE_COLOUR_KEY(2);
@@ -1661,12 +1674,12 @@ i32 edppSaveEffects(char *filename, char page) {
         WRITE_FLOAT_AT(0x2e4);
         WRITE_FLOAT_AT(0x2e8);
         WRITE_FLOAT_AT(0x2ec);
-        EdFileWriteChar(effect->process_spheres);
-        EdFileWriteChar(effect->time_group);
-        EdFileWriteChar(effect->field_2f2);
-        EdFileWriteChar(effect->use_explicit_clip_box);
-        EdFileWriteNuVec(&effect->repeat_box);
-        EdFileWriteFloat(effect->thinning);
+        EdFileWriteChar(effecttypes[index].process_spheres);
+        EdFileWriteChar(effecttypes[index].time_group);
+        EdFileWriteChar(effecttypes[index].field_2f2);
+        EdFileWriteChar(effecttypes[index].use_explicit_clip_box);
+        EdFileWriteNuVec(&effecttypes[index].repeat_box);
+        EdFileWriteFloat(effecttypes[index].thinning);
         WRITE_FLOAT_AT(0x304);
         WRITE_FLOAT_AT(0x308);
         WRITE_FLOAT_AT(0x30c);
@@ -1720,34 +1733,35 @@ i32 edppSaveEffects(char *filename, char page) {
         WRITE_FLOAT_AT(0x3cc);
 #undef WRITE_FLOAT_AT
 
-        i32 sound_count = (effect->sound_data[0] != -1) + (effect->sound_data[3] != -1) +
-                          (effect->sound_data[6] != -1) + (effect->sound_data[9] != -1);
+        i32 sound_count = (effecttypes[index].sound_data[0] != -1) + (effecttypes[index].sound_data[3] != -1) +
+                          (effecttypes[index].sound_data[6] != -1) + (effecttypes[index].sound_data[9] != -1);
         EdFileWriteInt(sound_count);
-        if (effect->sound_data[0] != -1) {
-            EdFileWrite(const_cast<char *>(g_soundInfo[effect->sound_data[0]].sfx_name), 16);
-            EdFileWriteInt(effect->sound_data[1]);
-            EdFileWriteInt(effect->sound_data[2]);
+        if (effecttypes[index].sound_data[0] != -1) {
+            EdFileWrite(const_cast<char *>(g_soundInfo[effecttypes[index].sound_data[0]].sfx_name), 16);
+            EdFileWriteInt(effecttypes[index].sound_data[1]);
+            EdFileWriteInt(effecttypes[index].sound_data[2]);
         }
-        if (effect->sound_data[3] != -1) {
-            EdFileWrite(const_cast<char *>(g_soundInfo[effect->sound_data[3]].sfx_name), 16);
-            EdFileWriteInt(effect->sound_data[4]);
-            EdFileWriteInt(effect->sound_data[5]);
+        if (effecttypes[index].sound_data[3] != -1) {
+            EdFileWrite(const_cast<char *>(g_soundInfo[effecttypes[index].sound_data[3]].sfx_name), 16);
+            EdFileWriteInt(effecttypes[index].sound_data[4]);
+            EdFileWriteInt(effecttypes[index].sound_data[5]);
         }
-        if (effect->sound_data[6] != -1) {
-            EdFileWrite(const_cast<char *>(g_soundInfo[effect->sound_data[6]].sfx_name), 16);
-            EdFileWriteInt(effect->sound_data[7]);
-            EdFileWriteInt(effect->sound_data[8]);
+        if (effecttypes[index].sound_data[6] != -1) {
+            EdFileWrite(const_cast<char *>(g_soundInfo[effecttypes[index].sound_data[6]].sfx_name), 16);
+            EdFileWriteInt(effecttypes[index].sound_data[7]);
+            EdFileWriteInt(effecttypes[index].sound_data[8]);
         }
-        if (effect->sound_data[9] != -1) {
-            EdFileWrite(const_cast<char *>(g_soundInfo[effect->sound_data[9]].sfx_name), 16);
-            EdFileWriteInt(effect->sound_data[10]);
-            EdFileWriteInt(effect->sound_data[11]);
+        if (effecttypes[index].sound_data[9] != -1) {
+            EdFileWrite(const_cast<char *>(g_soundInfo[effecttypes[index].sound_data[9]].sfx_name), 16);
+            EdFileWriteInt(effecttypes[index].sound_data[10]);
+            EdFileWriteInt(effecttypes[index].sound_data[11]);
         }
-        EdFileWriteChar(effect->trail_count);
-        EdFileWriteFloat(effect->trail_time);
-        EdFileWriteChar(effect->radial_segments);
-        EdFileWriteFloat(effect->radial_floor);
-        EdFileWriteFloat(effect->scale_in_time);
+        EdFileWriteChar(effecttypes[index].trail_count);
+        EdFileWriteFloat(effecttypes[index].trail_time);
+        EdFileWriteChar(effecttypes[index].radial_segments);
+        EdFileWriteFloat(effecttypes[index].radial_floor);
+        EdFileWriteFloat(effecttypes[index].scale_in_time);
+        writer_limit = EDPP_MAX_TYPES;
     }
 
     if (page == 1 || page == 2) {
@@ -1891,7 +1905,9 @@ void edanimDrawCursor() {
         NuVecRotateZ(&direction, &direction, edanim_emitrotz);
         NuVecRotateY(&direction, &direction, edanim_emitroty);
         line[0].position = edanim_cam_pos;
-        NuVecAdd(&line[1].position, &edanim_cam_pos, &direction);
+        line[1].position.x = edanim_cam_pos.x + direction.x;
+        line[1].position.y = edanim_cam_pos.y + direction.y;
+        line[1].position.z = edanim_cam_pos.z + direction.z;
         line[0].colour = line[1].colour = 0xff0000ff;
         NuRndrLine3d(line, edanim_mtl, NULL);
     }
@@ -1914,8 +1930,10 @@ void edanimDrawCursor() {
         NuGScnGetSpecial(&special, edbits_base_scene, edanim_nearest);
         NuQFntPrintEx(system_qfont, 0x17c0, 0xaf0, 0x10, "Curr Spcl: %s", NuSpecialGetName(&special));
     }
-    NuQFntPrintEx(system_qfont, 0x17c0, 0xb90, 0x10, edanim_nearest_param_id == -1 ? "Params: No" : "Params: Yes");
-    if (edanim_nearest_param_id != -1) {
+    if (edanim_nearest_param_id == -1) {
+        NuQFntPrintEx(system_qfont, 0x17c0, 0xb90, 0x10, "Params: No");
+    } else {
+        NuQFntPrintEx(system_qfont, 0x17c0, 0xb90, 0x10, "Params: Yes");
         auto &param = AnimParams[edanim_nearest_param_id];
         if (edanim_particle_mode != 0) {
             NuQFntPrintEx(system_qfont, 0x1810, 0xc30, 0x10, "Particles: %d (Max %d)", param.effect_count, 8);
@@ -2059,14 +2077,16 @@ void edpartDrawCursor() {
     draw_axis({0.0f, 0.5f, 0.0f});
     draw_axis({0.0f, 0.0f, 0.5f});
     auto draw_mark = [&](NUVEC start, NUVEC end) {
-        rotate(start);
-        rotate(end);
-        line[0].position.x = edpart_cam_pos.x + start.x;
-        line[0].position.y = edpart_cam_pos.y + start.y;
-        line[0].position.z = edpart_cam_pos.z + start.z;
-        line[1].position.x = edpart_cam_pos.x + end.x;
-        line[1].position.y = edpart_cam_pos.y + end.y;
-        line[1].position.z = edpart_cam_pos.z + end.z;
+        NUVEC scratch = start;
+        rotate(scratch);
+        line[0].position.x = edpart_cam_pos.x + scratch.x;
+        line[0].position.y = edpart_cam_pos.y + scratch.y;
+        line[0].position.z = edpart_cam_pos.z + scratch.z;
+        scratch = end;
+        rotate(scratch);
+        line[1].position.x = edpart_cam_pos.x + scratch.x;
+        line[1].position.y = edpart_cam_pos.y + scratch.y;
+        line[1].position.z = edpart_cam_pos.z + scratch.z;
         line[0].colour = line[1].colour = 0xff00ff00;
         NuRndrLine3d(line, edpart_mtl, NULL);
     };
@@ -3575,15 +3595,14 @@ __attribute__((force_align_arg_pointer)) i32 EdManScale::Process(EdInputContext 
                     f32 movement = delta.x * first_axis.x + delta.y * first_axis.y + delta.z * first_axis.z;
                     if (movement == 0.0f)
                         continue;
-                    VuVec local_axis = first_axis;
-                    NuVecInvMtxRotate(reinterpret_cast<NUVEC *>(&local_axis), reinterpret_cast<NUVEC *>(&local_axis),
+                    NuVecInvMtxRotate(reinterpret_cast<NUVEC *>(&first_axis), reinterpret_cast<NUVEC *>(&first_axis),
                                       &matrix);
-                    NuVecNorm(reinterpret_cast<NUVEC *>(&local_axis), reinterpret_cast<NUVEC *>(&local_axis));
+                    NuVecNorm(reinterpret_cast<NUVEC *>(&first_axis), reinterpret_cast<NUVEC *>(&first_axis));
                     f32 scaled_magnitude = Scale * magnitude;
                     f32 change = (scaled_magnitude + movement) / scaled_magnitude - 1.0f;
-                    scale_x = local_axis.x * change + 1.0f;
-                    scale_y = local_axis.y * change + 1.0f;
-                    scale_z = local_axis.z * change + 1.0f;
+                    scale_x = first_axis.x * change + 1.0f;
+                    scale_y = first_axis.y * change + 1.0f;
+                    scale_z = first_axis.z * change + 1.0f;
                     break;
                 }
                 case 4:
@@ -3600,15 +3619,14 @@ __attribute__((force_align_arg_pointer)) i32 EdManScale::Process(EdInputContext 
                     movement += delta.x * second_axis.x + delta.y * second_axis.y + delta.z * second_axis.z;
                     if (movement == 0.0f)
                         continue;
-                    VuVec local_axis = first_axis;
-                    NuVecInvMtxRotate(reinterpret_cast<NUVEC *>(&local_axis), reinterpret_cast<NUVEC *>(&local_axis),
+                    NuVecInvMtxRotate(reinterpret_cast<NUVEC *>(&first_axis), reinterpret_cast<NUVEC *>(&first_axis),
                                       &matrix);
-                    NuVecNorm(reinterpret_cast<NUVEC *>(&local_axis), reinterpret_cast<NUVEC *>(&local_axis));
+                    NuVecNorm(reinterpret_cast<NUVEC *>(&first_axis), reinterpret_cast<NUVEC *>(&first_axis));
                     f32 scaled_magnitude = Scale * magnitude;
                     f32 change = (scaled_magnitude + movement) / scaled_magnitude - 1.0f;
-                    scale_x = local_axis.x * change + second_axis.x * change + 1.0f;
-                    scale_y = local_axis.y * change + second_axis.y * change + 1.0f;
-                    scale_z = local_axis.z * change + second_axis.z * change + 1.0f;
+                    scale_x = first_axis.x * change + second_axis.x * change + 1.0f;
+                    scale_y = first_axis.y * change + second_axis.y * change + 1.0f;
+                    scale_z = first_axis.z * change + second_axis.z * change + 1.0f;
                     break;
                 }
                 case 7: {
@@ -4508,13 +4526,13 @@ void EdManipulator::DrawAxis(VuVec &origin, VuMtx *matrix) {
     }
     EdDrawEnd();
     EdDrawBegin(0);
-    const float arrow_half_size = Scale * 0.25f * 0.5f;
-    const float arrow_radius = Scale * 0.25f * 0.2f;
+    const float arrow_size = Scale * 0.25f;
+    const float arrow_radius = arrow_size * 0.2f;
     for (i32 axis = 1; axis <= 3; ++axis) {
         const VuVec &point = points[axis];
         const VuVec &center = points[7];
-        const VuVec offset((point.x - center.x) * arrow_half_size, (point.y - center.y) * arrow_half_size,
-                           (point.z - center.z) * arrow_half_size, 0.0f);
+        const VuVec offset((point.x - center.x) * arrow_size * 0.5f, (point.y - center.y) * arrow_size * 0.5f,
+                           (point.z - center.z) * arrow_size * 0.5f, 0.0f);
         const VuVec start(point.x - offset.x, point.y - offset.y, point.z - offset.z, 0.0f);
         const VuVec end(point.x + offset.x, point.y + offset.y, point.z + offset.z, 0.0f);
         const i32 colour = *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(this) + 8) != 0
@@ -4826,23 +4844,21 @@ i32 EdManipulator::SelectRotator(EdInputContext &input, VuVec &center, VuVec &pl
                 }
             }
         }
-        if (input.GetPress(3) != 0.0f) {
-            *selected_axis = axis;
-            *angle_delta = 0;
-            if (axis == 0) {
-                *selected_plane = plane;
-                *start_angle = *last_angle = 0;
-                return 0;
-            }
+        i32 angle = 0;
+        if (axis != 0) {
             plane = VuVec(axis == 1 ? 1.0f : 0.0f, axis == 2 ? 1.0f : 0.0f, axis == 3 ? 1.0f : 0.0f,
                           axis == 1   ? -center.x
                           : axis == 2 ? -center.y
                                       : -center.z);
-            *selected_plane = plane;
             f32 x = chosen.x - center.x;
             f32 y = chosen.y - center.y;
             f32 z = chosen.z - center.z;
-            i32 angle = axis == 1 ? NuAtan2DA(y, z) : axis == 2 ? NuAtan2DA(x, -z) : NuAtan2DA(x, y);
+            angle = axis == 1 ? NuAtan2DA(y, z) : axis == 2 ? NuAtan2DA(x, -z) : NuAtan2DA(x, y);
+        }
+        if (input.GetPress(3) != 0.0f) {
+            *selected_axis = axis;
+            *angle_delta = 0;
+            *selected_plane = plane;
             *start_angle = *last_angle = angle;
             return axis;
         }
@@ -4943,7 +4959,6 @@ void EdInputContext::Set(i32 input, float value, float repeat_delay) {
 void EdInputContext::Update(nucamera_s *camera, nupad_s *new_pad, float elapsed, bool) {
     static __used__ volatile u8 UseMouse;
     pad = new_pad;
-    delta_time = elapsed;
 
     f32 *view = reinterpret_cast<f32 *>(reserved_00);
     view[0] = camera->mtx.m30;
@@ -4970,6 +4985,7 @@ void EdInputContext::Update(nucamera_s *camera, nupad_s *new_pad, float elapsed,
     view[13] = ray_end.y - view[9];
     view[14] = ray_end.z - view[10];
     view[15] = 0.0f;
+    delta_time = elapsed;
 
     // The original editor suppresses its input context while a property text
     // field is being edited, releasing held actions before returning.
@@ -4983,14 +4999,22 @@ void EdInputContext::Update(nucamera_s *camera, nupad_s *new_pad, float elapsed,
     const i32 shift_or_s = NuKeyboard(0x2a) | NuKeyboard(0x36) | NuKeyboard(0x1f);
     const i32 alt_or_space = NuKeyboard(0x38) | NuKeyboard(0xb8) | NuKeyboard(0x39);
     const i32 control_or_c = NuKeyboard(0x1d) | NuKeyboard(0x9d) | NuKeyboard(0x2e);
-    const u32 buttons = new_pad->digital_buttons;
-    const i32 left_click = (NuMouseReadButtons() == 1 || (buttons & 0x800) != 0) && !alt_or_space;
+    const i32 left_click = (NuMouseReadButtons() == 1 || (pad->digital_buttons & 0x800) != 0) && !alt_or_space;
     const f32 mouse_x = NuMouseReadXVel();
     const f32 mouse_y = NuMouseReadYVel();
     const f32 mouse_z = NuMouseReadZVel();
-    const bool pad_enabled = edGetPadDisabled() == 0;
-    const bool menu_closed = pad_enabled && eduiGetActiveMenu() == NULL;
-    const i32 right_click = NuMouseReadButtons() == 2 || (pad_enabled && (buttons & 0x20) != 0);
+    u32 square = 0;
+    i32 right_click;
+    if (edGetPadDisabled() == 0) {
+        if (eduiGetActiveMenu() == NULL) {
+            const u32 buttons = pad->digital_buttons;
+            square = buttons & 0x80;
+            Set(38, static_cast<f32>(buttons & 0x40), elapsed);
+        }
+        right_click = NuMouseReadButtons() == 2 || (pad->digital_buttons & 0x20) != 0;
+    } else {
+        right_click = NuMouseReadButtons() == 2;
+    }
     Set(0, mouse_x, elapsed);
     Set(1, mouse_y, elapsed);
     Set(2, mouse_z, elapsed);
@@ -5027,10 +5051,8 @@ void EdInputContext::Update(nucamera_s *camera, nupad_s *new_pad, float elapsed,
     Set(33, static_cast<f32>(NuKeyboard(9)), elapsed);
     Set(34, static_cast<f32>(NuKeyboard(10)), elapsed);
     Set(35, static_cast<f32>(NuKeyboard(11)), elapsed);
-    Set(37, static_cast<f32>(menu_closed ? buttons & 0x80 : 0), elapsed);
-    if (menu_closed)
-        Set(38, static_cast<f32>(buttons & 0x40), elapsed);
-    Set(39, static_cast<f32>(buttons & 0x800), elapsed);
+    Set(37, static_cast<f32>(square), elapsed);
+    Set(39, static_cast<f32>(pad->digital_buttons & 0x800), elapsed);
     memset(cleared, 0, sizeof(cleared));
 }
 
@@ -5532,14 +5554,14 @@ __attribute__((force_align_arg_pointer)) void EdValueControl<f32>::cbButton(edui
     nupad_s *pad = EdControl::Input->pad;
     f32 change = 0.0f;
     if (pad && (pad->digital_buttons & EDUI_CURSOR_PRIMARY)) {
-        if (pad->analog_right_y > 128)
-            change = 10.0f * sensitivity * (pad->analog_right_y - 128.0f);
-        else if (pad->analog_right_y < 128)
-            change = -10.0f * sensitivity * (128.0f - pad->analog_right_y);
         if (pad->analog_left_y > 128)
-            change = 0.1f * sensitivity * (pad->analog_left_y - 128.0f);
+            change = 10.0f * sensitivity * (pad->analog_left_y - 128.0f);
         else if (pad->analog_left_y < 128)
-            change = -0.1f * sensitivity * (128.0f - pad->analog_left_y);
+            change = -10.0f * sensitivity * (128.0f - pad->analog_left_y);
+        if (pad->analog_right_y > 128)
+            change = 0.1f * sensitivity * (pad->analog_right_y - 128.0f);
+        else if (pad->analog_right_y < 128)
+            change = -0.1f * sensitivity * (128.0f - pad->analog_right_y);
     } else {
         f32 dx = 0.0f;
         f32 dy = 0.0f;
@@ -6477,6 +6499,15 @@ EdControl::~EdControl() {
 
 inline void EdControl::operator delete(void *memory) {
     theMemoryManager.FreePool(memory, sizeof(EdControl));
+}
+
+// Match each control's allocation type, rather than inheriting the base size.
+inline void EdEnumControl::operator delete(void *memory) {
+    theMemoryManager.FreePool(memory, sizeof(EdEnumControl));
+}
+
+inline void EdBitControl::operator delete(void *memory) {
+    theMemoryManager.FreePool(memory, sizeof(EdBitControl));
 }
 
 void EdControl::AddMenuItem(eduimenu_s *menu, EdRef *member, void *target) {

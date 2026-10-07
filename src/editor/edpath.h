@@ -23,6 +23,7 @@ DECOMP_ASSERT(offsetof(EDAIPATHCHECK_s, angle) == 0x18, "editor path check angle
 
 typedef void AIEDITORPATHNODECALLBACK(EDAIPATHNODE_s *node);
 extern "C" {
+    extern char *(*EdGetCnxFlagNames)(u32 flags);
     extern AIEDITORPATHNODECALLBACK *AIPathNodeDeletedFn;
     void InitFn_AIPathNodeDeleted(AIEDITORPATHNODECALLBACK *function);
     void pathEditor_OnPathCheck(nuvec_s *point, EDAIPATHCHECK_s *result, EDAIPATH_s *path, f32 tolerance);

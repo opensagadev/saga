@@ -80,7 +80,7 @@ i32 AIPathCheckExtents(AIPATH *path, NUVEC *position) {
         position->x > path->bounds_max.x || position->y > path->bounds_max.y) {
         return 0;
     }
-    return position->z <= path->bounds_max.z;
+    return !(position->z > path->bounds_max.z);
 }
 
 __attribute__((force_align_arg_pointer)) void pathEditorDrawNode(nuvec_s *position, float radius, float lower_height,
@@ -121,8 +121,8 @@ AIPATHCNXHELPER_s *AIPathCnxHelperSys_Find(AIPATHCNXHELPERSYS_s *system, GameObj
         return NULL;
     }
 
-    for (i32 index = 0; index < system->helper_count; ++index) {
-        AIPATHCNXHELPER_s *helper = &system->helpers[index];
+    AIPATHCNXHELPER_s *helper = system->helpers;
+    for (i32 index = 0; index < system->helper_count; ++index, ++helper) {
         if (helper->connection == connection && (helper->direction == 0xff || helper->direction == direction) &&
             helper->type == type && (filter == NULL || filter(helper, object, connection, direction, type) == 0)) {
             return helper;
@@ -332,8 +332,11 @@ AIPATHCNXCONTROLLER_s *AIPathCnxControllerCreate(AIPATHCNXCONTROLSYS_s *control_
     NuLinkedListAppend(&control_system->active_controllers, node);
 
     AIPATHCNXCONTROLLER_s *controller = reinterpret_cast<AIPATHCNXCONTROLLER_s *>(node);
-    for (u8 index = 0; index < ai_system->path_sys->path_count; ++index) {
-        if (ai_system->path_sys->paths[index] == path) {
+    AIPATHSYS *path_system = ai_system->path_sys;
+    const u8 path_count = path_system->path_count;
+    AIPATH **path_cursor = path_system->paths;
+    for (u8 index = 0; index < path_count; ++index, ++path_cursor) {
+        if (*path_cursor == path) {
             controller->path_index = index;
             break;
         }

@@ -137,14 +137,14 @@ f32 ForceTowardsMid(GameObject_s *object) {
 }
 
 void ResetPushProgress(WORLDINFO_s *world, void *progress_data) {
-    if (world->push_blocks == NULL || world->push_block_count <= 0) {
+    pushblock_s *block = world->push_blocks;
+    if (block == NULL || world->push_block_count <= 0) {
         return;
     }
 
     PUSHPROGRESS *progress = static_cast<PUSHPROGRESS *>(progress_data);
-    for (i32 index = 0; index < world->push_block_count; ++index) {
+    for (i32 index = 0; index < world->push_block_count; ++index, ++block) {
         if (index < 16 && progress != NULL) {
-            pushblock_s *block = &world->push_blocks[index];
             const u32 bit = 1u << index;
             block->flags_0cb = (block->flags_0cb & ~2u) | (((progress->state_mask & bit) != 0) << 1);
             block->flags_0ca = (block->flags_0ca & ~4u) | (((progress->visible_mask & bit) != 0) << 2);
@@ -308,9 +308,10 @@ void FindForcePushTarget(GameObject_s *object, i32 activate, i32 target_filter) 
             choke_style = second_style == 0;
         }
 
+        i32 object_count = HIGHGAMEOBJECT;
         f32 best_distance = 1.5625f;
-        for (i32 index = 0; index < HIGHGAMEOBJECT; ++index) {
-            GameObject_s *candidate = &Obj[index];
+        GameObject_s *candidate = Obj;
+        for (i32 index = 0; index < object_count; ++index, ++candidate) {
             if (candidate == object || (candidate->apiobj.field_0x1f8 & 0x1001) != 0x1001 ||
                 candidate->apiobj.field_0x287 != 0 || candidate->apiobj.model_draw_result == 0 ||
                 candidate->character_context == 0x3c || candidate->character_context == 0x39 ||
@@ -320,60 +321,74 @@ void FindForcePushTarget(GameObject_s *object, i32 activate, i32 target_filter) 
                 (candidate->apiobj.character_data->game_character->flags_090 & 0x8000) != 0 ||
                 (CInfo[candidate->character_context].flags & 0x8000) != 0 ||
                 (candidate->apiobj.character_data->game_character->flags_094[1] & 2) != 0 ||
-                (candidate->field_0xefc_word & 0x400010) != 0 || !TouchHacks::CanForceTargetObj(*object, *candidate)) {
+                (candidate->field_0xefc_word & 0x400010) != 0) {
                 continue;
             }
 
-            const bool candidate_is_player = candidate->apiobj.field_0x27c != -1;
-            if (!(WORLD->area == EMPERORFIGHT_ADATA && ((candidate->field_0xefb & 8) != 0 || candidate_is_player))) {
-                if (candidate->id == id_BODYGUARD) {
-                    continue;
+            {
+                if (!TouchHacks::CanForceTargetObj(*object, *candidate)) {
+                    goto reload_object_count;
                 }
 
-                if (target_filter == 1) {
-                    if (candidate_is_player) {
+                const bool candidate_is_player = candidate->apiobj.field_0x27c != -1;
+                if (!(WORLD->area != NULL && WORLD->area == EMPERORFIGHT_ADATA &&
+                      ((candidate->field_0xefb & 8) != 0 || candidate_is_player))) {
+                    if (candidate->id == id_BODYGUARD) {
+                        goto reload_object_count;
+                    }
+
+                    if (target_filter == 1) {
+                        if (candidate_is_player) {
+                            goto reload_object_count;
+                        }
+                        if ((candidate->apiobj.field_0x1f4 & 5) != 0) {
+                            const u8 source_index = object->apiobj.field_0x289;
+                            const u8 target_index = candidate->apiobj.field_0x289;
+                            const u32 hostility =
+                                WORLD->api_object_sys->hostility_masks[source_index][target_index >> 5];
+                            if ((hostility & (1u << (target_index & 31))) == 0) {
+                                goto reload_object_count;
+                            }
+                        }
+                    } else if (target_filter == 2 && !candidate_is_player) {
+                        goto reload_object_count;
+                    }
+                    if ((candidate->field_0xefb & 8) != 0) {
+                        goto reload_object_count;
+                    }
+
+                    i32 candidate_choke;
+                    i32 candidate_second;
+                    i32 candidate_direct;
+                    if (!target_animation_style(candidate, choke_style, second_style, super_weirdo, &candidate_choke,
+                                                &candidate_second, &candidate_direct)) {
+                        goto reload_object_count;
+                    }
+
+                    NUVEC delta;
+                    f32 distance =
+                        NuVecDistSqr(&object->apiobj.collision_position, &candidate->apiobj.collision_position, &delta);
+                    if (candidate->id == id_ATST) {
+                        distance *= 1.0f / 3.0f;
+                    }
+                    if (!(distance < best_distance)) {
+                        goto reload_object_count;
+                    }
+                    object_count = HIGHGAMEOBJECT;
+                    if (!(delta.x * object->facing_direction.x + delta.z * object->facing_direction.z < 0.0f)) {
                         continue;
                     }
-                    if ((candidate->apiobj.field_0x1f4 & 5) != 0) {
-                        const u8 source_index = object->apiobj.field_0x289;
-                        const u8 target_index = candidate->apiobj.field_0x289;
-                        const u32 hostility = WORLD->api_object_sys->hostility_masks[source_index][target_index >> 5];
-                        if ((hostility & (1u << (target_index & 31))) == 0) {
-                            continue;
-                        }
-                    }
-                } else if (target_filter == 2 && !candidate_is_player) {
-                    continue;
-                }
-                if ((candidate->field_0xefb & 8) != 0) {
-                    continue;
-                }
 
-                i32 candidate_choke;
-                i32 candidate_second;
-                i32 candidate_direct;
-                if (!target_animation_style(candidate, choke_style, second_style, super_weirdo, &candidate_choke,
-                                            &candidate_second, &candidate_direct)) {
+                    best = candidate;
+                    best_distance = distance;
+                    selected_choke = candidate_choke;
+                    selected_second = candidate_second;
+                    selected_direct = candidate_direct;
                     continue;
                 }
-
-                NUVEC delta;
-                f32 distance =
-                    NuVecDistSqr(&object->apiobj.collision_position, &candidate->apiobj.collision_position, &delta);
-                if (candidate->id == id_ATST) {
-                    distance *= 1.0f / 3.0f;
-                }
-                if (distance >= best_distance ||
-                    delta.x * object->facing_direction.x + delta.z * object->facing_direction.z >= 0.0f) {
-                    continue;
-                }
-
-                best = candidate;
-                best_distance = distance;
-                selected_choke = candidate_choke;
-                selected_second = candidate_second;
-                selected_direct = candidate_direct;
             }
+        reload_object_count:
+            object_count = HIGHGAMEOBJECT;
         }
     }
     if (best == NULL || best->character_context == 0x0f) {
@@ -436,7 +451,9 @@ void FindForcePushTarget(GameObject_s *object, i32 activate, i32 target_filter) 
                 best->context_animation = 0x53;
                 best->action_movement_state = 3;
             } else {
-                best->context_animation = best->apiobj.character_model->model_data_b[5] != NULL ? 5 : 0x2b;
+                best->context_animation = best->apiobj.character_model->model_data_b[0x2b] != NULL
+                                              ? 0x2b
+                                              : (best->apiobj.character_model->model_data_b[5] != NULL ? 5 : 0x2b);
                 best->action_movement_state = 0;
                 if (object->apiobj.player_controlled && Cheat_IsOn(0x13)) {
                     best->action_movement_state = 4;
@@ -571,11 +588,11 @@ void PushCode(GameObject_s *object, i32 allow_push) {
         return;
     }
 
-    u8 saved_context = object->character_context;
+    i8 saved_context = object->character_context;
     u16 wall_angle;
     i32 surface;
     i32 angle_difference;
-    f32 saved_push_timer = object->field_0xdc4;
+    i32 obstacle_input_difference;
     i32 set_facing_angle;
     i32 allow_block_push;
     i32 walljumpwait_context;
@@ -659,7 +676,7 @@ check_cinfo_flags: {
     if (set_facing_angle != 0) {
         object->takeover_start_angle = wall_angle;
     }
-    if (saved_push_timer <= 0.0f) {
+    if (object->field_0xdc4 <= 0.0f) {
         goto exit_push_check;
     }
     goto check_current_contexts;
@@ -682,7 +699,7 @@ check_jump_context: {
 check_walljump_flag: {
     GAMECHARACTERDATA_s *game_character =
         static_cast<GAMECHARACTERDATA_s *>(object->apiobj.character_data->field11_0x24);
-    if ((game_character->flags_090 & 0x8000000) != 0) {
+    if ((game_character->flags_090 & 0x8000000) == 0) {
         goto check_current_contexts;
     }
     walljumpwait_context = LEGOCONTEXT_WALLJUMPWAIT;
@@ -722,8 +739,9 @@ revalidate_context: {
     FastWeaponIn(object, 0);
     if (LEGOCONTEXT_WALLJUMPWAIT != -1 && LEGOCONTEXT_WALLJUMPWAIT == context) {
         PlayLandSfx(object, 0, 0);
+    } else {
+        PlayGruntSfx(object);
     }
-    PlayGruntSfx(object);
     if (set_facing_angle == 0) {
         return;
     }
@@ -732,10 +750,9 @@ revalidate_context: {
 }
 
 near_floor_push_check: {
-    if (GameObjectNearFloor(object, 1.25f, NULL) != 0) {
-        context = object->character_context;
-    }
-    if (context == -1) {
+    i32 near_floor = GameObjectNearFloor(object, 1.25f, NULL);
+    context = object->character_context;
+    if (near_floor != 0 && context == -1) {
         goto push_entry_gate;
     }
     goto check_jump_context_inner;
@@ -751,9 +768,6 @@ check_jump_context_inner: {
 
 push_entry_gate: {
     if (allow_push != 0) {
-        if (LEGOCONTEXT_PUSH == -1) {
-            goto check_jump_context_inner;
-        }
         if (LEGOACT_PUSH == -1 || object->apiobj.character_model->model_data_b[LEGOACT_PUSH] == NULL) {
             goto check_jump_context_inner;
         }
@@ -773,17 +787,16 @@ push_entry_gate: {
     if (object->character_context == -1) {
         goto check_current_contexts;
     }
-    if (LEGOACT_PUSH == -1) {
-        goto check_current_contexts;
-    }
     object->context_animation = LEGOACT_PUSH;
     SetPushAngle(object);
-    FastWeaponIn(object, 0);
-    PlayGruntSfx(object);
-    goto pushblock_maintain;
+    context = object->character_context;
+    goto check_current_contexts;
 }
 
 exit_push_check: {
+    if (LEGOCONTEXT_PUSHOBSTACLE != -1 && LEGOCONTEXT_PUSHOBSTACLE == context) {
+        GameCam_Blend(NULL, 0.5f, 0.0f, 1);
+    }
     object->character_context = -1;
     context = -1;
     goto check_current_contexts;
@@ -847,7 +860,7 @@ interaction_timer_expired: {
         }
     }
     {
-        u16 facing = object->apiobj.facing_angle;
+        u16 facing = object->apiobj.movement_facing_angle;
         facing += 0x8000;
         object->apiobj.facing_angle = facing;
         object->apiobj.movement_facing_angle = facing;
@@ -863,7 +876,7 @@ start_jump_nine: {
     StartJump(object, 9);
     object->airborne_action_timer = 1.2f;
     {
-        u16 facing = object->apiobj.facing_angle;
+        u16 facing = object->apiobj.movement_facing_angle;
         facing += 0x8000;
         object->apiobj.facing_angle = facing;
         object->apiobj.movement_facing_angle = facing;
@@ -891,11 +904,11 @@ pushobstacle_maintain: {
     {
         u16 wanted = GamePad_InputAngle(object, pad);
         u16 have = object->takeover_start_angle;
-        i32 diff = RotDiff(wanted, have);
-        if (diff < 0) {
-            diff = -diff;
+        obstacle_input_difference = RotDiff(wanted, have);
+        if (obstacle_input_difference < 0) {
+            obstacle_input_difference = -obstacle_input_difference;
         }
-        if (diff > 0x31c6) {
+        if (obstacle_input_difference > 0x31c6) {
             goto obstacle_steer;
         }
     }
@@ -907,8 +920,8 @@ pushobstacle_maintain: {
     {
         GIZOBSTACLE_s *obstacle = static_cast<GIZOBSTACLE_s *>(object->field_0x788);
         i32 mode = obstacle->anim_set->state;
-        i32 below = mode < 1;
-        i32 at_least = mode >= 1;
+        i32 below = mode == 0;
+        i32 at_least = mode != 0;
         GizObstacle_SetPushControlled(obstacle, object, -1.0f);
         if (below) {
             goto obstacle_rumble_a;
@@ -973,19 +986,19 @@ input_dead_obstacle: {
 }
 
 obstacle_steer: {
-    if (angle_difference <= 0x4e38) {
+    if (obstacle_input_difference <= 0x4e38) {
         goto superpush_idle_set;
     }
     object->field_0x758 = 0.75f;
-    object->context_animation = LEGOACT_SUPERPUSH_PUSH;
-    if (object->field_0x7a6 == 0x1e) {
+    object->context_animation = LEGOACT_SUPERPUSH_PULL;
+    if (object->field_0x7a6 != 0x1e) {
         goto obstacle_control_eq2;
     }
     {
         GIZOBSTACLE_s *obstacle = static_cast<GIZOBSTACLE_s *>(object->field_0x788);
         i32 mode = obstacle->anim_set->state;
-        i32 below = mode < 1;
-        i32 at_least = mode >= 1;
+        i32 below = mode == 0;
+        i32 at_least = mode != 0;
         GizObstacle_SetPushControlled(obstacle, object, -1.0f);
         if (below) {
             goto obstacle_rumble_a;
@@ -1018,10 +1031,10 @@ pushspinner_maintain: {
         if (object->apiobj.player_controlled) {
             u32 strength = qrand();
             f32 scaled = static_cast<f32>(strength) * 1.5259021893143654e-05f;
-            scaled *= 0.3f;
+            scaled *= 0.4f;
             NewRumble(object->pad_gamepad->pad, scaled, 0);
         }
-        search_center = reinterpret_cast<NUVEC *>(reinterpret_cast<uintptr_t>(object) - 0x80);
+        search_center = &object->apiobj.collision_position;
         GameAudio_PlaySfx(0x38, search_center, 0, 0);
         context = object->character_context;
         goto revalidate_context;
@@ -1080,9 +1093,7 @@ obstacle_path: {
 spinner_find: {
     // NOTE: unlike the obstacle branch below, the original performs no
     // permission check here and goes straight to the spinner search.
-    uintptr_t search_addr = reinterpret_cast<uintptr_t>(object);
-    search_addr -= 0x80;
-    search_center = reinterpret_cast<NUVEC *>(search_addr);
+    search_center = &object->apiobj.collision_position;
     {
         found_spinner = GizSpinner_Find(WORLD, search_center, 1);
         if (found_spinner == NULL) {
@@ -1104,9 +1115,7 @@ check_spinner_room: {
         context = object->character_context;
         goto push_anim_set;
     }
-    // The original compares a carried FP value against field_0x090 here;
-    // observably this gates on the armed push timer.
-    if (object->field_0xdc4 >= found_spinner->field_0x090) {
+    if (found_spinner->field_0x090 <= 0.0f) {
         goto spinner_teamwork_check;
     }
     context = object->character_context;
@@ -1114,8 +1123,7 @@ check_spinner_room: {
 }
 
 spinner_teamwork_check: {
-    // If a teammate in PUSHSPINNER already holds this spinner, join the
-    // push. Unrolled to match the original's straight-line layout.
+    // Another player already owns this spinner; only an unclaimed one can attach.
     i32 pushspinner_id = LEGOCONTEXT_PUSHSPINNER;
 #define CHECK_TEAMMATE(idx)                                                                                            \
     {                                                                                                                  \
@@ -1162,9 +1170,6 @@ push_anim_set_tail: {
     if (context == -1) {
         goto check_current_contexts;
     }
-    if (LEGOACT_PUSH == -1) {
-        goto check_current_contexts;
-    }
     object->context_animation = LEGOACT_PUSH;
     SetPushAngle(object);
     goto check_current_contexts;
@@ -1172,9 +1177,6 @@ push_anim_set_tail: {
 
 obstacle_find_check: {
     if (LEGOCONTEXT_PUSHOBSTACLE == -1) {
-        goto attach_obstacle_fail;
-    }
-    if (LEGOCONTEXT_PUSHSPINNER == -1) {
         goto attach_obstacle_fail;
     }
     if (CanPushObstaclesFn == NULL) {
@@ -1189,7 +1191,7 @@ obstacle_find_check: {
     }
     {
         f32 distance;
-        search_center = reinterpret_cast<NUVEC *>(reinterpret_cast<uintptr_t>(object) - 0x80);
+        search_center = &object->apiobj.collision_position;
         GIZOBSTACLE_s *obstacle = GizObstacle_FindNearest(WORLD->giz_obstacle_sys, search_center, object, &distance, 7);
         if (obstacle == NULL) {
             goto attach_obstacle_fail;
@@ -1212,7 +1214,7 @@ obstacle_find_check: {
 attach_obstacle_fail: { goto push_anim_set; }
 
 wallshuffle_entry: {
-    if (surface > 31) {
+    if (static_cast<u32>(surface) > 31) {
         goto wallshuffle_entry_gated;
     }
     if ((TerSurface[surface].flags & 0x10581) != 0) {
@@ -1220,10 +1222,7 @@ wallshuffle_entry: {
     }
 wallshuffle_entry_gated: {
     GAMECHARACTERDATA_s *gcd = static_cast<GAMECHARACTERDATA_s *>(object->apiobj.character_data->field11_0x24);
-    if (object->pad_gamepad->input_magnitude != gcd->run_speed) {
-        if (!allow_block_push) {
-            goto check_current_contexts;
-        }
+    if (object->pad_gamepad->input_magnitude != gcd->run_speed && !allow_block_push) {
         goto check_current_contexts;
     }
     if (set_facing_angle == 0) {
@@ -1274,7 +1273,7 @@ wallshuffle_entry_gated: {
         object->context_animation = wait_anim;
         object->landing_followup = 0;
         f32 duration = AnimDuration(object->id, wait_anim, 0.0f, 0.0f, 0);
-        f32 timer_value = duration <= 0.0f ? duration : 0.3f;
+        f32 timer_value = duration <= 0.0f ? 0.3f : duration;
         object->apiobj.movement_facing_angle = wall_angle;
         object->context_animation_timer = timer_value;
         object->apiobj.velocity = v000;

@@ -1637,8 +1637,9 @@ extern "C" {
                         const u32 wrapped = static_cast<u32>(angles[axis]) & 0xffff;
                         angles[axis] =
                             wrapped >= 0x8000 ? static_cast<i32>(wrapped) - 0x10000 : static_cast<i32>(wrapped);
-                        if (joint_override.rotation_limit_start[axis] >= angles[axis] &&
-                            angles[axis] < joint_override.rotation_limit_end[axis]) {
+                        if (angles[axis] > joint_override.rotation_limit_start[axis]) {
+                            angles[axis] = joint_override.rotation_limit_start[axis];
+                        } else if (angles[axis] < joint_override.rotation_limit_end[axis]) {
                             angles[axis] = joint_override.rotation_limit_end[axis];
                         }
                     }
@@ -2769,8 +2770,8 @@ extern "C" {
         NUMTX clip_matrix;
         NuCameraGetClipMtx(&clip_matrix, NULL);
         f32 aspect = (f32)PS2_REZ_W / (f32)PS2_REZ_H;
-        for (i32 i = 0; i < NuLgtLaserCnt; ++i) {
-            NULGTLASER *laser = &NuLgtLaserData[i];
+        NULGTLASER *laser = NuLgtLaserData;
+        for (i32 i = 0; i < NuLgtLaserCnt; ++i, ++laser) {
             vertices[4].x = laser->start.x;
             vertices[4].y = laser->start.y;
             vertices[4].z = laser->start.z;
@@ -4430,13 +4431,19 @@ extern "C" {
                 ++plane;
                 --plane_count;
             }
-            if (plane_distance > 0.0f) {
+            if (!(plane_distance <= 0.0f)) {
                 continue;
             }
 
+            // Later matches do not change the selected pair; avoid overflowing the candidate slots.
+            if (candidate_count >= 3) {
+                continue;
+            }
+
+            // Retail snapshots the old candidate rooms before inserting this room.
+            NUROOM &first = scene->rooms[candidates[0]];
+            NUROOM &second = scene->rooms[candidates[1]];
             if (candidate_count == 2) {
-                NUROOM &first = scene->rooms[candidates[0]];
-                NUROOM &second = scene->rooms[candidates[1]];
                 if (first.priority < second.priority) {
                     candidates[0] = static_cast<i16>(room_index);
                 } else {
@@ -4451,8 +4458,6 @@ extern "C" {
                 continue;
             }
 
-            NUROOM &first = scene->rooms[candidates[0]];
-            NUROOM &second = scene->rooms[candidates[1]];
             if ((first.flags & NUROOM_FLAG_OVERLAPPING) != 0 || (second.flags & NUROOM_FLAG_OVERLAPPING) != 0) {
                 continue;
             }
@@ -4460,7 +4465,7 @@ extern "C" {
         }
 
         if (candidate_count == 1) {
-            return candidates[0];
+            return static_cast<u16>(candidates[0]);
         }
         if (candidate_count == 0) {
             return -1;

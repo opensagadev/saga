@@ -63,79 +63,63 @@ static i32 AddNode(nuqthdr_s *header, i32 child) {
     return index;
 }
 
-static i32 AddElementR(nuqthdr_s *header, i32 index, nuqtdim_s *bounds,
-                       nuqtdim_s *item_bounds, void *item, i32 depth) {
+static i32 AddElementR(nuqthdr_s *header, i32 index, nuqtdim_s *bounds, nuqtdim_s *item_bounds, void *item, i32 depth) {
     i32 result = 0;
     --depth;
-    nuqtdim_s q0 = {bounds->x0, (bounds->x0 + bounds->x1) / 2.0f,
-                    bounds->y0, (bounds->y0 + bounds->y1) / 2.0f};
-    nuqtdim_s q1 = {(bounds->x0 + bounds->x1) / 2.0f, bounds->x1,
-                    bounds->y0, (bounds->y0 + bounds->y1) / 2.0f};
-    nuqtdim_s q2 = {bounds->x0, (bounds->x0 + bounds->x1) / 2.0f,
-                    (bounds->y0 + bounds->y1) / 2.0f, bounds->y1};
-    nuqtdim_s q3 = {(bounds->x0 + bounds->x1) / 2.0f, bounds->x1,
-                    (bounds->y0 + bounds->y1) / 2.0f, bounds->y1};
-    nuqtentry_s *entry = &header->entries[index];
-    if (entry->count >= 0) {
-        if (entry->count < static_cast<i32>(header->field_30) || depth == 0)
+    nuqtdim_s q0 = {bounds->x0, (bounds->x0 + bounds->x1) / 2.0f, bounds->y0, (bounds->y0 + bounds->y1) / 2.0f};
+    nuqtdim_s q1 = {(bounds->x0 + bounds->x1) / 2.0f, bounds->x1, bounds->y0, (bounds->y0 + bounds->y1) / 2.0f};
+    nuqtdim_s q2 = {bounds->x0, (bounds->x0 + bounds->x1) / 2.0f, (bounds->y0 + bounds->y1) / 2.0f, bounds->y1};
+    nuqtdim_s q3 = {(bounds->x0 + bounds->x1) / 2.0f, bounds->x1, (bounds->y0 + bounds->y1) / 2.0f, bounds->y1};
+    if (header->entries[index].count >= 0) {
+        if (header->entries[index].count < static_cast<i32>(header->field_30) || depth == 0)
             return InsertData(header, index, item);
 
-        u8 *old_data = entry->data;
-        entry->children[0] = AddNode(header, index);
-        entry->children[1] = AddNode(header, index);
-        entry->children[2] = AddNode(header, index);
-        entry->children[3] = AddNode(header, index);
-        if (entry->children[0] == 0 || entry->children[1] == 0 ||
-            entry->children[2] == 0 || entry->children[3] == 0) {
-            entry->data = old_data;
+        u8 *old_data = header->entries[index].data;
+        header->entries[index].children[0] = AddNode(header, index);
+        header->entries[index].children[1] = AddNode(header, index);
+        header->entries[index].children[2] = AddNode(header, index);
+        header->entries[index].children[3] = AddNode(header, index);
+        if (header->entries[index].children[0] != 0 || header->entries[index].children[1] == 0 ||
+            header->entries[index].children[2] == 0 || header->entries[index].children[3] == 0) {
+            header->entries[index].data = old_data;
             return InsertData(header, index, item);
         }
         u8 *old_item = old_data;
-        for (i32 i = 0; i < entry->count; ++i) {
+        for (i32 i = 0; i < header->entries[index].count; ++i) {
             // The original tests the incoming item's bounds when redistributing
             // existing data, and uses the saved data pointer for each recursive item.
             if (ElOverlaps(&q0, item_bounds))
-                result = AddElementR(header, entry->children[0], &q0,
-                                     item_bounds, old_item, depth);
+                result = AddElementR(header, header->entries[index].children[0], &q0, item_bounds, old_item, depth);
             if (ElOverlaps(&q1, item_bounds))
-                result = AddElementR(header, entry->children[1], &q1,
-                                     item_bounds, old_item, depth);
+                result = AddElementR(header, header->entries[index].children[1], &q1, item_bounds, old_item, depth);
             if (ElOverlaps(&q2, item_bounds))
-                result = AddElementR(header, entry->children[2], &q2,
-                                     item_bounds, old_item, depth);
+                result = AddElementR(header, header->entries[index].children[2], &q2, item_bounds, old_item, depth);
             if (ElOverlaps(&q3, item_bounds))
-                result = AddElementR(header, entry->children[3], &q3,
-                                     item_bounds, old_item, depth);
+                result = AddElementR(header, header->entries[index].children[3], &q3, item_bounds, old_item, depth);
             old_item += header->element_size;
         }
-        RemoveData(header, reinterpret_cast<char *>(old_data), entry->count);
-        entry->count = -1;
+        RemoveData(header, reinterpret_cast<char *>(old_data), header->entries[index].count);
+        header->entries[index].count = -1;
     }
-    if (entry->count < 0) {
-        if (ElOverlaps(&q0, item_bounds) && entry->children[0] != 0)
-            result = AddElementR(header, entry->children[0], &q0,
-                                 item_bounds, item, depth);
-        if (ElOverlaps(&q1, item_bounds) && entry->children[1] != 0)
-            result = AddElementR(header, entry->children[1], &q1,
-                                 item_bounds, item, depth);
-        if (ElOverlaps(&q2, item_bounds) && entry->children[2] != 0)
-            result = AddElementR(header, entry->children[2], &q2,
-                                 item_bounds, item, depth);
-        if (ElOverlaps(&q3, item_bounds) && entry->children[3] != 0)
-            result = AddElementR(header, entry->children[3], &q3,
-                                 item_bounds, item, depth);
+    if (header->entries[index].count < 0) {
+        if (ElOverlaps(&q0, item_bounds) && header->entries[index].children[0] != 0)
+            result = AddElementR(header, header->entries[index].children[0], &q0, item_bounds, item, depth);
+        if (ElOverlaps(&q1, item_bounds) && header->entries[index].children[1] != 0)
+            result = AddElementR(header, header->entries[index].children[1], &q1, item_bounds, item, depth);
+        if (ElOverlaps(&q2, item_bounds) && header->entries[index].children[2] != 0)
+            result = AddElementR(header, header->entries[index].children[2], &q2, item_bounds, item, depth);
+        if (ElOverlaps(&q3, item_bounds) && header->entries[index].children[3] != 0)
+            result = AddElementR(header, header->entries[index].children[3], &q3, item_bounds, item, depth);
     }
     return result;
 }
 
-extern "C" void NuQTAddElement(nuqthdr_s *header, void *item, f32 x0, f32 x1,
-                                 f32 y0, f32 y1) {
+extern "C" void NuQTAddElement(nuqthdr_s *header, void *item, f32 x0, f32 x1, f32 y0, f32 y1) {
     i16 root = 0;
-    nuqtdim_s bounds = {header->bounds_values[3], header->bounds_values[4],
-                        header->bounds_values[1], header->bounds_values[2]};
+    nuqtdim_s bounds = {header->bounds_values[3], header->bounds_values[4], header->bounds_values[1],
+                        header->bounds_values[2]};
     nuqtdim_s item_bounds = {x0, x1, y0, y1};
-    AddElementR(header, static_cast<u16>(root), &bounds, &item_bounds, item,
-                header->field_34);
+    AddElementR(header, static_cast<u16>(root), &bounds, &item_bounds, item, header->field_34);
 }
 
 static void NuQTUnfixAddress(nuqthdr_s *header) {
@@ -183,12 +167,10 @@ extern "C" i32 NuQTWrite(char *path, nuqthdr_s *header) {
     return 0;
 }
 
-extern "C" i32 NuQTCreate(i32 entry_capacity, i32 data_capacity, i32 element_size,
-                          u32 field_34, u32 field_30, u32 field_04, u32 field_0c,
-                          u32 field_08, u32 field_10, u8 **cursor, u8 **end) {
+extern "C" i32 NuQTCreate(i32 entry_capacity, i32 data_capacity, i32 element_size, u32 field_34, u32 field_30,
+                          u32 field_04, u32 field_0c, u32 field_08, u32 field_10, u8 **cursor, u8 **end) {
     *cursor = reinterpret_cast<u8 *>((reinterpret_cast<usize>(*cursor) + 15) & ~usize(15));
-    i32 required_size = sizeof(nuqthdr_s) + sizeof(nuqtentry_s) * entry_capacity +
-                        16 + data_capacity;
+    i32 required_size = sizeof(nuqthdr_s) + sizeof(nuqtentry_s) * entry_capacity + 16 + data_capacity;
     if (reinterpret_cast<usize>(*cursor) + required_size <= reinterpret_cast<usize>(*end)) {
         nuqthdr_s *header = reinterpret_cast<nuqthdr_s *>(*cursor);
         *cursor += sizeof(nuqthdr_s);

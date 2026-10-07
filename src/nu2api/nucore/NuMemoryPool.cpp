@@ -1,11 +1,12 @@
 #include "decomp.h"
 #include "nu2api/nucore/NuMemoryPool.h"
 #include "nu2api/nucore/numemory.h"
+#include "nu2api/nucore/nuthread.h"
 
 #include <string.h>
 
 NuMemoryPool *NuMemoryPool::m_firstPool;
-pthread_mutex_t NuMemoryPool::m_globalCriticalSection;
+NuCriticalSection NuMemoryPool::m_globalCriticalSection(NULL);
 
 void NuMemoryPool::AddPage(void *ptr, u32 size) {
     Page *page = NU_ALLOC_T(Page, NuMemoryManager::MEM_ALLOC_SET_TO_ZERO, "", NUMEMORY_CATEGORY_NONE);
@@ -202,10 +203,10 @@ NuMemoryPool::NuMemoryPool(IEventHandler *handler, u32 size, const char *debug_n
     page_list_stable = true;
     memset(free_lists, 0, sizeof(free_lists));
 
-    pthread_mutex_lock(&m_globalCriticalSection);
+    pthread_mutex_lock(&m_globalCriticalSection.mutex);
     next = m_firstPool;
     m_firstPool = this;
-    pthread_mutex_unlock(&m_globalCriticalSection);
+    pthread_mutex_unlock(&m_globalCriticalSection.mutex);
 }
 
 void *NuMemoryPool::PageAlloc(u32 size, const char *name) {
@@ -443,17 +444,17 @@ void NuMemoryPool::ReleaseUnreferencedPages_OLD() {
 }
 
 void NuMemoryPool::VisitPools(IVisitor *visitor) {
-    pthread_mutex_lock(&m_globalCriticalSection);
+    pthread_mutex_lock(&m_globalCriticalSection.mutex);
     for (NuMemoryPool *pool = m_firstPool; pool != NULL; pool = pool->next) {
         visitor->Visit(pool);
     }
-    pthread_mutex_unlock(&m_globalCriticalSection);
+    pthread_mutex_unlock(&m_globalCriticalSection.mutex);
 }
 
 NuMemoryPool::~NuMemoryPool() {
     ReleaseUnreferencedPages();
 
-    pthread_mutex_lock(&m_globalCriticalSection);
+    pthread_mutex_lock(&m_globalCriticalSection.mutex);
     if (m_firstPool == this) {
         m_firstPool = next;
     } else {
@@ -465,7 +466,7 @@ NuMemoryPool::~NuMemoryPool() {
             previous->next = next;
         }
     }
-    pthread_mutex_unlock(&m_globalCriticalSection);
+    pthread_mutex_unlock(&m_globalCriticalSection.mutex);
 
     pthread_mutex_destroy(&mutex);
 }

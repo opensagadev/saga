@@ -102,7 +102,7 @@ void ThermalDetonator_Throw(GameObject_s *object) {
             const VuVec arc = TouchHacks::CalculateXZVelForArcToHitPoint(origin, target, 2.0f, -5.0f);
             NextThermalTarget.Reset();
             // The retail path clamps only X; Z retains the calculated arc velocity.
-            velocity.x = arc.x < -3.0f ? -3.0f : arc.x >= 3.0f ? 3.0f : arc.x;
+            velocity.x = arc.x < 3.0f ? (arc.x < -3.0f ? -3.0f : arc.x) : 3.0f;
             velocity.z = arc.z;
         }
         velocity.y = 2.0f;
@@ -220,7 +220,7 @@ i32 ThermalDetonator_MoveCode(GameObject_s *object) {
 
         PART_s *part = FindPart(NULL, 0, object);
         if (part != NULL) {
-            if ((part->active & 2) != 0 && !(part->elapsed > 1.0f)) {
+            if ((part->active & 2) != 0 && !(part->field_100 > 1.0f)) {
                 return 0;
             }
             KillPart(part, 0);
@@ -343,6 +343,9 @@ void ThermalDetonator_ThrowMom(GameObject_s *object, nuvec_s *velocity) {
 }
 
 void PartImpact_ThermalDetonator(PART_s *part) {
+    if (part == NULL) {
+        return;
+    }
     if ((part->render_flags & 0x80) != 0 || part->field_209 == 0x1c) {
         KillPart(part, 0);
         return;
@@ -365,28 +368,31 @@ void PartImpact_ThermalDetonator(PART_s *part) {
     } else {
         GameShadow(NULL, &part->position, 5.0f, -1);
         u32 shadow = ShadowInfo();
-        if (shadow < 32 && (TerSurface[shadow].flags & 0x1000) != 0) {
-            PlaySfx(const_cast<char *>("imp_thermalDet_attach"), &part->position);
-            stuck = 2;
-        } else {
-            f32 water = EShadY;
-            if (water != 2000000.0f && (EShadowInfo() & ~8) == 1 && water > part->position.y) {
-                PlaySfx(const_cast<char *>("FS_WaterJump"), &part->position);
-                stuck = 1;
+        if (shadow < 32) {
+            if ((TerSurface[shadow].flags & 0x1000) != 0) {
+                PlaySfx(const_cast<char *>("imp_thermalDet_attach"), &part->position);
+                stuck = 2;
+            } else {
+                f32 water = EShadY;
+                if (water != 2000000.0f && (EShadowInfo() & ~8) == 1 && water > part->position.y) {
+                    PlaySfx(const_cast<char *>("FS_WaterJump"), &part->position);
+                    stuck = 1;
+                }
             }
         }
     }
     if (stuck != 0) {
+        void (*stop_callback)(PART_s *) = part->stop_callback;
         part->active |= 2;
-        if (part->stop_callback != NULL) {
-            part->stop_callback(part);
+        if (stop_callback != NULL) {
+            stop_callback(part);
         }
     }
     if (stuck != 2 && brickimpactwait <= 0.0f) {
         PartImpact_Brick(part);
         PlaySfx(const_cast<char *>("ThermalDet_Bnce"), &part->position);
     }
-    if ((part->active & 3) == 1) {
+    if ((part->active & 3) == 1 && WORLD != NULL) {
         NUVEC trail = {
             part->impact_position.x - part->impact_normal.x * part->radius,
             part->impact_position.y - part->impact_normal.y * part->radius,
@@ -397,6 +403,9 @@ void PartImpact_ThermalDetonator(PART_s *part) {
 }
 
 void PartUpdate_ThermalDetonator(PART_s *part) {
+    if (part == NULL) {
+        return;
+    }
     if ((part->active & 2) != 0 && (part->render_flags & 0x40) == 0) {
         if (part->field_100 > 0.0f && part->field_100 < 1.0f) {
             PlaySfx(const_cast<char *>("ThermalDet_Beep"), &part->position);
@@ -416,7 +425,7 @@ void PartUpdate_ThermalDetonator(PART_s *part) {
     }
     if (part->position.y > height) {
         i32 surface = ShadowInfo();
-        if (surface >= -1 && surface <= 16 && (TerSurface[surface].flags & 2) != 0) {
+        if (static_cast<u32>(surface) <= 16 && (TerSurface[surface].flags & 2) != 0) {
             part->reflection_height = height;
             part->reflection_flags |= 2;
         }
@@ -433,7 +442,8 @@ void PartUpdate_ThermalDetonator(PART_s *part) {
         ((TerLayer[layer].flags & 1) != 0 || (layer & ~8) == 1)) {
         part->render_flags |= 0x80;
     }
-    if (WORLD->current_level == DEATHSTARRESCUEA_LDATA && GameCam->sock_position.location.sock == 2) {
+    if (WORLD != NULL && GameCam != NULL && WORLD->current_level == DEATHSTARRESCUEA_LDATA &&
+        GameCam->sock_position.location.sock == 2) {
         part->velocity.x = SeekValF(part->velocity.x, 0.0f, 3.0f);
         part->velocity.z = SeekValF(part->velocity.z, 0.0f, 3.0f);
     }

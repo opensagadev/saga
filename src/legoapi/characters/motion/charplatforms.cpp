@@ -33,11 +33,12 @@ void SkinPlatform(terrsitu_s *terrain_group, unsigned char *buffer, PLATSKININFO
     while (input->marker >= 0) {
         output->marker = input->marker;
         output->shape_count = input->shape_count;
+        const i32 shape_count = input->shape_count;
         TERRAIN_SHAPE *source = reinterpret_cast<TERRAIN_SHAPE *>(input + 1);
         TERRAIN_SHAPE *destination = reinterpret_cast<TERRAIN_SHAPE *>(output + 1);
         f32 min_x = 123456792.0f, min_z = 123456792.0f;
         f32 max_x = -123456792.0f, max_z = -123456792.0f;
-        for (i32 i = 0; i < input->shape_count; ++i, ++source, ++destination) {
+        for (i32 remaining = shape_count; remaining > 0; --remaining, ++source, ++destination) {
             i32 last_vertex = source->normals[1].y > 65535.0f ? 2 : 3;
             memcpy(destination, source, sizeof(TERRAIN_SHAPE));
             NUVEC minimum = {123456792.0f, 123456792.0f, 123456792.0f};
@@ -66,10 +67,7 @@ void SkinPlatform(terrsitu_s *terrain_group, unsigned char *buffer, PLATSKININFO
             destination->max_x = maximum.x + 0.05f;
             destination->max_y = maximum.y + 0.05f;
             destination->max_z = maximum.z + 0.05f;
-            for (i32 normal = source->normals[1].y < 65535.0f ? 1 : 0; normal >= 0; --normal) {
-                i32 origin = normal != 0 ? 3 : 0;
-                i32 first = normal != 0 ? 1 : 2;
-                i32 second = normal != 0 ? 2 : 1;
+            auto update_normal = [destination](i32 normal, i32 origin, i32 first, i32 second) {
                 NUVEC a, b;
                 a.x = destination->vectors[first].x - destination->vectors[origin].x;
                 a.y = destination->vectors[first].y - destination->vectors[origin].y;
@@ -84,9 +82,13 @@ void SkinPlatform(terrsitu_s *terrain_group, unsigned char *buffer, PLATSKININFO
                 n.x *= inverse;
                 n.y *= inverse;
                 n.z *= inverse;
+            };
+            if (source->normals[1].y < 65535.0f) {
+                update_normal(1, 3, 1, 2);
             }
+            update_normal(0, 0, 2, 1);
         }
-        if (input->shape_count > 0) {
+        if (shape_count > 0) {
             min_x -= 0.05f;
             min_z -= 0.05f;
             max_x += 0.05f;
@@ -155,6 +157,7 @@ void CharPlatforms_Configure(WORLDINFO_s *world, char *config) {
             continue;
         }
 
+        system = world->char_platform_sys;
         CHARPLATFORM_s *platform = &system->platforms[system->platform_count];
         platform->object_id = CharIDFromName(parser->word_buf);
         if (platform->object_id == -1 || NuFParGetWord(parser) == 0) {
@@ -164,12 +167,14 @@ void CharPlatforms_Configure(WORLDINFO_s *world, char *config) {
             continue;
         }
 
+        system = world->char_platform_sys;
         platform->platform_id = -1;
         platform->object = NULL;
         ++system->platform_count;
     }
 
     NuFParDestroy(parser);
+    system = world->char_platform_sys;
     if (system->platform_count > 0) {
         world->giz_buffer.addr = ALIGN(reinterpret_cast<usize>(&system->platforms[system->platform_count]), 4);
     } else {

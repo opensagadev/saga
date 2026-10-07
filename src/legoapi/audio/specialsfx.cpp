@@ -180,25 +180,23 @@ void EngineNoiseCode(GameObject_s *object, i32 silent) {
     if (silent == 0) {
         f32 speed;
         if (object->apiobj.player_controlled) {
-            speed = *reinterpret_cast<f32 *>(reinterpret_cast<u8 *>(&object->player_packet) + 0x714);
-            if (speed < 0.0f) {
-                speed = -speed;
-            }
+            speed = __builtin_fabsf(object->field_0xdc8);
         } else {
             speed = object->apiobj.velocity_magnitude / character->movement_speed;
         }
-        target = speed <= 1.0f ? speed : 1.0f;
+        target = 1.0f < speed ? 1.0f : speed;
     }
 
-    f32 &engine_level = *reinterpret_cast<f32 *>(reinterpret_cast<u8 *>(&object->player_packet) + 0x6e0);
+    f32 &engine_level = object->force_use_volume;
     engine_level = SeekLinearF(engine_level, target, FRAMETIME * 0.5f);
     f32 volume = engine_level * 0.5f + 0.5f;
     if (!object->apiobj.player_controlled) {
         volume *= 0.6f;
     }
+    f32 pitch = engine_level * 0.4f + 0.6f;
+    pitch += (static_cast<f32>(static_cast<i32>(object->apiobj.field_0x289)) / 63.0f) * 0.05f - 0.025f;
     f32 variation = static_cast<f32>(qrand()) * 1.5259022e-5f * 0.03f + 0.985f;
-    f32 pitch = variation *
-                ((static_cast<f32>(object->apiobj.field_0x289) / 63.0f) * 0.05f - 0.025f + engine_level * 0.4f + 0.6f);
+    pitch *= variation;
     PlaySfxByIdAndSetVolumeAndPitch(sfx_id, &object->apiobj.collision_position, volume, pitch);
 }
 
@@ -284,12 +282,10 @@ void UpdateSpecialSfx(WORLDINFO_s *world) {
             f32 previous = event->previous_frame;
             f32 trigger = event->trigger_frame;
             if ((flags & 2) != 0) {
-                if (direction == 0) {
-                    if ((flags & 4) != 0 && trigger <= frame && frame <= previous) {
+                if ((direction == 0 && (flags & 4) != 0) || (flags & 0xc) == 0xc) {
+                    if (trigger <= frame && frame <= previous) {
                         play = true;
                     }
-                } else if ((flags & 0xc) == 0xc && trigger <= frame && frame <= previous) {
-                    play = true;
                 } else if (direction == 1 && (flags & 8) != 0 && frame <= trigger && trigger <= previous) {
                     play = true;
                 }
@@ -314,7 +310,9 @@ void UpdateSpecialSfx(WORLDINFO_s *world) {
                     continue;
                 }
             }
-            event->previous_frame = frame;
+            if ((event->flags & 2) == 0) {
+                event->previous_frame = frame;
+            }
             event = event->next;
         }
         entry->animation_playing = (animation->flags & NUINSTANIM_FLAG_PLAYING) != 0;

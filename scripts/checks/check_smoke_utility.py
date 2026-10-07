@@ -30,9 +30,15 @@ def main():
         run(["--area", "Negotiations", "--save", str(corrupt)], 2, "invalid game save")
         run(["--area", "Negotiations", "--save", str(corrupt) + ".missing"], 2, "invalid game save")
     run(["--area", "does-not-exist"], 2, "unknown destination")
+    run(["--level", "does-not-exist"], 2, "unknown destination")
+    # Existing title, cutscene and status entries must not enter the engine's
+    # gameplay path simply because they were selected by name instead of area.
+    for level in ("titles", "credits", "ep1_failedneg_intro1", "FailedNeg_Outro", "negotiations_status"):
+        run(["--level", level], 2, "destination is not a gameplay level")
     run(["--area", "Negotiations", "--timeout-ms", "1"], 124, "overall deadline")
     run(["--area", "Negotiations", "--stall-ms", "1"], 124, "stopped completing frames")
     run(["--area", "Negotiations", "--frames", "120"], 0, "smoke: PASS")
+    run(["--level", "Map", "--frames", "120"], 0, "smoke: PASS")
     # Version-7 turret records with a nonempty optional sound name previously
     # shifted the following record and overflowed the animation-name buffer.
     run(["--area", "AnakinsFlight", "--frames", "300"], 0, "smoke: PASS")

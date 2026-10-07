@@ -60,7 +60,9 @@ void ImplodePutByteToMem(unsigned char) {
 }
 
 i32 refpack(unsigned char *source, abi_long source_size, unsigned char *destination) {
-    memset(HashTable, 0xff, 0x40000);
+    for (u32 index = 0; index < 0x10000; ++index) {
+        HashTable[index] = -1;
+    }
 
     unsigned char *output = destination;
     if (source_size <= 0) {
@@ -70,28 +72,35 @@ i32 refpack(unsigned char *source, abi_long source_size, unsigned char *destinat
 
     unsigned char *input_start = source;
     unsigned char *literal_start = source;
-    abi_long remaining = source_size;
     u32 literal_count = 0;
 
-    while (remaining > 0) {
-        const i32 input_index = source - input_start;
+    while (source_size > 0) {
         const u32 hash = HashString(source);
+        const i32 input_index = source - input_start;
         i32 candidate_index = HashTable[hash];
-        const i32 chain_limit = MAX(0, input_index - 0x3fff);
+        const i32 chain_limit = input_index >= 0x4000 ? input_index - 0x3fff : 0;
+        if (candidate_index < chain_limit) {
+            LinkArray[input_index & 0x3fff] = candidate_index;
+            HashTable[hash] = input_index;
+            ++source;
+            --source_size;
+            ++literal_count;
+            continue;
+        }
         u32 match_length = 2;
         u32 match_offset = 0;
         u32 command_size = 2;
 
-        while (candidate_index >= chain_limit) {
+        do {
             unsigned char *candidate = input_start + candidate_index;
             if (candidate[match_length] == source[match_length]) {
-                const u32 length = GetMatchLength(source, candidate, MIN(remaining, 0x404));
+                const u32 length = GetMatchLength(source, candidate, MIN(source_size, 0x404));
                 if (length > match_length) {
                     const u32 offset = input_index - 1 - candidate_index;
                     u32 size;
-                    if (offset <= 0x3ff && length <= 0xa) {
+                    if (length <= 0xa && offset <= 0x3ff) {
                         size = 2;
-                    } else if (offset <= 0x3fff && length <= 0x43) {
+                    } else if (length <= 0x43 && offset <= 0x3fff) {
                         size = 3;
                     } else {
                         size = 4;
@@ -107,47 +116,49 @@ i32 refpack(unsigned char *source, abi_long source_size, unsigned char *destinat
                 }
             }
             candidate_index = LinkArray[candidate_index & 0x3fff];
-        }
+        } while (candidate_index >= chain_limit);
 
-        LinkArray[input_index & 0x3fff] = HashTable[hash];
-        HashTable[hash] = input_index;
+        if (command_size < match_length) {
+            while (literal_count > 3) {
+                const u32 count = MIN(literal_count & ~3u, 0x70u);
+                *output++ = (count >> 2) - 0x21;
+                memmove(output, literal_start, count);
+                output += count;
+                literal_start += count;
+                literal_count -= count;
+            }
 
-        if (command_size >= match_length) {
-            ++source;
-            --remaining;
-            ++literal_count;
-            continue;
-        }
+            if (command_size == 2) {
+                *output++ = ((match_length - 3) << 2) + ((match_offset >> 8) << 5) + literal_count;
+                *output++ = match_offset;
+            } else if (command_size == 3) {
+                *output++ = match_length + 0x7c;
+                *output++ = (literal_count << 6) + (match_offset >> 8);
+                *output++ = match_offset;
+            } else {
+                *output++ = 0xc0 + ((match_offset >> 16) << 4) + (((match_length - 5) >> 8) << 2) + literal_count;
+                *output++ = match_offset >> 8;
+                *output++ = match_offset;
+                *output++ = match_length - 5;
+            }
 
-        while (literal_count > 3) {
-            const u32 count = MIN(literal_count & ~3u, 0x70u);
-            *output++ = (count >> 2) - 0x21;
-            memmove(output, literal_start, count);
-            output += count;
-            literal_start += count;
-            literal_count -= count;
-        }
-
-        if (command_size == 2) {
-            *output++ = ((match_length - 3) << 2) + ((match_offset >> 8) << 5) + literal_count;
-            *output++ = match_offset;
-        } else if (command_size == 3) {
-            *output++ = match_length + 0x7c;
-            *output++ = (literal_count << 6) + (match_offset >> 8);
-            *output++ = match_offset;
+            if (literal_count != 0) {
+                memmove(output, literal_start, literal_count);
+                output += literal_count;
+            }
+            LinkArray[input_index & 0x3fff] = HashTable[hash];
+            HashTable[hash] = input_index;
+            source += match_length;
+            source_size -= match_length;
+            literal_start = source;
+            literal_count = 0;
         } else {
-            *output++ = 0xc0 + ((match_offset >> 16) << 4) + (((match_length - 5) >> 8) << 2) + literal_count;
-            *output++ = match_offset >> 8;
-            *output++ = match_offset;
-            *output++ = match_length - 5;
+            LinkArray[input_index & 0x3fff] = HashTable[hash];
+            HashTable[hash] = input_index;
+            ++source;
+            --source_size;
+            ++literal_count;
         }
-
-        memmove(output, literal_start, literal_count);
-        output += literal_count;
-        source += match_length;
-        remaining -= match_length;
-        literal_start = source;
-        literal_count = 0;
     }
 
     while (literal_count > 3) {
@@ -159,7 +170,9 @@ i32 refpack(unsigned char *source, abi_long source_size, unsigned char *destinat
         literal_count -= count;
     }
     *output++ = literal_count - 4;
-    memmove(output, literal_start, literal_count);
-    output += literal_count;
+    if (literal_count != 0) {
+        memmove(output, literal_start, literal_count);
+        output += literal_count;
+    }
     return output - destination;
 }

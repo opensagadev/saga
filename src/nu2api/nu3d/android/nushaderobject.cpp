@@ -397,8 +397,7 @@ extern "C" void NuShaderObjectGLSLProbeSemantics(NUSHADEROBJECT *shader) {
         return;
     }
 
-    const char *source_path =
-        "i:/SagaTouch-Android_9176564/nu2api.saga/shaderbuilder/android/nushaderobject.cpp";
+    const char *source_path = "i:/SagaTouch-Android_9176564/nu2api.saga/shaderbuilder/android/nushaderobject.cpp";
     BeginCriticalSectionGL(source_path, 582);
 
     GLint uniform_count;
@@ -997,35 +996,35 @@ extern "C" void NuShaderObjectGLSLSetupTextureStates(NUSHADEROBJECT *shader, num
         switch (semantic) {
             case 0: {
                 BIND_STATE_TEXTURE(mtl->shader_desc.diffuse_map_tex_id[0]);
-                const u8 wraps = reinterpret_cast<const u8 *>(mtl)[0x41];
-                const u32 wrap_t = (wraps >> 2) & 3;
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap_modes[wraps & 3]);
+                const u32 wrap_s = mtl->attribs.unknown_1_1_2;
+                const u32 wrap_t = mtl->attribs.unknown_1_4_8;
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap_modes[wrap_s]);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap_modes[wrap_t]);
                 NuCheckGLErrorsFL(source, 0x491);
                 break;
             }
             case 1: {
                 BIND_STATE_TEXTURE(mtl->shader_desc.diffuse_map_tex_id[1]);
-                const u8 wraps = reinterpret_cast<const u8 *>(mtl)[0x41];
-                const u32 wrap_t = (wraps >> 2) & 3;
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap_modes[wraps & 3]);
+                const u32 wrap_s = mtl->attribs.unknown_1_1_2;
+                const u32 wrap_t = mtl->attribs.unknown_1_4_8;
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap_modes[wrap_s]);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap_modes[wrap_t]);
                 NuCheckGLErrorsFL(source, 0x49a);
                 break;
             }
             case 2: {
                 BIND_STATE_TEXTURE(mtl->shader_desc.diffuse_map_tex_id[2]);
-                const u8 wraps = reinterpret_cast<const u8 *>(mtl)[0x41];
-                const u32 wrap_t = (wraps >> 2) & 3;
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap_modes[wraps & 3]);
+                const u32 wrap_s = mtl->attribs.unknown_1_1_2;
+                const u32 wrap_t = mtl->attribs.unknown_1_4_8;
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap_modes[wrap_s]);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap_modes[wrap_t]);
                 break;
             }
             case 3: {
                 BIND_STATE_TEXTURE(mtl->shader_desc.diffuse_map_tex_id[3]);
-                const u8 wraps = reinterpret_cast<const u8 *>(mtl)[0x41];
-                const u32 wrap_t = (wraps >> 2) & 3;
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap_modes[wraps & 3]);
+                const u32 wrap_s = mtl->attribs.unknown_1_1_2;
+                const u32 wrap_t = mtl->attribs.unknown_1_4_8;
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap_modes[wrap_s]);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap_modes[wrap_t]);
                 NuCheckGLErrorsFL(source, 0x4ab);
                 break;

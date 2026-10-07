@@ -6,6 +6,7 @@
 #include "legoapi/gizmos/traps/gizforce.h"
 #include "legoapi/gizmos/traps/gizturrets.h"
 #include "legoapi/characters/motion.h"
+#include "legoapi/characters/core/players.h"
 
 u32 GizmoBlowups_TotalScore(void *world);
 extern i32 DoubleScore;
@@ -255,6 +256,7 @@ extern FadeSystem FadeSys;
 
 void Collection_Draw(COLLECTION_s *collection, float x, float y, float scale, APICHARACTERMODELLIST_s *models,
                      float alpha, i32 hide_selected) {
+    const f32 base_dy = COLLECTION_DY;
     nuhspecial_s *special = collection_draw_hspecial;
     i32 (*valid)(COLLECTION_s *, i32) = collection_draw_IsValidFn;
     collection_draw_hspecial = NULL;
@@ -290,7 +292,7 @@ void Collection_Draw(COLLECTION_s *collection, float x, float y, float scale, AP
                 }
         }
     }
-    const f32 dy = COLLECTION_DY * scale;
+    const f32 dy = base_dy * scale;
     collection->field_14 = dy;
     if (alpha > 1.0f)
         alpha = 1.0f;
@@ -328,7 +330,7 @@ void Collection_Draw(COLLECTION_s *collection, float x, float y, float scale, AP
                 id = -1;
             }
             opacity *= alpha;
-            if (opacity <= 0.0f)
+            if (!(opacity > 0.0f))
                 continue;
             u32 neighbours = 0;
             for (i32 player = 0; player < 2; ++player) {
@@ -438,7 +440,7 @@ void Collection_CreateCustom(char *name, i16 *id_list, COLLECTION_s *collection,
             if (id < 0) {
                 continue;
             }
-            if (excluded_model_flags != 0 && (CDataList[id].model_flags & excluded_model_flags) != 0) {
+            if (excluded_model_flags != 0 && (apicharsys->char_data[id].model_flags & excluded_model_flags) != 0) {
                 continue;
             }
             if (require_buyable != 0 && source.can_buy == 0) {
@@ -459,7 +461,7 @@ void Collection_CreateCustom(char *name, i16 *id_list, COLLECTION_s *collection,
                 (CDataList[id].model_flags & required_model_flags) != required_model_flags) {
                 continue;
             }
-            if (excluded_model_flags != 0 && (CDataList[id].model_flags & excluded_model_flags) != 0) {
+            if (excluded_model_flags != 0 && (apicharsys->char_data[id].model_flags & excluded_model_flags) != 0) {
                 continue;
             }
             if (required_game_flags != 0 && (GCDataList[id].flags_090 & required_game_flags) != required_game_flags) {

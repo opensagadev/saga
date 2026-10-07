@@ -27,22 +27,26 @@ void ReadInstAnimBlockDlist(i32 file, nugscn_s *scene) {
     NUDLDLISTSCENE *display_list = scene->display_list;
     scene->num_instance_animations = static_cast<i16>(NuFileReadInt(file));
     NuFileReadInt(file);
-    scene->instance_animations = static_cast<nuinstanim_s *>(NuMemFileAddr(file));
+    nuinstanim_s *animations = static_cast<nuinstanim_s *>(NuMemFileAddr(file));
+    scene->instance_animations = animations;
 
-    if (scene->instance_animations != NULL && display_list->nspecials > 0) {
-        NUDISPLAYSPECIAL *specials = static_cast<NUDISPLAYSPECIAL *>(display_list->specials);
-        for (i32 special_index = 0; special_index < display_list->nspecials; ++special_index) {
-            NUDISPLAYSPECIAL *special = &specials[special_index];
-            const isize animation_index = reinterpret_cast<isize>(special->instance_animation);
-            if (animation_index == -1) {
-                special->instance_animation = NULL;
-                continue;
+    if (animations != NULL) {
+        const i32 special_count = display_list->nspecials;
+        if (special_count > 0) {
+            NUDISPLAYSPECIAL *specials = static_cast<NUDISPLAYSPECIAL *>(display_list->specials);
+            for (i32 special_index = 0; special_index < special_count; ++special_index) {
+                NUDISPLAYSPECIAL *special = &specials[special_index];
+                const isize animation_index = reinterpret_cast<isize>(special->instance_animation);
+                if (animation_index == -1) {
+                    special->instance_animation = NULL;
+                    continue;
+                }
+
+                nuinstanim_s *animation = &animations[animation_index];
+                special->instance_animation = animation;
+                animation->mtx = special->instance_mtx;
+                animation->instance_ix = static_cast<u16>(special_index);
             }
-
-            nuinstanim_s *animation = &scene->instance_animations[animation_index];
-            special->instance_animation = animation;
-            animation->mtx = special->instance_mtx;
-            animation->instance_ix = static_cast<u16>(special_index);
         }
     }
 

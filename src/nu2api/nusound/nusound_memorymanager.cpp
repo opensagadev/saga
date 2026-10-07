@@ -8,14 +8,14 @@
 #include <cstdio>
 #include <new>
 
-pthread_mutex_t NuSoundMemoryBuffer::s_cs = PTHREAD_MUTEX_INITIALIZER;
+NuCriticalSection NuSoundMemoryBuffer::s_cs(NULL);
 
 void NuSoundMemoryBuffer::BeginCriticalSection() {
-    pthread_mutex_lock(&s_cs);
+    s_cs.Lock();
 }
 
 void NuSoundMemoryBuffer::EndCriticalSection() {
-    pthread_mutex_unlock(&s_cs);
+    s_cs.Unlock();
 }
 
 void NuSoundMemoryBuffer::SetNext(NuSoundMemoryBuffer *next) {

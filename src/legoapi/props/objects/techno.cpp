@@ -136,13 +136,13 @@ static void Technos_Reset(void *world_ptr, void *, void *progress_ptr) {
 
         NewTerrPlatformsOff();
         const f32 floor_height = GameShadow(NULL, &techno.ground_position, 5.0f, -1);
-        if (floor_height == floor_height) {
+        if (floor_height == 2000000.0f) {
             techno.ground_position.y = 2000000.0f;
-            techno.ground_offset = 0.0f;
         } else {
             techno.ground_position.y = floor_height + 0.005f;
             FindAnglesZX(&ShadNorm, &techno.ground_x_rotation, &techno.ground_z_rotation);
         }
+        techno.ground_offset = 0.0f;
 
         techno.flags =
             static_cast<u8>((techno.flags | TECHNO_FLAG_ACTIVE | TECHNO_FLAG_VISIBLE) & ~TECHNO_FLAG_USED_THIS_FRAME);
@@ -203,11 +203,11 @@ static void Technos_Draw(void *world_ptr, void *, float) {
         return;
     }
 
+    TECHNO *techno = world->technos;
     const u16 spin_angle = static_cast<u16>(NuFmod(GameTimer.time_elapsed, 5.0f) / 5.0f * 65536.0f);
     const f32 pulse_phase = NuFmod(GameTimer.time_elapsed_mod_seconds, 0.5f) * 2.0f * 65536.0f;
     const f32 pulse = NuTrigTable[(static_cast<i32>(pulse_phase) >> 1) & 0x7fff] * 0.2f + 0.8f;
 
-    TECHNO *techno = world->technos;
     for (i32 index = 0; index < world->ntechnos; ++index, ++techno) {
         if ((techno->flags & TECHNO_FLAG_VISIBLE) == 0) {
             continue;
@@ -310,7 +310,6 @@ static i32 Technos_Load(void *world_ptr, void *) {
         techno.y_rotation = static_cast<i16>(EdFileReadShort());
 
         if (version <= 1) {
-            techno.enabled = 1;
             techno.scale = 1.0f;
             techno.output = 0;
             continue;
@@ -614,9 +613,9 @@ void Techno_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
             object->character_context = -1;
             object->tag_flags |= 1;
             object->apiobj.movement_facing_angle += 0x8000;
-            Technos_MoveTarget(techno, NULL);
+            Technos_MoveTarget(static_cast<TECHNO *>(object->field_0x788), NULL);
         } else {
-            Technos_MoveTarget(techno, object);
+            Technos_MoveTarget(static_cast<TECHNO *>(object->field_0x788), object);
         }
     } else {
         if ((object->apiobj.player_controlled || object->use_action == 2) && object->suit != NULL &&
@@ -627,7 +626,7 @@ void Techno_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
                 return;
             }
 
-            f32 range = object->apiobj.field_0x1dc + 2000000.0f;
+            f32 range = object->apiobj.field_0x1dc + 0.25f;
             f32 hint_range = range * 2.5f;
             if (hint_range * hint_range > distance) {
                 techno->flags |= TECHNO_FLAG_USED_THIS_FRAME;

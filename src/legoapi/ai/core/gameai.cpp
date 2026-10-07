@@ -87,9 +87,9 @@ void LoopCode(GameObject_s *object, i32 jump_pressed, i32, GAMEPAD_s *pad, i32 a
             object->delayed_turn_timer = 0.3f;
         } else {
             const f32 phase = object->context_animation_timer / object->airborne_action_duration;
-            const i32 index = static_cast<i32>((1.0f - phase) * -65536.0f + 16384.0f);
+            const i32 index = static_cast<i32>((1.0f - phase) * 32768.0f + 16384.0f);
             const f32 curve = (NuTrigTable[(index >> 1) & 0x7fff] + 1.0f) * 0.5f;
-            object->secondary_lean_angle = static_cast<i16>((1.0f - curve) * 65536.0f);
+            object->secondary_lean_angle = static_cast<i16>(static_cast<i32>((1.0f - curve) * 65536.0f));
         }
         return;
     }

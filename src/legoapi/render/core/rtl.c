@@ -3431,7 +3431,7 @@ extern "C" void edrtlCalculateBurnout(burnset_s *set, f32 *threshold, f32 *inten
         }
         if (desired_dispersion > set->parameters_copy.field_1c) {
             f32 moved = set->parameters_copy.field_1c + step;
-            set->parameters_copy.field_1c = desired_dispersion > moved ? moved : desired_dispersion;
+            set->parameters_copy.field_1c = desired_dispersion > moved ? desired_dispersion : moved;
         } else if (desired_dispersion < set->parameters_copy.field_1c) {
             f32 moved = set->parameters_copy.field_1c - step;
             set->parameters_copy.field_1c = moved > desired_dispersion ? desired_dispersion : moved;

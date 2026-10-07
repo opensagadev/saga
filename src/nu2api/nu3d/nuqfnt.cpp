@@ -738,19 +738,31 @@ void NuQFntPopPrintMode(void) {
 i32 UnicodeToIndexFast(vucharidx_s *map, i32 count, u16 unicode) {
     if (count <= 0 || map[count - 1].unicode < unicode)
         return -1;
+    if (count == 1)
+        return map[0].unicode == unicode ? map[0].index : -1;
 
     i32 low = 0;
     i32 high = count - 1;
-    while (low <= high) {
-        i32 middle = (low + high) >> 1;
-        if (map[middle].unicode == unicode)
-            return map[middle].index;
-        if (map[middle].unicode < unicode)
-            low = middle + 1;
-        else
-            high = middle - 1;
+    i32 middle = count / 2;
+    u16 middle_unicode = map[middle].unicode;
+    while (middle_unicode != unicode) {
+        if (low + 1 == high) {
+            if (map[high].unicode == unicode)
+                return map[high].index;
+            if (map[low].unicode == unicode)
+                return map[low].index;
+            return -1;
+        }
+        if (middle_unicode > unicode) {
+            high = middle;
+            middle = (low + middle) >> 1;
+        } else {
+            low = middle;
+            middle = (high + middle) >> 1;
+        }
+        middle_unicode = map[middle].unicode;
     }
-    return -1;
+    return map[middle].index;
 }
 
 u16 NuQFntEncodeUnicodeChar(NUQFNT *font, u16 character) {
@@ -823,13 +835,14 @@ f32 NuQFntPrintJustifiedRSW(RNDRSTREAM *stream, void *font_ptr, u16 *text, f32 x
                 ++next;
             line[length] = 0;
             const f32 word_width = NuQFntPrintLenW(font, line);
+            const f32 combined_word_width = word_width + words_width;
             if (words != 0 &&
-                width * justify_squash <
-                    (words + punctuation_spaces + extra_spaces) * printed_space_width + word_width + words_width) {
+                !(width * justify_squash >=
+                  (words + punctuation_spaces + extra_spaces) * printed_space_width + combined_word_width)) {
                 next = word_start;
                 break;
             }
-            words_width = word_width + words_width;
+            words_width = combined_word_width;
             ++words;
             punctuation_spaces += extra_spaces;
             if (*next == 0)
@@ -837,14 +850,15 @@ f32 NuQFntPrintJustifiedRSW(RNDRSTREAM *stream, void *font_ptr, u16 *text, f32 x
         }
 
         i32 length = 0;
-        while (text < next) {
-            if (*text != 0x20) {
-                line[length++] = *text++;
+        u16 *copy_cursor = text;
+        while (copy_cursor < next) {
+            if (*copy_cursor != 0x20) {
+                line[length++] = *copy_cursor++;
             } else {
                 line[length++] = 0x20;
                 do {
-                    ++text;
-                } while (*text == 0x20);
+                    ++copy_cursor;
+                } while (*copy_cursor == 0x20);
             }
         }
         line[length] = 0;
@@ -852,12 +866,12 @@ f32 NuQFntPrintJustifiedRSW(RNDRSTREAM *stream, void *font_ptr, u16 *text, f32 x
         f32 scale;
         if (*next == 0) {
             const f32 ratio = width / (printed_space_width * spaces + words_width);
-            scale = ratio <= 1.0f ? ratio : 1.0f;
+            scale = 1.0f < ratio ? 1.0f : ratio;
         } else if (words == 1) {
             scale = width / words_width;
         } else {
             const f32 ratio = width / (printed_space_width * spaces + words_width);
-            scale = ratio <= justify_stretch ? ratio : justify_stretch;
+            scale = justify_stretch < ratio ? justify_stretch : ratio;
         }
         NuQFntSetScaleRS(stream, font, sx * scale, sy);
         if (*next == 0) {
@@ -1035,19 +1049,21 @@ struct NuQFntVertex {
 };
 
 static inline u16 NuQFntFloatToHalf(f32 value) {
+    // The reference packs signed intermediates into a 16-bit result.
     union {
         f32 value;
         u32 bits;
     } conversion = {value};
-    i32 exponent = static_cast<i32>((conversion.bits >> 23) & 0xff) - 0x70;
-    u16 half_exponent = 0;
+    i32 sign = conversion.bits >> 31;
+    i32 exponent = ((conversion.bits >> 23) & 0xff) - 112;
+    i32 mantissa = conversion.bits & 0x7fffff;
+    i16 half_exponent = 0;
     if (exponent >= 0) {
-        half_exponent = 0x7c00;
-        if (exponent < 0x20)
-            half_exponent = static_cast<u16>(exponent << 10);
+        i16 candidate = static_cast<i16>(exponent << 10);
+        half_exponent = exponent > 31 ? static_cast<i16>(0x7c00) : candidate;
     }
-    return static_cast<u16>((conversion.bits & 0x7fffff) >> 13) | static_cast<u16>((conversion.bits >> 31) << 15) |
-           half_exponent;
+    i16 result = (sign << 15) | (mantissa >> 13) | half_exponent;
+    return *reinterpret_cast<const u16 *>(&result);
 }
 
 static inline void NuQFntSetVertexAttributes(NuQFntVertex *vertex, u32 colour, u32 half_colour, f32 u, f32 v) {

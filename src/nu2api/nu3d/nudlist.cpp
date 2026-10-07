@@ -401,26 +401,32 @@ extern "C" NUDLDLISTSCENE *NuDisplaySceneClone(NUDLDLISTSCENE *source, VARIPTR *
     NuDisplaySceneClonePS(source, scene, buffer);
     global_dlist_manager.dlists[global_dlist_manager.ndisplay_lists++] = scene;
     ResetSceneBeforeFrame(scene, false);
-    NUSORTPRI *sort_list = global_dlist_manager.sort_list;
-    for (i32 i = 0; i < scene->nsort_pris; ++i) {
-        NUSORTPRI *sort = &scene->sort_pris[i];
-        sort->sort_pri &= 0x1ffff;
-        if (numtl_renderplane != 0)
-            sort->sort_pri += numtl_renderplane * 0x20000;
-        NUSORTPRI *previous = NULL;
-        NUSORTPRI *current = sort_list;
-        while (current != NULL && current->sort_pri < sort->sort_pri) {
-            previous = current;
-            current = current->sys_next;
+    if (scene->nsort_pris > 0) {
+        NUSORTPRI *sort = scene->sort_pris;
+        NUSORTPRI *sort_list = global_dlist_manager.sort_list;
+        i32 render_plane = numtl_renderplane;
+        i32 render_plane_offset = render_plane * 0x20000;
+        i32 used_sort_pris = global_dlist_manager.nused_sort_pris;
+        for (i32 i = 0; i < scene->nsort_pris; ++i, ++sort) {
+            sort->sort_pri &= 0x1ffff;
+            if (render_plane != 0)
+                sort->sort_pri += render_plane_offset;
+            NUSORTPRI *previous = NULL;
+            NUSORTPRI *current = sort_list;
+            while (current != NULL && current->sort_pri < sort->sort_pri) {
+                previous = current;
+                current = current->sys_next;
+            }
+            sort->sys_next = current;
+            if (previous == NULL)
+                sort_list = sort;
+            else
+                previous->sys_next = sort;
+            ++used_sort_pris;
         }
-        sort->sys_next = current;
-        if (previous == NULL)
-            sort_list = sort;
-        else
-            previous->sys_next = sort;
-        ++global_dlist_manager.nused_sort_pris;
+        global_dlist_manager.sort_list = sort_list;
+        global_dlist_manager.nused_sort_pris = used_sort_pris;
     }
-    global_dlist_manager.sort_list = sort_list;
     scene->flags &= 0xef;
     scene->render_buffer |= 0x20;
     NuDisplaySceneAddPS(scene);

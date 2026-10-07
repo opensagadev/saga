@@ -117,13 +117,13 @@ i32 InModelListDataFlags(APICHARACTERMODELLIST_s *models, u32 model_flags, u32 g
             return FindModelListDataFlags<true, true, false>(models, model_flags, game_flags, first_id);
         return FindModelListDataFlags<true, false, false>(models, model_flags, game_flags, first_id);
     }
-    if (reject_flag_80 != 0) {
-        if (reject_flag_40 != 0)
+    if (reject_flag_40 != 0) {
+        if (reject_flag_80 != 0)
             return FindModelListDataFlags<false, true, true>(models, model_flags, game_flags, first_id);
-        return FindModelListDataFlags<false, false, true>(models, model_flags, game_flags, first_id);
-    }
-    if (reject_flag_40 != 0)
         return FindModelListDataFlags<false, true, false>(models, model_flags, game_flags, first_id);
+    }
+    if (reject_flag_80 != 0)
+        return FindModelListDataFlags<false, false, true>(models, model_flags, game_flags, first_id);
     return FindModelListDataFlags<false, false, false>(models, model_flags, game_flags, first_id);
 }
 
@@ -249,10 +249,11 @@ void creatureEditor_Render(i32 x, i32 y, float xscale, float yscale) {
          link = NuLinkedListGetNext(&aieditor->creatures, link)) {
         u8 *record = reinterpret_cast<u8 *>(link);
         EDCREATURE_s *creature = reinterpret_cast<EDCREATURE_s *>(record);
+        u8 *nearest_for_render = *reinterpret_cast<u8 **>(aieditor->unknown_3692c);
         i32 render_colour = record == reinterpret_cast<u8 *>(aieditor->mode_selection_36930)
-                                ? (record == nearest_for_menu ? 0xff0000ff : 0x800000ff)
-                                : (record == nearest_for_menu ? -1 : 0);
-        for (i32 group = 0; group < record[0x5b]; ++group) {
+                                ? (record == nearest_for_render ? 0xff0000ff : 0x800000ff)
+                                : (record == nearest_for_render ? -1 : 0);
+        for (i32 group = 0; group < record[0x5b]; ++group, render_colour = 0) {
             u32 valid_positions = *reinterpret_cast<u32 *>(record + 0x54);
             if (!((static_cast<u64>(valid_positions) >> (group & 63)) & 1) || !creatureEditor_IsSelectable(creature)) {
                 continue;
@@ -282,10 +283,10 @@ void creatureEditor_Render(i32 x, i32 y, float xscale, float yscale) {
                 line[1].colour = render_colour + 0x8000;
                 AiRndrLine3d(line, nullptr, nullptr);
             }
-            render_colour = 0;
         }
     }
-    if (nearest_for_menu == nullptr && *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(aieditor) + 0x48) != 0 &&
+    if (*reinterpret_cast<u8 **>(aieditor->unknown_3692c) == nullptr &&
+        *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(aieditor) + 0x48) != 0 &&
         *reinterpret_cast<f32 *>(reinterpret_cast<u8 *>(aieditor) + 0x42ea4) < 1.0f &&
         aieditorsettings.current_path_type >= 0) {
         GlobalCharacterRenderFn(&aieditor->camera_position, static_cast<i16>(aieditorsettings.area_rotation),

@@ -222,7 +222,7 @@ void UpdateStreaks(float elapsed) {
         while (streak != NULL) {
             STREAK_s *next_streak = streak->next;
             streak->remaining_time -= elapsed;
-            if (streak->remaining_time <= 0.0f) {
+            if (streak->remaining_time <= 0.0f && next_streak == NULL) {
                 UnlinkStreak(&header->streaks, streak);
                 streak->next = streaks_free;
                 streaks_free = streak;

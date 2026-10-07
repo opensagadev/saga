@@ -1,0 +1,33 @@
+load("@rules_cc//cc:cc_test.bzl", "cc_test")
+
+# Actual production predicate and context-table owner, not copied logic.
+# Linux i686 diagnostic; no engine archive, assets, services, or display.
+# Requires a 32-bit C++ toolchain and GLES2 development headers.
+cc_test(
+    name = "cannot_kill_test",
+    size = "small",
+    srcs = [
+        "cannot_kill_test.cpp",
+        "//src:legoapi/actions/combat/hits.cpp",
+        "//src:legoapi/characters/motion/move.cpp",
+    ],
+    additional_compiler_inputs = ["//src:all_source_files"],
+    defines = ["ANDROID"],
+    copts = [
+        "-Isrc",
+        "-x",
+        "c++",
+        "-std=gnu++17",
+        "-m32",
+        "-march=i686",
+        "-msse2",
+        "-mfpmath=sse",
+        "-ffunction-sections",
+        "-fdata-sections",
+    ],
+    linkopts = [
+        "-m32",
+        "-Wl,--gc-sections",
+    ],
+    target_compatible_with = ["@platforms//os:linux"],
+)
