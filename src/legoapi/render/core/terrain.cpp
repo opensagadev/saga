@@ -7542,7 +7542,7 @@ i16 *NewScanHandelFull(nuvec_s *position, nuvec_s *movement, f32 radius, i32 sca
 
 i16 *NewScanHandelSubset(i16 *subset, nuvec_s *position, nuvec_s *movement, f32 radius, i32 terrain_mask) {
     TerrainScanWriter writer;
-    if (subset == NULL || CurTerr == NULL || position == NULL || movement == NULL || !TerrainBeginHandle(&writer))
+    if (subset == NULL || !TerrainBeginHandle(&writer))
         return NULL;
     i16 *result = reinterpret_cast<i16 *>(writer.group_header);
     TerrainScanBounds bounds = TerrainHandleBounds(*position, *movement, radius);
