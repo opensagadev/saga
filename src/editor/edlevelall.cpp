@@ -621,7 +621,8 @@ i32 ClassEditor::Editable(void *object, EdClass *object_class, i32 index) {
 }
 
 i32 ClassEditor::FindNearestObject(VuVec &point, ClassObject &result, ClassObject &after, i32 filter) {
-    ClassObject candidates[16];
+    EdClass *candidate_classes[16] = {};
+    void *candidate_objects[16] = {};
     i32 candidate_count = 0;
     for (i32 class_index = 0; class_index < theRegistry.class_count; ++class_index) {
         EdClass *ed_class = &theRegistry.classes[class_index];
@@ -630,7 +631,7 @@ i32 ClassEditor::FindNearestObject(VuVec &point, ClassObject &result, ClassObjec
             interface->vtable->get_next_object == NULL)
             continue;
         for (void *object = interface->vtable->get_next_object(interface, NULL); object != NULL;
-             object = interface->vtable->get_next_object(interface, object)) {
+             object = ed_class->interface->vtable->get_next_object(ed_class->interface, object)) {
             if (!Editable(object, ed_class, -1))
                 continue;
             EdMember member;
@@ -641,11 +642,15 @@ i32 ClassEditor::FindNearestObject(VuVec &point, ClassObject &result, ClassObjec
             f32 dx = position.x - point.x;
             f32 dy = position.y - point.y;
             f32 dz = position.z - point.z;
+            f32 distance_squared = dx * dx + dy * dy + dz * dz;
             f32 radius = 1.0f;
             if (ed_class->FindMember(&member, object, 0x40, 1))
                 member.reference->GetAttributeData(member.object, 0x40, EdType_Float, &radius, 0);
-            if (dx * dx + dy * dy + dz * dz < radius * radius && candidate_count < 16)
-                candidates[candidate_count++] = {ed_class, object, NULL};
+            if (distance_squared < radius * radius && candidate_count < 16) {
+                candidate_classes[candidate_count] = ed_class;
+                candidate_objects[candidate_count] = object;
+                ++candidate_count;
+            }
         }
     }
     if (candidate_count == 0)
@@ -653,14 +658,14 @@ i32 ClassEditor::FindNearestObject(VuVec &point, ClassObject &result, ClassObjec
     i32 choice = 0;
     if (after.object != NULL) {
         for (i32 index = 0; index < candidate_count; ++index) {
-            if (candidates[index].object == after.object) {
+            if (candidate_objects[index] == after.object) {
                 choice = (index + 1) % candidate_count;
                 break;
             }
         }
     }
-    result.ed_class = candidates[choice].ed_class;
-    result.object = candidates[choice].object;
+    result.ed_class = candidate_classes[choice];
+    result.object = candidate_objects[choice];
     return 1;
 }
 

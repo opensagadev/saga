@@ -172,7 +172,7 @@ void UpdateExplosion_Generic(EXPLOSION *explosion) {
                 explosion->object == target || target->spawn_protection_timer > 0.0f ||
                 (target->field_0xefe & 0x40) != 0)
                 continue;
-            if (object->field_0x27c != -1 && target->field_0x1024 > 0.0f && (explosion->field_0x24 & 0x2000) == 0)
+            if (object->field_0x27c != -1 && !(target->field_0x1024 <= 0.0f) && (explosion->field_0x24 & 0x2000) == 0)
                 continue;
             GameObject_s *source;
             if (explosion->object != NULL && !(Arcade_GetMode(NULL) == 99 && (explosion->field_0x24 & 0x10010) != 0)) {

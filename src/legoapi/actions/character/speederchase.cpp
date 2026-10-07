@@ -169,7 +169,8 @@ GameObject_s *ObjOpponent(GameObject_s *object, f32 range, f32 extra_radius, i32
                     continue;
             }
             if ((target->apiobj.character_data->model_flags & 0x2000) != 0 ||
-                ((runtime->flags_090 & 0x40) != 0 && (target->apiobj.flags_low & 0x80) == 0))
+                ((((GAMECHARACTERDATA_s *)target->apiobj.character_data->field11_0x24)->flags_090 & 0x40) != 0 &&
+                 (target->apiobj.flags_low & 0x80) == 0))
                 continue;
         }
         if (!(allow_untargeted != 0 && (ignore_ai != 0 || object->ai.action_target_ref == NULL || mode != 0)) &&
@@ -177,7 +178,7 @@ GameObject_s *ObjOpponent(GameObject_s *object, f32 range, f32 extra_radius, i32
             continue;
         NUVEC delta;
         f32 distance = NuVecDistSqr(&target->apiobj.position, &object->apiobj.position, &delta);
-        if (distance >= range * range)
+        if (!(distance < range * range))
             continue;
         i32 behind = 0;
         if (forward.x * delta.x + forward.z * delta.z < 0.0f) {
@@ -618,11 +619,11 @@ i32 Action_SpeederBeingChased(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_
                 speeder_mode_ahead_timer = 0.0f;
             }
             if (speeder_shootrate > 0.0f) {
-                const f32 half_interval = speeder_shootrate * 0.5f;
+                const f32 shoot_interval = speeder_shootrate;
                 processor->action_timer -= elapsed;
                 if (processor->action_timer <= 0.0f) {
                     const f32 random = NuRandFloat();
-                    processor->action_timer = half_interval + random * speeder_shootrate;
+                    processor->action_timer = shoot_interval * 0.5f + random * speeder_shootrate;
                     if (can_fire != 0)
                         object->pad_gamepad->buttons_down_08 |= GAMEPAD_ACTION;
                 }
@@ -678,8 +679,9 @@ void SpeederChaseA_Update(WORLDINFO_s *world) {
         GameObject_s *object = Player[i];
         if (object != NULL && static_cast<i8>(object->apiobj.flags_low) < 0 &&
             (object->apiobj.field_0x1f4 & 0x40000) == 0 &&
-            (GoingForwardsAlongNarrowSock(object) == 0 || object->field_0x7a5 == 0x2a)) {
+            (GoingForwardsAlongNarrowSock(object) == 0 || Player[i]->field_0x7a5 == 0x2a)) {
             players_going_forward = 0;
+            break;
         }
     }
 

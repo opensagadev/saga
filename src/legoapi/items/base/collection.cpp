@@ -297,8 +297,9 @@ void Collection_Draw(COLLECTION_s *collection, float x, float y, float scale, AP
     if (alpha > 1.0f)
         alpha = 1.0f;
     f32 py = y - static_cast<i32>(rows - 1) * dy * 0.5f;
+    const f32 start_x = x - static_cast<i32>(columns - 1) * dx * 0.5f;
     for (i32 row = 0; row < rows; ++row) {
-        f32 px = x - static_cast<i32>(columns - 1) * dx * 0.5f;
+        f32 px = start_x;
         for (i32 col = 0; col < columns; ++col, px += dx) {
             const i32 index = row * columns + col;
             if (index >= count)

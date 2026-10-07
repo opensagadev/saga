@@ -698,20 +698,19 @@ extern "C" {
     }
 
     void APIObjectVelocities(GameObject_s *object) {
-        APIOBJECT &api = object->apiobj;
-        if (api.velocity.x == 0.0f && api.velocity.z == 0.0f) {
-            api.horizontal_velocity_magnitude = 0.0f;
-            api.velocity_magnitude = NuFabs(api.velocity.y);
-            return;
-        }
-
-        const f32 horizontal_squared = api.velocity.x * api.velocity.x + api.velocity.z * api.velocity.z;
-        api.horizontal_velocity_magnitude = NuFsqrt(horizontal_squared);
-
-        if (api.velocity.y == 0.0f) {
-            api.velocity_magnitude = api.horizontal_velocity_magnitude;
+        if (object->apiobj.velocity.x != 0.0f || object->apiobj.velocity.z != 0.0f) {
+            f32 horizontal_squared = object->apiobj.velocity.x * object->apiobj.velocity.x +
+                                     object->apiobj.velocity.z * object->apiobj.velocity.z;
+            object->apiobj.horizontal_velocity_magnitude = NuFsqrt(horizontal_squared);
+            if (object->apiobj.velocity.y != 0.0f) {
+                object->apiobj.velocity_magnitude =
+                    NuFsqrt(object->apiobj.velocity.y * object->apiobj.velocity.y + horizontal_squared);
+            } else {
+                object->apiobj.velocity_magnitude = object->apiobj.horizontal_velocity_magnitude;
+            }
         } else {
-            api.velocity_magnitude = NuFsqrt(api.velocity.y * api.velocity.y + horizontal_squared);
+            object->apiobj.horizontal_velocity_magnitude = 0.0f;
+            object->apiobj.velocity_magnitude = NuFabs(object->apiobj.velocity.y);
         }
     }
 

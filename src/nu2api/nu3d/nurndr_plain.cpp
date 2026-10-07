@@ -563,42 +563,18 @@ extern "C" void NuRndrGradRectUV2di(i32 x, i32 y, i32 w, i32 h, f32 u0, f32 v0, 
 
     NuPrim2DBegin(1, 7, mtl);
     NuRndrPrimSetColour(colours[0]);
-    if (!g_NuPrim_NeedsHalfUVs) {
-        *(f32 *)(g_NuPrim_StreamBufferPtr->u8_ptr + 0x10) = u0;
-        *(f32 *)(g_NuPrim_StreamBufferPtr->u8_ptr + 0x14) = v0;
-    } else {
-        *(u16 *)(g_NuPrim_StreamBufferPtr->u8_ptr + 0x10) = NuRndrFloatToHalf(u0);
-        *(u16 *)(g_NuPrim_StreamBufferPtr->u8_ptr + 0x12) = NuRndrFloatToHalf(v0);
-    }
+    NuRndrPrimUV(u0, v0);
     NuPrim2DAddXYZ(sx, sy, 0.0f);
     NuRndrPrimSetColour(colours[1]);
-    if (!g_NuPrim_NeedsHalfUVs) {
-        *(f32 *)(g_NuPrim_StreamBufferPtr->u8_ptr + 0x10) = u1;
-        *(f32 *)(g_NuPrim_StreamBufferPtr->u8_ptr + 0x14) = v0;
-    } else {
-        *(u16 *)(g_NuPrim_StreamBufferPtr->u8_ptr + 0x10) = NuRndrFloatToHalf(u1);
-        *(u16 *)(g_NuPrim_StreamBufferPtr->u8_ptr + 0x12) = NuRndrFloatToHalf(v0);
-    }
+    NuRndrPrimUV(u1, v0);
     const f32 ex = sx + width;
     NuPrim2DAddXYZ(ex, sy, 0.0f);
     NuRndrPrimSetColour(colours[2]);
-    if (!g_NuPrim_NeedsHalfUVs) {
-        *(f32 *)(g_NuPrim_StreamBufferPtr->u8_ptr + 0x10) = u0;
-        *(f32 *)(g_NuPrim_StreamBufferPtr->u8_ptr + 0x14) = v1;
-    } else {
-        *(u16 *)(g_NuPrim_StreamBufferPtr->u8_ptr + 0x10) = NuRndrFloatToHalf(u0);
-        *(u16 *)(g_NuPrim_StreamBufferPtr->u8_ptr + 0x12) = NuRndrFloatToHalf(v1);
-    }
+    NuRndrPrimUV(u0, v1);
     const f32 ey = sy + height;
     NuPrim2DAddXYZ(sx, ey, 0.0f);
     NuRndrPrimSetColour(colours[3]);
-    if (!g_NuPrim_NeedsHalfUVs) {
-        *(f32 *)(g_NuPrim_StreamBufferPtr->u8_ptr + 0x10) = u1;
-        *(f32 *)(g_NuPrim_StreamBufferPtr->u8_ptr + 0x14) = v1;
-    } else {
-        *(u16 *)(g_NuPrim_StreamBufferPtr->u8_ptr + 0x10) = NuRndrFloatToHalf(u1);
-        *(u16 *)(g_NuPrim_StreamBufferPtr->u8_ptr + 0x12) = NuRndrFloatToHalf(v1);
-    }
+    NuRndrPrimUV(u1, v1);
     NuPrim2DAddXYZ(ex, ey, 0.0f);
     NuPrim2DEnd();
 }
@@ -790,28 +766,10 @@ struct NuLineVertex2D {
 extern "C" i32 NuRndrLine2d(NuLineVertex2D *vertices, NUMTL *material) {
     NuPrim2DBegin(2, 7, material);
     NuRndrPrimSetColour(vertices[0].colour);
-    f32 u = vertices[0].u;
-    f32 v = vertices[0].v;
-    if (!g_NuPrim_NeedsHalfUVs) {
-        *(f32 *)&((PrimVertexRaw *)g_NuPrim_StreamBufferPtr->void_ptr)->uv[0] = u;
-        *(f32 *)&((PrimVertexRaw *)g_NuPrim_StreamBufferPtr->void_ptr)->uv[1] = v;
-    } else {
-        u16 *uv = (u16 *)(g_NuPrim_StreamBufferPtr->u8_ptr + 0x10);
-        uv[0] = NuRndrFloatToHalf(u);
-        uv[1] = NuRndrFloatToHalf(v);
-    }
+    NuRndrPrimUV(vertices[0].u, vertices[0].v);
     NuPrim2DAddXYZ(vertices[0].x, vertices[0].y, 0.0f);
     NuRndrPrimSetColour(vertices[1].colour);
-    u = vertices[1].u;
-    v = vertices[1].v;
-    if (!g_NuPrim_NeedsHalfUVs) {
-        *(f32 *)&((PrimVertexRaw *)g_NuPrim_StreamBufferPtr->void_ptr)->uv[0] = u;
-        *(f32 *)&((PrimVertexRaw *)g_NuPrim_StreamBufferPtr->void_ptr)->uv[1] = v;
-    } else {
-        u16 *uv = (u16 *)(g_NuPrim_StreamBufferPtr->u8_ptr + 0x10);
-        uv[0] = NuRndrFloatToHalf(u);
-        uv[1] = NuRndrFloatToHalf(v);
-    }
+    NuRndrPrimUV(vertices[1].u, vertices[1].v);
     NuPrim2DAddXYZ(vertices[1].x, vertices[1].y, 0.0f);
     NuPrim2DEnd();
     return 1;
@@ -832,16 +790,33 @@ extern "C" void NuRndrLine2di(i32 x0, i32 y0, i32 x1, i32 y1, i32 colour, NUMTL 
 }
 extern "C" i32 NuRndrLine3d(NURND_VERTEX3D *vertices, NUMTL *material, NUMTX *matrix) {
     NuPrim3DBegin(2, 7, material, matrix);
-    for (i32 i = 0; i < 2; ++i) {
+    {
         if (!g_NuPrim_NeedsOverbrightening)
             ((PrimVertexRaw *)g_NuPrim_StreamBufferPtr->void_ptr)->color =
-                ((vertices[i].colour >> 1) & 0x007f7f7f) | (vertices[i].colour & 0xff000000);
+                ((vertices[0].colour >> 1) & 0x007f7f7f) | (vertices[0].colour & 0xff000000);
         else
-            ((PrimVertexRaw *)g_NuPrim_StreamBufferPtr->void_ptr)->color = vertices[i].colour;
-        NuRndrPrimUV(vertices[i].u, vertices[i].v);
-        f32 x = vertices[i].position.x;
-        f32 y = vertices[i].position.y;
-        f32 z = vertices[i].position.z;
+            ((PrimVertexRaw *)g_NuPrim_StreamBufferPtr->void_ptr)->color = vertices[0].colour;
+        NuRndrPrimUV(vertices[0].u, vertices[0].v);
+        f32 x = vertices[0].position.x;
+        f32 y = vertices[0].position.y;
+        f32 z = vertices[0].position.z;
+        PrimVertexRaw *vertex = (PrimVertexRaw *)g_NuPrim_StreamBufferPtr->void_ptr;
+        vertex->x = x;
+        vertex->y = y;
+        vertex->z = z;
+        g_NuPrim_StreamBufferPtr->u8_ptr += sizeof(PrimVertexRaw);
+        ++g_NuPrim_VertexCount;
+    }
+    {
+        if (!g_NuPrim_NeedsOverbrightening)
+            ((PrimVertexRaw *)g_NuPrim_StreamBufferPtr->void_ptr)->color =
+                ((vertices[1].colour >> 1) & 0x007f7f7f) | (vertices[1].colour & 0xff000000);
+        else
+            ((PrimVertexRaw *)g_NuPrim_StreamBufferPtr->void_ptr)->color = vertices[1].colour;
+        NuRndrPrimUV(vertices[1].u, vertices[1].v);
+        f32 x = vertices[1].position.x;
+        f32 y = vertices[1].position.y;
+        f32 z = vertices[1].position.z;
         PrimVertexRaw *vertex = (PrimVertexRaw *)g_NuPrim_StreamBufferPtr->void_ptr;
         vertex->x = x;
         vertex->y = y;

@@ -209,7 +209,8 @@ static LEDGE *Ledge_AttachPoint(WORLDINFO_s *world, NUVEC *position, NUVEC *boun
     f32 endpoint_distance = 100000.0f;
     NUVEC segment_position, endpoint_position;
     u16 segment_angle = 0, endpoint_angle = 0;
-    for (i32 i = 0; i < world->ledge_count; ++i, ++ledge) {
+    i32 count = world->ledge_count;
+    for (i32 i = 0; i < count; ++i, ++ledge) {
         if ((ledge->state_flags & 3) != 3 || ((ledge->flags & 1) && ShadowMode == 0))
             continue;
         if (bounds_min->x > ledge->bounds_max.x || ledge->bounds_min.x > bounds_max->x ||
@@ -219,7 +220,6 @@ static LEDGE *Ledge_AttachPoint(WORLDINFO_s *world, NUVEC *position, NUVEC *boun
         LEDGEPIECE *piece = &LedgePiece[ledge->type_index];
         NUVEC local = {position->x - ledge->position.x, 0.0f, position->z - ledge->position.z};
         NuVecRotateY(&local, &local, -ledge->y_rotation);
-        bool check_start = false;
         bool check_end = false;
         if (piece->field_0x3 != 0) {
             if (local.x >= piece->start.x && local.x <= piece->end.x) {
@@ -232,10 +232,13 @@ static LEDGE *Ledge_AttachPoint(WORLDINFO_s *world, NUVEC *position, NUVEC *boun
                     segment_distance = distance;
                     segment_angle = ledge->y_rotation;
                 }
-                continue;
+                goto next_ledge;
             }
-            check_start = local.x < piece->start.x;
-            check_end = !check_start;
+            if (local.x < piece->start.x) {
+                check_end = false;
+                goto check_start_endpoint;
+            }
+            goto check_end_endpoint;
         } else {
             u16 local_angle = NuAtan2D(local.x - piece->start.x, local.z - piece->end.z);
             if (static_cast<u32>(RotDiff(piece->field_0x1e, local_angle) + 0x2000) <= 0x4000) {
@@ -252,25 +255,26 @@ static LEDGE *Ledge_AttachPoint(WORLDINFO_s *world, NUVEC *position, NUVEC *boun
                     if (piece->field_0x1c > 0x8000)
                         segment_angle += 0x8000;
                 }
-                continue;
+                goto next_ledge;
             }
-            check_start = check_end = true;
+            check_end = true;
         }
-        if (check_start) {
-            f32 distance = NuVecDistSqr(&local, &piece->start, NULL);
-            if (distance < endpoint_distance) {
-                NuVecRotateY(&local, &piece->start, ledge->y_rotation);
-                NuVecAdd(&endpoint_position, &local, &ledge->position);
-                nearest_endpoint = ledge;
-                endpoint_distance = distance;
-                endpoint_angle = ledge->y_rotation;
-            }
+    check_start_endpoint: {
+        f32 distance = NuVecDistSqr(&local, &piece->start, NULL);
+        if (distance < endpoint_distance) {
+            NuVecRotateY(&local, &piece->start, ledge->y_rotation);
+            NuVecAdd(&endpoint_position, &local, &ledge->position);
+            nearest_endpoint = ledge;
+            endpoint_distance = distance;
+            endpoint_angle = ledge->y_rotation;
         }
+    }
         if (!check_end)
-            continue;
+            goto next_ledge;
+    check_end_endpoint: {
         f32 distance = NuVecDistSqr(&local, &piece->end, NULL);
         if (!(distance < endpoint_distance))
-            continue;
+            goto next_ledge;
         NuVecRotateY(&local, &piece->end, ledge->y_rotation);
         NuVecAdd(&endpoint_position, &local, &ledge->position);
         nearest_endpoint = ledge;
@@ -278,6 +282,9 @@ static LEDGE *Ledge_AttachPoint(WORLDINFO_s *world, NUVEC *position, NUVEC *boun
         endpoint_angle = ledge->y_rotation;
         if (piece->field_0x3 == 0)
             endpoint_angle += piece->field_0x1c;
+    }
+    next_ledge:
+        count = world->ledge_count;
     }
     if (nearest_segment != NULL) {
         *position = segment_position;

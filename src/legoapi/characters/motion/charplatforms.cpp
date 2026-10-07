@@ -37,7 +37,10 @@ void SkinPlatform(terrsitu_s *terrain_group, unsigned char *buffer, PLATSKININFO
         TERRAIN_SHAPE *destination = reinterpret_cast<TERRAIN_SHAPE *>(output + 1);
         f32 min_x = 123456792.0f, min_z = 123456792.0f;
         f32 max_x = -123456792.0f, max_z = -123456792.0f;
-        for (i32 i = 0; i < input->shape_count; ++i, ++source, ++destination) {
+        TERRAIN_SHAPE *const first_shape = source;
+        const i32 shape_count = input->shape_count;
+        TERRAIN_SHAPE *const end_shape = shape_count > 0 ? source + shape_count : source;
+        for (; source != end_shape; ++source, ++destination) {
             i32 last_vertex = source->normals[1].y > 65535.0f ? 2 : 3;
             memcpy(destination, source, sizeof(TERRAIN_SHAPE));
             NUVEC minimum = {123456792.0f, 123456792.0f, 123456792.0f};
@@ -99,7 +102,7 @@ void SkinPlatform(terrsitu_s *terrain_group, unsigned char *buffer, PLATSKININFO
                 n.z = inverse * n.z;
             }
         }
-        if (input->shape_count > 0) {
+        if (source != first_shape) {
             min_x -= 0.05f;
             min_z -= 0.05f;
             max_x += 0.05f;

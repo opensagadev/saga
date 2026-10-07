@@ -685,8 +685,8 @@ static i32 InsideLineXZ(f32 x, f32 z, f32 x0, f32 z0, f32 x1, f32 z1) {
 }
 
 static f32 DistanceToPlane(NUVEC *point, NUVEC *plane_point, NUVEC *normal) {
-    return normal->x * (point->x - plane_point->x) + normal->y * (point->y - plane_point->y) +
-           normal->z * (point->z - plane_point->z);
+    return (point->x - plane_point->x) * normal->x + (point->y - plane_point->y) * normal->y +
+           (point->z - plane_point->z) * normal->z;
 }
 
 f32 RatioBetweenPlanes(NUVEC *point, NUVEC *point_a, NUVEC *normal_a, NUVEC *point_b, NUVEC *normal_b) {
@@ -1656,14 +1656,14 @@ extern "C" {
             }
         }
         if (player_count == 2 && two_player_pullback != 0.0f) {
-            SOCK *active_socket = &sock_sys->sock[camera_socket_position->location.sock];
             // The reference has distinct spatial and planar pullback blocks.
 #define SOCK_CAMERA_PAIR_PULLBACK(distance_service, with_y)                                                            \
     do {                                                                                                               \
-        if ((active_socket->flags & SOCK_FLAG_TWO_PLAYER_VERTICAL_SEPARATION) == 0)                                    \
-            pair_offset = distance_service(&player_camera_positions[0], &player_camera_positions[1], NULL);            \
-        else                                                                                                           \
+        if ((sock_sys->sock[camera_socket_position->location.sock].flags &                                             \
+             SOCK_FLAG_TWO_PLAYER_VERTICAL_SEPARATION) != 0)                                                           \
             pair_offset = NuFabs(player_camera_positions[0].y - player_camera_positions[1].y);                         \
+        else                                                                                                           \
+            pair_offset = distance_service(&player_camera_positions[0], &player_camera_positions[1], NULL);            \
         pair_offset *= -two_player_pullback;                                                                           \
         working_scale = distance_service(camera_target, camera_position, &scratch);                                    \
         NuVecNorm(&scratch, &scratch);                                                                                 \
@@ -1674,10 +1674,12 @@ extern "C" {
             camera_position->y += scratch.y * pair_offset;                                                             \
         camera_position->z += scratch.z * pair_offset;                                                                 \
     } while (0)
-            if ((active_socket->flags & SOCK_FLAG_TWO_PLAYER_PLANAR_PULLBACK) == 0) {
-                SOCK_CAMERA_PAIR_PULLBACK(NuVecDist, true);
-            } else {
+            if (camera_socket_position->location.sock != -1 &&
+                (sock_sys->sock[camera_socket_position->location.sock].flags & SOCK_FLAG_TWO_PLAYER_PLANAR_PULLBACK) !=
+                    0) {
                 SOCK_CAMERA_PAIR_PULLBACK(NuVecXZDist, false);
+            } else {
+                SOCK_CAMERA_PAIR_PULLBACK(NuVecDist, true);
             }
 #undef SOCK_CAMERA_PAIR_PULLBACK
         }

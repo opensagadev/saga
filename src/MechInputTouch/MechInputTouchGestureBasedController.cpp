@@ -693,11 +693,11 @@ void MechInputTouchGestureBasedController::ProcessAutoJumpOverGap(GameObject_s *
         object->apiobj.character_data->player_config != NULL
             ? *reinterpret_cast<f32 *>(reinterpret_cast<u8 *>(object->apiobj.character_data->player_config) + 0x1c)
             : 0.0f;
-    NUVEC boosted_velocity = object->apiobj.velocity;
+    VuVec boosted_velocity(object->apiobj.velocity.x, object->apiobj.velocity.y, object->apiobj.velocity.z, 1.0f);
     f32 magnitude_sq = boosted_velocity.x * boosted_velocity.x + boosted_velocity.y * boosted_velocity.y +
                        boosted_velocity.z * boosted_velocity.z;
     if (magnitude_sq < speed * speed) {
-        NuVecNorm(&boosted_velocity, &boosted_velocity);
+        NuVecNorm(&boosted_velocity.xyz, &boosted_velocity.xyz);
         speed =
             object->apiobj.character_data->player_config != NULL
                 ? *reinterpret_cast<f32 *>(reinterpret_cast<u8 *>(object->apiobj.character_data->player_config) + 0x1c)
@@ -709,8 +709,8 @@ void MechInputTouchGestureBasedController::ProcessAutoJumpOverGap(GameObject_s *
     GameObject_s *backup_recipient = player != NULL ? player : object;
     NUVEC previous_velocity = backup_recipient->apiobj.velocity;
     NUVEC previous_target_velocity = backup_recipient->target_velocity;
-    object->apiobj.velocity = boosted_velocity;
-    object->target_velocity = boosted_velocity;
+    object->apiobj.velocity = boosted_velocity.xyz;
+    object->target_velocity = boosted_velocity.xyz;
     if (!TriggerJumpTask(packet, false, true, true)) {
         GameObject_s *restore_recipient = player != NULL ? player : object;
         restore_recipient->apiobj.velocity = previous_velocity;

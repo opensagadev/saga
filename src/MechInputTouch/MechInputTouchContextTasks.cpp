@@ -658,8 +658,12 @@ bool MechTouchTaskHatMachine::Update() {
 }
 
 void MechTouchTaskPlannedGoTo::AnalysePath() {
-    const i32 end = path_index + MIN(2, path_count - path_index);
-    VuVec position = start_position;
+    const i32 end = path_index + (MIN(2, path_count - path_index));
+    VuVec position;
+    position.x = start_position.x;
+    position.y = start_position.y;
+    position.z = start_position.z;
+    position.w = start_position.w;
     for (; path_index <= end;) {
         position.x += step_x;
         position.z += step_z;
@@ -682,11 +686,15 @@ void MechTouchTaskPlannedGoTo::AnalysePath() {
             path_points[path_index].y = ground_height;
             if (path_index > 1 && path_index < path_count) {
                 MechTempPosInterface marker_position;
-                marker_position.position = path_points[path_index];
+                marker_position.position.x = path_points[path_index].x;
+                marker_position.position.y = path_points[path_index].y;
+                marker_position.position.z = path_points[path_index].z;
+                marker_position.position.w = path_points[path_index].w;
                 marker_position.position.x += static_cast<f32>(qrand()) * 1.5259022e-6f - 0.05f;
                 marker_position.position.z += static_cast<f32>(qrand()) * 1.5259022e-6f - 0.05f;
                 const f32 base_radius = static_cast<f32>(path_index) / static_cast<f32>(path_count) * 0.2f;
-                marker_position.radius = MAX(static_cast<f32>(qrand()) * 1.5259022e-7f + base_radius, 0.05f);
+                const f32 radius = static_cast<f32>(qrand()) * 1.5259022e-7f + base_radius;
+                marker_position.radius = MAX(radius, 0.05f);
                 if (field_6fe == 0) {
                     MoveToMarker *marker = MechSystems::Get()->NewMoveToMarker(marker_position);
                     if (marker != NULL) {
@@ -696,7 +704,10 @@ void MechTouchTaskPlannedGoTo::AnalysePath() {
             }
             field_20 = 0;
         }
-        start_position = position;
+        start_position.x = position.x;
+        start_position.y = position.y;
+        start_position.z = position.z;
+        start_position.w = position.w;
         position.y = path_points[path_index].y + step_y;
         ++path_index;
     }
@@ -1170,9 +1181,10 @@ void MechTouchTaskPlannedDoubleClickGoTo::OnStart() {
     const f32 distance = NuFsqrt(distance_squared);
     const f32 offset_z = position.z / distance * 2.0f;
     const f32 offset_x = position.x / distance * 2.0f;
-    target.Get()->GetPos(position, -1);
-    position.x -= offset_x;
-    position.z -= offset_z;
+    VuVec next_position;
+    target.Get()->GetPos(next_position, -1);
+    position.x = next_position.x - offset_x;
+    position.z = next_position.z - offset_z;
     position.y = GameShadow(player, &position.xyz, 5.0f, -1);
     target_position.position.x = position.x;
     target_position.position.y = position.y;

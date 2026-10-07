@@ -575,9 +575,14 @@ void GizmoBlowupTypeRemove(GIZMOBLOWUPTYPE_s *type, WORLDINFO_s *world) {
     GIZMOBLOWUPTYPE_s *last_type = active_end - 1;
     if (type < last_allocated_type) {
         for (GIZMOBLOWUPTYPE_s *moved_type = type + 1; moved_type <= last_allocated_type; ++moved_type) {
-            for (i32 index = 0; index < world->gizmo_blowup_count; ++index) {
-                if (world->gizmo_blowups[index].type == moved_type) {
-                    world->gizmo_blowups[index].type = moved_type - 1;
+            if (world->gizmo_blowup_count <= 0) {
+                continue;
+            }
+            GIZMOBLOWUP_s *blowup = world->gizmo_blowups;
+            GIZMOBLOWUP_s *end = blowup + world->gizmo_blowup_count;
+            for (; blowup != end; ++blowup) {
+                if (blowup->type == moved_type) {
+                    blowup->type = moved_type - 1;
                 }
             }
         }

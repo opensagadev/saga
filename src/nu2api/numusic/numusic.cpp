@@ -361,11 +361,14 @@ void NuMusic::BuildSoundTable(variptr_u *buffer_start, variptr_u buffer_end) {
 
         // Track flags bit1 (looping) decides whether the file registers as a
         // streaming sample; the pitch rides along for the loader.
-        const i32 streaming = static_cast<i8>(static_cast<u8>(track->flags) << 6) >> 7;
-        track->file_indexes[0] = FindOrCreateSoundFile(finfo, &count, track->path, streaming, track->pitch);
+        i32 streaming = static_cast<i8>(static_cast<u8>(track->flags) << 6) >> 7;
+        track->file_indexes[0] = FindOrCreateSoundFile(this->fileinfo, &count, track->path, streaming, track->pitch);
+        track = &this->tracks[i];
+        streaming = static_cast<i8>(static_cast<u8>(track->flags) << 6) >> 7;
         track->file_indexes[1] = FindOrCreateSoundFile(this->fileinfo, &count, track->name, streaming, track->pitch);
     }
 
+    finfo = this->fileinfo;
     nusound_filename_info_s *puVar1 = &finfo[count];
     puVar1->filename = NULL;
     puVar1->field4_0x4 = NULL;
@@ -1050,62 +1053,54 @@ void NuMusic::Process(f32 delta) {
         this->duck_current = MIN(duck_target, duck_current);
     }
 
-    for (i32 vi = 0; vi < 2; vi++) {
-        Voice *voice = &this->voices[vi];
-        Track *track = this->voices[vi].tracks[this->voices[vi].track_index];
-
-        // Reconcile the music voice with the underlying stream state.
-        i32 key_status = NuSound3StreamKeyStatus(voice->stream_index);
-        if (key_status == NUSOUND_STEREO_STREAM_INACTIVE) {
-            NuSound3StopStereoStream(voice->stream_index);
-            voice->SetStatusFn(VOICE_STATUS_READY, 0x246);
-        } else if (key_status == NUSOUND_STEREO_STREAM_FINISHED) {
-            voice->SetStatusFn(VOICE_STATUS_ENDED, 0x24a);
-        } else if (key_status == NUSOUND_STEREO_STREAM_PLAYING) {
-            voice->SetStatusFn(VOICE_STATUS_PLAYING_LOADED, 0x24e);
-        }
-
-        // Fade gain; a fade that reaches zero (or below) stops the stream.
-        if (voice->status == VOICE_STATUS_PLAYING_LOADED && voice->fade_rate != 0.0f) {
-            f32 gain = voice->fade_rate * delta + voice->gain;
-            voice->gain = MAX(0.0f, MIN(gain, 1.0f));
-            if (voice->gain == 0.0f) {
-                // Fade finished: reset for the next play and mark the track as
-                // having played (so its next Play fades in instead of snapping).
-                voice->fade_rate = 0.0f;
-                NuSound3StopStereoStream(voice->stream_index);
-                voice->SetStatusFn(VOICE_STATUS_READY, 0x25e);
-                voice->fade_rate = 1.0f;
-                Track *cur = this->voices[vi].tracks[this->voices[vi].track_index];
-                ((u8 *)&cur->flags)[1] = 1;
-            }
-        }
-
-        // Final mix: duck * master * voice gain * class volume * fader *
-        // track attenuation * global attenuation, pushed as a 14-bit volume.
-        f32 duck = this->duck_current;
-        f32 attenuation = 1.0f;
-        f32 class_volume = 1.0f;
-        if (track != NULL) {
-            if (((track->flags & 1) != 0) || track->duck_volume != 1.0f) {
-                // NODUCK tracks ignore the duck gain.
-                duck = 1.0f;
-            }
-            i32 index = ClassToIX(track->clazz);
-            attenuation = track->attenuation;
-            class_volume = this->class_volumes[index];
-        }
-
-        f32 volume = duck * this->master_volume * voice->gain * class_volume * this->fader_current * attenuation *
-                     this->global_attenuation;
-        voice->volume = volume;
-        if (volume != voice->last_volume) {
-            NuSound3SetStereoStreamVolume(voice->stream_index, (i32)(volume * 16383.0f));
-            voice->last_volume = voice->volume;
-        }
-
-        voice->play_time = delta + voice->play_time;
-    }
+#define PROCESS_MUSIC_VOICE(vi)                                                                                        \
+    do {                                                                                                               \
+        Voice *voice = &this->voices[vi];                                                                              \
+        Track *track = this->voices[vi].tracks[this->voices[vi].track_index];                                          \
+        i32 key_status = NuSound3StreamKeyStatus(voice->stream_index);                                                 \
+        if (key_status == NUSOUND_STEREO_STREAM_INACTIVE) {                                                            \
+            NuSound3StopStereoStream(voice->stream_index);                                                             \
+            voice->SetStatusFn(VOICE_STATUS_READY, 0x246);                                                             \
+        } else if (key_status == NUSOUND_STEREO_STREAM_FINISHED) {                                                     \
+            voice->SetStatusFn(VOICE_STATUS_ENDED, 0x24a);                                                             \
+        } else if (key_status == NUSOUND_STEREO_STREAM_PLAYING) {                                                      \
+            voice->SetStatusFn(VOICE_STATUS_PLAYING_LOADED, 0x24e);                                                    \
+        }                                                                                                              \
+        if (voice->status == VOICE_STATUS_PLAYING_LOADED && voice->fade_rate != 0.0f) {                                \
+            f32 gain = voice->fade_rate * delta + voice->gain;                                                         \
+            voice->gain = MAX(0.0f, MIN(gain, 1.0f));                                                                  \
+            if (voice->gain == 0.0f) {                                                                                 \
+                voice->fade_rate = 0.0f;                                                                               \
+                NuSound3StopStereoStream(voice->stream_index);                                                         \
+                voice->SetStatusFn(VOICE_STATUS_READY, 0x25e);                                                         \
+                voice->fade_rate = 1.0f;                                                                               \
+                Track *cur = this->voices[vi].tracks[this->voices[vi].track_index];                                    \
+                ((u8 *)&cur->flags)[1] = 1;                                                                            \
+            }                                                                                                          \
+        }                                                                                                              \
+        f32 duck = this->duck_current;                                                                                 \
+        f32 attenuation = 1.0f;                                                                                        \
+        f32 class_volume = 1.0f;                                                                                       \
+        if (track != NULL) {                                                                                           \
+            if (((track->flags & 1) != 0) || track->duck_volume != 1.0f) {                                             \
+                duck = 1.0f;                                                                                           \
+            }                                                                                                          \
+            i32 index = ClassToIX(track->clazz);                                                                       \
+            attenuation = track->attenuation;                                                                          \
+            class_volume = this->class_volumes[index];                                                                 \
+        }                                                                                                              \
+        f32 volume = duck * this->master_volume * voice->gain * class_volume * this->fader_current * attenuation *     \
+                     this->global_attenuation;                                                                         \
+        voice->volume = volume;                                                                                        \
+        if (volume != voice->last_volume) {                                                                            \
+            NuSound3SetStereoStreamVolume(voice->stream_index, (i32)(volume * 16383.0f));                              \
+            voice->last_volume = voice->volume;                                                                        \
+        }                                                                                                              \
+        voice->play_time = delta + voice->play_time;                                                                   \
+    } while (0)
+    PROCESS_MUSIC_VOICE(0);
+    PROCESS_MUSIC_VOICE(1);
+#undef PROCESS_MUSIC_VOICE
 }
 
 extern "C" f32 numusicGetDuckVolume(void) {
@@ -1140,32 +1135,36 @@ void NuMusic::Debug(i32, i32 y) {
     NuQFntSetScale(system_qfont, 0.8f, 0.8f);
     NuQFntSetColour(system_qfont, 0x80ffffff);
 
-    for (i32 i = 0; i < 2; i++) {
-        Voice *voice = &voices[i];
-        NuSound3GetStreamInfo(voice->stream_index, &stream_info);
-        NuQFntPrintEx(system_qfont, 4800, y, 0x10, "VOICE:%d", i);
-        y += (i32)NuQFntHeight(system_qfont);
-        if (voice->tracks[voice->track_index] == NULL) {
-            NuQFntPrintEx(system_qfont, 4800, y, 0x10, "TRACK:NONE");
-            y += (i32)NuQFntHeight(system_qfont);
-            NuQFntPrintEx(system_qfont, 4800, y, 0x10, "CLASS:NONE");
-        } else {
-            NuQFntPrintEx(system_qfont, 4800, y, 0x10, "TRACK:%s",
-                          voice->tracks[voice->track_index]->filenames[voice->track_sub[voice->track_index]]);
-            y += (i32)NuQFntHeight(system_qfont);
-            NuQFntPrintEx(system_qfont, 4800, y, 0x10, "CLASS:%s",
-                          class_names[ClassToIX(voice->tracks[voice->track_index]->clazz) + 1]);
-        }
-        y += (i32)NuQFntHeight(system_qfont);
-        NuQFntPrintEx(system_qfont, 4800, y, 0x10, "STATUS:%s", voice_status_txt[voice->status]);
-        y += (i32)NuQFntHeight(system_qfont);
-        NuQFntPrintEx(system_qfont, 4800, y, 0x10, "VOLUME:%f (%f)", voice->gain, voice->last_volume);
-        y += (i32)NuQFntHeight(system_qfont);
-        NuQFntPrintEx(system_qfont, 4800, y, 0x10, "FADE:%f", voice->fade_rate);
-        y += (i32)NuQFntHeight(system_qfont);
-        NuQFntPrintEx(system_qfont, 4800, y, 0x10, "POS:%f", stream_info.playback_position);
-        y += (i32)NuQFntHeight(system_qfont);
-    }
+#define DEBUG_MUSIC_VOICE(i)                                                                                           \
+    do {                                                                                                               \
+        Voice *voice = &voices[i];                                                                                     \
+        NuSound3GetStreamInfo(voice->stream_index, &stream_info);                                                      \
+        NuQFntPrintEx(system_qfont, 4800, y, 0x10, "VOICE:%d", i);                                                     \
+        y += (i32)NuQFntHeight(system_qfont);                                                                          \
+        if (voice->tracks[voice->track_index] == NULL) {                                                               \
+            NuQFntPrintEx(system_qfont, 4800, y, 0x10, "TRACK:NONE");                                                  \
+            y += (i32)NuQFntHeight(system_qfont);                                                                      \
+            NuQFntPrintEx(system_qfont, 4800, y, 0x10, "CLASS:NONE");                                                  \
+        } else {                                                                                                       \
+            NuQFntPrintEx(system_qfont, 4800, y, 0x10, "TRACK:%s",                                                     \
+                          voice->tracks[voice->track_index]->filenames[voice->track_sub[voice->track_index]]);         \
+            y += (i32)NuQFntHeight(system_qfont);                                                                      \
+            NuQFntPrintEx(system_qfont, 4800, y, 0x10, "CLASS:%s",                                                     \
+                          class_names[ClassToIX(voice->tracks[voice->track_index]->clazz) + 1]);                       \
+        }                                                                                                              \
+        y += (i32)NuQFntHeight(system_qfont);                                                                          \
+        NuQFntPrintEx(system_qfont, 4800, y, 0x10, "STATUS:%s", voice_status_txt[voice->status]);                      \
+        y += (i32)NuQFntHeight(system_qfont);                                                                          \
+        NuQFntPrintEx(system_qfont, 4800, y, 0x10, "VOLUME:%f (%f)", voice->gain, voice->last_volume);                 \
+        y += (i32)NuQFntHeight(system_qfont);                                                                          \
+        NuQFntPrintEx(system_qfont, 4800, y, 0x10, "FADE:%f", voice->fade_rate);                                       \
+        y += (i32)NuQFntHeight(system_qfont);                                                                          \
+        NuQFntPrintEx(system_qfont, 4800, y, 0x10, "POS:%f", stream_info.playback_position);                           \
+        y += (i32)NuQFntHeight(system_qfont);                                                                          \
+    } while (0)
+    DEBUG_MUSIC_VOICE(0);
+    DEBUG_MUSIC_VOICE(1);
+#undef DEBUG_MUSIC_VOICE
     NuQFntPopPrintMode();
 }
 
@@ -1310,6 +1309,8 @@ void NuMusic::ParseTrack(u32 category, nufpar_s *fpar) {
 
     memset(track, 0, sizeof(Track));
 
+    track = this->current_track;
+
     // Entry times carve sequential slices out of the shared INDEX pool.
     track->entry_times = this->indexes + this->index_count;
 
@@ -1321,7 +1322,7 @@ void NuMusic::ParseTrack(u32 category, nufpar_s *fpar) {
 
     // Signature (4), overlay (8) and cutscene (16) tracks default to
     // non-looping; everything else loops until NONLOOPING says otherwise.
-    if ((i32)category < 0x11 && ((1u << ((u8)category & 0x1f)) & 0x10110u) != 0) {
+    if (category <= 0x10 && ((1u << ((u8)category & 0x1f)) & 0x10110u) != 0) {
         ((u8 *)&track->flags)[0] &= 0xfd;
     } else {
         ((u8 *)&track->flags)[0] |= 2;
@@ -1334,7 +1335,9 @@ void NuMusic::ParseTrack(u32 category, nufpar_s *fpar) {
     NuStrCat(buf, fpar->word_buf);
     SubstituteString(buf2, buf, "$lang", this->language);
 
-    track->path = AllocString(buf2);
+    Track *path_track = this->current_track;
+    path_track->path = AllocString(buf2);
+    track = this->current_track;
     track->ident = RemovePath(track->path);
 
     nufpcomfn *prev_handler = NULL;
