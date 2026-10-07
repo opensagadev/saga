@@ -1658,8 +1658,13 @@ void MenuDrawViewTextStrings(MENU_s *menu) {
         dme_align = 0;
         GameDrawMenuEntry(menu, const_cast<char *>(" "));
 
-        const f32 y = menu->draw_y - menu->centre_offset;
-        if (MenuStopDraw != 0 || y < -1.25f || y >= 1.25f) {
+        const f32 draw_y = menu->draw_y;
+        const f32 centre_offset = menu->centre_offset;
+        if (MenuStopDraw != 0) {
+            continue;
+        }
+        const f32 y = draw_y - centre_offset;
+        if (!(y >= -1.25f && y < 1.25f)) {
             continue;
         }
 

@@ -522,6 +522,7 @@ void MenuDrawExtras(MENU_s *menu) {
             snprintf(text, sizeof(text), "%s: %s", name != NULL ? name : "", value);
         }
 
+        dme_sy = menu->item_scale;
         if (cheat > 7) {
             dme_rgb = 1;
         }
@@ -537,7 +538,6 @@ void MenuDrawExtras(MENU_s *menu) {
             dme_align = PauseMenus_Align;
             menu->draw_x = PauseMenus_X;
         }
-        dme_sy = menu->item_scale;
         DrawMenuEntryEx(menu, text, static_cast<u8>(static_cast<i32>(static_cast<f32>(MenuA) * alpha)));
     }
 }

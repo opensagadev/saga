@@ -127,27 +127,39 @@ void GameAntinode_FindGridPosition(WORLDINFO_s *world, NUVEC *position, f32 radi
     f32 cell_z = (world->level_max[2] - world->level_min[2]) * (1.0f / 64.0f);
     if (min_x != NULL) {
         f32 offset = position->x - radius_x - world->level_min[0];
-        *min_x = offset == 0.0f || cell_x == 0.0f ? 0 : static_cast<u8>(offset / cell_x);
-        if (*min_x > 63)
-            *min_x = 63;
+        if (offset == 0.0f || cell_x == 0.0f) {
+            *min_x = 0;
+        } else {
+            u8 index = static_cast<u8>(offset / cell_x);
+            *min_x = index < 64 ? index : 63;
+        }
     }
     if (max_x != NULL) {
         f32 offset = radius_x + position->x - world->level_min[0];
-        *max_x = offset == 0.0f || cell_x == 0.0f ? 0 : static_cast<u8>(offset / cell_x);
-        if (*max_x > 63)
-            *max_x = 63;
+        if (offset == 0.0f || cell_x == 0.0f) {
+            *max_x = 0;
+        } else {
+            u8 index = static_cast<u8>(offset / cell_x);
+            *max_x = index < 64 ? index : 63;
+        }
     }
     if (min_z != NULL) {
         f32 offset = position->z - radius_z - world->level_min[2];
-        *min_z = offset == 0.0f || cell_z == 0.0f ? 0 : static_cast<u8>(offset / cell_z);
-        if (*min_z > 63)
-            *min_z = 63;
+        if (offset == 0.0f || cell_z == 0.0f) {
+            *min_z = 0;
+        } else {
+            u8 index = static_cast<u8>(offset / cell_z);
+            *min_z = index < 64 ? index : 63;
+        }
     }
     if (max_z != NULL) {
         f32 offset = radius_z + position->z - world->level_min[2];
-        *max_z = offset == 0.0f || cell_z == 0.0f ? 0 : static_cast<u8>(offset / cell_z);
-        if (*max_z > 63)
-            *max_z = 63;
+        if (offset == 0.0f || cell_z == 0.0f) {
+            *max_z = 0;
+        } else {
+            u8 index = static_cast<u8>(offset / cell_z);
+            *max_z = index < 64 ? index : 63;
+        }
     }
 }
 
@@ -239,12 +251,19 @@ GAMEANTINODE_s *GameAntinode_UpdateAntiNodeUsingData(GAMEANTINODESYS_s *system, 
             node->position = data->position;
             NuVecRotateY(&node->position, &node->position, angle);
             NuVecAdd(&node->position, &node->position, position);
-            node->min_y = data->min_y + position->y;
-            node->max_y = position->y + data->max_y;
-            node->radius = data->radius;
-            node->extent_x = data->extent_x;
-            node->extent_z = data->extent_z;
-            node->angle = data->flags + angle;
+            const f32 position_y = position->y;
+            const f32 min_y = data->min_y + position_y;
+            const f32 max_y = position_y + data->max_y;
+            const f32 base_radius = data->radius;
+            const f32 extent_x = data->extent_x;
+            const f32 extent_z = data->extent_z;
+            const u16 node_angle = data->flags + angle;
+            node->min_y = min_y;
+            node->max_y = max_y;
+            node->radius = base_radius;
+            node->extent_x = extent_x;
+            node->extent_z = extent_z;
+            node->angle = node_angle;
             node->shape = data->use_largest_extent;
             node->remaining_time = duration;
 

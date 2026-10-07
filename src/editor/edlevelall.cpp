@@ -2828,14 +2828,15 @@ i32 PropertyTool::ProcessMenu(EdInputContext &input) {
             return 1;
         }
     }
-    for (PropertyMenu *menu = active_menu; menu != NULL; menu = menu->next) {
-        if (menu == active) {
-            continue;
+    for (PropertyMenu *menu = active_menu; menu != NULL;) {
+        PropertyMenu *next = menu->next;
+        if (menu != active) {
+            RefreshMenuControls(menu);
+            if (eduiMenuProcess(menu->menu, input.delta_time, input.pad) != 0) {
+                return 1;
+            }
         }
-        RefreshMenuControls(menu);
-        if (eduiMenuProcess(menu->menu, input.delta_time, input.pad) != 0) {
-            return 1;
-        }
+        menu = next;
     }
     if ((input.pad->digital_buttons_pressed & 0x100) != 0) {
         ToggleActiveMenu();

@@ -236,6 +236,9 @@ void NuMusic::InitData(const char *file, VARIPTR *buffer_start, VARIPTR buffer_e
     this->albums = BUFFER_ALLOC_ARRAY(buffer_start, 512, Album);
     this->tracks = BUFFER_ALLOC_ARRAY(buffer_start, 2048, Track);
     this->indexes = BUFFER_ALLOC_ARRAY(buffer_start, 2048, f32);
+    this->album_count = 0;
+    this->track_count = 0;
+    this->index_count = 0;
     LOG_DEBUG("this->albums=%p, this->tracks=%p, this->indexes=%p", this->albums, this->tracks, this->indexes);
 
     NuFParSetInterpreterErrorHandler(0);
@@ -714,7 +717,7 @@ i32 NuMusic::StopAll(i32 toggle) {
     if ((toggle & 2) == 0) {
         // Stop both voices outright, cutscene tracks included.
         NuSound3StopStereoStream(this->voices[0].stream_index);
-        this->voices[0].SetStatusFn(VOICE_STATUS_READY, 0x1f0);
+        this->voices[0].SetStatusFn(VOICE_STATUS_READY, 0x432);
         this->voices[0].fade_rate = 0.0f;
         this->voices[0].gain = 0.0f;
         this->voices[0].track_index = 0;
@@ -726,7 +729,7 @@ i32 NuMusic::StopAll(i32 toggle) {
         Track *track0 = this->voices[0].tracks[this->voices[0].track_index];
         if (track0 == NULL || track0->clazz != TRACK_CLASS_CUTSCENE) {
             NuSound3StopStereoStream(this->voices[0].stream_index);
-            this->voices[0].SetStatusFn(VOICE_STATUS_READY, 0x1f0);
+            this->voices[0].SetStatusFn(VOICE_STATUS_READY, 0x432);
             this->voices[0].fade_rate = 0.0f;
             this->voices[0].gain = 0.0f;
             this->voices[0].track_index = 0;
@@ -741,7 +744,7 @@ i32 NuMusic::StopAll(i32 toggle) {
         NuSound3StopStereoStream(this->voices[1].stream_index);
     }
 
-    this->voices[1].SetStatusFn(VOICE_STATUS_READY, 0x1f0);
+    this->voices[1].SetStatusFn(VOICE_STATUS_READY, 0x432);
     this->voices[1].fade_rate = 0.0f;
     this->voices[1].gain = 0.0f;
     this->voices[1].track_index = 0;
@@ -1180,22 +1183,13 @@ i32 NuMusic::GetAlbumHandle(char const *name) {
 }
 
 f32 NuMusic::GetPlaybackTime(u32 clazz) {
-    Voice *voice = &voices[0];
-    Track *track = voice->tracks[voice->track_index];
-    if (track == NULL || (track->clazz & clazz) == 0 || voice->status != VOICE_STATUS_PLAYING_LOADED) {
-        voice = &voices[1];
-        track = voice->tracks[voice->track_index];
-        if (track == NULL) {
-            return 0.0f;
-        }
-        if ((track->clazz & clazz) == 0) {
-            return 0.0f;
-        }
-        if (voice->status != VOICE_STATUS_PLAYING_LOADED) {
-            return 0.0f;
-        }
+    for (i32 i = 0; i < 2; ++i) {
+        Voice *voice = &voices[i];
+        Track *track = voice->tracks[voice->track_index];
+        if (track != NULL && (track->clazz & clazz) != 0 && voice->status == VOICE_STATUS_PLAYING_LOADED)
+            return NuSound3GetStreamPlaybackTime(voice->stream_index);
     }
-    return NuSound3GetStreamPlaybackTime(voice->stream_index);
+    return 0.0f;
 }
 
 NuMusic *NuMusic::GetPlayer() {

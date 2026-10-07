@@ -776,18 +776,19 @@ void locatorEditor_Enter(void) {
             }
         }
     }
-    if ((*state)->current_locator_set != nullptr) {
-        strcpy(aieditorsettings.current_route_name, (*state)->current_locator_set->name);
+    AIEDITOR_RENDER_STATE *context = *state;
+    if (context->current_locator_set != nullptr) {
+        strcpy(aieditorsettings.current_route_name, context->current_locator_set->name);
     }
     if (aieditorsettings.current_route_name[0] == 0) {
-        (*state)->current_locator_set = nullptr;
+        context->current_locator_set = nullptr;
         return;
     }
-    EDLOCATORSET_s *set = (EDLOCATORSET_s *)NuLinkedListGetHead(&(*state)->locator_sets);
+    EDLOCATORSET_s *set = (EDLOCATORSET_s *)NuLinkedListGetHead(&context->locator_sets);
     while (set != nullptr && NuStrICmp(aieditorsettings.current_route_name, set->name) != 0) {
         set = (EDLOCATORSET_s *)NuLinkedListGetNext(&(*state)->locator_sets, &set->link);
     }
-    (*state)->current_locator_set = set;
+    context->current_locator_set = set;
 }
 
 void locatorEditor_Render(i32 x, i32 y, float x_scale, float y_scale) {

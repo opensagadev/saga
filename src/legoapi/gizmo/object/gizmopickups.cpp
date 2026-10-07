@@ -162,13 +162,15 @@ void AddPickups(i32 coins, i32 hearts, i32 torpedoes, i32 powerups, nuvec_s *pos
     if (coins > 0) {
         PlaySfx("CoinsLand", position);
         i32 remaining = coins;
-        for (i32 i = 3; remaining > 0; --i) {
-            i32 type = CoinTab[i];
+        uintptr_t coin = reinterpret_cast<uintptr_t>(&CoinTab[3]);
+        do {
+            i32 type = *reinterpret_cast<const u8 *>(coin);
             while (remaining - GizmoPickupType[type].score >= 0) {
                 remaining -= GizmoPickupType[type].score;
                 ++counts[type];
             }
-        }
+            --coin;
+        } while (remaining > 0);
         has_coins = true;
     }
     if (world->area != NULL && (world->area->flags & 0x104) == 0 && consolidate) {

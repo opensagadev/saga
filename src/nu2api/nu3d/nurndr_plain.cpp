@@ -482,10 +482,12 @@ extern "C" i32 NuRndrCircle(f32 x, f32 y, f32 radius, f32 aspect, i32 count, f32
         f32 angle = static_cast<f32>(i) * step;
         f32 sine = NuSinf(angle);
         f32 cosine = NuCosf(angle);
-        f32 next_x = sine * radius * aspect + x;
+        f32 half_cosine = 0.5f * cosine;
+        f32 half_sine = 0.5f * sine;
         f32 next_y = cosine * radius + y;
-        f32 next_u = (0.5f * sine + 0.5f) * u1 + u0;
-        f32 next_v = v1 * (0.5f - 0.5f * cosine) + v0;
+        f32 next_x = sine * radius * aspect + x;
+        f32 next_v = v1 * (0.5f - half_cosine) + v0;
+        f32 next_u = (half_sine + 0.5f) * u1 + u0;
         NuRndrPrimSetColour(colour);
         NuRndrPrimUV(0.5f * u1 + u0, 0.5f * v1 + v0);
         NuPrim2DAddXYZ(static_cast<f32>(PS2_VREZ_W) * x, static_cast<f32>(PS2_VREZ_H) * y, 0.0f);
@@ -900,20 +902,24 @@ extern "C" i32 NuRndrLineStrip2d(NuLineVertex2D *vertices, NUMTL *material, i32 
 }
 extern "C" void NuRndrLineStrip2di(i32 *positions, f32 *uvs, i32 count, i32 colour, NUMTL *material) {
     NuPrim2DBegin(2, 7, material);
-    for (i32 i = 0; i < count; ++i) {
-        NuRndrPrimSetColour(colour);
-        if (uvs) {
-            f32 u = uvs[i * 2];
-            f32 v = uvs[i * 2 + 1];
-            if (!g_NuPrim_NeedsHalfUVs) {
-                *(f32 *)(g_NuPrim_StreamBufferPtr->u8_ptr + 0x10) = u;
-                *(f32 *)(g_NuPrim_StreamBufferPtr->u8_ptr + 0x14) = v;
-            } else {
-                *(u16 *)(g_NuPrim_StreamBufferPtr->u8_ptr + 0x10) = NuRndrFloatToHalf(u);
-                *(u16 *)(g_NuPrim_StreamBufferPtr->u8_ptr + 0x12) = NuRndrFloatToHalf(v);
+    if (count > 0) {
+        const i32 end = count * 2;
+        for (i32 i = 0; i != end; i += 2) {
+            NuRndrPrimSetColour(colour);
+            if (uvs) {
+                f32 u = uvs[i];
+                f32 v = uvs[i + 1];
+                u8 *vertex = g_NuPrim_StreamBufferPtr->u8_ptr;
+                if (!g_NuPrim_NeedsHalfUVs) {
+                    *(f32 *)(vertex + 0x10) = u;
+                    *(f32 *)(vertex + 0x14) = v;
+                } else {
+                    *(u16 *)(vertex + 0x10) = NuRndrFloatToHalf(u);
+                    *(u16 *)(vertex + 0x12) = NuRndrFloatToHalf(v);
+                }
             }
+            NuPrim2DAddXYZ((f32)positions[i] * 0.0625f, (f32)positions[i + 1] * 0.0625f, 0.0f);
         }
-        NuPrim2DAddXYZ((f32)positions[i * 2] * 0.0625f, (f32)positions[i * 2 + 1] * 0.0625f, 0.0f);
     }
     NuPrim2DEnd();
 }
@@ -1327,20 +1333,24 @@ extern "C" i32 NuRndrTri3dClip(NURND_VERTEX3D *vertices, i32 count, NUMTX *matri
 }
 extern "C" void NuRndrTriStrip2di(i32 *positions, f32 *uvs, i32 count, i32 colour, NUMTL *material) {
     NuPrim2DBegin(1, 7, material);
-    for (i32 i = 0; i < count; ++i) {
-        NuRndrPrimSetColour(colour);
-        if (uvs) {
-            f32 u = uvs[i * 2];
-            f32 v = uvs[i * 2 + 1];
-            if (!g_NuPrim_NeedsHalfUVs) {
-                *(f32 *)(g_NuPrim_StreamBufferPtr->u8_ptr + 0x10) = u;
-                *(f32 *)(g_NuPrim_StreamBufferPtr->u8_ptr + 0x14) = v;
-            } else {
-                *(u16 *)(g_NuPrim_StreamBufferPtr->u8_ptr + 0x10) = NuRndrFloatToHalf(u);
-                *(u16 *)(g_NuPrim_StreamBufferPtr->u8_ptr + 0x12) = NuRndrFloatToHalf(v);
+    if (count > 0) {
+        const i32 end = count * 2;
+        for (i32 i = 0; i != end; i += 2) {
+            NuRndrPrimSetColour(colour);
+            if (uvs) {
+                f32 u = uvs[i];
+                f32 v = uvs[i + 1];
+                u8 *vertex = g_NuPrim_StreamBufferPtr->u8_ptr;
+                if (!g_NuPrim_NeedsHalfUVs) {
+                    *(f32 *)(vertex + 0x10) = u;
+                    *(f32 *)(vertex + 0x14) = v;
+                } else {
+                    *(u16 *)(vertex + 0x10) = NuRndrFloatToHalf(u);
+                    *(u16 *)(vertex + 0x12) = NuRndrFloatToHalf(v);
+                }
             }
+            NuPrim2DAddXYZ((f32)positions[i] * 0.0625f, (f32)positions[i + 1] * 0.0625f, 0.0f);
         }
-        NuPrim2DAddXYZ((f32)positions[i * 2] * 0.0625f, (f32)positions[i * 2 + 1] * 0.0625f, 0.0f);
     }
     NuPrim2DEnd();
 }

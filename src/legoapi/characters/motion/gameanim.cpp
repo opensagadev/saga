@@ -862,7 +862,7 @@ void Animate_DROIDEKA(GameObject_s *object) {
             } else if (object->ground_contact_grace_timer > 0.0f) {
                 const GAMECHARACTERDATA *game_character =
                     static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
-                if (game_character->field_0x28 <= 0.0f ||
+                if (!(game_character->field_0x28 > 0.0f) ||
                     object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_FALL] == NULL) {
                     packet.requested_animation = static_cast<i16>(GetDefaultIdle(object));
                 }
@@ -871,7 +871,7 @@ void Animate_DROIDEKA(GameObject_s *object) {
                         object->nearby_floor_distance < 0.25f && object->apiobj.velocity.y < 0.0f)) {
                 const GAMECHARACTERDATA *game_character =
                     static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
-                if (game_character->field_0x28 <= 0.0f ||
+                if (!(game_character->field_0x28 > 0.0f) ||
                     object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_FALL] == NULL) {
                     packet.requested_animation = static_cast<i16>(GetDefaultIdle(object));
                 }
@@ -884,7 +884,7 @@ void Animate_DROIDEKA(GameObject_s *object) {
                    object->pad_gamepad->input_magnitude > 0.0f) {
             const GAMECHARACTERDATA *game_character = GetGameCharacterData(object);
             const f32 walk_threshold = (game_character->tiptoe_speed + game_character->walk_speed) * 0.5f;
-            packet.requested_animation = object->pad_gamepad->input_magnitude > walk_threshold
+            packet.requested_animation = !(object->pad_gamepad->input_magnitude <= walk_threshold)
                                              ? CHARACTER_ANIMATION_WALK
                                              : CHARACTER_ANIMATION_TIPTOE;
         }
@@ -1601,14 +1601,10 @@ void Animate_SUPERBATTLEDROID(GameObject_s *object) {
             bool use_default_idle = object->apiobj.field_0x27d != 0;
             if (!use_default_idle) {
                 const bool has_fall = object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_FALL] != NULL;
-                if (object->ground_contact_grace_timer > 0.0f) {
-                    const GAMECHARACTERDATA *game_character = GetGameCharacterData(object);
-                    use_default_idle = game_character->field_0x28 <= 0.0f || !has_fall;
-                } else if (!has_fall) {
-                    use_default_idle = true;
-                } else if (object->fall_animation_timer < 0.2f && object->nearby_floor_distance != 2000000.0f &&
-                           object->nearby_floor_distance < 0.25f && object->apiobj.velocity.y < 0.0f) {
-                    use_default_idle = true;
+                if (object->ground_contact_grace_timer > 0.0f || !has_fall ||
+                    (object->fall_animation_timer < 0.2f && object->nearby_floor_distance != 2000000.0f &&
+                     object->nearby_floor_distance < 0.25f && object->apiobj.velocity.y < 0.0f)) {
+                    use_default_idle = !(GetGameCharacterData(object)->field_0x28 > 0.0f) || !has_fall;
                 }
             }
             if (use_default_idle) {
@@ -1625,7 +1621,7 @@ void Animate_SUPERBATTLEDROID(GameObject_s *object) {
             if ((object->pad_gamepad->allocated_5a & GAMEPAD_RUNTIME_SUPPRESS_MOVEMENT) == 0 &&
                 object->pad_gamepad->input_magnitude > 0.0f) {
                 const f32 run_threshold = (game_character->walk_speed + game_character->run_speed) * 0.5f;
-                if (object->pad_gamepad->input_magnitude > run_threshold) {
+                if (!(object->pad_gamepad->input_magnitude <= run_threshold)) {
                     packet.requested_animation = weapon_out ? CHARACTER_ANIMATION_SABER_RUN : CHARACTER_ANIMATION_RUN;
                 } else {
                     packet.requested_animation = weapon_out ? CHARACTER_ANIMATION_SABER_WALK : CHARACTER_ANIMATION_WALK;
@@ -2194,15 +2190,15 @@ extern "C" {
     i32 StateAnimEvaluate(StateAnim *state, u8 *index, u8 *value, f32 frame) {
         u8 next = *index;
         if (next < state->count) {
-            bool changed = false;
+            i32 changed = 0;
             do {
-                if (frame < state->times[next]) {
+                if (!(frame >= state->times[next])) {
                     if (changed) {
                         return 1;
                     }
                     break;
                 }
-                changed = true;
+                changed = 1;
                 *value = state->values[next];
                 next = static_cast<u8>(*index + 1);
                 *index = next;
@@ -2217,7 +2213,7 @@ extern "C" {
             return 0;
         }
         do {
-            if (state->times[next - 1] <= frame) {
+            if (!(state->times[next - 1] > frame)) {
                 return changed;
             }
             next--;

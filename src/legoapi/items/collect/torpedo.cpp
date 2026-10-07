@@ -499,7 +499,7 @@ void Torpedo_Ricochet(BOLT_s *bolt, TORPEDOPACKET_s *packet) {
             f32 absolute = NuFabs(cosine);
             f32 root = NuFsqrt(1.0f - cosine * cosine);
             f32 smaller = MIN(root, absolute);
-            f32 quadrant = CLAMP((absolute - 0.70710677f) * 3.40282e38f, -1.0f, 1.0f);
+            f32 quadrant = MAX(MIN((absolute - 0.70710677f) * 3.40282e38f, 1.0f), -1.0f);
             f32 sign = MIN(cosine * 3.40282e38f, 1.0f);
             sign = MAX(sign, -1.0f);
             f32 product = quadrant * sign;
