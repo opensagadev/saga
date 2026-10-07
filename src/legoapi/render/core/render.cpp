@@ -623,14 +623,12 @@ extern "C" void NuGScnUpdate(NUGSCN *gscn, f32 frame_delta) {
                 goto next_animation;
             }
 
-            u8 flags = static_cast<u8>(instance_animation->flags);
-            if ((flags & NUINSTANIM_FLAG_PLAYING) != 0) {
+            if (instance_animation->playing != 0) {
                 instance_animation->ltime += frame_delta * instance_animation->tfactor;
-                if ((flags & NUINSTANIM_FLAG_WAITING) != 0) {
+                if (instance_animation->waiting != 0) {
                     if (!(instance_animation->ltime >= instance_animation->tfirst)) {
                         goto evaluate_animation;
                     }
-                    flags &= ~NUINSTANIM_FLAG_WAITING;
                     instance_animation->waiting = 0;
                     instance_animation->ltime -= instance_animation->tfirst - 1.0f;
                 }
@@ -638,15 +636,13 @@ extern "C" void NuGScnUpdate(NUGSCN *gscn, f32 frame_delta) {
                 frame = instance_animation->ltime;
                 const f32 interval_end = instance_animation->tinterval + end_frame;
                 if (frame >= interval_end) {
-                    if ((flags & NUINSTANIM_FLAG_REPEATING) != 0) {
+                    if (instance_animation->repeating != 0) {
                         const f32 repeat_length = interval_end - 1.0f;
                         const f32 repeats = NuFloor((instance_animation->ltime - 1.0f) / repeat_length);
                         const f32 live_repeat_length = instance_animation->tinterval + end_frame - 1.0f;
                         instance_animation->ltime -= live_repeat_length * repeats;
                         frame = instance_animation->ltime;
-                        flags = static_cast<u8>(instance_animation->flags);
                     } else {
-                        flags &= ~NUINSTANIM_FLAG_PLAYING;
                         instance_animation->playing = 0;
                         instance_animation->ltime = end_frame;
                         frame = end_frame;
@@ -654,13 +650,12 @@ extern "C" void NuGScnUpdate(NUGSCN *gscn, f32 frame_delta) {
                 } else if (frame > end_frame) {
                     frame = end_frame;
                 } else if (frame < 1.0f) {
-                    flags &= ~NUINSTANIM_FLAG_PLAYING;
                     instance_animation->playing = 0;
                     instance_animation->ltime = 1.0f;
                     frame = 1.0f;
                 }
 
-                if ((flags & NUINSTANIM_FLAG_BACKWARDS) != 0) {
+                if (instance_animation->backwards != 0) {
                     frame = end_frame + 1.0f - frame;
                 }
             } else {
@@ -2575,6 +2570,9 @@ void DrawSubItemMenu2D() {
             break;
         case 5:
             return;
+        case 1:
+            price = items[CharShelfIds[3]].price;
+            break;
         default:
             price = items[CharShelfIds[3]].price;
             break;
@@ -3260,27 +3258,6 @@ void Draw_OK(MENU_s *menu) {
     DrawMenuEntry(menu, apitxt_OK);
 }
 
-void DrawItem(nuhspecial_s *special, nuvec_s *position, float scale_value, float, float y_push, u16 x_rot, u16 y_rot,
-              u16 z_rot) {
-    NUVEC scale;
-    NUANGVEC rotation;
-    NUMTX_ALIGNED16 matrix;
-    if (position != NULL) {
-        if (NuSpecialExistsFn(special) != 0) {
-            rotation.x = x_rot;
-            rotation.y = y_rot;
-            rotation.z = z_rot;
-            NuMtxSetRotateXYZVU0(&matrix, &rotation);
-
-            scale.x = scale.y = scale.z = scale_value;
-            NuMtxScaleVU0(&matrix, &scale);
-            *reinterpret_cast<NUVEC *>(&matrix.m30) = *position;
-            matrix.m31 += y_push;
-            NuSpecialDrawAt(special, &matrix);
-        }
-    }
-}
-
 void DrawAABox(_vuv_s *position, _vuv_s *size, i32 colour) {
     const NUVEC *centre = reinterpret_cast<const NUVEC *>(position);
     const NUVEC *extent = reinterpret_cast<const NUVEC *>(size);
@@ -3778,7 +3755,12 @@ static void DrawParaphernalia(GameObject_s *object) {
     }
     GAMECHARACTERDATA_s *config = object->apiobj.character_data->game_character;
     NUMTX *joints = object->joint_matrices;
-    if ((config->flags_094[0] & 1) == 0) {
+    if ((config->flags_094[0] & 1) != 0) {
+        if (BonusArea && VehicleArea) {
+            CharMiniKit_Draw(object->id, &object->apiobj.field_0xb8, object->field_0x1087, object->field_0x1020,
+                             WORLD->current_level->unknown_0cc);
+        }
+    } else {
         if (object->apiobj.character_data->flags & 1) {
             i32 locator = config->thingy_locator;
             matrix = locator != -1 && object->apiobj.character_model->points_of_interest[locator] != NULL &&
@@ -3796,9 +3778,6 @@ static void DrawParaphernalia(GameObject_s *object) {
                                   object->apiobj.character_data->game_character->weapon_shoot_joints[0], -1, joints, 0,
                                   object->field_0x1054, NULL, NULL, 1.0f, 1.0f);
         }
-    } else if (BonusArea && VehicleArea) {
-        CharMiniKit_Draw(object->id, &object->apiobj.field_0xb8, object->field_0x1087, object->field_0x1020,
-                         WORLD->current_level->unknown_0cc);
     }
     config = object->apiobj.character_data->game_character;
     if (config->uses_weapon_action == 1 && AnimPlaying(&object->apiobj.anim_packet, 0x60, 1, 1)) {

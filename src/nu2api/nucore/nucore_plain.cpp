@@ -4767,10 +4767,10 @@ void NuLgtArcLaserEx(i32 type, NUVEC *start, NUVEC *end, NUVEC *bend, f32 width,
         blue = 255;
     if (alpha > 255)
         alpha = 255;
-    laser->colour = blue | (red << 16) | green | (alpha << 24);
+    laser->colour = (blue | (red << 16)) | (green | (alpha << 24));
     laser->flags = flags;
     if ((NuLgtArcLaserFrame & 1) == 0 || laser->seed == 0)
-        laser->seed = NuLgtRand();
+        NuLgtArcLaserData[index].seed = NuLgtRand();
     for (i32 i = 0; i < 6; ++i)
         NuLgtRand();
     ++NuLgtArcLaserCnt;

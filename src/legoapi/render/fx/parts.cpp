@@ -282,28 +282,29 @@ i32 CannotKill(GameObject_s *);
 
 static void PartCollide(PART_s *part, i32 three_dimensional) {
     const f32 radius = part->field_0e4;
-    const f32 minimum_x = part->position.x - radius;
-    const f32 maximum_x = part->position.x + radius;
-    const f32 minimum_y = part->position.y - radius;
-    const f32 maximum_y = part->position.y + radius;
-    const f32 minimum_z = part->position.z - radius;
-    const f32 maximum_z = part->position.z + radius;
+    NUVEC minimum = part->position;
+    NUVEC maximum = part->position;
+    minimum.x -= radius;
+    maximum.x += radius;
+    minimum.y -= radius;
+    maximum.y += radius;
+    minimum.z -= radius;
+    maximum.z += radius;
     GameObject_s *object = Obj;
     for (i32 i = 0; i < HIGHGAMEOBJECT; ++i, ++object) {
-        const i8 force_player_mask = part->force_player_mask;
         APIOBJECT_s *api = &object->apiobj;
         if ((api->field_0x1f8 & 0x1001) != 0x1001 || api->field_0x287 != 0)
             continue;
         i8 context = static_cast<i8>(object->character_context);
         if ((CInfo[context].flags & 0x8000) != 0 || (object->field_0xe20 & 0x20) != 0)
             continue;
-        if (force_player_mask != 0) {
-            if ((part->flags & 0x8000) == 0 && part->owner == object)
+        if (part->force_player_mask == 0) {
+            if (part->owner == object) {
+                if (part->scale_time < 0.5f)
+                    continue;
+            } else if (api->field_0x27c != -1 && part->scale_time < 0.25f)
                 continue;
-        } else if (part->owner == object) {
-            if (!(part->scale_time >= 0.5f))
-                continue;
-        } else if (api->field_0x27c != -1 && !(part->scale_time >= 0.25f))
+        } else if ((part->flags & 0x8000) == 0 && part->owner == object)
             continue;
         if (context == 0x39 || context == 0x3b || context == 0x3c)
             continue;
@@ -311,15 +312,17 @@ static void PartCollide(PART_s *part, i32 three_dimensional) {
             continue;
         if ((part->flags & 4) != 0 && (api->flags_low & 0x80) == 0)
             continue;
-        if (!(minimum_x <= api->collision_max.x && api->collision_min.x <= maximum_x &&
-              minimum_z <= api->collision_max.z && api->collision_min.z <= maximum_z))
+        if (minimum.x > api->collision_max.x || api->collision_min.x > maximum.x ||
+            minimum.z > api->collision_max.z || api->collision_min.z > maximum.z)
             continue;
-        if (three_dimensional != 0 &&
-            !((api->character_data->model_flags & 0x2000) != 0 && (part->flags & 0x40) != 0)) {
-            if (minimum_y > api->collision_max.y || api->collision_min.y > maximum_y)
+        if (three_dimensional != 0) {
+            if ((api->character_data->model_flags & 0x2000) != 0 && (part->flags & 0x40) != 0)
+                goto collect_pickup;
+            if (minimum.y > api->collision_max.y || api->collision_min.y > maximum.y)
                 continue;
         }
         if ((part->flags & 0x40) != 0) {
+        collect_pickup:
             if ((part->active & 2) == 0) {
                 if (part->pickup_type == 0xcb) {
                     if (!(part->scale_time >= 0.5f))
@@ -340,7 +343,7 @@ static void PartCollide(PART_s *part, i32 three_dimensional) {
             } else if (part->pickup_type == 0xd0) {
                 CollectPowerUp(object, &part->position, part->rotation_y, 1);
                 KillPart(part, 2);
-            } else if (force_player_mask == 3) {
+            } else if (part->force_player_mask == 3) {
                 if ((api->character_data->model_flags & 0x2000) == 0 || object->torpedo == NULL)
                     continue;
                 if (object->torpedo->count < getMaxTorpedos(object)) {
@@ -1458,33 +1461,33 @@ extern "C" {
                                            i32 count, f32 duration, NUMTX *emitter_orientation,
                                            NUMTX *particle_orientation, u16 render_priority, i8 timed_flags) {
         if (debris_suspended != 0 || static_cast<u32>(effect_index + 1) <= 1 || EDPP_MAX_TYPES <= effect_index ||
-            debtab[effect_index] == NULL || count < 1) {
+            debtab[effect_index] == NULL) {
             return;
         }
 
         debinftype *effect = debtab[effect_index];
-        if (effect->disabled != 0) {
+        if (effect->disabled != 0 || count < 1) {
             return;
         }
 
         if (effect->time_group != 4) {
-            NUVEC clipped_position = *position;
-            NUVEC extent = {1.0f, 1.0f, 1.0f};
+            NUVEC clipped_position;
+            clipped_position.x = position->x;
+            clipped_position.y = position->y;
+            clipped_position.z = position->z;
+            NUVEC extent;
+            extent.x = extent.y = extent.z = 1.0f;
             if (NuCameraClipTestExtentsAxisAligned(&clipped_position, &extent, effect->clip_extent) == 0) {
                 return;
             }
         }
 
-        f32 emission_interval = 0.0f;
-        bool no_interval = true;
         const f32 thinning =
             forced_debris_thinning == 0
-                ? (debris_thinning_level <= effect->thinning ? debris_thinning_level : effect->thinning)
+                ? (effect->thinning < debris_thinning_level ? effect->thinning : debris_thinning_level)
                 : debris_thinning_level;
-        if (thinning != 0.0f && count != 0) {
-            emission_interval = thinning / static_cast<f32>(count);
-            no_interval = emission_interval == 0.0f;
-        }
+        const f32 emission_rate = NuFdiv(static_cast<f32>(count), thinning);
+        const f32 emission_interval = NuFdiv(1.0f, emission_rate);
 
         if (emitter_orientation == NULL) {
             emitter_orientation = &numtx_identity;
@@ -1493,11 +1496,19 @@ extern "C" {
             particle_orientation = &numtx_identity;
         }
 
-        const bool panel_time = effect->time_group == 4;
-        const f32 now = panel_time ? panelglobaltime : globaltime;
+        i32 control_stack_index;
+        f32 now;
+        if (effect->time_group == 4) {
+            control_stack_index = 1;
+            now = panelglobaltime;
+        } else {
+            control_stack_index = 0;
+            now = globaltime;
+        }
         const f32 end_time = now + duration;
-        const f32 elapsed_intervals = no_interval ? 0.0f : static_cast<f32>(static_cast<i32>(now / emission_interval));
-        f32 emission_time = emission_interval + elapsed_intervals * emission_interval;
+        const f32 elapsed_intervals = static_cast<f32>(static_cast<i32>(NuFdiv(now, emission_interval)));
+        const f32 emission_epoch = elapsed_intervals * emission_interval;
+        f32 emission_time = emission_interval + emission_epoch;
         if (end_time < emission_time) {
             return;
         }
@@ -1510,8 +1521,6 @@ extern "C" {
         } while (next_emission_time <= end_time && emission_count != 99);
 
         const i32 particle_count = emission_count * (static_cast<i32>(effect->trail_count) + 1);
-        const i32 particles_per_chunk = effect->particle_type == 7 ? 12 : 32;
-        const i32 maximum_particles = effect->particle_type == 7 ? 0x180 : 0x400;
 
         i32 particle_key_slot = -1;
         debkeydatatype_s *key = NULL;
@@ -1520,10 +1529,13 @@ extern "C" {
 #define TRY_EXISTING_DEBRIS_KEY(slot)                                                                                  \
     if (effect->particle_keys[slot] != -1) {                                                                           \
         key = &debkeydata[effect->particle_keys[slot]];                                                                \
-        if (key->particle_count + particle_count <= maximum_particles) {                                               \
+        if (effect->particle_type == 7 ? key->particle_count + particle_count <= 0x180 :                                 \
+                                        key->particle_count + particle_count <= 0x400) {                               \
             particle_key_slot = slot;                                                                                  \
             goto debris_key_found;                                                                                     \
         }                                                                                                              \
+    } else {                                                                                                          \
+        key = NULL;                                                                                                   \
     }
 
 #define TRY_OR_ALLOCATE_DEBRIS_KEY(slot)                                                                               \
@@ -1532,7 +1544,8 @@ extern "C" {
         goto allocate_debris_key;                                                                                      \
     }                                                                                                                  \
     key = &debkeydata[effect->particle_keys[slot]];                                                                    \
-    if (key->particle_count + particle_count <= maximum_particles) {                                                   \
+    if (effect->particle_type == 7 ? key->particle_count + particle_count <= 0x180 :                                     \
+                                    key->particle_count + particle_count <= 0x400) {                                   \
         particle_key_slot = slot;                                                                                      \
         goto debris_key_found;                                                                                         \
     }
@@ -1546,7 +1559,7 @@ extern "C" {
             TRY_EXISTING_DEBRIS_KEY(5);
             TRY_EXISTING_DEBRIS_KEY(6);
             TRY_EXISTING_DEBRIS_KEY(7);
-            return;
+            goto debris_keys_searched;
         }
 
         TRY_OR_ALLOCATE_DEBRIS_KEY(0);
@@ -1557,12 +1570,12 @@ extern "C" {
         TRY_OR_ALLOCATE_DEBRIS_KEY(5);
         TRY_OR_ALLOCATE_DEBRIS_KEY(6);
         TRY_OR_ALLOCATE_DEBRIS_KEY(7);
-        return;
+        goto debris_keys_searched;
 
     allocate_debris_key:
         new_key_index = DebAlloc();
         effect->particle_keys[particle_key_slot] = static_cast<i16>(new_key_index);
-        key = &debkeydata[new_key_index];
+        key = &debkeydata[effect->particle_keys[particle_key_slot]];
         key->effect_index = static_cast<i16>(effect_index);
         key->field_1d4 = 0;
         key->generator = gensorttab[static_cast<i8>(effect->generator_type)];
@@ -1571,107 +1584,132 @@ extern "C" {
         key->effect_orientation.m30 = 0.0f;
         key->effect_orientation.m31 = 0.0f;
         key->effect_orientation.m32 = 0.0f;
-        DebrisEmitterPos(new_key_index, 0.0f, 0.0f, 0.0f);
+        DebrisEmitterPos(effect->particle_keys[particle_key_slot], 0.0f, 0.0f, 0.0f);
         key->timed_flags = timed_flags;
         key->render_priority = render_priority;
+
+    debris_keys_searched:
+        if (key == NULL) {
+            return;
+        }
 
     debris_key_found:
 #undef TRY_OR_ALLOCATE_DEBRIS_KEY
 #undef TRY_EXISTING_DEBRIS_KEY
 
         const i32 required_particles = key->particle_count + particle_count;
-        const i32 required_chunks = (required_particles + particles_per_chunk - 1) / particles_per_chunk;
-        i32 allocated_chunks = key->allocated_chunk_count;
-        if (allocated_chunks < 0) {
-            key->allocated_chunk_count = 0;
-            allocated_chunks = 0;
-        }
-        if (required_chunks > allocated_chunks) {
-            const i32 new_chunk_count = required_chunks - allocated_chunks;
-            i32 &free_chunk_count = effect->particle_type == 7 ? freedebchkptrg : freedebchkptr;
-            const i32 available_chunk_count = effect->particle_type == 7 ? debrischunksglass : debrischunks;
-            dma_particle_chunk_s **free_chunks = effect->particle_type == 7 ? freedebchunksglass : freedebchunks;
-            if (available_chunk_count <= free_chunk_count + new_chunk_count || required_chunks > 32) {
-                return;
-            }
 
-            for (i32 i = 0; i != new_chunk_count; ++i) {
-                dma_particle_chunk_s *chunk = free_chunks[free_chunk_count + i];
-                key->particle_chunks[allocated_chunks + i] = chunk;
-                for (i32 particle = 0; particle != particles_per_chunk; ++particle) {
-                    chunk->particles[particle].start_time = 0.0f;
-                    chunk->particles[particle].inverse_lifetime = 32768.0f;
-                }
-            }
-            free_chunk_count += new_chunk_count;
-            key->allocated_chunk_count = static_cast<i16>(required_chunks);
-            LinkDmaParticalSets(key->particle_chunks, required_chunks);
+#define GROW_DEBRIS_CHUNKS(width, free_count, capacity, free_list)                                                     \
+    do {                                                                                                             \
+        i32 allocated_chunks = key->allocated_chunk_count;                                                            \
+        if (allocated_chunks * width < required_particles) {                                                         \
+            if (allocated_chunks < 0) {                                                                              \
+                key->allocated_chunk_count = 0;                                                                      \
+                allocated_chunks = 0;                                                                                \
+            }                                                                                                        \
+            const i32 required_chunks = (required_particles + width - 1) / width;                                   \
+            const i32 new_chunk_count = required_chunks - allocated_chunks;                                         \
+            const i32 first_free_chunk = free_count;                                                                 \
+            if (capacity <= first_free_chunk + new_chunk_count || required_chunks > 32) {                           \
+                return;                                                                                              \
+            }                                                                                                        \
+            for (i32 i = 0; i < new_chunk_count; ++i) {                                                              \
+                key->particle_chunks[allocated_chunks + i] = free_list[first_free_chunk + i];                       \
+                for (i32 particle = 0; particle < width; ++particle) {                                               \
+                    key->particle_chunks[allocated_chunks + i]->particles[particle].start_time = 0.0f;              \
+                    key->particle_chunks[allocated_chunks + i]->particles[particle].inverse_lifetime = 32768.0f;    \
+                }                                                                                                    \
+            }                                                                                                        \
+            free_count = first_free_chunk + new_chunk_count;                                                         \
+            key->allocated_chunk_count = static_cast<i16>(required_chunks);                                          \
+            LinkDmaParticalSets(key->particle_chunks, required_chunks);                                               \
+            if (required_chunks == new_chunk_count) {                                                                \
+                const i32 total_chunk_count = debrischunks + debrischunksglass;                                      \
+                for (i32 i = 0; i < total_chunk_count; ++i) {                                                        \
+                    particlechunkrendertype_s *render_chunk = &ParticleChunkToRender[i];                           \
+                    if (render_chunk->particle_chunk == NULL) {                                                     \
+                        render_chunk->particle_chunk = key->particle_chunks[0];                                     \
+                        render_chunk->effect = effect;                                                              \
+                        render_chunk->key = key;                                                                    \
+                        render_chunk->render_priority = render_priority;                                            \
+                        AddChunkToRenderStack(render_chunk, &ParticleChunkRenderStack[effect->time_group]);         \
+                        break;                                                                                       \
+                    }                                                                                                \
+                }                                                                                                    \
+            }                                                                                                        \
+        }                                                                                                            \
+    } while (0)
 
-            // The renderer needs one entry per contiguous DMA chain, created
-            // when the key receives its first chunk; subsequent growth merely
-            // relinks that same chain.
-            if (required_chunks == new_chunk_count) {
-                const i32 total_chunk_count = debrischunks + debrischunksglass;
-                particlechunkrendertype_s *render_chunk = NULL;
-                for (i32 i = 0; i < total_chunk_count; ++i) {
-                    if (ParticleChunkToRender[i].particle_chunk == NULL) {
-                        render_chunk = &ParticleChunkToRender[i];
-                        break;
-                    }
-                }
-                if (render_chunk != NULL) {
-                    render_chunk->particle_chunk = key->particle_chunks[0];
-                    render_chunk->effect = effect;
-                    render_chunk->key = key;
-                    render_chunk->render_priority = render_priority;
-                    AddChunkToRenderStack(render_chunk, &ParticleChunkRenderStack[effect->time_group]);
-                }
-            }
-            allocated_chunks = required_chunks;
-        }
-
-        key->particle_count = static_cast<i16>(required_particles);
-        if (momentum == NULL) {
-            key->momentum = nuvec_zero;
+        if (effect->particle_type == 7) {
+            GROW_DEBRIS_CHUNKS(12, freedebchkptrg, debrischunksglass, freedebchunksglass);
         } else {
-            key->momentum = *momentum;
+            GROW_DEBRIS_CHUNKS(32, freedebchkptr, debrischunks, freedebchunks);
+        }
+#undef GROW_DEBRIS_CHUNKS
+
+        key->particle_count += particle_count;
+        if (momentum == NULL) {
+            key->momentum.x = 0.0f;
+            key->momentum.y = 0.0f;
+            key->momentum.z = 0.0f;
+        } else {
+            key->momentum.x = momentum->x;
+            key->momentum.y = momentum->y;
+            key->momentum.z = momentum->z;
         }
         DebrisEmitterOrientationMtx(effect->particle_keys[particle_key_slot], emitter_orientation);
-        key->emission_epoch = elapsed_intervals * emission_interval;
+        key->emission_epoch = emission_epoch;
 
-        for (i32 i = 0; i != 99 && emission_time <= end_time; ++i) {
-            if (position_delta == NULL) {
-                key->emission_position = *position;
-            } else {
+        if (position_delta == NULL) {
+            i32 i = 1;
+            do {
+                key->emission_position.x = position->x;
+                key->emission_position.y = position->y;
+                key->emission_position.z = position->z;
+                key->emission_time = emission_time;
+                uv1deb *particle = key->generator(key, effect, emission_time);
+                if (effect->process_spheres != 0 && particle != NULL && i == 1) {
+                    DebrisProcessSpheres(particle, emission_time, effect, key, 1);
+                }
+                emission_time = key->emission_epoch + emission_interval;
+            } while (emission_time <= end_time && ++i != 100);
+        } else {
+            i32 i = 1;
+            do {
                 NuVecAddScale(&key->emission_position, position, position_delta, emission_time - end_time);
-            }
-            key->emission_time = emission_time;
-            uv1deb *particle = key->generator(key, effect, emission_time);
-            if (effect->process_spheres != 0 && particle != NULL && i == 0) {
-                DebrisProcessSpheres(particle, emission_time, effect, key, 1);
-            }
-            emission_time = key->emission_epoch + emission_interval;
+                key->emission_time = emission_time;
+                uv1deb *particle = key->generator(key, effect, emission_time);
+                if (effect->process_spheres != 0 && particle != NULL && i == 1) {
+                    DebrisProcessSpheres(particle, emission_time, effect, key, 1);
+                }
+                emission_time = key->emission_epoch + emission_interval;
+            } while (emission_time <= end_time && ++i != 100);
         }
 
         DebrisGetControlStackLock();
-        while (key->controlled_chunk_count < key->allocated_chunk_count &&
-               freechunkcontrolsptr < (debrischunks + debrischunksglass) * 2) {
-            const i32 chunk_index = key->controlled_chunk_count;
-            debris_chunk_control_s *control = freechunkcontrols[freechunkcontrolsptr++];
+        for (i32 chunk_index = key->controlled_chunk_count; chunk_index < key->allocated_chunk_count; ++chunk_index) {
+            if (freechunkcontrolsptr >= (debrischunks + debrischunksglass) * 2) {
+                continue;
+            }
+            debris_chunk_control_s *control = freechunkcontrols[freechunkcontrolsptr];
             control->particle_chunk = key->particle_chunks[chunk_index];
             control->active = 1;
             control->owner = key;
             control->expiry_time =
                 now + effect->particle_lifetime + static_cast<f32>(effect->trail_count) * effect->trail_time;
-            AddChunkControlToStack(control, &debris_chunk_control_stack[panel_time ? 1 : 0]);
+            AddChunkControlToStack(control, &debris_chunk_control_stack[control_stack_index]);
+            ++freechunkcontrolsptr;
             ++key->controlled_chunk_count;
         }
 
-        if (key->controlled_chunk_count == key->allocated_chunk_count && key->controlled_chunk_count != 0) {
-            debris_chunk_control_s **stack = &debris_chunk_control_stack[panel_time ? 1 : 0];
-            const dma_particle_chunk_s *last_chunk = key->particle_chunks[key->controlled_chunk_count - 1];
-            for (debris_chunk_control_s *control = *stack; control != NULL; control = control->next) {
-                if (control->particle_chunk == last_chunk) {
+        if (key->controlled_chunk_count == key->allocated_chunk_count) {
+            debris_chunk_control_s **stack = &debris_chunk_control_stack[control_stack_index];
+            if (*stack != NULL) {
+                const dma_particle_chunk_s *last_chunk = key->particle_chunks[key->controlled_chunk_count - 1];
+                for (debris_chunk_control_s *control = *stack; control != NULL; control = control->next) {
+                    if (control->particle_chunk != last_chunk) {
+                        continue;
+                    }
                     RemoveChunkControlFromStack(control, stack);
                     control->expiry_time =
                         now + effect->particle_lifetime + static_cast<f32>(effect->trail_count) * effect->trail_time;
@@ -2253,7 +2291,7 @@ extern "C" {
             PART_s *part = &parts[i];
             if ((part->active & 1) == 0)
                 continue;
-            part->previous_transform = part->transform;
+            memcpy(&part->previous_transform, &part->transform, sizeof(NUMTX));
             part->scale_time += time;
             if ((part->active & 2) == 0) {
                 f32 movement_time = time;
@@ -2272,7 +2310,9 @@ extern "C" {
                                     KillPart(part, 0);
                             } else {
                                 movement_time -= part->elapsed;
-                                part->position = part->impact_position;
+                                part->position.x = part->impact_position.x;
+                                part->position.y = part->impact_position.y;
+                                part->position.z = part->impact_position.z;
                                 FullReflect(&part->impact_normal, &part->velocity, &part->velocity);
                                 if ((part->flags & 0x80) != 0)
                                     NewPartRotation(part);
@@ -2322,8 +2362,8 @@ extern "C" {
                     } else {
                         part->position.x += part->velocity.x * movement_time;
                         part->position.y += part->velocity.y * movement_time;
-                        part->position.z += part->velocity.z * movement_time;
                         part->velocity.y += part->gravity * movement_time;
+                        part->position.z += part->velocity.z * movement_time;
                     }
                 }
                 if ((part->render_flags & 1) == 0 && part->field_0f0 != 2000000.0f &&
@@ -3541,6 +3581,8 @@ void NewPartOrderedRotation(PART_s *part) {
     part->field_124[2] = base + static_cast<i32>((NuRandFloatSeeded(&partseed) * 2.0f - 1.0f) * range);
 }
 
+static i32 lastrandkillmode;
+
 void KillParts(GameObject_s *object, i32 animation, i32 excluded_layer, i32 mode, float vertical_scale,
                i32 use_vehicle_velocity, u16 *angle_override) {
     CHARACTERDATA *character = object->apiobj.character_data;
@@ -3555,7 +3597,7 @@ void KillParts(GameObject_s *object, i32 animation, i32 excluded_layer, i32 mode
     GameAudio_PlaySfx(0x4f, &object->apiobj.collision_position, 0, 0);
 
     extern HUBMINIKITPIECES_s **Char_MiniKit;
-    if ((character->model_flags & 0x04000000) != 0 && object->id != id_MINIDROIDEKA) {
+    if ((object->apiobj.character_data->model_flags & 0x04000000) != 0 && object->id != id_MINIDROIDEKA) {
         if (Char_MiniKit == NULL || object->id < 0 || object->id >= CHARCOUNT)
             return;
         HUBMINIKITPIECES_s *pieces = Char_MiniKit[object->id];
@@ -3598,14 +3640,14 @@ void KillParts(GameObject_s *object, i32 animation, i32 excluded_layer, i32 mode
         static_cast<u16>(static_cast<i32>(static_cast<f32>(qrand()) * (1.0f / 65535.0f) * 25486.0f - 12743.0f));
     const u16 random_rotation_b =
         static_cast<u16>(static_cast<i32>(static_cast<f32>(qrand()) * (1.0f / 65535.0f) * 16384.0f - 8192.0f));
-    static i32 previous_variant;
     i32 random_variant = qrand() / 21846;
-    for (i32 retry = 0; retry < 8 && random_variant == previous_variant; ++retry)
+    for (i32 retry = 0; retry < 8 && random_variant == lastrandkillmode; ++retry)
         random_variant = qrand() / 21846;
-    previous_variant = random_variant;
+    lastrandkillmode = random_variant;
 
-    u32 layers = (game_character->flags_094[2] & 4) != 0 ? object->field_0x1054
-                                                         : AdjustLayerBits(game_character->layer_mask_dead, object);
+    u32 layers = (object->apiobj.character_data->game_character->flags_094[2] & 4) != 0
+                     ? object->field_0x1054
+                     : AdjustLayerBits(object->apiobj.character_data->game_character->layer_mask_dead, object);
     if (animation != -1)
         layers = 1u << animation;
     else if (excluded_layer != -1)
@@ -3616,23 +3658,25 @@ void KillParts(GameObject_s *object, i32 animation, i32 excluded_layer, i32 mode
     CHARACTERMODEL_s *model = object->apiobj.character_model;
     EvalModelAnim(model, &object->apiobj.anim_packet, &object->apiobj.field_0xb8, joint_matrices, NULL, NULL, NULL,
                   layers);
-    const i32 render_count = game_character->make_layer_list(model, render_indices, layers);
+    const i32 render_count = object->apiobj.character_data->game_character->make_layer_list(
+        object->apiobj.character_model, render_indices, layers);
     i32 part_index = 0;
     for (i32 render_index = 0; render_index < render_count; ++render_index) {
         const i32 layer = render_indices[render_index];
         if (layer == -1 || (animation != -1 && layer != animation) || (excluded_layer != -1 && layer == excluded_layer))
             continue;
-        nuhgobjrender_s *render = &model->hierarchy->render_parts[layer];
+        nuhgobjrender_s *render = &object->apiobj.character_model->hierarchy->render_parts[layer];
         if (render->rigid_specials == NULL)
             continue;
-        for (i32 joint = 0; joint < model->hierarchy->joint_count; ++joint, ++part_index) {
+        for (i32 joint = 0; joint < object->apiobj.character_model->hierarchy->joint_count; ++joint, ++part_index) {
             nuhspecial_s *special = static_cast<nuhspecial_s *>(render->rigid_specials[joint]);
             if (special == NULL)
                 continue;
             NUMTX matrix;
             NUVEC momentum;
             ADDPART_s params;
-            if (VehicleArea != 0 && (character->model_flags & 0x2000) != 0 && game_character->field_0x28 > 0.0f) {
+            if (VehicleArea != 0 && (object->apiobj.character_data->model_flags & 0x2000) != 0 &&
+                object->apiobj.character_data->game_character->field_0x28 > 0.0f) {
                 NuMtxMul(&matrix, &joint_matrices[joint], &object->apiobj.field_0xb8);
                 SetKillPartMom(&momentum);
                 NuVecScale(&momentum, &momentum, 4.0f);
@@ -3647,7 +3691,7 @@ void KillParts(GameObject_s *object, i32 animation, i32 excluded_layer, i32 mode
                 momentum.y += vertical_scale;
                 if (animation != -1)
                     momentum.y += 1.0f;
-                if ((character->model_flags & 0x2000) != 0) {
+                if ((object->apiobj.character_data->model_flags & 0x2000) != 0) {
                     momentum.x += object->apiobj.velocity.x * 0.75f;
                     momentum.y += object->apiobj.velocity.y * 0.75f;
                     momentum.z += object->apiobj.velocity.z * 0.75f;
@@ -3690,8 +3734,9 @@ void KillParts(GameObject_s *object, i32 animation, i32 excluded_layer, i32 mode
         }
     }
 
-    if ((character->flags & 1) != 0 && VehicleArea != 0 && (character->model_flags & 0x2000) != 0 &&
-        game_character->field_0x28 > 0.0f) {
+    if ((object->apiobj.character_data->flags & 1) != 0 && VehicleArea != 0 &&
+        (object->apiobj.character_data->model_flags & 0x2000) != 0 &&
+        object->apiobj.character_data->game_character->field_0x28 > 0.0f) {
         extern nuhspecial_s *CharScene_FindHSpecial(WORLDINFO_s *, i32);
         nuhspecial_s *special = CharScene_FindHSpecial(WORLD, object->id);
         if (special != NULL) {
@@ -3722,6 +3767,6 @@ void KillParts(GameObject_s *object, i32 animation, i32 excluded_layer, i32 mode
                 part->field_100 = static_cast<f32>(qrand()) * (1.0f / 65535.0f) * 2.0f + 3.0f;
         }
     }
-    if (game_character->uses_weapon_action == 0)
+    if (object->apiobj.character_data->game_character->uses_weapon_action == 0)
         Customiser_AddPartAccessories(CharacterCustomiser, object, animation, mode, vertical_scale);
 }

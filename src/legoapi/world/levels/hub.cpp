@@ -306,7 +306,8 @@ struct HUBAREAINFO_s {
     const char *bonus_gizmo_name_2;
     f32 panel_offset;
     f32 panel_scale;
-    i32 flags;
+    u8 flags;
+    u8 force_open;
     AREADATA_s *area;
     GIZMO *door;
     nuhspecial_s lock;
@@ -329,6 +330,8 @@ struct HUBEPISODEINFO_s {
 
 #if UINTPTR_MAX == 0xffffffff
 DECOMP_ASSERT(sizeof(HUBAREAINFO_s) == 0x3c, "HUBAREAINFO_s size");
+DECOMP_ASSERT(offsetof(HUBAREAINFO_s, force_open) == 0x1d, "HUBAREAINFO_s force_open offset");
+DECOMP_ASSERT(offsetof(HUBAREAINFO_s, area) == 0x20, "HUBAREAINFO_s area offset");
 DECOMP_ASSERT(sizeof(HUBEPISODEINFO_s) == 0x34, "HUBEPISODEINFO_s size");
 #endif
 
@@ -382,8 +385,8 @@ static HUBAREAINFO_s HubAreaInfo[] = {{"negotiations", "de1_1", "lock_1_1_on", N
                                       {"anewhope", "de7_4", "lock_7_4_on", "frame_4", NULL, 0.0f, 0.0f, 1},
                                       {"bonus2", "de7_5", "lock_7_5_on", "frame_5", NULL, 0.0f, 0.0f, 1},
                                       {"bonus", "de7_6", "lock_7_6_on", "frame_6", NULL, 0.0f, 0.0f, 1},
-                                      {"losttemple", "de7_7", "lock_7_7_on", NULL, NULL, 0.0f, 0.0f, 0x101},
-                                      {"senate", "network_door", NULL, NULL, NULL, 0.0f, 0.0f, 0x101},
+                                      {"losttemple", "de7_7", "lock_7_7_on", NULL, NULL, 0.0f, 0.0f, 1, 1},
+                                      {"senate", "network_door", NULL, NULL, NULL, 0.0f, 0.0f, 1, 1},
                                       {}};
 
 static HUBEPISODEINFO_s HubEpisodeInfo[] = {
@@ -785,7 +788,7 @@ void Hub_Update(WORLDINFO_s *world) {
         }
         if (missions_available != 0) {
             // Original 0x1b762b writes the low byte of the Jabba entry's override.
-            HubEpisodeInfo[8].force_open = (HubEpisodeInfo[8].force_open & ~0xff) | 1;
+            HubEpisodeInfo[8].force_open = 1;
         }
         const i32 gold_bricks = Game.field_0x7c26[0];
         i32 buildit_index = 0;
@@ -843,27 +846,27 @@ void Hub_Update(WORLDINFO_s *world) {
     i32 completed_areas;
     Episode_IsComplete(HubEpisodeInfo[0].data, &completed_areas);
     if (completed_areas == 6) {
-        HubAreaInfo[6].flags = (HubAreaInfo[6].flags & ~0xff00) | 0x100;
+        HubAreaInfo[6].force_open = 1;
     }
     Episode_IsComplete(HubEpisodeInfo[1].data, &completed_areas);
     if (completed_areas == 6) {
-        HubAreaInfo[13].flags = (HubAreaInfo[13].flags & ~0xff00) | 0x100;
+        HubAreaInfo[13].force_open = 1;
     }
     Episode_IsComplete(HubEpisodeInfo[2].data, &completed_areas);
     if (completed_areas == 6) {
-        HubAreaInfo[20].flags = (HubAreaInfo[20].flags & ~0xff00) | 0x100;
+        HubAreaInfo[20].force_open = 1;
     }
     Episode_IsComplete(HubEpisodeInfo[3].data, &completed_areas);
     if (completed_areas == 6) {
-        HubAreaInfo[27].flags = (HubAreaInfo[27].flags & ~0xff00) | 0x100;
+        HubAreaInfo[27].force_open = 1;
     }
     Episode_IsComplete(HubEpisodeInfo[4].data, &completed_areas);
     if (completed_areas == 6) {
-        HubAreaInfo[34].flags = (HubAreaInfo[34].flags & ~0xff00) | 0x100;
+        HubAreaInfo[34].force_open = 1;
     }
     Episode_IsComplete(HubEpisodeInfo[5].data, &completed_areas);
     if (completed_areas == 6) {
-        HubAreaInfo[41].flags = (HubAreaInfo[41].flags & ~0xff00) | 0x100;
+        HubAreaInfo[41].force_open = 1;
     }
     i32 selected_area = -1;
     for (i32 i = 0; HubAreaInfo[i].area_name != NULL; ++i) {
@@ -889,7 +892,7 @@ void Hub_Update(WORLDINFO_s *world) {
             if (Episode_CountOpenAreas(static_cast<i8>(area.area->episode_index), area.area->index, Game_AreaSave) !=
                     0 ||
                 (area.bonus_gizmo != NULL && GizmoGetOutput(world->gizmo_sys, area.bonus_gizmo, 0, 0) != 0) ||
-                ((area.flags >> 8) & 0xff) == 1) {
+                area.force_open == 1) {
                 static_cast<GIZOBSTACLE_s *>(area.door->object)->runtime_flags &= static_cast<u8>(~8);
                 NuSpecialSetVisibility(&area.lock, 1);
             }
@@ -1163,9 +1166,9 @@ void Hub_DrawPanel(WORLDINFO_s *) {
             }
         } else if (hub_episode == 8) {
             i32 gold_count = 0, gold_total = 0, buildup_count = 0, buildup_total = 0;
-            AREADATA *area = ADataList;
-            AREASAVE_s *save = Game.area_save;
-            for (i32 i = 0; i < AREACOUNT; ++i, ++area, ++save) {
+            for (i32 i = 0; i < AREACOUNT; ++i) {
+                AREADATA *area = &ADataList[i];
+                AREASAVE_s *save = &Game.area_save[i];
                 if (area == HUB_ADATA || (area->flags & 0x22) || area->episode_index != 0xff || (area->flags & 0x2010))
                     continue;
                 if (area->flags & 0x100) {
@@ -2514,16 +2517,16 @@ void Hub_UpdateFreePlaySelect() {
             break;
         case 1: {
             i32 active = 0, confirmed = 0;
-            bool exit = false;
+            i32 exit = 0;
             for (i32 player = 0; player < 2; ++player) {
                 const i32 other = (player + 1) & 1;
                 const i32 previous = freeplay_i[player];
                 i32 index = previous;
-                bool select = false, cancel = false;
+                i32 select = 0, cancel = 0;
                 if (menu->input_activity != 0 && player == 0) {
                     if (menu->confirm_pressed != 0) {
                         if (menu->selected_item == 9999)
-                            select = true;
+                            select = 1;
                         else
                             index = menu->selected_item;
                     }
@@ -2531,9 +2534,9 @@ void Hub_UpdateFreePlaySelect() {
                 }
                 if (MenuPacket.active_player[player] != 0) {
                     if ((GamePad[player].pad->digital_buttons_pressed & GAMEPAD_MENUSELECT) != 0) {
-                        select = true;
+                        select = 1;
                     } else if ((GamePad[player].pad->digital_buttons_pressed & GAMEPAD_MENUCANCEL) != 0) {
-                        cancel = true;
+                        cancel = 1;
                     } else if (freeplay_selected[player] == 0) {
                         const u32 held = GamePad[player].buttons_held | GamePad[player].buttons_released;
                         const u32 pressed = GamePad[player].buttons_pressed | GamePad[player].left_directions;
@@ -2556,47 +2559,55 @@ void Hub_UpdateFreePlaySelect() {
                                    FRAMETIME);
                         MenuRepeat(&right_held, &right, &rightrepeattime[player], &rightrepeatcount[player], 0.1f,
                                    FRAMETIME);
-                        const i32 columns = collection->count_x;
-                        const i32 count = collection->count_y;
-                        // Retail data has a nonempty grid and another selectable
-                        // model. Bound malformed or single-model grids instead
-                        // of dividing by zero or looping forever.
-                        if (columns > 0 && count > 0 && (up || down || left || right)) {
+                        if (up) {
+                            const i32 columns = collection->count_x;
+                            const i32 count = collection->count_y;
                             const i32 span = (count / columns + 1) * columns;
                             index = previous;
-                            for (i32 attempt = 0; attempt < count; ++attempt) {
-                                if (up) {
-                                    index -= columns;
-                                    if (index < 0) {
-                                        index += span;
-                                        if (index >= count)
-                                            index -= columns;
-                                    }
-                                } else if (down) {
-                                    index += columns;
-                                    if (index >= count) {
-                                        if (index < span)
-                                            index += columns;
-                                        index -= span;
-                                    }
-                                } else if (left) {
-                                    i32 column = index % columns - 1;
-                                    if (column < 0)
-                                        column += columns;
-                                    index = (index / columns) * columns + column;
+                            do {
+                                index -= columns;
+                                if (index < 0) {
+                                    index += span;
                                     if (index >= count)
-                                        index = count - 1;
-                                } else {
-                                    i32 column = index % columns + 1;
-                                    const i32 row = (index / columns) * columns;
-                                    if (column >= columns)
-                                        column -= columns;
-                                    if (row + column < count)
-                                        index = row + column;
+                                        index -= columns;
                                 }
-                                if (collection->list[index].id != MenuPacket.player_model[other])
-                                    break;
-                            }
+                            } while (collection->list[index].id == MenuPacket.player_model[other]);
+                        } else if (down) {
+                            const i32 columns = collection->count_x;
+                            const i32 count = collection->count_y;
+                            const i32 span = (count / columns + 1) * columns;
+                            index = previous;
+                            do {
+                                index += columns;
+                                if (index >= count) {
+                                    if (index < span)
+                                        index += columns;
+                                    index -= span;
+                                }
+                            } while (collection->list[index].id == MenuPacket.player_model[other]);
+                        } else if (left) {
+                            const i32 columns = collection->count_x;
+                            const i32 count = collection->count_y;
+                            index = previous;
+                            do {
+                                i32 column = index % columns - 1;
+                                if (column < 0)
+                                    column += columns;
+                                index = (index / columns) * columns + column;
+                                if (index >= count)
+                                    index = count - 1;
+                            } while (collection->list[index].id == MenuPacket.player_model[other]);
+                        } else if (right) {
+                            const i32 columns = collection->count_x;
+                            const i32 count = collection->count_y;
+                            index = previous;
+                            do {
+                                i32 column = index % columns + 1;
+                                const i32 row = (index / columns) * columns;
+                                if (column >= columns)
+                                    column -= columns;
+                                index = row + column < count ? row + column : row;
+                            } while (collection->list[index].id == MenuPacket.player_model[other]);
                         }
                     }
                     ++active;
@@ -2633,12 +2644,12 @@ void Hub_UpdateFreePlaySelect() {
                             GameAudio_PlaySfx(0x31, NULL, 0, 0);
                         }
                     } else if (freeplay_selected[player] == 0 && freeplay_time[player] <= 0.0f) {
-                        exit = true;
+                        exit = 1;
                     }
                 }
                 // Touch navigation commits after selection, just like the
                 // original: confirmation checks the previously selected model.
-                if (index != previous && index >= 0 && index < collection->count_y) {
+                if (index != previous) {
                     freeplay_i[player] = index;
                     MenuPacket.player_model[player] = collection->list[index].id;
                     GameAudio_PlaySfx(0x2f, NULL, 0, 0);
@@ -2654,8 +2665,7 @@ void Hub_UpdateFreePlaySelect() {
                     if (net_recievedFreePlayList == 0)
                         break;
                     fpcount = 0;
-                    // The network roster's verified storage is 49 entries.
-                    for (i32 i = 0; i < net_FreePlayModelCount && i < 49; ++i) {
+                    for (i32 i = 0; i < net_FreePlayModelCount; ++i) {
                         FreePlayModelList[i] = NetFreePlayModelList[i];
                         if (Collection_Got(NetFreePlayModelList[i].model_id) != 0)
                             fplist[fpcount++] = NetFreePlayModelList[i];
@@ -2712,7 +2722,7 @@ void Hub_UpdateFreePlaySelect() {
                 FadeSys.fade = 1.0f;
                 FinishLoop_On = 0;
                 if (hub_freeplaysource == 0) {
-                    if (hub_selectmode == 2 && NewLData != NULL)
+                    if (hub_selectmode == 2)
                         InitChallenge(NewLData->area_index);
                 } else if (hub_freeplaysource == 1 && bonusmodearcade != 0) {
                     Arcade = 1;

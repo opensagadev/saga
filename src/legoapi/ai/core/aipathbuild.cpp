@@ -279,9 +279,9 @@ extern "C" {
                  shared != nullptr;
                  shared = (EDAISHAREDPATHNODE_s *)NuLinkedListGetNext(&aieditor->shared_path_nodes, &shared->link)) {
                 AIPATHSPECIALROUTE_s *route = &system->special_routes[shared->runtime_index];
-                i32 participants = shared->reference_count;
-                route->paths = (AIPATH_s **)AISysBufferAlloc(&scratch, scratch_limit, participants * sizeof(AIPATH_s));
-                memset(route->paths, 0, participants * sizeof(AIPATH_s));
+                route->paths = (AIPATH_s **)AISysBufferAlloc(
+                    &scratch, scratch_limit, shared->reference_count * sizeof(AIPATH_s));
+                memset(route->paths, 0, shared->reference_count * sizeof(AIPATH_s));
             }
         }
         system->paths = (AIPATH_s **)AISysBufferAlloc(cursor, end, system->path_count * sizeof(AIPATH_s *));
@@ -293,8 +293,8 @@ extern "C" {
         i32 path_index = 0;
         for (EDAIPATH_s *editor_path = (EDAIPATH_s *)NuLinkedListGetHead(&aieditor->paths); editor_path != nullptr;
              editor_path = (EDAIPATH_s *)NuLinkedListGetNext(&aieditor->paths, &editor_path->link), ++path_index) {
-            AIPATH_s *path = (AIPATH_s *)AISysBufferAlloc(cursor, end, sizeof(AIPATH_s));
-            system->paths[path_index] = path;
+            system->paths[path_index] = (AIPATH_s *)AISysBufferAlloc(cursor, end, sizeof(AIPATH_s));
+            AIPATH_s *path = system->paths[path_index];
             if (path == nullptr) {
                 continue;
             }
@@ -365,7 +365,9 @@ extern "C" {
                             if (runtime->connection_count != 0) {
                                 runtime->connections = (AIPATHCNX_s **)AISysBufferAlloc(
                                     cursor, end, runtime->connection_count * sizeof(AIPATHCNX_s *));
-                                memset(runtime->connections, 0, runtime->connection_count * sizeof(AIPATHCNX_s *));
+                                if (runtime->connections != nullptr) {
+                                    memset(runtime->connections, 0, runtime->connection_count * sizeof(AIPATHCNX_s *));
+                                }
                                 i32 next = 0;
                                 for (i32 slot = 0; slot < 8; ++slot) {
                                     EDAIPATHCNX_s *editor_connection = &node->connections[slot];
@@ -379,21 +381,21 @@ extern "C" {
                                             AIPATHCNX_s *connection = other_runtime->connections[reverse];
                                             if (connection->node_indices[1] == node->index) {
                                                 runtime->connections[next] = connection;
-                                                connection->traversal_flags[1] = editor_connection->flags;
-                                                connection->original_traversal_flags[1] = editor_connection->flags;
+                                                runtime->connections[next]->traversal_flags[1] = editor_connection->flags;
+                                                runtime->connections[next]->original_traversal_flags[1] = editor_connection->flags;
                                                 break;
                                             }
                                         }
                                     } else {
-                                        AIPATHCNX_s *connection = &path->connections[connection_index++];
-                                        runtime->connections[next] = connection;
-                                        connection->node_indices[0] = node->index;
-                                        connection->node_indices[1] = other->index;
+                                        runtime->connections[next] = &path->connections[connection_index++];
+                                        runtime->connections[next]->node_indices[0] = node->index;
+                                        runtime->connections[next]->node_indices[1] = editor_connection->node->index;
+                                        AIPATHCNX_s *connection = runtime->connections[next];
                                         connection->traversal_flags[0] = editor_connection->flags;
                                         connection->original_traversal_flags[0] = editor_connection->flags;
                                         NUVEC difference;
                                         connection->distance =
-                                            NuVecDist(&other->position, &node->position, &difference);
+                                            NuVecDist(&editor_connection->node->position, &node->position, &difference);
                                         runtime->connections[next]->horizontal_distance = NuVecXZDist(
                                             &editor_connection->node->position, &node->position, &difference);
                                         connection = runtime->connections[next];
@@ -433,16 +435,17 @@ extern "C" {
                         memset(path->route_matrix[source], 0, path->node_count);
                     }
                 }
-                if (distance_tables != nullptr && path->nodes != nullptr && distance_tables[path_index] != nullptr) {
-                    f32 **distances = distance_tables[path_index];
+                u8 **route_matrix = path->route_matrix;
+                f32 **distances = distance_tables[path_index];
+                if (distance_tables != nullptr && path->nodes != nullptr && distances != nullptr) {
                     for (i32 source = 0; source < path->node_count; ++source) {
+                        AIPATHNODE_s *node = &path->nodes[source];
                         for (i32 destination = 0; destination < path->node_count; ++destination) {
-                            path->route_matrix[source][destination] = 0xff;
+                            route_matrix[source][destination] = 0xff;
                             if (destination == source) {
                                 continue;
                             }
                             f32 best = FLT_MAX;
-                            AIPATHNODE_s *node = &path->nodes[source];
                             for (i32 edge = 0; edge < node->connection_count; ++edge) {
                                 AIPATHCNX_s *connection = node->connections[edge];
                                 bool direction = connection->node_indices[0] != source;
@@ -453,7 +456,7 @@ extern "C" {
                                 f32 distance = distances[source][neighbor] + distances[neighbor][destination];
                                 if (distance < best) {
                                     best = distance;
-                                    path->route_matrix[source][destination] = edge;
+                                    route_matrix[source][destination] = edge;
                                 }
                             }
                         }
@@ -464,25 +467,25 @@ extern "C" {
         }
         if (system->path_count > 1) {
             AIPATHINFO info;
-            memset(&info, 0, sizeof(info));
             AIPATH_s *first_path = system->paths[0];
+            memset(&info, 0, sizeof(info));
             for (i32 path_index = 1; path_index < system->path_count; ++path_index) {
                 AIPATH_s *path = system->paths[path_index];
                 for (i32 node_index = 0; node_index < path->node_count; ++node_index) {
                     AIPATHNODE_s *node = &path->nodes[node_index];
                     AISysGetPathPos(aieditor->ai_system, &node->position, &info, first_path, 0xff);
-                    if (!info.on_path) {
+                    if (info.on_path) {
+                        node->path_flags = info.connection - path->connections;
+                        if (info.dist > 0.5f || (info.direction != 0 && info.dist < 0.5f)) {
+                            node->runtime_flags |= 4;
+                        }
+                        node->runtime_flags |= 1;
+                        node->path_flags = info.connection - info.path->connections;
+                        path->flags |= 2;
+                    } else {
                         node->path_flags = -1;
                         node->runtime_flags &= ~u8(1);
-                        continue;
                     }
-                    node->path_flags = info.connection - path->connections;
-                    if (info.dist > 0.5f || (info.direction != 0 && info.dist < 0.5f)) {
-                        node->runtime_flags |= 4;
-                    }
-                    node->runtime_flags |= 1;
-                    node->path_flags = info.connection - info.path->connections;
-                    path->flags |= 2;
                 }
                 if (!(path->flags & 2) || distance_tables == nullptr || distance_tables[path_index] == nullptr) {
                     continue;
@@ -494,7 +497,7 @@ extern "C" {
                     }
                     f32 nearest = FLT_MAX;
                     for (i32 candidate = 0; candidate < path->node_count; ++candidate) {
-                        if (candidate != node_index && (path->nodes[candidate].runtime_flags & 1) &&
+                        if (&path->nodes[candidate] != node && (path->nodes[candidate].runtime_flags & 1) &&
                             distance_tables[path_index][node_index][candidate] < nearest) {
                             nearest = distance_tables[path_index][node_index][candidate];
                             node->path_flags = candidate;

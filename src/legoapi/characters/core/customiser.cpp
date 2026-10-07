@@ -207,8 +207,7 @@ void Customiser_LoadAccessories(CUSTOMISER *customiser, APICHARACTERMODELLIST_s 
             }
 
             resource->character_model = character_model;
-            const u16 piece_index = side == 0 ? static_cast<u16>(customiser->save->pieces[category_index])
-                                              : static_cast<u16>(customiser->save->secondary_pieces[category_index]);
+            const u16 piece_index = customiser->save[side].pieces[category_index];
             CUSTOMPIECE *piece = &customiser->piece_sets[category_index][piece_index];
             char piece_name[0x80];
             char path[0x80];
@@ -264,7 +263,7 @@ void Customiser_DrawAccessories(CUSTOMISER *customiser, GameObject_s *object, nu
         if (customiser->piece_counts[category] <= 0 || category == 2)
             continue;
         if (category == 0) {
-            const i16 *pieces = side == 0 ? customiser->save->pieces : customiser->save->secondary_pieces;
+            const u16 *pieces = customiser->save[side].pieces;
             if ((customiser->piece_sets[0][static_cast<u16>(pieces[0])].layer_flags & 0x20) != 0 ||
                 (customiser->piece_sets[1][static_cast<u16>(pieces[1])].layer_flags & 1) != 0 ||
                 object->field_0x108e != 0)
@@ -293,25 +292,26 @@ void Customiser_DrawAccessories(CUSTOMISER *customiser, GameObject_s *object, nu
 }
 
 void Customiser_AddPartAccessories(CUSTOMISER *customiser, GameObject_s *object, i32 animation, i32 mode, float scale) {
-    if (customiser == NULL || object == NULL || object->apiobj.character_data == NULL ||
-        object->apiobj.character_data->player_config == NULL || object->apiobj.character_model == NULL)
-        return;
     const i32 joint = object->apiobj.character_data->player_config->helmet_locator;
-    if (joint == -1 || object->apiobj.character_model->points_of_interest[joint] == NULL)
+    if (customiser == NULL || joint == -1 || object->apiobj.character_model->points_of_interest[joint] == NULL)
         return;
 
     const i32 side = object->id != customiser->character_ids[0];
-    const i16 *pieces = side == 0 ? customiser->save->pieces : customiser->save->secondary_pieces;
-    for (i32 category = 0; category != 9; ++category) {
+    i32 next_category = 0;
+    CUSTOMPIECERESOURCE *next_resource = Accessory[side];
+    do {
+        CUSTOMPIECERESOURCE *resource = next_resource++;
+        const i32 category = next_category++;
         if (category == 2)
             continue;
-        if (category == 0 &&
-            ((customiser->piece_sets[1][static_cast<u16>(pieces[1])].availability_flags & 1) != 0 ||
-             (customiser->piece_sets[0][static_cast<u16>(pieces[0])].availability_flags & 0x20) != 0)) {
-            continue;
+        if (category == 0) {
+            const u16 *pieces = customiser->save[side].pieces;
+            if ((customiser->piece_sets[1][pieces[1]].layer_flags & 1) != 0 ||
+                (customiser->piece_sets[0][pieces[0]].layer_flags & 0x20) != 0)
+                continue;
         }
 
-        nuhspecial_s *special = &Accessory[side][category].special;
+        nuhspecial_s *special = &resource->special;
         if (!NuSpecialExistsFn(special))
             continue;
 
@@ -328,15 +328,15 @@ void Customiser_AddPartAccessories(CUSTOMISER *customiser, GameObject_s *object,
         params.field_18 = 0.1f;
         params.gravity = -5.0f;
         params.special = special;
-        params.flags = mode < 1 ? 0x480 : 0x90;
-        params.field_3c = PartImpact_Brick;
-        params.stop_fn = PartStop_Flickerer;
-        params.draw_fn = PartDraw_Flickerer;
-        params.time_step = FRAMETIME;
         params.lighting = Cheats_CheckFlags(1) ? reinterpret_cast<PARTLIGHTSOURCE_s *>(ZeroRTL)
                                                : reinterpret_cast<PARTLIGHTSOURCE_s *>(&object->light_data);
+        params.flags = mode == 0 ? 0x480 : 0x90;
+        params.time_step = FRAMETIME;
+        params.stop_fn = PartStop_Flickerer;
+        params.draw_fn = PartDraw_Flickerer;
+        params.field_3c = PartImpact_Brick;
         AddPart(&params);
-    }
+    } while (next_category != 9);
 }
 
 static inline void Customiser_DumpAccessory(CUSTOMISER *customiser, i32 side, i32 category) {
@@ -591,9 +591,9 @@ void Customiser_Set100PercentPieces(CUSTOMISER *customiser) {
         for (i32 index = 0; index < count; ++index, ++piece) {
             const u16 flags = piece->availability_flags;
             if ((flags & 0x80) != 0)
-                save->pieces[category] = index;
+                save[0].pieces[category] = index;
             if ((flags & 0x100) != 0)
-                save->secondary_pieces[category] = index;
+                save[1].pieces[category] = index;
         }
     }
 }
@@ -608,24 +608,24 @@ void Customiser_CopyDefaultPiecesToSave(CUSTOMISER *customiser, CUSTOMISESAVE_s 
             return;
         }
     }
-    save->pieces[0] = customiser->default_pieces[0][0];
-    save->pieces[1] = customiser->default_pieces[0][1];
-    save->pieces[2] = customiser->default_pieces[0][2];
-    save->pieces[3] = customiser->default_pieces[0][3];
-    save->pieces[4] = customiser->default_pieces[0][4];
-    save->pieces[5] = customiser->default_pieces[0][5];
-    save->pieces[6] = customiser->default_pieces[0][6];
-    save->pieces[7] = customiser->default_pieces[0][7];
-    save->pieces[8] = customiser->default_pieces[0][8];
-    save->secondary_pieces[0] = customiser->default_pieces[1][0];
-    save->secondary_pieces[1] = customiser->default_pieces[1][1];
-    save->secondary_pieces[2] = customiser->default_pieces[1][2];
-    save->secondary_pieces[3] = customiser->default_pieces[1][3];
-    save->secondary_pieces[4] = customiser->default_pieces[1][4];
-    save->secondary_pieces[5] = customiser->default_pieces[1][5];
-    save->secondary_pieces[6] = customiser->default_pieces[1][6];
-    save->secondary_pieces[7] = customiser->default_pieces[1][7];
-    save->secondary_pieces[8] = customiser->default_pieces[1][8];
+    save[0].pieces[0] = customiser->default_pieces[0][0];
+    save[0].pieces[1] = customiser->default_pieces[0][1];
+    save[0].pieces[2] = customiser->default_pieces[0][2];
+    save[0].pieces[3] = customiser->default_pieces[0][3];
+    save[0].pieces[4] = customiser->default_pieces[0][4];
+    save[0].pieces[5] = customiser->default_pieces[0][5];
+    save[0].pieces[6] = customiser->default_pieces[0][6];
+    save[0].pieces[7] = customiser->default_pieces[0][7];
+    save[0].pieces[8] = customiser->default_pieces[0][8];
+    save[1].pieces[0] = customiser->default_pieces[1][0];
+    save[1].pieces[1] = customiser->default_pieces[1][1];
+    save[1].pieces[2] = customiser->default_pieces[1][2];
+    save[1].pieces[3] = customiser->default_pieces[1][3];
+    save[1].pieces[4] = customiser->default_pieces[1][4];
+    save[1].pieces[5] = customiser->default_pieces[1][5];
+    save[1].pieces[6] = customiser->default_pieces[1][6];
+    save[1].pieces[7] = customiser->default_pieces[1][7];
+    save[1].pieces[8] = customiser->default_pieces[1][8];
 }
 
 CUSTOMISER *Customiser_Configure(char *filename, VARIPTR *buffer, VARIPTR *, i32 first_character, i32 second_character,
@@ -784,7 +784,7 @@ CUSTOMISER *Customiser_Configure(char *filename, VARIPTR *buffer, VARIPTR *, i32
     if (customiser->save == NULL) {
         customiser->save = static_cast<CUSTOMISESAVE_s *>(buffer->void_ptr);
         // The serialized save occupies a four-byte-rounded arena allocation.
-        buffer->addr = ALIGN(buffer->addr + sizeof(CUSTOMISESAVE_s), 4);
+        buffer->addr = ALIGN(buffer->addr + sizeof(CUSTOMISESAVE_s) * 2, 4);
     }
     for (i32 category = 0; category < 9; ++category) {
         i32 first_found = 0, second_found = 0;
@@ -830,8 +830,8 @@ CUSTOMPIECE *Customiser_FindPieceByName(CUSTOMISER *customiser, char *name, i32 
 }
 
 i32 Customiser_GetIcon(CUSTOMISER *customiser, CUSTOMISESAVE_s *save, i32) {
-    CUSTOMPIECE *first = &customiser->piece_sets[0][static_cast<u16>(save->pieces[0])];
-    CUSTOMPIECE *second = &customiser->piece_sets[1][static_cast<u16>(save->pieces[1])];
+    CUSTOMPIECE *first = &customiser->piece_sets[0][static_cast<u16>(save[0].pieces[0])];
+    CUSTOMPIECE *second = &customiser->piece_sets[1][static_cast<u16>(save[0].pieces[1])];
     i32 id;
     if (first->layer_flags & 0x20)
         goto second_piece;

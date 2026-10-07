@@ -236,9 +236,12 @@ void edppDoInput(nupad_s *pad) {
         edcamMove(pad);
     if (pad->digital_buttons & 0x100) {
         if (pad->digital_buttons_pressed & 0x20) {
-            edpp_copy_mode = !edpp_copy_mode;
-            if (edpp_copy_mode)
+            if (edpp_copy_mode) {
+                edpp_copy_mode = 0;
+            } else {
                 edpp_copy_source_count = 0;
+                edpp_copy_mode = 1;
+            }
         }
         if (edpp_nearest == -1) {
             edppDetermineNearest(-1.0f);
@@ -248,34 +251,33 @@ void edppDoInput(nupad_s *pad) {
                     ++edpp_nearest;
                     if (edpp_nearest == 512)
                         edpp_nearest = 0;
-                } while (edpp_ptls[edpp_nearest].instance_id == 99999 || edpp_ptls[edpp_nearest].instance_id == -1);
+                } while (edpp_ptls[edpp_nearest].instance_id == -1 || edpp_ptls[edpp_nearest].instance_id == 99999);
             }
             if (pad->digital_buttons_pressed & 2) {
                 do {
                     --edpp_nearest;
                     if (edpp_nearest == -1)
                         edpp_nearest = 511;
-                } while (edpp_ptls[edpp_nearest].instance_id == 99999 || edpp_ptls[edpp_nearest].instance_id == -1);
+                } while (edpp_ptls[edpp_nearest].instance_id == -1 || edpp_ptls[edpp_nearest].instance_id == 99999);
             }
         }
         if (edpp_nearest != -1) {
-            edpp_particle_s &particle = edpp_ptls[edpp_nearest];
-            edcamSetPos(&particle.position);
-            edpp_rotz = particle.rotation_z;
-            edpp_roty = particle.rotation_y;
-            edpp_emitrotz = particle.emitter_rotation_z;
-            edpp_emitroty = particle.emitter_rotation_y;
-            edpp_emitrotx = particle.emitter_rotation_x;
-            edpp_offset = particle.start_offset;
-            edpp_create_type = particle.effect_index;
-            edpp_effect_list = debtab[particle.effect_index]->category;
+            edcamSetPos(&edpp_ptls[edpp_nearest].position);
+            edpp_rotz = edpp_ptls[edpp_nearest].rotation_z;
+            edpp_roty = edpp_ptls[edpp_nearest].rotation_y;
+            edpp_emitrotz = edpp_ptls[edpp_nearest].emitter_rotation_z;
+            edpp_emitroty = edpp_ptls[edpp_nearest].emitter_rotation_y;
+            edpp_emitrotx = edpp_ptls[edpp_nearest].emitter_rotation_x;
+            edpp_offset = edpp_ptls[edpp_nearest].start_offset;
+            edpp_create_type = edpp_ptls[edpp_nearest].effect_index;
+            edpp_effect_list = debtab[edpp_ptls[edpp_nearest].effect_index]->category;
         }
     }
 
-    if (edpp_snap_enabled == 0)
-        edcamGetPosAng(&edpp_cam_pos, &edpp_cam_ax, &edpp_cam_ay);
-    else
+    if (edpp_snap_enabled)
         edcamGetPosAngSnap(&edpp_cam_pos, &edpp_cam_ax, &edpp_cam_ay);
+    else
+        edcamGetPosAng(&edpp_cam_pos, &edpp_cam_ax, &edpp_cam_ay);
 
     if ((pad->digital_buttons & 0x100) == 0) {
         if (pad->digital_buttons_pressed & 0x80)
@@ -292,91 +294,83 @@ void edppDoInput(nupad_s *pad) {
             else if (edpp_nearest != -1)
                 edppPtlPlace(edpp_nearest, &edpp_cam_pos);
         }
-        if ((pad->digital_buttons & 0x400) && edpp_copy_mode == 0 && edpp_nearest != -1)
-            edppPtlPlace(edpp_nearest, &edpp_cam_pos);
+        if (pad->digital_buttons & 0x400) {
+            if (edpp_copy_mode == 0 && edpp_nearest != -1)
+                edppPtlPlace(edpp_nearest, &edpp_cam_pos);
+        }
         if (pad->digital_buttons_pressed & 0x10) {
             if (edpp_copy_mode != 0)
                 edppMultipleCopyClear();
-            else if (edpp_nearest != -1) {
-                edppPtlDestroy(edpp_nearest);
+            else {
+                if (edpp_nearest != -1)
+                    edppPtlDestroy(edpp_nearest);
                 edpp_nearest = -1;
             }
         }
     }
 
-    const i32 right = pad->analog_left_pad_right;
-    const i32 left = pad->analog_left_pad_left;
-    const i32 up = pad->analog_left_pad_up;
-    const i32 down = pad->analog_left_pad_down;
-    if (edpp_copy_mode != 0) {
-        edpp_copy_size += static_cast<f32>(up) / 5000.0f;
-        edpp_copy_size -= static_cast<f32>(down) / 5000.0f;
-        if (edpp_copy_size < 0.05f)
+    if (edpp_copy_mode) {
+        f32 size = edpp_copy_size + static_cast<f32>(pad->analog_left_pad_up) / 5000.0f -
+                   static_cast<f32>(pad->analog_left_pad_down) / 5000.0f;
+        if (size < 0.05f)
             edpp_copy_size = 0.05f;
-        if (edpp_copy_size > 2.0f)
+        else if (2.0f < size)
             edpp_copy_size = 2.0f;
-        edpp_copyroty += right - left;
-        return;
-    }
-
-    switch (edpp_dpad_mode) {
-        case 0:
+        else
+            edpp_copy_size = size;
+        edpp_copyroty = edpp_copyroty + pad->analog_left_pad_right - pad->analog_left_pad_left;
+    } else {
+        if (edpp_dpad_mode == 1) {
             if (pad->digital_buttons & 0x200)
-                edpp_emitrotz = edpp_emitroty = edpp_emitrotx = 0;
-            if (pad->digital_buttons & 0x400) {
-                edpp_emitrotx += right - left;
-            } else {
-                edpp_emitroty += right - left;
-                i32 rotation = edpp_emitrotz + up;
-                if (rotation > 0x8000)
-                    rotation = 0x8000;
-                rotation -= down;
-                if (rotation < -0x8000)
-                    rotation = -0x8000;
-                edpp_emitrotz = rotation;
+                edpp_roty = edpp_rotz = 0;
+            edpp_roty = edpp_roty + pad->analog_left_pad_right - pad->analog_left_pad_left;
+            edpp_rotz += pad->analog_left_pad_up;
+            if (edpp_rotz > 0)
+                edpp_rotz = 0;
+            edpp_rotz -= pad->analog_left_pad_down;
+            if (edpp_rotz < -0x8000)
+                edpp_rotz = -0x8000;
+        } else if (edpp_dpad_mode == 0) {
+            if (pad->digital_buttons & 0x200) {
+                edpp_emitrotz = 0;
+                edpp_emitroty = 0;
+                edpp_emitrotx = 0;
             }
-            break;
-        case 1: {
-            if (pad->digital_buttons & 0x200)
-                edpp_rotz = edpp_roty = 0;
-            edpp_roty += right - left;
-            i32 rotation = edpp_rotz + up;
-            if (rotation > 0)
-                rotation = 0;
-            rotation -= down;
-            if (rotation < -0x8000)
-                rotation = -0x8000;
-            edpp_rotz = rotation;
-            break;
-        }
-        case 2:
-            if (up == 255 || (pad->digital_buttons_pressed & 0x1000))
+            if (pad->digital_buttons & 0x400) {
+                edpp_emitrotx = edpp_emitrotx + pad->analog_left_pad_right - pad->analog_left_pad_left;
+            } else {
+                edpp_emitroty = edpp_emitroty + pad->analog_left_pad_right - pad->analog_left_pad_left;
+                edpp_emitrotz += pad->analog_left_pad_up;
+                if (edpp_emitrotz > 0x8000)
+                    edpp_emitrotz = 0x8000;
+                edpp_emitrotz -= pad->analog_left_pad_down;
+                if (edpp_emitrotz < -0x8000)
+                    edpp_emitrotz = -0x8000;
+            }
+        } else if (edpp_dpad_mode == 3) {
+            edpp_refroty = edpp_refroty + pad->analog_left_pad_right - pad->analog_left_pad_left;
+            edpp_refrotz += pad->analog_left_pad_up;
+            if (edpp_refrotz > 0)
+                edpp_refrotz = 0;
+            edpp_refrotz -= pad->analog_left_pad_down;
+            if (edpp_refrotz < -0x8000)
+                edpp_refrotz = -0x8000;
+        } else if (edpp_dpad_mode == 2) {
+            if (pad->analog_left_pad_up == 255 || (pad->digital_buttons_pressed & 0x1000))
                 edpp_offset += 1.25f;
-            if (down == 255 || (pad->digital_buttons_pressed & 0x4000))
+            if (pad->analog_left_pad_down == 255 || (pad->digital_buttons_pressed & 0x4000))
                 edpp_offset -= 1.25f;
             if (edpp_offset < 0.0f)
                 edpp_offset = 0.0f;
-            break;
-        case 3: {
-            edpp_refroty += right - left;
-            i32 rotation = edpp_refrotz + up;
-            if (rotation > 0)
-                rotation = 0;
-            rotation -= down;
-            if (rotation < -0x8000)
-                rotation = -0x8000;
-            edpp_refrotz = rotation;
-            break;
-        }
-        case 4:
-            edpp_facroty += right - left;
-            edpp_facrotx -= up;
+        } else if (edpp_dpad_mode == 4) {
+            edpp_facroty = edpp_facroty + pad->analog_left_pad_right - pad->analog_left_pad_left;
+            edpp_facrotx -= pad->analog_left_pad_up;
             if (edpp_facrotx < -0x4000)
                 edpp_facrotx = -0x4000;
-            edpp_facrotx += down;
+            edpp_facrotx += pad->analog_left_pad_down;
             if (edpp_facrotx > 0x4000)
                 edpp_facrotx = 0x4000;
-            break;
+        }
     }
 }
 
@@ -840,17 +834,14 @@ void EdDrawLineCube(VuMtx const &transform, float size, i32 colour) {
 
 void EdDrawPolyAxis(VuMtx const &transform, float size, i32 opacity) {
     const NUMTX &matrix = transform.matrix;
-    VuVec origin(matrix.m30, matrix.m31, matrix.m32, 0.0f);
+    const VuVec origin(matrix.m30, matrix.m31, matrix.m32, matrix.m33);
     VuVec tip(matrix.m30 + matrix.m00 * size, matrix.m31 + matrix.m01 * size, matrix.m32 + matrix.m02 * size, 0.0f);
     const float width = size * 0.02f;
     EdDrawPolyArrow(origin, tip, 8, static_cast<i32>(0xff000000 | (opacity & 0xff)), width, width, 0.02f, 0.0f);
-    tip.x = matrix.m30 + matrix.m10 * size;
-    tip.y = matrix.m31 + matrix.m11 * size;
-    tip.z = matrix.m32 + matrix.m12 * size;
-    EdDrawPolyArrow(origin, tip, 8, static_cast<i32>(0xff000000 | ((opacity & 0xff) << 8)), width, width, 0.02f, 0.0f);
-    tip.x = matrix.m30 + matrix.m20 * size;
-    tip.y = matrix.m31 + matrix.m21 * size;
-    tip.z = matrix.m32 + matrix.m22 * size;
+    tip = VuVec(matrix.m30 + matrix.m10 * size, matrix.m31 + matrix.m11 * size, matrix.m32 + matrix.m12 * size, 0.0f);
+    EdDrawPolyArrow(origin, tip, 8, static_cast<i32>(0xff000000 | ((static_cast<u32>(opacity) << 8) & 0xffff)), width,
+                    width, 0.02f, 0.0f);
+    tip = VuVec(matrix.m30 + matrix.m20 * size, matrix.m31 + matrix.m21 * size, matrix.m32 + matrix.m22 * size, 0.0f);
     EdDrawPolyArrow(origin, tip, 8, static_cast<i32>(0xff000000 | ((opacity & 0xff) << 16)), width, width, 0.02f, 0.0f);
 }
 
@@ -946,15 +937,22 @@ void edpartInitType(i32 index) {
 }
 
 void edppDrawCursor() {
-    const i32 rotation_z = edpp_copy_mode == 0 ? edpp_rotz : edpp_copyrotz;
-    const i32 rotation_y = edpp_copy_mode == 0 ? edpp_roty : edpp_copyroty;
+    i32 rotation_z, rotation_y;
+    if (edpp_copy_mode != 0) {
+        rotation_z = edpp_copyrotz;
+        rotation_y = edpp_copyroty;
+    } else {
+        rotation_z = edpp_rotz;
+        rotation_y = edpp_roty;
+    }
+    NUVEC vector;
     NURND_VERTEX3D line[2];
-    auto rotate = [&](NUVEC &vector) {
+    auto rotate = [&]() {
         NuVecRotateZ(&vector, &vector, rotation_z);
         NuVecRotateY(&vector, &vector, rotation_y);
     };
-    auto draw_axis = [&](NUVEC vector) {
-        rotate(vector);
+    auto draw_axis = [&]() {
+        rotate();
         line[0].position.x = edpp_cam_pos.x - vector.x;
         line[0].position.y = edpp_cam_pos.y - vector.y;
         line[0].position.z = edpp_cam_pos.z - vector.z;
@@ -974,91 +972,102 @@ void edppDrawCursor() {
         line[1].colour = 0xff00ff00;
         NuRndrLine3d(line, edpp_mtl, NULL);
     };
-    draw_axis({0.5f, 0.0f, 0.0f});
-    draw_axis({0.0f, 0.5f, 0.0f});
-    draw_axis({0.0f, 0.0f, 0.5f});
-    auto draw_mark = [&](NUVEC start, NUVEC end) {
-        rotate(start);
-        line[0].position.x = edpp_cam_pos.x + start.x;
-        line[0].position.y = edpp_cam_pos.y + start.y;
-        line[0].position.z = edpp_cam_pos.z + start.z;
+    vector = {0.5f, 0.0f, 0.0f};
+    draw_axis();
+    vector = {0.0f, 0.5f, 0.0f};
+    draw_axis();
+    vector = {0.0f, 0.0f, 0.5f};
+    draw_axis();
+    auto draw_mark = [&](f32 sx, f32 sy, f32 sz, f32 ex, f32 ey, f32 ez) {
+        vector.x = sx;
+        vector.y = sy;
+        vector.z = sz;
+        rotate();
+        line[0].position.x = edpp_cam_pos.x + vector.x;
+        line[0].position.y = edpp_cam_pos.y + vector.y;
+        line[0].position.z = edpp_cam_pos.z + vector.z;
         line[0].colour = 0xff00ff00;
-        rotate(end);
-        line[1].position.x = edpp_cam_pos.x + end.x;
-        line[1].position.y = edpp_cam_pos.y + end.y;
-        line[1].position.z = edpp_cam_pos.z + end.z;
+        vector.x = ex;
+        vector.y = ey;
+        vector.z = ez;
+        rotate();
+        line[1].position.x = edpp_cam_pos.x + vector.x;
+        line[1].position.y = edpp_cam_pos.y + vector.y;
+        line[1].position.z = edpp_cam_pos.z + vector.z;
         line[1].colour = 0xff00ff00;
         NuRndrLine3d(line, edpp_mtl, NULL);
     };
-    draw_mark({0.55f, 0.05f, 0.0f}, {0.6f, -0.05f, 0.0f});
-    draw_mark({0.6f, 0.05f, 0.0f}, {0.55f, -0.05f, 0.0f});
-    draw_mark({0.0f, 0.65f, -0.025f}, {0.0f, 0.6f, 0.0f});
-    draw_mark({0.0f, 0.65f, 0.025f}, {0.0f, 0.6f, 0.0f});
-    draw_mark({0.0f, 0.6f, 0.0f}, {0.0f, 0.55f, 0.0f});
-    draw_mark({0.0f, 0.05f, 0.55f}, {0.0f, 0.05f, 0.6f});
-    draw_mark({0.0f, 0.05f, 0.6f}, {0.0f, -0.05f, 0.55f});
-    draw_mark({0.0f, -0.05f, 0.55f}, {0.0f, -0.05f, 0.6f});
+    draw_mark(0.55f, 0.05f, 0.0f, 0.6f, -0.05f, 0.0f);
+    draw_mark(0.6f, 0.05f, 0.0f, 0.55f, -0.05f, 0.0f);
+    draw_mark(0.0f, 0.65f, -0.025f, 0.0f, 0.6f, 0.0f);
+    draw_mark(0.0f, 0.65f, 0.025f, 0.0f, 0.6f, 0.0f);
+    draw_mark(0.0f, 0.6f, 0.0f, 0.0f, 0.55f, 0.0f);
+    draw_mark(0.0f, 0.05f, 0.55f, 0.0f, 0.05f, 0.6f);
+    draw_mark(0.0f, 0.05f, 0.6f, 0.0f, -0.05f, 0.55f);
+    draw_mark(0.0f, -0.05f, 0.55f, 0.0f, -0.05f, 0.6f);
 
-    if (edpp_copy_mode == 0) {
-        auto draw_direction = [&](NUVEC direction, u32 colour) {
-            rotate(direction);
+    if (edpp_copy_mode != 0) {
+        edbitsDrawCube(edpp_cam_pos.x, edpp_cam_pos.y, edpp_cam_pos.z, edpp_copy_size, edpp_copy_size, edpp_copy_size,
+                       0, 0, 0, 0, 0, 0xffffffff, edpp_mtl);
+    } else {
+        auto draw_direction = [&](u32 colour) {
+            rotate();
             line[0].position.x = edpp_cam_pos.x;
             line[0].position.y = edpp_cam_pos.y;
             line[0].position.z = edpp_cam_pos.z;
-            line[1].position.x = edpp_cam_pos.x + direction.x;
-            line[1].position.y = edpp_cam_pos.y + direction.y;
-            line[1].position.z = edpp_cam_pos.z + direction.z;
-            line[0].colour = line[1].colour = colour;
+            line[1].position.x = edpp_cam_pos.x + vector.x;
+            line[1].position.y = edpp_cam_pos.y + vector.y;
+            line[1].position.z = edpp_cam_pos.z + vector.z;
+            line[0].colour = colour;
+            line[1].colour = colour;
             NuRndrLine3d(line, edpp_mtl, NULL);
         };
-        NUVEC emitter_tip = {0.0f, 0.375f, 0.0f};
-        NuVecRotateZ(&emitter_tip, &emitter_tip, edpp_emitrotz);
-        NuVecRotateY(&emitter_tip, &emitter_tip, edpp_emitroty);
-        NuVecRotateX(&emitter_tip, &emitter_tip, edpp_emitrotx);
-        draw_direction(emitter_tip, 0xff0000ff);
-        NUVEC emitter_side = {0.0f, 0.375f, 0.125f};
-        NuVecRotateZ(&emitter_side, &emitter_side, edpp_emitrotz);
-        NuVecRotateY(&emitter_side, &emitter_side, edpp_emitroty);
-        NuVecRotateX(&emitter_side, &emitter_side, edpp_emitrotx);
-        rotate(emitter_side);
-        line[0].position.x = edpp_cam_pos.x + emitter_side.x;
-        line[0].position.y = edpp_cam_pos.y + emitter_side.y;
-        line[0].position.z = edpp_cam_pos.z + emitter_side.z;
+        vector = {0.0f, 0.375f, 0.0f};
+        NuVecRotateZ(&vector, &vector, edpp_emitrotz);
+        NuVecRotateY(&vector, &vector, edpp_emitroty);
+        NuVecRotateX(&vector, &vector, edpp_emitrotx);
+        draw_direction(0xff0000ff);
+        vector = {0.0f, 0.375f, 0.125f};
+        NuVecRotateZ(&vector, &vector, edpp_emitrotz);
+        NuVecRotateY(&vector, &vector, edpp_emitroty);
+        NuVecRotateX(&vector, &vector, edpp_emitrotx);
+        rotate();
+        line[0].position.x = edpp_cam_pos.x + vector.x;
+        line[0].position.y = edpp_cam_pos.y + vector.y;
+        line[0].position.z = edpp_cam_pos.z + vector.z;
         line[0].colour = 0xff0000ff;
         NuRndrLine3d(line, edpp_mtl, NULL);
         if (edpp_dpad_mode == 3) {
-            NUVEC reflection = {0.0f, 0.25f, 0.0f};
-            NuVecRotateZ(&reflection, &reflection, edpp_refrotz);
-            NuVecRotateY(&reflection, &reflection, edpp_refroty);
-            draw_direction(reflection, 0xffff0000);
+            vector = {0.0f, 0.25f, 0.0f};
+            NuVecRotateZ(&vector, &vector, edpp_refrotz);
+            NuVecRotateY(&vector, &vector, edpp_refroty);
+            draw_direction(0xffff0000);
             if (edpp_nearest != -1) {
-                reflection = {0.0f, edpp_ptls[edpp_nearest].reflection_offset, 0.0f};
-                NuVecRotateZ(&reflection, &reflection, edpp_refrotz);
-                NuVecRotateY(&reflection, &reflection, edpp_refroty);
-                rotate(reflection);
-                edbitsDrawCube(edpp_cam_pos.x + reflection.x, edpp_cam_pos.y + reflection.y,
-                               edpp_cam_pos.z + reflection.z, 0.25f, 0.0f, 0.25f, edpp_refrotz, edpp_refroty, 0,
+                vector = {0.0f, edpp_ptls[edpp_nearest].reflection_offset, 0.0f};
+                NuVecRotateZ(&vector, &vector, edpp_refrotz);
+                NuVecRotateY(&vector, &vector, edpp_refroty);
+                rotate();
+                edbitsDrawCube(edpp_cam_pos.x + vector.x, edpp_cam_pos.y + vector.y,
+                               edpp_cam_pos.z + vector.z, 0.25f, 0.0f, 0.25f, edpp_refrotz, edpp_refroty, 0,
                                rotation_z, rotation_y, 0xffff0000, edpp_mtl);
             }
         }
         if (edpp_dpad_mode == 4) {
-            NUVEC facing = {0.0f, 0.0f, 0.25f};
-            NuVecRotateX(&facing, &facing, edpp_facrotx);
-            NuVecRotateY(&facing, &facing, edpp_facroty);
+            vector = {0.0f, 0.0f, 0.25f};
+            NuVecRotateX(&vector, &vector, edpp_facrotx);
+            NuVecRotateY(&vector, &vector, edpp_facroty);
             line[0].position.x = edpp_cam_pos.x;
             line[0].position.y = edpp_cam_pos.y;
             line[0].position.z = edpp_cam_pos.z;
-            line[1].position.x = edpp_cam_pos.x + facing.x;
-            line[1].position.y = edpp_cam_pos.y + facing.y;
-            line[1].position.z = edpp_cam_pos.z + facing.z;
-            line[0].colour = line[1].colour = 0xffff0000;
+            line[1].position.x = edpp_cam_pos.x + vector.x;
+            line[1].position.y = edpp_cam_pos.y + vector.y;
+            line[1].position.z = edpp_cam_pos.z + vector.z;
+            line[0].colour = 0xffff0000;
+            line[1].colour = 0xffff0000;
             NuRndrLine3d(line, edpp_mtl, NULL);
             edbitsDrawBasicCube(edpp_cam_pos.x, edpp_cam_pos.y, edpp_cam_pos.z, 0.25f, 0.25f, 0.0f, edpp_facrotx,
                                 edpp_facroty, 0, 0xffff0000, edpp_mtl);
         }
-    } else {
-        edbitsDrawCube(edpp_cam_pos.x, edpp_cam_pos.y, edpp_cam_pos.z, edpp_copy_size, edpp_copy_size, edpp_copy_size,
-                       0, 0, 0, 0, 0, 0xffffffff, edpp_mtl);
     }
 
     NuRndrRect2di(0x1680, 0x9b0, 4000, 0x410, 0x80808080, edpp_boxmtl);
@@ -1082,23 +1091,7 @@ void edppDrawCursor() {
         NuQFntPrintEx(system_qfont, 0x1720, 0x988, 0x10, "Co-ordinates");
     }
     NuQFntSetColour(system_qfont, 0x80000000);
-    if (edpp_readout == 1) {
-        if (edpp_nearest == -1) {
-            NuQFntPrintEx(system_qfont, 0x1720, 0xa50, 0x10, "Highlight: <none>");
-        } else {
-            edpp_particle_s &particle = edpp_ptls[edpp_nearest];
-            debkeydatatype_s &key = debkeydata[particle.instance_id];
-            NuQFntPrintEx(system_qfont, 0x1720, 0xa50, 0x10, "Highlight: %s", debtab[key.effect_index]->name);
-            NuQFntPrintEx(system_qfont, 0x1720, 0xaf0, 0x10, "XYZ: %0.2f %0.2f %0.2f", key.position.x, key.position.y,
-                          key.position.z);
-            NuQFntPrintEx(system_qfont, 0x1720, 0xb90, 0x10, "RotZ: %d", edpp_ptls[edpp_nearest].rotation_z);
-            NuQFntPrintEx(system_qfont, 0x1720, 0xc30, 0x10, "RotY: %d", edpp_ptls[edpp_nearest].rotation_y);
-            NuQFntPrintEx(system_qfont, 0x1720, 0xcd0, 0x10, "EmitRotZ: %d",
-                          edpp_ptls[edpp_nearest].emitter_rotation_z);
-            NuQFntPrintEx(system_qfont, 0x1720, 0xd70, 0x10, "EmitRotY: %d",
-                          edpp_ptls[edpp_nearest].emitter_rotation_y);
-        }
-    } else if (edpp_readout == 0) {
+    if (edpp_readout == 0) {
         if (edpp_copy_mode == 0) {
             if (edpp_effect_list == 1)
                 NuQFntPrintEx(system_qfont, 0x1720, 0xa50, 0x10, "Current List: Level");
@@ -1122,7 +1115,12 @@ void edppDrawCursor() {
             else
                 NuQFntPrintEx(system_qfont, 0x1720, 0xb90, 0x10, "Clipboard: %d items", edpp_copy_source_count);
         }
-        if (edpp_copy_mode == 0) {
+        if (edpp_copy_mode != 0) {
+            if (edpp_copy_enclosed > 8)
+                NuQFntSetColour(system_qfont, 0x80000080);
+            NuQFntPrintEx(system_qfont, 0x1720, 0xc30, 0x10, "Enclosed: %d", edpp_copy_enclosed);
+            NuQFntSetColour(system_qfont, 0x80000000);
+        } else {
             if (edpp_nearest == -1) {
                 NuQFntPrintEx(system_qfont, 0x1720, 0xc30, 0x10, "Highlight: <none>");
             } else {
@@ -1141,45 +1139,50 @@ void edppDrawCursor() {
                 NuQFntSet(system_qfont);
                 NuQFntPrintEx(system_qfont, 0x1720, 0xc30, 0x10, "Highlight: %s", effect->name);
                 NuQFntPrintEx(system_qfont, 0x1720, 0xcd0, 0x10, "Particles:");
-                const i32 group = effect->particle_type == 7 ? 12 : 32;
-                const i32 limit = effect->particle_type == 7 ? 384 : 1024;
+                i32 group = 12;
+                i32 limit = 384;
+                if (effect->particle_type != 7) {
+                    group = 32;
+                    limit = 1024;
+                }
                 i32 count = effect->max_particles;
                 if (count > limit) {
                     NuQFntSetColour(system_qfont, 0x80000080);
                     count = effect->max_particles;
                 }
-                const i32 rounded = ((count - 1) / group + 1) * group;
-                NuQFntPrintEx(system_qfont, 0x1cc0, 0xcd0, 0x10, "%d (%d)", count, rounded);
+                NuQFntPrintEx(system_qfont, 0x1cc0, 0xcd0, 0x10, "%d (%d)", count,
+                              ((count - 1) / group + 1) * group);
                 NuQFntSetColour(system_qfont, 0x80000000);
             }
+        }
+        if (edpp_copy_mode != 0)
+            NuQFntPrintEx(system_qfont, 0x1720, 0xd70, 0x10, "Multiple Copy Mode");
+        else if (edpp_dpad_mode == 0)
+            NuQFntPrintEx(system_qfont, 0x1720, 0xd70, 0x10, "Dpad Mode: Emit Rotate");
+        else if (edpp_dpad_mode == 1)
+            NuQFntPrintEx(system_qfont, 0x1720, 0xd70, 0x10, "Dpad Mode: Grav Rotate");
+        else if (edpp_dpad_mode == 2)
+            NuQFntPrintEx(system_qfont, 0x1720, 0xd70, 0x10, "Dpad Mode: Offset (%0.2f)", edpp_offset);
+        else if (edpp_dpad_mode == 3)
+            NuQFntPrintEx(system_qfont, 0x1720, 0xd70, 0x10, "Dpad Mode: Reflections");
+        else if (edpp_dpad_mode == 4)
+            NuQFntPrintEx(system_qfont, 0x1720, 0xd70, 0x10, "Dpad Mode: Facing");
+    } else if (edpp_readout == 1) {
+        if (edpp_nearest == -1) {
+            NuQFntPrintEx(system_qfont, 0x1720, 0xa50, 0x10, "Highlight: <none>");
         } else {
-            if (edpp_copy_enclosed > 8)
-                NuQFntSetColour(system_qfont, 0x80000080);
-            NuQFntPrintEx(system_qfont, 0x1720, 0xc30, 0x10, "Enclosed: %d", edpp_copy_enclosed);
-            NuQFntSetColour(system_qfont, 0x80000000);
+            edpp_particle_s &particle = edpp_ptls[edpp_nearest];
+            debkeydatatype_s &key = debkeydata[particle.instance_id];
+            NuQFntPrintEx(system_qfont, 0x1720, 0xa50, 0x10, "Highlight: %s", debtab[key.effect_index]->name);
+            NuQFntPrintEx(system_qfont, 0x1720, 0xaf0, 0x10, "XYZ: %0.2f %0.2f %0.2f", key.position.x, key.position.y,
+                          key.position.z);
+            NuQFntPrintEx(system_qfont, 0x1720, 0xb90, 0x10, "RotZ: %d", edpp_ptls[edpp_nearest].rotation_z);
+            NuQFntPrintEx(system_qfont, 0x1720, 0xc30, 0x10, "RotY: %d", edpp_ptls[edpp_nearest].rotation_y);
+            NuQFntPrintEx(system_qfont, 0x1720, 0xcd0, 0x10, "EmitRotZ: %d",
+                          edpp_ptls[edpp_nearest].emitter_rotation_z);
+            NuQFntPrintEx(system_qfont, 0x1720, 0xd70, 0x10, "EmitRotY: %d",
+                          edpp_ptls[edpp_nearest].emitter_rotation_y);
         }
-        const char *mode = edpp_copy_mode ? "Multiple Copy Mode" : nullptr;
-        if (edpp_copy_mode == 0) {
-            switch (edpp_dpad_mode) {
-                case 0:
-                    mode = "Dpad Mode: Emit Rotate";
-                    break;
-                case 1:
-                    mode = "Dpad Mode: Grav Rotate";
-                    break;
-                case 2:
-                    NuQFntPrintEx(system_qfont, 0x1720, 0xd70, 0x10, "Dpad Mode: Offset (%0.2f)", edpp_offset);
-                    break;
-                case 3:
-                    mode = "Dpad Mode: Reflections";
-                    break;
-                case 4:
-                    mode = "Dpad Mode: Facing";
-                    break;
-            }
-        }
-        if (mode)
-            NuQFntPrintEx(system_qfont, 0x1720, 0xd70, 0x10, mode);
     }
     NuQFntPopPrintMode();
     NuQFntPopCoordinateSystem();
@@ -1238,42 +1241,40 @@ void EdDrawLineCross(VuVec const &position, float size, i32 colour) {
 
 void EdDrawPolyArrow(VuVec const &start, VuVec const &end, i32 sides, i32 colour, float radius, float limit,
                      float radius_factor, float radius_offset) {
-    VuVec direction(end.x - start.x, end.y - start.y, end.z - start.z, 0.0f);
-    const float length = NuVecMag(&direction.xyz);
-    if (length <= 0.0f)
+    VuVec displacement(end.x - start.x, end.y - start.y, end.z - start.z, 0.0f);
+    const float length = NuVecMag(&displacement.xyz);
+    if (!(length > 0.0f))
         return;
     const float inverse_length = 1.0f / length;
-    direction.x *= inverse_length;
-    direction.y *= inverse_length;
-    direction.z *= inverse_length;
+    VuVec direction(displacement.x * inverse_length, displacement.y * inverse_length,
+                    displacement.z * inverse_length, 0.0f);
     const float half_length = length * 0.4f;
     const float minimum_radius = radius_factor * half_length + radius_offset;
-    if (radius < minimum_radius)
-        radius = minimum_radius;
-    if (limit > radius)
-        limit = radius;
 
-    NUANGVEC angles{};
+    NUANGVEC angles;
     if (direction.x == 0.0f && direction.z == 0.0f) {
         angles.x = -0x4000;
+        angles.y = 0;
     } else {
         angles.y = NuAtan2D(direction.x, direction.z);
         NuVecRotateY(&direction.xyz, &direction.xyz, -angles.y);
         angles.x = -NuAtan2D(direction.y, direction.z);
     }
+    angles.z = 0;
+    const float draw_radius = radius > minimum_radius ? radius : minimum_radius;
+    const float draw_limit = limit < draw_radius ? limit : draw_radius;
 
-    NUMTX transform;
-    NuMtxSetRotateXYZVU0(&transform, &angles);
-    NUVEC center{start.x + (end.x - start.x) * 0.4f, start.y + (end.y - start.y) * 0.4f,
-                 start.z + (end.z - start.z) * 0.4f};
-    NuMtxTranslate(&transform, &center);
-    EdDrawPolyCylinder(*reinterpret_cast<VuMtx *>(&transform), half_length, limit, limit, sides, colour, 1, 0);
-    NuMtxTranslateNeg(&transform, &center);
-    center.x = end.x - (end.x - start.x) * 0.1f;
-    center.y = end.y - (end.y - start.y) * 0.1f;
-    center.z = end.z - (end.z - start.z) * 0.1f;
-    NuMtxTranslate(&transform, &center);
-    EdDrawPolyCylinder(*reinterpret_cast<VuMtx *>(&transform), half_length * 0.25f, limit * 1.6f, 0.0f, sides, colour,
+    VuMtx transform;
+    VuVec center(start.x + displacement.x * 0.4f, start.y + displacement.y * 0.4f,
+                 start.z + displacement.z * 0.4f, 0.0f);
+    NuMtxSetRotateXYZVU0(&transform.matrix, &angles);
+    NuMtxTranslate(&transform.matrix, &center.xyz);
+    EdDrawPolyCylinder(transform, half_length, draw_limit, draw_limit, sides, colour, 1, 0);
+    NuMtxTranslateNeg(&transform.matrix, &center.xyz);
+    center = VuVec(end.x - displacement.x * 0.1f, end.y - displacement.y * 0.1f,
+                   end.z - displacement.z * 0.1f, 0.0f);
+    NuMtxTranslate(&transform.matrix, &center.xyz);
+    EdDrawPolyCylinder(transform, half_length * 0.25f, draw_limit * 1.6f, 0.0f, sides, colour,
                        1, 0);
 }
 
@@ -1466,14 +1467,20 @@ i32 edppSaveEffects(char *filename, char page) {
     for (i32 index = 1; index < EDPP_MAX_TYPES; ++index) {
         if (debtab[index] == NULL)
             continue;
-        const debinftype &effect = effecttypes[index];
-        if (category == 2 ||
-            (category == 1 && effect.category == 1 && static_cast<i8>(effect.page) == edbits_particle_level_page) ||
-            (category != 1 && effect.category == category))
+        if (category == 1) {
+            if (effecttypes[index].category == 1)
+                effect_count += static_cast<i8>(effecttypes[index].page) == edbits_particle_level_page;
+        } else if (category == 2) {
             ++effect_count;
+        } else {
+            effect_count += effecttypes[index].category == category;
+        }
     }
 
-    EdFileSetMedia(edpp_usememcard == 0 ? 1 : 2);
+    if (edpp_usememcard != 0)
+        EdFileSetMedia(2);
+    else
+        EdFileSetMedia(1);
     if (EdFileOpen(filename, NUFILE_WRITE) == 0)
         return 0;
     EdFileSetReadWrongEndianess(1);
@@ -1484,59 +1491,61 @@ i32 edppSaveEffects(char *filename, char page) {
     for (i32 index = 1; index < writer_limit; ++index) {
         if (debtab[index] == NULL)
             continue;
-        if (category != 2 &&
-            !(category == 1 && effecttypes[index].category == 1 &&
-              static_cast<i8>(effecttypes[index].page) == edbits_particle_level_page) &&
-            !(category != 1 && effecttypes[index].category == category))
-            continue;
+        if (category != 2) {
+            if (category == 1) {
+                if (effecttypes[index].category != 1 ||
+                    static_cast<i8>(effecttypes[index].page) != edbits_particle_level_page)
+                    continue;
+            } else if (effecttypes[index].category != category) {
+                continue;
+            }
+        }
 
-#define WRITE_FLOAT_AT(offset)                                                                                         \
-    EdFileWriteFloat(*reinterpret_cast<f32 *>(reinterpret_cast<u8 *>(&effecttypes[index]) + (offset)))
         EdFileWrite(effecttypes[index].name, 16);
         EdFileWriteShort(effecttypes[index].frequency);
         EdFileWriteShort(effecttypes[index].max_particles);
-        WRITE_FLOAT_AT(0x18);
-        WRITE_FLOAT_AT(0x1c);
-        WRITE_FLOAT_AT(0x20);
-        WRITE_FLOAT_AT(0x24);
-        WRITE_FLOAT_AT(0x28);
+        EdFileWriteFloat(effecttypes[index].emission_period);
+        EdFileWriteFloat(effecttypes[index].emission_period_random);
+        EdFileWriteFloat(effecttypes[index].emission_pause);
+        EdFileWriteFloat(effecttypes[index].emission_pause_random);
+        EdFileWriteFloat(effecttypes[index].start_offset_random);
         EdFileWriteChar(effecttypes[index].generator_type);
         EdFileWriteChar(effecttypes[index].momentum_adjustment_type);
         EdFileWriteChar(effecttypes[index].cutscene_only);
         EdFileWriteChar(effecttypes[index].particle_type);
         EdFileWriteChar(effecttypes[index].camera_facing);
-        WRITE_FLOAT_AT(0x30);
-        WRITE_FLOAT_AT(0x34);
-        WRITE_FLOAT_AT(0x38);
-        WRITE_FLOAT_AT(0x3c);
-        WRITE_FLOAT_AT(0x40);
-        WRITE_FLOAT_AT(0x44);
-        WRITE_FLOAT_AT(0x48);
-        EdFileWriteNuVec(reinterpret_cast<NUVEC *>(reinterpret_cast<u8 *>(&effecttypes[index]) + 0x4c));
-        EdFileWriteNuVec(reinterpret_cast<NUVEC *>(reinterpret_cast<u8 *>(&effecttypes[index]) + 0x58));
-        EdFileWriteNuVec(reinterpret_cast<NUVEC *>(reinterpret_cast<u8 *>(&effecttypes[index]) + 0x64));
-        WRITE_FLOAT_AT(0x70);
-        WRITE_FLOAT_AT(0x74);
-        WRITE_FLOAT_AT(0x78);
-        WRITE_FLOAT_AT(0x7c);
-        WRITE_FLOAT_AT(0x80);
-        WRITE_FLOAT_AT(0x84);
-        WRITE_FLOAT_AT(0x88);
-        WRITE_FLOAT_AT(0x8c);
-        WRITE_FLOAT_AT(0x90);
-        WRITE_FLOAT_AT(0x94);
-        WRITE_FLOAT_AT(0x98);
-        WRITE_FLOAT_AT(0x9c);
-        WRITE_FLOAT_AT(0xa0);
-        WRITE_FLOAT_AT(0xa4);
+        EdFileWriteFloat(reinterpret_cast<f32 *>(effecttypes[index].fields_030)[0]);
+        EdFileWriteFloat(effecttypes[index].cut_on);
+        EdFileWriteFloat(effecttypes[index].clip_extent);
+        EdFileWriteFloat(effecttypes[index].sound_range);
+        EdFileWriteFloat(effecttypes[index].sound_range_override);
+        EdFileWriteFloat(effecttypes[index].field_044);
+        EdFileWriteFloat(effecttypes[index].field_048);
+        EdFileWriteNuVec(reinterpret_cast<NUVEC *>(&effecttypes[index].field_04c));
+        EdFileWriteNuVec(reinterpret_cast<NUVEC *>(&effecttypes[index].field_058));
+        EdFileWriteNuVec(&effecttypes[index].emitter_velocity);
+        EdFileWriteFloat(reinterpret_cast<f32 *>(effecttypes[index].fields_070)[0]);
+        EdFileWriteFloat(reinterpret_cast<f32 *>(effecttypes[index].fields_070)[1]);
+        EdFileWriteFloat(reinterpret_cast<f32 *>(effecttypes[index].fields_070)[2]);
+        EdFileWriteFloat(reinterpret_cast<f32 *>(effecttypes[index].fields_070)[3]);
+        EdFileWriteFloat(reinterpret_cast<f32 *>(effecttypes[index].fields_070)[4]);
+        EdFileWriteFloat(reinterpret_cast<f32 *>(effecttypes[index].fields_070)[5]);
+        EdFileWriteFloat(reinterpret_cast<f32 *>(effecttypes[index].fields_070)[6]);
+        EdFileWriteFloat(reinterpret_cast<f32 *>(effecttypes[index].fields_070)[7]);
+        EdFileWriteFloat(reinterpret_cast<f32 *>(effecttypes[index].fields_070)[8]);
+        EdFileWriteFloat(reinterpret_cast<f32 *>(effecttypes[index].fields_070)[9]);
+        EdFileWriteFloat(reinterpret_cast<f32 *>(effecttypes[index].fields_070)[10]);
+        EdFileWriteFloat(reinterpret_cast<f32 *>(effecttypes[index].fields_070)[11]);
+        EdFileWriteFloat(effecttypes[index].field_0a0);
+        EdFileWriteFloat(effecttypes[index].particle_lifetime);
         EdFileWriteShort(effecttypes[index].field_0a8);
         EdFileWriteChar(effecttypes[index].field_0aa);
         EdFileWriteChar(effecttypes[index].field_0ab);
-        WRITE_FLOAT_AT(0xac);
-        WRITE_FLOAT_AT(0xb0);
-        WRITE_FLOAT_AT(0xb4);
-        WRITE_FLOAT_AT(0xb8);
-        WRITE_FLOAT_AT(0xbc);
+        EdFileWriteFloat(effecttypes[index].field_0ac);
+        EdFileWriteFloat(effecttypes[index].jib_x_frequency);
+        EdFileWriteFloat(effecttypes[index].jib_x_amplitude);
+        EdFileWriteFloat(effecttypes[index].jib_y_frequency);
+        EdFileWriteFloat(effecttypes[index].jib_y_amplitude);
 #define WRITE_COLOUR_KEY(key)                                                                                          \
     EdFileWriteFloat(effecttypes[index].colour_keys[key].time);                                                        \
     EdFileWriteUnsignedChar(effecttypes[index].colour_keys[key].red);                                                  \
@@ -1552,186 +1561,185 @@ i32 edppSaveEffects(char *filename, char page) {
         WRITE_COLOUR_KEY(6);
         WRITE_COLOUR_KEY(7);
 #undef WRITE_COLOUR_KEY
-        WRITE_FLOAT_AT(0x100);
-        WRITE_FLOAT_AT(0x104);
-        WRITE_FLOAT_AT(0x108);
-        WRITE_FLOAT_AT(0x10c);
-        WRITE_FLOAT_AT(0x110);
-        WRITE_FLOAT_AT(0x114);
-        WRITE_FLOAT_AT(0x118);
-        WRITE_FLOAT_AT(0x11c);
-        WRITE_FLOAT_AT(0x120);
-        WRITE_FLOAT_AT(0x124);
-        WRITE_FLOAT_AT(0x128);
-        WRITE_FLOAT_AT(0x12c);
-        WRITE_FLOAT_AT(0x130);
-        WRITE_FLOAT_AT(0x134);
-        WRITE_FLOAT_AT(0x138);
-        WRITE_FLOAT_AT(0x13c);
-        WRITE_FLOAT_AT(0x140);
-        WRITE_FLOAT_AT(0x144);
-        WRITE_FLOAT_AT(0x148);
-        WRITE_FLOAT_AT(0x14c);
-        WRITE_FLOAT_AT(0x150);
-        WRITE_FLOAT_AT(0x154);
-        WRITE_FLOAT_AT(0x158);
-        WRITE_FLOAT_AT(0x15c);
-        WRITE_FLOAT_AT(0x160);
-        WRITE_FLOAT_AT(0x164);
-        WRITE_FLOAT_AT(0x168);
-        WRITE_FLOAT_AT(0x16c);
-        WRITE_FLOAT_AT(0x170);
-        WRITE_FLOAT_AT(0x174);
-        WRITE_FLOAT_AT(0x178);
-        WRITE_FLOAT_AT(0x17c);
-        WRITE_FLOAT_AT(0x180);
-        WRITE_FLOAT_AT(0x184);
-        WRITE_FLOAT_AT(0x188);
-        WRITE_FLOAT_AT(0x18c);
-        WRITE_FLOAT_AT(0x190);
-        WRITE_FLOAT_AT(0x194);
-        WRITE_FLOAT_AT(0x198);
-        WRITE_FLOAT_AT(0x19c);
-        WRITE_FLOAT_AT(0x1a0);
-        WRITE_FLOAT_AT(0x1a4);
-        WRITE_FLOAT_AT(0x1a8);
-        WRITE_FLOAT_AT(0x1ac);
-        WRITE_FLOAT_AT(0x1b0);
-        WRITE_FLOAT_AT(0x1b4);
-        WRITE_FLOAT_AT(0x1b8);
-        WRITE_FLOAT_AT(0x1bc);
-        WRITE_FLOAT_AT(0x1c0);
-        WRITE_FLOAT_AT(0x1c4);
-        WRITE_FLOAT_AT(0x1c8);
-        WRITE_FLOAT_AT(0x1cc);
-        WRITE_FLOAT_AT(0x1d0);
-        WRITE_FLOAT_AT(0x1d4);
-        WRITE_FLOAT_AT(0x1d8);
-        WRITE_FLOAT_AT(0x1dc);
-        WRITE_FLOAT_AT(0x1e0);
-        WRITE_FLOAT_AT(0x1e4);
-        WRITE_FLOAT_AT(0x1e8);
-        WRITE_FLOAT_AT(0x1ec);
-        WRITE_FLOAT_AT(0x1f0);
-        WRITE_FLOAT_AT(0x1f4);
-        WRITE_FLOAT_AT(0x1f8);
-        WRITE_FLOAT_AT(0x1fc);
-        WRITE_FLOAT_AT(0x200);
-        WRITE_FLOAT_AT(0x204);
-        WRITE_FLOAT_AT(0x208);
-        WRITE_FLOAT_AT(0x20c);
-        WRITE_FLOAT_AT(0x210);
-        WRITE_FLOAT_AT(0x214);
-        WRITE_FLOAT_AT(0x218);
-        WRITE_FLOAT_AT(0x21c);
-        WRITE_FLOAT_AT(0x220);
-        WRITE_FLOAT_AT(0x224);
-        WRITE_FLOAT_AT(0x228);
-        WRITE_FLOAT_AT(0x22c);
-        WRITE_FLOAT_AT(0x230);
-        WRITE_FLOAT_AT(0x234);
-        WRITE_FLOAT_AT(0x238);
-        WRITE_FLOAT_AT(0x23c);
-        WRITE_FLOAT_AT(0x240);
-        WRITE_FLOAT_AT(0x244);
-        WRITE_FLOAT_AT(0x248);
-        WRITE_FLOAT_AT(0x24c);
-        WRITE_FLOAT_AT(0x250);
-        WRITE_FLOAT_AT(0x254);
-        WRITE_FLOAT_AT(0x258);
-        WRITE_FLOAT_AT(0x25c);
-        WRITE_FLOAT_AT(0x260);
-        WRITE_FLOAT_AT(0x264);
-        WRITE_FLOAT_AT(0x268);
-        WRITE_FLOAT_AT(0x26c);
-        WRITE_FLOAT_AT(0x270);
-        WRITE_FLOAT_AT(0x274);
-        WRITE_FLOAT_AT(0x278);
-        WRITE_FLOAT_AT(0x27c);
-        WRITE_FLOAT_AT(0x280);
-        WRITE_FLOAT_AT(0x284);
-        WRITE_FLOAT_AT(0x288);
-        WRITE_FLOAT_AT(0x28c);
-        WRITE_FLOAT_AT(0x290);
-        WRITE_FLOAT_AT(0x294);
-        WRITE_FLOAT_AT(0x298);
-        WRITE_FLOAT_AT(0x29c);
-        WRITE_FLOAT_AT(0x2a0);
-        WRITE_FLOAT_AT(0x2a4);
-        WRITE_FLOAT_AT(0x2b0);
-        WRITE_FLOAT_AT(0x2b4);
-        WRITE_FLOAT_AT(0x2b8);
-        WRITE_FLOAT_AT(0x2bc);
-        WRITE_FLOAT_AT(0x2c0);
-        WRITE_FLOAT_AT(0x2c4);
-        WRITE_FLOAT_AT(0x2c8);
-        WRITE_FLOAT_AT(0x2cc);
-        WRITE_FLOAT_AT(0x2d0);
-        WRITE_FLOAT_AT(0x2d4);
-        WRITE_FLOAT_AT(0x2d8);
-        WRITE_FLOAT_AT(0x2dc);
-        WRITE_FLOAT_AT(0x2e0);
-        WRITE_FLOAT_AT(0x2e4);
-        WRITE_FLOAT_AT(0x2e8);
-        WRITE_FLOAT_AT(0x2ec);
+        EdFileWriteFloat(effecttypes[index].alpha_keys[0].time);
+        EdFileWriteFloat(effecttypes[index].alpha_keys[0].value);
+        EdFileWriteFloat(effecttypes[index].alpha_keys[1].time);
+        EdFileWriteFloat(effecttypes[index].alpha_keys[1].value);
+        EdFileWriteFloat(effecttypes[index].alpha_keys[2].time);
+        EdFileWriteFloat(effecttypes[index].alpha_keys[2].value);
+        EdFileWriteFloat(effecttypes[index].alpha_keys[3].time);
+        EdFileWriteFloat(effecttypes[index].alpha_keys[3].value);
+        EdFileWriteFloat(effecttypes[index].alpha_keys[4].time);
+        EdFileWriteFloat(effecttypes[index].alpha_keys[4].value);
+        EdFileWriteFloat(effecttypes[index].alpha_keys[5].time);
+        EdFileWriteFloat(effecttypes[index].alpha_keys[5].value);
+        EdFileWriteFloat(effecttypes[index].alpha_keys[6].time);
+        EdFileWriteFloat(effecttypes[index].alpha_keys[6].value);
+        EdFileWriteFloat(effecttypes[index].alpha_keys[7].time);
+        EdFileWriteFloat(effecttypes[index].alpha_keys[7].value);
+        EdFileWriteFloat(effecttypes[index].field_140);
+        EdFileWriteFloat(effecttypes[index].field_144);
+        EdFileWriteFloat(effecttypes[index].min_size);
+        EdFileWriteFloat(effecttypes[index].max_size);
+        EdFileWriteFloat(effecttypes[index].width_keys[0].time);
+        EdFileWriteFloat(effecttypes[index].width_keys[0].value);
+        EdFileWriteFloat(effecttypes[index].width_keys[1].time);
+        EdFileWriteFloat(effecttypes[index].width_keys[1].value);
+        EdFileWriteFloat(effecttypes[index].width_keys[2].time);
+        EdFileWriteFloat(effecttypes[index].width_keys[2].value);
+        EdFileWriteFloat(effecttypes[index].width_keys[3].time);
+        EdFileWriteFloat(effecttypes[index].width_keys[3].value);
+        EdFileWriteFloat(effecttypes[index].width_keys[4].time);
+        EdFileWriteFloat(effecttypes[index].width_keys[4].value);
+        EdFileWriteFloat(effecttypes[index].width_keys[5].time);
+        EdFileWriteFloat(effecttypes[index].width_keys[5].value);
+        EdFileWriteFloat(effecttypes[index].width_keys[6].time);
+        EdFileWriteFloat(effecttypes[index].width_keys[6].value);
+        EdFileWriteFloat(effecttypes[index].width_keys[7].time);
+        EdFileWriteFloat(effecttypes[index].width_keys[7].value);
+        EdFileWriteFloat(effecttypes[index].height_keys[0].time);
+        EdFileWriteFloat(effecttypes[index].height_keys[0].value);
+        EdFileWriteFloat(effecttypes[index].height_keys[1].time);
+        EdFileWriteFloat(effecttypes[index].height_keys[1].value);
+        EdFileWriteFloat(effecttypes[index].height_keys[2].time);
+        EdFileWriteFloat(effecttypes[index].height_keys[2].value);
+        EdFileWriteFloat(effecttypes[index].height_keys[3].time);
+        EdFileWriteFloat(effecttypes[index].height_keys[3].value);
+        EdFileWriteFloat(effecttypes[index].height_keys[4].time);
+        EdFileWriteFloat(effecttypes[index].height_keys[4].value);
+        EdFileWriteFloat(effecttypes[index].height_keys[5].time);
+        EdFileWriteFloat(effecttypes[index].height_keys[5].value);
+        EdFileWriteFloat(effecttypes[index].height_keys[6].time);
+        EdFileWriteFloat(effecttypes[index].height_keys[6].value);
+        EdFileWriteFloat(effecttypes[index].height_keys[7].time);
+        EdFileWriteFloat(effecttypes[index].height_keys[7].value);
+        EdFileWriteFloat(effecttypes[index].min_rotation);
+        EdFileWriteFloat(effecttypes[index].max_rotation);
+        EdFileWriteFloat(effecttypes[index].rotation_keys[0].time);
+        EdFileWriteFloat(effecttypes[index].rotation_keys[0].value);
+        EdFileWriteFloat(effecttypes[index].rotation_keys[1].time);
+        EdFileWriteFloat(effecttypes[index].rotation_keys[1].value);
+        EdFileWriteFloat(effecttypes[index].rotation_keys[2].time);
+        EdFileWriteFloat(effecttypes[index].rotation_keys[2].value);
+        EdFileWriteFloat(effecttypes[index].rotation_keys[3].time);
+        EdFileWriteFloat(effecttypes[index].rotation_keys[3].value);
+        EdFileWriteFloat(effecttypes[index].rotation_keys[4].time);
+        EdFileWriteFloat(effecttypes[index].rotation_keys[4].value);
+        EdFileWriteFloat(effecttypes[index].rotation_keys[5].time);
+        EdFileWriteFloat(effecttypes[index].rotation_keys[5].value);
+        EdFileWriteFloat(effecttypes[index].rotation_keys[6].time);
+        EdFileWriteFloat(effecttypes[index].rotation_keys[6].value);
+        EdFileWriteFloat(effecttypes[index].rotation_keys[7].time);
+        EdFileWriteFloat(effecttypes[index].rotation_keys[7].value);
+        EdFileWriteFloat(effecttypes[index].field_218_keys[0].time);
+        EdFileWriteFloat(effecttypes[index].field_218_keys[0].value);
+        EdFileWriteFloat(effecttypes[index].field_218_keys[1].time);
+        EdFileWriteFloat(effecttypes[index].field_218_keys[1].value);
+        EdFileWriteFloat(effecttypes[index].field_218_keys[2].time);
+        EdFileWriteFloat(effecttypes[index].field_218_keys[2].value);
+        EdFileWriteFloat(effecttypes[index].field_218_keys[3].time);
+        EdFileWriteFloat(effecttypes[index].field_218_keys[3].value);
+        EdFileWriteFloat(effecttypes[index].field_218_keys[4].time);
+        EdFileWriteFloat(effecttypes[index].field_218_keys[4].value);
+        EdFileWriteFloat(effecttypes[index].field_218_keys[5].time);
+        EdFileWriteFloat(effecttypes[index].field_218_keys[5].value);
+        EdFileWriteFloat(effecttypes[index].field_218_keys[6].time);
+        EdFileWriteFloat(effecttypes[index].field_218_keys[6].value);
+        EdFileWriteFloat(effecttypes[index].field_218_keys[7].time);
+        EdFileWriteFloat(effecttypes[index].field_218_keys[7].value);
+        EdFileWriteFloat(effecttypes[index].field_258_keys[0].time);
+        EdFileWriteFloat(effecttypes[index].field_258_keys[0].value);
+        EdFileWriteFloat(effecttypes[index].field_258_keys[1].time);
+        EdFileWriteFloat(effecttypes[index].field_258_keys[1].value);
+        EdFileWriteFloat(effecttypes[index].field_258_keys[2].time);
+        EdFileWriteFloat(effecttypes[index].field_258_keys[2].value);
+        EdFileWriteFloat(effecttypes[index].field_258_keys[3].time);
+        EdFileWriteFloat(effecttypes[index].field_258_keys[3].value);
+        EdFileWriteFloat(effecttypes[index].field_258_keys[4].time);
+        EdFileWriteFloat(effecttypes[index].field_258_keys[4].value);
+        EdFileWriteFloat(effecttypes[index].field_258_keys[5].time);
+        EdFileWriteFloat(effecttypes[index].field_258_keys[5].value);
+        EdFileWriteFloat(effecttypes[index].field_258_keys[6].time);
+        EdFileWriteFloat(effecttypes[index].field_258_keys[6].value);
+        EdFileWriteFloat(effecttypes[index].field_258_keys[7].time);
+        EdFileWriteFloat(effecttypes[index].field_258_keys[7].value);
+        EdFileWriteFloat(effecttypes[index].texture_u0);
+        EdFileWriteFloat(effecttypes[index].texture_v0);
+        EdFileWriteFloat(effecttypes[index].texture_u1);
+        EdFileWriteFloat(effecttypes[index].texture_v1);
+        EdFileWriteFloat(effecttypes[index].collision_keys[0].time);
+        EdFileWriteFloat(effecttypes[index].collision_keys[0].value);
+        EdFileWriteFloat(effecttypes[index].collision_keys[1].time);
+        EdFileWriteFloat(effecttypes[index].collision_keys[1].value);
+        EdFileWriteFloat(effecttypes[index].collision_keys[2].time);
+        EdFileWriteFloat(effecttypes[index].collision_keys[2].value);
+        EdFileWriteFloat(effecttypes[index].collision_keys[3].time);
+        EdFileWriteFloat(effecttypes[index].collision_keys[3].value);
+        EdFileWriteFloat(effecttypes[index].collision_keys[4].time);
+        EdFileWriteFloat(effecttypes[index].collision_keys[4].value);
+        EdFileWriteFloat(effecttypes[index].collision_keys[5].time);
+        EdFileWriteFloat(effecttypes[index].collision_keys[5].value);
+        EdFileWriteFloat(effecttypes[index].collision_keys[6].time);
+        EdFileWriteFloat(effecttypes[index].collision_keys[6].value);
+        EdFileWriteFloat(effecttypes[index].collision_keys[7].time);
+        EdFileWriteFloat(effecttypes[index].collision_keys[7].value);
         EdFileWriteChar(effecttypes[index].process_spheres);
         EdFileWriteChar(effecttypes[index].time_group);
         EdFileWriteChar(effecttypes[index].field_2f2);
         EdFileWriteChar(effecttypes[index].use_explicit_clip_box);
         EdFileWriteNuVec(&effecttypes[index].repeat_box);
         EdFileWriteFloat(effecttypes[index].thinning);
-        WRITE_FLOAT_AT(0x304);
-        WRITE_FLOAT_AT(0x308);
-        WRITE_FLOAT_AT(0x30c);
-        WRITE_FLOAT_AT(0x310);
-        WRITE_FLOAT_AT(0x314);
-        WRITE_FLOAT_AT(0x318);
-        WRITE_FLOAT_AT(0x31c);
-        WRITE_FLOAT_AT(0x320);
-        WRITE_FLOAT_AT(0x324);
-        WRITE_FLOAT_AT(0x328);
-        WRITE_FLOAT_AT(0x32c);
-        WRITE_FLOAT_AT(0x330);
-        WRITE_FLOAT_AT(0x334);
-        WRITE_FLOAT_AT(0x338);
-        WRITE_FLOAT_AT(0x33c);
-        WRITE_FLOAT_AT(0x340);
-        WRITE_FLOAT_AT(0x344);
-        WRITE_FLOAT_AT(0x348);
-        WRITE_FLOAT_AT(0x34c);
-        WRITE_FLOAT_AT(0x350);
-        WRITE_FLOAT_AT(0x354);
-        WRITE_FLOAT_AT(0x358);
-        WRITE_FLOAT_AT(0x35c);
-        WRITE_FLOAT_AT(0x360);
-        WRITE_FLOAT_AT(0x364);
-        WRITE_FLOAT_AT(0x368);
-        WRITE_FLOAT_AT(0x36c);
-        WRITE_FLOAT_AT(0x370);
-        WRITE_FLOAT_AT(0x374);
-        WRITE_FLOAT_AT(0x378);
-        WRITE_FLOAT_AT(0x37c);
-        WRITE_FLOAT_AT(0x380);
-        WRITE_FLOAT_AT(0x384);
-        WRITE_FLOAT_AT(0x388);
-        WRITE_FLOAT_AT(0x38c);
-        WRITE_FLOAT_AT(0x390);
-        WRITE_FLOAT_AT(0x394);
-        WRITE_FLOAT_AT(0x398);
-        WRITE_FLOAT_AT(0x39c);
-        WRITE_FLOAT_AT(0x3a0);
-        WRITE_FLOAT_AT(0x3a4);
-        WRITE_FLOAT_AT(0x3a8);
-        WRITE_FLOAT_AT(0x3ac);
-        WRITE_FLOAT_AT(0x3b0);
-        WRITE_FLOAT_AT(0x3b4);
-        WRITE_FLOAT_AT(0x3b8);
-        WRITE_FLOAT_AT(0x3bc);
-        WRITE_FLOAT_AT(0x3c0);
-        WRITE_FLOAT_AT(0x3c4);
-        WRITE_FLOAT_AT(0x3c8);
-        WRITE_FLOAT_AT(0x3cc);
-#undef WRITE_FLOAT_AT
+        EdFileWriteFloat(effecttypes[index].torus_radius1);
+        EdFileWriteFloat(effecttypes[index].torus_radius2);
+        EdFileWriteFloat(effecttypes[index].torus_lifetime);
+        EdFileWriteFloat(effecttypes[index].torus_keys1[0].time);
+        EdFileWriteFloat(effecttypes[index].torus_keys1[0].value);
+        EdFileWriteFloat(effecttypes[index].torus_keys1[1].time);
+        EdFileWriteFloat(effecttypes[index].torus_keys1[1].value);
+        EdFileWriteFloat(effecttypes[index].torus_keys1[2].time);
+        EdFileWriteFloat(effecttypes[index].torus_keys1[2].value);
+        EdFileWriteFloat(effecttypes[index].torus_keys1[3].time);
+        EdFileWriteFloat(effecttypes[index].torus_keys1[3].value);
+        EdFileWriteFloat(effecttypes[index].torus_keys1[4].time);
+        EdFileWriteFloat(effecttypes[index].torus_keys1[4].value);
+        EdFileWriteFloat(effecttypes[index].torus_keys1[5].time);
+        EdFileWriteFloat(effecttypes[index].torus_keys1[5].value);
+        EdFileWriteFloat(effecttypes[index].torus_keys1[6].time);
+        EdFileWriteFloat(effecttypes[index].torus_keys1[6].value);
+        EdFileWriteFloat(effecttypes[index].torus_keys1[7].time);
+        EdFileWriteFloat(effecttypes[index].torus_keys1[7].value);
+        EdFileWriteFloat(effecttypes[index].torus_keys2[0].time);
+        EdFileWriteFloat(effecttypes[index].torus_keys2[0].value);
+        EdFileWriteFloat(effecttypes[index].torus_keys2[1].time);
+        EdFileWriteFloat(effecttypes[index].torus_keys2[1].value);
+        EdFileWriteFloat(effecttypes[index].torus_keys2[2].time);
+        EdFileWriteFloat(effecttypes[index].torus_keys2[2].value);
+        EdFileWriteFloat(effecttypes[index].torus_keys2[3].time);
+        EdFileWriteFloat(effecttypes[index].torus_keys2[3].value);
+        EdFileWriteFloat(effecttypes[index].torus_keys2[4].time);
+        EdFileWriteFloat(effecttypes[index].torus_keys2[4].value);
+        EdFileWriteFloat(effecttypes[index].torus_keys2[5].time);
+        EdFileWriteFloat(effecttypes[index].torus_keys2[5].value);
+        EdFileWriteFloat(effecttypes[index].torus_keys2[6].time);
+        EdFileWriteFloat(effecttypes[index].torus_keys2[6].value);
+        EdFileWriteFloat(effecttypes[index].torus_keys2[7].time);
+        EdFileWriteFloat(effecttypes[index].torus_keys2[7].value);
+        EdFileWriteFloat(effecttypes[index].torus_keys3[0].time);
+        EdFileWriteFloat(effecttypes[index].torus_keys3[0].value);
+        EdFileWriteFloat(effecttypes[index].torus_keys3[1].time);
+        EdFileWriteFloat(effecttypes[index].torus_keys3[1].value);
+        EdFileWriteFloat(effecttypes[index].torus_keys3[2].time);
+        EdFileWriteFloat(effecttypes[index].torus_keys3[2].value);
+        EdFileWriteFloat(effecttypes[index].torus_keys3[3].time);
+        EdFileWriteFloat(effecttypes[index].torus_keys3[3].value);
+        EdFileWriteFloat(effecttypes[index].torus_keys3[4].time);
+        EdFileWriteFloat(effecttypes[index].torus_keys3[4].value);
+        EdFileWriteFloat(effecttypes[index].torus_keys3[5].time);
+        EdFileWriteFloat(effecttypes[index].torus_keys3[5].value);
+        EdFileWriteFloat(effecttypes[index].torus_keys3[6].time);
+        EdFileWriteFloat(effecttypes[index].torus_keys3[6].value);
+        EdFileWriteFloat(effecttypes[index].torus_keys3[7].time);
+        EdFileWriteFloat(effecttypes[index].torus_keys3[7].value);
 
         i32 sound_count = (effecttypes[index].sound_data[0] != -1) + (effecttypes[index].sound_data[3] != -1) +
                           (effecttypes[index].sound_data[6] != -1) + (effecttypes[index].sound_data[9] != -1);
@@ -1804,33 +1812,38 @@ i32 edppSaveEffects(char *filename, char page) {
 
 void EdDrawLineSphere(VuVec const &center, float radius, float scale, i32 colour) {
     const float radius_squared = radius * radius;
+    VuVec first;
+    VuVec second;
     for (i32 latitude = 0; latitude < 8; ++latitude) {
         float first_radius;
         float second_radius;
-        if (latitude < 4) {
-            first_radius = radius * NuTrigTable[latitude * 0x800];
-            second_radius = radius * NuTrigTable[(latitude + 1) * 0x800];
-        } else {
-            first_radius = radius * NuTrigTable[(8 - latitude) * 0x800];
-            second_radius = radius * NuTrigTable[(7 - latitude) * 0x800];
-        }
+        if (latitude < 4)
+            first_radius = radius * NU_SIN_LUT(latitude * 0x1000);
+        else
+            first_radius = radius * NU_SIN_LUT((8 - latitude) * 0x1000);
+        if (latitude < 3)
+            second_radius = radius * NU_SIN_LUT((latitude + 1) * 0x1000);
+        else
+            second_radius = radius * NU_SIN_LUT((7 - latitude) * 0x1000);
         float first_height = NuFsqrt(radius_squared - first_radius * first_radius) * scale;
         float second_height = NuFsqrt(radius_squared - second_radius * second_radius) * scale;
         if (latitude >= 5)
             first_height = -first_height;
         if (latitude >= 4)
             second_height = -second_height;
+        first_height += center.y;
+        second_height += center.y;
 #define ED_DRAW_SPHERE_LONGITUDE(angle, next_angle)                                                                    \
     {                                                                                                                  \
-        const VuVec first(center.x + first_radius * NU_COS_LUT(angle), center.y + first_height,                        \
-                          center.z + first_radius * NU_SIN_LUT(angle), 1.0f);                                          \
-        const VuVec second(center.x + second_radius * NU_COS_LUT(angle), center.y + second_height,                     \
-                           center.z + second_radius * NU_SIN_LUT(angle), 1.0f);                                        \
+        first = VuVec(center.x + first_radius * NU_COS_LUT(angle), first_height,                                       \
+                      center.z + first_radius * NU_SIN_LUT(angle), 1.0f);                                              \
+        second = VuVec(center.x + second_radius * NU_COS_LUT(angle), second_height,                                     \
+                       center.z + second_radius * NU_SIN_LUT(angle), 1.0f);                                            \
         EdDrawLineSegment(first, second, colour);                                                                      \
         if (latitude != 0) {                                                                                           \
-            const VuVec next(center.x + first_radius * NU_COS_LUT(next_angle), center.y + first_height,                \
-                             center.z + first_radius * NU_SIN_LUT(next_angle), 1.0f);                                  \
-            EdDrawLineSegment(first, next, colour);                                                                    \
+            second = VuVec(center.x + first_radius * NU_COS_LUT(next_angle), first_height,                             \
+                           center.z + first_radius * NU_SIN_LUT(next_angle), 1.0f);                                    \
+            EdDrawLineSegment(first, second, colour);                                                                  \
         }                                                                                                              \
     }
         ED_DRAW_SPHERE_LONGITUDE(0x0000, 0x2000);
@@ -1847,30 +1860,72 @@ void EdDrawLineSphere(VuVec const &center, float radius, float scale, i32 colour
 
 void EdDrawPolySector(VuVec const &center, float radius, i32 axis, i32 first_angle, i32 last_angle, i32 colour,
                       i32 segments) {
-    const i32 step = segments != 0 ? 0x10000 / segments : 0x1000;
-    i32 angle = first_angle < last_angle ? first_angle : last_angle;
-    i32 remaining = (first_angle < last_angle ? last_angle - first_angle : first_angle - last_angle) & 0xffff;
-    if (remaining == 0 || remaining >= 0x8000)
+    i32 step = 0x1000;
+    if (segments != 0)
+        step = 0x10000 / segments;
+    i32 angle = first_angle;
+    i32 remaining;
+    if (first_angle < last_angle) {
+        remaining = (last_angle - first_angle) & 0xffff;
+        if (remaining >= 0x8000)
+            return;
+    } else {
+        remaining = (first_angle - last_angle) & 0xffff;
+        if (remaining >= 0x8000)
+            return;
+        angle = last_angle;
+    }
+    if (remaining <= 0)
         return;
+    const float negative_radius = -radius;
     do {
-        const i32 delta = remaining < step ? remaining : step;
-        VuVec first(0.0f, 0.0f, 0.0f, 1.0f);
-        VuVec second(0.0f, 0.0f, 0.0f, 1.0f);
-        if (axis == 0) {
-            first.z = radius;
-            second.z = radius;
-            NuVecRotateX(&first.xyz, &first.xyz, -angle);
-            NuVecRotateX(&second.xyz, &second.xyz, -angle - delta);
-        } else if (axis == 1) {
-            first.z = -radius;
-            second.z = -radius;
-            NuVecRotateY(&first.xyz, &first.xyz, -angle);
-            NuVecRotateY(&second.xyz, &second.xyz, -angle - delta);
-        } else if (axis == 2) {
+        const i32 previous_angle = angle;
+        if (remaining > step) {
+            angle += step;
+            remaining -= step;
+        } else {
+            angle += remaining;
+            remaining = 0;
+        }
+        VuVec first;
+        VuVec second;
+        switch (axis) {
+        case 1:
+            first.w = 1.0f;
+            first.x = negative_radius * 0.0f;
+            first.y = negative_radius * 0.0f;
+            first.z = negative_radius;
+            NuVecRotateY(&first.xyz, &first.xyz, -previous_angle);
+            second.w = 1.0f;
+            second.x = negative_radius * 0.0f;
+            second.y = negative_radius * 0.0f;
+            second.z = negative_radius;
+            NuVecRotateY(&second.xyz, &second.xyz, -angle);
+            break;
+        case 2:
+            first.w = 1.0f;
+            first.x = 0.0f * radius;
             first.y = radius;
+            first.z = 0.0f * radius;
+            NuVecRotateZ(&first.xyz, &first.xyz, -previous_angle);
+            second.w = 1.0f;
+            second.x = 0.0f * radius;
             second.y = radius;
-            NuVecRotateZ(&first.xyz, &first.xyz, -angle);
-            NuVecRotateZ(&second.xyz, &second.xyz, -angle - delta);
+            second.z = 0.0f * radius;
+            NuVecRotateZ(&second.xyz, &second.xyz, -angle);
+            break;
+        case 0:
+            first.w = 1.0f;
+            first.x = 0.0f * radius;
+            first.y = 0.0f * radius;
+            first.z = radius;
+            NuVecRotateX(&first.xyz, &first.xyz, -previous_angle);
+            second.w = 1.0f;
+            second.x = 0.0f * radius;
+            second.y = 0.0f * radius;
+            second.z = radius;
+            NuVecRotateX(&second.xyz, &second.xyz, -angle);
+            break;
         }
         first.x += center.x;
         first.y += center.y;
@@ -1879,8 +1934,6 @@ void EdDrawPolySector(VuVec const &center, float radius, i32 axis, i32 first_ang
         second.y += center.y;
         second.z += center.z;
         EdDrawPolyTri(center, first, second, colour);
-        angle += delta;
-        remaining -= delta;
     } while (remaining > 0);
 }
 
@@ -2049,23 +2102,34 @@ void edpartDrawCursor() {
     extern part_emit_s *edpart_nearest_emit;
     extern part_typedesc_s *edpart_nearest_type;
 
-    const i32 rotation_z = edpart_copy_mode == 0 ? edpart_rotz : edpart_copyrotz;
-    const i32 rotation_y = edpart_copy_mode == 0 ? edpart_roty : edpart_copyroty;
+    i32 rotation_z, rotation_y;
+    if (edpart_copy_mode != 0) {
+        rotation_z = edpart_copyrotz;
+        rotation_y = edpart_copyroty;
+    } else {
+        rotation_z = edpart_rotz;
+        rotation_y = edpart_roty;
+    }
+    NUVEC vector;
     NURND_VERTEX3D line[2];
-    auto rotate = [&](NUVEC &vector) {
+    auto rotate = [&]() {
         NuVecRotateZ(&vector, &vector, rotation_z);
         NuVecRotateY(&vector, &vector, rotation_y);
     };
-    auto draw_axis = [&](NUVEC vector) {
-        rotate(vector);
+    auto draw_axis = [&]() {
+        rotate();
         line[0].position.x = edpart_cam_pos.x - vector.x;
         line[0].position.y = edpart_cam_pos.y - vector.y;
         line[0].position.z = edpart_cam_pos.z - vector.z;
         line[0].colour = 0xffffffff;
-        line[1].position = edpart_cam_pos;
+        line[1].position.x = edpart_cam_pos.x;
+        line[1].position.y = edpart_cam_pos.y;
+        line[1].position.z = edpart_cam_pos.z;
         line[1].colour = 0xffffffff;
         NuRndrLine3d(line, edpart_mtl, NULL);
-        line[0].position = edpart_cam_pos;
+        line[0].position.x = edpart_cam_pos.x;
+        line[0].position.y = edpart_cam_pos.y;
+        line[0].position.z = edpart_cam_pos.z;
         line[0].colour = 0xff00ff00;
         line[1].position.x = edpart_cam_pos.x + vector.x;
         line[1].position.y = edpart_cam_pos.y + vector.y;
@@ -2073,80 +2137,104 @@ void edpartDrawCursor() {
         line[1].colour = 0xff00ff00;
         NuRndrLine3d(line, edpart_mtl, NULL);
     };
-    draw_axis({0.5f, 0.0f, 0.0f});
-    draw_axis({0.0f, 0.5f, 0.0f});
-    draw_axis({0.0f, 0.0f, 0.5f});
-    auto draw_mark = [&](NUVEC start, NUVEC end) {
-        NUVEC scratch = start;
-        rotate(scratch);
-        line[0].position.x = edpart_cam_pos.x + scratch.x;
-        line[0].position.y = edpart_cam_pos.y + scratch.y;
-        line[0].position.z = edpart_cam_pos.z + scratch.z;
-        scratch = end;
-        rotate(scratch);
-        line[1].position.x = edpart_cam_pos.x + scratch.x;
-        line[1].position.y = edpart_cam_pos.y + scratch.y;
-        line[1].position.z = edpart_cam_pos.z + scratch.z;
-        line[0].colour = line[1].colour = 0xff00ff00;
+    vector = {0.5f, 0.0f, 0.0f};
+    draw_axis();
+    vector = {0.0f, 0.5f, 0.0f};
+    draw_axis();
+    vector = {0.0f, 0.0f, 0.5f};
+    draw_axis();
+    auto draw_mark = [&](f32 sx, f32 sy, f32 sz, f32 ex, f32 ey, f32 ez) {
+        vector.x = sx;
+        vector.y = sy;
+        vector.z = sz;
+        rotate();
+        line[0].position.x = edpart_cam_pos.x + vector.x;
+        line[0].position.y = edpart_cam_pos.y + vector.y;
+        line[0].position.z = edpart_cam_pos.z + vector.z;
+        line[0].colour = 0xff00ff00;
+        vector.x = ex;
+        vector.y = ey;
+        vector.z = ez;
+        rotate();
+        line[1].position.x = edpart_cam_pos.x + vector.x;
+        line[1].position.y = edpart_cam_pos.y + vector.y;
+        line[1].position.z = edpart_cam_pos.z + vector.z;
+        line[1].colour = 0xff00ff00;
         NuRndrLine3d(line, edpart_mtl, NULL);
     };
-    draw_mark({0.55f, 0.05f, 0.0f}, {0.6f, -0.05f, 0.0f});
-    draw_mark({0.6f, 0.05f, 0.0f}, {0.55f, -0.05f, 0.0f});
-    draw_mark({0.0f, 0.65f, -0.025f}, {0.0f, 0.6f, 0.0f});
-    draw_mark({0.0f, 0.65f, 0.025f}, {0.0f, 0.6f, 0.0f});
-    draw_mark({0.0f, 0.6f, 0.0f}, {0.0f, 0.55f, 0.0f});
-    draw_mark({0.0f, 0.05f, 0.55f}, {0.0f, 0.05f, 0.6f});
-    draw_mark({0.0f, 0.05f, 0.6f}, {0.0f, -0.05f, 0.55f});
-    draw_mark({0.0f, -0.05f, 0.55f}, {0.0f, -0.05f, 0.6f});
+    draw_mark(0.55f, 0.05f, 0.0f, 0.6f, -0.05f, 0.0f);
+    draw_mark(0.6f, 0.05f, 0.0f, 0.55f, -0.05f, 0.0f);
+    draw_mark(0.0f, 0.65f, -0.025f, 0.0f, 0.6f, 0.0f);
+    draw_mark(0.0f, 0.65f, 0.025f, 0.0f, 0.6f, 0.0f);
+    draw_mark(0.0f, 0.6f, 0.0f, 0.0f, 0.55f, 0.0f);
+    draw_mark(0.0f, 0.05f, 0.55f, 0.0f, 0.05f, 0.6f);
+    draw_mark(0.0f, 0.05f, 0.6f, 0.0f, -0.05f, 0.55f);
+    draw_mark(0.0f, -0.05f, 0.55f, 0.0f, -0.05f, 0.6f);
 
-    if (edpart_copy_mode == 0) {
-        NUVEC emitter_tip = {0.0f, 0.375f, 0.0f};
-        NuVecRotateZ(&emitter_tip, &emitter_tip, edpart_emitrotz);
-        NuVecRotateY(&emitter_tip, &emitter_tip, edpart_emitroty);
-        NuVecRotateX(&emitter_tip, &emitter_tip, edpart_emitrotx);
-        rotate(emitter_tip);
-        line[0].position = edpart_cam_pos;
-        line[1].position.x = edpart_cam_pos.x + emitter_tip.x;
-        line[1].position.y = edpart_cam_pos.y + emitter_tip.y;
-        line[1].position.z = edpart_cam_pos.z + emitter_tip.z;
-        line[0].colour = line[1].colour = 0xff0000ff;
+    if (edpart_copy_mode != 0) {
+        edbitsDrawCube(edpart_cam_pos.x, edpart_cam_pos.y, edpart_cam_pos.z, edpart_copy_size, edpart_copy_size,
+                       edpart_copy_size, 0, 0, 0, 0, 0, 0xffffffff, edpart_mtl);
+    } else {
+        vector.x = 0.0f;
+        vector.y = 0.375f;
+        vector.z = 0.0f;
+        NuVecRotateZ(&vector, &vector, edpart_emitrotz);
+        NuVecRotateY(&vector, &vector, edpart_emitroty);
+        NuVecRotateX(&vector, &vector, edpart_emitrotx);
+        NuVecRotateZ(&vector, &vector, rotation_z);
+        NuVecRotateY(&vector, &vector, rotation_y);
+        line[0].position.x = edpart_cam_pos.x;
+        line[0].position.y = edpart_cam_pos.y;
+        line[0].position.z = edpart_cam_pos.z;
+        line[1].position.x = edpart_cam_pos.x + vector.x;
+        line[1].position.y = edpart_cam_pos.y + vector.y;
+        line[1].position.z = edpart_cam_pos.z + vector.z;
+        line[0].colour = 0xff0000ff;
+        line[1].colour = 0xff0000ff;
         NuRndrLine3d(line, edpart_mtl, NULL);
-        NUVEC emitter_side = {0.0f, 0.375f, 0.125f};
-        NuVecRotateZ(&emitter_side, &emitter_side, edpart_emitrotz);
-        NuVecRotateY(&emitter_side, &emitter_side, edpart_emitroty);
-        NuVecRotateX(&emitter_side, &emitter_side, edpart_emitrotx);
-        rotate(emitter_side);
-        line[0].position.x = edpart_cam_pos.x + emitter_side.x;
-        line[0].position.y = edpart_cam_pos.y + emitter_side.y;
-        line[0].position.z = edpart_cam_pos.z + emitter_side.z;
+        vector.x = 0.0f;
+        vector.y = 0.375f;
+        vector.z = 0.125f;
+        NuVecRotateZ(&vector, &vector, edpart_emitrotz);
+        NuVecRotateY(&vector, &vector, edpart_emitroty);
+        NuVecRotateX(&vector, &vector, edpart_emitrotx);
+        NuVecRotateZ(&vector, &vector, rotation_z);
+        NuVecRotateY(&vector, &vector, rotation_y);
+        line[0].position.x = edpart_cam_pos.x + vector.x;
+        line[0].position.y = edpart_cam_pos.y + vector.y;
+        line[0].position.z = edpart_cam_pos.z + vector.z;
         line[0].colour = 0xff0000ff;
         NuRndrLine3d(line, edpart_mtl, NULL);
         if (edpart_dpad_mode == 3) {
-            NUVEC reflection = {0.0f, 0.25f, 0.0f};
-            NuVecRotateZ(&reflection, &reflection, edpart_refrotz);
-            NuVecRotateY(&reflection, &reflection, edpart_refroty);
-            rotate(reflection);
-            line[0].position = edpart_cam_pos;
-            line[1].position.x = edpart_cam_pos.x + reflection.x;
-            line[1].position.y = edpart_cam_pos.y + reflection.y;
-            line[1].position.z = edpart_cam_pos.z + reflection.z;
-            line[0].colour = line[1].colour = 0xffff0000;
+            vector.x = 0.0f;
+            vector.y = 0.25f;
+            vector.z = 0.0f;
+            NuVecRotateZ(&vector, &vector, edpart_refrotz);
+            NuVecRotateY(&vector, &vector, edpart_refroty);
+            NuVecRotateZ(&vector, &vector, rotation_z);
+            NuVecRotateY(&vector, &vector, rotation_y);
+            line[0].position.x = edpart_cam_pos.x;
+            line[0].position.y = edpart_cam_pos.y;
+            line[0].position.z = edpart_cam_pos.z;
+            line[1].position.x = edpart_cam_pos.x + vector.x;
+            line[1].position.y = edpart_cam_pos.y + vector.y;
+            line[1].position.z = edpart_cam_pos.z + vector.z;
+            line[0].colour = 0xffff0000;
+            line[1].colour = 0xffff0000;
             NuRndrLine3d(line, edpart_mtl, NULL);
             if (edpart_nearest != -1) {
-                reflection.x = 0.0f;
-                reflection.y = *reinterpret_cast<f32 *>(&part_emits[edpart_nearest].trailing_state_words[4]);
-                reflection.z = 0.0f;
-                NuVecRotateZ(&reflection, &reflection, edpart_refrotz);
-                NuVecRotateY(&reflection, &reflection, edpart_refroty);
-                rotate(reflection);
-                edbitsDrawCube(edpart_cam_pos.x + reflection.x, edpart_cam_pos.y + reflection.y,
-                               edpart_cam_pos.z + reflection.z, 0.25f, 0.0f, 0.25f, edpart_refrotz, edpart_refroty, 0,
+                vector.x = 0.0f;
+                vector.y = *reinterpret_cast<f32 *>(&part_emits[edpart_nearest].trailing_state_words[4]);
+                vector.z = 0.0f;
+                NuVecRotateZ(&vector, &vector, edpart_refrotz);
+                NuVecRotateY(&vector, &vector, edpart_refroty);
+                NuVecRotateZ(&vector, &vector, rotation_z);
+                NuVecRotateY(&vector, &vector, rotation_y);
+                edbitsDrawCube(edpart_cam_pos.x + vector.x, edpart_cam_pos.y + vector.y,
+                               edpart_cam_pos.z + vector.z, 0.25f, 0.0f, 0.25f, edpart_refrotz, edpart_refroty, 0,
                                rotation_z, rotation_y, 0xffff0000, edpart_mtl);
             }
         }
-    } else {
-        edbitsDrawCube(edpart_cam_pos.x, edpart_cam_pos.y, edpart_cam_pos.z, edpart_copy_size, edpart_copy_size,
-                       edpart_copy_size, 0, 0, 0, 0, 0, 0xffffffff, edpart_mtl);
     }
 
     NuRndrRect2di(0x1720, 0x9b0, 0xf00, 0x410, 0x80808080, edpart_boxmtl);
@@ -2172,20 +2260,7 @@ void edpartDrawCursor() {
         NuQFntPrintEx(system_qfont, 0x17c0, 0x988, 0x10, "Co-ordinates");
     }
     NuQFntSetColour(system_qfont, 0x80000000);
-    if (edpart_readout == 1) {
-        if (edpart_nearest == -1) {
-            NuQFntPrintEx(system_qfont, 0x17c0, 0xa50, 0x10, "Highlight: <none>");
-        } else {
-            NuQFntPrintEx(system_qfont, 0x17c0, 0xa50, 0x10, "Highlight: %s", edpart_nearest_type->name);
-            NuQFntPrintEx(system_qfont, 0x17c0, 0xaf0, 0x10, "XYZ: %0.2f %0.2f %0.2f", edpart_nearest_emit->position.x,
-                          edpart_nearest_emit->position.y, edpart_nearest_emit->position.z);
-            const i16 *rotation = reinterpret_cast<const i16 *>(&edpart_nearest_emit->trailing_state_words[0]);
-            NuQFntPrintEx(system_qfont, 0x17c0, 0xb90, 0x10, "RotZ: %d", rotation[0]);
-            NuQFntPrintEx(system_qfont, 0x17c0, 0xc30, 0x10, "RotY: %d", rotation[1]);
-            NuQFntPrintEx(system_qfont, 0x17c0, 0xcd0, 0x10, "EmitRotZ: %d", edpart_nearest_emit->rotation_2c);
-            NuQFntPrintEx(system_qfont, 0x17c0, 0xd70, 0x10, "EmitRotY: %d", edpart_nearest_emit->rotation_2e);
-        }
-    } else if (edpart_readout == 0) {
+    if (edpart_readout == 0) {
         if (edpart_copy_mode == 0) {
             if (edpart_create_type == -1)
                 NuQFntPrintEx(system_qfont, 0x17c0, 0xa50, 0x10, "Current Type: <none>");
@@ -2198,6 +2273,8 @@ void edpartDrawCursor() {
                 NuQFntPrintEx(system_qfont, 0x17c0, 0xaf0, 0x10, "Current List: Level");
             else if (edpart_effect_list == 0)
                 NuQFntPrintEx(system_qfont, 0x17c0, 0xaf0, 0x10, "Current List: General");
+        }
+        if (edpart_copy_mode == 0) {
             if (edpart_nearest == -1) {
                 NuQFntPrintEx(system_qfont, 0x17c0, 0xc30, 0x10, "Highlight: <none>");
             } else {
@@ -2227,6 +2304,20 @@ void edpartDrawCursor() {
         }
         NuQFntPrintEx(system_qfont, 0x17c0, 0xd70, 0x10, "Types: %d/%d; Emits: %d/%d", part_types_used, 128,
                       part_emits_used, 40);
+    } else if (edpart_readout == 1) {
+        if (edpart_nearest == -1) {
+            NuQFntPrintEx(system_qfont, 0x17c0, 0xa50, 0x10, "Highlight: <none>");
+        } else {
+            NuQFntPrintEx(system_qfont, 0x17c0, 0xa50, 0x10, "Highlight: %s", edpart_nearest_type->name);
+            NuQFntPrintEx(system_qfont, 0x17c0, 0xaf0, 0x10, "XYZ: %0.2f %0.2f %0.2f", edpart_nearest_emit->position.x,
+                          edpart_nearest_emit->position.y, edpart_nearest_emit->position.z);
+            NuQFntPrintEx(system_qfont, 0x17c0, 0xb90, 0x10, "RotZ: %d",
+                          reinterpret_cast<const i16 *>(&edpart_nearest_emit->trailing_state_words[0])[0]);
+            NuQFntPrintEx(system_qfont, 0x17c0, 0xc30, 0x10, "RotY: %d",
+                          reinterpret_cast<const i16 *>(&edpart_nearest_emit->trailing_state_words[0])[1]);
+            NuQFntPrintEx(system_qfont, 0x17c0, 0xcd0, 0x10, "EmitRotZ: %d", edpart_nearest_emit->rotation_2c);
+            NuQFntPrintEx(system_qfont, 0x17c0, 0xd70, 0x10, "EmitRotY: %d", edpart_nearest_emit->rotation_2e);
+        }
     }
     NuQFntPopPrintMode();
     NuQFntPopCoordinateSystem();
@@ -2315,10 +2406,10 @@ i32 edanimParamCreate(i32 instance_id) {
 }
 
 i32 edpartSaveEffects(char *filename, char page) {
+    char empty_name[16] = {};
     i32 type_count = 0;
     for (i32 index = 0; index < 128; ++index) {
-        const part_type_s &type = part_types[index];
-        if (type.name[0] != '\0' && type.field_b3 == static_cast<u8>(page))
+        if (part_types[index].name[0] != '\0' && part_types[index].field_b3 == static_cast<u8>(page))
             ++type_count;
     }
 
@@ -2329,41 +2420,39 @@ i32 edpartSaveEffects(char *filename, char page) {
     EdFileWriteInt(16);
     EdFileWriteInt(type_count);
 
-    char empty_name[16] = {};
     static char null_instance_name[16] = "NULL instance";
     for (i32 index = 0; index < 128; ++index) {
-        part_type_s &type = part_types[index];
-        if (type.name[0] == '\0' || type.field_b3 != static_cast<u8>(page))
+        if (part_types[index].name[0] == '\0' || part_types[index].field_b3 != static_cast<u8>(page))
             continue;
 
-        EdFileWrite(type.name, 16);
-        EdFileWriteChar(type.effect_pages[0]);
-        EdFileWriteChar(type.effect_pages[1]);
-        EdFileWriteChar(type.effect_pages[2]);
-        EdFileWriteChar(type.effect_pages[3]);
-        EdFileWriteChar(type.effect_pages[4]);
-        EdFileWriteChar(type.effect_pages[5]);
-        EdFileWriteChar(type.effect_pages[6]);
-        EdFileWriteChar(type.effect_pages[7]);
-#define WRITE_PART_OBJECT_NAME(variant)                                                                                \
-    do {                                                                                                               \
-        char *name = empty_name;                                                                                       \
-        i16 effect_id = type.effect_ids[variant];                                                                      \
-        if (effect_id == 9999)                                                                                         \
-            name = null_instance_name;                                                                                 \
-        else if (effect_id == 9998)                                                                                    \
-            name = type.object_names[variant];                                                                         \
-        else if (effect_id != -1) {                                                                                    \
-            if (type.effect_pages[variant] == 0 || type.effect_pages[variant] == 1) {                                  \
-                NUGSCN *scene = type.effect_pages[variant] == 0 ? edbits_base_scene : edbits_things_scene;             \
-                nuhspecial_s special;                                                                                  \
-                NuGScnGetSpecial(&special, scene, effect_id);                                                          \
-                name = NuSpecialGetName(&special);                                                                     \
-                EdFileWrite(name, 16);                                                                                 \
-                break;                                                                                                 \
-            }                                                                                                          \
-        }                                                                                                              \
-        EdFileWrite(name, 16);                                                                                         \
+        EdFileWrite(part_types[index].name, 16);
+        EdFileWriteChar(part_types[index].effect_pages[0]);
+        EdFileWriteChar(part_types[index].effect_pages[1]);
+        EdFileWriteChar(part_types[index].effect_pages[2]);
+        EdFileWriteChar(part_types[index].effect_pages[3]);
+        EdFileWriteChar(part_types[index].effect_pages[4]);
+        EdFileWriteChar(part_types[index].effect_pages[5]);
+        EdFileWriteChar(part_types[index].effect_pages[6]);
+        EdFileWriteChar(part_types[index].effect_pages[7]);
+#define WRITE_PART_OBJECT_NAME(variant) \
+    do { \
+        i16 effect_id = part_types[index].effect_ids[variant]; \
+        if (effect_id == -1) \
+            EdFileWrite(empty_name, 16); \
+        else if (effect_id == 9999) \
+            EdFileWrite(null_instance_name, 16); \
+        else if (effect_id == 9998) \
+            EdFileWrite(part_types[index].object_names[variant], 16); \
+        else if (part_types[index].effect_pages[variant] == 0) { \
+            nuhspecial_s special; \
+            NuGScnGetSpecial(&special, edbits_base_scene, effect_id); \
+            EdFileWrite(NuSpecialGetName(&special), 16); \
+        } else if (part_types[index].effect_pages[variant] == 1) { \
+            nuhspecial_s special; \
+            NuGScnGetSpecial(&special, edbits_things_scene, effect_id); \
+            EdFileWrite(NuSpecialGetName(&special), 16); \
+        } else \
+            EdFileWrite(empty_name, 16); \
     } while (0)
         WRITE_PART_OBJECT_NAME(0);
         WRITE_PART_OBJECT_NAME(1);
@@ -2374,49 +2463,79 @@ i32 edpartSaveEffects(char *filename, char page) {
         WRITE_PART_OBJECT_NAME(6);
         WRITE_PART_OBJECT_NAME(7);
 #undef WRITE_PART_OBJECT_NAME
-        EdFileWriteChar(type.variant_mode);
-        EdFileWriteFloat(type.particle_scale);
-        EdFileWriteFloat(type.effect_scale);
-        EdFileWriteFloat(type.lifetime);
-        EdFileWriteFloat(type.lifetime_random);
-        EdFileWriteFloat(type.speed);
-        EdFileWriteFloat(type.gravity);
-        EdFileWriteFloat(type.emission_rate);
-        EdFileWriteFloat(type.bounce);
-        EdFileWriteNuVec(&type.position_random);
-        EdFileWriteNuVec(&type.velocity_random);
-        EdFileWriteFloat(type.emission_period);
-        EdFileWriteFloat(type.emission_period_random);
-        EdFileWriteFloat(type.emission_pause);
-        EdFileWriteFloat(type.emission_pause_random);
-        EdFileWriteInt(type.rotation[0]);
-        EdFileWriteInt(type.rotation[1]);
-        EdFileWriteInt(type.rotation[2]);
-        EdFileWriteInt(type.rotation_random[0]);
-        EdFileWriteInt(type.rotation_random[1]);
-        EdFileWriteInt(type.rotation_random[2]);
-        EdFileWriteUnsignedInt(type.flags);
+        EdFileWriteChar(part_types[index].variant_mode);
+        EdFileWriteFloat(part_types[index].particle_scale);
+        EdFileWriteFloat(part_types[index].effect_scale);
+        EdFileWriteFloat(part_types[index].lifetime);
+        EdFileWriteFloat(part_types[index].lifetime_random);
+        EdFileWriteFloat(part_types[index].speed);
+        EdFileWriteFloat(part_types[index].gravity);
+        EdFileWriteFloat(part_types[index].emission_rate);
+        EdFileWriteFloat(part_types[index].bounce);
+        EdFileWriteNuVec(&part_types[index].position_random);
+        EdFileWriteNuVec(&part_types[index].velocity_random);
+        EdFileWriteFloat(part_types[index].emission_period);
+        EdFileWriteFloat(part_types[index].emission_period_random);
+        EdFileWriteFloat(part_types[index].emission_pause);
+        EdFileWriteFloat(part_types[index].emission_pause_random);
+        EdFileWriteInt(part_types[index].rotation[0]);
+        EdFileWriteInt(part_types[index].rotation[1]);
+        EdFileWriteInt(part_types[index].rotation[2]);
+        EdFileWriteInt(part_types[index].rotation_random[0]);
+        EdFileWriteInt(part_types[index].rotation_random[1]);
+        EdFileWriteInt(part_types[index].rotation_random[2]);
+        EdFileWriteUnsignedInt(part_types[index].flags);
 
-        EdFileWrite(type.trail_effects[0] == -1 ? empty_name : debtab[type.trail_effects[0]]->name, 16);
-        EdFileWrite(type.trail_effects[1] == -1 ? empty_name : debtab[type.trail_effects[1]]->name, 16);
-        EdFileWrite(type.attached_effect == -1 ? empty_name : debtab[type.attached_effect]->name, 16);
-        EdFileWriteFloat(type.trail_rates[0]);
-        EdFileWriteFloat(type.trail_rates[1]);
-        EdFileWrite(type.kill_effect == -1 ? empty_name : debtab[type.kill_effect]->name, 16);
-        EdFileWrite(type.impact_effect == -1 ? empty_name : debtab[type.impact_effect]->name, 16);
-        EdFileWrite(type.impact_part == -1 ? empty_name : part_types[type.impact_part].name, 16);
-        EdFileWrite(type.sounds[0] == -1 ? empty_name : const_cast<char *>(g_soundInfo[type.sounds[0]].sfx_name), 16);
-        EdFileWrite(type.sounds[1] == -1 ? empty_name : const_cast<char *>(g_soundInfo[type.sounds[1]].sfx_name), 16);
-        EdFileWrite(type.sounds[2] == -1 ? empty_name : const_cast<char *>(g_soundInfo[type.sounds[2]].sfx_name), 16);
-        EdFileWrite(type.sounds[3] == -1 ? empty_name : const_cast<char *>(g_soundInfo[type.sounds[3]].sfx_name), 16);
-        EdFileWriteChar(type.sound_modes[0]);
-        EdFileWriteChar(type.sound_modes[1]);
-        EdFileWriteChar(type.sound_modes[2]);
-        EdFileWriteChar(type.sound_modes[3]);
-        EdFileWriteFloat(type.maximum_distance);
-        EdFileWriteFloat(type.field_160);
-        EdFileWriteFloat(type.field_164);
-        EdFileWriteFloat(type.field_168);
+        if (part_types[index].trail_effects[0] != -1)
+            EdFileWrite(debtab[part_types[index].trail_effects[0]]->name, 16);
+        else
+            EdFileWrite(empty_name, 16);
+        if (part_types[index].trail_effects[1] != -1)
+            EdFileWrite(debtab[part_types[index].trail_effects[1]]->name, 16);
+        else
+            EdFileWrite(empty_name, 16);
+        if (part_types[index].attached_effect != -1)
+            EdFileWrite(debtab[part_types[index].attached_effect]->name, 16);
+        else
+            EdFileWrite(empty_name, 16);
+        EdFileWriteFloat(part_types[index].trail_rates[0]);
+        EdFileWriteFloat(part_types[index].trail_rates[1]);
+        if (part_types[index].kill_effect != -1)
+            EdFileWrite(debtab[part_types[index].kill_effect]->name, 16);
+        else
+            EdFileWrite(empty_name, 16);
+        if (part_types[index].impact_effect != -1)
+            EdFileWrite(debtab[part_types[index].impact_effect]->name, 16);
+        else
+            EdFileWrite(empty_name, 16);
+        if (part_types[index].impact_part != -1)
+            EdFileWrite(part_types[part_types[index].impact_part].name, 16);
+        else
+            EdFileWrite(empty_name, 16);
+        if (part_types[index].sounds[0] != -1)
+            EdFileWrite(const_cast<char *>(g_soundInfo[part_types[index].sounds[0]].sfx_name), 16);
+        else
+            EdFileWrite(empty_name, 16);
+        if (part_types[index].sounds[1] != -1)
+            EdFileWrite(const_cast<char *>(g_soundInfo[part_types[index].sounds[1]].sfx_name), 16);
+        else
+            EdFileWrite(empty_name, 16);
+        if (part_types[index].sounds[2] != -1)
+            EdFileWrite(const_cast<char *>(g_soundInfo[part_types[index].sounds[2]].sfx_name), 16);
+        else
+            EdFileWrite(empty_name, 16);
+        if (part_types[index].sounds[3] != -1)
+            EdFileWrite(const_cast<char *>(g_soundInfo[part_types[index].sounds[3]].sfx_name), 16);
+        else
+            EdFileWrite(empty_name, 16);
+        EdFileWriteChar(part_types[index].sound_modes[0]);
+        EdFileWriteChar(part_types[index].sound_modes[1]);
+        EdFileWriteChar(part_types[index].sound_modes[2]);
+        EdFileWriteChar(part_types[index].sound_modes[3]);
+        EdFileWriteFloat(part_types[index].maximum_distance);
+        EdFileWriteFloat(part_types[index].field_160);
+        EdFileWriteFloat(part_types[index].field_164);
+        EdFileWriteFloat(part_types[index].field_168);
     }
 
     if (page == 1) {
@@ -2427,16 +2546,15 @@ i32 edpartSaveEffects(char *filename, char page) {
         }
         EdFileWriteInt(emitter_count);
         for (i32 index = 0; index < 40; ++index) {
-            part_emit_s &emitter = part_emits[index];
-            if (emitter.effect_id == -1)
+            if (part_emits[index].effect_id == -1)
                 continue;
-            EdFileWriteNuVec(&emitter.position);
-            EdFileWrite(emitter.name, 16);
-            EdFileWriteShort(emitter.rotation_30);
-            EdFileWriteShort(emitter.rotation_2e);
-            EdFileWriteShort(emitter.rotation_2c);
-            EdFileWriteShort(emitter.field_44);
-            EdFileWriteShort(emitter.field_46);
+            EdFileWriteNuVec(&part_emits[index].position);
+            EdFileWrite(part_emits[index].name, 16);
+            EdFileWriteShort(part_emits[index].rotation_30);
+            EdFileWriteShort(part_emits[index].rotation_2e);
+            EdFileWriteShort(part_emits[index].rotation_2c);
+            EdFileWriteShort(part_emits[index].field_44);
+            EdFileWriteShort(part_emits[index].field_46);
         }
     } else {
         EdFileWriteInt(0);
@@ -2507,36 +2625,36 @@ i32 edppPtlCreateCopy(NUVEC *position, i32 source_index) {
 void EdDrawPolyCylinder(VuMtx const &transform, float half_length, float radius, float end_radius, i32 sides,
                         i32 colour, i32 cap_start, i32 cap_end) {
     const float taper = end_radius / radius;
+    i32 shaded_colour = colour & 0xff000000;
+    shaded_colour |= ((colour & 0xff) * 0xdc) >> 8;
+    shaded_colour |= ((((colour >> 8) & 0xff) * 0xdc) & 0xff00) |
+                     (((((colour >> 16) & 0xff) * 0xdc) >> 8) << 16);
+    VuVec first;
+    VuVec second;
+    VuVec third;
     EdDrawMtx(&transform);
-    i32 segment_colour = colour;
-    if (sides > 0) {
-        float previous_sine = NU_SIN_LUT(0) * radius;
-        float previous_cosine = NU_COS_LUT(0) * radius;
-        for (i32 segment = 1;; ++segment) {
-            const i32 angle = segment * 0x10000 / sides;
-            const float sine = NU_SIN_LUT(angle) * radius;
-            const float cosine = NU_COS_LUT(angle) * radius;
-            const VuVec previous_top(previous_sine * taper, previous_cosine * taper, half_length, 1.0f);
-            const VuVec top(sine * taper, cosine * taper, half_length, 1.0f);
-            const VuVec bottom(sine, cosine, -half_length, 1.0f);
-            const VuVec previous_bottom(previous_sine, previous_cosine, -half_length, 1.0f);
-            EdDrawPolyTri(previous_top, top, bottom, segment_colour);
-            EdDrawPolyTri(previous_top, bottom, previous_bottom, segment_colour);
-            previous_sine = sine;
-            previous_cosine = cosine;
-            if (segment == sides)
-                break;
-            segment_colour = (segment & 1) == 0 ? colour
-                                                : static_cast<i32>((static_cast<u32>(colour) & 0xff000000) |
-                                                                   (((colour & 0xff) * 0xdc) >> 8) |
-                                                                   ((((colour >> 8) & 0xff) * 0xdc) & 0xff00) |
-                                                                   (((((colour >> 16) & 0xff) * 0xdc) >> 8) << 16));
-        }
+    i32 segment_colour = 0;
+    float previous_sine = NU_SIN_LUT(0) * radius;
+    float previous_cosine = NU_COS_LUT(0) * radius;
+    for (i32 segment = 0; segment < sides; ++segment) {
+        segment_colour = (segment & 1) == 0 ? colour : shaded_colour;
+        const i32 angle = (segment + 1) * 0x10000 / sides;
+        const float sine = NU_SIN_LUT(angle) * radius;
+        const float cosine = NU_COS_LUT(angle) * radius;
+        first = VuVec(previous_sine * taper, previous_cosine * taper, half_length, 1.0f);
+        second = VuVec(sine * taper, cosine * taper, half_length, 1.0f);
+        third = VuVec(sine, cosine, -half_length, 1.0f);
+        EdDrawPolyTri(first, second, third, segment_colour);
+        first = VuVec(previous_sine * taper, previous_cosine * taper, half_length, 1.0f);
+        second = VuVec(sine, cosine, -half_length, 1.0f);
+        third = VuVec(previous_sine, previous_cosine, -half_length, 1.0f);
+        EdDrawPolyTri(first, second, third, segment_colour);
+        previous_sine = sine;
+        previous_cosine = cosine;
     }
     if (cap_start != 0 || cap_end != 0) {
-        const float negative_half_length = -half_length;
-        float first_sine = NU_SIN_LUT(0);
-        float first_cosine = NU_COS_LUT(0);
+        float first_sine = NU_SIN_LUT(0) * radius;
+        float first_cosine = NU_COS_LUT(0) * radius;
         const i32 first_angle = 0x10000 / sides;
         float previous_sine = NU_SIN_LUT(first_angle) * radius;
         float previous_cosine = NU_COS_LUT(first_angle) * radius;
@@ -2545,16 +2663,16 @@ void EdDrawPolyCylinder(VuMtx const &transform, float half_length, float radius,
             const float sine = NU_SIN_LUT(angle) * radius;
             const float cosine = NU_COS_LUT(angle) * radius;
             if (cap_end != 0) {
-                const VuVec first(first_sine * radius * taper, first_cosine * radius * taper, half_length, 1.0f);
-                const VuVec current(sine * taper, cosine * taper, half_length, 1.0f);
-                const VuVec previous(previous_sine * taper, previous_cosine * taper, half_length, 1.0f);
-                EdDrawPolyTri(first, current, previous, segment_colour);
+                first = VuVec(first_sine * taper, first_cosine * taper, half_length, 1.0f);
+                second = VuVec(sine * taper, cosine * taper, half_length, 1.0f);
+                third = VuVec(previous_sine * taper, previous_cosine * taper, half_length, 1.0f);
+                EdDrawPolyTri(first, second, third, segment_colour);
             }
             if (cap_start != 0) {
-                const VuVec first(first_sine * radius, first_cosine * radius, negative_half_length, 1.0f);
-                const VuVec previous(previous_sine, previous_cosine, negative_half_length, 1.0f);
-                const VuVec current(sine, cosine, negative_half_length, 1.0f);
-                EdDrawPolyTri(first, previous, current, segment_colour);
+                first = VuVec(first_sine, first_cosine, -half_length, 1.0f);
+                second = VuVec(previous_sine, previous_cosine, -half_length, 1.0f);
+                third = VuVec(sine, cosine, -half_length, 1.0f);
+                EdDrawPolyTri(first, second, third, segment_colour);
             }
             previous_sine = sine;
             previous_cosine = cosine;
@@ -2568,32 +2686,35 @@ __attribute__((force_align_arg_pointer)) void EdDrawPolyCylinder(VuVec const &st
                                                                  float offset) {
     VuVec direction(end.x - start.x, end.y - start.y, end.z - start.z, 0.0f);
     const float length = NuVecMag(&direction.xyz);
-    if (length <= 0.0f)
+    if (!(length > 0.0f))
         return;
     const float inverse_length = 1.0f / length;
     direction.x *= inverse_length;
     direction.y *= inverse_length;
     direction.z *= inverse_length;
-    NUANGVEC angles{};
+    NUANGVEC angles;
     if (direction.x == 0.0f && direction.z == 0.0f) {
         angles.x = 0x2000;
+        angles.y = 0;
     } else {
         angles.y = NuAtan2D(direction.x, direction.z);
         NuVecRotateY(&direction.xyz, &direction.xyz, -angles.y);
         angles.x = -NuAtan2D(direction.y, direction.z);
     }
-    NUMTX transform;
-    NuMtxSetRotateXYZVU0(&transform, &angles);
-    NUVEC center{(start.x + end.x) * 0.5f, (start.y + end.y) * 0.5f, (start.z + end.z) * 0.5f};
-    NuMtxTranslate(&transform, &center);
-    const float minimum_radius = radius * 0.5f * length;
+    angles.z = 0;
+    VuVec center((end.x + start.x) * 0.5f, (end.y + start.y) * 0.5f, (end.z + start.z) * 0.5f, 0.0f);
+    VuMtx transform;
+    NuMtxSetRotateXYZVU0(&transform.matrix, &angles);
+    NuMtxTranslate(&transform.matrix, &center.xyz);
+    const float half_length = length * 0.5f;
+    const float minimum_radius = radius * half_length;
     float first_radius = limit > minimum_radius ? limit : minimum_radius;
     if (first_radius > offset)
         first_radius = offset;
     float second_radius = limit > minimum_radius * 0.1f ? limit : minimum_radius * 0.1f;
     if (second_radius > offset)
         second_radius = offset;
-    EdDrawPolyCylinder(*reinterpret_cast<VuMtx *>(&transform), length * 0.5f, first_radius, second_radius, sides,
+    EdDrawPolyCylinder(transform, half_length, first_radius, second_radius, sides,
                        colour, 1, 1);
 }
 
@@ -2625,143 +2746,180 @@ void edgraCalculatePage(char page, i32 calculate_vectors) {
     NUMTX *matrix = edgra_page_matrix_stack[page_index];
     i32 max_clumps = EDGRA_MAX_CLUMPS;
     for (i32 clump_index = 0; clump_index < max_clumps; ++clump_index) {
-        edgra_clump_s &clump = GrassClumps[clump_index];
-        if (clump.element_count <= 0 || static_cast<i8>(clump.page) != page)
+        const i32 count = GrassClumps[clump_index].element_count;
+        if (count == 0 || static_cast<i8>(GrassClumps[clump_index].page) != page)
             continue;
-        struct Sample {
-            NUVEC position;
-            f32 scale;
-        } samples[256];
-        u32 seed = clump.seed;
-        const i32 count = clump.element_count;
-        for (i32 element = 0; element < count; ++element) {
-            Sample &sample = samples[element];
-            f32 distance = 0.0f;
-            if (clump.kind == 3) {
-                sample.position.x = GetIndGrassClump(clump.individual_index, element)->position.x;
-                sample.position.y = GetIndGrassClump(clump.individual_index, element)->position.y;
-                sample.position.z = GetIndGrassClump(clump.individual_index, element)->position.z;
+        if (count <= 0)
+            continue;
+        VuVec samples[256];
+        const i32 terrain_enabled = static_cast<i8>(GrassClumps[clump_index].field_42);
+        i32 terrain_rotation = static_cast<i8>(GrassClumps[clump_index].field_43);
+        if (GrassClumps[clump_index].kind == 1)
+            terrain_rotation = 0;
+        if (!terrain_enabled)
+            terrain_rotation = 0;
+        const f32 terrain_height = GrassClumps[clump_index].field_44;
+        u32 seed = GrassClumps[clump_index].seed;
+        VuVec *sample_cursor = samples;
+        for (i32 element = 0; element < count; ++element, ++sample_cursor) {
+            VuVec &sample = *sample_cursor;
+            if (GrassClumps[clump_index].kind == 3) {
+                sample.x = GetIndGrassClump(GrassClumps[clump_index].individual_index, element)->position.x;
+                sample.y = GetIndGrassClump(GrassClumps[clump_index].individual_index, element)->position.y;
+                sample.z = GetIndGrassClump(GrassClumps[clump_index].individual_index, element)->position.z;
             } else {
-                NUVEC offset = {};
-                switch (clump.unknown_25) {
+                NUVEC offset;
+                switch (static_cast<i8>(GrassClumps[clump_index].unknown_25)) {
                     case 1: {
                         u32 angle = NuRandIntSeeded(&seed) & 0xffff;
-                        f32 radius = NuRandFloatSeeded(&seed) * clump.size;
+                        f32 radius = NuRandFloatSeeded(&seed) * GrassClumps[clump_index].size;
+                        offset.y = 0.0f;
                         offset.x = NU_SIN_LUT(angle) * radius;
                         offset.z = NU_COS_LUT(angle) * radius;
-                        distance = NuFsqrt(offset.x * offset.x + offset.z * offset.z);
-                        offset.x *= distance + 1.5f;
-                        offset.z *= distance + 1.5f;
+                        sample.w = NuFsqrt(offset.x * offset.x + offset.z * offset.z);
+                        offset.x *= sample.w + 1.5f;
+                        offset.z *= sample.w + 1.5f;
                         break;
                     }
                     case 2: {
                         u32 angle = NuRandIntSeeded(&seed) & 0xffff;
-                        f32 radius = NuRandFloatSeeded(&seed) * clump.size;
+                        f32 radius = NuRandFloatSeeded(&seed) * GrassClumps[clump_index].size;
+                        offset.y = 0.0f;
                         offset.x = radius * NU_SIN_LUT(angle);
                         offset.z = radius * NU_COS_LUT(angle);
-                        distance = NuFsqrt(offset.x * offset.x + offset.z * offset.z);
+                        sample.w = NuFsqrt(offset.x * offset.x + offset.z * offset.z);
                         break;
                     }
                     case 3:
-                        offset.x = (NuRandFloatSeeded(&seed) * 2.0f - 1.0f) * clump.size;
-                        offset.z = (NuRandFloatSeeded(&seed) * 2.0f - 1.0f) * clump.size;
-                        distance = NuFsqrt(offset.x * offset.x + offset.z * offset.z);
+                        offset.y = 0.0f;
+                        offset.x = (NuRandFloatSeeded(&seed) * 2.0f - 1.0f) * GrassClumps[clump_index].size;
+                        offset.z = (NuRandFloatSeeded(&seed) * 2.0f - 1.0f) * GrassClumps[clump_index].size;
+                        sample.w = NuFsqrt(offset.x * offset.x + offset.z * offset.z);
                         break;
                     case 4: {
                         i32 rows = static_cast<i32>(NuFsqrt(static_cast<f32>(count)));
                         i32 columns = (count - 1 + rows) / rows;
+                        offset.y = 0.0f;
                         offset.x =
-                            static_cast<f32>(element / columns) * (2.0f * clump.size / static_cast<f32>(rows - 1)) -
-                            clump.size;
+                            static_cast<f32>(element / columns) *
+                                (2.0f * GrassClumps[clump_index].size / static_cast<f32>(rows - 1)) -
+                            GrassClumps[clump_index].size;
                         offset.z =
-                            static_cast<f32>(element % columns) * (2.0f * clump.size / static_cast<f32>(columns - 1)) -
-                            clump.size;
-                        distance = NuFsqrt(offset.x * offset.x + offset.z * offset.z);
+                            static_cast<f32>(element % columns) *
+                                (2.0f * GrassClumps[clump_index].size / static_cast<f32>(columns - 1)) -
+                            GrassClumps[clump_index].size;
+                        sample.w = NuFsqrt(offset.x * offset.x + offset.z * offset.z);
                         break;
                     }
+                    default:
+                        goto translate_sample;
                 }
-                NuVecRotateZ(&offset, &offset, clump.rotation_z);
-                NuVecRotateY(&offset, &offset, clump.rotation_y);
-                sample.position = offset;
+                NuVecRotateZ(&offset, &offset, GrassClumps[clump_index].rotation_z);
+                NuVecRotateY(&offset, &offset, GrassClumps[clump_index].rotation_y);
+                sample.x = offset.x;
+                sample.y = offset.y;
+                sample.z = offset.z;
             }
-            sample.position.x += clump.position.x;
-            sample.position.y += clump.position.y;
-            sample.position.z += clump.position.z;
-            if (clump.kind == 3) {
-                sample.scale =
-                    (clump.field_30 - clump.field_2c) * GetIndGrassClump(clump.individual_index, element)->field_0c +
-                    clump.field_2c;
+        translate_sample:
+            sample.x += GrassClumps[clump_index].position.x;
+            sample.y += GrassClumps[clump_index].position.y;
+            sample.z += GrassClumps[clump_index].position.z;
+            if (GrassClumps[clump_index].kind == 3) {
+                edgra_individual_s *individual = GetIndGrassClump(GrassClumps[clump_index].individual_index, element);
+                sample.w =
+                    (GrassClumps[clump_index].field_30 - GrassClumps[clump_index].field_2c) * individual->field_0c +
+                    GrassClumps[clump_index].field_2c;
             } else {
-                sample.scale = distance;
-                switch (clump.unknown_26) {
+                switch (static_cast<i8>(GrassClumps[clump_index].unknown_26)) {
                     case 1: {
+                        const f32 attenuation = 1.25f * sample.w;
                         const f32 random = NuRandFloatSeeded(&seed);
-                        f32 scale = ((1.25f - 0.1f * distance) + (random - 0.25f) * (random - 0.25f)) / 1.7625f *
-                                    clump.field_30;
-                        if (scale < clump.field_2c)
-                            scale = clump.field_2c;
-                        sample.scale = scale;
+                        sample.w = ((1.2f - attenuation) + (random - 0.25f) * (random - 0.25f)) / 1.7625f *
+                                   GrassClumps[clump_index].field_30;
+                        if (GrassClumps[clump_index].field_2c > sample.w)
+                            sample.w = GrassClumps[clump_index].field_2c;
                         break;
                     }
                     case 2:
-                        sample.scale = NuRandFloatSeeded(&seed) * (clump.field_30 - clump.field_2c) + clump.field_2c;
+                        sample.w = NuRandFloatSeeded(&seed) *
+                                       (GrassClumps[clump_index].field_30 - GrassClumps[clump_index].field_2c) +
+                                   GrassClumps[clump_index].field_2c;
                         break;
                     case 3: {
-                        f32 limited = distance < clump.size ? distance : clump.size;
-                        sample.scale = clump.field_30 - (limited / clump.size) * (clump.field_30 - clump.field_2c);
+                        f32 limited = sample.w < GrassClumps[clump_index].size ? sample.w
+                                                                             : GrassClumps[clump_index].size;
+                        sample.w = GrassClumps[clump_index].field_30 -
+                                   (limited / GrassClumps[clump_index].size) *
+                                       (GrassClumps[clump_index].field_30 - GrassClumps[clump_index].field_2c);
                         break;
                     }
                     case 4: {
-                        f32 limited = distance < clump.size ? distance : clump.size;
-                        i32 angle = static_cast<i32>((limited / clump.size) * 16384.0f);
-                        sample.scale = (clump.field_30 - clump.field_2c) * NU_COS_LUT(angle) + clump.field_2c;
+                        f32 limited = sample.w < GrassClumps[clump_index].size ? sample.w
+                                                                             : GrassClumps[clump_index].size;
+                        i32 angle = static_cast<i32>((limited / GrassClumps[clump_index].size) * 16384.0f);
+                        sample.w = (GrassClumps[clump_index].field_30 - GrassClumps[clump_index].field_2c) *
+                                       NU_COS_LUT(angle) +
+                                   GrassClumps[clump_index].field_2c;
                         break;
                     }
                 }
             }
         }
-        seed = clump.seed;
+        seed = GrassClumps[clump_index].seed;
         NUMTX *matrix_start = matrix;
-        NUVEC *terrain_values = static_cast<NUVEC *>(clump.vector_buffer);
-        for (i32 element = 0; element < count; ++element) {
-            Sample &sample = samples[element];
-            if (clump.kind == 3) {
-                if (clump.field_42 && calculate_vectors)
-                    terrain_values[element] = NuFadeObjGetAngleTerrainValues(&sample.position);
-                NuMtxSetIdentity(matrix);
-                NuMtxRotateZ(matrix, GetIndGrassClump(clump.individual_index, element)->field_10);
-                NuMtxRotateY(matrix, GetIndGrassClump(clump.individual_index, element)->field_12);
-                if (clump.field_42 && clump.field_43) {
-                    NuMtxRotateZ(matrix, static_cast<i32>(terrain_values[element].z));
-                    NuMtxRotateX(matrix, static_cast<i32>(terrain_values[element].x));
+        NUMTX *element_matrix = matrix;
+        i32 element;
+        sample_cursor = samples;
+        for (element = 0; element < count; ++element, ++sample_cursor) {
+            VuVec &sample = *sample_cursor;
+            NUVEC scale;
+            scale.x = scale.y = scale.z = sample.w;
+            NUVEC position;
+            position.x = sample.x;
+            position.y = sample.y;
+            position.z = sample.z;
+            if (GrassClumps[clump_index].kind == 3) {
+                if (terrain_enabled && calculate_vectors)
+                    static_cast<NUVEC *>(GrassClumps[clump_index].vector_buffer)[element] =
+                        NuFadeObjGetAngleTerrainValues(&position);
+                NuMtxSetIdentity(element_matrix);
+                NuMtxRotateZ(element_matrix,
+                             GetIndGrassClump(GrassClumps[clump_index].individual_index, element)->field_10);
+                NuMtxRotateY(element_matrix,
+                             GetIndGrassClump(GrassClumps[clump_index].individual_index, element)->field_12);
+                if (terrain_rotation) {
+                    NuMtxRotateZ(element_matrix,
+                                 static_cast<i32>(static_cast<NUVEC *>(GrassClumps[clump_index].vector_buffer)[element].z));
+                    NuMtxRotateX(element_matrix,
+                                 static_cast<i32>(static_cast<NUVEC *>(GrassClumps[clump_index].vector_buffer)[element].x));
                 }
-                NUVEC scale = {sample.scale, sample.scale, sample.scale};
-                NuMtxScale(matrix, &scale);
-                NUVEC position = sample.position;
-                if (clump.field_42)
-                    position.y = clump.field_44 + terrain_values[element].y;
-                NuMtxTranslate(matrix, &position);
+                NuMtxScale(element_matrix, &scale);
+                if (terrain_enabled)
+                    position.y = terrain_height + static_cast<NUVEC *>(GrassClumps[clump_index].vector_buffer)[element].y;
+                NuMtxTranslate(element_matrix, &position);
             } else {
-                if (clump.field_42 && calculate_vectors)
-                    terrain_values[element] = NuFadeObjGetAngleTerrainValues(&sample.position);
-                NuMtxSetIdentity(matrix);
-                NuMtxPreRotateY(matrix, static_cast<u16>(NuRandIntSeeded(&seed)));
-                if (clump.kind != 1 && clump.field_42 && clump.field_43) {
-                    NuMtxRotateZ(matrix, static_cast<i32>(terrain_values[element].z));
-                    NuMtxRotateX(matrix, static_cast<i32>(terrain_values[element].x));
+                if (terrain_enabled && calculate_vectors)
+                    static_cast<NUVEC *>(GrassClumps[clump_index].vector_buffer)[element] =
+                        NuFadeObjGetAngleTerrainValues(&position);
+                NuMtxSetIdentity(element_matrix);
+                NuMtxPreRotateY(element_matrix, static_cast<u16>(NuRandIntSeeded(&seed)));
+                if (terrain_rotation) {
+                    NuMtxRotateZ(element_matrix,
+                                 static_cast<i32>(static_cast<NUVEC *>(GrassClumps[clump_index].vector_buffer)[element].z));
+                    NuMtxRotateX(element_matrix,
+                                 static_cast<i32>(static_cast<NUVEC *>(GrassClumps[clump_index].vector_buffer)[element].x));
                 }
-                NUVEC scale = {sample.scale, sample.scale, sample.scale};
-                NuMtxScale(matrix, &scale);
-                NUVEC position = sample.position;
-                if (clump.field_42)
-                    position.y = clump.field_44 + terrain_values[element].y;
-                NuMtxTranslate(matrix, &position);
-                if (clump.kind == 1)
-                    matrix->m33 = clump.field_18 * sample.scale;
+                NuMtxScale(element_matrix, &scale);
+                if (terrain_enabled)
+                    position.y = terrain_height + static_cast<NUVEC *>(GrassClumps[clump_index].vector_buffer)[element].y;
+                NuMtxTranslate(element_matrix, &position);
+                if (GrassClumps[clump_index].kind == 1)
+                    element_matrix->m33 = GrassClumps[clump_index].field_18 * sample.w;
             }
-            ++matrix;
+            ++element_matrix;
         }
-        clump.matrices = matrix_start;
+        GrassClumps[clump_index].matrices = matrix_start;
+        matrix += element;
         max_clumps = EDGRA_MAX_CLUMPS;
     }
 }
@@ -3555,27 +3713,28 @@ __attribute__((force_align_arg_pointer)) i32 EdManScale::Process(EdInputContext 
     if (selected.GetAveragePosition(average) == 0)
         return 0;
 
-    VuMtx orientation;
+    VuMtx transform;
+    EdMember member;
+    i32 matrix_type = EdType_VuMtx;
     ClassObjectListEntry *first = selected.first;
     if (first->reference == NULL ||
-        first->reference->GetAttributeData(first->object, 0x10, EdType_VuMtx, &orientation, 0) == 0) {
-        EdMember member;
+        first->reference->GetAttributeData(first->object, 0x10, matrix_type, &transform, 0) == 0) {
         if (first->ed_class->FindMember(&member, first->object, 0x10, 1) != 0)
-            member.reference->GetAttributeData(member.object, 0x10, EdType_VuMtx, &orientation, 0);
+            member.reference->GetAttributeData(member.object, 0x10, matrix_type, &transform, 0);
     }
     VuVec first_axis;
     VuVec second_axis;
-    i32 axis = SelectAxis(input, average, first_axis, second_axis, &orientation);
+    i32 axis = SelectAxis(input, average, first_axis, second_axis, &transform);
     theLevelEditor.field_0x2c = AxisColour[axis];
     if (input.GetHold(3) != 0.0f) {
         VuVec const &delta = *reinterpret_cast<VuVec const *>(reinterpret_cast<u8 *>(this) + 0x40);
         for (ClassObjectListEntry *entry = selected.first; entry != NULL; entry = entry->next) {
-            VuMtx transform;
+            average = VuVec(0.0f, 0.0f, 0.0f, 1.0f);
+            matrix_type = EdType_VuMtx;
             if (entry->reference == NULL ||
-                entry->reference->GetAttributeData(entry->object, 0x20, EdType_VuMtx, &transform, 0) == 0) {
-                EdMember member;
+                entry->reference->GetAttributeData(entry->object, 0x20, matrix_type, &transform, 0) == 0) {
                 if (entry->ed_class->FindMember(&member, entry->object, 0x20, 1) != 0)
-                    member.reference->GetAttributeData(member.object, 0x20, EdType_VuMtx, &transform, 0);
+                    member.reference->GetAttributeData(member.object, 0x20, matrix_type, &transform, 0);
             }
 
             f32 scale_x = 1.0f;
@@ -3590,15 +3749,14 @@ __attribute__((force_align_arg_pointer)) i32 EdManScale::Process(EdInputContext 
                     projected.x = matrix.m00 * first_axis.x + matrix.m10 * first_axis.y + matrix.m20 * first_axis.z;
                     projected.y = matrix.m01 * first_axis.x + matrix.m11 * first_axis.y + matrix.m21 * first_axis.z;
                     projected.z = matrix.m02 * first_axis.x + matrix.m12 * first_axis.y + matrix.m22 * first_axis.z;
-                    projected.w = 0.0f;
                     f32 magnitude = NuVecMag(reinterpret_cast<NUVEC *>(&projected));
+                    f32 scaled_magnitude = Scale * magnitude;
                     f32 movement = delta.x * first_axis.x + delta.y * first_axis.y + delta.z * first_axis.z;
                     if (movement == 0.0f)
                         continue;
                     NuVecInvMtxRotate(reinterpret_cast<NUVEC *>(&first_axis), reinterpret_cast<NUVEC *>(&first_axis),
                                       &matrix);
                     NuVecNorm(reinterpret_cast<NUVEC *>(&first_axis), reinterpret_cast<NUVEC *>(&first_axis));
-                    f32 scaled_magnitude = Scale * magnitude;
                     f32 change = (scaled_magnitude + movement) / scaled_magnitude - 1.0f;
                     scale_x = first_axis.x * change + 1.0f;
                     scale_y = first_axis.y * change + 1.0f;
@@ -3613,8 +3771,8 @@ __attribute__((force_align_arg_pointer)) i32 EdManScale::Process(EdInputContext 
                     projected.x = matrix.m00 * first_axis.x + matrix.m10 * first_axis.y + matrix.m20 * first_axis.z;
                     projected.y = matrix.m01 * first_axis.x + matrix.m11 * first_axis.y + matrix.m21 * first_axis.z;
                     projected.z = matrix.m02 * first_axis.x + matrix.m12 * first_axis.y + matrix.m22 * first_axis.z;
-                    projected.w = 0.0f;
                     f32 magnitude = NuVecMag(reinterpret_cast<NUVEC *>(&projected));
+                    f32 scaled_magnitude = Scale * magnitude;
                     f32 movement = delta.x * first_axis.x + delta.y * first_axis.y + delta.z * first_axis.z;
                     movement += delta.x * second_axis.x + delta.y * second_axis.y + delta.z * second_axis.z;
                     if (movement == 0.0f)
@@ -3622,7 +3780,6 @@ __attribute__((force_align_arg_pointer)) i32 EdManScale::Process(EdInputContext 
                     NuVecInvMtxRotate(reinterpret_cast<NUVEC *>(&first_axis), reinterpret_cast<NUVEC *>(&first_axis),
                                       &matrix);
                     NuVecNorm(reinterpret_cast<NUVEC *>(&first_axis), reinterpret_cast<NUVEC *>(&first_axis));
-                    f32 scaled_magnitude = Scale * magnitude;
                     f32 change = (scaled_magnitude + movement) / scaled_magnitude - 1.0f;
                     scale_x = first_axis.x * change + second_axis.x * change + 1.0f;
                     scale_y = first_axis.y * change + second_axis.y * change + 1.0f;
@@ -3640,6 +3797,7 @@ __attribute__((force_align_arg_pointer)) i32 EdManScale::Process(EdInputContext 
                     continue;
             }
             NUMTX &matrix = transform.matrix;
+            average = VuVec(matrix.m30, matrix.m31, matrix.m32, matrix.m33);
             const NUMTX original = matrix;
             const f32 zero = 0.0f;
             matrix.m00 = scale_x * original.m00 + zero * original.m10 + zero * original.m20;
@@ -3652,11 +3810,15 @@ __attribute__((force_align_arg_pointer)) i32 EdManScale::Process(EdInputContext 
             matrix.m21 = zero * original.m01 + zero * original.m11 + scale_z * original.m21;
             matrix.m22 = zero * original.m02 + zero * original.m12 + scale_z * original.m22;
             matrix.m03 = matrix.m13 = matrix.m23 = 0.0f;
+            matrix.m30 = average.x;
+            matrix.m31 = average.y;
+            matrix.m32 = average.z;
+            matrix.m33 = average.w;
+            matrix_type = EdType_VuMtx;
             if (entry->reference == NULL ||
-                entry->reference->SetAttributeData(entry->object, 0x20, EdType_VuMtx, &transform, 0) == 0) {
-                EdMember member;
+                entry->reference->SetAttributeData(entry->object, 0x20, matrix_type, &transform, 0) == 0) {
                 if (entry->ed_class->FindMember(&member, entry->object, 0x20, 1) != 0)
-                    member.reference->SetAttributeData(member.object, 0x20, EdType_VuMtx, &transform, 0);
+                    member.reference->SetAttributeData(member.object, 0x20, matrix_type, &transform, 0);
             }
         }
     }
@@ -3993,17 +4155,12 @@ void EdRegistry::Serialise(EdStream &stream) {
 
 void EdRegistry::SerialiseObjects(EdStream &stream, EdRegistry *source_registry) {
     char object_name[256];
-    auto get_attribute = [](EdClass *object_class, void *object, i32 attribute, i32 type, void *data, i32 size) {
-        EdMember member;
+    EdMember member;
+    i32 filter_flags;
+    i16 group;
+    auto get_attribute = [&](EdClass *object_class, void *object, i32 attribute, i32 type, void *data, i32 size) {
         if (object_class->FindMember(&member, object, attribute, 1))
             member.reference->GetAttributeData(member.object, attribute, type, data, size);
-    };
-    auto include_object = [&](EdClass *object_class, void *object) {
-        i32 object_flags = 0;
-        i16 group = 0;
-        get_attribute(object_class, object, 1, EdType_Int, &object_flags, 0);
-        get_attribute(object_class, object, 0x100, EdType_Short, &group, 0);
-        return !(object_flags & (stream.flags & 0x400000 ? 0x400000 : 0x10000000)) && group == stream.unknown_10;
     };
     auto read_objects = [&](EdClass *object_class, EdClass *source_class) {
         i32 count;
@@ -4015,17 +4172,16 @@ void EdRegistry::SerialiseObjects(EdStream &stream, EdRegistry *source_registry)
             if (object_flags & 0x02000000) {
                 stream.SerialiseString(object_name, sizeof(object_name));
                 object = object_class->FindObject(object_name);
-            } else {
-                void *original = NULL;
-                if (object_class->flags & 0x04000000) {
-                    stream.SerialiseString(object_name, sizeof(object_name));
-                    original = object_class->FindObject(object_name);
-                    if (original == NULL) {
-                        object_class->SerialiseObject(stream, NULL, source_class, source_registry);
-                        continue;
-                    }
+            } else if (object_class->flags & 0x04000000) {
+                stream.SerialiseString(object_name, sizeof(object_name));
+                void *original = object_class->FindObject(object_name);
+                if (original == NULL) {
+                    object_class->SerialiseObject(stream, NULL, source_class, source_registry);
+                    continue;
                 }
                 object = theRegistry.CreateObject(object_class->interface, original, 4, 0, 2);
+            } else {
+                object = theRegistry.CreateObject(object_class->interface, NULL, 4, 0, 2);
             }
             object_class->SerialiseObject(stream, object, source_class, source_registry);
             if (object != NULL)
@@ -4037,30 +4193,62 @@ void EdRegistry::SerialiseObjects(EdStream &stream, EdRegistry *source_registry)
         i32 count = 0;
         for (i32 index = 0; index < class_count; ++index) {
             EdClass *object_class = &classes[index];
-            if (object_class->interface != NULL &&
-                !(object_class->flags & (stream.flags & 0x400000 ? 0x400000 : 0x10000000)))
-                ++count;
+            if (object_class->interface == NULL)
+                continue;
+            if (stream.flags & 0x400000) {
+                if (object_class->flags & 0x400000)
+                    continue;
+            } else if (object_class->flags & 0x10000000) {
+                continue;
+            }
+            ++count;
         }
         stream.SerialiseBuffer(&count, sizeof(count), 1);
         for (i32 index = 0; index < class_count; ++index) {
             EdClass *object_class = &classes[index];
-            if (object_class->interface == NULL ||
-                (object_class->flags & (stream.flags & 0x400000 ? 0x400000 : 0x10000000)))
+            if (object_class->interface == NULL)
                 continue;
+            if (stream.flags & 0x400000) {
+                if (object_class->flags & 0x400000)
+                    continue;
+            } else if (object_class->flags & 0x10000000) {
+                continue;
+            }
             stream.BeginBlock("ObjectList");
             stream.SerialiseString(&object_class->name);
             i32 object_count = 0;
             for (void *object = object_class->interface->vtable->get_next_object(object_class->interface, NULL);
                  object != NULL;
                  object = object_class->interface->vtable->get_next_object(object_class->interface, object)) {
-                if (include_object(object_class, object))
-                    ++object_count;
+                filter_flags = 0;
+                group = 0;
+                get_attribute(object_class, object, 1, EdType_Int, &filter_flags, 0);
+                get_attribute(object_class, object, 0x100, EdType_Short, &group, 0);
+                if (stream.flags & 0x400000) {
+                    if (filter_flags & 0x400000)
+                        continue;
+                } else if (filter_flags & 0x10000000) {
+                    continue;
+                }
+                if (group != stream.unknown_10)
+                    continue;
+                ++object_count;
             }
             stream.SerialiseBuffer(&object_count, sizeof(object_count), 1);
             for (void *object = object_class->interface->vtable->get_next_object(object_class->interface, NULL);
                  object != NULL;
                  object = object_class->interface->vtable->get_next_object(object_class->interface, object)) {
-                if (!include_object(object_class, object))
+                filter_flags = 0;
+                group = 0;
+                get_attribute(object_class, object, 1, EdType_Int, &filter_flags, 0);
+                get_attribute(object_class, object, 0x100, EdType_Short, &group, 0);
+                if (stream.flags & 0x400000) {
+                    if (filter_flags & 0x400000)
+                        continue;
+                } else if (filter_flags & 0x10000000) {
+                    continue;
+                }
+                if (group != stream.unknown_10)
                     continue;
                 i32 object_flags = 0;
                 get_attribute(object_class, object, 1, EdType_Int, &object_flags, 0);
@@ -4155,60 +4343,64 @@ __attribute__((force_align_arg_pointer)) i32 EdManRotate::RotateItem(EdInputCont
     for (ClassObjectListEntry *entry = first; entry != NULL; entry = entry->next) {
         NUMTX matrix;
         NuMtxSetIdentity(&matrix);
-        EdMember member;
-        i32 got_matrix = entry->reference != NULL &&
-                         entry->reference->GetAttributeData(entry->object, 0x10, EdType_VuMtx, &matrix, 0) != 0;
-        if (!got_matrix) {
-            got_matrix = entry->ed_class->FindMember(&member, entry->object, 0x10, 1) != 0 &&
-                         member.reference->GetAttributeData(member.object, 0x10, EdType_VuMtx, &matrix, 0) != 0;
+        i32 matrix_type = EdType_VuMtx;
+        if (entry->reference == NULL ||
+            entry->reference->GetAttributeData(entry->object, 0x10, matrix_type, &matrix, 0) == 0) {
+            EdMember member;
+            if (entry->ed_class->FindMember(&member, entry->object, 0x10, 1) == 0 ||
+                member.reference->GetAttributeData(member.object, 0x10, matrix_type, &matrix, 0) == 0)
+                continue;
         }
-        if (!got_matrix)
-            continue;
         switch (axis) {
             case 1: {
-                f32 sine = NuTrigTable[sine_index];
+                average = VuVec(matrix.m30, matrix.m31, matrix.m32, matrix.m33);
                 f32 cosine = NuTrigTable[cosine_index];
+                f32 sine = NuTrigTable[sine_index];
                 f32 m01 = matrix.m01, m11 = matrix.m11, m21 = matrix.m21;
-                matrix.m01 = m01 * cosine - matrix.m02 * sine;
+                matrix.m01 = cosine * m01 - sine * matrix.m02;
                 matrix.m02 = m01 * sine + matrix.m02 * cosine;
-                matrix.m11 = m11 * cosine - matrix.m12 * sine;
+                matrix.m11 = cosine * m11 - sine * matrix.m12;
                 matrix.m12 = m11 * sine + matrix.m12 * cosine;
-                matrix.m21 = m21 * cosine - matrix.m22 * sine;
+                matrix.m21 = cosine * m21 - sine * matrix.m22;
                 matrix.m22 = m21 * sine + matrix.m22 * cosine;
                 break;
             }
             case 2: {
-                f32 sine = NuTrigTable[sine_index];
+                average = VuVec(matrix.m30, matrix.m31, matrix.m32, matrix.m33);
                 f32 cosine = NuTrigTable[cosine_index];
+                f32 sine = NuTrigTable[sine_index];
                 f32 m00 = matrix.m00, m10 = matrix.m10, m20 = matrix.m20;
-                matrix.m00 = m00 * cosine + matrix.m02 * sine;
+                matrix.m00 = cosine * m00 + sine * matrix.m02;
                 matrix.m02 = matrix.m02 * cosine - m00 * sine;
-                matrix.m10 = m10 * cosine + matrix.m12 * sine;
+                matrix.m10 = cosine * m10 + sine * matrix.m12;
                 matrix.m12 = matrix.m12 * cosine - m10 * sine;
-                matrix.m20 = m20 * cosine + matrix.m22 * sine;
+                matrix.m20 = cosine * m20 + sine * matrix.m22;
                 matrix.m22 = matrix.m22 * cosine - m20 * sine;
                 break;
             }
             case 3: {
-                f32 sine = NuTrigTable[sine_index];
+                average = VuVec(matrix.m30, matrix.m31, matrix.m32, matrix.m33);
                 f32 cosine = NuTrigTable[cosine_index];
+                f32 sine = NuTrigTable[sine_index];
                 f32 m00 = matrix.m00, m10 = matrix.m10, m20 = matrix.m20;
-                matrix.m00 = m00 * cosine - matrix.m01 * sine;
+                matrix.m00 = cosine * m00 - sine * matrix.m01;
                 matrix.m01 = m00 * sine + matrix.m01 * cosine;
-                matrix.m10 = m10 * cosine - matrix.m11 * sine;
+                matrix.m10 = cosine * m10 - sine * matrix.m11;
                 matrix.m11 = m10 * sine + matrix.m11 * cosine;
-                matrix.m20 = m20 * cosine - matrix.m21 * sine;
+                matrix.m20 = cosine * m20 - sine * matrix.m21;
                 matrix.m21 = m20 * sine + matrix.m21 * cosine;
                 break;
             }
             default:
                 continue;
         }
-        if (entry->reference != NULL &&
-            entry->reference->SetAttributeData(entry->object, 0x10, EdType_VuMtx, &matrix, 0) != 0)
-            continue;
-        if (entry->ed_class->FindMember(&member, entry->object, 0x10, 1) != 0)
-            member.reference->SetAttributeData(member.object, 0x10, EdType_VuMtx, &matrix, 0);
+        matrix_type = EdType_VuMtx;
+        if (entry->reference == NULL ||
+            entry->reference->SetAttributeData(entry->object, 0x10, matrix_type, &matrix, 0) == 0) {
+            EdMember member;
+            if (entry->ed_class->FindMember(&member, entry->object, 0x10, 1) != 0)
+                member.reference->SetAttributeData(member.object, 0x10, matrix_type, &matrix, 0);
+        }
     }
     return axis;
 }
@@ -4512,39 +4704,87 @@ void EdManipulator::DrawAxis(VuVec &origin, VuMtx *matrix) {
     VuVec points[8];
     GetAxisLocators(origin, points, matrix);
     EdDrawBegin(1);
-    for (i32 axis = 1; axis <= 3; ++axis) {
-        const i32 colour = *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(this) + 8) != 0
-                               ? AxisColour[axis]
-                               : static_cast<i32>(0xff808080);
-        EdDrawLineSphere(points[axis], Scale * 0.25f, 1.0f, colour);
-    }
+    EdDrawLineSphere(points[1], Scale * 0.25f, 1.0f,
+                     *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(this) + 8) != 0 ? AxisColour[1]
+                                                                                     : static_cast<i32>(0xff808080));
+    EdDrawLineSphere(points[2], Scale * 0.25f, 1.0f,
+                     *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(this) + 8) != 0 ? AxisColour[2]
+                                                                                     : static_cast<i32>(0xff808080));
+    EdDrawLineSphere(points[3], Scale * 0.25f, 1.0f,
+                     *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(this) + 8) != 0 ? AxisColour[3]
+                                                                                     : static_cast<i32>(0xff808080));
     VuMtx box;
     NuMtxSetIdentity(&box.matrix);
-    for (i32 plane = 4; plane <= 7; ++plane) {
-        box.matrix.m30 = points[plane].x;
-        box.matrix.m31 = points[plane].y;
-        box.matrix.m32 = points[plane].z;
-        box.matrix.m33 = 1.0f;
-        const i32 colour = *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(this) + 8) != 0
-                               ? AxisColour[plane]
-                               : static_cast<i32>(0xff808080);
-        EdDrawLineCube(box, Scale * 0.1f, colour);
-    }
+    box.matrix.m30 = points[4].x;
+    box.matrix.m31 = points[4].y;
+    box.matrix.m32 = points[4].z;
+    box.matrix.m33 = 1.0f;
+    EdDrawLineCube(box, Scale * 0.1f,
+                   *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(this) + 8) != 0 ? AxisColour[4]
+                                                                                   : static_cast<i32>(0xff808080));
+    box.matrix.m30 = points[5].x;
+    box.matrix.m31 = points[5].y;
+    box.matrix.m32 = points[5].z;
+    box.matrix.m33 = 1.0f;
+    EdDrawLineCube(box, Scale * 0.1f,
+                   *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(this) + 8) != 0 ? AxisColour[5]
+                                                                                   : static_cast<i32>(0xff808080));
+    box.matrix.m30 = points[6].x;
+    box.matrix.m31 = points[6].y;
+    box.matrix.m32 = points[6].z;
+    box.matrix.m33 = 1.0f;
+    EdDrawLineCube(box, Scale * 0.1f,
+                   *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(this) + 8) != 0 ? AxisColour[6]
+                                                                                   : static_cast<i32>(0xff808080));
+    box.matrix.m30 = points[7].x;
+    box.matrix.m31 = points[7].y;
+    box.matrix.m32 = points[7].z;
+    box.matrix.m33 = 1.0f;
+    EdDrawLineCube(box, Scale * 0.1f,
+                   *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(this) + 8) != 0 ? AxisColour[7]
+                                                                                   : static_cast<i32>(0xff808080));
     EdDrawEnd();
     EdDrawBegin(0);
     const float arrow_size = Scale * 0.25f;
-    const float arrow_radius = arrow_size * 0.2f;
-    for (i32 axis = 1; axis <= 3; ++axis) {
-        const VuVec &point = points[axis];
+    float arrow_radius;
+    VuVec start;
+    VuVec end;
+    {
+        const VuVec &point = points[1];
         const VuVec &center = points[7];
         const VuVec offset((point.x - center.x) * arrow_size * 0.5f, (point.y - center.y) * arrow_size * 0.5f,
                            (point.z - center.z) * arrow_size * 0.5f, 0.0f);
-        const VuVec start(point.x - offset.x, point.y - offset.y, point.z - offset.z, 0.0f);
-        const VuVec end(point.x + offset.x, point.y + offset.y, point.z + offset.z, 0.0f);
+        start = VuVec(point.x - offset.x, point.y - offset.y, point.z - offset.z, 0.0f);
+        end = VuVec(offset.x + point.x, offset.y + point.y, offset.z + point.z, 0.0f);
+        arrow_radius = arrow_size * 0.2f;
         const i32 colour = *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(this) + 8) != 0
-                               ? AxisColour[axis]
+                               ? AxisColour[1]
                                : static_cast<i32>(0xff808080);
-        EdDrawPolyArrow(start, end, 8, colour, arrow_radius, arrow_radius, axis == 1 ? 0.5f : 0.2f, 0.0f);
+        EdDrawPolyArrow(start, end, 8, colour, arrow_radius, arrow_radius, 0.5f, 0.0f);
+    }
+    {
+        const VuVec &point = points[2];
+        const VuVec &center = points[7];
+        const VuVec offset((point.x - center.x) * arrow_size * 0.5f, (point.y - center.y) * arrow_size * 0.5f,
+                           (point.z - center.z) * arrow_size * 0.5f, 0.0f);
+        start = VuVec(point.x - offset.x, point.y - offset.y, point.z - offset.z, 0.0f);
+        end = VuVec(offset.x + point.x, offset.y + point.y, offset.z + point.z, 0.0f);
+        const i32 colour = *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(this) + 8) != 0
+                               ? AxisColour[2]
+                               : static_cast<i32>(0xff808080);
+        EdDrawPolyArrow(start, end, 8, colour, arrow_radius, arrow_radius, 0.2f, 0.0f);
+    }
+    {
+        const VuVec &point = points[3];
+        const VuVec &center = points[7];
+        const VuVec offset((point.x - center.x) * arrow_size * 0.5f, (point.y - center.y) * arrow_size * 0.5f,
+                           (point.z - center.z) * arrow_size * 0.5f, 0.0f);
+        start = VuVec(point.x - offset.x, point.y - offset.y, point.z - offset.z, 0.0f);
+        end = VuVec(offset.x + point.x, offset.y + point.y, offset.z + point.z, 0.0f);
+        const i32 colour = *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(this) + 8) != 0
+                               ? AxisColour[3]
+                               : static_cast<i32>(0xff808080);
+        EdDrawPolyArrow(start, end, 8, colour, arrow_radius, arrow_radius, 0.2f, 0.0f);
     }
     EdDrawEnd();
 }
@@ -4723,8 +4963,8 @@ __attribute__((force_align_arg_pointer)) i32 EdManipulator::SelectAxis(EdInputCo
 
     VuVec *ray_origin = reinterpret_cast<VuVec *>(input.reserved_00 + 0x20);
     VuVec *ray_direction = reinterpret_cast<VuVec *>(input.reserved_00 + 0x30);
-    f32 nearest_distance = __FLT_MAX__;
     i32 nearest = 0;
+    f32 nearest_distance = __FLT_MAX__;
 #define CHECK_AXIS(index, radius)                                                                                      \
     {                                                                                                                  \
         f32 distance = LineToPointDistance(*ray_origin, *ray_direction, locators[index], NULL);                        \
@@ -4746,29 +4986,29 @@ __attribute__((force_align_arg_pointer)) i32 EdManipulator::SelectAxis(EdInputCo
 
     switch (nearest) {
         case 1:
-            first_axis.x = 1.0f;
+            first_axis = VuVec(1.0f, 0.0f, 0.0f, 1.0f);
             break;
         case 2:
-            first_axis.y = 1.0f;
+            first_axis = VuVec(0.0f, 1.0f, 0.0f, 1.0f);
             break;
         case 3:
-            first_axis.z = 1.0f;
+            first_axis = VuVec(0.0f, 0.0f, 1.0f, 1.0f);
             break;
         case 4:
-            first_axis.x = 1.0f;
-            second_axis.y = 1.0f;
+            first_axis = VuVec(1.0f, 0.0f, 0.0f, 1.0f);
+            second_axis = VuVec(0.0f, 1.0f, 0.0f, 1.0f);
             break;
         case 5:
-            first_axis.x = 1.0f;
-            second_axis.z = 1.0f;
+            first_axis = VuVec(1.0f, 0.0f, 0.0f, 1.0f);
+            second_axis = VuVec(0.0f, 0.0f, 1.0f, 1.0f);
             break;
         case 6:
-            first_axis.y = 1.0f;
-            second_axis.z = 1.0f;
+            first_axis = VuVec(0.0f, 1.0f, 0.0f, 1.0f);
+            second_axis = VuVec(0.0f, 0.0f, 1.0f, 1.0f);
             break;
         case 7:
-            first_axis.y = 1.0f;
-            second_axis.z = 1.0f;
+            first_axis = VuVec(0.0f, 1.0f, 0.0f, 1.0f);
+            second_axis = VuVec(0.0f, 0.0f, 1.0f, 1.0f);
             break;
         default:
             break;
@@ -4794,23 +5034,38 @@ __attribute__((force_align_arg_pointer)) i32 EdManipulator::SelectAxis(EdInputCo
     }
     if (input.GetPress(3) != 0.0f) {
         *selected_axis = nearest;
-        *reinterpret_cast<VuVec *>(reinterpret_cast<u8 *>(this) + 0x10) = first_axis;
-        *reinterpret_cast<VuVec *>(reinterpret_cast<u8 *>(this) + 0x20) = second_axis;
-    } else if (input.GetHold(3) == 0.0f) {
-        *selected_axis = 0;
-        *reinterpret_cast<VuVec *>(reinterpret_cast<u8 *>(this) + 0x10) = VuVec_Zero;
-        *reinterpret_cast<VuVec *>(reinterpret_cast<u8 *>(this) + 0x20) = VuVec_Zero;
-    } else {
+        VuVec *selected_first = reinterpret_cast<VuVec *>(reinterpret_cast<u8 *>(this) + 0x10);
+        VuVec *selected_second = reinterpret_cast<VuVec *>(reinterpret_cast<u8 *>(this) + 0x20);
+        selected_first->x = first_axis.x;
+        selected_first->y = first_axis.y;
+        selected_first->z = first_axis.z;
+        selected_first->w = first_axis.w;
+        selected_second->x = second_axis.x;
+        selected_second->y = second_axis.y;
+        selected_second->z = second_axis.z;
+        selected_second->w = second_axis.w;
+    } else if (input.GetHold(3) != 0.0f) {
         nearest = *selected_axis;
-        first_axis = *reinterpret_cast<VuVec *>(reinterpret_cast<u8 *>(this) + 0x10);
-        second_axis = *reinterpret_cast<VuVec *>(reinterpret_cast<u8 *>(this) + 0x20);
+        const VuVec *selected_first = reinterpret_cast<VuVec *>(reinterpret_cast<u8 *>(this) + 0x10);
+        const VuVec *selected_second = reinterpret_cast<VuVec *>(reinterpret_cast<u8 *>(this) + 0x20);
+        first_axis.x = selected_first->x;
+        first_axis.y = selected_first->y;
+        first_axis.z = selected_first->z;
+        first_axis.w = selected_first->w;
+        second_axis.x = selected_second->x;
+        second_axis.y = selected_second->y;
+        second_axis.z = selected_second->z;
+        second_axis.w = selected_second->w;
+    } else {
+        *selected_axis = 0;
+        *reinterpret_cast<VuVec *>(reinterpret_cast<u8 *>(this) + 0x10) = VuVec(0.0f, 0.0f, 0.0f, 1.0f);
+        *reinterpret_cast<VuVec *>(reinterpret_cast<u8 *>(this) + 0x20) = VuVec(0.0f, 0.0f, 0.0f, 1.0f);
     }
     return nearest;
 }
 
 i32 EdManipulator::SelectRotator(EdInputContext &input, VuVec &center, VuVec &plane) {
-    VuVec &ray_origin = *reinterpret_cast<VuVec *>(reinterpret_cast<u8 *>(&input) + 0x20);
-    VuVec &ray_direction = *reinterpret_cast<VuVec *>(reinterpret_cast<u8 *>(&input) + 0x30);
+    f32 scale = Scale;
     i32 *selected_axis = reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(this) + 0x0c);
     i32 *start_angle = reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(this) + 0x60);
     i32 *last_angle = reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(this) + 0x64);
@@ -4821,60 +5076,77 @@ i32 EdManipulator::SelectRotator(EdInputContext &input, VuVec &center, VuVec &pl
     if (pressed != 0.0f || input.GetHold(3) == 0.0f) {
         VuVec far_point;
         VuVec near_point;
+        VuVec normals[3] = {VuVec(1.0f, 0.0f, 0.0f, -center.x), VuVec(0.0f, 1.0f, 0.0f, -center.y),
+                            VuVec(0.0f, 0.0f, 1.0f, -center.z)};
         i32 axis = 0;
-        VuVec chosen = VuVec_Zero;
+        VuVec chosen;
         f32 nearest_distance = __FLT_MAX__;
-        if (LineToSphereIntersection(ray_origin, ray_direction, center, Scale + 0.01f, &far_point, &near_point) != 0) {
+        i32 angle = 0;
+        if (LineToSphereIntersection(*reinterpret_cast<VuVec *>(input.reserved_00 + 0x20),
+                                     *reinterpret_cast<VuVec *>(input.reserved_00 + 0x30),
+                                     center, scale + 0.01f, &far_point, &near_point) != 0) {
             SpherePos1 = far_point;
             SpherePos2 = near_point;
-            for (i32 candidate = 1; candidate <= 3; ++candidate) {
-                for (i32 side = 0; side < 2; ++side) {
-                    const VuVec &point = side == 0 ? far_point : near_point;
-                    VuVec normal = {candidate == 1 ? 1.0f : 0.0f, candidate == 2 ? 1.0f : 0.0f,
-                                    candidate == 3 ? 1.0f : 0.0f,
-                                    candidate == 1   ? -center.x
-                                    : candidate == 2 ? -center.y
-                                                     : -center.z};
-                    f32 distance_to_plane = point.x * normal.x + point.y * normal.y + point.z * normal.z + normal.w;
-                    VuVec projection = {point.x - normal.x * distance_to_plane, point.y - normal.y * distance_to_plane,
-                                        point.z - normal.z * distance_to_plane, 0.0f};
-                    VuVec screen_point;
-                    VuVec screen_projection;
-                    NuCameraTransformScreenClip(reinterpret_cast<NUVEC *>(&screen_projection),
-                                                reinterpret_cast<NUVEC *>(&projection), 1, NULL);
-                    NuCameraTransformScreenClip(reinterpret_cast<NUVEC *>(&screen_point),
-                                                reinterpret_cast<NUVEC *>(const_cast<VuVec *>(&point)), 1, NULL);
-                    VuVec difference = {screen_point.x - screen_projection.x, screen_point.y - screen_projection.y,
-                                        screen_point.z - screen_projection.z, 0.0f};
-                    f32 distance = NuVecMag(reinterpret_cast<NUVEC *>(&difference));
-                    if (distance < 0.05f && distance < nearest_distance) {
-                        nearest_distance = distance;
-                        chosen = point;
-                        axis = candidate;
-                    }
+            VuVec screen_point;
+            VuVec projection;
+            VuVec difference;
+#define CHECK_ROTATOR(point, normal, candidate) \
+            { \
+                f32 distance_to_plane = point.x * normal.x + point.y * normal.y + point.z * normal.z + normal.w; \
+                projection = VuVec(point.x - normal.x * distance_to_plane, point.y - normal.y * distance_to_plane, \
+                                   point.z - normal.z * distance_to_plane, 0.0f); \
+                NuCameraTransformScreenClip(&projection.xyz, &projection.xyz, 1, NULL); \
+                NuCameraTransformScreenClip(&screen_point.xyz, &point.xyz, 1, NULL); \
+                difference.x = screen_point.x - projection.x; \
+                difference.y = screen_point.y - projection.y; \
+                difference.z = screen_point.z - projection.z; \
+                f32 distance = NuVecMag(&difference.xyz); \
+                if (distance < 0.05f && distance < nearest_distance) { \
+                    nearest_distance = distance; \
+                    chosen = point; \
+                    axis = candidate; \
+                } \
+            }
+            for (i32 candidate = 0; candidate < 3; ++candidate) {
+                CHECK_ROTATOR(far_point, normals[candidate], candidate + 1);
+                CHECK_ROTATOR(near_point, normals[candidate], candidate + 1);
+            }
+#undef CHECK_ROTATOR
+            if (axis != 0) {
+                f32 x = chosen.x - center.x;
+                f32 y = chosen.y - center.y;
+                f32 z = chosen.z - center.z;
+                switch (axis) {
+                    case 1:
+                        plane = VuVec(1.0f, 0.0f, 0.0f, 1.0f);
+                        plane.w = -center.x;
+                        angle = NuAtan2DA(y, z);
+                        break;
+                    case 2:
+                        plane = VuVec(0.0f, 1.0f, 0.0f, 1.0f);
+                        plane.w = -center.y;
+                        angle = NuAtan2DA(x, -z);
+                        break;
+                    case 3:
+                        plane = VuVec(0.0f, 0.0f, 1.0f, 1.0f);
+                        plane.w = -center.z;
+                        angle = NuAtan2DA(x, y);
+                        break;
                 }
             }
         }
-        i32 angle = 0;
-        if (axis != 0) {
-            plane = VuVec(axis == 1 ? 1.0f : 0.0f, axis == 2 ? 1.0f : 0.0f, axis == 3 ? 1.0f : 0.0f,
-                          axis == 1   ? -center.x
-                          : axis == 2 ? -center.y
-                                      : -center.z);
-            f32 x = chosen.x - center.x;
-            f32 y = chosen.y - center.y;
-            f32 z = chosen.z - center.z;
-            angle = axis == 1 ? NuAtan2DA(y, z) : axis == 2 ? NuAtan2DA(x, -z) : NuAtan2DA(x, y);
-        }
         if (input.GetPress(3) != 0.0f) {
             *selected_axis = axis;
-            *angle_delta = 0;
             *selected_plane = plane;
-            *start_angle = *last_angle = angle;
+            *start_angle = angle;
+            *last_angle = angle;
+            *angle_delta = 0;
             return axis;
         }
         *selected_axis = 0;
-        *start_angle = *last_angle = *angle_delta = 0;
+        *start_angle = 0;
+        *last_angle = 0;
+        *angle_delta = 0;
         *selected_plane = VuVec_Zero;
         *secondary_plane = VuVec_Zero;
         return axis;
@@ -4882,18 +5154,31 @@ i32 EdManipulator::SelectRotator(EdInputContext &input, VuVec &center, VuVec &pl
     i32 axis = *selected_axis;
     plane = *selected_plane;
     VuVec intersection;
-    if (LineToPlaneIntersecion(ray_origin, ray_direction, plane, &intersection) == 0) {
+    if (LineToPlaneIntersecion(*reinterpret_cast<VuVec *>(input.reserved_00 + 0x20),
+                             *reinterpret_cast<VuVec *>(input.reserved_00 + 0x30), plane, &intersection) == 0) {
         *angle_delta = 0;
         return axis;
     }
     f32 x = intersection.x - center.x;
     f32 y = intersection.y - center.y;
     f32 z = intersection.z - center.z;
-    i32 angle = axis == 1 ? NuAtan2DA(y, z) : axis == 2 ? NuAtan2DA(x, -z) : axis == 3 ? NuAtan2DA(x, y) : 0;
-    i32 delta = (*last_angle - angle) & 0xffff;
+    i32 angle = 0;
+    switch (axis) {
+        case 1:
+            angle = NuAtan2DA(y, z);
+            break;
+        case 2:
+            angle = NuAtan2DA(x, -z);
+            break;
+        case 3:
+            angle = NuAtan2DA(x, y);
+            break;
+    }
+    i32 delta = *last_angle - angle;
+    *last_angle = angle;
+    delta &= 0xffff;
     if (delta >= 0x8000)
         delta -= 0x10000;
-    *last_angle = angle;
     *angle_delta = delta;
     return axis;
 }

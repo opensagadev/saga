@@ -215,24 +215,25 @@ void pathEditorDrawNode(NUVEC *position, f32 radius, f32 lower_height, f32 upper
                         i32 segments, i32 solid);
 
 static void pathEditorDrawPath(EDAIPATH_s *path, i32 path_index) {
-    u8 drawn_connections[0x1fe0] = {};
-    i16 mode = aieditorsettings.current_mode;
+    u8 drawn_connections[255][32];
+    NURND_VERTEX3D vertices[2];
+    memset(drawn_connections, 0, sizeof(drawn_connections));
     i32 solid = aieditorsettings.solid_path_display &&
-                (mode == AIEDITOR_PATHS || mode == AIEDITOR_CREATURES || mode == AIEDITOR_LOCATORS);
+                ((i16)aieditorsettings.current_mode == AIEDITOR_PATHS || (i16)aieditorsettings.current_mode == AIEDITOR_CREATURES || (i16)aieditorsettings.current_mode == AIEDITOR_LOCATORS);
     u32 active_route = 0;
-    if (mode == AIEDITOR_ROUTES && aieditor->current_path != nullptr) {
+    if ((i16)aieditorsettings.current_mode == AIEDITOR_ROUTES) {
         EDAIPATH_s *selected = aieditor->current_path;
-        active_route = selected->current_route != nullptr ? 1u << (selected->current_route - selected->routes) : 1u;
+        active_route = selected->current_route != nullptr ? 1ULL << (selected->current_route - selected->routes) : 1;
     }
-    u32 colour =
-        path == aieditor->current_path ? 0xffffffff : AISysGetPathColour(path_index % AISysGetPathColourCount());
+    u32 colour = path == aieditor->current_path ? 0xffffffff : AISysGetPathColour(path_index % AISysGetPathColourCount());
     if (path == nullptr) {
         return;
     }
     for (EDAIPATHNODE_s *node = (EDAIPATHNODE_s *)NuLinkedListGetHead(&path->nodes); node != nullptr;
          node = (EDAIPATHNODE_s *)NuLinkedListGetNext(&path->nodes, &node->link)) {
-        u32 node_colour = colour;
-        i32 segments = 8;
+        i32 first_index = node->index;
+        u32 node_colour;
+        i32 segments;
         if (path == aieditor->current_path) {
             if (node == path->current_node) {
                 node_colour = 0xff0000ff;
@@ -240,112 +241,215 @@ static void pathEditorDrawPath(EDAIPATH_s *path, i32 path_index) {
             } else if (node == path->other_node) {
                 node_colour = 0xff00ffff;
                 segments = 32;
+            } else {
+                node_colour = colour;
+                segments = 8;
             }
+        } else {
+            node_colour = colour;
+            segments = 8;
         }
         pathEditorDrawNode(&node->position, node->radius, node->position.y + node->lower_height,
                            node->position.y + node->upper_height, node_colour, nullptr, segments, solid);
         if (node->shared_node != nullptr && !(node->shared_node->draw_flags & 1)) {
-            NURND_VERTEX3D vertices[2];
+            f32 radius = node->radius;
             vertices[0].position = node->position;
-            vertices[1].position = node->position;
             vertices[0].colour = node_colour;
+            vertices[0].position.x += radius;
+            vertices[1].position = node->position;
             vertices[1].colour = node_colour;
-            vertices[0].position.x += node->radius;
-            vertices[1].position.x -= node->radius;
+            vertices[1].position.x -= radius;
             AiRndrLine3d(vertices, nullptr, nullptr);
             vertices[0].position = node->position;
+            vertices[0].position.z += radius;
             vertices[1].position = node->position;
-            vertices[0].position.z += node->radius;
-            vertices[1].position.z -= node->radius;
+            vertices[1].position.z -= radius;
             AiRndrLine3d(vertices, nullptr, nullptr);
             node->shared_node->draw_flags |= 1;
         }
-        if (active_route != 0 && (node->route_mask & active_route)) {
-            pathEditorDrawNode(&node->position, node->radius * 0.9f, node->position.y + node->lower_height,
-                               node->position.y + node->upper_height, node_colour, nullptr, segments, solid);
+        if (node->route_mask & active_route) {
+            if (path == aieditor->current_path && node == path->current_node) {
+                pathEditorDrawNode(&node->position, node->radius * 0.9f, node->position.y + node->lower_height,
+                                   node->position.y + node->upper_height, 0xff0000ff, nullptr, 32, solid);
+            } else if (path == aieditor->current_path && node == path->other_node) {
+                pathEditorDrawNode(&node->position, node->radius * 0.9f, node->position.y + node->lower_height,
+                                   node->position.y + node->upper_height, 0xff00ffff, nullptr, 32, solid);
+            } else {
+                pathEditorDrawNode(&node->position, node->radius * 0.9f, node->position.y + node->lower_height,
+                                   node->position.y + node->upper_height, colour, nullptr, 8, solid);
+            }
         }
         for (i32 slot = 0; slot < 8; ++slot) {
-            EDAIPATHCNX_s *connection = &node->connections[slot];
-            EDAIPATHNODE_s *other = connection->node;
+            EDAIPATHNODE_s *other = node->connections[slot].node;
             if (other == nullptr) {
                 continue;
             }
+            i32 second_index = other->index;
             u32 connection_colour = colour;
-            if (path == aieditor->current_path && node == path->current_node && other == path->other_node) {
+            if (node == path->current_node && other == path->other_node) {
                 connection_colour = 0xff00ffff;
             }
-            pathEditorDrawConnectionInfo(&node->position, node->radius, &other->position, connection->flags,
+            pathEditorDrawConnectionInfo(&node->position, node->radius, &other->position, node->connections[slot].flags,
                                          connection_colour);
-
-            i32 first_index = node->index;
-            i32 second_index = other->index;
-            if (first_index >= 0 && first_index < 255 && second_index >= 0 && second_index < 255) {
-                u8 &seen = drawn_connections[first_index * 32 + second_index / 8];
-                u8 bit = static_cast<u8>(1u << (second_index & 7));
-                if (seen & bit) {
-                    continue;
+            if (drawn_connections[first_index][second_index / 8] & (1 << (second_index % 8))) {
+                continue;
+            }
+            drawn_connections[first_index][second_index / 8] |= 1 << (second_index % 8);
+            drawn_connections[second_index][first_index / 8] |= 1 << (first_index % 8);
+            u32 edge_colour = colour;
+            if (path == aieditor->current_path) {
+                if ((node == path->current_node && node->connections[slot].node == path->other_node) ||
+                    (node == path->other_node && node->connections[slot].node == path->current_node)) {
+                    edge_colour = 0xff00ffff;
+                } else if (node == path->current_node || node->connections[slot].node == path->current_node) {
+                    edge_colour = 0xff0000ff;
                 }
-                seen |= bit;
-                drawn_connections[second_index * 32 + first_index / 8] |= static_cast<u8>(1u << (first_index & 7));
             }
-
-            bool current_edge =
-                path == aieditor->current_path && (node == path->current_node || other == path->current_node);
-            bool selected_pair =
-                path == aieditor->current_path && ((node == path->current_node && other == path->other_node) ||
-                                                   (node == path->other_node && other == path->current_node));
-            u32 edge_colour = selected_pair ? 0xff00ffff : current_edge ? 0xff0000ff : colour;
-            NUVEC direction;
-            f32 distance = NuVecXZDist(&node->position, &other->position, &direction);
-            if (distance > 0.0f) {
-                direction.x /= distance;
-                direction.z /= distance;
-            }
-            i32 angle = 0x4000;
-            if (distance > 0.0f && node->radius != other->radius) {
-                angle -= NuASin((other->radius - node->radius) / distance);
-            }
-            NURND_VERTEX3D vertices[2];
-            vertices[0].colour = edge_colour;
-            vertices[1].colour = edge_colour;
-            for (i32 side_index = 0; side_index < 2; ++side_index) {
-                NUVEC side;
-                if (node->radius == other->radius) {
-                    side.x = side_index == 0 ? direction.z : -direction.z;
-                    side.y = direction.y;
-                    side.z = side_index == 0 ? -direction.x : direction.x;
-                } else {
-                    NuVecRotateY(&side, &direction, side_index == 0 ? angle : -angle);
+            if (solid) {
+                NUVEC direction;
+                other = node->connections[slot].node;
+                f32 distance = NuVecXZDist(&node->position, &other->position, &direction);
+                if (distance > 0.0f) {
+                    direction.x /= distance;
+                    direction.z /= distance;
                 }
-                vertices[0].position = node->position;
-                vertices[1].position = other->position;
-                vertices[0].position.x += node->radius * side.x;
-                vertices[0].position.z += node->radius * side.z;
-                vertices[1].position.x += other->radius * side.x;
-                vertices[1].position.z += other->radius * side.z;
-                if (solid) {
-                    vertices[0].position.y += node->lower_height;
-                    vertices[1].position.y += other->lower_height;
+                if (node->radius != other->radius) {
+                    NUVEC side;
+                    i16 angle = 0x4000 - NuASin((other->radius - node->radius) / distance);
+                    NuVecRotateY(&side, &direction, angle);
+                    vertices[0].position = node->position;
+                    vertices[0].colour = edge_colour;
+                    vertices[0].position.x += node->radius * side.x;
+                    vertices[0].position.z += node->radius * side.z;
+                    vertices[1].position = other->position;
+                    vertices[1].colour = edge_colour;
+                    vertices[1].position.x += other->radius * side.x;
+                    vertices[1].position.z += other->radius * side.z;
+                    vertices[0].position.y = node->position.y + node->lower_height;
+                    vertices[1].position.y = other->position.y + other->lower_height;
+                    AiRndrLine3d(vertices, nullptr, nullptr);
+                    vertices[0].position.y = node->position.y + node->upper_height;
+                    vertices[1].position.y = other->position.y + other->upper_height;
+                    AiRndrLine3d(vertices, nullptr, nullptr);
+                    NuVecRotateY(&side, &direction, -angle);
+                    vertices[0].position = node->position;
+                    vertices[0].colour = edge_colour;
+                    vertices[0].position.x += node->radius * side.x;
+                    vertices[0].position.z += node->radius * side.z;
+                    vertices[1].position = other->position;
+                    vertices[1].colour = edge_colour;
+                    vertices[1].position.x += other->radius * side.x;
+                    vertices[1].position.z += other->radius * side.z;
+                    vertices[0].position.y = node->position.y + node->lower_height;
+                    vertices[1].position.y = other->position.y + other->lower_height;
                     AiRndrLine3d(vertices, nullptr, nullptr);
                     vertices[0].position.y = node->position.y + node->upper_height;
                     vertices[1].position.y = other->position.y + other->upper_height;
                     AiRndrLine3d(vertices, nullptr, nullptr);
                 } else {
+                    vertices[0].position = node->position;
+                    vertices[0].colour = edge_colour;
+                    vertices[0].position.x += node->radius * direction.z;
+                    vertices[0].position.z -= node->radius * direction.x;
+                    vertices[1].position = other->position;
+                    vertices[1].colour = edge_colour;
+                    vertices[1].position.x += other->radius * direction.z;
+                    vertices[1].position.z -= other->radius * direction.x;
+                    vertices[0].position.y = node->position.y + node->lower_height;
+                    vertices[1].position.y = other->position.y + other->lower_height;
+                    AiRndrLine3d(vertices, nullptr, nullptr);
+                    vertices[0].position.y = node->position.y + node->upper_height;
+                    vertices[1].position.y = other->position.y + other->upper_height;
+                    AiRndrLine3d(vertices, nullptr, nullptr);
+                    vertices[0].position = node->position;
+                    vertices[0].colour = edge_colour;
+                    vertices[0].position.x -= node->radius * direction.z;
+                    vertices[0].position.z += node->radius * direction.x;
+                    vertices[1].position = other->position;
+                    vertices[1].colour = edge_colour;
+                    vertices[1].position.x -= other->radius * direction.z;
+                    vertices[1].position.z += other->radius * direction.x;
+                    vertices[0].position.y = node->position.y + node->lower_height;
+                    vertices[1].position.y = other->position.y + other->lower_height;
+                    AiRndrLine3d(vertices, nullptr, nullptr);
+                    vertices[0].position.y = node->position.y + node->upper_height;
+                    vertices[1].position.y = other->position.y + other->upper_height;
+                    AiRndrLine3d(vertices, nullptr, nullptr);
+                }
+            } else {
+                NUVEC direction;
+                other = node->connections[slot].node;
+                f32 distance = NuVecXZDist(&node->position, &other->position, &direction);
+                if (distance > 0.0f) {
+                    direction.x /= distance;
+                    direction.z /= distance;
+                }
+                if (node->radius != other->radius) {
+                    NUVEC side;
+                    i16 angle = 0x4000 - NuASin((other->radius - node->radius) / distance);
+                    NuVecRotateY(&side, &direction, angle);
+                    vertices[0].position = node->position;
+                    vertices[0].colour = edge_colour;
+                    vertices[0].position.x += node->radius * side.x;
+                    vertices[0].position.z += node->radius * side.z;
                     vertices[0].position.y += aiEditor_DrawYOffset;
+                    vertices[1].position = other->position;
+                    vertices[1].colour = edge_colour;
+                    vertices[1].position.x += other->radius * side.x;
                     vertices[1].position.y += aiEditor_DrawYOffset;
+                    vertices[1].position.z += other->radius * side.z;
+                    AiRndrLine3d(vertices, nullptr, nullptr);
+                    NuVecRotateY(&side, &direction, -angle);
+                    vertices[0].position = node->position;
+                    vertices[0].colour = edge_colour;
+                    vertices[0].position.x += node->radius * side.x;
+                    vertices[0].position.z += node->radius * side.z;
+                    vertices[0].position.y += aiEditor_DrawYOffset;
+                    vertices[1].position = other->position;
+                    vertices[1].colour = edge_colour;
+                    vertices[1].position.x += other->radius * side.x;
+                    vertices[1].position.y += aiEditor_DrawYOffset;
+                    vertices[1].position.z += other->radius * side.z;
+                    AiRndrLine3d(vertices, nullptr, nullptr);
+                } else {
+                    vertices[0].position = node->position;
+                    vertices[0].colour = edge_colour;
+                    vertices[0].position.x += node->radius * direction.z;
+                    vertices[0].position.y += aiEditor_DrawYOffset;
+                    vertices[0].position.z -= node->radius * direction.x;
+                    vertices[1].position = other->position;
+                    vertices[1].colour = edge_colour;
+                    vertices[1].position.x += other->radius * direction.z;
+                    vertices[1].position.y += aiEditor_DrawYOffset;
+                    vertices[1].position.z -= other->radius * direction.x;
+                    AiRndrLine3d(vertices, nullptr, nullptr);
+                    vertices[0].position = node->position;
+                    vertices[0].colour = edge_colour;
+                    vertices[0].position.x -= node->radius * direction.z;
+                    vertices[0].position.y += aiEditor_DrawYOffset;
+                    vertices[0].position.z += node->radius * direction.x;
+                    vertices[1].position = other->position;
+                    vertices[1].colour = edge_colour;
+                    vertices[1].position.x -= other->radius * direction.z;
+                    vertices[1].position.y += aiEditor_DrawYOffset;
+                    vertices[1].position.z += other->radius * direction.x;
                     AiRndrLine3d(vertices, nullptr, nullptr);
                 }
             }
-
-            if (active_route != 0 && (connection->route_mask & active_route)) {
-                vertices[0].position = node->position;
-                vertices[1].position = other->position;
-                vertices[0].position.y += aiEditor_DrawYOffset + 0.02f;
-                vertices[1].position.y += aiEditor_DrawYOffset + 0.02f;
-                u32 route_colour = selected_pair ? 0xff00ffff : 0xffff0000;
-                vertices[0].colour = route_colour;
-                vertices[1].colour = route_colour;
-                AiRndrLine3d(vertices, nullptr, nullptr);
+            u32 route_colour = 0xffff0000;
+            if ((node == path->current_node && node->connections[slot].node == path->other_node) ||
+                (node == path->other_node && node->connections[slot].node == path->current_node)) {
+                route_colour = 0xff00ffff;
+            }
+            if (node->connections[slot].route_mask & active_route) {
+                NURND_VERTEX3D route_vertices[2];
+                route_vertices[0].position = node->position;
+                route_vertices[0].colour = route_colour;
+                route_vertices[0].position.y += aiEditor_DrawYOffset + 0.02f;
+                route_vertices[1].position = node->connections[slot].node->position;
+                route_vertices[1].colour = route_colour;
+                route_vertices[1].position.y += aiEditor_DrawYOffset + 0.02f;
+                AiRndrLine3d(route_vertices, nullptr, nullptr);
             }
         }
     }
@@ -1463,6 +1567,25 @@ extern "C" void pathEditor_CalcNodeIXs(void);
 extern "C" EDAIPATH_s *pathEditor_GetPath(const char *name);
 
 void pathEditor_Enter(void) {
+    auto find_connection = [](EDAIPATHNODE_s *node, EDAIPATHNODE_s *other) -> i32 {
+        if (node->connections[0].node == other)
+            return 0;
+        if (node->connections[1].node == other)
+            return 1;
+        if (node->connections[2].node == other)
+            return 2;
+        if (node->connections[3].node == other)
+            return 3;
+        if (node->connections[4].node == other)
+            return 4;
+        if (node->connections[5].node == other)
+            return 5;
+        if (node->connections[6].node == other)
+            return 6;
+        if (node->connections[7].node == other)
+            return 7;
+        return 8;
+    };
     aieditor->paths.head = nullptr;
     aieditor->paths.tail = nullptr;
     for (i32 index = 0; index < 32; ++index) {
@@ -1520,10 +1643,11 @@ void pathEditor_Enter(void) {
                 NuLinkedListRemove(&aieditor->free_path_nodes, &node->link);
                 NuLinkedListAppend(&path->nodes, &node->link);
                 ++path->node_count;
+                f32 source_height = source->position.y;
                 node->position = source->position;
                 node->radius = source->radius;
-                node->lower_height = source->min_height - source->position.y;
-                node->upper_height = source->max_height - source->position.y;
+                node->lower_height = source->min_height - source_height;
+                node->upper_height = source->max_height - source_height;
                 node->flags = source->runtime_flags;
                 node->special = source->special_handle;
                 node->special_position = source->special_position;
@@ -1565,80 +1689,88 @@ void pathEditor_Enter(void) {
                     i32 direction = connection->node_indices[0] != node_index;
                     i32 other_index = connection->node_indices[direction ^ 1];
                     EDAIPATHNODE_s *other = &aieditor->node_storage[node_storage_start + other_index];
-                    EDAIPATHCNX_s *editor_connection = nullptr;
-                    if (node->connections[0].node == other)
-                        editor_connection = &node->connections[0];
-                    else if (node->connections[1].node == other)
-                        editor_connection = &node->connections[1];
-                    else if (node->connections[2].node == other)
-                        editor_connection = &node->connections[2];
-                    else if (node->connections[3].node == other)
-                        editor_connection = &node->connections[3];
-                    else if (node->connections[4].node == other)
-                        editor_connection = &node->connections[4];
-                    else if (node->connections[5].node == other)
-                        editor_connection = &node->connections[5];
-                    else if (node->connections[6].node == other)
-                        editor_connection = &node->connections[6];
-                    else if (node->connections[7].node == other)
-                        editor_connection = &node->connections[7];
-                    if (editor_connection == nullptr) {
-                        i32 free_node_slot = -1;
-                        i32 free_other_slot = -1;
+                    if (node != nullptr && other != nullptr) {
+                        i32 connection_slot = find_connection(node, other);
+                        if (connection_slot == 8) {
+                            i32 free_node_slot = -1;
+                            i32 free_other_slot = -1;
 #define FIND_FREE_OTHER(source_slot)                                                                                   \
     if (other->connections[0].node == nullptr) {                                                                       \
         free_node_slot = source_slot;                                                                                  \
         free_other_slot = 0;                                                                                           \
+        goto free_slots_found;                                                                                         \
     } else if (other->connections[1].node == nullptr) {                                                                \
         free_node_slot = source_slot;                                                                                  \
         free_other_slot = 1;                                                                                           \
+        goto free_slots_found;                                                                                         \
     } else if (other->connections[2].node == nullptr) {                                                                \
         free_node_slot = source_slot;                                                                                  \
         free_other_slot = 2;                                                                                           \
+        goto free_slots_found;                                                                                         \
     } else if (other->connections[3].node == nullptr) {                                                                \
         free_node_slot = source_slot;                                                                                  \
         free_other_slot = 3;                                                                                           \
+        goto free_slots_found;                                                                                         \
     } else if (other->connections[4].node == nullptr) {                                                                \
         free_node_slot = source_slot;                                                                                  \
         free_other_slot = 4;                                                                                           \
+        goto free_slots_found;                                                                                         \
     } else if (other->connections[5].node == nullptr) {                                                                \
         free_node_slot = source_slot;                                                                                  \
         free_other_slot = 5;                                                                                           \
+        goto free_slots_found;                                                                                         \
     } else if (other->connections[6].node == nullptr) {                                                                \
         free_node_slot = source_slot;                                                                                  \
         free_other_slot = 6;                                                                                           \
+        goto free_slots_found;                                                                                         \
     } else if (other->connections[7].node == nullptr) {                                                                \
         free_node_slot = source_slot;                                                                                  \
         free_other_slot = 7;                                                                                           \
+        goto free_slots_found;                                                                                         \
     }
                         if (node->connections[0].node == nullptr) {
                             FIND_FREE_OTHER(0)
-                        } else if (node->connections[1].node == nullptr) {
+                        }
+                        if (node->connections[1].node == nullptr) {
                             FIND_FREE_OTHER(1)
-                        } else if (node->connections[2].node == nullptr) {
+                        }
+                        if (node->connections[2].node == nullptr) {
                             FIND_FREE_OTHER(2)
-                        } else if (node->connections[3].node == nullptr) {
+                        }
+                        if (node->connections[3].node == nullptr) {
                             FIND_FREE_OTHER(3)
-                        } else if (node->connections[4].node == nullptr) {
+                        }
+                        if (node->connections[4].node == nullptr) {
                             FIND_FREE_OTHER(4)
-                        } else if (node->connections[5].node == nullptr) {
+                        }
+                        if (node->connections[5].node == nullptr) {
                             FIND_FREE_OTHER(5)
-                        } else if (node->connections[6].node == nullptr) {
+                        }
+                        if (node->connections[6].node == nullptr) {
                             FIND_FREE_OTHER(6)
-                        } else if (node->connections[7].node == nullptr) {
+                        }
+                        if (node->connections[7].node == nullptr) {
                             FIND_FREE_OTHER(7)
                         }
 #undef FIND_FREE_OTHER
-                        if (free_node_slot < 0 || free_other_slot < 0)
                             continue;
-                        editor_connection = &node->connections[free_node_slot];
-                        EDAIPATHCNX_s *reciprocal = &other->connections[free_other_slot];
-                        editor_connection->node = other;
-                        editor_connection->flags = 0;
-                        reciprocal->node = node;
-                        reciprocal->flags = 0;
+                        free_slots_found:
+                            EDAIPATHCNX_s *editor_connection = &node->connections[free_node_slot];
+                            EDAIPATHCNX_s *reciprocal = &other->connections[free_other_slot];
+                            editor_connection->node = other;
+                            editor_connection->flags = 0;
+                            reciprocal->node = node;
+                            reciprocal->flags = 0;
+                        }
+                        connection_slot = find_connection(node, other);
+                        if (connection_slot == 8)
+                            continue;
+                        EDAIPATHCNX_s *editor_connection = &node->connections[connection_slot];
+                        editor_connection->flags = connection->original_traversal_flags[direction];
+                        if (editor_connection->flags & 0x10000000)
+                            editor_connection->flags &= ~u32(0x10000000);
+                        editor_connection->route_mask |= connection->route_mask;
                     }
-                    editor_connection->route_mask |= connection->route_mask;
                 }
                 node->route_mask = source->route_boundary_mask;
             }

@@ -253,16 +253,16 @@ char *GameObj_GetName(i32 model, GameObject_s *object, char *buffer) {
     if (buffer != NULL) {
         i32 index = -1;
         if (model == id_WEIRDO1) {
-            if (Game.customizer.primary_use_saved_name)
+            if (Game.customizer[0].use_saved_name)
                 index = 0;
         } else if (model == id_WEIRDO2) {
-            if (Game.customizer.secondary_use_saved_name)
+            if (Game.customizer[1].use_saved_name)
                 index = 1;
         }
         if (index == -1)
             return TTab[CDataList[model].name_id];
         NuStrCpy(buffer,
-                 reinterpret_cast<char *>(&Game.customizer) + offsetof(CUSTOMISESAVE_s, primary_name) + index * 0x38);
+                 Game.customizer[index].name);
         i32 i = 14;
         while (i >= 0 && buffer[i] == ' ') {
             buffer[i] = '\0';

@@ -3654,9 +3654,9 @@ void MovePlayer_VEHICLEDIRECTIONAL(GameObject_s *object) {
                           operator_object->apiobj.character_data->game_character->run_speed *
                           35.0f;
     else
-        requested_speed = pad->input_magnitude /
-                          operator_object->apiobj.character_data->game_character->run_speed *
-                          api.character_data->game_character->run_speed;
+        requested_speed = api.character_data->game_character->run_speed *
+                          (pad->input_magnitude /
+                           operator_object->apiobj.character_data->game_character->run_speed);
     if ((object->field_0xe20 & 0x20) != 0 && object->character_context != 0x23 && object->character_context != 0x24) {
         MoveInactiveVehicle(object, 0, &other);
         if (other != NULL) {
@@ -3695,12 +3695,13 @@ void MovePlayer_VEHICLEDIRECTIONAL(GameObject_s *object) {
                        object->character_context != 0x23 && object->character_context != 0x24 &&
                        (object->character_context != 0x17 || (object->jump_input_flags & 1) != 0) &&
                        !AnimPlaying(&api.anim_packet, 12, 1, 1) && !AnimPlaying(&api.anim_packet, 6, 1, 1)) {
-                if (object->in_narrow_socket &&
-                    (((api.flags_low & 0x80) != 0 && WORLD->current_level == DEATHSTARBATTLED_LDATA &&
-                      ObjInNarrowSock(object, WORLD->sock_sys, WORLD->level_idx)) ||
-                     WORLD->current_level == DEATHSTAR2BATTLEE_LDATA ||
-                     WORLD->current_level == DEATHSTAR2BATTLEF_LDATA ||
-                     WORLD->current_level == DEATHSTAR2BATTLEG_LDATA))
+                if ((object->in_narrow_socket && (api.flags_low & 0x80) != 0 &&
+                     WORLD->current_level == DEATHSTARBATTLED_LDATA &&
+                     ObjInNarrowSock(object, WORLD->sock_sys, WORLD->level_idx)) ||
+                    (object->in_narrow_socket &&
+                     (WORLD->current_level == DEATHSTAR2BATTLEE_LDATA ||
+                      WORLD->current_level == DEATHSTAR2BATTLEF_LDATA ||
+                      WORLD->current_level == DEATHSTAR2BATTLEG_LDATA)))
                     turn_multiplier = 0.5f;
                 else if (WORLD->current_level == SPEEDERCHASEA_LDATA && !disable_narrow_socks)
                     turn_multiplier = 0.75f;
@@ -3738,10 +3739,10 @@ void MovePlayer_VEHICLEDIRECTIONAL(GameObject_s *object) {
                         degrees = (i32)(degrees * turn_multiplier);
                     i32 limit = static_cast<i32>(static_cast<u32>(degrees) << 16) / 360;
                     if (abs(delta) <= 0x4000) {
-                        if (delta > limit)
-                            api.movement_facing_angle = narrow_yaw + limit;
-                        else if (delta < -limit)
+                        if (delta < -limit)
                             api.movement_facing_angle = narrow_yaw - limit;
+                        else if (delta > limit)
+                            api.movement_facing_angle = narrow_yaw + limit;
                     } else {
                         limit = static_cast<i32>(static_cast<u32>(180 - degrees) << 16) / 360;
                         if (delta > 0 && delta < limit)
@@ -3769,11 +3770,11 @@ void MovePlayer_VEHICLEDIRECTIONAL(GameObject_s *object) {
                 if ((api.flags_low & 0x80) != 0 && (PODSPRINT_ADATA == NULL || WORLD->area != PODSPRINT_ADATA) &&
                     (api.character_data->game_character->flags_090 & 0x10000) == 0 &&
                     WORLD->current_level != SPEEDERCHASEA_LDATA) {
-                    u16 normal_yaw = NuAtan2D(object->contact_normal.x, object->contact_normal.z);
+                    i32 normal_yaw = NuAtan2D(object->contact_normal.x, object->contact_normal.z);
                     if (requested_speed == 0.0f || abs(RotDiff(normal_yaw, object->current_input_angle)) > 0x4000) {
                         i32 delta = RotDiff(normal_yaw, api.field_0x276);
                         if (abs(delta) > 0x4000) {
-                            u16 tangent = normal_yaw + (delta < 0 ? -0x4000 : 0x4000);
+                            i32 tangent = normal_yaw + (delta < 0 ? -0x4000 : 0x4000);
                             if (object->field_0xddc > 0.0f &&
                                 RotDiff(object->previous_boundary_angle, normal_yaw) > 0x2aaa &&
                                 abs(RotDiff(api.field_0x276, normal_yaw)) > 0x3fff) {
@@ -3826,7 +3827,7 @@ void MovePlayer_VEHICLEDIRECTIONAL(GameObject_s *object) {
             object->target_velocity.z = carwash_delta.z * 3.0f;
             seek_rate = 5.0f;
         } else {
-            const i8 speed_context = object->character_context;
+            const u8 speed_context = object->character_context;
             f32 water_mul = 1.0f;
             if (speed_context == 0x3a)
                 object->field_0xdc8 = 1.0f;
@@ -4061,7 +4062,7 @@ void MovePlayer_VEHICLEDIRECTIONAL(GameObject_s *object) {
 vehicle_collision:
     GizmoBlowupCheckProximity(WORLD, object);
     if ((VehicleArea || (WORLD->area == SPEEDERCHASE_ADATA && object->id == id_SPEEDERBIKE)) &&
-        !(WORLD->area != NULL && (PODSPRINT_ADATA != NULL && WORLD->area == PODSPRINT_ADATA)))
+        !(WORLD->area != NULL && WORLD->area == PODSPRINT_ADATA))
         VehicleCollisionCode(object);
 }
 
@@ -5935,11 +5936,11 @@ static void DeactivatedCode(GameObject_s *object) {
         return;
     }
     if ((object->apiobj.character_data->model_flags & 0x20000000) != 0) {
-        bool controlled = false;
+        i32 controlled = 0;
         for (i32 i = 0; i < 8; ++i) {
             if (Player[i] != NULL && Player[i]->character_context == 0x51 && Player[i]->field_0x788 != NULL &&
                 static_cast<TECHNO *>(Player[i]->field_0x788)->controlled_object == object)
-                controlled = true;
+                controlled = 1;
         }
         if (controlled || object->field_0xcc0 != NULL || (object->apiobj.flags_low & 0x80) != 0) {
             if (object->character_context == 0x17)
@@ -6008,13 +6009,21 @@ static void DeactivatedCode(GameObject_s *object) {
     GameObject_s *candidate = Obj;
     for (i32 i = 0; i < HIGHGAMEOBJECT && count < 10; ++i, ++candidate) {
         GameObject_s *target = candidate;
-        if (kind == 1) {
+        if (kind != 1) {
+            if (!ZapTarget(target) || target == object || target->apiobj.field_0x27c != -1 ||
+                (target->field_0xefb & 8) != 0 || CannotKill(target) ||
+                (static_cast<GAMECHARACTERDATA *>(target->apiobj.character_data->field11_0x24)->flags_090 & 0x8040) !=
+                    0 ||
+                target->character_context == 0x0f || target->character_context == 0x3c ||
+                target->character_context == 0x47 || target->character_context == 0x46)
+                continue;
+        } else {
             if ((target->apiobj.field_0x1f8 & 0x1001) != 0x1001 || target->apiobj.field_0x287 != 0 ||
                 target->apiobj.field_0x27d == 0 || target == object || target->apiobj.field_0x27c != -1 ||
                 (target->field_0xefb & 8) != 0 || CannotKill(target) ||
                 target->apiobj.character_model->model_data_b[0x41] == NULL)
                 continue;
-            i32 context = target->character_context;
+            i8 context = target->character_context;
             if (context == 0x3c || context == 0x39 || context == 0x3b || context == 0x17 || context == 0x41 ||
                 context == 0x0f || context == 0x47 || context == 0x46 ||
                 (target->apiobj.character_data->model_flags & 0x10) != 0 ||
@@ -6022,14 +6031,6 @@ static void DeactivatedCode(GameObject_s *object) {
                     0 ||
                 (CInfo[context].flags & 0x8000) != 0 ||
                 (static_cast<GAMECHARACTERDATA *>(target->apiobj.character_data->field11_0x24)->flags_094[1] & 2) != 0)
-                continue;
-        } else {
-            if (!ZapTarget(target) || target == object || target->apiobj.field_0x27c != -1 ||
-                (target->field_0xefb & 8) != 0 || CannotKill(target) ||
-                (static_cast<GAMECHARACTERDATA *>(target->apiobj.character_data->field11_0x24)->flags_090 & 0x8040) !=
-                    0 ||
-                target->character_context == 0x0f || target->character_context == 0x3c ||
-                target->character_context == 0x47 || target->character_context == 0x46)
                 continue;
         }
         if (NuVecDistSqr(&target->apiobj.collision_position, &object->apiobj.collision_position, NULL) < range)

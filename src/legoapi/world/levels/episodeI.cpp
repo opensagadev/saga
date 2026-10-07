@@ -148,6 +148,7 @@ static float pod_pacemaker_alpha;     // _ZL19pod_pacemaker_alpha
 static float podlapalpha;             // _ZL11podlapalpha
 static float podhurryalpha;           // _ZL13podhurryalpha
 static float podstartracealpha;       // _ZL17podstartracealpha
+static const float mine_generate_d_sock_along[] = {0.0f, 1.5f, 0.75f, 1.5f};
 static i32 podhurry_i;                // _ZL10podhurry_i
 static NUVEC pod_old_pos[2] __used__; // _ZL11pod_old_pos (0x18 bytes of .bss)
 
@@ -389,25 +390,34 @@ static void PodSprint_InitAISpline(WORLDINFO_s *world, PODSPRINT_AISPLINE_s *ai,
     }
 }
 
-// Original: _ZL22UpdatePacemakerDisplayP11WORLDINFO_s.isra.7.part.8 — callers
-// pass WORLD::lev_objs directly (that is what the .isra clone consumed).
-static void UpdatePacemakerDisplay(void *lev_objs) {
-    GameObject_s *pacemaker = pod_pacemaker;
-    float v[3];
-    v[0] = pacemaker->apiobj.field_0x190;
-    v[1] = 0.75f + pacemaker->apiobj.field_0x194;
-    v[2] = pacemaker->apiobj.field_0x198;
-    GAMEMESSAGE_s *msg =
-        (GAMEMESSAGE_s *)AddGameMessage(" ", (nuvec_s *)v, 0.08f, NULL, 0.0f, 0xff, 0x3f, 0x3f, 0x10083, 0);
-    if (msg != NULL) {
-        i32 idx = ((i32)(16384.0f * pod_pacemaker_alpha) >> 1) & 0x7fff;
-        msg->icon = 0x134;
-        msg->alpha = (u8)(128.0f * pacemaker_alpha_table[idx]);
-        PACEMAKERDATA_s *data = *(PACEMAKERDATA_s **)lev_objs;
-        if (data->enabled != 0) {
-            msg->color1 = data->color1;
-            msg->color2 = data->color2;
-            msg->color3 = data->color3;
+static void UpdatePacemakerDisplay(WORLDINFO_s *world) {
+    if (pod_pacemaker != NULL) {
+        if (FadeSys.fade == 0.0f && pause_rndr_on == 0) {
+            pod_pacemaker_alpha += FRAMETIME + FRAMETIME;
+            if (pod_pacemaker_alpha > 1.0f)
+                pod_pacemaker_alpha = 1.0f;
+            if (NuFmod(GameTimer.time_elapsed_mod_seconds, 0.2f) < 0.1f) {
+                GameObject_s *pacemaker = pod_pacemaker;
+                float v[3];
+                v[0] = pacemaker->apiobj.field_0x190;
+                v[1] = 0.75f + pacemaker->apiobj.field_0x194;
+                v[2] = pacemaker->apiobj.field_0x198;
+                GAMEMESSAGE_s *msg =
+                    (GAMEMESSAGE_s *)AddGameMessage(" ", (nuvec_s *)v, 0.08f, NULL, 0.0f, 0xff, 0x3f, 0x3f, 0x10083, 0);
+                if (msg != NULL) {
+                    i32 idx = ((i32)(16384.0f * pod_pacemaker_alpha) >> 1) & 0x7fff;
+                    msg->icon = 0x134;
+                    msg->alpha = (u8)(128.0f * pacemaker_alpha_table[idx]);
+                    PACEMAKERDATA_s *data = (PACEMAKERDATA_s *)world->lev_objs;
+                    if (data->enabled != 0) {
+                        msg->color1 = data->color1;
+                        msg->color2 = data->color2;
+                        msg->color3 = data->color3;
+                    }
+                }
+            }
+        } else {
+            pod_pacemaker_alpha = 0.0f;
         }
     }
 }
@@ -735,38 +745,13 @@ void PodRace_IncreaseLap() {
 }
 
 void PodRaceUpdate(WORLDINFO_s *world, float dt) {
-    if (PodRace == NULL || world == NULL)
-        return;
-    float old_countdown = PodRace->lap_countdown;
     if (netclient != 0) {
-        if (podrace_netpacket == NULL)
-            return;
         PodRace->lap_countdown = podrace_netpacket->start_countdown;
         PodRace->lap_display = podrace_netpacket->remaining_time;
         PodRace->prev_lap_display = podrace_netpacket->available_time;
         Lap = podrace_netpacket->lap;
-        old_countdown = PodRace->lap_countdown;
-    } else if (old_countdown <= 0.0f) {
-        PodRace->mushroom_timer += dt;
-        if (PodRace->prev_lap_display > 0.0f) {
-            PodRace->lap_display = PodRace->prev_lap_display - PodRace->mushroom_timer;
-            if (PodRace->lap_display < 0.0f && FadeSys.fade == 0.0f) {
-                PodRace->lap_display = 0.0f;
-                if (Player[0] != NULL && Player[0]->apiobj.player_controlled)
-                    LoseCoins(Player[0], 1);
-                if (Player[1] != NULL && Player[1]->apiobj.player_controlled)
-                    LoseCoins(Player[1], 1);
-                PodRace->flags |= 2;
-                KillPlayer(player, 2, 1, NULL);
-                ++PodRace->lap_attempts;
-                if (PodRace->prev_lap_display < PodRace->max_lap_time && PodRace->lap_attempts_per_increment != 0 &&
-                    PodRace->lap_attempts % PodRace->lap_attempts_per_increment == 0) {
-                    float time = PodRace->prev_lap_display + PodRace->lap_time_increment;
-                    PodRace->prev_lap_display = time <= PodRace->max_lap_time ? time : PodRace->max_lap_time;
-                }
-            }
-        }
     }
+    float old_countdown = PodRace->lap_countdown;
     if (old_countdown > 0.0f) {
         avg_currentspeed_mul = 0.0f;
         PodRace->lap_display = PodRace->prev_lap_display;
@@ -784,6 +769,26 @@ void PodRaceUpdate(WORLDINFO_s *world, float dt) {
             PlaySfx("Pod_Race_Go", NULL);
         else if ((i32)PodRace->lap_countdown != (i32)old_countdown)
             PlaySfx("Pod_Race_Light", NULL);
+    } else if (netclient == 0) {
+        PodRace->mushroom_timer += dt;
+        if (PodRace->prev_lap_display > 0.0f) {
+            PodRace->lap_display = PodRace->prev_lap_display - PodRace->mushroom_timer;
+            if (PodRace->lap_display < 0.0f && FadeSys.fade == 0.0f) {
+                PodRace->lap_display = 0.0f;
+                if (Player[0] != NULL && Player[0]->apiobj.player_controlled)
+                    LoseCoins(Player[0], 1);
+                if (Player[1] != NULL && Player[1]->apiobj.player_controlled)
+                    LoseCoins(Player[1], 1);
+                PodRace->flags |= 2;
+                KillPlayer(player, 2, 1, NULL);
+                ++PodRace->lap_attempts;
+                if (PodRace->prev_lap_display < PodRace->max_lap_time && PodRace->lap_attempts_per_increment != 0 &&
+                    PodRace->lap_attempts % PodRace->lap_attempts_per_increment == 0) {
+                    float time = PodRace->prev_lap_display + PodRace->lap_time_increment;
+                    PodRace->prev_lap_display = time < PodRace->max_lap_time ? time : PodRace->max_lap_time;
+                }
+            }
+        }
     }
     for (i32 i = 0; i < 0x10; i++) {
         racepod_s *pod = &PodRace->lap_entries[i];
@@ -899,7 +904,7 @@ void PodRaceUpdate(WORLDINFO_s *world, float dt) {
         object = pod->object;
         if (object != NULL) {
             object->vehicle_orientation = pod->matrix;
-            object->apiobj.position = {pod->matrix.m30, pod->matrix.m31, pod->matrix.m32};
+            object->apiobj.position = *NUMTX_GET_ROW_VEC(&pod->matrix, 3);
             object->saved_position = object->apiobj.position;
         }
     }
@@ -910,7 +915,7 @@ void PodRaceUpdate(WORLDINFO_s *world, float dt) {
         NuStrCpy(reason, (PodRace->flags & 2) == 0 ? "EP1_PODRACE_PODEXPLODE" : "Ep1_PodRace_OutOfTime");
         ResetLevel(world, reason, 1);
     }
-    if (netclient == 0 && podrace_netpacket != NULL) {
+    if (netclient == 0) {
         podrace_netpacket->start_countdown = PodRace->lap_countdown;
         podrace_netpacket->remaining_time = PodRace->lap_display;
         podrace_netpacket->available_time = PodRace->prev_lap_display;
@@ -953,39 +958,37 @@ void PodRacePanel(WORLDINFO_s *world) {
 
 void UpdatePodRaceLapDisplay(float arg) {
     if (FadeSys.fade == 0.0f && MiniCutCam == 0 && CUTSTOPGAME == 0) {
-        if (Paused != 0) {
-            podlapalpha = SeekLinearF(podlapalpha, 1.0f, arg + arg);
-            return;
-        } else {
-            float t = 0.0f;
-            if (WORLD->current_level == PODRACEB_LDATA && GameTimer.time_elapsed >= 1.0f &&
-                GameTimer.time_elapsed > 6.0f)
-                t = 1.0f;
-            podlapalpha = SeekLinearF(podlapalpha, t, arg + arg);
-        }
+        float target = 0.0f;
+        if (Paused != 0)
+            target = 1.0f;
+        else if (WORLD->current_level == PODRACEB_LDATA && GameTimer.time_elapsed >= 1.0f &&
+                 GameTimer.time_elapsed < 6.0f)
+            target = 1.0f;
+        podlapalpha = SeekLinearF(podlapalpha, target, arg + arg);
     } else {
         podlapalpha = 0.0f;
         podhurryalpha = 0.0f;
         podstartracealpha = 0.0f;
-        if (Paused != 0)
-            return;
     }
-    if (PodRace != NULL && PodRace->lap_display < 10.0f) {
-        i32 oldhurry = podhurry_i;
+    i32 oldhurry = podhurry_i;
+    if (Paused == 0 && PodRace != NULL && PodRace->lap_display < 10.0f) {
         podhurry_i = (i32)PodRace->lap_display;
         if (podhurryalpha < 1.0f) {
-            float x = arg * 2.0f + podhurryalpha;
-            podhurryalpha = x < 1.0f ? x : 1.0f;
+            podhurryalpha += arg + arg;
+            if (podhurryalpha > 1.0f)
+                podhurryalpha = 1.0f;
         }
-        if (podhurry_i > 0 && oldhurry != podhurry_i) {
+        if (podhurry_i > 0 && oldhurry != podhurry_i)
             TickTockSfx();
-            if (Paused != 0)
-                return;
-        }
+    } else {
+        podhurryalpha = 0.0f;
     }
+    if (Paused != 0)
+        return;
     if (PodRace != NULL && PodRace->lap_countdown > 0.0f && podstartracealpha < 1.0f) {
-        float x = arg * 2.0f + podstartracealpha;
-        podstartracealpha = 1.0f >= x ? x : 1.0f;
+        podstartracealpha += arg + arg;
+        if (podstartracealpha > 1.0f)
+            podstartracealpha = 1.0f;
     }
 }
 
@@ -1001,34 +1004,32 @@ i32 PodRace_InStartCountdown(WORLDINFO_s *world) {
 }
 
 void PodRaceAUpdate(WORLDINFO_s *world) {
-    if (pod_pacemaker != 0) {
-        if (FadeSys.fade == 0.0f || pause_rndr_on != 0)
-            pod_pacemaker_alpha = 0.0f;
-    }
+    UpdatePacemakerDisplay(world);
     PodRaceUpdate(world, FRAMETIME);
-    if (netclient != 0 || Lap > 3 || MiniCutCam != 0) {
-        UpdatePodRaceMines();
-        return;
-    }
-    MINESYS_s *mines = &minesys;
-    float t = mines->update_timer + FRAMETIME;
-    mines->update_timer = t;
-    if (t > 1.0f) {
-        GAMECAMERA_s *cam = GameCam;
-        if (mines->spawn_timer == 1000000000.0f) {
-            float v = cam->sock_position.distance;
-            mines->spawn_timer = v;
-            if (v < 100.0f) {
-                nuvec_s vec = {(0.5f - NuRandFloat()) * 60.0f, 0.0f, 100.0f};
-                NuVecRotateY(&vec, &vec, player->yrot);
-                nuvec_s p;
-                NUVEC player_pos = {player->apiobj.pos_x, player->apiobj.pos_y, player->apiobj.pos_z};
-                NuVecAdd(&p, &vec, &player_pos);
-                if (CreatePodRaceMine(&p) != NULL)
-                    mines->spawn_timer = cam->sock_position.distance;
+    if (netclient == 0) {
+        if (Lap <= 3 && MiniCutCam == 0) {
+            MINESYS_s *mines = &minesys;
+            float t = mines->update_timer + FRAMETIME;
+            mines->update_timer = t;
+            if (t > 1.0f) {
+                if (mines->spawn_timer == 1000000000.0f) {
+                    mines->spawn_timer = GameCam->sock_position.distance;
+                }
+                if (GameCam->sock_position.distance < 100.0f && GameCam->sock_position.distance >= mines->spawn_timer) {
+                    nuvec_s vec;
+                    vec.x = (0.5f - NuRandFloat()) * 60.0f;
+                    vec.y = 0.0f;
+                    vec.z = 100.0f;
+                    NuVecRotateY(&vec, &vec, player->yrot);
+                    NuVecAdd(&vec, &vec, &player->apiobj.collision_position);
+                    if (CreatePodRaceMine(&vec) != NULL) {
+                        mines->spawn_timer = GameCam->sock_position.distance + mine_generate_d_sock_along[Lap];
+                    }
+                }
             }
         }
     }
+    UpdatePodRaceMines();
 }
 
 void PodRaceA_AlwaysUpdate(WORLDINFO_s *world) {
@@ -1046,18 +1047,17 @@ void PodRaceA_AlwaysUpdate(WORLDINFO_s *world) {
 }
 
 void PodRaceADraw(WORLDINFO_s *world) {
+    NUMTX mtx;
     if (netclient != 0) {
-        NUMTX mtx;
         for (i32 i = 0; i < 0x40; i++) {
-            i32 bit = 1 << (i & 0x1f);
-            if (((client_mines.present_words[0] & bit) | (client_mines.present_words[1] & (bit >> 31))) != 0) {
+            i64 bit = (i32)(1u << (i & 0x1f));
+            if ((client_mines.present_mask & bit) != 0) {
                 NuMtxSetIdentity(&mtx);
                 NuMtxTranslate(&mtx, &client_mines.positions[i]);
                 NuSpecialDrawAt(&minesys, &mtx);
             }
         }
     } else if (NuSpecialExistsFn(&minesys) != 0) {
-        NUMTX mtx;
         MINESYS_s *mines = &minesys;
         for (MINEENTRY_s *entry = mines->mines; entry != &mines->mines[64]; entry++) {
             if (entry->active != 0) {
@@ -1171,16 +1171,7 @@ void PodRaceBUpdate(WORLDINFO_s *world) {
             }
         }
     }
-    if (pod_pacemaker != 0) {
-        if (FadeSys.fade == 0.0f && pause_rndr_on == 0) {
-            float t = FRAMETIME + FRAMETIME + pod_pacemaker_alpha;
-            pod_pacemaker_alpha = 1.0f < t ? 1.0f : t;
-            if (NuFmod(GameTimer.time_elapsed_mod_seconds, 0.2f) < 0.1f)
-                UpdatePacemakerDisplay(world->lev_objs);
-        } else {
-            pod_pacemaker_alpha = 0.0f;
-        }
-    }
+    UpdatePacemakerDisplay(world);
     UpdatePodRaceLapDisplay(FRAMETIME);
     PodRaceUpdate(world, FRAMETIME);
     if (Lap == 1) {
@@ -1194,16 +1185,7 @@ void PodRaceBUpdate(WORLDINFO_s *world) {
 }
 
 void PodRaceCUpdate(WORLDINFO_s *world) {
-    if (pod_pacemaker != 0) {
-        if (FadeSys.fade == 0.0f && pause_rndr_on == 0) {
-            float t = FRAMETIME + FRAMETIME + pod_pacemaker_alpha;
-            pod_pacemaker_alpha = 1.0f < t ? 1.0f : t;
-            if (NuFmod(GameTimer.time_elapsed_mod_seconds, 0.2f) < 0.1f)
-                UpdatePacemakerDisplay(world->lev_objs);
-        } else {
-            pod_pacemaker_alpha = 0.0f;
-        }
-    }
+    UpdatePacemakerDisplay(world);
     UpdatePodRaceLapDisplay(FRAMETIME);
     PodRaceUpdate(world, FRAMETIME);
     PodRaceSnipersUpdate();
@@ -1686,17 +1668,12 @@ void PodSprintA_Init(WORLDINFO_s *world) {
 
 void PodSprintA_Reset(WORLDINFO_s *world) {
     PODSPRINT_s *ps = &podsprint;
-    u8 b = ps->flags;
     ps->field_0x78 = 0;
-    ps->flags = b & 0xef;
-    pod_old_pos[0].x = -1.0f;
-    pod_old_pos[0].y = -1.0f;
-    pod_old_pos[0].z = -1.0f;
-    pod_old_pos[1].x = -1.0f;
-    pod_old_pos[1].y = -1.0f;
-    pod_old_pos[1].z = -1.0f;
+    pod_old_pos[0].x = pod_old_pos[0].y = pod_old_pos[0].z = -1.0f;
+    pod_old_pos[1].x = pod_old_pos[1].y = pod_old_pos[1].z = -1.0f;
+    ps->flags &= 0xef;
     ps->field_0x88 = 0;
-    if ((b & 0xc) != 0 || (netclient != 0 && podsprint_netpacket->ai_state > 2)) {
+    if ((ps->flags & 0xc) != 0 || (netclient != 0 && podsprint_netpacket->ai_state > 2)) {
         ps->ai_state = 3;
         ps->flags &= 0xf2;
         ps->ai_index = 4;
@@ -1708,7 +1685,8 @@ void PodSprintA_Reset(WORLDINFO_s *world) {
             p->apiobj.velocity.y = 0.0f;
             p->apiobj.velocity.z = ((PLAYERSUBOBJ2_s *)((PLAYERSUBOBJ_s *)p->apiobj.character_data)->field_0x24)->value;
             NuVecRotateY(&p->apiobj.velocity, &p->apiobj.velocity, p->apiobj.field_0x276);
-        } else if (player2 != NULL && (player2->apiobj.field_0x1f8 & 0x1000)) {
+        }
+        if (player2 != NULL && (player2->apiobj.field_0x1f8 & 0x1000)) {
             GameObject_s *p2 = player2;
             p2->field_0xdc8 = 1.0f;
             p2->apiobj.velocity.x = 0.0f;
@@ -1717,10 +1695,9 @@ void PodSprintA_Reset(WORLDINFO_s *world) {
                 ((PLAYERSUBOBJ2_s *)((PLAYERSUBOBJ_s *)p2->apiobj.character_data)->field_0x24)->value;
             NuVecRotateY(&p2->apiobj.velocity, &p2->apiobj.velocity, p2->apiobj.field_0x276);
         }
-        void *cs = game_cutscenes.cutscene;
-        if (cs != NULL) {
-            CutScene_SnapToEnd((CUTINFO *)cs);
-            CutScene_StoppedFn_LSW((CUTINFO *)cs);
+        if (game_cutscenes.cutscene != NULL) {
+            CutScene_SnapToEnd((CUTINFO *)game_cutscenes.cutscene);
+            CutScene_StoppedFn_LSW((CUTINFO *)game_cutscenes.cutscene);
         }
     } else {
         ps->ai_state = 1;
@@ -1735,15 +1712,16 @@ void PodSprintA_Reset(WORLDINFO_s *world) {
 
 void PodSprintA_Update(WORLDINFO_s *world) {
     PODSPRINT_s *ps = &podsprint;
-    PODSPRINTNETPACKET_s *net = podsprint_netpacket;
     VehicleAreaRememberSpeed = 1.0f;
     if (nethost != 0) {
+        PODSPRINTNETPACKET_s *net = podsprint_netpacket;
         net->ai_state = (i16)(i8)ps->ai_state;
         net->speed = (i16)ps->speed;
         net->speed2 = (i16)ps->field_0x88;
         if (netclient != 0)
             goto speed_section;
     } else if (netclient != 0) {
+        PODSPRINTNETPACKET_s *net = podsprint_netpacket;
         ps->speed = (float)(i16)net->speed;
         ps->ai_state = (u8)net->ai_state;
         ps->field_0x88 = (float)(i16)net->speed2;
@@ -1786,12 +1764,10 @@ speed_section:
             *(u8 *)((u8 *)ps->field_0x78 + 0x287) == 0) {
             if (FadeSys.fade == 0.0f && pause_rndr_on == 0) {
                 float t = ps->field_0x80 + FRAMETIME * 2.0f;
-                ps->field_0x80 = t < 1.0f ? t : 1.0f;
+                ps->field_0x80 = t > 1.0f ? 1.0f : t;
                 if (NuFmod(GameTimer.time_elapsed_mod_seconds, 0.2f) < 0.1f) {
                     NUVEC message_position;
-                    message_position.x = *(float *)((u8 *)ps->field_0x78 + 0x190);
-                    message_position.y = *(float *)((u8 *)ps->field_0x78 + 0x194);
-                    message_position.z = *(float *)((u8 *)ps->field_0x78 + 0x198);
+                    message_position = *(NUVEC *)((u8 *)ps->field_0x78 + 0x190);
                     message_position.y += 0.75f;
                     GAMEMESSAGE_s *msg = (GAMEMESSAGE_s *)AddGameMessage(" ", &message_position, 0.05f, NULL, 0.0f,
                                                                          0xff, 0x3f, 0x3f, 0x10083, 0);
@@ -1799,7 +1775,7 @@ speed_section:
                         msg->icon = 0x134;
                         i32 idx = ((i32)(16384.0f * ps->field_0x80) >> 1) & 0x7fff;
                         msg->alpha = (u8)(128.0f * NuTrigTable[idx]);
-                        PACEMAKERDATA_s *pd = *(PACEMAKERDATA_s **)world->lev_objs;
+                        PACEMAKERDATA_s *pd = (PACEMAKERDATA_s *)world->lev_objs;
                         if (pd->enabled) {
                             msg->color1 = pd->color1;
                             msg->color2 = pd->color2;
@@ -1881,30 +1857,24 @@ speed_section:
                 }
             }
             if (Player[0] != NULL) {
-                pod_old_pos[0].x = *(float *)((u8 *)Player[0] + 0x5c);
-                pod_old_pos[0].y = *(float *)((u8 *)Player[0] + 0x60);
-                pod_old_pos[0].z = *(float *)((u8 *)Player[0] + 0x64);
+                pod_old_pos[0] = *(NUVEC *)((u8 *)Player[0] + 0x5c);
             }
             if (Player[1] != NULL) {
-                pod_old_pos[1].x = *(float *)((u8 *)Player[1] + 0x5c);
-                pod_old_pos[1].y = *(float *)((u8 *)Player[1] + 0x60);
-                pod_old_pos[1].z = *(float *)((u8 *)Player[1] + 0x64);
+                pod_old_pos[1] = *(NUVEC *)((u8 *)Player[1] + 0x5c);
             }
             ps->lap_msg->value = (float)(i8)ps->ai_state;
             PodRaceSnipersUpdate();
         }
     }
     // Object pool loop: ease each active pod vehicle's boulder offset.
-    i32 count = HIGHGAMEOBJECT;
-    for (GameObject_s *obj = Obj; count > 0; count--, ++obj) {
+    GameObject_s *obj = Obj;
+    for (i32 i = 0; i < HIGHGAMEOBJECT; i++, obj++) {
         if ((obj->apiobj.field_0x1f8 & 0x1001) == 0x1001 && (u8)obj->apiobj.field_0x27c == 0xff) {
             float seek_src = 0.0f;
-            if (ps->boulders != NULL && WORLD->ai_sys != NULL && ps->ai_state > 1) {
+            if (ps->boulders != NULL && WORLD->ai_sys != NULL && (i8)ps->ai_state > 1) {
                 i32 slot = static_cast<AIAREA_s *>(ps->boulders) - WORLD->ai_sys->areas;
-                u32 bit = 1u << (slot & 0x1f);
-                // Retail sign-extends the low mask: bit 31 enables every high-word bit.
-                u32 high_mask = static_cast<i32>(bit) >> 31;
-                if (((obj->apiobj.ai_area_mask_high & high_mask) | (obj->apiobj.ai_area_mask_low & bit)) != 0)
+                i64 mask = static_cast<i32>(1u << (slot & 0x1f));
+                if ((obj->apiobj.ai_area_mask & mask) != 0)
                     seek_src = boulder_offset_y;
             }
             obj->movement_spline_offset.y = SeekValF(obj->movement_spline_offset.y, seek_src, boulder_offset_y_seek);
@@ -2146,8 +2116,8 @@ void RetakeE_Init(WORLDINFO_s *world) {
         g->field_0xa0 |= 2;
 
     // The four obstacles are deliberately not uniform in the original:
-    // obstacle3 shifts specials -0.75 on z, obstacle12 +0.75, and 11/13 reuse
-    // the pos pointer left over from the previous loop iteration.
+    // obstacle3 shifts specials -0.5 on z, obstacle12 +0.5, and 12/11/13
+    // copy the last obstacle3 position.
     GIZOBSTACLE_s *obs;
     GIZOBSTACLENODE_s *n;
     struct nuvec_s *pos;
@@ -2156,13 +2126,13 @@ void RetakeE_Init(WORLDINFO_s *world) {
     if (obs != NULL) {
         n = (GIZOBSTACLENODE_s *)((GIZOBSTACLENODE_s *)obs->anim_set)->field_0x18;
         while (n != NULL) {
-            pos = NuSpecialGetPos(n->special);
-            pos->z -= 0.75f;
+            pos = NuSpecialGetPos(&n->special);
+            pos->z -= 0.5f;
             GizObstacle_EvalAveragePosAndRadius(obs, 2);
+            n = (GIZOBSTACLENODE_s *)n->next;
             obs->field_0x18 = pos->z;
             obs->field_0x24 = pos->z;
             obs->field_0x3c = 15.0f;
-            n = (GIZOBSTACLENODE_s *)n->next;
         }
     }
 
@@ -2170,15 +2140,13 @@ void RetakeE_Init(WORLDINFO_s *world) {
     if (obs != NULL) {
         n = (GIZOBSTACLENODE_s *)((GIZOBSTACLENODE_s *)obs->anim_set)->field_0x18;
         while (n != NULL) {
-            pos = NuSpecialGetPos(n->special);
-            pos->z += 0.75f;
+            NUVEC *shift_pos = NuSpecialGetPos(&n->special);
+            shift_pos->z += 0.5f;
             GizObstacle_EvalAveragePosAndRadius(obs, 2);
-            obs->field_0x18 = pos->z;
-            obs->field_0x1c = pos->x;
-            obs->field_0x20 = pos->y;
-            obs->field_0x24 = pos->z;
-            obs->field_0x3c = 15.0f;
             n = (GIZOBSTACLENODE_s *)n->next;
+            obs->field_0x18 = shift_pos->z;
+            obs->secondary_position = *pos;
+            obs->field_0x3c = 15.0f;
         }
     }
 
@@ -2186,11 +2154,9 @@ void RetakeE_Init(WORLDINFO_s *world) {
     if (obs != NULL) {
         n = (GIZOBSTACLENODE_s *)((GIZOBSTACLENODE_s *)obs->anim_set)->field_0x18;
         while (n != NULL) {
-            obs->field_0x1c = pos->x; // stale pos on purpose (matches original)
-            obs->field_0x20 = pos->y;
-            obs->field_0x24 = pos->z;
-            obs->field_0x3c = 15.0f;
             n = (GIZOBSTACLENODE_s *)n->next;
+            obs->secondary_position = *pos;
+            obs->field_0x3c = 15.0f;
         }
     }
 
@@ -2198,11 +2164,9 @@ void RetakeE_Init(WORLDINFO_s *world) {
     if (obs != NULL) {
         n = (GIZOBSTACLENODE_s *)((GIZOBSTACLENODE_s *)obs->anim_set)->field_0x18;
         while (n != NULL) {
-            obs->field_0x1c = pos->x; // stale pos on purpose (matches original)
-            obs->field_0x20 = pos->y;
-            obs->field_0x24 = pos->z;
-            obs->field_0x3c = 15.0f;
             n = (GIZOBSTACLENODE_s *)n->next;
+            obs->secondary_position = *pos;
+            obs->field_0x3c = 15.0f;
         }
     }
 }
@@ -2264,25 +2228,24 @@ void RetakeG_Update(WORLDINFO_s *world) {
 }
 
 void RetakeG_Panel(WORLDINFO_s *world) {
-    (void)world;
-    char buf[0x10];
     i16 countbuf[6];
+    char buf[6];
     for (i32 i = 0; i < 6; i++) {
         buf[i] = 1;
         countbuf[i] = id_ROYALGUARD;
     }
-    if (RetakeG_TotalGuards_msg != NULL && RetakeG_GuardsToRescue_msg != NULL &&
-        RetakeG_TotalGuards_msg->value > 0.0f && RetakeG_GuardsToRescue_msg->value > 0.0f) {
+    if (RetakeG_TotalGuards_msg != NULL && RetakeG_TotalGuards_msg->value > 0.0f &&
+        RetakeG_GuardsToRescue_msg != NULL && RetakeG_GuardsToRescue_msg->value > 0.0f) {
         i32 n = (i32)RetakeG_GuardsToRescue_msg->value;
         if (n > 6)
             n = 6;
-        if (n > 0)
-            memset(buf, 0, n);
+        for (i32 i = 0; i < n; i++)
+            buf[i] = 0;
+        i32 m = (i32)RetakeG_TotalGuards_msg->value;
+        if (m > 6)
+            m = 6;
+        DrawMeleeTargets(countbuf, buf, NULL, m);
     }
-    i32 m = (i32)(RetakeG_TotalGuards_msg ? RetakeG_TotalGuards_msg->value : 0.0f);
-    if (m > 6)
-        m = 6;
-    DrawMeleeTargets(countbuf, buf, NULL, m);
 }
 
 // ===========================================================================

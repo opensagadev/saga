@@ -184,26 +184,42 @@ f32 MissileDist = -3.0f;
 static NUVEC4 PlayerPos, PlayerVel;
 
 static i32 ProcessStarFighter(starfighter_s *fighter, quickboltinfo *info) {
+    NUVEC_ALIGNED16 impulse;
+    NUVEC4_ALIGNED16 parent_position;
+    NUVEC4_ALIGNED16 direction;
+    NUVEC_ALIGNED16 offset;
+    NUVEC_ALIGNED16 local;
+    NUMTX_ALIGNED16 aim_matrix;
     if (Player[0] != NULL && Player[0]->sock_position.distance > 435.0f)
         MissileDist = 2.0f;
     if (fighter->hit_count != 0) {
-        const bool escort = fighter->spline != NULL && static_cast<u32>(fighter->spline->id - 84) < 2;
-        if (escort)
-            fighter->health = 0;
-        else
+        if (fighter->spline == NULL) {
             --fighter->health;
+        } else {
+            switch (fighter->spline->id) {
+            case 84:
+            case 85:
+                fighter->health = 0;
+                break;
+            default:
+                --fighter->health;
+                break;
+            }
+        }
         --fighter->hit_count;
         if (fighter->health == 0) {
-            fighter->death_timer = escort ? 1.0f : 2.0f;
-            NUVEC impulse;
+            if (fighter->spline == NULL) {
+                fighter->death_timer = 2.0f;
+            } else if (static_cast<u32>(fighter->spline->id - 84) < 2) {
+                fighter->death_timer = 1.0f;
+            } else {
+                fighter->death_timer = 2.0f;
+            }
             if (fighter->parent != NULL) {
                 impulse.x = fighter->matrix.m30 - fighter->parent->matrix.m30;
                 impulse.y = fighter->matrix.m31 - fighter->parent->matrix.m31;
                 impulse.z = fighter->matrix.m32 - fighter->parent->matrix.m32;
-                fighter->parent->target.x = fighter->matrix.m30;
-                fighter->parent->target.y = fighter->matrix.m31;
-                fighter->parent->target.z = fighter->matrix.m32;
-                fighter->parent->target.w = fighter->matrix.m33;
+                fighter->parent->target = *reinterpret_cast<NUVEC4 *>(&fighter->matrix.m30);
             } else {
                 impulse = v010;
             }
@@ -219,7 +235,7 @@ static i32 ProcessStarFighter(starfighter_s *fighter, quickboltinfo *info) {
             fighter->velocity.z += impulse.z;
             fighter->death_rotate_x = qrand() * (65536.0f / 65535.0f) - 32768.0f;
             fighter->death_rotate_z = qrand() * (65536.0f / 65535.0f) - 32768.0f;
-            if (!escort)
+            if (fighter->spline == NULL || static_cast<u32>(fighter->spline->id - 84) > 1)
                 AddGameDebris(WORLD->debris_sys, 23, reinterpret_cast<NUVEC *>(&fighter->matrix.m30));
         }
         if (fighter->health == -2)
@@ -227,7 +243,10 @@ static i32 ProcessStarFighter(starfighter_s *fighter, quickboltinfo *info) {
     }
     if (fighter->health < 1 && (fighter->spline == NULL || static_cast<u32>(fighter->spline->id - 84) > 1)) {
         fighter->death_timer -= FRAMETIME;
-        if (fighter->death_timer > 0.0f) {
+        if (fighter->death_timer <= 0.0f) {
+            AddGameDebris(WORLD->debris_sys, 23, reinterpret_cast<NUVEC *>(&fighter->matrix.m30));
+            fighter->active = 0;
+        } else {
             NuMtxPreRotateX(&fighter->matrix,
                             static_cast<i16>(static_cast<i32>(fighter->death_rotate_x * FRAMETIME * 4.0f)));
             NuMtxPreRotateZ(&fighter->matrix,
@@ -237,9 +256,6 @@ static i32 ProcessStarFighter(starfighter_s *fighter, quickboltinfo *info) {
             fighter->matrix.m30 += FRAMETIME * fighter->velocity.x;
             AddVariableShotDebrisEffect(WORLD->debris_sys->entries[48].effect,
                                         reinterpret_cast<NUVEC *>(&fighter->matrix.m30), 1, 0, 0);
-        } else {
-            AddGameDebris(WORLD->debris_sys, 23, reinterpret_cast<NUVEC *>(&fighter->matrix.m30));
-            fighter->active = 0;
         }
         return 0;
     }
@@ -249,20 +265,21 @@ static i32 ProcessStarFighter(starfighter_s *fighter, quickboltinfo *info) {
         NuVecMtxTransform(reinterpret_cast<NUVEC *>(&fighter->matrix.m30),
                           reinterpret_cast<NUVEC *>(&fighter->parent_offset), &fighter->parent->matrix);
         fighter->shoot_timer -= FRAMETIME;
-        if (fighter->shoot_timer > 0.0f)
-            return 1;
-        _vuv_s position = {0.0f, 0.0f, -10.0f, 1.0f};
-        NuVecMtxTransform(reinterpret_cast<NUVEC *>(&position), reinterpret_cast<NUVEC *>(&position), &fighter->matrix);
-        fighter->shoot_timer = 1.0f;
+        if (fighter->shoot_timer <= 0.0f) {
+            parent_position.x = 0.0f;
+            parent_position.y = 0.0f;
+            parent_position.z = -10.0f;
+            parent_position.w = 1.0f;
+            NuVecMtxTransform(reinterpret_cast<NUVEC *>(&parent_position), reinterpret_cast<NUVEC *>(&parent_position), &fighter->matrix);
+            fighter->shoot_timer = 1.0f;
+        }
         return 1;
     }
     if (fighter->spline == NULL)
         return 0;
-    NUVEC4_ALIGNED16 direction;
     direction.x = fighter->target_position.x - fighter->matrix.m30;
     direction.y = fighter->target_position.y - fighter->matrix.m31;
     direction.z = fighter->target_position.z - fighter->matrix.m32;
-    direction.w = 0.0f;
     f32 distance_squared = direction.x * direction.x + direction.y * direction.y + direction.z * direction.z;
     if (fighter->death_timer >= 0.0f)
         fighter->death_timer -= FRAMETIME;
@@ -297,13 +314,19 @@ static i32 ProcessStarFighter(starfighter_s *fighter, quickboltinfo *info) {
             pitch = 0.25f * camera_distance + 1.0f;
     }
     NUVEC *position = reinterpret_cast<NUVEC *>(&fighter->matrix.m30);
-    if (fighter->model_id == -299) {
+    switch (fighter->model_id) {
+    case -299:
         if (fighter->health > 0)
             PlaySfxAndSetPitch("Dog_TriFighterEngLp", position, pitch);
-    } else if (fighter->model_id == -300) {
+        break;
+    case -300:
         PlaySfxAndSetPitch("Dog_CloneARC170EngLp", position, pitch);
-    } else if ((fighter->model_id == -298 || fighter->model_id == -297) && fighter->health > 0) {
-        PlaySfxAndSetPitch("Dog_DroidFighterEngLp", position, pitch);
+        break;
+    case -298:
+    case -297:
+        if (fighter->health > 0)
+            PlaySfxAndSetPitch("Dog_DroidFighterEngLp", position, pitch);
+        break;
     }
     if (finished) {
         fighter->active = 0;
@@ -320,11 +343,8 @@ static i32 ProcessStarFighter(starfighter_s *fighter, quickboltinfo *info) {
             fighter->matrix.m32 += direction.z;
             fighter->matrix.m30 += direction.x;
             fighter->matrix.m31 += direction.y;
-            StarFighterAlign(fighter, reinterpret_cast<_vuv_s *>(&direction), distance, fighter->death_timer > 0.0f);
-            fighter->movement.x = direction.x;
-            fighter->movement.y = direction.y;
-            fighter->movement.z = direction.z;
-            fighter->movement.w = direction.w;
+            StarFighterAlign(fighter, reinterpret_cast<_vuv_s *>(&direction), distance / 5.0f, fighter->death_timer > 0.0f);
+            fighter->movement = direction;
         }
     }
     fighter->matrix.m33 = 1.0f;
@@ -332,10 +352,10 @@ static i32 ProcessStarFighter(starfighter_s *fighter, quickboltinfo *info) {
         return 1;
     if (fighter->initial_delay != 0.0f) {
         fighter->initial_delay -= FRAMETIME;
-        if (fighter->initial_delay > 0.0f)
-            return 1;
-        fighter->initial_delay = 0.0f;
-        fighter->aim_bias = 2.0f;
+        if (fighter->initial_delay <= 0.0f) {
+            fighter->initial_delay = 0.0f;
+            fighter->aim_bias = 2.0f;
+        }
         return 1;
     }
     if (fighter->target_ready == 0) {
@@ -347,9 +367,13 @@ static i32 ProcessStarFighter(starfighter_s *fighter, quickboltinfo *info) {
             fighter->target_id = -1;
             fighter->target = NULL;
             return 1;
-        } else if (target_id == -2 || target_id == -3) {
+        } else if (target_id == -2) {
             fighter->target_ready = 1;
-            fighter->target_id = target_id;
+            fighter->target_id = -2;
+            fighter->target = NULL;
+        } else if (target_id == -3) {
+            fighter->target_ready = 1;
+            fighter->target_id = -3;
             fighter->target = NULL;
         } else {
             starfighter_s *target = space->queued_fighters;
@@ -374,14 +398,12 @@ static i32 ProcessStarFighter(starfighter_s *fighter, quickboltinfo *info) {
     fighter->shoot_timer = NuRandFloat() * 0.2f + 0.2f;
     if (info == NULL)
         return 1;
-    NUMTX_ALIGNED16 aim_matrix;
-    if (fighter->target_id == -3) {
-        aim_matrix = fighter->matrix;
-    } else {
+    {
         NUVEC *target_position, *target_velocity;
-        if (fighter->target_id == -1)
+        switch (fighter->target_id) {
+        case -1:
             goto lost_target;
-        if (fighter->target_id == -2) {
+        case -2: {
             GameObject_s *player = NULL;
             if (NuRandFloat() < 0.5f && Player[0] != NULL && (Player[0]->apiobj.object_flags & 0x80) != 0)
                 player = Player[0];
@@ -393,15 +415,22 @@ static i32 ProcessStarFighter(starfighter_s *fighter, quickboltinfo *info) {
             }
             target_position = reinterpret_cast<NUVEC *>(&PlayerPos);
             target_velocity = reinterpret_cast<NUVEC *>(&PlayerVel);
-        } else {
+            break;
+        }
+        case -3:
+            aim_matrix = fighter->matrix;
+            goto fire;
+        default:
             if (fighter->target == NULL || fighter->target->active == 0)
                 goto lost_target;
             target_position = reinterpret_cast<NUVEC *>(&fighter->target->matrix.m30);
             // The retail code predicts this target using the firing ship's velocity.
             target_velocity = reinterpret_cast<NUVEC *>(&fighter->velocity);
+            break;
         }
-        NUVEC offset = {target_position->x - fighter->matrix.m30, target_position->y - fighter->matrix.m31,
-                        target_position->z - fighter->matrix.m32};
+        offset.x = target_position->x - fighter->matrix.m30;
+        offset.y = target_position->y - fighter->matrix.m31;
+        offset.z = target_position->z - fighter->matrix.m32;
         f32 forward = offset.x * fighter->matrix.m20 + offset.y * fighter->matrix.m21 + offset.z * fighter->matrix.m22;
         if (forward < 5.0f || forward > 100.0f)
             goto lost_target;
@@ -413,9 +442,12 @@ static i32 ProcessStarFighter(starfighter_s *fighter, quickboltinfo *info) {
         if (closing_speed < 1.0f)
             return 1;
         forward /= closing_speed;
-        offset.x += target_velocity->x * forward;
-        offset.y += target_velocity->y * forward;
-        offset.z += target_velocity->z * forward;
+        local.x = target_velocity->x * forward;
+        local.y = target_velocity->y * forward;
+        local.z = target_velocity->z * forward;
+        offset.x += local.x;
+        offset.y += local.y;
+        offset.z += local.z;
         if (fighter->fired == 0) {
             NUVEC *axis = reinterpret_cast<NUVEC *>(&fighter->matrix.m00);
             f32 least = NuFabs(axis->x * offset.x + axis->y * offset.y + axis->z * offset.z);
@@ -435,12 +467,14 @@ static i32 ProcessStarFighter(starfighter_s *fighter, quickboltinfo *info) {
                       reinterpret_cast<NUVEC *>(&fighter->aim_direction));
         }
         if (fighter->aim_bias != 0.0f) {
-            offset.x += fighter->aim_bias * fighter->aim_direction.x;
-            offset.y += fighter->aim_bias * fighter->aim_direction.y;
-            offset.z += fighter->aim_bias * fighter->aim_direction.z;
+            local.x = fighter->aim_bias * fighter->aim_direction.x;
+            local.y = fighter->aim_bias * fighter->aim_direction.y;
+            local.z = fighter->aim_bias * fighter->aim_direction.z;
+            offset.x += local.x;
+            offset.y += local.y;
+            offset.z += local.z;
         }
         aim_matrix = fighter->matrix;
-        NUVEC local;
         NuVecInvMtxRotate(&local, &offset, &aim_matrix);
         const i16 yaw = static_cast<i16>(NuAtan2D(local.x, local.z));
         NuVecRotateY(&local, &local, -yaw);
@@ -448,8 +482,11 @@ static i32 ProcessStarFighter(starfighter_s *fighter, quickboltinfo *info) {
         NuMtxPreRotateY(&aim_matrix, yaw);
         NuMtxPreRotateX(&aim_matrix, -pitch);
     }
+fire:
     {
-        const NUVEC velocity = {aim_matrix.m20 * 75.0f, aim_matrix.m21 * 75.0f, aim_matrix.m22 * 75.0f};
+        const NUVEC velocity = {aim_matrix.m00 * 0.0f + aim_matrix.m10 * 0.0f + aim_matrix.m20 * 75.0f,
+                                aim_matrix.m01 * 0.0f + aim_matrix.m11 * 0.0f + aim_matrix.m21 * 75.0f,
+                                aim_matrix.m02 * 0.0f + aim_matrix.m12 * 0.0f + aim_matrix.m22 * 75.0f};
         if (fighter->missile_count != 0 && static_cast<u32>(fighter->spline->id - 84) > 1 && NuRandFloat() < 0.2f &&
             g_lowEndLevelBehaviour == 0) {
             spacelevel_s *space = WORLD->space_level;
@@ -472,6 +509,7 @@ static i32 ProcessStarFighter(starfighter_s *fighter, quickboltinfo *info) {
                 break;
             }
         }
+        const i32 type = fighter->model_id == -300;
         quickbolt_s *bolt = info->bolts + info->used;
         quickbolt_s *end = info->bolts + info->count;
         quickbolt_s *slot = bolt;
@@ -507,10 +545,10 @@ static i32 ProcessStarFighter(starfighter_s *fighter, quickboltinfo *info) {
         slot->duration = 2.5f;
         slot->matrix = aim_matrix;
         NuMtxPreRotateX(&slot->matrix, 16384);
-        slot->type = fighter->model_id == -300;
-        slot->velocity.x = velocity.x + aim_matrix.m10 * 0.0f + aim_matrix.m00 * 0.0f;
-        slot->velocity.y = velocity.y + aim_matrix.m11 * 0.0f + aim_matrix.m01 * 0.0f;
-        slot->velocity.z = velocity.z + aim_matrix.m12 * 0.0f + aim_matrix.m02 * 0.0f;
+        slot->type = type;
+        slot->velocity.x = velocity.x;
+        slot->velocity.y = velocity.y;
+        slot->velocity.z = velocity.z;
         slot->velocity.w = 0.0f;
     }
     fighter->fired = 1;
@@ -522,6 +560,9 @@ lost_target:
 }
 
 static void ProcessSpaceLevel(spacelevel_s *space) {
+    NUVEC4_ALIGNED16 formation_start, formation_target;
+    NUVEC4_ALIGNED16 passing_start, passing_target;
+    NUVEC4_ALIGNED16 direction;
     space->door_elapsed = space->door_countdown;
     space->door_time += FRAMETIME;
     space->door_countdown += FRAMETIME * space->normalized_speed;
@@ -536,21 +577,23 @@ static void ProcessSpaceLevel(spacelevel_s *space) {
                 space->unknown_337c = space->actions->command;
             }
             if (space->unknown_337c == 1) {
-                _vuv_s start = {0.0f, 0.0f, 300.0f, 1.0f};
-                _vuv_s target = {GameCam->render_mtx.m30, GameCam->render_mtx.m31, GameCam->render_mtx.m32, 0.0f};
-                NuVecMtxTransform(reinterpret_cast<NUVEC *>(&start), reinterpret_cast<NUVEC *>(&start),
+                formation_start = {0.0f, 0.0f, 300.0f, 1.0f};
+                formation_target.x = GameCam->render_mtx.m30;
+                formation_target.y = GameCam->render_mtx.m31;
+                formation_target.z = GameCam->render_mtx.m32;
+                NuVecMtxTransform(reinterpret_cast<NUVEC *>(&formation_start), reinterpret_cast<NUVEC *>(&formation_start),
                                   &GameCam->render_mtx);
-                MakeWingFormation(&start, &target, space->current_action->value, 1);
+                MakeWingFormation(reinterpret_cast<_vuv_s *>(&formation_start), reinterpret_cast<_vuv_s *>(&formation_target), space->current_action->value, 1);
                 space->unknown_337c = 4;
             } else if (space->unknown_337c == 2) {
-                _vuv_s start = {-10.0f, -5.0f, -10.0f, 1.0f};
-                NuVecRotateZ(reinterpret_cast<NUVEC *>(&start), reinterpret_cast<NUVEC *>(&start), qrand());
-                NuVecMtxTransform(reinterpret_cast<NUVEC *>(&start), reinterpret_cast<NUVEC *>(&start),
+                passing_start = {-10.0f, -5.0f, -10.0f, 1.0f};
+                NuVecRotateZ(reinterpret_cast<NUVEC *>(&passing_start), reinterpret_cast<NUVEC *>(&passing_start), qrand());
+                NuVecMtxTransform(reinterpret_cast<NUVEC *>(&passing_start), reinterpret_cast<NUVEC *>(&passing_start),
                                   &GameCam->render_mtx);
-                _vuv_s target = {0.0f, 0.0f, 400.0f, 1.0f};
-                NuVecMtxTransform(reinterpret_cast<NUVEC *>(&target), reinterpret_cast<NUVEC *>(&target),
+                passing_target = {0.0f, 0.0f, 400.0f, 1.0f};
+                NuVecMtxTransform(reinterpret_cast<NUVEC *>(&passing_target), reinterpret_cast<NUVEC *>(&passing_target),
                                   &GameCam->render_mtx);
-                MakeWingFormation(&start, &target, space->current_action->value, 0);
+                MakeWingFormation(reinterpret_cast<_vuv_s *>(&passing_start), reinterpret_cast<_vuv_s *>(&passing_target), space->current_action->value, 0);
                 space->unknown_337c = 4;
             } else if (space->unknown_337c == 0) {
                 space->action_timer = space->current_action->value;
@@ -567,7 +610,10 @@ static void ProcessSpaceLevel(spacelevel_s *space) {
         spacelevel_flight_group_s *group = &space->flight_groups[i];
         if (group->active == 0)
             continue;
-        if (static_cast<u32>(group->state) < 2) {
+        switch (group->state) {
+        case 0:
+        case 1:
+        {
             if (group->state == 0) {
                 NuVecSub(reinterpret_cast<NUVEC *>(&group->velocity),
                          reinterpret_cast<NUVEC *>(&GameCam->render_mtx.m30),
@@ -588,6 +634,8 @@ static void ProcessSpaceLevel(spacelevel_s *space) {
             if (group->duration < 0.0f || (group->camera_position.z > 800.0f && group->state == 1) ||
                 (group->camera_position.z < 0.0f && group->state == 0))
                 group->active = 0;
+            break;
+        }
         }
         i32 active = 0;
 #define PROCESS_WING_FIGHTER(index)                                                                                    \
@@ -602,49 +650,60 @@ static void ProcessSpaceLevel(spacelevel_s *space) {
         if (active == 0)
             group->draw_target = 1;
         if (active == 0 || group->draw_target != 0) {
-            group->target.y = group->velocity.y * FRAMETIME + group->matrix.m31;
-            group->target.z = group->velocity.z * FRAMETIME + group->matrix.m32;
-            group->target.x = group->velocity.x * FRAMETIME + group->matrix.m30;
+            NUVEC position = {group->velocity.x * FRAMETIME + group->matrix.m30,
+                              group->velocity.y * FRAMETIME + group->matrix.m31,
+                              group->velocity.z * FRAMETIME + group->matrix.m32};
+            *reinterpret_cast<NUVEC *>(&group->target) = position;
         }
     }
     if (info->count != 0) {
-        bool valid[2] = {false, false};
-        NUVEC player_position[2];
-        if (Player[0] != NULL && (Player[0]->apiobj.object_flags & 0x80) != 0) {
-            player_position[0] = *reinterpret_cast<NUVEC *>(&Player[0]->apiobj.field_0xb8.m30);
-            valid[0] = true;
+        i32 valid0 = 0, valid1 = 0;
+        f32 player0x, player0y, player0z;
+        f32 player1x, player1y, player1z;
+        if (Player[0] != NULL && static_cast<i8>(Player[0]->apiobj.object_flags) < 0) {
+            player0x = Player[0]->apiobj.field_0xb8.m30;
+            player0y = Player[0]->apiobj.field_0xb8.m31;
+            player0z = Player[0]->apiobj.field_0xb8.m32;
+            valid0 = 1;
         }
-        if (Player[1] != NULL && (Player[1]->apiobj.object_flags & 0x80) != 0) {
-            player_position[1] = *reinterpret_cast<NUVEC *>(&Player[1]->apiobj.field_0xb8.m30);
-            valid[1] = true;
+        if (Player[1] != NULL && static_cast<i8>(Player[1]->apiobj.object_flags) < 0) {
+            player1x = Player[1]->apiobj.field_0xb8.m30;
+            player1y = Player[1]->apiobj.field_0xb8.m31;
+            player1z = Player[1]->apiobj.field_0xb8.m32;
+            valid1 = 1;
         }
         quickbolt_s *end = info->bolts + info->count;
         for (quickbolt_s *bolt = info->bolts; bolt < end; ++bolt) {
             if (bolt->duration == 0.0f)
                 continue;
-            bolt->matrix.m31 += bolt->velocity.y * FRAMETIME;
-            bolt->matrix.m32 += bolt->velocity.z * FRAMETIME;
-            bolt->matrix.m30 += bolt->velocity.x * FRAMETIME;
-            if (Player[0] != NULL && valid[0]) {
-                const f32 dx = bolt->matrix.m30 - player_position[0].x;
-                const f32 dy = bolt->matrix.m31 - player_position[0].y;
-                const f32 dz = bolt->matrix.m32 - player_position[0].z;
+            NUVEC *velocity = reinterpret_cast<NUVEC *>(&bolt->velocity);
+            NUVEC *position = reinterpret_cast<NUVEC *>(&bolt->matrix.m30);
+            NUVEC movement = {velocity->x * FRAMETIME, velocity->y * FRAMETIME, velocity->z * FRAMETIME};
+            NUVEC next = {position->x + movement.x, position->y + movement.y, position->z + movement.z};
+            position->y = next.y;
+            position->z = next.z;
+            position->x = next.x;
+            if (Player[0] != NULL && valid0) {
+                const f32 dx = bolt->matrix.m30 - player0x;
+                const f32 dy = bolt->matrix.m31 - player0y;
+                const f32 dz = bolt->matrix.m32 - player0z;
                 if (dx * dx + dy * dy + dz * dz < 1.0f) {
                     bolt->duration = 0.0f;
                     ObjHitObj(NULL, Player[0], 1, 0, 0, 1);
                 }
             }
-            if (valid[1] && Player[1] != NULL) {
-                const f32 dx = bolt->matrix.m30 - player_position[1].x;
-                const f32 dy = bolt->matrix.m31 - player_position[1].y;
-                const f32 dz = bolt->matrix.m32 - player_position[1].z;
+            if (valid1 && Player[1] != NULL) {
+                const f32 dx = bolt->matrix.m30 - player1x;
+                const f32 dy = bolt->matrix.m31 - player1y;
+                const f32 dz = bolt->matrix.m32 - player1z;
                 if (dx * dx + dy * dy + dz * dz < 1.0f) {
                     bolt->duration = 0.0f;
                     ObjHitObj(NULL, Player[1], 1, 0, 0, 1);
                 }
             }
-            const f32 duration = bolt->duration - FRAMETIME;
-            bolt->duration = duration >= 0.0f ? duration : 0.0f;
+            bolt->duration -= FRAMETIME;
+            if (bolt->duration < 0.0f)
+                bolt->duration = 0.0f;
         }
     }
     for (i32 i = 0; i != 256; ++i) {
@@ -653,21 +712,23 @@ static void ProcessSpaceLevel(spacelevel_s *space) {
             !(spline->spawn_time <= space->door_countdown))
             continue;
         if (g_lowEndLevelBehaviour == 0) {
-            for (i32 j = 0; j != 96; ++j) {
+            i32 j;
+            for (j = 0; j != 96; ++j) {
+                if (space->queued_fighters[j].active == 0)
+                    break;
+            }
+            if (j != 96) {
                 starfighter_s *fighter = &space->queued_fighters[j];
-                if (fighter->active != 0)
-                    continue;
                 fighter->spawn_time = spline->spawn_time;
                 NuMtxSetIdentity(&fighter->matrix);
-                fighter->matrix.m30 = spline->points[0].x;
-                fighter->matrix.m31 = spline->points[0].y;
-                fighter->matrix.m32 = spline->points[0].z;
-                fighter->matrix.m33 = spline->points[0].w;
-                _vuv_s direction = {spline->points[1].x - spline->points[0].x,
-                                    spline->points[1].y - spline->points[0].y,
-                                    spline->points[1].z - spline->points[0].z, 0.0f};
-                StarFighterAlign(fighter, &direction, 1.0f, 0);
-                fighter->velocity.x = fighter->velocity.y = fighter->velocity.z = 0.0f;
+                *reinterpret_cast<_vuv_s *>(&fighter->matrix.m30) = spline->points[0];
+                direction.x = spline->points[1].x - spline->points[0].x;
+                direction.y = spline->points[1].y - spline->points[0].y;
+                direction.z = spline->points[1].z - spline->points[0].z;
+                StarFighterAlign(fighter, reinterpret_cast<_vuv_s *>(&direction), 1.0f, 0);
+                fighter->velocity.x = 0.0f;
+                fighter->velocity.y = 0.0f;
+                fighter->velocity.z = 0.0f;
                 fighter->velocity.w = 1.0f;
                 fighter->target_position = *reinterpret_cast<NUVEC4 *>(&spline->points[0]);
                 fighter->active = 1;
@@ -675,30 +736,39 @@ static void ProcessSpaceLevel(spacelevel_s *space) {
                 fighter->spline = spline;
                 fighter->spline_progress = 0.0f;
                 fighter->health = 1;
-                fighter->hit_count = fighter->fired = fighter->delete_when_done = 0;
-                fighter->initial_delay = fighter->shoot_timer = 0.0f;
-                fighter->scale = 1.0f;
-                fighter->speed = 50.0f;
+                fighter->hit_count = 0;
+                fighter->fired = 0;
+                fighter->delete_when_done = 0;
+                fighter->initial_delay = 0.0f;
+                fighter->shoot_timer = 0.0f;
                 if (spline->id == 87)
                     fighter->model_id = -297;
                 else if (spline->id == 86)
                     fighter->model_id = -299;
                 else if (spline->id == 54) {
                     fighter->model_id = -298;
-                    fighter->scale = 2.0f;
-                } else if (spline->id == 85 || spline->id == 84)
+                } else if (spline->id == 85)
+                    fighter->model_id = -300;
+                else if (spline->id == 84)
                     fighter->model_id = -300;
                 else
                     fighter->model_id = spline->id;
+                fighter->scale = 1.0f;
                 fighter->draw_flags = 1;
                 fighter->object_id = spline->field_0x520;
                 fighter->target_id = spline->field_0x51c;
+                fighter->speed = 50.0f;
                 fighter->missile_count = 1;
-                if (spline->id == 87 || spline->id == 86 || static_cast<u32>(spline->id - 84) < 2)
+                if (spline->id == 87)
+                    fighter->speed = 22.5f;
+                else if (spline->id == 86)
+                    fighter->speed = 22.5f;
+                else if (static_cast<u32>(spline->id - 84) < 2)
                     fighter->speed = 22.5f;
                 else if (spline->id == -307)
                     fighter->speed = 33.0f;
-                break;
+                if (spline->id == 54)
+                    fighter->scale = 2.0f;
             }
         }
         if (spline->field_0x40c == 0.0f)
@@ -718,13 +788,40 @@ static void ProcessSpaceLevel(spacelevel_s *space) {
             ProcessStarFighter(&space->queued_fighters[i], info);
     }
     i32 door_index = -1;
-    for (i32 i = 6; i >= 0; --i) {
-        if ((Player[0] != NULL && Player[0]->field_0x68c > DogFightDoors.doors[i].distance) ||
-            (Player[1] != NULL && Player[1]->field_0x68c > DogFightDoors.doors[i].distance)) {
-            door_index = i;
-            break;
-        }
+#define DOOR_REACHED(player_index, door_index) \
+    (Player[player_index]->field_0x68c > DogFightDoors.doors[door_index].distance)
+    if (Player[0] != NULL) {
+        if (DOOR_REACHED(0, 6) || (Player[1] != NULL && DOOR_REACHED(1, 6)))
+            door_index = 6;
+        else if (DOOR_REACHED(0, 5) || (Player[1] != NULL && DOOR_REACHED(1, 5)))
+            door_index = 5;
+        else if (DOOR_REACHED(0, 4) || (Player[1] != NULL && DOOR_REACHED(1, 4)))
+            door_index = 4;
+        else if (DOOR_REACHED(0, 3) || (Player[1] != NULL && DOOR_REACHED(1, 3)))
+            door_index = 3;
+        else if (DOOR_REACHED(0, 2) || (Player[1] != NULL && DOOR_REACHED(1, 2)))
+            door_index = 2;
+        else if (DOOR_REACHED(0, 1) || (Player[1] != NULL && DOOR_REACHED(1, 1)))
+            door_index = 1;
+        else if (DOOR_REACHED(0, 0) || (Player[1] != NULL && DOOR_REACHED(1, 0)))
+            door_index = 0;
+    } else if (Player[1] != NULL) {
+        if (DOOR_REACHED(1, 6))
+            door_index = 6;
+        else if (DOOR_REACHED(1, 5))
+            door_index = 5;
+        else if (DOOR_REACHED(1, 4))
+            door_index = 4;
+        else if (DOOR_REACHED(1, 3))
+            door_index = 3;
+        else if (DOOR_REACHED(1, 2))
+            door_index = 2;
+        else if (DOOR_REACHED(1, 1))
+            door_index = 1;
+        else if (DOOR_REACHED(1, 0))
+            door_index = 0;
     }
+#undef DOOR_REACHED
     if (door_index >= 0) {
         DOOR_s *door = WORLD->doors;
         for (i32 i = 0; i < WORLD->door_count; ++i, ++door) {
@@ -813,6 +910,8 @@ static void DrawStarFighter(starfighter_s *starfighter) {
 static inline void QuickBolt_Draw(quickboltinfo *info) {
     static const i32 BoltObjA[4] = {303, 305, 301, 301};
     static const i32 BoltObjB[4] = {304, 306, 302, 302};
+    if (info == NULL)
+        return;
     if (info->count != 0) {
         quickbolt_s *bolt = info->bolts;
         quickbolt_s *end = bolt + info->count;
@@ -821,6 +920,53 @@ static inline void QuickBolt_Draw(quickboltinfo *info) {
                 Draw3DObjectMtx(WORLD, BoltObjA[bolt->type], &bolt->matrix);
                 Draw3DObjectMtx(WORLD, BoltObjB[bolt->type], &bolt->matrix);
             }
+        }
+    }
+}
+
+static inline void DrawSpaceGroup(spacelevel_flight_group_s *group) {
+    if (group->active != 0) {
+        if (group->fighters[0].active != 0)
+            DrawStarFighter(&group->fighters[0]);
+        if (group->fighters[1].active != 0)
+            DrawStarFighter(&group->fighters[1]);
+        if (group->fighters[2].active != 0)
+            DrawStarFighter(&group->fighters[2]);
+        if (group->fighters[3].active != 0)
+            DrawStarFighter(&group->fighters[3]);
+        if (group->fighters[4].active != 0)
+            DrawStarFighter(&group->fighters[4]);
+        if (group->draw_target != 0)
+            DrawCross_Now(reinterpret_cast<_vuv_s *>(&group->target), 3.0f, 0xffffff, 1);
+    }
+}
+
+static inline void DrawSpaceJet(i32 player_index, i32 key_index, bool left) {
+    GameObject_s *player = Player[player_index];
+    if (player != NULL) {
+        if (player->id == id_JEDISTARFIGHTERYELLOWEP3 || player->id == id_JEDISTARFIGHTERREDEP3) {
+            if (DogDebKey[key_index] == -1) {
+                AddDebrisEffect(&DogDebKey[key_index], WORLD->debris_sys->entries[47].effect, 0.0f, 0.0f, 0.0f);
+            } else {
+                NUMTX_ALIGNED16 matrix = {
+                    player->apiobj.field_0xb8.m00, player->apiobj.field_0xb8.m01, player->apiobj.field_0xb8.m02, player->apiobj.field_0xb8.m03,
+                    player->apiobj.field_0xb8.m20, player->apiobj.field_0xb8.m21, player->apiobj.field_0xb8.m22, player->apiobj.field_0xb8.m23,
+                    -player->apiobj.field_0xb8.m10, -player->apiobj.field_0xb8.m11, -player->apiobj.field_0xb8.m12, -player->apiobj.field_0xb8.m13,
+                    player->apiobj.field_0xb8.m30, player->apiobj.field_0xb8.m31, player->apiobj.field_0xb8.m32, player->apiobj.field_0xb8.m33
+                };
+                if (left) {
+                    matrix.m30 += (matrix.m20 * Jetpos.y - matrix.m00 * Jetpos.x) + matrix.m10 * Jetpos.z;
+                    matrix.m31 += (matrix.m21 * Jetpos.y - matrix.m01 * Jetpos.x) + matrix.m11 * Jetpos.z;
+                    matrix.m32 += (matrix.m22 * Jetpos.y - matrix.m02 * Jetpos.x) + matrix.m12 * Jetpos.z;
+                } else {
+                    matrix.m30 += matrix.m00 * Jetpos.x + matrix.m20 * Jetpos.y + matrix.m10 * Jetpos.z;
+                    matrix.m31 += matrix.m01 * Jetpos.x + matrix.m21 * Jetpos.y + matrix.m11 * Jetpos.z;
+                    matrix.m32 += matrix.m02 * Jetpos.x + matrix.m22 * Jetpos.y + matrix.m12 * Jetpos.z;
+                }
+                DebrisPosOrientationMtx(DogDebKey[key_index], &matrix);
+            }
+        } else if (DogDebKey[key_index] != -1) {
+            DebFreeInstantly(&DogDebKey[key_index]);
         }
     }
 }
@@ -838,72 +984,24 @@ static void DrawSpaceLevel(spacelevel_s *space) {
         DrawCross_Now(reinterpret_cast<_vuv_s *>(&space->crosses[1].world_position), space->crosses[1].scale,
                       space->crosses[1].colour, 1);
     }
-#define DRAW_SPACE_FIGHTER(group_index, fighter_index)                                                                 \
-    if (space->flight_groups[group_index].fighters[fighter_index].active != 0)                                         \
-    DrawStarFighter(&space->flight_groups[group_index].fighters[fighter_index])
-#define DRAW_SPACE_GROUP(group_index)                                                                                  \
-    do {                                                                                                               \
-        if (space->flight_groups[group_index].active != 0) {                                                           \
-            DRAW_SPACE_FIGHTER(group_index, 0);                                                                        \
-            DRAW_SPACE_FIGHTER(group_index, 1);                                                                        \
-            DRAW_SPACE_FIGHTER(group_index, 2);                                                                        \
-            DRAW_SPACE_FIGHTER(group_index, 3);                                                                        \
-            DRAW_SPACE_FIGHTER(group_index, 4);                                                                        \
-            if (space->flight_groups[group_index].draw_target != 0)                                                    \
-                DrawCross_Now(reinterpret_cast<_vuv_s *>(&space->flight_groups[group_index].target), 3.0f, 0xffffff,   \
-                              1);                                                                                      \
-        }                                                                                                              \
-    } while (0)
-    DRAW_SPACE_GROUP(0);
-    DRAW_SPACE_GROUP(1);
-    DRAW_SPACE_GROUP(2);
-    DRAW_SPACE_GROUP(3);
-    DRAW_SPACE_GROUP(4);
-    DRAW_SPACE_GROUP(5);
-    DRAW_SPACE_GROUP(6);
-    DRAW_SPACE_GROUP(7);
-#undef DRAW_SPACE_GROUP
-#undef DRAW_SPACE_FIGHTER
+    DrawSpaceGroup(&space->flight_groups[0]);
+    DrawSpaceGroup(&space->flight_groups[1]);
+    DrawSpaceGroup(&space->flight_groups[2]);
+    DrawSpaceGroup(&space->flight_groups[3]);
+    DrawSpaceGroup(&space->flight_groups[4]);
+    DrawSpaceGroup(&space->flight_groups[5]);
+    DrawSpaceGroup(&space->flight_groups[6]);
+    DrawSpaceGroup(&space->flight_groups[7]);
     for (i32 i = 0; i != 96; ++i) {
         if (space->queued_fighters[i].active != 0)
             DrawStarFighter(&space->queued_fighters[i]);
     }
     QuickBolt_Draw(&space->quick_bolts);
 
-#define DRAW_SPACE_JET(player_index, key_index, left)                                                                  \
-    do {                                                                                                               \
-        GameObject_s *player = Player[player_index];                                                                   \
-        if (player != NULL) {                                                                                          \
-            if (player->id == id_JEDISTARFIGHTERYELLOWEP3 || player->id == id_JEDISTARFIGHTERREDEP3) {                 \
-                if (DogDebKey[key_index] == -1) {                                                                      \
-                    AddDebrisEffect(&DogDebKey[key_index], WORLD->debris_sys->entries[47].effect, 0.0f, 0.0f, 0.0f);   \
-                } else {                                                                                               \
-                    NUMTX_ALIGNED16 matrix = player->apiobj.field_0xb8;                                                \
-                    matrix.m10 = -matrix.m10;                                                                          \
-                    matrix.m11 = -matrix.m11;                                                                          \
-                    matrix.m12 = -matrix.m12;                                                                          \
-                    matrix.m13 = -matrix.m13;                                                                          \
-                    if (left) {                                                                                        \
-                        matrix.m30 += (matrix.m10 * Jetpos.y - matrix.m00 * Jetpos.x) + matrix.m20 * Jetpos.z;         \
-                        matrix.m31 += (matrix.m11 * Jetpos.y - matrix.m01 * Jetpos.x) + matrix.m21 * Jetpos.z;         \
-                        matrix.m32 += (matrix.m12 * Jetpos.y - matrix.m02 * Jetpos.x) + matrix.m22 * Jetpos.z;         \
-                    } else {                                                                                           \
-                        matrix.m30 += matrix.m00 * Jetpos.x + matrix.m10 * Jetpos.y + matrix.m20 * Jetpos.z;           \
-                        matrix.m31 += matrix.m01 * Jetpos.x + matrix.m11 * Jetpos.y + matrix.m21 * Jetpos.z;           \
-                        matrix.m32 += matrix.m02 * Jetpos.x + matrix.m12 * Jetpos.y + matrix.m22 * Jetpos.z;           \
-                    }                                                                                                  \
-                    DebrisPosOrientationMtx(DogDebKey[key_index], &matrix);                                            \
-                }                                                                                                      \
-            } else if (DogDebKey[key_index] != -1) {                                                                   \
-                DebFreeInstantly(&DogDebKey[key_index]);                                                               \
-            }                                                                                                          \
-        }                                                                                                              \
-    } while (0)
-    DRAW_SPACE_JET(0, 0, false);
-    DRAW_SPACE_JET(0, 1, true);
-    DRAW_SPACE_JET(1, 2, false);
-    DRAW_SPACE_JET(1, 3, true);
-#undef DRAW_SPACE_JET
+    DrawSpaceJet(0, 0, false);
+    DrawSpaceJet(0, 1, true);
+    DrawSpaceJet(1, 2, false);
+    DrawSpaceJet(1, 3, true);
 }
 
 void ChrisAnakinADraw() {

@@ -265,12 +265,11 @@ void Players_InitPositions(WORLDINFO *world) {
     }
 
     if (A != NULL) {
-        f32 *ps = A->positions;
         NUVEC tmp;
         i32 n = ninit;
         for (i32 i = 0; i < 8; i++) {
-            PlayerStart[i].pos = (NUVEC *)&ps[6 * n];
-            NuVecSub(&tmp, (NUVEC *)&ps[6 * n + 3], (NUVEC *)&ps[6 * n]);
+            PlayerStart[i].pos = (NUVEC *)&A->positions[6 * n];
+            NuVecSub(&tmp, (NUVEC *)&A->positions[3 * (2 * n + 1)], (NUVEC *)&A->positions[6 * n]);
             PlayerStart[i].angle = NuAtan2D(tmp.x, tmp.z);
             if (2 * n + 4 > A->count)
                 n = ninit;
@@ -278,15 +277,16 @@ void Players_InitPositions(WORLDINFO *world) {
                 n = n + 1;
         }
         if (bonus != 0 && A->count > 3) {
-            i32 nc = A->count >> 2;
+            i16 nc = A->count >> 2;
             i32 r = qrand() / (i32)(0xffff / nc + 1);
-            PlayerStart[0].pos = (NUVEC *)&ps[12 * r];
-            NuVecSub(&tmp, (NUVEC *)&ps[12 * r + 3], (NUVEC *)&ps[12 * r]);
-            PlayerStart[0].angle = NuAtan2D(tmp.x, tmp.z);
-            PlayerStart[1].pos = (NUVEC *)&ps[12 * r + 6];
-            tmp.z = ps[12 * r + 11] - ps[12 * r + 8];
-            tmp.x = ps[12 * r + 9] - PlayerStart[0].pos->x;
-            PlayerStart[1].angle = NuAtan2D(tmp.x, tmp.z);
+            PlayerStart[0].pos = (NUVEC *)&A->positions[12 * r];
+            NUVEC *target = (NUVEC *)&A->positions[12 * r + 3];
+            PlayerStart[0].angle = NuAtan2D(target->x - PlayerStart[0].pos->x,
+                                          target->z - PlayerStart[0].pos->z);
+            PlayerStart[1].pos = (NUVEC *)&A->positions[12 * r + 6];
+            target = (NUVEC *)&A->positions[12 * r + 9];
+            PlayerStart[1].angle = NuAtan2D(target->x - PlayerStart[0].pos->x,
+                                          target->z - PlayerStart[1].pos->z);
         }
     }
 
@@ -996,9 +996,7 @@ void Player_CopyEssentials(GameObject_s *source, GameObject_s *destination) {
 }
 
 i32 Player_HasDeflectBolts(GameObject_s *object) {
-    if (Cheats_CheckFlags(0x80000) != 0 || (object != NULL && object->field_0xdec > 0.0f))
-        return 1;
-    return 0;
+    return Cheats_CheckFlags(0x80000) != 0 || (object != NULL && object->field_0xdec > 0.0f);
 }
 
 i32 FULLDEBUGTOGGLE;
@@ -1030,8 +1028,8 @@ void Player_ToggleCharacter(GameObject_s *object, i32 direction, i32 sound) {
     i32 left;
     i32 right;
     if (direction != 0) {
-        left = direction <= 0;
         right = direction > 0;
+        left = direction <= 0;
     } else {
         u32 left_mask = GAMEPAD_TOGGLELEFT;
         u32 right_mask = GAMEPAD_TOGGLERIGHT;
@@ -1040,15 +1038,15 @@ void Player_ToggleCharacter(GameObject_s *object, i32 direction, i32 sound) {
             right_mask &= ~GAMEPAD_LIFT;
         }
         GAMEPAD_s *pad = object->pad_gamepad;
-        left = pad->buttons_pressed & left_mask;
         right = pad->buttons_pressed & right_mask;
-        if ((left != 0 && right != 0) || (left | right) == 0) {
+        left = pad->buttons_pressed & left_mask;
+        if ((right != 0 && left != 0) || (left | right) == 0) {
             if ((object->apiobj.flags_low & 0x80) == 0) {
                 return;
             }
-            left = pad->buttons_held & left_mask;
             right = pad->buttons_held & right_mask;
-            if ((left != 0 && right != 0) || (left | right) == 0) {
+            left = pad->buttons_held & left_mask;
+            if ((right != 0 && left != 0) || (left | right) == 0) {
                 object->input_toggle_hold_time = TOGGLEHOLDTIME;
                 return;
             }
@@ -1063,17 +1061,16 @@ void Player_ToggleCharacter(GameObject_s *object, i32 direction, i32 sound) {
     if (Player_ToggleSubCharacterFn != NULL && Player_ToggleSubCharacterFn(object, left, sound) != 0) {
         return;
     }
-    i32 index;
-    for (index = 0; index < apicharsys->loaded_model_count; ++index) {
-        if (apicharsys->models[index].model_id == object->id) {
-            break;
-        }
+    i32 index = 0;
+    while (index < apicharsys->loaded_model_count && object->id != apicharsys->models[index].model_id) {
+        ++index;
     }
     if (index == apicharsys->loaded_model_count) {
         return;
     }
     i32 attempts = 0;
-    for (;;) {
+    i32 id;
+    do {
         if (left != 0) {
             if (--index == -1) {
                 index = apicharsys->loaded_model_count - 1;
@@ -1081,7 +1078,7 @@ void Player_ToggleCharacter(GameObject_s *object, i32 direction, i32 sound) {
         } else if (++index == apicharsys->loaded_model_count) {
             index = 0;
         }
-        i32 id = apicharsys->models[index].model_id;
+        id = apicharsys->models[index].model_id;
         ++attempts;
         i32 collected = InCollectList_Index(id, NULL, 0);
         if ((apicharsys->models[index].flags & 1) == 0) {
@@ -1157,22 +1154,16 @@ void Player_ToggleCharacter(GameObject_s *object, i32 direction, i32 sound) {
         }
         return;
     next_character:
-        if (attempts > apicharsys->loaded_model_count || id == object->id) {
-            return;
-        }
-    }
+        ;
+    } while (attempts <= apicharsys->loaded_model_count && id != object->id);
 }
 
 i32 Player_HasInvincibility(GameObject_s *object) {
-    if (Cheats_CheckFlags(0x80) != 0 || (object != NULL && object->field_0xdec > 0.0f))
-        return 1;
-    return 0;
+    return Cheats_CheckFlags(0x80) != 0 || (object != NULL && object->field_0xdec > 0.0f);
 }
 
 i32 Player_HasDoubleBoltDamage(GameObject_s *object) {
-    if (Cheats_CheckFlags(2) != 0 || (object != NULL && object->field_0xdec > 0.0f))
-        return 1;
-    return 0;
+    return Cheats_CheckFlags(2) != 0 || (object != NULL && object->field_0xdec > 0.0f);
 }
 
 void PlayerButton_OnHold_Callback(MechTouchUIElement &element, TouchHolder &) {
@@ -1185,10 +1176,7 @@ void PlayerButton_OnHold_Callback(MechTouchUIElement &element, TouchHolder &) {
 }
 
 i32 Player_HasDoubleWeaponDamage(GameObject_s *object) {
-    if (Cheats_CheckFlags(0x400) == 0 && (object == NULL || object->field_0xdec <= 0.0f)) {
-        return 0;
-    }
-    return 1;
+    return Cheats_CheckFlags(0x400) != 0 || (object != NULL && object->field_0xdec > 0.0f);
 }
 
 void PlayerButton_OnLeave_Callback(MechTouchUIElement &element, TouchHolder &holder) {
@@ -1706,21 +1694,15 @@ void SetToLastSafePos(GameObject_s *object) {
 }
 
 i32 AvailableToPlayer(u32 character_flags, i32 weapon_action, i32 context, i32 require_all) {
-#define CHECK_AVAILABLE_PLAYER(index, predicate)                                                                       \
-    do {                                                                                                               \
-        GameObject_s *object = Player[index];                                                                          \
-        if (object != NULL && object->apiobj.character_data != NULL && (predicate))                                    \
-            return 1;                                                                                                  \
-    } while (0)
-#define CHECK_AVAILABLE_PLAYERS(predicate)                                                                             \
-    CHECK_AVAILABLE_PLAYER(0, predicate);                                                                              \
-    CHECK_AVAILABLE_PLAYER(1, predicate);                                                                              \
-    CHECK_AVAILABLE_PLAYER(2, predicate);                                                                              \
-    CHECK_AVAILABLE_PLAYER(3, predicate);                                                                              \
-    CHECK_AVAILABLE_PLAYER(4, predicate);                                                                              \
-    CHECK_AVAILABLE_PLAYER(5, predicate);                                                                              \
-    CHECK_AVAILABLE_PLAYER(6, predicate);                                                                              \
-    CHECK_AVAILABLE_PLAYER(7, predicate)
+    GameObject_s *object;
+#define CHECK_AVAILABLE_PLAYER(index, predicate) \
+    ((object = Player[index]) != NULL && object->apiobj.character_data != NULL && (predicate))
+#define CHECK_AVAILABLE_PLAYERS(predicate) \
+    if (CHECK_AVAILABLE_PLAYER(0, predicate) || CHECK_AVAILABLE_PLAYER(1, predicate) || \
+        CHECK_AVAILABLE_PLAYER(2, predicate) || CHECK_AVAILABLE_PLAYER(3, predicate) || \
+        CHECK_AVAILABLE_PLAYER(4, predicate) || CHECK_AVAILABLE_PLAYER(5, predicate) || \
+        CHECK_AVAILABLE_PLAYER(6, predicate) || CHECK_AVAILABLE_PLAYER(7, predicate)) \
+        return 1
 #define PLAYER_HAS_FLAGS ((object->apiobj.character_data->model_flags & character_flags) == character_flags)
 #define PLAYER_HAS_WEAPON                                                                                              \
     (static_cast<i8>(object->apiobj.character_data->game_character->uses_weapon_action) == weapon_action)
@@ -1947,10 +1929,10 @@ u32 AdjustLayerBits(u32 mask, GameObject_s *object) {
         else
             mask |= 0x40;
     } else if (CharacterCustomiser != NULL && object->id == CharacterCustomiser->character_ids[0]) {
-        if ((CharacterCustomiser->pieces[static_cast<u16>(Game.customizer.pieces[5])].layer_flags & 0x40) == 0)
+        if ((CharacterCustomiser->pieces[static_cast<u16>(Game.customizer[0].pieces[5])].layer_flags & 0x40) == 0)
             mask |= cape;
     } else if (CharacterCustomiser != NULL && object->id == CharacterCustomiser->character_ids[1]) {
-        if ((CharacterCustomiser->pieces[static_cast<u16>(Game.customizer.secondary_pieces[5])].layer_flags & 0x40) ==
+        if ((CharacterCustomiser->pieces[static_cast<u16>(Game.customizer[1].pieces[5])].layer_flags & 0x40) ==
             0)
             mask |= cape;
     } else if (object->id == id_CHEWBACCA) {

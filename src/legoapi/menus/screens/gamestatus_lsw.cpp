@@ -345,7 +345,7 @@ void InitStatusScreen(WORLDINFO_s *world) {
             p.player0_model = 0xffff;
         } else {
             p.player0_model = Player[0]->id;
-            p.player0_active = Player[0]->apiobj.flags_low >> 7;
+            p.player0_active = Player[0]->apiobj.player_controlled;
             p.coins_remaining[0] = Player[0]->coinpacket == NULL ? 0 : Player[0]->coinpacket->coins;
             ++p.status_flags;
         }
@@ -353,7 +353,7 @@ void InitStatusScreen(WORLDINFO_s *world) {
             p.player1_model = 0xffff;
         } else {
             p.player1_model = Player[1]->id;
-            p.player1_active = Player[1]->apiobj.flags_low >> 7;
+            p.player1_active = Player[1]->apiobj.player_controlled;
             p.coins_remaining[1] = Player[1]->coinpacket == NULL ? 0 : Player[1]->coinpacket->coins;
             ++p.status_flags;
         }
@@ -362,9 +362,10 @@ void InitStatusScreen(WORLDINFO_s *world) {
         return;
     }
     p.stage_count = 0;
-    p.mode_flags = (p.mode_flags & 0xfb) | ((SuperStory & 1) << 2);
-    p.field_0xb0 = (p.field_0xb0 & 0xbf) | ((FreePlay & 1) << 6);
-    p.mode_flags = (p.mode_flags & 0xe7) | ((from_save_and_exit & 1) << 3);
+    p.super_story_mode = SuperStory;
+    p.free_play = FreePlay;
+    p.saved_and_exited = from_save_and_exit;
+    p.continue_story = 0;
     p.mission = Mission_Active(NULL);
     if (p.mission == NULL)
         p.mission_state = 0;
@@ -380,14 +381,15 @@ void InitStatusScreen(WORLDINFO_s *world) {
     p.field_0xbd = 0;
     p.challenge_state = ChallengeMode;
     const i32 area = static_cast<i8>(world->level_sub_id);
-    p.field_0xb0 &= 0xf7;
+    p.next_area_unlocked = 0;
     p.score = &Game.coins;
     p.previous_completion = Game.completion;
     p.area_id = area;
     p.previous_gold_bricks = Game.field_0x7c26[0];
     p.displayed_gold_bricks = Game.field_0x7c26[0];
-    p.field_0xb0 &= 0x7f;
-    p.mode_flags &= 0xfc;
+    p.vehicle_area = 0;
+    p.bonus_mode = 0;
+    p.super_bonus_mode = 0;
     i32 episode = -1;
     if (area == -1) {
         p.area = NULL;
@@ -398,15 +400,15 @@ void InitStatusScreen(WORLDINFO_s *world) {
         p.episode_id = p.area->episode_index;
         episode = p.episode_id;
         if (episode != -1) {
-            p.episode = EDataList + episode;
+            p.episode = EDataList + static_cast<i8>(p.area->episode_index);
         }
         p.chapter = p.area->area_index;
-        if ((p.area->flags & 1) != 0)
-            p.field_0xb0 |= 0x80;
-        if ((p.area->flags & 4) != 0)
-            p.mode_flags |= 1;
+        if ((p.area->flags & AREAFLAG_VEHICLE_AREA) != 0)
+            p.vehicle_area = 1;
+        if ((p.area->flags & AREAFLAG_BONUS_AREA) != 0)
+            p.bonus_mode = 1;
         if ((p.area->flags & 0x100) != 0)
-            p.mode_flags |= 2;
+            p.super_bonus_mode = 1;
     }
     if (p.init_callback(world, &p) != 0) {
         return;
@@ -597,24 +599,20 @@ void InitStatusScreen(WORLDINFO_s *world) {
         p.minikit_max = (p.area->flags & 0x10) != 0 ? 10 : 0;
         if (p.minikit_count > p.minikit_max)
             p.minikit_count = p.minikit_max;
-        p.true_hero_target =
-            static_cast<u32>((p.field_0xb0 & 0x40) != 0 ? p.area->true_hero_targets[1] : p.area->true_hero_targets[0]);
+        p.true_hero_target = static_cast<u32>(p.area->true_hero_targets[p.free_play]);
     }
     p.area_time = AreaTimer.time_elapsed;
-    const u32 total = p.coins_remaining[0] + p.coins_remaining[1];
-    if (total < p.coins_remaining[0] || total >= 4000000000U)
+    const u64 total = static_cast<u64>(p.coins_remaining[0]) + p.coins_remaining[1];
+    if (total >= 4000000000ULL)
         p.collected_score = 4000000000.0f;
     else
-        p.collected_score = static_cast<f32>(total);
+        p.collected_score = static_cast<f32>(p.coins_remaining[0] + p.coins_remaining[1]);
     p.newly_completed = 0;
     if ((p.field_0xb0 & 4) != 0)
         p.true_hero_percent = 100.0f;
-    else if (p.collected_score * 100.0f == 0.0f || p.true_hero_target == 0.0f)
-        p.true_hero_percent = 0.0f;
     else {
-        p.true_hero_percent = p.collected_score * 100.0f / p.true_hero_target;
-        if (p.true_hero_percent > 99.0f)
-            p.true_hero_percent = 99.0f;
+        const f32 percent = NuFdiv(p.collected_score * 100.0f, p.true_hero_target);
+        p.true_hero_percent = percent > 99.0f ? 99.0f : percent;
     }
     p.coins_collected[0] = p.coins_remaining[0];
     p.coins_collected[1] = p.coins_remaining[1];
@@ -634,16 +632,19 @@ void InitStatusScreen(WORLDINFO_s *world) {
                 ++save[0x50];
             }
         }
-        i32 gold = 0;
-        i32 completed_episode = 0;
+        i32 gold;
+        i32 completed_episode;
         if ((p.field_0xb0 & 0x40) == 0 && Game.area_save[area].area_complete == 0 && (p.area->flags & 0x26) == 0) {
             Game.area_save[area].area_complete = 1;
             p.newly_completed = 1;
             AddToCompletionPoints(POINTS_PER_STORY);
+            gold = 0;
             if ((p.mode_flags & 1) == 0 && (p.area->flags & 0x800) == 0)
                 gold = AddGoldBrickMessage(&p, tLEVELCOMPLETE);
             if (p.episode != NULL && Episode_IsComplete(p.episode, NULL) != 0)
                 completed_episode = static_cast<i8>(p.area->episode_index);
+            else
+                completed_episode = 0;
             if (p.episode_id != -1 && p.chapter != -1) {
                 sprintf(event, "story_ep%i_ch%i_complete", p.episode_id + 1, p.chapter + 1);
                 NuIOS_RecordFlurryEvent(event);
@@ -659,12 +660,16 @@ void InitStatusScreen(WORLDINFO_s *world) {
                 Game.area_save[p.next_area].complete = 1;
             else if (p.episode != NULL) {
                 const i32 bonus = Episode_FindAreaFromFlags(p.episode, 5, 4);
-                hub_startoutsidebonusdoor_area = Episode_FindAreaFromFlags(p.episode, 5, 5);
+                const i32 bonus2 = Episode_FindAreaFromFlags(p.episode, 5, 5);
                 if (bonus != -1)
                     Game.area_save[bonus].complete = 1;
-                if (hub_startoutsidebonusdoor_area != -1)
-                    Game.area_save[hub_startoutsidebonusdoor_area].complete = 1;
+                if (bonus2 != -1)
+                    Game.area_save[bonus2].complete = 1;
+                hub_startoutsidebonusdoor_area = bonus2;
             }
+        } else {
+            gold = 0;
+            completed_episode = 0;
         }
         if (p.newly_completed != 0)
             AddStatusStage(&p, 13, gold);
@@ -687,9 +692,8 @@ void InitStatusScreen(WORLDINFO_s *world) {
         RememberPlayerIDs(1, static_cast<i16>(p.player0_model), static_cast<i16>(p.player1_model));
     }
     if (area != -1 && ((p.area->flags & 0x136) == 0x10 || (p.area->flags & 0x4000) != 0)) {
-        AREASAVE_s &save = Game.area_save[area];
         if (BOTHTRUEJEDIGOLDBRICKS != 0) {
-            u8 &complete = (p.field_0xb0 & 0x40) != 0 ? save.true_hero_complete[1] : save.true_hero_complete[0];
+            u8 &complete = Game.area_save[area].true_hero_complete[(p.field_0xb0 >> 6) & 1];
             if (complete == 0) {
                 if ((p.field_0xb0 & 4) != 0) {
                     complete = 1;
@@ -698,15 +702,15 @@ void InitStatusScreen(WORLDINFO_s *world) {
                 } else if (p.collected_score > 0.0f)
                     AddStatusStage(&p, 2, 0);
             }
-        } else if (save.true_hero_complete[0] == 0 && save.true_hero_complete[1] == 0) {
+        } else if (Game.area_save[area].true_hero_complete[0] == 0 && Game.area_save[area].true_hero_complete[1] == 0) {
             if ((p.field_0xb0 & 4) != 0) {
-                save.true_hero_complete[0] = save.true_hero_complete[1] = 1;
+                Game.area_save[area].true_hero_complete[0] = Game.area_save[area].true_hero_complete[1] = 1;
                 AddToCompletionPoints(POINTS_PER_TRUEJEDI);
                 AddStatusStage(&p, 1, AddGoldBrickMessage(&p, tTRUEHERO));
-                if (p.episode_id == -1 || p.chapter == -1)
-                    sprintf(event, "truejedi_%s_awarded", p.area->file);
-                else
+                if (p.episode_id != -1 && p.chapter != -1)
                     sprintf(event, "truejedi_ep%i_ch%i_awarded", p.episode_id + 1, p.chapter + 1);
+                else
+                    sprintf(event, "truejedi_%s_awarded", p.area->file);
                 NuIOS_RecordFlurryEvent(event);
             } else if (p.collected_score > 0.0f && (p.mode_flags & 8) == 0)
                 AddStatusStage(&p, 2, 0);
@@ -959,16 +963,15 @@ extern "C" void NuStrCat(char *, const char *);
 void TrueHero_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active) {
     if (active == 0)
         return;
-    char text[252];
+    char text[256];
     f32 alpha = 1.0f;
-    const f32 time = stage->field_0x18;
     switch (stage->field_0x14) {
         case 0:
             alpha = 0.0f;
             break;
         case 1: {
-            alpha = time;
-            const f32 ratio = stage->field_0x1c != 0.0f && time != 0.0f ? time / stage->field_0x1c : 0.0f;
+            alpha = stage->field_0x18;
+            const f32 ratio = NuFdiv(stage->field_0x18, stage->field_0x1c);
             const f32 blend =
                 1.0f - (NuTrigTable[(static_cast<i32>(ratio * 32768.0f + 16384.0f) >> 1) & 0x7fff] + 1.0f) * 0.5f;
             DrawBuildUpBar(0.0f,
@@ -978,20 +981,23 @@ void TrueHero_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active
             break;
         }
         case 2: {
+            f32 time = stage->field_0x18;
+            if (time > 1.0f)
+                time = 1.0f;
             const f32 blend =
-                1.0f -
-                (NuTrigTable[(static_cast<i32>((time <= 1.0f ? time : 1.0f) * 32768.0f + 16384.0f) >> 1) & 0x7fff] +
-                 1.0f) *
-                    0.5f;
+                (NuTrigTable[(static_cast<i32>(time * 32768.0f + 16384.0f) >> 1) & 0x7fff] + 1.0f) * 0.5f;
             DrawBuildUpBar(0.0f, 0.7f, packet->true_hero_percent, 100, 1.0f, 1.75f, 1.0f, 0);
             sprintf(text, "%i%%", static_cast<i32>(packet->true_hero_percent));
-            Text3DEx(text, 0.0f, 0.3f, 1.0f, 0.8f, 0.8f, 0.8f, 0, 255, 191, 0, static_cast<i32>(blend * 128.0f) & 255);
+            Text3DEx(text, 0.0f, 0.3f, 1.0f, 0.8f, 0.8f, 0.8f, 0, 255, 191, 0,
+                     static_cast<u8>(static_cast<i32>((1.0f - blend) * 128.0f)));
             break;
         }
         case 3: {
             const f32 blend =
                 1.0f -
-                (NuTrigTable[time < 1.0f ? ((static_cast<i32>(time * 32768.0f + 16384.0f) >> 1) & 0x7fff) : 0x6000] +
+                (NuTrigTable[stage->field_0x18 < 1.0f
+                                 ? ((static_cast<i32>(stage->field_0x18 * 32768.0f + 16384.0f) >> 1) & 0x7fff)
+                                 : 0x6000] +
                  1.0f) *
                     0.5f;
             if (blend < 1.0f) {
@@ -1005,11 +1011,11 @@ void TrueHero_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active
             break;
         }
         case 6: {
-            alpha = 1.0f - time;
+            alpha = 1.0f - stage->field_0x18;
             if (stage->type == 2 && alpha > 0.0f) {
                 sprintf(text, "%i%%", static_cast<i32>(packet->true_hero_percent));
                 Text3DEx(text, 0.0f, 0.3f, 1.0f, 0.8f, 0.8f, 0.8f, 0, 255, 191, 0,
-                         static_cast<i32>(alpha * 128.0f) & 255);
+                         static_cast<u8>(static_cast<i32>(alpha * 128.0f)));
             }
             const f32 ratio = stage->field_0x18 < 1.0f ? 1.0f - stage->field_0x18 : 0.0f;
             const f32 blend =
@@ -1021,10 +1027,7 @@ void TrueHero_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active
             break;
         }
     }
-    if (alpha < 0.0f)
-        alpha = 0.0f;
-    else if (alpha > 1.0f)
-        alpha = 1.0f;
+    alpha = alpha < 0.0f ? 0.0f : alpha > 1.0f ? 1.0f : alpha;
     NuStrCpy(text, TTab[tTRUEJEDI]);
     if (BOTHTRUEJEDIGOLDBRICKS != 0) {
         NuStrCat(text, " ");
@@ -1048,7 +1051,7 @@ void DrawStatusScreen(WORLDINFO_s *) {
     memset(KitPart, 0, sizeof(KitPart));
 
     if (GAMEDEMO != 0) {
-        if (GAMEDEMO != 1 || FadeSys.fade != 0.0f || TTab == NULL)
+        if (GAMEDEMO != 1 || FadeSys.fade != 0.0f)
             return;
         char *freeplay_text = TTab[tFREEPLAY];
         char *exit_text = TTab[tEXIT];
@@ -1086,7 +1089,7 @@ void DrawStatusScreen(WORLDINFO_s *) {
                 green = MENUENTRYG;
                 blue = MENUENTRYB;
             }
-            Text3D(text, 0.0f, y, 1.0f, MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, 0, red, green, blue);
+            Text3D(text, 0.0f, y, 1.0f, MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, 0, red & 255, green & 255, blue & 255);
         }
         y += MENUDY;
         {
@@ -1122,7 +1125,7 @@ void DrawStatusScreen(WORLDINFO_s *) {
                 green = MENUENTRYG;
                 blue = MENUENTRYB;
             }
-            Text3D(text, 0.0f, y, 1.0f, MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, 0, red, green, blue);
+            Text3D(text, 0.0f, y, 1.0f, MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, 0, red & 255, green & 255, blue & 255);
         }
         return;
     }
@@ -1131,55 +1134,58 @@ void DrawStatusScreen(WORLDINFO_s *) {
     }
 
     STATUSPACKET_s *status = &StatusPacket;
-    if (status->status_flags == 0) {
-        char time[256];
-        const f32 remaining = MAX(6.0f - GameTimer.time_elapsed, 0.0f);
-        Text_MakeTime(remaining, 0, 0, 0, time);
-        const f32 y_phase = NuFmod(GameTimer.time_elapsed, 0.5f);
-        const f32 y = 0.01f * NU_SIN_LUT(static_cast<i32>((y_phase + y_phase) * 65536.0f));
-        const f32 x_phase = NuFmod(GameTimer.time_elapsed, 0.432f);
-        const f32 x = 0.01f * NU_SIN_LUT(static_cast<i32>(x_phase / 0.432f * 65536.0f));
-        Text3D(time, x, y, 1.0f, 1.0f, 1.0f, 1.0f, 0, 255, 191, 0);
-        return;
-    }
+    if (status->status_flags != 0) {
 
-    if (status->draw_background_callback != NULL) {
-        status->draw_background_callback(status);
-    }
-
-    i32 stage_index = 1;
-    for (STATUS_STAGE_s *stage = StatusStages; stage != NULL && stage->type != -1;
-         stage = StatusStages + stage_index++) {
-        if (stage->draw_callback != NULL) {
-            stage->draw_callback(stage, status, stage == status->stage);
+        if (status->draw_background_callback != NULL) {
+            status->draw_background_callback(status);
         }
-    }
 
-    STATUS_STAGE_s *stage = status->stage;
-    if (stage == NULL)
-        return;
-    f32 alpha;
-    if (stage->type == 11) {
-        return;
-    } else if (stage->type == 12) {
-        alpha = 0.0f;
-    } else if (stage->type == 10) {
-        alpha = stage->field_0x18 < 1.0f ? 1.0f - stage->field_0x18 : 0.0f;
-    } else {
-        alpha = 1.0f;
-        if (stage->type == 19 && stage->field_0x14 != 0) {
-            const f32 time = stage->field_0x18;
-            if (time < 1.0f) {
-                alpha = 1.0f - time;
-            } else {
-                const f32 fade_start = stage->field_0x1c - 1.0f;
-                alpha = time < fade_start ? 0.0f : (time - fade_start) / (stage->field_0x1c - fade_start);
+        i32 stage_index = 1;
+        for (STATUS_STAGE_s *stage = StatusStages; stage->type != -1;
+             stage = StatusStages + stage_index++) {
+            if (stage->draw_callback != NULL) {
+                if (stage == status->stage)
+                    stage->draw_callback(stage, status, 1);
+                else
+                    stage->draw_callback(stage, status, 0);
             }
         }
-    }
 
-    if (draw_player_icons != 0) {
-        DrawStatusIcons(status, icon_y, iconalphaoverride >= 0.0f ? iconalphaoverride : alpha);
+        STATUS_STAGE_s *stage = status->stage;
+        f32 alpha;
+        if (stage->type == 11) {
+            return;
+        } else if (stage->type == 12) {
+            alpha = 0.0f;
+        } else if (stage->type == 10) {
+            alpha = stage->field_0x18 < 1.0f ? 1.0f - stage->field_0x18 : 0.0f;
+        } else {
+            alpha = 1.0f;
+            if (stage->type == 19 && stage->field_0x14 != 0) {
+                const f32 time = stage->field_0x18;
+                if (time < 1.0f) {
+                    alpha = 1.0f - time;
+                } else {
+                    const f32 fade_start = stage->field_0x1c - 1.0f;
+                    alpha = 0.0f;
+                    if (time >= fade_start)
+                        alpha = (time - fade_start) / (stage->field_0x1c - fade_start);
+                }
+            }
+        }
+
+        if (draw_player_icons != 0) {
+            DrawStatusIcons(status, icon_y, iconalphaoverride >= 0.0f ? iconalphaoverride : alpha);
+        }
+    } else {
+        char time[256];
+        const f32 remaining = MAX(0.0f, 6.0f - GameTimer.time_elapsed);
+        Text_MakeTime(remaining, 0, 0, 0, time);
+        const f32 y_phase = NuFmod(GameTimer.time_elapsed, 0.5f);
+        const f32 y = 0.01f * NuTrigTable[static_cast<u16>(static_cast<i32>((y_phase + y_phase) * 65536.0f)) >> 1];
+        const f32 x_phase = NuFmod(GameTimer.time_elapsed, 0.432f);
+        const f32 x = 0.01f * NuTrigTable[static_cast<u16>(static_cast<i32>(x_phase / 0.432f * 65536.0f)) >> 1];
+        Text3D(time, x, y, 1.0f, 1.0f, 1.0f, 1.0f, 0, 255, 191, 0);
     }
 }
 

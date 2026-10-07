@@ -798,10 +798,10 @@ void DisplayListLinkDynamicMtls(void) {
                     sp_idx = j;
             }
         }
-        nusortpri_s *sp = (sp_idx >= 0) ? &mgr->dyn_mtl_dlist.sort_pris[sp_idx] : nullptr;
+        nusortpri_s *sp = &mgr->dyn_mtl_dlist.sort_pris[sp_idx];
         nudisplaylistitem_s *mtl_item = mtl->display_list->mtl_item;
 
-        if (sp) {
+        {
             if (sp->items == mtl_item) {
                 sp->items = static_cast<nudisplaylistitem_s *>(mtl_item[7].next);
                 mtl_item[7].type = kItemType_Terminator;
@@ -833,18 +833,16 @@ void DisplayListLinkDynamicMtls(void) {
             }
         }
 
-        if (sp) {
+        {
             if (--sp->nmtls == 0) {
                 // Unlink empty sortpri.
                 if (mgr->sort_list == sp) {
                     mgr->sort_list = sp->sys_next;
                 } else {
-                    for (nusortpri_s *cur = mgr->sort_list; cur; cur = cur->sys_next) {
-                        if (cur->sys_next == sp) {
-                            cur->sys_next = sp->sys_next;
-                            break;
-                        }
-                    }
+                    nusortpri_s *cur = mgr->sort_list;
+                    while (cur->sys_next != sp)
+                        cur = cur->sys_next;
+                    cur->sys_next = sp->sys_next;
                 }
                 --mgr->nused_sort_pris;
                 for (i32 j = sp_idx; j < mgr->dyn_mtl_dlist.nsort_pris - 1; ++j) {

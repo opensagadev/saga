@@ -68,3 +68,15 @@ NU_MTX_ROTATE_Y_IMPL(NuMtxRotateYInline, static inline)
     }
 
 NU_MTX_ROTATE_Z_IMPL(NuMtxRotateZInline, static inline)
+
+#define NU_MTX_SET_ROTATION_Y_IMPL(function_name, storage)                                                              \
+    storage void function_name(NUMTX *m, NUANG a) {                                                                    \
+        m->m00 = m->m22 = NU_COS_LUT(a);                                                                               \
+        m->m20 = NU_SIN_LUT(a);                                                                                       \
+        m->m02 = -m->m20;                                                                                             \
+        m->m11 = 1.0f;                                                                                                \
+        m->m01 = m->m10 = m->m03 = m->m23 = m->m12 = m->m21 = m->m13 = m->m30 = m->m31 = m->m32 = 0.0f;               \
+        m->m33 = 1.0f;                                                                                                \
+    }
+
+NU_MTX_SET_ROTATION_Y_IMPL(NuMtxSetRotationYInline, static inline)

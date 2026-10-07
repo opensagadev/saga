@@ -201,59 +201,59 @@ void Customiser_Init(CUSTOMISER *customiser) {
     Customiser_SetNameAndIcon(customiser, -1);
     Customise_NameAlpha = 0.0f;
     if (customiser->piece_counts[0] > 0)
-        Game.customizer.pieces[0] = Customiser_NextPieceRight(
-            customiser, static_cast<u16>(Game.customizer.pieces[0]) - 1, customiser->piece_counts[0], 0, 0);
+        Game.customizer[0].pieces[0] = Customiser_NextPieceRight(
+            customiser, static_cast<u16>(Game.customizer[0].pieces[0]) - 1, customiser->piece_counts[0], 0, 0);
     if (customiser->piece_counts[1] > 0)
-        Game.customizer.pieces[1] = Customiser_NextPieceRight(
-            customiser, static_cast<u16>(Game.customizer.pieces[1]) - 1, customiser->piece_counts[1], 0, 1);
+        Game.customizer[0].pieces[1] = Customiser_NextPieceRight(
+            customiser, static_cast<u16>(Game.customizer[0].pieces[1]) - 1, customiser->piece_counts[1], 0, 1);
     if (customiser->piece_counts[2] > 0)
-        Game.customizer.pieces[2] = Customiser_NextPieceRight(
-            customiser, static_cast<u16>(Game.customizer.pieces[2]) - 1, customiser->piece_counts[2], 0, 2);
+        Game.customizer[0].pieces[2] = Customiser_NextPieceRight(
+            customiser, static_cast<u16>(Game.customizer[0].pieces[2]) - 1, customiser->piece_counts[2], 0, 2);
     if (customiser->piece_counts[3] > 0)
-        Game.customizer.pieces[3] = Customiser_NextPieceRight(
-            customiser, static_cast<u16>(Game.customizer.pieces[3]) - 1, customiser->piece_counts[3], 0, 3);
+        Game.customizer[0].pieces[3] = Customiser_NextPieceRight(
+            customiser, static_cast<u16>(Game.customizer[0].pieces[3]) - 1, customiser->piece_counts[3], 0, 3);
     if (customiser->piece_counts[4] > 0)
-        Game.customizer.pieces[4] = Customiser_NextPieceRight(
-            customiser, static_cast<u16>(Game.customizer.pieces[4]) - 1, customiser->piece_counts[4], 0, 4);
+        Game.customizer[0].pieces[4] = Customiser_NextPieceRight(
+            customiser, static_cast<u16>(Game.customizer[0].pieces[4]) - 1, customiser->piece_counts[4], 0, 4);
     if (customiser->piece_counts[5] > 0)
-        Game.customizer.pieces[5] = Customiser_NextPieceRight(
-            customiser, static_cast<u16>(Game.customizer.pieces[5]) - 1, customiser->piece_counts[5], 0, 5);
+        Game.customizer[0].pieces[5] = Customiser_NextPieceRight(
+            customiser, static_cast<u16>(Game.customizer[0].pieces[5]) - 1, customiser->piece_counts[5], 0, 5);
     if (customiser->piece_counts[6] > 0)
-        Game.customizer.pieces[6] = Customiser_NextPieceRight(
-            customiser, static_cast<u16>(Game.customizer.pieces[6]) - 1, customiser->piece_counts[6], 0, 6);
+        Game.customizer[0].pieces[6] = Customiser_NextPieceRight(
+            customiser, static_cast<u16>(Game.customizer[0].pieces[6]) - 1, customiser->piece_counts[6], 0, 6);
     if (customiser->piece_counts[7] > 0)
-        Game.customizer.pieces[7] = Customiser_NextPieceRight(
-            customiser, static_cast<u16>(Game.customizer.pieces[7]) - 1, customiser->piece_counts[7], 0, 7);
+        Game.customizer[0].pieces[7] = Customiser_NextPieceRight(
+            customiser, static_cast<u16>(Game.customizer[0].pieces[7]) - 1, customiser->piece_counts[7], 0, 7);
     if (customiser->piece_counts[8] > 0)
-        Game.customizer.pieces[8] = Customiser_NextPieceRight(
-            customiser, static_cast<u16>(Game.customizer.pieces[8]) - 1, customiser->piece_counts[8], 0, 8);
+        Game.customizer[0].pieces[8] = Customiser_NextPieceRight(
+            customiser, static_cast<u16>(Game.customizer[0].pieces[8]) - 1, customiser->piece_counts[8], 0, 8);
     if (customiser->piece_counts[0] > 0)
-        Game.customizer.secondary_pieces[0] = Customiser_NextPieceRight(
-            customiser, static_cast<u16>(Game.customizer.secondary_pieces[0]) - 1, customiser->piece_counts[0], 1, 0);
+        Game.customizer[1].pieces[0] = Customiser_NextPieceRight(
+            customiser, static_cast<u16>(Game.customizer[1].pieces[0]) - 1, customiser->piece_counts[0], 1, 0);
     if (customiser->piece_counts[1] > 0)
-        Game.customizer.secondary_pieces[1] = Customiser_NextPieceRight(
-            customiser, static_cast<u16>(Game.customizer.secondary_pieces[1]) - 1, customiser->piece_counts[1], 1, 1);
+        Game.customizer[1].pieces[1] = Customiser_NextPieceRight(
+            customiser, static_cast<u16>(Game.customizer[1].pieces[1]) - 1, customiser->piece_counts[1], 1, 1);
     if (customiser->piece_counts[2] > 0)
-        Game.customizer.secondary_pieces[2] = Customiser_NextPieceRight(
-            customiser, static_cast<u16>(Game.customizer.secondary_pieces[2]) - 1, customiser->piece_counts[2], 1, 2);
+        Game.customizer[1].pieces[2] = Customiser_NextPieceRight(
+            customiser, static_cast<u16>(Game.customizer[1].pieces[2]) - 1, customiser->piece_counts[2], 1, 2);
     if (customiser->piece_counts[3] > 0)
-        Game.customizer.secondary_pieces[3] = Customiser_NextPieceRight(
-            customiser, static_cast<u16>(Game.customizer.secondary_pieces[3]) - 1, customiser->piece_counts[3], 1, 3);
+        Game.customizer[1].pieces[3] = Customiser_NextPieceRight(
+            customiser, static_cast<u16>(Game.customizer[1].pieces[3]) - 1, customiser->piece_counts[3], 1, 3);
     if (customiser->piece_counts[4] > 0)
-        Game.customizer.secondary_pieces[4] = Customiser_NextPieceRight(
-            customiser, static_cast<u16>(Game.customizer.secondary_pieces[4]) - 1, customiser->piece_counts[4], 1, 4);
+        Game.customizer[1].pieces[4] = Customiser_NextPieceRight(
+            customiser, static_cast<u16>(Game.customizer[1].pieces[4]) - 1, customiser->piece_counts[4], 1, 4);
     if (customiser->piece_counts[5] > 0)
-        Game.customizer.secondary_pieces[5] = Customiser_NextPieceRight(
-            customiser, static_cast<u16>(Game.customizer.secondary_pieces[5]) - 1, customiser->piece_counts[5], 1, 5);
+        Game.customizer[1].pieces[5] = Customiser_NextPieceRight(
+            customiser, static_cast<u16>(Game.customizer[1].pieces[5]) - 1, customiser->piece_counts[5], 1, 5);
     if (customiser->piece_counts[6] > 0)
-        Game.customizer.secondary_pieces[6] = Customiser_NextPieceRight(
-            customiser, static_cast<u16>(Game.customizer.secondary_pieces[6]) - 1, customiser->piece_counts[6], 1, 6);
+        Game.customizer[1].pieces[6] = Customiser_NextPieceRight(
+            customiser, static_cast<u16>(Game.customizer[1].pieces[6]) - 1, customiser->piece_counts[6], 1, 6);
     if (customiser->piece_counts[7] > 0)
-        Game.customizer.secondary_pieces[7] = Customiser_NextPieceRight(
-            customiser, static_cast<u16>(Game.customizer.secondary_pieces[7]) - 1, customiser->piece_counts[7], 1, 7);
+        Game.customizer[1].pieces[7] = Customiser_NextPieceRight(
+            customiser, static_cast<u16>(Game.customizer[1].pieces[7]) - 1, customiser->piece_counts[7], 1, 7);
     if (customiser->piece_counts[8] > 0)
-        Game.customizer.secondary_pieces[8] = Customiser_NextPieceRight(
-            customiser, static_cast<u16>(Game.customizer.secondary_pieces[8]) - 1, customiser->piece_counts[8], 1, 8);
+        Game.customizer[1].pieces[8] = Customiser_NextPieceRight(
+            customiser, static_cast<u16>(Game.customizer[1].pieces[8]) - 1, customiser->piece_counts[8], 1, 8);
     CustomiseNameBoardTMul[1] = 0.0f;
     CustomiseNameBoardMul[0] = 0.0f;
     CustomiseNameLetterBlipScale[1] = 1.0f;
@@ -305,11 +305,11 @@ void Customiser_TransformToPanel(CUSTOMISER *) {
     NuCameraTransformScreenClip(&CustomiseScreenPos[1], &CustomisePos[1], 1, NULL);
 }
 
-static const i16 *Customiser_GetSelection(i32 side) {
-    return side == 0 ? Game.customizer.pieces : Game.customizer.secondary_pieces;
+static u16 *Customiser_GetSelection(i32 side) {
+    return Game.customizer[side].pieces;
 }
 
-static CUSTOMPIECE *Customiser_GetSelectedPiece(CUSTOMISER *customiser, const i16 *selection, i32 category) {
+static CUSTOMPIECE *Customiser_GetSelectedPiece(CUSTOMISER *customiser, const u16 *selection, i32 category) {
     if (customiser->piece_sets[category] == NULL || customiser->piece_counts[category] <= 0) {
         return NULL;
     }
@@ -320,7 +320,7 @@ static CUSTOMPIECE *Customiser_GetSelectedPiece(CUSTOMISER *customiser, const i1
     return &customiser->piece_sets[category][index];
 }
 
-static u32 Customiser_GetLayerMask(CUSTOMISER *customiser, GAMECHARACTERDATA *runtime, const i16 *selection) {
+static u32 Customiser_GetLayerMask(CUSTOMISER *customiser, GAMECHARACTERDATA *runtime, const u16 *selection) {
     u32 layer_mask = 0;
     for (i32 category = 0; category < 9; ++category) {
         // Slot five is the cape selection; its hierarchy layer is supplied by the character data.
@@ -367,7 +367,7 @@ static u32 Customiser_GetLayerMask(CUSTOMISER *customiser, GAMECHARACTERDATA *ru
         if (runtime == NULL)                                                                                           \
             break;                                                                                                     \
         runtime->flags_090 = 0;                                                                                        \
-        const i16 *selection = saved_selection;                                                                        \
+        const u16 *selection = saved_selection;                                                                        \
         u32 layer_mask = 0;                                                                                            \
         CUSTOM_SETUP_LAYER(0)                                                                                          \
         CUSTOM_SETUP_LAYER(1)                                                                                          \
@@ -423,8 +423,8 @@ void Customiser_SetUpCharacterData(CUSTOMISER *customiser) {
     if (customiser == NULL)
         return;
     // The reference has two fixed previews and nine fixed piece categories.
-    CUSTOM_SETUP_SIDE(0, Game.customizer.pieces);
-    CUSTOM_SETUP_SIDE(1, Game.customizer.secondary_pieces);
+    CUSTOM_SETUP_SIDE(0, Game.customizer[0].pieces);
+    CUSTOM_SETUP_SIDE(1, Game.customizer[1].pieces);
     Customiser_SetNameAndIcon(customiser, -1);
 }
 #undef CUSTOM_SETUP_SIDE
@@ -458,7 +458,7 @@ void Customiser_Draw3D(CUSTOMISER *customiser) {
         rtlResetEx(&light_data, 1);
         rtlApplySetScale(world->rtl_set, &light_data, &CustomisePos[side], NULL, -1, 1.0f);
         SetLights_RTLDATA(&light_data, 1.0f);
-        const i16 *selection = Customiser_GetSelection(side);
+        const u16 *selection = Customiser_GetSelection(side);
         u32 layer_mask = Customiser_GetLayerMask(customiser, runtime, selection);
         if (runtime->cape_layer != -1 && selected == 5 && GetMenuID() == 12 && customiser_quit == 0)
             layer_mask |= 1u << (static_cast<u8>(runtime->cape_layer) & 31);
@@ -516,49 +516,53 @@ void Customiser_Draw3D(CUSTOMISER *customiser) {
 }
 
 void Customiser_Update(CUSTOMISER *customiser, WORLDINFO_s *world) {
+    const f32 frame_time = FRAMETIME;
     if (customiser == NULL)
         return;
     i32 active_side, active_count;
     Customiser_GetActiveWeirdoIndex(&active_side, &active_count);
     i32 preview_side = -1;
-    if (active_count == 1 && active_side >= 0 && active_side < 2)
-        preview_side = MenuPacket.customise_other_player[active_side] != 0 ? 1 - active_side : active_side;
-    const u8 colour = menu_flash != 0 ? 255 : 191;
+    if (active_count == 1)
+        preview_side = MenuPacket.customise_other_player[active_side] != 0 ? active_side == 0 : active_side;
+    const i32 colour = menu_flash == 0 ? 255 : 191;
+    const u16 rotation_step = static_cast<i32>(10922.0f * frame_time);
+    const u16 tilt_x_step = static_cast<i32>(12379.0f * frame_time);
+    const u16 tilt_z_step = static_cast<i32>(10376.0f * frame_time);
+    const u16 bob_step = static_cast<i32>(20206.0f * frame_time);
     for (i32 side = 0; side < 2; ++side) {
         const i32 control_side = active_count == 2                  ? side
                                  : MenuPacket.active_player[0] != 0 ? 0
                                  : MenuPacket.active_player[1] != 0 ? 1
                                                                     : -1;
-        CustomiseRotY[side] += static_cast<u16>(static_cast<i32>(10922.0f * FRAMETIME));
-        CustomiseTiltX[side] += static_cast<u16>(static_cast<i32>(12379.0f * FRAMETIME));
-        CustomiseTiltZ[side] += static_cast<u16>(static_cast<i32>(10376.0f * FRAMETIME));
-        CustomiseBob[side] += static_cast<u16>(static_cast<i32>(20206.0f * FRAMETIME));
+        CustomiseRotY[side] += rotation_step;
+        CustomiseTiltX[side] += tilt_x_step;
+        CustomiseTiltZ[side] += tilt_z_step;
+        CustomiseBob[side] += bob_step;
         UpdateCustomPieceAnim(&HeadAnim[side], 0xd556, 0x2aaa);
         UpdateCustomPieceAnim(&ArmsAnim[side], 0x1555, 0x4000);
         UpdateCustomPieceAnim(&LegsAnim[side], 0xe000, 0x4000);
-        const i16 *selection = Customiser_GetSelection(side);
-        CUSTOMPIECE *head = Customiser_GetSelectedPiece(customiser, selection, 0);
-        CUSTOMPIECE *torso = Customiser_GetSelectedPiece(customiser, selection, 1);
+        const u16 *selection = Customiser_GetSelection(side);
+        CUSTOMPIECE *head = &customiser->piece_sets[0][static_cast<u16>(selection[0])];
+        CUSTOMPIECE *torso = &customiser->piece_sets[1][static_cast<u16>(selection[1])];
         f32 no_hat = 0.0f;
-        if (torso != NULL && (torso->layer_flags & 1) != 0) {
-            if ((torso->layer_flags & 4) != 0)
-                no_hat = head != NULL && (head->layer_flags & 8) != 0 ? 0.21f : 0.168f;
+        if ((torso->availability_flags & 1) != 0) {
+            if ((torso->availability_flags & 4) != 0)
+                no_hat = (head->availability_flags & 8) != 0 ? 0.21f : 0.168f;
             else
-                no_hat = head != NULL && (head->layer_flags & 8) != 0 ? 0.168f : 0.126f;
+                no_hat = (head->availability_flags & 8) != 0 ? 0.168f : 0.126f;
         }
         NoHatPos[side].y = SeekValF(NoHatPos[side].y, no_hat, 10.0f);
         CustomiseMenuTime[side] += FRAMETIME;
         CHARACTERMODEL_s *model = APICharacterLoaded(customiser->character_ids[side]);
         if (model == NULL)
             continue;
-        CUSTOMPIECE *weapon = Customiser_GetSelectedPiece(customiser, selection, 2);
-        const i32 saber_colour = weapon == NULL ? -1 : LightSabre_ColourFromObj(weapon->weapon_model, NULL);
+        CUSTOMPIECE *weapon = &customiser->piece_sets[2][static_cast<u16>(selection[2])];
+        const i32 saber_colour = LightSabre_ColourFromObj(weapon->weapon_model, NULL);
         if (customiser->animation_state[side] != 0)
             --customiser->animation_state[side];
         ANIMPACKET_s *packet = &customiser->animation_packets[side];
-        const i16 intro = saber_colour == -1 ? 0x62 : 0x61;
-        if (customiser->animation_active[side] == 0 && model->model_data_b != NULL &&
-            model->model_data_b[intro] != NULL) {
+        const i32 intro = saber_colour == -1 ? 0x62 : 0x61;
+        if (customiser->animation_active[side] == 0 && model->model_data_b[intro] != NULL) {
             if (customiser->animation_values[side] == 0.0f) {
                 customiser->animation_values[side] = AnimDuration(model->model_id, intro, 0.0f, 0.0f, 1);
             } else {
@@ -570,15 +574,17 @@ void Customiser_Update(CUSTOMISER *customiser, WORLDINFO_s *world) {
             customiser->animation_active[side] = 1;
         }
         packet->previous_animation = packet->animation_index;
-        packet->requested_animation =
-            customiser->animation_active[side] == 0 ? intro : static_cast<i16>(saber_colour == -1 ? 99 : 0xbe);
+        if (saber_colour == -1)
+            packet->requested_animation = customiser->animation_active[side] == 0 ? 0x62 : 0x63;
+        else
+            packet->requested_animation = customiser->animation_active[side] == 0 ? 0x61 : 0xbe;
         UpdateAnimPacket(model, packet, FRAMETIME * 30.0f, 0.0f, FRAMETIME, 0.0f);
         const u16 angle = CustomiseYRot[side] + 0xc000;
         for (i32 category = 0; category < 9; ++category) {
             const i32 selected = CustomiseMenuY[side];
             const i32 locator = customiser->locator_indices[category];
             if (selected == category && GetMenuID() == 12 && customiser_quit == 0 &&
-                (active_count == 2 || side == preview_side) && control_side != -1 && locator >= 0 && locator < 16 &&
+                (active_count == 2 || side == preview_side) && control_side != -1 && locator != -1 &&
                 model->points_of_interest[locator] != NULL) {
                 const NUMTX &joint = customiser->joint_matrices[side][locator];
                 NUVEC position = {joint.m30, joint.m31, joint.m32};
@@ -594,7 +600,7 @@ void Customiser_Update(CUSTOMISER *customiser, WORLDINFO_s *world) {
                     if (idle > 4.0f) {
                         const i32 phase = static_cast<i32>(NuFmod(idle, 4.0f) * 0.25f * 65536.0f);
                         const f32 pulse = NU_SIN_LUT(phase) - 0.8f;
-                        if (pulse >= 0.0f)
+                        if (!(pulse < 0.0f))
                             scale += pulse;
                     }
                 }
@@ -613,7 +619,7 @@ void Customiser_Update(CUSTOMISER *customiser, WORLDINFO_s *world) {
                 customiser->touch_heights[1] = height;
                 customiser->touch_positions[1].x = screen.x + width;
                 customiser->touch_positions[1].y = screen.y;
-                if (category > 0) {
+                if (CustomiseMenuY[side] > 0) {
                     Text3D(ASCII_UP, screen.x, screen.y + height, 1.0f, scale, scale, scale, 0, colour, colour, colour);
                     customiser->touch_positions[2].x = screen.x;
                     customiser->touch_positions[2].y = screen.y + height;
@@ -622,7 +628,7 @@ void Customiser_Update(CUSTOMISER *customiser, WORLDINFO_s *world) {
                 } else {
                     customiser->touch_widths[2] = 0.0f;
                 }
-                if (category < 8) {
+                if (CustomiseMenuY[side] < 8) {
                     Text3D(ASCII_DOWN, screen.x, screen.y - height, 1.0f, scale, scale, scale, 0, colour, colour,
                            colour);
                     customiser->touch_positions[3].x = screen.x;
@@ -633,20 +639,17 @@ void Customiser_Update(CUSTOMISER *customiser, WORLDINFO_s *world) {
                     customiser->touch_widths[3] = 0.0f;
                 }
             }
-            if (world == NULL || model->hierarchy == NULL)
-                continue;
             CUSTOMPIECECATEGORY *category_data = customiser->categories[category];
             CUSTOMPIECERESOURCE *resources = world->customiser_resources[category];
-            if (category_data == NULL || category_data->uses_special != 0 || category_data->material_tag == -1 ||
-                resources == NULL || customiser->piece_counts[category] <= 0)
+            if (resources == NULL || customiser->piece_counts[category] <= 0 || category_data->uses_special != 0 ||
+                category_data->material_tag == -1)
                 continue;
-            const i32 piece_index = selection[category];
-            if (piece_index < 0 || piece_index >= customiser->piece_counts[category] ||
-                resources[piece_index].texture_id == 0)
+            const i32 piece_index = static_cast<u16>(selection[category]);
+            if (resources[piece_index].texture_id == 0)
                 continue;
             for (i32 material = 0; material < model->hierarchy->material_count; ++material) {
                 NUMTL *entry = model->hierarchy->materials[material];
-                if (entry != NULL && entry->unknown_9a[0] == static_cast<u8>(category_data->material_tag)) {
+                if (entry->unknown_9a[0] == category_data->material_tag) {
                     entry->tex_id = resources[piece_index].texture_id;
                     NuMtlUpdate(entry);
                 }
@@ -680,32 +683,38 @@ void CustomiserMenu_Draw(MENU_s *) {
         return;
     CUSTOMISER *customiser = CharacterCustomiser;
     i32 side, active_count;
-    if (Customise_NameAlpha > 0.0f) {
+    if (!(Customise_NameAlpha <= 0.0f)) {
         Customiser_GetActiveWeirdoIndex(&side, &active_count);
         if (active_count == 1 && MenuPacket.customise_other_player[side] != 0)
             side = side == 0;
         for (i32 index = 0; index < active_count; ++index, ++side) {
-            const u8 blue = side == 0 ? 255 : 0;
-            const u8 green = side == 0 ? 191 : 255;
-            const u8 red = side == 0 ? 0 : 127;
-            if (CustomiseMode[side] == 1) {
-                const char *name = side == 0 ? Game.customizer.primary_name : Game.customizer.secondary_name;
+            const i32 green = side == 0 ? 191 : 255;
+            const i32 blue = side == 0 ? 255 : 0;
+            const i32 red = side == 0 ? 0 : 127;
+            if (CustomiseMode[side] != 1) {
+                char name[64];
+                GameObj_GetName(customiser->character_ids[side], NULL, name);
+                SmartTextEx(name, CustomiseScreenPos[side].x, -0.85f, 1.0f, 0.5f, 0.5f, 0.5f, 0, red, green, blue,
+                            0.75f, 2, NULL, 0, static_cast<i32>(128.0f * Customise_NameAlpha));
+            } else {
                 char letter[2];
+                letter[0] = 0;
                 letter[1] = 0;
                 const f32 gap = Game.options_save.widescreen == 0 ? 0.05249999836087227f : 0.041999999433755875f;
                 const f32 half_width = Game.options_save.widescreen == 0 ? 0.367499977350235f : 0.2939999997615814f;
-                i32 length = 15;
-                while (length > 0 && name[length - 1] == ' ')
-                    --length;
+                i32 length;
+                for (length = 15; length != 0; --length)
+                    if (Game.customizer[side].name[length - 1] != ' ')
+                        break;
                 f32 x = CustomiseScreenPos[side].x - half_width;
                 if (active_count == 2)
                     x += side == 0 ? -0.06f : 0.06f;
                 for (i32 column = 0; column != 15; ++column) {
                     f32 scale;
-                    u8 letter_red, letter_green, letter_blue;
+                    i32 letter_red, letter_green, letter_blue;
                     if (CustomiseNameX[side] == column) {
                         letter[0] = CustomiseLetter[CustomiseNameY[side]];
-                        const u8 arrow_colour = menu_flash == 0 ? 255 : 191;
+                        const i32 arrow_colour = menu_flash == 0 ? 255 : 191;
                         Text3D(ASCII_UP, x, -0.75f, 1.0f, 0.6f, 0.6f, 0.6f, 0, arrow_colour, arrow_colour,
                                arrow_colour);
                         Text3D(ASCII_DOWN, x, -0.9500000476837158f, 1.0f, 0.6f, 0.6f, 0.6f, 0, arrow_colour,
@@ -715,7 +724,7 @@ void CustomiserMenu_Draw(MENU_s *) {
                         letter_blue = 255;
                         scale = CustomiseNameLetterBlipScale[side];
                     } else {
-                        letter[0] = name[column];
+                        letter[0] = Game.customizer[side].name[column];
                         letter_red = red;
                         letter_green = green;
                         letter_blue = blue;
@@ -733,11 +742,6 @@ void CustomiserMenu_Draw(MENU_s *) {
                                blue);
                     x += gap;
                 }
-            } else {
-                char name[64];
-                GameObj_GetName(customiser->character_ids[side], NULL, name);
-                SmartTextEx(name, CustomiseScreenPos[side].x, -0.85f, 1.0f, 0.5f, 0.5f, 0.5f, 0, red, green, blue,
-                            0.75f, 2, NULL, 0, static_cast<i32>(128.0f * Customise_NameAlpha));
             }
             const f32 icon_size = ICONSIZE;
             f32 pulse = 1.0f;
@@ -746,7 +750,7 @@ void CustomiserMenu_Draw(MENU_s *) {
                 if (idle > 4.0f) {
                     const f32 time = NuFmod(idle, 4.0f);
                     const f32 excess = NuTrigTable[(static_cast<i32>(time * 0.25f * 65536.0f) >> 1) & 0x7fff] - 0.8f;
-                    if (excess >= 0.0f)
+                    if (!(excess < 0.0f))
                         pulse = 1.0f + excess;
                 }
             }
@@ -754,8 +758,7 @@ void CustomiserMenu_Draw(MENU_s *) {
             const f32 size = pulse * 0.1f * icon_size;
             const f32 alpha = (1.0f - CustomiseNameBoardMul[side]) * Customise_NameAlpha;
             DrawPanel3DObject(x, -0.6f, 1.0f, size, size, size, 0, 0, 0, &WORLD->lev_objs[167].special, 0, alpha);
-            CUSTOMISESAVE_s *save =
-                side == 0 ? &Game.customizer : reinterpret_cast<CUSTOMISESAVE_s *>(Game.customizer.secondary_pieces);
+            CUSTOMISESAVE_s *save = &Game.customizer[side];
             const i32 icon = Customiser_GetIcon(customiser, save, index);
             if (icon != -1)
                 DrawPanel3DObject(x, -0.6f, 1.0f, size, size, size, 0, 0, 0,
@@ -770,16 +773,21 @@ void CustomiserMenu_Draw(MENU_s *) {
                 if (idle > 4.0f) {
                     const f32 time = NuFmod(idle, 4.0f);
                     const f32 excess = NuTrigTable[(static_cast<i32>(time * 0.25f * 65536.0f) >> 1) & 0x7fff] - 0.8f;
-                    if (excess >= 0.0f)
+                    if (!(excess < 0.0f))
                         pulse = 1.0f + excess;
                 }
             }
             const f32 width = 0.125f * pulse;
             const f32 height = width / GetAspectRatio();
-            const u8 colour = menu_flash == 0 ? 255 : 191;
-            const f32 toggle_x = side == 0 ? x + 0.2f : x - 0.2f;
-            Text3D(const_cast<char *>(side == 0 ? ">" : "<"), toggle_x, -0.6f, 1.0f, pulse, pulse, pulse, 0, colour,
-                   colour, colour);
+            const i32 colour = menu_flash == 0 ? 255 : 191;
+            f32 toggle_x;
+            if (side != 0) {
+                toggle_x = x - 0.2f;
+                Text3D("<", toggle_x, -0.6f, 1.0f, pulse, pulse, pulse, 0, colour, colour, colour);
+            } else {
+                toggle_x = x + 0.2f;
+                Text3D(">", toggle_x, -0.6f, 1.0f, pulse, pulse, pulse, 0, colour, colour, colour);
+            }
             customiser->touch_positions[5].x = toggle_x;
             customiser->touch_positions[5].y = -0.6f;
             customiser->touch_widths[5] = width;
@@ -790,7 +798,7 @@ void CustomiserMenu_Draw(MENU_s *) {
     const f32 alpha = MenuPacket.active_player[0] == 0 ? DROPINALPHA : 1.0f;
     DrawCharIcon(MenuPacket.player_model[0], -ICONX, STATSPOSY, 0.0f, ICONSIZE, 0xa6, alpha, alpha, 1, NULL);
     if (GAMEDEMO == 0)
-        Customise_GetToggleString(active_count == 1 && MenuPacket.customise_other_player[side] != 0);
+        Customise_GetToggleString(active_count == 1 && MenuPacket.customise_other_player[0] != 0);
 }
 
 void Customiser_InitNames(CUSTOMISER *customiser) {
@@ -810,6 +818,14 @@ void Customiser_InitNames(CUSTOMISER *customiser) {
             TTab[text] = customiser->display_names[1];
         }
     }
+}
+
+static i32 Customise_FindLetter(char character) {
+    i32 letter = 0;
+    for (; letter != 38; ++letter)
+        if (character == CustomiseLetter[letter])
+            break;
+    return letter == 38 ? 0 : letter;
 }
 
 void CustomiserMenu_Update(MENU_s *) {
@@ -850,14 +866,15 @@ void CustomiserMenu_Update(MENU_s *) {
             cancel = true;
     }
     if (cancel && CustomiseMode[0] != 1 && CustomiseMode[1] != 1) {
-        quit = true;
         if (GAMEDEMO != 0 && MenuPacket.active_player[0] != 0 && MenuPacket.active_player[1] != 0) {
             if ((GamePad[0].buttons_pressed & GAMEPAD_MENUCANCEL) != 0)
                 MenuPacket.customise_demo_exit[0] = MenuPacket.customise_demo_exit[0] == 0;
             if ((GamePad[1].buttons_pressed & GAMEPAD_MENUCANCEL) != 0)
                 MenuPacket.customise_demo_exit[1] = MenuPacket.customise_demo_exit[1] == 0;
-            quit = MenuPacket.customise_demo_exit[0] != 0 && MenuPacket.customise_demo_exit[1] != 0;
-        }
+            if (MenuPacket.customise_demo_exit[0] != 0 && MenuPacket.customise_demo_exit[1] != 0)
+                quit = true;
+        } else
+            quit = true;
     } else if ((select[0] != 0 || select[1] != 0) && active_count == 1 && CustomiseMode[0] != 1 &&
                CustomiseMode[1] != 1) {
         if (!quit) {
@@ -869,12 +886,13 @@ void CustomiserMenu_Update(MENU_s *) {
         bool toggle = false;
         bool cancel_name = false;
         quit = false;
-        for (u32 player = 0; player != 2; ++player) {
+        GAMEPAD_s *pad = GamePad;
+        for (i32 player = 0; player != 2; ++player, ++pad) {
             if (MenuPacket.active_player[player] == 0)
                 continue;
-            GAMEPAD_s *pad = &GamePad[player];
             const u32 pressed = pad->buttons_pressed | pad->left_directions;
-            u32 side = player;
+            const u32 held = pad->buttons_held | pad->buttons_released;
+            i32 side = player;
             if (active_count == 1 && MenuPacket.customise_other_player[player] != 0)
                 side = player ^ 1;
             const i32 old_mode = CustomiseMode[side];
@@ -882,10 +900,14 @@ void CustomiserMenu_Update(MENU_s *) {
             bool randomise = false, touch_exit = false;
             if ((pressed & GAMEPAD_ACTION) != 0 && old_mode != 1) {
                 randomise = true;
-            } else if ((pressed & GAMEPAD_SPECIAL) != 0 ||
-                       (select[player] != 0 && (CustomiseMode[0] == 1 || CustomiseMode[1] == 1))) {
-                if ((pressed & GAMEPAD_SPECIAL) != 0)
-                    cancel_name = true;
+            } else if ((pressed & GAMEPAD_SPECIAL) != 0) {
+                new_mode = old_mode;
+                do {
+                    new_mode = (new_mode + 1) % 3;
+                } while (new_mode == 0);
+                GameAudio_PlaySfx(0x30, NULL, 0, 0);
+                cancel_name = true;
+            } else if (select[player] != 0 && (CustomiseMode[0] == 1 || CustomiseMode[1] == 1)) {
                 new_mode = old_mode;
                 do {
                     new_mode = (new_mode + 1) % 3;
@@ -893,10 +915,9 @@ void CustomiserMenu_Update(MENU_s *) {
                 GameAudio_PlaySfx(0x30, NULL, 0, 0);
             } else {
                 const f32 repeat_delay = old_mode == 1 ? 0.1f : 0.25f;
-                const u32 held = pad->buttons_held | pad->buttons_released;
                 const i32 category = CustomiseMenuY[side];
                 const i32 piece_count = customiser->piece_counts[category];
-                i16 *pieces = side == 0 ? Game.customizer.pieces : Game.customizer.secondary_pieces;
+                u16 *pieces = Game.customizer[side].pieces;
                 const u16 old_piece = static_cast<u16>(pieces[category]);
                 i32 up = pressed & GAMEPAD_DUP, down = pressed & GAMEPAD_DDOWN;
                 i32 left = pressed & GAMEPAD_DLEFT, right = pressed & GAMEPAD_DRIGHT;
@@ -947,30 +968,25 @@ void CustomiserMenu_Update(MENU_s *) {
                 if (touch_exit)
                     customiser->field_0xd17 = 0;
                 if (CustomiseMode[side] == 1) {
-                    char *name = side == 0 ? Game.customizer.primary_name : Game.customizer.secondary_name;
+                    char *name = Game.customizer[side].name;
                     const i32 old_x = CustomiseNameX[side], old_y = CustomiseNameY[side];
                     if (left != 0) {
                         if (old_x > 0) {
                             name[old_x] = CustomiseLetter[old_y];
                             CustomiseNameX[side] = old_x - 1;
+                            CustomiseNameY[side] = Customise_FindLetter(name[CustomiseNameX[side]]);
                         }
                     } else if (right != 0) {
                         NuStrLen(name);
                         if (CustomiseNameX[side] < 14) {
                             name[CustomiseNameX[side]] = CustomiseLetter[CustomiseNameY[side]];
                             ++CustomiseNameX[side];
+                            CustomiseNameY[side] = Customise_FindLetter(name[CustomiseNameX[side]]);
                         }
                     } else if (up != 0) {
                         CustomiseNameY[side] = old_y + 1 == 38 ? 0 : old_y + 1;
                     } else if (down != 0) {
                         CustomiseNameY[side] = old_y - 1 == -1 ? 37 : old_y - 1;
-                    }
-                    if (old_x != CustomiseNameX[side]) {
-                        i32 letter = 0;
-                        for (; letter != 38; ++letter)
-                            if (name[CustomiseNameX[side]] == CustomiseLetter[letter])
-                                break;
-                        CustomiseNameY[side] = letter == 38 ? 0 : letter;
                     }
                     if (old_x != CustomiseNameX[side] || old_y != CustomiseNameY[side]) {
                         GameAudio_PlaySfx(0x2f, NULL, 0, 0);
@@ -987,29 +1003,37 @@ void CustomiserMenu_Update(MENU_s *) {
                         BlipR[player] = 1.0f;
                     i32 next_category = category;
                     u32 next_piece = old_piece;
+                    bool category_changed = false, piece_changed = false;
                     if (up != 0) {
-                        if (category > 0)
+                        if (category > 0) {
                             --next_category;
+                            category_changed = true;
+                        }
                     } else if (down != 0) {
-                        if (category < 8)
+                        if (category < 8) {
                             ++next_category;
-                    } else if (left != 0)
+                            category_changed = true;
+                        }
+                    } else if (left != 0) {
                         next_piece = Customiser_NextPieceLeft(customiser, old_piece, piece_count, side, category);
-                    else if (right != 0)
+                        piece_changed = next_piece != old_piece;
+                    } else if (right != 0) {
                         next_piece = Customiser_NextPieceRight(customiser, old_piece, piece_count, side, category);
-                    pieces[category] = static_cast<i16>(next_piece);
+                        piece_changed = next_piece != old_piece;
+                    }
+                    pieces[category] = static_cast<u16>(next_piece);
                     CustomiseMenuY[side] = next_category;
-                    if (next_category != category || next_piece != old_piece) {
+                    if (category_changed || piece_changed) {
                         GameAudio_PlaySfx(0x2f, NULL, 0, 0);
                         CustomiseMenuTime[side] = 0.0f;
-                        if (next_piece != old_piece)
+                        if (piece_changed)
                             Customiser_SetNameAndIcon(customiser, side);
                     }
                 }
             }
             if (new_mode != -1) {
                 CustomiseMode[side] = new_mode;
-                char *name = side == 0 ? Game.customizer.primary_name : Game.customizer.secondary_name;
+                char *name = Game.customizer[side].name;
                 // The upper half of each 32-byte name field holds the edit backup.
                 char *backup = name + 16;
                 if (new_mode == 1) {
@@ -1017,11 +1041,7 @@ void CustomiserMenu_Update(MENU_s *) {
                     i32 length = NuStrLen(name);
                     if (length < 15)
                         name[length] = ' ';
-                    i32 letter = 0;
-                    for (; letter != 38; ++letter)
-                        if (name[CustomiseNameX[side]] == CustomiseLetter[letter])
-                            break;
-                    CustomiseNameY[side] = letter == 38 ? 0 : letter;
+                    CustomiseNameY[side] = Customise_FindLetter(name[CustomiseNameX[side]]);
                     CustomiseNameLetterBlipScale[side] = 1.0f;
                 } else if (old_mode == 1) {
                     if (cancel_name)
@@ -1048,30 +1068,28 @@ void CustomiserMenu_Update(MENU_s *) {
                             NuStrCpy(name, backup);
                     }
                 }
-                if (side == 0)
-                    Game.customizer.primary_name_unlocked = 1;
-                else
-                    Game.customizer.secondary_name_unlocked = 1;
+                Game.customizer[side].use_saved_name = 1;
             }
             if (randomise) {
                 NUVEC *position = &CustomisePos[side];
                 PlaySfx("ToggleChar", position);
                 NewBuzzFrames(pad->pad, 1, 0);
-                i16 *pieces = side == 0 ? Game.customizer.pieces : Game.customizer.secondary_pieces;
+                u16 *pieces = Game.customizer[side].pieces;
                 for (i32 category = 0; category != 9; ++category) {
                     if (customiser->piece_counts[category] > 0) {
                         i32 piece;
                         do {
                             piece = qrand() / (0xffff / customiser->piece_counts[category] + 1);
                         } while (customiser->piece_available(&customiser->piece_sets[category][piece]) == 0);
-                        pieces[category] = static_cast<i16>(piece);
+                        pieces[category] = static_cast<u16>(piece);
                     }
                 }
                 Customiser_SetNameAndIcon(customiser, side);
                 NUVEC debris_position = {0.0f, 0.21f, 0.0f};
                 NUMTX_ALIGNED16 matrix;
-                const i32 z = static_cast<i32>(NuTrigTable[CustomiseTiltZ[side] >> 1] * 910.0f);
-                const f32 sz = NuTrigTable[(z >> 1) & 0x7fff], cz = NuTrigTable[((z + 0x4000) >> 1) & 0x7fff];
+                const u16 tilt_z = CustomiseTiltZ[side] >> 1;
+                const i32 z = static_cast<i32>(NuTrigTable[tilt_z] * 910.0f);
+                const f32 cz = NuTrigTable[((z + 0x4000) >> 1) & 0x7fff], sz = NuTrigTable[(z >> 1) & 0x7fff];
                 matrix.m00 = cz;
                 matrix.m01 = sz;
                 matrix.m02 = matrix.m03 = 0.0f;
@@ -1083,8 +1101,9 @@ void CustomiserMenu_Update(MENU_s *) {
                 matrix.m23 = 0.0f;
                 matrix.m30 = matrix.m31 = matrix.m32 = 0.0f;
                 matrix.m33 = 1.0f;
-                const i32 x = static_cast<i32>(910.0f * NuTrigTable[CustomiseTiltX[side] >> 1]);
-                const f32 sx = NuTrigTable[(x >> 1) & 0x7fff], cx = NuTrigTable[((x + 0x4000) >> 1) & 0x7fff];
+                const u16 tilt_x = CustomiseTiltX[side] >> 1;
+                const i32 x = static_cast<i32>(910.0f * NuTrigTable[tilt_x]);
+                const f32 cx = NuTrigTable[((x + 0x4000) >> 1) & 0x7fff], sx = NuTrigTable[(x >> 1) & 0x7fff];
 #define CUSTOMISE_ROTATE_X(row)                                                                                        \
     {                                                                                                                  \
         const f32 first = matrix.m##row##1, second = matrix.m##row##2;                                                 \
@@ -1096,8 +1115,9 @@ void CustomiserMenu_Update(MENU_s *) {
                 CUSTOMISE_ROTATE_X(2);
                 CUSTOMISE_ROTATE_X(3);
 #undef CUSTOMISE_ROTATE_X
-                const i32 y = static_cast<i32>(10922.0f * NuTrigTable[CustomiseRotY[side] >> 1]);
-                const f32 sy = NuTrigTable[(y >> 1) & 0x7fff], cy = NuTrigTable[((y + 0x4000) >> 1) & 0x7fff];
+                const u16 rotation_y = CustomiseRotY[side] >> 1;
+                const i32 y = static_cast<i32>(10922.0f * NuTrigTable[rotation_y]);
+                const f32 cy = NuTrigTable[((y + 0x4000) >> 1) & 0x7fff], sy = NuTrigTable[(y >> 1) & 0x7fff];
 #define CUSTOMISE_ROTATE_Y(row)                                                                                        \
     {                                                                                                                  \
         const f32 first = matrix.m##row##0, second = matrix.m##row##2;                                                 \
@@ -1125,14 +1145,10 @@ void CustomiserMenu_Update(MENU_s *) {
             NewBuzzFrames(Player[active_index]->pad_gamepad->pad, 1, 0);
         }
     }
-    // The reference compares both complete 0x38-byte save records, including
-    // the final byte currently represented by GAMESAVE_s::field_0x7c9f.
-    const u8 *current_save = reinterpret_cast<const u8 *>(&Game) + offsetof(GAMESAVE_s, customizer);
-    const u8 *old_save = reinterpret_cast<const u8 *>(&OldCustomiseGame) + offsetof(GAMESAVE_s, customizer);
-    customiser_changed = memcmp(current_save, old_save, 0x70) != 0 ||
-                         memcmp(Game.customizer.primary_name, OldCustomiseGame.customizer.primary_name, 0x20) != 0 ||
-                         Game.customizer.primary_name_unlocked != OldCustomiseGame.customizer.primary_name_unlocked ||
-                         Game.customizer.secondary_name_unlocked != OldCustomiseGame.customizer.secondary_name_unlocked;
+    customiser_changed = memcmp(Game.customizer, OldCustomiseGame.customizer, sizeof(Game.customizer)) != 0 ||
+                         memcmp(Game.customizer[0].name, OldCustomiseGame.customizer[0].name, 0x20) != 0 ||
+                         Game.customizer[0].use_saved_name != OldCustomiseGame.customizer[0].use_saved_name ||
+                         Game.customizer[1].use_saved_name != OldCustomiseGame.customizer[1].use_saved_name;
     if (!quit)
         return;
     PlaySfx("menuBack", NULL);
@@ -1181,13 +1197,13 @@ void Customiser_SetNameAndIcon(CUSTOMISER *customiser, i32 index) {
     if (index == 0 || !single) {
         customiser->display_names[0][0] = 0;
         sprintf(customiser->display_names[0], "%s %i", TTab[tSTRANGER], 1);
-        CDataList[customiser->character_ids[0]].field20_0x42 = Customiser_GetIcon(customiser, &Game.customizer, 0);
+        CDataList[customiser->character_ids[0]].field20_0x42 = Customiser_GetIcon(customiser, Game.customizer, 0);
     }
     if (index == 1 || !single) {
         customiser->display_names[1][0] = 0;
         sprintf(customiser->display_names[1], "%s %i", TTab[tSTRANGER], 2);
         CDataList[customiser->character_ids[1]].field20_0x42 =
-            Customiser_GetIcon(customiser, reinterpret_cast<CUSTOMISESAVE_s *>(Game.customizer.secondary_pieces), 1);
+            Customiser_GetIcon(customiser, &Game.customizer[1], 1);
     }
 }
 
