@@ -887,7 +887,7 @@ static i32 GizmoPickups_Load(void *world_ptr, void *) {
         AreaPickupScale = 1.0f;
     }
 
-    if (version < 6 && !(pickup_sys->draw_distance >= 10.0f)) {
+    if (version < 6 && pickup_sys->draw_distance < 10.0f) {
         pickup_sys->draw_distance = 10.0f;
     }
     if (version <= 6 && world->level_sub_id >= 0 && world->level_sub_id < AREACOUNT &&
@@ -896,16 +896,16 @@ static i32 GizmoPickups_Load(void *world_ptr, void *) {
     }
     SetAreaPickupGravity(world->level_sub_id, world->level_idx);
 
-    for (i32 index = 0; index < pickup_sys->pickup_count; ++index) {
-        GIZMOPICKUP_s &pickup = pickup_sys->pickups[index];
-        EdFileRead(pickup.name, sizeof(pickup.name));
-        EdFileReadNuVec(&pickup.position);
-        pickup.type_code = static_cast<char>(EdFileReadChar());
+    GIZMOPICKUP_s *pickup = world->gizmo_pickup_sys->pickups;
+    for (i32 index = 0; index < world->gizmo_pickup_sys->pickup_count; ++index, ++pickup) {
+        EdFileRead(pickup->name, sizeof(pickup->name));
+        EdFileReadNuVec(&pickup->position);
+        pickup->type_code = static_cast<char>(EdFileReadChar());
         if (version >= 2) {
-            pickup.config_flags = static_cast<u8>(EdFileReadChar());
+            pickup->config_flags = static_cast<u8>(EdFileReadChar());
         }
         if (version >= 4) {
-            pickup.activation_group = static_cast<u8>(EdFileReadChar());
+            pickup->activation_group = static_cast<u8>(EdFileReadChar());
         }
     }
     return 1;

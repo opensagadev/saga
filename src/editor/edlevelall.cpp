@@ -263,9 +263,11 @@ void ClassEditor::AddMenuItems(eduimenu_s *menu) {
     EdClass *classes[32];
     i32 class_count = 0;
     for (ClassObjectListEntry *entry = selected_objects.first; entry != NULL; entry = entry->next) {
-        i32 index = 0;
-        while (index < class_count && classes[index] != entry->ed_class)
-            ++index;
+        i32 index;
+        for (index = 0; index < class_count; ++index) {
+            if (classes[index] == entry->ed_class)
+                break;
+        }
         if (index == class_count)
             classes[class_count++] = entry->ed_class;
     }

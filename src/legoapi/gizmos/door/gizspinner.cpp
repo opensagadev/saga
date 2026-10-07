@@ -673,13 +673,13 @@ static i32 GizSpinner_Load(void *world_ptr, void *) {
             NuVecAdd(&maximum, &maximum, &arm_maximum);
         }
         {
-            f32 extent = maximum.z - minimum.z;
-            const f32 other_extent = maximum.x - minimum.x;
+            f32 extent = maximum.x - minimum.x;
+            const f32 other_extent = maximum.z - minimum.z;
             spinner->type = 4;
             spinner->output_count = 1;
             spinner->rotation = spinner->initial_rotation;
             spinner->animation_speed = 1.0f;
-            if (other_extent > extent) {
+            if (!(extent > other_extent)) {
                 extent = other_extent;
             }
             spinner->animation_points[0] = 1.0f;

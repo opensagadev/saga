@@ -49,22 +49,24 @@ void LevelStreaming_Update(WORLDINFO_s *world) {
 
                 LEVELLOAD_s *load = LevelLoad;
                 i32 i;
-                for (i = 0; i < LevelLoadCount; ++i) {
-                    if (LevelLoad[i].level == world->level_idx && (((LevelLoad[i].flags & 1) != 0 && InStory() != 0) ||
-                                                                   ((LevelLoad[i].flags & 2) != 0 && InStory() == 0))) {
+                for (i = 0; i < LevelLoadCount; ++i, ++load) {
+                    if (load->level == world->level_idx &&
+                        (((load->flags & 1) != 0 && InStory() != 0) || ((load->flags & 2) != 0 && InStory() == 0))) {
                         break;
                     }
                 }
                 if (i < LevelLoadCount) {
-                    if (load->first_level == load->second_level) {
-                        other_level = load->first_level;
+                    const i16 first_level = load->first_level;
+                    const i16 second_level = load->second_level;
+                    if (first_level == second_level) {
+                        other_level = first_level;
                     } else if (LEGOSPL_SPLIT != -1 && world->camera_splines[LEGOSPL_SPLIT] != NULL) {
                         NUVEC *points = world->camera_splines[LEGOSPL_SPLIT]->pts;
                         if (InsideLineXZ(position.x, position.z, points[0].x, points[0].z, points[1].x, points[1].z) !=
                             0) {
-                            other_level = LevelLoad[i].first_level;
+                            other_level = first_level;
                         } else {
-                            other_level = load->second_level;
+                            other_level = second_level;
                         }
                     }
                 }

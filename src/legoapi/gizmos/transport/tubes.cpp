@@ -385,8 +385,8 @@ void Tube_MoveCode(GameObject_s *object, WORLDINFO_s *world) {
     if ((CInfo[object->character_context].flags & 0x400000) != 0 || world->tubes == NULL)
         return;
 
-    for (i32 index = 0; index < world->tube_count; ++index) {
-        TUBE *tube = &world->tubes[index];
+    TUBE *tube = world->tubes;
+    for (i32 index = 0; index < world->tube_count; ++index, ++tube) {
         if ((tube->flags & (TUBE_FLAG_ACTIVE | TUBE_FLAG_VISIBLE | TUBE_FLAG_DIRECTIONAL)) !=
             (TUBE_FLAG_ACTIVE | TUBE_FLAG_VISIBLE)) {
             continue;

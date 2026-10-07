@@ -53,7 +53,7 @@ extern f32 brickimpactwait;
 
 void ThermalDetonator_Throw(GameObject_s *object) {
     ADDPART_s params = Default_ADDPART;
-    if (!(object == NULL || WORLD == NULL || WORLD->lev_objs == NULL || WORLD->lev_objs[0xea].active == 0)) {
+    if (!(object == NULL || WORLD == NULL || WORLD->lev_objs == NULL || WORLD->lev_objs[0xe9].active == 0)) {
         if (object->apiobj.player_controlled) {
             Hint_SetComplete(0x2b8);
             Hint_SetComplete(0x283);
@@ -116,19 +116,18 @@ void ThermalDetonator_Throw(GameObject_s *object) {
         }
 
         params.matrix = &matrix;
-        params.position = &object->apiobj.collision_position;
         params.velocity = &velocity;
         params.owner = object;
         NUVEC centre;
-        NuSpecialGetRadius(&WORLD->lev_objs[0xea].special, &centre, &params.field_14);
+        NuSpecialGetRadius(&WORLD->lev_objs[0xe9].special, &centre, &params.field_14);
         params.field_18 = params.field_14;
         params.field_14 *= 0.75f;
         params.field_c4 = 1;
         params.gravity = -5.0f;
-        params.special = &WORLD->lev_objs[0xea].special;
+        params.special = &WORLD->lev_objs[0xe9].special;
         params.flags = 0x08000292;
-        params.update_fn = PartCollide_3D;
-        params.field_40 = PartImpact_ThermalDetonator;
+        params.field_40 = PartCollide_3D;
+        params.field_3c = PartImpact_ThermalDetonator;
         params.field_44 = PartKill_ThermalDetonator;
         params.stop_fn = PartStop_Flickerer;
         params.draw_fn = PartDraw_ThermalDetonator;
@@ -139,7 +138,7 @@ void ThermalDetonator_Throw(GameObject_s *object) {
         if (part != NULL) {
             part->force_flags = ObjHitObj_Flags(object) & 0xffff;
             part->force_player_mask = 0;
-            part->update_callback = PartUpdate_ThermalDetonator;
+            part->field_1c4 = PartUpdate_ThermalDetonator;
             part->reflection_height = 2000000.0f;
             part->render_flags &= ~0x80;
             part->reflection_flags &= ~3;
@@ -274,7 +273,7 @@ i32 ThermalDetonator_MoveCode(GameObject_s *object) {
 
 void ThermalDetonator_ThrowMom(GameObject_s *object, nuvec_s *velocity) {
     ADDPART_s params = Default_ADDPART;
-    if (!(object == NULL || WORLD == NULL || WORLD->lev_objs == NULL || WORLD->lev_objs[0xea].active == 0)) {
+    if (!(object == NULL || WORLD == NULL || WORLD->lev_objs == NULL || WORLD->lev_objs[0xe9].active == 0)) {
         // This entry point creates the thrown part with supplied momentum; it
         // does not calculate or modify the caller's vector.
         NUMTX matrix;
@@ -311,15 +310,15 @@ void ThermalDetonator_ThrowMom(GameObject_s *object, nuvec_s *velocity) {
         params.velocity = velocity;
         params.owner = object;
         NUVEC centre;
-        NuSpecialGetRadius(&WORLD->lev_objs[0xea].special, &centre, &params.field_14);
+        NuSpecialGetRadius(&WORLD->lev_objs[0xe9].special, &centre, &params.field_14);
         params.field_18 = params.field_14;
         params.field_14 *= 0.75f;
         params.field_c4 = 1;
         params.gravity = -5.0f;
-        params.special = &WORLD->lev_objs[0xea].special;
+        params.special = &WORLD->lev_objs[0xe9].special;
         params.flags = 0x08000292;
-        params.update_fn = PartCollide_3D;
-        params.field_40 = PartImpact_ThermalDetonator;
+        params.field_40 = PartCollide_3D;
+        params.field_3c = PartImpact_ThermalDetonator;
         params.field_44 = PartKill_ThermalDetonator;
         params.stop_fn = PartStop_Flickerer;
         params.draw_fn = PartDraw_ThermalDetonator;
@@ -330,7 +329,7 @@ void ThermalDetonator_ThrowMom(GameObject_s *object, nuvec_s *velocity) {
         if (part != NULL) {
             part->force_flags = ObjHitObj_Flags(object) & 0xffff;
             part->force_player_mask = 0;
-            part->update_callback = PartUpdate_ThermalDetonator;
+            part->field_1c4 = PartUpdate_ThermalDetonator;
             part->reflection_height = 2000000.0f;
             part->render_flags &= ~0x80;
             part->reflection_flags &= ~3;

@@ -28,7 +28,10 @@ NuVertexFormatPS *NuGetVertexDeclaration(NUVERTEXDESCRIPTOR vtx_desc) {
         return NULL;
     NuVertexFormatPoolEntryPS *record = &g_vertexFormatPool[count];
     NuVertexFormatPS *format = &record->format;
-    const u32 descriptor = vtx_desc.flags;
+    NUVERTEXDESCRIPTOR descriptor_copy = vtx_desc;
+    const u8 texture_coordinates = vtx_desc.tex_coord_mode;
+    descriptor_copy.tex_coord_mode = texture_coordinates;
+    const u32 descriptor = descriptor_copy.flags;
     // Each optional stream is decoded first: 0 = absent, 1 = float, 2 = packed bytes.
     const i32 normal = (descriptor & 0x880008) ? 2 : vtx_desc.has_normal;
     const i32 tangent = (descriptor & 0x1000020) ? 2 : vtx_desc.has_tangent;

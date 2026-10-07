@@ -689,14 +689,14 @@ void Text_LoadAndFixUpStrings(unsigned char *filename, unsigned char **buffer, c
                 if (index <= 0 || index >= count)
                     continue;
                 NuFParGetWord(parser);
-                char *word = parser->word_buf;
-                if (NuStrICmp(word, "360") == 0 || NuStrICmp(word, "gc") == 0 || NuStrICmp(word, "ps2") == 0 ||
-                    NuStrICmp(word, "ps3") == 0 || NuStrICmp(word, "psp") == 0 || NuStrICmp(word, "pc") == 0 ||
-                    NuStrICmp(word, "wii") == 0 || NuStrICmp(word, "xbox") == 0)
+                if (NuStrICmp(parser->word_buf, "360") == 0 || NuStrICmp(parser->word_buf, "gc") == 0 ||
+                    NuStrICmp(parser->word_buf, "ps2") == 0 || NuStrICmp(parser->word_buf, "ps3") == 0 ||
+                    NuStrICmp(parser->word_buf, "psp") == 0 || NuStrICmp(parser->word_buf, "pc") == 0 ||
+                    NuStrICmp(parser->word_buf, "wii") == 0 || NuStrICmp(parser->word_buf, "xbox") == 0)
                     continue;
-                i32 length = NuStrLen(word);
+                i32 length = NuStrLen(parser->word_buf);
                 table[index] = reinterpret_cast<char *>(out);
-                NuStrCpy(reinterpret_cast<char *>(out), word);
+                NuStrCpy(reinterpret_cast<char *>(out), parser->word_buf);
                 out += length + 1;
             }
         } else {
@@ -705,11 +705,12 @@ void Text_LoadAndFixUpStrings(unsigned char *filename, unsigned char **buffer, c
                 if (index <= 0 || index >= count)
                     continue;
                 NuFParGetWord(parser);
-                char *word = parser->word_buf;
-                if (NuStrICmp(word, "360") == 0 || NuStrICmp(word, "gc") == 0 || NuStrICmp(word, "ps2") == 0 ||
-                    NuStrICmp(word, "ps3") == 0 || NuStrICmp(word, "psp") == 0 || NuStrICmp(word, "pc") == 0 ||
-                    NuStrICmp(word, "wii") == 0 || NuStrICmp(word, "xbox") == 0)
+                if (NuStrICmp(parser->word_buf, "360") == 0 || NuStrICmp(parser->word_buf, "gc") == 0 ||
+                    NuStrICmp(parser->word_buf, "ps2") == 0 || NuStrICmp(parser->word_buf, "ps3") == 0 ||
+                    NuStrICmp(parser->word_buf, "psp") == 0 || NuStrICmp(parser->word_buf, "pc") == 0 ||
+                    NuStrICmp(parser->word_buf, "wii") == 0 || NuStrICmp(parser->word_buf, "xbox") == 0)
                     continue;
+                char *word = parser->word_buf;
                 i32 length = NuStrLen(word);
                 if (length <= 0)
                     continue;
@@ -1421,7 +1422,7 @@ extern "C" {
                 unsigned char *output = is_button ? buttons : normal;
                 i32 &count = is_button ? button_count : normal_count;
                 output[count++] = decoded[i++];
-                while ((decoded[i] & 0xc0) == 0x80)
+                while (static_cast<u8>(decoded[i] - 0x80) <= 0x3f)
                     output[count++] = decoded[i++];
             }
             buttons[button_count] = normal[normal_count] = 0;
@@ -1514,7 +1515,7 @@ extern "C" {
                 button_font = false;
             }
             fragment[count++] = decoded[i++];
-            while ((decoded[i] & 0xc0) == 0x80)
+            while (static_cast<u8>(decoded[i] - 0x80) <= 0x3f)
                 fragment[count++] = decoded[i++];
         }
         if (count != 0) {

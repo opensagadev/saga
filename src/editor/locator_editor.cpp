@@ -959,14 +959,18 @@ process_buttons:
             if (suffix != nullptr) {
                 *suffix = 0;
             }
+            AIEDITOR_RENDER_STATE *context = aieditor;
+            i32 direction = aieditorsettings.area_rotation;
+            previous = context->current_locator;
             EDLOCATOR_s *locator = (EDLOCATOR_s *)NuLinkedListGetHead(&aieditor->free_locators);
             if (locator != nullptr) {
                 NuLinkedListRemove(&aieditor->free_locators, &locator->link);
                 NuLinkedListAppend(&aieditor->locators, &locator->link);
-                locator->position = aieditor->camera_position;
-                locator->direction = aieditorsettings.area_rotation;
+                locator->position = context->camera_position;
+                locator->direction = direction;
             }
-            aieditor->current_locator = locator;
+            context->current_locator = locator;
+            locator = aieditor->current_locator;
             if (locator != nullptr) {
                 char name[16];
                 i32 index = 0;
@@ -978,10 +982,12 @@ process_buttons:
                         other = (EDLOCATOR_s *)NuLinkedListGetNext(&aieditor->locators, &other->link);
                     }
                 } while (other != nullptr);
-                strcpy(locator->name, name);
+                strcpy(aieditor->current_locator->name, name);
+                locator = aieditor->current_locator;
                 memcpy(locator->path_check, reinterpret_cast<u8 *>(aieditor) + 0x48, 0x1c);
                 locator->path_angle = NuAngSub(locator->direction, locator->path_angle);
                 if (aieditor->current_locator_set != nullptr) {
+                    locator = aieditor->current_locator;
                     EDLOCATOR_s *before = previous != locator ? previous : nullptr;
                     AddLocatorToSet(aieditor->current_locator_set, locator, before);
                 }
