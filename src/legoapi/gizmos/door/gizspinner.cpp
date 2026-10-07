@@ -816,7 +816,9 @@ int GizSpinner_Update(GIZSPINNER_s *spinner) {
                 movement_angle = NuAtan2D(api->velocity.x, api->velocity.z);
                 speed = NuFsqrt(api->velocity.x * api->velocity.x + api->velocity.z * api->velocity.z);
                 GAMECHARACTERDATA_s *character = api->character_data->game_character;
-                if (speed >= character->tiptoe_speed && speed < character->run_speed) {
+                if (speed < character->tiptoe_speed) {
+                    speed = character->tiptoe_speed;
+                } else if (speed < character->run_speed) {
                     speed = character->run_speed;
                 }
             }
@@ -881,6 +883,14 @@ int GizSpinner_Update(GIZSPINNER_s *spinner) {
         } else {
             GameAnimSet_Stop(spinner->anim_set);
         }
+
+        NUMTX matrix;
+        NuMtxSetRotationY(&matrix, spinner->rotation);
+        if ((old_flags & 0x100) != 0)
+            NuMtxRotateY(&matrix, 0x0222);
+        else if ((old_flags & 0x200) != 0)
+            NuMtxRotateY(&matrix, 0xfdde);
+        NuMtxTranslate(&matrix, &spinner->position);
 
         spinner->state = static_cast<u8>(GizSpinner_GetState(spinner));
         if ((old_flags & GIZSPINNER_STATE_RESET) == 0 && previous_state == 1 && spinner->state != 1) {

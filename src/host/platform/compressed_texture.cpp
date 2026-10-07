@@ -7,8 +7,16 @@
 #include <GLES2/gl2.h>
 
 #include <algorithm>
+#include <stdlib.h>
 #include <string.h>
 #include <vector>
+
+extern "C" void *NuIOS_AllocateDefaultTexturePixels(usize bytes) {
+    // The original fallback fills pixels in pairs, including the 1x1 mip.
+    // Keep its second write inside the host allocation; GL uploads only the
+    // requested pixels. The matching target retains its original malloc call.
+    return malloc(bytes + (bytes % 8 != 0 ? 4 : 0));
+}
 
 // Compatibility for compressed formats supported by the original device but
 // not guaranteed by a desktop GLES implementation. The target texture parser,

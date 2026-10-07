@@ -1067,76 +1067,82 @@ extern "C" void NuRndrSetDebBox(NUVEC *range) {
     const NUVEC size = *range;
     // The original uses a narrow near rectangle and a wider far rectangle,
     // transformed by the cached camera before finding their world bounds.
-    const NUVEC right = {size.x * cammtx.m00, size.x * cammtx.m01, size.x * cammtx.m02};
-    const NUVEC up = {size.y * cammtx.m10, size.y * cammtx.m11, size.y * cammtx.m12};
-    const NUVEC forward = {size.z * cammtx.m20, size.z * cammtx.m21, size.z * cammtx.m22};
-    NUVEC corner0 = {((right.x * -0.2f + cammtx.m30) + up.x * -0.2f) + forward.x * -0.05f,
-                     ((right.y * -0.2f + cammtx.m31) + up.y * -0.2f) + forward.y * -0.05f,
-                     ((right.z * -0.2f + cammtx.m32) + up.z * -0.2f) + forward.z * -0.05f};
-    NUVEC corner1 = {((right.x * 0.2f + cammtx.m30) + up.x * -0.2f) + forward.x * -0.05f,
-                     ((right.y * 0.2f + cammtx.m31) + up.y * -0.2f) + forward.y * -0.05f,
-                     ((right.z * 0.2f + cammtx.m32) + up.z * -0.2f) + forward.z * -0.05f};
-    NUVEC corner2 = {((right.x * -0.2f + cammtx.m30) + up.x * 0.2f) + forward.x * -0.05f,
-                     ((right.y * -0.2f + cammtx.m31) + up.y * 0.2f) + forward.y * -0.05f,
-                     ((right.z * -0.2f + cammtx.m32) + up.z * 0.2f) + forward.z * -0.05f};
-    NUVEC corner3 = {((right.x * 0.2f + cammtx.m30) + up.x * 0.2f) + forward.x * -0.05f,
-                     ((right.y * 0.2f + cammtx.m31) + up.y * 0.2f) + forward.y * -0.05f,
-                     ((right.z * 0.2f + cammtx.m32) + up.z * 0.2f) + forward.z * -0.05f};
-    NUVEC corner4 = {((right.x * -0.5f + cammtx.m30) + up.x * -0.5f) + forward.x * 0.8f,
-                     ((right.y * -0.5f + cammtx.m31) + up.y * -0.5f) + forward.y * 0.8f,
-                     ((right.z * -0.5f + cammtx.m32) + up.z * -0.5f) + forward.z * 0.8f};
-    NUVEC corner5 = {((right.x * 0.5f + cammtx.m30) + up.x * -0.5f) + forward.x * 0.8f,
-                     ((right.y * 0.5f + cammtx.m31) + up.y * -0.5f) + forward.y * 0.8f,
-                     ((right.z * 0.5f + cammtx.m32) + up.z * -0.5f) + forward.z * 0.8f};
-    NUVEC corner6 = {((right.x * -0.5f + cammtx.m30) + up.x * 0.5f) + forward.x * 0.8f,
-                     ((right.y * -0.5f + cammtx.m31) + up.y * 0.5f) + forward.y * 0.8f,
-                     ((right.z * -0.5f + cammtx.m32) + up.z * 0.5f) + forward.z * 0.8f};
-    NUVEC corner7 = {((right.x * 0.5f + cammtx.m30) + up.x * 0.5f) + forward.x * 0.8f,
-                     ((right.y * 0.5f + cammtx.m31) + up.y * 0.5f) + forward.y * 0.8f,
-                     ((right.z * 0.5f + cammtx.m32) + up.z * 0.5f) + forward.z * 0.8f};
+    NUVEC corner0 = {
+        (((size.x * cammtx.m00) * -0.2f + cammtx.m30) + (size.y * cammtx.m10) * -0.2f) + (size.z * cammtx.m20) * -0.05f,
+        (((size.x * cammtx.m01) * -0.2f + cammtx.m31) + (size.y * cammtx.m11) * -0.2f) + (size.z * cammtx.m21) * -0.05f,
+        (((size.x * cammtx.m02) * -0.2f + cammtx.m32) + (size.y * cammtx.m12) * -0.2f) +
+            (size.z * cammtx.m22) * -0.05f};
     NUVEC minimum = corner0;
     NUVEC maximum = corner0;
+    NUVEC corner1 = {
+        (((size.x * cammtx.m00) * 0.2f + cammtx.m30) + (size.y * cammtx.m10) * -0.2f) + (size.z * cammtx.m20) * -0.05f,
+        (((size.x * cammtx.m01) * 0.2f + cammtx.m31) + (size.y * cammtx.m11) * -0.2f) + (size.z * cammtx.m21) * -0.05f,
+        (((size.x * cammtx.m02) * 0.2f + cammtx.m32) + (size.y * cammtx.m12) * -0.2f) + (size.z * cammtx.m22) * -0.05f};
     minimum.x = corner1.x < minimum.x ? corner1.x : minimum.x;
-    maximum.x = corner1.x > maximum.x ? corner1.x : maximum.x;
     minimum.y = corner1.y < minimum.y ? corner1.y : minimum.y;
-    maximum.y = corner1.y > maximum.y ? corner1.y : maximum.y;
     minimum.z = corner1.z < minimum.z ? corner1.z : minimum.z;
+    maximum.x = corner1.x > maximum.x ? corner1.x : maximum.x;
+    maximum.y = corner1.y > maximum.y ? corner1.y : maximum.y;
     maximum.z = corner1.z > maximum.z ? corner1.z : maximum.z;
+    NUVEC corner2 = {
+        (((size.x * cammtx.m00) * -0.2f + cammtx.m30) + (size.y * cammtx.m10) * 0.2f) + (size.z * cammtx.m20) * -0.05f,
+        (((size.x * cammtx.m01) * -0.2f + cammtx.m31) + (size.y * cammtx.m11) * 0.2f) + (size.z * cammtx.m21) * -0.05f,
+        (((size.x * cammtx.m02) * -0.2f + cammtx.m32) + (size.y * cammtx.m12) * 0.2f) + (size.z * cammtx.m22) * -0.05f};
     minimum.x = corner2.x < minimum.x ? corner2.x : minimum.x;
-    maximum.x = corner2.x > maximum.x ? corner2.x : maximum.x;
     minimum.y = corner2.y < minimum.y ? corner2.y : minimum.y;
-    maximum.y = corner2.y > maximum.y ? corner2.y : maximum.y;
     minimum.z = corner2.z < minimum.z ? corner2.z : minimum.z;
+    maximum.x = corner2.x > maximum.x ? corner2.x : maximum.x;
+    maximum.y = corner2.y > maximum.y ? corner2.y : maximum.y;
     maximum.z = corner2.z > maximum.z ? corner2.z : maximum.z;
+    NUVEC corner3 = {
+        (((size.x * cammtx.m00) * 0.2f + cammtx.m30) + (size.y * cammtx.m10) * 0.2f) + (size.z * cammtx.m20) * -0.05f,
+        (((size.x * cammtx.m01) * 0.2f + cammtx.m31) + (size.y * cammtx.m11) * 0.2f) + (size.z * cammtx.m21) * -0.05f,
+        (((size.x * cammtx.m02) * 0.2f + cammtx.m32) + (size.y * cammtx.m12) * 0.2f) + (size.z * cammtx.m22) * -0.05f};
     minimum.x = corner3.x < minimum.x ? corner3.x : minimum.x;
-    maximum.x = corner3.x > maximum.x ? corner3.x : maximum.x;
     minimum.y = corner3.y < minimum.y ? corner3.y : minimum.y;
-    maximum.y = corner3.y > maximum.y ? corner3.y : maximum.y;
     minimum.z = corner3.z < minimum.z ? corner3.z : minimum.z;
+    maximum.x = corner3.x > maximum.x ? corner3.x : maximum.x;
+    maximum.y = corner3.y > maximum.y ? corner3.y : maximum.y;
     maximum.z = corner3.z > maximum.z ? corner3.z : maximum.z;
+    NUVEC corner4 = {
+        (((size.x * cammtx.m00) * -0.5f + cammtx.m30) + (size.y * cammtx.m10) * -0.5f) + (size.z * cammtx.m20) * 0.8f,
+        (((size.x * cammtx.m01) * -0.5f + cammtx.m31) + (size.y * cammtx.m11) * -0.5f) + (size.z * cammtx.m21) * 0.8f,
+        (((size.x * cammtx.m02) * -0.5f + cammtx.m32) + (size.y * cammtx.m12) * -0.5f) + (size.z * cammtx.m22) * 0.8f};
     minimum.x = corner4.x < minimum.x ? corner4.x : minimum.x;
-    maximum.x = corner4.x > maximum.x ? corner4.x : maximum.x;
     minimum.y = corner4.y < minimum.y ? corner4.y : minimum.y;
-    maximum.y = corner4.y > maximum.y ? corner4.y : maximum.y;
     minimum.z = corner4.z < minimum.z ? corner4.z : minimum.z;
+    maximum.x = corner4.x > maximum.x ? corner4.x : maximum.x;
+    maximum.y = corner4.y > maximum.y ? corner4.y : maximum.y;
     maximum.z = corner4.z > maximum.z ? corner4.z : maximum.z;
+    NUVEC corner5 = {
+        (((size.x * cammtx.m00) * 0.5f + cammtx.m30) + (size.y * cammtx.m10) * -0.5f) + (size.z * cammtx.m20) * 0.8f,
+        (((size.x * cammtx.m01) * 0.5f + cammtx.m31) + (size.y * cammtx.m11) * -0.5f) + (size.z * cammtx.m21) * 0.8f,
+        (((size.x * cammtx.m02) * 0.5f + cammtx.m32) + (size.y * cammtx.m12) * -0.5f) + (size.z * cammtx.m22) * 0.8f};
     minimum.x = corner5.x < minimum.x ? corner5.x : minimum.x;
-    maximum.x = corner5.x > maximum.x ? corner5.x : maximum.x;
     minimum.y = corner5.y < minimum.y ? corner5.y : minimum.y;
-    maximum.y = corner5.y > maximum.y ? corner5.y : maximum.y;
     minimum.z = corner5.z < minimum.z ? corner5.z : minimum.z;
+    maximum.x = corner5.x > maximum.x ? corner5.x : maximum.x;
+    maximum.y = corner5.y > maximum.y ? corner5.y : maximum.y;
     maximum.z = corner5.z > maximum.z ? corner5.z : maximum.z;
+    NUVEC corner6 = {
+        (((size.x * cammtx.m00) * -0.5f + cammtx.m30) + (size.y * cammtx.m10) * 0.5f) + (size.z * cammtx.m20) * 0.8f,
+        (((size.x * cammtx.m01) * -0.5f + cammtx.m31) + (size.y * cammtx.m11) * 0.5f) + (size.z * cammtx.m21) * 0.8f,
+        (((size.x * cammtx.m02) * -0.5f + cammtx.m32) + (size.y * cammtx.m12) * 0.5f) + (size.z * cammtx.m22) * 0.8f};
     minimum.x = corner6.x < minimum.x ? corner6.x : minimum.x;
-    maximum.x = corner6.x > maximum.x ? corner6.x : maximum.x;
     minimum.y = corner6.y < minimum.y ? corner6.y : minimum.y;
-    maximum.y = corner6.y > maximum.y ? corner6.y : maximum.y;
     minimum.z = corner6.z < minimum.z ? corner6.z : minimum.z;
+    maximum.x = corner6.x > maximum.x ? corner6.x : maximum.x;
+    maximum.y = corner6.y > maximum.y ? corner6.y : maximum.y;
     maximum.z = corner6.z > maximum.z ? corner6.z : maximum.z;
+    NUVEC corner7 = {
+        (((size.x * cammtx.m00) * 0.5f + cammtx.m30) + (size.y * cammtx.m10) * 0.5f) + (size.z * cammtx.m20) * 0.8f,
+        (((size.x * cammtx.m01) * 0.5f + cammtx.m31) + (size.y * cammtx.m11) * 0.5f) + (size.z * cammtx.m21) * 0.8f,
+        (((size.x * cammtx.m02) * 0.5f + cammtx.m32) + (size.y * cammtx.m12) * 0.5f) + (size.z * cammtx.m22) * 0.8f};
     minimum.x = corner7.x < minimum.x ? corner7.x : minimum.x;
-    maximum.x = corner7.x > maximum.x ? corner7.x : maximum.x;
     minimum.y = corner7.y < minimum.y ? corner7.y : minimum.y;
-    maximum.y = corner7.y > maximum.y ? corner7.y : maximum.y;
     minimum.z = corner7.z < minimum.z ? corner7.z : minimum.z;
+    maximum.x = corner7.x > maximum.x ? corner7.x : maximum.x;
+    maximum.y = corner7.y > maximum.y ? corner7.y : maximum.y;
     maximum.z = corner7.z > maximum.z ? corner7.z : maximum.z;
     NuRndrDebBase.x = (maximum.x + minimum.x) * 0.5f - size.x * 0.5f;
     NuRndrDebBase.y = (maximum.y + minimum.y) * 0.5f - size.y * 0.5f;
@@ -1395,15 +1401,19 @@ extern "C" void NuShaderGetDirtyMask(NUSHADERUSAGEMASK *mask, NUSHADEROBJECT *sh
     }
     void *light_packet = *g_packetToShaderStateMappings[0].packet;
     if (shader->last_light_packet == light_packet) {
-        for (i32 i = 0; i < 4; ++i)
-            mask->semantics[i] &= ~g_packetToShaderStateMappings[0].mask.semantics[i];
+        mask->semantics[0] &= ~g_packetToShaderStateMappings[0].mask.semantics[0];
+        mask->semantics[1] &= ~g_packetToShaderStateMappings[0].mask.semantics[1];
+        mask->semantics[2] &= ~g_packetToShaderStateMappings[0].mask.semantics[2];
+        mask->semantics[3] &= ~g_packetToShaderStateMappings[0].mask.semantics[3];
     } else {
         shader->last_light_packet = light_packet;
     }
     void *camera_packet = *g_packetToShaderStateMappings[1].packet;
     if (shader->last_camera_packet == camera_packet) {
-        for (i32 i = 0; i < 4; ++i)
-            mask->semantics[i] &= ~g_packetToShaderStateMappings[1].mask.semantics[i];
+        mask->semantics[0] &= ~g_packetToShaderStateMappings[1].mask.semantics[0];
+        mask->semantics[1] &= ~g_packetToShaderStateMappings[1].mask.semantics[1];
+        mask->semantics[2] &= ~g_packetToShaderStateMappings[1].mask.semantics[2];
+        mask->semantics[3] &= ~g_packetToShaderStateMappings[1].mask.semantics[3];
     } else {
         shader->last_camera_packet = camera_packet;
     }

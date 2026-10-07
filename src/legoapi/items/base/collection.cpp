@@ -399,10 +399,12 @@ i32 Collection_GetIDList(COLLECTION_s *collection, u32 model_flag_mask, u32 requ
         }
         ++result_count;
 
-        if (first_id != NULL && *first_id == -1) {
-            *first_id = id;
-        } else if (first_id != NULL && second_id != NULL && *second_id == -1) {
-            *second_id = id;
+        if (first_id != NULL) {
+            if (*first_id == -1) {
+                *first_id = id;
+            } else if (second_id != NULL && *second_id == -1) {
+                *second_id = id;
+            }
         }
     }
 
@@ -425,13 +427,11 @@ void Collection_CreateCustom(char *name, i16 *id_list, COLLECTION_s *collection,
                              u32 excluded_model_flags, u32 required_game_flags, i32 require_buyable, i32 columns,
                              VARIPTR *buffer, VARIPTR *, i32 use_all_characters, f32 scale) {
     collection->count_x = static_cast<u16>(columns);
-    collection->count_y = 0;
-    collection->field_8 = id_list;
     collection->field_c = name;
+    collection->field_8 = id_list;
+    collection->list = reinterpret_cast<COLLECTID *>(ALIGN(buffer->addr, 4));
     collection->field_10 = scale;
-
-    buffer->addr = ALIGN(buffer->addr, 4);
-    collection->list = reinterpret_cast<COLLECTID *>(buffer->void_ptr);
+    collection->count_y = 0;
 
     if (use_all_characters == 0) {
         for (i32 index = 0; index < CollectCount; ++index) {
@@ -453,7 +453,8 @@ void Collection_CreateCustom(char *name, i16 *id_list, COLLECTION_s *collection,
                 (CDataList[id].model_flags & required_model_flags) != required_model_flags) {
                 continue;
             }
-            collection->list[collection->count_y++] = source;
+            collection->list[collection->count_y] = source;
+            ++collection->count_y;
         }
     } else {
         for (i32 id = 0; id < CHARCOUNT; ++id) {
@@ -467,13 +468,14 @@ void Collection_CreateCustom(char *name, i16 *id_list, COLLECTION_s *collection,
             if (required_game_flags != 0 && (GCDataList[id].flags_090 & required_game_flags) != required_game_flags) {
                 continue;
             }
-            COLLECTID &entry = collection->list[collection->count_y++];
+            COLLECTID &entry = collection->list[collection->count_y];
             memset(&entry, 0, sizeof(entry));
             entry.id = static_cast<i16>(id);
+            ++collection->count_y;
         }
     }
 
-    buffer->addr += static_cast<usize>(collection->count_y) * sizeof(COLLECTID);
+    buffer->void_ptr = collection->list + collection->count_y;
 }
 
 COLLECTID *CollectIDUnlocked(i32 id) {

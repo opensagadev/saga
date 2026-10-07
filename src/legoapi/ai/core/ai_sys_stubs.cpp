@@ -835,8 +835,9 @@ static AIPATHSYS *AISysLoadPaths(AISYS *system, i32 version, NUGSCN *scene) {
 
 static AIAREA *AISysLoadFindArea(AISYS *system, char *name) {
     for (i32 index = 0; index < system->area_count; ++index) {
-        if (NuStrICmp(system->areas[index].name, name) == 0) {
-            return &system->areas[index];
+        AIAREA *area = &system->areas[index];
+        if (NuStrICmp(name, area->name) == 0) {
+            return area;
         }
     }
     return NULL;
@@ -1139,8 +1140,9 @@ static void AISysResetPathSearchConnectionChecks(AIPATH *path) {
 
 static AILOCATOR *AISysLoadFindLocator(AISYS *system, char *name) {
     for (i32 index = 0; index < system->locator_count; ++index) {
-        if (NuStrICmp(system->locators[index].name, name) == 0) {
-            return &system->locators[index];
+        AILOCATOR *locator = &system->locators[index];
+        if (NuStrICmp(name, locator->name) == 0) {
+            return locator;
         }
     }
     return NULL;
@@ -1521,7 +1523,7 @@ extern "C" {
         const i32 node_index = static_cast<i32>(node - path->nodes);
         const u8 node_bit = static_cast<u8>(1u << (node_index % 8));
         u8 &updated_nodes = path->updated_node_bits[node_index / 8];
-        if ((updated_nodes & node_bit) != 0) {
+        if (((updated_nodes >> (node_index % 8)) & 1) != 0) {
             return;
         }
         updated_nodes |= node_bit;
@@ -1535,9 +1537,12 @@ extern "C" {
             node->runtime_flags &= static_cast<u8>(~AIPATHNODE_RUNTIME_SPECIAL_UNAVAILABLE);
             for (i32 index = 0; index < node->connection_count; ++index) {
                 AIPATHCNX *connection = node->connections[index];
-                const u8 other_index =
-                    connection->direction_a == node_index ? connection->direction_b : connection->direction_a;
-                if ((path->nodes[other_index].runtime_flags & AIPATHNODE_RUNTIME_SPECIAL_UNAVAILABLE) == 0) {
+                AIPATHNODE *other_node;
+                if (connection->direction_a == node_index)
+                    other_node = &path->nodes[connection->direction_b];
+                else
+                    other_node = &path->nodes[connection->direction_a];
+                if ((other_node->runtime_flags & AIPATHNODE_RUNTIME_SPECIAL_UNAVAILABLE) == 0) {
                     connection->traversal_flags[0] &= ~AIPATH_CONNECTION_FLAG_SPECIAL_UNAVAILABLE;
                     connection->traversal_flags[1] &= ~AIPATH_CONNECTION_FLAG_SPECIAL_UNAVAILABLE;
                 }
@@ -1563,20 +1568,14 @@ extern "C" {
         for (i32 index = 0; index < node->connection_count; ++index) {
             AIPATHCNX *connection = node->connections[index];
             AIPATHNODE *other_node;
-            NUVEC *from;
-            NUVEC *to;
+            NUVEC direction;
             if (connection->direction_a == node_index) {
                 other_node = &path->nodes[connection->direction_b];
-                from = &other_node->position;
-                to = &node->position;
+                connection->horizontal_distance = NuVecXZDist(&other_node->position, &node->position, &direction);
             } else {
                 other_node = &path->nodes[connection->direction_a];
-                from = &node->position;
-                to = &other_node->position;
+                connection->horizontal_distance = NuVecXZDist(&node->position, &other_node->position, &direction);
             }
-
-            NUVEC direction;
-            connection->horizontal_distance = NuVecXZDist(from, to, &direction);
             connection->rotation = static_cast<i16>(NuAtan2(direction.x, direction.z) * 10430.378f);
 
             if (connection->max_horizontal_distance != 0.0f) {
@@ -2559,8 +2558,9 @@ extern "C" {
     AIAREA *AISysFindArea(AISYS *sys, char *name) {
         if (sys != NULL) {
             for (i32 i = 0; i < sys->area_count; ++i) {
-                if (NuStrICmp(sys->areas[i].name, name) == 0) {
-                    return &sys->areas[i];
+                AIAREA *area = &sys->areas[i];
+                if (NuStrICmp(name, area->name) == 0) {
+                    return area;
                 }
             }
         }
@@ -2570,9 +2570,8 @@ extern "C" {
     AIPATH *AISysFindPath(AISYS *sys, char *name) {
         if (sys != NULL && sys->path_sys != NULL) {
             for (i32 i = 0; i < sys->path_sys->path_count; ++i) {
-                AIPATH *path = sys->path_sys->paths[i];
-                if (NuStrICmp(path->name, name) == 0) {
-                    return path;
+                if (NuStrICmp(sys->path_sys->paths[i]->name, name) == 0) {
+                    return sys->path_sys->paths[i];
                 }
             }
         }
@@ -2985,7 +2984,10 @@ extern "C" {
         for (i32 index = 0; index < 16; ++index) {
             AIGROUP *group = &system->groups[index];
             if (group->is_used) {
-                group->can_respawn = group->member_is_alive == 0;
+                if (group->member_is_alive == 0)
+                    group->can_respawn = 1;
+                else
+                    group->can_respawn = 0;
             }
         }
 

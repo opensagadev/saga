@@ -873,7 +873,53 @@ static void GizBuildIts_LateUpdate(void *world_ptr, void *data, float) {
         const f32 previous_step_timer = buildit.step_timer;                                                            \
         buildit.step_timer -= FRAMETIME;                                                                               \
                                                                                                                        \
-        if (!(buildit.step_timer <= 0.0f)) {                                                                           \
+        if (buildit.step_timer <= 0.0f) {                                                                              \
+            GAMEANIMOBJ_s *piece = buildit.anim_objects[buildit.built_object_count];                                   \
+            if (buildit.linked_buildit != NULL) {                                                                      \
+                GIZBUILDITANIMDATA_s *piece_data = static_cast<GIZBUILDITANIMDATA_s *>(piece->object_data);            \
+                piece_data->draw_mtx = piece_data->end_mtx;                                                            \
+                GameAudio_PlaySfx(BUILDIT_SFX_PLACE_PIECE, NUMTX_GET_ROW_VEC(&piece_data->draw_mtx, 3), 0, 0);         \
+            } else {                                                                                                   \
+                NuSpecialSetVisibility(&piece->special, 1);                                                            \
+                if (!automatic || piece->instance_animation != NULL) {                                                 \
+                    piece->instance_animation->playing = 0;                                                            \
+                    piece->instance_animation->ltime = piece->end_frame;                                               \
+                    EvalAnim2(&piece->special, piece->end_frame);                                                      \
+                }                                                                                                      \
+                GameAudio_PlaySfx(BUILDIT_SFX_PLACE_PIECE, NuSpecialGetDrawPos(&piece->special), 0, 0);                \
+                if (automatic) {                                                                                       \
+                    NuSpecialSetDrawPos(&piece->special, NuSpecialGetPos(&piece->special));                            \
+                }                                                                                                      \
+            }                                                                                                          \
+            ++buildit.built_object_count;                                                                              \
+                                                                                                                       \
+            if (buildit.built_object_count == buildit.anim_object_count) {                                             \
+                buildit.build_state = GIZBUILDIT_BUILD_FINISHING;                                                      \
+                buildit.step_timer = 0.0f;                                                                             \
+                EmitBuildItDebris(world, &buildit);                                                                    \
+                if (builder != NULL) {                                                                                 \
+                    NewBuzz(builder->pad_gamepad->pad, 0.1f, 0);                                                       \
+                }                                                                                                      \
+            } else if (automatic || buildit.built_object_count < buildit.anim_object_count) {                          \
+                GizBuildIt_SetStepTime(&buildit, builder);                                                             \
+                if (builder != NULL) {                                                                                 \
+                    NewBuzzFrames(builder->pad_gamepad->pad, 1, 0);                                                    \
+                }                                                                                                      \
+            }                                                                                                          \
+                                                                                                                       \
+            if (builder != NULL) {                                                                                     \
+                if (buildit.build_state == GIZBUILDIT_BUILD_IDLE &&                                                    \
+                    ((builder->pad_gamepad->buttons_held & GAMEPAD_SPECIAL) != 0 ||                                    \
+                     (builder->apiobj.field_0x1f4 & 0x40000) != 0)) {                                                  \
+                    builder->field_0xe21 ^= 0x40;                                                                      \
+                    if (builder->build_button_taps < 10) {                                                             \
+                        ++builder->build_button_taps;                                                                  \
+                    }                                                                                                  \
+                } else {                                                                                               \
+                    ReleaseBuildIt(builder, buildit.build_state);                                                      \
+                }                                                                                                      \
+            }                                                                                                          \
+        } else {                                                                                                       \
             GAMEANIMOBJ_s *piece = buildit.anim_objects[buildit.built_object_count];                                   \
             if (previous_step_timer == buildit.step_duration) {                                                        \
                 NUVEC *position = NuSpecialGetDrawPos(&piece->special);                                                \
@@ -884,53 +930,6 @@ static void GizBuildIts_LateUpdate(void *world_ptr, void *data, float) {
                 GizMoveAttractoBuildItPiece(&buildit, piece);                                                          \
             } else if (buildit.linked_buildit == NULL) {                                                               \
                 NuSpecialSetVisibility(&piece->special, 0);                                                            \
-            }                                                                                                          \
-            goto idle_wobble;                                                                                          \
-        }                                                                                                              \
-                                                                                                                       \
-        GAMEANIMOBJ_s *piece = buildit.anim_objects[buildit.built_object_count];                                       \
-        if (buildit.linked_buildit != NULL) {                                                                          \
-            GIZBUILDITANIMDATA_s *piece_data = static_cast<GIZBUILDITANIMDATA_s *>(piece->object_data);                \
-            piece_data->draw_mtx = piece_data->end_mtx;                                                                \
-            GameAudio_PlaySfx(BUILDIT_SFX_PLACE_PIECE, NUMTX_GET_ROW_VEC(&piece_data->draw_mtx, 3), 0, 0);             \
-        } else {                                                                                                       \
-            NuSpecialSetVisibility(&piece->special, 1);                                                                \
-            if (!automatic || piece->instance_animation != NULL) {                                                     \
-                piece->instance_animation->playing = 0;                                                                \
-                piece->instance_animation->ltime = piece->end_frame;                                                   \
-                EvalAnim2(&piece->special, piece->end_frame);                                                          \
-            }                                                                                                          \
-            GameAudio_PlaySfx(BUILDIT_SFX_PLACE_PIECE, NuSpecialGetDrawPos(&piece->special), 0, 0);                    \
-            if (automatic) {                                                                                           \
-                NuSpecialSetDrawPos(&piece->special, NuSpecialGetPos(&piece->special));                                \
-            }                                                                                                          \
-        }                                                                                                              \
-        ++buildit.built_object_count;                                                                                  \
-                                                                                                                       \
-        if (buildit.built_object_count == buildit.anim_object_count) {                                                 \
-            buildit.build_state = GIZBUILDIT_BUILD_FINISHING;                                                          \
-            buildit.step_timer = 0.0f;                                                                                 \
-            EmitBuildItDebris(world, &buildit);                                                                        \
-            if (builder != NULL) {                                                                                     \
-                NewBuzz(builder->pad_gamepad->pad, 0.1f, 0);                                                           \
-            }                                                                                                          \
-        } else if (automatic || buildit.built_object_count < buildit.anim_object_count) {                              \
-            GizBuildIt_SetStepTime(&buildit, builder);                                                                 \
-            if (builder != NULL) {                                                                                     \
-                NewBuzzFrames(builder->pad_gamepad->pad, 1, 0);                                                        \
-            }                                                                                                          \
-        }                                                                                                              \
-                                                                                                                       \
-        if (builder != NULL) {                                                                                         \
-            if (buildit.build_state == GIZBUILDIT_BUILD_IDLE &&                                                        \
-                ((builder->pad_gamepad->buttons_held & GAMEPAD_SPECIAL) != 0 ||                                        \
-                 (builder->apiobj.field_0x1f4 & 0x40000) != 0)) {                                                      \
-                builder->field_0xe21 ^= 0x40;                                                                          \
-                if (builder->build_button_taps < 10) {                                                                 \
-                    ++builder->build_button_taps;                                                                      \
-                }                                                                                                      \
-            } else {                                                                                                   \
-                ReleaseBuildIt(builder, buildit.build_state);                                                          \
             }                                                                                                          \
         }                                                                                                              \
     } while (0)

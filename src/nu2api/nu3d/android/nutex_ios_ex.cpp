@@ -394,9 +394,13 @@ GLuint CreateTexturePS(void) {
     return tex;
 }
 
+SAGA_HOST_HOOK void *NuIOS_AllocateDefaultTexturePixels(usize bytes) {
+    return malloc(bytes);
+}
+
 GLuint loadDefaultTexture(GLuint texture, GLint level, GLsizei size, GLenum texture_type, GLenum target) {
     isize pixel_count = size * size;
-    u8 *pixels = (u8 *)malloc(pixel_count * 4);
+    u8 *pixels = (u8 *)NuIOS_AllocateDefaultTexturePixels(pixel_count * 4);
     u8 *p1 = pixels + 8;
     u8 *p2 = pixels + 4;
     for (i32 i = 0; i < pixel_count; i += 2) {

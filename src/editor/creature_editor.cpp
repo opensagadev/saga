@@ -336,23 +336,21 @@ static __used__
 #undef CREATURE_EDITOR_REGPARM1
 
 static __used__ void creatureEditor_cbActivationMenu(eduimenu_s *parent, eduiitem_s *, unsigned int) {
-    CreatureEditorRecord *creature = creatureEditor_Current();
-    if (creature == nullptr)
+    if (creatureEditor_Current() == nullptr)
         return;
     eduimenu_s *menu = eduiMenuCreate(220, 70, 240, 250, ed_fnt, creatureEditor_cbCancelMenu, "Activation Condition");
     if (menu == nullptr)
         return;
-    eduiMenuAddItem(menu, eduiItemSliderCreateInt(1, attr, 0, creatureEditor_cb_difficulty, 1, 9, creature->difficulty,
-                                                  "Activation Difficulty"));
-    eduiMenuAddItem(
-        menu, eduiItemCheckCreate(0, attr, creature->activation == 0, 1, creatureEditor_cbSetActivation, "AUTOMATIC"));
-    eduiMenuAddItem(
-        menu, eduiItemCheckCreate(2, attr, creature->activation == 2, 1, creatureEditor_cbSetActivation, "SCRIPT"));
+    eduiMenuAddItem(menu, eduiItemSliderCreateInt(1, attr, 0, creatureEditor_cb_difficulty, 1, 9,
+                                                  creatureEditor_Current()->difficulty, "Activation Difficulty"));
+    eduiMenuAddItem(menu, eduiItemCheckCreate(0, attr, creatureEditor_Current()->activation == 0, 1,
+                                              creatureEditor_cbSetActivation, "AUTOMATIC"));
+    eduiMenuAddItem(menu, eduiItemCheckCreate(2, attr, creatureEditor_Current()->activation == 2, 1,
+                                              creatureEditor_cbSetActivation, "SCRIPT"));
     i32 index = 0;
     char label[64];
-    NULISTHDR *list = creatureEditor_AreaList();
-    for (NULISTLNK *link = NuLinkedListGetHead(list); link != nullptr;
-         link = NuLinkedListGetNext(list, link), ++index) {
+    for (NULISTLNK *link = NuLinkedListGetHead(creatureEditor_AreaList()); link != nullptr;
+         link = NuLinkedListGetNext(creatureEditor_AreaList(), link), ++index) {
         if (creatureEditor_Current()->activation_area == link) {
             sprintf(label, "AREA \"%s\"", reinterpret_cast<char *>(link) + 8);
             eduiMenuAddItem(menu, eduiItemCheckCreate(index, attr, 1, 1, creatureEditor_cbSetAreaActivation, label));
@@ -399,22 +397,21 @@ static __used__ void creatureEditor_cbFlagsToggle(eduimenu_s *, eduiitem_s *item
 }
 
 static __used__ void creatureEditor_cbGroupMenu(eduimenu_s *parent, eduiitem_s *, unsigned int) {
-    CreatureEditorRecord *creature = creatureEditor_Current();
-    if (creature == nullptr)
+    if (creatureEditor_Current() == nullptr)
         return;
     eduimenu_s *menu = eduiMenuCreate(220, 70, 240, 250, ed_fnt, creatureEditor_cbCancelMenu, "Group Values");
     if (menu == nullptr)
         return;
-    eduiMenuAddItem(menu, eduiItemSliderCreateInt(1, attr, 0, creatureEditor_cb_ngroup, 1, 31, creature->group_count,
-                                                  "Group Size"));
+    eduiMenuAddItem(menu, eduiItemSliderCreateInt(1, attr, 0, creatureEditor_cb_ngroup, 1, 31,
+                                                  creatureEditor_Current()->group_count, "Group Size"));
     eduiMenuAddItem(menu, eduiItemSliderCreate(1, attr, 0, creatureEditor_cb_stagger_start, 0.0f, 60.0f,
-                                               creature->stagger_start, "Stagger Time"));
-    eduiMenuAddItem(menu, eduiItemSliderCreateInt(1, attr, 0, creatureEditor_cb_nacross, 1, 31, creature->across_count,
-                                                  "Formation Width"));
-    eduiMenuAddItem(menu, eduiItemSliderCreate(1, attr, 0, creatureEditor_cb_xspacing, 0.2f, 4.8f, creature->x_spacing,
-                                               "Formation X Spacing"));
-    eduiMenuAddItem(menu, eduiItemSliderCreate(1, attr, 0, creatureEditor_cb_zspacing, 0.2f, 4.8f, creature->z_spacing,
-                                               "Formation Z Spacing"));
+                                               creatureEditor_Current()->stagger_start, "Stagger Time"));
+    eduiMenuAddItem(menu, eduiItemSliderCreateInt(1, attr, 0, creatureEditor_cb_nacross, 1, 31,
+                                                  creatureEditor_Current()->across_count, "Formation Width"));
+    eduiMenuAddItem(menu, eduiItemSliderCreate(1, attr, 0, creatureEditor_cb_xspacing, 0.2f, 4.8f,
+                                               creatureEditor_Current()->x_spacing, "Formation X Spacing"));
+    eduiMenuAddItem(menu, eduiItemSliderCreate(1, attr, 0, creatureEditor_cb_zspacing, 0.2f, 4.8f,
+                                               creatureEditor_Current()->z_spacing, "Formation Z Spacing"));
     eduiMenuAttach(parent, menu);
 }
 
@@ -512,30 +509,29 @@ static __used__ __attribute__((force_align_arg_pointer)) void creatureEditor_cbV
 }
 
 static __used__ void creatureEditor_cbScriptParams(eduimenu_s *parent, eduiitem_s *, unsigned int) {
-    CreatureEditorRecord *creature = creatureEditor_Current();
-    if (creature == nullptr)
+    if (creatureEditor_Current() == nullptr)
         return;
     eduimenu_s *menu = eduiMenuCreate(220, 70, 240, 250, ed_fnt, creatureEditor_cbCancelMenu, "Script Params");
     if (menu == nullptr)
         return;
     char label[64];
     if (NuLinkedListGetHead(creatureEditor_AreaList()) != nullptr) {
-        if (creature->trigger_area != nullptr) {
-            sprintf(label, "Trigger Area \"%s\"", reinterpret_cast<char *>(creature->trigger_area) + 8);
+        if (creatureEditor_Current()->trigger_area != nullptr) {
+            sprintf(label, "Trigger Area \"%s\"", reinterpret_cast<char *>(creatureEditor_Current()->trigger_area) + 8);
         } else {
             strcpy(label, "Trigger Area NONE");
         }
         eduiMenuAddItem(menu, eduiItemSelCreate(1, attr, 0, 0, creatureEditor_cbSelectTriggerArea, label));
     }
     if (NuLinkedListGetHead(creatureEditor_LocatorList()) != nullptr) {
-        if (creature->locator != nullptr) {
-            sprintf(label, "Locator \"%s\"", reinterpret_cast<char *>(creature->locator) + 8);
+        if (creatureEditor_Current()->locator != nullptr) {
+            sprintf(label, "Locator \"%s\"", reinterpret_cast<char *>(creatureEditor_Current()->locator) + 8);
         } else {
             strcpy(label, "Locator NONE");
         }
         eduiMenuAddItem(menu, eduiItemSelCreate(1, attr, 0, 0, creatureEditor_cbSelectLocator, label));
     }
-    AISCRIPT *script = AIScriptFind(aieditor->ai_system, creature->script_name, 1, 1, 1);
+    AISCRIPT *script = AIScriptFind(aieditor->ai_system, creatureEditor_Current()->script_name, 1, 1, 1);
     if (script == nullptr) {
         sprintf(label, "Param%d", 0);
         eduiMenuAddItem(menu, eduiItemSliderCreate(0, attr, 0, creatureEditor_cbSetScriptParam, 0.0f, 100.0f,
@@ -669,9 +665,7 @@ static __used__ void creatureEditor_cbSetScriptParam(eduimenu_s *menu, eduiitem_
     if (value == aieditorsettings.current_script_params[index])
         return;
     aieditorsettings.current_script_params[index] = value;
-    u32 bit = 2u << (index & 31);
-    if (index & 0x20)
-        bit = 0;
+    u32 bit = static_cast<u32>(u64(2) << (index & 63));
     aieditorsettings.current_script_flags |= bit;
     creature->script_params[index] = value;
     creature->flags = (creature->flags & ~0x1e) | aieditorsettings.current_script_flags;

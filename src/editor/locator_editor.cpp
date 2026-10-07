@@ -495,8 +495,10 @@ extern "C" {
             locator = (EDLOCATOR_s *)NuLinkedListGetNext(&(*state)->locators, &locator->link);
         }
         if ((*state)->current_locator_set != nullptr) {
-            for (i32 index = 0; index < 64 && (*state)->current_locator_set->locators[index] != nullptr; ++index) {
+            for (i32 index = 0; index < 64; ++index) {
                 locator = (*state)->current_locator_set->locators[index];
+                if (locator == nullptr)
+                    break;
                 i32 colour;
                 if (locator == (*state)->current_locator) {
                     colour = locator == (*state)->nearest_locator ? 0xff0000ff : 0x800000ff;
@@ -714,8 +716,9 @@ extern "C" {
                              locator->first_node->radius * (1.0f - locator->path_fraction);
                 }
                 locator->position = locator->first_node->position;
-                direction.x = -direction.x * radius;
-                direction.z *= radius;
+                f32 normalized_x = direction.x;
+                direction.x = direction.z * radius;
+                direction.z = -normalized_x * radius;
                 NuVecScale(&movement, &difference, locator->path_fraction);
                 NuVecAdd(&locator->position, &locator->position, &movement);
                 NuVecScale(&movement, &direction, locator->path_width);
@@ -831,8 +834,8 @@ void locatorEditor_Render(i32 x, i32 y, float x_scale, float y_scale) {
     EDLOCATORSET_s *set = aieditor->current_locator_set;
     if (set != nullptr && set->locators[0] != nullptr) {
         NUVEC previous = set->locators[0]->position;
-        for (i32 index = 1; index < 64 && set->locators[index] != nullptr; ++index) {
-            NUVEC current = set->locators[index]->position;
+        for (i32 index = 1; index <= 64 && set->locators[index - 1] != nullptr; ++index) {
+            NUVEC current = set->locators[index - 1]->position;
             if (index != 1) {
                 NURND_VERTEX3D vertices[2] = {};
                 vertices[0].colour = 0x32323232;

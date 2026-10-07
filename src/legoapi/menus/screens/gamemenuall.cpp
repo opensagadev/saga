@@ -1736,8 +1736,38 @@ void MenuEnterAutoSaveWarning(MENU_s *) {
     memcard_autosavedisabled = 0;
 }
 
-void MenuUpdateAutoSaveCancel(MENU_s *) {
-    STUBBED();
+extern f32 memcard_autosavecanceldelay;
+void MenuUpdateAutoSaveCancel(MENU_s *menu) {
+    static bool firstTimeIn = true;
+    if (MenuASCancelFinished != 0) {
+        MenuASCancelFinished = 0;
+        BackupMenu();
+    } else {
+        switch (memcard_savefailed) {
+            default: {
+                if (firstTimeIn) {
+                    firstTimeIn = false;
+                    memcard_autosavecanceldelay = 5.0f;
+                    g_enableButtonPrompts = 0;
+                } else if (!(memcard_autosavecanceldelay > 0.0f)) {
+                    g_enableButtonPrompts = 1;
+                    NewMenu(1000, -1, -1);
+                    MenuASCancelFinished = 1;
+                    firstTimeIn = true;
+                    memcard_autosavecanceldelay = 5.0f;
+                    goto check_input;
+                }
+                break;
+            }
+            case 0:
+            check_input:
+                if (menu->confirm_pressed != 0 || menu->cancel_pressed != 0) {
+                    MenuASCancelFinished = 1;
+                    MenuSFX = MENUSFX_MENUSELECT;
+                }
+                break;
+        }
+    }
 }
 
 void MenuUpdateNotEnoughSpace(MENU_s *menu) {

@@ -478,9 +478,8 @@ void ClassEditor::Render() {
         if (!Editable(NULL, ed_class, index) || ed_class->interface == NULL || (ed_class->flags & 0x08000080) == 0)
             continue;
 
-        EdClassInterface *interface = ed_class->interface;
-        for (void *object = interface->vtable->get_next_object(interface, NULL); object != NULL;
-             object = interface->vtable->get_next_object(interface, object)) {
+        for (void *object = ed_class->interface->vtable->get_next_object(ed_class->interface, NULL); object != NULL;
+             object = ed_class->interface->vtable->get_next_object(ed_class->interface, object)) {
             if (!Editable(object, ed_class, -1))
                 continue;
 

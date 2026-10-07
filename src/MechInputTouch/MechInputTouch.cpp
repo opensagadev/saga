@@ -206,37 +206,48 @@ void MechTouchUIPartySelector_OnRelease_Callback(MechTouchUIElement &element, To
 void MechInputTouchSystem::AddChangeLayoutButtons(NuVirtualTouchDevice &, i32) {
 }
 
-i32 MechInputTouchSystem::ChooseTouchLayout(bool paused) {
+i32 MechInputTouchSystem::ChooseTouchLayout(bool) {
     i32 layout = control_mode;
     s_baseControlMode = layout != 1;
-
-    const i32 menu_id = GetMenuID();
-    const bool in_gameplay = menu_id == 0x19 || (!paused && menu_id == -1);
-    if (Controller_IsConnected() != 0) {
+    bool active;
+    if (GetMenuID() == 0x19 || (Paused == 0 && GetMenuID() == -1)) {
+        if (Controller_IsConnected() != 0) {
+            s_baseControlMode = 0;
+            layout = 7;
+            active = false;
+            goto done;
+        }
+        if (layout != 2) {
+            active = layout != 7 && layout != 1;
+            goto done;
+        }
+    } else if (Controller_IsConnected() != 0) {
         s_baseControlMode = 0;
         layout = 7;
-        TouchHacks::TouchControlsActive = false;
-    } else if (in_gameplay && layout != 2) {
-        TouchHacks::TouchControlsActive = layout != 7 && layout != 1;
-    } else if (WORLD != NULL && (WORLD->area == PODRACE_ADATA || WORLD->area == PODSPRINT_ADATA)) {
+        active = false;
+        goto done;
+    }
+    if (WORLD != NULL && (WORLD->area == PODRACE_ADATA || WORLD->area == PODSPRINT_ADATA)) {
         layout = 3;
-        TouchHacks::TouchControlsActive = true;
+        active = true;
     } else if (WORLD != NULL && WORLD->area == BONUS_GUNSHIP_ADATA) {
         layout = 4;
-        TouchHacks::TouchControlsActive = true;
-    } else if (WORLD != NULL && WORLD->current_level == DEATHSTARRESCUEE_LDATA && Player[0] != NULL &&
-               Player[0]->id == id_GRABCONTROL) {
+        active = true;
+    } else if (WORLD != NULL && WORLD->current_level == DEATHSTARRESCUEE_LDATA && player != NULL &&
+               player->id == id_GRABCONTROL) {
         layout = 5;
-        TouchHacks::TouchControlsActive = true;
+        active = true;
     } else if (WORLD != NULL && WORLD->current_level == SPEEDERCHASEA_LDATA && players_cannot_exit_speeder != 0 &&
-               Player[0] != NULL && (Player[0]->id == id_SPEEDERBIKE || Player[0]->id == id_SPEEDERBIKESNOW)) {
+               player != NULL && (player->id == id_SPEEDERBIKE || player->id == id_SPEEDERBIKESNOW)) {
         layout = 6;
-        TouchHacks::TouchControlsActive = true;
+        active = true;
     } else {
         layout = 2;
-        TouchHacks::TouchControlsActive = true;
+        active = true;
     }
 
+done:
+    TouchHacks::TouchControlsActive = active;
     s_actualTouchMode = layout;
     return layout;
 }

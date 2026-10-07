@@ -1140,48 +1140,50 @@ void RemoveAnyChunkControls(i32 *);
 void RemoveChunkFromRenderStack(particlechunkrendertype_s *, particlechunkrendertype_s **);
 
 void DebFreeChunksInstantly(i32 *handle) {
-    debkeydatatype_s *key = &debkeydata[*handle];
-    if (key->effect_index == 0 || key->allocated_chunk_count == 0) {
+    const i16 effect_index = debkeydata[*handle].effect_index;
+    if (effect_index == 0)
         return;
-    }
-    debinftype *effect = debtab[key->effect_index];
+    debinftype *effect = debtab[effect_index];
+    if (debkeydata[*handle].allocated_chunk_count == 0)
+        return;
 
     DebrisGetControlStackLock();
-    for (i32 i = 0; i < key->allocated_chunk_count; ++i) {
-        RemoveAnyChunkControls(reinterpret_cast<i32 *>(key->particle_chunks[i]));
-        debris_chunk_control_s *control = freechunkcontrols[freechunkcontrolsptr++];
-        control->particle_chunk = key->particle_chunks[i];
+    for (i32 i = 0; i < debkeydata[*handle].allocated_chunk_count; ++i) {
+        RemoveAnyChunkControls(reinterpret_cast<i32 *>(debkeydata[*handle].particle_chunks[i]));
+        debris_chunk_control_s *control = freechunkcontrols[freechunkcontrolsptr];
+        control->particle_chunk = debkeydata[*handle].particle_chunks[i];
         control->active = effect->particle_type == 7 ? 9 : 2;
         control->owner = NULL;
         const bool panel_time = effect->time_group == 4;
         control->expiry_time = panel_time ? panelglobaltime : globaltime;
         AddChunkControlToStack(control, &debris_chunk_control_stack[panel_time ? 1 : 0]);
+        ++freechunkcontrolsptr;
     }
     DebrisReleaseControlStackLock();
 
-    const i32 render_chunk_count = debrischunks + debrischunksglass;
+    i32 render_chunk_count = debrischunks + debrischunksglass;
     for (i32 i = 0; i < render_chunk_count; ++i) {
         particlechunkrendertype_s *render_chunk = &ParticleChunkToRender[i];
-        if (render_chunk->particle_chunk == key->particle_chunks[0]) {
-            if (key->field_2f6 != 0) {
+        if (render_chunk->particle_chunk == debkeydata[*handle].particle_chunks[0]) {
+            if (debkeydata[*handle].field_2f6 != 0) {
                 RemoveChunkFromRenderStack(render_chunk, &ParticleChunkRenderStack[effect->time_group]);
+                render_chunk = &ParticleChunkToRender[i];
+                render_chunk_count = debrischunks + debrischunksglass;
             }
             render_chunk->particle_chunk = NULL;
             render_chunk->effect = NULL;
-            render_chunk->key = NULL;
-            break;
         }
     }
 
-    for (i32 i = 0; i < key->allocated_chunk_count; ++i) {
-        key->particle_chunks[i] = NULL;
+    for (i32 i = 0; i < debkeydata[*handle].allocated_chunk_count; ++i) {
+        debkeydata[*handle].particle_chunks[i] = NULL;
     }
-    key->particle_count = 0;
-    key->allocated_chunk_count = 0;
-    key->previous_particle_count = 0;
-    key->previous_allocated_chunk_count = 0;
-    key->controlled_chunk_count = 0;
-    key->field_18a = 0;
+    debkeydata[*handle].particle_count = 0;
+    debkeydata[*handle].allocated_chunk_count = 0;
+    debkeydata[*handle].previous_particle_count = 0;
+    debkeydata[*handle].previous_allocated_chunk_count = 0;
+    debkeydata[*handle].controlled_chunk_count = 0;
+    debkeydata[*handle].field_18a = 0;
 }
 
 extern "C" {
@@ -1458,20 +1460,31 @@ void xxxNuDisplayListUpdateSpecial(nuhspecial_s *special) {
         {display->bounds_max.x, display->bounds_min.y, display->bounds_min.z},
         {display->bounds_max.x, display->bounds_min.y, display->bounds_max.z},
     };
-    for (i32 i = 0; i < 8; ++i) {
-        NuVecMtxTransform(&corners[i], &corners[i], &matrix);
-    }
+    NuVecMtxTransform(&corners[0], &corners[0], &matrix);
+    NuVecMtxTransform(&corners[1], &corners[1], &matrix);
+    NuVecMtxTransform(&corners[2], &corners[2], &matrix);
+    NuVecMtxTransform(&corners[3], &corners[3], &matrix);
+    NuVecMtxTransform(&corners[4], &corners[4], &matrix);
+    NuVecMtxTransform(&corners[5], &corners[5], &matrix);
+    NuVecMtxTransform(&corners[6], &corners[6], &matrix);
+    NuVecMtxTransform(&corners[7], &corners[7], &matrix);
 
     NUVEC minimum;
     NUVEC maximum;
     NuVecMin(&minimum, &corners[0], &corners[1]);
-    for (i32 i = 2; i < 8; ++i) {
-        NuVecMin(&minimum, &minimum, &corners[i]);
-    }
+    NuVecMin(&minimum, &minimum, &corners[2]);
+    NuVecMin(&minimum, &minimum, &corners[3]);
+    NuVecMin(&minimum, &minimum, &corners[4]);
+    NuVecMin(&minimum, &minimum, &corners[5]);
+    NuVecMin(&minimum, &minimum, &corners[6]);
+    NuVecMin(&minimum, &minimum, &corners[7]);
     NuVecMax(&maximum, &corners[0], &corners[1]);
-    for (i32 i = 2; i < 8; ++i) {
-        NuVecMax(&maximum, &maximum, &corners[i]);
-    }
+    NuVecMax(&maximum, &maximum, &corners[2]);
+    NuVecMax(&maximum, &maximum, &corners[3]);
+    NuVecMax(&maximum, &maximum, &corners[4]);
+    NuVecMax(&maximum, &maximum, &corners[5]);
+    NuVecMax(&maximum, &maximum, &corners[6]);
+    NuVecMax(&maximum, &maximum, &corners[7]);
 
     if ((scene->render_buffer & NUDL_SCENE_RENDER_FLAG_CENTER_EXTENT_BOUNDS) != 0) {
         NUVEC extent;
