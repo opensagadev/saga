@@ -3820,9 +3820,10 @@ void ScanTerrainPlatform(i32 group_index, i32 terrain_mask) {
             while (batch->marker >= 0) {
                 i32 shape_count = batch->shape_count;
                 TERRAIN_SHAPE *source = reinterpret_cast<TERRAIN_SHAPE *>(batch + 1);
+                TERRAIN_SHAPE *next = source + shape_count;
                 if (local.max_x < batch->min_x || batch->max_x <= local.min_x || local.max_z < batch->min_z ||
                     batch->max_z <= local.min_z) {
-                    source += shape_count;
+                    source = next;
                 } else {
                     for (i32 remaining = shape_count; remaining > 0; --remaining, ++source) {
                         if (!(source->min_x <= local.max_x && local.min_x < source->max_x &&
@@ -3887,7 +3888,7 @@ void ScanTerrainPlatform(i32 group_index, i32 terrain_mask) {
                         }
                     }
                 }
-                batch = reinterpret_cast<TERRAIN_SHAPE_BATCH *>(source);
+                batch = reinterpret_cast<TERRAIN_SHAPE_BATCH *>(next);
             }
         }
     } else {
