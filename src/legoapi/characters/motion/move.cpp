@@ -4324,7 +4324,8 @@ vehicle_gravity_done:
 
     if (object->id == id_SNOWMOB) {
         Buck_MoveCode(object, pad->buttons_pressed & (GAMEPAD_SPECIAL | GAMEPAD_ACTION));
-    } else if (object->id == id_ZAMSSPEEDER && WORLD->current_level == BOUNTYHUNTERPURSUITE_LDATA &&
+    }
+    if (object->id == id_ZAMSSPEEDER && WORLD->current_level == BOUNTYHUNTERPURSUITE_LDATA &&
                object->current_hp < static_cast<i32>(object->hitpoints)) {
         const i32 effect = WORLD->debris_sys->entries[134].effect;
         if (effect != -1) {
@@ -10200,9 +10201,11 @@ static i32 ShootCode(GameObject_s *object, i32 pressed, i32 special_pressed, i32
         if (static_cast<i8>(object->apiobj.flags_low) < 0) {
             if ((context == 6 || context == 7) && (object->apiobj.character_data->game_character->flags_094[1] & 0x10) != 0)
                 return 0;
-        } else if (context == 6 || context == 7 ||
-                   (context == 1 && (object->context_animation == 0xb3 || object->context_animation == 0x59))) {
+        } else if (context == 6 || context == 7) {
             goto shoot_weapon_in;
+        } else if (context == 1) {
+            if (object->context_animation == 0xb3 || object->context_animation == 0x59)
+                goto shoot_weapon_in;
         }
         if (BonusWinner != -1)
             return 0;
