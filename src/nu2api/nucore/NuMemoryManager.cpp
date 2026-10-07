@@ -574,20 +574,30 @@ void NuMemoryManager::AddPage(void *ptr, u32 size, bool _unknown) {
     page->end = (u32 *)(allocation_end - 4);
     page->is_external = _unknown;
 
-    // Allocated zero-sized fence blocks prevent coalescing beyond the page.
+    // Fence flags prevent coalescing beyond the page while preserving the other bits.
     Header *left_fence = (Header *)((usize)page + sizeof(Page));
-    left_fence->value = 0x08000000;
+    left_fence->value = (left_fence->value & BLOCK_SIZE_MASK) | 0x08000000;
     Header *right_fence = (Header *)(allocation_end - 4);
-    right_fence->value = 0x08000000;
+    right_fence->value = (right_fence->value & BLOCK_SIZE_MASK) | 0x08000000;
 
     FreeHeader *free_block = (FreeHeader *)page->first_header;
     const u32 free_size = (usize)right_fence - (usize)free_block;
     free_block->block_header.value = free_size / 4;
     free_block->next = NULL;
     free_block->prev = NULL;
-    *END_TAG(free_block, free_size) = free_block->block_header.value;
+    u32 value = free_block->block_header.value;
+    u32 manager_index = this->idx;
+    u32 *end_tag = (u32 *)END_TAG(free_block, BLOCK_SIZE(value));
+    if ((value & 0x38000000) == 0) {
+        *end_tag = value & BLOCK_SIZE_MASK;
+    } else if (manager_index <= 29) {
+        *end_tag = ((manager_index + 1) << 27) | (value & BLOCK_SIZE_MASK);
+    } else {
+        *end_tag = value | HEADER_MGR_HI_MASK;
+        *(end_tag - 1) = manager_index;
+    }
 
-    this->stats.unknown_00 += free_size;
+    this->stats.unknown_00 += BLOCK_SIZE(free_block->block_header.value);
 
     pthread_mutex_lock(&this->mutex);
     BinLink(free_block, true);
@@ -1294,21 +1304,21 @@ u16 NuMemoryManager::DumpBlock(u32 dump_id, NuSymbolQuery *, Header *header, u32
     usize *end_tag = END_TAG(header, block_size);
     u32 encoded_index = *end_tag >> 27;
     u32 manager_index = encoded_index == 31 ? *(end_tag - 1) : encoded_index - 1;
-    u8 *data = reinterpret_cast<u8 *>(header) + m_headerSize;
 
     NuStrFormatSize(size_text, sizeof(size_text),
-                    total_bytes - (m_headerSize - 4) * count - (manager_index >= 30 ? 8 : 4), false);
-    NuStrFormatAddress(address_text, sizeof(address_text), data);
+                    total_bytes - (m_headerSize - 4) * count - (manager_index >= 30 ? 4 : 0), false);
+    NuStrFormatAddress(address_text, sizeof(address_text), reinterpret_cast<u8 *>(header) + m_headerSize);
 
     u16 category = 0;
     if ((m_flags & MEM_MANAGER_DEBUG) == 0) {
+        u8 *data = reinterpret_cast<u8 *>(header) + m_headerSize;
         snprintf(line, sizeof(line),
                  "| %s | %10u | %s |     |           | [%02X %02X %02X %02X %02X %02X %02X %02X ...]\r\n", address_text,
                  count, size_text, data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7]);
     } else {
         DebugHeader *debug = reinterpret_cast<DebugHeader *>(header);
-        category = debug->category;
         const char *debug_name = debug->name != NULL ? NuStrStripPath(debug->name) : "";
+        category = debug->category;
         char category_text[10];
         if (category < category_count) {
             const char *name = category_names[category];
@@ -1321,9 +1331,10 @@ u16 NuMemoryManager::DumpBlock(u32 dump_id, NuSymbolQuery *, Header *header, u32
         } else {
             strcpy(category_text, "        ");
         }
-        const char flag_a = (debug->flags.alloc_flags & 8) != 0 ? 'X' : '-';
+        u8 *data = reinterpret_cast<u8 *>(header) + m_headerSize;
+        const char flag_a = (debug->flags.alloc_flags & 2) != 0 ? 'X' : '-';
         const char flag_s = (debug->flags.alloc_flags & 4) != 0 ? 'X' : '-';
-        const char flag_c = (debug->flags.alloc_flags & 2) != 0 ? 'X' : '-';
+        const char flag_c = (debug->flags.alloc_flags & 8) != 0 ? 'X' : '-';
 
         if (count > 1 && (flags & 2) == 0) {
             snprintf(line, sizeof(line), "| %s | %10u | %s | %c%c%c | %s | %s\r\n", address_text, count, size_text,

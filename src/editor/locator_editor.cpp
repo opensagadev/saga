@@ -1095,7 +1095,14 @@ process_buttons:
         } else if (remainder < -0x2000) {
             --quadrant;
         }
-        aieditorsettings.area_rotation = NuAngAdd(path_angle, quadrant << 14);
+        aieditorsettings.area_rotation =
+            NuAngAdd(quadrant << 14, *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(aieditor) + 0x60));
+        if (aieditor->current_locator != nullptr && aieditor->current_locator == aieditor->nearest_locator) {
+            aieditor->current_locator->direction = aieditorsettings.area_rotation;
+            aieditor->current_locator->path_angle =
+                NuAngSub(aieditor->current_locator->direction,
+                         *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(aieditor) + 0x60));
+        }
     } else if ((pad->digital_buttons & 0x20) != 0 && aieditor->current_locator_set != nullptr &&
                (pad->digital_buttons_pressed & 0x20) != 0 && aieditor->nearest_locator != nullptr) {
         EDLOCATORSET_s *set = aieditor->current_locator_set;

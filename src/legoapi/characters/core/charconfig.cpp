@@ -338,15 +338,7 @@ static void CC_layers_special(NUFPAR *parser) {
     u32 *mask = &charconfig.runtime->layer_mask_special;
     *mask = 0;
     i32 count = 0;
-    if (charconfig.named_layers == 0) {
-        while (NuFParGetWord(parser) != 0) {
-            const u32 layer = NuAToI(parser->word_buf);
-            if (layer < 32) {
-                ++count;
-                *mask |= 1u << layer;
-            }
-        }
-    } else {
+    if (charconfig.named_layers != 0) {
         while (NuFParGetWord(parser) != 0) {
             const i32 layer = LayerFromName(charconfig.runtime, parser->word_buf);
             if (layer != -1) {
@@ -354,12 +346,21 @@ static void CC_layers_special(NUFPAR *parser) {
                 *mask |= 1u << layer;
             }
         }
+    } else {
+        while (NuFParGetWord(parser) != 0) {
+            const u32 layer = NuAToI(parser->word_buf);
+            if (layer < 32) {
+                ++count;
+                *mask |= 1u << layer;
+            }
+        }
     }
     if (count != 0) {
-        charconfig.runtime->layer_mask_dead = *mask;
-        charconfig.runtime->layer_mask_low = *mask;
-        charconfig.runtime->layer_mask_medium = *mask;
-        charconfig.runtime->layer_mask = *mask;
+        const u32 special_mask = charconfig.runtime->layer_mask_special;
+        charconfig.runtime->layer_mask_dead = special_mask;
+        charconfig.runtime->layer_mask_low = special_mask;
+        charconfig.runtime->layer_mask_medium = special_mask;
+        charconfig.runtime->layer_mask = special_mask;
     }
 }
 
@@ -1621,15 +1622,7 @@ static void CC_layers_medium(NUFPAR *parser) {
     u32 *mask = &charconfig.runtime->layer_mask_medium;
     *mask = 0;
     i32 count = 0;
-    if (charconfig.named_layers == 0) {
-        while (NuFParGetWord(parser) != 0) {
-            const u32 layer = NuAToI(parser->word_buf);
-            if (layer < 32) {
-                ++count;
-                *mask |= 1u << layer;
-            }
-        }
-    } else {
+    if (charconfig.named_layers != 0) {
         while (NuFParGetWord(parser) != 0) {
             const i32 layer = LayerFromName(charconfig.runtime, parser->word_buf);
             if (layer != -1) {
@@ -1637,9 +1630,17 @@ static void CC_layers_medium(NUFPAR *parser) {
                 *mask |= 1u << layer;
             }
         }
+    } else {
+        while (NuFParGetWord(parser) != 0) {
+            const u32 layer = NuAToI(parser->word_buf);
+            if (layer < 32) {
+                ++count;
+                *mask |= 1u << layer;
+            }
+        }
     }
     if (count != 0) {
-        charconfig.runtime->layer_mask_low = *mask;
+        charconfig.runtime->layer_mask_low = charconfig.runtime->layer_mask_medium;
     }
 }
 
@@ -1849,11 +1850,25 @@ static void CC_sfx_hurt(NUFPAR *parser) {
 }
 
 static void CC_sfx_misc(NUFPAR *parser) {
-    i32 index = 0;
-    while (index < 6 && charconfig.runtime->sfx_misc[index] != -1)
-        ++index;
+    GAMECHARACTERDATA *data = charconfig.runtime;
+    i32 index;
+    if (data->sfx_misc[0] == -1)
+        index = 0;
+    else if (data->sfx_misc[1] == -1)
+        index = 1;
+    else if (data->sfx_misc[2] == -1)
+        index = 2;
+    else if (data->sfx_misc[3] == -1)
+        index = 3;
+    else if (data->sfx_misc[4] == -1)
+        index = 4;
+    else if (data->sfx_misc[5] == -1)
+        index = 5;
+    else
+        index = 6;
     if (index < 6 && NuFParGetWord(parser) != 0) {
-        charconfig.runtime->sfx_misc[index] = static_cast<i16>(GetSfxId(parser->word_buf));
+        i16 *slot = &charconfig.runtime->sfx_misc[index];
+        *slot = static_cast<i16>(GetSfxId(parser->word_buf));
     }
     if (index + 1 < 6)
         charconfig.runtime->sfx_misc[index + 1] = -1;
@@ -2463,57 +2478,59 @@ static i32 CharConfig(i32 character_id, char *directory, char *filename, VARIPTR
         }
         NuFParDestroy(parser);
     }
-    character->model_flags |= 1;
+    charconfig.character->model_flags |= 1;
     if ((charconfig.flags & 0xc) == 4)
-        data->field_0x78 = data->turn_rate;
-    if ((charconfig.flags & 0x10) == 0 && (character->model_flags & 0x2000) != 0) {
-        data->ai_update_distance_0 = vehicle_timebase_dist[0];
-        data->ai_update_distance_1 = vehicle_timebase_dist[1];
-        data->ai_update_distance_2 = vehicle_timebase_dist[2];
-        data->ai_update_distance_3 = vehicle_timebase_dist[3];
-        data->ai_update_interval_0 = static_cast<u8>(vehicle_timebase_nframes[0]);
-        data->ai_update_interval_1 = static_cast<u8>(vehicle_timebase_nframes[1]);
-        data->ai_update_interval_2 = static_cast<u8>(vehicle_timebase_nframes[2]);
-        data->ai_update_interval_3 = static_cast<u8>(vehicle_timebase_nframes[3]);
+        charconfig.runtime->field_0x78 = charconfig.runtime->turn_rate;
+    if ((charconfig.flags & 0x10) == 0 && (charconfig.character->model_flags & 0x2000) != 0) {
+        charconfig.runtime->ai_update_distance_0 = vehicle_timebase_dist[0];
+        charconfig.runtime->ai_update_distance_1 = vehicle_timebase_dist[1];
+        charconfig.runtime->ai_update_distance_2 = vehicle_timebase_dist[2];
+        charconfig.runtime->ai_update_distance_3 = vehicle_timebase_dist[3];
+        charconfig.runtime->ai_update_interval_0 = static_cast<u8>(vehicle_timebase_nframes[0]);
+        charconfig.runtime->ai_update_interval_1 = static_cast<u8>(vehicle_timebase_nframes[1]);
+        charconfig.runtime->ai_update_interval_2 = static_cast<u8>(vehicle_timebase_nframes[2]);
+        charconfig.runtime->ai_update_interval_3 = static_cast<u8>(vehicle_timebase_nframes[3]);
     }
-    CharConfig_CalculateJumpStats(data->jump_speed, data->gravity, &data->jump_duration, &data->jump_height);
-    CharConfig_CalculateJumpStats(data->second_jump_speed, data->gravity, &data->second_jump_duration,
-                                  &data->second_jump_height);
+    CharConfig_CalculateJumpStats(charconfig.runtime->jump_speed, charconfig.runtime->gravity,
+                                  &charconfig.runtime->jump_duration, &charconfig.runtime->jump_height);
+    CharConfig_CalculateJumpStats(charconfig.runtime->second_jump_speed, charconfig.runtime->gravity,
+                                  &charconfig.runtime->second_jump_duration, &charconfig.runtime->second_jump_height);
     if ((charconfig.flags & 0x20) != 0) {
-        CHARACTERANIM_s *sentinel = &character->animations[charconfig.animation_count];
-        character->field5_0x14 = charconfig.animation_count++;
+        CHARACTERANIM_s *sentinel = &charconfig.character->animations[charconfig.animation_count];
+        charconfig.character->field5_0x14 = charconfig.animation_count++;
         sentinel->name = NULL;
         sentinel->action_id = -1;
-        arena->void_ptr = character->animations + charconfig.animation_count;
+        charconfig.arena->void_ptr = character->animations + charconfig.animation_count;
         for (i32 i = 0; i < charconfig.animation_count - 1; ++i) {
-            char *name = static_cast<char *>(arena->void_ptr);
-            NuStrCpy(name, charconfig.animation_names[i]);
-            character->animations[i].name = name;
-            arena->addr += NuStrLen(name) + 1;
+            NuStrCpy(static_cast<char *>(charconfig.arena->void_ptr), charconfig.animation_names[i]);
+            char *name = static_cast<char *>(charconfig.arena->void_ptr);
+            charconfig.character->animations[i].name = name;
+            charconfig.arena->addr += NuStrLen(name) + 1;
         }
         if (charconfig.effect_count > 0) {
             effects[charconfig.effect_count++].character_id = -1;
-            arena->addr = ALIGN(arena->addr, 4);
-            character->effects = static_cast<CHARACTER_EFFECT_s *>(arena->void_ptr);
-            memmove(character->effects, effects, charconfig.effect_count * sizeof(*effects));
-            arena->addr += charconfig.effect_count * sizeof(*effects);
+            charconfig.arena->addr = ALIGN(charconfig.arena->addr, 4);
+            charconfig.character->effects = static_cast<CHARACTER_EFFECT_s *>(charconfig.arena->void_ptr);
+            memmove(charconfig.character->effects, effects, charconfig.effect_count * sizeof(*effects));
+            charconfig.arena->addr += charconfig.effect_count * sizeof(*effects);
         }
     }
     if ((charconfig.flags & 2) != 0) {
-        if (data->layer_count == 0) {
-            data->layers = NULL;
-            data->layer_count = 0;
+        if (charconfig.runtime->layer_count == 0) {
+            charconfig.runtime->layers = NULL;
+            charconfig.runtime->layer_count = 0;
         } else {
-            arena->addr = ALIGN(arena->addr, 4);
-            data->layers = static_cast<GAMECHARACTERLAYER_s *>(arena->void_ptr);
-            arena->addr += data->layer_count * sizeof(*layers);
-            memmove(data->layers, layers, data->layer_count * sizeof(*layers));
-            data->layer_lookup = static_cast<i8 *>(arena->void_ptr);
-            arena->addr += 32;
+            charconfig.arena->addr = ALIGN(charconfig.arena->addr, 4);
+            charconfig.runtime->layers = static_cast<GAMECHARACTERLAYER_s *>(charconfig.arena->void_ptr);
+            charconfig.arena->addr += charconfig.runtime->layer_count * sizeof(*layers);
+            memmove(charconfig.runtime->layers, charconfig.layer_scratch,
+                    charconfig.runtime->layer_count * sizeof(*layers));
+            charconfig.runtime->layer_lookup = static_cast<i8 *>(charconfig.arena->void_ptr);
+            charconfig.arena->addr += 32;
             for (i32 bit = 0; bit < 32; ++bit) {
-                for (i32 layer = 0; layer < data->layer_count; ++layer) {
-                    if (data->layers[layer].mask_bit == bit)
-                        data->layer_lookup[bit] = static_cast<i8>(layer);
+                for (i32 layer = 0; layer < charconfig.runtime->layer_count; ++layer) {
+                    if (charconfig.runtime->layers[layer].mask_bit == bit)
+                        charconfig.runtime->layer_lookup[bit] = static_cast<i8>(layer);
                 }
             }
         }

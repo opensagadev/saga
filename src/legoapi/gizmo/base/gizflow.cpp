@@ -649,14 +649,16 @@ DECOMP_ASSERT(sizeof(flowboxtypes) == 0x24, "Flow-box callback table ABI");
 
 static void ProcessFlowBox(GIZFLOW_s *system, FLOWBOX_s *box, u8 frame) {
     if (box->state_flags_high & 1) {
-        i32 i;
-        for (i = 0; i < box->parent_count; ++i) {
+        bool parents_ready = true;
+        for (i32 i = 0; i < box->parent_count; ++i) {
             FLOWBOX_s *parent = box->parents[i];
-            if (!flowboxtypes[parent->type].check_output(system, parent, box->output_indices[0]))
+            if (!flowboxtypes[parent->type].check_output(system, parent, box->output_indices[0])) {
+                parents_ready = false;
                 break;
+            }
         }
         FLOWBOXGIZMODATA_s *data = box->data;
-        if (i == box->parent_count) {
+        if (parents_ready) {
             for (i32 j = 0; j < data->gizmo_count; ++j)
                 GizmoActivateReverse(system->gizmo_sys, data->gizmos[j]->gizmo, 0, box->state_flags_low >> 7, 1);
         } else {

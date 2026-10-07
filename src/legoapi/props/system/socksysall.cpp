@@ -1542,14 +1542,14 @@ extern "C" {
                         NuVecRotateX(&look_position, &look_position, candidate->camera_rotation.x);
                         NuVecRotateY(&look_position, &look_position, candidate->camera_rotation.y);
                     } else {
-                        SOCKROT *from_rotation = &sock->cam_rotations[look_from];
-                        SOCKROT *to_rotation = &sock->cam_rotations[look_to];
-                        const u16 pitch = static_cast<u16>(static_cast<i32>(
-                            from_rotation->x +
-                            static_cast<f32>(RotDiff(from_rotation->x, to_rotation->x)) * candidate->ratio));
-                        const u16 yaw = static_cast<u16>(static_cast<i32>(
-                            from_rotation->y +
-                            static_cast<f32>(RotDiff(from_rotation->y, to_rotation->y)) * candidate->ratio));
+                        u16 from_angle = sock->cam_rotations[look_from].x;
+                        i32 difference = RotDiff(sock->cam_rotations[look_from].x, sock->cam_rotations[look_to].x);
+                        const u16 pitch = static_cast<u16>(
+                            static_cast<i32>(from_angle + static_cast<f32>(difference) * candidate->ratio));
+                        from_angle = sock->cam_rotations[look_from].y;
+                        difference = RotDiff(sock->cam_rotations[look_from].y, sock->cam_rotations[look_to].y);
+                        const u16 yaw = static_cast<u16>(
+                            static_cast<i32>(from_angle + static_cast<f32>(difference) * candidate->ratio));
                         NuVecRotateX(&look_position, &look_position, pitch);
                         NuVecRotateY(&look_position, &look_position, yaw - 0x1555);
                     }

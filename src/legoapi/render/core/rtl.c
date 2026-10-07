@@ -659,29 +659,16 @@ static f32 ClampUnit(f32 value) {
 }
 
 static __used__ void rtlCalcLights(nuvec_s *position, numtx_s *rotation, f32 scale, rtlidata_s *lighting_data) {
-    for (i32 slot = 0; slot < 3; ++slot) {
-        if (lighting_data->directional_lights[slot] == NULL) {
-            lighting_data->intensity_vectors[slot] = {0.0f, 0.0f, 0.0f};
-            lighting_data->direction[slot] = nuvec_y;
-        } else {
-            bool invalid = false;
+    const NUVEC black = {0.0f, 0.0f, 0.0f};
+    i32 slot;
+    f32 strength;
+    for (slot = 0; slot < 3; ++slot) {
+        if (lighting_data->directional_lights[slot] != NULL) {
+            i32 invalid = 0;
+            // The reference copies ambient x/y/z back to the selected light in the default, 4 and 2 arms.
             switch (lighting_data->directional_lights[slot]->type) {
-                case 2:
-                case 3:
-                case 6:
-                case 8:
-                    if (position == NULL)
-                        invalid = true;
-                    else {
-                        NuVecSub(&lighting_data->direction[slot], &lighting_data->directional_lights[slot]->position,
-                                 position);
-                        NuVecNorm(&lighting_data->direction[slot], &lighting_data->direction[slot]);
-                    }
-                    break;
-                case 4:
-                    lighting_data->direction[slot] = lighting_data->directional_lights[slot]->direction;
-                    break;
                 default:
+                    lighting_data->directional_lights[slot]->ambient = lighting_data->directional_lights[slot]->ambient;
                     lighting_data->direction[slot] = {0.0f, 0.0f, 1.0f};
                     NuVecRotateX(&lighting_data->direction[slot], &lighting_data->direction[slot],
                                  lighting_data->directional_lights[slot]->pitch);
@@ -691,13 +678,39 @@ static __used__ void rtlCalcLights(nuvec_s *position, numtx_s *rotation, f32 sca
                                    &global_camera.mtx);
                     lighting_data->directional_strengths[slot] = 1.0f;
                     break;
+                case 4:
+                    lighting_data->directional_lights[slot]->ambient = lighting_data->directional_lights[slot]->ambient;
+                    lighting_data->direction[slot] = lighting_data->directional_lights[slot]->direction;
+                    break;
+                case 2:
+                    if (position == NULL)
+                        invalid = 1;
+                    else {
+                        lighting_data->directional_lights[slot]->ambient =
+                            lighting_data->directional_lights[slot]->ambient;
+                        NuVecSub(&lighting_data->direction[slot], &lighting_data->directional_lights[slot]->position,
+                                 position);
+                        NuVecNorm(&lighting_data->direction[slot], &lighting_data->direction[slot]);
+                    }
+                    break;
+                case 3:
+                case 6:
+                case 8:
+                    if (position == NULL)
+                        invalid = 1;
+                    else {
+                        NuVecSub(&lighting_data->direction[slot], &lighting_data->directional_lights[slot]->position,
+                                 position);
+                        NuVecNorm(&lighting_data->direction[slot], &lighting_data->direction[slot]);
+                    }
+                    break;
             }
             if (invalid)
-                lighting_data->intensity_vectors[slot] = {0.0f, 0.0f, 0.0f};
+                lighting_data->intensity_vectors[slot] = black;
             else {
-                f32 strength = ApplyAntilights(lighting_data->directional_lights[slot], lighting_data,
-                                               lighting_data->directional_strengths[slot] *
-                                                   lighting_data->directional_lights[slot]->intensity);
+                strength = ApplyAntilights(lighting_data->directional_lights[slot], lighting_data,
+                                           lighting_data->directional_strengths[slot] *
+                                               lighting_data->directional_lights[slot]->intensity);
                 // Re-read selected lights after service callbacks, as in the reference.
                 lighting_data->intensity_vectors[slot].x =
                     lighting_data->directional_lights[slot]->ambient.x * strength;
@@ -706,6 +719,9 @@ static __used__ void rtlCalcLights(nuvec_s *position, numtx_s *rotation, f32 sca
                 lighting_data->intensity_vectors[slot].z =
                     lighting_data->directional_lights[slot]->ambient.z * strength;
             }
+        } else {
+            lighting_data->intensity_vectors[slot] = black;
+            lighting_data->direction[slot] = nuvec_y;
         }
         if (rotation != NULL)
             NuVecMtxRotate(&lighting_data->direction[slot], &lighting_data->direction[slot], rotation);
@@ -716,16 +732,16 @@ static __used__ void rtlCalcLights(nuvec_s *position, numtx_s *rotation, f32 sca
         NuVecScale(&lighting_data->intensity_vectors[2], &lighting_data->intensity_vectors[2], scale);
     }
     NuVecClear(&lighting_data->ambient);
-    for (i32 slot = 0; slot < 3; ++slot) {
+    for (slot = 0; slot < 3; ++slot) {
         if (lighting_data->ambient_lights[slot] != NULL) {
-            f32 strength = ApplyAntilights(lighting_data->ambient_lights[slot], lighting_data,
-                                           lighting_data->ambient_lights[slot]->intensity *
-                                               lighting_data->ambient_strengths[slot]);
+            strength = ApplyAntilights(lighting_data->ambient_lights[slot], lighting_data,
+                                       lighting_data->ambient_lights[slot]->intensity *
+                                           lighting_data->ambient_strengths[slot]);
 #define RTL_AMBIENT_COMPONENT(component)                                                                               \
     lighting_data->ambient.component =                                                                                 \
-        lighting_data->ambient.component + lighting_data->ambient_lights[slot]->ambient.component * strength <= 1.0f   \
-            ? lighting_data->ambient.component + lighting_data->ambient_lights[slot]->ambient.component * strength     \
-            : 1.0f
+        lighting_data->ambient.component + lighting_data->ambient_lights[slot]->ambient.component * strength > 1.0f    \
+            ? 1.0f                                                                                                     \
+            : lighting_data->ambient.component + lighting_data->ambient_lights[slot]->ambient.component * strength
             RTL_AMBIENT_COMPONENT(x);
             RTL_AMBIENT_COMPONENT(y);
             RTL_AMBIENT_COMPONENT(z);

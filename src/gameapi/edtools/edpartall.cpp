@@ -2288,6 +2288,7 @@ void edpartDoInput(nupad_s *pad) {
         if (edpart_nearest != -1) {
             part_emit_s *emit = &part_emits[edpart_nearest];
             edcamSetPos(&emit->position);
+            emit = &part_emits[edpart_nearest];
             const i16 *reference_rotation = reinterpret_cast<const i16 *>(&emit->trailing_state_words[0]);
             edpart_rotz = reference_rotation[0];
             edpart_roty = reference_rotation[1];

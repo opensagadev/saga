@@ -1366,61 +1366,36 @@ extern "C" {
 static f32 UpdateAnimTimer(CHARACTERMODEL_s *model, ANIMPACKET_s *packet, i16 animation, f32 time, f32 frame_step,
                            f32 movement_speed, i32 report_events, char *reversed, i32 backwards,
                            f32 backwards_multiplier) {
-    CHARACTERANIM_s *animation_info = static_cast<CHARACTERANIM_s *>(model->model_data_a[animation]);
-
-    f32 rate = animation_info->playback_rate;
-    if (animation_info->movement_speed > 0.0f) {
-        rate *= movement_speed / animation_info->movement_speed;
-        if (rate >= 0.0f) {
-            if (animation_info->movement_rate_cap > 0.0f && rate > animation_info->movement_rate_cap) {
-                rate = animation_info->movement_rate_cap;
+    i32 looped = 0;
+    f32 rate = static_cast<CHARACTERANIM_s *>(model->model_data_a[animation])->playback_rate;
+    f32 reference_speed = static_cast<CHARACTERANIM_s *>(model->model_data_a[animation])->movement_speed;
+    if (reference_speed > 0.0f) {
+        rate *= movement_speed / reference_speed;
+        const f32 rate_cap = static_cast<CHARACTERANIM_s *>(model->model_data_a[animation])->movement_rate_cap;
+        if (rate < 0.0f) {
+            if (rate_cap < 0.0f && rate < rate_cap) {
+                rate = rate_cap;
             }
-        } else if (animation_info->movement_rate_cap < 0.0f && rate < animation_info->movement_rate_cap) {
-            rate = animation_info->movement_rate_cap;
+        } else if (rate_cap > 0.0f && rate > rate_cap) {
+            rate = rate_cap;
         }
     }
     if (*reversed != 0) {
-        frame_step = -(frame_step * backwards_multiplier);
+        rate *= -(frame_step * backwards_multiplier) / 30.0f;
+    } else {
+        rate *= frame_step / 30.0f;
     }
-
-    const f32 delta = rate * (frame_step / 30.0f);
-    time += delta;
+    time += rate;
     const f32 end_frame = NuAnimEndFrame(model->model_data_b[animation]);
-    bool looped = false;
 
     // Original 0x3ce29f only enters reverse playback for an ordered negative delta.
-    if (!(delta < 0.0f)) {
-        if (time > end_frame) {
-            if ((animation_info->flags & CHARACTER_ANIMATION_FLAG_SYNCHRONISED) == 0) {
-                time = end_frame;
-                if (report_events) {
-                    packet->flags |= ANIMPACKET_FLAG_FINISHED;
-                }
-            } else {
-                if (end_frame > 1.0f) {
-                    while (time > end_frame) {
-                        time -= end_frame - 1.0f;
-                    }
-                } else {
-                    time = 1.0f;
-                }
-                if (report_events) {
-                    packet->flags |= ANIMPACKET_FLAG_LOOPED;
-                }
-                looped = true;
-            }
-        }
-    } else {
+    if (rate < 0.0f) {
         if (report_events) {
             packet->flags |= ANIMPACKET_FLAG_PLAYING_REVERSED;
         }
         if (time < 1.0f) {
-            if ((animation_info->flags & CHARACTER_ANIMATION_FLAG_SYNCHRONISED) == 0) {
-                time = 1.0f;
-                if (report_events) {
-                    packet->flags |= ANIMPACKET_FLAG_FINISHED;
-                }
-            } else {
+            if ((static_cast<CHARACTERANIM_s *>(model->model_data_a[animation])->flags &
+                 CHARACTER_ANIMATION_FLAG_SYNCHRONISED) != 0) {
                 if (end_frame > 1.0f) {
                     while (time < 1.0f) {
                         time += end_frame - 1.0f;
@@ -1431,18 +1406,45 @@ static f32 UpdateAnimTimer(CHARACTERMODEL_s *model, ANIMPACKET_s *packet, i16 an
                 if (report_events) {
                     packet->flags |= ANIMPACKET_FLAG_LOOPED;
                 }
-                looped = true;
+                looped = 1;
+            } else {
+                time = 1.0f;
+                if (report_events) {
+                    packet->flags |= ANIMPACKET_FLAG_FINISHED;
+                }
+            }
+        }
+    } else {
+        if (time > end_frame) {
+            if ((static_cast<CHARACTERANIM_s *>(model->model_data_a[animation])->flags &
+                 CHARACTER_ANIMATION_FLAG_SYNCHRONISED) != 0) {
+                if (end_frame > 1.0f) {
+                    while (time > end_frame) {
+                        time -= end_frame - 1.0f;
+                    }
+                } else {
+                    time = 1.0f;
+                }
+                if (report_events) {
+                    packet->flags |= ANIMPACKET_FLAG_LOOPED;
+                }
+                looped = 1;
+            } else {
+                time = end_frame;
+                if (report_events) {
+                    packet->flags |= ANIMPACKET_FLAG_FINISHED;
+                }
             }
         }
     }
 
     if (looped) {
-        if (*reversed == 0) {
-            if (backwards && (animation_info->flags & CHARACTER_ANIMATION_FLAG_REVERSE_WITH_MOVEMENT) != 0) {
-                *reversed = 1;
-            }
-        } else if (!backwards) {
+        if (*reversed != 0 && backwards == 0) {
             *reversed = 0;
+        } else if (*reversed == 0 && backwards != 0 &&
+                   (static_cast<CHARACTERANIM_s *>(model->model_data_a[animation])->flags &
+                    CHARACTER_ANIMATION_FLAG_REVERSE_WITH_MOVEMENT) != 0) {
+            *reversed = 1;
         }
     }
     return time;

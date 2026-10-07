@@ -79,8 +79,9 @@ static void GizBombGens_Update(void *world_ptr, void *system_ptr, float) {
                     NUVEC bomb_position;
                     GameAnimSet_GetAveragePos(bomb_generator->anim_set, &bomb_position, 2, 1, 1);
                     if (netclient == 0) {
-                        bomb_generator->generated_bomb = AddDynamicCreature(
-                            *bomb_model_id, &bomb_position, 0, const_cast<char *>(""), NULL, NULL, 1, NULL, NULL, 0, 0);
+                        bomb_generator->generated_bomb =
+                            AddDynamicCreature(*bomb_model_id, &bomb_position, 0, const_cast<char *>("dragbomb"), NULL,
+                                               NULL, 1, NULL, NULL, 0, 0);
                         if (Cheat_IsOn(5) != 0) {
                             AddGameDebris(world->debris_sys, 0x7d, &bomb_position);
                             AddGameDebris(world->debris_sys, 0x7e, &bomb_position);
@@ -128,16 +129,21 @@ static void GizBombGens_Update(void *world_ptr, void *system_ptr, float) {
                 if (player_bombs[0] != NULL && player->cable != NULL && player->cable->target != NULL &&
                     player->cable->target->id == *bomb_model_id) {
                     KillGameObject(player->cable->target, 4, 0);
-                    player->cable = NULL;
+                    player = players[0];
+                    if (player != NULL)
+                        player->cable = NULL;
                 }
 
-                if (player->apiobj.player_controlled && player_bombs[0] != NULL && player->cable == NULL) {
+                if (player != NULL && player->apiobj.player_controlled && player_bombs[0] != NULL &&
+                    player->cable == NULL) {
                     NUVEC bomb_position = {0.0f, 0.0f, -2.0f};
                     NuVecRotateY(&bomb_position, &bomb_position, player->apiobj.field_0x276);
-                    NuVecAdd(&bomb_position, &bomb_position, &player->apiobj.collision_position);
-                    GameObject_s *bomb = AddDynamicCreature(*bomb_model_id, &bomb_position, 0, const_cast<char *>(""),
-                                                            NULL, NULL, 0, NULL, NULL, 0, 0);
-                    if (bomb != NULL) {
+                    NuVecAdd(&bomb_position, &bomb_position, &players[0]->apiobj.collision_position);
+                    GameObject_s *bomb =
+                        AddDynamicCreature(*bomb_model_id, &bomb_position, 0, const_cast<char *>("dragbomb"), NULL,
+                                           NULL, 0, NULL, NULL, 0, 0);
+                    player = players[0];
+                    if (bomb != NULL && player != NULL) {
                         player->cable = CreateCable(player, bomb, 0);
                         if (players[0]->cable != NULL) {
                             players[0]->cable->max_length = 1000000000.0f;
@@ -146,15 +152,17 @@ static void GizBombGens_Update(void *world_ptr, void *system_ptr, float) {
                 }
             }
 
-            player = players[1];
-            if (player != NULL) {
+            if (netclient == 0 && (player = players[1]) != NULL) {
                 if (player_bombs[1] != NULL && player->cable != NULL && player->cable->target != NULL &&
                     player->cable->target->id == *bomb_model_id) {
                     KillGameObject(player->cable->target, 4, 0);
-                    player->cable = NULL;
+                    player = players[1];
+                    if (player != NULL)
+                        player->cable = NULL;
                 }
 
-                if (player->apiobj.player_controlled && player_bombs[1] != NULL && player->cable == NULL) {
+                if (player != NULL && player->apiobj.player_controlled && player_bombs[1] != NULL &&
+                    player->cable == NULL) {
                     GameObject_s *bomb = NULL;
                     if (players_share_bomb && players[0]->cable != NULL && players[0]->cable->target != NULL &&
                         players[0]->cable->target->id == *bomb_model_id) {
@@ -162,11 +170,12 @@ static void GizBombGens_Update(void *world_ptr, void *system_ptr, float) {
                     } else {
                         NUVEC bomb_position = {0.0f, 0.0f, -2.0f};
                         NuVecRotateY(&bomb_position, &bomb_position, player->apiobj.field_0x276);
-                        NuVecAdd(&bomb_position, &bomb_position, &player->apiobj.collision_position);
-                        bomb = AddDynamicCreature(*bomb_model_id, &bomb_position, 0, const_cast<char *>(""), NULL, NULL,
-                                                  0, NULL, NULL, 0, 0);
+                        NuVecAdd(&bomb_position, &bomb_position, &players[1]->apiobj.collision_position);
+                        bomb = AddDynamicCreature(*bomb_model_id, &bomb_position, 0, const_cast<char *>("dragbomb"),
+                                                  NULL, NULL, 0, NULL, NULL, 0, 0);
                     }
-                    if (bomb != NULL) {
+                    player = players[1];
+                    if (bomb != NULL && player != NULL) {
                         player->cable = CreateCable(player, bomb, 0);
                         if (players[1]->cable != NULL) {
                             players[1]->cable->max_length = 1000000000.0f;

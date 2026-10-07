@@ -531,8 +531,7 @@ void LevelSplines_InitForGame(LEVELSPLINE *splines) {
     for (LEVELSPLINE *spline = splines; spline->name != NULL; ++spline) {
         if (levspl_i_start == -1 && NuStrICmp(spline->name, "start") == 0) {
             levspl_i_start = LEVELSPLINECOUNT;
-        }
-        if (levspl_i_startcam == -1 && NuStrICmp(spline->name, "start_cam") == 0) {
+        } else if (levspl_i_startcam == -1 && NuStrICmp(spline->name, "start_cam") == 0) {
             levspl_i_startcam = LEVELSPLINECOUNT;
         }
         ++LEVELSPLINECOUNT;

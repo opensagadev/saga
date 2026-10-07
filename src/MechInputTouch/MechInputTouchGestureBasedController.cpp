@@ -144,11 +144,10 @@ bool MechInputTouchGestureBasedController::OnClick(GameObject_s &object, TouchHo
         return false;
     }
 
-    bool dispatch = object.id == id_TRAININGREMOTE || object.character_context == LEGOCONTEXT_JUMP ||
-                    object.character_context == LEGOCONTEXT_BIGJUMP || object.apiobj.field_0x27d != 0 ||
-                    VehicleArea != 0;
-    if (!dispatch) {
-        dispatch = (object.apiobj.character_data->model_flags & 0x2000) != 0 || object.field_0xe31 == 1;
+    bool dispatch = object.id == id_TRAININGREMOTE;
+    if (!dispatch && object.character_context != LEGOCONTEXT_JUMP && object.character_context != LEGOCONTEXT_BIGJUMP) {
+        dispatch = object.apiobj.field_0x27d != 0 || VehicleArea != 0 ||
+                   (object.apiobj.character_data->model_flags & 0x2000) != 0 || object.field_0xe31 == 1;
     }
     if (!dispatch) {
         if ((object.apiobj.character_data->model_flags & 0x8000) != 0 && object.id != id_WATTO &&
@@ -156,25 +155,43 @@ bool MechInputTouchGestureBasedController::OnClick(GameObject_s &object, TouchHo
             object.field_0xf04 |= 0x10;
             return true;
         }
-        if (target != NULL && (target->GetObjectType() == 2 || target->GetObjectType() == 4) &&
-            TouchHacks::CanShoot(object)) {
-            ForceNextShootTarget(*target);
-            button_was_pressed[0] = 1;
+        if (target != NULL && (target->GetObjectType() == 4 || target->GetObjectType() == 2)) {
+            if (TouchHacks::CanShoot(object)) {
+                ForceNextShootTarget(*target);
+                button_was_pressed[0] = 1;
+                return true;
+            }
+            ForceNextLungeTarget(target);
+            object.field_0xf04 |= 0x20;
             return true;
         }
-        ForceNextLungeTarget(target);
+        ForceNextLungeTarget(NULL);
         object.field_0xf04 |= 0x20;
         return true;
     }
 
     if (target == NULL) {
         target = MechInputTouchSystem::FindTargetObject(object, position, 0x80, NULL, &temporary_position);
+        if (VehicleArea != 0) {
+            if (target != NULL && object.character_context == -1) {
+                VuVec target_position;
+                target->GetPos(target_position, -1);
+                target_position.x -= object.apiobj.position.x;
+                target_position.y -= object.apiobj.position.y;
+                target_position.z -= object.apiobj.position.z;
+                object.apiobj.movement_facing_angle = NuAtan2D(target_position.x, target_position.z);
+            }
+            button_was_pressed[0] = 1;
+            target = NULL;
+        }
     }
     holder.target_object = target;
     holder.previous_target_object = target;
     if (target == NULL) {
         return false;
     }
+    if (VehicleArea != 0)
+        button_was_pressed[0] = 1;
     target->TargetedFlash();
     switch (target->GetObjectType()) {
         case 1:
@@ -183,12 +200,12 @@ bool MechInputTouchGestureBasedController::OnClick(GameObject_s &object, TouchHo
             return true;
         case 2: {
             GameObject_s *character = target->GetCharacterObject();
-            if (character == Player[0]) {
+            if (character == player) {
                 if (object.touch_task != NULL &&
                     object.touch_task->GetHashId().value == MechTouchTaskAttack::HashId.value) {
                     return false;
                 }
-                if (FireBountyHunterRocket(Player[0])) {
+                if (FireBountyHunterRocket(player)) {
                     return false;
                 }
                 if (TouchHacks::CanPoo(object)) {
@@ -198,30 +215,39 @@ bool MechInputTouchGestureBasedController::OnClick(GameObject_s &object, TouchHo
                 if (PerformCloseMechanic(object, holder)) {
                     return false;
                 }
-                if (object.character_context != LEGOCONTEXT_WEAPONOUT && object.weapon_scale <= 0.0f) {
+                if (object.character_context != LEGOCONTEXT_WEAPONOUT && !(object.weapon_scale > 0.0f)) {
                     SlowWeaponOut(&object);
                 }
                 return true;
             }
+            character = target->GetCharacterObject();
             if (character == NULL) {
                 return false;
             }
-            if (static_cast<i32>(character->apiobj.field_0x1f4) >= 0) {
-                StartNewTask(new MechTouchTaskAttack(*this, target, position), holder, false, true);
+            character = target->GetCharacterObject();
+            if (character == NULL) {
+                return false;
+            }
+            if (static_cast<i32>(character->apiobj.field_0x1f4) < 0) {
+                VuVec target_position;
+                target->GetPos(target_position, -1);
+                NUVEC direction = {player->apiobj.position.x - target_position.x, 0.0f,
+                                   player->apiobj.position.z - target_position.z};
+                NuVecNorm(&direction, &direction);
+                f32 scale = target->GetRadius() * 2.5f;
+                temporary_position.position =
+                    VuVec(target_position.x + direction.x * scale, target_position.y + direction.y * scale,
+                          target_position.z + direction.z * scale, 0.0f);
+                MechTouchTaskPlannedGoTo *task = new MechTouchTaskPlannedGoTo(*this, &temporary_position, NULL);
+                task->field_6fd = 1;
+                task->field_6fe = 1;
+                StartNewTask(task, holder, false, true);
                 return true;
             }
-            VuVec target_position;
-            target->GetPos(target_position, -1);
-            NUVEC direction = {Player[0]->apiobj.position.x - target_position.x, 0.0f,
-                               Player[0]->apiobj.position.z - target_position.z};
-            NuVecNorm(&direction, &direction);
-            f32 scale = target->GetRadius() * 2.5f;
-            temporary_position.position = VuVec(target_position.x + direction.x * scale, target_position.y,
-                                                target_position.z + direction.z * scale, 0.0f);
-            MechTouchTaskPlannedGoTo *task = new MechTouchTaskPlannedGoTo(*this, &temporary_position, NULL);
-            task->field_6fd = 1;
-            task->field_6fe = 1;
-            StartNewTask(task, holder, false, true);
+            character = target->GetCharacterObject();
+            if (character == NULL || static_cast<i32>(character->apiobj.field_0x1f4) < 0)
+                return false;
+            StartNewTask(new MechTouchTaskAttack(*this, target, position), holder, false, true);
             return true;
         }
         case 3:
@@ -397,20 +423,26 @@ bool MechInputTouchGestureBasedController::OnHold(GameObject_s &object, TouchHol
         return false;
     }
     VuVec position(holder.down_position.x, holder.down_position.y, 0.0f, 1.0f);
-    const i32 type = target->GetObjectType();
-    if (type == 12 && object.force_glow_candidate != NULL && target->GetPart() == object.force_glow_candidate) {
-        StartNewTask(new MechTouchTaskUseForce(*this, target, position), holder, true, true);
-        holder.consumed = 1;
-        return true;
+    if (holder.target_object->GetObjectType() == 12) {
+        void *force_target = object.force_glow_object;
+        if (force_target != NULL && holder.target_object->GetPart() == force_target) {
+            target = holder.target_object.Get();
+            StartNewTask(new MechTouchTaskUseForce(*this, target, position), holder, true, true);
+            holder.consumed = 1;
+            return true;
+        }
     }
+    const i32 type = holder.target_object->GetObjectType();
     if (type == 5) {
-        target->TargetedFlash();
+        holder.target_object->TargetedFlash();
+        target = holder.target_object.Get();
         StartNewTask(new MechTouchTaskUseForce(*this, target, position), holder, true, true);
         holder.consumed = 1;
         return true;
     }
     if (type == 6) {
-        target->TargetedFlash();
+        holder.target_object->TargetedFlash();
+        target = holder.target_object.Get();
         StartNewTask(new MechTouchTaskBuildIt(*this, target, position), holder, true, true);
         holder.consumed = 1;
         return true;
@@ -418,7 +450,7 @@ bool MechInputTouchGestureBasedController::OnHold(GameObject_s &object, TouchHol
     if (type != 2) {
         return false;
     }
-    GameObject_s *character = target->GetCharacterObject();
+    GameObject_s *character = holder.target_object->GetCharacterObject();
     if (character == NULL) {
         return false;
     }
@@ -450,9 +482,11 @@ bool MechInputTouchGestureBasedController::OnHold(GameObject_s &object, TouchHol
                 }
             }
         }
-    } else if (character == object.force_glow_candidate) {
+    } else if (character == object.force_glow_object) {
+        target = holder.target_object.Get();
         StartNewTask(new MechTouchTaskUseForce(*this, target, position), holder, true, true);
     } else if (character->apiobj.field_0x27c == -1 && static_cast<i32>(character->apiobj.field_0x1f4) >= 0) {
+        target = holder.target_object.Get();
         StartNewTask(new MechTouchTaskAttack(*this, target, position), holder, true, true);
     } else if (character == &object) {
         StartNewTask(new MechTouchTaskBlock(*this), holder, false, true);

@@ -593,8 +593,9 @@ i32 NuNetEmu::SplitSendPacket(NuNetEmu::EmuPacket *packet) {
     EmuPacket *second = new (MemoryManagerAllocPool(&theMemoryManager, sizeof(EmuPacket), 1))
         EmuPacket(reinterpret_cast<nunetaddr_s *>(&packet->address));
 
+    EmuPacket *packets[2] = {first, second};
     for (u32 i = 0; i < segment_count; i++) {
-        EmuPacket *destination = second->payload_size < first->payload_size ? second : first;
+        EmuPacket *destination = packets[second->payload_size < first->payload_size];
         memmove(destination->payload + destination->payload_size, packet->payload + segments[i].offset,
                 segments[i].size);
         destination->payload_size += segments[i].size;
