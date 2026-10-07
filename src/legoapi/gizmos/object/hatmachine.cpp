@@ -378,7 +378,8 @@ disable:
 
 static void HatMachine_Draw(void *world_ptr, void *, float) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
-    if (world == NULL || world->hat_machine_sys == NULL || world->hat_machine_sys->count == 0) {
+    HATMACHINESYS_s *system;
+    if (world == NULL || (system = world->hat_machine_sys) == NULL || system->count == 0) {
         return;
     }
 
@@ -424,7 +425,6 @@ static void HatMachine_Draw(void *world_ptr, void *, float) {
             NuAnimEndFrameOld(effect_special_c->scene->instance_animation_data[effect_instance_animation_c->anim_ix]);
     }
 
-    HATMACHINESYS_s *system = world->hat_machine_sys;
     for (i32 index = 0; index < system->count; ++index) {
         HATMACHINE_s *machine = &system->machines[index];
         if ((machine->flags & HATMACHINE_FLAG_VISIBLE) == 0 && editor_active == 0) {
@@ -482,23 +482,26 @@ static void HatMachine_Draw(void *world_ptr, void *, float) {
         if (animated_instance_animation != NULL) {
             if (machine->animation_state > 0) {
                 machine->animation_time += FRAMETIME;
-                if (machine->animation_state <= 3 && !(machine->animation_time < 3.0f)) {
+                if (machine->animation_state <= 3 && machine->animation_time >= 3.0f) {
                     machine->animation_state = 4;
                     machine->state_elapsed = 0.0f;
                     machine->state_duration = 2.0f;
                 }
                 animation_frame = machine->animation_time * animated_instance_animation->tfactor * 60.0f;
-                if (animation_frame > animated_end_frame) {
+                if (animated_end_frame <= animation_frame) {
                     animation_frame = animated_end_frame;
                 }
             } else {
                 machine->animation_time = 0.0f;
+                animation_frame = 0.0f;
                 if ((machine->flags & (HATMACHINE_FLAG_ANIMATING | HATMACHINE_FLAG_FINISHED |
                                        HATMACHINE_FLAG_ENABLED)) == HATMACHINE_FLAG_ENABLED) {
                     if (machine->idle_bounce_timer > 0.0f) {
                         machine->idle_bounce_timer -= FRAMETIME;
-                        if (machine->idle_bounce_timer > 0.0f) {
-                            const f32 idle_phase = machine->idle_bounce_timer / 0.15f * 50.0f + 16384.0f;
+                        if (machine->idle_bounce_timer < 0.0f) {
+                            machine->idle_bounce_timer = 0.0f;
+                        } else {
+                            const f32 idle_phase = machine->idle_bounce_timer / 0.15f * 32768.0f + 16384.0f;
                             animation_frame =
                                 (1.0f - NuFabs(NuTrigTable[(static_cast<i32>(idle_phase) >> 1) & 0x7fff])) * 1.5f +
                                 16.0f;
@@ -529,7 +532,7 @@ static void HatMachine_Draw(void *world_ptr, void *, float) {
         NUMTX effect_matrix;
         if (effect_instance_animation_a != NULL) {
             f32 frame = machine->animation_time * animated_instance_animation->tfactor * 60.0f;
-            if (frame > effect_end_frame_a)
+            if (effect_end_frame_a <= frame)
                 frame = effect_end_frame_a;
             EvalAnim(effect_special_a, frame, &effect_matrix, 0);
             NuMtxMulVU0(&effect_matrix, &effect_matrix, &machine->transform);
@@ -539,7 +542,7 @@ static void HatMachine_Draw(void *world_ptr, void *, float) {
         }
         if (effect_instance_animation_b != NULL) {
             f32 frame = machine->animation_time * animated_instance_animation->tfactor * 60.0f;
-            if (frame > effect_end_frame_b)
+            if (effect_end_frame_b <= frame)
                 frame = effect_end_frame_b;
             EvalAnim(effect_special_b, frame, &effect_matrix, 0);
             NuMtxMulVU0(&effect_matrix, &effect_matrix, &machine->transform);
@@ -547,7 +550,7 @@ static void HatMachine_Draw(void *world_ptr, void *, float) {
         }
         if (effect_instance_animation_c != NULL) {
             f32 frame = machine->animation_time * animated_instance_animation->tfactor * 60.0f;
-            if (frame > effect_end_frame_c)
+            if (effect_end_frame_c <= frame)
                 frame = effect_end_frame_c;
             EvalAnim(effect_special_c, frame, &effect_matrix, 0);
             NuMtxMulVU0(&effect_matrix, &effect_matrix, &machine->transform);
@@ -556,19 +559,19 @@ static void HatMachine_Draw(void *world_ptr, void *, float) {
 
         if ((machine->flags & HATMACHINE_FLAG_ENABLED) != 0 && machine->displayed_hat != 0) {
             const i32 hat_index = machine->displayed_hat + 249;
-            if (machine->animation_time < 2.35f && world->lev_objs[hat_index].active != 0) {
+            if (!(machine->animation_time >= 2.35f) && world->lev_objs[hat_index].active != 0) {
                 const NUVEC *hat_offset = &HatMachine_HatOffset;
                 NUVEC hat_position = *hat_offset;
                 const f32 hat_phase = machine->hat_delay * 32768.0f + 16384.0f;
                 const f32 hat_sine = NuTrigTable[(static_cast<i32>(hat_phase) >> 1) & 0x7fff];
-                const f32 hat_scale = (hat_sine + 1.0f) * 0.5f;
+                const f32 hat_scale = 1.0f - (1.0f - (hat_sine + 1.0f) * 0.5f);
                 hat_position.y += (1.0f - hat_scale) * 0.1f;
 
                 if (machine->animation_state <= 2) {
                     f32 bob_scale = 0.01f;
                     if (animation_frame != 0.0f) {
                         const f32 frame_fade = animation_frame / 50.0f;
-                        bob_scale = frame_fade <= 1.0f ? (1.0f - frame_fade) * 0.01f : 0.0f;
+                        bob_scale = frame_fade > 1.0f ? 0.0f : (1.0f - frame_fade) * 0.01f;
                     }
                     hat_position.y +=
                         NuTrigTable[(static_cast<i32>(GameTimer.time_elapsed * 32768.0f) >> 1) & 0x7fff] * bob_scale;

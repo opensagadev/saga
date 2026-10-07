@@ -803,6 +803,7 @@ bool NuMemoryManager::PopContext(NuMemoryManager::PopDebugMode debug_mode) {
             strcpy(ctx_name, this->cur_ctx->name);
         }
     } else {
+        leak_count = 0;
         _unknown = 0;
         largest_stranded = NULL;
 
@@ -910,6 +911,12 @@ bool NuMemoryManager::PopContext(NuMemoryManager::PopDebugMode debug_mode) {
 
             this->error_handler->HandleError(this, MEM_ERROR_LEAK_DETECTED, this->error_msg);
 
+            pthread_mutex_unlock(&this->error_mutex);
+        } else if (leak_count != 0) {
+            pthread_mutex_lock(&this->error_mutex);
+            snprintf(this->error_msg, sizeof(this->error_msg),
+                     "%u (estimated) memory leak(s) detected popping context %s\n", leak_count, this->cur_ctx->name);
+            this->error_handler->HandleError(this, MEM_ERROR_LEAK_DETECTED, this->error_msg);
             pthread_mutex_unlock(&this->error_mutex);
         }
 

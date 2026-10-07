@@ -301,15 +301,15 @@ static void LoadPermData(BGPROCINFO *proc) {
     {
         MemoryManager &manager = theMemoryManager;
         const usize aligned_base = ALIGN(permbuffer_ptr.addr, 0x10);
+        manager.cursor_cell = &manager.cursor;
+        manager.allocated = 0;
         manager.cursor = aligned_base;
         manager.end = aligned_base + kSmallHeapSize;
-        manager.cursor_cell = &manager.cursor;
-        manager.end_cell = &manager.end;
-        manager.high_water = 0;
-        manager.allocated = 0;
-        manager.remaining = kSmallHeapSize;
-        memset(manager.free_lists, 0, sizeof(manager.free_lists));
         permbuffer_ptr.addr = aligned_base + kSmallHeapSize;
+        manager.remaining = kSmallHeapSize;
+        manager.high_water = 0;
+        manager.end_cell = &manager.end;
+        memset(manager.free_lists, 0, sizeof(manager.free_lists));
     }
 
     CreateThingManager();

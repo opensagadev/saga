@@ -251,14 +251,15 @@ void DrawStreaks() {
     for (STREAKHDR_s *header = streakhdrs_used; header != NULL; header = header->next) {
         NURND_VERTEX3D vertices[254];
         i32 vertex_count = 0;
+        const u32 endpoint_colour = header->colour;
         STREAK_s *streak = header->streaks;
 
         while (vertex_count < 254 && streak != NULL) {
             const f32 fade = streak->remaining_time < 0.0f ? 0.0f : streak->remaining_time;
-            i32 alpha = static_cast<i32>(static_cast<f32>(header->colour >> 24) * fade * 2.0f);
+            i32 alpha = static_cast<i32>(static_cast<f32>(endpoint_colour >> 24) * fade * 2.0f);
             if (alpha > 255)
                 alpha = 255;
-            const u32 colour = (header->colour & 0x00ffffff) | (static_cast<u32>(alpha) << 24);
+            const u32 colour = (endpoint_colour & 0x00ffffff) | (static_cast<u32>(alpha) << 24);
 
             vertices[vertex_count].position = streak->position;
             vertices[vertex_count].colour = colour;

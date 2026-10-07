@@ -91,104 +91,86 @@ enum CHARACTER_ANIMATION : i16 {
 };
 
 static void MoveAnim_Check(GameObject_s *object) {
-    if (GetAnimBlendMode() == 1) {
+    if (GetAnimBlendMode() == 1)
         return;
-    }
-
     ANIMPACKET_s &packet = object->apiobj.anim_packet;
     i16 requested = packet.requested_animation;
     const i16 previous = packet.previous_animation;
-
-    if (object->released_movement_animation != -1) {
-        object->movement_animation_hold_timer = 0.1f;
-        object->held_movement_animation = -1;
-    } else {
-        if (requested == previous) {
-            object->movement_animation_hold_timer = 0.1f;
-            object->held_movement_animation = -1;
-            object->movement_animation_release_timer = 0.1f;
-            object->released_movement_animation = -1;
+    if (object->released_movement_animation == -1)
+        goto check_hold;
+reset_hold:
+    object->movement_animation_hold_timer = 0.1f;
+    object->held_movement_animation = -1;
+check_release:
+    requested = packet.requested_animation;
+    {
+        const u32 requested_flags = ActionInfo[requested].flags;
+        if (requested == previous || (requested_flags & 7) == 0 ||
+            (previous != CHARACTER_ANIMATION_ALT_IDLE && previous != CHARACTER_ANIMATION_IDLE) ||
+            (requested_flags & 4) != 0)
+            goto reset_release;
+        if (object->released_movement_animation != -1) {
+            object->movement_animation_release_timer -= FRAMETIME;
+            if (object->movement_animation_release_timer <= 0.0f)
+                object->movement_animation_release_timer = -1.0f;
+            else
+                packet.requested_animation = object->released_movement_animation;
             return;
         }
-
+        object->movement_animation_hold_timer = 0.1f;
+        if (packet.blending == 0 && (requested_flags & 3) != 0) {
+            packet.requested_animation = previous;
+            object->released_movement_animation = previous;
+        }
+        return;
+    }
+reset_release:
+    object->movement_animation_release_timer = 0.1f;
+    object->released_movement_animation = -1;
+    return;
+check_hold:
+    if (requested == previous)
+        goto reset_hold;
+    {
         const u32 requested_flags = ActionInfo[requested].flags;
         if (((requested_flags & 7) == 0 && requested != CHARACTER_ANIMATION_ALT_IDLE &&
              requested != CHARACTER_ANIMATION_IDLE) ||
-            (ActionInfo[previous].flags & 7) == 0 || (requested_flags & 4) != 0) {
-            object->movement_animation_hold_timer = 0.1f;
-            object->held_movement_animation = -1;
-            object->movement_animation_release_timer = 0.1f;
-            object->released_movement_animation = -1;
-            return;
-        }
-
-        if (object->held_movement_animation != -1) {
-            object->movement_animation_hold_timer -= FRAMETIME;
-            if (object->movement_animation_hold_timer > 0.0f) {
-                packet.requested_animation = object->held_movement_animation;
-                object->movement_animation_release_timer = 0.1f;
-                object->released_movement_animation = -1;
-                return;
-            }
+            (ActionInfo[previous].flags & 7) == 0 || (requested_flags & 4) != 0)
+            goto reset_hold;
+    }
+    if (object->held_movement_animation != -1) {
+        object->movement_animation_hold_timer -= FRAMETIME;
+        if (object->movement_animation_hold_timer <= 0.0f) {
             object->held_movement_animation = -1;
         } else {
-            object->movement_animation_hold_timer = 0.1f;
-            if (packet.blending == 0) {
-                bool retain_previous = false;
-                if (previous == CHARACTER_ANIMATION_RUN) {
-                    retain_previous = requested == CHARACTER_ANIMATION_WALK ||
-                                      requested == CHARACTER_ANIMATION_TIPTOE || requested == CHARACTER_ANIMATION_IDLE;
-                } else if (previous == CHARACTER_ANIMATION_SABER_RUN) {
-                    const GAMECHARACTERDATA *game_character =
-                        static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
-                    const i16 alternate_idle =
-                        game_character->field275_0x116 != 0
-                            ? CHARACTER_ANIMATION_ALT_IDLE
-                            : static_cast<i16>((object->apiobj.character_data->model_flags & 0x80) != 0 ? 118 : 25);
-                    retain_previous = requested == CHARACTER_ANIMATION_SABER_TIPTOE ||
-                                      requested == CHARACTER_ANIMATION_SABER_WALK || requested == alternate_idle;
-                }
-
-                if (retain_previous) {
-                    packet.requested_animation = previous;
-                    object->held_movement_animation = previous;
-                    object->movement_animation_release_timer = 0.1f;
-                    object->released_movement_animation = -1;
-                    return;
-                }
+            packet.requested_animation = object->held_movement_animation;
+            goto reset_release;
+        }
+    } else {
+        object->movement_animation_hold_timer = 0.1f;
+        if (packet.blending == 0) {
+            bool retain_previous = false;
+            if (previous == CHARACTER_ANIMATION_RUN) {
+                retain_previous = requested == CHARACTER_ANIMATION_WALK || requested == CHARACTER_ANIMATION_TIPTOE ||
+                                  requested == CHARACTER_ANIMATION_IDLE;
+            } else if (previous == CHARACTER_ANIMATION_SABER_RUN) {
+                const GAMECHARACTERDATA *game_character =
+                    static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
+                const i16 alternate_idle =
+                    game_character->field275_0x116 != 0
+                        ? CHARACTER_ANIMATION_ALT_IDLE
+                        : static_cast<i16>((object->apiobj.character_data->model_flags & 0x80) != 0 ? 118 : 25);
+                retain_previous = requested == CHARACTER_ANIMATION_SABER_TIPTOE ||
+                                  requested == CHARACTER_ANIMATION_SABER_WALK || requested == alternate_idle;
             }
-
-            object->movement_animation_release_timer = 0.1f;
-            object->released_movement_animation = -1;
-            return;
+            if (retain_previous) {
+                packet.requested_animation = previous;
+                object->held_movement_animation = previous;
+                goto reset_release;
+            }
         }
     }
-
-    requested = packet.requested_animation;
-    const u32 requested_flags = ActionInfo[requested].flags;
-    if (requested == previous || (requested_flags & 7) == 0 ||
-        (previous != CHARACTER_ANIMATION_ALT_IDLE && previous != CHARACTER_ANIMATION_IDLE) ||
-        (requested_flags & 4) != 0) {
-        object->movement_animation_release_timer = 0.1f;
-        object->released_movement_animation = -1;
-        return;
-    }
-
-    if (object->released_movement_animation != -1) {
-        object->movement_animation_release_timer -= FRAMETIME;
-        if (object->movement_animation_release_timer <= 0.0f) {
-            object->movement_animation_release_timer = -1.0f;
-        } else {
-            packet.requested_animation = object->released_movement_animation;
-        }
-        return;
-    }
-
-    object->movement_animation_hold_timer = 0.1f;
-    if (packet.blending == 0 && (requested_flags & 3) != 0) {
-        packet.requested_animation = previous;
-        object->released_movement_animation = previous;
-    }
+    goto check_release;
 }
 
 static void JumpAnimCode(GameObject_s *object) {

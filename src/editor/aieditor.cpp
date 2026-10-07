@@ -153,8 +153,8 @@ __attribute__((optimize("no-tree-loop-optimize"))) void antinodeEditor_Enter() {
     for (i32 i = 0; i < 128; ++i)
         NuLinkedListAppend(antinode_free_list(), &antinode_pool()[i].link);
     AISYS_s *system = aieditor->ai_system;
-    for (i32 i = 0; i < system->antinode_count; ++i) {
-        AIANTINODE *source = &system->antinodes[i];
+    for (i32 i = 0; i < aieditor->ai_system->antinode_count; ++i) {
+        AIANTINODE *source = &aieditor->ai_system->antinodes[i];
         EDANTINODE_s *node = CreateAntinode(&source->position);
         if (node == nullptr)
             continue;
@@ -282,7 +282,8 @@ static EDANTINODE_REGPARM1 EDANTINODE_s *antinodeEditor_GetNearestAntinode(i32 r
         if (!(nearest_distance > distance))
             continue;
         f32 height = aieditor->camera_position.y - node->position.y;
-        if (height > NuFmax(0.2f, node->upper_height) || height < NuFmin(-0.2f, node->lower_height))
+        f32 upper = NuFmax(0.2f, node->upper_height);
+        if (!((height >= NuFmin(-0.2f, node->lower_height)) & (upper >= height)))
             continue;
         if (require_inside) {
             if (node->type == 1) {
@@ -298,9 +299,10 @@ static EDANTINODE_REGPARM1 EDANTINODE_s *antinodeEditor_GetNearestAntinode(i32 r
                 if (!(extent * extent > ellipse_distance))
                     continue;
                 ellipse_offset.y = 0.0f;
+                f32 aspect_ratio = node->base_height / node->base_radius;
                 nuvec_s rotated;
                 NuVecRotateY(&rotated, &ellipse_offset, -node->flags);
-                i32 angle = NuAtan2D((node->base_height / node->base_radius) * rotated.x, rotated.z);
+                i32 angle = NuAtan2D(aspect_ratio * rotated.x, rotated.z);
                 f32 ellipse_x = NuTrigTable[(angle >> 1) & 0x7fff] * node->base_radius;
                 f32 ellipse_z = NuTrigTable[((angle + 0x4000) >> 1) & 0x7fff] * node->base_height;
                 if (!(ellipse_x * ellipse_x + ellipse_z * ellipse_z > ellipse_distance))

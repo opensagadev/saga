@@ -654,16 +654,17 @@ void Batarang_MoveCode(GameObject_s *object) {
             StartJump(object, 0);
             return;
         }
-        if ((object->pad_gamepad->buttons_held & GAMEPAD_ACTION) != 0 || !(object->context_animation_timer >= 0.3f)) {
+        if ((object->pad_gamepad->buttons_held & GAMEPAD_ACTION) != 0 || object->context_animation_timer < 0.3f) {
             if (object->apiobj.character_model->model_data_b[object->context_animation] == NULL ||
                 AnimPlaying(&object->apiobj.anim_packet, object->context_animation, 1, 0) != NULL) {
                 GAMEPAD_s *pad = object->pad_gamepad;
                 object->context_animation_timer += FRAMETIME;
                 f32 x = pad->input_direction_z * 1.25f;
                 f32 y = 1.25f * pad->input_direction_x;
-                if (!(object->context_animation_timer >= 0.25f)) {
-                    x = x * object->context_animation_timer * 4.0f;
-                    y = y * object->context_animation_timer * 4.0f;
+                if (object->context_animation_timer < 0.25f) {
+                    const f32 ramp = object->context_animation_timer * 4.0f;
+                    x *= ramp;
+                    y *= ramp;
                 }
                 BATARANG_s *aim = static_cast<BATARANG_s *>(object->batarang);
                 aim->sight_velocity.x = SeekValF(aim->sight_velocity.x, x, 10.0f);

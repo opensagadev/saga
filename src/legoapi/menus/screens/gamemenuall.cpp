@@ -1208,10 +1208,10 @@ void MenuUpdateMissions(MENU_s *menu) {
 collected_input:
     if (menu->input_activity) {
         if (menu->confirm_pressed) {
-            if (hub_mission == menu->selected_row)
+            if (hub_mission == menu->selected_column)
                 start = 1;
             else
-                hub_mission = menu->selected_row;
+                hub_mission = menu->selected_column;
         }
         if (menu->cancel_pressed)
             cancel = 1;
@@ -1250,7 +1250,8 @@ collected_input:
     if (MissionSys != NULL) {
         for (i32 i = 0; i < MissionSys->count; ++i)
             MissionIconScale[i] = SeekValF(MissionIconScale[i], i == hub_mission ? 1.0f : 0.0f, 5.0f);
-        for (i32 i = 0; i < MissionSys->count; ++i) {
+        const u8 *mission_count = &MissionSys->count;
+        for (i32 i = 0; i < *mission_count; ++i) {
             f32 x = 0.0f;
             if (i < hub_mission)
                 x = -0.035f - (hub_mission - i) * 0.12f;

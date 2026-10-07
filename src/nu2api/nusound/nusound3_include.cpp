@@ -761,19 +761,16 @@ void NuSound3Update(void) {
             continue;
         }
 
-        if (stream->pending_start != 0) {
-            if (NuSound3Stream::mVoice.obj == NULL) {
-                if (stream->stream != NULL &&
-                    stream->stream->GetLoadState() == NuSoundSample::LoadState::STREAM_READY &&
-                    stream->stream->GetResourceCount() > 0 && stream->stream->GetThreadQueueCount() == 0) {
-                    NuSound3Stream::mVoice.Set(NuSound.CreateVoice(stream->stream, stream->field_0xc != 0));
-                    if (NuSound3Stream::mVoice.obj != NULL) {
-                        ((NuSoundVoice *)NuSound3Stream::mVoice.obj)->SetAutoDelete(false);
-                        ((NuSoundVoice *)NuSound3Stream::mVoice.obj)->SetVolume(PS2VolumeToScalar(stream->ps2volume));
-                        ((NuSoundVoice *)NuSound3Stream::mVoice.obj)->Play();
-                        stream->pending_start = 0;
-                        stream->field_0xd = 1;
-                    }
+        if (stream->pending_start != 0 && NuSound3Stream::mVoice.obj == NULL) {
+            if (stream->stream != NULL && stream->stream->GetLoadState() == NuSoundSample::LoadState::STREAM_READY &&
+                stream->stream->GetResourceCount() > 0 && stream->stream->GetThreadQueueCount() == 0) {
+                NuSound3Stream::mVoice.Set(NuSound.CreateVoice(stream->stream, stream->field_0xc != 0));
+                if (NuSound3Stream::mVoice.obj != NULL) {
+                    ((NuSoundVoice *)NuSound3Stream::mVoice.obj)->SetAutoDelete(false);
+                    ((NuSoundVoice *)NuSound3Stream::mVoice.obj)->SetVolume(PS2VolumeToScalar(stream->ps2volume));
+                    ((NuSoundVoice *)NuSound3Stream::mVoice.obj)->Play();
+                    stream->pending_start = 0;
+                    stream->field_0xd = 1;
                 }
             }
         } else if (NuSound3Stream::mVoice.obj != NULL) {
