@@ -2550,7 +2550,9 @@ void MovePlayer_DIRECTIONAL(GameObject_s *object) {
     }
 
     object->field_0xe23 &= ~0x10;
-    if (MovingBackwards(object) || static_cast<i8>(object->field_0xefd) < 0) {
+    if (MovingBackwards(object) != 0) {
+        object->field_0xefd |= GAMEOBJECT_MOVEMENT_FLAG_BACKWARDS;
+    } else if (static_cast<i8>(object->field_0xefd) < 0) {
         object->field_0xefd |= GAMEOBJECT_MOVEMENT_FLAG_BACKWARDS;
     }
     if (object->character_context == 0x35) {
@@ -2658,11 +2660,12 @@ void MovePlayer_DIRECTIONAL(GameObject_s *object) {
         do {
             if (object->character_context == 0x46)
                 goto directional_heading_0x46;
-            if (object->character_context == 0x1b)
+            if (api.player_controlled && object->character_context == 0x1b &&
+                (object->field_0xe21 & 2) == 0)
                 goto directional_heading_0x1b;
             if (object->character_context == 0x1c)
                 goto directional_heading_0x1c;
-            if (object->character_context == 0x16)
+            if (object->character_context == 0x1b || object->character_context == 0x16)
                 goto directional_heading_0x16;
             if (object->character_context == 0x22)
                 goto directional_heading_0x22;
@@ -2823,15 +2826,12 @@ void MovePlayer_DIRECTIONAL(GameObject_s *object) {
             heading_handled = SuperCarry_YRotation(object, input_angle);
             break;
         directional_heading_0x1b:
-            if ((api.flags_low & 0x80) != 0 && (object->field_0xe21 & 2) == 0) {
-                if (object->field_0x7a3 == 1)
-                    api.movement_facing_angle = input_angle;
-                else
-                    FaceOpponent(object, NULL);
-                turn_override = 0.333f;
-                break;
-            }
-            // Other actors and the alternate state use ordinary opponent-facing speed.
+            if (object->field_0x7a3 == 1)
+                api.movement_facing_angle = input_angle;
+            else
+                FaceOpponent(object, NULL);
+            turn_override = 0.333f;
+            break;
         directional_heading_0x16:
             FaceOpponent(object, NULL);
             break;
