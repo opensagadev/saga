@@ -263,13 +263,13 @@ void Collection_Draw(COLLECTION_s *collection, float x, float y, float scale, AP
     collection_draw_IsValidFn = NULL;
     if (collection->list == NULL || FadeSys.fade > 0.0f)
         return;
-    const u32 count = collection->count_y;
-    const u32 columns = collection->count_x;
+    const i32 count = collection->count_y;
+    const i32 columns = collection->count_x;
     if (count == 0 || columns == 0)
         return;
     f32 dx = COLLECTION_DX * scale;
     f32 size = COLLECTION_ICONSIZE * scale;
-    const u32 rows = count / columns + (count % columns != 0);
+    const i32 rows = count / columns + (count % columns != 0);
     if (Game_OptionsSave != NULL && Game_OptionsSave->field11_0xb != 0) {
         dx *= 0.75f;
         size *= 0.875f;
@@ -281,9 +281,9 @@ void Collection_Draw(COLLECTION_s *collection, float x, float y, float scale, AP
         Collection_GetSelectingPlayerIDsFn(ids);
         if (ids[0] != -1 || ids[1] != -1) {
             i32 found = 0;
-            for (u32 row = 0; row < rows; ++row)
-                for (u32 col = 0; col < columns; ++col) {
-                    const u32 index = row * columns + col;
+            for (i32 row = 0; row < rows; ++row)
+                for (i32 col = 0; col < columns; ++col) {
+                    const i32 index = row * columns + col;
                     if (found != 2 && index < count &&
                         (collection->list[index].id == ids[0] || collection->list[index].id == ids[1])) {
                         selected_x[found] = col;
@@ -297,10 +297,10 @@ void Collection_Draw(COLLECTION_s *collection, float x, float y, float scale, AP
     if (alpha > 1.0f)
         alpha = 1.0f;
     f32 py = y - static_cast<i32>(rows - 1) * dy * 0.5f;
-    for (u32 row = 0; row < rows; ++row) {
+    for (i32 row = 0; row < rows; ++row) {
         f32 px = x - static_cast<i32>(columns - 1) * dx * 0.5f;
-        for (u32 col = 0; col < columns; ++col, px += dx) {
-            const u32 index = row * columns + col;
+        for (i32 col = 0; col < columns; ++col, px += dx) {
+            const i32 index = row * columns + col;
             if (index >= count)
                 continue;
             COLLECTID *entry = &collection->list[index];
@@ -336,13 +336,18 @@ void Collection_Draw(COLLECTION_s *collection, float x, float y, float scale, AP
             for (i32 player = 0; player < 2; ++player) {
                 if (selected_x[player] == -1 || selected_y[player] == -1)
                     continue;
-                const i32 ax = abs(static_cast<i32>(col) - selected_x[player]);
-                const i32 ay = abs(static_cast<i32>(row) - selected_y[player]);
-                if ((ax == 0 && ay == 1) || (ax == 1 && ay == 0))
+                const i32 sx = selected_x[player];
+                const i32 sy = selected_y[player];
+                const bool same_x = static_cast<i32>(col) == sx;
+                const bool same_y = static_cast<i32>(row) == sy;
+                const bool adjacent_x = static_cast<i32>(col) == sx - 1 || static_cast<i32>(col) == sx + 1;
+                const bool adjacent_y = static_cast<i32>(row) == sy - 1 || static_cast<i32>(row) == sy + 1;
+                if ((same_x && adjacent_y) || (adjacent_x && same_y))
                     neighbours |= 1;
-                else if (ax == 1 && ay == 1)
+                if (adjacent_x && adjacent_y)
                     neighbours |= 2;
-                else if ((ax == 0 && ay == 2) || (ax == 2 && ay == 0))
+                if ((same_x && (static_cast<i32>(row) == sy - 2 || static_cast<i32>(row) == sy + 2)) ||
+                    (same_y && (static_cast<i32>(col) == sx - 2 || static_cast<i32>(col) == sx + 2)))
                     neighbours |= 4;
             }
             if ((neighbours & 1) != 0)

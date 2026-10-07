@@ -486,6 +486,7 @@ load_type_done:
         BackDrop_ResetColours();
     }
     TextCrawl_Init(&TextCrawl_LSW, Area, 1);
+    i32 icon_stage = HUB_ADATA != NULL && HUB_ADATA->index == Area ? 0 : 2;
     loadareadata_loadlevel = 1;
     WorldInfo_ReArrangeBuffers(Area, last_area);
     SetBackgroundMusic(1);
@@ -507,7 +508,6 @@ load_type_done:
     }
     bgPostRequest(LoadAreaData, NULL, NULL, 0);
 
-    i32 icon_stage = HUB_ADATA != NULL && HUB_ADATA->index == Area ? 0 : 2;
     f32 icon_time = 0.0f;
     bool character_load_active = true;
     bool fade_scene_active = false;

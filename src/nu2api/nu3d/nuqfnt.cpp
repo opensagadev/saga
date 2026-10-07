@@ -598,8 +598,8 @@ NUQFNT *NuQFntReadBuffer(VARIPTR *font, VARIPTR *buf, VARIPTR buf_end) {
         height /= 2;
     }
 
-    memmove(texture.void_ptr, relocation_table.void_ptr, relocation_table_end - (relocation_table.addr - base.addr));
     g_buttonsFont = 0;
+    memmove(texture.void_ptr, relocation_table.void_ptr, relocation_table_end - (relocation_table.addr - base.addr));
     *(i32 *)base.void_ptr = texture.addr - base.addr;
 
     if (relocation_count != 0) {

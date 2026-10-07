@@ -1252,7 +1252,7 @@ extern "C" {
             else if (fraction < 0.0f)
                 radius = check->first->radius;
             else
-                radius = check->first->radius * (1.0f - fraction) + check->second->radius * fraction;
+                radius = check->second->radius * fraction + check->first->radius * (1.0f - fraction);
 
             f32 old_y = record->position.y;
             record->position = check->first->position;

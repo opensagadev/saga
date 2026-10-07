@@ -418,10 +418,7 @@ static i32 cbSortSeg(void const *left, void const *right) {
     return 0;
 }
 
-NuNetEmu::NuNetEmu() : raw_stats("EmuRaw"), packet_stats("EmuPack") {
-    field_04 = 0;
-    field_08 = 0;
-    field_0c = 0;
+NuNetEmu::NuNetEmu() : field_04(NULL), field_08(NULL), field_0c(0), raw_stats("EmuRaw"), packet_stats("EmuPack") {
     field_10 = 0;
     field_14 = 0;
     field_18 = 0;
@@ -481,16 +478,22 @@ i32 NuNetEmu::SendTo(void *data, i32 size, nunetaddr_s *address, i32) {
     }
 
     if (field_24 == 1) {
-        if (field_34 > NuRandFloat()) {
-            return 0;
+        f32 random = NuRandFloat();
+        if (field_34 > random) {
+            return size;
         }
     } else if (field_24 == 2) {
-        if (field_30 == 0 && field_34 > NuRandFloat()) {
-            field_30 = field_28 + static_cast<i32>(NuRandFloat() * static_cast<f32>(field_2c - field_28));
+        if (field_30 == 0) {
+            f32 random = NuRandFloat();
+            if (field_34 > random) {
+                f32 range = static_cast<f32>(field_2c - field_28);
+                f32 random = NuRandFloat();
+                field_30 = static_cast<i32>(random * range) + field_28;
+            }
         }
         if (field_30 > 0) {
             field_30--;
-            return 0;
+            return size;
         }
     }
 
@@ -503,8 +506,9 @@ i32 NuNetEmu::SendTo(void *data, i32 size, nunetaddr_s *address, i32) {
         packet = new (MemoryManagerAllocPool(&theMemoryManager, sizeof(EmuPacket), 1)) EmuPacket(address);
         u32 now = UtilGetFrameStartTime();
         if (field_18 > 0) {
-            packet->send_time =
-                now + field_14 + static_cast<i32>(NuRandFloat() * static_cast<f32>(field_18 - field_14));
+            f32 range = static_cast<f32>(field_18 - field_14);
+            f32 random = NuRandFloat();
+            packet->send_time = now + (static_cast<u32>(static_cast<i32>(random * range)) + static_cast<u32>(field_14));
         } else {
             packet->send_time = 0;
         }

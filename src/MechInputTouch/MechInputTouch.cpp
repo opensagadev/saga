@@ -495,7 +495,11 @@ MechObjectInterface *MechInputTouchSystem::FindTargetObject(GameObject_s &object
                     f32 radius = part->radius;
                     if (part->flags & 0x8000)
                         radius *= 6.0f;
-                    VuVec center(part->position.x, part->position.y, part->position.z, 1.0f);
+                    VuVec center;
+                    center.z = part->position.z;
+                    center.y = part->position.y;
+                    center.x = part->position.x;
+                    center.w = 1.0f;
                     f32 distance = CalcCapsuleIntersectDistance(start, direction, best_distance, center, radius);
                     if (best_distance > distance) {
                         best_distance = distance;
@@ -531,7 +535,11 @@ MechObjectInterface *MechInputTouchSystem::FindTargetObject(GameObject_s &object
                 if (__builtin_expect(sphere, 0)) {
                     NUVEC *position = item->field_0x120 ? static_cast<NUVEC *>(item->field_0x120)
                                                         : reinterpret_cast<NUVEC *>(mid_z - 2);
-                    VuVec center(position->x, position->y, position->z, 1.0f);
+                    VuVec center;
+                    center.z = position->z;
+                    center.y = position->y;
+                    center.x = position->x;
+                    center.w = 1.0f;
                     f32 radius = item->field_0x128 > 0.0f ? item->field_0x128 : item->target_scale;
                     if (VehicleArea)
                         radius *= 3.0f;
@@ -581,7 +589,11 @@ MechObjectInterface *MechInputTouchSystem::FindTargetObject(GameObject_s &object
             for (i32 index = 0; index < world->nlevers; ++index, ++item) {
                 if (item == NULL || (item->flags & 0x93) != 0x90 || item->pull_progress != 0.0f)
                     continue;
-                VuVec center(item->position.x, item->position.y, item->position.z, 1.0f);
+                VuVec center;
+                center.z = item->position.z;
+                center.y = item->position.y;
+                center.x = item->position.x;
+                center.w = 1.0f;
                 f32 distance = CalcCapsuleIntersectDistance(start, direction, best_distance, center, 0.2f);
                 if (best_distance > distance) {
                     best_distance = distance;
@@ -594,7 +606,11 @@ MechObjectInterface *MechInputTouchSystem::FindTargetObject(GameObject_s &object
             for (i32 index = 0; index < world->hat_machine_sys->count; ++index, ++item) {
                 if (item == NULL || (item->flags & 15) != 12)
                     continue;
-                VuVec center(item->position.x, item->position.y, item->position.z, 1.0f);
+                VuVec center;
+                center.z = item->position.z;
+                center.y = item->position.y;
+                center.x = item->position.x;
+                center.w = 1.0f;
                 f32 distance = CalcCapsuleIntersectDistance(start, direction, best_distance, center, 0.2f);
                 if (best_distance > distance) {
                     best_distance = distance;
@@ -608,7 +624,11 @@ MechObjectInterface *MechInputTouchSystem::FindTargetObject(GameObject_s &object
                 if (item == NULL || item->enabled == 0 || item->active != 0)
                     continue;
                 NUVEC *point = &item->path->pts[0];
-                VuVec center(point->x, point->y + object.apiobj.scaled_height * 0.5f, point->z, 1.0f);
+                VuVec center;
+                center.z = point->z;
+                center.y = point->y + object.apiobj.scaled_height * 0.5f;
+                center.x = point->x;
+                center.w = 1.0f;
                 f32 distance = CalcCapsuleIntersectDistance(start, direction, best_distance, center, 0.4f);
                 if (best_distance > distance) {
                     static_cast<TeleportObjectInterface *>(item->GetMechObjectInterface())->index = 0;
@@ -633,7 +653,11 @@ MechObjectInterface *MechInputTouchSystem::FindTargetObject(GameObject_s &object
             for (i32 index = 0; index < system->count; ++index, ++item) {
                 if ((item->flags & 11) != 8 || !GizPanel_CanUsePanel(&object, item))
                     continue;
-                VuVec center(item->position.x, item->position.y, item->position.z, 1.0f);
+                VuVec center;
+                center.z = item->position.z;
+                center.y = item->position.y;
+                center.x = item->position.x;
+                center.w = 1.0f;
                 f32 distance = CalcCapsuleIntersectDistance(start, direction, best_distance, center, 0.2f);
                 if (best_distance > distance) {
                     best_distance = distance;
@@ -647,7 +671,11 @@ MechObjectInterface *MechInputTouchSystem::FindTargetObject(GameObject_s &object
             for (i32 index = 0; index < system->count; ++index, ++item) {
                 if (item == NULL || (item->flags & 0x22) != 2)
                     continue;
-                VuVec center(item->field_0x3c.x, item->field_0x3c.y, item->field_0x3c.z, 1.0f);
+                VuVec center;
+                center.z = item->field_0x3c.z;
+                center.y = item->field_0x3c.y;
+                center.x = item->field_0x3c.x;
+                center.w = 1.0f;
                 f32 distance = CalcCapsuleIntersectDistance(start, direction, best_distance, center, item->field_0x140);
                 if (best_distance > distance) {
                     best_distance = distance;
@@ -736,7 +764,11 @@ MechObjectInterface *MechInputTouchSystem::FindTargetObject(GameObject_s &object
                 if ((item->progress_flags & 3) != 3 || (i8)item->runtime_flags < 0 || item->anim_set == NULL ||
                     item->anim_set->state == 2 || item->proximity_output != 0 || item->mode == 1 || item->mode == 3)
                     continue;
-                VuVec center(item->evaluated_position.x, item->evaluated_position.y, item->evaluated_position.z, 1.0f);
+                VuVec center;
+                center.z = item->evaluated_position.z;
+                center.y = item->evaluated_position.y;
+                center.x = item->evaluated_position.x;
+                center.w = 1.0f;
                 f32 distance =
                     CalcCapsuleIntersectDistance(start, direction, best_distance, center, item->field_0x58) * 1.5f;
                 if (best_distance > distance) {

@@ -982,7 +982,7 @@ void Grapple_MoveCode(GameObject_s *object) {
                         static_cast<i32>(static_cast<u16>(Grapple_RopeSwingRotate) * FRAMETIME);
             }
             if (object->field_0x768 > 0.0f || GRAPPLE_CURRENT->has_terrain_platform != 0 ||
-                GRAPPLE_CURRENT->retain_attachment != 0 || (GRAPPLE_CURRENT->flags & GRAPPLE_FLAG_DISABLED) != 0)
+                (GRAPPLE_CURRENT->flags & GRAPPLE_FLAG_DISABLED) != 0)
                 object->airborne_action_duration = 0.0f;
             else {
                 object->airborne_action_duration += FRAMETIME;
@@ -1076,7 +1076,8 @@ void Grapple_MoveCode(GameObject_s *object) {
                 GRAPPLE_QUANTIZE(angle);
             if ((GrappleSwingMode == 0 && abs(RotDiff(angle, input_angle)) < 0x4000) ||
                 (GrappleSwingMode != 0 && swing)) {
-                object->grapple_swing_degrees = MIN(60, object->grapple_swing_degrees + 10);
+                const u8 increased_degrees = static_cast<u8>(object->grapple_swing_degrees + 10);
+                object->grapple_swing_degrees = increased_degrees <= 60 ? increased_degrees : 60;
                 return;
             }
             change = -20;

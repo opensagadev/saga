@@ -1521,12 +1521,11 @@ extern "C" {
         }
 
         const i32 node_index = static_cast<i32>(node - path->nodes);
-        const u8 node_bit = static_cast<u8>(1u << (node_index % 8));
         u8 &updated_nodes = path->updated_node_bits[node_index / 8];
         if (((updated_nodes >> (node_index % 8)) & 1) != 0) {
             return;
         }
-        updated_nodes |= node_bit;
+        updated_nodes |= 1 << (node_index % 8);
 
         nuhspecial_s *special = &node->special_handle;
         if ((node->runtime_flags & AIPATHNODE_RUNTIME_SPECIAL_UNAVAILABLE) != 0) {

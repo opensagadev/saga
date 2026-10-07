@@ -24,6 +24,7 @@
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numath/nuvec.h"
 #include "nu2api/numath/numtx.h"
+#include "nu2api/numath/numtx_inline.h"
 
 #include <string.h>
 
@@ -885,11 +886,17 @@ int GizSpinner_Update(GIZSPINNER_s *spinner) {
         }
 
         NUMTX matrix;
-        NuMtxSetRotationY(&matrix, spinner->rotation);
+        matrix.m00 = matrix.m22 = NU_COS_LUT(spinner->rotation);
+        matrix.m20 = NU_SIN_LUT(spinner->rotation);
+        matrix.m02 = -matrix.m20;
+        matrix.m11 = 1.0f;
+        matrix.m01 = matrix.m10 = matrix.m03 = matrix.m23 = matrix.m12 = matrix.m21 = matrix.m13 = matrix.m30 =
+            matrix.m31 = matrix.m32 = 0.0f;
+        matrix.m33 = 1.0f;
         if ((old_flags & 0x100) != 0)
-            NuMtxRotateY(&matrix, 0x0222);
+            NuMtxRotateYInline(&matrix, 0x0222);
         else if ((old_flags & 0x200) != 0)
-            NuMtxRotateY(&matrix, 0xfdde);
+            NuMtxRotateYInline(&matrix, 0xfdde);
         NuMtxTranslate(&matrix, &spinner->position);
 
         spinner->state = static_cast<u8>(GizSpinner_GetState(spinner));

@@ -889,8 +889,8 @@ void MenuUpdateStore(MENU_s *menu) {
     i32 hit;
 #define CHECK_STORE_TOUCH_POINT(INDEX)                                                                                 \
     if (MenuAlpha >= 1.0f && MechInputTouchMenuController::AnyTouchesThisFrame > 0) {                                  \
-        const f32 dx = StoreTouchLastPos.x - entry.x;                                                                  \
-        const f32 dy = StoreTouchLastPos.y - entry.y;                                                                  \
+        const f32 dx = StoreTouchLastPos.x - entry_x;                                                                  \
+        const f32 dy = StoreTouchLastPos.y - entry_y;                                                                  \
         if (__builtin_expect(dx * dx + dy * dy < 0.01f, 0)) {                                                          \
             hit = INDEX;                                                                                               \
             goto store_touch_selected;                                                                                 \
@@ -902,6 +902,8 @@ void MenuUpdateStore(MENU_s *menu) {
         if (entry.text[0] == 0) {                                                                                      \
             return;                                                                                                    \
         }                                                                                                              \
+        const f32 entry_x = entry.x;                                                                                   \
+        const f32 entry_y = entry.y;                                                                                   \
         CHECK_STORE_TOUCH_POINT(INDEX);                                                                                \
     } while (0)
 #define CHECK_STORE_PULSE(INDEX)                                                                                       \
@@ -910,14 +912,16 @@ void MenuUpdateStore(MENU_s *menu) {
         if (entry.text[0] == 0) {                                                                                      \
             return;                                                                                                    \
         }                                                                                                              \
-        const f32 trigger = MenuAlpha - (entry.y + 1.0f) * 4.0f;                                                       \
+        const f32 entry_x = entry.x;                                                                                   \
+        const f32 entry_y = entry.y;                                                                                   \
+        const f32 trigger = 8.0f - (entry_y + 1.0f) * 4.0f;                                                            \
         if (time >= trigger && time - FRAMETIME < trigger) {                                                           \
-            VuVec pulse __attribute__((aligned(16))) = VuVec(entry.x, entry.y, 1.0f, 1.0f);                            \
+            VuVec pulse __attribute__((aligned(16))) = VuVec(entry_x, entry_y, 1.0f, 1.0f);                            \
             MechSystems::Get()->NewRadarPulse(pulse, false);                                                           \
         }                                                                                                              \
         CHECK_STORE_TOUCH_POINT(INDEX);                                                                                \
     } while (0)
-    if (__builtin_expect(time >= 8.0f, 1)) {
+    if (!(time < 8.0f)) {
         CHECK_STORE_TOUCH(0);
         CHECK_STORE_TOUCH(1);
         CHECK_STORE_TOUCH(2);

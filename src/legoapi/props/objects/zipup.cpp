@@ -495,57 +495,64 @@ void ZipUp_MoveCode(GameObject_s *object, i32 special_pressed) {
             }
             api.velocity = v000;
             NUVEC delta;
-            if (object->field_0x7a3 == 0) {
-                f32 fraction;
-                bool animation_fraction = false;
-                if (playing != NULL && *playing > 0.0f) {
-                    f32 frame = AnimListFrame(api.character_model, object->context_animation, 0);
-                    if (!(frame <= 1.0f) && AnimEndFrame(api.character_model, object->context_animation) > frame) {
-                        f32 progress = (*playing - 1.0f) / (frame - 1.0f);
-                        fraction = progress < 1.0f ? progress : 1.0f;
-                        animation_fraction = true;
+            switch (object->field_0x7a3) {
+                case 0: {
+                    f32 fraction;
+                    bool animation_fraction = false;
+                    if (playing != NULL && *playing > 0.0f) {
+                        f32 frame = AnimListFrame(api.character_model, object->context_animation, 0);
+                        if (frame > 1.0f && AnimEndFrame(api.character_model, object->context_animation) > frame) {
+                            f32 progress = (*playing - 1.0f) / (frame - 1.0f);
+                            fraction = 1.0f < progress ? 1.0f : progress;
+                            animation_fraction = true;
+                        }
                     }
+                    if (!animation_fraction)
+                        fraction = object->context_animation_timer / object->airborne_action_duration;
+                    NuVecSub(&delta, &object->zipup_start_position, &object->zipup_entry_position);
+                    NuVecScale(&delta, &delta, fraction);
+                    NuVecAdd(&api.position, &object->zipup_entry_position, &delta);
+                    if (object->context_animation_timer >= object->airborne_action_duration) {
+                        object->field_0x7a3 = 1;
+                        object->context_animation_timer = 0.0f;
+                        object->context_animation = LEGOACT_WHIP_SWING_SWING;
+                        f32 duration = AnimDuration(object->id, object->context_animation, 0.0f, 0.0f, 0);
+                        object->airborne_action_duration = duration;
+                        if (duration <= 0.0f)
+                            object->airborne_action_duration = 1.0f;
+                        GameAudio_PlaySfx(0x4d, &api.collision_position, GameAudio_GetPlrSfxBits(object), 0);
+                    }
+                    break;
                 }
-                if (!animation_fraction)
-                    fraction = object->context_animation_timer / object->airborne_action_duration;
-                NuVecSub(&delta, &object->zipup_start_position, &object->zipup_entry_position);
-                NuVecScale(&delta, &delta, fraction);
-                NuVecAdd(&api.position, &object->zipup_entry_position, &delta);
-                if (object->context_animation_timer >= object->airborne_action_duration) {
-                    object->field_0x7a3 = 1;
-                    object->context_animation_timer = 0.0f;
-                    object->context_animation = LEGOACT_WHIP_SWING_SWING;
-                    f32 duration = AnimDuration(object->id, object->context_animation, 0.0f, 0.0f, 0);
-                    object->airborne_action_duration = duration;
-                    if (!(duration > 0.0f))
-                        object->airborne_action_duration = 1.0f;
-                    GameAudio_PlaySfx(0x4d, &api.collision_position, GameAudio_GetPlrSfxBits(object), 0);
+                case 1: {
+                    f32 fraction = object->context_animation_timer / object->airborne_action_duration;
+                    NuVecSub(&delta, &object->zipup_swing_position, &object->zipup_start_position);
+                    NuVecScale(&delta, &delta, fraction);
+                    NuVecAdd(&api.position, &object->zipup_start_position, &delta);
+                    if (object->context_animation_timer >= object->airborne_action_duration) {
+                        object->field_0x7a3 = 2;
+                        object->context_animation_timer = 0.0f;
+                        object->context_animation = LEGOACT_WHIP_SWING_JUMP;
+                        f32 duration = AnimDuration(object->id, object->context_animation, 0.0f, 0.0f, 0);
+                        object->airborne_action_duration = duration;
+                        if (duration <= 0.0f)
+                            object->airborne_action_duration = 1.0f;
+                        PlayJumpSfx(object, 0);
+                    }
+                    break;
                 }
-            } else if (object->field_0x7a3 == 1) {
-                f32 fraction = object->context_animation_timer / object->airborne_action_duration;
-                NuVecSub(&delta, &object->zipup_swing_position, &object->zipup_start_position);
-                NuVecScale(&delta, &delta, fraction);
-                NuVecAdd(&api.position, &object->zipup_start_position, &delta);
-                if (object->context_animation_timer >= object->airborne_action_duration) {
-                    object->field_0x7a3 = 2;
-                    object->context_animation_timer = 0.0f;
-                    object->context_animation = LEGOACT_WHIP_SWING_JUMP;
-                    f32 duration = AnimDuration(object->id, object->context_animation, 0.0f, 0.0f, 0);
-                    object->airborne_action_duration = duration;
-                    if (!(duration > 0.0f))
-                        object->airborne_action_duration = 1.0f;
-                    PlayJumpSfx(object, 0);
-                }
-            } else if (object->field_0x7a3 == 2) {
-                f32 fraction = object->context_animation_timer / object->airborne_action_duration;
-                NuVecSub(&delta, &object->zipup_landing_position, &object->zipup_swing_position);
-                NuVecScale(&delta, &delta, fraction);
-                NuVecAdd(&api.position, &object->zipup_swing_position, &delta);
-                if (object->context_animation_timer >= object->airborne_action_duration) {
-                    api.velocity.x = api.velocity.z = 0.0f;
-                    api.velocity.y = -2.0f;
-                    object->character_context = -1;
-                    StartFallLand(object, LEGOACT_LAND);
+                case 2: {
+                    f32 fraction = object->context_animation_timer / object->airborne_action_duration;
+                    NuVecSub(&delta, &object->zipup_landing_position, &object->zipup_swing_position);
+                    NuVecScale(&delta, &delta, fraction);
+                    NuVecAdd(&api.position, &object->zipup_swing_position, &delta);
+                    if (object->context_animation_timer >= object->airborne_action_duration) {
+                        api.velocity.x = api.velocity.z = 0.0f;
+                        api.velocity.y = -2.0f;
+                        object->character_context = -1;
+                        StartFallLand(object, LEGOACT_LAND);
+                    }
+                    break;
                 }
             }
             return;
@@ -643,7 +650,7 @@ void ZipUp_MoveCode(GameObject_s *object, i32 special_pressed) {
     ZIPUP *zipup = ZipUp_FindNearest(WORLD, &api.lower_position, api.collision_radius, NULL, &endpoint, object, false);
     if (objInNetWaitContext(object, 0x47)) {
         object->context_animation_timer -= FRAMETIME;
-        if (!(object->context_animation_timer > 0.0f))
+        if (object->context_animation_timer <= 0.0f)
             object->character_context = -1;
     }
     if (zipup == NULL)
@@ -675,7 +682,7 @@ void ZipUp_MoveCode(GameObject_s *object, i32 special_pressed) {
         object->context_animation = LEGOACT_WHIP_SWING_START;
         f32 duration = AnimDuration(object->id, object->context_animation, 0.0f, 0.0f, 0);
         object->airborne_action_duration = duration;
-        if (!(duration > 0.0f))
+        if (duration <= 0.0f)
             object->airborne_action_duration = 0.5f;
         object->zipup_entry_position = api.position;
         ZIPUP *current = static_cast<ZIPUP *>(object->field_0x788);
@@ -732,8 +739,9 @@ void ZipUp_MoveCode(GameObject_s *object, i32 special_pressed) {
     NuVecRotateY(&end_offset, &end_offset, yaw);
     NuVecNorm(&start_offset, &start_offset);
     NuVecNorm(&end_offset, &end_offset);
+    // Retail inlines the same acos polynomial used by the exported NuACos.
     static_cast<ZIPUP *>(object->field_0x788)->pitch_adjustment =
-        NuACos(start_offset.y * end_offset.y + start_offset.z * end_offset.z);
+        static_cast<i16>(0x4000 - NuASin(start_offset.y * end_offset.y + start_offset.z * end_offset.z));
     zipup = static_cast<ZIPUP *>(object->field_0x788);
     zipup->rider_target_position = zipup->rider_start_offset;
     NuVecAdd(&zipup->rider_target_position, hook, &zipup->rider_target_position);
