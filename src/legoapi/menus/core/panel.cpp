@@ -876,8 +876,7 @@ void InitPanel(i32) {
 }
 
 void DrawPanel() {
-    // Original debug coordinates were never initialized by this port.
-    NUVEC coordinate_positions[8] = {};
+    NUVEC coordinate_positions[8];
     const i32 menu = GetMenuID();
     SetQFont2D();
     if (CUTSTOPGAME == 0)
@@ -885,8 +884,7 @@ void DrawPanel() {
     if (HUB_ADATA != NULL && WORLD->area == HUB_ADATA)
         Customiser_TransformToPanel(CharacterCustomiser);
     const i32 paused = screendump ? save_paused : Paused;
-    // The original loading shortcut reads this before initialization. Give that path a stable result.
-    i32 removed_controller = -1;
+    i32 removed_controller;
     char text[512], auxiliary[128];
     f32 status_y = 0.0f;
     if (PANELOFF && !paused && (WORLD->current_level->flags & LEVEL_GAMEPLAY))
@@ -912,6 +910,7 @@ void DrawPanel() {
         if (gone_through_door_to_new_level)
             goto draw_panel_menu;
     }
+    removed_controller = -1;
     {
         f32 pulse = 0.25f * NU_SIN_LUT(static_cast<i32>(GlobalTimer.time_elapsed_mod_seconds * 65536.0f));
         {

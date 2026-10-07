@@ -720,10 +720,10 @@ void AIMoveToDestination(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *objec
     f32 saved_stopping_distance = packet->fallback_stopping_distance;
     f32 saved_parameter = packet->movement_parameter;
     AIPATHINFO saved_path_info = packet->fallback_path_info;
-    AIPATH *diversion_path = packet->path_info.path;
+    AIPATH *path = packet->path_info.path;
     i32 diverted = 0;
-    if (diversion_path != packet->fallback_path_info.path || packet->fallback_path_info.connection == NULL) {
-        AIMoveFindDivertNode(system, diversion_path, packet, &packet->fallback_destination);
+    if (path != packet->fallback_path_info.path || packet->fallback_path_info.connection == NULL) {
+        AIMoveFindDivertNode(system, path, packet, &packet->fallback_destination);
         if (packet->divert_node_index >= packet->path_info.path->node_count ||
             packet->path_info.path->nodes[packet->divert_node_index].connection_count == 0) {
             packet->movement_destination = packet->owner->apiobj.position;
@@ -736,6 +736,7 @@ void AIMoveToDestination(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *objec
         packet->movement_parameter = NuFmax(node->radius - 1.0f, 1.0f);
         memset(&packet->fallback_path_info, 0, sizeof(packet->fallback_path_info));
         packet->fallback_path_info.path = packet->path_info.path;
+        path = packet->path_info.path;
         packet->fallback_path_info.connection = node->connections[0];
         packet->fallback_path_info.direction = node->connections[0]->node_indices[0] == packet->divert_node_index;
         packet->fallback_path_info.dist =
@@ -744,7 +745,6 @@ void AIMoveToDestination(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *objec
     }
     AIPATHCNX *destination_connection = packet->fallback_path_info.connection;
     AIPATHCNX *connection = packet->path_info.connection;
-    AIPATH *path = packet->path_info.path;
     NUVEC difference;
     f32 distance_squared = NuVecDistSqr(&packet->fallback_destination, &object->position, &difference);
     if ((object->supporting_platform_id == -1 || (path->nodes[connection->node_indices[0]].has_special != 0 &&
@@ -1369,11 +1369,18 @@ u32 DoSomeChecks(GameObject_s &object, AIPATH_s &path, AIPATHCNX_s &connection, 
     }
     f32 distance = NuVecXZDistSqr(&object.ai.terrain_origin, &node->position, NULL);
     u32 result = 0;
-    if (distance < node->radius_squared || distance < testAutoJumpXZCanUseRangeSqr) {
-        result |= 1;
-    }
-    if (distance < testAutoJumpXZCanDisplayRangeSqr) {
-        result |= 2;
+    if (distance >= node->radius_squared) {
+        if (distance < testAutoJumpXZCanUseRangeSqr) {
+            result |= 1;
+        }
+        if (distance < testAutoJumpXZCanDisplayRangeSqr) {
+            result |= 2;
+        }
+    } else if (distance < node->radius_squared) {
+        result = 1;
+        if (distance < testAutoJumpXZCanDisplayRangeSqr) {
+            result |= 2;
+        }
     }
     if (result == 0 || !AISysCharacterCanReachThisJumpConnection(object, path, connection, direction)) {
         return 0;

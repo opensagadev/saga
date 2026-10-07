@@ -803,8 +803,10 @@ static void GizBuildIts_LateUpdate(void *world_ptr, void *data, float) {
     GIZBUILDIT_s *current = buildit_sys->buildits;
     for (i32 index = 0; index < buildit_sys->count; ++index, ++current) {
         GIZBUILDIT_s &buildit = *current;
-        if ((buildit.availability_flags & 2) == 0 || (buildit.availability_flags & 1) == 0 ||
-            buildit.anim_set == NULL || buildit.anim_object_count == 0) {
+        if ((buildit.availability_flags & 2) == 0) {
+            continue;
+        }
+        if ((buildit.availability_flags & 1) == 0 || buildit.anim_set == NULL || buildit.anim_object_count == 0) {
             continue;
         }
 
@@ -1034,9 +1036,10 @@ static void GizBuildIts_LateUpdate(void *world_ptr, void *data, float) {
                     angle = -angle;
 #define ROTATE_BUILDIT_WOBBLE(axis_name)                                                                               \
     do {                                                                                                               \
+        NUVEC normal;                                                                                                  \
         NuMtxGet##axis_name##Axis(&matrix, &axis);                                                                     \
-        NuVecNorm(&target, &axis);                                                                                     \
-        const f32 vertical = fabsf(NuVecDot(&target, &v010));                                                          \
+        NuVecNorm(&normal, &axis);                                                                                     \
+        const f32 vertical = fabsf(NuVecDot(&normal, &v010));                                                          \
         const f32 factor = 1.0f - (1.0f - NU_SIN_LUT(vertical * 16384.0f + 16384.0f)) * vertical;                      \
         NuMtxPreRotate##axis_name(&matrix, static_cast<i32>(static_cast<f32>(angle) * factor));                        \
     } while (0)
