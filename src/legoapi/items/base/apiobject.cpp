@@ -2338,7 +2338,7 @@ extern "C" {
                             count = 1;
                         }
                         if (count > 0 && (effects->random == 0 || (NuRandInt() >> 16) <= (effects->random << 8))) {
-                            if ((effects->flags & 0x1000) != 0 || (effects->flags & 0x800) != 0 || locator_count == 0) {
+                            if ((effects->flags & 0x1000) != 0) {
                                 if ((effects->flags & 0x400000) != 0 && object != NULL) {
                                     AddGameDebrisMom(debris_sys, effects->debris_id, &position, count,
                                                      &object->apiobj.velocity);
@@ -2346,19 +2346,40 @@ extern "C" {
                                     AddGameDebrisRot(debris_sys, effects->debris_id, &position, count, 0, 0);
                                 }
                             } else {
-                                for (i32 i = 0; i < locator_count; ++i) {
+                                u16 y_rotation = 0;
+                                u16 z_rotation = y_rotation;
+                                if ((effects->flags & 0x800) != 0) {
                                     if ((effects->flags & 0x400000) != 0 && object != NULL) {
-                                        NUVEC velocity;
-                                        NuVecSub(&velocity, &object->apiobj.position, &object->apiobj.start_position);
-                                        NuVecScale(&velocity, &velocity, 1.0f / frame_time);
-                                        AddGameDebrisMom(debris_sys, effects->debris_id, &locator_positions[i], count,
-                                                         &velocity);
-                                    } else if ((effects->flags & 0x4000000) != 0) {
-                                        AddGameDebrisMtx(debris_sys, effects->debris_id, &locator_positions[i], count,
-                                                         &locator_matrices[i]);
+                                        AddGameDebrisMom(debris_sys, effects->debris_id, &position, count,
+                                                         &object->apiobj.velocity);
                                     } else {
-                                        AddGameDebrisRot(debris_sys, effects->debris_id, &locator_positions[i], count,
-                                                         0, 0);
+                                        AddGameDebrisRot(debris_sys, effects->debris_id, &position, count, z_rotation,
+                                                         y_rotation);
+                                    }
+                                } else if (locator_count != 0) {
+                                    for (i32 i = 0; i < locator_count; ++i) {
+                                        if ((effects->flags & 0x400000) != 0 && object != NULL) {
+                                            NUVEC velocity;
+                                            NuVecSub(&velocity, &object->apiobj.position,
+                                                     &object->apiobj.start_position);
+                                            NuVecScale(&velocity, &velocity, 1.0f / frame_time);
+                                            AddGameDebrisMom(debris_sys, effects->debris_id, &locator_positions[i],
+                                                             count, &velocity);
+                                        } else if ((effects->flags & 0x4000000) != 0) {
+                                            AddGameDebrisMtx(debris_sys, effects->debris_id, &locator_positions[i],
+                                                             count, &locator_matrices[i]);
+                                        } else {
+                                            AddGameDebrisRot(debris_sys, effects->debris_id, &locator_positions[i],
+                                                             count, z_rotation, y_rotation);
+                                        }
+                                    }
+                                } else {
+                                    if ((effects->flags & 0x400000) != 0 && object != NULL) {
+                                        AddGameDebrisMom(debris_sys, effects->debris_id, &position, count,
+                                                         &object->apiobj.velocity);
+                                    } else {
+                                        AddGameDebrisRot(debris_sys, effects->debris_id, &position, count, z_rotation,
+                                                         y_rotation);
                                     }
                                 }
                             }

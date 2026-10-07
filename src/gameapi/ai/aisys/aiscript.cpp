@@ -237,7 +237,7 @@ static void xActions(NUFPAR *parser) {
 }
 
 static void ConditionsParseFinalise(AICONDITION *cond, NUFPAR *parser) {
-    cond->keep_blocked = 0;
+    *(reinterpret_cast<u8 *>(cond) + offsetof(AICONDITION, param_idx) + 1) &= static_cast<u8>(~2);
 
     NuFParGetWord(parser);
 
@@ -246,7 +246,7 @@ static void ConditionsParseFinalise(AICONDITION *cond, NUFPAR *parser) {
     NuFParGetWord(parser);
 
     if (NuStrICmp(parser->word_buf, "KeepBlockedMessages") == 0) {
-        cond->keep_blocked = 1;
+        *(reinterpret_cast<u8 *>(cond) + offsetof(AICONDITION, param_idx) + 1) |= 2;
     }
 }
 
@@ -525,7 +525,7 @@ static void xConditions(NUFPAR *parser) {
 
                         if (param_name != NULL && NuStrICmp(param_name, parser->word_buf) == 0) {
                             cond->param_idx = i;
-                            cond->is_param_idx_valid = 1;
+                            *(reinterpret_cast<u8 *>(cond) + offsetof(AICONDITION, param_idx) + 1) |= 4;
 
                             break;
                         }
@@ -535,11 +535,11 @@ static void xConditions(NUFPAR *parser) {
                     cond->param_idx = param_idx;
 
                     if (param_idx < 4) {
-                        cond->is_param_idx_valid = 1;
+                        *(reinterpret_cast<u8 *>(cond) + offsetof(AICONDITION, param_idx) + 1) |= 4;
                     }
                 }
 
-                if (!cond->is_param_idx_valid) {
+                if (!(*(reinterpret_cast<u8 *>(cond) + offsetof(AICONDITION, param_idx) + 1) & 4)) {
                     i32 i;
 
                     for (i = 0; i < aiscript_const_curr; i++) {
@@ -554,7 +554,7 @@ static void xConditions(NUFPAR *parser) {
                         cond->param_val = AiParseExpression(parser->word_buf);
 
                         if (AiParseExpressionFailed) {
-                            cond->is_complex = 1;
+                            *(reinterpret_cast<u8 *>(cond) + offsetof(AICONDITION, param_idx) + 1) |= 8;
                             cond->param_idx = complex_idx++;
                             cond->complex_arg = AIScriptCopyString(parser->word_buf, load_buff, load_endbuff);
                         }
@@ -567,7 +567,7 @@ static void xConditions(NUFPAR *parser) {
             if (NuStrICmp(parser->word_buf, "goto") == 0) {
                 ConditionsParseFinalise(cond, parser);
             } else if (NuStrICmp(parser->word_buf, "and") == 0) {
-                cond->bool_and = 1;
+                *(reinterpret_cast<u8 *>(cond) + offsetof(AICONDITION, param_idx) + 1) |= 1;
             }
         } else if (NuStrICmp(parser->word_buf, "OnMacro") == 0) {
             AICONDITIONMACRO *macro;
@@ -587,7 +587,7 @@ static void xConditions(NUFPAR *parser) {
                     if (NuStrICmp(parser->word_buf, "goto") == 0) {
                         ConditionsParseFinalise(macro_last, parser);
                     } else if (NuStrICmp(parser->word_buf, "and") == 0) {
-                        macro_last->bool_and = 1;
+                        *(reinterpret_cast<u8 *>(macro_last) + offsetof(AICONDITION, param_idx) + 1) |= 1;
                     }
 
                     break;

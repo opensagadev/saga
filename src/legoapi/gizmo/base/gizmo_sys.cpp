@@ -159,7 +159,7 @@ void MiniKit_InitPieces(MINIKIT *minikit, i32 count, VARIPTR *buf, VARIPTR *buf_
     }
 
     static const char *const direction_names[] = {"NegX", "PosX", "NegY", "PosY", "NegZ", "PosZ"};
-    u8 direction_counts[6] = {};
+    i32 direction_counts[6] = {};
     char name[76];
 
     buf->addr = ALIGN(buf->addr, 4);
@@ -173,9 +173,11 @@ void MiniKit_InitPieces(MINIKIT *minikit, i32 count, VARIPTR *buf, VARIPTR *buf_
             if (NuSpecialFind(minikit->gscn, &piece->special, name, 1) == 0) {
                 continue;
             }
+            piece = &reinterpret_cast<HUBMINIKITPIECE_s *>(minikit->field_0x4)[minikit->field_0x8];
             piece->matrix = *NuSpecialGetInstanceMtx(&piece->special);
-            piece->direction = direction;
-            piece->direction_index = direction_counts[direction]++;
+            reinterpret_cast<HUBMINIKITPIECE_s *>(minikit->field_0x4)[minikit->field_0x8].direction = direction;
+            reinterpret_cast<HUBMINIKITPIECE_s *>(minikit->field_0x4)[minikit->field_0x8].direction_index =
+                direction_counts[direction]++;
             ++minikit->field_0x8;
         }
     }

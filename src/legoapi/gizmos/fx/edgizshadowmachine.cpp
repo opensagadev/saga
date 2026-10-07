@@ -90,7 +90,7 @@ static i32 edGizShadow_Load(void *world_ptr, void *) {
 
     EDGIZSHADOW *shadow = world->shadow_editor;
     const i32 version = EdFileReadChar();
-    const i32 record_count = EdFileReadChar() + 1;
+    const i32 record_count = EdFileReadChar();
     for (i32 record = 0; record < record_count; ++record) {
         EdFileReadNuVec(&shadow->direction);
         shadow->field_0x0c = EdFileReadFloat();
@@ -103,16 +103,18 @@ static i32 edGizShadow_Load(void *world_ptr, void *) {
                 shadow->field_0x1c = EdFileReadFloat();
                 if (version != 3) {
                     shadow->field_0x20 = EdFileReadFloat();
-                    (void)EdFileReadFloat();
-                    (void)EdFileReadFloat();
                     if (version != 4) {
-                        shadow->field_0x24 = EdFileReadFloat();
-                        shadow->field_0x28 = EdFileReadFloat();
-                        shadow->field_0x2c = EdFileReadFloat();
-                        if (version != 6) {
-                            shadow->field_0x30 = EdFileReadFloat();
-                            if (version != 7) {
-                                shadow->preset = static_cast<EDGIZSHADOW_PRESET>(EdFileReadInt());
+                        (void)EdFileReadFloat();
+                        (void)EdFileReadFloat();
+                        if (version != 5) {
+                            shadow->field_0x24 = EdFileReadFloat();
+                            shadow->field_0x28 = EdFileReadFloat();
+                            shadow->field_0x2c = EdFileReadFloat();
+                            if (version != 6) {
+                                shadow->field_0x30 = EdFileReadFloat();
+                                if (version != 7) {
+                                    shadow->preset = static_cast<EDGIZSHADOW_PRESET>(EdFileReadInt());
+                                }
                             }
                         }
                     }
@@ -132,7 +134,7 @@ static i32 edGizShadow_Load(void *world_ptr, void *) {
             shadow->field_0x20 = 22.0f;
         }
 
-        if (world->area != NULL) {
+        if (version <= 7 && world->area != NULL) {
             if ((world->area->flags & 1) == 0) {
                 edGizShadow_SetPreset1(shadow);
             } else {

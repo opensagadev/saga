@@ -319,7 +319,7 @@ i32 GetMipOffset(NuHardwareTexture *tex, i32 targetMip, i32 targetSlice, NUTEXFO
 #define SQUISH_KDXT3 (1 << 1) // 2
 #define SQUISH_KDXT5 (1 << 2) // 4
 
-static const i32 CSWTCH_249[] = {SQUISH_KDXT1, SQUISH_KDXT3, SQUISH_KDXT5};
+static const i32 CSWTCH_249[] = {SQUISH_KDXT3, SQUISH_KDXT1, SQUISH_KDXT5};
 
 void DecompressTextureToRGBA(unsigned char *ddsData, u32 size, unsigned char *&outBuffer) {
     i32 squishFlags;
@@ -375,10 +375,11 @@ void DecompressTextureToRGBA(unsigned char *ddsData, u32 size, unsigned char *&o
     for (i32 face = 0; face < faceLimit; face++) {
         if (tex.mips != 0) {
             for (i32 mip = 0; mip < tex.mips; mip++) {
+                i32 mipWidth = tex.width >> mip;
+                i32 mipHeight = tex.height >> mip;
                 i32 mipOffset = GetMipOffset(&tex, mip, face, NUTEX_UNKNOWN);
                 i32 rgbaOffset = GetMipOffset(&tex, mip, face, NUTEX_RGBA32);
-                squish::DecompressImage(outBuffer + rgbaOffset, tex.width >> mip, tex.height >> mip,
-                                        ddsData + mipOffset, squishFlags);
+                squish::DecompressImage(outBuffer + rgbaOffset, mipWidth, mipHeight, ddsData + mipOffset, squishFlags);
             }
         }
     }
@@ -794,9 +795,9 @@ i32 GetMipOffset(i32 width, i32 height, NUTEXFORMAT format, i32 depth, bool isCu
     if (format > 0 && format < 119) {
         const i32 formatIndex = format - 1;
         isCompressed = FormatIsCompressedTable[formatIndex];
-        minBlocks = FormatMinBlocksYTable[formatIndex];
-        bytesPerBlockOrPixel = FormatBytesPerElementTable[formatIndex];
-        blockWidth = FormatBlockWidthTable[formatIndex];
+        minBlocks = static_cast<i8>(FormatMinBlocksYTable[formatIndex]);
+        bytesPerBlockOrPixel = static_cast<i8>(FormatBytesPerElementTable[formatIndex]);
+        blockWidth = static_cast<i8>(FormatBlockWidthTable[formatIndex]);
     } else {
         isCompressed = false;
         minBlocks = 1;

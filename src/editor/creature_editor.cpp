@@ -498,13 +498,14 @@ static __used__ __attribute__((force_align_arg_pointer)) void creatureEditor_cbV
     if (menu == nullptr)
         return;
     eduiMenuAddItem(menu, eduiItemSliderCreate(1, attr, 0, creatureEditor_cb_viewdistance, 0.5f, 49.5f,
-                                               creature->view_distance, "View Distance"));
+                                               creatureEditor_Current()->view_distance, "View Distance"));
     eduiMenuAddItem(menu, eduiItemSliderCreate(1, attr, 0, creatureEditor_cb_heardistance, 0.5f, 49.5f,
-                                               creature->hear_distance, "Hearing Distance"));
+                                               creatureEditor_Current()->hear_distance, "Hearing Distance"));
     eduiMenuAddItem(menu, eduiItemSliderCreate(1, attr, 0, creatureEditor_cb_maxviewheight, 0.1f, 99.9f,
-                                               creature->max_view_height, "Max View Height"));
-    eduiMenuAddItem(menu, eduiItemSliderCreate(1, attr, 0, creatureEditor_cb_minviewheight, 0.1f, 99.9f,
-                                               -creature->negative_min_view_height, "Min View Height -"));
+                                               creatureEditor_Current()->max_view_height, "Max View Height"));
+    eduiMenuAddItem(menu,
+                    eduiItemSliderCreate(1, attr, 0, creatureEditor_cb_minviewheight, 0.1f, 99.9f,
+                                         -creatureEditor_Current()->negative_min_view_height, "Min View Height -"));
     eduiMenuAttach(parent, menu);
 }
 
@@ -1127,22 +1128,29 @@ extern "C" {
             }
             if (aidata_version <= 10)
                 continue;
-            EdFileWriteFloat(GetViewRangeFn != nullptr &&
-                                     creature->view_distance == GetViewRangeFn(creature->character_type)
-                                 ? 0.0f
-                                 : creature->view_distance);
-            EdFileWriteFloat(GetHearDistanceFn != nullptr &&
-                                     creature->hear_distance == GetHearDistanceFn(creature->character_type)
-                                 ? 0.0f
-                                 : creature->hear_distance);
-            EdFileWriteFloat(GetMaxViewHeightFn != nullptr &&
-                                     creature->max_view_height == GetMaxViewHeightFn(creature->character_type)
-                                 ? 0.0f
-                                 : creature->max_view_height);
-            EdFileWriteFloat(GetMinViewHeightFn != nullptr &&
-                                     creature->negative_min_view_height == GetMinViewHeightFn(creature->character_type)
-                                 ? 0.0f
-                                 : creature->negative_min_view_height);
+            if (GetViewRangeFn != nullptr && creature->view_distance == GetViewRangeFn(creature->character_type)) {
+                EdFileWriteFloat(0.0f);
+            } else {
+                EdFileWriteFloat(creature->view_distance);
+            }
+            if (GetHearDistanceFn != nullptr &&
+                creature->hear_distance == GetHearDistanceFn(creature->character_type)) {
+                EdFileWriteFloat(0.0f);
+            } else {
+                EdFileWriteFloat(creature->hear_distance);
+            }
+            if (GetMaxViewHeightFn != nullptr &&
+                creature->max_view_height == GetMaxViewHeightFn(creature->character_type)) {
+                EdFileWriteFloat(0.0f);
+            } else {
+                EdFileWriteFloat(creature->max_view_height);
+            }
+            if (GetMinViewHeightFn != nullptr &&
+                creature->negative_min_view_height == GetMinViewHeightFn(creature->character_type)) {
+                EdFileWriteFloat(0.0f);
+            } else {
+                EdFileWriteFloat(creature->negative_min_view_height);
+            }
             EdFileWriteInt(0);
         }
     }

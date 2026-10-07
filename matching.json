@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 73.65311,
+    "fuzzy_match_percent": 73.69151,
     "total_code": "4722419",
     "matched_code": "571557",
     "matched_code_percent": 12.103055,
@@ -14451,7 +14451,7 @@
           "address": 4493360,
           "offset": 3603392,
           "size": 1863,
-          "match_percent": 82.04082
+          "match_percent": 86.165535
         },
         {
           "name": "_ZN19MechAutoJumpManager6RenderEv",
@@ -14784,7 +14784,7 @@
           "address": 4448432,
           "offset": 3558464,
           "size": 7833,
-          "match_percent": 53.41161
+          "match_percent": 54.649734
         },
         {
           "name": "_ZN20MechInputTouchSystemD1Ev",
@@ -19507,7 +19507,7 @@
           "address": 4017312,
           "offset": 3127344,
           "size": 556,
-          "match_percent": 92.2193
+          "match_percent": 99.64035
         },
         {
           "name": "_ZL26creatureEditor_cbGroupMenuP10eduimenu_sP10eduiitem_sj",
@@ -19691,7 +19691,7 @@
           "address": 4222448,
           "offset": 3332480,
           "size": 1704,
-          "match_percent": 80.471886
+          "match_percent": 81.61858
         },
         {
           "name": "creatureEditor_GetNearest",
@@ -19795,7 +19795,7 @@
           "address": 4249232,
           "offset": 3359264,
           "size": 4175,
-          "match_percent": 54.98657
+          "match_percent": 54.95868
         },
         {
           "name": "creatureEditor_RenderAllCreatures",
@@ -22358,7 +22358,7 @@
           "address": 4052064,
           "offset": 3162096,
           "size": 543,
-          "match_percent": 99.76761
+          "match_percent": 99.87324
         },
         {
           "name": "_ZL12xActionMacroP8nufpar_s",
@@ -22374,7 +22374,7 @@
           "address": 4055024,
           "offset": 3165056,
           "size": 509,
-          "match_percent": 99.58778
+          "match_percent": 97.87023
         },
         {
           "name": "_ZL6xParamP8nufpar_s",
@@ -22382,7 +22382,7 @@
           "address": 4055776,
           "offset": 3165808,
           "size": 340,
-          "match_percent": 99.23333
+          "match_percent": 99.933334
         },
         {
           "name": "RegisterAIScriptActions",
@@ -22422,7 +22422,7 @@
           "address": 4067808,
           "offset": 3177840,
           "size": 2172,
-          "match_percent": 75.08484
+          "match_percent": 95.26895
         },
         {
           "name": "_ZL10xRefScriptP8nufpar_s",
@@ -47502,7 +47502,7 @@
           "address": 2987616,
           "offset": 2097648,
           "size": 206,
-          "match_percent": 57.347828
+          "match_percent": 89.85507
         },
         {
           "name": "StateAnimFixPtrs",
@@ -54295,7 +54295,7 @@
           "address": 4806496,
           "offset": 3916528,
           "size": 1947,
-          "match_percent": 75.77738
+          "match_percent": 91.527824
         },
         {
           "name": "_Z14CreateGizmoSysPvP9variptr_uS1_",
@@ -56775,7 +56775,7 @@
           "address": 5237312,
           "offset": 4347344,
           "size": 547,
-          "match_percent": 48.882812
+          "match_percent": 67.03125
         },
         {
           "name": "_ZL30edGizShadow_ReserveBufferSpacePv",
@@ -61066,7 +61066,7 @@
           "address": 3975686,
           "offset": 3085718,
           "size": 4233,
-          "match_percent": 86.29173
+          "match_percent": 93.63209
         },
         {
           "name": "APICharacterSysInit",
@@ -63675,7 +63675,7 @@
           "address": 5123008,
           "offset": 4233040,
           "size": 554,
-          "match_percent": 71.76978
+          "match_percent": 80.61151
         },
         {
           "name": "_Z23LookupRippleEffectIndexPc",
@@ -68694,7 +68694,7 @@
           "address": 4783856,
           "offset": 3893888,
           "size": 101,
-          "match_percent": 67.55556
+          "match_percent": 86.80556
         },
         {
           "name": "_Z9GetMenuIDv",
@@ -73388,7 +73388,7 @@
           "address": 1946368,
           "offset": 1056400,
           "size": 415,
-          "match_percent": 60.72477
+          "match_percent": 86.90826
         },
         {
           "name": "_ZL21Technos_StoreProgressPvS_S_",
@@ -86300,7 +86300,7 @@
           "address": 2264736,
           "offset": 1374768,
           "size": 2241,
-          "match_percent": 57.65574
+          "match_percent": 59.356556
         },
         {
           "name": "_Z12SenateA_InitP11WORLDINFO_s",
@@ -90763,7 +90763,7 @@
           "address": 2744848,
           "offset": 1854880,
           "size": 687,
-          "match_percent": 62.09929
+          "match_percent": 82.53191
         },
         {
           "name": "_Z15CreateTexturePSv",
@@ -90803,7 +90803,7 @@
           "address": 2749648,
           "offset": 1859680,
           "size": 537,
-          "match_percent": 65.53425
+          "match_percent": 67.0685
         },
         {
           "name": "_Z15UnlockTexturePSjPviiibi11NUTEXFORMATRjS1_jb",
@@ -99444,7 +99444,7 @@
           "address": 3099968,
           "offset": 2210000,
           "size": 1877,
-          "match_percent": 35.507973
+          "match_percent": 35.519363
         },
         {
           "name": "_ZN12NuCopyFilterD1Ev",

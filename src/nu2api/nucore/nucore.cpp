@@ -715,7 +715,7 @@ void NuDynamicLight::addShadowCasterScene(nugscn_s *scene) {
                 f32 sx = set.capsule_end.x - set.capsule_center.x;
                 f32 sy = set.capsule_end.y - set.capsule_center.y;
                 f32 sz = set.capsule_end.z - set.capsule_center.z;
-                f32 length = sx * sx + sy * sy + sz * sz;
+                f32 length = sy * sy + sx * sx + sz * sz;
                 f32 radius = set.capsule_radius + box.first_w;
                 f32 ox = box.first.x - set.capsule_center.x;
                 f32 oy = box.first.y - set.capsule_center.y;

@@ -2220,6 +2220,7 @@ extern "C" {
             *index = next;
             *value = next == 0 ? state->values[0] : state->values[next - 1];
             changed = 1;
+            next = *index;
         } while (next != 0);
         return 1;
     }

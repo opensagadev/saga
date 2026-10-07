@@ -304,37 +304,36 @@ static i32 Technos_Load(void *world_ptr, void *) {
     const i32 version = EdFileReadInt();
     world->ntechnos = EdFileReadInt();
     for (i32 index = 0; index < world->ntechnos; ++index) {
-        TECHNO &techno = world->technos[index];
-        EdFileRead(techno.name, sizeof(techno.name));
-        EdFileReadNuVec(&techno.position);
-        techno.y_rotation = static_cast<i16>(EdFileReadShort());
+        EdFileRead(world->technos[index].name, sizeof(world->technos[index].name));
+        EdFileReadNuVec(&world->technos[index].position);
+        world->technos[index].y_rotation = static_cast<i16>(EdFileReadShort());
 
         if (version <= 1) {
-            techno.scale = 1.0f;
-            techno.output = 0;
+            world->technos[index].scale = 1.0f;
+            world->technos[index].output = 0;
             continue;
         }
 
-        techno.target_mode = static_cast<u8>(EdFileReadChar());
+        world->technos[index].target_mode = static_cast<u8>(EdFileReadChar());
         const i32 target_name_length = EdFileReadInt();
-        EdFileRead(techno.target_object_name, target_name_length);
-        NuStrCpy(techno.target_name, techno.target_object_name);
+        EdFileRead(world->technos[index].target_object_name, target_name_length);
+        NuStrCpy(world->technos[index].target_name, world->technos[index].target_object_name);
         if (version == 2) {
-            techno.enabled = 1;
-            techno.scale = 1.0f;
-            techno.output = 0;
+            world->technos[index].enabled = 1;
+            world->technos[index].scale = 1.0f;
+            world->technos[index].output = 0;
             continue;
         }
 
-        techno.enabled = static_cast<u8>(EdFileReadChar());
+        world->technos[index].enabled = static_cast<u8>(EdFileReadChar());
         if (version == 3) {
-            techno.scale = 1.0f;
-            techno.output = 0;
+            world->technos[index].scale = 1.0f;
+            world->technos[index].output = 0;
             continue;
         }
 
-        techno.scale = EdFileReadFloat();
-        techno.output = version == 4 ? 0 : EdFileReadInt();
+        world->technos[index].scale = EdFileReadFloat();
+        world->technos[index].output = version == 4 ? 0 : EdFileReadInt();
     }
     return 1;
 }

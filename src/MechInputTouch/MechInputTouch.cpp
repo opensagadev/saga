@@ -603,13 +603,17 @@ MechObjectInterface *MechInputTouchSystem::FindTargetObject(GameObject_s &object
         }
         if ((flags & 0x100) && world->hat_machine_sys != NULL && TouchHacks::CanUseHatMachine(object)) {
             HATMACHINE_s *item = world->hat_machine_sys->machines;
-            for (i32 index = 0; index < world->hat_machine_sys->count; ++index, ++item) {
+            uintptr_t position_z =
+                item != NULL ? reinterpret_cast<uintptr_t>(item) + offsetof(HATMACHINE_s, position) + offsetof(NUVEC, z)
+                             : 0;
+            for (i32 index = 0; index < world->hat_machine_sys->count; ++index, ++item, position_z += sizeof(*item)) {
                 if (item == NULL || (item->flags & 15) != 12)
                     continue;
                 VuVec center;
-                center.z = item->position.z;
-                center.y = item->position.y;
-                center.x = item->position.x;
+                const NUVEC *position = reinterpret_cast<const NUVEC *>(position_z - offsetof(NUVEC, z));
+                center.z = position->z;
+                center.y = position->y;
+                center.x = position->x;
                 center.w = 1.0f;
                 f32 distance = CalcCapsuleIntersectDistance(start, direction, best_distance, center, 0.2f);
                 if (best_distance > distance) {

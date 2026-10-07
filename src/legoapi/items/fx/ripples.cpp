@@ -411,7 +411,7 @@ void RippleEffects_Configure(WORLDINFO_s *world, char *config) {
     world->giz_buffer.addr = (world->giz_buffer.addr + 3) & ~static_cast<usize>(3);
     world->ripple_effects = reinterpret_cast<RIPPLEEFFECT_s *>(world->giz_buffer.addr);
     RIPPLEEFFECT_s *effect = world->ripple_effects;
-    bool active = false;
+    i32 active = 0;
     NuFParPushCom(parser, RippleEffect_ConfigKeywords);
     while (NuFParGetLine(parser)) {
         NuFParGetWord(parser);
@@ -430,9 +430,9 @@ void RippleEffects_Configure(WORLDINFO_s *world, char *config) {
             effect->end_color.value = 0;
             effect->material = NULL;
             RE_rippleeffect = effect;
-            active = true;
+            active = 1;
         } else if (NuStrICmp(parser->word_buf, "rippleeffects_end") == 0) {
-            active = false;
+            active = 0;
             if (effect->texture_name[0] != 0) {
                 ++effect;
                 ++world->ripple_effect_count;

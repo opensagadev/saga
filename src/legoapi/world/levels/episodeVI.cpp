@@ -915,6 +915,14 @@ void LegoCity_Update(WORLDINFO_s *world) {
     if (world == NULL || world->pickup_sys == NULL) {
         return;
     }
+    const u8 previousTractor = prevOnTractor;
+    const u8 previousTaunTaun = prevOnTaunTaun;
+    const u8 previousMoonCar = prevOnMoonCar;
+    const u8 previousTownCar = prevOnTownCar;
+    u8 changedTractor = previousTractor;
+    u8 changedTaunTaun = previousTaunTaun;
+    u8 changedMoonCar = previousMoonCar;
+    u8 changedTownCar = previousTownCar;
     u8 onTractor = 0;
     u8 onTaunTaun = 0;
     u8 onMoonCar = 0;
@@ -925,17 +933,20 @@ void LegoCity_Update(WORLDINFO_s *world) {
             object->field_0xcc0 != NULL && object->field_0xcc0->character_context == CHARACTER_CONTEXT_LINKED_OBJECT) {
             if (object->id == id_TRACTOR) {
                 onTractor = 0xff;
+                changedTractor = static_cast<u8>(~previousTractor);
             } else if (object->id == id_TAUNTAUN) {
                 onTaunTaun = 0xff;
+                changedTaunTaun = static_cast<u8>(~previousTaunTaun);
             } else if (object->id == id_MOONCAR) {
                 onMoonCar = 0xff;
+                changedMoonCar = static_cast<u8>(~previousMoonCar);
             } else if (object->id == id_TOWNCAR) {
                 onTownCar = 0xff;
+                changedTownCar = static_cast<u8>(~previousTownCar);
             }
         }
     }
-    u8 changed = (onTractor ^ prevOnTractor) | (onTaunTaun ^ prevOnTaunTaun) | (onMoonCar ^ prevOnMoonCar) |
-                 (onTownCar ^ prevOnTownCar);
+    u8 changed = changedTractor | changedTaunTaun | changedMoonCar | changedTownCar;
     prevOnTractor = onTractor;
     prevOnTaunTaun = onTaunTaun;
     prevOnMoonCar = onMoonCar;

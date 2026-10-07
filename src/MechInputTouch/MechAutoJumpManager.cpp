@@ -250,7 +250,8 @@ void MechAutoJumpManager::Process() {
         streak->elapsed += FRAMETIME;
         AIPATHNODE *start_node = &streak->path->nodes[streak->path_connection->node_indices[streak->direction]];
         AIPATHNODE *end_node = &streak->path->nodes[streak->path_connection->node_indices[streak->direction == 0]];
-        f32 distance = NuVecXZDist(&end_node->position, &start_node->position, NULL);
+        NUVEC cross;
+        f32 distance = NuVecXZDist(&end_node->position, &start_node->position, &cross);
         if (distance < testStreakMinDist) {
             distance = testStreakMinDist;
         }
@@ -259,14 +260,14 @@ void MechAutoJumpManager::Process() {
             NuLinkedListRemove(&streaks, reinterpret_cast<NULISTLNK *>(streak));
             delete streak;
         } else {
-            f32 t = distance != 0.0f ? progress / distance : 0.0f;
+            f32 t = distance != 0.0f && progress != 0.0f ? progress / distance : 0.0f;
             NUVEC centre;
             centre.x = start_node->position.x + (end_node->position.x - start_node->position.x) * t;
             centre.y = start_node->position.y + (end_node->position.y - start_node->position.y) * t;
             centre.z = start_node->position.z + (end_node->position.z - start_node->position.z) * t;
             centre.y += NuTrigTable[(static_cast<i32>(t * 32768.0f) >> 1) & 0x7fff];
             i32 facing = NuAtan2D(end_node->position.x - centre.x, end_node->position.z - centre.z);
-            NUVEC cross = {testStreakCrossSize, 0.0f, 0.0f};
+            cross = {testStreakCrossSize, 0.0f, 0.0f};
             NuVecRotateZ(&cross, &cross, static_cast<u16>(LevelTimer.time_elapsed * testStreakRotateSpeed));
             NuVecRotateY(&cross, &cross, static_cast<u16>(facing));
             NuVecAdd(&streak->start, &centre, &cross);

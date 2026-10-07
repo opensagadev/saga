@@ -754,8 +754,8 @@ i32 Text_GetMaxOverallStrings() {
     return Text_MaxStrings_Overall;
 }
 void Text_LocaliseDecimalPoint(char *text) {
-    if ((Text_Language >= 2 && Text_Language <= 5) || Text_Language == 6 || Text_Language == 7 || Text_Language == 8 ||
-        Text_Language == 12 || Text_Language == 16) {
+    if ((Text_Language >= 2 && Text_Language <= 5) || Text_Language == 8 || Text_Language == 6 || Text_Language == 16 ||
+        Text_Language == 7 || Text_Language == 12) {
         while (*text != '\0') {
             if (*text == '.') {
                 *text = ',';
