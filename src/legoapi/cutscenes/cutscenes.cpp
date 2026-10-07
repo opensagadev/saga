@@ -960,8 +960,7 @@ static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTS
         dwa_animation_a = static_cast<nuanimdata2_s *>(model->model_data_c[animation_a_index - 1]);
     }
 
-    // The original draw callback uses a 32-byte aligned stack frame.
-    NUMTX joint_matrices[256] __attribute__((aligned(32)));
+    NUMTX joint_matrices[256];
     void **dwa = NULL;
     if (!blending) {
         if (animation_a == NULL) {
