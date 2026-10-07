@@ -23,27 +23,28 @@ void GetSurfaceInfo(GameObject_s *object, i32 update_surface, f32 shadow_height)
 void PlayJumpSfx(GameObject_s *object, i32 type);
 void AlertSurroundingCreatures(GameObject_s *object, NUVEC *position);
 
-static inline void Teleport_GetSegment(GameObject_s *object, TELEPORT_s *teleport, NUVEC **start, NUVEC **end) {
-    NUVEC *points = teleport->path->pts;
+static inline void Teleport_GetSegment(GameObject_s *object, TELEPORT_s *teleport, i32 *start, i32 *end) {
     const bool forwards = (object->context_variant_flags & 4) != 0;
-
     if ((teleport->flags & 4) != 0) {
-        *start = &points[forwards ? 0 : 3];
-        *end = &points[forwards ? 3 : 0];
+        *start = forwards ? 0 : 3;
+        *end = forwards ? 3 : 0;
     } else if (forwards) {
-        *start = &points[object->field_0x7a4 == 0 ? 0 : 2];
-        *end = &points[object->field_0x7a4 == 0 ? 1 : 3];
+        *start = object->field_0x7a4 == 0 ? 0 : 2;
+        *end = object->field_0x7a4 == 0 ? 1 : 3;
     } else {
-        *start = &points[object->field_0x7a4 == 0 ? 3 : 1];
-        *end = &points[object->field_0x7a4 == 0 ? 2 : 0];
+        *start = object->field_0x7a4 == 0 ? 3 : 1;
+        *end = object->field_0x7a4 == 0 ? 2 : 0;
     }
 }
 
-static inline f32 Teleport_GetSegmentDuration(GameObject_s *object, TELEPORT_s *teleport, NUVEC *start, NUVEC *end) {
+static inline f32 Teleport_GetSegmentDuration(GameObject_s *object, TELEPORT_s *teleport, i32 start, i32 end) {
     if (object->apiobj.character_model->model_data_b[object->context_animation] != NULL) {
         const f32 animation_speed = AnimSpeed(object->apiobj.character_model, object->context_animation);
-        if (animation_speed != 0.0f)
-            return NuVecXZDist(start, end, NULL) / NuFabs(animation_speed);
+        teleport = static_cast<TELEPORT_s *>(object->field_0x788);
+        if (animation_speed != 0.0f) {
+            NUVEC *points = teleport->path->pts;
+            return NuVecXZDist(&points[start], &points[end], NULL) / NuFabs(animation_speed);
+        }
     }
     return (teleport->flags & 4) != 0 ? 3.0f : 1.0f;
 }
@@ -188,12 +189,14 @@ void Teleport_MoveCode(GameObject_s *object, i32 start_immediately) {
         object->field_0x7a3 = 0;
         object->field_0x7a4 = 0;
 
-        NUVEC *segment_start;
-        NUVEC *segment_end;
-        Teleport_GetSegment(object, teleport, &segment_start, &segment_end);
-        object->airborne_action_duration = Teleport_GetSegmentDuration(object, teleport, segment_start, segment_end);
+        i32 start_index;
+        i32 end_index;
+        teleport = static_cast<TELEPORT_s *>(object->field_0x788);
+        Teleport_GetSegment(object, teleport, &start_index, &end_index);
+        object->airborne_action_duration = Teleport_GetSegmentDuration(object, teleport, start_index, end_index);
         object->context_animation_timer = object->airborne_action_duration;
-        Teleport_SetFacing(object, segment_start, segment_end, false);
+        teleport = static_cast<TELEPORT_s *>(object->field_0x788);
+        Teleport_SetFacing(object, &teleport->path->pts[start_index], &teleport->path->pts[end_index], false);
         object->context_x_rotation = 0;
         object->apiobj.velocity = v000;
         return;
@@ -234,13 +237,14 @@ void Teleport_MoveCode(GameObject_s *object, i32 start_immediately) {
         bool has_surface = false;
         if (object->context_animation_timer <= 0.0f) {
             object->field_0x7a3 = 0;
-            NUVEC *segment_start;
-            NUVEC *segment_end;
-            Teleport_GetSegment(object, teleport, &segment_start, &segment_end);
-            object->airborne_action_duration =
-                Teleport_GetSegmentDuration(object, teleport, segment_start, segment_end);
+            i32 start_index;
+            i32 end_index;
+            teleport = static_cast<TELEPORT_s *>(object->field_0x788);
+            Teleport_GetSegment(object, teleport, &start_index, &end_index);
+            object->airborne_action_duration = Teleport_GetSegmentDuration(object, teleport, start_index, end_index);
             object->context_animation_timer = object->airborne_action_duration;
-            Teleport_SetFacing(object, segment_start, segment_end, true);
+            teleport = static_cast<TELEPORT_s *>(object->field_0x788);
+            Teleport_SetFacing(object, &teleport->path->pts[start_index], &teleport->path->pts[end_index], true);
 
             shadow_height = GameShadow(NULL, &object->apiobj.position, 5.0f, -1);
             object->apiobj.field_0x218 = shadow_height;
@@ -248,12 +252,13 @@ void Teleport_MoveCode(GameObject_s *object, i32 start_immediately) {
             GetSurfaceInfo(object, has_surface, shadow_height);
             progress = 1.0f;
         }
+        teleport = static_cast<TELEPORT_s *>(object->field_0x788);
         NUVEC *points = teleport->path->pts;
         NUVEC *start = &points[(object->context_variant_flags & 4) != 0 ? 1 : 2];
         NUVEC *end = &points[(object->context_variant_flags & 4) != 0 ? 2 : 1];
-        object->apiobj.position.x = start->x + (end->x - start->x) * progress;
-        object->apiobj.position.y = start->y + (end->y - start->y) * progress;
-        object->apiobj.position.z = start->z + (end->z - start->z) * progress;
+        object->apiobj.position.x = (end->x - start->x) * progress + start->x;
+        object->apiobj.position.y = (end->y - start->y) * progress + start->y;
+        object->apiobj.position.z = (end->z - start->z) * progress + start->z;
         object->apiobj.velocity = v000;
         if (has_surface)
             object->apiobj.position.y = shadow_height - object->character_bottom * object->apiobj.field_0xa8;
@@ -276,13 +281,16 @@ void Teleport_MoveCode(GameObject_s *object, i32 start_immediately) {
     }
 
     const f32 progress = 1.0f - object->context_animation_timer / object->airborne_action_duration;
-    NUVEC *segment_start;
-    NUVEC *segment_end;
-    Teleport_GetSegment(object, teleport, &segment_start, &segment_end);
+    i32 start_index;
+    i32 end_index;
+    teleport = static_cast<TELEPORT_s *>(object->field_0x788);
+    Teleport_GetSegment(object, teleport, &start_index, &end_index);
+    NUVEC *segment_start = &teleport->path->pts[start_index];
+    NUVEC *segment_end = &teleport->path->pts[end_index];
     NUVEC target;
-    target.x = segment_start->x + (segment_end->x - segment_start->x) * progress;
-    target.y = segment_start->y + (segment_end->y - segment_start->y) * progress;
-    target.z = segment_start->z + (segment_end->z - segment_start->z) * progress;
+    target.x = (segment_end->x - segment_start->x) * progress + segment_start->x;
+    target.y = (segment_end->y - segment_start->y) * progress + segment_start->y;
+    target.z = (segment_end->z - segment_start->z) * progress + segment_start->z;
     SeekVec(&object->apiobj.position, &object->apiobj.position, &target, 10.0f);
     object->apiobj.velocity = v000;
 
@@ -300,6 +308,7 @@ void Teleport_MoveCode(GameObject_s *object, i32 start_immediately) {
 
     if (!completed)
         return;
+    teleport = static_cast<TELEPORT_s *>(object->field_0x788);
     if ((teleport->flags & 4) != 0 || object->field_0x7a4 != 0) {
         object->apiobj.velocity.y = -0.1f;
         object->apiobj.field_0x27d = 0;

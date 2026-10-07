@@ -2021,12 +2021,12 @@ GIZMOBLOWUP_s *GizmoBlowUp_Hit(GameObject_s *object, NUVEC *points, i32 point_co
         }
         const NUVEC &center = blowup->mid_position;
         const f32 extent = blowup->target_scale;
-        if (!(center.x - extent <= maximum->x && minimum->x <= center.x + extent && center.z - extent <= maximum->z &&
-              minimum->z <= center.z + extent && center.y - extent <= maximum->y && minimum->y <= center.y + extent)) {
+        if (center.x - extent > maximum->x || minimum->x > center.x + extent || center.z - extent > maximum->z ||
+            minimum->z > center.z + extent || center.y - extent > maximum->y || minimum->y > center.y + extent) {
             continue;
         }
         for (i32 point = point_count - 1; point >= 0; --point) {
-            if (SphereSphereOverlap(&blowup->mid_position, extent, &points[point], radius)) {
+            if (SphereSphereOverlap(&blowup->mid_position, blowup->target_scale, &points[point], radius)) {
                 NUVEC *origin = object != NULL ? &object->apiobj.collision_position : &points[point];
                 const f32 distance = NuVecDistSqr(origin, &blowup->mid_position, NULL);
                 if (distance < nearest_distance) {

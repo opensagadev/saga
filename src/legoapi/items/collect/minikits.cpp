@@ -222,125 +222,123 @@ extern i16 tMINIKIT;
 
 void MiniKit_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current) {
     char text[60];
-    if (current == 0) {
+    if (current != 0) {
+        f32 title_alpha = 1.0f;
+        switch (stage->field_0x14) {
+            case 0:
+                title_alpha = 0.0f;
+                break;
+            case 1: {
+                title_alpha = stage->field_0x18;
+                i32 angle = 0x6000;
+                if (title_alpha < 1.0f)
+                    angle = (static_cast<i32>(title_alpha * 32768.0f + 16384.0f) >> 1) & 0x7fff;
+                const f32 blend = 1.0f - (NuTrigTable[angle] + 1.0f) * 0.5f;
+                if (title_alpha <= stage->field_0x1c)
+                    DrawStatusMiniKit(0.0f, blend * -1.4f + 1.4f, 1.1f, 0.333f, 0.0f, currentminikit, packet, 0.0f);
+                else
+                    DrawStatusMiniKit(0.0f, 0.0f, 1.1f, 0.333f, 0.0f, currentminikit, packet, 0.0f);
+                const i32 count = packet->new_minikits < 1 ? Game.area_save[packet->area->index].field_0x5[0]
+                                  : currentminikit < 0     ? 0
+                                                           : currentminikit;
+                DrawMiniKitCount(blend, 1.0f, count, packet->minikit_max);
+                break;
+            }
+            case 2: {
+                const f32 duration = stage->field_0x1c - 0.25f;
+                f32 size;
+                if (stage->field_0x18 < duration) {
+                    i32 angle = 0;
+                    if (duration != 0.0f && stage->field_0x18 != 0.0f)
+                        angle =
+                            (static_cast<i32>((stage->field_0x18 / duration) * 16384.0f + 49152.0f + 16384.0f) >> 1) &
+                            0x7fff;
+                    size = NuTrigTable[angle] * 0.333f;
+                } else
+                    size = 0.333f;
+                DrawStatusMiniKit(0.0f, 0.0f, 1.1f, 0.333f, size, currentminikit + 1, packet, 0.0f);
+                const i32 count = packet->new_minikits < 1 ? Game.area_save[packet->area->index].field_0x5[0]
+                                  : currentminikit < 0     ? 0
+                                                           : currentminikit;
+                DrawMiniKitCount(1.0f, 1.0f, count, packet->minikit_max);
+                break;
+            }
+            case 3: {
+                f32 blend = 0.0f;
+                if (stage->field_0x1c - jibberlen < stage->field_0x18)
+                    blend = (stage->field_0x18 - (stage->field_0x1c - jibberlen)) / jibberlen;
+                DrawStatusMiniKit(0.0f, 0.0f, 1.1f, 0.333f, 0.333f, currentminikit + 1, packet, blend);
+                i32 count =
+                    packet->new_minikits < 1 ? Game.area_save[packet->area->index].field_0x5[0] : currentminikit;
+                if (blend >= 0.5f)
+                    ++count;
+                if (count < 0)
+                    count = 0;
+                const f32 size =
+                    (1.0f - fabsf(NuTrigTable[(static_cast<i32>(blend * 32768.0f + 16384.0f) >> 1) & 0x7fff])) * 0.25f +
+                    1.0f;
+                DrawMiniKitCount(1.0f, size, count, packet->minikit_max);
+                break;
+            }
+            case 4: {
+                title_alpha = 1.0f - stage->field_0x18;
+                f32 progress = 0.0f;
+                if (stage->field_0x1c != 0.0f && stage->field_0x18 != 0.0f)
+                    progress = stage->field_0x18 / stage->field_0x1c;
+                const f32 blend =
+                    1.0f -
+                    (NuTrigTable[(static_cast<i32>(progress * 32768.0f + 16384.0f) >> 1) & 0x7fff] + 1.0f) * 0.5f;
+                DrawStatusMiniKit(blend * -0.6f + 0.0f, blend * -0.5f + 0.0f, 1.1f, blend * -0.183f + 0.333f, 1.0f,
+                                  Game.area_save[packet->area->index].field_0x5[0], packet, 0.0f);
+                const f32 off = stage->field_0x18 < 1.0f ? 1.0f - stage->field_0x18 : 0.0f;
+                DrawMiniKitCount(
+                    1.0f - (NuTrigTable[(static_cast<i32>(off * 32768.0f + 16384.0f) >> 1) & 0x7fff] + 1.0f) * 0.5f,
+                    1.0f, Game.area_save[packet->area->index].field_0x5[0], packet->minikit_max);
+                break;
+            }
+            case 6: {
+                title_alpha = 1.0f - stage->field_0x18;
+                i32 angle = 0x2000;
+                if (stage->field_0x18 < 1.0f)
+                    angle = (static_cast<i32>(title_alpha * 32768.0f + 16384.0f) >> 1) & 0x7fff;
+                if (stage->field_0x18 < stage->field_0x1c) {
+                    DrawMiniKitCount(1.0f - (NuTrigTable[angle] + 1.0f) * 0.5f, 1.0f,
+                                     Game.area_save[packet->area->index].field_0x5[0], packet->minikit_max);
+                    DrawStatusMiniKit(0.0f, 0.0f, 1.1f, 0.333f, 1.0f, Game.area_save[packet->area->index].field_0x5[0],
+                                      packet, 0.0f);
+                }
+                break;
+            }
+            default:
+                break;
+        }
+        title_alpha = title_alpha < 0.0f ? 0.0f : title_alpha > 1.0f ? 1.0f : title_alpha;
+        Text3DEx(TTab[tMINIKIT], 0.0f, STATUS_TITLE_Y, 1.0f, 0.5f, 0.5f, 0.5f, 0, 255, 255, 255,
+                 static_cast<u8>(static_cast<i32>(title_alpha * 128.0f)));
+    } else {
         if (stage->field_0x12 == 0)
             return;
         const f32 alpha = getFinishedStatusAlpha(packet);
+        const i32 opacity = static_cast<i32>(alpha * 128.0f);
         i32 angle = 0x2000;
-        if (GameTimer.time_elapsed_mod_seconds <= 0.25f) {
+        if (!(GameTimer.time_elapsed_mod_seconds > 0.25f)) {
             angle = (static_cast<i32>(GameTimer.time_elapsed_mod_seconds * 32768.0f + 16384.0f) >> 1) & 0x7fff;
         }
         if (Game.area_save[packet->area->index].field_0x5[0] == 0) {
             const f32 size = ((1.0f - fabsf(NuTrigTable[angle])) + 1.0f) * 1.2f;
-            Text3DEx("?", -0.6f, -0.6f, 1.1f, size, size, size, 0, 255, 255, 255,
-                     static_cast<u8>(static_cast<i32>(alpha * 128.0f)));
+            Text3DEx("?", -0.6f, -0.6f, 1.1f, size, size, size, 0, 255, 255, 255, static_cast<u8>(opacity));
         } else if (alpha > 0.0f) {
             DrawStatusMiniKit(-0.6f, -0.5f, 1.1f,
                               NuTrigTable[(static_cast<i32>(alpha * 16384.0f) >> 1) & 0x7fff] * 0.15f, 1.0f,
                               Game.area_save[packet->area->index].field_0x5[0], packet, 0.0f);
         }
         if (packet->minikit_max == Game.area_save[packet->area->index].field_0x5[0]) {
-            Text3DEx("$", -0.6f, -0.7f, 1.0f, 0.8f, 0.8f, 0.8f, 0, 255, 0, 127,
-                     static_cast<u8>(static_cast<i32>(alpha * 128.0f)));
+            Text3DEx("$", -0.6f, -0.7f, 1.0f, 0.8f, 0.8f, 0.8f, 0, 255, 0, 127, static_cast<u8>(opacity));
         } else {
             sprintf(text, "%i/%i", Game.area_save[packet->area->index].field_0x5[0], packet->minikit_max);
-            Text3DEx(text, -0.6f, -0.8f, 1.0f, 0.5f, 0.5f, 0.5f, 0, 255, 0, 127,
-                     static_cast<u8>(static_cast<i32>(alpha * 128.0f)));
+            Text3DEx(text, -0.6f, -0.8f, 1.0f, 0.5f, 0.5f, 0.5f, 0, 255, 0, 127, static_cast<u8>(opacity));
         }
-        return;
     }
-    f32 title_alpha;
-    switch (stage->field_0x14) {
-        case 0:
-            title_alpha = 0.0f;
-            break;
-        case 1: {
-            title_alpha = stage->field_0x18;
-            i32 angle = 0x6000;
-            if (title_alpha < 1.0f)
-                angle = (static_cast<i32>(title_alpha * 32768.0f + 16384.0f) >> 1) & 0x7fff;
-            const f32 blend = 1.0f - (NuTrigTable[angle] + 1.0f) * 0.5f;
-            if (title_alpha <= stage->field_0x1c)
-                DrawStatusMiniKit(0.0f, blend * -1.4f + 1.4f, 1.1f, 0.333f, 0.0f, currentminikit, packet, 0.0f);
-            else
-                DrawStatusMiniKit(0.0f, 0.0f, 1.1f, 0.333f, 0.0f, currentminikit, packet, 0.0f);
-            const i32 count = packet->new_minikits < 1 ? Game.area_save[packet->area->index].field_0x5[0]
-                              : currentminikit < 0     ? 0
-                                                       : currentminikit;
-            DrawMiniKitCount(blend, 1.0f, count, packet->minikit_max);
-            break;
-        }
-        case 2: {
-            const f32 duration = stage->field_0x1c - 0.25f;
-            f32 size;
-            if (stage->field_0x18 < duration) {
-                i32 angle = 0;
-                if (duration != 0.0f && stage->field_0x18 != 0.0f)
-                    angle = (static_cast<i32>((stage->field_0x18 / duration) * 16384.0f + 49152.0f + 16384.0f) >> 1) &
-                            0x7fff;
-                size = NuTrigTable[angle] * 0.333f;
-            } else
-                size = 0.333f;
-            DrawStatusMiniKit(0.0f, 0.0f, 1.1f, 0.333f, size, currentminikit + 1, packet, 0.0f);
-            const i32 count = packet->new_minikits < 1 ? Game.area_save[packet->area->index].field_0x5[0]
-                              : currentminikit < 0     ? 0
-                                                       : currentminikit;
-            DrawMiniKitCount(1.0f, 1.0f, count, packet->minikit_max);
-            title_alpha = 1.0f;
-            break;
-        }
-        case 3: {
-            f32 blend = 0.0f;
-            if (stage->field_0x1c - jibberlen < stage->field_0x18)
-                blend = (stage->field_0x18 - (stage->field_0x1c - jibberlen)) / jibberlen;
-            DrawStatusMiniKit(0.0f, 0.0f, 1.1f, 0.333f, 0.333f, currentminikit + 1, packet, blend);
-            i32 count = packet->new_minikits < 1 ? Game.area_save[packet->area->index].field_0x5[0] : currentminikit;
-            if (blend >= 0.5f)
-                ++count;
-            if (count < 0)
-                count = 0;
-            const f32 size =
-                (1.0f - fabsf(NuTrigTable[(static_cast<i32>(blend * 32768.0f + 16384.0f) >> 1) & 0x7fff])) * 0.25f +
-                1.0f;
-            DrawMiniKitCount(1.0f, size, count, packet->minikit_max);
-            title_alpha = 1.0f;
-            break;
-        }
-        case 4: {
-            title_alpha = 1.0f - stage->field_0x18;
-            f32 progress = 0.0f;
-            if (stage->field_0x1c != 0.0f && stage->field_0x18 != 0.0f)
-                progress = stage->field_0x18 / stage->field_0x1c;
-            const f32 blend =
-                1.0f - (NuTrigTable[(static_cast<i32>(progress * 32768.0f + 16384.0f) >> 1) & 0x7fff] + 1.0f) * 0.5f;
-            DrawStatusMiniKit(blend * -0.6f + 0.0f, blend * -0.5f + 0.0f, 1.1f, blend * -0.183f + 0.333f, 1.0f,
-                              Game.area_save[packet->area->index].field_0x5[0], packet, 0.0f);
-            const f32 off = stage->field_0x18 < 1.0f ? 1.0f - stage->field_0x18 : 0.0f;
-            DrawMiniKitCount(1.0f - (NuTrigTable[(static_cast<i32>(off * 32768.0f + 16384.0f) >> 1) & 0x7fff] + 1.0f) *
-                                        0.5f,
-                             1.0f, Game.area_save[packet->area->index].field_0x5[0], packet->minikit_max);
-            break;
-        }
-        case 6: {
-            title_alpha = 1.0f - stage->field_0x18;
-            i32 angle = 0x2000;
-            if (stage->field_0x18 < 1.0f)
-                angle = (static_cast<i32>(title_alpha * 32768.0f + 16384.0f) >> 1) & 0x7fff;
-            if (stage->field_0x18 < stage->field_0x1c) {
-                DrawMiniKitCount(1.0f - (NuTrigTable[angle] + 1.0f) * 0.5f, 1.0f,
-                                 Game.area_save[packet->area->index].field_0x5[0], packet->minikit_max);
-                DrawStatusMiniKit(0.0f, 0.0f, 1.1f, 0.333f, 1.0f, Game.area_save[packet->area->index].field_0x5[0],
-                                  packet, 0.0f);
-            }
-            break;
-        }
-        default:
-            title_alpha = 1.0f;
-            break;
-    }
-    title_alpha = title_alpha < 0.0f ? 0.0f : title_alpha > 1.0f ? 1.0f : title_alpha;
-    Text3DEx(TTab[tMINIKIT], 0.0f, STATUS_TITLE_Y, 1.0f, 0.5f, 0.5f, 0.5f, 0, 255, 255, 255,
-             static_cast<u8>(static_cast<i32>(title_alpha * 128.0f)));
 }
 
 void MiniKit_LSW_Skip(STATUS_STAGE_s *stage, STATUSPACKET_s *packet) {

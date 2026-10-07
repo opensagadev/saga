@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 71.3277,
+    "fuzzy_match_percent": 71.38032,
     "total_code": "4722419",
     "matched_code": "561429",
     "matched_code_percent": 11.888589,
@@ -19364,7 +19364,7 @@
           "address": 4064368,
           "offset": 3174400,
           "size": 3322,
-          "match_percent": 54.48052
+          "match_percent": 68.56883
         },
         {
           "name": "areaEditorSaveData",
@@ -41180,7 +41180,7 @@
           "address": 4099904,
           "offset": 3209936,
           "size": 6313,
-          "match_percent": 38.061134
+          "match_percent": 39.206562
         },
         {
           "name": "AISysProcess",
@@ -41284,7 +41284,7 @@
           "address": 4129424,
           "offset": 3239456,
           "size": 4697,
-          "match_percent": 39.83077
+          "match_percent": 43.720192
         },
         {
           "name": "AISysGetCharacterPathPos",
@@ -54738,7 +54738,7 @@
           "address": 1239520,
           "offset": 349552,
           "size": 3358,
-          "match_percent": 54.533516
+          "match_percent": 62.879616
         },
         {
           "name": "_Z20Teleport_UpdateHintsP6HINT_s",
@@ -55663,7 +55663,7 @@
           "address": 4970640,
           "offset": 4080672,
           "size": 1469,
-          "match_percent": 40.071217
+          "match_percent": 46.421364
         },
         {
           "name": "_Z21GizmoBlowup_HitBlowupP12GameObject_sP13GIZMOBLOWUP_siP6BOLT_sP7nuvec_sPhji",
@@ -61242,7 +61242,7 @@
           "address": 3990756,
           "offset": 3100788,
           "size": 2957,
-          "match_percent": 76.78983
+          "match_percent": 85.01921
         },
         {
           "name": "AnimPacket_MiniToFull",
@@ -62937,7 +62937,7 @@
           "address": 2048304,
           "offset": 1158336,
           "size": 2863,
-          "match_percent": 39.006943
+          "match_percent": 52.09375
         },
         {
           "name": "_Z19ResetMinikitCounterv",
@@ -68844,7 +68844,7 @@
           "address": 5109952,
           "offset": 4219984,
           "size": 2516,
-          "match_percent": 39.103638
+          "match_percent": 55.454544
         },
         {
           "name": "_Z12Credits_InitP11WORLDINFO_s",
@@ -79813,7 +79813,7 @@
           "address": 3456608,
           "offset": 2566640,
           "size": 2413,
-          "match_percent": 74.30035
+          "match_percent": 74.482635
         },
         {
           "name": "DebrisSetup",
@@ -79837,7 +79837,7 @@
           "address": 3466416,
           "offset": 2576448,
           "size": 1226,
-          "match_percent": 52.934784
+          "match_percent": 70.228264
         },
         {
           "name": "DebrisStartOffsetEx",
@@ -87477,7 +87477,7 @@
           "address": 1831696,
           "offset": 941728,
           "size": 3917,
-          "match_percent": 42.03484
+          "match_percent": 44.536774
         },
         {
           "name": "_Z9StartPermv",
@@ -112357,7 +112357,7 @@
           "address": 3205168,
           "offset": 2315200,
           "size": 621,
-          "match_percent": 66.91279
+          "match_percent": 74.18604
         },
         {
           "name": "_Z17PS2VolumeToScalari",

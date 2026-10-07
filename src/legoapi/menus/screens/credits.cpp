@@ -106,13 +106,21 @@ void Credits_Load(WORLDINFO_s *, VARIPTR *buffer, VARIPTR *buffer_end) {
                     }
                 }
             } else {
-                CREDIT_TYPE_s *type = NULL;
-                for (i32 i = 0; i < 5; ++i) {
-                    if (NuStrICmp(CreditType[i].name, parser->word_buf) == 0) {
-                        type = &CreditType[i];
-                        break;
-                    }
-                }
+                const char *style_word = parser->word_buf;
+                i32 style_index;
+                if (NuStrICmp(CreditType[0].name, style_word) == 0)
+                    style_index = 0;
+                else if (NuStrICmp(CreditType[1].name, style_word) == 0)
+                    style_index = 1;
+                else if (NuStrICmp(CreditType[2].name, style_word) == 0)
+                    style_index = 2;
+                else if (NuStrICmp(CreditType[3].name, style_word) == 0)
+                    style_index = 3;
+                else if (NuStrICmp(CreditType[4].name, style_word) == 0)
+                    style_index = 4;
+                else
+                    style_index = -1;
+                CREDIT_TYPE_s *type = style_index == -1 ? NULL : &CreditType[style_index];
                 if (type != NULL) {
                     char *text = NuFParGetWord(parser) ? parser->word_buf : NULL;
                     if (text != NULL && NuStrICmp(text, "colour") == 0) {
@@ -129,11 +137,19 @@ void Credits_Load(WORLDINFO_s *, VARIPTR *buffer, VARIPTR *buffer_end) {
                         credit->type = type->type;
                         switch (type->type) {
                             case 0:
+                                InitCredit(credit, text, 0.0f, y, type->scale, type->colour[0], type->colour[1],
+                                           type->colour[2], type->colour[3], 0, buffer, buffer_end);
+                                y += CreditType[0].scale / CreditType[1].scale * 0.2f;
+                                break;
                             case 1:
+                                InitCredit(credit, text, 0.0f, y, type->scale, type->colour[0], type->colour[1],
+                                           type->colour[2], type->colour[3], 0, buffer, buffer_end);
+                                y += CreditType[1].scale / CreditType[1].scale * 0.2f;
+                                break;
                             case 4:
                                 InitCredit(credit, text, 0.0f, y, type->scale, type->colour[0], type->colour[1],
                                            type->colour[2], type->colour[3], 0, buffer, buffer_end);
-                                y += CreditType[type->type].scale / CreditType[1].scale * 0.2f;
+                                y += CreditType[4].scale / CreditType[1].scale * 0.2f;
                                 break;
                             case 2:
                                 InitCredit(credit, text, -0.015f, y, type->scale, type->colour[0], type->colour[1],

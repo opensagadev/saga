@@ -273,14 +273,14 @@ void NuSound3SampleLoadThread(void *arg) {
                 nusound_filename_info_s &info = g_NuSoundSamples.data[i];
                 if (!(info.index <= 0xfff)) {
                     u16 request = g_NuSoundLoadBits[i >> 4] & static_cast<u16>(1 << (i & 0xf));
-                    NuSoundSample *sample = reinterpret_cast<NuSoundSample *>(info.sample);
-                    NuSoundSample::LoadState load_state = sample->GetLoadState();
-                    sample->GetLastErrorState();
+                    NuSoundSample::LoadState load_state =
+                        reinterpret_cast<NuSoundSample *>(info.sample)->GetLoadState();
+                    reinterpret_cast<NuSoundSample *>(info.sample)->GetLastErrorState();
 
-                    if (request == 0 && load_state != NuSoundSample::LoadState::NOT_LOADED && sample != NULL &&
-                        sample->field_0x18 == 0) {
-                        sample->Release();
-                        sample->Unload();
+                    if (request == 0 && load_state != NuSoundSample::LoadState::NOT_LOADED && info.sample != NULL &&
+                        reinterpret_cast<NuSoundSample *>(info.sample)->field_0x18 == 0) {
+                        reinterpret_cast<NuSoundSample *>(info.sample)->Release();
+                        reinterpret_cast<NuSoundSample *>(info.sample)->Unload();
                     }
                 }
             }
@@ -289,14 +289,15 @@ void NuSound3SampleLoadThread(void *arg) {
                 nusound_filename_info_s &info = g_NuSoundSamples.data[i];
                 if (!(info.index <= 0xfff)) {
                     u16 request = g_NuSoundLoadBits[i >> 4] & static_cast<u16>(1 << (i & 0xf));
-                    NuSoundSample *sample = reinterpret_cast<NuSoundSample *>(info.sample);
-                    NuSoundSample::LoadState load_state = sample->GetLoadState();
-                    NuSoundSample::ErrorState error = sample->GetLastErrorState();
+                    NuSoundSample::LoadState load_state =
+                        reinterpret_cast<NuSoundSample *>(info.sample)->GetLoadState();
+                    NuSoundSample::ErrorState error =
+                        reinterpret_cast<NuSoundSample *>(info.sample)->GetLastErrorState();
 
                     if (request != 0 && error != NuSoundSample::ErrorState::FILE_NOT_FOUND &&
-                        load_state == NuSoundSample::LoadState::NOT_LOADED && sample != NULL) {
-                        sample->Reference();
-                        sample->Load(NULL, 0, NULL);
+                        load_state == NuSoundSample::LoadState::NOT_LOADED && info.sample != NULL) {
+                        reinterpret_cast<NuSoundSample *>(info.sample)->Reference();
+                        reinterpret_cast<NuSoundSample *>(info.sample)->Load(NULL, 0, NULL);
                     }
                 }
             }

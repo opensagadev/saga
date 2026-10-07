@@ -1540,12 +1540,12 @@ extern "C" {
             if (packet->previous_animation != -1 && packet->requested_animation != -1 &&
                 model->model_data_b[packet->previous_animation] != NULL &&
                 model->model_data_b[packet->requested_animation] != NULL) {
-                CHARACTERANIM_s *source_info =
-                    static_cast<CHARACTERANIM_s *>(model->model_data_a[packet->previous_animation]);
-                CHARACTERANIM_s *target_info =
-                    static_cast<CHARACTERANIM_s *>(model->model_data_a[packet->requested_animation]);
-                if (source_info != NULL && target_info != NULL && source_info->blend_out_time > blend_step &&
-                    target_info->blend_in_time > blend_step) {
+                if (static_cast<CHARACTERANIM_s *>(model->model_data_a[packet->previous_animation]) != NULL &&
+                    static_cast<CHARACTERANIM_s *>(model->model_data_a[packet->requested_animation]) != NULL &&
+                    static_cast<CHARACTERANIM_s *>(model->model_data_a[packet->previous_animation])->blend_out_time >
+                        blend_step &&
+                    static_cast<CHARACTERANIM_s *>(model->model_data_a[packet->requested_animation])->blend_in_time >
+                        blend_step) {
                     packet->blending = 1;
                     packet->blend_animation_a = packet->previous_animation;
                     packet->blend_source_reversed = static_cast<u8>(interrupted_reversed);
@@ -1555,19 +1555,27 @@ extern "C" {
                     }
                     packet->blend_source_reversed = packet->current_reversed;
 
-                    const bool synchronised = (source_info->flags & CHARACTER_ANIMATION_FLAG_SYNCHRONISED) != 0 &&
-                                              (target_info->flags & CHARACTER_ANIMATION_FLAG_SYNCHRONISED) != 0 &&
-                                              source_info->playback_rate == target_info->playback_rate &&
-                                              NuAnimEndFrame(model->model_data_b[packet->blend_animation_a]) ==
-                                                  NuAnimEndFrame(model->model_data_b[packet->blend_animation_b]);
-                    if (synchronised) {
+                    // End-frame callbacks can change the animation entries and packet indices.
+                    if ((static_cast<CHARACTERANIM_s *>(model->model_data_a[packet->blend_animation_a])->flags &
+                         CHARACTER_ANIMATION_FLAG_SYNCHRONISED) != 0 &&
+                        (static_cast<CHARACTERANIM_s *>(model->model_data_a[packet->blend_animation_b])->flags &
+                         CHARACTER_ANIMATION_FLAG_SYNCHRONISED) != 0 &&
+                        static_cast<CHARACTERANIM_s *>(model->model_data_a[packet->blend_animation_a])->playback_rate ==
+                            static_cast<CHARACTERANIM_s *>(model->model_data_a[packet->blend_animation_b])
+                                ->playback_rate &&
+                        NuAnimEndFrame(model->model_data_b[packet->blend_animation_a]) ==
+                            NuAnimEndFrame(model->model_data_b[packet->blend_animation_b])) {
                         packet->blend_target_time = packet->blend_source_time;
                         packet->blend_target_reversed =
-                            backwards != 0 && (target_info->flags & CHARACTER_ANIMATION_FLAG_REVERSE_WITH_MOVEMENT) != 0
+                            backwards != 0 && model->model_data_b[packet->blend_animation_b] != NULL &&
+                                    (static_cast<CHARACTERANIM_s *>(model->model_data_a[packet->blend_animation_b])
+                                         ->flags &
+                                     CHARACTER_ANIMATION_FLAG_REVERSE_WITH_MOVEMENT) != 0
                                 ? 1
                                 : 0;
-                    } else if (backwards != 0 &&
-                               (target_info->flags & CHARACTER_ANIMATION_FLAG_REVERSE_WITH_MOVEMENT) != 0) {
+                    } else if (backwards != 0 && model->model_data_b[packet->blend_animation_b] != NULL &&
+                               (static_cast<CHARACTERANIM_s *>(model->model_data_a[packet->blend_animation_b])->flags &
+                                CHARACTER_ANIMATION_FLAG_REVERSE_WITH_MOVEMENT) != 0) {
                         packet->blend_target_reversed = 1;
                         packet->blend_target_time = NuAnimEndFrame(model->model_data_b[packet->blend_animation_b]);
                     } else {
@@ -1575,9 +1583,13 @@ extern "C" {
                         packet->blend_target_time = 1.0f;
                     }
                     packet->blend_elapsed = 0.0f;
-                    packet->blend_duration = target_info->blend_in_time;
-                    if (packet->blend_duration > source_info->blend_out_time) {
-                        packet->blend_duration = source_info->blend_out_time;
+                    packet->blend_duration =
+                        static_cast<CHARACTERANIM_s *>(model->model_data_a[packet->blend_animation_b])->blend_in_time;
+                    if (static_cast<CHARACTERANIM_s *>(model->model_data_a[packet->blend_animation_a])->blend_out_time <
+                        packet->blend_duration) {
+                        packet->blend_duration =
+                            static_cast<CHARACTERANIM_s *>(model->model_data_a[packet->blend_animation_a])
+                                ->blend_out_time;
                     }
                     packet->flags |= ANIMPACKET_FLAG_ANIMATION_CHANGED;
                     goto update_timers;

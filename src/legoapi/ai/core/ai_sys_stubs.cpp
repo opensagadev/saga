@@ -713,8 +713,8 @@ static AIPATHSYS *AISysLoadPaths(AISYS *system, i32 version, NUGSCN *scene) {
     path_system->paths = static_cast<AIPATH **>(AISysLoadAlloc(system, path_system->path_count * sizeof(AIPATH *)));
 
     for (i32 path_index = 0; path_index < path_system->path_count; ++path_index) {
-        AIPATH *path = static_cast<AIPATH *>(AISysLoadAlloc(system, sizeof(AIPATH)));
-        path_system->paths[path_index] = path;
+        path_system->paths[path_index] = static_cast<AIPATH *>(AISysLoadAlloc(system, sizeof(AIPATH)));
+        AIPATH *path = path_system->paths[path_index];
         EdFileRead(path->name, sizeof(path->name));
         path->node_count = static_cast<u8>(EdFileReadChar());
         path->flags = static_cast<u8>(EdFileReadChar());
@@ -935,7 +935,7 @@ static u32 AISysCharacterTestPathCnx(AISYS *system, APIOBJECT *object, AIPACKET 
             i32 node_index = first - path->nodes;
             path->inside_node_bits[node_index / 8] |= 1 << (node_index % 8);
             packet->inside_path_node = node_index;
-            if (second_radius * second_radius >= NuVecXZDistSqr(&object->position, &second->position, &radial)) {
+            if (NuVecXZDistSqr(&object->position, &second->position, &radial) <= second_radius * second_radius) {
                 node_index = second - path->nodes;
                 path->inside_node_bits[node_index / 8] |= 1 << (node_index % 8);
                 packet->inside_path_node = node_index;
@@ -962,7 +962,7 @@ static u32 AISysCharacterTestPathCnx(AISYS *system, APIOBJECT *object, AIPACKET 
         return 0;
     }
 
-    const i32 angle = AISysPathIntersectionAngle((second_radius - first_radius) / connection->horizontal_distance);
+    const i32 angle = NuASin((second_radius - first_radius) / connection->horizontal_distance);
     NUVEC wall = local;
     if (wall.x < 0.0f) {
         wall.x = -wall.x;
@@ -1076,13 +1076,13 @@ static u32 AISysCharacterTestPathCnx(AISYS *system, APIOBJECT *object, AIPACKET 
             packet->last_path_position = object->position;
             packet->inside_path_node = -1;
             if (first_radius > local.z) {
-                if (first_radius * first_radius >= NuVecXZDistSqr(&object->position, &first->position, &radial)) {
+                if (NuVecXZDistSqr(&object->position, &first->position, &radial) <= first_radius * first_radius) {
                     u8 node_index = connection->node_indices[0];
                     path->inside_node_bits[node_index >> 3] |= 1 << (node_index & 7);
                     packet->inside_path_node = connection->node_indices[0];
                 }
             } else if (local.z > length - second_radius) {
-                if (second_radius * second_radius >= NuVecXZDistSqr(&object->position, &second->position, &radial)) {
+                if (NuVecXZDistSqr(&object->position, &second->position, &radial) <= second_radius * second_radius) {
                     u8 node_index = connection->node_indices[1];
                     path->inside_node_bits[node_index >> 3] |= 1 << (node_index & 7);
                     packet->inside_path_node = connection->node_indices[1];
