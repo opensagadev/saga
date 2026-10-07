@@ -976,8 +976,6 @@ extern "C" {
             return 0;
         NuSpecialHandleLayout *handle = reinterpret_cast<NuSpecialHandleLayout *>(special_handle);
         NuSpecialBoundsDisplayLayout *special = static_cast<NuSpecialBoundsDisplayLayout *>(handle->display_special);
-        if (handle->scene == NULL || special == NULL)
-            return 0;
         NUMTX wind_matrix;
         if (special->wind_scale != 0) {
             WindShear(&wind_matrix, mtx, special->wind_scale, special->wind_speed);
