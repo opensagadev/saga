@@ -145,8 +145,11 @@ void NuDynamicLight::computeClippingPlanes(const VuMtx &matrix, bool zero_near, 
                                {-1, -1, 1, 1}, {-1, 1, 1, 1}, {1, 1, 1, 1}, {1, -1, 1, 1}};
     const VuVec *source = zero_near ? positive : symmetric;
     VuVec corners[8];
-    for (i32 i = 0; i < 8; ++i)
-        corners[i] = LightClipTransform(source[i], matrix.matrix);
+    VuVec *destination = corners;
+    const VuVec *end = source + 8;
+    do {
+        *destination++ = LightClipTransform(*source++, matrix.matrix);
+    } while (source != end);
     NUVEC near_up = LightClipEdge(corners[1], corners[0]);
     NUVEC depth_left = LightClipEdge(corners[4], corners[0]);
     NUVEC near_right = LightClipEdge(corners[3], corners[0]);

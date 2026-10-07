@@ -112,9 +112,11 @@ bool OccluderSet::IsOccludedOBB(nuvec_s const *minimum, nuvec_s const *maximum, 
         for (i32 edge = 0; edge < 4 && inside; ++edge) {
             i32 start = winding > 0.0f ? edge : 3 - edge;
             i32 end = winding > 0.0f ? (edge + 1) & 3 : (6 - edge) & 3;
-            NUVEC4 normal = {v[end].y - v[start].y, -(v[end].x - v[start].x), 0.0f, 0.0f};
-            NuVecNorm(reinterpret_cast<NUVEC *>(&normal), reinterpret_cast<NUVEC *>(&normal));
+            NUVEC4 normal;
+            normal.y = -(v[end].x - v[start].x);
+            normal.x = v[end].y - v[start].y;
             normal.z = normal.w = 0.0f;
+            NuVecNorm(reinterpret_cast<NUVEC *>(&normal), reinterpret_cast<NUVEC *>(&normal));
             for (u32 corner = 0; corner < 8; ++corner) {
                 float distance =
                     (corners[corner].x - v[start].x) * normal.x + (corners[corner].y - v[start].y) * normal.y + 0.0f;

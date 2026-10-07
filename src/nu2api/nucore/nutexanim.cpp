@@ -527,7 +527,9 @@ extern "C" void NuTexAnimEnvProc(nutexanimenv_s *env) {
                 return;
             }
             case 1: {
-                env->texture_index = NuRand(&texanim_rand) % instruction[1];
+                i32 random = NuRand(&texanim_rand);
+                instruction = program->instructions + env->instruction_index;
+                env->texture_index = random % instruction[1];
                 next_instruction = env->instruction_index + 2;
                 u16 *texture_id = &env->texture_ids[env->texture_index];
                 material->tex_id = *texture_id;
@@ -561,6 +563,7 @@ extern "C" void NuTexAnimEnvProc(nutexanimenv_s *env) {
             }
             case 3: {
                 i32 texture = NuRand(&texanim_rand) % (instruction[2] - instruction[1] + 1);
+                instruction = program->instructions + env->instruction_index;
                 texture += instruction[1] + env->texture_index;
                 if (texture < instruction[3])
                     texture = instruction[3];
@@ -581,8 +584,11 @@ extern "C" void NuTexAnimEnvProc(nutexanimenv_s *env) {
             }
             case 4:
                 env->wait_remaining += instruction[1];
-                if (instruction[2] != 0)
-                    env->wait_remaining += NuRand(&texanim_rand) % instruction[2];
+                if (instruction[2] != 0) {
+                    i32 random = NuRand(&texanim_rand);
+                    instruction = program->instructions + env->instruction_index;
+                    env->wait_remaining += random % instruction[2];
+                }
                 env->instruction_index += 3;
                 if (env->wait_remaining < 0)
                     env->wait_remaining = 0;
@@ -610,8 +616,11 @@ extern "C" void NuTexAnimEnvProc(nutexanimenv_s *env) {
                 continue;
             case 13:
                 env->loop_counts[env->loop_depth] = instruction[1];
-                if (instruction[2] != 0)
-                    env->loop_counts[env->loop_depth] += NuRand(&texanim_rand) % instruction[2];
+                if (instruction[2] != 0) {
+                    i32 random = NuRand(&texanim_rand);
+                    instruction = program->instructions + env->instruction_index;
+                    env->loop_counts[env->loop_depth] += random % instruction[2];
+                }
                 env->instruction_index += 3;
                 env->loop_starts[env->loop_depth++] = env->instruction_index;
                 continue;

@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 71.59626,
+    "fuzzy_match_percent": 71.6403,
     "total_code": "4722419",
     "matched_code": "564695",
     "matched_code_percent": 11.957749,
@@ -15412,7 +15412,7 @@
           "address": 915040,
           "offset": 25072,
           "size": 635,
-          "match_percent": 99.76271
+          "match_percent": 99.169495
         },
         {
           "name": "_ZN13MechTouchTaskD1Ev",
@@ -15556,7 +15556,7 @@
           "address": 4463824,
           "offset": 3573856,
           "size": 828,
-          "match_percent": 81.77193
+          "match_percent": 84.7193
         },
         {
           "name": "_ZN17MechTouchTaskGoTo12UpdateTargetER19MechObjectInterface",
@@ -18027,7 +18027,7 @@
           "address": 4497776,
           "offset": 3607808,
           "size": 3072,
-          "match_percent": 56.642
+          "match_percent": 58.86919
         },
         {
           "name": "_ZN22MechJumpAutoPilotAddon19LookForLandingPointEv",
@@ -18520,7 +18520,7 @@
           "address": 4547952,
           "offset": 3657984,
           "size": 277,
-          "match_percent": 41.38356
+          "match_percent": 44.547947
         },
         {
           "name": "_ZN20MechTouchUITexButtonD1Ev",
@@ -18624,7 +18624,7 @@
           "address": 4552736,
           "offset": 3662768,
           "size": 551,
-          "match_percent": 48.393333
+          "match_percent": 86.18
         },
         {
           "name": "_ZN19MechTouchUICharIcon7ProcessEf",
@@ -18664,7 +18664,7 @@
           "address": 4554128,
           "offset": 3664160,
           "size": 878,
-          "match_percent": 55.49727
+          "match_percent": 88.36612
         },
         {
           "name": "_ZN24MechTouchUIPartySelectorC2ER23MechTouchUIPlayerButtonPi",
@@ -18672,7 +18672,7 @@
           "address": 4554128,
           "offset": 3664160,
           "size": 878,
-          "match_percent": 55.49727
+          "match_percent": 88.36612
         },
         {
           "name": "_ZN23MechTouchUIPlayerButton11ShowChooserEv",
@@ -55885,7 +55885,7 @@
           "address": 1990272,
           "offset": 1100304,
           "size": 1142,
-          "match_percent": 51.185184
+          "match_percent": 54.577778
         },
         {
           "name": "_Z10AddPickupsiiiiP7nuvec_sS0_fiffP12GameObject_siib",
@@ -56926,7 +56926,7 @@
           "address": 4982816,
           "offset": 4092848,
           "size": 283,
-          "match_percent": 27.402779
+          "match_percent": 27.61111
         },
         {
           "name": "_ZL26GizmoPickups_StoreProgressPvS_S_",
@@ -61481,7 +61481,7 @@
           "address": 1170816,
           "offset": 280848,
           "size": 1511,
-          "match_percent": 59.627117
+          "match_percent": 64.694916
         },
         {
           "name": "_Z10ReleaseEatP12GameObject_s",
@@ -62850,7 +62850,7 @@
           "address": 1925152,
           "offset": 1035184,
           "size": 3211,
-          "match_percent": 37.04706
+          "match_percent": 38.969116
         }
       ]
     },
@@ -63366,7 +63366,7 @@
           "address": 2062448,
           "offset": 1172480,
           "size": 1639,
-          "match_percent": 43.203705
+          "match_percent": 50.661377
         },
         {
           "name": "_Z21FindNearestTorpTargetP11WORLDINFO_sP7nuvec_sfPh",
@@ -74600,7 +74600,7 @@
           "address": 3939610,
           "offset": 3049642,
           "size": 9247,
-          "match_percent": 84.47472
+          "match_percent": 86.3191
         },
         {
           "name": "_Z30CalculateDistanceToNearestSideP7nuvec_sP14SOCKPOSITION_siP7SOCKSYS",
@@ -81725,7 +81725,7 @@
           "address": 2824736,
           "offset": 1934768,
           "size": 4801,
-          "match_percent": 70.1065
+          "match_percent": 74.31949
         },
         {
           "name": "_ZNK11OccluderSet15RenderOccludersEb",
@@ -91958,7 +91958,7 @@
           "address": 2847120,
           "offset": 1957152,
           "size": 5050,
-          "match_percent": 63.991
+          "match_percent": 69.197945
         },
         {
           "name": "_ZN14NuDynamicLight18computeFrustumCubeEPK10nucamera_sP5VuVecS4_",
@@ -105710,7 +105710,7 @@
           "address": 2932768,
           "offset": 2042800,
           "size": 2235,
-          "match_percent": 45.799614
+          "match_percent": 47.88632
         },
         {
           "name": "NuTexAnimSetSignals",
@@ -117278,7 +117278,7 @@
           "address": 3252896,
           "offset": 2362928,
           "size": 129,
-          "match_percent": 53.916668
+          "match_percent": 61.375
         },
         {
           "name": "_ZN13NuSoundSystem14PauseAllVoicesEv",
@@ -117286,7 +117286,7 @@
           "address": 3253040,
           "offset": 2363072,
           "size": 101,
-          "match_percent": 20.125
+          "match_percent": 55.1
         },
         {
           "name": "_ZN13NuSoundSystem12ResumeVoicesEi",
@@ -117294,7 +117294,7 @@
           "address": 3253152,
           "offset": 2363184,
           "size": 129,
-          "match_percent": 53.916668
+          "match_percent": 61.375
         },
         {
           "name": "_ZN13NuSoundSystem15ResumeAllVoicesEv",
@@ -117302,7 +117302,7 @@
           "address": 3253296,
           "offset": 2363328,
           "size": 101,
-          "match_percent": 20.125
+          "match_percent": 55.1
         },
         {
           "name": "_ZN13NuSoundSystem14GetOldestVoiceEP13NuSoundSampleRf",
@@ -117310,7 +117310,7 @@
           "address": 3253408,
           "offset": 2363440,
           "size": 229,
-          "match_percent": 48.13158
+          "match_percent": 63.894737
         },
         {
           "name": "_ZN13NuSoundSystem16GetQuietestVoiceEP13NuSoundSampleRf",
@@ -117614,7 +117614,7 @@
           "address": 3259808,
           "offset": 2369840,
           "size": 1180,
-          "match_percent": 39.44856
+          "match_percent": 46.95062
         },
         {
           "name": "_ZN13NuSoundSystem21ReleaseCrossfadeCurveEj",

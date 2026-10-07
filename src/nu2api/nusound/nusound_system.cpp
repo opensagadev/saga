@@ -542,18 +542,18 @@ NuSoundEffect *NuSoundSystem::CreateEffect(NuSoundEffect::EffectType type) {
                 effect = new (memory) NuSoundEffectRandomPitch();
             break;
         }
-        case NuSoundEffect::EffectType::DOPPLER: {
-            void *memory = _AllocMemory(MemoryDiscipline::SCRATCH, sizeof(NuSoundEffectDoppler), 4,
-                                        "i:/SagaTouch-Android_9176564/nu2api.2013/nusound/nusound.cpp:1130");
-            if (memory != NULL)
-                effect = new (memory) NuSoundEffectDoppler();
-            break;
-        }
         case NuSoundEffect::EffectType::REPEAT: {
             void *memory = _AllocMemory(MemoryDiscipline::SCRATCH, sizeof(NuSoundEffectRepeat), 4,
                                         "i:/SagaTouch-Android_9176564/nu2api.2013/nusound/nusound.cpp:1136");
             if (memory != NULL)
                 effect = new (memory) NuSoundEffectRepeat();
+            break;
+        }
+        case NuSoundEffect::EffectType::DOPPLER: {
+            void *memory = _AllocMemory(MemoryDiscipline::SCRATCH, sizeof(NuSoundEffectDoppler), 4,
+                                        "i:/SagaTouch-Android_9176564/nu2api.2013/nusound/nusound.cpp:1130");
+            if (memory != NULL)
+                effect = new (memory) NuSoundEffectDoppler();
             break;
         }
         default:
@@ -702,8 +702,10 @@ i32 NuSoundSystem::GetNumAvailableOutputDevices() {
 NuSoundVoice *NuSoundSystem::GetOldestVoice(NuSoundSample *sample, float &playback_position) {
     playback_position = -1.0f;
     NuSoundVoice *oldest = NULL;
-    for (NuSoundVoice *voice = voice_list.Front(); voice != voice_list.End(); voice = voice->field_0x28) {
-        if (voice->GetState() != NuSoundVoice::PLAYSTATE_PLAYING || voice->sound_source != sample) {
+    NuSoundVoice *end = voice_list.End();
+    for (NuSoundVoice *voice = voice_list.Front(); voice != end; voice = voice->field_0x28) {
+        if (voice->GetState() != NuSoundVoice::PLAYSTATE_PLAYING ||
+            voice->sound_source->GetName() != sample->GetName()) {
             continue;
         }
         f32 position = voice->GetPlaybackPositionSeconds();
@@ -776,13 +778,15 @@ bool NuSoundSystem::LoadSample(NuSoundSample *sample, void *data, i32 size, NuSo
 }
 
 void NuSoundSystem::PauseAllVoices() {
-    for (NuSoundVoice *voice = voice_list.Front(); voice != voice_list.End(); voice = voice->field_0x28) {
+    NuSoundVoice *end = voice_list.End();
+    for (NuSoundVoice *voice = voice_list.Front(); voice != end; voice = voice->field_0x28) {
         voice->Pause();
     }
 }
 
 void NuSoundSystem::PauseVoices(i32 mask) {
-    for (NuSoundVoice *voice = voice_list.Front(); voice != voice_list.End(); voice = voice->field_0x28) {
+    NuSoundVoice *end = voice_list.End();
+    for (NuSoundVoice *voice = voice_list.Front(); voice != end; voice = voice->field_0x28) {
         if ((voice->field131_0x148 & mask) != 0) {
             voice->Pause();
         }
@@ -884,13 +888,15 @@ void NuSoundSystem::RemoveListener(NuSoundListener *listener) {
 }
 
 void NuSoundSystem::ResumeAllVoices() {
-    for (NuSoundVoice *voice = voice_list.Front(); voice != voice_list.End(); voice = voice->field_0x28) {
+    NuSoundVoice *end = voice_list.End();
+    for (NuSoundVoice *voice = voice_list.Front(); voice != end; voice = voice->field_0x28) {
         voice->Resume();
     }
 }
 
 void NuSoundSystem::ResumeVoices(i32 mask) {
-    for (NuSoundVoice *voice = voice_list.Front(); voice != voice_list.End(); voice = voice->field_0x28) {
+    NuSoundVoice *end = voice_list.End();
+    for (NuSoundVoice *voice = voice_list.Front(); voice != end; voice = voice->field_0x28) {
         if ((voice->field131_0x148 & mask) != 0) {
             voice->Resume();
         }

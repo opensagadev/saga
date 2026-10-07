@@ -119,8 +119,10 @@ void Torpedo_UpdateJobbies(GameObject_s *object) {
         if (packet->field_08 < 0.8f && index + 1 == packet->count) {
             NUVEC direction;
             NuVecSub(&direction, &position, &packet->pickup_positions[index]);
+            packet = object->torpedo;
             const f32 scale = 1.0f - (NU_SIN_LUT(packet->field_08 / 0.8f * 32768.0f + 16384.0f) + 1.0f) * 0.5f;
             NuVecScale(&direction, &direction, scale);
+            packet = object->torpedo;
             NuVecAdd(&packet->pickup_positions[index], &packet->pickup_positions[index], &direction);
         } else {
             packet->pickup_positions[index] = position;
@@ -128,19 +130,24 @@ void Torpedo_UpdateJobbies(GameObject_s *object) {
 
         if (index == 0) {
             target_z_rotation = NuAngAdd(object->apiobj.field_0x276, NUANG_180DEG);
+            packet = object->torpedo;
             target_y_rotation = -object->secondary_lean_angle;
         } else {
+            packet = object->torpedo;
             target_z_rotation = static_cast<u16>(packet->pickup_data[index - 1]);
             target_y_rotation = static_cast<u16>(packet->pickup_flags[index - 1]);
         }
 
         packet->pickup_data[index] = SeekRot(static_cast<u16>(packet->pickup_data[index]), target_z_rotation, 5.0f);
+        packet = object->torpedo;
         packet->pickup_flags[index] = SeekRot(static_cast<u16>(packet->pickup_flags[index]), target_y_rotation, 5.0f);
 
+        packet = object->torpedo;
         if (index != 0) {
             NUVEC direction;
             NuVecSub(&direction, &packet->pickup_positions[index], &packet->pickup_positions[index - 1]);
             GetRotationAngles(&direction, &target_z_rotation, &target_y_rotation);
+            packet = object->torpedo;
             AddVariableShotDebrisEffectTimed1(
                 WORLD->debris_sys->entries[129].effect, &packet->pickup_positions[index - 1], 90, FRAMETIME,
                 static_cast<i16>(target_z_rotation), static_cast<i16>(target_y_rotation), NULL);
@@ -151,6 +158,7 @@ void Torpedo_UpdateJobbies(GameObject_s *object) {
                                               FRAMETIME, static_cast<i16>(packet->pickup_flags[0] - NUANG_90DEG),
                                               static_cast<i16>(packet->pickup_data[0] - NUANG_90DEG), NULL);
         }
+        packet = object->torpedo;
     }
 
     if ((packet->field_0x1 & 0x20) == 0 || packet->count == 0 || object->apiobj.field_0x27c != -1) {
@@ -165,6 +173,7 @@ void Torpedo_UpdateJobbies(GameObject_s *object) {
             player->torpedo->count > 4 || player->torpedo->steal_timer != 0.0f) {
             continue;
         }
+        packet = object->torpedo;
         NUVEC distance;
         if (NuVecXZDistSqr(&packet->pickup_positions[packet->count - 1], &player->apiobj.collision_position,
                            &distance) < steal_torpedo_range * steal_torpedo_range) {
@@ -174,6 +183,7 @@ void Torpedo_UpdateJobbies(GameObject_s *object) {
     }
 
     if (player_index != -1) {
+        packet = object->torpedo;
         TORPEDOPACKET *player_packet = Player[player_index]->torpedo;
         const i32 destination = player_packet->count;
         const i32 source = packet->count - 1;

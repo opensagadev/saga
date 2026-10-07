@@ -1093,7 +1093,7 @@ void MechTouchTaskPlannedDoubleClickGoTo::OnResume() {
     f32 velocity_x;
     f32 velocity_y;
     f32 velocity_z;
-    if (dx * dx + dy * dy + dz * dz > 1.96f || dy > player->apiobj.scaled_height) {
+    if (dx * dx + dy * dy + dz * dz > 1.4f * 1.4f || dy > player->apiobj.scaled_height) {
         const VuVec velocity = TouchHacks::CalculateJumpVelToHitPointDblJump(*player, position);
         velocity_x = velocity.x;
         velocity_y = velocity.y;
@@ -1112,9 +1112,10 @@ void MechTouchTaskPlannedDoubleClickGoTo::OnResume() {
     const f32 previous_target_y = player->target_velocity.y;
     const f32 previous_x = player->apiobj.velocity.x;
     const f32 previous_target_x = player->target_velocity.x;
+    GameObject_s *angle_player = player;
     const i32 angle = NuAtan2D(velocity_x, velocity_z);
-    player->apiobj.movement_facing_angle = angle;
-    player->apiobj.facing_angle = angle;
+    angle_player->apiobj.movement_facing_angle = angle;
+    angle_player->apiobj.facing_angle = angle;
     player->apiobj.velocity.x = velocity_x;
     player->apiobj.velocity.y = velocity_y;
     player->apiobj.velocity.z = velocity_z;

@@ -184,7 +184,14 @@ void Detonator_MoveCode(GameObject_s *object) {
             if (object->field_0xde0 >= 0.3f && object->field_0xde0 >= 1.0f) {
                 f32 oldest_time = -1.0f;
                 DETONATOR_s *oldest = NULL;
-                DetonatorConsiderOldest(&Detonator[0], oldest_time, oldest);
+                if (Detonator[0].active != 0) {
+                    oldest = &Detonator[0];
+                    oldest_time = Detonator[0].timer;
+                    if (!(oldest_time > -1.0f)) {
+                        oldest = NULL;
+                        oldest_time = -1.0f;
+                    }
+                }
                 DetonatorConsiderOldest(&Detonator[1], oldest_time, oldest);
                 DetonatorConsiderOldest(&Detonator[2], oldest_time, oldest);
                 DetonatorConsiderOldest(&Detonator[3], oldest_time, oldest);

@@ -196,6 +196,7 @@ extern "C" {
 extern FadeSystem FadeSys;
 extern i32 BonusArea;
 extern i32 TimingBarSet;
+extern u8 CharClipToBlobShadows;
 
 f32 GameShadow(GameObject_s *object, NUVEC *position, f32 probe_height, i32 terrain_mask);
 void FindAnglesZX(NUVEC *normal, u16 *x_rotation, u16 *z_rotation);
@@ -261,67 +262,79 @@ namespace {
         memset(progress->activated, 0, sizeof(progress->activated));
     }
 
-    void DrawPickupList(WORLDINFO *world, GIZMOPICKUP_s *pickups, i32 count) {
-        if (world == NULL || pickups == NULL || world->lev_objs == NULL || GameCam == NULL) {
-            return;
+} // namespace
+
+static void GizmoPickups_DrawList(WORLDINFO *world, GIZMOPICKUP_s *pickups, i32 count) {
+    if (world == NULL || pickups == NULL || world->lev_objs == NULL || GameCam == NULL) {
+        return;
+    }
+
+    NuFmod(GameTimer.time_elapsed_mod_seconds, 0.5f);
+    f32 maximum_distance = world->gizmo_pickup_sys->draw_distance;
+    f32 shadow_distance_squared;
+    if (g_lowEndLevelBehaviour == 0) {
+        const f32 shadow_distance = maximum_distance * 0.5f;
+        shadow_distance_squared = shadow_distance * shadow_distance;
+    } else {
+        shadow_distance_squared = 0.0f;
+        if (CharClipToBlobShadows != 0 && maximum_distance > world->current_level->blob_shadow_fade_far) {
+            maximum_distance = static_cast<f32>(world->current_level->blob_shadow_fade_far);
+        }
+    }
+    const f32 maximum_distance_squared = maximum_distance * maximum_distance;
+    for (i32 index = 0; index < count; ++index) {
+        GIZMOPICKUP_s &pickup = pickups[index];
+        if ((pickup.state_flags & GIZMOPICKUP_STATE_ACTIVE) == 0) {
+            continue;
+        }
+        pickup.state_flags &= static_cast<u8>(~GIZMOPICKUP_STATE_DRAWN);
+        if ((pickup.state_flags & (GIZMOPICKUP_STATE_VISIBLE | GIZMOPICKUP_STATE_COLLECTED)) !=
+                GIZMOPICKUP_STATE_VISIBLE ||
+            (pickup.state_flags & GIZMOPICKUP_STATE_DRAW_VISIBLE) == 0) {
+            continue;
+        }
+        if (pickup.room_index >= 0 && world->rooms_visible_ptr != NULL &&
+            world->rooms_visible_ptr[pickup.room_index] == 0) {
+            continue;
         }
 
-        const f32 maximum_distance = world->gizmo_pickup_sys->draw_distance;
-        const f32 maximum_distance_squared = maximum_distance * maximum_distance;
-        for (i32 index = 0; index < count; ++index) {
-            GIZMOPICKUP_s &pickup = pickups[index];
-            pickup.state_flags &= static_cast<u8>(~GIZMOPICKUP_STATE_DRAWN);
-            if ((pickup.state_flags & GIZMOPICKUP_STATE_ACTIVE) == 0 ||
-                (pickup.state_flags & (GIZMOPICKUP_STATE_VISIBLE | GIZMOPICKUP_STATE_COLLECTED)) !=
-                    GIZMOPICKUP_STATE_VISIBLE ||
-                (pickup.state_flags & GIZMOPICKUP_STATE_DRAW_VISIBLE) == 0) {
-                continue;
-            }
-            if (pickup.room_index >= 0 && world->rooms_visible_ptr != NULL &&
-                world->rooms_visible_ptr[pickup.room_index] == 0) {
-                continue;
-            }
+        GIZMO_PICKUP_TYPE *type = GetPickupType(pickup);
+        if (type->field_0x0f != 0 && pickups != WorldInfo_CurrentlyActive()->gizmo_pickup_sys->temporary_pickups) {
+            continue;
+        }
+        const f32 camera_x = pickup.position.x - GameCam->pos.x;
+        const f32 camera_z = pickup.position.z - GameCam->pos.z;
+        if (camera_x * camera_x + camera_z * camera_z > maximum_distance_squared) {
+            continue;
+        }
 
-            const f32 camera_x = pickup.position.x - GameCam->pos.x;
-            const f32 camera_z = pickup.position.z - GameCam->pos.z;
-            if (camera_x * camera_x + camera_z * camera_z > maximum_distance_squared) {
-                continue;
-            }
-
-            GIZMO_PICKUP_TYPE *type = GetPickupType(pickup);
-            if (type->field_0x0f != 0 && pickups != WorldInfo_CurrentlyActive()->gizmo_pickup_sys->temporary_pickups) {
-                continue;
-            }
-            const i32 model_index = type->first_model_id + pickup.model_variant;
-            LEVEL_OBJECT_RUNTIME_s &model = world->lev_objs[model_index];
-            if (model.active == 0) {
-                continue;
-            }
-
+        const i32 model_index = type->first_model_id + pickup.model_variant;
+        LEVEL_OBJECT_RUNTIME_s &model = world->lev_objs[model_index];
+        if (model.active != 0) {
             NUMTX matrix;
             if ((type->flags & GIZMOPICKUP_TYPE_DRAW_TUMBLING) != 0) {
                 const u16 y_rotation = pickup.draw_rotation;
-                const i32 x_rotation = static_cast<i32>(NU_SIN_LUT(y_rotation) * 1820.0f);
+                const i32 x_rotation = static_cast<i32>(NuTrigTable[y_rotation & 0x7fff] * 1820.0f);
                 const f32 cos_x = NU_COS_LUT(x_rotation);
                 const f32 sin_x = NU_SIN_LUT(x_rotation);
                 const f32 cos_y = NU_COS_LUT(y_rotation);
                 const f32 sin_y = NU_SIN_LUT(y_rotation);
 
-                matrix.m00 = cos_y;
+                matrix.m00 = cos_y + sin_y * 0.0f;
                 matrix.m01 = 0.0f;
-                matrix.m02 = -sin_y;
+                matrix.m02 = cos_y * 0.0f - sin_y;
                 matrix.m03 = 0.0f;
-                matrix.m10 = sin_x * sin_y;
+                matrix.m10 = sin_x * sin_y + cos_y * 0.0f;
                 matrix.m11 = cos_x;
-                matrix.m12 = sin_x * cos_y;
+                matrix.m12 = sin_x * cos_y - sin_y * 0.0f;
                 matrix.m13 = 0.0f;
-                matrix.m20 = cos_x * sin_y;
+                matrix.m20 = sin_y * cos_x + cos_y * 0.0f;
                 matrix.m21 = -sin_x;
-                matrix.m22 = cos_x * cos_y;
+                matrix.m22 = cos_y * cos_x - sin_y * 0.0f;
                 matrix.m23 = 0.0f;
-                matrix.m30 = 0.0f;
+                matrix.m30 = sin_y * 0.0f + cos_y * 0.0f;
                 matrix.m31 = 0.0f;
-                matrix.m32 = 0.0f;
+                matrix.m32 = cos_y * 0.0f - sin_y * 0.0f;
                 matrix.m33 = 1.0f;
                 NuMtxTranslate(&matrix, &pickup.position);
             } else if ((type->flags & GIZMOPICKUP_TYPE_DRAW_Y_ROTATION) != 0) {
@@ -352,21 +365,20 @@ namespace {
             if ((pickup.config_flags & GIZMOPICKUP_CONFIG_DISABLE_SHADOW_MAP) != 0) {
                 EnableShadowMapRendering(0);
             }
-
-            if (VehicleArea == 0 && pickup.floor_height != 2000000.0f && maximum_distance_squared > 0.0f) {
-                const f32 distance_ratio = (camera_x * camera_x + camera_z * camera_z) / maximum_distance_squared;
-                NUVEC shadow_position = pickup.position;
-                shadow_position.y = pickup.floor_height + 0.005f;
-                const i32 opacity =
-                    static_cast<i32>((1.0f - distance_ratio) *
-                                     static_cast<f32>(static_cast<u8>(world->current_level->blob_shadow_alpha)));
-                NuRndrAddShadow(&shadow_position, type->shadow_radius_x, opacity, pickup.shadow_x_rotation, 0,
-                                pickup.shadow_z_rotation);
-            }
+        }
+        const f32 distance_squared = camera_x * camera_x + camera_z * camera_z;
+        if (VehicleArea == 0 && pickup.floor_height != 2000000.0f && maximum_distance_squared > 0.0f &&
+            distance_squared < shadow_distance_squared) {
+            const f32 distance_ratio = distance_squared / shadow_distance_squared;
+            NUVEC shadow_position = pickup.position;
+            shadow_position.y = pickup.floor_height + 0.005f;
+            const i32 opacity = static_cast<i32>(
+                (1.0f - distance_ratio) * static_cast<f32>(static_cast<u8>(world->current_level->blob_shadow_alpha)));
+            NuRndrAddShadow(&shadow_position, type->shadow_radius_x, opacity, pickup.shadow_x_rotation, 0,
+                            pickup.shadow_z_rotation);
         }
     }
-
-} // namespace
+}
 
 static void GizmoPickups_UpdateList(WORLDINFO *world, GIZMOPICKUP_s *pickups, i32 count, i32 play_nearby_sfx) {
     if (world == NULL || pickups == NULL) {
@@ -514,10 +526,10 @@ static void GizmoPickups_Draw(void *world_ptr, void *, float) {
 
     GIZMOPICKUPRUNTIMESYS_s *pickup_sys = world->gizmo_pickup_sys;
     if (pickup_sys->pickups != NULL && Missions_PickupsOff(MissionSys) == 0) {
-        DrawPickupList(world, pickup_sys->pickups, pickup_sys->pickup_count);
+        GizmoPickups_DrawList(world, pickup_sys->pickups, pickup_sys->pickup_count);
     }
     if (pickup_sys->temporary_pickups != NULL && Missions_PickupsOff(MissionSys) == 0) {
-        DrawPickupList(world, pickup_sys->temporary_pickups, GIZMOPICKUP_TEMPORARY_CAPACITY);
+        GizmoPickups_DrawList(world, pickup_sys->temporary_pickups, GIZMOPICKUP_TEMPORARY_CAPACITY);
     }
 
     if (TimingBarSet == 5) {

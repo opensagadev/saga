@@ -142,19 +142,15 @@ bool MechJumpAutoPilotAddon::LookForLandingSpotAroundPoint(VuVec const &point) {
 
     bool found = false;
     f32 best_score = -2000000000.0f;
-    const f32 sweep_height = field_94 * 3.0f + 0.5f;
-    const f32 ray_height = field_24.y + (sweep_height - 0.5f);
+    const f32 sweep_height = field_94 * 3.0f + 1.0f;
+    const f32 ray_offset = sweep_height - 1.0f;
     const f32 ray_length = -sweep_height;
 
-    VuVec ray;
-    ray.w = 1.0f;
     for (i32 i = 0; i < 9; ++i) {
-        ray.x = 0.0f;
-        ray.y = ray_length;
-        ray.z = 0.0f;
+        VuVec ray(0.0f, ray_length, 0.0f, 1.0f);
         VuVec origin;
         origin.x = point.x + offsets[i].x;
-        origin.y = ray_height;
+        origin.y = field_24.y + ray_offset;
         origin.z = point.z + offsets[i].z;
         if (GameRayCast(&origin.xyz, &ray.xyz, 0.0f, 0)) {
             const VuVec hit(origin.x + ray.x, origin.y + ray.y, origin.z + ray.z, 0.0f);

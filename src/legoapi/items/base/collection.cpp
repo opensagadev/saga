@@ -738,16 +738,15 @@ void ReCalculateCompletionPoints() {
         }
     }
 
-    for (i32 index = 0; index < AREACOUNT; ++index) {
-        AREADATA *area = &ADataList[index];
-        AREASAVE_s *save = &Game.area_save[index];
-        const u16 flags = area->flags;
+    AREADATA *area = ADataList;
+    AREASAVE_s *save = Game.area_save;
+    for (i32 index = 0; index < AREACOUNT; ++index, ++area, ++save) {
         if (area == HUB_ADATA ||
-            (flags & (AREAFLAG_ENDING_AREA | AREAFLAG_TEST_AREA | AREAFLAG_NO_COMPLETION_POINTS)) != 0) {
+            (area->flags & (AREAFLAG_ENDING_AREA | AREAFLAG_TEST_AREA | AREAFLAG_NO_COMPLETION_POINTS)) != 0) {
             continue;
         }
 
-        if ((flags & 0x100) != 0) {
+        if ((area->flags & 0x100) != 0) {
             CompletionPointInfo_ReCalculate[1] += POINTS_PER_SUPERBONUSCOMPLETE;
             if (save->area_complete != 0) {
                 AddToCompletionPoints(POINTS_PER_SUPERBONUSCOMPLETE);
@@ -758,7 +757,7 @@ void ReCalculateCompletionPoints() {
             continue;
         }
 
-        if ((flags & AREAFLAG_BONUS_AREA) != 0) {
+        if ((area->flags & AREAFLAG_BONUS_AREA) != 0) {
             CompletionPointInfo_ReCalculate[1] += POINTS_PER_TIMETRIAL;
             if (save->area_complete != 0 || save->challenge_trial_time < static_cast<f32>(area->challenge_trial_time)) {
                 AddToCompletionPoints(POINTS_PER_TIMETRIAL);
@@ -770,13 +769,13 @@ void ReCalculateCompletionPoints() {
         CompletionPointInfo_ReCalculate[1] += POINTS_PER_STORY;
         if (save->area_complete != 0) {
             AddToCompletionPoints(POINTS_PER_STORY);
-            if ((flags & AREAFLAG_NO_GOLDBRICK) == 0) {
+            if ((area->flags & AREAFLAG_NO_GOLDBRICK) == 0) {
                 AddToGoldBricks();
             }
         }
 
-        if ((flags & AREAFLAG_MINIKIT) == 0) {
-            if ((flags & AREAFLAG_TRUE_JEDI) != 0 &&
+        if ((area->flags & AREAFLAG_MINIKIT) == 0) {
+            if ((area->flags & AREAFLAG_TRUE_JEDI) != 0 &&
                 (save->true_hero_complete[0] != 0 || save->true_hero_complete[1] != 0)) {
                 AddToCompletionPoints(POINTS_PER_TRUEJEDI);
                 AddToGoldBricks();
@@ -790,20 +789,23 @@ void ReCalculateCompletionPoints() {
             AddToGoldBricks();
         }
 
-        CompletionPointInfo_ReCalculate[1] += POINTS_PER_TRUEJEDI;
-        if (save->true_hero_complete[0] != 0) {
-            AddToCompletionPoints(POINTS_PER_TRUEJEDI);
-            AddToGoldBricks();
-        }
         if (BOTHTRUEJEDIGOLDBRICKS != 0) {
+            CompletionPointInfo_ReCalculate[1] += POINTS_PER_TRUEJEDI;
+            if (save->true_hero_complete[0] != 0) {
+                AddToCompletionPoints(POINTS_PER_TRUEJEDI);
+                AddToGoldBricks();
+            }
             CompletionPointInfo_ReCalculate[1] += POINTS_PER_TRUEJEDI;
             if (save->true_hero_complete[1] != 0) {
                 AddToCompletionPoints(POINTS_PER_TRUEJEDI);
                 AddToGoldBricks();
             }
-        } else if (save->true_hero_complete[0] == 0 && save->true_hero_complete[1] != 0) {
-            AddToCompletionPoints(POINTS_PER_TRUEJEDI);
-            AddToGoldBricks();
+        } else {
+            CompletionPointInfo_ReCalculate[1] += POINTS_PER_TRUEJEDI;
+            if (save->true_hero_complete[0] != 0 || save->true_hero_complete[1] != 0) {
+                AddToCompletionPoints(POINTS_PER_TRUEJEDI);
+                AddToGoldBricks();
+            }
         }
 
         CompletionPointInfo_ReCalculate[1] += POINTS_PER_REDBRICK;

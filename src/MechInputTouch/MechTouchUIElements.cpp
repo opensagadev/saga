@@ -330,7 +330,6 @@ void MechTouchUICharIcon::SetupDisabled() {
         GameObject_s *target = Player[i];
         if (target != NULL && target->id == character_id) {
             disabled = !TouchHacks::CanTagTo(*player, *target);
-            return;
         }
     }
 }
@@ -542,8 +541,10 @@ void MechTouchUITexButton::Process(float) {
         scale_elapsed += frame_time;
         if (scale_elapsed > scale_duration + scale_delay)
             scale_elapsed = scale_duration + scale_delay;
-        if (scale_elapsed >= scale_delay)
+        if (scale_elapsed >= scale_delay) {
             *scale_target = ((scale_elapsed - scale_delay) / scale_duration) * (scale_to - scale_from) + scale_from;
+            frame_time = FRAMETIME;
+        }
     }
     if (!(alpha_duration < 0.0f) && !(alpha_elapsed >= alpha_duration + alpha_delay)) {
         alpha_elapsed += frame_time;
@@ -895,16 +896,20 @@ MechTouchUIPartySelector::MechTouchUIPartySelector(MechTouchUIPlayerButton &butt
     : icon_count(0), player_button(&button), field_0x88(0) {
     memset(icons, 0, sizeof(icons));
 
+    Cleanup();
+    const VuVec button_position = button.position;
+    const f32 button_bottom = button.position.y - button.radius_y;
     const bool small_screen = NuIOS_IsSmallScreen() != 0;
     const f32 gap = small_screen ? 0.11f : 0.06f;
     const f32 scale = small_screen ? 0.16f : 0.15f;
     const i32 icons_per_row = small_screen ? 5 : 7;
-    const f32 first_y = button.position.y - button.radius_y - gap * 2.0f;
-    f32 x = button.position.x;
+    const f32 first_y = (button_bottom - gap) - gap;
+    f32 x = button_position.x;
     f32 y = first_y;
     f32 delay = 0.0f;
     f32 delay_step = 0.03f;
     i32 column = 0;
+    i32 icon_index = 0;
 
     for (i32 target_index = 0; target_index < 32; ++target_index) {
         if (target_ids[target_index] < 0 || player == NULL) {
@@ -914,21 +919,22 @@ MechTouchUIPartySelector::MechTouchUIPartySelector(MechTouchUIPlayerButton &butt
             ++icon_count;
         }
 
-        VuVec position(x, y, button.position.z, button.position.w);
-        MechTouchUICharIcon *icon = new MechTouchUICharIcon(*this, position, target_ids[target_index], scale);
-        icons[target_index] = icon;
+        MechTouchUICharIcon *icon = new MechTouchUICharIcon(*this, ::VuVec_Zero, target_ids[target_index], scale);
+        icons[icon_index] = icon;
         icon->on_release = MechTouchUIPartySelector_OnRelease_Callback;
         icon->owner = button.owner;
+        icon->position = VuVec(x, y, button_position.z, button_position.w);
         icon->SetupDisabled();
+        icon = icons[icon_index];
         icon->alpha_end = icon->disabled != 0 ? 0.3f : 1.0f;
         icon->alpha_delay = delay;
         icon->alpha_start = 0.0f;
         icon->alpha_elapsed = 0.0f;
         icon->alpha_duration = 0.3f;
         *icon->alpha_target = 0.0f;
-        MechSystems::Get()->TouchUI().AddUIElement(*icon);
-
         ++column;
+        MechSystems::Get()->TouchUI().AddUIElement(*icon);
+        ++icon_index;
         if (column >= icons_per_row) {
             column = 0;
             x += GetAspectRatio() * (scale + gap);

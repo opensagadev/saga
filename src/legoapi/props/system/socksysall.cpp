@@ -1420,8 +1420,10 @@ extern "C" {
                                         candidate->ratio);
                 local_right = {1.0f, 0.0f, 0.0f};
                 NuVecRotateY(&local_right, &local_right, candidate->midpoint_rotation.y);
-                magnitude = local_right.x * (scratch.x - candidate->midpoint.x) +
-                            local_right.z * (scratch.z - candidate->midpoint.z);
+                displacement.x = scratch.x - candidate->midpoint.x;
+                displacement.z = scratch.z - candidate->midpoint.z;
+                side = local_right.x * displacement.x + local_right.z * displacement.z;
+                magnitude = side;
 
                 SockSysPointAlongSpline(&scratch, sock->a, candidate->location.segment, candidate->next_segment,
                                         candidate->ratio);
@@ -1432,8 +1434,8 @@ extern "C" {
                                         candidate->ratio);
                 displacement.x = scratch.x - candidate->midpoint.x;
                 displacement.z = scratch.z - candidate->midpoint.z;
-                half_width =
-                    (half_width + NuFsqrt(displacement.x * displacement.x + displacement.z * displacement.z)) * 0.5f;
+                half_width += NuFsqrt(displacement.x * displacement.x + displacement.z * displacement.z);
+                half_width *= 0.5f;
                 lateral_ratio = half_width > 0.0f ? magnitude / half_width * working_scale : 0.0f;
             }
 
@@ -1473,7 +1475,8 @@ extern "C" {
             }
 
             if (sock->camera_vertical_ratio != 0.0f && (sock->flags & SOCK_FLAG_PROJECT_CAMERA_FROM_PLAYER) == 0) {
-                candidate_camera.y += sock->camera_vertical_ratio * (average_camera_position.y - candidate->midpoint.y);
+                displacement.y = sock->camera_vertical_ratio * (average_camera_position.y - candidate->midpoint.y);
+                candidate_camera.y += displacement.y;
             }
 
             if ((sock->camera_arena_blend.x > 0.0f || sock->camera_arena_blend.y > 0.0f ||
@@ -1498,8 +1501,10 @@ extern "C" {
                 }
             } else if (sock->camera_arena_offset.y != 0.0f) {
                 height_sum = 0.0f;
-                for (i32 player = 0; player < player_count; ++player)
-                    height_sum = height_sum + player_camera_positions[player].y + sock->camera_arena_offset.y;
+                for (i32 player = 0; player < player_count; ++player) {
+                    height_sum += player_camera_positions[player].y;
+                    height_sum += sock->camera_arena_offset.y;
+                }
                 candidate_camera.y = height_sum / static_cast<f32>(player_count);
                 if ((sock->flags & SOCK_FLAG_CLAMP_TARGET_Y) != 0) {
                     candidate_camera.y = EnforceSockYLimits(candidate_camera.y, candidate, sock_sys);
@@ -1555,12 +1560,9 @@ extern "C" {
                     }
                     NuVecAdd(&look_position, &look_position, &candidate_camera);
                 }
-                accumulated_target.x =
-                    accumulated_target.x + (camera_target->x - look_position.x) * sock->look_ratio_xz + look_position.x;
-                accumulated_target.y =
-                    accumulated_target.y + (camera_target->y - look_position.y) * sock->look_ratio_y + look_position.y;
-                accumulated_target.z =
-                    accumulated_target.z + (camera_target->z - look_position.z) * sock->look_ratio_xz + look_position.z;
+                accumulated_target.x += (camera_target->x - look_position.x) * sock->look_ratio_xz + look_position.x;
+                accumulated_target.y += (camera_target->y - look_position.y) * sock->look_ratio_y + look_position.y;
+                accumulated_target.z += (camera_target->z - look_position.z) * sock->look_ratio_xz + look_position.z;
             }
 
             NuVecAdd(camera_position, camera_position, &candidate_camera);
