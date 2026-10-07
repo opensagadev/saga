@@ -547,7 +547,7 @@ extern i32 finishloop_backdroponly;
 // ------------------------------------------------------------------------
 extern u8 g_forceSysMemVbs;
 extern i32 texanimbits;
-extern i32 Reflections_On;
+extern u8 Reflections_On;
 extern i32 (*MatrixReflection_CanOverrideFn)(f32);
 extern i32 disable_narrow_socks;
 extern i32 set_speedermode;

@@ -96,10 +96,10 @@ void ReleaseCable(CABLE_s *cable, i32 snapped) {
         if (cable->source == player || cable->source == player2) {
             GameCam_Blend(GameCam, 1.0f, 0.0f, 1);
         }
-        if (cable->source != NULL && cable->source->cable == cable) {
-            cable->source->cable = NULL;
-            cable->source = NULL;
-        }
+    }
+    if (cable->source != NULL && cable->source->cable == cable) {
+        cable->source->cable = NULL;
+        cable->source = NULL;
     }
     cable->target = NULL;
     for (i32 i = 0; i < cable->point_count; ++i) {
@@ -112,30 +112,27 @@ void UpdateCables() {
             NUVEC delta;
             if (cable->flags_1e9 & 4) {
                 cable->total_length = 0.0f;
-                bool grounded = true;
-                NUVEC *point = cable->points;
-                NUVEC *velocity = cable->velocities;
-                f32 *segment_length = cable->segment_lengths;
-                for (i32 i = 0; i < cable->point_count; ++i, ++point, ++velocity) {
-                    f32 ground = GameShadow(NULL, point, 5.0f, -1);
+                i32 grounded = 1;
+                for (i32 i = 0; i < cable->point_count; ++i) {
+                    f32 ground = GameShadow(NULL, &cable->points[i], 5.0f, -1);
                     if (ground == 2000000.0f)
-                        ground = point->y;
-                    velocity->x -= (velocity->x * cable_damping) * FRAMETIME;
-                    velocity->y -= FRAMETIME * cable_gravity;
-                    velocity->z -= (cable_damping * velocity->z) * FRAMETIME;
-                    point->x += FRAMETIME * velocity->x;
-                    point->y += velocity->y * FRAMETIME;
-                    point->z += FRAMETIME * velocity->z;
-                    if (ground > point->y) {
-                        point->y = ground;
-                        velocity->x -= (velocity->x * cable_ground_damping) * FRAMETIME;
-                        velocity->z -= (cable_ground_damping * velocity->z) * FRAMETIME;
+                        ground = cable->points[i].y;
+                    cable->velocities[i].x -= (cable->velocities[i].x * cable_damping) * FRAMETIME;
+                    cable->velocities[i].y -= FRAMETIME * cable_gravity;
+                    cable->velocities[i].z -= (cable_damping * cable->velocities[i].z) * FRAMETIME;
+                    cable->points[i].x += FRAMETIME * cable->velocities[i].x;
+                    cable->points[i].y += cable->velocities[i].y * FRAMETIME;
+                    cable->points[i].z += FRAMETIME * cable->velocities[i].z;
+                    if (ground > cable->points[i].y) {
+                        cable->points[i].y = ground;
+                        cable->velocities[i].x -= (cable->velocities[i].x * cable_ground_damping) * FRAMETIME;
+                        cable->velocities[i].z -= (cable_ground_damping * cable->velocities[i].z) * FRAMETIME;
                     } else {
-                        grounded = false;
+                        grounded = 0;
                     }
                     if (i < cable->point_count - 1) {
-                        f32 length = NuVecDist(point + 1, point, &delta);
-                        *segment_length++ = length;
+                        f32 length = NuVecDist(&cable->points[i + 1], &cable->points[i], &delta);
+                        cable->segment_lengths[i] = length;
                         cable->total_length = length + cable->total_length;
                     }
                 }
@@ -145,52 +142,32 @@ void UpdateCables() {
             }
 
             GameObject_s *target = cable->target;
-            bool lost_target = target != NULL && target->apiobj.field_0x218 < -100.0f;
-            auto release = [&](i32 snapped, bool toppled) {
-                ReleaseCable(cable, snapped);
-                if (toppled) {
-                    target->character_context = 0x3d;
-                    target->context_animation = 0x85;
-                    f32 duration = AnimDuration(static_cast<i16>(target->id), 0x85, 0, 0, 1);
-                    target->context_animation_timer = 0.0f;
-                    target->field_0xf02 |= 0x80;
-                    target->airborne_action_duration = duration;
-                    IncrementMinikitCounter(target);
-                    for (i32 j = 0; j < HIGHGAMEOBJECT; ++j) {
-                        GameObject_s *object = &Obj[j];
-                        if ((object->apiobj.field_0x1f8 & 0x1000) && object->apiobj.field_0x287 == 0 &&
-                            object->cable != NULL && object->cable->target == target) {
-                            ReleaseCable(object->cable, 1);
-                        }
-                    }
-                }
-            };
+            i32 lost_target = target != NULL && target->apiobj.field_0x218 < -100.0f;
             GameObject_s *source = cable->source;
             if (source == NULL || (source->apiobj.field_0x1f8 & 0x1000) == 0 || source->apiobj.field_0x287 != 0 ||
                 (source->field_0xe20 & 0x20) || (target != NULL && target->character_context == 0x17) ||
                 ((cable->flags_1e9 & 2) && source->pad_gamepad->pad != NULL &&
                  (source->pad_gamepad->pad->digital_buttons_pressed & GAMEPAD_SPECIAL))) {
-                release(0, false);
+                ReleaseCable(cable, 0);
                 continue;
             }
             cable->flags_1e9 |= 2;
             NUVEC path[16];
             path[0] = source->apiobj.collision_position;
             if (target == NULL || (target->apiobj.field_0x1f8 & 0x1000) == 0 || target->apiobj.field_0x287 != 0) {
-                release(0, false);
+                ReleaseCable(cable, 0);
                 continue;
             }
             if (target->id == id_ATAT) {
-                auto locator = [&](i32 index) -> NUVEC * {
-                    return reinterpret_cast<NUVEC *>(&cable->target->joint_matrices[atat_locators[index]].m30);
-                };
                 if (cable->wrap_count == 0) {
-                    f32 nearest = NuVecDistSqr(&path[0], locator(0), &delta);
-                    if (nearest >= 1000000000.0f)
+                    f32 nearest = NuVecDistSqr(
+                        &path[0], NUMTX_GET_ROW_VEC(&cable->target->joint_matrices[atat_locators[0]], 3), &delta);
+                    if (!(nearest < 1000000000.0f))
                         nearest = 1000000000.0f;
                     i32 selected = 0;
                     for (i32 i = 1; i < 4; ++i) {
-                        f32 distance = NuVecDistSqr(&path[0], locator(i), &delta);
+                        f32 distance = NuVecDistSqr(
+                            &path[0], NUMTX_GET_ROW_VEC(&cable->target->joint_matrices[atat_locators[i]], 3), &delta);
                         if (nearest > distance) {
                             nearest = distance;
                             selected = i;
@@ -201,7 +178,7 @@ void UpdateCables() {
                     target = cable->target;
                 }
                 i32 last = cable->wrap_indices[cable->wrap_count - 1];
-                NUVEC *last_position = reinterpret_cast<NUVEC *>(&target->joint_matrices[atat_locators[last]].m30);
+                NUVEC *last_position = NUMTX_GET_ROW_VEC(&target->joint_matrices[atat_locators[last]], 3);
                 if (!(cable->wrap_count > 1)) {
                     f32 along0, along1;
                     i32 next = (last + 1) & 3;
@@ -211,14 +188,14 @@ void UpdateCables() {
                     i32 opposite_locator = atat_locators[(previous + 3) & 3];
                     if (XZLinesIntersect(
                             &path[0], last_position,
-                            reinterpret_cast<NUVEC *>(&target->joint_matrices[atat_locators[next]].m30),
-                            reinterpret_cast<NUVEC *>(&target->joint_matrices[atat_locators[(last + 2) & 3]].m30),
+                            NUMTX_GET_ROW_VEC(&target->joint_matrices[atat_locators[next]], 3),
+                            NUMTX_GET_ROW_VEC(&target->joint_matrices[atat_locators[(last + 2) & 3]], 3),
                             &along0, &along1)) {
                         cable->wrap_indices[cable->wrap_count++] = static_cast<u8>(next);
                     } else if (XZLinesIntersect(
                                    &path[0], last_position,
-                                   reinterpret_cast<NUVEC *>(&target->joint_matrices[previous_locator].m30),
-                                   reinterpret_cast<NUVEC *>(&target->joint_matrices[opposite_locator].m30), &along0,
+                                   NUMTX_GET_ROW_VEC(&target->joint_matrices[previous_locator], 3),
+                                   NUMTX_GET_ROW_VEC(&target->joint_matrices[opposite_locator], 3), &along0,
                                    &along1)) {
                         cable->wrap_indices[cable->wrap_count++] = static_cast<u8>(previous);
                     }
@@ -234,7 +211,7 @@ void UpdateCables() {
                     i32 previous_locator = atat_locators[previous];
                     NuVecSub(&delta, &path[0], last_position);
                     i32 angle = NuAtan2D(delta.x, delta.z);
-                    NuVecSub(&delta, reinterpret_cast<NUVEC *>(&target->joint_matrices[next_locator].m30),
+                    NuVecSub(&delta, NUMTX_GET_ROW_VEC(&target->joint_matrices[next_locator], 3),
                              last_position);
                     i32 next_angle = NuAtan2D(delta.x, delta.z);
                     i32 turn = NuAngSub(next_angle, angle);
@@ -248,7 +225,7 @@ void UpdateCables() {
                         }
                     } else {
                         NuVecSub(&delta, last_position,
-                                 reinterpret_cast<NUVEC *>(&target->joint_matrices[previous_locator].m30));
+                                 NUMTX_GET_ROW_VEC(&target->joint_matrices[previous_locator], 3));
                         i32 previous_angle = NuAtan2D(delta.x, delta.z);
                         if (NuAngSub(previous_angle, angle) * direction < 0) {
                             // The original clears the slot at the old count, which overlaps point_count at 15.
@@ -271,7 +248,7 @@ void UpdateCables() {
                     i32 index = cable->wrap_indices[i];
                     if (cable->target->apiobj.character_model->points_of_interest[index]) {
                         path[path_count++] =
-                            *reinterpret_cast<NUVEC *>(&cable->target->joint_matrices[atat_locators[index]].m30);
+                            *NUMTX_GET_ROW_VEC(&cable->target->joint_matrices[atat_locators[index]], 3);
                     }
                 }
             } else {
@@ -280,21 +257,21 @@ void UpdateCables() {
             }
             if (lost_target) {
                 target = cable->target;
-                release(0, false);
+                ReleaseCable(cable, 0);
                 continue;
             }
             if ((cable->source->apiobj.character_data->game_character->flags_090 & 0x400) == 0) {
                 target = cable->target;
-                release(0, false);
+                ReleaseCable(cable, 0);
                 continue;
             }
             f32 distance_sq = NuVecDistSqr(&path[0], &path[1], &delta);
             if (GameRayCast(&path[1], &delta, 0.0f, TERRAINMASK_NONDROID | 0x1f)) {
                 target = cable->target;
-                release(1, false);
+                ReleaseCable(cable, 1);
                 continue;
             }
-            bool obstruction = false;
+            i32 obstruction = 0;
             for (i32 i = 0; i < HIGHGAMEOBJECT; ++i) {
                 GameObject_s *object = &Obj[i];
                 if ((object->apiobj.field_0x1f8 & 0x1001) != 0x1001 || object->apiobj.field_0x287 != 0 ||
@@ -319,7 +296,7 @@ void UpdateCables() {
                         f32 dx = object->apiobj.collision_position.x - closest.x;
                         f32 dz = object->apiobj.collision_position.z - closest.z;
                         if (radius * radius > dx * dx + dz * dz) {
-                            obstruction = true;
+                            obstruction = 1;
                             break;
                         }
                     }
@@ -327,7 +304,7 @@ void UpdateCables() {
             }
             if (obstruction) {
                 target = cable->target;
-                release(1, false);
+                ReleaseCable(cable, 1);
                 continue;
             }
             target = cable->target;
@@ -363,7 +340,21 @@ void UpdateCables() {
                             cable->pull_time > 1.0f) {
                             NuVecSub(&cable->source->apiobj.velocity, &cable->source->apiobj.velocity, &source_impulse);
                             target = cable->target;
-                            release(0, true);
+                            ReleaseCable(cable, 0);
+                            target->character_context = 0x3d;
+                            target->context_animation = 0x85;
+                            f32 duration = AnimDuration(static_cast<i16>(target->id), 0x85, 0, 0, 1);
+                            target->context_animation_timer = 0.0f;
+                            target->field_0xf02 |= 0x80;
+                            target->airborne_action_duration = duration;
+                            IncrementMinikitCounter(target);
+                            GameObject_s *object = Obj;
+                            for (i32 j = 0; j < HIGHGAMEOBJECT; ++j, ++object) {
+                                if ((object->apiobj.field_0x1f8 & 0x1000) && object->apiobj.field_0x287 == 0 &&
+                                    object->cable != NULL && object->cable->target == target) {
+                                    ReleaseCable(object->cable, 1);
+                                }
+                            }
                             continue;
                         }
                     }
@@ -378,10 +369,10 @@ void UpdateCables() {
                 cable->max_length = remaining;
                 for (i32 i = 0; i < path_count - 1; ++i) {
                     f32 length = NuVecDist(&path[i + 1], &path[i], &delta);
-                    if (remaining < length) {
+                    if (!(remaining >= length)) {
                         cable->segment_lengths[i] = remaining;
                         cable->total_length += remaining;
-                        f32 scale = length == 0.0f || remaining == 0.0f ? 0.0f : remaining / length;
+                        f32 scale = NuFdiv(remaining, length);
                         NuVecScale(&delta, &delta, scale);
                         NuVecAdd(&cable->points[cable->point_count], &cable->points[cable->point_count - 1], &delta);
                         ++cable->point_count;
@@ -421,18 +412,20 @@ void UpdateCables() {
 GameObject_s *CableTargetGameObject(GameObject_s *source, nuvec_s *position, f32 radius) {
     GameObject_s *nearest = NULL;
     f32 nearest_distance = 100000000.0f;
-    const f32 minimum_x = position->x - radius;
-    const f32 maximum_x = position->x + radius;
-    const f32 minimum_z = position->z - radius;
-    const f32 maximum_z = position->z + radius;
     const f32 radius_squared = radius * radius;
+    const f32 minimum_x = position->x - radius;
+    const f32 minimum_z = position->z - radius;
+    const f32 maximum_x = position->x + radius;
+    const f32 maximum_z = position->z + radius;
 
     GameObject_s *candidate = Obj;
     for (i32 i = 0; i < HIGHGAMEOBJECT; ++i, ++candidate) {
-        const i8 context = candidate->character_context;
         if (candidate == source || (candidate->apiobj.field_0x1f8 & 0x1000) == 0 ||
-            candidate->apiobj.field_0x287 != 0 || candidate == Player[0] || candidate == Player[1] ||
-            (CInfo[context].flags & 0x8000) != 0 || context == 0x17) {
+            candidate->apiobj.field_0x287 != 0 || candidate == Player[0] || candidate == Player[1]) {
+            continue;
+        }
+        const i8 context = candidate->character_context;
+        if ((CInfo[context].flags & 0x8000) != 0 || context == 0x17) {
             continue;
         }
         if (!(context == 0x3b || context == 0x41 || context == 0x3d)) {
@@ -454,7 +447,10 @@ GameObject_s *CableTargetGameObject(GameObject_s *source, nuvec_s *position, f32
             } else if (candidate->id == id_ATAT) {
                 distance *= 0.9f;
             }
-            if (distance < radius_squared && distance < nearest_distance) {
+            if (!(distance < radius_squared)) {
+                continue;
+            }
+            if (distance < nearest_distance) {
                 nearest_distance = distance;
                 nearest = candidate;
             }

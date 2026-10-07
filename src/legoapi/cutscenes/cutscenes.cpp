@@ -131,7 +131,7 @@ static i32 cutaudiopaused;
 static CUTINFO *g_lastCutInfo;
 static f32 g_lastCutsceneTime;
 static f32 g_accumCutsceneTime;
-static f32 CutFrame;
+static i32 CutFrame;
 static i32 stream_cut_issued;
 i32 NewCutInfoCount;
 static CUTINFO *NewCutInfo[8];
@@ -146,7 +146,6 @@ extern "C" i32 NewMode;
 void GameAudio_PlaySfx(i32, nuvec_s *, i32, i32);
 
 extern "C" {
-    void PauseGameAudio(void);
     void PauseGameCut(void);
     void PlaySfxById(i32 sfx_id, nuvec_s *position);
     extern instNUGCUTSCENE_s *cutscene_load_instance;
@@ -165,44 +164,43 @@ static void bgLoadStreamCutScene(bgprocinfo_s *) {
 }
 
 static i32 CutScene_Start(WORLDINFO_s *world, CUTINFO *cut, i32) {
-    instNUGCUTSCENE_s *instance = static_cast<instNUGCUTSCENE_s *>(cut->instance);
     if (cut->music_handle != -1) {
         g_lastCutsceneTime = 0.0f;
         g_accumCutsceneTime = 0.0f;
         g_lastCutInfo = NULL;
     }
-    instNuGCutSceneReset(instance);
+    instNuGCutSceneReset(static_cast<instNUGCUTSCENE_s *>(cut->instance));
     if (CutScene_StartFn != NULL) {
         CutScene_StartFn(cut);
     }
     if (CutScenePlayer_Active() != 0) {
         CutScenePlayer_SetObjects(cut);
     }
-    instance->rate = cut->frames_per_second * FRAMETIME;
-    instNuGCutSceneStart(instance);
+    static_cast<instNUGCUTSCENE_s *>(cut->instance)->rate = cut->frames_per_second * FRAMETIME;
+    instNuGCutSceneStart(static_cast<instNUGCUTSCENE_s *>(cut->instance));
     if ((cut->flags & 0x200) != 0) {
-        instance->flags_88 |= 8;
+        static_cast<instNUGCUTSCENE_s *>(cut->instance)->flags_88 |= 8;
     } else {
-        instance->flags_88 &= ~8U;
+        static_cast<instNUGCUTSCENE_s *>(cut->instance)->flags_88 &= ~8U;
     }
     cut->field_58 = 0.0f;
 
     if (cut->music_handle != -1) {
         music_man.SelectTrackByHandle(TRACK_CLASS_CUTSCENE, cut->music_handle);
         i32 status = music_man.PlayTrack(TRACK_CLASS_CUTSCENE, 0);
-        instance->rate = 0.0f;
+        static_cast<instNUGCUTSCENE_s *>(cut->instance)->rate = 0.0f;
         if ((cut->flags & 1) == 0 || status != 1) {
             cutaudiopaused = 0;
         } else {
             CutSceneWaiting = 1;
-            PauseGameAudio();
+            PauseGameAudio(0);
             cutaudiopaused = 1;
         }
     } else {
-        PauseGameAudio();
-        SetLinkedCutSceneMusic(instance, cut->linked_audio == 0 ? MUSIC_PLAYBACK_DUAL_STREAM
-                                                                : MUSIC_PLAYBACK_DUAL_STREAM_PENDING);
-        instance->rate = cut->frames_per_second * FRAMETIME;
+        PauseGameAudio(0);
+        SetLinkedCutSceneMusic(static_cast<instNUGCUTSCENE_s *>(cut->instance),
+                               cut->linked_audio == 0 ? MUSIC_PLAYBACK_DUAL_STREAM : MUSIC_PLAYBACK_DUAL_STREAM_PENDING);
+        static_cast<instNUGCUTSCENE_s *>(cut->instance)->rate = cut->frames_per_second * FRAMETIME;
         if ((cut->flags & 1) != 0) {
             CutSceneWaiting = 0;
             cutaudiopaused = 0;
@@ -288,6 +286,7 @@ void CutScenes_Draw(WORLDINFO_s *world) {
         if (CUTDRAWWORLD != 0 && world->current_gscn != NULL) {
             SetLevelLights(world->rtl_set, 1.0f);
             NuGScnRndr3(world->current_gscn);
+            cut = static_cast<CUTINFO *>(CutStopInfo);
             if (world->gizmo_sys != NULL && cut != NULL && (cut->flags & 0x8000) != 0) {
                 GizmoSysDraw(world->gizmo_sys, world, FRAMETIME);
             }
@@ -324,19 +323,24 @@ void CutScenes_Reset(WORLDINFO_s *world) {
                 if (character->character != reinterpret_cast<void *>(1))
                     continue;
                 NUGCUTCHAR_s *definition = &characters->characters[j];
-                GameObject_s *object = NULL;
                 if ((character->field_14 & 2) == 0) {
-                    for (i32 p = 0; p < 8; ++p) {
+                    char *model_file = definition->model_file;
+                    i32 p;
+                    for (p = 0; p < 8; ++p) {
                         GameObject_s *player = Player[p];
                         if (player != NULL && (player->apiobj.flags_low & 1) != 0 &&
-                            NuStrICmp(player->apiobj.character_data->file, definition->model_file) == 0) {
-                            object = player;
+                            NuStrICmp(player->apiobj.character_data->file, model_file) == 0) {
+                            character->character = player;
                             break;
                         }
                     }
+                    if (p == 8) {
+                        character->character = NULL;
+                    }
+                } else {
+                    character->character = NULL;
                 }
-                character->character = object;
-                definition->character = object;
+                definition->character = character->character;
             }
         }
     }
@@ -423,7 +427,7 @@ void CutScenes_Start(WORLDINFO_s *world) {
 }
 
 void CutScenes_Update(WORLDINFO_s *world, i32 paused) {
-    i32 active_before[32] = {};
+    i32 active_before[32];
     if (CutScenePlayer_Active() != 0 && CutStopInfo != NULL) {
         CutScenePlayer_SetObjects(static_cast<CUTINFO *>(CutStopInfo));
     }
@@ -439,15 +443,14 @@ void CutScenes_Update(WORLDINFO_s *world, i32 paused) {
     CUTNOFOG = 0;
     CUTSKIPLOCK = 0;
 
-    CUTSYS *system = world->cutscene_sys;
-    if (system == NULL) {
+    if (world->cutscene_sys == NULL) {
         return;
     }
 
     i32 stop_index = -1;
-    for (i32 i = 0; i < system->count; ++i) {
-        CUTINFO *cut = system->cuts[i];
-        if (cut == NULL || cut->instance == NULL) {
+    for (i32 i = 0; i < world->cutscene_sys->count; ++i) {
+        CUTINFO *cut = world->cutscene_sys->cuts[i];
+        if (cut->instance == NULL) {
             continue;
         }
         instNUGCUTSCENE_s *instance = reinterpret_cast<instNUGCUTSCENE_s *>(cut->instance);
@@ -474,9 +477,9 @@ void CutScenes_Update(WORLDINFO_s *world, i32 paused) {
     }
 
     ACTIVECUTCOUNT = 0;
-    for (i32 i = 0; i < system->count; ++i) {
-        CUTINFO *cut = system->cuts[i];
-        if (cut == NULL || cut->instance == NULL) {
+    for (i32 i = 0; i < world->cutscene_sys->count; ++i) {
+        CUTINFO *cut = world->cutscene_sys->cuts[i];
+        if (cut->instance == NULL) {
             active_before[i] = 0;
             continue;
         }
@@ -494,19 +497,15 @@ void CutScenes_Update(WORLDINFO_s *world, i32 paused) {
         }
 
         if (i == stop_index || stop_index == -1) {
-            bool waiting_for_audio = false;
             if (NOSOUND == 0 && NOMUSIC == 0 && i == stop_index && cut->music_handle != -1 && instance->rate == 0.0f &&
                 cutaudiopaused != 0 && music_man.GetStatus(TRACK_CLASS_CUTSCENE, NULL) != 4) {
-                instance->rate = 0.0f;
+                static_cast<instNUGCUTSCENE_s *>(cut->instance)->rate = 0.0f;
                 CutSceneWaiting = 1;
-                waiting_for_audio = true;
-            }
-
-            if (!waiting_for_audio) {
-                i32 music_status = music_man.GetStatus(TRACK_CLASS_CUTSCENE, NULL);
-                if (instance->current_frame == 1.0f && cut->music_handle != -1 && music_status != 4) {
+            } else {
+                if (static_cast<instNUGCUTSCENE_s *>(cut->instance)->current_frame == 1.0f && cut->music_handle != -1 &&
+                    music_man.GetStatus(TRACK_CLASS_CUTSCENE, NULL) != 4) {
                     music_man.PlayTrack(TRACK_CLASS_CUTSCENE, 0);
-                } else if (music_status == 4) {
+                } else if (music_man.GetStatus(TRACK_CLASS_CUTSCENE, NULL) == 4) {
                     if (g_lastCutInfo != cut) {
                         g_accumCutsceneTime += g_lastCutsceneTime;
                         g_lastCutsceneTime =
@@ -518,10 +517,10 @@ void CutScenes_Update(WORLDINFO_s *world, i32 paused) {
                     if (audio_frame < 0.0f) {
                         audio_frame = 0.0f;
                     }
-                    f32 rate = audio_frame - (instance->current_frame - 1.0f);
-                    instance->rate = rate < 0.0f ? 0.0f : rate;
+                    f32 rate = audio_frame - (static_cast<instNUGCUTSCENE_s *>(cut->instance)->current_frame - 1.0f);
+                    static_cast<instNUGCUTSCENE_s *>(cut->instance)->rate = rate < 0.0f ? 0.0f : rate;
                 } else {
-                    instance->rate = cut->frames_per_second * FRAMETIME;
+                    static_cast<instNUGCUTSCENE_s *>(cut->instance)->rate = cut->frames_per_second * FRAMETIME;
                 }
 
                 if (i == stop_index && CutSceneWaiting != 0) {
@@ -530,14 +529,15 @@ void CutScenes_Update(WORLDINFO_s *world, i32 paused) {
                 }
             }
 
-            instNuGCutScenePause(instance, 0);
+            instNuGCutScenePause(static_cast<instNUGCUTSCENE_s *>(cut->instance), 0);
             if (CutScene_PreUpdateFn != NULL) {
                 CutScene_PreUpdateFn(cut);
             }
             for (CUTSCENETEXANIM &animation : cut->texture_animations) {
                 if (animation.index != -1) {
                     const u32 bit = 1U << (animation.index & 0x1f);
-                    if ((texanimbits & bit) == 0 && animation.frame <= instance->current_frame) {
+                    if ((texanimbits & bit) == 0 &&
+                        animation.frame <= static_cast<instNUGCUTSCENE_s *>(cut->instance)->current_frame) {
                         texanimbits |= bit;
                     }
                 }
@@ -558,12 +558,9 @@ void CutScenes_Update(WORLDINFO_s *world, i32 paused) {
     }
 
     if (paused == 0) {
-        for (i32 i = 0; i < system->count; ++i) {
-            if (active_before[i] == 0) {
-                continue;
-            }
-            CUTINFO *cut = system->cuts[i];
-            if (cut == NULL || cut->instance == NULL) {
+        for (i32 i = 0; i < world->cutscene_sys->count; ++i) {
+            CUTINFO *cut = world->cutscene_sys->cuts[i];
+            if (cut->instance == NULL || active_before[i] == 0) {
                 continue;
             }
             instNUGCUTSCENE_s *instance = static_cast<instNUGCUTSCENE_s *>(cut->instance);
@@ -593,10 +590,9 @@ void CutScenes_Update(WORLDINFO_s *world, i32 paused) {
         return;
     }
 
-    CUTINFO *stop_cut = system->cuts[stop_index];
-    instNUGCUTSCENE_s *stop_instance = static_cast<instNUGCUTSCENE_s *>(stop_cut->instance);
+    CUTINFO *stop_cut = world->cutscene_sys->cuts[stop_index];
     GameFog_Reset();
-    if (instNuGCutSceneIsFinished(stop_instance) == 0) {
+    if (instNuGCutSceneIsFinished(static_cast<instNUGCUTSCENE_s *>(stop_cut->instance)) == 0) {
         return;
     }
     if (NewLData == NULL || NewLData == WORLD->current_level || NewLData != HUB_LDATA) {
@@ -614,7 +610,7 @@ void CutScenes_Update(WORLDINFO_s *world, i32 paused) {
     }
 
     if (stop_cut->skip_level == -1) {
-        CUTINFO *next = NewCutScene(NULL, system, stop_cut->next_cutscene, 0);
+        CUTINFO *next = NewCutScene(NULL, world->cutscene_sys, stop_cut->next_cutscene, 0);
         if (CutScenePlayer_Active() != 0 && next == NULL) {
             NewLevelFromMenu(HUB_LDATA, -1, -1, 1);
             hub_from_cutsceneplayer = 1;
@@ -635,8 +631,11 @@ void CutScenes_Update(WORLDINFO_s *world, i32 paused) {
         }
     } else {
         NewLData = &LDataList[stop_cut->skip_level];
-        if (NewLData == HUB_LDATA && CutScenePlayer_Active() == 0) {
-            if (WORLD->area != NULL && (WORLD->area->flags & 2) != 0) {
+        if (HUB_LDATA != NULL && NewLData == HUB_LDATA) {
+            if (CutScenePlayer_Active() != 0) {
+                NewLevelFromMenu(HUB_LDATA, -1, -1, 1);
+                hub_from_cutsceneplayer = 1;
+            } else if (WORLD->area != NULL && (WORLD->area->flags & 2) != 0) {
                 NewLData = SuperStory == 0 ? CREDITS_LDATA : STATUS_LDATA;
             }
         } else if (CutScenePlayer_Active() != 0 &&
@@ -645,17 +644,17 @@ void CutScenes_Update(WORLDINFO_s *world, i32 paused) {
             NewLevelFromMenu(HUB_LDATA, -1, -1, 1);
             hub_from_cutsceneplayer = 1;
         }
-    }
-
-    if (waiting_for_level != -1) {
-        cut_waiting_for_new_level = 1;
-        PauseGameCut();
-        music_man.PauseTrack(TRACK_CLASS_CUTSCENE);
-        newlevel_resumecutaudio = 1;
+        if (waiting_for_level != -1) {
+            cut_waiting_for_new_level = 1;
+            PauseGameCut();
+            music_man.PauseTrack(TRACK_CLASS_CUTSCENE);
+            newlevel_resumecutaudio = 1;
+        }
     }
     CUTNOFOG = 0;
 
     if (CutInstEndCount < 4) {
+        instNUGCUTSCENE_s *stop_instance = static_cast<instNUGCUTSCENE_s *>(stop_cut->instance);
         CutInstEndStop = CutInstEndCount;
         CutInstEnd[CutInstEndCount++] = stop_instance;
         stop_instance->flags_88 |= 2;
@@ -691,17 +690,15 @@ void CutScenes_Destroy(CUTSYS *system) {
         return;
     }
     for (i32 i = 0; i < system->count; ++i) {
-        CUTINFO *cut = system->cuts[i];
-        if (cut->instance != NULL) {
-            instNuGCutSceneDestroy(static_cast<instNUGCUTSCENE_s *>(cut->instance));
-            cut->instance = NULL;
+        if (system->cuts[i]->instance != NULL) {
+            instNuGCutSceneDestroy(static_cast<instNUGCUTSCENE_s *>(system->cuts[i]->instance));
+            system->cuts[i]->instance = NULL;
         }
     }
     for (i32 i = 0; i < system->count; ++i) {
-        CUTINFO *cut = system->cuts[i];
-        if (cut->scene != NULL) {
-            NuGCutSceneDestroy(static_cast<NUGCUTSCENE_s *>(cut->scene));
-            cut->scene = NULL;
+        if (system->cuts[i]->scene != NULL) {
+            NuGCutSceneDestroy(static_cast<NUGCUTSCENE_s *>(system->cuts[i]->scene));
+            system->cuts[i]->scene = NULL;
         }
     }
 }
@@ -1279,7 +1276,7 @@ static void CutScene_RigidPostRender(NUGCUTRIGID_s *rigid, instNUGCUTRIGID_s *in
     }
 
     NUVEC *position = reinterpret_cast<NUVEC *>(&matrix->m30);
-    if (NuVecDistSqr(position, reinterpret_cast<NUVEC *>(&GameCam->render_mtx.m30), NULL) >= CutReflectRange2) {
+    if (!(NuVecDistSqr(position, reinterpret_cast<NUVEC *>(&GameCam->render_mtx.m30), NULL) < CutReflectRange2)) {
         return;
     }
 
@@ -1419,17 +1416,14 @@ void CutScenes_ConfigureList(char *filename, variptr_u *buffer, variptr_u) {
                     break;
                 }
 
-                i32 i = 0;
-                volatile i32 duplicate = 0;
-                while (i < CUTCOUNT) {
+                i32 duplicate = 0;
+                for (i32 i = 0; i < CUTCOUNT; ++i) {
                     if (duplicate != 0) {
                         break;
                     }
                     if (NuStrICmp(directory, entries[i].directory) == 0 && NuStrICmp(file, entries[i].filename) == 0 &&
                         entries[CUTCOUNT].level == entries[i].level) {
                         duplicate = 1;
-                    } else {
-                        ++i;
                     }
                 }
                 if (duplicate == 0) {
@@ -1648,20 +1642,20 @@ void Exit_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapse
 }
 
 void Fade_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed) {
-    if (stage->field_0x14 == 0) {
-        stage->field_0x18 = 0.0f;
-        stage->field_0x1c = 0.6f;
-        stage->field_0x14 = 1;
-    } else if (stage->field_0x14 == 1) {
-        stage->field_0x18 += elapsed;
-        if (stage->field_0x18 >= stage->field_0x1c) {
-            FinishStatusPacket(packet->prompt_choice);
+    switch (stage->field_0x14) {
+        case 0:
+            stage->field_0x18 = 0.0f;
+            stage->field_0x1c = 0.6f;
+            stage->field_0x14 = 1;
+            break;
+        case 1: {
+            stage->field_0x18 += elapsed;
+            if (stage->field_0x18 >= stage->field_0x1c) {
+                FinishStatusPacket(packet->prompt_choice);
+            }
+            icon_y = -StatusIconsOnOff(NuFdiv(stage->field_0x18, stage->field_0x1c));
+            break;
         }
-        f32 ratio = 0.0f;
-        if (stage->field_0x1c != 0.0f && stage->field_0x18 != 0.0f) {
-            ratio = stage->field_0x18 / stage->field_0x1c;
-        }
-        icon_y = -StatusIconsOnOff(ratio);
     }
 }
 
@@ -1672,164 +1666,160 @@ NUGCUTSCENE_s *RelocateCutScene(NUGCUTSCENE_s *source, variptr_u *buffer) {
     buffer->addr = ALIGN(buffer->addr, 4);
     NUGCUTSCENE_s *cutscene = reinterpret_cast<NUGCUTSCENE_s *>(buffer->void_ptr);
     isize delta = reinterpret_cast<isize>(cutscene) - reinterpret_cast<isize>(source);
-    if (delta == 0) {
-        buffer->addr = reinterpret_cast<usize>(cutscene) + cutscene->loaded_size;
-        return cutscene;
-    }
+    if (delta != 0) {
+        source->string_delta = delta;
+        source->relocation_delta = delta;
+        memmove(cutscene, source, source->loaded_size);
 
-    source->string_delta = delta;
-    source->relocation_delta = delta;
-    memmove(cutscene, source, source->loaded_size);
-
-    cutscene->strings =
-        cutscene->strings != NULL
-            ? reinterpret_cast<char *>(reinterpret_cast<isize>(cutscene->strings) + cutscene->string_delta)
-            : NULL;
-    if (cutscene->camera_system != NULL) {
-        isize data_delta = cutscene->string_delta;
-        cutscene->camera_system =
-            reinterpret_cast<NUGCUTCAMERASYS_s *>(reinterpret_cast<isize>(cutscene->camera_system) + data_delta);
-        NUGCUTCAMERASYS_s *system = cutscene->camera_system;
-        system->cameras =
-            system->cameras != NULL
-                ? reinterpret_cast<NUGCUTCAMERA_s *>(reinterpret_cast<isize>(system->cameras) + data_delta)
+        cutscene->strings =
+            cutscene->strings != NULL
+                ? reinterpret_cast<char *>(reinterpret_cast<isize>(cutscene->strings) + cutscene->string_delta)
                 : NULL;
-        if (__builtin_expect(static_cast<u8>(cutscene->version) > 4, 1)) {
-            if (system->focus_animation != NULL) {
-                system->focus_animation =
-                    static_cast<nuanimdata2_s *>(NuAnimData2FixPtrs(system->focus_animation, delta, 1, 0));
+        if (cutscene->camera_system != NULL) {
+            isize data_delta = cutscene->string_delta;
+            cutscene->camera_system =
+                reinterpret_cast<NUGCUTCAMERASYS_s *>(reinterpret_cast<isize>(cutscene->camera_system) + data_delta);
+            NUGCUTCAMERASYS_s *system = cutscene->camera_system;
+            system->cameras =
+                system->cameras != NULL
+                    ? reinterpret_cast<NUGCUTCAMERA_s *>(reinterpret_cast<isize>(system->cameras) + data_delta)
+                    : NULL;
+            if (__builtin_expect(static_cast<u8>(cutscene->version) > 4, 1)) {
+                if (system->focus_animation != NULL) {
+                    system->focus_animation =
+                        static_cast<nuanimdata2_s *>(NuAnimData2FixPtrs(system->focus_animation, delta, 1, 0));
+                }
+                system->focus_state_animation = StateAnimFixPtrs(system->focus_state_animation, delta);
             }
-            system->focus_state_animation = StateAnimFixPtrs(system->focus_state_animation, delta);
+            if (system->animation != NULL) {
+                system->animation = static_cast<nuanimdata2_s *>(NuAnimData2FixPtrs(system->animation, delta, 1, 0));
+            }
+            system->state_animation = StateAnimFixPtrs(system->state_animation, delta);
         }
-        if (system->animation != NULL) {
-            system->animation = static_cast<nuanimdata2_s *>(NuAnimData2FixPtrs(system->animation, delta, 1, 0));
-        }
-        system->state_animation = StateAnimFixPtrs(system->state_animation, delta);
-    }
 
-    if (cutscene->locator_system != NULL) {
-        isize data_delta = cutscene->string_delta;
-        cutscene->locator_system =
-            reinterpret_cast<NUGCUTLOCATORSYS_s *>(reinterpret_cast<isize>(cutscene->locator_system) + data_delta);
-        NUGCUTLOCATORSYS_s *system = cutscene->locator_system;
-        system->locators =
-            system->locators != NULL
-                ? reinterpret_cast<NUGCUTLOCATOR_s *>(reinterpret_cast<isize>(system->locators) + data_delta)
-                : NULL;
-        if (system->locators != NULL) {
-            for (i32 i = 0; i < system->locator_count; ++i) {
-                NUGCUTLOCATOR_s *locator = &system->locators[i];
-                if (locator->animation != NULL) {
-                    locator->animation =
-                        static_cast<nuanimdata2_s *>(NuAnimData2FixPtrs(locator->animation, delta, 1, 0));
+        if (cutscene->locator_system != NULL) {
+            isize data_delta = cutscene->string_delta;
+            cutscene->locator_system =
+                reinterpret_cast<NUGCUTLOCATORSYS_s *>(reinterpret_cast<isize>(cutscene->locator_system) + data_delta);
+            NUGCUTLOCATORSYS_s *system = cutscene->locator_system;
+            system->locators =
+                system->locators != NULL
+                    ? reinterpret_cast<NUGCUTLOCATOR_s *>(reinterpret_cast<isize>(system->locators) + data_delta)
+                    : NULL;
+            if (system->locators != NULL) {
+                for (i32 i = 0; i < system->locator_count; ++i) {
+                    NUGCUTLOCATOR_s *locator = &system->locators[i];
+                    if (locator->animation != NULL) {
+                        locator->animation =
+                            static_cast<nuanimdata2_s *>(NuAnimData2FixPtrs(locator->animation, delta, 1, 0));
+                    }
                 }
             }
-        }
-        system->types =
-            system->types != NULL
-                ? reinterpret_cast<NUGCUTLOCATORTYPE_s *>(reinterpret_cast<isize>(system->types) + data_delta)
-                : NULL;
-        if (system->types != NULL) {
-            for (i32 i = 0; i < system->type_count; ++i) {
-                if (system->types[i].name != NULL) {
-                    system->types[i].name =
-                        reinterpret_cast<char *>(reinterpret_cast<isize>(system->types[i].name) + data_delta);
-                }
-            }
-        }
-    }
-
-    if (cutscene->rigid_system != NULL) {
-        isize data_delta = cutscene->string_delta;
-        cutscene->rigid_system =
-            reinterpret_cast<NUGCUTRIGIDSYS_s *>(reinterpret_cast<isize>(cutscene->rigid_system) + data_delta);
-        NUGCUTRIGIDSYS_s *system = cutscene->rigid_system;
-        system->rigids = system->rigids != NULL
-                             ? reinterpret_cast<NUGCUTRIGID_s *>(reinterpret_cast<isize>(system->rigids) + data_delta)
-                             : NULL;
-        if (system->rigids != NULL) {
-            for (i32 i = 0; i < system->count; ++i) {
-                NUGCUTRIGID_s *rigid = &system->rigids[i];
-                if (rigid->name != NULL) {
-                    rigid->name = reinterpret_cast<char *>(reinterpret_cast<isize>(rigid->name) + data_delta);
-                }
-                if (rigid->animation != NULL) {
-                    rigid->animation = static_cast<nuanimdata2_s *>(NuAnimData2FixPtrs(rigid->animation, delta, 1, 0));
-                }
-                rigid->state_animation = StateAnimFixPtrs(rigid->state_animation, delta);
-            }
-        }
-    }
-
-    if (cutscene->character_system != NULL) {
-        isize data_delta = cutscene->string_delta;
-        cutscene->character_system =
-            reinterpret_cast<NUGCUTCHARSYS_s *>(reinterpret_cast<isize>(cutscene->character_system) + data_delta);
-        NUGCUTCHARSYS_s *system = cutscene->character_system;
-        system->characters =
-            system->characters != NULL
-                ? reinterpret_cast<NUGCUTCHAR_s *>(reinterpret_cast<isize>(system->characters) + data_delta)
-                : NULL;
-        if (system->characters != NULL) {
-            for (i32 i = 0; i < system->character_count; ++i) {
-                NUGCUTCHAR_s *character = &system->characters[i];
-                if (character->name != NULL) {
-                    character->name = reinterpret_cast<char *>(reinterpret_cast<isize>(character->name) + data_delta);
-                }
-                if (character->animation != NULL) {
-                    character->animation =
-                        static_cast<nuanimdata2_s *>(NuAnimData2FixPtrs(character->animation, delta, 1, 0));
-                }
-                if (character->face_animation != NULL) {
-                    character->face_animation =
-                        static_cast<nuanimdata2_s *>(NuAnimData2FixPtrs(character->face_animation, delta, 1, 0));
-                }
-                if (character->extra_animation != NULL) {
-                    character->extra_animation =
-                        static_cast<nuanimdata2_s *>(NuAnimData2FixPtrs(character->extra_animation, delta, 1, 0));
-                }
-            }
-        }
-        if (static_cast<u8>(cutscene->version) > 3 && cutscene->character_animations != NULL) {
-            cutscene->character_animations = reinterpret_cast<NUGCUTCHARANIM_s *>(
-                reinterpret_cast<isize>(cutscene->character_animations) + data_delta);
-            if (system->characters != NULL) {
-                for (i32 i = 0; i < system->character_count; ++i) {
-                    NUGCUTCHARANIM_s *animation = &cutscene->character_animations[i];
-                    if (animation->animation != NULL) {
-                        animation->animation =
-                            static_cast<nuanimdata2_s *>(NuAnimData2FixPtrs(animation->animation, delta, 1, 0));
+            system->types =
+                system->types != NULL
+                    ? reinterpret_cast<NUGCUTLOCATORTYPE_s *>(reinterpret_cast<isize>(system->types) + data_delta)
+                    : NULL;
+            if (system->types != NULL) {
+                for (i32 i = 0; i < system->type_count; ++i) {
+                    if (system->types[i].name != NULL) {
+                        system->types[i].name =
+                            reinterpret_cast<char *>(reinterpret_cast<isize>(system->types[i].name) + data_delta);
                     }
                 }
             }
         }
-    }
 
-    if (cutscene->trigger_system != NULL) {
-        isize data_delta = cutscene->string_delta;
-        cutscene->trigger_system =
-            reinterpret_cast<NUGCUTTRIGGERSYS_s *>(reinterpret_cast<isize>(cutscene->trigger_system) + data_delta);
-        NUGCUTTRIGGERSYS_s *system = cutscene->trigger_system;
-        system->events =
-            system->events != NULL
-                ? reinterpret_cast<NUGCUTTRIGGEREVENT_s *>(reinterpret_cast<isize>(system->events) + data_delta)
-                : NULL;
-        if (system->events != NULL) {
-            for (i32 i = 0; i < system->event_count; ++i) {
-                NUGCUTTRIGGEREVENT_s *event = &system->events[i];
-                event->field_04 = event->field_04 != NULL
-                                      ? reinterpret_cast<void *>(reinterpret_cast<isize>(event->field_04) + data_delta)
-                                      : NULL;
-                event->state_animation = StateAnimFixPtrs(event->state_animation, delta);
+        if (cutscene->rigid_system != NULL) {
+            isize data_delta = cutscene->string_delta;
+            cutscene->rigid_system =
+                reinterpret_cast<NUGCUTRIGIDSYS_s *>(reinterpret_cast<isize>(cutscene->rigid_system) + data_delta);
+            NUGCUTRIGIDSYS_s *system = cutscene->rigid_system;
+            system->rigids = system->rigids != NULL
+                                 ? reinterpret_cast<NUGCUTRIGID_s *>(reinterpret_cast<isize>(system->rigids) + data_delta)
+                                 : NULL;
+            if (system->rigids != NULL) {
+                for (i32 i = 0; i < system->count; ++i) {
+                    NUGCUTRIGID_s *rigid = &system->rigids[i];
+                    if (rigid->name != NULL) {
+                        rigid->name = reinterpret_cast<char *>(reinterpret_cast<isize>(rigid->name) + data_delta);
+                    }
+                    if (rigid->animation != NULL) {
+                        rigid->animation = static_cast<nuanimdata2_s *>(NuAnimData2FixPtrs(rigid->animation, delta, 1, 0));
+                    }
+                    rigid->state_animation = StateAnimFixPtrs(rigid->state_animation, delta);
+                }
             }
         }
-    }
-    cutscene->bounds =
-        cutscene->bounds != NULL
-            ? reinterpret_cast<void *>(reinterpret_cast<isize>(cutscene->bounds) + cutscene->string_delta)
-            : NULL;
 
-    buffer->addr = reinterpret_cast<usize>(cutscene) + cutscene->loaded_size;
+        if (cutscene->character_system != NULL) {
+            isize data_delta = cutscene->string_delta;
+            cutscene->character_system =
+                reinterpret_cast<NUGCUTCHARSYS_s *>(reinterpret_cast<isize>(cutscene->character_system) + data_delta);
+            NUGCUTCHARSYS_s *system = cutscene->character_system;
+            system->characters =
+                system->characters != NULL
+                    ? reinterpret_cast<NUGCUTCHAR_s *>(reinterpret_cast<isize>(system->characters) + data_delta)
+                    : NULL;
+            if (system->characters != NULL) {
+                for (i32 i = 0; i < system->character_count; ++i) {
+                    NUGCUTCHAR_s *character = &system->characters[i];
+                    if (character->name != NULL) {
+                        character->name = reinterpret_cast<char *>(reinterpret_cast<isize>(character->name) + data_delta);
+                    }
+                    if (character->animation != NULL) {
+                        character->animation =
+                            static_cast<nuanimdata2_s *>(NuAnimData2FixPtrs(character->animation, delta, 1, 0));
+                    }
+                    if (character->face_animation != NULL) {
+                        character->face_animation =
+                            static_cast<nuanimdata2_s *>(NuAnimData2FixPtrs(character->face_animation, delta, 1, 0));
+                    }
+                    if (character->extra_animation != NULL) {
+                        character->extra_animation =
+                            static_cast<nuanimdata2_s *>(NuAnimData2FixPtrs(character->extra_animation, delta, 1, 0));
+                    }
+                }
+            }
+            if (static_cast<u8>(cutscene->version) > 3 && cutscene->character_animations != NULL) {
+                cutscene->character_animations = reinterpret_cast<NUGCUTCHARANIM_s *>(
+                    reinterpret_cast<isize>(cutscene->character_animations) + data_delta);
+                if (system->characters != NULL && cutscene->character_animations != NULL) {
+                    for (i32 i = 0; i < system->character_count; ++i) {
+                        NUGCUTCHARANIM_s *animation = &cutscene->character_animations[i];
+                        if (animation->animation != NULL) {
+                            animation->animation =
+                                static_cast<nuanimdata2_s *>(NuAnimData2FixPtrs(animation->animation, delta, 1, 0));
+                        }
+                    }
+                }
+            }
+        }
+
+        if (cutscene->trigger_system != NULL) {
+            isize data_delta = cutscene->string_delta;
+            cutscene->trigger_system =
+                reinterpret_cast<NUGCUTTRIGGERSYS_s *>(reinterpret_cast<isize>(cutscene->trigger_system) + data_delta);
+            NUGCUTTRIGGERSYS_s *system = cutscene->trigger_system;
+            system->events =
+                system->events != NULL
+                    ? reinterpret_cast<NUGCUTTRIGGEREVENT_s *>(reinterpret_cast<isize>(system->events) + data_delta)
+                    : NULL;
+            if (system->events != NULL) {
+                for (i32 i = 0; i < system->event_count; ++i) {
+                    NUGCUTTRIGGEREVENT_s *event = &system->events[i];
+                    event->field_04 = event->field_04 != NULL
+                                          ? reinterpret_cast<void *>(reinterpret_cast<isize>(event->field_04) + data_delta)
+                                          : NULL;
+                    event->state_animation = StateAnimFixPtrs(event->state_animation, delta);
+                }
+            }
+        }
+        cutscene->bounds =
+            cutscene->bounds != NULL
+                ? reinterpret_cast<void *>(reinterpret_cast<isize>(cutscene->bounds) + cutscene->string_delta)
+                : NULL;
+    }
+    buffer->addr += cutscene->loaded_size;
     return cutscene;
 }
 
@@ -1860,22 +1850,23 @@ void GoldBrick_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 activ
         const f32 time = stage->field_0x18;
         if (time >= 1.0f && time < stage->field_0x1c - 1.0f) {
             f32 blend = 1.0f;
-            i32 count = packet->previous_gold_bricks;
-            if (time >= 2.0f) {
+            i32 count = Game.field_0x7c26[0];
+            const i32 previous = packet->previous_gold_bricks;
+            if (time < 2.0f) {
+                blend = NuTrigTable[(static_cast<i32>((time - 1.0f) * 16384.0f) >> 1) & 0x7fff];
+                count = previous;
+            } else {
                 const f32 end = stage->field_0x1c - 2.0f;
                 if (time >= end)
                     blend = NuTrigTable[(static_cast<i32>((1.0f - (time - end)) * 16384.0f) >> 1) & 0x7fff];
-                count = Game.field_0x7c26[0];
-                if (time < (Game.field_0x7c26[0] - packet->previous_gold_bricks - 1) * 2.5f + 2.0f) {
-                    count = (packet->previous_gold_bricks + 1) + (time - 2.0f) / 2.5f;
-                }
-            } else
-                blend = NuTrigTable[(static_cast<i32>((time - 1.0f) * 16384.0f) >> 1) & 0x7fff];
+                if (time < (count - previous - 1) * 2.5f + 2.0f)
+                    count = (previous + 1) + (time - 2.0f) / 2.5f;
+            }
             char text[268];
             sprintf(text, "%i/%i", count, GOLDBRICKPOINTS);
             SmartTextEx(text, 0.0f, blend * -0.99999994f + 1.3f, 1.0f, 1.5f, 1.5f, 1.5f, 0, 255, 255, 255, 1.7f, 1,
                         NULL, 0, static_cast<i32>(blend * 128.0f));
-            const u32 angle = NuFmod(GlobalTimer.time_elapsed, 4.0f) * 0.25f * 65536.0f;
+            const u16 angle = NuFmod(GlobalTimer.time_elapsed, 4.0f) * 0.25f * 65536.0f;
             DrawPanel3DObjectNoAlpha(0.0f, blend * 0.99999994f - 1.3f, 1.0f, 1.0f, 1.0f, 1.0f,
                                      static_cast<i32>(NuTrigTable[angle & 0x7fff] * 1820.0f), angle, 0,
                                      reinterpret_cast<nuhspecial_s *>(&WORLD->lev_objs[0xd3]), 2);
@@ -1896,46 +1887,52 @@ void GoldBrick_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *packet) {
 
 void GoldBrick_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed) {
     const i32 count = Game.field_0x7c26[0] - packet->previous_gold_bricks;
-    if (stage->field_0x14 == 0) {
-        stage->field_0x14 = 1;
-        stage->field_0x18 = 0.0f;
-        stage->field_0x1c = (count - 1) * 2.5f + 2.0f + 3.0f + 1.0f + 1.0f;
-    } else if (stage->field_0x14 == 1) {
-        const f32 previous = stage->field_0x18;
-        stage->field_0x18 += elapsed;
-        if (stage->field_0x18 >= stage->field_0x1c)
-            NextStatusStage(packet);
-        else
-            for (i32 i = 0; i < count; ++i) {
-                const f32 at = i * 2.5f + 2.0f;
-                if (previous < at && stage->field_0x18 >= at) {
-                    PlaySfx(const_cast<char *>("TrueJedi_100pc"), NULL);
-                    NewStatusRumbleBuzz(-1, 0.6f, 0.0f, 0);
-                    const i32 points = packet->previous_gold_bricks + i + 1;
-                    char text[252];
-                    sprintf(text, "%i/%i", points, GOLDBRICKPOINTS);
-                    AddFancyMessage(text, 0.0f, 0.3f, 0.75f, 1.25f, 1, 1);
-                    nuvec_s position = {0.0f, 0.0375f, 1.0f};
-                    const i16 id = reinterpret_cast<i16 *>(packet->field_0x12c)[i];
-                    char *label = TTab[id];
-                    if (id == tTRUEJEDI) {
-                        NuStrCpy(text, label);
-                        if (BOTHTRUEJEDIGOLDBRICKS != 0) {
-                            NuStrCat(text, " ");
-                            NuStrCat(text, TTab[(packet->field_0xb0 & 0x40) != 0 ? tFREEPLAY : tSTORY]);
+    const i32 last = count - 1;
+    switch (stage->field_0x14) {
+        case 0:
+            stage->field_0x14 = 1;
+            stage->field_0x18 = 0.0f;
+            stage->field_0x1c = last * 2.5f + 2.0f + 3.0f + 1.0f + 1.0f;
+            break;
+        case 1: {
+            const f32 previous = stage->field_0x18;
+            stage->field_0x18 += elapsed;
+            if (stage->field_0x18 >= stage->field_0x1c)
+                NextStatusStage(packet);
+            else
+                for (i32 i = 0; i <= last; ++i) {
+                    const f32 at = i * 2.5f + 2.0f;
+                    if (previous < at && stage->field_0x18 >= at) {
+                        PlaySfx(const_cast<char *>("TrueJedi_100pc"), NULL);
+                        NewStatusRumbleBuzz(-1, 0.6f, 0.0f, 0);
+                        const i32 points = packet->previous_gold_bricks + i + 1;
+                        char text[252];
+                        sprintf(text, "%i/%i", points, GOLDBRICKPOINTS);
+                        AddFancyMessage(text, 0.0f, 0.3f, 0.75f, 1.25f, 1, 1);
+                        nuvec_s position = {0.0f, 0.0375f, 1.0f};
+                        const i16 id = reinterpret_cast<i16 *>(packet->field_0x12c)[i];
+                        char *label;
+                        if (id == tTRUEJEDI) {
+                            NuStrCpy(text, TTab[id]);
+                            if (BOTHTRUEJEDIGOLDBRICKS != 0) {
+                                NuStrCat(text, " ");
+                                NuStrCat(text, TTab[(packet->field_0xb0 & 0x40) != 0 ? tFREEPLAY : tSTORY]);
+                            }
+                            label = text;
+                        } else
+                            label = TTab[id];
+                        AddGameMessage(label, &position, 0.7f, &position, 0.7f, 255, 0, 127, 0x4020, 2.0f);
+                        if (points > 60) {
+                            IncreaseScore(packet->score, 100000, 0);
+                            CoinTotalScale = 1.5f;
+                            PlaySfx(const_cast<char *>("Shop_BuyCheat"), NULL);
+                            Text_MakeScore(100000, text);
+                            AddFancyMessage(text, 0.0f, -STATSPOSY, 0.5f, 1.25f, 0, 0);
                         }
-                        label = text;
-                    }
-                    AddGameMessage(label, &position, 0.7f, &position, 0.7f, 255, 0, 127, 0x4020, 2.0f);
-                    if (points > 60) {
-                        IncreaseScore(packet->score, 100000, 0);
-                        CoinTotalScale = 1.5f;
-                        PlaySfx(const_cast<char *>("Shop_BuyCheat"), NULL);
-                        Text_MakeScore(100000, text);
-                        AddFancyMessage(text, 0.0f, -STATSPOSY, 0.5f, 1.25f, 0, 0);
                     }
                 }
-            }
+            break;
+        }
     }
 }
 
@@ -2077,7 +2074,10 @@ void LevelComplete_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 a
 }
 
 void LevelComplete_LSW_Skip(STATUS_STAGE_s *stage, STATUSPACKET_s *packet) {
-    if ((stage->type == 26 && packet->mission_state == 2) || (stage->type == 23 && packet->challenge_state == 2)) {
+    if (stage->type == 26 && packet->mission_state == 2) {
+        *packet->score = packet->reward_score;
+    }
+    if (stage->type == 23 && packet->challenge_state == 2) {
         *packet->score = packet->reward_score;
     }
     NextStatusStage(packet);
@@ -2088,43 +2088,51 @@ void NewStatusRumbleBuzz(i32, f32, f32, i32);
 extern "C" void PlaySfx(char *, nuvec_s *);
 
 void LevelComplete_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed) {
-    if (stage->field_0x14 == 0) {
-        stage->field_0x18 = 0.0f;
-        stage->field_0x1c = 4.0f;
-        stage->field_0x14 = 1;
-        return;
-    }
-    if (stage->field_0x14 != 1) {
-        return;
-    }
-    SetDrawGoldBrick(packet, packet->current_gold_brick);
-    const f32 previous = stage->field_0x18;
-    stage->field_0x18 += elapsed;
-    if (stage->field_0x18 >= stage->field_0x1c) {
-        if ((stage->type == 26 && packet->mission_state == 2) || (stage->type == 23 && packet->challenge_state == 2)) {
-            *packet->score = packet->reward_score;
+    switch (stage->field_0x14) {
+        case 0:
+            stage->field_0x18 = 0.0f;
+            stage->field_0x1c = 4.0f;
+            stage->field_0x14 = 1;
+            return;
+        case 1: {
+            SetDrawGoldBrick(packet, packet->current_gold_brick);
+            const f32 previous = stage->field_0x18;
+            stage->field_0x18 += elapsed;
+            if (stage->field_0x18 >= stage->field_0x1c) {
+                if (stage->type == 26 && packet->mission_state == 2) {
+                    *packet->score = packet->reward_score;
+                }
+                if (stage->type == 23 && packet->challenge_state == 2) {
+                    *packet->score = packet->reward_score;
+                }
+                NextStatusStage(packet);
+                return;
+            }
+            if (previous < 0.5f && stage->field_0x18 >= 0.5f) {
+                if ((stage->type == 23 && packet->challenge_state == 3) ||
+                    (stage->type == 26 && packet->mission_state == 3)) {
+                    GameAudio_PlaySfx(0x32, NULL, 0, 0);
+                } else {
+                    PlaySfx(const_cast<char *>("StatusAward"), NULL);
+                }
+                NewStatusRumbleBuzz(-1, 0.6f, 0.0f, 0);
+                return;
+            }
+            if ((stage->type != 26 || packet->mission_state != 2) &&
+                (stage->type != 23 || packet->challenge_state != 2)) {
+                return;
+            }
+            const f32 reward_end = stage->field_0x1c - 0.75f;
+            if (previous < reward_end && stage->field_0x18 >= reward_end) {
+                CoinTotalScale = 1.5f;
+                NewStatusRumbleBuzz(-1, 0.0f, 0.1f, 0);
+                PlaySfx(const_cast<char *>("Shop_BuyCheat"), NULL);
+            } else if (stage->field_0x18 >= 0.75f && stage->field_0x18 < reward_end) {
+                PlaySfx(const_cast<char *>("PickupCoin"), NULL);
+            }
+            return;
         }
-        NextStatusStage(packet);
-        return;
-    }
-    if (previous < 0.5f && stage->field_0x18 >= 0.5f) {
-        if ((stage->type == 23 && packet->challenge_state == 3) || (stage->type == 26 && packet->mission_state == 3)) {
-            GameAudio_PlaySfx(0x32, NULL, 0, 0);
-        } else {
-            PlaySfx(const_cast<char *>("StatusAward"), NULL);
-        }
-        NewStatusRumbleBuzz(-1, 0.6f, 0.0f, 0);
-        return;
-    }
-    if ((stage->type != 26 || packet->mission_state != 2) && (stage->type != 23 || packet->challenge_state != 2)) {
-        return;
-    }
-    const f32 reward_end = stage->field_0x1c - 0.75f;
-    if (previous < reward_end && stage->field_0x18 >= reward_end) {
-        CoinTotalScale = 1.5f;
-        NewStatusRumbleBuzz(-1, 0.0f, 0.1f, 0);
-        PlaySfx(const_cast<char *>("Shop_BuyCheat"), NULL);
-    } else if (stage->field_0x18 >= 0.75f && stage->field_0x18 < reward_end) {
-        PlaySfx(const_cast<char *>("PickupCoin"), NULL);
+        default:
+            return;
     }
 }

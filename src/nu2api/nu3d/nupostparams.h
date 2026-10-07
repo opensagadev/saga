@@ -33,8 +33,10 @@ typedef struct NuDepthOfFieldParameters {
     f32 near_distance;
     f32 far_distance;
     i32 mode;
-    f32 bias;
+    i32 bias;
 } NuDepthOfFieldParameters;
+DECOMP_ASSERT(sizeof(NuDepthOfFieldParameters) == 0x18, "depth-of-field parameters");
+DECOMP_ASSERT(offsetof(NuDepthOfFieldParameters, bias) == 0x14, "depth-of-field bias offset");
 
 typedef struct NuSpeedBlurParameters {
     i32 enabled;

@@ -566,9 +566,8 @@ void Hub_Update(WORLDINFO_s *world) {
         }
     }
 
-    STOREPACK *current_pack = StorePack;
-    for (i32 pack = 0; pack < 11; ++pack, ++current_pack) {
-        STOREPACK &store_pack = *current_pack;
+    for (i32 pack = 0; pack < 11; ++pack) {
+        STOREPACK &store_pack = StorePack[pack];
         if (store_pack.id != NULL) {
             const i32 id = *store_pack.id;
             if (id != -1 && Store_IsPackUnlocked(pack) == 0 &&
@@ -2212,14 +2211,13 @@ void Hub_DrawFreePlaySelect() {
         }
         i32 model = FreePlayModelList[0].model_id;
         f32 opacity = (MenuPacket.active_player[0] ? 1.0f : DROPINALPHA) * fade;
-        if (freeplay_time[0] <= 0.0f) {
-            if (freeplay_selected[0] != 0)
-                model = MenuPacket.player_model[0];
-        } else {
+        if (freeplay_time[0] > 0.0f) {
             f32 progress = freeplay_time[0] / 0.75f;
             if (freeplay_selected[0] == 0)
                 progress = 1.0f - progress;
             opacity *= progress;
+        } else if (freeplay_selected[0] != 0) {
+            model = MenuPacket.player_model[0];
         }
         if (opacity > 0.0f)
             DrawCharIcon(model, -ICONX, STATSPOSY, 0.0f, ICONSIZE, 0xa6, opacity, opacity, 1, NULL);
@@ -2316,22 +2314,22 @@ void Hub_DrawFreePlaySelect() {
                               MenuPacket.active_player[1], 0, 1.0f, -1, 0, -1, 0);
         return;
     }
-    if (freeplaymode == 2) {
-        list[0].model_id = MenuPacket.player_model[0];
-        i32 count = 1;
-        for (i32 i = 0; i < fpcount; ++i)
-            list[count++] = fplist[i];
-        list[count].model_id = -1;
-        f32 alpha = 0.0f;
-        if (freeplaytime < freeplayduration - 0.1f)
-            alpha = 1.0f - freeplaytime / (freeplayduration - 0.1f);
-        Collection_Draw(collection, 0.0f, COLLECTION_Y_HUB, collection->field_10, list, alpha, 1);
-        if (alpha >= 0.0f)
-            Hub_DrawIconCursors(collection, 0, alpha, 1.0f);
+    if (freeplaymode != 3 && freeplaymode != 4) {
+        if (freeplaymode == 2) {
+            list[0].model_id = MenuPacket.player_model[0];
+            i32 count = 1;
+            for (i32 i = 0; i < fpcount; ++i)
+                list[count++] = fplist[i];
+            list[count].model_id = -1;
+            f32 alpha = 0.0f;
+            if (freeplaytime < freeplayduration - 0.1f)
+                alpha = 1.0f - freeplaytime / (freeplayduration - 0.1f);
+            Collection_Draw(collection, 0.0f, COLLECTION_Y_HUB, collection->field_10, list, alpha, 1);
+            if (alpha >= 0.0f)
+                Hub_DrawIconCursors(collection, 0, alpha, 1.0f);
+        }
         return;
     }
-    if (freeplaymode != 3 && freeplaymode != 4)
-        return;
     list[0].model_id = MenuPacket.player_model[0];
     i32 count = 1;
     i16 second = MenuPacket.player_model[1];
@@ -2983,12 +2981,22 @@ static void Hub_MakeFreePlayList(i32 first_model, i32 second_model) {
         }
     } else {
         const i32 selectable_count = FreePlayResidentCount + FreePlayBonusCount;
-        for (i32 index = 2; index < selectable_count + 2 && FreePlayModelList[index].model_id != -1; ++index) {
+        for (i32 offset = 0; offset < selectable_count; ++offset) {
+            const i32 index = offset + 2;
             const i32 model = FreePlayModelList[index].model_id;
-            if ((area == -1 ||
-                 ((CDataList[model].model_flags & HUB_FREEPLAY_MODEL_VEHICLE) != 0) ==
-                     ((ADataList[area].flags & AREAFLAG_VEHICLE_AREA) != 0)) &&
-                Collection_Got(model) != 0) {
+            if (model == -1) {
+                break;
+            }
+            if (area != -1) {
+                if ((ADataList[area].flags & AREAFLAG_VEHICLE_AREA) != 0) {
+                    if ((CDataList[model].model_flags & HUB_FREEPLAY_MODEL_VEHICLE) == 0) {
+                        continue;
+                    }
+                } else if ((CDataList[model].model_flags & HUB_FREEPLAY_MODEL_VEHICLE) != 0) {
+                    continue;
+                }
+            }
+            if (Collection_Got(model) != 0) {
                 fplist[fpcount++] = FreePlayModelList[index];
             }
         }
@@ -2998,9 +3006,9 @@ static void Hub_MakeFreePlayList(i32 first_model, i32 second_model) {
     if (fpcount > 3) {
         for (i32 shuffle = 0; shuffle < 64; ++shuffle) {
             const i32 first_offset = qrand() / (0xffff / (fpcount - 2) + 1);
-            const i32 first_index = first_offset + 2;
             const i32 second_offset = qrand() / (0xffff / (fpcount - 3) + 1);
             const i32 second_index = (second_offset + first_offset) % (fpcount - 2) + 2;
+            const i32 first_index = first_offset + 2;
             const APICHARACTERMODELLIST_s saved = fplist[first_index];
             fplist[first_index] = fplist[second_index];
             fplist[second_index] = saved;

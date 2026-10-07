@@ -357,8 +357,7 @@ void WorldInfo_Init(WORLDINFO *world) {
     script_spline_selected = 0;
 
     world->reset_flags = 0;
-    // This original flag occupies one byte despite the shared legacy i32 declaration.
-    reinterpret_cast<u8 *>(&Reflections_On)[0] = NuDeviceSpecs::ms_instance->specs > 1;
+    Reflections_On = NuDeviceSpecs::ms_instance->specs > 1;
     g_lowEndLevelBehaviour = g_isLowEndDevice;
     if (!g_isLowEndDevice) {
         if (world->current_level != NULL && NuStrIStr(world->current_level->name, "JabbasPalace_Intro1") != NULL) {
@@ -383,7 +382,7 @@ void WorldInfo_Init(WORLDINFO *world) {
         }
         if (NuDeviceSpecs::ms_instance->specs <= 2 && world->current_level != NULL &&
             NuStrIStr(world->current_level->name, "Negotiations_") != NULL) {
-            reinterpret_cast<u8 *>(&Reflections_On)[0] = 0;
+            Reflections_On = 0;
         }
     } else {
         if (world->current_level != NULL) {

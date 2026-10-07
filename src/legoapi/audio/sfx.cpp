@@ -773,7 +773,7 @@ extern "C" {
         return sfx_id == -1 ? -1 : g_soundInfo[sfx_id].loop;
     }
 
-    void PauseGameAudio(void) {
+    void PauseGameAudio(i32) {
         if (NOSOUND == 0) {
             NuSound3StopSFX();
             NuSound3SetSFXPitch(0);

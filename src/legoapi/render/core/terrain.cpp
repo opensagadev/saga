@@ -342,7 +342,7 @@ namespace {
         TerrainScanWriter *scale_writer = (writer_arg);                                                                \
         if (TerI->object_scale != 1.0f) {                                                                              \
             TERRAIN_SHAPE *source = scale_candidate;                                                                   \
-            scale_candidate = &ScaleTerrain[scale_writer->scaled_shape_count++];                                       \
+            scale_candidate = &ScaleTerrain[scale_writer->scaled_shape_count];                                         \
             scale_candidate->material[0] = source->material[0];                                                        \
             scale_candidate->material[1] = source->material[1];                                                        \
             scale_candidate->flags = source->flags;                                                                    \
@@ -350,17 +350,17 @@ namespace {
                                                                                                                        \
             for (i32 vector_index = 0; vector_index < 3; ++vector_index) {                                             \
                 scale_candidate->vectors[vector_index].x = source->vectors[vector_index].x;                            \
+                scale_candidate->vectors[vector_index].z = source->vectors[vector_index].z;                            \
                 scale_candidate->vectors[vector_index].y =                                                             \
                     (source->vectors[vector_index].y + scale_group.origin.y) * TerI->inverse_object_scale -            \
                     scale_group.origin.y;                                                                              \
-                scale_candidate->vectors[vector_index].z = source->vectors[vector_index].z;                            \
             }                                                                                                          \
                                                                                                                        \
             if (source->normals[1].y < 65535.0f) {                                                                     \
                 scale_candidate->vectors[3].x = source->vectors[3].x;                                                  \
+                scale_candidate->vectors[3].z = source->vectors[3].z;                                                  \
                 scale_candidate->vectors[3].y =                                                                        \
                     (source->vectors[3].y + scale_group.origin.y) * TerI->inverse_object_scale - scale_group.origin.y; \
-                scale_candidate->vectors[3].z = source->vectors[3].z;                                                  \
                                                                                                                        \
                 const f32 length = NuFsqrt(source->normals[1].x * source->normals[1].x +                               \
                                            source->normals[1].y * source->normals[1].y * TerI->object_scale_sq +       \
@@ -380,6 +380,7 @@ namespace {
             scale_candidate->normals[0].x = source->normals[0].x * inverse_length;                                     \
             scale_candidate->normals[0].y = source->normals[0].y * TerI->object_scale * inverse_length;                \
             scale_candidate->normals[0].z = source->normals[0].z * inverse_length;                                     \
+            ++scale_writer->scaled_shape_count;                                                                        \
         }                                                                                                              \
     } while (0)
 
@@ -1825,10 +1826,12 @@ void ScanTerrain(i32 scan_type, i32 terrain_mask, i32 scan_flags) {
             TERRAIN_SHAPE_BATCH *batch = static_cast<TERRAIN_SHAPE_BATCH *>(group.data);
             while (batch->marker >= 0) {
                 TERRAIN_SHAPE *shapes = reinterpret_cast<TERRAIN_SHAPE *>(batch + 1);
+                const i32 shape_count = batch->shape_count;
                 if (group_bounds_max_x >= batch->min_x && batch->max_x > group_bounds_min_x &&
                     group_bounds_max_z >= batch->min_z && batch->max_z > group_bounds_min_z) {
-                    for (i32 shape_index = 0; shape_index < batch->shape_count; ++shape_index) {
-                        TERRAIN_SHAPE *candidate = &shapes[shape_index];
+                    TERRAIN_SHAPE *shape_cursor = shapes;
+                    for (i32 remaining = shape_count; remaining > 0; --remaining, ++shape_cursor) {
+                        TERRAIN_SHAPE *candidate = shape_cursor;
                         if (!(group_bounds_max_x >= candidate->min_x && candidate->max_x > group_bounds_min_x &&
                               group_bounds_max_z >= candidate->min_z && candidate->max_z > group_bounds_min_z &&
                               group_bounds_max_y >= candidate->min_y && candidate->max_y > group_bounds_min_y) ||
@@ -1847,7 +1850,7 @@ void ScanTerrain(i32 scan_type, i32 terrain_mask, i32 scan_flags) {
                         ++writer.group_shape_count;
                     }
                 }
-                batch = reinterpret_cast<TERRAIN_SHAPE_BATCH *>(shapes + batch->shape_count);
+                batch = reinterpret_cast<TERRAIN_SHAPE_BATCH *>(shapes + shape_count);
             }
             TerrainFinishScanGroup(&writer, group_index);
         }
@@ -1878,10 +1881,12 @@ void ScanTerrain(i32 scan_type, i32 terrain_mask, i32 scan_flags) {
         TERRAIN_SHAPE_BATCH *batch = static_cast<TERRAIN_SHAPE_BATCH *>(group.data);
         while (batch->marker >= 0) {
             TERRAIN_SHAPE *shapes = reinterpret_cast<TERRAIN_SHAPE *>(batch + 1);
+            const i32 shape_count = batch->shape_count;
             if (local_bounds_max_x >= batch->min_x && batch->max_x > local_bounds_min_x &&
                 local_bounds_max_z >= batch->min_z && batch->max_z > local_bounds_min_z) {
-                for (i32 shape_index = 0; shape_index < batch->shape_count; ++shape_index) {
-                    TERRAIN_SHAPE *candidate = &shapes[shape_index];
+                TERRAIN_SHAPE *shape_cursor = shapes;
+                for (i32 remaining = shape_count; remaining > 0; --remaining, ++shape_cursor) {
+                    TERRAIN_SHAPE *candidate = shape_cursor;
                     if (!(local_bounds_max_x >= candidate->min_x && candidate->max_x > local_bounds_min_x &&
                           local_bounds_max_z >= candidate->min_z && candidate->max_z > local_bounds_min_z &&
                           local_bounds_max_y >= candidate->min_y && candidate->max_y > local_bounds_min_y) ||
@@ -1900,7 +1905,7 @@ void ScanTerrain(i32 scan_type, i32 terrain_mask, i32 scan_flags) {
                     ++writer.group_shape_count;
                 }
             }
-            batch = reinterpret_cast<TERRAIN_SHAPE_BATCH *>(shapes + batch->shape_count);
+            batch = reinterpret_cast<TERRAIN_SHAPE_BATCH *>(shapes + shape_count);
         }
         TerrainFinishScanGroup(&writer, group_index);
     }
@@ -2056,6 +2061,7 @@ void ScanTerrain(i32 scan_type, i32 terrain_mask, i32 scan_flags) {
                                     transformed->vectors[2].z = vertices[2].z;
                                     transformed->vectors[2].y =
                                         (vertices[2].y + group.origin.y) * TerI->inverse_object_scale - group.origin.y;
+                                    quad = shape->normals[1].y < 65535.0f;
                                     if (quad) {
                                         transformed->vectors[3].x = vertices[3].x;
                                         transformed->vectors[3].z = vertices[3].z;
@@ -5646,6 +5652,8 @@ void NewScan(nuvec_s *position, i32 terrain_mask, i32 scan_platforms) {
 
 void NewScanRot(nuvec_s *position, i32 terrain_mask) {
     void *scratch = NuScratchAlloc32(0xd0);
+    const f32 position_z = position->z;
+    const f32 position_x = position->x;
     i32 cache_index = 0;
     i16 oldest_age = CurTerr->index_levels[0].cache_age;
     bool cache_hit = false;
@@ -5653,9 +5661,9 @@ void NewScanRot(nuvec_s *position, i32 terrain_mask) {
         TERRAIN_INDEX_LEVEL &cache = CurTerr->index_levels[i];
         i16 age = cache.cache_age;
         if (age > 0) {
-            f32 dx = (position->x + 1.0f) - cache.center_x;
+            f32 dx = (position_x + 1.0f) - cache.center_x;
             if (dx > 0.0f && dx < 2.0f) {
-                f32 dz = (position->z + 1.0f) - cache.center_z;
+                f32 dz = (position_z + 1.0f) - cache.center_z;
                 if (dz > 0.0f && dz < 2.0f) {
                     cache_index = i;
                     cache_hit = true;
@@ -5678,10 +5686,10 @@ void NewScanRot(nuvec_s *position, i32 terrain_mask) {
     writer.shape_count = 0;
 
     const f32 extent = fill_cache ? 1.0f : SHADOW_SCAN_HALF_EXTENT;
-    f32 min_x = position->x - extent;
-    f32 max_x = position->x + extent;
-    f32 min_z = position->z - extent;
-    f32 max_z = position->z + extent;
+    f32 min_x = position_x - extent;
+    f32 max_x = position_x + extent;
+    f32 min_z = position_z - extent;
+    f32 max_z = position_z + extent;
 
     if (!cache_hit) {
         for (i32 cell_index = 0; cell_index < CurTerr->used_cell_count; ++cell_index) {
@@ -5741,10 +5749,10 @@ void NewScanRot(nuvec_s *position, i32 terrain_mask) {
         writer.group_header = TerI->scan_list_storage;
         writer.cursor = reinterpret_cast<TERRAIN_SHAPE **>(writer.group_header + sizeof(TERRAIN_SHAPE *));
         writer.limit = writer.group_header + 0x7f4;
-        min_x = position->x - SHADOW_SCAN_HALF_EXTENT;
-        max_x = position->x + SHADOW_SCAN_HALF_EXTENT;
-        min_z = position->z - SHADOW_SCAN_HALF_EXTENT;
-        max_z = position->z + SHADOW_SCAN_HALF_EXTENT;
+        min_x = position_x - SHADOW_SCAN_HALF_EXTENT;
+        max_x = position_x + SHADOW_SCAN_HALF_EXTENT;
+        min_z = position_z - SHADOW_SCAN_HALF_EXTENT;
+        max_z = position_z + SHADOW_SCAN_HALF_EXTENT;
         u8 *entry = cache.scan_list;
         for (;;) {
             i16 count = reinterpret_cast<i16 *>(entry)[0];
@@ -5761,8 +5769,8 @@ void NewScanRot(nuvec_s *position, i32 terrain_mask) {
             f32 local_min_z = min_z - group.origin.z, local_max_z = max_z - group.origin.z;
             for (i32 i = 0; i < count; ++i) {
                 TERRAIN_SHAPE *shape = shapes[i];
-                if (local_max_x < shape->min_x || shape->max_x <= local_min_x || local_max_z < shape->min_z ||
-                    shape->max_z <= local_min_z)
+                if (!(local_max_x >= shape->min_x && shape->max_x > local_min_x &&
+                      local_max_z >= shape->min_z && shape->max_z > local_min_z))
                     continue;
                 if (shape->material[1] != 0 && (shape->material[1] & terrain_mask) == 0)
                     continue;
@@ -5839,17 +5847,23 @@ void NewScanRot(nuvec_s *position, i32 terrain_mask) {
                     if (reinterpret_cast<u8 *>(writer.cursor) >= writer.limit)
                         continue;
                     if (!rotating) {
-                        if (local_max_x < shape->min_x || shape->max_x <= local_min_x || local_max_z < shape->min_z ||
-                            shape->max_z <= local_min_z)
+                        if (!(local_max_x >= shape->min_x && shape->max_x > local_min_x &&
+                              local_max_z >= shape->min_z && shape->max_z > local_min_z))
                             continue;
                     } else {
                         for (i32 v = 0; v < 3; ++v) {
-                            vertices[v] = {shape->vectors[v].x, shape->vectors[v].y, shape->vectors[v].z, 0.0f};
+                            vertices[v].x = shape->vectors[v].x;
+                            vertices[v].y = shape->vectors[v].y;
+                            vertices[v].z = shape->vectors[v].z;
+                            vertices[v].w = 0.0f;
                         }
                         NuVec4MtxTransformVU0x3(vertices, vertices, matrix);
                         bool quad = shape->normals[1].y < 65535.0f;
                         if (quad) {
-                            vertices[3] = {shape->vectors[3].x, shape->vectors[3].y, shape->vectors[3].z, 0.0f};
+                            vertices[3].x = shape->vectors[3].x;
+                            vertices[3].y = shape->vectors[3].y;
+                            vertices[3].z = shape->vectors[3].z;
+                            vertices[3].w = 0.0f;
                             NuVec4MtxTransformVU0(&vertices[3], &vertices[3], matrix);
                         } else
                             vertices[3] = vertices[2];
@@ -5866,12 +5880,16 @@ void NewScanRot(nuvec_s *position, i32 terrain_mask) {
                               local_max_z > vertices[2].z || local_max_z > vertices[3].z))
                             continue;
                         TERRAIN_SHAPE *transformed = &ScaleTerrain[transformed_count];
-                        *reinterpret_cast<u32 *>(transformed->material) = *reinterpret_cast<u32 *>(shape->material);
-                        for (i32 v = 0; v < (quad ? 4 : 3); ++v)
-                            transformed->vectors[v] = {vertices[v].x, vertices[v].y, vertices[v].z};
-                        if (!quad)
-                            transformed->normals[1].y = 65536.0f;
-                        if (quad) {
+                        memcpy(transformed->material, shape->material, 4);
+                        for (i32 v = 0; v < 3; ++v) {
+                            transformed->vectors[v].x = vertices[v].x;
+                            transformed->vectors[v].y = vertices[v].y;
+                            transformed->vectors[v].z = vertices[v].z;
+                        }
+                        if (shape->normals[1].y < 65535.0f) {
+                            transformed->vectors[3].x = vertices[3].x;
+                            transformed->vectors[3].y = vertices[3].y;
+                            transformed->vectors[3].z = vertices[3].z;
                             vertices[0].x = transformed->vectors[1].x - transformed->vectors[3].x;
                             vertices[0].y = transformed->vectors[1].y - transformed->vectors[3].y;
                             vertices[0].z = transformed->vectors[1].z - transformed->vectors[3].z;
@@ -5887,6 +5905,8 @@ void NewScanRot(nuvec_s *position, i32 terrain_mask) {
                             transformed->normals[1].x *= inverse;
                             transformed->normals[1].y *= inverse;
                             transformed->normals[1].z *= inverse;
+                        } else {
+                            transformed->normals[1].y = 65536.0f;
                         }
                         vertices[0].x = transformed->vectors[2].x - transformed->vectors[0].x;
                         vertices[0].y = transformed->vectors[2].y - transformed->vectors[0].y;

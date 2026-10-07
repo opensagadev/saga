@@ -39,15 +39,18 @@ nushaderprogram_s *NuPostFilterGen::blur5x5Program, *NuPostFilterGen::blur7x7Pro
 nushaderprogram_s *NuPostFilterGen::blurGuardProgram;
 
 NuMainFilterGen::NuMainFilterGen() {
-    dof_strength = dof_near = dof_far = 1.0f;
+    dof_strength = 1.0f;
+    dof_near = 1.0f;
+    dof_far = 1.0f;
+    dof_bias = 0;
     dof_mode = 3;
-    dof_bias = 0.0f;
     bloom = NULL;
     dof_blur = 3.0f;
     blur_radius = 5.0f;
     blur_gain = 2.1f;
     downsample_lod = 0;
-    motion_scale = motion_maximum = 0.0f;
+    motion_scale = 0.0f;
+    motion_maximum = 0.0f;
     motion_falloff = 1.0f;
 }
 
@@ -123,9 +126,7 @@ void NuMainFilterGen::preprocessBlurTextures(nueffecttex_s *color, nueffecttex_s
 void NuMainFilterGen::preprocessDofMotionBlur(nueffecttex_s *) {
     i32 selection = 1;
     if (dof_enabled) {
-        u32 bias_bits;
-        memcpy(&bias_bits, &dof_bias, sizeof(bias_bits));
-        selection = bias_bits == 1 ? (motion_blur_enabled ? 4 : 3) : (motion_blur_enabled ? 2 : 0);
+        selection = dof_bias == 1 ? (motion_blur_enabled ? 4 : 3) : (motion_blur_enabled ? 2 : 0);
     }
     nushaderprogram_s *program = programs[selection];
     PostBindProgram(program);

@@ -597,7 +597,8 @@ void PartKill_Grabber(PART_s *part, i32) {
 #include "legoapi/characters/core/character.h"
 #include "nu2api/nucore/nuhgobj.h"
 #include "nu2api/nu3d/nurndr.h"
-extern i32 CHARSHADOWS_ON, Paused, Reflections_On;
+extern i32 CHARSHADOWS_ON, Paused;
+extern u8 Reflections_On;
 extern LEVELDATA *BLOCKADERUNNERC_LDATA;
 extern MAKELAYERLISTFN MakeLayerList;
 void EnableShadowMapRendering(i32);

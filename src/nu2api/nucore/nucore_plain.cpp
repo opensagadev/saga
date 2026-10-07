@@ -2576,7 +2576,7 @@ extern "C" {
         currentScene.dof.strength = strength;
         currentScene.dof.near_distance = near_distance;
         currentScene.dof.far_distance = far_distance;
-        currentScene.dof.bias = 0.0f;
+        currentScene.dof.bias = 0;
         currentScene.dof.mode = 3;
         if (NuRndrDoingScreenGrab != 0) {
             currentScene.dof.enabled = 0;

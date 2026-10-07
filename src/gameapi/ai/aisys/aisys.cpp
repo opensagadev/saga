@@ -5109,8 +5109,10 @@ __used__ static i32 Action_SnapToLocator(AISYS *sys, AISCRIPTPROCESS *processor,
             } else if (NuStrIStr(params[i], "dont_check_terrain") != NULL)
                 check_terrain = 0;
         }
-        if (object == NULL && packet != NULL && packet->owner != NULL)
-            object = packet->owner->apiobj.objptr;
+        if (object == NULL) {
+            if (packet != NULL && packet->owner != NULL)
+                object = packet->owner->apiobj.objptr;
+        }
         if (object != NULL) {
             AILOCATOR *locator = object->ai.locator;
             if (name != NULL) {
@@ -5126,19 +5128,19 @@ __used__ static i32 Action_SnapToLocator(AISYS *sys, AISCRIPTPROCESS *processor,
                 locator = AIPathFindLocator(sys, locator_name);
             }
             if (locator != NULL) {
-                NUVEC position = locator->position;
-                object->apiobj.position = position;
-                object->apiobj.field_0x276 = locator->flags;
-                object->apiobj.facing_angle = locator->flags;
-                object->apiobj.movement_facing_angle = locator->flags;
+                object->apiobj.position = locator->position;
+                i32 rotation = locator->flags;
+                object->apiobj.field_0x276 = rotation;
+                object->apiobj.facing_angle = rotation;
+                object->apiobj.movement_facing_angle = rotation;
                 object->ai.path_info = locator->path_info;
-                object->apiobj.initial_position = position;
-                object->apiobj.collision_position = position;
-                plr_lastpos = position;
-                object->apiobj.start_position = position;
-                object->apiobj.respawn_position = position;
-                object->apiobj.last_safe_position = position;
-                object->saved_position = position;
+                object->apiobj.initial_position = object->apiobj.position;
+                object->apiobj.collision_position = object->apiobj.position;
+                plr_lastpos = object->apiobj.position;
+                object->apiobj.start_position = object->apiobj.position;
+                object->apiobj.respawn_position = object->apiobj.position;
+                object->apiobj.last_safe_position = object->apiobj.position;
+                object->saved_position = object->apiobj.position;
                 object->apiobj.velocity = v000;
                 extern void InitSurfaceInfo(GameObject *);
                 extern i32 SetObjOnSurface(GameObject *, i32);

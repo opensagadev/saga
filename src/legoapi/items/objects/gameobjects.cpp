@@ -2950,15 +2950,15 @@ void GameAIProcess() {
                     second->collision_min.y > first->collision_max.y || first->collision_link == second ||
                     second->collision_link == first)
                     continue;
-                i32 fixed_first = (first->flags_low & 0x80) != 0;
-                i32 fixed_second = (second->flags_low & 0x80) != 0;
+                bool fixed_first = (first->flags_low & 0x80) != 0;
+                bool fixed_second = (second->flags_low & 0x80) != 0;
                 if (first->collision_priority > second->collision_priority)
-                    fixed_first = 1;
+                    fixed_first = true;
                 if (first->collision_priority == second->collision_priority)
                     continue;
                 if (second->collision_priority > first->collision_priority)
-                    fixed_second = 1;
-                if (static_cast<u8>(fixed_first) & static_cast<u8>(fixed_second))
+                    fixed_second = true;
+                if (fixed_first && fixed_second)
                     continue;
                 f32 distance = NuFsqrt(difference.x * difference.x + difference.z * difference.z);
                 if (distance < radius) {
@@ -4313,14 +4313,13 @@ APIOBJECT *GameAPIOBJECTFromObjID(u8 object_id) {
         return NULL;
     }
 
-    if ((object->apiobj.flags_high & APIOBJECT_HIGH_FLAG_PLAYER_CHARACTER) == 0 &&
-        object->ai.reset_mode != AI_OBJECT_ROUTE_STATE_SCRIPT_VISIBLE) {
-        return NULL;
+    if ((object->apiobj.flags_high & APIOBJECT_HIGH_FLAG_PLAYER_CHARACTER) != 0 ||
+        object->ai.reset_mode == AI_OBJECT_ROUTE_STATE_SCRIPT_VISIBLE) {
+        if (object->apiobj.field_0x287 == 0 || object->field_0x101c > 0.0f) {
+            return &object->apiobj;
+        }
     }
-    if (object->apiobj.field_0x287 != 0 && !(object->field_0x101c > 0.0f)) {
-        return NULL;
-    }
-    return &object->apiobj;
+    return NULL;
 }
 
 i32 GameDrawCharacterModel(CHARACTERMODEL_s *model, ANIMPACKET_s *animation, NUMTX *matrix, NUMTX *secondary_matrix,

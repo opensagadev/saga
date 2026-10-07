@@ -58,25 +58,29 @@ void SetPushAngle(GameObject_s *object) {
 // Original: 1,554 bytes.
 f32 ForceTowardsMid(GameObject_s *object) {
     SOCKSYS *system = WorldInfo_CurrentlyActive()->sock_sys;
-    if (system == NULL || object->sock_position.location.sock == -1 ||
-        static_cast<u8>(object->sock_position.candidate_count) > 1)
+    if (system == NULL || object->sock_position.location.sock == -1)
         return 0.0f;
-    SOCK *sock = &system->sock[object->sock_position.location.sock];
+    SOCK *socks = system->sock;
+    f32 amount = 0.0f;
+    if (static_cast<u8>(object->sock_position.candidate_count) > 1)
+        return amount;
+    SOCK *sock = &socks[object->sock_position.location.sock];
     f32 inner = sock->mid_force_inner_radius;
     f32 outer = sock->mid_force_outer_radius;
     if (sock->flags & 2) {
-        if (object->field_0x1086 == 4 || !(inner > 0.0f) || !(outer > 0.0f))
-            return 0.0f;
-        f32 dy = object->sock_position.midpoint.y - object->apiobj.position.y;
-        if (!(dy * dy >= inner * inner))
-            return 0.0f;
-        f32 amount = (fabsf(dy) - inner) / (outer - inner);
-        object->target_velocity.y += (dy * object->apiobj.character_data->game_character->run_speed) * amount;
+        if (object->field_0x1086 != 4 && inner > 0.0f && outer > 0.0f) {
+            f32 dy = object->sock_position.midpoint.y - object->apiobj.position.y;
+            if (dy * dy >= inner * inner) {
+                f32 ratio = (NuFabs(dy) - inner) / (outer - inner);
+                object->target_velocity.y += (dy * object->apiobj.character_data->game_character->run_speed) * ratio;
+                amount = ratio;
+            }
+        }
         return amount;
     }
-    f32 amount = 0.0f;
     if (inner > 0.0f && outer > 0.0f) {
         i32 planar = sock->flags & 4;
+        f32 inner_squared = inner * inner;
         NUVEC delta;
         f32 distance_squared;
         if (planar != 0) {
@@ -88,7 +92,7 @@ f32 ForceTowardsMid(GameObject_s *object) {
             NuVecSub(&delta, &object->sock_position.midpoint, &object->apiobj.position);
             distance_squared = delta.x * delta.x + delta.y * delta.y + delta.z * delta.z;
         }
-        if (distance_squared >= inner * inner) {
+        if (distance_squared >= inner_squared) {
             f32 ratio = (NuFsqrt(distance_squared) - inner) / (outer - inner);
             if (ratio > 3.0f)
                 ratio = 3.0f;
@@ -147,10 +151,10 @@ void ResetPushProgress(WORLDINFO_s *world, void *progress_data) {
         if (index < 16 && progress != NULL) {
             const u32 bit = 1u << index;
             block->flags_0cb = (block->flags_0cb & ~2u) | (((progress->state_mask & bit) != 0) << 1);
-            block->flags_0ca = (block->flags_0ca & ~4u) | (((progress->visible_mask & bit) != 0) << 2);
-            if ((block->flags_0ca & 4) == 0) {
+            block->push_visible = (progress->visible_mask & bit) != 0;
+            if (!block->push_visible) {
                 NuSpecialSetVisibility(&block->special, 0);
-                block->flags_0ca &= ~4u;
+                block->push_visible = 0;
                 for (i32 output = 0; output < block->end_position_count; ++output) {
                     NuSpecialSetVisibility(&block->end_position_specials[output], 0);
                 }
@@ -160,36 +164,33 @@ void ResetPushProgress(WORLDINFO_s *world, void *progress_data) {
                 continue;
             }
             nuinstanim_s *animation = NuSpecialGetInstAnim(&block->special);
-            if (!((block->flags_0ca & 4) == 0 && animation != NULL)) {
+            if (block->push_visible || animation == NULL) {
                 NUMTX *matrix = NuSpecialGetInstanceMtx(&block->special);
-                matrix->m30 = progress->positions[index].x;
-                matrix->m31 = progress->positions[index].y;
-                matrix->m32 = progress->positions[index].z;
+                *NUMTX_GET_ROW_VEC(matrix, 3) = progress->positions[index];
                 NuSpecialUpdate(&block->special);
-                for (i32 output = 0; output < block->end_position_count; ++output) {
-                    matrix = NuSpecialGetInstanceMtx(&block->end_position_specials[output]);
-                    const NUVEC &position = progress->end_positions[output][index];
-                    matrix->m30 = position.x;
-                    matrix->m31 = position.y;
-                    matrix->m32 = position.z;
-                    NuSpecialUpdate(&block->end_position_specials[output]);
+                if (block->end_position_count != 0) {
+                    i32 output = 0;
+                    do {
+                        matrix = NuSpecialGetInstanceMtx(&block->end_position_specials[output]);
+                        *NUMTX_GET_ROW_VEC(matrix, 3) = progress->end_positions[output][index];
+                        NuSpecialUpdate(&block->end_position_specials[output]);
+                    } while (block->end_position_count > ++output);
                 }
             } else {
                 NUMTX evaluated;
                 NUMTX *matrix = NuSpecialGetInstanceMtx(&block->special);
                 EvalAnim(&block->special, 1.0f, &evaluated, 0);
-                matrix->m30 = evaluated.m30;
-                matrix->m31 = evaluated.m31;
-                matrix->m32 = evaluated.m32;
+                *NUMTX_GET_ROW_VEC(matrix, 3) = *NUMTX_GET_ROW_VEC(&evaluated, 3);
                 NuSpecialUpdate(&block->special);
-                for (i32 output = 0; output < block->end_position_count; ++output) {
-                    nuhspecial_s *special = &block->end_position_specials[output];
-                    matrix = NuSpecialGetInstanceMtx(special);
-                    EvalAnim(special, 1.0f, &evaluated, 0);
-                    matrix->m30 = evaluated.m30;
-                    matrix->m31 = evaluated.m31;
-                    matrix->m32 = evaluated.m32;
-                    NuSpecialUpdate(special);
+                if (block->end_position_count != 0) {
+                    i32 output = 0;
+                    do {
+                        nuhspecial_s *special = &block->end_position_specials[output];
+                        matrix = NuSpecialGetInstanceMtx(special);
+                        EvalAnim(special, 1.0f, &evaluated, 0);
+                        *NUMTX_GET_ROW_VEC(matrix, 3) = *NUMTX_GET_ROW_VEC(&evaluated, 3);
+                        NuSpecialUpdate(special);
+                    } while (block->end_position_count > ++output);
                 }
             }
         }
@@ -214,8 +215,7 @@ void FindForcePushTarget(GameObject_s *object, i32 activate, i32 target_filter) 
         return;
     }
 
-    const bool continuing_push = (object->pad_gamepad->allocated_5a & 0x10) != 0;
-    if (continuing_push) {
+    if ((object->pad_gamepad->allocated_5a & 0x10) != 0) {
         activate = 1;
     } else if (!object->apiobj.player_controlled) {
         return;
@@ -229,90 +229,67 @@ void FindForcePushTarget(GameObject_s *object, i32 activate, i32 target_filter) 
         return;
     }
 
-    GAMECHARACTERDATA *source_data = object->apiobj.character_data->game_character;
-    const i32 base_choke_style = source_data->flags_090 & 2;
-    const i32 base_second_style = source_data->flags_090 & 4;
-
-    const auto target_animation_style = [&](GameObject_s *candidate, i32 choke_style, i32 second_style,
-                                            bool super_weirdo, i32 *selected_choke, i32 *selected_second,
-                                            i32 *selected_direct) -> bool {
-        if (choke_style == 0 && source_data->uses_weapon_action == 0x0c &&
-            (object->apiobj.character_data->model_flags & 8) != 0 && candidate->id == id_GAMORREANGUARD) {
-            choke_style = 1;
-        }
-
-        void **animations = candidate->apiobj.character_model->model_data_b;
-        const bool target_special = (candidate->apiobj.character_data->model_flags & 0x10) != 0;
-        const bool target_force_reaction = (candidate->apiobj.character_data->game_character->flags_090 & 0x40) != 0;
-
-        if (!target_special && target_force_reaction && animations[0x41] != NULL) {
-            *selected_choke = choke_style;
-            *selected_second = second_style;
-            *selected_direct = 1;
-            return true;
-        }
-
-        if (choke_style != 0 || second_style != 0) {
-            if (super_weirdo && qrand() <= 0x7fff && !target_special && animations[0x41] != NULL) {
-                *selected_choke = choke_style;
-                *selected_second = second_style;
-                *selected_direct = 1;
-                return true;
-            }
-            if ((second_style != 0 && animations[0x54] != NULL) ||
-                (second_style == 0 && choke_style != 0 && animations[0x53] != NULL)) {
-                *selected_choke = choke_style;
-                *selected_second = second_style;
-                *selected_direct = 0;
-                return true;
-            }
-            if (!target_special) {
-                return false;
-            }
-        } else if (!target_special) {
-            if (animations[0x41] != NULL) {
-                *selected_choke = 0;
-                *selected_second = 0;
-                *selected_direct = 1;
-                return true;
-            }
-            if (animations[0x2b] == NULL) {
-                return false;
-            }
-        } else if (animations[0x2b] == NULL && animations[5] == NULL) {
-            return false;
-        }
-
-        *selected_choke = 0;
-        *selected_second = 0;
-        *selected_direct = 0;
-        return true;
-    };
-
+    i32 choke_style = object->apiobj.character_data->game_character->flags_090 & 2;
+    i32 second_style = object->apiobj.character_data->game_character->flags_090 & 4;
     GameObject_s *best = NULL;
-    i32 selected_choke = 0;
-    i32 selected_second = 0;
-    i32 selected_direct = 0;
-    if (continuing_push && object->force_push_target != NULL) {
+    i32 selected_choke;
+    i32 selected_second;
+    i32 selected_direct;
+    if ((object->pad_gamepad->allocated_5a & 0x10) != 0 && object->force_push_target != NULL) {
         best = object->force_push_target;
-        if (!target_animation_style(best, base_choke_style, base_second_style, false, &selected_choke, &selected_second,
-                                    &selected_direct)) {
+        if (choke_style == 0 && object->apiobj.character_data->game_character->uses_weapon_action == 0x0c &&
+            (object->apiobj.character_data->model_flags & 8) != 0) {
+            choke_style = best->id == id_GAMORREANGUARD;
+        }
+        i32 target_special = best->apiobj.character_data->model_flags & 0x10;
+        i32 continuing_direct = 0;
+        if (target_special == 0 &&
+            (best->apiobj.character_data->game_character->flags_090 & 0x40) != 0 &&
+            best->apiobj.character_model->model_data_b[0x41] != NULL) {
+            continuing_direct = 1;
+        } else if ((choke_style | second_style) != 0) {
+            if (second_style != 0) {
+                if (best->apiobj.character_model->model_data_b[0x54] == NULL) {
+                    if (target_special == 0)
+                        return;
+                    choke_style = 0;
+                    second_style = 0;
+                }
+            } else if (best->apiobj.character_model->model_data_b[0x53] == NULL) {
+                if (target_special == 0)
+                    return;
+                choke_style = 0;
+            }
+        } else if (target_special == 0) {
+            if (best->apiobj.character_model->model_data_b[0x41] != NULL) {
+                continuing_direct = 1;
+            } else if (best->apiobj.character_model->model_data_b[0x2b] == NULL) {
+                return;
+            }
+        } else if (best->apiobj.character_model->model_data_b[0x2b] == NULL &&
+                   best->apiobj.character_model->model_data_b[5] == NULL) {
             return;
         }
+        selected_choke = choke_style;
+        selected_second = second_style;
+        selected_direct = continuing_direct;
     } else {
-        i32 choke_style = base_choke_style;
-        i32 second_style = base_second_style;
-        const bool super_weirdo = SuperWeirdo(object) != 0;
-        if (super_weirdo) {
-            second_style = qrand() > 0x7fff;
-            choke_style = second_style == 0;
+        i32 super_weirdo = SuperWeirdo(object);
+        if (super_weirdo != 0) {
+            i32 random = qrand();
+            second_style = random > 0x7fff;
+            choke_style = random <= 0x7fff;
         }
 
         i32 object_count = HIGHGAMEOBJECT;
         f32 best_distance = 1.5625f;
         GameObject_s *candidate = Obj;
+        selected_choke = 0;
+        selected_second = 0;
+        selected_direct = 0;
         for (i32 index = 0; index < object_count; ++index, ++candidate) {
-            if (candidate == object || (candidate->apiobj.field_0x1f8 & 0x1001) != 0x1001 ||
+            if (candidate->apiobj.in_use == 0 || candidate == object ||
+                candidate->apiobj.character == 0 ||
                 candidate->apiobj.field_0x287 != 0 || candidate->apiobj.model_draw_result == 0 ||
                 candidate->character_context == 0x3c || candidate->character_context == 0x39 ||
                 candidate->character_context == 0x3b || candidate->character_context == 0x41 ||
@@ -324,68 +301,84 @@ void FindForcePushTarget(GameObject_s *object, i32 activate, i32 target_filter) 
                 (candidate->field_0xefc_word & 0x400010) != 0) {
                 continue;
             }
-
-            {
-                if (!TouchHacks::CanForceTargetObj(*object, *candidate)) {
+            if (TouchHacks::CanForceTargetObj(*object, *candidate) &&
+                !(WORLD->area != NULL && WORLD->area == EMPERORFIGHT_ADATA &&
+                  ((candidate->field_0xefb & 8) != 0 || candidate->apiobj.field_0x27c != -1)) &&
+                candidate->id != id_BODYGUARD) {
+                if (target_filter == 1) {
+                    if (candidate->apiobj.field_0x27c != -1) {
+                        goto reload_object_count;
+                    }
+                    if ((candidate->apiobj.field_0x1f4 & 5) != 0) {
+                        const u32 *mask = WORLD->api_object_sys->hostility_masks[object->apiobj.field_0x289];
+                        const u64 hostility = static_cast<u64>(mask[0]) | (static_cast<u64>(mask[1]) << 32);
+                        if (((hostility >> (candidate->apiobj.field_0x289 & 63)) & 1) == 0) {
+                            goto reload_object_count;
+                        }
+                    }
+                } else if (target_filter == 2 && candidate->apiobj.field_0x27c == -1) {
+                    goto reload_object_count;
+                }
+                if ((candidate->field_0xefb & 8) != 0) {
                     goto reload_object_count;
                 }
 
-                const bool candidate_is_player = candidate->apiobj.field_0x27c != -1;
-                if (!(WORLD->area != NULL && WORLD->area == EMPERORFIGHT_ADATA &&
-                      ((candidate->field_0xefb & 8) != 0 || candidate_is_player))) {
-                    if (candidate->id == id_BODYGUARD) {
-                        goto reload_object_count;
-                    }
-
-                    if (target_filter == 1) {
-                        if (candidate_is_player) {
-                            goto reload_object_count;
-                        }
-                        if ((candidate->apiobj.field_0x1f4 & 5) != 0) {
-                            const u8 source_index = object->apiobj.field_0x289;
-                            const u8 target_index = candidate->apiobj.field_0x289;
-                            const u32 hostility =
-                                WORLD->api_object_sys->hostility_masks[source_index][target_index >> 5];
-                            if ((hostility & (1u << (target_index & 31))) == 0) {
+                i32 candidate_choke = choke_style;
+                i32 candidate_second = second_style;
+                i32 candidate_direct = 0;
+                if (candidate_choke == 0 && object->apiobj.character_data->game_character->uses_weapon_action == 0x0c &&
+                    (object->apiobj.character_data->model_flags & 8) != 0) {
+                    candidate_choke = candidate->id == id_GAMORREANGUARD;
+                }
+                if ((candidate->apiobj.character_data->model_flags & 0x10) == 0 &&
+                    (candidate->apiobj.character_data->game_character->flags_090 & 0x40) != 0 &&
+                    candidate->apiobj.character_model->model_data_b[0x41] != NULL) {
+                    candidate_direct = 1;
+                } else if ((candidate_choke | second_style) != 0) {
+                    if (super_weirdo != 0 && qrand() <= 0x7fff &&
+                        (candidate->apiobj.character_data->model_flags & 0x10) == 0 &&
+                        candidate->apiobj.character_model->model_data_b[0x41] != NULL) {
+                        candidate_direct = 1;
+                    } else if (second_style != 0) {
+                        if (candidate->apiobj.character_model->model_data_b[0x54] == NULL) {
+                            if ((candidate->apiobj.character_data->model_flags & 0x10) == 0)
                                 goto reload_object_count;
-                            }
+                            candidate_choke = 0;
+                            candidate_second = 0;
                         }
-                    } else if (target_filter == 2 && !candidate_is_player) {
+                    } else if (candidate->apiobj.character_model->model_data_b[0x53] == NULL) {
+                        if ((candidate->apiobj.character_data->model_flags & 0x10) == 0)
+                            goto reload_object_count;
+                        candidate_choke = 0;
+                    }
+                } else if ((candidate->apiobj.character_data->model_flags & 0x10) == 0) {
+                    if (candidate->apiobj.character_model->model_data_b[0x41] != NULL) {
+                        candidate_direct = 1;
+                    } else if (candidate->apiobj.character_model->model_data_b[0x2b] == NULL) {
                         goto reload_object_count;
                     }
-                    if ((candidate->field_0xefb & 8) != 0) {
-                        goto reload_object_count;
-                    }
+                } else if (candidate->apiobj.character_model->model_data_b[0x2b] == NULL &&
+                           candidate->apiobj.character_model->model_data_b[5] == NULL) {
+                    goto reload_object_count;
+                }
 
-                    i32 candidate_choke;
-                    i32 candidate_second;
-                    i32 candidate_direct;
-                    if (!target_animation_style(candidate, choke_style, second_style, super_weirdo, &candidate_choke,
-                                                &candidate_second, &candidate_direct)) {
-                        goto reload_object_count;
-                    }
-
-                    NUVEC delta;
-                    f32 distance =
-                        NuVecDistSqr(&object->apiobj.collision_position, &candidate->apiobj.collision_position, &delta);
-                    if (candidate->id == id_ATST) {
-                        distance *= 1.0f / 3.0f;
-                    }
-                    if (!(distance < best_distance)) {
-                        goto reload_object_count;
-                    }
-                    object_count = HIGHGAMEOBJECT;
-                    if (!(delta.x * object->facing_direction.x + delta.z * object->facing_direction.z < 0.0f)) {
-                        continue;
-                    }
-
+                NUVEC delta;
+                f32 distance = NuVecDistSqr(&object->apiobj.collision_position, &candidate->apiobj.collision_position, &delta);
+                if (candidate->id == id_ATST) {
+                    distance *= 1.0f / 3.0f;
+                }
+                if (!(distance < best_distance)) {
+                    goto reload_object_count;
+                }
+                object_count = HIGHGAMEOBJECT;
+                if (delta.x * object->facing_direction.x + delta.z * object->facing_direction.z < 0.0f) {
                     best = candidate;
                     best_distance = distance;
                     selected_choke = candidate_choke;
                     selected_second = candidate_second;
                     selected_direct = candidate_direct;
-                    continue;
                 }
+                continue;
             }
         reload_object_count:
             object_count = HIGHGAMEOBJECT;
@@ -480,12 +473,14 @@ i32 CannotKill(GameObject_s *object);
 extern i16 id_GONKDROID;
 
 i32 Pushing(GameObject_s *object, u16 *normal_angle, i32 *surface, i32 *angle_difference) {
-    i32 pushing_obstacle = 0;
+    i32 pushing_obstacle;
     if (LEGOCONTEXT_PUSHOBSTACLE != -1 && LEGOCONTEXT_PUSHOBSTACLE == object->character_context)
         pushing_obstacle = 1;
     else if (LEGOCONTEXT_JUMP != -1 && LEGOCONTEXT_JUMP == object->character_context &&
              object->action_movement_state == 9)
         pushing_obstacle = 1;
+    else
+        pushing_obstacle = 0;
 
     if ((object->apiobj.player_controlled || (object->field_0xf02 & 3) != 0) &&
         (object->pad_gamepad->input_magnitude > 0.0f || pushing_obstacle != 0) && object->field_0x1084 != 0 &&
@@ -958,8 +953,7 @@ obstacle_rumble_a: {
 
 obstacle_rumble_b: {
     {
-        u32 strength = qrand();
-        f32 scaled = static_cast<f32>(strength) * 1.5259021893143654e-05f;
+        f32 scaled = QRAND_FLOAT();
         scaled *= 0.3f;
         GAMEPAD_s *pad = object->pad_gamepad;
         NewRumble(pad->pad, scaled, 0);
@@ -1029,8 +1023,7 @@ pushspinner_maintain: {
             goto revalidate_context;
         }
         if (object->apiobj.player_controlled) {
-            u32 strength = qrand();
-            f32 scaled = static_cast<f32>(strength) * 1.5259021893143654e-05f;
+            f32 scaled = QRAND_FLOAT();
             scaled *= 0.4f;
             NewRumble(object->pad_gamepad->pad, scaled, 0);
         }

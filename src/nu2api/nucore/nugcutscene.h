@@ -326,7 +326,7 @@ struct instNUGCUTSCENE_s {
         };
         struct {
             u32 flags_88_word_low : 13;
-            u32 repeat_count : 5; // the original stores this as one 32-bit field
+            i32 repeat_count : 5;
             u32 flags_88_word_high : 14;
         };
     };
