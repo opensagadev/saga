@@ -732,49 +732,42 @@ void MechInputTouchGestureBasedController::ProcessAutoJumpWhenStuck(GameObject_s
         field_a6 = 0;
         return;
     }
+    NUVEC movement = {object.apiobj.velocity.x, 0.0f, object.apiobj.velocity.z};
+    const f32 movement_sq = NuVecMagSqr(&movement);
     const f32 intended_speed = object.pad_gamepad->input_magnitude * 0.5f;
-    const f32 movement_sq =
-        object.apiobj.velocity.x * object.apiobj.velocity.x + object.apiobj.velocity.z * object.apiobj.velocity.z;
-    if (movement_sq >= intended_speed * intended_speed) {
+    if (!(movement_sq < intended_speed * intended_speed)) {
         field_98 = 0.0f;
         field_a6 = 0;
         return;
     }
     field_98 += FRAMETIME;
-    if (field_98 <= 0.2f || field_a6 != 0) {
+    if (!(field_98 > 0.2f) || field_a6 != 0) {
         return;
     }
     field_a6 = 1;
-    NUVEC intended = object.target_velocity;
-    f32 length = NuFsqrt(intended.x * intended.x + intended.y * intended.y + intended.z * intended.z);
-    if (length <= 0.0f) {
-        return;
-    }
-    intended.x /= length;
-    intended.y /= length;
-    intended.z /= length;
     NUVEC probe = object.apiobj.position;
-    probe.x += intended.x * object.target_velocity.x;
-    probe.y += intended.y * object.target_velocity.y;
-    probe.z += intended.z * object.target_velocity.z;
-    if (GameShadow(Player[0], &probe, 2.0f, -1) <= Player[0]->apiobj.position.y + 0.1f) {
+    VuVec intended(object.target_velocity.x, object.target_velocity.y, object.target_velocity.z, 1.0f);
+    NuVecNorm(&intended.xyz, &intended.xyz);
+    probe.x += intended.x * 0.5f;
+    probe.y += 1.0f;
+    probe.z += intended.z * 0.5f;
+    if (!(GameShadow(player, &probe, 2.0f, -1) > player->apiobj.position.y + 0.1f)) {
         return;
     }
-    NUVEC previous_velocity = Player[0]->apiobj.velocity;
-    NUVEC previous_target_velocity = Player[0]->target_velocity;
-    f32 speed =
-        *reinterpret_cast<f32 *>(reinterpret_cast<u8 *>(Player[0]->apiobj.character_data->player_config) + 0x18);
+    NUVEC previous_velocity = player->apiobj.velocity;
+    NUVEC previous_target_velocity = player->target_velocity;
+    f32 speed = *reinterpret_cast<f32 *>(reinterpret_cast<u8 *>(player->apiobj.character_data->player_config) + 0x18);
     NUVEC velocity = {intended.x * speed, intended.y * speed, intended.z * speed};
-    Player[0]->apiobj.velocity = velocity;
-    Player[0]->target_velocity = velocity;
+    player->apiobj.velocity = velocity;
+    player->target_velocity = velocity;
     JumpTriggerPacket packet = {};
     packet.type = 1;
     packet.player = &object;
     packet.touch_holder = holder;
     packet.velocity = VuVec(velocity.x, velocity.y, velocity.z, 1.0f);
     if (!TriggerJumpTask(packet, false, true, true)) {
-        Player[0]->apiobj.velocity = previous_velocity;
-        Player[0]->target_velocity = previous_target_velocity;
+        player->apiobj.velocity = previous_velocity;
+        player->target_velocity = previous_target_velocity;
     }
 }
 

@@ -212,7 +212,7 @@ void AITriggerSetSysProcess(AITRIGGERSETSYS_s *system) {
                 }
                 if (Lever_BeingPulled(lever) && set->trigger_indices[index] != -1) {
                     GameObject_s *object = &Obj[set->trigger_indices[index]];
-                    if ((object->apiobj.object_flags & 0x1001) != 0x1001 || !GameObjectUsingLever(object, lever))
+                    if ((object->apiobj.field_0x1f8 & 0x1001) != 0x1001 || !GameObjectUsingLever(object, lever))
                         release = true;
                 }
             } else if (gizmo->type_id == obstacle_gizmotype_id) {
@@ -315,7 +315,7 @@ void AITriggerSetSysProcess(AITRIGGERSETSYS_s *system) {
                         GameObject_s *object = Obj;
                         for (i32 object_index = 0; object_index < HIGHGAMEOBJECT; ++object_index, ++object) {
                             if (system->field_0x42c0[object_index] != -1 ||
-                                (object->apiobj.object_flags & 0x1001) != 0x1001 || object->apiobj.field_0x287 != 0 ||
+                                (object->apiobj.field_0x1f8 & 0x1001) != 0x1001 || object->apiobj.field_0x287 != 0 ||
                                 (object->apiobj.flags_low & 0x80) || (object->field_0xeff & 1) ||
                                 (character_mask && !(character_mask & object->ai.character_type_mask)) ||
                                 !(object->field_0xf02 & 4) || (!set->field_0x20e && object->trigger_set != set))

@@ -259,16 +259,17 @@ MechTouchUICharIcon::MechTouchUICharIcon(MechTouchUIPartySelector &party, VuVec 
 
 void MechTouchUICharIcon::Process(float) {
     if (selector->icon_count == 1) {
-        position.z = 10.0f;
+        radius_x = 10.0f;
     }
 
-    const bool is_hovered = hovered != 0;
+    u8 is_hovered = hovered != 0;
     if (is_hovered && field_0x46 == 0) {
         PlaySfx(const_cast<char *>("LegoClicks2"), NULL);
+        is_hovered = hovered;
     }
     field_0x46 = is_hovered;
 
-    if (alpha_duration >= 0.0f && alpha_elapsed < alpha_duration + alpha_delay) {
+    if (!(alpha_duration < 0.0f) && !(alpha_elapsed >= alpha_duration + alpha_delay)) {
         alpha_elapsed += FRAMETIME;
         if (alpha_elapsed > alpha_duration + alpha_delay) {
             alpha_elapsed = alpha_duration + alpha_delay;

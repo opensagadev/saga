@@ -1952,15 +1952,17 @@ extern "C" {
                     AdjustMinMaxBox(&sock->a->pts[next], &segment->min, &segment->max);
                     AdjustMinMaxBox(&sock->b->pts[next], &segment->min, &segment->max);
                 }
-                if (sock->mid == NULL)
+                if (sock->mid != NULL)
+                    segment->length = NuVecDist(&sock->mid->pts[segment_index], &sock->mid->pts[next], NULL);
+                else
                     segment->length = NuVecDist(&sock->segments[segment_index].midpoint,
                                                 &sock->segments[segment_index].next_midpoint, NULL);
-                else
-                    segment->length = NuVecDist(&sock->mid->pts[segment_index], &sock->mid->pts[next], NULL);
                 segment->distance_from_start = distance_from_start;
                 distance_from_start += segment->length;
             }
-            if (sock->mid == NULL) {
+            if (sock->mid != NULL) {
+                sock->unknown_98 = SplineLength(sock->mid, sock->unknown_33);
+            } else {
                 sock->unknown_98 = 0.0f;
                 u32 segment_count = sock->length;
                 if (sock->unknown_33 != 0)
@@ -1969,8 +1971,6 @@ extern "C" {
                     sock->unknown_98 += NuVecDist(&sock->segments[segment_index].midpoint,
                                                   &sock->segments[segment_index].next_midpoint, NULL);
                 }
-            } else {
-                sock->unknown_98 = SplineLength(sock->mid, sock->unknown_33);
             }
             buf->void_ptr = segment;
         }
@@ -1984,7 +1984,11 @@ extern "C" {
             for (i32 other_index = 0; other_index < 0x40; ++other_index, ++other) {
                 if (sock_index == other_index || other->valid == 0)
                     continue;
-                bool ignore_y = (sock->flags & 1) != 0 || (other->flags & 1) != 0;
+                i32 ignore_y;
+                if ((sock->flags & 1) != 0 || (other->flags & 1) != 0)
+                    ignore_y = 1;
+                else
+                    ignore_y = 0;
                 if (sock->max.x < other->min.x || other->max.x < sock->min.x || sock->max.z < other->min.z ||
                     other->max.z < sock->min.z ||
                     (!ignore_y && (sock->max.y < other->min.y || other->max.y < sock->min.y))) {

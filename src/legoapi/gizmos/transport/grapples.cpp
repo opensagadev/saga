@@ -781,8 +781,9 @@ void Grapple_MoveCode(GameObject_s *object) {
 #define GRAPPLE_CURRENT (static_cast<GRAPPLE *>(object->field_0x788))
 #define GRAPPLE_QUANTIZE(angle)                                                                                        \
     do {                                                                                                               \
-        const i32 difference = RotDiff((angle), static_cast<u16>(GRAPPLE_CURRENT->y_rotation + 0x4000));               \
-        (angle) = static_cast<u16>(GRAPPLE_CURRENT->y_rotation + (abs(difference) <= 0x4000 ? 0x4000 : 0xc000));       \
+        GRAPPLE *const quantize_grapple = GRAPPLE_CURRENT;                                                             \
+        const i32 difference = RotDiff((angle), static_cast<u16>(quantize_grapple->y_rotation + 0x4000));              \
+        (angle) = static_cast<u16>(quantize_grapple->y_rotation + (abs(difference) <= 0x4000 ? 0x4000 : 0xc000));      \
     } while (0)
 #define GRAPPLE_MAXIMUM_LENGTH(result)                                                                                 \
     do {                                                                                                               \

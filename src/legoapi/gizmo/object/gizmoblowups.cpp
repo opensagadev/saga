@@ -257,12 +257,17 @@ void GizBlowup_Respawn(GIZMOBLOWUP_s *blowup) {
     blowup->saved_state_1 = blowup->initial_state_1;
     blowup->saved_state_0 = blowup->initial_state_0;
     nuinstanim_s *animation = NuSpecialGetInstAnim(&blowup->type->animated_special);
+    u8 state_flags = blowup->state_flags;
     if (animation != NULL && animation->playing != 0) {
-        blowup->state_flags |= 0x10;
-        if (animation->repeating != 0)
-            blowup->state_flags |= 0x48;
+        const u8 previous_state_flags = state_flags;
+        state_flags |= 0x10;
+        blowup->state_flags = state_flags;
+        if (animation->repeating != 0) {
+            state_flags = previous_state_flags | 0x58;
+            blowup->state_flags = state_flags;
+        }
     }
-    blowup->state_flags |= 1;
+    blowup->state_flags = state_flags | 1;
     if (BonusArea != 0 && VehicleArea != 0 && (blowup->draw_flags & 0x1000000) != 0) {
         if (NuSpecialExistsFn(&blowup->type->animated_special)) {
             NuSpecialSetVisibility(&blowup->type->animated_special, 0);
@@ -1724,41 +1729,51 @@ static void Blowups_Reset(void *world_ptr, void *, void *progress_ptr) {
             } else {
                 state_flags = blowup->state_flags;
             }
-            blowup->state_flags = state_flags | GIZMOBLOWUP_STATE_ACTIVE;
+            state_flags |= GIZMOBLOWUP_STATE_ACTIVE;
+            blowup->state_flags = state_flags;
 
             if (FreePlay != 0 && PODSPRINT_ADATA != NULL && world->area == PODSPRINT_ADATA &&
                 (blowup->draw_flags & 0x8000) == 0) {
                 blowup->draw_flags |= 0x8000;
             }
 
+            u8 output_flags;
             if (index <= 511 && has_progress) {
                 u32 bit = 1;
                 bit <<= (index & 31);
                 const i32 word = index >> 5;
 
                 const u8 blown_up = (progress->blown_up[word] & bit) != 0;
-                blowup->output_flags = (blowup->output_flags & ~GIZMOBLOWUP_OUTPUT_BLOWN_UP) | blown_up;
+                output_flags = (blowup->output_flags & ~GIZMOBLOWUP_OUTPUT_BLOWN_UP) | blown_up;
+                blowup->output_flags = output_flags;
 
                 const u8 old_visibility = blowup->visibility_flags;
                 u8 visible = (progress->visible[word] & bit) != 0;
                 visible <<= 6;
                 blowup->visibility_flags = (old_visibility & ~GIZMOBLOWUP_VISIBLE) | visible;
                 if ((old_visibility & GIZMOBLOWUP_VISIBLE) == 0) {
-                    if ((blowup->visibility_flags & GIZMOBLOWUP_VISIBLE) != 0)
+                    if ((blowup->visibility_flags & GIZMOBLOWUP_VISIBLE) != 0) {
                         GizBlowup_InitSingleTerrain(blowup);
+                        state_flags = blowup->state_flags;
+                        output_flags = blowup->output_flags;
+                    }
                 } else if ((blowup->visibility_flags & GIZMOBLOWUP_VISIBLE) == 0) {
                     GizBlowup_DeleteSingleTerrain(blowup);
+                    state_flags = blowup->state_flags;
+                    output_flags = blowup->output_flags;
                 }
 
                 u8 activated = (progress->activated[word] & bit) != 0;
                 activated <<= 7;
-                blowup->state_flags = (blowup->state_flags & ~GIZMOBLOWUP_STATE_ACTIVATED) | activated;
+                blowup->state_flags = (state_flags & ~GIZMOBLOWUP_STATE_ACTIVATED) | activated;
 
                 u8 secondary_output = (progress->secondary_output[word] & bit) != 0;
                 secondary_output <<= 4;
                 blowup->field_0x9f = (blowup->field_0x9f & ~0x10) | secondary_output;
+            } else {
+                output_flags = blowup->output_flags;
             }
-            if ((blowup->output_flags & GIZMOBLOWUP_OUTPUT_BLOWN_UP) != 0)
+            if ((output_flags & GIZMOBLOWUP_OUTPUT_BLOWN_UP) != 0)
                 blowup->animation_time = 0.0f;
         }
     }

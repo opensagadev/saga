@@ -22,7 +22,8 @@ void CharShadows_Draw() {
     }
 
     GameObject_s *object = Obj;
-    for (i32 object_index = 0; object_index < HIGHGAMEOBJECT; ++object_index, ++object) {
+    i32 object_count = HIGHGAMEOBJECT;
+    for (i32 object_index = 0; object_index < object_count; ++object_index, ++object) {
         const u16 required_flags = APIOBJECT_FLAG_IN_USE | APIOBJECT_FLAG_CHARACTER;
         if ((object->apiobj.field_0x1f8 & required_flags) != required_flags || object->apiobj.field_0x287 != 0) {
             continue;
@@ -50,7 +51,8 @@ void CharShadows_Draw() {
         }
 
         const f32 opacity_scale = object->shadow_opacity * static_cast<f32>(alpha);
-        const f32 radius = object->shadow_radius * object->apiobj.field_0xa8 * DropInOutScale(object);
+        const f32 scaled_radius = object->shadow_radius * object->apiobj.field_0xa8;
+        const f32 radius = DropInOutScale(object) * scaled_radius;
         i32 shadow_index = 0;
         CHARACTER_SHADOW_s *shadow_cursor = object->character_shadows;
         NUMTX *joint_matrix = object->joint_matrices;
@@ -63,15 +65,18 @@ void CharShadows_Draw() {
 
             CHARACTER_SHADOW_s &shadow = *shadow_cursor;
             if (shadow.position.y != kInvalidShadowHeight && shadow.opacity > 0.0f &&
-                shadow.position.y <= joint_matrix->m31 + 0.025f) {
-                NUVEC position = shadow.position;
-                position.y += 0.005f;
+                shadow.position.y <= 0.025f + joint_matrix->m31) {
+                NUVEC position;
+                position.y = shadow.position.y + 0.005f;
+                position.x = shadow.position.x;
+                position.z = shadow.position.z;
                 NuRndrAddShadow(&position, radius, static_cast<i32>(shadow.opacity * opacity_scale), shadow.x_rotation,
                                 0, shadow.z_rotation);
             }
             ++shadow_index;
             ++shadow_cursor;
         }
+        object_count = HIGHGAMEOBJECT;
     }
 }
 
@@ -134,7 +139,7 @@ void CharShadows_Update() {
                 continue;
             }
 
-            NUVEC query_position = joint_position;
+            NUVEC query_position = *NUMTX_GET_ROW_VEC(&object->joint_matrices[joint_index], 3);
             const f32 shadow_height = GameShadow(object, &query_position, 5.0f, -1);
             shadow.position.y = shadow_height;
             if (shadow_height == kInvalidShadowHeight) {

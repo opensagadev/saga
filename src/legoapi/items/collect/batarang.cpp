@@ -536,6 +536,8 @@ void Batarangs_Update() {
             continue;
         }
         batarang->flight_time += FRAMETIME;
+        if (!(batarang->flight_time < 2.0f) && batarang->flight_time > 4.0f)
+            batarang->flight_time = 4.0f;
         if (!Batarang_SeekToTarget(batarang)) {
             continue;
         }
@@ -544,6 +546,7 @@ void Batarangs_Update() {
             GameObject_s *owner = batarang->owner;
             owner->hold_timer = 0.0f;
             NewBuzzFrames(owner->pad_gamepad->pad, 1, 0);
+            owner = batarang->owner;
             if ((owner->pad_gamepad->buttons_held & GAMEPAD_ACTION) != 0) {
                 Batarang_StartTargetting(owner);
             } else if (owner->pad_gamepad->input_magnitude == 0.0f && owner->character_context == -1 &&

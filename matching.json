@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 71.72313,
+    "fuzzy_match_percent": 71.78479,
     "total_code": "4722419",
     "matched_code": "564889",
     "matched_code_percent": 11.961857,
@@ -17002,7 +17002,7 @@
           "address": 4522336,
           "offset": 3632368,
           "size": 1086,
-          "match_percent": 33.513966
+          "match_percent": 57.256985
         },
         {
           "name": "_ZN36MechInputTouchGestureBasedController6UpdateEPK16NuInputTouchData",
@@ -17010,7 +17010,7 @@
           "address": 4523424,
           "offset": 3633456,
           "size": 1113,
-          "match_percent": 75.00376
+          "match_percent": 74.83459
         },
         {
           "name": "_ZN36MechInputTouchGestureBasedController20PerformCloseMechanicER12GameObject_sR11TouchHolder",
@@ -18632,7 +18632,7 @@
           "address": 4553296,
           "offset": 3663328,
           "size": 661,
-          "match_percent": 70.49693
+          "match_percent": 71.582825
         },
         {
           "name": "_ZN24MechTouchUIPartySelector7CleanupEv",
@@ -41863,7 +41863,7 @@
           "address": 1974448,
           "offset": 1084480,
           "size": 3163,
-          "match_percent": 52.29067
+          "match_percent": 52.816
         },
         {
           "name": "_Z21AITriggerSysAutoSetUpP11WORLDINFO_sP17AITRIGGERSETSYS_s",
@@ -46890,7 +46890,7 @@
           "address": 4812672,
           "offset": 3922704,
           "size": 899,
-          "match_percent": 54.57547
+          "match_percent": 62.226414
         },
         {
           "name": "_Z16CharShadows_Drawv",
@@ -46898,7 +46898,7 @@
           "address": 4813584,
           "offset": 3923616,
           "size": 738,
-          "match_percent": 49.925465
+          "match_percent": 62.397514
         }
       ]
     },
@@ -55423,7 +55423,7 @@
           "address": 4948496,
           "offset": 4058528,
           "size": 782,
-          "match_percent": 55.215115
+          "match_percent": 62.563953
         },
         {
           "name": "_Z23GizmoBlowups_TotalScorePv",
@@ -55575,7 +55575,7 @@
           "address": 4959808,
           "offset": 4069840,
           "size": 683,
-          "match_percent": 13.64375
+          "match_percent": 66.3375
         },
         {
           "name": "_Z23GizmoBlowupUpdateMatrixP13GIZMOBLOWUP_s",
@@ -58591,7 +58591,7 @@
           "address": 5069472,
           "offset": 4179504,
           "size": 5024,
-          "match_percent": 22.350525
+          "match_percent": 22.651384
         },
         {
           "name": "_Z18Grapple_ReachedTopP12GameObject_s",
@@ -62205,7 +62205,7 @@
           "address": 1935920,
           "offset": 1045952,
           "size": 1006,
-          "match_percent": 34.183487
+          "match_percent": 38.766056
         },
         {
           "name": "_Z21Batarang_GetSightInfoiPiS_S_Pc",
@@ -62213,7 +62213,7 @@
           "address": 1936928,
           "offset": 1046960,
           "size": 159,
-          "match_percent": 89.75
+          "match_percent": 89.5
         },
         {
           "name": "_Z17Batarang_MoveCodeP12GameObject_s",
@@ -74000,7 +74000,7 @@
           "address": 3921467,
           "offset": 3031499,
           "size": 3611,
-          "match_percent": 93.09637
+          "match_percent": 97.87659
         },
         {
           "name": "SockSysPointAlongSpline",
@@ -98826,7 +98826,7 @@
           "address": 3072992,
           "offset": 2183024,
           "size": 4731,
-          "match_percent": 40.229393
+          "match_percent": 42.150944
         },
         {
           "name": "_Z25NuIOS_GetShaderProgramKeyRK15ShaderObjectKey",
@@ -99420,7 +99420,7 @@
           "address": 3078288,
           "offset": 2188320,
           "size": 4659,
-          "match_percent": 48.588375
+          "match_percent": 85.72479
         },
         {
           "name": "_ZN14NuDynamicLight13resetGeometryEv",

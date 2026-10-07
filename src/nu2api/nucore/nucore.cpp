@@ -836,7 +836,8 @@ NuDynamicLight *NuDynamicLight::clone(variptr_u *arena, variptr_u) {
         CloneLightVector(destination.capsule_center, source.capsule_center);
         CloneLightVector(destination.capsule_end, source.capsule_end);
         destination.capsule_radius = source.capsule_radius;
-        memcpy(destination.display_lists, source.display_lists, sizeof(source.display_lists));
+        destination.display_lists[0] = source.display_lists[0];
+        destination.display_lists[1] = source.display_lists[1];
         {
             nurndrstate_s *first = source.render_states[0];
             nurndrstate_s *second = source.render_states[1];
