@@ -946,11 +946,13 @@ extern "C" void NuRndrLineStrip2di(i32 *positions, f32 *uvs, i32 count, i32 colo
 extern "C" void NuRndrRect(f32 x, f32 y, f32 z, f32 width, f32 height, f32 u0, f32 v0, f32 u1, f32 v1, i32 colour,
                            NUMTL *material) {
     NuPrim2DBegin(4, 7, material);
-    u8 *vertex = g_NuPrim_StreamBufferPtr->u8_ptr;
+    u8 *vertex;
     if (!g_NuPrim_NeedsHalfUVs) {
+        vertex = g_NuPrim_StreamBufferPtr->u8_ptr;
         *(f32 *)(vertex + 0x10) = u0;
         *(f32 *)(vertex + 0x14) = v0;
     } else {
+        vertex = g_NuPrim_StreamBufferPtr->u8_ptr;
         *(u16 *)(vertex + 0x10) = NuRndrFloatToHalf(u0);
         *(u16 *)(vertex + 0x12) = NuRndrFloatToHalf(v0);
     }
@@ -959,11 +961,12 @@ extern "C" void NuRndrRect(f32 x, f32 y, f32 z, f32 width, f32 height, f32 u0, f
         adjusted_colour = ((colour >> 1) & 0x007f7f7f) | (colour & 0xff000000);
     *(i32 *)(vertex + 0x0c) = adjusted_colour;
     NuPrim2DAddXYZ(x, y, z);
-    vertex = g_NuPrim_StreamBufferPtr->u8_ptr;
     if (!g_NuPrim_NeedsHalfUVs) {
+        vertex = g_NuPrim_StreamBufferPtr->u8_ptr;
         *(f32 *)(vertex + 0x10) = u1;
         *(f32 *)(vertex + 0x14) = v1;
     } else {
+        vertex = g_NuPrim_StreamBufferPtr->u8_ptr;
         *(u16 *)(vertex + 0x10) = NuRndrFloatToHalf(u1);
         *(u16 *)(vertex + 0x12) = NuRndrFloatToHalf(v1);
     }

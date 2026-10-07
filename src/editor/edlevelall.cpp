@@ -1101,12 +1101,13 @@ void ClassEditor::UpdateLists(MemoryBuffer *first, MemoryBuffer *second) {
 void ClassEditor::UpdateSelectedObjects(EdInputContext &input) {
     for (ClassObjectListEntry *entry = selected_objects.first; entry != NULL;) {
         ClassObjectListEntry *next_entry = entry->next;
+        void *selected_object = entry->object;
         EdClassInterface *interface = entry->ed_class->interface;
         void *object = interface->vtable->get_next_object(interface, NULL);
         for (;;) {
             if (object == NULL)
                 break;
-            if (object == entry->object)
+            if (object == selected_object)
                 break;
             object = interface->vtable->get_next_object(interface, object);
         }

@@ -1404,25 +1404,24 @@ __attribute__((optimize("O2"))) eduimenu_s *creatureEditor_Process(nupad_s *pad)
                     selected->locator = locator;
             }
         } else {
-            NULISTHDR *creatures = &aieditor->creatures;
             CreatureEditorRecord *selected = creatureEditor_Current();
             bool change_selection = false;
             if ((pad->digital_buttons_pressed & 0x1000) != 0 ||
                 ((pad->digital_buttons & 0x100) != 0 && (pad->digital_buttons_pressed & 8) != 0)) {
                 if (selected != nullptr)
-                    aieditor->mode_selection_36930 =
-                        reinterpret_cast<EditorNamedEntry *>(NuLinkedListGetNext(creatures, &selected->link));
+                    aieditor->mode_selection_36930 = reinterpret_cast<EditorNamedEntry *>(
+                        NuLinkedListGetNext(&aieditor->creatures, &selected->link));
                 if (creatureEditor_Current() == nullptr)
                     aieditor->mode_selection_36930 =
-                        reinterpret_cast<EditorNamedEntry *>(NuLinkedListGetHead(creatures));
+                        reinterpret_cast<EditorNamedEntry *>(NuLinkedListGetHead(&aieditor->creatures));
                 change_selection = true;
             } else if ((pad->digital_buttons & 0x100) != 0 && (pad->digital_buttons_pressed & 2) != 0) {
                 if (selected != nullptr)
-                    aieditor->mode_selection_36930 =
-                        reinterpret_cast<EditorNamedEntry *>(NuLinkedListGetPrev(creatures, &selected->link));
+                    aieditor->mode_selection_36930 = reinterpret_cast<EditorNamedEntry *>(
+                        NuLinkedListGetPrev(&aieditor->creatures, &selected->link));
                 if (creatureEditor_Current() == nullptr)
                     aieditor->mode_selection_36930 =
-                        reinterpret_cast<EditorNamedEntry *>(NuLinkedListGetTail(creatures));
+                        reinterpret_cast<EditorNamedEntry *>(NuLinkedListGetTail(&aieditor->creatures));
                 change_selection = true;
             } else if (pad->digital_buttons_pressed & 0x100) {
                 aieditor->mode_selection_36930 = reinterpret_cast<EditorNamedEntry *>(creatureEditor_GetNearest(0));
@@ -1434,6 +1433,7 @@ __attribute__((optimize("O2"))) eduimenu_s *creatureEditor_Process(nupad_s *pad)
                 if (next != nullptr) {
                     aieditor->current_path = reinterpret_cast<EDAIPATH_s *>(next->path);
                     edcamSetPos(&next->position);
+                    next = creatureEditor_Current();
                     aieditorsettings.current_path_type = next->character_type;
                     aieditor_SetCurrentScript(next->script_name,
                                               reinterpret_cast<const AIEditorScriptSelection *>(next));

@@ -803,7 +803,7 @@ int GizSpinner_Update(GIZSPINNER_s *spinner) {
             const f32 dx = api->position.x - spinner->position.x;
             const f32 dz = api->position.z - spinner->position.z;
             const f32 radius = 0.5f + spinner->field_0x09c + api->field_0x1dc;
-            if (dx * dx + dz * dz >= radius * radius) {
+            if (!(dx * dx + dz * dz < radius * radius)) {
                 continue;
             }
 
@@ -833,12 +833,13 @@ int GizSpinner_Update(GIZSPINNER_s *spinner) {
 
     const u8 previous_state = spinner->state;
     if (!stop_animation) {
+        f32 play_speed;
         if (spinner->field_0x090 > 0.0f) {
             spinner->field_0x090 -= FRAMETIME;
             if (spinner->field_0x090 <= 0.0f) {
                 spinner->rotation = spinner->target_rotation;
-                spinner->field_0x090 = 0.0f;
                 GameAnimSet_Stop(spinner->anim_set);
+                spinner->field_0x090 = 0.0f;
             } else {
                 const f32 blend = NU_SIN_LUT(static_cast<u16>((1.0f - spinner->field_0x090 * 4.0f) * 16384.0f));
                 i32 difference = RotDiff(spinner->previous_rotation, spinner->target_rotation);
@@ -852,38 +853,51 @@ int GizSpinner_Update(GIZSPINNER_s *spinner) {
                 spinner->rotation = static_cast<u16>(static_cast<f32>(spinner->previous_rotation) +
                                                      static_cast<f32>(difference) * blend);
             }
-        } else if (spinner->room_index != -1) {
+            goto animation_updated;
+        }
+        if (spinner->room_index != -1) {
             const bool forward = spinner->room_index == 0x1e
                                      ? (spinner->state_flags & SPINNER_STATE_INVERT_ANIMATION) == 0
                                      : (spinner->state_flags & SPINNER_STATE_INVERT_ANIMATION) != 0;
-            const bool at_endpoint = forward ? spinner->anim_set->state == GAMEANIMSET_STATE_AT_END
-                                             : GameAnimSet_IsAnimationReset(spinner->anim_set) != 0;
-            if (!at_endpoint && spinner->animation_speed != 0.0f) {
-                GameAnimSet_Play(spinner->anim_set, forward ? spinner->animation_speed : -spinner->animation_speed, 1);
+            if (forward) {
+                if (spinner->anim_set->state == GAMEANIMSET_STATE_AT_END)
+                    goto stop_animation;
+                play_speed = spinner->animation_speed;
             } else {
-                GameAnimSet_Stop(spinner->anim_set);
+                if (GameAnimSet_IsAnimationReset(spinner->anim_set) != 0)
+                    goto stop_animation;
+                play_speed = -spinner->animation_speed;
             }
-        } else if ((spinner->flags & SPINNER_RUNTIME_AUTO_RETURN) == 0) {
+            goto play_animation;
+        }
+        if ((spinner->flags & SPINNER_RUNTIME_AUTO_RETURN) == 0 || !(spinner->field_0x090 <= 0.0f) ||
+            ((spinner->state_flags & 0x400) != 0 && spinner->anim_set->state == GAMEANIMSET_STATE_AT_END)) {
             GameAnimSet_Stop(spinner->anim_set);
             spinner->state_flags &= ~SPINNER_STATE_ROTATING;
-        } else if (GameAnimSet_IsAnimationReset(spinner->anim_set) != 0 ||
-                   ((spinner->state_flags & 0x400) != 0 && spinner->anim_set->state == GAMEANIMSET_STATE_AT_END)) {
-            GameAnimSet_Stop(spinner->anim_set);
-            spinner->state_flags &= ~SPINNER_STATE_ROTATING;
-        } else if (spinner->animation_speed != 0.0f && spinner->animation_points[0] != 0.0f) {
-            const f32 return_speed = -spinner->animation_points[0];
+            goto animation_updated;
+        }
+        if (GameAnimSet_IsAnimationReset(spinner->anim_set) != 0)
+            goto stop_animation;
+        if (spinner->animation_speed == 0.0f || spinner->animation_points[0] == 0.0f)
+            goto stop_animation;
+        {
             const i32 rotation_step =
                 static_cast<i32>(5461.0f * FRAMETIME * (spinner->animation_points[0] / spinner->animation_speed));
             const u32 direction = spinner->state_flags & (SPINNER_STATE_REVERSE | SPINNER_STATE_INVERT_ANIMATION);
-            if (direction == 0 || direction == (SPINNER_STATE_REVERSE | SPINNER_STATE_INVERT_ANIMATION)) {
+            if (direction == 0 || direction == (SPINNER_STATE_REVERSE | SPINNER_STATE_INVERT_ANIMATION))
                 spinner->rotation = static_cast<u16>(spinner->rotation + rotation_step);
-            } else {
+            else
                 spinner->rotation = static_cast<u16>(spinner->rotation - rotation_step);
-            }
-            GameAnimSet_Play(spinner->anim_set, return_speed, 1);
-        } else {
-            GameAnimSet_Stop(spinner->anim_set);
         }
+        play_speed = -spinner->animation_points[0];
+    play_animation:
+        if (play_speed != 0.0f) {
+            GameAnimSet_Play(spinner->anim_set, play_speed, 1);
+            goto animation_updated;
+        }
+    stop_animation:
+        GameAnimSet_Stop(spinner->anim_set);
+    animation_updated:
 
         NUMTX matrix;
         matrix.m00 = matrix.m22 = NU_COS_LUT(spinner->rotation);

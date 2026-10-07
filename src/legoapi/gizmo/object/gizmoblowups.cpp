@@ -1276,8 +1276,7 @@ void GizmoBlowupEarlyUpdate(void *world_ptr, void *, float) {
         }
 
         nuinstanim_s *animation = NuSpecialGetInstAnim(&blowup->type->animated_special);
-        bool requires_update = ((blowup->state_flags & GIZMOBLOWUP_STATE_ACTIVATED) != 0 &&
-                                (blowup->output_flags & GIZMOBLOWUP_OUTPUT_BLOWN_UP) == 0) ||
+        bool requires_update = ((blowup->status_flags & 0x800001) == 0x800000) ||
                                (blowup->state_flags & GIZMOBLOWUP_STATE_DELAY_ACTIVE) != 0;
         if (requires_update) {
             if ((blowup->draw_flags & 0x400000) != 0) {

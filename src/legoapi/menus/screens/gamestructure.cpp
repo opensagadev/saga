@@ -1047,8 +1047,10 @@ void MenuDrawStore(MENU_s *) {
 #define ADD_BUNDLE_PACK(INDEX)                                                                                         \
     if ((bundle.pack_mask & (1u << INDEX)) != 0) {                                                                     \
         character_ids[count] = *StorePack[INDEX].id;                                                                   \
-        already_owned[count] = Store_IsPackUnlocked(INDEX);                                                            \
-        if (already_owned[count] == 0) {                                                                               \
+        if (Store_IsPackUnlocked(INDEX)) {                                                                             \
+            already_owned[count] = 1;                                                                                  \
+        } else {                                                                                                       \
+            already_owned[count] = 0;                                                                                  \
             STORE_PRODUCT_s pack_product;                                                                              \
             char *pack_product_id = *reinterpret_cast<char **>(&StorePack[INDEX].field1_0x4);                          \
             if (NuIOS_GetInAppProductByID(pack_product_id, reinterpret_cast<NuIOS_InAppProduct *>(&pack_product)) !=   \

@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 71.250244,
+    "fuzzy_match_percent": 71.3277,
     "total_code": "4722419",
     "matched_code": "561429",
     "matched_code_percent": 11.888589,
@@ -19795,7 +19795,7 @@
           "address": 4249232,
           "offset": 3359264,
           "size": 4175,
-          "match_percent": 50.8688
+          "match_percent": 52.47934
         },
         {
           "name": "creatureEditor_RenderAllCreatures",
@@ -21034,7 +21034,7 @@
           "address": 5555584,
           "offset": 4665616,
           "size": 749,
-          "match_percent": 49.646465
+          "match_percent": 52.631313
         },
         {
           "name": "_ZN11ClassEditor17FindNearestObjectER5VuVecR11ClassObjectS3_i",
@@ -41300,7 +41300,7 @@
           "address": 4135968,
           "offset": 3246000,
           "size": 568,
-          "match_percent": 49.380596
+          "match_percent": 49.49254
         },
         {
           "name": "AISysGetPathPosEx",
@@ -41428,7 +41428,7 @@
           "address": 4205648,
           "offset": 3315680,
           "size": 3761,
-          "match_percent": 48.553
+          "match_percent": 68.139
         },
         {
           "name": "CalculateLocatorDirection",
@@ -41863,7 +41863,7 @@
           "address": 1974448,
           "offset": 1084480,
           "size": 3163,
-          "match_percent": 41.057335
+          "match_percent": 47.788
         },
         {
           "name": "_Z21AITriggerSysAutoSetUpP11WORLDINFO_sP17AITRIGGERSETSYS_s",
@@ -55519,7 +55519,7 @@
           "address": 4957088,
           "offset": 4067120,
           "size": 1588,
-          "match_percent": 30.293604
+          "match_percent": 51.139534
         },
         {
           "name": "_Z8PlayAnimP12nuinstanim_sPffi",
@@ -56306,7 +56306,7 @@
           "address": 5021920,
           "offset": 4131952,
           "size": 2623,
-          "match_percent": 51.097515
+          "match_percent": 59.78776
         },
         {
           "name": "_Z18GizSpinners_UpdatePvS_f",
@@ -61066,7 +61066,7 @@
           "address": 3975686,
           "offset": 3085718,
           "size": 4233,
-          "match_percent": 78.95057
+          "match_percent": 86.29173
         },
         {
           "name": "APICharacterSysInit",
@@ -61362,7 +61362,7 @@
           "address": 3996135,
           "offset": 3106167,
           "size": 1887,
-          "match_percent": 66.53546
+          "match_percent": 99.96099
         },
         {
           "name": "NuHGobjRestrictEvaluation",
@@ -70968,7 +70968,7 @@
           "address": 4705120,
           "offset": 3815152,
           "size": 5064,
-          "match_percent": 52.98803
+          "match_percent": 58.326443
         },
         {
           "name": "_Z13MenuExitStoreP6MENU_s",
@@ -71647,7 +71647,7 @@
           "address": 3460432,
           "offset": 2570464,
           "size": 2485,
-          "match_percent": 41.668278
+          "match_percent": 56.21256
         },
         {
           "name": "DebReAlloc",
@@ -93907,7 +93907,7 @@
           "address": 3003232,
           "offset": 2113264,
           "size": 619,
-          "match_percent": 63.987732
+          "match_percent": 66.59509
         },
         {
           "name": "NuRndrRect2d",
@@ -98738,7 +98738,7 @@
           "address": 2746288,
           "offset": 1856320,
           "size": 2449,
-          "match_percent": 29.662313
+          "match_percent": 46.72761
         },
         {
           "name": "_Z29NuIOS_CopyBackbufferToTextureP13nunativetex_sb",
@@ -122051,6 +122051,7 @@
       "size": 52,
       "match_percent": 99.94118,
       "candidate_units": [
+        "legoapi/items/base/apiobject.cpp.o",
         "legoapi/render/core/rtl.c.o"
       ]
     },
@@ -122278,8 +122279,9 @@
       "address": 3958464,
       "offset": 3068496,
       "size": 52,
-      "match_percent": 0.0,
+      "match_percent": 99.94118,
       "candidate_units": [
+        "legoapi/items/base/apiobject.cpp.o",
         "legoapi/render/core/rtl.c.o"
       ]
     },

@@ -684,18 +684,18 @@ GLuint NuIOS_CreateGLTexFromPVRInMemory(void *data, i32 *out_width, i32 *out_hei
         GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, GL_TEXTURE_CUBE_MAP_POSITIVE_Z, GL_TEXTURE_CUBE_MAP_NEGATIVE_Z,
     };
 
-    comeFromHash = 0;
+    *reinterpret_cast<u8 *>(&comeFromHash) = 0;
 
     u8 *header = (u8 *)data;
     u8 *pixels = header + 0x34 + *(u32 *)(header + 0x30);
     const u32 pixel_format = *(u32 *)(header + 0x08);
     const u32 channel_bits = *(u32 *)(header + 0x0c);
-    const i32 height = *(i32 *)(header + 0x18);
-    const i32 width = *(i32 *)(header + 0x1c);
-    const u32 depth = *(u32 *)(header + 0x20);
-    const u32 surfaces = *(u32 *)(header + 0x24);
-    const u32 faces = *(u32 *)(header + 0x28);
-    const u32 mip_count = *(u32 *)(header + 0x2c);
+    const i32 &height = *(i32 *)(header + 0x18);
+    const i32 &width = *(i32 *)(header + 0x1c);
+    const u32 &depth = *(u32 *)(header + 0x20);
+    const u32 &surfaces = *(u32 *)(header + 0x24);
+    const u32 &faces = *(u32 *)(header + 0x28);
+    const u32 &mip_count = *(u32 *)(header + 0x2c);
 
     if (faces == 6) {
         struct PVRMetadataHeader {
@@ -714,27 +714,131 @@ GLuint NuIOS_CreateGLTexFromPVRInMemory(void *data, i32 *out_width, i32 *out_hei
                 break;
             }
             if (record.fourcc == 0x03525650 && record.key == 2 && record.data_size == 6) {
-                for (u32 face = 0; face < 6; ++face) {
-                    switch (metadata[face]) {
-                        case 'X':
-                            cube_faces[face] = GL_TEXTURE_CUBE_MAP_POSITIVE_X;
-                            break;
-                        case 'x':
-                            cube_faces[face] = GL_TEXTURE_CUBE_MAP_NEGATIVE_X;
-                            break;
-                        case 'Y':
-                            cube_faces[face] = GL_TEXTURE_CUBE_MAP_POSITIVE_Y;
-                            break;
-                        case 'y':
-                            cube_faces[face] = GL_TEXTURE_CUBE_MAP_NEGATIVE_Y;
-                            break;
-                        case 'Z':
-                            cube_faces[face] = GL_TEXTURE_CUBE_MAP_POSITIVE_Z;
-                            break;
-                        case 'z':
-                            cube_faces[face] = GL_TEXTURE_CUBE_MAP_NEGATIVE_Z;
-                            break;
-                    }
+
+                switch (metadata[0]) {
+                    case 'X':
+                        cube_faces[0] = GL_TEXTURE_CUBE_MAP_POSITIVE_X;
+                        break;
+                    case 'x':
+                        cube_faces[0] = GL_TEXTURE_CUBE_MAP_NEGATIVE_X;
+                        break;
+                    case 'Y':
+                        cube_faces[0] = GL_TEXTURE_CUBE_MAP_POSITIVE_Y;
+                        break;
+                    case 'y':
+                        cube_faces[0] = GL_TEXTURE_CUBE_MAP_NEGATIVE_Y;
+                        break;
+                    case 'Z':
+                        cube_faces[0] = GL_TEXTURE_CUBE_MAP_POSITIVE_Z;
+                        break;
+                    case 'z':
+                        cube_faces[0] = GL_TEXTURE_CUBE_MAP_NEGATIVE_Z;
+                        break;
+                }
+
+                switch (metadata[1]) {
+                    case 'X':
+                        cube_faces[1] = GL_TEXTURE_CUBE_MAP_POSITIVE_X;
+                        break;
+                    case 'x':
+                        cube_faces[1] = GL_TEXTURE_CUBE_MAP_NEGATIVE_X;
+                        break;
+                    case 'Y':
+                        cube_faces[1] = GL_TEXTURE_CUBE_MAP_POSITIVE_Y;
+                        break;
+                    case 'y':
+                        cube_faces[1] = GL_TEXTURE_CUBE_MAP_NEGATIVE_Y;
+                        break;
+                    case 'Z':
+                        cube_faces[1] = GL_TEXTURE_CUBE_MAP_POSITIVE_Z;
+                        break;
+                    case 'z':
+                        cube_faces[1] = GL_TEXTURE_CUBE_MAP_NEGATIVE_Z;
+                        break;
+                }
+
+                switch (metadata[2]) {
+                    case 'X':
+                        cube_faces[2] = GL_TEXTURE_CUBE_MAP_POSITIVE_X;
+                        break;
+                    case 'x':
+                        cube_faces[2] = GL_TEXTURE_CUBE_MAP_NEGATIVE_X;
+                        break;
+                    case 'Y':
+                        cube_faces[2] = GL_TEXTURE_CUBE_MAP_POSITIVE_Y;
+                        break;
+                    case 'y':
+                        cube_faces[2] = GL_TEXTURE_CUBE_MAP_NEGATIVE_Y;
+                        break;
+                    case 'Z':
+                        cube_faces[2] = GL_TEXTURE_CUBE_MAP_POSITIVE_Z;
+                        break;
+                    case 'z':
+                        cube_faces[2] = GL_TEXTURE_CUBE_MAP_NEGATIVE_Z;
+                        break;
+                }
+
+                switch (metadata[3]) {
+                    case 'X':
+                        cube_faces[3] = GL_TEXTURE_CUBE_MAP_POSITIVE_X;
+                        break;
+                    case 'x':
+                        cube_faces[3] = GL_TEXTURE_CUBE_MAP_NEGATIVE_X;
+                        break;
+                    case 'Y':
+                        cube_faces[3] = GL_TEXTURE_CUBE_MAP_POSITIVE_Y;
+                        break;
+                    case 'y':
+                        cube_faces[3] = GL_TEXTURE_CUBE_MAP_NEGATIVE_Y;
+                        break;
+                    case 'Z':
+                        cube_faces[3] = GL_TEXTURE_CUBE_MAP_POSITIVE_Z;
+                        break;
+                    case 'z':
+                        cube_faces[3] = GL_TEXTURE_CUBE_MAP_NEGATIVE_Z;
+                        break;
+                }
+
+                switch (metadata[4]) {
+                    case 'X':
+                        cube_faces[4] = GL_TEXTURE_CUBE_MAP_POSITIVE_X;
+                        break;
+                    case 'x':
+                        cube_faces[4] = GL_TEXTURE_CUBE_MAP_NEGATIVE_X;
+                        break;
+                    case 'Y':
+                        cube_faces[4] = GL_TEXTURE_CUBE_MAP_POSITIVE_Y;
+                        break;
+                    case 'y':
+                        cube_faces[4] = GL_TEXTURE_CUBE_MAP_NEGATIVE_Y;
+                        break;
+                    case 'Z':
+                        cube_faces[4] = GL_TEXTURE_CUBE_MAP_POSITIVE_Z;
+                        break;
+                    case 'z':
+                        cube_faces[4] = GL_TEXTURE_CUBE_MAP_NEGATIVE_Z;
+                        break;
+                }
+
+                switch (metadata[5]) {
+                    case 'X':
+                        cube_faces[5] = GL_TEXTURE_CUBE_MAP_POSITIVE_X;
+                        break;
+                    case 'x':
+                        cube_faces[5] = GL_TEXTURE_CUBE_MAP_NEGATIVE_X;
+                        break;
+                    case 'Y':
+                        cube_faces[5] = GL_TEXTURE_CUBE_MAP_POSITIVE_Y;
+                        break;
+                    case 'y':
+                        cube_faces[5] = GL_TEXTURE_CUBE_MAP_NEGATIVE_Y;
+                        break;
+                    case 'Z':
+                        cube_faces[5] = GL_TEXTURE_CUBE_MAP_POSITIVE_Z;
+                        break;
+                    case 'z':
+                        cube_faces[5] = GL_TEXTURE_CUBE_MAP_NEGATIVE_Z;
+                        break;
                 }
             }
             metadata += record.data_size;
@@ -869,7 +973,6 @@ GLuint NuIOS_CreateGLTexFromPVRInMemory(void *data, i32 *out_width, i32 *out_hei
 
     return texture;
 }
-
 void NuDynamicLightTestShadowExtrusions(nudynamiclight_s *light, _vuv_s const *first, _vuv_s const *second, i32 *) {
     reinterpret_cast<NuDynamicLight *>(light)->testShadowExtrusions(*reinterpret_cast<const VuVec *>(first),
                                                                     *reinterpret_cast<const VuVec *>(second));
