@@ -2689,7 +2689,7 @@ void TerrainPlayer(GameObject_s *object) {
         object->field_0xe20 &= static_cast<u8>(~8u);
         const f32 entry_vertical_velocity = api.velocity.y;
         const AIPATHINFO &path_info = object->ai.path_info;
-        bool special_path_endpoints = false;
+        i32 special_path_endpoints = false;
         if (path_info.path != NULL && path_info.connection != NULL) {
             const AIPATHCNX *path_connection = path_info.connection;
             const AIPATHNODE *nodes = path_info.path->nodes;
