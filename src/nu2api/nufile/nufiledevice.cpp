@@ -101,8 +101,7 @@ i32 NuFileDevice::FormatName(char *output, i32 size, char const *path) const {
         const char *colon = path;
         for (i32 i = 0; *colon != ':' && *colon && i < 8; ++i)
             ++colon;
-        if (*colon == ':')
-            path = colon + 1;
+        const char *relative_path = *colon == ':' ? colon + 1 : path;
         if (*mount_name > 0) {
             NuStrCat(output, mount_name);
             char *last = output + NuStrLen(mount_name) - 1;
@@ -111,15 +110,16 @@ i32 NuFileDevice::FormatName(char *output, i32 size, char const *path) const {
         }
         i32 length = NuStrLen(output);
         normalized = output + length;
-        if ((((path[0] >= 'a' && path[0] <= 'z') || (path[0] >= 'A' && path[0] <= 'Z')) && path[1] == ':' &&
-             (path[2] == '/' || path[2] == '\\')) ||
-            path[0] == '/' || path[0] == '\\') {
-            NuStrCat(relative, path);
+        if ((((relative_path[0] >= 'a' && relative_path[0] <= 'z') ||
+              (relative_path[0] >= 'A' && relative_path[0] <= 'Z')) &&
+             relative_path[1] == ':' && (relative_path[2] == '/' || relative_path[2] == '\\')) ||
+            relative_path[0] == '/' || relative_path[0] == '\\') {
+            NuStrCat(relative, relative_path);
         } else {
             if (length > 0 && current_dir[0] != '\\' && current_dir[0] != '/')
                 NuStrCat(relative, separator);
             NuStrCat(relative, current_dir);
-            NuStrCat(relative, path);
+            NuStrCat(relative, relative_path);
         }
     }
     if (flags & 2)

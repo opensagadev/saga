@@ -760,14 +760,15 @@ static void GizmoPickups_Reset(void *world_ptr, void *, void *progress_ptr) {
     }
 
     GIZMOPICKUPRUNTIMESYS_s *pickup_sys = world->gizmo_pickup_sys;
-    for (i32 index = 0; index < pickup_sys->pickup_count; ++index) {
-        GIZMOPICKUP_s &pickup = pickup_sys->pickups[index];
+    GIZMOPICKUP_s *pickup_cursor = pickup_sys->pickups;
+    for (i32 index = 0; index < world->gizmo_pickup_sys->pickup_count; ++index, ++pickup_cursor) {
+        GIZMOPICKUP_s &pickup = *pickup_cursor;
         pickup.type_index = static_cast<u8>(FindPickupTypeIndex(pickup.type_code));
 
         NewTerrPlatformsOff();
         pickup.floor_height = GameShadow(NULL, &pickup.position, 5.0f, -1);
         if (pickup.floor_height != 2000000.0f) {
-            if (pickup.floor_height < pickup.position.y) {
+            if (!(pickup.floor_height >= pickup.position.y)) {
                 FindAnglesZX(&ShadNorm, &pickup.shadow_x_rotation, &pickup.shadow_z_rotation);
             } else {
                 pickup.floor_height = 2000000.0f;
@@ -822,6 +823,7 @@ static void GizmoPickups_Reset(void *world_ptr, void *, void *progress_ptr) {
         }
     }
 
+    pickup_sys = world->gizmo_pickup_sys;
     if (pickup_sys->temporary_pickups != NULL) {
         memset(pickup_sys->temporary_pickups, 0, sizeof(GIZMOPICKUP_s) * GIZMOPICKUP_TEMPORARY_CAPACITY);
     }

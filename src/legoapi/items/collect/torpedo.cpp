@@ -595,6 +595,7 @@ void DrawTorpedos(GameObject_s *object) {
         return;
     if (packet->target != NULL && static_cast<i8>(object->apiobj.flags_low) < 0)
         DrawTorpedoTargetSprite(packet->target, packet->target_type, 4.0f * object->torpedo_target_timer);
+    packet = object->torpedo;
     if (packet->count == 0)
         return;
 
@@ -608,9 +609,11 @@ void DrawTorpedos(GameObject_s *object) {
         NUMTX matrix;
         NuMtxSetIdentity(&matrix);
         NuMtxPreRotateX(&matrix, static_cast<u16>(x_rotation));
+        packet = object->torpedo;
         NuMtxRotateY(&matrix, static_cast<u16>(packet->pickup_data[index]));
         NuMtxTranslate(&matrix, &packet->pickup_positions[index]);
 
+        packet = object->torpedo;
         f32 blend = 1.0f;
         if (packet->field_03 == 0 && index == packet->count - 1) {
             blend = 1.0f - (NU_SIN_LUT(packet->field_08 / 0.8f * 32768.0f + 16384.0f) + 1.0f) * 0.5f;
@@ -623,6 +626,7 @@ void DrawTorpedos(GameObject_s *object) {
             NuSpecialDrawAt(&WORLD->lev_objs[0x79].special, &matrix);
         if (WORLD->lev_objs[0x7a].active != 0)
             NuSpecialDrawAt(&WORLD->lev_objs[0x7a].special, &matrix);
+        packet = object->torpedo;
     }
 }
 

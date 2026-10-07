@@ -117,12 +117,16 @@ void Text_MakeTime(float time, i32 show_hours, i32 show_minutes, i32 show_centis
     }
 
     i32 seconds;
-    if (show_minutes != 0 || show_centiseconds != 0) {
+    if (show_hours != 0 || show_minutes != 0) {
         seconds = static_cast<i32>(NuFmod(time, 60.0f));
     } else {
         seconds = static_cast<i32>(time);
     }
     const i32 centiseconds = static_cast<i32>(NuFmod(time, 1.0f) * 100.0f);
+
+    if (text == nullptr) {
+        return;
+    }
 
     if (show_hours != 0) {
         if (show_centiseconds != 0) {

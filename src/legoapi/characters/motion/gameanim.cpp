@@ -434,13 +434,13 @@ static void MoveAnim_Manage(GameObject_s *object, f32 movement_speed, i32 allow_
     if (allow_tiptoe != 0 && movement_speed <= (game_character->tiptoe_speed + game_character->walk_speed) * 0.5f) {
         object->apiobj.anim_packet.requested_animation = animation =
             weapon_variant != 0 &&
-                    (object->weapon_scale == 0.0f || object->weapon_scale_state == WEAPON_SCALE_EXTENDING) &&
+                    (object->weapon_scale == 1.0f || object->weapon_scale_state == WEAPON_SCALE_EXTENDING) &&
                     object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_SABER_TIPTOE] != NULL
                 ? CHARACTER_ANIMATION_SABER_TIPTOE
                 : CHARACTER_ANIMATION_TIPTOE;
     } else if (movement_speed <= (game_character->walk_speed + game_character->run_speed) * 0.5f) {
         if (weapon_variant != 0 &&
-            (object->weapon_scale == 0.0f || object->weapon_scale_state == WEAPON_SCALE_EXTENDING) &&
+            (object->weapon_scale == 1.0f || object->weapon_scale_state == WEAPON_SCALE_EXTENDING) &&
             object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_SABER_WALK] != NULL) {
             object->apiobj.anim_packet.requested_animation = animation = CHARACTER_ANIMATION_SABER_WALK;
         } else if (object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_BACKWARDS] != NULL &&
@@ -452,7 +452,7 @@ static void MoveAnim_Manage(GameObject_s *object, f32 movement_speed, i32 allow_
     } else {
         object->apiobj.anim_packet.requested_animation = animation =
             weapon_variant != 0 &&
-                    (object->weapon_scale == 0.0f || object->weapon_scale_state == WEAPON_SCALE_EXTENDING) &&
+                    (object->weapon_scale == 1.0f || object->weapon_scale_state == WEAPON_SCALE_EXTENDING) &&
                     object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_SABER_RUN] != NULL
                 ? CHARACTER_ANIMATION_SABER_RUN
                 : CHARACTER_ANIMATION_RUN;

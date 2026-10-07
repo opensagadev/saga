@@ -510,13 +510,14 @@ void LoadPerm(void) {
                     legal_timer = 5.8f;
                 }
             } else {
-                if (legal_tid != 0) {
+                const i32 texture_id = legal_tid;
+                if (texture_id != 0) {
                     NUMTL *mtl = NuMtlCreate(1);
                     if (mtl != nullptr) {
                         mtl->diffuse_color = {1.0f, 1.0f, 1.0f};
                         mtl->opacity = 1.0f;
                         mtl->shader_desc.flags = 0x1000;
-                        mtl->tex_id = static_cast<i16>(legal_tid);
+                        mtl->tex_id = static_cast<i16>(texture_id);
                         u8 *attrib = reinterpret_cast<u8 *>(&mtl->attribs);
                         attrib[1] = (attrib[1] & 0xcf) | 0xe0;
                         attrib[0] = (attrib[0] & 0xc0) | 0x22;

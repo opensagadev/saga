@@ -482,21 +482,25 @@ eduimenu_s *areaEditor_Process(nupad_s *pad) {
     if ((buttons & 0x100) != 0 && (pressed & 0x0a) != 0) {
         EDAIAREA_s *next = NULL;
         if (pressed & 0x08) {
-            next = area_selected() == NULL
-                       ? area_head()
-                       : reinterpret_cast<EDAIAREA_s *>(NuLinkedListGetNext(area_list(), &area_selected()->link));
-            if (next == NULL) {
-                next = area_head();
+            if (area_selected() != NULL) {
+                EDAIAREA_s *&selection = area_selected();
+                selection = reinterpret_cast<EDAIAREA_s *>(NuLinkedListGetNext(area_list(), &selection->link));
+            }
+            if (area_selected() == NULL) {
+                EDAIAREA_s *&selection = area_selected();
+                selection = area_head();
             }
         } else if (pressed & 0x02) {
-            next = area_selected() == NULL
-                       ? reinterpret_cast<EDAIAREA_s *>(NuLinkedListGetTail(area_list()))
-                       : reinterpret_cast<EDAIAREA_s *>(NuLinkedListGetPrev(area_list(), &area_selected()->link));
-            if (next == NULL) {
-                next = reinterpret_cast<EDAIAREA_s *>(NuLinkedListGetTail(area_list()));
+            if (area_selected() != NULL) {
+                EDAIAREA_s *&selection = area_selected();
+                selection = reinterpret_cast<EDAIAREA_s *>(NuLinkedListGetPrev(area_list(), &selection->link));
+            }
+            if (area_selected() == NULL) {
+                EDAIAREA_s *&selection = area_selected();
+                selection = reinterpret_cast<EDAIAREA_s *>(NuLinkedListGetTail(area_list()));
             }
         }
-        area_selected() = next;
+        next = area_selected();
         if (next != NULL) {
             edcamSetPos(&next->position);
         }

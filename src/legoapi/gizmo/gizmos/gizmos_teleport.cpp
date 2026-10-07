@@ -65,8 +65,8 @@ TELEPORT_s *Teleport_Find(GameObject_s *object, float range_squared, VuVec *posi
     const f32 radius_squared = radius * radius;
     i32 nearest = -1;
     f32 nearest_distance = 100000000.0f;
-    for (i32 i = 0; i < WORLD->teleport_count; ++i) {
-        TELEPORT_s *teleport = &WORLD->teleports[i];
+    TELEPORT_s *teleport = WORLD->teleports;
+    for (i32 i = 0; i < WORLD->teleport_count; ++i, ++teleport) {
         if (teleport->active != 0 || teleport->enabled == 0)
             continue;
         if (NuSpecialExistsFn(&teleport->blocking_special)) {
@@ -78,11 +78,13 @@ TELEPORT_s *Teleport_Find(GameObject_s *object, float range_squared, VuVec *posi
                 continue;
             }
         }
-        const f32 fallback_range = (teleport->flags & 2) != 0 ? teleport->range_squared : radius_squared;
+        const u16 range_flag = teleport->flags & 2;
         NUVEC *point = teleport->path->pts;
         f32 distance = NuVecDistSqr(&object->apiobj.collision_position, point, NULL);
-        if (((range_squared != 0.0f && distance < range_squared) || distance < fallback_range) &&
+        if (((range_squared != 0.0f && distance < range_squared) ||
+             distance < (range_flag != 0 ? teleport->range_squared : radius_squared)) &&
             (nearest == -1 || distance < nearest_distance)) {
+            point = teleport->path->pts;
             if (position != NULL && point != NULL) {
                 position->x = point->x;
                 position->y = point->y;
@@ -96,8 +98,10 @@ TELEPORT_s *Teleport_Find(GameObject_s *object, float range_squared, VuVec *posi
             continue;
         point = &teleport->path->pts[teleport->path->length - 1];
         distance = NuVecDistSqr(&object->apiobj.collision_position, point, NULL);
-        if (((range_squared != 0.0f && distance < range_squared) || distance < fallback_range) &&
+        if (((range_squared != 0.0f && distance < range_squared) ||
+             distance < (range_flag != 0 ? teleport->range_squared : radius_squared)) &&
             (nearest == -1 || distance < nearest_distance)) {
+            point = &teleport->path->pts[teleport->path->length - 1];
             if (position != NULL && point != NULL) {
                 position->x = point->x;
                 position->y = point->y;
