@@ -18,13 +18,21 @@ void NuWindInitialise(NUWIND *wind) {
 
 void NuWindSetWorldSize(NUWIND *wind, f32 size) {
     if (wind != NULL) {
-        wind->unk2.x = 1.0f <= size ? size : 1.0f;
+        if (size >= 1.0f) {
+            wind->unk2.x = size;
+        } else {
+            wind->unk2.x = 1.0f;
+        }
     }
 }
 
 void NuWindSetSpeed(NUWIND *wind, f32 speed) {
     if (wind != NULL) {
-        wind->unk2.y = 1.0f <= speed ? speed : 1.0f;
+        if (speed >= 1.0f) {
+            wind->unk2.y = speed;
+        } else {
+            wind->unk2.y = 1.0f;
+        }
     }
 }
 
@@ -40,8 +48,9 @@ void NuWindAnimate(NUWIND *wind, f32 frametime) {
         if (wind->unk2.z >= 1.0f) {
             wind->unk2.z = NuFmod(wind->unk2.z, 1.0f);
         }
-        f32 scaled_time = 5.0f * frametime;
-        wind->unk2.w = frametime + wind->unk2.w;
-        wind->unk3 = scaled_time + wind->unk3;
+        f32 elapsed = wind->unk2.w + frametime;
+        f32 phase = wind->unk3 + 5.0f * frametime;
+        wind->unk2.w = elapsed;
+        wind->unk3 = phase;
     }
 }

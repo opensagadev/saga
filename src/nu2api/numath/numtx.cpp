@@ -1288,7 +1288,7 @@ void NuMtx24BitCorrection(NUMTX *correction, NUMTX *matrix) {
                 continue;
             f32 previous;
             f32 error;
-            f32 *value = reinterpret_cast<f32 *>(correction) + element;
+            f32 *value = &correction->m00 + element;
             previous = *value;
             *value += step;
             reinterpret_cast<u8 *>(value)[0] = 0;

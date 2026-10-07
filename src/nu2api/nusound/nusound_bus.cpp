@@ -10,7 +10,9 @@ const char *NuSoundBus::GetName() {
 }
 
 NuSoundBus *NuSoundSystem::GetBus(const char *name) {
-    for (NuSoundBus *bus = bus_list.Front(); bus != bus_list.End(); bus = reinterpret_cast<NuSoundBus **>(bus)[1]) {
+    NuSoundBus *bus = bus_list.Front();
+    NuSoundBus *end = bus_list.End();
+    for (; bus != end; bus = reinterpret_cast<NuSoundBus **>(bus)[1]) {
         if (NuStrICmp(bus->GetName(), name) == 0) {
             return bus;
         }

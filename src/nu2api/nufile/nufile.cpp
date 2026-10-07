@@ -955,7 +955,6 @@ NUDATHDR *NuDatOpenEx(char *filepath, VARIPTR *buf, i32 *_unused, i16 mode) {
     char _unused2[256];
     i32 path_len;
     i32 i;
-    i32 j;
     NUFILE file;
     i64 seek_offset;
     i32 file_len;
@@ -1077,7 +1076,7 @@ NUDATHDR *NuDatOpenEx(char *filepath, VARIPTR *buf, i32 *_unused, i16 mode) {
         for (n = 0; n < hdr->tree_node_count; n++) {
             _unused4 = 0;
             hdr->file_tree[n].name = reinterpret_cast<char *>(
-                reinterpret_cast<usize>(hdr->leaf_names) + reinterpret_cast<usize>(hdr->file_tree[n].name) - _unused4);
+                reinterpret_cast<usize>(hdr->file_tree[n].name) + (reinterpret_cast<usize>(hdr->leaf_names) - _unused4));
         }
 
         hdr->file_tree[0].name = NULL;
@@ -1145,7 +1144,7 @@ NUDATHDR *NuDatOpenEx(char *filepath, VARIPTR *buf, i32 *_unused, i16 mode) {
                 hash_idx = hdr->hash_idxs[i];
                 idx_to_swap = i;
 
-                for (j = i + 1; j < hdr->file_count; j++) {
+                for (i32 j = i + 1; j < hdr->file_count; j++) {
                     if (hdr->hash_idxs[j] <= hash_idx) {
                         hash_idx = hdr->hash_idxs[j];
                         idx_to_swap = j;
@@ -1154,7 +1153,7 @@ NUDATHDR *NuDatOpenEx(char *filepath, VARIPTR *buf, i32 *_unused, i16 mode) {
 
                 if (i != idx_to_swap) {
                     tmp_idx = hdr->hash_idxs[i];
-                    hdr->hash_idxs[j] = hdr->hash_idxs[idx_to_swap];
+                    hdr->hash_idxs[i] = hdr->hash_idxs[idx_to_swap];
                     hdr->hash_idxs[idx_to_swap] = tmp_idx;
 
                     tmp = hdr->file_info[i];
@@ -1806,7 +1805,6 @@ refill_distance_low_bit:;
 start_bulk_length:;
     count.value = 0x3;
     goto bulk_length_bit;
-bulk_length_next:;
 bulk_length_bit:;
     bits.value = (bits.value + bits.value);
     carry.value = (bits.value >> 0x8);
@@ -1821,7 +1819,7 @@ bulk_length_accumulate:;
     carry.value = (carry.value & 0x1);
     count.value = (count.value - 0x1);
     if ((i32)(count.value) >= 0)
-        goto bulk_length_next;
+        goto bulk_length_bit;
     distance.value = (distance.value + 0x2);
 copy_bulk_literals:;
     last.value = (u8)(*(u8 *)(input.value));
@@ -1838,7 +1836,7 @@ copy_bulk_literals:;
     if (!((i32)(distance.value) < 0)) {
         goto copy_bulk_literals;
     } else {
-        goto token_after_bulk;
+        goto next_token;
     }
 decode_match_length:;
     bits.value = (bits.value + bits.value);
@@ -1858,7 +1856,7 @@ match_length_accumulate:;
         goto refill_match_length_extension;
 match_length_extension:;
     if (carry.value == 0)
-        goto match_distance_from_length;
+        goto decode_match_distance;
     count.value = (count.value - 0x1);
     bits.value = (bits.value + bits.value);
     carry.value = (bits.value >> 0x8);
@@ -1877,9 +1875,6 @@ match_length_low:;
     } else {
         goto start_bulk_length;
     }
-match_distance_from_length:;
-    goto decode_match_distance;
-match_distance_from_three:;
 decode_match_distance:;
     bits.value = (bits.value + bits.value);
     carry.value = (bits.value >> 0x8);
@@ -1889,7 +1884,7 @@ decode_match_distance:;
         goto refill_distance_prefix;
 distance_prefix:;
     if (carry.value == 0)
-        goto distance_byte_from_zero;
+        goto read_distance_byte;
     bits.value = (bits.value + bits.value);
     carry.value = (bits.value >> 0x8);
     carry.value = (carry.value & 0x1);
@@ -1909,10 +1904,9 @@ distance_extension:;
     if (carry.value != 0)
         goto distance_extended_prefix;
     if (distance.value != 0)
-        goto distance_pack_from_one;
+        goto distance_pack;
     distance.value = (distance.value + 0x1);
     goto distance_low_bit;
-distance_low_from_extension:;
 distance_low_bit:;
     bits.value = (bits.value + bits.value);
     carry.value = (bits.value >> 0x8);
@@ -1926,16 +1920,12 @@ distance_low_accumulate:;
     carry.value = (distance.value >> 0x10);
     carry.value = (carry.value & 0x1);
     goto distance_pack;
-distance_pack_from_one:;
 distance_pack:;
     last.value = (distance.value << 0x8);
     last.value = (last.value & 0xff00);
     distance.value = (distance.value >> 0x8);
     distance.value = (distance.value | last.value);
     goto read_distance_byte;
-distance_byte_from_zero:;
-    goto read_distance_byte;
-distance_byte_from_pair:;
 read_distance_byte:;
     upper.value = (distance.value & 0xff00);
     distance.value = (u8)(*(u8 *)(input.value));
@@ -1947,17 +1937,16 @@ read_distance_byte:;
     carry.value = (count.value & 0x1);
     count.value = (count.value >> 1);
     if (carry.value == 0)
-        goto copy_pairs_even;
+        goto copy_pairs_setup;
     last.value = (u8)(*(u8 *)(copy.value));
     copy.value = (copy.value + 0x1);
     *(u8 *)(output.value) = last.byte;
     output.value = (output.value + 0x1);
     goto copy_pairs_setup;
-copy_pairs_even:;
 copy_pairs_setup:;
     count.value = (count.value - 0x1);
     if (distance.value != 0)
-        goto copy_back_reference_start;
+        goto copy_back_reference;
     upper.value = (distance.value & 0xff00);
     distance.value = (u8)(*(u8 *)(copy.value));
     distance.value = (distance.value | upper.value);
@@ -1969,9 +1958,8 @@ copy_repeated_byte:;
     if (!((i32)(count.value) < 0)) {
         goto copy_repeated_byte;
     } else {
-        goto token_after_repeat;
+        goto next_token;
     }
-copy_back_reference_start:;
 copy_back_reference:;
     temp.value = (u8)(*(u8 *)((copy.value + 0x1)));
     last.value = (u8)(*(u8 *)(copy.value));
@@ -1983,7 +1971,7 @@ copy_back_reference:;
     if (!((i32)(count.value) < 0)) {
         goto copy_back_reference;
     } else {
-        goto token_after_copy;
+        goto next_token;
     }
 refill_token:;
     bits.value = (u8)(*(u8 *)(input.value));
@@ -1995,28 +1983,20 @@ refill_token:;
     if (!(carry.value != 0)) {
         goto literal_copy;
     } else {
-        goto match_after_refill;
+        goto decode_match;
     }
-literal_after_token:;
 literal_copy:;
     last.value = (u8)(*(u8 *)(input.value));
     input.value = (input.value + 0x1);
     *(u8 *)(output.value) = last.byte;
     output.value = (output.value + 0x1);
     goto next_token;
-token_after_bulk:;
-    goto next_token;
-token_after_repeat:;
-    goto next_token;
-token_after_copy:;
-    goto next_token;
-token_after_block:;
 next_token:;
     bits.value = (bits.value + bits.value);
     carry.value = (bits.value >> 0x8);
     carry.value = (carry.value & 0x1);
     if (carry.value != 0)
-        goto match_token_from_one;
+        goto match_token_boundary;
     last.value = (u8)(*(u8 *)(input.value));
     input.value = (input.value + 0x1);
     *(u8 *)(output.value) = last.byte;
@@ -2027,9 +2007,8 @@ next_token:;
     if (!(carry.value == 0)) {
         goto match_token_boundary;
     } else {
-        goto literal_after_token;
+        goto literal_copy;
     }
-match_token_from_one:;
 match_token_boundary:;
     bits.value = (bits.value & 0xff);
     if (!(bits.value == 0)) {
@@ -2037,7 +2016,6 @@ match_token_boundary:;
     } else {
         goto refill_token;
     }
-match_after_refill:;
 decode_match:;
     count.value = 0x2;
     distance.value = 0x0;
@@ -2058,7 +2036,7 @@ match_kind:;
         goto refill_short_kind;
 match_short_kind:;
     if (carry.value == 0)
-        goto distance_byte_from_pair;
+        goto read_distance_byte;
     count.value = (count.value + 0x1);
     bits.value = (bits.value + bits.value);
     carry.value = (bits.value >> 0x8);
@@ -2068,7 +2046,7 @@ match_short_kind:;
         goto refill_long_kind;
 match_long_kind:;
     if (carry.value == 0)
-        goto match_distance_from_three;
+        goto decode_match_distance;
     count.value = (u8)(*(u8 *)(input.value));
     input.value = (input.value + 0x1);
     if (count.value != 0)
@@ -2109,7 +2087,7 @@ distance_extended_low:;
     if (!(carry.value == 0)) {
         goto distance_pack;
     } else {
-        goto distance_low_from_extension;
+        goto distance_low_bit;
     }
 refill_match_kind:;
     bits.value = (u8)(*(u8 *)(input.value));
@@ -2160,11 +2138,11 @@ refill_block_end:;
     carry.value = (carry.value & 0x1);
 block_end:;
     if (carry.value != 0)
-        goto token_after_block;
+        goto next_token;
     length.value = (u16)(*(u16 *)(saved.value));
     saved.value = (saved.value + 0x2);
     if (length.value == 0)
-        goto unpack_empty_return;
+        goto unpack_return;
 // Retained from the original, although this decoder only pushes a zero sentinel.
 restore_saved_bytes:;
     saved_byte.value = (u16)(*(u16 *)(saved.value));
@@ -2177,7 +2155,6 @@ restore_saved_bytes:;
     } else {
         goto unpack_return;
     }
-unpack_empty_return:;
 unpack_return:;
     return;
 }

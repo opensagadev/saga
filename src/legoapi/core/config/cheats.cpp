@@ -41,8 +41,9 @@ void Cheats_Init(CHEAT *cheats) {
     if (cheats != NULL && cheats[0].name != NULL) {
         i32 count = 0;
         do {
+            ++cheats;
             count++;
-        } while (cheats[count].name != NULL);
+        } while (cheats->name != NULL);
         CheatSystem.cheats_count = count;
     }
 }
@@ -60,36 +61,15 @@ void Cheats_SetFlags() {
     i32 count = CheatSystem.cheats_count;
     CheatSystem.flags = 0;
     if (count > 0) {
+        CHEAT *cheats = CheatSystem.cheats;
         i32 flags = 0;
         f32 powerup_time = Cheat_PowerUpTime;
         i32 vehicle_area = VehicleArea;
-        if (ONEPLAYERPOWERUPS == 0) {
-            if (powerup_time > 0.0009765625f) {
-                if (vehicle_area != 0) {
-                    for (i32 i = 0; i < count; i++) {
-                        if (CheatSystem.cheats[i].enabled || (CheatSystem.cheats[i].flag & 0x20000)) {
-                            flags |= CheatSystem.cheats[i].flag;
-                        }
-                    }
-                } else {
-                    for (i32 i = 0; i < count; i++) {
-                        if (CheatSystem.cheats[i].enabled || (CheatSystem.cheats[i].flag & 0x10000)) {
-                            flags |= CheatSystem.cheats[i].flag;
-                        }
-                    }
-                }
-            } else {
-                for (i32 i = 0; i < count; i++) {
-                    if (CheatSystem.cheats[i].enabled) {
-                        flags |= CheatSystem.cheats[i].flag;
-                    }
-                }
-            }
-        } else {
-            for (i32 i = 0; i < count; i++) {
-                if (CheatSystem.cheats[i].enabled) {
-                    flags |= CheatSystem.cheats[i].flag;
-                }
+        for (i32 i = 0; i < count; i++) {
+            if (cheats[i].enabled ||
+                (ONEPLAYERPOWERUPS == 0 && powerup_time > 0.0009765625f &&
+                 (cheats[i].flag & (vehicle_area ? 0x20000 : 0x10000)))) {
+                flags |= cheats[i].flag;
             }
         }
         CheatSystem.flags = flags;
@@ -122,9 +102,11 @@ i32 Cheat_IsOn(i32 cheat) {
             return 1;
         }
         if (ONEPLAYERPOWERUPS == 0 && Cheat_PowerUpTime > 0.0f) {
-            u8 vehicle_flag = reinterpret_cast<u8 *>(&CheatSystem.cheats[cheat].flag)[2];
-            vehicle_flag &= VehicleArea == 0 ? 1U : 2U;
-            if (vehicle_flag != 0) {
+            if (VehicleArea != 0) {
+                if (CheatSystem.cheats[cheat].flag & 0x20000) {
+                    return 1;
+                }
+            } else if (CheatSystem.cheats[cheat].flag & 0x10000) {
                 return 1;
             }
         }
@@ -136,14 +118,18 @@ void Cheat_GetOnOffBitfield(i32 *onoffs, i32 count) {
     memset(onoffs, 0, ((count + 31) / 32) << 2);
     for (i32 i = 0; i < count; i++) {
         if (CheatSystem.cheats[i].enabled) {
-            onoffs[i >> 5] |= 1 << i;
+            onoffs[i >> 5] |= 1u << (i & 31);
         }
     }
 }
 
 void Cheat_SetOnOffBitfield(i32 *onoffs, i32 count) {
     for (i32 i = 0; i < count; i++) {
-        CheatSystem.cheats[i].enabled = ((onoffs[i >> 5] >> i) & 1) ? 1 : 0;
+        if ((onoffs[i >> 5] >> (i & 31)) & 1) {
+            CheatSystem.cheats[i].enabled = 1;
+        } else {
+            CheatSystem.cheats[i].enabled = 0;
+        }
     }
 }
 
@@ -189,12 +175,12 @@ void Cheat_StartPowerUp(nuvec_s *position, GameObject_s *object) {
         Cheat_PowerUpTime = CHEAT_POWERUPTIME;
     }
 
-    char *message = TTab[POWERUP_TEXTID];
-    void *display = AddGameMessage(message, position, 0.5f, position, 0.75f, 0xff, 0xff, 0xff, 0x4023, 1.0f);
+    void *display =
+        AddGameMessage(TTab[POWERUP_TEXTID], position, 0.5f, position, 0.75f, 0xff, 0xff, 0xff, 0x4023, 1.0f);
     if (display != NULL) {
         *reinterpret_cast<f32 *>(static_cast<char *>(display) + 0xd4) = 0.75f;
     }
-    display = AddGameMessage(message, position, 0.5f, position, 0.25f, 0xff, 0xff, 0xff, 0x4023, 1.0f);
+    display = AddGameMessage(TTab[POWERUP_TEXTID], position, 0.5f, position, 0.25f, 0xff, 0xff, 0xff, 0x4023, 1.0f);
     if (display != NULL) {
         *reinterpret_cast<f32 *>(static_cast<char *>(display) + 0xd4) = 0.75f;
     }

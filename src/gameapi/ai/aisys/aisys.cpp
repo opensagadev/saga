@@ -2673,24 +2673,26 @@ __used__ static i32 Action_GoToOrigin(AISYS *sys, AISCRIPTPROCESS *processor, AI
         packet->movement_instruction_parameter = 0.2f;
         f32 min_time = 0.0f;
         f32 max_time = 0.0f;
-        for (i32 index = 0; index < param_count; ++index) {
-            if (AIActionParseSpeedFn != NULL && AIActionParseSpeedFn(params[index], &packet->goal_speed_mode) != 0) {
-                continue;
-            }
-            char *value = NuStrIStr(params[index], "waittime");
-            if (value != NULL) {
-                processor->action_timer = AIParamToFloatEx(packet, processor, value + NuStrLen("waittime") + 1);
-            } else if ((value = NuStrIStr(params[index], "mintime")) != NULL) {
-                min_time = AIParamToFloatEx(packet, processor, value + NuStrLen("mintime") + 1);
-            } else if ((value = NuStrIStr(params[index], "maxtime")) != NULL) {
-                max_time = AIParamToFloatEx(packet, processor, value + NuStrLen("maxtime") + 1);
-            } else if (NuStrICmp(params[index], "xz_rangecheck") == 0) {
-                processor->action_data_2 = 1;
-            } else if ((value = NuStrIStr(params[index], "goalrange")) != NULL) {
-                packet->movement_instruction_parameter =
-                    AIParamToFloatEx(packet, processor, value + NuStrLen("goalrange") + 1);
-            } else {
-                packet->movement_instruction_parameter = AIParamToFloatEx(packet, processor, params[index]);
+        if (param_count != 0) {
+            for (i32 index = 0; index < param_count; ++index) {
+                if (AIActionParseSpeedFn != NULL && AIActionParseSpeedFn(params[index], &packet->goal_speed_mode) != 0) {
+                    continue;
+                }
+                char *value = NuStrIStr(params[index], "waittime");
+                if (value != NULL) {
+                    processor->action_timer = AIParamToFloatEx(packet, processor, value + NuStrLen("waittime") + 1);
+                } else if ((value = NuStrIStr(params[index], "mintime")) != NULL) {
+                    min_time = AIParamToFloatEx(packet, processor, value + NuStrLen("mintime") + 1);
+                } else if ((value = NuStrIStr(params[index], "maxtime")) != NULL) {
+                    max_time = AIParamToFloatEx(packet, processor, value + NuStrLen("maxtime") + 1);
+                } else if (NuStrICmp(params[index], "xz_rangecheck") == 0) {
+                    processor->action_data_2 = 1;
+                } else if ((value = NuStrIStr(params[index], "goalrange")) != NULL) {
+                    packet->movement_instruction_parameter =
+                        AIParamToFloatEx(packet, processor, value + NuStrLen("goalrange") + 1);
+                } else {
+                    packet->movement_instruction_parameter = AIParamToFloatEx(packet, processor, params[index]);
+                }
             }
         }
         if (processor->action_timer == 0.0f) {
@@ -4342,12 +4344,12 @@ __used__ static i32 Action_SnapToOrigin(AISYS *sys, AISCRIPTPROCESS *processor, 
     }
 
     AICREATURE *creature = &sys->creatures[object->ai.field_0x134];
+    object->apiobj.position = creature->pos;
     u16 rotation = static_cast<u16>(creature->y_rot);
     object->apiobj.field_0x276 = rotation;
     object->apiobj.facing_angle = rotation;
     object->apiobj.movement_facing_angle = rotation;
     object->ai.path_info.on_path = 0;
-    object->apiobj.position = creature->pos;
     object->apiobj.initial_position = object->apiobj.position;
     object->apiobj.collision_position = object->apiobj.position;
     plr_lastpos = object->apiobj.position;
@@ -6369,9 +6371,9 @@ __used__ static i32 Action_CreateCreatures(AISYS *sys, AISCRIPTPROCESS *processo
     AIPATHINFO *path;
     i32 yaw;
     if (packet != NULL && packet->owner != NULL) {
+        path = &packet->path_info;
         position = packet->owner->apiobj.position;
         yaw = packet->owner->apiobj.field_0x276;
-        path = &packet->path_info;
     } else {
         yaw = 0;
         path = NULL;
@@ -6445,9 +6447,10 @@ __used__ static i32 Action_CreateCreatures(AISYS *sys, AISCRIPTPROCESS *processo
             max_dy = AIParamToFloat(processor, value + 6);
         else if ((value = NuStrIStr(params[index], "zipup")) != NULL) {
             if (locator_count < 32) {
-                for (i32 i = 0; i < WORLD->zipup_count; ++i) {
-                    ZIPUP *zipup = &WORLD->zipups[i];
-                    if ((zipup->flags & 0xc0) == 0xc0 && NuStrICmp(value + 6, zipup->name) == 0) {
+                value += 6;
+                ZIPUP *zipup = WORLD->zipups;
+                for (i32 i = 0; i < WORLD->zipup_count; ++i, ++zipup) {
+                    if ((zipup->flags & 0xc0) == 0xc0 && NuStrICmp(value, zipup->name) == 0) {
                         zipups[zipup_count++] = zipup;
                         break;
                     }
@@ -6577,19 +6580,19 @@ __used__ static i32 Action_CreateCreatures(AISYS *sys, AISCRIPTPROCESS *processo
                 if (nearest != 0)
                     locator = LocalGetNearestLocator(locators, locator_count, clip_radius, &player->apiobj.position,
                                                      max_range, onscreen, max_dy, min_dy);
-                else if (max_range != 1000000000.0f)
+                else if (max_range == 1000000000.0f)
+                    locator = LocalGetRandomLocator(locators, locator_count, clip_radius, NULL, 1000000000.0f, onscreen,
+                                                    max_dy, min_dy);
+                else
                     locator =
                         LocalGetRandomLocator(locators, locator_count, clip_radius, &player->apiobj.collision_position,
                                               max_range, onscreen, max_dy, min_dy);
-                else
-                    locator = LocalGetRandomLocator(locators, locator_count, clip_radius, NULL, 1000000000.0f, onscreen,
-                                                    max_dy, min_dy);
             }
             if (locator == NULL)
                 break;
+            path = &locator->path_info;
             position = locator->position;
             yaw = locator->flags;
-            path = &locator->path_info;
             offset_applied = 0;
         } else if (zipup_count != 0) {
             i32 eligible = 0;
@@ -6608,8 +6611,8 @@ __used__ static i32 Action_CreateCreatures(AISYS *sys, AISCRIPTPROCESS *processo
             path = NULL;
             surface = 0;
         } else if (rider != NULL) {
-            position = rider->ai.last_path_position;
             path = &rider->ai.path_info;
+            position = rider->ai.last_path_position;
             yaw = rider->apiobj.field_0x276;
         }
         if (offset_applied == 0 && (offset.x != 0.0f || offset.y != 0.0f || offset.z != 0.0f)) {
@@ -6620,12 +6623,13 @@ __used__ static i32 Action_CreateCreatures(AISYS *sys, AISCRIPTPROCESS *processo
         if (count > 0) {
             i32 members = 1;
             i32 make_group = 0;
-            if (grouped != 0) {
+            if (grouped == 0)
+                --count;
+            else {
                 members = count;
                 make_group = count > 1;
                 count = 0;
-            } else
-                --count;
+            }
             AIGROUP *group = NULL;
             for (i32 member = 0; member < members; ++member) {
                 if (member == 0 && make_group != 0) {
@@ -6648,9 +6652,8 @@ __used__ static i32 Action_CreateCreatures(AISYS *sys, AISCRIPTPROCESS *processo
                     SpawnCreatureFromCrate(object, crate_height, delay);
                 delay += crate_delay;
                 if (locator_set != NULL && object->ai.locator != NULL) {
-                    i32 locator_index = object->ai.locator - sys->locators;
                     for (i32 i = 0; i < locator_set->locator_count; ++i) {
-                        if (locator_set->locator_entries[i] == locator_index) {
+                        if (locator_set->locator_entries[i] == object->ai.locator - sys->locators) {
                             locator_set->assigned[i] = object->apiobj.field_0x289;
                             break;
                         }
@@ -6659,11 +6662,13 @@ __used__ static i32 Action_CreateCreatures(AISYS *sys, AISCRIPTPROCESS *processo
                 if (zipup != NULL) {
                     object->field_0x788 = zipup;
                     zipup->runtime_flags |= 1;
+                    ZIPUP *attached_zipup = static_cast<ZIPUP *>(object->field_0x788);
                     object->context_flags |= 0x20;
                     object->field_0x7a5 = 0x47;
                     object->context_animation = 0x2a;
-                    object->apiobj.movement_facing_angle = NuAtan2D(zipup->upper_position.x - zipup->lower_position.x,
-                                                                    zipup->upper_position.z - zipup->lower_position.z);
+                    object->apiobj.movement_facing_angle =
+                        NuAtan2D(attached_zipup->upper_position.x - attached_zipup->lower_position.x,
+                                 attached_zipup->upper_position.z - attached_zipup->lower_position.z);
                     object->field_0xe22 |= 1;
                     object->apiobj.velocity.y = 0.0f;
                     object->context_animation_timer = 0.0f;
@@ -6672,10 +6677,10 @@ __used__ static i32 Action_CreateCreatures(AISYS *sys, AISCRIPTPROCESS *processo
                     PlayJumpSfx(object, 0);
                     object->field_0xe31 = 0;
                     ZIPUP *current_zipup = static_cast<ZIPUP *>(object->field_0x788);
-                    f32 dx = current_zipup->hook_origin.x - zipup->lower_position.x;
-                    f32 dz = current_zipup->hook_origin.z - zipup->lower_position.z;
-                    i32 angle =
-                        NuAtan2D(current_zipup->hook_origin.y - zipup->lower_position.y, NuFsqrt(dx * dx + dz * dz));
+                    f32 dx = current_zipup->hook_origin.x - attached_zipup->lower_position.x;
+                    f32 dz = current_zipup->hook_origin.z - attached_zipup->lower_position.z;
+                    i32 angle = NuAtan2D(current_zipup->hook_origin.y - attached_zipup->lower_position.y,
+                                        NuFsqrt(dx * dx + dz * dz));
                     i32 rotation = 0x4000 - (angle < 0 ? -angle : angle);
                     if (angle < 0)
                         rotation = -rotation;

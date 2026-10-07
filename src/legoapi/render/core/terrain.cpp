@@ -159,6 +159,7 @@ static TERRAIN_WALL_POINT *WallSplList;
 static i32 WallSplCount;
 static i32 terraincnt;
 static i32 curSphereter;
+static TERRAIN_SPHERE SphereData[16];
 static i32 platinrange;
 static TERRAIN_SHAPE *ShadPoly;
 static TERRAIN_SHAPE *TerrPoly;
@@ -2268,14 +2269,12 @@ NUVEC TerrainSkin(PLATSKININFO *info, nuvec_s *position, float weight, i32 mode)
     return result;
 }
 void DerotateMovementVector() {
-    TerrainQuery_s *query = TerI;
-
-    query->movement_yaw = static_cast<f32>(NuAtan2DA(query->movement.x, query->movement.z));
+    TerI->movement_yaw = static_cast<f32>(NuAtan2DA(TerI->movement.x, TerI->movement.z));
     const f32 horizontal_length =
-        NuFsqrt(query->movement.x * query->movement.x + query->movement.z * query->movement.z);
-    query->movement_pitch = static_cast<f32>(NuAtan2DA(-query->movement.y, horizontal_length));
-    query->movement_length = NuFsqrt(query->movement.x * query->movement.x + query->movement.y * query->movement.y +
-                                     query->movement.z * query->movement.z);
+        NuFsqrt(TerI->movement.x * TerI->movement.x + TerI->movement.z * TerI->movement.z);
+    TerI->movement_pitch = static_cast<f32>(NuAtan2DA(-TerI->movement.y, horizontal_length));
+    TerI->movement_length = NuFsqrt(TerI->movement.x * TerI->movement.x + TerI->movement.y * TerI->movement.y +
+                                  TerI->movement.z * TerI->movement.z);
 }
 
 void RotateVec(NUVEC *source, NUVEC *destination) {
@@ -7970,13 +7969,12 @@ i32 HitTerrain() {
 
     NUVEC sphere_position;
     for (i32 sphere_index = 0; sphere_index < curSphereter; ++sphere_index) {
-        const TERRAIN_SPHERE &sphere = SphereData[sphere_index];
         const f32 scaled_collision_radius = TerI->collision_radius * TerI->object_scale;
-        sphere_position = sphere.position;
+        sphere_position = SphereData[sphere_index].position;
         sphere_position.y *= TerI->inverse_object_scale;
         sphere_position.y -= scaled_collision_radius;
         DeRotatePoint(&sphere_position);
-        collision_found |= CheckSphereTer(&sphere_position, sphere.radius);
+        collision_found |= CheckSphereTer(&sphere_position, SphereData[sphere_index].radius);
     }
 
     TerrainQuery_s *query = TerI;

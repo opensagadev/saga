@@ -687,27 +687,28 @@ i32 NetworkObjectManager::GetNextGuid() {
         return 0;
     }
 
-    i32 group_start = guid_group << 10;
-    i32 group_end = (guid_group + 1) << 10;
     if (next_guid < 0) {
-        if (group_start == 0)
-            next_guid = 0;
-        else
-            next_guid = group_start - 1;
+        u32 first_guid = static_cast<u32>(guid_group) << 10;
+        next_guid = first_guid == 0 ? 0 : first_guid - 1;
     }
 
+    i32 group_end = (guid_group + 1) << 10;
+    i32 group_start = guid_group << 10;
     i32 attempts = 0;
     do {
-        next_guid++;
-        attempts++;
+        ++next_guid;
+        ++attempts;
         if (next_guid >= group_end) {
-            next_guid = group_start == 0 ? 1 : group_start;
+            next_guid = group_start;
+            if (next_guid == 0) {
+                next_guid = 1;
+            }
         }
-        if (objects[next_guid].object == NULL) {
-            return next_guid;
-        }
-    } while (attempts != 1024);
-    return 0;
+    } while (objects[next_guid].object != NULL && attempts != 1024);
+    if (attempts == 1024) {
+        return 0;
+    }
+    return next_guid;
 }
 
 void *NetworkObjectManager::GetObject(i32 id) {

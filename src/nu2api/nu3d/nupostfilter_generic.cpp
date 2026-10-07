@@ -72,10 +72,12 @@ void NuMainFilterGen::initTextureResources(i32 width, i32 height) {
     blur_texture = NuEffectTexCreate2D(width / 2, height / 2, 2, 1, 2);
     downsample_lod = 0;
     i32 w = width, h = height;
-    while (w >= 128 && h >= 128 && downsample_lod < 3) {
+    for (i32 i = 0; i < 3; ++i) {
+        if (w < 128 || h < 128)
+            break;
+        ++downsample_lod;
         w >>= 1;
         h >>= 1;
-        ++downsample_lod;
     }
     downsample_texture = NuEffectTexCreate2D(w, h, 1, 1, 2);
     if (height < 704) {
@@ -262,7 +264,8 @@ void NuPostFilterGen::blend(nueffecttex_s *, nueffecttex_s *, nuframebuffer_s *o
 void NuPostFilterGen::blur5x5(nueffecttex_s *source, i32 source_lod, nueffecttex_s *textures, i32 first_lod,
                               i32 iterations, i32 levels, bool mip_chain) {
     PostBindProgram(blur5x5Program);
-    for (i32 level = first_lod; level < first_lod + levels; ++level) {
+    for (i32 lod = 0; lod < levels; ++lod) {
+        i32 level = first_lod + lod;
         nueffecttex_s *input = level == first_lod ? source : (mip_chain ? textures : textures + level - 1);
         i32 input_lod = level == first_lod ? source_lod : (mip_chain ? level - 1 : 0);
         nueffecttex_s *output = mip_chain ? textures : textures + level;
@@ -296,7 +299,8 @@ void NuPostFilterGen::blur7x7Loopback(nueffecttex_s *source, i32 source_lod, nue
         glUseProgram(g_boundShader);
         g_currentShaderProgram = bound;
     }
-    for (i32 level = first_lod; level < first_lod + levels; ++level) {
+    for (i32 lod = 0; lod < levels; ++lod) {
+        i32 level = first_lod + lod;
         nueffecttex_s *input = level == first_lod ? source : (mip_chain ? textures : textures + level - 1);
         i32 input_lod = level == first_lod ? source_lod : (mip_chain ? level - 1 : 0);
         nueffecttex_s *output = mip_chain ? textures : textures + level;
@@ -307,16 +311,21 @@ void NuPostFilterGen::blur7x7Loopback(nueffecttex_s *source, i32 source_lod, nue
             NuEffectTexGetDimension(output, output_lod, &out_width, &out_height);
             f32 dx = radius / width;
             f32 dy = radius / height;
-            VuVec horizontal[7] = {
-                {dx * 0.0f, 0.0f, .34f, 0.0f},  {dx * 1.0f, 0.0f, .18f, 0.0f},  {dx * 2.0f, 0.0f, .10f, 0.0f},
-                {dx * 3.0f, 0.0f, .05f, 0.0f},  {dx * -1.0f, 0.0f, .18f, 0.0f}, {dx * -2.0f, 0.0f, .10f, 0.0f},
-                {dx * -3.0f, 0.0f, .05f, 0.0f},
-            };
-            VuVec vertical[7] = {
-                {0.0f, dy * 0.0f, .34f, 0.0f},  {0.0f, dy * 1.0f, .18f, 0.0f},  {0.0f, dy * 2.0f, .10f, 0.0f},
-                {0.0f, dy * 3.0f, .05f, 0.0f},  {0.0f, dy * -1.0f, .18f, 0.0f}, {0.0f, dy * -2.0f, .10f, 0.0f},
-                {0.0f, dy * -3.0f, .05f, 0.0f},
-            };
+            VuVec horizontal[7], vertical[7];
+            horizontal[0] = VuVec(dx * 0.0f, 0.0f, .34f, 0.0f);
+            vertical[0] = VuVec(0.0f, dy * 0.0f, .34f, 0.0f);
+            horizontal[1] = VuVec(dx * 1.0f, 0.0f, .18f, 0.0f);
+            vertical[1] = VuVec(0.0f, dy * 1.0f, .18f, 0.0f);
+            horizontal[2] = VuVec(dx * 2.0f, 0.0f, .10f, 0.0f);
+            vertical[2] = VuVec(0.0f, dy * 2.0f, .10f, 0.0f);
+            horizontal[3] = VuVec(dx * 3.0f, 0.0f, .05f, 0.0f);
+            vertical[3] = VuVec(0.0f, dy * 3.0f, .05f, 0.0f);
+            horizontal[4] = VuVec(dx * -1.0f, 0.0f, .18f, 0.0f);
+            vertical[4] = VuVec(0.0f, dy * -1.0f, .18f, 0.0f);
+            horizontal[5] = VuVec(dx * -2.0f, 0.0f, .10f, 0.0f);
+            vertical[5] = VuVec(0.0f, dy * -2.0f, .10f, 0.0f);
+            horizontal[6] = VuVec(dx * -3.0f, 0.0f, .05f, 0.0f);
+            vertical[6] = VuVec(0.0f, dy * -3.0f, .05f, 0.0f);
             VuVec bias(1, 1, 0.0f / width, 0.0f / height);
             VuVec output_bias(1, 1, 0.0f / out_width, 0.0f / out_height);
             NuFramebufferAttachTex2D(NuPostFilterGen::blurFbo, 0, output, output_lod);
@@ -351,7 +360,8 @@ void NuPostFilterGen::blur7x7Separate(nueffecttex_s *source, i32 source_lod, nue
         glUseProgram(g_boundShader);
         g_currentShaderProgram = bound;
     }
-    for (i32 level = first_lod; level < first_lod + levels; ++level) {
+    for (i32 lod = 0; lod < levels; ++lod) {
+        i32 level = first_lod + lod;
         nueffecttex_s *input = level == first_lod ? source : (mip_chain ? textures : textures + level - 1);
         i32 input_lod = level == first_lod ? source_lod : (mip_chain ? level - 1 : 0);
         nueffecttex_s *output = mip_chain ? textures : textures + level;
@@ -472,17 +482,20 @@ void NuPostFilterGen::initResources() {
     input_fbo = NuFramebufferCreate();
 }
 
+static inline void PostRegisterPort(NuPostDataPort &port, NuDataPortManager &manager, const char *name) {
+    if (port.index >= 0)
+        --port.manager->entries[port.index].references;
+    port.manager = &manager;
+    port.index = manager.registerPort(name, NULL);
+}
+
 void NuPostFilterGen::initSharedResources() {
-    NuPostDataPort *ports[] = {&portOutFramebuffer, &portColorBuffer,   &portNormalBuffer,
-                               &portVelocityBuffer, &portDepthRTBuffer, &portDepthBuffer};
-    const char *names[] = {"postEffect.outFramebuffer", "postEffect.colorBuffer",   "postEffect.normalBuffer",
-                           "postEffect.velocityBuffer", "postEffect.depthRTBuffer", "postEffect.depthBuffer"};
-    for (i32 i = 0; i < 6; ++i) {
-        if (ports[i]->index >= 0)
-            --ports[i]->manager->entries[ports[i]->index].references;
-        ports[i]->manager = &resourceManager;
-        ports[i]->index = resourceManager.registerPort(names[i], NULL);
-    }
+    PostRegisterPort(portOutFramebuffer, resourceManager, "postEffect.outFramebuffer");
+    PostRegisterPort(portColorBuffer, resourceManager, "postEffect.colorBuffer");
+    PostRegisterPort(portNormalBuffer, resourceManager, "postEffect.normalBuffer");
+    PostRegisterPort(portVelocityBuffer, resourceManager, "postEffect.velocityBuffer");
+    PostRegisterPort(portDepthRTBuffer, resourceManager, "postEffect.depthRTBuffer");
+    PostRegisterPort(portDepthBuffer, resourceManager, "postEffect.depthBuffer");
     blurFbo = NuFramebufferCreate();
     copyFbo = NuFramebufferCreate();
 }
@@ -511,18 +524,18 @@ __attribute__((weak)) void NuPostFilterGen::resetAll() {
 }
 
 i32 NuDataPortManager::registerPort(char const *name, void *data) {
-    for (i32 i = 0; i < 256; ++i) {
-        if (NuStrCmp(entries[i].name, name) == 0) {
-            entries[i].data = data;
-            return i;
+    for (Entry *entry = entries; entry < entries + 256; ++entry) {
+        if (NuStrCmp(entry->name, name) == 0) {
+            entry->data = data;
+            return entry - entries;
         }
     }
-    for (i32 i = 0; i < 256; ++i) {
-        if (entries[i].references == 0) {
-            memmove(entries[i].name, name, NuStrLen(name) + 1);
-            entries[i].data = data;
-            ++entries[i].references;
-            return i;
+    for (Entry *entry = entries; entry < entries + 256; ++entry) {
+        if (entry->references == 0) {
+            memmove(entry->name, name, NuStrLen(name) + 1);
+            entry->data = data;
+            ++entry->references;
+            return entry - entries;
         }
     }
     return -1;
@@ -568,8 +581,7 @@ void NuMotionFilterGen::render() {
 }
 
 NuDeferredFilterGen::NuDeferredFilterGen() {
-    for (i32 i = 0; i < 6; ++i)
-        shadow_fbos[i] = NULL;
+    memset(shadow_fbos, 0, sizeof(shadow_fbos));
     light_fbo = NULL;
     enabled = false;
     sample_count = 4;
@@ -633,11 +645,11 @@ void NuSpeedBlurFilterGen::computeSpeedBlur(VuVec &result) {
     motion.y *= motionFactorPan;
     motion.z *= motionFactorPull;
     NuVec4Scale(&motion, &motion, parameters->scale);
-    result.x = motion.x < -motionFactorPanClamp ? -motionFactorPanClamp
+    motion.x = motion.x < -motionFactorPanClamp ? -motionFactorPanClamp
                                                 : (motion.x > motionFactorPanClamp ? motionFactorPanClamp : motion.x);
-    result.y = motion.y < -motionFactorPanClamp ? -motionFactorPanClamp
+    motion.y = motion.y < -motionFactorPanClamp ? -motionFactorPanClamp
                                                 : (motion.y > motionFactorPanClamp ? motionFactorPanClamp : motion.y);
-    result.z = motion.z;
+    memcpy(&result.xyz, &motion, sizeof(result.xyz));
     result.w = 0.0f;
 }
 

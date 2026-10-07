@@ -6,9 +6,7 @@
 NuCriticalSection NuSoundSample::sCriticalSection(NULL);
 
 NuSoundSample::NuSoundSample(const char *path, FeedType feed_type)
-    : NuSoundSource(path, SourceType::ZERO, feed_type), buffer{} {
-    this->field2_0x24 = 0;
-    this->field1_0x20 = 0;
+    : NuSoundSource(path, SourceType::ZERO, feed_type), field1_0x20(0), field2_0x24(0), buffer{} {
     this->file_type = NuSoundSystem::DetermineFileType(path);
     this->load_state = LoadState::NOT_LOADED;
     this->last_error = ErrorState::NONE;
@@ -140,10 +138,10 @@ i32 NuSoundSample::Unload() {
         this->buffer.Free();
     }
 
-    if (this->stream_desc != NULL) {
-        this->stream_desc->~NuSoundStreamDesc();
-        NuSoundSystem::FreeMemory(NuSoundSystem::MemoryDiscipline::SCRATCH, reinterpret_cast<usize>(this->stream_desc),
-                                  0);
+    NuSoundStreamDesc *desc = this->stream_desc;
+    if (desc != NULL) {
+        desc->~NuSoundStreamDesc();
+        NuSoundSystem::FreeMemory(NuSoundSystem::MemoryDiscipline::SCRATCH, reinterpret_cast<usize>(desc), 0);
         SetStreamDesc(NULL);
     }
 

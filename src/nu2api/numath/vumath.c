@@ -55,8 +55,8 @@ static void VuVecSet(f32 *out, f32 x, f32 y, f32 z, f32 w) {
     out[3] = w;
 }
 
-static void VuMtxTranspose(NUMTX *dst, NUMTX *src) {
-    NuMtxTranspose(dst, src);
+static void VuMtxTranspose(f32 dst[4][4], f32 src[4][4]) {
+    NuMtxTranspose((NUMTX *)&dst[0][0], (NUMTX *)&src[0][0]);
 }
 
 /* The original calls the VU helpers in this math unit, rather than the

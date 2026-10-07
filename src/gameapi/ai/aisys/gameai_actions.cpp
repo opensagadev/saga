@@ -65,40 +65,33 @@ static GameObject_s *ActionOwner(AIPACKET_s *packet) {
 
 static i32 Action_FollowCharacter(AISYS_s *system, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params,
                                   i32 param_count, i32 first_time, f32) {
-    if (packet == NULL || processor == NULL) {
+    if (packet == NULL) {
         return 1;
     }
     if (first_time != 0) {
-        processor->action_data_1 = 0;
-        processor->action_data_3 = NULL;
         for (i32 index = 0; index < param_count; ++index) {
-            char *param = params[index];
-            if (AIActionParseSpeedFn != NULL && AIActionParseSpeedFn(param, &packet->goal_speed_mode) != 0) {
+            if (AIActionParseSpeedFn != NULL && AIActionParseSpeedFn(params[index], &packet->goal_speed_mode) != 0) {
                 continue;
             }
-            char *value = NuStrIStr(param, "character=");
+            char *value = NuStrIStr(params[index], "character=");
             if (value != NULL) {
-                processor->action_data_3 = GetNamedAPIObjectFn != NULL ? GetNamedAPIObjectFn(system, value + 10) : NULL;
-            } else if (NuStrICmp(param, "ignore_radius") == 0) {
+                processor->action_data_3 = GetNamedGameObject(system, value + 10);
+            } else if (NuStrICmp(params[index], "ignore_radius") == 0) {
                 processor->action_data_1 |= 2;
-            } else if (NuStrICmp(param, "can_go_off_path") == 0) {
+            } else if (NuStrICmp(params[index], "can_go_off_path") == 0) {
                 processor->action_data_1 |= 1;
-            } else if (NuStrICmp(param, "Opponent") == 0) {
-                GameObject_s *opponent = static_cast<GameObject_s *>(packet->opponent);
-                processor->action_data_3 = opponent != NULL ? &opponent->apiobj : NULL;
-            } else if (NuStrICmp(param, "TakeOverTarget") == 0) {
-                GameObject_s *owner = ActionOwner(packet);
-                processor->action_data_3 =
-                    owner != NULL && owner->takeover_target != NULL ? &owner->takeover_target->apiobj : NULL;
+            } else if (NuStrICmp(params[index], "Opponent") == 0) {
+                processor->action_data_3 = packet->opponent;
+            } else if (NuStrICmp(params[index], "TakeOverTarget") == 0) {
+                processor->action_data_3 = packet->owner->apiobj.objptr->takeover_target;
             } else {
-                packet->movement_instruction_parameter = AIParamToFloat(processor, param);
+                packet->movement_instruction_parameter = AIParamToFloat(processor, params[index]);
             }
         }
     }
     APIOBJECT *target = static_cast<APIOBJECT *>(processor->action_data_3);
-    GameObject_s *owner = ActionOwner(packet);
-    if (target != NULL && owner != NULL) {
-        FollowAPIObject(&owner->apiobj, target, processor->action_data_1, packet->movement_instruction_parameter);
+    if (target != NULL) {
+        FollowAPIObject(&packet->owner->apiobj, target, processor->action_data_1, packet->movement_instruction_parameter);
     }
     return 0;
 }
@@ -111,10 +104,10 @@ i32 Action_MoveForward(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_s *pack
     GameObject_s *object = packet->owner->apiobj.objptr;
     if (first_time != 0) {
         processor->action_data_4 = static_cast<f32>(object->apiobj.field_0x276);
+        i32 random_direction = 0;
+        i32 turn = 0;
         i32 minimum_turn = 0;
         i32 maximum_turn = 0;
-        i32 turn = 0;
-        i32 random_direction = 0;
         for (i32 index = 0; index < param_count; ++index) {
             if (AIActionParseSpeedFn != NULL && AIActionParseSpeedFn(params[index], &packet->goal_speed_mode) != 0) {
                 continue;
@@ -226,6 +219,7 @@ static __used__ i32 Action_CreateSplineCreatures(AISYS_s *system, AISCRIPTPROCES
         return 1;
     i16 models[10];
     NUGSPLINE *splines[32];
+    u16 angle, pitch;
     i32 model_count = 0, spline_count = 0, use_selected = 0;
     i32 min_group_size = -1, max_group_size = -1, group_size = 1;
     f32 min_distance = 1000000000.0f, max_distance = 1000000000.0f, distance = 0.0f;
@@ -291,7 +285,7 @@ static __used__ i32 Action_CreateSplineCreatures(AISYS_s *system, AISCRIPTPROCES
         } else if ((value = NuStrIStr(params[i], "ridden_by=")) != NULL)
             rider = GetNamedGameObject(system, value + 10);
     }
-    if (min_group_size >= 0 && min_group_size < max_group_size)
+    if (min_group_size < max_group_size && min_group_size >= 0)
         group_size = NuRand(NULL) % (max_group_size + 1 - min_group_size) + min_group_size;
     if (min_distance != 1000000000.0f && max_distance != 1000000000.0f) {
         f32 fraction = NuRandFloat();
@@ -311,20 +305,21 @@ static __used__ i32 Action_CreateSplineCreatures(AISYS_s *system, AISCRIPTPROCES
             if (WORLD->current_level == PODSPRINTA_LDATA)
                 PodSprint_GetIAlongVals(spline, &start, &end);
             SPLINEPOS_s position;
-            if (relative_to_player)
+            if (relative_to_player) {
                 GetNearestSplinePos(&player->apiobj.collision_position, &position, spline, looping, start, end);
-            else
+                object->movement_spline_position = position;
+            } else if (relative_locator != NULL) {
                 GetNearestSplinePos(&relative_locator->position, &position, spline, looping, start, end);
-            object->movement_spline_position = position;
+                object->movement_spline_position = position;
+            }
         }
         if (distance != 0.0f) {
             MoveSplinePosition(&object->movement_spline_position, distance);
             NUVEC position, offset;
-            u16 angle, pitch;
             PointAlongSpline(object->movement_spline, object->movement_spline_position.along, &position, &angle, &pitch,
                              object->movement_spline_position.looping);
-            object->apiobj.facing_angle = angle;
             object->apiobj.movement_facing_angle = angle;
+            object->apiobj.facing_angle = angle;
             object->apiobj.field_0x276 = angle;
             object->apiobj.pitch_angle = -pitch;
             if (object->movement_spline_offset.x != 0.0f || object->movement_spline_offset.y != 0.0f ||
@@ -340,9 +335,7 @@ static __used__ i32 Action_CreateSplineCreatures(AISYS_s *system, AISCRIPTPROCES
             object->apiobj.start_position = position;
             GameObjectOrigin(object);
             object->apiobj.last_safe_position = object->apiobj.position;
-            object->field_0x10c8 = object->apiobj.position.x;
-            object->field_0x10cc = object->apiobj.position.y;
-            object->field_0x10d0 = object->apiobj.position.z;
+            object->ai_update_position = object->apiobj.position;
         }
         if (rider != NULL)
             TakeOverGameObject(rider, object, 0, 1);

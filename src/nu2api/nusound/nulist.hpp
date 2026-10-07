@@ -62,7 +62,10 @@ template <typename T> class NuList {
     i32 length;
 
   public:
-    NuList() : start(NULL, &end), end(&start, NULL), head(&start), tail(&end), length(0) {
+    NuList() : start(NULL, NULL), end(NULL, NULL), head(&start), tail(&end) {
+        start.SetNext(&end);
+        end.SetPrev(&start);
+        length = 0;
     }
 
     ~NuList() {

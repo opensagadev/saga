@@ -2960,9 +2960,11 @@ static void Hub_MakeFreePlayList(i32 first_model, i32 second_model) {
     const i32 area = LDataList[hub_new_level].area_index;
 
     if (hub_makefreeplaylist_addotherid != 0) {
-        const i32 other_player = PlayerID[1];
-        if (second_model == -1 && other_player != -1 && other_player != PlayerID[0] && other_player != first_model) {
-            second_model = other_player;
+        if (second_model == -1) {
+            const i32 other_player = PlayerID[1];
+            if (other_player != -1 && other_player != PlayerID[0] && other_player != first_model) {
+                second_model = other_player;
+            }
         }
         hub_makefreeplaylist_addotherid = 0;
     }
@@ -2981,11 +2983,12 @@ static void Hub_MakeFreePlayList(i32 first_model, i32 second_model) {
         }
     } else {
         const i32 selectable_count = FreePlayResidentCount + FreePlayBonusCount;
-        for (i32 index = 2; index < selectable_count + 2 && index < FreePlayModelCount; ++index) {
+        for (i32 index = 2; index < selectable_count + 2 && FreePlayModelList[index].model_id != -1; ++index) {
             const i32 model = FreePlayModelList[index].model_id;
-            const bool is_vehicle = (CDataList[model].model_flags & HUB_FREEPLAY_MODEL_VEHICLE) != 0;
-            const bool area_uses_vehicles = area != -1 && (ADataList[area].flags & AREAFLAG_VEHICLE_AREA) != 0;
-            if ((area == -1 || is_vehicle == area_uses_vehicles) && Collection_Got(model) != 0) {
+            if ((area == -1 ||
+                 ((CDataList[model].model_flags & HUB_FREEPLAY_MODEL_VEHICLE) != 0) ==
+                     ((ADataList[area].flags & AREAFLAG_VEHICLE_AREA) != 0)) &&
+                Collection_Got(model) != 0) {
                 fplist[fpcount++] = FreePlayModelList[index];
             }
         }

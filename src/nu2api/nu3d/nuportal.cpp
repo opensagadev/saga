@@ -395,11 +395,7 @@ extern "C" i32 NuPortalVisibility(NUGSCN *scene) {
     SetAllInstancesHidden(scene);
     cam = NuCameraGetCam();
     local_inv_view_mtx = *NuCameraGetMtx();
-    world_campos = {
-        global_camera.mtx.m30,
-        global_camera.mtx.m31,
-        global_camera.mtx.m32,
-    };
+    world_campos = *NUMTX_GET_ROW_VEC(&global_camera.mtx, 3);
 
     const f32 near_clip = cam->near_clip;
     camera_roomid = static_cast<i16>(NuPortalWhichRoom(scene, camera_position));
@@ -411,17 +407,17 @@ extern "C" i32 NuPortalVisibility(NUGSCN *scene) {
     const f32 forward_x = local_inv_view_mtx.m20;
     const f32 forward_y = local_inv_view_mtx.m21;
     const f32 forward_z = local_inv_view_mtx.m22;
-    cam_plane.a = forward_x;
-    cam_plane.b = forward_y;
-    cam_plane.c = forward_z;
-    cam_plane.d = -(forward_x * world_campos.x + forward_y * world_campos.y + forward_z * world_campos.z);
-
     near_clip_plane.a = forward_x;
     near_clip_plane.b = forward_y;
     near_clip_plane.c = forward_z;
     near_clip_plane.d =
         -((near_clip * forward_x + world_campos.x) * forward_x + (near_clip * forward_y + world_campos.y) * forward_y +
           (near_clip * forward_z + world_campos.z) * forward_z);
+
+    cam_plane.a = forward_x;
+    cam_plane.b = forward_y;
+    cam_plane.c = forward_z;
+    cam_plane.d = -(forward_x * world_campos.x + forward_y * world_campos.y + forward_z * world_campos.z);
 
     NUFRUSTRUM *frustum = buildFrustrum(&nuvec_minus_one, &nuvec_one, -2);
     if (draw_portals != 0) {

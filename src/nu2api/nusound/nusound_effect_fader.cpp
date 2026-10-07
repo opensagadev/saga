@@ -1,6 +1,9 @@
 #include "decomp.h"
 #include "nu2api_nusound_types.h"
 
+#include "nu2api/numath/nufloat.h"
+#include "nu2api/nusound/nusound_android.hpp"
+
 bool NuSoundEffectFader::AttachBus(NuSoundBus *) {
     return true;
 }
@@ -18,9 +21,16 @@ void NuSoundEffectFader::Enable() {
     state = progress < 1.0f;
 }
 
-NuSoundEffectFader::NuSoundEffectFader()
-    : NuSoundEffect(EffectType::FADER, EffectProcessStage::ZERO), curve{0, NULL}, start_mix(1.0f), target_mix(1.0f),
-      duration(0.0f), progress(1.0f), decreasing(0), finish_state(FinishState::NONE), callback(NULL), finished(false) {
+NuSoundEffectFader::NuSoundEffectFader() : NuSoundEffect(EffectType::FADER, EffectProcessStage::ZERO), duration(0.0f) {
+    curve.type = 0;
+    curve.data = NULL;
+    start_mix = 1.0f;
+    decreasing = 0;
+    target_mix = 1.0f;
+    callback = NULL;
+    progress = 1.0f;
+    finish_state = FinishState::NONE;
+    finished = false;
     state = 0;
 }
 
@@ -36,7 +46,7 @@ void NuSoundEffectFader::Process(float frametime) {
         return;
     }
 
-    progress = MAX(0.0f, MIN(progress + (frametime != 0.0f ? frametime / duration : 0.0f), 1.0f));
+    progress = MAX(0.0f, MIN(progress + NuFdiv(frametime, duration), 1.0f));
 
     f32 target_weight = 0.0f;
     f32 start_weight = 1.0f;
@@ -44,7 +54,7 @@ void NuSoundEffectFader::Process(float frametime) {
         target_weight = progress;
         start_weight = 1.0f - progress;
     } else if (curve.type == 1) {
-        target_weight = NuSoundSystem::GetInstance()->CalculateCrossfadeHeight(
+        target_weight = NuSound.CalculateCrossfadeHeight(
             *static_cast<const NuSoundSystem::CurveData *>(curve.data), progress);
         start_weight = 1.0f - target_weight;
     }
@@ -64,14 +74,20 @@ void NuSoundEffectFader::ProcessVoice(NuSoundVoice *voice, float) {
         return;
     }
 
-    if (finish_state == FinishState::PAUSE) {
+    switch (finish_state) {
+    case FinishState::PAUSE:
         voice->Pause();
-    } else if (finish_state == FinishState::CALLBACK) {
+        break;
+    case FinishState::CALLBACK:
         if (callback != NULL) {
             callback->OnFinished();
         }
-    } else if (finish_state == FinishState::STOP) {
+        break;
+    case FinishState::STOP:
         voice->Stop(true);
+        break;
+    default:
+        break;
     }
     finished = false;
 }

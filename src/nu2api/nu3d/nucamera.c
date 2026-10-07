@@ -181,15 +181,12 @@ SAGA_HOST_WEAK i32 NuCameraClipTestExtentsAxisAligned(NUVEC *center, NUVEC *exte
         ClipPlanes.near_far_planes.m30 += far_clip;
     }
     VuVecMtxMul(&distance.sides, center, &ClipPlanes.frustum_planes);
-    distance.fourth = ClipPlanes.frustum_planes.m33 +
-                      (center->z * ClipPlanes.frustum_planes.m23 +
-                       (center->x * ClipPlanes.frustum_planes.m03 + center->y * ClipPlanes.frustum_planes.m13));
-    distance.far = ClipPlanes.near_far_planes.m30 +
-                   (center->z * ClipPlanes.near_far_planes.m20 +
-                    (center->x * ClipPlanes.near_far_planes.m00 + center->y * ClipPlanes.near_far_planes.m10));
-    distance.near = ClipPlanes.near_far_planes.m31 +
-                    (center->z * ClipPlanes.near_far_planes.m21 +
-                     (center->x * ClipPlanes.near_far_planes.m01 + center->y * ClipPlanes.near_far_planes.m11));
+    distance.fourth = center->x * ClipPlanes.frustum_planes.m03 + center->y * ClipPlanes.frustum_planes.m13 +
+                      center->z * ClipPlanes.frustum_planes.m23 + ClipPlanes.frustum_planes.m33;
+    distance.far = center->x * ClipPlanes.near_far_planes.m00 + center->y * ClipPlanes.near_far_planes.m10 +
+                   center->z * ClipPlanes.near_far_planes.m20 + ClipPlanes.near_far_planes.m30;
+    distance.near = center->x * ClipPlanes.near_far_planes.m01 + center->y * ClipPlanes.near_far_planes.m11 +
+                    center->z * ClipPlanes.near_far_planes.m21 + ClipPlanes.near_far_planes.m31;
     VuVecMtxMul(&radius.sides, extent, &ClipPlanes.abs_frustum_planes);
     radius.fourth = extent->x * ClipPlanes.abs_frustum_planes.m03 + extent->y * ClipPlanes.abs_frustum_planes.m13 +
                     extent->z * ClipPlanes.abs_frustum_planes.m23;
@@ -206,14 +203,11 @@ SAGA_HOST_WEAK i32 NuCameraClipTestExtentsAxisAligned(NUVEC *center, NUVEC *exte
     if (distance.sides.x < radius.sides.x || distance.sides.y < radius.sides.y || distance.sides.z < radius.sides.z ||
         distance.fourth < radius.fourth) {
         VuVecMtxMul(&distance.sides, center, &ClipPlanes.scissor_planes);
-        distance.fourth = ClipPlanes.scissor_planes.m33 +
-                          (center->z * ClipPlanes.scissor_planes.m23 +
-                           (center->x * ClipPlanes.scissor_planes.m03 + center->y * ClipPlanes.scissor_planes.m13));
+        distance.fourth = center->x * ClipPlanes.scissor_planes.m03 + center->y * ClipPlanes.scissor_planes.m13 +
+                          center->z * ClipPlanes.scissor_planes.m23 + ClipPlanes.scissor_planes.m33;
         VuVecMtxMul(&radius.sides, extent, &ClipPlanes.abs_scissor_planes);
-        radius.fourth =
-            ClipPlanes.abs_scissor_planes.m33 +
-            (extent->z * ClipPlanes.abs_scissor_planes.m23 +
-             (extent->x * ClipPlanes.abs_scissor_planes.m03 + extent->y * ClipPlanes.abs_scissor_planes.m13));
+        radius.fourth = extent->x * ClipPlanes.abs_scissor_planes.m03 + extent->y * ClipPlanes.abs_scissor_planes.m13 +
+                        extent->z * ClipPlanes.abs_scissor_planes.m23 + ClipPlanes.abs_scissor_planes.m33;
         if (distance.sides.x < radius.sides.x || distance.sides.y < radius.sides.y ||
             distance.sides.z < radius.sides.z || distance.fourth < radius.fourth)
             return 2;

@@ -731,8 +731,6 @@ void DrawMeleeTargetsRows(i16 *targets, char *, f32 *values, i32 count) {
         i16 target = targets[i];
         if (target == -1) {
             ++i;
-            if (i >= count)
-                break;
             const i32 previous_row = row++;
             y -= 0.14f;
             const f32 width = row_counts[row] * 0.12000000476837158203125f * 0.5f;

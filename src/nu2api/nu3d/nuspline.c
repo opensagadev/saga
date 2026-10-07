@@ -8,11 +8,13 @@ i32 NuSplineFindAllSub(NUGSCN *scene, char *name, NUGSPLINE **results, i32 capac
         return 0;
     i32 count = 0;
     NUGSPLINE *spline = scene->splines;
-    for (i32 i = 0; i < scene->numsplines; spline++, i++) {
-        if (NuStrIStr(spline->name, name) != NULL) {
-            results[count++] = spline;
-            if (count >= capacity)
-                break;
+    if (scene->numsplines > 0) {
+        for (i32 i = 0; i < scene->numsplines; spline++, i++) {
+            if (NuStrIStr(spline->name, name) != NULL) {
+                results[count++] = spline;
+                if (count >= capacity)
+                    break;
+            }
         }
     }
     return count;
@@ -71,11 +73,13 @@ i32 NuSplineFindAllBeg(NUGSCN *scene, char *name, NUGSPLINE **results, i32 capac
         return 0;
     i32 count = 0;
     NUGSPLINE *spline = scene->splines;
-    for (i32 i = 0; i < scene->numsplines; spline++, i++) {
-        if (NuStrNICmp(name, spline->name, -1) == 0) {
-            results[count++] = spline;
-            if (count >= capacity)
-                break;
+    if (scene->numsplines > 0) {
+        for (i32 i = 0; i < scene->numsplines; spline++, i++) {
+            if (NuStrNICmp(name, spline->name, -1) == 0) {
+                results[count++] = spline;
+                if (count >= capacity)
+                    break;
+            }
         }
     }
     return count;

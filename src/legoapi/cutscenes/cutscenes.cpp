@@ -1211,22 +1211,19 @@ static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTS
 
 static void CutScene_EvalCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTSCENE_s *, instNUGCUTCHAR_s *instance,
                                    NUGCUTCHAR_s *character, f32 frame) {
+    GameObject_s *object = NULL;
+    if ((character->flags & 2) == 0) {
+        object = static_cast<GameObject_s *>(instance->character_model);
+    }
     NUMTX matrix;
     i32 visible;
-    u32 animation_index;
-    f32 animation_rate;
-    f32 blend_time;
-    f32 animation_start_frame;
-    i32 layer_mask = -1;
-    NuGCutCharAnimProcess(character, frame, &matrix, &visible, &animation_index, &animation_rate, &blend_time,
-                          &animation_start_frame, &layer_mask);
+    NuGCutCharAnimProcess(character, frame, &matrix, &visible, NULL, NULL, NULL, NULL, NULL);
     if (static_cast<i8>(cutscene_instance->flags_88) < 0) {
         NuMtxMul(&matrix, &matrix, &cutscene_instance->matrix);
     }
-    if ((character->flags & 2) == 0 && instance->character_model != NULL) {
-        u8 *object = static_cast<u8 *>(instance->character_model);
-        memcpy(object + 0xb8, &matrix, sizeof(matrix));
-        memcpy(object + 0x5c, &matrix.m30, sizeof(NUVEC));
+    if (object != NULL) {
+        object->apiobj.field_0xb8 = matrix;
+        object->apiobj.position = *NUMTX_GET_ROW_VEC(&matrix, 3);
     }
 }
 
@@ -1241,6 +1238,7 @@ static void CutScene_FindCharacters(NUGCUTSCENE_s *cutscene) {
             i32 character_id = apicharsys->models[model_index].model_id;
             if (NuStrICmp(character->name, CDataList[character_id].file) == 0) {
                 character->character_model = &apicharsys->models[model_index];
+                character_id = static_cast<CHARACTERMODEL_s *>(character->character_model)->model_id;
                 if (character_id != -1) {
                     CS_cutsys->character_bits[character_id / 32] |= 1U << (character_id & 0x1f);
                 }

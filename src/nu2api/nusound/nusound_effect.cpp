@@ -67,8 +67,7 @@ void NuSoundEffectAttenuation::ProcessVoice(NuSoundVoice *voice, f32) {
 }
 
 void NuSoundEffectRepeat::ProcessVoice(NuSoundVoice *voice, f32 frametime) {
-    NuSoundVoice::PlayState voice_state = voice->GetState();
-    if (voice_state == NuSoundVoice::PLAYSTATE_STOPPED) {
+    if (voice->GetState() == NuSoundVoice::PLAYSTATE_STOPPED) {
         if (armed && repeat_count != 0) {
             armed = false;
             repeat_count--;
@@ -78,7 +77,7 @@ void NuSoundEffectRepeat::ProcessVoice(NuSoundVoice *voice, f32 frametime) {
             voice->Play();
             voice->Pause();
         }
-    } else if (voice_state == NuSoundVoice::PLAYSTATE_PAUSED) {
+    } else if (voice->GetState() == NuSoundVoice::PLAYSTATE_PAUSED) {
         if (!armed && repeat_count != 0) {
             remaining_delay -= frametime;
             if (remaining_delay <= 0.0f) {

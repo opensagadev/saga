@@ -385,11 +385,8 @@ void BuildDebrisVerts(PartHeader *header, uv1debdata *chunk_data, NUMTL *materia
 }
 void AddParticleGroupToDisplayList(nunativedebrisdata_s *group) {
     NUDISPLAYLIST *list = group->material->display_list;
-    NUDLDLISTSCENE *display_scene = list->dlist;
-    display_scene->flags |= NUDL_SCENE_FLAG_CLIP_MATERIALS;
-    const i32 material_byte = list->mtl_id >= 0 ? list->mtl_id / 8 : (list->mtl_id + 7) / 8;
-    u8 *material_bits = display_scene->mtl_used[display_scene->render_buffer >> 7];
-    material_bits[material_byte] |= static_cast<u8>(1 << (list->mtl_id & 7));
+    list->dlist->clip_materials = 1;
+    list->dlist->mtl_used[list->dlist->current_buffer][list->mtl_id / 8] |= 1 << (list->mtl_id % 8);
 
     DisplayListUpdateRenderState(list, &render_state);
     NuDisplayListLinkItems(list, 1);
@@ -576,7 +573,8 @@ extern "C" void GenericDebinfoDmaTypeUpdate(debinftype *effect) {
     header->texture_v1 = static_cast<f32>(static_cast<u32>(effect->texture_v1) & 0x1ffU) * (1.0f / 255.0f);
 
     f32 width, height, rotation, alpha, red, green, blue;
-    f32 time, duration, elapsed, wave_x, wave_y, texture_x_numerator, texture_y_numerator;
+    f32 time, duration, elapsed, wave_x, wave_y;
+    f32 position_x, position_y, texture_x, texture_y, edge_x, edge_y;
     i32 i;
     for (i32 frame_index = 0; frame_index < 64; ++frame_index) {
         width = height = rotation = 0.0f;
@@ -586,10 +584,12 @@ extern "C" void GenericDebinfoDmaTypeUpdate(debinftype *effect) {
             if (effect->width_keys[i].time <= time && time <= effect->width_keys[i + 1].time) {
                 duration = effect->width_keys[i + 1].time - effect->width_keys[i].time;
                 elapsed = time - effect->width_keys[i].time;
-                width = elapsed == 0.0f ? effect->width_keys[i].value
-                                        : effect->width_keys[i].value +
-                                              (effect->width_keys[i + 1].value - effect->width_keys[i].value) *
-                                                  (elapsed / duration);
+                if (elapsed == 0.0f)
+                    width = effect->width_keys[i].value;
+                else
+                    width = effect->width_keys[i].value +
+                            (elapsed / duration) *
+                                (effect->width_keys[i + 1].value - effect->width_keys[i].value);
                 break;
             }
         }
@@ -597,10 +597,12 @@ extern "C" void GenericDebinfoDmaTypeUpdate(debinftype *effect) {
             if (effect->height_keys[i].time <= time && time <= effect->height_keys[i + 1].time) {
                 duration = effect->height_keys[i + 1].time - effect->height_keys[i].time;
                 elapsed = time - effect->height_keys[i].time;
-                height = elapsed == 0.0f ? effect->height_keys[i].value
-                                         : effect->height_keys[i].value +
-                                               (effect->height_keys[i + 1].value - effect->height_keys[i].value) *
-                                                   (elapsed / duration);
+                if (elapsed == 0.0f)
+                    height = effect->height_keys[i].value;
+                else
+                    height = effect->height_keys[i].value +
+                             (elapsed / duration) *
+                                 (effect->height_keys[i + 1].value - effect->height_keys[i].value);
                 break;
             }
         }
@@ -608,33 +610,36 @@ extern "C" void GenericDebinfoDmaTypeUpdate(debinftype *effect) {
             if (effect->rotation_keys[i].time <= time && time <= effect->rotation_keys[i + 1].time) {
                 duration = effect->rotation_keys[i + 1].time - effect->rotation_keys[i].time;
                 elapsed = time - effect->rotation_keys[i].time;
-                rotation = elapsed == 0.0f ? effect->rotation_keys[i].value
-                                           : effect->rotation_keys[i].value +
-                                                 (effect->rotation_keys[i + 1].value - effect->rotation_keys[i].value) *
-                                                     (elapsed / duration);
+                if (elapsed == 0.0f)
+                    rotation = effect->rotation_keys[i].value;
+                else
+                    rotation = effect->rotation_keys[i].value +
+                               (elapsed / duration) *
+                                   (effect->rotation_keys[i + 1].value - effect->rotation_keys[i].value);
                 break;
             }
         }
         wave_x = effect->jib_x_amplitude * NU_SIN_LUT(65536.0f * (effect->jib_x_frequency * time));
         wave_y = effect->jib_y_amplitude * NU_SIN_LUT(65536.0f * (effect->jib_y_frequency * time));
-        texture_x_numerator =
-            NU_SIN_LUT(rotation + 16384.0f) * (width / 4.0f) - (height / 4.0f) * NU_SIN_LUT(rotation) + wave_x;
-        texture_y_numerator =
-            NU_SIN_LUT(rotation) * (-width / 4.0f) - (height / 4.0f) * NU_SIN_LUT(rotation + 16384.0f) + wave_y;
-
-        debris_particle_frame_s &frame = header->frames[frame_index];
-        frame.position.x =
-            (NU_SIN_LUT(rotation + 16384.0f) * (-width / 4.0f) - (height / 4.0f) * NU_SIN_LUT(rotation) + wave_x) /
-            2048.0f;
-        frame.position.y =
-            (NU_SIN_LUT(rotation) * (width / 4.0f) - (height / 4.0f) * NU_SIN_LUT(rotation + 16384.0f) + wave_y) /
-            2048.0f;
+        debris_particle_frame_s &frame = effect->native_data->frames[frame_index];
+        position_x = -(width / 4.0f) * NU_SIN_LUT(rotation + 16384.0f) -
+                     (height / 4.0f) * NU_SIN_LUT(rotation) + wave_x;
+        position_y = (width / 4.0f) * NU_SIN_LUT(rotation) -
+                     (height / 4.0f) * NU_SIN_LUT(rotation + 16384.0f) + wave_y;
+        texture_x = (width / 4.0f) * NU_SIN_LUT(rotation + 16384.0f) -
+                    (height / 4.0f) * NU_SIN_LUT(rotation) + wave_x;
+        texture_y = -(width / 4.0f) * NU_SIN_LUT(rotation) -
+                    (height / 4.0f) * NU_SIN_LUT(rotation + 16384.0f) + wave_y;
+        edge_x = (height / 2.0f) * NU_SIN_LUT(rotation);
+        edge_y = (height / 2.0f) * NU_SIN_LUT(rotation + 16384.0f);
+        frame.position.x = position_x / 2048.0f;
+        frame.position.y = position_y / 2048.0f;
         frame.position.z = 0.0f;
-        frame.texture_offset.x = texture_x_numerator / 2048.0f;
-        frame.texture_offset.y = texture_y_numerator / 2048.0f;
+        frame.texture_offset.x = texture_x / 2048.0f;
+        frame.texture_offset.y = texture_y / 2048.0f;
         frame.texture_offset.z = 0.0f;
-        frame.extent.x = (texture_x_numerator + NU_SIN_LUT(rotation) * (height / 2.0f)) / 2048.0f;
-        frame.extent.y = (texture_y_numerator + NU_SIN_LUT(rotation + 16384.0f) * (height / 2.0f)) / 2048.0f;
+        frame.extent.x = (texture_x + edge_x) / 2048.0f;
+        frame.extent.y = (texture_y + edge_y) / 2048.0f;
         frame.extent.z = 0.0f;
         for (i = 0; i < 7; ++i) {
             if (effect->colour_keys[i].time <= time && time <= effect->colour_keys[i + 1].time) {
@@ -646,14 +651,14 @@ extern "C" void GenericDebinfoDmaTypeUpdate(debinftype *effect) {
                     blue = effect->colour_keys[i].blue;
                 } else {
                     red = effect->colour_keys[i].red +
-                          static_cast<i32>(effect->colour_keys[i + 1].red - effect->colour_keys[i].red) *
-                              (elapsed / duration);
+                          (elapsed / duration) *
+                              static_cast<i32>(effect->colour_keys[i + 1].red - effect->colour_keys[i].red);
                     green = effect->colour_keys[i].green +
-                            static_cast<i32>(effect->colour_keys[i + 1].green - effect->colour_keys[i].green) *
-                                (elapsed / duration);
+                            (elapsed / duration) *
+                                static_cast<i32>(effect->colour_keys[i + 1].green - effect->colour_keys[i].green);
                     blue = effect->colour_keys[i].blue +
-                           static_cast<i32>(effect->colour_keys[i + 1].blue - effect->colour_keys[i].blue) *
-                               (elapsed / duration);
+                           (elapsed / duration) *
+                               static_cast<i32>(effect->colour_keys[i + 1].blue - effect->colour_keys[i].blue);
                 }
                 break;
             }
@@ -671,10 +676,12 @@ extern "C" void GenericDebinfoDmaTypeUpdate(debinftype *effect) {
             if (effect->alpha_keys[i].time <= time && time <= effect->alpha_keys[i + 1].time) {
                 duration = effect->alpha_keys[i + 1].time - effect->alpha_keys[i].time;
                 elapsed = time - effect->alpha_keys[i].time;
-                alpha = elapsed == 0.0f ? effect->alpha_keys[i].value
-                                        : effect->alpha_keys[i].value +
-                                              (effect->alpha_keys[i + 1].value - effect->alpha_keys[i].value) *
-                                                  (elapsed / duration);
+                if (elapsed == 0.0f)
+                    alpha = effect->alpha_keys[i].value;
+                else
+                    alpha = effect->alpha_keys[i].value +
+                            (elapsed / duration) *
+                                (effect->alpha_keys[i + 1].value - effect->alpha_keys[i].value);
                 break;
             }
         }
