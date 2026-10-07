@@ -670,7 +670,7 @@ void Area_Configure(i32 area, i32 param, EXTRAMODEL *models, i16 *s) {
     SUPERCOUNTER counters[10];
     SUPERCOUNTER *counter = NULL;
     i32 counter_count = 0;
-    i32 in_counter = 0;
+    bool in_counter = false;
     while (NuFParGetLine(fp) != 0) {
         NuFParGetWord(fp);
         if (fp->word_buf[0] == '\0') {
@@ -680,7 +680,7 @@ void Area_Configure(i32 area, i32 param, EXTRAMODEL *models, i16 *s) {
             if (NuStrICmp(fp->word_buf, "supercounter_end") == 0) {
                 if (counter->pickup_count != 0) {
                     ++counter_count;
-                    in_counter = 0;
+                    in_counter = false;
                 }
             } else if (NuStrICmp(fp->word_buf, "pickup") == 0) {
                 if (counter->pickup_count >= 10 || NuFParGetWord(fp) == 0 || NuStrLen(fp->word_buf) > 7)
@@ -724,7 +724,7 @@ void Area_Configure(i32 area, i32 param, EXTRAMODEL *models, i16 *s) {
                     // bytes when these definitions are copied into the arena.
                     memset(counter, 0, sizeof(*counter));
                     counter->red = counter->green = counter->blue = 0xff;
-                    in_counter = 1;
+                    in_counter = true;
                 }
                 continue;
             }
