@@ -690,7 +690,9 @@ MechObjectInterface *MechInputTouchSystem::FindTargetObject(GameObject_s &object
         bool selected_nonplayer = false;
         f32 selected_distance = 1000000000.0f;
         f32 weighted_distance = 1000000000.0f;
-        for (i32 index = 0; index < HIGHGAMEOBJECT; ++index, ++candidate) {
+        const u8 *collision_z =
+            candidate != NULL ? reinterpret_cast<const u8 *>(&candidate->apiobj.collision_position.z) : NULL;
+        for (i32 index = 0; index < HIGHGAMEOBJECT; ++index, ++candidate, collision_z += sizeof(*candidate)) {
             if (candidate->field_0xcc0 == &object || (candidate->apiobj.object_flags & 0x1001) != 0x1001 ||
                 ((flags & 0x4000) && candidate == &object) || candidate->apiobj.field_0x287 != 0 ||
                 (CInfo[(i8)candidate->character_context].flags & 0x8000))
@@ -707,8 +709,8 @@ MechObjectInterface *MechInputTouchSystem::FindTargetObject(GameObject_s &object
             if (WORLD->current_level == VADERC_LDATA && candidate->id == id_ANAKINJEDI &&
                 !(candidate->apiobj.object_flags & 0x80) && vader_c.final_fight_message->value > 0.0f)
                 large = true;
-            VuVec center(candidate->apiobj.collision_position.x, candidate->apiobj.collision_position.y,
-                         candidate->apiobj.collision_position.z, 1.0f);
+            const NUVEC *collision_position = reinterpret_cast<const NUVEC *>(collision_z - offsetof(NUVEC, z));
+            VuVec center(collision_position->x, collision_position->y, collision_position->z, 1.0f);
             if (!large)
                 center.y = candidate->apiobj.scaled_height * 0.25f + center.y;
             f32 radius =

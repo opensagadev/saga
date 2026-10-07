@@ -76,11 +76,12 @@ void SurfaceMaskOn(u32 *surface_mask) {
 void GetSurfaceInfo(GameObject_s *object, i32 update_surface, f32 shadow_height) {
     APIOBJECT &api = object->apiobj;
     i32 surface;
+    i32 terrain_surface = 0;
     if (shadow_height != 2000000.0f) {
         surface = ShadowInfo();
-        const i32 terrain_surface = static_cast<u32>(surface) <= 31 ? surface : 0;
+        terrain_surface = static_cast<u32>(surface) <= 31 ? surface : 0;
         object->field_0x1087 = 2;
-        if ((api.character_data->game_character->flags_090 & 0x8000) != 0 ||
+        if ((api.character_data->game_character->flags_090 & 0x8000) == 0 &&
             (TerSurface[terrain_surface].flags & 2) != 0) {
             object->field_0x1020 = shadow_height;
         } else {
@@ -96,7 +97,7 @@ void GetSurfaceInfo(GameObject_s *object, i32 update_surface, f32 shadow_height)
 
     if (update_surface != 0) {
         object->field_0xe41 = static_cast<u8>(surface);
-        api.field_0x281 = static_cast<u8>(surface);
+        api.field_0x281 = static_cast<u8>(terrain_surface);
         object->surface_normal = api.field_0x218 == 2000000.0f ? v010 : ShadNorm;
     }
 

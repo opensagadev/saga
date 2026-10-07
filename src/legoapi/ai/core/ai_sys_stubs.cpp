@@ -624,7 +624,7 @@ static char *AISysLoadString(AISYS *system, i32 length) {
     return text;
 }
 
-static void AISysLoadPathRoutes(AISYS *system, AIPATH *path, i32 version) {
+static void AISysLoadPathRoutes(AISYS *system, AIPATH *path, i32 version, char *name_buffer) {
     path->route_matrix = static_cast<u8 **>(AISysLoadAlloc(system, path->node_count * sizeof(u8 *)));
     if (path->node_count != 0) {
         for (i32 i = 0; i < path->node_count; ++i) {
@@ -668,7 +668,7 @@ static void AISysLoadPathRoutes(AISYS *system, AIPATH *path, i32 version) {
 
             i32 character_count = EdFileReadChar();
             for (i32 character_index = 0; character_index < character_count; ++character_index) {
-                char character_name[256];
+                char *character_name = name_buffer;
                 i32 character_name_length = EdFileReadChar();
                 EdFileRead(character_name, character_name_length);
                 if (SpecialRouteCharacterTypeIDFn != NULL) {
@@ -699,7 +699,7 @@ static void AISysLoadPathRoutes(AISYS *system, AIPATH *path, i32 version) {
     }
 }
 
-static AIPATHSYS *AISysLoadPaths(AISYS *system, i32 version, NUGSCN *scene) {
+static AIPATHSYS *AISysLoadPaths(AISYS *system, i32 version, NUGSCN *scene, char *name_buffer) {
     i32 path_count = EdFileReadInt();
     if (path_count == 0) {
         return NULL;
@@ -779,7 +779,7 @@ static AIPATHSYS *AISysLoadPaths(AISYS *system, i32 version, NUGSCN *scene) {
                 if (version < 19)
                     node->special_route_index = 0xff;
 
-                char special_name[256];
+                char *special_name = name_buffer;
                 i32 special_name_length = EdFileReadChar();
                 if (special_name_length != 0) {
                     EdFileRead(special_name, special_name_length);
@@ -812,7 +812,7 @@ static AIPATHSYS *AISysLoadPaths(AISYS *system, i32 version, NUGSCN *scene) {
             AIPathCalcExtents(path);
         }
 
-        AISysLoadPathRoutes(system, path, version);
+        AISysLoadPathRoutes(system, path, version, name_buffer);
     }
 
     if (version < 19)
@@ -1300,9 +1300,10 @@ static void AISysLoadCreatures(AISYS *system, i32 version) {
         creature->path_info.connection = &creature->path_info.path->connections[connection_index];
 
         if (version > 2) {
-            for (i32 param = 0; param < 4; ++param) {
-                creature->script_params[param] = EdFileReadFloat();
-            }
+            creature->script_params[0] = EdFileReadFloat();
+            creature->script_params[1] = EdFileReadFloat();
+            creature->script_params[2] = EdFileReadFloat();
+            creature->script_params[3] = EdFileReadFloat();
         }
 
         if (version > 3) {
@@ -1366,7 +1367,7 @@ static void AISysLoadCreatures(AISYS *system, i32 version) {
     }
 }
 
-static void AISysLoadAntinodes(AISYS *system, i32 version, NUGSCN *scene) {
+static void AISysLoadAntinodes(AISYS *system, i32 version, NUGSCN *scene, char *name_buffer) {
     system->antinode_count = EdFileReadInt();
     if (system->antinode_count == 0) {
         return;
@@ -1401,7 +1402,7 @@ static void AISysLoadAntinodes(AISYS *system, i32 version, NUGSCN *scene) {
         }
         antinode->game_flags = static_cast<u8>(EdFileReadChar());
 
-        char special_name[256];
+        char *special_name = name_buffer;
         i32 special_name_length = EdFileReadChar();
         if (special_name_length != 0) {
             EdFileRead(special_name, special_name_length);
@@ -2952,7 +2953,7 @@ extern "C" {
             i32 version = EdFileReadInt();
             system->scene = gscene;
 
-            system->path_sys = AISysLoadPaths(system, version, gscene);
+            system->path_sys = AISysLoadPaths(system, version, gscene, packed_name);
             if (version > 3)
                 AISysLoadAreas(system, version);
             if (system->path_sys != NULL) {
@@ -2962,7 +2963,7 @@ extern "C" {
                 }
                 AISysLoadCreatures(system, version);
                 if (version > 12)
-                    AISysLoadAntinodes(system, version, gscene);
+                    AISysLoadAntinodes(system, version, gscene, packed_name);
                 if (version > 6 && GameAILoadFn != NULL) {
                     GameAILoadFn(system, version, gscene, cursor, end);
                 }

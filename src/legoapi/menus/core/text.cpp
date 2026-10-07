@@ -1,5 +1,7 @@
 #include "decomp.h"
 #include "gameapi/gui/apimenu_internal.h"
+#include "legoapi/characters/core/character.h"
+#include "legoapi/characters/core/customiser.h"
 #include "legoapi/core/input/gamepads.h"
 #include "legoapi/core/input/timer.h"
 #include "legoapi/menus/core/text.h"
@@ -32,6 +34,8 @@ extern i16 tGERMAN;
 extern i16 tITALIAN;
 extern i16 tSPANISH;
 extern i16 tDANISH;
+extern i16 tPLAYER1, tPLAYER2, tIOSAUTOSAVEWARNING, tLOADING, tSAVING;
+extern char *apitxt_AUTOSAVE_WARNING, *apitxt_LOADING, *apitxt_SAVING;
 char *txt_NULL = const_cast<char *>("?");
 char *apitxt_ENGLISH = const_cast<char *>("English");
 char *apitxt_FRENCH = const_cast<char *>("Fran\xc3\xa7"
@@ -62,6 +66,7 @@ char *Text_GetLanguagePath(i32 language);
 void Text_LoadAndFixUpStrings(unsigned char *filename, unsigned char **buffer, char **table, i32 count);
 void IntroText_SetTextID(i32 id);
 void Text_InsertCommasIntoNumber(char *number, char *text, i32 length);
+void Text_DecodeButtons(char *source, char *destination);
 void GameDrawMenuEntry(MENU *menu, char *text);
 extern "C" void BackupMenu(void);
 extern "C" {
@@ -358,7 +363,7 @@ void Text_InitTable(TEXTENTRY *entry, i32 first, i32 last) {
             if (index >= first && index <= last) {
                 entry->value = index;
                 *entry->text_id = index;
-                Text_StringBits[index >> 5] |= 1U << (index & 0x1f);
+                Text_StringBits[index / 32] |= 1U << (index & 0x1f);
             } else {
                 entry->value = 0;
                 *entry->text_id = 0;
@@ -382,11 +387,13 @@ void Text_MakeScore(u32 score, char *text) {
     Text_InsertCommasIntoNumber(first, text, static_cast<i32>(end - first));
 }
 extern i16 tALONGTIMEAGO;
-void Text_LoadStrings(variptr_u *buf, variptr_u *) {
+void Text_LoadStrings(variptr_u *buf, variptr_u *buf_end) {
     unsigned char *string_buffer = buf->u8_ptr;
     char language[32];
     char path[256];
 
+    TextRegisterButtonMapFn(Text_DecodeButtons);
+    TextRegisterPulseTimerFn(TextPulseTimer);
     NuStrCpy(language, Text_GetLanguagePath(Text_Language));
     NuStrCpy(path, "stuff\\text\\");
     NuStrCat(path, language);
@@ -394,6 +401,16 @@ void Text_LoadStrings(variptr_u *buf, variptr_u *) {
     Text_LoadAndFixUpStrings(reinterpret_cast<unsigned char *>(path), &string_buffer, TTab, 0x70d);
     IntroText_SetTextID(tALONGTIMEAGO);
     buf->addr = ALIGN(reinterpret_cast<usize>(string_buffer), 4);
+    if (TTab[tPLAYER1] != NULL)
+        NuStrCpy(Game.customizer[0].name, TTab[tPLAYER1]);
+    if (TTab[tPLAYER2] != NULL)
+        NuStrCpy(Game.customizer[1].name, TTab[tPLAYER2]);
+    FinishWeirdoNames(-1);
+    Customiser_InitNames(CharacterCustomiser);
+    MenuLoadTechnicalStrings(const_cast<char *>("stuff\\text\\trc.csv"), language, buf, *buf_end);
+    apitxt_AUTOSAVE_WARNING = TTab[tIOSAUTOSAVEWARNING];
+    apitxt_LOADING = TTab[tLOADING];
+    apitxt_SAVING = TTab[tSAVING];
 }
 void Text_SetLanguage(i32 language) {
     if (language == -1) {

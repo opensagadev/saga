@@ -304,16 +304,18 @@ void Animate_ATAT(GameObject_s *object) {
     }
 }
 
+static inline i16 JediWeaponIdle(GameObject_s *object) {
+    if (((object->field_0xe22 & GAMEOBJECT_E22_FLAG_WEAPON_ANIMATION) != 0 || object->field_0xe32 == 1) &&
+        object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_ALT_WEAPON_IDLE] != NULL)
+        return CHARACTER_ANIMATION_ALT_WEAPON_IDLE;
+    return CHARACTER_ANIMATION_WEAPON_IDLE;
+}
+
 void Animate_JEDI(GameObject_s *object) {
     ANIMPACKET_s &packet = object->apiobj.anim_packet;
 
     if ((object->field_0xe23 & GAMEOBJECT_E23_FLAG_FORCE_WEAPON_IDLE) != 0) {
-        if (((object->field_0xe22 & GAMEOBJECT_E22_FLAG_WEAPON_ANIMATION) != 0 || object->field_0xe32 == 1) &&
-            object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_ALT_WEAPON_IDLE] != NULL) {
-            packet.requested_animation = CHARACTER_ANIMATION_ALT_WEAPON_IDLE;
-        } else {
-            packet.requested_animation = CHARACTER_ANIMATION_WEAPON_IDLE;
-        }
+        packet.requested_animation = JediWeaponIdle(object);
     } else if ((CInfo[object->character_context].flags & CHARACTER_CONTEXT_INFO_FLAG_OWNS_ANIMATION) != 0) {
         packet.requested_animation = object->context_animation;
     } else {
@@ -345,12 +347,7 @@ void Animate_JEDI(GameObject_s *object) {
             packet.requested_animation = CHARACTER_ANIMATION_FALL;
         } else if (object->field_0x7a5 == CHARACTER_CONTEXT_FORCE_PUSH) {
             if ((object->action_flags & GAMEOBJECT_ACTION_FLAG_FORCE_PUSH_WEAPON_IDLE_MASK) != 0) {
-                if (((object->field_0xe22 & GAMEOBJECT_E22_FLAG_WEAPON_ANIMATION) != 0 || object->field_0xe32 == 1) &&
-                    object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_ALT_WEAPON_IDLE] != NULL) {
-                    packet.requested_animation = CHARACTER_ANIMATION_ALT_WEAPON_IDLE;
-                } else {
-                    packet.requested_animation = CHARACTER_ANIMATION_WEAPON_IDLE;
-                }
+                packet.requested_animation = JediWeaponIdle(object);
             } else {
                 packet.requested_animation =
                     object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_ALT_WEAPON_IDLE] != NULL
@@ -360,12 +357,7 @@ void Animate_JEDI(GameObject_s *object) {
         } else if (object->field_0x7a5 == CHARACTER_CONTEXT_FORCE_DEFLECT ||
                    object->field_0x7a5 == CHARACTER_CONTEXT_FORCE_THROW ||
                    object->field_0x7a5 == CHARACTER_CONTEXT_FORCE) {
-            if (((object->field_0xe22 & GAMEOBJECT_E22_FLAG_WEAPON_ANIMATION) != 0 || object->field_0xe32 == 1) &&
-                object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_ALT_WEAPON_IDLE] != NULL) {
-                packet.requested_animation = CHARACTER_ANIMATION_ALT_WEAPON_IDLE;
-            } else {
-                packet.requested_animation = CHARACTER_ANIMATION_WEAPON_IDLE;
-            }
+            packet.requested_animation = JediWeaponIdle(object);
         } else if (packet.requested_animation != CHARACTER_ANIMATION_FALL) {
             GAMEPAD_s *pad = object->pad_gamepad;
             if ((pad->allocated_5a & GAMEPAD_RUNTIME_SUPPRESS_MOVEMENT) == 0 && pad->input_magnitude > 0.0f) {

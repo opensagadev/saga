@@ -156,16 +156,15 @@ i32 PartDraw_ThermalDetonator(PART_s *part) {
 
     NUMTX reflection;
     i32 reflected = 0;
-    if ((part->reflection_flags & 2) != 0 && part->reflection_height != 0.0f) {
+    if ((part->reflection_flags & 2) != 0 && part->reflection_height != 2000000.0f) {
         reflected =
             MatrixReflection(&matrix, 2, part->reflection_height, WORLD->current_level->unknown_0cc, &reflection);
     }
 
-    LEVEL_OBJECT_RUNTIME *level_special = NULL;
+    i32 level_index = -1;
     if (WORLD->lev_objs[0xea].active != 0 && WORLD->lev_objs[0xeb].active != 0) {
-        const i32 index = draw == 1 ? 0xea : 0xeb;
-        level_special = &WORLD->lev_objs[index];
-        NuSpecialDrawAt(&level_special->special, &matrix);
+        level_index = draw == 1 ? 0xea : 0xeb;
+        NuSpecialDrawAt(&WORLD->lev_objs[level_index].special, &matrix);
     }
 
     if (reflected != 0) {
@@ -173,8 +172,8 @@ i32 PartDraw_ThermalDetonator(PART_s *part) {
         if (part->source_special != NULL) {
             NuSpecialDrawAt(&part->special, &reflection);
         }
-        if (level_special != NULL) {
-            NuSpecialDrawAt(&level_special->special, &reflection);
+        if (level_index != -1) {
+            NuSpecialDrawAt(&WORLD->lev_objs[level_index].special, &reflection);
         }
         NuRndrEndReflectionRender();
     }

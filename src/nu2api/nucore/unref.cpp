@@ -7,7 +7,7 @@ i32 unref(unsigned char *source, unsigned char *destination) {
     for (;;) {
         const i32 control = *source;
         if ((control & 0x80) == 0) {
-            const i32 offset_byte = source[1];
+            const u8 offset_byte = source[1];
             source += 2;
             const i32 literal_count = control & 3;
             for (i32 i = 0; i < literal_count; ++i)
@@ -17,8 +17,8 @@ i32 unref(unsigned char *source, unsigned char *destination) {
             for (i32 i = 0; i < length; ++i)
                 *destination++ = *match++;
         } else if ((control & 0x40) == 0) {
-            const i32 first = source[1];
-            const i32 second = source[2];
+            const u8 first = source[1];
+            const u8 second = source[2];
             source += 3;
             const i32 literal_count = first >> 6;
             for (i32 i = 0; i < literal_count; ++i)
@@ -28,9 +28,9 @@ i32 unref(unsigned char *source, unsigned char *destination) {
             for (i32 i = 0; i < length; ++i)
                 *destination++ = *match++;
         } else if ((control & 0x20) == 0) {
-            const i32 first = source[1];
-            const i32 second = source[2];
-            const i32 third = source[3];
+            const u8 first = source[1];
+            const u8 second = source[2];
+            const u8 third = source[3];
             source += 4;
             const i32 literal_count = control & 3;
             for (i32 i = 0; i < literal_count; ++i)

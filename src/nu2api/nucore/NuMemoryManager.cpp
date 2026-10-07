@@ -1350,6 +1350,11 @@ u16 NuMemoryManager::DumpBlock(u32 dump_id, NuSymbolQuery *, Header *header, u32
                      flag_a, flag_s, flag_c, category_text, debug_name);
         } else if ((debug->flags.alloc_flags & 4) != 0) {
             char value[257];
+            block_size = BLOCK_SIZE(header->value);
+            end_tag = END_TAG(header, block_size);
+            encoded_index = *end_tag >> 27;
+            manager_index = encoded_index == 31 ? *(end_tag - 1) : encoded_index - 1;
+
             u32 length = block_size - m_headerSize - (manager_index >= 30 ? 8 : 4);
             if (length > 256)
                 length = 256;

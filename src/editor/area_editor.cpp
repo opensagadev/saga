@@ -429,6 +429,7 @@ eduimenu_s *areaEditor_Process(nupad_s *pad) {
         goto process_done;
     }
     if ((pad->digital_buttons_pressed & 0x100) != 0) {
+        EDAIAREA_s *&selection = area_selected();
         EDAIAREA_s *nearest = NULL;
         f32 distance = 3.402823466e38f;
         for (EDAIAREA_s *area = area_head(); area != NULL; area = area_next(area)) {
@@ -439,7 +440,8 @@ eduimenu_s *areaEditor_Process(nupad_s *pad) {
             nearest = area;
             distance = current;
         }
-        area_selected() = nearest;
+        selection = nearest;
+        nearest = area_selected();
         if (nearest != NULL) {
             edcamSetPos(&nearest->position);
         }

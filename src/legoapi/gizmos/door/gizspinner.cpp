@@ -242,7 +242,8 @@ static i32 *GizSpinner_GetBestBoltTarget(GIZMOSET *, float *, NUVEC *result_posi
     float best_alignment = 0.0f;
     GIZMO *result = NULL;
 
-    for (i32 index = 0; index < set->count; ++index) {
+    for (i32 index = 0; index < set->count; ++index, set = &world->gizmo_sys->sets[spinner_gizmotype_id]) {
+        GIZMO *gizmos = set->gizmos;
         GIZSPINNER_s *spinner = &world->spinners[index];
         if (spinner->flags == 0 || (spinner->flags & 0x26) != 0 || (spinner->state_flags & 8) != 0 ||
             spinner->position.x < min_x || spinner->position.x > max_x || spinner->position.z < min_z ||
@@ -264,7 +265,7 @@ static i32 *GizSpinner_GetBestBoltTarget(GIZMOSET *, float *, NUVEC *result_posi
             NUVEC tangent;
             tangent.x = NuTrigTable[((angle + 0x4000) & 0xffff) >> 1];
             tangent.z = NuTrigTable[((angle + 0x8000) >> 1) & 0x7fff];
-            NUVEC facing = aim;
+            NUVEC facing = *direction;
             if (directional == 0) {
                 NuVecRotateY(&facing, &v001,
                              NuAtan2D(spinner->position.x - position->x, spinner->position.z - position->z));
@@ -305,7 +306,7 @@ static i32 *GizSpinner_GetBestBoltTarget(GIZMOSET *, float *, NUVEC *result_posi
             best_alignment = alignment;
             *result_velocity = v000;
             *result_position = target_position;
-            result = &set->gizmos[index];
+            result = &gizmos[index];
         }
     }
     return reinterpret_cast<i32 *>(result);
@@ -1001,7 +1002,7 @@ void GizSpinners_Update(void *world_ptr, void *, float) {
             continue;
         }
         const f32 frame = object->instance_animation->ltime;
-        const f32 length = object->end_frame - object->start_frame + 1.0f;
+        f32 length = object->end_frame - object->start_frame + 1.0f;
         const f32 margin = length / 40.0f;
         const i32 last = spinner->output_count - 1;
         i32 output = -1;
@@ -1039,6 +1040,10 @@ void GizSpinners_Update(void *world_ptr, void *, float) {
             ((spinner->state_flags & 0x400) != 0 && spinner->anim_set->state == GAMEANIMSET_STATE_AT_END) ||
             (spinner->state_flags & SPINNER_STATE_ROTATING) != 0)
             continue;
+        object = spinner->primary_anim_obj;
+        if (object == NULL || object->instance_animation == NULL)
+            continue;
+        length = object->end_frame - object->start_frame + 1.0f;
         const u32 direction_flags = spinner->state_flags & 6;
         const f32 direction = direction_flags == 2 || direction_flags == 4 ? 1.0f : -1.0f;
         f32 target = 1.0f;
@@ -1056,12 +1061,12 @@ void GizSpinners_Update(void *world_ptr, void *, float) {
             if (length != 0.0f && speed != 0.0f && rate != 0.0f) {
                 const f32 duration = __builtin_fabsf(length / (speed * rate * 60.0f));
                 const f32 rotation =
-                    (((duration * 30.0f) / length) * (length / 100.0f)) * target * 100.0f * 65536.0f / 360.0f;
+                    (((duration * 30.0f) / length) * (length / 100.0f)) * (target * 100.0f) * 65536.0f / 360.0f;
                 spinner->rotation =
                     static_cast<u16>(static_cast<i32>(direction * rotation) + spinner->initial_rotation);
             }
         } else if (length != 0.0f) {
-            const f32 rotation = direction * __builtin_fabsf(speed * rate * 60.0f / length) * difference * 5461.0f;
+            const f32 rotation = direction * (__builtin_fabsf(60.0f * speed * rate / length) * difference * 5461.0f);
             if (target < spinner->field_70) {
                 GameAnimSet_Play(spinner->anim_set, -0.25f, 1);
                 spinner->rotation = static_cast<u16>(spinner->rotation - static_cast<i32>(rotation));

@@ -91,23 +91,28 @@ void Whip_MoveCode(GameObject_s *object) {
 
         GIZMOBLOWUP_s *target = static_cast<GIZMOBLOWUP_s *>(object->field_0x788);
         i16 animation;
+        bool face_target;
         if (object->field_0x7aa == 2 && target != NULL && (target->status_flags & 0x804000) == 0x804000) {
             object->field_0x7a3 = 2;
             animation = LEGOACT_WHIP_BREAK;
+            face_target = true;
         } else if (object->field_0x7aa == 3 && target != NULL && (target->status_flags & 0x804000) == 0x804000) {
             object->field_0x7a3 = 3;
             animation = LEGOACT_WHIP_GRAB;
+            face_target = true;
         } else {
             object->field_0x7aa = 1;
             object->field_0x7a3 = 1;
             animation = LEGOACT_WHIP_CRACK;
+            face_target = false;
         }
 
         object->context_animation_timer = 0.0f;
         object->context_animation = animation;
         object->airborne_action_duration = AnimDuration(object->id, animation, 0.0f, 0.0f, 1);
         object->context_flags &= ~0x40;
-        if (object->field_0x7a3 != 1) {
+        if (face_target) {
+            target = static_cast<GIZMOBLOWUP_s *>(object->field_0x788);
             object->apiobj.movement_facing_angle = NuAtan2D(target->position.x - object->apiobj.position.x,
                                                             target->position.z - object->apiobj.position.z);
         }

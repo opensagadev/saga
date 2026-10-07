@@ -254,6 +254,18 @@ void (*Collection_GetSelectingPlayerIDsFn)(i16 *);
 void DrawCharIcon(i32, f32, f32, f32, f32, i32, f32, f32, i32, nuhspecial_s *);
 extern FadeSystem FadeSys;
 
+static inline u32 Collection_NeighbourFlags(i32 col, i32 row, i32 sx, i32 sy) {
+    if (sx == -1 || sy == -1)
+        return 0;
+    if ((col == sx && (row == sy - 1 || row == sy + 1)) || (row == sy && (col == sx - 1 || col == sx + 1)))
+        return 1;
+    if ((col == sx - 1 || col == sx + 1) && (row == sy - 1 || row == sy + 1))
+        return 2;
+    if ((col == sx && (row == sy - 2 || row == sy + 2)) || (row == sy && (col == sx - 2 || col == sx + 2)))
+        return 4;
+    return 0;
+}
+
 void Collection_Draw(COLLECTION_s *collection, float x, float y, float scale, APICHARACTERMODELLIST_s *models,
                      float alpha, i32 hide_selected) {
     const f32 base_dy = COLLECTION_DY;
@@ -333,24 +345,8 @@ void Collection_Draw(COLLECTION_s *collection, float x, float y, float scale, AP
             opacity *= alpha;
             if (!(opacity > 0.0f))
                 continue;
-            u32 neighbours = 0;
-            for (i32 player = 0; player < 2; ++player) {
-                if (selected_x[player] == -1 || selected_y[player] == -1)
-                    continue;
-                const i32 sx = selected_x[player];
-                const i32 sy = selected_y[player];
-                const bool same_x = static_cast<i32>(col) == sx;
-                const bool same_y = static_cast<i32>(row) == sy;
-                const bool adjacent_x = static_cast<i32>(col) == sx - 1 || static_cast<i32>(col) == sx + 1;
-                const bool adjacent_y = static_cast<i32>(row) == sy - 1 || static_cast<i32>(row) == sy + 1;
-                if ((same_x && adjacent_y) || (adjacent_x && same_y))
-                    neighbours |= 1;
-                if (adjacent_x && adjacent_y)
-                    neighbours |= 2;
-                if ((same_x && (static_cast<i32>(row) == sy - 2 || static_cast<i32>(row) == sy + 2)) ||
-                    (same_y && (static_cast<i32>(col) == sx - 2 || static_cast<i32>(col) == sx + 2)))
-                    neighbours |= 4;
-            }
+            const u32 neighbours = Collection_NeighbourFlags(col, row, selected_x[0], selected_y[0]) |
+                                   Collection_NeighbourFlags(col, row, selected_x[1], selected_y[1]);
             if ((neighbours & 1) != 0)
                 opacity *= 0.333f;
             else if ((neighbours & 2) != 0)

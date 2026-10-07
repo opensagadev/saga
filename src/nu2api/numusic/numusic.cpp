@@ -771,7 +771,11 @@ i32 NuMusic::StopTrack(u32 clazz, i32 fade) {
         if (voice == NULL) {                                                                                           \
             break;                                                                                                     \
         }                                                                                                              \
-        if (static_cast<u32>(voice->status - VOICE_STATUS_PLAYING) <= 1) {                                             \
+        if (static_cast<u32>(voice->status - VOICE_STATUS_STOPPING) <= 1) {                                            \
+            NuSound3StopStereoStream(voice->stream_index);                                                             \
+            voice->SetStatusFn(VOICE_STATUS_NONE, 0x46a);                                                              \
+            result = 1;                                                                                                \
+        } else if (static_cast<u32>(voice->status - VOICE_STATUS_PLAYING) <= 1) {                                      \
             if (fading) {                                                                                              \
                 voice->fade_rate = 2.0f;                                                                               \
                 voice->flags |= 1u;                                                                                    \
@@ -781,26 +785,22 @@ i32 NuMusic::StopTrack(u32 clazz, i32 fade) {
                 voice->SetStatusFn(VOICE_STATUS_NONE, 0x464);                                                          \
                 result = 1;                                                                                            \
             }                                                                                                          \
-        } else if (static_cast<u32>(voice->status - VOICE_STATUS_STOPPING) <= 1) {                                     \
-            NuSound3StopStereoStream(voice->stream_index);                                                             \
-            voice->SetStatusFn(VOICE_STATUS_NONE, 0x46a);                                                              \
-            result = 1;                                                                                                \
         }                                                                                                              \
     } while (0)
-    if ((fade & 1) == 0) {
-        STOP_MUSIC_TRACK(0, false);
-        STOP_MUSIC_TRACK(1, false);
-        STOP_MUSIC_TRACK(2, false);
-        STOP_MUSIC_TRACK(3, false);
-        STOP_MUSIC_TRACK(4, false);
-        STOP_MUSIC_TRACK(5, false);
-    } else {
+    if ((fade & 1) != 0) {
         STOP_MUSIC_TRACK(0, true);
         STOP_MUSIC_TRACK(1, true);
         STOP_MUSIC_TRACK(2, true);
         STOP_MUSIC_TRACK(3, true);
         STOP_MUSIC_TRACK(4, true);
         STOP_MUSIC_TRACK(5, true);
+    } else {
+        STOP_MUSIC_TRACK(0, false);
+        STOP_MUSIC_TRACK(1, false);
+        STOP_MUSIC_TRACK(2, false);
+        STOP_MUSIC_TRACK(3, false);
+        STOP_MUSIC_TRACK(4, false);
+        STOP_MUSIC_TRACK(5, false);
     }
 #undef STOP_MUSIC_TRACK
 
