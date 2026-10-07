@@ -7229,8 +7229,6 @@ namespace {
     static bool TerrainHandleWallOverlap(const TerrainScanBounds &bounds, const TERRAIN_WALL_POINT *wall);
 
     static bool TerrainBeginHandle(TerrainScanWriter *writer) {
-        if (TempScanStack == NULL || TempStackPtr == NULL)
-            return false;
         u8 *begin = static_cast<u8 *>(TempScanStack);
         u8 *end = begin + 0x2000;
         u8 *start = static_cast<u8 *>(TempStackPtr);
