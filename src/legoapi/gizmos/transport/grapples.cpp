@@ -771,10 +771,8 @@ void Grapple_RemoveDynamic(void *attached_object) {
 }
 
 void Grapple_MoveCode(GameObject_s *object) {
-    if (object == NULL)
-        return;
     object->field_0xe24 &= ~0x80;
-    if (LEGOCONTEXT_GRAPPLE == -1 || object->pad_gamepad == NULL)
+    if (LEGOCONTEXT_GRAPPLE == -1)
         return;
 
     // These expressions occur at separate, fixed sites in the retail action.
@@ -883,11 +881,6 @@ void Grapple_MoveCode(GameObject_s *object) {
         GameAudio_PlaySfx(0x44, &object->apiobj.lower_position, 0, 0);
         object->field_0xe31 = 0;
     } else {
-        if (GRAPPLE_CURRENT == NULL) {
-            object->character_context = -1;
-            GameCam_Blend(NULL, 0.5f, 0.0f, 1);
-            return;
-        }
         if (static_cast<i8>(object->apiobj.flags_low) >= 0 && object->can_use_object != object->field_0x788) {
             GRAPPLE_CURRENT->activation_progress = 0.0f;
             object->character_context = -1;
