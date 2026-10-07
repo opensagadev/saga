@@ -237,7 +237,7 @@ u8 aicreature_sets_alive[16] = {};
 // Render / compatibility options
 // ------------------------------------------------------------------------
 u8 g_forceSysMemVbs = 0;
-i32 Reflections_On = 1;
+u8 Reflections_On = 1;
 i32 (*MatrixReflection_CanOverrideFn)(f32) = NULL;
 i32 disable_narrow_socks = 0;
 i32 set_speedermode = 0;

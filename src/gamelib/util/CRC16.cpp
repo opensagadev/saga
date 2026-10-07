@@ -8,9 +8,13 @@ CRC16::CRC16() {
         u32 value = 0;
         u32 input = i << 8;
         for (i32 bit = 0; bit < 8; ++bit) {
-            const bool carry = ((value ^ input) & 0x8000) != 0;
-            value = carry ? ((value << 1) ^ 0x1021) & 0xffff : (value << 1) & 0xffff;
+            if (((value ^ input) & 0x8000) != 0) {
+                value = (value << 1) ^ 0x1021;
+            } else {
+                value <<= 1;
+            }
             input <<= 1;
+            value &= 0xffff;
         }
         crcTable[i] = value;
     }
@@ -22,8 +26,8 @@ u32 CRC16::hash(unsigned char const *data, i32 length) {
         unsigned char const *end = data + length;
         result = 0xffff;
         do {
-            result = ((result << 8) ^ crcTable[((result >> 8) ^ *data) & 0xff]) & 0xffff;
-            ++data;
+            u32 input = *data++;
+            result = ((result << 8) ^ crcTable[((result >> 8) ^ input) & 0xff]) & 0xffff;
         } while (data != end);
     }
     return result;

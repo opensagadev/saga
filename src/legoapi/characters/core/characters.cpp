@@ -773,22 +773,22 @@ GameObject_s *ActivateCharacter(char *name, nuvec_s *position, i32 angle) {
 
 void FinishWeirdoNames(i32 which) {
     if (which != 1) {
-        NuStrUpr(Game.customizer.primary_name, Game.customizer.primary_name);
-        i32 length = NuStrLen(Game.customizer.primary_name);
+        NuStrUpr(Game.customizer[0].name, Game.customizer[0].name);
+        i32 length = NuStrLen(Game.customizer[0].name);
         for (; length <= 14; length++) {
-            Game.customizer.primary_name[length] = ' ';
+            Game.customizer[0].name[length] = ' ';
         }
-        Game.customizer.primary_name[15] = '\0';
+        Game.customizer[0].name[15] = '\0';
         if (which == 0) {
             return;
         }
     }
-    NuStrUpr(Game.customizer.secondary_name, Game.customizer.secondary_name);
-    i32 length = NuStrLen(Game.customizer.secondary_name);
+    NuStrUpr(Game.customizer[1].name, Game.customizer[1].name);
+    i32 length = NuStrLen(Game.customizer[1].name);
     for (; length <= 14; length++) {
-        Game.customizer.secondary_name[length] = ' ';
+        Game.customizer[1].name[length] = ' ';
     }
-    Game.customizer.secondary_name[15] = '\0';
+    Game.customizer[1].name[15] = '\0';
 }
 
 extern i32 addcreature_override_id_check;
@@ -2012,7 +2012,7 @@ void LoadPerm2() {
     CharacterCustomiser =
         Customiser_Configure(const_cast<char *>("chars\\customiser.txt"), &permbuffer_ptr, &permbuffer_end, id_WEIRDO1,
                              id_WEIRDO2, Customiser_PieceAvailable, Customiser_PieceConfig,
-                             LevelObject_FindIndexFromName, &Game.customizer, CustomiserActionList_Game);
+                             LevelObject_FindIndexFromName, Game.customizer, CustomiserActionList_Game);
     SpecialMoves_Configure(const_cast<char *>("chars\\specialmoves.txt"), &permbuffer_ptr, &permbuffer_end);
 
     // Every status-screen level plays the status screen music in all three track slots.

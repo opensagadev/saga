@@ -189,7 +189,7 @@ static inline void SkipAni4QuaternionJoint(const ani3_animheader_s *anim, i32 qu
 static inline f32 DecodeAni4Quat3Scalar(const ani3_animheader_s *anim, i32 key_stride, const u16 *constants, u16 type,
                                         u32 quarter, f32 fraction, u8 *&keys, ani3_scalemin_s *&scale_min) {
     if (type != 6) {
-        const u32 constant = constants[type];
+        const u32 constant = constants[type - 16];
         return static_cast<f32>(constant) * anim->scale + anim->minimum;
     }
 
@@ -205,7 +205,7 @@ static inline f32 DecodeAni4Quat3Scalar(const ani3_animheader_s *anim, i32 key_s
     if (quarter == 3) {
         const f32 interpolated = (next_value - first_value) * tangent0 + first_value;
         const f32 tangent1 = static_cast<f32>((next_word >> 8) & 0x3f) * tangent_scale;
-        const f32 after_value = static_cast<f32>(keys[key_stride * 2]);
+        const i32 after_value = keys[key_stride * 2];
         const f32 next_interpolated = (after_value - next_value) * tangent1 + next_value;
         packed_value = (next_interpolated - interpolated) * fraction + interpolated;
     } else {
@@ -231,7 +231,7 @@ static inline void DecodeAni4Quat3Pair(const ani3_animheader_s *anim, i32 key_st
         const u16 *samples = reinterpret_cast<const u16 *>(keys);
         first = static_cast<f32>(samples[quarter]) * scale_min->scale + scale_min->minimum;
         const u16 next = quarter == 3 ? *reinterpret_cast<const u16 *>(keys + key_stride) : samples[quarter + 1];
-        second = static_cast<f32>(next) * scale_min->scale + scale_min->minimum;
+        second = static_cast<f32>(static_cast<i32>(next)) * scale_min->scale + scale_min->minimum;
         keys += 8;
         ++scale_min;
         return;
@@ -257,7 +257,7 @@ static inline void DecodeAni4Quat3Pair(const ani3_animheader_s *anim, i32 key_st
         return;
     }
 
-    first = second = static_cast<f32>(static_cast<u32>(constants[type])) * anim->scale + anim->minimum;
+    first = second = static_cast<f32>(static_cast<u32>(constants[type - 16])) * anim->scale + anim->minimum;
 }
 
 static inline void DecodeAni4BlendQuat3Pair(const ani3_animheader_s *anim, i32 key_stride, const u16 *constants,
@@ -290,7 +290,7 @@ static inline void DecodeAni4BlendQuat3Pair(const ani3_animheader_s *anim, i32 k
         ++scale_min;
         return;
     }
-    first = second = static_cast<f32>(static_cast<u32>(constants[type])) * anim->scale + anim->minimum;
+    first = second = static_cast<f32>(static_cast<u32>(constants[type - 16])) * anim->scale + anim->minimum;
 }
 
 static inline void DecodeAni4BlendQuat3WPair(const ani3_animheader_s *anim, i32 key_stride, const u16 *constants,
@@ -323,7 +323,7 @@ static inline void DecodeAni4BlendQuat3WPair(const ani3_animheader_s *anim, i32 
         ++scale_min;
         return;
     }
-    first = second = static_cast<f32>(static_cast<u32>(constants[type])) * anim->scale + anim->minimum;
+    first = second = static_cast<f32>(static_cast<u32>(constants[type - 16])) * anim->scale + anim->minimum;
 }
 
 float CalcValue1648(char *data, i32 quarter, i32 stride, float fraction, ani3_scalemin_s *scale_min) {
@@ -436,6 +436,7 @@ i32 ANI_SimpleAni3PlayerV4Joint_Quat3(ani3_animheader_s *anim, f32 frame, nuanim
                                       i32 first_joint) {
     const u8 *node_flags = anim->node_flags;
     buffer->use_quaternions = 1;
+    const i32 key_stride = anim->key_stride;
     u32 quarter;
     f32 fraction;
     i32 key_offset;
@@ -446,47 +447,46 @@ i32 ANI_SimpleAni3PlayerV4Joint_Quat3(ani3_animheader_s *anim, f32 frame, nuanim
     } else {
         const i32 last = anim->key_count - 1;
         f32 key = (frame - anim->first_frame) * static_cast<f32>(last) / static_cast<f32>(anim->frame_count - 1);
-        key = key >= 0.0f ? key : 0.0f;
+        key = key < 0.0f ? 0.0f : key;
         i32 whole;
         if (static_cast<f32>(last) <= key) {
-            whole = last;
-            fraction = 0.0f;
+            const f32 final_key = static_cast<f32>(last);
+            whole = static_cast<i32>(final_key);
+            fraction = final_key - static_cast<f32>(whole);
         } else {
             whole = static_cast<i32>(key);
             fraction = key - static_cast<f32>(whole);
         }
         quarter = static_cast<u32>(whole) & 3;
-        key_offset = (whole / 4) * anim->key_stride;
+        key_offset = (whole / 4) * key_stride;
     }
     u8 *keys = anim->keys + key_offset;
-    i32 key_stride = anim->key_stride;
-    const u16 *constants = reinterpret_cast<const u16 *>(anim->constants) - 16;
+    const u16 *constants = reinterpret_cast<const u16 *>(anim->constants);
     ani3_scalemin_s *scale_min = anim->scale_min;
     const u16 *curve_types = anim->curve_types;
+    nuanimbuffjoint_s *joint = buffer->joints;
     i32 count = joint_count < anim->node_count ? joint_count : anim->node_count;
     const u8 *first_flags = node_flags + first_joint;
-    for (const u8 *skip_flags = node_flags; skip_flags < first_flags; ++skip_flags) {
-        if (*skip_flags & 2) {
+    u8 *joint_flags = buffer->joint_flags + first_joint;
+    for (; node_flags < first_flags; ++node_flags, ++joint) {
+        if (*node_flags & 2) {
             SkipAni4V4Curve(curve_types[0], keys, scale_min);
             SkipAni4V4Curve(curve_types[1], keys, scale_min);
             SkipAni4V4Curve(curve_types[2], keys, scale_min);
         }
-        if (*skip_flags & 1) {
+        if (*node_flags & 1) {
             SkipAni4V4Curve(curve_types[3], keys, scale_min);
             SkipAni4V4Curve(curve_types[4], keys, scale_min);
             SkipAni4V4Curve(curve_types[5], keys, scale_min);
         }
-        if (*skip_flags & 8) {
+        if (*node_flags & 8) {
             SkipAni4V4Curve(curve_types[6], keys, scale_min);
             SkipAni4V4Curve(curve_types[7], keys, scale_min);
             SkipAni4V4Curve(curve_types[8], keys, scale_min);
         }
         curve_types += 9;
     }
-    node_flags += first_joint;
-    const u8 *end_flags = node_flags + count;
-    u8 *joint_flags = buffer->joint_flags + first_joint;
-    nuanimbuffjoint_s *joint = buffer->joints + first_joint;
+    const u8 *end_flags = first_flags + count;
     for (; node_flags < end_flags; ++node_flags, ++joint) {
         const u8 flags = *node_flags;
         *joint_flags++ = flags;
@@ -519,10 +519,8 @@ i32 ANI_SimpleAni3PlayerV4Joint_Quat3(ani3_animheader_s *anim, f32 frame, nuanim
                 first.w = NuFsqrt(1.0f - (first.x * first.x + first.y * first.y + first.z * first.z));
                 second.w = NuFsqrt(1.0f - (second.x * second.x + second.y * second.y + second.z * second.z));
                 if (first.x * second.x + first.y * second.y + first.z * second.z + first.w * second.w < 0.0f) {
-                    second.x = -second.x;
-                    second.y = -second.y;
-                    second.z = -second.z;
-                    second.w = -second.w;
+                    NUQUAT negated = {-second.x, -second.y, -second.z, -second.w};
+                    second = negated;
                 }
                 NUQUAT result;
                 result.x = first.x * (1.0f - fraction) + second.x * fraction;
@@ -531,7 +529,7 @@ i32 ANI_SimpleAni3PlayerV4Joint_Quat3(ani3_animheader_s *anim, f32 frame, nuanim
                 result.w = first.w * (1.0f - fraction) + second.w * fraction;
                 f32 length =
                     NuFsqrt(result.w * result.w + result.x * result.x + result.y * result.y + result.z * result.z);
-                f32 inverse_length = length == 0.0f ? 0.0f : 1.0f / length;
+                f32 inverse_length = NuFdiv(1.0f, length);
                 output[0] = result.x * inverse_length;
                 output[1] = result.y * inverse_length;
                 output[2] = result.z * inverse_length;
@@ -547,40 +545,24 @@ i32 ANI_SimpleAni3PlayerV4Joint_Quat3W(ani3_animheader_s *anim, f32 frame, nuani
 
     const u8 *node_flags = anim->node_flags;
     buffer->use_quaternions = 1;
+    const i32 key_stride = anim->key_stride;
     u32 quarter;
     f32 fraction;
     i32 key_offset;
-    if (anim->key_count == 1) {
-        quarter = 0;
-        fraction = 0.0f;
-        key_offset = 0;
-    } else {
-        const i32 last = anim->key_count - 1;
-        f32 key = (frame - anim->first_frame) * static_cast<f32>(last) / static_cast<f32>(anim->frame_count - 1);
-        key = key >= 0.0f ? key : 0.0f;
-        i32 whole;
-        if (static_cast<f32>(last) <= key) {
-            whole = last;
-            fraction = 0.0f;
-        } else {
-            whole = static_cast<i32>(key);
-            fraction = key - static_cast<f32>(whole);
-        }
-        quarter = static_cast<u32>(whole) & 3;
-        key_offset = (whole / 4) * anim->key_stride;
-    }
+    GetAni4SamplePosition(anim, frame, quarter, fraction, key_offset);
     u8 *keys = anim->keys + key_offset;
-    i32 key_stride = anim->key_stride;
-    const u16 *constants = reinterpret_cast<const u16 *>(anim->constants) - 16;
+    const u16 *constants = reinterpret_cast<const u16 *>(anim->constants);
     ani3_scalemin_s *scale_min = anim->scale_min;
     const u16 *curve_types = anim->curve_types;
+    nuanimbuffjoint_s *joint = buffer->joints;
     // The original clamps the count before applying first_joint.
     i32 count = joint_count < anim->node_count ? joint_count : anim->node_count;
     const u8 *first_flags = node_flags + first_joint;
-    for (const u8 *skip_flags = node_flags; skip_flags < first_flags; ++skip_flags) {
+    u8 *joint_flags = buffer->joint_flags + first_joint;
+    for (; node_flags < first_flags; ++node_flags, ++joint) {
         for (i32 group = 0; group < 3; ++group) {
             i32 components = group == 1 ? 4 : 3;
-            if (*skip_flags & CurveGroupMasks[group]) {
+            if (*node_flags & CurveGroupMasks[group]) {
                 for (i32 component = 0; component < components; ++component) {
                     SkipAni4V4Curve(*curve_types++, keys, scale_min);
                 }
@@ -588,10 +570,7 @@ i32 ANI_SimpleAni3PlayerV4Joint_Quat3W(ani3_animheader_s *anim, f32 frame, nuani
                 curve_types += components;
         }
     }
-    node_flags += first_joint;
-    const u8 *end_flags = node_flags + count;
-    u8 *joint_flags = buffer->joint_flags + first_joint;
-    nuanimbuffjoint_s *joint = buffer->joints + first_joint;
+    const u8 *end_flags = first_flags + count;
     for (; node_flags < end_flags; ++node_flags, ++joint) {
         const u8 flags = *node_flags;
         *joint_flags++ = flags;
@@ -608,23 +587,25 @@ i32 ANI_SimpleAni3PlayerV4Joint_Quat3W(ani3_animheader_s *anim, f32 frame, nuani
                 }
                 curve_types += group == 1 ? 4 : 3;
             } else if (group != 1) {
-                output[0] = DecodeAni4Quat3Scalar(anim, key_stride, constants, *curve_types++, quarter, fraction, keys,
+                output[0] = DecodeAni4Quat3Scalar(anim, key_stride, constants, curve_types[0], quarter, fraction, keys,
                                                   scale_min);
-                output[1] = DecodeAni4Quat3Scalar(anim, key_stride, constants, *curve_types++, quarter, fraction, keys,
+                output[1] = DecodeAni4Quat3Scalar(anim, key_stride, constants, curve_types[1], quarter, fraction, keys,
                                                   scale_min);
-                output[2] = DecodeAni4Quat3Scalar(anim, key_stride, constants, *curve_types++, quarter, fraction, keys,
+                output[2] = DecodeAni4Quat3Scalar(anim, key_stride, constants, curve_types[2], quarter, fraction, keys,
                                                   scale_min);
+                curve_types += 3;
             } else {
                 // This format stores w explicitly and interpolates the stored signs.
                 NUQUAT first, second;
-                DecodeAni4Quat3Pair(anim, key_stride, constants, *curve_types++, quarter, keys, scale_min, first.x,
+                DecodeAni4Quat3Pair(anim, key_stride, constants, curve_types[0], quarter, keys, scale_min, first.x,
                                     second.x);
-                DecodeAni4Quat3Pair(anim, key_stride, constants, *curve_types++, quarter, keys, scale_min, first.y,
+                DecodeAni4Quat3Pair(anim, key_stride, constants, curve_types[1], quarter, keys, scale_min, first.y,
                                     second.y);
-                DecodeAni4Quat3Pair(anim, key_stride, constants, *curve_types++, quarter, keys, scale_min, first.z,
+                DecodeAni4Quat3Pair(anim, key_stride, constants, curve_types[2], quarter, keys, scale_min, first.z,
                                     second.z);
-                DecodeAni4Quat3Pair(anim, key_stride, constants, *curve_types++, quarter, keys, scale_min, first.w,
+                DecodeAni4Quat3Pair(anim, key_stride, constants, curve_types[3], quarter, keys, scale_min, first.w,
                                     second.w);
+                curve_types += 4;
                 NUQUAT result;
                 result.x = first.x * (1.0f - fraction) + second.x * fraction;
                 result.y = first.y * (1.0f - fraction) + second.y * fraction;
@@ -632,10 +613,11 @@ i32 ANI_SimpleAni3PlayerV4Joint_Quat3W(ani3_animheader_s *anim, f32 frame, nuani
                 result.w = first.w * (1.0f - fraction) + second.w * fraction;
                 f32 length =
                     NuFsqrt(result.w * result.w + result.x * result.x + result.y * result.y + result.z * result.z);
-                f32 inverse_length = length == 0.0f ? 0.0f : 1.0f / length;
-                NUQUAT normalized = {result.x * inverse_length, result.y * inverse_length, result.z * inverse_length,
-                                     result.w * inverse_length};
-                *reinterpret_cast<NUQUAT *>(output) = normalized;
+                f32 inverse_length = NuFdiv(1.0f, length);
+                output[0] = result.x * inverse_length;
+                output[1] = result.y * inverse_length;
+                output[2] = result.z * inverse_length;
+                output[3] = result.w * inverse_length;
             }
         }
     }
@@ -655,7 +637,7 @@ static inline void DecodeAni4EulerPair(const ani3_animheader_s *anim, i32 key_st
         first = (tangent0 * (next - start) + start) * scale_min->scale + scale_min->minimum;
         if (quarter == 3) {
             const f32 tangent1 = static_cast<f32>((next_word >> 8) & 0x3f) * 0.01587302f;
-            const f32 after = static_cast<f32>(keys[key_stride * 2]);
+            const i32 after = keys[key_stride * 2];
             second = ((after - next) * tangent1 + next) * scale_min->scale + scale_min->minimum;
         } else {
             const f32 tangent1 = static_cast<f32>((tangents >> (((quarter * 3 + 3) * 2) & 0x1f)) & 0x3f) * 0.01587302f;
@@ -664,7 +646,7 @@ static inline void DecodeAni4EulerPair(const ani3_animheader_s *anim, i32 key_st
         keys += 4;
         ++scale_min;
     } else {
-        first = second = static_cast<f32>(static_cast<u32>(constants[type])) * anim->scale + anim->minimum;
+        first = second = static_cast<f32>(static_cast<u32>(constants[type - 16])) * anim->scale + anim->minimum;
     }
 }
 
@@ -682,7 +664,7 @@ extern "C" i32 ANI_SimpleAni3PlayerV4Joint_EulerQuat(ani3_animheader_s *anim, f3
     } else {
         const i32 last = anim->key_count - 1;
         f32 key = (frame - anim->first_frame) * static_cast<f32>(last) / static_cast<f32>(anim->frame_count - 1);
-        key = 0.0f <= key ? key : 0.0f;
+        key = key < 0.0f ? 0.0f : key;
         i32 whole;
         if (static_cast<f32>(last) <= key) {
             whole = last;
@@ -696,7 +678,7 @@ extern "C" i32 ANI_SimpleAni3PlayerV4Joint_EulerQuat(ani3_animheader_s *anim, f3
     }
     u8 *keys = anim->keys + key_offset;
     i32 key_stride = anim->key_stride;
-    const u16 *constants = reinterpret_cast<const u16 *>(anim->constants) - 16;
+    const u16 *constants = reinterpret_cast<const u16 *>(anim->constants);
     ani3_scalemin_s *scale_min = anim->scale_min;
     const u16 *curve_types = anim->curve_types;
     i32 count = joint_count < anim->node_count ? joint_count : anim->node_count;
@@ -777,7 +759,7 @@ extern "C" i32 ANI_SimpleAni3PlayerV4Joint_EulerQuat(ani3_animheader_s *anim, f3
                     result.w = first.w * (1.0f - fraction) + second.w * fraction;
                     f32 length =
                         NuFsqrt(result.w * result.w + result.x * result.x + result.y * result.y + result.z * result.z);
-                    f32 inverse_length = length == 0.0f ? 0.0f : 1.0f / length;
+                    f32 inverse_length = NuFdiv(1.0f, length);
                     output[0] = result.x * inverse_length;
                     output[1] = result.y * inverse_length;
                     output[2] = result.z * inverse_length;
@@ -829,6 +811,8 @@ extern "C" i32 ANI_SimpleAni3PlayerV4Joint(ani3_animheader_s *anim, f32 frame, n
         key_offset = (whole_key / 4) * anim->key_stride;
     }
 
+    const i32 key_stride = anim->key_stride;
+    const u16 *constants = reinterpret_cast<const u16 *>(anim->constants);
     u8 *keys = anim->keys + key_offset;
     ani3_scalemin_s *scale_min = anim->scale_min;
     const u16 *curve_types = anim->curve_types;
@@ -838,7 +822,9 @@ extern "C" i32 ANI_SimpleAni3PlayerV4Joint(ani3_animheader_s *anim, f32 frame, n
     const u16 *skip_types = curve_types;
     ani3_scalemin_s *skip_scale_min = scale_min;
     nuanimbuffjoint_s *joint = buffer->joints;
-    for (const u8 *skip_flags = node_flags; skip_flags < first_flags; ++skip_flags) {
+    u8 *joint_flags = buffer->joint_flags + first_joint;
+    const u8 *skip_flags = node_flags;
+    for (; skip_flags < first_flags; ++skip_flags) {
         const u8 flags = *skip_flags;
         if (flags & 2) {
             if (skip_types[0] < 16) {
@@ -884,19 +870,21 @@ extern "C" i32 ANI_SimpleAni3PlayerV4Joint(ani3_animheader_s *anim, f32 frame, n
         }
         skip_types += 9;
     }
-    curve_types += first_joint * 9;
-    joint += first_joint;
-    node_flags += first_joint;
+    const i32 skipped_joints = skip_flags - node_flags;
+    curve_types += skipped_joints * 9;
+    joint += skipped_joints;
+    node_flags = skip_flags;
     scale_min = skip_scale_min;
 
     const u8 *end_flags = first_flags + decode_count;
-    u8 *joint_flags = buffer->joint_flags + first_joint;
     for (; node_flags < end_flags; ++node_flags, ++joint) {
         const u8 flags = *node_flags;
         *joint_flags++ = flags;
         f32 *group_values = &joint->translation.x;
 
         for (i32 group = 0; group < 3; ++group) {
+            const u16 *group_types = curve_types;
+            curve_types += 3;
             if ((flags & CurveGroupMasks[group]) == 0) {
                 if (group == 2) {
                     group_values[0] = group_values[1] = group_values[2] = 1.0f;
@@ -904,12 +892,14 @@ extern "C" i32 ANI_SimpleAni3PlayerV4Joint(ani3_animheader_s *anim, f32 frame, n
                     group_values[0] = group_values[1] = group_values[2] = 0.0f;
                 }
             } else {
-                group_values[0] = DecodeAni4V4Curve(anim, curve_types[0], quarter, fraction, keys, scale_min);
-                group_values[1] = DecodeAni4V4Curve(anim, curve_types[1], quarter, fraction, keys, scale_min);
-                group_values[2] = DecodeAni4V4Curve(anim, curve_types[2], quarter, fraction, keys, scale_min);
+                group_values[0] = DecodeAni4Quat3Scalar(anim, key_stride, constants, group_types[0], quarter, fraction,
+                                                        keys, scale_min);
+                group_values[1] = DecodeAni4Quat3Scalar(anim, key_stride, constants, group_types[1], quarter, fraction,
+                                                        keys, scale_min);
+                group_values[2] = DecodeAni4Quat3Scalar(anim, key_stride, constants, group_types[2], quarter, fraction,
+                                                        keys, scale_min);
             }
 
-            curve_types += 3;
             group_values += 4;
         }
     }
@@ -919,11 +909,12 @@ extern "C" i32 ANI_SimpleAni3PlayerV4Joint(ani3_animheader_s *anim, f32 frame, n
 i32 ANI_SimpleAni3PlayerV4Joint_Blend_Quat3(ani3_animheader_s *anim, f32 frame, nuanimbuff_s *buffer, f32 blend,
                                             i32 joint_count, i32 first_joint, NUVEC *root_translation) {
     const u8 *node_flags = anim->node_flags;
+    nuanimbuffjoint_s *joint = buffer->joints;
     const f32 inverse_blend = 1.0f - blend;
     f32 key =
         (frame - anim->first_frame) * static_cast<f32>(anim->key_count - 1) / static_cast<f32>(anim->frame_count - 1);
-    key = key >= 0.0f ? key : 0.0f;
-    if (static_cast<f32>(anim->key_count) <= key)
+    key = key < 0.0f ? 0.0f : key;
+    if (static_cast<f32>(static_cast<i32>(anim->key_count)) <= key)
         key = static_cast<f32>(anim->key_count - 1);
     const i32 whole = static_cast<i32>(key);
     const u32 quarter = static_cast<u32>(whole) & 3;
@@ -931,34 +922,33 @@ i32 ANI_SimpleAni3PlayerV4Joint_Blend_Quat3(ani3_animheader_s *anim, f32 frame, 
     const i32 key_stride = anim->key_stride;
     u8 *keys = anim->keys + (whole / 4) * key_stride;
     ani3_scalemin_s *scale_min = anim->scale_min;
-    const u16 *constants = reinterpret_cast<const u16 *>(anim->constants) - 16;
+    const u16 *constants = reinterpret_cast<const u16 *>(anim->constants);
     const u16 *curve_types = anim->curve_types;
     const i32 count = joint_count < anim->node_count ? joint_count : anim->node_count;
     if (first_joint != 0)
         root_translation = NULL;
     const u8 *first_flags = node_flags + first_joint;
-    for (const u8 *skip_flags = node_flags; skip_flags < first_flags; ++skip_flags) {
-        if (*skip_flags & 2) {
+    const u8 *end_flags = first_flags + count;
+    for (; node_flags < first_flags; ++node_flags, ++joint) {
+        if (*node_flags & 2) {
             SkipAni4V4Curve(curve_types[0], keys, scale_min);
             SkipAni4V4Curve(curve_types[1], keys, scale_min);
             SkipAni4V4Curve(curve_types[2], keys, scale_min);
         }
-        if (*skip_flags & 1) {
+        if (*node_flags & 1) {
             SkipAni4V4Curve(curve_types[3], keys, scale_min);
             SkipAni4V4Curve(curve_types[4], keys, scale_min);
             SkipAni4V4Curve(curve_types[5], keys, scale_min);
         }
-        if (*skip_flags & 8) {
+        if (*node_flags & 8) {
             SkipAni4V4Curve(curve_types[6], keys, scale_min);
             SkipAni4V4Curve(curve_types[7], keys, scale_min);
             SkipAni4V4Curve(curve_types[8], keys, scale_min);
         }
         curve_types += 9;
     }
-    node_flags += first_joint;
-    const u8 *end_flags = node_flags + count;
     u8 *joint_flags = buffer->joint_flags + first_joint;
-    f32 *output = &buffer->joints[first_joint].translation.x;
+    f32 *output = &joint->translation.x;
     for (; node_flags < end_flags; ++node_flags) {
         const u8 flags = *node_flags;
         *joint_flags++ |= flags;
@@ -1045,9 +1035,9 @@ i32 ANI_SimpleAni3PlayerV4Joint_Blend_Quat3W(ani3_animheader_s *anim, f32 frame,
     const f32 inverse_blend = 1.0f - blend;
     f32 key =
         (frame - anim->first_frame) * static_cast<f32>(anim->key_count - 1) / static_cast<f32>(anim->frame_count - 1);
-    key = key >= 0.0f ? key : 0.0f;
+    key = key < 0.0f ? 0.0f : key;
     // Preserve the fractional interval after the last integer key.
-    if (static_cast<f32>(anim->key_count) <= key)
+    if (static_cast<f32>(static_cast<i32>(anim->key_count)) <= key)
         key = static_cast<f32>(anim->key_count - 1);
     const i32 whole = static_cast<i32>(key);
     const u32 quarter = static_cast<u32>(whole) & 3;
@@ -1055,7 +1045,7 @@ i32 ANI_SimpleAni3PlayerV4Joint_Blend_Quat3W(ani3_animheader_s *anim, f32 frame,
     const i32 key_stride = anim->key_stride;
     u8 *keys = anim->keys + (whole / 4) * key_stride;
     ani3_scalemin_s *scale_min = anim->scale_min;
-    const u16 *constants = reinterpret_cast<const u16 *>(anim->constants) - 16;
+    const u16 *constants = reinterpret_cast<const u16 *>(anim->constants);
     const u16 *curve_types = anim->curve_types;
     const i32 count = joint_count < anim->node_count ? joint_count : anim->node_count;
     if (first_joint != 0)
@@ -1175,7 +1165,7 @@ extern "C" i32 ANI_SimpleAni3PlayerV4Joint_Blend_EulerQuat(ani3_animheader_s *an
     const i32 key_offset = (whole / 4) * anim->key_stride;
     u8 *keys = anim->keys + key_offset;
     i32 key_stride = anim->key_stride;
-    const u16 *constants = reinterpret_cast<const u16 *>(anim->constants) - 16;
+    const u16 *constants = reinterpret_cast<const u16 *>(anim->constants);
     ani3_scalemin_s *scale_min = anim->scale_min;
     const u16 *curve_types = anim->curve_types;
     i32 count = joint_count < anim->node_count ? joint_count : anim->node_count;
@@ -1310,6 +1300,8 @@ extern "C" i32 ANI_SimpleAni3PlayerV4Joint_Blend(ani3_animheader_s *anim, f32 fr
                                                            root_translation);
     }
 
+    const i32 key_stride = anim->key_stride;
+    const u16 *constants = reinterpret_cast<const u16 *>(anim->constants);
     const f32 last_key = static_cast<f32>(anim->key_count - 1);
     f32 key = (frame - anim->first_frame) * last_key / static_cast<f32>(anim->frame_count - 1);
     if (key < 0.0f) {
@@ -1322,7 +1314,7 @@ extern "C" i32 ANI_SimpleAni3PlayerV4Joint_Blend(ani3_animheader_s *anim, f32 fr
     const i32 whole_key = static_cast<i32>(key);
     const u32 quarter = static_cast<u32>(whole_key) & 3;
     const f32 fraction = key - static_cast<f32>(whole_key);
-    u8 *keys = anim->keys + (whole_key / 4) * anim->key_stride;
+    u8 *keys = anim->keys + (whole_key / 4) * key_stride;
     ani3_scalemin_s *scale_min = anim->scale_min;
     const u16 *curve_types = anim->curve_types;
 
@@ -1359,7 +1351,8 @@ extern "C" i32 ANI_SimpleAni3PlayerV4Joint_Blend(ani3_animheader_s *anim, f32 fr
 
         for (i32 group = 0; group < 3; ++group) {
             if ((flags & CurveGroupMasks[group]) != 0) {
-                f32 decoded = DecodeAni4V4Curve(anim, curve_types[0], quarter, fraction, keys, scale_min);
+                f32 decoded = DecodeAni4Quat3Scalar(anim, key_stride, constants, curve_types[0], quarter, fraction,
+                                                    keys, scale_min);
                 f32 delta = decoded - group_values[0];
                 if (group == 1) {
                     delta = WrapAni4BlendRotation(delta);
@@ -1369,7 +1362,8 @@ extern "C" i32 ANI_SimpleAni3PlayerV4Joint_Blend(ani3_animheader_s *anim, f32 fr
                 }
                 group_values[0] += delta * blend;
 
-                decoded = DecodeAni4V4Curve(anim, curve_types[1], quarter, fraction, keys, scale_min);
+                decoded = DecodeAni4Quat3Scalar(anim, key_stride, constants, curve_types[1], quarter, fraction, keys,
+                                                scale_min);
                 delta = decoded - group_values[1];
                 if (group == 1) {
                     delta = WrapAni4BlendRotation(delta);
@@ -1379,7 +1373,8 @@ extern "C" i32 ANI_SimpleAni3PlayerV4Joint_Blend(ani3_animheader_s *anim, f32 fr
                 }
                 group_values[1] += delta * blend;
 
-                decoded = DecodeAni4V4Curve(anim, curve_types[2], quarter, fraction, keys, scale_min);
+                decoded = DecodeAni4Quat3Scalar(anim, key_stride, constants, curve_types[2], quarter, fraction, keys,
+                                                scale_min);
                 delta = decoded - group_values[2];
                 if (group == 1) {
                     delta = WrapAni4BlendRotation(delta);
@@ -1417,7 +1412,7 @@ extern "C" void ANI_Ani3ExtractAllNodeCurves(ani3_animheader_s *anim, float fram
                                              char *curve_mask) {
     u32 curve_count = anim->curve_count;
     u32 quarter;
-    u32 stride = anim->key_stride;
+    i32 stride;
     float fraction;
     i32 key_offset;
 
@@ -1425,27 +1420,35 @@ extern "C" void ANI_Ani3ExtractAllNodeCurves(ani3_animheader_s *anim, float fram
         if (anim->key_count == 1) {
             quarter = 0;
             fraction = 0.0f;
+            stride = anim->key_stride;
             key_offset = 0;
         } else {
+            float key = frame - static_cast<i32>(anim->first_frame);
             float last_key = static_cast<float>(anim->key_count - 1);
-            float key =
-                (frame - static_cast<float>(anim->first_frame)) * last_key / static_cast<float>(anim->frame_count - 1);
+            key = key * last_key / static_cast<float>(anim->frame_count - 1);
             if (key < 0.0f) {
                 key = 0.0f;
             }
-            if (last_key <= key) {
-                key = last_key;
+            if (!(last_key <= key)) {
+                i32 whole_key = static_cast<i32>(key);
+                fraction = key - static_cast<float>(whole_key);
+                quarter = static_cast<u32>(whole_key) & 3;
+                stride = anim->key_stride;
+                key_offset = (whole_key / 4) * stride;
+            } else {
+                i32 whole_key = static_cast<i32>(last_key);
+                fraction = last_key - static_cast<float>(whole_key);
+                quarter = static_cast<u32>(whole_key) & 3;
+                stride = anim->key_stride;
+                key_offset = (whole_key / 4) * stride;
             }
-            i32 whole_key = static_cast<i32>(key);
-            fraction = key - static_cast<float>(whole_key);
-            quarter = static_cast<u32>(whole_key) & 3;
-            key_offset = (whole_key / 4) * stride;
         }
     } else {
         float key = static_cast<float>(anim->end_frame + anim->key_count - 4);
         i32 whole_key = static_cast<i32>(key);
         fraction = key - static_cast<float>(whole_key);
         quarter = static_cast<u32>(whole_key) & 3;
+        stride = anim->key_stride;
         key_offset = (whole_key / 4) * stride;
     }
 
@@ -1453,79 +1456,108 @@ extern "C" void ANI_Ani3ExtractAllNodeCurves(ani3_animheader_s *anim, float fram
     u8 *force_zero = reinterpret_cast<u8 *>(types + anim->node_count * curve_count);
     ani3_scalemin_s *scale_min = anim->scale_min;
     i16 *constants = anim->constants;
+    const i32 constant_offset = anim->constant_index - 16;
+    u16 *constant_values = reinterpret_cast<u16 *>(constants);
     u8 *keys = anim->keys + key_offset;
 
     for (i32 n = 0; n < node; ++n) {
-        for (u32 curve = 0; curve < curve_count; ++curve) {
-            u16 type = *types++;
-            if (type < 16) {
-                ++scale_min;
-                keys += KeyStructSizes[type];
-            }
+        if (curve_count != 0) {
+            u16 *end_types = types + curve_count;
+            u16 *cursor = types;
+            do {
+                u16 type = *cursor++;
+                if (type < 16) {
+                    ++scale_min;
+                    keys += KeyStructSizes[type];
+                }
+            } while (cursor != end_types);
+            types = end_types;
+            force_zero += curve_count;
         }
-        force_zero += curve_count;
     }
 
+    if (curve_count == 0) {
+        return;
+    }
     i32 quarter_shift = static_cast<i32>(quarter) * 6;
     i32 next_quarter_shift = (static_cast<i32>(quarter) * 3 + 3) * 2;
     for (u32 curve = 0; curve < curve_count; ++curve, ++values) {
         u16 type = types[curve];
-        bool evaluate = curve_mask == NULL || *curve_mask == static_cast<char>(curve);
-        if (curve_mask != NULL && evaluate) {
-            ++curve_mask;
-        }
-        if (!evaluate) {
-            if (type == 7) {
-                keys += 8;
-                ++scale_min;
-            } else if (type == 6) {
-                keys += 4;
-                ++scale_min;
-            } else if (type == 8 || type == 10) {
-                keys += 4;
+        if (curve_mask != NULL && *curve_mask != curve) {
+            switch (type) {
+                case 7:
+                    keys += 8;
+                    ++scale_min;
+                    break;
+                case 6:
+                    keys += 4;
+                    ++scale_min;
+                    break;
+                case 8:
+                case 10:
+                    keys += 4;
+                    break;
             }
             continue;
         }
+        if (curve_mask != NULL) {
+            ++curve_mask;
+        }
 
         float key_fraction = (force_zero[curve] & 1) != 0 ? 0.0f : fraction;
-        if (type == 7) {
-            *values = CalcValue1648(reinterpret_cast<char *>(keys), quarter, stride, key_fraction, scale_min);
-            keys += 8;
-            ++scale_min;
-        } else if (type == 8) {
-            *values = static_cast<float>(constants[keys[quarter]]);
-            keys += 4;
-        } else if (type == 10) {
-            u32 index = keys[quarter];
-            const u32 packed = static_cast<u32>(static_cast<i32>(constants[index + 1])) |
-                               (static_cast<u32>(static_cast<i32>(constants[index])) << 16);
-            memcpy(values, &packed, sizeof(packed));
-            keys += 4;
-        } else if (type == 6) {
-            u32 first = *reinterpret_cast<u32 *>(keys);
-            u32 next = *reinterpret_cast<u32 *>(keys + stride);
-            float first_value = static_cast<float>(first & 0xff);
-            float next_value = static_cast<float>(next & 0xff);
-            u32 tangents = first >> 8;
-            float tangent0 = static_cast<float>((tangents >> quarter_shift) & 0x3f) * 0.01587302f;
-            float packed_value;
-            if (quarter == 3) {
-                float interpolated = (next_value - first_value) * tangent0 + first_value;
-                float tangent1 = static_cast<float>((next >> 8) & 0x3f) * 0.01587302f;
-                float after = static_cast<float>(keys[stride * 2]);
-                packed_value =
-                    (((after - next_value) * tangent1 + next_value) - interpolated) * key_fraction + interpolated;
-            } else {
-                float tangent1 = static_cast<float>((tangents >> (next_quarter_shift & 0x1f)) & 0x3f) * 0.01587302f;
-                packed_value =
-                    (next_value - first_value) * ((tangent1 - tangent0) * key_fraction + tangent0) + first_value;
+        switch (type) {
+            case 7:
+                *values = CalcValue1648(reinterpret_cast<char *>(keys), quarter, stride, key_fraction, scale_min);
+                keys += 8;
+                ++scale_min;
+                break;
+            case 8:
+                *values = static_cast<float>(constants[keys[quarter]]);
+                keys += 4;
+                break;
+            case 10: {
+                u32 index = keys[quarter];
+                keys += 4;
+                const u32 packed = static_cast<u32>(static_cast<i32>(constants[index + 1])) |
+                                   (static_cast<u32>(static_cast<i32>(constants[index])) << 16);
+                float value;
+                memcpy(&value, &packed, sizeof(value));
+                *values = value;
+                break;
             }
-            *values = packed_value * scale_min->scale + scale_min->minimum;
-            keys += 4;
-            ++scale_min;
-        } else {
-            u16 constant = reinterpret_cast<u16 *>(constants)[anim->constant_index + type - 16];
-            *values = static_cast<float>(constant) * anim->scale + anim->minimum;
+            case 6: {
+                u32 first = *reinterpret_cast<u32 *>(keys);
+                i32 first_value = first & 0xff;
+                u32 tangents = first >> 8;
+                u32 next = *reinterpret_cast<u32 *>(keys + stride);
+                i32 next_value = next & 0xff;
+                float tangent0 = static_cast<float>((tangents >> quarter_shift) & 0x3f) * 0.01587302f;
+                if (quarter != 3) {
+                    float tangent1 = static_cast<float>((tangents >> (next_quarter_shift & 0x1f)) & 0x3f) * 0.01587302f;
+                    float packed_value = (static_cast<float>(next_value) - static_cast<float>(first_value)) *
+                                             ((tangent1 - tangent0) * key_fraction + tangent0) +
+                                         static_cast<float>(first_value);
+                    *values = packed_value * scale_min->scale + scale_min->minimum;
+                } else {
+                    float interpolated = (static_cast<float>(next_value) - static_cast<float>(first_value)) * tangent0 +
+                                         static_cast<float>(first_value);
+                    float tangent1 = static_cast<float>((next >> 8) & 0x3f) * 0.01587302f;
+                    float after = static_cast<float>(static_cast<i32>(keys[stride * 2]));
+                    float packed_value =
+                        (((after - static_cast<float>(next_value)) * tangent1 + static_cast<float>(next_value)) -
+                         interpolated) *
+                            key_fraction +
+                        interpolated;
+                    *values = packed_value * scale_min->scale + scale_min->minimum;
+                }
+                keys += 4;
+                ++scale_min;
+                break;
+            }
+            default:
+                u16 constant = constant_values[constant_offset + type];
+                *values = static_cast<float>(constant) * anim->scale + anim->minimum;
+                break;
         }
     }
 }

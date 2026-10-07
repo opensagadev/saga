@@ -190,14 +190,8 @@ NULSTHDR *NuLstCreate(i32 element_count, i32 element_size) {
     i32 element_size_total;
     i32 i;
     NULNKHDR *first_free;
-    union {
-        char *char_ptr;
-        NULNKHDR *node_ptr;
-    } next;
-    union {
-        char *char_ptr;
-        NULNKHDR *node_ptr;
-    } curr;
+    VARIPTR next;
+    VARIPTR curr;
 
     element_size_total = element_size + sizeof(NULNKHDR);
     list =
@@ -214,22 +208,22 @@ NULSTHDR *NuLstCreate(i32 element_count, i32 element_size) {
         list->used_count = 0;
 
         first_free = list->free;
-        curr.node_ptr = first_free;
+        curr.void_ptr = first_free;
         next.char_ptr = curr.char_ptr + element_size_total;
         for (i = 1; i < element_count; i++) {
-            curr.node_ptr->next = next.node_ptr;
-            curr.node_ptr->id = i - 1;
-            curr.node_ptr->owner = list;
-            curr.node_ptr = next.node_ptr;
+            static_cast<NULNKHDR *>(curr.void_ptr)->next = static_cast<NULNKHDR *>(next.void_ptr);
+            static_cast<NULNKHDR *>(curr.void_ptr)->id = i - 1;
+            static_cast<NULNKHDR *>(curr.void_ptr)->owner = list;
+            curr.void_ptr = next.void_ptr;
 
             next.char_ptr = next.char_ptr + element_size_total;
         }
 
-        curr.node_ptr->next = NULL;
-        list->free_tail = curr.node_ptr;
-        curr.node_ptr->id = i - 1;
+        static_cast<NULNKHDR *>(curr.void_ptr)->next = NULL;
+        list->free_tail = static_cast<NULNKHDR *>(curr.void_ptr);
+        static_cast<NULNKHDR *>(curr.void_ptr)->id = i - 1;
 
-        curr.node_ptr->owner = list;
+        static_cast<NULNKHDR *>(curr.void_ptr)->owner = list;
         list->safe_thread = nu_current_thread_id;
     }
 
@@ -242,9 +236,15 @@ void NuLstDestroy(NULSTHDR *list) {
 
 NULSTHDR *NuLstCreateBuff(i32 count, i32 size, VARIPTR *buffer, VARIPTR end, i32 alignment) {
     NULSTHDR *list = NULL;
+    i32 i;
+    u32 stride;
+    usize bytes;
+    NULNKHDR *first_free;
+    VARIPTR next;
+    VARIPTR node;
     buffer->addr = (buffer->addr + alignment - 1) & -static_cast<usize>(alignment);
-    u32 stride = (alignment + size + sizeof(NULNKHDR) - 1) & -alignment;
-    usize bytes = count * stride + sizeof(NULSTHDR);
+    stride = (size + sizeof(NULNKHDR) + alignment - 1) & -alignment;
+    bytes = count * stride + sizeof(NULSTHDR);
     if (bytes < end.addr - buffer->addr) {
         list = static_cast<NULSTHDR *>(buffer->void_ptr);
         buffer->addr += bytes;
@@ -255,19 +255,20 @@ NULSTHDR *NuLstCreateBuff(i32 count, i32 size, VARIPTR *buffer, VARIPTR end, i32
         list->element_size = size;
         list->element_size_total = stride;
         list->used_count = 0;
-        NULNKHDR *node = list->free;
-        i32 i;
+        first_free = list->free;
+        node.void_ptr = first_free;
+        next.char_ptr = node.char_ptr + stride;
         for (i = 1; i < count; ++i) {
-            NULNKHDR *next = reinterpret_cast<NULNKHDR *>(reinterpret_cast<u8 *>(node) + stride);
-            node->next = next;
-            node->id = i - 1;
-            node->owner = list;
-            node = next;
+            static_cast<NULNKHDR *>(node.void_ptr)->next = static_cast<NULNKHDR *>(next.void_ptr);
+            static_cast<NULNKHDR *>(node.void_ptr)->id = i - 1;
+            static_cast<NULNKHDR *>(node.void_ptr)->owner = list;
+            node.void_ptr = next.void_ptr;
+            next.char_ptr = next.char_ptr + stride;
         }
-        node->next = NULL;
-        list->free_tail = node;
-        node->id = i - 1;
-        node->owner = list;
+        static_cast<NULNKHDR *>(node.void_ptr)->next = NULL;
+        list->free_tail = static_cast<NULNKHDR *>(node.void_ptr);
+        static_cast<NULNKHDR *>(node.void_ptr)->id = i - 1;
+        static_cast<NULNKHDR *>(node.void_ptr)->owner = list;
         list->safe_thread = nu_current_thread_id;
     }
     return list;

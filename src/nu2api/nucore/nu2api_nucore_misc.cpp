@@ -169,8 +169,8 @@ void NuLgtArcLaserDraw(i32 paused) {
     ++NuPrimCSPos;
     NuPrimSetCoordinateSystem(NUPRIM_SCALEMODE_PS2);
     NuPrim2DBegin(0, 5, NuLgtArcMtl[0].material);
-    for (i32 i = 0; i < NuLgtArcLaserCnt; ++i) {
-        NULGTARCLASER *laser = &NuLgtArcLaserData[i];
+    NULGTARCLASER *laser = NuLgtArcLaserData;
+    for (i32 i = 0; i < NuLgtArcLaserCnt; ++i, ++laser) {
         vertices[4].x = laser->start.x;
         vertices[4].y = laser->start.y;
         vertices[4].z = laser->start.z;

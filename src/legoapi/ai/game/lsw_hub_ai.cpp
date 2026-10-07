@@ -86,8 +86,8 @@ static void Hub_MakeListCharactersAvailable(i16 *characters) {
         characters[character] = apicharsys->playermodelids[character];
     }
 
-    for (i32 object_index = 0; object_index < HIGHGAMEOBJECT; ++object_index) {
-        GameObject_s *object = &Obj[object_index];
+    GameObject_s *object = Obj;
+    for (i32 object_index = 0; object_index < HIGHGAMEOBJECT; ++object_index, ++object) {
         if ((object->apiobj.field_0x1f8 & APIOBJECT_FLAG_IN_USE) != 0) {
             characters[object->id] = -1;
         }
@@ -308,10 +308,9 @@ i32 Hub_GetRandomCharType() {
         if (id_CANTINAALIEN != -1 && apicharsys->playermodelids[id_CANTINAALIEN] != -1) {
             candidates[candidate_count++] = id_CANTINAALIEN;
         }
-    }
-
-    if (candidate_count == 0) {
-        return -1;
+        if (candidate_count == 0) {
+            return -1;
+        }
     }
     return candidates[NuRandInt() % candidate_count];
 }

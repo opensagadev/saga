@@ -61,14 +61,7 @@ void NuMtxSetRotationX(NUMTX *m, NUANG a) {
     m->m33 = 1.0f;
 }
 
-void NuMtxSetRotationY(NUMTX *m, NUANG a) {
-    m->m00 = m->m22 = NU_COS_LUT(a);
-    m->m20 = NU_SIN_LUT(a);
-    m->m02 = -m->m20;
-    m->m11 = 1.0f;
-    m->m01 = m->m10 = m->m03 = m->m23 = m->m12 = m->m21 = m->m13 = m->m30 = m->m31 = m->m32 = 0.0f;
-    m->m33 = 1.0f;
-}
+NU_MTX_SET_ROTATION_Y_IMPL(NuMtxSetRotationY, )
 
 void NuMtxSetRotationZ(NUMTX *m, NUANG a) {
     m->m00 = m->m11 = NU_COS_LUT(a);
@@ -217,7 +210,7 @@ void NuMtxPreScaleX(NUMTX *m, f32 ScaleX) {
     m->m02 = m->m02 * ScaleX;
 }
 
-NU_MTX_ROTATE_X_IMPL(NuMtxRotateX,)
+NU_MTX_ROTATE_X_IMPL(NuMtxRotateX, )
 
 void NuMtxPreRotateX(NUMTX *m, NUANG a) {
     f32 cosx = NU_COS_LUT(a);
@@ -234,7 +227,7 @@ void NuMtxPreRotateX(NUMTX *m, NUANG a) {
     m->m22 = m->m22 * cosx - sinx * m12;
 }
 
-NU_MTX_ROTATE_Y_IMPL(NuMtxRotateY,)
+NU_MTX_ROTATE_Y_IMPL(NuMtxRotateY, )
 
 void NuMtxPreRotateY(NUMTX *m, NUANG a) {
     f32 cosx = NU_COS_LUT(a);
@@ -251,7 +244,7 @@ void NuMtxPreRotateY(NUMTX *m, NUANG a) {
     m->m22 = sinx * m02 + m->m22 * cosx;
 }
 
-NU_MTX_ROTATE_Z_IMPL(NuMtxRotateZ,)
+NU_MTX_ROTATE_Z_IMPL(NuMtxRotateZ, )
 
 void NuMtxPreRotateZ(NUMTX *m, NUANG a) {
     f32 cosx = NU_COS_LUT(a);
@@ -1288,7 +1281,7 @@ void NuMtx24BitCorrection(NUMTX *correction, NUMTX *matrix) {
                 continue;
             f32 previous;
             f32 error;
-            f32 *value = reinterpret_cast<f32 *>(correction) + element;
+            f32 *value = &correction->m00 + element;
             previous = *value;
             *value += step;
             reinterpret_cast<u8 *>(value)[0] = 0;

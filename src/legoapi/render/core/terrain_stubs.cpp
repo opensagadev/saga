@@ -71,8 +71,6 @@ static i32 PlatCodeCallback;
 static TERRAIN_PLATFORM_CALLBACK PlatCallback[8];
 void ScanTerrIDRemovePlat(i32 platform_index);
 
-TERRAIN_SPHERE SphereData[16];
-
 void TerrainSkinAllocate(terrsitu_s *terrain_group) {
     TERRAIN_GROUP *group = reinterpret_cast<TERRAIN_GROUP *>(terrain_group);
     i32 skin_index = ~static_cast<i32>(group->scene_index);

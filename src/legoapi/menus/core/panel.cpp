@@ -253,16 +253,15 @@ char *GameObj_GetName(i32 model, GameObject_s *object, char *buffer) {
     if (buffer != NULL) {
         i32 index = -1;
         if (model == id_WEIRDO1) {
-            if (Game.customizer.primary_use_saved_name)
+            if (Game.customizer[0].use_saved_name)
                 index = 0;
         } else if (model == id_WEIRDO2) {
-            if (Game.customizer.secondary_use_saved_name)
+            if (Game.customizer[1].use_saved_name)
                 index = 1;
         }
         if (index == -1)
             return TTab[CDataList[model].name_id];
-        NuStrCpy(buffer,
-                 reinterpret_cast<char *>(&Game.customizer) + offsetof(CUSTOMISESAVE_s, primary_name) + index * 0x38);
+        NuStrCpy(buffer, Game.customizer[index].name);
         i32 i = 14;
         while (i >= 0 && buffer[i] == ' ') {
             buffer[i] = '\0';
@@ -731,8 +730,6 @@ void DrawMeleeTargetsRows(i16 *targets, char *, f32 *values, i32 count) {
         i16 target = targets[i];
         if (target == -1) {
             ++i;
-            if (i >= count)
-                break;
             const i32 previous_row = row++;
             y -= 0.14f;
             const f32 width = row_counts[row] * 0.12000000476837158203125f * 0.5f;
@@ -878,8 +875,7 @@ void InitPanel(i32) {
 }
 
 void DrawPanel() {
-    // Original debug coordinates were never initialized by this port.
-    NUVEC coordinate_positions[8] = {};
+    NUVEC coordinate_positions[8];
     const i32 menu = GetMenuID();
     SetQFont2D();
     if (CUTSTOPGAME == 0)
@@ -887,8 +883,7 @@ void DrawPanel() {
     if (HUB_ADATA != NULL && WORLD->area == HUB_ADATA)
         Customiser_TransformToPanel(CharacterCustomiser);
     const i32 paused = screendump ? save_paused : Paused;
-    // The original loading shortcut reads this before initialization. Give that path a stable result.
-    i32 removed_controller = -1;
+    i32 removed_controller;
     char text[512], auxiliary[128];
     f32 status_y = 0.0f;
     if (PANELOFF && !paused && (WORLD->current_level->flags & LEVEL_GAMEPLAY))
@@ -914,6 +909,7 @@ void DrawPanel() {
         if (gone_through_door_to_new_level)
             goto draw_panel_menu;
     }
+    removed_controller = -1;
     {
         f32 pulse = 0.25f * NU_SIN_LUT(static_cast<i32>(GlobalTimer.time_elapsed_mod_seconds * 65536.0f));
         {

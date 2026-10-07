@@ -26,7 +26,7 @@ struct NuMainFilterGen : NuPostFilterGen {
     f32 blur_radius;
     f32 dof_strength, dof_near, dof_far, dof_blur;
     i32 dof_mode;
-    f32 dof_bias;
+    i32 dof_bias;
     bool dof_enabled;
     bool bloom_enabled;
     bool motion_blur_enabled;
@@ -42,3 +42,4 @@ struct NuMainFilterGen : NuPostFilterGen {
     }
 };
 DECOMP_ASSERT(sizeof(NuMainFilterGen) == 0x128, "NuMainFilterGen size");
+DECOMP_ASSERT(offsetof(NuMainFilterGen, dof_bias) == 0x84, "NuMainFilterGen depth-of-field bias offset");

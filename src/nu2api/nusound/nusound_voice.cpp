@@ -51,6 +51,9 @@ namespace {
 
     static inline void AttachVoiceListener(VoiceListenerLink *link, NuSoundListener *listener) {
         DetachVoiceListener(link);
+        if (listener == NULL) {
+            return;
+        }
 
         VoiceListenerLink *head = static_cast<VoiceListenerLink *>(listener->field_0x8);
         if (head == NULL) {
@@ -326,8 +329,8 @@ void NuSoundVoice::CalculatePositionalMix() {
     this->field66_0xa4 = this->field69_0xb0;
 
     VoiceListenerLink *real_link = reinterpret_cast<VoiceListenerLink *>(&this->field57_0x80);
-    VoiceListenerLink *focus_link = reinterpret_cast<VoiceListenerLink *>(&this->field60_0x8c);
     DetachVoiceListener(real_link);
+    VoiceListenerLink *focus_link = reinterpret_cast<VoiceListenerLink *>(&this->field60_0x8c);
     DetachVoiceListener(focus_link);
 
     if (this->surround_mode == 0) {
@@ -337,25 +340,26 @@ void NuSoundVoice::CalculatePositionalMix() {
         NuSoundListener *focus_listener =
             NuSoundSystem::GetNearestFocusListener(*this->listeners, CopySoundPosition(this->position), focus_distance);
 
-        if (real_listener == NULL || focus_listener->GetSensitivity() <= 0.0f || this->falloff_b <= focus_distance) {
+        if (real_listener == NULL || !(focus_listener->GetSensitivity() > 0.0f) ||
+            !(this->falloff_b > focus_distance)) {
             return;
         }
 
         f32 attenuation = this->CalculateFalloffAttenuation(focus_distance);
-        if (attenuation <= 0.0f) {
+        if (!(attenuation > 0.0f)) {
             return;
         }
 
         f32 real_distance = real_listener->GetHeadDistance(CopySoundPosition(this->position));
         NuSoundListener *second_real_listener = NULL;
         f32 second_real_distance = 0.0f;
-        NuSoundListener *listener = static_cast<NuSoundListener *>(this->listeners->begin->field_0x4);
-        while (listener != this->listeners->end) {
-            if (listener != real_listener && listener->IsEnabled()) {
-                f32 distance = listener->GetHeadDistance(CopySoundPosition(this->position));
-                if (distance - real_distance < 6.0f) {
+        NuSoundListener *listener = this->listeners->Front();
+        NuSoundListener *end = this->listeners->End();
+        while (listener != end) {
+            if (real_listener != listener && listener->IsEnabled()) {
+                second_real_distance = listener->GetHeadDistance(CopySoundPosition(this->position));
+                if (second_real_distance - real_distance < 6.0f) {
                     second_real_listener = listener;
-                    second_real_distance = distance;
                     break;
                 }
             }
@@ -363,19 +367,18 @@ void NuSoundVoice::CalculatePositionalMix() {
         }
 
         f32 field_angle = 0.0f;
-        f32 first_mix[8] = {};
-        f32 second_mix[8] = {};
+        f32 listener_mix[2][8] = {};
         if (real_listener->Get2DScreenPosition() != NULL) {
             NUMTX identity;
             NuMtxSetIdentity(&identity);
             VuVec screen_position(real_listener->Get2DScreenPosition()->x, 0.0f,
                                   1.0f - real_listener->Get2DScreenPosition()->y, 1.0f);
-            NUMTX copied_identity = identity;
             f32 outer_angle = this->field69_0xb0 + this->field71_0xb8;
             if (!(outer_angle < 360.0f)) {
                 outer_angle = 360.0f;
             }
-            this->CalculatePositionalCoefficients(this->mix_gains, screen_position,
+            NUMTX copied_identity = identity;
+            this->CalculatePositionalCoefficients(this->mix_gains, CopySoundPosition(screen_position),
                                                   *reinterpret_cast<VuMtx *>(&copied_identity), this->field69_0xb0,
                                                   outer_angle);
             second_real_listener = NULL;
@@ -385,22 +388,23 @@ void NuSoundVoice::CalculatePositionalMix() {
             if (!(outer_angle < 360.0f)) {
                 outer_angle = 360.0f;
             }
-            this->CalculatePositionalCoefficients(first_mix, CopySoundPosition(this->position),
+            this->CalculatePositionalCoefficients(listener_mix[0], CopySoundPosition(this->position),
                                                   *real_listener->GetHeadMatrix(), field_angle, outer_angle);
 
             if (second_real_listener == NULL) {
-                memmove(this->mix_gains, first_mix, sizeof(first_mix));
+                memmove(this->mix_gains, listener_mix[0], sizeof(listener_mix[0]));
             } else {
                 f32 second_field_angle = this->CalculateFieldAngle(second_real_distance);
                 f32 second_outer_angle = field_angle + this->field71_0xb8;
                 if (!(second_outer_angle < 360.0f)) {
                     second_outer_angle = 360.0f;
                 }
-                this->CalculatePositionalCoefficients(second_mix, CopySoundPosition(this->position),
+                this->CalculatePositionalCoefficients(listener_mix[1], CopySoundPosition(this->position),
                                                       *second_real_listener->GetHeadMatrix(), second_field_angle,
                                                       second_outer_angle);
                 for (u32 i = 0; i < 8; ++i) {
-                    this->mix_gains[i] = first_mix[i] > second_mix[i] ? first_mix[i] : second_mix[i];
+                    this->mix_gains[i] =
+                        listener_mix[0][i] > listener_mix[1][i] ? listener_mix[0][i] : listener_mix[1][i];
                 }
             }
         }
@@ -414,9 +418,7 @@ void NuSoundVoice::CalculatePositionalMix() {
         this->field67_0xa8 = attenuation * focus_listener->GetSensitivity();
 
         AttachVoiceListener(real_link, real_listener);
-        if (focus_listener != NULL) {
-            AttachVoiceListener(focus_link, focus_listener);
-        }
+        AttachVoiceListener(focus_link, focus_listener);
 
         this->field65_0xa0 = attenuation;
         this->field63_0x98 = real_distance;
@@ -429,7 +431,7 @@ void NuSoundVoice::CalculatePositionalMix() {
         f32 focus_distance = 0.0f;
         NuSoundListener *focus_listener =
             NuSoundSystem::GetNearestFocusListener(*this->listeners, CopySoundPosition(this->position), focus_distance);
-        if (focus_listener == NULL || this->falloff_b <= focus_distance) {
+        if (focus_listener == NULL || !(this->falloff_b > focus_distance)) {
             return;
         }
 
@@ -440,15 +442,18 @@ void NuSoundVoice::CalculatePositionalMix() {
         }
 
         const NUMTX *head_matrix = reinterpret_cast<const NUMTX *>(real_listener->GetHeadMatrix());
-        VuVec relative_direction(head_matrix->m30 - this->direction.x, head_matrix->m31 - this->direction.y,
-                                 head_matrix->m32 - this->direction.z, 0.0f);
+        VuVec relative_direction;
+        relative_direction.x = head_matrix->m30 - this->direction.x;
+        relative_direction.y = head_matrix->m31 - this->direction.y;
+        relative_direction.z = head_matrix->m32 - this->direction.z;
+        relative_direction.w = 0.0f;
         f32 coefficients[8] = {};
         f32 outer_angle = this->field69_0xb0 + this->field71_0xb8;
         if (!(outer_angle < 360.0f)) {
             outer_angle = 360.0f;
         }
-        this->CalculatePositionalCoefficients(coefficients, relative_direction, *real_listener->GetHeadMatrix(),
-                                              this->field69_0xb0, outer_angle);
+        this->CalculatePositionalCoefficients(coefficients, CopySoundPosition(relative_direction),
+                                              *real_listener->GetHeadMatrix(), this->field69_0xb0, outer_angle);
 
         f32 attenuation = this->CalculateFalloffAttenuation(focus_distance);
         for (u32 i = 0; i < 8; ++i) {
@@ -483,7 +488,7 @@ void NuSoundVoice::CalculatePositionalMix() {
         f32 focus_distance = 0.0f;
         NuSoundListener *focus_listener =
             NuSoundSystem::GetNearestFocusListener(*this->listeners, CopySoundPosition(this->position), focus_distance);
-        if (focus_listener == NULL || this->falloff_b <= focus_distance) {
+        if (focus_listener == NULL || !(this->falloff_b > focus_distance)) {
             return;
         }
 
@@ -639,7 +644,7 @@ f32 NuSoundVoice::CalculateFieldAngle(f32 distance) {
     return result;
 }
 
-// Literal speaker sites preserve the original per-channel branch ordering.
+// Speaker bearings repeat over adjacent revolutions for wrapped field angles.
 #define NUSOUND_SPEAKER_COEFFICIENT(Index, Angle)                                                                      \
     {                                                                                                                  \
         if (gains[(Index)] == 0.0f && (Angle) > outer_start && (Angle) < outer_end) {                                  \
@@ -649,15 +654,18 @@ f32 NuSoundVoice::CalculateFieldAngle(f32 distance) {
                 f32 outer = (Angle) - bearing >= 0.0f ? outer_end : outer_start;                                       \
                 f32 inner = (Angle) - bearing >= 0.0f ? inner_end : inner_start;                                       \
                 f32 value = NuFabs((outer - (Angle)) / (outer - inner));                                               \
-                gains[(Index)] = value < 1.0f ? value : 1.0f;                                                          \
+                gains[(Index)] = value;                                                                                \
+                if (!(gains[(Index)] < 1.0f)) {                                                                        \
+                    gains[(Index)] = 1.0f;                                                                             \
+                }                                                                                                      \
             }                                                                                                          \
         }                                                                                                              \
     }
 
 void NuSoundVoice::CalculatePositionalCoefficients(f32 *gains, VuVec const &position, VuMtx const &mtx,
                                                    f32 speaker_field_angle_min, f32 speaker_field_angle_max) {
-    NUVEC listener_space;
-    NuVecInvMtxTransform(&listener_space, reinterpret_cast<NUVEC *>(const_cast<VuVec *>(&position)),
+    VuVec listener_space;
+    NuVecInvMtxTransform(&listener_space.xyz, reinterpret_cast<NUVEC *>(const_cast<VuVec *>(&position)),
                          reinterpret_cast<NUMTX *>(const_cast<VuMtx *>(&mtx)));
 
     f32 bearing = NuFmod(NuATan2f(listener_space.x, listener_space.z) * 180.0f / 3.1415927f, 360.0f);
@@ -668,21 +676,15 @@ void NuSoundVoice::CalculatePositionalCoefficients(f32 *gains, VuVec const &posi
     f32 inner_start = NuFmod(bearing - speaker_field_angle_min, 360.0f);
     f32 inner_end = NuFmod(bearing + speaker_field_angle_min, 360.0f);
 
-    NUSOUND_SPEAKER_COEFFICIENT(2, -360.0f);
-    NUSOUND_SPEAKER_COEFFICIENT(1, -330.0f);
-    NUSOUND_SPEAKER_COEFFICIENT(5, -270.0f);
-    NUSOUND_SPEAKER_COEFFICIENT(7, -210.0f);
-    NUSOUND_SPEAKER_COEFFICIENT(6, -150.0f);
-    NUSOUND_SPEAKER_COEFFICIENT(4, -90.0f);
-    NUSOUND_SPEAKER_COEFFICIENT(0, -30.0f);
-
-    NUSOUND_SPEAKER_COEFFICIENT(2, 0.0f);
-    NUSOUND_SPEAKER_COEFFICIENT(1, 30.0f);
-    NUSOUND_SPEAKER_COEFFICIENT(5, 90.0f);
-    NUSOUND_SPEAKER_COEFFICIENT(7, 150.0f);
-    NUSOUND_SPEAKER_COEFFICIENT(6, 210.0f);
-    NUSOUND_SPEAKER_COEFFICIENT(4, 270.0f);
-    NUSOUND_SPEAKER_COEFFICIENT(0, 330.0f);
+    static const int channels[] = {1, 5, 7, 6, 4, 0};
+    for (int turn = -1; turn < 1; ++turn) {
+        f32 offset = turn * 360.0f;
+        NUSOUND_SPEAKER_COEFFICIENT(2, offset);
+        for (int i = 0; i < 6; ++i) {
+            f32 angle = offset + 30.0f + 60.0f * i;
+            NUSOUND_SPEAKER_COEFFICIENT(channels[i], angle);
+        }
+    }
     NUSOUND_SPEAKER_COEFFICIENT(2, 360.0f);
 }
 
@@ -746,7 +748,7 @@ f32 NuSoundVoice::GetPitch() const {
 
 f32 NuSoundVoice::GetPlaybackPositionSeconds() {
     u64 position = GetPlaybackPositionSamples();
-    u32 sample_rate = sound_source->GetStreamDesc()->GetSampleRate();
+    i32 sample_rate = sound_source->GetStreamDesc()->GetSampleRate();
     return static_cast<f32>(position) / static_cast<f32>(sample_rate);
 }
 

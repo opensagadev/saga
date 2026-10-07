@@ -976,8 +976,6 @@ extern "C" {
             return 0;
         NuSpecialHandleLayout *handle = reinterpret_cast<NuSpecialHandleLayout *>(special_handle);
         NuSpecialBoundsDisplayLayout *special = static_cast<NuSpecialBoundsDisplayLayout *>(handle->display_special);
-        if (handle->scene == NULL || special == NULL)
-            return 0;
         NUMTX wind_matrix;
         if (special->wind_scale != 0) {
             WindShear(&wind_matrix, mtx, special->wind_scale, special->wind_speed);
@@ -2576,7 +2574,7 @@ extern "C" {
         currentScene.dof.strength = strength;
         currentScene.dof.near_distance = near_distance;
         currentScene.dof.far_distance = far_distance;
-        currentScene.dof.bias = 0.0f;
+        currentScene.dof.bias = 0;
         currentScene.dof.mode = 3;
         if (NuRndrDoingScreenGrab != 0) {
             currentScene.dof.enabled = 0;
@@ -4767,10 +4765,10 @@ void NuLgtArcLaserEx(i32 type, NUVEC *start, NUVEC *end, NUVEC *bend, f32 width,
         blue = 255;
     if (alpha > 255)
         alpha = 255;
-    laser->colour = blue | (red << 16) | green | (alpha << 24);
+    laser->colour = (blue | (red << 16)) | (green | (alpha << 24));
     laser->flags = flags;
     if ((NuLgtArcLaserFrame & 1) == 0 || laser->seed == 0)
-        laser->seed = NuLgtRand();
+        NuLgtArcLaserData[index].seed = NuLgtRand();
     for (i32 i = 0; i < 6; ++i)
         NuLgtRand();
     ++NuLgtArcLaserCnt;

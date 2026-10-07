@@ -12,7 +12,6 @@ struct TerrainLastImpact_s {
 extern TerrainLastImpact_s TerrLastImpact;
 extern TERRSET *CurTerr;
 extern i32 WallSplinesOnly;
-extern TERRAIN_SPHERE SphereData[16];
 extern NUVEC ShadNorm;
 extern NUVEC ShadRoofNorm;
 extern NUVEC EShadNorm;

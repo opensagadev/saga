@@ -1,5 +1,7 @@
 #include "nu2api_nusound_types.h"
 
+#include "nu2api/numath/nufloat.h"
+
 bool NuSoundEffectPitchRamp::AttachVoice(NuSoundVoice *) {
     return true;
 }
@@ -18,14 +20,14 @@ void NuSoundEffectPitchRamp::Process(float frametime) {
             pitch_mix = target_pitch;
         } else {
             if (target_pitch > pitch_mix) {
-                pitch_mix += frametime != 0.0f ? frametime / duration : 0.0f;
+                pitch_mix += NuFdiv(frametime, duration);
                 if (pitch_mix > target_pitch) {
                     state = 0;
                     finished = true;
                     pitch_mix = target_pitch;
                 }
             } else {
-                pitch_mix -= frametime != 0.0f ? frametime / duration : 0.0f;
+                pitch_mix -= NuFdiv(frametime, duration);
                 if (pitch_mix < target_pitch) {
                     state = 0;
                     finished = true;

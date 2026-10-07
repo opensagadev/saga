@@ -47,7 +47,8 @@ char uberShader2[] = {
 };
 
 // Trailer videos played after the intro.
-char *Trailer[3] = {"demointro", "", NULL};
+extern i16 tINTRO;
+char *Trailer[3] = {"demointro", reinterpret_cast<char *>(&tINTRO), NULL};
 
 // Object name the save icon is drawn from.
 char *lsw_memcard_objname = "mem_card";

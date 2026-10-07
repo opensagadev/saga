@@ -855,33 +855,16 @@ DECOMP_ASSERT(offsetof(CUSTOMISER, animation_packets) == 0x178, "CUSTOMISER anim
 DECOMP_ASSERT(offsetof(CUSTOMISER, model_texture_ids) == 0x208, "CUSTOMISER model texture IDs offset");
 DECOMP_ASSERT(offsetof(CUSTOMISER, animation_active) == 0xa6c, "CUSTOMISER animation active offset");
 DECOMP_ASSERT(offsetof(CUSTOMISER, animation_ids_to_load) == 0xa68, "CUSTOMISER animation load-list offset");
-struct __attribute__((packed)) CUSTOMISESAVE_s {
-    i16 pieces[9];           // 0x00
-    u8 field_0x12[2];        // 0x12
-    char primary_name[0x20]; // 0x14
-    union {
-        u8 primary_name_unlocked;
-        u8 primary_use_saved_name;
-    }; // 0x34
-    u8 field_0x35[3];        // 0x35
-    i16 secondary_pieces[9]; // 0x38
-    union {
-        u8 field_0x4a[2];
-        u8 secondary_piece_flags[2];
-    }; // 0x4a
-    char secondary_name[0x20]; // 0x4c
-    union {
-        u8 secondary_name_unlocked;
-        u8 secondary_use_saved_name;
-    }; // 0x6c
-    u8 field_0x6d[2]; // 0x6d
+struct CUSTOMISESAVE_s {
+    u16 pieces[9];
+    u8 reserved_12[2];
+    char name[0x20];
+    u8 use_saved_name;
+    u8 reserved_35[3];
 };
-DECOMP_ASSERT(sizeof(CUSTOMISESAVE_s) == 0x6f, "CUSTOMISESAVE_s size");
-DECOMP_ASSERT(offsetof(CUSTOMISESAVE_s, secondary_pieces) == 0x38, "CUSTOMISESAVE secondary pieces offset");
-DECOMP_ASSERT(offsetof(CUSTOMISESAVE_s, primary_name) == 0x14, "CUSTOMISESAVE primary name offset");
-DECOMP_ASSERT(offsetof(CUSTOMISESAVE_s, primary_name_unlocked) == 0x34, "CUSTOMISESAVE primary flag offset");
-DECOMP_ASSERT(offsetof(CUSTOMISESAVE_s, secondary_name) == 0x4c, "CUSTOMISESAVE secondary name offset");
-DECOMP_ASSERT(offsetof(CUSTOMISESAVE_s, secondary_name_unlocked) == 0x6c, "CUSTOMISESAVE secondary flag offset");
+DECOMP_ASSERT(sizeof(CUSTOMISESAVE_s) == 0x38, "CUSTOMISESAVE_s size");
+DECOMP_ASSERT(offsetof(CUSTOMISESAVE_s, name) == 0x14, "CUSTOMISESAVE name offset");
+DECOMP_ASSERT(offsetof(CUSTOMISESAVE_s, use_saved_name) == 0x34, "CUSTOMISESAVE name flag offset");
 struct CUSTOMPIECE {
     char *name;
     i16 character_id;
@@ -921,7 +904,6 @@ struct CUSTOMPIECERESOURCE {
     CHARACTERMODEL_s *character_model;
 };
 DECOMP_ASSERT(sizeof(CUSTOMPIECERESOURCE) == 0x20, "CUSTOMPIECERESOURCE size");
-DECOMP_ASSERT(offsetof(CUSTOMISESAVE_s, secondary_pieces) == 0x38, "CUSTOMISESAVE secondary pieces offset");
 struct CUTSCENESFX {
     i16 id;
     u8 flags;
@@ -2504,14 +2486,40 @@ struct STATUSPACKET_s {
     i16 area_id;       // 0xa0
     i8 episode_id;     // 0xa2
     u8 field_0xa3;
-    u8 player0_active;    // 0xa4
-    u8 player1_active;    // 0xa5
+    union {
+        u8 player_active[2];
+        struct {
+            u8 player0_active;
+            u8 player1_active;
+        };
+    };
     u8 challenge_state;   // 0xa6
     u8 mission_state;     // 0xa7
     f32 superstory_time;  // 0xa8
     u32 superstory_score; // 0xac
-    u8 field_0xb0;
-    u8 mode_flags;            // 0xb1
+    union {
+        u8 field_0xb0;
+        struct {
+            u8 : 2;
+            u8 true_hero_complete : 1;
+            u8 next_area_unlocked : 1;
+            u8 new_minikit_complete : 1;
+            u8 bonus_winner : 1;
+            u8 free_play : 1;
+            u8 vehicle_area : 1;
+        };
+    };
+    union {
+        u8 mode_flags; // 0xb1
+        struct {
+            u8 bonus_mode : 1;
+            u8 super_bonus_mode : 1;
+            u8 super_story_mode : 1;
+            u8 saved_and_exited : 1;
+            u8 continue_story : 1;
+            u8 : 3;
+        };
+    };
     u8 status_flags;          // 0xb2
     u8 minikit_count;         // 0xb3
     u8 minikit_max;           // 0xb4
@@ -2538,6 +2546,12 @@ struct STATUSPACKET_s {
     undefined field_0x12c[0x14c - 0x12c];
 };
 DECOMP_ASSERT(sizeof(STATUSPACKET_s) == 0x14c, "STATUSPACKET_s size");
+DECOMP_ASSERT(offsetof(STATUSPACKET_s, field_0xb0) == 0xb0, "STATUSPACKET state flags offset");
+DECOMP_ASSERT(offsetof(STATUSPACKET_s, mode_flags) == 0xb1, "STATUSPACKET mode flags offset");
+DECOMP_ASSERT(offsetof(STATUSPACKET_s, player_active) == 0xa4, "STATUSPACKET active-player array offset");
+DECOMP_ASSERT(offsetof(STATUSPACKET_s, player0_active) == 0xa4, "STATUSPACKET player 0 activity offset");
+DECOMP_ASSERT(offsetof(STATUSPACKET_s, player1_active) == 0xa5, "STATUSPACKET player 1 activity offset");
+DECOMP_ASSERT(sizeof(((STATUSPACKET_s *)0)->player_active) == 2, "STATUSPACKET active-player array extent");
 struct STATUSPACKET_LSW_s {
     i32 field_0x00;
 };

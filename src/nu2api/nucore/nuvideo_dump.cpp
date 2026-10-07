@@ -12,7 +12,9 @@ extern "C" void NuPs2VideoScreenDump(char *filename, i32 format, f32 scale_x, f3
     } else {
         sprintf(path, "%s.bmp", filename);
         i32 suffix = 0;
-        while (NuFileSize(path) > 0) {
+        for (;;) {
+            if (NuFileSize(path) <= 0)
+                break;
             sprintf(path, "%s%03d.bmp", filename, suffix++);
         }
     }

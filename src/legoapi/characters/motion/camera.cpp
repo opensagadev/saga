@@ -77,35 +77,16 @@ void GameCam_Blend(GAMECAMERA_s *camera, f32 duration, f32 curve, i32 mode) {
     camera->blend_start_pitch = camera->desired_pitch;
     camera->blend_start_yaw = camera->desired_yaw;
     camera->blend_start_roll = camera->desired_roll;
-    camera->blend_mode = static_cast<u32>(mode) < 1 ? 1 : 2;
-    // Retain coordinate object bits while preparing both blend snapshots.
-    static_assert(sizeof(f32) == sizeof(u32), "blend coordinate storage");
-    u32 position_x, position_y, position_z;
-    memcpy(&position_x, &camera->desired_position.x, sizeof(position_x));
-    memcpy(&position_y, &camera->desired_position.y, sizeof(position_y));
-    memcpy(&position_z, &camera->desired_position.z, sizeof(position_z));
+    camera->blend_mode = mode == 0 ? 1 : 2;
     camera->previous_camera_mode = camera->previous_mode;
-
-    memcpy(reinterpret_cast<u8 *>(&camera->blend_start_target) + offsetof(NUVEC, y),
-           reinterpret_cast<const u8 *>(&camera->target) + offsetof(NUVEC, y), sizeof(NUVEC) - offsetof(NUVEC, y));
-    u32 target_x;
-    memcpy(&target_x, &camera->target.x, sizeof(target_x));
-    memcpy(&camera->blend_end_target.y, &camera->target.y, sizeof(f32));
-    u32 target_z;
-    memcpy(&target_z, &camera->target.z, sizeof(target_z));
     camera->reset_blend = 1;
-    memcpy(&camera->blend_start_position.x, &position_x, sizeof(position_x));
     camera->blend_curve = curve;
-    memcpy(&camera->blend_start_position.y, &position_y, sizeof(position_y));
     camera->blend_time = 0.0f;
-    memcpy(&camera->blend_start_position.z, &position_z, sizeof(position_z));
     camera->blend_duration = duration;
-    memcpy(&camera->blend_start_target.x, &target_x, sizeof(target_x));
-    memcpy(&camera->blend_end_position.x, &position_x, sizeof(position_x));
-    memcpy(&camera->blend_end_position.y, &position_y, sizeof(position_y));
-    memcpy(&camera->blend_end_position.z, &position_z, sizeof(position_z));
-    memcpy(&camera->blend_end_target.x, &target_x, sizeof(target_x));
-    memcpy(&camera->blend_end_target.z, &target_z, sizeof(target_z));
+    camera->blend_start_position = camera->desired_position;
+    camera->blend_start_target = camera->target;
+    camera->blend_end_position = camera->desired_position;
+    camera->blend_end_target = camera->target;
 }
 
 void GameCam_Reset(GAMECAMERA_s *camera) {

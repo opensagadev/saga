@@ -351,20 +351,22 @@ void SuperCarry_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
         f32 best = 100000.0f;
         GIZMOBLOWUP_s *blowup = world->gizmo_blowups;
         for (i32 i = 0; i < world->gizmo_blowup_count; ++i, ++blowup) {
-            if ((blowup->status_flags & 0x80c001) != 0x80c000 || (blowup->secondary_flags & 1) == 0)
-                continue;
-            if ((blowup->draw_flags & 0x20) != 0 && ShadowMode == 0)
-                continue;
-            if (blowup->platform_id != -1 && blowup->platform_id == object->field_0x1078)
-                continue;
-            NUVEC delta;
-            f32 distance = NuVecDistSqr(&blowup->mid_position, &object->apiobj.collision_position, &delta);
-            if (distance < best) {
+            if (!((blowup->status_flags & 0x80c001) != 0x80c000 || (blowup->secondary_flags & 1) == 0)) {
+                if ((blowup->draw_flags & 0x20) != 0 && ShadowMode == 0)
+                    continue;
+                if (blowup->platform_id != -1 && blowup->platform_id == object->field_0x1078)
+                    continue;
+                NUVEC delta;
+                f32 distance = NuVecDistSqr(&blowup->mid_position, &object->apiobj.collision_position, &delta);
+                if (!(distance < best))
+                    continue;
                 f32 radius = object->apiobj.field_0x1dc + blowup->target_scale + 0.2f;
-                if (distance < radius * radius && delta.x * forward.x + delta.z * forward.z > 0.0f) {
-                    nearest = blowup;
-                    best = distance;
-                }
+                if (!(distance < radius * radius))
+                    continue;
+                if (!(delta.x * forward.x + delta.z * forward.z > 0.0f))
+                    continue;
+                nearest = blowup;
+                best = distance;
             }
         }
         if (nearest == NULL)

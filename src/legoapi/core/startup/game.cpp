@@ -222,13 +222,13 @@ void NewGame() {
     Game.episode_save[4].superstory_score_target = kSuperStoryScoreTarget;
     Game.episode_save[5].superstory_score_target = kSuperStoryScoreTarget;
 
-    Customiser_CopyDefaultPiecesToSave(CharacterCustomiser, &Game.customizer);
+    Customiser_CopyDefaultPiecesToSave(CharacterCustomiser, Game.customizer);
     if (TTab != NULL) {
         if (TTab[kPrimaryCustomNameTextId] != NULL) {
-            NuStrCpy(Game.customizer.primary_name, TTab[kPrimaryCustomNameTextId]);
+            NuStrCpy(Game.customizer[0].name, TTab[kPrimaryCustomNameTextId]);
         }
         if (TTab[kSecondaryCustomNameTextId] != NULL) {
-            NuStrCpy(Game.customizer.secondary_name, TTab[kSecondaryCustomNameTextId]);
+            NuStrCpy(Game.customizer[1].name, TTab[kSecondaryCustomNameTextId]);
         }
         FinishWeirdoNames(-1);
     }
@@ -252,8 +252,8 @@ void NewGame() {
         CDataList[id_WEIRDO2].field0_0x0 = kSecondaryCustomNameTextId;
     }
 
-    Game.customizer.primary_name_unlocked = 1;
-    Game.customizer.secondary_name_unlocked = 1;
+    Game.customizer[0].use_saved_name = 1;
+    Game.customizer[1].use_saved_name = 1;
 
     u8 previous_group = 0;
     for (i32 i = 0; i < 10; ++i) {

@@ -191,7 +191,7 @@ DECOMP_ASSERT(sizeof(SUPEROPTIONS_s) == 0x18, "SUPEROPTIONS size");
 extern SUPEROPTIONS_s SuperOptions;
 
 typedef CUSTOMISESAVE_s CUSTOMISESAVE;
-DECOMP_ASSERT(sizeof(CUSTOMISESAVE) == 0x6f, "CUSTOMISESAVE size");
+DECOMP_ASSERT(sizeof(CUSTOMISESAVE) == 0x38, "CUSTOMISESAVE size");
 
 struct EPISODESAVE_s {
     f32 superstory_time_limit;
@@ -256,8 +256,7 @@ struct GAMESAVE_s {
         f32 field30_0x7c2c;
         f32 gameplay_seconds;
     };
-    CUSTOMISESAVE customizer;
-    u8 field_0x7c9f;
+    CUSTOMISESAVE customizer[2];
     MISSIONSAVE mission_save;
     u8 character_save[0x154];
 };
@@ -547,7 +546,7 @@ extern i32 finishloop_backdroponly;
 // ------------------------------------------------------------------------
 extern u8 g_forceSysMemVbs;
 extern i32 texanimbits;
-extern i32 Reflections_On;
+extern u8 Reflections_On;
 extern i32 (*MatrixReflection_CanOverrideFn)(f32);
 extern i32 disable_narrow_socks;
 extern i32 set_speedermode;

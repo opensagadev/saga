@@ -1345,7 +1345,7 @@ void InitGameAfterConfig(void) {
     CUTSCENEPLAYER_s *clip_player = static_cast<CUTSCENEPLAYER_s *>(CutScenePlayer_Available());
     CutScenePlayCount = clip_player != NULL ? clip_player->clip_count : 0;
     if (g_lowEndLevelBehaviour != 0) {
-        reinterpret_cast<u8 *>(&Reflections_On)[0] = 0;
+        Reflections_On = 0;
         extern u8 CharClipToBlobShadows;
         CharClipToBlobShadows = 1;
     }

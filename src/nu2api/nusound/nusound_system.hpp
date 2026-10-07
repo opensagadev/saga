@@ -69,9 +69,15 @@ class NuSoundEffect {
     NuList<void *> attachments;
 
   protected:
-    NuSoundEffect(EffectType type, EffectProcessStage stage)
-        : field_0x04(NULL), process_stage(stage), stop_effect(0), state(1), type(type), enabled(true), output_mix(1.0f),
-          pitch_mix(1.0f), keep_attached(false) {
+    NuSoundEffect(EffectType type, EffectProcessStage stage) : field_0x04(NULL) {
+        this->type = type;
+        process_stage = stage;
+        stop_effect = 0;
+        state = 1;
+        keep_attached = false;
+        output_mix = 1.0f;
+        enabled = true;
+        pitch_mix = 1.0f;
     }
 
   public:
