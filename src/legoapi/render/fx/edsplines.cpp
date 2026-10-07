@@ -409,11 +409,12 @@ i32 OutSideSplineArea(nuvec_s *position, nugspline_s *spline, nuvec_s *edge_end,
         f32 dx = spline->pts[i].x - position->x;
         f32 dz = spline->pts[i].z - position->z;
         f32 distance = dx * dx + dz * dz;
-        if (distance < best) {
+        if (distance < best)
             closest_index = i;
-            closest = spline->pts[i];
-            best = distance;
-        }
+        closest.x = distance < best ? spline->pts[i].x : closest.x;
+        closest.y = distance < best ? spline->pts[i].y : closest.y;
+        closest.z = distance < best ? spline->pts[i].z : closest.z;
+        best = distance < best ? distance : best;
     }
     i32 previous = closest_index == 0 ? spline->length - 2 : closest_index - 1;
     i32 next = closest_index == spline->length - 2 ? 0 : closest_index + 1;

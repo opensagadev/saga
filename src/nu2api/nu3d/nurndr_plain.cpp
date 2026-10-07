@@ -649,28 +649,28 @@ extern "C" i32 NuRndrHighResScreenGrab(char *prefix, f32 scale, f32 a, f32 b, f3
         header.xppm = header.yppm = 1;
         header.colours = header.important = 0;
         fh = NuFileOpen(path, static_cast<NUFILEMODE>(1));
-        if (fh != 0) {
-            NuFileWrite(fh, &header, 16);
-            NuFileWrite(fh, &header.info_size, 40);
-            NuFileSeek(fh, static_cast<u32>(header.image_size - 1), static_cast<NUFILESEEK>(1));
-            u8 padding = 0;
-            NuFileWrite(fh, &padding, 1);
-            dump_state = 0;
-            header_size = header.offset;
-            delay = 3;
-            xOffsetHack = 0;
-            xPos = yPos = 0.0f;
-            f32 w = static_cast<f32>(PS2_VREZ_W), h = static_cast<f32>(PS2_VREZ_H);
-            f32 sx = w * 0.0f * 0.75f, sy = h * 0.0f * 0.75f;
-            NuVpSetRegions((sx + -0.125f * w) / scale, (sy + -0.125f * h) / scale, (w + sx + -0.125f * w) / scale,
-                           (h + sy + -0.125f * h) / scale, 0, 0, w, h);
-            return 1;
+        if (fh == 0) {
+            NuRndrScreenGrabTileDeInit(&params);
+            dump_state = -1;
+            yPos = xPos = yTiles = xTiles = 0.0f;
+            NuVpResetRegions();
+            return 0;
         }
-        NuRndrScreenGrabTileDeInit(&params);
-        dump_state = -1;
-        yPos = xPos = yTiles = xTiles = 0.0f;
-        NuVpResetRegions();
-        return 0;
+        NuFileWrite(fh, &header, 16);
+        NuFileWrite(fh, &header.info_size, 40);
+        NuFileSeek(fh, static_cast<u32>(header.image_size - 1), static_cast<NUFILESEEK>(1));
+        u8 padding = 0;
+        NuFileWrite(fh, &padding, 1);
+        dump_state = 0;
+        header_size = header.offset;
+        delay = 3;
+        xOffsetHack = 0;
+        xPos = yPos = 0.0f;
+        f32 w = static_cast<f32>(PS2_VREZ_W), h = static_cast<f32>(PS2_VREZ_H);
+        f32 sx = w * 0.0f * 0.75f, sy = h * 0.0f * 0.75f;
+        NuVpSetRegions((sx + -0.125f * w) / scale, (sy + -0.125f * h) / scale, (w + sx + -0.125f * w) / scale,
+                       (h + sy + -0.125f * h) / scale, 0, 0, w, h);
+        return 1;
     }
     if (delay != 0) {
         --delay;
@@ -1288,16 +1288,15 @@ extern "C" i32 NuRndrStrip3d(NURND_VERTEX3D *vertices, numtl_s *material, NUMTX 
     NuPrim3DBegin(1, 7, material, matrix);
     for (i32 i = 0; i < count; ++i) {
         NURND_VERTEX3D *source = &vertices[i];
-        u8 *vertex = reinterpret_cast<u8 *>(g_NuPrim_StreamBufferPtr->addr);
-        *reinterpret_cast<u32 *>(vertex + 0xc) = NuRndrPrimColour(source->colour);
-        if (g_NuPrim_NeedsHalfUVs != 0) {
-            *reinterpret_cast<u16 *>(vertex + 0x10) = NuRndrFloatToHalf(source->u);
-            *reinterpret_cast<u16 *>(vertex + 0x12) = NuRndrFloatToHalf(source->v);
-        } else {
-            *reinterpret_cast<f32 *>(vertex + 0x10) = source->u;
-            *reinterpret_cast<f32 *>(vertex + 0x14) = source->v;
-        }
-        *reinterpret_cast<NUVEC *>(vertex) = source->position;
+        NuRndrPrimSetColour(source->colour);
+        NuRndrPrimUV(source->u, source->v);
+        f32 z = source->position.z;
+        f32 y = source->position.y;
+        f32 x = source->position.x;
+        PrimVertexRaw *vertex = (PrimVertexRaw *)g_NuPrim_StreamBufferPtr->void_ptr;
+        vertex->x = x;
+        vertex->y = y;
+        vertex->z = z;
         g_NuPrim_StreamBufferPtr->addr += 0x18;
     }
     if (count > 0)
@@ -1312,10 +1311,13 @@ extern "C" i32 NuRndrTri3dClip(NURND_VERTEX3D *vertices, i32 count, NUMTX *matri
     for (i32 i = 0; i < count; ++i) {
         NuRndrPrimSetColour(vertices[i].colour);
         NuRndrPrimUV(vertices[i].u, vertices[i].v);
+        f32 z = vertices[i].position.z;
+        f32 y = vertices[i].position.y;
+        f32 x = vertices[i].position.x;
         PrimVertexRaw *vertex = (PrimVertexRaw *)g_NuPrim_StreamBufferPtr->void_ptr;
-        vertex->x = vertices[i].position.x;
-        vertex->y = vertices[i].position.y;
-        vertex->z = vertices[i].position.z;
+        vertex->x = x;
+        vertex->y = y;
+        vertex->z = z;
         g_NuPrim_StreamBufferPtr->addr += 24;
     }
     if (count > 0)

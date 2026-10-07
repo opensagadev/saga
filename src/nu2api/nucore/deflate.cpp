@@ -259,11 +259,15 @@ i32 DecodeUncompressedBlock(DEFLATECONTEXT *ctx) {
 
     u8 bytes[sizeof(ctx->bit_buffer)];
     i32 count = 0;
-    while (ctx->num_bits_available > 0) {
-        bytes[count++] = ctx->bit_buffer;
-        ctx->bit_buffer >>= 8;
-        ctx->num_bits_available -= 8;
+    i32 available_bits = ctx->num_bits_available;
+    u32 buffered_bits = ctx->bit_buffer;
+    while (available_bits > 0) {
+        bytes[count++] = buffered_bits;
+        buffered_bits >>= 8;
+        available_bits -= 8;
     }
+    ctx->bit_buffer = buffered_bits;
+    ctx->num_bits_available = available_bits;
     while (count < 2) {
         bytes[count++] = ctx->read_buffer < ctx->read_buffer_end ? *ctx->read_buffer++ : 0;
     }

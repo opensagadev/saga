@@ -218,15 +218,22 @@ MechTouchTaskJump::MechTouchTaskJump(MechInputTouchGestureBasedController &owner
         end = packet.end;
         f32 x = packet.start.x - packet.end.x;
         f32 y = packet.start.y - packet.end.y;
-        if (x * x + y * y > 0.01f) {
+        if (x * x + y * y > 0.1f * 0.1f) {
             i32 angle = NuAtan2D(x, y);
             stick.x = NU_SIN_LUT(angle);
             stick.y = NU_COS_LUT(angle);
             f32 speed = player->apiobj.character_data->game_character->movement_speed;
             stick.x *= speed;
             stick.y *= speed;
-            stick.x = MAX(-1.0f, MIN(-stick.x, 1.0f));
-            stick.y = MAX(-1.0f, MIN(stick.y, 1.0f));
+            stick.x = -stick.x;
+            if (stick.x < 1.0f)
+                stick.x = MAX(-1.0f, stick.x);
+            else
+                stick.x = MIN(stick.x, 1.0f);
+            if (stick.y < 1.0f)
+                stick.y = MAX(-1.0f, stick.y);
+            else
+                stick.y = MIN(stick.y, 1.0f);
         }
     }
     flags |= 10;

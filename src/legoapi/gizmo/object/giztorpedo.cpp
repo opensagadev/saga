@@ -183,15 +183,14 @@ static void GizTorp_Draw(void *world_ptr, void *, float) {
             const f32 activation_phase = machine.activation_time * 2.0f;
             if (activation_phase >= 0.3f) {
                 const i32 opening_angle = (static_cast<i32>((activation_phase - 0.3f) / 0.7f * 16384.0f) >> 1) & 0x7fff;
-                const f32 opening_scale = NuTrigTable[opening_angle] * (system->scale * 4.0f);
+                const f32 opening_scale = (4.0f * WORLD->giz_torp_machine_sys->scale) * NuTrigTable[opening_angle];
                 const i32 pulse_angle =
-                    (static_cast<i32>(GameTimer.time_elapsed_mod_seconds / 0.2f * 65536.0f) >> 1) & 0x7fff;
-                const f32 effect_scale = (NuTrigTable[pulse_angle] * 0.1f + 1.0f) * opening_scale;
+                    (static_cast<i32>(NuFmod(GameTimer.time_elapsed_mod_seconds, 0.2f) / 0.2f * 65536.0f) >> 1) &
+                    0x7fff;
+                const f32 effect_scale = opening_scale * (0.1f * NuTrigTable[pulse_angle] + 1.0f);
 
-                Draw3DObject(world, GIZTORP_LEVEL_OBJECT_GLOW, &machine.position, 0, 0, 0, effect_scale, effect_scale,
-                             effect_scale, 2);
-                Draw3DObject(world, GIZTORP_LEVEL_OBJECT_ALTERNATE, &machine.position, 0, 0, 0, effect_scale,
-                             effect_scale, effect_scale, 2);
+                Draw3DObject(world, 0x79, &machine.position, 0, 0, 0, effect_scale, effect_scale, effect_scale, 2);
+                Draw3DObject(world, 0x7b, &machine.position, 0, 0, 0, effect_scale, effect_scale, effect_scale, 2);
             }
         }
     }

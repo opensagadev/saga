@@ -655,6 +655,9 @@ void SpeederChaseA_Update(WORLDINFO_s *world) {
         players_cannot_exit_speeder = LevAIMessage[4] != NULL && LevAIMessage[4]->value == 1.0f;
     }
 
+    WORLDINFO_s *current_world = WORLD;
+    const i16 bike_id = id_SPEEDERBIKE;
+    LEVELDATA *chase_level = SPEEDERCHASEA_LDATA;
     if (disable_narrow_socks != 0) {
         if (Player[0] != NULL) {
             Player[0]->field_0xf03 &= ~1;
@@ -665,7 +668,7 @@ void SpeederChaseA_Update(WORLDINFO_s *world) {
     } else {
         for (i32 i = 0; i < 2; ++i) {
             GameObject_s *object = Player[i];
-            if (object != NULL && WORLD->current_level == SPEEDERCHASEA_LDATA && object->id == id_SPEEDERBIKE &&
+            if (object != NULL && current_world->current_level == chase_level && object->id == bike_id &&
                 object->field_0xcc0 != NULL && object->field_0xcc0->apiobj.player_controlled) {
                 object->field_0xf03 |= 1;
             } else if (object != NULL) {

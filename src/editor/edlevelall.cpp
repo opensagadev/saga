@@ -675,11 +675,11 @@ i32 ClassEditor::FindNearestObject(VuVec &point, ClassObject &result, i32 filter
     f32 nearest_distance = FLT_MAX;
     for (i32 class_index = 0; class_index < theRegistry.class_count; ++class_index) {
         EdClass *ed_class = &theRegistry.classes[class_index];
-        EdClassInterface *interface = ed_class->interface;
         if (!Editable(NULL, ed_class, class_index) || (ed_class->flags & 8) == 0)
             continue;
+        EdClassInterface *interface = ed_class->interface;
         for (void *object = interface->vtable->get_next_object(interface, NULL); object != NULL;
-             object = interface->vtable->get_next_object(interface, object)) {
+             object = ed_class->interface->vtable->get_next_object(ed_class->interface, object)) {
             EdMember member;
             if (!ed_class->FindMember(&member, object, 8, 1))
                 continue;
@@ -697,13 +697,14 @@ i32 ClassEditor::FindNearestObject(VuVec &point, ClassObject &result, i32 filter
         }
     }
     if (nearest_object != NULL && filter != 0) {
+        f32 nearest_radius = NuFsqrt(nearest_distance);
         f32 radius = 1.0f;
         if ((nearest_class->flags & 0x40) != 0) {
             EdMember member;
             if (nearest_class->FindMember(&member, nearest_object, 0x40, 1))
                 member.reference->GetAttributeData(member.object, 0x40, EdType_Float, &radius, 0);
         }
-        if (NuFsqrt(nearest_distance) > radius) {
+        if (nearest_radius > radius) {
             nearest_class = NULL;
             nearest_object = NULL;
         }
@@ -2632,9 +2633,13 @@ PropertyMenu *PropertyTool::CreatePropertyMenu(ClassObject &object) {
     PropertyMenuMetrics metrics __attribute__((aligned(16))) = ediGetMenuStartMetrics();
     char name[64];
     char title[128];
-    if (!get_class_object_attribute(object.ed_class, object.object, object.reference, 2, EdType_String, name,
-                                    sizeof(name))) {
-        NuStrCpy(name, const_cast<char *>("no name"));
+    EdMember member;
+    i32 name_type = EdType_String;
+    if (object.reference == NULL ||
+        !object.reference->GetAttributeData(object.object, 2, name_type, name, sizeof(name))) {
+        if (!object.ed_class->FindMember(&member, object.object, 2, 1) ||
+            !member.reference->GetAttributeData(member.object, 2, name_type, name, sizeof(name)))
+            NuStrCpy(name, const_cast<char *>("no name"));
     }
     sprintf(title, "%s - %s", object.ed_class->name, name);
     eduimenu_s *menu = eduiMenuCreate(metrics.x, metrics.y, metrics.width, metrics.height,
@@ -3002,16 +3007,28 @@ i32 ClassObjectList::GetAveragePosition(VuVec &average, float &radius) {
     float radii[64];
     for (ClassObjectListEntry *entry = first; entry != NULL && position_count < 64; entry = entry->next) {
         VuVec &position = positions[position_count];
-        if (get_class_object_attribute(entry->ed_class, entry->object, entry->reference, 8, EdType_VuVec, &position,
-                                       0)) {
-            average.x += position.x;
-            average.y += position.y;
-            average.z += position.z;
-            radii[position_count] = 1.0f;
-            get_class_object_attribute(entry->ed_class, entry->object, entry->reference, 64, EdType_Float,
-                                       &radii[position_count], 0);
-            ++position_count;
-        }
+        EdMember member;
+        i32 position_type = EdType_VuVec;
+        if (entry->reference != NULL &&
+            entry->reference->GetAttributeData(entry->object, 8, position_type, &position, 0))
+            goto position_found;
+        if (!entry->ed_class->FindMember(&member, entry->object, 8, 1))
+            continue;
+        if (!member.reference->GetAttributeData(member.object, 8, position_type, &position, 0))
+            continue;
+    position_found:
+        average.x += position.x;
+        average.y += position.y;
+        average.z += position.z;
+        radii[position_count] = 1.0f;
+        i32 radius_type = EdType_Float;
+        if (entry->reference != NULL &&
+            entry->reference->GetAttributeData(entry->object, 64, radius_type, &radii[position_count], 0))
+            goto radius_found;
+        if (entry->ed_class->FindMember(&member, entry->object, 64, 1))
+            member.reference->GetAttributeData(member.object, 64, radius_type, &radii[position_count], 0);
+    radius_found:
+        ++position_count;
     }
     if (position_count != 0) {
         float scale = 1.0f / position_count;

@@ -118,8 +118,8 @@ static i32 Batarang_FindTarget(WORLDINFO_s *world, GameObject_s *object, i32 aut
     GameObject_s *nearest_object = NULL;
     f32 nearest_distance = 16.0f;
     GameObject_s *first_object = NULL;
-    for (i32 i = 0; i < HIGHGAMEOBJECT; ++i) {
-        GameObject_s *candidate = &Obj[i];
+    GameObject_s *candidate = Obj;
+    for (i32 i = 0; i < HIGHGAMEOBJECT; ++i, ++candidate) {
         const i8 context = candidate->character_context;
         if ((candidate->apiobj.object_flags & 0x1001) != 0x1001 || candidate->apiobj.field_0x287 != 0 ||
             (CInfo[context].flags & 0x8000) != 0 || candidate->apiobj.model_draw_result == 0 || candidate == object ||
@@ -197,8 +197,9 @@ static i32 Batarang_FindTarget(WORLDINFO_s *world, GameObject_s *object, i32 aut
     GIZMOBLOWUP_s *nearest_blowup = NULL;
     GIZMOBLOWUP_s *first_blowup = NULL;
     nearest_distance = 16.0f;
-    for (i32 i = 0; i < world->gizmo_blowup_count; ++i) {
-        GIZMOBLOWUP_s *candidate = &world->gizmo_blowups[i];
+    GIZMOBLOWUP_s *candidate_blowup = world->gizmo_blowups;
+    for (i32 i = 0; i < world->gizmo_blowup_count; ++i, ++candidate_blowup) {
+        GIZMOBLOWUP_s *candidate = candidate_blowup;
         if ((candidate->status_flags & 0x80c001) != 0x80c000 || (candidate->draw_flags & 1) == 0 ||
             ((candidate->draw_flags & 0x20) != 0 && ShadowMode == 0)) {
             continue;
