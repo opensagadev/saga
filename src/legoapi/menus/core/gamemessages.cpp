@@ -115,7 +115,7 @@ GAMEMESSAGE_s *AddGameMsg(ADDGAMEMSG *message) {
             f32 value;
             if (slot->field_0xfa != 0) {
                 value = 1.0f;
-            } else if (slot->duration == 0.0f || slot->elapsed == 0.0f) {
+            } else if ((slot->elapsed == 0.0f) | (slot->duration == 0.0f)) {
                 value = 0.0f;
             } else {
                 value = slot->elapsed / slot->duration;

@@ -728,15 +728,15 @@ static AIPATHSYS *AISysLoadPaths(AISYS *system, i32 version, NUGSCN *scene) {
                 AIPATHCNX *connection = &path->connections[connection_index];
                 connection->direction_a = static_cast<u8>(EdFileReadChar());
                 connection->direction_b = static_cast<u8>(EdFileReadChar());
-                if (version < 9) {
-                    connection->node_a = EdFileReadChar();
-                    connection->node_b = EdFileReadChar();
-                } else if (version < 12) {
+                if (version > 11) {
+                    connection->node_a = EdFileReadInt();
+                    connection->node_b = EdFileReadInt();
+                } else if (version > 8) {
                     connection->node_a = EdFileReadShort();
                     connection->node_b = EdFileReadShort();
                 } else {
-                    connection->node_a = EdFileReadInt();
-                    connection->node_b = EdFileReadInt();
+                    connection->node_a = EdFileReadChar();
+                    connection->node_b = EdFileReadChar();
                 }
                 connection->previous_node_a = connection->node_a;
                 connection->previous_node_b = connection->node_b;
@@ -2977,6 +2977,7 @@ extern "C" {
     }
 
     void AISysProcess(AISYS *system, APIOBJECT *player_1, APIOBJECT *player_2) {
+        NUVEC forward = {0.0f, 0.0f, 1.0f};
         if (system == NULL) {
             return;
         }
@@ -3007,7 +3008,6 @@ extern "C" {
             antinode->max_y = antinode->position.y + antinode->max_y_offset;
 
             if (antinode->type != 0) {
-                NUVEC forward = {0.0f, 0.0f, 1.0f};
                 NUVEC rotated;
                 NuVecMtxRotate(&rotated, &forward, draw_matrix);
                 antinode->flags = NuAtan2D(rotated.x, rotated.z);
@@ -3025,8 +3025,8 @@ extern "C" {
             }
         }
 
-        for (i32 index = 0; index < system->locator_count; ++index) {
-            AILOCATOR *locator = &system->locators[index];
+        AILOCATOR *locator = system->locators;
+        for (i32 index = 0; index < system->locator_count; ++index, ++locator) {
             if (locator->path_info.path == NULL || locator->path_info.connection == NULL) {
                 continue;
             }

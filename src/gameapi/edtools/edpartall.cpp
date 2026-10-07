@@ -2377,18 +2377,14 @@ void edpartDoInput(nupad_s *pad) {
     }
 
     if (edpart_copy_mode == 0) {
-        i32 right = pad->analog_left_pad_right;
-        i32 left = pad->analog_left_pad_left;
-        i32 up = pad->analog_left_pad_up;
-        i32 down = pad->analog_left_pad_down;
         if (edpart_dpad_mode == 1) {
             if (pad->digital_buttons & 0x200)
                 edpart_roty = edpart_rotz = 0;
-            edpart_roty += right - left;
-            i32 rotation = edpart_rotz + up;
+            edpart_roty += pad->analog_left_pad_right - pad->analog_left_pad_left;
+            i32 rotation = edpart_rotz + pad->analog_left_pad_up;
             if (rotation > 0)
                 rotation = 0;
-            rotation -= down;
+            rotation -= pad->analog_left_pad_down;
             if (rotation < -0x8000)
                 rotation = -0x8000;
             edpart_rotz = rotation;
@@ -2396,31 +2392,31 @@ void edpartDoInput(nupad_s *pad) {
             if (pad->digital_buttons & 0x200)
                 edpart_emitrotx = edpart_emitroty = edpart_emitrotz = 0;
             if (pad->digital_buttons & 0x400)
-                edpart_emitrotx = edpart_emitrotx + right - left;
+                edpart_emitrotx = edpart_emitrotx + pad->analog_left_pad_right - pad->analog_left_pad_left;
             else {
-                edpart_emitroty = edpart_emitroty + right - left;
-                i32 rotation = edpart_emitrotz + up;
+                edpart_emitroty = edpart_emitroty + pad->analog_left_pad_right - pad->analog_left_pad_left;
+                i32 rotation = edpart_emitrotz + pad->analog_left_pad_up;
                 if (rotation > 0x8000)
                     rotation = 0x8000;
-                rotation -= down;
+                rotation -= pad->analog_left_pad_down;
                 if (rotation < -0x8000)
                     rotation = -0x8000;
                 edpart_emitrotz = rotation;
             }
         } else if (edpart_dpad_mode == 3) {
-            edpart_refroty = edpart_refroty + right - left;
-            i32 rotation = edpart_refrotz + up;
+            edpart_refroty = edpart_refroty + pad->analog_left_pad_right - pad->analog_left_pad_left;
+            i32 rotation = edpart_refrotz + pad->analog_left_pad_up;
             if (rotation > 0)
                 rotation = 0;
-            rotation -= down;
+            rotation -= pad->analog_left_pad_down;
             if (rotation < -0x8000)
                 rotation = -0x8000;
             edpart_refrotz = rotation;
         } else if (edpart_dpad_mode == 2) {
-            if (up == 255 || (pad->digital_buttons_pressed & 0x1000))
-                edpart_offset += 1.25f;
-            if (down == 255 || (pad->digital_buttons_pressed & 0x4000))
-                edpart_offset -= 1.25f;
+            if (pad->analog_left_pad_up == 255 || (pad->digital_buttons_pressed & 0x1000))
+                edpart_offset += 0.01f;
+            if (pad->analog_left_pad_down == 255 || (pad->digital_buttons_pressed & 0x4000))
+                edpart_offset -= 0.01f;
             if (edpart_offset < 0.0f)
                 edpart_offset = 0.0f;
         }

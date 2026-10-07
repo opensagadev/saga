@@ -575,7 +575,7 @@ i32 NuMusic::Voice::Play() {
     if (key_status != NUSOUND_STEREO_STREAM_INACTIVE) {
         if (this->status == VOICE_STATUS_STOPPED) {
             NuSound3ResumeStereoStream(this->stream_index);
-            SetStatusFn(VOICE_STATUS_PLAYING, 0x1e3);
+            SetStatusFn(VOICE_STATUS_PLAYING, 0x1ca);
             return 1;
         }
     } else if (this->status == VOICE_STATUS_STOPPED) {

@@ -334,26 +334,31 @@ static EDAIAREA_s *areaEditorFindHover() {
 }
 
 static EDAIAREA_s *areaEditorCreateArea() {
+    AIEDITOR_RENDER_STATE *context = aieditor;
     EDAIAREA_s *previous = area_selected();
+    u8 flags = previous != NULL ? previous->flags : 0;
+    i32 rotation = aieditorsettings.area_rotation;
     EDAIAREA_s *area = reinterpret_cast<EDAIAREA_s *>(NuLinkedListGetHead(area_free_list()));
     if (area == NULL) {
-        area_selected() = NULL;
+        *reinterpret_cast<EDAIAREA_s **>(reinterpret_cast<u8 *>(context) + 0x37a48) = NULL;
         return NULL;
     }
     NuLinkedListRemove(area_free_list(), &area->link);
     NuLinkedListAppend(area_list(), &area->link);
-    area->position = aieditor->camera_position;
-    area->rotation = static_cast<i16>(aieditorsettings.area_rotation);
+    area->position = context->camera_position;
+    area->rotation = static_cast<i16>(rotation);
+    area->flags = flags;
+    *reinterpret_cast<EDAIAREA_s **>(reinterpret_cast<u8 *>(context) + 0x37a48) = area;
+    area = area_selected();
+    if (area == NULL)
+        return NULL;
     if (previous != NULL) {
         area->size = previous->size;
-        area->flags = previous->flags;
     } else {
         area->size.x = 1.0f;
         area->size.y = 1.0f;
         area->size.z = 1.0f;
-        area->flags = 0;
     }
-    area_selected() = area;
     char name[16];
     i32 suffix = 0;
     for (;;) {

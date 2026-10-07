@@ -109,10 +109,12 @@ void LedgeTerrain_MoveCode(GameObject_s *object) {
             f32 z = object->external_force.z;
             object->apiobj.movement_facing_angle = wall_angle + 0x8000;
             object->external_force.y = position.y;
-            object->launch_origin = position;
+            object->launch_origin.x = position.x;
             object->external_force.x = object->apiobj.position.x;
             object->external_force.z = object->apiobj.position.z;
             object->airborne_action_duration = 0.25f;
+            object->launch_origin.y = position.y;
+            object->launch_origin.z = position.z;
             x = object->apiobj.position.x - x;
             z = object->apiobj.position.z - z;
             travelled = NuFsqrt(x * x + z * z);

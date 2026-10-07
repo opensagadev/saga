@@ -195,7 +195,7 @@ static i32 Batarang_FindTarget(WORLDINFO_s *world, GameObject_s *object, i32 aut
         }
     }
     GIZMOBLOWUP_s *nearest_blowup = NULL;
-    GIZMOBLOWUP_s *first_blowup = NULL;
+    GIZMOBLOWUP_s *blowup = NULL;
     nearest_distance = 16.0f;
     GIZMOBLOWUP_s *candidate_blowup = world->gizmo_blowups;
     for (i32 i = 0; i < world->gizmo_blowup_count; ++i, ++candidate_blowup) {
@@ -221,7 +221,7 @@ static i32 Batarang_FindTarget(WORLDINFO_s *world, GameObject_s *object, i32 aut
             }
             if (NuVecDistSqr(&candidate->mid_position, &object->apiobj.collision_position, &delta) <
                 selected_distance) {
-                first_blowup = candidate;
+                blowup = candidate;
                 break;
             }
         } else {
@@ -235,8 +235,9 @@ static i32 Batarang_FindTarget(WORLDINFO_s *world, GameObject_s *object, i32 aut
             }
         }
     }
-    GIZMOBLOWUP_s *blowup =
-        nearest_blowup != NULL && nearest_distance < selected_distance ? nearest_blowup : first_blowup;
+    if (nearest_blowup != NULL && nearest_distance < selected_distance) {
+        blowup = nearest_blowup;
+    }
     i16 platform = -1;
     if (blowup != NULL) {
         selected_position = blowup->mid_position;

@@ -235,20 +235,25 @@ i32 ReleaseHearts() {
     GameObject_s *player = Player[0];
     i32 total_hitpoints;
     i32 missing_hitpoints;
-    if (player != NULL && player->apiobj.field_0x287 == 0 && player->hitpoints != 0) {
+    if (player != NULL && player->apiobj.field_0x287 == 0) {
         total_hitpoints = player->hitpoints;
-        missing_hitpoints = total_hitpoints - static_cast<i8>(player->current_hp);
+        const i32 current_hitpoints = static_cast<i8>(player->current_hp);
+        missing_hitpoints = total_hitpoints != 0 ? total_hitpoints - current_hitpoints : 0;
     } else {
         total_hitpoints = 0;
         missing_hitpoints = 0;
     }
 
     player = Player[1];
-    if (player != NULL && player->apiobj.field_0x287 == 0 && player->hitpoints != 0) {
+    if (player != NULL && player->apiobj.field_0x287 == 0) {
         i32 hitpoints = player->hitpoints;
         i32 current_hitpoints = static_cast<i8>(player->current_hp);
-        total_hitpoints += hitpoints;
-        missing_hitpoints += hitpoints - current_hitpoints;
+        if (hitpoints != 0) {
+            total_hitpoints += hitpoints;
+            missing_hitpoints += hitpoints - current_hitpoints;
+        } else if (total_hitpoints == 0) {
+            return 0;
+        }
     } else if (total_hitpoints == 0) {
         return 0;
     }

@@ -1253,36 +1253,38 @@ static void GizObstacleUpdate_Proximity(GIZOBSTACLE_s *obstacle) {
         GameObject_s *closest_object = NULL;
         u32 players_not_satisfying_terrain = 0;
 
-        const bool camera_mode = obstacle->mode == 1 || obstacle->mode == 5;
-        if (camera_mode && GameCam != NULL && GameCam->mode != -1 && obstacle->trigger_mode == 0xff &&
-            (obstacle->config_flags &
-             (GIZOBSTACLE_CONFIG_INVERT_PROXIMITY | GIZOBSTACLE_CONFIG_EXCLUDE_NON_PLAYER |
-              GIZOBSTACLE_CONFIG_CHECK_SUPPORTING_PLATFORM | GIZOBSTACLE_CONFIG_REQUIRE_ACTIVE_PLAYER |
-              GIZOBSTACLE_CONFIG_REQUIRE_LINKED_OBJECT | GIZOBSTACLE_CONFIG_REQUIRE_CHARACTER_DATA_FLAG_04)) == 0) {
-            const f32 distance_squared = NuVecDistSqr(&GameCam->pos, &obstacle->secondary_position, NULL);
-            if (distance_squared < closest_distance_squared &&
-                (!ObstacleUsesBoxTrigger(obstacle) || GizObstacle_PosWithinBox(obstacle, &GameCam->pos) != 0)) {
-                closest_distance_squared = distance_squared;
-                closest_position = &GameCam->pos;
-            }
-        }
-
-        const bool accepts_external_triggers =
-            obstacle->mode == 1 || obstacle->mode == 2 || obstacle->mode == 5 || obstacle->mode == 6;
-        if (accepts_external_triggers && (obstacle->config_flags & GIZOBSTACLE_CONFIG_INVERT_PROXIMITY) == 0) {
-            for (i32 index = 0; index < ngizobstacletriggers; ++index) {
-                NUVEC *trigger = gizobstacletriggers[index];
-                const f32 distance_squared = NuVecDistSqr(&obstacle->secondary_position, trigger, NULL);
+        const u8 initial_mode = obstacle->mode;
+        if (static_cast<u8>(initial_mode - 1) < 2 || initial_mode == 5 || initial_mode == 6) {
+            if ((initial_mode & 0xfb) == 1 && GameCam != NULL && GameCam->mode != -1 &&
+                obstacle->trigger_mode == 0xff &&
+                (obstacle->config_flags &
+                 (GIZOBSTACLE_CONFIG_INVERT_PROXIMITY | GIZOBSTACLE_CONFIG_EXCLUDE_NON_PLAYER |
+                  GIZOBSTACLE_CONFIG_CHECK_SUPPORTING_PLATFORM | GIZOBSTACLE_CONFIG_REQUIRE_ACTIVE_PLAYER |
+                  GIZOBSTACLE_CONFIG_REQUIRE_LINKED_OBJECT | GIZOBSTACLE_CONFIG_REQUIRE_CHARACTER_DATA_FLAG_04)) == 0) {
+                const f32 distance_squared = NuVecDistSqr(&GameCam->pos, &obstacle->secondary_position, NULL);
                 if (distance_squared < closest_distance_squared &&
-                    (!ObstacleUsesBoxTrigger(obstacle) || GizObstacle_PosWithinBox(obstacle, trigger) != 0)) {
+                    (!ObstacleUsesBoxTrigger(obstacle) || GizObstacle_PosWithinBox(obstacle, &GameCam->pos) != 0)) {
                     closest_distance_squared = distance_squared;
-                    closest_position = trigger;
+                    closest_position = &GameCam->pos;
+                }
+            }
+
+            if ((obstacle->config_flags & GIZOBSTACLE_CONFIG_INVERT_PROXIMITY) == 0) {
+                for (i32 index = 0; index < ngizobstacletriggers; ++index) {
+                    NUVEC *trigger = gizobstacletriggers[index];
+                    const f32 distance_squared = NuVecDistSqr(&obstacle->secondary_position, trigger, NULL);
+                    trigger = gizobstacletriggers[index];
+                    if (distance_squared < closest_distance_squared &&
+                        (!ObstacleUsesBoxTrigger(obstacle) || GizObstacle_PosWithinBox(obstacle, trigger) != 0)) {
+                        closest_distance_squared = distance_squared;
+                        closest_position = gizobstacletriggers[index];
+                    }
                 }
             }
         }
 
-        for (i32 index = 0; index < HIGHGAMEOBJECT; ++index) {
-            GameObject_s *object = &Obj[index];
+        GameObject_s *object = Obj;
+        for (i32 index = 0; index < HIGHGAMEOBJECT; ++index, ++object) {
             if ((object->apiobj.field_0x1f8 & (APIOBJECT_FLAG_IN_USE | APIOBJECT_FLAG_CHARACTER)) !=
                     (APIOBJECT_FLAG_IN_USE | APIOBJECT_FLAG_CHARACTER) ||
                 object->apiobj.field_0x287 != 0 ||
@@ -1340,19 +1342,20 @@ static void GizObstacleUpdate_Proximity(GIZOBSTACLE_s *obstacle) {
                 if ((!ObstacleUsesBoxTrigger(obstacle) ||
                      GizObstacle_PosWithinBox(obstacle, &object->apiobj.collision_position) != 0) &&
                     GizObstacle_SatisfyingTerrainChecks(obstacle, object) != 0) {
-                    if (player_index != -1) {
-                        players_not_satisfying_terrain &= ~(1u << (static_cast<u8>(player_index) & 31));
+                    if (object->apiobj.field_0x27c != -1) {
+                        players_not_satisfying_terrain &= ~(1u << (static_cast<u8>(object->apiobj.field_0x27c) & 31));
                     }
                     closest_distance_squared = distance_squared;
                     closest_position = &object->apiobj.lower_position;
                     closest_object = object;
                 }
-            } else if ((obstacle->config_flags & GIZOBSTACLE_CONFIG_REQUIRE_ALL_PLAYERS) != 0 && player_index != -1 &&
-                       distance_squared < radius_squared &&
+            } else if ((obstacle->config_flags & GIZOBSTACLE_CONFIG_REQUIRE_ALL_PLAYERS) != 0 &&
+                       object->apiobj.field_0x27c != -1 &&
+                       distance_squared < obstacle->trigger_radius * obstacle->trigger_radius &&
                        (!ObstacleUsesBoxTrigger(obstacle) ||
                         GizObstacle_PosWithinBox(obstacle, &object->apiobj.collision_position) != 0) &&
                        GizObstacle_SatisfyingTerrainChecks(obstacle, object) != 0) {
-                players_not_satisfying_terrain &= ~(1u << (static_cast<u8>(player_index) & 31));
+                players_not_satisfying_terrain &= ~(1u << (static_cast<u8>(object->apiobj.field_0x27c) & 31));
             }
         }
 

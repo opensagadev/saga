@@ -67,8 +67,9 @@ static void CalculateBezierPoint(NUVEC *result, NUVEC *start, NUVEC *end, NUVEC 
 
     const f32 inverse = 1.0f - amount;
     const f32 start_weight = inverse * inverse * inverse;
-    const f32 control_a_weight = inverse * 3.0f * amount * inverse;
-    const f32 control_b_weight = amount * 3.0f * amount * inverse;
+    const f32 three_amount = 3.0f * amount;
+    const f32 control_a_weight = inverse * three_amount * inverse;
+    const f32 control_b_weight = amount * three_amount * inverse;
     const f32 end_weight = amount * amount * amount;
     result->x =
         start->x * start_weight + control_a.x * control_a_weight + control_b.x * control_b_weight + end->x * end_weight;
@@ -80,11 +81,12 @@ static void CalculateBezierPoint(NUVEC *result, NUVEC *start, NUVEC *end, NUVEC 
 
 static void CalculateStreakSegment(STREAK_s *newer, STREAK_s *segment) {
     for (i32 index = 1; index < segment->segment_count; ++index) {
-        const f32 amount = static_cast<f32>(index) / static_cast<f32>(segment->segment_count);
         CalculateBezierPoint(&segment->positions[index - 1], &newer->position, &segment->position,
-                             &newer->start_tangent, &segment->start_tangent, amount);
+                             &newer->start_tangent, &segment->start_tangent,
+                             (1.0f / static_cast<f32>(segment->segment_count)) * static_cast<f32>(index));
         CalculateBezierPoint(&segment->tangents[index - 1], &newer->previous_position, &segment->previous_position,
-                             &newer->end_tangent, &segment->end_tangent, amount);
+                             &newer->end_tangent, &segment->end_tangent,
+                             (1.0f / static_cast<f32>(segment->segment_count)) * static_cast<f32>(index));
     }
 }
 

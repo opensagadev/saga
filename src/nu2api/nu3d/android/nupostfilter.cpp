@@ -87,8 +87,7 @@ static VirtualStackAllocator filterAllocator(filterMem, sizeof(filterMem));
 template <typename T> static T *AllocatePostFilter() {
     T *filter = reinterpret_cast<T *>(filterAllocator.cursor);
     filterAllocator.cursor += sizeof(T);
-    memset(filter, 0, sizeof(T));
-    return new (filter) T;
+    return new (filter) T();
 }
 
 static constexpr i32 kProxyKind_Color = 0;
