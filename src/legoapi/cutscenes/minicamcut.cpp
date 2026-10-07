@@ -369,10 +369,10 @@ void Minicam_AddCommand(i32 type, f32 duration, i32 argument, void *target, nuve
             MiniCam.commands[MiniCam.command_count].target = NULL;
             break;
         case 16:
+            MiniCam.commands[MiniCam.command_count].position = position;
             MiniCam.commands[MiniCam.command_count].type = 16;
             MiniCam.commands[MiniCam.command_count].argument = 0;
             MiniCam.commands[MiniCam.command_count].duration = 0.0f;
-            MiniCam.commands[MiniCam.command_count].position = position;
             MiniCam.commands[MiniCam.command_count].target = NULL;
             break;
         case 17:
@@ -422,11 +422,9 @@ void Minicam_ResetForNextCommand() {
     const i32 next_command = current_command + 1;
     i32 remaining_commands;
     if (next_command < command_count) {
-        MINICAMCOMMAND_s *source = &MiniCam.commands[next_command];
         MINICAMCOMMAND_s *destination = MiniCam.commands;
-        MINICAMCOMMAND_s *const command_end = &MiniCam.commands[command_count];
-        while (source != command_end) {
-            *destination++ = *source++;
+        for (i32 source = next_command; source < command_count; ++source) {
+            *destination++ = MiniCam.commands[source];
         }
         remaining_commands = command_count - next_command;
     } else {
@@ -434,8 +432,8 @@ void Minicam_ResetForNextCommand() {
     }
 
     MiniCam.command_count = static_cast<u8>(remaining_commands);
-    memset(&MiniCam.commands[remaining_commands], 0,
-           static_cast<usize>(32 - remaining_commands) * sizeof(MINICAMCOMMAND_s));
+    memset(&MiniCam.commands[MiniCam.command_count], 0,
+           static_cast<usize>(32 - MiniCam.command_count) * sizeof(MINICAMCOMMAND_s));
     MiniCam.current_command = 0;
     MiniCam.delta_time = 0.0f;
 }

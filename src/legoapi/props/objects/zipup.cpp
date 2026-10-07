@@ -99,6 +99,7 @@ static void ZipUps_Draw(void *world_ptr, void *, float) {
 
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
     if (world != NULL && world->zipups != NULL) {
+        ZIPUP *zipup = world->zipups;
         const u16 spin_angle = static_cast<u16>(NuFmod(GameTimer.time_elapsed, 5.0f) / 5.0f * 65536.0f);
         const f32 pulse_phase = NuFmod(GameTimer.time_elapsed_mod_seconds, 0.5f) * 2.0f * 65536.0f;
         const f32 pulse_alpha = NuTrigTable[(static_cast<i32>(pulse_phase) >> 1) & 0x7fff] * 0.2f + 0.8f;
@@ -108,7 +109,6 @@ static void ZipUps_Draw(void *world_ptr, void *, float) {
         NUVEC ground_position;
         NUMTX matrices[ZIPUP_MATRIX_COUNT];
 
-        ZIPUP *zipup = world->zipups;
         for (i32 index = 0; index < world->zipup_count; ++index, ++zipup) {
             if ((zipup->flags & (ZIPUP_FLAG_ACTIVE | ZIPUP_FLAG_VISIBLE)) != (ZIPUP_FLAG_ACTIVE | ZIPUP_FLAG_VISIBLE)) {
                 continue;

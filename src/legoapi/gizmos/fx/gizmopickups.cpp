@@ -973,11 +973,15 @@ void SpecialMiniKits_Configure(WORLDINFO_s *world, char *config) {
     i32 count = 0;
 
     while (NuFParGetLine(parser) != 0) {
-        if (NuFParGetWord(parser) == 0 || NuStrICmp(parser->word_buf, const_cast<char *>("specialminikit")) != 0) {
+        if (NuFParGetWord(parser) == 0) {
+            break;
+        }
+        if (NuStrICmp(parser->word_buf, const_cast<char *>("specialminikit")) != 0) {
             continue;
         }
 
-        SPECIALMINIKIT_s item = {};
+        SPECIALMINIKIT_s &item = *next;
+        item = {};
         item.flags = 1;
         while (NuFParGetWord(parser) != 0) {
             if (NuStrICmp(parser->word_buf, const_cast<char *>("pickup")) == 0) {
@@ -1024,7 +1028,7 @@ void SpecialMiniKits_Configure(WORLDINFO_s *world, char *config) {
                 item.end_frame = NuAnimEndFrameOld(item.anim_data);
             }
         }
-        *next++ = item;
+        ++next;
         ++count;
     }
     NuFParDestroy(parser);
@@ -1079,8 +1083,8 @@ void SpecialMiniKits_Draw(WORLDINFO_s *world) {
     const u16 x_rotation =
         static_cast<u16>(static_cast<i32>(NuTrigTable[static_cast<i32>(y_rotation) & 0x7fff] * 1820.0f));
 
-    for (i32 index = 0; index < system->count; ++index) {
-        SPECIALMINIKIT_s *item = &system->items[index];
+    SPECIALMINIKIT_s *item = world->special_minikits->items;
+    for (i32 index = 0; index < world->special_minikits->count; ++index, ++item) {
         NUMTX matrix;
         NUVEC *position;
 

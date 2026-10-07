@@ -12,35 +12,41 @@ HashedKey MechJumpAutoPilotAddon::s_hashId("MechJumpAutopilotAddon");
 
 void MechJumpAutoPilotAddon::AnalyseJumpTrajectory() {
     float y = field_44.y;
-    if (y < field_24.y - 2.0f || state == 2) {
-        state = 2;
-        return;
+    float limit = field_24.y - 2.0f;
+    if (!(y >= limit) || state == 2)
+        goto finish;
+
+    {
+        float vy = field_54.y;
+        float x = field_44.x;
+        float z = field_44.z;
+        for (int count = 50; count != 0; --count) {
+            if (state == 2)
+                break;
+
+            VuVec next;
+            next.x = x + field_54.x * 0.1f;
+            next.y = y + vy * 0.1f;
+            next.z = z + field_54.z * 0.1f;
+            LookForBottomInt(next);
+            LookForTerrInt(next);
+
+            field_44.w = next.w;
+            field_44.x = next.x;
+            field_44.y = next.y;
+            field_44.z = next.z;
+            limit = field_24.y - 2.0f;
+            vy = field_54.y + character->apiobj.character_data->game_character->gravity * 0.1f;
+            field_54.y = vy;
+            x = next.x;
+            y = next.y;
+            z = next.z;
+            if (!(y >= limit))
+                break;
+        }
     }
-
-    float vy = field_54.y;
-    float x = field_44.x;
-    float z = field_44.z;
-    for (int count = 50; count != 0; --count) {
-        if (state == 2)
-            break;
-
-        VuVec next;
-        next.x = x + field_54.x * 0.1f;
-        next.y = y + vy * 0.1f;
-        next.z = z + field_54.z * 0.1f;
-        LookForBottomInt(next);
-        LookForTerrInt(next);
-
-        field_44 = next;
-        vy = field_54.y + character->apiobj.character_data->game_character->gravity * 0.1f;
-        field_54.y = vy;
-        x = next.x;
-        y = next.y;
-        z = next.z;
-        if (y < field_24.y - 2.0f)
-            break;
-    }
-    if (y < field_24.y - 2.0f || state == 2)
+finish:
+    if (limit > y || state == 2)
         state = 2;
 }
 
@@ -59,7 +65,7 @@ void MechJumpAutoPilotAddon::CalculateModifiedJumpTrajectory() {
     const float vx = field_34.x * time;
     const float vz = field_34.z * time;
     speed_scale = ((dx * dx + dz * dz) * 0.5f) / (vx * vx + vz * vz);
-    if (__builtin_expect(speed_scale < 1.0f && !(character->jump_input_flags & 0x10), 1)) {
+    if (__builtin_expect(!(speed_scale < 1.0f) && !(character->jump_input_flags & 0x10), 1)) {
         speed_scale = 1.0f;
         character->jump_input_flags |= 0x10;
         state = 6;
@@ -141,7 +147,7 @@ bool MechJumpAutoPilotAddon::LookForLandingSpotAroundPoint(VuVec const &point) {
     offsets[8].z = NuTrigTable[0x2000] * 0.5f;
 
     bool found = false;
-    f32 best_score = -2000000000.0f;
+    f32 best_score = -1000000000.0f;
     const f32 sweep_height = field_94 * 3.0f + 1.0f;
     const f32 ray_offset = sweep_height - 1.0f;
     const f32 ray_length = -sweep_height;
@@ -244,11 +250,14 @@ bool MechJumpAutoPilotAddon::OnProcess(MechAddon::ProcessStage, float delta_time
         field_34.y = character->apiobj.velocity.y;
         field_34.z = character->apiobj.velocity.z;
         field_34.w = 1.0f;
-        field_44 = field_24;
-        field_54 = field_34;
-        field_64.w = 1.0f;
-        field_74.w = 1.0f;
-        field_84.w = 1.0f;
+        field_44.x = field_24.x;
+        field_44.y = field_24.y;
+        field_44.z = field_24.z;
+        field_44.w = 1.0f;
+        field_54.x = field_34.x;
+        field_54.y = field_34.y;
+        field_54.z = field_34.z;
+        field_54.w = 1.0f;
         field_9c = false;
         field_9d = false;
         state = 1;
@@ -260,7 +269,7 @@ bool MechJumpAutoPilotAddon::OnProcess(MechAddon::ProcessStage, float delta_time
     }
 
 update_started:
-    started = character->character_context == LEGOCONTEXT_JUMP || started;
+    started |= character->character_context == LEGOCONTEXT_JUMP;
     return true;
 }
 

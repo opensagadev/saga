@@ -1762,27 +1762,59 @@ i32 GameAnimSet_GetAveragePos(GAMEANIMSET_s *set, NUVEC *position, i32 frame_sel
     if (position == NULL || set == NULL || set->object_count == 0 || set->objects == NULL)
         return 0;
     i32 count = 0;
-    for (GAMEANIMOBJ_s *object = set->objects; object != NULL; object = object->next) {
-        if ((object->flags & 1) != 0)
-            continue;
-        if (object->instance_animation != NULL) {
-            if (include_animated == 0)
-                continue;
-            f32 frame;
-            if (frame_selection == 0)
-                frame = object->start_frame;
-            else if (frame_selection == 1)
-                frame = object->end_frame;
-            else
-                frame = object->instance_animation->ltime;
-            NUMTX matrix;
-            EvalAnim(&object->special, frame, &matrix, 1);
-            NuVecAdd(&sum, &sum, NUMTX_GET_ROW_VEC(&matrix, 3));
-            ++count;
-        } else if (include_static != 0) {
-            NuVecAdd(&sum, &sum, NuSpecialGetDrawPos(&object->special));
-            ++count;
+    NUMTX matrix;
+    GAMEANIMOBJ_s *object = set->objects;
+    if (include_static == 0) {
+        if (include_animated == 0) {
+            do {
+                object = object->next;
+            } while (object != NULL);
+            return 0;
         }
+        do {
+            if ((object->flags & 1) == 0 && object->instance_animation != NULL) {
+                f32 frame;
+                if (frame_selection == 0)
+                    frame = object->start_frame;
+                else if (frame_selection == 1)
+                    frame = object->end_frame;
+                else
+                    frame = object->instance_animation->ltime;
+                EvalAnim(&object->special, frame, &matrix, 1);
+                ++count;
+                NuVecAdd(&sum, &sum, NUMTX_GET_ROW_VEC(&matrix, 3));
+            }
+            object = object->next;
+        } while (object != NULL);
+    } else if (include_animated == 0) {
+        do {
+            if ((object->flags & 1) == 0 && object->instance_animation == NULL) {
+                NuVecAdd(&sum, &sum, NuSpecialGetDrawPos(&object->special));
+                ++count;
+            }
+            object = object->next;
+        } while (object != NULL);
+    } else {
+        do {
+            if ((object->flags & 1) == 0) {
+                if (object->instance_animation == NULL) {
+                    NuVecAdd(&sum, &sum, NuSpecialGetDrawPos(&object->special));
+                    ++count;
+                } else {
+                    f32 frame;
+                    if (frame_selection == 0)
+                        frame = object->start_frame;
+                    else if (frame_selection == 1)
+                        frame = object->end_frame;
+                    else
+                        frame = object->instance_animation->ltime;
+                    EvalAnim(&object->special, frame, &matrix, 1);
+                    ++count;
+                    NuVecAdd(&sum, &sum, NUMTX_GET_ROW_VEC(&matrix, 3));
+                }
+            }
+            object = object->next;
+        } while (object != NULL);
     }
     if (count == 0)
         return 0;

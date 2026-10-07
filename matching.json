@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 71.6403,
+    "fuzzy_match_percent": 71.68728,
     "total_code": "4722419",
-    "matched_code": "564695",
-    "matched_code_percent": 11.957749,
+    "matched_code": "564889",
+    "matched_code_percent": 11.961857,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 6568,
-    "matched_functions_percent": 48.80006,
+    "matched_functions": 6569,
+    "matched_functions_percent": 48.80749,
     "total_units": 1
   },
   "text": {
@@ -18019,7 +18019,7 @@
           "address": 4497440,
           "offset": 3607472,
           "size": 336,
-          "match_percent": 49.024097
+          "match_percent": 73.843376
         },
         {
           "name": "_ZN22MechJumpAutoPilotAddon29LookForLandingSpotAroundPointERK5VuVec",
@@ -18043,7 +18043,7 @@
           "address": 4501008,
           "offset": 3611040,
           "size": 335,
-          "match_percent": 77.25974
+          "match_percent": 84.72727
         },
         {
           "name": "_ZN22MechJumpAutoPilotAddon10ModifyJumpEv",
@@ -18067,7 +18067,7 @@
           "address": 4501376,
           "offset": 3611408,
           "size": 663,
-          "match_percent": 48.28481
+          "match_percent": 62.873417
         },
         {
           "name": "_ZN22MechJumpAutoPilotAddon11RecalculateEv",
@@ -19795,7 +19795,7 @@
           "address": 4249232,
           "offset": 3359264,
           "size": 4175,
-          "match_percent": 52.47934
+          "match_percent": 53.502068
         },
         {
           "name": "creatureEditor_RenderAllCreatures",
@@ -47566,7 +47566,7 @@
           "address": 4882272,
           "offset": 3992304,
           "size": 194,
-          "match_percent": 91.46429
+          "match_percent": 100.0
         },
         {
           "name": "_Z25GameAnimSys_StoreProgressP13GAMEANIMSYS_si",
@@ -47702,7 +47702,7 @@
           "address": 4884960,
           "offset": 3994992,
           "size": 575,
-          "match_percent": 35.70909
+          "match_percent": 37.460606
         },
         {
           "name": "_Z30GameAnimSet_GetCentreAndRadiusP13GAMEANIMSET_sP7nuvec_sPfiii",
@@ -51860,7 +51860,7 @@
           "address": 5085024,
           "offset": 4195056,
           "size": 736,
-          "match_percent": 70.0359
+          "match_percent": 70.184616
         },
         {
           "name": "_Z18MiniCam_ChangeModei",
@@ -51892,7 +51892,7 @@
           "address": 5087504,
           "offset": 4197536,
           "size": 237,
-          "match_percent": 67.457146
+          "match_percent": 69.328575
         },
         {
           "name": "_Z22Minicam_ResetForNewCutv",
@@ -57046,7 +57046,7 @@
           "address": 4988928,
           "offset": 4098960,
           "size": 1047,
-          "match_percent": 46.75
+          "match_percent": 60.659092
         },
         {
           "name": "_Z21SpecialMiniKits_ResetP11WORLDINFO_s",
@@ -57062,7 +57062,7 @@
           "address": 4990160,
           "offset": 4100192,
           "size": 972,
-          "match_percent": 11.833333
+          "match_percent": 39.321136
         }
       ]
     },
@@ -63382,7 +63382,7 @@
           "address": 2064864,
           "offset": 1174896,
           "size": 2068,
-          "match_percent": 39.493477
+          "match_percent": 51.058697
         },
         {
           "name": "_Z21HomeNearestTorpTargetP6BOLT_sP15TORPEDOPACKET_s",
@@ -63564,7 +63564,7 @@
           "address": 5133072,
           "offset": 4243104,
           "size": 2117,
-          "match_percent": 66.98874
+          "match_percent": 68.64639
         },
         {
           "name": "_Z13Pulses_AddSfxP10PULSESYS_sPiS1_i",
@@ -73817,7 +73817,7 @@
           "address": 1906848,
           "offset": 1016880,
           "size": 633,
-          "match_percent": 75.32903
+          "match_percent": 75.425804
         },
         {
           "name": "_ZL11ZipUps_LoadPvS_",
@@ -73841,7 +73841,7 @@
           "address": 1908208,
           "offset": 1018240,
           "size": 1773,
-          "match_percent": 67.498695
+          "match_percent": 67.72063
         },
         {
           "name": "_Z17ZipUp_FindNearestP11WORLDINFO_sP7nuvec_sfPfPiP12GameObject_sb",
@@ -73849,7 +73849,7 @@
           "address": 1909984,
           "offset": 1020016,
           "size": 612,
-          "match_percent": 55.090908
+          "match_percent": 55.188313
         },
         {
           "name": "_Z14ZipUp_MoveCodeP12GameObject_si",
@@ -73889,7 +73889,7 @@
           "address": 1916480,
           "offset": 1026512,
           "size": 2765,
-          "match_percent": 95.74895
+          "match_percent": 95.7173
         },
         {
           "name": "_Z16ZipUps_DrawLinesv",
@@ -74048,7 +74048,7 @@
           "address": 3928892,
           "offset": 3038924,
           "size": 981,
-          "match_percent": 68.30961
+          "match_percent": 93.63345
         },
         {
           "name": "MoveSockPosition",
@@ -74656,7 +74656,7 @@
           "address": 3953930,
           "offset": 3063962,
           "size": 3621,
-          "match_percent": 87.852356
+          "match_percent": 90.97487
         },
         {
           "name": "SockOn",
@@ -75987,7 +75987,7 @@
           "address": 3846486,
           "offset": 2956518,
           "size": 712,
-          "match_percent": 29.547619
+          "match_percent": 99.96191
         },
         {
           "name": "rtlSaveSet",
@@ -82026,7 +82026,7 @@
           "address": 1213776,
           "offset": 323808,
           "size": 5414,
-          "match_percent": 46.29554
+          "match_percent": 49.63011
         },
         {
           "name": "_Z10FixUpAreasv",
@@ -87516,7 +87516,7 @@
           "address": 5415520,
           "offset": 4525552,
           "size": 809,
-          "match_percent": 85.18687
+          "match_percent": 84.79798
         },
         {
           "name": "_Z26NuDDSSetTextureDescriptionPc11NUTEXFORMATiiii15nutexturetype_e",
@@ -87532,7 +87532,7 @@
           "address": 5416976,
           "offset": 4527008,
           "size": 872,
-          "match_percent": 69.54941
+          "match_percent": 87.72727
         },
         {
           "name": "_Z12NuDDSGetSizePKc",
@@ -94330,7 +94330,7 @@
           "address": 3200448,
           "offset": 2310480,
           "size": 563,
-          "match_percent": 33.179104
+          "match_percent": 41.96269
         },
         {
           "name": "_Z10LookupHashjPjP12HashRedirectj",

@@ -515,6 +515,10 @@ load_type_done:
     i32 draw_touch_prompt = 0;
     f32 touch_prompt_time = 0.0f;
 
+    const f32 icon_end_time = 3.1f + 0.6f;
+    const f32 icons_end_time = icon_end_time + 0.25f;
+    const f32 icon_fade_duration = icon_end_time - 3.1f;
+
     while (true) {
         if (AreaDataLoaded != 0 && !(LoadWait > 0.0f) && !character_load_active) {
             CutBorderScale = 0.0f;
@@ -593,8 +597,8 @@ load_type_done:
             if (!(icon_time <= 0.6f) && CharacterDataLoad != 2) {
                 icon_time = 0.6f;
             }
-            if (!(icon_time < 3.95f)) {
-                icon_time = 3.95f;
+            if (!(icon_time < icons_end_time)) {
+                icon_time = icons_end_time;
                 icon_stage = 2;
             }
         }
@@ -626,9 +630,7 @@ load_type_done:
         music_man.Process(FRAMETIME);
 
         NuRndrBeginScene(-1);
-        if (load_type != 2) {
-            NuRndrGradClear(0xf00, static_cast<i32>(0x80000000u), static_cast<i32>(0x80000000u), 1.0f);
-        } else {
+        if (load_type == 2) {
             const u32 top_colour = 0x80000000u | (static_cast<i32>(backdrop_top_b) & 0xff) << 16 |
                                    (static_cast<i32>(backdrop_top_g) & 0xff) << 8 |
                                    (static_cast<i32>(backdrop_top_r) & 0xff);
@@ -636,8 +638,6 @@ load_type_done:
                                       (static_cast<i32>(backdrop_bot_g) & 0xff) << 8 |
                                       (static_cast<i32>(backdrop_bot_r) & 0xff);
             NuRndrGradClear(0xf00, static_cast<i32>(top_colour), static_cast<i32>(bottom_colour), 1.0f);
-        }
-        if (load_type == 2) {
             const f32 backdrop_alpha =
                 loadareacharacters_no_backdrop_reset == 0 && LoadTime < 0.5f ? LoadTime * 2.0f : 1.0f;
             BackDrop_Draw(backdrop_alpha, 1);
@@ -657,46 +657,55 @@ load_type_done:
                 SetQFont2D();
                 Text3DEx(TTab[tTOUCHTOSTART], 0.0f, 0.745f, 1.0f, 0.4f, 0.4f, 0.4f, 0, 255, 255, 255, prompt_alpha);
             }
-        } else if (load_type == 1) {
-            BackDrop_Draw(1.0f, 1);
-        }
-
-        if (LoadWait == LOADWAITTIME && HUB_ADATA != NULL && HUB_ADATA->index == Area && CharacterDataLoad != 0 &&
-            icon_time > 0.0f && icon_time < 3.7f) {
-            const f32 wobble = NuTrigTable[(static_cast<i32>(NuFmod(LoadTime, 1.0f) * 65536.0f) >> 1) & 0x7fff] * 0.15f;
-            const bool widescreen = Game_OptionsSave != NULL && Game_OptionsSave->field11_0xb != 0;
-            const f32 icon_x = widescreen ? 0.106875f : 0.1425f;
-            const f32 icon_travel = widescreen ? 0.406875f : 0.4425f;
-            const f32 icon_scale = widescreen ? 0.35f : 0.4f;
-
-            f32 alpha = 1.0f;
-            f32 x = -icon_x;
-            if (!(icon_time >= 0.6f)) {
-                const f32 progress = icon_time / 0.6f;
-                const i32 angle = static_cast<i32>(progress * 16384.0f);
-                x = -(NuTrigTable[(angle >> 1) & 0x7fff] * -0.3f + icon_travel);
-                alpha = progress;
-            } else if (!(icon_time < 3.1f)) {
-                alpha = 1.0f - (icon_time - 3.1f) / 0.6f;
+        } else {
+            NuRndrGradClear(0xf00, static_cast<i32>(0x80000000u), static_cast<i32>(0x80000000u), 1.0f);
+            if (load_type == 1) {
+                BackDrop_Draw(1.0f, 1);
             }
-            drawcharicon_find = 1;
-            DrawCharIcon(PlayerID[0], x, 0.16625f, 0.0f, icon_scale, 0xa6, alpha, (0.85f + wobble) * alpha, 1, NULL);
 
-            const f32 second_time = icon_time - 0.25f;
-            if (!(second_time <= 0.0f) && !(second_time >= 3.7f)) {
-                f32 alpha = 1.0f;
-                f32 x = icon_x;
-                if (!(second_time >= 0.6f)) {
-                    const f32 progress = second_time / 0.6f;
-                    const i32 angle = static_cast<i32>(progress * 16384.0f);
-                    x = NuTrigTable[(angle >> 1) & 0x7fff] * -0.3f + icon_travel;
-                    alpha = progress;
-                } else if (!(second_time < 3.1f)) {
-                    alpha = 1.0f - (second_time - 3.1f) / 0.6f;
+            if (LoadWait == LOADWAITTIME) {
+                const i32 wobble_angle = static_cast<i32>(NuFmod(LoadTime, 1.0f) * 65536.0f);
+                if (HUB_ADATA != NULL && HUB_ADATA->index == Area && CharacterDataLoad != 0 && icon_time > 0.0f &&
+                    icon_time < icons_end_time) {
+                    const f32 wobble = NuTrigTable[(wobble_angle >> 1) & 0x7fff] * 0.15f;
+                    const bool widescreen = Game_OptionsSave != NULL && Game_OptionsSave->field11_0xb != 0;
+                    const f32 icon_x = widescreen ? 0.106875f : 0.1425f;
+                    const f32 icon_travel = widescreen ? 0.406875f : 0.4425f;
+                    const f32 icon_scale = widescreen ? 0.35f : 0.4f;
+
+                    if (icon_time < icon_end_time) {
+                        f32 alpha = 1.0f;
+                        f32 x = -icon_x;
+                        if (!(icon_time >= 0.6f)) {
+                            const f32 progress = icon_time / 0.6f;
+                            const i32 angle = static_cast<i32>(progress * 16384.0f);
+                            x = -(NuTrigTable[(angle >> 1) & 0x7fff] * -0.3f + icon_travel);
+                            alpha = progress;
+                        } else if (!(icon_time < 3.1f)) {
+                            alpha = 1.0f - (icon_time - 3.1f) / icon_fade_duration;
+                        }
+                        drawcharicon_find = 1;
+                        DrawCharIcon(PlayerID[0], x, 0.16624999f, 0.0f, icon_scale, 0xa6, alpha,
+                                     (0.85f + wobble) * alpha, 1, NULL);
+                    }
+
+                    const f32 second_time = icon_time - 0.25f;
+                    if (!(second_time <= 0.0f) && !(second_time >= icon_end_time)) {
+                        f32 alpha = 1.0f;
+                        f32 x = icon_x;
+                        if (!(second_time >= 0.6f)) {
+                            const f32 progress = second_time / 0.6f;
+                            const i32 angle = static_cast<i32>(progress * 16384.0f);
+                            x = NuTrigTable[(angle >> 1) & 0x7fff] * -0.3f + icon_travel;
+                            alpha = progress;
+                        } else if (!(second_time < 3.1f)) {
+                            alpha = 1.0f - (second_time - 3.1f) / icon_fade_duration;
+                        }
+                        drawcharicon_find = 1;
+                        DrawCharIcon(PlayerID[1], x, -0.16624999f, 0.0f, icon_scale, 0xa5, alpha,
+                                     (0.85f - wobble) * alpha, 1, NULL);
+                    }
                 }
-                drawcharicon_find = 1;
-                DrawCharIcon(PlayerID[1], x, -0.16625f, 0.0f, icon_scale, 0xa5, alpha, (0.85f - wobble) * alpha, 1,
-                             NULL);
             }
         }
 

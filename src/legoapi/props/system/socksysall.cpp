@@ -848,6 +848,7 @@ extern "C" {
 
     void ComplexSockPosition(SOCKSYS *sock_sys, NUVEC *position, i32 prior_sock, i32 prior_segment,
                              SOCKPOSITION *result) {
+        i32 fallback_search = 0;
         if (sock_sys == NULL) {
             result->location.sock = -1;
             result->location.segment = -1;
@@ -858,7 +859,11 @@ extern "C" {
         i32 original_prior_sock = prior_sock;
         i32 forced_sock = complexsockposition_forcesock;
         complexsockposition_forcesock = -1;
-        memset(TempSPosList, 0, sizeof(TempSPosList));
+        SOCKPOSITION *positions = TempSPosList;
+        memset(positions, 0, sizeof(TempSPosList));
+        i32 candidate_count = 0;
+        SOCKPOSITION *best = NULL;
+        f32 best_distance = 1000000.0f;
         temp_pos = *position;
 
         i32 sockets_to_check = 0x40;
@@ -866,36 +871,30 @@ extern "C" {
             prior_sock = forced_sock;
             prior_segment = -1;
             sockets_to_check = 1;
-        } else if (prior_sock == -1) {
+        }
+        if (prior_sock == -1) {
             prior_sock = 0;
             prior_segment = -1;
         }
 
-        bool fallback_search = false;
         for (;;) {
-            i32 candidate_count = 0;
             u32 candidate_mask = 0;
-            bool excluded_socket_seen = false;
-            SOCKPOSITION *best = NULL;
-            f32 best_distance = 1000000.0f;
+            i32 excluded_socket_seen = 0;
 
             for (i32 checked = 0; checked < sockets_to_check; ++checked) {
-                SOCK *sock = &sock_sys->sock[prior_sock];
-                if ((sock->flags & 0x100) == 0) {
-                    bool excluded = forced_sock == -1 && !fallback_search && original_prior_sock != -1 &&
-                                    prior_sock != original_prior_sock &&
-                                    SockBitIsSet(&sock_sys->sock[original_prior_sock], prior_sock);
-                    if (excluded) {
-                        excluded_socket_seen = true;
+                if ((sock_sys->sock[prior_sock].flags & 0x100) == 0) {
+                    if (forced_sock == -1 && !fallback_search && original_prior_sock != -1 &&
+                        prior_sock != original_prior_sock &&
+                        SockBitSet(&sock_sys->sock[original_prior_sock], prior_sock)) {
+                        excluded_socket_seen = 1;
                     } else {
-                        f32 distance = BestSockPosition(sock_sys, position, &TempSPosList[candidate_count], prior_sock,
+                        f32 distance = BestSockPosition(sock_sys, position, &positions[candidate_count], prior_sock,
                                                         prior_segment);
-                        SOCKPOSITION *candidate = &TempSPosList[candidate_count];
-                        if (candidate->location.sock != -1) {
-                            candidate->midpoint = temp_sockmidpos;
-                            candidate->camera_position = temp_sockcampos;
+                        if (positions[candidate_count].location.sock != -1) {
+                            positions[candidate_count].midpoint = temp_sockmidpos;
+                            positions[candidate_count].camera_position = temp_sockcampos;
                             if (best == NULL || distance < best_distance) {
-                                best = candidate;
+                                best = &positions[candidate_count];
                                 best_distance = distance;
                             }
                             candidate_mask |= 1U << (prior_sock & 0x1f);
@@ -913,30 +912,29 @@ extern "C" {
             if (best != NULL) {
                 *result = *best;
                 result->candidate_mask = candidate_mask;
-                result->flags = fallback_search ? 1 : 0;
-                result->candidate_count = (i8)candidate_count;
-                TempBestSPos = best;
-                TempSPosCount = candidate_count;
-                memcpy(TempSLoc, result, sizeof(TempSLoc));
-                return;
+                result->flags = 0;
+                if (fallback_search)
+                    result->flags |= 1;
+                break;
             }
             if (!excluded_socket_seen) {
                 result->location.sock = -1;
                 result->location.segment = -1;
                 result->flags = 0;
-                result->candidate_count = 0;
-                TempBestSPos = NULL;
-                TempSPosCount = 0;
-                memcpy(TempSLoc, result, sizeof(TempSLoc));
-                return;
+                break;
             }
 
-            fallback_search = true;
+            fallback_search = 1;
             prior_sock = 0;
             prior_segment = -1;
             forced_sock = -1;
+            candidate_count = 0;
             sockets_to_check = 0x40;
         }
+        result->candidate_count = (i8)candidate_count;
+        TempBestSPos = best;
+        TempSPosCount = candidate_count;
+        memcpy(TempSLoc, result, sizeof(TempSLoc));
     }
 
     void ComplexSockAngles(SOCKROT *angles) {
@@ -1165,8 +1163,14 @@ extern "C" {
         NuMtxSetIdentity(out);
         if (position->location.sock == -1)
             return;
-        i32 first = (mode == 4 || mode == 5) ? 0 : 1;
-        i32 last = (mode == 4 || mode == 5) ? 3 : 2;
+        i32 first, last;
+        if (mode == 4 || mode == 5) {
+            first = 0;
+            last = 3;
+        } else {
+            first = 1;
+            last = 2;
+        }
         SOCK *sock = &system->sock[position->location.sock];
         i32 segment = position->location.segment;
         i32 samples[4];
@@ -1229,13 +1233,17 @@ extern "C" {
         ratio += (f32)(segment % stride);
         ratio /= (f32)stride;
         if (sock->flags & 0x200) {
-            f32 width = (1.0f - ratio) * (widths[1] / base_width) + (widths[2] / base_width) * ratio;
+            f32 first_width = widths[1] / base_width;
+            f32 second_width = widths[2] / base_width;
+            f32 width = (1.0f - ratio) * first_width + second_width * ratio;
             if (1.0f >= width)
                 sock->camera_local_x_ratio = sock->camera_lateral_ratio * width;
             else
                 sock->camera_local_x_ratio =
                     sock->camera_lateral_ratio + (1.0f - 1.0f / width) * (1.0f - sock->camera_lateral_ratio);
-            f32 height = (1.0f - ratio) * (heights[1] / base_height) + (heights[2] / base_height) * ratio;
+            f32 first_height = heights[1] / base_height;
+            f32 second_height = heights[2] / base_height;
+            f32 height = (1.0f - ratio) * first_height + second_height * ratio;
             if (1.0f >= height)
                 sock->camera_vertical_ratio = sock->camera_lateral_ratio * height;
             else

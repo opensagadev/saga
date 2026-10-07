@@ -118,6 +118,7 @@ i32 NuDDSGetTextureDescription(const char *dds_data, NUTEXFORMAT &out_format, i3
     }
 
     u32 mipmap_count = header->dw_mip_map_count;
+    const u32 caps2 = header->dw_caps2;
     if (mipmap_count == 0) {
         mipmap_count = (header->dw_flags & 0x20000) == 0;
     }
@@ -125,19 +126,19 @@ i32 NuDDSGetTextureDescription(const char *dds_data, NUTEXFORMAT &out_format, i3
 
     if ((header->dw_caps & 8) == 0)
         return 1;
-    if ((header->dw_caps2 & DDSCAPS2_CUBEMAP) == 0)
+    if ((caps2 & DDSCAPS2_CUBEMAP) == 0)
         return 1;
-    if ((header->dw_caps2 & DDSCAPS2_CUBEMAP_POSITIVEY) == 0)
+    if ((caps2 & DDSCAPS2_CUBEMAP_POSITIVEY) == 0)
         return 1;
-    if ((header->dw_caps2 & DDSCAPS2_CUBEMAP_POSITIVEX) == 0)
+    if ((caps2 & DDSCAPS2_CUBEMAP_POSITIVEX) == 0)
         return 1;
-    if ((header->dw_caps2 & DDSCAPS2_CUBEMAP_NEGATIVEX) == 0)
+    if ((caps2 & DDSCAPS2_CUBEMAP_NEGATIVEX) == 0)
         return 1;
-    if ((header->dw_caps2 & DDSCAPS2_CUBEMAP_POSITIVEZ) == 0)
+    if ((caps2 & DDSCAPS2_CUBEMAP_POSITIVEZ) == 0)
         return 1;
-    if ((header->dw_caps2 & DDSCAPS2_CUBEMAP_NEGATIVEZ) == 0)
+    if ((caps2 & DDSCAPS2_CUBEMAP_NEGATIVEZ) == 0)
         return 1;
-    if ((header->dw_caps2 & DDSCAPS2_CUBEMAP_NEGATIVEY) == 0)
+    if ((caps2 & DDSCAPS2_CUBEMAP_NEGATIVEY) == 0)
         return 1;
 
     out_is_cube_map = true;
@@ -249,22 +250,36 @@ void NuDDSGetMipLevel(i32 width, i32 height, i32 depth, NUTEXFORMAT format, i32 
                 out_width = total_size;
         }
 
+        i32 level_width;
+        i32 level_height;
         if (!compressed) {
-            if (mip_width < 1)
-                mip_width = 1;
-            if (mip_height < 1)
-                mip_height = 1;
+            if (mip_width > 0) {
+                level_width = mip_width;
+                mip_width >>= 1;
+            } else {
+                level_width = 1;
+                mip_width = 0;
+            }
+            if (mip_height > 0) {
+                level_height = mip_height;
+                mip_height >>= 1;
+            } else {
+                level_height = 1;
+                mip_height = 0;
+            }
         } else {
             i32 minimum_width = minimum_blocks * block_width;
             i32 minimum_height = minimum_blocks * 4;
             mip_width = mip_width >= minimum_width ? mip_width : minimum_width;
             mip_height = mip_height >= minimum_height ? mip_height : minimum_height;
+            level_width = mip_width;
+            level_height = mip_height;
+            mip_width >>= 1;
+            mip_height >>= 1;
         }
 
-        previous_size = bpp * mip_width * mip_height * mip_depth / 8;
+        previous_size = bpp * level_width * level_height * mip_depth / 8;
         out_height = mip > level ? out_height : previous_size;
-        mip_width >>= 1;
-        mip_height >>= 1;
         if (mip_depth != 1)
             mip_depth >>= 1;
     }

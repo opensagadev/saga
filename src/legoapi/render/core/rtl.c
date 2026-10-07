@@ -507,40 +507,56 @@ extern "C" {
         rtlset *set = static_cast<rtlset *>(buffer->void_ptr);
         memset(set, 0, sizeof(*set));
 
-        if (NuFileLoadBuffer(path, set, buffer_end - buffer->addr) > 0) {
+        i32 loaded = NuFileLoadBuffer(path, buffer->void_ptr, buffer_end - buffer->addr);
+        if (loaded > 0) {
             rtlSwapSetEndianess(set);
         }
 
-        const u32 version = set->header;
-        if (version == 2) {
-            rtlfog_s *old_fog = reinterpret_cast<rtlfog_s *>(&set->lights[64]);
-            old_fog[0].type = 1;
-            old_fog[0].radius = 10.0f;
-            old_fog[0].position = {0.0f, 0.0f, 0.0f};
-            for (i32 i = 1; i < 32; ++i)
-                old_fog[i].type = 0;
-        }
-        if (version == 2 || version == 3) {
-            rtlfog_s *old_fog = reinterpret_cast<rtlfog_s *>(&set->lights[64]);
-            memmove(set->fog, old_fog, sizeof(set->fog));
-            for (i32 i = 64; i < 128; ++i)
-                set->lights[i].type = 0;
-        }
-        if (version >= 2 && version <= 4) {
-            for (i32 i = 0; i < 128; ++i) {
-                set->lights[i].field_79 = -1;
-                set->lights[i].field_7a = -1;
-                set->lights[i].field_7b = 0;
-                set->lights[i].intensity = 1.0f;
+        struct LegacySet {
+            u32 header;
+            rtl_s lights[64];
+            rtlfog_s fog[32];
+        };
+        i32 i;
+        switch (set->header) {
+            case 2: {
+                LegacySet *legacy = reinterpret_cast<LegacySet *>(set);
+                legacy->fog[0].radius = 10.0f;
+                NuVecClear(&legacy->fog[0].position);
+                legacy->fog[0].type = 1;
+                for (i = 1; i < 32; ++i)
+                    legacy->fog[i].type = 0;
             }
-        }
-        if (version != 1) {
-            for (i32 i = 0; i < 128; ++i) {
-                set->lights[i].uid = rtl_uid++;
-                if (rtl_uid == 0)
-                    ++rtl_uid;
-                set->lights[i].field_7c = set->lights;
+            // Fall through to migrate the legacy fog records.
+            case 3: {
+                LegacySet *legacy = reinterpret_cast<LegacySet *>(set);
+                i = 32;
+                while (i != 0) {
+                    --i;
+                    set->fog[i] = legacy->fog[i];
+                }
+                for (i = 64; i < 128; ++i)
+                    set->lights[i].type = 0;
             }
+            // Fall through to initialize the newer modifier fields.
+            case 4:
+                for (i = 0; i < 128; ++i) {
+                    set->lights[i].field_79 = -1;
+                    set->lights[i].field_7a = -1;
+                    set->lights[i].field_7b = 0;
+                    set->lights[i].intensity = 1.0f;
+                }
+                // Fall through to assign unique light identifiers.
+            default:
+                for (i = 0; i < 128; ++i) {
+                    set->lights[i].uid = rtl_uid++;
+                    if (rtl_uid == 0)
+                        ++rtl_uid;
+                    set->lights[i].field_7c = set->lights;
+                }
+                break;
+            case 1:
+                break;
         }
         set->header = curr_version;
         buffer->addr += sizeof(*set);

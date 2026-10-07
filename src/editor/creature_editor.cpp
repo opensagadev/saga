@@ -1440,13 +1440,12 @@ __attribute__((optimize("O2"))) eduimenu_s *creatureEditor_Process(nupad_s *pad)
                 }
             } else if ((pad->digital_buttons & 0x100) == 0) {
                 EDAIPATHCHECK_s *check = reinterpret_cast<EDAIPATHCHECK_s *>(reinterpret_cast<u8 *>(aieditor) + 0x48);
-                i32 angle = aieditorsettings.area_rotation;
                 bool rotate = false;
                 if (pad->digital_buttons & 0x2000) {
                     rotate = true;
                     CreatureEditorRecord *hover = *reinterpret_cast<CreatureEditorRecord **>(aieditor->unknown_3692c);
                     if (selected != nullptr && selected == hover)
-                        angle = selected->angle;
+                        aieditorsettings.area_rotation = selected->angle;
                     i32 &step = *reinterpret_cast<i32 *>(aieditor->unknown_36934);
                     if (pad->digital_buttons_pressed & 0x8000)
                         step = 0x14;
@@ -1454,12 +1453,12 @@ __attribute__((optimize("O2"))) eduimenu_s *creatureEditor_Process(nupad_s *pad)
                         step += 0x14;
                     if (step > 600)
                         step = 600;
-                    angle = NuAngAdd(angle, step);
+                    aieditorsettings.area_rotation = NuAngAdd(aieditorsettings.area_rotation, step);
                 } else if (pad->digital_buttons & 0x8000) {
                     rotate = true;
                     CreatureEditorRecord *hover = *reinterpret_cast<CreatureEditorRecord **>(aieditor->unknown_3692c);
                     if (selected != nullptr && selected == hover)
-                        angle = selected->angle;
+                        aieditorsettings.area_rotation = selected->angle;
                     i32 &step = *reinterpret_cast<i32 *>(aieditor->unknown_36934);
                     if (pad->digital_buttons_pressed & 0x2000)
                         step = 0x14;
@@ -1467,26 +1466,29 @@ __attribute__((optimize("O2"))) eduimenu_s *creatureEditor_Process(nupad_s *pad)
                         step += 0x14;
                     if (step > 600)
                         step = 600;
-                    angle = NuAngSub(angle, step);
+                    aieditorsettings.area_rotation = NuAngSub(aieditorsettings.area_rotation, step);
                 } else if (pad->digital_buttons & 0x4000) {
                     rotate = true;
-                    const i32 relative = NuAngSub(angle, check->angle);
+                    const i32 relative = NuAngSub(aieditorsettings.area_rotation, check->angle);
                     i32 quarter_turns = relative / 0x4000;
                     if (relative % 0x4000 > 0x2000)
                         ++quarter_turns;
                     else if (relative % 0x4000 < -0x2000)
                         --quarter_turns;
-                    angle = NuAngAdd(quarter_turns << 14, check->angle);
+                    aieditorsettings.area_rotation =
+                        NuAngAdd(quarter_turns << 14,
+                                 reinterpret_cast<EDAIPATHCHECK_s *>(reinterpret_cast<u8 *>(aieditor) + 0x48)->angle);
                 }
                 if (rotate) {
-                    aieditorsettings.area_rotation = angle;
+                    selected = creatureEditor_Current();
                     CreatureEditorRecord *hover = *reinterpret_cast<CreatureEditorRecord **>(aieditor->unknown_3692c);
                     if (selected != nullptr && selected == hover) {
-                        selected->angle = angle;
+                        selected->angle = aieditorsettings.area_rotation;
                         check = reinterpret_cast<EDAIPATHCHECK_s *>(selected->path_check);
                         check->angle = NuAngSub(
-                            angle, reinterpret_cast<EDAIPATHCHECK_s *>(reinterpret_cast<u8 *>(aieditor) + 0x48)->angle);
-                        creatureEditor_Updated(reinterpret_cast<EDCREATURE_s *>(selected));
+                            aieditorsettings.area_rotation,
+                            reinterpret_cast<EDAIPATHCHECK_s *>(reinterpret_cast<u8 *>(aieditor) + 0x48)->angle);
+                        creatureEditor_Updated(reinterpret_cast<EDCREATURE_s *>(creatureEditor_Current()));
                     }
                 }
             }

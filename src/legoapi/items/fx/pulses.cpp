@@ -95,7 +95,7 @@ void Pulses_Update(PULSESYS_s *pulse_sys) {
             NUVEC *pulse_position = NuSpecialGetDrawPos(&pulse->special);
             pulse = &pulse_sys->pulses[i];
             pulse->timer -= FRAMETIME;
-            if (!(pulse->timer > 0.0f) && netclient == 0) {
+            if (pulse->timer <= 0.0f && netclient == 0) {
                 if (pulse->active != 0) {
                     pulse->active = 0;
                     pulse->timer = pulse->off_time;
@@ -133,7 +133,7 @@ void Pulses_Update(PULSESYS_s *pulse_sys) {
                 GameObject_s *player = Player[player_index];
                 if (player == NULL || !player->apiobj.player_controlled || player->apiobj.field_0x287 != 0 ||
                     (LEGOCONTEXT_DOOMED != -1 && player->character_context == LEGOCONTEXT_DOOMED) ||
-                    !(player->flicker_timer <= 0.0f) || !(player->spawn_protection_timer <= 0.0f) ||
+                    !(player->flicker_timer <= 0.0f) || player->spawn_protection_timer > 0.0f ||
                     (player->field_0xefe & 0x40) != 0) {
                     continue;
                 }
@@ -142,7 +142,7 @@ void Pulses_Update(PULSESYS_s *pulse_sys) {
                 NuVecSub(&offset, &player->apiobj.collision_position, pulse_position);
                 f32 distance = direction.x * offset.x + direction.z * offset.z;
                 if (pulse_sys->radial_hit_direction == 1) {
-                    if (!(distance >= 0.0f)) {
+                    if (distance < 0.0f) {
                         continue;
                     }
                     NuVecRotateY(&offset, &offset, 0x4000);
@@ -153,7 +153,8 @@ void Pulses_Update(PULSESYS_s *pulse_sys) {
                     continue;
                 }
                 if (pulse_sys->radial_hit_direction == 0 &&
-                    offset.x * pulse_sys->hit_direction_line + offset.z * pulse_sys->hit_direction_radius_origin < 0.0f) {
+                    offset.x * pulse_sys->hit_direction_line + offset.z * pulse_sys->hit_direction_radius_origin <
+                        0.0f) {
                     continue;
                 }
 
@@ -169,7 +170,8 @@ void Pulses_Update(PULSESYS_s *pulse_sys) {
                 player->flicker_flags = (player->flicker_flags & ~7) | (distance >= 0.0f ? 4 : 3);
 
                 i32 debris_handle = -1;
-                AddFiniteShotDebrisEffect(&debris_handle, world->debris_sys->entries[pulse_sys->debris_hit_player].effect,
+                AddFiniteShotDebrisEffect(&debris_handle,
+                                          world->debris_sys->entries[pulse_sys->debris_hit_player].effect,
                                           &player->apiobj.collision_position, 1);
             }
         }
